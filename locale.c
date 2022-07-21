@@ -1129,36 +1129,44 @@ S_emulate_setlocale_i(pTHX_
         }
     }
     else {  /* Here is the general case, not to LC_ALL=>C */
-        /* Specially handle two objects */
-        if (old_obj == LC_GLOBAL_LOCALE || old_obj == PL_C_locale_obj) {
+        locale_t basis_obj = entry_obj;
 
-            /* If we weren't in a thread safe locale, set so that newlocale()
-             * below which uses 'old_obj', gets a legal copy.  And, as a
-             * defensive coding measure, make sure we don't mistakenly modify
-             * our reserved C object, which the newlocale() just below would
-             * otherwise do. */
-            if (old_obj == LC_GLOBAL_LOCALE) {
-            old_obj = duplocale(old_obj);
+        /* Specially handle two objects */
+        if (basis_obj == LC_GLOBAL_LOCALE || basis_obj == PL_C_locale_obj) {
+
+            /* For these two objects, we make duplicates to hand to newlocale()
+             * below.  For LC_GLOBAL_LOCALE, this is because newlocale()
+             * doesn't necessarily accept it as input (the results are
+             * undefined).  For PL_C_locale_obj, it is so that it never gets
+             * modified, as otherwise newlocale() is free to do so */
+            basis_obj = duplocale(entry_obj);
+            if (! basis_obj) {
+                setlocale_failure_panic_i(index, "switching back to",
+                                          locale_on_entry, __LINE__, line);
+                NOT_REACHED; /* NOTREACHED */
             }
-            else if (old_obj == PL_C_locale_obj) {
-            old_obj = (locale_t) 0;
-            }
+
+            DEBUG_Lv(PerlIO_printf(Perl_debug_log,
+                                   "(%" LINE_Tf "): emulate_setlocale_i"
+                                   " created %p by duping the input\n",
+                                   line, basis_obj));
         }
 
         /* Ready to create a new locale by modification of the exising one */
-        new_obj = newlocale(mask, new_locale, old_obj);
+        new_obj = newlocale(mask, new_locale, basis_obj);
 
         if (! new_obj) {
             DEBUG_L(PerlIO_printf(Perl_debug_log,
                                   " (%" LINE_Tf "): emulate_setlocale_i"
-                                  " creating new object failed: errno=%d\n",
-                                  line, GET_ERRNO));
+                                  " creating new object from %p failed:"
+                                  " errno=%d\n",
+                                  line, basis_obj, GET_ERRNO));
 
             /* Failed.  Likely this is because the proposed new locale isn't
              * valid on this system.  But we earlier switched to the LC_ALL=>C
              * locale in anticipation of it succeeding,  Now have to switch
              * back to the state upon entry */
-            if (! uselocale(old_obj)) {
+            if (! uselocale(entry_obj)) {
                 setlocale_failure_panic_i(index, "switching back to",
                                           locale_on_entry, __LINE__, line);
                 NOT_REACHED; /* NOTREACHED */
@@ -1185,14 +1193,9 @@ S_emulate_setlocale_i(pTHX_
             return NULL;
         }
 
-        DEBUG_Lv(STMT_START {
-            PerlIO_printf(Perl_debug_log,
-                          "(%" LINE_Tf "): emulate_setlocale_i created %p",
-                          line, new_obj);
-            if (old_obj) PerlIO_printf(Perl_debug_log,
-                                       "; should have freed %p", old_obj);
-            PerlIO_printf(Perl_debug_log, "\n");
-        } STMT_END);
+        DEBUG_Lv(PerlIO_printf(Perl_debug_log,
+                               "(%" LINE_Tf "): emulate_setlocale_i created %p"
+                               " while freeing %p\n", line, new_obj, basis_obj));
 
         /* Here, successfully created an object representing the desired
          * locale; now switch into it */
