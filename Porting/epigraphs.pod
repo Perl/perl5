@@ -17,6 +17,13 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.37.2 - James Clear, "Atomic Habits"
+
+L<Announced on 2022-02-20 by Nicolas R.|https://www.nntp.perl.org/group/perl.perl5.porters/2022/07/msg264438.html>
+
+If you can get one percent better each day for one year,
+you'll end up thiry-seven times better by the time you are done
+
 =head2 v5.37.1 - Squirt, "Finding Nemo"
 
 L<Announced on 2022-06-20 by Matthew Horsfall|https://www.nntp.perl.org/group/perl.perl5.porters/2022/06/msg264107.html>
