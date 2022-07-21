@@ -1098,11 +1098,10 @@ S_emulate_setlocale_i(pTHX_
     locale_t old_obj = uselocale(PL_C_locale_obj);
 
     if (! old_obj) {
-        DEBUG_L(PerlIO_printf(Perl_debug_log,
-                              "(%" LINE_Tf "):"
-                               " emulate_setlocale_i switching to C failed:"
-                               " %d\n", line, GET_ERRNO));
-        return NULL;
+        /* Not being able to change to the C locale is severe; don't keep
+         * going.  */
+        setlocale_failure_panic_i(index, locale_on_entry, "C", __LINE__, line);
+        NOT_REACHED; /* NOTREACHED */
     }
 
     DEBUG_Lv(PerlIO_printf(Perl_debug_log,
@@ -1158,9 +1157,9 @@ S_emulate_setlocale_i(pTHX_
              * locale in anticipation of it succeeding,  Now have to switch
              * back to the state upon entry */
             if (! uselocale(old_obj)) {
-                DEBUG_L(PerlIO_printf(Perl_debug_log,
-                                      "(%" LINE_Tf "): switching back failed:"
-                                      " %d\n", line, GET_ERRNO));
+                setlocale_failure_panic_i(index, "switching back to",
+                                          locale_on_entry, __LINE__, line);
+                NOT_REACHED; /* NOTREACHED */
             }
 
 #    ifdef USE_PL_CURLOCALES
@@ -1196,20 +1195,10 @@ S_emulate_setlocale_i(pTHX_
         /* Here, successfully created an object representing the desired
          * locale; now switch into it */
         if (! uselocale(new_obj)) {
-            DEBUG_L(PerlIO_printf(Perl_debug_log,
-                    "(%" LINE_Tf "): emulate_setlocale_i switching to new"
-                    " object failed\n", line));
-
-            if (! uselocale(old_obj)) {
-                DEBUG_L(PerlIO_printf(Perl_debug_log,
-                                      "(%" LINE_Tf "):"
-                                      " switching back to %p failed: %d\n",
-                                      line, old_obj, GET_ERRNO));
-
-            }
-
             freelocale(new_obj);
-            return NULL;
+            locale_panic_(Perl_form(aTHX_ "(%" LINE_Tf "): emulate_setlocale_i"
+                                          " switching into new locale failed",
+                                          line));
         }
     }
 
