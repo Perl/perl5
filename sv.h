@@ -1902,19 +1902,22 @@ END_EXTERN_C
     (((SvFLAGS(sv) & (SVf_POK|SVs_GMG)) == SVf_POK) || ((SvFLAGS(sv) & (SVf_IOK|SVp_POK|SVs_GMG)) == (SVf_IOK|SVp_POK)))
 
 #define SvPV_flags(sv, len, flags)                                          \
+   (__ASSERT_(sizeof(len) == sizeof(STRLEN))                                \
    Perl_SvPV_helper(aTHX_ sv, &len, flags, SvPVnormal_type_,                \
-                    Perl_sv_2pv_flags, FALSE, 0)
+                    Perl_sv_2pv_flags, FALSE, 0))
 #define SvPV_flags_const(sv, len, flags)                                    \
+   (__ASSERT_(sizeof(len) == sizeof(STRLEN))                                \
    ((const char*) Perl_SvPV_helper(aTHX_ sv, &len, flags, SvPVnormal_type_, \
                                    Perl_sv_2pv_flags, FALSE,                \
-                                   SV_CONST_RETURN))
+                                   SV_CONST_RETURN)))
 #define SvPV_flags_const_nolen(sv, flags)                                   \
    ((const char*) Perl_SvPV_helper(aTHX_ sv, NULL, flags, SvPVnormal_type_, \
                                    Perl_sv_2pv_flags, FALSE,                \
                                    SV_CONST_RETURN))
 #define SvPV_flags_mutable(sv, len, flags)                                  \
+   (__ASSERT_(sizeof(len) == sizeof(STRLEN))                                \
     Perl_SvPV_helper(aTHX_ sv, &len, flags, SvPVnormal_type_,               \
-                     Perl_sv_2pv_flags, FALSE, SV_MUTABLE_RETURN)
+                     Perl_sv_2pv_flags, FALSE, SV_MUTABLE_RETURN))
 
 #define SvPV_nolen(sv)                                                      \
     Perl_SvPV_helper(aTHX_ sv, NULL, SV_GMAGIC, SvPVnormal_type_,           \
@@ -1934,14 +1937,16 @@ END_EXTERN_C
 #define SvPV_nomg_const_nolen(sv)   SvPV_flags_const_nolen(sv, 0)
 
 #define SvPV_force_flags(sv, len, flags)                                    \
+   (__ASSERT_(sizeof(len) == sizeof(STRLEN))                                \
     Perl_SvPV_helper(aTHX_ sv, &len, flags, SvPVforce_type_,                \
-                     Perl_sv_pvn_force_flags, FALSE, 0)
+                     Perl_sv_pvn_force_flags, FALSE, 0))
 #define SvPV_force_flags_nolen(sv, flags)                                   \
     Perl_SvPV_helper(aTHX_ sv, NULL, flags, SvPVforce_type_,                \
                      Perl_sv_pvn_force_flags, FALSE, 0)
 #define SvPV_force_flags_mutable(sv, len, flags)                            \
+   (__ASSERT_(sizeof(len) == sizeof(STRLEN))                                \
     Perl_SvPV_helper(aTHX_ sv, &len, flags, SvPVforce_type_,                \
-                     Perl_sv_pvn_force_flags, FALSE, SV_MUTABLE_RETURN)
+                     Perl_sv_pvn_force_flags, FALSE, SV_MUTABLE_RETURN))
 
 #define SvPV_force(sv, len)         SvPV_force_flags(sv, len, SV_GMAGIC)
 #define SvPV_force_nolen(sv)        SvPV_force_flags_nolen(sv, SV_GMAGIC)
@@ -1952,44 +1957,54 @@ END_EXTERN_C
 #define SvPV_force_nomg_nolen(sv)   SvPV_force_flags_nolen(sv, 0)
 
 #define SvPVutf8(sv, len)                                                   \
+   (__ASSERT_(sizeof(len) == sizeof(STRLEN))                                \
     Perl_SvPV_helper(aTHX_ sv, &len, SV_GMAGIC, SvPVutf8_type_,             \
-                     Perl_sv_2pvutf8_flags, FALSE, 0)
+                     Perl_sv_2pvutf8_flags, FALSE, 0))
 #define SvPVutf8_nomg(sv, len)                                              \
+   (__ASSERT_(sizeof(len) == sizeof(STRLEN))                                \
     Perl_SvPV_helper(aTHX_ sv, &len, 0, SvPVutf8_type_,                     \
-                     Perl_sv_2pvutf8_flags, FALSE, 0)
+                     Perl_sv_2pvutf8_flags, FALSE, 0))
 #define SvPVutf8_nolen(sv)                                                  \
     Perl_SvPV_helper(aTHX_ sv, NULL, SV_GMAGIC, SvPVutf8_type_,             \
                      Perl_sv_2pvutf8_flags, FALSE, 0)
 #define SvPVutf8_or_null(sv, len)                                           \
+   (__ASSERT_(sizeof(len) == sizeof(STRLEN))                                \
     Perl_SvPV_helper(aTHX_ sv, &len, SV_GMAGIC, SvPVutf8_type_,             \
-                     Perl_sv_2pvutf8_flags, TRUE, 0)
+                     Perl_sv_2pvutf8_flags, TRUE, 0))
 #define SvPVutf8_or_null_nomg(sv, len)                                      \
+   (__ASSERT_(sizeof(len) == sizeof(STRLEN))                                \
     Perl_SvPV_helper(aTHX_ sv, &len, 0, SvPVutf8_type_,                     \
-                     Perl_sv_2pvutf8_flags, TRUE, 0)
+                     Perl_sv_2pvutf8_flags, TRUE, 0))
 
 #define SvPVbyte(sv, len)                                                   \
+   (__ASSERT_(sizeof(len) == sizeof(STRLEN))                                \
     Perl_SvPV_helper(aTHX_ sv, &len, SV_GMAGIC, SvPVbyte_type_,             \
-                     Perl_sv_2pvbyte_flags, FALSE, 0)
+                     Perl_sv_2pvbyte_flags, FALSE, 0))
 #define SvPVbyte_nomg(sv, len)                                              \
+   (__ASSERT_(sizeof(len) == sizeof(STRLEN))                                \
     Perl_SvPV_helper(aTHX_ sv, &len, 0, SvPVbyte_type_,                     \
-                     Perl_sv_2pvbyte_flags, FALSE, 0)
+                     Perl_sv_2pvbyte_flags, FALSE, 0))
 #define SvPVbyte_nolen(sv)                                                  \
     Perl_SvPV_helper(aTHX_ sv, NULL, SV_GMAGIC, SvPVbyte_type_,             \
                      Perl_sv_2pvbyte_flags, FALSE, 0)
 #define SvPVbyte_or_null(sv, len)                                           \
+   (__ASSERT_(sizeof(len) == sizeof(STRLEN))                                \
     Perl_SvPV_helper(aTHX_ sv, &len, SV_GMAGIC, SvPVbyte_type_,             \
-                     Perl_sv_2pvbyte_flags, TRUE, 0)
+                     Perl_sv_2pvbyte_flags, TRUE, 0))
 #define SvPVbyte_or_null_nomg(sv, len)                                      \
+   (__ASSERT_(sizeof(len) == sizeof(STRLEN))                                \
     Perl_SvPV_helper(aTHX_ sv, &len, 0, SvPVbyte_type_,                     \
-                     Perl_sv_2pvbyte_flags, TRUE, 0)
+                     Perl_sv_2pvbyte_flags, TRUE, 0))
 
 #define SvPVutf8_force(sv, len)                                             \
+   (__ASSERT_(sizeof(len) == sizeof(STRLEN))                                \
     Perl_SvPV_helper(aTHX_ sv, &len, 0, SvPVutf8_pure_type_,                \
-                     Perl_sv_pvutf8n_force_wrapper, FALSE, 0)
+                     Perl_sv_pvutf8n_force_wrapper, FALSE, 0))
 
 #define SvPVbyte_force(sv, len)                                             \
+   (__ASSERT_(sizeof(len) == sizeof(STRLEN))                                \
     Perl_SvPV_helper(aTHX_ sv, &len, 0, SvPVbyte_pure_type_,                \
-                     Perl_sv_pvbyten_force_wrapper, FALSE, 0)
+                     Perl_sv_pvbyten_force_wrapper, FALSE, 0))
 
 /* define FOOx(): Before FOO(x) was inlined, these were idempotent versions of
  * FOO(). */
