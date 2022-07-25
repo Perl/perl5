@@ -2948,6 +2948,7 @@ PERL_CALLCONV_NO_RET void	Perl_noperl_die(const char* pat, ...)
 #define PERL_ARGS_ASSERT_NOPERL_DIE	\
 	assert(pat)
 
+PERL_CALLCONV void	Perl_noshutdownhook(void);
 PERL_CALLCONV int	Perl_nothreadhook(pTHX);
 #define PERL_ARGS_ASSERT_NOTHREADHOOK
 PERL_CALLCONV void	Perl_notify_parser_that_changed_to_utf8(pTHX)

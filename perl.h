@@ -3595,6 +3595,8 @@ freeing any remaining Perl interpreters.
 #define PERL_SYS_INIT3(argc, argv, env)	Perl_sys_init3(argc, argv, env)
 #define PERL_SYS_TERM()			Perl_sys_term()
 
+#define SHUTDOWN_TERM PL_shutdownhook();
+
 #ifndef PERL_WRITE_MSG_TO_CONSOLE
 #  define PERL_WRITE_MSG_TO_CONSOLE(io, msg, len) PerlIO_write(io, msg, len)
 #endif
@@ -5298,6 +5300,7 @@ typedef int  (*thrhook_proc_t) (pTHX);
 typedef OP* (*PPADDR_t[]) (pTHX);
 typedef bool (*destroyable_proc_t) (pTHX_ SV *sv);
 typedef void (*despatch_signals_proc_t) (pTHX);
+typedef void (*shutdown_proc_t)();
 
 #if defined(__DYNAMIC__) && defined(PERL_DARWIN) && defined(PERL_CORE)
 #  include <crt_externs.h>	/* for the env array */

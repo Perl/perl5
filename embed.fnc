@@ -2878,6 +2878,7 @@ AdpbD	|void	|sv_nolocking	|NULLOK SV *sv
 Adp	|bool	|sv_destroyable	|NULLOK SV *sv
 AdpbD	|void	|sv_nounlocking	|NULLOK SV *sv
 Adp	|int	|nothreadhook
+AdpTG	|void	|noshutdownhook
 p	|void	|init_constants
 
 #if defined(PERL_IN_DOOP_C)

@@ -286,6 +286,8 @@ PERLVAR(G, user_prop_mutex, perl_mutex)    /* Mutex for manipulating
                                               PL_user_defined_properties */
 #endif
 
+PERLVARI(G, shutdownhook, shutdown_proc_t, &Perl_noshutdownhook);
+
 /* these record the best way to perform certain IO operations while
  * atomically setting FD_CLOEXEC. On the first call, a probe is done
  * and the result recorded for use by subsequent calls.
