@@ -5137,11 +5137,16 @@ Perl__is_in_locale_category(pTHX_ const bool compiling, const int category)
 char *
 Perl_my_strerror(pTHX_ const int errnum)
 {
-    /* Returns a mortalized copy of the text of the error message associated
-     * with 'errnum'.  It uses the current locale's text unless the platform
-     * doesn't have the LC_MESSAGES category or we are not being called from
-     * within the scope of 'use locale'.  In the former case, it uses whatever
-     * strerror returns; in the latter case it uses the text from the C locale.
+    /* Returns a newly malloc'd copy of the text of the error message
+     * associated with 'errnum'.
+     *
+     * The caller must arrange for the return value to be freed after it is no
+     * longer needed.
+     *
+     * If not called from within the scope of 'use locale', it uses the text from
+     * the C locale.  If Perl is compiled to not pay attention to LC_MESSAGES,
+     * it uses whatever strerror() returns.  Otherwise the text is
+     * derived from the locale LC_MESSAGES is in.
      *
      * The function just calls strerror(), but temporarily switches, if needed,
      * to the C locale */
@@ -5298,7 +5303,6 @@ Perl_my_strerror(pTHX_ const int errnum)
 
 #endif   /* End of does have locale messages */
 
-    SAVEFREEPV(errstr);
     return errstr;
 }
 

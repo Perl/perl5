@@ -846,6 +846,7 @@ Perl_sv_string_from_errnum(pTHX_ int errnum, SV *tgtsv)
     errstr = my_strerror(errnum);
     if(errstr) {
         sv_setpv(tgtsv, errstr);
+        Safefree(errstr);
         fixup_errno_string(tgtsv);
     } else {
         SvPVCLEAR(tgtsv);
@@ -925,7 +926,14 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
 #elif defined(OS2)
         if (!(_emx_env & 0x200)) {	/* Under DOS */
             sv_setnv(sv, (NV)errno);
-            sv_setpv(sv, errno ? my_strerror(errno) : "");
+            if (errno) {
+                errstr = my_strerror(errno);
+                sv_setpv(sv, errstr);
+                Safefree(errstr);
+            }
+            else {
+                SvPVCLEAR(sv);
+            }
         } else {
             if (errno != errno_isOS2) {
                 const int tmp = _syserrno();
