@@ -3595,6 +3595,7 @@ static int store_hook(
     switch (type) {
     case svis_REF:
     case svis_SCALAR:
+    case svis_REGEXP:
         obj_type = SHT_SCALAR;
         break;
     case svis_ARRAY:
