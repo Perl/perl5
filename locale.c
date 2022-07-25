@@ -3575,11 +3575,11 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 #  else /* !LC_ALL */
 
                 PerlIO_printf(Perl_error_log,
-                "perl: warning: Setting locale failed for the categories:\n\t");
+                "perl: warning: Setting locale failed for the categories:\n");
 
                 for (j = 0; j < NOMINAL_LC_ALL_INDEX; j++) {
                     if (! curlocales[j]) {
-                        PerlIO_printf(Perl_error_log, category_names[j]);
+                        PerlIO_printf(Perl_error_log, "\t%s\n", category_names[j]);
                     }
                     else {
                         Safefree(curlocales[j]);
