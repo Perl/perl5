@@ -1377,6 +1377,11 @@ S_stdize_locale(pTHX_ const int category,
         return retval;
     }
 
+#    else   /* else no LC_ALL */
+
+    PERL_UNUSED_ARG(category);
+    PERL_UNUSED_ARG(caller_line);
+
 #    endif
 
     /* Here, there was a problem in an individual category.  This means that at
@@ -3581,9 +3586,6 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
                                          *bad_lang_use_once
                                        && strNE("0", bad_lang_use_once)))));
 
-    /* setlocale() return vals; not copied so must be looked at immediately */
-    const char * sl_result[NOMINAL_LC_ALL_INDEX + 1];
-
     /* current locale for given category; should have been copied so aren't
      * volatile */
     const char * curlocales[NOMINAL_LC_ALL_INDEX + 1];
@@ -3775,6 +3777,9 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 
 #  ifdef LC_ALL
 
+        /* setlocale() return vals; not copied so must be looked at
+         * immediately. */
+        const char * sl_result[NOMINAL_LC_ALL_INDEX + 1];
         sl_result[LC_ALL_INDEX_] = stdized_setlocale(LC_ALL, trial_locale);
         DEBUG_LOCALE_INIT(LC_ALL_INDEX_, trial_locale, sl_result[LC_ALL_INDEX_]);
         if (! sl_result[LC_ALL_INDEX_]) {
