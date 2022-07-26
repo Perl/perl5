@@ -125,7 +125,7 @@ if ($ENV{PERL_DEBUG_FULL_TEST}) {
 my $utf8_locale;
 
 my @charsets = qw(a d u aa);
-my $locales_ok = locales_enabled('LC_CTYPE');
+my $locales_ok = locales_enabled([ 'LC_CTYPE', 'LC_ALL' ]);
 if (! is_miniperl() && $locales_ok) {
     require POSIX;
     my $current_locale = POSIX::setlocale( &POSIX::LC_ALL, "C") // "";
