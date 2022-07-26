@@ -58,6 +58,7 @@ PP(pp_nextstate)
 PP(pp_gvsv)
 {
     dSP;
+    assert(SvTYPE(cGVOP_gv) == SVt_PVGV);
     EXTEND(SP,1);
     if (UNLIKELY(PL_op->op_private & OPpLVAL_INTRO))
         PUSHs(save_scalar(cGVOP_gv));
@@ -96,6 +97,9 @@ PP(pp_stringify)
 PP(pp_gv)
 {
     dSP;
+    /* cGVOP_gv might be a real GV or might be an RV to a CV */
+    assert(SvTYPE(cGVOP_gv) == SVt_PVGV ||
+           (SvTYPE(cGVOP_gv) <= SVt_PVMG && SvROK(cGVOP_gv) && SvTYPE(SvRV(cGVOP_gv)) == SVt_PVCV));
     XPUSHs(MUTABLE_SV(cGVOP_gv));
     RETURN;
 }
