@@ -653,11 +653,11 @@ lintflags = \
 	@echo `$(CCCMD)` $(PLDLFLAGS) $*.c
 	@`$(CCCMD)` $(PLDLFLAGS) $*.c
 
-.c.i:	perl.h config.h
+.c.i:
 	@echo `$(CCCMDSRC)` -E $*.c \> $*.i
 	@`$(CCCMDSRC)` -E $*.c > $*.i
 
-.c.s:	perl.h config.h
+.c.s:
 	@echo `$(CCCMDSRC)` -S $*.c
 	@`$(CCCMDSRC)` -S $*.c
 
