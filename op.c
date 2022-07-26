@@ -1059,19 +1059,19 @@ Perl_op_clear(pTHX_ OP *o)
     case OP_METHOD_REDIR:
     case OP_METHOD_REDIR_SUPER:
 #ifdef USE_ITHREADS
-        if (cMETHOPx(o)->op_rclass_targ) {
-            pad_swipe(cMETHOPx(o)->op_rclass_targ, 1);
-            cMETHOPx(o)->op_rclass_targ = 0;
+        if (cMETHOPo->op_rclass_targ) {
+            pad_swipe(cMETHOPo->op_rclass_targ, 1);
+            cMETHOPo->op_rclass_targ = 0;
         }
 #else
-        SvREFCNT_dec(cMETHOPx(o)->op_rclass_sv);
-        cMETHOPx(o)->op_rclass_sv = NULL;
+        SvREFCNT_dec(cMETHOPo->op_rclass_sv);
+        cMETHOPo->op_rclass_sv = NULL;
 #endif
         /* FALLTHROUGH */
     case OP_METHOD_NAMED:
     case OP_METHOD_SUPER:
-        SvREFCNT_dec(cMETHOPx(o)->op_u.op_meth_sv);
-        cMETHOPx(o)->op_u.op_meth_sv = NULL;
+        SvREFCNT_dec(cMETHOPo->op_u.op_meth_sv);
+        cMETHOPo->op_u.op_meth_sv = NULL;
 #ifdef USE_ITHREADS
         if (o->op_targ) {
             pad_swipe(o->op_targ, 1);

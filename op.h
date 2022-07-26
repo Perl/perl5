@@ -477,6 +477,7 @@ struct loop {
 #define cPVOP		cPVOPx(PL_op)
 #define cCOP		cCOPx(PL_op)
 #define cLOOP		cLOOPx(PL_op)
+#define cMETHOP         cMETHOPx(PL_op)
 
 #define cUNOPo		cUNOPx(o)
 #define cUNOP_AUXo	cUNOP_AUXx(o)
@@ -489,6 +490,7 @@ struct loop {
 #define cPVOPo		cPVOPx(o)
 #define cCOPo		cCOPx(o)
 #define cLOOPo		cLOOPx(o)
+#define cMETHOPo        cMETHOPx(o)
 
 #define kUNOP		cUNOPx(kid)
 #define kUNOP_AUX	cUNOP_AUXx(kid)
@@ -501,6 +503,7 @@ struct loop {
 #define kPVOP		cPVOPx(kid)
 #define kCOP		cCOPx(kid)
 #define kLOOP		cLOOPx(kid)
+#define kMETHOP         cMETHOPx(kid)
 
 
 typedef enum {
@@ -545,6 +548,12 @@ typedef enum {
 #endif
 
 #define	cMETHOPx_meth(v)	cSVOPx_sv(v)
+
+#define cMETHOP_meth            cMETHOPx_meth(PL_op)
+#define cMETHOP_rclass          cMETHOPx_rclass(PL_op)
+
+#define cMETHOPo_meth           cMETHOPx_meth(o)
+#define cMETHOPo_rclass         cMETHOPx_rclass(o)
 
 #define	cGVOP_gv		cGVOPx_gv(PL_op)
 #define	cGVOPo_gv		cGVOPx_gv(o)

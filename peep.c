@@ -1284,7 +1284,7 @@ S_finalize_op(pTHX_ OP* o)
         case OP_METHOD_SUPER:
         case OP_METHOD_REDIR:
         case OP_METHOD_REDIR_SUPER:
-            op_relocate_sv(&cMETHOPx(o)->op_u.op_meth_sv, &o->op_targ);
+            op_relocate_sv(&cMETHOPo->op_u.op_meth_sv, &o->op_targ);
             break;
 #endif
 

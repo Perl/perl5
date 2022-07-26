@@ -1255,7 +1255,7 @@ S_do_op_dump_bar(pTHX_ I32 level, UV bar, PerlIO *file, const OP *o)
         /* with ITHREADS, consts are stored in the pad, and the right pad
          * may not be active here, so skip */
         S_opdump_indent(aTHX_ o, level, bar, file, "SV = %s\n",
-                        SvPEEK(cMETHOPx_meth(o)));
+                        SvPEEK(cMETHOPo_meth));
 #endif
         break;
     case OP_NULL:
