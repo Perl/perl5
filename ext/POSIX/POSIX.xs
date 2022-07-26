@@ -3200,7 +3200,7 @@ mblen(s, n = ~0)
             }
             else {
                 size_t len;
-                char * string = SvPV(byte_s, len);
+                char * string = SvPVbyte(byte_s, len);
                 if (n < len) len = n;
 #ifdef USE_MBRLEN
                 RETVAL = (SSize_t) mbrlen(string, len, &PL_mbrlen_ps);
@@ -3244,7 +3244,7 @@ mbtowc(pwc, s, n = ~0)
             }
             else {
                 size_t len;
-                char * string = SvPV(byte_s, len);
+                char * string = SvPVbyte(byte_s, len);
                 if (n < len) len = n;
                 RETVAL = mbtowc_(&wc, string, len);
                 if (RETVAL >= 0) {
