@@ -7772,9 +7772,12 @@ yyl_word_or_keyword(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct
         return yyl_fake_eof(aTHX_ LEX_FAKE_EOF, FALSE, s);
 
     case KEY___SUB__:
+        /* If !CvCLONE(PL_compcv) then rpeep will probably turn this into an
+         * OP_CONST. We need to make it big enough to allow room for that if
+         * so */
         FUN0OP(CvCLONE(PL_compcv)
                     ? newOP(OP_RUNCV, 0)
-                    : newPVOP(OP_RUNCV,0,NULL));
+                    : newSVOP(OP_RUNCV, 0, &PL_sv_undef));
 
     case KEY_AUTOLOAD:
     case KEY_DESTROY:

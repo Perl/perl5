@@ -7335,9 +7335,12 @@ Perl_newSVOP(pTHX_ I32 type, I32 flags, SV *sv)
 
     PERL_ARGS_ASSERT_NEWSVOP;
 
+    /* OP_RUNCV is allowed specially so rpeep has room to convert it into an
+     * OP_CONST */
     assert((PL_opargs[type] & OA_CLASS_MASK) == OA_SVOP
         || (PL_opargs[type] & OA_CLASS_MASK) == OA_PVOP_OR_SVOP
         || (PL_opargs[type] & OA_CLASS_MASK) == OA_FILESTATOP
+        || type == OP_RUNCV
         || type == OP_CUSTOM);
 
     NewOp(1101, svop, 1, SVOP);
@@ -7459,7 +7462,7 @@ Perl_newPVOP(pTHX_ I32 type, I32 flags, char *pv)
     flags &= ~SVf_UTF8;
 
     assert((PL_opargs[type] & OA_CLASS_MASK) == OA_PVOP_OR_SVOP
-        || type == OP_RUNCV || type == OP_CUSTOM
+        || type == OP_CUSTOM
         || (PL_opargs[type] & OA_CLASS_MASK) == OA_LOOPEXOP);
 
     NewOp(1101, pvop, 1, PVOP);
@@ -13926,7 +13929,7 @@ Perl_ck_entersub_args_core(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
 
             }
             return opnum == OP_RUNCV
-                ? newPVOP(OP_RUNCV,0,NULL)
+                ? newSVOP(OP_RUNCV, 0, &PL_sv_undef)
                 : newOP(opnum,0);
         default:
             return op_convert_list(opnum,0,aop);
