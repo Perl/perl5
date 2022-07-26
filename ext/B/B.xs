@@ -1072,13 +1072,13 @@ next(o)
                  */
 		ret = make_op_object(aTHX_
                             o->op_type == OP_METHOD
-                                ? cMETHOPx(o)->op_u.op_first : NULL);
+                                ? cMETHOPo->op_u.op_first : NULL);
 		break;
 	    case 54: /* B::METHOP::meth_sv */
                 /* see comment above about METHOP */
 		ret = make_sv_object(aTHX_
                             o->op_type == OP_METHOD
-                                ? NULL : cMETHOPx(o)->op_u.op_meth_sv);
+                                ? NULL : cMETHOPo->op_u.op_meth_sv);
 		break;
 	    case 55: /* B::PMOP::pmregexp */
 		ret = make_sv_object(aTHX_ (SV *)PM_GETRE(cPMOPo));
@@ -1088,13 +1088,13 @@ next(o)
 		ret = sv_2mortal(newSVuv(
 		    (o->op_type == OP_METHOD_REDIR ||
 		     o->op_type == OP_METHOD_REDIR_SUPER) ?
-		      cMETHOPx(o)->op_rclass_targ : 0
+		      cMETHOPo->op_rclass_targ : 0
 		));
 #else
 		ret = make_sv_object(aTHX_
 		    (o->op_type == OP_METHOD_REDIR ||
 		     o->op_type == OP_METHOD_REDIR_SUPER) ?
-		      cMETHOPx(o)->op_rclass_sv : NULL
+		      cMETHOPo->op_rclass_sv : NULL
 		);
 #endif
 		break;

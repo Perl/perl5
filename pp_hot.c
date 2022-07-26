@@ -5661,7 +5661,7 @@ PP(pp_method_named)
 {
     dSP;
     GV* gv;
-    SV* const meth = cMETHOPx_meth(PL_op);
+    SV* const meth = cMETHOP_meth;
     HV* const stash = opmethod_stash(meth);
 
     if (LIKELY(SvTYPE(stash) == SVt_PVHV)) {
@@ -5680,7 +5680,7 @@ PP(pp_method_super)
     dSP;
     GV* gv;
     HV* cache;
-    SV* const meth = cMETHOPx_meth(PL_op);
+    SV* const meth = cMETHOP_meth;
     HV* const stash = CopSTASH(PL_curcop);
     /* Actually, SUPER doesn't need real object's (or class') stash at all,
      * as it uses CopSTASH. However, we must ensure that object(class) is
@@ -5702,12 +5702,12 @@ PP(pp_method_redir)
 {
     dSP;
     GV* gv;
-    SV* const meth = cMETHOPx_meth(PL_op);
-    HV* stash = gv_stashsv(cMETHOPx_rclass(PL_op), 0);
+    SV* const meth = cMETHOP_meth;
+    HV* stash = gv_stashsv(cMETHOP_rclass, 0);
     opmethod_stash(meth); /* not used but needed for error checks */
 
     if (stash) { METHOD_CHECK_CACHE(stash, stash, meth); }
-    else stash = MUTABLE_HV(cMETHOPx_rclass(PL_op));
+    else stash = MUTABLE_HV(cMETHOP_rclass);
 
     gv = gv_fetchmethod_sv_flags(stash, meth, GV_AUTOLOAD|GV_CROAK);
     assert(gv);
@@ -5721,11 +5721,11 @@ PP(pp_method_redir_super)
     dSP;
     GV* gv;
     HV* cache;
-    SV* const meth = cMETHOPx_meth(PL_op);
-    HV* stash = gv_stashsv(cMETHOPx_rclass(PL_op), 0);
+    SV* const meth = cMETHOP_meth;
+    HV* stash = gv_stashsv(cMETHOP_rclass, 0);
     opmethod_stash(meth); /* not used but needed for error checks */
 
-    if (UNLIKELY(!stash)) stash = MUTABLE_HV(cMETHOPx_rclass(PL_op));
+    if (UNLIKELY(!stash)) stash = MUTABLE_HV(cMETHOP_rclass);
     else if ((cache = HvMROMETA(stash)->super)) {
          METHOD_CHECK_CACHE(stash, cache, meth);
     }
