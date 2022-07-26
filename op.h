@@ -256,8 +256,7 @@ struct methop {
     BASEOP
     union {
         /* op_u.op_first *must* be aligned the same as the op_first
-         * field of the other op types, and op_u.op_meth_sv *must*
-         * be aligned with op_sv */
+         * field of the other op types */
         OP* op_first;   /* optree for method name */
         SV* op_meth_sv; /* static method name */
     } op_u;
@@ -535,6 +534,8 @@ typedef enum {
                                  ? cSVOPx(v)->op_sv : PAD_SVl((v)->op_targ))
 #  define	cSVOPx_svp(v)	(cSVOPx(v)->op_sv \
                                  ? &cSVOPx(v)->op_sv : &PAD_SVl((v)->op_targ))
+#  define       cMETHOPx_meth(v) (cMETHOPx(v)->op_u.op_meth_sv \
+                                  ? cMETHOPx(v)->op_u.op_meth_sv : PAD_SVl((v)->op_targ))
 #  define	cMETHOPx_rclass(v) PAD_SVl(cMETHOPx(v)->op_rclass_targ)
 #else
 #  define	cGVOPx_gv(o)	((GV*)cSVOPx(o)->op_sv)
@@ -544,10 +545,9 @@ typedef enum {
 #  endif
 #  define	cSVOPx_sv(v)	(cSVOPx(v)->op_sv)
 #  define	cSVOPx_svp(v)	(&cSVOPx(v)->op_sv)
+#  define       cMETHOPx_meth(v)   (cMETHOPx(v)->op_u.op_meth_sv)
 #  define	cMETHOPx_rclass(v) (cMETHOPx(v)->op_rclass_sv)
 #endif
-
-#define	cMETHOPx_meth(v)	cSVOPx_sv(v)
 
 #define cMETHOP_meth            cMETHOPx_meth(PL_op)
 #define cMETHOP_rclass          cMETHOPx_rclass(PL_op)
