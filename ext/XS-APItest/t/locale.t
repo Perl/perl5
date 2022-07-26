@@ -98,7 +98,7 @@ open my $fh, "<", $hdr;
 $|=1;
 
 SKIP: {
-    skip "No LC_ALL", 1 unless find_locales( &LC_ALL );
+    skip "No LC_ALL", 1 unless locales_enabled('LC_ALL');
 
     use POSIX;
     setlocale(LC_ALL, "C");
