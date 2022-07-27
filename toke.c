@@ -10076,25 +10076,14 @@ Perl_scan_word(pTHX_ char *s, char *dest, STRLEN destlen, int allow_package, STR
     return s;
 }
 
-/* Is the byte 'd' a legal single character identifier name?  'u' is true
- * iff Unicode semantics are to be used.  The legal ones are any of:
- *  a) all ASCII characters except:
- *          1) control and space-type ones, like NUL, SOH, \t, and SPACE;
- *          2) '{'
- *     The final case currently doesn't get this far in the program, so we
- *     don't test for it.  If that were to change, it would be ok to allow it.
- *  b) When not under Unicode rules, any upper Latin1 character
- *  c) Otherwise, when unicode rules are used, all XIDS characters.
- *
- *      Because all ASCII characters have the same representation whether
- *      encoded in UTF-8 or not, we can use the foo_A macros below and '\0' and
- *      '{' without knowing if is UTF-8 or not. */
-#define VALID_LEN_ONE_IDENT(s, e, is_utf8)                                  \
-    (isGRAPH_A(*(s)) || ((is_utf8)                                          \
-                         ? isIDFIRST_utf8_safe(s, e)                        \
-                         : (isGRAPH_L1(*s)                                  \
-                            && LIKELY((U8) *(s) != LATIN1_TO_NATIVE(0xAD)))))
 
+/* scan s and extract an identifier ($var) from it if possible
+ * into dest.
+ * XXX: This function has subtle implications on parsing, and
+ * changing how it behaves can cause a variable to change from
+ * being a run time rv2sv call or a compile time binding to a
+ * specific variable name.
+ */
 STATIC char *
 S_scan_ident(pTHX_ char *s, char *dest, STRLEN destlen, I32 ck_uni)
 {
@@ -10158,11 +10147,41 @@ S_scan_ident(pTHX_ char *s, char *dest, STRLEN destlen, I32 ck_uni)
             s = skipspace(s);
         }
     }
+
+
+    /* Extract the first character of the variable name from 's' and
+     * copy it, null terminated into 'd'. Note that this does not
+     * involve checking for just IDFIRST characters, as it allows the
+     * '^' for ${^FOO} type variable names, and it allows all the
+     * characters that are legal in a single character variable name.
+     *
+     * The legal ones are any of:
+     *  a) all ASCII characters except:
+     *          1) control and space-type ones, like NUL, SOH, \t, and SPACE;
+     *          2) '{'
+     *     The final case currently doesn't get this far in the program, so we
+     *     don't test for it.  If that were to change, it would be ok to allow it.
+     *  b) When not under Unicode rules, any upper Latin1 character
+     *  c) Otherwise, when unicode rules are used, all XIDS characters.
+     *
+     *      Because all ASCII characters have the same representation whether
+     *      encoded in UTF-8 or not, we can use the foo_A macros below and '\0' and
+     *      '{' without knowing if is UTF-8 or not. */
+
     if ((s <= PL_bufend - ((is_utf8)
                           ? UTF8SKIP(s)
                           : 1))
-        && VALID_LEN_ONE_IDENT(s, PL_bufend, is_utf8))
-    {
+        && (
+            isGRAPH_A(*s)
+            ||
+            ( is_utf8
+              ? isIDFIRST_utf8_safe(s, PL_bufend)
+              : (isGRAPH_L1(*s)
+                 && LIKELY((U8) *s != LATIN1_TO_NATIVE(0xAD))
+                )
+            )
+        )
+    ){
         if (is_utf8) {
             const STRLEN skip = UTF8SKIP(s);
             STRLEN i;
@@ -10172,24 +10191,27 @@ S_scan_ident(pTHX_ char *s, char *dest, STRLEN destlen, I32 ck_uni)
         }
         else {
             *d = *s++;
-            /* special case to handle ${10}, ${11} the same way we handle ${1} etc */
-            if (isDIGIT(*d)) {
-                bool is_zero= *d == '0' ? TRUE : FALSE;
-                char *digit_start= d;
-                while (s < PL_bufend && isDIGIT(*s)) {
-                    d++;
-                    if (d >= e)
-                        Perl_croak(aTHX_ "%s", ident_too_long);
-                    *d= *s++;
-                }
-                if (is_zero && d - digit_start > 1)
-                    Perl_croak(aTHX_ ident_var_zero_multi_digit);
-            }
             d[1] = '\0';
         }
     }
+
+    /* special case to handle ${10}, ${11} the same way we handle ${1} etc */
+    if (isDIGIT(*d)) {
+        bool is_zero= *d == '0' ? TRUE : FALSE;
+        char *digit_start= d;
+        while (s < PL_bufend && isDIGIT(*s)) {
+            d++;
+            if (d >= e)
+                Perl_croak(aTHX_ "%s", ident_too_long);
+            *d= *s++;
+        }
+        if (is_zero && d - digit_start >= 1) /* d points at the last digit */
+            Perl_croak(aTHX_ ident_var_zero_multi_digit);
+        d[1] = '\0';
+    }
+
     /* Convert $^F, ${^F} and the ^F of ${^FOO} to control characters */
-    if (*d == '^' && *s && isCONTROLVAR(*s)) {
+    else if (*d == '^' && *s && isCONTROLVAR(*s)) {
         *d = toCTRL(*s);
         s++;
     }
@@ -10198,6 +10220,7 @@ S_scan_ident(pTHX_ char *s, char *dest, STRLEN destlen, I32 ck_uni)
        about when not to warn.  */
     else if (ck_uni && bracket == -1)
         check_uni();
+
     if (bracket != -1) {
         bool skip;
         char *s2;
