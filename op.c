@@ -7571,7 +7571,7 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
 
             /* Fake up a method call to VERSION */
             meth = newSVpvs_share("VERSION");
-            veop = op_convert_list(OP_ENTERSUB, OPf_STACKED|OPf_SPECIAL,
+            veop = op_convert_list(OP_ENTERSUB, OPf_STACKED,
                             op_append_elem(OP_LIST,
                                         op_prepend_elem(OP_LIST, pack, version),
                                         newMETHOP_named(OP_METHOD_NAMED, 0, meth)));
@@ -7598,7 +7598,7 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
         /* Fake up a method call to import/unimport */
         meth = aver
             ? newSVpvs_share("import") : newSVpvs_share("unimport");
-        imop = op_convert_list(OP_ENTERSUB, OPf_STACKED|OPf_SPECIAL,
+        imop = op_convert_list(OP_ENTERSUB, OPf_STACKED,
                        op_append_elem(OP_LIST,
                                    op_prepend_elem(OP_LIST, pack, arg),
                                    newMETHOP_named(OP_METHOD_NAMED, 0, meth)
