@@ -3482,14 +3482,9 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 
     for (i= 0; i < trial_locales_count; i++) {
         const char * trial_locale = trial_locales[i];
+        setlocale_failure = FALSE;
 
         if (i > 0) {
-
-            /* XXX This is to preserve old behavior for LOCALE_ENVIRON_REQUIRED
-             * when i==0, but I (khw) don't think that behavior makes much
-             * sense */
-            setlocale_failure = FALSE;
-
 #  ifdef SYSTEM_DEFAULT_LOCALE
 #    ifdef WIN32    /* Note that assumes Win32 has LC_ALL */
 
