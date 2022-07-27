@@ -27,7 +27,7 @@ skip_all_without_unicode_tables();
 
 my $has_locales = locales_enabled('LC_CTYPE');
 
-plan tests => 1046;  # Update this when adding/deleting tests.
+plan tests => 1214;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -35,6 +35,34 @@ run_tests() unless caller;
 # Tests start here.
 #
 sub run_tests {
+    {
+        # see https://github.com/Perl/perl5/issues/12948
+        my $string="ABCDEFGHIJKL";
+        my $pat= "(.)" x length($string);
+        my $ok= $string=~/^$pat\z/;
+        foreach my $n (1 .. length($string)) {
+            $ok= eval sprintf 'is $%d, "%s", q($%d = %s); 1', ($n, substr($string,$n-1,1))x2;
+            ok($ok, "eval for \$$n test");
+            $ok= eval sprintf 'is ${%d}, "%s", q(${%d} = %s); 1', ($n, substr($string,$n-1,1))x2;
+            ok($ok, "eval for \${$n} test");
+
+            $ok= eval sprintf 'is $0%d, "%s", q($0%d = %s); 1', ($n, substr($string,$n-1,1))x2;
+            ok(!$ok, "eval failed as expected for \$0$n test");
+            $ok= eval sprintf 'is ${0%d}, "%s", q(${0%d} = %s); 1', ($n, substr($string,$n-1,1))x2;
+            ok(!$ok, "eval failed as expected for \${0$n} test");
+
+            no strict 'refs';
+            $ok= eval sprintf 'is ${0b%b}, "%s", q(${0b%b} = %s); 1', ($n, substr($string,$n-1,1))x2;
+            ok($ok, sprintf "eval for \${0b%b} test", $n);
+            $ok= eval sprintf 'is ${0x%x}, "%s", q(${0x%x} = %s); 1', ($n, substr($string,$n-1,1))x2;
+            ok($ok, sprintf "eval for \${0x%x} test", $n);
+            $ok= eval sprintf 'is ${0b%08b}, "%s", q(${0b%08b} = %s); 1', ($n, substr($string,$n-1,1))x2;
+            ok($ok, sprintf "eval for \${0b%b} test", $n);
+            $ok= eval sprintf 'is ${0x%04x}, "%s", q(${0x%04x} = %s); 1', ($n, substr($string,$n-1,1))x2;
+            ok($ok, sprintf "eval for \${0x%04x} test", $n);
+        }
+    }
+
     my $sharp_s = uni_to_native("\xdf");
 
     {
