@@ -3098,8 +3098,8 @@ S_my_nl_langinfo(const int item, bool toggle)
 /* Above is the common beginning to all the implementations of my_langinfo().
  * Below are the various completions */
 #  if defined(HAS_NL_LANGINFO) /* nl_langinfo() is available.  */
-#  if   ! defined(HAS_THREAD_SAFE_NL_LANGINFO_L)      \
-     || ! defined(USE_POSIX_2008_LOCALE)
+#    if   ! defined(HAS_THREAD_SAFE_NL_LANGINFO_L)              \
+       || ! defined(USE_POSIX_2008_LOCALE)
 
     /* Here, use plain nl_langinfo(), switching to the underlying LC_NUMERIC
      * for those items dependent on it.  This must be copied to a buffer before
@@ -3136,7 +3136,7 @@ S_my_nl_langinfo(const int item, bool toggle)
     {
         locale_t cur = use_curlocale_scratch();
 
-#    ifdef USE_LOCALE_NUMERIC
+#      ifdef USE_LOCALE_NUMERIC
 
         if (toggle) {
             if (PL_underlying_numeric_obj) {
@@ -3147,7 +3147,7 @@ S_my_nl_langinfo(const int item, bool toggle)
             }
         }
 
-#    endif
+#      endif
 
         /* We have to save it to a buffer, because the freelocale() just below
          * can invalidate the internal one */
@@ -3156,7 +3156,7 @@ S_my_nl_langinfo(const int item, bool toggle)
                                 &PL_langinfo_bufsize, 0);
     }
 
-#  endif
+#    endif
 
     return retval;
 /*--------------------------------------------------------------------------*/
@@ -3170,7 +3170,7 @@ S_my_nl_langinfo(const int item, bool toggle)
         const char * temp;
         DECLARATION_FOR_LC_NUMERIC_MANIPULATION;
 
-#    ifdef TS_W32_BROKEN_LOCALECONV
+#      ifdef TS_W32_BROKEN_LOCALECONV
 
         const char * save_global;
         const char * save_thread;
@@ -3179,8 +3179,8 @@ S_my_nl_langinfo(const int item, bool toggle)
         char * e;
         char * item_start;
 
+#      endif
 #    endif
-#  endif
 
         /* We copy the results to a per-thread buffer, even if not
          * multi-threaded.  This is in part to simplify this code, and partly
@@ -3204,7 +3204,7 @@ S_my_nl_langinfo(const int item, bool toggle)
                 LOCALECONV_LOCK;    /* Prevent interference with other threads
                                        using localeconv() */
 
-#    ifdef TS_W32_BROKEN_LOCALECONV
+#      ifdef TS_W32_BROKEN_LOCALECONV
 
                 /* This is a workaround for a Windows bug prior to VS 15.
                  * What we do here is, while locked, switch to the global
@@ -3222,7 +3222,7 @@ S_my_nl_langinfo(const int item, bool toggle)
         save_global= querylocale_c(LC_ALL);
         void_setlocale_c(LC_ALL, save_thread);
 
-#    endif
+#      endif
 
                 lc = localeconv();
 
@@ -3251,18 +3251,18 @@ S_my_nl_langinfo(const int item, bool toggle)
                     PL_langinfo_buf[0] = '+';
                 }
 
-#    ifdef TS_W32_BROKEN_LOCALECONV
+#      ifdef TS_W32_BROKEN_LOCALECONV
 
         void_setlocale_c(LC_ALL, save_global);
                 _configthreadlocale(_ENABLE_PER_THREAD_LOCALE);
         void_setlocale_c(LC_ALL, save_thread);
 
-#    endif
+#      endif
 
                 LOCALECONV_UNLOCK;
                 break;
 
-#    ifdef TS_W32_BROKEN_LOCALECONV
+#      ifdef TS_W32_BROKEN_LOCALECONV
 
             case RADIXCHAR:
 
@@ -3337,7 +3337,7 @@ S_my_nl_langinfo(const int item, bool toggle)
                 LOCALECONV_LOCK;    /* Prevent interference with other threads
                                        using localeconv() */
 
-#    ifdef TS_W32_BROKEN_LOCALECONV
+#      ifdef TS_W32_BROKEN_LOCALECONV
 
                 /* This should only be for the thousands separator.  A
                  * different work around would be to use GetNumberFormat on a
@@ -3346,7 +3346,7 @@ S_my_nl_langinfo(const int item, bool toggle)
                 _configthreadlocale(_DISABLE_PER_THREAD_LOCALE);
         save_global = querylocale_c(LC_ALL);
         void_setlocale_c(LC_ALL, save_thread);
-#      if 0
+#        if 0
                 /* This is the start of code that for broken Windows replaces
                  * the above and below code, and instead calls
                  * GetNumberFormat() and then would parse that to find the
@@ -3359,8 +3359,8 @@ S_my_nl_langinfo(const int item, bool toggle)
                     "return from GetNumber, count=%d, val=%s\n",
                     needed_size, PL_langinfo_buf));
 
+#        endif
 #      endif
-#    endif
 
                 lc = localeconv();
                 if (! lc) {
@@ -3379,13 +3379,13 @@ S_my_nl_langinfo(const int item, bool toggle)
                                         ((const char **) &PL_langinfo_buf),
                                         &PL_langinfo_bufsize, 0);
 
-#    ifdef TS_W32_BROKEN_LOCALECONV
+#      ifdef TS_W32_BROKEN_LOCALECONV
 
         void_setlocale_c(LC_ALL, save_global);
                 _configthreadlocale(_ENABLE_PER_THREAD_LOCALE);
         void_setlocale_c(LC_ALL, save_thread);
 
-#    endif
+#      endif
 
                 LOCALECONV_UNLOCK;
 
@@ -3395,26 +3395,25 @@ S_my_nl_langinfo(const int item, bool toggle)
 
                 break;
 
-#  endif  /* Some form of localeconv */
-#  ifdef HAS_STRFTIME
+#    endif  /* Some form of localeconv */
+#    ifdef HAS_STRFTIME
 
-            /* These formats are only available in later strfmtime's */
-            case ERA_D_FMT: case ERA_T_FMT: case ERA_D_T_FMT: case T_FMT_AMPM:
+      /* These formats are only available in later strfmtime's */
+      case ERA_D_FMT: case ERA_T_FMT: case ERA_D_T_FMT: case T_FMT_AMPM:
 
-            /* The rest can be gotten from most versions of strftime(). */
-            case ABDAY_1: case ABDAY_2: case ABDAY_3:
-            case ABDAY_4: case ABDAY_5: case ABDAY_6: case ABDAY_7:
-            case ALT_DIGITS:
-            case AM_STR: case PM_STR:
-            case ABMON_1: case ABMON_2: case ABMON_3: case ABMON_4:
-            case ABMON_5: case ABMON_6: case ABMON_7: case ABMON_8:
-            case ABMON_9: case ABMON_10: case ABMON_11: case ABMON_12:
-            case DAY_1: case DAY_2: case DAY_3: case DAY_4:
-            case DAY_5: case DAY_6: case DAY_7:
-            case MON_1: case MON_2: case MON_3: case MON_4:
-            case MON_5: case MON_6: case MON_7: case MON_8:
-            case MON_9: case MON_10: case MON_11: case MON_12:
-
+      /* The rest can be gotten from most versions of strftime(). */
+      case ABDAY_1: case ABDAY_2: case ABDAY_3:
+      case ABDAY_4: case ABDAY_5: case ABDAY_6: case ABDAY_7:
+      case ALT_DIGITS:
+      case AM_STR: case PM_STR:
+      case ABMON_1: case ABMON_2: case ABMON_3: case ABMON_4:
+      case ABMON_5: case ABMON_6: case ABMON_7: case ABMON_8:
+      case ABMON_9: case ABMON_10: case ABMON_11: case ABMON_12:
+      case DAY_1: case DAY_2: case DAY_3: case DAY_4:
+      case DAY_5: case DAY_6: case DAY_7:
+      case MON_1: case MON_2: case MON_3: case MON_4:
+      case MON_5: case MON_6: case MON_7: case MON_8:
+      case MON_9: case MON_10: case MON_11: case MON_12:
         {
             const char * format;
             bool return_format = FALSE;
@@ -3422,84 +3421,85 @@ S_my_nl_langinfo(const int item, bool toggle)
             int mday = 1;
             int hour = 6;
 
-                GCC_DIAG_IGNORE_STMT(-Wimplicit-fallthrough);
+            GCC_DIAG_IGNORE_STMT(-Wimplicit-fallthrough);
 
-                switch (item) {
-                    default:
+            switch (item) {
+              default:
                 locale_panic_(Perl_form(aTHX_ "switch case: %d problem", item));
-                        NOT_REACHED; /* NOTREACHED */
-                    case PM_STR: hour = 18;
-                    case AM_STR:
-                        format = "%p";
-                        break;
-                    case ABDAY_7: mday++;
-                    case ABDAY_6: mday++;
-                    case ABDAY_5: mday++;
-                    case ABDAY_4: mday++;
-                    case ABDAY_3: mday++;
-                    case ABDAY_2: mday++;
-                    case ABDAY_1:
-                        format = "%a";
-                        break;
-                    case DAY_7: mday++;
-                    case DAY_6: mday++;
-                    case DAY_5: mday++;
-                    case DAY_4: mday++;
-                    case DAY_3: mday++;
-                    case DAY_2: mday++;
-                    case DAY_1:
-                        format = "%A";
-                        break;
-                    case ABMON_12: mon++;
-                    case ABMON_11: mon++;
-                    case ABMON_10: mon++;
-                    case ABMON_9:  mon++;
-                    case ABMON_8:  mon++;
-                    case ABMON_7:  mon++;
-                    case ABMON_6:  mon++;
-                    case ABMON_5:  mon++;
-                    case ABMON_4:  mon++;
-                    case ABMON_3:  mon++;
-                    case ABMON_2:  mon++;
-                    case ABMON_1:
-                        format = "%b";
-                        break;
-                    case MON_12: mon++;
-                    case MON_11: mon++;
-                    case MON_10: mon++;
-                    case MON_9:  mon++;
-                    case MON_8:  mon++;
-                    case MON_7:  mon++;
-                    case MON_6:  mon++;
-                    case MON_5:  mon++;
-                    case MON_4:  mon++;
-                    case MON_3:  mon++;
-                    case MON_2:  mon++;
-                    case MON_1:
-                        format = "%B";
-                        break;
-                    case T_FMT_AMPM:
-                        format = "%r";
-                        return_format = TRUE;
-                        break;
-                    case ERA_D_FMT:
-                        format = "%Ex";
-                        return_format = TRUE;
-                        break;
-                    case ERA_T_FMT:
-                        format = "%EX";
-                        return_format = TRUE;
-                        break;
-                    case ERA_D_T_FMT:
-                        format = "%Ec";
-                        return_format = TRUE;
-                        break;
-                    case ALT_DIGITS:
-                        format = "%Ow";	/* Find the alternate digit for 0 */
-                        break;
-                }
+                NOT_REACHED; /* NOTREACHED */
 
-                GCC_DIAG_RESTORE_STMT;
+              case PM_STR: hour = 18;
+              case AM_STR:
+                format = "%p";
+                break;
+              case ABDAY_7: mday++;
+              case ABDAY_6: mday++;
+              case ABDAY_5: mday++;
+              case ABDAY_4: mday++;
+              case ABDAY_3: mday++;
+              case ABDAY_2: mday++;
+              case ABDAY_1:
+                format = "%a";
+                break;
+              case DAY_7: mday++;
+              case DAY_6: mday++;
+              case DAY_5: mday++;
+              case DAY_4: mday++;
+              case DAY_3: mday++;
+              case DAY_2: mday++;
+              case DAY_1:
+                format = "%A";
+                break;
+              case ABMON_12: mon++;
+              case ABMON_11: mon++;
+              case ABMON_10: mon++;
+              case ABMON_9:  mon++;
+              case ABMON_8:  mon++;
+              case ABMON_7:  mon++;
+              case ABMON_6:  mon++;
+              case ABMON_5:  mon++;
+              case ABMON_4:  mon++;
+              case ABMON_3:  mon++;
+              case ABMON_2:  mon++;
+              case ABMON_1:
+                format = "%b";
+                break;
+              case MON_12: mon++;
+              case MON_11: mon++;
+              case MON_10: mon++;
+              case MON_9:  mon++;
+              case MON_8:  mon++;
+              case MON_7:  mon++;
+              case MON_6:  mon++;
+              case MON_5:  mon++;
+              case MON_4:  mon++;
+              case MON_3:  mon++;
+              case MON_2:  mon++;
+              case MON_1:
+                format = "%B";
+                break;
+              case T_FMT_AMPM:
+                format = "%r";
+                return_format = TRUE;
+                break;
+              case ERA_D_FMT:
+                format = "%Ex";
+                return_format = TRUE;
+                break;
+              case ERA_T_FMT:
+                format = "%EX";
+                return_format = TRUE;
+                break;
+              case ERA_D_T_FMT:
+                format = "%Ec";
+                return_format = TRUE;
+                break;
+              case ALT_DIGITS:
+                format = "%Ow";	/* Find the alternate digit for 0 */
+                break;
+            }
+
+            GCC_DIAG_RESTORE_STMT;
 
             /* The year was deliberately chosen so that January 1 is on the
              * first day of the week.  Since we're only getting one thing at a
@@ -3507,7 +3507,7 @@ S_my_nl_langinfo(const int item, bool toggle)
             const char * temp = my_strftime(format, 30, 30, hour, mday, mon,
                                              2011, 0, 0, 0);
             retval = save_to_buffer(temp, (const char **) &PL_langinfo_buf,
-                                                       &PL_langinfo_bufsize, 0);
+                                          &PL_langinfo_bufsize, 0);
             Safefree(temp);
 
             /* If the item is 'ALT_DIGITS', 'PL_langinfo_buf' contains the
@@ -3518,9 +3518,9 @@ S_my_nl_langinfo(const int item, bool toggle)
              * Things like tm_sec have two digits as the minimum: '00'.) */
             if (item == ALT_DIGITS && strEQ(PL_langinfo_buf, "0")) {
                 return "";
-                }
+            }
 
-                /* ALT_DIGITS is problematic.  Experiments on it showed that
+            /* ALT_DIGITS is problematic.  Experiments on it showed that
              * strftime() did not always work properly when going from alt-9 to
              * alt-10.  Only a few locales have this item defined, and in all
              * of them on Linux that khw was able to find, nl_langinfo() merely
@@ -3539,25 +3539,25 @@ S_my_nl_langinfo(const int item, bool toggle)
 
             if (return_format) {
 
-            /* If to return the format, not the value, overwrite the buffer
-             * with it.  But some strftime()s will keep the original format if
-             * illegal, so change those to "" */
-            if (strEQ(PL_langinfo_buf, format)) {
-                retval = "";
-            }
-            else {
-                retval = format;
-            }
+                /* If to return the format, not the value, overwrite the buffer
+                 * with it.  But some strftime()s will keep the original format
+                 * if illegal, so change those to "" */
+                if (strEQ(*retbufp, format)) {
+                    retval = "";
+                }
+                else {
+                    retval = format;
+                }
             }
 
             break;
         }
 
-#  endif
+#    endif
 
       case CODESET:
 
-#  ifndef WIN32
+#    ifndef WIN32
 
         /* On non-windows, this is unimplemented, in part because of
          * inconsistencies between vendors.  The Darwin native
@@ -3568,7 +3568,7 @@ S_my_nl_langinfo(const int item, bool toggle)
          * have UTF-8 in their names, aren't really UTF-8 */
         return "";
 
-#  else
+#    else
 
         {   /* But on Windows, the name does seem to be consistent, so
                use that. */
@@ -3615,7 +3615,7 @@ S_my_nl_langinfo(const int item, bool toggle)
 
         break;
 
-#  endif
+#    endif
 
         }
     }
