@@ -3824,7 +3824,7 @@ S_apply_attrs_my(pTHX_ HV *stash, OP *target, OP *attrs, OP **imopsp)
 
     /* Fake up a method call to import */
     meth = newSVpvs_share("import");
-    imop = op_convert_list(OP_ENTERSUB, OPf_STACKED|OPf_SPECIAL|OPf_WANT_VOID,
+    imop = op_convert_list(OP_ENTERSUB, OPf_STACKED|OPf_WANT_VOID,
                    op_append_elem(OP_LIST,
                                op_prepend_elem(OP_LIST, pack, arg),
                                newMETHOP_named(OP_METHOD_NAMED, 0, meth)));
