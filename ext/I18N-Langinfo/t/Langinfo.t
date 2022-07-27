@@ -37,7 +37,16 @@ plan tests => 1 + 3 * @constants + keys(@want) + 1 + 2;
 use_ok('I18N::Langinfo', 'langinfo', @constants, 'CRNCYSTR');
 
 use POSIX;
-setlocale(LC_ALL, "C");
+
+if (locales_enabled('LC_ALL')) {
+    setlocale(LC_ALL, "C");
+}
+else { # If no LC_ALL, make sure the categories used in Langinfo are in C
+    setlocale(LC_CTYPE, "C")    if locales_enabled('LC_CTYPE');
+    setlocale(LC_MONETARY, "C") if locales_enabled('LC_MONETARY');
+    setlocale(LC_NUMERIC, "C")  if locales_enabled('LC_NUMERIC');
+    setlocale(LC_TIME, "C")     if locales_enabled('LC_TIME');
+}
 
 for my $constant (@constants) {
     SKIP: {
