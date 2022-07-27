@@ -3541,6 +3541,7 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
         if (! setlocale_failure) {
             unsigned int j;
             for (j = 0; j < NOMINAL_LC_ALL_INDEX; j++) {
+                Safefree(curlocales[j]);
                 curlocales[j] = setlocale_i(j, trial_locale);
                 if (! curlocales[j]) {
                     setlocale_failure = TRUE;
@@ -3575,9 +3576,6 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
                 for (j = 0; j < NOMINAL_LC_ALL_INDEX; j++) {
                     if (! curlocales[j]) {
                         PerlIO_printf(Perl_error_log, "\t%s\n", category_names[j]);
-                    }
-                    else {
-                        Safefree(curlocales[j]);
                     }
                 }
 
