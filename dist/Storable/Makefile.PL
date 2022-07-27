@@ -11,14 +11,11 @@ use warnings;
 use ExtUtils::MakeMaker 6.31;
 use Config;
 
-my $defines = $ENV{PERL_CORE} ? q[] : q[-DUSE_PPPORT_H];
-
 WriteMakefile(
     NAME                => 'Storable',
     AUTHOR              => 'Perl 5 Porters',
     LICENSE             => 'perl',
     DISTNAME            => "Storable",
-    DEFINE              => $defines,
     PREREQ_PM           =>
       {
           XSLoader => 0,

@@ -1182,7 +1182,6 @@ use File::Glob qw(:case);
             qr{^examples/},
             qw( t/pod.t
                 t/test.pl
-                threads.h
                 ),
         ],
     },
@@ -1192,7 +1191,6 @@ use File::Glob qw(:case);
         'FILES'        => q[dist/threads-shared],
         'EXCLUDED'     => [
             qw( examples/class.pl
-                shared.h
                 t/pod.t
                 t/test.pl
                 ),

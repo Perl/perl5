@@ -16,16 +16,14 @@
 #include <perl.h>
 #include <XSUB.h>
 
-#ifdef USE_PPPORT_H
-#   define NEED_PL_parser
-#   define NEED_sv_2pv_flags
-#   define NEED_load_module
-#   define NEED_vload_module
-#   define NEED_newCONSTSUB
-#   define NEED_newSVpvn_flags
-#   define NEED_newRV_noinc
+#define NEED_PL_parser
+#define NEED_sv_2pv_flags
+#define NEED_load_module
+#define NEED_vload_module
+#define NEED_newCONSTSUB
+#define NEED_newSVpvn_flags
+#define NEED_newRV_noinc
 #include "ppport.h"             /* handle old perls */
-#endif
 
 #ifdef DEBUGGING
 #define DEBUGME /* Debug mode, turns assertions on as well */

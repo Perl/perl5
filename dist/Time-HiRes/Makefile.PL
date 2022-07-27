@@ -868,8 +868,6 @@ EOM
 sub doMakefile {
     my @makefileopts = ();
 
-    DEFINE('USE_PPPORT_H') unless $ENV{PERL_CORE};
-
     push (@makefileopts,
         'NAME'  => 'Time::HiRes',
         'AUTHOR'    => 'Jarkko Hietaniemi <jhi@iki.fi>',

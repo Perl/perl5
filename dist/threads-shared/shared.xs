@@ -130,14 +130,11 @@
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
-#ifdef HAS_PPPORT_H
-#  define NEED_sv_2pv_flags
-#  define NEED_vnewSVpvf
-#  define NEED_warner
-#  define NEED_newSVpvn_flags
-#  include "ppport.h"
-#  include "shared.h"
-#endif
+#define NEED_sv_2pv_flags
+#define NEED_vnewSVpvf
+#define NEED_warner
+#define NEED_newSVpvn_flags
+#include "ppport.h"
 
 #ifndef CLANG_DIAG_IGNORE
 # define CLANG_DIAG_IGNORE(x)
