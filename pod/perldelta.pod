@@ -358,6 +358,13 @@ actual behaviour (it suppresses a warning that would otherwise be generated
 about ambiguous names), in order to be less confusing with a possible upcoming
 feature.
 
+=item *
+
+The C<OPf_SPECIAL> flag is no longer set on the C<OP_ENTERSUB> op
+constructed to call the C<VERSION>, C<import> and C<unimport> methods
+as part of a C<use> statement and attribute application, nor when
+assigning to an C<:lvalue> subroutine.
+
 =back
 
 =head1 Selected Bug Fixes
