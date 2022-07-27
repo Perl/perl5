@@ -4974,7 +4974,7 @@ PERL_STATIC_INLINE void	Perl_cx_pushloop_plain(pTHX_ PERL_CONTEXT *cx);
 	assert(cx)
 #endif
 #ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE void	Perl_cx_pushsub(pTHX_ PERL_CONTEXT *cx, CV *cv, OP *retop, bool hasargs);
+PERL_STATIC_INLINE void	Perl_cx_pushsub(pTHX_ PERL_CONTEXT *cx, CV *cv, OP *retop, bool hasargs, U8 op_private);
 #define PERL_ARGS_ASSERT_CX_PUSHSUB	\
 	assert(cx); assert(cv)
 #endif

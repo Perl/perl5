@@ -743,13 +743,13 @@ struct block_format {
 #  define CX_POP(cx) cxstack_ix--;
 #endif
 
-#define CX_PUSHSUB_GET_LVALUE_MASK(func) \
+#define CX_PUSHSUB_GET_LVALUE_MASK(func, op_private) \
         /* If the context is indeterminate, then only the lvalue */	\
         /* flags that the caller also has are applicable.        */	\
         (								\
            (PL_op->op_flags & OPf_WANT)					\
                ? OPpENTERSUB_LVAL_MASK					\
-               : !(PL_op->op_private & OPpENTERSUB_LVAL_MASK)		\
+               : !(op_private & OPpENTERSUB_LVAL_MASK)			\
                    ? 0 : (U8)func(aTHX)					\
         )
 
@@ -1274,7 +1274,7 @@ See L<perlcall/LIGHTWEIGHT CALLBACKS>.
         PUSHSTACKi(PERLSI_MULTICALL);					\
         cx = cx_pushblock((CXt_SUB|CXp_MULTICALL|flags), (U8)gimme,     \
                   PL_stack_sp, PL_savestack_ix);	                \
-        cx_pushsub(cx, cv, NULL, 0);                                    \
+        cx_pushsub(cx, cv, NULL, 0, 0);                                 \
         SAVEOP();					                \
         if (!(flags & CXp_SUB_RE_FAKE))                                 \
             CvDEPTH(cv)++;						\
@@ -1317,7 +1317,7 @@ See L<perlcall/LIGHTWEIGHT CALLBACKS>.
         assert(CxMULTICALL(cx));                                        \
         cx_popsub_common(cx);                                           \
         cx->cx_type = (CXt_SUB|CXp_MULTICALL|flags);                    \
-        cx_pushsub(cx, cv, NULL, 0);			                \
+        cx_pushsub(cx, cv, NULL, 0, 0);			                \
         if (!(flags & CXp_SUB_RE_FAKE))                                 \
             CvDEPTH(cv)++;						\
         if (CvDEPTH(cv) >= 2)  						\

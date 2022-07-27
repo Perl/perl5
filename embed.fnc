@@ -3811,7 +3811,7 @@ Cixp	|PERL_CONTEXT *	|cx_pushblock|U8 type|U8 gimme|NN SV** sp|I32 saveix
 Cixp	|void	|cx_popblock|NN PERL_CONTEXT *cx
 Cixp	|void	|cx_topblock|NN PERL_CONTEXT *cx
 Cixp	|void	|cx_pushsub      |NN PERL_CONTEXT *cx|NN CV *cv \
-				 |NULLOK OP *retop|bool hasargs
+				 |NULLOK OP *retop|bool hasargs|U8 op_private
 Cixp	|void	|cx_popsub_common|NN PERL_CONTEXT *cx
 Cixp	|void	|cx_popsub_args  |NN PERL_CONTEXT *cx
 Cixp	|void	|cx_popsub       |NN PERL_CONTEXT *cx

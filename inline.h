@@ -2753,9 +2753,9 @@ Perl_cx_topblock(pTHX_ PERL_CONTEXT *cx)
 
 
 PERL_STATIC_INLINE void
-Perl_cx_pushsub(pTHX_ PERL_CONTEXT *cx, CV *cv, OP *retop, bool hasargs)
+Perl_cx_pushsub(pTHX_ PERL_CONTEXT *cx, CV *cv, OP *retop, bool hasargs, U8 op_private)
 {
-    U8 phlags = CX_PUSHSUB_GET_LVALUE_MASK(Perl_was_lvalue_sub);
+    U8 phlags = CX_PUSHSUB_GET_LVALUE_MASK(Perl_was_lvalue_sub, op_private);
 
     PERL_ARGS_ASSERT_CX_PUSHSUB;
 
@@ -2768,7 +2768,7 @@ Perl_cx_pushsub(pTHX_ PERL_CONTEXT *cx, CV *cv, OP *retop, bool hasargs)
     cx->cx_type |= (hasargs) ? CXp_HASARGS : 0;
     cx->blk_sub.retop = retop;
     SvREFCNT_inc_simple_void_NN(cv);
-    cx->blk_u16 = PL_op->op_private & (phlags|OPpDEREF);
+    cx->blk_u16 = op_private & (phlags|OPpDEREF);
 }
 
 
