@@ -7,7 +7,7 @@
 # This is based on the module of the same name by Malcolm Beattie,
 # but essentially none of his code remains.
 
-package B::Deparse 1.66;
+package B::Deparse 1.67;
 use strict;
 use Carp;
 use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
@@ -5103,9 +5103,7 @@ sub pp_entersub {
     my $prefix = "";
     my $amper = "";
     my($kid, @exprs);
-    if ($op->flags & OPf_SPECIAL && !($op->flags & OPf_MOD)) {
-	$prefix = "do ";
-    } elsif ($op->private & OPpENTERSUB_AMPER) {
+    if ($op->private & OPpENTERSUB_AMPER) {
 	$amper = "&";
     }
     $kid = $op->first;
