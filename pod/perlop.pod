@@ -1790,9 +1790,9 @@ X<\l> X<\u> X<\L> X<\U> X<\E> X<\Q> X<\F>
 
     \l		lowercase next character only
     \u		titlecase (not uppercase!) next character only
-    \L		lowercase all characters till \E or end of string
-    \U		uppercase all characters till \E or end of string
-    \F		foldcase all characters till \E or end of string
+    \L		lowercase all characters till \U, \F, \E or end of string
+    \U		uppercase all characters till \L, \F, \E or end of string
+    \F		foldcase all characters till \U, \L, \E or end of string
     \Q          quote (disable) pattern metacharacters till \E or
                 end of string
     \E		end either case modification or quoted section
