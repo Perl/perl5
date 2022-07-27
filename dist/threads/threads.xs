@@ -19,12 +19,10 @@
 #    define setjmp(x) _setjmpex((x), mingw_getsp())
 #  endif
 #endif
-#ifdef HAS_PPPORT_H
-#  define NEED_PL_signals
-#  define NEED_sv_2pv_flags
-#  include "ppport.h"
-#  include "threads.h"
-#endif
+#define NEED_PL_signals
+#define NEED_sv_2pv_flags
+#include "ppport.h"
+#include "threads.h"
 #ifndef sv_dup_inc
 #  define sv_dup_inc(s,t) SvREFCNT_inc(sv_dup(s,t))
 #endif

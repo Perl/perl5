@@ -28,7 +28,7 @@ our @EXPORT_OK = qw(
 our ($canonical, $forgive_me);
 
 BEGIN {
-  our $VERSION = '3.29';
+  our $VERSION = '3.30';
 }
 
 our $recursion_limit;

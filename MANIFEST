@@ -4107,6 +4107,7 @@ dist/threads/t/stress_string.t	Test with multiple threads, string cv argument.
 dist/threads/t/thread.t		General ithread tests from thr5005
 dist/threads/t/unique.t		Test unique attribute with threads
 dist/threads/t/version.t	Test that pod version matches code version.
+dist/threads/threads.h		threads compatibility helper
 dist/threads/threads.xs		ithreads
 dist/threads-shared/hints/linux.pl	thread shared variables
 dist/threads-shared/lib/threads/shared.pm	thread shared variables

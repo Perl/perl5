@@ -2,13 +2,11 @@
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
-#ifdef USE_PPPORT_H
-#  define NEED_my_snprintf
-#  define NEED_my_sprintf
-#  define NEED_sv_2pv_flags
-#  define NEED_utf8_to_uvchr_buf
-#  include "ppport.h"
-#endif
+#define NEED_my_snprintf
+#define NEED_my_sprintf
+#define NEED_sv_2pv_flags
+#define NEED_utf8_to_uvchr_buf
+#include "ppport.h"
 
 #ifndef strlcpy
 #  ifdef my_strlcpy
