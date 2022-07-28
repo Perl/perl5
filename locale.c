@@ -3913,8 +3913,13 @@ S_my_langinfo_i(pTHX_
             const Size_t initial_size = 10;
 
             Newx(floatbuf, initial_size, char);
+
+            /* 1.5 is exactly representable on binary computers */
             Size_t needed_size = snprintf(floatbuf, initial_size, "%.1f", 1.5);
-            if (needed_size >= initial_size) {
+
+            /* If our guess wasn't big enough, increase and try again, based on
+             * the real number that strnprintf() is supposed to return */
+            if (UNLIKELY(needed_size >= initial_size)) {
                 needed_size++;  /* insurance */
                 Renew(floatbuf, needed_size, char);
                 Size_t new_needed = snprintf(floatbuf, needed_size, "%.1f", 1.5);
@@ -3941,7 +3946,7 @@ S_my_langinfo_i(pTHX_
             }
 
             /* Everything in between is the radix string */
-            if (s < e) {
+            if (LIKELY(s < e)) {
                 *s = '\0';
                 retval = save_to_buffer(item_start,
                                         (const char **) &PL_langinfo_buf,
@@ -3967,7 +3972,9 @@ S_my_langinfo_i(pTHX_
 #    endif
 #    ifdef HAS_SOME_LOCALECONV
 
-    /* These items are available from localeconv(). */
+    /* These items are available from localeconv().  (To avoid using
+     * TS_W32_BROKEN_LOCALECONV, one could use GetNumberFormat and
+     * GetCurrencyFormat; patches welcome) */
 
       case CRNCYSTR:
       case THOUSEP:
