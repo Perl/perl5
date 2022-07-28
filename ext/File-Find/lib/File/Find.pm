@@ -3,7 +3,7 @@ use 5.006;
 use strict;
 use warnings;
 use warnings::register;
-our $VERSION = '1.40';
+our $VERSION = '1.41';
 use Exporter 'import';
 require Cwd;
 
@@ -913,8 +913,6 @@ a dangling symbolic link, then fullname will be set to C<undef>.
 
 =back
 
-This is a no-op on Win32.
-
 =item C<follow_fast>
 
 This is similar to I<follow> except that it may report some files more
@@ -922,8 +920,6 @@ than once.  It does detect cycles, however.  Since only symbolic links
 have to be hashed, this is much cheaper both in space and time.  If
 processing a file more than once (by the user's C<wanted()> function)
 is worse than just taking time, the option I<follow> should be used.
-
-This is also a no-op on Win32.
 
 =item C<follow_skip>
 
