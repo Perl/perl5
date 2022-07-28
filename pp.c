@@ -904,11 +904,11 @@ PP(pp_undef)
                           "Constant subroutine %" SVf " undefined",
                            SVfARG(CvANON((const CV *)sv)
                              ? newSVpvs_flags("(anonymous)", SVs_TEMP)
-                             : sv_2mortal(newSVhek(
+                             : newSVhek_mortal(
                                 CvNAMED(sv)
                                  ? CvNAME_HEK((CV *)sv)
                                  : GvENAME_HEK(CvGV((const CV *)sv))
-                               ))
+                               )
                            ));
         /* FALLTHROUGH */
     case SVt_PVFM:

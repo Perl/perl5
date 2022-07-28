@@ -1756,7 +1756,7 @@ Perl_mess_sv(pTHX_ SV *basemsg, bool consume)
             Perl_sv_catpvf(aTHX_ sv, ", <%" SVf "> %s %" IVdf,
                            SVfARG(PL_last_in_gv == PL_argvgv
                                  ? &PL_sv_no
-                                 : sv_2mortal(newSVhek(GvNAME_HEK(PL_last_in_gv)))),
+                                 : newSVhek_mortal(GvNAME_HEK(PL_last_in_gv))),
                            line_mode ? "line" : "chunk",
                            (IV)IoLINES(GvIOp(PL_last_in_gv)));
         }
@@ -3916,7 +3916,7 @@ Perl_report_evil_fh(pTHX_ const GV *gv)
     if (ckWARN(warn_type)) {
         SV * const name
             = gv && isGV_with_GP(gv) && GvENAMELEN(gv) ?
-                                     sv_2mortal(newSVhek(GvENAME_HEK(gv))) : NULL;
+                                     newSVhek_mortal(GvENAME_HEK(gv)) : NULL;
         const char * const pars =
             (const char *)(OP_IS_FILETEST(op) ? "" : "()");
         const char * const func =

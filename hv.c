@@ -3127,7 +3127,7 @@ Perl_hv_iterkeysv(pTHX_ HE *entry)
 {
     PERL_ARGS_ASSERT_HV_ITERKEYSV;
 
-    return sv_2mortal(newSVhek(HeKEY_hek(entry)));
+    return newSVhek_mortal(HeKEY_hek(entry));
 }
 
 /*

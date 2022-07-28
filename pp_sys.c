@@ -2844,7 +2844,7 @@ PP(pp_stat)
                                "lstat() on filehandle%s%" SVf,
                                 gv ? " " : "",
                                 SVfARG(gv
-                                        ? sv_2mortal(newSVhek(GvENAME_HEK(gv)))
+                                        ? newSVhek_mortal(GvENAME_HEK(gv))
                                         : &PL_sv_no));
             } else if (PL_laststype != OP_LSTAT)
                 /* diag_listed_as: The stat preceding %s wasn't an lstat */

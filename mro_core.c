@@ -812,7 +812,7 @@ Perl_mro_package_moved(pTHX_ HV * const stash, HV * const oldstash,
                 : newSVpvs_flags("",  SVs_TEMP);
         }
         else {
-            namesv = sv_2mortal(newSVhek(*namep));
+            namesv = newSVhek_mortal(*namep);
             if (GvNAMELEN(gv) == 1) sv_catpvs(namesv, ":");
             else                    sv_catpvs(namesv, "::");
         }
