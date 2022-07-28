@@ -3314,7 +3314,10 @@ S_my_langinfo(const nl_item item, bool toggle)
                 while (ptr < e && *ptr != '1') {
                     ptr++;
                 }
+
+            if (LIKELY(ptr < e)) {
                 ptr++;
+            }
 
                 /* Find the '5' */
                 item_start = ptr;
