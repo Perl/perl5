@@ -53,16 +53,16 @@ sub dir_path {
     my $first_arg = shift @_;
 
     if ($first_arg eq '.') {
-	    return './' unless @_;
-	    my $path = File::Spec->catdir(@_);
-	    # add leading "./"
-	    $path = "./$path";
-	    return $path;
+        return './' unless @_;
+        my $path = File::Spec->catdir(@_);
+        # add leading "./"
+        $path = "./$path";
+        return $path;
     }
     else { # $first_arg ne '.'
         return $first_arg unless @_; # return plain filename
-	    my $fname = File::Spec->catdir($first_arg, @_); # relative path
-	    $fname = VMS::Filespec::unixpath($fname) if $^O eq 'VMS';
+            my $fname = File::Spec->catdir($first_arg, @_); # relative path
+            $fname = VMS::Filespec::unixpath($fname) if $^O eq 'VMS';
         return $fname;
     }
 }
@@ -82,16 +82,16 @@ sub file_path {
     my $first_arg = shift @_;
 
     if ($first_arg eq '.') {
-	    return './' unless @_;
-	    my $path = File::Spec->catfile(@_);
-	    # add leading "./"
-	    $path = "./$path";
-	    return $path;
+        return './' unless @_;
+        my $path = File::Spec->catfile(@_);
+        # add leading "./"
+        $path = "./$path";
+        return $path;
     }
     else { # $first_arg ne '.'
         return $first_arg unless @_; # return plain filename
-	    my $fname = File::Spec->catfile($first_arg, @_); # relative path
-	    $fname = VMS::Filespec::unixify($fname) if $^O eq 'VMS';
+            my $fname = File::Spec->catfile($first_arg, @_); # relative path
+            $fname = VMS::Filespec::unixify($fname) if $^O eq 'VMS';
         return $fname;
     }
 }
