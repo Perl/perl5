@@ -51,7 +51,6 @@ sub run_tests {
             $ok= eval sprintf 'is ${0%d}, "%s", q(${0%d} = %s); 1', ($n, substr($string,$n-1,1))x2;
             ok(!$ok, "eval failed as expected for \${0$n} test");
 
-            no strict 'refs';
             $ok= eval sprintf 'is ${0b%b}, "%s", q(${0b%b} = %s); 1', ($n, substr($string,$n-1,1))x2;
             ok($ok, sprintf "eval for \${0b%b} test", $n);
             $ok= eval sprintf 'is ${0x%x}, "%s", q(${0x%x} = %s); 1', ($n, substr($string,$n-1,1))x2;

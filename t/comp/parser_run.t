@@ -10,7 +10,7 @@ BEGIN {
     set_up_inc( qw(. ../lib ) );
 }
 
-plan(70);
+plan(82);
 
 # [perl #130814] can reallocate lineptr while looking ahead for
 # "Missing $ on loop variable" diagnostic.
@@ -38,7 +38,10 @@ for my $var ('$00','${00}','$001','${001}','$01','${01}','$09324', '${09324}') {
     }
 }
 
-for my $var ('$0', '${0}', '$1', '${1}', '$10', '${10}', '$9324', '${9324}') {
+for my $var (
+    '$0', '${0}', '$1', '${1}', '$10', '${10}', '$9324', '${9324}',
+    '${0x10}', '${0b10000}', '${0xA}',
+) {
     for my $utf8 ("","use utf8;") {
         for my $strict ("","use strict;") {
             fresh_perl_is(

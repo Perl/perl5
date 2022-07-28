@@ -10195,18 +10195,52 @@ S_scan_ident(pTHX_ char *s, char *dest, STRLEN destlen, I32 ck_uni)
         }
     }
 
-    /* special case to handle ${10}, ${11} the same way we handle ${1} etc */
-    if (isDIGIT(*d)) {
-        bool is_zero= *d == '0' ? TRUE : FALSE;
+    /* special case to handle ${10}, ${11} the same way we handle $1 and ${1} etc,
+     * also special case ${0x10} and ${0b10000} to do the right thing and refer to
+     * $16 at compile time without triggering use strict violations */
+    if (isDIGIT(*d) && s < PL_bufend) {
         char *digit_start= d;
-        while (s < PL_bufend && isDIGIT(*s)) {
-            d++;
-            if (d >= e)
-                Perl_croak(aTHX_ "%s", ident_too_long);
-            *d= *s++;
+        bool has_leading_zero= *d == '0' ? TRUE : FALSE;
+        if (isDIGIT(*s)) {
+            do {
+                d++;
+                if (d >= e)
+                    Perl_croak(aTHX_ "%s", ident_too_long);
+                *d = *s++;
+            } while (s < PL_bufend && isDIGIT(*s));
+            if (has_leading_zero && d - digit_start >= 1) /* d points at the last digit */
+                Perl_croak(aTHX_ ident_var_zero_multi_digit);
         }
-        if (is_zero && d - digit_start >= 1) /* d points at the last digit */
-            Perl_croak(aTHX_ ident_var_zero_multi_digit);
+        else
+        if ( has_leading_zero ) {
+            int shift = 0;
+            U8 class_bit = 0;
+            if (*s == 'x') {
+                shift = 4;
+                class_bit = CC_XDIGIT_;
+            } else if (*s == 'b') {
+                shift = 1;
+                class_bit = CC_BINDIGIT_;
+            } else if (*s == 'o') {
+                shift = 3;
+                class_bit = CC_OCTDIGIT_;
+            }
+            if (shift) {
+                STRLEN len = PL_bufend - s;
+                I32 flags = PERL_SCAN_SILENT_ILLDIGIT | PERL_SCAN_DISALLOW_PREFIX;
+                UV uv = Perl_grok_bin_oct_hex(aTHX_ s+1, &len, &flags, NULL, shift, class_bit, *s);
+                if (len) {
+                    s += len + 1; /* move past the prefix digit and tail */
+                    if (flags & PERL_SCAN_GREATER_THAN_UV_MAX || d+len >= e)
+                        Perl_croak(aTHX_ "%s", ident_too_long);
+                    len = snprintf(dest,destlen, "%" UVuf, uv);
+                    d = dest + len - 1;
+                    /* note we dont need to worry about trailing garbage, that will be
+                     * handled later. */
+                }
+            }
+        }
+
         d[1] = '\0';
     }
 
