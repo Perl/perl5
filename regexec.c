@@ -10365,7 +10365,7 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
         }
         break;
 
-      case ANYOFHbbm:
+      case ANYOFHbbm_t8:
         while (   hardcount < max
                && scan + 1 < this_eol
                && (U8) *scan == ANYOF_FLAGS(p)

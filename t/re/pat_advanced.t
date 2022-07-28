@@ -2688,6 +2688,12 @@ EOF_DEBUG_OUT
                       {}, "Related to Github Issue #19350, forward \\g{x} pattern segv under use re Debug => 'PARSE'");
     }
 
+    {   # GH 20009
+        my $x = "awesome quotes";
+        utf8::upgrade($x);
+        $x =~ s/^[\x{0301}\x{030C}]+//;
+    }
+
 
     # !!! NOTE that tests that aren't at all likely to crash perl should go
     # a ways above, above these last ones.  There's a comment there that, like
