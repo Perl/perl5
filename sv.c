@@ -9954,6 +9954,11 @@ Perl_newSVsv_flags(pTHX_ SV *const old, I32 flags)
         SvGETMAGIC(old);
     new_SV(sv);
     sv_setsv_flags(sv, old, flags & ~SV_GMAGIC);
+
+    if(flags & SVs_TEMP){
+        PUSH_EXTEND_MORTAL__SV_C(sv);
+    }
+
     return sv;
 }
 
