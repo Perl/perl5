@@ -9574,7 +9574,7 @@ Perl_cv_ckproto_len_flags(pTHX_ const CV *cv, const GV *gv, const char *p,
         else if (SvPOK(gv) && *SvPVX((SV *)gv) == '&')
             name = newSVpvn_flags(SvPVX((SV *)gv)+1, SvCUR(gv)-1, SvUTF8(gv)|SVs_TEMP);
         else if (flags & CV_CKPROTO_CURSTASH || SvROK(gv)) {
-            name = sv_2mortal(newSVhek(HvNAME_HEK(PL_curstash)));
+            name = newSVhek_mortal(HvNAME_HEK(PL_curstash));
             sv_catpvs(name, "::");
             if (SvROK(gv)) {
                 assert (SvTYPE(SvRV_const(gv)) == SVt_PVCV);
@@ -12829,7 +12829,7 @@ Perl_ck_refassign(pTHX_ OP *o)
                 /* a CVREF here confuses pp_refassign, so make sure
                    it gets a GV */
                 CV *const cv = (CV*)SvRV(sv);
-                SV *name_sv = sv_2mortal(newSVhek(CvNAME_HEK(cv)));
+                SV *name_sv = newSVhek_mortal(CvNAME_HEK(cv));
                 (void)gv_init_sv((GV*)sv, CvSTASH(cv), name_sv, 0);
                 assert(SvTYPE(sv) == SVt_PVGV);
             }

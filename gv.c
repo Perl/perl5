@@ -1367,7 +1367,7 @@ Perl_gv_autoload_pvn(pTHX_ HV *stash, const char *name, STRLEN len, U32 flags)
             stash = NULL;
         }
         else
-            packname = sv_2mortal(newSVhek(HvNAME_HEK(stash)));
+            packname = newSVhek_mortal(HvNAME_HEK(stash));
         if (flags & GV_SUPER) sv_catpvs(packname, "::SUPER");
     }
     if (!(gv = gv_fetchmeth_pvn(stash, S_autoload, S_autolen, FALSE,
@@ -2744,7 +2744,7 @@ Perl_gv_fullname4(pTHX_ SV *sv, const GV *gv, const char *prefix, bool keepmain)
       }
     }
     else sv_catpvs(sv,"__ANON__::");
-    sv_catsv(sv,sv_2mortal(newSVhek(GvNAME_HEK(gv))));
+    sv_catsv(sv,newSVhek_mortal(GvNAME_HEK(gv)));
 }
 
 void
@@ -3788,7 +3788,7 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
                         "in overloaded package ":
                         "has no overloaded magic",
                       SvAMAGIC(left)?
-                        SVfARG(sv_2mortal(newSVhek(HvNAME_HEK(SvSTASH(SvRV(left)))))):
+                        SVfARG(newSVhek_mortal(HvNAME_HEK(SvSTASH(SvRV(left))))):
                         SVfARG(&PL_sv_no),
                       SvAMAGIC(right)?
                         ",\n\tright argument in overloaded package ":
@@ -3796,7 +3796,7 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
                          ? ""
                          : ",\n\tright argument has no overloaded magic"),
                       SvAMAGIC(right)?
-                        SVfARG(sv_2mortal(newSVhek(HvNAME_HEK(SvSTASH(SvRV(right)))))):
+                        SVfARG(newSVhek_mortal(HvNAME_HEK(SvSTASH(SvRV(right))))):
                         SVfARG(&PL_sv_no)));
         if (use_default_op) {
           DEBUG_o( Perl_deb(aTHX_ "%" SVf, SVfARG(msg)) );
@@ -3882,7 +3882,7 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
                      flags & AMGf_unary? "" :
                      lr==1 ? " for right argument": " for left argument",
                      flags & AMGf_unary? " for argument" : "",
-                     stash ? SVfARG(sv_2mortal(newSVhek(HvNAME_HEK(stash)))) : SVfARG(newSVpvs_flags("null", SVs_TEMP)),
+                     stash ? SVfARG(newSVhek_mortal(HvNAME_HEK(stash))) : SVfARG(newSVpvs_flags("null", SVs_TEMP)),
                      fl? ",\n\tassignment variant used": "") );
   }
 #endif

@@ -11227,7 +11227,7 @@ S_scan_inputsymbol(pTHX_ char *start)
                 if (PAD_COMPNAME_FLAGS_isOUR(tmp)) {
                     HV * const stash = PAD_COMPNAME_OURSTASH(tmp);
                     HEK * const stashname = HvNAME_HEK(stash);
-                    SV * const sym = sv_2mortal(newSVhek(stashname));
+                    SV * const sym = newSVhek_mortal(stashname);
                     sv_catpvs(sym, "::");
                     sv_catpv(sym, d+1);
                     d = SvPVX(sym);

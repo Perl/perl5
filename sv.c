@@ -16377,7 +16377,7 @@ S_find_hash_subscript(pTHX_ const HV *const hv, const SV *const val)
         HE *entry;
         for (entry = array[i]; entry; entry = HeNEXT(entry)) {
             if (HeVAL(entry) == val)
-                return sv_2mortal(newSVhek(HeKEY_hek(entry)));
+                return newSVhek_mortal(HeKEY_hek(entry));
         }
     }
     return NULL;
