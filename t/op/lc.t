@@ -17,7 +17,7 @@ BEGIN {
 
 use feature qw( fc );
 
-plan tests => 139 + 2 * (5 * 256) + 17;
+plan tests => 139 + 2 + 2 * (5 * 256) + 17;
 
 is(lc(undef),	   "", "lc(undef) is ''");
 is(lcfirst(undef), "", "lcfirst(undef) is ''");
@@ -71,6 +71,9 @@ is(lcfirst($b)    , "hello\.\* WORLD",      'lcfirst');
 is(uc($b)         , "HELLO\.\* WORLD",      'uc');
 is(lc($b)         , "hello\.\* world",      'lc');
 is(fc($b)         , "hello\.\* world",      'fc');
+
+is("\L$a\U$b",    'hello.* worldHELLO.* WORLD', '\L$a\U$b');
+is("\U$a\L$b",    'HELLO.* WORLDhello.* world', '\U$a\L$b');
 
 # \x{100} is LATIN CAPITAL LETTER A WITH MACRON; its bijective lowercase is
 # \x{101}, LATIN SMALL LETTER A WITH MACRON.
