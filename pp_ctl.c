@@ -1274,7 +1274,7 @@ PP(pp_flop)
                 XPUSHs(sv);
                 if (strEQ(SvPVX_const(sv),tmps))
                     break;
-                sv = sv_2mortal(newSVsv(sv));
+                sv = newSVsv_flags(sv, SV_GMAGIC|SV_NOSTEAL|SVs_TEMP);
                 sv_inc(sv);
             }
         }
@@ -2026,7 +2026,7 @@ PP(pp_caller)
             }
             else {
                 /* I think this is will always be "", but be sure */
-                PUSHs(sv_2mortal(newSVsv(cur_text)));
+                PUSHs(newSVsv_flags(cur_text, SV_GMAGIC|SV_NOSTEAL|SVs_TEMP));
             }
 
             PUSHs(&PL_sv_no);

@@ -1190,7 +1190,7 @@ S_mro_gather_and_rename(pTHX_ HV * const stashes, HV * const seen_stashes,
                             }
                         }
                         else {
-                            subname = sv_2mortal(newSVsv(namesv));
+                            subname = newSVsv_flags(namesv, SV_GMAGIC|SV_NOSTEAL|SVs_TEMP);
                             if (len == 1) sv_catpvs(subname, ":");
                             else {
                                 sv_catpvs(subname, "::");
@@ -1273,7 +1273,7 @@ S_mro_gather_and_rename(pTHX_ HV * const stashes, HV * const seen_stashes,
                             }
                         }
                         else {
-                            subname = sv_2mortal(newSVsv(namesv));
+                            subname = newSVsv_flags(namesv, SV_GMAGIC|SV_NOSTEAL|SVs_TEMP);
                             if (len == 1) sv_catpvs(subname, ":");
                             else {
                                 sv_catpvs(subname, "::");

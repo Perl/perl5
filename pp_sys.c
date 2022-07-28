@@ -345,7 +345,7 @@ PP(pp_glob)
 
     /* make a copy of the pattern if it is gmagical, to ensure that magic
      * is called once and only once */
-    if (SvGMAGICAL(TOPs)) TOPs = sv_2mortal(newSVsv(TOPs));
+    if (SvGMAGICAL(TOPs)) TOPs = newSVsv_flags(TOPs, SV_GMAGIC|SV_NOSTEAL|SVs_TEMP);
 
     tryAMAGICunTARGETlist(iter_amg, (PL_op->op_flags & OPf_SPECIAL));
 

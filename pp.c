@@ -3096,7 +3096,7 @@ PP(pp_oct)
     if (DO_UTF8(sv)) {
          /* If Unicode, try to downgrade
           * If not possible, croak. */
-         SV* const tsv = sv_2mortal(newSVsv(sv));
+         SV* const tsv = newSVsv_flags(sv, SV_GMAGIC|SV_NOSTEAL|SVs_TEMP);
 
          SvUTF8_on(tsv);
          sv_utf8_downgrade(tsv, FALSE);
@@ -6855,7 +6855,7 @@ PP(pp_refassign)
         (void)hv_store_ent((HV *)left, key, SvREFCNT_inc_simple_NN(SvRV(sv)), 0);
     }
     if (PL_op->op_flags & OPf_MOD)
-        SETs(sv_2mortal(newSVsv(sv)));
+        SETs(newSVsv_flags(sv, SV_GMAGIC|SV_NOSTEAL|SVs_TEMP));
     /* XXX else can weak references go stale before they are read, e.g.,
        in leavesub?  */
     RETURN;

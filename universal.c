@@ -1038,7 +1038,7 @@ XS(XS_re_regexp_pattern)
         } else {
             /* Scalar, so use the string that Perl would return */
             /* return the pattern in (?msixn:..) format */
-            pattern = sv_2mortal(newSVsv(MUTABLE_SV(re)));
+            pattern = newSVsv_flags(MUTABLE_SV(re), SV_GMAGIC|SV_NOSTEAL|SVs_TEMP);
             PUSHs(pattern);
             XSRETURN(1);
         }

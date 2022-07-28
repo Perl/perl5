@@ -4499,7 +4499,7 @@ PP(pp_subst)
                    However, I suspect it isn't worth the complexity of
                    unravelling the C<goto force_it> for the small number of
                    cases where it would be viable to drop into the copy code. */
-                TARG = sv_2mortal(newSVsv(TARG));
+                TARG = newSVsv_flags(TARG, SV_GMAGIC|SV_NOSTEAL|SVs_TEMP);
             }
             orig = SvPV_force_nomg(TARG, len);
             goto force_it;

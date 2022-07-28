@@ -3968,7 +3968,7 @@ S_move_proto_attr(pTHX_ OP **proto, OP **attrs, const GV * name,
 
             if (curstash && svname == (SV *)name
              && !memchr(SvPVX(svname), ':', SvCUR(svname))) {
-                svname = sv_2mortal(newSVsv(PL_curstname));
+                svname = newSVsv_flags(PL_curstname, SV_GMAGIC|SV_NOSTEAL|SVs_TEMP);
                 sv_catpvs(svname, "::");
                 sv_catsv(svname, (SV *)name);
             }
