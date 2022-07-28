@@ -2823,6 +2823,10 @@ PERL_CALLCONV SV*	Perl_newSVhek(pTHX_ const HEK *const hek)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_NEWSVHEK
 
+PERL_CALLCONV SV*	Perl_newSVhek_mortal(pTHX_ const HEK *const hek)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_NEWSVHEK_MORTAL
+
 PERL_CALLCONV SV*	Perl_newSViv(pTHX_ const IV i)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_NEWSVIV

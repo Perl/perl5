@@ -1531,6 +1531,7 @@ ApdR	|SV*	|newSVpv	|NULLOK const char *const s|const STRLEN len
 ApdR	|SV*	|newSVpvn	|NULLOK const char *const buffer|const STRLEN len
 ApdR	|SV*	|newSVpvn_flags	|NULLOK const char *const s|const STRLEN len|const U32 flags
 ApdR	|SV*	|newSVhek	|NULLOK const HEK *const hek
+ApdR	|SV*	|newSVhek_mortal|NULLOK const HEK *const hek
 ApdR	|SV*	|newSVpvn_share	|NULLOK const char* s|I32 len|U32 hash
 ApdR	|SV*	|newSVpv_share	|NULLOK const char* s|U32 hash
 AfpdR	|SV*	|newSVpvf	|NN const char *const pat|...
