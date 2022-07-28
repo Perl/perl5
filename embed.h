@@ -380,6 +380,7 @@
 #define newSV_type_mortal(a)	Perl_newSV_type_mortal(aTHX_ a)
 #define newSVbool(a)		Perl_newSVbool(aTHX_ a)
 #define newSVhek(a)		Perl_newSVhek(aTHX_ a)
+#define newSVhek_mortal(a)	Perl_newSVhek_mortal(aTHX_ a)
 #define newSViv(a)		Perl_newSViv(aTHX_ a)
 #define newSVnv(a)		Perl_newSVnv(aTHX_ a)
 #define newSVpv(a,b)		Perl_newSVpv(aTHX_ a,b)

@@ -9554,6 +9554,30 @@ Perl_newSVpvn(pTHX_ const char *const buffer, const STRLEN len)
 }
 
 /*
+=for apidoc newSVhek_mortal
+
+Creates a new mortal SV from the hash key structure.  It will generate
+scalars that point to the shared string table where possible.  Returns
+a new (undefined) SV if C<hek> is NULL.
+
+This is more efficient than using sv_2mortal(newSVhek( ... ))
+
+=cut
+*/
+
+SV *
+Perl_newSVhek_mortal(pTHX_ const HEK *const hek)
+{
+    SV * const sv = newSVhek(hek);
+    assert(sv);
+    assert(!SvIMMORTAL(sv));
+
+    PUSH_EXTEND_MORTAL__SV_C(sv);
+    SvTEMP_on(sv);
+    return sv;
+}
+
+/*
 =for apidoc newSVhek
 
 Creates a new SV from the hash key structure.  It will generate scalars that
