@@ -43,11 +43,21 @@ sub contract_name {
     return $abs_name;
 }
 
+sub _is_absolute {
+    return $_[0] =~ m|^(?:[A-Za-z]:)?/| if $Is_Win32;
+    return substr($_[0], 0, 1) eq '/';
+}
+
+sub _is_root {
+    return $_[0] =~ m|^(?:[A-Za-z]:)?/\z| if $Is_Win32;
+    return $_[0] eq '/';
+}
+
 sub PathCombine($$) {
     my ($Base,$Name) = @_;
     my $AbsName;
 
-    if (substr($Name,0,1) eq '/') {
+    if (_is_absolute($Name)) {
         $AbsName= $Name;
     }
     else {
@@ -123,6 +133,7 @@ sub is_tainted_pp {
     return length($@) != 0;
 }
 
+
 sub _find_opt {
     my $wanted = shift;
     return unless @_;
@@ -183,19 +194,17 @@ sub _find_opt {
 
         ($topdev,$topino,$topmode,$topnlink) = $follow ? stat $top_item : lstat $top_item;
 
-        if ($Is_Win32) {
-            $top_item =~ s|[/\\]\z||
-              unless $top_item =~ m{^(?:\w:)?[/\\]$};
-        }
-        else {
-            $top_item =~ s|/\z|| unless $top_item eq '/';
-        }
+        # canonicalize directory separators
+        $top_item =~ s|[/\\]|/|g if $Is_Win32;
+
+        # no trailing / unless path is root
+        $top_item =~ s|/\z|| unless _is_root($top_item);
 
         $Is_Dir= 0;
 
         if ($follow) {
 
-            if (substr($top_item,0,1) eq '/') {
+            if (_is_absolute($top_item)) {
                 $abs_dir = $top_item;
             }
             elsif ($top_item eq $File::Find::current_dir) {
@@ -304,11 +313,7 @@ sub _find_dir($$$) {
     my $tainted = 0;
     my $no_nlink;
 
-    if ($Is_Win32) {
-        $dir_pref
-          = ($p_dir =~ m{^(?:\w:[/\\]?|[/\\])$} ? $p_dir : "$p_dir/" );
-    } elsif ($Is_VMS) {
-
+    if ($Is_VMS) {
         # VMS is returning trailing .dir on directories
         # and trailing . on files and symbolic links
         # in UNIX syntax.
@@ -319,7 +324,7 @@ sub _find_dir($$$) {
         $dir_pref = ($p_dir =~ m/[\]>]+$/ ? $p_dir : "$p_dir/" );
     }
     else {
-        $dir_pref= ( $p_dir eq '/' ? '/' : "$p_dir/" );
+        $dir_pref = _is_root($p_dir) ? $p_dir : "$p_dir/";
     }
 
     local ($dir, $name, $prune);
@@ -471,12 +476,7 @@ sub _find_dir($$$) {
                 $CdLvl = $Level;
             }
 
-            if ($Is_Win32) {
-                $dir_name = ($p_dir =~ m{^(?:\w:[/\\]?|[/\\])$}
-                    ? "$p_dir$dir_rel" : "$p_dir/$dir_rel");
-                $dir_pref = "$dir_name/";
-            }
-            elsif ($^O eq 'VMS') {
+            if ($^O eq 'VMS') {
                 if ($p_dir =~ m/[\]>]+$/) {
                     $dir_name = $p_dir;
                     $dir_name =~ s/([\]>]+)$/.$dir_rel$1/;
@@ -488,7 +488,7 @@ sub _find_dir($$$) {
                 }
             }
             else {
-                $dir_name = ($p_dir eq '/' ? "/$dir_rel" : "$p_dir/$dir_rel");
+                $dir_name = _is_root($p_dir) ? "$p_dir$dir_rel" : "$p_dir/$dir_rel";
                 $dir_pref = "$dir_name/";
             }
 
@@ -540,8 +540,8 @@ sub _find_dir_symlnk($$$) {
     my $tainted = 0;
     my $ok = 1;
 
-    $dir_pref = ( $p_dir   eq '/' ? '/' : "$p_dir/" );
-    $loc_pref = ( $dir_loc eq '/' ? '/' : "$dir_loc/" );
+    $dir_pref = _is_root($p_dir) ? $p_dir : "$p_dir/";
+    $loc_pref = _is_root($dir_loc) ? $dir_loc : "$dir_loc/";
 
     local ($dir, $name, $fullname, $prune);
 
@@ -677,7 +677,7 @@ sub _find_dir_symlnk($$$) {
     continue {
         while (defined($SE = pop @Stack)) {
             ($dir_loc, $updir_loc, $p_dir, $dir_rel, $byd_flag) = @$SE;
-            $dir_name = ($p_dir eq '/' ? "/$dir_rel" : "$p_dir/$dir_rel");
+            $dir_name = _is_root($p_dir) ? "$p_dir$dir_rel" : "$p_dir/$dir_rel";
             $dir_pref = "$dir_name/";
             $loc_pref = "$dir_loc/";
             if ( $byd_flag < 0 ) {  # must be finddepth, report dirname now

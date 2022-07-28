@@ -4265,6 +4265,7 @@ ext/File-DosGlob/DosGlob.xs		Win32 DOS-globbing module
 ext/File-DosGlob/lib/File/DosGlob.pm	Win32 DOS-globbing module
 ext/File-DosGlob/t/DosGlob.t		See if File::DosGlob works
 ext/File-Find/lib/File/Find.pm	Routines to do a find
+ext/File-Find/t/correct-absolute-path-with-follow.t
 ext/File-Find/t/find.t		See if File::Find works
 ext/File-Find/t/lib/Testing.pm		Functions used in testing File-find
 ext/File-Find/t/taint.t		See if File::Find works with taint

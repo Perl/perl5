@@ -1060,7 +1060,7 @@ if ($^O eq 'MSWin32') {
                             'wanted' => sub {
                                 -f or return; # the first call is for $root_dir itself.
                                 my $got = $File::Find::name;
-                                my $exp = "$root_dir$expected_first_file";
+                                (my $exp = "$root_dir$expected_first_file") =~ s|\\|/|g;
                                 print "# no_chdir=$no_chdir $root_dir '$got'\n";
                                 is($got, $exp,
                                    "Win32: Run 'find' with 'no_chdir' set to $no_chdir" );
