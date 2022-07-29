@@ -1730,8 +1730,11 @@ unless (extract_from_file('Configure', 'ignore_versioned_solibs')) {
     $defines{libs} = \@libs unless exists $defines{libs};
 }
 
+# a4f3eea9be6bcf3c added a test for GNU libc to Configure
+# Prior to that we really don't get much choice but to force usenm off
+# everywhere (and modern systems are fast enough that this doesn't matter)
 $defines{usenm} = undef
-    if $major < 2 && !exists $defines{usenm};
+    if $major < 4 && !exists $defines{usenm};
 
 my ($missing, $created_dirs);
 ($missing, $created_dirs) = force_manifest()
