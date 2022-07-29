@@ -1802,8 +1802,10 @@ if ($target =~ /config\.s?h/) {
 
     run_report_and_exit(@ARGV);
 } elsif (!-f 'config.sh') {
-    # Skip if something went wrong with Configure
+    report_and_exit(undef, 'PLEASE REPORT BUG', 'could not build', 'config.sh')
+        if $options{'test-build'};
 
+    # Skip if something went wrong with Configure
     skip('could not build config.sh');
 }
 
