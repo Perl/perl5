@@ -4014,19 +4014,60 @@ EOFIX
         apply_commit('4d106cc5d8fd328d', 'ext/SDBM_File/Makefile.PL');
     }
 
-    if ($major < 22 && -f 'ext/Errno/Errno_pm.PL'
-            && !extract_from_file('ext/Errno/Errno_pm.PL', qr/RT#123784/)) {
-        my $gcc_major = extract_from_file('config.sh',
-                                          qr/^gccversion='([0-9]+)\./,
-                                          0);
-        if ($gcc_major >= 5) {
-            # This is the fix of commit 816b056ffb99ae54, but implemented in a
-            # way that should work back to the earliest versions of Errno:
-            edit_file('ext/Errno/Errno_pm.PL', sub {
-                          my $code = shift;
-                          $code =~ s/( \$Config\{cppflags\})/$1 -P/g;
-                          return $code;
-                      });
+    if (-f 'ext/Errno/Errno_pm.PL') {
+        if ($major < 22 && !extract_from_file('ext/Errno/Errno_pm.PL',
+                                              qr/RT#123784/)) {
+            my $gcc_major = extract_from_file('config.sh',
+                                              qr/^gccversion='([0-9]+)\./,
+                                              0);
+            if ($gcc_major >= 5) {
+                # This is the fix of commit 816b056ffb99ae54, but implemented in
+                # a way that should work back to the earliest versions of Errno:
+                edit_file('ext/Errno/Errno_pm.PL', sub {
+                              my $code = shift;
+                              $code =~ s/( \$Config\{cppflags\})/$1 -P/g;
+                              return $code;
+                          });
+            }
+        }
+        if ($major < 8 && !extract_from_file('ext/Errno/Errno_pm.PL',
+                                             qr/With the -dM option, gcc/)) {
+            # This is the fix of commit 9ae2e8df64ee1443 re-ordered slightly so
+            # that it should work back to the earliest versions of Errno:
+            apply_patch(<<'EOPATCH');
+diff --git a/ext/Errno/Errno_pm.PL b/ext/Errno/Errno_pm.PL
+index b669790314..c00d6c1a86 100644
+--- a/ext/Errno/Errno_pm.PL
++++ b/ext/Errno/Errno_pm.PL
+@@ -30,6 +30,12 @@ sub process_file {
+             warn "Cannot open '$file'";
+             return;
+ 	}     
++    } elsif ($Config{gccversion} ne '') {
++	# With the -dM option, gcc outputs every #define it finds
++	unless(open(FH,"$Config{cc} -E -dM $file |")) {
++            warn "Cannot open '$file'";
++            return;
++	}
+     } else {
+ 	unless(open(FH,"< $file")) {
+             warn "Cannot open '$file'";
+@@ -45,8 +51,12 @@ sub process_file {
+ 
+ sub get_files {
+     my %file = ();
+-    # VMS keeps its include files in system libraries (well, except for Gcc)
+-    if ($^O eq 'VMS') {
++    if ($^O eq 'linux') {
++	# Some Linuxes have weird errno.hs which generate
++	# no #file or #line directives
++	$file{'/usr/include/errno.h'} = 1;
++    } elsif ($^O eq 'VMS') {
++	# VMS keeps its include files in system libraries (well, except for Gcc)
+ 	if ($Config{vms_cc_type} eq 'decc') {
+ 	    $file{'Sys$Library:DECC$RTLDEF.TLB'} = 1;
+ 	} elsif ($Config{vms_cc_type} eq 'vaxc') {
+EOPATCH
         }
     }
 }
