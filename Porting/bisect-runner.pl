@@ -2334,6 +2334,76 @@ EOPATCH
         }
     }
 
+    if ($major < 5) {
+        my $what = extract_from_file('Configure', qr!(\s+)return __libc_main!);
+        if ($what) {
+            # To add to the fun commit commit dfe9444ca7881e71 in Feb 1988
+            # changed several things:
+            if ($what !~ /\t/) {
+                apply_patch(<<'EOPATCH');
+--- a/Configure
++++ b/Configure
+@@ -3854,11 +3911,12 @@ n) echo "OK, that should do.";;
+ int
+ main()
+ {
+-  return __libc_main();
++	return __libc_main();
+ }
+ EOM
+-if $cc $ccflags $ldflags -o gnulibc gnulibc.c $libs >/dev/null 2>&1 && \
+-    ./gnulibc | $contains '^GNU C Library' >/dev/null 2>&1; then
++set gnulibc
++if eval $compile && \
++  ./gnulibc | $contains '^GNU C Library' >/dev/null 2>&1; then
+ 	val="$define"
+ 	echo "You are using the GNU C Library"
+ else
+EOPATCH
+            }
+
+            # And commit dc45a647708b6c54 tweaks 1 line in April 1998
+            edit_file('Configure', sub {
+                          my $code = shift;
+                          $code =~ s{contains '\^GNU C Library' >/dev/null 2>&1; then}
+                                    {contains '^GNU C Library'; then};
+                          return $code;
+                      });
+
+            # This is part of aebf16e7cdbc86ec from June 1998
+            # but with compiles_ok inlined
+            apply_patch(<<'EOPATCH');
+diff --git a/Configure b/Configure
+index 38072f0e5e..43735feacf 100755
+--- a/Configure
++++ b/Configure
+@@ -4024,15 +4024,19 @@ $cc $optimize $ccflags $ldflags -o ${mc_file} $* ${mc_file}.c $libs;'
+ echo " "
+ echo "Checking for GNU C Library..." >&4
+ cat >gnulibc.c <<EOM
++#include <stdio.h>
+ int
+ main()
+ {
+-	return __libc_main();
++#ifdef __GLIBC__
++    exit(0);
++#else
++    exit(1);
++#endif
+ }
+ EOM
+ set gnulibc
+-if eval $compile && \
+-  ./gnulibc | $contains '^GNU C Library'; then
++if $cc $ccflags $ldflags -o gnulibc gnulibc.c $libs && ./gnulibc; then
+ 	val="$define"
+ 	echo "You are using the GNU C Library"
+ else
+EOPATCH
+        }
+    }
+
     if ($major < 6 && !extract_from_file('Configure',
                                          qr!^\t-A\)$!)) {
         # This adds the -A option to Configure, which is incredibly useful
