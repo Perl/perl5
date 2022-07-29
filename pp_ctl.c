@@ -652,15 +652,15 @@ PP(pp_formline)
                             break;
                     }
                     else {
+                        if (size == fieldsize)
+                            break;
                         if (strchr(PL_chopset, *s)) {
                             /* provisional split point */
                             /* for a non-space split char, we include
                              * the split char; hence the '+1' */
                             chophere = s + 1;
-                            itemsize = size;
+                            itemsize = size + 1;
                         }
-                        if (size == fieldsize)
-                            break;
                         if (!isCNTRL(*s))
                             gotsome = TRUE;
                     }
