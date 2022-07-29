@@ -3264,6 +3264,36 @@ index 4608a2a..f0c9d1d 100644
 EOPATCH
     }
 
+    # _(( was the macro wrapper for hiding ANSI prototypes from K&R C compilers:
+    if ($major == 3 && !extract_from_file('proto.h', qr/\bsafemalloc\s+_\(\(/)) {
+        # This is part of commit bbce6d69784bf43b:
+        # [inseparable changes from patch from perl5.003_08 to perl5.003_09]
+        # This only affects a few versions, but without this safemalloc etc get
+        # an implicit return type (of int), and that is truncating addresses on
+        # 64 bit systems. (And these days, seems that x86_64 linux has a memory
+        # map which causes malloc to return addresses >= 2**32)
+        apply_patch(<<'EOPATCH');
+diff --git a/proto.h b/proto.h
+index 851567b340..e650c8b07d 100644
+--- a/proto.h
++++ b/proto.h
+@@ -479,6 +479,13 @@ Malloc_t realloc _((Malloc_t where, MEM_SIZE nbytes));
+ Free_t   free _((Malloc_t where));
+ #endif
+ 
++#ifndef MYMALLOC
++Malloc_t safemalloc _((MEM_SIZE nbytes));
++Malloc_t safecalloc _((MEM_SIZE elements, MEM_SIZE size));
++Malloc_t saferealloc _((Malloc_t where, MEM_SIZE nbytes));
++Free_t   safefree _((Malloc_t where));
++#endif
++
+ #ifdef LEAKTEST
+ Malloc_t safexmalloc _((I32 x, MEM_SIZE size));
+ Malloc_t safexcalloc _((I32 x, MEM_SIZE elements, MEM_SIZE size));
+EOPATCH
+    }
+
     if ($major < 4 && $^O eq 'openbsd') {
         my $bad;
         # Need changes from commit a6e633defa583ad5.
