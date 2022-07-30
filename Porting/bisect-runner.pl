@@ -2632,6 +2632,13 @@ index 3d2e8b9..6ce7766 100755
  
 EOPATCH
     }
+
+    if ($major < 38 && !extract_from_file('Configure', qr/Too many attempts asking the same question/)) {
+        # Without this, myread can loop infinitely trying to get a valid answer,
+        # and hence Configure gets stuck in a loop, outputting the same question
+        # repeatedly. This isn't what we need.
+        apply_commit('46bfb3c49f22629a');
+    }
 }
 
 sub patch_hints {
