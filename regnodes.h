@@ -1978,7 +1978,7 @@ EXTCONST U8 PL_reg_off_by_arg[] = {
 };
 #endif
 
-/* reg_name[] - Opcode/state names in string form, for debugging */
+/* PL_reg_name[] - Opcode/state names in string form, for debugging */
 
 #ifndef DOINIT
 EXTCONST char * PL_reg_name[];

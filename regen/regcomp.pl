@@ -569,7 +569,7 @@ sub print_reg_name {
     my ($out)= @_;
     print $out <<EOP;
 
-/* reg_name[] - Opcode/state names in string form, for debugging */
+/* PL_reg_name[] - Opcode/state names in string form, for debugging */
 
 #ifndef DOINIT
 EXTCONST char * PL_reg_name[];
