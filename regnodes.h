@@ -1857,11 +1857,12 @@ EXTCONST U8 PL_regarglen[] = {
 #endif /* DOINIT */
 
 
-#ifdef REG_COMP_C
+/* PL_reg_off_by_arg[] - Which argument holds the offset to the next node */
 
-/* reg_off_by_arg[] - Which argument holds the offset to the next node */
-
-static const char reg_off_by_arg[] = {
+#ifndef DOINIT
+EXTCONST U8 PL_reg_off_by_arg[];
+#else
+EXTCONST U8 PL_reg_off_by_arg[] = {
 	0,	/* END          */
 	0,	/* SUCCEED      */
 	0,	/* SBOL         */
@@ -1975,9 +1976,7 @@ static const char reg_off_by_arg[] = {
 	0,	/* PSEUDO       */
 	0,	/* REGEX_SET    */
 };
-
-#endif /* REG_COMP_C */
-
+#endif
 
 /* reg_name[] - Opcode/state names in string form, for debugging */
 
