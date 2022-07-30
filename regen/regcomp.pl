@@ -529,7 +529,7 @@ EOP
 
     foreach my $node (@ops) {
         my $size= 0;
-        $size= "EXTRA_SIZE(struct regnode_$node->{suffix})" if $node->{suffix};
+        $size= "EXTRA_SIZE($node->{typedef})" if $node->{suffix};
 
         printf $out "\t%*s\t/* %*s */\n", -37, "$size,", -$rwidth, $node->{name};
     }
