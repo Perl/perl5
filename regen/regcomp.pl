@@ -597,12 +597,12 @@ sub print_reg_name {
     my ($out)= @_;
     print $out <<EOP;
 
-/* PL_reg_name[] - Opcode/state names in string form, for debugging */
+/* PL_regnode_name[] - Opcode/state names in string form, for debugging */
 
 #ifndef DOINIT
-EXTCONST char * PL_reg_name[];
+EXTCONST char * PL_regnode_name[];
 #else
-EXTCONST char * const PL_reg_name[] = {
+EXTCONST char * const PL_regnode_name[] = {
 EOP
 
     my $ofs= 0;

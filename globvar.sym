@@ -57,7 +57,7 @@ PL_phase_names
 PL_ppaddr
 PL_reg_extflags_name
 PL_reg_intflags_name
-PL_reg_name
+PL_regnode_name
 PL_regnode_off_by_arg
 PL_regnode_arg_len
 PL_regnode_arg_len_varies
