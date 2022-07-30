@@ -22966,27 +22966,28 @@ Perl_regnext(pTHX_ regnode *p)
 }
 
 /*
- - regnode_after - find the next node after this one.
+ - regnode_after - find the node physically following p in memory,
+   taking into account the size of p as determined by OP(p), our
+   sizing data, and possibly the STR_SZ() macro.
  */
 regnode *
-Perl_regnode_after(pTHX_ regnode *p)
+Perl_regnode_after(pTHX_ const regnode *p)
 {
-    if (!p) {
-        return NULL;
-    }
+    assert(p);
     const U8 op = OP(p);
-
-    if (op > REGNODE_MAX) {                /* regnode.type is unsigned */
-        return NULL;
-    }
-
-    return (p + NODE_STEP_REGNODE + PL_regnode_arg_len[op]);
+    assert(op < REGNODE_MAX);
+    const regnode *ret = p + NODE_STEP_REGNODE + PL_regnode_arg_len[op];
+    if (PL_regnode_arg_len_varies[op])
+        ret += STR_SZ(STR_LEN(p));
+    return (regnode *)ret;
 }
 
+/* validate that the passed in node and extra length would match that
+ * returned by regnode_after() */
 bool
 Perl_check_regnode_after(pTHX_ const regnode *p, const STRLEN extra)
 {
-    const regnode *nextoper= regnode_after((regnode *)p);
+    const regnode *nextoper = regnode_after((regnode *)p,FALSE);
     /* this should be the ONLY place that REGNODE_AFTER_PLUS is used outside
      * of regcomp.h */
     const regnode *other= REGNODE_AFTER_PLUS(p, extra);
@@ -22995,8 +22996,6 @@ Perl_check_regnode_after(pTHX_ const regnode *p, const STRLEN extra)
     }
     return TRUE;
 }
-
-
 #endif
 
 STATIC void
