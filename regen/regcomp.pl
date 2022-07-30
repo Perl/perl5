@@ -519,12 +519,12 @@ sub print_regarglen {
     my ($out)= @_;
     print $out <<EOP;
 
-/* PL_regarglen[] - How large is the argument part of the node (in regnodes) */
+/* PL_regnode_arg_len[] - How large is the argument part of the node (in regnodes) */
 
 #ifndef DOINIT
-EXTCONST U8 PL_regarglen[];
+EXTCONST U8 PL_regnode_arg_len[];
 #else
-EXTCONST U8 PL_regarglen[] = {
+EXTCONST U8 PL_regnode_arg_len[] = {
 EOP
 
     foreach my $node (@ops) {
