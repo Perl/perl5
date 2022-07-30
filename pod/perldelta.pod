@@ -373,7 +373,9 @@ well.
 
 =item *
 
-XXX
+A new magic type C<PERL_MAGIC_extvalue> has been added. This is available for
+use like C<PERL_MAGIC_ext>, but is a value magic: upon localization the new
+value will not be magical.
 
 =back
 

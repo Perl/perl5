@@ -57,7 +57,8 @@
                                          smart parameter vivification */
 #define PERL_MAGIC_lvref          '\\' /* Lvalue reference constructor */
 #define PERL_MAGIC_checkcall      ']' /* Inlining/mutation of call to this CV */
-#define PERL_MAGIC_ext            '~' /* Available for use by extensions */
+#define PERL_MAGIC_extvalue       '^' /* Value magic available for use by extensions */
+#define PERL_MAGIC_ext            '~' /* Variable magic available for use by extensions */
 
 enum {		/* pass one of these to get_vtbl */
     want_vtbl_arylen,

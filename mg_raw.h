@@ -86,7 +86,9 @@
       "/* lvref '\\' Lvalue reference constructor */" },
     { ']', "want_vtbl_checkcall | PERL_MAGIC_VALUE_MAGIC",
       "/* checkcall ']' Inlining/mutation of call to this CV */" },
+    { '^', "magic_vtable_max | PERL_MAGIC_READONLY_ACCEPTABLE | PERL_MAGIC_VALUE_MAGIC",
+      "/* extvalue '^' Value magic available for use by extensions */" },
     { '~', "magic_vtable_max | PERL_MAGIC_READONLY_ACCEPTABLE",
-      "/* ext '~' Available for use by extensions */" },
+      "/* ext '~' Variable magic available for use by extensions */" },
 
 /* ex: set ro: */
