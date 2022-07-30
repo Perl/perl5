@@ -1857,15 +1857,15 @@ EXTCONST U8 PL_regnode_arg_len[] = {
 #endif /* DOINIT */
 
 
-/* PL_regargvaries[] - Is the size of the node determined by STR_SZ() macros?
+/* PL_regnode_arg_len_varies[] - Is the size of the node determined by STR_SZ() macros?
    Currently this is a boolean, but in the future it might turn into something
    that uses more bits of the value to indicate that a different macro would be
    used. */
 
 #ifndef DOINIT
-EXTCONST U8 PL_regargvaries[];
+EXTCONST U8 PL_regnode_arg_len_varies[];
 #else
-EXTCONST U8 PL_regargvaries[] = {
+EXTCONST U8 PL_regnode_arg_len_varies[] = {
 	0,                                   	/* END          */
 	0,                                   	/* SUCCEED      */
 	0,                                   	/* SBOL         */
