@@ -1558,8 +1558,10 @@ will be lost.
                                              constructor
  ]  PERL_MAGIC_checkcall      vtbl_checkcall Inlining/mutation of call
                                              to this CV
- ~  PERL_MAGIC_ext            (none)         Available for use by
-                                             extensions
+ ^  PERL_MAGIC_extvalue       (none)         Value magic available for
+                                             use by extensions
+ ~  PERL_MAGIC_ext            (none)         Variable magic available
+                                             for use by extensions
 
 
 =for apidoc_section $magic
@@ -1576,6 +1578,7 @@ will be lost.
 =for apidoc_item ||PERL_MAGIC_env
 =for apidoc_item ||PERL_MAGIC_envelem
 =for apidoc_item ||PERL_MAGIC_ext
+=for apidoc_item ||PERL_MAGIC_extvalue
 =for apidoc_item ||PERL_MAGIC_fm
 =for apidoc_item ||PERL_MAGIC_hints
 =for apidoc_item ||PERL_MAGIC_hintselem
@@ -1616,12 +1619,15 @@ uppercase letter is typically used to represent some kind of composite type
 of that composite type.  Some internals code makes use of this case
 relationship.  However, 'v' and 'V' (vec and v-string) are in no way related.
 
-The C<PERL_MAGIC_ext> and C<PERL_MAGIC_uvar> magic types are defined
-specifically for use by extensions and will not be used by perl itself.
-Extensions can use C<PERL_MAGIC_ext> magic to 'attach' private information
-to variables (typically objects).  This is especially useful because
-there is no way for normal perl code to corrupt this private information
-(unlike using extra elements of a hash object).
+The C<PERL_MAGIC_ext>, C<PERL_MAGIC_extvalue> and C<PERL_MAGIC_uvar> magic types
+are defined specifically for use by extensions and will not be used by perl
+itself.  Extensions can use C<PERL_MAGIC_ext> or C<PERL_MAGIC_extvalue> magic to
+'attach' private information to variables (typically objects).  This is
+especially useful because there is no way for normal perl code to corrupt this
+private information (unlike using extra elements of a hash object).
+C<PERL_MAGIC_extvalue> is value magic (unlike C<PERL_MAGIC_ext> and
+C<PERL_MAGIC_uvar>) meaning that on localization the new value will not be
+magical.
 
 Similarly, C<PERL_MAGIC_uvar> magic can be used much like tie() to call a
 C function any time a scalar's value is used or changed.  The C<MAGIC>'s

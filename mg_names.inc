@@ -49,6 +49,7 @@
 	{ PERL_MAGIC_defelem,        "defelem(y)" },
 	{ PERL_MAGIC_lvref,          "lvref(\\)" },
 	{ PERL_MAGIC_checkcall,      "checkcall(])" },
+	{ PERL_MAGIC_extvalue,       "extvalue(^)" },
 	{ PERL_MAGIC_ext,            "ext(~)" },
 
 /* ex: set ro: */
