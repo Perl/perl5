@@ -1982,12 +1982,12 @@ EXTCONST U8 PL_regnode_arg_len_varies[] = {
 #endif /* DOINIT */
 
 
-/* PL_reg_off_by_arg[] - Which argument holds the offset to the next node */
+/* PL_regnode_off_by_arg[] - Which argument holds the offset to the next node */
 
 #ifndef DOINIT
-EXTCONST U8 PL_reg_off_by_arg[];
+EXTCONST U8 PL_regnode_off_by_arg[];
 #else
-EXTCONST U8 PL_reg_off_by_arg[] = {
+EXTCONST U8 PL_regnode_off_by_arg[] = {
 	0,	/* END          */
 	0,	/* SUCCEED      */
 	0,	/* SBOL         */
