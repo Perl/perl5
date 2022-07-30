@@ -25,6 +25,7 @@ if ($ENV{PERL_CORE}) {
     plan skip_all => "Sys::Syslog was not build" 
         unless $Config{'extensions'} =~ /\bSyslog\b/;
 }
+plan skip_all => "Skipping because fails without LC_TIME";
 
 # we also need Socket
 plan skip_all => "Socket was not build" 

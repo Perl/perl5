@@ -13,6 +13,7 @@ use warnings qw(closure deprecated exiting glob io misc numeric once overflow
                 pack portable recursion redefine regexp severe signal substr
                 syntax taint uninitialized unpack untie utf8 void);
 
+plan skip_all => "Skipping because fails without LC_TIME";
 # if someone is using warnings::compat, the previous trick won't work, so we
 # must manually disable warnings
 $^W = 0 if $] < 5.006;
