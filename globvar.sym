@@ -58,7 +58,7 @@ PL_ppaddr
 PL_reg_extflags_name
 PL_reg_intflags_name
 PL_reg_name
-PL_reg_off_by_arg
+PL_regnode_off_by_arg
 PL_regnode_arg_len
 PL_regnode_arg_len_varies
 PL_regnode_kind
