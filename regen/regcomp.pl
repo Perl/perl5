@@ -272,10 +272,10 @@ sub print_process_EXACTish {
     print $out <<EOP,
 
 /* Is 'op', known to be of type EXACT, folding? */
-#define isEXACTFish(op) (__ASSERT_(PL_regkind[op] == EXACT) (PL_EXACTFish_bitmask & (1U << (op - EXACT))))
+#define isEXACTFish(op) (__ASSERT_(PL_regnode_kind[op] == EXACT) (PL_EXACTFish_bitmask & (1U << (op - EXACT))))
 
 /* Do only UTF-8 target strings match 'op', known to be of type EXACT? */
-#define isEXACT_REQ8(op) (__ASSERT_(PL_regkind[op] == EXACT) (PL_EXACT_REQ8_bitmask & (1U << (op - EXACT))))
+#define isEXACT_REQ8(op) (__ASSERT_(PL_regnode_kind[op] == EXACT) (PL_EXACT_REQ8_bitmask & (1U << (op - EXACT))))
 
 #ifndef DOINIT
 EXTCONST U32 PL_EXACTFish_bitmask;
@@ -460,12 +460,12 @@ sub print_regkind {
     my ($out)= @_;
     print $out <<EOP;
 
-/* PL_regkind[] What type of regop or state is this. */
+/* PL_regnode_kind[] What type of regop or state is this. */
 
 #ifndef DOINIT
-EXTCONST U8 PL_regkind[];
+EXTCONST U8 PL_regnode_kind[];
 #else
-EXTCONST U8 PL_regkind[] = {
+EXTCONST U8 PL_regnode_kind[] = {
 EOP
     use Data::Dumper;
     foreach my $node (@all) {
