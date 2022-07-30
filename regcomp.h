@@ -489,8 +489,10 @@ struct regnode_ssc {
 /* find the regnode after this p by using OP(p) to find the regnode type of p */
 #define REGNODE_AFTER_dynamic(p)            REGNODE_AFTER_opcode((p),OP(p))
 /* find the regnode after this p by using the size of the struct associated with
- * the opcode for p. use this when you *know* that p is pointer to a given type */
-#define REGNODE_AFTER_type(p,t)             REGNODE_AFTER_plus((p),EXTRA_SIZE(t))
+
+/* find the regnode after this p by using OP(p) to find the regnode type of p */
+#define REGNODE_AFTER(p)            regnode_after(p)
+
 
 /* REGNODE_BEFORE() is trickier to deal with in terms of validation, execution.
  * All the places that use it assume that p will be one struct regnode large.

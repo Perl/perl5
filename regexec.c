@@ -8489,7 +8489,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                     cursor = scan;
                     cursor && ( OP(cursor) != END );
                     cursor = ( PL_regnode_kind[ OP(cursor) ] == END )
-                             ? REGNODE_AFTER_dynamic(cursor)
+                             ? REGNODE_AFTER(cursor)
                              : regnext(cursor)
                 ){
                     if ( OP(cursor) != CLOSE )
@@ -8690,7 +8690,7 @@ NULL
 
             min = ARG1(cur_curlyx->u.curlyx.me);
             max = ARG2(cur_curlyx->u.curlyx.me);
-            A = REGNODE_AFTER_dynamic(cur_curlyx->u.curlyx.me);
+            A = REGNODE_AFTER(cur_curlyx->u.curlyx.me);
             n = ++cur_curlyx->u.curlyx.count; /* how many A's matched */
             ST.save_lastloc = cur_curlyx->u.curlyx.lastloc;
             ST.cache_offset = 0;
@@ -8891,7 +8891,7 @@ NULL
                             maxopenparen);
             REGCP_SET(ST.lastcp);
             PUSH_STATE_GOTO(WHILEM_A_min,
-                /*A*/ REGNODE_AFTER_dynamic(ST.save_curlyx->u.curlyx.me),
+                /*A*/ REGNODE_AFTER(ST.save_curlyx->u.curlyx.me),
                 locinput, loceol, script_run_begin);
             NOT_REACHED; /* NOTREACHED */
 
@@ -9589,7 +9589,7 @@ NULL
             logical = 0; /* XXX: reset state of logical once it has been saved into ST */
 
             /* execute body of (?...A) */
-            PUSH_YES_STATE_GOTO(IFMATCH_A, REGNODE_AFTER_dynamic(scan), ST.start,
+            PUSH_YES_STATE_GOTO(IFMATCH_A, REGNODE_AFTER(scan), ST.start,
                                 ST.end, script_run_begin);
             NOT_REACHED; /* NOTREACHED */
 
