@@ -232,7 +232,7 @@ See L<perlguts/Autoloading with XSUBs>.
 #  define CVf_METHOD            CVf_NOWARN_AMBIGUOUS
 #  define CvMETHOD(cv)          CvNOWARN_AMBIGUOUS(cv)
 #  define CvMETHOD_on(cv)       CvNOWARN_AMBIGUOUS_on(cv)
-#  define CvMETHOD_off(cv)      CvNOWARN_AMBIGUOUS_off(off)
+#  define CvMETHOD_off(cv)      CvNOWARN_AMBIGUOUS_off(cv)
 #endif
 
 /* Flags for newXS_flags  */
