@@ -2690,6 +2690,16 @@ sub patch_hints {
                       return $code;
                   });
         }
+
+        if ($major < 34) {
+            edit_file('hints/darwin.sh', sub {
+                      my $code = shift;
+                      # This is commits aadc6422eaec39c2 and 54d41b60822734cf
+                      # rolled into one:
+                      $code =~ s/    10\.\*(?: \| 11\.\*)?\)/    [1-9][0-9].*)/g;
+                      return $code;
+                  });
+        }
     } elsif ($^O eq 'netbsd') {
         if ($major < 6) {
             # These are part of commit 099685bc64c7dbce
