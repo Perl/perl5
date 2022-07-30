@@ -239,12 +239,12 @@ select regnode types in the execution phase. It is also heavily used in
 the code for dumping the regexp program for debugging.
 
 There are a selection of macros which can be used to compute this as
-efficiently as possible depending on the circumstances, for instance if
-the code is dedicated to handling a specific type of regnode you can use
-C<REGNODE_AFTER_type()> to produce the most efficient code. If you have
-already extracted the nodes opcode then you can use
-C<REGNODE_AFTER_opcode()>, and if you just have a pointer to a regnode you
-can use C<REGNODE_AFTER_dynamic()>.
+efficiently as possible depending on the circumstances. The canonical
+macro is C<REGNODE_AFTER()>, which is the most powerful and should handle
+any case we have, but is also potentially the slowest. There are two
+additional macros for the special case that you KNOW the current regnode
+size is constant, and you know its type or opcode. In which case you can
+use C<REGNODE_AFTER_opcode()> or C<REGNODE_AFTER_type()>.
 
 In older versions of the regex engine C<REGNODE_AFTER()> was called
 C<NEXTOPER> but this was found to be confusing and it was renamed. There

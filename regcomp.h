@@ -406,13 +406,8 @@ struct regnode_ssc {
 #define	OPERAND(p)	STRING(p)
 
 /* The number of (smallest) regnode equivalents that a string of length l bytes
- * occupies */
+ * occupies - Used by the REGNODE_AFTER() macros and functions. */
 #define STR_SZ(l)	(((l) + sizeof(regnode) - 1) / sizeof(regnode))
-
-/* The number of (smallest) regnode equivalents that the node 'p' which uses
- * 'struct regnode_string' occupies.  (These are EXACTish nodes and a few
- * others.) */
-#define NODE_SZ_STR(p)	(STR_SZ(STR_LEN(p)) + 1 + PL_regnode_arg_len[(p)->type])
 
 #define setSTR_LEN(p,v)                                                     \
     STMT_START{                                                             \
@@ -428,8 +423,6 @@ struct regnode_ssc {
 
 #undef NODE_ALIGN
 #undef ARG_LOC
-#undef REGNODE_AFTER
-#undef REGNODE_BEFORE
 
 #define	NODE_ALIGN(node)
 #define	ARG_LOC(p)	(((struct regnode_1 *)p)->arg1)
@@ -470,7 +463,7 @@ struct regnode_ssc {
  *
  */
 #define        REGNODE_AFTER_PLUS(p,extra)    ((p) + NODE_STEP_REGNODE + (extra))
-/* under DEBUGGING we check that all REGNODE_AFTER style macro did the
+/* under DEBUGGING we check that all REGNODE_AFTER optimized macros did the
  * same thing that Perl_regnode_after() would have done. Note that when
  * not compiled under DEBUGGING the assert_() macro is empty. Thus we
  * don't have to implement different versions for DEBUGGING and not DEBUGGING,
@@ -479,19 +472,19 @@ struct regnode_ssc {
 #define REGNODE_AFTER_PLUS_DEBUG(p,extra) \
     (assert_(check_regnode_after(p,extra))  REGNODE_AFTER_PLUS((p),(extra)))
 
-/* try to avoid using either of the following two directly. They exist for legacy
- * purposes only */
-#define REGNODE_AFTER_plus(p,extra)         REGNODE_AFTER_PLUS_DEBUG((p),(extra))
-#define        REGNODE_AFTER(p)                    REGNODE_AFTER_plus((p),0)
 /* find the regnode after this p by using the opcode we previously extracted
  * with OP(p) */
-#define REGNODE_AFTER_opcode(p,op)          REGNODE_AFTER_plus((p),PL_regnode_arg_len[op])
-/* find the regnode after this p by using OP(p) to find the regnode type of p */
-#define REGNODE_AFTER_dynamic(p)            REGNODE_AFTER_opcode((p),OP(p))
+#define REGNODE_AFTER_opcode(p,op)          REGNODE_AFTER_PLUS_DEBUG((p),PL_regnode_arg_len[op])
+
 /* find the regnode after this p by using the size of the struct associated with
+ * the opcode for p. use this when you *know* that p is pointer to a given type*/
+#define REGNODE_AFTER_type(p,t)             REGNODE_AFTER_PLUS_DEBUG((p),EXTRA_SIZE(t))
 
 /* find the regnode after this p by using OP(p) to find the regnode type of p */
-#define REGNODE_AFTER(p)            regnode_after(p)
+#define REGNODE_AFTER_varies(p)            regnode_after(p,TRUE)
+
+/* find the regnode after this p by using OP(p) to find the regnode type of p */
+#define REGNODE_AFTER(p)            regnode_after(p,FALSE)
 
 
 /* REGNODE_BEFORE() is trickier to deal with in terms of validation, execution.
@@ -1373,6 +1366,10 @@ typedef enum {
 #  define GET_REGCLASS_AUX_DATA(a,b,c,d,e,f)  get_regclass_aux_data(a,b,c,d,e,f)
 #else
 #  define GET_REGCLASS_AUX_DATA(a,b,c,d,e,f)  get_re_gclass_aux_data(a,b,c,d,e,f)
+#endif
+
+#if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C)
+#include "reginline.h"
 #endif
 
 #endif /* PERL_REGCOMP_H_ */

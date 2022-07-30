@@ -98,7 +98,6 @@
 #define cast_iv			Perl_cast_iv
 #define cast_ulong		Perl_cast_ulong
 #define cast_uv			Perl_cast_uv
-#define check_regnode_after(a,b)	Perl_check_regnode_after(aTHX_ a,b)
 #define ck_entersub_args_list(a)	Perl_ck_entersub_args_list(aTHX_ a)
 #define ck_entersub_args_proto(a,b,c)	Perl_ck_entersub_args_proto(aTHX_ a,b,c)
 #define ck_entersub_args_proto_or_list(a,b,c)	Perl_ck_entersub_args_proto_or_list(aTHX_ a,b,c)
@@ -476,8 +475,6 @@
 #define regexec_flags(a,b,c,d,e,f,g,h)	Perl_regexec_flags(aTHX_ a,b,c,d,e,f,g,h)
 #define regfree_internal(a)	Perl_regfree_internal(aTHX_ a)
 #define reginitcolors()		Perl_reginitcolors(aTHX)
-#define regnext(a)		Perl_regnext(aTHX_ a)
-#define regnode_after(a)	Perl_regnode_after(aTHX_ a)
 #define repeatcpy		Perl_repeatcpy
 #define require_pv(a)		Perl_require_pv(aTHX_ a)
 #define rninstr			Perl_rninstr
@@ -819,6 +816,11 @@
 #if defined(MYMALLOC)
 #define dump_mstats(a)		Perl_dump_mstats(aTHX_ a)
 #define get_mstats(a,b,c)	Perl_get_mstats(aTHX_ a,b,c)
+#endif
+#if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C)
+#define check_regnode_after(a,b)	Perl_check_regnode_after(aTHX_ a,b)
+#define regnext(a)		Perl_regnext(aTHX_ a)
+#define regnode_after(a,b)	Perl_regnode_after(aTHX_ a,b)
 #endif
 #if defined(PERL_IN_SV_C)
 #define more_sv()		Perl_more_sv(aTHX)

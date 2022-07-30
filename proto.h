@@ -481,10 +481,6 @@ PERL_CALLCONV UV	Perl_cast_uv(NV f)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_CAST_UV
 
-PERL_CALLCONV bool	Perl_check_regnode_after(pTHX_ const regnode* p, const STRLEN extra)
-			__attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT_CHECK_REGNODE_AFTER
-
 PERL_CALLCONV bool	Perl_check_utf8_print(pTHX_ const U8 *s, const STRLEN len)
 			__attribute__visibility__("hidden");
 #define PERL_ARGS_ASSERT_CHECK_UTF8_PRINT	\
@@ -3331,14 +3327,6 @@ PERL_CALLCONV void	Perl_regfree_internal(pTHX_ REGEXP *const rx);
 	assert(rx)
 PERL_CALLCONV void	Perl_reginitcolors(pTHX);
 #define PERL_ARGS_ASSERT_REGINITCOLORS
-PERL_CALLCONV regnode*	Perl_regnext(pTHX_ regnode* p)
-			__attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT_REGNEXT
-
-PERL_CALLCONV regnode*	Perl_regnode_after(pTHX_ regnode* p)
-			__attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT_REGNODE_AFTER
-
 PERL_CALLCONV void	Perl_repeatcpy(char* to, const char* from, I32 len, IV count);
 #define PERL_ARGS_ASSERT_REPEATCPY	\
 	assert(to); assert(from)
@@ -6674,11 +6662,29 @@ PERL_STATIC_INLINE const char *	S_get_regex_charset_name(const U32 flags, STRLEN
 #endif
 #endif
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C)
+#ifndef PERL_NO_INLINE_FUNCTIONS
+PERL_STATIC_INLINE bool	Perl_check_regnode_after(pTHX_ const regnode* p, const STRLEN extra)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_CHECK_REGNODE_AFTER
+#endif
+
 PERL_CALLCONV int	Perl_re_printf(pTHX_ const char *fmt, ...)
 			__attribute__visibility__("hidden")
 			__attribute__format__(__printf__,pTHX_1,pTHX_2);
 #define PERL_ARGS_ASSERT_RE_PRINTF	\
 	assert(fmt)
+
+#ifndef PERL_NO_INLINE_FUNCTIONS
+PERL_STATIC_INLINE regnode*	Perl_regnext(pTHX_ const regnode* p)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_REGNEXT
+#endif
+
+#ifndef PERL_NO_INLINE_FUNCTIONS
+PERL_STATIC_INLINE regnode*	Perl_regnode_after(pTHX_ const regnode* p, bool varies)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_REGNODE_AFTER
+#endif
 
 PERL_CALLCONV void	Perl_regprop(pTHX_ const regexp *prog, SV* sv, const regnode* o, const regmatch_info *reginfo, const RExC_state_t *pRExC_state)
 			__attribute__visibility__("hidden");
