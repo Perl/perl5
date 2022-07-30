@@ -541,6 +541,34 @@ EOP
 EOP
 }
 
+sub print_regargvaries {
+    my ($out)= @_;
+    print $out <<EOP;
+
+/* PL_regargvaries[] - Is the size of the node determined by STR_SZ() macros?
+   Currently this is a boolean, but in the future it might turn into something
+   that uses more bits of the value to indicate that a different macro would be
+   used. */
+
+#ifndef DOINIT
+EXTCONST U8 PL_regargvaries[];
+#else
+EXTCONST U8 PL_regargvaries[] = {
+EOP
+    foreach my $node (@ops) {
+        my $varies= 0;
+        $varies= 1 if $node->{code}=~"str";
+
+        printf $out "\t%*s\t/* %*s */\n", -37, "$varies,", -$rwidth, $node->{name};
+    }
+
+    print $out <<EOP;
+};
+#endif /* DOINIT */
+
+EOP
+}
+
 sub print_reg_off_by_arg {
     my ($out)= @_;
     print $out <<EOP;
@@ -841,6 +869,7 @@ print_typedefs($out);
 print_state_defs($out);
 print_regkind($out);
 print_regarglen($out);
+print_regargvaries($out);
 print_reg_off_by_arg($out);
 print_reg_name($out);
 print_reg_extflags_name($out);

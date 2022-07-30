@@ -1857,6 +1857,131 @@ EXTCONST U8 PL_regarglen[] = {
 #endif /* DOINIT */
 
 
+/* PL_regargvaries[] - Is the size of the node determined by STR_SZ() macros?
+   Currently this is a boolean, but in the future it might turn into something
+   that uses more bits of the value to indicate that a different macro would be
+   used. */
+
+#ifndef DOINIT
+EXTCONST U8 PL_regargvaries[];
+#else
+EXTCONST U8 PL_regargvaries[] = {
+	0,                                   	/* END          */
+	0,                                   	/* SUCCEED      */
+	0,                                   	/* SBOL         */
+	0,                                   	/* MBOL         */
+	0,                                   	/* SEOL         */
+	0,                                   	/* MEOL         */
+	0,                                   	/* EOS          */
+	0,                                   	/* GPOS         */
+	0,                                   	/* BOUND        */
+	0,                                   	/* BOUNDL       */
+	0,                                   	/* BOUNDU       */
+	0,                                   	/* BOUNDA       */
+	0,                                   	/* NBOUND       */
+	0,                                   	/* NBOUNDL      */
+	0,                                   	/* NBOUNDU      */
+	0,                                   	/* NBOUNDA      */
+	0,                                   	/* REG_ANY      */
+	0,                                   	/* SANY         */
+	0,                                   	/* ANYOF        */
+	0,                                   	/* ANYOFD       */
+	0,                                   	/* ANYOFL       */
+	0,                                   	/* ANYOFPOSIXL  */
+	0,                                   	/* ANYOFH       */
+	0,                                   	/* ANYOFHb      */
+	0,                                   	/* ANYOFHr      */
+	1,                                   	/* ANYOFHs      */
+	0,                                   	/* ANYOFR       */
+	0,                                   	/* ANYOFRb      */
+	0,                                   	/* ANYOFHbbm    */
+	0,                                   	/* ANYOFM       */
+	0,                                   	/* NANYOFM      */
+	0,                                   	/* POSIXD       */
+	0,                                   	/* POSIXL       */
+	0,                                   	/* POSIXU       */
+	0,                                   	/* POSIXA       */
+	0,                                   	/* NPOSIXD      */
+	0,                                   	/* NPOSIXL      */
+	0,                                   	/* NPOSIXU      */
+	0,                                   	/* NPOSIXA      */
+	0,                                   	/* CLUMP        */
+	0,                                   	/* BRANCH       */
+	1,                                   	/* EXACT        */
+	1,                                   	/* LEXACT       */
+	1,                                   	/* EXACTL       */
+	1,                                   	/* EXACTF       */
+	1,                                   	/* EXACTFL      */
+	1,                                   	/* EXACTFU      */
+	1,                                   	/* EXACTFAA     */
+	1,                                   	/* EXACTFAA_NO_TRIE */
+	1,                                   	/* EXACTFUP     */
+	1,                                   	/* EXACTFLU8    */
+	1,                                   	/* EXACT_REQ8   */
+	1,                                   	/* LEXACT_REQ8  */
+	1,                                   	/* EXACTFU_REQ8 */
+	1,                                   	/* EXACTFU_S_EDGE */
+	0,                                   	/* LNBREAK      */
+	0,                                   	/* TRIE         */
+	0,                                   	/* TRIEC        */
+	0,                                   	/* AHOCORASICK  */
+	0,                                   	/* AHOCORASICKC */
+	0,                                   	/* NOTHING      */
+	0,                                   	/* TAIL         */
+	0,                                   	/* STAR         */
+	0,                                   	/* PLUS         */
+	0,                                   	/* CURLY        */
+	0,                                   	/* CURLYN       */
+	0,                                   	/* CURLYM       */
+	0,                                   	/* CURLYX       */
+	0,                                   	/* WHILEM       */
+	0,                                   	/* OPEN         */
+	0,                                   	/* CLOSE        */
+	0,                                   	/* SROPEN       */
+	0,                                   	/* SRCLOSE      */
+	0,                                   	/* REF          */
+	0,                                   	/* REFF         */
+	0,                                   	/* REFFL        */
+	0,                                   	/* REFFU        */
+	0,                                   	/* REFFA        */
+	0,                                   	/* REFN         */
+	0,                                   	/* REFFN        */
+	0,                                   	/* REFFLN       */
+	0,                                   	/* REFFUN       */
+	0,                                   	/* REFFAN       */
+	0,                                   	/* LONGJMP      */
+	0,                                   	/* BRANCHJ      */
+	0,                                   	/* IFMATCH      */
+	0,                                   	/* UNLESSM      */
+	0,                                   	/* SUSPEND      */
+	0,                                   	/* IFTHEN       */
+	0,                                   	/* GROUPP       */
+	0,                                   	/* EVAL         */
+	0,                                   	/* MINMOD       */
+	0,                                   	/* LOGICAL      */
+	0,                                   	/* RENUM        */
+	0,                                   	/* GOSUB        */
+	0,                                   	/* GROUPPN      */
+	0,                                   	/* INSUBP       */
+	0,                                   	/* DEFINEP      */
+	0,                                   	/* ENDLIKE      */
+	0,                                   	/* OPFAIL       */
+	0,                                   	/* ACCEPT       */
+	0,                                   	/* VERB         */
+	0,                                   	/* PRUNE        */
+	0,                                   	/* MARKPOINT    */
+	0,                                   	/* SKIP         */
+	0,                                   	/* COMMIT       */
+	0,                                   	/* CUTGROUP     */
+	0,                                   	/* KEEPS        */
+	0,                                   	/* LOOKBEHIND_END */
+	0,                                   	/* OPTIMIZED    */
+	0,                                   	/* PSEUDO       */
+	0,                                   	/* REGEX_SET    */
+};
+#endif /* DOINIT */
+
+
 /* PL_reg_off_by_arg[] - Which argument holds the offset to the next node */
 
 #ifndef DOINIT

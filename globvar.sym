@@ -60,6 +60,7 @@ PL_reg_intflags_name
 PL_reg_name
 PL_reg_off_by_arg
 PL_regarglen
+PL_regargvaries
 PL_regkind
 PL_revision
 PL_runops_dbg
