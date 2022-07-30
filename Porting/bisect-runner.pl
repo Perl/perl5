@@ -3957,6 +3957,22 @@ index 9418b52..b8b1a7c 100644
  #if defined(STANDARD_C) && defined(I_STDLIB)
 EOPATCH
     }
+
+    if ($major == 15) {
+        # This affects a small range of commits around July 2011, but build
+        # failures here get in the way of bisecting other problems:
+
+        my $line = extract_from_file('embed.fnc', qr/^X?pR\t\|I32\t\|was_lvalue_sub$/);
+        if ($line) {
+            # Need to export Perl_was_lvalue_sub:
+            apply_commit('7b70e8177801df4e')
+                unless $line =~ /X/;
+
+            # It needs to be 'ApR' not 'XpR', to be visible to List::Util
+            # (arm64 macOS treats the missing prototypes as errors)
+            apply_commit('c73b0699db4d0b8b');
+        }
+    }
 }
 
 sub patch_ext {
