@@ -482,20 +482,6 @@ EOP
 EOP
 }
 
-sub wrap_ifdef_print {
-    my $out= shift;
-    my $token= shift;
-    print $out <<EOP;
-
-#ifdef $token
-EOP
-    $_->($out) for @_;
-    print $out <<EOP;
-#endif /* $token */
-
-EOP
-}
-
 sub print_typedefs {
     my ($out)= @_;
     print $out <<EOP;
@@ -559,9 +545,12 @@ sub print_reg_off_by_arg {
     my ($out)= @_;
     print $out <<EOP;
 
-/* reg_off_by_arg[] - Which argument holds the offset to the next node */
+/* PL_reg_off_by_arg[] - Which argument holds the offset to the next node */
 
-static const char reg_off_by_arg[] = {
+#ifndef DOINIT
+EXTCONST U8 PL_reg_off_by_arg[];
+#else
+EXTCONST U8 PL_reg_off_by_arg[] = {
 EOP
 
     foreach my $node (@ops) {
@@ -572,7 +561,7 @@ EOP
 
     print $out <<EOP;
 };
-
+#endif
 EOP
 }
 
@@ -846,12 +835,9 @@ print $out "#if $confine_to_core\n\n";
 print_typedefs($out);
 print_state_defs($out);
 print_regkind($out);
-print_regarglen($out),
-wrap_ifdef_print(
-    $out,
-    "REG_COMP_C",
-    \&print_reg_off_by_arg
-);
+print_regarglen($out);
+print_regargvaries($out);
+print_reg_off_by_arg($out);
 print_reg_name($out);
 print_reg_extflags_name($out);
 print_reg_intflags_name($out);
