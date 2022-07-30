@@ -836,7 +836,6 @@ print_typedefs($out);
 print_state_defs($out);
 print_regkind($out);
 print_regarglen($out);
-print_regargvaries($out);
 print_reg_off_by_arg($out);
 print_reg_name($out);
 print_reg_extflags_name($out);
