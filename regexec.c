@@ -6183,7 +6183,7 @@ S_backup_one_WB(pTHX_ WB_enum * previous, const U8 * const strbeg, U8 ** curpos,
         Perl_re_printf( aTHX_                               \
             "%*s" pp " %s%s%s%s%s\n",                       \
             INDENT_CHARS(depth), "",                        \
-            PL_reg_name[st->resume_state],                  \
+            PL_regnode_name[st->resume_state],                  \
             ((st==yes_state||st==mark_state) ? "[" : ""),   \
             ((st==yes_state) ? "Y" : ""),                   \
             ((st==mark_state) ? "M" : ""),                  \
@@ -9816,7 +9816,7 @@ NULL
                     Perl_re_exec_indentf( aTHX_ "%4s #%-3d %-10s %s\n",
                         depth,
                         i ? "    " : "push",
-                        depth - i, PL_reg_name[cur->resume_state],
+                        depth - i, PL_regnode_name[cur->resume_state],
                         (curyes == cur) ? "yes" : ""
                     );
                     if (curyes == cur)
@@ -10643,7 +10643,7 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
 
     default:
         Perl_croak(aTHX_ "panic: regrepeat() called with unrecognized"
-                         " node type %d='%s'", OP(p), PL_reg_name[OP(p)]);
+                         " node type %d='%s'", OP(p), PL_regnode_name[OP(p)]);
         NOT_REACHED; /* NOTREACHED */
 
     }

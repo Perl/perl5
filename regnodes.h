@@ -2103,12 +2103,12 @@ EXTCONST U8 PL_regnode_off_by_arg[] = {
 };
 #endif
 
-/* PL_reg_name[] - Opcode/state names in string form, for debugging */
+/* PL_regnode_name[] - Opcode/state names in string form, for debugging */
 
 #ifndef DOINIT
-EXTCONST char * PL_reg_name[];
+EXTCONST char * PL_regnode_name[];
 #else
-EXTCONST char * const PL_reg_name[] = {
+EXTCONST char * const PL_regnode_name[] = {
 	"END",                   	/* 0000 */
 	"SUCCEED",               	/* 0x01 */
 	"SBOL",                  	/* 0x02 */

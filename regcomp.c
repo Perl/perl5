@@ -2950,7 +2950,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
         case EXACTFU:
         case EXACTFLU8: folder = PL_fold_latin1; break;
         case EXACTF:  folder = PL_fold; break;
-        default: Perl_croak( aTHX_ "panic! In trie construction, unknown node type %u %s", (unsigned) flags, PL_reg_name[flags] );
+        default: Perl_croak( aTHX_ "panic! In trie construction, unknown node type %u %s", (unsigned) flags, PL_regnode_name[flags] );
     }
 
     trie = (reg_trie_data *) PerlMemShared_calloc( 1, sizeof(reg_trie_data) );
@@ -5168,7 +5168,7 @@ S_study_chunk(pTHX_
                                 }
                                 Perl_re_printf( aTHX_  "(First==%d,Last==%d,Cur==%d,tt==%s,ntt==%s,nntt==%s)\n",
                                    REG_NODE_NUM(first), REG_NODE_NUM(prev), REG_NODE_NUM(cur),
-                                   PL_reg_name[trietype], PL_reg_name[noper_trietype], PL_reg_name[noper_next_trietype]
+                                   PL_regnode_name[trietype], PL_regnode_name[noper_trietype], PL_regnode_name[noper_next_trietype]
                                 );
                             });
 
@@ -5266,7 +5266,7 @@ S_study_chunk(pTHX_
                               depth+1, SvPV_nolen_const( RExC_mysv ), REG_NODE_NUM(cur));
                             Perl_re_printf( aTHX_  "(First==%d, Last==%d, Cur==%d, tt==%s)\n",
                                REG_NODE_NUM(first), REG_NODE_NUM(prev), REG_NODE_NUM(cur),
-                               PL_reg_name[trietype]
+                               PL_regnode_name[trietype]
                             );
 
                         });
@@ -6788,7 +6788,7 @@ S_study_chunk(pTHX_
 
         else if (OP(scan) == REGEX_SET) {
             Perl_croak(aTHX_ "panic: %s regnode should be resolved"
-                             " before optimization", PL_reg_name[REGEX_SET]);
+                             " before optimization", PL_regnode_name[REGEX_SET]);
         }
 
         /* Else: zero-length, ignore. */
@@ -21390,7 +21390,7 @@ S_reginsert(pTHX_ RExC_state_t *pRExC_state, const U8 op,
     PERL_UNUSED_CONTEXT;
     PERL_UNUSED_ARG(depth);
 /* (PL_regnode_kind[(U8)op] == CURLY ? EXTRA_STEP_2ARGS : 0); */
-    DEBUG_PARSE_FMT("inst"," - %s", PL_reg_name[op]);
+    DEBUG_PARSE_FMT("inst"," - %s", PL_regnode_name[op]);
     assert(!RExC_study_started); /* I believe we should never use reginsert once we have started
                                     studying. If this is wrong then we need to adjust RExC_recurse
                                     below like we do with RExC_open_parens/RExC_close_parens. */
@@ -21474,7 +21474,7 @@ S_regtail(pTHX_ RExC_state_t * pRExC_state,
             Perl_re_printf( aTHX_  "~ %s (%zu) %s %s\n",
                 SvPV_nolen_const(RExC_mysv), scan,
                     (temp == NULL ? "->" : ""),
-                    (temp == NULL ? PL_reg_name[OP(REGNODE_p(val))] : "")
+                    (temp == NULL ? PL_regnode_name[OP(REGNODE_p(val))] : "")
             );
         });
         if (temp == NULL)
@@ -21567,7 +21567,7 @@ S_regtail_study(pTHX_ RExC_state_t *pRExC_state, regnode_offset p,
             Perl_re_printf( aTHX_  "~ %s (%zu) -> %s\n",
                 SvPV_nolen_const(RExC_mysv),
                 scan,
-                PL_reg_name[exact]);
+                PL_regnode_name[exact]);
         });
         if (temp == NULL)
             break;
@@ -21895,7 +21895,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
                              (int)op, (int)REGNODE_MAX);
         }
     }
-    sv_catpv(sv, PL_reg_name[op]); /* Take off const! */
+    sv_catpv(sv, PL_regnode_name[op]); /* Take off const! */
 
     k = PL_regnode_kind[op];
 
@@ -21923,7 +21923,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
         const reg_trie_data * const trie
             = (reg_trie_data*)progi->data->data[!IS_TRIE_AC(op) ? n : ac->trie];
 
-        Perl_sv_catpvf(aTHX_ sv, "-%s", PL_reg_name[o->flags]);
+        Perl_sv_catpvf(aTHX_ sv, "-%s", PL_regnode_name[o->flags]);
         DEBUG_TRIE_COMPILE_r({
           if (trie->jump)
             sv_catpvs(sv, "(JUMP)");
