@@ -1759,19 +1759,19 @@ EXTCONST U8 PL_regarglen[] = {
 	0,                                   	/* NBOUNDA      */
 	0,                                   	/* REG_ANY      */
 	0,                                   	/* SANY         */
-	EXTRA_SIZE(struct regnode_charclass),	/* ANYOF        */
-	EXTRA_SIZE(struct regnode_charclass),	/* ANYOFD       */
-	EXTRA_SIZE(struct regnode_charclass),	/* ANYOFL       */
-	EXTRA_SIZE(struct regnode_charclass_posixl),	/* ANYOFPOSIXL  */
-	EXTRA_SIZE(struct regnode_1),        	/* ANYOFH       */
-	EXTRA_SIZE(struct regnode_1),        	/* ANYOFHb      */
-	EXTRA_SIZE(struct regnode_1),        	/* ANYOFHr      */
-	EXTRA_SIZE(struct regnode_1),        	/* ANYOFHs      */
-	EXTRA_SIZE(struct regnode_1),        	/* ANYOFR       */
-	EXTRA_SIZE(struct regnode_1),        	/* ANYOFRb      */
-	EXTRA_SIZE(struct regnode_bbm),      	/* ANYOFHbbm    */
-	EXTRA_SIZE(struct regnode_1),        	/* ANYOFM       */
-	EXTRA_SIZE(struct regnode_1),        	/* NANYOFM      */
+	EXTRA_SIZE(tregnode_ANYOF),          	/* ANYOF        */
+	EXTRA_SIZE(tregnode_ANYOFD),         	/* ANYOFD       */
+	EXTRA_SIZE(tregnode_ANYOFL),         	/* ANYOFL       */
+	EXTRA_SIZE(tregnode_ANYOFPOSIXL),    	/* ANYOFPOSIXL  */
+	EXTRA_SIZE(tregnode_ANYOFH),         	/* ANYOFH       */
+	EXTRA_SIZE(tregnode_ANYOFHb),        	/* ANYOFHb      */
+	EXTRA_SIZE(tregnode_ANYOFHr),        	/* ANYOFHr      */
+	EXTRA_SIZE(tregnode_ANYOFHs),        	/* ANYOFHs      */
+	EXTRA_SIZE(tregnode_ANYOFR),         	/* ANYOFR       */
+	EXTRA_SIZE(tregnode_ANYOFRb),        	/* ANYOFRb      */
+	EXTRA_SIZE(tregnode_ANYOFHbbm),      	/* ANYOFHbbm    */
+	EXTRA_SIZE(tregnode_ANYOFM),         	/* ANYOFM       */
+	EXTRA_SIZE(tregnode_NANYOFM),        	/* NANYOFM      */
 	0,                                   	/* POSIXD       */
 	0,                                   	/* POSIXL       */
 	0,                                   	/* POSIXU       */
@@ -1783,7 +1783,7 @@ EXTCONST U8 PL_regarglen[] = {
 	0,                                   	/* CLUMP        */
 	0,                                   	/* BRANCH       */
 	0,                                   	/* EXACT        */
-	EXTRA_SIZE(struct regnode_1),        	/* LEXACT       */
+	EXTRA_SIZE(tregnode_LEXACT),         	/* LEXACT       */
 	0,                                   	/* EXACTL       */
 	0,                                   	/* EXACTF       */
 	0,                                   	/* EXACTFL      */
@@ -1793,66 +1793,66 @@ EXTCONST U8 PL_regarglen[] = {
 	0,                                   	/* EXACTFUP     */
 	0,                                   	/* EXACTFLU8    */
 	0,                                   	/* EXACT_REQ8   */
-	EXTRA_SIZE(struct regnode_1),        	/* LEXACT_REQ8  */
+	EXTRA_SIZE(tregnode_LEXACT_REQ8),    	/* LEXACT_REQ8  */
 	0,                                   	/* EXACTFU_REQ8 */
 	0,                                   	/* EXACTFU_S_EDGE */
 	0,                                   	/* LNBREAK      */
-	EXTRA_SIZE(struct regnode_1),        	/* TRIE         */
-	EXTRA_SIZE(struct regnode_charclass),	/* TRIEC        */
-	EXTRA_SIZE(struct regnode_1),        	/* AHOCORASICK  */
-	EXTRA_SIZE(struct regnode_charclass),	/* AHOCORASICKC */
+	EXTRA_SIZE(tregnode_TRIE),           	/* TRIE         */
+	EXTRA_SIZE(tregnode_TRIEC),          	/* TRIEC        */
+	EXTRA_SIZE(tregnode_AHOCORASICK),    	/* AHOCORASICK  */
+	EXTRA_SIZE(tregnode_AHOCORASICKC),   	/* AHOCORASICKC */
 	0,                                   	/* NOTHING      */
 	0,                                   	/* TAIL         */
 	0,                                   	/* STAR         */
 	0,                                   	/* PLUS         */
-	EXTRA_SIZE(struct regnode_2),        	/* CURLY        */
-	EXTRA_SIZE(struct regnode_2),        	/* CURLYN       */
-	EXTRA_SIZE(struct regnode_2),        	/* CURLYM       */
-	EXTRA_SIZE(struct regnode_2),        	/* CURLYX       */
+	EXTRA_SIZE(tregnode_CURLY),          	/* CURLY        */
+	EXTRA_SIZE(tregnode_CURLYN),         	/* CURLYN       */
+	EXTRA_SIZE(tregnode_CURLYM),         	/* CURLYM       */
+	EXTRA_SIZE(tregnode_CURLYX),         	/* CURLYX       */
 	0,                                   	/* WHILEM       */
-	EXTRA_SIZE(struct regnode_1),        	/* OPEN         */
-	EXTRA_SIZE(struct regnode_1),        	/* CLOSE        */
+	EXTRA_SIZE(tregnode_OPEN),           	/* OPEN         */
+	EXTRA_SIZE(tregnode_CLOSE),          	/* CLOSE        */
 	0,                                   	/* SROPEN       */
 	0,                                   	/* SRCLOSE      */
-	EXTRA_SIZE(struct regnode_1),        	/* REF          */
-	EXTRA_SIZE(struct regnode_1),        	/* REFF         */
-	EXTRA_SIZE(struct regnode_1),        	/* REFFL        */
-	EXTRA_SIZE(struct regnode_1),        	/* REFFU        */
-	EXTRA_SIZE(struct regnode_1),        	/* REFFA        */
-	EXTRA_SIZE(struct regnode_1),        	/* REFN         */
-	EXTRA_SIZE(struct regnode_1),        	/* REFFN        */
-	EXTRA_SIZE(struct regnode_1),        	/* REFFLN       */
-	EXTRA_SIZE(struct regnode_1),        	/* REFFUN       */
-	EXTRA_SIZE(struct regnode_1),        	/* REFFAN       */
-	EXTRA_SIZE(struct regnode_1),        	/* LONGJMP      */
-	EXTRA_SIZE(struct regnode_1),        	/* BRANCHJ      */
-	EXTRA_SIZE(struct regnode_1),        	/* IFMATCH      */
-	EXTRA_SIZE(struct regnode_1),        	/* UNLESSM      */
-	EXTRA_SIZE(struct regnode_1),        	/* SUSPEND      */
-	EXTRA_SIZE(struct regnode_1),        	/* IFTHEN       */
-	EXTRA_SIZE(struct regnode_1),        	/* GROUPP       */
-	EXTRA_SIZE(struct regnode_2L),       	/* EVAL         */
+	EXTRA_SIZE(tregnode_REF),            	/* REF          */
+	EXTRA_SIZE(tregnode_REFF),           	/* REFF         */
+	EXTRA_SIZE(tregnode_REFFL),          	/* REFFL        */
+	EXTRA_SIZE(tregnode_REFFU),          	/* REFFU        */
+	EXTRA_SIZE(tregnode_REFFA),          	/* REFFA        */
+	EXTRA_SIZE(tregnode_REFN),           	/* REFN         */
+	EXTRA_SIZE(tregnode_REFFN),          	/* REFFN        */
+	EXTRA_SIZE(tregnode_REFFLN),         	/* REFFLN       */
+	EXTRA_SIZE(tregnode_REFFUN),         	/* REFFUN       */
+	EXTRA_SIZE(tregnode_REFFAN),         	/* REFFAN       */
+	EXTRA_SIZE(tregnode_LONGJMP),        	/* LONGJMP      */
+	EXTRA_SIZE(tregnode_BRANCHJ),        	/* BRANCHJ      */
+	EXTRA_SIZE(tregnode_IFMATCH),        	/* IFMATCH      */
+	EXTRA_SIZE(tregnode_UNLESSM),        	/* UNLESSM      */
+	EXTRA_SIZE(tregnode_SUSPEND),        	/* SUSPEND      */
+	EXTRA_SIZE(tregnode_IFTHEN),         	/* IFTHEN       */
+	EXTRA_SIZE(tregnode_GROUPP),         	/* GROUPP       */
+	EXTRA_SIZE(tregnode_EVAL),           	/* EVAL         */
 	0,                                   	/* MINMOD       */
 	0,                                   	/* LOGICAL      */
-	EXTRA_SIZE(struct regnode_1),        	/* RENUM        */
-	EXTRA_SIZE(struct regnode_2L),       	/* GOSUB        */
-	EXTRA_SIZE(struct regnode_1),        	/* GROUPPN      */
-	EXTRA_SIZE(struct regnode_1),        	/* INSUBP       */
-	EXTRA_SIZE(struct regnode_1),        	/* DEFINEP      */
+	EXTRA_SIZE(tregnode_RENUM),          	/* RENUM        */
+	EXTRA_SIZE(tregnode_GOSUB),          	/* GOSUB        */
+	EXTRA_SIZE(tregnode_GROUPPN),        	/* GROUPPN      */
+	EXTRA_SIZE(tregnode_INSUBP),         	/* INSUBP       */
+	EXTRA_SIZE(tregnode_DEFINEP),        	/* DEFINEP      */
 	0,                                   	/* ENDLIKE      */
-	EXTRA_SIZE(struct regnode_1),        	/* OPFAIL       */
-	EXTRA_SIZE(struct regnode_2L),       	/* ACCEPT       */
-	EXTRA_SIZE(struct regnode_1),        	/* VERB         */
-	EXTRA_SIZE(struct regnode_1),        	/* PRUNE        */
-	EXTRA_SIZE(struct regnode_1),        	/* MARKPOINT    */
-	EXTRA_SIZE(struct regnode_1),        	/* SKIP         */
-	EXTRA_SIZE(struct regnode_1),        	/* COMMIT       */
-	EXTRA_SIZE(struct regnode_1),        	/* CUTGROUP     */
+	EXTRA_SIZE(tregnode_OPFAIL),         	/* OPFAIL       */
+	EXTRA_SIZE(tregnode_ACCEPT),         	/* ACCEPT       */
+	EXTRA_SIZE(tregnode_VERB),           	/* VERB         */
+	EXTRA_SIZE(tregnode_PRUNE),          	/* PRUNE        */
+	EXTRA_SIZE(tregnode_MARKPOINT),      	/* MARKPOINT    */
+	EXTRA_SIZE(tregnode_SKIP),           	/* SKIP         */
+	EXTRA_SIZE(tregnode_COMMIT),         	/* COMMIT       */
+	EXTRA_SIZE(tregnode_CUTGROUP),       	/* CUTGROUP     */
 	0,                                   	/* KEEPS        */
 	0,                                   	/* LOOKBEHIND_END */
 	0,                                   	/* OPTIMIZED    */
 	0,                                   	/* PSEUDO       */
-	EXTRA_SIZE(struct regnode_p),        	/* REGEX_SET    */
+	EXTRA_SIZE(tregnode_REGEX_SET),      	/* REGEX_SET    */
 };
 #endif /* DOINIT */
 
