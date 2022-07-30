@@ -412,7 +412,7 @@ struct regnode_ssc {
 /* The number of (smallest) regnode equivalents that the node 'p' which uses
  * 'struct regnode_string' occupies.  (These are EXACTish nodes and a few
  * others.) */
-#define NODE_SZ_STR(p)	(STR_SZ(STR_LEN(p)) + 1 + PL_regarglen[(p)->type])
+#define NODE_SZ_STR(p)	(STR_SZ(STR_LEN(p)) + 1 + PL_regnode_arg_len[(p)->type])
 
 #define setSTR_LEN(p,v)                                                     \
     STMT_START{                                                             \
@@ -485,7 +485,7 @@ struct regnode_ssc {
 #define        REGNODE_AFTER(p)                    REGNODE_AFTER_plus((p),0)
 /* find the regnode after this p by using the opcode we previously extracted
  * with OP(p) */
-#define REGNODE_AFTER_opcode(p,op)          REGNODE_AFTER_plus((p),PL_regarglen[op])
+#define REGNODE_AFTER_opcode(p,op)          REGNODE_AFTER_plus((p),PL_regnode_arg_len[op])
 /* find the regnode after this p by using OP(p) to find the regnode type of p */
 #define REGNODE_AFTER_dynamic(p)            REGNODE_AFTER_opcode((p),OP(p))
 /* find the regnode after this p by using the size of the struct associated with
@@ -519,13 +519,13 @@ struct regnode_ssc {
                     FILL_ADVANCE_NODE(offset, op);                      \
                     /* This is used generically for other operations    \
                      * that have a longer argument */                   \
-                    (offset) += PL_regarglen[op];                          \
+                    (offset) += PL_regnode_arg_len[op];                          \
     } STMT_END
 #define FILL_ADVANCE_NODE_ARGp(offset, op, arg)                          \
     STMT_START {                                                        \
                     ARGp_SET(REGNODE_p(offset), arg);                    \
                     FILL_ADVANCE_NODE(offset, op);                      \
-                    (offset) += PL_regarglen[op];                          \
+                    (offset) += PL_regnode_arg_len[op];                          \
     } STMT_END
 #define FILL_ADVANCE_NODE_2L_ARG(offset, op, arg1, arg2)                \
     STMT_START {                                                        \

@@ -1735,12 +1735,12 @@ EXTCONST U8 PL_regkind[] = {
 };
 #endif
 
-/* PL_regarglen[] - How large is the argument part of the node (in regnodes) */
+/* PL_regnode_arg_len[] - How large is the argument part of the node (in regnodes) */
 
 #ifndef DOINIT
-EXTCONST U8 PL_regarglen[];
+EXTCONST U8 PL_regnode_arg_len[];
 #else
-EXTCONST U8 PL_regarglen[] = {
+EXTCONST U8 PL_regnode_arg_len[] = {
 	0,                                   	/* END          */
 	0,                                   	/* SUCCEED      */
 	0,                                   	/* SBOL         */
