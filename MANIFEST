@@ -5531,7 +5531,8 @@ regen/warnings.pl		Program to write warnings.h and lib/warnings.pm
 regen_perly.pl			generate perly.{act,h,tab} from perly.y
 regexec.c			Regular expression evaluator
 regexp.h			Public declarations for the above
-regnodes.h			Description of nodes of RE engine
+reginline.h			Inline subs for the RE engine.
+regnodes.h			Description of nodes of the RE engine
 run.c				The interpreter loop
 runtests.SH			A script that generates runtests
 sbox32_hash.h			SBox hash code (32 Bit SBOX based hash function)

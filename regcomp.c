@@ -3806,9 +3806,9 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
             }
             trie->prefixlen = (state-1);
             if (str) {
-                regnode *n = convert+NODE_SZ_STR(convert);
-                assert( NODE_SZ_STR(convert) <= U16_MAX );
-                NEXT_OFF(convert) = (U16)(NODE_SZ_STR(convert));
+                regnode *n = REGNODE_AFTER(convert);
+                assert( n - convert <= U16_MAX );
+                NEXT_OFF(convert) = n - convert;
                 trie->startstate = state;
                 trie->minlen -= (state - 1);
                 trie->maxlen -= (state - 1);
@@ -4227,7 +4227,7 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan,
 
     regnode *n = regnext(scan);
     U32 stringok = 1;
-    regnode *next = scan + NODE_SZ_STR(scan);
+    regnode *next = REGNODE_AFTER_varies(scan);
     U32 merged = 0;
     U32 stopnow = 0;
 #ifdef DEBUGGING
@@ -4380,10 +4380,10 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan,
             DEBUG_PEEP("merg", n, depth, 0);
             merged++;
 
+            next = REGNODE_AFTER_varies(n);
             NEXT_OFF(scan) += NEXT_OFF(n);
             assert( ( STR_LEN(scan) + STR_LEN(n) ) < 256 );
             setSTR_LEN(scan, (U8)(STR_LEN(scan) + STR_LEN(n)));
-            next = n + NODE_SZ_STR(n);
             /* Now we can overwrite *n : */
             Move(STRING(n), STRING(scan) + oldl, STR_LEN(n), char);
 #ifdef DEBUGGING
@@ -4612,7 +4612,7 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan,
 #ifdef DEBUGGING
     /* Allow dumping but overwriting the collection of skipped
      * ops and/or strings with fake optimized ops */
-    n = scan + NODE_SZ_STR(scan);
+    n = REGNODE_AFTER_varies(scan);
     while (n <= stop) {
         OP(n) = OPTIMIZED;
         FLAGS(n) = 0;
@@ -20656,7 +20656,7 @@ S_optimize_regclass(pTHX_
                     Copy(low_utf8,  /* Add the common bytes */
                     ((struct regnode_anyofhs *) REGNODE_p(*ret))->string,
                        len, U8);
-                    RExC_emit += NODE_SZ_STR(REGNODE_p(*ret));
+                    RExC_emit = REGNODE_OFFSET(REGNODE_AFTER_varies(REGNODE_p(*ret)));
                     set_ANYOF_arg(pRExC_state, REGNODE_p(*ret), cp_list,
                                               NULL, only_utf8_locale_list);
                     return op;
@@ -22940,64 +22940,6 @@ Perl_regdupe_internal(pTHX_ REGEXP * const rx, CLONE_PARAMS *param)
 
 #endif    /* USE_ITHREADS */
 
-#ifndef PERL_IN_XSUB_RE
-
-/*
- - regnext - dig the "next" pointer out of a node
- */
-regnode *
-Perl_regnext(pTHX_ regnode *p)
-{
-    I32 offset;
-
-    if (!p)
-        return(NULL);
-
-    if (OP(p) > REGNODE_MAX) {		/* regnode.type is unsigned */
-        Perl_croak(aTHX_ "Corrupted regexp opcode %d > %d",
-                                                (int)OP(p), (int)REGNODE_MAX);
-    }
-
-    offset = (PL_regnode_off_by_arg[OP(p)] ? ARG(p) : NEXT_OFF(p));
-    if (offset == 0)
-        return(NULL);
-
-    return(p+offset);
-}
-
-/*
- - regnode_after - find the node physically following p in memory,
-   taking into account the size of p as determined by OP(p), our
-   sizing data, and possibly the STR_SZ() macro.
- */
-regnode *
-Perl_regnode_after(pTHX_ const regnode *p)
-{
-    assert(p);
-    const U8 op = OP(p);
-    assert(op < REGNODE_MAX);
-    const regnode *ret = p + NODE_STEP_REGNODE + PL_regnode_arg_len[op];
-    if (PL_regnode_arg_len_varies[op])
-        ret += STR_SZ(STR_LEN(p));
-    return (regnode *)ret;
-}
-
-/* validate that the passed in node and extra length would match that
- * returned by regnode_after() */
-bool
-Perl_check_regnode_after(pTHX_ const regnode *p, const STRLEN extra)
-{
-    const regnode *nextoper = regnode_after((regnode *)p,FALSE);
-    /* this should be the ONLY place that REGNODE_AFTER_PLUS is used outside
-     * of regcomp.h */
-    const regnode *other= REGNODE_AFTER_PLUS(p, extra);
-    if (nextoper != other) {
-        return FALSE;
-    }
-    return TRUE;
-}
-#endif
-
 STATIC void
 S_re_croak(pTHX_ bool utf8, const char* pat,...)
 {
@@ -23715,7 +23657,7 @@ S_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node,
         if (op == CLOSE || op == SRCLOSE || op == WHILEM)
             indent--;
         next = regnext((regnode *)node);
-        const regnode *after = regnode_after((regnode *)node);
+        const regnode *after = regnode_after((regnode *)node,0);
 
         /* Where, what. */
         if (op == OPTIMIZED) {
@@ -23819,7 +23761,7 @@ S_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node,
         }
         else if (PL_regnode_kind[op] == EXACT || op == ANYOFHs) {
             /* Literal string, where present. */
-            node += NODE_SZ_STR(node); /* NOT REGNODE_AFTER! */
+            node = (const regnode *)REGNODE_AFTER_varies(node);
         }
         else {
             node = REGNODE_AFTER_opcode(node,op);
