@@ -829,6 +829,11 @@ END_OF_DESCR
 
 my $confine_to_core = 'defined(PERL_CORE) || defined(PERL_EXT_RE_BUILD)';
 read_definition("regcomp.sym");
+if ($ENV{DUMP}) {
+    require Data::Dumper;
+    print Data::Dumper::Dumper(\@all);
+    exit(1);
+}
 my $out= open_new( 'regnodes.h', '>',
     { by => 'regen/regcomp.pl', from => 'regcomp.sym' } );
 print $out "#if $confine_to_core\n\n";
