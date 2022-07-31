@@ -436,31 +436,72 @@ struct regnode_ssc {
 #define NODE_STEP_REGNODE	1	/* sizeof(regnode)/sizeof(regnode) */
 #define EXTRA_STEP_2ARGS	EXTRA_SIZE(struct regnode_2)
 
-/* core macros for computing the regnode after this one, there is also
- * a function which is more powerful called Perl_regnode_after(), see
- * regcomp.c.
+/* Core macros for computing "the regnode after this one". See also
+ * Perl_regnode_after() in reginline.h
  *
- * Note that regnodes can be thought of as nodes in binary tree like structure.
- * The first "child" of a node is its immediate successor in the program, the
- * second "child" of a node, if it has one, will be stored as an index in the
- * regnode struct, usually in a field marked next_off (but sometimes somewhere
- * else).  To access the immediate successor of a regnode you should use one
- * of the REGNODE_AFTER_xxx() macros which understand how long a given regnode is.
- * To access the optional successor of a regnode you use the Perl_regnext()
- * function in regcomp.c
+ * At the struct level regnodes are a linked list, with each node pointing
+ * at the next (via offsets), usually via the C<next_off> field in the
+ * structure. Where there is a need for a node to have two children the
+ * immediate physical successor of the node in the compiled program is used
+ * to represent one of them. A good example is the BRANCH construct,
+ * consider the pattern C</head(?:[ab]foo|[cd]bar)tail/>
  *
- * There are several variants of the REGNODE_AFTER_xxx() macros which are intended
- * for use in different situations depending on how confident the code is about
- * what node it is trying to find a successor for.
+ *      1: EXACT <head> (3)
+ *      3: BRANCH (8)
+ *      4:   ANYOFR[ab] (6)
+ *      6:   EXACT <foo> (14)
+ *      8: BRANCH (FAIL)
+ *      9:   ANYOFR[cd] (11)
+ *     11:   EXACT <bar> (14)
+ *     13: TAIL (14)
+ *     14: EXACT <tail> (16)
+ *     16: END (0)
  *
- * So for instance if you know you are dealing with a known node type
- * then you should use REGNODE_AFTER_type(NODE,TYPE).
+ * The numbers in parens at the end of each line show the "next_off" value
+ * for that regnode in the program. We can see that the C<next_off> of
+ * the first BRANCH node (#3) is the second BRANCH node (#8), and indicates
+ * where execution should go if the regnodes *following* the BRANCH node fail
+ * to accept the input string. Thus to find the "next BRANCH" we would do
+ * C<Perl_regnext()> and follow the C<next_off> pointer, and to find
+ * the "BRANCHes contents" we would use C<REGNODE_AFTER()>.
  *
- * If you have a regnode pointer and nothing else use: REGNODE_AFTER_dynamic(NODE)
+ * Be aware that C<REGNODE_AFTER()> is not guaranteed to give a *useful*
+ * result once the regex peephole optimizer has run (it will be correct
+ * however!). By the time code in regexec.c executes various regnodes
+ * may have been optimized out of the the C<next_off> chain. An example
+ * can be seen above, node 13 will never be reached during execution
+ * flow as it has been stitched out of the C<next_off> chain. Both 6 and
+ * 11 would have pointed at it during compilation, but it exists only to
+ * facilitate the construction of the BRANCH structure and is effectively
+ * a NOOP, and thus the optimizer adjusts the links so it is skipped
+ * from execution time flow. In regexec.c it is only safe to use
+ * REGNODE_AFTER() on specific node types.
  *
- * If you have a regnode pointer and you have already extracted its opcode use:
- * REGNODE_AFTER_opcode(NODE,OPCODE).
+ * Conversely during compilation C<Perl_regnext()> may not work properly
+ * as the C<next_off> may not be known until "later", (such as in the
+ * case of BRANCH nodes) and thus in regcomp.c the REGNODE_AFTER() macro
+ * is used very heavily instead.
  *
+ * There are several variants of the REGNODE_AFTER_xxx() macros which
+ * are intended for use in different situations depending on how
+ * confident the code is about what type of node it is trying to find a
+ * successor for.
+ *
+ * So for instance if you know you are dealing with a known node type of
+ * constant size then you should use REGNODE_AFTER_type(n,TYPE).
+ *
+ * If you have a regnode pointer and you know you are dealing with a
+ * regnode type of constant size and you have already extracted its
+ * opcode use: REGNODE_AFTER_opcode(n,OPCODE).
+ *
+ * If you have a regnode and you know it is variable size then you
+ * you can produce optimized code by using REGNODE_AFTER_varies(n).
+ *
+ * If you have a regnode pointer and nothing else use: REGNODE_AFTER(n)
+ * This is the safest option and wraps C<Perl_regnode_after()>. It
+ * should produce the correct result regardless of its argument. The
+ * other options only produce correct results under specific
+ * constraints.
  */
 #define        REGNODE_AFTER_PLUS(p,extra)    ((p) + NODE_STEP_REGNODE + (extra))
 /* under DEBUGGING we check that all REGNODE_AFTER optimized macros did the

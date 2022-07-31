@@ -214,7 +214,7 @@ and equivalents for reading and setting the arguments; and C<STR_LEN()>,
 C<STRING()> and C<OPERAND()> for manipulating strings and regop bearing
 types.
 
-=head3 What regop is next?
+=head3 What regnode is next?
 
 There are two distinct concepts of "next regnode" in the regex engine,
 and it is important to keep them distinct in your thinking as they
