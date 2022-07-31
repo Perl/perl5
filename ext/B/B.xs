@@ -703,8 +703,8 @@ walkoptree_debug(...)
     CODE:
 	dMY_CXT;
 	RETVAL = walkoptree_debug;
-	if (items > 0 && SvTRUE(ST(1)))
-	    walkoptree_debug = 1;
+	if (items > 0)
+	    walkoptree_debug = SvTRUE(ST(0));
     OUTPUT:
 	RETVAL
 
