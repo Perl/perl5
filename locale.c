@@ -1584,14 +1584,20 @@ S_setlocale_failure_panic_i(pTHX_
     NOT_REACHED; /* NOTREACHED */
 }
 
+/* Any of these will allow us to find the RADIX */
+#  if defined(USE_LOCALE_NUMERIC) && (   defined(HAS_SOME_LANGINFO)         \
+                                      || defined(HAS_SOME_LOCALECONV)       \
+                                      || defined(HAS_SNPRINTF))
+#    define CAN_CALCULATE_RADIX
+#  endif
+
 STATIC void
 S_set_numeric_radix(pTHX_ const bool use_locale)
 {
     /* If 'use_locale' is FALSE, set to use a dot for the radix character.  If
      * TRUE, use the radix character derived from the current locale */
 
-#  if defined(USE_LOCALE_NUMERIC) && (   defined(HAS_SOME_LOCALECONV)   \
-                                      || defined(HAS_SOME_LANGINFO))
+#  ifdef CAN_CALCULATE_RADIX
 
     const char * radix = (use_locale)
                          ? my_langinfo(RADIXCHAR, FALSE)
@@ -2997,13 +3003,17 @@ Perl_langinfo(const nl_item item)
         return "-";
 
 #endif
-#if  defined(USE_LOCALE_NUMERIC)                                    \
- && (defined(HAS_SOME_LANGINFO) || defined(HAS_SOME_LOCALECONV))
+
+#ifdef CAN_CALCULATE_RADIX
 #else
 
       case RADIXCHAR:
         return C_decimal_point;
 
+#endif
+#if  defined(USE_LOCALE_NUMERIC)                                    \
+ && (defined(HAS_SOME_LANGINFO) || defined(HAS_SOME_LOCALECONV))
+#else
       case THOUSEP:
         return C_thousands_sep;
 
@@ -3190,13 +3200,19 @@ S_my_langinfo(const nl_item item, bool toggle)
 
     {
 
+#    ifdef USE_LOCALE_NUMERIC
+
+        DECLARATION_FOR_LC_NUMERIC_MANIPULATION;
+
+#    endif
 #    ifdef HAS_SOME_LOCALECONV
 
         const struct lconv* lc;
         const char * temp;
-        DECLARATION_FOR_LC_NUMERIC_MANIPULATION;
 
-#      ifdef TS_W32_BROKEN_LOCALECONV
+#    endif
+#    if      defined(HAS_SNPRINTF)                                              \
+       && (! defined(HAS_SOME_LOCALECONV) || defined(TS_W32_BROKEN_LOCALECONV))
 
         const char * save_global;
         const char * save_thread;
@@ -3205,7 +3221,6 @@ S_my_langinfo(const nl_item item, bool toggle)
         char * e;
         char * item_start;
 
-#      endif
 #    endif
 
         /* We copy the results to a per-thread buffer, even if not
@@ -3280,12 +3295,19 @@ S_my_langinfo(const nl_item item, bool toggle)
                 LOCALECONV_UNLOCK;
                 break;
 
-#      ifdef TS_W32_BROKEN_LOCALECONV
+#    endif    /* HAS_SOME_LOCALECONV */
 
-            case RADIXCHAR:
+      case RADIXCHAR:
 
-                /* For this, we output a known simple floating point number to
-                 * a buffer, and parse it, looking for the radix */
+#    if      defined(HAS_SNPRINTF)                                              \
+       && (! defined(HAS_SOME_LOCALECONV) || defined(TS_W32_BROKEN_LOCALECONV))
+
+            /* snprintf() can be used to find the radix character by outputting
+             * a known simple floating point number to a buffer, and parsing
+             * it, inferring the radix as the bytes separating the integer and
+             * fractional parts.  But localeconv() is more direct, not
+             * requiring inference, so use it instead of the code just below,
+             * if (likely) it is available and works ok */
 
                 if (toggle) {
                     STORE_LC_NUMERIC_FORCE_TO_UNDERLYING();
@@ -3296,13 +3318,13 @@ S_my_langinfo(const nl_item item, bool toggle)
                     Renew(PL_langinfo_buf, PL_langinfo_bufsize, char);
                 }
 
-                needed_size = my_snprintf(PL_langinfo_buf, PL_langinfo_bufsize,
+                needed_size = snprintf(PL_langinfo_buf, PL_langinfo_bufsize,
                                           "%.1f", 1.5);
                 if (needed_size >= (int) PL_langinfo_bufsize) {
                     PL_langinfo_bufsize = needed_size + 1;
                     Renew(PL_langinfo_buf, PL_langinfo_bufsize, char);
             needed_size
-                    = my_snprintf(PL_langinfo_buf, PL_langinfo_bufsize,
+                    = snprintf(PL_langinfo_buf, PL_langinfo_bufsize,
                                              "%.1f", 1.5);
                     assert(needed_size < (int) PL_langinfo_bufsize);
                 }
@@ -3325,29 +3347,32 @@ S_my_langinfo(const nl_item item, bool toggle)
                     ptr++;
                 }
 
+            if (toggle) {
+                RESTORE_LC_NUMERIC();
+            }
+
                 /* Everything in between is the radix string */
-                if (ptr >= e) {
-                    PL_langinfo_buf[0] = '?';
-                    PL_langinfo_buf[1] = '\0';
-                }
-                else {
+                if (ptr < e) {
                     *ptr = '\0';
             Move(item_start, PL_langinfo_buf, ptr - PL_langinfo_buf,
                                                                 char);
-                }
-
-                if (toggle) {
-                    RESTORE_LC_NUMERIC();
-                }
 
                 retval = PL_langinfo_buf;
                 break;
+                }
 
-#    else
+#      ifdef HAS_SOME_LOCALECONV /* snprintf() failed; drop down to use
+                                    localeconv() */
 
-            case RADIXCHAR:     /* No special handling needed */
+        /* FALLTHROUGH */                                                           \
 
+#      else                      /* snprintf() failed and no localeconv() */
+
+        return C_decimal_point;
+
+#      endif
 #    endif
+#    ifdef HAS_SOME_LOCALECONV
 
             case THOUSEP:
 
