@@ -940,6 +940,7 @@ hansmu\100xs4all.nl                     hansm\100icgroup.nl
 +                                       hans\100icgroup.nl
 +                                       hansm\100euronet.nl
 +                                       hansm\100euro.net
+harald.joerg\100arcor.de                haj\100posteo.de
 hio\100ymir.co.jp                       hio\100hio.jp
 hops\100sco.com                         hops\100scoot.pdev.sco.com
 

@@ -294,8 +294,8 @@ C<SETLINEBUF>, C<SYSOPEN>, C<TELL>, C<UNREAD>, C<UTF8>, C<WRITE>
 
 =item documented in L<perlfunc>
 
-L<< C<import> | perlfunc/use >>, L<< C<unimport> | perlfunc/use >>,
-L<< C<INC> | perlfunc/require >>
+L<< C<import>|perlfunc/use >>, L<< C<unimport>|perlfunc/use >>,
+L<< C<INC>|perlfunc/require >>
 
 =item documented in L<UNIVERSAL>
 
