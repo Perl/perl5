@@ -1493,7 +1493,7 @@
 #      endif
 #    endif
 #  endif
-#  if !(defined(HAS_NL_LANGINFO))
+#  if !(defined(HAS_NL_LANGINFO) || defined(HAS_NL_LANGINFO_L))
 #    if defined(PERL_IN_LOCALE_C)
 #      if defined(USE_LOCALE)
 #define my_langinfo		S_my_langinfo
@@ -1607,7 +1607,7 @@
 #define do_semop(a,b)		Perl_do_semop(aTHX_ a,b)
 #define do_shmio(a,b,c)		Perl_do_shmio(aTHX_ a,b,c)
 #  endif
-#  if defined(HAS_NL_LANGINFO)
+#  if defined(HAS_NL_LANGINFO) || defined(HAS_NL_LANGINFO_L)
 #    if defined(PERL_IN_LOCALE_C)
 #      if defined(USE_LOCALE)
 #define my_langinfo		S_my_langinfo

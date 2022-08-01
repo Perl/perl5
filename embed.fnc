@@ -3352,7 +3352,7 @@ S	|char*	|win32_setlocale|int category|NULLOK const char* locale
 pTC	|wchar_t *|Win_utf8_string_to_wstring|NULLOK const char * utf8_string
 pTC	|char *	|Win_wstring_to_utf8_string|NULLOK const wchar_t * wstring
 #    endif
-#    ifdef HAS_NL_LANGINFO
+#    if defined(HAS_NL_LANGINFO) || defined(HAS_NL_LANGINFO_L)
 ST	|const char*|my_langinfo|const nl_item item|bool toggle
 #    else
 ST	|const char*|my_langinfo|const int item|bool toggle

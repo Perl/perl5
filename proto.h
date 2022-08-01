@@ -4664,7 +4664,7 @@ STATIC int	S_sv_2iuv_non_preserve(pTHX_ SV *const sv);
 PERL_CALLCONV const char*	Perl_langinfo(const int item);
 #define PERL_ARGS_ASSERT_PERL_LANGINFO
 #endif
-#if !(defined(HAS_NL_LANGINFO))
+#if !(defined(HAS_NL_LANGINFO) || defined(HAS_NL_LANGINFO_L))
 #  if defined(PERL_IN_LOCALE_C)
 #    if defined(USE_LOCALE)
 STATIC const char*	S_my_langinfo(const int item, bool toggle);
@@ -5189,17 +5189,17 @@ PERL_CALLCONV I32	Perl_do_shmio(pTHX_ I32 optype, SV** mark, SV** sp)
 	assert(mark); assert(sp)
 
 #endif
-#if defined(HAS_NL_LANGINFO)
+#if defined(HAS_NL_LANGINFO) && defined(PERL_LANGINFO_H)
+PERL_CALLCONV const char*	Perl_langinfo(const nl_item item);
+#define PERL_ARGS_ASSERT_PERL_LANGINFO
+#endif
+#if defined(HAS_NL_LANGINFO) || defined(HAS_NL_LANGINFO_L)
 #  if defined(PERL_IN_LOCALE_C)
 #    if defined(USE_LOCALE)
 STATIC const char*	S_my_langinfo(const nl_item item, bool toggle);
 #define PERL_ARGS_ASSERT_MY_LANGINFO
 #    endif
 #  endif
-#endif
-#if defined(HAS_NL_LANGINFO) && defined(PERL_LANGINFO_H)
-PERL_CALLCONV const char*	Perl_langinfo(const nl_item item);
-#define PERL_ARGS_ASSERT_PERL_LANGINFO
 #endif
 #if defined(HAS_PIPE)
 PERL_CALLCONV int	Perl_PerlProc_pipe_cloexec(pTHX_ int *pipefd)
