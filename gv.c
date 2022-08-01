@@ -1245,8 +1245,8 @@ Perl_gv_fetchmethod_pvn_flags(pTHX_ HV *stash, const char *name, const STRLEN le
                         return gv;
                 }
                 Perl_croak(aTHX_
-                           "Can't locate object method \"%" UTF8f
-                           "\" via package \"%" HEKf "\"",
+                           "Can't locate object method %" UTF8f_QUOTEDPREFIX ""
+                           " via package %" HEKf_QUOTEDPREFIX,
                                     UTF8fARG(is_utf8, name_end - name, name),
                                     HEKfARG(HvNAME_HEK(stash)));
             }
@@ -1261,9 +1261,9 @@ Perl_gv_fetchmethod_pvn_flags(pTHX_ HV *stash, const char *name, const STRLEN le
                 }
 
                 Perl_croak(aTHX_
-                           "Can't locate object method \"%" UTF8f
-                           "\" via package \"%" SVf "\""
-                           " (perhaps you forgot to load \"%" SVf "\"?)",
+                           "Can't locate object method %" UTF8f_QUOTEDPREFIX ""
+                           " via package %" SVf_QUOTEDPREFIX ""
+                           " (perhaps you forgot to load %" SVf_QUOTEDPREFIX "?)",
                            UTF8fARG(is_utf8, name_end - name, name),
                            SVfARG(packnamesv), SVfARG(packnamesv));
             }

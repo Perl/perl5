@@ -182,7 +182,9 @@ foreach my $cur_entry ( keys %entries) {
 # List from perlguts.pod "Formatted Printing of IVs, UVs, and NVs"
 # Convert from internal formats to ones that the readers will be familiar
 # with, while removing any format modifiers, such as precision, the
-# presence of which would just confuse the pod's explanation
+# presence of which would just confuse the pod's explanation.
+# Note that the 'S' formats get converted into \"%s\" as they inject
+# double quotes.
 my %specialformats = (IVdf => 'd',
 		      UVuf => 'd',
 		      UVof => 'o',
@@ -192,12 +194,18 @@ my %specialformats = (IVdf => 'd',
 		      NVff => 'f',
 		      NVgf => 'f',
 		      HEKf256=>'s',
+		      HEKf256_QUOTEDPREFIX => 'S',
 		      HEKf => 's',
+		      HEKf_QUOTEDPREFIX => 'S',
 		      UTF8f=> 's',
+		      UTF8f_QUOTEDPREFIX => 'S',
 		      SVf256=>'s',
 		      SVf32=> 's',
 		      SVf  => 's',
+		      SVf_QUOTEDPREFIX  => 'S',
+                      PVf_QUOTEDPREFIX  => 'S',
 		      PNf  => 's');
+
 my $format_modifiers = qr/ [#0\ +-]*              # optional flags
 			  (?: [1-9][0-9]* | \* )? # optional field width
 			  (?: \. \d* )?           # optional precision
@@ -205,8 +213,8 @@ my $format_modifiers = qr/ [#0\ +-]*              # optional flags
 			/x;
 
 my $specialformats =
- join '|', sort { length $b cmp length $a } keys %specialformats;
-my $specialformats_re = qr/%$format_modifiers"\s*($specialformats)(\s*")?/;
+ join '|', sort { length($b) <=> length($a) || $a cmp $b } keys %specialformats;
+my $specialformats_re = qr/%$format_modifiers"\s*($specialformats)(\s*(?:"|\z))?/;
 
 # We skip the bodies of most XS functions, but not within these files
 my @include_xs_files = (
@@ -321,6 +329,7 @@ sub check_file {
     # in later lines.
 
     s/$specialformats_re/"%$specialformats{$1}" .  (defined $2 ? '' : '"')/ge;
+    s/\%S/\\"%s\\"/g; # convert an %S into a quoted %s.
 
     # Remove any remaining format modifiers, but not in %%
     s/ (?<!%) % $format_modifiers ( [dioxXucsfeEgGp] ) /%$1/xg;
