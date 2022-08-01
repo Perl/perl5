@@ -4154,6 +4154,28 @@ EOFIX
                   });
     }
 
+    if ($major < 10 and -f 'ext/Digest/MD5/MD5.xs') {
+        require Digest::MD5;
+        my ($was, $now);
+        # The edit to the XS is commit 9ee8e69ab2318ba3, but the testcase fixup
+        # needs to work for several earlier commits.
+        edit_file('ext/Digest/MD5/MD5.xs', sub {
+                      my $xs = shift;
+                      $was = Digest::MD5::md5_hex($xs);
+                      $xs =~ s{\Q#if PATCHLEVEL <= 4 && !defined(PL_dowarn)}
+                              {#if PERL_VERSION <= 4 && !defined(PL_dowarn)};
+                      $now = Digest::MD5::md5_hex($xs);
+                      return $xs;
+                  });
+
+        edit_file('ext/Digest/MD5/t/files.t', sub {
+                      my $testcase = shift;
+                      $testcase =~ s/$was/$now/g;
+                      return $testcase;
+                  })
+            if $was ne $now;
+    }
+
     if ($major >= 10 && $major < 20
             && !extract_from_file('ext/SDBM_File/Makefile.PL', qr/MY::subdir_x/)) {
         # Parallel make fix for SDBM_File
