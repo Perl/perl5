@@ -1871,6 +1871,21 @@ last (foo());
 next (foo());
 redo (foo());
 ####
+# function call via subref
+$a->();
+$a->(1, 2);
+$b = $a->();
+$b = $a->(1, 2);
+() = $a->();
+() = $a->(1, 2);
+>>>>
+&$a();
+&$a(1, 2);
+$b = &$a();
+$b = &$a(1, 2);
+() = &$a();
+() = &$a(1, 2);
+####
 # require vstring
 require v5.16;
 ####
