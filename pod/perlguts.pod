@@ -3021,6 +3021,16 @@ You can use this to concatenate two scalars:
  SV *var3 = newSVpvf("var1=%" SVf " and var2=%" SVf,
                      SVfARG(var1), SVfARG(var2));
 
+=for apidoc Amnh||SVf_QUOTEDPREFIX
+
+C<SVf_QUOTEDPREFIX> is similar to C<SVf> except that it restricts the
+number of the characters printed, showing at most the first
+C<PERL_QUOTEDPREFIX_LEN> characters of the argument, and rendering it with
+double quotes and with the contents escaped using double quoted string
+escaping rules. If the string is longer than this then ellipses "..."
+will be appended after the trailing quote. This is intended for error
+messages where the string is assumed to be a class name.
+
 =head2 Formatted Printing of Strings
 
 If you just want the bytes printed in a 7bit NUL-terminated string, you can
@@ -3054,6 +3064,11 @@ C<-C> parameter.  (See L<perlrun/-C [numberE<sol>list]>.
 
 =for apidoc_section $io_formats
 =for apidoc Amnh||UTF8f
+Output a possibly UTF8 value. Be sure to use UTF8fARG() to compose
+the arguments for this format.
+=for apidoc Amnh||UTF8f_QUOTEDPREFIX
+Same as C<UTF8f> but the output is quoted, escaped and length limited.
+See C<SVf_QUOTEDPREFIX> for more details on escaping.
 =for apidoc Amh||UTF8fARG|bool is_utf8|Size_t byte_len|char *str
 
 =cut

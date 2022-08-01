@@ -428,7 +428,7 @@ is $kalled, 1, 'calling a class method via a magic variable';
     eval {
         NulTest->${ \"method\0Whoops" };
     };
-    like $@, qr/Can't locate object method "method\0Whoops" via package "NulTest" at/,
+    like $@, qr/Can't locate object method "method\\0Whoops" via package "NulTest" at/,
             "method lookup is nul-clean";
 
     *NulTest::AUTOLOAD = sub { our $AUTOLOAD; return $AUTOLOAD };

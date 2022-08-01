@@ -4152,8 +4152,28 @@ out there, Solaris being the most prominent.
 
 #define SVfARG(p) ((void*)(p))
 
+/* Render an SV as a quoted and escaped string suitable for an error message.
+ * Only shows the first PERL_QUOTEDPREFIX_LEN characters, and adds ellipses if the
+ * string is too long.
+ */
+#ifndef PERL_QUOTEDPREFIX_LEN
+# define PERL_QUOTEDPREFIX_LEN 256
+#endif
+#ifndef SVf_QUOTEDPREFIX
+#  define SVf_QUOTEDPREFIX "5p"
+#endif
+
+/* like %s but runs through the quoted prefix logic */
+#ifndef PVf_QUOTEDPREFIX
+#  define PVf_QUOTEDPREFIX "1p"
+#endif
+
 #ifndef HEKf
 #  define HEKf "2p"
+#endif
+
+#ifndef HEKf_QUOTEDPREFIX
+#  define HEKf_QUOTEDPREFIX "7p"
 #endif
 
 /* Not ideal, but we cannot easily include a number in an already-numeric
@@ -4162,19 +4182,28 @@ out there, Solaris being the most prominent.
 #  define HEKf256 "3p"
 #endif
 
+#ifndef HEKf256_QUOTEDPREFIX
+#  define HEKf256_QUOTEDPREFIX "8p"
+#endif
+
 #define HEKfARG(p) ((void*)(p))
 
 /* Documented in perlguts
  *
- * %4p is a custom format
+ * %4p and %9p are custom formats for handling UTF8 parameters.
+ * They only occur when prefixed by specific other formats.
  */
 #ifndef UTF8f
 #  define UTF8f "d%" UVuf "%4p"
+#endif
+#ifndef UTF8f_QUOTEDPREFIX
+#  define UTF8f_QUOTEDPREFIX "d%" UVuf "%9p"
 #endif
 #define UTF8fARG(u,l,p) (int)cBOOL(u), (UV)(l), (void*)(p)
 
 #define PNf UTF8f
 #define PNfARG(pn) (int)1, (UV)PadnameLEN(pn), (void *)PadnamePV(pn)
+
 
 #ifdef PERL_CORE
 /* not used; but needed for backward compatibility with XS code? - RMB
@@ -8121,7 +8150,7 @@ Allows one ending \0
 #define PERL_PV_ESCAPE_NONASCII     0x000400
 #define PERL_PV_ESCAPE_FIRSTCHAR    0x000800
 
-#define PERL_PV_ESCAPE_ALL            0x001000
+#define PERL_PV_ESCAPE_ALL          0x001000
 #define PERL_PV_ESCAPE_NOBACKSLASH  0x002000
 #define PERL_PV_ESCAPE_NOCLEAR      0x004000
 #define PERL_PV_PRETTY_NOCLEAR      PERL_PV_ESCAPE_NOCLEAR
@@ -8132,6 +8161,18 @@ Allows one ending \0
 
 /* Escape PV with all hex, including NUL. */
 #define PERL_PV_ESCAPE_DWIM_ALL_HEX 0x020000
+
+/* Do not escape word characters, alters meaning of other flags */
+#define PERL_PV_ESCAPE_NON_WC       0x040000
+#define PERL_PV_ESCAPE_TRUNC_MIDDLE 0x080000
+
+#define PERL_PV_PRETTY_QUOTEDPREFIX (   \
+        PERL_PV_PRETTY_ELLIPSES |       \
+        PERL_PV_PRETTY_QUOTE    |       \
+        PERL_PV_ESCAPE_NONASCII |       \
+        PERL_PV_ESCAPE_NON_WC   |       \
+        PERL_PV_ESCAPE_TRUNC_MIDDLE |   \
+        0)
 
 
 /* used by pv_display in dump.c*/

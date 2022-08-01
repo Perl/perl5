@@ -110,28 +110,31 @@ will also be escaped.
 Normally the SV will be cleared before the escaped string is prepared,
 but when C<PERL_PV_ESCAPE_NOCLEAR> is set this will not occur.
 
-If C<PERL_PV_ESCAPE_UNI> is set then the input string is treated as UTF-8
-if C<PERL_PV_ESCAPE_UNI_DETECT> is set then the input string is scanned
+If C<PERL_PV_ESCAPE_UNI> is set then the input string is treated as UTF-8.
+If C<PERL_PV_ESCAPE_UNI_DETECT> is set then the input string is scanned
 using C<is_utf8_string()> to determine if it is UTF-8.
 
 If C<PERL_PV_ESCAPE_ALL> is set then all input chars will be output
-using C<\x01F1> style escapes, otherwise if C<PERL_PV_ESCAPE_NONASCII> is set, only
-non-ASCII chars will be escaped using this style; otherwise, only chars above
-255 will be so escaped; other non printable chars will use octal or
-common escaped patterns like C<\n>.
-Otherwise, if C<PERL_PV_ESCAPE_NOBACKSLASH>
-then all chars below 255 will be treated as printable and
-will be output as literals.
+using C<\x01F1> style escapes, otherwise if C<PERL_PV_ESCAPE_NONASCII>
+is set, only non-ASCII chars will be escaped using this style;
+otherwise, only chars above 255 will be so escaped; other non printable
+chars will use octal or common escaped patterns like C<\n>. Otherwise,
+if C<PERL_PV_ESCAPE_NOBACKSLASH> then all chars below 255 will be
+treated as printable and will be output as literals. The
+C<PERL_PV_ESCAPE_NON_WC> modifies the previous rules to cause word
+chars, unicode or otherwise, to be output as literals, note this uses
+the *unicode* rules for deciding on word characters.
 
 If C<PERL_PV_ESCAPE_FIRSTCHAR> is set then only the first char of the
-string will be escaped, regardless of max.  If the output is to be in hex,
-then it will be returned as a plain hex
-sequence.  Thus the output will either be a single char,
-an octal escape sequence, a special escape like C<\n> or a hex value.
+string will be escaped, regardless of max. If the output is to be in
+hex, then it will be returned as a plain hex sequence. Thus the output
+will either be a single char, an octal escape sequence, a special escape
+like C<\n> or a hex value.
 
-If C<PERL_PV_ESCAPE_RE> is set then the escape char used will be a C<"%"> and
-not a C<"\\">.  This is because regexes very often contain backslashed
-sequences, whereas C<"%"> is not a particularly common character in patterns.
+If C<PERL_PV_ESCAPE_RE> is set then the escape char used will be a
+C<"%"> and not a C<"\\">. This is because regexes very often contain
+backslashed sequences, whereas C<"%"> is not a particularly common
+character in patterns.
 
 Returns a pointer to the escaped text as held by C<dsv>.
 
@@ -144,6 +147,7 @@ Returns a pointer to the escaped text as held by C<dsv>.
 =for apidoc Amnh||PERL_PV_ESCAPE_RE
 =for apidoc Amnh||PERL_PV_ESCAPE_UNI
 =for apidoc Amnh||PERL_PV_ESCAPE_UNI_DETECT
+=for apidoc Amnh||PERL_PV_ESCAPE_NON_WC
 
 =cut
 
@@ -161,7 +165,7 @@ Unused or not for public use
 
 char *
 Perl_pv_escape( pTHX_ SV *dsv, char const * const str, 
-                const STRLEN count, const STRLEN max, 
+                const STRLEN count, STRLEN max,
                 STRLEN * const escaped, U32 flags )
 {
 
@@ -173,13 +177,42 @@ Perl_pv_escape( pTHX_ SV *dsv, char const * const str,
 
     const char esc = (flags & PERL_PV_ESCAPE_RE) ? '%' : '\\';
     const char dq = (flags & PERL_PV_ESCAPE_QUOTE) ? '"' : esc;
+    const char *qs;
+    const char *qe;
+
     char octbuf[PV_ESCAPE_OCTBUFSIZE] = "%123456789ABCDF";
     STRLEN wrote = 0;    /* chars written so far */
     STRLEN chsize = 0;   /* size of data to be written */
     STRLEN readsize = 1; /* size of data just read */
-    bool isuni= flags & PERL_PV_ESCAPE_UNI ? 1 : 0; /* is this UTF-8 */
+    bool isuni= (flags & PERL_PV_ESCAPE_UNI)
+                ? TRUE : FALSE; /* is this UTF-8 */
     const char *pv  = str;
     const char * const end = pv + count; /* end of string */
+    const char *restart = NULL;
+    STRLEN extra_len = 0;
+    STRLEN tail = 0;
+    if ((flags & PERL_PV_ESCAPE_TRUNC_MIDDLE) && max > 3) {
+        if (flags & PERL_PV_ESCAPE_QUOTE) {
+            qs = qe = "\"";
+            extra_len = 5;
+        } else if (flags & PERL_PV_PRETTY_LTGT) {
+            qs = "<";
+            qe = ">";
+            extra_len = 5;
+        } else {
+            qs = qe = "";
+            extra_len = 3;
+        }
+        tail = max / 2;
+        restart = isuni ? (char *)utf8_hop_back((U8*)end,-tail,(U8*)pv) : end - tail;
+        if (restart > pv) {
+            max -= tail;
+        } else {
+            tail = 0;
+            restart = NULL;
+        }
+    }
+
     octbuf[0] = esc;
 
     PERL_ARGS_ASSERT_PV_ESCAPE;
@@ -192,9 +225,10 @@ Perl_pv_escape( pTHX_ SV *dsv, char const * const str,
     if ((flags & PERL_PV_ESCAPE_UNI_DETECT) && is_utf8_string((U8*)pv, count))
         isuni = 1;
     
-    for ( ; (pv < end && (!max || (wrote < max))) ; pv += readsize ) {
+    for ( ; pv < end ; pv += readsize ) {
         const UV u= (isuni) ? utf8_to_uvchr_buf((U8*)pv, (U8*) end, &readsize) : (U8)*pv;
         const U8 c = (U8)u;
+        const char *source_buf = octbuf;
         
         if ( ( u > 255 )
           || (flags & PERL_PV_ESCAPE_ALL)
@@ -203,6 +237,11 @@ Perl_pv_escape( pTHX_ SV *dsv, char const * const str,
             if (flags & PERL_PV_ESCAPE_FIRSTCHAR) 
                 chsize = my_snprintf( octbuf, PV_ESCAPE_OCTBUFSIZE, 
                                       "%" UVxf, u);
+            else
+            if ((flags & PERL_PV_ESCAPE_NON_WC) && isWORDCHAR_uvchr(u)) {
+                chsize = readsize;
+                source_buf = pv;
+            }
             else
                 chsize = my_snprintf( octbuf, PV_ESCAPE_OCTBUFSIZE, 
                                       ((flags & PERL_PV_ESCAPE_DWIM) && !isuni)
@@ -251,11 +290,22 @@ Perl_pv_escape( pTHX_ SV *dsv, char const * const str,
                 chsize = 1;
             }
         }
-        if ( max && (wrote + chsize > max) ) {
-            break;
+        if (max && (wrote + chsize > max)) {
+            if (restart) {
+                /* this only happens with PERL_PV_ESCAPE_TRUNC_MIDDLE */
+                if (dsv)
+                    Perl_sv_catpvf( aTHX_ dsv,"%s...%s", qe, qs);
+                wrote += extra_len;
+                pv = restart;
+                max = tail;
+                wrote = tail = 0;
+                restart = NULL;
+            } else {
+                break;
+            }
         } else if (chsize > 1) {
             if (dsv)
-                sv_catpvn(dsv, octbuf, chsize);
+                sv_catpvn(dsv, source_buf, chsize);
             wrote += chsize;
         } else {
             /* If PERL_PV_ESCAPE_NOBACKSLASH is set then non-ASCII bytes

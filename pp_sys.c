@@ -932,7 +932,8 @@ PP(pp_tie)
        stash = gv_stashsv(*MARK, 0);
        if (!stash) {
            if (SvROK(*MARK))
-               DIE(aTHX_ "Can't locate object method \"%s\" via package \"%" SVf "\"",
+               DIE(aTHX_ "Can't locate object method %" PVf_QUOTEDPREFIX
+                         " via package %" SVf_QUOTEDPREFIX,
                    methname, SVfARG(*MARK));
            else if (isGV(*MARK)) {
                /* If the glob doesn't name an existing package, using
@@ -940,15 +941,17 @@ PP(pp_tie)
                 * generate the name for the error message explicitly. */
                SV *stashname = sv_newmortal();
                gv_fullname4(stashname, (GV *) *MARK, NULL, FALSE);
-               DIE(aTHX_ "Can't locate object method \"%s\" via package \"%" SVf "\"",
+               DIE(aTHX_ "Can't locate object method %" PVf_QUOTEDPREFIX
+                         " via package %" SVf_QUOTEDPREFIX,
                    methname, SVfARG(stashname));
            }
            else {
                SV *stashname = !SvPOK(*MARK) ? &PL_sv_no
                              : SvCUR(*MARK)  ? *MARK
                              :                 newSVpvs_flags("main", SVs_TEMP);
-               DIE(aTHX_ "Can't locate object method \"%s\" via package \"%" SVf "\""
-                   " (perhaps you forgot to load \"%" SVf "\"?)",
+               DIE(aTHX_ "Can't locate object method %" PVf_QUOTEDPREFIX
+                         " via package %" SVf_QUOTEDPREFIX
+                   " (perhaps you forgot to load %" SVf_QUOTEDPREFIX "?)",
                    methname, SVfARG(stashname), SVfARG(stashname));
            }
        }
@@ -957,7 +960,8 @@ PP(pp_tie)
             * been deleted from the symbol table, which this one can't
             * be, since we just looked it up by name.
             */
-           DIE(aTHX_ "Can't locate object method \"%s\" via package \"%" HEKf "\"",
+           DIE(aTHX_ "Can't locate object method %" PVf_QUOTEDPREFIX
+                     " via package %" HEKf_QUOTEDPREFIX ,
                methname, HvENAME_HEK_NN(stash));
        }
         ENTER_with_name("call_TIE");
