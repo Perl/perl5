@@ -8974,7 +8974,7 @@ Perl_reg_named_buff_fetch(pTHX_ REGEXP * const r, SV * const namesv,
             IV i;
             SV* sv_dat=HeVAL(he_str);
             I32 *nums=(I32*)SvPVX(sv_dat);
-            AV * const retarray = (flags & RXapif_ALL) ? newAV() : NULL;
+            AV * const retarray = (flags & RXapif_ALL) ? newAV_alloc_x(SvIVX(sv_dat)) : NULL;
             for ( i=0; i<SvIVX(sv_dat); i++ ) {
                 if ((I32)(rx->nparens) >= nums[i]
                     && rx->offs[nums[i]].start != -1
@@ -8989,7 +8989,7 @@ Perl_reg_named_buff_fetch(pTHX_ REGEXP * const r, SV * const namesv,
                         ret = newSV_type(SVt_NULL);
                 }
                 if (retarray)
-                    av_push(retarray, ret);
+                    av_push_simple(retarray, ret);
             }
             if (retarray)
                 return newRV_noinc(MUTABLE_SV(retarray));
