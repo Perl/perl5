@@ -810,23 +810,19 @@ PERLVAR(I, pad_reset_pending, bool)	/* reset pad on next attempted alloc */
 
 PERLVAR(I, srand_called, bool)
 
-#ifdef USE_LOCALE_NUMERIC
-
 PERLVARI(I, numeric_underlying, bool, TRUE)
                                         /* Assume underlying locale numerics */
 PERLVARI(I, numeric_underlying_is_standard, bool, TRUE)
 
-PERLVARI(I, numeric_standard, int, TRUE)
-                                        /* Assume C locale numerics */
-PERLVAR(I, numeric_name, char *)	/* Name of current numeric locale */
+PERLVARI(I, numeric_standard, int, TRUE)    /* Assume C locale numerics */
+PERLVAR(I, numeric_name, char *)     /* Name of current numeric locale */
 PERLVAR(I, numeric_radix_sv, SV *)	/* The radix separator if not '.' */
 
-#  ifdef USE_POSIX_2008_LOCALE
+#if defined(USE_LOCALE_NUMERIC) && defined(USE_POSIX_2008_LOCALE)
 
 PERLVARI(I, underlying_numeric_obj, locale_t, NULL)
 
-#  endif
-#endif /* !USE_LOCALE_NUMERIC */
+#endif
 
 /* Array of signal handlers, indexed by signal number, through which the C
    signal handler dispatches.  */
