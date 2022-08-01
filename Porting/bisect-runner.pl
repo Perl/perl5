@@ -3958,6 +3958,34 @@ index 9418b52..b8b1a7c 100644
 EOPATCH
     }
 
+    if ($major < 10) {
+        # This is commit 731e259481f36b35, but adapted to remove all the
+        # variations of guards around the inclusion of <signal.h>
+        # Whilst we only hit this as a problem on arm64 macOS (so far), because
+        # it insists on prototypes for everything, I'm assuming that doing this
+        # everywhere and unconditionally might solve similar problems on other
+        # platforms. Certainly, it *ought* to be safe to include a C89 header
+        # these days.
+        for my $file (qw(doop.c mg.c mpeix/mpeixish.h plan9/plan9ish.h unixish.h util.c)) {
+            next
+                unless -f $file;
+            edit_file($file, sub {
+                          my $code = shift;
+                          $code =~ s{
+                                        \n
+                                        \#if \s+ [^\n]+
+                                        \n
+                                        \# \s* include \s+ <signal\.h>
+                                        \n
+                                        \#endif
+                                        \n
+                                }
+                                    {\n#include <signal.h>\n}x;
+                          return $code;
+                      });
+        }
+    }
+
     if ($major == 15) {
         # This affects a small range of commits around July 2011, but build
         # failures here get in the way of bisecting other problems:
