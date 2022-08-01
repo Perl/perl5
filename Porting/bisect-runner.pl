@@ -2710,6 +2710,31 @@ sub patch_hints {
                   });
         }
 
+        if ($major < 16) {
+            edit_file('hints/darwin.sh', sub {
+                          my $code = shift;
+                          # This is commit 60a655a1ee05c577
+                          $code =~ s/usenm='true'/usenm='false'/;
+
+                          # With the Configure probes fixed (in patch_Configure)
+                          # the "d_stdstdio" logic now concludes "define".
+                          # Unfortunately that is not correct - attempting to
+                          # build 5.8.0 without this override results in SEGVs
+                          # or similar chaos.
+                          #
+                          # The problem is introduced by commit 5a3a8a022aa61cba
+                          # which enables perlio by default.
+                          # The problem is hidden after 15b61c98f82f3010, which
+                          # adds "d_faststdio" and defaults it to "undef" from
+                          # that commit onwards, but override that and the build
+                          # would break, up until "turning off perlio" was
+                          # disabled by commit dd35fa16610ef2fa
+                          $code .= "\nd_stdstdio='undef'\n";
+
+                          return $code;
+                      });
+        }
+
         if ($major < 34) {
             edit_file('hints/darwin.sh', sub {
                       my $code = shift;
