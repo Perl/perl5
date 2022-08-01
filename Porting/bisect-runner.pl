@@ -1333,9 +1333,11 @@ sub extract_from_file {
 
 sub edit_file {
     my ($file, $munger) = @_;
-    local $/;
     my $fh = open_or_die($file);
-    my $orig = <$fh>;
+    my $orig = do {
+        local $/;
+        <$fh>;
+    };
     die_255("Can't read $file: $!") unless defined $orig && close $fh;
     my $new = $munger->($orig);
     return if $new eq $orig;
@@ -2547,18 +2549,48 @@ EOPATCH
                   });
     }
 
-    if ($major == 8 || $major == 9) {
+    if ($major < 10) {
         # Fix symbol detection to that of commit 373dfab3839ca168 if it's any
         # intermediate version 5129fff43c4fe08c or later, as the intermediate
         # versions don't work correctly on (at least) Sparc Linux.
         # 5129fff43c4fe08c adds the first mention of mistrustnm.
         # 373dfab3839ca168 removes the last mention of lc=""
+        #
+        # Fix symbol detection prior to 5129fff43c4fe08c to use the same
+        # approach, where we don't call printf without a prototype
+        # We can't include <stdio.h> to get its prototype, as the way this works
+        # is to create a (wrong) prototype for the probed functions, and those
+        # conflict if the function in question is in stdio.h.
         edit_file('Configure', sub {
                       my $code = shift;
                       return $code
                           if $code !~ /\btc="";/; # 373dfab3839ca168 or later
-                      return $code
-                          if $code !~ /\bmistrustnm\b/; # before 5129fff43c4fe08c
+                      if ($code !~ /\bmistrustnm\b/) {
+                          # doing this as a '' heredoc seems to be the easiest
+                          # way to avoid confusing levels of backslashes:
+                          my $now = <<'EOT';
+void *(*(p()))$tdc { extern void *$1$tdc; return &$1; } int main() { if(p()) return(0); else return(1); }
+EOT
+                          chomp $now;
+
+                          # before 5129fff43c4fe08c
+                          # befure 16d20bd98cd29be7
+                          my @old = (<<'EOT', <<'EOT');
+main() { extern short $1$tdc; printf(\"%hd\", $1$tc); }
+EOT
+main() { extern int $1$tdc; printf(\"%d\", $1$tc); }
+EOT
+                          for my $was (@old) {
+                              chomp $was;
+                              $was = quotemeta $was;
+
+                              # Prior to commit d674cd6de52ff38b there was no
+                              # 'int ' for 'int main'
+                              $code =~ s/(?:int )?$was/$now/;
+                          }
+                          return $code;
+                      }
+
                       my $fixed = <<'EOC';
 
 : is a C symbol defined?
