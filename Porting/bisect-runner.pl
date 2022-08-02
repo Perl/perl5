@@ -4200,6 +4200,33 @@ index 2a6cbcd..eab2de1 100644
 EOPATCH
     }
 
+    if ($major < 6 && $^O eq 'darwin'
+            && !extract_from_file('perl.h', qr/ifdef I_FCNTL/)) {
+        # This is part of commit 9a34ef1dede5fef4, but in a stable part of the
+        # file:
+        apply_patch(<<'EOPATCH')
+diff --git a/perl.h b/perl.h
+index 0d3f0b8333..19f6684894 100644
+--- a/perl.h
++++ b/perl.h
+@@ -310,6 +310,14 @@ register struct op *Perl_op asm(stringify(OP_IN_REGISTER));
+ #   define BYTEORDER 0x1234
+ #endif
+ 
++#ifdef I_FCNTL
++#  include <fcntl.h>
++#endif
++
++#ifdef I_SYS_FILE
++#  include <sys/file.h>
++#endif
++
+ /* Overall memory policy? */
+ #ifndef CONSERVATIVE
+ #   define LIBERAL 1
+EOPATCH
+    }
+
     if ($major == 7 && $^O eq 'aix' && -f 'ext/List/Util/Util.xs'
         && extract_from_file('ext/List/Util/Util.xs', qr/PUSHBLOCK/)
         && !extract_from_file('makedef.pl', qr/^Perl_cxinc/)) {
