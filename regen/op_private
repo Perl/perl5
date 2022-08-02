@@ -318,7 +318,7 @@ addbits($_, 7 => qw(OPpLVAL_INTRO LVINTRO))
     for qw(gvsv rv2sv rv2hv rv2gv rv2av aelem helem aslice split
            hslice delete padsv padav padhv enteriter entersub padrange
            pushmark cond_expr refassign lvref lvrefslice lvavref multideref
-           multiconcat padsv_store undef),
+           multiconcat padsv_store undef emptyavhv),
            'list', # this gets set in my_attrs() for some reason
            ;
 
@@ -500,7 +500,7 @@ addbits($_, 7 => qw(OPpPV_IS_UTF8 UTF)) for qw(last redo next goto dump);
 
 addbits($_, 6 => qw(OPpPAD_STATE STATE))  for qw(padav padhv padsv lvavref
                                                  lvref refassign pushmark
-                                                 padsv_store undef);
+                                                 padsv_store undef emptyavhv);
 
 # NB: both sassign and aassign use the 'OPpASSIGN' naming convention
 # for their private flags
@@ -858,6 +858,13 @@ addbits('pushdefer',
 addbits('undef',
     4 => qw(OPpTARGET_MY TARGMY),
     5 => qw(OPpUNDEF_KEEP_PV KEEP_PV),
+);
+
+addbits('emptyavhv',
+  # 7       OPpLVAL_INTRO
+  # 6       OPpPAD_STATE
+    5 => qw(OPpEMPTYAVHV_IS_HV ANONHASH),
+  # 4       OPpTARGET_MY
 );
 
 1;

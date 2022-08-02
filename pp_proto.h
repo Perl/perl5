@@ -63,6 +63,7 @@ PERL_CALLCONV OP *Perl_pp_die(pTHX) __attribute__visibility__("hidden");
 PERL_CALLCONV OP *Perl_pp_divide(pTHX) __attribute__visibility__("hidden");
 PERL_CALLCONV OP *Perl_pp_each(pTHX) __attribute__visibility__("hidden");
 PERL_CALLCONV OP *Perl_pp_ehostent(pTHX) __attribute__visibility__("hidden");
+PERL_CALLCONV OP *Perl_pp_emptyavhv(pTHX) __attribute__visibility__("hidden");
 PERL_CALLCONV OP *Perl_pp_enter(pTHX) __attribute__visibility__("hidden");
 PERL_CALLCONV OP *Perl_pp_entereval(pTHX) __attribute__visibility__("hidden");
 PERL_CALLCONV OP *Perl_pp_entergiven(pTHX) __attribute__visibility__("hidden");

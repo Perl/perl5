@@ -336,6 +336,7 @@ invert_opset function.
     warn die lineseq nextstate scope enter leave
 
     rv2cv anoncode prototype coreargs avhvswitch anonconst
+    emptyavhv
 
     entersub leavesub leavesublv return method method_named
     method_super method_redir method_redir_super
