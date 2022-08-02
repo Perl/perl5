@@ -2507,6 +2507,18 @@ index 4b55fa6..60c3c64 100755
 EOPATCH
     }
 
+    if ($major < 6) {
+        edit_file('Configure', sub {
+                      my $code = shift;
+                      # This will cause a build failure, but it will stop
+                      # Configure looping endlessly trying to get a different
+                      # answer:
+                      $code =~ s{(dflt=)n(\n\s+rp="Function \$ans does not exist)}
+                                {$1y$2};
+                      return $code;
+                  });
+    }
+
     if ($major < 8 && $^O eq 'aix') {
         edit_file('Configure', sub {
                       my $code = shift;
