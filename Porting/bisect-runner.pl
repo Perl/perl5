@@ -2932,6 +2932,31 @@ sub patch_hints {
                   });
         }
 
+        if ($major < 8 ||
+                ($major < 10 && !extract_from_file('ext/DynaLoader/Makefile.PL',
+                                                   qr/sub MY::static /))) {
+            edit_file('hints/darwin.sh', sub {
+                          my $code = shift;
+                          # As above, the build fails if version of code in op.o
+                          # is linked to, instead of opmini.o
+                          # We don't need this after commit 908fcb8bef8cbab8,
+                          # which moves DynaLoader.o into the shared perl
+                          # library, as it *also* redoes the build so that
+                          # miniperl is linked against all the object files
+                          # (explicitly excluding op.o), instead of against the
+                          # shared library (and reyling on "flat namespaces"
+                          # - ie make Mach-O behave like ELF - to end up with
+                          # objects in the library linking against opmini.o)
+                          $code .= <<'EOHACK';
+
+# Force a flat namespace everywhere:
+echo $ldflags | grep flat_namespace || ldflags=`echo \$lddflags -flat_namespace`
+echo $lddlflags | grep flat_namespace || lddlflags=`echo \$lddlflags -flat_namespace`
+EOHACK
+                          return $code;
+                      });
+        }
+
         if ($major < 16) {
             edit_file('hints/darwin.sh', sub {
                           my $code = shift;
