@@ -2215,6 +2215,7 @@ $startsh
 xxxm=\$dflt
 $myecho
 ans='!'
+counter=42
 case "\$fastread" in
 yes) case "\$dflt" in
 	'') ;;
@@ -2289,6 +2290,12 @@ while expr "X\$ans" : "X!" >/dev/null; do
 		$myecho
 		;;
 	esac
+	counter=\`echo \$counter | awk '{ print --\$0 }'\`
+	if [ \$counter = 0 ]; then
+		echo >&4
+		echo >&4 Too many attempts asking the same question.  Giving up.
+		exit 1
+	fi
 done
 case "\$ans" in
 '') ans="\$xxxm";;
