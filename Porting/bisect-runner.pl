@@ -4200,6 +4200,11 @@ index 2a6cbcd..eab2de1 100644
 EOPATCH
     }
 
+    if ($major < 6 && extract_from_file('perl.h', qr/PL_uuemap\[\]/)) {
+        # That [] needs to be [65]:
+        apply_commit('7575fa06ca7baf15');
+    }
+
     if ($major < 6 && $^O eq 'darwin'
             && !extract_from_file('perl.h', qr/ifdef I_FCNTL/)) {
         # This is part of commit 9a34ef1dede5fef4, but in a stable part of the
