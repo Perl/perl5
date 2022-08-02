@@ -1367,6 +1367,31 @@
         code    => 'undef my $x',
     },
 
+    'expr::sassign::anonlist' => {
+        setup   => '',
+        code => '$x = []'
+    },
+    'expr::sassign::anonlist_lex' => {
+        setup   => 'my $x',
+        code => '$x = []'
+    },
+    'expr::sassign::my_anonlist_lex' => {
+        setup   => '',
+        code => 'my $x = []'
+    },
+    'expr::sassign::anonhash' => {
+        setup   => '',
+        code => '$x = {}'
+    },
+    'expr::sassign::anonhash_lex' => {
+        setup   => 'my $x',
+        code => '$x = {}'
+    },
+    'expr::sassign::my_anonhash_lex' => {
+        setup   => '',
+        code => 'my $x = {}'
+    },
+
     'expr::sassign::my_conststr' => {
         setup   => '',
         code    => 'my $x = "abc"',
@@ -1418,6 +1443,10 @@
         code    => '$x[0][1] = 1',
     },
 
+    'expr::sassign::bless_lex' => {
+        setup   => 'my $x',
+        code    => '$x = bless {}, "X"'
+    },
 
     'func::grep::bool0' => {
         desc    => 'grep returning 0 items in boolean context',

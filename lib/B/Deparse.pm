@@ -7,14 +7,14 @@
 # This is based on the module of the same name by Malcolm Beattie,
 # but essentially none of his code remains.
 
-package B::Deparse 1.70;
+package B::Deparse 1.71;
 use strict;
 use Carp;
 use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
 	 OPf_WANT OPf_WANT_VOID OPf_WANT_SCALAR OPf_WANT_LIST
 	 OPf_KIDS OPf_REF OPf_STACKED OPf_SPECIAL OPf_MOD OPf_PARENS
 	 OPpLVAL_INTRO OPpOUR_INTRO OPpENTERSUB_AMPER OPpSLICE OPpKVSLICE
-         OPpCONST_BARE
+         OPpCONST_BARE OPpEMPTYAVHV_IS_HV
 	 OPpTRANS_SQUASH OPpTRANS_DELETE OPpTRANS_COMPLEMENT OPpTARGET_MY
 	 OPpEXISTS_SUB OPpSORT_NUMERIC OPpSORT_INTEGER OPpREPEAT_DOLIST
 	 OPpSORT_REVERSE OPpMULTIDEREF_EXISTS OPpMULTIDEREF_DELETE
@@ -2784,6 +2784,21 @@ sub pp_anonlist {
 }
 
 *pp_anonhash = \&pp_anonlist;
+
+sub pp_emptyavhv {
+    my $self = shift;
+    my ($op, $cx, $forbid_parens) = @_;
+    my $val = ($op->private & OPpEMPTYAVHV_IS_HV) ? '{}' : '[]';
+    if ($op->private & OPpTARGET_MY) {
+        my $targ = $op->targ;
+        my $var = $self->maybe_my($op, $cx, $self->padname($targ),
+                           $self->padname_sv($targ),
+                           $forbid_parens);
+        return $self->maybe_parens("$var = $val", $cx, 7);
+    } else {
+        return $val;
+    }
+}
 
 sub pp_refgen {
     my $self = shift;	
