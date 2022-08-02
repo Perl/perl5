@@ -2270,6 +2270,124 @@ index 53649d5..0635a6e 100755
 EOPATCH
     }
 
+    if ($major < 4 && extract_from_file('Configure',
+                                        qr/: see which flavor of setpgrp is in use/)) {
+        edit_file('Configure', sub {
+                      my $code = shift;
+                      my $new = <<'EOT';
+if $cc $ccflags $ldflags -o set set.c $libs >/dev/null 2>&1; then
+EOT
+                      chomp $new;
+
+                      # before commit ecfc54246c2a6f42:
+                      # before commit 8e07c86ebc651fe9:
+                      my @old = (<<'EOT', <<'EOT');
+if $cc $ccflags -o set $ldflags set.c $libs >/dev/null 2>&1; then
+EOT
+if $cc $ccflags -o set set.c $ldflags $libs >/dev/null 2>&1; then
+EOT
+                      for my $was (@old) {
+                          # Yes, this modifies @old. No problem here:
+                          chomp $was;
+                          $was = quotemeta $was;
+                          $code =~ s/$was/$new/;
+                      }
+
+                      # also commit ecfc54246c2a6f42:
+                      $code =~ s!\tif usg; then!\tif ./usg; then!;
+
+                      return $code;
+                  });
+
+        # We need the new probe from 2afac517c48c20de, which has prototypes
+        # (but include the various C headers unconditionally)
+        apply_patch(<<'EOPATCH');
+diff --git a/Configure b/Configure
+index 18f2172435..5a75ebd767 100755
+--- a/Configure
++++ b/Configure
+@@ -4986,45 +5055,61 @@ eval $inlibc
+ set setpgrp d_setpgrp
+ eval $inlibc
+ 
+-: see which flavor of setpgrp is in use
++echo "Checking to see which flavor of setpgrp is in use . . . "
+ case "$d_setpgrp" in
+ "$define")
+ 	echo " "
+ 	$cat >set.c <<EOP
++#include <stdio.h>
++#include <sys/types.h>
++#include <unistd.h>
+ main()
+ {
+ 	if (getuid() == 0) {
+ 		printf("(I see you are running Configure as super-user...)\n");
+ 		setuid(1);
+ 	}
++#ifdef TRY_BSD_PGRP
+ 	if (-1 == setpgrp(1, 1))
+-		exit(1);
+-	exit(0);
++		exit(0);
++#else
++	if (setpgrp() != -1)
++		exit(0);
++#endif
++	exit(1);
+ }
+ EOP
+-	if $cc $ccflags $ldflags -o set set.c $libs >/dev/null 2>&1; then
+-		./set 2>/dev/null
+-		case $? in
+-		0) echo "You have to use setpgrp() instead of setpgrp(pid, pgrp)." >&4
+-			val="$undef";;
+-		*) echo "You have to use setpgrp(pid, pgrp) instead of setpgrp()." >&4
+-			val="$define";;
+-		esac
++	if $cc -DTRY_BSD_PGRP $ccflags $ldflags -o set set.c $libs >/dev/null 2>&1 && ./set; then
++		echo 'You have to use setpgrp(pid,pgrp) instead of setpgrp().' >&4
++		val="$define"
++	elif $cc $ccflags $ldflags -o set set.c $libs >/dev/null 2>&1 && ./set; then
++		echo 'You have to use setpgrp() instead of setpgrp(pid,pgrp).' >&4
++		val="$undef"
+ 	else
++		echo "I can't seem to compile and run the test program."
+ 		if ./usg; then
+-			xxx="USG one, i.e. you use setpgrp()."
+-			val="$undef"
++			xxx="a USG one, i.e. you use setpgrp()."
+ 		else
+-			xxx="BSD one, i.e. you use setpgrp(pid, pgrp)."
+-			val="$define"
++			# SVR4 systems can appear rather BSD-ish.
++			case "$i_unistd" in
++			$undef)
++				xxx="a BSD one, i.e. you use setpgrp(pid,pgrp)."
++				val="$define"
++				;;
++			$define)
++				xxx="probably a USG one, i.e. you use setpgrp()."
++				val="$undef"
++				;;
++			esac
+ 		fi
+-		echo "Assuming your setpgrp is a $xxx" >&4
++		echo "Assuming your setpgrp is $xxx" >&4
+ 	fi
+ 	;;
+ *) val="$undef";;
+ esac
+-set d_bsdpgrp
++set d_bsdsetpgrp
+ eval $setvar
++d_bsdpgrp=$d_bsdsetpgrp
+ $rm -f set set.c
+ 
+ : see if bzero exists
+EOPATCH
+    }
+
     if ($major == 4 && extract_from_file('Configure', qr/^d_gethbynam=/)) {
         # Fixes a bug introduced in 4599a1dedd47b916
         apply_commit('3cbc818d1d0ac470');
