@@ -2549,6 +2549,78 @@ EOPATCH
                   });
     }
 
+    if ($major < 32) {
+        edit_file('Configure', sub {
+                      my $code = shift;
+
+                      # A lot of the probes used to be written assuming no need
+                      # for prototypes for exit(), printf() etc.
+                      # Curiously also the code was written to call exit()
+                      # rather than return from main - early portability?
+                      #
+                      # Commit 55954f198635e488 did most of the work in ensuring
+                      # that there was always a prototype for exit, by adding
+                      # #include <stdlib.h> in many probes. However the last
+                      # missing prototype was only addressed by f16c94bc75aefb81
+                      # (for futimes), and the last missing prototypes a few
+                      # commits later in f82f0f36c7188b6d
+                      #
+                      # As an aside, commit dc45a647708b6c54 fixes the signal
+                      # name probe (etc) - the commit tagged as perl-5.004_01
+                      # *seems* to fix the signal name probe, but actually it
+                      # fixes an error in the fallback awk code, not the C
+                      # probe's missing prototype.
+                      #
+                      # With current C compilers there is no correctness risk
+                      # from including a header more than once, so the easiest
+                      # approach to making this all work is to add includes
+                      # "to be sure to be sure"
+                      #
+                      # The trick is not to break *working* probes by
+                      # accidentally including a header *within* a construction.
+                      # So we need to have some confidence that it's the start
+                      # of a file (or somewhere safe)
+
+                      my $headers = <<'EOFIX';
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+EOFIX
+
+                      # This handles $cat and plain cat:
+                      $code =~ s{([\$\t\n ]cat > *[a-z0-9]+\.c <<[^\n]*\n)}
+                                {$1$headers}g;
+                      # Of course, there's always one that's backwards:
+                      $code =~ s{([\$\t\n ]cat <<[^\n]* > *[a-z0-9]+\.c\n)}
+                                {$1$headers}g;
+
+                      # and >> used to *create* a file.
+                      # We have to be careful to distinguish those from >> used
+                      # to append to a file. All the first lines have #include
+                      # or #ifdef. Except the few that don't...
+                      $code =~ s{
+                                    ([\$\t\n ]cat\ >>\ *[a-z]+\.c\ <<[^\n]*\n)
+                                    (
+                                        # #include/#ifdef ...
+                                        \#
+                                    |
+                                        # The non-blocking IO probe
+                                        (?:int\ )?main\(\)
+                                    |
+                                        # The alignment constraint probe
+                                        struct\ foobar
+                                    )
+                                }
+                                {$1$headers$2}gx;
+
+                      # This is part of commit c727eafaa06ca49a:
+                      $code =~ s{\(int\)exit\(0\);}
+                                {\(void\)exit\(0\);};
+
+                      return $code;
+                  });
+    }
+
     if ($major < 10) {
         # Fix symbol detection to that of commit 373dfab3839ca168 if it's any
         # intermediate version 5129fff43c4fe08c or later, as the intermediate
