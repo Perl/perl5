@@ -3424,6 +3424,15 @@ $2!;
         }
     }
 
+    if ($major == 3) {
+        # This is part of commit f0efd8cf98c95b42:
+        edit_file('Makefile.SH', sub {
+                      my $code = shift;
+                      $code =~ s/<<!NO!SUBS!/<<'!NO!SUBS!'/;
+                      return $code;
+                  });
+    }
+
     if ($major == 7) {
         # Remove commits 9fec149bb652b6e9 and 5bab1179608f81d8, which add/amend
         # rules to automatically run regen scripts that rebuild C headers. These
