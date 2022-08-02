@@ -4711,14 +4711,14 @@ sv_magic_foo(SV *sv, SV *thingy)
 ALIAS:
     sv_magic_bar = 1
 CODE:
-    sv_magicext(SvRV(sv), NULL, PERL_MAGIC_ext, ix ? &vtbl_bar : &vtbl_foo, (const char *)thingy, 0);
+    sv_magicext(sv, NULL, PERL_MAGIC_ext, ix ? &vtbl_bar : &vtbl_foo, (const char *)thingy, 0);
 
 SV *
 mg_find_foo(SV *sv)
 ALIAS:
     mg_find_bar = 1
 CODE:
-    MAGIC *mg = mg_findext(SvRV(sv), PERL_MAGIC_ext, ix ? &vtbl_bar : &vtbl_foo);
+    MAGIC *mg = mg_findext(sv, PERL_MAGIC_ext, ix ? &vtbl_bar : &vtbl_foo);
     RETVAL = mg ? SvREFCNT_inc((SV *)mg->mg_ptr) : &PL_sv_undef;
 OUTPUT:
     RETVAL
@@ -4728,12 +4728,12 @@ sv_unmagic_foo(SV *sv)
 ALIAS:
     sv_unmagic_bar = 1
 CODE:
-    sv_unmagicext(SvRV(sv), PERL_MAGIC_ext, ix ? &vtbl_bar : &vtbl_foo);
+    sv_unmagicext(sv, PERL_MAGIC_ext, ix ? &vtbl_bar : &vtbl_foo);
 
 void
 sv_magic(SV *sv, SV *thingy)
 CODE:
-    sv_magic(SvRV(sv), NULL, PERL_MAGIC_ext, (const char *)thingy, 0);
+    sv_magic(sv, NULL, PERL_MAGIC_ext, (const char *)thingy, 0);
 
 UV
 test_get_vtbl()

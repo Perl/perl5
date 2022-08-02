@@ -4,7 +4,7 @@ use Test::More;
 
 use XS::APItest;
 
-my $sv = bless {}, 'Moo';
+my $sv = 'Moo';
 my $foo = 'affe';
 my $bar = 'tiger';
 
