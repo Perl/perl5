@@ -247,16 +247,17 @@ shift @INC;
     my $data = [];
     unshift @INC, sub { $die, $data };
 
-    my $initial_sub_refcnt = &Internals::SvREFCNT($die);
-    my $initial_data_refcnt = &Internals::SvREFCNT($data);
+    # + 1 to account for prototype-defeating &... calling convention
+    my $initial_sub_refcnt = &Internals::SvREFCNT($die) + 1;
+    my $initial_data_refcnt = &Internals::SvREFCNT($data) + 1;
 
     do "foo";
-    is(&Internals::SvREFCNT($die), $initial_sub_refcnt, "no leaks");
-    is(&Internals::SvREFCNT($data), $initial_data_refcnt, "no leaks");
+    refcount_is $die, $initial_sub_refcnt, "no leaks";
+    refcount_is $data, $initial_data_refcnt, "no leaks";
 
     do "bar";
-    is(&Internals::SvREFCNT($die), $initial_sub_refcnt, "no leaks");
-    is(&Internals::SvREFCNT($data), $initial_data_refcnt, "no leaks");
+    refcount_is $die, $initial_sub_refcnt, "no leaks";
+    refcount_is $data, $initial_data_refcnt, "no leaks";
 
     shift @INC;
 }

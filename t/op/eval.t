@@ -514,7 +514,7 @@ END_EVAL_TEST
     my $t;
     my $s = "a";
     $s =~ s/a/$t = \%^H;  qq( qq() );/ee;
-    is(Internals::SvREFCNT(%$t), $count_expected, 'RT 63110');
+    refcount_is $t, $count_expected, 'RT 63110';
 }
 
 # make sure default arg eval only adds a hints hash once to entereval
@@ -531,9 +531,9 @@ END_EVAL_TEST
     # test that the CV compiled for the eval is freed by checking that no additional 
     # reference to outside lexicals are made.
     my $x;
-    is(Internals::SvREFCNT($x), 1, "originally only 1 reference");
+    refcount_is \$x, 1+1, "originally only 1 reference"; # + 1 to account for the ref here
     eval '$x';
-    is(Internals::SvREFCNT($x), 1, "execution eval doesn't create new references");
+    refcount_is \$x, 1+1, "execution eval doesn't create new references"; # + 1 the same
 }
 
 fresh_perl_is(<<'EOP', "ok\n", undef, 'RT #70862');

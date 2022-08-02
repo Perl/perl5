@@ -87,9 +87,9 @@ $b = $m =~ s/xxx/yyy/r;
 ok( ! defined tied($b), 's///r magic isn\'t contagious' );
 
 my $ref = \("aaa" =~ s/aaa/bbb/r);
-is (Internals::SvREFCNT($$ref), 1, 's///r does not leak');
+refcount_is $ref, 1, 's///r does not leak';
 $ref = \("aaa" =~ s/aaa/bbb/rg);
-is (Internals::SvREFCNT($$ref), 1, 's///rg does not leak');
+refcount_is $ref, 1, 's///rg does not leak';
 
 $x = 'foo';
 $_ = "x";
