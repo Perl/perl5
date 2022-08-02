@@ -1505,7 +1505,9 @@ sub apply_patch {
     my ($patch, $what, $files) = @_;
     $what = 'patch' unless defined $what;
     unless (defined $files) {
-        $patch =~ m!^--- [ab]/(\S+)\n\+\+\+ [ba]/\1!sm;
+        # Handle context diffs (*** ---) and unified diffs (+++ ---)
+        # and ignore trailing "garbage" after the filenames
+        $patch =~ m!^[-*]{3} [ab]/(\S+)[^\n]*\n[-+]{3} [ba]/\1!sm;
         $files = " $1";
     }
     my $patch_to_use = placate_patch_prog($patch);
@@ -4411,7 +4413,7 @@ sub patch_ext {
         checkout_file('ext/DynaLoader/dl_dyld.xs', 'f556e5b971932902');
         apply_patch(<<'EOPATCH');
 diff -u a/ext/DynaLoader/dl_dyld.xs~ a/ext/DynaLoader/dl_dyld.xs
---- a/ext/DynaLoader/dl_dyld.xs~	2011-10-11 21:41:27.000000000 +0100
+--- a/ext/DynaLoader/dl_dyld.xs	2011-10-11 21:41:27.000000000 +0100
 +++ b/ext/DynaLoader/dl_dyld.xs	2011-10-11 21:42:20.000000000 +0100
 @@ -41,6 +41,35 @@
  #include "perl.h"
@@ -4462,7 +4464,7 @@ EOPATCH
         if ($major < 4 && !extract_from_file('util.c', qr/^form/m)) {
             apply_patch(<<'EOPATCH');
 diff -u a/ext/DynaLoader/dl_dyld.xs~ a/ext/DynaLoader/dl_dyld.xs
---- a/ext/DynaLoader/dl_dyld.xs~	2011-10-11 21:56:25.000000000 +0100
+--- a/ext/DynaLoader/dl_dyld.xs	2011-10-11 21:56:25.000000000 +0100
 +++ b/ext/DynaLoader/dl_dyld.xs	2011-10-11 22:00:00.000000000 +0100
 @@ -60,6 +60,18 @@
  #  define get_av perl_get_av
