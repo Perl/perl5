@@ -4431,12 +4431,13 @@ EOPATCH
     if ($major < 10) {
         if ($unfixable_db_file) {
             # Nothing we can do.
-        } elsif (!extract_from_file('ext/DB_File/DB_File.xs',
-                                    qr/^#ifdef AT_LEAST_DB_4_1$/)) {
-            # This line is changed by commit 3245f0580c13b3ab
-            my $line = extract_from_file('ext/DB_File/DB_File.xs',
-                                         qr/^(        status = \(?RETVAL->dbp->open\)?\(RETVAL->dbp, name, NULL, RETVAL->type, $)/);
-            apply_patch(<<"EOPATCH");
+        } else {
+            if (!extract_from_file('ext/DB_File/DB_File.xs',
+                                   qr/^#ifdef AT_LEAST_DB_4_1$/)) {
+                # This line is changed by commit 3245f0580c13b3ab
+                my $line = extract_from_file('ext/DB_File/DB_File.xs',
+                                             qr/^(        status = \(?RETVAL->dbp->open\)?\(RETVAL->dbp, name, NULL, RETVAL->type, $)/);
+                apply_patch(<<"EOPATCH");
 diff --git a/ext/DB_File/DB_File.xs b/ext/DB_File/DB_File.xs
 index 489ba96..fba8ded 100644
 --- a/ext/DB_File/DB_File.xs
@@ -4463,6 +4464,13 @@ index 489ba96..fba8ded 100644
  	/* printf("open returned %d %s\\n", status, db_strerror(status)) ; */
  
 EOPATCH
+            }
+
+            if (!extract_from_file('ext/DB_File/DB_File.xs',
+                                   qr/\bextern void __getBerkeleyDBInfo\b/)) {
+                # A prototype for __getBerkeleyDBInfo();
+                apply_commit('b92372bcedd4cbc4');
+            }
         }
     }
 
