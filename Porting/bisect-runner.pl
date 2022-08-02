@@ -4266,8 +4266,26 @@ index 900b491..6251a0b 100644
 EOPATCH
 }
 
-    if ($major < 8 && $^O eq 'openbsd'
-        && !extract_from_file('perl.h', qr/include <unistd\.h>/)) {
+    if ($major < 8 && !extract_from_file('perl.h', qr/\bshort htovs\b/)) {
+        # This is part of commit c623ac675720b314
+        apply_patch(<<'EOPATCH');
+diff --git a/perl.h b/perl.h
+index 023b90b7ea..59a21faecd 100644
+--- a/perl.h
++++ b/perl.h
+@@ -2279,4 +2279,8 @@ struct ptr_tbl {
+ # endif
+ 	/* otherwise default to functions in util.c */
++short htovs(short n);
++short vtohs(short n);
++long htovl(long n);
++long vtohl(long n);
+ #endif
+ 
+EOPATCH
+    }
+
+    if ($major < 8 && !extract_from_file('perl.h', qr/include <unistd\.h>/)) {
         # This is part of commit 3f270f98f9305540, applied at a slightly
         # different location in perl.h, where the context is stable back to
         # 5.000
