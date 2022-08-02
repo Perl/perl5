@@ -476,6 +476,19 @@ sub like_yn ($$$@) {
     _ok($pass, _where(), $name, @mess);
 }
 
+sub refcount_is {
+    # Don't unpack first arg; access it directly via $_[0] to avoid creating
+    # another reference and upsetting the refcount
+    my (undef, $expected, $name, @mess) = @_;
+    my $got = &Internals::SvREFCNT($_[0]) + 1; # +1 to account for the & calling style
+    my $pass = $got == $expected;
+    unless ($pass) {
+        unshift @mess, "#      got $got references\n" .
+                       "# expected $expected\n";
+    }
+    _ok($pass, _where(), $name, @mess);
+}
+
 sub pass {
     _ok(1, '', @_);
 }
