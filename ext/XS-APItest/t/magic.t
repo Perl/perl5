@@ -4,7 +4,7 @@ use Test::More;
 
 use XS::APItest;
 
-my $sv = 'Moo';
+our $sv = 'Moo';
 my $foo = 'affe';
 my $bar = 'tiger';
 
@@ -14,6 +14,13 @@ ok !mg_find_bar($sv), 'no bar magic yet';
 sv_magic_foo($sv, $foo);
 is mg_find_foo($sv), $foo, 'foo magic attached';
 ok !mg_find_bar($sv), '... but still no bar magic';
+
+{
+	local $sv = 'Emu';
+	sv_magic_foo($sv, $foo);
+	is mg_find_foo($sv), $foo, 'foo magic attached to localized value';
+	ok !mg_find_bar($sv), '... but still no bar magic to localized value';
+}
 
 sv_magic_bar($sv, $bar);
 is mg_find_foo($sv), $foo, 'foo magic still attached';
