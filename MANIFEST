@@ -5459,6 +5459,7 @@ Porting/rt_list_patches		A tool to help you apply patches from RT
 Porting/security_template.pod	Template for vulnerability announcements
 Porting/sort_perldiag.pl	Keep our diagnostics orderly
 Porting/sync-with-cpan		Sync with CPAN
+Porting/test-dist-modules.pl	Test dist/ modules on currently active perl (used for CI)
 Porting/timecheck.c		Test program for the 2038 fix
 Porting/timecheck2.c		Test program for the 2038 fix
 Porting/todo.pod		Perl things to do

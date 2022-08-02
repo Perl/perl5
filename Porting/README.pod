@@ -359,6 +359,11 @@ and case are ignored, as explained in L<perldiag>.
 
 Script to help out with syncing cpan distros.
 
+=head2 F<test-dist-modules.pl>
+
+Test modules in F<dist/> against the perl in C<PATH>.  Used in the
+github workflow to test against older perls.
+
 =head2 F<timecheck2.c>
 
 A little program to test the limits of your system's time functions. See

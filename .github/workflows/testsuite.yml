@@ -638,3 +638,43 @@ jobs:
         # LeakSanitizer is disabled because it randomly crashes, see [gh #19189]
         run: |
           ASAN_OPTIONS=detect_leaks=0 PERL_DESTRUCT_LEVEL=2 LC_ALL=en_US.UTF-8 PERL_UNICODE="" TEST_JOBS=2 ./perl t/harness
+
+  #      _ _     _                            _       _
+  #   __| (_)___| |_      _ __ ___   ___   __| |_   _| | ___  ___
+  #  / _` | / __| __|____| '_ ` _ \ / _ \ / _` | | | | |/ _ \/ __|
+  # | (_| | \__ \ ||_____| | | | | | (_) | (_| | |_| | |  __/\__ \
+  #  \__,_|_|___/\__|    |_| |_| |_|\___/ \__,_|\__,_|_|\___||___/
+
+  dist-modules:
+    name: dist-modules
+    needs: sanity_check
+    runs-on: ubuntu-latest
+    if: needs.sanity_check.outputs.run_all_jobs == 'true'
+
+    env:
+      # some plugins still needs this to run their tests...
+      # these don't really matter, but might later
+      PERL_USE_UNSAFE_INC: 0
+      AUTHOR_TESTING: 1
+      AUTOMATED_TESTING: 1
+      RELEASE_TESTING: 1
+
+    strategy:
+      fail-fast: false
+      matrix:
+        perl-version:
+          - 'latest'
+          - '5.24'
+          - '5.10'
+          - '5.8'
+
+    container:
+      image: perldocker/perl-tester:${{ matrix.perl-version }}
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: perl -V
+        run: perl -V
+      - name: Build and test dist modules
+        run:
+          perl Porting/test-dist-modules.pl
