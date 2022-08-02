@@ -1525,7 +1525,7 @@ filehandle, even though it looks like one).  DBNAME is the name of the
 database (without the F<.dir> or F<.pag> extension if any).  If the
 database does not exist, it is created with protection specified by MASK
 (as modified by the L<C<umask>|/umask EXPR>).  To prevent creation of
-the database if it doesn't exist, you may specify a MODE of 0, and the
+the database if it doesn't exist, you may specify a MASK of 0, and the
 function will return a false value if it can't find an existing
 database.  If your system supports only the older DBM functions, you may
 make only one L<C<dbmopen>|/dbmopen HASH,DBNAME,MASK> call in your
