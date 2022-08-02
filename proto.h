@@ -2752,10 +2752,12 @@ PERL_CALLCONV SV*	Perl_newRV(pTHX_ SV *const sv)
 #define PERL_ARGS_ASSERT_NEWRV	\
 	assert(sv)
 
-PERL_CALLCONV SV*	Perl_newRV_noinc(pTHX_ SV *const tmpRef)
+#ifndef PERL_NO_INLINE_FUNCTIONS
+PERL_STATIC_INLINE SV*	Perl_newRV_noinc(pTHX_ SV *const tmpRef)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_NEWRV_NOINC	\
 	assert(tmpRef)
+#endif
 
 PERL_CALLCONV OP*	Perl_newSLICEOP(pTHX_ I32 flags, OP* subscript, OP* listop)
 			__attribute__warn_unused_result__;

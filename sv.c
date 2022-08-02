@@ -9878,39 +9878,6 @@ Perl_newSV_false(pTHX)
     return sv;
 }
 
-/*
-=for apidoc newRV_noinc
-
-Creates an RV wrapper for an SV.  The reference count for the original
-SV is B<not> incremented.
-
-=cut
-*/
-
-SV *
-Perl_newRV_noinc(pTHX_ SV *const tmpRef)
-{
-    SV *sv;
-
-    PERL_ARGS_ASSERT_NEWRV_NOINC;
-
-    new_SV(sv);
-
-    /* We're starting from SVt_FIRST, so provided that's
-     * actual 0, we don't have to unset any SV type flags
-     * to promote to SVt_IV. */
-    STATIC_ASSERT_STMT(SVt_FIRST == 0);
-
-    SET_SVANY_FOR_BODYLESS_IV(sv);
-    SvFLAGS(sv) |= SVt_IV;
-
-    SvTEMP_off(tmpRef);
-
-    sv_setrv_noinc(sv, tmpRef);
-
-    return sv;
-}
-
 /* newRV_inc is the official function name to use now.
  * newRV_inc is in fact #defined to newRV in sv.h
  */
