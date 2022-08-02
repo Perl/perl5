@@ -929,5 +929,30 @@ Perl_SvPV_helper(pTHX_
 }
 
 /*
+=for apidoc newRV_noinc
+
+Creates an RV wrapper for an SV.  The reference count for the original
+SV is B<not> incremented.
+
+=cut
+*/
+
+PERL_STATIC_INLINE SV *
+Perl_newRV_noinc(pTHX_ SV *const tmpRef)
+{
+    SV *sv = newSV_type(SVt_IV);
+
+    PERL_ARGS_ASSERT_NEWRV_NOINC;
+
+    SvTEMP_off(tmpRef);
+
+    /* inlined, simplified sv_setrv_noinc(sv, tmpRef); */
+    SvRV_set(sv, tmpRef);
+    SvROK_on(sv);
+
+    return sv;
+}
+
+/*
  * ex: set ts=8 sts=4 sw=4 et:
  */
