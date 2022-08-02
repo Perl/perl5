@@ -34,6 +34,14 @@ sv_unmagic_bar($sv);
 ok !mg_find_foo($sv), 'foo magic still removed';
 ok !mg_find_bar($sv), '... and bar magic is removed too';
 
+sv_magic_baz($sv, $bar);
+is mg_find_baz($sv), $bar, 'baz magic attached';
+ok !mg_find_bar($sv), '';
+{
+	local $sv = 'Emu';
+	ok !mg_find_baz($sv), '';
+}
+
 is(test_get_vtbl(), 0, 'get_vtbl(-1) returns NULL');
 
 eval { sv_magic(\!0, $foo) };

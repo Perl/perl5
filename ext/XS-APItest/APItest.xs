@@ -4710,16 +4710,22 @@ void
 sv_magic_foo(SV *sv, SV *thingy)
 ALIAS:
     sv_magic_bar = 1
+    sv_magic_baz = 2
 CODE:
-    sv_magicext(sv, NULL, PERL_MAGIC_ext, ix ? &vtbl_bar : &vtbl_foo, (const char *)thingy, 0);
+    sv_magicext(sv, NULL, ix == 2 ? PERL_MAGIC_extvalue : PERL_MAGIC_ext, ix ? &vtbl_bar : &vtbl_foo, (const char *)thingy, 0);
 
 SV *
 mg_find_foo(SV *sv)
 ALIAS:
     mg_find_bar = 1
+    mg_find_baz = 2
 CODE:
-    MAGIC *mg = mg_findext(sv, PERL_MAGIC_ext, ix ? &vtbl_bar : &vtbl_foo);
-    RETVAL = mg ? SvREFCNT_inc((SV *)mg->mg_ptr) : &PL_sv_undef;
+	RETVAL = &PL_sv_undef;
+	if (SvTYPE(sv) >= SVt_PVMG) {
+		MAGIC *mg = mg_findext(sv, ix == 2 ? PERL_MAGIC_extvalue : PERL_MAGIC_ext, ix ? &vtbl_bar : &vtbl_foo);
+		if (mg)
+			RETVAL = SvREFCNT_inc((SV *)mg->mg_ptr);
+	}
 OUTPUT:
     RETVAL
 
@@ -4727,8 +4733,9 @@ void
 sv_unmagic_foo(SV *sv)
 ALIAS:
     sv_unmagic_bar = 1
+    sv_unmagic_baz = 2
 CODE:
-    sv_unmagicext(sv, PERL_MAGIC_ext, ix ? &vtbl_bar : &vtbl_foo);
+    sv_unmagicext(sv, ix == 2 ? PERL_MAGIC_extvalue : PERL_MAGIC_ext, ix ? &vtbl_bar : &vtbl_foo);
 
 void
 sv_magic(SV *sv, SV *thingy)
