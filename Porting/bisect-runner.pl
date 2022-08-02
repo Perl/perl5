@@ -86,7 +86,24 @@ exit 255 unless $rv;
 
 my ($target, $match) = @options{qw(target match)};
 
-@ARGV = ('sh', '-c', 'cd t && ./perl TEST base/*.t')
+# El Capitan (OS X 10.11) (and later) strip DYLD_LIBRARY_PATH
+# from the environment of /bin/sh
+# https://developer.apple.com/library/archive/documentation/Security/Conceptual/System_Integrity_Protection_Guide/RuntimeProtections/RuntimeProtections.html
+#
+# (They *could* have chosen instead to ignore it and pass it through. It would
+# have the same direct effect, but maybe needing more coding. I suspect the
+# choice to strip it was deliberate, as it will also eliminate a bunch more
+# attack vectors, because it prevents you sneaking an override "into" something
+# else you convince the user to run.)
+
+my $aggressive_apple_security = "";
+if ($^O eq 'darwin') {
+    require Cwd;
+    my $cwd = quotemeta Cwd::getcwd();
+    $aggressive_apple_security = "DYLD_LIBRARY_PATH=$cwd ";
+}
+
+@ARGV = ('sh', '-c', "cd t && $aggressive_apple_security./perl TEST base/*.t")
     if $options{validate} && !@ARGV;
 
 pod2usage(exitval => 0, verbose => 2) if $options{usage};
@@ -123,7 +140,7 @@ if (defined $target && $target =~ /\.t\z/) {
     unless ($target =~ s!\At/!!) {
         $target = "../$target";
     }
-    @ARGV = ('sh', '-c', "cd t && ./perl TEST " . quotemeta $target);
+    @ARGV = ('sh', '-c', "cd t && $aggressive_apple_security./perl TEST " . quotemeta $target);
     $target = 'test_prep';
 }
 
@@ -1691,6 +1708,7 @@ if ($options{'all-fixups'}) {
     patch_SH();
     patch_C();
     patch_ext();
+    patch_t();
 }
 apply_fixups($options{'early-fixup'});
 
@@ -1824,6 +1842,7 @@ if($options{'force-regen'}
 unless ($options{'all-fixups'}) {
     patch_C();
     patch_ext();
+    patch_t();
 }
 
 # Parallel build for miniperl is safe
@@ -3424,6 +3443,38 @@ $2!;
         }
     }
 
+    if ($^O eq 'darwin' && ($major < 8
+                                || ($major < 10
+                                    && !extract_from_file('ext/DynaLoader/Makefile.PL',
+                                                          qr/sub MY::static /)))) {
+        my $cwd = Cwd::getcwd();
+        my $wrapper = 'miniperl.sh';
+        my $fh = open_or_die($wrapper, '>');
+        print $fh <<"EOT";
+#!/bin/sh
+${aggressive_apple_security}exec $cwd/miniperl "\$\@"
+EOT
+        close_or_die($fh);
+        chmod 0755, $wrapper
+            or die "Couldn't chmod 0755 $wrapper: $!";
+
+        edit_file('ext/util/make_ext', sub {
+                      my $code = shift;
+                      # This is shell expansion syntax
+                      $code =~ s{ (\.\./\$depth/miniperl) }
+                                { $1.sh };
+                      # This is actually the same line as edited above.
+                      # We need this because (yay), without this EU::MM will
+                      # default to searching for a working perl binary
+                      # (sensible plan) but due to macOS stripping
+                      # DYLD_LIBRARY_PATH during system(...), .../miniperl
+                      # (as found from $^X) *isn't* going to work.
+                      $code =~ s{ (Makefile\.PL INSTALLDIRS=perl) }
+                                { $1 PERL=\.\./\$depth/miniperl.sh };
+                      return $code;
+                  });
+    }
+
     if ($^O eq 'aix' && $major >= 8 && $major < 28
         && extract_from_file('Makefile.SH', qr!\Q./$(MINIPERLEXP) makedef.pl\E.*aix!)) {
         # This is a variant the AIX part of commit 72bbce3da5eeffde:
@@ -4541,6 +4592,18 @@ index b669790314..c00d6c1a86 100644
  	} elsif ($Config{vms_cc_type} eq 'vaxc') {
 EOPATCH
         }
+    }
+}
+
+sub patch_t {
+    if ($^O eq 'darwin') {
+        # This has # $x = `$^X -le "print 'hi there'"`;
+        # and it needs to pass for the automated validation self-test:
+        edit_file('t/base/term.t', sub {
+                      my $code = shift;
+                      $code =~ s/`(\$\^X )/`$aggressive_apple_security$1/;
+                      return $code;
+                  });
     }
 }
 
