@@ -515,7 +515,7 @@ struct regnode_ssc {
 
 /* find the regnode after this p by using the opcode we previously extracted
  * with OP(p) */
-#define REGNODE_AFTER_opcode(p,op)          REGNODE_AFTER_PLUS_DEBUG((p),PL_regnode_arg_len[op])
+#define REGNODE_AFTER_opcode(p,op)          REGNODE_AFTER_PLUS_DEBUG((p),REGNODE_ARG_LEN(op))
 
 /* find the regnode after this p by using the size of the struct associated with
  * the opcode for p. use this when you *know* that p is pointer to a given type*/
@@ -555,13 +555,13 @@ struct regnode_ssc {
                     FILL_ADVANCE_NODE(offset, op);                      \
                     /* This is used generically for other operations    \
                      * that have a longer argument */                   \
-                    (offset) += PL_regnode_arg_len[op];                          \
+                    (offset) += REGNODE_ARG_LEN(op);                          \
     } STMT_END
 #define FILL_ADVANCE_NODE_ARGp(offset, op, arg)                          \
     STMT_START {                                                        \
                     ARGp_SET(REGNODE_p(offset), arg);                    \
                     FILL_ADVANCE_NODE(offset, op);                      \
-                    (offset) += PL_regnode_arg_len[op];                          \
+                    (offset) += REGNODE_ARG_LEN(op);                          \
     } STMT_END
 #define FILL_ADVANCE_NODE_2L_ARG(offset, op, arg1, arg2)                \
     STMT_START {                                                        \
@@ -1411,6 +1411,7 @@ typedef enum {
 
 #define REGNODE_TYPE(arg) PL_regnode_kind[(arg)]
 #define REGNODE_OFF_BY_ARG(node) PL_regnode_of_by_arg[(node)]
+#define REGNODE_ARG_LEN(node) PL_regnode_arg_len[(node)]
 
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C)
 #include "reginline.h"
