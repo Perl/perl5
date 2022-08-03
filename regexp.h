@@ -22,6 +22,13 @@
 
 typedef SSize_t regnode_offset;
 
+struct regnode_meta {
+    U8 type;
+    U8 arg_len;
+    U8 arg_len_varies;
+    U8 off_by_arg;
+};
+
 struct regnode {
     U8	flags;
     U8  type;
