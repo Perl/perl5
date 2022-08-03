@@ -1823,7 +1823,7 @@ S_get_ANYOF_cp_list_for_ssc(pTHX_ const RExC_state_t *pRExC_state,
     SV* invlist = NULL;
     SV* only_utf8_locale_invlist = NULL;
     bool new_node_has_latin1 = FALSE;
-    const U8 flags = (PL_regnode_kind[OP(node)] == ANYOF)
+    const U8 flags = (REGNODE_TYPE(OP(node)) == ANYOF)
                       ? ANYOF_FLAGS(node)
                       : 0;
 
@@ -1882,7 +1882,7 @@ S_get_ANYOF_cp_list_for_ssc(pTHX_ const RExC_state_t *pRExC_state,
     }
 
     /* Add in the points from the bit map */
-    if (PL_regnode_kind[OP(node)] == ANYOF){
+    if (REGNODE_TYPE(OP(node)) == ANYOF){
         for (unsigned i = 0; i < NUM_ANYOF_CODE_POINTS; i++) {
             if (ANYOF_BITMAP_TEST(node, i)) {
                 unsigned int start = i++;
@@ -1976,7 +1976,7 @@ S_ssc_and(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc,
      * another SSC or a regular ANYOF class.  Can create false positives. */
 
     SV* anded_cp_list;
-    U8  and_with_flags = (PL_regnode_kind[OP(and_with)] == ANYOF)
+    U8  and_with_flags = (REGNODE_TYPE(OP(and_with)) == ANYOF)
                           ? ANYOF_FLAGS(and_with)
                           : 0;
     U8  anded_flags;
@@ -2161,7 +2161,7 @@ S_ssc_or(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc,
 
     SV* ored_cp_list;
     U8 ored_flags;
-    U8  or_with_flags = (PL_regnode_kind[OP(or_with)] == ANYOF)
+    U8  or_with_flags = (REGNODE_TYPE(OP(or_with)) == ANYOF)
                          ? ANYOF_FLAGS(or_with)
                          : 0;
 
@@ -4244,20 +4244,20 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan,
 #endif
     DEBUG_PEEP("join", scan, depth, 0);
 
-    assert(PL_regnode_kind[OP(scan)] == EXACT);
+    assert(REGNODE_TYPE(OP(scan)) == EXACT);
 
     /* Look through the subsequent nodes in the chain.  Skip NOTHING, merge
      * EXACT ones that are mergeable to the current one. */
     while (    n
-           && (    PL_regnode_kind[OP(n)] == NOTHING
-               || (stringok && PL_regnode_kind[OP(n)] == EXACT))
+           && (    REGNODE_TYPE(OP(n)) == NOTHING
+               || (stringok && REGNODE_TYPE(OP(n)) == EXACT))
            && NEXT_OFF(n)
            && NEXT_OFF(scan) + NEXT_OFF(n) < I16_MAX)
     {
 
         if (OP(n) == TAIL || n > next)
             stringok = 0;
-        if (PL_regnode_kind[OP(n)] == NOTHING) {
+        if (REGNODE_TYPE(OP(n)) == NOTHING) {
             DEBUG_PEEP("skip:", n, depth, 0);
             NEXT_OFF(scan) += NEXT_OFF(n);
             next = n + NODE_STEP_REGNODE;
@@ -4668,7 +4668,7 @@ S_rck_elide_nothing(pTHX_ regnode *node)
         while (
             (n = regnext(n))
             && (
-                (PL_regnode_kind[OP(n)] == NOTHING && (noff = NEXT_OFF(n)))
+                (REGNODE_TYPE(OP(n)) == NOTHING && (noff = NEXT_OFF(n)))
                 || ((OP(n) == LONGJMP) && (noff = ARG(n)))
             )
             && off + noff < max
@@ -4799,7 +4799,7 @@ S_study_chunk(pTHX_
          * parsing code, as each (?:..) is handled by a different invocation of
          * reg() -- Yves
          */
-        if (PL_regnode_kind[OP(scan)] == EXACT
+        if (REGNODE_TYPE(OP(scan)) == EXACT
             && OP(scan) != LEXACT
             && OP(scan) != LEXACT_REQ8
             && mutate_ok
@@ -5456,7 +5456,7 @@ S_study_chunk(pTHX_
                 continue;
             }
         }
-        else if (PL_regnode_kind[OP(scan)] == EXACT && ! isEXACTFish(OP(scan))) {
+        else if (REGNODE_TYPE(OP(scan)) == EXACT && ! isEXACTFish(OP(scan))) {
             SSize_t bytelen = STR_LEN(scan), charlen;
             UV uc;
             assert(bytelen);
@@ -5511,7 +5511,7 @@ S_study_chunk(pTHX_
             flags &= ~SCF_DO_STCLASS;
             DEBUG_STUDYDATA("end EXACT", data, depth, is_inf, min, stopmin, delta);
         }
-        else if (PL_regnode_kind[OP(scan)] == EXACT) {
+        else if (REGNODE_TYPE(OP(scan)) == EXACT) {
             /* But OP != EXACT!, so is EXACTFish */
             SSize_t bytelen = STR_LEN(scan), charlen;
             const U8 * s = (U8*)STRING(scan);
@@ -5605,14 +5605,14 @@ S_study_chunk(pTHX_
             regnode_ssc *oclass = NULL;
             I32 next_is_eval = 0;
 
-            switch (PL_regnode_kind[OP(scan)]) {
+            switch (REGNODE_TYPE(OP(scan))) {
             case WHILEM:		/* End of (?:...)* . */
                 scan = REGNODE_AFTER(scan);
                 goto finish;
             case PLUS:
                 if (flags & (SCF_DO_SUBSTR | SCF_DO_STCLASS)) {
                     next = REGNODE_AFTER(scan);
-                    if (   (     PL_regnode_kind[OP(next)] == EXACT
+                    if (   (     REGNODE_TYPE(OP(next)) == EXACT
                             && ! isEXACTFish(OP(next)))
                         || (flags & SCF_DO_STCLASS))
                     {
@@ -5826,7 +5826,7 @@ S_study_chunk(pTHX_
                     /* Skip open. */
                     nxt = regnext(nxt);
                     if (!REGNODE_SIMPLE(OP(nxt))
-                        && !(PL_regnode_kind[OP(nxt)] == EXACT
+                        && !(REGNODE_TYPE(OP(nxt)) == EXACT
                              && STR_LEN(nxt) == 1))
                         goto nogo;
 #ifdef DEBUGGING
@@ -6322,14 +6322,14 @@ S_study_chunk(pTHX_
                 flags &= ~SCF_DO_STCLASS;
             }
         }
-        else if (PL_regnode_kind[OP(scan)] == EOL && flags & SCF_DO_SUBSTR) {
+        else if (REGNODE_TYPE(OP(scan)) == EOL && flags & SCF_DO_SUBSTR) {
             data->flags |= (OP(scan) == MEOL
                             ? SF_BEFORE_MEOL
                             : SF_BEFORE_SEOL);
             scan_commit(pRExC_state, data, minlenp, is_inf);
 
         }
-        else if (  PL_regnode_kind[OP(scan)] == BRANCHJ
+        else if (  REGNODE_TYPE(OP(scan)) == BRANCHJ
                  /* Lookbehind, or need to calculate parens/evals/stclass: */
                    && (scan->flags || data || (flags & SCF_DO_STCLASS))
                    && (OP(scan) == IFMATCH || OP(scan) == UNLESSM))
@@ -6580,7 +6580,7 @@ S_study_chunk(pTHX_
             if (data)
                 data->flags |= SF_HAS_EVAL;
         }
-        else if ( PL_regnode_kind[OP(scan)] == ENDLIKE ) {
+        else if ( REGNODE_TYPE(OP(scan)) == ENDLIKE ) {
             if (flags & SCF_DO_SUBSTR) {
                 scan_commit(pRExC_state, data, minlenp, is_inf);
                 flags &= ~SCF_DO_SUBSTR;
@@ -6630,7 +6630,7 @@ S_study_chunk(pTHX_
         }
 #ifdef TRIE_STUDY_OPT
 #ifdef FULL_TRIE_STUDY
-        else if (PL_regnode_kind[OP(scan)] == TRIE) {
+        else if (REGNODE_TYPE(OP(scan)) == TRIE) {
             /* NOTE - There is similar code to this block above for handling
                BRANCH nodes on the initial study.  If you change stuff here
                check there too. */
@@ -6694,7 +6694,7 @@ S_study_chunk(pTHX_
                             stopparen, recursed_depth, NULL, f, depth+1,
                             mutate_ok);
                     }
-                    if (nextbranch && PL_regnode_kind[OP(nextbranch)]==BRANCH)
+                    if (nextbranch && REGNODE_TYPE(OP(nextbranch))==BRANCH)
                         nextbranch= regnext((regnode*)nextbranch);
 
                     if (min1 > (SSize_t)(minnext + trie->minlen))
@@ -6764,7 +6764,7 @@ S_study_chunk(pTHX_
             continue;
         }
 #else
-        else if (PL_regnode_kind[OP(scan)] == TRIE) {
+        else if (REGNODE_TYPE(OP(scan)) == TRIE) {
             reg_trie_data *trie = (reg_trie_data*)RExC_rxi->data->data[ ARG(scan) ];
             U8*bang=NULL;
 
@@ -8458,8 +8458,8 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
             (OP(first) == PLUS) ||
             (OP(first) == MINMOD) ||
                /* An {n,m} with n>0 */
-            (PL_regnode_kind[OP(first)] == CURLY && ARG1(first) > 0) ||
-            (OP(first) == NOTHING && PL_regnode_kind[OP(first_next)] != END ))
+            (REGNODE_TYPE(OP(first)) == CURLY && ARG1(first) > 0) ||
+            (OP(first) == NOTHING && REGNODE_TYPE(OP(first_next)) != END ))
         {
                 /*
                  * the only op that could be a regnode is PLUS, all the rest
@@ -8481,7 +8481,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
       again:
         DEBUG_PEEP("first:", first, 0, 0);
         /* Ignore EXACT as we deal with it later. */
-        if (PL_regnode_kind[OP(first)] == EXACT) {
+        if (REGNODE_TYPE(OP(first)) == EXACT) {
             if (! isEXACTFish(OP(first))) {
                 NOOP;	/* Empty, get anchored substr later. */
             }
@@ -8489,7 +8489,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
                 RExC_rxi->regstclass = first;
         }
 #ifdef TRIE_STCLASS
-        else if (PL_regnode_kind[OP(first)] == TRIE &&
+        else if (REGNODE_TYPE(OP(first)) == TRIE &&
                 ((reg_trie_data *)RExC_rxi->data->data[ ARG(first) ])->minlen>0)
         {
             /* this can happen only on restudy
@@ -8500,10 +8500,10 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 #endif
         else if (REGNODE_SIMPLE(OP(first)))
             RExC_rxi->regstclass = first;
-        else if (PL_regnode_kind[OP(first)] == BOUND ||
-                 PL_regnode_kind[OP(first)] == NBOUND)
+        else if (REGNODE_TYPE(OP(first)) == BOUND ||
+                 REGNODE_TYPE(OP(first)) == NBOUND)
             RExC_rxi->regstclass = first;
-        else if (PL_regnode_kind[OP(first)] == BOL) {
+        else if (REGNODE_TYPE(OP(first)) == BOL) {
             RExC_rx->intflags |= (OP(first) == MBOL
                            ? PREGf_ANCH_MBOL
                            : PREGf_ANCH_SBOL);
@@ -8518,7 +8518,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
         else if ((!sawopen || !RExC_sawback) &&
             !sawlookahead &&
             (OP(first) == STAR &&
-            PL_regnode_kind[OP(REGNODE_AFTER(first))] == REG_ANY) &&
+            REGNODE_TYPE(OP(REGNODE_AFTER(first))) == REG_ANY) &&
             !(RExC_rx->intflags & PREGf_ANCH) && !pRExC_state->code_blocks)
         {
             /* turn .* into ^.* with an implied $*=1 */
@@ -8828,7 +8828,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
         /* It's safe to read through *next only if OP(first) is a regop of
          * the right type (not EXACT, for example).
          */
-        if (PL_regnode_kind[fop] == NOTHING && nop == END)
+        if (REGNODE_TYPE(fop) == NOTHING && nop == END)
             RExC_rx->extflags |= RXf_NULL;
         else if ((fop == MBOL || (fop == SBOL && !first->flags)) && nop == END)
             /* when fop is SBOL first->flags will be true only when it was
@@ -8838,11 +8838,11 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
              * See rt #122761 for more details. -- Yves */
             RExC_rx->extflags |= RXf_START_ONLY;
         else if (fop == PLUS
-                 && PL_regnode_kind[nop] == POSIXD && FLAGS(next) == CC_SPACE_
+                 && REGNODE_TYPE(nop) == POSIXD && FLAGS(next) == CC_SPACE_
                  && OP(regnext(first)) == END)
             RExC_rx->extflags |= RXf_WHITE;
         else if ( RExC_rx->extflags & RXf_SPLIT
-                  && (PL_regnode_kind[fop] == EXACT && ! isEXACTFish(fop))
+                  && (REGNODE_TYPE(fop) == EXACT && ! isEXACTFish(fop))
                   && STR_LEN(first) == 1
                   && *(STRING(first)) == ' '
                   && OP(regnext(first)) == END )
@@ -12898,7 +12898,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
 
             /* Hook the tails of the branches to the closing node. */
             for (br = REGNODE_p(ret); br; br = regnext(br)) {
-                const U8 op = PL_regnode_kind[OP(br)];
+                const U8 op = REGNODE_TYPE(OP(br));
                 regnode *nextoper = REGNODE_AFTER(br);
                 if (op == BRANCH) {
                     if (! REGTAIL_STUDY(pRExC_state,
@@ -12926,7 +12926,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
             }
             if (is_nothing) {
                 regnode * ret_as_regnode = REGNODE_p(ret);
-                br= PL_regnode_kind[OP(ret_as_regnode)] != BRANCH
+                br= REGNODE_TYPE(OP(ret_as_regnode)) != BRANCH
                                ? regnext(ret_as_regnode)
                                : ret_as_regnode;
                 DEBUG_PARSE_r({
@@ -16052,7 +16052,7 @@ S_populate_anyof_bitmap_from_invlist(pTHX_ regnode *node, SV** invlist_ptr)
     PERL_ARGS_ASSERT_POPULATE_ANYOF_BITMAP_FROM_INVLIST;
 
     /* There is no bitmap for this node type */
-    if (PL_regnode_kind[OP(node)]  != ANYOF) {
+    if (REGNODE_TYPE(OP(node))  != ANYOF) {
         return;
     }
 
@@ -20741,7 +20741,7 @@ S_set_ANYOF_arg(pTHX_ RExC_state_t* const pRExC_state,
         /* On plain ANYOF nodes without the possibility of a runtime locale
          * making a difference, maybe there's no information to be gleaned
          * except for what's in the bitmap */
-        if (PL_regnode_kind[OP(node)] == ANYOF && ! only_utf8_locale_list) {
+        if (REGNODE_TYPE(OP(node)) == ANYOF && ! only_utf8_locale_list) {
 
             /* There are two such cases:
              *  1)  there is no list of code points matched outside the bitmap
@@ -21283,7 +21283,7 @@ S_regnode_guts(pTHX_ RExC_state_t *pRExC_state, const STRLEN extra_size)
 STATIC regnode_offset
 S_regnode_guts_debug(pTHX_ RExC_state_t *pRExC_state, const U8 op, const STRLEN extra_size) {
     PERL_ARGS_ASSERT_REGNODE_GUTS_DEBUG;
-    assert(extra_size >= PL_regnode_arg_len[op] || PL_regnode_kind[op] == ANYOF);
+    assert(extra_size >= PL_regnode_arg_len[op] || REGNODE_TYPE(op) == ANYOF);
     return S_regnode_guts(aTHX_ pRExC_state, extra_size);
 }
 
@@ -21389,7 +21389,7 @@ S_reginsert(pTHX_ RExC_state_t *pRExC_state, const U8 op,
     PERL_ARGS_ASSERT_REGINSERT;
     PERL_UNUSED_CONTEXT;
     PERL_UNUSED_ARG(depth);
-/* (PL_regnode_kind[(U8)op] == CURLY ? EXTRA_STEP_2ARGS : 0); */
+/* (REGNODE_TYPE((U8)op) == CURLY ? EXTRA_STEP_2ARGS : 0); */
     DEBUG_PARSE_FMT("inst"," - %s", PL_regnode_name[op]);
     assert(!RExC_study_started); /* I believe we should never use reginsert once we have started
                                     studying. If this is wrong then we need to adjust RExC_recurse
@@ -21543,7 +21543,7 @@ S_regtail_study(pTHX_ RExC_state_t *pRExC_state, regnode_offset p,
     for (;;) {
         regnode * const temp = regnext(REGNODE_p(scan));
 #ifdef EXPERIMENTAL_INPLACESCAN
-        if (PL_regnode_kind[OP(REGNODE_p(scan))] == EXACT) {
+        if (REGNODE_TYPE(OP(REGNODE_p(scan))) == EXACT) {
             bool unfolded_multi_char;	/* Unexamined in this routine */
             if (join_exact(pRExC_state, scan, &min,
                            &unfolded_multi_char, 1, REGNODE_p(val), depth+1))
@@ -21551,7 +21551,7 @@ S_regtail_study(pTHX_ RExC_state_t *pRExC_state, regnode_offset p,
         }
 #endif
         if ( exact ) {
-            if (PL_regnode_kind[OP(REGNODE_p(scan))] == EXACT) {
+            if (REGNODE_TYPE(OP(REGNODE_p(scan))) == EXACT) {
                 if (exact == PSEUDO )
                     exact= OP(REGNODE_p(scan));
                 else if (exact != OP(REGNODE_p(scan)) )
@@ -21897,7 +21897,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
     }
     sv_catpv(sv, PL_regnode_name[op]); /* Take off const! */
 
-    k = PL_regnode_kind[op];
+    k = REGNODE_TYPE(op);
 
     if (k == EXACT) {
         sv_catpvs(sv, " ");
@@ -22252,7 +22252,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
         if (op == ANYOFHs) {
             Perl_sv_catpvf(aTHX_ sv, " (Leading UTF-8 bytes=%s", _byte_dump_string((U8 *) ((struct regnode_anyofhs *) o)->string, FLAGS(o), 1));
         }
-        else if (PL_regnode_kind[op] != ANYOF) {
+        else if (REGNODE_TYPE(op) != ANYOF) {
             U8 lowest = (op != ANYOFHr)
                          ? FLAGS(o)
                          : LOWEST_ANYOF_HRx_BYTE(FLAGS(o));
@@ -23675,8 +23675,8 @@ S_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node,
         if (op != OPTIMIZED) {
             if (next == NULL)		/* Next ptr. */
                 Perl_re_printf( aTHX_  " (0)");
-            else if (PL_regnode_kind[op] == BRANCH
-                     && PL_regnode_kind[OP(next)] != BRANCH )
+            else if (REGNODE_TYPE(op) == BRANCH
+                     && REGNODE_TYPE(OP(next)) != BRANCH )
                 Perl_re_printf( aTHX_  " (FAIL)");
             else
                 Perl_re_printf( aTHX_  " (%" IVdf ")", (IV)(next - start));
@@ -23684,7 +23684,7 @@ S_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node,
         }
 
       after_print:
-        if (PL_regnode_kind[op] == BRANCHJ) {
+        if (REGNODE_TYPE(op) == BRANCHJ) {
             assert(next);
             const regnode *nnode = (OP(next) == LONGJMP
                                    ? regnext((regnode *)next)
@@ -23693,11 +23693,11 @@ S_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node,
                 nnode = last;
             DUMPUNTIL(after, nnode);
         }
-        else if (PL_regnode_kind[op] == BRANCH) {
+        else if (REGNODE_TYPE(op) == BRANCH) {
             assert(next);
             DUMPUNTIL(after, next);
         }
-        else if ( PL_regnode_kind[op]  == TRIE ) {
+        else if ( REGNODE_TYPE(op)  == TRIE ) {
             const regnode *this_trie = node;
             const U32 n = ARG(node);
             const reg_ac_data * const ac = op>=AHOCORASICK ?
@@ -23738,7 +23738,7 @@ S_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node,
                             nextbranch= this_trie + trie->jump[0];
                         DUMPUNTIL(this_trie + dist, nextbranch);
                     }
-                    if (nextbranch && PL_regnode_kind[OP(nextbranch)]==BRANCH)
+                    if (nextbranch && REGNODE_TYPE(OP(nextbranch))==BRANCH)
                         nextbranch= regnext((regnode *)nextbranch);
                 } else {
                     Perl_re_printf( aTHX_  "\n");
@@ -23752,14 +23752,14 @@ S_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node,
         else if ( op == CURLY ) {   /* "next" might be very big: optimizer */
             DUMPUNTIL(after, after + 1); /* +1 is NOT a REGNODE_AFTER */
         }
-        else if (PL_regnode_kind[op] == CURLY && op != CURLYX) {
+        else if (REGNODE_TYPE(op) == CURLY && op != CURLYX) {
             assert(next);
             DUMPUNTIL(after, next);
         }
         else if ( op == PLUS || op == STAR) {
             DUMPUNTIL(after, after + 1); /* +1 NOT a REGNODE_AFTER */
         }
-        else if (PL_regnode_kind[op] == EXACT || op == ANYOFHs) {
+        else if (REGNODE_TYPE(op) == EXACT || op == ANYOFHs) {
             /* Literal string, where present. */
             node = (const regnode *)REGNODE_AFTER_varies(node);
         }
@@ -23768,7 +23768,7 @@ S_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node,
         }
         if (op == CURLYX || op == OPEN || op == SROPEN)
             indent++;
-        if (PL_regnode_kind[op] == END)
+        if (REGNODE_TYPE(op) == END)
             break;
     }
     CLEAR_OPTSTART;

@@ -306,7 +306,7 @@ struct regnode_ssc {
 #define set_ANYOF_SYNTHETIC(n) STMT_START{ OP(n) = ANYOF;              \
                                            NEXT_OFF(n) = 1;            \
                                } STMT_END
-#define is_ANYOF_SYNTHETIC(n) (PL_regnode_kind[OP(n)] == ANYOF && NEXT_OFF(n) == 1)
+#define is_ANYOF_SYNTHETIC(n) (REGNODE_TYPE(OP(n)) == ANYOF && NEXT_OFF(n) == 1)
 
 /* XXX fix this description.
    Impose a limit of REG_INFTY on various pattern matching operations
@@ -1408,6 +1408,8 @@ typedef enum {
 #else
 #  define GET_REGCLASS_AUX_DATA(a,b,c,d,e,f)  get_re_gclass_aux_data(a,b,c,d,e,f)
 #endif
+
+#define REGNODE_TYPE(arg) PL_regnode_kind[(arg)]
 
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C)
 #include "reginline.h"

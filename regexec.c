@@ -188,11 +188,11 @@ static const char non_utf8_target_but_utf8_required[]
     OP(rn) == SUSPEND || OP(rn) == IFMATCH ||                                      \
     OP(rn) == PLUS || OP(rn) == MINMOD ||                                          \
     OP(rn) == KEEPS ||                                                             \
-    (PL_regnode_kind[OP(rn)] == CURLY && ARG1(rn) > 0)                                  \
+    (REGNODE_TYPE(OP(rn)) == CURLY && ARG1(rn) > 0)                                  \
 )
-#define IS_EXACT(rn) (PL_regnode_kind[OP(rn)] == EXACT)
+#define IS_EXACT(rn) (REGNODE_TYPE(OP(rn)) == EXACT)
 
-#define HAS_TEXT(rn) ( IS_EXACT(rn) || PL_regnode_kind[OP(rn)] == REF )
+#define HAS_TEXT(rn) ( IS_EXACT(rn) || REGNODE_TYPE(OP(rn)) == REF )
 
 /*
   Search for mandatory following text node; for lookahead, the text must
@@ -201,7 +201,7 @@ static const char non_utf8_target_but_utf8_required[]
 #define FIND_NEXT_IMPT(rn) STMT_START {                                   \
     while (JUMPABLE(rn)) { \
         const OPCODE type = OP(rn); \
-        if (type == SUSPEND || PL_regnode_kind[type] == CURLY) \
+        if (type == SUSPEND || REGNODE_TYPE(type) == CURLY) \
             rn = REGNODE_AFTER_opcode(rn,type); \
         else if (type == PLUS) \
             rn = REGNODE_AFTER_type(rn,tregnode_PLUS); \
@@ -1485,11 +1485,11 @@ Perl_re_intuit_start(pTHX_
      * (trie stclasses are too expensive to use here, we are better off to
      * leave it to regmatch itself) */
 
-    if (progi->regstclass && PL_regnode_kind[OP(progi->regstclass)]!=TRIE) {
+    if (progi->regstclass && REGNODE_TYPE(OP(progi->regstclass))!=TRIE) {
         const U8* const str = (U8*)STRING(progi->regstclass);
 
         /* XXX this value could be pre-computed */
-        const SSize_t cl_l = (PL_regnode_kind[OP(progi->regstclass)] == EXACT
+        const SSize_t cl_l = (REGNODE_TYPE(OP(progi->regstclass)) == EXACT
                     ?  (reginfo->is_utf8_pat
                         ? (SSize_t)utf8_distance(str + STR_LEN(progi->regstclass), str)
                         : (SSize_t)STR_LEN(progi->regstclass))
@@ -4050,7 +4050,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
         if (minlen) {
             const OPCODE op = OP(progi->regstclass);
             /* don't bother with what can't match */
-            if (PL_regnode_kind[op] != EXACT && PL_regnode_kind[op] != TRIE)
+            if (REGNODE_TYPE(op) != EXACT && REGNODE_TYPE(op) != TRIE)
                 strend = HOPc(strend, -(minlen - 1));
         }
         DEBUG_EXECUTE_r({
@@ -6465,7 +6465,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                     INDENT_CHARS(depth), "",
                     (IV)(scan - rexi->program),
                     SvPVX_const(prop),
-                    (PL_regnode_kind[OP(scan)] == END || !rnext) ?
+                    (REGNODE_TYPE(OP(scan)) == END || !rnext) ?
                         0 : (IV)(rnext - rexi->program));
             }
         );
@@ -8488,7 +8488,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 for (
                     cursor = scan;
                     cursor && ( OP(cursor) != END );
-                    cursor = ( PL_regnode_kind[ OP(cursor) ] == END )
+                    cursor = ( REGNODE_TYPE( OP(cursor) ) == END )
                              ? REGNODE_AFTER(cursor)
                              : regnext(cursor)
                 ){
@@ -9061,7 +9061,7 @@ NULL
                     regnode *text_node = ST.B;
                     if (! HAS_TEXT(text_node))
                         FIND_NEXT_IMPT(text_node);
-                    if (PL_regnode_kind[OP(text_node)] == EXACT) {
+                    if (REGNODE_TYPE(OP(text_node)) == EXACT) {
                         if (! S_setup_EXACTISH_ST(aTHX_ text_node,
                                                         &ST.Binfo, reginfo))
                         {
@@ -9218,7 +9218,7 @@ NULL
                 if (! HAS_TEXT(text_node))
                     ST.Binfo.count = 0;
                 else {
-                    if ( PL_regnode_kind[OP(text_node)] != EXACT ) {
+                    if ( REGNODE_TYPE(OP(text_node)) != EXACT ) {
                         ST.Binfo.count = 0;
                     }
                     else {
@@ -9281,7 +9281,7 @@ NULL
                     sayNO;
                 SET_locinput(li);
                 if ((ST.count > ST.min)
-                    && (PL_regnode_kind[OP(ST.B)] == EOL) && (OP(ST.B) != MEOL))
+                    && (REGNODE_TYPE(OP(ST.B)) == EOL) && (OP(ST.B) != MEOL))
                 {
                     /* A{m,n} must come at the end of the string, there's
                      * no point in backing off ... */
