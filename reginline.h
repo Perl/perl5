@@ -37,7 +37,7 @@ Perl_regnode_after(pTHX_ const regnode *p, const bool varies)
     assert(p);
     const U8 op = OP(p);
     assert(op < REGNODE_MAX);
-    const regnode *ret = p + NODE_STEP_REGNODE + PL_regnode_arg_len[op];
+    const regnode *ret = p + NODE_STEP_REGNODE + REGNODE_ARG_LEN(op);
     if (varies || PL_regnode_arg_len_varies[op])
         ret += STR_SZ(STR_LEN(p));
     return (regnode *)ret;
