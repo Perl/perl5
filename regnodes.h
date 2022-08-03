@@ -1573,536 +1573,6 @@ typedef struct regnode                           tregnode_WHILEM;
 #define KEEPS_next_fail_t8_p8             607  /*      0x25f */
 
 
-/* PL_regnode_kind[] What type of regop or state is this. */
-
-#ifndef DOINIT
-EXTCONST U8 PL_regnode_kind[];
-#else
-EXTCONST U8 PL_regnode_kind[] = {
-	END,      	/* END                    */
-	END,      	/* SUCCEED                */
-	BOL,      	/* SBOL                   */
-	BOL,      	/* MBOL                   */
-	EOL,      	/* SEOL                   */
-	EOL,      	/* MEOL                   */
-	EOL,      	/* EOS                    */
-	GPOS,     	/* GPOS                   */
-	BOUND,    	/* BOUND                  */
-	BOUND,    	/* BOUNDL                 */
-	BOUND,    	/* BOUNDU                 */
-	BOUND,    	/* BOUNDA                 */
-	NBOUND,   	/* NBOUND                 */
-	NBOUND,   	/* NBOUNDL                */
-	NBOUND,   	/* NBOUNDU                */
-	NBOUND,   	/* NBOUNDA                */
-	REG_ANY,  	/* REG_ANY                */
-	REG_ANY,  	/* SANY                   */
-	ANYOF,    	/* ANYOF                  */
-	ANYOF,    	/* ANYOFD                 */
-	ANYOF,    	/* ANYOFL                 */
-	ANYOF,    	/* ANYOFPOSIXL            */
-	ANYOFH,   	/* ANYOFH                 */
-	ANYOFH,   	/* ANYOFHb                */
-	ANYOFH,   	/* ANYOFHr                */
-	ANYOFH,   	/* ANYOFHs                */
-	ANYOFR,   	/* ANYOFR                 */
-	ANYOFR,   	/* ANYOFRb                */
-	ANYOFHbbm,	/* ANYOFHbbm              */
-	ANYOFM,   	/* ANYOFM                 */
-	ANYOFM,   	/* NANYOFM                */
-	POSIXD,   	/* POSIXD                 */
-	POSIXD,   	/* POSIXL                 */
-	POSIXD,   	/* POSIXU                 */
-	POSIXD,   	/* POSIXA                 */
-	NPOSIXD,  	/* NPOSIXD                */
-	NPOSIXD,  	/* NPOSIXL                */
-	NPOSIXD,  	/* NPOSIXU                */
-	NPOSIXD,  	/* NPOSIXA                */
-	CLUMP,    	/* CLUMP                  */
-	BRANCH,   	/* BRANCH                 */
-	EXACT,    	/* EXACT                  */
-	EXACT,    	/* LEXACT                 */
-	EXACT,    	/* EXACTL                 */
-	EXACT,    	/* EXACTF                 */
-	EXACT,    	/* EXACTFL                */
-	EXACT,    	/* EXACTFU                */
-	EXACT,    	/* EXACTFAA               */
-	EXACT,    	/* EXACTFAA_NO_TRIE       */
-	EXACT,    	/* EXACTFUP               */
-	EXACT,    	/* EXACTFLU8              */
-	EXACT,    	/* EXACT_REQ8             */
-	EXACT,    	/* LEXACT_REQ8            */
-	EXACT,    	/* EXACTFU_REQ8           */
-	EXACT,    	/* EXACTFU_S_EDGE         */
-	LNBREAK,  	/* LNBREAK                */
-	TRIE,     	/* TRIE                   */
-	TRIE,     	/* TRIEC                  */
-	TRIE,     	/* AHOCORASICK            */
-	TRIE,     	/* AHOCORASICKC           */
-	NOTHING,  	/* NOTHING                */
-	NOTHING,  	/* TAIL                   */
-	STAR,     	/* STAR                   */
-	PLUS,     	/* PLUS                   */
-	CURLY,    	/* CURLY                  */
-	CURLY,    	/* CURLYN                 */
-	CURLY,    	/* CURLYM                 */
-	CURLY,    	/* CURLYX                 */
-	WHILEM,   	/* WHILEM                 */
-	OPEN,     	/* OPEN                   */
-	CLOSE,    	/* CLOSE                  */
-	SROPEN,   	/* SROPEN                 */
-	SRCLOSE,  	/* SRCLOSE                */
-	REF,      	/* REF                    */
-	REF,      	/* REFF                   */
-	REF,      	/* REFFL                  */
-	REF,      	/* REFFU                  */
-	REF,      	/* REFFA                  */
-	REF,      	/* REFN                   */
-	REF,      	/* REFFN                  */
-	REF,      	/* REFFLN                 */
-	REF,      	/* REFFUN                 */
-	REF,      	/* REFFAN                 */
-	LONGJMP,  	/* LONGJMP                */
-	BRANCHJ,  	/* BRANCHJ                */
-	BRANCHJ,  	/* IFMATCH                */
-	BRANCHJ,  	/* UNLESSM                */
-	BRANCHJ,  	/* SUSPEND                */
-	BRANCHJ,  	/* IFTHEN                 */
-	GROUPP,   	/* GROUPP                 */
-	EVAL,     	/* EVAL                   */
-	MINMOD,   	/* MINMOD                 */
-	LOGICAL,  	/* LOGICAL                */
-	BRANCHJ,  	/* RENUM                  */
-	GOSUB,    	/* GOSUB                  */
-	GROUPPN,  	/* GROUPPN                */
-	INSUBP,   	/* INSUBP                 */
-	DEFINEP,  	/* DEFINEP                */
-	ENDLIKE,  	/* ENDLIKE                */
-	ENDLIKE,  	/* OPFAIL                 */
-	ENDLIKE,  	/* ACCEPT                 */
-	VERB,     	/* VERB                   */
-	VERB,     	/* PRUNE                  */
-	VERB,     	/* MARKPOINT              */
-	VERB,     	/* SKIP                   */
-	VERB,     	/* COMMIT                 */
-	VERB,     	/* CUTGROUP               */
-	KEEPS,    	/* KEEPS                  */
-	END,      	/* LOOKBEHIND_END         */
-	NOTHING,  	/* OPTIMIZED              */
-	PSEUDO,   	/* PSEUDO                 */
-	REGEX_SET,	/* REGEX_SET              */
-	/* ------------ States ------------- */
-	TRIE,     	/* TRIE_next              */
-	TRIE,     	/* TRIE_next_fail         */
-	EVAL,     	/* EVAL_B                 */
-	EVAL,     	/* EVAL_B_fail            */
-	EVAL,     	/* EVAL_postponed_AB      */
-	EVAL,     	/* EVAL_postponed_AB_fail */
-	CURLYX,   	/* CURLYX_end             */
-	CURLYX,   	/* CURLYX_end_fail        */
-	WHILEM,   	/* WHILEM_A_pre           */
-	WHILEM,   	/* WHILEM_A_pre_fail      */
-	WHILEM,   	/* WHILEM_A_min           */
-	WHILEM,   	/* WHILEM_A_min_fail      */
-	WHILEM,   	/* WHILEM_A_max           */
-	WHILEM,   	/* WHILEM_A_max_fail      */
-	WHILEM,   	/* WHILEM_B_min           */
-	WHILEM,   	/* WHILEM_B_min_fail      */
-	WHILEM,   	/* WHILEM_B_max           */
-	WHILEM,   	/* WHILEM_B_max_fail      */
-	BRANCH,   	/* BRANCH_next            */
-	BRANCH,   	/* BRANCH_next_fail       */
-	CURLYM,   	/* CURLYM_A               */
-	CURLYM,   	/* CURLYM_A_fail          */
-	CURLYM,   	/* CURLYM_B               */
-	CURLYM,   	/* CURLYM_B_fail          */
-	IFMATCH,  	/* IFMATCH_A              */
-	IFMATCH,  	/* IFMATCH_A_fail         */
-	CURLY,    	/* CURLY_B_min            */
-	CURLY,    	/* CURLY_B_min_fail       */
-	CURLY,    	/* CURLY_B_max            */
-	CURLY,    	/* CURLY_B_max_fail       */
-	COMMIT,   	/* COMMIT_next            */
-	COMMIT,   	/* COMMIT_next_fail       */
-	MARKPOINT,	/* MARKPOINT_next         */
-	MARKPOINT,	/* MARKPOINT_next_fail    */
-	SKIP,     	/* SKIP_next              */
-	SKIP,     	/* SKIP_next_fail         */
-	CUTGROUP, 	/* CUTGROUP_next          */
-	CUTGROUP, 	/* CUTGROUP_next_fail     */
-	KEEPS,    	/* KEEPS_next             */
-	KEEPS,    	/* KEEPS_next_fail        */
-};
-#endif
-
-/* PL_regnode_arg_len[] - How large is the argument part of the node (in regnodes) */
-
-#ifndef DOINIT
-EXTCONST U8 PL_regnode_arg_len[];
-#else
-EXTCONST U8 PL_regnode_arg_len[] = {
-	0,                                   	/* END          */
-	0,                                   	/* SUCCEED      */
-	0,                                   	/* SBOL         */
-	0,                                   	/* MBOL         */
-	0,                                   	/* SEOL         */
-	0,                                   	/* MEOL         */
-	0,                                   	/* EOS          */
-	0,                                   	/* GPOS         */
-	0,                                   	/* BOUND        */
-	0,                                   	/* BOUNDL       */
-	0,                                   	/* BOUNDU       */
-	0,                                   	/* BOUNDA       */
-	0,                                   	/* NBOUND       */
-	0,                                   	/* NBOUNDL      */
-	0,                                   	/* NBOUNDU      */
-	0,                                   	/* NBOUNDA      */
-	0,                                   	/* REG_ANY      */
-	0,                                   	/* SANY         */
-	EXTRA_SIZE(tregnode_ANYOF),          	/* ANYOF        */
-	EXTRA_SIZE(tregnode_ANYOFD),         	/* ANYOFD       */
-	EXTRA_SIZE(tregnode_ANYOFL),         	/* ANYOFL       */
-	EXTRA_SIZE(tregnode_ANYOFPOSIXL),    	/* ANYOFPOSIXL  */
-	EXTRA_SIZE(tregnode_ANYOFH),         	/* ANYOFH       */
-	EXTRA_SIZE(tregnode_ANYOFHb),        	/* ANYOFHb      */
-	EXTRA_SIZE(tregnode_ANYOFHr),        	/* ANYOFHr      */
-	EXTRA_SIZE(tregnode_ANYOFHs),        	/* ANYOFHs      */
-	EXTRA_SIZE(tregnode_ANYOFR),         	/* ANYOFR       */
-	EXTRA_SIZE(tregnode_ANYOFRb),        	/* ANYOFRb      */
-	EXTRA_SIZE(tregnode_ANYOFHbbm),      	/* ANYOFHbbm    */
-	EXTRA_SIZE(tregnode_ANYOFM),         	/* ANYOFM       */
-	EXTRA_SIZE(tregnode_NANYOFM),        	/* NANYOFM      */
-	0,                                   	/* POSIXD       */
-	0,                                   	/* POSIXL       */
-	0,                                   	/* POSIXU       */
-	0,                                   	/* POSIXA       */
-	0,                                   	/* NPOSIXD      */
-	0,                                   	/* NPOSIXL      */
-	0,                                   	/* NPOSIXU      */
-	0,                                   	/* NPOSIXA      */
-	0,                                   	/* CLUMP        */
-	0,                                   	/* BRANCH       */
-	0,                                   	/* EXACT        */
-	EXTRA_SIZE(tregnode_LEXACT),         	/* LEXACT       */
-	0,                                   	/* EXACTL       */
-	0,                                   	/* EXACTF       */
-	0,                                   	/* EXACTFL      */
-	0,                                   	/* EXACTFU      */
-	0,                                   	/* EXACTFAA     */
-	0,                                   	/* EXACTFAA_NO_TRIE */
-	0,                                   	/* EXACTFUP     */
-	0,                                   	/* EXACTFLU8    */
-	0,                                   	/* EXACT_REQ8   */
-	EXTRA_SIZE(tregnode_LEXACT_REQ8),    	/* LEXACT_REQ8  */
-	0,                                   	/* EXACTFU_REQ8 */
-	0,                                   	/* EXACTFU_S_EDGE */
-	0,                                   	/* LNBREAK      */
-	EXTRA_SIZE(tregnode_TRIE),           	/* TRIE         */
-	EXTRA_SIZE(tregnode_TRIEC),          	/* TRIEC        */
-	EXTRA_SIZE(tregnode_AHOCORASICK),    	/* AHOCORASICK  */
-	EXTRA_SIZE(tregnode_AHOCORASICKC),   	/* AHOCORASICKC */
-	0,                                   	/* NOTHING      */
-	0,                                   	/* TAIL         */
-	0,                                   	/* STAR         */
-	0,                                   	/* PLUS         */
-	EXTRA_SIZE(tregnode_CURLY),          	/* CURLY        */
-	EXTRA_SIZE(tregnode_CURLYN),         	/* CURLYN       */
-	EXTRA_SIZE(tregnode_CURLYM),         	/* CURLYM       */
-	EXTRA_SIZE(tregnode_CURLYX),         	/* CURLYX       */
-	0,                                   	/* WHILEM       */
-	EXTRA_SIZE(tregnode_OPEN),           	/* OPEN         */
-	EXTRA_SIZE(tregnode_CLOSE),          	/* CLOSE        */
-	0,                                   	/* SROPEN       */
-	0,                                   	/* SRCLOSE      */
-	EXTRA_SIZE(tregnode_REF),            	/* REF          */
-	EXTRA_SIZE(tregnode_REFF),           	/* REFF         */
-	EXTRA_SIZE(tregnode_REFFL),          	/* REFFL        */
-	EXTRA_SIZE(tregnode_REFFU),          	/* REFFU        */
-	EXTRA_SIZE(tregnode_REFFA),          	/* REFFA        */
-	EXTRA_SIZE(tregnode_REFN),           	/* REFN         */
-	EXTRA_SIZE(tregnode_REFFN),          	/* REFFN        */
-	EXTRA_SIZE(tregnode_REFFLN),         	/* REFFLN       */
-	EXTRA_SIZE(tregnode_REFFUN),         	/* REFFUN       */
-	EXTRA_SIZE(tregnode_REFFAN),         	/* REFFAN       */
-	EXTRA_SIZE(tregnode_LONGJMP),        	/* LONGJMP      */
-	EXTRA_SIZE(tregnode_BRANCHJ),        	/* BRANCHJ      */
-	EXTRA_SIZE(tregnode_IFMATCH),        	/* IFMATCH      */
-	EXTRA_SIZE(tregnode_UNLESSM),        	/* UNLESSM      */
-	EXTRA_SIZE(tregnode_SUSPEND),        	/* SUSPEND      */
-	EXTRA_SIZE(tregnode_IFTHEN),         	/* IFTHEN       */
-	EXTRA_SIZE(tregnode_GROUPP),         	/* GROUPP       */
-	EXTRA_SIZE(tregnode_EVAL),           	/* EVAL         */
-	0,                                   	/* MINMOD       */
-	0,                                   	/* LOGICAL      */
-	EXTRA_SIZE(tregnode_RENUM),          	/* RENUM        */
-	EXTRA_SIZE(tregnode_GOSUB),          	/* GOSUB        */
-	EXTRA_SIZE(tregnode_GROUPPN),        	/* GROUPPN      */
-	EXTRA_SIZE(tregnode_INSUBP),         	/* INSUBP       */
-	EXTRA_SIZE(tregnode_DEFINEP),        	/* DEFINEP      */
-	0,                                   	/* ENDLIKE      */
-	EXTRA_SIZE(tregnode_OPFAIL),         	/* OPFAIL       */
-	EXTRA_SIZE(tregnode_ACCEPT),         	/* ACCEPT       */
-	EXTRA_SIZE(tregnode_VERB),           	/* VERB         */
-	EXTRA_SIZE(tregnode_PRUNE),          	/* PRUNE        */
-	EXTRA_SIZE(tregnode_MARKPOINT),      	/* MARKPOINT    */
-	EXTRA_SIZE(tregnode_SKIP),           	/* SKIP         */
-	EXTRA_SIZE(tregnode_COMMIT),         	/* COMMIT       */
-	EXTRA_SIZE(tregnode_CUTGROUP),       	/* CUTGROUP     */
-	0,                                   	/* KEEPS        */
-	0,                                   	/* LOOKBEHIND_END */
-	0,                                   	/* OPTIMIZED    */
-	0,                                   	/* PSEUDO       */
-	EXTRA_SIZE(tregnode_REGEX_SET),      	/* REGEX_SET    */
-};
-#endif /* DOINIT */
-
-
-/* PL_regnode_arg_len_varies[] - Is the size of the node determined by STR_SZ() macros?
-   Currently this is a boolean, but in the future it might turn into something
-   that uses more bits of the value to indicate that a different macro would be
-   used. */
-
-#ifndef DOINIT
-EXTCONST U8 PL_regnode_arg_len_varies[];
-#else
-EXTCONST U8 PL_regnode_arg_len_varies[] = {
-	0,                                   	/* END          */
-	0,                                   	/* SUCCEED      */
-	0,                                   	/* SBOL         */
-	0,                                   	/* MBOL         */
-	0,                                   	/* SEOL         */
-	0,                                   	/* MEOL         */
-	0,                                   	/* EOS          */
-	0,                                   	/* GPOS         */
-	0,                                   	/* BOUND        */
-	0,                                   	/* BOUNDL       */
-	0,                                   	/* BOUNDU       */
-	0,                                   	/* BOUNDA       */
-	0,                                   	/* NBOUND       */
-	0,                                   	/* NBOUNDL      */
-	0,                                   	/* NBOUNDU      */
-	0,                                   	/* NBOUNDA      */
-	0,                                   	/* REG_ANY      */
-	0,                                   	/* SANY         */
-	0,                                   	/* ANYOF        */
-	0,                                   	/* ANYOFD       */
-	0,                                   	/* ANYOFL       */
-	0,                                   	/* ANYOFPOSIXL  */
-	0,                                   	/* ANYOFH       */
-	0,                                   	/* ANYOFHb      */
-	0,                                   	/* ANYOFHr      */
-	1,                                   	/* ANYOFHs      */
-	0,                                   	/* ANYOFR       */
-	0,                                   	/* ANYOFRb      */
-	0,                                   	/* ANYOFHbbm    */
-	0,                                   	/* ANYOFM       */
-	0,                                   	/* NANYOFM      */
-	0,                                   	/* POSIXD       */
-	0,                                   	/* POSIXL       */
-	0,                                   	/* POSIXU       */
-	0,                                   	/* POSIXA       */
-	0,                                   	/* NPOSIXD      */
-	0,                                   	/* NPOSIXL      */
-	0,                                   	/* NPOSIXU      */
-	0,                                   	/* NPOSIXA      */
-	0,                                   	/* CLUMP        */
-	0,                                   	/* BRANCH       */
-	1,                                   	/* EXACT        */
-	1,                                   	/* LEXACT       */
-	1,                                   	/* EXACTL       */
-	1,                                   	/* EXACTF       */
-	1,                                   	/* EXACTFL      */
-	1,                                   	/* EXACTFU      */
-	1,                                   	/* EXACTFAA     */
-	1,                                   	/* EXACTFAA_NO_TRIE */
-	1,                                   	/* EXACTFUP     */
-	1,                                   	/* EXACTFLU8    */
-	1,                                   	/* EXACT_REQ8   */
-	1,                                   	/* LEXACT_REQ8  */
-	1,                                   	/* EXACTFU_REQ8 */
-	1,                                   	/* EXACTFU_S_EDGE */
-	0,                                   	/* LNBREAK      */
-	0,                                   	/* TRIE         */
-	0,                                   	/* TRIEC        */
-	0,                                   	/* AHOCORASICK  */
-	0,                                   	/* AHOCORASICKC */
-	0,                                   	/* NOTHING      */
-	0,                                   	/* TAIL         */
-	0,                                   	/* STAR         */
-	0,                                   	/* PLUS         */
-	0,                                   	/* CURLY        */
-	0,                                   	/* CURLYN       */
-	0,                                   	/* CURLYM       */
-	0,                                   	/* CURLYX       */
-	0,                                   	/* WHILEM       */
-	0,                                   	/* OPEN         */
-	0,                                   	/* CLOSE        */
-	0,                                   	/* SROPEN       */
-	0,                                   	/* SRCLOSE      */
-	0,                                   	/* REF          */
-	0,                                   	/* REFF         */
-	0,                                   	/* REFFL        */
-	0,                                   	/* REFFU        */
-	0,                                   	/* REFFA        */
-	0,                                   	/* REFN         */
-	0,                                   	/* REFFN        */
-	0,                                   	/* REFFLN       */
-	0,                                   	/* REFFUN       */
-	0,                                   	/* REFFAN       */
-	0,                                   	/* LONGJMP      */
-	0,                                   	/* BRANCHJ      */
-	0,                                   	/* IFMATCH      */
-	0,                                   	/* UNLESSM      */
-	0,                                   	/* SUSPEND      */
-	0,                                   	/* IFTHEN       */
-	0,                                   	/* GROUPP       */
-	0,                                   	/* EVAL         */
-	0,                                   	/* MINMOD       */
-	0,                                   	/* LOGICAL      */
-	0,                                   	/* RENUM        */
-	0,                                   	/* GOSUB        */
-	0,                                   	/* GROUPPN      */
-	0,                                   	/* INSUBP       */
-	0,                                   	/* DEFINEP      */
-	0,                                   	/* ENDLIKE      */
-	0,                                   	/* OPFAIL       */
-	0,                                   	/* ACCEPT       */
-	0,                                   	/* VERB         */
-	0,                                   	/* PRUNE        */
-	0,                                   	/* MARKPOINT    */
-	0,                                   	/* SKIP         */
-	0,                                   	/* COMMIT       */
-	0,                                   	/* CUTGROUP     */
-	0,                                   	/* KEEPS        */
-	0,                                   	/* LOOKBEHIND_END */
-	0,                                   	/* OPTIMIZED    */
-	0,                                   	/* PSEUDO       */
-	0,                                   	/* REGEX_SET    */
-};
-#endif /* DOINIT */
-
-
-/* PL_regnode_off_by_arg[] - Which argument holds the offset to the next node */
-
-#ifndef DOINIT
-EXTCONST U8 PL_regnode_off_by_arg[];
-#else
-EXTCONST U8 PL_regnode_off_by_arg[] = {
-	0,	/* END          */
-	0,	/* SUCCEED      */
-	0,	/* SBOL         */
-	0,	/* MBOL         */
-	0,	/* SEOL         */
-	0,	/* MEOL         */
-	0,	/* EOS          */
-	0,	/* GPOS         */
-	0,	/* BOUND        */
-	0,	/* BOUNDL       */
-	0,	/* BOUNDU       */
-	0,	/* BOUNDA       */
-	0,	/* NBOUND       */
-	0,	/* NBOUNDL      */
-	0,	/* NBOUNDU      */
-	0,	/* NBOUNDA      */
-	0,	/* REG_ANY      */
-	0,	/* SANY         */
-	0,	/* ANYOF        */
-	0,	/* ANYOFD       */
-	0,	/* ANYOFL       */
-	0,	/* ANYOFPOSIXL  */
-	0,	/* ANYOFH       */
-	0,	/* ANYOFHb      */
-	0,	/* ANYOFHr      */
-	0,	/* ANYOFHs      */
-	0,	/* ANYOFR       */
-	0,	/* ANYOFRb      */
-	0,	/* ANYOFHbbm    */
-	0,	/* ANYOFM       */
-	0,	/* NANYOFM      */
-	0,	/* POSIXD       */
-	0,	/* POSIXL       */
-	0,	/* POSIXU       */
-	0,	/* POSIXA       */
-	0,	/* NPOSIXD      */
-	0,	/* NPOSIXL      */
-	0,	/* NPOSIXU      */
-	0,	/* NPOSIXA      */
-	0,	/* CLUMP        */
-	0,	/* BRANCH       */
-	0,	/* EXACT        */
-	0,	/* LEXACT       */
-	0,	/* EXACTL       */
-	0,	/* EXACTF       */
-	0,	/* EXACTFL      */
-	0,	/* EXACTFU      */
-	0,	/* EXACTFAA     */
-	0,	/* EXACTFAA_NO_TRIE */
-	0,	/* EXACTFUP     */
-	0,	/* EXACTFLU8    */
-	0,	/* EXACT_REQ8   */
-	0,	/* LEXACT_REQ8  */
-	0,	/* EXACTFU_REQ8 */
-	0,	/* EXACTFU_S_EDGE */
-	0,	/* LNBREAK      */
-	0,	/* TRIE         */
-	0,	/* TRIEC        */
-	0,	/* AHOCORASICK  */
-	0,	/* AHOCORASICKC */
-	0,	/* NOTHING      */
-	0,	/* TAIL         */
-	0,	/* STAR         */
-	0,	/* PLUS         */
-	0,	/* CURLY        */
-	0,	/* CURLYN       */
-	0,	/* CURLYM       */
-	0,	/* CURLYX       */
-	0,	/* WHILEM       */
-	0,	/* OPEN         */
-	0,	/* CLOSE        */
-	0,	/* SROPEN       */
-	0,	/* SRCLOSE      */
-	0,	/* REF          */
-	0,	/* REFF         */
-	0,	/* REFFL        */
-	0,	/* REFFU        */
-	0,	/* REFFA        */
-	0,	/* REFN         */
-	0,	/* REFFN        */
-	0,	/* REFFLN       */
-	0,	/* REFFUN       */
-	0,	/* REFFAN       */
-	1,	/* LONGJMP      */
-	1,	/* BRANCHJ      */
-	1,	/* IFMATCH      */
-	1,	/* UNLESSM      */
-	1,	/* SUSPEND      */
-	1,	/* IFTHEN       */
-	0,	/* GROUPP       */
-	0,	/* EVAL         */
-	0,	/* MINMOD       */
-	0,	/* LOGICAL      */
-	1,	/* RENUM        */
-	0,	/* GOSUB        */
-	0,	/* GROUPPN      */
-	0,	/* INSUBP       */
-	0,	/* DEFINEP      */
-	0,	/* ENDLIKE      */
-	0,	/* OPFAIL       */
-	0,	/* ACCEPT       */
-	0,	/* VERB         */
-	0,	/* PRUNE        */
-	0,	/* MARKPOINT    */
-	0,	/* SKIP         */
-	0,	/* COMMIT       */
-	0,	/* CUTGROUP     */
-	0,	/* KEEPS        */
-	0,	/* LOOKBEHIND_END */
-	0,	/* OPTIMIZED    */
-	0,	/* PSEUDO       */
-	0,	/* REGEX_SET    */
-};
-#endif
-
 /* PL_regnode_name[] - Opcode/state names in string form, for debugging */
 
 #ifndef DOINIT
@@ -2262,6 +1732,1080 @@ EXTCONST char * const PL_regnode_name[] = {
 	"CUTGROUP_next_fail",    	/* REGNODE_MAX +0x26 */
 	"KEEPS_next",            	/* REGNODE_MAX +0x27 */
 	"KEEPS_next_fail",       	/* REGNODE_MAX +0x28 */
+};
+#endif /* DOINIT */
+
+
+/* PL_regnode_info[] - Opcode/state names in string form, for debugging */
+
+#ifndef DOINIT
+EXTCONST struct regnode_meta PL_regnode_info[];
+#else
+EXTCONST struct regnode_meta const PL_regnode_info[] = {
+    {
+        /* #0 op END */
+        .type = END,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #1 op SUCCEED */
+        .type = END,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #2 op SBOL */
+        .type = BOL,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #3 op MBOL */
+        .type = BOL,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #4 op SEOL */
+        .type = EOL,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #5 op MEOL */
+        .type = EOL,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #6 op EOS */
+        .type = EOL,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #7 op GPOS */
+        .type = GPOS,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #8 op BOUND */
+        .type = BOUND,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #9 op BOUNDL */
+        .type = BOUND,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #10 op BOUNDU */
+        .type = BOUND,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #11 op BOUNDA */
+        .type = BOUND,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #12 op NBOUND */
+        .type = NBOUND,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #13 op NBOUNDL */
+        .type = NBOUND,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #14 op NBOUNDU */
+        .type = NBOUND,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #15 op NBOUNDA */
+        .type = NBOUND,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #16 op REG_ANY */
+        .type = REG_ANY,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #17 op SANY */
+        .type = REG_ANY,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #18 op ANYOF */
+        .type = ANYOF,
+        .arg_len = EXTRA_SIZE(tregnode_ANYOF),
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #19 op ANYOFD */
+        .type = ANYOF,
+        .arg_len = EXTRA_SIZE(tregnode_ANYOFD),
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #20 op ANYOFL */
+        .type = ANYOF,
+        .arg_len = EXTRA_SIZE(tregnode_ANYOFL),
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #21 op ANYOFPOSIXL */
+        .type = ANYOF,
+        .arg_len = EXTRA_SIZE(tregnode_ANYOFPOSIXL),
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #22 op ANYOFH */
+        .type = ANYOFH,
+        .arg_len = EXTRA_SIZE(tregnode_ANYOFH),
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #23 op ANYOFHb */
+        .type = ANYOFH,
+        .arg_len = EXTRA_SIZE(tregnode_ANYOFHb),
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #24 op ANYOFHr */
+        .type = ANYOFH,
+        .arg_len = EXTRA_SIZE(tregnode_ANYOFHr),
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #25 op ANYOFHs */
+        .type = ANYOFH,
+        .arg_len = EXTRA_SIZE(tregnode_ANYOFHs),
+        .arg_len_varies = 1,
+        .off_by_arg = 0
+    },
+    {
+        /* #26 op ANYOFR */
+        .type = ANYOFR,
+        .arg_len = EXTRA_SIZE(tregnode_ANYOFR),
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #27 op ANYOFRb */
+        .type = ANYOFR,
+        .arg_len = EXTRA_SIZE(tregnode_ANYOFRb),
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #28 op ANYOFHbbm */
+        .type = ANYOFHbbm,
+        .arg_len = EXTRA_SIZE(tregnode_ANYOFHbbm),
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #29 op ANYOFM */
+        .type = ANYOFM,
+        .arg_len = EXTRA_SIZE(tregnode_ANYOFM),
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #30 op NANYOFM */
+        .type = ANYOFM,
+        .arg_len = EXTRA_SIZE(tregnode_NANYOFM),
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #31 op POSIXD */
+        .type = POSIXD,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #32 op POSIXL */
+        .type = POSIXD,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #33 op POSIXU */
+        .type = POSIXD,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #34 op POSIXA */
+        .type = POSIXD,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #35 op NPOSIXD */
+        .type = NPOSIXD,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #36 op NPOSIXL */
+        .type = NPOSIXD,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #37 op NPOSIXU */
+        .type = NPOSIXD,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #38 op NPOSIXA */
+        .type = NPOSIXD,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #39 op CLUMP */
+        .type = CLUMP,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #40 op BRANCH */
+        .type = BRANCH,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #41 op EXACT */
+        .type = EXACT,
+        .arg_len = 0,
+        .arg_len_varies = 1,
+        .off_by_arg = 0
+    },
+    {
+        /* #42 op LEXACT */
+        .type = EXACT,
+        .arg_len = EXTRA_SIZE(tregnode_LEXACT),
+        .arg_len_varies = 1,
+        .off_by_arg = 0
+    },
+    {
+        /* #43 op EXACTL */
+        .type = EXACT,
+        .arg_len = 0,
+        .arg_len_varies = 1,
+        .off_by_arg = 0
+    },
+    {
+        /* #44 op EXACTF */
+        .type = EXACT,
+        .arg_len = 0,
+        .arg_len_varies = 1,
+        .off_by_arg = 0
+    },
+    {
+        /* #45 op EXACTFL */
+        .type = EXACT,
+        .arg_len = 0,
+        .arg_len_varies = 1,
+        .off_by_arg = 0
+    },
+    {
+        /* #46 op EXACTFU */
+        .type = EXACT,
+        .arg_len = 0,
+        .arg_len_varies = 1,
+        .off_by_arg = 0
+    },
+    {
+        /* #47 op EXACTFAA */
+        .type = EXACT,
+        .arg_len = 0,
+        .arg_len_varies = 1,
+        .off_by_arg = 0
+    },
+    {
+        /* #48 op EXACTFAA_NO_TRIE */
+        .type = EXACT,
+        .arg_len = 0,
+        .arg_len_varies = 1,
+        .off_by_arg = 0
+    },
+    {
+        /* #49 op EXACTFUP */
+        .type = EXACT,
+        .arg_len = 0,
+        .arg_len_varies = 1,
+        .off_by_arg = 0
+    },
+    {
+        /* #50 op EXACTFLU8 */
+        .type = EXACT,
+        .arg_len = 0,
+        .arg_len_varies = 1,
+        .off_by_arg = 0
+    },
+    {
+        /* #51 op EXACT_REQ8 */
+        .type = EXACT,
+        .arg_len = 0,
+        .arg_len_varies = 1,
+        .off_by_arg = 0
+    },
+    {
+        /* #52 op LEXACT_REQ8 */
+        .type = EXACT,
+        .arg_len = EXTRA_SIZE(tregnode_LEXACT_REQ8),
+        .arg_len_varies = 1,
+        .off_by_arg = 0
+    },
+    {
+        /* #53 op EXACTFU_REQ8 */
+        .type = EXACT,
+        .arg_len = 0,
+        .arg_len_varies = 1,
+        .off_by_arg = 0
+    },
+    {
+        /* #54 op EXACTFU_S_EDGE */
+        .type = EXACT,
+        .arg_len = 0,
+        .arg_len_varies = 1,
+        .off_by_arg = 0
+    },
+    {
+        /* #55 op LNBREAK */
+        .type = LNBREAK,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #56 op TRIE */
+        .type = TRIE,
+        .arg_len = EXTRA_SIZE(tregnode_TRIE),
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #57 op TRIEC */
+        .type = TRIE,
+        .arg_len = EXTRA_SIZE(tregnode_TRIEC),
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #58 op AHOCORASICK */
+        .type = TRIE,
+        .arg_len = EXTRA_SIZE(tregnode_AHOCORASICK),
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #59 op AHOCORASICKC */
+        .type = TRIE,
+        .arg_len = EXTRA_SIZE(tregnode_AHOCORASICKC),
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #60 op NOTHING */
+        .type = NOTHING,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #61 op TAIL */
+        .type = NOTHING,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #62 op STAR */
+        .type = STAR,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #63 op PLUS */
+        .type = PLUS,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #64 op CURLY */
+        .type = CURLY,
+        .arg_len = EXTRA_SIZE(tregnode_CURLY),
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #65 op CURLYN */
+        .type = CURLY,
+        .arg_len = EXTRA_SIZE(tregnode_CURLYN),
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #66 op CURLYM */
+        .type = CURLY,
+        .arg_len = EXTRA_SIZE(tregnode_CURLYM),
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #67 op CURLYX */
+        .type = CURLY,
+        .arg_len = EXTRA_SIZE(tregnode_CURLYX),
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #68 op WHILEM */
+        .type = WHILEM,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #69 op OPEN */
+        .type = OPEN,
+        .arg_len = EXTRA_SIZE(tregnode_OPEN),
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #70 op CLOSE */
+        .type = CLOSE,
+        .arg_len = EXTRA_SIZE(tregnode_CLOSE),
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #71 op SROPEN */
+        .type = SROPEN,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #72 op SRCLOSE */
+        .type = SRCLOSE,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #73 op REF */
+        .type = REF,
+        .arg_len = EXTRA_SIZE(tregnode_REF),
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #74 op REFF */
+        .type = REF,
+        .arg_len = EXTRA_SIZE(tregnode_REFF),
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #75 op REFFL */
+        .type = REF,
+        .arg_len = EXTRA_SIZE(tregnode_REFFL),
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #76 op REFFU */
+        .type = REF,
+        .arg_len = EXTRA_SIZE(tregnode_REFFU),
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #77 op REFFA */
+        .type = REF,
+        .arg_len = EXTRA_SIZE(tregnode_REFFA),
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #78 op REFN */
+        .type = REF,
+        .arg_len = EXTRA_SIZE(tregnode_REFN),
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #79 op REFFN */
+        .type = REF,
+        .arg_len = EXTRA_SIZE(tregnode_REFFN),
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #80 op REFFLN */
+        .type = REF,
+        .arg_len = EXTRA_SIZE(tregnode_REFFLN),
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #81 op REFFUN */
+        .type = REF,
+        .arg_len = EXTRA_SIZE(tregnode_REFFUN),
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #82 op REFFAN */
+        .type = REF,
+        .arg_len = EXTRA_SIZE(tregnode_REFFAN),
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #83 op LONGJMP */
+        .type = LONGJMP,
+        .arg_len = EXTRA_SIZE(tregnode_LONGJMP),
+        .arg_len_varies = 0,
+        .off_by_arg = 1
+    },
+    {
+        /* #84 op BRANCHJ */
+        .type = BRANCHJ,
+        .arg_len = EXTRA_SIZE(tregnode_BRANCHJ),
+        .arg_len_varies = 0,
+        .off_by_arg = 1
+    },
+    {
+        /* #85 op IFMATCH */
+        .type = BRANCHJ,
+        .arg_len = EXTRA_SIZE(tregnode_IFMATCH),
+        .arg_len_varies = 0,
+        .off_by_arg = 1
+    },
+    {
+        /* #86 op UNLESSM */
+        .type = BRANCHJ,
+        .arg_len = EXTRA_SIZE(tregnode_UNLESSM),
+        .arg_len_varies = 0,
+        .off_by_arg = 1
+    },
+    {
+        /* #87 op SUSPEND */
+        .type = BRANCHJ,
+        .arg_len = EXTRA_SIZE(tregnode_SUSPEND),
+        .arg_len_varies = 0,
+        .off_by_arg = 1
+    },
+    {
+        /* #88 op IFTHEN */
+        .type = BRANCHJ,
+        .arg_len = EXTRA_SIZE(tregnode_IFTHEN),
+        .arg_len_varies = 0,
+        .off_by_arg = 1
+    },
+    {
+        /* #89 op GROUPP */
+        .type = GROUPP,
+        .arg_len = EXTRA_SIZE(tregnode_GROUPP),
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #90 op EVAL */
+        .type = EVAL,
+        .arg_len = EXTRA_SIZE(tregnode_EVAL),
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #91 op MINMOD */
+        .type = MINMOD,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #92 op LOGICAL */
+        .type = LOGICAL,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #93 op RENUM */
+        .type = BRANCHJ,
+        .arg_len = EXTRA_SIZE(tregnode_RENUM),
+        .arg_len_varies = 0,
+        .off_by_arg = 1
+    },
+    {
+        /* #94 op GOSUB */
+        .type = GOSUB,
+        .arg_len = EXTRA_SIZE(tregnode_GOSUB),
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #95 op GROUPPN */
+        .type = GROUPPN,
+        .arg_len = EXTRA_SIZE(tregnode_GROUPPN),
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #96 op INSUBP */
+        .type = INSUBP,
+        .arg_len = EXTRA_SIZE(tregnode_INSUBP),
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #97 op DEFINEP */
+        .type = DEFINEP,
+        .arg_len = EXTRA_SIZE(tregnode_DEFINEP),
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #98 op ENDLIKE */
+        .type = ENDLIKE,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #99 op OPFAIL */
+        .type = ENDLIKE,
+        .arg_len = EXTRA_SIZE(tregnode_OPFAIL),
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #100 op ACCEPT */
+        .type = ENDLIKE,
+        .arg_len = EXTRA_SIZE(tregnode_ACCEPT),
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #101 op VERB */
+        .type = VERB,
+        .arg_len = EXTRA_SIZE(tregnode_VERB),
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #102 op PRUNE */
+        .type = VERB,
+        .arg_len = EXTRA_SIZE(tregnode_PRUNE),
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #103 op MARKPOINT */
+        .type = VERB,
+        .arg_len = EXTRA_SIZE(tregnode_MARKPOINT),
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #104 op SKIP */
+        .type = VERB,
+        .arg_len = EXTRA_SIZE(tregnode_SKIP),
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #105 op COMMIT */
+        .type = VERB,
+        .arg_len = EXTRA_SIZE(tregnode_COMMIT),
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #106 op CUTGROUP */
+        .type = VERB,
+        .arg_len = EXTRA_SIZE(tregnode_CUTGROUP),
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #107 op KEEPS */
+        .type = KEEPS,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #108 op LOOKBEHIND_END */
+        .type = END,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #109 op OPTIMIZED */
+        .type = NOTHING,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #110 op PSEUDO */
+        .type = PSEUDO,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #111 op REGEX_SET */
+        .type = REGEX_SET,
+        .arg_len = EXTRA_SIZE(tregnode_REGEX_SET),
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #112 state TRIE_next */
+        .type = TRIE,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #113 state TRIE_next_fail */
+        .type = TRIE,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #114 state EVAL_B */
+        .type = EVAL,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #115 state EVAL_B_fail */
+        .type = EVAL,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #116 state EVAL_postponed_AB */
+        .type = EVAL,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #117 state EVAL_postponed_AB_fail */
+        .type = EVAL,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #118 state CURLYX_end */
+        .type = CURLYX,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #119 state CURLYX_end_fail */
+        .type = CURLYX,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #120 state WHILEM_A_pre */
+        .type = WHILEM,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #121 state WHILEM_A_pre_fail */
+        .type = WHILEM,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #122 state WHILEM_A_min */
+        .type = WHILEM,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #123 state WHILEM_A_min_fail */
+        .type = WHILEM,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #124 state WHILEM_A_max */
+        .type = WHILEM,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #125 state WHILEM_A_max_fail */
+        .type = WHILEM,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #126 state WHILEM_B_min */
+        .type = WHILEM,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #127 state WHILEM_B_min_fail */
+        .type = WHILEM,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #128 state WHILEM_B_max */
+        .type = WHILEM,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #129 state WHILEM_B_max_fail */
+        .type = WHILEM,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #130 state BRANCH_next */
+        .type = BRANCH,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #131 state BRANCH_next_fail */
+        .type = BRANCH,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #132 state CURLYM_A */
+        .type = CURLYM,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #133 state CURLYM_A_fail */
+        .type = CURLYM,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #134 state CURLYM_B */
+        .type = CURLYM,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #135 state CURLYM_B_fail */
+        .type = CURLYM,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #136 state IFMATCH_A */
+        .type = IFMATCH,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #137 state IFMATCH_A_fail */
+        .type = IFMATCH,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #138 state CURLY_B_min */
+        .type = CURLY,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #139 state CURLY_B_min_fail */
+        .type = CURLY,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #140 state CURLY_B_max */
+        .type = CURLY,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #141 state CURLY_B_max_fail */
+        .type = CURLY,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #142 state COMMIT_next */
+        .type = COMMIT,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #143 state COMMIT_next_fail */
+        .type = COMMIT,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #144 state MARKPOINT_next */
+        .type = MARKPOINT,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #145 state MARKPOINT_next_fail */
+        .type = MARKPOINT,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #146 state SKIP_next */
+        .type = SKIP,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #147 state SKIP_next_fail */
+        .type = SKIP,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #148 state CUTGROUP_next */
+        .type = CUTGROUP,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #149 state CUTGROUP_next_fail */
+        .type = CUTGROUP,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #150 state KEEPS_next */
+        .type = KEEPS,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #151 state KEEPS_next_fail */
+        .type = KEEPS,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    }
 };
 #endif /* DOINIT */
 

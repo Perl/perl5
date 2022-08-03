@@ -51,8 +51,8 @@ use strict;
 # id            Both    integer value for this opcode/state
 # optype        Both    Either 'op' or 'state'
 # line_num      Both    line_num number of the input file for this item.
-# type          Op      Type of node (aka regkind)
-# code          Op      Apparently not used
+# type          Op      Type of node (aka regnode_kind)
+# code          Op      Meta about the node, used to detect variable length nodes
 # suffix        Op      which regnode struct this uses, so if this is '1', it
 #                       uses 'struct regnode_1'
 # flags         Op      S for simple; V for varies
@@ -272,10 +272,10 @@ sub print_process_EXACTish {
     print $out <<EOP,
 
 /* Is 'op', known to be of type EXACT, folding? */
-#define isEXACTFish(op) (__ASSERT_(PL_regnode_kind[op] == EXACT) (PL_EXACTFish_bitmask & (1U << (op - EXACT))))
+#define isEXACTFish(op) (__ASSERT_(REGNODE_TYPE(op) == EXACT) (PL_EXACTFish_bitmask & (1U << (op - EXACT))))
 
 /* Do only UTF-8 target strings match 'op', known to be of type EXACT? */
-#define isEXACT_REQ8(op) (__ASSERT_(PL_regnode_kind[op] == EXACT) (PL_EXACT_REQ8_bitmask & (1U << (op - EXACT))))
+#define isEXACT_REQ8(op) (__ASSERT_(REGNODE_TYPE(op) == EXACT) (PL_EXACT_REQ8_bitmask & (1U << (op - EXACT))))
 
 #ifndef DOINIT
 EXTCONST U32 PL_EXACTFish_bitmask;
@@ -456,32 +456,6 @@ sub print_state_def_line
     print $fh "\n"; # Blank line separates groups for clarity
 }
 
-sub print_regkind {
-    my ($out)= @_;
-    print $out <<EOP;
-
-/* PL_regnode_kind[] What type of regop or state is this. */
-
-#ifndef DOINIT
-EXTCONST U8 PL_regnode_kind[];
-#else
-EXTCONST U8 PL_regnode_kind[] = {
-EOP
-    use Data::Dumper;
-    foreach my $node (@all) {
-        print Dumper($node) if !defined $node->{type} or !defined( $node->{name} );
-        printf $out "\t%*s\t/* %*s */\n",
-            -1 - $twidth, "$node->{type},", -$base_name_width, $node->{name};
-        print $out "\t/* ------------ States ------------- */\n"
-            if $node->{id} == $#ops and $node->{id} != $#all;
-    }
-
-    print $out <<EOP;
-};
-#endif
-EOP
-}
-
 sub print_typedefs {
     my ($out)= @_;
     print $out <<EOP;
@@ -515,23 +489,44 @@ EOP
 
 }
 
-sub print_regarglen {
+
+
+
+sub print_regnode_info {
     my ($out)= @_;
     print $out <<EOP;
 
-/* PL_regnode_arg_len[] - How large is the argument part of the node (in regnodes) */
+/* PL_regnode_info[] - Opcode/state names in string form, for debugging */
 
 #ifndef DOINIT
-EXTCONST U8 PL_regnode_arg_len[];
+EXTCONST struct regnode_meta PL_regnode_info[];
 #else
-EXTCONST U8 PL_regnode_arg_len[] = {
+EXTCONST struct regnode_meta const PL_regnode_info[] = {
 EOP
+    my @fields= qw(type arg_len arg_len_varies off_by_arg);
+    foreach my $node_idx (0..$#all) {
+        my $node= $all[$node_idx];
+        {
+            my $size= 0;
+            $size= "EXTRA_SIZE($node->{typedef})" if $node->{suffix};
+            $node->{arg_len}= $size;
 
-    foreach my $node (@ops) {
-        my $size= 0;
-        $size= "EXTRA_SIZE($node->{typedef})" if $node->{suffix};
-
-        printf $out "\t%*s\t/* %*s */\n", -37, "$size,", -$rwidth, $node->{name};
+        }
+        {
+            my $varies= 0;
+            $varies= 1 if $node->{code} and $node->{code}=~"str";
+            $node->{arg_len_varies}= $varies;
+        }
+        $node->{off_by_arg}= $node->{longj} || 0;
+        print $out "    {\n";
+        print $out "        /* #$node_idx $node->{optype} $node->{name} */\n";
+        foreach my $f_idx (0..$#fields) {
+            my $field= $fields[$f_idx];
+            printf $out  "        .%s = %s", $field, $node->{$field} // 0;
+            printf $out $f_idx == $#fields ? "\n" : ",\n";
+        }
+        print $out "    }";
+        print $out $node_idx==$#all ? "\n" : ",\n";
     }
 
     print $out <<EOP;
@@ -541,59 +536,8 @@ EOP
 EOP
 }
 
-sub print_regargvaries {
-    my ($out)= @_;
-    print $out <<EOP;
 
-/* PL_regnode_arg_len_varies[] - Is the size of the node determined by STR_SZ() macros?
-   Currently this is a boolean, but in the future it might turn into something
-   that uses more bits of the value to indicate that a different macro would be
-   used. */
-
-#ifndef DOINIT
-EXTCONST U8 PL_regnode_arg_len_varies[];
-#else
-EXTCONST U8 PL_regnode_arg_len_varies[] = {
-EOP
-    foreach my $node (@ops) {
-        my $varies= 0;
-        $varies= 1 if $node->{code}=~"str";
-
-        printf $out "\t%*s\t/* %*s */\n", -37, "$varies,", -$rwidth, $node->{name};
-    }
-
-    print $out <<EOP;
-};
-#endif /* DOINIT */
-
-EOP
-}
-
-sub print_reg_off_by_arg {
-    my ($out)= @_;
-    print $out <<EOP;
-
-/* PL_regnode_off_by_arg[] - Which argument holds the offset to the next node */
-
-#ifndef DOINIT
-EXTCONST U8 PL_regnode_off_by_arg[];
-#else
-EXTCONST U8 PL_regnode_off_by_arg[] = {
-EOP
-
-    foreach my $node (@ops) {
-        my $size= $node->{longj} || 0;
-
-        printf $out "\t%d,\t/* %*s */\n", $size, -$rwidth, $node->{name};
-    }
-
-    print $out <<EOP;
-};
-#endif
-EOP
-}
-
-sub print_reg_name {
+sub print_regnode_name {
     my ($out)= @_;
     print $out <<EOP;
 
@@ -608,8 +552,6 @@ EOP
     my $ofs= 0;
     my $sym= "";
     foreach my $node (@all) {
-        my $size= $node->{longj} || 0;
-
         printf $out "\t%*s\t/* $sym%#04x */\n",
             -3 - $base_name_width, qq("$node->{name}",), $node->{id} - $ofs;
         if ( $node->{id} == $#ops and @ops != @all ) {
@@ -867,11 +809,11 @@ my $out= open_new( 'regnodes.h', '>',
 print $out "#if $confine_to_core\n\n";
 print_typedefs($out);
 print_state_defs($out);
-print_regkind($out);
-print_regarglen($out);
-print_regargvaries($out);
-print_reg_off_by_arg($out);
-print_reg_name($out);
+
+print_regnode_name($out);
+print_regnode_info($out);
+
+
 print_reg_extflags_name($out);
 print_reg_intflags_name($out);
 print_process_flags($out);

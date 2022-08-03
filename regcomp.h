@@ -10,6 +10,7 @@
 
 #if ! defined(PERL_REGCOMP_H_) && (   defined(PERL_CORE)            \
                                    || defined(PERL_EXT_RE_BUILD))
+
 #define PERL_REGCOMP_H_
 
 #include "regcharclass.h"
@@ -1409,11 +1410,11 @@ typedef enum {
 #  define GET_REGCLASS_AUX_DATA(a,b,c,d,e,f)  get_re_gclass_aux_data(a,b,c,d,e,f)
 #endif
 
-#define REGNODE_TYPE(arg) PL_regnode_kind[(arg)]
-#define REGNODE_OFF_BY_ARG(node) PL_regnode_of_by_arg[(node)]
-#define REGNODE_ARG_LEN(node) PL_regnode_arg_len[(node)]
-#define REGNODE_ARG_LEN_VARIES(node) PL_regnode_arg_len_varies[(node)]
-#define REGNODE_NAME(node) PL_regnode_name[(node)]
+#define REGNODE_TYPE(node)              (PL_regnode_info[(node)].type)
+#define REGNODE_OFF_BY_ARG(node)        (PL_regnode_info[(node)].off_by_arg)
+#define REGNODE_ARG_LEN(node)           (PL_regnode_info[(node)].arg_len)
+#define REGNODE_ARG_LEN_VARIES(node)    (PL_regnode_info[(node)].arg_len_varies)
+#define REGNODE_NAME(node)              (PL_regnode_name[(node)])
 
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C)
 #include "reginline.h"
