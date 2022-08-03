@@ -4396,7 +4396,7 @@ S_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan,
 #ifdef EXPERIMENTAL_INPLACESCAN
         if (flags && !NEXT_OFF(n)) {
             DEBUG_PEEP("atch", val, depth, 0);
-            if (PL_regnode_off_by_arg[OP(n)]) {
+            if (REGNODE_OFF_BY_ARG(OP(n))) {
                 ARG_SET(n, val - n);
             }
             else {
@@ -4656,11 +4656,11 @@ S_rck_elide_nothing(pTHX_ regnode *node)
     PERL_ARGS_ASSERT_RCK_ELIDE_NOTHING;
 
     if (OP(node) != CURLYX) {
-        const int max = (PL_regnode_off_by_arg[OP(node)]
+        const int max = (REGNODE_OFF_BY_ARG(OP(node))
                         ? I32_MAX
                           /* I32 may be smaller than U16 on CRAYs! */
                         : (I32_MAX < U16_MAX ? I32_MAX : U16_MAX));
-        int off = (PL_regnode_off_by_arg[OP(node)] ? ARG(node) : NEXT_OFF(node));
+        int off = (REGNODE_OFF_BY_ARG(OP(node)) ? ARG(node) : NEXT_OFF(node));
         int noff;
         regnode *n = node;
 
@@ -4675,7 +4675,7 @@ S_rck_elide_nothing(pTHX_ regnode *node)
         ) {
             off += noff;
         }
-        if (PL_regnode_off_by_arg[OP(node)])
+        if (REGNODE_OFF_BY_ARG(OP(node)))
             ARG(node) = off;
         else
             NEXT_OFF(node) = off;
@@ -5908,7 +5908,7 @@ S_study_chunk(pTHX_
                         while ( nxt1 && (OP(nxt1) != WHILEM)) {
                             regnode *nnxt = regnext(nxt1);
                             if (nnxt == nxt) {
-                                if (PL_regnode_off_by_arg[OP(nxt1)])
+                                if (REGNODE_OFF_BY_ARG(OP(nxt1)))
                                     ARG_SET(nxt1, nxt2 - nxt1);
                                 else if (nxt2 - nxt1 < U16_MAX)
                                     NEXT_OFF(nxt1) = nxt2 - nxt1;
@@ -21484,7 +21484,7 @@ S_regtail(pTHX_ RExC_state_t * pRExC_state,
 
     /* Populate this node's next pointer */
     assert(val >= scan);
-    if (PL_regnode_off_by_arg[OP(REGNODE_p(scan))]) {
+    if (REGNODE_OFF_BY_ARG(OP(REGNODE_p(scan)))) {
         assert((UV) (val - scan) <= U32_MAX);
         ARG_SET(REGNODE_p(scan), val - scan);
     }
@@ -21583,7 +21583,7 @@ S_regtail_study(pTHX_ RExC_state_t *pRExC_state, regnode_offset p,
                       (IV)(val - scan)
         );
     });
-    if (PL_regnode_off_by_arg[OP(REGNODE_p(scan))]) {
+    if (REGNODE_OFF_BY_ARG(OP(REGNODE_p(scan)))) {
         assert((UV) (val - scan) <= U32_MAX);
         ARG_SET(REGNODE_p(scan), val - scan);
     }

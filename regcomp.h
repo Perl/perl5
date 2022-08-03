@@ -1410,6 +1410,7 @@ typedef enum {
 #endif
 
 #define REGNODE_TYPE(arg) PL_regnode_kind[(arg)]
+#define REGNODE_OFF_BY_ARG(node) PL_regnode_of_by_arg[(node)]
 
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C)
 #include "reginline.h"
