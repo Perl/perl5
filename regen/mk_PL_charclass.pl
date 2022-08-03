@@ -6,7 +6,13 @@ require './regen/regen_lib.pl';
 require './regen/charset_translations.pl';
 use Unicode::UCD 'prop_invlist';
 
-# This program outputs l1_charclass_tab.h, which defines the guts of the
+# Regenerate (overwriting only if changed):
+#
+#    l1_char_class_tab.h
+#
+# from information hardcoded into this script.
+
+# l1_charclass_tab.h defines the guts of the
 # PL_charclass table.  Each line is a bit map of properties that the Unicode
 # code point at the corresponding position in the table array has.  The first
 # line corresponds to code point 0x0, NULL, the last line to 0xFF.  For

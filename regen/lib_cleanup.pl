@@ -4,6 +4,14 @@ require './regen/regen_lib.pl';
 require './Porting/pod_lib.pl';
 our ($TAP, $Verbose);
 
+# Update Makefile.SH and win32/Makefile.* to remove directories that have
+# been created but should be removed on `make clean`
+# Regenerate (overwriting only if changed):
+#
+#    lib/.gitignore
+#
+# from information hardcoded into this script.
+
 # For processing later
 my @ext;
 # Lookup hash of all directories in lib/ in a clean distribution

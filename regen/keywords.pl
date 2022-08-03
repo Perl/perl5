@@ -2,7 +2,8 @@
 #
 # Regenerate (overwriting only if changed):
 #
-#    keywords.h keywords.c
+#    keywords.h
+#    keywords.c
 #
 # from information stored in the DATA section of this file.
 #

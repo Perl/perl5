@@ -17,7 +17,14 @@ require './lib/unicore/UCD.pl';
 require './regen/mph.pl';
 use re "/aa";
 
-# This program outputs charclass_invlists.h, which contains various inversion
+# Regenerate (overwriting only if changed):
+#
+#    charclass_invlists.h
+#    uni_keywords.h
+#
+# from information hardcoded into this script.
+
+# charclass_invlists.h contains various inversion
 # lists in the form of C arrays that are to be used as-is for inversion lists.
 # Thus, the lists it contains are essentially pre-compiled, and need only a
 # light-weight fast wrapper to make them usable at run-time.

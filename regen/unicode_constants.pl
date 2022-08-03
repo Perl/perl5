@@ -18,6 +18,12 @@ my $output_lists = 0;
 # reason.
 my $output_omitteds = 0;
 
+# Regenerate (overwriting only if changed):
+#
+#    unicode_constants.h
+#
+# from information stored in this file
+
 my $out_fh = open_new('unicode_constants.h', '>',
         {style => '*', by => $0,
                       from => "Unicode data"});
