@@ -14,6 +14,19 @@ BEGIN {
     use_ok('version', 0.9930);
 }
 
+sub radix { # Returns the radix character for the current locale.
+
+    # Use localeconv() on earlier perls; if it is just a stub, assume a dot.
+    if (! $^V or $^V lt v5.37.4) {
+        return localeconv()->{decimal_point} || ".";
+    }
+
+    # localeconv() may be a stub on some platforms.  But on later perls,
+    # langinfo() will always exist and returns the best available value.
+    use if $^V && $^V ge v5.37.4, 'I18N::Langinfo' => qw(langinfo RADIXCHAR);
+    return langinfo(RADIXCHAR);
+}
+
 SKIP: {
 	skip 'No locale testing for Perl < 5.6.0', 7 if $] < 5.006;
 	skip 'No locale testing without d_setlocale', 7
@@ -38,10 +51,10 @@ SKIP: {
 	while (<DATA>) {
 	    chomp;
 	    $loc = setlocale( LC_ALL, $_);
-	    last if $loc && localeconv()->{decimal_point} eq ',';
+	    last if $loc && radix() eq ',';
 	}
 	skip 'Cannot test locale handling without a comma locale', 6
-	    unless $loc and localeconv()->{decimal_point} eq ',';
+	    unless $loc and radix() eq ',';
 
 	setlocale(LC_NUMERIC, $loc);
 	$ver = 1.23;  # has to be floating point number
