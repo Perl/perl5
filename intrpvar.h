@@ -232,6 +232,10 @@ fallback by macros on platforms where L<perlapi/PERL_USE_GCC_BRACE_GROUPS>> is
 unavailable, and which would otherwise evaluate their SV parameter more than
 once.
 
+B<BUT BEWARE>, if this is used in a situation where something that is using it
+is in a call stack with something else that is using it, this variable would
+get zapped, leading to hard-to-diagnose errors.
+
 =cut
 */
 PERLVAR(I, Sv,		SV *)
@@ -251,6 +255,10 @@ better named something like C<PL_temp_strlen>.
 It is is typically used with C<SvPV> when one is actually planning to discard
 the returned length, (hence the length is "Not Applicable", which is how this
 variable got its name).
+
+B<BUT BEWARE>, if this is used in a situation where something that is using it
+is in a call stack with something else that is using it, this variable would
+get zapped, leading to hard-to-diagnose errors.
 
 It is usually more efficient to either declare a local variable and use that
 instead, or to use the C<SvPV_nolen> macro.
