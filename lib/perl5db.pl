@@ -532,7 +532,7 @@ BEGIN {
 use vars qw($VERSION $header);
 
 # bump to X.XX in blead, only use X.XX_XX in maint
-$VERSION = '1.74';
+$VERSION = '1.75';
 
 $header = "perl5db.pl version $VERSION";
 
@@ -3258,7 +3258,7 @@ deal with them instead of processing them in-line.
 =head4 C<y> - List lexicals in higher scope
 
 Uses C<PadWalker> to find the lexicals supplied as arguments in a scope
-above the current one and then displays then using C<dumpvar.pl>.
+above the current one and then displays them using F<dumpvar.pl>.
 
 =head3 COMMANDS NOT WORKING AFTER PROGRAM ENDS
 
