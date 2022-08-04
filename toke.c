@@ -852,7 +852,7 @@ Perl_lex_start(pTHX_ SV *line, PerlIO *rsfp, U32 flags)
     Newxz(parser->lex_shared, 1, LEXSHARED);
 
     if (line) {
-        STRLEN len;
+        Size_t len;
         const U8* first_bad_char_loc;
 
         s = SvPV_const(line, len);
