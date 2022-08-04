@@ -272,6 +272,16 @@ instead, or to use the C<SvPV_nolen> macro.
 PERLVAR(I, na,		STRLEN)		/* for use in SvPV when length is
                                            Not Applicable */
 
+/* The next two are for internal core use only.  Set before use as the system
+ * never clears them, nor copies them to another thread.
+ *
+ * B<BUT BEWARE>, if either of these is used in a situation where something
+ * that is using it is in a call stack with something else that is using it,
+ * the variable would get zapped, leading to hard-to-diagnose errors. */
+PERLVARI(I, scratch_pv_, char *, NULL)  /* for use in SvPV when length is
+                                           Not Applicable */
+PERLVARI(I, scratch_strlen_, STRLEN, 0)
+
 /* stat stuff */
 PERLVAR(I, statcache,	Stat_t)		/* _ */
 PERLVAR(I, statgv,	GV *)
