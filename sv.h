@@ -1901,19 +1901,91 @@ END_EXTERN_C
 #define SvPOK_or_cached_IV(sv) \
     (((SvFLAGS(sv) & (SVf_POK|SVs_GMG)) == SVf_POK) || ((SvFLAGS(sv) & (SVf_IOK|SVp_POK|SVs_GMG)) == (SVf_IOK|SVp_POK)))
 
+/* A helper macro for SvPV macros that have a 'len' parameter that needs to
+ * have written into it the length of the returned PV.  Too-many-to-easily-fix
+ * CPAN modules illegally have 'len' not be STRLEN, which is what they should
+ * be declaring it as.  Those have previously worked, as long as the PV length
+ * fits in the available size; for some, the problem space is such that no
+ * PV will ever be too long; for others, it is a bug waiting to happen, but
+ * rare for a PV to be too long.  The addition of the inline function
+ * Perl_SvPV_helper() (so as to avoid evaluating 'sv' more than once)
+ * exacerbated these issues.  This macro is used to restore these illegal calls
+ * to work as well as they previously did.
+ *
+ * If the passed in 'len' is the same size as a STRLEN object, and is unsigned,
+ * it should be compatible, and we just call Perl_Sv_PV_helper.  Otherwise,
+ * call svpv_helper_incompatible_len_() to compensate for the discrepancy.
+ *
+ * This is known at compile-time by using sizeof and constant folding, so the
+ * compiler should get rid of the conditional below.
+ */
+#  define svpv_helper_with_len_(sv, len, flags, type, non_trivial, or_null, \
+                                return_flags)                               \
+    ( (sizeof(len) == sizeof(STRLEN) && ((len) = -1, (len) > 0))            \
+      ? Perl_SvPV_helper(aTHX_ (sv), ((STRLEN *) &(len)), flags, type,      \
+                         non_trivial, or_null, return_flags)                \
+      : svpv_helper_incompatible_len_((sv), (len), flags, type,             \
+                                      non_trivial, or_null, return_flags))
+
+/* Used only when one of the SvPV macros is called with 'len' not being
+ * declared as STRLEN (or equivalent), svpv_helper_incompatible_len_()
+ * compensates for this by calling Perl_SvPV_helper() with a STRLEN parameter,
+ * and then sets 'len' to the returned value. */
+#if defined(PERL_CORE) || defined(PERL_EXT)
+
+    /* Don't tolerate this sloppiness in code maintained by p5p */
+#  define svpv_helper_incompatible_len_(sv, len, flags, type, non_trivial,  \
+                                        or_null, return_flags)              \
+    (assert_(0) (char *) 0)
+
+#elif defined(PERL_USE_GCC_BRACE_GROUPS)
+
+    /* With brace groups, we can just declare temporaries to use in a block
+     * that gets treated as an expression */
+#  define svpv_helper_incompatible_len_(sv, len, flags, type, non_trivial,  \
+                                        or_null, return_flags)              \
+    ({                                                                      \
+        STRLEN len_svpv_helper_incompatible_len;                            \
+                                                                            \
+        char * pv_svpv_helper_incompatible_len_ =                           \
+                      Perl_SvPV_helper(aTHX_ (sv),                          \
+                                       &len_svpv_helper_incompatible_len,   \
+                                       flags, type, non_trivial,            \
+                                       or_null, return_flags);              \
+        (len) = len_svpv_helper_incompatible_len;                           \
+        pv_svpv_helper_incompatible_len_;                                   \
+    })
+
+#else
+
+    /* But without brace groups, need to use per-interpreter scratch variables
+     * to store the results, at a slight loss of efficiency.  If somehow a
+     * recursive call got made, those scratch variables could get wrongly
+     * zapped, leading to mysterious bugs */
+#  define svpv_helper_incompatible_len_(sv, len, flags, type, non_trivial,  \
+                                        or_null, return_flags)              \
+         (PL_scratch_pv_ = Perl_SvPV_helper(aTHX_ (sv), &PL_scratch_strlen_,\
+                                   flags, type, non_trivial,                \
+                                   or_null, return_flags),                  \
+          (len) = PL_scratch_strlen_,                                       \
+          PL_scratch_pv_)
+
+#endif
+
 #define SvPV_flags(sv, len, flags)                                          \
-   Perl_SvPV_helper(aTHX_ sv, &len, flags, SvPVnormal_type_,                \
-                    Perl_sv_2pv_flags, FALSE, 0)
+   svpv_helper_with_len_(sv, len, flags, SvPVnormal_type_,                  \
+                         Perl_sv_2pv_flags, FALSE, 0)
 #define SvPV_flags_const(sv, len, flags)                                    \
-   ((const char*) Perl_SvPV_helper(aTHX_ sv, &len, flags, SvPVnormal_type_, \
-                                   Perl_sv_2pv_flags, FALSE,                \
-                                   SV_CONST_RETURN))
+   ((const char*) svpv_helper_with_len_(sv, len, flags, SvPVnormal_type_,   \
+                                        Perl_sv_2pv_flags, FALSE,           \
+                                        SV_CONST_RETURN))
+
 #define SvPV_flags_const_nolen(sv, flags)                                   \
    ((const char*) Perl_SvPV_helper(aTHX_ sv, NULL, flags, SvPVnormal_type_, \
                                    Perl_sv_2pv_flags, FALSE,                \
                                    SV_CONST_RETURN))
 #define SvPV_flags_mutable(sv, len, flags)                                  \
-    Perl_SvPV_helper(aTHX_ sv, &len, flags, SvPVnormal_type_,               \
+    svpv_helper_with_len_(sv, len, flags, SvPVnormal_type_,                 \
                      Perl_sv_2pv_flags, FALSE, SV_MUTABLE_RETURN)
 
 #define SvPV_nolen(sv)                                                      \
@@ -1934,13 +2006,13 @@ END_EXTERN_C
 #define SvPV_nomg_const_nolen(sv)   SvPV_flags_const_nolen(sv, 0)
 
 #define SvPV_force_flags(sv, len, flags)                                    \
-    Perl_SvPV_helper(aTHX_ sv, &len, flags, SvPVforce_type_,                \
+    svpv_helper_with_len_(sv, len, flags, SvPVforce_type_,                  \
                      Perl_sv_pvn_force_flags, FALSE, 0)
 #define SvPV_force_flags_nolen(sv, flags)                                   \
     Perl_SvPV_helper(aTHX_ sv, NULL, flags, SvPVforce_type_,                \
                      Perl_sv_pvn_force_flags, FALSE, 0)
 #define SvPV_force_flags_mutable(sv, len, flags)                            \
-    Perl_SvPV_helper(aTHX_ sv, &len, flags, SvPVforce_type_,                \
+    svpv_helper_with_len_(sv, len, flags, SvPVforce_type_,                  \
                      Perl_sv_pvn_force_flags, FALSE, SV_MUTABLE_RETURN)
 
 #define SvPV_force(sv, len)         SvPV_force_flags(sv, len, SV_GMAGIC)
@@ -1952,7 +2024,7 @@ END_EXTERN_C
 #define SvPV_force_nomg_nolen(sv)   SvPV_force_flags_nolen(sv, 0)
 
 #define SvPVutf8(sv, len)                                                   \
-    Perl_SvPV_helper(aTHX_ sv, &len, SV_GMAGIC, SvPVutf8_type_,             \
+    svpv_helper_with_len_(sv, len, SV_GMAGIC, SvPVutf8_type_,               \
                      Perl_sv_2pvutf8_flags, FALSE, 0)
 #define SvPVutf8_nomg(sv, len)                                              \
     Perl_SvPV_helper(aTHX_ sv, &len, 0, SvPVutf8_type_,                     \
@@ -1961,34 +2033,34 @@ END_EXTERN_C
     Perl_SvPV_helper(aTHX_ sv, NULL, SV_GMAGIC, SvPVutf8_type_,             \
                      Perl_sv_2pvutf8_flags, FALSE, 0)
 #define SvPVutf8_or_null(sv, len)                                           \
-    Perl_SvPV_helper(aTHX_ sv, &len, SV_GMAGIC, SvPVutf8_type_,             \
+    svpv_helper_with_len_(sv, len, SV_GMAGIC, SvPVutf8_type_,               \
                      Perl_sv_2pvutf8_flags, TRUE, 0)
 #define SvPVutf8_or_null_nomg(sv, len)                                      \
-    Perl_SvPV_helper(aTHX_ sv, &len, 0, SvPVutf8_type_,                     \
+    svpv_helper_with_len_(sv, len, 0, SvPVutf8_type_,                       \
                      Perl_sv_2pvutf8_flags, TRUE, 0)
 
 #define SvPVbyte(sv, len)                                                   \
-    Perl_SvPV_helper(aTHX_ sv, &len, SV_GMAGIC, SvPVbyte_type_,             \
+    svpv_helper_with_len_(sv, len, SV_GMAGIC, SvPVbyte_type_,               \
                      Perl_sv_2pvbyte_flags, FALSE, 0)
 #define SvPVbyte_nomg(sv, len)                                              \
-    Perl_SvPV_helper(aTHX_ sv, &len, 0, SvPVbyte_type_,                     \
+    svpv_helper_with_len_(sv, len, 0, SvPVbyte_type_,                       \
                      Perl_sv_2pvbyte_flags, FALSE, 0)
 #define SvPVbyte_nolen(sv)                                                  \
     Perl_SvPV_helper(aTHX_ sv, NULL, SV_GMAGIC, SvPVbyte_type_,             \
                      Perl_sv_2pvbyte_flags, FALSE, 0)
 #define SvPVbyte_or_null(sv, len)                                           \
-    Perl_SvPV_helper(aTHX_ sv, &len, SV_GMAGIC, SvPVbyte_type_,             \
+    svpv_helper_with_len_(sv, len, SV_GMAGIC, SvPVbyte_type_,               \
                      Perl_sv_2pvbyte_flags, TRUE, 0)
 #define SvPVbyte_or_null_nomg(sv, len)                                      \
-    Perl_SvPV_helper(aTHX_ sv, &len, 0, SvPVbyte_type_,                     \
+    svpv_helper_with_len_(sv, len, 0, SvPVbyte_type_,                       \
                      Perl_sv_2pvbyte_flags, TRUE, 0)
 
 #define SvPVutf8_force(sv, len)                                             \
-    Perl_SvPV_helper(aTHX_ sv, &len, 0, SvPVutf8_pure_type_,                \
+    svpv_helper_with_len_(sv, len, 0, SvPVutf8_pure_type_,                  \
                      Perl_sv_pvutf8n_force_wrapper, FALSE, 0)
 
 #define SvPVbyte_force(sv, len)                                             \
-    Perl_SvPV_helper(aTHX_ sv, &len, 0, SvPVbyte_pure_type_,                \
+    svpv_helper_with_len_(sv, len, 0, SvPVbyte_pure_type_,                  \
                      Perl_sv_pvbyten_force_wrapper, FALSE, 0)
 
 /* define FOOx(): Before FOO(x) was inlined, these were idempotent versions of
