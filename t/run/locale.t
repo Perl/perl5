@@ -183,11 +183,11 @@ EOF
 EOF
                 "format() does not look at LC_NUMERIC without 'use locale'");
 
-    {
-    fresh_perl_is(<<'EOF', "$difference\n", { eval $switches },
-    use POSIX;
-    use locale;
-    format STDOUT =
+            {
+                fresh_perl_is(<<'EOF', "$difference\n", { eval $switches },
+                use POSIX;
+                use locale;
+                format STDOUT =
 @.#
 4.179
 .
