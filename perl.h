@@ -556,7 +556,7 @@ and use C<L</PERL_UNUSED_VAR>> on that.
 =cut
 
 The __typeof__() is used instead of typeof() since typeof() is not
-available under strict C89, and because of compilers masquerading
+available under strict ISO C, and because of compilers masquerading
 as gcc (clang and icc), we want exactly the gcc extension
 __typeof__ and nothing else.
 
