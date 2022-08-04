@@ -106,6 +106,7 @@ select ($tie, undef, undef, $tie);
 ok("no crash from select $numeric_tie, undef, undef, $numeric_tie");
 
 SKIP: {
+    skip "Can't load modules under miniperl", 4 if is_miniperl;
     my $SKIP_CR = sub {
         skip shift, 4;
     };
