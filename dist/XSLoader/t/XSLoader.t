@@ -56,11 +56,14 @@ sub can_ok ($@) {
     ok $inv->can($methods[0]), "$inv->can('$methods[0]')";
 }
 sub skip ($$) {
-    my ($message, $tests) = @_;
+    my ($message, $count) = @_;
     die "bad skip"
-        if !$tests || $tests =~ /[^0-9]/;
-    $tests += $tests;
-    $passed_tests += $tests;
+        if !$count || $count =~ /[^0-9]/;
+    for (1..$count) {
+        $tests++;
+        print STDOUT "ok $tests # skip $message\n";
+    }
+    $passed_tests += $count;
     no warnings 'exiting';
     last SKIP;
 }
