@@ -22,6 +22,7 @@ BEGIN {
 }
 use Config;
 my $have_strtod = $Config{d_strtod} eq 'define';
+my $have_localeconv = defined $Config{d_locconv} && $Config{d_locconv} eq 'define';
 my @locales = find_locales( [ 'LC_ALL', 'LC_CTYPE', 'LC_NUMERIC' ]);
 skip_all("no locales available") unless @locales;
 note("locales available: @locales");
@@ -195,8 +196,12 @@ EOF
                 "format() looks at LC_NUMERIC with 'use locale'");
             }
 
-            {
-                fresh_perl_is(<<'EOF', ",,", { eval $switches },
+      SKIP: {
+                unless ($have_localeconv) {
+                    skip("no localeconv()", 1);
+                }
+                else {
+                    fresh_perl_is(<<'EOF', ",,", { eval $switches },
     use POSIX;
     no warnings "utf8";
     print localeconv()->{decimal_point};
@@ -204,6 +209,7 @@ EOF
     print localeconv()->{decimal_point};
 EOF
                 "localeconv() looks at LC_NUMERIC with and without 'use locale'");
+                }
             }
 
             {
