@@ -2217,7 +2217,7 @@ following:
 
 1) If a problem is about a link to an unknown module or man page that
    you know exists, re-run the command something like:
-      ./perl -I../lib porting/podcheck.t --add-link MODULE man_page ...
+      ./perl -I../lib porting/podcheck.t --add-link { MODULE | man_page ... }
    (MODULEs should look like Foo::Bar, and man_pages should look like
    bar(3c); don't do this for a module or man page that you aren't sure
    about; instead treat as another type of issue and follow the
