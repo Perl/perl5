@@ -1,7 +1,16 @@
 use strict;
 use warnings;
-use threads;
 use Test::More;
+
+BEGIN {
+    use Config;
+    if (! $Config{'useithreads'}) {
+        print("1..0 # SKIP Perl not compiled with 'useithreads'\n");
+        exit(0);
+    }
+}
+
+use threads;
 
 # test that the version documented in threads.pm pod matches
 # that of the code.

@@ -2967,21 +2967,75 @@ last-inclusive range.
  * are very useful when you want an integer to "dance" in a random way,
  * but you also never want it to become 0 and thus false.
  *
- * Obviously they leave x unchanged if it starts out as 0. */
+ * Obviously they leave x unchanged if it starts out as 0.
+ *
+ * We have two variants just because that can be helpful in certain
+ * places. There is no advantage to either, they are equally bad as each
+ * other as far RNG's go. Sufficiently random for many purposes, but
+ * insufficiently random for serious use as they fail important tests in
+ * the Test01 BigCrush RNG test suite by L’Ecuyer and Simard. (Note
+ * that Drand48 also fails BigCrush). The main point is they produce
+ * different sequences and in places where we want some randomlike
+ * behavior they are cheap and easy.
+ *
+ * Marsaglia was one of the early researchers into RNG testing and wrote
+ * the Diehard RNG test suite, which after his death become the
+ * Dieharder RNG suite, and was generally supplanted by the Test01 suite
+ * by L'Ecruyer and associates.
+ *
+ * There are dozens of shift parameters that create a pseudo random ring
+ * of integers 1..2^N-1, if you need a different sequence just read the
+ * paper and select a set of parameters. In fact, simply reversing the
+ * shift order from L/R/L to R/L/R should result in another valid
+ * example, but read the paper before you do that.
+ *
+ * PDF of the original paper:
+ *  https://www.jstatsoft.org/article/download/v008i14/916
+ * Wikipedia:
+ *  https://en.wikipedia.org/wiki/Xorshift
+ * Criticism:
+ *  https://www.iro.umontreal.ca/~lecuyer/myftp/papers/xorshift.pdf
+ * Test01:
+ *  http://simul.iro.umontreal.ca/testu01/tu01.html
+ * Diehard:
+ *  https://en.wikipedia.org/wiki/Diehard_tests
+ * Dieharder:
+ *  https://webhome.phy.duke.edu/~rgb/General/rand_rate/rand_rate.abs
+ *
+ */
 
-#define PERL_XORSHIFT64(x)      \
+/* 32 bit version */
+#define PERL_XORSHIFT32_A(x)    \
 STMT_START {                    \
-    (x) ^= (x) << 13;           \
-    (x) ^= (x) >> 17;           \
-    (x) ^= (x) << 5;            \
+    (x) ^= ((x) << 13);         \
+    (x) ^= ((x) >> 17);         \
+    (x) ^= ((x) << 5);          \
+} STMT_END
+
+/* 64 bit version */
+#define PERL_XORSHIFT64_A(x)    \
+STMT_START {                    \
+    (x) ^= ((x) << 13);         \
+    (x) ^= ((x) >> 7);          \
+    (x) ^= ((x) << 17);         \
 } STMT_END
 
 /* 32 bit version */
-#define PERL_XORSHIFT32(x)           \
+#define PERL_XORSHIFT32_B(x)    \
 STMT_START {                    \
-    (x) ^= (x) << 13;           \
-    (x) ^= (x) >> 7;            \
-    (x) ^= (x) << 17;           \
+    (x) ^= ((x) << 5);          \
+    (x) ^= ((x) >> 27);         \
+    (x) ^= ((x) << 8);          \
+} STMT_END
+
+/* 64 bit version - currently this is unused,
+ * it is provided here to complement the 32 bit _B
+ * variant which IS used. */
+#define PERL_XORSHIFT64_B(x)    \
+STMT_START {                    \
+    (x) ^= ((x) << 15);         \
+    (x) ^= ((x) >> 49);         \
+    (x) ^= ((x) << 26);         \
 } STMT_END
 
 

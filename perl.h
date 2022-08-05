@@ -8806,8 +8806,31 @@ END_EXTERN_C
 #  endif
 #endif
 
-#endif /* DOUBLE_HAS_NAN */
+/* these are used to faciliate the env var PERL_RAND_SEED,
+ * which allows consistent behavior from code that calls
+ * srand() with no arguments, either explicitly or implicitly.
+ */
+#define PERL_SRAND_OVERRIDE_NEXT() PERL_XORSHIFT32_A(PL_srand_override_next);
 
+#define PERL_SRAND_OVERRIDE_NEXT_INIT() STMT_START {    \
+    PL_srand_override = PL_srand_override_next;         \
+    PERL_SRAND_OVERRIDE_NEXT();                         \
+} STMT_END
+
+#define PERL_SRAND_OVERRIDE_GET(into) STMT_START {      \
+    into= PL_srand_override;                            \
+    PERL_SRAND_OVERRIDE_NEXT_INIT();                    \
+} STMT_END
+
+#define PERL_SRAND_OVERRIDE_NEXT_CHILD() STMT_START {   \
+    PERL_XORSHIFT32_B(PL_srand_override_next);          \
+    PERL_SRAND_OVERRIDE_NEXT_INIT();                    \
+} STMT_END
+
+#define PERL_SRAND_OVERRIDE_NEXT_PARENT() \
+    PERL_SRAND_OVERRIDE_NEXT()
+
+#endif /* DOUBLE_HAS_NAN */
 
 /*
 

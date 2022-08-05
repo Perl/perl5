@@ -27,6 +27,17 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 PERL_RAND_SEED
+
+Added a new environment variable C<PERL_RAND_SEED> which can be used to
+cause a perl program which uses C<rand> without using C<srand()>
+explicitly or which uses C<srand()> with no arguments to be repeatable.
+See L<perlrun>. This feature can be disabled at compile time by passing
+
+    -Accflags=-DNO_PERL_RAND_SEED
+
+to F<Configure> during the build process.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security

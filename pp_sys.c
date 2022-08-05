@@ -4232,6 +4232,7 @@ PP(pp_fork)
     sigset_t oldmask, newmask;
 #endif
 
+
     EXTEND(SP, 1);
     PERL_FLUSHALL_FOR_CHILD;
 #ifdef HAS_SIGPROCMASK
@@ -4259,6 +4260,9 @@ PP(pp_fork)
 #ifdef PERL_USES_PL_PIDSTATUS
         hv_clear(PL_pidstatus);	/* no kids, so don't wait for 'em */
 #endif
+        PERL_SRAND_OVERRIDE_NEXT_CHILD();
+    } else {
+        PERL_SRAND_OVERRIDE_NEXT_PARENT();
     }
     PUSHi(childpid);
     RETURN;
@@ -4271,6 +4275,19 @@ PP(pp_fork)
     childpid = PerlProc_fork();
     if (childpid == -1)
         RETPUSHUNDEF;
+    else if (childpid) {
+        /* we are in the parent */
+        PERL_SRAND_OVERRIDE_NEXT_PARENT();
+    }
+    else {
+        /* This is part of the logic supporting the env var
+         * PERL_RAND_SEED which causes use of rand() without an
+         * explicit srand() to use a deterministic seed. This logic is
+         * intended to give most forked children of a process a
+         * deterministic but different srand seed.
+         */
+        PERL_SRAND_OVERRIDE_NEXT_CHILD();
+    }
     PUSHi(childpid);
     RETURN;
 #else

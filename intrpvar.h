@@ -810,7 +810,9 @@ PERLVARI(I, perl_destruct_level, signed char,	0)
 
 PERLVAR(I, pad_reset_pending, bool)	/* reset pad on next attempted alloc */
 
-PERLVAR(I, srand_called, bool)
+PERLVARI(I, srand_called, bool, false)      /* has random_state been initialized yet? */
+PERLVARI(I, srand_override, U32, 0)         /* Should we use a deterministic sequence? */
+PERLVARI(I, srand_override_next, U32, 0)    /* Next item in the sequence */
 
 PERLVARI(I, numeric_underlying, bool, TRUE)
                                         /* Assume underlying locale numerics */
