@@ -3302,6 +3302,7 @@ SG   |bool   |sv_derived_from_svpvn  |NULLOK SV *sv			\
 #endif
 
 #if defined(PERL_IN_LOCALE_C)
+iR	|const char *|mortalized_pv_copy|NULLOK const char * const pv
 iTR	|const char *|save_to_buffer|NULLOK const char * string	\
 				    |NULLOK const char **buf	\
 				    |NN Size_t *buf_size	\

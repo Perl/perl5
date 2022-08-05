@@ -5614,6 +5614,12 @@ PERL_CALLCONV SV*	Perl_hfree_next_entry(pTHX_ HV *hv, STRLEN *indexp)
 #endif
 #if defined(PERL_IN_LOCALE_C)
 #ifndef PERL_NO_INLINE_FUNCTIONS
+PERL_STATIC_INLINE const char *	S_mortalized_pv_copy(pTHX_ const char * const pv)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_MORTALIZED_PV_COPY
+#endif
+
+#ifndef PERL_NO_INLINE_FUNCTIONS
 PERL_STATIC_INLINE const char *	S_save_to_buffer(const char * string, const char **buf, Size_t *buf_size, const Size_t offset)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_SAVE_TO_BUFFER	\
