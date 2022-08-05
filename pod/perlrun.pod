@@ -1405,6 +1405,32 @@ with tainting enabled.
 
 Perl may be built to ignore this variable.
 
+=item PERL_RAND_SEED
+X<PERL_RAND_SEED>
+
+When set to an integer value this value will be used to seed the perl
+internal random number generator used for C<rand()> when it is used
+without an explicit C<srand()> call or for when an explicit no-argument
+C<srand()> call is made.
+
+Normally calling C<rand()> prior to calling C<srand()> or calling
+C<srand()> explicitly with no arguments should result in the random
+number generator using "best efforts" to seed the generator state with a
+relatively high quality random seed. When this environment variable is
+set then the seeds used will be deterministically computed from the
+value provided in the env var in such a way that the application process
+and any forks or threads should continue to have their own unique seed but
+that the program may be run twice with identical results as far as
+C<rand()> goes (assuming all else is equal).
+
+PERL_RAND_SEED is intended for performance measurements and debugging
+and is explicitly NOT intended for stable testing. The only guarantee is
+that a specific perl executable will produce the same results twice in a
+row, there is no guarantee that the results will be the same between
+perl releases or on different architectures.
+
+Ignored if perl is run setuid or setgid.
+
 =back
 
 Perl also has environment variables that control how Perl handles data

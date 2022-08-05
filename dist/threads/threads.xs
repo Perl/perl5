@@ -807,6 +807,7 @@ S_ithread_create(
     thread->gimme = gimme;
     thread->state = exit_opt;
 
+
     /* "Clone" our interpreter into the thread's interpreter.
      * This gives thread access to "static data" and code.
      */
@@ -1171,6 +1172,7 @@ ithread_create(...)
         if (! thread) {
             XSRETURN_UNDEF;     /* Mutex already unlocked */
         }
+        PERL_SRAND_OVERRIDE_NEXT_PARENT();
         ST(0) = sv_2mortal(S_ithread_to_SV(aTHX_ Nullsv, thread, classname, FALSE));
 
         /* Let thread run. */
@@ -1179,7 +1181,6 @@ ithread_create(...)
         /* warning: releasing mutex 'thread->mutex' that was not held [-Wthread-safety-analysis] */
         MUTEX_UNLOCK(&thread->mutex);
         CLANG_DIAG_RESTORE_STMT;
-
         /* XSRETURN(1); - implied */
 
 

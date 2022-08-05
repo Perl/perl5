@@ -266,20 +266,43 @@ perl_construct(pTHXx)
 
     init_stacks();
 
-/* The PERL_INTERNAL_RAND_SEED set-up must be after init_stacks because it calls
+#if !defined(NO_PERL_RAND_SEED) || !defined(NO_PERL_INTERNAL_HASH_SEED)
+    bool sensitive_env_vars_allowed =
+            (PerlProc_getuid() == PerlProc_geteuid() &&
+             PerlProc_getgid() == PerlProc_getegid()) ? TRUE : FALSE;
+#endif
+
+/* The seed set-up must be after init_stacks because it calls
  * things that may put SVs on the stack.
  */
+#ifndef NO_PERL_RAND_SEED
+    if (sensitive_env_vars_allowed) {
+        UV seed= 0;
+        const char *env_pv;
+        if ((env_pv = PerlEnv_getenv("PERL_RAND_SEED")) &&
+            grok_number(env_pv, strlen(env_pv), &seed) == IS_NUMBER_IN_UV)
+        {
 
+            PL_srand_override_next = seed;
+            PERL_SRAND_OVERRIDE_NEXT_INIT();
+        }
+    }
+#endif
+
+    /* This is NOT the state used for C<rand()>, this is only
+     * used in internal functionality */
 #ifdef NO_PERL_INTERNAL_RAND_SEED
     Perl_drand48_init_r(&PL_internal_random_state, seed());
 #else
     {
         UV seed;
         const char *env_pv;
-        if (PerlProc_getuid() != PerlProc_geteuid() ||
-            PerlProc_getgid() != PerlProc_getegid() ||
+        if (
+            !sensitive_env_vars_allowed ||
             !(env_pv = PerlEnv_getenv("PERL_INTERNAL_RAND_SEED")) ||
-            grok_number(env_pv, strlen(env_pv), &seed) != IS_NUMBER_IN_UV) {
+            grok_number(env_pv, strlen(env_pv), &seed) != IS_NUMBER_IN_UV)
+        {
+            /* use a randomly generated seed */
             seed = seed();
         }
         Perl_drand48_init_r(&PL_internal_random_state, (U32)seed);
@@ -2037,6 +2060,12 @@ S_Internals_V(pTHX_ CV *cv)
 #  endif
 #  ifdef USE_THREAD_SAFE_LOCALE
                              " USE_THREAD_SAFE_LOCALE"
+#  endif
+#  ifdef NO_PERL_RAND_SEED
+                             " NO_PERL_RAND_SEED"
+#  endif
+#  ifdef NO_PERL_INTERNAL_RAND_SEED
+                             " NO_PERL_INTERNAL_RAND_SEED"
 #  endif
         ;
     PERL_UNUSED_ARG(cv);

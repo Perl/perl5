@@ -8480,7 +8480,7 @@ The point of the function is to "seed" the L<C<rand>|/rand EXPR>
 function so that L<C<rand>|/rand EXPR> can produce a different sequence
 each time you run your program.  When called with a parameter,
 L<C<srand>|/srand EXPR> uses that for the seed; otherwise it
-(semi-)randomly chooses a seed.  In either case, starting with Perl 5.14,
+(semi-)randomly chooses a seed (see below).  In either case, starting with Perl 5.14,
 it returns the seed.  To signal that your code will work I<only> on Perls
 of a recent vintage:
 
@@ -8511,6 +8511,20 @@ A typical use of the returned seed is for a test program which has too many
 combinations to test comprehensively in the time available to it each run.  It
 can test a random subset each time, and should there be a failure, log the seed
 used for that run so that it can later be used to reproduce the same results.
+
+If the C<PERL_RAND_SEED> environment variable is set to a non-negative
+integer during process startup then calls to C<srand()> with no
+arguments will initialize the perl random number generator with a
+consistent seed each time it is called, whether called explicitly with
+no arguments or implicitly via use of C<rand()>. The exact seeding that
+a given C<PERL_RAND_SEED> will produce is deliberately unspecified, but
+using different values for C<PERL_RAND_SEED> should produce different
+results. This is intended for debugging and performance analysis and is
+only guaranteed to produce consistent results between invocations of the
+same perl executable running the same code when all other factors are
+equal. The environment variable is read only once during process
+startup, and changing it during the program flow will not affect the
+currently running process. See L<perlrun> for more details.
 
 B<L<C<rand>|/rand EXPR> is not cryptographically secure.  You should not rely
 on it in security-sensitive situations.>  As of this writing, a

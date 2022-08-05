@@ -2920,7 +2920,17 @@ PP(pp_sin)
 PP(pp_rand)
 {
     if (!PL_srand_called) {
-        (void)seedDrand01((Rand_seed_t)seed());
+        Rand_seed_t s;
+        if (PL_srand_override) {
+            /* env var PERL_RAND_SEED has been set so the user wants
+             * consistent srand() initialization. */
+            PERL_SRAND_OVERRIDE_GET(s);
+        } else {
+            /* Pseudo random initialization from context state and possible
+             * random devices */
+            s= (Rand_seed_t)seed();
+        }
+        (void)seedDrand01(s);
         PL_srand_called = TRUE;
     }
     {
@@ -2979,7 +2989,13 @@ PP(pp_srand)
         }
     }
     else {
-        anum = seed();
+        if (PL_srand_override) {
+            /* env var PERL_RAND_SEED has been set so the user wants
+             * consistent srand() initialization. */
+            PERL_SRAND_OVERRIDE_GET(anum);
+        } else {
+            anum = seed();
+        }
     }
 
     (void)seedDrand01((Rand_seed_t)anum);

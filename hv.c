@@ -56,10 +56,10 @@ static const char S_strtab_error[]
  */
 #if IVSIZE == 8
 /* 64 bit version */
-#define XORSHIFT_RAND_BITS(x)   PERL_XORSHIFT64(x)
+#define XORSHIFT_RAND_BITS(x)   PERL_XORSHIFT64_A(x)
 #else
 /* 32 bit version */
-#define XORSHIFT_RAND_BITS(x)   PERL_XORSHIFT32(x)
+#define XORSHIFT_RAND_BITS(x)   PERL_XORSHIFT32_A(x)
 #endif
 
 #define UPDATE_HASH_RAND_BITS_KEY(key,klen)                             \

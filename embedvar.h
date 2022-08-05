@@ -280,6 +280,8 @@
 #define PL_sortstash		(vTHX->Isortstash)
 #define PL_splitstr		(vTHX->Isplitstr)
 #define PL_srand_called		(vTHX->Isrand_called)
+#define PL_srand_override	(vTHX->Isrand_override)
+#define PL_srand_override_next	(vTHX->Isrand_override_next)
 #define PL_stack_base		(vTHX->Istack_base)
 #define PL_stack_max		(vTHX->Istack_max)
 #define PL_stack_sp		(vTHX->Istack_sp)

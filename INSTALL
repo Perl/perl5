@@ -2755,6 +2755,12 @@ X<PERL_INTERNAL_RAND_SEED>
 If you configure perl with C<-Accflags=-DNO_PERL_INTERNAL_RAND_SEED>,
 perl will ignore the C<PERL_INTERNAL_RAND_SEED> environment variable.
 
+=head2 C<-DNO_PERL_RAND_SEED>
+X<PERL_RAND_SEED>
+
+If you configure perl with C<-Accflags=-DNO_PERL_RAND_SEED>,
+perl will ignore the C<PERL_RAND_SEED> environment variable.
+
 =head1 DOCUMENTATION
 
 Read the manual entries before running perl.  The main documentation
