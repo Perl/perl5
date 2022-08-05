@@ -4451,15 +4451,31 @@ diff -u a/ext/DynaLoader/dl_dyld.xs~ a/ext/DynaLoader/dl_dyld.xs
  #define DL_LOADONCEONLY
  
  #include "dlutils.c"	/* SaveError() etc	*/
-@@ -185,7 +191,7 @@
+@@ -104,7 +145,7 @@
+     dl_last_error = savepv(error);
+ }
+ 
+-static char *dlopen(char *path, int mode /* mode is ignored */)
++static char *dlopen(char *path)
+ {
+     int dyld_result;
+     NSObjectFileImage ofile;
+@@ -161,13 +202,11 @@
+ dl_load_file(filename, flags=0)
+     char *	filename
+     int		flags
+-    PREINIT:
+-    int mode = 1;
      CODE:
      DLDEBUG(1,PerlIO_printf(Perl_debug_log, "dl_load_file(%s,%x):\n", filename,flags));
      if (flags & 0x01)
 -	Perl_warn(aTHX_ "Can't make loaded symbols global on this platform while loading %s",filename);
+-    RETVAL = dlopen(filename, mode) ;
 +	Perl_warn_nocontext("Can't make loaded symbols global on this platform while loading %s",filename);
-     RETVAL = dlopen(filename, mode) ;
++    RETVAL = dlopen(filename);
      DLDEBUG(2,PerlIO_printf(Perl_debug_log, " libref=%x\n", RETVAL));
      ST(0) = sv_newmortal() ;
+     if (RETVAL == NULL)
 EOPATCH
         if ($major < 4 && !extract_from_file('util.c', qr/^form/m)) {
             apply_patch(<<'EOPATCH');
