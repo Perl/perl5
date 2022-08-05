@@ -272,9 +272,10 @@ regardless of what feature declarations are in scope.
 =head2 The 'postderef' and 'postderef_qq' features
 
 The 'postderef_qq' feature extends the applicability of L<postfix
-dereference syntax|perlref/Postfix Dereference Syntax> so that postfix array
-and scalar dereference are available in double-quotish interpolations. For
-example, it makes the following two statements equivalent:
+dereference syntax|perlref/Postfix Dereference Syntax> so that
+postfix array dereference, postfix scalar dereference, and
+postfix array highest index access are available in double-quotish interpolations.
+For example, it makes the following two statements equivalent:
 
   my $s = "[@{ $h->{a} }]";
   my $s = "[$h->{a}->@*]";
