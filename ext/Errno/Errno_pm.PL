@@ -43,6 +43,13 @@ else {
 }
 $errno_tmp = write_errno_pm();
 unlink "errno.c" if -f "errno.c";
+open my $OUT2, '>>', $errno_tmp
+    or die "Unable to open $errno_tmp for appending";
+# We place the code writing the modeline here because if it's too close to the
+# end of *this* file, this file becomes treated as 'readonly' if modelines are
+# activated.  See https://github.com/Perl/perl5/issues/20046.
+print $OUT2 "# ex: set ro:\n";
+close $OUT2 or die "Unable to close $errno_tmp after appending";
 rename $errno_tmp, $errno_pm or die "Cannot rename $errno_tmp to $errno_pm: $!";
 
 sub process_file {
@@ -469,7 +476,6 @@ under the same terms as Perl itself.
 
 =cut
 
-# ex: set ro:
 ESQ
 
     close OUT or die "Error closing $errno_tmp: $!";
