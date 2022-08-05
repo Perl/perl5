@@ -2960,6 +2960,31 @@ last-inclusive range.
 
 #endif
 
+/* These are simple Marsaglia XOR-SHIFT RNG's for 64 and 32 bits. These
+ * RNG's are of reasonable quality, very fast, and have the interesting
+ * property that provided 'x' is non-zero they create a cycle of 2^32-1
+ * or 2^64-1 "random" like numbers, with the exception of 0. Thus they
+ * are very useful when you want an integer to "dance" in a random way,
+ * but you also never want it to become 0 and thus false.
+ *
+ * Obviously they leave x unchanged if it starts out as 0. */
+
+#define PERL_XORSHIFT64(x)      \
+STMT_START {                    \
+    (x) ^= (x) << 13;           \
+    (x) ^= (x) >> 17;           \
+    (x) ^= (x) << 5;            \
+} STMT_END
+
+/* 32 bit version */
+#define PERL_XORSHIFT32(x)           \
+STMT_START {                    \
+    (x) ^= (x) << 13;           \
+    (x) ^= (x) >> 7;            \
+    (x) ^= (x) << 17;           \
+} STMT_END
+
+
 #endif  /* PERL_HANDY_H_ */
 
 /*
