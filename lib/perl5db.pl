@@ -532,7 +532,7 @@ BEGIN {
 use vars qw($VERSION $header);
 
 # bump to X.XX in blead, only use X.XX_XX in maint
-$VERSION = '1.75';
+$VERSION = '1.76';
 
 $header = "perl5db.pl version $VERSION";
 
@@ -8184,7 +8184,7 @@ B<|>I<dbcmd>        Run debugger command, piping DB::OUT to current pager.
 B<||>I<dbcmd>        Same as B<|>I<dbcmd> but DB::OUT is temporarily select()ed as well.
 B<\=> [I<alias> I<value>]    Define a command alias, or list current aliases.
 I<command>        Execute as a perl statement in current package.
-B<R>        Pure-man-restart of debugger, some of debugger state
+B<R>        Poor man's restart of the debugger, some of debugger state
         and command-line options may be lost.
         Currently the following settings are preserved:
         history, breakpoints and actions, debugger B<O>ptions
@@ -8360,7 +8360,7 @@ B<||>I<dbcmd>        Same as B<|>I<dbcmd> but DB::OUT is temporarilly select()ed
 B<\=> [I<alias> I<value>]    Define a command alias, or list current aliases.
 I<command>        Execute as a perl statement in current package.
 B<v>        Show versions of loaded modules.
-B<R>        Pure-man-restart of debugger, some of debugger state
+B<R>        Poor man's restart of the debugger, some of debugger state
         and command-line options may be lost.
         Currently the following settings are preserved:
         history, breakpoints and actions, debugger B<O>ptions
