@@ -3544,6 +3544,23 @@ sub patch_C {
     # This is ordered by $major, as it's likely that different platforms may
     # well want to share code.
 
+    if ($major == 0) {
+        apply_patch(<<'EOPATCH');
+diff --git a/proto.h b/proto.h
+index 9ffc6bbabc..16da198342 100644
+--- a/proto.h
++++ b/proto.h
+@@ -8,6 +8,7 @@
+ #endif
+ #ifdef OVERLOAD
+ SV*	amagic_call _((SV* left,SV* right,int method,int dir));
++bool Gv_AMupdate _((HV* stash));
+ #endif /* OVERLOAD */
+ OP*	append_elem _((I32 optype, OP* head, OP* tail));
+ OP*	append_list _((I32 optype, LISTOP* first, LISTOP* last));
+EOPATCH
+    }
+
     if ($major == 2 && extract_from_file('perl.c', qr/^\tfclose\(e_fp\);$/)) {
         # need to patch perl.c to avoid calling fclose() twice on e_fp when
         # using -e
