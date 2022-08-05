@@ -1688,6 +1688,7 @@
 #define unshare_hek_or_pvn(a,b,c,d)	S_unshare_hek_or_pvn(aTHX_ a,b,c,d)
 #  endif
 #  if defined(PERL_IN_LOCALE_C)
+#define mortalized_pv_copy(a)	S_mortalized_pv_copy(aTHX_ a)
 #define save_to_buffer		S_save_to_buffer
 #    if defined(USE_LOCALE)
 #define category_name		S_category_name
