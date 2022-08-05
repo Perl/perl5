@@ -2,15 +2,17 @@ use ExtUtils::MakeMaker;
 use Config;
 use strict;
 
-our $VERSION = "1.36";
+our $VERSION = "1.37";
 
 my %err = ();
 
 my $IsMSWin32 = $^O eq 'MSWin32';
 
-unlink "Errno.pm" if -f "Errno.pm";
-unlink "Errno.tmp" if -f "Errno.tmp";
-open OUT, '>', 'Errno.tmp' or die "Cannot open Errno.tmp: $!";
+my $errno_pm = 'Errno.pm';
+my $errno_tmp = 'Errno.tmp';
+unlink $errno_pm if -f $errno_pm;
+unlink $errno_tmp if -f $errno_tmp;
+open OUT, '>', $errno_tmp or die "Cannot open $errno_tmp: $!";
 select OUT;
 my $file;
 my @files = get_files();
@@ -43,9 +45,9 @@ else {
 }
 write_errno_pm();
 unlink "errno.c" if -f "errno.c";
-close OUT or die "Error closing Errno.tmp: $!";
+close OUT or die "Error closing $errno_tmp: $!";
 select STDOUT;
-rename "Errno.tmp", "Errno.pm" or die "Cannot rename Errno.tmp to Errno.pm: $!";
+rename $errno_tmp, $errno_pm or die "Cannot rename $errno_tmp to $errno_pm: $!";
 
 sub process_file {
     my($file) = @_;
