@@ -102,6 +102,7 @@ Devel::InnerPackage
 Devel::NYTProf
 Devel::NYTProf::Apache
 Devel::PPPort
+Devel::ptkdb
 Devel::SawAmpersand
 Devel::Spy
 dirfd(3)
@@ -335,6 +336,8 @@ Switch
 tar(1)
 Template::Declare
 Term::ReadKey
+Term::ReadLine::Gnu
+Term::ReadLine::Perl
 Term::UI
 Term::UI::History
 Test::Harness::TAP
