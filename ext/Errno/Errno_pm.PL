@@ -12,8 +12,6 @@ my $errno_pm = 'Errno.pm';
 my $errno_tmp = 'Errno.tmp';
 unlink $errno_pm if -f $errno_pm;
 unlink $errno_tmp if -f $errno_tmp;
-open OUT, '>', $errno_tmp or die "Cannot open $errno_tmp: $!";
-select OUT;
 my $file;
 my @files = get_files();
 if ($Config{gccversion} ne '' && $^O eq 'MSWin32') {
@@ -43,10 +41,8 @@ else {
 	process_file($file);
     }
 }
-write_errno_pm();
+$errno_tmp = write_errno_pm();
 unlink "errno.c" if -f "errno.c";
-close OUT or die "Error closing $errno_tmp: $!";
-select STDOUT;
 rename $errno_tmp, $errno_pm or die "Cannot rename $errno_tmp to $errno_pm: $!";
 
 sub process_file {
@@ -274,6 +270,9 @@ sub write_errno_pm {
 
     # Write Errno.pm
 
+    open OUT, '>', $errno_tmp or die "Cannot open $errno_tmp: $!";
+    select OUT;
+
     print <<"EDQ";
 # -*- buffer-read-only: t -*-
 #
@@ -473,4 +472,7 @@ under the same terms as Perl itself.
 # ex: set ro:
 ESQ
 
+    close OUT or die "Error closing $errno_tmp: $!";
+    select STDOUT;
+    return $errno_tmp;
 }
