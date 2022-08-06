@@ -23,7 +23,19 @@
 #endif
 
 #ifndef PERL_HASH_USE_SBOX32_ALSO
-#define PERL_HASH_USE_SBOX32_ALSO 1
+#  if defined(PERL_HASH_USE_SBOX32) || !defined(PERL_HASH_NO_SBOX32)
+#    define PERL_HASH_USE_SBOX32_ALSO 1
+#  else
+#    define PERL_HASH_USE_SBOX32_ALSO 0
+#  endif
+#endif
+
+#undef PERL_HASH_USE_SBOX32
+#undef PERL_HASH_NO_SBOX32
+#if PERL_HASH_USE_SBOX32_ALSO != 0
+#  define PERL_HASH_USE_SBOX32
+#else
+#  define PERL_HASH_NO_SBOX32
 #endif
 
 #ifndef SBOX32_MAX_LEN
@@ -34,6 +46,7 @@
 #include "sbox32_hash.h"
 
 #if defined(PERL_HASH_FUNC_SIPHASH)
+# define PERL_HASH_FUNC_DEFINE "PERL_HASH_FUNC_SIPHASH"
 # define PVT__PERL_HASH_FUNC "SIPHASH_2_4"
 # define PVT__PERL_HASH_WORD_TYPE U64
 # define PVT__PERL_HASH_WORD_SIZE sizeof(PVT__PERL_HASH_WORD_TYPE)
@@ -42,6 +55,7 @@
 # define PVT__PERL_HASH_SEED_STATE(seed,state) S_perl_siphash_seed_state(seed,state)
 # define PVT__PERL_HASH_WITH_STATE(state,str,len) S_perl_hash_siphash_2_4_with_state((state),(U8*)(str),(len))
 #elif defined(PERL_HASH_FUNC_SIPHASH13)
+# define PERL_HASH_FUNC_DEFINE "PERL_HASH_FUNC_SIPHASH13"
 # define PVT__PERL_HASH_FUNC "SIPHASH_1_3"
 # define PVT__PERL_HASH_WORD_TYPE U64
 # define PVT__PERL_HASH_WORD_SIZE sizeof(PVT__PERL_HASH_WORD_TYPE)
@@ -50,6 +64,7 @@
 # define PVT__PERL_HASH_SEED_STATE(seed,state) S_perl_siphash_seed_state(seed,state)
 # define PVT__PERL_HASH_WITH_STATE(state,str,len) S_perl_hash_siphash_1_3_with_state((state),(U8*)(str),(len))
 #elif defined(PERL_HASH_FUNC_ZAPHOD32)
+# define PERL_HASH_FUNC_DEFINE "PERL_HASH_FUNC_ZAPHOD32"
 # define PVT__PERL_HASH_FUNC "ZAPHOD32"
 # define PVT__PERL_HASH_WORD_TYPE U32
 # define PVT__PERL_HASH_WORD_SIZE sizeof(PVT__PERL_HASH_WORD_TYPE)
@@ -82,7 +97,7 @@
 #define PL_hash_seed ((U8 *)PL_hash_seed_w)
 #define PL_hash_state ((U8 *)PL_hash_state_w)
 
-#if PERL_HASH_USE_SBOX32_ALSO != 1
+#if PERL_HASH_USE_SBOX32_ALSO == 0
 # define PVT_PERL_HASH_FUNC                        PVT__PERL_HASH_FUNC
 # define PVT_PERL_HASH_SEED_BYTES                  PVT__PERL_HASH_SEED_BYTES
 # define PVT_PERL_HASH_STATE_BYTES                 PVT__PERL_HASH_STATE_BYTES

@@ -1923,6 +1923,7 @@ perl_parse(pTHXx_ XSINIT_t xsinit, int argc, char **argv, char **env)
 
 /* What this returns is subject to change.  Use the public interface in Config.
  */
+
 static void
 S_Internals_V(pTHX_ CV *cv)
 {
@@ -1959,29 +1960,15 @@ S_Internals_V(pTHX_ CV *cv)
 #  ifdef PERL_EXTERNAL_GLOB
                              " PERL_EXTERNAL_GLOB"
 #  endif
-#  ifdef PERL_HASH_FUNC_SIPHASH
-                             " PERL_HASH_FUNC_SIPHASH"
+#  ifdef PERL_HASH_FUNC_DEFINE
+/* note that this is different from the others, PERL_HASH_FUNC_DEFINE
+ * is a string which says which define was defined. */
+                             " " PERL_HASH_FUNC_DEFINE
 #  endif
-#  ifdef PERL_HASH_FUNC_SDBM
-                             " PERL_HASH_FUNC_SDBM"
-#  endif
-#  ifdef PERL_HASH_FUNC_DJB2
-                             " PERL_HASH_FUNC_DJB2"
-#  endif
-#  ifdef PERL_HASH_FUNC_SUPERFAST
-                             " PERL_HASH_FUNC_SUPERFAST"
-#  endif
-#  ifdef PERL_HASH_FUNC_MURMUR3
-                             " PERL_HASH_FUNC_MURMUR3"
-#  endif
-#  ifdef PERL_HASH_FUNC_ONE_AT_A_TIME
-                             " PERL_HASH_FUNC_ONE_AT_A_TIME"
-#  endif
-#  ifdef PERL_HASH_FUNC_ONE_AT_A_TIME_HARD
-                             " PERL_HASH_FUNC_ONE_AT_A_TIME_HARD"
-#  endif
-#  ifdef PERL_HASH_FUNC_ONE_AT_A_TIME_OLD
-                             " PERL_HASH_FUNC_ONE_AT_A_TIME_OLD"
+#  ifdef PERL_HASH_USE_SBOX32
+                             " PERL_HASH_USE_SBOX32"
+#  else
+                             " PERL_HASH_NO_SBOX32"
 #  endif
 #  ifdef PERL_IS_MINIPERL
                              " PERL_IS_MINIPERL"
@@ -2019,6 +2006,7 @@ S_Internals_V(pTHX_ CV *cv)
 #  ifdef PERL_USE_SAFE_PUTENV
                              " PERL_USE_SAFE_PUTENV"
 #  endif
+
 #  ifdef PERL_USE_UNSHARED_KEYS_IN_LARGE_HASHES
                              " PERL_USE_UNSHARED_KEYS_IN_LARGE_HASHES"
 #  endif

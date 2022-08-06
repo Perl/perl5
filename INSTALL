@@ -450,30 +450,39 @@ storage with 256 32-bit random values as well. In practice the RNG we use
 for seeding the SBOX32 storage is very efficient, and populating the table
 required for hashing even fairly long keys is negligible as we only do it
 during startup. By default we build with SBOX32 enabled, but you can change
-that by setting
+that by setting the C<PERL_HASH_USE_SBOX32_ALSO> in the Configure process,
+with something like this
 
-   PERL_HASH_USE_SBOX32_ALSO
+   -Accflags='-DPERL_HASH_USE_SBOX32_ALSO=0'
 
-to zero in configure. By default Perl will use SBOX32 to hash strings 24 bytes
-or shorter, you can change this length by setting
+or alternatively you can use the simple define C<PERL_HASH_NO_SBOX32> like this:
 
-    SBOX32_MAX_LEN
+    -Accflags='-DPERL_HASH_NO_SBOX32'
 
-to the desired length, with the maximum length being 256.
+By default Perl will use SBOX32 to hash strings 24 bytes
+or shorter, you can change this length by setting C<SBOX32_MAX_LEN>
+to the desired length, with the maximum length being 256. For example with
+this:
+
+    -Accflags='-DSBOX_MAX_LEN=128'
 
 As of Perl 5.18 the order returned by keys(), values(), and each() is
 non-deterministic and distinct per hash, and the insert order for
 colliding keys is randomized as well, and perl allows for controlling this
 by the PERL_PERTURB_KEYS environment setting. You can disable this behavior
-entirely with the define
+entirely with the define C<PERL_PERTURB_KEYS_DISABLED> with
 
-    PERL_PERTURB_KEYS_DISABLED
+    -Accflags='-DPERL_PERTURB_KEYS_DISABLED'
 
 You can disable the environment variable checks and compile time specify
-the type of key traversal randomization to be used by defining one of these:
+the type of key traversal randomization to be used by defining either
+C<PERL_PERTURB_KEYS_RANDOM> or C<PERL_PERTURB_KEYS_DETERMINISTIC> with
 
-    PERL_PERTURB_KEYS_RANDOM
-    PERL_PERTURB_KEYS_DETERMINISTIC
+    -Accflags='-DPERL_PERTURB_KEYS_RANDOM'
+
+or
+
+    -Accflags='-DPERL_PERTURB_KEYS_DETERMINISTIC'
 
 Since Perl 5.18 the seed used for the hash function is randomly selected
 at process start, which can be overridden by specifying a seed by setting
@@ -489,9 +498,9 @@ DETERMINISTIC in this context means "if everything else is kept the same
 the same results should be observed".
 
 You can change this behavior so that your perl is built with a hard coded
-seed with the define
+seed with the define C<NO_HASH_SEED> by providing to Configure
 
-    NO_HASH_SEED
+    -Accflags='-DNO_HASH_SEED'
 
 Note that if you do this you should modify the code in hv_func.h to specify
 your own key. In the future this define may be renamed and replaced with one
