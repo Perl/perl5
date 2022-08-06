@@ -1741,7 +1741,7 @@ EXTCONST char * const PL_regnode_name[] = {
 #ifndef DOINIT
 EXTCONST struct regnode_meta PL_regnode_info[];
 #else
-EXTCONST struct regnode_meta const PL_regnode_info[] = {
+EXTCONST struct regnode_meta PL_regnode_info[] = {
     {
         /* #0 op END */
         .type = END,
