@@ -501,7 +501,7 @@ sub print_regnode_info {
 #ifndef DOINIT
 EXTCONST struct regnode_meta PL_regnode_info[];
 #else
-EXTCONST struct regnode_meta const PL_regnode_info[] = {
+EXTCONST struct regnode_meta PL_regnode_info[] = {
 EOP
     my @fields= qw(type arg_len arg_len_varies off_by_arg);
     foreach my $node_idx (0..$#all) {
