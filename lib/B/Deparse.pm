@@ -4305,6 +4305,17 @@ sub pp_gv {
     return $self->maybe_qualify("", $self->gv_name($gv));
 }
 
+sub pp_aelemfastlex_store {
+    my $self = shift;
+    my($op, $cx) = @_;
+    my $name = $self->padname($op->targ);
+    $name =~ s/^@/\$/;
+    my $i = $op->private;
+    $i -= 256 if $i > 127;
+    my $val = $self->deparse($op->first, 7);
+    return $self->maybe_parens("${name}[$i] = $val", $cx, 7);
+}
+
 sub pp_aelemfast_lex {
     my $self = shift;
     my($op, $cx) = @_;

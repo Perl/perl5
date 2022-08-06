@@ -169,6 +169,56 @@ PP(pp_padsv_store)
     RETURN;
 }
 
+/* A mashup of simplified AELEMFAST_LEX + SASSIGN OPs */
+
+PP(pp_aelemfastlex_store)
+{
+    dSP;
+    OP * const op = PL_op;
+    SV* const val = TOPs; /* RHS value to assign */
+    AV * const av = MUTABLE_AV(PAD_SV(op->op_targ));
+    const I8 key   = (I8)PL_op->op_private;
+    SV * targ = NULL;
+
+    /* !OPf_STACKED is not handled by this OP */
+    assert(op->op_flags & OPf_STACKED);
+
+    /* Inlined, simplified pp_aelemfast here */
+    assert(SvTYPE(av) == SVt_PVAV);
+    assert(key >= 0);
+
+    /* inlined av_fetch() for simple cases ... */
+    if (!SvRMAGICAL(av) && key <= AvFILLp(av)) {
+        targ = AvARRAY(av)[key];
+    }
+    /* ... else do it the hard way */
+    if (!targ) {
+        SV **svp = av_fetch(av, key, 1);
+
+        if (svp)
+            targ = *svp;
+        else
+            DIE(aTHX_ PL_no_aelem, (int)key);
+    }
+
+    /* Inlined, simplified pp_sassign from here */
+    assert(TAINTING_get || !TAINT_get);
+    if (UNLIKELY(TAINT_get) && !SvTAINTED(val))
+        TAINT_NOT;
+
+    if (
+      UNLIKELY(SvTEMP(targ)) && !SvSMAGICAL(targ) && SvREFCNT(targ) == 1 &&
+      (!isGV_with_GP(targ) || SvFAKE(targ)) && ckWARN(WARN_MISC)
+    )
+        Perl_warner(aTHX_
+            packWARN(WARN_MISC), "Useless assignment to a temporary"
+        );
+    SvSetMagicSV(targ, val);
+
+    SETs(targ);
+    RETURN;
+}
+
 PP(pp_sassign)
 {
     dSP;

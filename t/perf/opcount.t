@@ -886,4 +886,36 @@ test_opcount(0, 'my $y= 1; my @x= \($y= undef);',
                     srefgen     => 1,
                 });
 
+# aelemfast_lex + sassign are replaced by a combined OP
+test_opcount(0, "simple aelemfast_lex + sassign replacement",
+                sub { my @x; $x[0] = "foo" },
+                {
+                    aelemfast_lex      => 0,
+                    aelemfastlex_store => 1,
+                    padav              => 1,
+                    sassign            => 0,
+                });
+
+# aelemfast_lex + sassign are not replaced by a combined OP
+# when key <0 (not handled, to keep the pp_ function simple
+test_opcount(0, "no aelemfast_lex + sassign replacement with neg key",
+                sub { my @x = (1,2); $x[-1] = 7 },
+                {
+                    aelemfast_lex      => 1,
+                    aelemfastlex_store => 0,
+                    padav              => 1,
+                    sassign            => 1,
+                });
+
+# aelemfast_lex + sassign optimization does not disrupt multideref
+test_opcount(0, "no aelemfast_lex + sassign replacement with multideref",
+                sub { my @x = ([1,2]); $x[0][1] = 1; },
+                {
+                    aelemfast_lex      => 0,
+                    aelemfastlex_store => 0,
+                    multideref         => 1,
+                    padav              => 1,
+                    sassign            => 1,
+                });
+
 done_testing();

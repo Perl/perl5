@@ -199,7 +199,7 @@ use strict;
     # find which ops use 0,1,2,3 or 4 bits of op_private for arg count info
 
     $args0{$_} = 1 for qw(entersub avhvswitch
-                       rv2hv);                  # UNOPs that usurp bit 0
+                       rv2hv aelemfastlex_store);                  # UNOPs that usurp bit 0
 
     # Historically, bit ops used bit 0 to indicate 'use integer' in scope;
     # For now, ban use of bits 0..1 as an arg count, in order to detect
@@ -627,7 +627,7 @@ addbits('padrange',
 
 
 
-for (qw(aelemfast aelemfast_lex)) {
+for (qw(aelemfast aelemfast_lex aelemfastlex_store)) {
     addbits($_,
         '0..7' =>  {
                 label     => 'key',

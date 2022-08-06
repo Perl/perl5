@@ -3951,6 +3951,55 @@ Perl_rpeep(pTHX_ OP *o)
                 /* NULL the previous op ptrs, so rpeep can continue */
                 oldoldop = NULL; oldop = NULL;
             }
+
+            /* Combine a simple SASSIGN OP with an AELEMFAST_LEX lvalue
+             * into a single OP. This optimization covers arbitrarily
+             * complicated RHS OP trees. */
+
+            if (!(o->op_private & (OPpASSIGN_BACKWARDS|OPpASSIGN_CV_TO_GV))
+                && (lval->op_type == OP_NULL) && (lval->op_private == 2) &&
+                (cBINOPx(lval)->op_first->op_type == OP_AELEMFAST_LEX) &&
+                ((I8)(cBINOPx(lval)->op_first->op_private) >= 0)
+            ) {
+                OP * lex = cBINOPx(lval)->op_first;
+                /* SASSIGN's bitfield flags, such as op_moresib and
+                 * op_slabbed, will be carried over unchanged. */
+                OpTYPE_set(o, OP_AELEMFASTLEX_STORE);
+
+                /* Explicitly craft the new OP's op_flags, carrying
+                 * some bits over from the SASSIGN */
+                o->op_flags = (
+                    OPf_KIDS | OPf_STACKED |
+                    (o->op_flags & (OPf_WANT|OPf_PARENS))
+                );
+
+                /* Copy the AELEMFAST_LEX op->private, which contains
+                 * the key index. */
+                o->op_private = lex->op_private;
+
+                /* Take the targ from the AELEMFAST_LEX */
+                o->op_targ = lex->op_targ; lex->op_targ = 0;
+
+                assert(oldop->op_type == OP_AELEMFAST_LEX);
+                /* oldoldop can be arbitrarily deep in the RHS OP tree */
+                oldoldop->op_next = o;
+
+                /* Even when (rhs != oldoldop), rhs might still have a
+                 * relevant op_next ptr to lex. (Updating it here can
+                 * also cause other ops in the RHS to get the desired
+                 * op_next pointer, presumably thanks to the finalizer.)
+                 * This is definitely truewhen rhs is OP_NULL with a
+                 * LOGOP kid (e.g. orassign). There may be other cases. */
+                if (rhs->op_next == lex)
+                    rhs->op_next = o;
+
+                /* Now null-out the AELEMFAST_LEX */
+                op_null(lex);
+
+                /* NULL the previous op ptrs, so rpeep can continue */
+                oldop = oldoldop; oldoldop = NULL;
+            }
+
             break;
         }
 

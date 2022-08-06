@@ -12,6 +12,7 @@ PERL_CALLCONV OP *Perl_pp_add(pTHX) __attribute__visibility__("hidden");
 PERL_CALLCONV OP *Perl_pp_aeach(pTHX) __attribute__visibility__("hidden");
 PERL_CALLCONV OP *Perl_pp_aelem(pTHX) __attribute__visibility__("hidden");
 PERL_CALLCONV OP *Perl_pp_aelemfast(pTHX) __attribute__visibility__("hidden");
+PERL_CALLCONV OP *Perl_pp_aelemfastlex_store(pTHX) __attribute__visibility__("hidden");
 PERL_CALLCONV OP *Perl_pp_akeys(pTHX) __attribute__visibility__("hidden");
 PERL_CALLCONV OP *Perl_pp_alarm(pTHX) __attribute__visibility__("hidden");
 PERL_CALLCONV OP *Perl_pp_and(pTHX) __attribute__visibility__("hidden");
