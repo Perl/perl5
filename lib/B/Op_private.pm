@@ -254,6 +254,7 @@ $bits{aeach}{0} = $bf[0];
 @{$bits{aelem}}{5,4,1,0} = ($bf[8], $bf[8], $bf[1], $bf[1]);
 @{$bits{aelemfast}}{7,6,5,4,3,2,1,0} = ($bf[6], $bf[6], $bf[6], $bf[6], $bf[6], $bf[6], $bf[6], $bf[6]);
 @{$bits{aelemfast_lex}}{7,6,5,4,3,2,1,0} = ($bf[6], $bf[6], $bf[6], $bf[6], $bf[6], $bf[6], $bf[6], $bf[6]);
+@{$bits{aelemfastlex_store}}{7,6,5,4,3,2,1,0} = ($bf[6], $bf[6], $bf[6], $bf[6], $bf[6], $bf[6], $bf[6], $bf[6]);
 $bits{akeys}{0} = $bf[0];
 $bits{alarm}{0} = $bf[0];
 $bits{and}{0} = $bf[0];

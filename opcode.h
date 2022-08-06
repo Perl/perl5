@@ -288,6 +288,7 @@ EXTCONST char* const PL_op_name[] = {
 	"rv2av",
 	"aelemfast",
 	"aelemfast_lex",
+	"aelemfastlex_store",
 	"aelem",
 	"aslice",
 	"kvaslice",
@@ -712,6 +713,7 @@ EXTCONST char* const PL_op_desc[] = {
 	"array dereference",
 	"constant array element",
 	"constant lexical array element",
+	"const lexical array element store",
 	"array element",
 	"array slice",
 	"index/value array slice",
@@ -1139,6 +1141,7 @@ EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
 	Perl_pp_rv2av,
 	Perl_pp_aelemfast,
 	Perl_pp_aelemfast_lex,	/* implemented by Perl_pp_aelemfast */
+	Perl_pp_aelemfastlex_store,
 	Perl_pp_aelem,
 	Perl_pp_aslice,
 	Perl_pp_kvaslice,
@@ -1562,6 +1565,7 @@ EXT Perl_check_t PL_check[] /* or perlvars.h */
 	Perl_ck_rvconst,	/* rv2av */
 	Perl_ck_null,		/* aelemfast */
 	Perl_ck_null,		/* aelemfast_lex */
+	Perl_ck_null,		/* aelemfastlex_store */
 	Perl_ck_null,		/* aelem */
 	Perl_ck_null,		/* aslice */
 	Perl_ck_null,		/* kvaslice */
@@ -1986,6 +1990,7 @@ EXTCONST U32 PL_opargs[] = {
 	0x00000148,	/* rv2av */
 	0x00013644,	/* aelemfast */
 	0x00013040,	/* aelemfast_lex */
+	0x00013140,	/* aelemfastlex_store */
 	0x00013204,	/* aelem */
 	0x00023401,	/* aslice */
 	0x00023401,	/* kvaslice */
@@ -2671,6 +2676,7 @@ EXTCONST I16  PL_op_private_bitdef_ix[] = {
      118, /* rv2av */
      125, /* aelemfast */
      125, /* aelemfast_lex */
+     125, /* aelemfastlex_store */
      126, /* aelem */
      131, /* aslice */
      134, /* kvaslice */
@@ -3003,7 +3009,7 @@ EXTCONST U16  PL_op_private_bitdefs[] = {
     0x32cc, 0x0067, /* vec */
     0x3438, 0x05b4, 0x4730, 0x018f, /* index, rindex */
     0x31dc, 0x3858, 0x05b4, 0x32cc, 0x40a8, 0x4384, 0x0003, /* rv2av */
-    0x025f, /* aelemfast, aelemfast_lex */
+    0x025f, /* aelemfast, aelemfast_lex, aelemfastlex_store */
     0x31dc, 0x30d8, 0x03d6, 0x32cc, 0x0067, /* aelem, helem */
     0x31dc, 0x32cc, 0x40a9, /* aslice, hslice */
     0x32cd, /* kvaslice, kvhslice */
@@ -3187,6 +3193,7 @@ EXTCONST U8 PL_op_private_valid[] = {
     /* RV2AV      */ (OPpARG1_MASK|OPpHINT_STRICT_REFS|OPpSLICEWARNING|OPpMAYBE_LVSUB|OPpTRUEBOOL|OPpOUR_INTRO|OPpLVAL_INTRO),
     /* AELEMFAST  */ (255),
     /* AELEMFAST_LEX */ (255),
+    /* AELEMFASTLEX_STORE */ (255),
     /* AELEM      */ (OPpARG2_MASK|OPpMAYBE_LVSUB|OPpDEREF|OPpLVAL_DEFER|OPpLVAL_INTRO),
     /* ASLICE     */ (OPpSLICEWARNING|OPpMAYBE_LVSUB|OPpLVAL_INTRO),
     /* KVASLICE   */ (OPpMAYBE_LVSUB),

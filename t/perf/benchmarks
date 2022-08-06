@@ -1402,6 +1402,22 @@
         code    => '$r = []; $r = $r1;',
     },
 
+    'expr::sassign::aelemfast_lex_assign' => {
+        desc    => 'lexical $x[0] = 1',
+        setup   => 'my @x',
+        code    => '$x[0] = 1',
+    },
+    'expr::sassign::aelemfast_lex_assign_ref' => {
+        desc    => 'lexical $x[0] = []',
+        setup   => 'my @x',
+        code    => '$x[0] = []',
+    },
+    'expr::sassign::aelemfast_lex_assign_deref' => {
+        desc    => 'lexical $x[0][1]',
+        setup   => 'my @x = ([1,2])',
+        code    => '$x[0][1] = 1',
+    },
+
 
     'func::grep::bool0' => {
         desc    => 'grep returning 0 items in boolean context',
