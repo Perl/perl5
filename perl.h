@@ -5682,6 +5682,9 @@ EXTCONST char PL_bincompat_options[] =
 #  ifdef MYMALLOC
                              " MYMALLOC"
 #  endif
+#  ifdef NO_HASH_SEED
+                             " NO_HASH_SEED"
+#  endif
 #  ifdef PERLIO_LAYERS
                              " PERLIO_LAYERS"
 #  endif
@@ -5690,6 +5693,16 @@ EXTCONST char PL_bincompat_options[] =
 #  endif
 #  ifdef PERL_DEBUG_READONLY_OPS
                              " PERL_DEBUG_READONLY_OPS"
+#  endif
+#  ifdef PERL_HASH_FUNC_DEFINE
+/* note that this is different from the others, PERL_HASH_FUNC_DEFINE
+ * is a string which says which define was defined. */
+                             " " PERL_HASH_FUNC_DEFINE
+#  endif
+#  ifdef PERL_HASH_USE_SBOX32
+                             " PERL_HASH_USE_SBOX32"
+#  else
+                             " PERL_HASH_NO_SBOX32"
 #  endif
 #  ifdef PERL_IMPLICIT_SYS
                              " PERL_IMPLICIT_SYS"
