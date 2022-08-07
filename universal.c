@@ -732,7 +732,7 @@ XS(XS_PerlIO_get_layers)
     {
         SV *	sv;
         GV *	gv;
-        IO *	io;
+        IO *	io = NULL;
         bool	input = TRUE;
         bool	details = FALSE;
 
@@ -775,12 +775,16 @@ XS(XS_PerlIO_get_layers)
         }
 
         sv = POPs;
-        gv = MAYBE_DEREF_GV(sv);
 
-        if (!gv && !SvROK(sv))
-            gv = gv_fetchsv_nomg(sv, 0, SVt_PVIO);
+        /* MAYBE_DEREF_GV will call get magic */
+        if ((gv = MAYBE_DEREF_GV(sv)))
+            io = GvIO(gv);
+        else if (SvROK(sv) && SvTYPE(SvRV(sv)) == SVt_PVIO)
+            io = (IO*)SvRV(sv);
+        else if (!SvROK(sv) && (gv = gv_fetchsv_nomg(sv, 0, SVt_PVIO)))
+            io = GvIO(gv);
 
-        if (gv && (io = GvIO(gv))) {
+        if (io) {
              AV* const av = PerlIO_get_layers(aTHX_ input ?
                                         IoIFP(io) : IoOFP(io));
              SSize_t i;
