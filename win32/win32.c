@@ -1469,24 +1469,21 @@ win32_kill(int pid, int sig)
 PERL_STATIC_INLINE
 time_t
 translate_ft_to_time_t(FILETIME ft) {
-    SYSTEMTIME st, local_st;
+    SYSTEMTIME st;
     struct tm pt;
 
-    if (!FileTimeToSystemTime(&ft, &st) ||
-        !SystemTimeToTzSpecificLocalTime(NULL, &st, &local_st)) {
+    if (!FileTimeToSystemTime(&ft, &st))
         return -1;
-    }
 
     Zero(&pt, 1, struct tm);
-    pt.tm_year = local_st.wYear - 1900;
-    pt.tm_mon = local_st.wMonth - 1;
-    pt.tm_mday = local_st.wDay;
-    pt.tm_hour = local_st.wHour;
-    pt.tm_min = local_st.wMinute;
-    pt.tm_sec = local_st.wSecond;
-    pt.tm_isdst = -1;
+    pt.tm_year = st.wYear - 1900;
+    pt.tm_mon = st.wMonth - 1;
+    pt.tm_mday = st.wDay;
+    pt.tm_hour = st.wHour;
+    pt.tm_min = st.wMinute;
+    pt.tm_sec = st.wSecond;
 
-    return mktime(&pt);
+    return _mkgmtime(&pt);
 }
 
 typedef DWORD (__stdcall *pGetFinalPathNameByHandleA_t)(HANDLE, LPSTR, DWORD, DWORD);
