@@ -1935,15 +1935,14 @@ S_Internals_V(pTHX_ CV *cv)
 #endif
     const int entries = 3 + local_patch_count;
     int i;
+    /* NOTE - This list must remain sorted. Do not put any settings here
+     * which affect binary compatibility */
     static const char non_bincompat_options[] =
 #  ifdef DEBUGGING
                              " DEBUGGING"
 #  endif
 #  ifdef NO_MATHOMS
                              " NO_MATHOMS"
-#  endif
-#  ifdef NO_HASH_SEED
-                             " NO_HASH_SEED"
 #  endif
 #  ifdef NO_TAINT_SUPPORT
                              " NO_TAINT_SUPPORT"
@@ -1959,16 +1958,6 @@ S_Internals_V(pTHX_ CV *cv)
 #  endif
 #  ifdef PERL_EXTERNAL_GLOB
                              " PERL_EXTERNAL_GLOB"
-#  endif
-#  ifdef PERL_HASH_FUNC_DEFINE
-/* note that this is different from the others, PERL_HASH_FUNC_DEFINE
- * is a string which says which define was defined. */
-                             " " PERL_HASH_FUNC_DEFINE
-#  endif
-#  ifdef PERL_HASH_USE_SBOX32
-                             " PERL_HASH_USE_SBOX32"
-#  else
-                             " PERL_HASH_NO_SBOX32"
 #  endif
 #  ifdef PERL_IS_MINIPERL
                              " PERL_IS_MINIPERL"
