@@ -3530,7 +3530,10 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
     const char * const setlocale_init = (PerlEnv_getenv("PERL_SKIP_LOCALE_INIT"))
                                         ? NULL
                                         : "";
-    const char* trial_locales[5];   /* 5 = 1 each for "", LC_ALL, LANG, "", C */
+    typedef struct trial_locales_struct {
+        const char* trial_locale;
+    } trial_locales_struct;
+    struct trial_locales_struct trial_locales[5]; /* 5 = 1 each for "", LC_ALL, LANG, "", C */
     unsigned int trial_locales_count;
     const char * const lc_all     = PerlEnv_getenv("LC_ALL");
     const char * const lang       = PerlEnv_getenv("LANG");
@@ -3733,11 +3736,13 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
      * the list.  Normally the loop is executed just once.  But if setting the
      * locale fails, inside the loop we add fallback trials to the array and so
      * will execute the loop multiple times */
-    trial_locales[0] = setlocale_init;
+    trial_locales[0] = (trial_locales_struct) {
+        .trial_locale = setlocale_init,
+    };
     trial_locales_count = 1;
 
     for (i= 0; i < trial_locales_count; i++) {
-        const char * trial_locale = trial_locales[i];
+        const char * trial_locale = trial_locales[i].trial_locale;
         setlocale_failure = FALSE;
 
         if (i > 0) {
@@ -3760,7 +3765,7 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
                     goto next_iteration;
                 }
                 for (j = 0; j < trial_locales_count; j++) {
-                    if (strEQ(system_default_locale, trial_locales[j])) {
+                    if (strEQ(system_default_locale, trial_locales[j].trial_locale)) {
                         goto next_iteration;
                     }
                 }
@@ -3915,21 +3920,25 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
              * to change the behavior. */
             if (lc_all) {
                 for (j = 0; j < trial_locales_count; j++) {
-                    if (strEQ(lc_all, trial_locales[j])) {
+                    if (strEQ(lc_all, trial_locales[j].trial_locale)) {
                         goto done_lc_all;
                     }
                 }
-                trial_locales[trial_locales_count++] = lc_all;
+                trial_locales[trial_locales_count++] = (trial_locales_struct) {
+                    .trial_locale = lc_all,
+                };
             }
           done_lc_all:
 
             if (lang) {
                 for (j = 0; j < trial_locales_count; j++) {
-                    if (strEQ(lang, trial_locales[j])) {
+                    if (strEQ(lang, trial_locales[j].trial_locale)) {
                         goto done_lang;
                     }
                 }
-                trial_locales[trial_locales_count++] = lang;
+                trial_locales[trial_locales_count++] = (trial_locales_struct) {
+                    .trial_locale = lang,
+                };
             }
           done_lang:
 
@@ -3941,16 +3950,20 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
              * fallback possibility).  The "" is the same as the 0th element of
              * the array, but the code at the loop above knows to treat it
              * differently when not the 0th */
-            trial_locales[trial_locales_count++] = "";
+            trial_locales[trial_locales_count++] = (trial_locales_struct) {
+                .trial_locale = "",
+            };
 
 #  endif
 
             for (j = 0; j < trial_locales_count; j++) {
-                if (strEQ("C", trial_locales[j])) {
+                if (strEQ("C", trial_locales[j].trial_locale)) {
                     goto done_C;
                 }
             }
-            trial_locales[trial_locales_count++] = "C";
+            trial_locales[trial_locales_count++] = (trial_locales_struct) {
+                .trial_locale = "C",
+            };
 
           done_C: ;
         }   /* end of first time through the loop */
@@ -3990,14 +4003,14 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
         if (locwarn) {
             const char * description;
             const char * name = "";
-            if (strEQ(trial_locales[i], "C")) {
+            if (strEQ(trial_locales[i].trial_locale, "C")) {
                 description = "the standard locale";
                 name = "C";
             }
 
 #  ifdef SYSTEM_DEFAULT_LOCALE
 
-            else if (strEQ(trial_locales[i], "")) {
+            else if (strEQ(trial_locales[i].trial_locale, "")) {
                 description = "the system default locale";
                 if (system_default_locale) {
                     name = system_default_locale;
@@ -4008,7 +4021,7 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 
             else {
                 description = "a fallback locale";
-                name = trial_locales[i];
+                name = trial_locales[i].trial_locale;
             }
             if (name && strNE(name, "")) {
                 PerlIO_printf(Perl_error_log,
