@@ -1659,7 +1659,7 @@ S_new_numeric(pTHX_ const char *newnum)
 
     if (! newnum) {
         Safefree(PL_numeric_name);
-        PL_numeric_name = NULL;
+        PL_numeric_name = savepv("C");
         PL_numeric_standard = TRUE;
         PL_numeric_underlying = TRUE;
         PL_numeric_underlying_is_standard = TRUE;
@@ -1685,7 +1685,7 @@ S_new_numeric(pTHX_ const char *newnum)
 #    endif
 
     /* Save the new name if it isn't the same as the previous one, if any */
-    if (! PL_numeric_name || strNE(PL_numeric_name, save_newnum)) {
+    if (strNE(PL_numeric_name, save_newnum)) {
     /* Save the locale name for future use */
         Safefree(PL_numeric_name);
         PL_numeric_name = save_newnum;
@@ -2159,11 +2159,9 @@ S_new_collate(pTHX_ const char *newcoll)
      * an unlikely bug */
 
     if (! newcoll) {
-        if (PL_collation_name) {
-            ++PL_collation_ix;
-            Safefree(PL_collation_name);
-            PL_collation_name = NULL;
-        }
+        ++PL_collation_ix;
+        Safefree(PL_collation_name);
+        PL_collation_name = NULL;
         PL_collation_standard = TRUE;
       is_standard_collation:
         PL_collxfrm_base = 0;
@@ -2175,7 +2173,7 @@ S_new_collate(pTHX_ const char *newcoll)
     }
 
     /* If this is not the same locale as currently, set the new one up */
-    if (! PL_collation_name || strNE(PL_collation_name, newcoll)) {
+    if (strNE(PL_collation_name, newcoll)) {
         ++PL_collation_ix;
         Safefree(PL_collation_name);
         PL_collation_name = savepv(newcoll);
@@ -3743,6 +3741,14 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 #  ifdef USE_LOCALE_NUMERIC
 
     PL_numeric_radix_sv = newSVpvs(".");
+    Newx(PL_numeric_name, 2, char);
+    Copy("C", PL_numeric_name, 2, char);
+
+#  endif
+#  ifdef USE_LOCALE_COLLATE
+
+    Newx(PL_collation_name, 2, char);
+    Copy("C", PL_collation_name, 2, char);
 
 #  endif
 #  ifdef USE_PL_CURLOCALES
