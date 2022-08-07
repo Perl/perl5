@@ -129,19 +129,19 @@ checkOptree ( name	=> 'sub {my $a=undef}',
 	      bcopts	=> '-basic',
 	      strip_open_hints => 1,
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
-4  <1> leavesub[1 ref] K/REFC,1 ->(end)
--     <@> lineseq KP ->4
-1        <;> nextstate(main 641 optree_varinit.t:130) v:>,<,% ->2
-3        <1> padsv_store[$a:1508,1509] sKS/LVINTRO ->4
-2           <0> undef s ->3
--           <0> ex-padsv sRM*/LVINTRO ->3
+3  <1> leavesub[1 ref] K/REFC,1 ->(end)
+-     <@> lineseq KP ->3
+1        <;> nextstate(main 1517 optree_varinit.t:128) v ->2
+-        <1> ex-sassign sKS/2 ->-
+2           <0> undef[$a:1517,1518] s/LVINTRO,KEEP_PV,TARGMY ->3
+-           <0> ex-padsv sRM*/LVINTRO ->-
 EOT_EOT
-# 4  <1> leavesub[1 ref] K/REFC,1 ->(end)
-# -     <@> lineseq KP ->4
-# 1        <;> nextstate(main 641 optree_varinit.t:130) v:>,<,% ->2
-# 3        <1> padsv_store[$a:1508,1509] sKS/LVINTRO ->4
-# 2           <0> undef s ->3
-# -           <0> ex-padsv sRM*/LVINTRO ->3
+# 3  <1> leavesub[1 ref] K/REFC,1 ->(end)
+# -     <@> lineseq KP ->3
+# 1        <;> nextstate(main 1517 optree_varinit.t:128) v ->2
+# -        <1> ex-sassign sKS/2 ->-
+# 2           <0> undef[$a:1517,1518] s/LVINTRO,KEEP_PV,TARGMY ->3
+# -           <0> ex-padsv sRM*/LVINTRO ->-
 EONT_EONT
 
 checkOptree ( name	=> 'sub {our $a=undef}',
@@ -152,7 +152,7 @@ checkOptree ( name	=> 'sub {our $a=undef}',
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
 5  <1> leavesub[1 ref] K/REFC,1 ->(end)
 -     <@> lineseq KP ->5
-1        <;> nextstate(main 26 optree.t:109) v:>,<,%,{ ->2
+1        <;> nextstate(main 1520 optree_varinit.t:148) v:{ ->2
 4        <2> sassign sKS/2 ->5
 2           <0> undef s ->3
 -           <1> ex-rv2sv sKRM*/OURINTR,1 ->4
@@ -160,7 +160,7 @@ checkOptree ( name	=> 'sub {our $a=undef}',
 EOT_EOT
 # 5  <1> leavesub[1 ref] K/REFC,1 ->(end)
 # -     <@> lineseq KP ->5
-# 1        <;> nextstate(main 446 optree_varinit.t:137) v:>,<,%,{ ->2
+# 1        <;> nextstate(main 1520 optree_varinit.t:148) v:{ ->2
 # 4        <2> sassign sKS/2 ->5
 # 2           <0> undef s ->3
 # -           <1> ex-rv2sv sKRM*/OURINTR,1 ->4
@@ -175,7 +175,7 @@ checkOptree ( name	=> 'sub {local $a=undef}',
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
 5  <1> leavesub[1 ref] K/REFC,1 ->(end)
 -     <@> lineseq KP ->5
-1        <;> nextstate(main 28 optree.t:122) v:>,<,%,{ ->2
+1        <;> nextstate(main 1523 optree_varinit.t:171) v:{ ->2
 4        <2> sassign sKS/2 ->5
 2           <0> undef s ->3
 -           <1> ex-rv2sv sKRM*/LVINTRO,1 ->4
@@ -183,7 +183,7 @@ checkOptree ( name	=> 'sub {local $a=undef}',
 EOT_EOT
 # 5  <1> leavesub[1 ref] K/REFC,1 ->(end)
 # -     <@> lineseq KP ->5
-# 1        <;> nextstate(main 58 optree.t:141) v:>,<,%,{ ->2
+# 1        <;> nextstate(main 1523 optree_varinit.t:171) v:{ ->2
 # 4        <2> sassign sKS/2 ->5
 # 2           <0> undef s ->3
 # -           <1> ex-rv2sv sKRM*/LVINTRO,1 ->4
@@ -195,19 +195,19 @@ checkOptree ( name	=> 'my $a=undef',
 	      bcopts	=> '-basic',
 	      strip_open_hints => 1,
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
-5  <@> leave[1 ref] vKP/REFC ->(end)
+4  <@> leave[1 ref] vKP/REFC ->(end)
 1     <0> enter v ->2
-2     <;> nextstate(main 1 -e:1) v:>,<,%,{ ->3
-4     <1> padsv_store[$a:1,2] vKS/LVINTRO ->5
-3        <0> undef s ->4
--        <0> ex-padsv sRM*/LVINTRO ->4
+2     <;> nextstate(main 1 -e:1) v:{ ->3
+-     <1> ex-sassign vKS/2 ->4
+3        <0> undef[$a:1,2] s/LVINTRO,KEEP_PV,TARGMY ->4
+-        <0> ex-padsv sRM*/LVINTRO ->-
 EOT_EOT
-# 5  <@> leave[1 ref] vKP/REFC ->(end)
+# 4  <@> leave[1 ref] vKP/REFC ->(end)
 # 1     <0> enter v ->2
-# 2     <;> nextstate(main 1 -e:1) v:>,<,%,{ ->3
-# 4     <1> padsv_store[$a:1,2] vKS/LVINTRO ->5
-# 3        <0> undef s ->4
-# -        <0> ex-padsv sRM*/LVINTRO ->4
+# 2     <;> nextstate(main 1 -e:1) v:{ ->3
+# -     <1> ex-sassign vKS/2 ->4
+# 3        <0> undef[$a:1,2] s/LVINTRO,KEEP_PV,TARGMY ->4
+# -        <0> ex-padsv sRM*/LVINTRO ->-
 EONT_EONT
 
 checkOptree ( name	=> 'our $a=undef',
@@ -218,7 +218,7 @@ checkOptree ( name	=> 'our $a=undef',
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
 6  <@> leave[1 ref] vKP/REFC ->(end)
 1     <0> enter v ->2
-2     <;> nextstate(main 1 -e:1) v:>,<,%,{ ->3
+2     <;> nextstate(main 1 -e:1) v:{ ->3
 5     <2> sassign vKS/2 ->6
 3        <0> undef s ->4
 -        <1> ex-rv2sv sKRM*/OURINTR,1 ->5
@@ -226,7 +226,7 @@ checkOptree ( name	=> 'our $a=undef',
 EOT_EOT
 # 6  <@> leave[1 ref] vKP/REFC ->(end)
 # 1     <0> enter v ->2
-# 2     <;> nextstate(main 1 -e:1) v:>,<,%,{ ->3
+# 2     <;> nextstate(main 1 -e:1) v:{ ->3
 # 5     <2> sassign vKS/2 ->6
 # 3        <0> undef s ->4
 # -        <1> ex-rv2sv sKRM*/OURINTR,1 ->5
@@ -242,7 +242,7 @@ checkOptree ( name	=> 'local $c=undef',
 	      expect	=> <<'EOT_EOT', expect_nt => <<'EONT_EONT');
 6  <@> leave[1 ref] vKP/REFC ->(end)
 1     <0> enter v ->2
-2     <;> nextstate(main 1 -e:1) v:>,<,%,{ ->3
+2     <;> nextstate(main 1 -e:1) v:{ ->3
 5     <2> sassign vKS/2 ->6
 3        <0> undef s ->4
 -        <1> ex-rv2sv sKRM*/LVINTRO,1 ->5
@@ -250,7 +250,7 @@ checkOptree ( name	=> 'local $c=undef',
 EOT_EOT
 # 6  <@> leave[1 ref] vKP/REFC ->(end)
 # 1     <0> enter v ->2
-# 2     <;> nextstate(main 1 -e:1) v:>,<,%,{ ->3
+# 2     <;> nextstate(main 1 -e:1) v:{ ->3
 # 5     <2> sassign vKS/2 ->6
 # 3        <0> undef s ->4
 # -        <1> ex-rv2sv sKRM*/LVINTRO,1 ->5
