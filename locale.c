@@ -3535,7 +3535,8 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
         const char* fallback_desc;
         const char* fallback_name;
     } trial_locales_struct;
-    struct trial_locales_struct trial_locales[5]; /* 5 = 1 each for "", LC_ALL, LANG, "", C */
+    /* 5 = 1 each for "", LC_ALL, LANG, (Win32) system default locale, C */
+    struct trial_locales_struct trial_locales[5];
     unsigned int trial_locales_count;
     const char * const lc_all     = PerlEnv_getenv("LC_ALL");
     const char * const lang       = PerlEnv_getenv("LANG");
@@ -3559,18 +3560,6 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
     /* current locale for given category; should have been copied so aren't
      * volatile */
     const char * curlocales[NOMINAL_LC_ALL_INDEX + 1];
-
-#  ifdef WIN32
-
-    /* In some systems you can find out the system default locale
-     * and use that as the fallback locale. */
-#    define SYSTEM_DEFAULT_LOCALE
-#  endif
-#  ifdef SYSTEM_DEFAULT_LOCALE
-
-    const char *system_default_locale = NULL;
-
-#  endif
 
 #  ifndef DEBUGGING
 #    define DEBUG_LOCALE_INIT(a,b,c)
@@ -3749,44 +3738,6 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
         const char * trial_locale = trial_locales[i].trial_locale;
         setlocale_failure = FALSE;
 
-        if (i > 0) {
-#  ifdef SYSTEM_DEFAULT_LOCALE
-#    ifdef WIN32    /* Note that assumes Win32 has LC_ALL */
-
-            /* On Windows machines, an entry of "" after the 0th means to use
-             * the system default locale, which we now proceed to get. */
-            if (strEQ(trial_locale, "")) {
-                unsigned int j;
-
-                /* Note that this may change the locale, but we are going to do
-                 * that anyway just below */
-                system_default_locale = stdized_setlocale(LC_ALL, "");
-                DEBUG_LOCALE_INIT(LC_ALL_INDEX_, "", system_default_locale);
-
-                /* Skip if invalid or if it's already on the list of locales to
-                 * try */
-                if (! system_default_locale) {
-                    goto next_iteration;
-                }
-                for (j = 0; j < trial_locales_count; j++) {
-                    if (strEQ(system_default_locale, trial_locales[j].trial_locale)) {
-                        goto next_iteration;
-                    }
-                }
-
-                trial_locales[i].fallback_desc = (strEQ(system_default_locale, "C")
-                                                  ? "the standard locale"
-                                                  : "the system default locale");
-                trial_locales[i].fallback_name = system_default_locale;
-                trial_locale = system_default_locale;
-            }
-#    else
-#      error SYSTEM_DEFAULT_LOCALE only implemented for Win32
-#    endif
-#  endif /* SYSTEM_DEFAULT_LOCALE */
-
-        }   /* For i > 0 */
-
 #  ifdef LC_ALL
 
         sl_result[LC_ALL_INDEX_] = stdized_setlocale(LC_ALL, trial_locale);
@@ -3963,14 +3914,33 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
             /* For Windows, we also try the system default locale before "C".
              * (If there exists a Windows without LC_ALL we skip this because
              * it gets too complicated.  For those, the "C" is the next
-             * fallback possibility).  The "" is the same as the 0th element of
-             * the array, but the code at the loop above knows to treat it
-             * differently when not the 0th */
-            trial_locales[trial_locales_count++] = (trial_locales_struct) {
-                .trial_locale = "",
-                .fallback_desc = "", /* overwritten at the top of the loop */
-                .fallback_name = "", /* overwritten at the top of the loop */
-            };
+             * fallback possibility). */
+            {
+                /* Note that this may change the locale, but we are going to do
+                 * that anyway */
+                const char *system_default_locale = stdized_setlocale(LC_ALL, "");
+                DEBUG_LOCALE_INIT(LC_ALL_INDEX_, "", system_default_locale);
+
+                /* Skip if invalid or if it's already on the list of locales to
+                 * try */
+                if (! system_default_locale) {
+                    goto done_system_default;
+                }
+                for (j = 0; j < trial_locales_count; j++) {
+                    if (strEQ(system_default_locale, trial_locales[j].trial_locale)) {
+                        goto done_system_default;
+                    }
+                }
+
+                trial_locales[trial_locales_count++] = (trial_locales_struct) {
+                    .trial_locale = system_default_locale,
+                    .fallback_desc = (strEQ(system_default_locale, "C")
+                                      ? "the standard locale"
+                                      : "the system default locale"),
+                    .fallback_name = system_default_locale,
+                };
+            }
+          done_system_default:
 
 #  endif
 
