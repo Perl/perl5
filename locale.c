@@ -3532,6 +3532,8 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
                                         : "";
     typedef struct trial_locales_struct {
         const char* trial_locale;
+        const char* fallback_desc;
+        const char* fallback_name;
     } trial_locales_struct;
     struct trial_locales_struct trial_locales[5]; /* 5 = 1 each for "", LC_ALL, LANG, "", C */
     unsigned int trial_locales_count;
@@ -3738,6 +3740,8 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
      * will execute the loop multiple times */
     trial_locales[0] = (trial_locales_struct) {
         .trial_locale = setlocale_init,
+        .fallback_desc = NULL,
+        .fallback_name = NULL,
     };
     trial_locales_count = 1;
 
@@ -3770,6 +3774,10 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
                     }
                 }
 
+                trial_locales[i].fallback_desc = (strEQ(system_default_locale, "C")
+                                                  ? "the standard locale"
+                                                  : "the system default locale");
+                trial_locales[i].fallback_name = system_default_locale;
                 trial_locale = system_default_locale;
             }
 #    else
@@ -3926,6 +3934,10 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
                 }
                 trial_locales[trial_locales_count++] = (trial_locales_struct) {
                     .trial_locale = lc_all,
+                    .fallback_desc = (strEQ(lc_all, "C")
+                                      ? "the standard locale"
+                                      : "a fallback locale"),
+                    .fallback_name = lc_all,
                 };
             }
           done_lc_all:
@@ -3938,6 +3950,10 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
                 }
                 trial_locales[trial_locales_count++] = (trial_locales_struct) {
                     .trial_locale = lang,
+                    .fallback_desc = (strEQ(lang, "C")
+                                      ? "the standard locale"
+                                      : "a fallback locale"),
+                    .fallback_name = lang,
                 };
             }
           done_lang:
@@ -3952,6 +3968,8 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
              * differently when not the 0th */
             trial_locales[trial_locales_count++] = (trial_locales_struct) {
                 .trial_locale = "",
+                .fallback_desc = "", /* overwritten at the top of the loop */
+                .fallback_name = "", /* overwritten at the top of the loop */
             };
 
 #  endif
@@ -3963,6 +3981,8 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
             }
             trial_locales[trial_locales_count++] = (trial_locales_struct) {
                 .trial_locale = "C",
+                .fallback_desc = "the standard locale",
+                .fallback_name = "C",
             };
 
           done_C: ;
@@ -4001,28 +4021,9 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
         }
 
         if (locwarn) {
-            const char * description;
-            const char * name = "";
-            if (strEQ(trial_locales[i].trial_locale, "C")) {
-                description = "the standard locale";
-                name = "C";
-            }
+            const char * description = trial_locales[i].fallback_desc;
+            const char * name = trial_locales[i].fallback_name;
 
-#  ifdef SYSTEM_DEFAULT_LOCALE
-
-            else if (strEQ(trial_locales[i].trial_locale, "")) {
-                description = "the system default locale";
-                if (system_default_locale) {
-                    name = system_default_locale;
-                }
-            }
-
-#  endif /* SYSTEM_DEFAULT_LOCALE */
-
-            else {
-                description = "a fallback locale";
-                name = trial_locales[i].trial_locale;
-            }
             if (name && strNE(name, "")) {
                 PerlIO_printf(Perl_error_log,
                     "perl: warning: %s %s (\"%s\").\n", msg, description, name);
