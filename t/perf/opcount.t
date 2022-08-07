@@ -796,4 +796,94 @@ test_opcount(0, "sassign + padsv replaced by padsv_store",
                     padsv_store  => 2,
                 });
 
+# OPpTARGET_MY optimizations on undef
+test_opcount(0, "undef + padsv (undef my \$x) is reduced to undef",
+                sub { undef my $x },
+                {
+                    undef       => 1,
+                    padsv       => 0,
+                    padsv_store => 0,
+                    sassign     => 0,
+                });
+test_opcount(0, "undef + padsv + sassign (my \$x = undef) is reduced to undef",
+                sub { my $x = undef },
+                {
+                    undef       => 1,
+                    padsv       => 0,
+                    padsv_store => 0,
+                    sassign     => 0,
+                });
+test_opcount(0, "undef + padsv (undef \$x) is reduced to undef",
+                sub { my $x; undef $x },
+                {
+                    undef       => 1,
+                    padsv       => 1,
+                    padsv_store => 0,
+                    sassign     => 0,
+                });
+test_opcount(0, "undef + padsv + sassign (\$x = undef) is reduced to undef",
+                sub { my $x; $x = undef },
+                {
+                    undef       => 1,
+                    padsv       => 1,
+                    padsv_store => 0,
+                    sassign     => 0,
+                });
+# Additional test cases requested by demerphq
+test_opcount(0, 'my $y= 1; my @x= ($y= undef);',
+                sub { my $y= 1; my @x= ($y= undef); },
+                {
+                    undef       => 1,
+                    aassign     => 1,
+                    padav       => 1,
+                    padsv       => 0,
+                    padsv_store => 1,
+                    sassign     => 0,
+                });
+
+test_opcount(0, 'my $x= 1; sub f{} f($x=undef);',
+                sub { my $x= 1; sub f{} f($x=undef); },
+                {
+                    undef       => 1,
+                    gv          => 1,
+                    padsv       => 0,
+                    padsv_store => 1,
+                    sassign     => 0,
+                });
+
+test_opcount(0, 'my ($x,$p)=(1,2); sub f{} f(($x=undef),$p);',
+                sub { my ($x,$p)=(1,2); sub f{} f(($x=undef),$p); },
+                {
+                    undef       => 1,
+                    aassign     => 1,
+                    gv          => 1,
+                    padrange    => 1,
+                    padsv       => 3,
+                    padsv_store => 0,
+                    sassign     => 0,
+                });
+
+test_opcount(0, 'my $h= {}; my @k= keys %{($h=undef)||{}};',
+                sub { my $h= {}; my @k= keys %{($h=undef)||{}}; },
+                {
+                    undef       => 1,
+                    aassign     => 1,
+                    padav       => 1,
+                    padsv       => 0,
+                    padsv_store => 1,
+                    sassign     => 0,
+                });
+
+test_opcount(0, 'my $y= 1; my @x= \($y= undef);',
+                sub { my $y= 1; my @x= \($y= undef); },
+                {
+                    undef       => 1,
+                    aassign     => 1,
+                    padav       => 1,
+                    padsv       => 0,
+                    padsv_store => 1,
+                    sassign     => 0,
+                    srefgen     => 1,
+                });
+
 done_testing();

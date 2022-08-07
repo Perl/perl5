@@ -3775,6 +3775,58 @@ Perl_rpeep(pTHX_ OP *o)
             break;
         }
 
+        case OP_UNDEF:
+            if ((o->op_flags & OPf_KIDS) &&
+                (cUNOPx(o)->op_first->op_type == OP_PADSV)) {
+
+                /* Convert:
+                 *     undef
+                 *       padsv[$x]
+                 * to:
+                 *     undef[$x]
+                 */
+
+                OP * padsv = cUNOPx(o)->op_first;
+                o->op_private = OPpTARGET_MY |
+                        (padsv->op_private & (OPpLVAL_INTRO|OPpPAD_STATE));
+                o->op_targ = padsv->op_targ; padsv->op_targ = 0;
+                op_null(padsv);
+                /* Optimizer does NOT seem to fix up the padsv op_next ptr */
+                if (oldoldop)
+                    oldoldop->op_next = o;
+                oldop = oldoldop;
+                oldoldop = NULL;
+
+            } else if (o->op_next->op_type == OP_PADSV) {
+                OP * padsv = o->op_next;
+                OP * sassign = (padsv->op_next &&
+                        padsv->op_next->op_type == OP_SASSIGN) ?
+                        padsv->op_next : NULL;
+                if (sassign && cBINOPx(sassign)->op_first == o) {
+                    /* Convert:
+                     *     sassign
+                     *       undef
+                     *       padsv[$x]
+                     * to:
+                     *     undef[$x]
+                     * NOTE: undef does not have the "T" flag set in
+                     *       regen/opcodes, as this would cause
+                     *       S_maybe_targlex to do the optimization.
+                     *       Seems easier to keep it all here, rather
+                     *       than have an undef-specific branch in
+                     *       S_maybe_targlex just to add the
+                     *       OPpUNDEF_KEEP_PV flag.
+                     */
+                     o->op_private = OPpTARGET_MY | OPpUNDEF_KEEP_PV |
+                         (padsv->op_private & (OPpLVAL_INTRO|OPpPAD_STATE));
+                     o->op_targ = padsv->op_targ; padsv->op_targ = 0;
+                     op_null(padsv);
+                     op_null(sassign);
+                     /* Optimizer DOES seems to fix up the op_next ptrs */
+                }
+            }
+            break;
+
         case OP_QR:
         case OP_MATCH:
             if (!(cPMOP->op_pmflags & PMf_ONCE)) {

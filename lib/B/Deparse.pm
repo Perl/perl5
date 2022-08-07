@@ -2513,7 +2513,21 @@ sub pp_chomp { maybe_targmy(@_, \&unop, "chomp") }
 sub pp_schop { maybe_targmy(@_, \&unop, "chop") }
 sub pp_schomp { maybe_targmy(@_, \&unop, "chomp") }
 sub pp_defined { unop(@_, "defined") }
-sub pp_undef { unop(@_, "undef") }
+sub pp_undef {
+    if ($_[1]->private & OPpTARGET_MY) {
+        my $targ = $_[1]->targ;
+        my $var = $_[0]->maybe_my($_[1], $_[2], $_[0]->padname($targ),
+            $_[0]->padname_sv($targ),
+            1);
+        my $func = unop(@_, "undef");
+        if ($func =~ /\s/) {
+            return unop(@_, "undef").$var;
+        } else {
+            return "$var = undef";
+        }
+    }
+    unop(@_, "undef") 
+}
 sub pp_study { unop(@_, "study") }
 sub pp_ref { unop(@_, "ref") }
 sub pp_pos { maybe_local(@_, unop(@_, "pos")) }

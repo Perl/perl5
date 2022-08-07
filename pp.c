@@ -879,11 +879,21 @@ PP(pp_undef)
         RETPUSHUNDEF;
     }
 
-    sv = TOPs;
-    if (!sv)
-    {
-        SETs(&PL_sv_undef);
-        return NORMAL;
+    if (PL_op->op_private & OPpTARGET_MY) {
+        SV** const padentry = &PAD_SVl(PL_op->op_targ);
+        sv = *padentry;
+        EXTEND(SP,1);sp++;PUTBACK;
+        if ((PL_op->op_private & (OPpLVAL_INTRO|OPpPAD_STATE)) == OPpLVAL_INTRO) {
+            save_clearsv(padentry);
+        }
+    } else {
+        sv = TOPs;
+
+        if (!sv)
+        {
+            SETs(&PL_sv_undef);
+            return NORMAL;
+        }
     }
 
     if (SvTHINKFIRST(sv))
@@ -960,7 +970,9 @@ PP(pp_undef)
             break;
         }
     default:
-        if (SvTYPE(sv) >= SVt_PV && SvPVX_const(sv) && SvLEN(sv)) {
+        if (SvTYPE(sv) >= SVt_PV && SvPVX_const(sv) && SvLEN(sv)
+            && !(PL_op->op_private & OPpUNDEF_KEEP_PV)
+        ) {
             SvPV_free(sv);
             SvPV_set(sv, NULL);
             SvLEN_set(sv, 0);
