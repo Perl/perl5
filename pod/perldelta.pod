@@ -330,9 +330,18 @@ L</Modules and Pragmata> section.
 
 =over 4
 
-=item XXX-some-platform
+=item Windows
 
-XXX
+=over 4
+
+=item *
+
+In some cases, timestamps returned by L<stat()|perlfunc/stat> and
+L<lstat()|perlfunc/lstat> failed to take daylight saving time into account.
+[L<GH #20018|https://github.com/Perl/perl5/issues/20018>]
+[L<GH #20061|https://github.com/Perl/perl5/issues/20061>]
+
+=back
 
 =back
 
