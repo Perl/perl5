@@ -3328,6 +3328,12 @@ Sr	|void	|setlocale_failure_panic_i|const unsigned int cat_index	\
 				|NN const char * failed			\
 				|const line_t caller_0_line		\
 				|const line_t caller_1_line
+So	|const char *|toggle_locale_i|const unsigned switch_cat_index	\
+				|NN const char * new_locale		\
+				|const line_t caller_line
+So	|void	|restore_toggled_locale_i|const unsigned cat_index	\
+                                |NULLOK const char * original_locale    \
+				|const line_t caller_line
 #    if defined(USE_POSIX_2008_LOCALE)
 S	|const char*|emulate_setlocale_i|const unsigned int index	\
 				    |NULLOK const char* new_locale	\
