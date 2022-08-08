@@ -45,7 +45,7 @@ my %field_spec= (
 my $Collate= Unicode::Collate->new(level => 1, indentical => 1);
 my @field_codes= sort keys %field_spec;
 my @field_names= map { $field_spec{$_} } @field_codes;
-my $tformat= "=" . join "%x00", map { "%" . $_ } @field_codes;
+my $tformat= "=" . join "%x09", map { "%" . $_ } @field_codes;
 
 sub _make_name_author_info {
     my ($self, $commit_info, $name_key)= @_;
@@ -205,7 +205,10 @@ sub read_commit_log {
 
     my $last_commit_info;
     my $cmd= qq(git log --pretty='format:$tformat' $numstat $commit_range);
-    open my $fh, "$cmd |";
+    $cmd =~ s/'/"/g if $^O =~ /Win/;
+    open my $fh, "-|", $cmd
+        or die "Failed to open git log pipe: $!";
+    binmode($fh);
     while (defined(my $line= <$fh>)) {
         chomp $line;
         $line= decode_utf8($line);
@@ -234,7 +237,7 @@ sub read_commit_log {
         $commits_read++;
         my $commit_info= {};
         $last_commit_info= $commit_info;
-        @{$commit_info}{@field_names}= split /\0/, $line, 0 + @field_names;
+        @{$commit_info}{@field_names}= split /\t/, $line, 0 + @field_names;
 
         my $author_name_mm_canon=
             $self->_make_name_author_info($commit_info, "author_name_mm");
