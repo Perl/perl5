@@ -3360,13 +3360,15 @@ pTC	|wchar_t *|Win_utf8_string_to_wstring|NULLOK const char * utf8_string
 pTC	|char *	|Win_wstring_to_utf8_string|NULLOK const wchar_t * wstring
 #    endif
 #    if defined(HAS_NL_LANGINFO) || defined(HAS_NL_LANGINFO_L)
-S	|const char*|my_langinfo|const nl_item item			\
-				|bool toggle				\
+S	|const char*|my_langinfo_i|const nl_item item			\
+				|const unsigned int cat_index		\
+				|NN const char * locale			\
 				|NN const char ** retbufp		\
 				|NULLOK Size_t * retbuf_sizep
 #    else
-S	|const char*|my_langinfo|const int item				\
-				|bool toggle				\
+S	|const char*|my_langinfo_i|const int item			\
+				|const unsigned int cat_index		\
+				|NN const char * locale			\
 				|NN const char ** retbufp		\
 				|NULLOK Size_t * retbuf_sizep
 #    endif
