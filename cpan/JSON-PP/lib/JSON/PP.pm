@@ -14,7 +14,7 @@ use JSON::PP::Boolean;
 use Carp ();
 #use Devel::Peek;
 
-$JSON::PP::VERSION = '4.10';
+$JSON::PP::VERSION = '4.11';
 
 @JSON::PP::EXPORT = qw(encode_json decode_json from_json to_json);
 
@@ -46,6 +46,7 @@ use constant P_ALLOW_TAGS           => 19;
 
 use constant OLD_PERL => $] < 5.008 ? 1 : 0;
 use constant USE_B => $ENV{PERL_JSON_PP_USE_B} || 0;
+use constant CORE_BOOL => defined &builtin::is_bool;
 
 my $invalid_char_re;
 
@@ -212,11 +213,52 @@ sub boolean_values {
         my ($false, $true) = @_;
         $self->{false} = $false;
         $self->{true} = $true;
+        if (CORE_BOOL) {
+            BEGIN { CORE_BOOL and warnings->unimport(qw(experimental::builtin)) }
+            if (builtin::is_bool($true) && builtin::is_bool($false) && $true && !$false) {
+                $self->{core_bools} = !!1;
+            }
+            else {
+                delete $self->{core_bools};
+            }
+        }
     } else {
         delete $self->{false};
         delete $self->{true};
+        delete $self->{core_bools};
     }
     return $self;
+}
+
+sub core_bools {
+    my $self = shift;
+    my $core_bools = defined $_[0] ? $_[0] : 1;
+    if ($core_bools) {
+        $self->{true} = !!1;
+        $self->{false} = !!0;
+        $self->{core_bools} = !!1;
+    }
+    else {
+        $self->{true} = $JSON::PP::true;
+        $self->{false} = $JSON::PP::false;
+        $self->{core_bools} = !!0;
+    }
+    return $self;
+}
+
+sub get_core_bools {
+    my $self = shift;
+    return !!$self->{core_bools};
+}
+
+sub unblessed_bool {
+    my $self = shift;
+    return $self->core_bools(@_);
+}
+
+sub get_unblessed_bool {
+    my $self = shift;
+    return $self->get_core_bools(@_);
 }
 
 sub get_boolean_values {
@@ -479,7 +521,11 @@ sub allow_bigint {
         my $type = ref($value);
 
         if (!$type) {
-            if (_looks_like_number($value)) {
+            BEGIN { CORE_BOOL and warnings->unimport('experimental::builtin') }
+            if (CORE_BOOL && builtin::is_bool($value)) {
+                return $value ? 'true' : 'false';
+            }
+            elsif (_looks_like_number($value)) {
                 return $value;
             }
             return $self->string_to_json($value);
@@ -1524,7 +1570,20 @@ BEGIN {
 $JSON::PP::true  = do { bless \(my $dummy = 1), "JSON::PP::Boolean" };
 $JSON::PP::false = do { bless \(my $dummy = 0), "JSON::PP::Boolean" };
 
-sub is_bool { blessed $_[0] and ( $_[0]->isa("JSON::PP::Boolean") or $_[0]->isa("Types::Serialiser::BooleanBase") or $_[0]->isa("JSON::XS::Boolean") ); }
+sub is_bool {
+  if (blessed $_[0]) {
+    return (
+      $_[0]->isa("JSON::PP::Boolean")
+      or $_[0]->isa("Types::Serialiser::BooleanBase")
+      or $_[0]->isa("JSON::XS::Boolean")
+    );
+  }
+  elsif (CORE_BOOL) {
+    BEGIN { CORE_BOOL and warnings->unimport('experimental::builtin') }
+    return builtin::is_bool($_[0]);
+  }
+  return !!0;
+}
 
 sub true  { $JSON::PP::true  }
 sub false { $JSON::PP::false }
@@ -1861,6 +1920,9 @@ Except being faster.
 Returns true if the passed scalar represents either JSON::PP::true or
 JSON::PP::false, two constants that act like C<1> and C<0> respectively
 and are also used to represent JSON C<true> and C<false> in Perl strings.
+
+On perl 5.36 and above, will also return true when given one of perl's
+standard boolean values, such as the result of a comparison.
 
 See L<MAPPING>, below, for more information on how JSON values are mapped to
 Perl.
@@ -2277,6 +2339,22 @@ to their default values.
 
 C<get_boolean_values> will return both C<$false> and C<$true> values, or
 the empty list when they are set to the default.
+
+=head2 core_bools
+
+    $json->core_bools([$enable]);
+
+If C<$enable> is true (or missing), then C<decode>, will produce standard
+perl boolean values. Equivalent to calling:
+
+    $json->boolean_values(!!1, !!0)
+
+C<get_core_bools> will return true if this has been set. On perl 5.36, it will
+also return true if the boolean values have been set to perl's core booleans
+using the C<boolean_values> method.
+
+The methods C<unblessed_bool> and C<get_unblessed_bool> are provided as aliases
+for compatibility with L<Cpanel::JSON::XS>.
 
 =head2 filter_json_object
 
