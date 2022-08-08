@@ -702,7 +702,7 @@ for their use.
 
 =item *
 
-Testing for operating systems or versions when should be testing for
+Testing for operating systems or versions when you should be testing for
 features
 
   #ifdef __FOONIX__    /* BAD */
