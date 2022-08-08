@@ -3206,12 +3206,28 @@ S_my_langinfo_i(pTHX_
                            item, locale));
 /*--------------------------------------------------------------------------*/
 /* Above is the common beginning to all the implementations of my_langinfo().
- * Below are the various completions */
+ * Below are the various completions.
+ *
+ * Some platforms don't deal well with non-ASCII strings in locale X when
+ * LC_CTYPE is not in X.  (Actually it is probably when X is UTF-8 and LC_CTYPE
+ * isn't, or vice versa).  There is explicit code to bring the categories into
+ * sync.  This doesn't seem to be a problem with nl_langinfo(), so that
+ * implementation doesn't currently worry about it.  But it is a problem on
+ * Windows boxes, which don't have nl_langinfo(). */
+
 #  if defined(HAS_THREAD_SAFE_NL_LANGINFO_L) && defined(USE_POSIX_2008_LOCALE)
 
-    /* Simplest is if we can use nl_langinfo_l() */
+    /* Simplest is if we can use nl_langinfo_l()
+     *
+     * With it, we can change LC_CTYPE in the same call as the other category */
+#    ifdef USE_LOCALE_CTYPE
+#      define CTYPE_SAFETY_MASK LC_CTYPE_MASK
+#    else
+#      define CTYPE_SAFETY_MASK 0
+#    endif
 
-    locale_t cur = newlocale(category_masks[cat_index], locale, (locale_t) 0);
+    locale_t cur = newlocale((category_masks[cat_index] | CTYPE_SAFETY_MASK),
+                             locale, (locale_t) 0);
 
     retval = save_to_buffer(nl_langinfo_l(item, cur), retbufp, retbuf_sizep);
 
@@ -3223,6 +3239,14 @@ S_my_langinfo_i(pTHX_
 
     /* The second version of my_langinfo() is if we have plain nl_langinfo() */
 
+#    ifdef USE_LOCALE_CTYPE
+
+    /* Ths function sorts out if things actually have to be switched or not,
+     * for both calls. */
+    const char * orig_CTYPE_locale = toggle_locale_c(LC_CTYPE, locale);
+
+#    endif
+
     const char * orig_switched_locale = toggle_locale_i(cat_index, locale);
 
     NL_LANGINFO_LOCK;
@@ -3230,6 +3254,10 @@ S_my_langinfo_i(pTHX_
     NL_LANGINFO_UNLOCK;
 
     restore_toggled_locale_i(cat_index, orig_switched_locale);
+
+#    ifdef USE_LOCALE_CTYPE
+    restore_toggled_locale_c(LC_CTYPE, orig_CTYPE_locale);
+#    endif
 
     return retval;
 /*--------------------------------------------------------------------------*/
@@ -3248,6 +3276,11 @@ S_my_langinfo_i(pTHX_
 
         const char * save_global;
         const char * save_thread;
+
+#    endif
+#    ifdef USE_LOCALE_CTYPE
+
+    const char * orig_CTYPE_locale =  toggle_locale_c(LC_CTYPE, locale);
 
 #    endif
 
@@ -3696,6 +3729,11 @@ S_my_langinfo_i(pTHX_
     } /* Giant switch() of nl_langinfo() items */
 
     restore_toggled_locale_i(cat_index, orig_switched_locale);
+
+#    ifdef USE_LOCALE_CTYPE
+    restore_toggled_locale_c(LC_CTYPE, orig_CTYPE_locale);
+#    endif
+
     return retval;
 
 #  endif    /* All the implementations of my_langinfo() */
