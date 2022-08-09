@@ -196,8 +196,6 @@ SKIP: {
 }
 
 SKIP: {
-    skip "Temporarily skip on windows until UTF-8 revamping done", 2
-                                                            if $^O eq 'MSWin32';
 
     my $found_time = 0;
     my $found_monetary = 0;
