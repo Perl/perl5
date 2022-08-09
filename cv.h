@@ -134,6 +134,7 @@ See L<perlguts/Autoloading with XSUBs>.
 #define CVf_LEXICAL	0x10000 /* Omit package from name */
 #define CVf_ANONCONST	0x20000 /* :const - create anonconst op */
 #define CVf_SIGNATURE   0x40000 /* CV uses a signature */
+#define CVf_REFCOUNTED_ANYSV 0x80000 /* CvXSUBANY().any_sv is refcounted */
 
 /* This symbol for optimised communication between toke.c and op.c: */
 #define CVf_BUILTIN_ATTRS	(CVf_NOWARN_AMBIGUOUS|CVf_LVALUE|CVf_ANONCONST)
@@ -226,6 +227,33 @@ See L<perlguts/Autoloading with XSUBs>.
 #define CvSIGNATURE(cv)		(CvFLAGS(cv) & CVf_SIGNATURE)
 #define CvSIGNATURE_on(cv)	(CvFLAGS(cv) |= CVf_SIGNATURE)
 #define CvSIGNATURE_off(cv)	(CvFLAGS(cv) &= ~CVf_SIGNATURE)
+
+/*
+
+=for apidoc m|bool|CvREFCOUNTED_ANYSV|CV *cv
+
+If true, indicates that the C<CvXSUBANY(cv).any_sv> member contains an SV
+pointer whose reference count should be decremented when the CV itself is
+freed.  In addition, C<cv_clone()> will increment the reference count, and
+C<sv_dup()> will duplicate the entire pointed-to SV if this flag is set.
+
+Any CV that wraps an XSUB has an C<ANY> union that the XSUB function is free
+to use for its own purposes.  It may be the case that the code wishes to store
+an SV in the C<any_sv> member of this union.  By setting this flag, this SV
+reference will be properly reclaimed or duplicated when the CV itself is.
+
+=for apidoc m|void|CvREFCOUNTED_ANYSV_on|CV *cv
+
+Helper macro to turn on the C<CvREFCOUNTED_ANYSV> flag.
+
+=for apidoc m|void|CvREFCOUNTED_ANYSV_off|CV *cv
+
+Helper macro to turn off the C<CvREFCOUNTED_ANYSV> flag.
+*/
+
+#define CvREFCOUNTED_ANYSV(cv)          (CvFLAGS(cv) & CVf_REFCOUNTED_ANYSV)
+#define CvREFCOUNTED_ANYSV_on(cv)       (CvFLAGS(cv) |= CVf_REFCOUNTED_ANYSV)
+#define CvREFCOUNTED_ANYSV_off(cv)      (CvFLAGS(cv) &= ~CVf_REFCOUNTED_ANYSV)
 
 /* Back-compat */
 #ifndef PERL_CORE
