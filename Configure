@@ -21657,28 +21657,6 @@ EOCP
 	fi
 fi
 
-if $test X"$sPRId64" = X -a X"$quadtype" != X; then
-	$cat >try.c <<EOCP
-#include <sys/types.h>
-#include <stdio.h>
-int main() {
-  $quadtype q = 12345678901;
-  printf("%Ld\n", q);
-}
-EOCP
-	set try
-	if eval $compile; then
-		yyy=`$run ./try`
-		case "$yyy" in
-		12345678901)
-			sPRId64='"Ld"'; sPRIi64='"Li"'; sPRIu64='"Lu"';
-			sPRIo64='"Lo"'; sPRIx64='"Lx"'; sPRIXU64='"LX"';
-			echo "We will use %Ld."
-			;;
-		esac
-	fi
-fi
-
 if $test X"$sPRId64" = X -a X"$quadtype" = X"long long"; then
 	$cat >try.c <<'EOCP'
 #include <sys/types.h>
@@ -21718,6 +21696,28 @@ EOCP
 			sPRId64='"qd"'; sPRIi64='"qi"'; sPRIu64='"qu"';
 			sPRIo64='"qo"'; sPRIx64='"qx"'; sPRIXU64='"qX"';
 			echo "We will use %qd."
+			;;
+		esac
+	fi
+fi
+
+if $test X"$sPRId64" = X -a X"$quadtype" != X; then
+	$cat >try.c <<EOCP
+#include <sys/types.h>
+#include <stdio.h>
+int main() {
+  $quadtype q = 12345678901;
+  printf("%Ld\n", q);
+}
+EOCP
+	set try
+	if eval $compile; then
+		yyy=`$run ./try`
+		case "$yyy" in
+		12345678901)
+			sPRId64='"Ld"'; sPRIi64='"Li"'; sPRIu64='"Lu"';
+			sPRIo64='"Lo"'; sPRIx64='"Lx"'; sPRIXU64='"LX"';
+			echo "We will use %Ld."
 			;;
 		esac
 	fi
