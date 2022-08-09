@@ -4709,18 +4709,13 @@ PERL_CALLCONV Signal_t	Perl_sighandler(int sig)
 #define PERL_ARGS_ASSERT_SIGHANDLER
 
 #endif
-#if !(defined(USE_QUERYLOCALE))
+#if !(defined(USE_POSIX_2008_LOCALE) && defined(USE_QUERYLOCALE))
 #  if defined(PERL_IN_LOCALE_C)
 #    if defined(USE_LOCALE)
-#      if defined(USE_POSIX_2008_LOCALE)
+#      if defined(USE_POSIX_2008_LOCALE) || ! defined(LC_ALL)
 STATIC const char *	S_calculate_LC_ALL(pTHX_ const char ** individ_locales);
 #define PERL_ARGS_ASSERT_CALCULATE_LC_ALL	\
 	assert(individ_locales)
-STATIC const char *	S_find_locale_from_environment(pTHX_ const unsigned int index);
-#define PERL_ARGS_ASSERT_FIND_LOCALE_FROM_ENVIRONMENT
-STATIC const char*	S_update_PL_curlocales_i(pTHX_ const unsigned int index, const char * new_locale, recalc_lc_all_t recalc_LC_ALL);
-#define PERL_ARGS_ASSERT_UPDATE_PL_CURLOCALES_I	\
-	assert(new_locale)
 #      endif
 #    endif
 #  endif
@@ -5031,6 +5026,19 @@ STATIC void	S_validate_suid(pTHX_ PerlIO *rsfp);
 /* PERL_CALLCONV void	CopFILEGV_set(pTHX_ COP * c, GV * gv); */
 #define PERL_ARGS_ASSERT_COPFILEGV_SET
 #endif
+#if !defined(USE_QUERYLOCALE)
+#  if defined(PERL_IN_LOCALE_C)
+#    if defined(USE_LOCALE)
+#      if defined(USE_POSIX_2008_LOCALE)
+STATIC const char *	S_find_locale_from_environment(pTHX_ const unsigned int index);
+#define PERL_ARGS_ASSERT_FIND_LOCALE_FROM_ENVIRONMENT
+STATIC const char*	S_update_PL_curlocales_i(pTHX_ const unsigned int index, const char * new_locale, recalc_lc_all_t recalc_LC_ALL);
+#define PERL_ARGS_ASSERT_UPDATE_PL_CURLOCALES_I	\
+	assert(new_locale)
+#      endif
+#    endif
+#  endif
+#endif
 #if !defined(WIN32)
 PERL_CALLCONV bool	Perl_do_exec3(pTHX_ const char *incmd, int fd, int do_report)
 			__attribute__visibility__("hidden");
@@ -5087,6 +5095,8 @@ STATIC void	S_print_bytes_for_locale(pTHX_ const char * const s, const char * co
 #define PERL_ARGS_ASSERT_PRINT_BYTES_FOR_LOCALE	\
 	assert(s); assert(e)
 #    if defined(USE_LOCALE)
+STATIC const char *	S_get_LC_ALL_display(pTHX);
+#define PERL_ARGS_ASSERT_GET_LC_ALL_DISPLAY
 STATIC void	S_print_collxfrm_input_and_return(pTHX_ const char * s, const char * e, const char * xbuf, const STRLEN xlen, const bool is_utf8);
 #define PERL_ARGS_ASSERT_PRINT_COLLXFRM_INPUT_AND_RETURN	\
 	assert(s); assert(e)
@@ -5707,10 +5717,10 @@ STATIC const char *	S_setlocale_from_aggregate_LC_ALL(pTHX_ const char * locale,
 	assert(locale)
 STATIC locale_t	S_use_curlocale_scratch(pTHX);
 #define PERL_ARGS_ASSERT_USE_CURLOCALE_SCRATCH
-#      if defined(USE_QUERYLOCALE)
+#    endif
+#    if defined(USE_POSIX_2008_LOCALE) && defined(USE_QUERYLOCALE)
 STATIC const char *	S_calculate_LC_ALL(pTHX_ const locale_t cur_obj);
 #define PERL_ARGS_ASSERT_CALCULATE_LC_ALL
-#      endif
 #    endif
 #    if defined(WIN32)
 PERL_CALLCONV wchar_t *	Perl_Win_utf8_string_to_wstring(const char * utf8_string);

@@ -3373,14 +3373,19 @@ S	|locale_t   |use_curlocale_scratch
 S	|const char *|setlocale_from_aggregate_LC_ALL			\
 				|NN const char * locale			\
 				|const line_t line
-#      ifdef USE_QUERYLOCALE
-S	|const char *|calculate_LC_ALL|const locale_t cur_obj
-#      else
-S	|const char *|calculate_LC_ALL|NN const char ** individ_locales
+#      ifndef USE_QUERYLOCALE
 S	|const char*|update_PL_curlocales_i|const unsigned int index	\
 				    |NN const char * new_locale		\
 				    |recalc_lc_all_t recalc_LC_ALL
 S	|const char *|find_locale_from_environment|const unsigned int index
+#      endif
+#    endif
+#    if defined(USE_POSIX_2008_LOCALE) && defined(USE_QUERYLOCALE)
+S	|const char *|calculate_LC_ALL|const locale_t cur_obj
+#    else
+:	    regen/embed.pl can't currently cope with 'elif'
+#      if defined(USE_POSIX_2008_LOCALE) || ! defined(LC_ALL)
+S	|const char *|calculate_LC_ALL|NN const char ** individ_locales
 #      endif
 #    endif
 #    ifdef WIN32
@@ -3413,6 +3418,7 @@ S	|void	|print_collxfrm_input_and_return		\
 STR	|char *	|setlocale_debug_string_i|const unsigned cat_index	    \
 					|NULLOK const char* const locale    \
 					|NULLOK const char* const retval
+S	|const char *|get_LC_ALL_display
 #    endif
 #  endif
 #  ifdef DEBUGGING
