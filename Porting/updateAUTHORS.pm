@@ -329,8 +329,25 @@ sub read_authors_file {
         $copy =~ s/\s+\z//;
         $name= $copy;
         $email //= "unknown";
+        my $orig_name= $name;
+        my $orig_email= $email;
+        if (my $new_name= $self->{change_name_for_name}{$orig_name}) {
+            $name= $new_name;
+        }
+        if (my $new_name= $self->{change_name_for_email}{$orig_email}) {
+            $name= $new_name;
+        }
+        if (my $new_email= $self->{change_email_for_name}{$orig_name}) {
+            $email= $new_email;
+        }
+        if (my $new_email= $self->{change_email_for_email}{$orig_email}) {
+            $email= $new_email;
+        }
+        $line= sprintf "%-31s%s", $name, $email =~ /^\@/ ? $email : "<$email>";
+        $line =~ s/\s+<unknown>\z//;
         $email= lc($email);
 
+        $line =~ s/\s+\z//;
         $author_info{"lines"}{$line}++;
         $author_info{"email2line"}{$email}= $line
             if $email and $email ne "unknown";
@@ -543,9 +560,22 @@ sub parse_orig_mailmap_hash {
             die encode_utf8 "Both preferred name and email are mandatory ",
                 "in line num $line_num: '$line'";
         }
+        my ($name, $email, $other_name, $other_email)= ($1, $2, $3, $4);
+        my ($orig_name, $orig_email)= ($1, $2);
+        if (my $new_name= $self->{change_name_for_name}{$orig_name}) {
+            $name= $new_name;
+        }
+        if (my $new_name= $self->{change_name_for_email}{$orig_email}) {
+            $name= $new_name;
+        }
+        if (my $new_email= $self->{change_email_for_name}{$orig_name}) {
+            $email= $new_email;
+        }
+        if (my $new_email= $self->{change_email_for_email}{$orig_email}) {
+            $email= $new_email;
+        }
 
-        # [ preferred_name, preferred_email, other_name, other_email ]
-        push @recs, [ $1, $2, $3, $4, $line_num ];
+        push @recs, [ $name, $email, $other_name, $other_email, $line_num ];
     }
     return \@recs;
 }

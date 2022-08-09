@@ -50,6 +50,11 @@ my @OPTSPEC= qw(
 
     numstat
     no_update
+
+    change_name_for_name|change_name=s%
+    change_name_for_email=s%
+    change_email_for_name=s%
+    change_email_for_email|change_email=s%
 );
 
 my %implies_numstat= (
@@ -77,8 +82,8 @@ sub main {
             # support hyphens as well as underbars,
             # underbars must be first. Only handles two
             # part words right now.
-            s/\b([a-z]+)_([a-z]+)\b/${1}_${2}|${1}-${2}/gr
-        } @OPTSPEC
+            ref $_ ? $_ : s/\b([a-z]+)_([a-z]+)\b/${1}_${2}|${1}-${2}/gr
+        } @OPTSPEC,
     ) or pod2usage(2);
     $opts{commit_range}= join " ", @ARGV;
     if (!$opts{commit_range}) {
@@ -389,6 +394,10 @@ are properly listed.
     Update canonical name or email in AUTHORS and .mailmap properly.
     --exclude-contrib       NAME_AND_EMAIL
     --exclude-me
+    --change-name           OLD_NAME=NEW_NAME
+    --change-name-for-email OLD_ADDR=NEW_NAME
+    --change-email-for-name OLD_NAME=NEW_ADDR
+    --change-email          OLD_ADDR=NEW_EMAIL
 
  Reports About People
     --stats             detailed report of authors and what they did
@@ -579,6 +588,26 @@ older checkAUTHORS.pl script would have.
 Show an additional column with the rank number of a row in the report in
 reports that do not normally show the rank number.
 
+=item C<--change-name OLD_NAME=NEW_NAME>
+
+=item C<--change-name-for-email OLD_EMAIL=NEW_NAME>
+
+=item C<--change-email OLD_EMAIL=NEW_EMAIL>
+
+=item C<--change-email-for-name OLD_NAME=NEW_EMAIL>
+
+Change email or name based on OLD_NAME or OLD_EMAIL.
+
+Eg,
+
+    --change-name-for-email somebody@gmail.com="Bob Rob"
+
+would cause the preferred name for the person with the preferred email
+C<somebody@gmail.com> to change to "Bob Rob" in our records. If that
+persons name was "Daniel Dude" then we might have done this as well:
+
+    --change-name "Bob Rob"="Daniel Dude"
+
 =back
 
 =head1 DESCRIPTION
@@ -605,16 +634,13 @@ about the commits it has analyzed.
 
 =head2 ADDING A NEW CONTRIBUTOR
 
-Run the tool with no arguments. It will add anything that is missing.
-Check the changes and then commit them.
+Commit your changes. Run the tool with no arguments. It will add
+anything that is missing. Check the changes and then commit them.
 
 =head2 CHANGING A CONTRIBUTORS CANONICAL NAME OR EMAIL
 
-Manually modify F<AUTHORS> so that the name or email is correct. Run the
-tool with no arguments, it should update C<.mailmap> appropriately.
-Check the changes before you commit them. If you wish to change BOTH
-files at the same time you should do it in two steps, running the tool
-in between each step. Check the changes and then commit them.
+Use the C<--change-name-for-name> and related options. This will do
+things "properly" and update all the files.
 
 =head2 A CONTRIBUTOR WANTS TO BE FORGOTTEN
 
@@ -673,6 +699,9 @@ in casual use of C<git log> and other C<git> tooling.
   perl Porting/updateAUTHORS.pl --files --from=v5.31.6
   perl Porting/updateAUTHORS.pl --activity --from=v5.31.6
   perl Porting/updateAUTHORS.pl --chainsaw v5.31.6..HEAD
+  perl Porting/updateAUTHORS.pl --change-name "Old Name"="New Name"
+  perl Porting/updateAUTHORS.pl --change-name-for-email "x@y.com"="Name"
+  perl Porting/updateAUTHORS.pl --change-email-for-name "Name"="p@q.com"
 
 =head1 RELATED FILES
 
