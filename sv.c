@@ -14633,6 +14633,9 @@ S_sv_dup_common(pTHX_ const SV *const ssv, CLONE_PARAMS *const param)
                 } else if (CvCONST(dsv)) {
                     CvXSUBANY(dsv).any_ptr =
                         sv_dup_inc((const SV *)CvXSUBANY(dsv).any_ptr, param);
+                } else if (CvREFCOUNTED_ANYSV(dsv)) {
+                    CvXSUBANY(dsv).any_sv =
+                        sv_dup_inc((const SV *)CvXSUBANY(dsv).any_sv, param);
                 }
                 assert(!CvSLABBED(dsv));
                 if (CvDYNFILE(dsv)) CvFILE(dsv) = SAVEPV(CvFILE(dsv));

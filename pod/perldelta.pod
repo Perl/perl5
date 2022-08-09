@@ -385,6 +385,13 @@ constructed to call the C<VERSION>, C<import> and C<unimport> methods
 as part of a C<use> statement and attribute application, nor when
 assigning to an C<:lvalue> subroutine.
 
+=item *
+
+A new CV flag C<CVf_REFCOUNTED_ANYSV> has been added, which indicates that the
+CV is an XSUB and stores an SV pointer in the C<CvXSUBANY.any_sv> union field.
+Perl core operations such as cloning or destroying the CV will maintain the
+reference count of the pointed-to SV, destroying it when required.
+
 =back
 
 =head1 Selected Bug Fixes
