@@ -342,6 +342,7 @@ sub read_authors_file {
             and $email ne "unknown";
         $author_info{"name2email"}{$name}= $email
             if $name and $name ne "unknown";
+        $author_info{"clean_full"}{ __fold_trim_ws($line) }= $line;
     }
     close $in_fh
         or die "Failed to close '$authors_file': $!";
@@ -489,6 +490,7 @@ sub update_mailmap_file {
         foreach
             my $line (@$mailmap_preamble, __sorted_hash_keys($mailmap_hash),)
         {
+            next if $line =~ m!\A(.*) \1\z!;
             print $out encode_utf8($line), "\n"
                 or die "Failed to print to scalar buffer handle: $!";
         }
@@ -535,7 +537,8 @@ sub parse_orig_mailmap_hash {
         my $line_num= $mailmap_hash->{$line};
         $line =~ /^ \s* (?: ( [^<>]*? ) \s+ )? <([^<>]*)>
                 (?: \s+ (?: ( [^<>]*? ) \s+ )? <([^<>]*)> )? \s* \z /x
-            or die encode_utf8 "Failed to parse line num $line_num: '$line'";
+            or die encode_utf8
+            "Failed to parse '$self->{mailmap_file}' line num $line_num: '$line'\n";
         if (!$1 or !$2) {
             die encode_utf8 "Both preferred name and email are mandatory ",
                 "in line num $line_num: '$line'";
@@ -620,13 +623,20 @@ sub _author_to_mailmap {
 
 sub check_fix_mailmap_hash {
     my ($self)= @_;
-    my $mailmap_hash= $self->{orig_mailmap_hash};
+    my $orig_mailmap_hash= $self->{orig_mailmap_hash};
     my $author_info= $self->{author_info};
-
+    foreach my $key (keys %{ $author_info->{clean_full} }) {
+        $key .= " <unknown>"
+            unless $key =~ /\s+(?:<[^>]+>|\@\w+)\z/;
+        $key =~ s/\s+(\@\w+)\z/ <$1>/;
+        $orig_mailmap_hash->{"$key $key"} //= -1;
+    }
     my $parsed= $self->parse_orig_mailmap_hash();
     my @fixed;
     my %seen_map;
     my %pref_groups;
+
+    my $remove_no_names_with_overlaps= 0;
 
     # first pass through the data, do any conversions, eg, LC
     # the email address, decode any MIME-Header style email addresses.
@@ -683,25 +693,34 @@ sub check_fix_mailmap_hash {
             }
         }
 
-        # Build an index of "preferred name/email" to other-email, other name
-        # we use this later to remove redundant entries missing a name.
-        $pref_groups{"$pname $pemail"}{$oemail}{ $oname || "" }=
-            [ $pname, $pemail, $oname, $oemail, $line_num ];
+        my $rec= [ $pname, $pemail, $oname, $oemail, $line_num ];
+        if ($remove_no_names_with_overlaps) {
+
+            # Build an index of "preferred name/email" to other-email, other name
+            # we use this later to remove redundant entries missing a name.
+            $pref_groups{"$pname $pemail"}{$oemail}{ $oname || "" }= $rec;
+        }
+        else {
+            push @fixed, $rec;
+        }
     }
 
-    # this removes entries like
-    # Joe <blogs> <whatever>
-    # where there is a corresponding
-    # Joe <blogs> Joe X <blogs>
-    foreach my $pref (__sorted_hash_keys(\%pref_groups)) {
-        my $entries= $pref_groups{$pref};
-        foreach my $email (__sorted_hash_keys($entries)) {
-            my @names= __sorted_hash_keys($entries->{$email});
-            if ($names[0] eq "" and @names > 1) {
-                shift @names;
-            }
-            foreach my $name (@names) {
-                push @fixed, $entries->{$email}{$name};
+    if ($remove_no_names_with_overlaps) {
+
+        # this removes entries like
+        # Joe <blogs> <whatever>
+        # where there is a corresponding
+        # Joe <blogs> Joe X <whatever>
+        foreach my $pref (__sorted_hash_keys(\%pref_groups)) {
+            my $entries= $pref_groups{$pref};
+            foreach my $email (__sorted_hash_keys($entries)) {
+                my @names= __sorted_hash_keys($entries->{$email});
+                if (0 and $names[0] eq "" and @names > 1) {
+                    shift @names;
+                }
+                foreach my $name (@names) {
+                    push @fixed, $entries->{$email}{$name};
+                }
             }
         }
     }
@@ -901,6 +920,8 @@ sub new {
     }
 
     $self->read_exclude_file();
+
+    die Dumper(\%self) if $self{dump_opts};
 
     return $self;
 }
