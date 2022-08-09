@@ -4,7 +4,7 @@ use strict;
 use warnings;
 # ABSTRACT: A small, simple, correct HTTP/1.1 client
 
-our $VERSION = '0.080';
+our $VERSION = '0.082';
 
 sub _croak { require Carp; Carp::croak(@_) }
 
@@ -245,9 +245,10 @@ sub post_form {
     while ( my ($key, $value) = each %{$args->{headers} || {}} ) {
         $headers->{lc $key} = $value;
     }
-    delete $args->{headers};
 
     return $self->request('POST', $url, {
+            # Any existing 'headers' key in $args will be overridden with a
+            # normalized version below.
             %$args,
             content => $self->www_form_urlencode($data),
             headers => {
@@ -388,6 +389,10 @@ sub mirror {
 #pod in-progress response hash reference, as described below.  (This allows
 #pod customizing the action of the callback based on the C<status> or C<headers>
 #pod received prior to the content body.)
+#pod
+#pod Content data in the request/response is handled as "raw bytes".  Any
+#pod encoding/decoding (with associated headers) are the responsibility of the
+#pod caller.
 #pod
 #pod The C<request> method returns a hashref containing the response.  The hashref
 #pod will have the following keys:
@@ -1704,7 +1709,7 @@ HTTP::Tiny - A small, simple, correct HTTP/1.1 client
 
 =head1 VERSION
 
-version 0.080
+version 0.082
 
 =head1 SYNOPSIS
 
@@ -1942,6 +1947,10 @@ containing a chunk of the response body, the second argument will be the
 in-progress response hash reference, as described below.  (This allows
 customizing the action of the callback based on the C<status> or C<headers>
 received prior to the content body.)
+
+Content data in the request/response is handled as "raw bytes".  Any
+encoding/decoding (with associated headers) are the responsibility of the
+caller.
 
 The C<request> method returns a hashref containing the response.  The hashref
 will have the following keys:
@@ -2337,7 +2346,7 @@ David Golden <dagolden@cpan.org>
 
 =head1 CONTRIBUTORS
 
-=for stopwords Alan Gardner Alessandro Ghedini A. Sinan Unur Brad Gilbert brian m. carlson Chris Nehren Weyl Claes Jakobsson Clinton Gormley Craig Berry David Golden Mitchell Dean Pearce Edward Zborowski Felipe Gasper Greg Kennedy James E Keenan Raspass Jeremy Mates Jess Robinson Karen Etheridge Lukas Eklund Martin J. Evans Martin-Louis Bright Matthew Horsfall Michael R. Davis Mike Doherty Nicolas Rochelemagne Olaf Alders Olivier Mengué Petr Písař sanjay-cpu Serguei Trouchelle Shoichi Kaji SkyMarshal Sören Kornetzki Steve Grazzini Syohei YOSHIDA Tatsuhiko Miyagawa Tom Hukins Tony Cook Xavier Guimard
+=for stopwords Alan Gardner Alessandro Ghedini A. Sinan Unur Brad Gilbert brian m. carlson Chris Nehren Weyl Claes Jakobsson Clinton Gormley Craig Berry David Golden Mitchell Dean Pearce Edward Zborowski Felipe Gasper Graham Knop Greg Kennedy James E Keenan Raspass Jeremy Mates Jess Robinson Karen Etheridge Lukas Eklund Martin J. Evans Martin-Louis Bright Matthew Horsfall Michael R. Davis Mike Doherty Nicolas Rochelemagne Olaf Alders Olivier Mengué Petr Písař sanjay-cpu Serguei Trouchelle Shoichi Kaji SkyMarshal Sören Kornetzki Steve Grazzini Syohei YOSHIDA Tatsuhiko Miyagawa Tom Hukins Tony Cook Xavier Guimard
 
 =over 4
 
@@ -2404,6 +2413,10 @@ Edward Zborowski <ed@rubensteintech.com>
 =item *
 
 Felipe Gasper <felipe@felipegasper.com>
+
+=item *
+
+Graham Knop <haarg@haarg.org>
 
 =item *
 
@@ -2517,7 +2530,7 @@ Xavier Guimard <yadd@debian.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-This software is copyright (c) 2021 by Christian Hansen.
+This software is copyright (c) 2022 by Christian Hansen.
 
 This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
