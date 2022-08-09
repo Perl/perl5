@@ -50,7 +50,7 @@ SKIP: {
 
 	while (<DATA>) {
 	    chomp;
-	    $loc = setlocale( LC_ALL, $_);
+	    $loc = setlocale( LC_NUMERIC, $_);
 	    last if $loc && radix() eq ',';
 	}
 	skip 'Cannot test locale handling without a comma locale', 6
@@ -70,7 +70,7 @@ SKIP: {
             $ver = 'version'->new($]);
             is "$ver", "$]", 'Use PV for dualvars';
         }
-	setlocale( LC_ALL, $orig_loc); # reset this before possible skip
+	setlocale( LC_NUMERIC, $orig_loc); # reset this before possible skip
 	skip 'Cannot test RT#46921 with Perl < 5.008', 1
 	    if ($] < 5.008);
 	my ($fh, $filename) = tempfile('tXXXXXXX', SUFFIX => '.pm', UNLINK => 1);
@@ -81,10 +81,10 @@ use locale;
 use POSIX qw(locale_h);
 \$^W = 1;
 use version;
-setlocale (LC_ALL, '$loc');
+setlocale (LC_NUMERIC, '$loc');
 use version ;
 eval "use Socket 1.7";
-setlocale( LC_ALL, '$orig_loc');
+setlocale( LC_NUMERIC, '$orig_loc');
 1;
 EOF
 	close $fh;
