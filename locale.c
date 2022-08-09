@@ -1407,7 +1407,7 @@ S_stdize_locale(pTHX_ const int category,
     return retval;
 }
 
-#if defined(USE_POSIX_2008_LOCALE)
+#if defined(USE_POSIX_2008_LOCALE) || ! defined(LC_ALL)
 
 STATIC
 const char *
@@ -1464,7 +1464,7 @@ S_calculate_LC_ALL(pTHX_ const char ** individ_locales)
 
     /* First calculate the needed size for the string listing the categories
      * and their locales. */
-    for (i = 0; i < LC_ALL_INDEX_; i++) {
+    for (i = 0; i < NOMINAL_LC_ALL_INDEX; i++) {
 
 #  ifdef USE_QUERYLOCALE
         const char * entry = querylocale_l(i, cur_obj);
@@ -1484,7 +1484,7 @@ S_calculate_LC_ALL(pTHX_ const char ** individ_locales)
     SAVEFREEPV(Newxz(aggregate_locale, names_len, char));
 
     /* Then fill it in */
-    for (i = 0; i < LC_ALL_INDEX_; i++) {
+    for (i = 0; i < NOMINAL_LC_ALL_INDEX; i++) {
         Size_t new_len;
 
 #  ifdef USE_QUERYLOCALE
@@ -1530,7 +1530,34 @@ S_calculate_LC_ALL(pTHX_ const char ** individ_locales)
 
     return aggregate_locale;
 }
-#endif /*defined(USE_POSIX_2008_LOCALE)*/
+
+#endif
+
+#if defined(USE_LOCALE) && defined(DEBUGGING)
+
+STATIC const char *
+S_get_LC_ALL_display(pTHX)
+{
+
+#  ifdef LC_ALL
+
+    return querylocale_c(LC_ALL);
+
+#  else
+
+    const char * curlocales[NOMINAL_LC_ALL_INDEX];
+
+    for (unsigned i = 0; i < NOMINAL_LC_ALL_INDEX; i++) {
+        curlocales[i] = querylocale_i(i);
+    }
+
+    return calculate_LC_ALL(curlocales);
+
+#  endif
+
+}
+
+#endif
 
 STATIC void
 S_setlocale_failure_panic_i(pTHX_

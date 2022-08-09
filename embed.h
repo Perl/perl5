@@ -1518,13 +1518,11 @@
 #  if !(defined(PERL_USE_3ARG_SIGHANDLER))
 #define sighandler		Perl_sighandler
 #  endif
-#  if !(defined(USE_QUERYLOCALE))
+#  if !(defined(USE_POSIX_2008_LOCALE) && defined(USE_QUERYLOCALE))
 #    if defined(PERL_IN_LOCALE_C)
 #      if defined(USE_LOCALE)
-#        if defined(USE_POSIX_2008_LOCALE)
+#        if defined(USE_POSIX_2008_LOCALE) || ! defined(LC_ALL)
 #define calculate_LC_ALL(a)	S_calculate_LC_ALL(aTHX_ a)
-#define find_locale_from_environment(a)	S_find_locale_from_environment(aTHX_ a)
-#define update_PL_curlocales_i(a,b,c)	S_update_PL_curlocales_i(aTHX_ a,b,c)
 #        endif
 #      endif
 #    endif
@@ -1576,6 +1574,16 @@
 #define new_he()		S_new_he(aTHX)
 #    endif
 #  endif
+#  if !defined(USE_QUERYLOCALE)
+#    if defined(PERL_IN_LOCALE_C)
+#      if defined(USE_LOCALE)
+#        if defined(USE_POSIX_2008_LOCALE)
+#define find_locale_from_environment(a)	S_find_locale_from_environment(aTHX_ a)
+#define update_PL_curlocales_i(a,b,c)	S_update_PL_curlocales_i(aTHX_ a,b,c)
+#        endif
+#      endif
+#    endif
+#  endif
 #  if !defined(WIN32)
 #define do_exec3(a,b,c)		Perl_do_exec3(aTHX_ a,b,c)
 #  endif
@@ -1601,6 +1609,7 @@
 #    if defined(PERL_IN_LOCALE_C)
 #define print_bytes_for_locale(a,b,c)	S_print_bytes_for_locale(aTHX_ a,b,c)
 #      if defined(USE_LOCALE)
+#define get_LC_ALL_display()	S_get_LC_ALL_display(aTHX)
 #define print_collxfrm_input_and_return(a,b,c,d,e)	S_print_collxfrm_input_and_return(aTHX_ a,b,c,d,e)
 #define setlocale_debug_string_i	S_setlocale_debug_string_i
 #      endif
@@ -1739,9 +1748,9 @@
 #define my_querylocale_i(a)	S_my_querylocale_i(aTHX_ a)
 #define setlocale_from_aggregate_LC_ALL(a,b)	S_setlocale_from_aggregate_LC_ALL(aTHX_ a,b)
 #define use_curlocale_scratch()	S_use_curlocale_scratch(aTHX)
-#        if defined(USE_QUERYLOCALE)
+#      endif
+#      if defined(USE_POSIX_2008_LOCALE) && defined(USE_QUERYLOCALE)
 #define calculate_LC_ALL(a)	S_calculate_LC_ALL(aTHX_ a)
-#        endif
 #      endif
 #      if defined(WIN32)
 #define win32_setlocale(a,b)	S_win32_setlocale(aTHX_ a,b)
