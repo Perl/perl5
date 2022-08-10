@@ -96,6 +96,19 @@ sub _my_fail($) {
 
 my $ctype_excluded = category_excluded('LC_CTYPE');
 
+sub valid_locale_categories() {
+    # Returns a list of the locale categories (expressed as strings, like
+    # "LC_ALL) known to this program that are available on this platform.
+
+    return grep { ! category_excluded($_) } @platform_categories;
+}
+
+sub is_category_valid($) {
+    my $name = shift;
+    $name = 'LC_' . $name =~ s/^LC_//r;
+    return grep { $name eq $_ } valid_locale_categories();
+}
+
 sub _trylocale ($$$$) { # For use only by other functions in this file!
 
     # Adds the locale given by the first parameter to the list given by the
@@ -208,19 +221,6 @@ sub _decode_encodings { # For use only by other functions in this file!
     push @enc, "65001"; # Windows UTF-8
 
     return @enc;
-}
-
-sub valid_locale_categories() {
-    # Returns a list of the locale categories (expressed as strings, like
-    # "LC_ALL) known to this program that are available on this platform.
-
-    return grep { ! category_excluded($_) } @platform_categories;
-}
-
-sub is_category_valid($) {
-    my $name = shift;
-    $name = 'LC_' . $name =~ s/^LC_//r;
-    return grep { $name eq $_ } valid_locale_categories();
 }
 
 sub locales_enabled(;$) {
