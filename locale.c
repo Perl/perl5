@@ -5488,62 +5488,58 @@ Perl_my_strerror(pTHX_ const int errnum)
     bool locale_is_C = FALSE;
 
     /* We have a critical section to prevent another thread from executing this
-     * same code at the same time.  (On thread-safe perls, the LOCK is a
-     * no-op.)  Since this is the only place in core that changes LC_MESSAGES
-     * (unless the user has called setlocale(), this works to prevent races. */
+     * same code at the same time which could cause LC_MESSAGES to be changed
+     * to something else while we need it to be constant.  (On thread-safe
+     * perls, the LOCK is a no-op.)  Since this is the only place in core that
+     * changes LC_MESSAGES (unless the user has called setlocale()), this works
+     * to prevent races. */
     SETLOCALE_LOCK;
 
     DEBUG_Lv(PerlIO_printf(Perl_debug_log,
                             "my_strerror called with errnum %d\n", errnum));
-    if (! within_locale_scope) {
+
+    /* If not within locale scope, need to return messages in the C locale */
+    if (within_locale_scope) {
+        DEBUG_Lv(PerlIO_printf(Perl_debug_log, "WITHIN locale scope\n"));
+    }
+    else {
         save_locale = querylocale_c(LC_MESSAGES);
         if (! save_locale) {
             SETLOCALE_UNLOCK;
             locale_panic_("Could not find current LC_MESSAGES locale");
+            NOT_REACHED; /* NOTREACHED */                                   \
         }
-        else {
-            locale_is_C = isNAME_C_OR_POSIX(save_locale);
 
-            /* Switch to the C locale if not already in it */
-            if (! locale_is_C) {
+        locale_is_C = isNAME_C_OR_POSIX(save_locale);
 
-                /* The setlocale() just below likely will zap 'save_locale', so
-                 * create a copy.  */
-                save_locale = savepv(save_locale);
-                if (! bool_setlocale_c(LC_MESSAGES, "C")) {
+        /* Switch to the C locale if not already in it */
+        if (! locale_is_C && ! bool_setlocale_c(LC_MESSAGES, "C")) {
 
-                    /* If, for some reason, the locale change failed, we
-                     * soldier on as best as possible under the circumstances,
-                     * using the current locale, and clear save_locale, so we
-                     * don't try to change back.  On z/0S, all setlocale()
-                     * calls fail after you've created a thread.  This is their
-                     * way of making sure the entire process is always a single
-                     * locale.  This means that 'use locale' is always in place
-                     * for messages under these circumstances. */
-                    Safefree(save_locale);
-                    save_locale = NULL;
-                }
-            }
+            /* If, for some reason, the locale change failed, we soldier on as
+             * best as possible under the circumstances, using the current
+             * locale, and clear save_locale, so we don't try to change back.
+             * On z/0S, all setlocale() calls fail after you've created a
+             * thread.  This is their way of making sure the entire process is
+             * always a single locale.  This means that 'use locale' is always
+             * in place for messages under these circumstances. */
+            save_locale = NULL;
         }
     }   /* end of ! within_locale_scope */
-    else {
-        DEBUG_Lv(PerlIO_printf(Perl_debug_log, "WITHIN locale scope\n"));
-    }
 
     DEBUG_Lv(PerlIO_printf(Perl_debug_log,
              "Any locale change has been done; about to call Strerror\n"));
     errstr = savepv(Strerror(errnum));
 
-    if (! within_locale_scope) {
-        if (save_locale && ! locale_is_C) {
-            if (! bool_setlocale_c(LC_MESSAGES, save_locale)) {
-                SETLOCALE_UNLOCK;
-                locale_panic_(Perl_form(aTHX_
-                                        "setlocale restore to '%s' failed",
-                                        save_locale));
-            }
-            Safefree(save_locale);
-        }
+    /* Switch back if we successully switched */
+    if (     save_locale
+        && ! locale_is_C
+        && ! bool_setlocale_c(LC_MESSAGES, save_locale))
+    {
+        SETLOCALE_UNLOCK;
+        locale_panic_(Perl_form(aTHX_
+                                "setlocale restore to '%s' failed",
+                                save_locale));
+        NOT_REACHED; /* NOTREACHED */                                   \
     }
 
     SETLOCALE_UNLOCK;
