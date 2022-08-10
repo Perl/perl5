@@ -400,8 +400,12 @@ Now a no-op.
 #    define __attribute__always_inline__      __attribute__((always_inline))
 #  endif
 #endif
-#if defined(HASATTRIBUTE_VISIBILITY) && !defined(_WIN32)
-/* On Windows, instead of this, we use __declspec(dllexport) and a .def file */
+#if defined(HASATTRIBUTE_VISIBILITY) && !defined(_WIN32) && !defined(__CYGWIN__)
+/* On Windows instead of this, we use __declspec(dllexport) and a .def file
+ * Cygwin works by exporting every global symbol, see the definition of ldflags
+ * near the end of hints/cygwin.sh and the visibility attribute doesn't appear
+ * to control that.
+ */
 #  define __attribute__visibility__(x) __attribute__((visibility(x)))
 #endif
 
