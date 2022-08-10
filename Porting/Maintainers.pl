@@ -371,7 +371,7 @@ use File::Glob qw(:case);
     },
 
     'Digest::SHA' => {
-        'DISTRIBUTION' => 'MSHELOR/Digest-SHA-6.02.tar.gz',
+        'DISTRIBUTION' => 'MSHELOR/Digest-SHA-6.03.tar.gz',
         'FILES'        => q[cpan/Digest-SHA],
         'EXCLUDED'     => [
             qw( t/pod.t
