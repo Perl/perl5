@@ -25,6 +25,7 @@ my @OPTSPEC= qw(
     exclude_missing|exclude
     exclude_contrib=s@
     exclude_me
+    dump_opts
 
     show_rank|rank
     show_applied|thanks_applied|applied
