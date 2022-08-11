@@ -43,7 +43,8 @@ my @field_names= map { $field_spec{$_} } @field_codes;
 my $tformat= join "%x00", map { "%" . $_ } @field_codes;
 
 sub _make_name_author_info {
-    my ($self, $author_info, $commit_info, $name_key)= @_;
+    my ($self, $commit_info, $name_key)= @_;
+    my $author_info= $self->{author_info};
     (my $email_key= $name_key) =~ s/name/email/;
     my $email= $commit_info->{$email_key};
     my $name= $commit_info->{$name_key};
@@ -65,10 +66,11 @@ sub _make_name_simple {
 }
 
 sub read_commit_log {
-    my ($self, $author_info, $mailmap_info)= @_;
-    $author_info ||= {};
-    open my $fh, qq(git log --pretty='tformat:$tformat' |);
+    my ($self)= @_;
+    my $author_info= $self->{author_info}   ||= {};
+    my $mailmap_info= $self->{mailmap_info} ||= {};
 
+    open my $fh, qq(git log --pretty='tformat:$tformat' |);
     while (defined(my $line= <$fh>)) {
         chomp $line;
         $line= decode_utf8($line);
@@ -76,24 +78,22 @@ sub read_commit_log {
         @{$commit_info}{@field_names}= split /\0/, $line, 0 + @field_names;
 
         my $author_name_mm=
-            $self->_make_name_author_info($author_info, $commit_info,
-            "author_name_mm");
+            $self->_make_name_author_info($commit_info, "author_name_mm");
 
         my $committer_name_mm=
-            $self->_make_name_author_info($author_info, $commit_info,
-            "committer_name_mm");
+            $self->_make_name_author_info($commit_info, "committer_name_mm");
 
         my $author_name_real= $self->_make_name_simple($commit_info, "author");
 
         my $committer_name_real=
             $self->_make_name_simple($commit_info, "committer");
 
+        $self->_check_name_mailmap($author_name_mm, $author_name_real,
+            $commit_info, "author name");
         $self->_check_name_mailmap(
-            $mailmap_info, $author_name_mm, $author_name_real,
-            $commit_info,  "author name"
+            $committer_name_mm, $committer_name_real,
+            $commit_info,       "committer name"
         );
-        $self->_check_name_mailmap($mailmap_info, $committer_name_mm,
-            $committer_name_real, $commit_info, "committer name");
 
         $author_info->{"lines"}{$author_name_mm}++;
         $author_info->{"lines"}{$committer_name_mm}++;
@@ -102,8 +102,8 @@ sub read_commit_log {
 }
 
 sub read_authors {
-    my ($self, $authors_file)= @_;
-    $authors_file ||= "AUTHORS";
+    my ($self)= @_;
+    my $authors_file= $self->{authors_file};
 
     my @authors_preamble;
     open my $in_fh, "<", $authors_file
@@ -147,12 +147,19 @@ sub read_authors {
     }
     close $in_fh
         or die "Failed to close '$authors_file': $!";
+
+    $self->{author_info}= \%author_info;
+    $self->{authors_preamble}= \@authors_preamble;
     return (\%author_info, \@authors_preamble);
 }
 
 sub update_authors {
-    my ($self, $author_info, $authors_preamble, $authors_file)= @_;
-    $authors_file ||= "AUTHORS";
+    my ($self)= @_;
+
+    my $author_info= $self->{author_info};
+    my $authors_preamble= $self->{authors_preamble};
+    my $authors_file= $self->{authors_file};
+
     my $authors_file_new= $authors_file . ".new";
     open my $out_fh, ">", $authors_file_new
         or die "Failed to open for write '$authors_file_new': $!";
@@ -177,8 +184,8 @@ sub update_authors {
 }
 
 sub read_mailmap {
-    my ($self, $mailmap_file)= @_;
-    $mailmap_file ||= ".mailmap";
+    my ($self)= @_;
+    my $mailmap_file= $self->{mailmap_file};
 
     open my $in, "<", $mailmap_file
         or die "Failed to read '$mailmap_file': $!";
@@ -204,7 +211,9 @@ sub read_mailmap {
         }
     }
     close $in;
-    return \%mailmap_hash, \@mailmap_preamble;
+    $self->{orig_mailmap_hash}= \%mailmap_hash;
+    $self->{mailmap_preamble}= \@mailmap_preamble;
+    return (\%mailmap_hash, \@mailmap_preamble);
 }
 
 # this can be used to extract data from the checkAUTHORS data
@@ -233,8 +242,10 @@ sub __sorted_hash_keys {
 }
 
 sub update_mailmap {
-    my ($self, $mailmap_hash, $mailmap_preamble, $mailmap_file)= @_;
-    $mailmap_file ||= ".mailmap";
+    my ($self)= @_;
+    my $mailmap_hash= $self->{new_mailmap_hash};
+    my $mailmap_preamble= $self->{mailmap_preamble};
+    my $mailmap_file= $self->{mailmap_file};
 
     my $mailmap_file_new= $mailmap_file . "_new";
     open my $out, ">", $mailmap_file_new
@@ -250,8 +261,10 @@ sub update_mailmap {
     return 1;    # ok
 }
 
-sub parse_mailmap_hash {
-    my ($self, $mailmap_hash)= @_;
+sub parse_orig_mailmap_hash {
+    my ($self)= @_;
+    my $mailmap_hash= $self->{orig_mailmap_hash};
+
     my @recs;
     foreach my $line (sort keys %$mailmap_hash) {
         my $line_num= $mailmap_hash->{$line};
@@ -289,7 +302,9 @@ my $E2P= "email2preferred";
 my $blurb= "";    # FIXME - replace with a nice message
 
 sub _check_name_mailmap {
-    my ($self, $mailmap_info, $auth_name, $raw_name, $commit_info, $descr)= @_;
+    my ($self, $auth_name, $raw_name, $commit_info, $descr)= @_;
+    my $mailmap_info= $self->{mailmap_info};
+
     my $name= $auth_name;
     $name =~ s/<([^<>]+)>/<\L$1\E>/
         or $name =~ s/(\s)(\@\w+)\z/$1<\L$2\E>/
@@ -300,7 +315,8 @@ sub _check_name_mailmap {
     if (!$mailmap_info->{$P2O}{$name}) {
         warn encode_utf8 sprintf "Unknown %s '%s' in commit %s '%s'\n%s",
             $descr,
-            $name, $commit_info->{"abbrev_hash"},
+            $name,
+            $commit_info->{"abbrev_hash"},
             $commit_info->{"commit_subject"},
             $blurb;
         $mailmap_info->{add}{"$name $raw_name"}++;
@@ -313,8 +329,11 @@ sub _check_name_mailmap {
 }
 
 sub check_fix_mailmap_hash {
-    my ($self, $mailmap_hash, $authors_info)= @_;
-    my $parsed= $self->parse_mailmap_hash($mailmap_hash);
+    my ($self)= @_;
+    my $mailmap_hash= $self->{orig_mailmap_hash};
+    my $author_info= $self->{author_info};
+
+    my $parsed= $self->parse_orig_mailmap_hash();
     my @fixed;
     my %seen_map;
     my %pref_groups;
@@ -331,12 +350,12 @@ sub check_fix_mailmap_hash {
         if ($pname =~ /=\?UTF-8\?/) {
             $pname= decode("MIME-Header", $pname);
         }
-        my $auth_email= $authors_info->{"name2email"}{$pname};
+        my $auth_email= $author_info->{"name2email"}{$pname};
         if ($auth_email) {
             ## this name exists in authors, so use its email data for pemail
             $pemail= $auth_email;
         }
-        my $auth_name= $authors_info->{"email2name"}{$pemail};
+        my $auth_name= $author_info->{"email2name"}{$pemail};
         if ($auth_name) {
             ## this email exists in authors, so use its name data for pname
             $pname= $auth_name;
@@ -425,11 +444,16 @@ sub check_fix_mailmap_hash {
         $line .= " $other" if $other;
         $new_mailmap_hash->{$line}= $line_num;
     }
+    $self->{new_mailmap_hash}= $new_mailmap_hash;
+    $self->{mailmap_info}= $mailmap_info;
     return ($new_mailmap_hash, $mailmap_info);
 }
 
 sub add_new_mailmap_entries {
-    my ($self, $mailmap_hash, $mailmap_info, $mailmap_file)= @_;
+    my ($self)= @_;
+    my $mailmap_hash= $self->{new_mailmap_hash};
+    my $mailmap_info= $self->{mailmap_info};
+    my $mailmap_file= $self->{mailmap_file};
 
     my $mailmap_add= $mailmap_info->{add}
         or return 0;
@@ -444,37 +468,34 @@ sub add_new_mailmap_entries {
 }
 
 sub read_and_update {
-    my ($self, $authors_file, $mailmap_file)= @_;
+    my ($self)= @_;
+    my ($authors_file, $mailmap_file)=
+        %{$self}{qw(authors_file mailmap_file)};
 
     # read the authors file and extract the info it contains
-    my ($author_info, $authors_preamble)= $self->read_authors($authors_file);
+    $self->read_authors();
 
     # read the mailmap file.
-    my ($orig_mailmap_hash, $mailmap_preamble)=
-        $self->read_mailmap($mailmap_file);
+    $self->read_mailmap();
 
     # check and possibly fix the mailmap data, and build a set of precomputed
     # datasets to work with it.
-    my ($mailmap_hash, $mailmap_info)=
-        $self->check_fix_mailmap_hash($orig_mailmap_hash, $author_info);
+    $self->check_fix_mailmap_hash();
 
-    # update the mailmap based on any check or fixes we just did,
-    # we always write even if we did not do any changes.
-    $self->update_mailmap($mailmap_hash, $mailmap_preamble, $mailmap_file);
+    # update the mailmap based on any check or fixes we just did.
+    $self->update_mailmap();
 
     # read the commits names using git log, and compares and checks
     # them against the data we have in authors.
-    $self->read_commit_log($author_info, $mailmap_info);
+    $self->read_commit_log();
 
-    # update the authors file with any changes, we always write,
-    # but we may not change anything
-    $self->update_authors($author_info, $authors_preamble, $authors_file);
+    # update the authors file with any changes
+    $self->update_authors();
 
     # check if we discovered new email data from the commits that
     # we need to write back to disk.
-    $self->add_new_mailmap_entries($mailmap_hash, $mailmap_info, $mailmap_file)
-        and $self->update_mailmap($mailmap_hash, $mailmap_preamble,
-        $mailmap_file, $mailmap_info);
+    $self->add_new_mailmap_entries()
+        and $self->update_mailmap();
 
     return undef;
 }
@@ -505,7 +526,7 @@ Porting::updateAUTHORS - Library to automatically update AUTHORS and .mailmap ba
         authors_file => "AUTHORS",
         mailmap_file => ".mailmap",
     );
-    $updater->read_and_update($authors_file, $mailmap_file);
+    $updater->read_and_update();
 
 =head1 DESCRIPTION
 
@@ -517,17 +538,18 @@ for more details.
 
 =head1 METHODS
 
-These are as follows:
+Porting::updateAUTHORS uses OO as way of managing its internal state.
+This documents the public methods it exposes.
 
 =over 4
 
-=item add_new_mailmap_entries($mailmap_hash, $mailmap_info, $mailmap_file)
+=item add_new_mailmap_entries()
 
 If any additions were identified while reading the commits this will
 inject them into the mailmap_hash so they can be written out. Returns a
 count of additions found.
 
-=item check_fix_mailmap_hash($mailmap_hash, $authors_info)
+=item check_fix_mailmap_hash()
 
 Analyzes the data contained the in the .mailmap file and applies any
 automated fixes which are required and which it can automatically
@@ -549,7 +571,7 @@ used to cleanup and generate the current version of the .mailmap file.
 
 Will be deleted.
 
-=item parse_mailmap_hash($mailmap_hash)
+=item parse_orig_mailmap_hash()
 
 Takes a mailmap_hash and parses it and returns it as an array of array
 records with the contents:
@@ -558,33 +580,45 @@ records with the contents:
       $other_name, $other_email,
       $line_num ]
 
-=item read_and_update($authors_file, $mailmap_file)
+=item read_and_update()
 
 Wraps the other functions in this library and implements the logic and
 intent of this tool. Takes two arguments, the authors file name, and the
 mailmap file name. Returns nothing but may modify the AUTHORS file
 or the .mailmap file. Requires that both files are editable.
 
-=item read_commit_log($authors_info, $mailmap_info)
+=item read_commit_log()
 
 Read the commit log and find any new names it contains.
 
-=item read_authors($authors_file)
+Normally used via C<read_and_update> and not called directly.
 
-Read the AUTHORS file and return data about it.
+=item read_authors()
 
-=item read_mailmap($mailmap_file)
+Read the AUTHORS file into the object, and return data about it.
 
-Read the .mailmap file and return data about it.
+Normally used via C<read_and_update> and not called directly.
 
-=item update_authors($authors_info, $authors_preamble, $authors_file)
+=item read_mailmap()
+
+Read the .mailmap file into the object and return data about it.
+
+Normally used via C<read_and_update> and not called directly.
+
+=item read_exclusion_file()
+
+Read the exclusion file into the object and return data about it.
+
+Normally used via C<read_and_update> and not called directly.
+
+=item update_authors()
 
 Write out an updated AUTHORS file atomically if it has changed,
 returns 0 if the file was actually updated, 1 if it was not.
 
 Normally used via C<read_and_update> and not called directly.
 
-=item update_mailmap($mm_hash, $mm_preamble, $mailmap_file, $mm_info)
+=item update_mailmap()
 
 Write out an updated .mailmap file atomically if it has changed,
 returns 0 if the file was actually updated, 1 if it was not.
