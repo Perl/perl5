@@ -8818,7 +8818,7 @@ Perl_newLOOPOP(pTHX_ I32 flags, I32 debuggable, OP *expr, OP *block)
     {
         assert(cUNOPo->op_first->op_type == OP_AND
             || cUNOPo->op_first->op_type == OP_OR);
-        o->op_next = ((LOGOP*)cUNOPo->op_first)->op_other;
+        o->op_next = cLOGOPx(cUNOPo->op_first)->op_other;
     }
 
     if (o == listop)
@@ -9107,7 +9107,7 @@ Perl_newFOROP(pTHX_ I32 flags, OP *sv, OP *expr, OP *block, OP *cont)
          * treated as min/max values by 'pp_enteriter'.
          */
         const UNOP* const flip = (UNOP*)((UNOP*)cBINOPx(expr)->op_first)->op_first;
-        LOGOP* const range = (LOGOP*) flip->op_first;
+        LOGOP* const range = cLOGOPx(flip->op_first);
         OP* const left  = range->op_first;
         OP* const right = OpSIBLING(left);
         LISTOP* listop;
