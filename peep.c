@@ -1296,7 +1296,7 @@ S_finalize_op(pTHX_ OP* o)
             if ((key_op = cSVOPx(cBINOPo->op_last))->op_type != OP_CONST)
                 break;
 
-            rop = (UNOP*)cBINOPo->op_first;
+            rop = cUNOPx(cBINOPo->op_first);
 
             goto check_keys;
 
@@ -1317,7 +1317,7 @@ S_finalize_op(pTHX_ OP* o)
                              ? kid
                              : OpSIBLING(kLISTOP->op_first));
 
-            rop = (UNOP*)(cLISTOPo->op_last);
+            rop = cUNOPx(cLISTOPo->op_last);
 
         check_keys:
             if (o->op_private & OPpLVAL_INTRO || rop->op_type != OP_RV2HV)
@@ -2072,7 +2072,7 @@ S_maybe_multideref(pTHX_ OP *start, OP *orig_o, UV orig_action, U8 hints)
                                    || helem_op->op_type == OP_NULL
                                    || pass == 0);
                             if (helem_op->op_type == OP_HELEM) {
-                                rop = (UNOP*)(cBINOPx(helem_op)->op_first);
+                                rop = cUNOPx(cBINOPx(helem_op)->op_first);
                                 if (   helem_op->op_private & OPpLVAL_INTRO
                                     || rop->op_type != OP_RV2HV
                                 )

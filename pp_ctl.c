@@ -1299,7 +1299,7 @@ PP(pp_flop)
         }
 
         if (flop) {
-            sv_setiv(PAD_SV(((UNOP*)cUNOP->op_first)->op_first->op_targ), 0);
+            sv_setiv(PAD_SV(cUNOPx(cUNOP->op_first)->op_first->op_targ), 0);
             sv_catpvs(targ, "E0");
         }
         SETs(targ);
