@@ -6,6 +6,7 @@ use Encode qw(encode_utf8 decode_utf8 decode);
 use Digest::SHA qw(sha256_base64);
 use Text::Wrap qw(wrap);
 use Unicode::Collate;
+use feature 'fc';
 $Text::Wrap::columns= 80;
 
 # The style of this file is determined by:
@@ -454,7 +455,11 @@ sub merge_mailmap_with_AUTHORS_and_checkAUTHORS_data {
 
 sub __sorted_hash_keys {
     my ($hash)= @_;
-    my @sorted= sort { lc($a) cmp lc($b) || $a cmp $b } keys %$hash;
+    return __sort_names(keys %$hash);
+}
+
+sub __sort_names {
+    my @sorted= sort { fc($a) cmp fc($b) || $a cmp $b } @_;
     return @sorted;
 }
 
@@ -510,7 +515,7 @@ sub parse_orig_mailmap_hash {
     my $mailmap_hash= $self->{orig_mailmap_hash};
 
     my @recs;
-    foreach my $line (sort keys %$mailmap_hash) {
+    foreach my $line (__sorted_hash_keys($mailmap_hash)) {
         my $line_num= $mailmap_hash->{$line};
         $line =~ /^ \s* (?: ( [^<>]*? ) \s+ )? <([^<>]*)>
                 (?: \s+ (?: ( [^<>]*? ) \s+ )? <([^<>]*)> )? \s* \z /x
@@ -724,7 +729,7 @@ sub add_new_mailmap_entries {
         or return 0;
 
     my $num= 0;
-    for my $new (sort keys %$mailmap_add) {
+    for my $new (__sorted_hash_keys($mailmap_add)) {
         !$mailmap_hash->{$new}++ or next;
         warn encode_utf8 "Updating '$mailmap_file' with: $new\n"
             if $self->{verbose};
