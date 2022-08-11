@@ -1317,7 +1317,7 @@ S_finalize_op(pTHX_ OP* o)
                              ? kid
                              : OpSIBLING(kLISTOP->op_first));
 
-            rop = (UNOP*)((LISTOP*)o)->op_last;
+            rop = (UNOP*)(cLISTOPo->op_last);
 
         check_keys:
             if (o->op_private & OPpLVAL_INTRO || rop->op_type != OP_RV2HV)
@@ -3687,11 +3687,11 @@ Perl_rpeep(pTHX_ OP *o)
             if (o->op_private & OPpSORT_INPLACE)
                 break;
 
-            enter = (LISTOP *) o->op_next;
+            enter = cLISTOPx(o->op_next);
             if (!enter)
                 break;
             if (enter->op_type == OP_NULL) {
-                enter = (LISTOP *) enter->op_next;
+                enter = cLISTOPx(enter->op_next);
                 if (!enter)
                     break;
             }
@@ -3699,11 +3699,11 @@ Perl_rpeep(pTHX_ OP *o)
                for (...) just has an OP_GV.  */
             if (enter->op_type == OP_GV) {
                 gvop = (OP *) enter;
-                enter = (LISTOP *) enter->op_next;
+                enter = cLISTOPx(enter->op_next);
                 if (!enter)
                     break;
                 if (enter->op_type == OP_RV2GV) {
-                  enter = (LISTOP *) enter->op_next;
+                  enter = cLISTOPx(enter->op_next);
                   if (!enter)
                     break;
                 }
@@ -3721,7 +3721,7 @@ Perl_rpeep(pTHX_ OP *o)
                 || expushmark->op_targ != OP_PUSHMARK)
                 break;
 
-            exlist = (LISTOP *) OpSIBLING(expushmark);
+            exlist = cLISTOPx(OpSIBLING(expushmark));
             if (!exlist || exlist->op_type != OP_NULL
                 || exlist->op_targ != OP_LIST)
                 break;
@@ -3741,11 +3741,11 @@ Perl_rpeep(pTHX_ OP *o)
                 break;
             }
 
-            ourmark = ((LISTOP *)o)->op_first;
+            ourmark = cLISTOPo->op_first;
             if (!ourmark || ourmark->op_type != OP_PUSHMARK)
                 break;
 
-            ourlast = ((LISTOP *)o)->op_last;
+            ourlast = cLISTOPo->op_last;
             if (!ourlast || ourlast->op_next != o)
                 break;
 

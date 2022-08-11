@@ -2297,7 +2297,7 @@ Perl_scalarvoid(pTHX_ OP *arg)
                             && refgen->op_type != OP_SREFGEN))
                 break;
 
-            exlist = (LISTOP *)refgen->op_first;
+            exlist = cLISTOPx(refgen->op_first);
             if (!exlist || exlist->op_type != OP_NULL
                 || exlist->op_targ != OP_LIST)
                 break;
@@ -3035,7 +3035,7 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
             !(o->op_flags & OPf_STACKED)) {
             OpTYPE_set(o, OP_RV2CV);		/* entersub => rv2cv */
             assert(cUNOPo->op_first->op_type == OP_NULL);
-            op_null(((LISTOP*)cUNOPo->op_first)->op_first);/* disable pushmark */
+            op_null(cLISTOPx(cUNOPo->op_first)->op_first);/* disable pushmark */
             break;
         }
         else {				/* lvalue subroutine call */
@@ -3627,7 +3627,7 @@ Perl_doref(pTHX_ OP *o, I32 type, bool set_op_ref)
                 OpTYPE_set(o, OP_RV2CV);             /* entersub => rv2cv */
                 assert(cUNOPo->op_first->op_type == OP_NULL);
                 /* disable pushmark */
-                op_null(((LISTOP*)cUNOPo->op_first)->op_first);
+                op_null(cLISTOPx(cUNOPo->op_first)->op_first);
                 o->op_flags |= OPf_SPECIAL;
             }
             else if (type == OP_RV2SV || type == OP_RV2AV || type == OP_RV2HV){
@@ -4110,7 +4110,7 @@ Perl_my_attrs(pTHX_ OP *o, OP *attrs)
         else {
             /* The listop in rops might have a pushmark at the beginning,
                which will mess up list assignment. */
-            LISTOP * const lrops = (LISTOP *)rops; /* for brevity */
+            LISTOP * const lrops = cLISTOPx(rops); /* for brevity */
             if (rops->op_type == OP_LIST &&
                 lrops->op_first && lrops->op_first->op_type == OP_PUSHMARK)
             {
@@ -4373,7 +4373,7 @@ Perl_op_scope(pTHX_ OP *o)
         else if (o->op_type == OP_LINESEQ) {
             OP *kid;
             OpTYPE_set(o, OP_SCOPE);
-            kid = ((LISTOP*)o)->op_first;
+            kid = cLISTOPo->op_first;
             if (kid->op_type == OP_NEXTSTATE || kid->op_type == OP_DBSTATE) {
                 op_null(kid);
 
@@ -5111,7 +5111,7 @@ Perl_op_append_elem(pTHX_ I32 type, OP *first, OP *last)
         return newLISTOP(type, 0, first, last);
     }
 
-    op_sibling_splice(first, ((LISTOP*)first)->op_last, 0, last);
+    op_sibling_splice(first, cLISTOPx(first)->op_last, 0, last);
     first->op_flags |= OPf_KIDS;
     return first;
 }
@@ -5144,9 +5144,9 @@ Perl_op_append_list(pTHX_ I32 type, OP *first, OP *last)
     if (last->op_type != (unsigned)type)
         return op_append_elem(type, first, last);
 
-    OpMORESIB_set(((LISTOP*)first)->op_last, ((LISTOP*)last)->op_first);
-    ((LISTOP*)first)->op_last = ((LISTOP*)last)->op_last;
-    OpLASTSIB_set(((LISTOP*)first)->op_last, first);
+    OpMORESIB_set(cLISTOPx(first)->op_last, cLISTOPx(last)->op_first);
+    cLISTOPx(first)->op_last = cLISTOPx(last)->op_last;
+    OpLASTSIB_set(cLISTOPx(first)->op_last, first);
     first->op_flags |= (last->op_flags & OPf_KIDS);
 
     S_op_destroy(aTHX_ last);
@@ -8007,7 +8007,7 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 
         if (OP_TYPE_IS_OR_WAS(left, OP_LIST))
         {
-            OP *lop = ((LISTOP*)left)->op_first, *vop, *eop;
+            OP *lop = cLISTOPx(left)->op_first, *vop, *eop;
             if (!(left->op_flags & OPf_PARENS) &&
                     lop->op_type == OP_PUSHMARK &&
                     (vop = OpSIBLING(lop)) &&
@@ -8123,11 +8123,11 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
                 goto detach_split;
             }
             else if (PL_modcount < RETURN_UNLIMITED_NUMBER &&
-                    ((LISTOP*)right)->op_last->op_type == OP_CONST)
+                    cLISTOPx(right)->op_last->op_type == OP_CONST)
             {
                 /* convert split(...,0) to split(..., PL_modcount+1) */
                 SV ** const svp =
-                    &cSVOPx(((LISTOP*)right)->op_last)->op_sv;
+                    &cSVOPx(cLISTOPx(right)->op_last)->op_sv;
                 SV * const sv = *svp;
                 if (SvIOK(sv) && SvIVX(sv) == 0)
                 {
@@ -8812,7 +8812,7 @@ Perl_newLOOPOP(pTHX_ I32 flags, I32 debuggable, OP *expr, OP *block)
     }
 
     if (listop)
-        ((LISTOP*)listop)->op_last->op_next = LINKLIST(o);
+        cLISTOPx(listop)->op_last->op_next = LINKLIST(o);
 
     if (once && o != listop)
     {
@@ -8926,7 +8926,7 @@ Perl_newWHILEOP(pTHX_ I32 flags, I32 debuggable, LOOP *loop,
             return expr;		/* listop already freed by new_logop */
         }
         if (listop)
-            ((LISTOP*)listop)->op_last->op_next =
+            cLISTOPx(listop)->op_last->op_next =
                 (o == listop ? redo : LINKLIST(o));
     }
     else
@@ -9022,7 +9022,7 @@ Perl_newFOROP(pTHX_ I32 flags, OP *sv, OP *expr, OP *block, OP *cont)
         else if (sv->op_type == OP_NULL && sv->op_targ == OP_SREFGEN)
             NOOP;
         else if (sv->op_type == OP_LIST) {
-            LISTOP *list = (LISTOP *) sv;
+            LISTOP *list = cLISTOPx(sv);
             OP *pushmark = list->op_first;
             OP *first_padsv;
             UNOP *padsv;
@@ -9116,7 +9116,7 @@ Perl_newFOROP(pTHX_ I32 flags, OP *sv, OP *expr, OP *block, OP *cont)
         /* detach range's children */
         op_sibling_splice((OP*)range, NULL, -1, NULL);
 
-        listop = (LISTOP*)newLISTOP(OP_LIST, 0, left, right);
+        listop = cLISTOPx(newLISTOP(OP_LIST, 0, left, right));
         listop->op_first->op_next = range->op_next;
         left->op_next = range->op_other;
         right->op_next = (OP*)listop;
