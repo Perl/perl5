@@ -108,7 +108,10 @@ sub read_authors {
     my @authors_preamble;
     open my $in_fh, "<", $authors_file
         or die "Failed to open for read '$authors_file': $!";
+    my $raw_text= "";
     while (defined(my $line= <$in_fh>)) {
+        $raw_text .= $line;
+        $line= decode_utf8($line);
         chomp $line;
         push @authors_preamble, $line;
         if ($line =~ /^--/) {
@@ -117,8 +120,9 @@ sub read_authors {
     }
     my %author_info;
     while (defined(my $line= <$in_fh>)) {
-        chomp $line;
+        $raw_text .= $line;
         $line= decode_utf8($line);
+        chomp $line;
         my ($name, $email);
         my $copy= $line;
         $copy =~ s/\s+\z//;
@@ -150,7 +154,8 @@ sub read_authors {
 
     $self->{author_info}= \%author_info;
     $self->{authors_preamble}= \@authors_preamble;
-    return (\%author_info, \@authors_preamble);
+    $self->{authors_raw_text}= $raw_text;
+    return (\%author_info, \@authors_preamble, $raw_text);
 }
 
 sub update_authors {
@@ -159,28 +164,48 @@ sub update_authors {
     my $author_info= $self->{author_info};
     my $authors_preamble= $self->{authors_preamble};
     my $authors_file= $self->{authors_file};
+    my $old_raw_text= $self->{authors_raw_text};
 
     my $authors_file_new= $authors_file . ".new";
-    open my $out_fh, ">", $authors_file_new
-        or die "Failed to open for write '$authors_file_new': $!";
-    binmode $out_fh;
-    foreach my $line (@$authors_preamble) {
-        print $out_fh encode_utf8($line), "\n"
-            or die "Failed to print to '$authors_file_new': $!";
-    }
-    foreach my $author (__sorted_hash_keys($author_info->{"lines"})) {
-        next if $author =~ /^unknown/;
-        if ($author =~ s/\s*<unknown>\z//) {
-            next if $author =~ /^\w+$/;
+    my $new_raw_text= "";
+    {
+        open my $out_fh, ">", \$new_raw_text
+            or die "Failed to open scalar buffer for write: $!";
+        foreach my $line (@$authors_preamble) {
+            print $out_fh encode_utf8($line), "\n"
+                or die "Failed to print to scalar buffer handle: $!";
         }
-        print $out_fh encode_utf8($author), "\n"
-            or die "Failed to print to '$authors_file_new': $!";
+        foreach my $author (__sorted_hash_keys($author_info->{"lines"})) {
+            next if $author =~ /^unknown/;
+            if ($author =~ s/\s*<unknown>\z//) {
+                next if $author =~ /^\w+$/;
+            }
+            print $out_fh encode_utf8($author), "\n"
+                or die "Failed to print to scalar buffer handle: $!";
+        }
+        close $out_fh
+            or die "Failed to close scalar buffer handle: $!";
     }
-    close $out_fh
-        or die "Failed to close '$authors_file_new': $!";
-    rename $authors_file_new, $authors_file
-        or die "Failed to rename '$authors_file_new' to '$authors_file':$!";
-    return 1;    # ok
+    if ($new_raw_text ne $old_raw_text) {
+        $self->{changed_count}++;
+        $self->{changed_file}{$authors_file}++;
+
+        warn "Updating '$authors_file'\n" if $self->{verbose};
+
+        open my $out_fh, ">", $authors_file_new
+            or die "Failed to open for write '$authors_file_new': $!";
+        binmode $out_fh;
+        print $out_fh $new_raw_text;
+        close $out_fh
+            or die "Failed to close '$authors_file_new': $!";
+        rename $authors_file_new, $authors_file
+            or die
+            "Failed to rename '$authors_file_new' to '$authors_file': $!";
+        return 1;
+    }
+    else {
+        return 0;
+    }
 }
 
 sub read_mailmap {
@@ -192,11 +217,13 @@ sub read_mailmap {
     my %mailmap_hash;
     my @mailmap_preamble;
     my $line_num= 0;
+    my $raw_text= "";
     while (defined(my $line= <$in>)) {
+        $raw_text .= $line;
+        $line= decode_utf8($line);
         ++$line_num;
         next unless $line =~ /\S/;
         chomp($line);
-        $line= decode_utf8($line);
         if ($line =~ /^#/) {
             if (!keys %mailmap_hash) {
                 push @mailmap_preamble, $line;
@@ -210,10 +237,12 @@ sub read_mailmap {
             $mailmap_hash{$line}= $line_num;
         }
     }
-    close $in;
+    close $in
+        or die "Failed to close '$mailmap_file' after reading: $!";
     $self->{orig_mailmap_hash}= \%mailmap_hash;
     $self->{mailmap_preamble}= \@mailmap_preamble;
-    return (\%mailmap_hash, \@mailmap_preamble);
+    $self->{mailmap_raw_text}= $raw_text;
+    return (\%mailmap_hash, \@mailmap_preamble, $raw_text);
 }
 
 # this can be used to extract data from the checkAUTHORS data
@@ -241,24 +270,51 @@ sub __sorted_hash_keys {
     return @sorted;
 }
 
+# Returns 0 if the file needed to be changed, Return 1 if it does not.
 sub update_mailmap {
     my ($self)= @_;
     my $mailmap_hash= $self->{new_mailmap_hash};
     my $mailmap_preamble= $self->{mailmap_preamble};
     my $mailmap_file= $self->{mailmap_file};
+    my $old_raw_text= $self->{mailmap_raw_text};
 
-    my $mailmap_file_new= $mailmap_file . "_new";
-    open my $out, ">", $mailmap_file_new
-        or die "Failed to write '$mailmap_file_new':$!";
-    binmode $out;
-    foreach my $line (@$mailmap_preamble, __sorted_hash_keys($mailmap_hash),) {
-        print $out encode_utf8($line), "\n"
-            or die "Failed to print to '$mailmap_file': $!";
+    my $new_raw_text= "";
+    {
+        open my $out, ">", \$new_raw_text
+            or die "Failed to open scalar buffer for write: $!";
+        foreach
+            my $line (@$mailmap_preamble, __sorted_hash_keys($mailmap_hash),)
+        {
+            print $out encode_utf8($line), "\n"
+                or die "Failed to print to scalar buffer handle: $!";
+        }
+        close $out
+            or die "Failed to close scalar buffer handle: $!";
     }
-    close $out;
-    rename $mailmap_file_new, $mailmap_file
-        or die "Failed to rename '$mailmap_file_new' to '$mailmap_file':$!";
-    return 1;    # ok
+    if ($new_raw_text ne $old_raw_text) {
+        $self->{changed_count}++;
+        $self->{changed_file}{$mailmap_file}++;
+
+        warn "Updating '$mailmap_file'\n"
+            if $self->{verbose};
+
+        my $mailmap_file_new= $mailmap_file . ".new";
+        open my $out, ">", $mailmap_file_new
+            or die "Failed to write '$mailmap_file_new': $!";
+        binmode $out
+            or die "Failed to binmode '$mailmap_file_new': $!";
+        print $out $new_raw_text
+            or die "Failed to print to '$mailmap_file_new': $!";
+        close $out
+            or die "Failed to close '$mailmap_file_new' after writing: $!";
+        rename $mailmap_file_new, $mailmap_file
+            or die
+            "Failed to rename '$mailmap_file_new' to '$mailmap_file': $!";
+        return 1;
+    }
+    else {
+        return 0;
+    }
 }
 
 sub parse_orig_mailmap_hash {
@@ -497,11 +553,27 @@ sub read_and_update {
     $self->add_new_mailmap_entries()
         and $self->update_mailmap();
 
-    return undef;
+    return $self->changed_count();
+}
+
+sub changed_count {
+    my ($self)= @_;
+    return $self->{changed_count};
+}
+
+sub changed_file {
+    my ($self, $name)= @_;
+    return $self->{changed_file}{$name};
+}
+
+sub unchanged_file {
+    my ($self, $name)= @_;
+    return $self->changed_file($name) ? 0 : 1;
 }
 
 sub new {
     my ($class, %self)= @_;
+    $self{changed_count}= 0;
     for my $name (qw(authors_file mailmap_file)) {
         $self{$name}
             or die "Property '$name' is mandatory in constructor";

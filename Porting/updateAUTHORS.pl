@@ -47,9 +47,9 @@ sub main {
 
     my $self= Porting::updateAUTHORS->new(%opts);
 
-    $self->read_and_update();
+    my $changed= $self->read_and_update();
 
-    return 0;    # 0 for no error - intended for exit();
+    return $changed;    # 0 means nothing changed
 }
 
 exit(main()) unless caller;
