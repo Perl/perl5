@@ -6059,7 +6059,7 @@ PP(pp_split)
     const bool do_utf8 = DO_UTF8(sv);
     const bool in_uni_8_bit = IN_UNI_8_BIT;
     const char *strend = s + len;
-    PMOP *pm = cPMOPx(PL_op);
+    PMOP *pm = cPMOP;
     REGEXP *rx;
     SV *dstr;
     const char *m;

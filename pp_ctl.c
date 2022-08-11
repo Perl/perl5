@@ -78,7 +78,7 @@ PP(pp_regcreset)
 PP(pp_regcomp)
 {
     dSP;
-    PMOP *pm = (PMOP*)cLOGOP->op_other;
+    PMOP *pm = cPMOPx(cLOGOP->op_other);
     SV **args;
     int nargs;
     REGEXP *re = NULL;
@@ -189,7 +189,7 @@ PP(pp_substcont)
 {
     dSP;
     PERL_CONTEXT *cx = CX_CUR();
-    PMOP * const pm = (PMOP*) cLOGOP->op_other;
+    PMOP * const pm = cPMOPx(cLOGOP->op_other);
     SV * const dstr = cx->sb_dstr;
     char *s = cx->sb_s;
     char *m = cx->sb_m;
@@ -4957,7 +4957,7 @@ PP(pp_leavegiven)
 STATIC PMOP *
 S_make_matcher(pTHX_ REGEXP *re)
 {
-    PMOP *matcher = (PMOP *) newPMOP(OP_MATCH, OPf_WANT_SCALAR | OPf_STACKED);
+    PMOP *matcher = cPMOPx(newPMOP(OP_MATCH, OPf_WANT_SCALAR | OPf_STACKED));
 
     PERL_ARGS_ASSERT_MAKE_MATCHER;
 
