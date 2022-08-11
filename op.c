@@ -1386,7 +1386,7 @@ S_find_and_forget_pmops(pTHX_ OP *o)
         case OP_SPLIT:
         case OP_MATCH:
         case OP_QR:
-            forget_pmop((PMOP*)o);
+            forget_pmop(cPMOPo);
         }
 
         if (o->op_flags & OPf_KIDS) {
@@ -7061,7 +7061,7 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, OP *repl, UV flags, I32 floor)
     }
 
     PL_hints |= HINT_BLOCK_SCOPE;
-    pm = (PMOP*)o;
+    pm = cPMOPo;
     assert(floor==0 || (pm->op_pmflags & PMf_HAS_CV));
 
     if (is_compiletime) {
@@ -7147,7 +7147,7 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, OP *repl, UV flags, I32 floor)
                  * squirrel away expr in op_code_list without the peephole
                  * optimiser etc processing it for a second time */
                 OP *qr = newPMOP(OP_QR, 0);
-                ((PMOP*)qr)->op_code_list = expr;
+                cPMOPx(qr)->op_code_list = expr;
 
                 /* handle the implicit sub{} wrapped round the qr/(?{..})/ */
                 SvREFCNT_inc_simple_void(PL_compcv);
@@ -8076,11 +8076,11 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
                 OP *tmpop;
                 if (gvop) {
 #ifdef USE_ITHREADS
-                    ((PMOP*)right)->op_pmreplrootu.op_pmtargetoff
+                    cPMOPx(right)->op_pmreplrootu.op_pmtargetoff
                         = cPADOPx(gvop)->op_padix;
                     cPADOPx(gvop)->op_padix = 0;	/* steal it */
 #else
-                    ((PMOP*)right)->op_pmreplrootu.op_pmtargetgv
+                    cPMOPx(right)->op_pmreplrootu.op_pmtargetgv
                         = MUTABLE_GV(cSVOPx(gvop)->op_sv);
                     cSVOPx(gvop)->op_sv = NULL;	/* steal it */
 #endif
@@ -8088,7 +8088,7 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
                         left->op_private & OPpOUR_INTRO;
                 }
                 else {
-                    ((PMOP*)right)->op_pmreplrootu.op_pmtargetoff = left->op_targ;
+                    cPMOPx(right)->op_pmreplrootu.op_pmtargetoff = left->op_targ;
                     left->op_targ = 0;	/* steal it */
                     right->op_private |= OPpSPLIT_LEX;
                 }
@@ -13264,7 +13264,7 @@ Perl_ck_split(pTHX_ OP *o)
 
     assert(kid->op_type == OP_MATCH || kid->op_type == OP_SPLIT);
 
-    if (((PMOP *)kid)->op_pmflags & PMf_GLOBAL) {
+    if (kPMOP->op_pmflags & PMf_GLOBAL) {
       Perl_ck_warner(aTHX_ packWARN(WARN_REGEXP),
                      "Use of /g modifier is meaningless in split");
     }
