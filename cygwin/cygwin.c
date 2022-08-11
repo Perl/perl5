@@ -160,6 +160,7 @@ leave:
 char*
 wide_to_utf8(const wchar_t *wbuf)
 {
+    dTHX;
     char *buf;
     int wlen = 0;
     char *oldlocale;
@@ -188,6 +189,7 @@ wide_to_utf8(const wchar_t *wbuf)
 wchar_t*
 utf8_to_wide(const char *buf)
 {
+    dTHX;
     wchar_t *wbuf;
     mbstate_t mbs;
     char *oldlocale;
