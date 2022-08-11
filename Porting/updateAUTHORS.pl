@@ -20,6 +20,8 @@ my @OPTSPEC= qw(
     man
     authors_file=s
     mailmap_file=s
+
+    verbose+
 );
 
 sub main {
@@ -67,6 +69,7 @@ Porting/updateAUTHORS.pl
  Options:
    --help               brief help message
    --man                full documentation
+   --verbose            be verbose
 
  File Locations:
    --authors-file=FILE  override default of 'AUTHORS'
@@ -83,6 +86,10 @@ Print a brief help message and exits.
 =item C<--man>
 
 Prints the manual page and exits.
+
+=item C<--verbose>
+
+Be verbose about what is happening. Can be repeated more than once.
 
 =item C<--authors-file=FILE>
 

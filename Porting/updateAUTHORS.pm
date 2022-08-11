@@ -563,6 +563,13 @@ Create a new object. Required parameters are
     authors_file
     mailmap_file
 
+Other supported parameters are as follows:
+
+    verbose
+
+this list is not exhaustive. See the code implementing the main()
+function in F<Porting/updateAUTHORS.pl> for an exhaustive list.
+
 =item merge_mailmap_with_AUTHORS_and_checkAUTHORS_data
 
 This is a utility function that combines data from this tool with data
