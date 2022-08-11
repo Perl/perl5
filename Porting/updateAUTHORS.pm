@@ -4,6 +4,9 @@ use warnings;
 use Data::Dumper;
 use Encode qw(encode_utf8 decode_utf8 decode);
 use Digest::SHA qw(sha256_base64);
+use Text::Wrap qw(wrap);
+use Unicode::Collate;
+$Text::Wrap::columns= 80;
 
 # The style of this file is determined by:
 #
@@ -39,9 +42,10 @@ my %field_spec= (
     "s"  => "commit_subject",
 );
 
+my $Collate= Unicode::Collate->new(level => 1, indentical => 1);
 my @field_codes= sort keys %field_spec;
 my @field_names= map { $field_spec{$_} } @field_codes;
-my $tformat= join "%x00", map { "%" . $_ } @field_codes;
+my $tformat= "=" . join "%x00", map { "%" . $_ } @field_codes;
 
 sub _make_name_author_info {
     my ($self, $commit_info, $name_key)= @_;
@@ -82,6 +86,8 @@ sub _register_author {
 
     my $digest= $self->_keeper_digest($name)
         or return;
+
+    $self->{who_stats}{$name}{$type}++;
 
     $self->{author_info}{"lines"}{$name}
         and return;
@@ -147,6 +153,46 @@ sub current_author_name_email {
     return $full ? $self->format_name_email($n, $e) : ($n, $e);
 }
 
+sub finalize_commit_info {
+    my ($self, $commit_info)= @_;
+    my $author= $commit_info->{author_name_mm_canon};
+    my $author_stats= $self->{who_stats}{$author} ||= {};
+
+    my $file_info= $commit_info->{files} ||= {};
+    foreach my $file (keys %{$file_info}) {
+        if (!$self->{file_stats}{$file}) {
+            $self->{summary_stats}{num_files}++;
+        }
+        my $fs= $self->{file_stats}{$file}          ||= {};
+        my $afs= $author_stats->{file_stats}{$file} ||= {};
+        my $added= $file_info->{$file}{lines_added};
+        my $removed= $file_info->{$file}{lines_removed};
+        my $delta= $file_info->{$file}{lines_delta};
+        defined $_ and $_ eq "-" and undef $_ for $added, $removed;
+
+        if (defined $added) {
+            for my $h ($author_stats, $fs, $afs) {
+                $h->{lines_delta}   += $delta;
+                $h->{lines_added}   += $added;
+                $h->{lines_removed} += $removed;
+            }
+        }
+        else {
+            $author_stats->{binary_change}++;
+            $fs->{binary_change}++;
+            $afs->{binary_change}++;
+        }
+        $afs->{commits}++
+            or $author_stats->{num_files}++;
+
+        $fs->{commits}++
+            or $self->{summary_stats}{num_files}++;
+
+        $fs->{who}{$author}++
+            or $self->{summary_stats}{authors}++;
+    }
+}
+
 sub read_commit_log {
     my ($self)= @_;
     my $author_info= $self->{author_info}   ||= {};
@@ -155,13 +201,39 @@ sub read_commit_log {
     my $commit_range= $self->{commit_range};
     my $commits_read= 0;
 
-    my $cmd= qq(git log --pretty='format:$tformat' $commit_range);
+    my $numstat= $self->{numstat} ? "--numstat" : "";
+
+    my $last_commit_info;
+    my $cmd= qq(git log --pretty='format:$tformat' $numstat $commit_range);
     open my $fh, "$cmd |";
     while (defined(my $line= <$fh>)) {
         chomp $line;
         $line= decode_utf8($line);
+        if ($line =~ s/^=//) {
+            $self->finalize_commit_info($last_commit_info)
+                if $last_commit_info;
+        }
+        elsif ($line =~ /\S/) {
+            my ($added, $removed, $file)= split /\s+/, $line;
+            if ($added ne "-") {
+                $last_commit_info->{files}{$file}= {
+                    lines_added   => $added,
+                    lines_removed => $removed,
+                    lines_delta   => $added - $removed,
+                };
+            }
+            else {
+                $last_commit_info->{files}{$file}{binary_changes}++;
+            }
+            next;
+        }
+        else {
+            # whitspace only or empty line
+            next;
+        }
         $commits_read++;
         my $commit_info= {};
+        $last_commit_info= $commit_info;
         @{$commit_info}{@field_names}= split /\0/, $line, 0 + @field_names;
 
         my $author_name_mm_canon=
@@ -175,12 +247,15 @@ sub read_commit_log {
         my $committer_name_real=
             $self->_make_name_simple($commit_info, "committer");
 
+        my ($author_good, $committer_good);
+
         if (   $self->_keeper_digest($author_name_mm_canon)
             && $self->_keeper_digest($author_name_real))
         {
             $self->_check_name_mailmap($author_name_mm_canon, $author_name_real,
                 $commit_info, "author name");
             $self->_register_author($author_name_mm_canon, "author");
+            $author_good= 1;
         }
 
         if (   $self->_keeper_digest($committer_name_mm_canon)
@@ -189,8 +264,16 @@ sub read_commit_log {
             $self->_check_name_mailmap($committer_name_mm_canon,
                 $committer_name_real, $commit_info, "committer name");
             $self->_register_author($committer_name_mm_canon, "committer");
+            $committer_good= 1;
+        }
+        if (    $author_good
+            and $committer_good
+            and $committer_name_mm_canon ne $author_name_mm_canon)
+        {
+            $self->{who_stats}{$committer_name_mm_canon}{applied}++;
         }
     }
+    $self->finalize_commit_info($last_commit_info) if $last_commit_info;
     if (!$commits_read) {
         if ($self->{commit_range}) {
             die "No commits in range '$self->{commit_range}'\n";
@@ -727,6 +810,11 @@ sub update_exclude_file {
     if ($exclude_text ne $self->{exclude_file_text_orig}) {
         $self->{changed_count}++;
         $self->{changed_file}{$exclude_file}++;
+
+        if ($self->{no_update}) {
+            return 1;
+        }
+
         warn "Updating '$exclude_file'\n" if $self->{verbose};
 
         my $tmp_file= "$exclude_file.new";
@@ -833,6 +921,154 @@ sub _exclude_contrib {
     $digest //= __digest($name);
     $self->{exclude_digest}{$digest}++
         or warn "Excluding '$name' with '$digest'\n";
+}
+
+my %pretty_name= (
+    "author"         => "Authored",
+    "committer"      => "Committed",
+    "applied"        => "Applied",
+    "name"           => "Name",
+    "pos"            => "Pos",
+    "num_files"      => "NFiles",
+    "lines_added"    => "L++",
+    "lines_removed"  => "L--",
+    "lines_delta"    => "L+-",
+    "binary_changed" => "Bin+-",
+);
+
+sub report_stats {
+    my ($self, $stats_key, @types)= @_;
+    my @extra= "name";
+    my @rows;
+    my @total;
+    foreach my $name (__sorted_hash_keys($self->{$stats_key})) {
+        my @data= map { $self->{$stats_key}{$name}{$_} // 0 } @types;
+        $total[$_] += $data[$_] for 0 .. $#data;
+        push @data, $name;
+        push @rows, \@data if $data[0];
+    }
+    @rows= sort {
+        my $cmp= 0;
+        for (0 .. $#$a - 1) {
+            $cmp= $b->[$_] <=> $a->[$_];
+            last if $cmp;
+        }
+        $cmp ||= $Collate->cmp($a->[-1], $b->[-1]);
+        $cmp
+    } @rows;
+    @rows= reverse @rows if $self->{in_reverse};
+
+    if ($self->{as_cumulative}) {
+        my $sum= [];
+        for my $row (@rows) {
+            do {
+                $sum->[$_] += $row->[$_];
+                $row->[$_]= $sum->[$_];
+                }
+                for 0 .. $#types;
+        }
+    }
+
+    if ($self->{as_percentage}) {
+        for my $row (@rows) {
+            $row->[$_]= sprintf "%.2f", ($row->[$_] / $total[$_]) * 100
+                for 0 .. $#types;
+        }
+    }
+
+    foreach my $row (@rows) {
+        my $name= $row->[-1];
+        $name =~ s/\s+<.*\z//;
+        $name =~ s/\s+\@.*\z//;
+        $row->[-1]= $name;
+    }
+    my @col_names= map { $pretty_name{$_} // $_ } @types;
+    if ($self->{as_percentage}) {
+        $_= "%$_" for @col_names;
+    }
+    push @col_names, map { $pretty_name{$_} // $_ } @extra;
+
+    if ($self->{as_list} && @types == 1) {
+        $self->_report_list(\@rows, \@types, \@extra, \@col_names);
+    }
+    else {
+        $self->_report_table(\@rows, \@types, \@extra, \@col_names);
+    }
+}
+
+sub _report_table {
+    my ($self, $rows, $types, $extra, $col_names)= @_;
+    my $pos= 1;
+    unshift @$_,         $pos++ for @$rows;
+    unshift @$col_names, "Pos";
+    my @width= (0) x @$col_names;
+    foreach my $row ($col_names, @$rows) {
+        for my $idx (0 .. $#$row) {
+            $width[$idx] < length($row->[$idx])
+                and $width[$idx]= length($row->[$idx]);
+        }
+    }
+    $width[-1]= 40 if $width[-1] > 40;
+    $width[$_]= -$width[$_] for 0, -1;
+    my $fmt= "#" . join(" | ", ("%*s") x @$col_names) . "\n";
+    my $bar_fmt= "#" . join("-+-", ("%*s") x @$col_names) . "\n";
+    printf $fmt,     map { $width[$_], $col_names->[$_] } 0 .. $#width;
+    printf $bar_fmt, map { $width[$_], "-" x abs($width[$_]) } 0 .. $#width;
+    for my $idx (0 .. $#$rows) {
+        my $row= $rows->[$idx];
+        print encode_utf8 sprintf $fmt,
+            map { $width[$_], $row->[$_] } 0 .. $#width;
+    }
+}
+
+sub _report_list {
+    my ($self, $rows, $types, $extra, $col_names)= @_;
+    my %hash;
+    foreach my $row (@$rows) {
+        $hash{ $row->[0] }{ $row->[-1] }++;
+    }
+    my @vals= sort { $b <=> $a } keys %hash;    # numeric sort
+    my $width= length($col_names->[0]);
+    $width < length($_) and $width= length($_) for @vals;
+    @vals= reverse @vals if $self->{in_reverse};
+
+    my $hdr_str= sprintf "%*s | %s", $width, $col_names->[0], $col_names->[-1];
+    my $sep_str= sprintf "%*s-+-%s", $width, "-" x $width, "-" x 40;
+    my $fmt= "%*s | %s";
+
+    if ($self->{with_rank_numbers}) {
+        $hdr_str= sprintf "#%*s | %s", -length(0 + @$rows), "Pos", $hdr_str;
+        $sep_str= sprintf "#%*s-+-%s", -length(0 + @$rows),
+            "-" x length(0 + @$rows), $hdr_str;
+    }
+    print $hdr_str, "\n";
+    print $sep_str, "\n";
+    my $pos= 1;
+    foreach my $val (@vals) {
+        my $val_f= sprintf "%*s | ", $width, $val;
+        $val_f= sprintf "#%*d | %s", -length(0 + @$rows), $pos++, $val_f
+            if $self->{with_rank_numbers};
+        print encode_utf8 wrap $val_f,
+            " " x length($val_f),
+            join(", ", $Collate->sort(keys %{ $hash{$val} })) . "\n";
+    }
+}
+
+sub _filter_sort_who {
+    my ($self, $hash)= @_;
+    my @who;
+    foreach my $name ($Collate->sort(keys %$hash)) {
+        $name =~ s/\s+<.*\z//;
+        $name =~ s/\s+\@.*\z//;
+        push @who, $name if length $name and lc($name) ne "unknown";
+    }
+    return @who;
+}
+
+sub print_who {
+    my ($self)= @_;
+    my @who= $self->_filter_sort_who($self->{who_stats});
+    print encode_utf8 wrap "", "", join(", ", @who) . ".\n";
 }
 
 1;
