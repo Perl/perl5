@@ -5394,7 +5394,6 @@ Porting/bisect-runner.pl	Tool to be called by git bisect run
 Porting/bump-perl-version	bump the perl version in relevant files
 Porting/check-cpan-pollution	Check for commits that may wrongly touch CPAN distros
 Porting/checkansi.pl		Check source code for ANSI-C violations
-Porting/checkAUTHORS.pl		Check that the AUTHORS file is complete
 Porting/checkcfguse.pl		Check that config symbols are being used
 Porting/checkcfgvar.pl		Check that config scripts define all symbols
 Porting/checkpodencoding.pl	Check POD encoding
@@ -6082,7 +6081,6 @@ t/porting/known_pod_issues.dat	Data file for porting/podcheck.t
 t/porting/libperl.t		Check libperl.a sanity
 t/porting/maintainers.t		Test that Porting/Maintainers.pl is up to date
 t/porting/manifest.t		Test that this MANIFEST file is well formed
-t/porting/pending-author.t	Check if any pending commit would break tests
 t/porting/perlfunc.t		Test that Functions_pm.PL can parse perlfunc.pod
 t/porting/pod_rules.t		Check that various pod lists are consistent
 t/porting/podcheck.t		Test the POD of shipped modules is well formed

@@ -463,25 +463,6 @@ sub read_mailmap_file {
     return (\%mailmap_hash, \@mailmap_preamble, $raw_text);
 }
 
-# this can be used to extract data from the checkAUTHORS data
-sub merge_mailmap_with_AUTHORS_and_checkAUTHORS_data {
-    my ($self, $mailmap_hash, $author_info)= @_;
-    require 'Porting/checkAUTHORS.pl' or die "No authors?";
-    my ($map, $preferred_email_or_github)=
-        Porting::checkAUTHORS::generate_known_author_map();
-
-    foreach my $old (sort keys %$preferred_email_or_github) {
-        my $new= $preferred_email_or_github->{$old};
-        next if $old !~ /\@/ or $new !~ /\@/ or $new eq $old;
-        my $name= $author_info->{"email2name"}{$new};
-        if ($name) {
-            my $line= "$name <$new> <$old>";
-            $mailmap_hash->{$line}++;
-        }
-    }
-    return 1;    # ok
-}
-
 sub __sorted_hash_keys {
     my ($hash)= @_;
     return __sort_names(keys %$hash);
@@ -1252,14 +1233,6 @@ Other supported parameters are as follows:
 
 this list is not exhaustive. See the code implementing the main()
 function in F<Porting/updateAUTHORS.pl> for an exhaustive list.
-
-=item merge_mailmap_with_AUTHORS_and_checkAUTHORS_data
-
-This is a utility function that combines data from this tool with data
-contained in F<Porting/checkAUTHORS.pl> it is not used directly, but was
-used to cleanup and generate the current version of the .mailmap file.
-
-Will be deleted.
 
 =item parse_orig_mailmap_hash()
 
