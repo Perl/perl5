@@ -12,10 +12,13 @@
 # is strictly forbidden.  (Passive distribution with the Perl source
 # code kit is, of course, allowed.)
 #
-# This should contain the preferred addresses.  Alternate addresses are in
-# Porting/checkAUTHORS.pl.
-#
-# updated_by: ./Porting/checkAUTHORS.pl --update --from=v5.30.0
+# This file contains the "canonical" or "preferred" details for our
+# contributors, and is managed by the Porting/updateAUTHORS.pl script,
+# along with .mailmap and Porting/exclude_contrib.txt. Generally you
+# should use the script to make any changes to this file, especially if
+# you wish to remove yourself. If you wish to register a new email
+# against one of these names you should update the .mailmap file
+# instead.
 -- 
 A. C. Yardley                  <yardley@tanet.net>
 A. Sinan Unur                  <nanis@cpan.org>
