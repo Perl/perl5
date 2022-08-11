@@ -589,31 +589,106 @@ the files themselves. It uses no other sources of data. Expects to be
 run from the root directory of a git repo of perl.
 
 In simple, execute the script and it will either die with a helpful
-message or it will update the files as necessary, possibly not at all if
-there is no need to do so. Note it will actually rewrite the files at
-least once, but it may not actually make any changes to their content.
-Thus to use the script is currently required that the files are
-modifiable.
+message or it will update the files as necessary, possibly not at all
+if there is no need to do so. If the C<--validate> option is provided
+the the content will not be updated and instead the tool will act as a
+test script validating that the F<AUTHORS> and F<.mailmap> files are
+up to date.
 
-Review the changes it makes to make sure they are sane. If they are
-commit. If they are not then update the AUTHORS or .mailmap files as is
-appropriate and run the tool again. Typically you shouldn't need to do
-either unless you are changing the default name or email for a user. For
-instance if a person currently listed in the AUTHORS file whishes to
-change their preferred name or email then change it in the AUTHORS file
-and run the script again. I am not sure when you might need to directly
-modify .mailmap, usually modifying the AUTHORS file should suffice.
+By default the script operates on the *entire* history of Perl
+development that is reachable from HEAD. This can be overriden by using
+the C<--from> and C<--to> options, or providing a git commit range as an
+argument after the options just like you might do with C<git log>.
+
+The script can also be used to produce various reports and other content
+about the commits it has analyzed.
+
+=head2 ADDING A NEW CONTRIBUTOR
+
+Run the tool with no arguments. It will add anything that is missing.
+Check the changes and then commit them.
+
+=head2 CHANGING A CONTRIBUTORS CANONICAL NAME OR EMAIL
+
+Manually modify F<AUTHORS> so that the name or email is correct. Run the
+tool with no arguments, it should update C<.mailmap> appropriately.
+Check the changes before you commit them. If you wish to change BOTH
+files at the same time you should do it in two steps, running the tool
+in between each step. Check the changes and then commit them.
+
+=head2 A CONTRIBUTOR WANTS TO BE FORGOTTEN
+
+There are several ways to do this:
+
+=over 2
+
+=item Manual Exclusion
+
+Manually modify F<AUTHORS> and F<.mailmap> so the user detals are
+removed and then run this tool with the C<--exclude> option. This should
+result in various SHA-256 digests (in base64) being added to
+F<Porting/exclude_contrib.txt>. Commit the changes afterwards.
+
+=item Exclude Yourself
+
+Use the C<--exclude-me> option to the tool, review and commit the results.
+This will use roughly the same rules that git would to figure out what your
+name and email are.
+
+=item Exclude Someone Else
+
+Use the C<--exclude-contrib> option and specify their name and email.
+For example
+
+ --exclude-contrib="Their Name <email@provider.com>"
+
+Should exclude the person with this name from our files.
+
+=back
+
+Note that excluding a person by canonical details (that is the details
+in the F<AUTHORS> file) will result in their .mailmap'ed names being
+excluded as well. Excluding a persons secondary account details will
+simply block that specific email from being listed, and is likely not
+what you want to do most of the time.
+
+=head2 AFTER RUNNING THE TOOL
+
+Review the changes to make sure they are sane. If they are ok (and
+they should be most of the time) commit. If they are not then update
+the F<AUTHORS> or F<.mailmap> files as is appropriate and run the
+tool again.
+
+Do not panic that your email details get added to F<.mailmap>, this is
+by design so that your chosen name and email are displayed on GitHub and
+in casual use of C<git log> and other C<git> tooling.
+
+=head1 RECIPES
+
+  perl Porting/updateAUTHORS.pl --who --from=v5.31.6 --to=v5.31.7
+  perl Porting/updateAUTHORS.pl --who v5.31.6..v5.31.7
+  perl Porting/updateAUTHORS.pl --rank --percentage --from=v5.31.6
+  perl Porting/updateAUTHORS.pl --thanks-applied --from=v5.31.6
+  perl Porting/updateAUTHORS.pl --tap --from=v5.31.6
+  perl Porting/updateAUTHORS.pl --files --from=v5.31.6
+  perl Porting/updateAUTHORS.pl --activity --from=v5.31.6
+  perl Porting/updateAUTHORS.pl --chainsaw v5.31.6..HEAD
+
+=head1 RELATED FILES
+
+F<AUTHORS>, F<.mailmap>, F<Porting/excluded_author.txt>
 
 =head1 TODO
 
 More documentation and testing.
 
-=head1 SEE ALSO
-
-F<Porting/checkAUTHORS.pl>
-
 =head1 AUTHOR
 
 Yves Orton <demerphq@gmail.com>
+
+=head1 THANKS
+
+Loosely based on the older F<Porting/checkAUTHORS.pl> script which this tool
+replaced. Thanks to the contributors of that tool. See the Perl change log.
 
 =cut
