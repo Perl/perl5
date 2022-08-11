@@ -1313,7 +1313,7 @@ S_finalize_op(pTHX_ OP* o)
                 break;
             }
 
-            key_op = (SVOP*)(kid->op_type == OP_CONST
+            key_op = cSVOPx(kid->op_type == OP_CONST
                              ? kid
                              : OpSIBLING(kLISTOP->op_first));
 
@@ -3465,7 +3465,7 @@ Perl_rpeep(pTHX_ OP *o)
                     pop->op_next->op_type == OP_AELEM &&
                     !(pop->op_next->op_private &
                       (OPpLVAL_INTRO|OPpLVAL_DEFER|OPpDEREF|OPpMAYBE_LVSUB)) &&
-                    (i = SvIV(((SVOP*)pop)->op_sv)) >= -128 && i <= 127)
+                    (i = SvIV(cSVOPx(pop)->op_sv)) >= -128 && i <= 127)
                 {
                     GV *gv;
                     if (cSVOPx(pop)->op_private & OPpCONST_STRICT)
