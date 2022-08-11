@@ -3560,7 +3560,7 @@ Perl_rpeep(pTHX_ OP *o)
                 )
                 && (o->op_next->op_flags & OPf_WANT) == OPf_WANT_VOID
             ) {
-                o->op_next = ((LOGOP*)o->op_next)->op_other;
+                o->op_next = cLOGOPx(o->op_next)->op_other;
             }
             DEFER(cLOGOP->op_other);
             o->op_opt = 1;

@@ -998,7 +998,7 @@ PP(pp_grepstart)
     PUTBACK;
     if (PL_op->op_type == OP_MAPSTART)
         Perl_pp_pushmark(aTHX);			/* push top */
-    return ((LOGOP*)PL_op->op_next)->op_other;
+    return cLOGOPx(PL_op->op_next)->op_other;
 }
 
 /* pp_grepwhile() lives in pp_hot.c */
@@ -1161,7 +1161,7 @@ PP(pp_flip)
     dSP;
 
     if (GIMME_V == G_LIST) {
-        RETURNOP(((LOGOP*)cUNOP->op_first)->op_other);
+        RETURNOP(cLOGOPx(cUNOP->op_first)->op_other);
     }
     else {
         dTOPss;
@@ -1190,7 +1190,7 @@ PP(pp_flip)
             else {
                 sv_setiv(targ, 0);
                 SP--;
-                RETURNOP(((LOGOP*)cUNOP->op_first)->op_other);
+                RETURNOP(cLOGOPx(cUNOP->op_first)->op_other);
             }
         }
         SvPVCLEAR(TARG);
