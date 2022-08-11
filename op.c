@@ -2291,7 +2291,7 @@ Perl_scalarvoid(pTHX_ OP *arg)
             if (!rv2gv || rv2gv->op_type != OP_RV2GV)
                 break;
 
-            refgen = (UNOP *)cBINOPo->op_first;
+            refgen = cUNOPx(cBINOPo->op_first);
 
             if (!refgen || (refgen->op_type != OP_REFGEN
                             && refgen->op_type != OP_SREFGEN))
@@ -2306,7 +2306,7 @@ Perl_scalarvoid(pTHX_ OP *arg)
                 && exlist->op_first != exlist->op_last)
                 break;
 
-            rv2cv = (UNOP*)exlist->op_last;
+            rv2cv = cUNOPx(exlist->op_last);
 
             if (rv2cv->op_type != OP_RV2CV)
                 break;
@@ -2653,13 +2653,13 @@ Perl_check_hash_fields_and_hekify(pTHX_ UNOP *rop, SVOP *key_op, int real)
     if (rop) {
         if (rop->op_first->op_type == OP_PADSV)
             /* @$hash{qw(keys here)} */
-            rop = (UNOP*)rop->op_first;
+            rop = cUNOPx(rop->op_first);
         else {
             /* @{$hash}{qw(keys here)} */
             if (rop->op_first->op_type == OP_SCOPE
                 && cLISTOPx(rop->op_first)->op_last->op_type == OP_PADSV)
                 {
-                    rop = (UNOP*)cLISTOPx(rop->op_first)->op_last;
+                    rop = cUNOPx(cLISTOPx(rop->op_first)->op_last);
                 }
             else
                 rop = NULL;
@@ -5062,7 +5062,7 @@ S_gen_constant_list(pTHX_ OP *o)
     av = (AV *)SvREFCNT_inc_NN(*PL_stack_sp--);
 
     /* replace subtree with an OP_CONST */
-    curop = ((UNOP*)o)->op_first;
+    curop = cUNOPo->op_first;
     op_sibling_splice(o, NULL, -1, newSVOP(OP_CONST, 0, (SV *)av));
     op_free(curop);
 
@@ -7249,7 +7249,7 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, OP *repl, UV flags, I32 floor)
         if (expr->op_type == OP_REGCRESET || expr->op_type == OP_REGCMAYBE) {
             LINKLIST(expr);
             rcop->op_next = expr;
-            ((UNOP*)expr)->op_first->op_next = (OP*)rcop;
+            cUNOPx(expr)->op_first->op_next = (OP*)rcop;
         }
         else {
             rcop->op_next = LINKLIST(expr);
@@ -8069,7 +8069,7 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
             OP *gvop = NULL;
 
             if (   (  left->op_type == OP_RV2AV
-                   && (gvop=((UNOP*)left)->op_first)->op_type==OP_GV)
+                   && (gvop=cUNOPx(left)->op_first)->op_type==OP_GV)
                 || left->op_type == OP_PADAV)
             {
                 /* @pkg or @lex or local @pkg' or 'my @lex' */
@@ -8096,7 +8096,7 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
 
               detach_split:
                 tmpop = cUNOPo->op_first;	/* to list (nulled) */
-                tmpop = ((UNOP*)tmpop)->op_first; /* to pushmark */
+                tmpop = cUNOPx(tmpop)->op_first; /* to pushmark */
                 assert(OpSIBLING(tmpop) == right);
                 assert(!OpHAS_SIBLING(right));
                 /* detach the split subtreee from the o tree,
@@ -8452,7 +8452,7 @@ S_new_logop(pTHX_ I32 type, I32 flags, OP** firstp, OP** otherp)
     else if ((first->op_flags & OPf_KIDS) && type != OP_DOR
         && ckWARN(WARN_MISC)) /* [#24076] Don't warn for <FH> err FOO. */
     {
-        const OP * const k1 = ((UNOP*)first)->op_first;
+        const OP * const k1 = cUNOPx(first)->op_first;
         const OP * const k2 = OpSIBLING(k1);
         OPCODE warnop = 0;
         switch (first->op_type)
@@ -8778,7 +8778,7 @@ Perl_newLOOPOP(pTHX_ I32 flags, I32 debuggable, OP *expr, OP *block)
             expr = newUNOP(OP_DEFINED, 0,
                 newASSIGNOP(0, newDEFSVOP(), 0, expr) );
         } else if (expr->op_flags & OPf_KIDS) {
-            const OP * const k1 = ((UNOP*)expr)->op_first;
+            const OP * const k1 = cUNOPx(expr)->op_first;
             const OP * const k2 = k1 ? OpSIBLING(k1) : NULL;
             switch (expr->op_type) {
               case OP_NULL:
@@ -8875,7 +8875,7 @@ Perl_newWHILEOP(pTHX_ I32 flags, I32 debuggable, LOOP *loop,
             expr = newUNOP(OP_DEFINED, 0,
                 newASSIGNOP(0, newDEFSVOP(), 0, expr) );
         } else if (expr->op_flags & OPf_KIDS) {
-            const OP * const k1 = ((UNOP*)expr)->op_first;
+            const OP * const k1 = cUNOPx(expr)->op_first;
             const OP * const k2 = (k1) ? OpSIBLING(k1) : NULL;
             switch (expr->op_type) {
               case OP_NULL:
@@ -9044,7 +9044,7 @@ Perl_newFOROP(pTHX_ I32 flags, OP *sv, OP *expr, OP *block, OP *cont)
 
             /* There should be at least one more PADSV to find, and the ops
                should have consecutive values in targ: */
-            padsv = (UNOP *) OpSIBLING(first_padsv);
+            padsv = cUNOPx(OpSIBLING(first_padsv));
             do {
                 if (!padsv || padsv->op_type != OP_PADSV) {
                     Perl_croak(aTHX_ "panic: newFORLOOP, found %s at %zd, expecting padsv",
@@ -9057,7 +9057,7 @@ Perl_newFOROP(pTHX_ I32 flags, OP *sv, OP *expr, OP *block, OP *cont)
                                how_many_more, padsv->op_targ, padoff + how_many_more);
                 }
 
-                padsv = (UNOP *) OpSIBLING(padsv);
+                padsv = cUNOPx(OpSIBLING(padsv));
             } while (padsv);
 
             /* OK, this optree has the shape that we expected. So now *we*
@@ -9067,13 +9067,13 @@ Perl_newFOROP(pTHX_ I32 flags, OP *sv, OP *expr, OP *block, OP *cont)
 
             i = padoff;
 
-            padsv = (UNOP *) OpSIBLING(first_padsv);
+            padsv = cUNOPx(OpSIBLING(first_padsv));
             do {
                 ++i;
                 padsv->op_targ = 0;
                 PAD_COMPNAME_GEN_set(i, PERL_INT_MAX);
 
-                padsv = (UNOP *) OpSIBLING(padsv);
+                padsv = cUNOPx(OpSIBLING(padsv));
             } while (padsv);
 
             op_free(sv);
@@ -9106,7 +9106,7 @@ Perl_newFOROP(pTHX_ I32 flags, OP *sv, OP *expr, OP *block, OP *cont)
          * set the STACKED flag to indicate that these values are to be
          * treated as min/max values by 'pp_enteriter'.
          */
-        const UNOP* const flip = (UNOP*)((UNOP*)cBINOPx(expr)->op_first)->op_first;
+        const UNOP* const flip = cUNOPx(cUNOPx(cBINOPx(expr)->op_first)->op_first);
         LOGOP* const range = cLOGOPx(flip->op_first);
         OP* const left  = range->op_first;
         OP* const right = OpSIBLING(left);
@@ -12239,7 +12239,7 @@ Perl_ck_fun(pTHX_ OP *o)
                                            "[]" : "{}";
                                       if (((op->op_type == OP_RV2AV) ||
                                            (op->op_type == OP_RV2HV)) &&
-                                          (firstop = ((UNOP*)op)->op_first) &&
+                                          (firstop = cUNOPx(op)->op_first) &&
                                           (firstop->op_type == OP_GV)) {
                                            /* packagevar $a[] or $h{} */
                                            GV * const gv = cGVOPx_gv(firstop);
@@ -14153,7 +14153,7 @@ Perl_ck_subr(pTHX_ OP *o)
                 const_class = &cSVOPx(aop)->op_sv;
             }
             else if (aop->op_type == OP_LIST) {
-                OP * const sib = OpSIBLING(((UNOP*)aop)->op_first);
+                OP * const sib = OpSIBLING(cUNOPx(aop)->op_first);
                 if (sib && sib->op_type == OP_CONST) {
                     sib->op_private &= ~OPpCONST_STRICT;
                     const_class = &cSVOPx(sib)->op_sv;
