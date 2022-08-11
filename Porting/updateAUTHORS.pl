@@ -38,7 +38,8 @@ sub main {
         mailmap_file => $mailmap_file,
     );
 
-    $self->read_and_update($authors_file, $mailmap_file);
+    $self->read_and_update();
+
     return 0;    # 0 for no error - intended for exit();
 }
 
