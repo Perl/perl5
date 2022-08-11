@@ -5459,6 +5459,7 @@ Porting/timecheck.c		Test program for the 2038 fix
 Porting/timecheck2.c		Test program for the 2038 fix
 Porting/todo.pod		Perl things to do
 Porting/updateAUTHORS.pl	Tool to automatically update AUTHORS and .mailmap from git log data
+Porting/updateAUTHORS.pm	Brains of updateAUTHORS.pl
 Porting/valgrindpp.pl		Summarize valgrind reports
 Porting/vote_admin_guide.pod	Perlgov Vote Administrator guide
 pp.c				Push/Pop code

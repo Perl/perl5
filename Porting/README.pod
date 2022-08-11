@@ -381,9 +381,14 @@ any previous attempts.
 =head2 F<updateAUTHORS.pl>
 
 This script will automatically update AUTHORS and create .mailmap entries
-based on the git commit log history. If F<checkAUTHORS.pl> complains
+based on the git commit log history. If F<t/porting/authors.t> complains
 during testing you should run this. It will automatically fix most if not
 all AUTHORS related test fails.
+
+=head2 F<updateAUTHORS.pm>
+
+The class used by F<updateAUTHORS.pl> to do its business. Package name
+C<Porting::updateAUTHORS>.
 
 =head2 F<valgrindpp.pl>
 
