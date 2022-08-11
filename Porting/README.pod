@@ -37,12 +37,6 @@ number in various files within the perl source.
 
 Check source code for ANSI-C violations.
 
-=head2 F<checkAUTHORS.pl>
-
-Used by F<t/porting/authors.t> to ensure the F<AUTHORS> list is up to
-date. See also L<< /"F<updateAUTHORS.pl>" >> for a way to automatically
-fix issues found by this tool.
-
 =head2 F<checkcfguse.pl>
 
 Check where the symbols defined in the various F<config.sh>-clones
