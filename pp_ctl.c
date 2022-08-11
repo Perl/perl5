@@ -4072,7 +4072,7 @@ S_require_file(pTHX_ SV *sv)
 
         /*XXX OPf_KIDS should always be true? -dapm 4/2017 */
         if (PL_op->op_flags & OPf_KIDS) {
-            SVOP * const kid = (SVOP*)cUNOP->op_first;
+            SVOP * const kid = cSVOPx(cUNOP->op_first);
 
             if (kid->op_type == OP_CONST && (kid->op_private & OPpCONST_BARE)) {
                 /* Make sure that a bareword module name (e.g. ::Foo::Bar)

@@ -2676,7 +2676,7 @@ Perl_check_hash_fields_and_hekify(pTHX_ UNOP *rop, SVOP *key_op, int real)
          && (fields = (GV**)hv_fetchs(PadnameTYPE(lexname), "FIELDS", FALSE))
          && isGV(*fields) && GvHV(*fields);
 
-    for (; key_op; key_op = (SVOP*)OpSIBLING(key_op)) {
+    for (; key_op; key_op = cSVOPx(OpSIBLING(key_op))) {
         SV **svp, *sv;
         if (key_op->op_type != OP_CONST)
             continue;
@@ -5728,8 +5728,8 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
      * The rhs of the tr/// is here referred to as the r side.
      */
 
-    SV * const tstr = ((SVOP*)expr)->op_sv;
-    SV * const rstr = ((SVOP*)repl)->op_sv;
+    SV * const tstr = cSVOPx(expr)->op_sv;
+    SV * const rstr = cSVOPx(repl)->op_sv;
     STRLEN tlen;
     STRLEN rlen;
     const U8 * t0 = (U8*)SvPV_const(tstr, tlen);
@@ -7556,7 +7556,7 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
     veop = NULL;
 
     if (version) {
-        SV * const vesv = ((SVOP*)version)->op_sv;
+        SV * const vesv = cSVOPx(version)->op_sv;
 
         if (!arg && !SvNIOKp(vesv)) {
             arg = version;
@@ -7569,7 +7569,7 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
                 Perl_croak(aTHX_ "Version number must be a constant number");
 
             /* Make copy of idop so we don't free it twice */
-            pack = newSVOP(OP_CONST, 0, newSVsv(((SVOP*)idop)->op_sv));
+            pack = newSVOP(OP_CONST, 0, newSVsv(cSVOPx(idop)->op_sv));
 
             /* Fake up a method call to VERSION */
             meth = newSVpvs_share("VERSION");
@@ -7584,10 +7584,10 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
     if (arg && arg->op_type == OP_STUB) {
         imop = arg;		/* no import on explicit () */
     }
-    else if (SvNIOKp(((SVOP*)idop)->op_sv)) {
+    else if (SvNIOKp(cSVOPx(idop)->op_sv)) {
         imop = NULL;		/* use 5.0; */
         if (aver)
-            use_version = ((SVOP*)idop)->op_sv;
+            use_version = cSVOPx(idop)->op_sv;
         else
             idop->op_private |= OPpCONST_NOVER;
     }
@@ -7595,7 +7595,7 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
         SV *meth;
 
         /* Make copy of idop so we don't free it twice */
-        pack = newSVOP(OP_CONST, 0, newSVsv(((SVOP*)idop)->op_sv));
+        pack = newSVOP(OP_CONST, 0, newSVsv(cSVOPx(idop)->op_sv));
 
         /* Fake up a method call to import/unimport */
         meth = aver
@@ -8127,7 +8127,7 @@ Perl_newASSIGNOP(pTHX_ I32 flags, OP *left, I32 optype, OP *right)
             {
                 /* convert split(...,0) to split(..., PL_modcount+1) */
                 SV ** const svp =
-                    &((SVOP*)((LISTOP*)right)->op_last)->op_sv;
+                    &cSVOPx(((LISTOP*)right)->op_last)->op_sv;
                 SV * const sv = *svp;
                 if (SvIOK(sv) && SvIVX(sv) == 0)
                 {
@@ -8401,9 +8401,9 @@ S_new_logop(pTHX_ I32 type, I32 flags, OP** firstp, OP** otherp)
             no_bareword_allowed(cstop);
         else if ((cstop->op_private & OPpCONST_BARE))
                 Perl_ck_warner(aTHX_ packWARN(WARN_BAREWORD), "Bareword found in conditional");
-        if ((type == OP_AND &&  SvTRUE(((SVOP*)cstop)->op_sv)) ||
-            (type == OP_OR  && !SvTRUE(((SVOP*)cstop)->op_sv)) ||
-            (type == OP_DOR && !SvOK(((SVOP*)cstop)->op_sv))) {
+        if ((type == OP_AND &&  SvTRUE(cSVOPx(cstop)->op_sv)) ||
+            (type == OP_OR  && !SvTRUE(cSVOPx(cstop)->op_sv)) ||
+            (type == OP_DOR && !SvOK(cSVOPx(cstop)->op_sv))) {
             /* Elide the (constant) lhs, since it can't affect the outcome */
             *firstp = NULL;
             if (other->op_type == OP_CONST)
@@ -8563,7 +8563,7 @@ Perl_newCONDOP(pTHX_ I32 flags, OP *first, OP *trueop, OP *falseop)
     scalarboolean(first);
     if ((cstop = search_const(first))) {
         /* Left or right arm of the conditional?  */
-        const bool left = SvTRUE(((SVOP*)cstop)->op_sv);
+        const bool left = SvTRUE(cSVOPx(cstop)->op_sv);
         OP *live = left ? trueop : falseop;
         OP *const dead = left ? falseop : trueop;
         if (cstop->op_private & OPpCONST_BARE &&
@@ -8757,7 +8757,7 @@ Perl_newLOOPOP(pTHX_ I32 flags, I32 debuggable, OP *expr, OP *block)
 
     if (expr) {
         if (once && (
-              (expr->op_type == OP_CONST && !SvTRUE(((SVOP*)expr)->op_sv))
+              (expr->op_type == OP_CONST && !SvTRUE(cSVOPx(expr)->op_sv))
            || (  expr->op_type == OP_NOT
               && cUNOPx(expr)->op_first->op_type == OP_CONST
               && SvTRUE(cSVOPx_sv(cUNOPx(expr)->op_first))
@@ -9205,14 +9205,14 @@ Perl_newLOOPEX(pTHX_ I32 type, OP *label)
 
     /* Check for a constant argument */
     if (label->op_type == OP_CONST) {
-            SV * const sv = ((SVOP *)label)->op_sv;
+            SV * const sv = cSVOPx(label)->op_sv;
             STRLEN l;
             const char *s = SvPV_const(sv,l);
             if (l == strlen(s)) {
                 o = newPVOP(type,
-                            SvUTF8(((SVOP*)label)->op_sv),
+                            SvUTF8(cSVOPx(label)->op_sv),
                             savesharedpv(
-                                SvPV_nolen_const(((SVOP*)label)->op_sv)));
+                                SvPV_nolen_const(cSVOPx(label)->op_sv)));
             }
     }
 
@@ -9803,8 +9803,8 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
 
     if (proto) {
         assert(proto->op_type == OP_CONST);
-        ps = SvPV_const(((SVOP*)proto)->op_sv, ps_len);
-        ps_utf8 = SvUTF8(((SVOP*)proto)->op_sv);
+        ps = SvPV_const(cSVOPx(proto)->op_sv, ps_len);
+        ps_utf8 = SvUTF8(cSVOPx(proto)->op_sv);
     }
     else
         ps = NULL;
@@ -10279,8 +10279,8 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 
     if (proto) {
         assert(proto->op_type == OP_CONST);
-        ps = SvPV_const(((SVOP*)proto)->op_sv, ps_len);
-        ps_utf8 = SvUTF8(((SVOP*)proto)->op_sv);
+        ps = SvPV_const(cSVOPx(proto)->op_sv, ps_len);
+        ps_utf8 = SvUTF8(cSVOPx(proto)->op_sv);
     }
     else
         ps = NULL;
@@ -11338,7 +11338,7 @@ Perl_newGVREF(pTHX_ I32 type, OP *o)
     if (!FEATURE_BAREWORD_FILEHANDLES_IS_ENABLED &&
         ((PL_opargs[type] >> OASHIFT) & 7) == OA_FILEREF &&
         o->op_type == OP_CONST && (o->op_private & OPpCONST_BARE)) {
-        no_bareword_filehandle(SvPVX(cSVOPx_sv((SVOP*)o)));
+        no_bareword_filehandle(SvPVX(cSVOPo_sv));
     }
 
     return ref(newUNOP(OP_RV2GV, OPf_REF, o), type);
@@ -11750,7 +11750,7 @@ Perl_ck_eval(pTHX_ OP *o)
 
     PL_hints |= HINT_BLOCK_SCOPE;
     if (o->op_flags & OPf_KIDS) {
-        SVOP * const kid = (SVOP*)cUNOPo->op_first;
+        SVOP * const kid = cSVOPx(cUNOPo->op_first);
         assert(kid);
 
         if (o->op_type == OP_ENTERTRY) {
@@ -11913,7 +11913,7 @@ Perl_ck_exists(pTHX_ OP *o)
 OP *
 Perl_ck_rvconst(pTHX_ OP *o)
 {
-    SVOP * const kid = (SVOP*)cUNOPo->op_first;
+    SVOP * const kid = cSVOPx(cUNOPo->op_first);
 
     PERL_ARGS_ASSERT_CK_RVCONST;
 
@@ -12015,13 +12015,13 @@ Perl_ck_ftst(pTHX_ OP *o)
         NOOP;
     }
     else if (o->op_flags & OPf_KIDS && cUNOPo->op_first->op_type != OP_STUB) {
-        SVOP * const kid = (SVOP*)cUNOPo->op_first;
+        SVOP * const kid = cSVOPx(cUNOPo->op_first);
         const OPCODE kidtype = kid->op_type;
 
         if (kidtype == OP_CONST && (kid->op_private & OPpCONST_BARE)
          && !kid->op_folded) {
             if (!FEATURE_BAREWORD_FILEHANDLES_IS_ENABLED) {
-                no_bareword_filehandle(SvPVX(cSVOPx_sv((SVOP*)kid)));
+                no_bareword_filehandle(SvPVX(kSVOP_sv));
             }
             OP * const newop = newGVOP(type, OPf_REF,
                 gv_fetchsv(kid->op_sv, GV_ADD, SVt_PVIO));
@@ -12178,11 +12178,11 @@ Perl_ck_fun(pTHX_ OP *o)
                         (kid->op_private & OPpCONST_BARE))
                     {
                         OP * const newop = newGVOP(OP_GV, 0,
-                            gv_fetchsv(((SVOP*)kid)->op_sv, GV_ADD, SVt_PVIO));
+                            gv_fetchsv(kSVOP->op_sv, GV_ADD, SVt_PVIO));
                         /* a first argument is handled by toke.c, ideally we'd
                          just check here but several ops don't use ck_fun() */
                         if (!FEATURE_BAREWORD_FILEHANDLES_IS_ENABLED) {
-                            no_bareword_filehandle(SvPVX(cSVOPx_sv((SVOP*)kid)));
+                            no_bareword_filehandle(SvPVX(kSVOP_sv));
                         }
                         /* replace kid with newop in chain */
                         op_sibling_splice(o, prev_kid, 1, newop);
@@ -12498,7 +12498,7 @@ Perl_ck_readline(pTHX_ OP *o)
          OP *kid = cLISTOPo->op_first;
          if (!FEATURE_BAREWORD_FILEHANDLES_IS_ENABLED
              && kid->op_type == OP_CONST && (kid->op_private & OPpCONST_BARE)) {
-             no_bareword_filehandle(SvPVX(cSVOPx_sv((SVOP*)kid)));
+             no_bareword_filehandle(SvPVX(kSVOP_sv));
          }
          if (kid->op_type == OP_RV2GV) kid->op_private |= OPpALLOW_FAKE;
          scalar(kid);
@@ -12542,7 +12542,7 @@ Perl_ck_listiob(pTHX_ OP *o)
         if (kid->op_type == OP_CONST && kid->op_private & OPpCONST_BARE
          && !kid->op_folded) {
             if (!FEATURE_BAREWORD_FILEHANDLES_IS_ENABLED) {
-                no_bareword_filehandle(SvPVX(cSVOPx_sv((SVOP*)kid)));
+                no_bareword_filehandle(SvPVX(kSVOP_sv));
             }
             o->op_flags |= OPf_STACKED;	/* make it a filehandle */
             scalar(kid);
@@ -12748,8 +12748,8 @@ Perl_ck_open(pTHX_ OP *o)
              (oa = OpSIBLING(first)) &&		/* The fh. */
              (oa = OpSIBLING(oa)) &&			/* The mode. */
              (oa->op_type == OP_CONST) &&
-             SvPOK(((SVOP*)oa)->op_sv) &&
-             (mode = SvPVX_const(((SVOP*)oa)->op_sv)) &&
+             SvPOK(cSVOPx(oa)->op_sv) &&
+             (mode = SvPVX_const(cSVOPx(oa)->op_sv)) &&
              mode[0] == '>' && mode[1] == '&' &&	/* A dup open. */
              (last == OpSIBLING(oa)))			/* The bareword. */
               last->op_private &= ~OPpCONST_STRICT;
@@ -12900,7 +12900,7 @@ Perl_ck_require(pTHX_ OP *o)
     PERL_ARGS_ASSERT_CK_REQUIRE;
 
     if (o->op_flags & OPf_KIDS) {	/* Shall we supply missing .pm? */
-        SVOP * const kid = (SVOP*)cUNOPo->op_first;
+        SVOP * const kid = cSVOPx(cUNOPo->op_first);
         U32 hash;
         char *s;
         STRLEN len;
@@ -14240,10 +14240,10 @@ Perl_ck_trunc(pTHX_ OP *o)
     PERL_ARGS_ASSERT_CK_TRUNC;
 
     if (o->op_flags & OPf_KIDS) {
-        SVOP *kid = (SVOP*)cUNOPo->op_first;
+        SVOP *kid = cSVOPx(cUNOPo->op_first);
 
         if (kid->op_type == OP_NULL)
-            kid = (SVOP*)OpSIBLING(kid);
+            kid = cSVOPx(OpSIBLING(kid));
         if (kid && kid->op_type == OP_CONST &&
             (kid->op_private & OPpCONST_BARE) &&
             !kid->op_folded)
