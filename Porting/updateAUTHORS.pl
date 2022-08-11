@@ -26,8 +26,32 @@ my @OPTSPEC= qw(
     exclude_contrib=s@
     exclude_me
 
+    show_rank|rank
+    show_applied|thanks_applied|applied
+    show_stats|stats
+    show_who|who
+    show_files|files
+    show_file_changes|activity
+    show_file_chainsaw|chainsaw
+
+    as_percentage|percentage
+    as_cumulative|cumulative
+    as_list|old_style
+
+    in_reverse|reverse
+    with_rank_numbers|numbered|num
+
     from_commit|from=s
     to_commit|to=s
+
+    numstat
+    no_update
+);
+
+my %implies_numstat= (
+    show_files         => 1,
+    show_file_changes  => 1,
+    show_file_chainsaw => 1,
 );
 
 sub main {
@@ -63,6 +87,11 @@ sub main {
     pod2usage(1)             if $opts{help};
     pod2usage(-verbose => 2) if $opts{man};
 
+    foreach my $opt (keys %opts) {
+        $opts{numstat}++   if $implies_numstat{$opt};
+        $opts{no_update}++ if $opt =~ /^show_/;
+    }
+
     if (delete $opts{exclude_me}) {
         my ($author_full)=
             Porting::updateAUTHORS->current_author_name_email("full");
@@ -81,6 +110,48 @@ sub main {
 
     my $changed= $self->read_and_update();
 
+    if ($self->{show_rank}) {
+        $self->report_stats("who_stats", "author");
+        return 0;
+    }
+    elsif ($self->{show_applied}) {
+        $self->report_stats("who_stats", "applied");
+        return 0;
+    }
+    elsif ($self->{show_stats}) {
+        my @fields= ("author", "applied", "committer");
+        push @fields,
+            ("num_files", "lines_added", "lines_removed", "lines_delta")
+            if $self->{numstat};
+        $self->report_stats("who_stats", @fields);
+        return 0;
+    }
+    elsif ($self->{show_files}) {
+        $self->report_stats(
+            "file_stats",  "commits", "lines_added", "lines_removed",
+            "lines_delta", "binary_change"
+        );
+        return 0;
+    }
+    elsif ($self->{show_file_changes}) {
+        $self->report_stats(
+            "file_stats", "lines_delta", "lines_added", "lines_removed",
+            "commits"
+        );
+        return 0;
+    }
+    elsif ($self->{show_file_chainsaw}) {
+        $self->{in_reverse}= !$self->{in_reverse};
+        $self->report_stats(
+            "file_stats", "lines_delta", "lines_added", "lines_removed",
+            "commits"
+        );
+        return 0;
+    }
+    elsif ($self->{show_who}) {
+        $self->print_who();
+        return 0;
+    }
     return $changed;    # 0 means nothing changed
 }
 
@@ -116,6 +187,7 @@ are properly listed.
    --mailmap-file=FILE  override default of '.mailmap'
 
  Action Modifiers
+   --no-update          Do not update.
    --exclude-missing    Add new names to the exclude file so they never
                         appear in AUTHORS or .mailmap.
 
@@ -123,6 +195,27 @@ are properly listed.
     Update canonical name or email in AUTHORS and .mailmap properly.
     --exclude-contrib       NAME_AND_EMAIL
     --exclude-me
+
+ Reports About People
+    --stats             detailed report of authors and what they did
+    --who               Sorted, wrapped list of who did what
+    --thanks-applied    report who applied stuff for others
+    --rank              report authors by number of commits created
+
+ Reports About Files
+    --files             detailed report files that were modified
+    --activity          simple report of files that grew the most
+    --chainsaw          simple report of files that shrank the most
+
+ Report Modifiers
+    --percentage        show percentages not counts
+    --cumulative        show cumulative numbers not individual
+    --reverse           show reports in reverse order
+    --numstat           show additional file based data in some reports
+                        (not needed for most reports)
+    --as-list           show reports with names with common values
+                        folded into a list like checkAUTHORS.pl used to
+    --numbered          add rank numbers to reports where they are missing
 
 =head1 OPTIONS
 
@@ -139,6 +232,10 @@ Prints the manual page and exits.
 =item C<--verbose>
 
 Be verbose about what is happening. Can be repeated more than once.
+
+=item C<--no-update>
+
+Do not update files on disk even if they need to be changed.
 
 =item C<--authors-file=FILE>
 
@@ -207,6 +304,79 @@ and F<.mailmap> you delete their details manually, and then run this
 tool with the C<--exclude> option. It is probably a good idea to run it
 first without any arguments to make sure you dont exclude something or
 someone you did not intend to.
+
+=item C<--stats>
+
+Show detailed stats about committers and the work they did in a tabular
+form. If the C<--numstat> option is provided this report will provide
+additional data about the files a developer worked on. May be slow the
+first time it is used as git unpacks the relevant data.
+
+=item C<--who>
+
+Show a list of which committers and authors contributed to the project
+in the selected range of commits. The list will contain the name only,
+and will sorted according to unicode collation rules. This list is
+suitable in release notes and similar contexts.
+
+=item C<--thanks-applied>
+
+Show a report of which committers applied work on behalf of
+someone else, including counts. Modified by the C<--as-list> and
+C<--display-rank>.
+
+=item C<--rank>
+
+Shows a report of which commits did the most work. Modified by the
+C<--as-list> and C<--display-rank> options.
+
+=item C<--files>
+
+Show detailed stats about the files that have been modified in the
+selected range of commits. Implies C<--numstat>. May be slow the first
+time it is used as git unpacks the relevant data.
+
+=item C<--activity>
+
+Show simple stats about which files had the most additions. Implies
+C<--numstat>. May be slow the first time it is used as git unpacks the
+relevant data.
+
+
+=item C<--chainsaw>
+
+Show simple stats about whcih files had the most removals. Implies
+C<--numstat>. May be slow the first time it is used as git unpacks the
+relevant data.
+
+=item C<--percentage>
+
+Show numeric data as percentages of the total, not counts.
+
+=item C<--cumulative>
+
+Show numeric data as cumulative counts in the reports.
+
+=item C<--reverse>
+
+Show the reports in reverse order to normal.
+
+=item C<--numstat>
+
+Gather additional data about the files that were changed, not just the
+authors who did the changes. This option currently is only necessary for
+the C<--stats> option, which will display additional data when this
+option is also provided.
+
+=item C<--as-list>
+
+Show the reports with name data rolled up together into a list like the
+older checkAUTHORS.pl script would have.
+
+=item C<--numbered>
+
+Show an additional column with the rank number of a row in the report in
+reports that do not normally show the rank number.
 
 =back
 
