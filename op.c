@@ -2287,11 +2287,11 @@ Perl_scalarvoid(pTHX_ OP *arg)
             if ((o->op_private & ~OPpASSIGN_BACKWARDS) != 2)
                 break;
 
-            rv2gv = ((BINOP *)o)->op_last;
+            rv2gv = cBINOPo->op_last;
             if (!rv2gv || rv2gv->op_type != OP_RV2GV)
                 break;
 
-            refgen = (UNOP *)((BINOP *)o)->op_first;
+            refgen = (UNOP *)cBINOPo->op_first;
 
             if (!refgen || (refgen->op_type != OP_REFGEN
                             && refgen->op_type != OP_SREFGEN))
@@ -5607,7 +5607,7 @@ Perl_newBINOP(pTHX_ I32 type, I32 flags, OP *first, OP *last)
     if (binop->op_last)
         OpLASTSIB_set(binop->op_last, (OP*)binop);
 
-    binop = (BINOP*)CHECKOP(type, binop);
+    binop = (BINOP*) CHECKOP(type, binop);
     if (binop->op_next || binop->op_type != (OPCODE)type)
         return (OP*)binop;
 
@@ -9100,13 +9100,13 @@ Perl_newFOROP(pTHX_ I32 flags, OP *sv, OP *expr, OP *block, OP *cont)
     }
     else if (expr->op_type == OP_NULL &&
              (expr->op_flags & OPf_KIDS) &&
-             ((BINOP*)expr)->op_first->op_type == OP_FLOP)
+             cBINOPx(expr)->op_first->op_type == OP_FLOP)
     {
         /* Basically turn for($x..$y) into the same as for($x,$y), but we
          * set the STACKED flag to indicate that these values are to be
          * treated as min/max values by 'pp_enteriter'.
          */
-        const UNOP* const flip = (UNOP*)((UNOP*)((BINOP*)expr)->op_first)->op_first;
+        const UNOP* const flip = (UNOP*)((UNOP*)cBINOPx(expr)->op_first)->op_first;
         LOGOP* const range = (LOGOP*) flip->op_first;
         OP* const left  = range->op_first;
         OP* const right = OpSIBLING(left);
@@ -12230,7 +12230,7 @@ Perl_ck_fun(pTHX_ OP *o)
                                      || kid->op_type == OP_HELEM)
                             {
                                  OP *firstop;
-                                 OP *op = ((BINOP*)kid)->op_first;
+                                 OP *op = kBINOP->op_first;
                                  name = NULL;
                                  if (op) {
                                       SV *tmpstr = NULL;
