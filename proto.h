@@ -5685,8 +5685,6 @@ STATIC void	S_new_ctype(pTHX_ const char* newctype);
 STATIC void	S_new_numeric(pTHX_ const char* newnum);
 #define PERL_ARGS_ASSERT_NEW_NUMERIC	\
 	assert(newnum)
-STATIC void	S_restore_switched_locale(pTHX_ const int category, const char * const original_locale);
-#define PERL_ARGS_ASSERT_RESTORE_SWITCHED_LOCALE
 STATIC void	S_restore_toggled_locale_i(pTHX_ const unsigned cat_index, const char * original_locale, const line_t caller_line);
 #define PERL_ARGS_ASSERT_RESTORE_TOGGLED_LOCALE_I
 STATIC const char *	S_save_to_buffer(const char * string, const char **buf, Size_t *buf_size);
@@ -5698,8 +5696,6 @@ PERL_STATIC_NO_RET void	S_setlocale_failure_panic_i(pTHX_ const unsigned int cat
 
 STATIC const char*	S_stdize_locale(pTHX_ const int category, const char* input_locale, const char **buf, Size_t *buf_size, line_t caller_line);
 #define PERL_ARGS_ASSERT_STDIZE_LOCALE
-STATIC const char*	S_switch_category_locale_to_template(pTHX_ const int switch_category, const int template_category, const char * template_locale);
-#define PERL_ARGS_ASSERT_SWITCH_CATEGORY_LOCALE_TO_TEMPLATE
 STATIC const char *	S_toggle_locale_i(pTHX_ const unsigned switch_cat_index, const char * new_locale, const line_t caller_line);
 #define PERL_ARGS_ASSERT_TOGGLE_LOCALE_I	\
 	assert(new_locale)
@@ -7525,10 +7521,6 @@ PERL_CALLCONV SV*	Perl_sv_dup_inc(pTHX_ const SV *const ssv, CLONE_PARAMS *const
 #define PERL_ARGS_ASSERT_SV_DUP_INC	\
 	assert(param)
 
-#endif
-#if defined(USE_LOCALE)		    && (   defined(PERL_IN_LOCALE_C)	        || defined(PERL_IN_MG_C)		|| defined (PERL_EXT_POSIX)		|| defined (PERL_EXT_LANGINFO))
-PERL_CALLCONV bool	Perl__is_cur_LC_category_utf8(pTHX_ int category);
-#define PERL_ARGS_ASSERT__IS_CUR_LC_CATEGORY_UTF8
 #endif
 #if defined(USE_LOCALE_COLLATE)
 PERL_CALLCONV int	Perl_magic_freecollxfrm(pTHX_ SV* sv, MAGIC* mg)
