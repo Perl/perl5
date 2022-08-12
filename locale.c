@@ -421,20 +421,6 @@ S_get_category_index(const int category, const char * locale)
     return NOMINAL_LC_ALL_INDEX + 1;
 }
 
-STATIC const char *
-S_category_name(const int category)
-{
-    unsigned int index;
-
-    index = get_category_index(category, NULL);
-
-    if (index <= NOMINAL_LC_ALL_INDEX) {
-        return category_names[index];
-    }
-
-    return Perl_form_nocontext("%d (unknown)", category);
-}
-
 #endif /* ifdef USE_LOCALE */
 
 void
@@ -1051,7 +1037,7 @@ S_emulate_setlocale_i(pTHX_
              "emulate_setlocale_i input=%d (%s), mask=0x%x,"
              " new locale=\"%s\", current locale=\"%s\","
              "index=%d, object=%p\n",
-             categories[index], category_name(categories[index]), mask,
+             categories[index], category_names[index], mask,
              ((new_locale == NULL) ? "(nil)" : new_locale),
              locale_on_entry, index, entry_obj));
 
