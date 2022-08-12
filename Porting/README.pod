@@ -146,6 +146,11 @@ The charter of the Perl Documentation Team
 
 List of Perl release epigraphs.
 
+=head2 F<exclude_contrib.txt>
+
+List of base 64 encoded SHA256 digests of C<< "name <email>" >> data
+which should be ignored by F<updateAUTHORS.pl>.
+
 =head2 F<exec-bit.txt>
 
 This file contains a list of files that F<makerel> will ensure get an
@@ -403,4 +408,3 @@ leaks.
 Guide for Vote Administrators for running Steering Council elections.
 
 =cut
-

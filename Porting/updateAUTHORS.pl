@@ -22,6 +22,9 @@ my @OPTSPEC= qw(
     mailmap_file=s
 
     verbose+
+    exclude_missing|exclude
+    exclude_contrib=s@
+    exclude_me
 
     from_commit|from=s
     to_commit|to=s
@@ -30,10 +33,12 @@ my @OPTSPEC= qw(
 sub main {
     local $Data::Dumper::Sortkeys= 1;
     my %opts= (
-        authors_file => "AUTHORS",
-        mailmap_file => ".mailmap",
-        from         => "",
-        to           => "",
+        authors_file    => "AUTHORS",
+        mailmap_file    => ".mailmap",
+        exclude_file    => "Porting/exclude_contrib.txt",
+        from            => "",
+        to              => "",
+        exclude_contrib => [],
     );
 
     ## Parse options and print usage if there is a syntax error,
@@ -58,6 +63,20 @@ sub main {
     pod2usage(1)             if $opts{help};
     pod2usage(-verbose => 2) if $opts{man};
 
+    if (delete $opts{exclude_me}) {
+        my ($author_full)=
+            Porting::updateAUTHORS->current_author_name_email("full");
+        my ($committer_full)=
+            Porting::updateAUTHORS->current_committer_name_email("full");
+
+        push @{ $opts{exclude_contrib} }, $author_full
+            if $author_full;
+        push @{ $opts{exclude_contrib} }, $committer_full
+            if $committer_full
+            and (!$author_full
+            or $committer_full ne $author_full);
+    }
+
     my $self= Porting::updateAUTHORS->new(%opts);
 
     my $changed= $self->read_and_update();
@@ -73,7 +92,7 @@ __END__
 =head1 NAME
 
 F<Porting/updateAUTHORS.pl> - Automatically update F<AUTHORS> and F<.mailmap>
-based on commit data.
+and F<Porting/exclude_contrib.txt> based on commit data.
 
 =head1 SYNOPSIS
 
@@ -95,6 +114,15 @@ are properly listed.
  File Locations:
    --authors-file=FILE  override default of 'AUTHORS'
    --mailmap-file=FILE  override default of '.mailmap'
+
+ Action Modifiers
+   --exclude-missing    Add new names to the exclude file so they never
+                        appear in AUTHORS or .mailmap.
+
+ Details Changes
+    Update canonical name or email in AUTHORS and .mailmap properly.
+    --exclude-contrib       NAME_AND_EMAIL
+    --exclude-me
 
 =head1 OPTIONS
 
@@ -125,6 +153,60 @@ the F<AUTHORS> file in the current directory.
 
 Override the default location of the mailmap file, which is by default
 the F<.mailmap> file in the current directory.
+
+=item C<--exclude-file=FILE>
+
+=item C<--exclude_file=FILE>
+
+Override the default location of the exclude file, which is by default
+the F<Porting/exclude_contrib.txt> file reachable from the current
+directory.
+
+=item C<--exclude-contrib=NAME_AND_EMAIL>
+
+=item C<--exclude_contrib=NAME_AND_EMAIL>
+
+Exclude a specific name/email combination from our contributor datasets.
+Can be repeated multiple times on the command line to remove multiple
+items at once. If the contributor details correspond to a canonical
+identity of a contributor (one that is in the AUTHORS file or on the
+left in the .mailmap file) then ALL records, including those linked to
+that identity in .mailmap will be marked for exclusion. This is similar
+to C<--exclude-missing> but it only affects the specifically named
+users. Note that the format for NAME_AND_EMAIL is similar to that of the
+.mailmap file, email addresses and C< @github > style identifiers should
+be wrapped in angle brackets like this: C<< <@github> >>, users with no
+email in the AUTHORS file should use C<< <unknown> >>.
+
+For example:
+
+  Porting/updateAUTHORS.pl --exclude-contrib="Joe B <b@joe.com>"
+
+Would remove all references to "Joe B" from F<AUTHORS> and F<.mailmap>
+and add the required entires to F<Porting/exclude_contrib.txt> such that
+the contributor would never be automatically added back, and would be
+automatically removed should someone read them manually.
+
+=item C<--exclude-missing>
+
+=item C<--exclude_missing>
+
+=item C<--exclude>
+
+Normally when the tool is run it *adds* missing data only. If this
+option is set then the reverse will happen, any author data missing will
+be marked as intentionally missing in such a way that future "normal"
+runs of the script ignore the author(s) that were excluded.
+
+The exclude data is stored in F<Porting/exclude_contrib.txt> as a SHA256
+digest (in base 64) of the user name and email being excluded so that
+the list itself doesnt contain the contributor details in plain text.
+
+The general idea is that if you want to remove someone from F<AUTHORS>
+and F<.mailmap> you delete their details manually, and then run this
+tool with the C<--exclude> option. It is probably a good idea to run it
+first without any arguments to make sure you dont exclude something or
+someone you did not intend to.
 
 =back
 
