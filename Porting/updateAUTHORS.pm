@@ -154,6 +154,12 @@ sub current_author_name_email {
     return $full ? $self->format_name_email($n, $e) : ($n, $e);
 }
 
+sub git_status_porcelain {
+    my ($self)= @_;
+    my $status= `git status --porcelain`;
+    return $status // "";
+}
+
 sub finalize_commit_info {
     my ($self, $commit_info)= @_;
     my $author= $commit_info->{author_name_mm_canon};
@@ -377,7 +383,12 @@ sub update_authors_file {
     }
     if ($new_raw_text ne $old_raw_text) {
         $self->{changed_count}++;
-        $self->{changed_file}{$authors_file}++;
+        $self->_log_file_changes_quick_and_dirty_diff($authors_file,
+            $old_raw_text, $new_raw_text);
+
+        if ($self->{no_update}) {
+            return 1;
+        }
 
         warn "Updating '$authors_file'\n" if $self->{verbose};
 
@@ -486,7 +497,12 @@ sub update_mailmap_file {
     }
     if ($new_raw_text ne $old_raw_text) {
         $self->{changed_count}++;
-        $self->{changed_file}{$mailmap_file}++;
+        $self->_log_file_changes_quick_and_dirty_diff($mailmap_file,
+            $old_raw_text, $new_raw_text);
+
+        if ($self->{no_update}) {
+            return 1;
+        }
 
         warn "Updating '$mailmap_file'\n"
             if $self->{verbose};
@@ -549,6 +565,17 @@ my $N2P= "name2preferred";
 my $E2P= "email2preferred";
 
 my $blurb= "";    # FIXME - replace with a nice message
+
+sub known_contributor {
+    my ($self, $name, $email)= @_;
+    if (!$name or !$email) { return 0 }
+    my $combined= "$name <$email>";
+    return ((
+                   $self->{mailmap_info}{$O2P}{$combined}
+                && $self->_keeper_digest($combined)
+        ) ? 1 : 0
+    );
+}
 
 sub _check_name_mailmap {
     my ($self, $auth_name, $raw_name, $commit_info, $descr)= @_;
@@ -817,7 +844,9 @@ sub update_exclude_file {
     }
     if ($exclude_text ne $self->{exclude_file_text_orig}) {
         $self->{changed_count}++;
-        $self->{changed_file}{$exclude_file}++;
+        $self->_log_file_changes_quick_and_dirty_diff($exclude_file,
+            $self->{exclude_file_text_orig},
+            $exclude_text);
 
         if ($self->{no_update}) {
             return 1;
@@ -929,6 +958,38 @@ sub _exclude_contrib {
     $digest //= __digest($name);
     $self->{exclude_digest}{$digest}++
         or warn "Excluding '$name' with '$digest'\n";
+}
+
+sub _log_file_changes_quick_and_dirty_diff {
+    my ($self, $file, $old_raw_text, $new_raw_text)= @_;
+
+    my %old;
+    $old{$_}++ for split /\n/, $old_raw_text;
+    my %new;
+    $new{$_}++ for split /\n/, $new_raw_text;
+    foreach my $key (keys %new) {
+        delete $new{$key} if delete $old{$key};
+    }
+    $self->{changed_file}{$file}{add}= \%new if keys %new;
+    $self->{changed_file}{$file}{del}= \%old if keys %old;
+    return $self->{changed_file}{$file};
+}
+
+sub _diff_diag {
+    my ($self, $want_file)= @_;
+    my $diag_str= "";
+    foreach my $file (sort keys %{ $self->{changed_file} || {} }) {
+        next if $want_file and $file ne $want_file;
+        $diag_str .= "  File '$file' changes:\n";
+        foreach my $action (sort keys %{ $self->{changed_file}{$file} }) {
+            foreach
+                my $line (sort keys %{ $self->{changed_file}{$file}{$action} })
+            {
+                $diag_str .= "    would $action: $line\n";
+            }
+        }
+    }
+    return $diag_str;
 }
 
 my %pretty_name= (
