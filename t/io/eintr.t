@@ -19,16 +19,16 @@ use Config;
 
 my $piped;
 eval {
-	pipe my $in, my $out;
-	$piped = 1;
+    pipe my $in, my $out;
+    $piped = 1;
 };
 if (!$piped) {
-	skip_all('pipe not implemented');
-	exit 0;
+    skip_all('pipe not implemented');
+    exit 0;
 }
 unless (exists  $Config{'d_alarm'}) {
-	skip_all('alarm not implemented');
-	exit 0;
+    skip_all('alarm not implemented');
+    exit 0;
 }
 
 # XXX for some reason the stdio layer doesn't seem to interrupt
@@ -36,8 +36,8 @@ unless (exists  $Config{'d_alarm'}) {
 # hang.
 
 if (exists $ENV{PERLIO} && $ENV{PERLIO} =~ /stdio/  ) {
-	skip_all('stdio not supported for this script');
-	exit 0;
+    skip_all('stdio not supported for this script');
+    exit 0;
 }
 
 # on Win32, alarm() won't interrupt the read/write call.
@@ -55,8 +55,8 @@ if ($^O eq 'VMS' || $^O eq 'MSWin32' || $^O eq 'cygwin' || $^O =~ /freebsd/ || $
      ($^O eq 'darwin' && $osmajmin < 9) ||
     ((int($]*1000) & 1) == 0)
 ) {
-	skip_all('various portability issues');
-	exit 0;
+    skip_all('various portability issues');
+    exit 0;
 }
 
 
@@ -69,10 +69,10 @@ plan(tests => 10);
 # make two handles that will always block
 
 sub fresh_io {
-	close $in if $in; close $out if $out;
-	undef $in; undef $out; # use fresh handles each time
-	pipe $in, $out;
-	$sigst = "";
+    close $in if $in; close $out if $out;
+    undef $in; undef $out; # use fresh handles each time
+    pipe $in, $out;
+    $sigst = "";
 }
 
 $SIG{PIPE} = 'IGNORE';
