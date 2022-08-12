@@ -61,7 +61,7 @@ if ($^O eq 'VMS' || $^O eq 'MSWin32' || $^O eq 'cygwin' || $^O =~ /freebsd/ || $
 
 
 
-my ($in, $out, $st, $sigst, $buf);
+my ($in, $out, $st, $sigst, $buf, $pipe_buf_size);
 
 plan(tests => 10);
 
@@ -73,6 +73,15 @@ sub fresh_io {
     undef $in; undef $out; # use fresh handles each time
     pipe $in, $out;
     $sigst = "";
+
+    # This used to be 1_000_000, but on Linux/ppc64 (POWER7) this kept
+    # consistently failing. At exactly 0x100000 it started passing
+    # again. Now we're asking the kernel what the pipe buffer is, and if
+    # that fails, hoping this number is bigger than any pipe buffer.
+    $pipe_buf_size = (eval {
+        use Fcntl qw(F_GETPIPE_SZ);
+        fcntl($out, F_GETPIPE_SZ, 0);
+    } || 0xfffff) + 1;
 }
 
 $SIG{PIPE} = 'IGNORE';
@@ -101,15 +110,6 @@ ok(close($in), 'read/die: close status');
 SKIP: {
     skip "Tests hang on older versions of Darwin", 5
           if $^O eq 'darwin' && $osmajmin < 16;
-
-    # This used to be 1_000_000, but on Linux/ppc64 (POWER7) this kept
-    # consistently failing. At exactly 0x100000 it started passing
-    # again. Now we're asking the kernel what the pipe buffer is, and if
-    # that fails, hoping this number is bigger than any pipe buffer.
-    my $pipe_buf_size = (eval {
-        use Fcntl qw(F_GETPIPE_SZ);
-        fcntl($out, F_GETPIPE_SZ, 0);
-    } || 0xfffff) + 1;
 
     # close during print
 
