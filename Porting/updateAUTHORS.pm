@@ -3,6 +3,7 @@ use strict;
 use warnings;
 use Data::Dumper;
 use Encode qw(encode_utf8 decode_utf8 decode);
+use Digest::SHA qw(sha256_base64);
 
 # The style of this file is determined by:
 #
@@ -54,6 +55,7 @@ sub _make_name_author_info {
 
     $line //= sprintf "%-31s<%s>",
         $commit_info->{$name_key}, $commit_info->{$email_key};
+    $commit_info->{ $name_key . "_canon" }= $line;
     return $line;
 }
 
@@ -63,6 +65,86 @@ sub _make_name_simple {
     my $email_key= $key . "_email";
     return sprintf "%s <%s>", $commit_info->{$name_key},
         lc($commit_info->{$email_key});
+}
+
+sub __fold_trim_ws {
+    my ($munged)= @_;
+    $munged =~ s/\s+/ /g;
+    $munged =~ s/\A\s+//;
+    $munged =~ s/\s+\z//;
+    return $munged;
+}
+
+sub _register_author {
+    my ($self, $name, $type)= @_;
+
+    return if $self->_logical_exclude_author($name);
+
+    my $digest= $self->_keeper_digest($name)
+        or return;
+
+    $self->{author_info}{"lines"}{$name}
+        and return;
+
+    my $munged= __fold_trim_ws($name);
+    if ($self->{exclude_missing}) {
+        $self->_exclude_contrib($name, $digest);
+    }
+    else {
+        $self->{author_info}{"lines"}{$name}++;
+
+        my $munged= __fold_trim_ws($name);
+        warn encode_utf8 sprintf
+            "New %s '%s' (%s) will be added to AUTHORS file.\n",
+            $type, $munged, $digest
+            if $self->{verbose};
+    }
+}
+
+sub git_conf_get {
+    my ($self, $setting)= @_;
+    chomp(my $value= `git config --get $setting`);
+    return $value;
+}
+
+sub current_git_user_name {
+    my ($self)= @_;
+    return $self->git_conf_get("user.name");
+}
+
+sub current_git_user_email {
+    my ($self)= @_;
+    return $self->git_conf_get("user.email");
+}
+
+sub current_git_name_email {
+    my ($self, $type)= @_;
+    my $name=
+           $ENV{"GIT_\U$type\E_NAME"}
+        || $self->git_conf_get("\L$type\E.name")
+        || $self->current_git_user_name();
+    my $email=
+           $ENV{"GIT_\U$type\E_EMAIL"}
+        || $self->git_conf_get("\L$type\E.email")
+        || $self->current_git_user_email();
+    return $name, $email;
+}
+
+sub format_name_email {
+    my ($self, $name, $email)= @_;
+    return sprintf "%s <%s>", $name, $email;
+}
+
+sub current_committer_name_email {
+    my ($self, $full)= @_;
+    my ($n,    $e)= $self->current_git_name_email("committer");
+    return $full ? $self->format_name_email($n, $e) : ($n, $e);
+}
+
+sub current_author_name_email {
+    my ($self, $full)= @_;
+    my ($n,    $e)= $self->current_git_name_email("author");
+    return $full ? $self->format_name_email($n, $e) : ($n, $e);
 }
 
 sub read_commit_log {
@@ -82,10 +164,10 @@ sub read_commit_log {
         my $commit_info= {};
         @{$commit_info}{@field_names}= split /\0/, $line, 0 + @field_names;
 
-        my $author_name_mm=
+        my $author_name_mm_canon=
             $self->_make_name_author_info($commit_info, "author_name_mm");
 
-        my $committer_name_mm=
+        my $committer_name_mm_canon=
             $self->_make_name_author_info($commit_info, "committer_name_mm");
 
         my $author_name_real= $self->_make_name_simple($commit_info, "author");
@@ -93,15 +175,21 @@ sub read_commit_log {
         my $committer_name_real=
             $self->_make_name_simple($commit_info, "committer");
 
-        $self->_check_name_mailmap($author_name_mm, $author_name_real,
-            $commit_info, "author name");
-        $self->_check_name_mailmap(
-            $committer_name_mm, $committer_name_real,
-            $commit_info,       "committer name"
-        );
+        if (   $self->_keeper_digest($author_name_mm_canon)
+            && $self->_keeper_digest($author_name_real))
+        {
+            $self->_check_name_mailmap($author_name_mm_canon, $author_name_real,
+                $commit_info, "author name");
+            $self->_register_author($author_name_mm_canon, "author");
+        }
 
-        $author_info->{"lines"}{$author_name_mm}++;
-        $author_info->{"lines"}{$committer_name_mm}++;
+        if (   $self->_keeper_digest($committer_name_mm_canon)
+            && $self->_keeper_digest($committer_name_real))
+        {
+            $self->_check_name_mailmap($committer_name_mm_canon,
+                $committer_name_real, $commit_info, "committer name");
+            $self->_register_author($committer_name_mm_canon, "committer");
+        }
     }
     if (!$commits_read) {
         if ($self->{commit_range}) {
@@ -189,9 +277,10 @@ sub update_authors_file {
                 or die "Failed to print to scalar buffer handle: $!";
         }
         foreach my $author (__sorted_hash_keys($author_info->{"lines"})) {
-            next if $author =~ /^unknown/;
-            if ($author =~ s/\s*<unknown>\z//) {
-                next if $author =~ /^\w+$/;
+            next if $self->_logical_exclude_author($author);
+            my $author_mm= $self->_author_to_mailmap($author);
+            if (!$self->_keeper_digest($author_mm)) {
+                next;
             }
             print $out_fh encode_utf8($author), "\n"
                 or die "Failed to print to scalar buffer handle: $!";
@@ -374,27 +463,41 @@ sub _check_name_mailmap {
     my ($self, $auth_name, $raw_name, $commit_info, $descr)= @_;
     my $mailmap_info= $self->{mailmap_info};
 
-    my $name= $auth_name;
+    my $name= $self->_author_to_mailmap($auth_name);
+
+    my $digest= $self->_keeper_digest($name)
+        or return 1;    # known but ignore
+
+    my $name_info= $mailmap_info->{$P2O}{$name};
+
+    if (!$name_info || !$name_info->{$raw_name}) {
+        if ($self->{exclude_missing}) {
+            $self->_exclude_contrib($name, $digest);
+        }
+        else {
+            $mailmap_info->{add}{"$name $raw_name"}++;
+
+            warn encode_utf8 sprintf
+                "Unknown %s '%s' in commit %s '%s'\n%s",
+                $descr,
+                $name,
+                $commit_info->{"abbrev_hash"},
+                $commit_info->{"commit_subject"}, $blurb
+                if $self->{verbose};
+        }
+        return 0;
+    }
+    return 1;
+}
+
+sub _author_to_mailmap {
+    my ($self, $name)= @_;
     $name =~ s/<([^<>]+)>/<\L$1\E>/
         or $name =~ s/(\s)(\@\w+)\z/$1<\L$2\E>/
         or $name .= " <unknown>";
 
-    $name =~ s/\s+/ /g;
-
-    if (!$mailmap_info->{$P2O}{$name}) {
-        warn encode_utf8 sprintf "Unknown %s '%s' in commit %s '%s'\n%s",
-            $descr,
-            $name,
-            $commit_info->{"abbrev_hash"},
-            $commit_info->{"commit_subject"},
-            $blurb;
-        $mailmap_info->{add}{"$name $raw_name"}++;
-        return 0;
-    }
-    elsif (!$mailmap_info->{$P2O}{$name}{$raw_name}) {
-        $mailmap_info->{add}{"$name $raw_name"}++;
-    }
-    return 1;
+    $name= __fold_trim_ws($name);
+    return $name;
 }
 
 sub check_fix_mailmap_hash {
@@ -497,6 +600,13 @@ sub check_fix_mailmap_hash {
         if (defined $oemail) {
             $other= $oname ? "$oname <$oemail>" : "<$oemail>";
         }
+        if (!$self->_keeper_digest($preferred)) {
+            $self->_exclude_contrib($other);
+            next;
+        }
+        elsif (!$self->_keeper_digest($other)) {
+            next;
+        }
         if ($other and $other ne "<unknown>") {
             $self->_safe_set_key($mailmap_info, $O2P,  $other, $preferred);
             $self->_safe_set_key($mailmap_info, $O2PN, $other, $pname);
@@ -530,7 +640,8 @@ sub add_new_mailmap_entries {
     my $num= 0;
     for my $new (sort keys %$mailmap_add) {
         !$mailmap_hash->{$new}++ or next;
-        warn encode_utf8 "Updating '$mailmap_file' with: $new\n";
+        warn encode_utf8 "Updating '$mailmap_file' with: $new\n"
+            if $self->{verbose};
         $num++;
     }
     return $num;
@@ -566,7 +677,73 @@ sub read_and_update {
     $self->add_new_mailmap_entries()
         and $self->update_mailmap_file();
 
+    $self->update_exclude_file();
+
     return $self->changed_count();
+}
+
+sub read_exclude_file {
+    my ($self)= @_;
+    my $exclude_file= $self->{exclude_file};
+    my $exclude_digest= $self->{exclude_digest} ||= {};
+
+    open my $in_fh, "<", $exclude_file
+        or do {
+        warn "Failed to open '$exclude_file': $!";
+        return;
+        };
+    my $head= "";
+    my $orig= "";
+    my $seen_data= 0;
+    while (defined(my $line= <$in_fh>)) {
+        $orig .= $line;
+        if ($line =~ /^\s*#/ || $line !~ /\S/) {
+            $head .= $line unless $seen_data;
+            next;
+        }
+        else {
+            $seen_data= 1;
+        }
+        chomp($line);
+        $line =~ s/\A\s+//;
+        $line =~ s/\s*(?:#.*)?\z//;
+        $exclude_digest->{$line}++ if length($line);
+    }
+    close $in_fh
+        or die "Failed to close '$exclude_file' after reading: $!";
+    $self->{exclude_file_text_head}= $head;
+    $self->{exclude_file_text_orig}= $orig;
+
+    return $exclude_digest;
+}
+
+sub update_exclude_file {
+    my ($self)= @_;
+    my $exclude_file= $self->{exclude_file};
+    my $exclude_text= $self->{exclude_file_text_head};
+    foreach my $digest (__sorted_hash_keys($self->{exclude_digest})) {
+        $exclude_text .= "$digest\n";
+    }
+    if ($exclude_text ne $self->{exclude_file_text_orig}) {
+        $self->{changed_count}++;
+        $self->{changed_file}{$exclude_file}++;
+        warn "Updating '$exclude_file'\n" if $self->{verbose};
+
+        my $tmp_file= "$exclude_file.new";
+        open my $out_fh, ">", $tmp_file
+            or die "Cant open '$tmp_file' for write $!";
+        print $out_fh $exclude_text
+            or die "Failed to print to '$tmp_file': $!";
+        close $out_fh
+            or die "Failed to close '$tmp_file' after writing: $!";
+        rename $tmp_file, $exclude_file
+            or die "Failed to rename '$tmp_file' to '$exclude_file': $!";
+
+        return 1;
+    }
+    else {
+        return 0;
+    }
 }
 
 sub changed_count {
@@ -587,13 +764,75 @@ sub unchanged_file {
 sub new {
     my ($class, %self)= @_;
     $self{changed_count}= 0;
-    for my $name (qw(authors_file mailmap_file)) {
+    for my $name (qw(authors_file mailmap_file exclude_file)) {
         $self{$name}
             or die "Property '$name' is mandatory in constructor";
     }
 
     my $self= bless \%self, $class;
+
+    if (my $ary= $self->{exclude_contrib}) {
+        $self->_exclude_contrib($_) for @$ary;
+    }
+
+    $self->read_exclude_file();
+
     return $self;
+}
+
+sub __digest {
+    my $thing= $_[0];
+    utf8::encode($thing);
+    return sha256_base64($thing);
+}
+
+# if this name is a "keeper" then return its digest
+# (if we know the digest and it is marked for exclusion
+# then we return 0)
+sub _keeper_digest {
+    my ($self, $real_name)= @_;
+    my $digest;
+    $digest= $self->{digest_cache}{$real_name};
+
+    if (!$digest) {
+        my $name= __fold_trim_ws($real_name);
+
+        $digest= ($self->{digest_cache}{$name} //= __digest($name));
+        $self->{digest_cache}{$real_name}= $digest;
+    }
+
+    return $self->{exclude_digest}{$digest} ? 0 : $digest;
+}
+
+# should we exclude this author from the AUTHORS file
+# simply because of the form of their details?
+sub _logical_exclude_author {
+    my ($self, $author)= @_;
+
+    # don't know the persona
+    return 1 if $author =~ /^unknown/;
+
+    # Someone at <unknown> with a single word name.
+    # Eg, we wont list "Bob <unknown>"
+    if ($author =~ s/\s*<unknown>\z//) {
+        return 1 if $author =~ /^\w+$/;
+    }
+    return 0;
+}
+
+# exclude this contributor by name, if digest isnt provided
+# then it is computed using _digest.
+sub _exclude_contrib {
+    my ($self, $name, $digest)= @_;
+
+    # if we would exclude them anyway due to the logical
+    # naming rules then we do not need to add them to the exclude
+    # file.
+    return if $self->_logical_exclude_author($name);
+    $name= __fold_trim_ws($name);
+    $digest //= __digest($name);
+    $self->{exclude_digest}{$digest}++
+        or warn "Excluding '$name' with '$digest'\n";
 }
 
 1;
@@ -610,6 +849,7 @@ Porting::updateAUTHORS - Library to automatically update AUTHORS and .mailmap ba
     my $updater= Porting::updateAUTHORS->new(
         authors_file => "AUTHORS",
         mailmap_file => ".mailmap",
+        exclude_file => "Porting/exclude_contrib.txt",
     );
     $updater->read_and_update();
 
@@ -647,6 +887,7 @@ Create a new object. Required parameters are
 
     authors_file
     mailmap_file
+    exclude_file
 
 Other supported parameters are as follows:
 

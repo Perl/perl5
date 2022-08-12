@@ -6,10 +6,6 @@
 # Each line specifies the canonical name and email for a developer
 # and mapping data from other names and email addresses.
 #
-# Every developer who has worked on the project should have at least
-# one entry in this file, and should have one entry per every distinct
-# name/email combination they have used while working on the project.
-#
 # The mapping works from *right* to *left*, that is the definition
 # on the left specifies the "preferred email", the definition on the
 # right specifies the "other email". The "preferred email" is what
@@ -53,8 +49,7 @@
 # Please do NOT add comments after the header block.
 #
 # See also: https://git-scm.com/docs/gitmailmap
-# However be aware, we do not support all the forms that git does. We
-# want to have one entry per actually use author/commit data.
+# However be aware, we do not support all the forms that git does.
 #
 ########################################################################
 A. C. Yardley <yardley@tanet.net> A. C. Yardley <yardley@tanet.net>
