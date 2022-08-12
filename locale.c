@@ -1599,12 +1599,14 @@ S_set_numeric_radix(pTHX_ const bool use_locale)
 
 #  ifdef CAN_CALCULATE_RADIX
 
+    const char * scratch_buffer = NULL;
     const char * radix = (use_locale)
-                         ? my_langinfo(RADIXCHAR, FALSE)
+                         ? my_langinfo(RADIXCHAR, FALSE, &scratch_buffer, NULL)
                                         /* FALSE => already in dest locale */
                          : C_decimal_point;
 
         sv_setpv(PL_numeric_radix_sv, radix);
+    Safefree(scratch_buffer);
 
     /* If this is valid UTF-8 that isn't totally ASCII, and we are in
         * a UTF-8 locale, then mark the radix as being in UTF-8 */
@@ -1700,10 +1702,17 @@ S_new_numeric(pTHX_ const char *newnum)
      * THOUSEP can currently (but rarely) cause a race, so avoid doing that,
      * and just always change the locale if not C nor POSIX on those systems */
     if (! PL_numeric_standard) {
-        PL_numeric_standard = (   strEQ(C_decimal_point, my_langinfo(RADIXCHAR,
-                                            FALSE /* Don't toggle locale */  ))
-                               && strEQ(C_thousands_sep,  my_langinfo(THOUSEP,
-                                            FALSE)));
+        const char * scratch_buffer = NULL;
+        PL_numeric_standard  = strEQ(C_decimal_point,
+                                     my_langinfo(RADIXCHAR,
+                                                FALSE, /* Don't toggle locale */
+                                                &scratch_buffer, NULL));
+        Safefree(scratch_buffer);
+
+        PL_numeric_standard &= strEQ(C_thousands_sep,
+                                     my_langinfo(THOUSEP, FALSE,
+                                                 &scratch_buffer, NULL));
+        Safefree(scratch_buffer);
     }
 
 #    endif
@@ -2082,9 +2091,12 @@ S_new_ctype(pTHX_ const char *newctype)
 
 #    ifdef HAS_SOME_LANGINFO
 
+            const char * scratch_buffer = NULL;
             Perl_sv_catpvf(aTHX_ PL_warn_locale, "; codeset=%s",
                                     /* parameter FALSE is a don't care here */
-                                    my_langinfo(CODESET, FALSE));
+                                 my_langinfo(CODESET, FALSE,
+                                 &scratch_buffer, NULL));
+            Safefree(scratch_buffer);
 
 #  endif
 
@@ -2965,6 +2977,8 @@ typedef int nl_item;    /* Substitute 'int' for emulated nl_langinfo() */
 const char *
 Perl_langinfo(const nl_item item)
 {
+    dTHX;
+
     /* If we are not paying attention to the category that controls an item,
      * instead return a default value.  Also return the default value if there
      * is no way for us to figure out the correct value.  If we have some form
@@ -3104,7 +3118,7 @@ Perl_langinfo(const nl_item item)
 
 #else
 
-    return my_langinfo(item, TRUE);
+    return my_langinfo(item, TRUE, &PL_langinfo_buf, &PL_langinfo_bufsize);
 
 #endif
 
@@ -3112,12 +3126,23 @@ Perl_langinfo(const nl_item item)
 
 #ifdef USE_LOCALE
 
+/* There are several implementations of my_langinfo, depending on the
+ * Configuration.  They all share the same beginning of the function */
 STATIC const char *
-S_my_langinfo(const nl_item item, bool toggle)
-{
+S_my_langinfo(pTHX_
+                const nl_item item,           /* The item to look up */
+                bool toggle,
 
-    dTHX;
-    const char * retval;
+                /* Where to store the result, and where the size of that buffer
+                 * is stored, updated on exit. retbuf_sizep may be NULL for an
+                 * empty-on-entry, single use buffer whose size we don't need
+                 * to keep track of */
+                const char ** retbufp,
+                Size_t * retbuf_sizep)
+{
+    const char * retval = NULL;
+
+    PERL_ARGS_ASSERT_MY_LANGINFO;
 
 #  ifdef USE_LOCALE_NUMERIC
 
@@ -3156,13 +3181,15 @@ S_my_langinfo(const nl_item item, bool toggle)
         /* Copy to a per-thread buffer, which is also one that won't be
          * destroyed by a subsequent setlocale(), such as the
          * RESTORE_LC_NUMERIC may do just below. */
-        retval = save_to_buffer(nl_langinfo(item), &PL_langinfo_buf, &PL_langinfo_bufsize);
+        retval = save_to_buffer(nl_langinfo(item), retbufp, retbuf_sizep);
         NL_LANGINFO_UNLOCK;
 
         if (toggle) {
             RESTORE_LC_NUMERIC();
         }
     }
+
+    return retval;
 /*--------------------------------------------------------------------------*/
 #    else /* Use nl_langinfo_l(), avoiding both a mutex and changing the
              locale. */
@@ -3185,12 +3212,12 @@ S_my_langinfo(const nl_item item, bool toggle)
 
         /* We have to save it to a buffer, because the freelocale() just below
          * can invalidate the internal one */
-        retval = save_to_buffer(nl_langinfo_l(item, cur), &PL_langinfo_buf, &PL_langinfo_bufsize);
+        retval = save_to_buffer(nl_langinfo_l(item, cur), retbufp, retbuf_sizep);
     }
 
-#    endif
-
     return retval;
+
+#    endif
 /*--------------------------------------------------------------------------*/
 #  else   /* Below, emulate nl_langinfo as best we can */
 
@@ -3271,7 +3298,7 @@ S_my_langinfo(const nl_item item, bool toggle)
                             : '+';
 
             retval = save_to_buffer(Perl_form(aTHX_ "%c%s", precedes, currency),
-                                    &PL_langinfo_buf, &PL_langinfo_bufsize);
+                                    retbufp, retbuf_sizep);
                 }
 
 #      ifdef TS_W32_BROKEN_LOCALECONV
@@ -3391,10 +3418,10 @@ S_my_langinfo(const nl_item item, bool toggle)
                  * issues. */
 
         needed_size = GetNumberFormatEx(PL_numeric_name, 0, "1234.5",
-                            NULL, PL_langinfo_buf, PL_langinfo_bufsize);
+                            NULL, retbufp, *retbuf_sizep);
                 DEBUG_L(PerlIO_printf(Perl_debug_log,
                     "return from GetNumber, count=%d, val=%s\n",
-                    needed_size, PL_langinfo_buf));
+                    needed_size, retbufp));
 
 #        endif
 #      endif
@@ -3412,7 +3439,7 @@ S_my_langinfo(const nl_item item, bool toggle)
                     }
                 }
 
-                retval = save_to_buffer(temp, &PL_langinfo_buf, &PL_langinfo_bufsize);
+        retval = save_to_buffer(temp, retbufp, retbuf_sizep);
 
 #      ifdef TS_W32_BROKEN_LOCALECONV
 
@@ -3541,16 +3568,16 @@ S_my_langinfo(const nl_item item, bool toggle)
              * time, it all works */
             const char * temp = my_strftime(format, 30, 30, hour, mday, mon,
                                              2011, 0, 0, 0);
-            retval = save_to_buffer(temp, &PL_langinfo_buf, &PL_langinfo_bufsize);
+            retval = save_to_buffer(temp, retbufp, retbuf_sizep);
             Safefree(temp);
 
-            /* If the item is 'ALT_DIGITS', 'PL_langinfo_buf' contains the
-             * alternate format for wday 0.  If the value is the same as the
-             * normal 0, there isn't an alternate, so clear the buffer.
+            /* If the item is 'ALT_DIGITS', '*retbuf' contains the alternate
+             * format for wday 0.  If the value is the same as the normal 0,
+             * there isn't an alternate, so clear the buffer.
              *
              * (wday was chosen because its range is all a single digit.
              * Things like tm_sec have two digits as the minimum: '00'.) */
-            if (item == ALT_DIGITS && strEQ(PL_langinfo_buf, "0")) {
+            if (item == ALT_DIGITS && strEQ(*retbufp, "0")) {
                 return "";
             }
 
@@ -3576,7 +3603,7 @@ S_my_langinfo(const nl_item item, bool toggle)
                 /* If to return the format, not the value, overwrite the buffer
                  * with it.  But some strftime()s will keep the original format
                  * if illegal, so change those to "" */
-                if (strEQ(PL_langinfo_buf, format)) {
+                if (strEQ(*retbufp, format)) {
                     retval = "";
                 }
                 else {
@@ -3620,7 +3647,7 @@ S_my_langinfo(const nl_item item, bool toggle)
             /* Use everything past the dot */
             retval++;
 
-            retval = save_to_buffer(retval, &PL_langinfo_buf, &PL_langinfo_bufsize);
+            retval = save_to_buffer(retval, retbufp, retbuf_sizep);
         }
 
         break;
@@ -5122,7 +5149,8 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
              defective locale definition.  XXX We should probably check for
              these in the Latin1 range and warn (but on glibc, requires
              iswalnum() etc. due to their not handling 80-FF correctly */
-            const char *codeset = my_langinfo(CODESET, FALSE);
+            const char * scratch_buffer = NULL;
+            const char *codeset = my_langinfo(CODESET, FALSE, &scratch_buffer, NULL);
                                           /* FALSE => already in dest locale */
 
             DEBUG_Lv(PerlIO_printf(Perl_debug_log,
@@ -5142,6 +5170,7 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
                        "\tnllanginfo returned CODESET '%s'; ?UTF8 locale=%d\n",
                                                      codeset,         is_utf8));
                 restore_switched_locale(LC_CTYPE, original_ctype_locale);
+                Safefree(scratch_buffer);
                 goto finish_and_return;
             }
         }
@@ -5191,8 +5220,10 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
                                                              category,
                                                              save_input_locale);
             bool only_ascii = FALSE;
+            const char * scratch_buffer = NULL;
             const U8 * currency_string
-                            = (const U8 *) my_langinfo(CRNCYSTR, FALSE);
+                            = (const U8 *) my_langinfo(CRNCYSTR, FALSE,
+                                                       &scratch_buffer, NULL);
                                       /* 2nd param not relevant for this item */
             const U8 * first_variant;
 
@@ -5213,6 +5244,7 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
             else {
                 is_utf8 = is_strict_utf8_string(first_variant, 0);
             }
+            Safefree(scratch_buffer);
 
             restore_switched_locale(LC_MONETARY, original_monetary_locale);
 
