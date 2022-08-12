@@ -313,10 +313,10 @@ S_convert_path_common(pTHX_ const direction_t direction)
                      ? CCP_WIN_W_TO_POSIX
                      : CCP_POSIX_TO_WIN_W);
         STRLEN wlen;
-        wchar_t *wsrc = NULL;
-        wchar_t *wconverted = NULL;
+        wchar_t *wsrc = NULL;       /* The source, as a wchar_t */
+        wchar_t *wconverted = NULL; /* wsrc, converted to the destination */
 
-        if (!IN_BYTES) {
+        if (LIKELY(! IN_BYTES)) {    /* Normal case, convert UTF-8 to UTF-16 */
             wlen = PATH_LEN_GUESS;
             wconverted = utf8_to_wide_extra_len(src_path, &wlen);
 
