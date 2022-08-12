@@ -1723,7 +1723,6 @@
 #  if defined(PERL_IN_LOCALE_C)
 #define mortalized_pv_copy(a)	S_mortalized_pv_copy(aTHX_ a)
 #    if defined(USE_LOCALE)
-#define category_name		S_category_name
 #define get_category_index	S_get_category_index
 #define get_locale_string_utf8ness_i(a,b,c,d)	S_get_locale_string_utf8ness_i(aTHX_ a,b,c,d)
 #define is_codeset_name_UTF8	S_is_codeset_name_UTF8

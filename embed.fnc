@@ -3319,7 +3319,6 @@ iR	|const char *|mortalized_pv_copy|NULLOK const char * const pv
 ST	|const char *|save_to_buffer|NULLOK const char * string	\
 				    |NULLOK const char **buf	\
 				    |NULLOK Size_t *buf_size
-ST	|const char*|category_name |const int category
 ST	|unsigned int|get_category_index|const int category|NULLOK const char * locale
 ST	|bool	    |is_codeset_name_UTF8|NN const char * name
 S	|utf8ness_t|get_locale_string_utf8ness_i				\

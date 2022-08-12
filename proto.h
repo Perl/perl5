@@ -5662,8 +5662,6 @@ PERL_STATIC_INLINE const char *	S_mortalized_pv_copy(pTHX_ const char * const pv
 #endif
 
 #  if defined(USE_LOCALE)
-STATIC const char*	S_category_name(const int category);
-#define PERL_ARGS_ASSERT_CATEGORY_NAME
 STATIC unsigned int	S_get_category_index(const int category, const char * locale);
 #define PERL_ARGS_ASSERT_GET_CATEGORY_INDEX
 STATIC utf8ness_t	S_get_locale_string_utf8ness_i(pTHX_ const char * locale, const unsigned cat_index, const char * string, const locale_utf8ness_t known_utf8);
