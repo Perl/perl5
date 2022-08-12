@@ -23,16 +23,22 @@ my $pppfile = "$pppdir/ppport.h";
 -f $pppfile
   or die "No ppport.h found in $pppdir\n";
 
-opendir my $distdir, "dist" or die;
+# Devel-PPPort is manually processed before anything else to ensure we
+# have an up to date ppport.h
+opendir my $distdir, "dist"
+  or die "Cannot opendir 'dist': $!\n";
 my @dists = sort { lc $a cmp lc $b } grep { /^\w/ && $_ ne "Devel-PPPort" } readdir $distdir;
 closedir $distdir;
 
-# https://github.com/Perl/version.pm claims CPAN is upstream
-@dists = grep { $_ ne "version" } @dists;
+# These may end up being included if their problems are resolved
+{
+    # https://github.com/Perl/version.pm claims CPAN is upstream
+    @dists = grep { $_ ne "version" } @dists;
 
-# Safe is tied pretty heavily to core
-# in any case it didn't seem simple to fix
-@dists = grep { $_ ne "Safe" } @dists;
+    # Safe is tied pretty heavily to core
+    # in any case it didn't seem simple to fix
+    @dists = grep { $_ ne "Safe" } @dists;
+}
 
 for my $dist (@dists) {
     test_dist($dist);
@@ -43,10 +49,10 @@ sub test_dist {
 
     print "*** Testing $name ***\n";
     my $dir = tempdir( CLEANUP => 1);
-    system qq(cp -a "dist/$name/." "$dir/.")
-      and die "Cannot copy files";
+    system "cp", "-a", "dist/$name/.", "$dir/."
+      and die "Cannot copy dist files to working directory\n";
     chdir $dir
-      or die "Cannot chdir $dir: $!";
+      or die "Cannot chdir to dist working directory '$dir': $!\n";
     if ($pppfile) {
         system "cp", $pppfile, "."
           and die "Cannot copy $pppfile to .\n";
@@ -121,14 +127,14 @@ WriteMakefile(
 EOM
         close $fh;
     }
-    system "$^X Makefile.PL"
+    system $^X, "Makefile.PL"
       and die "$name: Makefile.PL failed\n";
 
     my $verbose = 0;
-    system "make test TEST_VERBOSE=$verbose"
+    system "make", "test", "TEST_VERBOSE=$verbose"
       and die "$name: make test failed\n";
 
-    system "make install"
+    system "make", "install"
       and die "$name: make install failed\n";
 
     chdir $start
@@ -137,6 +143,12 @@ EOM
     $dir;
 }
 
+# IO, threads and threads-shared use the blead t/test.pl when tested in core
+# and bundle their own test.pl when distributed on CPAN.
+# The test.pl source below is from the IO distribution but so far seems sufficient
+# for threads and threads-shared.
+#
+# This might be better as a file in Porting/ rather than embedded here.
 sub write_testpl {
     open my $fh, ">", "t/test.pl"
       or die "Cannot create t/test.pl: $!";
