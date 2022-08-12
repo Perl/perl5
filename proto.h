@@ -4667,8 +4667,9 @@ PERL_CALLCONV const char*	Perl_langinfo(const int item);
 #if !(defined(HAS_NL_LANGINFO) || defined(HAS_NL_LANGINFO_L))
 #  if defined(PERL_IN_LOCALE_C)
 #    if defined(USE_LOCALE)
-STATIC const char*	S_my_langinfo(const int item, bool toggle);
-#define PERL_ARGS_ASSERT_MY_LANGINFO
+STATIC const char*	S_my_langinfo(pTHX_ const int item, bool toggle, const char ** retbufp, Size_t * retbuf_sizep);
+#define PERL_ARGS_ASSERT_MY_LANGINFO	\
+	assert(retbufp)
 #    endif
 #  endif
 #endif
@@ -5196,8 +5197,9 @@ PERL_CALLCONV const char*	Perl_langinfo(const nl_item item);
 #if defined(HAS_NL_LANGINFO) || defined(HAS_NL_LANGINFO_L)
 #  if defined(PERL_IN_LOCALE_C)
 #    if defined(USE_LOCALE)
-STATIC const char*	S_my_langinfo(const nl_item item, bool toggle);
-#define PERL_ARGS_ASSERT_MY_LANGINFO
+STATIC const char*	S_my_langinfo(pTHX_ const nl_item item, bool toggle, const char ** retbufp, Size_t * retbuf_sizep);
+#define PERL_ARGS_ASSERT_MY_LANGINFO	\
+	assert(retbufp)
 #    endif
 #  endif
 #endif
