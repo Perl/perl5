@@ -78,10 +78,16 @@ sub fresh_io {
     # consistently failing. At exactly 0x100000 it started passing
     # again. Now we're asking the kernel what the pipe buffer is, and if
     # that fails, hoping this number is bigger than any pipe buffer.
-    $pipe_buf_size = (eval {
+    $pipe_buf_size = eval {
         use Fcntl qw(F_GETPIPE_SZ);
         fcntl($out, F_GETPIPE_SZ, 0);
-    } || 0xfffff) + 1;
+    };
+    if ($@ or not $pipe_buf_size) {
+        $pipe_buf_size = 0xfffff;
+        diag("fcntl F_GETPIPE_SZ failed, falling back to $pipe_buf_size");
+    };
+    $pipe_buf_size++; # goal is to completely fill the buffer so write one
+                      # byte more then the buffer size
 }
 
 $SIG{PIPE} = 'IGNORE';
