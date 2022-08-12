@@ -8,6 +8,8 @@ use Data::Dumper;
 use Encode qw(encode_utf8 decode_utf8 decode);
 use lib "./";
 use Porting::updateAUTHORS;
+use Test::More;
+use Text::Wrap qw(wrap);
 
 # The style of this file is determined by:
 #
@@ -21,6 +23,7 @@ my @OPTSPEC= qw(
     authors_file=s
     mailmap_file=s
 
+    validate|tap
     verbose+
     exclude_missing|exclude
     exclude_contrib=s@
@@ -90,7 +93,7 @@ sub main {
 
     foreach my $opt (keys %opts) {
         $opts{numstat}++   if $implies_numstat{$opt};
-        $opts{no_update}++ if $opt =~ /^show_/;
+        $opts{no_update}++ if $opt =~ /^show_/ or $opt eq "validate";
     }
 
     if (delete $opts{exclude_me}) {
@@ -111,7 +114,66 @@ sub main {
 
     my $changed= $self->read_and_update();
 
-    if ($self->{show_rank}) {
+    if ($self->{validate}) {
+        for my $file_type (qw(authors_file mailmap_file exclude_file)) {
+            my $file= $self->{$file_type};
+            my $changes= $self->changed_file($file);
+            ok(!$changes, "Is $file_type '$file' up to date?")
+                or diag $self->_diff_diag($file);
+        }
+
+        ok(
+            !$self->{missing_author}{$_},
+            sprintf "%s is listed in AUTHORS",
+            _clean_name($_)) for sort keys %{ $self->{missing_author} || {} };
+
+        my $uncommitted_files= $self->git_status_porcelain;
+        if ($uncommitted_files) {
+            my ($author_name, $author_email)=
+                $self->current_author_name_email();
+            my ($committer_name, $committer_email)=
+                $self->current_committer_name_email();
+
+            ok($author_name && $author_email,
+                "git knows your author name and email.");
+            ok(
+                $committer_name && $committer_email,
+                "git knows your committer name and email."
+            );
+
+            my $author_known=
+                $self->known_contributor($author_name, $author_email);
+            my $committer_known=
+                $self->known_contributor($committer_name, $committer_email);
+            if (
+                is(
+                    $author_known && $committer_known,
+                    1, "Uncommitted changes are by a known contributor?"
+                ))
+            {
+                diag
+                    "Testing uncommtted changes! Remember to commit before you push!"
+                    if $ENV{TEST_VERBOSE};
+            }
+            else {
+                diag error_advice_for_uncommitted_changes(
+                    $author_name,     $author_email, $committer_name,
+                    $committer_email, $uncommitted_files
+                );
+            }
+        }
+        else {
+            # this will always pass... but it adds test output that is helpful
+            ok(!$uncommitted_files, "git status --porcelain should be empty");
+        }
+
+        diag "\nFiles need updating! You probably just need to run\n\n",
+            "   Porting/updateAUTHORS.pl\n\n", "and commit the results."
+            if $self->changed_count;
+        done_testing();
+        return 0;
+    }
+    elsif ($self->{show_rank}) {
         $self->report_stats("who_stats", "author");
         return 0;
     }
@@ -158,6 +220,136 @@ sub main {
 
 exit(main()) unless caller;
 
+sub error_advice_for_uncommitted_changes {
+    my (
+        $author_name,     $author_email, $committer_name,
+        $committer_email, $uncommitted_files
+    )= @_;
+    $_ //= ""
+        for $author_name, $author_email, $committer_name, $committer_email;
+    my $extra= "";
+    my @git_env_keys=
+        map { /^GIT_(AUTHOR|COMMITTER)_(NAME|EMAIL)\z/ ? "$_='$ENV{$_}'" : () }
+        sort keys %ENV;
+    if (@git_env_keys) {
+        $extra .= "\n" . wrap "", "",
+              "Its seems that your environment has "
+            . join(", ", @git_env_keys)
+            . " defined. This may cause this test to fail.\n\n";
+    }
+
+    my $quote= $^O =~ /Win/ ? '"' : "'";
+    my @config=
+        `git config --get-regexp $quote^(user|author|committer).(name|email)$quote`;
+    if (@config) {
+
+        $extra .=
+            "\nYou have configured the following relevant git config settings:\n\n"
+            . join("",
+            map { sprintf "    %-16s = %s", split /\s+/, $_, 2 } @config)
+            . "\n";
+    }
+    else {
+        $extra .=
+              "\nYou do not have any git user config set up, consider using\n\n"
+            . "    git config --set user.name 'Your Name'\n"
+            . "    git config --set user.email 'your\@email.com'\n\n";
+    }
+
+    my $props= "";
+    if (   $author_name ne $committer_name
+        or $author_email ne $committer_email)
+    {
+        $props .= <<EOF_PROPS;
+
+    Author Name     = $author_name
+    Author Email    = $author_email
+    Committer Name  = $committer_name
+    Committer Email = $committer_email
+EOF_PROPS
+
+        $extra .= <<EOF_EXTRA;
+
+Your committer and author details differ. You may want to review your
+git configuration.
+
+EOF_EXTRA
+
+    }
+    else {
+        $props .= <<EOF_PROPS;
+
+    Name = $author_name
+    Email = $author_email
+EOF_PROPS
+    }
+
+    return <<"EOF_MESAGE";
+
+There are uncommitted changes in the working directory
+$uncommitted_files
+and your git credentials are new to us. We think that git thinks your
+credentials are as follows (git may use defaults we don't guess
+properly):
+$props$extra
+To resolve this you can perform one or more of these steps:
+
+    1. Remove the uncommitted changes, including untracked files that
+       show up in
+
+            git status
+
+       if you wish to REMOVE UNTRACKED FILES and DELETE ANY CHANGES
+       you can
+
+            git clean -dfx
+            git checkout -f
+
+        BE WARNED: THIS MAY LOSE DATA.
+
+    2. You are already configured in git and you just need to add
+       yourself to AUTHORS and other infra: commit the changes in the
+       working directory, including any untracked files that you plan to
+       add (the rest should be removed), and then run
+
+            Porting/updateAUTHORS.pl
+
+       to update the AUTHORS and .mailmap files automatically. Inspect
+       the changes it makes and then commit them once you are
+       satisfied. This is your option to decide who you will be known
+       as in the future!
+
+    3. You are already a contributor to the project but you are committing
+       changes on behalf of someone who is new. Run
+
+            Porting/updateAUTHORS.pl
+
+       to update the AUTHORS and .mailmap files automatically. Inspect
+       the changes it makes and then commit them once you are satisfied.
+       Make sure the conributor is ok with the decisions you make before
+       you merge.
+
+    3. You are already an author but your git config is broken or
+       different from what you expect, or you are a new author but you
+       havent configured your git details properly, in which case you
+       can use something like the following commands:
+
+            git config --set user.name "Some Name"
+            git config --set user.email "somewhere\@provider"
+
+       If you are known to the project already this is all you need to
+       do. If you are not then you should perform option 2 or 4 as well
+       afterwards.
+
+    4. You do not want to be listed in AUTHORS: commit the changes,
+       including any untracked unignored files, and then run
+
+            Porting/updateAUTHORS.pl --exclude
+
+       and commit the changes it creates. This test should pass once
+       those commits are created. Thank you for your contributions.
+EOF_MESAGE
+}
 1;
 __END__
 
@@ -189,6 +381,7 @@ are properly listed.
 
  Action Modifiers
    --no-update          Do not update.
+   --validate           output TAP about status and change nothing
    --exclude-missing    Add new names to the exclude file so they never
                         appear in AUTHORS or .mailmap.
 
@@ -237,6 +430,13 @@ Be verbose about what is happening. Can be repeated more than once.
 =item C<--no-update>
 
 Do not update files on disk even if they need to be changed.
+
+=item C<--validate>
+
+=item C<--tap>
+
+Instead of modifying files, test to see which would be modified and
+output TAP test output about the validation.
 
 =item C<--authors-file=FILE>
 
