@@ -106,7 +106,7 @@ SKIP: {
     # consistently failing. At exactly 0x100000 it started passing
     # again. Now we're asking the kernel what the pipe buffer is, and if
     # that fails, hoping this number is bigger than any pipe buffer.
-    my $surely_this_arbitrary_number_is_fine = (eval {
+    my $pipe_buf_size = (eval {
         use Fcntl qw(F_GETPIPE_SZ);
         fcntl($out, F_GETPIPE_SZ, 0);
     } || 0xfffff) + 1;
@@ -115,7 +115,7 @@ SKIP: {
 
     fresh_io;
     $SIG{ALRM} = sub { $sigst = close($out) ? "ok" : "nok" };
-    $buf = "a" x $surely_this_arbitrary_number_is_fine . "\n";
+    $buf = "a" x $pipe_buf_size . "\n";
     select $out; $| = 1; select STDOUT;
     alarm(1);
     $st = print $out $buf;
@@ -128,7 +128,7 @@ SKIP: {
 
     fresh_io;
     $SIG{ALRM} = sub { die };
-    $buf = "a" x $surely_this_arbitrary_number_is_fine . "\n";
+    $buf = "a" x $pipe_buf_size . "\n";
     select $out; $| = 1; select STDOUT;
     alarm(1);
     $st = eval { print $out $buf };
