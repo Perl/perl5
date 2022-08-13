@@ -3439,7 +3439,7 @@ mbtowc(pwc, s, n = ~0)
             mbtowc_(NULL, NULL, 0);
         }
         else {  /* Not resetting state */
-            wchar_t wc;
+            wchar_t wc = 0;
             SV * byte_s = sv_2mortal(newSVsv_nomg(s));
             if (! sv_utf8_downgrade_nomg(byte_s, TRUE)) {
                 SETERRNO(EINVAL, LIB_INVARG);
