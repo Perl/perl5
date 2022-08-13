@@ -5085,7 +5085,7 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
       * shown that, like nl_langinfo() above, there are locales that are not
       * strictly UTF-8 that this will return that they are */
         {
-            wchar_t wc;
+            wchar_t wc = 0;
             int len;
 
             PERL_UNUSED_RESULT(mbtowc_(NULL, NULL, 0));
