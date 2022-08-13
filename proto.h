@@ -2545,7 +2545,7 @@ PERL_CALLCONV int	Perl_my_socketpair(int family, int type, int protocol, int fd[
 #define PERL_ARGS_ASSERT_MY_STAT
 PERL_CALLCONV I32	Perl_my_stat_flags(pTHX_ const U32 flags);
 #define PERL_ARGS_ASSERT_MY_STAT_FLAGS
-PERL_CALLCONV char*	Perl_my_strerror(pTHX_ const int errnum, utf8ness_t * utf8ness)
+PERL_CALLCONV const char*	Perl_my_strerror(pTHX_ const int errnum, utf8ness_t * utf8ness)
 			__attribute__visibility__("hidden");
 #define PERL_ARGS_ASSERT_MY_STRERROR	\
 	assert(utf8ness)

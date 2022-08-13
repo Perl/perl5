@@ -1656,7 +1656,7 @@ p	|bool	|get_win32_message_utf8ness|NULLOK const char * string
 #endif
 pEX	|int	|mbtowc_|NULLOK const wchar_t * pwc|NULLOK const char * s|const Size_t len
 CpO	|int	|init_i18nl10n	|int printwarn
-p	|char*	|my_strerror	|const int errnum|NN utf8ness_t * utf8ness
+p	|const char*	|my_strerror	|const int errnum|NN utf8ness_t * utf8ness
 XpT	|void	|_warn_problematic_locale
 Xp	|void	|set_numeric_underlying
 Xp	|void	|set_numeric_standard
