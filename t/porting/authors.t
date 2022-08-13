@@ -41,6 +41,6 @@ elsif( $ENV{GITHUB_ACTIONS} && length $ENV{GITHUB_BASE_REF} ) {
 }
 
 # This is the subset of "pretty=fuller" that checkAUTHORS.pl actually needs:
-print qx{git log --pretty=format:"Author: %an <%ae>" $revision_range | $^X Porting/checkAUTHORS.pl --tap -};
+print qx{git log --pretty=format:"Author: %aN <%aE>" $revision_range | $^X Porting/checkAUTHORS.pl --tap -};
 
 # EOF
