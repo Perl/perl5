@@ -6775,14 +6775,14 @@ Perl__is_in_locale_category(pTHX_ const bool compiling, const int category)
 #  if ! defined(USE_LOCALE_CTYPE) && ! defined(USE_LOCALE_MESSAGES)
 
 /* Here, neither category is defined: use the C locale */
-char *
+const char *
 Perl_my_strerror(pTHX_ const int errnum, utf8ness_t * utf8ness)
 {
     PERL_ARGS_ASSERT_MY_STRERROR;
 
     DEBUG_STRERROR_ENTER(errnum, 0);
 
-    char *errstr = savepv(strerror_l(errnum, PL_C_locale_obj));
+    const char *errstr = savepv(strerror_l(errnum, PL_C_locale_obj));
     *utf8ness = UTF8NESS_IMMATERIAL;
 
     DEBUG_STRERROR_RETURN(errstr, utf8ness);
@@ -6799,7 +6799,7 @@ Perl_my_strerror(pTHX_ const int errnum, utf8ness_t * utf8ness)
  * are not within 'use locale' scope of the only one defined, we use the C
  * locale; otherwise use the current locale object */
 
-char *
+const char *
 Perl_my_strerror(pTHX_ const int errnum, utf8ness_t * utf8ness)
 {
     PERL_ARGS_ASSERT_MY_STRERROR;
@@ -6811,7 +6811,7 @@ Perl_my_strerror(pTHX_ const int errnum, utf8ness_t * utf8ness)
                                ? PL_C_locale_obj
                                : use_curlocale_scratch();
 
-    char *errstr = savepv(strerror_l(errnum, which_obj));
+    const char *errstr = savepv(strerror_l(errnum, which_obj));
     *utf8ness = get_locale_string_utf8ness_i(NULL, WHICH_LC_INDEX, errstr,
                                              LOCALE_UTF8NESS_UNKNOWN);
     DEBUG_STRERROR_RETURN(errstr, utf8ness);
@@ -6824,14 +6824,14 @@ Perl_my_strerror(pTHX_ const int errnum, utf8ness_t * utf8ness)
 #  else     /* Are using both categories.  Place them in the same CODESET,
              * either C or the LC_MESSAGES locale */
 
-char *
+const char *
 Perl_my_strerror(pTHX_ const int errnum, utf8ness_t * utf8ness)
 {
     PERL_ARGS_ASSERT_MY_STRERROR;
 
     DEBUG_STRERROR_ENTER(errnum, IN_LC(LC_MESSAGES));
 
-    char *errstr;
+    const char *errstr;
     if (! IN_LC(LC_MESSAGES)) {    /* Use C if not within locale scope */
         errstr = savepv(strerror_l(errnum, PL_C_locale_obj));
         *utf8ness = UTF8NESS_IMMATERIAL;
@@ -6860,14 +6860,14 @@ Perl_my_strerror(pTHX_ const int errnum, utf8ness_t * utf8ness)
 /* If not using using either of the categories, return plain, unadorned
  * strerror */
 
-char *
+const char *
 Perl_my_strerror(pTHX_ const int errnum, utf8ness_t * utf8ness)
 {
     PERL_ARGS_ASSERT_MY_STRERROR;
 
     DEBUG_STRERROR_ENTER(errnum, 0);
 
-    char *errstr = savepv(Strerror(errnum));
+    const char *errstr = savepv(Strerror(errnum));
     *utf8ness = UTF8NESS_IMMATERIAL;
 
     DEBUG_STRERROR_RETURN(errstr, utf8ness);
@@ -6883,14 +6883,14 @@ Perl_my_strerror(pTHX_ const int errnum, utf8ness_t * utf8ness)
  * are not within 'use locale' scope of the only one defined, we use the C
  * locale; otherwise use the current locale */
 
-char *
+const char *
 Perl_my_strerror(pTHX_ const int errnum, utf8ness_t * utf8ness)
 {
     PERL_ARGS_ASSERT_MY_STRERROR;
 
     DEBUG_STRERROR_ENTER(errnum, IN_LC(categories[WHICH_LC_INDEX]));
 
-    char *errstr;
+    const char *errstr;
     if (IN_LC(categories[WHICH_LC_INDEX])) {
         errstr = savepv(Strerror(errnum));
         *utf8ness = get_locale_string_utf8ness_i(NULL, WHICH_LC_INDEX, errstr,
@@ -6924,7 +6924,7 @@ Perl_my_strerror(pTHX_ const int errnum, utf8ness_t * utf8ness)
 /* Below, have both LC_CTYPE and LC_MESSAGES.  Place them in the same CODESET,
  * either C or the LC_MESSAGES locale */
 
-char *
+const char *
 Perl_my_strerror(pTHX_ const int errnum, utf8ness_t * utf8ness)
 {
     PERL_ARGS_ASSERT_MY_STRERROR;
@@ -6941,7 +6941,7 @@ Perl_my_strerror(pTHX_ const int errnum, utf8ness_t * utf8ness)
     const char* orig_CTYPE_locale    = toggle_locale_c(LC_CTYPE, desired_locale);
     const char* orig_MESSAGES_locale = toggle_locale_c(LC_MESSAGES,
                                                        desired_locale);
-    char *errstr = savepv(Strerror(errnum));
+    const char *errstr = savepv(Strerror(errnum));
 
     restore_toggled_locale_c(LC_MESSAGES, orig_MESSAGES_locale);
     restore_toggled_locale_c(LC_CTYPE, orig_CTYPE_locale);
