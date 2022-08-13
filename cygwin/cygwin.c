@@ -316,27 +316,28 @@ S_convert_path_common(pTHX_ const direction_t direction)
         wchar_t *wsrc = NULL;       /* The source, as a wchar_t */
         wchar_t *wconverted = NULL; /* wsrc, converted to the destination */
 
+        /* ptr to either wsrc, or under BYTES, the src_path so can have common
+         * code below */
+        wchar_t *which_src = (wchar_t *) src_path;
+
         if (LIKELY(! IN_BYTES)) {    /* Normal case, convert UTF-8 to UTF-16 */
             wlen = PATH_LEN_GUESS;
-            wconverted = utf8_to_wide_extra_len(src_path, &wlen);
-
-            if (wlen > 0) {
-                wsrc = (wchar_t *) safemalloc(wlen);
-                err = cygwin_conv_path(what, wconverted, wsrc, wlen);
-            }
+            wsrc = utf8_to_wide_extra_len(src_path, &wlen);
+            which_src = wsrc;
         }
         else { /* use bytes; assume already UTF-16 encoded bytestream */
             wlen = sizeof(wchar_t) * (len + PATH_LEN_GUESS);
-            wconverted = (wchar_t *) safemalloc(sizeof(wchar_t)*len);
-            wsrc = (wchar_t *) safemalloc(wlen);
-            err = cygwin_conv_path(what, src_path, wsrc, wlen);
+        }
+
+        if (LIKELY(wlen > 0)) { /* Make sure didn't get an error */
+            wconverted = (wchar_t *) safemalloc(wlen);
+            err = cygwin_conv_path(what, which_src, wconverted, wlen);
         }
 
         if (err == ENOSPC) { /* our space assumption was wrong, not enough space */
-            int newlen = cygwin_conv_path(what, wconverted, wsrc, 0);
-            wsrc = (wchar_t *) realloc(&wsrc, newlen);
-            err = cygwin_conv_path(what, wconverted, wsrc, newlen);
-            wlen = newlen;
+            int newlen = cygwin_conv_path(what, which_src, wconverted, 0);
+            wconverted = (wchar_t *) realloc(&wconverted, newlen);
+            err = cygwin_conv_path(what, which_src, wconverted, newlen);
         }
 
         converted_path = wide_to_utf8(wconverted);
