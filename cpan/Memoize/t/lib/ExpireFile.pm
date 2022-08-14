@@ -1,16 +1,7 @@
-package Memoize::ExpireFile;
+use strict; use warnings;
 
-=head1 NAME
+package ExpireFile;
 
-Memoize::ExpireFile - test for Memoize expiration semantics
-
-=head1 DESCRIPTION
-
-See L<Memoize::Expire>.
-
-=cut
-
-$VERSION = '1.03';
 use Carp;
 
 my $Zero = pack("N", 0);
@@ -50,3 +41,17 @@ sub EXISTS {
 }
 
 1;
+
+__END__
+
+=pod
+
+=head1 NAME
+
+ExpireFile - test for Memoize expiration semantics
+
+=head1 DESCRIPTION
+
+See L<Memoize::Expire>.
+
+=cut

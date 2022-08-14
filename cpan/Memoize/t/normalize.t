@@ -1,10 +1,7 @@
-#!/usr/bin/perl
-
-use lib '..';
+use strict; use warnings;
 use Memoize;
 
-print "1..7\n";
-
+print "1..8\n";
 
 sub n_null { '' }
 
@@ -24,8 +21,10 @@ my $a_normal =  memoize('a1', INSTALL => undef);
 my $a_nomemo =  memoize('a2', INSTALL => undef, NORMALIZER => 'n_diff');
 my $a_allmemo = memoize('a3', INSTALL => undef, NORMALIZER => 'n_null');
 
+my @ARGS;
 @ARGS = (1, 2, 3, 2, 1);
 
+my @res;
 @res  = map { &$a_normal($_) } @ARGS;
 print ((("@res" eq "1-1 2-2 3-3 2-2 1-1") ? '' : 'not '), "ok 1\n");
 
@@ -36,8 +35,8 @@ print ((("@res" eq "1-1 2-2 3-3 2-4 1-5") ? '' : 'not '), "ok 2\n");
 print ((("@res" eq "1-1 1-1 1-1 1-1 1-1") ? '' : 'not '), "ok 3\n");
 
 		
-       
 # Test fully-qualified name and installation
+my $COUNT;
 $COUNT = 0;
 sub parity { $COUNT++; $_[0] % 2 }
 sub parnorm { $_[0] % 2 }
@@ -54,4 +53,8 @@ memoize('par2', NORMALIZER =>  \&parnorm);
 print ((("@res" eq "1 0 1 0 1") ? '' : 'not '), "ok 6\n");
 print (( ($COUNT == 2) ? '' : 'not '), "ok 7\n");
 
-
+$COUNT = 0;
+sub count_uninitialized { $COUNT += join('', @_) =~ /\AUse of uninitialized value / }
+my $war1 = memoize(sub {1}, NORMALIZER => sub {undef});
+{ local $SIG{__WARN__} = \&count_uninitialized; $war1->() }
+print (( ($COUNT == 0) ? '' : 'not '), "ok 8\n");

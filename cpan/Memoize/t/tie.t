@@ -1,15 +1,12 @@
-#!/usr/bin/perl
-
-use lib qw(. ..);
+use strict; use warnings;
 use Memoize 0.52 qw(memoize unmemoize);
 use Fcntl;
+
 eval {require Memoize::AnyDBM_File};
 if ($@) {
-  print "1..0\n";
+  print "1..0 # Skipped: Could not load Memoize::AnyDBM_File\n";
   exit 0;
 }
-
-
 
 print "1..4\n";
 
@@ -17,6 +14,7 @@ sub i {
   $_[0];
 }
 
+my $ARG;
 $ARG = 'Keith Bostic is a pinhead';
 
 sub c119 { 119 }
@@ -29,6 +27,7 @@ sub n {
   $_[0]+1;
 }
 
+my ($file, @files);
 $file = "md$$";
 @files = ($file, "$file.db", "$file.dir", "$file.pag");
 1 while unlink @files;
@@ -55,14 +54,14 @@ sub tryout {
   $testno++;
   print (($t2 == 5) ? "ok $testno\n" : "not ok $testno\n");
   unmemoize 'c5';
-  
+
   # Now something tricky---we'll memoize c23 with the wrong table that
   # has the 5 already cached.
   memoize 'c23', 
   SCALAR_CACHE => ['HASH', \%cache],
   LIST_CACHE => 'FAULT'
     ;
-  
+
   my $t3 = c23($ARG);
   my $t4 = c23($ARG);
   $testno++;
@@ -74,6 +73,7 @@ sub tryout {
 
 { 
   my @present = grep -e, @files;
+  my @failed;
   if (@present && (@failed = grep { not unlink } @present)) {
     warn "Can't unlink @failed!  ($!)";
   }

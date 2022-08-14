@@ -1,14 +1,12 @@
-#!/usr/bin/perl
-
-use lib '..';
+use strict; use warnings;
 use Memoize;
+use lib 't/lib';
 
 my $n = 0;
 $|=1;
 
-
-if (-e '.fast') {
-  print "1..0\n";
+if ($ENV{PERL_MEMOIZE_TESTS_FAST_ONLY}) {
+  print "1..0 # Skipped: Slow tests disabled\n";
   exit 0;
 }
 
@@ -35,11 +33,11 @@ sub readfile {
   $data;
 }
 
-require Memoize::ExpireFile;
+require ExpireFile;
 # (2)
 ++$n; print "ok $n\n";
 
-tie my %cache => 'Memoize::ExpireFile';
+tie my %cache => 'ExpireFile';
 memoize 'readfile',
     SCALAR_CACHE => [HASH => \%cache],
     LIST_CACHE => 'FAULT'
@@ -72,4 +70,4 @@ my $t3 = readfile($FILE);
 ++$n; print ((($READFILE_CALLS == 2) ? '' : 'not '), "ok $n\n");
 ++$n; print ((($t1 ne $t3) ? '' : 'not '), "ok $n\n");
 
-END { 1 while unlink $FILE }
+END { 1 while unlink $FILE || () }
