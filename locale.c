@@ -1188,6 +1188,10 @@ S_emulate_setlocale_i(pTHX_
             }
 #    endif
 
+#    ifdef HAS_GLIBC_LC_MESSAGES_BUG
+            Safefree(old_messages_locale);
+#    endif
+
             return NULL;
         }
 
