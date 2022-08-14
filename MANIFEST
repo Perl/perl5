@@ -1457,8 +1457,6 @@ cpan/Math-Complex/t/underbar.t		See if Math::Complex works
 cpan/Memoize/Memoize.pm			Memoize
 cpan/Memoize/Memoize/AnyDBM_File.pm	Memoize glue layer for AnyDBM_File
 cpan/Memoize/Memoize/Expire.pm		Memoize expiry manager example
-cpan/Memoize/Memoize/ExpireFile.pm	Memoize expiry manager test scaffold
-cpan/Memoize/Memoize/ExpireTest.pm	Memoize expiry manager test scaffold
 cpan/Memoize/Memoize/NDBM_File.pm	Memoize glue layer for NDBM_File
 cpan/Memoize/Memoize/SDBM_File.pm	Memoize glue layer for SDBM_File
 cpan/Memoize/Memoize/Storable.pm	Memoize glue layer for Storable
@@ -1468,12 +1466,19 @@ cpan/Memoize/t/correctness.t		Memoize basic correctness tests
 cpan/Memoize/t/errors.t			Memoize PEBKAC detection tests
 cpan/Memoize/t/expfile.t		Memoize expiry manager tests
 cpan/Memoize/t/expire.t			Memoize expiry manager tests
+cpan/Memoize/t/expmod.t
 cpan/Memoize/t/expmod_n.t		Memoize expiry manager tests
 cpan/Memoize/t/expmod_t.t		Memoize expiry manager (timed) tests
 cpan/Memoize/t/flush.t			Memoize 'flush_cache' function tests
+cpan/Memoize/t/lib/ExpireFile.pm
+cpan/Memoize/t/lib/ExpireTest.pm
+cpan/Memoize/t/merge.t
 cpan/Memoize/t/normalize.t		Memoize 'normalizer' feature tests
 cpan/Memoize/t/prototype.t		Memoize prototyped function handling tests
+cpan/Memoize/t/rememoize.t
 cpan/Memoize/t/speed.t			"Makes functions faster" advertisement test
+cpan/Memoize/t/st_concurrency
+cpan/Memoize/t/threadsafe.t
 cpan/Memoize/t/tie.t			Memoize tied file test
 cpan/Memoize/t/tie_gdbm.t		Memoize GDBM interface test
 cpan/Memoize/t/tie_ndbm.t		Memoize NDBM interface test

@@ -821,19 +821,9 @@ use File::Glob qw(:case);
     },
 
     'Memoize' => {
-        'DISTRIBUTION' => 'MJD/Memoize-1.03.tgz',
+        'DISTRIBUTION' => 'ARISTOTLE/Memoize-1.10.tar.gz',
         'FILES'        => q[cpan/Memoize],
         'EXCLUDED'     => ['article.html'],
-        'CUSTOMIZED'   => [
-            # CVE-2016-1238
-            qw( Memoize.pm ),
-
-            # CPAN RT 108382
-            qw( t/expmod_t.t t/speed.t ),
-
-            # CPAN RT 139736
-            qw( t/errors.t t/tie_gdbm.t ),
-        ],
     },
 
     'MIME::Base64' => {

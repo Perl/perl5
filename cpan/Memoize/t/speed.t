@@ -1,10 +1,8 @@
-#!/usr/bin/perl
-
-use lib '..';
+use strict; use warnings;
 use Memoize;
 
-if (-e '.fast') {
-  print "1..0\n";
+if ($ENV{PERL_MEMOIZE_TESTS_FAST_ONLY}) {
+  print "1..0 # Skipped: Slow tests disabled\n";
   exit 0;
 }
 $| = 1;
@@ -40,6 +38,7 @@ print "1..6\n";
 # $LONG_RUN is the number of seconds that the function call must last
 # in order for the call to be considered sufficiently long.
 
+my ($N, $COUNT, $RESULT, $ELAPSED, $start, $RESULT2, $ELAPSED2);
 
 sub fib {
   my $n = shift;

@@ -1,11 +1,8 @@
-#!/usr/bin/perl
+use strict; use warnings;
+use Memoize qw(flush_cache memoize);
 
-use lib '..';
-use Memoize 'flush_cache', 'memoize';
 print "1..8\n";
 print "ok 1\n";
-
-
 
 my $V = 100;
 sub VAL { $V }
@@ -35,8 +32,3 @@ print (($c1 == 300) ? "ok 7\n" : "not ok 7\n");
 $V = 400;
 $c1 = VAL();
 print (($c1 == 300) ? "ok 8\n" : "not ok 8\n");
-
-
-
-
-

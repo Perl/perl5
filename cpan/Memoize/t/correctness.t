@@ -1,7 +1,7 @@
-#!/usr/bin/perl
-
-use lib '..';
+use strict; use warnings;
 use Memoize;
+
+my ($c1, $c2, $c3, $c4, $FAIL, $COUNT, $f, $fm);
 
 print "1..25\n";
 
@@ -62,6 +62,7 @@ sub mt2 {
   mt1($n-1) + mt2($n-2);
 }
 
+my (@f1, @f2, @f3, @f4, $n, $i, $j, $k, @arrays);
 @f1 = map { mt1($_) } (0 .. 15);
 @f2 = map { mt2($_) } (0 .. 15);
 memoize('mt1');
@@ -82,7 +83,6 @@ for ($i=0; $i<3; $i++) {
 }
 
 
-
 print "# Normalizers\n";
 
 sub fake_normalize {
@@ -101,6 +101,7 @@ sub f3 {
 &memoize('f1');
 &memoize('f2', NORMALIZER => 'fake_normalize');
 &memoize('f3', NORMALIZER => \&fake_normalize);
+my (@f1r, @f2r, @f3r);
 @f1r = map { f1($_) } (1 .. 10);
 @f2r = map { f2($_) } (1 .. 10);
 @f3r = map { f3($_) } (1 .. 10);
@@ -116,6 +117,7 @@ print "# INSTALL => undef option.\n";
   sub u1 { $i++ }
 }
 my $um = memoize('u1', INSTALL => undef);
+my (@umr, @u1r);
 @umr = (&$um, &$um, &$um);
 @u1r = (&u1,  &u1,  &u1 );	# Did *not* clobber &u1
 $n++;
@@ -126,4 +128,3 @@ $n++;
 print ((defined &{"undef"}) ? "not ok $n\n" : "ok $n\n"); # Just in case
 
 print "# $n tests in all.\n";
-
