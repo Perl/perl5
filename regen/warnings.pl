@@ -449,7 +449,7 @@ while (<DATA>) {
     print $warn_pm $_ ;
 }
 
-my $last_ver = 0;
+$last_ver = 0;
 print $warn_pm "our %Offsets = (" ;
 foreach my $k (sort { $a <=> $b } keys %VALUE_TO_NAME) {
     my ($name, $version) = @{ $VALUE_TO_NAME{$k} };
