@@ -174,14 +174,14 @@ for my $i (1..@want) {
 }
 
 my $comma_locale;
-for (find_locales( [ 'LC_NUMERIC' ] )) {
+for my $locale (find_locales( 'LC_NUMERIC' )) {
     use POSIX;
     use locale;
-    setlocale(LC_NUMERIC, $_) or next;
+    setlocale(LC_NUMERIC, $locale) or next;
     my $in = 4.2; # avoid any constant folding bugs
     my $s = sprintf("%g", $in);
     if ($s eq "4,2")  {
-        $comma_locale = $_;
+        $comma_locale = $locale;
         last;
     }
 }
