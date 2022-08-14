@@ -5075,6 +5075,7 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
                     if (i > 6) {
                         month++;
                     }
+                    Safefree(formatted_time);
                     continue;
                 }
 
@@ -5088,6 +5089,7 @@ Perl__is_cur_LC_category_utf8(pTHX_ int category)
                                     save_input_locale,
                                     is_utf8_string((U8 *) formatted_time, 0)));
                 is_utf8 = is_utf8_string((U8 *) formatted_time, 0);
+                Safefree(formatted_time);
                 goto finish_and_return;
             }
 
