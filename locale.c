@@ -1178,9 +1178,9 @@ S_emulate_setlocale_i(pTHX_
                  * code would have then set them up, but since it didn't, do so
                  * here.  khw isn't sure if this prevents some issues or not,
                  * but tis is defensive coding.  The system setlocale() returns
-                 * the desired information.  Calculate LC_ALL's entry on the
-                 * final iteration */
-                for (PERL_UINT_FAST8_T i = 0; i <= NOMINAL_LC_ALL_INDEX; i++) {
+                 * the desired information.  This will calculate LC_ALL's entry
+                 * on the final iteration */
+                for (PERL_UINT_FAST8_T i = 0; i < NOMINAL_LC_ALL_INDEX; i++) {
                     update_PL_curlocales_i(i,
                                        porcelain_setlocale(categories[i], NULL),
                                        LOOPING);
