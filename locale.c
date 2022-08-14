@@ -4016,7 +4016,7 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 
 #  endif
 
-    /* Done with finding the locales; update our records */
+    /* Done with finding the locales; update the auxiliary records */
     new_LC_ALL(NULL);
 
     for (i = 0; i < NOMINAL_LC_ALL_INDEX; i++) {
