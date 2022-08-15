@@ -522,16 +522,10 @@ sub check_message {
 # Entries after __CATEGORIES__ are those that are in perldiag but fail the
 # severity/category test.
 
-# Also FIXME this test, as the first entry in TODO *is* covered by the
-# description: Malformed UTF-8 character (%s)
 __DATA__
-Malformed UTF-8 character (unexpected non-continuation byte 0x%x, immediately after start byte 0x%x)
-
 Cannot apply "%s" in non-PerlIO perl
-Cannot set timer
 Can't find DLL name for the module `%s' by the handle %d, rc=%u=%x
 Can't find string terminator %c%s%c anywhere before EOF
-Can't fix broken locale name "%s"
 Can't get short module name from a handle
 Can't load DLL `%s', possible problematic module `%s'
 Can't locate %s:   %s
@@ -544,18 +538,15 @@ Can't %s "%s": %s
 Can't %s `%s' with ARGV[0] being `%s' (looking for executables only, not found)
 Can't use string ("%s"%s) as a subroutine ref while "strict refs" in use
 Character(s) in '%c' format wrapped in %s
-chown not implemented!
 clear %s
 Code missing after '/' in pack
 Code missing after '/' in unpack
-Could not find version 1.1 of winsock dll
 Could not find version 2.0 of winsock dll
 '%c' outside of string in pack
 Debug leaking scalars child failed%s with errno %d: %s
 detach of a thread which could not start
 detach on an already detached thread
 detach on a thread with a waiter
--Dp not implemented on this platform
 Empty array reference given to mod2fname
 endhostent not implemented!
 endnetent not implemented!
@@ -563,7 +554,6 @@ endprotoent not implemented!
 endservent not implemented!
 Error loading module '%s': %s
 Error reading "%s": %s
-execl not implemented!
 EVAL without pos change exceeded limit in regex
 Filehandle opened only for %sput
 Filehandle %s opened only for %sput
@@ -591,20 +581,13 @@ Goto undefined subroutine
 Goto undefined subroutine &%s
 Got signal %d
 ()-group starts with a count in %s
-Illegal binary digit '%c' ignored
-Illegal character %sin prototype for %s : %s
-Illegal hexadecimal digit '%c' ignored
 Illegal octal digit '%c' ignored
 INSTALL_PREFIX too long: `%s'
 Invalid argument to sv_cat_decode
 Invalid range "%c-%c" in transliteration operator
 Invalid separator character %c%c%c in PerlIO layer specification %s
-Invalid TOKEN object ignored
 ioctl implemented only on sockets
-ioctlsocket not implemented!
 join with a thread with a waiter
-killpg not implemented!
-List form of pipe open not implemented
 Looks like we have no PM; will not load DLL %s without $ENV{PERL_ASIF_PM}
 Malformed integer in [] in %s
 Malformed %s
@@ -622,17 +605,14 @@ Operator or semicolon missing before %c%s
 Out of memory during list extend
 panic queryaddr
 Parse error
-PerlApp::TextQuery: no arguments, please
 POSIX syntax [%c %c] is reserved for future extensions in regex; marked by <-- HERE in m/%s/
 ptr wrong %p != %p fl=%x nl=%p e=%p for %d
 QUITing...
 Recompile perl with -DDEBUGGING to use -D switch (did you mean -d ?)
 recursion detected in %s
-Regexp *+ operand could be empty in regex; marked by <-- HERE in m/%s/
 Reversed %c= operator
 %s: Can't parse EXE/DLL name: '%s'
 %s(%f) failed
-%sCompilation failed in require
 %s: Error stripping dirs from EXE/DLL/INSTALLDIR name
 sethostent not implemented!
 setnetent not implemented!
@@ -648,9 +628,7 @@ Size magic not implemented
 %s not implemented!
 %s number > %s non-portable
 %srealloc() %signored
-%s in regex m/%s/
 %s on %s %s
-socketpair not implemented!
 %s: %s
 Starting Full Screen process with flag=%d, mytype=%d
 Starting PM process with flag=%d, mytype=%d
@@ -675,8 +653,6 @@ Value of logical "%s" too long. Truncating to %i bytes
 waitpid: process %x is not a child of process %x
 Wide character
 Wide character in $/
-win32_get_osfhandle() TBD on this platform
-win32_open_osfhandle() TBD on this platform
 Within []-length '*' not allowed in %s
 Within []-length '%c' not allowed in %s
 Wrong size of loadOrdinals array: expected %d, actual %d
