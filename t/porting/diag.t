@@ -243,6 +243,12 @@ sub standardize {
   elsif ($name =~ m/^(panic|Usage): /) {
     $name = "$1: \%s";
   }
+  else {
+    $name =~ s/ (*plb:^Function\ ")
+                (\w+)
+                (*pla:"\ not\ implemented\ in\ this\ version\ of\ perl\.)
+              /%s/gx;
+  }
 
   return $name;
 }
@@ -569,29 +575,7 @@ fork() not implemented!
 YOU HAVEN'T DISABLED SET-ID SCRIPTS IN THE KERNEL YET! FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!
 free %s
 Free to wrong pool %p not %p
-Function "endnetent" not implemented in this version of perl.
-Function "endprotoent" not implemented in this version of perl.
-Function "endservent" not implemented in this version of perl.
-Function "getnetbyaddr" not implemented in this version of perl.
-Function "getnetbyname" not implemented in this version of perl.
-Function "getnetent" not implemented in this version of perl.
-Function "getprotobyname" not implemented in this version of perl.
-Function "getprotobynumber" not implemented in this version of perl.
-Function "getprotoent" not implemented in this version of perl.
-Function "getservbyport" not implemented in this version of perl.
-Function "getservent" not implemented in this version of perl.
-Function "getsockopt" not implemented in this version of perl.
-Function "recvmsg" not implemented in this version of perl.
-Function "sendmsg" not implemented in this version of perl.
-Function "sethostent" not implemented in this version of perl.
-Function "setnetent" not implemented in this version of perl.
-Function "setprotoent" not implemented in this version of perl.
-Function "setservent"  not implemented in this version of perl.
-Function "setsockopt" not implemented in this version of perl.
-Function "tcdrain" not implemented in this version of perl.
-Function "tcflow" not implemented in this version of perl.
-Function "tcflush" not implemented in this version of perl.
-Function "tcsendbreak" not implemented in this version of perl.
+Function "%s" not implemented in this version of perl.
 get %s %p %p %p
 gethostent not implemented!
 getnetbyaddr not implemented!
