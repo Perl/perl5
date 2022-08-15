@@ -240,8 +240,8 @@ sub standardize {
   elsif ( $name =~ m/^(Invalid version format) \([^\)]*\)/ ) {
     $name = "$1 (\%s)";
   }
-  elsif ($name =~ m/^panic: /) {
-    $name = "panic: \%s";
+  elsif ($name =~ m/^(panic|Usage): /) {
+    $name = "$1: \%s";
   }
 
   return $name;
@@ -685,20 +685,7 @@ Unexpected program mode %d when morphing back from PM
 Unrecognized character %s; marked by <-- HERE after %s<-- HERE near column %d
 Unstable directory path, current directory changed unexpectedly
 Unterminated compressed integer in unpack
-Usage: %s(%s)
-Usage: %s::%s(%s)
-Usage: CODE(0x%x)(%s)
-Usage: File::Copy::rmscopy(from,to[,date_flag])
-Usage: VMS::Filespec::candelete(spec)
-Usage: VMS::Filespec::fileify(spec)
-Usage: VMS::Filespec::pathify(spec)
-Usage: VMS::Filespec::rmsexpand(spec[,defspec])
-Usage: VMS::Filespec::unixify(spec)
-Usage: VMS::Filespec::unixpath(spec)
-Usage: VMS::Filespec::unixrealpath(spec)
-Usage: VMS::Filespec::vmsify(spec)
-Usage: VMS::Filespec::vmspath(spec)
-Usage: VMS::Filespec::vmsrealpath(spec)
+Usage: %s
 utf8 "\x%X" does not map to Unicode
 Value of logical "%s" too long. Truncating to %i bytes
 waitpid: process %x is not a child of process %x
