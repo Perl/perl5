@@ -585,7 +585,7 @@ use File::Glob qw(:case);
             ''                 => 'cpan/Filter-Util-Call/',
         },
         'CUSTOMIZED'   => [
-            qw(pod/perlfilter.pod)
+            qw(../../pod/perlfilter.pod)
         ],
     },
 
