@@ -7287,10 +7287,15 @@ S_concat_pat(pTHX_ RExC_state_t * const pRExC_state,
             else
                 array = AvARRAY(av);
 
-            pat = S_concat_pat(aTHX_ pRExC_state, pat,
-                                array, maxarg, NULL, recompile_p,
-                                /* $" */
-                                GvSV((gv_fetchpvs("\"", GV_ADDMULTI, SVt_PV))));
+            if (maxarg > 0) {
+                pat = S_concat_pat(aTHX_ pRExC_state, pat,
+                                   array, maxarg, NULL, recompile_p,
+                                   /* $" */
+                                   GvSV((gv_fetchpvs("\"", GV_ADDMULTI, SVt_PV))));
+            }
+            else if (!pat) {
+                pat = newSVpvs_flags("", SVs_TEMP);
+            }
 
             continue;
         }
