@@ -96,9 +96,9 @@ SKIP: {
 
     my $found_time = 0;
     my $found_monetary = 0;
-    my @locales = find_locales( [ 'LC_TIME', 'LC_CTYPE', 'LC_MONETARY' ]);
 
-    while (defined (my $utf8_locale = find_utf8_ctype_locale(\@locales))) {
+    my @locales = find_locales( [ qw(LC_TIME LC_CTYPE LC_MONETARY) ] );
+    foreach my $utf8_locale (find_utf8_ctype_locales(\@locales)) {
         if (! $found_time) {
             setlocale(&LC_TIME, $utf8_locale);
             foreach my $time_item (@times) {
@@ -144,10 +144,6 @@ SKIP: {
         }
 
         last if $found_monetary && $found_time;
-
-        # Remove this locale from the list, and loop to find another utf8
-        # locale
-        @locales = grep { $_ ne $utf8_locale } @locales;
     }
 
     if ($found_time + $found_monetary < 2) {
