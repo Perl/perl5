@@ -843,6 +843,11 @@ but then $foo no longer contains a glob.
 (F) You called C<continue>, but you're not inside a C<when>
 or C<default> block.
 
+=item can't convert empty path
+
+(F) On Cygwin, you called a path conversion function with an empty path.
+Only non-empty paths are legal.
+
 =item Can't create pipe mailbox
 
 (P) An error peculiar to VMS.  The process is suffering from exhausted
