@@ -379,7 +379,7 @@ XS(XS_Cygwin_posix_to_win_path)
      */
     if (isutf8) {
         int what = CCP_POSIX_TO_WIN_W | ((absolute_flag) ? 0 : CCP_RELATIVE);
-        int wlen = sizeof(wchar_t)*(len + PATH_LEN_GUESS);
+        STRLEN wlen = sizeof(wchar_t)*(len + PATH_LEN_GUESS);
         wchar_t *wconverted = (wchar_t *) safemalloc(sizeof(wchar_t)*len);
         wchar_t *wsrc = (wchar_t *) safemalloc(wlen);
 
