@@ -3530,13 +3530,13 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
     const char * const setlocale_init = (PerlEnv_getenv("PERL_SKIP_LOCALE_INIT"))
                                         ? NULL
                                         : "";
-    typedef struct trial_locales_struct {
+    typedef struct trial_locales_struct_s {
         const char* trial_locale;
         const char* fallback_desc;
         const char* fallback_name;
     } trial_locales_struct;
     /* 5 = 1 each for "", LC_ALL, LANG, (Win32) system default locale, C */
-    struct trial_locales_struct trial_locales[5];
+    trial_locales_struct trial_locales[5];
     unsigned int trial_locales_count;
     const char * const lc_all     = PerlEnv_getenv("LC_ALL");
     const char * const lang       = PerlEnv_getenv("LANG");
