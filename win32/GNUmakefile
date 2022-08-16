@@ -1185,7 +1185,7 @@ regen_config_h:
 	-$(MINIPERL) -I..\lib config_h.PL "ARCHPREFIX=$(ARCHPREFIX)"
 	rename config.h $(CFGH_TMPL)
 
-$(CONFIGPM): ..\config.sh config_h.PL
+$(CONFIGPM): ..\config.sh config_h.PL ..\git_version.h
 	$(MINIPERL) -I..\lib ..\configpm --chdir=..
 	-$(MINIPERL) -I..\lib config_h.PL "ARCHPREFIX=$(ARCHPREFIX)"
 
