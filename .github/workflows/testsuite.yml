@@ -149,6 +149,7 @@ jobs:
           - "-Duseshrplib -Dusequadmath -Dusecbacktrace -Dusethreads"
           - "-Duserelocatableinc"
           - "-Dcc='clang'"
+          - "-Dcc='g++'"
 
     steps:
       - name: Install System dependencies
