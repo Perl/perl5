@@ -51,14 +51,6 @@ our $opt_v = scalar grep $_ eq '-v', @ARGV;
 
 BEGIN {
     my $root=".";
-    # test 1st to see if we're a -Dmksymlinks target dir
-    $subcd = '';
-    $srcdir = $root;
-    if (-l "./Configure") {
-	$srcdir = readlink("./Configure");
-	$srcdir =~ s/Configure//;
-	$subcd = "cd $srcdir &&"; # activate backtick fragment
-    }
     while (!-e "$root/perl.c" and length($root)<100) {
         if ($root eq '.') {
             $root="..";
@@ -68,6 +60,15 @@ BEGIN {
     }
     die "Can't find toplevel" if !-e "$root/perl.c";
     sub path_to { "$root/$_[0]" } # use $_[0] if this'd be placed in toplevel.
+
+    # test to see if we're a -Dmksymlinks target dir
+    $subcd = '';
+    $srcdir = $root;
+    if (-l "$root/Configure") {
+        $srcdir = readlink("$root/Configure");
+        $srcdir =~ s/Configure//;
+        $subcd = "cd $srcdir &&"; # activate backtick fragment
+    }
 }
 
 sub read_file {
