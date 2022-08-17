@@ -249,6 +249,8 @@ Helper macro to turn on the C<CvREFCOUNTED_ANYSV> flag.
 =for apidoc m|void|CvREFCOUNTED_ANYSV_off|CV *cv
 
 Helper macro to turn off the C<CvREFCOUNTED_ANYSV> flag.
+
+=cut
 */
 
 #define CvREFCOUNTED_ANYSV(cv)          (CvFLAGS(cv) & CVf_REFCOUNTED_ANYSV)
