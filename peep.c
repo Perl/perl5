@@ -3799,7 +3799,7 @@ Perl_rpeep(pTHX_ OP *o)
             }
             break;
 
-        case OP_SASSIGN:
+        case OP_SASSIGN: {
             if (OP_GIMME(o,0) == G_VOID
              || (  o->op_next->op_type == OP_LINESEQ
                 && (  o->op_next->op_next->op_type == OP_LEAVESUB
@@ -3893,6 +3893,7 @@ Perl_rpeep(pTHX_ OP *o)
                 oldoldop = NULL; oldop = NULL;
             }
             break;
+        }
 
         case OP_AASSIGN: {
             int l, r, lr, lscalars, rscalars;
