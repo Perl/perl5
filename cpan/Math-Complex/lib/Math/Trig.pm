@@ -619,7 +619,7 @@ The great_circle_midpoint() is just a special case of
 
 Where the $way is a value from zero ($theta0, $phi0) to one ($theta1,
 $phi1).  Note that antipodal points (where their distance is I<pi>
-radians) do not have waypoints between them (they would have an an
+radians) do not have waypoints between them (they would have an
 "equator" between them), and therefore C<undef> is returned for
 antipodal points.  If the points are the same and the distance
 therefore zero and all waypoints therefore identical, the first point
