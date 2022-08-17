@@ -520,7 +520,7 @@ SKIP:
 {
     use locale;
     # look for an english locale (so a < B, hopefully)
-    my ($en) = grep /^en_/, @locales;
+    my ($en) = grep { /^en_/ } find_locales( [ 'LC_COLLATE' ]);
     defined $en
         or skip "didn't find a suitable locale", 1;
     POSIX::setlocale(LC_COLLATE, $en);
