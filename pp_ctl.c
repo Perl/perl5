@@ -1169,8 +1169,9 @@ PP(pp_flip)
         int flip = 0;
 
         if (PL_op->op_private & OPpFLIP_LINENUM) {
-            if (GvIO(PL_last_in_gv)) {
-                flip = SvIV(sv) == (IV)IoLINES(GvIOp(PL_last_in_gv));
+            GV *gv = last_in_gv();
+            if (GvIO(gv)) {
+                flip = SvIV(sv) == (IV)IoLINES(GvIOp(gv));
             }
             else {
                 GV * const gv = gv_fetchpvs(".", GV_ADD|GV_NOTQUAL, SVt_PV);
@@ -1286,8 +1287,9 @@ PP(pp_flop)
         sv_inc(targ);
 
         if (PL_op->op_private & OPpFLIP_LINENUM) {
-            if (GvIO(PL_last_in_gv)) {
-                flop = SvIV(sv) == (IV)IoLINES(GvIOp(PL_last_in_gv));
+            GV *gv = last_in_gv();
+            if (GvIO(gv)) {
+                flop = SvIV(sv) == (IV)IoLINES(GvIOp(gv));
             }
             else {
                 GV * const gv = gv_fetchpvs(".", GV_ADD|GV_NOTQUAL, SVt_PV);

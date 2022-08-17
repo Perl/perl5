@@ -6,7 +6,7 @@ BEGIN {
     set_up_inc('../lib');
 }
 
-plan tests => 32;
+plan tests => 34;
 
 # [perl #19566]: sv_gets writes directly to its argument via
 # TARG. Test that we respect SvREADONLY.
@@ -268,10 +268,11 @@ open *foom,'test.pl';
 my %f;
 $f{g} = *foom;
 readline $f{g};
-$f{g} = 3; # PL_last_in_gv should be cleared now
-is tell, -1, 'tell returns -1 after last gv is unglobbed';
+$f{g} = 3; # PL_last_in_gv should be cleared now, but PL_last_in_io is still set
+# but we now remember the underlying IO object
+isnt tell, -1, 'tell no longer returns -1 after last gv is unglobbed';
 $f{g} = *foom; # since PL_last_in_gv is null, this should have no effect
-is tell, -1, 'unglobbery of last gv nullifies PL_last_in_gv';
+isnt tell, -1, 'unglobbery of last gv nullifies PL_last_in_gv, but PL_last_in_io still set';
 readline *{$f{g}};
 is tell, tell *foom, 'readline *$glob_copy sets PL_last_in_gv';
 
@@ -287,6 +288,22 @@ is ${^LAST_FH}, undef, '${^LAST_FH} after readline undef';
     like $w, qr/^readline\(\) on unopened filehandle y at .*\n(?x:
                 )Undefined value assigned to typeglob at .*\n\z/,
         '[perl #123790] *x=<y> used to fail an assertion';
+}
+
+# github #1420
+{
+    {
+        # test case from the ticket
+        my $io = do { open FH, "<", "test.pl" or die; *FH{IO}; };
+        <$io>;
+        ok(defined $., "IO refs now saved as a last handle");
+    }
+
+    {
+        my $io = do { open FH, "<", "test.pl" or die; *FH{IO}; };
+        <$io>;
+        is(*{${^LAST_FH}}{IO}, $io, 'test ${^LAST_FH} properly populated');
+    }
 }
 
 __DATA__

@@ -865,6 +865,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
     const char *s = NULL;
     REGEXP *rx;
     char nextchar;
+    GV *gv;
 
     PERL_ARGS_ASSERT_MAGIC_GET;
 
@@ -1015,6 +1016,24 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
                 sv_setrv_inc(sv, MUTABLE_SV(PL_last_in_gv));
                 sv_rvweaken(sv);
             }
+            else if (PL_last_in_io && SvTYPE(PL_last_in_io) == SVt_PVIO) {
+                /* sv_rvweaken() will remove one reference, and we
+                   want the GV referenced to live long enough for the
+                   accessing code to see it, so make the other
+                   reference mortalized.
+                */
+                GV *gv = (GV*)sv_newmortal();
+                SvREFCNT_inc_simple_NN(gv); /* one reference for sv_rvweaken() to eat */
+                gv_init(gv, 0, "__ANONIO__", 10, 0);
+                SvREFCNT_inc_simple_NN(PL_last_in_io);
+                GvIOp(gv) = MUTABLE_IO(PL_last_in_io);
+                SV_CHECK_THINKFIRST_COW_DROP(sv);
+                prepare_SV_for_RV(sv);
+                SvOK_off(sv);
+                SvRV_set(sv, (SV*)gv);
+                SvROK_on(sv);
+                sv_rvweaken(sv);
+            }
             else
                 sv_set_undef(sv);
         }
@@ -1108,8 +1127,8 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
         }
         goto set_undef;
     case '.':
-        if (GvIO(PL_last_in_gv)) {
-            sv_setiv(sv, (IV)IoLINES(GvIOp(PL_last_in_gv)));
+        if ((gv = last_in_gv()) && GvIO(gv)) {
+            sv_setiv(sv, (IV)IoLINES(GvIOp(gv)));
         }
         break;
     case '?':
@@ -2860,6 +2879,7 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
     I32 i;
     STRLEN len;
     MAGIC *tmg;
+    GV *gv;
 
     PERL_ARGS_ASSERT_MAGIC_SET;
 
@@ -3053,11 +3073,13 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
         break;
     case '.':
         if (PL_localizing) {
-            if (PL_localizing == 1)
+            if (PL_localizing == 1) {
                 SAVESPTR(PL_last_in_gv);
+                SAVESPTR(PL_last_in_io);
+            }
         }
-        else if (SvOK(sv) && GvIO(PL_last_in_gv))
-            IoLINES(GvIOp(PL_last_in_gv)) = SvIV(sv);
+        else if (SvOK(sv) && (gv = last_in_gv()) && GvIO(gv))
+            IoLINES(GvIOp(gv)) = SvIV(sv);
         break;
     case '^':
         Safefree(IoTOP_NAME(GvIOp(PL_defoutgv)));

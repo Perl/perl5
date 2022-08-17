@@ -3790,4 +3790,8 @@ Amd	|void	|CopFILEGV_set	|NN COP * c|NN GV * gv
 
 Amd|const char *const|phase_name|enum perl_phase
 
+#ifdef PERL_CORE
+dip	|GV*	|last_in_gv
+#endif
+
 : ex: set ts=8 sts=4 sw=4 noet:

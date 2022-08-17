@@ -1613,6 +1613,7 @@
 #define malloced_size		Perl_malloced_size
 #  endif
 #  if defined(PERL_CORE)
+#define last_in_gv()		Perl_last_in_gv(aTHX)
 #define opslab_force_free(a)	Perl_opslab_force_free(aTHX_ a)
 #define opslab_free(a)		Perl_opslab_free(aTHX_ a)
 #define opslab_free_nopad(a)	Perl_opslab_free_nopad(aTHX_ a)
