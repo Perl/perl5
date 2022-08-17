@@ -249,6 +249,9 @@ for C<my Foo $bar>.
 =for apidoc Amx|SSize_t|PadnameREFCNT|PADNAME * pn
 The reference count of the pad name.
 
+=for apidoc Amx|PADNAME *|PadnameREFCNT_inc|PADNAME * pn
+Increases the reference count of the pad name.  Returns the pad name itself.
+
 =for apidoc Amx|void|PadnameREFCNT_dec|PADNAME * pn
 Lowers the reference count of the pad name.
 
@@ -321,6 +324,7 @@ Restore the old pad saved into the local variable C<opad> by C<PAD_SAVE_LOCAL()>
 #define PadnameHasTYPE(pn)      cBOOL(PadnameTYPE(pn))
 #define PadnamePROTOCV(pn)	(pn)->xpadn_type_u.xpadn_protocv
 #define PadnameREFCNT(pn)	(pn)->xpadn_refcnt
+#define PadnameREFCNT_inc(pn)   Perl_padname_refcnt_inc(pn)
 #define PadnameREFCNT_dec(pn)	Perl_padname_free(aTHX_ pn)
 #define PadnameOURSTASH_set(pn,s) (PadnameOURSTASH(pn) = (s))
 #define PadnameTYPE_set(pn,s)	  (PadnameTYPE(pn) = (s))

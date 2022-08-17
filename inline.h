@@ -3430,6 +3430,13 @@ Perl_cop_file_avn(pTHX_ const COP *cop) {
 
 #endif
 
+PERL_STATIC_INLINE PADNAME *
+Perl_padname_refcnt_inc(PADNAME *pn)
+{
+    PadnameREFCNT(pn)++;
+    return pn;
+}
+
 /*
  * ex: set ts=8 sts=4 sw=4 et:
  */
