@@ -873,7 +873,8 @@ perlglob$(o)  : perlglob.c
 ..\perl$(o) : ..\git_version.h
 
 ..\config.sh : $(CFGSH_TMPL) config_sh.PL FindExt.pm $(MINIPERL)
-	$(MINIPERL) -I..\lib config_sh.PL $(CFG_VARS) $(CFGSH_TMPL) > ..\config.sh
+	$(MINIPERL) -I..\lib config_sh.PL $(CFG_VARS) $(CFGSH_TMPL) > ..\config.sh.tmp
+	rename ..\config.sh.tmp config.sh
 
 # This target is for when changes to the main config.sh happen.
 # Edit config.vc, then make perl in a minimal configuration (i.e. with MULTI,
