@@ -124,7 +124,7 @@ sub generate_proto_h {
         my $has_context = ( $flags !~ /T/ );
         my $never_returns = ( $flags =~ /r/ );
         my $binarycompat = ( $flags =~ /b/ );
-        my $commented_out = ( $flags =~ /m/ );
+        my $has_mflag = ( $flags =~ /m/ );
         my $is_malloc = ( $flags =~ /a/ );
         my $can_ignore = ( $flags !~ /R/ ) && ( $flags !~ /P/ ) && !$is_malloc;
         my @names_of_nn;
@@ -138,10 +138,10 @@ sub generate_proto_h {
         die_at_end "$plain_func: S and p flags are mutually exclusive"
                                             if $flags =~ /S/ && $flags =~ /p/;
         die_at_end "$plain_func: m and $1 flags are mutually exclusive"
-                                        if $flags =~ /m/ && $flags =~ /([pS])/;
+                                        if $has_mflag && $flags =~ /([pS])/;
 
         die_at_end "$plain_func: u flag only usable with m" if $flags =~ /u/
-                                                            && $flags !~ /m/;
+                                                            && ! $has_mflag;
 
         my ($static_flag, @extra_static_flags)= $flags =~/([SsIi])/g;
 
@@ -202,11 +202,11 @@ sub generate_proto_h {
         die_at_end "For '$plain_func', X flag requires one of [Iip] flags"
                                             if $flags =~ /X/ && $flags !~ /[Iip]/;
         die_at_end "For '$plain_func', X and m flags are mutually exclusive"
-                                            if $flags =~ /X/ && $flags =~ /m/;
+                                            if $flags =~ /X/ && $has_mflag;
         die_at_end "For '$plain_func', [Ii] with [ACX] requires p flag"
                         if $flags =~ /[Ii]/ && $flags =~ /[ACX]/ && $flags !~ /p/;
         die_at_end "For '$plain_func', b and m flags are mutually exclusive"
-                 . " (try M flag)" if $flags =~ /b/ && $flags =~ /m/;
+                 . " (try M flag)" if $flags =~ /b/ && $has_mflag;
         die_at_end "For '$plain_func', b flag without M flag requires D flag"
                             if $flags =~ /b/ && $flags !~ /M/ && $flags !~ /D/;
         die_at_end "For '$plain_func', I and i flags are mutually exclusive"
@@ -234,7 +234,7 @@ sub generate_proto_h {
 
                     $arg = "const char * const $name";
                     die_at_end 'm flag required for "literal" argument'
-                                                            unless $flags =~ /m/;
+							    unless $has_mflag;
                 }
                 elsif (   $args_assert_line
                        && $arg =~ /\*/
@@ -267,7 +267,7 @@ sub generate_proto_h {
                 if (!$nocheck and defined $argtype and exists $type_asserts{$argtype}) {
                     push @typed_args, [ $argtype, $argname ];
                 }
-                if (defined $argname && ($nn||$nz) && !($commented_out && !$binarycompat)) {
+                if (defined $argname && ($nn||$nz) && !($has_mflag && !$binarycompat)) {
                     push @names_of_nn, $argname;
                 }
             }
@@ -343,7 +343,7 @@ sub generate_proto_h {
             $ret .= join( "\n", map { (" " x 8) . $_ } @attrs );
         }
         $ret .= ";";
-        $ret = "/* $ret */" if $commented_out;
+        $ret = "/* $ret */" if $has_mflag;
 
         if ($args_assert_line || @names_of_nn) {
             $ret .= "\n#${ind}define PERL_ARGS_ASSERT_\U$plain_func\E";
