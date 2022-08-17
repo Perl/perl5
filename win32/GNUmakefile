@@ -1111,7 +1111,8 @@ CFG_VARS	=					\
 		"LINK_FLAGS=$(subst ",\",$(LINK_FLAGS))"\
 		"optimize=$(subst ",\",$(OPTIMIZE))"	\
 		"ARCHPREFIX=$(ARCHPREFIX)"		\
-		"WIN64=$(WIN64)"
+		"WIN64=$(WIN64)"                        \
+		"SKIP_CCHOME_CHECK=$(SKIP_CCHOME_CHECK)"
 
 #
 # Top targets

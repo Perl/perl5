@@ -834,7 +834,8 @@ CFG_VARS	=					\
 		"default_inc_excludes_dot=$(DEFAULT_INC_EXCLUDES_DOT)"	\
 		"LINK_FLAGS=$(LINK_FLAGS:"=\")"		\
 		"optimize=$(OPTIMIZE:"=\")"		\
-		"WIN64=$(WIN64)"
+		"WIN64=$(WIN64)"                        \
+		"SKIP_CCHOME_CHECK=$(SKIP_CCHOME_CHECK)"
 
 #
 # Top targets
