@@ -613,7 +613,7 @@ Perl_pad_add_name_pvn(pTHX_ const char *namepv, STRLEN namelen,
         SAVEFREEPADNAME(name); /* in case of fatal warnings */
         /* check for duplicate declaration */
         pad_check_dup(name, flags & padadd_OUR, ourstash);
-        PadnameREFCNT(name)++;
+        PadnameREFCNT_inc(name);
         LEAVE;
     }
 
@@ -2714,7 +2714,7 @@ Perl_padnamelist_dup(pTHX_ PADNAMELIST *srcpad, CLONE_PARAMS *param)
       if (PadnamelistARRAY(srcpad)[max]) {
         PadnamelistARRAY(dstpad)[max] =
             padname_dup(PadnamelistARRAY(srcpad)[max], param);
-        PadnameREFCNT(PadnamelistARRAY(dstpad)[max])++;
+        PadnameREFCNT_inc(PadnamelistARRAY(dstpad)[max]);
       }
 
     return dstpad;
@@ -2775,7 +2775,7 @@ Perl_newPADNAMEouter(PADNAME *outer)
     PadnamePV(pn) = PadnamePV(outer);
     /* Not PadnameREFCNT(outer), because ‘outer’ may itself close over
        another entry.  The original pad name owns the buffer.  */
-    PadnameREFCNT(PADNAME_FROM_PV(PadnamePV(outer)))++;
+    PadnameREFCNT_inc(PADNAME_FROM_PV(PadnamePV(outer)));
     PadnameFLAGS(pn) = PADNAMEf_OUTER;
     PadnameLEN(pn) = PadnameLEN(outer);
     return pn;
