@@ -519,19 +519,34 @@ sub check_message {
     return $ret;
 }
 
-# Lists all missing things as of the inauguration of this script, so we
-# don't have to go from "meh" to perfect all at once.
-# 
-# PLEASE DO NOT ADD TO THIS LIST.  Instead, write an entry in
-# pod/perldiag.pod for your new (warning|error).  Nevertheless,
-# listing exceptions here when this script is not smart enough
-# to recognize the messages is not so bad, as long as there are
-# entries in perldiag.
-
-# Entries after __CATEGORIES__ are those that are in perldiag but fail the
-# severity/category test.
+# The DATA section includes two types of entries, in two sets separated by a
+# blank line.
+#
+# The first set are entries whose text we think is fully explanatory and don't
+# need further elaboration in perldiag.  This set should consist of very few
+# entries.
+#
+# The second set, after the blank line, consists of TODO entries.  (There are
+# actually two subsets described below.)  This list should basically be just
+# those entries that otherwise would have generated an error upon inauguration
+# of this program, so we didn't have to go from "meh" to perfect all at once.
+# The only valid reason we can think of to add to the list is for cases where
+# this program is not smart enough to recognize the message is something that
+# actually is in perldiag.  Otherwise, DO NOT ADD TO THIS LIST.  Instead,
+# write an entry in pod/perldiag.pod for your new (warning|error).
+#
+# This second set has a subcategory, after the line marked __CATEGORIES__ .
+# These are entries that are in perldiag but fail the severity/category test.
 
 __DATA__
+Function "%s" not implemented in this version of perl.
+QUITing...
+Recompile perl with -DDEBUGGING to use -D switch (did you mean -d ?)
+System V IPC is not implemented on this machine
+Terminating on signal SIG%s(%d)
+This version of OS/2 does not support %s.%s
+Usage: %s
+
 Cannot apply "%s" in non-PerlIO perl
 Can't find DLL name for the module `%s' by the handle %d, rc=%u=%x
 Can't find string terminator %c%s%c anywhere before EOF
@@ -574,7 +589,6 @@ fork() not implemented!
 YOU HAVEN'T DISABLED SET-ID SCRIPTS IN THE KERNEL YET! FIX YOUR KERNEL, PUT A C WRAPPER AROUND THIS SCRIPT, OR USE -u AND UNDUMP!
 free %s
 Free to wrong pool %p not %p
-Function "%s" not implemented in this version of perl.
 get %s %p %p %p
 gethostent not implemented!
 getnetbyaddr not implemented!
@@ -616,8 +630,6 @@ panic queryaddr
 Parse error
 POSIX syntax [%c %c] is reserved for future extensions in regex; marked by <-- HERE in m/%s/
 ptr wrong %p != %p fl=%x nl=%p e=%p for %d
-QUITing...
-Recompile perl with -DDEBUGGING to use -D switch (did you mean -d ?)
 recursion detected in %s
 Reversed %c= operator
 %s: Can't parse EXE/DLL name: '%s'
@@ -643,10 +655,7 @@ Starting Full Screen process with flag=%d, mytype=%d
 Starting PM process with flag=%d, mytype=%d
 switching effective gid is not implemented
 switching effective uid is not implemented
-System V IPC is not implemented on this machine
-Terminating on signal SIG%s(%d)
 This perl was compiled without taint support. Cowardly refusing to run with -t or -T flags
-This version of OS/2 does not support %s.%s
 Too deeply nested ()-groups in %s
 Too many args on %s line of "%s"
 U0 mode on a byte string
@@ -656,7 +665,6 @@ Unexpected program mode %d when morphing back from PM
 Unrecognized character %s; marked by <-- HERE after %s<-- HERE near column %d
 Unstable directory path, current directory changed unexpectedly
 Unterminated compressed integer in unpack
-Usage: %s
 utf8 "\x%X" does not map to Unicode
 Value of logical "%s" too long. Truncating to %i bytes
 waitpid: process %x is not a child of process %x
