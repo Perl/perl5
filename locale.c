@@ -555,9 +555,9 @@ Perl_locale_panic(const char * msg,
 #  define emulate_setlocale_c(cat, locale, recalc_LC_ALL, line)             \
            emulate_setlocale_i(cat##_INDEX_, locale, recalc_LC_ALL, line)
 
-     /* A wrapper for the macros below.  TRUE => do recalculate LC_ALL */
+     /* A wrapper for the macros below. */
 #  define common_emulate_setlocale(i, locale)                               \
-                            emulate_setlocale_i(i, locale, TRUE, __LINE__)
+                 emulate_setlocale_i(i, locale, YES_RECALC_LC_ALL, __LINE__)
 
 #  define setlocale_i(i, locale)     common_emulate_setlocale(i, locale)
 #  define setlocale_c(cat, locale)     setlocale_i(cat##_INDEX_, locale)
@@ -715,22 +715,13 @@ S_my_querylocale_i(pTHX_ const unsigned int index)
     return retval;
 }
 
-#  define LOOPING -1  /* Special value for 'recalc_LC_ALL' parameter below */
-
 #  ifdef USE_PL_CURLOCALES
 
 STATIC const char *
 S_update_PL_curlocales_i(pTHX_
                          const unsigned int index,
                          const char * new_locale,
-
-                         /* 0 => skip recalculating LC_ALL;
-                          * 1 => do recalculate LC_ALL
-                          * LOOPING => this call is part of a loop that goes
-                          *            through all categories by index-order.
-                          *            Recalculate only on the final iteration,
-                          *            after all values are known */
-                         int recalc_LC_ALL)
+                         recalc_lc_all_t recalc_LC_ALL)
 {
     /* This is a helper function for emulate_setlocale_i(), mostly used to
      * make that function easier to read. */
@@ -749,7 +740,7 @@ S_update_PL_curlocales_i(pTHX_
             PL_curlocales[i] = savepv(new_locale);
         }
 
-        recalc_LC_ALL = TRUE;
+        recalc_LC_ALL = YES_RECALC_LC_ALL;
     }
     else {
 
@@ -757,12 +748,14 @@ S_update_PL_curlocales_i(pTHX_
         Safefree(PL_curlocales[index]);
         PL_curlocales[index] = savepv(new_locale);
 
-        if (recalc_LC_ALL == LOOPING) {
-            recalc_LC_ALL = (index == NOMINAL_LC_ALL_INDEX - 1);
+        if (recalc_LC_ALL == RECALCULATE_LC_ALL_ON_FINAL_INTERATION) {
+            recalc_LC_ALL = (index == NOMINAL_LC_ALL_INDEX - 1)
+                            ? YES_RECALC_LC_ALL
+                            : DONT_RECALC_LC_ALL;
         }
     }
 
-    if (recalc_LC_ALL) { /* And recalculate LC_ALL */
+    if (recalc_LC_ALL == YES_RECALC_LC_ALL) {
         Safefree(PL_curlocales[LC_ALL_INDEX_]);
         PL_curlocales[LC_ALL_INDEX_] =
                                     savepv(calculate_LC_ALL(PL_curlocales));
@@ -804,7 +797,7 @@ S_setlocale_from_aggregate_LC_ALL(pTHX_ const char * locale, const line_t line)
      * all the individual categories to "C", and override the furnished
      * ones below.  FALSE => No need to recalculate LC_ALL, as this is a
      * temporary state */
-    if (! emulate_setlocale_c(LC_ALL, "C", FALSE, line)) {
+    if (! emulate_setlocale_c(LC_ALL, "C", DONT_RECALC_LC_ALL, line)) {
         setlocale_failure_panic_c(LC_ALL, locale_on_entry,
                                   "C", __LINE__, line);
         NOT_REACHED; /* NOTREACHED */
@@ -862,10 +855,13 @@ S_setlocale_from_aggregate_LC_ALL(pTHX_ const char * locale, const line_t line)
 
             /* And do the change.  FALSE => Don't recalculate LC_ALL; we'll do
              * it ourselves after the loop */
-            if (! emulate_setlocale_i(i, individ_locale, FALSE, line)) {
+            if (! emulate_setlocale_i(i, individ_locale,
+                                      DONT_RECALC_LC_ALL, line))
+            {
 
                 /* But if we have to back out, do fix up LC_ALL */
-                if (! emulate_setlocale_c(LC_ALL, locale_on_entry, TRUE, line))
+                if (! emulate_setlocale_c(LC_ALL, locale_on_entry,
+                                          YES_RECALC_LC_ALL, line))
                 {
                     Safefree(locale_on_entry);
                     setlocale_failure_panic_i(i, individ_locale,
@@ -991,10 +987,15 @@ S_find_locale_from_environment(pTHX_ const unsigned int index)
 
 STATIC const char *
 S_emulate_setlocale_i(pTHX_
-                      const unsigned int index,
-                      const char * new_locale,
-                      const int recalc_LC_ALL,
-                      const line_t line)
+
+        /* Our internal index of the 'category' setlocale is
+           called with */
+        const unsigned int index,
+
+        const char * new_locale, /* The locale to set the category to */
+        const recalc_lc_all_t recalc_LC_ALL,  /* Explained below */
+        const line_t line     /* Called from this line number */
+       )
 {
     PERL_ARGS_ASSERT_EMULATE_SETLOCALE_I;
     assert(index <= NOMINAL_LC_ALL_INDEX);
@@ -1010,16 +1011,19 @@ S_emulate_setlocale_i(pTHX_
      * By doing this, most locale-sensitive functions become thread-safe.  The
      * exceptions are mostly those that return a pointer to static memory.
      *
-     * This function takes our internal index of the 'category' setlocale is
-     * called with, and the 'new_locale' to set the category to.  It uses the
-     * index to find the category mask that the POSIX 2008 functions use.
+     * This function may be called in a tight loop that iterates over all
+     * categories.  Because LC_ALL is not a "real" category, but merely the sum
+     * of all the other ones, such loops don't include LC_ALL.  On systems that
+     * have querylocale() or similar, the current LC_ALL value is immediately
+     * retrievable; on systems lacking that feature, we have to keep track of
+     * LC_ALL ourselves.  We could do that on each iteration, only to throw it
+     * away on the next, but the calculation is more than a trivial amount of
+     * work.  Instead, the 'recalc_LC_ALL' parameter is set to
+     * RECALCULATE_LC_ALL_ON_FINAL_INTERATION to only do the calculation once.
+     * This function calls itself recursively in such a loop.
      *
-     * The function can be called recursively on all the individual categories,
-     * when the outer call is for LC_ALL.  It would be unnecessary work to
-     * recalculate LC_ALL in the middle of all this; so the 'recalc_LC_ALL'
-     * parameter is set to LOOPING in this circumstance, to indicate to
-     * recalculate only on the final category; 0 to indicate to not recalculate
-     * at all; and 1 to indicate to do so unconditionally */
+     * When not in such a loop, the parameter is set to the other enum values
+     * DONT_RECALC_LC_ALL or YES_RECALC_LC_ALL. */
 
     int mask = category_masks[index];
     const locale_t entry_obj = uselocale((locale_t) 0);
@@ -1179,11 +1183,11 @@ S_emulate_setlocale_i(pTHX_
                  * here.  khw isn't sure if this prevents some issues or not,
                  * but tis is defensive coding.  The system setlocale() returns
                  * the desired information.  This will calculate LC_ALL's entry
-                 * on the final iteration */
+                 * only on the final iteration */
                 for (PERL_UINT_FAST8_T i = 0; i < NOMINAL_LC_ALL_INDEX; i++) {
                     update_PL_curlocales_i(i,
                                        porcelain_setlocale(categories[i], NULL),
-                                       LOOPING);
+                                       RECALCULATE_LC_ALL_ON_FINAL_INTERATION);
                 }
             }
 #    endif
@@ -4011,7 +4015,9 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
      * them now, calculating LC_ALL only on the final go round, when all have
      * been set. */
     for (i = 0; i < NOMINAL_LC_ALL_INDEX; i++) {
-        (void) emulate_setlocale_i(i, curlocales[i], LOOPING, __LINE__);
+        (void) emulate_setlocale_i(i, curlocales[i],
+                                   RECALCULATE_LC_ALL_ON_FINAL_INTERATION,
+                                   __LINE__);
     }
 
 #  endif
