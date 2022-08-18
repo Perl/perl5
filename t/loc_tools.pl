@@ -161,11 +161,13 @@ sub _trylocale ($$$$) { # For use only by other functions in this file!
 
     my $badutf8 = 0;
     my $plays_well = 1;
+    my $unsupported = 0;
 
     use warnings 'locale';
 
     local $SIG{__WARN__} = sub {
         $badutf8 = 1 if grep { /Malformed UTF-8/ } @_;
+        $unsupported = 1 if grep { /Locale .* is unsupported/i } @_;
         $plays_well = 0 if grep {
                     /Locale .* may not work well(?#
                    )|The Perl program will use the expected meanings/i
@@ -199,6 +201,8 @@ sub _trylocale ($$$$) { # For use only by other functions in this file!
             _my_fail("Verify locale name doesn't contain malformed utf8");
             return;
         }
+
+        return if $unsupported;
 
         # Commas in locale names are bad in Windows, and there is a bug in
         # some versions where setlocale() turns a legal input locale name into
@@ -397,7 +401,9 @@ sub find_locales ($;$) {
     my $input_categories = shift;
     my $allow_incompatible = shift // 0;
 
-    my @categories = (ref $input_categories) ? $input_categories->@* : $input_categories;
+    my @categories = (ref $input_categories)
+                      ? $input_categories->@*
+                      : $input_categories;
     return unless locales_enabled(\@categories);
 
     # Note, the subroutine call above converts the $categories into a form
@@ -554,8 +560,8 @@ sub is_locale_utf8 ($) { # Return a boolean as to if core Perl thinks the input
 
     my $locale = shift;
 
-    use locale;
     no warnings 'locale'; # We may be trying out a weird locale
+    use locale;
 
     my $save_locale = setlocale(&POSIX::LC_CTYPE());
     if (! $save_locale) {
@@ -585,7 +591,7 @@ sub is_locale_utf8 ($) { # Return a boolean as to if core Perl thinks the input
     }
 
     die "Couldn't restore locale '$save_locale'"
-        unless setlocale(&POSIX::LC_CTYPE(), $save_locale);
+                            unless setlocale(&POSIX::LC_CTYPE(), $save_locale);
 
     return $ret;
 }
