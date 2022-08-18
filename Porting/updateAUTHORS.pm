@@ -70,10 +70,15 @@ sub read_commit_log {
     my $author_info= $self->{author_info}   ||= {};
     my $mailmap_info= $self->{mailmap_info} ||= {};
 
-    open my $fh, qq(git log --pretty='tformat:$tformat' |);
+    my $commit_range= $self->{commit_range};
+    my $commits_read= 0;
+
+    my $cmd= qq(git log --pretty='format:$tformat' $commit_range);
+    open my $fh, "$cmd |";
     while (defined(my $line= <$fh>)) {
         chomp $line;
         $line= decode_utf8($line);
+        $commits_read++;
         my $commit_info= {};
         @{$commit_info}{@field_names}= split /\0/, $line, 0 + @field_names;
 
@@ -97,6 +102,14 @@ sub read_commit_log {
 
         $author_info->{"lines"}{$author_name_mm}++;
         $author_info->{"lines"}{$committer_name_mm}++;
+    }
+    if (!$commits_read) {
+        if ($self->{commit_range}) {
+            die "No commits in range '$self->{commit_range}'\n";
+        }
+        else {
+            die "Panic! There are no commits!\n";
+        }
     }
     return $author_info;
 }
@@ -638,6 +651,7 @@ Create a new object. Required parameters are
 Other supported parameters are as follows:
 
     verbose
+    commit_range
 
 this list is not exhaustive. See the code implementing the main()
 function in F<Porting/updateAUTHORS.pl> for an exhaustive list.
@@ -668,7 +682,8 @@ or the .mailmap file. Requires that both files are editable.
 
 =item read_commit_log()
 
-Read the commit log and find any new names it contains.
+Read the commit log specified by the property "commit_range" and find
+any new names it contains.
 
 Normally used via C<read_and_update> and not called directly.
 

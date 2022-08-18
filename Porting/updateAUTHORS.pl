@@ -22,6 +22,9 @@ my @OPTSPEC= qw(
     mailmap_file=s
 
     verbose+
+
+    from_commit|from=s
+    to_commit|to=s
 );
 
 sub main {
@@ -29,6 +32,8 @@ sub main {
     my %opts= (
         authors_file => "AUTHORS",
         mailmap_file => ".mailmap",
+        from         => "",
+        to           => "",
     );
 
     ## Parse options and print usage if there is a syntax error,
@@ -42,6 +47,14 @@ sub main {
             s/\b([a-z]+)_([a-z]+)\b/${1}_${2}|${1}-${2}/gr
         } @OPTSPEC
     ) or pod2usage(2);
+    $opts{commit_range}= join " ", @ARGV;
+    if (!$opts{commit_range}) {
+        if ($opts{from_commit}) {
+            $opts{to_commit} ||= "HEAD";
+            $opts{$_} =~ s/\.+\z// for qw(from_commit to_commit);
+            $opts{commit_range}= "$opts{from_commit}..$opts{to_commit}";
+        }
+    }
     pod2usage(1)             if $opts{help};
     pod2usage(-verbose => 2) if $opts{man};
 
@@ -64,12 +77,20 @@ based on commit data.
 
 =head1 SYNOPSIS
 
-Porting/updateAUTHORS.pl
+Porting/updateAUTHORS.pl [OPTIONS] [GIT_REF_RANGE]
+
+By default scans the commit history specified (or the entire history from the
+current commit) and then updates F<AUTHORS> and F<.mailmap> so all contributors
+are properly listed.
 
  Options:
    --help               brief help message
    --man                full documentation
    --verbose            be verbose
+
+ Commit Range:
+   --from=GIT_REF       Select commits to use
+   --to=GIT_REF         Select commits to use, defaults to HEAD
 
  File Locations:
    --authors-file=FILE  override default of 'AUTHORS'
