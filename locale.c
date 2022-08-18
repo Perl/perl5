@@ -1057,6 +1057,23 @@ S_emulate_setlocale_i(pTHX_
                  "(%" LINE_Tf "): emulate_setlocale_i"
                  " no-op to change to what it already was\n",
                  line));
+
+#  ifdef USE_PL_CURLOCALES
+
+       /* On the final iteration of a loop that needs to recalculate LC_ALL, do
+        * so.  If no iteration changed anything, LC_ALL also doesn't change,
+        * but khw believes the complexity needed to keep track of that isn't
+        * worth it. */
+        if (UNLIKELY(   recalc_LC_ALL == RECALCULATE_LC_ALL_ON_FINAL_INTERATION
+                     && index == NOMINAL_LC_ALL_INDEX - 1))
+        {
+            Safefree(PL_curlocales[LC_ALL_INDEX_]);
+            PL_curlocales[LC_ALL_INDEX_] =
+                                        savepv(calculate_LC_ALL(PL_curlocales));
+        }
+
+#  endif
+
         return locale_on_entry;
     }
 
