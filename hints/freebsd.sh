@@ -367,3 +367,7 @@ esac
 EOCBU
   ;;
 esac
+
+# This function on this box has weird behavior.  See
+# https://bugs.freebsd.org/bugzilla/show_bug.cgi?id=255646
+d_querylocale='undef'
