@@ -1139,8 +1139,8 @@ S_emulate_setlocale_i(pTHX_
              * modified, as otherwise newlocale() is free to do so */
             basis_obj = duplocale(entry_obj);
             if (! basis_obj) {
-                setlocale_failure_panic_i(index, "switching back to",
-                                          locale_on_entry, __LINE__, line);
+                locale_panic_(Perl_form(aTHX_ "(%" LINE_Tf "): duplocale failed",
+                                              line));
                 NOT_REACHED; /* NOTREACHED */
             }
 
