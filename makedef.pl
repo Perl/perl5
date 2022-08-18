@@ -550,11 +550,6 @@ unless ($define{USE_LOCALE_COLLATE}) {
 unless ($define{USE_LOCALE_NUMERIC}) {
     ++$skip{$_} foreach qw(
 		    PL_numeric_local
-		    PL_numeric_name
-		    PL_numeric_radix_sv
-		    PL_numeric_standard
-                    PL_numeric_underlying
-                    PL_numeric_underlying_is_standard
                     PL_underlying_numeric_obj
 			 );
 }
