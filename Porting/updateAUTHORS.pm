@@ -114,7 +114,7 @@ sub read_commit_log {
     return $author_info;
 }
 
-sub read_authors {
+sub read_authors_file {
     my ($self)= @_;
     my $authors_file= $self->{authors_file};
 
@@ -171,7 +171,7 @@ sub read_authors {
     return (\%author_info, \@authors_preamble, $raw_text);
 }
 
-sub update_authors {
+sub update_authors_file {
     my ($self)= @_;
 
     my $author_info= $self->{author_info};
@@ -221,7 +221,7 @@ sub update_authors {
     }
 }
 
-sub read_mailmap {
+sub read_mailmap_file {
     my ($self)= @_;
     my $mailmap_file= $self->{mailmap_file};
 
@@ -284,7 +284,7 @@ sub __sorted_hash_keys {
 }
 
 # Returns 0 if the file needed to be changed, Return 1 if it does not.
-sub update_mailmap {
+sub update_mailmap_file {
     my ($self)= @_;
     my $mailmap_hash= $self->{new_mailmap_hash};
     my $mailmap_preamble= $self->{mailmap_preamble};
@@ -542,29 +542,29 @@ sub read_and_update {
         %{$self}{qw(authors_file mailmap_file)};
 
     # read the authors file and extract the info it contains
-    $self->read_authors();
+    $self->read_authors_file();
 
     # read the mailmap file.
-    $self->read_mailmap();
+    $self->read_mailmap_file();
 
     # check and possibly fix the mailmap data, and build a set of precomputed
     # datasets to work with it.
     $self->check_fix_mailmap_hash();
 
     # update the mailmap based on any check or fixes we just did.
-    $self->update_mailmap();
+    $self->update_mailmap_file();
 
     # read the commits names using git log, and compares and checks
     # them against the data we have in authors.
     $self->read_commit_log();
 
     # update the authors file with any changes
-    $self->update_authors();
+    $self->update_authors_file();
 
     # check if we discovered new email data from the commits that
     # we need to write back to disk.
     $self->add_new_mailmap_entries()
-        and $self->update_mailmap();
+        and $self->update_mailmap_file();
 
     return $self->changed_count();
 }
@@ -687,13 +687,13 @@ any new names it contains.
 
 Normally used via C<read_and_update> and not called directly.
 
-=item read_authors()
+=item read_authors_file()
 
 Read the AUTHORS file into the object, and return data about it.
 
 Normally used via C<read_and_update> and not called directly.
 
-=item read_mailmap()
+=item read_mailmap_file()
 
 Read the .mailmap file into the object and return data about it.
 
@@ -705,14 +705,14 @@ Read the exclusion file into the object and return data about it.
 
 Normally used via C<read_and_update> and not called directly.
 
-=item update_authors()
+=item update_authors_file()
 
 Write out an updated AUTHORS file atomically if it has changed,
 returns 0 if the file was actually updated, 1 if it was not.
 
 Normally used via C<read_and_update> and not called directly.
 
-=item update_mailmap()
+=item update_mailmap_file()
 
 Write out an updated .mailmap file atomically if it has changed,
 returns 0 if the file was actually updated, 1 if it was not.
