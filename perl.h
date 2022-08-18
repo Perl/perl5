@@ -1352,6 +1352,23 @@ violations are fatal.
 #  endif
 #endif
 
+#ifdef PERL_CORE
+
+/* Used in locale.c only, but defined here so that embed.fnc can generate
+ * the proper prototypes. */
+
+typedef enum {
+    DONT_RECALC_LC_ALL,
+    YES_RECALC_LC_ALL,
+
+    /* Used in tight loops through all sub-categories, where LC_ALL won't be
+     * fully known until all subcategories are handled. */
+    RECALCULATE_LC_ALL_ON_FINAL_INTERATION
+} recalc_lc_all_t;
+
+#endif
+
+
 #include <setjmp.h>
 
 #ifdef I_SYS_PARAM
