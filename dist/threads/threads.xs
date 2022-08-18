@@ -15,6 +15,7 @@
 #    define setjmp(x) _setjmp(x)
 #  endif
 #  if defined(__MINGW64__)
+#    include <intrin.h>
 #    define setjmp(x) _setjmpex((x), mingw_getsp())
 #  endif
 #endif
