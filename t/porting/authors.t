@@ -9,7 +9,6 @@ BEGIN {
 
 use TestInit qw(T);    # T is chdir to the top level
 use strict;
-use File::Spec;
 
 find_git_or_skip('all');
 skip_all(
@@ -30,8 +29,7 @@ elsif( $ENV{GITHUB_ACTIONS} && length $ENV{GITHUB_BASE_REF} ) {
     # https://help.github.com/en/actions/automating-your-workflow-with-github-actions/using-environment-variables
 
     # we should be on a merge commit, but double check
-    my $null = File::Spec->devnull;
-    my $branch_head = `git rev-parse "HEAD^2" 2>$null`;
+    my $branch_head = `git rev-parse -q --verify "HEAD^2"`;
     chomp $branch_head;
 
     # gives the history of the branch being merged, excluding what it is
