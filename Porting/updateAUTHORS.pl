@@ -15,28 +15,35 @@ use Porting::updateAUTHORS;
 #   -isbc -nolc -otr -kis -ci=4 -se -sot -sct -nsbl -pt=2 -fs  \
 #   -fsb='#start-no-tidy' -fse='#end-no-tidy'
 
+my @OPTSPEC= qw(
+    help|?
+    man
+    authors_file=s
+    mailmap_file=s
+);
+
 sub main {
     local $Data::Dumper::Sortkeys= 1;
-    my $authors_file= "AUTHORS";
-    my $mailmap_file= ".mailmap";
-    my $show_man= 0;
-    my $show_help= 0;
+    my %opts= (
+        authors_file => "AUTHORS",
+        mailmap_file => ".mailmap",
+    );
 
     ## Parse options and print usage if there is a syntax error,
     ## or if usage was explicitly requested.
     GetOptions(
-        'help|?'                      => \$show_help,
-        'man'                         => \$show_man,
-        'authors_file|authors-file=s' => \$authors_file,
-        'mailmap_file|mailmap-file=s' => \$mailmap_file,
+        \%opts,
+        map {
+            # support hyphens as well as underbars,
+            # underbars must be first. Only handles two
+            # part words right now.
+            s/\b([a-z]+)_([a-z]+)\b/${1}_${2}|${1}-${2}/gr
+        } @OPTSPEC
     ) or pod2usage(2);
-    pod2usage(1)             if $show_help;
-    pod2usage(-verbose => 2) if $show_man;
+    pod2usage(1)             if $opts{help};
+    pod2usage(-verbose => 2) if $opts{man};
 
-    my $self= Porting::updateAUTHORS->new(
-        authors_file => $authors_file,
-        mailmap_file => $mailmap_file,
-    );
+    my $self= Porting::updateAUTHORS->new(%opts);
 
     $self->read_and_update();
 
@@ -50,7 +57,7 @@ __END__
 
 =head1 NAME
 
-Porting/updateAUTHORS.pl - Automatically update AUTHORS and .mailmap
+F<Porting/updateAUTHORS.pl> - Automatically update F<AUTHORS> and F<.mailmap>
 based on commit data.
 
 =head1 SYNOPSIS
@@ -60,43 +67,45 @@ Porting/updateAUTHORS.pl
  Options:
    --help               brief help message
    --man                full documentation
-   --authors-file=FILE  override default location of AUTHORS
-   --mailmap-file=FILE  override default location of .mailmap
+
+ File Locations:
+   --authors-file=FILE  override default of 'AUTHORS'
+   --mailmap-file=FILE  override default of '.mailmap'
 
 =head1 OPTIONS
 
 =over 4
 
-=item --help
+=item C<--help>
 
 Print a brief help message and exits.
 
-=item --man
+=item C<--man>
 
 Prints the manual page and exits.
 
-=item --authors-file=FILE
+=item C<--authors-file=FILE>
 
-=item --authors_file=FILE
+=item C<--authors_file=FILE>
 
-Override the default location of the authors file, which is "AUTHORS" in
-the current directory.
+Override the default location of the authors file, which is by default
+the F<AUTHORS> file in the current directory.
 
-=item --mailmap-file=FILE
+=item C<--mailmap-file=FILE>
 
-=item --mailmap_file=FILE
+=item C<--mailmap_file=FILE>
 
-Override the default location of the mailmap file, which is ".mailmap"
-in the current directory.
+Override the default location of the mailmap file, which is by default
+the F<.mailmap> file in the current directory.
 
 =back
 
 =head1 DESCRIPTION
 
-This program will automatically manage updates to the AUTHORS file and
-.mailmap file based on the data in our commits and the data in the files
-themselves. It uses no other sources of data. Expects to be run from
-the root a git repo of perl.
+This program will automatically manage updates to the F<AUTHORS> file
+and F<.mailmap> file based on the data in our commits and the data in
+the files themselves. It uses no other sources of data. Expects to be
+run from the root directory of a git repo of perl.
 
 In simple, execute the script and it will either die with a helpful
 message or it will update the files as necessary, possibly not at all if
