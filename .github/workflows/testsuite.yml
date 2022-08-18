@@ -24,7 +24,7 @@ jobs:
   # \__ \ '  \/ _ \ / / -_)  | || ' \|  _/ _ \ '_| '  \/ _` |  _| / _ \ ' \(_-<
   # |___/_|_|_\___/_\_\___| |___|_||_|_| \___/_| |_|_|_\__,_|\__|_\___/_||_/__/
 
-  authors:
+  involved_authors_debug:
     runs-on: ubuntu-latest
     if: ( github.event.pull_request.head.repo.full_name == 'Perl/perl5' || github.repository == 'Perl/perl5' ) && github.base_ref != ''
     continue-on-error: true
@@ -47,7 +47,9 @@ jobs:
           BASE_REF: ${{ github.base_ref }}
       - name: Involved authors
         run: |
-          git log --pretty=format:"Author: %an <%ae>" origin/${BASE_REF}...${SHA}^2 | sort -u
+          echo "Authors from origin/${BASE_REF}..${SHA}^2"
+          echo "specifically: $(git rev-parse origin/${BASE_REF})..$(git rev-parse ${SHA}^2)"
+          git log --pretty=format:"Author: %aN <%aE>" origin/${BASE_REF}..${SHA}^2 | sort | uniq -c
         env:
           BASE_REF: ${{ github.base_ref }}
           SHA: ${{ github.sha }}
