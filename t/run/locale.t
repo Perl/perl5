@@ -543,4 +543,30 @@ else {
 EOF
 }
 
+SKIP: {   # GH #20085
+    my @utf8_locales = find_utf8_ctype_locales();
+    skip "didn't find a UTF-8 locale", 1 unless @utf8_locales;
+
+    local $ENV{LC_CTYPE} = $utf8_locales[0];
+    local $ENV{LC_ALL} = undef;
+    fresh_perl_is(<<~'EOF', "ok\n", {}, "check that setlocale overrides startup");
+        use POSIX;
+
+        my $a_acute = "\N{LATIN SMALL LETTER A WITH ACUTE}";
+        my $egrave  = "\N{LATIN SMALL LETTER E WITH GRAVE}";
+        my $combo = "$a_acute.$egrave";
+
+        setlocale(&POSIX::LC_ALL, "C");
+        use locale;
+
+        # In a UTF-8 locale, \b matches Latin1 before string, mid, and end
+        if ($combo eq ($combo =~ s/\b/!/gr)) {
+            print "ok\n";
+        }
+        else {
+            print "not ok\n";
+        }
+    EOF
+}
+
 done_testing();
