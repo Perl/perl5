@@ -248,7 +248,7 @@ Math::Trig - trigonometric functions
 
     $rad = deg2rad(120);
 
-    # Import constants pi2, pip2, pip4 (2*pi, pi/2, pi/4).
+    # Import constants pi2, pi4, pip2, pip4 (2*pi, 4*pi, pi/2, pi/4).
     use Math::Trig ':pi';
 
     # Import the conversions between cartesian/spherical/cylindrical.
