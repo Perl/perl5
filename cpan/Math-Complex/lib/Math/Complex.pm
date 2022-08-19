@@ -1847,7 +1847,7 @@ number mathematicians call C<j> such that:
 
 is a simple matter of writing:
 
-	$j = ((root(1, 3))[1];
+	$j = (root(1, 3))[1];
 
 The I<k>th root for C<z = [r,t]> is given by:
 
