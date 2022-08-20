@@ -152,6 +152,16 @@ L<lstat()|perlfunc/lstat> failed to take daylight saving time into account.
 
 =back
 
+=item FreeBSD
+
+=over 4
+
+=item *
+
+FreeBSD no longer uses thread-safe locale operations, to avoid L<a bug in FreeBSD|https://bugs.freebsd.org/bugzilla/show_bug.cgi?id=265950>
+
+=back
+
 =back
 
 
