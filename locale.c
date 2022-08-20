@@ -4948,8 +4948,18 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
              * fallback possibility). */
             {
                 /* Note that this may change the locale, but we are going to do
-                 * that anyway */
-                const char *system_default_locale = stdized_setlocale(LC_ALL, "");
+                 * that anyway.
+                 *
+                 * Our normal Windows setlocale() implementation ignores the
+                 * system default locale to make things work like POSIX.  This
+                 * is the only place where we want to consider it, so have to
+                 * use wrap_wsetlocale(). */
+                const char *system_default_locale =
+                                    stdize_locale(LC_ALL,
+                                                  S_wrap_wsetlocale(aTHX_ LC_ALL, ""),
+                                                  &PL_stdize_locale_buf,
+                                                  &PL_stdize_locale_bufsize,
+                                                  __LINE__);
                 DEBUG_LOCALE_INIT(LC_ALL_INDEX_, "", system_default_locale);
 
                 /* Skip if invalid or if it's already on the list of locales to

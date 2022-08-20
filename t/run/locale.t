@@ -570,4 +570,19 @@ SKIP: {   # GH #20085
     EOF
 }
 
+SKIP: {   # GH #20054
+    my @lc_all_locales = find_locales('LC_ALL');
+    my $locale = $lc_all_locales[0];
+    skip "LC_ALL not enabled on this platform", 1 unless $locale;
+
+    local $ENV{LC_ALL} = "This is not a legal locale name";
+    local $ENV{LANG} = "Nor this neither";
+
+    my $fallback = ($^O eq "MSWin32")
+                    ? "system default"
+                    : "standard";
+    fresh_perl_like("", qr/Falling back to the $fallback locale/,
+                    {}, "check that illegal startup environment falls back");
+}
+
 done_testing();
