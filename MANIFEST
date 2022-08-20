@@ -6089,6 +6089,7 @@ t/porting/readme.t		Check that all files in Porting/ are mentioned in Porting/RE
 t/porting/regen.t		Check that regen.pl doesn't need running
 t/porting/ss_dup.t		Check that sv.c:ss_dup handles everything
 t/porting/test_bootstrap.t	Test that the instructions for test bootstrapping aren't accidentally overlooked.
+t/porting/update_authors.t	Tests for Porting/updateAUTHORS.pl
 t/porting/utils.t		Check that utility scripts still compile
 t/re/alpha_assertions.t		See if things like '(*postive_lookahed:...) work properly
 t/re/anyof.t			See if bracketed char classes [...] compile properly
