@@ -43,51 +43,92 @@ runtime. L<[GH #19943]|https://github.com/Perl/perl5/pull/19943>.
 
 =head1 Modules and Pragmata
 
-XXX All changes to installed files in F<cpan/>, F<dist/>, F<ext/> and F<lib/>
-go here.  If Module::CoreList is updated, generate an initial draft of the
-following sections using F<Porting/corelist-perldelta.pl>.  A paragraph summary
-for important changes should then be added by hand.  In an ideal world,
-dual-life modules would have a F<Changes> file that could be cribbed.
-
-The list of new and updated modules is modified automatically as part of
-preparing a Perl release, so the only reason to manually add entries here is if
-you're summarising the important changes in the module update. (Also, if the
-manually-added details don't match the automatically-generated ones, the
-release manager will have to investigate the situation carefully.)
-
-[ Within each section, list entries as an =item entry ]
-
-=head2 New Modules and Pragmata
-
-=over 4
-
-=item *
-
-XXX Remove this section if not applicable.
-
-=back
-
 =head2 Updated Modules and Pragmata
 
 =over 4
 
 =item *
 
-L<XXX> has been upgraded from version A.xx to B.yy.
-
-If there was something important to note about this change, include that here.
-
-=back
-
-=head2 Removed Modules and Pragmata
-
-=over 4
+L<attributes> has been upgraded from version 0.34 to 0.35.
 
 =item *
 
-XXX
+L<B> has been upgraded from version 1.85 to 1.86.
+
+=item *
+
+L<B::Deparse> has been upgraded from version 1.65 to 1.68.
+
+=item *
+
+L<Digest::SHA> has been upgraded from version 6.02 to 6.03.
+
+=item *
+
+L<DynaLoader> has been upgraded from version 1.52 to 1.53.
+
+=item *
+
+L<Encode> has been upgraded from version 3.18 to 3.19.
+
+=item *
+
+L<ExtUtils::PL2Bat> has been upgraded from version 0.004 to 0.005.
+
+=item *
+
+L<File::Find> has been upgraded from version 1.40 to 1.41.
+
+=item *
+
+L<Filter::Util::Call> has been upgraded from version 1.61 to 1.64.
+
+=item *
+
+L<HTTP::Tiny> has been upgraded from version 0.080 to 0.082:
+no longer deletes the 'headers' key from post_form arguments hashref.
+
+=item *
+
+L<JSON::PP> has been upgraded from version 4.10 to 4.11.
+
+=item *
+
+L<Memoize> has been upgraded from version 1.03_01 to 1.10.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 5.20220720 to 5.20220820.
+
+=item *
+
+L<NDBM_File> has been upgraded from version 1.15 to 1.16.
+
+=item *
+
+L<Opcode> has been upgraded from version 1.59 to 1.60.
+
+=item *
+
+L<Scalar::Util> has been upgraded from version 1.62 to 1.63:
+fix off-by-one in stack handling of head() / tail() (RT143905).
+
+=item *
+
+L<Socket> has been upgraded from version 2.035 to 2.036:
+Avoid putting macros inside arguments to other macros,
+as it annoys strict C compilers
+
+=item *
+
+L<threads> has been upgraded from version 2.28 to 2.29.
+
+=item *
+
+L<XS::APItest> has been upgraded from version 1.24 to 1.25.
 
 =back
+
 
 
 
@@ -95,11 +136,6 @@ XXX
 
 
 =head2 Platform-Specific Notes
-
-XXX List any changes for specific platforms.  This could include configuration
-and compilation changes or changes in portability/compatibility.  However,
-changes within modules for platforms should generally be listed in the
-L</Modules and Pragmata> section.
 
 =over 4
 
@@ -161,9 +197,35 @@ also accept IO references.
 
 =head1 Acknowledgements
 
-XXX Generate this with:
+Perl 5.37.3 represents approximately 4 weeks of development since Perl
+5.37.2 and contains approximately 13,000 lines of changes across 240 files
+from 25 authors.
 
-  perl Porting/acknowledgements.pl v5.37.2..HEAD
+Excluding auto-generated files, documentation and release tools, there were
+approximately 11,000 lines of changes to 160 .pm, .t, .c and .h files.
+
+Perl continues to flourish into its fourth decade thanks to a vibrant
+community of users and developers. The following people are known to have
+contributed the improvements that became Perl 5.37.3:
+
+Aristotle Pagaltzis, Bram, Dagfinn Ilmari Mannsåker, Dan Book, Dan Kogai,
+David Golden, David Mitchell, Elvin Aslanov, Graham Knop, Harald Jörg,
+James E Keenan, Karl Williamson, Leon Timmermans, Mark Shelor, Neil Bowers,
+Nicholas Clark, Nicolas R, Paul Evans, Reini Urban, Richard Leach, Sinan
+Unur, Tomasz Konojacki, Tony Cook, Yves Orton, 小鸡.
+
+The list above is almost certainly incomplete as it is automatically
+generated from version control history. In particular, it does not include
+the names of the (very much appreciated) contributors who reported issues to
+the Perl bug tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core. We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please
+see the F<AUTHORS> file in the Perl source distribution.
+
 
 =head1 Reporting Bugs
 
