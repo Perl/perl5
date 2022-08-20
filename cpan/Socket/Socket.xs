@@ -1197,13 +1197,14 @@ inet_ntop(af, ip_address_sv)
 	    break;
 #endif
 	  default:
-		croak("Bad address family for %s, got %d, should be"
 #ifdef AF_INET6
-		      " either AF_INET or AF_INET6",
+#    define WANT_FAMILY "either AF_INET or AF_INET6"
 #else
-		      " AF_INET",
+#    define WANT_FAMILY "AF_INET"
 #endif
+		croak("Bad address family for %s, got %d, should be " WANT_FAMILY,
 		      "Socket::inet_ntop", af);
+#undef WANT_FAMILY
 	}
 
 	if(addrlen < sizeof(addr)) {
@@ -1246,13 +1247,13 @@ inet_pton(af, host)
 	    break;
 #endif
 	  default:
-		croak("Bad address family for %s, got %d, should be"
 #ifdef AF_INET6
-		      " either AF_INET or AF_INET6",
+#    define WANT_FAMILY "either AF_INET or AF_INET6"
 #else
-		      " AF_INET",
+#    define WANT_FAMILY "AF_INET"
 #endif
-		      "Socket::inet_pton", af);
+		croak("Bad address family for %s, got %d, should be " WANT_FAMILY, "Socket::inet_pton", af);
+#undef WANT_FAMILY
 	}
 	ok = (*host != '\0') && inet_pton(af, host, &ip_address);
 
