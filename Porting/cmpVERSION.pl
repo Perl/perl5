@@ -141,7 +141,7 @@ my %skip;
 
 my %skip_versions = (
 	   # 'some/sample/file.pm' => [ '1.23', '1.24' ],
-       # version was bumped prior a release to CPAN and released in v5.37.1 - can be removed once v5.37.3 is released
+       # version was bumped prior a release to CPAN and released in v5.37.1 - can be removed once v5.37.4 is released
        'cpan/experimental/lib/experimental.pm' => [ '0.028' ],
 	  );
 
