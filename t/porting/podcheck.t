@@ -447,7 +447,8 @@ my $non_pods = qr/
                            | core .*
                        )
                  $
-               ) | ~$
+               ) | ~$                    # Vim droppings
+                 | \.bak$                # Other editor droppings
                  | \ \(Autosaved\)\.txt$ # Other editor droppings
                  | ^cxx\$demangler_db\.$ # VMS name mangler database
                  | ^typemap\.?$          # typemap files
