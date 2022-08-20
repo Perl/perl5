@@ -56,7 +56,7 @@ sub _make_name_author_info {
     my $name= $commit_info->{$name_key};
 
     my $line= $author_info->{"email2line"}{$email}
-        // $author_info->{"name2line"}{$name};
+        // $author_info->{"name2line"}{ lc($name) };
 
     $line //= sprintf "%-31s<%s>",
         $commit_info->{$name_key}, $commit_info->{$email_key};
@@ -295,6 +295,21 @@ sub read_commit_log {
     return $author_info;
 }
 
+sub dupe_info {
+    my ($self)= @_;
+    my $msg= "";
+    foreach my $type (sort keys %{ $self->{dupe} || {} }) {
+        $msg .= "Duplicate \u$type in $self->{authors_file}:\n";
+        foreach my $key (sort keys %{ $self->{dupe}{$type} }) {
+            $msg .= "  \u$type '$key'\n";
+            foreach my $line (sort keys %{ $self->{dupe}{$type}{$key} }) {
+                $msg .= "    $line\n";
+            }
+        }
+    }
+    return $msg;
+}
+
 sub read_authors_file {
     my ($self)= @_;
     my $authors_file= $self->{authors_file};
@@ -349,15 +364,29 @@ sub read_authors_file {
 
         $line =~ s/\s+\z//;
         $author_info{"lines"}{$line}++;
-        $author_info{"email2line"}{$email}= $line
-            if $email and $email ne "unknown";
-        $author_info{"name2line"}{$name}= $line
-            if $name and $name ne "unknown";
-        $author_info{"email2name"}{ lc($email) }= $name
+        if ($email and $email ne "unknown") {
+            if (my $other= $author_info{"email2line"}{$email}) {
+                $self->{dupe}{email}{$email}{$other}= 1;
+                $self->{dupe}{email}{$email}{$line}= 1;
+            }
+            else {
+                $author_info{"email2line"}{$email}= $line;
+            }
+        }
+        if ($name and $name ne "unknown") {
+            if (my $other= $author_info{"name2line"}{ lc($name) }) {
+                $self->{dupe}{name}{$name}{$other}= 1;
+                $self->{dupe}{name}{$name}{$line}= 1;
+            }
+            else {
+                $author_info{"name2line"}{ lc($name) }= $line;
+            }
+        }
+        $author_info{"email2name"}{$email} //= $name
             if $email
             and $name
             and $email ne "unknown";
-        $author_info{"name2email"}{$name}= $email
+        $author_info{"name2email"}{$name} //= $email
             if $name and $name ne "unknown";
         $author_info{"clean_full"}{ __fold_trim_ws($line) }= $line;
     }

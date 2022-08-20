@@ -126,6 +126,9 @@ sub main {
             ok(!$changes, "Is $file_type '$file' up to date?")
                 or diag $self->_diff_diag($file);
         }
+        my $dupe_info= $self->dupe_info();
+        ok(!$dupe_info, "No dupes in AUTHORS")
+            or diag $dupe_info;
 
         ok(
             !$self->{missing_author}{$_},
