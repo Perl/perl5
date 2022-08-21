@@ -464,7 +464,18 @@ sub _tests_from_manifest {
     return @results;
 }
 
-unless (@ARGV) {
+my $test_manifest= "./RUNTESTS_TEST_ARGS";
+if (-e $test_manifest and !@ARGV) {
+    print STDERR "# using '$test_manifest' for t/TEST arguments!\n";
+    open my $fh, "<", $test_manifest
+	or die "Failed to read '$test_manifest': $!";
+    while (defined(my $arg= <$fh>)) {
+	chomp($arg);
+	push @ARGV, $arg;
+    }
+    close $fh;
+}
+elsif (!@ARGV) {
     # base first, as TEST bails out if that can't run
     # then comp, to validate that require works
     # then run, to validate that -M works

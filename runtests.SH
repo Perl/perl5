@@ -71,8 +71,12 @@ case $1 in
 	;;
 esac
 
-if test X"$TESTFILE" = X; then
-    TESTFILE=TEST
+if [ "x$TESTFILE" = "x" ]; then
+    if [ -e "./RUNTESTS_HARNESS_ARGS" ]; then
+        TESTFILE=harness
+    else
+        TESTFILE=TEST
+    fi
 fi
 
 cd t

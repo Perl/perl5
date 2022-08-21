@@ -55,6 +55,14 @@ while (<$m>) {
 
     isnt($file, undef, "Line $. doesn't start with a blank") or next;
     ok(-f $file, "File $file exists");
+    if ($file=~/RUNTESTS_([A-Z]+)_ARGS/) {
+        # files of the form RUNTESTS_([A-Z]+)_ARGS should never be listed in
+        # the manifest, and their presence on disk should ALWAYS cause a manifest
+        # failure if the manifest test is run. They are strictly meant for use
+        # during development to control our testing CI.
+        fail("Forbidden file '$file' should not be listed in MANIFEST at line $.");
+        next;
+    }
     if ($separator !~ tr/\t//c) {
 	# It's all tabs
 	next;

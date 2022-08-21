@@ -14,6 +14,18 @@ use TAP::Harness 3.13;
 use strict;
 use Config;
 
+my $test_manifest= "./RUNTESTS_HARNESS_ARGS";
+if (-e $test_manifest and !@ARGV) {
+    print STDERR "# using $test_manifest for t/harness arguments!\n";
+    open my $fh, "<", $test_manifest
+	or die "Failed to read '$test_manifest': $!";
+    while (defined(my $arg= <$fh>)) {
+	chomp($arg);
+	push @ARGV, $arg;
+    }
+    close $fh;
+}
+
 $::do_nothing = $::do_nothing = 1;
 require './TEST';
 our $Valgrind_Log;
