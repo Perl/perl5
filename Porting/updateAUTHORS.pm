@@ -318,14 +318,27 @@ sub read_authors_file {
     open my $in_fh, "<", $authors_file
         or die "Failed to open for read '$authors_file': $!";
     my $raw_text= "";
+    my $found_sep= 0;
     while (defined(my $line= <$in_fh>)) {
         $raw_text .= $line;
         $line= decode_utf8($line);
         chomp $line;
         push @authors_preamble, $line;
         if ($line =~ /^--/) {
+            $found_sep= 1;
             last;
         }
+    }
+    if (!$found_sep) {
+        die sprintf <<'EOFMT', $authors_file;
+Possibly corrupted authors file '%s'.
+
+There should be a big '#' comment block at the start of the file
+followed by "--" followed by a list of names and email/contact
+details. We couldn't find the separator. Where did it go?
+
+Cowardly refusing to continue until this is fixed.
+EOFMT
     }
     my %author_info;
     while (defined(my $line= <$in_fh>)) {
@@ -486,6 +499,17 @@ sub read_mailmap_file {
     }
     close $in
         or die "Failed to close '$mailmap_file' after reading: $!";
+    if (!@mailmap_preamble) {
+        die sprintf <<'EOFMT', $mailmap_file;
+Possibly corrupted mailmap file '%s'.
+
+This file should have a preamble of '#' comments in it.
+
+Where did they go?
+
+Cowardly refusing to continue until this is fixed.
+EOFMT
+    }
     $self->{orig_mailmap_hash}= \%mailmap_hash;
     $self->{mailmap_preamble}= \@mailmap_preamble;
     $self->{mailmap_raw_text}= $raw_text;
@@ -888,6 +912,17 @@ sub read_exclude_file {
     }
     close $in_fh
         or die "Failed to close '$exclude_file' after reading: $!";
+    if (!$head) {
+        die sprintf <<'EOFMT', $exclude_file;
+Possibly corrupted exclude file '%s'.
+
+This file should have a header of '#' comments in it.
+
+Where did they go?
+
+Cowardly refusing to continue until this is fixed.
+EOFMT
+    }
     $self->{exclude_file_text_head}= $head;
     $self->{exclude_file_text_orig}= $orig;
 
