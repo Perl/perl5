@@ -1354,8 +1354,8 @@ violations are fatal.
 
 #ifdef PERL_CORE
 
-/* Used in locale.c only, but defined here so that embed.fnc can generate
- * the proper prototypes. */
+/* Both typedefs are used in locale.c only, but defined here so that embed.fnc
+ * can generate the proper prototypes. */
 
 typedef enum {
     DONT_RECALC_LC_ALL,
@@ -1366,8 +1366,14 @@ typedef enum {
     RECALCULATE_LC_ALL_ON_FINAL_INTERATION
 } recalc_lc_all_t;
 
-#endif
 
+typedef enum {  /* Is the locale UTF8? */
+    LOCALE_NOT_UTF8,
+    LOCALE_IS_UTF8,
+    LOCALE_UTF8NESS_UNKNOWN
+} locale_utf8ness_t;
+
+#endif
 
 #include <setjmp.h>
 
