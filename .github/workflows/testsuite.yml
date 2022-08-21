@@ -203,6 +203,11 @@ jobs:
       matrix:
         CONFIGURE_ARGS:
           - "-Dusedevel"
+        TEST_TARGET:
+          - "test"
+          - "test_harness"
+          - "test_porting"
+          - "test_reonly"
 
     steps:
       - name: Install System dependencies
@@ -234,7 +239,7 @@ jobs:
       # linux-i386 is just one job (not a matrix)
       - name: Run Tests
         run: |
-          MALLOC_PERTURB_=254 MALLOC_CHECK_=3 make -j2 test
+          MALLOC_PERTURB_=254 MALLOC_CHECK_=3 make -j2 ${{ matrix.TEST_TARGET }}
 
   #                  _          _           _        _ _
   #  _ __ ___   __ _| | _____  (_)_ __  ___| |_ __ _| | |
