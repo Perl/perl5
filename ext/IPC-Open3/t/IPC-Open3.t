@@ -14,7 +14,7 @@ BEGIN {
 }
 
 use strict;
-use Test::More tests => 45;
+use Test::More;
 
 use IO::Handle;
 use IPC::Open3;
@@ -219,12 +219,8 @@ foreach my $handle (qw (DUMMY STDIN STDOUT STDERR)) {
     };
     is($@, '', "No errors with localised $handle");
     cmp_ok($pid, '>', 0, "Got a pid with localised $handle");
-    if ($handle eq 'STDOUT') {
-	is(<$out>, undef, "Expected no output with localised $handle");
-    } else {
-	like(<$out>, qr/\A# $handle\r?\n\z/,
-	     "Expected output with localised $handle");
-    }
+    like(<$out>, qr/\A# $handle\r?\n\z/,
+         "Expected output with localised $handle");
     waitpid $pid, 0;
 }
 
@@ -258,3 +254,46 @@ SKIP: {
 	untie $handle;
     }
 }
+# Test that STDOUT open for in-memory I/O does not cause trouble.
+# Github issue https://github.com/Perl/perl5/issues/19573
+{
+        my $buffer;
+        close(STDOUT);
+        open(STDOUT, '>', \$buffer);
+        print STDOUT "huff";
+        my ($in, $out);
+	my $pid = eval {
+	    open3 $in, $out, undef, $perl, '-ne', 'print';
+	};
+	is($@, '', "no errors calling open3 with STDOUT open for in-memory I/O");
+	print $in "Yeppers!\n";
+	close $in;
+	my $japh = <$out>;
+        close $out;
+	waitpid $pid, 0;
+	is($japh, "Yeppers!\n", "read input correctly");
+
+        print STDOUT "buff!";
+
+        # Now try for the case where we don't exec
+        if ($^O ne 'os2' && $^O ne 'MSWin32') {
+                $pid = eval {
+                        open3 $in, $out, undef, '-';
+                };
+                if (!$pid) {
+                        # In the child
+                        print STDOUT "moremsg\n";
+                        exit(0);
+                } else {
+                        is ($@, '', 'no errors calling open3 without execing a program');
+                        $japh = <$out>;
+                        close $out;
+                        waitpid $pid, 0;
+                        is ($japh, "moremsg\n", "read input correctly");
+                        print STDOUT "moar";
+                }
+                is ($buffer, "huffbuff!moar", "STDOUT still open for in-memory I/O");
+        }
+}
+
+done_testing;
