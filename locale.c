@@ -5811,8 +5811,7 @@ S_print_collxfrm_input_and_return(pTHX_
 #  endif    /* DEBUGGING */
 #endif /* USE_LOCALE_COLLATE */
 
-#ifdef USE_LOCALE
-#  ifdef DEBUGGING
+#ifdef DEBUGGING
 
 STATIC void
 S_print_bytes_for_locale(pTHX_
@@ -5849,7 +5848,8 @@ S_print_bytes_for_locale(pTHX_
     }
 }
 
-#  endif   /* #ifdef DEBUGGING */
+#endif   /* #ifdef DEBUGGING */
+#ifdef USE_LOCALE
 
 STATIC const char *
 S_toggle_locale_i(pTHX_ const unsigned cat_index,
