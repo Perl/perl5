@@ -3854,6 +3854,8 @@ Perl_rpeep(pTHX_ OP *o)
             if (!(o->op_private & (OPpASSIGN_BACKWARDS|OPpASSIGN_CV_TO_GV))
                  && lval && (lval->op_type == OP_PADSV) &&
                 !(lval->op_private & OPpDEREF)
+                 /* skip if padrange has already gazumped the padsv */
+                 && (lval == oldop)
                ) {
 
                 /* SASSIGN's bitfield flags, such as op_moresib and
@@ -3876,6 +3878,7 @@ Perl_rpeep(pTHX_ OP *o)
                 o->op_targ = lval->op_targ; lval->op_targ = 0;
 
                 /* Fixup op_next ptrs */
+                assert(oldop->op_type == OP_PADSV);
                 /* oldoldop can be arbitrarily deep in the RHS OP tree */
                 oldoldop->op_next = o;
 
