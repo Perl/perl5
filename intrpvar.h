@@ -757,7 +757,7 @@ PERLVARI(I, collation_standard, bool, TRUE)
                                         /* Assume simple collation */
 #endif /* USE_LOCALE_COLLATE */
 
-PERLVARI(I, langinfo_buf, char *, NULL)
+PERLVARI(I, langinfo_buf, const char *, NULL)
 PERLVARI(I, langinfo_bufsize, Size_t, 0)
 PERLVARI(I, setlocale_buf, const char *, NULL)
 PERLVARI(I, setlocale_bufsize, Size_t, 0)

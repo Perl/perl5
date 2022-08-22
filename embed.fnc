@@ -1449,7 +1449,12 @@ Cpd	|PerlIO*|my_popen_list	|NN const char* mode|int n|NN SV ** args
 Apd	|void	|my_setenv	|NULLOK const char* nam|NULLOK const char* val
 m	|I32	|my_stat
 pX	|I32	|my_stat_flags	|NULLOK const U32 flags
-Adfp	|char *	|my_strftime	|NN const char *fmt|int sec|int min|int hour|int mday|int mon|int year|int wday|int yday|int isdst
+Adfp	|char *	|my_strftime	|NN const char *fmt|int sec|int min|int hour \
+				|int mday|int mon|int year|int wday|int yday \
+				|int isdst
+Adfp	|char *	|my_strftime8	|NN const char *fmt|int sec|int min|int hour \
+				|int mday|int mon|int year|int wday|int yday \
+				|int isdst|NULLOK utf8ness_t * utf8ness
 : Used in pp_ctl.c
 p	|void	|my_unexec
 ApR	|OP*	|newANONLIST	|NULLOK OP* o
@@ -1638,11 +1643,15 @@ CTpor	|void	|locale_panic	|NN const char * msg			\
 				|const line_t line			\
 				|const int errnum
 ATdo	|const char*|Perl_setlocale|const int category|NULLOK const char* locale
+Ado	|HV *	|Perl_localeconv
 #if defined(HAS_NL_LANGINFO) && defined(PERL_LANGINFO_H)
 ATdo	|const char*|Perl_langinfo|const nl_item item
+ATdo	|const char*|Perl_langinfo8|const nl_item item|NULLOK utf8ness_t * utf8ness
 #else
 ATdo	|const char*|Perl_langinfo|const int item
+ATdo	|const char*|Perl_langinfo8|const int item|NULLOK utf8ness_t * utf8ness
 #endif
+pEX	|int	|mbtowc_|NULLOK const wchar_t * pwc|NULLOK const char * s|const Size_t len
 CpO	|int	|init_i18nl10n	|int printwarn
 p	|char*	|my_strerror	|const int errnum
 XpT	|void	|_warn_problematic_locale
@@ -3302,20 +3311,21 @@ SG   |bool   |sv_derived_from_svpvn  |NULLOK SV *sv			\
 #endif
 
 #if defined(PERL_IN_LOCALE_C)
-iTR	|const char *|save_to_buffer|NULLOK const char * string	\
-				    |NULLOK const char **buf	\
-				    |NN Size_t *buf_size	\
-				    |const Size_t offset
-#  ifdef HAS_NL_LANGINFO
-ST	|const char*|my_nl_langinfo|const nl_item item|bool toggle
-#  else
-ST	|const char*|my_nl_langinfo|const int item|bool toggle
-#  endif
+iR	|const char *|mortalized_pv_copy|NULLOK const char * const pv
 #  ifdef USE_LOCALE
+ST	|const char *|save_to_buffer|NULLOK const char * string	\
+				    |NULLOK const char **buf	\
+				    |NULLOK Size_t *buf_size
 ST	|const char*|category_name |const int category
 ST	|unsigned int|get_category_index|const int category|NULLOK const char * locale
+ST	|bool	    |is_codeset_name_UTF8|NN const char * name
 S	|const char*|switch_category_locale_to_template|const int switch_category|const int template_category|NULLOK const char * template_locale
 S	|void	|restore_switched_locale|const int category|NULLOK const char * const original_locale
+S	|utf8ness_t|get_locale_string_utf8ness_i				\
+				|NULLOK const char * locale		\
+				|const unsigned cat_index		\
+				|NULLOK const char * string		\
+				|const locale_utf8ness_t known_utf8
 S	|void	|new_collate	|NULLOK const char* newcoll
 S	|void	|new_ctype	|NN const char* newctype
 S	|void	|set_numeric_radix|const bool use_locale
@@ -3331,6 +3341,29 @@ Sr	|void	|setlocale_failure_panic_i|const unsigned int cat_index	\
 				|NN const char * failed			\
 				|const line_t caller_0_line		\
 				|const line_t caller_1_line
+So	|const char *|toggle_locale_i|const unsigned switch_cat_index	\
+				|NN const char * new_locale		\
+				|const line_t caller_line
+So	|void	|restore_toggled_locale_i|const unsigned cat_index	\
+                                |NULLOK const char * original_locale    \
+				|const line_t caller_line
+S	|bool	|is_locale_utf8	|NN const char * locale
+#    if (defined(HAS_LOCALECONV) || defined(HAS_LOCALECONV_L))		\
+     && (defined(USE_LOCALE_MONETARY) || defined(USE_LOCALE_NUMERIC))
+S	|HV *	|my_localeconv|const int item				\
+			      |const locale_utf8ness_t locale_is_utf8
+S	|HV *	|populate_localeconv|NN const struct lconv *lcbuf	\
+			|const int unused				\
+			|const locale_utf8ness_t numeric_locale_is_utf8	\
+			|const locale_utf8ness_t monetary_locale_is_utf8
+#if   ! defined(HAS_NL_LANGINFO_L) && ! defined(HAS_NL_LANGINFO)
+S	|HV *	|get_nl_item_from_localeconv				\
+				|NN const struct lconv *lcbuf		\
+                                |const int item				\
+                                |const locale_utf8ness_t unused1	\
+                                |const locale_utf8ness_t unused2
+#      endif
+#    endif
 #    if defined(USE_POSIX_2008_LOCALE)
 S	|const char*|emulate_setlocale_i|const unsigned int index	\
 				    |NULLOK const char* new_locale	\
@@ -3353,6 +3386,23 @@ S	|const char *|find_locale_from_environment|const unsigned int index
 #    endif
 #    ifdef WIN32
 S	|char*	|win32_setlocale|int category|NULLOK const char* locale
+pTC	|wchar_t *|Win_utf8_string_to_wstring|NULLOK const char * utf8_string
+pTC	|char *	|Win_wstring_to_utf8_string|NULLOK const wchar_t * wstring
+#    endif
+#    if defined(HAS_NL_LANGINFO) || defined(HAS_NL_LANGINFO_L)
+S	|const char*|my_langinfo_i|const nl_item item			\
+				|const unsigned int cat_index		\
+				|NN const char * locale			\
+				|NN const char ** retbufp		\
+				|NULLOK Size_t * retbuf_sizep		\
+				|NULLOK utf8ness_t * utf8ness
+#    else
+S	|const char*|my_langinfo_i|const int item			\
+				|const unsigned int cat_index		\
+				|NN const char * locale			\
+				|NN const char ** retbufp		\
+				|NULLOK Size_t * retbuf_sizep		\
+				|NULLOK utf8ness_t * utf8ness
 #    endif
 #    ifdef DEBUGGING
 S	|void	|print_collxfrm_input_and_return		\

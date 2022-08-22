@@ -21,6 +21,7 @@ BEGIN {
     }
 }
 use Config;
+use I18N::Langinfo qw(langinfo RADIXCHAR);
 my $have_strtod = $Config{d_strtod} eq 'define';
 my $have_localeconv = defined $Config{d_locconv} && $Config{d_locconv} eq 'define';
 my @locales = find_locales( [ 'LC_ALL', 'LC_CTYPE', 'LC_NUMERIC' ]);
@@ -141,7 +142,7 @@ EOF
         } else {
             $different ||= $_;
             $difference ||= $s;
-            my $radix = localeconv()->{decimal_point};
+            my $radix = langinfo(RADIXCHAR);
 
             # For utf8 locales with a non-ascii radix, it should be encoded as
             # UTF-8 with the internal flag so set.
@@ -183,11 +184,11 @@ EOF
 EOF
                 "format() does not look at LC_NUMERIC without 'use locale'");
 
-    {
-    fresh_perl_is(<<'EOF', "$difference\n", { eval $switches },
-    use POSIX;
-    use locale;
-    format STDOUT =
+            {
+                fresh_perl_is(<<'EOF', "$difference\n", { eval $switches },
+                use POSIX;
+                use locale;
+                format STDOUT =
 @.#
 4.179
 .

@@ -327,6 +327,7 @@
 #define my_setenv(a,b)		Perl_my_setenv(aTHX_ a,b)
 #define my_socketpair		Perl_my_socketpair
 #define my_strftime(a,b,c,d,e,f,g,h,i,j)	Perl_my_strftime(aTHX_ a,b,c,d,e,f,g,h,i,j)
+#define my_strftime8(a,b,c,d,e,f,g,h,i,j,k)	Perl_my_strftime8(aTHX_ a,b,c,d,e,f,g,h,i,j,k)
 #define my_strtod		Perl_my_strtod
 #define newANONATTRSUB(a,b,c,d)	Perl_newANONATTRSUB(aTHX_ a,b,c,d)
 #define newANONHASH(a)		Perl_newANONHASH(aTHX_ a)
@@ -824,6 +825,14 @@
 #define dump_mstats(a)		Perl_dump_mstats(aTHX_ a)
 #define get_mstats(a,b,c)	Perl_get_mstats(aTHX_ a,b,c)
 #endif
+#if defined(PERL_IN_LOCALE_C)
+#  if defined(USE_LOCALE)
+#    if defined(WIN32)
+#define Win_utf8_string_to_wstring	Perl_Win_utf8_string_to_wstring
+#define Win_wstring_to_utf8_string	Perl_Win_wstring_to_utf8_string
+#    endif
+#  endif
+#endif
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C)
 #define check_regnode_after(a,b)	Perl_check_regnode_after(aTHX_ a,b)
 #define regnext(a)		Perl_regnext(aTHX_ a)
@@ -925,6 +934,7 @@
 #define get_prop_definition(a)	Perl_get_prop_definition(aTHX_ a)
 #define get_prop_values		Perl_get_prop_values
 #define load_charnames(a,b,c,d)	Perl_load_charnames(aTHX_ a,b,c,d)
+#define mbtowc_(a,b,c)		Perl_mbtowc_(aTHX_ a,b,c)
 #define mg_find_mglob(a)	Perl_mg_find_mglob(aTHX_ a)
 #define multiconcat_stringify(a)	Perl_multiconcat_stringify(aTHX_ a)
 #define multideref_stringify(a,b)	Perl_multideref_stringify(aTHX_ a,b)
@@ -1477,6 +1487,15 @@
 #define yyparse(a)		Perl_yyparse(aTHX_ a)
 #define yyquit()		Perl_yyquit(aTHX)
 #define yyunlex()		Perl_yyunlex(aTHX)
+#  if ! defined(HAS_NL_LANGINFO_L) && ! defined(HAS_NL_LANGINFO)
+#    if (defined(HAS_LOCALECONV) || defined(HAS_LOCALECONV_L))		     && (defined(USE_LOCALE_MONETARY) || defined(USE_LOCALE_NUMERIC))
+#      if defined(PERL_IN_LOCALE_C)
+#        if defined(USE_LOCALE)
+#define get_nl_item_from_localeconv(a,b,c,d)	S_get_nl_item_from_localeconv(aTHX_ a,b,c,d)
+#        endif
+#      endif
+#    endif
+#  endif
 #  if !(defined(DEBUGGING))
 #    if !defined(NV_PRESERVES_UV)
 #      if defined(PERL_IN_SV_C)
@@ -1484,9 +1503,11 @@
 #      endif
 #    endif
 #  endif
-#  if !(defined(HAS_NL_LANGINFO))
+#  if !(defined(HAS_NL_LANGINFO) || defined(HAS_NL_LANGINFO_L))
 #    if defined(PERL_IN_LOCALE_C)
-#define my_nl_langinfo		S_my_nl_langinfo
+#      if defined(USE_LOCALE)
+#define my_langinfo_i(a,b,c,d,e,f)	S_my_langinfo_i(aTHX_ a,b,c,d,e,f)
+#      endif
 #    endif
 #  endif
 #  if !(defined(PERL_DEFAULT_DO_EXEC3_IMPLEMENTATION))
@@ -1556,6 +1577,14 @@
 #  if !defined(WIN32)
 #define do_exec3(a,b,c)		Perl_do_exec3(aTHX_ a,b,c)
 #  endif
+#  if (defined(HAS_LOCALECONV) || defined(HAS_LOCALECONV_L))		     && (defined(USE_LOCALE_MONETARY) || defined(USE_LOCALE_NUMERIC))
+#    if defined(PERL_IN_LOCALE_C)
+#      if defined(USE_LOCALE)
+#define my_localeconv(a,b)	S_my_localeconv(aTHX_ a,b)
+#define populate_localeconv(a,b,c,d)	S_populate_localeconv(aTHX_ a,b,c,d)
+#      endif
+#    endif
+#  endif
 #  if 0	/* Not currently used, but may be needed in the future */
 #    if defined(PERL_IN_UTF8_C)
 #define warn_on_first_deprecated_use(a,b,c,d,e)	S_warn_on_first_deprecated_use(aTHX_ a,b,c,d,e)
@@ -1596,9 +1625,11 @@
 #define do_semop(a,b)		Perl_do_semop(aTHX_ a,b)
 #define do_shmio(a,b,c)		Perl_do_shmio(aTHX_ a,b,c)
 #  endif
-#  if defined(HAS_NL_LANGINFO)
+#  if defined(HAS_NL_LANGINFO) || defined(HAS_NL_LANGINFO_L)
 #    if defined(PERL_IN_LOCALE_C)
-#define my_nl_langinfo		S_my_nl_langinfo
+#      if defined(USE_LOCALE)
+#define my_langinfo_i(a,b,c,d,e,f)	S_my_langinfo_i(aTHX_ a,b,c,d,e,f)
+#      endif
 #    endif
 #  endif
 #  if defined(HAS_PIPE)
@@ -1688,15 +1719,19 @@
 #define unshare_hek_or_pvn(a,b,c,d)	S_unshare_hek_or_pvn(aTHX_ a,b,c,d)
 #  endif
 #  if defined(PERL_IN_LOCALE_C)
-#define save_to_buffer		S_save_to_buffer
+#define mortalized_pv_copy(a)	S_mortalized_pv_copy(aTHX_ a)
 #    if defined(USE_LOCALE)
 #define category_name		S_category_name
 #define get_category_index	S_get_category_index
+#define get_locale_string_utf8ness_i(a,b,c,d)	S_get_locale_string_utf8ness_i(aTHX_ a,b,c,d)
+#define is_codeset_name_UTF8	S_is_codeset_name_UTF8
+#define is_locale_utf8(a)	S_is_locale_utf8(aTHX_ a)
 #define new_LC_ALL(a)		S_new_LC_ALL(aTHX_ a)
 #define new_collate(a)		S_new_collate(aTHX_ a)
 #define new_ctype(a)		S_new_ctype(aTHX_ a)
 #define new_numeric(a)		S_new_numeric(aTHX_ a)
 #define restore_switched_locale(a,b)	S_restore_switched_locale(aTHX_ a,b)
+#define save_to_buffer		S_save_to_buffer
 #define set_numeric_radix(a)	S_set_numeric_radix(aTHX_ a)
 #define setlocale_failure_panic_i(a,b,c,d,e)	S_setlocale_failure_panic_i(aTHX_ a,b,c,d,e)
 #define stdize_locale(a,b,c,d,e)	S_stdize_locale(aTHX_ a,b,c,d,e)
