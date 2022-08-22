@@ -3410,13 +3410,15 @@ S	|void	|print_collxfrm_input_and_return		\
 			    |NULLOK const char * xbuf		\
 			    |const STRLEN xlen			\
 			    |const bool is_utf8
-S	|void	|print_bytes_for_locale	|NN const char * const s	\
-					|NN const char * const e	\
-					|const bool is_utf8
 STR	|char *	|setlocale_debug_string_i|const unsigned cat_index	    \
 					|NULLOK const char* const locale    \
 					|NULLOK const char* const retval
 #    endif
+#  endif
+#  ifdef DEBUGGING
+S	|void	|print_bytes_for_locale	|NN const char * const s	\
+					|NN const char * const e	\
+					|const bool is_utf8
 #  endif
 #endif
 
