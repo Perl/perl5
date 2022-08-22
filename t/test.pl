@@ -1724,7 +1724,11 @@ sub warning_like {
     }
 }
 
-# Set a watchdog to timeout the entire test file
+# Set a watchdog to timeout the entire test file.  The input seconds is
+# multiplied by $ENV{PERL_TEST_TIME_OUT_FACTOR} (default 1; minimum 1).
+# Set this in your profile for slow boxes, or use it to override the timeout
+# temporarily for debugging.
+#
 # NOTE:  If the test file uses 'threads', then call the watchdog() function
 #        _AFTER_ the 'threads' module is loaded.
 sub watchdog ($;$)
@@ -1733,8 +1737,16 @@ sub watchdog ($;$)
     my $method  = shift || "";
     my $timeout_msg = 'Test process timed out - terminating';
 
+    # Accept either spelling
+    my $timeout_factor = $ENV{PERL_TEST_TIME_OUT_FACTOR}
+                      || $ENV{PERL_TEST_TIMEOUT_FACTOR}
+                      || 1;
+    $timeout_factor = 1 if $timeout_factor < 1;
+
     # Valgrind slows perl way down so give it more time before dying.
-    $timeout *= 10 if $ENV{PERL_VALGRIND};
+    $timeout_factor = 10 if $timeout_factor < 10 && $ENV{PERL_VALGRIND};
+
+    $timeout *= $timeout_factor;
 
     my $pid_to_kill = $$;   # PID for this process
 
