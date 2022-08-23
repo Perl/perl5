@@ -977,7 +977,7 @@ p	|void	|do_vop 	|I32 optype				\
 : Used in perly.y
 p	|OP *	|dofile 	|NN OP *term				\
 				|I32 force_builtin
-CdpR	|U8	|dowantarray
+CdpRD	|U8	|dowantarray
 Adp	|void	|dump_all
 p	|void	|dump_all_perl	|bool justperl
 Apdh	|void	|dump_eval
