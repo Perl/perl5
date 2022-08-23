@@ -4,6 +4,7 @@ Revision history for the Perl extension Time::HiRes.
 
  - Remove obsolete vms code
  - Use core version compare
+ - Use GIMME_V instead of the deprecated GIMME
 
 1.9764 [2020-08-10]
  - Fix a bunch of repeated-word typos

@@ -1193,7 +1193,7 @@ gettimeofday()
         int status;
         status = gettimeofday (&Tp, NULL);
         if (status == 0) {
-            if (GIMME == G_LIST) {
+            if (GIMME_V == G_LIST) {
                 EXTEND(sp, 2);
                 PUSHs(sv_2mortal(newSViv(Tp.tv_sec)));
                 PUSHs(sv_2mortal(newSViv(Tp.tv_usec)));
@@ -1250,7 +1250,7 @@ setitimer(which, seconds, interval = 0)
         if (setitimer(which, &newit, &oldit) == 0) {
             EXTEND(sp, 1);
             PUSHs(sv_2mortal(newSVnv(TV2NV(oldit.it_value))));
-            if (GIMME == G_LIST) {
+            if (GIMME_V == G_LIST) {
                 EXTEND(sp, 1);
                 PUSHs(sv_2mortal(newSVnv(TV2NV(oldit.it_interval))));
             }
@@ -1270,7 +1270,7 @@ getitimer(which)
         if (getitimer(which, &nowit) == 0) {
             EXTEND(sp, 1);
             PUSHs(sv_2mortal(newSVnv(TV2NV(nowit.it_value))));
-            if (GIMME == G_LIST) {
+            if (GIMME_V == G_LIST) {
                 EXTEND(sp, 1);
                 PUSHs(sv_2mortal(newSVnv(TV2NV(nowit.it_interval))));
             }
