@@ -205,7 +205,7 @@ sub read_commit_log {
     my $author_info= $self->{author_info}   ||= {};
     my $mailmap_info= $self->{mailmap_info} ||= {};
 
-    my $commit_range= $self->{commit_range};
+    my $commit_range= $self->{commit_range} ? qq#'$self->{commit_range}'# : "";
     my $commits_read= 0;
 
     my $numstat= $self->{numstat} ? "--numstat" : "";
