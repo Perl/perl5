@@ -1017,6 +1017,7 @@ Perl_dounwind(pTHX_ I32 cxix);
 
 PERL_CALLCONV U8
 Perl_dowantarray(pTHX)
+        __attribute__deprecated__
         __attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_DOWANTARRAY
 
