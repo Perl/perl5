@@ -142,6 +142,51 @@ sub main {
             my ($committer_name, $committer_email)=
                 $self->current_committer_name_email();
 
+            # ---- BEGIN TEMP ---
+            #
+            # Several of the smokers are not happy:
+            #
+            # Test::Smoke leaves some files in the build dir which causes this
+            # code to (correctly) conclude that there are uncommitted files.
+            # The test then continues to check if the author name/email is
+            # configured and if the 'user' is known in AUTHORS.
+            # On several smokers (including mine) there is *no* git config
+            # and that causes the tests to fail.
+            #
+            # The old code (t/porting/pending-authors.t) which was removed
+            # differs from this code in two ways:
+            # - it ignored untracked files (in git status)
+            # - it skipped the tests when author name/email was not set in
+            #   the git config.
+            #
+            # For now: restore the old behavior and 'skip' the tests when
+            #          there is no git config.
+            #
+            # (A better fix might be to add the Test::Smoke files into
+            #  the .gitignore file but it needs to be checked if there are
+            #  side effects from that + required knowing which files were
+            #  created.)
+            #
+            if ($uncommitted_files !~ m/^[^\?]/m) {
+                note(
+                    "Only untracked files in \$uncommited_files - skipping tests"
+                );
+                done_testing();
+                return 0;
+            }
+            if (not $author_name or not $author_email) {
+                note("Author name or email unknown in git - skipping tests");
+                done_testing();
+                return 0;
+            }
+            if (not $committer_name or not $committer_email) {
+                note("Committer name or email unknown in git - skipping tests");
+                done_testing();
+                return 0;
+            }
+            #
+            # ---- END TEMP ---
+
             ok($author_name && $author_email,
                 "git knows your author name and email.");
             ok(
