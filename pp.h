@@ -201,6 +201,10 @@ C<TARG>, so C<dTARGET> or C<dXSTARG> should be called to declare it.  Do not
 call multiple C<TARG>-oriented macros to return lists from XSUB's - see
 C<L</mPUSHp>> instead.  See also C<L</XPUSHp>> and C<L</mXPUSHp>>.
 
+=for apidoc Am|void|PUSHpvs|"literal string"
+A variation on C<PUSHp> that takes a literal string and calculates its size
+directly.
+
 =for apidoc Am|void|PUSHn|NV nv
 Push a double onto the stack.  The stack must have room for this element.
 Handles 'set' magic.  Uses C<TARG>, so C<dTARGET> or C<dXSTARG> should be
@@ -233,6 +237,10 @@ indicates the length of the string.  Handles 'set' magic.  Uses C<TARG>, so
 C<dTARGET> or C<dXSTARG> should be called to declare it.  Do not call
 multiple C<TARG>-oriented macros to return lists from XSUB's - see
 C<L</mXPUSHp>> instead.  See also C<L</PUSHp>> and C<L</mPUSHp>>.
+
+=for apidoc Am|void|XPUSHpvs|"literal string"
+A variation on C<XPUSHp> that takes a literal string and calculates its size
+directly.
 
 =for apidoc Am|void|XPUSHn|NV nv
 Push a double onto the stack, extending the stack if necessary.  Handles
@@ -270,6 +278,10 @@ Push a string onto the stack.  The stack must have room for this element.
 The C<len> indicates the length of the string.  Does not use C<TARG>.
 See also C<L</PUSHp>>, C<L</mXPUSHp>> and C<L</XPUSHp>>.
 
+=for apidoc Am|void|mPUSHpvs|"literal string"
+A variation on C<mPUSHp> that takes a literal string and calculates its size
+directly.
+
 =for apidoc Am|void|mPUSHn|NV nv
 Push a double onto the stack.  The stack must have room for this element.
 Does not use C<TARG>.  See also C<L</PUSHn>>, C<L</mXPUSHn>> and C<L</XPUSHn>>.
@@ -296,6 +308,10 @@ C<L</PUSHs>>.
 Push a string onto the stack, extending the stack if necessary.  The C<len>
 indicates the length of the string.  Does not use C<TARG>.  See also
 C<L</XPUSHp>>, C<mPUSHp> and C<PUSHp>.
+
+=for apidoc Am|void|mXPUSHpvs|"literal string"
+A variation on C<mXPUSHp> that takes a literal string and calculates its size
+directly.
 
 =for apidoc Am|void|mXPUSHn|NV nv
 Push a double onto the stack, extending the stack if necessary.
@@ -472,6 +488,7 @@ Does not use C<TARG>.  See also C<L</XPUSHu>>, C<L</mPUSHu>> and C<L</PUSHu>>.
 #define PUSHs(s)	(*++sp = (s))
 #define PUSHTARG	STMT_START { SvSETMAGIC(TARG); PUSHs(TARG); } STMT_END
 #define PUSHp(p,l)	STMT_START { sv_setpvn(TARG, (p), (l)); PUSHTARG; } STMT_END
+#define PUSHpvs(s)      PUSHp("" s "", sizeof(s)-1)
 #define PUSHn(n)	STMT_START { TARGn(n,1); PUSHs(TARG); } STMT_END
 #define PUSHi(i)	STMT_START { TARGi(i,1); PUSHs(TARG); } STMT_END
 #define PUSHu(u)	STMT_START { TARGu(u,1); PUSHs(TARG); } STMT_END
@@ -479,6 +496,7 @@ Does not use C<TARG>.  See also C<L</XPUSHu>>, C<L</mPUSHu>> and C<L</PUSHu>>.
 #define XPUSHs(s)	STMT_START { EXTEND(sp,1); *++sp = (s); } STMT_END
 #define XPUSHTARG	STMT_START { SvSETMAGIC(TARG); XPUSHs(TARG); } STMT_END
 #define XPUSHp(p,l)	STMT_START { sv_setpvn(TARG, (p), (l)); XPUSHTARG; } STMT_END
+#define XPUSHpvs(s)     XPUSHp("" s "", sizeof(s)-1)
 #define XPUSHn(n)	STMT_START { TARGn(n,1); XPUSHs(TARG); } STMT_END
 #define XPUSHi(i)	STMT_START { TARGi(i,1); XPUSHs(TARG); } STMT_END
 #define XPUSHu(u)	STMT_START { TARGu(u,1); XPUSHs(TARG); } STMT_END
@@ -487,6 +505,7 @@ Does not use C<TARG>.  See also C<L</XPUSHu>>, C<L</mPUSHu>> and C<L</PUSHu>>.
 #define mPUSHs(s)	PUSHs(sv_2mortal(s))
 #define PUSHmortal	PUSHs(sv_newmortal())
 #define mPUSHp(p,l)	PUSHs(newSVpvn_flags((p), (l), SVs_TEMP))
+#define mPUSHpvs(s)     mPUSHp("" s "", sizeof(s)-1)
 #define mPUSHn(n)	sv_setnv(PUSHmortal, (NV)(n))
 #define mPUSHi(i)	sv_setiv(PUSHmortal, (IV)(i))
 #define mPUSHu(u)	sv_setuv(PUSHmortal, (UV)(u))
@@ -494,6 +513,7 @@ Does not use C<TARG>.  See also C<L</XPUSHu>>, C<L</mPUSHu>> and C<L</PUSHu>>.
 #define mXPUSHs(s)	XPUSHs(sv_2mortal(s))
 #define XPUSHmortal	XPUSHs(sv_newmortal())
 #define mXPUSHp(p,l)	STMT_START { EXTEND(sp,1); mPUSHp((p), (l)); } STMT_END
+#define mXPUSHpvs(s)    mXPUSHp("" s "", sizeof(s)-1)
 #define mXPUSHn(n)	STMT_START { EXTEND(sp,1); mPUSHn(n); } STMT_END
 #define mXPUSHi(i)	STMT_START { EXTEND(sp,1); mPUSHi(i); } STMT_END
 #define mXPUSHu(u)	STMT_START { EXTEND(sp,1); mPUSHu(u); } STMT_END

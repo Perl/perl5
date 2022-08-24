@@ -2463,7 +2463,7 @@ mpushp()
         EXTEND(SP, 3);
         mPUSHp("one", 3);
         mPUSHp("two", 3);
-        mPUSHp("three", 5);
+        mPUSHpvs("three");
         XSRETURN(3);
 
 void
@@ -2498,7 +2498,7 @@ mxpushp()
         PPCODE:
         mXPUSHp("one", 3);
         mXPUSHp("two", 3);
-        mXPUSHp("three", 5);
+        mXPUSHpvs("three");
         XSRETURN(3);
 
 void
