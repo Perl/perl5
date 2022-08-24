@@ -549,7 +549,6 @@ unless ($define{USE_LOCALE_COLLATE}) {
 
 unless ($define{USE_LOCALE_NUMERIC}) {
     ++$skip{$_} foreach qw(
-		    PL_numeric_local
                     PL_underlying_numeric_obj
 			 );
 }
