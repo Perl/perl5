@@ -1920,6 +1920,24 @@ S_new_ctype(pTHX_ const char *newctype)
         }
     }
     else {  /* Not a canned locale we know the values for.  Compute them */
+
+#    ifdef DEBUGGING
+
+        bool has_non_ascii_fold = FALSE;
+        bool found_unexpected = FALSE;
+
+        if (DEBUG_Lv_TEST) {
+            for (i = 128; i < 256; i++) {
+                int j = LATIN1_TO_NATIVE(i);
+                if (toU8_LOWER_LC(j) != j || toU8_UPPER_LC(j) != j) {
+                    has_non_ascii_fold = TRUE;
+                    break;
+                }
+            }
+        }
+
+#    endif
+
         for (i = 0; i < 256; i++) {
             if (isU8_UPPER_LC(i))
                 PL_fold_locale[i] = (U8) toU8_LOWER_LC(i);
@@ -1927,6 +1945,69 @@ S_new_ctype(pTHX_ const char *newctype)
                 PL_fold_locale[i] = (U8) toU8_UPPER_LC(i);
             else
                 PL_fold_locale[i] = (U8) i;
+
+#    ifdef DEBUGGING
+
+            if (DEBUG_Lv_TEST) {
+                bool unexpected = FALSE;
+
+                if (isUPPER_L1(i)) {
+                    if (isUPPER_A(i)) {
+                        if (PL_fold_locale[i] != toLOWER_A(i)) {
+                            unexpected = TRUE;
+                        }
+                    }
+                    else if (has_non_ascii_fold) {
+                        if (PL_fold_locale[i] != toLOWER_L1(i)) {
+                            unexpected = TRUE;
+                        }
+                    }
+                    else if (PL_fold_locale[i] != i) {
+                        unexpected = TRUE;
+                    }
+                }
+                else if (   isLOWER_L1(i)
+                         && i != LATIN_SMALL_LETTER_SHARP_S
+                         && i != MICRO_SIGN)
+                {
+                    if (isLOWER_A(i)) {
+                        if (PL_fold_locale[i] != toUPPER_A(i)) {
+                            unexpected = TRUE;
+                        }
+                    }
+                    else if (has_non_ascii_fold) {
+                        if (PL_fold_locale[i] != toUPPER_LATIN1_MOD(i)) {
+                            unexpected = TRUE;
+                        }
+                    }
+                    else if (PL_fold_locale[i] != i) {
+                        unexpected = TRUE;
+                    }
+                }
+                else if (PL_fold_locale[i] != i) {
+                    unexpected = TRUE;
+                }
+
+                if (unexpected) {
+                    found_unexpected = TRUE;
+                    DEBUG_Lv(PerlIO_printf(Perl_debug_log,
+                                           "For %s, fold of %02x is %02x\n",
+                                           newctype, i, PL_fold_locale[i]));
+                }
+            }
+        }
+
+        if (found_unexpected) {
+            DEBUG_Lv(PerlIO_printf(Perl_debug_log,
+                               "All bytes not mentioned above either fold to"
+                               " themselves or are the expected ASCII or"
+                               " Latin1 ones\n"));
+        }
+        else {
+            DEBUG_Lv(PerlIO_printf(Perl_debug_log,
+                                   "No nonstandard folds were found\n"));
+#    endif
+
         }
     }
 
