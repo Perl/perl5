@@ -125,6 +125,17 @@ XXX Remove this section if not applicable.
 
 =item *
 
+L<I18N::Langinfo> has been upgraded from version 0.21 to 0.22.
+
+This module uses the POSIX L<nl_langinfo(3)> function if available, and
+emulates it otherwise, such as on Windows.  This new version improves
+the handling of the C<CODESET> item.  Now it works completely correctly
+on Windows platforms (barring any bugs in Windows functions), and
+reliably handles C<UTF-8>, C<C>, and C<POSIX> on other emulated
+platforms
+
+=item *
+
 L<XXX> has been upgraded from version A.xx to B.yy.
 
 If there was something important to note about this change, include that here.
