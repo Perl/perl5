@@ -608,11 +608,16 @@ LIBFILES	+= -lquadmath
 endif
 
 ifeq ($(CFG),Debug)
-OPTIMIZE	= -g -O2
+# According to https://gcc.gnu.org/onlinedocs/gcc-8.3.0/gcc/Optimize-Options.html
+# -Og should provide some optimizations while still giving convenient debugging
+OPTIMIZE	= -g -Og
 LINK_DBG	= -g
 DEFINES		+= -DDEBUGGING
 else
-OPTIMIZE	= -O2
+# In https://github.com/Perl/perl5/issues/20081 it is found that the previous
+# optimization level -O2 causes generated code that fails in mysterious ways
+# when run on Win11 (*even* if it was built and successfully tested on Win10!).
+OPTIMIZE	= -Os
 LINK_DBG	= -s
 endif
 
