@@ -3329,7 +3329,7 @@ S	|utf8ness_t|get_locale_string_utf8ness_i				\
 S	|void	|new_collate	|NULLOK const char* newcoll
 S	|void	|new_ctype	|NN const char* newctype
 S	|void	|set_numeric_radix|const bool use_locale
-S	|void	|new_numeric	|NULLOK const char* newnum
+S	|void	|new_numeric	|NN const char* newnum
 S	|void	|new_LC_ALL	|NULLOK const char* unused
 S	|const char*|stdize_locale|const int category			\
 				|NULLOK const char* input_locale	\

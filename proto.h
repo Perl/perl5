@@ -5681,7 +5681,8 @@ STATIC void	S_new_ctype(pTHX_ const char* newctype);
 #define PERL_ARGS_ASSERT_NEW_CTYPE	\
 	assert(newctype)
 STATIC void	S_new_numeric(pTHX_ const char* newnum);
-#define PERL_ARGS_ASSERT_NEW_NUMERIC
+#define PERL_ARGS_ASSERT_NEW_NUMERIC	\
+	assert(newnum)
 STATIC void	S_restore_switched_locale(pTHX_ const int category, const char * const original_locale);
 #define PERL_ARGS_ASSERT_RESTORE_SWITCHED_LOCALE
 STATIC void	S_restore_toggled_locale_i(pTHX_ const unsigned cat_index, const char * original_locale, const line_t caller_line);
