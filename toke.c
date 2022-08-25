@@ -10777,7 +10777,6 @@ S_scan_heredoc(pTHX_ char *s)
 #endif
 
     tmpstr = newSV_type(SVt_PVIV);
-    SvGROW(tmpstr, 80);
     if (term == '\'') {
         op_type = OP_CONST;
         SvIV_set(tmpstr, -1);
@@ -10888,7 +10887,7 @@ S_scan_heredoc(pTHX_ char *s)
             goto interminable;
         }
 
-        sv_setpvn(tmpstr,d+1,s-d);
+        sv_setpvn_fresh(tmpstr,d+1,s-d);
         s += len - 1;
         /* the preceding stmt passes a newline */
         PL_parser->herelines++;
@@ -10935,6 +10934,7 @@ S_scan_heredoc(pTHX_ char *s)
         char *oldbufptr_save;
         char *oldoldbufptr_save;
       streaming:
+        sv_grow_fresh(tmpstr, 80);
         SvPVCLEAR(tmpstr);   /* avoid "uninitialized" warning */
         term = PL_tokenbuf[1];
         len--;
