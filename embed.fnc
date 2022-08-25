@@ -3326,7 +3326,7 @@ S	|utf8ness_t|get_locale_string_utf8ness_i				\
 				|const unsigned cat_index		\
 				|NULLOK const char * string		\
 				|const locale_utf8ness_t known_utf8
-S	|void	|new_collate	|NULLOK const char* newcoll
+S	|void	|new_collate	|NN const char* newcoll
 S	|void	|new_ctype	|NN const char* newctype
 S	|void	|new_numeric	|NN const char* newnum
 S	|void	|new_LC_ALL	|NULLOK const char* unused

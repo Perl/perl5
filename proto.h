@@ -5676,7 +5676,8 @@ STATIC bool	S_is_locale_utf8(pTHX_ const char * locale);
 STATIC void	S_new_LC_ALL(pTHX_ const char* unused);
 #define PERL_ARGS_ASSERT_NEW_LC_ALL
 STATIC void	S_new_collate(pTHX_ const char* newcoll);
-#define PERL_ARGS_ASSERT_NEW_COLLATE
+#define PERL_ARGS_ASSERT_NEW_COLLATE	\
+	assert(newcoll)
 STATIC void	S_new_ctype(pTHX_ const char* newctype);
 #define PERL_ARGS_ASSERT_NEW_CTYPE	\
 	assert(newctype)
