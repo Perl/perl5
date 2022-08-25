@@ -89,7 +89,10 @@ There may well be none in a stable release.
 
 =item *
 
-XXX
+Additional optree optimizations for common OP patterns. For example, multiple
+simple OPs replaced by a single streamlined OP, so as to be more efficient at
+runtime. L<[GH #19943]|https://github.com/Perl/perl5/pull/19943>,
+L<[GH #20077]|https://github.com/Perl/perl5/pull/20077>.
 
 =back
 
