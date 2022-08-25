@@ -1646,6 +1646,7 @@ S_set_numeric_radix(pTHX_ const bool use_locale)
 STATIC void
 S_new_numeric(pTHX_ const char *newnum)
 {
+    PERL_ARGS_ASSERT_NEW_NUMERIC;
 
 #  ifndef USE_LOCALE_NUMERIC
 
@@ -1694,15 +1695,6 @@ S_new_numeric(pTHX_ const char *newnum)
      *                  with everything set up properly so as to avoid work on
      *                  such platforms.
      */
-
-    if (! newnum) {
-        Safefree(PL_numeric_name);
-        PL_numeric_name = savepv("C");
-        PL_numeric_standard = TRUE;
-        PL_numeric_underlying = TRUE;
-        PL_numeric_underlying_is_standard = TRUE;
-        return;
-    }
 
     PL_numeric_underlying = TRUE;
 
