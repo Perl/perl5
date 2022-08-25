@@ -2330,176 +2330,6 @@ S_new_collate(pTHX_ const char *newcoll)
 }
 
 #endif  /* USE_LOCALE */
-#ifdef USE_LOCALE_COLLATE
-
-STATIC void
-S_compute_collxfrm_coefficients(pTHX)
-{
-
-        PL_in_utf8_COLLATE_locale = (PL_collation_standard)
-                                    ? 0
-                                    : is_locale_utf8(PL_collation_name);
-        PL_strxfrm_NUL_replacement = '\0';
-        PL_strxfrm_max_cp = 0;
-
-        /* A locale collation definition includes primary, secondary, tertiary,
-         * etc. weights for each character.  To sort, the primary weights are
-         * used, and only if they compare equal, then the secondary weights are
-         * used, and only if they compare equal, then the tertiary, etc.
-         *
-         * strxfrm() works by taking the input string, say ABC, and creating an
-         * output transformed string consisting of first the primary weights,
-         * A¹B¹C¹ followed by the secondary ones, A²B²C²; and then the
-         * tertiary, etc, yielding A¹B¹C¹ A²B²C² A³B³C³ ....  Some characters
-         * may not have weights at every level.  In our example, let's say B
-         * doesn't have a tertiary weight, and A doesn't have a secondary
-         * weight.  The constructed string is then going to be
-         *  A¹B¹C¹ B²C² A³C³ ....
-         * This has the desired effect that strcmp() will look at the secondary
-         * or tertiary weights only if the strings compare equal at all higher
-         * priority weights.  The spaces shown here, like in
-         *  "A¹B¹C¹ A²B²C² "
-         * are not just for readability.  In the general case, these must
-         * actually be bytes, which we will call here 'separator weights'; and
-         * they must be smaller than any other weight value, but since these
-         * are C strings, only the terminating one can be a NUL (some
-         * implementations may include a non-NUL separator weight just before
-         * the NUL).  Implementations tend to reserve 01 for the separator
-         * weights.  They are needed so that a shorter string's secondary
-         * weights won't be misconstrued as primary weights of a longer string,
-         * etc.  By making them smaller than any other weight, the shorter
-         * string will sort first.  (Actually, if all secondary weights are
-         * smaller than all primary ones, there is no need for a separator
-         * weight between those two levels, etc.)
-         *
-         * The length of the transformed string is roughly a linear function of
-         * the input string.  It's not exactly linear because some characters
-         * don't have weights at all levels.  When we call strxfrm() we have to
-         * allocate some memory to hold the transformed string.  The
-         * calculations below try to find coefficients 'm' and 'b' for this
-         * locale so that m*x + b equals how much space we need, given the size
-         * of the input string in 'x'.  If we calculate too small, we increase
-         * the size as needed, and call strxfrm() again, but it is better to
-         * get it right the first time to avoid wasted expensive string
-         * transformations. */
-
-        {
-            /* We use the string below to find how long the tranformation of it
-             * is.  Almost all locales are supersets of ASCII, or at least the
-             * ASCII letters.  We use all of them, half upper half lower,
-             * because if we used fewer, we might hit just the ones that are
-             * outliers in a particular locale.  Most of the strings being
-             * collated will contain a preponderance of letters, and even if
-             * they are above-ASCII, they are likely to have the same number of
-             * weight levels as the ASCII ones.  It turns out that digits tend
-             * to have fewer levels, and some punctuation has more, but those
-             * are relatively sparse in text, and khw believes this gives a
-             * reasonable result, but it could be changed if experience so
-             * dictates. */
-            const char longer[] = "ABCDEFGHIJKLMnopqrstuvwxyz";
-            char * x_longer;        /* Transformed 'longer' */
-            Size_t x_len_longer;    /* Length of 'x_longer' */
-
-            char * x_shorter;   /* We also transform a substring of 'longer' */
-            Size_t x_len_shorter;
-
-            /* mem_collxfrm_() is used get the transformation (though here we
-             * are interested only in its length).  It is used because it has
-             * the intelligence to handle all cases, but to work, it needs some
-             * values of 'm' and 'b' to get it started.  For the purposes of
-             * this calculation we use a very conservative estimate of 'm' and
-             * 'b'.  This assumes a weight can be multiple bytes, enough to
-             * hold any UV on the platform, and there are 5 levels, 4 weight
-             * bytes, and a trailing NUL.  */
-            PL_collxfrm_base = 5;
-            PL_collxfrm_mult = 5 * sizeof(UV);
-
-            /* Find out how long the transformation really is */
-            x_longer = mem_collxfrm_(longer,
-                                     sizeof(longer) - 1,
-                                     &x_len_longer,
-
-                                     /* We avoid converting to UTF-8 in the
-                                      * called function by telling it the
-                                      * string is in UTF-8 if the locale is a
-                                      * UTF-8 one.  Since the string passed
-                                      * here is invariant under UTF-8, we can
-                                      * claim it's UTF-8 even though it isn't.
-                                      * */
-                                     PL_in_utf8_COLLATE_locale);
-            Safefree(x_longer);
-
-            /* Find out how long the transformation of a substring of 'longer'
-             * is.  Together the lengths of these transformations are
-             * sufficient to calculate 'm' and 'b'.  The substring is all of
-             * 'longer' except the first character.  This minimizes the chances
-             * of being swayed by outliers */
-            x_shorter = mem_collxfrm_(longer + 1,
-                                      sizeof(longer) - 2,
-                                      &x_len_shorter,
-                                      PL_in_utf8_COLLATE_locale);
-            Safefree(x_shorter);
-
-            /* If the results are nonsensical for this simple test, the whole
-             * locale definition is suspect.  Mark it so that locale collation
-             * is not active at all for it.  XXX Should we warn? */
-            if (   x_len_shorter == 0
-                || x_len_longer == 0
-                || x_len_shorter >= x_len_longer)
-            {
-                PL_collxfrm_mult = 0;
-                PL_collxfrm_base = 1;
-                DEBUG_L(PerlIO_printf(Perl_debug_log,
-                        "Disabling locale collation for LC_COLLATE='%s';"
-                        " length for shorter sample=%zu; longer=%zu\n",
-                        PL_collation_name, x_len_shorter, x_len_longer));
-            }
-            else {
-                SSize_t base;       /* Temporary */
-
-                /* We have both:    m * strlen(longer)  + b = x_len_longer
-                 *                  m * strlen(shorter) + b = x_len_shorter;
-                 * subtracting yields:
-                 *          m * (strlen(longer) - strlen(shorter))
-                 *                             = x_len_longer - x_len_shorter
-                 * But we have set things up so that 'shorter' is 1 byte smaller
-                 * than 'longer'.  Hence:
-                 *          m = x_len_longer - x_len_shorter
-                 *
-                 * But if something went wrong, make sure the multiplier is at
-                 * least 1.
-                 */
-                if (x_len_longer > x_len_shorter) {
-                    PL_collxfrm_mult = (STRLEN) x_len_longer - x_len_shorter;
-                }
-                else {
-                    PL_collxfrm_mult = 1;
-                }
-
-                /*     mx + b = len
-                 * so:      b = len - mx
-                 * but in case something has gone wrong, make sure it is
-                 * non-negative */
-                base = x_len_longer - PL_collxfrm_mult * (sizeof(longer) - 1);
-                if (base < 0) {
-                    base = 0;
-                }
-
-                /* Add 1 for the trailing NUL */
-                PL_collxfrm_base = base + 1;
-            }
-
-            DEBUG_L(PerlIO_printf(Perl_debug_log,
-                                  "?UTF-8 locale=%d; x_len_shorter=%zu, "
-                    "x_len_longer=%zu,"
-                    " collate multipler=%zu, collate base=%zu\n",
-                    PL_in_utf8_COLLATE_locale,
-                    x_len_shorter, x_len_longer,
-                                  PL_collxfrm_mult, PL_collxfrm_base));
-        }
-}
-
-#endif  /* USE_LOCALE */
 
 #ifdef WIN32
 
@@ -5218,6 +5048,173 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 }
 
 #ifdef USE_LOCALE_COLLATE
+
+STATIC void
+S_compute_collxfrm_coefficients(pTHX)
+{
+
+        PL_in_utf8_COLLATE_locale = (PL_collation_standard)
+                                    ? 0
+                                    : is_locale_utf8(PL_collation_name);
+        PL_strxfrm_NUL_replacement = '\0';
+        PL_strxfrm_max_cp = 0;
+
+        /* A locale collation definition includes primary, secondary, tertiary,
+         * etc. weights for each character.  To sort, the primary weights are
+         * used, and only if they compare equal, then the secondary weights are
+         * used, and only if they compare equal, then the tertiary, etc.
+         *
+         * strxfrm() works by taking the input string, say ABC, and creating an
+         * output transformed string consisting of first the primary weights,
+         * A¹B¹C¹ followed by the secondary ones, A²B²C²; and then the
+         * tertiary, etc, yielding A¹B¹C¹ A²B²C² A³B³C³ ....  Some characters
+         * may not have weights at every level.  In our example, let's say B
+         * doesn't have a tertiary weight, and A doesn't have a secondary
+         * weight.  The constructed string is then going to be
+         *  A¹B¹C¹ B²C² A³C³ ....
+         * This has the desired effect that strcmp() will look at the secondary
+         * or tertiary weights only if the strings compare equal at all higher
+         * priority weights.  The spaces shown here, like in
+         *  "A¹B¹C¹ A²B²C² "
+         * are not just for readability.  In the general case, these must
+         * actually be bytes, which we will call here 'separator weights'; and
+         * they must be smaller than any other weight value, but since these
+         * are C strings, only the terminating one can be a NUL (some
+         * implementations may include a non-NUL separator weight just before
+         * the NUL).  Implementations tend to reserve 01 for the separator
+         * weights.  They are needed so that a shorter string's secondary
+         * weights won't be misconstrued as primary weights of a longer string,
+         * etc.  By making them smaller than any other weight, the shorter
+         * string will sort first.  (Actually, if all secondary weights are
+         * smaller than all primary ones, there is no need for a separator
+         * weight between those two levels, etc.)
+         *
+         * The length of the transformed string is roughly a linear function of
+         * the input string.  It's not exactly linear because some characters
+         * don't have weights at all levels.  When we call strxfrm() we have to
+         * allocate some memory to hold the transformed string.  The
+         * calculations below try to find coefficients 'm' and 'b' for this
+         * locale so that m*x + b equals how much space we need, given the size
+         * of the input string in 'x'.  If we calculate too small, we increase
+         * the size as needed, and call strxfrm() again, but it is better to
+         * get it right the first time to avoid wasted expensive string
+         * transformations. */
+
+        {
+            /* We use the string below to find how long the tranformation of it
+             * is.  Almost all locales are supersets of ASCII, or at least the
+             * ASCII letters.  We use all of them, half upper half lower,
+             * because if we used fewer, we might hit just the ones that are
+             * outliers in a particular locale.  Most of the strings being
+             * collated will contain a preponderance of letters, and even if
+             * they are above-ASCII, they are likely to have the same number of
+             * weight levels as the ASCII ones.  It turns out that digits tend
+             * to have fewer levels, and some punctuation has more, but those
+             * are relatively sparse in text, and khw believes this gives a
+             * reasonable result, but it could be changed if experience so
+             * dictates. */
+            const char longer[] = "ABCDEFGHIJKLMnopqrstuvwxyz";
+            char * x_longer;        /* Transformed 'longer' */
+            Size_t x_len_longer;    /* Length of 'x_longer' */
+
+            char * x_shorter;   /* We also transform a substring of 'longer' */
+            Size_t x_len_shorter;
+
+            /* mem_collxfrm_() is used get the transformation (though here we
+             * are interested only in its length).  It is used because it has
+             * the intelligence to handle all cases, but to work, it needs some
+             * values of 'm' and 'b' to get it started.  For the purposes of
+             * this calculation we use a very conservative estimate of 'm' and
+             * 'b'.  This assumes a weight can be multiple bytes, enough to
+             * hold any UV on the platform, and there are 5 levels, 4 weight
+             * bytes, and a trailing NUL.  */
+            PL_collxfrm_base = 5;
+            PL_collxfrm_mult = 5 * sizeof(UV);
+
+            /* Find out how long the transformation really is */
+            x_longer = mem_collxfrm_(longer,
+                                     sizeof(longer) - 1,
+                                     &x_len_longer,
+
+                                     /* We avoid converting to UTF-8 in the
+                                      * called function by telling it the
+                                      * string is in UTF-8 if the locale is a
+                                      * UTF-8 one.  Since the string passed
+                                      * here is invariant under UTF-8, we can
+                                      * claim it's UTF-8 even though it isn't.
+                                      * */
+                                     PL_in_utf8_COLLATE_locale);
+            Safefree(x_longer);
+
+            /* Find out how long the transformation of a substring of 'longer'
+             * is.  Together the lengths of these transformations are
+             * sufficient to calculate 'm' and 'b'.  The substring is all of
+             * 'longer' except the first character.  This minimizes the chances
+             * of being swayed by outliers */
+            x_shorter = mem_collxfrm_(longer + 1,
+                                      sizeof(longer) - 2,
+                                      &x_len_shorter,
+                                      PL_in_utf8_COLLATE_locale);
+            Safefree(x_shorter);
+
+            /* If the results are nonsensical for this simple test, the whole
+             * locale definition is suspect.  Mark it so that locale collation
+             * is not active at all for it.  XXX Should we warn? */
+            if (   x_len_shorter == 0
+                || x_len_longer == 0
+                || x_len_shorter >= x_len_longer)
+            {
+                PL_collxfrm_mult = 0;
+                PL_collxfrm_base = 1;
+                DEBUG_L(PerlIO_printf(Perl_debug_log,
+                        "Disabling locale collation for LC_COLLATE='%s';"
+                        " length for shorter sample=%zu; longer=%zu\n",
+                        PL_collation_name, x_len_shorter, x_len_longer));
+            }
+            else {
+                SSize_t base;       /* Temporary */
+
+                /* We have both:    m * strlen(longer)  + b = x_len_longer
+                 *                  m * strlen(shorter) + b = x_len_shorter;
+                 * subtracting yields:
+                 *          m * (strlen(longer) - strlen(shorter))
+                 *                             = x_len_longer - x_len_shorter
+                 * But we have set things up so that 'shorter' is 1 byte smaller
+                 * than 'longer'.  Hence:
+                 *          m = x_len_longer - x_len_shorter
+                 *
+                 * But if something went wrong, make sure the multiplier is at
+                 * least 1.
+                 */
+                if (x_len_longer > x_len_shorter) {
+                    PL_collxfrm_mult = (STRLEN) x_len_longer - x_len_shorter;
+                }
+                else {
+                    PL_collxfrm_mult = 1;
+                }
+
+                /*     mx + b = len
+                 * so:      b = len - mx
+                 * but in case something has gone wrong, make sure it is
+                 * non-negative */
+                base = x_len_longer - PL_collxfrm_mult * (sizeof(longer) - 1);
+                if (base < 0) {
+                    base = 0;
+                }
+
+                /* Add 1 for the trailing NUL */
+                PL_collxfrm_base = base + 1;
+            }
+
+            DEBUG_L(PerlIO_printf(Perl_debug_log,
+                                  "?UTF-8 locale=%d; x_len_shorter=%zu, "
+                    "x_len_longer=%zu,"
+                    " collate multipler=%zu, collate base=%zu\n",
+                    PL_in_utf8_COLLATE_locale,
+                    x_len_shorter, x_len_longer,
+                                  PL_collxfrm_mult, PL_collxfrm_base));
+        }
+}
 
 char *
 Perl_mem_collxfrm_(pTHX_ const char *input_string,
