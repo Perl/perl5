@@ -4079,6 +4079,7 @@ dist/threads-shared/t/stress.t		Stress test
 dist/threads-shared/t/sv_refs.t		thread shared variables
 dist/threads-shared/t/sv_simple.t	thread shared variables
 dist/threads-shared/t/utf8.t		Test UTF-8 keys in shared hashes
+dist/threads-shared/t/version.t		Test that pod version matches code version.
 dist/threads-shared/t/wait.t		Test cond_wait and cond_timedwait
 dist/threads-shared/t/waithires.t	Test sub-second cond_timedwait
 dist/Tie-File/ChangeLog			Tie::File
