@@ -4156,7 +4156,9 @@ Perl_sv_setsv_flags(pTHX_ SV *dsv, SV* ssv, const I32 flags)
     SV_CHECK_THINKFIRST_COW_DROP(dsv);
     dtype = SvTYPE(dsv); /* THINKFIRST may have changed type */
 
-    /* There's a lot of redundancy below but we're going for speed here */
+    /* There's a lot of redundancy below but we're going for speed here
+     * Note: some of the cases below do return; rather than break; so the
+     * if-elseif-else logic below this switch does not see all cases. */
 
     switch (stype) {
     case SVt_NULL:
@@ -4244,7 +4246,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dsv, SV* ssv, const I32 flags)
 
     case SVt_INVLIST:
         invlist_clone(ssv, dsv);
-        break;
+        return;
     default:
         {
         const char * const type = sv_reftype(ssv,0);
