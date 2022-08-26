@@ -2235,6 +2235,10 @@ Catamount. See L<perlport>.
 
 (F) The final summary message when a Perl compilation fails.
 
+=item Execution of %s aborted due to compilation errors.
+
+(F) The final summary message when a Perl compilation fails.
+
 =item exists argument is not a HASH or ARRAY element or a subroutine
 
 (F) The argument to C<exists> must be a hash or array element or a

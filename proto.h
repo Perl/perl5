@@ -231,11 +231,11 @@ PERL_CALLCONV UV	Perl__utf8n_to_uvchr_msgs_helper(const U8 *s, STRLEN curlen, ST
 	assert(s)
 PERL_CALLCONV void	Perl__warn_problematic_locale(void);
 #define PERL_ARGS_ASSERT__WARN_PROBLEMATIC_LOCALE
-PERL_CALLCONV_NO_RET void	Perl_abort_execution(pTHX_ const char * const msg, const char * const name)
+PERL_CALLCONV_NO_RET void	Perl_abort_execution(pTHX_ SV *msg_sv, const char * const name)
 			__attribute__noreturn__
 			__attribute__visibility__("hidden");
 #define PERL_ARGS_ASSERT_ABORT_EXECUTION	\
-	assert(msg); assert(name)
+	assert(name)
 
 PERL_CALLCONV LOGOP*	Perl_alloc_LOGOP(pTHX_ I32 type, OP *first, OP *other)
 			__attribute__visibility__("hidden");

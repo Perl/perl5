@@ -261,13 +261,8 @@ Reversed *= operator at - line 5.
 Reversed %= operator at - line 6.
 Reversed &= operator at - line 7.
 Reversed .= operator at - line 8.
-Reversed ^= operator at - line 9.
-Reversed |= operator at - line 10.
-Reversed <= operator at - line 11.
 syntax error at - line 8, near "=."
-syntax error at - line 9, near "=^"
-syntax error at - line 10, near "=|"
-Unterminated <> operator at - line 11.
+Execution of - aborted due to compilation errors.
 ########
 # toke.c
 no warnings 'syntax' ;
@@ -283,9 +278,7 @@ $a =< 2 ;
 $a =/ 2 ;
 EXPECT
 syntax error at - line 8, near "=."
-syntax error at - line 9, near "=^"
-syntax error at - line 10, near "=|"
-Unterminated <> operator at - line 11.
+Execution of - aborted due to compilation errors.
 ########
 # toke.c
 use warnings 'syntax' ;

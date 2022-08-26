@@ -817,8 +817,6 @@ meow {
 };
 EXPECT
 syntax error at - line 12, near "used"
-syntax error at - line 12, near "used}"
-Unmatched right curly bracket at - line 14, at end of line
 Execution of - aborted due to compilation errors.
 ######## [perl #112312] crash on syntax error - another test
 # SKIP: !defined &DynaLoader::boot_DynaLoader # miniperl
@@ -849,6 +847,4 @@ sub testo {
 
 EXPECT
 syntax error at - line 15, near "used"
-syntax error at - line 15, near "used}"
-Unmatched right curly bracket at - line 17, at end of line
 Execution of - aborted due to compilation errors.

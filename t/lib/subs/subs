@@ -18,7 +18,7 @@ EXPECT
 Number found where operator expected at - line 3, near "Fred 1"
 	(Do you need to predeclare Fred?)
 syntax error at - line 3, near "Fred 1"
-BEGIN not safe after errors--compilation aborted at - line 4.
+Execution of - aborted due to compilation errors.
 ########
 
 # AOK
@@ -104,4 +104,4 @@ EXPECT
 Number found where operator expected at - line 5, near "ふれど 1"
 	(Do you need to predeclare ふれど?)
 syntax error at - line 5, near "ふれど 1"
-BEGIN not safe after errors--compilation aborted at - line 6.
+Execution of - aborted due to compilation errors.

@@ -6,7 +6,7 @@ BEGIN {
     set_up_inc('../lib');
 }
 
-plan(tests => 62);
+plan(tests => 63);
 
 sub empty_sub {}
 
@@ -426,3 +426,10 @@ eval '
    CORE::state sub b; sub d { sub b {} sub d }
  ';
 eval '()=%e; sub e { sub e; eval q|$x| } e;';
+
+fresh_perl_like(
+    q#<s,,$0[sub{m]]]],}>0,shift#,
+    qr/^syntax error/,
+    {},
+    "GH Issue #16944 - Syntax error with sub and shift causes segfault"
+);

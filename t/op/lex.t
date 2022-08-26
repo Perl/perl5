@@ -134,7 +134,7 @@ SKIP: {
 Bareword found where operator expected at - line 1, near ""ab}"ax"
 	(Missing operator before ax?)
 syntax error at - line 1, near ""ab}"ax"
-Unrecognized character \\x8A; marked by <-- HERE after ab}"ax;&\0z<-- HERE near column 12 at - line 1.
+Execution of - aborted due to compilation errors.
 gibberish
        { stderr => 1 },
       'gibberish containing &\0z - used to crash [perl #123753]'
@@ -144,7 +144,7 @@ gibberish
 Bareword found where operator expected at - line 1, near ""ab}"ax"
 	(Missing operator before ax?)
 syntax error at - line 1, near ""ab}"ax"
-Unrecognized character \\x8A; marked by <-- HERE after }"ax;&{+z}<-- HERE near column 14 at - line 1.
+Execution of - aborted due to compilation errors.
 gibberish
        { stderr => 1 },
       'gibberish containing &{+z} - used to crash [perl #123753]'
