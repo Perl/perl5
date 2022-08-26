@@ -246,6 +246,24 @@ L<Locale '%s' is unsupported, and may crash the interpreter.message|perldiag/"Lo
 
 =item *
 
+The compiler will now stop parsing on the first syntax error it
+encounters. Historically the compiler would attempt to "skip past" the
+error and continue parsing so that it could list multiple errors. For
+things like undeclared variables under strict this makes sense. For
+syntax errors however it has been found that continuing tends to result
+in a storm of unrelated or bizarre errors that mostly just obscure the
+true error. In extreme cases it can even lead to segfaults and other
+malbehavior.
+
+Therefore we have reformed the continuation logic so that the parse will
+stop after the first seen syntax error. Semantic errors like undeclared
+variables will not stop the parse, so you may still see multiple errors
+when compiling code. However if there is a syntax error it will be the
+last error message reported by perl and all of the errors that you see
+will be something that actually needs to be fixed.
+
+=item *
+
 Error messages that output class or package names have been modified to
 output double quoted strings with various characters escaped so as to
 make the exact value clear to a reader. The exact rules on which

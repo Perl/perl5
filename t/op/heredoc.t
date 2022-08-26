@@ -7,7 +7,7 @@ BEGIN {
 }
 
 use strict;
-plan(tests => 137);
+plan(tests => 138);
 
 # heredoc without newline (#65838)
 {
@@ -233,3 +233,13 @@ HEREDOC
         );
     }
 }
+fresh_perl_like(
+q#<<E1;
+${sub{b{]]]{} @{[ <<E2 ]}
+E2
+E1
+#,
+    qr/^syntax error/,
+    {},
+    "GH Issue #17397 - Syntax error inside of here doc causes segfault"
+);

@@ -25,7 +25,6 @@ EXPECT
 Scalar found where operator expected at - line 1, near "0${"
 	(Missing operator before ${?)
 syntax error at - line 1, near "0$"
-Missing right curly or square bracket at - line 1, at end of line
 Execution of - aborted due to compilation errors.
 ########
 # NAME (Missing operator before $#{?) [perl #123737]
@@ -34,7 +33,6 @@ EXPECT
 Array length found where operator expected at - line 1, near "0$#{"
 	(Missing operator before $#{?)
 syntax error at - line 1, near "0$#"
-Missing right curly or square bracket at - line 1, at end of line
 Execution of - aborted due to compilation errors.
 ########
 # NAME (Missing operator before @foo) [perl #123737]
@@ -52,7 +50,6 @@ EXPECT
 Array found where operator expected at - line 1, near "0@{"
 	(Missing operator before @{?)
 syntax error at - line 1, near "0@"
-Missing right curly or square bracket at - line 1, at end of line
 Execution of - aborted due to compilation errors.
 ########
 # NAME Unterminated here-doc in string eval
@@ -483,8 +480,6 @@ Use of bare << to mean <<"" is forbidden at - line 1.
 EXPECT
 Bareword found where operator expected at - line 1, near "1e"
 	(Missing operator before e?)
-Number found where operator expected at - line 1, near "--5"
-	(Missing operator before 5?)
 syntax error at - line 1, near "1e"
 Execution of - aborted due to compilation errors.
 ########
@@ -573,9 +568,6 @@ Execution of - aborted due to compilation errors.
 EXPECT
 Number found where operator expected at - line 1, near "0 0x"
 	(Missing operator before  0x?)
-Array found where operator expected at - line 1, near "0x@
-;"
-	(Missing operator before ;?)
 No digits found for hexadecimal literal at - line 1, near "0 0x@"
 syntax error at - line 1, near "0 0x"
 Execution of - aborted due to compilation errors.
