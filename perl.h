@@ -8874,6 +8874,8 @@ END_EXTERN_C
 #  endif
 #endif
 
+#endif /* DOUBLE_HAS_NAN */
+
 /* these are used to faciliate the env var PERL_RAND_SEED,
  * which allows consistent behavior from code that calls
  * srand() with no arguments, either explicitly or implicitly.
@@ -8898,7 +8900,6 @@ END_EXTERN_C
 #define PERL_SRAND_OVERRIDE_NEXT_PARENT() \
     PERL_SRAND_OVERRIDE_NEXT()
 
-#endif /* DOUBLE_HAS_NAN */
 
 /*
 
