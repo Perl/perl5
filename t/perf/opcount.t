@@ -851,8 +851,8 @@ test_opcount(0, 'my $x= 1; sub f{} f($x=undef);',
                     sassign     => 0,
                 });
 
-test_opcount(0, 'my ($x,$p)=(1,2); sub f{} f(($x=undef),$p);',
-                sub { my ($x,$p)=(1,2); sub f{} f(($x=undef),$p); },
+test_opcount(0, 'my ($x,$p)=(1,2); sub g{} g(($x=undef),$p);',
+                sub { my ($x,$p)=(1,2); sub g{} g(($x=undef),$p); },
                 {
                     undef       => 1,
                     aassign     => 1,
