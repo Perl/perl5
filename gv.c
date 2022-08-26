@@ -916,8 +916,8 @@ S_gv_fetchmeth_internal(pTHX_ HV* stash, SV* meth, const char* name, STRLEN len,
                 } else {
                     Perl_ck_warner(aTHX_ packWARN(WARN_SYNTAX),
                         "While trying to resolve method call %.*s->%.*s()"
-                        " can not locate package \"%" SVf "\" yet it is mentioned in @%.*s::ISA"
-                        " (perhaps you forgot to load \"%" SVf "\"?)",
+                        " can not locate package %" SVf_QUOTEDPREFIX " yet it is mentioned in @%.*s::ISA"
+                        " (perhaps you forgot to load %" SVf_QUOTEDPREFIX "?)",
                          (int) hvnamelen, hvname,
                          (int) len, name,
                         SVfARG(linear_sv),
