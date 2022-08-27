@@ -1742,6 +1742,7 @@ sub watchdog ($;$)
                       || $ENV{PERL_TEST_TIMEOUT_FACTOR}
                       || 1;
     $timeout_factor = 1 if $timeout_factor < 1;
+	$timeout_factor = $1 if $timeout_factor =~ /^(\d+)$/;
 
     # Valgrind slows perl way down so give it more time before dying.
     $timeout_factor = 10 if $timeout_factor < 10 && $ENV{PERL_VALGRIND};
