@@ -108,7 +108,8 @@ foreach my $flags (0x0, 0x800, 0x1000, 0x1800) {
     # This is easier if we accept that the guts eval will add a trailing \n
     # for us
     my $prog = "1 + 1 + 1\n";
-    my $fail = "1 + \n";
+    my $syntax_errors_to_stop_after= 10;
+    my $fail = "1 +; \n" x ($syntax_errors_to_stop_after + 1);
 
     is (eval $prog, 3, 'String eval works');
     if ($flags & 0x800) {
