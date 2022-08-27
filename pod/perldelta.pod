@@ -241,13 +241,71 @@ L<Locale '%s' is unsupported, and may crash the interpreter.message|perldiag/"Lo
 
 =head2 Changes to Existing Diagnostics
 
-XXX Changes (i.e. rewording) of diagnostic messages go here
-
 =over 4
 
 =item *
 
-XXX Describe change here
+Error messages that output class or package names have been modified to
+output double quoted strings with various characters escaped so as to
+make the exact value clear to a reader. The exact rules on which
+characters are escaped may change over time but currently are that
+printable ASCII codepoints, with the exception of C<"> and C<\>, and
+unicode word characters whose codepoint is over 255 are output raw, and
+any other symbols are escaped much as Data::Dumper might escape them,
+using C<\n> for newline and C<\"> for double quotes, etc. Codepoints in
+the range 128-255 are always escaped as they can cause trouble on
+unicode terminals when output raw.
+
+In older versions of perl the one liner
+
+    $ perl -le'"thing\n"->foo()'
+
+would output the following error message exactly as shown here, with
+text spread over multiple lines because the "\n" would be emitted as
+a raw newline character:
+
+    Can't locate object method "foo" via package "thing
+    " (perhaps you forgot to load "thing
+    "?) at -e line 1.
+
+As of this release we would output this instead (as one line):
+
+    Can't locate object method "foo" via package "thing\n"
+      (perhaps you forgot to load "thing\n"?) at -e line 1.
+
+Notice the newline in the package name has been quoted and escaped, and
+thus the error message is a single line. The text is shown here wrapped
+to two lines only for readability.
+
+=item *
+
+When package or class names in errors are very large the middle excess
+portion will be elided from the message. As of this release error messages
+will show only up to the first 128 characters and the last 128 characters
+in a package or class name in error messages. For example
+
+ $ perl -le'("Foo" x 1000)->new()'
+
+will output the following as one line:
+
+ Can't locate object method "new" via package "FooFooFooFooFooFooFoo
+ FooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFoo
+ FooFooFooFooFooFooFooFooFooFooFooFooFooFo"..."oFooFooFooFooFooFooFoo
+ FooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFoo
+ FooFooFooFooFooFooFooFooFooFooFooFooFoo" (perhaps you forgot to load 
+ "FooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFoo
+ FooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFo"...
+ "oFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFoo
+ FooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFoo"?)
+ at -e line 1.
+
+Notice the C< "prefix"..."suffix" > form of the package name in this case.
+In previous versions of perl the complete string would have been shown
+making the error message over 6k long and there was no upper limit on the
+length of the error message at all. If you accidentally used a 1MB string
+as a class name then the error message would be over 2MB long. In this perl
+the upper limit should be around 2k when eliding and escaping are taken into
+account.
 
 =back
 
