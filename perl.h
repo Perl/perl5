@@ -7247,9 +7247,9 @@ the plain locale pragma without a parameter (S<C<use locale>>) is in effect.
                                 } STMT_END
 
 #  define LOCALE_TERM           STMT_START {                                \
-                                    MUTEX_DESTROY(&PL_locale_mutex);        \
-                                    LOCALE_TERM_LC_NUMERIC_;                \
                                     LOCALE_TERM_POSIX_2008_;                \
+                                    LOCALE_TERM_LC_NUMERIC_;                \
+                                    MUTEX_DESTROY(&PL_locale_mutex);        \
                                 } STMT_END
 #endif
 
