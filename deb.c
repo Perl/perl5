@@ -87,7 +87,9 @@ Perl_vdeb(pTHX_ const char *pat, va_list *args)
 #ifdef DEBUGGING
     const char* const file = PL_curcop ? OutCopFILE(PL_curcop) : "<null>";
     const char* const display_file = file ? file : "<free>";
-    const long line = PL_curcop ? (long)CopLINE(PL_curcop) : 0;
+    long line = PL_curcop ? (long)CopLINE(PL_curcop) : NOLINE;
+    if (line == NOLINE)
+        line = 0;
 
     PERL_ARGS_ASSERT_VDEB;
 
