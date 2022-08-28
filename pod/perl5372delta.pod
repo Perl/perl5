@@ -361,8 +361,8 @@ Fix regnode pointer alignment issue in <regcomp.h>.
 
 =item *
 
-Disabling the C<bareword_filehandles> feature no longer treats C<print
-Class->method> as an error.  [L<github #19704|https://github.com/Perl/perl5/issues/19704>]
+Disabling the C<bareword_filehandles> feature no longer treats C<< print
+Class->method >> as an error.  [L<github #19704|https://github.com/Perl/perl5/issues/19704>]
 
 =item *
 
