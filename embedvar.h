@@ -127,6 +127,7 @@
 #define PL_envgv		(vTHX->Ienvgv)
 #define PL_errgv		(vTHX->Ierrgv)
 #define PL_errors		(vTHX->Ierrors)
+#define PL_eval_begin_nest_depth	(vTHX->Ieval_begin_nest_depth)
 #define PL_eval_root		(vTHX->Ieval_root)
 #define PL_eval_start		(vTHX->Ieval_start)
 #define PL_evalseq		(vTHX->Ievalseq)

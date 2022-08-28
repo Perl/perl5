@@ -15435,6 +15435,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_savestack_max = -1;
     PL_sig_pending = 0;
     PL_parser = NULL;
+    PL_eval_begin_nest_depth = proto_perl->Ieval_begin_nest_depth;
     Zero(&PL_debug_pad, 1, struct perl_debug_pad);
     Zero(&PL_padname_undef, 1, PADNAME);
     Zero(&PL_padname_const, 1, PADNAME);

@@ -584,6 +584,54 @@ this variable.
 
 This variable was added in Perl 5.004.
 
+=item ${^MAX_NESTED_EVAL_BEGIN_BLOCKS}
+
+This variable determines the maximum number C<eval EXPR>/C<BEGIN> or
+C<require>/C<BEGIN> block nesting that is allowed. This means it also
+controls the maximum nesting of C<use> statements as well.
+
+The default of 1000 should be sufficiently large for normal working
+purposes, and if you must raise it then you should be conservative
+with your choice or you may encounter segfaults from exhaustion of
+the C stack. It seems unlikely that real code has a use depth above
+1000, but we have left this configurable just in case.
+
+When set to C<0> then C<BEGIN> blocks inside of C<eval EXPR> or
+C<require EXPR> are forbidden entirely and will trigger an exception
+which will terminate the compilation and in the case of C<require>
+will throw an exception, or in the case of C<eval> return the error in
+C<$@> as usual.
+
+Consider the code
+
+ perl -le'sub f { eval "BEGIN { f() }"; } f()'
+
+each invocation of C<f()> will consume considerable C stack, and this
+variable is used to cause code like this to die instead of exhausting
+the C stack and triggering a segfault. Needless to say code like this is
+unusual, it is unlikely you will actually need to raise the setting.
+However it may be useful to set it to 0 for a limited time period to
+prevent BEGIN{} blocks from being executed during an C<eval EXPR>.
+
+Note that setting this to 1 would NOT affect code like this:
+
+    BEGIN { $n += 1; BEGIN { $n += 2; BEGIN { $n += 4 } } }
+
+The reason is that BEGIN blocks are executed immediately after they are
+completed, thus the innermost will execute before the ones which contain
+it have even finished compiling, and the depth will not go above 1. In
+fact the above code is equivalent to
+
+    BEGIN { $n+=4 }
+    BEGIN { $n+=2 }
+    BEGIN { $n+=1 }
+
+which makes it obvious why a ${^MAX_EVAL_BEGIN_DEPTH} of 1 would not
+block this code.
+
+Only C<BEGIN>'s executed inside of an C<eval> or C<require> (possibly via
+C<use>) are affected.
+
 =item $OSNAME
 
 =item $^O

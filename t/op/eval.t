@@ -6,7 +6,7 @@ BEGIN {
     set_up_inc('../lib');
 }
 
-plan(tests => 140);
+plan(tests => 146);
 
 eval 'pass();';
 
@@ -696,4 +696,23 @@ pass("eval in freed package does not crash");
 
     eval q{ { 1; { 1; my $x = bless []; die $x = 0, "die in eval"; } } };
     ::like ($@, qr/die in eval/, "FREETMPS: die eval string exit");
+}
+
+{
+    local ${^MAX_NESTED_EVAL_BEGIN_BLOCKS}= 0;
+    my ($x, $ok);
+    $x = 0;
+    $ok= eval 'BEGIN { $x++ } 1';
+    ::ok(!$ok,'${^MAX_NESTED_EVAL_BEGIN_BLOCKS} = 0 blocks BEGIN blocks entirely');
+    ::like($@,qr/Too many nested BEGIN blocks, maximum of 0 allowed/,
+        'Blocked BEGIN results in expected error');
+    ::is($x,0,'BEGIN really did nothing');
+
+    ${^MAX_NESTED_EVAL_BEGIN_BLOCKS}= 2;
+    $ok= eval 'sub f { my $n= shift; eval q[BEGIN { $x++; f($n-1) if $n>0 } 1] or die $@ } f(3); 1';
+    ::ok(!$ok,'${^MAX_NESTED_EVAL_BEGIN_BLOCKS} = 2 blocked three nested BEGIN blocks');
+    ::like($@,qr/Too many nested BEGIN blocks, maximum of 2 allowed/,
+        'Blocked BEGIN results in expected error');
+    ::is($x,2,'BEGIN really did nothing');
+
 }

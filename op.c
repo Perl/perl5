@@ -10717,10 +10717,72 @@ S_process_special_blocks(pTHX_ I32 floor, const char *const fullname,
     if (*name == 'B') {
         if (strEQ(name, "BEGIN")) {
             const I32 oldscope = PL_scopestack_ix;
+            SV *max_nest_sv = NULL;
+            IV max_nest_iv;
             dSP;
             (void)CvGV(cv);
             if (floor) LEAVE_SCOPE(floor);
             ENTER;
+
+            /* make sure we don't recurse too deeply into BEGIN blocks
+             * but let the user control it via the new control variable
+             *
+             *   ${^MAX_NESTED_EVAL_BEGIN_BLOCKS}
+             *
+             * Note this *looks* code like when max_nest_iv is 1 that it
+             * would block the following code:
+             *
+             * BEGIN { $n |= 1; BEGIN { $n |= 2; BEGIN { $n |= 4 } } }
+             *
+             * but it does *not*, this code will happily execute when
+             * the nest limit is 1. The reason is revealed in the
+             * execution order. If we could watch $n in this code we
+             * would see the follow order of modifications:
+             *
+             * $n |= 4;
+             * $n |= 2;
+             * $n |= 1;
+             *
+             * This is because nested BEGIN blocks execute in FILO
+             * order, this is because BEGIN blocks are defined to
+             * execute immediately they are closed. So the innermost
+             * block is closed first, and it executes, which would the
+             * eval_begin_nest_depth by 1, it would finish, which would
+             * drop it back to its previous value. This would happen in
+             * turn as each BEGIN was terminated.
+             *
+             * The *only* place these counts matter is when BEGIN in
+             * inside of some kind of eval, either a require or a true
+             * eval. Only in that case would there be any nesting and
+             * would perl try to execute a BEGIN before another had
+             * completed.
+             *
+             * Thus this logic puts an upper limit on module nesting.
+             * Hence the reason we let the user control it, although its
+             * hard to imagine a 1000 level deep module use dependency
+             * even in a very large codebase. The real objective is to
+             * prevent code like this:
+             *
+             * perl -e'sub f { eval "BEGIN { f() }" } f()'
+             *
+             * from segfaulting due to stack exhaustion.
+             *
+             */
+            max_nest_sv = get_sv(PERL_VAR_MAX_NESTED_EVAL_BEGIN_BLOCKS, GV_ADD);
+            if (!SvOK(max_nest_sv))
+                sv_setiv(max_nest_sv, PERL_MAX_NESTED_EVAL_BEGIN_BLOCKS_DEFAULT);
+            max_nest_iv = SvIV(max_nest_sv);
+            if (max_nest_iv < 0) {
+                max_nest_iv = PERL_MAX_NESTED_EVAL_BEGIN_BLOCKS_DEFAULT;
+                sv_setiv(max_nest_sv, max_nest_iv);
+            }
+
+            if (PL_eval_begin_nest_depth >= max_nest_iv) {
+                Perl_croak(aTHX_ "Too many nested BEGIN blocks, maximum of %" IVdf " allowed",
+                             max_nest_iv);
+            }
+            SAVEINT(PL_eval_begin_nest_depth);
+            PL_eval_begin_nest_depth++;
 
             SAVEVPTR(PL_curcop);
             if (PL_curcop == &PL_compiling) {

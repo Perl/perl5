@@ -6375,6 +6375,19 @@ setting C<${^RE_COMPILE_RECURSION_LIMIT}> to some other value.  This may
 need to be done in a BEGIN block before the regular expression pattern
 is compiled.
 
+=item Too many nested BEGIN blocks, maximum of %d allowed
+
+(F) You have executed code that nests too many BEGIN blocks inside of
+each other, either explicitly as BEGIN{} or implicitly as use statements.
+This limit defaults to a rather high number which should not be exceeded
+in normal circumstances, and triggering likely indicates something is
+very wrong in your code. For instance infinite recursion of eval and
+BEGIN blocks is known to trigger this error.
+
+If you know that you have good reason to exceed the limit you can change
+it by setting C<${^MAX_NESTED_EVAL_BEGIN_BLOCKS}> to a different value from
+the default of 1000.
+
 =item Too many )'s
 
 (A) You've accidentally run your script through B<csh> instead of Perl.
