@@ -71,6 +71,7 @@ my $listen = IO::Socket::UNIX->new(Local => $PATH, Listen => 0);
 # local sockets.  Therefore we will retry with a File::Temp
 # generated filename from a temp directory.
 unless (defined $listen) {
+print STDERR "KEN1 TEMP\n";
     eval { require File::Temp };
     unless ($@) {
 	File::Temp->import( 'mktemp' );
@@ -100,7 +101,7 @@ if (my $pid = fork()) {
 	$sock->close;
 
 	waitpid($pid,0);
-	unlink($PATH) || $^O eq 'os2' || warn "Can't unlink $PATH: $!";
+	unlink($PATH) || $^O =~ /^(?:os2|MSWin32)$/ || warn "Can't unlink $PATH: $!";
 
 	print "ok 5\n";
     } else {
@@ -123,3 +124,4 @@ if (my $pid = fork()) {
 } else {
  die;
 }
+system('cmd.exe', '/c', 'del', $PATH) if $^O eq 'MSWin32';
