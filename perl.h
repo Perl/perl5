@@ -8900,6 +8900,21 @@ END_EXTERN_C
 #define PERL_SRAND_OVERRIDE_NEXT_PARENT() \
     PERL_SRAND_OVERRIDE_NEXT()
 
+/* in something like
+ *
+ * perl -le'sub f { eval "BEGIN{ f() }" }'
+ *
+ * Each iteration chews up 8 stacks frames, and we will eventually SEGV
+ * due to C stack overflow.
+ *
+ * This define provides a maximum limit to prevent the SEGV. Such code is
+ * unusual, so it unlikely we need a very large number here.
+ */
+#ifndef PERL_MAX_NESTED_EVAL_BEGIN_BLOCKS_DEFAULT
+#define PERL_MAX_NESTED_EVAL_BEGIN_BLOCKS_DEFAULT 1000
+#endif
+/* ${^MAX_NESTED_EVAL_BEGIN_BLOCKS} */
+#define PERL_VAR_MAX_NESTED_EVAL_BEGIN_BLOCKS "\015AX_NESTED_EVAL_BEGIN_BLOCKS"
 
 /*
 

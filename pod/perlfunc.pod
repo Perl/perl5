@@ -2237,6 +2237,16 @@ context of the current Perl program, any outer lexical variables are
 visible to it, and any package variable settings or subroutine and
 format definitions remain afterwards.
 
+Note that when C<BEGIN {}> blocks are embedded inside of an eval block
+the contents of the block will be executed immediately and before the rest
+of the eval code is executed. You can disable this entirely by
+
+   local ${^MAX_NESTED_EVAL_BEGIN_BLOCKS} = 0;
+   eval $string;
+
+which will cause any embedded C<BEGIN> blocks in C<$string> to throw an
+exception.
+
 =over 4
 
 =item Under the L<C<"unicode_eval"> feature|feature/The 'unicode_eval' and 'evalbytes' features>

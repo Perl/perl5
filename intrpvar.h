@@ -787,6 +787,8 @@ PERLVARI(I, phase,	enum perl_phase, PERL_PHASE_CONSTRUCT)
 
 PERLVARI(I, in_load_module, bool, FALSE)	/* to prevent recursions in PerlIO_find_layer */
 
+PERLVARI(I, eval_begin_nest_depth, U32, 0)
+
 PERLVAR(I, unsafe,	bool)
 PERLVAR(I, colorset,	bool)		/* PERL_RE_COLORS env var is in use */
 

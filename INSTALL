@@ -528,6 +528,38 @@ C<-Accflags=-DNO_PERL_HASH_ENV>.
 The C<PERL_HASH_SEED_DEBUG> environment variable can be disabled by
 configuring perl with C<-Accflags=-DNO_PERL_HASH_SEED_DEBUG>.
 
+=head3 MISCELLANEOUS CONFIG
+
+Perl uses various defines to control defaults for its behavior. These
+values are chosen to represent "sane" config, but users can override
+these values in their builds if they wish. This is a list of such
+settings.
+
+=over 2
+
+=item PERL_MAX_NESTED_EVAL_BEGIN_BLOCKS_DEFAULT
+
+This define is used to control the default maximum number of nested
+eval/BEGIN statements, and in this context require should be
+understood to be a special form of eval so this means require/BEGIN
+and "use" statements as well.
+
+Currently each C<BEGIN> block inside of an C<eval EXPR> or C<require>
+operation will use a fairly high number of frames of the perl internal
+C stack, and this value is used to prevent stack overflows. Normally
+it is defaulted to 1000 but the default can be configured to another
+value, for instance 100, like this
+
+  -Accflags='-DPERL_MAX_NESTED_EVAL_BEGIN_BLOCKS_DEFAULT=100'
+
+
+If you don't know what this is then it is safe to ignore it. Do not
+configure this to 0 or another very low value, it will break a lot of
+code. If you want to set it to a low value use the run time variable
+C<${^MAX_NESTED_EVAL_BEGIN_BLOCKS}> instead.
+
+=back
+
 =head3 SOCKS
 
 Perl can be configured to be 'socksified', that is, to use the SOCKS

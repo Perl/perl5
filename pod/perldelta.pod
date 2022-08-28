@@ -395,6 +395,22 @@ same as plain L<perlapi/C<Perl_langinfo>>, but with an extra parameter
 that allows the caller to simply and reliably know if the returned
 string is UTF-8.
 
+=item *
+
+We have introduced a limit on the number of nested C<eval EXPR>/C<BEGIN>
+blocks and C<require>/C<BEGIN> (and thus C<use> statements as well) to
+prevent C stack overflows. This variable can also be used to forbid
+C<BEGIN> blocks from executing during C<eval EXPR> compilation. The
+limit defaults to C<1000> but can be overriden by setting the
+C<${^MAX_NESTED_EVAL_BEGIN_BLOCKS}> variable. The default itself can be
+changed at compile time with
+
+    -Accflags='-DPERL_MAX_NESTED_EVAL_BEGIN_BLOCKS_DEFAULT=12345'
+
+Note that this value relates to the size of your C stack and if you
+choose an inappropriately large value Perl may segfault, be conservative
+about what you choose.
+
 =back
 
 =head1 Selected Bug Fixes
