@@ -71,7 +71,6 @@ my $listen = IO::Socket::UNIX->new(Local => $PATH, Listen => 0);
 # local sockets.  Therefore we will retry with a File::Temp
 # generated filename from a temp directory.
 unless (defined $listen) {
-print STDERR "KEN1 TEMP\n";
     eval { require File::Temp };
     unless ($@) {
 	File::Temp->import( 'mktemp' );
