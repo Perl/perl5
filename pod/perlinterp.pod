@@ -194,11 +194,11 @@ achieved via a C<JMPENV_JUMP()>. In particular:
 
 =over
 
-=item * perl-level exit() and internals my_exit()
+=item * level 2: perl-level exit() and internals my_exit()
 
 These unwind all stacks, then perform a JMPENV_JUMP(2).
 
-=item * perl-level die() and internals croak()
+=item * level 3: perl-level die() and internals croak()
 
 If currently within an eval, these pop the context stack back to the
 nearest C<CXt_EVAL> frame, set C<$@> as appropriate, set C<PL_restartop>
@@ -208,8 +208,13 @@ a JMPENV_JUMP(3).
 Otherwise, the error message is printed to C<STDERR>, then it is treated
 as an exit: unwind all stacks and perform a JMPENV_JUMP(2).
 
-(JMPENV_JUMP(1) is currently unused, and the zero value is for a normal
-return from JMPENV_PUSH().)
+=item * level 1: unused
+
+JMPENV_JUMP(1) is currently unused except in perl_run().
+
+=item * level 0: normal return.
+
+The zero value is for a normal return from JMPENV_PUSH()
 
 =back
 
