@@ -1733,16 +1733,13 @@ For historical reasons, the non-zero return value also attempts to
 be a suitable value to pass to the C library function C<exit> (or to
 return from C<main>), to serve as an exit code indicating the nature
 of the way initialisation terminated.  However, this isn't portable,
-due to differing exit code conventions.  A historical bug is preserved
-for the time being: if the Perl built-in C<exit> is called during this
-function's execution, with a type of exit entailing a zero exit code
-under the host operating system's conventions, then this function
-returns zero rather than a non-zero value.  This bug, [perl #2754],
-leads to C<perl_run> being called (and therefore C<INIT> blocks and the
-main program running) despite a call to C<exit>.  It has been preserved
-because a popular module-installing module has come to rely on it and
-needs time to be fixed.  This issue is [perl #132577], and the original
-bug is due to be fixed in Perl 5.30.
+due to differing exit code conventions.  An attempt is made to return
+an exit code of the type required by the host operating system, but
+because it is constrained to be non-zero, it is not necessarily possible
+to indicate every type of exit.  It is only reliable on Unix, where a
+zero exit code can be augmented with a set bit that will be ignored.
+In any case, this function is not the correct place to acquire an exit
+code: one should get that from L</perl_destruct>.
 
 =cut
 */
@@ -1935,12 +1932,11 @@ perl_parse(pTHXx_ XSINIT_t xsinit, int argc, char **argv, char **env)
         ret = STATUS_EXIT;
         if (ret == 0) {
             /*
-             * At this point we should do
-             *     ret = 0x100;
-             * to avoid [perl #2754], but that bugfix has been postponed
-             * because of the Module::Install breakage it causes
-             * [perl #132577].
+             * We do this here to avoid [perl #2754].
+             * Note this may cause trouble with Module::Install.
+             * See: [perl #132577].
              */
+            ret = 0x100;
         }
         break;
     case 3:

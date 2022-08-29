@@ -147,7 +147,6 @@ fresh_perl_is('END { print "ok\n" } INIT { bless {} and exit }', "ok\n",
 	       {}, 'null PL_curcop in newGP');
 
 # [perl #2754] exit(0) didn't exit from inside a UNITCHECK or CHECK block
-
 my $testblocks =
     join(" ",
         "BEGIN { \$| = 1; }",
@@ -167,21 +166,21 @@ SKIP: {
     skip "VMS doesn't have the perl #2754 bug", 3 if $^O eq 'VMS';
     fresh_perl_is(
         "$testblocks BEGIN { exit 0; }",
-        "begin\nunitcheck\ncheck\ninit\nend",
+        "begin\nunitcheck\ncheck\nend",
         {},
         "BEGIN{exit 0} doesn't exit yet"
     );
 
     fresh_perl_is(
         "$testblocks UNITCHECK { exit 0; }",
-        "begin\nunitcheck\ncheck\ninit\nmain\nend",
+        "begin\nunitcheck\ncheck\nend",
         {},
         "UNITCHECK{exit 0} doesn't exit yet"
     );
 
     fresh_perl_is(
         "$testblocks CHECK { exit 0; }",
-        "begin\nunitcheck\ncheck\ninit\nmain\nend",
+        "begin\nunitcheck\ncheck\nend",
         {},
         "CHECK{exit 0} doesn't exit yet"
     );
@@ -257,6 +256,7 @@ fresh_perl_like(
     {},
     "INIT{die} should exit"
 );
+
 
 TODO: {
     local $TODO = 'RT #2917: INIT{} in eval is wrongly considered too late';
