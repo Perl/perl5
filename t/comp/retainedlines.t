@@ -6,7 +6,7 @@
 # we've not yet verified that use works.
 # use strict;
 
-print "1..98\n";
+print "1..109\n";
 my $test = 0;
 
 sub failed {
@@ -164,6 +164,26 @@ for (0xA, 0) {
        "evals with BEGIN{die} are correctly cleaned up");
   }
 }
+
+for (0xA, 0) {
+  local $^P = $_;
+
+  eval (my $prog = "UNITCHECK{die}\n");
+  is (!!$@, 1, "Is \$@ true?");
+  is ($@=~/UNITCHECK failed--call queue aborted/, 1,
+      "Error is expected value?");
+
+  if ($_) {
+    check_retained_lines($prog, 'eval that defines UNITCHECK that dies');
+  }
+  else {
+    my @after = grep { /eval/ } keys %::;
+
+    is (scalar @after, 0 + keys %seen,
+       "evals with UNITCHECK{die} are correctly cleaned up");
+  }
+}
+
 
 # [perl #79442] A #line "foo" directive in a string eval was not updating
 # *{"_<foo"} in threaded perls, and was not putting the right lines into
