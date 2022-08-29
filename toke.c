@@ -12531,6 +12531,7 @@ Perl_abort_execution(pTHX_ const char * const msg, const char * const name)
         Perl_croak(aTHX_
                 "%sExecution of %s aborted due to compilation errors.\n", msg, name);
     }
+
     NOT_REACHED; /* NOTREACHED */
 }
 
@@ -12547,14 +12548,16 @@ int
 Perl_yyerror(pTHX_ const char *const s)
 {
     PERL_ARGS_ASSERT_YYERROR;
-    return yyerror_pvn(s, strlen(s), 0);
+    int r = yyerror_pvn(s, strlen(s), 0);
+    return r;
 }
 
 int
 Perl_yyerror_pv(pTHX_ const char *const s, U32 flags)
 {
     PERL_ARGS_ASSERT_YYERROR_PV;
-    return yyerror_pvn(s, strlen(s), flags);
+    int r = yyerror_pvn(s, strlen(s), flags);
+    return r;
 }
 
 int
