@@ -188,10 +188,6 @@ SKIP: {
 
 
 SKIP: {
-    if ($^O =~ /^(MSWin32|os2)$/) {
-        skip "non_UNIX plafforms and PERL_EXIT_DESTRUCT_END (RT #132863)", 6;
-    }
-
     fresh_perl_is(
         "$testblocks BEGIN { exit 1; }",
         "begin\nunitcheck\ncheck\nend",
