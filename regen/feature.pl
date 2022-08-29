@@ -64,6 +64,9 @@ use constant V5_35  => sort grep {; $_ ne 'switch'
 
 use constant V5_37  => sort grep {; $_ ne 'bareword_filehandles' } +V5_35;
 
+#
+# when updating features please also update the Pod entry for L</"FEATURES CHEAT SHEET">
+#
 my %feature_bundle = (
     all     => [ sort keys %feature ],
     default => [ qw{indirect multidimensional bareword_filehandles} ],
@@ -490,7 +493,7 @@ read_only_bottom_close_and_rename($h);
 __END__
 package feature;
 
-our $VERSION = '1.75';
+our $VERSION = '1.76';
 
 FEATURES
 
@@ -512,13 +515,13 @@ feature - Perl pragma to enable new features
     say "The case-folded version of $x is: " . fc $x;
 
 
-    # set features to match the :5.10 bundle, which may turn off or on
-    # multiple features (see below)
-    use feature ':5.10';
+    # set features to match the :5.36 bundle, which may turn off or on
+    # multiple features (see "FEATURE BUNDLES" below)
+    use feature ':5.36';
 
 
-    # implicitly loads :5.10 feature bundle
-    use v5.10;
+    # implicitly loads :5.36 feature bundle
+    use v5.36;
 
 =head1 DESCRIPTION
 
@@ -559,6 +562,8 @@ C<no feature> with no features specified will reset to the default group.  To
 disable I<all> features (an unusual request!) use C<no feature ':all'>.
 
 =head1 AVAILABLE FEATURES
+
+Read L</"FEATURE BUNDLES"> for the feature cheat sheet sumup.
 
 =head2 The 'say' feature
 
@@ -827,7 +832,7 @@ previous versions, it was simply on all the time.
 You can use the L<multidimensional> module on CPAN to disable
 multidimensional array emulation for older versions of Perl.
 
-=head2 The 'bareword_filehandles' feature.
+=head2 The 'bareword_filehandles' feature
 
 This feature enables bareword filehandles for builtin functions
 operations, a generally discouraged practice.  It is enabled by
@@ -1319,12 +1324,12 @@ main compilation unit (that is, the one-liner that follows C<-E>).
 By explicitly requiring a minimum Perl version number for your program, with
 the C<use VERSION> construct.  That is,
 
-    use v5.10.0;
+    use v5.36.0;
 
 will do an implicit
 
     no feature ':all';
-    use feature ':5.10';
+    use feature ':5.36';
 
 and so on.  Note how the trailing sub-version
 is automatically stripped from the
@@ -1332,7 +1337,7 @@ version.
 
 But to avoid portability warnings (see L<perlfunc/use>), you may prefer:
 
-    use 5.010;
+    use 5.036;
 
 with the same effect.
 
