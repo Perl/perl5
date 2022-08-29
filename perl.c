@@ -631,9 +631,6 @@ perl_destruct(pTHXx)
 
     assert(PL_scopestack_ix == 1);
 
-    /* wait for all pseudo-forked children to finish */
-    PERL_WAIT_FOR_CHILDREN;
-
     destruct_level = PL_perl_destruct_level;
     {
         const char * const s = PerlEnv_getenv("PERL_DESTRUCT_LEVEL");
@@ -671,6 +668,10 @@ perl_destruct(pTHXx)
     LEAVE;
     FREETMPS;
     assert(PL_scopestack_ix == 0);
+
+    /* wait for all pseudo-forked children to finish */
+    PERL_WAIT_FOR_CHILDREN;
+
 
     /* normally when we get here, PL_parser should be null due to having
      * its original (null) value restored by SAVEt_PARSER during leaving
