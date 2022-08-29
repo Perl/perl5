@@ -6,7 +6,7 @@
 # we've not yet verified that use works.
 # use strict;
 
-print "1..75\n";
+print "1..98\n";
 my $test = 0;
 
 sub failed {
@@ -101,7 +101,10 @@ for my $sep (' ', "\0") {
   my $prog = "sub $name {
     'This is $name'
   }
-1 +
+# 10 errors to triger a croak during compilation.
+1 +; 1 +; 1 +; 1 +; 1 +;
+1 +; 1 +; 1 +; 1 +; 1 +;
+1 +; # and one more for good measure.
 ";
 
   eval $prog and die;
@@ -119,7 +122,9 @@ foreach my $flags (0x0, 0x800, 0x1000, 0x1800) {
     # This is easier if we accept that the guts eval will add a trailing \n
     # for us
     my $prog = "1 + 1 + 1\n";
-    my $fail = "1 + \n";
+    my $fail = "1 +;\n" x 11; # we need 10 errors to trigger a croak during
+                              # compile, we add an extra one just for good
+                              # measure.
 
     is (eval $prog, 3, 'String eval works');
     if ($flags & 0x800) {

@@ -3686,12 +3686,13 @@ S_doeval_compile(pTHX_ U8 gimme, CV* outside, U32 seq, HV *hh)
 
     CALL_BLOCK_HOOKS(bhk_eval, saveop);
 
-    /* note that yyparse() may raise an exception, e.g. C<BEGIN{die}>,
-     * so honour CATCH_GET and trap it here if necessary */
-
-
+    /* we should never be CATCH_GET true here, as our immediate callers should
+     * always handle that case. */
+    assert(!CATCH_GET);
     /* compile the code */
-    yystatus = (!in_require && CATCH_GET) ? S_try_yyparse(aTHX_ GRAMPROG) : yyparse(GRAMPROG);
+    yystatus = (!in_require)
+               ? S_try_yyparse(aTHX_ GRAMPROG)
+               : yyparse(GRAMPROG);
 
     if (yystatus || PL_parser->error_count || !PL_eval_root) {
         PERL_CONTEXT *cx;
@@ -4577,6 +4578,8 @@ PP(pp_entereval)
      */
     if (CATCH_GET)
         return docatch(Perl_pp_entereval);
+
+    assert(!CATCH_GET);
 
     gimme = GIMME_V;
     was = PL_breakable_sub_gen;
