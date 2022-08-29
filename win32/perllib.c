@@ -180,6 +180,7 @@ RunPerl(int argc, char **argv, char **env)
     if (!(my_perl = perl_alloc()))
         return (1);
     perl_construct(my_perl);
+    PL_exit_flags |= PERL_EXIT_DESTRUCT_END;
     PL_perl_destruct_level = 0;
 
     /* PERL_SYS_INIT() may update the environment, e.g. via ansify_path().
