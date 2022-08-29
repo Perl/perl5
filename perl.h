@@ -4849,6 +4849,7 @@ Gid_t getegid (void);
             UNLIKELY((PL_debug & ((flag1)|(flag2)))         \
                               == ((flag1)|(flag2)))
 
+#  define DEBUG_force_TEST_ (1)
 #  define DEBUG_p_TEST_ UNLIKELY(PL_debug & DEBUG_p_FLAG)
 #  define DEBUG_s_TEST_ UNLIKELY(PL_debug & DEBUG_s_FLAG)
 #  define DEBUG_l_TEST_ UNLIKELY(PL_debug & DEBUG_l_FLAG)
@@ -4896,6 +4897,7 @@ Gid_t getegid (void);
 
 #ifdef DEBUGGING
 
+#  define DEBUG_force_TEST DEBUG_force_TEST_
 #  define DEBUG_p_TEST DEBUG_p_TEST_
 #  define DEBUG_s_TEST DEBUG_s_TEST_
 #  define DEBUG_l_TEST DEBUG_l_TEST_
@@ -4934,6 +4936,7 @@ Gid_t getegid (void);
 #  define PERL_DEB(a)                  a
 #  define PERL_DEB2(a,b)               a
 #  define PERL_DEBUG(a) if (PL_debug)  a
+#  define DEBUG_force(a) if (DEBUG_force_TEST) a
 #  define DEBUG_p(a) if (DEBUG_p_TEST) a
 #  define DEBUG_s(a) if (DEBUG_s_TEST) a
 #  define DEBUG_l(a) if (DEBUG_l_TEST) a
@@ -5027,6 +5030,7 @@ Gid_t getegid (void);
 
 #else /* ! DEBUGGING below */
 
+#  define DEBUG_force_TEST (0)
 #  define DEBUG_p_TEST (0)
 #  define DEBUG_s_TEST (0)
 #  define DEBUG_l_TEST (0)
