@@ -6414,6 +6414,15 @@ C<$tr> or C<$y> may cause this error.
 (F) The lexer couldn't find the final delimiter of a tr///, tr[][],
 y/// or y[][] construct.
 
+=item Treating %s::INIT block as BEGIN block as workaround
+
+(S) A package is using an old version of C<Module::Install::DSL> to
+install, which makes unsafe assumptions about when INIT blocks will be
+called. Because C<Module::Install::DSL> is used to install other modules
+and is difficult to upgrade we have a special workaround in place to
+deal with this. Unless you are a maintainer of an affected module you
+can ignore this warning. We emit it only as a sanity check.
+
 =item '%s' trapped by operation mask
 
 (F) You tried to use an operator from a Safe compartment in which it's

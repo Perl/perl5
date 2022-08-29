@@ -10711,16 +10711,19 @@ S_process_special_blocks(pTHX_ I32 floor, const char *const fullname,
 {
     const char *const colon = strrchr(fullname,':');
     const char *const name = colon ? colon + 1 : fullname;
+    int is_module_install_hack = 0;
 
     PERL_ARGS_ASSERT_PROCESS_SPECIAL_BLOCKS;
 
     if (*name == 'B') {
-        if (strEQ(name, "BEGIN")) {
+        module_install_hack:
+        if (strEQ(name, "BEGIN") || is_module_install_hack) {
             const I32 oldscope = PL_scopestack_ix;
             SV *max_nest_sv = NULL;
             IV max_nest_iv;
             dSP;
             (void)CvGV(cv);
+            is_module_install_hack = 0;
             if (floor) LEAVE_SCOPE(floor);
             ENTER;
 
@@ -10846,6 +10849,30 @@ S_process_special_blocks(pTHX_ I32 floor, const char *const fullname,
                 return FALSE;
         } else if (*name == 'I') {
             if (strEQ(name, "INIT")) {
+#ifdef MI_INIT_WORKAROUND_PACK
+                {
+                    HV *hv= CvSTASH(cv);
+                    STRLEN len = hv ? HvNAMELEN(hv) : 0;
+                    char *pv= (len == sizeof(MI_INIT_WORKAROUND_PACK)-1)
+                            ? HvNAME_get(hv) : NULL;
+                    if ( pv && strEQ(pv,MI_INIT_WORKAROUND_PACK) )
+                    {
+                        /* old versions of Module::Install::DSL contain code
+                         * that creates an INIT in eval, which expect to run
+                         * after an exit(0) in BEGIN. This unfortunately
+                         * breaks a lot of code in the CPAN river. So we magically
+                         * convert INIT blocks from Module::Install::DSL to
+                         * be BEGIN blocks. Which works out, since the INIT
+                         * blocks it creates are eval'ed so are late.
+                         */
+                        Perl_warn(aTHX_ "Treating %s::INIT block as BEGIN block as workaround",
+                                MI_INIT_WORKAROUND_PACK);
+                        is_module_install_hack = 1;
+                        goto module_install_hack;
+                    }
+
+                }
+#endif
                 if (PL_main_start)
                     /* diag_listed_as: Too late to run %s block */
                     Perl_ck_warner(aTHX_ packWARN(WARN_VOID),
