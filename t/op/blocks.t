@@ -6,7 +6,7 @@ BEGIN {
     set_up_inc('../lib');
 }
 
-plan tests => 22;
+plan tests => 23;
 
 my @expect = qw(
 b1
@@ -265,3 +265,7 @@ TODO: {
 
 fresh_perl_is('eval "BEGIN {goto end}"; end:', '', {}, 'RT #113934: goto out of BEGIN causes assertion failure');
 
+fresh_perl_is('package Module::Install::DSL; BEGIN { eval "INIT { print q(INIT fired in eval) }" }',
+    "Treating Module::Install::DSL::INIT block as BEGIN block as workaround at (eval 1) line 1.\n"
+    ."INIT fired in eval", {},
+   'GH Issue #16300: Module::Install::DSL workaround');
