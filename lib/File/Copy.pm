@@ -7,7 +7,7 @@
 
 package File::Copy;
 
-use 5.035007;
+use 5.035008;
 use strict;
 use warnings; no warnings 'newline';
 no warnings 'experimental::builtin';
@@ -339,14 +339,14 @@ File::Copy - Copy files or filehandles
 
 	use File::Copy;
 
-	copy("sourcefile","destinationfile") or die "Copy failed: $!";
-	copy("Copy.pm",\*STDOUT);
-	move("/dev1/sourcefile","/dev2/destinationfile");
+	copy("sourcefile", "destinationfile") or die "Copy failed: $!";
+	copy("Copy.pm", \*STDOUT);
+	move("/dev1/sourcefile", "/dev2/destinationfile");
 
 	use File::Copy "cp";
 
-	$n = FileHandle->new("/a/file","r");
-	cp($n,"x");
+	my $n = FileHandle->new("/a/file", "r");
+	cp($n, "x");
 
 =head1 DESCRIPTION
 
