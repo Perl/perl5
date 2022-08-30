@@ -118,11 +118,12 @@ open PLIN, "<", "patchlevel.h" or die "Couldn't open patchlevel.h : $!";
 open PLOUT, ">", "patchlevel.new" or die "Couldn't write on patchlevel.new : $!";
 my $seen=0;
 while (<PLIN>) {
-    if (/\t,NULL/ and $seen) {
+    if (/^(\s+),NULL/ and $seen) {
+       my $pre = $1;
        while (my $c = shift @ARGV){
             $c =~ s|\\|\\\\|g;
             $c =~ s|"|\\"|g;
-            print PLOUT qq{\t,"$c"\n};
+            print PLOUT qq{$pre,"$c"\n};
        }
     }
     $seen++ if /local_patches\[\]/;
