@@ -23,7 +23,7 @@ sub syscopy;
 sub cp;
 sub mv;
 
-$VERSION = '2.39';
+$VERSION = '2.40';
 
 require Exporter;
 @ISA = qw(Exporter);
@@ -339,14 +339,14 @@ File::Copy - Copy files or filehandles
 
 	use File::Copy;
 
-	copy("sourcefile","destinationfile") or die "Copy failed: $!";
-	copy("Copy.pm",\*STDOUT);
-	move("/dev1/sourcefile","/dev2/destinationfile");
+	copy("sourcefile", "destinationfile") or die "Copy failed: $!";
+	copy("Copy.pm", \*STDOUT);
+	move("/dev1/sourcefile", "/dev2/destinationfile");
 
 	use File::Copy "cp";
 
-	$n = FileHandle->new("/a/file","r");
-	cp($n,"x");
+	my $n = FileHandle->new("/a/file", "r");
+	cp($n, "x");
 
 =head1 DESCRIPTION
 
