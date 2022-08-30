@@ -110,26 +110,30 @@ typedef struct jmpenv JMPENV;
 
 #define dJMPENV		JMPENV cur_env
 
-#define JMPENV_PUSH(v) \
+#define JMPENV_PUSH(v)                                                  \
     STMT_START {							\
-        DEBUG_l({							\
-            int i = 0; JMPENV *p = PL_top_env;				\
+        PERL_DEB(int i=0);                                              \
+        DEBUG_l({                                                       \
+            JMPENV *p = PL_top_env;                                     \
             while (p) { i++; p = p->je_prev; }				\
-            Perl_deb(aTHX_ "JMPENV_PUSH level=%d at %s:%d\n",		\
-                         i,  __FILE__, __LINE__);})			\
+        });                                                             \
         cur_env.je_prev = PL_top_env;					\
         JE_OLD_STACK_HWM_save(cur_env);                                 \
-        cur_env.je_ret = PerlProc_setjmp(cur_env.je_buf, SCOPE_SAVES_SIGNAL_MASK);		\
+        cur_env.je_ret = PerlProc_setjmp(cur_env.je_buf, SCOPE_SAVES_SIGNAL_MASK);  \
         JE_OLD_STACK_HWM_restore(cur_env);                              \
         PL_top_env = &cur_env;						\
         cur_env.je_mustcatch = FALSE;					\
         cur_env.je_old_delaymagic = PL_delaymagic;			\
         (v) = cur_env.je_ret;						\
+        DEBUG_l({                                                       \
+            Perl_deb(aTHX_ "JMPENV_PUSH level=%d ret=%d at %s:%d\n",    \
+                         i, cur_env.je_ret,  __FILE__, __LINE__);       \
+        });                                                             \
     } STMT_END
 
 #define JMPENV_POP \
     STMT_START {							\
-        DEBUG_l({							\
+        DEBUG_l({                                                       \
             int i = -1; JMPENV *p = PL_top_env;				\
             while (p) { i++; p = p->je_prev; }				\
             Perl_deb(aTHX_ "JMPENV_POP level=%d at %s:%d\n",		\
@@ -141,26 +145,26 @@ typedef struct jmpenv JMPENV;
 
 #define JMPENV_JUMP(v) \
     STMT_START {						\
-        DEBUG_l({						\
+        DEBUG_l({                                               \
             int i = -1; JMPENV *p = PL_top_env;			\
             while (p) { i++; p = p->je_prev; }			\
             Perl_deb(aTHX_ "JMPENV_JUMP(%d) level=%d at %s:%d\n", \
-                         (int)v, i, __FILE__, __LINE__);})	\
+                         (int)(v), i, __FILE__, __LINE__);})    \
         if (PL_top_env->je_prev)				\
             PerlProc_longjmp(PL_top_env->je_buf, (v));		\
         if ((v) == 2)						\
             PerlProc_exit(STATUS_EXIT);		                \
-        PerlIO_printf(PerlIO_stderr(), "panic: top_env, v=%d\n", (int)v); \
+        PerlIO_printf(PerlIO_stderr(), "panic: top_env, v=%d\n", (int)(v)); \
         PerlProc_exit(1);					\
     } STMT_END
 
 #define CATCH_GET		(PL_top_env->je_mustcatch)
 #define CATCH_SET(v) \
     STMT_START {							\
-        DEBUG_l(							\
+        DEBUG_l(                                                        \
             Perl_deb(aTHX_						\
                 "JUMPLEVEL set catch %d => %d (for %p) at %s:%d\n",	\
-                 PL_top_env->je_mustcatch, v, (void*)PL_top_env,	\
+                 PL_top_env->je_mustcatch, (v), (void*)PL_top_env,      \
                  __FILE__, __LINE__);)					\
         PL_top_env->je_mustcatch = (v);					\
     } STMT_END
