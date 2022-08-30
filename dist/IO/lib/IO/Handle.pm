@@ -8,20 +8,20 @@ IO::Handle - supply object methods for I/O handles
 
     use IO::Handle;
 
-    $io = IO::Handle->new();
+    my $io = IO::Handle->new();
     if ($io->fdopen(fileno(STDIN),"r")) {
         print $io->getline;
         $io->close;
     }
 
-    $io = IO::Handle->new();
+    my $io = IO::Handle->new();
     if ($io->fdopen(fileno(STDOUT),"w")) {
         $io->print("Some text\n");
     }
 
     # setvbuf is not available by default on Perls 5.8.0 and later.
     use IO::Handle '_IOLBF';
-    $io->setvbuf($buffer_var, _IOLBF, 1024);
+    $io->setvbuf(my $buffer_var, _IOLBF, 1024);
 
     undef $io;       # automatically closes the file if it's open
 
@@ -270,7 +270,7 @@ use IO ();	# Load the XS module
 require Exporter;
 our @ISA = qw(Exporter);
 
-our $VERSION = "1.49";
+our $VERSION = "1.50";
 
 our @EXPORT_OK = qw(
     autoflush
