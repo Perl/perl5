@@ -45,6 +45,21 @@ XXX For a release on a stable branch, this section aspires to be:
 
 [ List each incompatible change as a =head2 entry ]
 
+=head2 readline() no longer clears the stream error flag
+
+C<readline()>, also spelled C<< <> >>, would clear the handle's error
+flag after an error occurred on the stream.
+
+The error flag is now only cleared when an error occurs when reading
+from the child process for glob() in F<miniperl>.  This allows it to
+correctly report errors from the child process on close().
+
+Since the error flag is no longer cleared calling close() on the
+stream may fail and if the stream was not explicitly closed, the
+implicit close of the stream may produce a warning.
+
+[github #20060]
+
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.
