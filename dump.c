@@ -212,6 +212,9 @@ Perl_pv_escape( pTHX_ SV *dsv, char const * const str,
             restart = NULL;
         }
     }
+    else {
+        qs = qe = "";
+    }
 
     octbuf[0] = esc;
 
