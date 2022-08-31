@@ -618,15 +618,21 @@ The great_circle_midpoint() is just a special case of
   ($thetai, $phii) =
     great_circle_waypoint($theta0, $phi0, $theta1, $phi1, $way);
 
-Where the $way is a value from zero ($theta0, $phi0) to one ($theta1,
-$phi1).  Note that antipodal points (where their distance is I<pi>
-radians) do not have waypoints between them (they would have an
-"equator" between them), and therefore C<undef> is returned for
-antipodal points.  If the points are the same and the distance
-therefore zero and all waypoints therefore identical, the first point
-(either point) is returned.
+Where $way indicates the position of the waypoint along the great
+circle arc through the starting point ($theta0, $phi0) and the end
+point ($theta1, $phi1) relative to the distance from the starting
+point to the end point. So $way = 0 gives the starting point, $way = 1
+gives the end point, $way < 0 gives a point "behind" the starting
+point, and $way > 1 gives a point beyond the end point.
 
-The thetas, phis, direction, and distance in the above are all in radians.
+Note that antipodal points (where their distance is I<pi> radians) do
+not have unique waypoints between them, and therefore C<undef> is
+returned in such cases.  If the points are the same, so the distance
+between them is zero, all waypoints are identical to the starting/end
+point.
+
+The thetas, phis, direction, and distance in the above are all in
+radians.
 
 You can import all the great circle formulas by
 
