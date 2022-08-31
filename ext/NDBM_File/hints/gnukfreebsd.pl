@@ -1,1 +1,1 @@
-do './hints/linux.pl' or die $@;
+eval `cat hints/linux.pl` or die $@;
