@@ -3133,8 +3133,14 @@ Perl_foldEQ_locale(pTHX_ const char *s1, const char *s2, I32 len)
     assert(len >= 0);
 
     while (len--) {
-        if (*a != *b && *a != PL_fold_locale[*b])
+        if (*a != *b && *a != PL_fold_locale[*b]) {
+            DEBUG_Lv(PerlIO_printf(Perl_debug_log,
+                     "%s:%d: Our records indicate %02x is not a fold of %02x"
+                     " or its mate %02x\n",
+                     __FILE__, __LINE__, *a, *b, PL_fold_locale[*b]));
+
             return 0;
+        }
         a++,b++;
     }
     return 1;

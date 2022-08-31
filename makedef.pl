@@ -553,6 +553,12 @@ unless ($define{USE_LOCALE_NUMERIC}) {
 			 );
 }
 
+unless ($define{USE_LOCALE_CTYPE}) {
+    ++$skip{$_} foreach qw(
+		    PL_ctype_name
+			 );
+}
+
 unless ($define{'USE_C_BACKTRACE'}) {
     ++$skip{Perl_get_c_backtrace_dump};
     ++$skip{Perl_dump_c_backtrace};

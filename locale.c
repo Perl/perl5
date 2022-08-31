@@ -1860,6 +1860,11 @@ S_new_ctype(pTHX_ const char *newctype)
 
     DEBUG_L(PerlIO_printf(Perl_debug_log, "Entering new_ctype(%s)\n", newctype));
 
+    /* No change means no-op */
+    if (PL_ctype_name && strEQ(PL_ctype_name, newctype)) {
+        return;
+    }
+
     /* We will replace any bad locale warning with 1) nothing if the new one is
      * ok; or 2) a new warning for the bad new locale */
     if (PL_warn_locale) {
@@ -1867,11 +1872,31 @@ S_new_ctype(pTHX_ const char *newctype)
         PL_warn_locale = NULL;
     }
 
+    /* Clear cache */
+    Safefree(PL_ctype_name);
+    PL_ctype_name = "";
+
+    /* Guard against the is_locale_utf8() call potentially zapping newctype.
+     * This is not extra work as the cache is set to this a few lines down, and
+     * that needs to be copied anyway */
+    newctype = savepv(newctype);
+
+    /* With cache cleared, this will know to compute a new value */
     PL_in_utf8_CTYPE_locale = is_locale_utf8(newctype);
 
-    /* A UTF-8 locale gets standard rules.  But note that code still has to
-     * handle this specially because of the three problematic code points */
-    if (PL_in_utf8_CTYPE_locale) {
+    /* Cache new name */
+    PL_ctype_name = newctype;
+
+    PL_in_utf8_turkic_locale = FALSE;
+
+    if (isNAME_C_OR_POSIX(PL_ctype_name)) {
+        Copy(PL_fold, PL_fold_locale, 256, U8);
+    }
+    else if (PL_in_utf8_CTYPE_locale) {
+
+        /* A UTF-8 locale gets standard rules.  But note that code still has to
+         * handle this specially because of the three problematic code points
+         * */
         Copy(PL_fold_latin1, PL_fold_locale, 256, U8);
 
         /* UTF-8 locales can have special handling for 'I' and 'i' if they are
@@ -1894,28 +1919,138 @@ S_new_ctype(pTHX_ const char *newctype)
             maybe_utf8_turkic = TRUE;
         }
     }
+    else {  /* Not a canned locale we know the values for.  Compute them */
+
+#    ifdef DEBUGGING
+
+        bool has_non_ascii_fold = FALSE;
+        bool found_unexpected = FALSE;
+
+        if (DEBUG_Lv_TEST) {
+            for (i = 128; i < 256; i++) {
+                int j = LATIN1_TO_NATIVE(i);
+                if (toU8_LOWER_LC(j) != j || toU8_UPPER_LC(j) != j) {
+                    has_non_ascii_fold = TRUE;
+                    break;
+                }
+            }
+        }
+
+#    endif
+
+        for (i = 0; i < 256; i++) {
+            if (isU8_UPPER_LC(i))
+                PL_fold_locale[i] = (U8) toU8_LOWER_LC(i);
+            else if (isU8_LOWER_LC(i))
+                PL_fold_locale[i] = (U8) toU8_UPPER_LC(i);
+            else
+                PL_fold_locale[i] = (U8) i;
+
+#    ifdef DEBUGGING
+
+            if (DEBUG_Lv_TEST) {
+                bool unexpected = FALSE;
+
+                if (isUPPER_L1(i)) {
+                    if (isUPPER_A(i)) {
+                        if (PL_fold_locale[i] != toLOWER_A(i)) {
+                            unexpected = TRUE;
+                        }
+                    }
+                    else if (has_non_ascii_fold) {
+                        if (PL_fold_locale[i] != toLOWER_L1(i)) {
+                            unexpected = TRUE;
+                        }
+                    }
+                    else if (PL_fold_locale[i] != i) {
+                        unexpected = TRUE;
+                    }
+                }
+                else if (   isLOWER_L1(i)
+                         && i != LATIN_SMALL_LETTER_SHARP_S
+                         && i != MICRO_SIGN)
+                {
+                    if (isLOWER_A(i)) {
+                        if (PL_fold_locale[i] != toUPPER_A(i)) {
+                            unexpected = TRUE;
+                        }
+                    }
+                    else if (has_non_ascii_fold) {
+                        if (PL_fold_locale[i] != toUPPER_LATIN1_MOD(i)) {
+                            unexpected = TRUE;
+                        }
+                    }
+                    else if (PL_fold_locale[i] != i) {
+                        unexpected = TRUE;
+                    }
+                }
+                else if (PL_fold_locale[i] != i) {
+                    unexpected = TRUE;
+                }
+
+                if (unexpected) {
+                    found_unexpected = TRUE;
+                    DEBUG_Lv(PerlIO_printf(Perl_debug_log,
+                                           "For %s, fold of %02x is %02x\n",
+                                           newctype, i, PL_fold_locale[i]));
+                }
+            }
+        }
+
+        if (found_unexpected) {
+            DEBUG_Lv(PerlIO_printf(Perl_debug_log,
+                               "All bytes not mentioned above either fold to"
+                               " themselves or are the expected ASCII or"
+                               " Latin1 ones\n"));
+        }
+        else {
+            DEBUG_Lv(PerlIO_printf(Perl_debug_log,
+                                   "No nonstandard folds were found\n"));
+#    endif
+
+        }
+    }
+
+#    ifdef MB_CUR_MAX
+
+    /* We only handle single-byte locales (outside of UTF-8 ones; so if this
+     * locale requires more than one byte, there are going to be BIG problems.
+     * */
+
+    if (MB_CUR_MAX > 1 && ! PL_in_utf8_CTYPE_locale
+
+            /* Some platforms return MB_CUR_MAX > 1 for even the "C" locale.
+             * Just assume that the implementation for them (plus for POSIX) is
+             * correct and the > 1 value is spurious.  (Since these are
+             * specially handled to never be considered UTF-8 locales, as long
+             * as this is the only problem, everything should work fine */
+        && ! isNAME_C_OR_POSIX(newctype))
+    {
+        DEBUG_L(PerlIO_printf(Perl_debug_log,
+                              "Unsupported, MB_CUR_MAX=%d\n", (int) MB_CUR_MAX));
+
+        Perl_ck_warner_d(aTHX_ packWARN(WARN_LOCALE),
+                         "Locale '%s' is unsupported, and may crash the"
+                         " interpreter.\n",
+                         newctype);
+    }
+
+#    endif
+
+    DEBUG_Lv(PerlIO_printf(Perl_debug_log, "check_for_problems=%d\n",
+                                           check_for_problems));
 
     /* We don't populate the other lists if a UTF-8 locale, but do check that
      * everything works as expected, unless checking turned off */
-    if (check_for_problems || ! PL_in_utf8_CTYPE_locale) {
+    if (check_for_problems) {
         /* Assume enough space for every character being bad.  4 spaces each
          * for the 94 printable characters that are output like "'x' "; and 5
          * spaces each for "'\\' ", "'\t' ", and "'\n' "; plus a terminating
          * NUL */
         char bad_chars_list[ (94 * 4) + (3 * 5) + 1 ] = { '\0' };
-        bool multi_byte_locale = FALSE;     /* Assume is a single-byte locale
-                                               to start */
         unsigned int bad_count = 0;         /* Count of bad characters */
 
         for (i = 0; i < 256; i++) {
-            if (! PL_in_utf8_CTYPE_locale) {
-                if (isU8_UPPER_LC(i))
-                    PL_fold_locale[i] = (U8) toU8_LOWER_LC(i);
-                else if (isU8_LOWER_LC(i))
-                    PL_fold_locale[i] = (U8) toU8_UPPER_LC(i);
-                else
-                    PL_fold_locale[i] = (U8) i;
-            }
 
             /* If checking for locale problems, see if the native ASCII-range
              * printables plus \n and \t are in their expected categories in
@@ -1926,9 +2061,7 @@ S_new_ctype(pTHX_ const char *newctype)
              * nowadays.  It isn't a problem for most controls to be changed
              * into something else; we check only \n and \t, though perhaps \r
              * could be an issue as well. */
-            if (    check_for_problems
-                && (isGRAPH_A(i) || isBLANK_A(i) || i == '\n'))
-            {
+            if (isGRAPH_A(i) || isBLANK_A(i) || i == '\n') {
                 bool is_bad = FALSE;
                 char name[4] = { '\0' };
 
@@ -2046,37 +2179,9 @@ S_new_ctype(pTHX_ const char *newctype)
             PL_in_utf8_turkic_locale = TRUE;
             DEBUG_L(PerlIO_printf(Perl_debug_log, "%s is turkic\n", newctype));
         }
-        else {
-            PL_in_utf8_turkic_locale = FALSE;
-        }
-
-#  ifdef MB_CUR_MAX
-
-        /* We only handle single-byte locales (outside of UTF-8 ones; so if
-         * this locale requires more than one byte, there are going to be
-         * problems. */
-        DEBUG_Lv(PerlIO_printf(Perl_debug_log,
-                 "check_for_problems=%d, MB_CUR_MAX=%d\n",
-                 check_for_problems, (int) MB_CUR_MAX));
-
-        if (   check_for_problems && MB_CUR_MAX > 1
-            && ! PL_in_utf8_CTYPE_locale
-
-               /* Some platforms return MB_CUR_MAX > 1 for even the "C"
-                * locale.  Just assume that the implementation for them (plus
-                * for POSIX) is correct and the > 1 value is spurious.  (Since
-                * these are specially handled to never be considered UTF-8
-                * locales, as long as this is the only problem, everything
-                * should work fine */
-            && strNE(newctype, "C") && strNE(newctype, "POSIX"))
-        {
-            multi_byte_locale = TRUE;
-        }
-
-#  endif
 
         /* If we found problems and we want them output, do so */
-        if (   (UNLIKELY(bad_count) || UNLIKELY(multi_byte_locale))
+        if (   (UNLIKELY(bad_count))
             && (LIKELY(ckWARN_d(WARN_LOCALE)) || UNLIKELY(DEBUG_L_TEST)))
         {
             if (UNLIKELY(bad_count) && PL_in_utf8_CTYPE_locale) {
@@ -2087,21 +2192,12 @@ S_new_ctype(pTHX_ const char *newctype)
                       newctype, bad_chars_list);
             }
             else {
-                PL_warn_locale = Perl_newSVpvf(aTHX_
-                             "Locale '%s' may not work well.%s%s%s\n",
-                             newctype,
-                             (multi_byte_locale)
-                              ? "  Some characters in it are not recognized by"
-                                " Perl."
-                              : "",
-                             (bad_count)
-                              ? "\nThe following characters (and maybe others)"
-                                " may not have the same meaning as the Perl"
-                                " program expects:\n"
-                              : "",
-                             (bad_count)
-                              ? bad_chars_list
-                              : ""
+                PL_warn_locale =
+                    Perl_newSVpvf(aTHX_
+                                  "\nThe following characters (and maybe"
+                                  " others) may not have the same meaning as"
+                                  " the Perl program expects: %s\n",
+                                  bad_chars_list
                             );
             }
 
@@ -6504,11 +6600,18 @@ S_is_locale_utf8(pTHX_ const char * locale)
 #  else
 
     const char * scratch_buffer = NULL;
-    const char * codeset = my_langinfo_c(CODESET, LC_CTYPE, locale,
-                                         &scratch_buffer, NULL, NULL);
-    bool retval = is_codeset_name_UTF8(codeset);
+    const char * codeset;
+    bool retval;
 
     PERL_ARGS_ASSERT_IS_LOCALE_UTF8;
+
+    if (PL_ctype_name && strEQ(locale, PL_ctype_name)) {
+        return PL_in_utf8_CTYPE_locale;
+    }
+
+    codeset = my_langinfo_c(CODESET, LC_CTYPE, locale,
+                            &scratch_buffer, NULL, NULL);
+    retval = is_codeset_name_UTF8(codeset);
 
     DEBUG_Lv(PerlIO_printf(Perl_debug_log,
                            "found codeset=%s, is_utf8=%d\n", codeset, retval));
