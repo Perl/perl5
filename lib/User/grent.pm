@@ -2,7 +2,7 @@ package User::grent;
 use strict;
 
 use 5.006_001;
-our $VERSION = '1.03';
+our $VERSION = '1.04';
 our(@EXPORT, @EXPORT_OK, %EXPORT_TAGS);
 our ($gr_name, $gr_gid, $gr_passwd, @gr_members);
 BEGIN { 
