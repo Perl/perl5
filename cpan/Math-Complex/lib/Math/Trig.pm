@@ -15,7 +15,7 @@ require Exporter;
 
 our @ISA = qw(Exporter);
 
-our $VERSION = 1.23;
+our $VERSION = 1.23_01;
 
 my @angcnv = qw(rad2deg rad2grad
 		deg2rad deg2grad
@@ -47,8 +47,9 @@ my @pi = qw(pi pi2 pi4 pip2 pip4);
 our @EXPORT_OK = (@rdlcnv, @greatcircle, @pi, 'Inf');
 
 # See e.g. the following pages:
-# http://www.movable-type.co.uk/scripts/LatLong.html
-# http://williams.best.vwh.net/avform.htm
+# https://www.movable-type.co.uk/scripts/latlong.html
+# https://edwilliams.org/avform.htm
+# https://en.wikipedia.org/wiki/Great-circle_distance
 
 our %EXPORT_TAGS = ('radial' => [ @rdlcnv ],
 	        'great_circle' => [ @greatcircle ],
