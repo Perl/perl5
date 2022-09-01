@@ -426,7 +426,7 @@ Rethrows a previously caught exception.  See L<perlguts/"Exception Handling">.
         } STMT_END
 
 #define DBM_ckFilter(arg,type,name)				\
-        STMT_START {						\
+    STMT_START {						\
         if (db->type) {						\
             if (db->filtering) {				\
                 croak("recursion detected in %s", name) ;	\
@@ -450,7 +450,8 @@ Rethrows a previously caught exception.  See L<perlguts/"Exception Handling">.
             if (name[7] == 's'){                                \
                 arg = sv_2mortal(arg);                          \
             }                                                   \
-        } } STMT_END
+        }                                                       \
+    } STMT_END
 
 #if 1		/* for compatibility */
 #  define VTBL_sv		&PL_vtbl_sv
