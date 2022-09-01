@@ -15,7 +15,7 @@ require Exporter;
 
 our @ISA = qw(Exporter);
 
-our $VERSION = 1.23_01;
+our $VERSION = 1.24;
 
 my @angcnv = qw(rad2deg rad2grad
 		deg2rad deg2grad
@@ -466,15 +466,15 @@ B<All angles are in radians>.
 
 B<Cartesian> coordinates are the usual rectangular I<(x, y, z)>-coordinates.
 
-Spherical coordinates, I<(rho, theta, pi)>, are three-dimensional
+Spherical coordinates, I<(rho, theta, phi)>, are three-dimensional
 coordinates which define a point in three-dimensional space.  They are
 based on a sphere surface.  The radius of the sphere is B<rho>, also
 known as the I<radial> coordinate.  The angle in the I<xy>-plane
 (around the I<z>-axis) is B<theta>, also known as the I<azimuthal>
 coordinate.  The angle from the I<z>-axis is B<phi>, also known as the
-I<polar> coordinate.  The North Pole is therefore I<0, 0, rho>, and
-the Gulf of Guinea (think of the missing big chunk of Africa) I<0,
-pi/2, rho>.  In geographical terms I<phi> is latitude (northward
+I<polar> coordinate.  The North Pole is therefore I<rho, 0, 0>, and
+the Gulf of Guinea (think of the missing big chunk of Africa) I<rho,
+0, pi/2>.  In geographical terms I<phi> is latitude (northward
 positive, southward negative) and I<theta> is longitude (eastward
 positive, westward negative).
 
