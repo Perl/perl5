@@ -950,7 +950,7 @@ PERLVAR(I, Xpv,		XPV *)		/* (unused) held temporary value */
 
 /* name of the scopes we've ENTERed. Only used with -DDEBUGGING, but needs to be
    present always, as -DDEBUGGING must be binary compatible with non.  */
-PERLVARI(I, scopestack_name, const char * *, NULL)
+PERLVARI(I, scopestack_name, const char **, NULL)
 
 PERLVAR(I, debug_pad,	struct perl_debug_pad)	/* always needed because of the re extension */
 
