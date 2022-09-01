@@ -1384,7 +1384,7 @@ p	|int	|magic_setcollxfrm|NN SV* sv|NN MAGIC* mg
 p	|int	|magic_freecollxfrm|NN SV* sv|NN MAGIC* mg
 : Defined in locale.c, used only in sv.c
 #   if defined(PERL_IN_LOCALE_C) || defined(PERL_IN_SV_C) || defined(PERL_IN_MATHOMS_C)
-p	|char*	|_mem_collxfrm	|NN const char* input_string	\
+Ep	|char*	|mem_collxfrm_	|NN const char* input_string	\
 				|STRLEN len			\
 				|NN STRLEN* xlen		\
 				|bool utf8
@@ -3326,7 +3326,7 @@ S	|utf8ness_t|get_locale_string_utf8ness_i				\
 				|const unsigned cat_index		\
 				|NULLOK const char * string		\
 				|const locale_utf8ness_t known_utf8
-S	|void	|new_collate	|NULLOK const char* newcoll
+S	|void	|new_collate	|NN const char* newcoll
 S	|void	|new_ctype	|NN const char* newctype
 S	|void	|new_numeric	|NN const char* newnum
 S	|void	|new_LC_ALL	|NULLOK const char* unused
@@ -3405,9 +3405,10 @@ S	|const char*|my_langinfo_i|const int item			\
 #    endif
 #    ifdef DEBUGGING
 S	|void	|print_collxfrm_input_and_return		\
-			    |NN const char * const s		\
-			    |NN const char * const e		\
-			    |NULLOK const STRLEN * const xlen	\
+			    |NN const char * s			\
+			    |NN const char * e			\
+			    |NULLOK const char * xbuf		\
+			    |const STRLEN xlen			\
 			    |const bool is_utf8
 S	|void	|print_bytes_for_locale	|NN const char * const s	\
 					|NN const char * const e	\

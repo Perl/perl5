@@ -2272,6 +2272,7 @@ S_new_LC_ALL(pTHX_ const char *unused)
 STATIC void
 S_new_collate(pTHX_ const char *newcoll)
 {
+    PERL_ARGS_ASSERT_NEW_COLLATE;
 
 #  ifndef USE_LOCALE_COLLATE
 
@@ -2297,12 +2298,21 @@ S_new_collate(pTHX_ const char *newcoll)
      * that a transformation would improperly be considered valid, leading to
      * an unlikely bug */
 
-    if (! newcoll) {
-        ++PL_collation_ix;
-        Safefree(PL_collation_name);
-        PL_collation_name = NULL;
-        PL_collation_standard = TRUE;
-      is_standard_collation:
+    /* Return if the locale isn't changing */
+    if (strEQ(PL_collation_name, newcoll)) {
+        return;
+    }
+
+    Safefree(PL_collation_name);
+    PL_collation_name = savepv(newcoll);
+    ++PL_collation_ix;
+
+    /* Set the new one up if trivial */
+    PL_collation_standard = isNAME_C_OR_POSIX(newcoll);
+    if (PL_collation_standard) {
+
+    /* Do minimal set up now */
+        DEBUG_Lv(PerlIO_printf(Perl_debug_log, "Setting PL_collation name='%s'\n", PL_collation_name));
         PL_collxfrm_base = 0;
         PL_collxfrm_mult = 2;
         PL_in_utf8_COLLATE_locale = FALSE;
@@ -2311,172 +2321,9 @@ S_new_collate(pTHX_ const char *newcoll)
         return;
     }
 
-    /* If this is not the same locale as currently, set the new one up */
-    if (strNE(PL_collation_name, newcoll)) {
-        ++PL_collation_ix;
-        Safefree(PL_collation_name);
-        PL_collation_name = savepv(newcoll);
-        PL_collation_standard = isNAME_C_OR_POSIX(newcoll);
-        if (PL_collation_standard) {
-            goto is_standard_collation;
-        }
-
-        PL_in_utf8_COLLATE_locale = is_locale_utf8(newcoll);
-        PL_strxfrm_NUL_replacement = '\0';
-        PL_strxfrm_max_cp = 0;
-
-        /* A locale collation definition includes primary, secondary, tertiary,
-         * etc. weights for each character.  To sort, the primary weights are
-         * used, and only if they compare equal, then the secondary weights are
-         * used, and only if they compare equal, then the tertiary, etc.
-         *
-         * strxfrm() works by taking the input string, say ABC, and creating an
-         * output transformed string consisting of first the primary weights,
-         * A¹B¹C¹ followed by the secondary ones, A²B²C²; and then the
-         * tertiary, etc, yielding A¹B¹C¹ A²B²C² A³B³C³ ....  Some characters
-         * may not have weights at every level.  In our example, let's say B
-         * doesn't have a tertiary weight, and A doesn't have a secondary
-         * weight.  The constructed string is then going to be
-         *  A¹B¹C¹ B²C² A³C³ ....
-         * This has the desired effect that strcmp() will look at the secondary
-         * or tertiary weights only if the strings compare equal at all higher
-         * priority weights.  The spaces shown here, like in
-         *  "A¹B¹C¹ A²B²C² "
-         * are not just for readability.  In the general case, these must
-         * actually be bytes, which we will call here 'separator weights'; and
-         * they must be smaller than any other weight value, but since these
-         * are C strings, only the terminating one can be a NUL (some
-         * implementations may include a non-NUL separator weight just before
-         * the NUL).  Implementations tend to reserve 01 for the separator
-         * weights.  They are needed so that a shorter string's secondary
-         * weights won't be misconstrued as primary weights of a longer string,
-         * etc.  By making them smaller than any other weight, the shorter
-         * string will sort first.  (Actually, if all secondary weights are
-         * smaller than all primary ones, there is no need for a separator
-         * weight between those two levels, etc.)
-         *
-         * The length of the transformed string is roughly a linear function of
-         * the input string.  It's not exactly linear because some characters
-         * don't have weights at all levels.  When we call strxfrm() we have to
-         * allocate some memory to hold the transformed string.  The
-         * calculations below try to find coefficients 'm' and 'b' for this
-         * locale so that m*x + b equals how much space we need, given the size
-         * of the input string in 'x'.  If we calculate too small, we increase
-         * the size as needed, and call strxfrm() again, but it is better to
-         * get it right the first time to avoid wasted expensive string
-         * transformations. */
-
-        {
-            /* We use the string below to find how long the tranformation of it
-             * is.  Almost all locales are supersets of ASCII, or at least the
-             * ASCII letters.  We use all of them, half upper half lower,
-             * because if we used fewer, we might hit just the ones that are
-             * outliers in a particular locale.  Most of the strings being
-             * collated will contain a preponderance of letters, and even if
-             * they are above-ASCII, they are likely to have the same number of
-             * weight levels as the ASCII ones.  It turns out that digits tend
-             * to have fewer levels, and some punctuation has more, but those
-             * are relatively sparse in text, and khw believes this gives a
-             * reasonable result, but it could be changed if experience so
-             * dictates. */
-            const char longer[] = "ABCDEFGHIJKLMnopqrstuvwxyz";
-            char * x_longer;        /* Transformed 'longer' */
-            Size_t x_len_longer;    /* Length of 'x_longer' */
-
-            char * x_shorter;   /* We also transform a substring of 'longer' */
-            Size_t x_len_shorter;
-
-            /* _mem_collxfrm() is used get the transformation (though here we
-             * are interested only in its length).  It is used because it has
-             * the intelligence to handle all cases, but to work, it needs some
-             * values of 'm' and 'b' to get it started.  For the purposes of
-             * this calculation we use a very conservative estimate of 'm' and
-             * 'b'.  This assumes a weight can be multiple bytes, enough to
-             * hold any UV on the platform, and there are 5 levels, 4 weight
-             * bytes, and a trailing NUL.  */
-            PL_collxfrm_base = 5;
-            PL_collxfrm_mult = 5 * sizeof(UV);
-
-            /* Find out how long the transformation really is */
-            x_longer = _mem_collxfrm(longer,
-                                     sizeof(longer) - 1,
-                                     &x_len_longer,
-
-                                     /* We avoid converting to UTF-8 in the
-                                      * called function by telling it the
-                                      * string is in UTF-8 if the locale is a
-                                      * UTF-8 one.  Since the string passed
-                                      * here is invariant under UTF-8, we can
-                                      * claim it's UTF-8 even though it isn't.
-                                      * */
-                                     PL_in_utf8_COLLATE_locale);
-            Safefree(x_longer);
-
-            /* Find out how long the transformation of a substring of 'longer'
-             * is.  Together the lengths of these transformations are
-             * sufficient to calculate 'm' and 'b'.  The substring is all of
-             * 'longer' except the first character.  This minimizes the chances
-             * of being swayed by outliers */
-            x_shorter = _mem_collxfrm(longer + 1,
-                                      sizeof(longer) - 2,
-                                      &x_len_shorter,
-                                      PL_in_utf8_COLLATE_locale);
-            Safefree(x_shorter);
-
-            /* If the results are nonsensical for this simple test, the whole
-             * locale definition is suspect.  Mark it so that locale collation
-             * is not active at all for it.  XXX Should we warn? */
-            if (   x_len_shorter == 0
-                || x_len_longer == 0
-                || x_len_shorter >= x_len_longer)
-            {
-                PL_collxfrm_mult = 0;
-                PL_collxfrm_base = 0;
-            }
-            else {
-                SSize_t base;       /* Temporary */
-
-                /* We have both:    m * strlen(longer)  + b = x_len_longer
-                 *                  m * strlen(shorter) + b = x_len_shorter;
-                 * subtracting yields:
-                 *          m * (strlen(longer) - strlen(shorter))
-                 *                             = x_len_longer - x_len_shorter
-                 * But we have set things up so that 'shorter' is 1 byte smaller
-                 * than 'longer'.  Hence:
-                 *          m = x_len_longer - x_len_shorter
-                 *
-                 * But if something went wrong, make sure the multiplier is at
-                 * least 1.
-                 */
-                if (x_len_longer > x_len_shorter) {
-                    PL_collxfrm_mult = (STRLEN) x_len_longer - x_len_shorter;
-                }
-                else {
-                    PL_collxfrm_mult = 1;
-                }
-
-                /*     mx + b = len
-                 * so:      b = len - mx
-                 * but in case something has gone wrong, make sure it is
-                 * non-negative */
-                base = x_len_longer - PL_collxfrm_mult * (sizeof(longer) - 1);
-                if (base < 0) {
-                    base = 0;
-                }
-
-                /* Add 1 for the trailing NUL */
-                PL_collxfrm_base = base + 1;
-            }
-
-            DEBUG_L(PerlIO_printf(Perl_debug_log,
-                                  "?UTF-8 locale=%d; x_len_shorter=%zu, "
-                    "x_len_longer=%zu,"
-                    " collate multipler=%zu, collate base=%zu\n",
-                    PL_in_utf8_COLLATE_locale,
-                    x_len_shorter, x_len_longer,
-                                  PL_collxfrm_mult, PL_collxfrm_base));
-        }
-    }
+    /* Flag that the remainder of the set up is being deferred until first need */
+    PL_collxfrm_mult = 0;
+    PL_collxfrm_base = 0;
 
 #  endif /* USE_LOCALE_COLLATE */
 
@@ -5202,8 +5049,175 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 
 #ifdef USE_LOCALE_COLLATE
 
+STATIC void
+S_compute_collxfrm_coefficients(pTHX)
+{
+
+        PL_in_utf8_COLLATE_locale = (PL_collation_standard)
+                                    ? 0
+                                    : is_locale_utf8(PL_collation_name);
+        PL_strxfrm_NUL_replacement = '\0';
+        PL_strxfrm_max_cp = 0;
+
+        /* A locale collation definition includes primary, secondary, tertiary,
+         * etc. weights for each character.  To sort, the primary weights are
+         * used, and only if they compare equal, then the secondary weights are
+         * used, and only if they compare equal, then the tertiary, etc.
+         *
+         * strxfrm() works by taking the input string, say ABC, and creating an
+         * output transformed string consisting of first the primary weights,
+         * A¹B¹C¹ followed by the secondary ones, A²B²C²; and then the
+         * tertiary, etc, yielding A¹B¹C¹ A²B²C² A³B³C³ ....  Some characters
+         * may not have weights at every level.  In our example, let's say B
+         * doesn't have a tertiary weight, and A doesn't have a secondary
+         * weight.  The constructed string is then going to be
+         *  A¹B¹C¹ B²C² A³C³ ....
+         * This has the desired effect that strcmp() will look at the secondary
+         * or tertiary weights only if the strings compare equal at all higher
+         * priority weights.  The spaces shown here, like in
+         *  "A¹B¹C¹ A²B²C² "
+         * are not just for readability.  In the general case, these must
+         * actually be bytes, which we will call here 'separator weights'; and
+         * they must be smaller than any other weight value, but since these
+         * are C strings, only the terminating one can be a NUL (some
+         * implementations may include a non-NUL separator weight just before
+         * the NUL).  Implementations tend to reserve 01 for the separator
+         * weights.  They are needed so that a shorter string's secondary
+         * weights won't be misconstrued as primary weights of a longer string,
+         * etc.  By making them smaller than any other weight, the shorter
+         * string will sort first.  (Actually, if all secondary weights are
+         * smaller than all primary ones, there is no need for a separator
+         * weight between those two levels, etc.)
+         *
+         * The length of the transformed string is roughly a linear function of
+         * the input string.  It's not exactly linear because some characters
+         * don't have weights at all levels.  When we call strxfrm() we have to
+         * allocate some memory to hold the transformed string.  The
+         * calculations below try to find coefficients 'm' and 'b' for this
+         * locale so that m*x + b equals how much space we need, given the size
+         * of the input string in 'x'.  If we calculate too small, we increase
+         * the size as needed, and call strxfrm() again, but it is better to
+         * get it right the first time to avoid wasted expensive string
+         * transformations. */
+
+        {
+            /* We use the string below to find how long the tranformation of it
+             * is.  Almost all locales are supersets of ASCII, or at least the
+             * ASCII letters.  We use all of them, half upper half lower,
+             * because if we used fewer, we might hit just the ones that are
+             * outliers in a particular locale.  Most of the strings being
+             * collated will contain a preponderance of letters, and even if
+             * they are above-ASCII, they are likely to have the same number of
+             * weight levels as the ASCII ones.  It turns out that digits tend
+             * to have fewer levels, and some punctuation has more, but those
+             * are relatively sparse in text, and khw believes this gives a
+             * reasonable result, but it could be changed if experience so
+             * dictates. */
+            const char longer[] = "ABCDEFGHIJKLMnopqrstuvwxyz";
+            char * x_longer;        /* Transformed 'longer' */
+            Size_t x_len_longer;    /* Length of 'x_longer' */
+
+            char * x_shorter;   /* We also transform a substring of 'longer' */
+            Size_t x_len_shorter;
+
+            /* mem_collxfrm_() is used get the transformation (though here we
+             * are interested only in its length).  It is used because it has
+             * the intelligence to handle all cases, but to work, it needs some
+             * values of 'm' and 'b' to get it started.  For the purposes of
+             * this calculation we use a very conservative estimate of 'm' and
+             * 'b'.  This assumes a weight can be multiple bytes, enough to
+             * hold any UV on the platform, and there are 5 levels, 4 weight
+             * bytes, and a trailing NUL.  */
+            PL_collxfrm_base = 5;
+            PL_collxfrm_mult = 5 * sizeof(UV);
+
+            /* Find out how long the transformation really is */
+            x_longer = mem_collxfrm_(longer,
+                                     sizeof(longer) - 1,
+                                     &x_len_longer,
+
+                                     /* We avoid converting to UTF-8 in the
+                                      * called function by telling it the
+                                      * string is in UTF-8 if the locale is a
+                                      * UTF-8 one.  Since the string passed
+                                      * here is invariant under UTF-8, we can
+                                      * claim it's UTF-8 even though it isn't.
+                                      * */
+                                     PL_in_utf8_COLLATE_locale);
+            Safefree(x_longer);
+
+            /* Find out how long the transformation of a substring of 'longer'
+             * is.  Together the lengths of these transformations are
+             * sufficient to calculate 'm' and 'b'.  The substring is all of
+             * 'longer' except the first character.  This minimizes the chances
+             * of being swayed by outliers */
+            x_shorter = mem_collxfrm_(longer + 1,
+                                      sizeof(longer) - 2,
+                                      &x_len_shorter,
+                                      PL_in_utf8_COLLATE_locale);
+            Safefree(x_shorter);
+
+            /* If the results are nonsensical for this simple test, the whole
+             * locale definition is suspect.  Mark it so that locale collation
+             * is not active at all for it.  XXX Should we warn? */
+            if (   x_len_shorter == 0
+                || x_len_longer == 0
+                || x_len_shorter >= x_len_longer)
+            {
+                PL_collxfrm_mult = 0;
+                PL_collxfrm_base = 1;
+                DEBUG_L(PerlIO_printf(Perl_debug_log,
+                        "Disabling locale collation for LC_COLLATE='%s';"
+                        " length for shorter sample=%zu; longer=%zu\n",
+                        PL_collation_name, x_len_shorter, x_len_longer));
+            }
+            else {
+                SSize_t base;       /* Temporary */
+
+                /* We have both:    m * strlen(longer)  + b = x_len_longer
+                 *                  m * strlen(shorter) + b = x_len_shorter;
+                 * subtracting yields:
+                 *          m * (strlen(longer) - strlen(shorter))
+                 *                             = x_len_longer - x_len_shorter
+                 * But we have set things up so that 'shorter' is 1 byte smaller
+                 * than 'longer'.  Hence:
+                 *          m = x_len_longer - x_len_shorter
+                 *
+                 * But if something went wrong, make sure the multiplier is at
+                 * least 1.
+                 */
+                if (x_len_longer > x_len_shorter) {
+                    PL_collxfrm_mult = (STRLEN) x_len_longer - x_len_shorter;
+                }
+                else {
+                    PL_collxfrm_mult = 1;
+                }
+
+                /*     mx + b = len
+                 * so:      b = len - mx
+                 * but in case something has gone wrong, make sure it is
+                 * non-negative */
+                base = x_len_longer - PL_collxfrm_mult * (sizeof(longer) - 1);
+                if (base < 0) {
+                    base = 0;
+                }
+
+                /* Add 1 for the trailing NUL */
+                PL_collxfrm_base = base + 1;
+            }
+
+            DEBUG_L(PerlIO_printf(Perl_debug_log,
+                                  "?UTF-8 locale=%d; x_len_shorter=%zu, "
+                    "x_len_longer=%zu,"
+                    " collate multipler=%zu, collate base=%zu\n",
+                    PL_in_utf8_COLLATE_locale,
+                    x_len_shorter, x_len_longer,
+                                  PL_collxfrm_mult, PL_collxfrm_base));
+        }
+}
+
 char *
-Perl__mem_collxfrm(pTHX_ const char *input_string,
+Perl_mem_collxfrm_(pTHX_ const char *input_string,
                          STRLEN len,    /* Length of 'input_string' */
                          STRLEN *xlen,  /* Set to length of returned string
                                            (not including the collation index
@@ -5211,7 +5225,7 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
                          bool utf8      /* Is the input in UTF-8? */
                    )
 {
-    /* _mem_collxfrm() is like strxfrm() but with two important differences.
+    /* mem_collxfrm_() is like strxfrm() but with two important differences.
      * First, it handles embedded NULs. Second, it allocates a bit more memory
      * than needed for the transformed data itself.  The real transformed data
      * begins at offset COLLXFRM_HDR_LEN.  *xlen is set to the length of that,
@@ -5230,17 +5244,25 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
     STRLEN xAlloc;          /* xalloc is a reserved word in VC */
     STRLEN length_in_chars;
     bool first_time = TRUE; /* Cleared after first loop iteration */
+    const char * orig_CTYPE_locale = NULL;
 
-    PERL_ARGS_ASSERT__MEM_COLLXFRM;
+#  if defined(USE_POSIX_2008_LOCALE) && defined HAS_STRXFRM_L
+    locale_t constructed_locale = (locale_t) 0;
+#  endif
+
+    PERL_ARGS_ASSERT_MEM_COLLXFRM_;
 
     /* Must be NUL-terminated */
     assert(*(input_string + len) == '\0');
 
-    /* If this locale has defective collation, skip */
-    if (PL_collxfrm_base == 0 && PL_collxfrm_mult == 0) {
-        DEBUG_L(PerlIO_printf(Perl_debug_log,
-                      "_mem_collxfrm: locale's collation is defective\n"));
-        goto bad;
+    if (PL_collxfrm_mult == 0) {     /* unknown or bad */
+        if (PL_collxfrm_base != 0) { /* bad collation => skip */
+            DEBUG_L(PerlIO_printf(Perl_debug_log,
+                            "mem_collxfrm_: locale's collation is defective\n"));
+            goto bad;
+        }
+
+        S_compute_collxfrm_coefficients(aTHX);
     }
 
     /* Replace any embedded NULs with the control that sorts before any others.
@@ -5281,6 +5303,16 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
                  try_non_controls < 2;
                  try_non_controls++)
             {
+
+#  ifdef USE_LOCALE_CTYPE
+
+                /* In this case we use isCNTRL_LC() below, which relies on
+                 * LC_CTYPE, so that must be switched to correspond with the
+                 * LC_COLLATE locale */
+                if (! try_non_controls && ! PL_in_utf8_COLLATE_locale) {
+                    orig_CTYPE_locale = toggle_locale_c(LC_CTYPE, PL_collation_name);
+                }
+#  endif
                 /* Look through all legal code points (NUL isn't) */
                 for (j = 1; j < 256; j++) {
                     char * x;       /* j's xfrm plus collation index */
@@ -5301,7 +5333,7 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
                     cur_source[0] = (char) j;
 
                     /* Then transform it */
-                    x = _mem_collxfrm(cur_source, trial_len, &x_len,
+                    x = mem_collxfrm_(cur_source, trial_len, &x_len,
                                       0 /* The string is not in UTF-8 */);
 
                     /* Ignore any character that didn't successfully transform.
@@ -5325,6 +5357,10 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
                     }
                 } /* end of loop through all 255 characters */
 
+#  ifdef USE_LOCALE_CTYPE
+                restore_toggled_locale_c(LC_CTYPE, orig_CTYPE_locale);
+#  endif
+
                 /* Stop looking if found */
                 if (cur_min_x) {
                     break;
@@ -5334,18 +5370,18 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
                  * work in the locale, repeat the loop, looking for any
                  * character that works */
                 DEBUG_L(PerlIO_printf(Perl_debug_log,
-                "_mem_collxfrm: No control worked.  Trying non-controls\n"));
+                "mem_collxfrm_: No control worked.  Trying non-controls\n"));
             } /* End of loop to try first the controls, then any char */
 
             if (! cur_min_x) {
                 DEBUG_L(PerlIO_printf(Perl_debug_log,
-                    "_mem_collxfrm: Couldn't find any character to replace"
+                    "mem_collxfrm_: Couldn't find any character to replace"
                     " embedded NULs in locale %s with", PL_collation_name));
                 goto bad;
             }
 
             DEBUG_L(PerlIO_printf(Perl_debug_log,
-                    "_mem_collxfrm: Replacing embedded NULs in locale %s with "
+                    "mem_collxfrm_: Replacing embedded NULs in locale %s with "
                     "0x%02X\n", PL_collation_name, PL_strxfrm_NUL_replacement));
 
             Safefree(cur_min_x);
@@ -5458,7 +5494,7 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
                         cur_source[0] = (char) j;
 
                         /* Then transform it */
-                        x = _mem_collxfrm(cur_source, 1, &x_len, FALSE);
+                        x = mem_collxfrm_(cur_source, 1, &x_len, FALSE);
 
                         /* If something went wrong (which it shouldn't), just
                          * ignore this code point */
@@ -5483,14 +5519,14 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
 
                     if (! cur_max_x) {
                         DEBUG_L(PerlIO_printf(Perl_debug_log,
-                            "_mem_collxfrm: Couldn't find any character to"
+                            "mem_collxfrm_: Couldn't find any character to"
                             " replace above-Latin1 chars in locale %s with",
                             PL_collation_name));
                         goto bad;
                     }
 
                     DEBUG_L(PerlIO_printf(Perl_debug_log,
-                            "_mem_collxfrm: highest 1-byte collating character"
+                            "mem_collxfrm_: highest 1-byte collating character"
                             " in locale %s is 0x%02X\n",
                             PL_collation_name,
                             PL_strxfrm_max_cp));
@@ -5550,19 +5586,49 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
     Newx(xbuf, xAlloc, char);
     if (UNLIKELY(! xbuf)) {
         DEBUG_L(PerlIO_printf(Perl_debug_log,
-                      "_mem_collxfrm: Couldn't malloc %zu bytes\n", xAlloc));
+                      "mem_collxfrm_: Couldn't malloc %zu bytes\n", xAlloc));
         goto bad;
     }
 
     /* Store the collation id */
     *(U32*)xbuf = PL_collation_ix;
 
+#  if defined(USE_POSIX_2008_LOCALE) && defined HAS_STRXFRM_L
+#    ifdef USE_LOCALE_CTYPE
+
+    constructed_locale = newlocale(LC_CTYPE_MASK, PL_collation_name,
+                                   duplocale(use_curlocale_scratch()));
+#    else
+
+    constructed_locale = duplocale(use_curlocale_scratch());
+
+#    endif
+#    define my_strxfrm(dest, src, n)  strxfrm_l(dest, src, n,           \
+                                                constructed_locale)
+#    define CLEANUP_STRXFRM                                             \
+        STMT_START {                                                    \
+            if (constructed_locale != (locale_t) 0)                     \
+                freelocale(constructed_locale);                         \
+        } STMT_END
+#  else
+#    define my_strxfrm(dest, src, n)  strxfrm(dest, src, n)
+#    ifdef USE_LOCALE_CTYPE
+
+    orig_CTYPE_locale = toggle_locale_c(LC_CTYPE, PL_collation_name);
+
+#      define CLEANUP_STRXFRM                                           \
+                restore_toggled_locale_c(LC_CTYPE, orig_CTYPE_locale)
+#    else
+#      define CLEANUP_STRXFRM  NOOP
+#    endif
+#  endif
+
     /* Then the transformation of the input.  We loop until successful, or we
      * give up */
     for (;;) {
 
         errno = 0;
-        *xlen = strxfrm(xbuf + COLLXFRM_HDR_LEN, s, xAlloc - COLLXFRM_HDR_LEN);
+        *xlen = my_strxfrm(xbuf + COLLXFRM_HDR_LEN, s, xAlloc - COLLXFRM_HDR_LEN);
 
         /* If the transformed string occupies less space than we told strxfrm()
          * was available, it means it transformed the whole string. */
@@ -5646,7 +5712,7 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
 
         if (UNLIKELY(*xlen >= PERL_INT_MAX)) {
             DEBUG_L(PerlIO_printf(Perl_debug_log,
-                  "_mem_collxfrm: Needed %zu bytes, max permissible is %u\n",
+                  "mem_collxfrm_: Needed %zu bytes, max permissible is %u\n",
                   *xlen, PERL_INT_MAX));
             goto bad;
         }
@@ -5673,7 +5739,7 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
             PL_strxfrm_is_behaved = FALSE;
 
             DEBUG_Lv(PerlIO_printf(Perl_debug_log,
-                     "_mem_collxfrm required more space than previously"
+                     "mem_collxfrm_ required more space than previously"
                      " calculated for locale %s, trying again with new"
                      " guess=%zu+%zu\n",
                 PL_collation_name,  COLLXFRM_HDR_LEN,
@@ -5683,18 +5749,16 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
         Renew(xbuf, xAlloc, char);
         if (UNLIKELY(! xbuf)) {
             DEBUG_L(PerlIO_printf(Perl_debug_log,
-                      "_mem_collxfrm: Couldn't realloc %zu bytes\n", xAlloc));
+                      "mem_collxfrm_: Couldn't realloc %zu bytes\n", xAlloc));
             goto bad;
         }
 
         first_time = FALSE;
     }
 
-    DEBUG_Lv((print_collxfrm_input_and_return(s, s + len, xlen, utf8),
-              PerlIO_printf(Perl_debug_log, "Its xfrm is:"),
-        PerlIO_printf(Perl_debug_log, "%s\n",
-                      _byte_dump_string((U8 *) xbuf + COLLXFRM_HDR_LEN,
-                            *xlen, 1))));
+    CLEANUP_STRXFRM;
+
+    DEBUG_L(print_collxfrm_input_and_return(s, s + len, xbuf, *xlen, utf8));
 
     /* Free up unneeded space; retain enough for trailing NUL */
     Renew(xbuf, COLLXFRM_HDR_LEN + *xlen + 1, char);
@@ -5707,7 +5771,8 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
 
   bad:
 
-    DEBUG_Lv(print_collxfrm_input_and_return(s, s + len, NULL, utf8));
+    CLEANUP_STRXFRM;
+    DEBUG_L(print_collxfrm_input_and_return(s, s + len, NULL, 0, utf8));
 
     Safefree(xbuf);
     if (s != input_string) {
@@ -5722,27 +5787,25 @@ Perl__mem_collxfrm(pTHX_ const char *input_string,
 
 STATIC void
 S_print_collxfrm_input_and_return(pTHX_
-                                  const char * const s,
-                                  const char * const e,
-                                  const STRLEN * const xlen,
+                                  const char * s,
+                                  const char * e,
+                                  const char * xbuf,
+                                  const STRLEN xlen,
                                   const bool is_utf8)
 {
 
     PERL_ARGS_ASSERT_PRINT_COLLXFRM_INPUT_AND_RETURN;
 
-    PerlIO_printf(Perl_debug_log, "_mem_collxfrm[%" UVuf "]: returning ",
-                                                        (UV)PL_collation_ix);
-    if (xlen) {
-        PerlIO_printf(Perl_debug_log, "%zu", *xlen);
-    }
-    else {
-        PerlIO_printf(Perl_debug_log, "NULL");
-    }
-    PerlIO_printf(Perl_debug_log, " for locale '%s', string='",
-                                                            PL_collation_name);
+    PerlIO_printf(Perl_debug_log,
+                  "mem_collxfrm_[ix %" UVuf "] for locale '%s':\n",
+                  (UV) PL_collation_ix, PL_collation_name);
+    PerlIO_printf(Perl_debug_log,  "     input=");
     print_bytes_for_locale(s, e, is_utf8);
-
-    PerlIO_printf(Perl_debug_log, "'\n");
+    PerlIO_printf(Perl_debug_log, "\n    return=%s\n    return len=%zu\n",
+           ((xbuf == NULL)
+             ? "(null)"
+             : _byte_dump_string((U8 *) xbuf + COLLXFRM_HDR_LEN, xlen, 0)),
+            xlen);
 }
 
 #  endif    /* DEBUGGING */

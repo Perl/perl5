@@ -5086,7 +5086,7 @@ PERL_CALLCONV void	Perl_set_padlist(CV * cv, PADLIST * padlist);
 STATIC void	S_print_bytes_for_locale(pTHX_ const char * const s, const char * const e, const bool is_utf8);
 #define PERL_ARGS_ASSERT_PRINT_BYTES_FOR_LOCALE	\
 	assert(s); assert(e)
-STATIC void	S_print_collxfrm_input_and_return(pTHX_ const char * const s, const char * const e, const STRLEN * const xlen, const bool is_utf8);
+STATIC void	S_print_collxfrm_input_and_return(pTHX_ const char * s, const char * e, const char * xbuf, const STRLEN xlen, const bool is_utf8);
 #define PERL_ARGS_ASSERT_PRINT_COLLXFRM_INPUT_AND_RETURN	\
 	assert(s); assert(e)
 STATIC char *	S_setlocale_debug_string_i(const unsigned cat_index, const char* const locale, const char* const retval)
@@ -5676,7 +5676,8 @@ STATIC bool	S_is_locale_utf8(pTHX_ const char * locale);
 STATIC void	S_new_LC_ALL(pTHX_ const char* unused);
 #define PERL_ARGS_ASSERT_NEW_LC_ALL
 STATIC void	S_new_collate(pTHX_ const char* newcoll);
-#define PERL_ARGS_ASSERT_NEW_COLLATE
+#define PERL_ARGS_ASSERT_NEW_COLLATE	\
+	assert(newcoll)
 STATIC void	S_new_ctype(pTHX_ const char* newctype);
 #define PERL_ARGS_ASSERT_NEW_CTYPE	\
 	assert(newctype)
@@ -5728,9 +5729,9 @@ STATIC char*	S_win32_setlocale(pTHX_ int category, const char* locale);
 #endif
 #if defined(PERL_IN_LOCALE_C) || defined(PERL_IN_SV_C) || defined(PERL_IN_MATHOMS_C)
 #  if defined(USE_LOCALE_COLLATE)
-PERL_CALLCONV char*	Perl__mem_collxfrm(pTHX_ const char* input_string, STRLEN len, STRLEN* xlen, bool utf8)
+PERL_CALLCONV char*	Perl_mem_collxfrm_(pTHX_ const char* input_string, STRLEN len, STRLEN* xlen, bool utf8)
 			__attribute__visibility__("hidden");
-#define PERL_ARGS_ASSERT__MEM_COLLXFRM	\
+#define PERL_ARGS_ASSERT_MEM_COLLXFRM_	\
 	assert(input_string); assert(xlen)
 
 #  endif
