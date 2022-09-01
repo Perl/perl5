@@ -10,7 +10,7 @@
 
 use strict;
 use warnings;
-use Test::More tests => 153;
+use Test::More tests => 157;
 
 use Math::Trig 1.18;
 use Math::Trig 1.18 qw(:pi Inf);
@@ -363,7 +363,15 @@ print "# great_circle_distance with small angles\n";
 for my $e (qw(1e-2 1e-3 1e-4 1e-5)) {
     # Can't assume == 0 because of floating point fuzz,
     # but let's hope for at least < $e.
-    cmp_ok(great_circle_distance(0, $e, 0, $e), '<', $e);
+    cmp_ok(great_circle_distance(0, $e, 0, $e), '<', $e,
+           "great_circle_distance(0, $e, 0, $e) < $e");
+}
+
+for my $e (qw(1e-5 1e-6 1e-7 1e-8)) {
+    # Verify that the distance is positive for points close together. A poor
+    # algorithm is likely to give a distance of zero in some of these cases.
+    cmp_ok(great_circle_distance(2, 2, 2, 2+$e), '>', 0,
+           "great_circle_distance(2, 2, 2, " . (2+$e) . ") > 0");
 }
 
 print "# asin_real, acos_real\n";
