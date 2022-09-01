@@ -1160,6 +1160,8 @@ perl_destruct(pTHXx)
     PL_numeric_name = NULL;
     SvREFCNT_dec(PL_numeric_radix_sv);
     PL_numeric_radix_sv = NULL;
+    SvREFCNT_dec(PL_underlying_radix_sv);
+    PL_underlying_radix_sv  = NULL;
 #endif
 #ifdef USE_LOCALE_CTYPE
     Safefree(PL_ctype_name);
