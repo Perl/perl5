@@ -305,9 +305,12 @@ struct regnode_ssc {
  *  to 12 regnode units on 32-bit systems, (hence the minimum this can be (if
  *  not 0) is 11 there.  Even if things get tightly packed on a 64-bit system,
  *  it still would be more than 1. */
-#define set_ANYOF_SYNTHETIC(n) STMT_START{ OP(n) = ANYOF;              \
-                                           NEXT_OFF(n) = 1;            \
-                               } STMT_END
+#define set_ANYOF_SYNTHETIC(n)  \
+    STMT_START{                 \
+        OP(n) = ANYOF;          \
+        NEXT_OFF(n) = 1;        \
+    } STMT_END
+
 #define is_ANYOF_SYNTHETIC(n) (REGNODE_TYPE(OP(n)) == ANYOF && NEXT_OFF(n) == 1)
 
 /* XXX fix this description.
