@@ -154,12 +154,19 @@ sub great_circle_distance {
 
     $rho = 1 unless defined $rho; # Default to the unit sphere.
 
-    my $lat0 = pip2 - $phi0;
-    my $lat1 = pip2 - $phi1;
+    my $dphi   = $phi1 - $phi0;
+    my $dtheta = $theta1 - $theta0;
 
-    return $rho *
-	acos_real( cos( $lat0 ) * cos( $lat1 ) * cos( $theta0 - $theta1 ) +
-		   sin( $lat0 ) * sin( $lat1 ) );
+    # A formula that is accurate for all distances is the following special
+    # case of the Vincenty formula for an ellipsoid with equal major and minor
+    # axes.  See
+    # https://en.wikipedia.org/wiki/Great-circle_distance#Computational_formulas
+
+    my $c1 = sin($phi1) * sin($dtheta);
+    my $c2 = sin($phi1) * cos($dtheta);
+    my $c3 = sin($phi0) * cos($phi1) - cos($phi0) * $c2;
+    my $c4 = cos($phi0) * cos($phi1) + sin($phi0) * $c2;
+    return $rho * atan2(sqrt($c1 * $c1 + $c3 * $c3), $c4);
 }
 
 sub great_circle_direction {
