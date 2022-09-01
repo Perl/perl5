@@ -824,7 +824,7 @@ time.  Suppose that the parameters to C<my_best_shot> in the example above
 didn't have to be UV.  This can be handled by changing the signature, something
 like this:
 
- #define my_best_shot(a, a_type, b, b_type) STMT_START {    \
+ #define my_best_shot(a, a_type, b, b_type)                 \
                 STMT_START {                                \
                     a_type my_best_shot_a = a;              \
                     b_type my_best_shot_b = b;              \
