@@ -710,8 +710,16 @@ S_my_querylocale_i(pTHX_ const unsigned int index)
 
 #  else
 
-        /* But we do have up-to-date values when we keep our own records */
-        retval = PL_curlocales[index];
+        /* But we do have up-to-date values when we keep our own records
+         * (except some times in initialization, where we get the value from
+         * the system. */
+        if (PL_curlocales[index] == NULL) {
+            retval = stdized_setlocale(category, NULL);
+            PL_curlocales[index] = savepv(retval);
+        }
+        else {
+            retval = PL_curlocales[index];
+        }
 
 #  endif
 
