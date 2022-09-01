@@ -265,7 +265,8 @@ PERLVARA(G, hash_seed_w, PERL_HASH_SEED_WORDS, PVT__PERL_HASH_WORD_TYPE) /* perl
 PERLVARA(G, hash_state_w, PERL_HASH_STATE_WORDS, PVT__PERL_HASH_WORD_TYPE) /* perl.c and hv.h */
 #endif
 #if defined(PERL_USE_SINGLE_CHAR_HASH_CACHE)
-PERLVARA(G, hash_chars, (1+256) * sizeof(U32), unsigned char) /* perl.c and hv.h */
+#define PERL_SINGLE_CHAR_HASH_CACHE_ELEMS ((1+256) * sizeof(U32))
+PERLVARA(G, hash_chars, PERL_SINGLE_CHAR_HASH_CACHE_ELEMS, unsigned char) /* perl.c and hv.h */
 #endif
 
 /* The path separator can vary depending on whether we're running under DCL or
