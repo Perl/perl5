@@ -1435,10 +1435,23 @@ Perl_sv_setiv(pTHX_ SV *const sv, const IV i)
 
     SV_CHECK_THINKFIRST_COW_DROP(sv);
     switch (SvTYPE(sv)) {
+#if NVSIZE <= IVSIZE
     case SVt_NULL:
+    case SVt_NV:
+        SET_SVANY_FOR_BODYLESS_IV(sv);
+        SvFLAGS(sv) &= ~SVTYPEMASK;
+        SvFLAGS(sv) |= SVt_IV;
+        break;
+#else
+    case SVt_NULL:
+        SET_SVANY_FOR_BODYLESS_IV(sv);
+        SvFLAGS(sv) &= ~SVTYPEMASK;
+        SvFLAGS(sv) |= SVt_IV;
+        break;
     case SVt_NV:
         sv_upgrade(sv, SVt_IV);
         break;
+#endif
     case SVt_PV:
         sv_upgrade(sv, SVt_PVIV);
         break;
@@ -1541,8 +1554,15 @@ Perl_sv_setnv(pTHX_ SV *const sv, const NV num)
     switch (SvTYPE(sv)) {
     case SVt_NULL:
     case SVt_IV:
+#if NVSIZE <= IVSIZE
+        SET_SVANY_FOR_BODYLESS_NV(sv);
+        SvFLAGS(sv) &= ~SVTYPEMASK;
+        SvFLAGS(sv) |= SVt_NV;
+        break;
+#else
         sv_upgrade(sv, SVt_NV);
         break;
+#endif
     case SVt_PV:
     case SVt_PVIV:
         sv_upgrade(sv, SVt_PVNV);
@@ -4090,9 +4110,14 @@ Perl_sv_setsv_flags(pTHX_ SV *dsv, SV* ssv, const I32 flags)
      * freed) just by testing the or'ed types */
     STATIC_ASSERT_STMT(SVt_NULL == 0);
     STATIC_ASSERT_STMT(SVt_IV   == 1);
+    STATIC_ASSERT_STMT(SVt_NV   == 2);
+#if NVSIZE <= IVSIZE
+    if (both_type <= 2) {
+#else
     if (both_type <= 1) {
-        /* both src and dst are UNDEF/IV/RV, so we can do a lot of
-         * special-casing */
+#endif
+        /* both src and dst are UNDEF/IV/RV - maybe NV depending on config,
+         * so we can do a lot of special-casing */
         U32 sflags;
         U32 new_dflags;
         SV *old_rv = NULL;
@@ -4105,6 +4130,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dsv, SV* ssv, const I32 flags)
                 sv_unref_flags(dsv, 0);
             else
                 old_rv = SvRV(dsv);
+            SvROK_off(dsv);
         }
 
         assert(!SvGMAGICAL(ssv));
@@ -4131,12 +4157,33 @@ Perl_sv_setsv_flags(pTHX_ SV *dsv, SV* ssv, const I32 flags)
                 new_dflags |= (SVf_IOK|SVp_IOK|(sflags & SVf_IVisUV));
             }
         }
+#if NVSIZE <= IVSIZE
+        else if (sflags & SVf_NOK) {
+            SET_SVANY_FOR_BODYLESS_NV(dsv);
+            new_dflags = (SVt_NV|SVf_NOK|SVp_NOK);
+
+            /* both src and dst are <= SVt_MV, so sv_any points to the
+             * head; so access the head directly
+             */
+            assert(    &(ssv->sv_u.svu_nv)
+                    == &(((XPVNV*) SvANY(ssv))->xnv_u.xnv_nv));
+            assert(    &(dsv->sv_u.svu_nv)
+                    == &(((XPVNV*) SvANY(dsv))->xnv_u.xnv_nv));
+            dsv->sv_u.svu_nv = ssv->sv_u.svu_nv;
+        }
+#endif
         else {
             new_dflags = dtype; /* turn off everything except the type */
         }
-        SvFLAGS(dsv) = new_dflags;
-        SvREFCNT_dec(old_rv);
+        /* Should preserve some dsv flags - at least SVs_TEMP, */
+        /* so cannot just set SvFLAGS(dsv) = new_dflags        */
+        /* First clear the flags that we do want to clobber    */
+        (void)SvOK_off(dsv);
+        SvFLAGS(dsv) &= ~SVTYPEMASK;
+        /* Now set the new flags */
+        SvFLAGS(dsv) |= new_dflags;
 
+        SvREFCNT_dec(old_rv);
         return;
     }
 
