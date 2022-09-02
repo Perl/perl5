@@ -349,36 +349,36 @@ SKIP: {
 SKIP: {
     eval { Socket::IPPROTO_TCP(); 1 } or skip 'no IPPROTO_TCP', 1;
     eval { Socket::SOL_SOCKET(); 1 } or skip 'no SOL_SOCKET', 1;
-    eval { Socket::SO_RCVBUF(); 1 } or skip 'no SO_RCVBUF', 1;
+    eval { Socket::SO_SNDBUF(); 1 } or skip 'no SO_SNDBUF', 1;
 
-    # The value of RCVBUF_SIZE constant below is changed from #19892 testcase;
+    # The value of SNDBUF_SIZE constant below is changed from #19892 testcase;
     # original "262144" may be clamped on low-memory systems.
     fresh_perl_is(<<'EOP', "Ok.\n", {}, 'setsockopt works for a constant that is once stringified');
 use warnings;
 use strict;
 
-use Socket qw'PF_INET SOCK_STREAM IPPROTO_TCP SOL_SOCKET SO_RCVBUF';
+use Socket qw'PF_INET SOCK_STREAM IPPROTO_TCP SOL_SOCKET SO_SNDBUF';
 
-use constant { RCVBUF_SIZE => 32768 };
+use constant { SNDBUF_SIZE => 32768 };
 
 socket(my $sock, PF_INET, SOCK_STREAM, IPPROTO_TCP)
   or die "Could not create socket - $!\n";
 
-setsockopt($sock,SOL_SOCKET,SO_RCVBUF,RCVBUF_SIZE)
-  or die "Could not set SO_RCVBUF on socket - $!\n";
+setsockopt($sock,SOL_SOCKET,SO_SNDBUF,SNDBUF_SIZE)
+  or die "Could not set SO_SNDBUF on socket - $!\n";
 
-my $rcvBuf=getsockopt($sock,SOL_SOCKET,SO_RCVBUF)
-  or die "Could not get SO_RCVBUF on socket - $!\n";
+my $sndBuf=getsockopt($sock,SOL_SOCKET,SO_SNDBUF)
+  or die "Could not get SO_SNDBUF on socket - $!\n";
 
-$rcvBuf=unpack('i',$rcvBuf);
+$sndBuf=unpack('i',$sndBuf);
 
-die "Unexpected SO_RCVBUF value: $rcvBuf\n"
-  unless($rcvBuf == RCVBUF_SIZE || $rcvBuf == 2*RCVBUF_SIZE);
+die "Unexpected SO_SNDBUF value: $sndBuf\n"
+  unless($sndBuf == SNDBUF_SIZE || $sndBuf == 2*SNDBUF_SIZE);
 
 print "Ok.\n";
 exit;
 
-sub bug {RCVBUF_SIZE.''}
+sub bug {SNDBUF_SIZE.''}
 EOP
 }
 
