@@ -1145,6 +1145,8 @@ violations are fatal.
 #   include <xlocale.h>
 #endif
 
+#include "perl_langinfo.h"    /* Needed for _NL_LOCALE_NAME */
+
 /* If not forbidden, we enable locale handling if either 1) the POSIX 2008
  * functions are available, or 2) just the setlocale() function.  This logic is
  * repeated in t/loc_tools.pl and makedef.pl;  The three should be kept in
