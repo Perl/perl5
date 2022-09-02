@@ -585,9 +585,7 @@ Perl_locale_panic(const char * msg,
 #  define querylocale_c(cat)    querylocale_i(cat##_INDEX_)
 #  define querylocale_r(cat)    querylocale_i(get_category_index(cat,NULL))
 
-#  ifndef USE_QUERYLOCALE
-#    define USE_PL_CURLOCALES
-#  else
+#  ifdef USE_QUERYLOCALE
 #    define isSINGLE_BIT_SET(mask) isPOWER_OF_2(mask)
 
      /* This code used to think querylocale() was valid on LC_ALL.  Make sure
