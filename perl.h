@@ -1324,6 +1324,8 @@ violations are fatal.
 #    endif
 #  endif
 
+#  include "perl_langinfo.h"    /* Needed for _NL_LOCALE_NAME */
+
 /* Allow use of glib's undocumented querylocale() equivalent if asked for, and
  * appropriate */
 #  ifdef USE_POSIX_2008_LOCALE

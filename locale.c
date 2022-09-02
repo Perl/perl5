@@ -107,7 +107,6 @@ static int debug_initialization = 0;
 
 #include "EXTERN.h"
 #define PERL_IN_LOCALE_C
-#include "perl_langinfo.h"
 #include "perl.h"
 
 #include "reentr.h"
