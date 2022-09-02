@@ -416,7 +416,7 @@ unless ($define{USE_POSIX_2008_LOCALE})
         PL_underlying_numeric_obj
     );
 }
-unless ($define{USE_POSIX_2008_LOCALE} && ! $define{HAS_QUERY_LOCALE})
+unless ($define{USE_POSIX_2008_LOCALE} && ! $define{USE_QUERY_LOCALE})
 {
     ++$skip{$_} foreach qw(
         PL_curlocales
