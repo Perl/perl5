@@ -1,1 +1,1 @@
-pod/perlhack.pod
+../pod/perlhack.pod
