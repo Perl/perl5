@@ -170,7 +170,6 @@
 #define PL_laststatval		(vTHX->Ilaststatval)
 #define PL_laststype		(vTHX->Ilaststype)
 #define PL_lc_numeric_mutex_depth	(vTHX->Ilc_numeric_mutex_depth)
-#define PL_locale_utf8ness	(vTHX->Ilocale_utf8ness)
 #define PL_localizing		(vTHX->Ilocalizing)
 #define PL_localpatches		(vTHX->Ilocalpatches)
 #define PL_lockhook		(vTHX->Ilockhook)

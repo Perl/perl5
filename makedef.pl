@@ -273,7 +273,7 @@ if ($ARGS{PLATFORM} ne 'vms') {
 
 if ($ARGS{PLATFORM} ne 'win32') {
     ++$skip{$_} foreach qw(
-		    Perl_my_setlocale
+		    Perl_get_win32_message_utf8ness
 			 );
 }
 

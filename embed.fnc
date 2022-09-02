@@ -1651,9 +1651,12 @@ ATdo	|const char*|Perl_langinfo8|const nl_item item|NULLOK utf8ness_t * utf8ness
 ATdo	|const char*|Perl_langinfo|const int item
 ATdo	|const char*|Perl_langinfo8|const int item|NULLOK utf8ness_t * utf8ness
 #endif
+#ifdef WIN32
+p	|bool	|get_win32_message_utf8ness|NULLOK const char * string
+#endif
 pEX	|int	|mbtowc_|NULLOK const wchar_t * pwc|NULLOK const char * s|const Size_t len
 CpO	|int	|init_i18nl10n	|int printwarn
-p	|char*	|my_strerror	|const int errnum
+p	|const char*	|my_strerror	|const int errnum|NN utf8ness_t * utf8ness
 XpT	|void	|_warn_problematic_locale
 Xp	|void	|set_numeric_underlying
 Xp	|void	|set_numeric_standard
@@ -3316,11 +3319,8 @@ iR	|const char *|mortalized_pv_copy|NULLOK const char * const pv
 ST	|const char *|save_to_buffer|NULLOK const char * string	\
 				    |NULLOK const char **buf	\
 				    |NULLOK Size_t *buf_size
-ST	|const char*|category_name |const int category
 ST	|unsigned int|get_category_index|const int category|NULLOK const char * locale
 ST	|bool	    |is_codeset_name_UTF8|NN const char * name
-S	|const char*|switch_category_locale_to_template|const int switch_category|const int template_category|NULLOK const char * template_locale
-S	|void	|restore_switched_locale|const int category|NULLOK const char * const original_locale
 S	|utf8ness_t|get_locale_string_utf8ness_i				\
 				|NULLOK const char * locale		\
 				|const unsigned cat_index		\
@@ -3410,24 +3410,17 @@ S	|void	|print_collxfrm_input_and_return		\
 			    |NULLOK const char * xbuf		\
 			    |const STRLEN xlen			\
 			    |const bool is_utf8
-S	|void	|print_bytes_for_locale	|NN const char * const s	\
-					|NN const char * const e	\
-					|const bool is_utf8
 STR	|char *	|setlocale_debug_string_i|const unsigned cat_index	    \
 					|NULLOK const char* const locale    \
 					|NULLOK const char* const retval
 #    endif
 #  endif
+#  ifdef DEBUGGING
+S	|void	|print_bytes_for_locale	|NN const char * const s	\
+					|NN const char * const e	\
+					|const bool is_utf8
+#  endif
 #endif
-
-#if        defined(USE_LOCALE)		\
-    && (   defined(PERL_IN_LOCALE_C)	\
-        || defined(PERL_IN_MG_C)	\
-	|| defined (PERL_EXT_POSIX)	\
-	|| defined (PERL_EXT_LANGINFO))
-Cp	|bool	|_is_cur_LC_category_utf8|int category
-#endif
-
 
 #if defined(PERL_IN_UTIL_C)
 S	|SV*	|mess_alloc

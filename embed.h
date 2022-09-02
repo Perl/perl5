@@ -884,9 +884,6 @@
 #define sv_dup(a,b)		Perl_sv_dup(aTHX_ a,b)
 #define sv_dup_inc(a,b)		Perl_sv_dup_inc(aTHX_ a,b)
 #endif
-#if defined(USE_LOCALE)		    && (   defined(PERL_IN_LOCALE_C)	        || defined(PERL_IN_MG_C)		|| defined (PERL_EXT_POSIX)		|| defined (PERL_EXT_LANGINFO))
-#define _is_cur_LC_category_utf8(a)	Perl__is_cur_LC_category_utf8(aTHX_ a)
-#endif
 #if defined(USE_LOCALE_COLLATE)
 #define sv_collxfrm_flags(a,b,c)	Perl_sv_collxfrm_flags(aTHX_ a,b,c)
 #endif
@@ -1408,7 +1405,7 @@
 #define my_clearenv()		Perl_my_clearenv(aTHX)
 #define my_lstat_flags(a)	Perl_my_lstat_flags(aTHX_ a)
 #define my_stat_flags(a)	Perl_my_stat_flags(aTHX_ a)
-#define my_strerror(a)		Perl_my_strerror(aTHX_ a)
+#define my_strerror(a,b)	Perl_my_strerror(aTHX_ a,b)
 #define my_unexec()		Perl_my_unexec(aTHX)
 #define newATTRSUB_x(a,b,c,d,e,f)	Perl_newATTRSUB_x(aTHX_ a,b,c,d,e,f)
 #define newSTUB(a,b)		Perl_newSTUB(aTHX_ a,b)
@@ -1602,8 +1599,8 @@
 #define get_debug_opts(a,b)	Perl_get_debug_opts(aTHX_ a,b)
 #define set_padlist		Perl_set_padlist
 #    if defined(PERL_IN_LOCALE_C)
-#      if defined(USE_LOCALE)
 #define print_bytes_for_locale(a,b,c)	S_print_bytes_for_locale(aTHX_ a,b,c)
+#      if defined(USE_LOCALE)
 #define print_collxfrm_input_and_return(a,b,c,d,e)	S_print_collxfrm_input_and_return(aTHX_ a,b,c,d,e)
 #define setlocale_debug_string_i	S_setlocale_debug_string_i
 #      endif
@@ -1726,7 +1723,6 @@
 #  if defined(PERL_IN_LOCALE_C)
 #define mortalized_pv_copy(a)	S_mortalized_pv_copy(aTHX_ a)
 #    if defined(USE_LOCALE)
-#define category_name		S_category_name
 #define get_category_index	S_get_category_index
 #define get_locale_string_utf8ness_i(a,b,c,d)	S_get_locale_string_utf8ness_i(aTHX_ a,b,c,d)
 #define is_codeset_name_UTF8	S_is_codeset_name_UTF8
@@ -1735,11 +1731,9 @@
 #define new_collate(a)		S_new_collate(aTHX_ a)
 #define new_ctype(a)		S_new_ctype(aTHX_ a)
 #define new_numeric(a)		S_new_numeric(aTHX_ a)
-#define restore_switched_locale(a,b)	S_restore_switched_locale(aTHX_ a,b)
 #define save_to_buffer		S_save_to_buffer
 #define setlocale_failure_panic_i(a,b,c,d,e)	S_setlocale_failure_panic_i(aTHX_ a,b,c,d,e)
 #define stdize_locale(a,b,c,d,e)	S_stdize_locale(aTHX_ a,b,c,d,e)
-#define switch_category_locale_to_template(a,b,c)	S_switch_category_locale_to_template(aTHX_ a,b,c)
 #      if defined(USE_POSIX_2008_LOCALE)
 #define emulate_setlocale_i(a,b,c,d)	S_emulate_setlocale_i(aTHX_ a,b,c,d)
 #define my_querylocale_i(a)	S_my_querylocale_i(aTHX_ a)
@@ -2080,6 +2074,9 @@
 #  if defined(USE_QUADMATH)
 #define quadmath_format_needed	Perl_quadmath_format_needed
 #define quadmath_format_valid	Perl_quadmath_format_valid
+#  endif
+#  if defined(WIN32)
+#define get_win32_message_utf8ness(a)	Perl_get_win32_message_utf8ness(aTHX_ a)
 #  endif
 #  if defined(_MSC_VER)
 #define magic_regdatum_set(a,b)	Perl_magic_regdatum_set(aTHX_ a,b)
