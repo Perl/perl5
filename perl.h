@@ -1343,6 +1343,10 @@ violations are fatal.
 #    endif
 #  endif
 
+#  if (defined(USE_POSIX_2008_LOCALE) && ! defined(USE_QUERYLOCALE))
+#    define USE_PL_CURLOCALES
+#  endif
+
 /*  Microsoft documentation reads in the change log for VS 2015:
  *     "The localeconv function declared in locale.h now works correctly when
  *     per-thread locale is enabled. In previous versions of the library, this
