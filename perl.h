@@ -1717,10 +1717,12 @@ Use L</UV> to declare variables of the maximum usable size on this platform.
                 if (newval) {					\
                   PERL_UNUSED_RESULT(panic_write2("panic: tainting with $ENV{PERL_MALLOC_OPT}\n"));\
                   exit(1); })
-#  define MALLOC_CHECK_TAINT(argc,argv,env)	STMT_START {	\
-        if (doing_taint(argc,argv,env)) {			\
-                MallocCfg_ptr[MallocCfg_skip_cfg_env] = 1;	\
-    }} STMT_END;
+#  define MALLOC_CHECK_TAINT(argc,argv,env)                     \
+    STMT_START {                                                \
+        if (doing_taint(argc,argv,env)) {                       \
+            MallocCfg_ptr[MallocCfg_skip_cfg_env] = 1;          \
+        }                                                       \
+    } STMT_END;
 #else  /* MYMALLOC */
 #  define safemalloc  safesysmalloc
 #  define safecalloc  safesyscalloc
