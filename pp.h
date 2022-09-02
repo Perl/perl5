@@ -398,7 +398,7 @@ Does not use C<TARG>.  See also C<L</XPUSHu>>, C<L</mPUSHu>> and C<L</PUSHu>>.
 #  define EXTEND_SKIP(p, n) STMT_START {                                \
                                 EXTEND_HWM_SET(p, n);                   \
                                 assert(!_EXTEND_NEEDS_GROW(p,n));       \
-                          } STMT_END
+                            } STMT_END
 
 
 #  define EXTEND(p,n)   STMT_START {                                    \
@@ -406,7 +406,8 @@ Does not use C<TARG>.  See also C<L</XPUSHu>>, C<L</mPUSHu>> and C<L</PUSHu>>.
                          if (UNLIKELY(_EXTEND_NEEDS_GROW(p,n))) {       \
                            sp = stack_grow(sp,p,_EXTEND_SAFE_N(n));     \
                            PERL_UNUSED_VAR(sp);                         \
-                         } } STMT_END
+                         }                                              \
+                        } STMT_END
 /* Same thing, but update mark register too. */
 #  define MEXTEND(p,n)  STMT_START {                                    \
                          EXTEND_HWM_SET(p, n);                          \
@@ -415,7 +416,8 @@ Does not use C<TARG>.  See also C<L</XPUSHu>>, C<L</mPUSHu>> and C<L</PUSHu>>.
                            sp = stack_grow(sp,p,_EXTEND_SAFE_N(n));     \
                            mark = PL_stack_base + markoff;              \
                            PERL_UNUSED_VAR(sp);                         \
-                         } } STMT_END
+                         }                                              \
+                        } STMT_END
 #endif
 
 
