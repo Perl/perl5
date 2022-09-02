@@ -739,7 +739,6 @@ PERLVAR(I, constpadix,	PADOFFSET)	/* lowest unused for constants */
 PERLVAR(I, padix_floor,	PADOFFSET)	/* how low may inner block reset padix */
 
 #if defined(USE_POSIX_2008_LOCALE)          \
- && defined(USE_THREAD_SAFE_LOCALE)         \
  && ! defined(USE_QUERYLOCALE)
 
 /* This is the most number of categories we've encountered so far on any

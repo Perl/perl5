@@ -15905,9 +15905,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 
     PL_subname		= sv_dup_inc(proto_perl->Isubname, param);
 
-#if   defined(USE_POSIX_2008_LOCALE)      \
- &&   defined(USE_THREAD_SAFE_LOCALE)     \
- && ! defined(HAS_QUERYLOCALE)
+#if defined(USE_POSIX_2008_LOCALE) && ! defined(USE_QUERYLOCALE)
     for (i = 0; i < (int) C_ARRAY_LENGTH(PL_curlocales); i++) {
         PL_curlocales[i] = SAVEPV(proto_perl->Icurlocales[i]);
     }
