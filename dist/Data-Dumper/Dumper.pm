@@ -30,7 +30,7 @@ our ( $Indent, $Trailingcomma, $Purity, $Pad, $Varname, $Useqq, $Terse, $Freezer
 our ( @ISA, @EXPORT, @EXPORT_OK, $VERSION );
 
 BEGIN {
-    $VERSION = '2.186'; # Don't forget to set version and release
+    $VERSION = '2.187'; # Don't forget to set version and release
                         # date in POD below!
 
     @ISA = qw(Exporter);
@@ -866,7 +866,7 @@ Data::Dumper - stringified perl data structures, suitable for both printing and 
     }
 
     # OO usage
-    $d = Data::Dumper->new([$foo, $bar], [qw(foo *ary)]);
+    my $d = Data::Dumper->new([$foo, $bar], [qw(foo *ary)]);
        ...
     print $d->Dump;
        ...
