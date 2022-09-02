@@ -564,20 +564,24 @@ and check for NULL.
 /* Stuff that needs to be included in the pluggable extension goes below here */
 
 #ifdef PERL_ANY_COW
-#  define RXp_MATCH_COPY_FREE(prog) \
-        STMT_START {if (RXp_SAVED_COPY(prog)) { \
-            SV_CHECK_THINKFIRST_COW_DROP(RXp_SAVED_COPY(prog)); \
-        } \
-        if (RXp_MATCH_COPIED(prog)) { \
-            Safefree(RXp_SUBBEG(prog)); \
-            RXp_MATCH_COPIED_off(prog); \
-        }} STMT_END
+#  define RXp_MATCH_COPY_FREE(prog)                                 \
+    STMT_START {                                                    \
+        if (RXp_SAVED_COPY(prog)) {                                 \
+            SV_CHECK_THINKFIRST_COW_DROP(RXp_SAVED_COPY(prog));     \
+        }                                                           \
+        if (RXp_MATCH_COPIED(prog)) {                               \
+            Safefree(RXp_SUBBEG(prog));                             \
+            RXp_MATCH_COPIED_off(prog);                             \
+        }                                                           \
+    } STMT_END
 #else
-#  define RXp_MATCH_COPY_FREE(prog) \
-        STMT_START {if (RXp_MATCH_COPIED(prog)) { \
-            Safefree(RXp_SUBBEG(prog)); \
-            RXp_MATCH_COPIED_off(prog); \
-        }} STMT_END
+#  define RXp_MATCH_COPY_FREE(prog)                     \
+    STMT_START {                                        \
+        if (RXp_MATCH_COPIED(prog)) {                   \
+            Safefree(RXp_SUBBEG(prog));                 \
+            RXp_MATCH_COPIED_off(prog);                 \
+        }                                               \
+    } STMT_END
 #endif
 #define RX_MATCH_COPY_FREE(rx_sv)       RXp_MATCH_COPY_FREE(ReANY(rx_sv))
 
