@@ -3750,7 +3750,7 @@ S_doeval_compile(pTHX_ U8 gimme, CV* outside, U32 seq, HV *hh)
         }
     }
 
-    if (PL_unitcheckav) {
+    if (PL_unitcheckav && av_count(PL_unitcheckav)>0) {
         OP *es = PL_eval_start;
         if (in_require) {
             call_list(PL_scopestack_ix, PL_unitcheckav);
