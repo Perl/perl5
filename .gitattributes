@@ -20,3 +20,4 @@ warnings.h linguist-generated
 *.pl linguist-language=Perl
 *.pm linguist-language=Perl
 *.t linguist-language=Perl
+README.* linguist-language=Pod
