@@ -22,10 +22,10 @@ use Getopt::Long;
 
 my ($diffs, $exclude_upstream, $tag_to_compare, $tap);
 unless (GetOptions('diffs' => \$diffs,
-		   'exclude|x' => \$exclude_upstream,
-		   'tag=s' => \$tag_to_compare,
-		   'tap' => \$tap,
-		   ) && @ARGV == 0) {
+                   'exclude|x' => \$exclude_upstream,
+                   'tag=s' => \$tag_to_compare,
+                   'tap' => \$tap,
+                   ) && @ARGV == 0) {
     die "usage: $0 [ -d -x --tag TAG --tap]";
 }
 
@@ -39,12 +39,12 @@ if (-d ".git" || (exists $ENV{GIT_DIR} && -d $ENV{GIT_DIR})) {
     my $found;
     if (-f '.git') {
         # the hash of the initial commit in perl.git (perl-1.0)
-	my $commit = '8d063cd8450e59ea1c611a2f4f5a21059a2804f1';
-	my $out = `git rev-parse --verify --quiet '$commit^{commit}'`;
-	chomp $out;
-	if($out eq $commit) {
+        my $commit = '8d063cd8450e59ea1c611a2f4f5a21059a2804f1';
+        my $out = `git rev-parse --verify --quiet '$commit^{commit}'`;
+        chomp $out;
+        if($out eq $commit) {
             ++$found;
-	}
+        }
     }
 
     die "$0: This is a Perl directory but does not look like Git working directory\n"
@@ -68,7 +68,7 @@ unless (defined $tag_to_compare) {
 
 unless (length $tag_to_compare) {
     die "$0: Git found, but no Git tags found\n"
-	unless $tap;
+        unless $tap;
     print "1..0 # SKIP: Git found, but no Git tags found\n";
     exit 0;
 }
@@ -88,9 +88,9 @@ if ($exclude_upstream) {
     require Maintainers;
 
     for my $m (grep {!defined $Maintainers::Modules{$_}{UPSTREAM}
-			 or $Maintainers::Modules{$_}{UPSTREAM} ne 'blead'}
-	       keys %Maintainers::Modules) {
-	$upstream_files{$_} = 1 for Maintainers::get_module_files($m);
+                         or $Maintainers::Modules{$_}{UPSTREAM} ne 'blead'}
+               keys %Maintainers::Modules) {
+        $upstream_files{$_} = 1 for Maintainers::get_module_files($m);
     }
 }
 
@@ -140,8 +140,8 @@ my %skip;
 # usually due to some # mix-up
 
 my %skip_versions = (
-	   # 'some/sample/file.pm' => [ '1.23', '1.24' ],
-	  );
+           # 'some/sample/file.pm' => [ '1.23', '1.24' ],
+          );
 
 my $skip_dirs = qr|^t/lib|;
 
@@ -149,30 +149,30 @@ sub pm_file_from_xs {
     my $xs = shift;
 
     foreach my $try (sub {
-			 # First try a .pm at the same level as the .xs file
-			 # with the same basename
-			 return shift =~ s/\.xs\z//r;
-		     },
-		     sub {
-			 # Try for a (different) .pm at the same level, based
-			 # on the directory name:
-			 my ($path) = shift =~ m!^(.*)/!;
-			 my ($last) = $path =~ m!([^-/]+)\z!;
-			 return "$path/$last";
-		     },
-		     sub {
-			 # Try to work out the extension's full package, and
-			 # look for a .pm in lib/ based on that:
-			 my ($path) = shift =~ m!^(.*)/!;
-			 my ($last) = $path =~ m!([^/]+)\z!;
-			 $last = 'List-Util' if $last eq 'Scalar-List-Utils';
-			 $last =~ tr !-!/!;
-			 return "$path/lib/$last";
-		     }) {
-	# For all cases, first look to see if the .pm file is generated.
-	my $base = $try->($xs);
-	return "${base}_pm.PL" if -f "${base}_pm.PL";
-	return "${base}.pm" if -f "${base}.pm";
+                         # First try a .pm at the same level as the .xs file
+                         # with the same basename
+                         return shift =~ s/\.xs\z//r;
+                     },
+                     sub {
+                         # Try for a (different) .pm at the same level, based
+                         # on the directory name:
+                         my ($path) = shift =~ m!^(.*)/!;
+                         my ($last) = $path =~ m!([^-/]+)\z!;
+                         return "$path/$last";
+                     },
+                     sub {
+                         # Try to work out the extension's full package, and
+                         # look for a .pm in lib/ based on that:
+                         my ($path) = shift =~ m!^(.*)/!;
+                         my ($last) = $path =~ m!([^/]+)\z!;
+                         $last = 'List-Util' if $last eq 'Scalar-List-Utils';
+                         $last =~ tr !-!/!;
+                         return "$path/lib/$last";
+                     }) {
+        # For all cases, first look to see if the .pm file is generated.
+        my $base = $try->($xs);
+        return "${base}_pm.PL" if -f "${base}_pm.PL";
+        return "${base}.pm" if -f "${base}.pm";
     }
 
     die "No idea which .pm file corresponds to '$xs', so aborting";
@@ -193,9 +193,9 @@ foreach (`git --no-pager diff --name-only $tag_to_compare --diff-filter=ACMRTUXB
     next if $this_dir =~ $skip_dirs || exists $skip{$_};
     next if exists $upstream_files{$_};
     if (/\.pm\z/ || m|^lib/.*\.pl\z| || /_pm\.PL\z/) {
-	push @{$module_diffs{$_}}, $_;
+        push @{$module_diffs{$_}}, $_;
     } elsif (/\.xs\z/ && !/\bt\b/) {
-	push @{$module_diffs{pm_file_from_xs($_)}}, $_;
+        push @{$module_diffs{pm_file_from_xs($_)}}, $_;
     }
 }
 
@@ -230,27 +230,27 @@ foreach my $pm_file (sort keys %module_diffs) {
     } elsif ($pm_version ne $orig_pm_version) { # good
         print "ok $count - $pm_file\n" if $tap;
     } else {
-	if ($tap) {
+        if ($tap) {
             print "#\n# " . '-' x 75 . "\n"
             . "# Version number ($pm_version) unchanged since"
             . " $tag_to_compare, but contents have changed:\n#\n";
-	    foreach (sort @{$module_diffs{$pm_file}}) {
-		print "# $_" for `$diff_cmd $q$_$q`;
-	    }
+            foreach (sort @{$module_diffs{$pm_file}}) {
+                print "# $_" for `$diff_cmd $q$_$q`;
+            }
             print "# " . '-' x 75 . "\n";
 
-	    if (exists $skip_versions{$pm_file}
-		and grep $pm_version eq $_, @{$skip_versions{$pm_file}}) {
-		print "ok $count - SKIP $pm_file version $pm_version\n";
-	    } else {
-		my $nok = "not ok $count - $pm_file version $pm_version\n";
-		print $nok;
-		print STDERR "# $nok";
-	    }
-	} else {
-	    push @diff, @{$module_diffs{$pm_file}};
-	    print "$pm_file version $pm_version\n";
-	}
+            if (exists $skip_versions{$pm_file}
+                and grep $pm_version eq $_, @{$skip_versions{$pm_file}}) {
+                print "ok $count - SKIP $pm_file version $pm_version\n";
+            } else {
+                my $nok = "not ok $count - $pm_file version $pm_version\n";
+                print $nok;
+                print STDERR "# $nok";
+            }
+        } else {
+            push @diff, @{$module_diffs{$pm_file}};
+            print "$pm_file version $pm_version\n";
+        }
     }
 }
 
@@ -264,7 +264,7 @@ sub get_file_from_git {
 
 if ($diffs) {
     for (sort @diff) {
-	print "\n";
-	system "$diff_cmd $q$_$q";
+        print "\n";
+        system "$diff_cmd $q$_$q";
     }
 }
