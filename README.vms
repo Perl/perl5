@@ -1,3 +1,5 @@
+# vim: syntax=pod
+
 If you read this file _as_is_, just ignore the equal signs on the left.
 This file is written in the POD format (see [.pod]perlpod.pod) which is
 specially designed to be readable as is.
