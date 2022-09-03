@@ -112,10 +112,12 @@ typedef struct jmpenv JMPENV;
 
 #define JMPENV_PUSH(v)                                                  \
     STMT_START {							\
-        PERL_DEB(int i=0);                                              \
         DEBUG_l({                                                       \
+            int i = 0;                                                  \
             JMPENV *p = PL_top_env;                                     \
             while (p) { i++; p = p->je_prev; }				\
+            Perl_deb(aTHX_ "JMPENV_PUSH pre level=%d at %s:%d\n",       \
+                         i,  __FILE__, __LINE__);                       \
         });                                                             \
         cur_env.je_prev = PL_top_env;					\
         JE_OLD_STACK_HWM_save(cur_env);                                 \
@@ -124,11 +126,14 @@ typedef struct jmpenv JMPENV;
         PL_top_env = &cur_env;						\
         cur_env.je_mustcatch = FALSE;					\
         cur_env.je_old_delaymagic = PL_delaymagic;			\
-        (v) = cur_env.je_ret;						\
         DEBUG_l({                                                       \
+            int i = 0;                                                  \
+            JMPENV *p = PL_top_env;                                     \
+            while (p) { i++; p = p->je_prev; }				\
             Perl_deb(aTHX_ "JMPENV_PUSH level=%d ret=%d at %s:%d\n",    \
                          i, cur_env.je_ret,  __FILE__, __LINE__);       \
         });                                                             \
+        (v) = cur_env.je_ret;						\
     } STMT_END
 
 #define JMPENV_POP \
