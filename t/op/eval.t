@@ -6,7 +6,7 @@ BEGIN {
     set_up_inc('../lib');
 }
 
-plan(tests => 146);
+plan(tests => 149);
 
 eval 'pass();';
 
@@ -715,4 +715,15 @@ pass("eval in freed package does not crash");
         'Blocked BEGIN results in expected error');
     ::is($x,2,'BEGIN really did nothing');
 
+}
+
+{
+    # make sure that none of these segfault.
+    foreach my $line (
+        'eval "UNITCHECK { eval q(UNITCHECK { die; }); print q(A-) }";',
+        'eval "UNITCHECK { eval q(BEGIN     { die; }); print q(A-) }";',
+        'eval "BEGIN     { eval q(UNITCHECK { die; }); print q(A-) }";',
+    ) {
+        fresh_perl_is($line . ' print "ok";', "A-ok", {}, "No segfault: $line");
+    }
 }
