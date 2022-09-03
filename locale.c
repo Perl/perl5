@@ -143,7 +143,8 @@ S_mortalized_pv_copy(pTHX_ const char * const pv)
 #define GET_ERRNO   saved_errno
 
 /* Default values come from the C locale */
-static const char C_codeset[] = "ANSI_X3.4-1968";
+#define C_codeset "ANSI_X3.4-1968" /* Only in some Configurations, and usually
+                                      a single instance, so is a #define */
 static const char C_decimal_point[] = ".";
 static const char C_thousands_sep[] = "";
 
