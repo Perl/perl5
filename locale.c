@@ -497,26 +497,25 @@ Perl_locale_panic(const char * msg,
         setlocale_failure_panic_i(cat##_INDEX_, current, failed,            \
                         caller_0_line, caller_1_line)
 
-/* porcelain_setlocale() presents a consistent POSIX-compliant interface to
+/* posix_setlocale() presents a consistent POSIX-compliant interface to
  * setlocale().   Windows requres a customized base-level setlocale() */
 #ifdef WIN32
-#  define porcelain_setlocale(cat, locale) win32_setlocale(cat, locale)
+#  define posix_setlocale(cat, locale) win32_setlocale(cat, locale)
 #else
-#  define porcelain_setlocale(cat, locale)                              \
-                                ((const char *) setlocale(cat, locale))
+#  define posix_setlocale(cat, locale) ((const char *) setlocale(cat, locale))
 #endif
 
 /* The next layer up is to catch vagaries and bugs in the libc setlocale return
  * value */
 #ifdef stdize_locale
 #  define stdized_setlocale(cat, locale)                                       \
-     stdize_locale(cat, porcelain_setlocale(cat, locale),                      \
+     stdize_locale(cat, posix_setlocale(cat, locale),                          \
                    &PL_stdize_locale_buf, &PL_stdize_locale_bufsize, __LINE__)
 #else
-#  define stdized_setlocale(cat, locale)  porcelain_setlocale(cat, locale)
+#  define stdized_setlocale(cat, locale)  posix_setlocale(cat, locale)
 #endif
 
-/* The next many lines form a layer above the close-to-the-metal 'porcelain'
+/* The next many lines form a layer above the close-to-the-metal 'posix'
  * and 'stdized' macros.  They are used to present a uniform API to the rest of
  * the code in this file in spite of the disparate underlying implementations.
  * */
@@ -534,7 +533,7 @@ Perl_locale_panic(const char * msg,
 
 #  define void_setlocale_i(i, locale)                                       \
     STMT_START {                                                            \
-        if (! porcelain_setlocale(categories[i], locale)) {                 \
+        if (! posix_setlocale(categories[i], locale)) {                     \
             setlocale_failure_panic_i(i, NULL, locale, __LINE__, 0);        \
             NOT_REACHED; /* NOTREACHED */                                   \
         }                                                                   \
@@ -544,8 +543,7 @@ Perl_locale_panic(const char * msg,
 #  define void_setlocale_r(cat, locale)                                     \
                void_setlocale_i(get_category_index(cat, locale), locale)
 
-#  define bool_setlocale_r(cat, locale)                                     \
-                                  cBOOL(porcelain_setlocale(cat, locale))
+#  define bool_setlocale_r(cat, locale) cBOOL(posix_setlocale(cat, locale))
 #  define bool_setlocale_i(i, locale)                                       \
                                  bool_setlocale_c(categories[i], locale)
 #  define bool_setlocale_c(cat, locale)    bool_setlocale_r(cat, locale)
@@ -700,7 +698,7 @@ S_my_querylocale_i(pTHX_ const unsigned int index)
     DEBUG_Lv(PerlIO_printf(Perl_debug_log, "my_querylocale_i(%s) on %p\n",
                                            category_names[index], cur_obj));
         if (cur_obj == LC_GLOBAL_LOCALE) {
-        retval = porcelain_setlocale(category, NULL);
+        retval = posix_setlocale(category, NULL);
         }
     else {
 
@@ -1220,7 +1218,7 @@ S_emulate_setlocale_i(pTHX_
                  * only on the final iteration */
                 for (PERL_UINT_FAST8_T i = 0; i < NOMINAL_LC_ALL_INDEX; i++) {
                     update_PL_curlocales_i(i,
-                                       porcelain_setlocale(categories[i], NULL),
+                                       posix_setlocale(categories[i], NULL),
                                        RECALCULATE_LC_ALL_ON_FINAL_INTERATION);
                 }
             }
@@ -1342,15 +1340,15 @@ S_stdize_locale(pTHX_ const int category,
         for (i = 0; i < NOMINAL_LC_ALL_INDEX; i++) {
             Size_t this_size = 0;
             individ_locales[i] = stdize_locale(categories[i],
-                                               porcelain_setlocale(categories[i],
-                                                                   NULL),
+                                               posix_setlocale(categories[i],
+                                                               NULL),
                                                &individ_locales[i],
                                                &this_size,
                                                caller_line);
 
             /* If the size didn't change, it means this category did not have
              * to be adjusted, and individ_locales[i] points to the buffer
-             * returned by porcelain_setlocale(); we have to copy that before
+             * returned by posix_setlocale(); we have to copy that before
              * it's called again in the next iteration */
             if (this_size == 0) {
                 individ_locales[i] = savepv(individ_locales[i]);
@@ -4708,7 +4706,7 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 
     /* Initialize our records. */
     for (i = 0; i < NOMINAL_LC_ALL_INDEX; i++) {
-        (void) emulate_setlocale_i(i, porcelain_setlocale(categories[i], NULL),
+        (void) emulate_setlocale_i(i, posix_setlocale(categories[i], NULL),
                                    RECALCULATE_LC_ALL_ON_FINAL_INTERATION,
                                    __LINE__);
     }
