@@ -140,8 +140,8 @@ my %skip;
 # usually due to some # mix-up
 
 my %skip_versions = (
-           # 'some/sample/file.pm' => [ '1.23', '1.24' ],
-          );
+    # 'some/sample/file.pm' => [ '1.23', '1.24' ],
+);
 
 my $skip_dirs = qr|^t/lib|;
 
