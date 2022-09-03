@@ -116,8 +116,8 @@ typedef struct jmpenv JMPENV;
             int i = 0;                                                  \
             JMPENV *p = PL_top_env;                                     \
             while (p) { i++; p = p->je_prev; }				\
-            Perl_deb(aTHX_ "JMPENV_PUSH pre level=%d at %s:%d\n",       \
-                         i,  __FILE__, __LINE__);                       \
+            Perl_deb(aTHX_ "JMPENV_PUSH pre level=%d in %s at %s:%d\n", \
+                         i,  SAFE_FUNCTION__, __FILE__, __LINE__);      \
         });                                                             \
         cur_env.je_prev = PL_top_env;					\
         JE_OLD_STACK_HWM_save(cur_env);                                 \
@@ -130,8 +130,8 @@ typedef struct jmpenv JMPENV;
             int i = 0;                                                  \
             JMPENV *p = PL_top_env;                                     \
             while (p) { i++; p = p->je_prev; }				\
-            Perl_deb(aTHX_ "JMPENV_PUSH level=%d ret=%d at %s:%d\n",    \
-                         i, cur_env.je_ret,  __FILE__, __LINE__);       \
+            Perl_deb(aTHX_ "JMPENV_PUSH level=%d ret=%d in %s at %s:%d\n",    \
+                         i, cur_env.je_ret, SAFE_FUNCTION__,  __FILE__, __LINE__); \
         });                                                             \
         (v) = cur_env.je_ret;						\
     } STMT_END
@@ -141,8 +141,8 @@ typedef struct jmpenv JMPENV;
         DEBUG_l({                                                       \
             int i = -1; JMPENV *p = PL_top_env;				\
             while (p) { i++; p = p->je_prev; }				\
-            Perl_deb(aTHX_ "JMPENV_POP level=%d at %s:%d\n",		\
-                         i, __FILE__, __LINE__);})			\
+            Perl_deb(aTHX_ "JMPENV_POP level=%d in %s at %s:%d\n",        \
+                         i, SAFE_FUNCTION__, __FILE__, __LINE__);})        \
         assert(PL_top_env == &cur_env);					\
         PL_delaymagic = cur_env.je_old_delaymagic;			\
         PL_top_env = cur_env.je_prev;					\
@@ -153,8 +153,8 @@ typedef struct jmpenv JMPENV;
         DEBUG_l({                                               \
             int i = -1; JMPENV *p = PL_top_env;			\
             while (p) { i++; p = p->je_prev; }			\
-            Perl_deb(aTHX_ "JMPENV_JUMP(%d) level=%d at %s:%d\n", \
-                         (int)(v), i, __FILE__, __LINE__);})    \
+            Perl_deb(aTHX_ "JMPENV_JUMP(%d) level=%d in %s at %s:%d\n",         \
+                         (int)(v), i, SAFE_FUNCTION__, __FILE__, __LINE__);})   \
         if (PL_top_env->je_prev)				\
             PerlProc_longjmp(PL_top_env->je_buf, (v));		\
         if ((v) == 2)						\
@@ -168,9 +168,9 @@ typedef struct jmpenv JMPENV;
     STMT_START {							\
         DEBUG_l(                                                        \
             Perl_deb(aTHX_						\
-                "JUMPLEVEL set catch %d => %d (for %p) at %s:%d\n",	\
+                "JUMPLEVEL set catch %d => %d (for %p) in %s at %s:%d\n",   \
                  PL_top_env->je_mustcatch, (v), (void*)PL_top_env,      \
-                 __FILE__, __LINE__);)					\
+                 SAFE_FUNCTION__, __FILE__, __LINE__);)			\
         PL_top_env->je_mustcatch = (v);					\
     } STMT_END
 
@@ -889,7 +889,7 @@ struct block {
 
 #define CX_DEBUG(cx, action)						\
     DEBUG_l(								\
-        Perl_deb(aTHX_ "CX %ld %s %s (scope %ld,%ld) (save %ld,%ld) at %s:%d\n",\
+        Perl_deb(aTHX_ "CX %ld %s %s (scope %ld,%ld) (save %ld,%ld) in %s at %s:%d\n",\
                     (long)cxstack_ix,					\
                     action,						\
                     PL_block_type[CxTYPE(cx)],	                        \
@@ -897,7 +897,7 @@ struct block {
                     (long)(cx->blk_oldscopesp),		                \
                     (long)PL_savestack_ix,				\
                     (long)(cx->blk_oldsaveix),                          \
-                    __FILE__, __LINE__));
+                    SAFE_FUNCTION__, __FILE__, __LINE__));
 
 
 
@@ -1162,8 +1162,8 @@ typedef struct stackinfo PERL_SI;
         DEBUG_l({							\
             int i = 0; PERL_SI *p = PL_curstackinfo;			\
             while (p) { i++; p = p->si_prev; }				\
-            Perl_deb(aTHX_ "push STACKINFO %d at %s:%d\n",		\
-                         i, __FILE__, __LINE__);})			\
+            Perl_deb(aTHX_ "push STACKINFO %d in %s at %s:%d\n",        \
+                         i, SAFE_FUNCTION__, __FILE__, __LINE__);})        \
         if (!next) {							\
             next = new_stackinfo(32, 2048/sizeof(PERL_CONTEXT) - 1);	\
             next->si_prev = PL_curstackinfo;				\
@@ -1190,8 +1190,8 @@ typedef struct stackinfo PERL_SI;
         DEBUG_l({							\
             int i = -1; PERL_SI *p = PL_curstackinfo;			\
             while (p) { i++; p = p->si_prev; }				\
-            Perl_deb(aTHX_ "pop  STACKINFO %d at %s:%d\n",		\
-                         i, __FILE__, __LINE__);})			\
+            Perl_deb(aTHX_ "pop  STACKINFO %d in %s at %s:%d\n",        \
+                         i, SAFE_FUNCTION__, __FILE__, __LINE__);})        \
         if (!prev) {							\
             Perl_croak_popstack();					\
         }								\
