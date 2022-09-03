@@ -1365,6 +1365,7 @@ struct IPerlSockInfo
 #  define PerlSock_bind(s, n, l)        bind(s, n, l)
 #  define PerlSock_connect(s, n, l)     connect(s, n, l)
 
+/* XXX Locks */
 #  define PerlSock_gethostbyaddr(a, l, t) gethostbyaddr(a, l, t)
 #  define PerlSock_gethostbyname(n)     gethostbyname(n)
 #  define PerlSock_gethostent           gethostent
