@@ -725,6 +725,7 @@ EOF
             }
 
             # This needs a special case, see its definition in config.h
+            # XXX
             my $setup = ($func eq 'localtime') ? "L_R_TZSET " : "";
 
             my $call = "$setup${func}_r($v$w)";
