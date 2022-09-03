@@ -119,6 +119,8 @@ static int debug_initialization = 0;
 #  include <wctype.h>
 #endif
 
+#ifdef USE_LOCALE
+
 PERL_STATIC_INLINE const char *
 S_mortalized_pv_copy(pTHX_ const char * const pv)
 {
@@ -136,6 +138,7 @@ S_mortalized_pv_copy(pTHX_ const char * const pv)
     return copy;
 }
 
+#endif
 
 /* Returns the Unix errno portion; ignoring any others.  This is a macro here
  * instead of putting it into perl.h, because unclear to khw what should be
