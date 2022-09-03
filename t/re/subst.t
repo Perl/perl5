@@ -1010,7 +1010,7 @@ eval { for (__PACKAGE__) { s/b/c/; } };
 like $@, qr/^Modification of a read-only value/,
     'read-only COW =~ s/does not match// should croak';
 
-SKIP: {
+{
     my $a_acute = chr utf8::unicode_to_native(0xE1); # LATIN SMALL LETTER A WITH ACUTE
     my $egrave = chr utf8::unicode_to_native(0xE8);  # LATIN SMALL LETTER E WITH GRAVE
     my $u_umlaut = chr utf8::unicode_to_native(0xFC);  # LATIN SMALL LETTER U WITH DIAERESIS
@@ -1059,21 +1059,21 @@ SKIP: {
         '[perl #126319: Segmentation fault in Perl_sv_catpvn_flags with \b{sb}'
     );
 
-SKIP: {
-    if (! locales_enabled('LC_ALL')) {
-        skip "Can't test locale (maybe you are missing POSIX)", 6;
+    SKIP: {
+        if (! locales_enabled('LC_ALL')) {
+            skip "Can't test locale (maybe you are missing POSIX)", 6;
+        }
+
+        setlocale(&POSIX::LC_ALL, "C");
+        use locale;
+        is("a.b" =~ s/\b/!/gr, "!a!.!b!", '\\b matches ASCII before string, mid, and end, /l');
+        is("$a_acute.$egrave" =~ s/\b/!/gr, "$a_acute.$egrave", '\\b matches Latin1 before string, mid, and end, /l');
+        is("\x{100}\x{101}.\x{102}" =~ s/\b/!/gr, "!\x{100}\x{101}!.!\x{102}!", '\\b matches above-Latin1 before string, mid, and end, /l');
+
+        is("..." =~ s/\B/!/gr, "!.!.!.!", '\\B matches ASCII before string, mid, and end, /l');
+        is("$division$division$division" =~ s/\B/!/gr, "!$division!$division!$division!", '\\B matches Latin1 before string, mid, and end, /l');
+        is("\x{2028}\x{2028}\x{2028}" =~ s/\B/!/gr, "!\x{2028}!\x{2028}!\x{2028}!", '\\B matches above-Latin1 before string, mid, and end, /l');
     }
-
-    setlocale(&POSIX::LC_ALL, "C");
-    use locale;
-    is("a.b" =~ s/\b/!/gr, "!a!.!b!", '\\b matches ASCII before string, mid, and end, /l');
-    is("$a_acute.$egrave" =~ s/\b/!/gr, "$a_acute.$egrave", '\\b matches Latin1 before string, mid, and end, /l');
-    is("\x{100}\x{101}.\x{102}" =~ s/\b/!/gr, "!\x{100}\x{101}!.!\x{102}!", '\\b matches above-Latin1 before string, mid, and end, /l');
-
-    is("..." =~ s/\B/!/gr, "!.!.!.!", '\\B matches ASCII before string, mid, and end, /l');
-    is("$division$division$division" =~ s/\B/!/gr, "!$division!$division!$division!", '\\B matches Latin1 before string, mid, and end, /l');
-    is("\x{2028}\x{2028}\x{2028}" =~ s/\B/!/gr, "!\x{2028}!\x{2028}!\x{2028}!", '\\B matches above-Latin1 before string, mid, and end, /l');
-}
 
 }
 
