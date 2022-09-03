@@ -4649,8 +4649,12 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 #  endif
 #  ifdef USE_PL_CURLOCALES
 
-    /* Initialize our records.  If we have POSIX 2008, we have LC_ALL */
-    void_setlocale_c(LC_ALL, porcelain_setlocale(LC_ALL, NULL));
+    /* Initialize our records. */
+    for (i = 0; i < NOMINAL_LC_ALL_INDEX; i++) {
+        (void) emulate_setlocale_i(i, porcelain_setlocale(categories[i], NULL),
+                                   RECALCULATE_LC_ALL_ON_FINAL_INTERATION,
+                                   __LINE__);
+    }
 
 #  endif
 
