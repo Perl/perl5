@@ -5665,12 +5665,6 @@ PERL_CALLCONV SV*	Perl_hfree_next_entry(pTHX_ HV *hv, STRLEN *indexp)
 
 #endif
 #if defined(PERL_IN_LOCALE_C)
-#ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_INLINE const char *	S_mortalized_pv_copy(pTHX_ const char * const pv)
-			__attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT_MORTALIZED_PV_COPY
-#endif
-
 #  if defined(USE_LOCALE)
 STATIC unsigned int	S_get_category_index(const int category, const char * locale);
 #define PERL_ARGS_ASSERT_GET_CATEGORY_INDEX
@@ -5682,6 +5676,12 @@ STATIC bool	S_is_codeset_name_UTF8(const char * name);
 STATIC bool	S_is_locale_utf8(pTHX_ const char * locale);
 #define PERL_ARGS_ASSERT_IS_LOCALE_UTF8	\
 	assert(locale)
+#ifndef PERL_NO_INLINE_FUNCTIONS
+PERL_STATIC_INLINE const char *	S_mortalized_pv_copy(pTHX_ const char * const pv)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_MORTALIZED_PV_COPY
+#endif
+
 STATIC void	S_new_LC_ALL(pTHX_ const char* unused);
 #define PERL_ARGS_ASSERT_NEW_LC_ALL
 STATIC void	S_new_collate(pTHX_ const char* newcoll);
