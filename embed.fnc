@@ -3328,7 +3328,9 @@ S	|utf8ness_t|get_locale_string_utf8ness_i				\
 				|const locale_utf8ness_t known_utf8
 S	|void	|new_collate	|NN const char* newcoll
 S	|void	|new_ctype	|NN const char* newctype
+#    ifdef USE_LOCALE_NUMERIC
 S	|void	|new_numeric	|NN const char* newnum
+#    endif
 S	|void	|new_LC_ALL	|NULLOK const char* unused
 S	|const char*|stdize_locale|const int category			\
 				|NULLOK const char* input_locale	\

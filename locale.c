@@ -1604,18 +1604,12 @@ S_setlocale_failure_panic_i(pTHX_
                                       || defined(HAS_SNPRINTF))
 #    define CAN_CALCULATE_RADIX
 #  endif
+#  ifdef USE_LOCALE_NUMERIC
 
 STATIC void
 S_new_numeric(pTHX_ const char *newnum)
 {
     PERL_ARGS_ASSERT_NEW_NUMERIC;
-
-#  ifndef USE_LOCALE_NUMERIC
-
-    PERL_ARGS_ASSERT_NEW_NUMERIC;
-    PERL_UNUSED_ARG(newnum);
-
-#  else
 
     /* Called after each libc setlocale() call affecting LC_NUMERIC, to tell
      * core Perl this and that 'newnum' is the name of the new locale, and we
@@ -1759,9 +1753,9 @@ S_new_numeric(pTHX_ const char *newnum)
         set_numeric_standard();
     }
 
-#  endif
-
 }
+
+#  endif
 
 void
 Perl_set_numeric_standard(pTHX)
