@@ -132,8 +132,8 @@ use I18N::Langinfo 'langinfo', @langinfo;
 # =1 adds debugging output; =2 increases the verbosity somewhat
 our $debug = $ENV{PERL_DEBUG_FULL_TEST} // 0;
 if ($^O =~ /cygwin | darwin /xi) {
-    $debug = 1 ;
-    $^D = 0x04000000|0x00100000;# if $^O eq 'cygwin';
+    $debug = 0; # 1 ;
+    $^D = 0x04000000|0x00100000 if $debug;# if $^O eq 'cygwin';
 }
 
 # Certain tests have been shown to be problematical for a few locales.  Don't
