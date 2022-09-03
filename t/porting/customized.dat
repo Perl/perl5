@@ -10,11 +10,6 @@ Math::Complex cpan/Math-Complex/lib/Math/Complex.pm 66f28a17647e2de166909ca66e4c
 Math::Complex cpan/Math-Complex/t/Complex.t 17039e03ee798539e770ea9a0d19a99364278306
 Math::Complex cpan/Math-Complex/t/Trig.t 508f8e27373c08228be13ca5d42b28812ab0e020
 Math::Complex cpan/Math-Complex/t/underbar.t 97e7b9615658eefc67a710d4b258349cc5bace63
-Memoize cpan/Memoize/Memoize.pm 902092ff91cdec9c7b4bd06202eb179e1ce26ca2
-Memoize cpan/Memoize/t/errors.t bcd0c02a4bc47dfda07a97d265d7210849871659
-Memoize cpan/Memoize/t/expmod_t.t a1c3d03fd3ec2e7c6c835f02316475756e1b16b7
-Memoize cpan/Memoize/t/speed.t 89fe8c8928f0164c9ed898b5a427dbbc814e9976
-Memoize cpan/Memoize/t/tie_gdbm.t d81c4f6208f6c925539b3878bff9a8ff1b73a37e
 Net::Ping dist/Net-Ping/t/000_load.t deff5dc2ca54dae28cb19d3631427db127279ac2
 Net::Ping dist/Net-Ping/t/001_new.t 7b24e05672e22edfe3e6b5cc0277f815efe557e5
 Net::Ping dist/Net-Ping/t/010_pingecho.t 218d7a9ee5b6d03ba2544210acaf6585f8dc5503
