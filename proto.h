@@ -5690,9 +5690,6 @@ STATIC void	S_new_collate(pTHX_ const char* newcoll);
 STATIC void	S_new_ctype(pTHX_ const char* newctype);
 #define PERL_ARGS_ASSERT_NEW_CTYPE	\
 	assert(newctype)
-STATIC void	S_new_numeric(pTHX_ const char* newnum);
-#define PERL_ARGS_ASSERT_NEW_NUMERIC	\
-	assert(newnum)
 STATIC void	S_restore_toggled_locale_i(pTHX_ const unsigned cat_index, const char * original_locale, const line_t caller_line);
 #define PERL_ARGS_ASSERT_RESTORE_TOGGLED_LOCALE_I
 STATIC const char *	S_save_to_buffer(const char * string, const char **buf, Size_t *buf_size);
@@ -5707,6 +5704,11 @@ STATIC const char*	S_stdize_locale(pTHX_ const int category, const char* input_l
 STATIC const char *	S_toggle_locale_i(pTHX_ const unsigned switch_cat_index, const char * new_locale, const line_t caller_line);
 #define PERL_ARGS_ASSERT_TOGGLE_LOCALE_I	\
 	assert(new_locale)
+#    if defined(USE_LOCALE_NUMERIC)
+STATIC void	S_new_numeric(pTHX_ const char* newnum);
+#define PERL_ARGS_ASSERT_NEW_NUMERIC	\
+	assert(newnum)
+#    endif
 #    if defined(USE_POSIX_2008_LOCALE)
 STATIC const char*	S_emulate_setlocale_i(pTHX_ const unsigned int index, const char* new_locale, const recalc_lc_all_t recalc_LC_ALL, const line_t line);
 #define PERL_ARGS_ASSERT_EMULATE_SETLOCALE_I
