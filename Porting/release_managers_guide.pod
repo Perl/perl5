@@ -67,6 +67,14 @@ of these release types.  If a step does not apply to a given
 type of release, you will see a notation to that effect at
 the beginning of the step.
 
+This guide assumes you are working on the Perl master repository (i.e.
+L<https://github.com/Perl/perl5>) and B<not> on your own fork of the perl5
+repository. While it is possible to prepare a release on your own fork
+this guide is not written with that in mind and as a result several
+key steps are missing. If you do use your own fork then extra care
+needs to be taken when setting/pushing the tag and doing the merge
+(do B<not> use a PR).
+
 =head2 Release types
 
 =over 4
