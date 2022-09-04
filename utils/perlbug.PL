@@ -86,7 +86,7 @@ BEGIN {
     $::HaveWrap = ($@ eq "");
 };
 
-our $VERSION = "1.42";
+our $VERSION = "1.43";
 
 #TODO:
 #       make sure failure (transmission-wise) of Mail::Send is accounted for.
@@ -620,6 +620,10 @@ generated with the help of perlbug $VERSION running under perl $perl_version.
 
 EOF
 
+    if ($report_about_module) {
+	print REP "Module: $report_about_module\n\n";
+    }
+
     if ($body) {
 	print REP $body;
     } elsif ($usefile) {
@@ -646,12 +650,25 @@ EOF
 	    print REP <<'EOF';
 
 -----------------------------------------------------------------
-[Please describe your issue here]
+<!--[Please describe your issue here]-->
+
+**Description**
+<!-- A clear and concise description of what the bug is. -->
 
 
 
-[Please do not change anything below this line]
------------------------------------------------------------------
+**Steps to Reproduce**
+<!-- A one-liner or script to reproduce the issue. -->
+
+
+
+**Expected behavior**
+<!-- A clear and concise description of what you expected to happen. -->
+
+
+
+<!--[Please do not change anything below this line]-->
+<!------------------------------------------------------------------- -->
 EOF
 	}
     }
@@ -671,26 +688,30 @@ sub Dump {
     $severity ||= 'low';
 
     print OUT <<EFF;
+
+
 ---
-Flags:
-    category=$category
-    severity=$severity
+**Flags**
+- category=$category
+- severity=$severity
 EFF
 
     if ($has_patch) {
         print OUT <<EFF;
-    Type=Patch
-    PatchStatus=HasPatch
+- Type=Patch
+- PatchStatus=HasPatch
 EFF
     }
 
     if ($report_about_module ) { 
         print OUT <<EFF;
-    module=$report_about_module
+- module=$report_about_module
 EFF
     }
     print OUT <<EFF;
 ---
+**Perl configuration**
+```
 EFF
     print OUT "This perlbug was built using Perl $config_tag1\n",
 	    "It is being executed now by  Perl $config_tag2.\n\n"
@@ -745,6 +766,7 @@ EOF
 	    print OUT "$_='$value'\n";
 	}
     }
+    print OUT "```\n";
 } # sub Dump
 
 sub Edit {
