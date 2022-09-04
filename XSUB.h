@@ -329,15 +329,15 @@ Rethrows a previously caught exception.  See L<perlguts/"Exception Handling">.
         return;						\
     } STMT_END
 
-#define XSRETURN_IV(v) STMT_START { XST_mIV(0,v);  XSRETURN(1); } STMT_END
-#define XSRETURN_UV(v) STMT_START { XST_mUV(0,v);  XSRETURN(1); } STMT_END
-#define XSRETURN_NV(v) STMT_START { XST_mNV(0,v);  XSRETURN(1); } STMT_END
-#define XSRETURN_PV(v) STMT_START { XST_mPV(0,v);  XSRETURN(1); } STMT_END
-#define XSRETURN_PVN(v,n) STMT_START { XST_mPVN(0,v,n);  XSRETURN(1); } STMT_END
-#define XSRETURN_NO    STMT_START { XST_mNO(0);    XSRETURN(1); } STMT_END
-#define XSRETURN_YES   STMT_START { XST_mYES(0);   XSRETURN(1); } STMT_END
-#define XSRETURN_UNDEF STMT_START { XST_mUNDEF(0); XSRETURN(1); } STMT_END
-#define XSRETURN_EMPTY STMT_START {                XSRETURN(0); } STMT_END
+#define XSRETURN_IV(v)    STMT_START { XST_mIV(0,v);    XSRETURN(1); } STMT_END
+#define XSRETURN_UV(v)    STMT_START { XST_mUV(0,v);    XSRETURN(1); } STMT_END
+#define XSRETURN_NV(v)    STMT_START { XST_mNV(0,v);    XSRETURN(1); } STMT_END
+#define XSRETURN_PV(v)    STMT_START { XST_mPV(0,v);    XSRETURN(1); } STMT_END
+#define XSRETURN_PVN(v,n) STMT_START { XST_mPVN(0,v,n); XSRETURN(1); } STMT_END
+#define XSRETURN_NO       STMT_START { XST_mNO(0);      XSRETURN(1); } STMT_END
+#define XSRETURN_YES      STMT_START { XST_mYES(0);     XSRETURN(1); } STMT_END
+#define XSRETURN_UNDEF    STMT_START { XST_mUNDEF(0);   XSRETURN(1); } STMT_END
+#define XSRETURN_EMPTY    STMT_START {                  XSRETURN(0); } STMT_END
 
 #define newXSproto(a,b,c,d)	newXS_flags(a,b,c,d,0)
 
