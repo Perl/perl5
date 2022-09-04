@@ -63,6 +63,10 @@ esac
 set `echo " $libswanted " | sed -e 's@ ld @ @' -e 's@ malloc @ @' -e 's@ ucb @ @' -e 's@ sec @ @' -e 's@ crypt @ @'`
 libswanted="$*"
 
+# Add libnsl for networking support
+set `echo " $libswanted " | sed -e 's@ inet @ inet nsl @'`
+libswanted="$*"
+
 # Look for architecture name.  We want to suggest a useful default.
 case "$archname" in
 '')
