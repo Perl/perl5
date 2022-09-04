@@ -13,7 +13,7 @@ use strict;
 use Carp;
 use Symbol;
 
-our $VERSION = "1.50";
+our $VERSION = "1.51";
 
 sub new {
     my $type = shift;
