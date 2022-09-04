@@ -2,7 +2,6 @@
 .editorconfig			EditorConfig style file
 .lgtm.yml			LGTM.com configuration file
 .metaconf-exclusions.txt	Symbols that should ignored when generating Configure
-.travis.yml		continuous integration on github (where enabled)
 amigaos4/amigaio.c	AmigaOS4 port
 amigaos4/amigaio.h	AmigaOS4 port
 amigaos4/amigaos.c	AmigaOS4 port
