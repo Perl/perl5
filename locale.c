@@ -1819,25 +1819,14 @@ Perl_set_numeric_underlying(pTHX)
 STATIC void
 S_new_ctype(pTHX_ const char *newctype)
 {
+    PERL_ARGS_ASSERT_NEW_CTYPE;
 
     /* Called after each libc setlocale() call affecting LC_CTYPE, to tell
      * core Perl this and that 'newctype' is the name of the new locale.
      *
      * This function sets up the folding arrays for all 256 bytes, assuming
      * that tofold() is tolc() since fold case is not a concept in POSIX,
-     *
-     * Any code changing the locale (outside this file) should use
-     * Perl_setlocale or POSIX::setlocale, which call this function.  Therefore
-     * this function should be called directly only from this file and from
-     * POSIX::setlocale() */
-
-    unsigned int i;
-
-    /* Don't check for problems if we are suppressing the warnings */
-    bool check_for_problems = ckWARN_d(WARN_LOCALE) || UNLIKELY(DEBUG_L_TEST);
-    bool maybe_utf8_turkic = FALSE;
-
-    PERL_ARGS_ASSERT_NEW_CTYPE;
+     */
 
     DEBUG_L(PerlIO_printf(Perl_debug_log, "Entering new_ctype(%s)\n", newctype));
 
@@ -1857,23 +1846,27 @@ S_new_ctype(pTHX_ const char *newctype)
     Safefree(PL_ctype_name);
     PL_ctype_name = "";
 
-    /* Guard against the is_locale_utf8() call potentially zapping newctype.
-     * This is not extra work as the cache is set to this a few lines down, and
-     * that needs to be copied anyway */
-    newctype = savepv(newctype);
-
-    /* With cache cleared, this will know to compute a new value */
-    PL_in_utf8_CTYPE_locale = is_locale_utf8(newctype);
-
-    /* Cache new name */
-    PL_ctype_name = newctype;
-
     PL_in_utf8_turkic_locale = FALSE;
 
-    if (isNAME_C_OR_POSIX(PL_ctype_name)) {
+    /* For the C locale, just use the standard folds, and we know there are no
+     * glitches possible, so return early */
+    if (isNAME_C_OR_POSIX(newctype)) {
         Copy(PL_fold, PL_fold_locale, 256, U8);
+        PL_ctype_name = savepv(newctype);
+        PL_in_utf8_CTYPE_locale = FALSE;
+        return;
     }
-    else if (PL_in_utf8_CTYPE_locale) {
+
+    /* The cache being cleared signals this to compute a new value */
+    PL_in_utf8_CTYPE_locale = is_locale_utf8(newctype);
+
+    PL_ctype_name = savepv(newctype);
+    bool maybe_utf8_turkic = FALSE;
+
+    /* Don't check for problems if we are suppressing the warnings */
+    bool check_for_problems = ckWARN_d(WARN_LOCALE) || UNLIKELY(DEBUG_L_TEST);
+
+    if (PL_in_utf8_CTYPE_locale) {
 
         /* A UTF-8 locale gets standard rules.  But note that code still has to
          * handle this specially because of the three problematic code points
@@ -1908,7 +1901,7 @@ S_new_ctype(pTHX_ const char *newctype)
         bool found_unexpected = FALSE;
 
         if (DEBUG_Lv_TEST) {
-            for (i = 128; i < 256; i++) {
+            for (unsigned i = 128; i < 256; i++) {
                 int j = LATIN1_TO_NATIVE(i);
                 if (toU8_LOWER_LC(j) != j || toU8_UPPER_LC(j) != j) {
                     has_non_ascii_fold = TRUE;
@@ -1919,7 +1912,7 @@ S_new_ctype(pTHX_ const char *newctype)
 
 #    endif
 
-        for (i = 0; i < 256; i++) {
+        for (unsigned i = 0; i < 256; i++) {
             if (isU8_UPPER_LC(i))
                 PL_fold_locale[i] = (U8) toU8_LOWER_LC(i);
             else if (isU8_LOWER_LC(i))
@@ -2031,7 +2024,7 @@ S_new_ctype(pTHX_ const char *newctype)
         char bad_chars_list[ (94 * 4) + (3 * 5) + 1 ] = { '\0' };
         unsigned int bad_count = 0;         /* Count of bad characters */
 
-        for (i = 0; i < 256; i++) {
+        for (unsigned i = 0; i < 256; i++) {
 
             /* If checking for locale problems, see if the native ASCII-range
              * printables plus \n and \t are in their expected categories in
