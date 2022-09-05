@@ -3908,8 +3908,12 @@ Perl_rpeep(pTHX_ OP *o)
                 !(lval->op_private & OPpDEREF)
                  /* skip if padrange has already gazumped the padsv */
                  && (lval == oldop)
+                 /* Memoize::Once produces a non-standard SASSIGN that
+                  * doesn't actually point to pp_sassign, has only one
+                  * child (PADSV), and gets to it via op_other rather
+                  * than op_next. Don't try to optimize this. */
+                 && (lval != rhs)
                ) {
-
                 /* SASSIGN's bitfield flags, such as op_moresib and
                  * op_slabbed, will be carried over unchanged. */
                 OpTYPE_set(o, OP_PADSV_STORE);
