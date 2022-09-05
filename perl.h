@@ -8918,6 +8918,24 @@ END_EXTERN_C
 /* ${^MAX_NESTED_EVAL_BEGIN_BLOCKS} */
 #define PERL_VAR_MAX_NESTED_EVAL_BEGIN_BLOCKS "\015AX_NESTED_EVAL_BEGIN_BLOCKS"
 
+/* Defines like this make it easier to do porting/diag.t. They are no-
+ * ops that return their argument which can be used to hint to diag.t
+ * that a string is actually an error message. By putting the category
+ * information into the macro name it considerably simplifies extended
+ * diag.t to support these cases. Feel free to add more.
+ *
+ * While it seems tempting to try to convert all of our diagnostics to
+ * this format, it would miss part of the point of diag.t in that it
+ * detects NEW diagnostics, which would not necessarily use these
+ * macros. The macros instead exist where we know we have an error
+ * message that isnt being picked up by diag.t because it is declared
+ * as a string independently of the function it is fed to, something
+ * diag.t can never handle right without help.
+ */
+#define PERL_DIAG_STR_(x)           ("" x "")
+#define PERL_DIAG_WARN_SYNTAX(x)    PERL_DIAG_STR_(x)
+#define PERL_DIAG_DIE_SYNTAX(x)     PERL_DIAG_STR_(x)
+
 /*
 
    (KEEP THIS LAST IN perl.h!)

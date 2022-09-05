@@ -1877,20 +1877,26 @@ Perl_warn_elem_scalar_context(pTHX_ const OP *o, SV *name, bool is_hash, bool is
 
     if (keypv) {
         msg = is_slice ?
-            "Scalar value @%" SVf "%c%s%c better written as $%" SVf "%c%s%c" :
-            "%%%" SVf "%c%s%c in scalar context better written as $%" SVf "%c%s%c";
-        /* diag_listed_as: %%s[%s] in scalar context better written as $%s[%s] */
-        /* diag_listed_as: Scalar value @%s[%s] better written as $%s[%s] */
+            /* diag_listed_as: Scalar value @%s[%s] better written as $%s[%s] */
+            PERL_DIAG_WARN_SYNTAX(
+                "Scalar value @%" SVf "%c%s%c better written as $%" SVf "%c%s%c") :
+            /* diag_listed_as: %%s[%s] in scalar context better written as $%s[%s] */
+            PERL_DIAG_WARN_SYNTAX(
+                "%%%" SVf "%c%s%c in scalar context better written as $%" SVf "%c%s%c");
+
         Perl_warner(aTHX_ packWARN(WARN_SYNTAX), msg,
                 SVfARG(name), lbrack, keypv, rbrack,
                 SVfARG(name), lbrack, keypv, rbrack);
     }
     else {
         msg = is_slice ?
-            "Scalar value @%" SVf "%c%" SVf "%c better written as $%" SVf "%c%" SVf "%c" :
-            "%%%" SVf "%c%" SVf "%c in scalar context better written as $%" SVf "%c%" SVf "%c";
-        /* diag_listed_as: %%s[%s] in scalar context better written as $%s[%s] */
-        /* diag_listed_as: Scalar value @%s[%s] better written as $%s[%s] */
+            /* diag_listed_as: Scalar value @%s[%s] better written as $%s[%s] */
+            PERL_DIAG_WARN_SYNTAX(
+                "Scalar value @%" SVf "%c%" SVf "%c better written as $%" SVf "%c%" SVf "%c") :
+            /* diag_listed_as: %%s[%s] in scalar context better written as $%s[%s] */
+            PERL_DIAG_WARN_SYNTAX(
+                "%%%" SVf "%c%" SVf "%c in scalar context better written as $%" SVf "%c%" SVf "%c");
+
         Perl_warner(aTHX_ packWARN(WARN_SYNTAX), msg,
                 SVfARG(name), lbrack, SVfARG(keysv), rbrack,
                 SVfARG(name), lbrack, SVfARG(keysv), rbrack);
