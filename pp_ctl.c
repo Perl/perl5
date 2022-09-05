@@ -3547,6 +3547,32 @@ S_try_yyparse(pTHX_ int gramtype)
     return ret;
 }
 
+/* Run PL_unitcheckav in a setjmp wrapper via call_list.
+ * Returns:
+ *   0: unitcheck blocks ran without error
+ *   3: a unitcheck block died
+ */
+STATIC int
+S_try_run_unitcheck(pTHX)
+{
+    int ret;
+    dJMPENV;
+    JMPENV_PUSH(ret);
+    switch (ret) {
+    case 0:
+        call_list(PL_scopestack_ix, PL_unitcheckav);
+        break;
+    case 3:
+        /* call_list die and threw an error */
+        break;
+    default:
+        JMPENV_POP;
+        JMPENV_JUMP(ret);
+        NOT_REACHED; /* NOTREACHED */
+    }
+    JMPENV_POP;
+    return ret;
+}
 
 /* Compile a require/do or an eval ''.
  *
@@ -3752,54 +3778,28 @@ S_doeval_compile(pTHX_ U8 gimme, CV* outside, U32 seq, HV *hh)
 
     if (PL_unitcheckav && av_count(PL_unitcheckav)>0) {
         OP *es = PL_eval_start;
+        /* TODO: are we sure we shouldn't do S_try_run_unitcheck()
+        * when `in_require` is true? */
         if (in_require) {
             call_list(PL_scopestack_ix, PL_unitcheckav);
-        } else {
-            /* TODO: are we sure we shouldn't do JMPENV_PUSH in
-             * when `in_require` is true? */
-            int ret=0;
-            dJMPENV;
-            JMPENV_PUSH(ret);
-            switch (ret) {
-            case 0:
-                /*
-                 * Doesn't seem like PUSHMARK(SP)/ENTER
-                 * is needed here. */
+        }
+        else if (S_try_run_unitcheck(aTHX)) {
+            /* there was an error! */
 
-                call_list(PL_scopestack_ix, PL_unitcheckav);
-                /* Nor LEAVE here. */
-                break;
-            case 3: {
-                /* call_list failed and threw an error */
+            /* Restore PL_OP */
+            PL_op = saveop;
 
-                /* Restore PL_OP */
-                PL_op = saveop;
-
-                SV *errsv = ERRSV;
-                if (!*(SvPV_nolen_const(errsv))) {
-                    /* This happens when using:
-                     * eval qq# UNITCHECK { die "\x00"; } #;
-                     */
-                    sv_setpvs(errsv, "Unit check error");
-                }
-
-                /* We're returning so POP our JMPENV */
-                /* NOTE: in `S_try_yyparse` the default for ret=3 is to
-                 *       break which falls back to the `JMPENV_POP`
-                 *       after the switch. In this code we're returning
-                 *       early so we must POP it outrself. */
-                JMPENV_POP;
-
-                if (gimme != G_LIST) PUSHs(&PL_sv_undef);
-                PUTBACK;
-                return FALSE;
-              }
-            default:
-                JMPENV_POP;
-                JMPENV_JUMP(ret);
-                NOT_REACHED; /* NOTREACHED */
+            SV *errsv = ERRSV;
+            if (!*(SvPV_nolen_const(errsv))) {
+                /* This happens when using:
+                 * eval qq# UNITCHECK { die "\x00"; } #;
+                 */
+                sv_setpvs(errsv, "Unit check error");
             }
-            JMPENV_POP;
+
+            if (gimme != G_LIST) PUSHs(&PL_sv_undef);
+            PUTBACK;
+            return FALSE;
         }
         PL_eval_start = es;
     }
