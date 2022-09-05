@@ -1610,8 +1610,10 @@
 #define print_bytes_for_locale(a,b,c)	S_print_bytes_for_locale(aTHX_ a,b,c)
 #      if defined(USE_LOCALE)
 #define get_LC_ALL_display()	S_get_LC_ALL_display(aTHX)
-#define print_collxfrm_input_and_return(a,b,c,d,e)	S_print_collxfrm_input_and_return(aTHX_ a,b,c,d,e)
 #define setlocale_debug_string_i	S_setlocale_debug_string_i
+#        if defined(USE_LOCALE_COLLATE)
+#define print_collxfrm_input_and_return(a,b,c,d,e)	S_print_collxfrm_input_and_return(aTHX_ a,b,c,d,e)
+#        endif
 #      endif
 #    endif
 #    if defined(PERL_IN_PAD_C)
@@ -1736,10 +1738,12 @@
 #define is_locale_utf8(a)	S_is_locale_utf8(aTHX_ a)
 #define mortalized_pv_copy(a)	S_mortalized_pv_copy(aTHX_ a)
 #define new_LC_ALL(a)		S_new_LC_ALL(aTHX_ a)
-#define new_collate(a)		S_new_collate(aTHX_ a)
 #define save_to_buffer		S_save_to_buffer
 #define setlocale_failure_panic_i(a,b,c,d,e)	S_setlocale_failure_panic_i(aTHX_ a,b,c,d,e)
 #define stdize_locale(a,b,c,d,e)	S_stdize_locale(aTHX_ a,b,c,d,e)
+#      if defined(USE_LOCALE_COLLATE)
+#define new_collate(a)		S_new_collate(aTHX_ a)
+#      endif
 #      if defined(USE_LOCALE_CTYPE)
 #define is_codeset_name_UTF8	S_is_codeset_name_UTF8
 #define new_ctype(a)		S_new_ctype(aTHX_ a)

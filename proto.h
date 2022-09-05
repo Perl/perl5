@@ -5097,13 +5097,15 @@ STATIC void	S_print_bytes_for_locale(pTHX_ const char * const s, const char * co
 #    if defined(USE_LOCALE)
 STATIC const char *	S_get_LC_ALL_display(pTHX);
 #define PERL_ARGS_ASSERT_GET_LC_ALL_DISPLAY
-STATIC void	S_print_collxfrm_input_and_return(pTHX_ const char * s, const char * e, const char * xbuf, const STRLEN xlen, const bool is_utf8);
-#define PERL_ARGS_ASSERT_PRINT_COLLXFRM_INPUT_AND_RETURN	\
-	assert(s); assert(e)
 STATIC char *	S_setlocale_debug_string_i(const unsigned cat_index, const char* const locale, const char* const retval)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_SETLOCALE_DEBUG_STRING_I
 
+#      if defined(USE_LOCALE_COLLATE)
+STATIC void	S_print_collxfrm_input_and_return(pTHX_ const char * s, const char * e, const char * xbuf, const STRLEN xlen, const bool is_utf8);
+#define PERL_ARGS_ASSERT_PRINT_COLLXFRM_INPUT_AND_RETURN	\
+	assert(s); assert(e)
+#      endif
 #    endif
 #  endif
 #  if defined(PERL_IN_PAD_C)
@@ -5681,9 +5683,6 @@ PERL_STATIC_INLINE const char *	S_mortalized_pv_copy(pTHX_ const char * const pv
 
 STATIC void	S_new_LC_ALL(pTHX_ const char* unused);
 #define PERL_ARGS_ASSERT_NEW_LC_ALL
-STATIC void	S_new_collate(pTHX_ const char* newcoll);
-#define PERL_ARGS_ASSERT_NEW_COLLATE	\
-	assert(newcoll)
 STATIC void	S_restore_toggled_locale_i(pTHX_ const unsigned cat_index, const char * original_locale, const line_t caller_line);
 #define PERL_ARGS_ASSERT_RESTORE_TOGGLED_LOCALE_I
 STATIC const char *	S_save_to_buffer(const char * string, const char **buf, Size_t *buf_size);
@@ -5698,6 +5697,11 @@ STATIC const char*	S_stdize_locale(pTHX_ const int category, const char* input_l
 STATIC const char *	S_toggle_locale_i(pTHX_ const unsigned switch_cat_index, const char * new_locale, const line_t caller_line);
 #define PERL_ARGS_ASSERT_TOGGLE_LOCALE_I	\
 	assert(new_locale)
+#    if defined(USE_LOCALE_COLLATE)
+STATIC void	S_new_collate(pTHX_ const char* newcoll);
+#define PERL_ARGS_ASSERT_NEW_COLLATE	\
+	assert(newcoll)
+#    endif
 #    if defined(USE_LOCALE_CTYPE)
 STATIC bool	S_is_codeset_name_UTF8(const char * name);
 #define PERL_ARGS_ASSERT_IS_CODESET_NAME_UTF8	\
