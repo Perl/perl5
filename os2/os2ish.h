@@ -192,7 +192,7 @@ extern int rc;
 #  define pthread_setspecific(k,v)	(*(k)=(v),0)
 #  define pthread_key_create(keyp,flag)			\
         ( DosAllocThreadLocalMemory(1,(unsigned long**)keyp)	\
-          ? Perl_croak_nocontext("LocalMemory"),1	\
+          ? Perl_croak_nocontext("Out of memory!"), 1        \
           : 0						\
         )
 #endif /* USE_SLOW_THREAD_SPECIFIC */
@@ -1239,4 +1239,3 @@ typedef struct {
 PQTOPLEVEL get_sysinfo(ULONG pid, ULONG flags);
 
 #endif /* _OS2_H */
-

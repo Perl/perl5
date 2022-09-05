@@ -8,7 +8,7 @@ use TestInit qw(T); # T is chdir to the top level
 use warnings;
 use strict;
 use Config;
-
+use Data::Dumper;
 require './t/test.pl';
 
 if ( $Config{usecrosscompile} ) {
@@ -40,6 +40,7 @@ foreach (@{(setup_embed())[0]}) {
   push @functions, 'S_' . $_->[2] if $_->[0] =~ /S/;
 };
 push @functions, 'Perl_mess';
+push @functions, 'PERL_DIAG_(?<wrapper>\w+)';
 
 my $regcomp_fail_re = '\b(?:(?:Simple_)?v)?FAIL[2-4]?(?:utf8f)?\b';
 my $regcomp_re =
@@ -286,26 +287,26 @@ sub check_file {
       $listed_as_line = $.+1;
     }
     elsif (m</\*\s*diag_listed_as: (.*?)\s*\z>) {
-      $listed_as = $1;
-      my $finished;
+      my $new_listed_as = $1;
       while (<$codefh>) {
         if (m<\*/>) {
-          $listed_as .= $` =~ s/^\s*/ /r =~ s/\s+\z//r;
+          $new_listed_as .= $` =~ s/^\s*/ /r =~ s/\s+\z//r;
           $listed_as_line = $.+1;
-          $finished = 1;
+          $listed_as= $new_listed_as;
           last;
         }
         else {
-          $listed_as .= s/^\s*/ /r =~ s/\s+\z//r;
+          $new_listed_as .= s/^\s*/ /r =~ s/\s+\z//r;
         }
       }
-      if (!$finished) { $listed_as = undef }
     }
     next if /^#/;
 
     my $multiline = 0;
     # Loop to accumulate the message text all on one line.
-    if (m/(?!^)\b(?:$source_msg_re(?:_nocontext)?|$regcomp_re)\s*\(/) {
+    if (m/(?!^)\b(?:$source_msg_re(?:_nocontext)?|$regcomp_re)\s*\((?<tail>(?:[^()]+|\([^()]+\))+\))?/
+        and !$+{tail}
+    ) {
       while (not m/\);\s*$/) {
         my $nextline = <$codefh>;
         # Means we fell off the end of the file.  Not terribly surprising;
@@ -335,11 +336,17 @@ sub check_file {
     s/ (?<!%) % $format_modifiers ( [dioxXucsfeEgGp] ) /%$1/xg;
 
     # The %"foo" thing needs to happen *before* this regex.
-    # diag($_);
+    #diag(">$_<");
     # DIE is just return Perl_die
-    my ($name, $category, $routine);
+    my ($name, $category, $routine, $wrapper);
     if (/\b$source_msg_call_re/) {
-      ($name, $category, $routine) = ($+{'text'}, $+{'category'}, $+{'routine'});
+      ($name, $category, $routine, $wrapper) = ($+{'text'}, $+{'category'}, $+{'routine'}, $+{'wrapper'});
+      if ($wrapper) {
+        $category = $wrapper if $wrapper=~/WARN/;
+        $routine = "Perl_warner" if $wrapper=~/WARN/;
+        $routine = "yyerror" if $wrapper=~/DIE/;
+      }
+      # diag(Dumper(\%+,{category=>$category, routine=>$routine, name=>$name}));
       # Sometimes the regexp will pick up too much for the category
       # e.g., WARN_UNINITIALIZED), PL_warn_uninit_sv ... up to the next )
       $category && $category =~ s/\).*//s;
@@ -394,8 +401,9 @@ sub check_file {
         join ", ",
               sort map {s/^WARN_//; lc $_} split /\s*[|,]\s*/, $category;
     }
-    if ($listed_as and $listed_as_line == $. - $multiline) {
+    if ($listed_as) {
       $name = $listed_as;
+      undef $listed_as;
     } else {
       # The form listed in perldiag ignores most sorts of fancy printf
       # formatting, or makes it more perlish.
@@ -479,13 +487,13 @@ sub check_message {
         my $qr = $qrs{$severity} ||= qr/$severity/;
 
         like($entries{$key}{severity}, $qr,
-          $severity =~ /\[/
-            ? "severity is one of $severity for $key"
-            : "severity is $severity for $key");
+          ($severity =~ /\[/
+            ? "severity is one of $severity"
+            : "severity is $severity") . "for '$name' at $codefn line $.");
 
         is($entries{$key}{category}, $categories,
            ($categories ? "categories are [$categories]" : "no category")
-             . " for $key");
+             . " for '$name' at $codefn line $.");
       }
     } elsif ($partial) {
       # noop
