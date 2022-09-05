@@ -205,13 +205,13 @@ sub read_commit_log {
     my $author_info= $self->{author_info}   ||= {};
     my $mailmap_info= $self->{mailmap_info} ||= {};
 
-    my $commit_range= $self->{commit_range} ? qq#'$self->{commit_range}'# : "";
     my $commits_read= 0;
-
-    my $numstat= $self->{numstat} ? "--numstat" : "";
+    my @args= ("--pretty='format:$tformat'");
+    push @args, "--numstat" if $self->{numstat};
+    push @args, "'$self->{commit_range}'" if $self->{commit_range};
 
     my $last_commit_info;
-    my $cmd= qq(git log --pretty='format:$tformat' $numstat $commit_range);
+    my $cmd= qq(git log @args);
     $cmd =~ s/'/"/g if $^O =~ /Win/;
     open my $fh, "-|", $cmd
         or die "Failed to open git log pipe: $!";
