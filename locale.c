@@ -525,8 +525,8 @@ Perl_locale_panic(const char * msg,
 
 /* For non-threaded perls (which we are not to use the POSIX 2008 API on), or a
  * thread-safe Windows one in which threading is invisible to us, the added
- * layer just calls the base-level functions.  See the introductory comments in
- * this file for the meaning of the suffixes '_c', '_r', '_i'. */
+ * layer just expands to the base-level functions.  See the introductory
+ * comments in this file for the meaning of the suffixes '_c', '_r', '_i'. */
 
 #  define setlocale_r(cat, locale)        stdized_setlocale(cat, locale)
 #  define setlocale_i(i, locale)      setlocale_r(categories[i], locale)
