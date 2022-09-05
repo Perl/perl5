@@ -3355,7 +3355,7 @@ S	|HV *	|populate_localeconv|NN const struct lconv *lcbuf	\
 			|const int unused				\
 			|const locale_utf8ness_t numeric_locale_is_utf8	\
 			|const locale_utf8ness_t monetary_locale_is_utf8
-#if   ! defined(HAS_NL_LANGINFO_L) && ! defined(HAS_NL_LANGINFO)
+#      if ! defined(HAS_NL_LANGINFO_L) && ! defined(HAS_NL_LANGINFO)
 S	|HV *	|get_nl_item_from_localeconv				\
 				|NN const struct lconv *lcbuf		\
                                 |const int item				\
