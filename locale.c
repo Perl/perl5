@@ -1816,19 +1816,11 @@ Perl_set_numeric_underlying(pTHX)
 
 }
 
-/*
- * Set up for a new ctype locale.
- */
+#  ifdef USE_LOCALE_CTYPE
+
 STATIC void
 S_new_ctype(pTHX_ const char *newctype)
 {
-
-#  ifndef USE_LOCALE_CTYPE
-
-    PERL_UNUSED_ARG(newctype);
-    PERL_UNUSED_CONTEXT;
-
-#  else
 
     /* Called after each libc setlocale() call affecting LC_CTYPE, to tell
      * core Perl this and that 'newctype' is the name of the new locale.
@@ -2224,10 +2216,9 @@ S_new_ctype(pTHX_ const char *newctype)
             }
         }
     }
+}
 
 #  endif /* USE_LOCALE_CTYPE */
-
-}
 
 void
 Perl__warn_problematic_locale()
@@ -5253,7 +5244,10 @@ Perl_mem_collxfrm_(pTHX_ const char *input_string,
     STRLEN xAlloc;          /* xalloc is a reserved word in VC */
     STRLEN length_in_chars;
     bool first_time = TRUE; /* Cleared after first loop iteration */
-    const char * orig_CTYPE_locale = NULL;
+
+#  ifdef USE_LOCALE_CTYPE
+        const char * orig_CTYPE_locale = NULL;
+#  endif
 
 #  if defined(USE_POSIX_2008_LOCALE) && defined HAS_STRXFRM_L
     locale_t constructed_locale = (locale_t) 0;
@@ -5949,6 +5943,8 @@ S_restore_toggled_locale_i(pTHX_ const unsigned int cat_index,
 
 }
 
+#ifdef USE_LOCALE_CTYPE
+
 STATIC bool
 S_is_codeset_name_UTF8(const char * name)
 {
@@ -5973,6 +5969,8 @@ S_is_codeset_name_UTF8(const char * name)
                 || memBEGINs(name, len, "utf"))
             && (len == 4 || name[3] == '-'));
 }
+
+#endif
 
 STATIC bool
 S_is_locale_utf8(pTHX_ const char * locale)
