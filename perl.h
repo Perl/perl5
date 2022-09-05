@@ -7106,7 +7106,31 @@ the plain locale pragma without a parameter (S<C<use locale>>) is in effect.
 #  define POSIX_SETLOCALE_UNLOCK    gwLOCALE_UNLOCK
 #endif
 
-/* This was defined above for the case where locales aren't thread safe. */
+/* Similar to gwLOCALE_LOCK, there are functions that require both the locale
+ * and environment to be constant during their execution, and don't change
+ * either of those things, but do write to some sort of shared global space.
+ * They require some sort of exclusive lock against similar functions, and a
+ * read lock on both the locale and environment.  However, on systems which
+ * have per-thread locales, the locale is constant during the execution of
+ * these functions, and so no locale lock is necssary.  For such systems, an
+ * exclusive ENV lock is necessary and sufficient.  On systems where the locale
+ * could change out from under us, we use an exclusive LOCALE lock to prevent
+ * that, and a read ENV lock to prevent other threads that have nothing to do
+ * with locales here from changing the environment. */
+#ifdef SETLOCALE_LOCK
+#  define gwENVr_LOCALEr_LOCK                                               \
+                    STMT_START { SETLOCALE_LOCK; ENV_READ_LOCK; } STMT_END
+#  define gwENVr_LOCALEr_UNLOCK                                             \
+                STMT_START { ENV_READ_UNLOCK; SETLOCALE_UNLOCK; } STMT_END
+#else
+#  define gwENVr_LOCALEr_LOCK           ENV_LOCK
+#  define gwENVr_LOCALEr_UNLOCK         ENV_UNLOCK
+#endif
+
+/* Now that we have defined gwENVr_LOCALEr_LOCK, we can finish defining
+ * SETLOCALE_LOCK, which we kept undefined until here on a thread-safe system
+ * so that we could use that fact to calculate what gwENVr_LOCALEr_LOCK should
+ * be */
 #ifndef SETLOCALE_LOCK
 #  define SETLOCALE_LOCK                NOOP
 #  define SETLOCALE_UNLOCK              NOOP
