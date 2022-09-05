@@ -3325,7 +3325,6 @@ S	|utf8ness_t|get_locale_string_utf8ness_i				\
 				|const unsigned cat_index		\
 				|NULLOK const char * string		\
 				|const locale_utf8ness_t known_utf8
-S	|void	|new_collate	|NN const char* newcoll
 #    ifdef USE_LOCALE_CTYPE
 S	|void	|new_ctype	|NN const char* newctype
 ST	|bool	|is_codeset_name_UTF8|NN const char * name
@@ -3392,6 +3391,17 @@ S	|const char *|calculate_LC_ALL|const locale_t cur_obj
 S	|const char *|calculate_LC_ALL|NN const char ** individ_locales
 #      endif
 #    endif
+#    ifdef USE_LOCALE_COLLATE
+S	|void	|new_collate	|NN const char* newcoll
+#      ifdef DEBUGGING
+S	|void	|print_collxfrm_input_and_return		\
+			    |NN const char * s			\
+			    |NN const char * e			\
+			    |NULLOK const char * xbuf		\
+			    |const STRLEN xlen			\
+			    |const bool is_utf8
+#      endif
+#    endif
 #    ifdef WIN32
 S	|char*	|win32_setlocale|int category|NULLOK const char* locale
 pTC	|wchar_t *|Win_utf8_string_to_wstring|NULLOK const char * utf8_string
@@ -3413,12 +3423,6 @@ S	|const char*|my_langinfo_i|const int item			\
 				|NULLOK utf8ness_t * utf8ness
 #    endif
 #    ifdef DEBUGGING
-S	|void	|print_collxfrm_input_and_return		\
-			    |NN const char * s			\
-			    |NN const char * e			\
-			    |NULLOK const char * xbuf		\
-			    |const STRLEN xlen			\
-			    |const bool is_utf8
 STR	|char *	|setlocale_debug_string_i|const unsigned cat_index	    \
 					|NULLOK const char* const locale    \
 					|NULLOK const char* const retval

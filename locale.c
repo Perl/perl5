@@ -2259,17 +2259,13 @@ S_new_LC_ALL(pTHX_ const char *unused)
     }
 }
 
+#  ifdef USE_LOCALE_COLLATE
+
 STATIC void
 S_new_collate(pTHX_ const char *newcoll)
 {
     PERL_ARGS_ASSERT_NEW_COLLATE;
 
-#  ifndef USE_LOCALE_COLLATE
-
-    PERL_UNUSED_ARG(newcoll);
-    PERL_UNUSED_CONTEXT;
-
-#  else
 
     /* Called after each libc setlocale() call affecting LC_COLLATE, to tell
      * core Perl this and that 'newcoll' is the name of the new locale.
@@ -2315,10 +2311,9 @@ S_new_collate(pTHX_ const char *newcoll)
     PL_collxfrm_mult = 0;
     PL_collxfrm_base = 0;
 
-#  endif /* USE_LOCALE_COLLATE */
-
 }
 
+#  endif /* USE_LOCALE_COLLATE */
 #endif  /* USE_LOCALE */
 
 #ifdef WIN32
