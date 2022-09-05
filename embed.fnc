@@ -3320,14 +3320,16 @@ ST	|const char *|save_to_buffer|NULLOK const char * string	\
 				    |NULLOK const char **buf	\
 				    |NULLOK Size_t *buf_size
 ST	|unsigned int|get_category_index|const int category|NULLOK const char * locale
-ST	|bool	    |is_codeset_name_UTF8|NN const char * name
 S	|utf8ness_t|get_locale_string_utf8ness_i				\
 				|NULLOK const char * locale		\
 				|const unsigned cat_index		\
 				|NULLOK const char * string		\
 				|const locale_utf8ness_t known_utf8
 S	|void	|new_collate	|NN const char* newcoll
+#    ifdef USE_LOCALE_CTYPE
 S	|void	|new_ctype	|NN const char* newctype
+ST	|bool	|is_codeset_name_UTF8|NN const char * name
+#    endif
 #    ifdef USE_LOCALE_NUMERIC
 S	|void	|new_numeric	|NN const char* newnum
 #    endif

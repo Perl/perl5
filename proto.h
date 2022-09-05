@@ -5670,9 +5670,6 @@ STATIC unsigned int	S_get_category_index(const int category, const char * locale
 #define PERL_ARGS_ASSERT_GET_CATEGORY_INDEX
 STATIC utf8ness_t	S_get_locale_string_utf8ness_i(pTHX_ const char * locale, const unsigned cat_index, const char * string, const locale_utf8ness_t known_utf8);
 #define PERL_ARGS_ASSERT_GET_LOCALE_STRING_UTF8NESS_I
-STATIC bool	S_is_codeset_name_UTF8(const char * name);
-#define PERL_ARGS_ASSERT_IS_CODESET_NAME_UTF8	\
-	assert(name)
 STATIC bool	S_is_locale_utf8(pTHX_ const char * locale);
 #define PERL_ARGS_ASSERT_IS_LOCALE_UTF8	\
 	assert(locale)
@@ -5687,9 +5684,6 @@ STATIC void	S_new_LC_ALL(pTHX_ const char* unused);
 STATIC void	S_new_collate(pTHX_ const char* newcoll);
 #define PERL_ARGS_ASSERT_NEW_COLLATE	\
 	assert(newcoll)
-STATIC void	S_new_ctype(pTHX_ const char* newctype);
-#define PERL_ARGS_ASSERT_NEW_CTYPE	\
-	assert(newctype)
 STATIC void	S_restore_toggled_locale_i(pTHX_ const unsigned cat_index, const char * original_locale, const line_t caller_line);
 #define PERL_ARGS_ASSERT_RESTORE_TOGGLED_LOCALE_I
 STATIC const char *	S_save_to_buffer(const char * string, const char **buf, Size_t *buf_size);
@@ -5704,6 +5698,14 @@ STATIC const char*	S_stdize_locale(pTHX_ const int category, const char* input_l
 STATIC const char *	S_toggle_locale_i(pTHX_ const unsigned switch_cat_index, const char * new_locale, const line_t caller_line);
 #define PERL_ARGS_ASSERT_TOGGLE_LOCALE_I	\
 	assert(new_locale)
+#    if defined(USE_LOCALE_CTYPE)
+STATIC bool	S_is_codeset_name_UTF8(const char * name);
+#define PERL_ARGS_ASSERT_IS_CODESET_NAME_UTF8	\
+	assert(name)
+STATIC void	S_new_ctype(pTHX_ const char* newctype);
+#define PERL_ARGS_ASSERT_NEW_CTYPE	\
+	assert(newctype)
+#    endif
 #    if defined(USE_LOCALE_NUMERIC)
 STATIC void	S_new_numeric(pTHX_ const char* newnum);
 #define PERL_ARGS_ASSERT_NEW_NUMERIC	\
