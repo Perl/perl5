@@ -6,7 +6,7 @@ BEGIN {
     set_up_inc('../lib');
 }
 
-plan(tests => 149);
+plan(tests => 152);
 
 eval 'pass();';
 
@@ -725,5 +725,8 @@ pass("eval in freed package does not crash");
         'eval "BEGIN     { eval q(UNITCHECK { die; }); print q(A-) }";',
     ) {
         fresh_perl_is($line . ' print "ok";', "A-ok", {}, "No segfault: $line");
+        my $sort_line= 'my @x= sort { ' . $line . ' } 1,2;';
+        fresh_perl_is($line . ' print "ok";', "A-ok", {}, "No segfault: $line");
+
     }
 }
