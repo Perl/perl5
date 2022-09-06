@@ -601,7 +601,6 @@ Error reading "%s": %s
 EVAL without pos change exceeded limit in regex
 Filehandle opened only for %sput
 Filehandle %s opened only for %sput
-Filehandle STD%s reopened as %s only for input
 file_type not implemented on DOS
 filter_del can only delete in reverse order (currently)
 fork() not available
