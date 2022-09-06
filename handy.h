@@ -1831,13 +1831,6 @@ END_EXTERN_C
      * don't think it's necessary to be so for the purposes where this gets
      * compiled */
 #   define isQUOTEMETA_(c)      (FITS_IN_8_BITS(c) && ! isWORDCHAR_L1(c))
-#   define _IS_IN_SOME_FOLD_ONLY_FOR_USE_BY_REGCOMP_DOT_C(c) isALPHA_L1(c)
-
-    /*  And these aren't accurate at all.  They are useful only for above
-     *  Latin1, which utilities and bootstrapping don't deal with */
-#   define _IS_NON_FINAL_FOLD_ONLY_FOR_USE_BY_REGCOMP_DOT_C(c) 0
-#   define _HAS_NONLATIN1_SIMPLE_FOLD_CLOSURE_ONLY_FOR_USE_BY_REGCOMP_DOT_C_AND_REGEXEC_DOT_C(c) 0
-#   define _HAS_NONLATIN1_FOLD_CLOSURE_ONLY_FOR_USE_BY_REGCOMP_DOT_C_AND_REGEXEC_DOT_C(c) 0
 
     /* Many of the macros later in this file are defined in terms of these.  By
      * implementing them with a function, which converts the class number into
