@@ -1062,6 +1062,38 @@ L<Commit 125e1a3|https://github.com/Perl/perl5/commit/125e1a36a939>
 
 =back
 
+=head2 When did perl stop segfaulting on certain code?
+
+=over 4
+
+=item * Problem
+
+It was reported that perl was segfaulting on this code in perl-5.36.0:
+
+    @a = sort{eval"("}1,2
+
+Bisection subsequently identified the commit at which the segfaulting first
+appeared.  But when we ran that code against what was then the HEAD of blead
+(L<Commit 70d911|https://github.com/Perl/perl5/commit/70d911984f>), we got no
+segfault.  So the next question we faced was: At what commit did the
+segfaulting cease?
+
+=item * Solution
+
+Because the code in question loaded no libraries, it was amenable to bisection
+with C<miniperl>, thereby shortening bisection time considerably.
+
+    perl Porting/bisect.pl \
+        --start=v5.36.0 \
+        --target=miniperl \
+        --expect-fail -e '@a = sort{eval"("}1,2'
+
+=item * Reference
+
+L<GH issue 20261|https://github.com/Perl/perl5/issues/20261>
+
+=back
+
 =cut
 
 # Ensure we always exit with 255, to cause git bisect to abort.
