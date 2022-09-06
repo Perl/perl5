@@ -2415,6 +2415,11 @@ previously.
 (W io) You opened for writing a filehandle that got the same filehandle id
 as STDIN.  This occurred because you closed STDIN previously.
 
+=item Filehandle STD%s reopened as %s only for input
+
+(W io) You opened for reading a filehandle that got the same filehandle id
+as STDOUT or STDERR.  This occurred because you closed the handle previously.
+
 =item Final $ should be \$ or $name
 
 (F) You must now decide whether the final $ in a string was meant to be
