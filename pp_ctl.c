@@ -3563,7 +3563,7 @@ S_try_run_unitcheck(pTHX)
         call_list(PL_scopestack_ix, PL_unitcheckav);
         break;
     case 3:
-        /* call_list die and threw an error */
+        /* call_list died */
         break;
     default:
         JMPENV_POP;
