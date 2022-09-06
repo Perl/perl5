@@ -121,7 +121,15 @@ typedef struct jmpenv JMPENV;
         });                                                             \
         cur_env.je_prev = PL_top_env;					\
         JE_OLD_STACK_HWM_save(cur_env);                                 \
-        cur_env.je_ret = PerlProc_setjmp(cur_env.je_buf, SCOPE_SAVES_SIGNAL_MASK);  \
+        /* setjmp() is callable in limited contexts which does not */	\
+        /* include assignment, so switch() instead */			\
+        switch (PerlProc_setjmp(cur_env.je_buf, SCOPE_SAVES_SIGNAL_MASK)) { \
+        case 0: cur_env.je_ret = 0; break;				\
+        case 1: cur_env.je_ret = 1; break;				\
+        case 2: cur_env.je_ret = 2; break;				\
+        case 3: cur_env.je_ret = 3; break;				\
+        default: Perl_croak(aTHX_ "panic: unexpected setjmp() result\n"); \
+        }								\
         JE_OLD_STACK_HWM_restore(cur_env);                              \
         PL_top_env = &cur_env;						\
         cur_env.je_mustcatch = FALSE;					\
@@ -155,8 +163,10 @@ typedef struct jmpenv JMPENV;
             while (p) { i++; p = p->je_prev; }			\
             Perl_deb(aTHX_ "JMPENV_JUMP(%d) level=%d in %s at %s:%d\n",         \
                          (int)(v), i, SAFE_FUNCTION__, __FILE__, __LINE__);})   \
-        if (PL_top_env->je_prev)				\
+        if (PL_top_env->je_prev) {				\
+            assert((v) >= 0 && (v) <= 3);			\
             PerlProc_longjmp(PL_top_env->je_buf, (v));		\
+        }    							\
         if ((v) == 2)						\
             PerlProc_exit(STATUS_EXIT);		                \
         PerlIO_printf(PerlIO_stderr(), "panic: top_env, v=%d\n", (int)(v)); \
