@@ -152,7 +152,7 @@ SKIP: {
         chomp;
         next unless / - \d+ $ /x;
         s/ ^ \# \s* define \s*//x;
-        m/ (.*) \  (.*) /x;
+        m/ (\S+) \s+ (.*) /x;
         $items{$1} = ($has_nl_langinfo)
                      ? $1       # Yields 'YESSTR'
                      : $2;      # Yields -54
