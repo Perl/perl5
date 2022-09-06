@@ -58,12 +58,20 @@ my $bad_version_re = qr{BADVERSION\([^"]*$text_re};
 my $regcomp_call_re = qr/$regcomp_re.*?$text_re/;
 
 my %entries;
-
+my $data_start_line= 0;
 # Get the ignores that are compiled into this file
 my $reading_categorical_exceptions;
+# reset the DATA point to the top of the file, read until we find __DATA__
+# so that $. is "correct" for our purposes.
+seek DATA, 0, 0;
+while (<DATA>) {
+    /^__DATA__/ and last;
+}
 while (<DATA>) {
   chomp;
+  next if /^\s*#/ and !/\S/;
   $entries{$_}{todo} = 1;
+  $entries{$_}{todo_line}= $data_start_line + $.;
   $reading_categorical_exceptions and $entries{$_}{cattodo}=1;
   /__CATEGORIES__/ and ++$reading_categorical_exceptions;
 }
@@ -112,13 +120,16 @@ while (<$diagfh>) {
 
     if (exists $entries{$cur_entry} &&  $entries{$cur_entry}{todo}
                                     && !$entries{$cur_entry}{cattodo}) {
+        my $data_line= $entries{$cur_entry}{todo_line};
         TODO: {
-            local $::TODO = "Remove the TODO entry \"$cur_entry\" from DATA as it is already in $pod near line $.";
+            local $::TODO = "Remove the TODO entry \"$cur_entry\" from DATA "
+                          . "at $0 line $data_line as it is already in $pod near line $.";
             ok($cur_entry);
         }
     }
     # Make sure to init this here, so an actual entry in perldiag
     # overwrites one in DATA.
+    # diag("adding '$cur_entry'");
     $entries{$cur_entry}{todo} = 0;
     $entries{$cur_entry}{line_number} = $.;
   }
@@ -336,7 +347,7 @@ sub check_file {
     s/ (?<!%) % $format_modifiers ( [dioxXucsfeEgGp] ) /%$1/xg;
 
     # The %"foo" thing needs to happen *before* this regex.
-    #diag(">$_<");
+    # diag(">$_<");
     # DIE is just return Perl_die
     my ($name, $category, $routine, $wrapper);
     if (/\b$source_msg_call_re/) {
@@ -465,6 +476,7 @@ sub check_message {
         TODO: {
           no warnings 'once';
           local $::TODO = 'in DATA';
+          # diag(Dumper($entries{$key}));
           # There is no listing, but it is in the list of exceptions.  TODO FAIL.
           fail($key);
           diag(
