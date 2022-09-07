@@ -1659,8 +1659,7 @@ END_EXTERN_C
 #   define isPUNCT_A(c)  generic_isCC_A_(c, CC_PUNCT_)
 #   define isSPACE_A(c)  generic_isCC_A_(c, CC_SPACE_)
 #   define isWORDCHAR_A(c) generic_isCC_A_(c, CC_WORDCHAR_)
-#   define isXDIGIT_A(c)  generic_isCC_(c, CC_XDIGIT_) /* No non-ASCII xdigits
-                                                        */
+#   define isXDIGIT_A(c)  generic_isCC_(c, CC_XDIGIT_) /* No non-ASCII xdigits */
 #   define isIDFIRST_A(c) generic_isCC_A_(c, CC_IDFIRST_)
 #   define isALPHA_L1(c)  generic_isCC_(c, CC_ALPHA_)
 #   define isALPHANUMERIC_L1(c) generic_isCC_(c, CC_ALPHANUMERIC_)
