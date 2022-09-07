@@ -85,6 +85,7 @@ Summary of my $package (revision $revision $version_patchlevel_string) configura
     useshrplib=$useshrplib
     libperl=$libperl
     gnulibc_version='$gnulibc_version'
+    mingwrt_version='$mingwrt_version'
   Dynamic Linking:
     dlsrc=$dlsrc
     dlext=$dlext
