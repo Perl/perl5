@@ -1004,9 +1004,8 @@ PERLVARA(I, sv_consts, SV_CONSTS_COUNT, SV*)	/* constant SVs with precomputed ha
 PERLVARA(I, op_exec_cnt, OP_max+2, UV)  /* Counts of executed OPs of the given type.
                                            If PERL_TRACE_OPS is enabled, we'll dump
                                            a summary count of all ops executed in the
-                                           program at perl_destruct time. For
-                                           profiling/debugging only. Works only if
-                                           DEBUGGING is enabled, too. */
+                                           program at perl_destruct time. Used only
+                                           for profiling in DEBUGGING mode. */
 #endif
 
 PERLVAR(I, random_state, PL_RANDOM_STATE_TYPE)
