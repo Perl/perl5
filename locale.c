@@ -1624,9 +1624,6 @@ S_new_numeric(pTHX_ const char *newnum)
      *                  such platforms.
      */
 
-    const char * radix = C_decimal_point;
-    utf8ness_t utf8ness = UTF8NESS_IMMATERIAL;
-
     DEBUG_L( PerlIO_printf(Perl_debug_log,
                            "Called new_numeric with %s, PL_numeric_name=%s\n",
                            newnum, PL_numeric_name));
@@ -1661,6 +1658,9 @@ S_new_numeric(pTHX_ const char *newnum)
                                           PL_underlying_numeric_obj);
 
 #    endif
+
+    const char * radix = NULL;
+    utf8ness_t utf8ness = UTF8NESS_IMMATERIAL;
 
     /* Find and save this locale's radix character. */
     my_langinfo_c(RADIXCHAR, LC_NUMERIC, PL_numeric_name,
