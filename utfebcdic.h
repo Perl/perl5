@@ -73,7 +73,7 @@
  * macro NATIVE_TO_I8().  However, one "shadow", or parallel table,
  * PL_utf8skip, has been constructed that doesn't require undoing things.  It
  * is such that for each byte, it says how long the sequence is if that
-* (UTF-EBCDIC) byte were to begin it
+ * (UTF-EBCDIC) byte were to begin it.
  *
  * There are actually 3 slightly different UTF-EBCDIC encodings in
  * ebcdic_tables.h, one for each of the code pages recognized by Perl.  That
