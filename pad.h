@@ -23,8 +23,9 @@ typedef SSize_t PADOFFSET; /* signed so that -1 is a valid value */
 struct padlist {
     SSize_t	xpadl_max;	/* max index for which array has space */
     union {
-        PAD **	xpadlarr_alloc; /* Pointer to beginning of array of AVs.
-                                   index 0 is a padnamelist *          */
+        PAD **  xpadlarr_alloc; /* Pointer to beginning of array of AVs.
+                                   Note that a 'padnamelist *' is stored
+                                   in the 0 index of the AV. */
         struct {
             PADNAMELIST * padnl;
             PAD * pad_1;        /* this slice of PAD * array always alloced */
