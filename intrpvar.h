@@ -58,7 +58,10 @@ PERLVARI(I, sub_generation, U32, 1)	/* incr to invalidate method cache */
 
 #ifdef PERL_HASH_RANDOMIZE_KEYS
 #ifdef USE_PERL_PERTURB_KEYS
-PERLVARI(I, hash_rand_bits_enabled, U8, 1) /* used to randomize hash stuff 0 == no-random, 1 == random, 2 == deterministic */
+PERLVARI(I, hash_rand_bits_enabled, U8, 1) /* used to randomize hash stuff
+                                              0. no-random
+                                              1. random
+                                              2. determinsitic */
 #endif
 PERLVARI(I, hash_rand_bits, UV, 0)      /* used to randomize hash stuff */
 #endif
@@ -998,7 +1001,7 @@ PERLVARI(I, sv_serial,	U32,	0)	/* SV serial number, used in sv.c */
 PERLVARA(I, sv_consts, SV_CONSTS_COUNT, SV*)	/* constant SVs with precomputed hash value */
 
 #ifdef PERL_TRACE_OPS
-PERLVARA(I, op_exec_cnt, OP_max+2, UV)	/* Counts of executed OPs of the given type.
+PERLVARA(I, op_exec_cnt, OP_max+2, UV)  /* Counts of executed OPs of the given type.
                                            If PERL_TRACE_OPS is enabled, we'll dump
                                            a summary count of all ops executed in the
                                            program at perl_destruct time. For
