@@ -125,6 +125,8 @@ if (exists $opt{cc}) {
     }
     elsif ($opt{cc} =~ /\bgcc\b/) {
         chomp($opt{gccversion} = `$opt{cc} -dumpversion`);
+        chomp($opt{mingwrt_version} = `$opt{cc} -o rt.exe configure/rt.c 1>nul 2>&1 && rt`);
+        `del /F /Q rt.exe`; # rt.exe no longer needed
     }
 }
 
