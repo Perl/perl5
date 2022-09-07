@@ -1369,11 +1369,12 @@ sub docout ($$$) { # output the docs for one function group
             my @base_args = $items[0]->{args}->@*;
             my $base_thread_context = $items[0]->{flags} =~ /T/;
             for (my $i = 1; $i < @items; $i++) {
-                no warnings 'experimental::smartmatch';
                 my $item = $items[$i];
+                my $args_are_equal = $item->{args}->@* == @base_args
+                  && !grep $item->{args}[$_] ne $base_args[$_], keys @base_args;
                 $need_individual_usage = 1
                                     if    $item->{ret_type} ne $base_ret_type
-                                    || ! ($item->{args}->@* ~~ @base_args)
+                                    || !  $args_are_equal
                                     ||   (   $item->{flags} =~ /T/
                                           != $base_thread_context);
                 my $ret_length = length $item->{ret_type};
