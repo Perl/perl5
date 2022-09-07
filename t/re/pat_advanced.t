@@ -2379,9 +2379,7 @@ EOF
         ok(1, $message);  # If it didn't crash, it worked.
     }
 
-    TODO: {   # Was looping
-        todo_skip('Triggers thread clone SEGV. See #86550')
-	  if $::running_as_thread && $::running_as_thread;
+    {   # Was looping
         watchdog(10);
         like("\x{00DF}", qr/[\x{1E9E}_]*/i, "\"\\x{00DF}\" =~ /[\\x{1E9E}_]*/i was looping");
     }
