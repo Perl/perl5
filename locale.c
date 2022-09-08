@@ -1672,7 +1672,9 @@ S_new_numeric(pTHX_ const char *newnum)
     Safefree(PL_numeric_name);
     PL_numeric_name = savepv(newnum);
 
-    /* Handle the trivial case */
+    /* Handle the trivial case.  Since this is called at process
+     * initialization, be aware that this bit can't rely on much being
+     * available. */
     if (isNAME_C_OR_POSIX(PL_numeric_name)) {
         PL_numeric_standard = TRUE;
         PL_numeric_underlying_is_standard = TRUE;
@@ -1849,7 +1851,9 @@ S_new_ctype(pTHX_ const char *newctype)
     PL_in_utf8_turkic_locale = FALSE;
 
     /* For the C locale, just use the standard folds, and we know there are no
-     * glitches possible, so return early */
+     * glitches possible, so return early.  Since this is called at process
+     * initialization, be aware that this bit can't rely on much being
+     * available. */
     if (isNAME_C_OR_POSIX(newctype)) {
         Copy(PL_fold, PL_fold_locale, 256, U8);
         PL_ctype_name = savepv(newctype);
@@ -2286,11 +2290,11 @@ S_new_collate(pTHX_ const char *newcoll)
     PL_collation_name = savepv(newcoll);
     ++PL_collation_ix;
 
-    /* Set the new one up if trivial */
+    /* Set the new one up if trivial.  Since this is called at process
+     * initialization, be aware that this bit can't rely on much being
+     * available. */
     PL_collation_standard = isNAME_C_OR_POSIX(newcoll);
     if (PL_collation_standard) {
-
-    /* Do minimal set up now */
         DEBUG_Lv(PerlIO_printf(Perl_debug_log, "Setting PL_collation name='%s'\n", PL_collation_name));
         PL_collxfrm_base = 0;
         PL_collxfrm_mult = 2;
@@ -4673,16 +4677,22 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 #  endif
 #  ifdef USE_LOCALE_NUMERIC
 
-    PL_numeric_radix_sv    = newSVpvn(C_decimal_point, strlen(C_decimal_point));
-    PL_underlying_radix_sv = newSVpvn(C_decimal_point, strlen(C_decimal_point));
-    Newx(PL_numeric_name, 2, char);
-    Copy("C", PL_numeric_name, 2, char);
+    PL_numeric_radix_sv    = newSV(1);
+    PL_underlying_radix_sv = newSV(1);
+    Newxz(PL_numeric_name, 1, char);    /* Single NUL character */
+    new_numeric("C");
 
 #  endif
 #  ifdef USE_LOCALE_COLLATE
 
-    Newx(PL_collation_name, 2, char);
-    Copy("C", PL_collation_name, 2, char);
+    Newxz(PL_collation_name, 1, char);
+    new_collate("C");
+
+#  endif
+#  ifdef USE_LOCALE_CTYPE
+
+    Newxz(PL_ctype_name, 1, char);
+    new_ctype("C");
 
 #  endif
 #  ifdef USE_PL_CURLOCALES
