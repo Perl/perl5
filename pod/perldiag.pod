@@ -5249,6 +5249,13 @@ the sub name and via the prototype attribute.  The prototype in
 parentheses is useless, since it will be replaced by the prototype
 from the attribute before it's ever used.
 
+=item %s on BEGIN block ignored
+
+(W syntax) C<BEGIN> blocks are executed immediately after they are parsed
+and then thrown away. Any prototypes or attributes are therefore
+meaningless and are ignored. You should remove them from the C<BEGIN> block.
+Note this also means you cannot create a constant called C<BEGIN>.
+
 =item Quantifier follows nothing in regex; marked by S<<-- HERE> in m/%s/
 
 (F) You started a regular expression with a quantifier.  Backslash it if

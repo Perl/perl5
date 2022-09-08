@@ -6,7 +6,7 @@ BEGIN {
     set_up_inc('../lib');
 }
 
-plan tests => 23;
+plan tests => 26;
 
 my @expect = qw(
 b1
@@ -253,6 +253,33 @@ fresh_perl_like(
     "INIT{die} should exit"
 );
 
+fresh_perl_is(
+    "BEGIN{} BEGIN(){1} print 'done'",
+    "Prototype on BEGIN block ignored at - line 1.\ndone",
+    {},
+    "Prototypes on BEGIN blocks should warn"
+);
+
+SKIP: {
+    skip "Test requires full perl, this is miniperl", 1
+        if is_miniperl;
+
+    fresh_perl_is(
+        "use attributes; BEGIN{} sub BEGIN :blerg {1} print 'done'",
+        "Attribute on BEGIN block ignored at - line 1.\ndone",
+        {},
+        "Attributes on BEGIN blocks should warn"
+    );
+}
+
+fresh_perl_is(
+    'BEGIN() {10} foreach my $p (sort {lc($a) cmp lc($b)} keys %v)',
+    "Prototype on BEGIN block ignored at - line 1.\n"
+    . "syntax error at - line 1, at EOF\n"
+    . "Execution of - aborted due to compilation errors.",
+    {},
+    "Prototype on BEGIN blocks should warn"
+);
 
 TODO: {
     local $TODO = 'RT #2917: INIT{} in eval is wrongly considered too late';
