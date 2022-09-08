@@ -309,6 +309,99 @@ C<-xc99>
 
 =back
 
+=head2 Symbol Names and Namespace Pollution
+
+=head3 Choosing legal symbol names
+
+C reserves for its implementation any symbol whose name begins with an
+underscore followed immediately by either an uppercase letter C<[A-Z]>
+or another underscore.  C++ further reserves any symbol containing two
+consecutive underscores, and further reserves in the global name space any
+symbol beginning with an underscore, not just ones followed by a
+capital.  We care about C++ because C<hdr> files need to be compilable by
+it, and some people do all their development using a C++ compiler.
+
+The consequences of failing to do this are probably none.  Unless you
+stumble on a name that the implementation uses, things will work.
+Indeed, the perl core has more than a few instances of using
+implementation-reserved symbols.  (These are gradually being changed.)
+But your code might stop working any time that the implementation
+decides to use a name you already had chosen, potentially many years
+before.  
+
+It's best then to:
+
+=over
+
+=item B<Don't begin a symbol name with an underscore>; (I<e.g.>, don't
+use: C<_FOOBAR>)
+
+=item B<Don't use two consecutive underscores in a symbol name>;
+(I<e.g.>, don't use C<FOO__BAR>)
+
+=back
+
+POSIX also reserves many symbols.  See Section 2.2.2 in
+L<http://pubs.opengroup.org/onlinepubs/9699919799/functions/V2_chap02.html>.
+Perl also has conflicts with that.
+
+Perl reserves for its use any symbol beginning with C<Perl>, C<perl>, or
+C<PL_>.  Any time you introduce a macro into a C<hdr> file that doesn't
+follow that convention, you are creating the possiblity of a namespace
+clash with an existing XS module, unless you restrict it by, say,
+
+ #ifdef PERL_CORE
+ #  define my_symbol
+ #endif
+
+There are many symbols in C<hdr> files that aren't of this form, and
+which are accessible from XS namespace, intentionally or not, just about
+anything in F<config.h>, for example.
+
+Having to use one of these prefixes detracts from the readability of the
+code, and hasn't been an actual issue for non-trivial names.  Things
+like perl defining its own C<MAX> macro have been problematic, but they
+were quickly discovered, and a S<C<#ifdef PERL_CORE>> guard added.
+
+So there's no rule imposed about using such symbols, just be aware of
+the issues.
+
+=head3 Choosing good symbol names
+
+Ideally, a symbol name name should correctly and precisely describe its
+intended purpose.  But there is a tension between that and getting names
+that are overly long and hence awkward to type and read.  Metaphors
+could be helpful (a poetic name), but those tend to be culturally
+specific, and may not translate for someone whose native language isn't
+English, or even comes from a different cultural background.  Besides,
+the talent of writing poetry seems to be rare in programmers.
+
+Certain symbol names don't reflect their purpose, but are nonetheless
+fine to use because of long-standing conventions.  These often
+originated in the field of Mathematics, where C<i> and C<j> are
+frequently used as subscripts, and C<n> as a population count.  Since at
+least the 1950's, computer programs have used C<i>, I<etc.> as loop
+variables.
+
+Our guidance is to choose a name that reasonably describes the purpose,
+and to comment its declaration more precisely.
+
+One certainly shouldn't use misleading nor ambiguous names.  C<last_foo>
+could mean either the final C<foo> or the previous C<foo>, and so could
+be confusing to the reader, or even to the writer coming back to the
+code after a few months of working on something else.  Sometimes the
+programmer has a particular line of thought in mind, and it doesn't
+occur to them that ambiguity is present.
+
+There are probably still many off-by-1 bugs around because the name
+L<perlapi/C<av_len>> doesn't correspond to what other I<-len> constructs
+mean, such as L<perlapi/C<sv_len>>.  Awkward (and controversial)
+synonyms were created to use instead that conveyed its true meaning
+(L<perlapi/C<av_top_index>>).  Eventually, though someone had the better
+idea to create a new name to signify what most people think C<-len>
+signifies.  So L<perlapi/C<av_count>> was born.  And we wish it had been
+thought up much earlier.
+
 =head2 Portability problems
 
 The following are common causes of compilation and/or execution
