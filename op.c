@@ -10231,6 +10231,7 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
     bool has_name;
     bool name_is_utf8 = o && !o_is_gv && SvUTF8(cSVOPo->op_sv);
     bool evanescent = FALSE;
+    bool isBEGIN = FALSE;
     OP *start = NULL;
 #ifdef PERL_DEBUG_READONLY_OPS
     OPSLAB *slab = NULL;
@@ -10283,6 +10284,36 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
         }
     }
 
+    if (o)
+        SAVEFREEOP(o);
+    if (proto)
+        SAVEFREEOP(proto);
+    if (attrs)
+        SAVEFREEOP(attrs);
+
+    /* we need this in two places later on, so set it up here */
+    if (name && block) {
+        const char *s = (char *) my_memrchr(name, ':', namlen);
+        s = s ? s+1 : name;
+        isBEGIN = strEQ(s,"BEGIN");
+    }
+
+    if (isBEGIN) {
+        /* Make sure that we do not have any prototypes or
+         * attributes associated with this BEGIN block, as the block
+         * is already done and dusted, and we will assert or worse
+         * if we try to attach the prototype to the now essentially
+         * nonexistent sub. */
+        if (proto)
+            /* diag_listed_as: %s on BEGIN block ignored */
+            Perl_warner(aTHX_ packWARN(WARN_SYNTAX), "Prototype on BEGIN block ignored");
+        if (attrs)
+            /* diag_listed_as: %s on BEGIN block ignored */
+            Perl_warner(aTHX_ packWARN(WARN_SYNTAX), "Attribute on BEGIN block ignored");
+        proto = NULL;
+        attrs = NULL;
+    }
+
     if (proto) {
         assert(proto->op_type == OP_CONST);
         ps = SvPV_const(cSVOPx(proto)->op_sv, ps_len);
@@ -10290,13 +10321,6 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
     }
     else
         ps = NULL;
-
-    if (o)
-        SAVEFREEOP(o);
-    if (proto)
-        SAVEFREEOP(proto);
-    if (attrs)
-        SAVEFREEOP(attrs);
 
     if (ec) {
         op_free(block);
@@ -10307,18 +10331,14 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
             cv = PL_compcv;
 
         PL_compcv = 0;
-        if (name && block) {
-            const char *s = (char *) my_memrchr(name, ':', namlen);
-            s = s ? s+1 : name;
-            if (strEQ(s, "BEGIN")) {
-                if (PL_in_eval & EVAL_KEEPERR)
-                    Perl_croak_nocontext("BEGIN not safe after errors--compilation aborted");
-                else {
-                    SV * const errsv = ERRSV;
-                    /* force display of errors found but not reported */
-                    sv_catpvs(errsv, "BEGIN not safe after errors--compilation aborted");
-                    Perl_croak_nocontext("%" SVf, SVfARG(errsv));
-                }
+        if (isBEGIN) {
+            if (PL_in_eval & EVAL_KEEPERR)
+                Perl_croak_nocontext("BEGIN not safe after errors--compilation aborted");
+            else {
+                SV * const errsv = ERRSV;
+                /* force display of errors found but not reported */
+                sv_catpvs(errsv, "BEGIN not safe after errors--compilation aborted");
+                Perl_croak_nocontext("%" SVf, SVfARG(errsv));
             }
         }
         goto done;
