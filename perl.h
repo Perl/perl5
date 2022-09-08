@@ -155,6 +155,17 @@ Otherwise ends a section of code already begun by a C<L</START_EXTERN_C>>.
 #  endif
 #endif
 
+#ifndef PERL_CALLCONV
+#  ifdef __cplusplus
+#    define PERL_CALLCONV  EXTERN_C
+#  else
+#    define PERL_CALLCONV
+#  endif
+#endif
+#ifndef PERL_CALLCONV_NO_RET
+#    define PERL_CALLCONV_NO_RET PERL_CALLCONV
+#endif
+
 /*
 =for apidoc_section $concurrency
 =for apidoc AmU|void|dTHXa|PerlInterpreter * a
@@ -4377,17 +4388,6 @@ typedef        struct crypt_data {     /* straight from /usr/include/crypt.h */
 } CRYPTD;
 #endif /* threading */
 #endif /* AIX */
-
-#ifndef PERL_CALLCONV
-#  ifdef __cplusplus
-#    define PERL_CALLCONV  EXTERN_C
-#  else
-#    define PERL_CALLCONV
-#  endif
-#endif
-#ifndef PERL_CALLCONV_NO_RET
-#    define PERL_CALLCONV_NO_RET PERL_CALLCONV
-#endif
 
 /* PERL_STATIC_NO_RET is supposed to be equivalent to STATIC on builds that
    dont have a noreturn as a declaration specifier
