@@ -1833,7 +1833,7 @@ S_new_ctype(pTHX_ const char *newctype)
     DEBUG_L(PerlIO_printf(Perl_debug_log, "Entering new_ctype(%s)\n", newctype));
 
     /* No change means no-op */
-    if (PL_ctype_name && strEQ(PL_ctype_name, newctype)) {
+    if (strEQ(PL_ctype_name, newctype)) {
         return;
     }
 
@@ -6000,7 +6000,7 @@ S_is_locale_utf8(pTHX_ const char * locale)
 
     PERL_ARGS_ASSERT_IS_LOCALE_UTF8;
 
-    if (PL_ctype_name && strEQ(locale, PL_ctype_name)) {
+    if (strEQ(locale, PL_ctype_name)) {
         return PL_in_utf8_CTYPE_locale;
     }
 
