@@ -10935,7 +10935,7 @@ S_scan_heredoc(pTHX_ char *s)
         char *oldoldbufptr_save;
       streaming:
         sv_grow_fresh(tmpstr, 80);
-        SvPVCLEAR(tmpstr);   /* avoid "uninitialized" warning */
+        SvPVCLEAR_FRESH(tmpstr);   /* avoid "uninitialized" warning */
         term = PL_tokenbuf[1];
         len--;
         linestr_save = PL_linestr; /* must restore this afterwards */
