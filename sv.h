@@ -2292,10 +2292,28 @@ existing size, but instead it is the total size C<sv> should be.
 Ensures that sv is a SVt_PV and that its SvCUR is 0, and that it is
 properly null terminated. Equivalent to sv_setpvs(""), but more efficient.
 
+=for apidoc Am|char *|SvPVCLEAR_FRESH|SV* sv
+
+Like SvPVCLEAR, but optimized for newly-minted SVt_PV/PVIV/PVNV/PVMG
+that already have a PV buffer allocated, but no SvTHINKFIRST.
+
 =cut
 */
 
 #define SvPVCLEAR(sv) sv_setpv_bufsize(sv,0,0)
+#define SvPVCLEAR_FRESH(sv)                             \
+        STMT_START {                                    \
+            assert(SvTYPE(sv) >= SVt_PV);               \
+            assert(SvTYPE(sv) <= SVt_PVMG);             \
+            assert(!SvTHINKFIRST(sv));                  \
+            assert(SvPVX(sv));                          \
+            SvCUR_set(sv, 0  );                         \
+            *(SvEND(sv))= '\0';                         \
+            (void)SvPOK_only_UTF8(sv);                  \
+            SvTAINT(sv);                                \
+            SvPVX(sv);                                  \
+        } STMT_END
+
 #define SvSHARE(sv) PL_sharehook(aTHX_ sv)
 #define SvLOCK(sv) PL_lockhook(aTHX_ sv)
 #define SvUNLOCK(sv) PL_unlockhook(aTHX_ sv)
