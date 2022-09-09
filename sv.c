@@ -15600,8 +15600,10 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 
     /* Did the locale setup indicate UTF-8? */
     PL_utf8locale	= proto_perl->Iutf8locale;
-#if defined(USE_ITHREADS) && ! defined(USE_THREAD_SAFE_LOCALE)
-    PL_lc_numeric_mutex_depth = 0;
+
+#ifdef USE_LOCALE_THREADS
+    assert(PL_locale_mutex_depth <= 0);
+    PL_locale_mutex_depth = 0;
 #endif
     /* Unicode features (see perlrun/-C) */
     PL_unicode		= proto_perl->Iunicode;
@@ -15905,9 +15907,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 
     PL_subname		= sv_dup_inc(proto_perl->Isubname, param);
 
-#if   defined(USE_POSIX_2008_LOCALE)      \
- &&   defined(USE_THREAD_SAFE_LOCALE)     \
- && ! defined(HAS_QUERYLOCALE)
+#ifdef USE_PL_CURLOCALES
     for (i = 0; i < (int) C_ARRAY_LENGTH(PL_curlocales); i++) {
         PL_curlocales[i] = SAVEPV(proto_perl->Icurlocales[i]);
     }

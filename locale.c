@@ -430,9 +430,15 @@ Perl_force_locale_unlock()
 #if defined(USE_LOCALE_THREADS)
 
     dTHX;
-#  ifdef LOCALE_UNLOCK_
-    LOCALE_UNLOCK_;
-#  endif
+
+    /* If recursively locked, clear all at once */
+    if (PL_locale_mutex_depth > 1) {
+        PL_locale_mutex_depth = 1;
+    }
+
+    if (PL_locale_mutex_depth > 0) {
+        LOCALE_UNLOCK_;
+    }
 
 #endif
 
@@ -585,9 +591,7 @@ Perl_locale_panic(const char * msg,
 #  define querylocale_c(cat)    querylocale_i(cat##_INDEX_)
 #  define querylocale_r(cat)    querylocale_i(get_category_index(cat,NULL))
 
-#  ifndef USE_QUERYLOCALE
-#    define USE_PL_CURLOCALES
-#  else
+#  ifdef USE_QUERYLOCALE
 #    define isSINGLE_BIT_SET(mask) isPOWER_OF_2(mask)
 
      /* This code used to think querylocale() was valid on LC_ALL.  Make sure
@@ -710,8 +714,16 @@ S_my_querylocale_i(pTHX_ const unsigned int index)
 
 #  else
 
-        /* But we do have up-to-date values when we keep our own records */
-        retval = PL_curlocales[index];
+        /* But we do have up-to-date values when we keep our own records
+         * (except some times in initialization, where we get the value from
+         * the system. */
+        if (PL_curlocales[index] == NULL) {
+            retval = stdized_setlocale(category, NULL);
+            PL_curlocales[index] = savepv(retval);
+        }
+        else {
+            retval = PL_curlocales[index];
+        }
 
 #  endif
 
@@ -720,6 +732,7 @@ S_my_querylocale_i(pTHX_ const unsigned int index)
                 DEBUG_Lv(PerlIO_printf(Perl_debug_log,
                            "my_querylocale_i(%s) returning '%s'\n",
                            category_names[index], retval));
+    assert(strNE(retval, ""));
     return retval;
 }
 
@@ -2659,12 +2672,14 @@ Perl_setlocale(const int category, const char * locale)
 
     /* Here, an actual change is being requested.  Do it */
     retval = setlocale_i(cat_index, locale);
+
     if (! retval) {
         DEBUG_L(PerlIO_printf(Perl_debug_log, "%s\n",
                           setlocale_debug_string_i(cat_index, locale, "NULL")));
         return NULL;
     }
 
+    assert(strNE(retval, ""));
     retval = save_to_buffer(retval, &PL_setlocale_buf, &PL_setlocale_bufsize);
 
     /* Now that have changed locales, we have to update our records to
@@ -2903,10 +2918,10 @@ Perl_mbtowc_(pTHX_ const wchar_t * pwc, const char * s, const Size_t len)
 
 #  else
 
-        MBTOWC_LOCK;
+        MBTOWC_LOCK_;
         SETERRNO(0, 0);
         retval = mbtowc(NULL, NULL, 0);
-        MBTOWC_UNLOCK;
+        MBTOWC_UNLOCK_;
         return retval;
 
 #  endif
@@ -2922,10 +2937,10 @@ Perl_mbtowc_(pTHX_ const wchar_t * pwc, const char * s, const Size_t len)
 
     /* Locking prevents races, but locales can be switched out without locking,
      * so this isn't a cure all */
-    MBTOWC_LOCK;
+    MBTOWC_LOCK_;
     SETERRNO(0, 0);
     retval = mbtowc((wchar_t *) pwc, s, len);
-    MBTOWC_UNLOCK;
+    MBTOWC_UNLOCK_;
 
 #  endif
 
@@ -3117,12 +3132,12 @@ S_my_localeconv(pTHX_ const int item, const locale_utf8ness_t locale_is_utf8)
 
 #    endif
 
-    LOCALECONV_LOCK;
+    gwLOCALE_LOCK;
     retval = copy_localeconv(aTHX_ localeconv(),
                                    item,
                                    numeric_locale_is_utf8,
                                    monetary_locale_is_utf8);
-    LOCALECONV_UNLOCK;
+    gwLOCALE_UNLOCK;
 
 #    ifdef USE_LOCALE_NUMERIC
 
@@ -3186,12 +3201,12 @@ S_my_localeconv(pTHX_ const int item, const locale_utf8ness_t locale_is_utf8)
     void_setlocale_c(LC_ALL, save_thread);
 
     /* Safely stash the desired data */
-    LOCALECONV_LOCK;
+    gwLOCALE_LOCK;
     retval = copy_localeconv(aTHX_ localeconv(),
                                    item,
                                    numeric_locale_is_utf8,
                                    monetary_locale_is_utf8);
-    LOCALECONV_UNLOCK;
+    gwLOCALE_UNLOCK;
 
     /* Restore the global locale's prior state */
     void_setlocale_c(LC_ALL, save_global);
@@ -3830,9 +3845,9 @@ S_my_langinfo_i(pTHX_
 
     const char * orig_switched_locale = toggle_locale_i(cat_index, locale);
 
-    NL_LANGINFO_LOCK;
+    gwLOCALE_LOCK;
     retval = save_to_buffer(nl_langinfo(item), retbufp, retbuf_sizep);
-    NL_LANGINFO_UNLOCK;
+    gwLOCALE_UNLOCK;
 
     if (utf8ness) {
         *utf8ness = get_locale_string_utf8ness_i(locale, cat_index,
@@ -3869,6 +3884,7 @@ S_my_langinfo_i(pTHX_
 
     switch (item) {
       default:
+        assert(item < 0);   /* Make sure using perl_langinfo.h */
         retval = "";
         break;
 

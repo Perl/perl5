@@ -157,6 +157,11 @@ elsif (   ($define{USE_LOCALE_THREADS} || $define{USE_THREAD_SAFE_LOCALE})
     $define{USE_POSIX_2008_LOCALE} = 1 if $define{HAS_POSIX_2008_LOCALE};
 }
 
+if (   ($define{USE_POSIX_2008_LOCALE} && ! $define{HAS_QUERYLOCALE}))
+{
+    $define{USE_PL_CURLOCALES} = 1;
+}
+
 if (   $ARGS{PLATFORM} eq 'win32'
     && $define{USE_THREAD_SAFE_LOCALE}
     && $cctype < 140)
@@ -373,8 +378,7 @@ unless ($define{'USE_ITHREADS'}) {
 		    PL_env_mutex
 		    PL_hints_mutex
 		    PL_locale_mutex
-		    PL_lc_numeric_mutex
-		    PL_lc_numeric_mutex_depth
+		    PL_locale_mutex_depth
 		    PL_my_ctx_mutex
 		    PL_perlio_mutex
 		    PL_stashpad
@@ -416,7 +420,7 @@ unless ($define{USE_POSIX_2008_LOCALE})
         PL_underlying_numeric_obj
     );
 }
-unless ($define{USE_POSIX_2008_LOCALE} && ! $define{HAS_QUERY_LOCALE})
+unless ($define{USE_PL_CURLOCALES})
 {
     ++$skip{$_} foreach qw(
         PL_curlocales
@@ -446,11 +450,6 @@ unless ($define{'MULTIPLICITY'}) {
 		    Perl_my_cxt_init
 		    Perl_my_cxt_index
 			 );
-}
-
-if ($define{USE_THREAD_SAFE_LOCALE}) {
-    ++$skip{PL_lc_numeric_mutex};
-    ++$skip{PL_lc_numeric_mutex_depth};
 }
 
 unless ($define{'USE_DTRACE'}) {

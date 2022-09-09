@@ -387,8 +387,8 @@ PERLVAR(I, utf8locale,	bool)		/* utf8 locale detected */
 PERLVAR(I, in_utf8_CTYPE_locale, bool)
 PERLVAR(I, in_utf8_COLLATE_locale, bool)
 PERLVAR(I, in_utf8_turkic_locale, bool)
-#if defined(USE_ITHREADS) && ! defined(USE_THREAD_SAFE_LOCALE)
-PERLVARI(I, lc_numeric_mutex_depth, int, 0)   /* Emulate general semaphore */
+#if defined(USE_LOCALE) && defined(USE_LOCALE_THREADS)
+PERLVARI(I, locale_mutex_depth, int, 0)     /* Emulate general semaphore */
 #endif
 
 #ifdef USE_LOCALE_CTYPE
@@ -738,9 +738,7 @@ PERLVAR(I, constpadix,	PADOFFSET)	/* lowest unused for constants */
 
 PERLVAR(I, padix_floor,	PADOFFSET)	/* how low may inner block reset padix */
 
-#if defined(USE_POSIX_2008_LOCALE)          \
- && defined(USE_THREAD_SAFE_LOCALE)         \
- && ! defined(HAS_QUERYLOCALE)
+#ifdef USE_PL_CURLOCALES
 
 /* This is the most number of categories we've encountered so far on any
  * platform */
