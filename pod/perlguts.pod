@@ -523,8 +523,8 @@ In general, though, it's best to use the C<Sv*V> macros.
 
 =head2 Working with AVs
 
-There are two ways to create and load an AV.  The first method creates an
-empty AV:
+There are two main, longstanding ways to create and load an AV.  The first
+method creates an empty AV:
 
     AV*  newAV();
 
@@ -534,6 +534,20 @@ The second method both creates the AV and initially populates it with SVs:
 
 The second argument points to an array containing C<num> C<SV*>'s.  Once the
 AV has been created, the SVs can be destroyed, if so desired.
+
+Perl v5.36 added two new ways to create an AV and allocate a SV** array
+without populating it. These are more efficient than a newAV() followed by an
+av_extend().
+
+    /* Creates but does not initialize (Zero) the SV** array */
+    AV *av = newAV_alloc_x(1);
+    /* Creates and does initialize (Zero) the SV** array */
+    AV *av = newAV_alloc_xz(1);
+
+The numerical argument refers to the number of array elements to allocate, not
+an array index, and must be >0. The first form must only ever be used when all
+elements will be initialized before any read occurs. Reading a non-initialized
+SV* - i.e. treating a random memory address as a SV* - is a serious bug.
 
 Once the AV has been created, the following operations are possible on it:
 
@@ -586,6 +600,46 @@ This returns NULL if the variable does not exist.
 
 See L</Understanding the Magic of Tied Hashes and Arrays> for more
 information on how to use the array access functions on tied arrays.
+
+=head3 More efficient working with new or vanilla AVs
+
+Perl v5.36 and v5.38 introduced streamlined, inlined versions of some
+functions:
+
+=over
+
+=item * C<av_store_simple>
+
+=item * C<av_fetch_simple>
+
+=item * C<av_push_simple>
+
+=back
+
+These are drop-in replacements, but can only be used on straightforward
+AVs that meet the following criteria:
+
+=over
+
+=item * are not magical
+
+=item * are not readonly
+
+=item * are "real" (refcounted) AVs
+
+=item * have an av_top_index value > -2
+
+=back
+
+AVs created using C<newAV()>, C<av_make>, C<newAV_alloc_x>, and
+C<newAV_alloc_xz> are all compatible at the time of creation. It is
+only if they are declared readonly or unreal, have magic attached, or
+are otherwise configured unusually that they will stop being compatible.
+
+Note that some interpreter functions may attach magic to an AV as part
+of normal operations. It is therefore safest, unless you are sure of the
+lifecycle of an AV, to only use these new functions close to the point
+of AV creation.
 
 =head2 Working with HVs
 
