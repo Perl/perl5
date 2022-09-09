@@ -18444,8 +18444,8 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                                 * points. */
                                 AV * this_string = (AV *) av_shift( strings);
                                 STRLEN cp_count = av_count(this_string);
-                                SV * final = newSV(cp_count * 4);
-                                SvPVCLEAR(final);
+                                SV * final = newSV(cp_count ? cp_count * 4 : 1);
+                                SvPVCLEAR_FRESH(final);
 
                                 /* Create another string of sequences of \x{...} */
                                 while (av_count(this_string) > 0) {
