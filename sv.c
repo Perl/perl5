@@ -9767,8 +9767,9 @@ Perl_vnewSVpvf(pTHX_ const char *const pat, va_list *const args)
 
     PERL_ARGS_ASSERT_VNEWSVPVF;
 
-    new_SV(sv);
-    sv_vsetpvfn(sv, pat, strlen(pat), args, NULL, 0, NULL);
+    sv = newSV(1);
+    SvPVCLEAR_FRESH(sv);
+    sv_vcatpvfn_flags(sv, pat, strlen(pat), args, NULL, 0, NULL, 0);
     return sv;
 }
 
