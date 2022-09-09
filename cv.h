@@ -120,7 +120,7 @@ See L<perlguts/Autoloading with XSUBs>.
 #define CVf_CLONED	0x0040	/* a clone of one of those */
 #define CVf_ANON	0x0080	/* CV is not pointed to by a GV */
 #define CVf_UNIQUE	0x0100	/* sub is only called once (eg PL_main_cv,
-                                 * require, eval). */
+                                   require, eval). */
 #define CVf_NODEBUG	0x0200	/* no DB::sub indirection for this CV
                                    (esp. useful for special XSUBs) */
 #define CVf_CVGV_RC	0x0400	/* CvGV is reference counted */
