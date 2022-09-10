@@ -2444,7 +2444,7 @@ S_dump_trie(pTHX_ const struct _reg_trie_data *trie, HV *widecharmap,
         depth+1, "Match","Base","Ofs" );
 
     for( state = 0 ; state < trie->uniquecharcount ; state++ ) {
-        SV ** const tmp = av_fetch( revcharmap, state, 0);
+        SV ** const tmp = av_fetch_simple( revcharmap, state, 0);
         if ( tmp ) {
             Perl_re_printf( aTHX_  "%*s",
                 colwidth,
@@ -2553,7 +2553,7 @@ S_dump_trie_interim_list(pTHX_ const struct _reg_trie_data *trie,
             );
         }
         for( charid = 1 ; charid <= TRIE_LIST_USED( state ) ; charid++ ) {
-            SV ** const tmp = av_fetch( revcharmap,
+            SV ** const tmp = av_fetch_simple( revcharmap,
                                         TRIE_LIST_ITEM(state, charid).forid, 0);
             if ( tmp ) {
                 Perl_re_printf( aTHX_  "%*s:%3X=%4" UVXf " | ",
@@ -2603,7 +2603,7 @@ S_dump_trie_interim_table(pTHX_ const struct _reg_trie_data *trie,
     Perl_re_indentf( aTHX_  "Char : ", depth+1 );
 
     for( charid = 0 ; charid < trie->uniquecharcount ; charid++ ) {
-        SV ** const tmp = av_fetch( revcharmap, charid, 0);
+        SV ** const tmp = av_fetch_simple( revcharmap, charid, 0);
         if ( tmp ) {
             Perl_re_printf( aTHX_  "%*s",
                 colwidth,
@@ -2779,10 +2779,10 @@ is the recommended Unicode-aware way of saying
             SvCUR_set(zlopp, kapow - flrbbbbb);				   \
             SvPOK_on(zlopp);						   \
             SvUTF8_on(zlopp);						   \
-            av_push(revcharmap, zlopp);					   \
+            av_push_simple(revcharmap, zlopp);					   \
         } else {							   \
             char ooooff = (char)val;                                           \
-            av_push(revcharmap, newSVpvn(&ooooff, 1));			   \
+            av_push_simple(revcharmap, newSVpvn(&ooooff, 1));			   \
         }								   \
         } STMT_END
 
@@ -2841,7 +2841,7 @@ is the recommended Unicode-aware way of saying
             tmp = newSVpvn_utf8(STRING(noper), STR_LEN(noper), UTF);	\
         else                                                    \
             tmp = newSVpvn_utf8( "", 0, UTF );			\
-        av_push( trie_words, tmp );                             \
+        av_push_simple( trie_words, tmp );                             \
     });                                                         \
                                                                 \
     curword++;                                                  \
@@ -3738,7 +3738,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
                             /* if this is the first state there is no common prefix
                              * to extract, so we can exit */
                             if ( state == 1 ) break;
-                            tmp = av_fetch( revcharmap, ofs, 0);
+                            tmp = av_fetch_simple( revcharmap, ofs, 0);
                             ch = (U8*)SvPV_nolen_const( *tmp );
 
                             /* if we are on count 2 then we need to initialize the
@@ -3752,7 +3752,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
                                         depth+1,
                                         (UV)state));
                                 if (first_ofs >= 0) {
-                                    SV ** const tmp = av_fetch( revcharmap, first_ofs, 0);
+                                    SV ** const tmp = av_fetch_simple( revcharmap, first_ofs, 0);
                                     const U8 * const ch = (U8*)SvPV_nolen_const( *tmp );
 
                                     TRIE_BITMAP_SET_FOLDED(trie,*ch, folder);
@@ -3772,7 +3772,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
                     /* This state has only one transition, its transition is part
                      * of a common prefix - we need to concatenate the char it
                      * represents to what we have so far. */
-                    SV **tmp = av_fetch( revcharmap, first_ofs, 0);
+                    SV **tmp = av_fetch_simple( revcharmap, first_ofs, 0);
                     STRLEN len;
                     char *ch = SvPV( *tmp, len );
                     DEBUG_OPTIMISE_r({
@@ -3825,7 +3825,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
                    ) {
                    U32 word = trie->wordcount;
                    while (word--) {
-                       SV ** const tmp = av_fetch( trie_words, word, 0 );
+                       SV ** const tmp = av_fetch_simple( trie_words, word, 0 );
                        if (tmp) {
                            if ( STR_LEN(convert) <= SvCUR(*tmp) )
                                sv_chop(*tmp, SvPV_nolen(*tmp) + STR_LEN(convert));
@@ -9130,7 +9130,7 @@ Perl_reg_named_buff_all(pTHX_ REGEXP * const r, const U32 flags)
                 }
             }
             if (parno || flags & RXapif_ALL) {
-                av_push(av, newSVhek(HeKEY_hek(temphe)));
+                av_push_simple(av, newSVhek(HeKEY_hek(temphe)));
             }
         }
     }
@@ -16129,7 +16129,7 @@ S_populate_anyof_bitmap_from_invlist(pTHX_ regnode *node, SV** invlist_ptr)
         if (posix_warnings) {                                               \
             if (! RExC_warn_text ) RExC_warn_text =                         \
                                          (AV *) sv_2mortal((SV *) newAV()); \
-            av_push(RExC_warn_text, Perl_newSVpvf(aTHX_                     \
+            av_push_simple(RExC_warn_text, Perl_newSVpvf(aTHX_                     \
                                              WARNING_PREFIX                 \
                                              text                           \
                                              REPORT_LOCATION,               \
@@ -17179,7 +17179,7 @@ redo_curchar:
                 }
 
                 /* Stack the position of this undealt-with left paren */
-                av_push(fence_stack, newSViv(fence));
+                av_push_simple(fence_stack, newSViv(fence));
                 fence = top_index + 1;
                 break;
 
@@ -17321,8 +17321,8 @@ redo_curchar:
                     /* Place the operator before the operand */
 
                     SV* lhs = av_pop(stack);
-                    av_push(stack, newSVuv(curchar));
-                    av_push(stack, lhs);
+                    av_push_simple(stack, newSVuv(curchar));
+                    av_push_simple(stack, lhs);
                     break;
                 }
 
@@ -17363,9 +17363,8 @@ redo_curchar:
                      * */
                     lhs = av_pop(stack);
                     assert(IS_OPERAND(lhs));
-
-                    av_push(stack, newSVuv(curchar));
-                    av_push(stack, lhs);
+                    av_push_simple(stack, newSVuv(curchar));
+                    av_push_simple(stack, lhs);
                     break;
                 }
 
@@ -17426,7 +17425,7 @@ redo_curchar:
                  * stacked operation */
                 only_to_avoid_leaks = av_pop(stack);
                 SvREFCNT_dec(only_to_avoid_leaks);
-                av_push(stack, rhs);
+                av_push_simple(stack, rhs);
                 goto redo_curchar;
 
             case '!':   /* Highest priority, right associative */
@@ -17441,7 +17440,7 @@ redo_curchar:
                 }
                 else { /* Otherwise, since it's right associative, just push
                           onto the stack */
-                    av_push(stack, newSVuv(curchar));
+                    av_push_simple(stack, newSVuv(curchar));
                 }
                 break;
 
@@ -17502,7 +17501,7 @@ redo_curchar:
 
             /* Here there was nothing on the stack or the top element was
              * another operand.  Just add this new one */
-            av_push(stack, current);
+            av_push_simple(stack, current);
 
         } /* End of switch on next parse token */
 
@@ -17684,7 +17683,7 @@ S_dump_regex_sets_structures(pTHX_ RExC_state_t *pRExC_state,
     else {
         PerlIO_printf(Perl_debug_log, "Fence_stack: \n");
         for (i = fence_stack_top; i >= 0; i--) {
-            SV ** element_ptr = av_fetch(fence_stack, i, FALSE);
+            SV ** element_ptr = av_fetch_simple(fence_stack, i, FALSE);
             if (! element_ptr) {
             }
 
@@ -17867,15 +17866,15 @@ S_add_multi_match(pTHX_ AV* multi_char_matches, SV* multi_string, const STRLEN c
     }
 
     if (av_exists(multi_char_matches, cp_count)) {
-        this_array_ptr = (AV**) av_fetch(multi_char_matches, cp_count, FALSE);
+        this_array_ptr = (AV**) av_fetch_simple(multi_char_matches, cp_count, FALSE);
         this_array = *this_array_ptr;
     }
     else {
         this_array = newAV();
-        av_store(multi_char_matches, cp_count,
+        av_store_simple(multi_char_matches, cp_count,
                  (SV*) this_array);
     }
-    av_push(this_array, multi_string);
+    av_push_simple(this_array, multi_string);
 
     return multi_char_matches;
 }
@@ -19200,7 +19199,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                 AV** this_array_ptr;
                 SV* this_sequence;
 
-                this_array_ptr = (AV**) av_fetch(multi_char_matches,
+                this_array_ptr = (AV**) av_fetch_simple(multi_char_matches,
                                                  cp_count, FALSE);
                 while ((this_sequence = av_pop(*this_array_ptr)) !=
                                                                 &PL_sv_undef)
@@ -20847,19 +20846,19 @@ S_set_ANYOF_arg(pTHX_ RExC_state_t* const pRExC_state,
     SV *rv;
 
     if (cp_list) {
-        av_store(av, INVLIST_INDEX, SvREFCNT_inc_NN(cp_list));
+        av_store_simple(av, INVLIST_INDEX, SvREFCNT_inc_NN(cp_list));
     }
 
     /* (Note that if any of this changes, the size calculations in
      * S_optimize_regclass() might need to be updated.) */
 
     if (only_utf8_locale_list) {
-        av_store(av, ONLY_LOCALE_MATCHES_INDEX,
+        av_store_simple(av, ONLY_LOCALE_MATCHES_INDEX,
                                        SvREFCNT_inc_NN(only_utf8_locale_list));
     }
 
     if (runtime_defns) {
-        av_store(av, DEFERRED_USER_DEFINED_INDEX,
+        av_store_simple(av, DEFERRED_USER_DEFINED_INDEX,
                      SvREFCNT_inc_NN(runtime_defns));
     }
 
@@ -21983,7 +21982,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
         }
         if ( name_list ) {
             if ( k != REF || (op < REFN)) {
-                SV **name= av_fetch(name_list, parno, 0 );
+                SV **name= av_fetch_simple(name_list, parno, 0 );
                 if (name)
                     Perl_sv_catpvf(aTHX_ sv, " '%" SVf "'", SVfARG(*name));
             }
@@ -21998,7 +21997,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
                  */
                 SV *sv_dat= MUTABLE_SV(progi->data->data[ parno ]);
                 I32 *nums=(I32*)SvPVX(sv_dat);
-                SV **name= av_fetch(name_list, nums[0], 0 );
+                SV **name= av_fetch_simple(name_list, nums[0], 0 );
                 I32 n;
                 if (name) {
                     for ( n=0; n<SvIVX(sv_dat); n++ ) {
@@ -22035,7 +22034,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
         Perl_sv_catpvf(aTHX_ sv, "%d[%+d:%d]", (int)ARG(o),(int)ARG2L(o),
                 (int)((o + (int)ARG2L(o)) - progi->program) );
         if (name_list) {
-            SV **name= av_fetch(name_list, ARG(o), 0 );
+            SV **name= av_fetch_simple(name_list, ARG(o), 0 );
             if (name)
                 Perl_sv_catpvf(aTHX_ sv, " '%" SVf "'", SVfARG(*name));
         }
@@ -23718,7 +23717,7 @@ S_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node,
             I32 word_idx;
             SvPVCLEAR(sv);
             for (word_idx= 0; word_idx < (I32)trie->wordcount; word_idx++) {
-                SV ** const elem_ptr = av_fetch(trie_words, word_idx, 0);
+                SV ** const elem_ptr = av_fetch_simple(trie_words, word_idx, 0);
 
                 Perl_re_indentf( aTHX_  "%s ",
                     indent+3,
@@ -24914,15 +24913,15 @@ S_parse_uniprop_string(pTHX_
                 }
 
                 this_string = newAV();
-                av_push(this_string, newSVuv(cp));
+                av_push_simple(this_string, newSVuv(cp));
 
                 do {
                     cp = valid_utf8_to_uvchr((U8 *) remaining, &character_len);
-                    av_push(this_string, newSVuv(cp));
+                    av_push_simple(this_string, newSVuv(cp));
                     remaining += character_len;
                 } while (remaining < SvEND(character));
 
-                av_push(*strings, (SV *) this_string);
+                av_push_simple(*strings, (SV *) this_string);
             }
 
             return prop_definition;
@@ -26072,7 +26071,7 @@ S_handle_names_wildcard(pTHX_ const char * wname, /* wildcard name to match */
                     }
 
                     is_multi = TRUE;
-                    av_push(this_string, newSVuv(cp));
+                    av_push_simple(this_string, newSVuv(cp));
                 }
             }
 
@@ -26081,7 +26080,7 @@ S_handle_names_wildcard(pTHX_ const char * wname, /* wildcard name to match */
                     *strings = newAV();
                 }
 
-                av_push(*strings, (SV *) this_string);
+                av_push_simple(*strings, (SV *) this_string);
             }
             else {  /* Only a single code point */
                 *prop_definition = add_cp_to_invlist(*prop_definition, cp);
