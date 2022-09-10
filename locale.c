@@ -6526,21 +6526,29 @@ Perl_thread_locale_init()
 
     dTHX_DEBUGGING;
 
-
      DEBUG_L(PerlIO_printf(Perl_debug_log,
-            "new thread, initial locale is %s; calling setlocale\n",
-            setlocale(LC_ALL, NULL)));
-
+                           "new thread, initial locale is %s;"
+                           " calling setlocale(LC_ALL, \"C\")\n",
+                           get_LC_ALL_display()));
 #  ifdef WIN32
 
     /* On Windows, make sure new thread has per-thread locales enabled */
     _configthreadlocale(_ENABLE_PER_THREAD_LOCALE);
 
 #  endif
+#  if defined(LC_ALL)
 
-    /* This thread starts off in the C locale */
+    /* This thread starts off in the C locale.  Use the full Perl_setlocale()
+     * to make sure no ill-advised shortcuts get taken on this new thread, */
     Perl_setlocale(LC_ALL, "C");
 
+#  else
+
+    for (unsigned i = 0; i < NOMINAL_LC_ALL_INDEX; i++) {
+        Perl_setlocale(categories[i], "C");
+    }
+
+#  endif
 #endif
 
 }
