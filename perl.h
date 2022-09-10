@@ -7201,11 +7201,6 @@ the plain locale pragma without a parameter (S<C<use locale>>) is in effect.
 #  endif
 #endif
 
-#ifndef LOCALE_LOCK_
-#  define LOCALE_LOCK_(cond)  NOOP
-#  define LOCALE_UNLOCK_      NOOP
-#endif
-
 /* There are some locale-related functions which may need locking only because
  * they share some common memory across threads, and hence there is the
  * potential for a race in accessing that space.  Most are because their return
