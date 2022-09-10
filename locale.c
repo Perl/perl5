@@ -6536,12 +6536,11 @@ Perl_thread_locale_init()
     /* On Windows, make sure new thread has per-thread locales enabled */
     _configthreadlocale(_ENABLE_PER_THREAD_LOCALE);
 
-#  else
+#  endif
 
     /* This thread starts off in the C locale */
     Perl_setlocale(LC_ALL, "C");
 
-#  endif
 #endif
 
 }
