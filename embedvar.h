@@ -86,6 +86,7 @@
 #define PL_constpadix		(vTHX->Iconstpadix)
 #define PL_cop_seqmax		(vTHX->Icop_seqmax)
 #define PL_ctype_name		(vTHX->Ictype_name)
+#define PL_cur_LC_ALL		(vTHX->Icur_LC_ALL)
 #define PL_curcop		(vTHX->Icurcop)
 #define PL_curcopdb		(vTHX->Icurcopdb)
 #define PL_curlocales		(vTHX->Icurlocales)

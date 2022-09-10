@@ -15891,6 +15891,9 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
         PL_curlocales[i] = SAVEPV("C");
     }
 #endif
+#ifdef USE_PL_CUR_LC_ALL
+    PL_cur_LC_ALL = SAVEPV(proto_perl->Icur_LC_ALL);
+#endif
 #ifdef USE_LOCALE_CTYPE
     Copy(PL_fold, PL_fold_locale, 256, U8);
 

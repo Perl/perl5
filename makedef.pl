@@ -428,6 +428,13 @@ unless ($define{USE_PL_CURLOCALES})
     );
 }
 
+unless ($define{USE_PL_CUR_LC_ALL})
+{
+    ++$skip{$_} foreach qw(
+        PL_cur_LC_ALL
+    );
+}
+
 unless ($define{'MULTIPLICITY'}) {
     ++$skip{$_} foreach qw(
 		    PL_my_cxt_index

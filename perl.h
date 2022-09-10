@@ -1275,6 +1275,7 @@ violations are fatal.
 
 #  if (defined(USE_POSIX_2008_LOCALE) && ! defined(USE_QUERYLOCALE))
 #    define USE_PL_CURLOCALES
+#    define USE_PL_CUR_LC_ALL
 #  endif
 
 /*  Microsoft documentation reads in the change log for VS 2015:
@@ -1283,8 +1284,11 @@ violations are fatal.
  *     function would return the lconv data for the global locale, not the
  *     thread's locale."
  */
-#  if defined(WIN32) && defined(USE_THREAD_SAFE_LOCALE) && _MSC_VER < 1900
-#  define TS_W32_BROKEN_LOCALECONV
+#  if defined(WIN32) && defined(USE_THREAD_SAFE_LOCALE)
+#    define USE_PL_CUR_LC_ALL
+#    if _MSC_VER < 1900
+#      define TS_W32_BROKEN_LOCALECONV
+#    endif
 #  endif
 #endif
 
