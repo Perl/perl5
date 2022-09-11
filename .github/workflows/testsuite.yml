@@ -164,10 +164,9 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libgdbm-dev libdb-dev
       - uses: actions/checkout@v2
-      - name: git cfg + fetch tags
+      - name: git cfg
         run: |
           git config diff.renameLimit 999999
-          git fetch --depth=1 origin +refs/tags/*:refs/tags/*
       - name: Configure
         run: |
           ./Configure -des -Dusedevel ${{ matrix.CONFIGURE_ARGS }} -Dprefix="$HOME/perl-blead" -DDEBUGGING
@@ -261,10 +260,9 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libgdbm-dev libdb-dev
       - uses: actions/checkout@v2
-      - name: git cfg + fetch tags
+      - name: git cfg
         run: |
           git config diff.renameLimit 999999
-          git fetch --depth=1 origin +refs/tags/*:refs/tags/*
       - name: Configure
         run: |
           ./Configure -des -Dusedevel -Duseshrplib -Dusesitecustomize -Duselongdouble -Dprefix="$HOME/perl-blead" -DDEBUGGING
@@ -523,10 +521,9 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libgdbm-dev libdb-dev
       - uses: actions/checkout@v2
-      - name: git cfg + fetch tags
+      - name: git cfg
         run: |
           git config diff.renameLimit 999999
-          git fetch --depth=1 origin +refs/tags/*:refs/tags/*
       - name: manicheck
         run: |
           perl Porting/manicheck --exitstatus
@@ -575,10 +572,9 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libgdbm-dev libdb-dev
       - uses: actions/checkout@v2
-      - name: git cfg + fetch tags
+      - name: git cfg
         run: |
           git config diff.renameLimit 999999
-          git fetch --depth=1 origin +refs/tags/*:refs/tags/*
       - name: Configure
         run: |
           ./Configure -des -Dusedevel -Dcc="clang -fsanitize=address" -Dld="clang -fsanitize=address" ${{ matrix.CONFIGURE_ARGS }} -Dprefix="$HOME/perl-blead"
@@ -624,10 +620,9 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libgdbm-dev libdb-dev
       - uses: actions/checkout@v2
-      - name: git cfg + fetch tags
+      - name: git cfg
         run: |
           git config diff.renameLimit 999999
-          git fetch --depth=1 origin +refs/tags/*:refs/tags/*
       - name: Show Locales
         run: locale -a
       - name: Configure
