@@ -520,7 +520,7 @@ jobs:
         # complete all CI runs.
         run: |
           cd ~/work
-          PATH=`pwd`:.:$PATH ./perl.exe t/TEST
+          PATH=`pwd`:.:$PATH TEST_JOBS=2 ./perl.exe t/harness
 
   #            _       _ _            _
   #  _ __ ___ (_)_ __ (_) |_ ___  ___| |_
