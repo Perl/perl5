@@ -223,6 +223,8 @@ jobs:
       # - https://github.com/actions/checkout/issues/334#issuecomment-1241306390
       # - https://github.com/actions/runner/issues/2115
       - uses: actions/checkout@v1
+        with:
+          fetch-depth: 1
       - name: git cfg
         run: |
           git config --global --add safe.directory /__w/perl5/perl5
