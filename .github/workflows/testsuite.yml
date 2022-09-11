@@ -469,13 +469,12 @@ jobs:
           git config --global core.autocrlf false
           mkdir -p ~
           cd ~
-          git clone -qn "https://$GITHUB_ACTOR:$GITHUB_TOKEN@github.com/$GITHUB_REPOSITORY" work
+          git init work
           cd work
-          if [ "$GITHUB_EVENT_NAME" = pull_request ]; then
-              git fetch origin "$GITHUB_REF" && git checkout FETCH_HEAD
-          else
-              git checkout "$GITHUB_SHA"
-          fi
+          git remote add origin "https://$GITHUB_ACTOR:$GITHUB_TOKEN@github.com/$GITHUB_REPOSITORY"
+          git config --local gc.auto 0
+          git fetch origin --depth=1 "$GITHUB_SHA"
+          git checkout "$GITHUB_SHA"
       - name: Configure
         shell: sh
         env:
