@@ -215,7 +215,13 @@ jobs:
         run: |
           apt-get update
           apt-get install -y build-essential git-core libgdbm-dev libdb-dev
-      # actions/checkout@v2 doesn't work in a container, so we use v1.
+      # actions/checkout@v2 doesn't work in a i386 container: the GitHub runner
+      # uses `node` that is installed on the host inside the container. The host
+      # is (likely) running x86_64 and using a binary build for x86_64 inside a
+      # i386 container just doesn't work.
+      # Upstream reports:
+      # - https://github.com/actions/checkout/issues/334#issuecomment-1241306390
+      # - https://github.com/actions/runner/issues/2115
       - uses: actions/checkout@v1
       - name: fix git remote credential
         run: |
