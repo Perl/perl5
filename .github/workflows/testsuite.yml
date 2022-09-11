@@ -223,14 +223,10 @@ jobs:
       # - https://github.com/actions/checkout/issues/334#issuecomment-1241306390
       # - https://github.com/actions/runner/issues/2115
       - uses: actions/checkout@v1
-      - name: fix git remote credential
+      - name: git cfg
         run: |
           git config --global --add safe.directory /__w/perl5/perl5
-          git remote set-url origin "https://$GITHUB_ACTOR:${{ secrets.GITHUB_TOKEN }}@github.com/$GITHUB_REPOSITORY"
-      - name: git cfg + fetch tags
-        run: |
           git config diff.renameLimit 999999
-          git fetch --depth=1 origin +refs/tags/*:refs/tags/*
       - name: Configure
         run: |
           ./Configure -des -Dusedevel ${{ matrix.CONFIGURE_ARGS }} -Dprefix="$HOME/perl-blead"
