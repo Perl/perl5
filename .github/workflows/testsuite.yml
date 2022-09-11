@@ -462,28 +462,51 @@ jobs:
       - name: Check out using Cygwin git, to ensure correct file permissions
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        shell: cmd
+          PATH: /usr/bin:/bin
+          SHELLOPTS: igncr
+        shell: sh
         run: |
-          path %GITHUB_WORKSPACE%\cygwin\bin;%GITHUB_WORKSPACE%\cygwin\usr\bin
-          sh -c "git config --global core.autocrlf false"
-          sh -c "mkdir -p ~; cd ~; git clone -qn \"https://$GITHUB_ACTOR:$GITHUB_TOKEN@github.com/$GITHUB_REPOSITORY\" work ; cd work ; if [ \"$GITHUB_EVENT_NAME\" = pull_request ] ; then git fetch origin \"$GITHUB_REF\" && git checkout FETCH_HEAD ; else  git checkout \"$GITHUB_SHA\" ; fi"
+          git config --global core.autocrlf false
+          mkdir -p ~
+          cd ~
+          git clone -qn "https://$GITHUB_ACTOR:$GITHUB_TOKEN@github.com/$GITHUB_REPOSITORY" work
+          cd work
+          if [ "$GITHUB_EVENT_NAME" = pull_request ]; then
+              git fetch origin "$GITHUB_REF" && git checkout FETCH_HEAD
+          else
+              git checkout "$GITHUB_SHA"
+          fi
       - name: Configure
-        shell: cmd
+        shell: sh
+        env:
+          PATH: /usr/bin:/bin
+          SHELLOPTS: igncr
         run: |
-          path %GITHUB_WORKSPACE%\cygwin\bin;%GITHUB_WORKSPACE%\cygwin\usr\bin
-          sh -c "cd ~/work; ./Configure -des -Dusedevel -Doptimize=-g -DDEBUGGING"
+          cd ~/work
+          set +e
+          ./Configure -des -Dusedevel -Doptimize=-g -DDEBUGGING || exit 1
       - name: Build
-        shell: cmd
+        shell: sh
+        env:
+          PATH: /usr/bin:/bin
+          SHELLOPTS: igncr
         run: |
-          path %GITHUB_WORKSPACE%\cygwin\bin;%GITHUB_WORKSPACE%\cygwin\usr\bin
-          sh -c "cd ~/work; make -j2 test_prep"
+          cd ~/work
+          make -j2 test_prep
       - name: Show Config
-        shell: cmd
+        shell: sh
+        env:
+          PATH: /usr/bin:/bin
+          SHELLOPTS: igncr
         run: |
-          path %GITHUB_WORKSPACE%\cygwin\bin;%GITHUB_WORKSPACE%\cygwin\usr\bin
-          sh -c "cd ~/work; ./perl -Ilib -V; ./perl -Ilib -e 'use Config; print Config::config_sh'"
+          cd ~/work
+          ./perl -Ilib -V
+          ./perl -Ilib -e 'use Config; print Config::config_sh'
       - name: Run Tests
-        shell: cmd
+        shell: sh
+        env:
+          PATH: /usr/bin:/bin
+          SHELLOPTS: igncr
         # Descend far enough down the cygwin yak warren, and one discovers that
         # hints/cygwin.sh sets ldlibpthname=PATH
         # Meaning that the Makefile variable LDLIBPTH is "PATH=..."
@@ -496,8 +519,8 @@ jobs:
         # about 40 seconds, which is nearly 1% of the total wallclock time for
         # complete all CI runs.
         run: |
-          path %GITHUB_WORKSPACE%\cygwin\bin;%GITHUB_WORKSPACE%\cygwin\usr\bin
-          sh -c "cd ~/work; PATH=`pwd`:.:$PATH ./perl.exe t/TEST"
+          cd ~/work
+          PATH=`pwd`:.:$PATH ./perl.exe t/TEST
 
   #            _       _ _            _
   #  _ __ ___ (_)_ __ (_) |_ ___  ___| |_
