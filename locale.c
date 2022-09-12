@@ -6446,21 +6446,30 @@ Perl_my_strerror(pTHX_ const int errnum, utf8ness_t * utf8ness)
 
 =for apidoc switch_to_global_locale
 
-On systems without locale support, or on typical single-threaded builds, or on
-platforms that do not support per-thread locale operations, this function does
-nothing.  On such systems that do have locale support, only a locale global to
-the whole program is available.
+This function copies the locale state of the calling thread into the program's
+global locale, and converts the thread to use that global locale.
 
-On multi-threaded builds on systems that do have per-thread locale operations,
-this function converts the thread it is running in to use the global locale.
-This is for code that has not yet or cannot be updated to handle multi-threaded
-locale operation.  As long as only a single thread is so-converted, everything
-works fine, as all the other threads continue to ignore the global one, so only
-this thread looks at it.
+It is intended so that Perl can safely be used with C libraries that access the
+global locale and which can't be converted to not access it.  Effectively, this
+means libraries that call C<L<setlocale(3)>> on non-Windows systems.  (For
+portability, it is a good idea to use it on Windows as well.)
 
-However, on Windows systems this isn't quite true prior to Visual Studio 15,
-at which point Microsoft fixed a bug.  A race can occur if you use the
-following operations on earlier Windows platforms:
+A downside of using it is that it disables the services that Perl provides to
+hide locale gotchas from your code.  The service you most likely will miss
+regards the radix character (decimal point) in floating point numbers.  Code
+executed after this function is called can no longer just assume that this
+character is correct for the current circumstances.
+
+To return to Perl control, and restart the gotcha prevention services, call
+C<L</sync_locale>>.  Behavior is undefined for any pure Perl code that executes
+while the switch is in effect.
+
+The global locale and the per-thread locales are independent.  As long as just
+one thread converts to the global locale, everything works smoothly.  But if
+more than one does, they can easily interfere with each other, and races are
+likely.  On Windows systems prior to Visual Studio 15 (at which point Microsoft
+fixed a bug), races can occur (even if only one thread has been converted to
+the global locale), but only if you use the following operations:
 
 =over
 
@@ -6473,53 +6482,100 @@ following operations on earlier Windows platforms:
 =back
 
 The first item is not fixable (except by upgrading to a later Visual Studio
-release), but it would be possible to work around the latter two items by using
-the Windows API functions C<GetNumberFormat> and C<GetCurrencyFormat>; patches
+release), but it would be possible to work around the latter two items by
+having Perl change its algorithm for calculating these to use Windows API
+functions (likely C<GetNumberFormat> and C<GetCurrencyFormat>); patches
 welcome.
 
-Without this function call, threads that use the L<C<setlocale(3)>> system
-function will not work properly, as all the locale-sensitive functions will
-look at the per-thread locale, and C<setlocale> will have no effect on this
-thread.
-
-Perl code should convert to either call
-L<C<Perl_setlocale>|perlapi/Perl_setlocale> (which is a drop-in for the system
-C<setlocale>) or use the methods given in L<perlcall> to call
+XS code should never call plain C<setlocale>, but should instead be converted
+to either call L<C<Perl_setlocale>|perlapi/Perl_setlocale> (which is a drop-in
+for the system C<setlocale>) or use the methods given in L<perlcall> to call
 L<C<POSIX::setlocale>|POSIX/setlocale>.  Either one will transparently properly
 handle all cases of single- vs multi-thread, POSIX 2008-supported or not.
-
-Non-Perl libraries, such as C<gtk>, that call the system C<setlocale> can
-continue to work if this function is called before transferring control to the
-library.
-
-Upon return from the code that needs to use the global locale,
-L<C<sync_locale()>|perlapi/sync_locale> should be called to restore the safe
-multi-thread operation.
 
 =cut
 */
 
 void
-Perl_switch_to_global_locale()
+Perl_switch_to_global_locale(pTHX)
 {
-    dTHX;
 
-#ifdef USE_THREAD_SAFE_LOCALE
-#  ifdef WIN32
+#ifdef USE_LOCALE
+
+    bool perl_controls = false;
+
+    DEBUG_L(PerlIO_printf(Perl_debug_log, "Entering switch_to_global; %s\n",
+                                          get_LC_ALL_display()));
+
+#  ifdef USE_THREAD_SAFE_LOCALE
+
+   /* In these cases, we use the system state to determine if we are in the
+    * global locale or not. */
+
+#    ifdef USE_POSIX_2008_LOCALE
+
+    perl_controls = LC_GLOBAL_LOCALE != uselocale((locale_t) 0);
+
+#    elif defined(WIN32)
+
+    perl_controls = _configthreadlocale(0) == _ENABLE_PER_THREAD_LOCALE;
+
+#    else
+#      error Unexpected Configuration
+#    endif
+#  endif
+
+    /* No-op if already in global */
+    if (! perl_controls) {
+        return;
+    }
+
+#  ifdef USE_THREAD_SAFE_LOCALE
+#    if defined(WIN32)
 
     _configthreadlocale(_DISABLE_PER_THREAD_LOCALE);
 
-#  else
+#    elif defined(USE_POSIX_2008_LOCALE)
 
-    {
-        unsigned int i;
+    const char * curlocales[NOMINAL_LC_ALL_INDEX + 1];
 
-        for (i = 0; i < LC_ALL_INDEX_; i++) {
-            setlocale(categories[i], querylocale_i(i));
-        }
+    /* Save each category's current state */
+    for (unsigned i = 0; i < NOMINAL_LC_ALL_INDEX; i++) {
+        curlocales[i] = querylocale_i(i);
     }
 
-    uselocale(LC_GLOBAL_LOCALE);
+    /* Switch to global */
+    locale_t old_locale = uselocale(LC_GLOBAL_LOCALE);
+    if (! old_locale) {
+        locale_panic_(Perl_form(aTHX_ "Could not change to global locale"));
+    }
+
+    if (old_locale != LC_GLOBAL_LOCALE && old_locale != PL_C_locale_obj) {
+        freelocale(old_locale);
+    }
+
+    /* Set the global to what was our per-thread state */
+    POSIX_SETLOCALE_LOCK;
+    for (unsigned int i = 0; i < NOMINAL_LC_ALL_INDEX; i++) {
+        posix_setlocale(categories[i], curlocales[i]);
+    }
+    POSIX_SETLOCALE_UNLOCK;
+
+    for (unsigned int i = 0; i < NOMINAL_LC_ALL_INDEX; i++) {
+        Safefree(curlocales[i]);
+    }
+
+#    else
+#      error Unexpected Configuration
+#    endif
+#  endif
+#  ifdef USE_LOCALE_NUMERIC
+
+    /* Switch to the underlying C numeric locale; the application is on its
+     * own. */
+    POSIX_SETLOCALE_LOCK;
+    posix_setlocale(LC_NUMERIC, PL_numeric_name);
+    POSIX_SETLOCALE_UNLOCK;
 
 #  endif
 #endif
@@ -6530,27 +6586,45 @@ Perl_switch_to_global_locale()
 
 =for apidoc sync_locale
 
+This function copies the state of the program global locale into the calling
+thread, and converts that thread to using per-thread locales, if it wasn't
+already, and the platform supports them.  The LC_NUMERIC locale is toggled into
+the standard state (using the C locale's conventions), if not within the
+lexical scope of S<C<use locale>>.
+
+Perl will now consider itself to have control of the locale.
+
+Since unthreaded perls have only a global locale, this function is a no-op
+without threads.
+
+This function is intended for use with C libraries that do locale manipulation.
+It allows Perl to accommodate the use of them.  Call this function before
+transferring back to Perl space so that it knows what state the C code has left
+things in.
+
+XS code should not manipulate the locale on its own.  Instead,
 L<C<Perl_setlocale>|perlapi/Perl_setlocale> can be used at any time to query or
 change the locale (though changing the locale is antisocial and dangerous on
 multi-threaded systems that don't have multi-thread safe locale operations.
-(See L<perllocale/Multi-threaded operation>).  Using the system
-L<C<setlocale(3)>> should be avoided.  Nevertheless, certain non-Perl libraries
-called from XS, such as C<Gtk> do so, and this can't be changed.  When the
-locale is changed by XS code that didn't use
-L<C<Perl_setlocale>|perlapi/Perl_setlocale>, Perl needs to be told that the
-locale has changed.  Use this function to do so, before returning to Perl.
+(See L<perllocale/Multi-threaded operation>).
+
+Using the libc L<C<setlocale(3)>> function should be avoided.  Nevertheless,
+certain non-Perl libraries called from XS, do call it, and their behavior may
+not be able to be changed.  This function, along with
+C<L</switch_to_global_locale>>, can be used to get seamless behavior in these
+circumstances, as long as only one thread is involved.
+
+If the library has an option to turn off its locale manipulation, doing that is
+preferable to using this mechanism.  C<Gtk> is such a library.
 
 The return value is a boolean: TRUE if the global locale at the time of call
-was in effect; and FALSE if a per-thread locale was in effect.  This can be
-used by the caller that needs to restore things as-they-were to decide whether
-or not to call
-L<C<Perl_switch_to_global_locale>|perlapi/switch_to_global_locale>.
+was in effect for the caller; and FALSE if a per-thread locale was in effect.
 
 =cut
 */
 
 bool
-Perl_sync_locale()
+Perl_sync_locale(pTHX)
 {
 
 #ifndef USE_LOCALE
@@ -6559,71 +6633,37 @@ Perl_sync_locale()
 
 #else
 
-    const char * newlocale;
-    dTHX;
+    bool was_in_global = TRUE;
 
-#  ifdef USE_POSIX_2008_LOCALE
+#  ifdef USE_THREAD_SAFE_LOCALE
+#    if defined(WIN32)
 
-    bool was_in_global_locale = FALSE;
-    locale_t cur_obj = uselocale((locale_t) 0);
+    was_in_global = _configthreadlocale(_ENABLE_PER_THREAD_LOCALE)
+                                    == _DISABLE_PER_THREAD_LOCALE;
 
-    /* On Windows, unless the foreign code has turned off the thread-safe
-     * locale setting, any plain setlocale() will have affected what we see, so
-     * no need to worry.  Otherwise, If the foreign code has done a plain
-     * setlocale(), it will only affect the global locale on POSIX systems, but
-     * will affect the */
-    if (cur_obj == LC_GLOBAL_LOCALE) {
+#    elif defined(USE_POSIX_2008_LOCALE)
 
-#    ifdef HAS_QUERY_LOCALE
-
-        void_setlocale_c(LC_ALL, querylocale_c(LC_ALL));
+    was_in_global = LC_GLOBAL_LOCALE == uselocale((locale_t) 0);
 
 #    else
-
-        unsigned int i;
-
-        /* We can't trust that we can read the LC_ALL format on the
-         * platform, so do them individually */
-        for (i = 0; i < LC_ALL_INDEX_; i++) {
-            void_setlocale_i(i, querylocale_i(i));
-        }
-
+#      error Unexpected Configuration
 #    endif
+#  endif    /* USE_THREAD_SAFE_LOCALE */
+#  ifdef LC_ALL
 
-        was_in_global_locale = TRUE;
-    }
+    /* Use the external interface Perl_setlocale() to make sure all setup gets
+     * done */
+    Perl_setlocale(LC_ALL, stdized_setlocale(LC_ALL, NULL));
 
 #  else
 
-    bool was_in_global_locale = TRUE;
+    for (unsigned i = 0; i < NOMINAL_LC_ALL_INDEX; i++) {
+        Perl_setlocale(categories[i], stdized_setlocale(categories[i], NULL);
+    }
 
 #  endif
-#  ifdef USE_LOCALE_CTYPE
 
-    newlocale = querylocale_c(LC_CTYPE);
-    DEBUG_Lv(PerlIO_printf(Perl_debug_log,
-                  "%s\n", setlocale_debug_string_c(LC_CTYPE, NULL, newlocale)));
-    new_ctype(newlocale);
-
-#  endif /* USE_LOCALE_CTYPE */
-#  ifdef USE_LOCALE_COLLATE
-
-    newlocale = querylocale_c(LC_COLLATE);
-    DEBUG_Lv(PerlIO_printf(Perl_debug_log,
-                "%s\n", setlocale_debug_string_c(LC_COLLATE, NULL, newlocale)));
-    new_collate(newlocale);
-
-#  endif
-#  ifdef USE_LOCALE_NUMERIC
-
-    newlocale = querylocale_c(LC_NUMERIC);
-    DEBUG_Lv(PerlIO_printf(Perl_debug_log,
-                "%s\n", setlocale_debug_string_c(LC_NUMERIC, NULL, newlocale)));
-    new_numeric(newlocale);
-
-#  endif /* USE_LOCALE_NUMERIC */
-
-    return was_in_global_locale;
+    return was_in_global;
 
 #endif
 

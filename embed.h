@@ -693,8 +693,8 @@
 #define sv_vsetpvf(a,b,c)	Perl_sv_vsetpvf(aTHX_ a,b,c)
 #define sv_vsetpvf_mg(a,b,c)	Perl_sv_vsetpvf_mg(aTHX_ a,b,c)
 #define sv_vsetpvfn(a,b,c,d,e,f,g)	Perl_sv_vsetpvfn(aTHX_ a,b,c,d,e,f,g)
-#define switch_to_global_locale	Perl_switch_to_global_locale
-#define sync_locale		Perl_sync_locale
+#define switch_to_global_locale()	Perl_switch_to_global_locale(aTHX)
+#define sync_locale()		Perl_sync_locale(aTHX)
 #define taint_env()		Perl_taint_env(aTHX)
 #define taint_proper(a,b)	Perl_taint_proper(aTHX_ a,b)
 #define thread_locale_init	Perl_thread_locale_init

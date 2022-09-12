@@ -4338,9 +4338,9 @@ PERL_CALLCONV void	Perl_sv_vsetpvf_mg(pTHX_ SV *const sv, const char *const pat,
 PERL_CALLCONV void	Perl_sv_vsetpvfn(pTHX_ SV *const sv, const char *const pat, const STRLEN patlen, va_list *const args, SV **const svargs, const Size_t sv_count, bool *const maybe_tainted);
 #define PERL_ARGS_ASSERT_SV_VSETPVFN	\
 	assert(sv); assert(pat)
-PERL_CALLCONV void	Perl_switch_to_global_locale(void);
+PERL_CALLCONV void	Perl_switch_to_global_locale(pTHX);
 #define PERL_ARGS_ASSERT_SWITCH_TO_GLOBAL_LOCALE
-PERL_CALLCONV bool	Perl_sync_locale(void);
+PERL_CALLCONV bool	Perl_sync_locale(pTHX);
 #define PERL_ARGS_ASSERT_SYNC_LOCALE
 PERL_CALLCONV void	Perl_sys_init(int* argc, char*** argv);
 #define PERL_ARGS_ASSERT_SYS_INIT	\
