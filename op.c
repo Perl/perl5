@@ -7220,7 +7220,6 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, OP *repl, UV flags, I32 floor)
              *                         pushmark (for regcomp)
              *                         pushmark (for entersub)
              *                         anoncode
-             *                         srefgen
              *                         entersub
              *     regcreset                  regcreset
              *     pushmark                   pushmark
@@ -7234,10 +7233,9 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, OP *repl, UV flags, I32 floor)
             SvREFCNT_inc_simple_void(PL_compcv);
             CvLVALUE_on(PL_compcv);
             /* these lines are just an unrolled newANONATTRSUB */
-            expr = newSVOP(OP_ANONCODE, 0,
+            expr = newSVOP(OP_ANONCODE, OPf_REF,
                     MUTABLE_SV(newATTRSUB(floor, 0, NULL, NULL, expr)));
             cv_targ = expr->op_targ;
-            expr = newUNOP(OP_REFGEN, 0, expr);
 
             expr = list(force_list(newUNOP(OP_ENTERSUB, 0, scalar(expr)), TRUE));
         }
@@ -11365,15 +11363,21 @@ OP *
 Perl_newANONATTRSUB(pTHX_ I32 floor, OP *proto, OP *attrs, OP *block)
 {
     SV * const cv = MUTABLE_SV(newATTRSUB(floor, 0, proto, attrs, block));
+
+    bool is_const = CvANONCONST(cv);
+
     OP * anoncode =
-        newSVOP(OP_ANONCODE, 0,
+        newSVOP(OP_ANONCODE, is_const ? 0 : OPf_REF,
                 cv);
-    if (CvANONCONST(cv))
-        anoncode = newUNOP(OP_ANONCONST, 0,
+
+    if (is_const) {
+        anoncode = newUNOP(OP_ANONCONST, OPf_REF,
                            op_convert_list(OP_ENTERSUB,
                                            OPf_STACKED|OPf_WANT_SCALAR,
                                            anoncode));
-    return newUNOP(OP_REFGEN, 0, anoncode);
+    }
+
+    return anoncode;
 }
 
 OP *
@@ -13745,6 +13749,7 @@ Perl_ck_entersub_args_proto(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
                 proto++;
                 arg++;
                 if (    o3->op_type != OP_UNDEF
+                    && o3->op_type != OP_ANONCODE
                     && (o3->op_type != OP_SREFGEN
                         || (  cUNOPx(cUNOPx(o3)->op_first)->op_first->op_type
                                 != OP_ANONCODE

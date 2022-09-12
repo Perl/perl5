@@ -2791,13 +2791,19 @@ sub pp_refgen {
     my $kid = $op->first;
     if ($kid->name eq "null") {
 	my $anoncode = $kid = $kid->first;
+
+	# Perl no longer generates this, but XS modules might:
 	if ($anoncode->name eq "anonconst") {
 	    $anoncode = $anoncode->first->first->sibling;
 	}
+
+	# Same as with `anonconst`:
 	if ($anoncode->name eq "anoncode"
 	 or !null($anoncode = $kid->sibling) and
 		 $anoncode->name eq "anoncode") {
             return $self->e_anoncode({ code => $self->padval($anoncode->targ) });
+
+	# Perl still generates this:
 	} elsif ($kid->name eq "pushmark") {
             my $sib_name = $kid->sibling->name;
             if ($sib_name eq 'entersub') {
@@ -2817,6 +2823,18 @@ sub e_anoncode {
     my ($self, $info) = @_;
     my $text = $self->deparse_sub($info->{code});
     return $self->keyword("sub") . " $text";
+}
+
+sub pp_anoncode {
+    my ($self, $anoncode) = @_;
+
+    return $self->e_anoncode( { code => $self->padval($anoncode->targ) } );
+}
+
+sub pp_anonconst {
+    my ($self, $anonconst) = @_;
+
+    return $self->pp_anoncode( $anonconst->first->first->sibling );
 }
 
 sub pp_srefgen { pp_refgen(@_) }
@@ -6351,9 +6369,7 @@ sub matchop {
 					     ->sibling #   entersub
 					     ->first   #     ex-list
 					     ->first   #       pushmark
-					     ->sibling #       srefgen
-					     ->first   #         ex-list
-					     ->first   #           anoncode
+					     ->sibling #       anoncode
 					     ->targ
 				     )
 				   : undef);

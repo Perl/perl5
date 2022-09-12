@@ -405,7 +405,15 @@ PP(pp_anoncode)
     if (CvCLONE(cv))
         cv = MUTABLE_CV(sv_2mortal(MUTABLE_SV(cv_clone(cv))));
     EXTEND(SP,1);
-    PUSHs(MUTABLE_SV(cv));
+
+    SV* sv = MUTABLE_SV(cv);
+
+    if (LIKELY(PL_op->op_flags & OPf_REF)) {
+        sv = refto(sv);
+    }
+
+    PUSHs(sv);
+
     RETURN;
 }
 
@@ -6996,10 +7004,25 @@ PP(pp_anonconst)
 {
     dSP;
     dTOPss;
-    SETs(sv_2mortal((SV *)newCONSTSUB(SvTYPE(CopSTASH(PL_curcop))==SVt_PVHV
-                                        ? CopSTASH(PL_curcop)
-                                        : NULL,
-                                      NULL, SvREFCNT_inc_simple_NN(sv))));
+
+    CV* constsub = newCONSTSUB(
+        SvTYPE(CopSTASH(PL_curcop))==SVt_PVHV ? CopSTASH(PL_curcop) : NULL,
+        NULL,
+        SvREFCNT_inc_simple_NN(sv)
+    );
+
+    SV* ret_sv = sv_2mortal((SV *)constsub);
+
+    /* Prior to Perl 5.38 anonconst ops always fed into srefgen.
+       5.38 redefined anonconst to create the reference without srefgen.
+       OPf_REF was added to the op. In case some XS code out there creates
+       anonconst the old way, we accommodate OPf_REF's absence here.
+    */
+    if (LIKELY(PL_op->op_flags & OPf_REF)) {
+        ret_sv = refto(ret_sv);
+    }
+
+    SETs(ret_sv);
     RETURN;
 }
 
