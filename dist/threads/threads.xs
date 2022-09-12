@@ -261,6 +261,13 @@ S_ithread_clear(pTHX_ ithread *thread)
         thread->interp = NULL;
     }
 
+    /* If we are freeing ourselves, aTHX would be left dangling, pointing to
+     * freed space (or if interp was NULL, this won't execute unless aTHX is
+     * already NULL). */
+    if (aTHX == interp) {
+        aTHX = NULL;
+    }
+
     PERL_SET_CONTEXT(aTHX);
 #ifdef THREAD_SIGNAL_BLOCKING
     S_set_sigmask(&origmask);
