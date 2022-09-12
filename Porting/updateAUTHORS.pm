@@ -111,7 +111,7 @@ sub _register_author {
 sub git_conf_get {
     my ($self, $setting)= @_;
     chomp(my $value= `git config --get $setting`);
-    return $value;
+    return decode_utf8 $value;
 }
 
 sub current_git_user_name {

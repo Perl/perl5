@@ -5,7 +5,7 @@ use warnings;
 use Getopt::Long qw(GetOptions);
 use Pod::Usage qw(pod2usage);
 use Data::Dumper;
-use Encode qw(encode_utf8 decode_utf8 decode);
+use Encode qw(encode_utf8 decode_utf8);
 use lib "./";
 use Porting::updateAUTHORS;
 use Test::More;
@@ -292,7 +292,7 @@ sub error_advice_for_uncommitted_changes {
     }
 
     my $quote= $^O =~ /Win/ ? '"' : "'";
-    my @config=
+    my @config= map decode_utf8($_),
         `git config --get-regexp $quote^(user|author|committer).(name|email)$quote`;
     if (@config) {
 
@@ -337,7 +337,7 @@ EOF_EXTRA
 EOF_PROPS
     }
 
-    return <<"EOF_MESAGE";
+    return encode_utf8 <<"EOF_MESAGE";
 
 There are uncommitted changes in the working directory
 $uncommitted_files
