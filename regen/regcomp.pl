@@ -9,6 +9,7 @@
 # from information stored in
 #
 #    regcomp.sym
+#    op_reg_common.h
 #    regexp.h
 #
 # pod/perldebguts.pod is not completely regenerated.  Only the table of
@@ -17,6 +18,34 @@
 # Accepts the standard regen_lib -q and -v args.
 #
 # This script is normally invoked from regen.pl.
+#
+# F<regcomp.sym> defines the opcodes and states used in the regex
+# engine, it also includes documentation on the opcodes. This script
+# parses those definitions out and turns them into typedefs, defines,
+# and data structures, and maybe even code which the regex engine can
+# use to operate.
+#
+# F<regexp.h> and op_reg_common.h contain defines C<RXf_xxx> and
+# C<PREGf_xxx> that are used in flags in our code. These defines are
+# parsed out and data structures are created to allow the debug mode of
+# the regex engine to show things such as which flags were set during
+# compilation. In some cases we transform the C code in the header files
+# into perl code which we execute to C<eval()> the contents. For instance
+# in a situation like this:
+#
+#   #define RXf_X 0x1   /* the X mode */
+#   #define RXf_Y 0x2   /* the Y mode */
+#   #define RXf_Z (X|Y) /* the Z mode */
+#
+# this script might end up eval()ing something like C<0x1> and then
+# C<0x2> and then C<(0x1|0x2)> the results of which it then might use in
+# constructing a data structure, or pod in perldebguts, or a comment in
+# C<regnodes.h>. It also would separate out the "X", "Y", and "Z" and
+# use them, and would also use the data in the line comment if present.
+#
+# If you compile a regex under perl -Mre=Debug,ALL you can see much
+# of the content that this file generates and parses out of its input
+# files.
 
 BEGIN {
     # Get function prototypes
@@ -805,7 +834,11 @@ if ($ENV{DUMP}) {
     exit(1);
 }
 my $out= open_new( 'regnodes.h', '>',
-    { by => 'regen/regcomp.pl', from => 'regcomp.sym' } );
+    {
+        by      => 'regen/regcomp.pl',
+        from    => [ 'regcomp.sym', 'op_reg_common.h', 'regexp.h' ],
+    },
+);
 print $out "#if $confine_to_core\n\n";
 print_typedefs($out);
 print_state_defs($out);
