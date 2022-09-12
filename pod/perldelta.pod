@@ -60,6 +60,35 @@ implicit close of the stream may produce a warning.
 
 [github #20060]
 
+=head2 C<INIT> blocks no longer run after an C<exit()> in C<BEGIN>
+
+C<INIT> blocks will no longer run after an C<exit()> performed inside of
+a C<BEGIN>. This means that the combination of the C<-v> option and the
+C<-c> option no longer executes a compile check as well as showing the
+perl version. The C<-v> option executes an exit(0) after printing the
+version information inside of a C<BEGIN> block, and the C<-c> check is
+implemented by using C<INIT> hooks, resulting in the C<-v> option taking
+precedence.
+
+[github #1537]
+[github #20181]
+
+=head2 Syntax errors will no longer produce "phantom error messages".
+
+Generally perl will continue parsing the source code even after
+encountering a compile error. In many cases this is helpful, for
+instance with misspelled variable names it is helpful to show as many
+examples of the error as possible. But in the case of syntax errors
+continuing often produces bizarre error messages, and may even cause
+segmentation faults during the compile process. In this release the
+compiler will halt at the first syntax error encountered. This means
+that any code expecting to see the specific error messages we used to
+produce will be broken. The error that is emitted will be one of the
+diagnostics that used to be produced, but in some cases some messages
+that used to be produced will no longer be displayed.
+
+See L<Changes to Existing Diagnostics> for more details.
+
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.
