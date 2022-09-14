@@ -216,7 +216,8 @@ Perl_mro_meta_dup(pTHX_ struct mro_meta* smeta, CLONE_PARAMS* param)
 =for apidoc mro_get_linear_isa_dfs
 
 Returns the Depth-First Search linearization of C<@ISA>
-the given stash.  The return value is a read-only AV*.
+the given stash.  The return value is a read-only AV*
+whose elements are string SVs giving class names.
 C<level> should be 0 (it is used internally in this
 function's recursion).
 
@@ -399,7 +400,7 @@ S_mro_get_linear_isa_dfs(pTHX_ HV *stash, U32 level)
 Returns the mro linearisation for the given stash.  By default, this
 will be whatever C<mro_get_linear_isa_dfs> returns unless some
 other MRO is in effect for the stash.  The return value is a
-read-only AV*.
+read-only AV* whose values are string SVs giving class names.
 
 You are responsible for C<SvREFCNT_inc()> on the
 return value if you plan to store it anywhere

@@ -14,7 +14,8 @@ static const struct mro_alg c3_alg =
 =for apidoc mro_get_linear_isa_c3
 
 Returns the C3 linearization of C<@ISA>
-the given stash.  The return value is a read-only AV*.
+the given stash.  The return value is a read-only AV*
+whose values are string SVs giving class names.
 C<level> should be 0 (it is used internally in this
 function's recursion).
 
