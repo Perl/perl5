@@ -12,6 +12,18 @@
 # in 'Settings' -> 'Secrets' -> 'Actions' -> 'Repository Secrets':
 #   - EXTENDED_TESTING: when this secret exists and is set to a true value then
 #     all build configurations are tested;
+#   - CI_SKIP_SANITY: if set to a true value then most of the 'Sanity Check' job is skipped;
+#   - CI_FORCE_LINUX: if set to a true value: run the 'linux' job;
+#   - CI_FORCE_LINUX_I386: if set to a true value: run the 'linux-i386' job;
+#   - CI_FORCE_INSTALL: if set to a true value: run the 'install' job;
+#   - CI_FORCE_MACOS: if set to a true value: run the 'smoke-macos-catalina-xcode12' job;
+#   - CI_FORCE_MSVC142: if set to a true value: run the 'windows-msvc142' job;
+#   - CI_FORCE_MINGW64: if set to a true value: run the 'mingw64' job;
+#   - CI_FORCE_CYGWIN: if set to a true value: run the 'cygwin' job;
+#   - CI_FORCE_MINITEST: if set to a true value: run the 'miniperl' job;
+#   - CI_FORCE_ASAN: if set to a true value: run the 'ASAN' job;
+#   - CI_FORCE_PERL_UNICODE: if set to a true value: run the 'PERL_UNICODE' job;
+#   - CI_FORCE_DIST_MODULES: if set to a true value: run the 'dist-modules' job;
 #
 # For the purpose of this workflow:
 #   - 'true value': any value that is not false
@@ -27,6 +39,12 @@
 # are replaced with '*'. (e.g. `s/1/*/g;`). So it's recommended to set
 # something that is unlikely to occur in the job(/build/test) output
 # (for example: '111111111111111111', 'Rumpelstiltskin', ...).
+#
+# Example: if you only want to run tests on cygwin then you can set:
+#   - EXTENDED_TESTING=00000000000000000000000000000000000000
+#   - CI_SKIP_SANITY=1111111111111111111111111111111111111111
+#   - CI_FORCE_CYGWIN=111111111111111111111111111111111111111
+#   - (and all other CI_FORCE_... secrets to 0000000000000000)
 #
 
 name: testsuite
@@ -114,36 +132,84 @@ jobs:
 
     outputs:
       run_all_jobs: ${{ steps.check_extended_testing.outputs.run_all_jobs }}
+      ci_force_linux: ${{ steps.ci_config.outputs.ci_force_linux }}
+      ci_force_linux_i386: ${{ steps.ci_config.outputs.ci_force_linux_i386 }}
+      ci_force_install: ${{ steps.ci_config.outputs.ci_force_install }}
+      ci_force_macos: ${{ steps.ci_config.outputs.ci_force_macos }}
+      ci_force_msvc142: ${{ steps.ci_config.outputs.ci_force_msvc142 }}
+      ci_force_mingw64: ${{ steps.ci_config.outputs.ci_force_mingw64 }}
+      ci_force_cygwin: ${{ steps.ci_config.outputs.ci_force_cygwin }}
+      ci_force_minitest: ${{ steps.ci_config.outputs.ci_force_minitest }}
+      ci_force_asan: ${{ steps.ci_config.outputs.ci_force_asan }}
+      ci_force_perl_unicode: ${{ steps.ci_config.outputs.ci_force_perl_unicode }}
+      ci_force_dist_modules: ${{ steps.ci_config.outputs.ci_force_dist_modules }}
 
     steps:
       - name: Dump GitHub context
         env:
           GITHUB_CONTEXT: ${{ toJson(github) }}
         run: echo "$GITHUB_CONTEXT"
+      - name: Check what-to-do
+        id: ci_config
+        env:
+          CI_SKIP_SANITY: ${{ secrets.CI_SKIP_SANITY }}
+          CI_FORCE_LINUX: ${{ secrets.CI_FORCE_LINUX }}
+          CI_FORCE_LINUX_I386: ${{ secrets.CI_FORCE_LINUX_I386 }}
+          CI_FORCE_INSTALL: ${{ secrets.CI_FORCE_INSTALL }}
+          CI_FORCE_MACOS: ${{ secrets.CI_FORCE_MACOS }}
+          CI_FORCE_MSVC142: ${{ secrets.CI_FORCE_MSVC142 }}
+          CI_FORCE_MINGW64: ${{ secrets.CI_FORCE_MINGW64 }}
+          CI_FORCE_CYGWIN: ${{ secrets.CI_FORCE_CYGWIN }}
+          CI_FORCE_MINITEST: ${{ secrets.CI_FORCE_MINITEST }}
+          CI_FORCE_ASAN: ${{ secrets.CI_FORCE_ASAN }}
+          CI_FORCE_PERL_UNICODE: ${{ secrets.CI_FORCE_PERL_UNICODE }}
+          CI_FORCE_DIST_MODULES: ${{ secrets.CI_FORCE_DIST_MODULES }}
+        run: |
+          echo '::echo::on'
+          [[ -n "${CI_SKIP_SANITY}"        ]] && [[ "${CI_SKIP_SANITY%[!0 ]*}"        != "${CI_SKIP_SANITY}"        ]] && echo "::set-output name=ci_skip_sanity::true"
+          [[ -n "${CI_FORCE_LINUX}"        ]] && [[ "${CI_FORCE_LINUX%[!0 ]*}"        != "${CI_FORCE_LINUX}"        ]] && echo "::set-output name=ci_force_linux::true"
+          [[ -n "${CI_FORCE_LINUX_I386}"   ]] && [[ "${CI_FORCE_LINUX_I386%[!0 ]*}"   != "${CI_FORCE_LINUX_I386}"   ]] && echo "::set-output name=ci_force_linux_i386::true"
+          [[ -n "${CI_FORCE_INSTALL}"      ]] && [[ "${CI_FORCE_INSTALL%[!0 ]*}"      != "${CI_FORCE_INSTALL}"      ]] && echo "::set-output name=ci_force_install::true"
+          [[ -n "${CI_FORCE_MACOS}"        ]] && [[ "${CI_FORCE_MACOS%[!0 ]*}"        != "${CI_FORCE_MACOS}"        ]] && echo "::set-output name=ci_force_macos::true"
+          [[ -n "${CI_FORCE_MSVC142}"      ]] && [[ "${CI_FORCE_MSVC142%[!0 ]*}"      != "${CI_FORCE_MSVC142}"      ]] && echo "::set-output name=ci_force_msvc142::true"
+          [[ -n "${CI_FORCE_MINGW64}"      ]] && [[ "${CI_FORCE_MINGW64%[!0 ]*}"      != "${CI_FORCE_MINGW64}"      ]] && echo "::set-output name=ci_force_mingw64::true"
+          [[ -n "${CI_FORCE_CYGWIN}"       ]] && [[ "${CI_FORCE_CYGWIN%[!0 ]*}"       != "${CI_FORCE_CYGWIN}"       ]] && echo "::set-output name=ci_force_cygwin::true"
+          [[ -n "${CI_FORCE_MINITEST}"     ]] && [[ "${CI_FORCE_MINITEST%[!0 ]*}"     != "${CI_FORCE_MINITEST}"     ]] && echo "::set-output name=ci_force_minitest::true"
+          [[ -n "${CI_FORCE_ASAN}"         ]] && [[ "${CI_FORCE_ASAN%[!0 ]*}"         != "${CI_FORCE_ASAN}"         ]] && echo "::set-output name=ci_force_asan::true"
+          [[ -n "${CI_FORCE_PERL_UNICODE}" ]] && [[ "${CI_FORCE_PERL_UNICODE%[!0 ]*}" != "${CI_FORCE_PERL_UNICODE}" ]] && echo "::set-output name=ci_force_perl_unicode::true"
+          [[ -n "${CI_FORCE_DIST_MODULES}" ]] && [[ "${CI_FORCE_DIST_MODULES%[!0 ]*}" != "${CI_FORCE_DIST_MODULES}" ]] && echo "::set-output name=ci_force_dist_modules::true"
+          echo '::echo::off'
       - name: Install System dependencies
+        if: steps.ci_config.outputs.ci_skip_sanity != 'true'
         run: |
           sudo apt-get update
           sudo apt-get install -y libgdbm-dev libdb-dev
       - uses: actions/checkout@v2
         with:
           fetch-depth: 0
+        if: steps.ci_config.outputs.ci_skip_sanity != 'true'
       - name: git cfg
+        if: steps.ci_config.outputs.ci_skip_sanity != 'true'
         run: |
           git config diff.renameLimit 999999
       - name: Configure
+        if: steps.ci_config.outputs.ci_skip_sanity != 'true'
         run: |
           ./Configure -des -Dusedevel ${CONFIGURE_ARGS} -Dprefix="$HOME/perl-blead"
         env:
           CONFIGURE_ARGS: "-Dusethreads"
       - name: Build
+        if: steps.ci_config.outputs.ci_skip_sanity != 'true'
         id: build
         run: |
           make -j2 test_prep
       - name: Show Config
+        if: steps.ci_config.outputs.ci_skip_sanity != 'true'
         run: |
           ./perl -Ilib -V
           ./perl -Ilib -e 'use Config; print Config::config_sh'
       - name: Run Tests (excluding t/porting)
+        if: steps.ci_config.outputs.ci_skip_sanity != 'true'
         run: |
           TEST_JOBS=2 ./perl t/harness -nre='^porting/'
 
@@ -166,7 +232,7 @@ jobs:
           fi
 
       - name: Run Porting Tests (t/porting)
-        if: (! cancelled() && steps.build.outcome == 'success')
+        if: (! cancelled() && steps.ci_config.outputs.ci_skip_sanity != 'true' && steps.build.outcome == 'success')
         run: |
           TEST_JOBS=2 ./perl t/harness -re='^porting/'
 
@@ -179,7 +245,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 120
     needs: sanity_check
-    if: (! cancelled() && needs.sanity_check.outputs.run_all_jobs == 'true')
+    if: (! cancelled() && (needs.sanity_check.outputs.run_all_jobs == 'true' || needs.sanity_check.outputs.ci_force_linux == 'true'))
 
     strategy:
       fail-fast: false
@@ -235,7 +301,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 120
     needs: sanity_check
-    if: (! cancelled() && needs.sanity_check.outputs.run_all_jobs == 'true')
+    if: (! cancelled() && (needs.sanity_check.outputs.run_all_jobs == 'true' || needs.sanity_check.outputs.ci_force_linux_i386 == 'true'))
 
     # https://hub.docker.com/r/i386/ubuntu/
     container:
@@ -293,7 +359,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 120
     needs: sanity_check
-    if: (! cancelled() && needs.sanity_check.outputs.run_all_jobs == 'true')
+    if: (! cancelled() && (needs.sanity_check.outputs.run_all_jobs == 'true' || needs.sanity_check.outputs.ci_force_install == 'true'))
 
     steps:
       - name: Install System dependencies
@@ -342,7 +408,7 @@ jobs:
     runs-on: macos-11
     timeout-minutes: 120
     needs: sanity_check
-    if: (! cancelled() && needs.sanity_check.outputs.run_all_jobs == 'true')
+    if: (! cancelled() && (needs.sanity_check.outputs.run_all_jobs == 'true' || needs.sanity_check.outputs.ci_force_macos == 'true'))
 
     strategy:
       fail-fast: false
@@ -377,7 +443,7 @@ jobs:
     runs-on: windows-2019
     timeout-minutes: 120
     needs: sanity_check
-    if: (! cancelled() && needs.sanity_check.outputs.run_all_jobs == 'true')
+    if: (! cancelled() && (needs.sanity_check.outputs.run_all_jobs == 'true' || needs.sanity_check.outputs.ci_force_msvc142 == 'true'))
 
     steps:
       - run: git config --global core.autocrlf false
@@ -433,7 +499,7 @@ jobs:
     runs-on: windows-2019
     timeout-minutes: 120
     needs: sanity_check
-    if: (! cancelled() && needs.sanity_check.outputs.run_all_jobs == 'true')
+    if: (! cancelled() && (needs.sanity_check.outputs.run_all_jobs == 'true' || needs.sanity_check.outputs.ci_force_mingw64 == 'true'))
 
     steps:
       - run: git config --global core.autocrlf false
@@ -483,7 +549,7 @@ jobs:
     runs-on: windows-2019
     timeout-minutes: 120
     needs: sanity_check
-    if: (! cancelled() && needs.sanity_check.outputs.run_all_jobs == 'true')
+    if: (! cancelled() && (needs.sanity_check.outputs.run_all_jobs == 'true' || needs.sanity_check.outputs.ci_force_cygwin == 'true'))
 
     steps:
       # we use Cygwin git, so no need to configure git here.
@@ -568,7 +634,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 120
     needs: sanity_check
-    if: (! cancelled() && needs.sanity_check.outputs.run_all_jobs == 'true')
+    if: (! cancelled() && (needs.sanity_check.outputs.run_all_jobs == 'true' || needs.sanity_check.outputs.ci_force_minitest == 'true'))
 
     outputs:
       run_all_jobs: ${{ steps.check_extended_testing.outputs.run_all_jobs }}
@@ -616,7 +682,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 120
     needs: sanity_check
-    if: (! cancelled() && needs.sanity_check.outputs.run_all_jobs == 'true')
+    if: (! cancelled() && (needs.sanity_check.outputs.run_all_jobs == 'true' || needs.sanity_check.outputs.ci_force_asan == 'true'))
 
     strategy:
       matrix:
@@ -666,7 +732,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 120
     needs: sanity_check
-    if: (! cancelled() && needs.sanity_check.outputs.run_all_jobs == 'true')
+    if: (! cancelled() && (needs.sanity_check.outputs.run_all_jobs == 'true' || needs.sanity_check.outputs.ci_force_perl_unicode == 'true'))
 
     strategy:
       matrix:
@@ -712,7 +778,7 @@ jobs:
     name: dist-modules
     needs: sanity_check
     runs-on: ubuntu-latest
-    if: (! cancelled() && needs.sanity_check.outputs.run_all_jobs == 'true')
+    if: (! cancelled() && (needs.sanity_check.outputs.run_all_jobs == 'true' || needs.sanity_check.outputs.ci_force_dist_modules == 'true'))
 
     env:
       # some plugins still needs this to run their tests...
