@@ -678,7 +678,7 @@ jobs:
     name: dist-modules
     needs: sanity_check
     runs-on: ubuntu-latest
-    if: needs.sanity_check.outputs.run_all_jobs == 'true'
+    if: always() && needs.sanity_check.outputs.run_all_jobs == 'true'
 
     env:
       # some plugins still needs this to run their tests...
