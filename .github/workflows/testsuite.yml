@@ -10,8 +10,23 @@
 #
 # Testing other build configurations is controlled by the 'Secrets' configured
 # in 'Settings' -> 'Secrets' -> 'Actions' -> 'Repository Secrets':
-#   - EXTENDED_TESTING: when this secret exists (value is irrelevant) then all
-#     build configurations are tested;
+#   - EXTENDED_TESTING: when this secret exists and is set to a true value then
+#     all build configurations are tested;
+#
+# For the purpose of this workflow:
+#   - 'true value': any value that is not false
+#   - 'false value':
+#      * empty string
+#      * string containing only spaces (i.e. '    ')
+#      * string containing only zeroes (i.e. '0', '0000')
+#      * string containing only spaces and zeroes (i.e. '0  0 0 0')
+#
+# When setting a value it's best to set a long and complex value
+# since GitHub will mask the secrets in the output. Which means if you
+# set (for example) EXTENDED_TESTING to 1 then all occurrences of '1'
+# are replaced with '*'. (e.g. `s/1/*/g;`). So it's recommended to set
+# something that is unlikely to occur in the job(/build/test) output
+# (for example: '111111111111111111', 'Rumpelstiltskin', ...).
 #
 
 name: testsuite
@@ -142,7 +157,7 @@ jobs:
           if [[ "${CURRENT_REPOSITORY}" = 'Perl/perl5' ]]; then
             echo "Running all test jobs"
             echo "::set-output name=run_all_jobs::true"
-          elif [[ -n "${EXTENDED_TESTING}" ]]; then
+          elif [[ -n "${EXTENDED_TESTING}" ]] && [[ "${EXTENDED_TESTING%[!0 ]*}" != "${EXTENDED_TESTING}" ]]; then
             echo "Running all test jobs"
             echo "::set-output name=run_all_jobs::true"
           else
