@@ -139,12 +139,15 @@ jobs:
           EXTENDED_TESTING: ${{ secrets.EXTENDED_TESTING }}
           CURRENT_REPOSITORY: ${{ github.repository }}
         run: |
-          if [[ -z "${EXTENDED_TESTING}" && "${CURRENT_REPOSITORY}" != 'Perl/perl5' ]]; then
-            echo "Skipping extended test jobs."
-            echo "::set-output name=run_all_jobs::false"
-          else
+          if [[ "${CURRENT_REPOSITORY}" = 'Perl/perl5' ]]; then
             echo "Running all test jobs"
             echo "::set-output name=run_all_jobs::true"
+          elif [[ -n "${EXTENDED_TESTING}" ]]; then
+            echo "Running all test jobs"
+            echo "::set-output name=run_all_jobs::true"
+          else
+            echo "Skipping extended test jobs."
+            echo "::set-output name=run_all_jobs::false"
           fi
 
       - name: Run Porting Tests (t/porting)
