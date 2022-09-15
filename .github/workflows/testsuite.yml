@@ -1,3 +1,19 @@
+#
+# Run the tests on various build configurations and various operating systems.
+#
+# In the Perl/perl5 repository all jobs are run by default.
+#
+# To enable the testing on a fork of the perl5 repository you first need to
+# enable GitHub Actions in 'Settings' -> 'Actions' -> 'General'.
+#
+# When actions are enabled then it will - by default - run the 'Sanity Check' job.
+#
+# Testing other build configurations is controlled by the 'Secrets' configured
+# in 'Settings' -> 'Secrets' -> 'Actions' -> 'Repository Secrets':
+#   - EXTENDED_TESTING: when this secret exists (value is irrelevant) then all
+#     build configurations are tested;
+#
+
 name: testsuite
 
 on:
