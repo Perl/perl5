@@ -1962,8 +1962,8 @@ win32_readlink(const char *pathname, char *buf, size_t bufsiz) {
             }
             bytes_out =
                 WideCharToMultiByte(CP_ACP, WC_NO_BEST_FIT_CHARS,
-                                    sd->PathBuffer + sd->SubstituteNameOffset/2,
-                                    sd->SubstituteNameLength/2,
+                                    sd->PathBuffer + sd->PrintNameOffset/2,
+                                    sd->PrintNameLength/2,
                                     buf, (int)bufsiz, NULL, &used_default);
         }
         break;
@@ -1977,8 +1977,8 @@ win32_readlink(const char *pathname, char *buf, size_t bufsiz) {
             }
             bytes_out =
                 WideCharToMultiByte(CP_ACP, WC_NO_BEST_FIT_CHARS,
-                                    rd->PathBuffer + rd->SubstituteNameOffset/2,
-                                    rd->SubstituteNameLength/2,
+                                    rd->PathBuffer + rd->PrintNameOffset/2,
+                                    rd->PrintNameLength/2,
                                     buf, (int)bufsiz, NULL, &used_default);
         }
         break;
