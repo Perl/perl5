@@ -129,7 +129,7 @@ jobs:
           fi
 
       - name: Run Porting Tests (t/porting)
-        if: always() && steps.build.outcome == 'success'
+        if: (! cancelled() && steps.build.outcome == 'success')
         run: |
           TEST_JOBS=2 ./perl t/harness -re='^porting/'
 
@@ -142,7 +142,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 120
     needs: sanity_check
-    if: always() && needs.sanity_check.outputs.run_all_jobs == 'true'
+    if: (! cancelled() && needs.sanity_check.outputs.run_all_jobs == 'true')
 
     strategy:
       fail-fast: false
@@ -198,7 +198,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 120
     needs: sanity_check
-    if: always() && needs.sanity_check.outputs.run_all_jobs == 'true'
+    if: (! cancelled() && needs.sanity_check.outputs.run_all_jobs == 'true')
 
     # https://hub.docker.com/r/i386/ubuntu/
     container:
@@ -256,7 +256,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 120
     needs: sanity_check
-    if: always() && needs.sanity_check.outputs.run_all_jobs == 'true'
+    if: (! cancelled() && needs.sanity_check.outputs.run_all_jobs == 'true')
 
     steps:
       - name: Install System dependencies
@@ -305,7 +305,7 @@ jobs:
     runs-on: macos-10.15
     timeout-minutes: 120
     needs: sanity_check
-    if: always() && needs.sanity_check.outputs.run_all_jobs == 'true'
+    if: (! cancelled() && needs.sanity_check.outputs.run_all_jobs == 'true')
 
     strategy:
       fail-fast: false
@@ -341,7 +341,7 @@ jobs:
     runs-on: windows-2019
     timeout-minutes: 120
     needs: sanity_check
-    if: always() && needs.sanity_check.outputs.run_all_jobs == 'true'
+    if: (! cancelled() && needs.sanity_check.outputs.run_all_jobs == 'true')
 
     steps:
       - run: git config --global core.autocrlf false
@@ -397,7 +397,7 @@ jobs:
     runs-on: windows-2019
     timeout-minutes: 120
     needs: sanity_check
-    if: always() && needs.sanity_check.outputs.run_all_jobs == 'true'
+    if: (! cancelled() && needs.sanity_check.outputs.run_all_jobs == 'true')
 
     steps:
       - run: git config --global core.autocrlf false
@@ -447,7 +447,7 @@ jobs:
     runs-on: windows-2019
     timeout-minutes: 120
     needs: sanity_check
-    if: always() && needs.sanity_check.outputs.run_all_jobs == 'true'
+    if: (! cancelled() && needs.sanity_check.outputs.run_all_jobs == 'true')
 
     steps:
       # we use Cygwin git, so no need to configure git here.
@@ -532,7 +532,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 120
     needs: sanity_check
-    if: always() && needs.sanity_check.outputs.run_all_jobs == 'true'
+    if: (! cancelled() && needs.sanity_check.outputs.run_all_jobs == 'true')
 
     outputs:
       run_all_jobs: ${{ steps.check_extended_testing.outputs.run_all_jobs }}
@@ -580,7 +580,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 120
     needs: sanity_check
-    if: always() && needs.sanity_check.outputs.run_all_jobs == 'true'
+    if: (! cancelled() && needs.sanity_check.outputs.run_all_jobs == 'true')
 
     strategy:
       matrix:
@@ -630,7 +630,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 120
     needs: sanity_check
-    if: always() && needs.sanity_check.outputs.run_all_jobs == 'true'
+    if: (! cancelled() && needs.sanity_check.outputs.run_all_jobs == 'true')
 
     strategy:
       matrix:
@@ -676,7 +676,7 @@ jobs:
     name: dist-modules
     needs: sanity_check
     runs-on: ubuntu-latest
-    if: always() && needs.sanity_check.outputs.run_all_jobs == 'true'
+    if: (! cancelled() && needs.sanity_check.outputs.run_all_jobs == 'true')
 
     env:
       # some plugins still needs this to run their tests...
