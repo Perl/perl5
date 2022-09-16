@@ -135,7 +135,7 @@ EOM
     system $^X, "Makefile.PL"
       and die "$name: Makefile.PL failed\n";
 
-    my $verbose = 0;
+    my $verbose = $github_ci && $ENV{'RUNNER_DEBUG'} ? 1 : 0;
     system "make", "test", "TEST_VERBOSE=$verbose"
       and die "$name: make test failed\n";
 
