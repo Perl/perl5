@@ -3403,14 +3403,22 @@ package Multi_Default;
         my $addr = pack 'J', refaddr $self;
 
         while (@_ > 1) {
-            my $default = shift;
-            my $eval = shift;
-            $class_defaults{$addr}->{$default} = $eval;
+            $self->append_default(shift, shift);
         }
 
-        $other_default{$addr} = shift;
+        $self->set_final_default(shift);
 
         return $self;
+    }
+
+    sub append_default($self, $new_default, $eval) {
+        my $addr = pack 'J', refaddr $self;
+        $class_defaults{$addr}->{$new_default} = $eval
+    }
+
+    sub set_final_default($self, $new_default) {
+        my $addr = pack 'J', refaddr $self;
+        $other_default{$addr} = $new_default;
     }
 
     sub get_next_defaults($self) {
