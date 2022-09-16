@@ -2801,6 +2801,7 @@ END
                             while ($_ =~ s/$BOM_re//) { # BOM; seems to be on
                                                         # many lines in some files!!
                                 $_ = <$file_handle>;
+                                goto no_version unless defined $_;
                                 chomp;
                                 if ($_ =~ /^# Version: (.*)/) {
                                     $this_version = $1;
