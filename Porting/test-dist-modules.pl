@@ -15,12 +15,23 @@ $|++;
 my $github_ci = $ENV{'GITHUB_SHA'} ? 1 : 0;
 
 my $manifest = maniread();
+my @failures = ();
 
 my $start = getcwd()
   or die "Cannot fetch current directory: $!\n";
 
 # get ppport.h
 my $pppdir = test_dist("Devel-PPPort");
+
+if (@failures) {
+    if ($github_ci) {
+        # GitHub may show STDERR before STDOUT.. despite autoflush
+        # being enabled.. Make sure it detects the 'endgroup' before
+        # the `die` statement.
+        print STDERR "::endgroup::\n";
+    }
+    die "Devel-PPPort failed, aborting other tests.\n";
+}
 
 my $pppfile = "$pppdir/ppport.h";
 
@@ -46,6 +57,17 @@ closedir $distdir;
 
 for my $dist (@dists) {
     test_dist($dist);
+}
+
+if (@failures) {
+    if ($github_ci) {
+        # GitHub may show STDERR before STDOUT.. despite autoflush
+        # being enabled.. Make sure it detects the 'endgroup' before
+        # the `die` statement.
+        print STDERR "::endgroup::\n";
+    }
+    my $msg = join("\n", map { "\t'$_->[0]' failed at $_->[1]" } @failures);
+    die "Following dists had failures:\n$msg\n";
 }
 
 sub test_dist {
@@ -132,20 +154,32 @@ WriteMakefile(
 EOM
         close $fh;
     }
-    system $^X, "Makefile.PL"
-      and die "$name: Makefile.PL failed\n";
 
     my $verbose = $github_ci && $ENV{'RUNNER_DEBUG'} ? 1 : 0;
-    system "make", "test", "TEST_VERBOSE=$verbose"
-      and die "$name: make test failed\n";
-
-    system "make", "install"
-      and die "$name: make install failed\n";
+    my $failed = "";
+    if (system($^X, "Makefile.PL")) {
+        $failed = "Makefile.PL";
+        die "$name: Makefile.PL failed\n" unless $github_ci;
+    }
+    elsif (system("make", "test", "TEST_VERBOSE=$verbose")) {
+        $failed = "make test";
+        die "$name: make test failed\n" unless $github_ci;
+    }
+    elsif (system("make", "install")) {
+        $failed = "make install";
+        die "$name: make install failed\n" unless $github_ci;
+    }
 
     chdir $start
       or die "Cannot return to $start: $!\n";
 
-    print "::endgroup::\n" if $github_ci;
+    if ($github_ci) {
+        print "::endgroup::\n";
+        if ($failed) {
+           print "::error ::$name failed at $failed\n";
+           push @failures, [ $name, $failed ];
+        }
+    }
 
     $dir;
 }
