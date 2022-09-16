@@ -1,4 +1,4 @@
-#!./perl -w
+#!./perl
 
 BEGIN {
     chdir 't' if -d 't';
@@ -6,10 +6,12 @@ BEGIN {
     set_up_inc('../lib');
 }
 
-plan(tests => 63);
+use strict;
+use warnings;
 
 sub empty_sub {}
 
+my @test;
 is(empty_sub,undef,"Is empty");
 is(empty_sub(1,2,3),undef,"Is still empty");
 @test = empty_sub();
@@ -19,6 +21,7 @@ is(scalar(@test), 0, 'Didnt return anything');
 
 # [perl #91844] return should always copy
 {
+    my %foo;
     $foo{bar} = 7;
     for my $x ($foo{bar}) {
 	# Pity test.pl doesnt have isn't.
@@ -151,6 +154,7 @@ is *_{ARRAY}, undef, 'goto &xsub when @_ does not exist';
 # another XSUB if this fails.
 ok !exists $INC{"re.pm"}, 're.pm not loaded yet';
 {
+    my @str;
     sub re::regmust{}
     bless \&re::regmust;
     DESTROY {
@@ -166,6 +170,7 @@ ok !exists $INC{"re.pm"}, 're.pm not loaded yet';
       'XSUB clobbering sub whose DESTROY assigns to the glob';
 }
 {
+    my @str;
     no warnings 'redefine';
     sub foo {}
     bless \&foo, 'newATTRSUBbug';
@@ -433,3 +438,5 @@ fresh_perl_like(
     {},
     "GH Issue #16944 - Syntax error with sub and shift causes segfault"
 );
+
+done_testing;
