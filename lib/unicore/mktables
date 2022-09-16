@@ -1854,8 +1854,7 @@ package main;
             no strict "refs";
 
             # Use typeglob to give the anonymous subroutine the name we want
-            *$destroy_name = sub {
-                my $self = shift;
+            *$destroy_name = sub ($self) {
                 my $addr = pack 'J', refaddr $self;
 
                 $self->$destroy_callback if $destroy_callback;
@@ -1870,9 +1869,8 @@ package main;
         unless ($package->can('dump')) {
             my $dump_name = "${package}::dump";
             no strict "refs";
-            *$dump_name = sub {
-                my $self = shift;
-                return dump_inside_out($self, $package_fields{$package}, @_);
+            *$dump_name = sub ($self, @_args) {
+                return dump_inside_out($self, $package_fields{$package}, @_args);
             }
         }
         return;
@@ -9829,7 +9827,7 @@ sub UCD_name ($table, $alias) {
     }
 }
 
-sub dump_inside_out( $object, $fields_ref ) {
+sub dump_inside_out( $object, $fields_ref, @args ) {
     # Dump inside-out hashes in an object's state by converting them to a
     # regular hash and then calling simple_dumper on that.
 
@@ -9840,7 +9838,7 @@ sub dump_inside_out( $object, $fields_ref ) {
         $hash{$key} = $fields_ref->{$key}{$addr};
     }
 
-    return simple_dumper(\%hash, $object, $fields_ref);
+    return simple_dumper(\%hash, @args);
 }
 
 sub _operator_dot($self, $other="", $reversed=0) {
