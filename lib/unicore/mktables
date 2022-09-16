@@ -3358,6 +3358,8 @@ END
 
 package Multi_Default;
 
+sub trace { return main::trace(@_); }
+
 # Certain properties in early versions of Unicode had more than one possible
 # default for code points missing from the files.  In these cases, one
 # default applies to everything left over after all the others are applied,
@@ -3376,12 +3378,13 @@ package Multi_Default;
 
     my %class_defaults;
     # The defaults structure for the classes
-    main::set_access('class_defaults', \%class_defaults);
+    main::set_access('class_defaults', \%class_defaults, 'readable_array');
 
     my %other_default;
     # The default that applies to everything left over.
     main::set_access('other_default', \%other_default, 'r');
 
+    my %iterator;
 
     sub new {
         # The constructor is called with default => eval pairs, terminated by
@@ -3401,6 +3404,9 @@ package Multi_Default;
 
         my $self = bless \do{my $anonymous_scalar}, $class;
         my $addr = pack 'J', refaddr $self;
+        $iterator{$addr} = 0;
+
+        return $self unless @_;
 
         while (@_ > 1) {
             $self->append_default(shift, shift);
@@ -3413,7 +3419,9 @@ package Multi_Default;
 
     sub append_default($self, $new_default, $eval) {
         my $addr = pack 'J', refaddr $self;
-        $class_defaults{$addr}->{$new_default} = $eval
+
+        # Pushes a default setting to the current list
+        push $class_defaults{$addr}->@*, [ $new_default, $eval ];
     }
 
     sub set_final_default($self, $new_default) {
@@ -3424,7 +3432,13 @@ package Multi_Default;
     sub get_next_defaults($self) {
         # Iterates and returns the next class of defaults.
 
-        return each %{$class_defaults{pack 'J', refaddr $self}};
+        my $addr = pack 'J', refaddr $self;
+        if ($iterator{$addr}++ < $class_defaults{$addr}->@*) {
+            return $class_defaults{$addr}->[$iterator{$addr}-1]->@*;
+        }
+
+        $iterator{$addr} = 0;
+        return undef;
     }
 }
 
@@ -13390,6 +13404,7 @@ END
             #
             # Go through each list.
             while (my ($default, $eval) = $default_map->get_next_defaults) {
+                last unless defined $eval;
 
                 # Get the class list, and intersect it with all the so-far
                 # unspecified code points yielding all the code points
