@@ -7,8 +7,12 @@ use File::Temp "tempdir";
 use ExtUtils::Manifest "maniread";
 use Cwd "getcwd";
 
+$|++;
+
 -f "Configure"
   or die "Expected to be run from a perl checkout";
+
+my $github_ci = $ENV{'GITHUB_SHA'} ? 1 : 0;
 
 my $manifest = maniread();
 
@@ -47,6 +51,7 @@ for my $dist (@dists) {
 sub test_dist {
     my ($name) = @_;
 
+    print "::group::Testing $name\n" if $github_ci;
     print "*** Testing $name ***\n";
     my $dir = tempdir( CLEANUP => 1);
     system "cp", "-a", "dist/$name/.", "$dir/."
@@ -139,6 +144,8 @@ EOM
 
     chdir $start
       or die "Cannot return to $start: $!\n";
+
+    print "::endgroup::\n" if $github_ci;
 
     $dir;
 }
