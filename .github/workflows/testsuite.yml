@@ -801,7 +801,7 @@ jobs:
       image: perldocker/perl-tester:${{ matrix.perl-version }}
 
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
       - name: perl -V
         run: perl -V
       - name: Build and test dist modules
