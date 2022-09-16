@@ -2801,20 +2801,30 @@ END
                             utf8::encode($BOM);
                             my $BOM_re = qr/ ^ (?:$BOM)? /x;
 
-                            while ($_ =~ s/$BOM_re//) { # BOM; seems to be on
-                                                        # many lines in some files!!
-                                $_ = <$file_handle>;
-                                goto no_version unless defined $_;
+                            do {
                                 chomp;
-                                if ($_ =~ /^# Version: (.*)/) {
-                                    $this_version = $1;
-                                    goto valid_version
-                                        if $this_version eq $string_version;
-                                    goto valid_version
-                                        if "$this_version.0" eq $string_version;
-                                    goto wrong_version;
+
+                                # BOM; seems to be on many lines in some
+                                # files!!
+                                $_ =~ s/$BOM_re//;
+
+                                if (/./) {
+
+                                    # Only look for the version if in the
+                                    # first comment block.
+                                    goto no_version unless $_ =~ /^#/;
+
+                                    if ($_ =~ /Version:? (\S*)/) {
+                                        $this_version = $1;
+                                        goto valid_version
+                                          if  $this_version eq $string_version;
+                                        goto valid_version
+                                            if  "$this_version.0"
+                                                            eq $string_version;
+                                    }
                                 }
-                            }
+                            } while (<$file_handle>);
+
                             goto no_version;
                         }
                     }
