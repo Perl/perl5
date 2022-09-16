@@ -439,4 +439,13 @@ fresh_perl_like(
     "GH Issue #16944 - Syntax error with sub and shift causes segfault"
 );
 
+# GH #19997 - evaluation order
+{
+    my $ord;
+    my @args;
+    (do { $ord .= "(sub)"; sub { @args = @_ } })->(do { $ord .= "(args)"; (1, 2) });
+    is $ord, "(sub)(args)", 'evaluation order is LtR';
+    ok eq_array(\@args, [1, 2]), 'args to invoked subref';
+}
+
 done_testing;

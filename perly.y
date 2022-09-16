@@ -1072,9 +1072,9 @@ subscripted:    gelem PERLY_BRACE_OPEN expr PERLY_SEMICOLON PERLY_BRACE_CLOSE   
 			      parser->expect = XOPERATOR;
 			}
 	|	term[code_reference] ARROW PERLY_PAREN_OPEN expr PERLY_PAREN_CLOSE     /* $subref->(@args) */
-			{ $$ = newUNOP(OP_ENTERSUB, OPf_STACKED,
-				   op_append_elem(OP_LIST, $expr,
-				       newCVREF(0, scalar($code_reference))));
+			{ $$ = newUNOP(OP_ENTERSUB, OPf_STACKED|OPf_SPECIAL,
+				   op_append_elem(OP_LIST,
+				       newCVREF(0, scalar($code_reference)), $expr));
 			  if (parser->expect == XBLOCK)
 			      parser->expect = XOPERATOR;
 			}

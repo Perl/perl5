@@ -5162,11 +5162,34 @@ Perl_clear_defarray(pTHX_ AV* av, bool abandon)
 
 PP(pp_entersub)
 {
-    dSP; dPOPss;
+    dSP;
+    SV *sv;
     GV *gv;
     CV *cv;
     PERL_CONTEXT *cx;
     I32 old_savestack_ix;
+    bool cvop_is_first = PL_op->op_flags & OPf_SPECIAL;
+
+    if(UNLIKELY(cvop_is_first)) {
+        /* We don't want to POPMARK */
+        SV **mark = PL_stack_base + TOPMARK;
+        SV **svp = mark + 1;
+
+        sv = *svp;
+
+        /* TODO: This is currently horribly inefficient. It can likely be made
+         * a lot better by adjusting the code lower down instead
+         * For now we'll just move all the stack args down one position
+         */
+        PERL_UNUSED_RESULT(POPs);
+
+        while(svp <= SP) {
+            svp[0] = svp[1];
+            svp++;
+        }
+    }
+    else
+        sv = POPs;
 
     if (UNLIKELY(!sv))
         goto do_die;
