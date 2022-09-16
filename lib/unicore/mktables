@@ -1183,7 +1183,12 @@ my $code_point_re = qr/\b$run_on_code_point_re/;
 # defaults for code points not listed (i.e., missing) in the file.  The code
 # depends on this ending with a semi-colon, so it can assume it is a valid
 # field when the line is split() by semi-colons
-my $missing_defaults_prefix = qr/^#\s+\@missing:\s+0000\.\.10FFFF\s*;/;
+my $missing_defaults_prefix = qr/ ^ \# \s+ \@missing: \s+
+                                           ($code_point_re)
+                                           \.\.
+                                           ($code_point_re)
+                                       \s* ;
+                                /x;
 
 # Property types.  Unicode has more types, but these are sufficient for our
 # purposes.
@@ -2935,6 +2940,9 @@ END
                     $self->carp_bad_line("Unexpected \@missing line.  Assuming no missing entries");
                 }
                 elsif ($has_missings_defaults{$addr} == $NOT_IGNORED) {
+                    my $start = $1;     # The pattern saves the beginning and
+                    my $end = $2;       # end points of the range the default
+                                        # is for
                     my @defaults = split /\s* ; \s*/x, $_;
 
                     # The first field is the @missing, which ends in a
@@ -3004,8 +3012,11 @@ END
 
                         # Store them as a sub-hash as part of an array, with
                         # both components.
-                        push @{$missings{$addr}}, { default  => $default,
-                                                    property => $property };
+                        push @{$missings{$addr}}, { start    => hex $start,
+                                                    end      => hex $end,
+                                                    default  => $default,
+                                                    property => $property
+                                                  };
                     }
                 }
 
