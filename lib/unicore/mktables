@@ -19218,6 +19218,7 @@ my $Indic_Skip
             = "Provisional; for the analysis and processing of Indic scripts";
 my $Validation = "Validation Tests";
 my $Validation_Documentation = "Documentation of validation Tests";
+my $Unused_Skip = "Currently unused by Perl";
 
 # This is a list of the input files and how to handle them.  The files are
 # processed in their order in this list.  Some reordering is possible if
@@ -19779,6 +19780,18 @@ my @input_file_objects = (
                     Pre_Handler => \&setup_IdType,
                     Each_Line_Handler => \&filter_IdType_line,
                     Property => 'Identifier_Type',
+                    UCD => 0,
+                   ),
+    Input_file->new('confusables.txt', v15.0.0,
+                    Skip => $Unused_Skip,
+                    UCD => 0,
+                   ),
+    Input_file->new('confusablesSummary.txt', v15.0.0,
+                    Skip => $Unused_Skip,
+                    UCD => 0,
+                   ),
+    Input_file->new('intentional.txt', v15.0.0,
+                    Skip => $Unused_Skip,
                     UCD => 0,
                    ),
 );
