@@ -7677,7 +7677,7 @@ match_uniprop( const unsigned char * const key, const U16 key_len ) {
  * 43f6df50e4878f501b417e366b0ee097ae5ccb2d4ce942026bed3d62d78e7887 lib/unicore/extracted/DLineBreak.txt
  * a04502ebb36a45d83cbe48a7d8132ea8143edb7b3d34d0aa6afe4a9685049741 lib/unicore/extracted/DNumType.txt
  * 11075771b112e8e7ccf6ffa637c4c91eadc3ef3db0517b24e605df8fd3624239 lib/unicore/extracted/DNumValues.txt
- * a6c2dcc098ee1ecae3bef321ebf9a66013ddf5a3660ecb4277b5097f3605e83a lib/unicore/mktables
+ * aab09afd4092ce858f5c1370ff792e0cec544da2dce5805e74d03e92d148f747 lib/unicore/mktables
  * c72bbdeda99714db1c8024d3311da4aef3c0db3b9b9f11455a7cfe10d5e9aba3 lib/unicore/version
  * 0a6b5ab33bb1026531f816efe81aea1a8ffcd34a27cbea37dd6a70a63d73c844 regen/charset_translations.pl
  * c7ff8e0d207d3538c7feb4a1a152b159e5e902d20293b303569ea8323e84633e regen/mk_PL_charclass.pl

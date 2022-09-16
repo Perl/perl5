@@ -10056,7 +10056,9 @@ sub finish_property_setup($file) {
     property_ref('Numeric_Value')->set_to_output_map($OUTPUT_ADJUSTED);
 
     # The rest of this sub is for properties that need the Multi_Default class
-    # to create objects for defaults.
+    # to create objects for defaults.  As of v15.0, this is no longer needed.
+
+    return if $v_version ge v15.0.0;
 
     # Bidi class has a complicated default, but the derived file takes care of
     # the complications, leaving just 'L'.
