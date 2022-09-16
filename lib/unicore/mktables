@@ -10945,12 +10945,19 @@ sub output_perl_charnames_line ($code_point, $name) {
                     # stored by the Input_file class until we access it here.
                     # It's possible that there is more than one such line
                     # waiting for us; collect them all, and parse
-                    my @missings_list = $file->get_missings
+                    my @missings_list;
+                    @missings_list = $file->get_missings
                                             if $file->has_missings_defaults;
 
                     foreach my $default_ref (@missings_list) {
-                        my $default = $default_ref->{default};
-                        my $addr = pack 'J', refaddr property_ref($default_ref->{property});
+
+                        # For now, we are only interested in the fallback
+                        # default for the entire property. i.e., an @missing
+                        # line that is for the whole Unicode range.
+                        next if $default_ref->{start} != 0
+                             || $default_ref->{end} != $MAX_UNICODE_CODEPOINT;
+
+                        $default_map = $default_ref->{default};
 
                         # For string properties, the default is just what the
                         # file says, but non-string properties should already
@@ -10960,16 +10967,76 @@ sub output_perl_charnames_line ($code_point, $name) {
                         if ($property_type == $STRING
                             || $property_type == $UNKNOWN)
                         {
-                            $this_property_info->{$MISSINGS} = $default;
+                            $this_property_info->{$MISSINGS} = $default_map;
                         }
                         else {
-                            $this_property_info->{$MISSINGS}
-                                            = $property_object->table($default);
+                            $default_map =
+                               $property_object->table($default_map)->full_name;
+                            $this_property_info->{$MISSINGS} = $default_map;
+                            $this_property_info->{$DEFAULT_MAP} = $default_map;
+                            if (! defined $property_object->default_map) {
+                                $property_object->set_default_map($default_map);
+                            }
                         }
                     }
 
-                    # Here, we have $default_map defined, possibly in terms of
-                    # $missings, but maybe not, and possibly is a dummy one.
+                    # For later Unicode versions, multiple @missing lines for
+                    # a single property can appear in the files.  The first
+                    # always applies to the entire Unicode range, and was
+                    # handled above.  The subsequent ones are for smaller
+                    # ranges, and can be read as "But for this range, the
+                    # default is ...".  So each overrides all the preceding
+                    # ones for the range it applies to.  Typically they apply
+                    # to disjoint ranges, but don't have to.  What we do is to
+                    # set them up to work in reverse order, so that after the
+                    # rest of the table is filled, the highest priority
+                    # default range fills in any code points that haven't been
+                    # specified; then the next highest priority one is
+                    # applied, and so forth.
+                    if (@missings_list > 1 && $v_version ge v15.0.0) {
+                        if ($property_type != $ENUM) {
+                            Carp::my_carp_bug("Multiple \@missings lines only"
+                                            . " make sense for ENUM-type"
+                                            . " properties.  Changing type to"
+                                            . " that");
+                            $property_type = $this_property_info->{$TYPE}
+                                                                        = $ENUM;
+                            $property_object->set_type($ENUM);
+                        }
+
+                        my $multi = Multi_Default->new();
+
+                        # The overall default should be first on this list,
+                        # and is handled differently than the rest.
+                        $default_map = shift @missings_list;
+                        Carp::my_carp_bug("\@missings needs to be entire range")
+                            if $default_map->{start} != 0
+                            || $default_map->{end} != $MAX_UNICODE_CODEPOINT;
+
+                        # We already have looked at this line above.  Use that
+                        # result
+                        $multi->set_final_default($this_property_info->
+                                                                  {$MISSINGS});
+
+                        # Now get the individual range elements, and add them
+                        # to Multi_Default object
+                        while (@missings_list) {
+                            my $this_entry = pop @missings_list;
+                            my $subrange_default = $this_entry->{default};
+
+                            # Use the short name as a standard
+                            $subrange_default = $property_object->
+                                        table($subrange_default)->short_name;
+                            $multi->append_default($subrange_default,
+                                "Range_List->new(Initialize => Range->new("
+                              . "$this_entry->{start}, $this_entry->{end}))");
+                        }
+
+                        # Override the property's simple default with this.
+                        $property_object->set_default_map($multi);
+                    }
+
+                    if (! $default_map || $property_type != $ENUM) {
 
                         # Finished storing all the @missings defaults in the
                         # input file so far.  Get the one for the current
@@ -11066,7 +11133,7 @@ END
                                         = $this_property_info->{$DEFAULT_TABLE}
                                         = $property_object->table($default_map);
                         }
-
+                    }
                 } # End of is first time for this property
             } # End of switching properties.
 
@@ -13422,7 +13489,7 @@ END
                 # Add mappings to the property for each code point in the list
                 foreach my $range ($list->ranges) {
                     $property->add_map($range->start, $range->end, $default,
-                    Replace => $CROAK);
+                    Replace => $NO);
                 }
             }
 
