@@ -9990,8 +9990,23 @@ sub finish_property_setup($file) {
         }
     }
 
-    # The following use the Multi_Default class to create objects for
-    # defaults.
+    # For backwards compatibility with applications that may read the mapping
+    # file directly (it was documented in 5.12 and 5.14 as being thusly
+    # usable), keep it from being adjusted.  (range_size_1 is
+    # used to force the traditional format.)
+    if (defined (my $nfkc_cf = property_ref('NFKC_Casefold'))) {
+        $nfkc_cf->set_to_output_map($EXTERNAL_MAP);
+        $nfkc_cf->set_range_size_1(1);
+    }
+    if (defined (my $bmg = property_ref('Bidi_Mirroring_Glyph'))) {
+        $bmg->set_to_output_map($EXTERNAL_MAP);
+        $bmg->set_range_size_1(1);
+    }
+
+    property_ref('Numeric_Value')->set_to_output_map($OUTPUT_ADJUSTED);
+
+    # The rest of this sub is for properties that need the Multi_Default class
+    # to create objects for defaults.
 
     # Bidi class has a complicated default, but the derived file takes care of
     # the complications, leaving just 'L'.
@@ -10076,21 +10091,6 @@ sub finish_property_setup($file) {
             $lb->set_default_map($default);
         }
     }
-
-    # For backwards compatibility with applications that may read the mapping
-    # file directly (it was documented in 5.12 and 5.14 as being thusly
-    # usable), keep it from being adjusted.  (range_size_1 is
-    # used to force the traditional format.)
-    if (defined (my $nfkc_cf = property_ref('NFKC_Casefold'))) {
-        $nfkc_cf->set_to_output_map($EXTERNAL_MAP);
-        $nfkc_cf->set_range_size_1(1);
-    }
-    if (defined (my $bmg = property_ref('Bidi_Mirroring_Glyph'))) {
-        $bmg->set_to_output_map($EXTERNAL_MAP);
-        $bmg->set_range_size_1(1);
-    }
-
-    property_ref('Numeric_Value')->set_to_output_map($OUTPUT_ADJUSTED);
 
     return;
 }
