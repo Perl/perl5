@@ -5177,16 +5177,12 @@ PP(pp_entersub)
 
         sv = *svp;
 
-        /* TODO: This is currently horribly inefficient. It can likely be made
-         * a lot better by adjusting the code lower down instead
-         * For now we'll just move all the stack args down one position
-         */
-        PERL_UNUSED_RESULT(POPs);
+        /* Move all the stack args down one position to where everyone expects
+         * them */
+        Size_t count = SP - mark;
+        Move(svp+1, svp, count, SV *);
 
-        while(svp <= SP) {
-            svp[0] = svp[1];
-            svp++;
-        }
+        PERL_UNUSED_RESULT(POPs);
     }
     else
         sv = POPs;
