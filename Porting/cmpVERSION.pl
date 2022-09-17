@@ -185,6 +185,7 @@ sub pm_file_from_xs {
 # with XS modules with more than one XS file, and "interesting" layouts.
 
 my %module_diffs;
+my %dist_diffs;
 
 foreach (`git --no-pager diff --name-only $tag_to_compare --diff-filter=ACMRTUXB`) {
     chomp;
@@ -196,21 +197,24 @@ foreach (`git --no-pager diff --name-only $tag_to_compare --diff-filter=ACMRTUXB
         push @{$module_diffs{$_}}, $_;
     } elsif (/\.xs\z/ && !/\bt\b/) {
         push @{$module_diffs{pm_file_from_xs($_)}}, $_;
+    } elsif (!/\bt\b/ && /\.[ch]\z/ && m!^((?:dist|ext|cpan)/[^/]+)/!) {
+       push @{ $dist_diffs{$1} }, $_;
     }
 }
 
-unless (%module_diffs) {
+unless (%module_diffs || %dist_diffs) {
     print "1..1\nok 1 - No difference found\n" if $tap;
     exit;
 }
 
-printf "1..%d\n" => scalar keys %module_diffs if $tap;
+printf "1..%d\n" => (keys(%module_diffs) + keys (%dist_diffs)) if $tap;
 print "#\n# Comparing against $tag_to_compare ....\n#\n" if $tap;
 
 my $count;
 my $diff_cmd = "git --no-pager diff $tag_to_compare ";
 my $q = ($^O eq 'MSWin32' || $^O eq 'VMS') ? '"' : "'";
 my (@diff);
+my %dist_bumped;
 
 foreach my $pm_file (sort keys %module_diffs) {
     # git has already told us that the files differ, so no need to grab each as
@@ -229,6 +233,9 @@ foreach my $pm_file (sort keys %module_diffs) {
         print STDERR "# $nok\n";
     } elsif ($pm_version ne $orig_pm_version) { # good
         print "ok $count - $pm_file\n" if $tap;
+        if ($pm_file =~ m!^((?:dist|ext|cpan)/[^/]+)/!) {
+           $dist_bumped{$1}++;
+        }
     } else {
         if ($tap) {
             print "#\n# " . '-' x 75 . "\n"
@@ -251,6 +258,22 @@ foreach my $pm_file (sort keys %module_diffs) {
             push @diff, @{$module_diffs{$pm_file}};
             print "$pm_file version $pm_version\n";
         }
+    }
+}
+
+foreach my $dist (sort keys %dist_diffs) {
+    my $file_count = @{ $dist_diffs{$dist} };
+    my $msg = $file_count == 1 ? "file was" : "files were";
+    ++$count;
+
+    if ($dist_bumped{$dist}) {
+         print "ok $count - in $dist $file_count $msg modified and a version was bumped\n";
+    } else {
+        my $nok = "not ok $count - in $dist $file_count $msg modified but no versions were bumped\n";
+        print "# No versions bumped in $dist but $file_count $msg modified\n";
+        print "# $_\n" for (sort @{$dist_diffs{$dist}});
+        print $nok if $tap;
+        print STDERR "# $nok\n";
     }
 }
 
