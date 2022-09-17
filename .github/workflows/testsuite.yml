@@ -300,9 +300,9 @@ jobs:
   # | '  \/ _` / _| (_) \__ \
   # |_|_|_\__,_\__|\___/|___/
 
-  smoke-macos-catalina-xcode12:
-    name: "macOS (catalina) xcode 12"
-    runs-on: macos-10.15
+  smoke-macos-big-sur-xcode13:
+    name: "macOS (big sur) xcode 13"
+    runs-on: macos-11
     timeout-minutes: 120
     needs: sanity_check
     if: always() && needs.sanity_check.outputs.run_all_jobs == 'true'
