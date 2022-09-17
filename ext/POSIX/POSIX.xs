@@ -3591,11 +3591,9 @@ strftime(fmt, sec, min, hour, mday, mon, year, wday = -1, yday = -1, isdst = -1)
                  * empty return, so even though sv_strftime_ints() has figured
                  * out the difference, return an empty string in all cases to
                  * mimic strftime() behavior */
-                sv = sv_newmortal();
-                SvUPGRADE(sv, SVt_PV);
+                sv = newSV_type_mortal(SVt_PV);
                 SvPV_set(sv, (char *) "");
                 SvPOK_on(sv);
-                SvCUR_set(sv, 0);
                 SvLEN_set(sv, 0);   /* Won't attempt to free the string when sv
                                        gets destroyed */
             }
