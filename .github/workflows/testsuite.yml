@@ -318,7 +318,6 @@ jobs:
       - uses: actions/checkout@v2
       - name: Configure
         run: |
-          export SDK=/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk
           sh ./Configure -des -Dusedevel ${{ matrix.CONFIGURE_ARGS }}
       - name: Build
         run: |
