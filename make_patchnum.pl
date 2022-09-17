@@ -162,8 +162,7 @@ elsif ($git_patch_file = read_file(".git_patch") and $git_patch_file !~ /\A\$For
     $commit_title = "Snapshot of:";
 }
 elsif (-d "$srcdir/.git") {
-    # git branch | awk 'BEGIN{ORS=""} /\*/ { print $2 }'
-    ($branch) = map { /\* ([^(]\S*)/ ? $1 : () } backtick("git branch");
+    ($branch) = backtick("git symbolic-ref -q HEAD") =~ m#^refs/heads/(.+)$#;
     $branch //= "";
     my ($remote,$merge);
     if (length $branch) {
