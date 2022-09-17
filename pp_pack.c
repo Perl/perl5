@@ -939,7 +939,8 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
             const U32 group_modifiers = TYPE_MODIFIERS(datumtype & ~symptr->flags);
             symptr->flags |= group_modifiers;
             symptr->patend = savsym.grpend;
-            symptr->previous = &savsym;
+            Newx(symptr->previous, 1, tempsym_t);
+            *symptr->previous = savsym;
             symptr->level++;
             PUTBACK;
             if (len && unpack_only_one) len = 1;
@@ -953,6 +954,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
             }
             SPAGAIN;
             savsym.flags = symptr->flags & ~group_modifiers;
+            Safefree(symptr->previous);
             *symptr = savsym;
             break;
         }
@@ -2249,7 +2251,8 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
             symptr->flags |= group_modifiers;
             symptr->patend = savsym.grpend;
             symptr->level++;
-            symptr->previous = &lookahead;
+            Newx(symptr->previous, 1, tempsym_t);
+            *symptr->previous = lookahead;
             while (len--) {
                 U32 was_utf8;
                 if (utf8) symptr->flags |=  FLAG_PARSE_UTF8;
@@ -2266,6 +2269,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
             }
             items = endlist - beglist;
             lookahead.flags  = symptr->flags & ~group_modifiers;
+            Safefree(symptr->previous);
             goto no_change;
         }
         case 'X' | TYPE_IS_SHRIEKING:
