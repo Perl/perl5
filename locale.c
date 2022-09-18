@@ -683,17 +683,22 @@ S_less_dicey_bool_setlocale_r(pTHX_ const int cat, const char * locale)
 #  define common_emulate_setlocale(i, locale)                               \
                  emulate_setlocale_i(i, locale, YES_RECALC_LC_ALL, __LINE__)
 
-#  define setlocale_i(i, locale)     common_emulate_setlocale(i, locale)
+#  define setlocale_i(i, locale)                                            \
+     save_to_buffer(common_emulate_setlocale(i, locale),                    \
+                                             &PL_stdize_locale_buf,         \
+                                             &PL_stdize_locale_bufsize)
 #  define setlocale_c(cat, locale)     setlocale_i(cat##_INDEX_, locale)
 #  define setlocale_r(cat, locale)                                          \
                     setlocale_i(get_category_index(cat, locale), locale)
 
-#  define void_setlocale_i(i, locale)     ((void) setlocale_i(i, locale))
+#  define void_setlocale_i(i, locale)                                       \
+                             ((void) common_emulate_setlocale(i, locale))
 #  define void_setlocale_c(cat, locale)                                     \
                                   void_setlocale_i(cat##_INDEX_, locale)
 #  define void_setlocale_r(cat, locale) ((void) setlocale_r(cat, locale))
 
-#  define bool_setlocale_i(i, locale)       cBOOL(setlocale_i(i, locale))
+#  define bool_setlocale_i(i, locale)                                       \
+                               cBOOL(common_emulate_setlocale(i, locale))
 #  define bool_setlocale_c(cat, locale)                                     \
                                   bool_setlocale_i(cat##_INDEX_, locale)
 #  define bool_setlocale_r(cat, locale)   cBOOL(setlocale_r(cat, locale))
@@ -1129,6 +1134,11 @@ S_emulate_setlocale_i(pTHX_
 {
     PERL_ARGS_ASSERT_EMULATE_SETLOCALE_I;
     assert(index <= NOMINAL_LC_ALL_INDEX);
+
+    /* Otherwise could have undefined behavior, as the return of this function
+     * may be copied to this buffer, which this function could change in the
+     * middle of its work */
+    assert(new_locale != PL_stdize_locale_buf);
 
     /* This function effectively performs a setlocale() on just the current
      * thread; thus it is thread-safe.  It does this by using the POSIX 2008
