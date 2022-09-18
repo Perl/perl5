@@ -54,35 +54,35 @@ my %defines =
 push @paths, qw(/usr/local/lib /lib /usr/lib)
         unless $linux64;
 
-unless(GetOptions(\%options,
-                  'target=s', 'make=s', 'jobs|j=i', 'crash', 'expect-pass=i',
-                  'expect-fail' => sub { $options{'expect-pass'} = 0; },
-                  'clean!', 'one-liner|e=s@', 'c', 'l', 'w', 'match=s',
-                  'no-match=s' => sub {
-                      $options{match} = $_[1];
-                      $options{'expect-pass'} = 0;
-                  },
-                  'force-manifest', 'force-regen', 'setpgrp!', 'timeout=i',
-                  'test-build', 'validate',
-                  'all-fixups', 'early-fixup=s@', 'late-fixup=s@', 'valgrind',
-                  'check-args', 'check-shebang!', 'usage|help|?', 'gold=s',
-                  'module=s', 'with-module=s', 'cpan-config-dir=s',
-                  'test-module=s', 'no-module-tests',
-                  'A=s@',
-                  'D=s@' => sub {
-                      my (undef, $val) = @_;
-                      if ($val =~ /\A([^=]+)=(.*)/s) {
-                          $defines{$1} = length $2 ? $2 : "\0";
-                      } else {
-                          $defines{$val} = '';
-                      }
-                  },
-                  'U=s@' => sub {
-                      $defines{$_[1]} = undef;
-                  },
-		 )) {
-    pod2usage(exitval => 255, verbose => 1);
-}
+my $rv = GetOptions(
+    \%options,
+    'target=s', 'make=s', 'jobs|j=i', 'crash', 'expect-pass=i',
+    'expect-fail' => sub { $options{'expect-pass'} = 0; },
+    'clean!', 'one-liner|e=s@', 'c', 'l', 'w', 'match=s',
+    'no-match=s' => sub {
+        $options{match} = $_[1];
+        $options{'expect-pass'} = 0;
+    },
+    'force-manifest', 'force-regen', 'setpgrp!', 'timeout=i',
+    'test-build', 'validate',
+    'all-fixups', 'early-fixup=s@', 'late-fixup=s@', 'valgrind',
+    'check-args', 'check-shebang!', 'usage|help|?', 'gold=s',
+    'module=s', 'with-module=s', 'cpan-config-dir=s',
+    'test-module=s', 'no-module-tests',
+    'A=s@',
+    'D=s@' => sub {
+        my (undef, $val) = @_;
+        if ($val =~ /\A([^=]+)=(.*)/s) {
+            $defines{$1} = length $2 ? $2 : "\0";
+        } else {
+            $defines{$val} = '';
+        }
+    },
+    'U=s@' => sub {
+        $defines{$_[1]} = undef;
+    },
+);
+exit 255 unless $rv;
 
 my ($target, $match) = @options{qw(target match)};
 
