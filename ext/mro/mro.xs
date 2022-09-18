@@ -73,7 +73,7 @@ S_mro_get_linear_isa_c3(pTHX_ HV* stash, U32 level)
         SV** seqs_ptr;
         I32 seqs_items;
         HV *tails;
-        AV *const seqs = newSV_type_mortal(SVt_PVAV);
+        AV *const seqs = newAV_mortal();
         I32* heads;
 
         /* This builds @seqs, which is an array of arrays.
@@ -139,7 +139,7 @@ S_mro_get_linear_isa_c3(pTHX_ HV* stash, U32 level)
             }
         }
         av_push_simple(seqs, SvREFCNT_inc_simple_NN(MUTABLE_SV(isa)));
-	tails = newSV_type_mortal(SVt_PVHV);
+	tails = MUTABLE_HV(newSV_type_mortal(SVt_PVHV));
 
         /* This builds "heads", which as an array of integer array
            indices, one per seq, which point at the virtual "head"
@@ -188,7 +188,7 @@ S_mro_get_linear_isa_c3(pTHX_ HV* stash, U32 level)
                 AV * const seq = MUTABLE_AV(avptr[s]);
 		SV* seqhead;
                 if(!seq) continue; /* skip empty seqs */
-                svp = av_fetch_simple(seq, heads[s], 0);
+                svp = av_fetch(seq, heads[s], 0);
                 seqhead = *svp; /* seqhead = head of this seq */
                 if(!winner) {
 		    HE* tail_entry;
@@ -226,7 +226,7 @@ S_mro_get_linear_isa_c3(pTHX_ HV* stash, U32 level)
                         /* Because we know this new seqhead used to be
                            a tail, we can assume it is in tails and has
                            a positive value, which we need to dec */
-                        svp = av_fetch_simple(seq, new_head, 0);
+                        svp = av_fetch(seq, new_head, 0);
                         seqhead = *svp;
                         tail_entry = hv_fetch_ent(tails, seqhead, 0, 0);
                         val = HeVAL(tail_entry);
@@ -253,7 +253,7 @@ S_mro_get_linear_isa_c3(pTHX_ HV* stash, U32 level)
                             "current merge results [\n",
                             HEKfARG(stashhek));
                 for (i = 0; i < av_count(retval); i++) {
-                    SV **elem = av_fetch_simple(retval, i, 0);
+                    SV **elem = av_fetch(retval, i, 0);
                     sv_catpvf(errmsg, "\t\t%" SVf ",\n", SVfARG(*elem));
                 }
                 sv_catpvf(errmsg, "\t]\n\tmerging failed on '%" SVf "'", SVfARG(cand));
@@ -539,7 +539,7 @@ mro__nextcan(...)
             }
 
             /* we found a real sub here */
-            sv = sv_newmortal();
+            sv = newSV_type_mortal(SVt_PV);
 
             gv_efullname3(sv, cvgv, NULL);
 

@@ -314,7 +314,7 @@ HUF_fix_objects(pTHX) {
     dMY_CXT;
     I32 i, len;
     HE* ent;
-    AV* oblist = newAV_mortal;
+    AV* oblist = newAV_mortal();
     hv_iterinit(MY_CXT.ob_reg);
     while((ent = hv_iternext(MY_CXT.ob_reg)))
         av_push_simple(oblist, SvREFCNT_inc(hv_iterkeysv(ent)));
