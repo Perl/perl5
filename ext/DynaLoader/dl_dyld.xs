@@ -165,7 +165,7 @@ dl_load_file(filename, flags=0)
 	Perl_warn(aTHX_ "Can't make loaded symbols global on this platform while loading %s",filename);
     RETVAL = dlopen(filename);
     DLDEBUG(2,PerlIO_printf(Perl_debug_log, " libref=%x\n", RETVAL));
-    ST(0) = sv_newmortal() ;
+    ST(0) = newSV_type_mortal(SVt_IV);
     if (RETVAL == NULL)
 	SaveError(aTHX_ "%s",dlerror()) ;
     else
@@ -185,7 +185,7 @@ dl_find_symbol(libhandle, symbolname, ign_err=0)
     RETVAL = dlsym(libhandle, symbolname);
     DLDEBUG(2, PerlIO_printf(Perl_debug_log,
 			     "  symbolref = %lx\n", (unsigned long) RETVAL));
-    ST(0) = sv_newmortal() ;
+    ST(0) = newSV_type_mortal(SVt_IV);
     if (RETVAL == NULL) {
         if (!ign_err)
 	    SaveError(aTHX_ "%s",dlerror()) ;
