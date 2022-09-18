@@ -491,7 +491,7 @@ Example usage:
 This is used to suppress compiler warnings that a parameter to a function is
 not used.  This situation can arise, for example, when a parameter is needed
 under some configuration conditions, but not others, so that C preprocessor
-conditional compilation causes it be used just some times.
+conditional compilation causes it be used just sometimes.
 
 =for apidoc Amn;||PERL_UNUSED_CONTEXT
 This is used to suppress compiler warnings that the thread context parameter to
