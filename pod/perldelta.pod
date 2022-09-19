@@ -546,7 +546,20 @@ platform specific bugs also go here.
 
 =item *
 
-XXX
+L<Variable::Magic>
+L<[RT #144052]|https://rt.cpan.org/Ticket/Display.html?id=144052>,
+and L<Devel::Caller>
+L<[RT #144051]|https://rt.cpan.org/Ticket/Display.html?id=144051>
+have not yet been updated to add awareness of new OPs introduced in
+this development cycle.
+L<[GH #20114]|https://github.com/Perl/perl5/issues/20114>. Patches have
+been submitted upstream but these have not been incorporated into new
+releases yet.
+
+L<Test::Vars>
+L<[Test-Vars/GH #47]|https://github.com/houseabsolute/p5-Test-Vars/issues/47>
+also requires updating, but since this module's own tests are not failing,
+it is harder to determine how the new OPs should be accounted for.
 
 =back
 
