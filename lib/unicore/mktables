@@ -11098,12 +11098,45 @@ END
                 }
             }
 
-            # If we can tell that this is a synonym for the default map, use
-            # the default one instead.
             if ($property_type != $STRING && $property_type != $UNKNOWN) {
                 my $table = $property_object->table($map);
-                if (defined $table && $table == $default_table) {
-                    $map = $default_map;
+                if (defined $table) {
+
+                    # Unicode isn't very consistent about which synonym they
+                    # use in their .txt files, even within the same file, or
+                    # two files that are for the same property.  For enum
+                    # properties, we know already what all the synonyms are
+                    # (because we processed PropValueAliases already).
+                    # Therefore we can take the input and map it to a uniform
+                    # value now, saving us trouble later.
+                    #
+                    # Only if the map is well-behaved do we try this:
+                    # non-empty, all non-blank.
+                    if ($property_type == $ENUM && $map =~ / ^ \S+ $ /x) {
+
+                        # Use existing practice as much as easily practicable,
+                        # so that code that has assumptions about spelling
+                        # doesn't have to change
+                        my $short_name = $property_object->short_name;
+                        if ($short_name =~ / ^ (BC | EA | GC  |HST | JT |
+                                                Lb | BT | BPT | NFCQC |
+                                                NFKCQC) $ /ix)
+                        {
+                            $map = $table->short_name;
+                        }
+                        elsif ($short_name !~ / ^ ( Ccc | Age | InSC | JG |
+                                                    SB) $ /ix)
+                        {
+                            $map = $table->full_name;
+                        }
+                    }
+                    elsif ($table == $default_table) {
+
+                        # When it isn't an ENUM, we we can still tell if
+                        # this is a synonym for the default map.  If so, use
+                        # the default one instead.
+                        $map = $default_map;
+                    }
                 }
             }
 
