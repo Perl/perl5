@@ -2301,19 +2301,7 @@ that already have a PV buffer allocated, but no SvTHINKFIRST.
 */
 
 #define SvPVCLEAR(sv) sv_setpv_bufsize(sv,0,0)
-#define SvPVCLEAR_FRESH(sv)                             \
-        STMT_START {                                    \
-            assert(SvTYPE(sv) >= SVt_PV);               \
-            assert(SvTYPE(sv) <= SVt_PVMG);             \
-            assert(!SvTHINKFIRST(sv));                  \
-            assert(SvPVX(sv));                          \
-            SvCUR_set(sv, 0  );                         \
-            *(SvEND(sv))= '\0';                         \
-            (void)SvPOK_only_UTF8(sv);                  \
-            SvTAINT(sv);                                \
-            SvPVX(sv);                                  \
-        } STMT_END
-
+#define SvPVCLEAR_FRESH(sv) sv_setpv_freshbuf(sv)
 #define SvSHARE(sv) PL_sharehook(aTHX_ sv)
 #define SvLOCK(sv) PL_lockhook(aTHX_ sv)
 #define SvUNLOCK(sv) PL_unlockhook(aTHX_ sv)

@@ -4162,6 +4162,11 @@ PERL_CALLCONV void	Perl_sv_setpv(pTHX_ SV *const sv, const char *const ptr);
 PERL_CALLCONV char  *	Perl_sv_setpv_bufsize(pTHX_ SV *const sv, const STRLEN cur, const STRLEN len);
 #define PERL_ARGS_ASSERT_SV_SETPV_BUFSIZE	\
 	assert(sv)
+#ifndef PERL_NO_INLINE_FUNCTIONS
+PERL_STATIC_INLINE char  *	Perl_sv_setpv_freshbuf(pTHX_ SV *const sv);
+#define PERL_ARGS_ASSERT_SV_SETPV_FRESHBUF	\
+	assert(sv)
+#endif
 PERL_CALLCONV void	Perl_sv_setpv_mg(pTHX_ SV *const sv, const char *const ptr);
 #define PERL_ARGS_ASSERT_SV_SETPV_MG	\
 	assert(sv)
