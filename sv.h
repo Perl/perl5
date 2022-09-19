@@ -2311,7 +2311,6 @@ that already have a PV buffer allocated, but no SvTHINKFIRST.
             *(SvEND(sv))= '\0';                         \
             (void)SvPOK_only_UTF8(sv);                  \
             SvTAINT(sv);                                \
-            SvPVX(sv);                                  \
         } STMT_END
 
 #define SvSHARE(sv) PL_sharehook(aTHX_ sv)
