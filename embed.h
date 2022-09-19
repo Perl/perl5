@@ -647,6 +647,7 @@
 #define sv_setnv_mg(a,b)	Perl_sv_setnv_mg(aTHX_ a,b)
 #define sv_setpv(a,b)		Perl_sv_setpv(aTHX_ a,b)
 #define sv_setpv_bufsize(a,b,c)	Perl_sv_setpv_bufsize(aTHX_ a,b,c)
+#define sv_setpv_freshbuf(a)	Perl_sv_setpv_freshbuf(aTHX_ a)
 #define sv_setpv_mg(a,b)	Perl_sv_setpv_mg(aTHX_ a,b)
 #if !defined(MULTIPLICITY) || defined(PERL_CORE)
 #define sv_setpvf(a,...)	Perl_sv_setpvf(aTHX_ a,__VA_ARGS__)

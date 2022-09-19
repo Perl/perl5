@@ -953,6 +953,21 @@ Perl_newRV_noinc(pTHX_ SV *const tmpRef)
     return sv;
 }
 
+PERL_STATIC_INLINE char *
+Perl_sv_setpv_freshbuf(pTHX_ SV *const sv)
+{
+    PERL_ARGS_ASSERT_SV_SETPV_FRESHBUF;
+    assert(SvTYPE(sv) >= SVt_PV);
+    assert(SvTYPE(sv) <= SVt_PVMG);
+    assert(!SvTHINKFIRST(sv));
+    assert(SvPVX(sv));
+    SvCUR_set(sv, 0);
+    *(SvEND(sv))= '\0';
+    (void)SvPOK_only_UTF8(sv);
+    SvTAINT(sv);
+    return SvPVX(sv);
+}
+
 /*
  * ex: set ts=8 sts=4 sw=4 et:
  */
