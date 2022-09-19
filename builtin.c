@@ -174,8 +174,6 @@ XS(XS_builtin_trim)
 {
     dXSARGS;
 
-    warn_experimental_builtin("trim", true);
-
     if (items != 1) {
         croak_xs_usage(cv, "arg");
     }
