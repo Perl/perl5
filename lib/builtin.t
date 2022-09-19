@@ -413,6 +413,40 @@ TODO: {
     is($HASH{key}, "val", 'Lexically exported hash is accessible');
 }
 
+# Load
+{
+    use builtin qw( load );
+
+    {
+        my $ok = eval 'load()'; my $e = $@;
+        ok(!$ok, 'load() without args not usable');
+        like($e, qr/^Not enough arguments for .*load/, 'load() requires arguments');
+    }
+
+    {
+        my $ok = eval 'load("cat", "dog")'; my $e = $@;
+        ok(!$ok, 'load() with too many args not usable');
+        like($e, qr/^Too many arguments for .*load/, 'load() requires no more than 1 argument');
+    }
+
+    {
+        my $ok = eval 'load(undef)'; my $e = $@;
+        ok(!$ok, 'load() with undef arg not usable');
+        like($e, qr/^Undefined argument to .*load/, 'load() requires a defined argument');
+    }
+
+    # This crashed before SV_force... was used
+    {
+        my $ok = eval 'load([])'; my $e = $@;
+        ok(!$ok, 'load() with arrayref arg not usable');
+        like($e, qr/^Can't locate ARRAY\(/, 'An arrayref is not a valid package name');
+    }
+
+    ok(! $Data::Dumper::VERSION, 'Data::Dumper maybe not loaded');
+    load("Data::Dumper");
+    ok($Data::Dumper::VERSION, 'Data::Dumper loaded');
+}
+
 # vim: tabstop=4 shiftwidth=4 expandtab autoindent softtabstop=4
 
 done_testing();

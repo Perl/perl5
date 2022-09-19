@@ -63,6 +63,30 @@ static void S_finish_export_lexical(pTHX)
     LEAVE;
 }
 
+XS(XS_builtin_load);
+XS(XS_builtin_load)
+{
+    dXSARGS;
+
+    if (items != 1) {
+        croak_xs_usage(cv, "arg");
+    }
+
+    SV *module = TOPs;
+
+    if (!SvOK(module)) {
+        Perl_croak(aTHX_ "Undefined argument to builtin::load");
+    }
+
+    module = newSVsv(module);
+
+    if (!SvPOK(module))
+        SvPV_force_nolen(module);
+
+    Perl_load_module(aTHX_ PERL_LOADMOD_NOIMPORT, module, NULL, NULL, NULL);
+
+    XSRETURN(1);
+}
 
 XS(XS_builtin_true);
 XS(XS_builtin_true)
@@ -500,6 +524,7 @@ static const struct BuiltinFuncDescriptor builtins[] = {
     { "builtin::floor",      &XS_builtin_func1_scalar, &ck_builtin_func1, OP_FLOOR      },
     { "builtin::is_tainted", &XS_builtin_func1_scalar, &ck_builtin_func1, OP_IS_TAINTED },
     { "builtin::trim",       &XS_builtin_trim,         &ck_builtin_func1, 0 },
+    { "builtin::load",       &XS_builtin_load,         &ck_builtin_func1, 0 },
 
     { "builtin::created_as_string", &XS_builtin_created_as_string, &ck_builtin_func1, 0 },
     { "builtin::created_as_number", &XS_builtin_created_as_number, &ck_builtin_func1, 0 },

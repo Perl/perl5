@@ -6506,6 +6506,11 @@ should have been freed, so this indicates a bug somewhere.
 (S internal) The exit code detected an internal inconsistency in how
 many mortal scalars were allocated and freed.
 
+=item Undefined argument to builtin::load
+
+(F) You tried to call load with an undefined value as an argument.
+Load expects a package name.  See L<builtin/load>.
+
 =item Undefined format "%s" called
 
 (F) The format indicated doesn't seem to exist.  Perhaps it's really in

@@ -1,4 +1,4 @@
-package builtin 0.008;
+package builtin 0.009;
 
 use strict;
 use warnings;
@@ -26,6 +26,7 @@ builtin - Perl pragma to import built-in utility functions
         trim
         is_tainted
         export_lexically
+        load
     );
 
 =head1 DESCRIPTION
@@ -317,6 +318,21 @@ Z<>
 This must be called at compile time; which typically means during a C<BEGIN>
 block. Usually this would be used as part of an C<import> method of a module,
 when invoked as part of a C<use ...> statement.
+
+=head2 load
+
+    load($module);
+
+This loads a named module from the inclusion paths (C<@INC>).  EXPR must be
+a string that provides a module name.  It cannot be omitted, and providing
+an invalid module name will result in an exception.
+
+The effect of C<load>-ing a module is the same as C<require>-ing, down to
+the same error conditions when the module does not exist, does not compile,
+or does not evalute to a true value.
+
+C<load> can't be used to require a particular version of Perl, nor can it
+be given a bareword module name as an argument.
 
 =head1 SEE ALSO
 
