@@ -939,6 +939,7 @@ S_unpack_rec(pTHX_ tempsym_t* symptr, const char *s, const char *strbeg, const c
             const U32 group_modifiers = TYPE_MODIFIERS(datumtype & ~symptr->flags);
             symptr->flags |= group_modifiers;
             symptr->patend = savsym.grpend;
+            /* cppcheck-suppress autoVariables */
             symptr->previous = &savsym;
             symptr->level++;
             PUTBACK;
@@ -2249,6 +2250,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
             symptr->flags |= group_modifiers;
             symptr->patend = savsym.grpend;
             symptr->level++;
+            /* cppcheck-suppress autoVariables */
             symptr->previous = &lookahead;
             while (len--) {
                 U32 was_utf8;
