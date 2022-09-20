@@ -93,6 +93,7 @@ DBIx::Profile
 dbm(3)
 dbm_open(3)
 Devel::Apache::Profiler
+Devel::Caller
 Devel::CallParser
 Devel::Callsite
 Devel::Cover
@@ -344,6 +345,7 @@ Test::Harness::TAP
 Test::Inline
 Test::MockObject
 Test::Unit
+Test::Vars
 Text::Autoformat
 Text::Diff
 Text::Soundex
@@ -369,6 +371,7 @@ Unicode::Tussle
 Unicode::Unihan
 unzip(1)
 utime(2)
+Variable::Magic
 Version::Requirements
 vsprintf(3)
 wait(2)
