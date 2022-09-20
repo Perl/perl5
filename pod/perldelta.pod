@@ -74,33 +74,61 @@ L<[GH #20077]|https://github.com/Perl/perl5/pull/20077>.
 
 =head1 Modules and Pragmata
 
-XXX All changes to installed files in F<cpan/>, F<dist/>, F<ext/> and F<lib/>
-go here.  If Module::CoreList is updated, generate an initial draft of the
-following sections using F<Porting/corelist-perldelta.pl>.  A paragraph summary
-for important changes should then be added by hand.  In an ideal world,
-dual-life modules would have a F<Changes> file that could be cribbed.
-
-The list of new and updated modules is modified automatically as part of
-preparing a Perl release, so the only reason to manually add entries here is if
-you're summarising the important changes in the module update. (Also, if the
-manually-added details don't match the automatically-generated ones, the
-release manager will have to investigate the situation carefully.)
-
-[ Within each section, list entries as an =item entry ]
-
-=head2 New Modules and Pragmata
+=head2 Updated Modules and Pragmata
 
 =over 4
 
 =item *
 
-XXX Remove this section if not applicable.
+L<B::Deparse> has been upgraded from version 1.68 to 1.69.
 
-=back
+=item *
 
-=head2 Updated Modules and Pragmata
+L<Carp> has been upgraded from version 1.53 to 1.54.
 
-=over 4
+=item *
+
+L<Class::Struct> has been upgraded from version 0.66 to 0.67.
+
+=item *
+
+L<Config::Perl::V> has been upgraded from version 0.33 to 0.34.
+
+=item *
+
+L<Errno> has been upgraded from version 1.36 to 1.37.
+
+=item *
+
+L<ExtUtils::ParseXS> has been upgraded from version 3.45 to 3.46.
+
+=item *
+
+L<ExtUtils::Typemaps> has been upgraded from version 3.45 to 3.46.
+
+=item *
+
+L<feature> has been upgraded from version 1.75 to 1.76.
+
+=item *
+
+L<File::Basename> has been upgraded from version 2.85 to 2.86.
+
+=item *
+
+L<File::Copy> has been upgraded from version 2.39 to 2.40.
+
+=item *
+
+L<File::stat> has been upgraded from version 1.12 to 1.13.
+
+=item *
+
+L<FileHandle> has been upgraded from version 2.04 to 2.05.
+
+=item *
+
+L<Hash::Util> has been upgraded from version 0.29 to 0.30.
 
 =item *
 
@@ -115,19 +143,51 @@ platforms
 
 =item *
 
-L<XXX> has been upgraded from version A.xx to B.yy.
-
-If there was something important to note about this change, include that here.
-
-=back
-
-=head2 Removed Modules and Pragmata
-
-=over 4
+L<IO> has been upgraded from version 1.50 to 1.51.
 
 =item *
 
-XXX
+L<Locale::Maketext> has been upgraded from version 1.31 to 1.32.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 5.20220820 to 5.20220920.
+
+=item *
+
+L<Opcode> has been upgraded from version 1.60 to 1.61.
+
+=item *
+
+L<POSIX> has been upgraded from version 2.04 to 2.06.
+
+=item *
+
+L<Safe> has been upgraded from version 2.43 to 2.44.
+
+=item *
+
+L<Sys::Hostname> has been upgraded from version 1.24 to 1.25.
+
+=item *
+
+L<Time::HiRes> has been upgraded from version 1.9770 to 1.9771.
+
+=item *
+
+L<User::grent> has been upgraded from version 1.03 to 1.04.
+
+=item *
+
+L<User::pwent> has been upgraded from version 1.01 to 1.02.
+
+=item *
+
+L<XS::APItest> has been upgraded from version 1.25 to 1.26.
+
+=item *
+
+L<XSLoader> has been upgraded from version 0.31 to 0.32.
 
 =back
 
