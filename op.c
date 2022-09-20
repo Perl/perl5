@@ -8754,6 +8754,8 @@ unused and should always be 1.
 OP *
 Perl_newLOOPOP(pTHX_ I32 flags, I32 debuggable, OP *expr, OP *block)
 {
+    PERL_ARGS_ASSERT_NEWLOOPOP;
+
     OP* listop;
     OP* o;
     const bool once = block && block->op_flags & OPf_SPECIAL &&
@@ -8761,48 +8763,46 @@ Perl_newLOOPOP(pTHX_ I32 flags, I32 debuggable, OP *expr, OP *block)
 
     PERL_UNUSED_ARG(debuggable);
 
-    if (expr) {
-        if (once && (
-              (expr->op_type == OP_CONST && !SvTRUE(cSVOPx(expr)->op_sv))
-           || (  expr->op_type == OP_NOT
-              && cUNOPx(expr)->op_first->op_type == OP_CONST
-              && SvTRUE(cSVOPx_sv(cUNOPx(expr)->op_first))
-              )
-           ))
-            /* Return the block now, so that S_new_logop does not try to
-               fold it away. */
-        {
-            op_free(expr);
-            return block;	/* do {} while 0 does once */
-        }
+    if (once && (
+          (expr->op_type == OP_CONST && !SvTRUE(cSVOPx(expr)->op_sv))
+       || (  expr->op_type == OP_NOT
+          && cUNOPx(expr)->op_first->op_type == OP_CONST
+          && SvTRUE(cSVOPx_sv(cUNOPx(expr)->op_first))
+          )
+       ))
+        /* Return the block now, so that S_new_logop does not try to
+           fold it away. */
+    {
+        op_free(expr);
+        return block;	/* do {} while 0 does once */
+    }
 
-        if (expr->op_type == OP_READLINE
-            || expr->op_type == OP_READDIR
-            || expr->op_type == OP_GLOB
-            || expr->op_type == OP_EACH || expr->op_type == OP_AEACH
-            || (expr->op_type == OP_NULL && expr->op_targ == OP_GLOB)) {
-            expr = newUNOP(OP_DEFINED, 0,
-                newASSIGNOP(0, newDEFSVOP(), 0, expr) );
-        } else if (expr->op_flags & OPf_KIDS) {
-            const OP * const k1 = cUNOPx(expr)->op_first;
-            const OP * const k2 = k1 ? OpSIBLING(k1) : NULL;
-            switch (expr->op_type) {
-              case OP_NULL:
-                if (k2 && (k2->op_type == OP_READLINE || k2->op_type == OP_READDIR)
-                      && (k2->op_flags & OPf_STACKED)
-                      && ((k1->op_flags & OPf_WANT) == OPf_WANT_SCALAR))
-                    expr = newUNOP(OP_DEFINED, 0, expr);
-                break;
+    if (expr->op_type == OP_READLINE
+        || expr->op_type == OP_READDIR
+        || expr->op_type == OP_GLOB
+        || expr->op_type == OP_EACH || expr->op_type == OP_AEACH
+        || (expr->op_type == OP_NULL && expr->op_targ == OP_GLOB)) {
+        expr = newUNOP(OP_DEFINED, 0,
+            newASSIGNOP(0, newDEFSVOP(), 0, expr) );
+    } else if (expr->op_flags & OPf_KIDS) {
+        const OP * const k1 = cUNOPx(expr)->op_first;
+        const OP * const k2 = k1 ? OpSIBLING(k1) : NULL;
+        switch (expr->op_type) {
+          case OP_NULL:
+            if (k2 && (k2->op_type == OP_READLINE || k2->op_type == OP_READDIR)
+                  && (k2->op_flags & OPf_STACKED)
+                  && ((k1->op_flags & OPf_WANT) == OPf_WANT_SCALAR))
+                expr = newUNOP(OP_DEFINED, 0, expr);
+            break;
 
-              case OP_SASSIGN:
-                if (k1 && (k1->op_type == OP_READDIR
-                      || k1->op_type == OP_GLOB
-                      || (k1->op_type == OP_NULL && k1->op_targ == OP_GLOB)
-                     || k1->op_type == OP_EACH
-                     || k1->op_type == OP_AEACH))
-                    expr = newUNOP(OP_DEFINED, 0, expr);
-                break;
-            }
+          case OP_SASSIGN:
+            if (k1 && (k1->op_type == OP_READDIR
+                  || k1->op_type == OP_GLOB
+                  || (k1->op_type == OP_NULL && k1->op_targ == OP_GLOB)
+                  || k1->op_type == OP_EACH
+                  || k1->op_type == OP_AEACH))
+                expr = newUNOP(OP_DEFINED, 0, expr);
+            break;
         }
     }
 
