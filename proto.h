@@ -2713,7 +2713,8 @@ PERL_CALLCONV OP*	Perl_newLOOPEX(pTHX_ I32 type, OP* label)
 
 PERL_CALLCONV OP*	Perl_newLOOPOP(pTHX_ I32 flags, I32 debuggable, OP* expr, OP* block)
 			__attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT_NEWLOOPOP
+#define PERL_ARGS_ASSERT_NEWLOOPOP	\
+	assert(expr)
 
 PERL_CALLCONV OP*	Perl_newMETHOP(pTHX_ I32 type, I32 flags, OP* dynamic_meth)
 			__attribute__warn_unused_result__;

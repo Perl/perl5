@@ -1472,7 +1472,7 @@ ApdR	|OP*	|newGIVENOP	|NN OP* cond|NN OP* block|PADOFFSET defsv_off
 ApdR	|OP*	|newLOGOP	|I32 optype|I32 flags|NN OP *first|NN OP *other
 px	|LOGOP*	|alloc_LOGOP	|I32 type|NULLOK OP *first|NULLOK OP *other
 ApdR	|OP*	|newLOOPEX	|I32 type|NN OP* label
-ApdR	|OP*	|newLOOPOP	|I32 flags|I32 debuggable|NULLOK OP* expr|NULLOK OP* block
+ApdR	|OP*	|newLOOPOP	|I32 flags|I32 debuggable|NN OP* expr|NULLOK OP* block
 ApdR	|OP*	|newNULLLIST
 ApdR	|OP*	|newOP		|I32 optype|I32 flags
 Cp	|void	|newPROG	|NN OP* o
