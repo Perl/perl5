@@ -449,6 +449,31 @@ EOF
 EOF
                 "1,5\n2,5", { stderr => 'devnull' }, "Can do math when radix is a comma"); # [perl 115800]
 
+            SKIP: {
+                skip "Perl not compiled with 'useithreads'", 1 if ! $Config{'useithreads'};
+
+                local $ENV{LC_ALL} = undef;
+                local $ENV{LC_NUMERIC} = $comma;
+                fresh_perl_is(<<"EOF",
+                    use threads;
+
+                    my \$x = eval "1.25";
+                    print "\$x", "\n";  # number is ok before thread
+                    my \$str_x = "\$x";
+
+                    my \$thr = threads->create(sub {});
+                    \$thr->join();
+
+                    print "\$x\n";  # number stringifies the same after thread
+
+                    my \$y = eval "1.25";
+                    print "\$y\n";  # number is ok after threads
+                    print "\$y" eq "\$str_x" || 0;    # new number stringifies the same as old number
+EOF
+                "1.25\n1.25\n1.25\n1", { }, "Thread join doesn't disrupt calling thread"
+                ); # [GH 20155]
+            }
+
           SKIP: {
             unless ($have_strtod) {
                 skip("no strtod()", 1);

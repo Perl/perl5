@@ -5011,6 +5011,15 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
     /* Done with finding the locales; update the auxiliary records */
     new_LC_ALL(NULL);
 
+#  if defined(USE_POSIX_2008_LOCALE) && defined(USE_LOCALE_NUMERIC)
+
+    /* This is a temporary workaround for #20155, to avoid issues where the
+     * global locale wants a radix different from the per-thread one.  This
+     * restores behavior for LC_NUMERIC to what it was before a7ff7ac. */
+    posix_setlocale(LC_NUMERIC, "C");
+
+#  endif
+
     for (i = 0; i < NOMINAL_LC_ALL_INDEX; i++) {
         Safefree(curlocales[i]);
     }
