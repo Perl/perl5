@@ -563,7 +563,7 @@ disable I<all> features (an unusual request!) use C<no feature ':all'>.
 
 =head1 AVAILABLE FEATURES
 
-Read L</"FEATURE BUNDLES"> for the feature cheat sheet sumup.
+Read L</"FEATURE BUNDLES"> for the feature cheat sheet summary.
 
 =head2 The 'say' feature
 
