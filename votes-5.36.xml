@@ -49,6 +49,8 @@ See https://github.com/perl/Perl5/issues?q=+label%3Abackport-5.36
 
 <div><h3>Documentation Fixes</h3>
 
+<commit votes="ilmari" id="3377d40549ee51d1d8f2efc65a084b6df01cc9a0" issue="" pull="" desc="perlexperiment: fix warning category for defer and extra parired delimiters"/>
+
 </div>
 
 <div><h3>Others</h3>
