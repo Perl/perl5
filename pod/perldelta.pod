@@ -2,9 +2,6 @@
 
 =head1 NAME
 
-[ this is a template for a new perldelta file.  Any text flagged as XXX needs
-to be processed before release. ]
-
 perldelta - what is new for perl v5.37.4
 
 =head1 DESCRIPTION
@@ -15,35 +12,7 @@ release.
 If you are upgrading from an earlier release such as 5.37.2, first read
 L<perl5373delta>, which describes differences between 5.37.2 and 5.37.3.
 
-=head1 Notice
-
-XXX Any important notices here
-
-=head1 Core Enhancements
-
-XXX New core language features go here.  Summarize user-visible core language
-enhancements.  Particularly prominent performance optimisations could go
-here, but most should go in the L</Performance Enhancements> section.
-
-[ List each enhancement as a =head2 entry ]
-
-=head1 Security
-
-XXX Any security-related notices go here.  In particular, any security
-vulnerabilities closed should be noted here rather than in the
-L</Selected Bug Fixes> section.
-
-[ List each security issue as a =head2 entry ]
-
 =head1 Incompatible Changes
-
-XXX For a release on a stable branch, this section aspires to be:
-
-    There are no changes intentionally incompatible with 5.XXX.XXX
-    If any exist, they are bugs, and we request that you submit a
-    report.  See L</Reporting Bugs> below.
-
-[ List each incompatible change as a =head2 entry ]
 
 =head2 readline() no longer clears the stream error flag
 
@@ -58,7 +27,7 @@ Since the error flag is no longer cleared calling close() on the
 stream may fail and if the stream was not explicitly closed, the
 implicit close of the stream may produce a warning.
 
-[github #20060]
+[L<GH #20060|https://github.com/Perl/perl5/issues/20060>]
 
 =head2 C<INIT> blocks no longer run after an C<exit()> in C<BEGIN>
 
@@ -70,8 +39,8 @@ version information inside of a C<BEGIN> block, and the C<-c> check is
 implemented by using C<INIT> hooks, resulting in the C<-v> option taking
 precedence.
 
-[github #1537]
-[github #20181]
+[L<GH #1537|https://github.com/Perl/perl5/issues/1537>]
+[L<GH #20181|https://github.com/Perl/perl5/issues/20181>]
 
 =head2 Syntax errors will no longer produce "phantom error messages".
 
@@ -89,45 +58,7 @@ that used to be produced will no longer be displayed.
 
 See L<Changes to Existing Diagnostics> for more details.
 
-=head1 Deprecations
-
-XXX Any deprecated features, syntax, modules etc. should be listed here.
-
-=head2 Module removals
-
-XXX Remove this section if not applicable.
-
-The following modules will be removed from the core distribution in a
-future release, and will at that time need to be installed from CPAN.
-Distributions on CPAN which require these modules will need to list them as
-prerequisites.
-
-The core versions of these modules will now issue C<"deprecated">-category
-warnings to alert you to this fact.  To silence these deprecation warnings,
-install the modules in question from CPAN.
-
-Note that these are (with rare exceptions) fine modules that you are encouraged
-to continue to use.  Their disinclusion from core primarily hinges on their
-necessity to bootstrapping a fully functional, CPAN-capable Perl installation,
-not usually on concerns over their design.
-
-=over
-
-=item XXX
-
-XXX Note that deprecated modules should be listed here even if they are listed
-as an updated module in the L</Modules and Pragmata> section.
-
-=back
-
-[ List each other deprecation as a =head2 entry ]
-
 =head1 Performance Enhancements
-
-XXX Changes which enhance performance without changing behaviour go here.
-There may well be none in a stable release.
-
-[ List each enhancement as an =item entry ]
 
 =over 4
 
@@ -202,36 +133,35 @@ XXX
 
 =head1 Documentation
 
-XXX Changes to files in F<pod/> go here.  Consider grouping entries by
-file and be sure to link to the appropriate page, e.g. L<perlfunc>.
-
-=head2 New Documentation
-
-XXX Changes which create B<new> files in F<pod/> go here.
-
-=head3 L<XXX>
-
-XXX Description of the purpose of the new file here
-
 =head2 Changes to Existing Documentation
 
 We have attempted to update the documentation to reflect the changes
 listed in this document.  If you find any we have missed, open an issue
 at L<https://github.com/Perl/perl5/issues>.
 
-XXX Changes which significantly change existing files in F<pod/> go here.
-However, any changes to F<pod/perldiag.pod> should go in the L</Diagnostics>
-section.
-
 Additionally, the following selected changes have been made:
-
-=head3 L<XXX>
 
 =over 4
 
 =item *
 
-XXX Description of the change here
+Entries have been added to L<perlguts> for the new C<newAV_alloc_x>, C<newAV_alloc_xz> and
+C<*_simple> functions.
+
+=item *
+
+References to the now-defunct PrePAN service have been removed from
+L<perlcommunity> and L<perlmodstyle>.
+
+=item *
+
+A section on symbol naming has been added to L<perlhacktips>.
+
+=item *
+
+L<perlexperiment> has been edited to properly reference the warning categories
+for the defer block modifier and extra paired delimiters for quote-like
+operators.
 
 =back
 
@@ -246,16 +176,17 @@ include any changes in L<perldiag> that reconcile it to the C<C> code.
 
 =head2 New Diagnostics
 
-XXX Newly added diagnostic messages go under here, separated into New Errors
-and New Warnings
-
 =head3 New Errors
 
 =over 4
 
 =item *
 
-XXX L<message|perldiag/"message">
+L<Too many nested BEGIN blocks, maximum of %d allowed|perldiag/"Too many nested BEGIN blocks, maximum of %d allowed">
+
+=item *
+
+L<Execution of %s aborted due to compilation errors.|perldiag/"Execution of %s aborted due to compilation errors.">
 
 =back
 
@@ -265,7 +196,19 @@ XXX L<message|perldiag/"message">
 
 =item *
 
-L<Locale '%s' is unsupported, and may crash the interpreter.message|perldiag/"Locale '%s' is unsupported, and may crash the interpreter.">
+L<Locale '%s' is unsupported, and may crash the interpreter.|perldiag/"Locale '%s' is unsupported, and may crash the interpreter.">
+
+=item *
+
+L<Treating %s::INIT block as BEGIN block as workaround|perldiag/"Treating s::INIT block as BEGIN block as workaround">
+
+=item *
+
+L<Filehandle STD%s reopened as %s only for input|perldiag/"Filehandle STD%s reopened as %s only for input">
+
+=item *
+
+L<%s on BEGIN block ignored|perldiag/"%s on BEGIN block ignored">
 
 =back
 
@@ -340,7 +283,7 @@ will output the following as one line:
  FooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFoo
  FooFooFooFooFooFooFooFooFooFooFooFooFooFo"..."oFooFooFooFooFooFooFoo
  FooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFoo
- FooFooFooFooFooFooFooFooFooFooFooFooFoo" (perhaps you forgot to load 
+ FooFooFooFooFooFooFooFooFooFooFooFooFoo" (perhaps you forgot to load
  "FooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFoo
  FooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFo"...
  "oFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFoo
@@ -357,127 +300,12 @@ account.
 
 =back
 
-=head1 Utility Changes
-
-XXX Changes to installed programs such as F<perldoc> and F<xsubpp> go here.
-Most of these are built within the directory F<utils>.
-
-[ List utility changes as a =head2 entry for each utility and =item
-entries for each change
-Use L<XXX> with program names to get proper documentation linking. ]
-
-=head2 L<XXX>
-
-=over 4
-
-=item *
-
-XXX
-
-=back
-
-=head1 Configuration and Compilation
-
-XXX Changes to F<Configure>, F<installperl>, F<installman>, and analogous tools
-go here.  Any other changes to the Perl build process should be listed here.
-However, any platform-specific changes should be listed in the
-L</Platform Support> section, instead.
-
-[ List changes as an =item entry ].
-
-=over 4
-
-=item *
-
-XXX
-
-=back
-
 =head1 Testing
-
-XXX Any significant changes to the testing of a freshly built perl should be
-listed here.  Changes which create B<new> files in F<t/> go here as do any
-large changes to the testing harness (e.g. when parallel testing was added).
-Changes to existing files in F<t/> aren't worth summarizing, although the bugs
-that they represent may be covered elsewhere.
-
-XXX If there were no significant test changes, say this:
 
 Tests were added and changed to reflect the other additions and changes
 in this release.
 
-XXX If instead there were significant changes, say this:
-
-Tests were added and changed to reflect the other additions and
-changes in this release.  Furthermore, these significant changes were
-made:
-
-[ List each test improvement as an =item entry ]
-
-=over 4
-
-=item *
-
-XXX
-
-=back
-
-=head1 Platform Support
-
-XXX Any changes to platform support should be listed in the sections below.
-
-[ Within the sections, list each platform as an =item entry with specific
-changes as paragraphs below it. ]
-
-=head2 New Platforms
-
-XXX List any platforms that this version of perl compiles on, that previous
-versions did not.  These will either be enabled by new files in the F<hints/>
-directories, or new subdirectories and F<README> files at the top level of the
-source tree.
-
-=over 4
-
-=item XXX-some-platform
-
-XXX
-
-=back
-
-=head2 Discontinued Platforms
-
-XXX List any platforms that this version of perl no longer compiles on.
-
-=over 4
-
-=item XXX-some-platform
-
-XXX
-
-=back
-
-=head2 Platform-Specific Notes
-
-XXX List any changes for specific platforms.  This could include configuration
-and compilation changes or changes in portability/compatibility.  However,
-changes within modules for platforms should generally be listed in the
-L</Modules and Pragmata> section.
-
-=over 4
-
-=item XXX-some-platform
-
-XXX
-
-=back
-
 =head1 Internal Changes
-
-XXX Changes which affect the interface available to C<XS> code go here.  Other
-significant internal changes for future core maintainers should be noted as
-well.
-
-[ List each change as an =item entry ]
 
 =over 4
 
@@ -519,28 +347,7 @@ about what you choose.
 
 =back
 
-=head1 Selected Bug Fixes
-
-XXX Important bug fixes in the core language are summarized here.  Bug fixes in
-files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
-
-[ List each fix as an =item entry ]
-
-=over 4
-
-=item *
-
-XXX
-
-=back
-
 =head1 Known Problems
-
-XXX Descriptions of platform agnostic bugs we know we can't fix go here.  Any
-tests that had to be C<TODO>ed for the release would be noted here.  Unfixed
-platform specific bugs also go here.
-
-[ List each fix as an =item entry ]
 
 =over 4
 
@@ -563,27 +370,36 @@ it is harder to determine how the new OPs should be accounted for.
 
 =back
 
-=head1 Errata From Previous Releases
-
-=over 4
-
-=item *
-
-XXX Add anything here that we forgot to add, or were mistaken about, in
-the perldelta of a previous release.
-
-=back
-
-=head1 Obituary
-
-XXX If any significant core contributor or member of the CPAN community has
-died, add a short obituary here.
-
 =head1 Acknowledgements
 
-XXX Generate this with:
+Perl 5.37.4 represents approximately 4 weeks of development since Perl
+5.37.3 and contains approximately 20,000 lines of changes across 270 files
+from 21 authors.
 
-  perl Porting/acknowledgements.pl v5.37.3..HEAD
+Excluding auto-generated files, documentation and release tools, there were
+approximately 12,000 lines of changes to 160 .pm, .t, .c and .h files.
+
+Perl continues to flourish into its fourth decade thanks to a vibrant
+community of users and developers. The following people are known to have
+contributed the improvements that became Perl 5.37.4:
+
+Bram, Dagfinn Ilmari Mannsåker, danielnachun, E. Choroba, Ed J, Elvin
+Aslanov, H.Merijn Brand, James E Keenan, Karen Etheridge, Karl Williamson,
+Kenneth Ölwing, Leon Timmermans, Neil Bowers, Nicolas R, Paul Evans,
+Richard Leach, Sisyphus, Todd Rinaldo, Tomasz Konojacki, Tony Cook, Yves
+Orton.
+
+The list above is almost certainly incomplete as it is automatically
+generated from version control history. In particular, it does not include
+the names of the (very much appreciated) contributors who reported issues to
+the Perl bug tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core. We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please
+see the F<AUTHORS> file in the Perl source distribution.
 
 =head1 Reporting Bugs
 
