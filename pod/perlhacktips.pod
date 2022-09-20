@@ -327,7 +327,7 @@ Indeed, the perl core has more than a few instances of using
 implementation-reserved symbols.  (These are gradually being changed.)
 But your code might stop working any time that the implementation
 decides to use a name you already had chosen, potentially many years
-before.  
+before.
 
 It's best then to:
 
