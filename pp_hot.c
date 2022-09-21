@@ -185,10 +185,9 @@ PP(pp_aelemfastlex_store)
 
     /* Inlined, simplified pp_aelemfast here */
     assert(SvTYPE(av) == SVt_PVAV);
-    assert(key >= 0);
 
     /* inlined av_fetch() for simple cases ... */
-    if (!SvRMAGICAL(av) && key <= AvFILLp(av)) {
+    if (!SvRMAGICAL(av) && key >=0 && key <= AvFILLp(av)) {
         targ = AvARRAY(av)[key];
     }
     /* ... else do it the hard way */
@@ -206,13 +205,14 @@ PP(pp_aelemfastlex_store)
     if (UNLIKELY(TAINT_get) && !SvTAINTED(val))
         TAINT_NOT;
 
-    if (
-      UNLIKELY(SvTEMP(targ)) && !SvSMAGICAL(targ) && SvREFCNT(targ) == 1 &&
-      (!isGV_with_GP(targ) || SvFAKE(targ)) && ckWARN(WARN_MISC)
-    )
-        Perl_warner(aTHX_
-            packWARN(WARN_MISC), "Useless assignment to a temporary"
-        );
+    /* This assertion is a deviation from pp_sassign, which uses an if()
+     * condition to check for "Useless assignment to a temporary" and
+     * warns if the condition is true. Here, the condition should NEVER
+     * be true when the LHS is the result of an array fetch. The
+     * assertion is here as a final check that this remains the case.
+     */
+    assert(!(SvTEMP(targ) && SvREFCNT(targ) == 1 && !SvSMAGICAL(targ)));
+
     SvSetMagicSV(targ, val);
 
     SETs(targ);

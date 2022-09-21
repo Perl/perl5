@@ -898,13 +898,13 @@ test_opcount(0, "simple aelemfast_lex + sassign replacement",
 
 # aelemfast_lex + sassign are not replaced by a combined OP
 # when key <0 (not handled, to keep the pp_ function simple
-test_opcount(0, "no aelemfast_lex + sassign replacement with neg key",
+test_opcount(0, "aelemfast_lex + sassign replacement with neg key",
                 sub { my @x = (1,2); $x[-1] = 7 },
                 {
-                    aelemfast_lex      => 1,
-                    aelemfastlex_store => 0,
+                    aelemfast_lex      => 0,
+                    aelemfastlex_store => 1,
                     padav              => 1,
-                    sassign            => 1,
+                    sassign            => 0,
                 });
 
 # aelemfast_lex + sassign optimization does not disrupt multideref
