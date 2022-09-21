@@ -2,77 +2,122 @@
 
 =head1 NAME
 
-perldelta - what is new for perl v5.37.4
+[ this is a template for a new perldelta file.  Any text flagged as XXX needs
+to be processed before release. ]
+
+perldelta - what is new for perl v5.37.5
 
 =head1 DESCRIPTION
 
-This document describes differences between the 5.37.3 release and the 5.37.4
+This document describes differences between the 5.37.4 release and the 5.37.5
 release.
 
-If you are upgrading from an earlier release such as 5.37.2, first read
-L<perl5373delta>, which describes differences between 5.37.2 and 5.37.3.
+If you are upgrading from an earlier release such as 5.37.3, first read
+L<perl5374delta>, which describes differences between 5.37.3 and 5.37.4.
+
+=head1 Notice
+
+XXX Any important notices here
+
+=head1 Core Enhancements
+
+XXX New core language features go here.  Summarize user-visible core language
+enhancements.  Particularly prominent performance optimisations could go
+here, but most should go in the L</Performance Enhancements> section.
+
+[ List each enhancement as a =head2 entry ]
+
+=head1 Security
+
+XXX Any security-related notices go here.  In particular, any security
+vulnerabilities closed should be noted here rather than in the
+L</Selected Bug Fixes> section.
+
+[ List each security issue as a =head2 entry ]
 
 =head1 Incompatible Changes
 
-=head2 readline() no longer clears the stream error flag
+XXX For a release on a stable branch, this section aspires to be:
 
-C<readline()>, also spelled C<< <> >>, would clear the handle's error
-flag after an error occurred on the stream.
+    There are no changes intentionally incompatible with 5.XXX.XXX
+    If any exist, they are bugs, and we request that you submit a
+    report.  See L</Reporting Bugs> below.
 
-The error flag is now only cleared when an error occurs when reading
-from the child process for glob() in F<miniperl>.  This allows it to
-correctly report errors from the child process on close().
+[ List each incompatible change as a =head2 entry ]
 
-Since the error flag is no longer cleared calling close() on the
-stream may fail and if the stream was not explicitly closed, the
-implicit close of the stream may produce a warning.
+=head1 Deprecations
 
-[L<GH #20060|https://github.com/Perl/perl5/issues/20060>]
+XXX Any deprecated features, syntax, modules etc. should be listed here.
 
-=head2 C<INIT> blocks no longer run after an C<exit()> in C<BEGIN>
+=head2 Module removals
 
-C<INIT> blocks will no longer run after an C<exit()> performed inside of
-a C<BEGIN>. This means that the combination of the C<-v> option and the
-C<-c> option no longer executes a compile check as well as showing the
-perl version. The C<-v> option executes an exit(0) after printing the
-version information inside of a C<BEGIN> block, and the C<-c> check is
-implemented by using C<INIT> hooks, resulting in the C<-v> option taking
-precedence.
+XXX Remove this section if not applicable.
 
-[L<GH #1537|https://github.com/Perl/perl5/issues/1537>]
-[L<GH #20181|https://github.com/Perl/perl5/issues/20181>]
+The following modules will be removed from the core distribution in a
+future release, and will at that time need to be installed from CPAN.
+Distributions on CPAN which require these modules will need to list them as
+prerequisites.
 
-=head2 Syntax errors will no longer produce "phantom error messages".
+The core versions of these modules will now issue C<"deprecated">-category
+warnings to alert you to this fact.  To silence these deprecation warnings,
+install the modules in question from CPAN.
 
-Generally perl will continue parsing the source code even after
-encountering a compile error. In many cases this is helpful, for
-instance with misspelled variable names it is helpful to show as many
-examples of the error as possible. But in the case of syntax errors
-continuing often produces bizarre error messages, and may even cause
-segmentation faults during the compile process. In this release the
-compiler will halt at the first syntax error encountered. This means
-that any code expecting to see the specific error messages we used to
-produce will be broken. The error that is emitted will be one of the
-diagnostics that used to be produced, but in some cases some messages
-that used to be produced will no longer be displayed.
+Note that these are (with rare exceptions) fine modules that you are encouraged
+to continue to use.  Their disinclusion from core primarily hinges on their
+necessity to bootstrapping a fully functional, CPAN-capable Perl installation,
+not usually on concerns over their design.
 
-See L<Changes to Existing Diagnostics> for more details.
+=over
+
+=item XXX
+
+XXX Note that deprecated modules should be listed here even if they are listed
+as an updated module in the L</Modules and Pragmata> section.
+
+=back
+
+[ List each other deprecation as a =head2 entry ]
 
 =head1 Performance Enhancements
+
+XXX Changes which enhance performance without changing behaviour go here.
+There may well be none in a stable release.
+
+[ List each enhancement as an =item entry ]
 
 =over 4
 
 =item *
 
-Additional optree optimizations for common OP patterns. For example, multiple
-simple OPs replaced by a single streamlined OP, so as to be more efficient at
-runtime. L<[GH #19943]|https://github.com/Perl/perl5/pull/19943>,
-L<[GH #20063]|https://github.com/Perl/perl5/pull/20063>,
-L<[GH #20077]|https://github.com/Perl/perl5/pull/20077>.
+XXX
 
 =back
 
 =head1 Modules and Pragmata
+
+XXX All changes to installed files in F<cpan/>, F<dist/>, F<ext/> and F<lib/>
+go here.  If Module::CoreList is updated, generate an initial draft of the
+following sections using F<Porting/corelist-perldelta.pl>.  A paragraph summary
+for important changes should then be added by hand.  In an ideal world,
+dual-life modules would have a F<Changes> file that could be cribbed.
+
+The list of new and updated modules is modified automatically as part of
+preparing a Perl release, so the only reason to manually add entries here is if
+you're summarising the important changes in the module update. (Also, if the
+manually-added details don't match the automatically-generated ones, the
+release manager will have to investigate the situation carefully.)
+
+[ Within each section, list entries as an =item entry ]
+
+=head2 New Modules and Pragmata
+
+=over 4
+
+=item *
+
+XXX Remove this section if not applicable.
+
+=back
 
 =head2 Updated Modules and Pragmata
 
@@ -80,118 +125,34 @@ L<[GH #20077]|https://github.com/Perl/perl5/pull/20077>.
 
 =item *
 
-L<B::Deparse> has been upgraded from version 1.68 to 1.69.
+L<XXX> has been upgraded from version A.xx to B.yy.
+
+If there was something important to note about this change, include that here.
+
+=back
+
+=head2 Removed Modules and Pragmata
+
+=over 4
 
 =item *
 
-L<Carp> has been upgraded from version 1.53 to 1.54.
-
-=item *
-
-L<Class::Struct> has been upgraded from version 0.66 to 0.67.
-
-=item *
-
-L<Config::Perl::V> has been upgraded from version 0.33 to 0.34.
-
-=item *
-
-L<Errno> has been upgraded from version 1.36 to 1.37.
-
-=item *
-
-L<ExtUtils::ParseXS> has been upgraded from version 3.45 to 3.46.
-
-=item *
-
-L<ExtUtils::Typemaps> has been upgraded from version 3.45 to 3.46.
-
-=item *
-
-L<feature> has been upgraded from version 1.75 to 1.76.
-
-=item *
-
-L<File::Basename> has been upgraded from version 2.85 to 2.86.
-
-=item *
-
-L<File::Copy> has been upgraded from version 2.39 to 2.40.
-
-=item *
-
-L<File::stat> has been upgraded from version 1.12 to 1.13.
-
-=item *
-
-L<FileHandle> has been upgraded from version 2.04 to 2.05.
-
-=item *
-
-L<Hash::Util> has been upgraded from version 0.29 to 0.30.
-
-=item *
-
-L<I18N::Langinfo> has been upgraded from version 0.21 to 0.22.
-
-This module uses the POSIX L<nl_langinfo(3)> function if available, and
-emulates it otherwise, such as on Windows.  This new version improves
-the handling of the C<CODESET> item.  Now it works completely correctly
-on Windows platforms (barring any bugs in Windows functions), and
-reliably handles C<UTF-8>, C<C>, and C<POSIX> on other emulated
-platforms
-
-=item *
-
-L<IO> has been upgraded from version 1.50 to 1.51.
-
-=item *
-
-L<Locale::Maketext> has been upgraded from version 1.31 to 1.32.
-
-=item *
-
-L<Module::CoreList> has been upgraded from version 5.20220820 to 5.20220920.
-
-=item *
-
-L<Opcode> has been upgraded from version 1.60 to 1.61.
-
-=item *
-
-L<POSIX> has been upgraded from version 2.04 to 2.06.
-
-=item *
-
-L<Safe> has been upgraded from version 2.43 to 2.44.
-
-=item *
-
-L<Sys::Hostname> has been upgraded from version 1.24 to 1.25.
-
-=item *
-
-L<Time::HiRes> has been upgraded from version 1.9770 to 1.9771.
-
-=item *
-
-L<User::grent> has been upgraded from version 1.03 to 1.04.
-
-=item *
-
-L<User::pwent> has been upgraded from version 1.01 to 1.02.
-
-=item *
-
-L<XS::APItest> has been upgraded from version 1.25 to 1.26.
-
-=item *
-
-L<XSLoader> has been upgraded from version 0.31 to 0.32.
+XXX
 
 =back
 
 =head1 Documentation
+
+XXX Changes to files in F<pod/> go here.  Consider grouping entries by
+file and be sure to link to the appropriate page, e.g. L<perlfunc>.
+
+=head2 New Documentation
+
+XXX Changes which create B<new> files in F<pod/> go here.
+
+=head3 L<XXX>
+
+XXX Description of the purpose of the new file here
 
 =head2 Changes to Existing Documentation
 
@@ -199,29 +160,19 @@ We have attempted to update the documentation to reflect the changes
 listed in this document.  If you find any we have missed, open an issue
 at L<https://github.com/Perl/perl5/issues>.
 
+XXX Changes which significantly change existing files in F<pod/> go here.
+However, any changes to F<pod/perldiag.pod> should go in the L</Diagnostics>
+section.
+
 Additionally, the following selected changes have been made:
+
+=head3 L<XXX>
 
 =over 4
 
 =item *
 
-Entries have been added to L<perlguts> for the new C<newAV_alloc_x>, C<newAV_alloc_xz> and
-C<*_simple> functions.
-
-=item *
-
-References to the now-defunct PrePAN service have been removed from
-L<perlcommunity> and L<perlmodstyle>.
-
-=item *
-
-A section on symbol naming has been added to L<perlhacktips>.
-
-=item *
-
-L<perlexperiment> has been edited to properly reference the warning categories
-for the defer block modifier and extra paired delimiters for quote-like
-operators.
+XXX Description of the change here
 
 =back
 
@@ -231,7 +182,13 @@ The following additions or changes have been made to diagnostic output,
 including warnings and fatal error messages.  For the complete list of
 diagnostic messages, see L<perldiag>.
 
+XXX New or changed warnings emitted by the core's C<C> code go here.  Also
+include any changes in L<perldiag> that reconcile it to the C<C> code.
+
 =head2 New Diagnostics
+
+XXX Newly added diagnostic messages go under here, separated into New Errors
+and New Warnings
 
 =head3 New Errors
 
@@ -239,11 +196,7 @@ diagnostic messages, see L<perldiag>.
 
 =item *
 
-L<Too many nested BEGIN blocks, maximum of %d allowed|perldiag/"Too many nested BEGIN blocks, maximum of %d allowed">
-
-=item *
-
-L<Execution of %s aborted due to compilation errors.|perldiag/"Execution of %s aborted due to compilation errors.">
+XXX L<message|perldiag/"message">
 
 =back
 
@@ -253,210 +206,204 @@ L<Execution of %s aborted due to compilation errors.|perldiag/"Execution of %s a
 
 =item *
 
-L<Locale '%s' is unsupported, and may crash the interpreter.|perldiag/"Locale '%s' is unsupported, and may crash the interpreter.">
-
-=item *
-
-L<Treating %s::INIT block as BEGIN block as workaround|perldiag/"Treating %s::INIT block as BEGIN block as workaround">
-
-=item *
-
-L<Filehandle STD%s reopened as %s only for input|perldiag/"Filehandle STD%s reopened as %s only for input">
-
-=item *
-
-L<%s on BEGIN block ignored|perldiag/"%s on BEGIN block ignored">
+XXX L<message|perldiag/"message">
 
 =back
 
 =head2 Changes to Existing Diagnostics
 
+XXX Changes (i.e. rewording) of diagnostic messages go here
+
 =over 4
 
 =item *
 
-The compiler will now stop parsing on the first syntax error it
-encounters. Historically the compiler would attempt to "skip past" the
-error and continue parsing so that it could list multiple errors. For
-things like undeclared variables under strict this makes sense. For
-syntax errors however it has been found that continuing tends to result
-in a storm of unrelated or bizarre errors that mostly just obscure the
-true error. In extreme cases it can even lead to segfaults and other
-incorrect behavior.
+XXX Describe change here
 
-Therefore we have reformed the continuation logic so that the parse will
-stop after the first seen syntax error. Semantic errors like undeclared
-variables will not stop the parse, so you may still see multiple errors
-when compiling code. However if there is a syntax error it will be the
-last error message reported by perl and all of the errors that you see
-will be something that actually needs to be fixed.
+=back
 
-=item *
+=head1 Utility Changes
 
-Error messages that output class or package names have been modified to
-output double quoted strings with various characters escaped so as to
-make the exact value clear to a reader. The exact rules on which
-characters are escaped may change over time but currently are that
-printable ASCII codepoints, with the exception of C<"> and C<\>, and
-unicode word characters whose codepoint is over 255 are output raw, and
-any other symbols are escaped much as Data::Dumper might escape them,
-using C<\n> for newline and C<\"> for double quotes, etc. Codepoints in
-the range 128-255 are always escaped as they can cause trouble on
-unicode terminals when output raw.
+XXX Changes to installed programs such as F<perldoc> and F<xsubpp> go here.
+Most of these are built within the directory F<utils>.
 
-In older versions of perl the one liner
+[ List utility changes as a =head2 entry for each utility and =item
+entries for each change
+Use L<XXX> with program names to get proper documentation linking. ]
 
-    $ perl -le'"thing\n"->foo()'
+=head2 L<XXX>
 
-would output the following error message exactly as shown here, with
-text spread over multiple lines because the "\n" would be emitted as
-a raw newline character:
-
-    Can't locate object method "foo" via package "thing
-    " (perhaps you forgot to load "thing
-    "?) at -e line 1.
-
-As of this release we would output this instead (as one line):
-
-    Can't locate object method "foo" via package "thing\n"
-      (perhaps you forgot to load "thing\n"?) at -e line 1.
-
-Notice the newline in the package name has been quoted and escaped, and
-thus the error message is a single line. The text is shown here wrapped
-to two lines only for readability.
+=over 4
 
 =item *
 
-When package or class names in errors are very large the middle excess
-portion will be elided from the message. As of this release error messages
-will show only up to the first 128 characters and the last 128 characters
-in a package or class name in error messages. For example
+XXX
 
- $ perl -le'("Foo" x 1000)->new()'
+=back
 
-will output the following as one line:
+=head1 Configuration and Compilation
 
- Can't locate object method "new" via package "FooFooFooFooFooFooFoo
- FooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFoo
- FooFooFooFooFooFooFooFooFooFooFooFooFooFo"..."oFooFooFooFooFooFooFoo
- FooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFoo
- FooFooFooFooFooFooFooFooFooFooFooFooFoo" (perhaps you forgot to load
- "FooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFoo
- FooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFo"...
- "oFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFoo
- FooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFooFoo"?)
- at -e line 1.
+XXX Changes to F<Configure>, F<installperl>, F<installman>, and analogous tools
+go here.  Any other changes to the Perl build process should be listed here.
+However, any platform-specific changes should be listed in the
+L</Platform Support> section, instead.
 
-Notice the C< "prefix"..."suffix" > form of the package name in this case.
-In previous versions of perl the complete string would have been shown
-making the error message over 6k long and there was no upper limit on the
-length of the error message at all. If you accidentally used a 1MB string
-as a class name then the error message would be over 2MB long. In this perl
-the upper limit should be around 2k when eliding and escaping are taken into
-account.
+[ List changes as an =item entry ].
+
+=over 4
+
+=item *
+
+XXX
 
 =back
 
 =head1 Testing
 
+XXX Any significant changes to the testing of a freshly built perl should be
+listed here.  Changes which create B<new> files in F<t/> go here as do any
+large changes to the testing harness (e.g. when parallel testing was added).
+Changes to existing files in F<t/> aren't worth summarizing, although the bugs
+that they represent may be covered elsewhere.
+
+XXX If there were no significant test changes, say this:
+
 Tests were added and changed to reflect the other additions and changes
 in this release.
 
-=head1 Internal Changes
+XXX If instead there were significant changes, say this:
+
+Tests were added and changed to reflect the other additions and
+changes in this release.  Furthermore, these significant changes were
+made:
+
+[ List each test improvement as an =item entry ]
 
 =over 4
 
 =item *
 
-A new API function L<perlapi/C<Perl_localeconv>> is added.  This is the
-same as L<C<POSIX::localeconv>|POSIX/localeconv> (returning a hash of
-the C<localeconv()>> fields), but directly callable from XS code.
+XXX
+
+=back
+
+=head1 Platform Support
+
+XXX Any changes to platform support should be listed in the sections below.
+
+[ Within the sections, list each platform as an =item entry with specific
+changes as paragraphs below it. ]
+
+=head2 New Platforms
+
+XXX List any platforms that this version of perl compiles on, that previous
+versions did not.  These will either be enabled by new files in the F<hints/>
+directories, or new subdirectories and F<README> files at the top level of the
+source tree.
+
+=over 4
+
+=item XXX-some-platform
+
+XXX
+
+=back
+
+=head2 Discontinued Platforms
+
+XXX List any platforms that this version of perl no longer compiles on.
+
+=over 4
+
+=item XXX-some-platform
+
+XXX
+
+=back
+
+=head2 Platform-Specific Notes
+
+XXX List any changes for specific platforms.  This could include configuration
+and compilation changes or changes in portability/compatibility.  However,
+changes within modules for platforms should generally be listed in the
+L</Modules and Pragmata> section.
+
+=over 4
+
+=item XXX-some-platform
+
+XXX
+
+=back
+
+=head1 Internal Changes
+
+XXX Changes which affect the interface available to C<XS> code go here.  Other
+significant internal changes for future core maintainers should be noted as
+well.
+
+[ List each change as an =item entry ]
+
+=over 4
 
 =item *
 
-A new API function L<perlapi/C<my_strftime8>> is added.  This is the
-same as plain L<perlapi/C<my_strftime>>, but with an extra parameter
-that allows the caller to simply and reliably know if the returned
-string is UTF-8.
+XXX
+
+=back
+
+=head1 Selected Bug Fixes
+
+XXX Important bug fixes in the core language are summarized here.  Bug fixes in
+files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
+
+[ List each fix as an =item entry ]
+
+=over 4
 
 =item *
 
-A new API function, L<perlapi/C<Perl_langinfo8>> is added.  This is the
-same as plain L<perlapi/C<Perl_langinfo>>, but with an extra parameter
-that allows the caller to simply and reliably know if the returned
-string is UTF-8.
-
-=item *
-
-We have introduced a limit on the number of nested C<eval EXPR>/C<BEGIN>
-blocks and C<require>/C<BEGIN> (and thus C<use> statements as well) to
-prevent C stack overflows. This variable can also be used to forbid
-C<BEGIN> blocks from executing during C<eval EXPR> compilation. The
-limit defaults to C<1000> but can be overridden by setting the
-C<${^MAX_NESTED_EVAL_BEGIN_BLOCKS}> variable. The default itself can be
-changed at compile time with
-
-    -Accflags='-DPERL_MAX_NESTED_EVAL_BEGIN_BLOCKS_DEFAULT=12345'
-
-Note that this value relates to the size of your C stack and if you
-choose an inappropriately large value Perl may segfault, be conservative
-about what you choose.
+XXX
 
 =back
 
 =head1 Known Problems
 
+XXX Descriptions of platform agnostic bugs we know we can't fix go here.  Any
+tests that had to be C<TODO>ed for the release would be noted here.  Unfixed
+platform specific bugs also go here.
+
+[ List each fix as an =item entry ]
+
 =over 4
 
 =item *
 
-L<Variable::Magic>
-L<[RT #144052]|https://rt.cpan.org/Ticket/Display.html?id=144052>,
-and L<Devel::Caller>
-L<[RT #144051]|https://rt.cpan.org/Ticket/Display.html?id=144051>
-have not yet been updated to add awareness of new OPs introduced in
-this development cycle.
-L<[GH #20114]|https://github.com/Perl/perl5/issues/20114>. Patches have
-been submitted upstream but these have not been incorporated into new
-releases yet.
-
-L<Test::Vars>
-L<[Test-Vars/GH #47]|https://github.com/houseabsolute/p5-Test-Vars/issues/47>
-also requires updating, but since this module's own tests are not failing,
-it is harder to determine how the new OPs should be accounted for.
+XXX
 
 =back
 
+=head1 Errata From Previous Releases
+
+=over 4
+
+=item *
+
+XXX Add anything here that we forgot to add, or were mistaken about, in
+the perldelta of a previous release.
+
+=back
+
+=head1 Obituary
+
+XXX If any significant core contributor or member of the CPAN community has
+died, add a short obituary here.
+
 =head1 Acknowledgements
 
-Perl 5.37.4 represents approximately 4 weeks of development since Perl
-5.37.3 and contains approximately 20,000 lines of changes across 270 files
-from 21 authors.
+XXX Generate this with:
 
-Excluding auto-generated files, documentation and release tools, there were
-approximately 12,000 lines of changes to 160 .pm, .t, .c and .h files.
-
-Perl continues to flourish into its fourth decade thanks to a vibrant
-community of users and developers. The following people are known to have
-contributed the improvements that became Perl 5.37.4:
-
-Bram, Dagfinn Ilmari Mannsåker, danielnachun, E. Choroba, Ed J, Elvin
-Aslanov, H.Merijn Brand, James E Keenan, Karen Etheridge, Karl Williamson,
-Kenneth Ölwing, Leon Timmermans, Neil Bowers, Nicolas R, Paul Evans,
-Richard Leach, Sisyphus, Todd Rinaldo, Tomasz Konojacki, Tony Cook, Yves
-Orton.
-
-The list above is almost certainly incomplete as it is automatically
-generated from version control history. In particular, it does not include
-the names of the (very much appreciated) contributors who reported issues to
-the Perl bug tracker.
-
-Many of the changes included in this version originated in the CPAN modules
-included in Perl's core. We're grateful to the entire CPAN community for
-helping Perl to flourish.
-
-For a more complete list of all of Perl's historical contributors, please
-see the F<AUTHORS> file in the Perl source distribution.
+  perl Porting/acknowledgements.pl v5.37.4..HEAD
 
 =head1 Reporting Bugs
 
