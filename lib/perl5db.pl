@@ -532,7 +532,7 @@ BEGIN {
 use vars qw($VERSION $header);
 
 # bump to X.XX in blead, only use X.XX_XX in maint
-$VERSION = '1.76';
+$VERSION = '1.77';
 
 $header = "perl5db.pl version $VERSION";
 
@@ -3490,7 +3490,9 @@ again.
 =cut
 
         # No more commands? Quit.
-        $fall_off_end = 1 unless defined $cmd;    # Emulate 'q' on EOF
+        unless (defined $cmd) {
+            DB::Obj::_do_quit();
+        }
 
         # Evaluate post-prompt commands.
         foreach $evalarg (@$post) {
@@ -4294,13 +4296,17 @@ sub _handle_x_command {
     return;
 }
 
+sub _do_quit {
+    $fall_off_end = 1;
+    DB::clean_ENV();
+    exit $?;
+}
+
 sub _handle_q_command {
     my $self = shift;
 
     if ($self->_is_full('q')) {
-        $fall_off_end = 1;
-        DB::clean_ENV();
-        exit $?;
+        _do_quit();
     }
 
     return;
