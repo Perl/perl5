@@ -3353,7 +3353,11 @@ package Multi_Default;
 # and for each of the others, there is a description of which class of code
 # points applies to it.  This object helps implement this by storing the
 # defaults, and for all but that final default, an eval string that generates
-# the class that it applies to.
+# the class that it applies to.  That class must be a Range_List, or contains
+# a Range_List that the overloaded operators recognize as to be operated on.
+# A string is used because this is called early when we know symbolically what
+# needs to be done, but typically before any data is gathered.  Thus the
+# evaluation gets delayed until we have at hand all the needed information.
 
 {   # Closure
 
@@ -3643,7 +3647,10 @@ sub trace { return main::trace(@_); }
         my $class = shift;
         my %args = @_;
 
-        # Optional initialization data for the range list.
+        # Optional initialization data for the range list.  NOTE: For large
+        # ranges, it is better to use Range object rather than
+        #   [ low .. high ]
+        # as it iterates through each one individually in the latter case.
         my $initialize = delete $args{'Initialize'};
 
         my $self;
@@ -8634,7 +8641,7 @@ package Property;
 # starts with unknown type, overridden by a parameter to the constructor, or
 # as match tables are added, or ranges added to the map table, the data is
 # inspected, and the type changed.  After the table is mostly or entirely
-# filled, compute_type() should be called to finalize they analysis.
+# filled, compute_type() should be called to finalize the analysis.
 #
 # There are very few operations defined.  One can safely remove a range from
 # the map table, and property_add_or_replace_non_nulls() adds the maps from another
@@ -10395,6 +10402,7 @@ END
         my $property = property_ref($default_ref->{property});
         $property->set_default_map($default);
     }
+
     return;
 }
 
@@ -10927,96 +10935,105 @@ sub output_perl_charnames_line ($code_point, $name) {
                         }
                     }
 
-                    # Finished storing all the @missings defaults in the input
-                    # file so far.  Get the one for the current property.
-                    my $missings = $this_property_info->{$MISSINGS};
-
-                    # But we likely have separately stored what the default
-                    # should be.  (This is to accommodate versions of the
-                    # standard where the @missings lines are absent or
-                    # incomplete.)  Hopefully the two will match.  But check
-                    # it out.
-                    $default_map = $property_object->default_map;
-
-                    # If the map is a ref, it means that the default won't be
-                    # processed until later, so undef it, so next few lines
-                    # will redefine it to something that nothing will match
-                    undef $default_map if ref $default_map;
-
-                    # Create a $default_map if don't have one; maybe a dummy
-                    # that won't match anything.
-                    if (! defined $default_map) {
-
-                        # Use any @missings line in the file.
-                        if (defined $missings) {
-                            if (ref $missings) {
-                                $default_map = $missings->full_name;
-                                $default_table = $missings;
-                            }
-                            else {
-                                $default_map = $missings;
-                            }
-
-                            # And store it with the property for outside use.
-                            $property_object->set_default_map($default_map);
-                        }
-                        else {
-
-                            # Neither an @missings nor a default map.  Create
-                            # a dummy one, so won't have to test definedness
-                            # in the main loop.
-                            $default_map = '_Perl This will never be in a file
-                                            from Unicode';
-                        }
-                    }
-
                     # Here, we have $default_map defined, possibly in terms of
                     # $missings, but maybe not, and possibly is a dummy one.
-                    if (defined $missings) {
 
-                        # Make sure there is no conflict between the two.
-                        # $missings has priority.
-                        if (ref $missings) {
-                            $default_table
-                                        = $property_object->table($default_map);
-                            if (! defined $default_table
-                                || $default_table != $missings)
-                            {
-                                if (! defined $default_table) {
-                                    $default_table = $UNDEF;
+                        # Finished storing all the @missings defaults in the
+                        # input file so far.  Get the one for the current
+                        # property.
+                        my $missings = $this_property_info->{$MISSINGS};
+
+                        # But we likely have separately stored what the
+                        # default should be.  (This is to accommodate versions
+                        # of the standard where the @missings lines are absent
+                        # or incomplete.)  Hopefully the two will match.  But
+                        # check it out.
+                        $default_map = $property_object->default_map;
+
+                        # If the map is a ref, it means that the default won't
+                        # be processed until later, so undef it, so next few
+                        # lines will redefine it to something that nothing
+                        # will match
+                        undef $default_map if ref $default_map;
+
+                        # Create a $default_map if don't have one; maybe a
+                        # dummy that won't match anything.
+                        if (! defined $default_map) {
+
+                            # Use any @missings line in the file.
+                            if (defined $missings) {
+                                if (ref $missings) {
+                                    $default_map = $missings->full_name;
+                                    $default_table = $missings;
                                 }
-                                $file->carp_bad_line(<<END
+                                else {
+                                    $default_map = $missings;
+                                }
+
+                                # And store it with the property for outside
+                                # use.
+                                $property_object->set_default_map($default_map);
+                            }
+                            else {
+
+                                # Neither an @missings nor a default map.
+                                # Create a dummy one, so won't have to test
+                                # definedness in the main loop.
+                                $default_map = '_Perl This will never be in a'
+                                             . ' file from Unicode';
+                            }
+                        }
+
+                        # Here, we have $default_map defined, possibly in
+                        # terms of $missings, but maybe not, and possibly is a
+                        # dummy one.
+                        if (defined $missings) {
+
+                            # Make sure there is no conflict between the two.
+                            # $missings has priority.
+                            if (ref $missings) {
+                                $default_table
+                                        = $property_object->table($default_map);
+                                if ( ! defined $default_table
+                                    || $default_table != $missings)
+                                {
+                                    if (! defined $default_table) {
+                                        $default_table = $UNDEF;
+                                    }
+                                    $file->carp_bad_line(<<END
 The \@missings line for $property_name in $file says that missings default to
 $missings, but we expect it to be $default_table.  $missings used.
 END
-                                );
-                                $default_table = $missings;
-                                $default_map = $missings->full_name;
-                            }
-                            $this_property_info->{$DEFAULT_TABLE}
+                                    );
+                                    $default_table = $missings;
+                                    $default_map = $missings->full_name;
+                                }
+                                $this_property_info->{$DEFAULT_TABLE}
                                                             = $default_table;
-                        }
-                        elsif ($default_map ne $missings) {
-                            $file->carp_bad_line(<<END
+                            }
+                            elsif ($default_map ne $missings) {
+                                $file->carp_bad_line(<<END
 The \@missings line for $property_name in $file says that missings default to
 $missings, but we expect it to be $default_map.  $missings used.
 END
-                            );
-                            $default_map = $missings;
+                                );
+                                $default_map = $missings;
+                            }
                         }
-                    }
 
-                    $this_property_info->{$DEFAULT_MAP} = $default_map;
+                        $this_property_info->{$DEFAULT_MAP} = $default_map;
 
-                    # If haven't done so already, find the table corresponding
-                    # to this map for non-string properties.
-                    if (! defined $default_table
-                        && $property_type != $STRING
-                        && $property_type != $UNKNOWN)
-                    {
-                        $default_table = $this_property_info->{$DEFAULT_TABLE}
-                                    = $property_object->table($default_map);
-                    }
+                        # If haven't done so already, find the table
+                        # corresponding to this map for non-string properties.
+                        if (! defined $default_table
+                            && $property_type != $STRING
+                            && $property_type != $UNKNOWN)
+                        {
+                            $default_table
+                                        = $this_property_info->{$DEFAULT_TABLE}
+                                        = $property_object->table($default_map);
+                        }
+
                 } # End of is first time for this property
             } # End of switching properties.
 
@@ -11045,7 +11062,8 @@ END
                 }
             }
 
-            if ($default_map eq $CODE_POINT && $map =~ / ^ $code_point_re $/x)
+            if (   $default_map eq $CODE_POINT
+                && $map =~ / ^ $code_point_re $/x)
             {
 
                 # Here, we have a map to a particular code point, and the
@@ -11082,9 +11100,7 @@ END
 
             # If we can tell that this is a synonym for the default map, use
             # the default one instead.
-            if ($property_type != $STRING
-                && $property_type != $UNKNOWN)
-            {
+            if ($property_type != $STRING && $property_type != $UNKNOWN) {
                 my $table = $property_object->table($map);
                 if (defined $table && $table == $default_table) {
                     $map = $default_map;
