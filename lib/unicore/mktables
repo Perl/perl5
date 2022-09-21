@@ -49,7 +49,7 @@ sub NON_ASCII_PLATFORM { ord("A") != 65 }
 # expected, a warning will be generated.  If an older version is being
 # compiled, any bounds tests that fail in the generated test file (-maketest
 # option) will be marked as TODO.
-my $version_of_mk_invlist_bounds = v14.0.0;
+my $version_of_mk_invlist_bounds = v15.0.0;
 
 ##########################################################################
 #
