@@ -740,110 +740,27 @@ as in
  if (x) STMT_START { ... } STMT_END else ...
 
 Note that you can't return a value out of this construct and cannot use it as
-an operand to the comma operator, which limit its utility.  If you need
-those features, instead use C language C<static inline> functions.
-But those won't work where the types of the inputs can vary depending on where
-called from; you'd have to create a separate function for each combination of
-parameter types.
+an operand to the comma operator.  These limit its utility.  
 
-Subtle bugs can occur due to this being a macro with names evaluated in
-the context of the caller, unlike a function.  These bugs can be eliminated by
-treating this more like a function.  This means that you must only use
-variables inside it that are either formal parameters or are declared
-internally within the construct.  Thus
+But, a value could be returned by constructing the API so that a pointer is
+passed and the macro dereferences this to set the return.  If the value can be
+any of various types, depending on context, you can handle that situation in
+some situations by adding the type of the return as an extra accompanying
+parameter:
 
-=over
+ #define foo(param, type)  STMT_START {
+                              type * param; *param = do_calc; ...
+                           } STMT_END
 
-=item *
+This could be awkward, so consider instead using a C language C<static inline>
+function.
 
-B<All> references to outside-the-construct variables must be through formal
-parameters.
-
-=item *
-
-All formal parameters should be used only once.  If a value needs to be used in
-more than one place, instead declare a variable internally, initialized with
-the formal parameter.  Then use that internal variable freely.  For example
-
- #define warn_if_odd(n)                                     \
-                STMT_START {                                \
-                    int n_ = n;                             \
-                                                            \
-                    if (n_ % 2 != 0) {                      \
-                        my_warn(aTHX_ "%d is odd\n", n_);   \
-                    }                                       \
-                } STMT_END
-
-This prevents issues when the macro is called with a parameter with side
-effects.
-
-Note that the internal variable must have a different name than the formal
-parameter one.  Using a trailing underscore is legal in C, and unobtrusive.
-C<But> see below for why you should choose a different naming convention if
-there are multiple parameters.
-
-=item *
-
-If there are multiple formal parameters, the names of the internal copies need
-to be something that won't clash with any names outside the macro.  This
-prevents subtle bugs when the caller uses one parameter in terms of another.
-
- #define my_best_shot(a, b)                                 \
-                STMT_START {                                \
-                    UV     my_best_shot_a = a;              \
-                    UV     my_best_shot_b = b;              \
-                                                            \
-                    Size_t ix;                              \
-                                                            \
-                    ...                                     \
-                                                            \
-                } STMT_END
-
- my_best_shot(a + b + ix, a - b - ix);
-
-Without the declarations, the macro call at the end of the example would be
-problematic.
-
-This example uses the macro name as part of each variable name that corresponds
-to a formal parameter.  If this convention is followed everywhere, there is no
-possibility of name collisions.
-
-Note that the C<ix> within the construct doesn't interfere with the outside
-C<ix>, but only because we have declared and initialized variables that are
-copies of all the formal parameters.
-
-Also note that if you forget and use plain C<a> or C<b> in some places, things
-may well compile, and have subtle run-time bugs.
-
-For a concrete example, see L<https://perlmonks.org/?node_id=11144355>.
-
-=item *
-
-Pass in the type for any declarations if it isn't known at macro definition
-time.  Suppose that the parameters to C<my_best_shot> in the example above
-didn't have to be UV.  This can be handled by changing the signature, something
-like this:
-
- #define my_best_shot(a, a_type, b, b_type)                 \
-                STMT_START {                                \
-                    a_type my_best_shot_a = a;              \
-                    b_type my_best_shot_b = b;              \
-                                                            \
-                    Size_t ix;                              \
-                                                            \
-                    ...                                     \
-                                                            \
-                } STMT_END
-
- my_best_shot(a + b + ix, int, a - b - ix, long);
-
-You are out of luck if the signature can't be changed to include the types.
-Best then is to document that the macro cannot safely be called with parameters
-with side effects.  And any internally-declared variables should have names
-that won't clash with any outside names.  C<ix> should then be
-C<my_best_shot_ix>, for example.
-
-=back
+If you do use this construct, it is easy to forget that it is a macro and not a
+function, and hence fall into traps that might not show up until someone
+someday writes code which contains names that clash with the ones you chose
+here, or calls it with a parameter which is an expression with side effects,
+the consequences of which you didn't think about.  See L<perlhacktips/Writing
+safer macros> for how to avoid these.
 
 =for apidoc_section $genconfig
 =for apidoc Amn#||PERL_USE_GCC_BRACE_GROUPS
