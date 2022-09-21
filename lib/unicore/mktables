@@ -10866,22 +10866,21 @@ sub output_perl_charnames_line ($code_point, $name) {
 
                 # If not the first time for this property, retrieve info about
                 # it from the cache
-                if (defined ($property_info{$property_addr}{$TYPE})) {
-                    $property_type = $property_info{$property_addr}{$TYPE};
-                    $default_map = $property_info{$property_addr}{$DEFAULT_MAP};
-                    $map_type
-                        = $property_info{$property_addr}{$PSEUDO_MAP_TYPE};
-                    $default_table
-                            = $property_info{$property_addr}{$DEFAULT_TABLE};
+                my $this_property_info = $property_info{$property_addr};
+                if (defined ($this_property_info->{$TYPE})) {
+                    $property_type = $this_property_info->{$TYPE};
+                    $default_map = $this_property_info->{$DEFAULT_MAP};
+                    $map_type = $this_property_info->{$PSEUDO_MAP_TYPE};
+                    $default_table = $this_property_info->{$DEFAULT_TABLE};
                 }
                 else {
 
                     # Here, is the first time for this property.  Set up the
                     # cache.
-                    $property_type = $property_info{$property_addr}{$TYPE}
+                    $property_type = $this_property_info->{$TYPE}
                                    = $property_object->type;
                     $map_type
-                        = $property_info{$property_addr}{$PSEUDO_MAP_TYPE}
+                        = $this_property_info->{$PSEUDO_MAP_TYPE}
                         = $property_object->pseudo_map_type;
 
                     # The Unicode files are set up so that if the map is not
@@ -10894,9 +10893,8 @@ sub output_perl_charnames_line ($code_point, $name) {
                         }
                         else {
                             $property_object->set_type($BINARY);
-                            $property_type
-                                = $property_info{$property_addr}{$TYPE}
-                                = $BINARY;
+                            $property_type = $this_property_info->{$TYPE}
+                                           = $BINARY;
                         }
                     }
 
@@ -10921,17 +10919,17 @@ sub output_perl_charnames_line ($code_point, $name) {
                         if ($property_type == $STRING
                             || $property_type == $UNKNOWN)
                         {
-                            $property_info{$addr}{$MISSINGS} = $default;
+                            $this_property_info->{$MISSINGS} = $default;
                         }
                         else {
-                            $property_info{$addr}{$MISSINGS}
-                                        = $property_object->table($default);
+                            $this_property_info->{$MISSINGS}
+                                            = $property_object->table($default);
                         }
                     }
 
                     # Finished storing all the @missings defaults in the input
                     # file so far.  Get the one for the current property.
-                    my $missings = $property_info{$property_addr}{$MISSINGS};
+                    my $missings = $this_property_info->{$MISSINGS};
 
                     # But we likely have separately stored what the default
                     # should be.  (This is to accommodate versions of the
@@ -10995,8 +10993,8 @@ END
                                 $default_table = $missings;
                                 $default_map = $missings->full_name;
                             }
-                            $property_info{$property_addr}{$DEFAULT_TABLE}
-                                                        = $default_table;
+                            $this_property_info->{$DEFAULT_TABLE}
+                                                            = $default_table;
                         }
                         elsif ($default_map ne $missings) {
                             $file->carp_bad_line(<<END
@@ -11008,8 +11006,7 @@ END
                         }
                     }
 
-                    $property_info{$property_addr}{$DEFAULT_MAP}
-                                                    = $default_map;
+                    $this_property_info->{$DEFAULT_MAP} = $default_map;
 
                     # If haven't done so already, find the table corresponding
                     # to this map for non-string properties.
@@ -11017,8 +11014,7 @@ END
                         && $property_type != $STRING
                         && $property_type != $UNKNOWN)
                     {
-                        $default_table = $property_info{$property_addr}
-                                                        {$DEFAULT_TABLE}
+                        $default_table = $this_property_info->{$DEFAULT_TABLE}
                                     = $property_object->table($default_map);
                     }
                 } # End of is first time for this property
