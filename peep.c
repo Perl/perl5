@@ -3958,8 +3958,7 @@ Perl_rpeep(pTHX_ OP *o)
 
             if (!(o->op_private & (OPpASSIGN_BACKWARDS|OPpASSIGN_CV_TO_GV))
                 && (lval->op_type == OP_NULL) && (lval->op_private == 2) &&
-                (cBINOPx(lval)->op_first->op_type == OP_AELEMFAST_LEX) &&
-                ((I8)(cBINOPx(lval)->op_first->op_private) >= 0)
+                (cBINOPx(lval)->op_first->op_type == OP_AELEMFAST_LEX)
             ) {
                 OP * lex = cBINOPx(lval)->op_first;
                 /* SASSIGN's bitfield flags, such as op_moresib and
