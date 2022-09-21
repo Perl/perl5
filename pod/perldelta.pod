@@ -27,6 +27,10 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 Unicode 15.0 is supported
+
+See L<https://www.unicode.org/versions/Unicode15.0.0/> for details.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
