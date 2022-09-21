@@ -17,6 +17,12 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.37.4 - C. F. Kettering
+
+L<Announced on 2022-09-20 by Karen Etheridge|https://www.nntp.perl.org/group/perl.perl5.porters/2022/09/msg264815.html>
+
+"A problem well stated is a problem half solved.
+
 =head2 v5.37.3 - John Steinbeck, "East of Eden"
 
 L<Announced on 2022-08-20 by Neil B|https://www.nntp.perl.org/group/perl.perl5.porters/2022/08/msg264651.html>
