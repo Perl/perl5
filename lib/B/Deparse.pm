@@ -7,7 +7,7 @@
 # This is based on the module of the same name by Malcolm Beattie,
 # but essentially none of his code remains.
 
-package B::Deparse 1.69;
+package B::Deparse 1.70;
 use strict;
 use Carp;
 use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
@@ -5129,7 +5129,7 @@ sub retscalar {
                  |msgrcv|semop|semget|semctl|hintseval|shostent|snetent
                  |sprotoent|sservent|ehostent|enetent|eprotoent|eservent
                  |spwent|epwent|sgrent|egrent|getlogin|syscall|lock|runcv
-                 |fc)\z/x
+                 |fc|padsv_store)\z/x
 }
 
 sub pp_entersub {
