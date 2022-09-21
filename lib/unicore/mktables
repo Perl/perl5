@@ -3002,8 +3002,10 @@ END
                             $default = "Unknown";
                         }
 
-                        # Store them as a sub-arrays with both components.
-                        push @{$missings{$addr}}, [ $default, $property ];
+                        # Store them as a sub-hash as part of an array, with
+                        # both components.
+                        push @{$missings{$addr}}, { default  => $default,
+                                                    property => $property };
                     }
                 }
 
@@ -3217,9 +3219,9 @@ END
 
     sub get_missings($self) {
         # Returns the stored up @missings lines' values, and clears the list.
-        # The values are in an array, consisting of the default in the first
-        # element, and the property in the 2nd.  However, since these lines
-        # can be stacked up, the return is an array of all these arrays.
+        # The values are in a hash, consisting of 'default' and 'property'.
+        # However, since these lines can be stacked up, the return is an array
+        # of all these hashes.
 
         my $addr = pack 'J', refaddr $self;
 
@@ -10389,8 +10391,8 @@ END
     # entries in the file, and may not show up until the end.
     my @defaults = $file->get_missings;
     foreach my $default_ref (@defaults) {
-        my $default = $default_ref->[0];
-        my $property = property_ref($default_ref->[1]);
+        my $default = $default_ref->{default};
+        my $property = property_ref($default_ref->{property});
         $property->set_default_map($default);
     }
     return;
@@ -10906,9 +10908,10 @@ sub output_perl_charnames_line ($code_point, $name) {
                     # waiting for us; collect them all, and parse
                     my @missings_list = $file->get_missings
                                             if $file->has_missings_defaults;
+
                     foreach my $default_ref (@missings_list) {
-                        my $default = $default_ref->[0];
-                        my $addr = pack 'J', refaddr property_ref($default_ref->[1]);
+                        my $default = $default_ref->{default};
+                        my $addr = pack 'J', refaddr property_ref($default_ref->{property});
 
                         # For string properties, the default is just what the
                         # file says, but non-string properties should already
