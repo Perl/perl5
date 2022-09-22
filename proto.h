@@ -5121,9 +5121,6 @@ PERL_CALLCONV void	Perl_set_padlist(CV * cv, PADLIST * padlist);
 #define PERL_ARGS_ASSERT_SET_PADLIST	\
 	assert(cv)
 #  if defined(PERL_IN_LOCALE_C)
-STATIC void	S_print_bytes_for_locale(pTHX_ const char * const s, const char * const e, const bool is_utf8);
-#define PERL_ARGS_ASSERT_PRINT_BYTES_FOR_LOCALE	\
-	assert(s); assert(e)
 #    if defined(USE_LOCALE)
 STATIC const char *	S_get_LC_ALL_display(pTHX);
 #define PERL_ARGS_ASSERT_GET_LC_ALL_DISPLAY
@@ -5697,6 +5694,9 @@ PERL_CALLCONV SV*	Perl_hfree_next_entry(pTHX_ HV *hv, STRLEN *indexp)
 
 #endif
 #if defined(PERL_IN_LOCALE_C)
+STATIC const char *	S_get_displayable_string(pTHX_ const char * const s, const char * const e, const bool is_utf8);
+#define PERL_ARGS_ASSERT_GET_DISPLAYABLE_STRING	\
+	assert(s); assert(e)
 #  if defined(USE_LOCALE)
 STATIC unsigned int	S_get_category_index(const int category, const char * locale);
 #define PERL_ARGS_ASSERT_GET_CATEGORY_INDEX

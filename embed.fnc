@@ -3450,11 +3450,9 @@ SR	|char *	|my_setlocale_debug_string_i			\
 			    |const line_t line
 #    endif
 #  endif
-#  ifdef DEBUGGING
-S	|void	|print_bytes_for_locale	|NN const char * const s	\
+S	|const char *|get_displayable_string|NN const char * const s	\
 					|NN const char * const e	\
 					|const bool is_utf8
-#  endif
 #endif
 
 #if defined(PERL_IN_UTIL_C)

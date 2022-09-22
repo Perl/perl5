@@ -1627,7 +1627,6 @@
 #define get_debug_opts(a,b)	Perl_get_debug_opts(aTHX_ a,b)
 #define set_padlist		Perl_set_padlist
 #    if defined(PERL_IN_LOCALE_C)
-#define print_bytes_for_locale(a,b,c)	S_print_bytes_for_locale(aTHX_ a,b,c)
 #      if defined(USE_LOCALE)
 #define get_LC_ALL_display()	S_get_LC_ALL_display(aTHX)
 #define my_setlocale_debug_string_i(a,b,c,d)	S_my_setlocale_debug_string_i(aTHX_ a,b,c,d)
@@ -1752,6 +1751,7 @@
 #define unshare_hek_or_pvn(a,b,c,d)	S_unshare_hek_or_pvn(aTHX_ a,b,c,d)
 #  endif
 #  if defined(PERL_IN_LOCALE_C)
+#define get_displayable_string(a,b,c)	S_get_displayable_string(aTHX_ a,b,c)
 #    if defined(USE_LOCALE)
 #define get_category_index	S_get_category_index
 #define get_locale_string_utf8ness_i(a,b,c,d)	S_get_locale_string_utf8ness_i(aTHX_ a,b,c,d)

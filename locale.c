@@ -956,7 +956,9 @@ S_setlocale_from_aggregate_LC_ALL(pTHX_ const char * locale, const line_t line)
 
         if (*p++ != '=') {
             locale_panic_(Perl_form(aTHX_
-                  "Unexpected character in locale category name '%02X", *(p-1)));
+                          "Unexpected character in locale category name '%s"
+                          "<-- HERE",
+                          get_displayable_string(s, p - 1, 0)));
         }
 
         /* Parse through the locale name */
@@ -5940,33 +5942,40 @@ S_print_collxfrm_input_and_return(pTHX_
     PERL_ARGS_ASSERT_PRINT_COLLXFRM_INPUT_AND_RETURN;
 
     PerlIO_printf(Perl_debug_log,
-                  "mem_collxfrm_[ix %" UVuf "] for locale '%s':\n",
-                  (UV) PL_collation_ix, PL_collation_name);
-    PerlIO_printf(Perl_debug_log,  "     input=");
-    print_bytes_for_locale(s, e, is_utf8);
-    PerlIO_printf(Perl_debug_log, "\n    return=%s\n    return len=%zu\n",
-           ((xbuf == NULL)
-             ? "(null)"
-             : _byte_dump_string((U8 *) xbuf + COLLXFRM_HDR_LEN, xlen, 0)),
-            xlen);
+                  "mem_collxfrm_[ix %" UVuf "] for locale '%s':\n"
+                  "     input=%s\n    return=%s\n    return len=%zu\n",
+                  (UV) PL_collation_ix, PL_collation_name,
+                  get_displayable_string(s, e, is_utf8),
+                  ((xbuf == NULL)
+                   ? "(null)"
+                   : _byte_dump_string((U8 *) xbuf + COLLXFRM_HDR_LEN, xlen, 0)),
+                  xlen);
 }
 
 #  endif    /* DEBUGGING */
 #endif /* USE_LOCALE_COLLATE */
 
-#ifdef DEBUGGING
-
-STATIC void
-S_print_bytes_for_locale(pTHX_
-                    const char * const s,
-                    const char * const e,
-                    const bool is_utf8)
+STATIC const char *
+S_get_displayable_string(pTHX_
+                         const char * const s,
+                         const char * const e,
+                         const bool is_utf8)
 {
+    PERL_ARGS_ASSERT_GET_DISPLAYABLE_STRING;
+
     const char * t = s;
     bool prev_was_printable = TRUE;
     bool first_time = TRUE;
+    char * ret;
 
-    PERL_ARGS_ASSERT_PRINT_BYTES_FOR_LOCALE;
+    /* Worst case scenario: All are non-printable so have a blank between each.
+     * If UTF-8, all are the largest possible code point; otherwise all are a
+     * single byte.  '(2 + 1)'  is from each byte takes 2 characters to
+     * display, and a blank (or NUL for the final one) after it */
+    SAVEFREEPV(Newxz(ret,
+                     (e - s) * (2 + 1)
+                             * ((is_utf8) ? UVSIZE : 1),
+                     char));
 
     while (t < e) {
         UV cp = (is_utf8)
@@ -5974,24 +5983,30 @@ S_print_bytes_for_locale(pTHX_
                 : * (U8 *) t;
         if (isPRINT(cp)) {
             if (! prev_was_printable) {
-                PerlIO_printf(Perl_debug_log, " ");
+                my_strlcat(ret, " ", sizeof(ret));
             }
-            PerlIO_printf(Perl_debug_log, "%c", (U8) cp);
+
+            /* Escape these to avoid any ambiguity */
+            if (cp == ' ' || cp == '\\') {
+                my_strlcat(ret, "\\", sizeof(ret));
+            }
+            my_strlcat(ret, Perl_form(aTHX_ "%c", (U8) cp), sizeof(ret));
             prev_was_printable = TRUE;
         }
         else {
             if (! first_time) {
-                PerlIO_printf(Perl_debug_log, " ");
+                my_strlcat(ret, " ", sizeof(ret));
             }
-            PerlIO_printf(Perl_debug_log, "%02" UVXf, cp);
+            my_strlcat(ret, Perl_form(aTHX_ "%02" UVXf, cp), sizeof(ret));
             prev_was_printable = FALSE;
         }
         t += (is_utf8) ? UTF8SKIP(t) : 1;
         first_time = FALSE;
     }
+
+    return ret;
 }
 
-#endif   /* #ifdef DEBUGGING */
 #ifdef USE_LOCALE
 
 STATIC const char *
@@ -6219,9 +6234,12 @@ Perl__is_in_locale_category(pTHX_ const bool compiling, const int category)
                            errnum, in_locale))
 #define DEBUG_STRERROR_RETURN(errstr, utf8ness)                             \
     DEBUG_Lv(PerlIO_printf(Perl_debug_log,                                  \
-                           "Strerror returned; saving a copy: '");          \
-       print_bytes_for_locale(errstr, errstr + strlen(errstr), 0);          \
-       PerlIO_printf(Perl_debug_log, "'; utf8ness=%d\n", (int) *utf8ness);)
+                           "Strerror returned; saving a copy: '%s';"        \
+                           " utf8ness=%d\n",                                \
+                           get_displayable_string(errstr,                   \
+                                                  errstr + strlen(errstr),  \
+                                                  *utf8ness),               \
+                           (int) *utf8ness))
 
 /* On platforms that have precisely one of these categories (Windows
  * qualifies), these yield the correct one */
