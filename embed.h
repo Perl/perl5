@@ -1529,10 +1529,18 @@
 #    endif
 #  endif
 #  if !(defined(USE_POSIX_2008_LOCALE))
+#    if 0
+#      if defined(PERL_IN_LOCALE_C)
+#        if defined(USE_LOCALE)
+#          if defined(USE_LOCALE_THREADS)					       && ! defined(USE_THREAD_SAFE_LOCALE)				       && ! defined(USE_THREAD_SAFE_LOCALE_EMULATION)
+#define less_dicey_bool_setlocale_r(a,b)	S_less_dicey_bool_setlocale_r(aTHX_ a,b)
+#          endif
+#        endif
+#      endif
+#    endif
 #    if defined(PERL_IN_LOCALE_C)
 #      if defined(USE_LOCALE)
 #        if defined(USE_LOCALE_THREADS)					       && ! defined(USE_THREAD_SAFE_LOCALE)				       && ! defined(USE_THREAD_SAFE_LOCALE_EMULATION)
-#define less_dicey_bool_setlocale_r(a,b)	S_less_dicey_bool_setlocale_r(aTHX_ a,b)
 #define less_dicey_setlocale_r(a,b)	S_less_dicey_setlocale_r(aTHX_ a,b)
 #define less_dicey_void_setlocale_i(a,b,c)	S_less_dicey_void_setlocale_i(aTHX_ a,b,c)
 #        endif

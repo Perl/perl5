@@ -648,6 +648,8 @@ S_less_dicey_void_setlocale_i(pTHX_ const unsigned cat_index,
 #  define void_setlocale_r(cat, locale)                                     \
        void_setlocale_i(get_category_index(cat, locale), locale)
 
+#  if 0     /* Not currently used */
+
 STATIC bool
 S_less_dicey_bool_setlocale_r(pTHX_ const int cat, const char * locale)
 {
@@ -662,6 +664,7 @@ S_less_dicey_bool_setlocale_r(pTHX_ const int cat, const char * locale)
     return retval;
 }
 
+#  endif
 #  define bool_setlocale_r(cat, locale)                                 \
                                less_dicey_bool_setlocale_r(cat, locale)
 #  define bool_setlocale_i(i, locale)                                   \

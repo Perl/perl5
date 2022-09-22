@@ -3390,9 +3390,12 @@ S	|const char *|find_locale_from_environment|const unsigned int index
 S	|const char *|less_dicey_setlocale_r				\
 				|const int category			\
 				|NULLOK const char * locale
+: Not currently used
+#      if 0
 S	|bool	|less_dicey_bool_setlocale_r				\
 				|const int cat				\
 				|NN const char * locale
+#      endif
 S	|void	|less_dicey_void_setlocale_i				\
 				|const unsigned cat_index		\
 				|NN const char * locale			\
