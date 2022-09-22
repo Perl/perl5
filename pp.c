@@ -981,7 +981,11 @@ PP(pp_undef)
         SvSETMAGIC(sv);
     }
 
-    SETs(&PL_sv_undef);
+
+    if (PL_op->op_private & OPpTARGET_MY)
+        SETs(sv);
+    else
+        SETs(&PL_sv_undef);
     return NORMAL;
 }
 
