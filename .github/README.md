@@ -20,13 +20,13 @@ object-oriented (OO) programming, has powerful built-in support for text
 processing, and has one of the world's most impressive collections of
 third-party modules.
 
-For an introduction to the language's features, see pod/perlintro.pod.
+For an introduction to the language's features, see [pod/perlintro.pod](/pod/perlintro.pod).
 
 For a discussion of the important changes in this release, see
-pod/perldelta.pod.
+[pod/perldelta.pod](/pod/perldelta.pod).
 
 There are also many Perl books available, covering a wide variety of topics,
-from various publishers.  See pod/perlbook.pod for more information.
+from various publishers.  See [pod/perlbook.pod](pod/perlbook.pod) for more information.
 
 
 # INSTALLATION
