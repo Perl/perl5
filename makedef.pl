@@ -294,7 +294,6 @@ unless ($define{'DEBUGGING'}) {
 		    Perl_debstackptrs
 		    Perl_pad_sv
 		    Perl_pad_setsv
-                    Perl__setlocale_debug_string
 		    Perl_set_padlist
 		    Perl_hv_assert
 		    PL_watchaddr
