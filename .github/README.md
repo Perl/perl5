@@ -26,7 +26,7 @@ For a discussion of the important changes in this release, see
 [pod/perldelta.pod](/pod/perldelta.pod).
 
 There are also many Perl books available, covering a wide variety of topics,
-from various publishers.  See [pod/perlbook.pod](pod/perlbook.pod) for more information.
+from various publishers.
 
 
 # INSTALLATION
