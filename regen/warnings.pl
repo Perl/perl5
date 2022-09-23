@@ -16,7 +16,7 @@
 #
 # This script is normally invoked from regen.pl.
 
-$VERSION = '1.58';
+$VERSION = '1.59';
 
 BEGIN {
     require './regen/regen_lib.pl';
@@ -169,6 +169,18 @@ my %VALUE_TO_NAME; # (index_number => [ 'NAME', version ], ...);
 
 my %NAME_TO_VALUE; # ('NAME'       => index_number,       ....);
 
+# the experiments were successful,
+# so no warning bit is needed anymore
+my %NO_BIT_FOR = map { ( uc $_ => 1, $_ => 1 ) } qw(
+  experimental::lexical_subs
+  experimental::postderef
+  experimental::signatures
+  experimental::bitwise
+  experimental::alpha_assertions
+  experimental::script_run
+  experimental::isa
+);
+
 ###########################################################################
 
 # Generate a hash with keys being the version number and values
@@ -218,6 +230,7 @@ sub orderValues
     my $index = 0;
     foreach my $ver ( sort { $a <=> $b } keys %v_list ) {
         foreach my $name (@{ $v_list{$ver} } ) {
+            next if $NO_BIT_FOR{$name};
             $VALUE_TO_NAME{ $index } = [ uc $name, $ver ] ;
             $NAME_TO_VALUE{ uc $name } = $index ++ ;
         }
@@ -242,6 +255,7 @@ sub walk
     foreach $k (sort keys %$tree) {
         $v = $tree->{$k};
         die "duplicate key $k\n" if defined $CATEGORIES{$k} ;
+        next if $NO_BIT_FOR{$k};
         die "Can't find key '$k'"
             if ! defined $NAME_TO_VALUE{uc $k} ;
         push @{ $CATEGORIES{$k} }, $NAME_TO_VALUE{uc $k} ;
@@ -301,6 +315,7 @@ sub warningsTree
     my $rv = '';
 
     while ($k = shift @keys) {
+        next if $NO_BIT_FOR{$k};
         $v = $tree->{$k};
         die "Value associated with key '$k' is not an ARRAY reference"
             if !ref $v || ref $v ne 'ARRAY' ;
@@ -488,6 +503,13 @@ foreach my $k (sort keys  %CATEGORIES) {
     print $warn_pm tab(6, "    '$k'"), '=> "',
                 mkHex($warn_size, map $_ * 2 + 1 , @list),
                 '", # [', mkRange(@list), "]\n" ;
+}
+
+print $warn_pm ");\n\n" ;
+
+print $warn_pm "our %NoOp = (\n" ;
+foreach my $k ( grep /\A[a-z:_]+\z/, sort keys %NO_BIT_FOR ) {
+    print $warn_pm tab(6, "    '$k'"), "=> 1,\n";
 }
 
 print $warn_pm ");\n\n" ;
@@ -698,6 +720,7 @@ sub _bits {
 
     $mask = _expand_bits($mask);
     foreach my $word ( @_ ) {
+        next if $NoOp{$word};
         if ($word eq 'FATAL') {
             $fatal = 1;
             $no_fatal = 0;
@@ -759,6 +782,7 @@ sub unimport
 
     $mask = _expand_bits($mask);
     foreach my $word ( @_ ) {
+        next if $NoOp{$word};
         if ($word eq 'FATAL') {
             next;
         }
@@ -1101,6 +1125,13 @@ which is equivalent to:
     use warnings 'all';
     no warnings  'experimental';
     use warnings 'experimental::somefeature';
+
+As experimental features become regular features of Perl,
+the corresponding warnings are not printed anymore.
+They also stop being listed in the L</Category Hierarchy> below.
+
+It is still possible to request turning on or off these warnings,
+but doing so has no effect.
 
 =head2 What's wrong with B<-w> and C<$^W>
 
