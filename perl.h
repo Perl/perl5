@@ -7152,6 +7152,7 @@ the plain locale pragma without a parameter (S<C<use locale>>) is in effect.
 #  define LC_NUMERIC_UNLOCK       NOOP
 #endif
 
+   /* These non-reentrant versions use global space */
 #  define MBLEN_LOCK_                gwLOCALE_LOCK
 #  define MBLEN_UNLOCK_              gwLOCALE_UNLOCK
 
@@ -7160,6 +7161,22 @@ the plain locale pragma without a parameter (S<C<use locale>>) is in effect.
 
 #  define WCTOMB_LOCK_               gwLOCALE_LOCK
 #  define WCTOMB_UNLOCK_             gwLOCALE_UNLOCK
+
+   /* Whereas the reentrant versions don't (assuming they are called with a
+    * per-thread buffer; some have the capability of being called with a NULL
+    * parameter, which defeats the reentrancy) */
+#  define MBRLEN_LOCK_                  NOOP
+#  define MBRLEN_UNLOCK_                NOOP
+#  define MBRTOWC_LOCK_                 NOOP
+#  define MBRTOWC_UNLOCK_               NOOP
+#  define WCRTOMB_LOCK_                 NOOP
+#  define WCRTOMB_UNLOCK_               NOOP
+
+#  define LC_COLLATE_LOCK               SETLOCALE_LOCK
+#  define LC_COLLATE_UNLOCK             SETLOCALE_UNLOCK
+
+#  define STRFTIME_LOCK                 ENV_LOCK
+#  define STRFTIME_UNLOCK               ENV_UNLOCK
 
 #ifdef USE_LOCALE_NUMERIC
 
