@@ -350,6 +350,7 @@ SKIP: {
     eval { Socket::IPPROTO_TCP(); 1 } or skip 'no IPPROTO_TCP', 1;
     eval { Socket::SOL_SOCKET(); 1 } or skip 'no SOL_SOCKET', 1;
     eval { Socket::SO_SNDBUF(); 1 } or skip 'no SO_SNDBUF', 1;
+    skip 'setting socket buffer size requires elevated privileges', 1 if $^O eq 'VMS';
 
     # The value of SNDBUF_SIZE constant below is changed from #19892 testcase;
     # original "262144" may be clamped on low-memory systems.
