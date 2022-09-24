@@ -1290,7 +1290,7 @@ S_emulate_setlocale_i(pTHX_
              * doesn't necessarily accept it as input (the results are
              * undefined).  For PL_C_locale_obj, it is so that it never gets
              * modified, as otherwise newlocale() is free to do so */
-            basis_obj = duplocale(entry_obj);
+            basis_obj = duplocale(basis_obj);
             if (! basis_obj) {
                 locale_panic_(Perl_form(aTHX_ "(%" LINE_Tf "): duplocale failed",
                                               line));
