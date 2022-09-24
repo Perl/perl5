@@ -4571,6 +4571,23 @@ $ tmp = "acess"
 $ GOSUB inlibc
 $ d_access = tmp
 $!
+$! Check for mkostemp
+$!
+$ OS
+$ WS "#if defined(__DECC) || defined(__DECCXX)"
+$ WS "#include <stdlib.h>"
+$ WS "#endif"
+$ WS "#include <stdio.h>"
+$ WS "int main()"
+$ WS "{"
+$ WS "mkostemp(""foo"", 0);"
+$ WS "exit(0);"
+$ WS "}"
+$ CS
+$ tmp = "mkostemp"
+$ GOSUB inlibc
+$ d_mkostemp = tmp
+$!
 $! Check for mkstemp
 $!
 $ OS
@@ -6372,6 +6389,7 @@ $ WC "d_mkdtemp='" + d_mkdtemp + "'"
 $ WC "d_mkfifo='undef'"
 $ WC "d_mknod='undef'"
 $ WC "d_mkostemp='undef'"
+$ WC "d_mkostemp='" + d_mkostemp + "'"
 $ WC "d_mkstemp='" + d_mkstemp + "'"
 $ WC "d_mkstemps='" + d_mkstemps + "'"
 $ WC "d_mktime='" + d_mktime + "'"
