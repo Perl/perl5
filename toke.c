@@ -12659,7 +12659,6 @@ Perl_yyerror_pvn(pTHX_ const char *const s, STRLEN len, U32 flags)
         const char * const name = OutCopFILE(PL_curcop);
         SV * errsv = NULL;
         U8 raw_error_count = PERL_PARSE_ERROR_COUNT(PL_error_count);
-        bool syntax_error = PERL_PARSE_IS_SYNTAX_ERROR(PL_error_count);
 
         if (PL_in_eval) {
             errsv = ERRSV;
@@ -12677,10 +12676,9 @@ Perl_yyerror_pvn(pTHX_ const char *const s, STRLEN len, U32 flags)
                 Perl_croak(aTHX_ "%s has too many errors.\n", name);
             }
         }
-        else
-        /* if (syntax_error) - implied */
-        {
-            assert(syntax_error);
+        else {
+            /* This is a syntax error, and we should stop compiling. */
+            assert(PERL_PARSE_IS_SYNTAX_ERROR(PL_error_count));
             if (errsv) {
                 Perl_croak_sv(aTHX_ errsv);
             } else {
