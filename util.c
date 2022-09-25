@@ -1717,8 +1717,8 @@ S_with_queued_errors(pTHX_ SV *ex)
     return ex;
 }
 
-STATIC bool
-S_invoke_exception_hook(pTHX_ SV *ex, bool warn)
+bool
+Perl_invoke_exception_hook(pTHX_ SV *ex, bool warn)
 {
     HV *stash;
     GV *gv;

@@ -1491,6 +1491,9 @@
 #       define doopen_pm(a)                     S_doopen_pm(aTHX_ a)
 #     endif /* !defined(PERL_DISABLE_PMC) */
 #   endif /* defined(PERL_IN_PP_CTL_C) */
+#   if defined(PERL_IN_PP_CTL_C) || defined(PERL_IN_UTIL_C)
+#     define invoke_exception_hook(a,b)         Perl_invoke_exception_hook(aTHX_ a,b)
+#   endif /* defined(PERL_IN_PP_CTL_C) || defined(PERL_IN_UTIL_C) */
 #   if defined(PERL_IN_PP_HOT_C)
 #     define do_oddball(a,b)                    S_do_oddball(aTHX_ a,b)
 #     define opmethod_stash(a)                  S_opmethod_stash(aTHX_ a)
@@ -1622,7 +1625,6 @@
 #   endif /* defined(PERL_IN_UTF8_C) */
 #   if defined(PERL_IN_UTIL_C)
 #     define ckwarn_common(a)                   S_ckwarn_common(aTHX_ a)
-#     define invoke_exception_hook(a,b)         S_invoke_exception_hook(aTHX_ a,b)
 #     define mess_alloc()                       S_mess_alloc(aTHX)
 #     define with_queued_errors(a)              S_with_queued_errors(aTHX_ a)
 #     if defined(PERL_MEM_LOG) && !defined(PERL_MEM_LOG_NOIMPL)

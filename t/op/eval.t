@@ -738,3 +738,20 @@ pass("eval in freed package does not crash");
             "No segfault inside sort: $sort_line");
     }
 }
+{
+    # test that all of these cases behave the same
+    for my $fragment ('bar', '1+;', '1+;' x 11, 's/', ']') {
+        fresh_perl_is(
+            # code:
+            'use strict; use warnings; $SIG{__DIE__} = sub { die "X" }; ' .
+            'eval { eval "'.$fragment.'"; print "after eval $@"; };' .
+            'if ($@) { print "outer eval $@" }',
+            # wanted:
+            "after eval X at - line 1.",
+            # opts:
+            {},
+            # name:
+            "test that nested eval '$fragment' calls sig die as expected"
+        );
+    }
+}
