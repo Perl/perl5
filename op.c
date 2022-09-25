@@ -4462,6 +4462,10 @@ Perl_block_end(pTHX_ I32 floor, OP *seq)
     if (PL_parser && PL_parser->parsed_sub) {
         o = newSTATEOP(0, NULL, NULL);
         op_null(o);
+
+        /* propagate features if this is the only COP in the block */
+        cCOPx(o)->cop_features = PL_curcop->cop_features;
+
         retval = op_append_elem(OP_LINESEQ, retval, o);
     }
 

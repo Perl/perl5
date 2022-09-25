@@ -4,8 +4,7 @@
 # Any changes made here will be lost!
 
 package feature;
-
-our $VERSION = '1.76';
+our $VERSION = '1.77';
 
 our %feature = (
     fc                      => 'feature_fc',
@@ -20,6 +19,7 @@ our %feature = (
     evalbytes               => 'feature_evalbytes',
     signatures              => 'feature_signatures',
     current_sub             => 'feature___SUB__',
+    module_true             => 'feature_module_true',
     refaliasing             => 'feature_refaliasing',
     postderef_qq            => 'feature_postderef_qq',
     unicode_eval            => 'feature_unieval',
@@ -37,8 +37,8 @@ our %feature_bundle = (
     "5.23"    => [qw(bareword_filehandles current_sub evalbytes fc indirect multidimensional postderef_qq say state switch unicode_eval unicode_strings)],
     "5.27"    => [qw(bareword_filehandles bitwise current_sub evalbytes fc indirect multidimensional postderef_qq say state switch unicode_eval unicode_strings)],
     "5.35"    => [qw(bareword_filehandles bitwise current_sub evalbytes fc isa postderef_qq say signatures state unicode_eval unicode_strings)],
-    "5.37"    => [qw(bitwise current_sub evalbytes fc isa postderef_qq say signatures state unicode_eval unicode_strings)],
-    "all"     => [qw(bareword_filehandles bitwise current_sub declared_refs defer evalbytes extra_paired_delimiters fc indirect isa multidimensional postderef_qq refaliasing say signatures state switch try unicode_eval unicode_strings)],
+    "5.37"    => [qw(bitwise current_sub evalbytes fc isa module_true postderef_qq say signatures state unicode_eval unicode_strings)],
+    "all"     => [qw(bareword_filehandles bitwise current_sub declared_refs defer evalbytes extra_paired_delimiters fc indirect isa module_true multidimensional postderef_qq refaliasing say signatures state switch try unicode_eval unicode_strings)],
     "default" => [qw(bareword_filehandles indirect multidimensional)],
 );
 
@@ -867,6 +867,14 @@ The complete list of accepted paired delimiters as of Unicode 14.0 is:
  🢫  🢪    U+1F8AB, U+1F8AA RIGHT/LEFTWARDS FRONT-TILTED SHADOWED WHITE
                           ARROW
 
+=head2 The 'module_true' feature
+
+This feature removes the need to return a true value at the end of a module
+loaded with C<require> or C<use>. Any errors during compilation will cause
+failures, but reaching the end of the module when this feature is in effect
+will prevent C<perl> from throwing an exception that the module "did not return
+a true value".
+
 =head1 FEATURE BUNDLES
 
 It's possible to load multiple features together, using
@@ -944,8 +952,8 @@ The following feature bundles are available:
             state unicode_eval unicode_strings
 
   :5.38     bitwise current_sub evalbytes fc isa
-            postderef_qq say signatures state
-            unicode_eval unicode_strings
+            module_true postderef_qq say signatures
+            state unicode_eval unicode_strings
 
 The C<:default> bundle represents the feature set that is enabled before
 any C<use feature> or C<no feature> declaration.

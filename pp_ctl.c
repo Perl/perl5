@@ -3763,7 +3763,6 @@ S_doeval_compile(pTHX_ U8 gimme, CV* outside, U32 seq, HV *hh)
     }
 
     /* Compilation successful. Now clean up */
-
     LEAVE_with_name("evalcomp");
 
     CopLINE_set(&PL_compiling, 0);
@@ -4766,11 +4765,11 @@ PP(pp_leaveeval)
     U8 gimme;
     PERL_CONTEXT *cx;
     OP *retop;
-    int failed;
+    int failed = 0;
     CV *evalcv;
     bool keep;
-
     PERL_ASYNC_CHECK();
+    int module_true = 0;
 
     cx = CX_CUR();
     assert(CxTYPE(cx) == CXt_EVAL);
@@ -4778,11 +4777,6 @@ PP(pp_leaveeval)
     oldsp = PL_stack_base + cx->blk_oldsp;
     gimme = cx->blk_gimme;
 
-    /* did require return a false value? */
-    failed =    CxOLD_OP_TYPE(cx) == OP_REQUIRE
-             && !(gimme == G_SCALAR
-                    ? SvTRUE_NN(*PL_stack_sp)
-                    : PL_stack_sp > oldsp);
 
     if (gimme == G_VOID) {
         PL_stack_sp = oldsp;
@@ -4791,6 +4785,29 @@ PP(pp_leaveeval)
     }
     else
         leave_adjust_stacks(oldsp, oldsp, gimme, 0);
+
+    /* did require return a false value?
+       make sure to initialize failed, whatever circumstance this was called
+       but check if use feature 'module_true' is enabled where it matters
+     */
+    if (CxOLD_OP_TYPE(cx) == OP_REQUIRE) {
+        COP *old_pl_curcop = PL_curcop;
+        if (PL_op->op_flags & OPf_KIDS && OP_TYPE_IS_OR_WAS(PL_op, OP_LEAVEEVAL)) {
+            const OP *kid = cLISTOPx(cUNOPx(PL_op)->op_first)->op_first;
+
+            for (; kid; kid = OpSIBLING(kid)) {
+                if (OP_TYPE_IS_OR_WAS(kid, OP_NEXTSTATE)) {
+                    PL_curcop = cCOPx(kid);
+                    module_true = FEATURE_MODULE_TRUE_IS_ENABLED;
+                }
+            }
+        }
+        PL_curcop = old_pl_curcop;
+
+        failed = !(gimme == G_SCALAR
+                        ? (module_true || SvTRUE_NN(*PL_stack_sp))
+                        : PL_stack_sp > oldsp);
+    }
 
     /* the cx_popeval does a leavescope, which frees the optree associated
      * with eval, which if it frees the nextstate associated with

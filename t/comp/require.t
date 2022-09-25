@@ -33,7 +33,7 @@ if (grep -e, @files_to_delete) {
 
 
 my $Is_UTF8   = (${^OPEN} || "") =~ /:utf8/;
-my $total_tests = 58;
+my $total_tests = 62;
 if ($Is_UTF8) { $total_tests -= 3; }
 print "1..$total_tests\n";
 
@@ -348,6 +348,41 @@ if (defined &DynaLoader::boot_DynaLoader) {
     print "${not}ok $i - require does not localise %^H at run time\n";
 }
 
+{
+    BEGIN { ${^OPEN} = ":utf8\0"; }
+    %INC = ();
+    write_file('bleah.pm',"package bleah;\nuse v5.37;\nsub foo {};\n");
+    my $not = eval 'use bleah; 1' ? "" : "not ";
+    $i++;
+    print "${not}ok $i - use v5.37 removes the need for an explicit true return value from a module ($@)\n";
+}
+{
+    BEGIN { ${^OPEN} = ":utf8\0"; }
+    %INC = ();
+    write_file('bleah.pm',"package bleah;\nuse feature ':5.38';\n");
+    my $not = eval 'use bleah; 1' ? "" : "not ";
+    $i++;
+    print "${not}ok $i - use feature :5.38 removes the need for an explicit true return value from a module ($@)\n";
+}
+
+{
+    BEGIN { ${^OPEN} = ":utf8\0"; }
+    %INC = ();
+    write_file('bleah.pm',"package bleah;\nuse feature ':all';\nsub foo {};\n");
+    my $not = eval 'use bleah; 1' ? "" : "not ";
+    $i++;
+    print "${not}ok $i - use feature :all removes the need for an explicit true return value from a module ($@)\n";
+}
+
+{
+    BEGIN { ${^OPEN} = ":utf8\0"; }
+    %INC = ();
+    write_file('bleah.pm',"package bleah;\nuse feature 'module_true';\nsub bar{};\n");
+    my $not = eval 'use bleah; 1' ? "" : "not ";
+    $i++;
+    print "${not}ok $i - use feature 'module_true' removes the need for an explicit true return value from a module ($@)\n";
+}
+
 ##########################################
 # What follows are UTF-8 specific tests. #
 # Add generic tests before this point.   #
@@ -379,7 +414,7 @@ foreach (sort keys %templates) {
 
 END {
     foreach my $file (@files_to_delete) {
-	1 while unlink $file;
+        1 while unlink $file;
     }
 }
 
