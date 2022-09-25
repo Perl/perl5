@@ -6218,6 +6218,7 @@ yyl_leftcurly(pTHX_ char *s, const U8 formbrack)
                     /* This hack is to get the ${} in the message. */
                     PL_bufptr = s+1;
                     yyerror("syntax error");
+                    yyquit();
                     break;
                 }
                 OPERATOR(HASHBRACK);
@@ -12949,15 +12950,6 @@ Perl_yyerror_pvn(pTHX_ const char *const s, STRLEN len, U32 flags)
                     SVfARG(errsv), name);
             } else {
                 Perl_croak(aTHX_ "%s has too many errors.\n", name);
-            }
-        }
-        else {
-            /* This is a syntax error, and we should stop compiling. */
-            assert(PERL_PARSE_IS_SYNTAX_ERROR(PL_error_count));
-            if (errsv) {
-                Perl_croak_sv(aTHX_ errsv);
-            } else {
-                abort_execution(errsv, name);
             }
         }
     }
