@@ -2558,7 +2558,7 @@ Adp	|char * |pv_uni_display |NN SV *dsv				\
 				|UV flags
 : FIXME - either make it public, or stop exporting it. (Data::Alias uses this)
 : Used in gv.c, op.c, toke.c
-EXp	|void	|qerror 	|NN SV *err
+EXp	|void	|qerror 	|NULLOK SV *err
 Adp	|char * |rcpv_copy	|NULLOK char * const pv
 Adp	|char * |rcpv_free	|NULLOK char * const pv
 Aadp	|char * |rcpv_new	|NULLOK const char * const pv		\
@@ -4831,6 +4831,11 @@ S	|void	|save_lines	|NULLOK AV *array			\
 RS	|PerlIO *|doopen_pm	|NN SV *name
 # endif /* !defined(PERL_DISABLE_PMC) */
 #endif /* defined(PERL_IN_PP_CTL_C) */
+#if defined(PERL_IN_PP_CTL_C) || defined(PERL_IN_UTIL_C)
+p	|bool	|invoke_exception_hook					\
+				|NULLOK SV *ex				\
+				|bool warn
+#endif /* defined(PERL_IN_PP_CTL_C) || defined(PERL_IN_UTIL_C) */
 #if defined(PERL_IN_PP_HOT_C)
 S	|void	|do_oddball	|NN SV **oddkey 			\
 				|NN SV **firstkey
@@ -5853,9 +5858,6 @@ S	|void	|warn_on_first_deprecated_use				\
 #endif /* defined(PERL_IN_UTF8_C) */
 #if defined(PERL_IN_UTIL_C)
 S	|bool	|ckwarn_common	|U32 w
-S	|bool	|invoke_exception_hook					\
-				|NULLOK SV *ex				\
-				|bool warn
 S	|SV *	|mess_alloc
 S	|SV *	|with_queued_errors					\
 				|NN SV *ex
