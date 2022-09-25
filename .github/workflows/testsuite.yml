@@ -18,6 +18,9 @@ env:
   PERL_SKIP_TTY_TEST: 1
   CONTINUOUS_INTEGRATION: 1
 
+permissions:
+  contents: read # to fetch code
+
 jobs:
   #  ___           _         ___       __                    _   _
   # / __|_ __  ___| |_____  |_ _|_ _  / _|___ _ _ _ __  __ _| |_(_)___ _ _  ___
