@@ -5,6 +5,7 @@ on: [push, pull_request]
 # IRC colors: https://modern.ircdocs.horse/formatting.html
 # yaml formating: https://www.yaml.info/learn/quote.html
 
+permissions: {}
 jobs:
   notify-irc:
     runs-on: ubuntu-latest
