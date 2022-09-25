@@ -6,7 +6,7 @@ BEGIN {
     set_up_inc('../lib');
 }
 
-plan(tests => 162);
+plan(tests => 167);
 
 eval 'pass();';
 
@@ -625,6 +625,7 @@ for("{;", "{") {
     eval $_; is $@ =~ s/eval \d+/eval 1/rag, <<'EOE',
 Missing right curly or square bracket at (eval 1) line 1, at end of line
 syntax error at (eval 1) line 1, at EOF
+Execution of (eval 1) aborted due to compilation errors.
 EOE
 	qq'Right line number for eval "$_"';
 }

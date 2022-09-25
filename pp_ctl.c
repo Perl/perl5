@@ -1671,13 +1671,7 @@ Perl_qerror(pTHX_ SV *err)
         Perl_warn(aTHX_ "%" SVf, SVfARG(err));
 
     if (PL_parser) {
-        STRLEN len;
-        char *err_pv = SvPV(err,len);
         ++PL_parser->error_count;
-        if (memBEGINs(err_pv,len,"syntax error"))
-        {
-            PL_parser->error_count |= PERL_PARSE_IS_SYNTAX_ERROR_FLAG;
-        }
     }
 }
 
