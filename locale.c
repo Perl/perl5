@@ -4829,6 +4829,10 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
     };
     trial_locales_count = 1;
 
+    for (i = 0; i < NOMINAL_LC_ALL_INDEX; i++) {
+        curlocales[i] = NULL;
+    }
+
     for (i= 0; i < trial_locales_count; i++) {
         const char * trial_locale = trial_locales[i].trial_locale;
         setlocale_failure = FALSE;
