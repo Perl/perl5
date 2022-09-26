@@ -608,10 +608,8 @@ S_less_dicey_setlocale_r(pTHX_ const int category, const char * locale)
     /* We reuse PL_stdize_locale_buf as it doesn't conflict, but the call may
      * already have used it, in which case we don't have to do anything further
      * */
-    if (retval != PL_stdize_locale_buf) {
-        retval = save_to_buffer(retval,
-                                &PL_stdize_locale_buf, &PL_stdize_locale_bufsize);
-    }
+    retval = save_to_buffer(retval,
+                            &PL_stdize_locale_buf, &PL_stdize_locale_bufsize);
 
     POSIX_SETLOCALE_UNLOCK;
 
@@ -2818,6 +2816,11 @@ S_save_to_buffer(const char * string, const char **buf, Size_t *buf_size)
 
     if (! string) {
         return NULL;
+    }
+
+    /* No-op to copy over oneself */
+    if (string == *buf) {
+        return string;
     }
 
     string_size = strlen(string) + 1;
