@@ -3557,6 +3557,7 @@ Perl_moreswitches(pTHX_ const char *s)
         {
             const char *start = ++s;
             while (*s && !isSPACE(*s)) ++s;
+            Safefree(PL_splitstr);
             PL_splitstr = savepvn(start, s - start);
         }
         return s;
