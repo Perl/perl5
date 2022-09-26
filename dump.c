@@ -2661,7 +2661,25 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 
 Dumps the contents of an SV to the C<STDERR> filehandle.
 
-For an example of its output, see L<Devel::Peek>.
+For an example of its output, see L<Devel::Peek>. If
+the item is an SvROK it will dump items to a depth of 4,
+otherwise it will dump only the top level item, which
+means that it will not dump the contents of an AV * or
+HV *. For that use C<av_dump()> or C<hv_dump()>.
+
+=for apidoc av_dump
+
+Dumps the contents of an AV to the C<STDERR> filehandle,
+Similar to using Devel::Peek on an arrayref but does not
+expect an RV wrapper. Dumps contents to a depth of 3 levels
+deep.
+
+=for apidoc hv_dump
+
+Dumps the contents of an HV to the C<STDERR> filehandle.
+Similar to using Devel::Peek on an hashref but does not
+expect an RV wrapper. Dumps contents to a depth of 3 levels
+deep.
 
 =cut
 */
@@ -2670,9 +2688,27 @@ void
 Perl_sv_dump(pTHX_ SV *sv)
 {
     if (sv && SvROK(sv))
-        do_sv_dump(0, Perl_debug_log, sv, 0, 4, 0, 0);
+        sv_dump_depth(sv, 4);
     else
-        do_sv_dump(0, Perl_debug_log, sv, 0, 0, 0, 0);
+        sv_dump_depth(sv, 0);
+}
+
+void
+Perl_sv_dump_depth(pTHX_ SV *sv, I32 depth)
+{
+    do_sv_dump(0, Perl_debug_log, sv, 0, depth, 0, 0);
+}
+
+void
+Perl_av_dump(pTHX_ AV *av)
+{
+    sv_dump_depth((SV*)av, 3);
+}
+
+void
+Perl_hv_dump(pTHX_ HV *hv)
+{
+    sv_dump_depth((SV*)hv, 3);
 }
 
 int

@@ -295,6 +295,8 @@ PERL_CALLCONV SV**	Perl_av_create_and_unshift_one(pTHX_ AV **const avp, SV *cons
 PERL_CALLCONV SV*	Perl_av_delete(pTHX_ AV *av, SSize_t key, I32 flags);
 #define PERL_ARGS_ASSERT_AV_DELETE	\
 	assert(av)
+PERL_CALLCONV void	Perl_av_dump(pTHX_ AV* av);
+#define PERL_ARGS_ASSERT_AV_DUMP
 PERL_CALLCONV bool	Perl_av_exists(pTHX_ AV *av, SSize_t key)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_AV_EXISTS	\
@@ -1613,6 +1615,8 @@ PERL_CALLCONV SV*	Perl_hv_delete_ent(pTHX_ HV *hv, SV *keysv, I32 flags, U32 has
 #define PERL_ARGS_ASSERT_HV_DELETE_ENT	\
 	assert(keysv)
 #endif
+PERL_CALLCONV void	Perl_hv_dump(pTHX_ HV* hv);
+#define PERL_ARGS_ASSERT_HV_DUMP
 PERL_CALLCONV HE**	Perl_hv_eiter_p(pTHX_ HV *hv)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_HV_EITER_P	\
@@ -3929,6 +3933,8 @@ PERL_CALLCONV bool	Perl_sv_does_sv(pTHX_ SV* sv, SV* namesv, U32 flags)
 
 PERL_CALLCONV void	Perl_sv_dump(pTHX_ SV* sv);
 #define PERL_ARGS_ASSERT_SV_DUMP
+PERL_CALLCONV void	Perl_sv_dump_depth(pTHX_ SV* sv, I32 depth);
+#define PERL_ARGS_ASSERT_SV_DUMP_DEPTH
 #ifndef NO_MATHOMS
 PERL_CALLCONV I32	Perl_sv_eq(pTHX_ SV* sv1, SV* sv2);
 #define PERL_ARGS_ASSERT_SV_EQ
