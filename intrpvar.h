@@ -496,7 +496,7 @@ PERLVAR(I, warnhook,	SV *)
 /* switches */
 PERLVAR(I, patchlevel,	SV *)
 PERLVAR(I, localpatches, const char * const *)
-PERLVARI(I, splitstr,	const char *, " ")
+PERLVARI(I, splitstr,	char *, NULL)
 
 PERLVAR(I, minus_c,	bool)
 PERLVAR(I, minus_n,	bool)

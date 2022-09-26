@@ -3585,9 +3585,11 @@ Perl_moreswitches(pTHX_ const char *s)
         PL_minus_a = TRUE;
         PL_minus_F = TRUE;
         PL_minus_n = TRUE;
-        PL_splitstr = ++s;
-        while (*s && !isSPACE(*s)) ++s;
-        PL_splitstr = savepvn(PL_splitstr, s - PL_splitstr);
+        {
+            const char *start = ++s;
+            while (*s && !isSPACE(*s)) ++s;
+            PL_splitstr = savepvn(start, s - start);
+        }
         return s;
     case 'a':
         PL_minus_a = TRUE;

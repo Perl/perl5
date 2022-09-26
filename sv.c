@@ -15569,7 +15569,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_minus_c		= proto_perl->Iminus_c;
 
     PL_localpatches	= proto_perl->Ilocalpatches;
-    PL_splitstr		= proto_perl->Isplitstr;
+    PL_splitstr		= SAVEPV(proto_perl->Isplitstr);
     PL_minus_n		= proto_perl->Iminus_n;
     PL_minus_p		= proto_perl->Iminus_p;
     PL_minus_l		= proto_perl->Iminus_l;

@@ -5,7 +5,6 @@ BEGIN {
     @INC = '../lib';
     require './test.pl';
 }
-plan(tests => 3);
 
 { # perl #116190
   fresh_perl_is('print qq!@F!', '1 2',
@@ -24,3 +23,19 @@ plan(tests => 3);
 		 switches => [ '-a' ],
 		}, "passing -a implies -n");
 }
+
+
+my $have_config = eval { require Config; 1 };
+SKIP:
+{
+  $have_config or skip "Can't check if we have threads", 1;
+  $Config::Config{usethreads} or skip "No threads", 1;
+  # this would only fail under valgrind/ASAN
+  fresh_perl_is('print $F[1]; threads->new(sub {})->join', "b",
+                {
+                    switches => [ "-F,", "-Mthreads" ],
+                    stdin => "a,b,c",
+                }, "PL_splitstr freed in each thread");
+}
+
+done_testing();
