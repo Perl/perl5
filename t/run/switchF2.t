@@ -38,4 +38,14 @@ SKIP:
                 }, "PL_splitstr freed in each thread");
 }
 
+{
+  # old value of PL_splitstr wasn't freed with multiple switches (it wasn't safe to before)
+  # this would only fail under valgrind/LSAN
+  fresh_perl_is('print $F[1]', "b",
+                {
+                    switches => [ "-F:", "-F," ],
+                    stdin => "a,b,c",
+                }, "PL_splitstr freed on extra -F switch");
+}
+
 done_testing();
