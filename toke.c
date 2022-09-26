@@ -12929,30 +12929,11 @@ Perl_yyerror_pvn(pTHX_ const char *const s, STRLEN len, U32 flags)
             qerror(msg);
         }
     }
-    if ( s == NULL ||
-         PL_error_count >= PERL_STOP_PARSING_AFTER_N_ERRORS
-    ) {
-        const char * const name = OutCopFILE(PL_curcop);
-        SV * errsv = NULL;
-        U8 raw_error_count = PERL_PARSE_ERROR_COUNT(PL_error_count);
+    /* if there was no message then this is a yyquit(), which is actualy handled
+     * by qerror() with a NULL argument */
+    if (s == NULL)
+        qerror(NULL);
 
-        if (PL_in_eval) {
-            errsv = ERRSV;
-        }
-
-        if (s == NULL) {
-            abort_execution(errsv, name);
-        }
-        else
-        if (raw_error_count >= PERL_STOP_PARSING_AFTER_N_ERRORS) {
-            if (errsv) {
-                Perl_croak(aTHX_ "%" SVf "%s has too many errors.\n",
-                    SVfARG(errsv), name);
-            } else {
-                Perl_croak(aTHX_ "%s has too many errors.\n", name);
-            }
-        }
-    }
     PL_in_my = 0;
     PL_in_my_stash = NULL;
     return 0;

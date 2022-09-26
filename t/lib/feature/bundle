@@ -109,3 +109,4 @@ print $_||$@;
 EXPECT
 Number found where operator expected (Do you need to predeclare "evalbytes"?) at (eval 1) line 1, near "evalbytes 12345"
 syntax error at (eval 1) line 1, near "evalbytes 12345"
+Execution of (eval 1) aborted due to compilation errors.

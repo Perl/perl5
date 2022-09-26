@@ -1656,25 +1656,51 @@ void
 Perl_qerror(pTHX_ SV *err)
 {
     PERL_ARGS_ASSERT_QERROR;
+    if (err!=NULL) {
+        if (PL_in_eval) {
+            if (PL_in_eval & EVAL_KEEPERR) {
+                    Perl_ck_warner(aTHX_ packWARN(WARN_MISC), "\t(in cleanup) %" SVf,
+                                                        SVfARG(err));
+            }
+            else {
+                sv_catsv(ERRSV, err);
+            }
+        }
+        else if (PL_errors)
+            sv_catsv(PL_errors, err);
+        else
+            Perl_warn(aTHX_ "%" SVf, SVfARG(err));
 
-    if (PL_in_eval) {
-        if (PL_in_eval & EVAL_KEEPERR) {
-                Perl_ck_warner(aTHX_ packWARN(WARN_MISC), "\t(in cleanup) %" SVf,
-                                                    SVfARG(err));
+        if (PL_parser) {
+            ++PL_parser->error_count;
+        }
+    }
+
+    if ( PL_parser && (err == NULL ||
+         PL_parser->error_count >= PERL_STOP_PARSING_AFTER_N_ERRORS)
+    ) {
+        const char * const name = OutCopFILE(PL_curcop);
+        SV * errsv = NULL;
+        U8 raw_error_count = PERL_PARSE_ERROR_COUNT(PL_parser->error_count);
+
+        if (PL_in_eval) {
+            errsv = ERRSV;
+        }
+
+        if (err == NULL) {
+            abort_execution(errsv, name);
         }
         else
-            sv_catsv(ERRSV, err);
-    }
-    else if (PL_errors)
-        sv_catsv(PL_errors, err);
-    else
-        Perl_warn(aTHX_ "%" SVf, SVfARG(err));
-
-    if (PL_parser) {
-        ++PL_parser->error_count;
+        if (raw_error_count >= PERL_STOP_PARSING_AFTER_N_ERRORS) {
+            if (errsv) {
+                Perl_croak(aTHX_ "%" SVf "%s has too many errors.\n",
+                    SVfARG(errsv), name);
+            } else {
+                Perl_croak(aTHX_ "%s has too many errors.\n", name);
+            }
+        }
     }
 }
-
 
 
 /* pop a CXt_EVAL context and in addition, if it was a require then
