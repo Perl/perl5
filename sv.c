@@ -15584,30 +15584,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_subline		= proto_perl->Isubline;
 
     PL_cv_has_eval	= proto_perl->Icv_has_eval;
-
-#ifdef USE_LOCALE_COLLATE
-    PL_collation_ix	= proto_perl->Icollation_ix;
-    PL_collation_standard = proto_perl->Icollation_standard;
-    PL_collxfrm_base	= proto_perl->Icollxfrm_base;
-    PL_collxfrm_mult	= proto_perl->Icollxfrm_mult;
-    PL_strxfrm_max_cp   = proto_perl->Istrxfrm_max_cp;
-    PL_strxfrm_is_behaved = proto_perl->Istrxfrm_is_behaved;
-    PL_strxfrm_NUL_replacement = proto_perl->Istrxfrm_NUL_replacement;
-#endif /* USE_LOCALE_COLLATE */
-
-#ifdef USE_LOCALE_NUMERIC
-    PL_numeric_standard	= proto_perl->Inumeric_standard;
-    PL_numeric_underlying	= proto_perl->Inumeric_underlying;
-    PL_numeric_underlying_is_standard	= proto_perl->Inumeric_underlying_is_standard;
-#endif /* !USE_LOCALE_NUMERIC */
-
-    /* Did the locale setup indicate UTF-8? */
-    PL_utf8locale	= proto_perl->Iutf8locale;
-
-#ifdef USE_LOCALE_THREADS
-    assert(PL_locale_mutex_depth <= 0);
-    PL_locale_mutex_depth = 0;
-#endif
     /* Unicode features (see perlrun/-C) */
     PL_unicode		= proto_perl->Iunicode;
 
@@ -15920,20 +15896,37 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     /* Should we warn if uses locale? */
     PL_ctype_name	= SAVEPV(proto_perl->Ictype_name);
     PL_warn_locale      = sv_dup_inc(proto_perl->Iwarn_locale, param);
-    PL_utf8locale             = proto_perl->Iutf8locale;
     PL_in_utf8_CTYPE_locale   = proto_perl->Iin_utf8_CTYPE_locale;
     PL_in_utf8_turkic_locale  = proto_perl->Iin_utf8_turkic_locale;
 #endif
 
+    /* Did the locale setup indicate UTF-8? */
+    PL_utf8locale	= proto_perl->Iutf8locale;
+
 #ifdef USE_LOCALE_COLLATE
     PL_in_utf8_COLLATE_locale = proto_perl->Iin_utf8_COLLATE_locale;
     PL_collation_name	= SAVEPV(proto_perl->Icollation_name);
+    PL_collation_ix	= proto_perl->Icollation_ix;
+    PL_collation_standard = proto_perl->Icollation_standard;
+    PL_collxfrm_base	= proto_perl->Icollxfrm_base;
+    PL_collxfrm_mult	= proto_perl->Icollxfrm_mult;
+    PL_strxfrm_max_cp   = proto_perl->Istrxfrm_max_cp;
+    PL_strxfrm_is_behaved = proto_perl->Istrxfrm_is_behaved;
+    PL_strxfrm_NUL_replacement = proto_perl->Istrxfrm_NUL_replacement;
 #endif /* USE_LOCALE_COLLATE */
+
+#ifdef USE_LOCALE_THREADS
+    assert(PL_locale_mutex_depth <= 0);
+    PL_locale_mutex_depth = 0;
+#endif
 
 #ifdef USE_LOCALE_NUMERIC
     PL_numeric_name	= SAVEPV(proto_perl->Inumeric_name);
     PL_numeric_radix_sv	= sv_dup_inc(proto_perl->Inumeric_radix_sv, param);
     PL_underlying_radix_sv = sv_dup_inc(proto_perl->Iunderlying_radix_sv, param);
+    PL_numeric_standard	= proto_perl->Inumeric_standard;
+    PL_numeric_underlying	= proto_perl->Inumeric_underlying;
+    PL_numeric_underlying_is_standard	= proto_perl->Inumeric_underlying_is_standard;
 
 #  if defined(USE_POSIX_2008_LOCALE)
     PL_underlying_numeric_obj = NULL;
