@@ -15888,31 +15888,32 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 
 #ifdef USE_PL_CURLOCALES
     for (i = 0; i < (int) C_ARRAY_LENGTH(PL_curlocales); i++) {
-        PL_curlocales[i] = SAVEPV(proto_perl->Icurlocales[i]);
+        PL_curlocales[i] = SAVEPV("C");
     }
 #endif
 #ifdef USE_LOCALE_CTYPE
-    Copy(proto_perl->Ifold_locale, PL_fold_locale, 256, U8);
+    Copy(PL_fold, PL_fold_locale, 256, U8);
+
     /* Should we warn if uses locale? */
-    PL_ctype_name	= SAVEPV(proto_perl->Ictype_name);
+    PL_ctype_name	= SAVEPV("C");
     PL_warn_locale      = sv_dup_inc(proto_perl->Iwarn_locale, param);
-    PL_in_utf8_CTYPE_locale   = proto_perl->Iin_utf8_CTYPE_locale;
-    PL_in_utf8_turkic_locale  = proto_perl->Iin_utf8_turkic_locale;
+    PL_in_utf8_CTYPE_locale   = false;
+    PL_in_utf8_turkic_locale  = false;
 #endif
 
     /* Did the locale setup indicate UTF-8? */
-    PL_utf8locale	= proto_perl->Iutf8locale;
+    PL_utf8locale	= false;
 
 #ifdef USE_LOCALE_COLLATE
-    PL_in_utf8_COLLATE_locale = proto_perl->Iin_utf8_COLLATE_locale;
-    PL_collation_name	= SAVEPV(proto_perl->Icollation_name);
+    PL_in_utf8_COLLATE_locale = false;
+    PL_collation_name	= SAVEPV("C");
     PL_collation_ix	= proto_perl->Icollation_ix;
-    PL_collation_standard = proto_perl->Icollation_standard;
-    PL_collxfrm_base	= proto_perl->Icollxfrm_base;
-    PL_collxfrm_mult	= proto_perl->Icollxfrm_mult;
-    PL_strxfrm_max_cp   = proto_perl->Istrxfrm_max_cp;
+    PL_collation_standard = true;
+    PL_collxfrm_base	= 0;
+    PL_collxfrm_mult	= 0;
+    PL_strxfrm_max_cp   = 0;
     PL_strxfrm_is_behaved = proto_perl->Istrxfrm_is_behaved;
-    PL_strxfrm_NUL_replacement = proto_perl->Istrxfrm_NUL_replacement;
+    PL_strxfrm_NUL_replacement = '\0';
 #endif /* USE_LOCALE_COLLATE */
 
 #ifdef USE_LOCALE_THREADS
@@ -15921,12 +15922,12 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 #endif
 
 #ifdef USE_LOCALE_NUMERIC
-    PL_numeric_name	= SAVEPV(proto_perl->Inumeric_name);
-    PL_numeric_radix_sv	= sv_dup_inc(proto_perl->Inumeric_radix_sv, param);
-    PL_underlying_radix_sv = sv_dup_inc(proto_perl->Iunderlying_radix_sv, param);
-    PL_numeric_standard	= proto_perl->Inumeric_standard;
-    PL_numeric_underlying	= proto_perl->Inumeric_underlying;
-    PL_numeric_underlying_is_standard	= proto_perl->Inumeric_underlying_is_standard;
+    PL_numeric_name	= SAVEPV("C");
+    PL_numeric_radix_sv	= newSVpvs(".");
+    PL_underlying_radix_sv = newSVpvs(".");
+    PL_numeric_standard	= true;
+    PL_numeric_underlying = true;
+    PL_numeric_underlying_is_standard = true;
 
 #  if defined(USE_POSIX_2008_LOCALE)
     PL_underlying_numeric_obj = NULL;
