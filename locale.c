@@ -121,14 +121,19 @@
 static int debug_initialization = 0;
 #  define DEBUG_INITIALIZATION_set(v) (debug_initialization = v)
 #  define DEBUG_LOCALE_INITIALIZATION_  debug_initialization
+/* C standards seem to say that __LINE__ is merely "an integer constant",
+ * which means it might be either int, long (with L suffix), or long long
+ * (or their corresponding unsigned type).  So, we have to explicitly cast
+ * __LINE__ to a particular integer type to pass it reliably to variadic
+ * functions like (PerlIO_)printf, as below: */
 #  ifdef USE_LOCALE_THREADS
 #    define DEBUG_PRE_STMTS                                                     \
      dSAVE_ERRNO; dTHX; PerlIO_printf(Perl_debug_log,"\n%s: %" LINE_Tf ": %p: ",\
-                                                     __FILE__, __LINE__, aTHX);
+                                      __FILE__, (line_t)__LINE__, aTHX);
 #  else
 #    define DEBUG_PRE_STMTS                                                     \
      dSAVE_ERRNO; dTHX; PerlIO_printf(Perl_debug_log, "\n%s: %" LINE_Tf ": ",   \
-                                                     __FILE__, __LINE__);
+                                      __FILE__, (line_t)__LINE__);
 #  endif
 #  define DEBUG_POST_STMTS  RESTORE_ERRNO;
 #else
