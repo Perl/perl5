@@ -6729,13 +6729,11 @@ S_my_setlocale_debug_string_i(pTHX_
 #endif
 
 void
-Perl_thread_locale_init()
+Perl_thread_locale_init(pTHX)
 {
     /* Called from a thread on startup*/
 
 #ifdef USE_THREAD_SAFE_LOCALE
-
-    dTHX_DEBUGGING;
 
      DEBUG_L(PerlIO_printf(Perl_debug_log,
                            "new thread, initial locale is %s;"
@@ -6765,7 +6763,7 @@ Perl_thread_locale_init()
 }
 
 void
-Perl_thread_locale_term()
+Perl_thread_locale_term(pTHX)
 {
     /* Called from a thread as it gets ready to terminate */
 
