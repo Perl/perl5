@@ -36,6 +36,7 @@ use feature 'signatures';
 no warnings qw( experimental::builtin );
 
 sub DEBUG () { 0 }  # Set to 0 for production; 1 for development
+$| = 1 if DEBUG;
 my $debugging_build = $Config{"ccflags"} =~ /-DDEBUGGING/;
 
 sub NON_ASCII_PLATFORM { ord("A") != 65 }
