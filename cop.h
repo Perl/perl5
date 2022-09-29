@@ -463,7 +463,7 @@ struct cop {
 =for apidoc Am|const char *|CopFILE|const COP * c
 Returns the name of the file associated with the C<COP> C<c>
 
-=for apidoc Am|STRLEN|CopLINE|const COP * c
+=for apidoc Am|line_t|CopLINE|const COP * c
 Returns the line number in the source code associated with the C<COP> C<c>
 
 =for apidoc Am|AV *|CopFILEAV|const COP * c
