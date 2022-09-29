@@ -2601,7 +2601,6 @@ S_win32_setlocale(pTHX_ int category, const char* locale)
      * use the particular category's variable if set; otherwise to use the LANG
      * variable. */
 
-
     if (locale == NULL) {
         return wrap_wsetlocale(category, NULL);
     }
@@ -2615,6 +2614,20 @@ S_win32_setlocale(pTHX_ int category, const char* locale)
     const char * result = wrap_wsetlocale(category, locale);
     DEBUG_L(PerlIO_printf(Perl_debug_log, "%s\n",
                           setlocale_debug_string_r(category, locale, result)));
+
+#  ifdef USE_PL_CUR_LC_ALL
+
+    /* If we need to keep track of LC_ALL, update it to the new value.  */
+    Safefree(PL_cur_LC_ALL);
+    if (category == LC_ALL) {
+        PL_cur_LC_ALL = savepv(result);
+    }
+    else {
+        PL_cur_LC_ALL = savepv(setlocale(LC_ALL, NULL));
+    }
+
+#  endif
+
     return result;
 }
 
@@ -6720,6 +6733,46 @@ S_my_setlocale_debug_string_i(pTHX_
                      category_names[cat_index], categories[cat_index],
                      locale_quote, locale, locale_quote,
                      retval_quote, retval, retval_quote);
+}
+
+#endif
+#ifdef USE_PERL_SWITCH_LOCALE_CONTEXT
+
+void
+Perl_switch_locale_context()
+{
+    /* libc keeps per-thread locale status information in some configurations.
+     * So, we can't just switch out aTHX to switch to a new thread.  libc has
+     * to follow along.  This routine does that based on per-interpreter
+     * variables we keep just for this purpose */
+
+    /* Can't use pTHX, because we may be called from a place where that
+     * isn't available */
+    dTHX;
+
+    if (UNLIKELY(   aTHX == NULL
+                 || PL_veto_switch_non_tTHX_context
+                 || PL_phase == PERL_PHASE_CONSTRUCT))
+    {
+        return;
+    }
+
+#  ifdef USE_POSIX_2008_LOCALE
+
+    if (! uselocale(PL_cur_locale_obj)) {
+        locale_panic_(Perl_form(aTHX_
+                                "Can't uselocale(%p), LC_ALL supposed to be '%s",
+                                PL_cur_locale_obj, get_LC_ALL_display()));
+    }
+
+#  elif defined(WIN32)
+
+    if (! bool_setlocale_c(LC_ALL, PL_cur_LC_ALL)) {
+        locale_panic_(Perl_form(aTHX_ "Can't setlocale(%s)", PL_cur_LC_ALL));
+    }
+
+#  endif
+
 }
 
 #endif
