@@ -3442,12 +3442,15 @@ S	|const char*|my_langinfo_i|const int item			\
 				|NULLOK utf8ness_t * utf8ness
 #    endif
 #    ifdef DEBUGGING
-S	|const char *|get_LC_ALL_display
 SR	|char *	|my_setlocale_debug_string_i			\
 			    |const unsigned cat_index		\
 			    |NULLOK const char* locale		\
 			    |NULLOK const char* retval		\
 			    |const line_t line
+#    endif
+#    if  defined(DEBUGGING)						    \
+     || (defined(USE_THREAD_SAFE_LOCALE) && defined(USE_POSIX_2008_LOCALE))
+S	|const char *|get_LC_ALL_display
 #    endif
 #  endif
 S	|const char *|get_displayable_string|NN const char * const s	\

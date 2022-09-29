@@ -1670,8 +1670,7 @@ S_calculate_LC_ALL(pTHX_ const char ** individ_locales)
 }
 
 #endif
-
-#if defined(USE_LOCALE) && defined(DEBUGGING)
+#ifdef USE_LOCALE
 
 STATIC const char *
 S_get_LC_ALL_display(pTHX)

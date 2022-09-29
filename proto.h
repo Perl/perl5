@@ -5122,8 +5122,6 @@ PERL_CALLCONV void	Perl_set_padlist(CV * cv, PADLIST * padlist);
 	assert(cv)
 #  if defined(PERL_IN_LOCALE_C)
 #    if defined(USE_LOCALE)
-STATIC const char *	S_get_LC_ALL_display(pTHX);
-#define PERL_ARGS_ASSERT_GET_LC_ALL_DISPLAY
 STATIC char *	S_my_setlocale_debug_string_i(pTHX_ const unsigned cat_index, const char* locale, const char* retval, const line_t line)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_MY_SETLOCALE_DEBUG_STRING_I
@@ -5213,6 +5211,14 @@ STATIC void	S_printbuf(pTHX_ const char *const fmt, const char *const s)
 STATIC int	S_tokereport(pTHX_ I32 rv, const YYSTYPE* lvalp);
 #define PERL_ARGS_ASSERT_TOKEREPORT	\
 	assert(lvalp)
+#  endif
+#endif
+#if defined(DEBUGGING)						         || (defined(USE_THREAD_SAFE_LOCALE) && defined(USE_POSIX_2008_LOCALE))
+#  if defined(PERL_IN_LOCALE_C)
+#    if defined(USE_LOCALE)
+STATIC const char *	S_get_LC_ALL_display(pTHX);
+#define PERL_ARGS_ASSERT_GET_LC_ALL_DISPLAY
+#    endif
 #  endif
 #endif
 #if defined(DEBUGGING) && defined(ENABLE_REGEX_SETS_DEBUGGING)
