@@ -15423,6 +15423,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 
     /* for each stash, determine whether its objects should be cloned */
     S_visit(proto_perl, do_mark_cloneable_stash, SVt_PVHV, SVTYPEMASK);
+    my_perl->Iphase = PERL_PHASE_CONSTRUCT;
     PERL_SET_THX(my_perl);
 
 #ifdef DEBUGGING
