@@ -738,6 +738,9 @@ PERLVAR(I, constpadix,	PADOFFSET)	/* lowest unused for constants */
 
 PERLVAR(I, padix_floor,	PADOFFSET)	/* how low may inner block reset padix */
 
+#if defined(USE_POSIX_2008_LOCALE) && defined(MULTIPLICITY)
+PERLVARI(I, cur_locale_obj, locale_t, NULL)
+#endif
 #ifdef USE_PL_CURLOCALES
 
 /* This is the most number of categories we've encountered so far on any
