@@ -397,12 +397,13 @@ extern PERL_THREAD_LOCAL void *PL_current_context;
 /* We must also call pthread_setspecific() always, as C++ code has to read it
  * with pthreads (the #else side just below) */
 
-#  define PERL_SET_CONTEXT(t)                                           \
-    STMT_START {                                                        \
-        int _eC_;                                                       \
-        if ((_eC_ = pthread_setspecific(PL_thr_key, PL_current_context = (void *)(t)))) \
+#  define PERL_SET_CONTEXT(t)                                               \
+    STMT_START {                                                            \
+        int _eC_;                                                           \
+        if ((_eC_ = pthread_setspecific(PL_thr_key,                         \
+                                        PL_current_context = (void *)(t)))) \
             Perl_croak_nocontext("panic: pthread_setspecific (%d) [%s:%d]", \
-                                 _eC_, __FILE__, __LINE__);             \
+                                 _eC_, __FILE__, __LINE__);                 \
     } STMT_END
 
 #else
