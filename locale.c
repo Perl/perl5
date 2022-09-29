@@ -4790,6 +4790,11 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
     DEBUG_Lv(PerlIO_printf(Perl_debug_log, "created C object %p\n",
                            PL_C_locale_obj));
 
+    /* Switch to using the POSIX 2008 interface now.  This would happen below
+     * anyway, but deferring it can lead to leaks of memory that would also get
+     * malloc'd in the interim */
+    uselocale(PL_C_locale_obj);
+
 #    ifdef USE_LOCALE_NUMERIC
 
     PL_underlying_numeric_obj = duplocale(PL_C_locale_obj);
