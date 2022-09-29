@@ -4355,9 +4355,9 @@ PERL_CALLCONV void	Perl_taint_env(pTHX);
 PERL_CALLCONV void	Perl_taint_proper(pTHX_ const char* f, const char *const s);
 #define PERL_ARGS_ASSERT_TAINT_PROPER	\
 	assert(s)
-PERL_CALLCONV void	Perl_thread_locale_init(void);
+PERL_CALLCONV void	Perl_thread_locale_init(pTHX);
 #define PERL_ARGS_ASSERT_THREAD_LOCALE_INIT
-PERL_CALLCONV void	Perl_thread_locale_term(void);
+PERL_CALLCONV void	Perl_thread_locale_term(pTHX);
 #define PERL_ARGS_ASSERT_THREAD_LOCALE_TERM
 PERL_CALLCONV OP *	Perl_tied_method(pTHX_ SV *methname, SV **sp, SV *const sv, const MAGIC *const mg, const U32 flags, U32 argc, ...)
 			__attribute__visibility__("hidden");

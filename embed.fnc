@@ -1663,8 +1663,8 @@ Xp	|void	|set_numeric_standard
 Cp	|bool	|_is_in_locale_category|const bool compiling|const int category
 Apd	|void	|switch_to_global_locale
 Apd	|bool	|sync_locale
-ApxT	|void	|thread_locale_init
-ApxT	|void	|thread_locale_term
+Apx	|void	|thread_locale_init
+Apx	|void	|thread_locale_term
 ApdO	|void	|require_pv	|NN const char* pv
 Apd	|void	|packlist	|NN SV *cat|NN const char *pat|NN const char *patend|NN SV **beglist|NN SV **endlist
 #if defined(PERL_USES_PL_PIDSTATUS) && defined(PERL_IN_UTIL_C)
