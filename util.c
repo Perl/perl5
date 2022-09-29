@@ -3975,11 +3975,12 @@ Perl_init_tm(pTHX_ struct tm *ptm)	/* see mktime, strftime and asctime */
     PERL_UNUSED_CONTEXT;
     PERL_ARGS_ASSERT_INIT_TM;
     (void)time(&now);
-    ENV_LOCALE_READ_LOCK;
+
+    LOCALTIME_LOCK;
     my_tm = localtime(&now);
     if (my_tm)
         Copy(my_tm, ptm, 1, struct tm);
-    ENV_LOCALE_READ_UNLOCK;
+    LOCALTIME_UNLOCK;
 #else
     PERL_UNUSED_CONTEXT;
     PERL_ARGS_ASSERT_INIT_TM;
@@ -4234,7 +4235,9 @@ giving localized results.
   STMT_START {
     struct tm mytm2;
     mytm2 = mytm;
+    MKTIME_LOCK;
     mktime(&mytm2);
+    MKTIME_UNLOCK;
 #ifdef HAS_TM_TM_GMTOFF
     mytm.tm_gmtoff = mytm2.tm_gmtoff;
 #endif
@@ -4248,7 +4251,9 @@ giving localized results.
 
   GCC_DIAG_IGNORE_STMT(-Wformat-nonliteral); /* fmt checked by caller */
 
+  STRFTIME_LOCK;
   len = strftime(buf, buflen, fmt, &mytm);
+  STRFTIME_UNLOCK;
 
   GCC_DIAG_RESTORE_STMT;
 
@@ -4277,7 +4282,9 @@ giving localized results.
     while (buf) {
 
       GCC_DIAG_IGNORE_STMT(-Wformat-nonliteral); /* fmt checked by caller */
+      STRFTIME_LOCK;
       buflen = strftime(buf, bufsize, fmt, &mytm);
+      STRFTIME_UNLOCK;
       GCC_DIAG_RESTORE_STMT;
 
       if (inRANGE(buflen, 1, bufsize - 1))

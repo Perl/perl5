@@ -2903,10 +2903,16 @@ PP(pp_sin)
 #if defined(NAN_COMPARE_BROKEN) && defined(Perl_isnan)
               ! Perl_isnan(value) &&
 #endif
-              (op_type == OP_LOG ? (value <= 0.0) : (value < 0.0))) {
+              (op_type == OP_LOG ? (value <= 0.0) : (value < 0.0)))
+          {
+              char * mesg;
+              SETLOCALE_LOCK;
               SET_NUMERIC_STANDARD();
+              mesg = Perl_form(aTHX_ "Can't take %s of %" NVgf, neg_report, value);
+              SETLOCALE_UNLOCK;
+
               /* diag_listed_as: Can't take log of %g */
-              DIE(aTHX_ "Can't take %s of %" NVgf, neg_report, value);
+              DIE(aTHX_ "%s", mesg);
           }
       }
       switch (op_type) {

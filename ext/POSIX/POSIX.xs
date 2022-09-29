@@ -1752,7 +1752,12 @@ my_tzset(pTHX)
 #endif
         fix_win32_tzenv();
 #endif
+    TZSET_LOCK;
     tzset();
+    TZSET_UNLOCK;
+    /* After the unlock, another thread could change things, but this is a
+     * problem with the Posix API generally, not Perl; and the result will be
+     * self-consistent */
 }
 
 MODULE = SigSet		PACKAGE = POSIX::SigSet		PREFIX = sig
@@ -3203,7 +3208,9 @@ mblen(s, n = ~0)
                 char * string = SvPVbyte(byte_s, len);
                 if (n < len) len = n;
 #ifdef USE_MBRLEN
+                MBRLEN_LOCK_;
                 RETVAL = (SSize_t) mbrlen(string, len, &PL_mbrlen_ps);
+                MBRLEN_UNLOCK_;
                 if (RETVAL < 0) RETVAL = -1;    /* Use mblen() ret code for
                                                    transparency */
 #else
@@ -3276,7 +3283,9 @@ wctomb(s, wchar)
 #ifdef USE_WCRTOMB
             /* The man pages khw looked at are in agreement that this works.
              * But probably memzero would too */
+            WCRTOMB_LOCK_;
             RETVAL = wcrtomb(NULL, L'\0', &PL_wcrtomb_ps);
+            WCRTOMB_UNLOCK_;
 #else
             WCTOMB_LOCK_;
             RETVAL = wctomb(NULL, L'\0');
@@ -3286,7 +3295,9 @@ wctomb(s, wchar)
         else {  /* Not resetting state */
             char buffer[MB_LEN_MAX];
 #ifdef USE_WCRTOMB
+            WCRTOMB_LOCK_;
             RETVAL = wcrtomb(buffer, wchar, &PL_wcrtomb_ps);
+            WCRTOMB_UNLOCK_;
 #else
             /* Locking prevents races, but locales can be switched out without
              * locking, so this isn't a cure all */
@@ -3305,6 +3316,12 @@ int
 strcoll(s1, s2)
 	char *		s1
 	char *		s2
+    CODE:
+        LC_COLLATE_LOCK;
+        RETVAL = strcoll(s1, s2);
+        LC_COLLATE_UNLOCK;
+    OUTPUT:
+        RETVAL
 
 void
 strtod(str)
@@ -3519,7 +3536,10 @@ asctime(sec, min, hour, mday, mon, year, wday = 0, yday = 0, isdst = -1)
 	    mytm.tm_yday = yday;
 	    mytm.tm_isdst = isdst;
 	    if (ix) {
-	        const time_t result = mktime(&mytm);
+	        time_t result;
+                MKTIME_LOCK;
+	        result = mktime(&mytm);
+                MKTIME_UNLOCK;
 		if (result == (time_t)-1)
 		    SvOK_off(TARG);
 		else if (result == 0)
@@ -3527,7 +3547,9 @@ asctime(sec, min, hour, mday, mon, year, wday = 0, yday = 0, isdst = -1)
 		else
 		    sv_setiv(TARG, (IV)result);
 	    } else {
+                ASCTIME_LOCK;
 		sv_setpv(TARG, asctime(&mytm));
+                ASCTIME_UNLOCK;
 	    }
 	    ST(0) = TARG;
 	    XSRETURN(1);
@@ -3614,8 +3636,12 @@ void
 tzname()
     PPCODE:
 	EXTEND(SP,2);
+        /* It is undefined behavior if another thread is changing this while
+         * its being read */
+        ENVr_LOCALEr_LOCK;
 	PUSHs(newSVpvn_flags(tzname[0], strlen(tzname[0]), SVs_TEMP));
 	PUSHs(newSVpvn_flags(tzname[1], strlen(tzname[1]), SVs_TEMP));
+        ENVr_LOCALEr_UNLOCK;
 
 char *
 ctermid(s = 0)
