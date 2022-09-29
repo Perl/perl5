@@ -1665,6 +1665,9 @@ Apd	|void	|switch_to_global_locale
 Apd	|bool	|sync_locale
 Apx	|void	|thread_locale_init
 Apx	|void	|thread_locale_term
+#ifdef USE_PERL_SWITCH_LOCALE_CONTEXT
+CopT	|void	|switch_locale_context
+#endif
 ApdO	|void	|require_pv	|NN const char* pv
 Apd	|void	|packlist	|NN SV *cat|NN const char *pat|NN const char *patend|NN SV **beglist|NN SV **endlist
 #if defined(PERL_USES_PL_PIDSTATUS) && defined(PERL_IN_UTIL_C)

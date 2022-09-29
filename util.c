@@ -3740,6 +3740,9 @@ Perl_set_context(void *t)
             Perl_croak_nocontext("panic: pthread_setspecific, error=%d", error);
     }
 #  endif
+
+    PERL_SET_NON_tTHX_CONTEXT(t);
+
 #else
     PERL_UNUSED_ARG(t);
 #endif
