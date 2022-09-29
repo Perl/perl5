@@ -1129,15 +1129,17 @@ perl_destruct(pTHXx)
     {
         /* This also makes sure we aren't using a locale object that gets freed
          * below */
-        const locale_t old_locale = uselocale(LC_GLOBAL_LOCALE);
-        if (   old_locale != LC_GLOBAL_LOCALE
-#  ifdef USE_POSIX_2008_LOCALE
-            && old_locale != PL_C_locale_obj
-#  endif
+        if (   PL_cur_locale_obj != NULL
+            && PL_cur_locale_obj != LC_GLOBAL_LOCALE
+            && PL_cur_locale_obj != PL_C_locale_obj
         ) {
-            DEBUG_Lv(PerlIO_printf(Perl_debug_log,
-                     "%s:%d: Freeing %p\n", __FILE__, __LINE__, old_locale));
-            freelocale(old_locale);
+            locale_t cur_locale = uselocale((locale_t) 0);
+            if (cur_locale == PL_cur_locale_obj) {
+                uselocale(LC_GLOBAL_LOCALE);
+            }
+
+            freelocale(PL_cur_locale_obj);
+            PL_cur_locale_obj = NULL;
         }
     }
 

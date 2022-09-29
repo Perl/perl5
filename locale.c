@@ -1309,6 +1309,10 @@ S_emulate_setlocale_i(pTHX_
     DEBUG_Lv(PerlIO_printf(Perl_debug_log,
              "(%" LINE_Tf "): emulate_setlocale_i now using %p\n", line, new_obj));
 
+#ifdef MULTIPLICITY
+    PL_cur_locale_obj = new_obj;
+#endif
+
     /* We are done, except for updating our records (if the system doesn't keep
      * them) and in the case of locale "", we don't actually know what the
      * locale that got switched to is, as it came from the environment.  So
@@ -6723,31 +6727,28 @@ S_my_setlocale_debug_string_i(pTHX_
 void
 Perl_thread_locale_init(pTHX)
 {
-    /* Called from a thread on startup*/
 
 #ifdef USE_THREAD_SAFE_LOCALE
+#  ifdef USE_POSIX_2008_LOCALE
+
+    /* Called from a thread on startup.
+     *
+     * The operations here have to be done from within the calling thread, as
+     * they affect libc's knowledge of the thread; libc has no knowledge of
+     * aTHX */
 
      DEBUG_L(PerlIO_printf(Perl_debug_log,
                            "new thread, initial locale is %s;"
                            " calling setlocale(LC_ALL, \"C\")\n",
                            get_LC_ALL_display()));
-#  ifdef WIN32
+
+    uselocale(PL_C_locale_obj);
+
+#  elif defined(WIN32)
 
     /* On Windows, make sure new thread has per-thread locales enabled */
     _configthreadlocale(_ENABLE_PER_THREAD_LOCALE);
-
-#  endif
-#  if defined(LC_ALL)
-
-    /* This thread starts off in the C locale.  Use the full Perl_setlocale()
-     * to make sure no ill-advised shortcuts get taken on this new thread, */
-    Perl_setlocale(LC_ALL, "C");
-
-#  else
-
-    for (unsigned i = 0; i < NOMINAL_LC_ALL_INDEX; i++) {
-        Perl_setlocale(categories[i], "C");
-    }
+    void_setlocale_c(LC_ALL, "C");
 
 #  endif
 #endif
@@ -6757,19 +6758,33 @@ Perl_thread_locale_init(pTHX)
 void
 Perl_thread_locale_term(pTHX)
 {
-    /* Called from a thread as it gets ready to terminate */
+    /* Called from a thread as it gets ready to terminate.
+     *
+     * The operations here have to be done from within the calling thread, as
+     * they affect libc's knowledge of the thread; libc has no knowledge of
+     * aTHX */
 
 #ifdef USE_POSIX_2008_LOCALE
 
     /* C starts the new thread in the global C locale.  If we are thread-safe,
      * we want to not be in the global locale */
 
-    {   /* Free up */
-        locale_t cur_obj = uselocale(LC_GLOBAL_LOCALE);
-        if (cur_obj != LC_GLOBAL_LOCALE && cur_obj != PL_C_locale_obj) {
-            freelocale(cur_obj);
-        }
+    /* Free up */
+    locale_t actual_obj   = uselocale(LC_GLOBAL_LOCALE);
+    if (actual_obj != LC_GLOBAL_LOCALE && actual_obj != PL_C_locale_obj) {
+        freelocale(actual_obj);
     }
+
+    /* Prevent leaks even if something has gone wrong */
+    locale_t expected_obj = PL_cur_locale_obj;
+    if (UNLIKELY(   expected_obj != actual_obj
+                 && expected_obj != LC_GLOBAL_LOCALE
+                 && expected_obj != PL_C_locale_obj))
+    {
+        freelocale(expected_obj);
+    }
+
+    PL_cur_locale_obj = LC_GLOBAL_LOCALE;
 
 #endif
 
