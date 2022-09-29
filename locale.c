@@ -972,11 +972,12 @@ S_setlocale_from_aggregate_LC_ALL(pTHX_ const char * locale, const line_t line)
         /* Parse through the locale name */
         const char * name_start = p;
         while (p < e && *p != ';') {
-            if (! isGRAPH(*p)) {
-                locale_panic_(Perl_form(aTHX_
-                              "Unexpected character in locale name '%02X", *p));
-            }
             p++;
+        }
+        if (UNLIKELY( p < e && *p != ';')) {
+            locale_panic_(Perl_form(aTHX_
+                          "Unexpected character in locale name '%s<-- HERE",
+                          get_displayable_string(s, p, 0)));
         }
 
         const char * name_end = p;
