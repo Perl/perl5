@@ -2586,6 +2586,22 @@ S_win32_setlocale(pTHX_ int category, const char* locale)
                           setlocale_debug_string_r(category, locale, result)));
 
     if (! override_LC_ALL)  {
+
+#  ifdef USE_PL_CUR_LC_ALL
+
+        /* If we need to keep this variable updated, and it potentially
+         * changed, update it */
+        if (locale != NULL) {
+            if (category == LC_ALL) {
+                PL_cur_LC_ALL = result;
+            }
+            else {
+                PL_cur_LC_ALL = S_wrap_wsetlocale(aTHX_ LC_ALL, NULL);
+            };
+        }
+
+#  endif
+
         return result;
     }
 
@@ -2611,6 +2627,11 @@ S_win32_setlocale(pTHX_ int category, const char* locale)
     result = setlocale(LC_ALL, NULL);
     DEBUG_L(PerlIO_printf(Perl_debug_log, "%s\n",
                           setlocale_debug_string_c(LC_ALL, NULL, result)));
+
+
+#  ifdef USE_PL_CUR_LC_ALL
+    PL_cur_LC_ALL = result;
+#  endif
 
     return result;
 }
