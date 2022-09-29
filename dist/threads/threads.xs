@@ -241,11 +241,20 @@ S_ithread_clear(pTHX_ ithread *thread)
     S_block_most_signals(&origmask);
 #endif
 
+    int save_veto = PL_veto_switch_non_tTHX_context;
+
     interp = thread->interp;
     if (interp) {
         dTHXa(interp);
 
+        /* We will pretend to be a thread that we are not by switching tTHX,
+         * which doesn't work with things that don't rely on tTHX during
+         * tear-down, as they will tend to rely on a mapping from the tTHX
+         * structure, and that structure is being destroyed. */
+        PL_veto_switch_non_tTHX_context = true;
+
         PERL_SET_CONTEXT(interp);
+
         S_ithread_set(aTHX_ thread);
 
         SvREFCNT_dec(thread->params);
@@ -262,6 +271,8 @@ S_ithread_clear(pTHX_ ithread *thread)
     }
 
     PERL_SET_CONTEXT(aTHX);
+    PL_veto_switch_non_tTHX_context = save_veto;
+
 #ifdef THREAD_SIGNAL_BLOCKING
     S_set_sigmask(&origmask);
 #endif

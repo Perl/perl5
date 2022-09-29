@@ -404,6 +404,7 @@ extern PERL_THREAD_LOCAL void *PL_current_context;
                                         PL_current_context = (void *)(t)))) \
             Perl_croak_nocontext("panic: pthread_setspecific (%d) [%s:%d]", \
                                  _eC_, __FILE__, __LINE__);                 \
+        PERL_SET_NON_tTHX_CONTEXT(t);                                       \
     } STMT_END
 
 #else

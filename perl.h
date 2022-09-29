@@ -4052,7 +4052,10 @@ out there, Solaris being the most prominent.
 
 /* the traditional thread-unsafe notion of "current interpreter". */
 #ifndef PERL_SET_INTERP
-#  define PERL_SET_INTERP(i)		(PL_curinterp = (PerlInterpreter*)(i))
+#  define PERL_SET_INTERP(i)                                            \
+            STMT_START { PL_curinterp = (PerlInterpreter*)(i);          \
+                         PERL_SET_NON_tTHX_CONTEXT(i);                  \
+            } STMT_END
 #endif
 
 #ifndef PERL_GET_INTERP
@@ -6268,6 +6271,27 @@ EXTCONST U8   PL_deBruijn_bitpos_tab64[];
 #  define PERL_SET_CONTEXT(i)		PERL_SET_INTERP(i)
 #endif
 
+#ifdef USE_PL_CUR_LC_ALL
+
+PERL_CALLCONV void	Perl_switch_locale_context();
+
+#  define PERL_SET_LOCALE_CONTEXT(i)                                        \
+      STMT_START {                                                          \
+          if (UNLIKELY(PL_veto_switch_non_tTHX_context))                    \
+                Perl_switch_locale_context();                               \
+      } STMT_END
+#else
+#  define PERL_SET_LOCALE_CONTEXT(i)  NOOP
+#endif
+
+/* In some Configurations there may be per-thread information that is carried
+ * in a library instead of perl's tTHX structure.  This macro is to be used to
+ * handle those when tTHX is changed.  Only locale handling is currently known
+ * to be affected. */
+#define PERL_SET_NON_tTHX_CONTEXT(i)                                        \
+                        STMT_START { PERL_SET_LOCALE_CONTEXT(i); } STMT_END
+
+
 #ifndef PERL_GET_CONTEXT
 #  define PERL_GET_CONTEXT		PERL_GET_INTERP
 #endif
@@ -7690,7 +7714,9 @@ C<strtoul>.
  *    "DynaLoader::_guts" XS_VERSION
  *    XXX in the current implementation, this string is ignored.
  * 2. Declare a typedef named my_cxt_t that is a structure that contains
- *    all the data that needs to be interpreter-local.
+ *    all the data that needs to be interpreter-local that perl controls.  This
+ *    doesn't include things that libc controls, such as the uselocale object
+ *    in Configurations that use it.
  * 3. Use the START_MY_CXT macro after the declaration of my_cxt_t.
  * 4. Use the MY_CXT_INIT macro such that it is called exactly once
  *    (typically put in the BOOT: section).

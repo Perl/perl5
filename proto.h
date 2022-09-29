@@ -5751,6 +5751,10 @@ STATIC void	S_new_numeric(pTHX_ const char* newnum);
 #define PERL_ARGS_ASSERT_NEW_NUMERIC	\
 	assert(newnum)
 #    endif
+#    if defined(USE_PL_CUR_LC_ALL)
+PERL_CALLCONV void	Perl_switch_locale_context(void);
+#define PERL_ARGS_ASSERT_SWITCH_LOCALE_CONTEXT
+#    endif
 #    if defined(USE_POSIX_2008_LOCALE)
 STATIC const char*	S_emulate_setlocale_i(pTHX_ const unsigned int index, const char* new_locale, const recalc_lc_all_t recalc_LC_ALL, const line_t line);
 #define PERL_ARGS_ASSERT_EMULATE_SETLOCALE_I

@@ -828,6 +828,9 @@
 #endif
 #if defined(PERL_IN_LOCALE_C)
 #  if defined(USE_LOCALE)
+#    if defined(USE_PL_CUR_LC_ALL)
+#define switch_locale_context	Perl_switch_locale_context
+#    endif
 #    if defined(WIN32)
 #define Win_utf8_string_to_wstring	Perl_Win_utf8_string_to_wstring
 #define Win_wstring_to_utf8_string	Perl_Win_wstring_to_utf8_string

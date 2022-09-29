@@ -169,6 +169,7 @@ PERLVAR(G, check_mutex,	perl_mutex)	/* Mutex for PL_check */
 #ifdef MULTIPLICITY
 # ifdef USE_ITHREADS
 PERLVAR(G, my_ctx_mutex, perl_mutex)
+PERLVARI(G, veto_switch_non_tTHX_context, int, FALSE)
 # endif
 PERLVARI(G, my_cxt_index, int,	0)
 #endif
