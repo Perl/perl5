@@ -386,6 +386,7 @@ unless ($define{'USE_ITHREADS'}) {
     ++$skip{$_} foreach qw(
                     PL_keyword_plugin_mutex
 		    PL_check_mutex
+                    PL_cur_locale_obj
 		    PL_op_mutex
 		    PL_regex_pad
 		    PL_regex_padav

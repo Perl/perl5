@@ -15939,6 +15939,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 #endif /* !USE_LOCALE_NUMERIC */
 #if defined(USE_POSIX_2008_LOCALE)
     PL_scratch_locale_obj = NULL;
+    PL_cur_locale_obj = PL_C_locale_obj;
 #endif
 
 #ifdef HAS_MBRLEN
