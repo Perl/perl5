@@ -381,6 +381,10 @@ barestmt:	PLUGSTMT
 			  parser->parsed_sub = 1;
 			}
 	|	KW_PACKAGE BAREWORD[version] BAREWORD[package] PERLY_SEMICOLON
+		    /* version and package appear in the reverse order to what may be
+		     * expected, because toke.c has already pushed both of them to a stack
+		     * by calling force_next() from within force_version().
+		     * When the parser pops them back out again they appear swapped */
 			{
 			  package($package);
 			  if ($version)
@@ -390,6 +394,8 @@ barestmt:	PLUGSTMT
 	|	KW_USE_or_NO startsub
 			{ CvSPECIAL_on(PL_compcv); /* It's a BEGIN {} */ }
 		BAREWORD[version] BAREWORD[module] optlistexpr PERLY_SEMICOLON
+		    /* version and package appear in reverse order for the same reason as
+		     * KW_PACKAGE; see comment above */
 			{
 			  SvREFCNT_inc_simple_void(PL_compcv);
 			  utilize($KW_USE_or_NO, $startsub, $version, $module, $optlistexpr);
