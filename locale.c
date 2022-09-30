@@ -5083,13 +5083,6 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 
           done_C: ;
         }   /* end of first time through the loop */
-
-#  ifdef WIN32
-
-      next_iteration: ;
-
-#  endif
-
     }   /* end of looping through the trial locales */
 
     if (ok < 1) {   /* If we tried to fallback */
