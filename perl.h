@@ -1223,7 +1223,7 @@ violations are fatal.
 #  endif
 #  if ! defined(HAS_SETLOCALE) && defined(HAS_POSIX_2008_LOCALE)
 #      define USE_POSIX_2008_LOCALE
-#      ifndef USE_THREAD_SAFE_LOCALE
+#      ifdef USE_LOCALE_THREADS
 #        define USE_THREAD_SAFE_LOCALE
 #      endif
                                    /* If compiled with
@@ -7030,7 +7030,7 @@ the plain locale pragma without a parameter (S<C<use locale>>) is in effect.
             }                                                               \
         } STMT_END
 
-#  ifndef USE_THREAD_SAFE_LOCALE
+#  if defined(USE_THREADS) && ! defined(USE_THREAD_SAFE_LOCALE)
 
      /* By definition, a thread-unsafe locale means we need a critical
       * section. */
