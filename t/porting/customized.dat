@@ -6,10 +6,10 @@ ExtUtils::Constant cpan/ExtUtils-Constant/lib/ExtUtils/Constant/Base.pm 7560e101
 ExtUtils::Constant cpan/ExtUtils-Constant/t/Constant.t 165e9c7132b003fd192d32a737b0f51f9ba4999e
 Filter::Util::Call pod/perlfilter.pod 545265af2f45741a0e59eecdd0cfc0c9e490c1e8
 Locale::Maketext::Simple cpan/Locale-Maketext-Simple/lib/Locale/Maketext/Simple.pm 57ed38905791a17c150210cd6f42ead22a7707b6
-Math::Complex cpan/Math-Complex/lib/Math/Complex.pm 66f28a17647e2de166909ca66e4ced26f8a0a62e
-Math::Complex cpan/Math-Complex/t/Complex.t 17039e03ee798539e770ea9a0d19a99364278306
-Math::Complex cpan/Math-Complex/t/Trig.t 508f8e27373c08228be13ca5d42b28812ab0e020
-Math::Complex cpan/Math-Complex/t/underbar.t 97e7b9615658eefc67a710d4b258349cc5bace63
+Math::Complex dist/Math-Complex/lib/Math/Complex.pm 66f28a17647e2de166909ca66e4ced26f8a0a62e
+Math::Complex dist/Math-Complex/t/Complex.t 17039e03ee798539e770ea9a0d19a99364278306
+Math::Complex dist/Math-Complex/t/Trig.t 508f8e27373c08228be13ca5d42b28812ab0e020
+Math::Complex dist/Math-Complex/t/underbar.t 97e7b9615658eefc67a710d4b258349cc5bace63
 Net::Ping dist/Net-Ping/t/000_load.t deff5dc2ca54dae28cb19d3631427db127279ac2
 Net::Ping dist/Net-Ping/t/001_new.t 7b24e05672e22edfe3e6b5cc0277f815efe557e5
 Net::Ping dist/Net-Ping/t/010_pingecho.t 74437379673c8ba82f81574fd7e652f41a65c993
