@@ -1452,11 +1452,6 @@ cpan/Math-BigRat/t/new-mbr.t
 cpan/Math-BigRat/t/requirer.t		see if require works properly
 cpan/Math-BigRat/t/rt121139.t
 cpan/Math-BigRat/t/trap.t		see if trap_nan and trap_inf work
-cpan/Math-Complex/lib/Math/Complex.pm	A Complex package
-cpan/Math-Complex/lib/Math/Trig.pm	A simple interface to complex trigonometry
-cpan/Math-Complex/t/Complex.t		See if Math::Complex works
-cpan/Math-Complex/t/Trig.t		See if Math::Trig works
-cpan/Math-Complex/t/underbar.t		See if Math::Complex works
 cpan/Memoize/Memoize.pm			Memoize
 cpan/Memoize/Memoize/AnyDBM_File.pm	Memoize glue layer for AnyDBM_File
 cpan/Memoize/Memoize/Expire.pm		Memoize expiry manager example
@@ -3832,6 +3827,11 @@ dist/Locale-Maketext/t/92_blacklist.t			See if Locale::Maketext works
 dist/Locale-Maketext/t/93_whitelist.t			See if Locale::Maketext works
 dist/Locale-Maketext/t/94_denylist.t			See if Locale::Maketext works
 dist/Locale-Maketext/t/95_allowlist.t			See if Locale::Maketext works
+dist/Math-Complex/lib/Math/Complex.pm	A Complex package
+dist/Math-Complex/lib/Math/Trig.pm	A simple interface to complex trigonometry
+dist/Math-Complex/t/Complex.t		See if Math::Complex works
+dist/Math-Complex/t/Trig.t		See if Math::Trig works
+dist/Math-Complex/t/underbar.t		See if Math::Complex works
 dist/Module-CoreList/Changes			Module::CoreList Changes
 dist/Module-CoreList/corelist			The corelist command-line utility
 dist/Module-CoreList/identify-dependencies	A usage example for Module::CoreList

@@ -36,6 +36,7 @@
          "dist/IO",
          "dist/lib",
          "dist/Locale-Maketext",
+         "dist/Math-Complex",
          "dist/Module-CoreList",
          "dist/Net-Ping",
          "dist/PathTools",
