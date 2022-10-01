@@ -1619,7 +1619,6 @@
 #define set_padlist		Perl_set_padlist
 #    if defined(PERL_IN_LOCALE_C)
 #      if defined(USE_LOCALE)
-#define get_LC_ALL_display()	S_get_LC_ALL_display(aTHX)
 #define my_setlocale_debug_string_i(a,b,c,d)	S_my_setlocale_debug_string_i(aTHX_ a,b,c,d)
 #        if defined(USE_LOCALE_COLLATE)
 #define print_collxfrm_input_and_return(a,b,c,d,e)	S_print_collxfrm_input_and_return(aTHX_ a,b,c,d,e)
@@ -1635,6 +1634,13 @@
 #    if defined(PERL_IN_TOKE_C)
 #define printbuf(a,b)		S_printbuf(aTHX_ a,b)
 #define tokereport(a,b)		S_tokereport(aTHX_ a,b)
+#    endif
+#  endif
+#  if defined(DEBUGGING) || defined(USE_PERL_SWITCH_LOCALE_CONTEXT)
+#    if defined(PERL_IN_LOCALE_C)
+#      if defined(USE_LOCALE)
+#define get_LC_ALL_display()	S_get_LC_ALL_display(aTHX)
+#      endif
 #    endif
 #  endif
 #  if defined(DEBUG_LEAKING_SCALARS_FORK_DUMP)
