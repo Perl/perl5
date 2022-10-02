@@ -261,7 +261,7 @@ S_ithread_clear(pTHX_ ithread *thread)
         thread->params = NULL;
 
         if (thread->err) {
-            SvREFCNT_dec(thread->err);
+            SvREFCNT_dec_NN(thread->err);
             thread->err = Nullsv;
         }
 
