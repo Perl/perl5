@@ -931,24 +931,63 @@ X<bless>
 
 =for Pod::Functions create an object
 
-This function tells the thingy referenced by REF that it is now an object
-in the CLASSNAME package.  If CLASSNAME is an empty string, it is
-interpreted as referring to the C<main> package.
-If CLASSNAME is omitted, the current package
-is used.  Because a L<C<bless>|/bless REF,CLASSNAME> is often the last
-thing in a constructor, it returns the reference for convenience.
-Always use the two-argument version if a derived class might inherit the
-method doing the blessing.  See L<perlobj> for more about the blessing
-(and blessings) of objects.
+C<bless> tells Perl to mark the item referred to by C<REF> as an
+object in a package.  The two-argument version of C<bless> is
+always preferable unless there is a specific reason to I<not>
+use it.
 
-Consider always blessing objects in CLASSNAMEs that are mixed case.
-Namespaces with all lowercase names are considered reserved for
-Perl pragmas.  Builtin types have all uppercase names.  To prevent
-confusion, you may wish to avoid such package names as well.
-It is advised to avoid the class name C<0>, because much code erroneously
-uses the result of L<C<ref>|/ref EXPR> as a truth value.
+=over
 
-See L<perlmod/"Perl Modules">.
+=item * Bless the referred-to item into a specific package
+(recommended form):
+
+    bless $ref, $package;
+
+The two-argument form adds the object to the package specified
+as the second argument.
+
+=item * Bless the referred-to item into package C<main>:
+
+    bless $ref, "";
+
+If the second argument is an empty string, C<bless> adds the
+object to package C<main>.
+
+=item * Bless the referred-to item into the current package (not
+inheritable):
+
+    bless $ref;
+
+If C<bless> is used without its second argument, the object is
+created in the current package. The second argument should
+always be supplied if a derived class might inherit a method
+executing C<bless>. Because it is a potential source of bugs,
+one-argument C<bless> is discouraged.
+
+=back
+
+See L<perlobj> for more about the blessing (and blessings) of
+objects.
+
+L<C<bless>|/bless REF,CLASSNAME> returns its first argument, the
+supplied reference, as the value of the function; since C<bless>
+is commonly the last thing executed in constructors, this means
+that the the reference to the object is returned as the
+constructor's value and allows the caller to immediately use
+this returned object in method calls.
+
+C<CLASSNAME> should always be a mixed-case name, as
+all-uppercase and all-lowercase names are meant to be used only
+for Perl builtin types and pragmas, respectively. Avoid creating
+all-uppercase or all-lowercase package names to prevent
+confusion.
+
+Also avoid <Cbless>ing things into the class name C<0>; this
+will cause code which (erroneously) checks the result of
+L<C<ref>|/ref EXPR> to see if a reference is C<bless>ed to fail,
+as "0", a falsy value, is returned.
+
+See L<perlmod/"Perl Modules"> for more details.
 
 =item break
 
