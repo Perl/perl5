@@ -4912,9 +4912,9 @@ Gid_t getegid (void);
 
 #  define DEBUG__(t, a)                                                 \
         STMT_START {                                                    \
-            if (t) STMT_START {                                         \
+            if (t) {                                                    \
                 DEBUG_PRE_STMTS a; DEBUG_POST_STMTS                     \
-            } STMT_END;                                                 \
+            }                                                           \
         } STMT_END
 
 #  define DEBUG_f(a) DEBUG__(DEBUG_f_TEST, a)
