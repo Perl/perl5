@@ -470,7 +470,7 @@ EOF
                     print "\$y\n";  # number is ok after threads
                     print "\$y" eq "\$str_x" || 0;    # new number stringifies the same as old number
 EOF
-                "1.25\n1.25\n1.25\n1", { }, "Thread join doesn't disrupt calling thread"
+                "1.25\n1.25\n1.25\n1", { eval $switches }, "Thread join doesn't disrupt calling thread"
                 ); # [GH 20155]
             }
 
