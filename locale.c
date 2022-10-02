@@ -121,14 +121,22 @@
 static int debug_initialization = 0;
 #  define DEBUG_INITIALIZATION_set(v) (debug_initialization = v)
 #  define DEBUG_LOCALE_INITIALIZATION_  debug_initialization
+#  ifdef USE_LOCALE_THREADS
+#    define DEBUG_PRE_STMTS                                                     \
+     dSAVE_ERRNO; dTHX; PerlIO_printf(Perl_debug_log,"\n%s: %" LINE_Tf ": %p: ",\
+                                                     __FILE__, __LINE__, aTHX);
+#  else
+#    define DEBUG_PRE_STMTS                                                     \
+     dSAVE_ERRNO; dTHX; PerlIO_printf(Perl_debug_log, "\n%s: %" LINE_Tf ": ",   \
+                                                     __FILE__, __LINE__);
+#  endif
+#  define DEBUG_POST_STMTS  RESTORE_ERRNO;
 #else
 #  define debug_initialization 0
 #  define DEBUG_INITIALIZATION_set(v)
+#  define DEBUG_PRE_STMTS
+#  define DEBUG_POST_STMTS
 #endif
-
-#define DEBUG_PRE_STMTS   dSAVE_ERRNO;                                        \
-    PerlIO_printf(Perl_debug_log, "%s: %" LINE_Tf ": ", __FILE__, __LINE__);
-#define DEBUG_POST_STMTS  RESTORE_ERRNO;
 
 #include "EXTERN.h"
 #define PERL_IN_LOCALE_C
