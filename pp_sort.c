@@ -878,7 +878,7 @@ PP(pp_sort)
             cx = cx_pushblock(CXt_NULL, gimme, PL_stack_base, old_savestack_ix);
             if (!(flags & OPf_SPECIAL)) {
                 cx->cx_type = CXt_SUB|CXp_MULTICALL;
-                cx_pushsub(cx, cv, NULL, hasargs);
+                cx_pushsub(cx, cv, NULL, hasargs, 0);
                 if (!is_xsub) {
                     PADLIST * const padlist = CvPADLIST(cv);
 

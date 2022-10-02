@@ -5162,11 +5162,30 @@ Perl_clear_defarray(pTHX_ AV* av, bool abandon)
 
 PP(pp_entersub)
 {
-    dSP; dPOPss;
+    dSP;
+    SV *sv;
     GV *gv;
     CV *cv;
     PERL_CONTEXT *cx;
     I32 old_savestack_ix;
+    bool cvop_is_first = PL_op->op_flags & OPf_SPECIAL;
+
+    if(UNLIKELY(cvop_is_first)) {
+        /* We don't want to POPMARK */
+        SV **mark = PL_stack_base + TOPMARK;
+        SV **svp = mark + 1;
+
+        sv = *svp;
+
+        /* Move all the stack args down one position to where everyone expects
+         * them */
+        Size_t count = SP - mark;
+        Move(svp+1, svp, count, SV *);
+
+        PERL_UNUSED_RESULT(POPs);
+    }
+    else
+        sv = POPs;
 
     if (UNLIKELY(!sv))
         goto do_die;
@@ -5336,7 +5355,7 @@ PP(pp_entersub)
         gimme = GIMME_V;
         cx = cx_pushblock(CXt_SUB, gimme, MARK, old_savestack_ix);
         hasargs = cBOOL(PL_op->op_flags & OPf_STACKED);
-        cx_pushsub(cx, cv, PL_op->op_next, hasargs);
+        cx_pushsub(cx, cv, PL_op->op_next, hasargs, PL_op->op_private);
 
         padlist = CvPADLIST(cv);
         if (UNLIKELY((depth = ++CvDEPTH(cv)) >= 2))
@@ -5395,7 +5414,7 @@ PP(pp_entersub)
         PUTBACK;
 
         if (UNLIKELY(((PL_op->op_private
-               & CX_PUSHSUB_GET_LVALUE_MASK(Perl_is_lvalue_sub)
+               & CX_PUSHSUB_GET_LVALUE_MASK(Perl_is_lvalue_sub, PL_op->op_private)
              ) & OPpENTERSUB_LVAL_MASK) == OPpLVAL_INTRO &&
             !CvLVALUE(cv)))
             DIE(aTHX_ "Can't modify non-lvalue subroutine call of &%" SVf,

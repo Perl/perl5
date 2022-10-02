@@ -2155,11 +2155,7 @@ PP(pp_dbstate)
         }
         else {
             cx = cx_pushblock(CXt_SUB, gimme, SP, PL_savestack_ix);
-            cx_pushsub(cx, cv, PL_op->op_next, 0);
-            /* OP_DBSTATE's op_private holds hint bits rather than
-             * the lvalue-ish flags seen in OP_ENTERSUB. So cancel
-             * any CxLVAL() flags that have now been mis-calculated */
-            cx->blk_u16 = 0;
+            cx_pushsub(cx, cv, PL_op->op_next, 0, 0);
 
             SAVEI32(PL_debug);
             PL_debug = 0;

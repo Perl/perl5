@@ -5145,8 +5145,18 @@ sub pp_entersub {
     }
     $kid = $op->first;
     $kid = $kid->first->sibling; # skip ex-list, pushmark
-    for (; not null $kid->sibling; $kid = $kid->sibling) {
-	push @exprs, $kid;
+    if ($op->flags & OPf_SPECIAL) {
+        # CV OP is first
+        my $cvop = $kid;
+        for ($kid = $kid->sibling; not null $kid; $kid = $kid->sibling) {
+            push @exprs, $kid;
+        }
+        $kid = $cvop;
+    }
+    else {
+        for (; not null $kid->sibling; $kid = $kid->sibling) {
+            push @exprs, $kid;
+        }
     }
     my $simple = 0;
     my $proto = undef;
@@ -5254,7 +5264,8 @@ sub pp_entersub {
     if ($prefix or $amper) {
 	if ($kid eq '&') { $kid = "{$kid}" } # &{&} cannot be written as &&
 	if ($op->flags & OPf_STACKED) {
-	    return $prefix . $amper . $kid . "(" . $args . ")";
+            $args = "($args)" if !($op->flags & OPf_SPECIAL);
+            return $prefix . $amper . $kid . $args;
 	} else {
 	    return $prefix . $amper. $kid;
 	}

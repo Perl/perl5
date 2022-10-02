@@ -478,6 +478,40 @@ S_pp_freed(pTHX)
 #endif
 
 
+/* skip an op we presume to be an OP_PUSHMARK */
+#define SKIP_PUSHMARK(o) \
+    (assert((o)->op_type == OP_PUSHMARK), (o) = OpSIBLING(o))
+
+/* Extracts the CV op and first argument op out of an OP_ENTERSUB
+ * Sets *cvopp to the op that generates the CV for the call, and
+ * *aopp to the first op that generates arguments. */
+static void
+S_extract_entersub_subtrees(const OP *entersubop, OP **cvopp, OP **aopp)
+{
+    bool cvop_is_first = entersubop->op_flags & OPf_SPECIAL;
+
+    OP *aop = cUNOPx(entersubop)->op_first;
+    if(!OpHAS_SIBLING(aop))
+        aop = cUNOPx(aop)->op_first;
+    SKIP_PUSHMARK(aop);
+
+    OP *cvop;
+
+    if(cvop_is_first) {
+        cvop = aop;
+        aop = OpSIBLING(aop);
+    }
+    else {
+        for (cvop = aop; OpHAS_SIBLING(cvop); cvop = OpSIBLING(cvop))
+            ;
+        /* Maybe there are no arguments at all? */
+        if(aop == cvop) aop = NULL;
+    }
+
+    if(cvopp) *cvopp = cvop;
+    if(aopp)  *aopp  = aop;
+}
+
 /* Return the block of memory used by an op to the free list of
  * the OP slab associated with that op.
  */
@@ -13633,14 +13667,13 @@ or a call where the callee has no prototype.
 OP *
 Perl_ck_entersub_args_list(pTHX_ OP *entersubop)
 {
-    OP *aop;
-
     PERL_ARGS_ASSERT_CK_ENTERSUB_ARGS_LIST;
 
-    aop = cUNOPx(entersubop)->op_first;
-    if (!OpHAS_SIBLING(aop))
-        aop = cUNOPx(aop)->op_first;
-    for (aop = OpSIBLING(aop); OpHAS_SIBLING(aop); aop = OpSIBLING(aop)) {
+    bool cvop_is_first = entersubop->op_flags & OPf_SPECIAL;
+
+    OP *aop;
+    S_extract_entersub_subtrees(entersubop, NULL, &aop);
+    for (; cvop_is_first ? cBOOL(aop): aop && OpHAS_SIBLING(aop); aop = OpSIBLING(aop)) {
         /* skip the extra attributes->import() call implicitly added in
          * something like foo(my $x : bar)
          */
@@ -13692,7 +13725,13 @@ Perl_ck_entersub_args_proto(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
     I32 arg = 0;
     I32 contextclass = 0;
     const char *e = NULL;
+
     PERL_ARGS_ASSERT_CK_ENTERSUB_ARGS_PROTO;
+    /* Currently only  $expr->(...)  syntax will generate OP_ENTERSUB with
+     * OPf_SPECIAL. If other forms do it too this function will need updating
+     */
+    assert(!(entersubop->op_flags & OPf_SPECIAL));
+
     if (SvTYPE(protosv) == SVt_PVCV ? !SvPOK(protosv) : !SvOK(protosv))
         Perl_croak(aTHX_ "panic: ck_entersub_args_proto CV with no proto, "
                    "flags=%lx", (unsigned long) SvFLAGS(protosv));
@@ -13708,7 +13747,7 @@ Perl_ck_entersub_args_proto(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
         aop = cUNOPx(aop)->op_first;
     }
     prev = aop;
-    aop = OpSIBLING(aop);
+    SKIP_PUSHMARK(aop);
     for (cvop = aop; OpHAS_SIBLING(cvop); cvop = OpSIBLING(cvop)) ;
     while (aop != cvop) {
         OP* o3 = aop;
@@ -13943,19 +13982,18 @@ Perl_ck_entersub_args_proto_or_list(pTHX_ OP *entersubop,
 OP *
 Perl_ck_entersub_args_core(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
 {
+    PERL_ARGS_ASSERT_CK_ENTERSUB_ARGS_CORE;
+
+    bool cvop_is_first = entersubop->op_flags & OPf_SPECIAL;
+
     IV cvflags = SvIVX(protosv);
     int opnum = cvflags & 0xffff;
     OP *aop = cUNOPx(entersubop)->op_first;
 
-    PERL_ARGS_ASSERT_CK_ENTERSUB_ARGS_CORE;
-
     if (!opnum) {
         OP *cvop;
-        if (!OpHAS_SIBLING(aop))
-            aop = cUNOPx(aop)->op_first;
-        aop = OpSIBLING(aop);
-        for (cvop = aop; OpSIBLING(cvop); cvop = OpSIBLING(cvop)) ;
-        if (aop != cvop) {
+        S_extract_entersub_subtrees(entersubop, &cvop, &aop);
+        if (aop) {
             SV *namesv = cv_name((CV *)namegv, NULL, CV_NAME_NOTQUAL);
             yyerror_pv(Perl_form(aTHX_ "Too many arguments for %" SVf,
                 SVfARG(namesv)), SvUTF8(namesv));
@@ -13991,12 +14029,18 @@ Perl_ck_entersub_args_core(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
         }
 
         first = prev = aop;
-        aop = OpSIBLING(aop);
-        /* find last sibling */
-        for (cvop = aop;
-             OpHAS_SIBLING(cvop);
-             prev = cvop, cvop = OpSIBLING(cvop))
-            ;
+        SKIP_PUSHMARK(aop);
+        if(cvop_is_first) {
+            cvop = aop;
+            aop = OpSIBLING(aop);
+        }
+        else {
+            /* find last sibling */
+            for (cvop = aop;
+                 OpHAS_SIBLING(cvop);
+                 prev = cvop, cvop = OpSIBLING(cvop))
+                ;
+        }
         if (!(cvop->op_private & OPpENTERSUB_NOPAREN)
             /* Usually, OPf_SPECIAL on an op with no args means that it had
              * parens, but these have their own meaning for that flag: */
@@ -14240,11 +14284,8 @@ Perl_ck_subr(pTHX_ OP *o)
 
     PERL_ARGS_ASSERT_CK_SUBR;
 
-    aop = cUNOPx(o)->op_first;
-    if (!OpHAS_SIBLING(aop))
-        aop = cUNOPx(aop)->op_first;
-    aop = OpSIBLING(aop);
-    for (cvop = aop; OpHAS_SIBLING(cvop); cvop = OpSIBLING(cvop)) ;
+    S_extract_entersub_subtrees(o, &cvop, &aop);
+
     cv = rv2cv_op_cv(cvop, RV2CVOPCV_MARK_EARLY);
     namegv = cv ? (GV*)rv2cv_op_cv(cvop, RV2CVOPCV_MAYBE_NAME_GV) : NULL;
 
