@@ -391,9 +391,10 @@ PERLVARI(I, locale_mutex_depth, int, 0)     /* Emulate general semaphore */
 
 #ifdef USE_LOCALE_CTYPE
 PERLVAR(I, warn_locale, SV *)
+#endif
+
 PERLVAR(I, in_utf8_CTYPE_locale, bool)
 PERLVAR(I, in_utf8_turkic_locale, bool)
-#endif
 
 PERLVARA(I, colors,6,	char *)		/* values from PERL_RE_COLORS env var */
 
