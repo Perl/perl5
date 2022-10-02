@@ -6651,7 +6651,7 @@ Perl_sync_locale(pTHX)
 #  else
 
     for (unsigned i = 0; i < NOMINAL_LC_ALL_INDEX; i++) {
-        Perl_setlocale(categories[i], stdized_setlocale(categories[i], NULL);
+        Perl_setlocale(categories[i], stdized_setlocale(categories[i], NULL));
     }
 
 #  endif
