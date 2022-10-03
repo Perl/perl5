@@ -1064,6 +1064,10 @@ violations are fatal.
 
 #include "perl_langinfo.h"    /* Needed for _NL_LOCALE_NAME */
 
+/* =========================================================================
+ * The defines from here to the following ===== line are unfortunately
+ * duplicated in makedef.pl, and changes here MUST also be made there */
+
 /* If not forbidden, we enable locale handling if either 1) the POSIX 2008
  * functions are available, or 2) just the setlocale() function.  This logic is
  * repeated in t/loc_tools.pl and makedef.pl;  The three should be kept in
@@ -1215,35 +1219,32 @@ violations are fatal.
 #    define LC_ALL_INDEX_               PERL_DUMMY_TOD_ + 1
 #  endif
 
-/* XXX The next few defines are unfortunately duplicated in makedef.pl, and
- * changes here MUST also be made there */
 
 #  if defined(USE_ITHREADS) && ! defined(NO_LOCALE_THREADS)
 #    define USE_LOCALE_THREADS
 #  endif
-#  if ! defined(HAS_SETLOCALE) && defined(HAS_POSIX_2008_LOCALE)
-#      define USE_POSIX_2008_LOCALE
-#      ifdef USE_LOCALE_THREADS
-#        define USE_THREAD_SAFE_LOCALE
-#      endif
-                                   /* If compiled with
-                                    * -DUSE_THREAD_SAFE_LOCALE, will do so even
-                                    * on unthreaded builds */
-#  elif   (defined(USE_LOCALE_THREADS) || defined(USE_THREAD_SAFE_LOCALE))   \
-       && (    defined(HAS_POSIX_2008_LOCALE)                                \
-           || (defined(WIN32) && defined(_MSC_VER)))                         \
-       && ! defined(NO_THREAD_SAFE_LOCALE)
-#    ifndef USE_THREAD_SAFE_LOCALE
+
+   /* Use POSIX 2008 locales if available, and no alternative exists
+    * ('setlocale()' is the alternative); or is threaded and not forbidden to
+    * use them */
+#  if defined(HAS_POSIX_2008_LOCALE) && (  ! defined(HAS_SETLOCALE)            \
+                                         || (     defined(USE_LOCALE_THREADS)  \
+                                             && ! defined(NO_POSIX_2008_LOCALE)))
+#    define USE_POSIX_2008_LOCALE
+#  endif
+
+   /* On threaded builds, use thread-safe locales if they are available and not
+    * forbidden.  Availability is when we are using POSIX 2008 locales, or
+    * Windows for quite a few releases now. */
+#  if defined(USE_LOCALE_THREADS) && ! defined(NO_THREAD_SAFE_LOCALE)
+#    if defined(USE_POSIX_2008_LOCALE) || (defined(WIN32) && defined(_MSC_VER))
 #      define USE_THREAD_SAFE_LOCALE
-#    endif
-#    ifdef HAS_POSIX_2008_LOCALE
-#      define USE_POSIX_2008_LOCALE
 #    endif
 #  endif
 
 #  include "perl_langinfo.h"    /* Needed for _NL_LOCALE_NAME */
 
-/* Allow use of glib's undocumented querylocale() equivalent if asked for, and
+/* Allow use of glibc's undocumented querylocale() equivalent if asked for, and
  * appropriate */
 #  ifdef USE_POSIX_2008_LOCALE
 #    if  defined(HAS_QUERYLOCALE)                                           \
@@ -1262,20 +1263,27 @@ violations are fatal.
 #    endif
 #  endif
 
+   /* POSIX 2008 has no means of finding out the current locale without a
+    * querylocale; so must keep track of it ourselves */
 #  if (defined(USE_POSIX_2008_LOCALE) && ! defined(USE_QUERYLOCALE))
 #    define USE_PL_CURLOCALES
 #  endif
 
-/*  Microsoft documentation reads in the change log for VS 2015:
- *     "The localeconv function declared in locale.h now works correctly when
- *     per-thread locale is enabled. In previous versions of the library, this
- *     function would return the lconv data for the global locale, not the
- *     thread's locale."
- */
-#  if defined(WIN32) && defined(USE_THREAD_SAFE_LOCALE) && _MSC_VER < 1900
-#  define TS_W32_BROKEN_LOCALECONV
+#  if defined(WIN32) && defined(USE_THREAD_SAFE_LOCALE)
+
+   /* Microsoft documentation reads in the change log for VS 2015: "The
+    * localeconv function declared in locale.h now works correctly when
+    * per-thread locale is enabled. In previous versions of the library, this
+    * function would return the lconv data for the global locale, not the
+    * thread's locale." */
+#    if _MSC_VER < 1900
+#      define TS_W32_BROKEN_LOCALECONV
+#    endif
 #  endif
 #endif
+
+/* end of makedef.pl logic duplication
+ * ========================================================================= */
 
 #ifdef PERL_CORE
 
