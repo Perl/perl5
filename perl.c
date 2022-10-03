@@ -1140,6 +1140,17 @@ perl_destruct(pTHXx)
             freelocale(old_locale);
         }
     }
+
+#  ifdef USE_PL_CUR_LC_ALL
+
+    if (PL_cur_LC_ALL) {
+        DEBUG_L( PerlIO_printf(Perl_debug_log, "PL_cur_LC_ALL=%p\n", PL_cur_LC_ALL));
+        Safefree(PL_cur_LC_ALL);
+        PL_cur_LC_ALL = NULL;
+    }
+
+#  endif
+
     if (PL_scratch_locale_obj) {
         freelocale(PL_scratch_locale_obj);
         PL_scratch_locale_obj = NULL;

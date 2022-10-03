@@ -172,6 +172,7 @@ if ($define{USE_POSIX_2008_LOCALE} && $define{HAS_QUERYLOCALE})
 if ($define{USE_POSIX_2008_LOCALE} && ! $define{USE_QUERYLOCALE})
 {
     $define{USE_PL_CURLOCALES} = 1;
+    $define{USE_PL_CUR_LC_ALL} = 1;
 }
 
 if ($ARGS{PLATFORM} eq 'win32' && $define{USE_THREAD_SAFE_LOCALE})
@@ -438,6 +439,13 @@ unless ($define{USE_PL_CURLOCALES})
 {
     ++$skip{$_} foreach qw(
         PL_curlocales
+    );
+}
+
+unless ($define{USE_PL_CUR_LC_ALL})
+{
+    ++$skip{$_} foreach qw(
+        PL_cur_LC_ALL
     );
 }
 
