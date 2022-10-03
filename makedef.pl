@@ -107,6 +107,7 @@ while (<CFG>) {
 }
 close(CFG);
 
+#==========================================================================
 # perl.h logic duplication begins
 
 if ($define{USE_ITHREADS}) {
@@ -143,33 +144,45 @@ my $cctype = $ARGS{CCTYPE} =~ s/MSVC//r;
 if ($define{USE_ITHREADS} && ! $define{NO_LOCALE_THREADS}) {
     $define{USE_LOCALE_THREADS} = 1;
 }
-if (! $define{HAS_SETLOCALE} && $define{HAS_POSIX_2008_LOCALE}) {
-    $define{USE_POSIX_2008_LOCALE} = 1;
-    $define{USE_THREAD_SAFE_LOCALE} = 1;
-}
-elsif (   ($define{USE_LOCALE_THREADS} || $define{USE_THREAD_SAFE_LOCALE})
-       && (    $define{HAS_POSIX_2008_LOCALE}
-           || ($ARGS{PLATFORM} eq 'win32' && (   $cctype !~ /\D/
-                                              && $cctype >= 80)))
-       && ! $define{NO_THREAD_SAFE_LOCALE})
+
+if (   $define{HAS_POSIX_2008_LOCALE}
+    && (  ! $define{HAS_SETLOCALE} || (     $define{USE_LOCALE_THREADS}
+                                       && ! $define{NO_POSIX_2008_LOCALE})))
 {
-    $define{USE_THREAD_SAFE_LOCALE} = 1 unless $define{USE_THREAD_SAFE_LOCALE};
-    $define{USE_POSIX_2008_LOCALE} = 1 if $define{HAS_POSIX_2008_LOCALE};
+    $define{USE_POSIX_2008_LOCALE} = 1;
 }
 
-if (   ($define{USE_POSIX_2008_LOCALE} && ! $define{HAS_QUERYLOCALE}))
+if ($define{USE_LOCALE_THREADS} && ! $define{NO_THREAD_SAFE_LOCALE})
+{
+    if (    $define{USE_POSIX_2008_LOCALE}
+        || ($ARGS{PLATFORM} eq 'win32' && (   $cctype !~ /\D/
+                                           && $cctype >= 80)))
+    {
+        $define{USE_THREAD_SAFE_LOCALE} = 1;
+    }
+}
+
+if ($define{USE_POSIX_2008_LOCALE} && $define{HAS_QUERYLOCALE})
+{
+    $define{USE_QUERYLOCALE} = 1;
+
+    # Don't need glibc only code from perl.h
+}
+
+if ($define{USE_POSIX_2008_LOCALE} && ! $define{USE_QUERYLOCALE})
 {
     $define{USE_PL_CURLOCALES} = 1;
 }
 
-if (   $ARGS{PLATFORM} eq 'win32'
-    && $define{USE_THREAD_SAFE_LOCALE}
-    && $cctype < 140)
+if ($ARGS{PLATFORM} eq 'win32' && $define{USE_THREAD_SAFE_LOCALE})
 {
-    $define{TS_W32_BROKEN_LOCALECONV} = 1;
+    if ($cctype < 140) {
+        $define{TS_W32_BROKEN_LOCALECONV} = 1;
+    }
 }
 
 # perl.h logic duplication ends
+#==========================================================================
 
 print STDERR "Defines: (" . join(' ', sort keys %define) . ")\n"
      unless $ARGS{PLATFORM} eq 'test';
