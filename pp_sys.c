@@ -4033,7 +4033,7 @@ PP(pp_rmdir)
 
 PP(pp_open_dir)
 {
-#if defined(Direntry_t) && defined(HAS_READDIR)
+#if PERL_PLATFORM_HAS_DIR_HANDLE_FUNCTIONS
 #	include "pp/open_dir_default.inc"
 #else
 #	include "pp/open_dir_unavailable.inc"
@@ -4042,7 +4042,7 @@ PP(pp_open_dir)
 
 PP(pp_readdir)
 {
-#if defined(Direntry_t) && defined(HAS_READDIR)
+#if PERL_PLATFORM_HAS_DIR_HANDLE_FUNCTIONS
 #	include "pp/readdir_default.inc"
 #else
 #	include "pp/readddir_unavailable.inc"
@@ -4133,7 +4133,7 @@ PP(pp_rewinddir)
 
 PP(pp_closedir)
 {
-#if defined(Direntry_t) && defined(HAS_READDIR)
+#if PERL_PLATFORM_HAS_DIR_HANDLE_FUNCTIONS
 #	include "pp/closedir_default.inc"
 #else
 #	include "pp/closedir_unavailable.inc"
