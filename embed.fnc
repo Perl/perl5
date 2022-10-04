@@ -3430,7 +3430,8 @@ ST	|wchar_t *|Win_byte_string_to_wstring|const UINT code_page	\
 				|NULLOK const char * byte_string
 ST	|char *	|Win_wstring_to_byte_string|const UINT code_page	\
 				|NULLOK const wchar_t * wstring
-S	|char *|wrap_wsetlocale |const int category			\
+S	|const char *|wrap_wsetlocale					\
+				|const int category			\
 				|NULLOK const char *locale
 #    endif
 #    if defined(HAS_NL_LANGINFO) || defined(HAS_NL_LANGINFO_L)
