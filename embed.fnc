@@ -3426,8 +3426,10 @@ S	|void	|print_collxfrm_input_and_return		\
 #    endif
 #    ifdef WIN32
 S	|char*	|win32_setlocale|int category|NULLOK const char* locale
-ST	|wchar_t *|Win_utf8_string_to_wstring|NULLOK const char * utf8_string
-ST	|char *	|Win_wstring_to_utf8_string|NULLOK const wchar_t * wstring
+ST	|wchar_t *|Win_byte_string_to_wstring|const UINT code_page	\
+				|NULLOK const char * byte_string
+ST	|char *	|Win_wstring_to_byte_string|const UINT code_page	\
+				|NULLOK const wchar_t * wstring
 S	|char *|wrap_wsetlocale |const int category			\
 				|NULLOK const char *locale
 #    endif

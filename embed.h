@@ -1772,8 +1772,8 @@
 #define calculate_LC_ALL(a)	S_calculate_LC_ALL(aTHX_ a)
 #      endif
 #      if defined(WIN32)
-#define Win_utf8_string_to_wstring	S_Win_utf8_string_to_wstring
-#define Win_wstring_to_utf8_string	S_Win_wstring_to_utf8_string
+#define Win_byte_string_to_wstring	S_Win_byte_string_to_wstring
+#define Win_wstring_to_byte_string	S_Win_wstring_to_byte_string
 #define win32_setlocale(a,b)	S_win32_setlocale(aTHX_ a,b)
 #define wrap_wsetlocale(a,b)	S_wrap_wsetlocale(aTHX_ a,b)
 #      endif

@@ -2495,11 +2495,11 @@ S_new_collate(pTHX_ const char *newcoll)
 #ifdef WIN32
 
 wchar_t *
-S_Win_utf8_string_to_wstring(const char * utf8_string)
+S_Win_byte_string_to_wstring(const UINT code_page, const char * byte_string)
 {
     wchar_t *wstring;
 
-    int req_size = MultiByteToWideChar(CP_UTF8, 0, utf8_string, -1, NULL, 0);
+    int req_size = MultiByteToWideChar(code_page, 0, byte_string, -1, NULL, 0);
     if (! req_size) {
         errno = EINVAL;
         return NULL;
@@ -2507,7 +2507,7 @@ S_Win_utf8_string_to_wstring(const char * utf8_string)
 
     Newx(wstring, req_size, wchar_t);
 
-    if (! MultiByteToWideChar(CP_UTF8, 0, utf8_string, -1, wstring, req_size))
+    if (! MultiByteToWideChar(code_page, 0, byte_string, -1, wstring, req_size))
     {
         Safefree(wstring);
         errno = EINVAL;
@@ -2517,26 +2517,30 @@ S_Win_utf8_string_to_wstring(const char * utf8_string)
     return wstring;
 }
 
+#define Win_utf8_string_to_wstring(s)  Win_byte_string_to_wstring(CP_UTF8, (s))
+
 char *
-S_Win_wstring_to_utf8_string(const wchar_t * wstring)
+S_Win_wstring_to_byte_string(const UINT code_page, const wchar_t * wstring)
 {
-    char *utf8_string;
 
     int req_size =
-              WideCharToMultiByte(CP_UTF8, 0, wstring, -1, NULL, 0, NULL, NULL);
+            WideCharToMultiByte(code_page, 0, wstring, -1, NULL, 0, NULL, NULL);
 
-    Newx(utf8_string, req_size, char);
+    char *byte_string;
+    Newx(byte_string, req_size, char);
 
-    if (! WideCharToMultiByte(CP_UTF8, 0, wstring, -1, utf8_string,
+    if (! WideCharToMultiByte(code_page, 0, wstring, -1, byte_string,
                                                          req_size, NULL, NULL))
     {
-        Safefree(utf8_string);
+        Safefree(byte_string);
         errno = EINVAL;
         return NULL;
     }
 
-    return utf8_string;
+    return byte_string;
 }
+
+#define Win_wstring_to_utf8_string(ws) Win_wstring_to_byte_string(CP_UTF8, (ws))
 
 STATIC char *
 S_wrap_wsetlocale(pTHX_ int category, const char *locale) {
