@@ -5765,7 +5765,7 @@ STATIC char *	S_Win_wstring_to_byte_string(const UINT code_page, const wchar_t *
 #define PERL_ARGS_ASSERT_WIN_WSTRING_TO_BYTE_STRING
 STATIC char*	S_win32_setlocale(pTHX_ int category, const char* locale);
 #define PERL_ARGS_ASSERT_WIN32_SETLOCALE
-STATIC char *	S_wrap_wsetlocale(pTHX_ const int category, const char *locale);
+STATIC const char *	S_wrap_wsetlocale(pTHX_ const int category, const char *locale);
 #define PERL_ARGS_ASSERT_WRAP_WSETLOCALE
 #    endif
 #    if defined(WIN32) || (     defined(USE_POSIX_2008_LOCALE)                              && ! defined(USE_QUERYLOCALE))

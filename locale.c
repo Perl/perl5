@@ -2542,13 +2542,12 @@ S_Win_wstring_to_byte_string(const UINT code_page, const wchar_t * wstring)
 
 #define Win_wstring_to_utf8_string(ws) Win_wstring_to_byte_string(CP_UTF8, (ws))
 
-STATIC char *
-S_wrap_wsetlocale(pTHX_ int category, const char *locale) {
+STATIC const char *
+S_wrap_wsetlocale(pTHX_ const int category, const char *locale)
+{
     PERL_ARGS_ASSERT_WRAP_WSETLOCALE;
 
-    wchar_t *wlocale = NULL;
-    wchar_t *wresult;
-    char *result;
+    const wchar_t * wlocale = NULL;
 
     if (locale) {
         wlocale = Win_utf8_string_to_wstring(locale);
@@ -2560,14 +2559,14 @@ S_wrap_wsetlocale(pTHX_ int category, const char *locale) {
         wlocale = NULL;
     }
 
-    wresult = _wsetlocale(category, wlocale);
+    const wchar_t * wresult = _wsetlocale(category, wlocale);
     Safefree(wlocale);
 
     if (! wresult) {
             return NULL;
         }
 
-    result = Win_wstring_to_utf8_string(wresult);
+    const char * result = Win_wstring_to_utf8_string(wresult);
     SAVEFREEPV(result); /* is there something better we can do here? */
 
     return result;
@@ -2601,10 +2600,10 @@ S_win32_setlocale(pTHX_ int category, const char* locale)
         locale = find_locale_from_environment(get_category_index(category, ""));
     }
 
-    char * result = wrap_wsetlocale(category, locale);
+    const char * result = wrap_wsetlocale(category, locale);
     DEBUG_L(PerlIO_printf(Perl_debug_log, "%s\n",
                           setlocale_debug_string_r(category, locale, result)));
-    return result;
+    return (char *) result;
 }
 
 #endif
