@@ -10048,10 +10048,10 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
             GV * const db_postponed = gv_fetchpvs("DB::postponed",
                                                   GV_ADDMULTI, SVt_PVHV);
             HV *hv;
-            SV * const sv = Perl_newSVpvf(aTHX_ "%s:%ld-%ld",
+            SV * const sv = Perl_newSVpvf(aTHX_ "%s:%ld-%" LINE_Tf,
                                           CopFILE(PL_curcop),
                                           (long)PL_subline,
-                                          (long)CopLINE(PL_curcop));
+                                          CopLINE(PL_curcop));
             if (HvNAME_HEK(PL_curstash)) {
                 sv_sethek(tmpstr, HvNAME_HEK(PL_curstash));
                 sv_catpvs(tmpstr, "::");
@@ -10260,9 +10260,9 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
         has_name = TRUE;
     } else if (PERLDB_NAMEANON && CopLINE(PL_curcop)) {
         SV * const sv = sv_newmortal();
-        Perl_sv_setpvf(aTHX_ sv, "%s[%s:%" IVdf "]",
+        Perl_sv_setpvf(aTHX_ sv, "%s[%s:%" LINE_Tf "]",
                        PL_curstash ? "__ANON__" : "__ANON__::__ANON__",
-                       CopFILE(PL_curcop), (IV)CopLINE(PL_curcop));
+                       CopFILE(PL_curcop), CopLINE(PL_curcop));
         gv = gv_fetchsv(sv, gv_fetch_flags, SVt_PVCV);
         has_name = TRUE;
     } else if (PL_curstash) {
@@ -10656,10 +10656,10 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
             GV * const db_postponed = gv_fetchpvs("DB::postponed",
                                                   GV_ADDMULTI, SVt_PVHV);
             HV *hv;
-            SV * const sv = Perl_newSVpvf(aTHX_ "%s:%ld-%ld",
+            SV * const sv = Perl_newSVpvf(aTHX_ "%s:%ld-%" LINE_Tf,
                                           CopFILE(PL_curcop),
                                           (long)PL_subline,
-                                          (long)CopLINE(PL_curcop));
+                                          CopLINE(PL_curcop));
             (void)hv_store_ent(GvHV(PL_DBsub), tmpstr, sv, 0);
             hv = GvHVn(db_postponed);
             if (HvTOTALKEYS(hv) > 0 && hv_exists_ent(hv, tmpstr, 0)) {
@@ -13973,7 +13973,7 @@ Perl_ck_entersub_args_core(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
         case 'L': return newSVOP(
                            OP_CONST, 0,
                            Perl_newSVpvf(aTHX_
-                             "%" IVdf, (IV)CopLINE(PL_curcop)
+                             "%" LINE_Tf, CopLINE(PL_curcop)
                            )
                          );
         case 'P': return newSVOP(OP_CONST, 0,

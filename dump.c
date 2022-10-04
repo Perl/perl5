@@ -1318,8 +1318,8 @@ S_do_op_dump_bar(pTHX_ I32 level, UV bar, PerlIO *file, const OP *o)
     case OP_NEXTSTATE:
     case OP_DBSTATE:
         if (CopLINE(cCOPo))
-            S_opdump_indent(aTHX_ o, level, bar, file, "LINE = %" UVuf "\n",
-                             (UV)CopLINE(cCOPo));
+            S_opdump_indent(aTHX_ o, level, bar, file, "LINE = %" LINE_Tf "\n",
+                            CopLINE(cCOPo));
 
         if (CopSTASHPV(cCOPo)) {
             SV* tmpsv = newSVpvs_flags("", SVs_TEMP);

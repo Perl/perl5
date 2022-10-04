@@ -362,7 +362,7 @@ PerlIO_debug(const char *fmt, ...)
         const char * const s = CopFILE(PL_curcop);
         /* Use fixed buffer as sv_catpvf etc. needs SVs */
         char buffer[1024];
-        const STRLEN len1 = my_snprintf(buffer, sizeof(buffer), "%.40s:%" IVdf " ", s ? s : "(none)", (IV) CopLINE(PL_curcop));
+        const STRLEN len1 = my_snprintf(buffer, sizeof(buffer), "%.40s:%" LINE_Tf " ", s ? s : "(none)", CopLINE(PL_curcop));
 #  ifdef USE_QUADMATH
 #    ifdef HAS_VSNPRINTF
         /* my_vsnprintf() isn't available with quadmath, but the native vsnprintf()
@@ -380,8 +380,8 @@ PerlIO_debug(const char *fmt, ...)
 #else
         const char *s = CopFILE(PL_curcop);
         STRLEN len;
-        SV * const sv = Perl_newSVpvf(aTHX_ "%s:%" IVdf " ", s ? s : "(none)",
-                                      (IV) CopLINE(PL_curcop));
+        SV * const sv = Perl_newSVpvf(aTHX_ "%s:%" LINE_Tf " ",
+                                      s ? s : "(none)", CopLINE(PL_curcop));
         Perl_sv_vcatpvf(aTHX_ sv, fmt, &ap);
 
         s = SvPV_const(sv, len);
