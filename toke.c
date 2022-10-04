@@ -7755,7 +7755,7 @@ yyl_word_or_keyword(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct
     case KEY___LINE__:
         FUN0OP(
             newSVOP(OP_CONST, 0,
-                Perl_newSVpvf(aTHX_ "%" IVdf, (IV)CopLINE(PL_curcop)))
+                Perl_newSVpvf(aTHX_ "%" LINE_Tf, CopLINE(PL_curcop)))
         );
 
     case KEY___PACKAGE__:
@@ -12626,9 +12626,9 @@ Perl_yyerror_pvn(pTHX_ const char *const s, STRLEN len, U32 flags)
                 Perl_sv_catpvf(aTHX_ where_sv, "\\%03o", yychar & 255);
         }
         msg = newSVpvn_flags(s, len, (flags & SVf_UTF8) | SVs_TEMP);
-        Perl_sv_catpvf(aTHX_ msg, " at %s line %" IVdf ", ",
+        Perl_sv_catpvf(aTHX_ msg, " at %s line %" LINE_Tf ", ",
             OutCopFILE(PL_curcop),
-            (IV)(PL_parser->preambling == NOLINE
+            (PL_parser->preambling == NOLINE
                    ? CopLINE(PL_curcop)
                    : PL_parser->preambling));
         if (context)

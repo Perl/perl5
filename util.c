@@ -1742,8 +1742,8 @@ Perl_mess_sv(pTHX_ SV *basemsg, bool consume)
                 cop = PL_curcop;
 
             if (CopLINE(cop))
-                Perl_sv_catpvf(aTHX_ sv, " at %s line %" IVdf,
-                                OutCopFILE(cop), (IV)CopLINE(cop));
+                Perl_sv_catpvf(aTHX_ sv, " at %s line %" LINE_Tf,
+                                OutCopFILE(cop), CopLINE(cop));
         }
 
         /* Seems that GvIO() can be untrustworthy during global destruction. */
@@ -5233,7 +5233,7 @@ S_mem_log_common(enum mem_log_type mlt, const UV n,
 #ifdef USE_C_BACKTRACE
             if(strchr(pmlenv,'c') && (mlt == MLT_NEW_SV)) {
                 len = my_snprintf(buf, sizeof(buf),
-                        "  caller %s at %s line %d\n",
+                        "  caller %s at %s line %" LINE_Tf "\n",
                         /* CopSTASHPV can crash early on startup; use CopFILE to check */
                         CopFILE(PL_curcop) ? CopSTASHPV(PL_curcop) : "<unknown>",
                         CopFILE(PL_curcop), CopLINE(PL_curcop));
