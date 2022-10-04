@@ -4034,26 +4034,9 @@ PP(pp_rmdir)
 PP(pp_open_dir)
 {
 #if defined(Direntry_t) && defined(HAS_READDIR)
-    dSP;
-    const char * const dirname = POPpconstx;
-    GV * const gv = MUTABLE_GV(POPs);
-    IO * const io = GvIOn(gv);
-
-    if ((IoIFP(io) || IoOFP(io)))
-        Perl_croak(aTHX_ "Cannot open %" HEKf " as a dirhandle: it is already open as a filehandle",
-                         HEKfARG(GvENAME_HEK(gv)));
-    if (IoDIRP(io))
-        PerlDir_close(IoDIRP(io));
-    if (!(IoDIRP(io) = PerlDir_open(dirname)))
-        goto nope;
-
-    RETPUSHYES;
-  nope:
-    if (!errno)
-        SETERRNO(EBADF,RMS_DIR);
-    RETPUSHUNDEF;
+#	include "pp/open_dir_default.inc"
 #else
-    DIE(aTHX_ PL_no_dir_func, "opendir");
+#	include "pp/open_dir_unavailable.inc"
 #endif
 }
 
