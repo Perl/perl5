@@ -2495,7 +2495,7 @@ S_new_collate(pTHX_ const char *newcoll)
 #ifdef WIN32
 
 wchar_t *
-Perl_Win_utf8_string_to_wstring(const char * utf8_string)
+S_Win_utf8_string_to_wstring(const char * utf8_string)
 {
     wchar_t *wstring;
 
@@ -2518,7 +2518,7 @@ Perl_Win_utf8_string_to_wstring(const char * utf8_string)
 }
 
 char *
-Perl_Win_wstring_to_utf8_string(const wchar_t * wstring)
+S_Win_wstring_to_utf8_string(const wchar_t * wstring)
 {
     char *utf8_string;
 

@@ -826,14 +826,6 @@
 #define dump_mstats(a)		Perl_dump_mstats(aTHX_ a)
 #define get_mstats(a,b,c)	Perl_get_mstats(aTHX_ a,b,c)
 #endif
-#if defined(PERL_IN_LOCALE_C)
-#  if defined(USE_LOCALE)
-#    if defined(WIN32)
-#define Win_utf8_string_to_wstring	Perl_Win_utf8_string_to_wstring
-#define Win_wstring_to_utf8_string	Perl_Win_wstring_to_utf8_string
-#    endif
-#  endif
-#endif
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C)
 #define check_regnode_after(a,b)	Perl_check_regnode_after(aTHX_ a,b)
 #define regnext(a)		Perl_regnext(aTHX_ a)
@@ -1780,6 +1772,8 @@
 #define calculate_LC_ALL(a)	S_calculate_LC_ALL(aTHX_ a)
 #      endif
 #      if defined(WIN32)
+#define Win_utf8_string_to_wstring	S_Win_utf8_string_to_wstring
+#define Win_wstring_to_utf8_string	S_Win_wstring_to_utf8_string
 #define win32_setlocale(a,b)	S_win32_setlocale(aTHX_ a,b)
 #define wrap_wsetlocale(a,b)	S_wrap_wsetlocale(aTHX_ a,b)
 #      endif

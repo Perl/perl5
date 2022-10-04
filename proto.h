@@ -5759,9 +5759,9 @@ STATIC const char *	S_calculate_LC_ALL(pTHX_ const locale_t cur_obj);
 #define PERL_ARGS_ASSERT_CALCULATE_LC_ALL
 #    endif
 #    if defined(WIN32)
-PERL_CALLCONV wchar_t *	Perl_Win_utf8_string_to_wstring(const char * utf8_string);
+STATIC wchar_t *	S_Win_utf8_string_to_wstring(const char * utf8_string);
 #define PERL_ARGS_ASSERT_WIN_UTF8_STRING_TO_WSTRING
-PERL_CALLCONV char *	Perl_Win_wstring_to_utf8_string(const wchar_t * wstring);
+STATIC char *	S_Win_wstring_to_utf8_string(const wchar_t * wstring);
 #define PERL_ARGS_ASSERT_WIN_WSTRING_TO_UTF8_STRING
 STATIC char*	S_win32_setlocale(pTHX_ int category, const char* locale);
 #define PERL_ARGS_ASSERT_WIN32_SETLOCALE
