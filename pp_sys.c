@@ -4042,10 +4042,10 @@ PP(pp_open_dir)
 
 PP(pp_readdir)
 {
-#if !defined(Direntry_t) || !defined(HAS_READDIR)
-#	include "pp/readddir_unavailable.inc"
-#else
+#if defined(Direntry_t) && defined(HAS_READDIR)
 #	include "pp/readdir_default.inc"
+#else
+#	include "pp/readddir_unavailable.inc"
 #endif
 }
 
