@@ -1325,12 +1325,13 @@ sub generate_pp_proto_h {
 
     my %funcs;
     for (@ops) {
-        my $name = $alias{$_} ? $alias{$_}[0] : "Perl_pp_$_";
+        my $name = $alias{$_} ? $alias{$_}[0] : "pp_$_";
+        $name =~ s/^Perl_//;
         ++$funcs{$name};
     }
 
     for (sort keys %funcs) {
-        print $pp qq{PERL_CALLCONV OP *$_(pTHX) __attribute__visibility__("hidden");\n};
+        print $pp qq{PERL_CALLCONV PP($_) __attribute__visibility__("hidden");\n};
     }
 
     read_only_bottom_close_and_rename(select);
