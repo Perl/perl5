@@ -10096,7 +10096,7 @@ S_scan_ident(pTHX_ char *s, char *dest, STRLEN destlen, I32 ck_uni)
     char *d = dest;
     char * const e = d + destlen - 3;    /* two-character token, ending NUL */
     bool is_utf8 = cBOOL(UTF);
-    I32 orig_copline = 0, tmp_copline = 0;
+    line_t orig_copline = 0, tmp_copline = 0;
 
     PERL_ARGS_ASSERT_SCAN_IDENT;
 
