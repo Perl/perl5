@@ -1782,6 +1782,7 @@
 #      endif
 #      if defined(WIN32)
 #define win32_setlocale(a,b)	S_win32_setlocale(aTHX_ a,b)
+#define wrap_wsetlocale(a,b)	S_wrap_wsetlocale(aTHX_ a,b)
 #      endif
 #    endif
 #  endif

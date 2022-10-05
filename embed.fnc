@@ -3425,6 +3425,8 @@ S	|void	|print_collxfrm_input_and_return		\
 S	|char*	|win32_setlocale|int category|NULLOK const char* locale
 pTC	|wchar_t *|Win_utf8_string_to_wstring|NULLOK const char * utf8_string
 pTC	|char *	|Win_wstring_to_utf8_string|NULLOK const wchar_t * wstring
+S	|char *|wrap_wsetlocale |const int category			\
+				|NULLOK const char *locale
 #    endif
 #    if defined(HAS_NL_LANGINFO) || defined(HAS_NL_LANGINFO_L)
 S	|const char*|my_langinfo_i|const nl_item item			\
