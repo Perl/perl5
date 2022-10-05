@@ -3381,7 +3381,6 @@ S	|const char *|setlocale_from_aggregate_LC_ALL			\
 S	|const char*|update_PL_curlocales_i|const unsigned int index	\
 				    |NN const char * new_locale		\
 				    |recalc_lc_all_t recalc_LC_ALL
-S	|const char *|find_locale_from_environment|const unsigned int index
 #      endif
 #    else
 #      if   defined(USE_LOCALE_THREADS)					\
@@ -3401,6 +3400,9 @@ S	|void	|less_dicey_void_setlocale_i				\
 				|NN const char * locale			\
 				|const line_t line
 #      endif
+#    endif
+#    if defined(USE_POSIX_2008_LOCALE) && ! defined(USE_QUERYLOCALE)
+S	|const char *|find_locale_from_environment|const unsigned int index
 #    endif
 #    if defined(USE_POSIX_2008_LOCALE) && defined(USE_QUERYLOCALE)
 S	|const char *|calculate_LC_ALL|const locale_t cur_obj
