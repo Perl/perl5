@@ -10048,9 +10048,9 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
             GV * const db_postponed = gv_fetchpvs("DB::postponed",
                                                   GV_ADDMULTI, SVt_PVHV);
             HV *hv;
-            SV * const sv = Perl_newSVpvf(aTHX_ "%s:%ld-%" LINE_Tf,
+            SV * const sv = Perl_newSVpvf(aTHX_ "%s:%" LINE_Tf "-%" LINE_Tf,
                                           CopFILE(PL_curcop),
-                                          (long)PL_subline,
+                                          (line_t)PL_subline,
                                           CopLINE(PL_curcop));
             if (HvNAME_HEK(PL_curstash)) {
                 sv_sethek(tmpstr, HvNAME_HEK(PL_curstash));
@@ -10656,9 +10656,9 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
             GV * const db_postponed = gv_fetchpvs("DB::postponed",
                                                   GV_ADDMULTI, SVt_PVHV);
             HV *hv;
-            SV * const sv = Perl_newSVpvf(aTHX_ "%s:%ld-%" LINE_Tf,
+            SV * const sv = Perl_newSVpvf(aTHX_ "%s:%" LINE_Tf "-%" LINE_Tf,
                                           CopFILE(PL_curcop),
-                                          (long)PL_subline,
+                                          (line_t)PL_subline,
                                           CopLINE(PL_curcop));
             (void)hv_store_ent(GvHV(PL_DBsub), tmpstr, sv, 0);
             hv = GvHVn(db_postponed);
