@@ -1598,7 +1598,6 @@
 #    if defined(PERL_IN_LOCALE_C)
 #      if defined(USE_LOCALE)
 #        if defined(USE_POSIX_2008_LOCALE)
-#define find_locale_from_environment(a)	S_find_locale_from_environment(aTHX_ a)
 #define update_PL_curlocales_i(a,b,c)	S_update_PL_curlocales_i(aTHX_ a,b,c)
 #        endif
 #      endif
@@ -1776,6 +1775,9 @@
 #define my_querylocale_i(a)	S_my_querylocale_i(aTHX_ a)
 #define setlocale_from_aggregate_LC_ALL(a,b)	S_setlocale_from_aggregate_LC_ALL(aTHX_ a,b)
 #define use_curlocale_scratch()	S_use_curlocale_scratch(aTHX)
+#      endif
+#      if defined(USE_POSIX_2008_LOCALE) && ! defined(USE_QUERYLOCALE)
+#define find_locale_from_environment(a)	S_find_locale_from_environment(aTHX_ a)
 #      endif
 #      if defined(USE_POSIX_2008_LOCALE) && defined(USE_QUERYLOCALE)
 #define calculate_LC_ALL(a)	S_calculate_LC_ALL(aTHX_ a)

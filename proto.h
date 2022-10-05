@@ -5060,8 +5060,6 @@ STATIC void	S_validate_suid(pTHX_ PerlIO *rsfp);
 #  if defined(PERL_IN_LOCALE_C)
 #    if defined(USE_LOCALE)
 #      if defined(USE_POSIX_2008_LOCALE)
-STATIC const char *	S_find_locale_from_environment(pTHX_ const unsigned int index);
-#define PERL_ARGS_ASSERT_FIND_LOCALE_FROM_ENVIRONMENT
 STATIC const char*	S_update_PL_curlocales_i(pTHX_ const unsigned int index, const char * new_locale, recalc_lc_all_t recalc_LC_ALL);
 #define PERL_ARGS_ASSERT_UPDATE_PL_CURLOCALES_I	\
 	assert(new_locale)
@@ -5755,6 +5753,10 @@ STATIC const char *	S_setlocale_from_aggregate_LC_ALL(pTHX_ const char * locale,
 	assert(locale)
 STATIC locale_t	S_use_curlocale_scratch(pTHX);
 #define PERL_ARGS_ASSERT_USE_CURLOCALE_SCRATCH
+#    endif
+#    if defined(USE_POSIX_2008_LOCALE) && ! defined(USE_QUERYLOCALE)
+STATIC const char *	S_find_locale_from_environment(pTHX_ const unsigned int index);
+#define PERL_ARGS_ASSERT_FIND_LOCALE_FROM_ENVIRONMENT
 #    endif
 #    if defined(USE_POSIX_2008_LOCALE) && defined(USE_QUERYLOCALE)
 STATIC const char *	S_calculate_LC_ALL(pTHX_ const locale_t cur_obj);
