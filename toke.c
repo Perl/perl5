@@ -9385,8 +9385,8 @@ Perl_yylex(pTHX)
     }
     DEBUG_T( {
         SV* tmp = newSVpvs("");
-        PerlIO_printf(Perl_debug_log, "### %" IVdf ":LEX_%s/X%s %s\n",
-            (IV)CopLINE(PL_curcop),
+        PerlIO_printf(Perl_debug_log, "### %" LINE_Tf ":LEX_%s/X%s %s\n",
+            CopLINE(PL_curcop),
             lex_state_names[PL_lex_state],
             exp_name[PL_expect],
             pv_display(tmp, s, strlen(s), 0, 60));
@@ -12641,8 +12641,8 @@ Perl_yyerror_pvn(pTHX_ const char *const s, STRLEN len, U32 flags)
         {
             Perl_sv_catpvf(aTHX_ msg,
             "  (Might be a runaway multi-line %c%c string starting on"
-            " line %" IVdf ")\n",
-                    (int)PL_multi_open,(int)PL_multi_close,(IV)PL_multi_start);
+            " line %" LINE_Tf ")\n",
+                    (int)PL_multi_open,(int)PL_multi_close,(line_t)PL_multi_start);
             PL_multi_end = 0;
         }
         if (PL_in_eval & EVAL_WARNONLY) {

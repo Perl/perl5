@@ -531,7 +531,7 @@ Perl_locale_panic(const char * msg,
 #endif
 
     /* diag_listed_as: panic: %s */
-    Perl_croak(aTHX_ "%s: %d: panic: %s; errno=%d\n",
+    Perl_croak(aTHX_ "%s: %" LINE_Tf ": panic: %s; errno=%d\n",
                      file_name, line, msg, errnum);
 }
 
@@ -6037,7 +6037,7 @@ S_toggle_locale_i(pTHX_ const unsigned cat_index,
     /* If the locales are the same, there's nothing to do */
     if (strEQ(locale_to_restore_to, new_locale)) {
         DEBUG_Lv(PerlIO_printf(Perl_debug_log,
-                               "(%d): %s locale unchanged as %s\n",
+                               "(%" LINE_Tf "): %s locale unchanged as %s\n",
                                caller_line, category_names[cat_index],
                                new_locale));
 
