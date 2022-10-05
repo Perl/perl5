@@ -2500,6 +2500,8 @@ Perl_Win_wstring_to_utf8_string(const wchar_t * wstring)
 
 STATIC char *
 S_wrap_wsetlocale(pTHX_ int category, const char *locale) {
+    PERL_ARGS_ASSERT_WRAP_WSETLOCALE;
+
     wchar_t *wlocale = NULL;
     wchar_t *wresult;
     char *result;
@@ -2587,7 +2589,7 @@ S_win32_setlocale(pTHX_ int category, const char* locale)
     }
 
 #ifdef USE_WSETLOCALE
-    result = S_wrap_wsetlocale(aTHX_ category, locale);
+    result = wrap_wsetlocale(category, locale);
 #else
     result = setlocale(category, locale);
 #endif
@@ -2608,7 +2610,7 @@ S_win32_setlocale(pTHX_ int category, const char* locale)
         result = PerlEnv_getenv(category_names[i]);
         if (result && strNE(result, "")) {
 #ifdef USE_WSETLOCALE
-            S_wrap_wsetlocale(aTHX_ categories[i], result);
+            wrap_wsetlocale(categories[i], result);
 #else
             setlocale(categories[i], result);
 #endif
@@ -5050,7 +5052,7 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
                  * use wrap_wsetlocale(). */
                 const char *system_default_locale =
                                     stdize_locale(LC_ALL,
-                                                  S_wrap_wsetlocale(aTHX_ LC_ALL, ""),
+                                                  wrap_wsetlocale(LC_ALL, ""),
                                                   &PL_stdize_locale_buf,
                                                   &PL_stdize_locale_bufsize,
                                                   __LINE__);

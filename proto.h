@@ -5767,6 +5767,8 @@ PERL_CALLCONV char *	Perl_Win_wstring_to_utf8_string(const wchar_t * wstring);
 #define PERL_ARGS_ASSERT_WIN_WSTRING_TO_UTF8_STRING
 STATIC char*	S_win32_setlocale(pTHX_ int category, const char* locale);
 #define PERL_ARGS_ASSERT_WIN32_SETLOCALE
+STATIC char *	S_wrap_wsetlocale(pTHX_ const int category, const char *locale);
+#define PERL_ARGS_ASSERT_WRAP_WSETLOCALE
 #    endif
 #  endif
 #endif
