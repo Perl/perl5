@@ -2497,7 +2497,7 @@ S_new_collate(pTHX_ const char *newcoll)
 wchar_t *
 S_Win_byte_string_to_wstring(const UINT code_page, const char * byte_string)
 {
-    wchar_t *wstring;
+    /* Caller must arrange to free the returned string */
 
     int req_size = MultiByteToWideChar(code_page, 0, byte_string, -1, NULL, 0);
     if (! req_size) {
@@ -2505,6 +2505,7 @@ S_Win_byte_string_to_wstring(const UINT code_page, const char * byte_string)
         return NULL;
     }
 
+    wchar_t *wstring;
     Newx(wstring, req_size, wchar_t);
 
     if (! MultiByteToWideChar(code_page, 0, byte_string, -1, wstring, req_size))
@@ -2522,6 +2523,7 @@ S_Win_byte_string_to_wstring(const UINT code_page, const char * byte_string)
 char *
 S_Win_wstring_to_byte_string(const UINT code_page, const wchar_t * wstring)
 {
+    /* Caller must arrange to free the returned string */
 
     int req_size =
             WideCharToMultiByte(code_page, 0, wstring, -1, NULL, 0, NULL, NULL);
@@ -2547,6 +2549,10 @@ S_wrap_wsetlocale(pTHX_ const int category, const char *locale)
 {
     PERL_ARGS_ASSERT_WRAP_WSETLOCALE;
 
+    /* Calls _wsetlocale(), converting the parameters/return to/from
+     * Perl-expected forms as if plain setlocale() were being called instead.
+     */
+
     const wchar_t * wlocale = NULL;
 
     if (locale) {
@@ -2555,16 +2561,13 @@ S_wrap_wsetlocale(pTHX_ const int category, const char *locale)
             return NULL;
         }
     }
-    else {
-        wlocale = NULL;
-    }
 
     const wchar_t * wresult = _wsetlocale(category, wlocale);
     Safefree(wlocale);
 
     if (! wresult) {
-            return NULL;
-        }
+        return NULL;
+    }
 
     const char * result = Win_wstring_to_utf8_string(wresult);
     SAVEFREEPV(result); /* is there something better we can do here? */
