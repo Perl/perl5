@@ -1504,10 +1504,6 @@ S_find_locale_from_environment(pTHX_ const unsigned int index)
      * be done before any threads had switched, say during perl construction
      * time.  But this code would still be needed for the general case. */
 
-    const char * default_name;
-    unsigned int i;
-    const char * locale_names[LC_ALL_INDEX_];
-
     /* We rely on PerlEnv_getenv() returning a mortalized copy */
     const char * const lc_all = PerlEnv_getenv("LC_ALL");
 
@@ -1517,35 +1513,52 @@ S_find_locale_from_environment(pTHX_ const unsigned int index)
         return lc_all;
     }
 
-    /* Otherwise, we need to dig deeper.  Unless overridden, the default is
-     * the LANG environment variable; "C" if it doesn't exist. */
-    default_name = PerlEnv_getenv("LANG");
-    if (! default_name || strEQ(default_name, "")) {
-        default_name = "C";
-    }
-
     /* If setting an individual category, use its corresponding value found in
-     * the environment, if any; otherwise use the default we already
-     * calculated. */
+     * the environment, if any */
     if (index != LC_ALL_INDEX_) {
         const char * const new_value = PerlEnv_getenv(category_names[index]);
 
-        return (new_value && strNE(new_value, ""))
-                ? new_value
-                : default_name;
+        if (new_value && strNE(new_value, "")) {
+            return new_value;
+        }
+
+        /* If no corresponding environment variable, see if LANG exists.  If
+         * so, use it. */
+        const char * default_name = PerlEnv_getenv("LANG");
+        if (default_name && strNE(default_name, "")) {
+            return default_name;
+        }
+
+        /* If no LANG, use "C" */
+        return "C";
     }
 
-    /* Here, we are getting LC_ALL.  Any categories that don't have a
-     * corresponding environment variable set should be set to 'default_name'
-     *
-     * Simply find the values for all categories, and call the function to
-     * compute LC_ALL. */
-    for (i = 0; i < LC_ALL_INDEX_; i++) {
+    /* Here is LC_ALL, and no LC_ALL environment variable.  LANG is used (or
+     * "C" if no LANG), but overridden for individual categories that have
+     * corresponding environment variables */
+    const char * default_name = PerlEnv_getenv("LANG");
+
+    /* Convert "" to NULL to save conditionals in the loop below */
+    if (default_name != NULL && strEQ(default_name, "")) {
+        default_name = NULL;
+    }
+
+    /* Loop through all the individual categories, setting each to any
+     * corresponding environment variable; or to the default if none exists for
+     * the category */
+    const char * locale_names[LC_ALL_INDEX_];
+    for (unsigned i = 0; i < LC_ALL_INDEX_; i++) {
         const char * const env_override = PerlEnv_getenv(category_names[i]);
 
-        locale_names[i] = (env_override && strNE(env_override, ""))
-                          ? env_override
-                          : default_name;
+        if (env_override && strNE(env_override, "")) {
+            locale_names[i] = env_override;
+        }
+        else if (default_name) {
+            locale_names[i] = default_name;
+        }
+        else {
+            locale_names[i] = "C";
+        }
 
         DEBUG_Lv(PerlIO_printf(Perl_debug_log,
                  "find_locale_from_environment i=%d, name=%s, locale=%s\n",
