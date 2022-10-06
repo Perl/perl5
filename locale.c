@@ -2572,7 +2572,7 @@ S_wrap_wsetlocale(pTHX_ const int category, const char *locale)
     return result;
 }
 
-STATIC char *
+STATIC const char *
 S_win32_setlocale(pTHX_ int category, const char* locale)
 {
     /* This, for Windows, emulates POSIX setlocale() behavior.  There is no
@@ -2603,7 +2603,7 @@ S_win32_setlocale(pTHX_ int category, const char* locale)
     const char * result = wrap_wsetlocale(category, locale);
     DEBUG_L(PerlIO_printf(Perl_debug_log, "%s\n",
                           setlocale_debug_string_r(category, locale, result)));
-    return (char *) result;
+    return result;
 }
 
 #endif
