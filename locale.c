@@ -1477,14 +1477,20 @@ S_stdize_locale(pTHX_ const int category,
     return retval;
 }
 
-#if defined(USE_POSIX_2008_LOCALE) && ! defined(USE_QUERYLOCALE)
+#if defined(WIN32) || (     defined(USE_POSIX_2008_LOCALE)      \
+                       && ! defined(USE_QUERYLOCALE))
 
 STATIC const char *
 S_find_locale_from_environment(pTHX_ const unsigned int index)
 {
-    /* On systems without querylocale(), it is problematic getting the results
-     * of the POSIX 2008 equivalent of setlocale(category, "") (which gets the
-     * locale from the environment).
+    /* On Windows systems, the concept of the POSIX ordering of environment
+     * variables is missing.  To increase portability of programs across
+     * platforms, the POSIX ordering is emulated on Windows.
+     *
+     * And on POSIX 2008 systems without querylocale(), it is problematic
+     * getting the results of the POSIX 2008 equivalent of
+     *      setlocale(category,  "")
+     * (which gets the locale from the environment).
      *
      * To ensure that we know exactly what those values are, we do the setting
      * ourselves, using the documented algorithm (assuming the documentation is
@@ -1493,16 +1499,27 @@ S_find_locale_from_environment(pTHX_ const unsigned int index)
      * standard documented value, but khw believes it is better to know what's
      * going on, even if different from native, than to just guess.
      *
-     * Another option would be, in a critical section, to save the global
-     * locale's current value, and do a straight setlocale(LC_ALL, "").  That
-     * would return our desired values, destroying the global locale's, which
-     * we would then restore.  But that could cause races with any other thread
-     * that is using the global locale and isn't using the mutex.  And, the
-     * only reason someone would have done that is because they are calling a
-     * library function, like in gtk, that calls setlocale(), and which can't
-     * be changed to use the mutex.  That wouldn't be a problem if this were to
-     * be done before any threads had switched, say during perl construction
-     * time.  But this code would still be needed for the general case. */
+     * Another option for the POSIX 2008 case would be, in a critical section,
+     * to save the global locale's current value, and do a straight
+     * setlocale(LC_ALL, "").  That would return our desired values, destroying
+     * the global locale's, which we would then restore.  But that could cause
+     * races with any other thread that is using the global locale and isn't
+     * using the mutex.  And, the only reason someone would have done that is
+     * because they are calling a library function, like in gtk, that calls
+     * setlocale(), and which can't be changed to use the mutex.  That wouldn't
+     * be a problem if this were to be done before any threads had switched,
+     * say during perl construction time.  But this code would still be needed
+     * for the general case.
+     *
+     * The Windows and POSIX 2008 differ in that the ultimate fallback is "C"
+     * in POSIX, and is the system default locale in Windows.  To get that
+     * system default value, we actually have to call setlocale() on Windows.
+     * Since this function doesn't actually change the locale, that means the
+     * locale must be saved and restored around the change.  A critical section
+     * is used for this, but since Windows has long had per-thread locales,
+     * it's likely that will be a no-op.  The function description could be
+     * changed to not guarantee that it is a read-only operation.
+     * */
 
     /* We rely on PerlEnv_getenv() returning a mortalized copy */
     const char * const lc_all = PerlEnv_getenv("LC_ALL");
@@ -1529,13 +1546,24 @@ S_find_locale_from_environment(pTHX_ const unsigned int index)
             return default_name;
         }
 
-        /* If no LANG, use "C" */
+        /* If no LANG, use "C" on POSIX 2008, the system default on Windows */
+#  ifndef WIN32
         return "C";
+#  else
+        SETLOCALE_LOCK;
+        const char * orginal = setlocale(categories[index], NULL);
+        const char * ret = wrap_wsetlocale(categories[index], "");
+        setlocale(categories[index], original);
+        SETLOCALE_UNLOCK;
+        return ret;
+#  endif
+
     }
 
-    /* Here is LC_ALL, and no LC_ALL environment variable.  LANG is used (or
-     * "C" if no LANG), but overridden for individual categories that have
-     * corresponding environment variables */
+    /* Here is LC_ALL, and no LC_ALL environment variable.  LANG is used as a
+     * default, but overridden for individual categories that have
+     * corresponding environment variables.  If no LANG exists, the default is
+     * "C" on POSIX 2008, or the system default for the category on Windows. */
     const char * default_name = PerlEnv_getenv("LANG");
 
     /* Convert "" to NULL to save conditionals in the loop below */
@@ -1557,7 +1585,17 @@ S_find_locale_from_environment(pTHX_ const unsigned int index)
             locale_names[i] = default_name;
         }
         else {
+
+#  ifndef WIN32
             locale_names[i] = "C";
+#  else
+            SETLOCALE_LOCK;
+            const char * orginal = setlocale(categories[index], NULL);
+            locale_names[i] = wrap_wsetlocale(categories[index], "");
+            setlocale(categories[index], original);
+            SETLOCALE_UNLOCK;
+#  endif
+
         }
 
         DEBUG_Lv(PerlIO_printf(Perl_debug_log,
@@ -1569,7 +1607,7 @@ S_find_locale_from_environment(pTHX_ const unsigned int index)
 }
 
 #endif
-#if defined(USE_POSIX_2008_LOCALE) || ! defined(LC_ALL)
+#if defined(WIN32) || defined(USE_POSIX_2008_LOCALE) || ! defined(LC_ALL)
 
 STATIC
 const char *
@@ -1587,8 +1625,11 @@ S_calculate_LC_ALL(pTHX_ const char ** individ_locales)
      * data, which is either a locale_t object, for systems with querylocale(),
      * or an array we keep updated to the proper values, otherwise.
      *
-     * This returns a mortalized string containing the locale name(s) of
-     * LC_ALL.
+     * For Windows, we also may need to construct an LC_ALL when setting the
+     * locale to the system default.
+     *
+     * This function returns a mortalized string containing the locale name(s)
+     * of LC_ALL.
      *
      * If all individual categories are the same locale, we can just set LC_ALL
      * to that locale.  But if not, we have to create an aggregation of all the
@@ -1596,12 +1637,15 @@ S_calculate_LC_ALL(pTHX_ const char ** individ_locales)
      * for these non-uniform locales for LC_ALL.  Some use a '/' or other
      * delimiter of the locales with a predetermined order of categories; a
      * Configure probe would be needed to tell us how to decipher those.  glibc
-     * uses a series of name=value pairs, like
+     * and Windows use a series of name=value pairs, like
      *      LC_NUMERIC=C;LC_TIME=en_US.UTF-8;...
-     * The syntax we use for our aggregation doesn't much matter, as we take
-     * care not to use the native setlocale() function on whatever style is
-     * chosen.  But, it would be possible for someone to call Perl_setlocale()
-     * using a native style we don't understand.  So far no one has complained.
+     * This function returns that syntax, which is suitable for input to the
+     * Windows setlocale().  It could also be suitable for glibc, but because
+     * the non-Windows code is common to systems that use a different syntax,
+     * we don't depend on it for glibc.  Instead we take care not to use the
+     * native setlocale() function on whatever non-Windows style is chosen.
+     * But, it would be possible for someone to call Perl_setlocale() using a
+     * native style we don't understand.  So far no one has complained.
      *
      * For systems that have categories we don't know about, the algorithm
      * below won't know about those missing categories, leading to potential
@@ -2560,81 +2604,18 @@ S_win32_setlocale(pTHX_ int category, const char* locale)
      * use the particular category's variable if set; otherwise to use the LANG
      * variable. */
 
-    bool override_LC_ALL = FALSE;
-    char * result;
-    unsigned int i;
 
     if (locale && strEQ(locale, "")) {
-
-#  ifdef LC_ALL
-
-        locale = PerlEnv_getenv("LC_ALL");
-        if (! locale) {
-            if (category ==  LC_ALL) {
-                override_LC_ALL = TRUE;
-            }
-            else {
-
-#  endif
-
-                for (i = 0; i < NOMINAL_LC_ALL_INDEX; i++) {
-                    if (category == categories[i]) {
-                        locale = PerlEnv_getenv(category_names[i]);
-                        goto found_locale;
-                    }
-                }
-
-                locale = PerlEnv_getenv("LANG");
-                if (! locale) {
-                    locale = "";
-                }
-
-              found_locale: ;
-
-#  ifdef LC_ALL
-
-            }
-        }
-
-#  endif
-
+        locale = find_locale_from_environment(get_category_index(category, ""));
     }
 
 #ifdef USE_WSETLOCALE
-    result = wrap_wsetlocale(category, locale);
+    char * result = wrap_wsetlocale(category, locale);
 #else
-    result = setlocale(category, locale);
+    char * result = setlocale(category, locale);
 #endif
     DEBUG_L(PerlIO_printf(Perl_debug_log, "%s\n",
                           setlocale_debug_string_r(category, locale, result)));
-
-    if (! override_LC_ALL)  {
-        return result;
-    }
-
-    /* Here the input category was LC_ALL, and we have set it to what is in the
-     * LANG variable or the system default if there is no LANG.  But these have
-     * lower priority than the other LC_foo variables, so override it for each
-     * one that is set.  (If they are set to "", it means to use the same thing
-     * we just set LC_ALL to, so can skip) */
-
-    for (i = 0; i < LC_ALL_INDEX_; i++) {
-        result = PerlEnv_getenv(category_names[i]);
-        if (result && strNE(result, "")) {
-#ifdef USE_WSETLOCALE
-            wrap_wsetlocale(categories[i], result);
-#else
-            setlocale(categories[i], result);
-#endif
-            DEBUG_Lv(PerlIO_printf(Perl_debug_log, "%s\n",
-                setlocale_debug_string_i(i, result, "not captured")));
-        }
-    }
-
-    result = setlocale(LC_ALL, NULL);
-    DEBUG_L(PerlIO_printf(Perl_debug_log, "%s\n",
-                          setlocale_debug_string_c(LC_ALL, NULL, result)));
-
     return result;
 }
 

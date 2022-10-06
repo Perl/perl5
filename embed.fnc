@@ -3401,14 +3401,15 @@ S	|void	|less_dicey_void_setlocale_i				\
 				|const line_t line
 #      endif
 #    endif
-#    if defined(USE_POSIX_2008_LOCALE) && ! defined(USE_QUERYLOCALE)
+#    if defined(WIN32) || (     defined(USE_POSIX_2008_LOCALE)   \
+                           && ! defined(USE_QUERYLOCALE))
 S	|const char *|find_locale_from_environment|const unsigned int index
 #    endif
 #    if defined(USE_POSIX_2008_LOCALE) && defined(USE_QUERYLOCALE)
 S	|const char *|calculate_LC_ALL|const locale_t cur_obj
 #    else
 :	    regen/embed.pl can't currently cope with 'elif'
-#      if defined(USE_POSIX_2008_LOCALE) || ! defined(LC_ALL)
+#      if defined(WIN32) || defined(USE_POSIX_2008_LOCALE) || ! defined(LC_ALL)
 S	|const char *|calculate_LC_ALL|NN const char ** individ_locales
 #      endif
 #    endif

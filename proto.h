@@ -4718,7 +4718,7 @@ PERL_CALLCONV Signal_t	Perl_sighandler(int sig)
 #if !(defined(USE_POSIX_2008_LOCALE) && defined(USE_QUERYLOCALE))
 #  if defined(PERL_IN_LOCALE_C)
 #    if defined(USE_LOCALE)
-#      if defined(USE_POSIX_2008_LOCALE) || ! defined(LC_ALL)
+#      if defined(WIN32) || defined(USE_POSIX_2008_LOCALE) || ! defined(LC_ALL)
 STATIC const char *	S_calculate_LC_ALL(pTHX_ const char ** individ_locales);
 #define PERL_ARGS_ASSERT_CALCULATE_LC_ALL	\
 	assert(individ_locales)
@@ -5754,10 +5754,6 @@ STATIC const char *	S_setlocale_from_aggregate_LC_ALL(pTHX_ const char * locale,
 STATIC locale_t	S_use_curlocale_scratch(pTHX);
 #define PERL_ARGS_ASSERT_USE_CURLOCALE_SCRATCH
 #    endif
-#    if defined(USE_POSIX_2008_LOCALE) && ! defined(USE_QUERYLOCALE)
-STATIC const char *	S_find_locale_from_environment(pTHX_ const unsigned int index);
-#define PERL_ARGS_ASSERT_FIND_LOCALE_FROM_ENVIRONMENT
-#    endif
 #    if defined(USE_POSIX_2008_LOCALE) && defined(USE_QUERYLOCALE)
 STATIC const char *	S_calculate_LC_ALL(pTHX_ const locale_t cur_obj);
 #define PERL_ARGS_ASSERT_CALCULATE_LC_ALL
@@ -5771,6 +5767,10 @@ STATIC char*	S_win32_setlocale(pTHX_ int category, const char* locale);
 #define PERL_ARGS_ASSERT_WIN32_SETLOCALE
 STATIC char *	S_wrap_wsetlocale(pTHX_ const int category, const char *locale);
 #define PERL_ARGS_ASSERT_WRAP_WSETLOCALE
+#    endif
+#    if defined(WIN32) || (     defined(USE_POSIX_2008_LOCALE)                              && ! defined(USE_QUERYLOCALE))
+STATIC const char *	S_find_locale_from_environment(pTHX_ const unsigned int index);
+#define PERL_ARGS_ASSERT_FIND_LOCALE_FROM_ENVIRONMENT
 #    endif
 #  endif
 #endif
