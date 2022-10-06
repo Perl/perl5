@@ -3425,7 +3425,7 @@ S	|void	|print_collxfrm_input_and_return		\
 #      endif
 #    endif
 #    ifdef WIN32
-S	|char*	|win32_setlocale|int category|NULLOK const char* locale
+S	|const char*|win32_setlocale|int category|NULLOK const char* locale
 ST	|wchar_t *|Win_byte_string_to_wstring|const UINT code_page	\
 				|NULLOK const char * byte_string
 ST	|char *	|Win_wstring_to_byte_string|const UINT code_page	\
