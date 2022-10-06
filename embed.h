@@ -1522,7 +1522,7 @@
 #  if !(defined(USE_POSIX_2008_LOCALE) && defined(USE_QUERYLOCALE))
 #    if defined(PERL_IN_LOCALE_C)
 #      if defined(USE_LOCALE)
-#        if defined(USE_POSIX_2008_LOCALE) || ! defined(LC_ALL)
+#        if defined(WIN32) || defined(USE_POSIX_2008_LOCALE) || ! defined(LC_ALL)
 #define calculate_LC_ALL(a)	S_calculate_LC_ALL(aTHX_ a)
 #        endif
 #      endif
@@ -1776,15 +1776,15 @@
 #define setlocale_from_aggregate_LC_ALL(a,b)	S_setlocale_from_aggregate_LC_ALL(aTHX_ a,b)
 #define use_curlocale_scratch()	S_use_curlocale_scratch(aTHX)
 #      endif
-#      if defined(USE_POSIX_2008_LOCALE) && ! defined(USE_QUERYLOCALE)
-#define find_locale_from_environment(a)	S_find_locale_from_environment(aTHX_ a)
-#      endif
 #      if defined(USE_POSIX_2008_LOCALE) && defined(USE_QUERYLOCALE)
 #define calculate_LC_ALL(a)	S_calculate_LC_ALL(aTHX_ a)
 #      endif
 #      if defined(WIN32)
 #define win32_setlocale(a,b)	S_win32_setlocale(aTHX_ a,b)
 #define wrap_wsetlocale(a,b)	S_wrap_wsetlocale(aTHX_ a,b)
+#      endif
+#      if defined(WIN32) || (     defined(USE_POSIX_2008_LOCALE)                              && ! defined(USE_QUERYLOCALE))
+#define find_locale_from_environment(a)	S_find_locale_from_environment(aTHX_ a)
 #      endif
 #    endif
 #  endif
