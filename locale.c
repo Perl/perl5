@@ -1483,7 +1483,9 @@ S_stdize_locale(pTHX_ const int category,
 STATIC const char *
 S_find_locale_from_environment(pTHX_ const unsigned int index)
 {
-    /* On Windows systems, the concept of the POSIX ordering of environment
+    /* NB: This function may actually change the locale on Windows.
+     *
+     * On Windows systems, the concept of the POSIX ordering of environment
      * variables is missing.  To increase portability of programs across
      * platforms, the POSIX ordering is emulated on Windows.
      *
@@ -1514,12 +1516,7 @@ S_find_locale_from_environment(pTHX_ const unsigned int index)
      * The Windows and POSIX 2008 differ in that the ultimate fallback is "C"
      * in POSIX, and is the system default locale in Windows.  To get that
      * system default value, we actually have to call setlocale() on Windows.
-     * Since this function doesn't actually change the locale, that means the
-     * locale must be saved and restored around the change.  A critical section
-     * is used for this, but since Windows has long had per-thread locales,
-     * it's likely that will be a no-op.  The function description could be
-     * changed to not guarantee that it is a read-only operation.
-     * */
+     */
 
     /* We rely on PerlEnv_getenv() returning a mortalized copy */
     const char * const lc_all = PerlEnv_getenv("LC_ALL");
@@ -1550,12 +1547,7 @@ S_find_locale_from_environment(pTHX_ const unsigned int index)
 #  ifndef WIN32
         return "C";
 #  else
-        SETLOCALE_LOCK;
-        const char * orginal = setlocale(categories[index], NULL);
-        const char * ret = wrap_wsetlocale(categories[index], "");
-        setlocale(categories[index], original);
-        SETLOCALE_UNLOCK;
-        return ret;
+        return wrap_wsetlocale(categories[index], "");
 #  endif
 
     }
@@ -1589,11 +1581,7 @@ S_find_locale_from_environment(pTHX_ const unsigned int index)
 #  ifndef WIN32
             locale_names[i] = "C";
 #  else
-            SETLOCALE_LOCK;
-            const char * orginal = setlocale(categories[index], NULL);
             locale_names[i] = wrap_wsetlocale(categories[index], "");
-            setlocale(categories[index], original);
-            SETLOCALE_UNLOCK;
 #  endif
 
         }
@@ -2606,6 +2594,8 @@ S_win32_setlocale(pTHX_ int category, const char* locale)
 
 
     if (locale && strEQ(locale, "")) {
+        /* Note this function may change the locale, but that's ok because we
+         * are about to change it anyway */
         locale = find_locale_from_environment(get_category_index(category, ""));
     }
 
