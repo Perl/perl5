@@ -3710,7 +3710,7 @@ CMdp	|U8 *	|uvoffuni_to_utf8_flags 				\
 Cp	|U8 *	|uvoffuni_to_utf8_flags_msgs				\
 				|NN U8 *d				\
 				|UV input_uv				\
-				|const UV flags 			\
+				|UV flags				\
 				|NULLOK HV **msgs
 CDbp	|U8 *	|uvuni_to_utf8	|NN U8 *d				\
 				|UV uv

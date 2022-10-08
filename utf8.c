@@ -203,7 +203,7 @@ The caller, of course, is responsible for freeing any returned HV.
 /* Undocumented; we don't want people using this.  Instead they should use
  * uvchr_to_utf8_flags_msgs() */
 U8 *
-Perl_uvoffuni_to_utf8_flags_msgs(pTHX_ U8 *d, UV input_uv, UV flags, HV** msgs)
+Perl_uvoffuni_to_utf8_flags_msgs(pTHX_ U8 *d, const UV input_uv, UV flags, HV** msgs)
 {
     U8 *p;
     UV shifted_uv = input_uv;

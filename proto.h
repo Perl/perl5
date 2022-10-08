@@ -5183,7 +5183,7 @@ Perl_uvoffuni_to_utf8_flags(pTHX_ U8 *d, UV uv, UV flags);
         assert(d)
 
 PERL_CALLCONV U8 *
-Perl_uvoffuni_to_utf8_flags_msgs(pTHX_ U8 *d, UV input_uv, const UV flags, HV **msgs);
+Perl_uvoffuni_to_utf8_flags_msgs(pTHX_ U8 *d, UV input_uv, UV flags, HV **msgs);
 #define PERL_ARGS_ASSERT_UVOFFUNI_TO_UTF8_FLAGS_MSGS \
         assert(d)
 
