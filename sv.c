@@ -10031,7 +10031,7 @@ Creates a new SV boolean.
 */
 
 SV *
-Perl_newSVbool(pTHX_ bool bool_val)
+Perl_newSVbool(pTHX_ const bool bool_val)
 {
     PERL_ARGS_ASSERT_NEWSVBOOL;
     SV *sv = newSVsv(bool_val ? &PL_sv_yes : &PL_sv_no);
