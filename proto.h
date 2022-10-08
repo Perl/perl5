@@ -6916,7 +6916,7 @@ Perl_gv_stashsvpvn_cached(pTHX_ SV *namesv, const char *name, U32 namelen, I32 f
 #endif
 #if defined(PERL_IN_HV_C)
 STATIC void
-S_clear_placeholders(pTHX_ HV *hv, U32 items);
+S_clear_placeholders(pTHX_ HV *hv, const U32 items);
 # define PERL_ARGS_ASSERT_CLEAR_PLACEHOLDERS    \
         assert(hv)
 

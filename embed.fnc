@@ -4352,7 +4352,7 @@ EGdp	|HV *	|gv_stashsvpvn_cached					\
 #if defined(PERL_IN_HV_C)
 Sx	|void	|clear_placeholders					\
 				|NN HV *hv				\
-				|U32 items
+				|const U32 items
 S	|void	|hsplit 	|NN HV *hv				\
 				|STRLEN const oldsize			\
 				|STRLEN newsize
