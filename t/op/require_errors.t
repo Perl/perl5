@@ -21,7 +21,7 @@ for my $file ($nonfile, ' ') {
 	require $file;
     };
 
-    like $@, qr/^Can't locate $file in \@INC \(\@INC contains: @INC\) at/,
+    like $@, qr/^Can't locate $file in \@INC \(\@INC contains: \Q@INC\E\) at/,
 	"correct error message for require '$file'";
 }
 
