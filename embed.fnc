@@ -3169,7 +3169,7 @@ Apd	|char * |pv_escape	|NULLOK SV *dsv 			\
 				|const STRLEN count			\
 				|const STRLEN max			\
 				|NULLOK STRLEN * const escaped		\
-				|const U32 flags
+				|U32 flags
 Apd	|char * |pv_pretty	|NN SV *dsv				\
 				|NN char const * const str		\
 				|const STRLEN count			\
