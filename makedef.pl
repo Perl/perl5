@@ -544,6 +544,7 @@ unless ($define{USE_LOCALE_COLLATE}) {
                     PL_strxfrm_NUL_replacement
                     PL_strxfrm_is_behaved
                     PL_strxfrm_max_cp
+		    PL_in_utf8_COLLATE_locale
 			 );
 }
 
