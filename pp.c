@@ -3846,7 +3846,7 @@ PP(pp_ucfirst)
              * call to lowercase above has handled this.  But SpecialCasing.txt
              * says we are supposed to remove the COMBINING DOT ABOVE.  We can
              * tell if we have this situation if I ==> i in a turkic locale. */
-            if (   UNLIKELY(PL_in_utf8_turkic_locale)
+            if (   UNLIKELY(IN_UTF8_TURKIC_LOCALE)
                 && IN_LC_RUNTIME(LC_CTYPE)
                 && (UNLIKELY(*s == 'I' && tmpbuf[0] == 'i')))
             {
@@ -3890,7 +3890,7 @@ PP(pp_ucfirst)
 #ifdef USE_LOCALE_CTYPE
 
         if (IN_LC_RUNTIME(LC_CTYPE)) {
-            if (    UNLIKELY(PL_in_utf8_turkic_locale)
+            if (    UNLIKELY(IN_UTF8_TURKIC_LOCALE)
                 && (   (op_type == OP_LCFIRST && UNLIKELY(*s == 'I'))
                     || (op_type == OP_UCFIRST && UNLIKELY(*s == 'i'))))
             {
@@ -4292,7 +4292,7 @@ PP(pp_uc)
 
 #ifdef USE_LOCALE_CTYPE
 
-                        && (LIKELY(   ! PL_in_utf8_turkic_locale
+                        && (LIKELY(   ! IN_UTF8_TURKIC_LOCALE
                                    || ! IN_LC_RUNTIME(LC_CTYPE))
                                    || *s != 'i')
 #endif
@@ -4398,7 +4398,7 @@ PP(pp_uc)
                      * its own loop */
 
 #ifdef USE_LOCALE_CTYPE
-                    if (   UNLIKELY(PL_in_utf8_turkic_locale)
+                    if (   UNLIKELY(IN_UTF8_TURKIC_LOCALE)
                         && UNLIKELY(IN_LC_RUNTIME(LC_CTYPE)))
                     {
                         for (; s < send; s++) {
@@ -4464,7 +4464,7 @@ PP(pp_lc)
 #ifdef USE_LOCALE_CTYPE
 
         && (   LIKELY(! IN_LC_RUNTIME(LC_CTYPE))
-            || LIKELY(! PL_in_utf8_turkic_locale))
+            || LIKELY(! IN_UTF8_TURKIC_LOCALE))
 
 #endif
 
@@ -4500,7 +4500,7 @@ PP(pp_lc)
 
         /* Lowercasing in a Turkic locale can cause non-UTF-8 to need to become
          * UTF-8 for the single case of the character 'I' */
-        if (     UNLIKELY(PL_in_utf8_turkic_locale)
+        if (     UNLIKELY(IN_UTF8_TURKIC_LOCALE)
             && ! DO_UTF8(source)
             &&   (next_I = (U8 *) memchr(s, 'I', len)))
         {
@@ -4557,7 +4557,7 @@ PP(pp_lc)
              * and if so, do it.  We know that there is a DOT because
              * _toLOWER_utf8_flags() wouldn't have returned 'i' unless there
              * was one in a proper position. */
-            if (   UNLIKELY(PL_in_utf8_turkic_locale)
+            if (   UNLIKELY(IN_UTF8_TURKIC_LOCALE)
                 && IN_LC_RUNTIME(LC_CTYPE))
             {
                 if (   UNLIKELY(remove_dot_above)
@@ -4849,7 +4849,7 @@ PP(pp_fc)
             for (; s < send; d++, s++) {
                 if (    UNLIKELY(*s == MICRO_SIGN)
 #ifdef USE_LOCALE_CTYPE
-                    || (   UNLIKELY(PL_in_utf8_turkic_locale)
+                    || (   UNLIKELY(IN_UTF8_TURKIC_LOCALE)
                         && UNLIKELY(IN_LC_RUNTIME(LC_CTYPE))
                         && UNLIKELY(*s == 'I'))
 #endif

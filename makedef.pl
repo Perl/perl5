@@ -557,6 +557,8 @@ unless ($define{USE_LOCALE_NUMERIC}) {
 unless ($define{USE_LOCALE_CTYPE}) {
     ++$skip{$_} foreach qw(
 		    PL_ctype_name
+                    PL_in_utf8_CTYPE_locale
+                    PL_in_utf8_turkic_locale
 			 );
 }
 

@@ -1880,7 +1880,13 @@ END_EXTERN_C
 #define toUPPER_LATIN1_MOD(c) ((! FITS_IN_8_BITS(c))                       \
                                ? (c)                                       \
                                : PL_mod_latin1_uc[ (U8) (c) ])
-#define IN_UTF8_CTYPE_LOCALE PL_in_utf8_CTYPE_locale
+#ifdef USE_LOCALE_CTYPE
+#  define IN_UTF8_CTYPE_LOCALE   PL_in_utf8_CTYPE_locale
+#  define IN_UTF8_TURKIC_LOCALE  PL_in_utf8_turkic_locale
+#else
+#  define IN_UTF8_CTYPE_LOCALE   false
+#  define IN_UTF8_TURKIC_LOCALE  false
+#endif
 
 /* Use foo_LC_uvchr() instead  of these for beyond the Latin1 range */
 

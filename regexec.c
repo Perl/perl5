@@ -4623,7 +4623,7 @@ S_setup_EXACTISH_ST(pTHX_ const regnode * const text_node,
     if (   (op == EXACTF && utf8_target)
         || (op == EXACTFL && IN_UTF8_CTYPE_LOCALE))
     {
-        if (op == EXACTFL && PL_in_utf8_turkic_locale) {
+        if (op == EXACTFL && IN_UTF8_TURKIC_LOCALE) {
             op = TURKISH;
         }
         else {
@@ -10823,7 +10823,7 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
                     }
                     else /* Failing that, hardcode the two tests for a Turkic
                             locale */
-                         if (   UNLIKELY(PL_in_utf8_turkic_locale)
+                         if (   UNLIKELY(IN_UTF8_TURKIC_LOCALE)
                              && isALPHA_FOLD_EQ(*p, 'i'))
                     {
                         /* Turkish locales have these hard-coded rules
@@ -10854,7 +10854,7 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
             /* In a Turkic locale under folding, hard-code the I i case pair
              * matches; these wouldn't have the ANYOF_HAS_EXTRA_RUNTIME_MATCHES
              * flag set unless [Ii] were match possibilities */
-            if (UNLIKELY(PL_in_utf8_turkic_locale) && ! match) {
+            if (UNLIKELY(IN_UTF8_TURKIC_LOCALE) && ! match) {
                 if (utf8_target) {
                     if (c == LATIN_CAPITAL_LETTER_I_WITH_DOT_ABOVE) {
                         if (ANYOF_BITMAP_TEST(n, 'i')) {
