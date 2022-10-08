@@ -8958,7 +8958,7 @@ Perl_regnext(pTHX_ const regnode *p)
 #   define PERL_ARGS_ASSERT_REGNEXT
 
 PERL_STATIC_INLINE regnode *
-Perl_regnode_after(pTHX_ const regnode *p, bool varies)
+Perl_regnode_after(pTHX_ const regnode *p, const bool varies)
         __attribute__warn_unused_result__;
 #   define PERL_ARGS_ASSERT_REGNODE_AFTER
 

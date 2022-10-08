@@ -5635,7 +5635,7 @@ CRip	|bool	|check_regnode_after					\
 				|const STRLEN extra
 CRip	|regnode *|regnext	|NULLOK const regnode *p
 CRip	|regnode *|regnode_after|NULLOK const regnode *p		\
-				|bool varies
+				|const bool varies
 # if defined(DEBUGGING)
 Ep	|void	|debug_peep	|NN const char *str			\
 				|NN const RExC_state_t *pRExC_state	\
