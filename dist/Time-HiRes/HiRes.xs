@@ -263,8 +263,6 @@ _gettimeofday(pTHX_ struct timeval *tp, void *not_used)
 static int
 _clock_gettime(pTHX_ clockid_t clock_id, struct timespec *tp)
 {
-    FT_t ft;
-
     switch (clock_id) {
     case CLOCK_REALTIME: {
         FT_t ft;
