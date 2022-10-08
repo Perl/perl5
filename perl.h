@@ -6918,7 +6918,7 @@ the plain locale pragma without a parameter (S<C<use locale>>) is in effect.
       * string, and an end position which it won't try to read past */
 #    define _CHECK_AND_OUTPUT_WIDE_LOCALE_CP_MSG(cp)                        \
         STMT_START {                                                        \
-            if (! PL_in_utf8_CTYPE_locale && ckWARN(WARN_LOCALE)) {         \
+            if (! IN_UTF8_CTYPE_LOCALE && ckWARN(WARN_LOCALE)) {            \
                 Perl_warner(aTHX_ packWARN(WARN_LOCALE),                    \
                                        "Wide character (U+%" UVXf ") in %s",\
                                        (UV) cp, OP_DESC(PL_op));            \
@@ -6927,7 +6927,7 @@ the plain locale pragma without a parameter (S<C<use locale>>) is in effect.
 
 #    define _CHECK_AND_OUTPUT_WIDE_LOCALE_UTF8_MSG(s, send)                 \
         STMT_START { /* Check if to warn before doing the conversion work */\
-            if (! PL_in_utf8_CTYPE_locale && ckWARN(WARN_LOCALE)) {         \
+            if (! IN_UTF8_CTYPE_LOCALE && ckWARN(WARN_LOCALE)) {            \
                 UV cp = utf8_to_uvchr_buf((U8 *) (s), (U8 *) (send), NULL); \
                 Perl_warner(aTHX_ packWARN(WARN_LOCALE),                    \
                     "Wide character (U+%" UVXf ") in %s",                   \

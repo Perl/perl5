@@ -3167,7 +3167,7 @@ Perl__to_uni_fold_flags(pTHX_ UV c, U8* p, STRLEN *lenp, U8 flags)
         /* Treat a non-Turkic UTF-8 locale as not being in locale at all,
          * except for potentially warning */
         CHECK_AND_WARN_PROBLEMATIC_LOCALE_;
-        if (IN_UTF8_CTYPE_LOCALE && ! PL_in_utf8_turkic_locale) {
+        if (IN_UTF8_CTYPE_LOCALE && ! IN_UTF8_TURKIC_LOCALE) {
             flags &= ~FOLD_FLAGS_LOCALE;
         }
         else {
@@ -3720,7 +3720,7 @@ S_turkic_uc(pTHX_ const U8 * const p, const U8 * const e,
     if (flags & (locale_flags)) {                                            \
         CHECK_AND_WARN_PROBLEMATIC_LOCALE_;                                  \
         if (IN_UTF8_CTYPE_LOCALE) {                                          \
-            if (UNLIKELY(PL_in_utf8_turkic_locale)) {                        \
+            if (UNLIKELY(IN_UTF8_TURKIC_LOCALE)) {                           \
                 UV ret = turkic(p, e, ustrp, lenp);                          \
                 if (ret) return ret;                                         \
             }                                                                \
@@ -4299,7 +4299,7 @@ Perl_foldEQ_utf8_flags(pTHX_ const char *s1, char **pe1, UV l1, bool u1,
 
     if (flags & FOLDEQ_LOCALE) {
         if (IN_UTF8_CTYPE_LOCALE) {
-            if (UNLIKELY(PL_in_utf8_turkic_locale)) {
+            if (UNLIKELY(IN_UTF8_TURKIC_LOCALE)) {
                 flags_for_folder |= FOLD_FLAGS_LOCALE;
             }
             else {
