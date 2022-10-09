@@ -806,4 +806,4 @@ jobs:
         run: perl -V
       - name: Build and test dist modules
         run:
-          perl Porting/test-dist-modules.pl
+          perl Porting/test-dist-modules.pl -continue

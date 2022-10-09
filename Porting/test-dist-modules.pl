@@ -6,6 +6,11 @@ use warnings;
 use File::Temp "tempdir";
 use ExtUtils::Manifest "maniread";
 use Cwd "getcwd";
+use Getopt::Long;
+
+my $continue;
+GetOptions("c|continue" => \$continue)
+  or die "Unknown options\n";
 
 $|++;
 
@@ -159,15 +164,15 @@ EOM
     my $failed = "";
     if (system($^X, "Makefile.PL")) {
         $failed = "Makefile.PL";
-        die "$name: Makefile.PL failed\n" unless $github_ci;
+        die "$name: Makefile.PL failed\n" unless $continue;
     }
     elsif (system("make", "test", "TEST_VERBOSE=$verbose")) {
         $failed = "make test";
-        die "$name: make test failed\n" unless $github_ci;
+        die "$name: make test failed\n" unless $continue;
     }
     elsif (system("make", "install")) {
         $failed = "make install";
-        die "$name: make install failed\n" unless $github_ci;
+        die "$name: make install failed\n" unless $continue;
     }
 
     chdir $start
@@ -175,10 +180,10 @@ EOM
 
     if ($github_ci) {
         print "::endgroup::\n";
-        if ($failed) {
-           print "::error ::$name failed at $failed\n";
-           push @failures, [ $name, $failed ];
-        }
+    }
+    if ($continue && $failed) {
+        print "::error ::$name failed at $failed\n" if $github_ci;
+        push @failures, [ $name, $failed ];
     }
 
     $dir;
