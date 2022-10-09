@@ -93,7 +93,9 @@ There may well be none in a stable release.
 
 =item *
 
-XXX
+Creating an anonymous sub no longer generates an C<srefgen> op, the
+reference generation is now done in the C<anoncode> or C<anonconst>
+op, saving runtime.  [github #20290]
 
 =back
 
