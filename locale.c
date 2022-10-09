@@ -3122,13 +3122,9 @@ S_my_localeconv(pTHX_ const int item, const locale_utf8ness_t locale_is_utf8)
     PERL_UNUSED_ARG(item);
     PERL_UNUSED_ARG(locale_is_utf8);
 
-#    ifdef USE_LOCALE_NUMERIC
-
     /* When there is a nl_langinfo, we will only be called for localeconv
      * numeric purposes. */
     const bool is_localeconv_call = true;
-
-#    endif
 
 #  else
 
@@ -3136,11 +3132,10 @@ S_my_localeconv(pTHX_ const int item, const locale_utf8ness_t locale_is_utf8)
      * when our perl_langinfo.h is used, and that uses negative numbers for all
      * the items */
     const bool is_localeconv_call = (item == 0);
-    if (is_localeconv_call)
 
 #  endif
 
-    {
+    if (is_localeconv_call) {
         copy_localeconv = S_populate_localeconv;
 
 #    ifdef USE_LOCALE_NUMERIC
