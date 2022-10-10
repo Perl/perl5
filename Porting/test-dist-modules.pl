@@ -7,9 +7,12 @@ use File::Temp "tempdir";
 use ExtUtils::Manifest "maniread";
 use Cwd "getcwd";
 use Getopt::Long;
+use Config;
 
 my $continue;
+my $separate;
 GetOptions("c|continue" => \$continue,
+           "s|separate" => \$separate,
            "h|help"     => \&usage)
   or die "Unknown options\n";
 
@@ -22,6 +25,18 @@ my $github_ci = $ENV{'GITHUB_SHA'} ? 1 : 0;
 
 my $manifest = maniread();
 my @failures = ();
+
+my @config;
+my $install_path;
+if ($separate) {
+    # require EU::MM 6.31 or later
+    my $install_base = tempdir( CLEANUP => 1 );
+    push @config, "INSTALL_BASE=$install_base";
+    $ENV{PERL5LIB} .= $Config{path_sep} if $ENV{PERL5LIB};
+    $ENV{PERL5LIB} .= join $Config{path_sep},
+      "$install_base/lib/perl5/$Config{archname}",
+      "$install_base/lib/perl5";
+}
 
 my $start = getcwd()
   or die "Cannot fetch current directory: $!\n";
@@ -163,7 +178,7 @@ EOM
 
     my $verbose = $github_ci && $ENV{'RUNNER_DEBUG'} ? 1 : 0;
     my $failed = "";
-    if (system($^X, "Makefile.PL")) {
+    if (system($^X, "Makefile.PL", @config)) {
         $failed = "Makefile.PL";
         die "$name: Makefile.PL failed\n" unless $continue;
     }
@@ -1151,6 +1166,8 @@ Usage: $^X $0 [options]
  -c | -continue
      Continue processing after failures
      Devel::PPPort must successfully build to continue.
+ -s | -separate
+     Install to a work path, not to perl's site_perl.
  -h | -help
      Display this message.
 EOS
