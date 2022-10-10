@@ -38,6 +38,13 @@ if ($separate) {
       "$install_base/lib/perl5";
 }
 
+my %dist_config = (
+    # these are defined by the modules as distributed on CPAN
+    # I don't know why their Makefile.PLs aren't in core
+    "threads"        => [ "DEFINE=-DHAS_PPPORT_H" ],
+    "threads-shared" => [ "DEFINE=-DHAS_PPPORT_H" ],
+   );
+
 my $start = getcwd()
   or die "Cannot fetch current directory: $!\n";
 
@@ -178,7 +185,11 @@ EOM
 
     my $verbose = $github_ci && $ENV{'RUNNER_DEBUG'} ? 1 : 0;
     my $failed = "";
-    if (system($^X, "Makefile.PL", @config)) {
+    my @my_config = @config;
+    if (my $cfg = $dist_config{$name}) {
+        push @my_config, @$cfg;
+    }
+    if (system($^X, "Makefile.PL", @my_config)) {
         $failed = "Makefile.PL";
         die "$name: Makefile.PL failed\n" unless $continue;
     }
