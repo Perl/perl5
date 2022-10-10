@@ -115,6 +115,9 @@ sub test_dist {
     if ($name eq "IO" || $name eq "threads" || $name eq "threads-shared") {
         write_testpl();
     }
+    if ($name eq "threads" || $name eq "threads-shared") {
+        write_threads_h();
+    }
     unless (-f "Makefile.PL") {
         print "  Creating Makefile.PL for $name\n";
         my $key = "ABSTRACT_FROM";
@@ -220,13 +223,57 @@ EOM
 # and bundle their own test.pl when distributed on CPAN.
 # The test.pl source below is from the IO distribution but so far seems sufficient
 # for threads and threads-shared.
-#
-# This might be better as a file in Porting/ rather than embedded here.
 sub write_testpl {
-    open my $fh, ">", "t/test.pl"
-      or die "Cannot create t/test.pl: $!";
-    # the blead t/test.pl uses modern features and can't be used here.
-    print $fh <<'EOS';
+    _write_from_data("t/test.pl");
+}
+
+# threads and threads-shared bundle this file, which isn't needed in core
+sub write_threads_h {
+    _write_from_data("threads.h");
+}
+
+# file data read from <DATA>
+my %file_data;
+
+sub _write_from_data {
+    my ($want_name) = @_;
+
+    unless (keys %file_data) {
+        my $name;
+        while (<DATA>) {
+            if (/^-- (\S+) --/) {
+                $name = $1;
+            }
+            else {
+                $file_data{$name} .= $_;
+            }
+        }
+        close DATA;
+    }
+
+    my $data = $file_data{$want_name} or die "No data found for $want_name";
+    open my $fh, ">", $want_name
+      or die "Cannot create $want_name: $!\n";
+    print $fh $data;
+    close $fh
+      or die "Cannot close $want_name: $!\n";
+}
+
+sub usage {
+    print <<EOS;
+Usage: $^X $0 [options]
+ -c | -continue
+     Continue processing after failures
+     Devel::PPPort must successfully build to continue.
+ -s | -separate
+     Install to a work path, not to perl's site_perl.
+ -h | -help
+     Display this message.
+EOS
+}
+
+__DATA__
+-- t/test.pl --
 #
 # t/test.pl - most of Test::More functionality without the fuss
  
@@ -1167,19 +1214,35 @@ sub watchdog ($)
 }
  
 1;
-EOS
-    close $fh;
-}
+-- threads.h --
+#ifndef _THREADS_H_
+#define _THREADS_H_
 
-sub usage {
-    print <<EOS;
-Usage: $^X $0 [options]
- -c | -continue
-     Continue processing after failures
-     Devel::PPPort must successfully build to continue.
- -s | -separate
-     Install to a work path, not to perl's site_perl.
- -h | -help
-     Display this message.
-EOS
-}
+/* Needed for 5.8.0 */
+#ifndef CLONEf_JOIN_IN
+#  define CLONEf_JOIN_IN        8
+#endif
+#ifndef SAVEBOOL
+#  define SAVEBOOL(a)
+#endif
+
+/* Added in 5.11.x */
+#ifndef G_WANT
+#  define G_WANT                (128|1)
+#endif
+
+/* Added in 5.24.x */
+#ifndef PERL_TSA_RELEASE
+#  define PERL_TSA_RELEASE(x)
+#endif
+#ifndef PERL_TSA_EXCLUDES
+#  define PERL_TSA_EXCLUDES(x)
+#endif
+#ifndef CLANG_DIAG_IGNORE
+#  define CLANG_DIAG_IGNORE(x)
+#endif
+#ifndef CLANG_DIAG_RESTORE
+#  define CLANG_DIAG_RESTORE
+#endif
+
+#endif
