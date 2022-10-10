@@ -104,13 +104,13 @@ sub test_dist {
     print "::group::Testing $name\n" if $github_ci;
     print "*** Testing $name ***\n";
     my $dir = tempdir( CLEANUP => 1);
-    system "cp", "-a", "dist/$name/.", "$dir/."
-      and die "Cannot copy dist files to working directory\n";
+    run("cp", "-a", "dist/$name/.", "$dir/.")
+      or die "Cannot copy dist files to working directory\n";
     chdir $dir
       or die "Cannot chdir to dist working directory '$dir': $!\n";
     if ($pppfile) {
-        system "cp", $pppfile, "."
-          and die "Cannot copy $pppfile to .\n";
+        run("cp", $pppfile, ".")
+          or die "Cannot copy $pppfile to .\n";
     }
     if ($name eq "IO" || $name eq "threads" || $name eq "threads-shared") {
         write_testpl();
@@ -192,15 +192,15 @@ EOM
     if (my $cfg = $dist_config{$name}) {
         push @my_config, @$cfg;
     }
-    if (system($^X, "Makefile.PL", @my_config)) {
+    if (!run($^X, "Makefile.PL", @my_config)) {
         $failed = "Makefile.PL";
         die "$name: Makefile.PL failed\n" unless $continue;
     }
-    elsif (system("make", "test", "TEST_VERBOSE=$verbose")) {
+    elsif (!run("make", "test", "TEST_VERBOSE=$verbose")) {
         $failed = "make test";
         die "$name: make test failed\n" unless $continue;
     }
-    elsif (system("make", "install")) {
+    elsif (!run("make", "install")) {
         $failed = "make install";
         die "$name: make install failed\n" unless $continue;
     }
@@ -257,6 +257,20 @@ sub _write_from_data {
     print $fh $data;
     close $fh
       or die "Cannot close $want_name: $!\n";
+}
+
+sub run {
+    my (@cmd) = @_;
+
+    print "\$ @cmd\n";
+    my $result = system(@cmd);
+    if ($result < 0) {
+        print "Failed: $!\n";
+    }
+    elsif ($result) {
+        printf "Failed: %d (%#x)\n", $result, $?;
+    }
+    return $result == 0;
 }
 
 sub usage {
