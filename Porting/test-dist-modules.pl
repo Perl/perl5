@@ -9,7 +9,8 @@ use Cwd "getcwd";
 use Getopt::Long;
 
 my $continue;
-GetOptions("c|continue" => \$continue)
+GetOptions("c|continue" => \$continue,
+           "h|help"     => \&usage)
   or die "Unknown options\n";
 
 $|++;
@@ -1142,4 +1143,15 @@ sub watchdog ($)
 1;
 EOS
     close $fh;
+}
+
+sub usage {
+    print <<EOS;
+Usage: $^X $0 [options]
+ -c | -continue
+     Continue processing after failures
+     Devel::PPPort must successfully build to continue.
+ -h | -help
+     Display this message.
+EOS
 }
