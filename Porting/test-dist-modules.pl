@@ -126,6 +126,7 @@ sub test_dist {
         my $key = "ABSTRACT_FROM";
         my @parts = split /-/, $name;
         my $last = $parts[-1];
+        my $module = join "::", @parts;
         my $fromname;
         for my $check ("$last.pm", join("/", "lib", @parts) . ".pm") {
             if (-f $check) {
@@ -139,7 +140,7 @@ sub test_dist {
         open my $fh, ">", "Makefile.PL"
           or die "Cannot create Makefile.PL: $!\n";
         # adapted from make_ext.pl
-        printf $fh <<'EOM', $name, $fromname, $key, $value;
+        printf $fh <<'EOM', $module, $fromname, $key, $value;
 use strict;
 use ExtUtils::MakeMaker;
 
