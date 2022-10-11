@@ -68,10 +68,18 @@ my $pppfile = "$pppdir/ppport.h";
 
 # Devel-PPPort is manually processed before anything else to ensure we
 # have an up to date ppport.h
-opendir my $distdir, "dist"
-  or die "Cannot opendir 'dist': $!\n";
-my @dists = sort { lc $a cmp lc $b } grep { /^\w/ && $_ ne "Devel-PPPort" } readdir $distdir;
-closedir $distdir;
+my @dists = @ARGV;
+if (@dists) {
+    for my $dist (@dists) {
+        -d "dist/$dist" or die "dist/$dist not a directory\n";
+    }
+}
+else {
+    opendir my $distdir, "dist"
+      or die "Cannot opendir 'dist': $!\n";
+    @dists = sort { lc $a cmp lc $b } grep { /^\w/ && $_ ne "Devel-PPPort" } readdir $distdir;
+    closedir $distdir;
+}
 
 # These may end up being included if their problems are resolved
 {
