@@ -68,8 +68,17 @@ __EOD__
             }
         }
 
-        my $ccflags = $Config{'ccflags'} . ' ' . "-I$COREincdir"
-         . ' -DPERL_NO_INLINE_FUNCTIONS';
+        my $ccflags = $Config{'ccflags'} . ' ';
+        my @osvers = split /\./, $Config{osvers};
+        if ($^O eq "darwin"
+            && $^X eq "/usr/bin/perl"
+            && $osvers[0] >= 18) {
+            $ccflags .= qq(-iwithsysroot "$COREincdir");
+        }
+        else {
+            $ccflags .= "-I$COREincdir"
+        }
+        $ccflags .= ' -DPERL_NO_INLINE_FUNCTIONS';
 
         if ($^O eq 'VMS') {
             $cccmd = "$Config{'cc'} /include=($COREincdir) $tmp.c";
