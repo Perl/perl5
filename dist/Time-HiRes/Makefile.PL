@@ -850,6 +850,11 @@ EOM
             print "NOT found.\n";
         }
     }
+    if ($^O eq "darwin") {
+        # the system perl on darwin doesn't seem to include -DPERL_DARWIN
+        # which breaks setting up emulation
+        DEFINE("PERL_DARWIN");
+    }
 
     if ($DEFINE) {
         $DEFINE =~ s/^\s+//;
