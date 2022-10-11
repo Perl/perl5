@@ -118,6 +118,9 @@ sub test_dist {
     if ($name eq "threads" || $name eq "threads-shared") {
         write_threads_h();
     }
+    if ($name eq "threads-shared") {
+        write_shared_h();
+    }
     unless (-f "Makefile.PL") {
         print "  Creating Makefile.PL for $name\n";
         my $key = "ABSTRACT_FROM";
@@ -230,6 +233,11 @@ sub write_testpl {
 # threads and threads-shared bundle this file, which isn't needed in core
 sub write_threads_h {
     _write_from_data("threads.h");
+}
+
+# threads-shared bundles this file, which isn't needed in core
+sub write_shared_h {
+    _write_from_data("shared.h");
 }
 
 # file data read from <DATA>
@@ -1257,6 +1265,17 @@ sub watchdog ($)
 #endif
 #ifndef CLANG_DIAG_RESTORE
 #  define CLANG_DIAG_RESTORE
+#endif
+
+#endif
+-- shared.h --
+#ifndef _SHARED_H_
+#define _SHARED_H_
+
+#include "ppport.h"
+
+#ifndef HvNAME_get
+#  define HvNAME_get(hv)        (0 + ((XPVHV*)SvANY(hv))->xhv_name)
 #endif
 
 #endif
