@@ -1288,6 +1288,11 @@ sub watchdog ($)
 #  define CLANG_DIAG_RESTORE
 #endif
 
+/* Added in 5.38 */
+#ifndef PERL_SRAND_OVERRIDE_NEXT_PARENT
+#  define PERL_SRAND_OVERRIDE_NEXT_PARENT()
+#endif
+
 #endif
 -- shared.h --
 #ifndef _SHARED_H_
