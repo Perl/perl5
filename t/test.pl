@@ -1731,10 +1731,12 @@ sub warning_like {
 #
 # NOTE:  If the test file uses 'threads', then call the watchdog() function
 #        _AFTER_ the 'threads' module is loaded.
+{ # Closure
+    my $watchdog;
+    my $watchdog_thread;
+
 sub watchdog ($;$)
 {
-    CORE::state $watchdog;
-    CORE::state $watchdog_thread;
     my $timeout = shift;
 
     # If cancelling, use the state variables to know which method was used to
@@ -1768,7 +1770,7 @@ sub watchdog ($;$)
                       || $ENV{PERL_TEST_TIMEOUT_FACTOR}
                       || 1;
     $timeout_factor = 1 if $timeout_factor < 1;
-	$timeout_factor = $1 if $timeout_factor =~ /^(\d+)$/;
+    $timeout_factor = $1 if $timeout_factor =~ /^(\d+)$/;
 
     # Valgrind slows perl way down so give it more time before dying.
     $timeout_factor = 10 if $timeout_factor < 10 && $ENV{PERL_VALGRIND};
@@ -1937,6 +1939,7 @@ WATCHDOG_VIA_ALARM:
         };
     }
 }
+} # End closure
 
 # Orphaned Docker or Linux containers do not necessarily attach to PID 1. They might attach to 0 instead.
 sub is_linux_container {
