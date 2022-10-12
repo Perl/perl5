@@ -2701,6 +2701,11 @@ perl_run(pTHXx)
 #ifndef MULTIPLICITY
     PERL_UNUSED_ARG(my_perl);
 #endif
+    /* perl_parse() may end up starting its own run loops, which might end
+     * up "leaking" PL_restartop from the parse phase into the run phase
+     * which then ends up confusing run_body(). This leakage shouldn't
+     * happen and if it does its a bug. */
+    assert(!PL_restartop);
 
     oldscope = PL_scopestack_ix;
 #ifdef VMS

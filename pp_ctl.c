@@ -3527,16 +3527,39 @@ Perl_find_runcv_where(pTHX_ U8 cond, IV arg, U32 *db_seqp)
 }
 
 
-/* Run yyparse() in a setjmp wrapper. Returns:
+/* S_try_yyparse():
+ *
+ * Run yyparse() in a setjmp wrapper. Returns:
  *   0: yyparse() successful
  *   1: yyparse() failed
  *   3: yyparse() died
+ *
+ * This is used to trap Perl_croak() calls that are executed
+ * during the compilation process and before the code has been
+ * completely compiled. It is expected to be called from
+ * doeval_compile() only. The parameter 'caller_op' is
+ * only used in DEBUGGING to validate the logic is working
+ * correctly.
+ *
+ * See also try_run_unitcheck().
+ *
  */
 STATIC int
-S_try_yyparse(pTHX_ int gramtype)
+S_try_yyparse(pTHX_ int gramtype, OP *caller_op)
 {
-    int ret;
+    /* if we die during compilation PL_restartop and PL_restartjmpenv
+     * will be set by Perl_die_unwind(). We need to restore their values
+     * if that happens as they are intended for the case where the code
+     * compiles and dies during execution, not where it dies during
+     * compilation. PL_restartop and caller_op->op_next should be the
+     * same anyway, and when compilation fails then caller_op->op_next is
+     * used as the next op after the compile.
+     */
+    JMPENV *restartjmpenv = PL_restartjmpenv;
+    OP *restartop = PL_restartop;
     dJMPENV;
+    int ret;
+    PERL_UNUSED_ARG(caller_op); /* only used in debugging builds */
 
     assert(CxTYPE(CX_CUR()) == CXt_EVAL);
     JMPENV_PUSH(ret);
@@ -3545,6 +3568,11 @@ S_try_yyparse(pTHX_ int gramtype)
         ret = yyparse(gramtype) ? 1 : 0;
         break;
     case 3:
+        /* yyparse() died and we trapped the error. We need to restore
+         * the old PL_restartjmpenv and PL_restartop values. */
+        assert(PL_restartop == caller_op->op_next); /* we expect these to match */
+        PL_restartjmpenv = restartjmpenv;
+        PL_restartop = restartop;
         break;
     default:
         JMPENV_POP;
@@ -3724,8 +3752,10 @@ S_doeval_compile(pTHX_ U8 gimme, CV* outside, U32 seq, HV *hh)
      * always handle that case. */
     assert(!CATCH_GET);
     /* compile the code */
+
+
     yystatus = (!in_require)
-               ? S_try_yyparse(aTHX_ GRAMPROG)
+               ? S_try_yyparse(aTHX_ GRAMPROG, saveop)
                : yyparse(GRAMPROG);
 
     if (yystatus || PL_parser->error_count || !PL_eval_root) {
@@ -3733,10 +3763,12 @@ S_doeval_compile(pTHX_ U8 gimme, CV* outside, U32 seq, HV *hh)
         SV *errsv;
 
         PL_op = saveop;
-        /* note that if yystatus == 3, then the require/eval died during
-         * compilation, so the EVAL CX block has already been popped, and
-         * various vars restored */
         if (yystatus != 3) {
+            /* note that if yystatus == 3, then the require/eval died during
+             * compilation, so the EVAL CX block has already been popped, and
+             * various vars restored. This block applies similar steps after
+             * the other "failed to compile" cases in yyparse, eg, where
+             * yystatus=1, "failed, but did not die". */
             if (PL_eval_root) {
                 op_free(PL_eval_root);
                 PL_eval_root = NULL;

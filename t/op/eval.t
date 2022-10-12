@@ -6,7 +6,7 @@ BEGIN {
     set_up_inc('../lib');
 }
 
-plan(tests => 152);
+plan(tests => 160);
 
 eval 'pass();';
 
@@ -723,10 +723,17 @@ pass("eval in freed package does not crash");
         'eval "UNITCHECK { eval q(UNITCHECK { die; }); print q(A-) }";',
         'eval "UNITCHECK { eval q(BEGIN     { die; }); print q(A-) }";',
         'eval "BEGIN     { eval q(UNITCHECK { die; }); print q(A-) }";',
+        'CHECK     { eval "]" } print q"A-";',
+        'INIT      { eval "]" } print q"A-";',
+        'UNITCHECK { eval "]" } print q"A-";',
+        'BEGIN     { eval "]" } print q"A-";',
     ) {
         fresh_perl_is($line . ' print "ok";', "A-ok", {}, "No segfault: $line");
-        my $sort_line= 'my @x= sort { ' . $line . ' } 1,2;';
-        fresh_perl_is($line . ' print "ok";', "A-ok", {}, "No segfault: $line");
 
+        # sort blocks are somewhat special and things that work in normal blocks
+        # can blow up in sort blocks, so test these constructs specially.
+        my $sort_line= 'my @x= sort { ' . $line . ' } 1,2;';
+        fresh_perl_is($sort_line . ' print "ok";', "A-ok", {},
+            "No segfault inside sort: $sort_line");
     }
 }
