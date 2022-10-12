@@ -3899,8 +3899,8 @@ S_my_langinfo_i(pTHX_
     assert(cat_index <= NOMINAL_LC_ALL_INDEX);
 
     DEBUG_Lv(PerlIO_printf(Perl_debug_log,
-                           "Entering my_langinfo item=%d, using locale %s\n",
-                           item, locale));
+                           "Entering my_langinfo item=%ld, using locale %s\n",
+                           (long) item, locale));
 /*--------------------------------------------------------------------------*/
 /* Above is the common beginning to all the implementations of my_langinfo().
  * Below are the various completions.
