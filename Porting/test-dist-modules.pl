@@ -292,7 +292,7 @@ sub run {
 
 sub usage {
     print <<EOS;
-Usage: $^X $0 [options]
+Usage: $^X $0 [options] [distnames]
  -c | -continue
      Continue processing after failures
      Devel::PPPort must successfully build to continue.
@@ -300,6 +300,18 @@ Usage: $^X $0 [options]
      Install to a work path, not to perl's site_perl.
  -h | -help
      Display this message.
+
+Optional distnames should be names of the distributions under dist/ to
+test.  If omitted all of the distributions under dist/ are tested.
+Devel-PPPort is always tested.
+
+Test all of the distributions, stop on the first failure:
+
+   $^X $0 -s
+
+Test the various threads distributions, continue on failure:
+
+   $^X $0 -s -c threads threads-shared Thread-Queue Thread-Semaphore
 EOS
 }
 
