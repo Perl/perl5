@@ -2382,6 +2382,7 @@ EOF
     {   # Was looping
         watchdog(10);
         like("\x{00DF}", qr/[\x{1E9E}_]*/i, "\"\\x{00DF}\" =~ /[\\x{1E9E}_]*/i was looping");
+        watchdog(0);
     }
 
     {   # Bug #90536, caused failed assertion
