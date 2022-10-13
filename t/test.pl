@@ -246,7 +246,7 @@ sub _ok {
         $name =~ s/#/\\#/g;
 	$out = $pass ? "ok $test - $name" : "not ok $test - $name";
     } else {
-	$out = $pass ? "ok $test" : "not ok $test";
+	$out = $pass ? "ok $test - [$where]" : "not ok $test - [$where]";
     }
 
     if ($TODO) {
