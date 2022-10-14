@@ -1733,8 +1733,34 @@ sub warning_like {
 #        _AFTER_ the 'threads' module is loaded.
 sub watchdog ($;$)
 {
+    CORE::state $watchdog;
+    CORE::state $watchdog_thread;
     my $timeout = shift;
-    my $method  = shift || "";
+
+    # If cancelling, use the state variables to know which method was used to
+    # create the watchdog.
+    if ($timeout == 0) {
+        if ($watchdog_thread) {
+            $watchdog_thread->kill('KILL');
+            undef $watch_dog_thread;
+        }
+        elsif ($watchdog) {
+            kill('KILL', $watchdog);
+            undef $watch_dog;
+        }
+        else {
+            alarm(0);
+        }
+
+        return;
+    }
+
+    # Make sure these aren't defined.
+    undef $watchdog;
+    undef $watchdog_thread;
+
+    my $method = shift || "";
+
     my $timeout_msg = 'Test process timed out - terminating';
 
     # Accept either spelling
@@ -1763,7 +1789,9 @@ sub watchdog ($;$)
     if (!$threads_on || $method eq "process") {
 
         # On Windows and VMS, try launching a watchdog process
-        #   using system(1, ...) (see perlport.pod)
+        #   using system(1, ...) (see perlport.pod).  system() returns
+        #   immediately on these platforms with effectively a pid of the new
+        #   process
         if ($is_mswin || $is_vms) {
             # On Windows, try to get the 'real' PID
             if ($is_mswin) {
@@ -1777,7 +1805,7 @@ sub watchdog ($;$)
             return if ($pid_to_kill <= 0);
 
             # Launch watchdog process
-            my $watchdog;
+            undef $watchdog;
             eval {
                 local $SIG{'__WARN__'} = sub {
                     _diag("Watchdog warning: $_[0]");
@@ -1826,7 +1854,7 @@ sub watchdog ($;$)
         }
 
         # Try using fork() to generate a watchdog process
-        my $watchdog;
+        undef $watchdog;
         eval { $watchdog = fork() };
         if (defined($watchdog)) {
             if ($watchdog) {   # Parent process
@@ -1871,9 +1899,11 @@ sub watchdog ($;$)
     # Use a watchdog thread because either 'threads' is loaded,
     #   or fork() failed
     if (eval {require threads; 1}) {
-        'threads'->create(sub {
+        $watchdog_thread = 'threads'->create(sub {
                 # Load POSIX if available
                 eval { require POSIX; };
+
+                $SIG{'KILL'} = sub { threads->exit(); };
 
                 # Execute the timeout
                 my $time_left = $timeout;
