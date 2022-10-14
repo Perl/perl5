@@ -5914,7 +5914,6 @@ yyl_colon(pTHX_ char *s)
         s = skipspace(s);
         attrs = NULL;
         while (isIDFIRST_lazy_if_safe(s, PL_bufend, UTF)) {
-            bool sig = PL_parser->sig_seen;
             I32 tmp;
             SV *sv;
             STRLEN len;
@@ -5954,45 +5953,8 @@ yyl_colon(pTHX_ char *s)
                 PL_lex_stuff = NULL;
             }
             else {
-                /* NOTE: any CV attrs applied here need to be part of
-                   the CVf_BUILTIN_ATTRS define in cv.h! */
-                if (!PL_in_my && memEQs(SvPVX(sv), len, "lvalue")) {
-                    sv_free(sv);
-                    if (!sig)
-                        CvLVALUE_on(PL_compcv);
-                }
-                else if (!PL_in_my && memEQs(SvPVX(sv), len, "method")) {
-                    sv_free(sv);
-                    if (!sig)
-                        CvNOWARN_AMBIGUOUS_on(PL_compcv);
-                }
-                else if (!PL_in_my && memEQs(SvPVX(sv), len, "const")) {
-                    sv_free(sv);
-                    if (!sig) {
-                        Perl_ck_warner_d(aTHX_
-                            packWARN(WARN_EXPERIMENTAL__CONST_ATTR),
-                           ":const is experimental"
-                        );
-                        CvANONCONST_on(PL_compcv);
-                        if (!CvANON(PL_compcv))
-                            yyerror(":const is not permitted on named "
-                                    "subroutines");
-                    }
-                }
-                /* After we've set the flags, it could be argued that
-                   we don't need to do the attributes.pm-based setting
-                   process, and shouldn't bother appending recognized
-                   flags.  To experiment with that, uncomment the
-                   following "else".  (Note that's already been
-                   uncommented.  That keeps the above-applied built-in
-                   attributes from being intercepted (and possibly
-                   rejected) by a package's attribute routines, but is
-                   justified by the performance win for the common case
-                   of applying only built-in attributes.) */
-                else
-                    attrs = op_append_elem(OP_LIST, attrs,
-                                        newSVOP(OP_CONST, 0,
-                                                sv));
+                attrs = op_append_elem(OP_LIST, attrs,
+                                    newSVOP(OP_CONST, 0, sv));
             }
             s = skipspace(d);
             if (*s == ':' && s[1] != ':')
@@ -12475,6 +12437,92 @@ Perl_start_subparse(pTHX_ I32 is_format, U32 flags)
         CvPADLIST(PL_compcv)->xpadl_outid = CvPADLIST(outsidecv)->xpadl_id;
 
     return oldsavestack_ix;
+}
+
+/* If o represents a builtin attribute, apply it to cv and returns true.
+ * Otherwise does nothing and returns false
+ */
+
+STATIC bool
+S_apply_builtin_cv_attribute(pTHX_ CV *cv, OP *o)
+{
+    assert(o->op_type == OP_CONST);
+    SV *sv = cSVOPo_sv;
+    STRLEN len = SvCUR(sv);
+
+    /* NOTE: any CV attrs applied here need to be part of
+       the CVf_BUILTIN_ATTRS define in cv.h! */
+
+    if(memEQs(SvPVX(sv), len, "lvalue"))
+        CvLVALUE_on(cv);
+    else if(memEQs(SvPVX(sv), len, "method"))
+        CvNOWARN_AMBIGUOUS_on(cv);
+    else if(memEQs(SvPVX(sv), len, "const")) {
+        Perl_ck_warner_d(aTHX_
+            packWARN(WARN_EXPERIMENTAL__CONST_ATTR),
+           ":const is experimental"
+        );
+        CvANONCONST_on(cv);
+        if (!CvANON(cv))
+            yyerror(":const is not permitted on named subroutines");
+    }
+    else
+        return false;
+
+    return true;
+}
+
+/*
+=for apidoc apply_builtin_cv_attributes
+
+Given an OP_LIST containing attribute definitions, filter it for known builtin
+attributes to apply to the cv, returning a possibly-smaller list containing
+just the remaining ones.
+
+=cut
+*/
+
+OP *
+Perl_apply_builtin_cv_attributes(pTHX_ CV *cv, OP *attrlist)
+{
+    PERL_ARGS_ASSERT_APPLY_BUILTIN_CV_ATTRIBUTES;
+
+    if(!attrlist)
+        return attrlist;
+
+    if(attrlist->op_type != OP_LIST) {
+        /* Not in fact a list but just a single attribute */
+        if(S_apply_builtin_cv_attribute(aTHX_ cv, attrlist)) {
+            op_free(attrlist);
+            return NULL;
+        }
+
+        return attrlist;
+    }
+
+    OP *prev = cLISTOPx(attrlist)->op_first;
+    assert(prev->op_type == OP_PUSHMARK);
+    OP *o = OpSIBLING(prev);
+
+    OP *next;
+    for(; o; o = next) {
+        next = OpSIBLING(o);
+
+        if(S_apply_builtin_cv_attribute(aTHX_ cv, o)) {
+            op_sibling_splice(attrlist, prev, 1, NULL);
+            op_free(o);
+        }
+        else {
+            prev = o;
+        }
+    }
+
+    if(OpHAS_SIBLING(cLISTOPx(attrlist)->op_first))
+        return attrlist;
+
+    /* The list is now entirely empty, we might as well discard it */
+    op_free(attrlist);
+    return NULL;
 }
 
 
