@@ -709,7 +709,12 @@ proto
 subattrlist
 	:	empty
 	|	COLONATTR THING
-			{ $$ = $THING; }
+			{
+			  OP *attrlist = $THING;
+			  if(attrlist && !PL_parser->sig_seen)
+			      attrlist = apply_builtin_cv_attributes(PL_compcv, attrlist);
+			  $$ = attrlist;
+			}
 	|	COLONATTR
 			{ $$ = NULL; }
 	;

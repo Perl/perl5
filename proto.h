@@ -269,6 +269,9 @@ PERL_CALLCONV I32	Perl_apply(pTHX_ I32 type, SV** mark, SV** sp)
 PERL_CALLCONV void	Perl_apply_attrs_string(pTHX_ const char *stashpv, CV *cv, const char *attrstr, STRLEN len);
 #define PERL_ARGS_ASSERT_APPLY_ATTRS_STRING	\
 	assert(stashpv); assert(cv); assert(attrstr)
+PERL_CALLCONV OP*	Perl_apply_builtin_cv_attributes(pTHX_ CV *cv, OP *attrlist);
+#define PERL_ARGS_ASSERT_APPLY_BUILTIN_CV_ATTRIBUTES	\
+	assert(cv)
 PERL_CALLCONV void	Perl_atfork_lock(void);
 #define PERL_ARGS_ASSERT_ATFORK_LOCK
 PERL_CALLCONV void	Perl_atfork_unlock(void);

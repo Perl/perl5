@@ -1810,6 +1810,7 @@ CTp	|Signal_t |csighandler3	|int sig|NULLOK Siginfo_t *info|NULLOK void *uap
 CTp	|Signal_t |perly_sighandler	|int sig|NULLOK Siginfo_t *info|NULLOK void *uap|bool safe
 Cp	|SV**	|stack_grow	|NN SV** sp|NN SV** p|SSize_t n
 Apd	|I32	|start_subparse	|I32 is_format|U32 flags
+Apd	|OP*	|apply_builtin_cv_attributes|NN CV *cv|NULLOK OP *attrlist
 Xp	|void	|init_named_cv	|NN CV *cv|NN OP *nameop
 : Used in pp_ctl.c
 p	|void	|sub_crush_depth|NN CV* cv
