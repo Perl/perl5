@@ -8,6 +8,7 @@ on: [push, pull_request]
 permissions: {}
 jobs:
   notify-irc:
+    timeout-minutes: 20
     runs-on: ubuntu-latest
     # only on main repo
     if: ( github.event.pull_request.head.repo.full_name == 'Perl/perl5' || github.repository == 'Perl/perl5' )
@@ -31,6 +32,7 @@ jobs:
           github_ref: ${{ github.event.ref }}
 
       - name: Setup commit message SUMUP env
+        id: sumup
         env:
           TXT: ${{ join(github.event.commits.*.message, '\n') }}
           C1: ${{ github.event.commits[0].message }}
@@ -60,7 +62,7 @@ jobs:
           my @l = split( "\n", $txt );
           my $max = 5;
           @l = ( @l[0..$max], "..." ) if @l > $max;
-          @l = grep { $_ !~ m{^EOF} } @l;
+          @l = grep { $_ !~ m{^EOS} } @l;
           say( join( "\n", @l ) );
           EOS
 
@@ -70,9 +72,9 @@ jobs:
 
           # -------------------------------------
           echo "# setup SUMUP environment variable"
-          echo 'SUMUP<<EOF' >> $GITHUB_ENV
+          echo 'SUMUP<<EOS' >> $GITHUB_ENV
           perl parse.pl     >> $GITHUB_ENV
-          echo 'EOF'        >> $GITHUB_ENV
+          echo 'EOS'        >> $GITHUB_ENV
 
           # -------------------------------------
           echo "# done"
@@ -107,6 +109,42 @@ jobs:
             ${{ env.SUMUP }}\n\
             ${{ github.event.compare }}"
 
+      - name: Shorten PR fields
+        if: github.event_name == 'pull_request'
+        id: shorten
+        env:
+          TITLE: ${{ github.event.pull_request.title }}
+          BODY:  ${{ github.event.pull_request.body }}
+        run: |
+          # -------------------------------------
+          echo "# script parse.pl"
+          cat <<'EOS' > parse.pl
+          use v5.14; use strict; use warnings;
+          my ( $key, $len ) = @ARGV;
+          $key //= ''; $len //= 50;
+          my $txt = substr( $ENV{$key} || "Unknown $key", 0, $len );
+          $txt =~ s{\\n}{\n}g; $txt =~ s{\\t}{ }g; $txt =~ s{\t}{ }g;
+          $txt =~ s{^EOS}{}mg;
+          say $txt;
+          EOS
+
+          # -------------------------------------
+          echo 'TITLE<<EOS'       >> $GITHUB_ENV
+          perl parse.pl TITLE 80  >> $GITHUB_ENV
+          echo 'EOS'              >> $GITHUB_ENV
+          # -------------------------------------
+          echo 'BODY<<EOS'        >> $GITHUB_ENV
+          perl parse.pl BODY 500  >> $GITHUB_ENV
+          echo 'EOS'               >> $GITHUB_ENV
+          # -------------------------------------
+          echo "# done"
+
+      - name: checking BODY and TITLE variable
+        if: github.event_name == 'pull_request'
+        run: |
+          echo "BODY: $BODY"
+          echo "TITLE: $TITLE"
+
       - name: irc opened pull request
         uses: rectalogic/notify-irc@v1
         if: github.event_name == 'pull_request' && github.event.action == 'opened'
@@ -117,8 +155,8 @@ jobs:
           nickname: Pull-Request
           message:
             "\x037${{ github.actor }}\x0F opened PR #${{ github.event.pull_request.number }}\n\
-            ${{ github.event.pull_request.title }}\n\
-            ${{ github.event.pull_request.body }}\n\
+            ${{ env.TITLE }}\n\
+            ${{ env.BODY }}\n\
             ${{ github.event.pull_request.html_url }}"
 
       - name: irc synchronize pull request
@@ -131,5 +169,5 @@ jobs:
           nickname: Pull-Request
           message:
             "\x037${{ github.actor }}\x0F updated PR #${{ github.event.pull_request.number }}\n\
-            ${{ github.event.pull_request.title }}\n\
+            ${{ env.TITLE }}\n\
             ${{ github.event.pull_request.html_url }}"
