@@ -603,6 +603,7 @@ thread is cloned all Perl data is cloned, however non-Perl data cannot
 be cloned automatically.  Perl after 5.8.0 has support for the C<CLONE>
 special subroutine.  In C<CLONE> you can do whatever
 you need to do,
+XXX also perlthreads
 like for example handle the cloning of non-Perl data, if necessary.
 C<CLONE> will be called once as a class method for every package that has it
 defined (or inherits it).  It will be called in the context of the new thread,
