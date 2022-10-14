@@ -2371,22 +2371,6 @@ $!
 $ bool_dflt = "n"
 $ vms_prefix = "perl_root"
 $ vms_prefixup = F$EDIT(vms_prefix,"UPCASE")
-$ rp = "Will you be sharing your ''vms_prefixup' with ''otherarch'? [''bool_dflt'] "
-$ GOSUB myread
-$ IF .NOT. ans
-$ THEN
-$   sharedperl = "N"
-$ ELSE
-$   sharedperl = "Y"
-$   IF (F$ELEMENT(0, "-", archname).EQS."VMS_AXP")
-$   THEN
-$     macros = macros + """AXE=1"","
-$   ENDIF
-$   IF (F$ELEMENT(0, "-", archname).EQS."VMS_IA64")
-$   THEN
-$     macros = macros + """IXE=1"","
-$   ENDIF
-$ ENDIF
 $!
 $!: is AFS running?                       !sfn
 $!: decide how portable to be.  Allow command line overrides. !sfn
@@ -3246,29 +3230,11 @@ $ if mymalloc then usemymalloc = "define"
 $!
 $ perl_cc=Mcc
 $!
-$ IF (sharedperl .AND. F$ELEMENT(0, "-", archname) .EQS. "VMS_AXP")
-$ THEN
-$   obj_ext=".abj"
-$   so="axe"
-$   dlext="axe"
-$   exe_ext=".axe"
-$   lib_ext=".alb"
-$ ELSE
-$   IF (sharedperl .AND. F$ELEMENT(0, "-", archname) .EQS. "VMS_IA64")
-$   THEN
-$     obj_ext=".ibj"
-$     so="ixe"
-$     dlext="ixe"
-$     exe_ext=".ixe"
-$     lib_ext=".ilb"
-$   ELSE
-$     obj_ext=".obj"
-$     so="exe"
-$     dlext="exe"
-$     exe_ext=".exe"
-$     lib_ext=".olb"
-$   ENDIF
-$ ENDIF
+$ obj_ext=".obj"
+$ so="exe"
+$ dlext="exe"
+$ exe_ext=".exe"
+$ lib_ext=".olb"
 $ dlobj="dl_vms''obj_ext'"
 $!
 $ cppstdin="''perl_cc'/noobj/comments=as_is/preprocess=sys$output sys$input"
@@ -7525,8 +7491,6 @@ $   echo ""
 $   echo4 "The perl.cld file is now being written..."
 $   OPEN/WRITE CONFIG 'file_2_find'
 $   ext = ".exe"
-$   IF (sharedperl .AND. F$ELEMENT(0, "-", archname) .EQS. "VMS_AXP") THEN ext := .AXE
-$   IF (sharedperl .AND. F$ELEMENT(0, "-", archname) .EQS. "VMS_IA64") THEN ext := .IXE
 $   IF (use_vmsdebug_perl)
 $   THEN
 $     WRITE CONFIG "define verb dbgperl"
@@ -7582,11 +7546,6 @@ $ WRITE CONFIG "$   root_spec = P1"
 $ WRITE CONFIG "$ endif"
 $ WRITE CONFIG "$ define/translation=concealed ''vms_prefix' 'root_spec'"
 $ WRITE CONFIG "$ ext = "".exe"""
-$ IF sharedperl
-$ THEN
-$ WRITE CONFIG "$ if f$getsyi(""ARCH_TYPE"") .eq. 2 then ext = "".AXE"""
-$ WRITE CONFIG "$ if f$getsyi(""ARCH_TYPE"") .eq. 3 then ext = "".IXE"""
-$ ENDIF
 $ IF (perl_symbol)
 $ THEN
 $   perl_setup_perl = "'" + "'perl'" ! triple quoted foreign command symbol
