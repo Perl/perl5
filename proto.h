@@ -5226,6 +5226,13 @@ STATIC const char *	S_get_LC_ALL_display(pTHX);
 #    endif
 #  endif
 #endif
+#if defined(DEBUGGING) || defined(USE_POSIX_2008_LOCALE)
+#  if defined(PERL_IN_LOCALE_C)
+STATIC const char *	S_get_displayable_string(pTHX_ const char * const s, const char * const e, const bool is_utf8);
+#define PERL_ARGS_ASSERT_GET_DISPLAYABLE_STRING	\
+	assert(s); assert(e)
+#  endif
+#endif
 #if defined(DEBUG_LEAKING_SCALARS_FORK_DUMP)
 PERL_CALLCONV void	Perl_dump_sv_child(pTHX_ SV *sv)
 			__attribute__visibility__("hidden");
@@ -5698,9 +5705,6 @@ PERL_CALLCONV SV*	Perl_hfree_next_entry(pTHX_ HV *hv, STRLEN *indexp)
 
 #endif
 #if defined(PERL_IN_LOCALE_C)
-STATIC const char *	S_get_displayable_string(pTHX_ const char * const s, const char * const e, const bool is_utf8);
-#define PERL_ARGS_ASSERT_GET_DISPLAYABLE_STRING	\
-	assert(s); assert(e)
 #  if defined(USE_LOCALE)
 STATIC unsigned int	S_get_category_index(const int category, const char * locale);
 #define PERL_ARGS_ASSERT_GET_CATEGORY_INDEX
