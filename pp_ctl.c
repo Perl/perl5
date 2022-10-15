@@ -4761,6 +4761,7 @@ PP(pp_entereval)
 
 PP(pp_leaveeval)
 {
+    dSP;
     SV **oldsp;
     U8 gimme;
     PERL_CONTEXT *cx;
@@ -4804,9 +4805,16 @@ PP(pp_leaveeval)
         }
         PL_curcop = old_pl_curcop;
 
-        failed = !(gimme == G_SCALAR
-                        ? (module_true || SvTRUE_NN(*PL_stack_sp))
-                        : PL_stack_sp > oldsp);
+        /* failed stays false */
+        if (module_true) {
+            POPs;
+            PUSHs(&PL_sv_yes);
+        }
+        else {
+            failed = !(gimme == G_SCALAR
+                            ? SvTRUE_NN(*PL_stack_sp)
+                            : PL_stack_sp > oldsp);
+        }
     }
 
     /* the cx_popeval does a leavescope, which frees the optree associated
