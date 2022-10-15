@@ -2336,8 +2336,10 @@ S_new_ctype(pTHX_ const char *newctype)
         if (bad_count == 2 && maybe_utf8_turkic) {
             bad_count = 0;
             *bad_chars_list = '\0';
-            PL_fold_locale['I'] = 'I';
-            PL_fold_locale['i'] = 'i';
+
+            /* The casts are because otherwise some compilers warn */
+            PL_fold_locale[ (U8) 'I' ] = 'I';
+            PL_fold_locale[ (U8) 'i' ] = 'i';
             PL_in_utf8_turkic_locale = TRUE;
             DEBUG_L(PerlIO_printf(Perl_debug_log, "%s is turkic\n", newctype));
         }
