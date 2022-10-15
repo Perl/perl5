@@ -3444,6 +3444,15 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
     case OP_SCALAR:
         op_lvalue(cUNOPo->op_first, OP_ENTERSUB);
         goto nomod;
+
+    case OP_ANONCODE:
+        /* If we were to set OPf_REF on this and it was constructed by XS
+         * code as a child of an OP_REFGEN then we'd end up generating a
+         * double-ref when executed. We don't want to do that, so don't
+         * set flag here.
+         *   See also https://github.com/Perl/perl5/issues/20384
+         */
+        goto do_next;
     }
 
     /* [20011101.069 (#7861)] File test operators interpret OPf_REF to mean that
