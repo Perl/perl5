@@ -5954,6 +5954,7 @@ S_print_collxfrm_input_and_return(pTHX_
 
 #  endif    /* DEBUGGING */
 #endif /* USE_LOCALE_COLLATE */
+#if  defined(DEBUGGING) || defined(USE_POSIX_2008_LOCALE)
 
 STATIC const char *
 S_get_displayable_string(pTHX_
@@ -6007,6 +6008,7 @@ S_get_displayable_string(pTHX_
     return ret;
 }
 
+#endif
 #ifdef USE_LOCALE
 
 STATIC const char *
