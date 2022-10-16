@@ -20,6 +20,7 @@ use v5.26;
 use warnings;
 
 sub generate_opcode_h;
+sub generate_opcode_h_epilogue;
 sub generate_opcode_h_prologue;
 sub generate_opcode_h_defines;
 sub generate_opcode_h_opnames;
@@ -33,11 +34,6 @@ BEGIN {
     # Get function prototypes
     require './regen/regen_lib.pl';
 }
-
-my $oc = open_new('opcode.h', '>',
-                  {by => 'regen/opcode.pl', from => 'its data',
-                   file => 'opcode.h', style => '*',
-                   copyright => [1993 .. 2007]});
 
 my $on = open_new('opnames.h', '>',
                   { by => 'regen/opcode.pl', from => 'its data', style => '*',
@@ -1073,23 +1069,32 @@ my $pp = open_new('pp_proto.h', '>',
     }
 }
 
-print $oc "\n\n";
-OP_PRIVATE::print_defines($oc);
-OP_PRIVATE::print_PL_op_private_tables($oc);
-
 OP_PRIVATE::print_B_Op_private($oprivpm);
 
-foreach ($oc, $on, $pp, $oprivpm) {
+foreach ($on, $pp, $oprivpm) {
     read_only_bottom_close_and_rename($_);
 }
 
 sub generate_opcode_h {
+    my $oc = open_new( 'opcode.h', '>', {
+        by        => 'regen/opcode.pl',
+        copyright => [1993 .. 2007],
+        file      => 'opcode.h',
+        from      => 'its data',
+        style     => '*',
+    });
+
+    my $old = select $oc;
+
     generate_opcode_h_prologue;
     generate_opcode_h_defines;
     generate_opcode_h_opnames;
     generate_opcode_h_pl_ppaddr;
     generate_opcode_h_pl_check;
     generate_opcode_h_pl_opargs;
+    generate_opcode_h_epilogue;
+
+    select $old;
 }
 
 my @unimplemented;
@@ -1098,11 +1103,11 @@ sub generate_opcode_h_defines {
 
     sub unimplemented {
         if (@unimplemented) {
-            print $oc "#else\n";
+            print "#else\n";
             foreach (@unimplemented) {
-                print $oc "#define $_ Perl_unimplemented_op\n";
+                print "#define $_ Perl_unimplemented_op\n";
             }
-            print $oc "#endif\n";
+            print "#endif\n";
             @unimplemented = ();
         }
 
@@ -1117,25 +1122,32 @@ sub generate_opcode_h_defines {
             unimplemented();
             $last_cond = $cond;
             if ($last_cond) {
-                print $oc "$last_cond\n";
+                print "$last_cond\n";
             }
         }
         push @unimplemented, $op_func if $last_cond;
-        print $oc "#define $op_func $impl\n" if $impl ne $op_func;
+        print "#define $op_func $impl\n" if $impl ne $op_func;
     }
     # If the last op was conditional, we need to close it out:
     unimplemented();
 
-    print $oc "\n#endif /* End of $restrict_to_core */\n\n";
+    print "\n#endif /* End of $restrict_to_core */\n\n";
+}
+
+sub generate_opcode_h_epilogue {
+    print "\n\n";
+    OP_PRIVATE::print_defines(select);
+    OP_PRIVATE::print_PL_op_private_tables(select);
+    read_only_bottom_close_and_rename(select);
 }
 
 sub generate_opcode_h_prologue {
-    print $oc "#$restrict_to_core\n\n";
+    print "#$restrict_to_core\n\n";
 }
 
 sub generate_opcode_h_opnames {
     # Emit op names and descriptions.
-    print $oc <<~'END';
+    print <<~'END';
     START_EXTERN_C
 
     #ifndef DOINIT
@@ -1145,10 +1157,10 @@ sub generate_opcode_h_opnames {
     END
 
     for (@ops) {
-        print $oc qq(\t"$_",\n);
+        print qq(\t"$_",\n);
     }
 
-    print $oc <<~'END';
+    print <<~'END';
             "freed",
     };
     #endif
@@ -1165,10 +1177,10 @@ sub generate_opcode_h_opnames {
         # Have to escape double quotes and escape characters.
         $safe_desc =~ s/([\\"])/\\$1/g;
 
-        print $oc qq(\t"$safe_desc",\n);
+        print qq(\t"$safe_desc",\n);
     }
 
-    print $oc <<~'END';
+    print <<~'END';
             "freed op",
     };
     #endif
@@ -1178,7 +1190,7 @@ sub generate_opcode_h_opnames {
 }
 
 sub generate_opcode_h_pl_check {
-    print $oc <<~'END';
+    print <<~'END';
 
     EXT Perl_check_t PL_check[] /* or perlvars.h */
     #if defined(DOINIT)
@@ -1186,10 +1198,10 @@ sub generate_opcode_h_pl_check {
     END
 
     for (@ops) {
-        print $oc "\t", tab(3, "Perl_$check{$_},"), "\t/* $_ */\n";
+        print "\t", tab(3, "Perl_$check{$_},"), "\t/* $_ */\n";
     }
 
-    print $oc <<~'END';
+    print <<~'END';
     }
     #endif
     ;
@@ -1200,7 +1212,7 @@ sub generate_opcode_h_pl_opargs {
     my $OCSHIFT = 8;
     my $OASHIFT = 12;
 
-    print $oc <<~'END';
+    print <<~'END';
 
     #ifndef DOINIT
     EXTCONST U32 PL_opargs[];
@@ -1246,10 +1258,10 @@ sub generate_opcode_h_pl_opargs {
             $argshift += 4;
         }
         $argsum = sprintf("0x%08x", $argsum);
-        print $oc "\t", tab(3, "$argsum,"), "/* $op */\n";
+        print "\t", tab(3, "$argsum,"), "/* $op */\n";
     }
 
-    print $oc <<~'END';
+    print <<~'END';
     };
     #endif
 
@@ -1260,7 +1272,7 @@ sub generate_opcode_h_pl_opargs {
 sub generate_opcode_h_pl_ppaddr {
     # Emit ppcode switch array.
 
-    print $oc <<~'END';
+    print <<~'END';
 
     START_EXTERN_C
 
@@ -1273,13 +1285,13 @@ sub generate_opcode_h_pl_ppaddr {
         my $op_func = "Perl_pp_$_";
         my $name = $alias{$_};
         if ($name && $name->[0] ne $op_func) {
-            print $oc "\t$op_func,\t/* implemented by $name->[0] */\n";
+            print "\t$op_func,\t/* implemented by $name->[0] */\n";
         } else {
-            print $oc "\t$op_func,\n";
+            print "\t$op_func,\n";
         }
     }
 
-    print $oc <<~'END';
+    print <<~'END';
     }
     #endif
     ;
