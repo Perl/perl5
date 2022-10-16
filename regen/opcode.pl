@@ -19,6 +19,9 @@
 use v5.26;
 use warnings;
 
+sub generate_opcode_h;
+sub generate_opcode_h_prologue;
+
 my $restrict_to_core = "if defined(PERL_CORE) || defined(PERL_EXT)";
 
 BEGIN {
@@ -920,7 +923,7 @@ require './regen/op_private';
 #use Data::Dumper;
 #print Dumper \%LABELS, \%DEFINES, \%FLAGS, \%BITFIELDS;
 
-print $oc "#$restrict_to_core\n\n";
+generate_opcode_h;
 
 # Emit defines.
 
@@ -1235,5 +1238,13 @@ OP_PRIVATE::print_B_Op_private($oprivpm);
 
 foreach ($oc, $on, $pp, $oprivpm) {
     read_only_bottom_close_and_rename($_);
+}
+
+sub generate_opcode_h {
+    generate_opcode_h_prologue;
+}
+
+sub generate_opcode_h_prologue {
+    print $oc "#$restrict_to_core\n\n";
 }
 
