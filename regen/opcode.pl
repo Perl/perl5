@@ -22,6 +22,7 @@ use warnings;
 sub generate_opcode_h;
 sub generate_opcode_h_prologue;
 sub generate_opcode_h_defines;
+sub generate_opcode_h_opnames;
 
 my $restrict_to_core = "if defined(PERL_CORE) || defined(PERL_EXT)";
 
@@ -937,49 +938,6 @@ print $on "} opcode;\n";
 print $on "\n#define MAXO ", scalar @ops, "\n";
 print $on "#define OP_FREED MAXO\n";
 
-# Emit op names and descriptions.
-
-print $oc <<'END';
-START_EXTERN_C
-
-#ifndef DOINIT
-EXTCONST char* const PL_op_name[];
-#else
-EXTCONST char* const PL_op_name[] = {
-END
-
-for (@ops) {
-    print $oc qq(\t"$_",\n);
-}
-
-print $oc <<'END';
-        "freed",
-};
-#endif
-
-#ifndef DOINIT
-EXTCONST char* const PL_op_desc[];
-#else
-EXTCONST char* const PL_op_desc[] = {
-END
-
-for (@ops) {
-    my($safe_desc) = $desc{$_};
-
-    # Have to escape double quotes and escape characters.
-    $safe_desc =~ s/([\\"])/\\$1/g;
-
-    print $oc qq(\t"$safe_desc",\n);
-}
-
-print $oc <<'END';
-        "freed op",
-};
-#endif
-
-END_EXTERN_C
-END
-
 # Emit ppcode switch array.
 
 print $oc <<'END';
@@ -1206,6 +1164,7 @@ foreach ($oc, $on, $pp, $oprivpm) {
 sub generate_opcode_h {
     generate_opcode_h_prologue;
     generate_opcode_h_defines;
+    generate_opcode_h_opnames;
 }
 
 my @unimplemented;
@@ -1249,3 +1208,46 @@ sub generate_opcode_h_prologue {
     print $oc "#$restrict_to_core\n\n";
 }
 
+sub generate_opcode_h_opnames {
+    # Emit op names and descriptions.
+    print $oc <<~'END';
+    START_EXTERN_C
+
+    #ifndef DOINIT
+    EXTCONST char* const PL_op_name[];
+    #else
+    EXTCONST char* const PL_op_name[] = {
+    END
+
+    for (@ops) {
+        print $oc qq(\t"$_",\n);
+    }
+
+    print $oc <<~'END';
+            "freed",
+    };
+    #endif
+
+    #ifndef DOINIT
+    EXTCONST char* const PL_op_desc[];
+    #else
+    EXTCONST char* const PL_op_desc[] = {
+    END
+
+    for (@ops) {
+        my($safe_desc) = $desc{$_};
+
+        # Have to escape double quotes and escape characters.
+        $safe_desc =~ s/([\\"])/\\$1/g;
+
+        print $oc qq(\t"$safe_desc",\n);
+    }
+
+    print $oc <<~'END';
+            "freed op",
+    };
+    #endif
+
+    END_EXTERN_C
+    END
+}
