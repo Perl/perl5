@@ -30,6 +30,7 @@ sub generate_opcode_h_pl_ppaddr;
 
 sub generate_opnames_h;
 sub generate_opnames_h_opcode_enum;
+sub generate_opnames_h_epilogue;
 sub generate_opnames_h_opcode_predicates;
 
 my $restrict_to_core = "if defined(PERL_CORE) || defined(PERL_EXT)";
@@ -1022,7 +1023,7 @@ my $pp = open_new('pp_proto.h', '>',
 
 OP_PRIVATE::print_B_Op_private($oprivpm);
 
-foreach ($on, $pp, $oprivpm) {
+foreach ($pp, $oprivpm) {
     read_only_bottom_close_and_rename($_);
 }
 
@@ -1252,6 +1253,7 @@ sub generate_opcode_h_pl_ppaddr {
 sub generate_opnames_h {
     generate_opnames_h_opcode_enum;
     generate_opnames_h_opcode_predicates;
+    generate_opnames_h_epilogue;
 }
 
 sub generate_opnames_h_opcode_enum {
@@ -1266,6 +1268,10 @@ sub generate_opnames_h_opcode_enum {
     print $on "} opcode;\n";
     print $on "\n#define MAXO ", scalar @ops, "\n";
     print $on "#define OP_FREED MAXO\n";
+}
+
+sub generate_opnames_h_epilogue {
+    read_only_bottom_close_and_rename($on);
 }
 
 sub generate_opnames_h_opcode_predicates {
