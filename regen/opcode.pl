@@ -28,6 +28,9 @@ sub generate_opcode_h_pl_check;
 sub generate_opcode_h_pl_opargs;
 sub generate_opcode_h_pl_ppaddr;
 
+sub generate_opnames_h;
+sub generate_opnames_h_opcode_enum;
+
 my $restrict_to_core = "if defined(PERL_CORE) || defined(PERL_EXT)";
 
 BEGIN {
@@ -924,16 +927,7 @@ require './regen/op_private';
 #use Data::Dumper;
 #print Dumper \%LABELS, \%DEFINES, \%FLAGS, \%BITFIELDS;
 
-print $on "typedef enum opcode {\n";
-
-my $i = 0;
-for (@ops) {
-      print $on "\t", tab(3,"OP_\U$_"), " = ", $i++, ",\n";
-}
-print $on "\t", tab(3,"OP_max"), "\n";
-print $on "} opcode;\n";
-print $on "\n#define MAXO ", scalar @ops, "\n";
-print $on "#define OP_FREED MAXO\n";
+generate_opnames_h;
 
 # Emit allowed argument types.
 
@@ -1296,4 +1290,22 @@ sub generate_opcode_h_pl_ppaddr {
     #endif
     ;
     END
+}
+
+sub generate_opnames_h {
+    generate_opnames_h_opcode_enum;
+}
+
+sub generate_opnames_h_opcode_enum {
+    print $on "typedef enum opcode {\n";
+
+    my $i = 0;
+    for (@ops) {
+        print $on "\t", tab(3,"OP_\U$_"), " = ", $i++, ",\n";
+    }
+
+    print $on "\t", tab(3,"OP_max"), "\n";
+    print $on "} opcode;\n";
+    print $on "\n#define MAXO ", scalar @ops, "\n";
+    print $on "#define OP_FREED MAXO\n";
 }
