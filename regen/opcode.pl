@@ -35,20 +35,14 @@ sub generate_opnames_h_opcode_predicates;
 
 sub generate_pp_proto_h;
 
+sub generate_b_op_private_pm;
+
 my $restrict_to_core = "if defined(PERL_CORE) || defined(PERL_EXT)";
 
 BEGIN {
     # Get function prototypes
     require './regen/regen_lib.pl';
 }
-
-my $oprivpm = open_new('lib/B/Op_private.pm', '>',
-                  { by => 'regen/opcode.pl',
-                    from => "data in\nregen/op_private "
-                           ."and pod embedded in regen/opcode.pl",
-                    style => '#',
-                    file => 'lib/B/Op_private.pm',
-                    copyright => [2014 .. 2014] });
 
 # Read 'opcodes' data.
 
@@ -975,6 +969,7 @@ my %opflags = (
 generate_opcode_h;
 generate_opnames_h;
 generate_pp_proto_h;
+generate_b_op_private_pm;
 
 sub gen_op_is_macro {
     my ($op_is, $macname) = @_;
@@ -1004,12 +999,6 @@ sub gen_op_is_macro {
         }
         print ")\n";
     }
-}
-
-OP_PRIVATE::print_B_Op_private($oprivpm);
-
-foreach ($oprivpm) {
-    read_only_bottom_close_and_rename($_);
 }
 
 sub generate_opcode_h {
@@ -1335,4 +1324,18 @@ sub generate_pp_proto_h {
     read_only_bottom_close_and_rename(select);
 
     select $old;
+}
+
+sub generate_b_op_private_pm {
+    my $oprivpm = open_new('lib/B/Op_private.pm', '>', {
+        by          => 'regen/opcode.pl',
+        from        => "data in\nregen/op_private and pod embedded in regen/opcode.pl",
+        style       => '#',
+        file        => 'lib/B/Op_private.pm',
+        copyright   => [2014 .. 2014],
+    });
+
+    OP_PRIVATE::print_B_Op_private($oprivpm);
+
+    read_only_bottom_close_and_rename($oprivpm);
 }
