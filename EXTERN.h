@@ -52,6 +52,6 @@
 #  endif
 
 #undef INIT
-#define INIT(x)
+#define INIT(...)
 
 #undef DOINIT
