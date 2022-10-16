@@ -23,6 +23,7 @@ sub generate_opcode_h;
 sub generate_opcode_h_prologue;
 sub generate_opcode_h_defines;
 sub generate_opcode_h_opnames;
+sub generate_opcode_h_pl_check;
 sub generate_opcode_h_pl_ppaddr;
 
 my $restrict_to_core = "if defined(PERL_CORE) || defined(PERL_EXT)";
@@ -941,20 +942,6 @@ print $on "#define OP_FREED MAXO\n";
 
 print $oc <<'END';
 
-EXT Perl_check_t PL_check[] /* or perlvars.h */
-#if defined(DOINIT)
-= {
-END
-
-for (@ops) {
-    print $oc "\t", tab(3, "Perl_$check{$_},"), "\t/* $_ */\n";
-}
-
-print $oc <<'END';
-}
-#endif
-;
-
 #ifndef DOINIT
 EXTCONST U32 PL_opargs[];
 #else
@@ -1142,6 +1129,7 @@ sub generate_opcode_h {
     generate_opcode_h_defines;
     generate_opcode_h_opnames;
     generate_opcode_h_pl_ppaddr;
+    generate_opcode_h_pl_check;
 }
 
 my @unimplemented;
@@ -1226,6 +1214,25 @@ sub generate_opcode_h_opnames {
     #endif
 
     END_EXTERN_C
+    END
+}
+
+sub generate_opcode_h_pl_check {
+    print $oc <<~'END';
+
+    EXT Perl_check_t PL_check[] /* or perlvars.h */
+    #if defined(DOINIT)
+    = {
+    END
+
+    for (@ops) {
+        print $oc "\t", tab(3, "Perl_$check{$_},"), "\t/* $_ */\n";
+    }
+
+    print $oc <<~'END';
+    }
+    #endif
+    ;
     END
 }
 
