@@ -23,6 +23,7 @@ sub generate_opcode_h;
 sub generate_opcode_h_prologue;
 sub generate_opcode_h_defines;
 sub generate_opcode_h_opnames;
+sub generate_opcode_h_pl_ppaddr;
 
 my $restrict_to_core = "if defined(PERL_CORE) || defined(PERL_EXT)";
 
@@ -938,32 +939,7 @@ print $on "} opcode;\n";
 print $on "\n#define MAXO ", scalar @ops, "\n";
 print $on "#define OP_FREED MAXO\n";
 
-# Emit ppcode switch array.
-
 print $oc <<'END';
-
-START_EXTERN_C
-
-EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
-#if defined(DOINIT)
-= {
-END
-
-for (@ops) {
-    my $op_func = "Perl_pp_$_";
-    my $name = $alias{$_};
-    if ($name && $name->[0] ne $op_func) {
-        print $oc "\t$op_func,\t/* implemented by $name->[0] */\n";
-    }
-    else {
-        print $oc "\t$op_func,\n";
-    }
-}
-
-print $oc <<'END';
-}
-#endif
-;
 
 EXT Perl_check_t PL_check[] /* or perlvars.h */
 #if defined(DOINIT)
@@ -1165,6 +1141,7 @@ sub generate_opcode_h {
     generate_opcode_h_prologue;
     generate_opcode_h_defines;
     generate_opcode_h_opnames;
+    generate_opcode_h_pl_ppaddr;
 }
 
 my @unimplemented;
@@ -1249,5 +1226,34 @@ sub generate_opcode_h_opnames {
     #endif
 
     END_EXTERN_C
+    END
+}
+
+sub generate_opcode_h_pl_ppaddr {
+    # Emit ppcode switch array.
+
+    print $oc <<~'END';
+
+    START_EXTERN_C
+
+    EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
+    #if defined(DOINIT)
+    = {
+    END
+
+    for (@ops) {
+        my $op_func = "Perl_pp_$_";
+        my $name = $alias{$_};
+        if ($name && $name->[0] ne $op_func) {
+            print $oc "\t$op_func,\t/* implemented by $name->[0] */\n";
+        } else {
+            print $oc "\t$op_func,\n";
+        }
+    }
+
+    print $oc <<~'END';
+    }
+    #endif
+    ;
     END
 }
