@@ -21,6 +21,7 @@ use warnings;
 
 sub generate_opcode_h;
 sub generate_opcode_h_prologue;
+sub generate_opcode_h_defines;
 
 my $restrict_to_core = "if defined(PERL_CORE) || defined(PERL_EXT)";
 
@@ -925,44 +926,6 @@ require './regen/op_private';
 
 generate_opcode_h;
 
-# Emit defines.
-
-{
-    my $last_cond = '';
-    my @unimplemented;
-
-    sub unimplemented {
-        if (@unimplemented) {
-            print $oc "#else\n";
-            foreach (@unimplemented) {
-                print $oc "#define $_ Perl_unimplemented_op\n";
-            }
-            print $oc "#endif\n";
-            @unimplemented = ();
-        }
-
-    }
-
-    for (@ops) {
-        my ($impl, $cond) = @{$alias{$_} || ["Perl_pp_$_", '']};
-        my $op_func = "Perl_pp_$_";
-
-        if ($cond ne $last_cond) {
-            # A change in condition. (including to or from no condition)
-            unimplemented();
-            $last_cond = $cond;
-            if ($last_cond) {
-                print $oc "$last_cond\n";
-            }
-        }
-        push @unimplemented, $op_func if $last_cond;
-        print $oc "#define $op_func $impl\n" if $impl ne $op_func;
-    }
-    # If the last op was conditional, we need to close it out:
-    unimplemented();
-}
-print $oc "\n#endif /* End of $restrict_to_core */\n\n";
-
 print $on "typedef enum opcode {\n";
 
 my $i = 0;
@@ -1242,6 +1205,44 @@ foreach ($oc, $on, $pp, $oprivpm) {
 
 sub generate_opcode_h {
     generate_opcode_h_prologue;
+    generate_opcode_h_defines;
+}
+
+my @unimplemented;
+sub generate_opcode_h_defines {
+    my $last_cond = '';
+
+    sub unimplemented {
+        if (@unimplemented) {
+            print $oc "#else\n";
+            foreach (@unimplemented) {
+                print $oc "#define $_ Perl_unimplemented_op\n";
+            }
+            print $oc "#endif\n";
+            @unimplemented = ();
+        }
+
+    }
+
+    for (@ops) {
+        my ($impl, $cond) = @{$alias{$_} || ["Perl_pp_$_", '']};
+        my $op_func = "Perl_pp_$_";
+
+        if ($cond ne $last_cond) {
+            # A change in condition. (including to or from no condition)
+            unimplemented();
+            $last_cond = $cond;
+            if ($last_cond) {
+                print $oc "$last_cond\n";
+            }
+        }
+        push @unimplemented, $op_func if $last_cond;
+        print $oc "#define $op_func $impl\n" if $impl ne $op_func;
+    }
+    # If the last op was conditional, we need to close it out:
+    unimplemented();
+
+    print $oc "\n#endif /* End of $restrict_to_core */\n\n";
 }
 
 sub generate_opcode_h_prologue {
