@@ -24,6 +24,7 @@ sub generate_opcode_h_prologue;
 sub generate_opcode_h_defines;
 sub generate_opcode_h_opnames;
 sub generate_opcode_h_pl_check;
+sub generate_opcode_h_pl_opargs;
 sub generate_opcode_h_pl_ppaddr;
 
 my $restrict_to_core = "if defined(PERL_CORE) || defined(PERL_EXT)";
@@ -927,8 +928,6 @@ require './regen/op_private';
 #use Data::Dumper;
 #print Dumper \%LABELS, \%DEFINES, \%FLAGS, \%BITFIELDS;
 
-generate_opcode_h;
-
 print $on "typedef enum opcode {\n";
 
 my $i = 0;
@@ -939,14 +938,6 @@ print $on "\t", tab(3,"OP_max"), "\n";
 print $on "} opcode;\n";
 print $on "\n#define MAXO ", scalar @ops, "\n";
 print $on "#define OP_FREED MAXO\n";
-
-print $oc <<'END';
-
-#ifndef DOINIT
-EXTCONST U32 PL_opargs[];
-#else
-EXTCONST U32 PL_opargs[] = {
-END
 
 # Emit allowed argument types.
 
@@ -1000,23 +991,7 @@ my %OP_IS_NUMCOMPARE;   # /S</
 my %OP_IS_DIRHOP;   # /Fd/
 my %OP_IS_INFIX_BIT;    # /S\|/
 
-my $OCSHIFT = 8;
-my $OASHIFT = 12;
-
 for my $op (@ops) {
-    my $argsum = 0;
-    my $flags = $flags{$op};
-    for my $flag (keys %opflags) {
-        if ($flags =~ s/$flag//) {
-            die "Flag collision for '$op' ($flags{$op}, $flag)\n"
-                if $argsum & $opflags{$flag};
-            $argsum |= $opflags{$flag};
-        }
-    }
-    die qq[Opcode '$op' has no class indicator ($flags{$op} => $flags)\n]
-        unless exists $opclass{$flags};
-    $argsum |= $opclass{$flags} << $OCSHIFT;
-    my $argshift = $OASHIFT;
     for my $arg (split(' ',$args{$op})) {
         if ($arg =~ s/^D//) {
             # handle 1st, just to put D 1st.
@@ -1032,26 +1007,10 @@ for my $op (@ops) {
             $OP_IS_NUMCOMPARE{$op} = $opnum{$op} if $arg =~ s/<//;
             $OP_IS_INFIX_BIT {$op} = $opnum{$op} if $arg =~ s/\|//;
         }
-        my $argnum = ($arg =~ s/\?//) ? 8 : 0;
-        die "op = $op, arg = $arg\n"
-            unless exists $argnum{$arg};
-        $argnum += $argnum{$arg};
-        die "Argument overflow for '$op'\n"
-            if $argshift >= $ARGBITS ||
-               $argnum > ((1 << ($ARGBITS - $argshift)) - 1);
-        $argsum += $argnum << $argshift;
-        $argshift += 4;
     }
-    $argsum = sprintf("0x%08x", $argsum);
-    print $oc "\t", tab(3, "$argsum,"), "/* $op */\n";
 }
 
-print $oc <<'END';
-};
-#endif
-
-END_EXTERN_C
-END
+generate_opcode_h;
 
 # Emit OP_IS_* macros
 
@@ -1130,6 +1089,7 @@ sub generate_opcode_h {
     generate_opcode_h_opnames;
     generate_opcode_h_pl_ppaddr;
     generate_opcode_h_pl_check;
+    generate_opcode_h_pl_opargs;
 }
 
 my @unimplemented;
@@ -1233,6 +1193,67 @@ sub generate_opcode_h_pl_check {
     }
     #endif
     ;
+    END
+}
+
+sub generate_opcode_h_pl_opargs {
+    my $OCSHIFT = 8;
+    my $OASHIFT = 12;
+
+    print $oc <<~'END';
+
+    #ifndef DOINIT
+    EXTCONST U32 PL_opargs[];
+    #else
+    EXTCONST U32 PL_opargs[] = {
+    END
+
+    for my $op (@ops) {
+        my $argsum = 0;
+        my $flags = $flags{$op};
+        for my $flag (keys %opflags) {
+            if ($flags =~ s/$flag//) {
+                die "Flag collision for '$op' ($flags{$op}, $flag)\n"
+                    if $argsum & $opflags{$flag};
+                $argsum |= $opflags{$flag};
+            }
+        }
+        die qq[Opcode '$op' has no class indicator ($flags{$op} => $flags)\n]
+            unless exists $opclass{$flags};
+        $argsum |= $opclass{$flags} << $OCSHIFT;
+        my $argshift = $OASHIFT;
+        for my $arg (split(' ',$args{$op})) {
+            if ($arg =~ s/^D//) {
+                # handle 1st, just to put D 1st.
+            }
+            if ($arg =~ /^F/) {
+                # record opnums of these opnames
+                $arg =~ s/s//;
+                $arg =~ s/-//;
+                $arg =~ s/\+//;
+            } elsif ($arg =~ /^S./) {
+                $arg =~ s/<//;
+                $arg =~ s/\|//;
+            }
+            my $argnum = ($arg =~ s/\?//) ? 8 : 0;
+            die "op = $op, arg = $arg\n"
+                unless exists $argnum{$arg};
+            $argnum += $argnum{$arg};
+            die "Argument overflow for '$op'\n"
+                if $argshift >= $ARGBITS ||
+                $argnum > ((1 << ($ARGBITS - $argshift)) - 1);
+            $argsum += $argnum << $argshift;
+            $argshift += 4;
+        }
+        $argsum = sprintf("0x%08x", $argsum);
+        print $oc "\t", tab(3, "$argsum,"), "/* $op */\n";
+    }
+
+    print $oc <<~'END';
+    };
+    #endif
+
+    END_EXTERN_C
     END
 }
 
