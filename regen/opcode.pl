@@ -1076,10 +1076,7 @@ sub generate_opcode_h_opnames {
     print <<~'END';
     START_EXTERN_C
 
-    #ifndef DOINIT
-    EXTCONST char* const PL_op_name[];
-    #else
-    EXTCONST char* const PL_op_name[] = {
+    EXTCONST char* const PL_op_name[] INIT({
     END
 
     for (@ops) {
@@ -1088,13 +1085,9 @@ sub generate_opcode_h_opnames {
 
     print <<~'END';
             "freed",
-    };
-    #endif
+    });
 
-    #ifndef DOINIT
-    EXTCONST char* const PL_op_desc[];
-    #else
-    EXTCONST char* const PL_op_desc[] = {
+    EXTCONST char* const PL_op_desc[] INIT({
     END
 
     for (@ops) {
@@ -1107,9 +1100,8 @@ sub generate_opcode_h_opnames {
     }
 
     print <<~'END';
-            "freed op",
-    };
-    #endif
+        "freed op",
+    });
 
     END_EXTERN_C
     END
@@ -1119,8 +1111,7 @@ sub generate_opcode_h_pl_check {
     print <<~'END';
 
     EXT Perl_check_t PL_check[] /* or perlvars.h */
-    #if defined(DOINIT)
-    = {
+    INIT({
     END
 
     for (@ops) {
@@ -1128,9 +1119,7 @@ sub generate_opcode_h_pl_check {
     }
 
     print <<~'END';
-    }
-    #endif
-    ;
+    });
     END
 }
 
@@ -1140,10 +1129,7 @@ sub generate_opcode_h_pl_opargs {
 
     print <<~'END';
 
-    #ifndef DOINIT
-    EXTCONST U32 PL_opargs[];
-    #else
-    EXTCONST U32 PL_opargs[] = {
+    EXTCONST U32 PL_opargs[] INIT({
     END
 
     for my $op (@ops) {
@@ -1188,8 +1174,7 @@ sub generate_opcode_h_pl_opargs {
     }
 
     print <<~'END';
-    };
-    #endif
+    });
 
     END_EXTERN_C
     END
@@ -1203,8 +1188,7 @@ sub generate_opcode_h_pl_ppaddr {
     START_EXTERN_C
 
     EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
-    #if defined(DOINIT)
-    = {
+    INIT({
     END
 
     for (@ops) {
@@ -1218,9 +1202,7 @@ sub generate_opcode_h_pl_ppaddr {
     }
 
     print <<~'END';
-    }
-    #endif
-    ;
+    });
     END
 }
 
