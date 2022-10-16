@@ -40,10 +40,6 @@ BEGIN {
     require './regen/regen_lib.pl';
 }
 
-my $on = open_new('opnames.h', '>',
-                  { by => 'regen/opcode.pl', from => 'its data', style => '*',
-                    file => 'opnames.h', copyright => [1999 .. 2008] });
-
 my $oprivpm = open_new('lib/B/Op_private.pm', '>',
                   { by => 'regen/opcode.pl',
                     from => "data in\nregen/op_private "
@@ -989,21 +985,21 @@ sub gen_op_is_macro {
         my $last = pop @rest;   # @rest slurped, get its last
         die "Invalid range of ops: $first .. $last\n" unless $last;
 
-        print $on "\n#define $macname(op)   \\\n\t(";
+        print "\n#define $macname(op)   \\\n\t(";
 
         # verify that op-ct matches 1st..last range (and fencepost)
         # (we know there are no dups)
         if ( $op_is->{$last} - $op_is->{$first} == scalar @rest + 1) {
             
             # contiguous ops -> optimized version
-            print $on "(op) >= OP_" . uc($first)
+            print "(op) >= OP_" . uc($first)
                 . " && (op) <= OP_" . uc($last);
         }
         else {
-            print $on join(" || \\\n\t ",
+            print join(" || \\\n\t ",
                            map { "(op) == OP_" . uc() } sort keys %$op_is);
         }
-        print $on ")\n";
+        print ")\n";
     }
 }
 
@@ -1251,32 +1247,44 @@ sub generate_opcode_h_pl_ppaddr {
 }
 
 sub generate_opnames_h {
+    my $on = open_new('opnames.h', '>', {
+        by => 'regen/opcode.pl',
+        from => 'its data',
+        style => '*',
+        file => 'opnames.h',
+        copyright => [1999 .. 2008],
+    });
+
+    my $old = select $on;
+
     generate_opnames_h_opcode_enum;
     generate_opnames_h_opcode_predicates;
     generate_opnames_h_epilogue;
+
+    select $old;
 }
 
 sub generate_opnames_h_opcode_enum {
-    print $on "typedef enum opcode {\n";
+    print "typedef enum opcode {\n";
 
     my $i = 0;
     for (@ops) {
-        print $on "\t", tab(3,"OP_\U$_"), " = ", $i++, ",\n";
+        print "\t", tab(3,"OP_\U$_"), " = ", $i++, ",\n";
     }
 
-    print $on "\t", tab(3,"OP_max"), "\n";
-    print $on "} opcode;\n";
-    print $on "\n#define MAXO ", scalar @ops, "\n";
-    print $on "#define OP_FREED MAXO\n";
+    print "\t", tab(3,"OP_max"), "\n";
+    print "} opcode;\n";
+    print "\n#define MAXO ", scalar @ops, "\n";
+    print "#define OP_FREED MAXO\n";
 }
 
 sub generate_opnames_h_epilogue {
-    read_only_bottom_close_and_rename($on);
+    read_only_bottom_close_and_rename(select);
 }
 
 sub generate_opnames_h_opcode_predicates {
     # Emit OP_IS_* macros
-    print $on <<~'EO_OP_IS_COMMENT';
+    print <<~'EO_OP_IS_COMMENT';
 
     /* the OP_IS_* macros are optimized to a simple range check because
         all the member OPs are contiguous in regen/opcodes table.
