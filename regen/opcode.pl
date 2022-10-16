@@ -16,7 +16,9 @@
 #
 # This script is normally invoked from regen.pl.
 
-use strict;
+use v5.26;
+use warnings;
+
 my $restrict_to_core = "if defined(PERL_CORE) || defined(PERL_EXT)";
 
 BEGIN {
