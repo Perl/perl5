@@ -33,6 +33,8 @@ sub generate_opnames_h_opcode_enum;
 sub generate_opnames_h_epilogue;
 sub generate_opnames_h_opcode_predicates;
 
+sub generate_pp_proto_h;
+
 my $restrict_to_core = "if defined(PERL_CORE) || defined(PERL_EXT)";
 
 BEGIN {
@@ -972,6 +974,7 @@ my %opflags = (
 
 generate_opcode_h;
 generate_opnames_h;
+generate_pp_proto_h;
 
 sub gen_op_is_macro {
     my ($op_is, $macname) = @_;
@@ -1003,23 +1006,9 @@ sub gen_op_is_macro {
     }
 }
 
-my $pp = open_new('pp_proto.h', '>',
-                  { by => 'opcode.pl', from => 'its data' });
-
-{
-    my %funcs;
-    for (@ops) {
-        my $name = $alias{$_} ? $alias{$_}[0] : "Perl_pp_$_";
-        ++$funcs{$name};
-    }
-    for (sort keys %funcs) {
-        print $pp qq{PERL_CALLCONV OP *$_(pTHX) __attribute__visibility__("hidden");\n};
-    }
-}
-
 OP_PRIVATE::print_B_Op_private($oprivpm);
 
-foreach ($pp, $oprivpm) {
+foreach ($oprivpm) {
     read_only_bottom_close_and_rename($_);
 }
 
@@ -1323,4 +1312,27 @@ sub generate_opnames_h_opcode_predicates {
     gen_op_is_macro( \%OP_IS_NUMCOMPARE, 'OP_IS_NUMCOMPARE');
     gen_op_is_macro( \%OP_IS_DIRHOP, 'OP_IS_DIRHOP');
     gen_op_is_macro( \%OP_IS_INFIX_BIT, 'OP_IS_INFIX_BIT');
+}
+
+sub generate_pp_proto_h {
+    my $pp = open_new('pp_proto.h', '>', {
+        by => 'opcode.pl',
+        from => 'its data',
+    });
+
+    my $old = select $pp;
+
+    my %funcs;
+    for (@ops) {
+        my $name = $alias{$_} ? $alias{$_}[0] : "Perl_pp_$_";
+        ++$funcs{$name};
+    }
+
+    for (sort keys %funcs) {
+        print $pp qq{PERL_CALLCONV OP *$_(pTHX) __attribute__visibility__("hidden");\n};
+    }
+
+    read_only_bottom_close_and_rename(select);
+
+    select $old;
 }
