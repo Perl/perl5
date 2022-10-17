@@ -370,7 +370,8 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-XXX
+An C<eval EXPR> referring to a lexical sub defined in grandparent
+scope no longer produces an assertion failues. [github #19857]
 
 =back
 
