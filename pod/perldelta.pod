@@ -131,9 +131,10 @@ XXX Remove this section if not applicable.
 
 =item *
 
-L<XXX> has been upgraded from version A.xx to B.yy.
+L<perl5db.pl> has been upgraded from version 1.76 to 1.77.
 
-If there was something important to note about this change, include that here.
+Supplying end of file to the debugger now acts like C<q>, as
+documented. [github #20307]
 
 =back
 
