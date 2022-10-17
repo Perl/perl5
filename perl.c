@@ -2783,6 +2783,14 @@ S_run_body(pTHX_ I32 oldscope)
     PERL_SET_PHASE(PERL_PHASE_RUN);
 
     if (PL_restartop) {
+#ifdef DEBUGGING
+        /* this complements the "EXECUTING..." debug we emit above.
+         * it will show up when an eval fails in the main program level
+         * and the code continues after the error.
+         */
+        if (!DEBUG_q_TEST)
+          PERL_DEBUG(PerlIO_printf(Perl_debug_log, "\nCONTINUING...\n\n"));
+#endif
         PL_restartjmpenv = NULL;
         PL_op = PL_restartop;
         PL_restartop = 0;
