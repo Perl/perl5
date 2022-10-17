@@ -4736,6 +4736,13 @@ sv_streq_flags(SV *sv1, SV *sv2, U32 flags)
     OUTPUT:
         RETVAL
 
+bool
+PL_throwing()
+    CODE:
+        RETVAL = PL_throwing;
+    OUTPUT:
+        RETVAL
+
 MODULE = XS::APItest PACKAGE = XS::APItest::AUTOLOADtest
 
 int
