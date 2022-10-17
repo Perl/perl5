@@ -195,11 +195,11 @@ definition even if we fed it things like this:
 
 Do not, however, be tempted to do this:
 
-    (@a, @b)   = upcase(@list1, @list2);
+    (@x, @y)   = upcase(@list1, @list2);
 
 Like the flattened incoming parameter list, the return list is also
 flattened on return.  So all you have managed to do here is stored
-everything in C<@a> and made C<@b> empty.  See 
+everything in C<@x> and made C<@y> empty.  See 
 L</Pass by Reference> for alternatives.
 
 A subroutine may be called using an explicit C<&> prefix.  The
@@ -335,7 +335,7 @@ block, after any name or attributes.
 
 For example,
 
-    sub foo :lvalue ($a, $b = 1, @c) { .... }
+    sub foo :lvalue ($x, $y = 1, @z) { .... }
 
 The signature declares lexical variables that are
 in scope for the block.  When the subroutine is called, the signature
@@ -1042,18 +1042,18 @@ also accepted.
     )
 
     {
-     my $a = delete local $hash{a};
-     # $a is [ 7, 8, 9 ]
+     my $x = delete local $hash{a};
+     # $x is [ 7, 8, 9 ]
      # %hash is (b => 1)
 
      {
-      my @nums = delete local @$a[0, 2]
+      my @nums = delete local @$x[0, 2]
       # @nums is (7, 9)
-      # $a is [ undef, 8 ]
+      # $x is [ undef, 8 ]
 
-      $a[0] = 999; # will be erased when the scope ends
+      $x[0] = 999; # will be erased when the scope ends
      }
-     # $a is back to [ 7, 8, 9 ]
+     # $x is back to [ 7, 8, 9 ]
 
     }
     # %hash is back to its original state
@@ -1346,7 +1346,7 @@ Here are a few simple examples.  First, let's pass in several arrays
 to a function and have it C<pop> all of then, returning a new list
 of all their former last elements:
 
-    @tailings = popmany ( \@a, \@b, \@c, \@d );
+    @tailings = popmany ( \@w, \@x, \@y, \@z );
 
     sub popmany {
 	my $aref;
@@ -1379,12 +1379,12 @@ a little expensive.
 
 Where people get into trouble is here:
 
-    (@a, @b) = func(@c, @d);
+    (@w, @x) = func(@y, @z);
 or
-    (%a, %b) = func(%c, %d);
+    (%w, %x) = func(%y, %z);
 
-That syntax simply won't work.  It sets just C<@a> or C<%a> and
-clears the C<@b> or C<%b>.  Plus the function didn't get passed
+That syntax simply won't work.  It sets just C<@w> or C<%w> and
+clears the C<@x> or C<%x>.  Plus the function didn't get passed
 into two separate arrays or hashes: it got one long list in C<@_>,
 as always.
 
@@ -1393,27 +1393,27 @@ cleaner code, although not so nice to look at.  Here's a function that
 takes two array references as arguments, returning the two array elements
 in order of how many elements they have in them:
 
-    ($aref, $bref) = func(\@c, \@d);
-    print "@$aref has more than @$bref\n";
+    ($wref, $xref) = func(\@y, \@z);
+    print "@$wref has more than @$xref\n";
     sub func {
-	my ($cref, $dref) = @_;
-	if (@$cref > @$dref) {
-	    return ($cref, $dref);
+	my ($yref, $zref) = @_;
+	if (@$yref > @$zref) {
+	    return ($yref, $zref);
 	} else {
-	    return ($dref, $cref);
+	    return ($zref, $yref);
 	}
     }
 
 It turns out that you can actually do this also:
 
-    (*a, *b) = func(\@c, \@d);
-    print "@a has more than @b\n";
+    (*w, *x) = func(\@y, \@z);
+    print "@w has more than @x\n";
     sub func {
-	local (*c, *d) = @_;
-	if (@c > @d) {
-	    return (\@c, \@d);
+	local (*y, *z) = @_;
+	if (@y > @z) {
+	    return (\@y, \@z);
 	} else {
-	    return (\@d, \@c);
+	    return (\@z, \@y);
 	}
     }
 
@@ -1491,14 +1491,14 @@ corresponding built-in.
    sub myvec ($$$)	   myvec $var, $offset, 1
    sub myindex ($$;$)	   myindex &getstring, "substr"
    sub mysyswrite ($$$;$)  mysyswrite $buf, 0, length($buf) - $off, $off
-   sub myreverse (@)	   myreverse $a, $b, $c
-   sub myjoin ($@)	   myjoin ":", $a, $b, $c
+   sub myreverse (@)	   myreverse $x, $y, $z
+   sub myjoin ($@)	   myjoin ":", $x, $y, $z
    sub mypop (\@)	   mypop @array
    sub mysplice (\@$$@)	   mysplice @array, 0, 2, @pushme
    sub mykeys (\[%@])	   mykeys $hashref->%*
    sub myopen (*;$)	   myopen HANDLE, $name
    sub mypipe (**)	   mypipe READHANDLE, WRITEHANDLE
-   sub mygrep (&@)	   mygrep { /foo/ } $a, $b, $c
+   sub mygrep (&@)	   mygrep { /foo/ } $x, $y, $z
    sub myrand (;$)	   myrand 42
    sub mytime ()	   mytime
 
@@ -1580,7 +1580,7 @@ without a prototype.  If you want to force a unary function to have the
 same precedence as a list operator, add C<;> to the end of the prototype:
 
     sub mygetprotobynumber($;);
-    mygetprotobynumber $a > $b; # parsed as mygetprotobynumber($a > $b)
+    mygetprotobynumber $x > $y; # parsed as mygetprotobynumber($x > $y)
 
 The interesting thing about C<&> is that you can generate new syntax with it,
 provided it's in the initial position:
