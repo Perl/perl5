@@ -46,9 +46,7 @@
 #include <unixio.h>
 #include <unixlib.h>
 #include <file.h>  /* it's not <sys/file.h>, so don't use I_SYS_FILE */
-#if (defined(__DECC) && defined(__DECC_VER) && __DECC_VER > 20000000) || defined(__DECCXX)
-#  include <unistd.h> /* DECC has this; gcc doesn't */
-#endif
+#include <unistd.h>
 
 #ifdef NO_PERL_TYPEDEFS /* a2p; we don't want Perl's special routines */
 #  define DONT_MASK_RTL_CALLS

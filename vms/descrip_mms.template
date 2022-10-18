@@ -23,7 +23,6 @@
 
 ~DECC~
 ~DECCXX~
-~GNUC~
 ~ARCH-TYPE~ = 1
 ~THREAD~
 ~SOCKET~
@@ -86,21 +85,6 @@ ARCHCORE = [.lib.$(ARCHNAME).$(PERL_VERSION).CORE]
 ARCHAUTO = [.lib.$(ARCHNAME).$(PERL_VERSION).auto]
 
 #: >>>>>Compiler-specific options <<<<<
-.ifdef GNUC
-.first
-	@ If F$TrnLnm("Sys").eqs."" Then Define/NoLog SYS GNU_CC_Include:[VMS]
-CC = gcc
-# -fno-builtin avoids bug in gcc up to version 2.6.2 which can destroy
-# data when memcpy() is called on large (>64 kB) blocks of memory
-# (fixed in gcc 2.6.3)
-XTRACCFLAGS = /Obj=$(MMS$TARGET_NAME)$(O)/NoCase_Hack/Optimize=2
-DBGSPECFLAGS =
-XTRADEF = 
-XTRAOBJS =
-LIBS1 = GNU_CC:[000000]GCCLIB.OLB/Library
-LIBS2 = Sys$Share:VAXCRTL/Shareable
-POSIX =
-.else
 XTRAOBJS = 
 LIBS1 = $(XTRAOBJS)
 DBGSPECFLAGS = /Show=(expansion,include)/machine
@@ -125,7 +109,6 @@ XTRACCFLAGS = /Include=[]/Standard=Relaxed_ANSI/Prefix=All/Obj=$(OBJVAL)
 .endif
 XTRADEF =
 POSIX = POSIX
-.endif
 
 #: >>>>> Configuration options <<<<<
 #: __DEBUG__: builds images with full VMS debugger support
