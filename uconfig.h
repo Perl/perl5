@@ -4156,6 +4156,26 @@
  *	This symbol defines the format string used for printing a Perl NV
  *	using %g-ish floating point format.
  */
+/* I32df:
+ *	This symbol defines the format string used for printing a Perl I32
+ *	as a signed decimal integer.
+ */
+/* U32uf:
+ *	This symbol defines the format string used for printing a Perl U32
+ *	as an unsigned decimal integer.
+ */
+/* U32of:
+ *	This symbol defines the format string used for printing a Perl U32
+ *	as an unsigned octal integer.
+ */
+/* U32xf:
+ *	This symbol defines the format string used for printing a Perl U32
+ *	as an unsigned hexadecimal integer in lowercase abcdef.
+ */
+/* U32Xf:
+ *	This symbol defines the format string used for printing a Perl U32
+ *	as an unsigned hexadecimal integer in uppercase ABCDEF.
+ */
 #define	IVdf		"ld"		/**/
 #define	UVuf		"lu"		/**/
 #define	UVof		"lo"		/**/
@@ -4164,6 +4184,11 @@
 #define	NVef		"e"		/**/
 #define	NVff		"f"		/**/
 #define	NVgf		"g"		/**/
+#define	I32df		"ld"		/**/
+#define	U32uf		"lu"		/**/
+#define	U32of		"lo"		/**/
+#define	U32xf		"lx"		/**/
+#define	U32Xf		"lX"		/**/
 
 /* SELECT_MIN_BITS:
  *	This symbol holds the minimum number of bits operated by select.
@@ -5351,6 +5376,6 @@
 #endif
 
 /* Generated from:
- * 72a47a9b71961a7325395f1b8ca5e40f71099b60c5f4abbc6c872a8ee4597b08 config_h.SH
- * bfca76a5b377754c7113eda85ec235ff8776e891a4041ce385a874c7788409a6 uconfig.sh
+ * 87bdd73bd78f6ebe0bf3b7bc0897da3ed460fceee0bc2e61363ef5e24db55bb2 config_h.SH
+ * 9c5779a38fbba64b0a5dcf7ce548120a29ea5039350102827f500c812bda10b2 uconfig.sh
  * ex: set ro: */

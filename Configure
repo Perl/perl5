@@ -1235,6 +1235,7 @@ u8size=''
 u8type=''
 uvsize=''
 uvtype=''
+i32dformat=''
 ivdformat=''
 nvEUformat=''
 nvFUformat=''
@@ -1242,6 +1243,10 @@ nvGUformat=''
 nveformat=''
 nvfformat=''
 nvgformat=''
+u32XUformat=''
+u32oformat=''
+u32uformat=''
+u32xformat=''
 uvXUformat=''
 uvoformat=''
 uvuformat=''
@@ -21807,6 +21812,45 @@ case "$ivdformat" in
     ;;
 esac
 
+case "$i32dformat" in
+'')	case "$i32type" in
+	int)
+		i32dformat='"d"'
+		u32uformat='"u"'
+		u32oformat='"o"'
+		u32xformat='"x"'
+		u32XUformat='"X"'
+		;;
+	long)
+		i32dformat='"ld"'
+		u32uformat='"lu"'
+		u32oformat='"lo"'
+		u32xformat='"lx"'
+		u32XUformat='"lX"'
+		;;
+	int_least32_t)			: will not happen currently
+		i32dformat=PRIdLEAST32
+		u32uformat=PRIuLEAST32
+		u32oformat=PRIoLEAST32
+		u32xformat=PRIxLEAST32
+		u32XUformat=PRIXLEAST32
+		;;
+	int32_t)
+		i32dformat=PRId32
+		u32uformat=PRIu32
+		u32oformat=PRIo32
+		u32xformat=PRIx32
+		u32XUformat=PRIX32
+		;;
+	esac ;;
+esac
+
+case "$i32dformat" in
+'') echo "$0: Fatal: failed to find format strings for 32-bit integers, cannot continue." >&4
+    exit 1
+    ;;
+esac
+
 : Check format string for GID
 
 echo " "
@@ -25270,6 +25314,7 @@ html3dir='$html3dir'
 html3direxp='$html3direxp'
 i16size='$i16size'
 i16type='$i16type'
+i32dformat='$i32dformat'
 i32size='$i32size'
 i32type='$i32type'
 i64size='$i64size'
@@ -25657,8 +25702,12 @@ troff='$troff'
 ttyname_r_proto='$ttyname_r_proto'
 u16size='$u16size'
 u16type='$u16type'
+u32XUformat='$u32XUformat'
+u32oformat='$u32oformat'
 u32size='$u32size'
 u32type='$u32type'
+u32uformat='$u32uformat'
+u32xformat='$u32xformat'
 u64size='$u64size'
 u64type='$u64type'
 u8size='$u8size'

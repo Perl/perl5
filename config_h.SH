@@ -4191,6 +4191,26 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	This symbol defines the format string used for printing a Perl NV
  *	using %g-ish floating point format.
  */
+/* I32df:
+ *	This symbol defines the format string used for printing a Perl I32
+ *	as a signed decimal integer.
+ */
+/* U32uf:
+ *	This symbol defines the format string used for printing a Perl U32
+ *	as an unsigned decimal integer.
+ */
+/* U32of:
+ *	This symbol defines the format string used for printing a Perl U32
+ *	as an unsigned octal integer.
+ */
+/* U32xf:
+ *	This symbol defines the format string used for printing a Perl U32
+ *	as an unsigned hexadecimal integer in lowercase abcdef.
+ */
+/* U32Xf:
+ *	This symbol defines the format string used for printing a Perl U32
+ *	as an unsigned hexadecimal integer in uppercase ABCDEF.
+ */
 #define	IVdf		$ivdformat		/**/
 #define	UVuf		$uvuformat		/**/
 #define	UVof		$uvoformat		/**/
@@ -4199,6 +4219,11 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #define	NVef		$nveformat		/**/
 #define	NVff		$nvfformat		/**/
 #define	NVgf		$nvgformat		/**/
+#define	I32df		$i32dformat		/**/
+#define	U32uf		$u32uformat		/**/
+#define	U32of		$u32oformat		/**/
+#define	U32xf		$u32xformat		/**/
+#define	U32Xf		$u32XUformat		/**/
 
 /* SELECT_MIN_BITS:
  *	This symbol holds the minimum number of bits operated by select.

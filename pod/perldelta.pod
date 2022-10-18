@@ -268,6 +268,12 @@ Use L<XXX> with program names to get proper documentation linking. ]
 
 =item *
 
+C<I32>/C<U32> formatting symbols added in 5.37.2, C<I32df>, C<U32xf>, etc.
+used to be defined in F<perl.h> using preprocessor conditionals.
+They are now determined in F<Configure> and defined in F<config.h>.
+
+=item *
+
 XXX
 
 =back

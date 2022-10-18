@@ -3501,6 +3501,10 @@ i16size (perlxv.U):
 i16type (perlxv.U):
 	This variable contains the C type used for Perl's I16.
 
+i32dformat (perlxvf.U):
+	This variable contains the format string used for printing
+	a Perl I32 as a signed decimal integer.
+
 i32size (perlxv.U):
 	This variable is the size of an I32 in bytes.
 
@@ -5518,11 +5522,27 @@ u16size (perlxv.U):
 u16type (perlxv.U):
 	This variable contains the C type used for Perl's U16.
 
+u32oformat (perlxvf.U):
+	This variable contains the format string used for printing
+	a Perl U32 as an unsigned octal integer.
+
 u32size (perlxv.U):
 	This variable is the size of an U32 in bytes.
 
 u32type (perlxv.U):
 	This variable contains the C type used for Perl's U32.
+
+u32uformat (perlxvf.U):
+	This variable contains the format string used for printing
+	a Perl U32 as an unsigned decimal integer.
+
+u32xformat (perlxvf.U):
+	This variable contains the format string used for printing
+	a Perl U32 as an unsigned hexadecimal integer in lowercase abcdef.
+
+u32XUformat (perlxvf.U):
+	This variable contains the format string used for printing
+	a Perl U32 as an unsigned hexadecimal integer in uppercase ABCDEF.
 
 u64size (perlxv.U):
 	This variable is the size of an U64 in bytes.

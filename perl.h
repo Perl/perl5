@@ -2391,57 +2391,6 @@ typedef UVTYPE UV;
 #endif
 
 /*
-=for apidoc   AmnU||U32of
-=for apidoc_item  ||U32uf
-=for apidoc_item  ||U32xf
-=for apidoc_item  ||U32Xf
-
-These symbols define the format strings used for printing variables declared
-as U32; respectively as octal, unsigned, hex (lowercase C<a-f>), and hex
-(uppercase C<a-f>).
-
-=cut
-*/
-
-#if U32SIZE == UVSIZE
-#  define U32uf UVuf
-#  define U32of UVof
-#  define U32xf UVxf
-#  define U32Xf UVXf
-#elif U32SIZE == INTSIZE
-#  define U32uf "u"
-#  define U32of "o"
-#  define U32xf "x"
-#  define U32Xf "X"
-#elif U32SIZE == LONGSIZE
-#  define U32uf "lu"
-#  define U32of "lo"
-#  define U32xf "lx"
-#  define U32Xf "lX"
-#else
-#  error Cant figure out formatting strings for U32SIZE
-#endif
-
-/*
-=for apidoc  AmnU||I32df
-
-This symbol defines the format string used for printing a variable declared as
-I32
-
-=cut
-*/
-
-#if I32SIZE == IVSIZE
-#  define I32df IVdf
-#elif I32SIZE == INTSIZE
-#  define I32df "d"
-#elif I32SIZE == LONGSIZE
-#  define I32df "ld"
-#else
-#  error Cant figure out formatting string for I32SIZE
-#endif
-
-/*
  *  The macros INT2PTR and NUM2PTR are (despite their names)
  *  bi-directional: they will convert int/float to or from pointers.
  *  However the conversion to int/float are named explicitly:
