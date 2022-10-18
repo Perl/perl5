@@ -162,7 +162,7 @@ Return the CV from the GV.
 #define GVf_INTRO	0x01
 #define GVf_MULTI	0x02
 #define GVf_ASSUMECV	0x04
-/*	UNUSED		0x08 */
+#define GVf_RESERVED    0x08   /* unused */
 #define GVf_IMPORTED	0xF0
 #define GVf_IMPORTED_SV	  0x10
 #define GVf_IMPORTED_AV	  0x20
