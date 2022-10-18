@@ -3583,16 +3583,43 @@ S_try_yyparse(pTHX_ int gramtype, OP *caller_op)
     return ret;
 }
 
-/* Run PL_unitcheckav in a setjmp wrapper via call_list.
+/* S_try_run_unitcheck()
+ *
+ * Run PL_unitcheckav in a setjmp wrapper via call_list.
  * Returns:
  *   0: unitcheck blocks ran without error
  *   3: a unitcheck block died
+ *
+ * This is used to trap Perl_croak() calls that are executed
+ * during UNITCHECK blocks executed after the compilation
+ * process has completed but before the code itself has been
+ * executed via the normal run loops. It is expected to be called
+ * from doeval_compile() only. The parameter 'caller_op' is
+ * only used in DEBUGGING to validate the logic is working
+ * correctly.
+ *
+ * See also try_yyparse().
  */
 STATIC int
-S_try_run_unitcheck(pTHX)
+S_try_run_unitcheck(pTHX_ OP* caller_op)
 {
-    int ret;
+    /* if we die during compilation PL_restartop and PL_restartjmpenv
+     * will be set by Perl_die_unwind(). We need to restore their values
+     * if that happens as they are intended for the case where the code
+     * compiles and dies during execution, not where it dies during
+     * compilation. UNITCHECK runs after compilation completes, and
+     * if it dies we will execute the PL_restartop anyway via the
+     * failed compilation code path. PL_restartop and caller_op->op_next
+     * should be the same anyway, and when compilation fails then
+     * caller_op->op_next is  used as the next op after the compile.
+     */
+    JMPENV *restartjmpenv = PL_restartjmpenv;
+    OP *restartop = PL_restartop;
     dJMPENV;
+    int ret;
+    PERL_UNUSED_ARG(caller_op); /* only used in debugging builds */
+
+    assert(CxTYPE(CX_CUR()) == CXt_EVAL);
     JMPENV_PUSH(ret);
     switch (ret) {
     case 0:
@@ -3600,6 +3627,14 @@ S_try_run_unitcheck(pTHX)
         break;
     case 3:
         /* call_list died */
+        /* call_list() died and we trapped the error. We should restore
+         * the old PL_restartjmpenv and PL_restartop values, as they are
+         * used only in the case where the code was actually run.
+         * The assert validates that we will still execute the PL_restartop.
+         */
+        assert(PL_restartop == caller_op->op_next); /* we expect these to match */
+        PL_restartjmpenv = restartjmpenv;
+        PL_restartop = restartop;
         break;
     default:
         JMPENV_POP;
@@ -3823,7 +3858,7 @@ S_doeval_compile(pTHX_ U8 gimme, CV* outside, U32 seq, HV *hh)
         if (in_require) {
             call_list(PL_scopestack_ix, PL_unitcheckav);
         }
-        else if (S_try_run_unitcheck(aTHX)) {
+        else if (S_try_run_unitcheck(aTHX_ saveop)) {
             /* there was an error! */
 
             /* Restore PL_OP */
