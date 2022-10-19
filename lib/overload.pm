@@ -2,7 +2,6 @@ package overload;
 
 use strict;
 no strict 'refs';
-no warnings 'experimental::builtin';
 
 our $VERSION = '1.35';
 
@@ -100,6 +99,7 @@ sub OverloadedStringify {
 sub Method {
     my $package = shift;
     if (ref $package) {
+        no warnings 'experimental::builtin';
         $package = builtin::blessed($package);
         return undef if !defined $package;
     }
