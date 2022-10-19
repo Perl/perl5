@@ -1744,14 +1744,15 @@ Perl_die_unwind(pTHX_ SV *msv)
     U8 in_eval = PL_in_eval;
     PERL_ARGS_ASSERT_DIE_UNWIND;
 
+    bool was_throwing = PL_throwing;
+    PL_throwing = true;
+
     if (in_eval) {
         I32 cxix;
         /* We can't use the regular SAVEBOOL() mechanism for this because we
          *   are currently unwinding the save stack. We will have to do it the
          *   old-fashioned way
          */
-        bool was_throwing = PL_throwing;
-        PL_throwing = true;
 
         /* We need to keep this SV alive through all the stack unwinding
          * and FREETMPSing below, while ensuing that it doesn't leak
