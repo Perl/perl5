@@ -1,5 +1,6 @@
 use strict; use warnings;
 use Memoize;
+use Memoize::Expire;
 
 my $DEBUG = 0;
 my $LIFETIME = 15;
@@ -15,24 +16,13 @@ if ($ENV{PERL_MEMOIZE_TESTS_FAST_ONLY}) {
 print "# Testing the timed expiration policy.\n";
 print "# This will take about thirty seconds.\n";
 
-print "1..26\n";
-
-require Memoize::Expire;
-++$test; print "ok $test - Expire loaded\n";
-
-sub now {
-#  print "NOW: @_ ", time(), "\n";
-  time;
-}
+print "1..24\n";
 
 tie my %cache => 'Memoize::Expire', LIFETIME => $LIFETIME;
-
-memoize 'now',
-    SCALAR_CACHE => [HASH => \%cache ],
-    LIST_CACHE => 'FAULT'
-    ;
-
-++$test; print "ok $test - function memoized\n";
+memoize sub { time },
+    SCALAR_CACHE => [ HASH => \%cache ],
+    LIST_CACHE => 'FAULT',
+    INSTALL => 'now';
 
 my (@before, @after, @now);
 

@@ -1,7 +1,7 @@
 use strict; use warnings;
 
 package Memoize::Expire;
-our $VERSION = '1.10';
+our $VERSION = '1.14';
 
 use Carp;
 our $DEBUG;
@@ -239,7 +239,7 @@ the cache, and it should return the cache object to the caller.
 For example, MyExpirePolicy::TIEHASH might create an object that
 contains a regular Perl hash (which it will to store the cached
 values) and some extra information about the arguments and how old the
-data is and things like that.  Let us call this object `C'.
+data is and things like that. Let us call this object I<C<C>>.
 
 When Memoize needs to check to see if an entry is in the cache
 already, it will invoke C<< C->EXISTS(key) >>.  C<key> is the normalized
@@ -272,7 +272,7 @@ cache item after ten seconds.
               $cache->{$key}{EXPIRE_TIME} > time) {
 	    return 1
 	  } else {
-	    return 0;  # Do NOT return `undef' here.
+	    return 0;  # Do NOT return undef here
 	  }
 	}
 
@@ -308,11 +308,10 @@ See the documentation for details.
 
 =head1 ALTERNATIVES
 
-Brent Powers has a C<Memoize::ExpireLRU> module that was designed to
+Brent Powers has a L<Memoize::ExpireLRU> module that was designed to
 work with Memoize and provides expiration of least-recently-used data.
 The cache is held at a fixed number of entries, and when new data
-comes in, the least-recently used data is expired.  See
-L<http://search.cpan.org/search?mode=module&query=ExpireLRU>.
+comes in, the least-recently used data is expired.
 
 Joshua Chamas's Tie::Cache module may be useful as an expiration
 manager.  (If you try this, let me know how it works out.)

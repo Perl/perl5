@@ -10,13 +10,12 @@
 use strict; use warnings;
 
 package Memoize;
-our $VERSION = '1.10';
+our $VERSION = '1.14';
 
 use Carp;
-use Exporter;
-our $DEBUG;
 use Config;                     # Dammit.
-*import = \&Exporter::import;
+
+BEGIN { require Exporter; *import = \&Exporter::import }
 our @EXPORT = qw(memoize);
 our @EXPORT_OK = qw(unmemoize flush_cache);
 
@@ -31,7 +30,7 @@ sub CLONE {
 
 # Raise an error if the user tries to specify one of thesepackage as a
 # tie for LIST_CACHE
-my %scalar_only = map {($_ => 1)} qw(DB_File GDBM_File SDBM_File ODBM_File NDBM_File);
+my %scalar_only = map {($_ => 1)} qw(DB_File GDBM_File SDBM_File ODBM_File), map +($_, "Memoize::$_"), qw(AnyDBM_File NDBM_File);
 
 sub memoize {
   my $fn = shift;
@@ -56,8 +55,8 @@ sub memoize {
   my $info;
   my $wrapper = 
       $Config{usethreads} 
-        ? eval "sub $proto { &_memoizer(\$info, \@_); }"
-        : eval "sub $proto { unshift \@_, \$info; goto &_memoizer; }";
+        ? eval "no warnings 'recursion'; sub $proto { &_memoizer(\$info, \@_); }"
+        : eval "no warnings 'recursion'; sub $proto { unshift \@_, \$info; goto &_memoizer; }";
 
   my $normalizer = $options{NORMALIZER};
   if (defined $normalizer  && ! ref $normalizer) {
@@ -198,7 +197,7 @@ sub _memoizer {
     if (exists $cache->{$argstr}) {
       return @{$cache->{$argstr}};
     } else {
-      my @q = &{$info->{U}};
+      my @q = do { no warnings 'recursion'; &{$info->{U}} };
       $cache->{$argstr} = \@q;
       @q;
     }
@@ -209,7 +208,7 @@ sub _memoizer {
       return $info->{MERGED}
         ? $cache->{$argstr}[0] : $cache->{$argstr};
     } else {
-      my $val = &{$info->{U}};
+      my $val = do { no warnings 'recursion'; &{$info->{U}} };
       # Scalars are considered to be lists; store appropriately
       if ($info->{MERGED}) {
 	$cache->{$argstr} = [$val];
@@ -269,7 +268,7 @@ sub _make_cref {
     my $parent = (caller(1))[3]; # Function that called _make_cref
     croak "Usage: argument 1 to `$parent' must be a function name or reference.\n";
   }
-  $DEBUG and warn "${name}($fn) => $cref in _make_cref\n";
+  our $DEBUG and warn "${name}($fn) => $cref in _make_cref\n";
   $cref;
 }
 
@@ -320,11 +319,13 @@ Options include:
 
 =head1 DESCRIPTION
 
-`Memoizing' a function makes it faster by trading space for time.  It
+I<Memoizing> a function makes it faster by trading space for time. It
 does this by caching the return values of the function in a table.
 If you call the function again with the same arguments, C<memoize>
 jumps in and gives you the value out of the table, instead of letting
 the function compute the value all over again.
+
+=head1 EXAMPLE
 
 Here is an extreme example.  Consider the Fibonacci sequence, defined
 by the following function:
@@ -348,14 +349,14 @@ run---fib(14) makes 1,200 extra recursive calls to itself, to compute
 and recompute things that it already computed.
 
 This function is a good candidate for memoization.  If you memoize the
-`fib' function above, it will compute fib(14) exactly once, the first
+C<fib> function above, it will compute fib(14) exactly once, the first
 time it needs to, and then save the result in a table.  Then if you
 ask for fib(14) again, it gives you the result out of the table.
 While computing fib(14), instead of computing fib(12) twice, it does
 it once; the second time it needs the value it gets it from the table.
 It doesn't compute fib(11) four times; it computes it once, getting it
 from the table the next three times.  Instead of making 1,200
-recursive calls to `fib', it makes 15.  This makes the function about
+recursive calls to C<fib>, it makes 15. This makes the function about
 150 times faster.
 
 You could do the memoization yourself, by rewriting the function, like
@@ -382,8 +383,8 @@ This makes it easy to turn memoizing on and off.
 
 Here's an even simpler example: I wrote a simple ray tracer; the
 program would look in a certain direction, figure out what it was
-looking at, and then convert the `color' value (typically a string
-like `red') of that object to a red, green, and blue pixel value, like
+looking at, and then convert the C<color> value (typically a string
+like C<red>) of that object to a red, green, and blue pixel value, like
 this:
 
     for ($direction = 0; $direction < 300; $direction++) {
@@ -921,8 +922,8 @@ function (or when your program exits):
         tie my %cache => 'Memoize::Storable', $filename, 'nstore';
 	memoize 'function', SCALAR_CACHE => [HASH => \%cache];
 
-Include the `nstore' option to have the C<Storable> database written
-in `network order'.  (See L<Storable> for more details about this.)
+Include the C<nstore> option to have the C<Storable> database written
+in I<network order>. (See L<Storable> for more details about this.)
 
 The C<flush_cache()> function will raise a run-time error unless the
 tied package provides a C<CLEAR> method.
@@ -953,27 +954,19 @@ C<f()> (C<f> called with no arguments) will not be memoized.  If this
 is a big problem, you can supply a normalizer function that prepends
 C<"x"> to every key.
 
-=head1 AUTHOR
-
-Mark-Jason Dominus
+=head1 SEE ALSO
 
 At
-http://perl.plover.com/MiniMemoize/ there is an article about
+L<https://perl.plover.com/MiniMemoize/> there is an article about
 memoization and about the internals of Memoize that appeared in The
 Perl Journal, issue #13.  (This article is also included in the
-Memoize distribution as `article.html'.)
+Memoize distribution as F<article.html>.)
 
-The author's book I<Higher-Order Perl> (2005, ISBN 1558607013, published
+Mark-Jason Dominus's book I<Higher-Order Perl> (2005, ISBN 1558607013,
+published
 by Morgan Kaufmann) discusses memoization (and many other 
 topics) in tremendous detail. It is available on-line for free.
-For more information, visit http://hop.perl.plover.com/ .
-
-=head1 COPYRIGHT AND LICENSE
-
-Copyright 1998, 1999, 2000, 2001, 2012  by Mark Jason Dominus
-
-This library is free software; you may redistribute it and/or modify
-it under the same terms as Perl itself.
+For more information, visit L<https://hop.perl.plover.com/>.
 
 =head1 THANK YOU
 
@@ -999,5 +992,16 @@ being a light in the world.
 Special thanks to Jarkko Hietaniemi, the 5.8.0 pumpking, for including
 this module in the core and for his patient and helpful guidance
 during the integration process.
+
+=head1 AUTHOR
+
+Mark Jason Dominus
+
+=head1 COPYRIGHT AND LICENSE
+
+This software is copyright (c) 2012 by Mark Jason Dominus.
+
+This is free software; you can redistribute it and/or modify it under
+the same terms as the Perl 5 programming language system itself.
 
 =cut

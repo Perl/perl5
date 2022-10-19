@@ -1452,37 +1452,30 @@ cpan/Math-BigRat/t/new-mbr.t
 cpan/Math-BigRat/t/requirer.t		see if require works properly
 cpan/Math-BigRat/t/rt121139.t
 cpan/Math-BigRat/t/trap.t		see if trap_nan and trap_inf work
+cpan/Memoize/inc/boilerplate.pl
 cpan/Memoize/Memoize.pm			Memoize
 cpan/Memoize/Memoize/AnyDBM_File.pm	Memoize glue layer for AnyDBM_File
 cpan/Memoize/Memoize/Expire.pm		Memoize expiry manager example
 cpan/Memoize/Memoize/NDBM_File.pm	Memoize glue layer for NDBM_File
 cpan/Memoize/Memoize/SDBM_File.pm	Memoize glue layer for SDBM_File
 cpan/Memoize/Memoize/Storable.pm	Memoize glue layer for Storable
-cpan/Memoize/t/array.t			Memoize array context return tests
-cpan/Memoize/t/array_confusion.t	Memoize ambiguous array return tests
+cpan/Memoize/t/basic.t
+cpan/Memoize/t/cache.t
 cpan/Memoize/t/correctness.t		Memoize basic correctness tests
-cpan/Memoize/t/errors.t			Memoize PEBKAC detection tests
-cpan/Memoize/t/expfile.t		Memoize expiry manager tests
-cpan/Memoize/t/expire.t			Memoize expiry manager tests
 cpan/Memoize/t/expmod.t
-cpan/Memoize/t/expmod_n.t		Memoize expiry manager tests
 cpan/Memoize/t/expmod_t.t		Memoize expiry manager (timed) tests
 cpan/Memoize/t/flush.t			Memoize 'flush_cache' function tests
-cpan/Memoize/t/lib/ExpireFile.pm
-cpan/Memoize/t/lib/ExpireTest.pm
-cpan/Memoize/t/merge.t
+cpan/Memoize/t/lib/DBMTest.pm
 cpan/Memoize/t/normalize.t		Memoize 'normalizer' feature tests
-cpan/Memoize/t/prototype.t		Memoize prototyped function handling tests
-cpan/Memoize/t/rememoize.t
-cpan/Memoize/t/speed.t			"Makes functions faster" advertisement test
 cpan/Memoize/t/st_concurrency
 cpan/Memoize/t/threadsafe.t
 cpan/Memoize/t/tie.t			Memoize tied file test
+cpan/Memoize/t/tie_db.t
 cpan/Memoize/t/tie_gdbm.t		Memoize GDBM interface test
 cpan/Memoize/t/tie_ndbm.t		Memoize NDBM interface test
+cpan/Memoize/t/tie_odbm.t
 cpan/Memoize/t/tie_sdbm.t		Memoize SDBM interface test
 cpan/Memoize/t/tie_storable.t		Memoize Storable interface test
-cpan/Memoize/t/tiefeatures.t		Memoize FAULT / MERGE / HASH options test
 cpan/Memoize/t/unmemoize.t		Memoize 'unmemoize' function test
 cpan/MIME-Base64/Base64.xs		MIME::Base64 extension
 cpan/MIME-Base64/lib/MIME/Base64.pm

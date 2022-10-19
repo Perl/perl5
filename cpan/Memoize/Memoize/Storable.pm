@@ -1,9 +1,9 @@
 use strict; use warnings;
 
 package Memoize::Storable;
-our $VERSION = '1.10';
+our $VERSION = '1.14';
 
-use Storable 1.002 ();
+use Storable 1.002 (); # for lock_* function variants
 
 our $Verbose;
 
@@ -13,7 +13,7 @@ sub TIEHASH {
   my $truehash = (-e $filename) ? Storable::lock_retrieve($filename) : {};
   my %options;
   print STDERR "Memoize::Storable::TIEHASH($filename, @_)\n" if $Verbose;
-  @options{@_} = ();
+  @options{@_} = (1) x @_;
   my $self = 
     {FILENAME => $filename, 
      H => $truehash, 
@@ -43,7 +43,7 @@ sub EXISTS {
 sub DESTROY {
   my $self= shift;
   print STDERR "Memoize::Storable::DESTROY(@_)\n" if $Verbose;
-  if (exists $self->{OPTIONS}{'nstore'}) {
+  if ($self->{OPTIONS}{'nstore'}) {
     Storable::lock_nstore($self->{H}, $self->{FILENAME});
   } else {
     Storable::lock_store($self->{H}, $self->{FILENAME});

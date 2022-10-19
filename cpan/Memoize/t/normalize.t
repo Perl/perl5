@@ -1,7 +1,6 @@
 use strict; use warnings;
 use Memoize;
-
-print "1..8\n";
+use Test::More tests => 10;
 
 sub n_null { '' }
 
@@ -24,37 +23,42 @@ my $a_allmemo = memoize('a3', INSTALL => undef, NORMALIZER => 'n_null');
 my @ARGS;
 @ARGS = (1, 2, 3, 2, 1);
 
-my @res;
-@res  = map { &$a_normal($_) } @ARGS;
-print ((("@res" eq "1-1 2-2 3-3 2-2 1-1") ? '' : 'not '), "ok 1\n");
+is_deeply [map $a_normal->($_),  @ARGS], [qw(1-1 2-2 3-3 2-2 1-1)], 'no normalizer';
+is_deeply [map $a_nomemo->($_),  @ARGS], [qw(1-1 2-2 3-3 2-4 1-5)], 'n_diff';
+is_deeply [map $a_allmemo->($_), @ARGS], [qw(1-1 1-1 1-1 1-1 1-1)], 'n_null';
 
-@res  = map { &$a_nomemo($_) } @ARGS;
-print ((("@res" eq "1-1 2-2 3-3 2-4 1-5") ? '' : 'not '), "ok 2\n");
-
-@res = map { &$a_allmemo($_) } @ARGS;
-print ((("@res" eq "1-1 1-1 1-1 1-1 1-1") ? '' : 'not '), "ok 3\n");
-
-		
 # Test fully-qualified name and installation
 my $COUNT;
 $COUNT = 0;
 sub parity { $COUNT++; $_[0] % 2 }
 sub parnorm { $_[0] % 2 }
 memoize('parity', NORMALIZER =>  'main::parnorm');
-@res = map { &parity($_) } @ARGS;
-print ((("@res" eq "1 0 1 0 1") ? '' : 'not '), "ok 4\n");
-print (( ($COUNT == 2) ? '' : 'not '), "ok 5\n");
+is_deeply [map parity($_), @ARGS], [qw(1 0 1 0 1)], 'parity normalizer';
+is $COUNT, 2, '... with the expected number of calls';
 
 # Test normalization with reference to normalizer function
 $COUNT = 0;
 sub par2 { $COUNT++; $_[0] % 2 }
 memoize('par2', NORMALIZER =>  \&parnorm);
-@res = map { &par2($_) } @ARGS;
-print ((("@res" eq "1 0 1 0 1") ? '' : 'not '), "ok 6\n");
-print (( ($COUNT == 2) ? '' : 'not '), "ok 7\n");
+is_deeply [map par2($_), @ARGS], [qw(1 0 1 0 1)], '... also installable by coderef';
+is $COUNT, 2, '... still with the expected number of calls';
 
 $COUNT = 0;
 sub count_uninitialized { $COUNT += join('', @_) =~ /\AUse of uninitialized value / }
 my $war1 = memoize(sub {1}, NORMALIZER => sub {undef});
 { local $SIG{__WARN__} = \&count_uninitialized; $war1->() }
-print (( ($COUNT == 0) ? '' : 'not '), "ok 8\n");
+is $COUNT, 0, 'no warning when normalizer returns undef';
+
+# Context propagated correctly to normalizer?
+sub n {
+  my $which = wantarray ? 'list' : 'scalar';
+  local $Test::Builder::Level = $Test::Builder::Level + 2;
+  $Test::Builder::Level += 2 # wrapper currently uses more stack frames on threaded perls
+    # tripwire: this will only compile for as long as Memoize.pm still loads Config.pm
+    if do { package Memoize; $Config{'usethreads'} };
+  is $_[0], $which, "$which context propagates properly";
+}
+sub f { 1 }
+memoize('f', NORMALIZER => 'n');
+my $s = f 'scalar';
+my @a = f 'list';
