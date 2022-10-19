@@ -100,8 +100,6 @@ sub OverloadedStringify {
 sub Method {
     my $package = shift;
     if (ref $package) {
-        local $@;
-        local $!;
         $package = builtin::blessed($package);
         return undef if !defined $package;
     }
