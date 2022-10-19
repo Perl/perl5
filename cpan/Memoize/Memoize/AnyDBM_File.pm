@@ -1,18 +1,16 @@
 use strict; use warnings;
 
 package Memoize::AnyDBM_File;
-our $VERSION = '1.10';
+our $VERSION = '1.14';
 
 our @ISA = qw(DB_File GDBM_File Memoize::NDBM_File SDBM_File ODBM_File) unless @ISA;
-
-our $Verbose;
 
 for my $mod (@ISA) {
   if (eval "require $mod") {
     $mod = 'NDBM_File'
 		if $mod eq 'Memoize::NDBM_File'
 		and eval { NDBM_File->VERSION( '1.16' ) };
-    print STDERR "AnyDBM_File => Selected $mod.\n" if $Verbose;
+    print STDERR "AnyDBM_File => Selected $mod.\n" if our $Verbose;
     @ISA = $mod;
     return 1;
   }
