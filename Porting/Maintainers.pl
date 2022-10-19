@@ -487,7 +487,7 @@ use File::Glob qw(:case);
     },
 
     'ExtUtils::PL2Bat' => {
-        'DISTRIBUTION' => 'LEONT/ExtUtils-PL2Bat-0.004.tar.gz',
+        'DISTRIBUTION' => 'LEONT/ExtUtils-PL2Bat-0.005.tar.gz',
         'FILES'        => q[cpan/ExtUtils-PL2Bat],
         'EXCLUDED'     => [
             't/00-compile.t',
