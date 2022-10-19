@@ -5816,7 +5816,7 @@ STATIC int	S_magic_methpack(pTHX_ SV *sv, const MAGIC *mg, SV *meth);
 	assert(sv); assert(mg); assert(meth)
 STATIC void	S_restore_magic(pTHX_ const void *p);
 #define PERL_ARGS_ASSERT_RESTORE_MAGIC
-STATIC void	S_save_magic_flags(pTHX_ I32 mgs_ix, SV *sv, U32 flags);
+STATIC void	S_save_magic_flags(pTHX_ U32 mgs_ix, SV *sv, U32 flags);
 #define PERL_ARGS_ASSERT_SAVE_MAGIC_FLAGS	\
 	assert(sv)
 STATIC void	S_unwind_handler_stack(pTHX_ const void *p);
