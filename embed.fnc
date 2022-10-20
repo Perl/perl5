@@ -1726,7 +1726,7 @@ Cp	|void	|savestack_grow_cnt	|I32 need
 Amd	|void	|save_aelem	|NN AV* av|SSize_t idx|NN SV **sptr
 Apd	|void	|save_aelem_flags|NN AV* av|SSize_t idx|NN SV **sptr \
 				 |const U32 flags
-Cpd	|I32	|save_alloc	|I32 size|I32 pad
+Cpd	|SSize_t|save_alloc	|SSize_t size|I32 pad
 Apdh	|void	|save_aptr	|NN AV** aptr
 Apdh	|AV*	|save_ary	|NN GV* gv
 Cp	|void	|save_bool	|NN bool* boolp
@@ -2969,7 +2969,7 @@ Sx	|void	|clear_placeholders	|NN HV *hv|U32 items
 #endif
 
 #if defined(PERL_IN_MG_C)
-S	|void	|save_magic_flags|I32 mgs_ix|NN SV *sv|U32 flags
+S	|void	|save_magic_flags|SSize_t mgs_ix|NN SV *sv|U32 flags
 S	|int	|magic_methpack	|NN SV *sv|NN const MAGIC *mg|NN SV *meth
 S	|SV*	|magic_methcall1|NN SV *sv|NN const MAGIC *mg \
 				|NN SV *meth|U32 flags \

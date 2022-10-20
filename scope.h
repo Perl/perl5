@@ -250,12 +250,12 @@ scope has the given name. C<name> must be a literal string.
 
 /*
 =for apidoc_section $stack
-=for apidoc    Am|I32|SSNEW  |Size_t size
-=for apidoc_item |   |SSNEWa |Size_t_size|Size_t align
-=for apidoc_item |   |SSNEWat|Size_t_size|type|Size_t align
-=for apidoc_item |   |SSNEWt |Size_t size|type
+=for apidoc    Am|SSize_t|SSNEW  |Size_t size
+=for apidoc_item |       |SSNEWa |Size_t_size|Size_t align
+=for apidoc_item |       |SSNEWat|Size_t_size|type|Size_t align
+=for apidoc_item |       |SSNEWt |Size_t size|type
 
-These temporarily allocates data on the savestack, returning an I32 index into
+These temporarily allocates data on the savestack, returning an SSize_t index into
 the savestack, because a pointer would get broken if the savestack is moved on
 reallocation.  Use L</C<SSPTR>> to convert the returned index into a pointer.
 
@@ -268,8 +268,8 @@ L</C<MEM_ALIGNBYTES>>.  The alignment will be preserved through savestack
 reallocation B<only> if realloc returns data aligned to a size divisible by
 "align"!
 
-=for apidoc   Am|type  |SSPTR |I32 index|type
-=for apidoc_item|type *|SSPTRt|I32 index|type
+=for apidoc   Am|type  |SSPTR |SSize_t index|type
+=for apidoc_item|type *|SSPTRt|SSize_t index|type
 
 These convert the C<index> returned by L/<C<SSNEW>> and kin into actual pointers.
 
@@ -285,8 +285,8 @@ casts it to a pointer of that C<type>.
     (I32)(align - ((size_t)((caddr_t)&PL_savestack[PL_savestack_ix]) % align)) % align)
 #define SSNEWat(n,t,align)	SSNEWa((n)*sizeof(t), align)
 
-#define SSPTR(off,type)         ((type)  ((char*)PL_savestack + off))
-#define SSPTRt(off,type)        ((type*) ((char*)PL_savestack + off))
+#define SSPTR(off,type)         (assert(sizeof(off) == sizeof(SSize_t)), (type)  ((char*)PL_savestack + off))
+#define SSPTRt(off,type)        (assert(sizeof(off) == sizeof(SSize_t)), (type*) ((char*)PL_savestack + off))
 
 #define save_freesv(op)		save_pushptr((void *)(op), SAVEt_FREESV)
 #define save_mortalizesv(op)	save_pushptr((void *)(op), SAVEt_MORTALIZESV)

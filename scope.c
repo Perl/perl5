@@ -1014,10 +1014,10 @@ function.
 =cut
 */
 
-I32
-Perl_save_alloc(pTHX_ I32 size, I32 pad)
+SSize_t
+Perl_save_alloc(pTHX_ SSize_t size, I32 pad)
 {
-    const I32 start = pad + ((char*)&PL_savestack[PL_savestack_ix]
+    const SSize_t start = pad + ((char*)&PL_savestack[PL_savestack_ix]
                           - (char*)PL_savestack);
     const UV elems = 1 + ((size + pad - 1) / sizeof(*PL_savestack));
     const UV elems_shifted = elems << SAVE_TIGHT_SHIFT;

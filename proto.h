@@ -3453,7 +3453,7 @@ PERL_CALLCONV void	Perl_save_adelete(pTHX_ AV *av, SSize_t key);
 PERL_CALLCONV void	Perl_save_aelem_flags(pTHX_ AV* av, SSize_t idx, SV **sptr, const U32 flags);
 #define PERL_ARGS_ASSERT_SAVE_AELEM_FLAGS	\
 	assert(av); assert(sptr)
-PERL_CALLCONV I32	Perl_save_alloc(pTHX_ I32 size, I32 pad);
+PERL_CALLCONV SSize_t	Perl_save_alloc(pTHX_ SSize_t size, I32 pad);
 #define PERL_ARGS_ASSERT_SAVE_ALLOC
 PERL_CALLCONV void	Perl_save_aptr(pTHX_ AV** aptr);
 #define PERL_ARGS_ASSERT_SAVE_APTR	\
@@ -5836,7 +5836,7 @@ STATIC int	S_magic_methpack(pTHX_ SV *sv, const MAGIC *mg, SV *meth);
 	assert(sv); assert(mg); assert(meth)
 STATIC void	S_restore_magic(pTHX_ const void *p);
 #define PERL_ARGS_ASSERT_RESTORE_MAGIC
-STATIC void	S_save_magic_flags(pTHX_ I32 mgs_ix, SV *sv, U32 flags);
+STATIC void	S_save_magic_flags(pTHX_ SSize_t mgs_ix, SV *sv, U32 flags);
 #define PERL_ARGS_ASSERT_SAVE_MAGIC_FLAGS	\
 	assert(sv)
 STATIC void	S_unwind_handler_stack(pTHX_ const void *p);

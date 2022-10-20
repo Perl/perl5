@@ -87,7 +87,7 @@ struct magic_state {
 /* MGS is typedef'ed to struct magic_state in perl.h */
 
 STATIC void
-S_save_magic_flags(pTHX_ I32 mgs_ix, SV *sv, U32 flags)
+S_save_magic_flags(pTHX_ SSize_t mgs_ix, SV *sv, U32 flags)
 {
     MGS* mgs;
     bool bumped = FALSE;
@@ -165,7 +165,7 @@ be >= C<SVt_PVMG>.  See C<L</sv_magic>>.
 int
 Perl_mg_get(pTHX_ SV *sv)
 {
-    const I32 mgs_ix = SSNEW(sizeof(MGS));
+    const SSize_t mgs_ix = SSNEW(sizeof(MGS));
     bool saved = FALSE;
     bool have_new = 0;
     bool taint_only = TRUE; /* the only get method seen is taint */
@@ -269,7 +269,7 @@ Do magic after a value is assigned to the SV.  See C<L</sv_magic>>.
 int
 Perl_mg_set(pTHX_ SV *sv)
 {
-    const I32 mgs_ix = SSNEW(sizeof(MGS));
+    const SSize_t mgs_ix = SSNEW(sizeof(MGS));
     MAGIC* mg;
     MAGIC* nextmg;
 
@@ -307,7 +307,7 @@ Perl_mg_size(pTHX_ SV *sv)
     for (mg = SvMAGIC(sv); mg; mg = mg->mg_moremagic) {
         const MGVTBL* const vtbl = mg->mg_virtual;
         if (vtbl && vtbl->svt_len) {
-            const I32 mgs_ix = SSNEW(sizeof(MGS));
+            const SSize_t mgs_ix = SSNEW(sizeof(MGS));
             I32 len;
             save_magic(mgs_ix, sv);
             /* omit MGf_GSKIP -- not changed here */
@@ -340,7 +340,7 @@ Clear something magical that the SV represents.  See C<L</sv_magic>>.
 int
 Perl_mg_clear(pTHX_ SV *sv)
 {
-    const I32 mgs_ix = SSNEW(sizeof(MGS));
+    const SSize_t mgs_ix = SSNEW(sizeof(MGS));
     MAGIC* mg;
     MAGIC *nextmg;
 
