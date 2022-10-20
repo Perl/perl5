@@ -740,6 +740,7 @@ the strings?).
  Nicolas R 5.37.2       2022-Jul-20
  Neil B    5.37.3       2022-Aug-20
  Ether     5.37.4       2022-Sep-20
+ Todd R    5.37.5       2022-Oct-20
 
 =head2 SELECTED RELEASE SIZES
 
