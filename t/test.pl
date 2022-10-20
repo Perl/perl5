@@ -1907,6 +1907,10 @@ sub watchdog ($;$)
 
                 $SIG{'KILL'} = sub { threads->exit(); };
 
+                # Detach after the signal handler is set up; the parent knows
+                # not to signal until detached.
+                'threads'->detach();
+
                 # Execute the timeout
                 my $time_left = $timeout;
                 do {
@@ -1919,7 +1923,18 @@ sub watchdog ($;$)
                 POSIX::_exit(1) if (defined(&POSIX::_exit));
                 my $sig = $is_vms ? 'TERM' : 'KILL';
                 kill($sig, $pid_to_kill);
-            })->detach();
+        });
+
+        # Don't proceed until the watchdog has set up its signal handler.
+        # (Otherwise there is a possibility that we will exit with threads
+        # running.)  The watchdog tells us the handler is set by detaching
+        # itself.  (The 'is_running()' is a fail-safe.)
+        while (     $watchdog_thread->is_running()
+               && ! $watchdog_thread->is_detached())
+        {
+            'threads'->yield();
+        }
+
         return;
     }
 
