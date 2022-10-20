@@ -17,11 +17,18 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.37.5 - Nori - The Lord of the Rings: The Rings of Power
+
+L<Announced on 2022-10-20 by Todd Rinaldo|https://www.nntp.perl.org/group/perl.perl5.porters/2022/10/msg264959.html>
+
+If we didn't do everything we weren't supposed to, we'd hardly do
+anything at all.
+
 =head2 v5.37.4 - C. F. Kettering
 
 L<Announced on 2022-09-20 by Karen Etheridge|https://www.nntp.perl.org/group/perl.perl5.porters/2022/09/msg264815.html>
 
-"A problem well stated is a problem half solved.
+A problem well stated is a problem half solved.
 
 =head2 v5.37.3 - John Steinbeck, "East of Eden"
 
