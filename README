@@ -1,13 +1,12 @@
+```
 Perl is Copyright (C) 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012,
 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022
 by Larry Wall and others.
 All rights reserved.
+```
 
-
-
-ABOUT PERL
-==========
+# ABOUT PERL
 
 Perl is a general-purpose programming language originally developed for
 text manipulation and now used for a wide range of tasks including
@@ -30,15 +29,14 @@ There are also many Perl books available, covering a wide variety of topics,
 from various publishers.  See pod/perlbook.pod for more information.
 
 
-INSTALLATION
-============
+# INSTALLATION
 
 If you're using a relatively modern operating system and want to
 install this version of Perl locally, run the following commands:
 
-  ./Configure -des -Dprefix=$HOME/localperl
-  make test
-  make install
+    ./Configure -des -Dprefix=$HOME/localperl
+    make test
+    make install
 
 This will configure and compile perl for your platform, run the regression
 tests, and install perl in a subdirectory "localperl" of your home directory.
@@ -52,11 +50,10 @@ variety of platforms, some more common than others.
 Once you have Perl installed, a wealth of documentation is available to you
 through the 'perldoc' tool.  To get started, run this command:
 
-  perldoc perl
+    perldoc perl
 
 
-IF YOU RUN INTO TROUBLE
-=======================
+# IF YOU RUN INTO TROUBLE
 
 Perl is a large and complex system that's used for everything from
 knitting to rocket science.  If you run into trouble, it's quite
@@ -78,12 +75,12 @@ Just a personal note:  I want you to know that I create nice things like this
 because it pleases the Author of my story.  If this bothers you, then your
 notion of Authorship needs some revision.  But you can use perl anyway. :-)
 
-							The author.
+The author.
 
 
-LICENSING
-=========
+# LICENSING
 
+```
 This program is free software; you can redistribute it and/or modify
 it under the terms of either:
 
@@ -128,5 +125,4 @@ is, in this case, a form of mere aggregation.)  This is my interpretation
 of the GPL.  If you still have concerns or difficulties understanding
 my intent, feel free to contact me.  Of course, the Artistic License
 spells all this out for your protection, so you may prefer to use that.
-
-
+```
