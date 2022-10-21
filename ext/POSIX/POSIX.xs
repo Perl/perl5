@@ -1021,7 +1021,7 @@ static NV my_log2(NV x)
 /* XXX nexttoward */
 
 /* GCC's FLT_ROUNDS is (wrongly) hardcoded to 1 (at least up to 11.x) */
-#if defined(PERL_IS_GCC) /* && __GNUC__ < XXX */
+#if defined(PERL_IS_GCC) /* && __GNUC__ < XXX */ || (defined(__clang__) && defined(__s390x__))
 #  define BROKEN_FLT_ROUNDS
 #endif
 
