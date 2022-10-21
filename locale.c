@@ -5222,11 +5222,6 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 STATIC void
 S_compute_collxfrm_coefficients(pTHX)
 {
-        PL_in_utf8_COLLATE_locale = (PL_collation_standard)
-                                    ? 0
-                                    : is_locale_utf8(PL_collation_name);
-        PL_strxfrm_NUL_replacement = '\0';
-        PL_strxfrm_max_cp = 0;
 
         /* A locale collation definition includes primary, secondary, tertiary,
          * etc. weights for each character.  To sort, the primary weights are
@@ -5289,6 +5284,12 @@ S_compute_collxfrm_coefficients(pTHX)
             char * x_shorter;   /* We also transform a substring of 'longer' */
             Size_t x_len_shorter;
 
+    PL_in_utf8_COLLATE_locale = (PL_collation_standard)
+                                ? 0
+                                : is_locale_utf8(PL_collation_name);
+    PL_strxfrm_NUL_replacement = '\0';
+    PL_strxfrm_max_cp = 0;
+            
             /* mem_collxfrm_() is used get the transformation (though here we
              * are interested only in its length).  It is used because it has
              * the intelligence to handle all cases, but to work, it needs some
