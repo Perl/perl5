@@ -8,9 +8,9 @@
 ##
 
 # Configure hasn't figured out the version number yet.  Bummer.
-perl_revision=`awk '/define[ 	]+PERL_REVISION/ {print $3}' $src/patchlevel.h`
-perl_version=`awk '/define[ 	]+PERL_VERSION/ {print $3}' $src/patchlevel.h`
-perl_subversion=`awk '/define[ 	]+PERL_SUBVERSION/ {print $3}' $src/patchlevel.h`
+perl_revision=`awk '/define[ 	]+PERL_VERSION_MAJOR/ {print $3}' $src/patchlevel.h`
+perl_version=`awk '/define[ 	]+PERL_VERSION_MINOR/ {print $3}' $src/patchlevel.h`
+perl_subversion=`awk '/define[ 	]+PERL_VERSION_PATCH/ {print $3}' $src/patchlevel.h`
 version="${perl_revision}.${perl_version}.${perl_subversion}"
 
 # Pretend that Darwin doesn't know about those system calls in Tiger

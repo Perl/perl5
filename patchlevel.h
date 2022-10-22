@@ -37,9 +37,28 @@ Instead use one of the version comparison macros.  See C<L</PERL_VERSION_EQ>>.
 /* do not adjust the whitespace! Configure expects the numbers to be
  * exactly on the third column */
 
-#define PERL_REVISION	5		/* age */
-#define PERL_VERSION	37		/* epoch */
-#define PERL_SUBVERSION	5		/* generation */
+/*
+   You should avoid using these variables directly
+   and prefer using the compare functions.
+       - PERL_VERSION_EQ
+       - PERL_VERSION_NE
+       - PERL_VERSION_LT
+       - PERL_VERSION_GT
+       - PERL_VERSION_LE
+       - PERL_VERSION_GE
+*/
+#define PERL_VERSION_MAJOR        5
+#define PERL_VERSION_MINOR       37
+#define PERL_VERSION_PATCH        5
+#define PERL_VERSION_RELEASE      0 /* for future usage */
+#define PERL_VERSION_BUILD        0 /* for future usage */
+
+/* Legacy Perl5 VERSION macro:
+    prefer PERL_VERSION_MAJOR, PERL_VERSION_MINOR & PERL_VERSION_PATCH
+*/
+#define PERL_REVISION           PERL_VERSION_MAJOR
+#define PERL_VERSION            PERL_VERSION_MINOR
+#define PERL_SUBVERSION         PERL_VERSION_PATCH
 
 /* The following numbers describe the earliest compatible version of
    Perl ("compatibility" here being defined as sufficient binary/API

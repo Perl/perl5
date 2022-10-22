@@ -307,8 +307,8 @@ is runperl(stderr => 1, prog => '#!perl -M'),
         skip "Win32 miniperl produces a default archname in -v", 1
 	  if $^O eq 'MSWin32' && is_miniperl;
         my $v = sprintf "%vd", $^V;
-        my $ver = $Config{PERL_VERSION};
-        my $rel = $Config{PERL_SUBVERSION};
+        my $ver = $Config{PERL_VERSION_MINOR};
+        my $rel = $Config{PERL_VERSION_PATCH};
         like( runperl( switches => ['-v'] ),
 	      qr/This is perl 5, version \Q$ver\E, subversion \Q$rel\E \(v\Q$v\E(?:[-*\w]+| \([^)]+\))?\) built for \Q$Config{archname}\E.+Copyright.+Larry Wall.+Artistic License.+GNU General Public License/s,
               '-v looks okay' );

@@ -178,8 +178,8 @@ my $ver = $Config{version};
 my $release = substr($],0,3);   # Not used currently.
 my $patchlevel = substr($],3,2);
 die "Patchlevel of perl ($patchlevel)",
-    "and patchlevel of config.sh ($Config{'PERL_VERSION'}) don't match\n"
-	if $patchlevel != $Config{'PERL_VERSION'};
+    "and patchlevel of config.sh ($Config{'PERL_VERSION_MINOR'}) don't match\n"
+	if $patchlevel != $Config{'PERL_VERSION_MINOR'};
 
 # Fetch some frequently-used items from %Config
 my $installbin = "$opts{destdir}$Config{installbin}";
