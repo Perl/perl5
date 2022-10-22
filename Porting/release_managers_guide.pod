@@ -397,6 +397,35 @@ colon-delimited versions to use for comparison.  For example:
 
 L<http://analysis.cpantesters.org/beforemaintrelease?pair=5.20.2:5.22.0%20RC1>
 
+=head3 check pod errors
+
+F<t/porting/podcheck.t> is a porting test that will fail if it finds new
+problems in pods.  However, it can be taught to ignore problems, and
+sometimes people do so for problems that really should be fixed before
+release.  To see what it is ignoring, run
+
+ ./perl -Ilib t/porting/podcheck.t --counts
+
+Any problems listed as pedantic aren't worth your time investigating.
+These have a C<?> at the beginning of the text, or are for the too-long
+verbatim lines.
+
+But other warnings could be.  In particular, a broken link can well
+mean that someone clicking on the pod in a web page will get a 404.
+
+To find out more about any real problems, capture the output from
+
+ ./perl -Ilib t/porting/podcheck.t --show-all
+
+and grep for those real problems.  (It can take a minute or so to run.)
+
+If you decide any should be fixed, after that gets done, run
+
+ ./perl -Ilib t/porting/podcheck.t
+
+to make sure those fixes were successful, and follow the directions in
+the output about regenerating the data base.
+
 =head3 update perldelta
 
 Get perldelta in a mostly finished state.
