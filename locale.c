@@ -2350,7 +2350,7 @@ S_new_ctype(pTHX_ const char *newctype)
         if (   (UNLIKELY(bad_count))
             && (LIKELY(ckWARN_d(WARN_LOCALE)) || UNLIKELY(DEBUG_L_TEST)))
         {
-            if (UNLIKELY(bad_count) && PL_in_utf8_CTYPE_locale) {
+            if (PL_in_utf8_CTYPE_locale) {
                 PL_warn_locale = Perl_newSVpvf(aTHX_
                      "Locale '%s' contains (at least) the following characters"
                      " which have\nunexpected meanings: %s\nThe Perl program"
