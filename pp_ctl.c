@@ -4766,11 +4766,9 @@ PP(pp_leaveeval)
     U8 gimme;
     PERL_CONTEXT *cx;
     OP *retop;
-    int failed = 0;
     CV *evalcv;
     bool keep;
     PERL_ASYNC_CHECK();
-    int module_true = 0;
 
     cx = CX_CUR();
     assert(CxTYPE(cx) == CXt_EVAL);
@@ -4788,11 +4786,14 @@ PP(pp_leaveeval)
         leave_adjust_stacks(oldsp, oldsp, gimme, 0);
 
     /* did require return a false value?
-       make sure to initialize failed, whatever circumstance this was called
-       but check if use feature 'module_true' is enabled where it matters
+       check if use feature 'module_true' is enabled where it matters
      */
+    bool failed = false;
+
     if (CxOLD_OP_TYPE(cx) == OP_REQUIRE) {
+        bool module_true = false;
         COP *old_pl_curcop = PL_curcop;
+
         if (PL_op->op_flags & OPf_KIDS && OP_TYPE_IS_OR_WAS(PL_op, OP_LEAVEEVAL)) {
             const OP *kid = cLISTOPx(cUNOPx(PL_op)->op_first)->op_first;
 
@@ -4805,10 +4806,10 @@ PP(pp_leaveeval)
         }
         PL_curcop = old_pl_curcop;
 
-        /* failed stays false */
         if (module_true) {
             POPs;
             PUSHs(&PL_sv_yes);
+            failed = false;
         }
         else {
             failed = !(gimme == G_SCALAR
