@@ -541,7 +541,8 @@ Perl_locale_panic(const char * msg,
                         caller_0_line, caller_1_line)
 
 /* posix_setlocale() presents a consistent POSIX-compliant interface to
- * setlocale().   Windows requres a customized base-level setlocale() */
+ * setlocale().   Windows requres a customized base-level setlocale().  Any
+ * necessary mutex locking needs to be done at a higher level */
 #ifdef WIN32
 #  define posix_setlocale(cat, locale) win32_setlocale(cat, locale)
 #else
@@ -549,7 +550,8 @@ Perl_locale_panic(const char * msg,
 #endif
 
 /* The next layer up is to catch vagaries and bugs in the libc setlocale return
- * value */
+ * value.  Again, any necessary mutex locking needs to be done at a higher
+ * level */
 #ifdef stdize_locale
 #  define stdized_setlocale(cat, locale)                                       \
      stdize_locale(cat, posix_setlocale(cat, locale),                          \
@@ -566,10 +568,14 @@ Perl_locale_panic(const char * msg,
 #if    (! defined(USE_LOCALE_THREADS) && ! defined(USE_POSIX_2008_LOCALE))    \
     || (  defined(WIN32) && defined(USE_THREAD_SAFE_LOCALE))
 
-/* For non-threaded perls (which we are not to use the POSIX 2008 API on), or a
- * thread-safe Windows one in which threading is invisible to us, the added
- * layer just expands to the base-level functions.  See the introductory
- * comments in this file for the meaning of the suffixes '_c', '_r', '_i'. */
+/* For non-threaded perls, the added layer just expands to the base-level
+ * functions, except if we are supposed to use the POSIX 2008 interface anyway.
+ * On perls where threading is invisible to us, the base-level functions are
+ * used regardless of threading.  Currently this is only on later Windows
+ * versions.
+ *
+ * See the introductory comments in this file for the meaning of the suffixes
+ * '_c', '_r', '_i'. */
 
 #  define setlocale_r(cat, locale)        stdized_setlocale(cat, locale)
 #  define setlocale_i(i, locale)      setlocale_r(categories[i], locale)
@@ -861,9 +867,9 @@ S_my_querylocale_i(pTHX_ const unsigned int index)
 
 #  endif
 
-            }
+    }
 
-                DEBUG_Lv(PerlIO_printf(Perl_debug_log,
+    DEBUG_Lv(PerlIO_printf(Perl_debug_log,
                            "my_querylocale_i(%s) returning '%s'\n",
                            category_names[index], retval));
     assert(strNE(retval, ""));
@@ -1009,8 +1015,8 @@ S_setlocale_from_aggregate_LC_ALL(pTHX_ const char * locale, const line_t line)
             const char * individ_locale = Perl_form(aTHX_ "%.*s",
                                 (int) (name_end - name_start), name_start);
 
-            /* And do the change.  FALSE => Don't recalculate LC_ALL; we'll do
-             * it ourselves after the loop */
+            /* And do the change.  Don't recalculate LC_ALL; we'll do it
+             * ourselves after the loop */
             if (! emulate_setlocale_i(i, individ_locale,
                                       DONT_RECALC_LC_ALL, line))
             {
@@ -1060,8 +1066,7 @@ S_setlocale_from_aggregate_LC_ALL(pTHX_ const char * locale, const line_t line)
 STATIC const char *
 S_emulate_setlocale_i(pTHX_
 
-        /* Our internal index of the 'category' setlocale is
-           called with */
+        /* Our internal index of the 'category' setlocale is called with */
         const unsigned int index,
 
         const char * new_locale, /* The locale to set the category to */
@@ -1280,9 +1285,8 @@ S_emulate_setlocale_i(pTHX_
                  * set PL_curlocales.  If the locale change had succeeded, the
                  * code would have then set them up, but since it didn't, do so
                  * here.  khw isn't sure if this prevents some issues or not,
-                 * but tis is defensive coding.  The system setlocale() returns
-                 * the desired information.  This will calculate LC_ALL's entry
-                 * only on the final iteration */
+                 * This will calculate LC_ALL's entry only on the final
+                 * iteration */
                 POSIX_SETLOCALE_LOCK;
                 for (PERL_UINT_FAST8_T i = 0; i < NOMINAL_LC_ALL_INDEX; i++) {
                     update_PL_curlocales_i(i,
@@ -1312,7 +1316,8 @@ S_emulate_setlocale_i(pTHX_
 
     /* Here, we are using 'new_obj' which matches the input 'new_locale'. */
     DEBUG_Lv(PerlIO_printf(Perl_debug_log,
-             "(%" LINE_Tf "): emulate_setlocale_i now using %p\n", line, new_obj));
+             "(%" LINE_Tf "): emulate_setlocale_i now using %p\n",
+             line, new_obj));
 
 #ifdef MULTIPLICITY
     PL_cur_locale_obj = new_obj;
@@ -1338,8 +1343,8 @@ S_emulate_setlocale_i(pTHX_
 #  endif
 #  ifdef HAS_GLIBC_LC_MESSAGES_BUG
 
-    /* Invalidate the glibc cache of loaded translations if the locale has changed,
-     * see [perl #134264] */
+    /* Invalidate the glibc cache of loaded translations if the locale has
+     * changed, see [perl #134264] */
     if (old_messages_locale) {
         if (strNE(old_messages_locale, my_querylocale_c(LC_MESSAGES))) {
             textdomain(textdomain(NULL));
@@ -1933,8 +1938,8 @@ S_new_numeric(pTHX_ const char *newnum)
      * same for this (patches welcome).
      *
      * Until then khw doesn't think it's worth even the small risk of a race to
-     * get this value, which in almost all locales is empty, and doesn't appear
-     * to be used in any of the Micrsoft library routines anyway. */
+     * get this value, which doesn't appear to be used in any of the Microsoft
+     * library routines anyway. */
 
     const char * scratch_buffer = NULL;
     PL_numeric_underlying_is_standard &= strEQ(C_thousands_sep,
@@ -2059,7 +2064,7 @@ S_new_ctype(pTHX_ const char *newctype)
         return;
     }
 
-    /* The cache being cleared signals this to compute a new value */
+    /* The cache being cleared signals this function to compute a new value */
     PL_in_utf8_CTYPE_locale = is_locale_utf8(newctype);
 
     PL_ctype_name = savepv(newctype);
@@ -2102,6 +2107,8 @@ S_new_ctype(pTHX_ const char *newctype)
         bool has_non_ascii_fold = FALSE;
         bool found_unexpected = FALSE;
 
+        /* Under -DLv, see if there are any folds outside the ASCII range.
+         * This factoid is used below */
         if (DEBUG_Lv_TEST) {
             for (unsigned i = 128; i < 256; i++) {
                 int j = LATIN1_TO_NATIVE(i);
@@ -2124,6 +2131,9 @@ S_new_ctype(pTHX_ const char *newctype)
 
 #    ifdef DEBUGGING
 
+            /* Most locales these days are supersets of ASCII.  When debugging
+             * with -DLv, it is helpful to know what the exceptions to that are
+             * in this locale */
             if (DEBUG_Lv_TEST) {
                 bool unexpected = FALSE;
 
@@ -2189,7 +2199,7 @@ S_new_ctype(pTHX_ const char *newctype)
 
 #    ifdef MB_CUR_MAX
 
-    /* We only handle single-byte locales (outside of UTF-8 ones; so if this
+    /* We only handle single-byte locales (outside of UTF-8 ones); so if this
      * locale requires more than one byte, there are going to be BIG problems.
      * */
 
@@ -2258,7 +2268,9 @@ S_new_ctype(pTHX_ const char *newctype)
                 }
 
                 /* Check each possibe class */
-                if (UNLIKELY(cBOOL(isU8_ALPHANUMERIC_LC(i)) != cBOOL(isALPHANUMERIC_A(i))))  {
+                if (UNLIKELY(cBOOL(isU8_ALPHANUMERIC_LC(i)) !=
+                                                    cBOOL(isALPHANUMERIC_A(i))))
+                {
                     is_bad = TRUE;
                     DEBUG_L(PerlIO_printf(Perl_debug_log,
                                           "isalnum('%s') unexpectedly is %x\n",
@@ -2466,7 +2478,6 @@ S_new_collate(pTHX_ const char *newcoll)
 {
     PERL_ARGS_ASSERT_NEW_COLLATE;
 
-
     /* Called after each libc setlocale() call affecting LC_COLLATE, to tell
      * core Perl this and that 'newcoll' is the name of the new locale.
      *
@@ -2498,7 +2509,9 @@ S_new_collate(pTHX_ const char *newcoll)
      * available. */
     PL_collation_standard = isNAME_C_OR_POSIX(newcoll);
     if (PL_collation_standard) {
-        DEBUG_Lv(PerlIO_printf(Perl_debug_log, "Setting PL_collation name='%s'\n", PL_collation_name));
+        DEBUG_Lv(PerlIO_printf(Perl_debug_log,
+                               "Setting PL_collation name='%s'\n",
+                               PL_collation_name));
         PL_collxfrm_base = 0;
         PL_collxfrm_mult = 2;
         PL_in_utf8_COLLATE_locale = FALSE;
@@ -2507,7 +2520,8 @@ S_new_collate(pTHX_ const char *newcoll)
         return;
     }
 
-    /* Flag that the remainder of the set up is being deferred until first need */
+    /* Flag that the remainder of the set up is being deferred until first
+     * need. */
     PL_collxfrm_mult = 0;
     PL_collxfrm_base = 0;
 
@@ -2671,11 +2685,16 @@ Finally, C<Perl_setlocale> works under all circumstances, whereas plain
 C<setlocale> can be completely ineffective on some platforms under some
 configurations.
 
-C<Perl_setlocale> should not be used to change the locale except on systems
-where the predefined variable C<${^SAFE_LOCALES}> is 1.  On some such systems,
-the system C<setlocale()> is ineffective, returning the wrong information, and
-failing to actually change the locale.  C<Perl_setlocale>, however works
-properly in all circumstances.
+Changing the locale is not a good idea when more than one thread is running,
+except on systems where the predefined variable C<${^SAFE_LOCALES}> is 1.
+This is because on such systems the locale is global to the whole process and
+not local to just the thread calling the function.  So changing it in one
+thread instantaneously changes it in all.  On some such systems, the system
+C<setlocale()> is ineffective, returning the wrong information, and failing to
+actually change the locale.  z/OS refuses to try to change the locale once a
+second thread is created.  C<Perl_setlocale>, should give you accurate results
+of what actually happened on these problematic platforms, returning NULL if the
+system forbade the locale change.
 
 The return points to a per-thread static buffer, which is overwritten the next
 time C<Perl_setlocale> is called from the same thread.
@@ -2779,8 +2798,6 @@ Perl_setlocale(const int category, const char * locale)
     } /* End of querying the current locale */
 
 
-    /* Here, the input has a locale to change to.  First find the current
-     * locale */
     unsigned int cat_index = get_category_index(category, NULL);
     retval = querylocale_i(cat_index);
 
@@ -2887,7 +2904,7 @@ S_save_to_buffer(const char * string, const char **buf, Size_t *buf_size)
                           ? string
                           :_byte_dump_string((U8 *) string, strlen(string), 0)),
                           *buf));
-            }
+    }
 
 #    ifdef DEBUGGING
 
@@ -2913,18 +2930,15 @@ S_get_locale_string_utf8ness_i(pTHX_ const char * locale,
                                      const char * string,
                                      const locale_utf8ness_t known_utf8)
 {
+    PERL_ARGS_ASSERT_GET_LOCALE_STRING_UTF8NESS_I;
+    assert(cat_index <= NOMINAL_LC_ALL_INDEX);
+
     /* Return to indicate if 'string' in the locale given by the input
      * arguments should be considered UTF-8 or not.
      *
      * If the input 'locale' is not NULL, use that for the locale; otherwise
      * use the current locale for the category specified by 'cat_index'.
      */
-
-    Size_t len;
-    const U8 * first_variant = NULL;
-
-    PERL_ARGS_ASSERT_GET_LOCALE_STRING_UTF8NESS_I;
-    assert(cat_index <= NOMINAL_LC_ALL_INDEX);
 
     if (string == NULL) {
         return UTF8NESS_NO;
@@ -2934,9 +2948,10 @@ S_get_locale_string_utf8ness_i(pTHX_ const char * locale,
         return UTF8NESS_NO;
     }
 
-    len = strlen(string);
+    Size_t len = strlen(string);
 
     /* UTF8ness is immaterial if the representation doesn't vary */
+    const U8 * first_variant = NULL;
     if (is_utf8_invariant_string_loc((U8 *) string, len, &first_variant)) {
         return UTF8NESS_IMMATERIAL;
     }
@@ -3625,7 +3640,7 @@ Concerning the differences between these and plain C<nl_langinfo()>:
 =item a.
 
 C<Perl_langinfo8> has an extra parameter, described above.  Besides this, the
-other reasons they aren't quite a drop-in replacement is actually an advantage.
+other reason they aren't quite a drop-in replacement is actually an advantage.
 The C<const>ness of the return allows the compiler to catch attempts to write
 into the returned buffer, which is illegal and could cause run-time crashes.
 
@@ -3666,8 +3681,8 @@ only one is completely unimplemented, though on non-Windows platforms, another
 significant one is not fully implemented).  They use various techniques to
 recover the other items, including calling C<L<localeconv(3)>>, and
 C<L<strftime(3)>>, both of which are specified in C89, so should be always be
-available.  Later C<strftime()> versions have additional capabilities; C<""> is
-returned for any item not available on your system.
+available.  Later C<strftime()> versions have additional capabilities; What the
+C locale yields or C<""> is returned for any item not available on your system.
 
 It is important to note that, when called with an item that is recovered by
 using C<localeconv>, the buffer from any previous explicit call to
@@ -3690,9 +3705,9 @@ have a native C<nl_langinfo()>, you must
 
  #include "perl_langinfo.h"
 
-before the C<perl.h> C<#include>.  You can replace your C<langinfo.h>
+before the C<perl.h> C<#include>.  You can replace your F<langinfo.h>
 C<#include> with this one.  (Doing it this way keeps out the symbols that plain
-C<langinfo.h> would try to import into the namespace for code that doesn't need
+F<langinfo.h> would try to import into the namespace for code that doesn't need
 it.)
 
 =cut
@@ -3952,6 +3967,7 @@ S_my_langinfo_i(pTHX_
                              locale, (locale_t) 0);
 
     retval = save_to_buffer(nl_langinfo_l(item, cur), retbufp, retbuf_sizep);
+
     if (utf8ness) {
         *utf8ness = get_locale_string_utf8ness_i(locale, cat_index, retval,
                                                  LOCALE_UTF8NESS_UNKNOWN);
@@ -4000,7 +4016,7 @@ S_my_langinfo_i(pTHX_
 
 #    ifdef USE_LOCALE_CTYPE
 
-    const char * orig_CTYPE_locale =  toggle_locale_c(LC_CTYPE, locale);
+    const char * orig_CTYPE_locale = toggle_locale_c(LC_CTYPE, locale);
 
 #    endif
 
@@ -4040,7 +4056,7 @@ S_my_langinfo_i(pTHX_
             Size_t needed_size = snprintf(floatbuf, initial_size, "%.1f", 1.5);
 
             /* If our guess wasn't big enough, increase and try again, based on
-             * the real number that strnprintf() is supposed to return */
+             * the real number that snprintf() is supposed to return */
             if (UNLIKELY(needed_size >= initial_size)) {
                 needed_size++;  /* insurance */
                 Renew(floatbuf, needed_size, char);
@@ -4077,7 +4093,6 @@ S_my_langinfo_i(pTHX_
                     is_utf8 = get_locale_string_utf8ness_i(locale, cat_index,
                                                            retval,
                                                        LOCALE_UTF8NESS_UNKNOWN);
-
                 }
 
                 break;
@@ -4089,7 +4104,7 @@ S_my_langinfo_i(pTHX_
 #      ifdef HAS_SOME_LOCALECONV /* snprintf() failed; drop down to use
                                     localeconv() */
 
-        /* FALLTHROUGH */                                                           \
+        /* FALLTHROUGH */
 
 #      else                      /* snprintf() failed and no localeconv() */
 
@@ -4104,6 +4119,7 @@ S_my_langinfo_i(pTHX_
      * TS_W32_BROKEN_LOCALECONV, one could use GetNumberFormat and
      * GetCurrencyFormat; patches welcome) */
 
+   /* case RADIXCHAR:   // May drop down to here in some configurations */
       case CRNCYSTR:
       case THOUSEP:
         {
@@ -4123,7 +4139,7 @@ S_my_langinfo_i(pTHX_
 #    endif  /* Some form of localeconv */
 #    ifdef HAS_STRFTIME
 
-      /* These formats are only available in later strfmtime's */
+      /* These formats are only available in later strftime's */
       case ERA_D_FMT: case ERA_T_FMT: case ERA_D_T_FMT: case T_FMT_AMPM:
 
       /* The rest can be gotten from most versions of strftime(). */
@@ -4316,7 +4332,6 @@ S_my_langinfo_i(pTHX_
         /* If libc mbtowc() evaluates the bytes that form the REPLACEMENT
          * CHARACTER as that Unicode code point, this has to be a UTF-8 locale.
          * */
-
         wchar_t wc = 0;
         (void) Perl_mbtowc_(aTHX_ NULL, NULL, 0);/* Reset shift state */
         int mbtowc_ret = Perl_mbtowc_(aTHX_ &wc,
@@ -4400,7 +4415,7 @@ S_my_langinfo_i(pTHX_
 
             /* Here we have gone through all the LC_TIME elements.  is_utf8 has
              * been set as follows:
-             *      UTF8NESS_NO           If any aren't legal UTF-8
+             *      UTF8NESS_NO           If at least one is't legal UTF-8
              *      UTF8NESS_IMMMATERIAL  If all are ASCII
              *      UTF8NESS_YES          If all are legal UTF-8 (including
              *                            ASCIIi), and at least one isn't
@@ -4460,7 +4475,7 @@ S_my_langinfo_i(pTHX_
             break;
         }
 
-        /* Use everything past the dot */
+        /* Don't include the dot */
         retval++;
 
         /* And stop before any '@' */
@@ -4537,10 +4552,11 @@ Perl_my_strftime8(pTHX_ const char *fmt, int sec, int min, int hour, int mday,
 
     }
 
-    DEBUG_Lv(PerlIO_printf(Perl_debug_log, "fmt=%s, retval=%s", fmt,
-                 ((is_utf8_string((U8 *) retval, 0))
-                  ? retval
-                  :_byte_dump_string((U8 *) retval, strlen(retval), 0)));
+    DEBUG_Lv(PerlIO_printf(Perl_debug_log,
+                        "fmt=%s, retval=%s", fmt,
+                        ((is_utf8_string((U8 *) retval, 0))
+                         ? retval
+                         :_byte_dump_string((U8 *) retval, strlen(retval), 0)));
              if (utf8ness) PerlIO_printf(Perl_debug_log, "; utf8ness=%d",
                                                          (int) *utf8ness);
              PerlIO_printf(Perl_debug_log, "\n");
@@ -5223,167 +5239,157 @@ STATIC void
 S_compute_collxfrm_coefficients(pTHX)
 {
 
-        /* A locale collation definition includes primary, secondary, tertiary,
-         * etc. weights for each character.  To sort, the primary weights are
-         * used, and only if they compare equal, then the secondary weights are
-         * used, and only if they compare equal, then the tertiary, etc.
-         *
-         * strxfrm() works by taking the input string, say ABC, and creating an
-         * output transformed string consisting of first the primary weights,
-         * A¹B¹C¹ followed by the secondary ones, A²B²C²; and then the
-         * tertiary, etc, yielding A¹B¹C¹ A²B²C² A³B³C³ ....  Some characters
-         * may not have weights at every level.  In our example, let's say B
-         * doesn't have a tertiary weight, and A doesn't have a secondary
-         * weight.  The constructed string is then going to be
-         *  A¹B¹C¹ B²C² A³C³ ....
-         * This has the desired effect that strcmp() will look at the secondary
-         * or tertiary weights only if the strings compare equal at all higher
-         * priority weights.  The spaces shown here, like in
-         *  "A¹B¹C¹ A²B²C² "
-         * are not just for readability.  In the general case, these must
-         * actually be bytes, which we will call here 'separator weights'; and
-         * they must be smaller than any other weight value, but since these
-         * are C strings, only the terminating one can be a NUL (some
-         * implementations may include a non-NUL separator weight just before
-         * the NUL).  Implementations tend to reserve 01 for the separator
-         * weights.  They are needed so that a shorter string's secondary
-         * weights won't be misconstrued as primary weights of a longer string,
-         * etc.  By making them smaller than any other weight, the shorter
-         * string will sort first.  (Actually, if all secondary weights are
-         * smaller than all primary ones, there is no need for a separator
-         * weight between those two levels, etc.)
-         *
-         * The length of the transformed string is roughly a linear function of
-         * the input string.  It's not exactly linear because some characters
-         * don't have weights at all levels.  When we call strxfrm() we have to
-         * allocate some memory to hold the transformed string.  The
-         * calculations below try to find coefficients 'm' and 'b' for this
-         * locale so that m*x + b equals how much space we need, given the size
-         * of the input string in 'x'.  If we calculate too small, we increase
-         * the size as needed, and call strxfrm() again, but it is better to
-         * get it right the first time to avoid wasted expensive string
-         * transformations. */
+    /* A locale collation definition includes primary, secondary, tertiary,
+     * etc. weights for each character.  To sort, the primary weights are used,
+     * and only if they compare equal, then the secondary weights are used, and
+     * only if they compare equal, then the tertiary, etc.
+     *
+     * strxfrm() works by taking the input string, say ABC, and creating an
+     * output transformed string consisting of first the primary weights,
+     * A¹B¹C¹ followed by the secondary ones, A²B²C²; and then the tertiary,
+     * etc, yielding A¹B¹C¹ A²B²C² A³B³C³ ....  Some characters may not have
+     * weights at every level.  In our example, let's say B doesn't have a
+     * tertiary weight, and A doesn't have a secondary weight.  The constructed
+     * string is then going to be
+     *  A¹B¹C¹ B²C² A³C³ ....
+     * This has the desired effect that strcmp() will look at the secondary or
+     * tertiary weights only if the strings compare equal at all higher
+     * priority weights.  The spaces shown here, like in
+     *  "A¹B¹C¹ A²B²C² "
+     * are not just for readability.  In the general case, these must actually
+     * be bytes, which we will call here 'separator weights'; and they must be
+     * smaller than any other weight value, but since these are C strings, only
+     * the terminating one can be a NUL (some implementations may include a
+     * non-NUL separator weight just before the NUL).  Implementations tend to
+     * reserve 01 for the separator weights.  They are needed so that a shorter
+     * string's secondary weights won't be misconstrued as primary weights of a
+     * longer string, etc.  By making them smaller than any other weight, the
+     * shorter string will sort first.  (Actually, if all secondary weights are
+     * smaller than all primary ones, there is no need for a separator weight
+     * between those two levels, etc.)
+     *
+     * The length of the transformed string is roughly a linear function of the
+     * input string.  It's not exactly linear because some characters don't
+     * have weights at all levels.  When we call strxfrm() we have to allocate
+     * some memory to hold the transformed string.  The calculations below try
+     * to find coefficients 'm' and 'b' for this locale so that m*x + b equals
+     * how much space we need, given the size of the input string in 'x'.  If
+     * we calculate too small, we increase the size as needed, and call
+     * strxfrm() again, but it is better to get it right the first time to
+     * avoid wasted expensive string transformations.
+     *
+     * We use the string below to find how long the tranformation of it is.
+     * Almost all locales are supersets of ASCII, or at least the ASCII
+     * letters.  We use all of them, half upper half lower, because if we used
+     * fewer, we might hit just the ones that are outliers in a particular
+     * locale.  Most of the strings being collated will contain a preponderance
+     * of letters, and even if they are above-ASCII, they are likely to have
+     * the same number of weight levels as the ASCII ones.  It turns out that
+     * digits tend to have fewer levels, and some punctuation has more, but
+     * those are relatively sparse in text, and khw believes this gives a
+     * reasonable result, but it could be changed if experience so dictates. */
+    const char longer[] = "ABCDEFGHIJKLMnopqrstuvwxyz";
+    char * x_longer;        /* Transformed 'longer' */
+    Size_t x_len_longer;    /* Length of 'x_longer' */
 
-        {
-            /* We use the string below to find how long the tranformation of it
-             * is.  Almost all locales are supersets of ASCII, or at least the
-             * ASCII letters.  We use all of them, half upper half lower,
-             * because if we used fewer, we might hit just the ones that are
-             * outliers in a particular locale.  Most of the strings being
-             * collated will contain a preponderance of letters, and even if
-             * they are above-ASCII, they are likely to have the same number of
-             * weight levels as the ASCII ones.  It turns out that digits tend
-             * to have fewer levels, and some punctuation has more, but those
-             * are relatively sparse in text, and khw believes this gives a
-             * reasonable result, but it could be changed if experience so
-             * dictates. */
-            const char longer[] = "ABCDEFGHIJKLMnopqrstuvwxyz";
-            char * x_longer;        /* Transformed 'longer' */
-            Size_t x_len_longer;    /* Length of 'x_longer' */
-
-            char * x_shorter;   /* We also transform a substring of 'longer' */
-            Size_t x_len_shorter;
+    char * x_shorter;   /* We also transform a substring of 'longer' */
+    Size_t x_len_shorter;
 
     PL_in_utf8_COLLATE_locale = (PL_collation_standard)
                                 ? 0
                                 : is_locale_utf8(PL_collation_name);
     PL_strxfrm_NUL_replacement = '\0';
     PL_strxfrm_max_cp = 0;
-            
-            /* mem_collxfrm_() is used get the transformation (though here we
-             * are interested only in its length).  It is used because it has
-             * the intelligence to handle all cases, but to work, it needs some
-             * values of 'm' and 'b' to get it started.  For the purposes of
-             * this calculation we use a very conservative estimate of 'm' and
-             * 'b'.  This assumes a weight can be multiple bytes, enough to
-             * hold any UV on the platform, and there are 5 levels, 4 weight
-             * bytes, and a trailing NUL.  */
-            PL_collxfrm_base = 5;
-            PL_collxfrm_mult = 5 * sizeof(UV);
 
-            /* Find out how long the transformation really is */
-            x_longer = mem_collxfrm_(longer,
-                                     sizeof(longer) - 1,
-                                     &x_len_longer,
+    /* mem_collxfrm_() is used get the transformation (though here we are
+     * interested only in its length).  It is used because it has the
+     * intelligence to handle all cases, but to work, it needs some values of
+     * 'm' and 'b' to get it started.  For the purposes of this calculation we
+     * use a very conservative estimate of 'm' and 'b'.  This assumes a weight
+     * can be multiple bytes, enough to hold any UV on the platform, and there
+     * are 5 levels, 4 weight bytes, and a trailing NUL.  */
+    PL_collxfrm_base = 5;
+    PL_collxfrm_mult = 5 * sizeof(UV);
 
-                                     /* We avoid converting to UTF-8 in the
-                                      * called function by telling it the
-                                      * string is in UTF-8 if the locale is a
-                                      * UTF-8 one.  Since the string passed
-                                      * here is invariant under UTF-8, we can
-                                      * claim it's UTF-8 even though it isn't.
-                                      * */
-                                     PL_in_utf8_COLLATE_locale);
-            Safefree(x_longer);
+    /* Find out how long the transformation really is */
+    x_longer = mem_collxfrm_(longer,
+                             sizeof(longer) - 1,
+                             &x_len_longer,
 
-            /* Find out how long the transformation of a substring of 'longer'
-             * is.  Together the lengths of these transformations are
-             * sufficient to calculate 'm' and 'b'.  The substring is all of
-             * 'longer' except the first character.  This minimizes the chances
-             * of being swayed by outliers */
-            x_shorter = mem_collxfrm_(longer + 1,
-                                      sizeof(longer) - 2,
-                                      &x_len_shorter,
-                                      PL_in_utf8_COLLATE_locale);
-            Safefree(x_shorter);
+                             /* We avoid converting to UTF-8 in the called
+                              * function by telling it the string is in UTF-8
+                              * if the locale is a UTF-8 one.  Since the string
+                              * passed here is invariant under UTF-8, we can
+                              * claim it's UTF-8 even though it isn't.  */
+                              PL_in_utf8_COLLATE_locale);
+    Safefree(x_longer);
 
-            /* If the results are nonsensical for this simple test, the whole
-             * locale definition is suspect.  Mark it so that locale collation
-             * is not active at all for it.  XXX Should we warn? */
-            if (   x_len_shorter == 0
-                || x_len_longer == 0
-                || x_len_shorter >= x_len_longer)
-            {
-                PL_collxfrm_mult = 0;
-                PL_collxfrm_base = 1;
-                DEBUG_L(PerlIO_printf(Perl_debug_log,
-                        "Disabling locale collation for LC_COLLATE='%s';"
-                        " length for shorter sample=%zu; longer=%zu\n",
-                        PL_collation_name, x_len_shorter, x_len_longer));
-            }
-            else {
-                SSize_t base;       /* Temporary */
+    /* Find out how long the transformation of a substring of 'longer' is.
+     * Together the lengths of these transformations are sufficient to
+     * calculate 'm' and 'b'.  The substring is all of 'longer' except the
+     * first character.  This minimizes the chances of being swayed by outliers
+     * */
+    x_shorter = mem_collxfrm_(longer + 1,
+                              sizeof(longer) - 2,
+                              &x_len_shorter,
+                              PL_in_utf8_COLLATE_locale);
+    Safefree(x_shorter);
 
-                /* We have both:    m * strlen(longer)  + b = x_len_longer
-                 *                  m * strlen(shorter) + b = x_len_shorter;
-                 * subtracting yields:
-                 *          m * (strlen(longer) - strlen(shorter))
-                 *                             = x_len_longer - x_len_shorter
-                 * But we have set things up so that 'shorter' is 1 byte smaller
-                 * than 'longer'.  Hence:
-                 *          m = x_len_longer - x_len_shorter
-                 *
-                 * But if something went wrong, make sure the multiplier is at
-                 * least 1.
-                 */
-                if (x_len_longer > x_len_shorter) {
-                    PL_collxfrm_mult = (STRLEN) x_len_longer - x_len_shorter;
-                }
-                else {
-                    PL_collxfrm_mult = 1;
-                }
+    /* If the results are nonsensical for this simple test, the whole locale
+     * definition is suspect.  Mark it so that locale collation is not active
+     * at all for it.  XXX Should we warn? */
+    if (   x_len_shorter == 0
+        || x_len_longer == 0
+        || x_len_shorter >= x_len_longer)
+    {
+        PL_collxfrm_mult = 0;
+        PL_collxfrm_base = 1;
+        DEBUG_L(PerlIO_printf(Perl_debug_log,
+                "Disabling locale collation for LC_COLLATE='%s';"
+                " length for shorter sample=%zu; longer=%zu\n",
+                PL_collation_name, x_len_shorter, x_len_longer));
+    }
+    else {
+        SSize_t base;       /* Temporary */
 
-                /*     mx + b = len
-                 * so:      b = len - mx
-                 * but in case something has gone wrong, make sure it is
-                 * non-negative */
-                base = x_len_longer - PL_collxfrm_mult * (sizeof(longer) - 1);
-                if (base < 0) {
-                    base = 0;
-                }
-
-                /* Add 1 for the trailing NUL */
-                PL_collxfrm_base = base + 1;
-            }
-
-            DEBUG_L(PerlIO_printf(Perl_debug_log,
-                                  "?UTF-8 locale=%d; x_len_shorter=%zu, "
-                    "x_len_longer=%zu,"
-                    " collate multipler=%zu, collate base=%zu\n",
-                    PL_in_utf8_COLLATE_locale,
-                    x_len_shorter, x_len_longer,
-                                  PL_collxfrm_mult, PL_collxfrm_base));
+        /* We have both: m * strlen(longer)  + b = x_len_longer
+         *               m * strlen(shorter) + b = x_len_shorter;
+         * subtracting yields:
+         *          m * (strlen(longer) - strlen(shorter))
+         *                             = x_len_longer - x_len_shorter
+         * But we have set things up so that 'shorter' is 1 byte smaller than
+         * 'longer'.  Hence:
+         *          m = x_len_longer - x_len_shorter
+         *
+         * But if something went wrong, make sure the multiplier is at least 1.
+         */
+        if (x_len_longer > x_len_shorter) {
+            PL_collxfrm_mult = (STRLEN) x_len_longer - x_len_shorter;
         }
+        else {
+            PL_collxfrm_mult = 1;
+        }
+
+        /*     mx + b = len
+         * so:      b = len - mx
+         * but in case something has gone wrong, make sure it is non-negative
+         * */
+        base = x_len_longer - PL_collxfrm_mult * (sizeof(longer) - 1);
+        if (base < 0) {
+            base = 0;
+        }
+
+        /* Add 1 for the trailing NUL */
+        PL_collxfrm_base = base + 1;
+    }
+
+    DEBUG_L(PerlIO_printf(Perl_debug_log,
+                          "?UTF-8 locale=%d; x_len_shorter=%zu, "
+                          "x_len_longer=%zu,"
+                          " collate multipler=%zu, collate base=%zu\n",
+                          PL_in_utf8_COLLATE_locale,
+                          x_len_shorter, x_len_longer,
+                          PL_collxfrm_mult, PL_collxfrm_base));
 }
 
 char *
@@ -5435,6 +5441,8 @@ Perl_mem_collxfrm_(pTHX_ const char *input_string,
             goto bad;
         }
 
+        /* (mult, base) == (0,0) means we need to calculate mult and base
+         * before proceeding */
         S_compute_collxfrm_coefficients(aTHX);
     }
 
@@ -6112,7 +6120,8 @@ S_toggle_locale_i(pTHX_ const unsigned cat_index,
              new_locale, locale_to_restore_to));
 
     if (! locale_to_restore_to) {
-        locale_panic_(Perl_form(aTHX_ "Could not find current %s locale, errno=%d",
+        locale_panic_(Perl_form(aTHX_
+                                "Could not find current %s locale, errno=%d",
                                 category_names[cat_index], errno));
     }
 
@@ -6129,14 +6138,15 @@ S_toggle_locale_i(pTHX_ const unsigned cat_index,
     /* Finally, change the locale to the new one */
     void_setlocale_i(cat_index, new_locale);
 
-    DEBUG_Lv(PerlIO_printf(Perl_debug_log, "(%" LINE_Tf "): %s locale switched to %s\n",
+    DEBUG_Lv(PerlIO_printf(Perl_debug_log,
+                           "(%" LINE_Tf "): %s locale switched to %s\n",
                            caller_line, category_names[cat_index], new_locale));
 
     return locale_to_restore_to;
 
-#ifndef DEBUGGING
+#  ifndef DEBUGGING
     PERL_UNUSED_ARG(caller_line);
-#endif
+#  endif
 
 }
 
@@ -6166,13 +6176,13 @@ S_restore_toggled_locale_i(pTHX_ const unsigned int cat_index,
 
     void_setlocale_i(cat_index, restore_locale);
 
-#ifndef DEBUGGING
+#  ifndef DEBUGGING
     PERL_UNUSED_ARG(caller_line);
-#endif
+#  endif
 
 }
 
-#ifdef USE_LOCALE_CTYPE
+#  ifdef USE_LOCALE_CTYPE
 
 STATIC bool
 S_is_codeset_name_UTF8(const char * name)
@@ -6183,14 +6193,14 @@ S_is_codeset_name_UTF8(const char * name)
 
     PERL_ARGS_ASSERT_IS_CODESET_NAME_UTF8;
 
-#  ifdef WIN32
+#    ifdef WIN32
 
     /* http://msdn.microsoft.com/en-us/library/windows/desktop/dd317756.aspx */
     if (memENDs(name, len, "65001")) {
         return TRUE;
     }
 
-#  endif
+#    endif
                /* 'UTF8' or 'UTF-8' */
     return (    inRANGE(len, 4, 5)
             &&  name[len-1] == '8'
@@ -6787,7 +6797,7 @@ S_my_setlocale_debug_string_i(pTHX_
 #  endif
 
     return Perl_form(aTHX_
-                     "%s:%" LINE_Tf ":" THREAD_FORMAT
+                     "%s:%" LINE_Tf ": " THREAD_FORMAT
                      " setlocale(%s[%d], %s%s%s) returned %s%s%s\n",
 
                      __FILE__, line, THREAD_ARGUMENT
