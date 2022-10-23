@@ -6781,6 +6781,21 @@ problems when being input or output, which is likely where this message
 came from.  If you really really know what you are doing you can turn
 off this warning by C<no warnings 'surrogate';>.
 
+=item Unimplemented
+
+(F) In Perl 5.12 and above, you have executed an
+L<ellipsis statement|perlsyn/"The Ellipsis Statement">.  This is a
+bare C<...;>, meant to be used to allow you to outline code that
+is to be written, but is not complete, similar to the following:
+
+    sub not_done_yet {
+      my($self, $arg1, $arg2) = @_;
+      ...
+    }
+
+If C<not_done_yet()> is called, Perl will die with an C<Unimplemented> error
+at the line containing C<...>.
+
 =item Unknown charname '%s'
 
 (F) The name you used inside C<\N{}> is unknown to Perl.  Check the
