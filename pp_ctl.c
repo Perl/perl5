@@ -4807,7 +4807,7 @@ PP(pp_leaveeval)
         PL_curcop = old_pl_curcop;
 
         if (module_true) {
-            POPs;
+            (void)POPs;
             PUSHs(&PL_sv_yes);
             failed = false;
         }

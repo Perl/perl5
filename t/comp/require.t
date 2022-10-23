@@ -33,7 +33,7 @@ if (grep -e, @files_to_delete) {
 
 
 my $Is_UTF8   = (${^OPEN} || "") =~ /:utf8/;
-my $total_tests = 62;
+my $total_tests = 64;
 if ($Is_UTF8) { $total_tests -= 3; }
 print "1..$total_tests\n";
 
@@ -381,6 +381,19 @@ if (defined &DynaLoader::boot_DynaLoader) {
     my $not = eval 'use bleah; 1' ? "" : "not ";
     $i++;
     print "${not}ok $i - use feature 'module_true' removes the need for an explicit true return value from a module ($@)\n";
+}
+
+{
+    BEGIN { ${^OPEN} = ":utf8\0"; }
+    %INC = ();
+    write_file('bleah.pm',"package bleah;\nuse feature 'module_true';\nsub bar{}; return 'some_true_value';\n");
+    my ($return_val, $rv2);
+    my $not = eval "\$return_val = require 'bleah.pm'; 1" ? "" : "not ";
+    $i++;
+    print "${not}ok $i - use feature 'module_true' works even if module has an explicit true return value ($@)\n";
+    $not = ($return_val && $return_val ne 'some_true_value') ? "" : "not ";
+    $i++;
+    print "${not}ok $i - use feature 'module_true' replaces any explicit return value with a true value ($@) <$return_val>\n";
 }
 
 ##########################################
