@@ -4442,7 +4442,11 @@ S_my_langinfo_i(pTHX_
          * part of the locale name.  This is very less than ideal; often there
          * is no code set in the name; and at other times they even lie.
          *
-         * Find any dot in the locale name */
+         * But there is an XPG standard syntax, which many locales follow:
+         *
+         * language[_territory[.codeset]][@modifier]
+         *
+         * So we take the part between the dot and any '@' */
         retval = (const char *) strchr(locale, '.');
         if (! retval) {
             retval = "";  /* Alas, no dot */
@@ -4451,6 +4455,17 @@ S_my_langinfo_i(pTHX_
 
         /* Use everything past the dot */
         retval++;
+
+        /* And stop before any '@' */
+        char * modifier = strchr(retval, '@');
+        if (modifier) {
+            char * code_set_name;
+            const Size_t name_len = modifier - retval;
+            Newx(code_set_name, name_len + 1, char);         /* +1 for NUL */
+            my_strlcpy(code_set_name, retval, name_len + 1);
+            SAVEFREEPV(code_set_name);
+            retval = code_set_name;
+        }
 
 #      if defined(HAS_MBTOWC) || defined(HAS_MBRTOWC)
 
@@ -4464,8 +4479,8 @@ S_my_langinfo_i(pTHX_
 
 #      endif
 
-        /* Otherwise the code set name is considered to be everything past the
-         * dot. */
+        /* Otherwise the code set name is considered to be everything between
+         * the dot and the '@' */
         retval = save_to_buffer(retval, retbufp, retbuf_sizep);
 
         break;
