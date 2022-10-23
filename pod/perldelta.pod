@@ -218,6 +218,23 @@ XXX Changes (i.e. rewording) of diagnostic messages go here
 
 =item *
 
+Various warnings that used to produce parenthesized hints underneath the
+main warning message and after its "location data" were chanaged to put
+the hint inline with the main message. For instance:
+
+ Bareword found where operator expected at -e line 1, near "foo bar"
+     (Do you need to predeclare foo?)
+
+will now look like this but as one line:
+
+ Bareword found where operator expected (Do you need to predeclare
+ foo?) at -e line 1, near "foo bar"
+
+as a result such warnings will no longer trigger C<$SIG{__WARN__}>
+twice, and the hint will be visible when fatal warnings is in effect.
+
+=item *
+
 XXX Describe change here
 
 =back

@@ -642,6 +642,10 @@ S_no_op(pTHX_ const char *const what, char *s)
 {
     char * const oldbp = PL_bufptr;
     const bool is_first = (PL_oldbufptr == PL_linestart);
+    SV *message = sv_2mortal( newSVpvf(
+                   PERL_DIAG_WARN_SYNTAX("%s found where operator expected"),
+                   what
+                  ) );
 
     PERL_ARGS_ASSERT_NO_OP;
 
@@ -649,34 +653,54 @@ S_no_op(pTHX_ const char *const what, char *s)
         s = oldbp;
     else
         PL_bufptr = s;
-    yywarn(Perl_form(aTHX_ "%s found where operator expected", what), UTF ? SVf_UTF8 : 0);
+
     if (ckWARN_d(WARN_SYNTAX)) {
-        if (is_first)
-            Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
-                    "\t(Missing semicolon on previous line?)\n");
-        else if (PL_oldoldbufptr && isIDFIRST_lazy_if_safe(PL_oldoldbufptr,
-                                                           PL_bufend,
-                                                           UTF))
-        {
+        bool has_more = FALSE;
+        if (is_first) {
+            has_more = TRUE;
+            sv_catpvs(message,
+                    " (Missing semicolon on previous line?)");
+        }
+        else if (PL_oldoldbufptr) {
+            /* yyerror (via yywarn) would do this itself, so we should too */
             const char *t;
             for (t = PL_oldoldbufptr;
-                 (isWORDCHAR_lazy_if_safe(t, PL_bufend, UTF) || *t == ':');
+                 t < PL_bufptr && isSPACE(*t);
                  t += UTF ? UTF8SKIP(t) : 1)
             {
                 NOOP;
             }
-            if (t < PL_bufptr && isSPACE(*t))
-                Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
-                        "\t(Do you need to predeclare %" UTF8f "?)\n",
-                      UTF8fARG(UTF, t - PL_oldoldbufptr, PL_oldoldbufptr));
+            /* see if we can identify the cause of the warning */
+            if (isIDFIRST_lazy_if_safe(t,PL_bufend,UTF))
+            {
+                const char *t_start= t;
+                for ( ;
+                     (isWORDCHAR_lazy_if_safe(t, PL_bufend, UTF) || *t == ':');
+                     t += UTF ? UTF8SKIP(t) : 1)
+                {
+                    NOOP;
+                }
+                if (t < PL_bufptr && isSPACE(*t)) {
+                    has_more = TRUE;
+                    sv_catpvf( message,
+                            " (Do you need to predeclare \"%" UTF8f "\"?)",
+                          UTF8fARG(UTF, t - t_start, t_start));
+                }
+            }
         }
-        else {
+        if (!has_more) {
+            const char *t= oldbp;
             assert(s >= oldbp);
-            Perl_warner(aTHX_ packWARN(WARN_SYNTAX),
-                    "\t(Missing operator before %" UTF8f "?)\n",
-                     UTF8fARG(UTF, s - oldbp, oldbp));
+            while (t < s && isSPACE(*t)) {
+                t += UTF ? UTF8SKIP(t) : 1;
+            }
+
+            sv_catpvf(message,
+                    " (Missing operator before \"%" UTF8f "\"?)",
+                     UTF8fARG(UTF, s - t, t));
         }
     }
+    yywarn(SvPV_nolen(message), UTF ? SVf_UTF8 : 0);
     PL_bufptr = oldbp;
 }
 

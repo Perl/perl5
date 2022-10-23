@@ -1040,10 +1040,8 @@ Operator or semicolon missing before %foo at - line 8.
 Ambiguous use of % resolved as operator % at - line 8.
 Operator or semicolon missing before %foo at - line 10.
 Ambiguous use of % resolved as operator % at - line 10.
-Bareword found where operator expected at - line 12, near "$%foo"
-	(Missing operator before foo?)
-Bareword found where operator expected at - line 13, near "$ %foo"
-	(Missing operator before foo?)
+Bareword found where operator expected (Missing operator before "foo"?) at - line 12, near "$%foo"
+Bareword found where operator expected (Missing operator before "foo"?) at - line 13, near "$ %foo"
 Illegal modulus zero at - line 3.
 ########
 # toke.c
@@ -1067,10 +1065,8 @@ Operator or semicolon missing before &foo at - line 8.
 Ambiguous use of & resolved as operator & at - line 8.
 Operator or semicolon missing before &foo at - line 10.
 Ambiguous use of & resolved as operator & at - line 10.
-Bareword found where operator expected at - line 13, near "$&foo"
-	(Missing operator before foo?)
-Bareword found where operator expected at - line 14, near "$ &foo"
-	(Missing operator before foo?)
+Bareword found where operator expected (Missing operator before "foo"?) at - line 13, near "$&foo"
+Bareword found where operator expected (Missing operator before "foo"?) at - line 14, near "$ &foo"
 Undefined subroutine &main::foo called at - line 3.
 ########
 # toke.c
@@ -1269,8 +1265,7 @@ eval q/5 6/;
 no warnings "syntax";
 eval q/5 6/;
 EXPECT
-Number found where operator expected at (eval 1) line 1, near "5 6"
-	(Missing operator before  6?)
+Number found where operator expected (Missing operator before "6"?) at (eval 1) line 1, near "5 6"
 ########
 # toke.c
 use warnings "syntax"; no warnings "deprecated";
@@ -1777,3 +1772,11 @@ Use of '》' is deprecated as a string delimiter at - line 12.
 Use of '‹' is deprecated as a string delimiter at - line 13.
 Use of '›' is deprecated as a string delimiter at - line 14.
 ########
+# NAME check bareword warning is a single error message
+BEGIN { $SIG{__WARN__}= sub { print STDERR "warn: $_[0]" }; }
+sub bar {}
+foo bar;
+EXPECT
+warn: Bareword found where operator expected (Do you need to predeclare "foo"?) at - line 3, near "foo bar"
+syntax error at - line 3, near "foo bar"
+Execution of - aborted due to compilation errors.
