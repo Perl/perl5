@@ -171,7 +171,7 @@ my %VALUE_TO_NAME; # (index_number => [ 'NAME', version ], ...);
 
 my %NAME_TO_VALUE; # ('NAME'       => index_number,       ....);
 
-# the experiments were successful,
+# the experiments were successful (or abandonned),
 # so no warning bit is needed anymore
 my %NO_BIT_FOR = map { ( uc $_ => 1, $_ => 1 ) } qw(
   experimental::lexical_subs
@@ -181,6 +181,7 @@ my %NO_BIT_FOR = map { ( uc $_ => 1, $_ => 1 ) } qw(
   experimental::alpha_assertions
   experimental::script_run
   experimental::isa
+  experimental::smartmatch
 );
 
 ###########################################################################
