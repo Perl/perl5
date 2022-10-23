@@ -815,7 +815,7 @@ use File::Glob qw(:case);
     },
 
     'Memoize' => {
-        'DISTRIBUTION' => 'ARISTOTLE/Memoize-1.14.tar.gz',
+        'DISTRIBUTION' => 'ARISTOTLE/Memoize-1.15.tar.gz',
         'FILES'        => q[cpan/Memoize],
         'EXCLUDED'     => ['article.html'],
     },

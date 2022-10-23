@@ -1,7 +1,7 @@
 use strict; use warnings;
 
 package Memoize::Expire;
-our $VERSION = '1.14';
+our $VERSION = '1.15';
 
 use Carp;
 our $DEBUG;

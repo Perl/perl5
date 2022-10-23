@@ -53,9 +53,6 @@ is $COUNT, 0, 'no warning when normalizer returns undef';
 sub n {
   my $which = wantarray ? 'list' : 'scalar';
   local $Test::Builder::Level = $Test::Builder::Level + 2;
-  $Test::Builder::Level += 2 # wrapper currently uses more stack frames on threaded perls
-    # tripwire: this will only compile for as long as Memoize.pm still loads Config.pm
-    if do { package Memoize; $Config{'usethreads'} };
   is $_[0], $which, "$which context propagates properly";
 }
 sub f { 1 }

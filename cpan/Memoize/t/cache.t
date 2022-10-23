@@ -1,7 +1,7 @@
 use strict; use warnings;
 use Memoize 0.45 qw(memoize unmemoize);
 use Fcntl;
-use Test::More tests => 59;
+use Test::More tests => 65;
 
 sub list { wantarray ? @_ : $_[-1] }
 
@@ -122,5 +122,27 @@ is @w, 1, '... and no other warnings';
 is eval { memoize sub {}, LIST_CACHE => 'YOB GORGLE' }, undef, 'bad LIST_CACHE fails';
 like $@, qr/^Unrecognized option to `LIST_CACHE': `YOB GORGLE'/, '... with the expected error';
 
-is eval { memoize sub {}, SCALAR_CACHE => ['YOB GORGLE'] }, undef, 'bad SCALAR_HASH fails';
+is eval { memoize sub {}, SCALAR_CACHE => ['YOB GORGLE'] }, undef, 'bad SCALAR_CACHE fails';
 like $@, qr/^Unrecognized option to `SCALAR_CACHE': `YOB GORGLE'/, '... with the expected error';
+
+for my $option (qw(LIST_CACHE SCALAR_CACHE)) {
+	is eval { memoize sub {}, $option => ['MERGE'] }, undef, "$option=>['MERGE'] fails";
+	like $@, qr/^Unrecognized option to `$option': `MERGE'/, '... with the expected error';
+}
+
+# this test needs a DBM which
+# a) Memoize knows is scalar-only
+# b) is always available (on all platforms, perl configs etc)
+# c) never fails to load
+# so we use AnyDBM_File (which fulfills (a) & (b))
+# on top of a fake dummy DBM (ditto (b) & (c))
+sub DummyDBM::TIEHASH { bless {}, shift }
+$INC{'DummyDBM.pm'} = 1;
+@AnyDBM_File::ISA = 'DummyDBM';
+$sub = eval {
+	no warnings;
+	memoize sub {}, SCALAR_CACHE => [ TIE => 'AnyDBM_File' ], LIST_CACHE => 'MERGE';
+};
+is $sub, undef, 'smuggling in a scalar-only LIST_CACHE via MERGE fails';
+like $@, qr/^You can't use AnyDBM_File for LIST_CACHE because it can only store scalars/,
+	'... with the expected error';
