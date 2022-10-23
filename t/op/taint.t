@@ -2453,6 +2453,7 @@ EOF
 	my $desc = "tainted value returned from " . shift(@descriptions);
 
 	my $res = do {
+	    no warnings 'deprecated';
 	    given ($_) {
 		when ('x') { $letter }
 		when ('y') { goto leavegiven }
@@ -2482,7 +2483,7 @@ EOF
 # Tainted values with smartmatch
 # [perl #93590] S_do_smartmatch stealing its own string buffers
 {
-no warnings 'experimental::smartmatch';
+no warnings 'deprecated';
 ok "M$TAINT" ~~ ['m', 'M'], '$tainted ~~ ["whatever", "match"]';
 ok !("M$TAINT" ~~ ['m', undef]), '$tainted ~~ ["whatever", undef]';
 }

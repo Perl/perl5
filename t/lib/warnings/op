@@ -363,7 +363,7 @@ OPTION fatal
 Can't use an array as a reference at - line 3.
 ########
 # op.c
-use warnings 'void' ; no warnings 'experimental::smartmatch'; close STDIN ;
+use warnings 'void' ; no warnings 'deprecated'; close STDIN ;
 #line 2
 1 x 3 ;			# OP_REPEAT (folded)
 (1) x 3 ;		# OP_REPEAT

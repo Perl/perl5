@@ -15,8 +15,6 @@ BEGIN {
   $^P |= 0x100; # Provide informative "file" names for evals
 }
 
-no warnings 'experimental::smartmatch';
-
 sub lis($$;$) {
   &is(map(@$_ ? "[@{[map $_//'~~u~~', @$_]}]" : 'nought', @_[0,1]), $_[2]);
 }
@@ -375,6 +373,7 @@ test_proto 'break';
 {
   $tests ++;
   my $tmp;
+  no warnings 'deprecated';
   CORE::given(1) {
     CORE::when(1) {
       &mybreak;
@@ -463,6 +462,7 @@ SKIP:
 
 test_proto 'continue';
 $tests ++;
+no warnings 'deprecated';
 CORE::given(1) {
   CORE::when(1) {
     &mycontinue();

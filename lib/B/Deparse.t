@@ -1061,7 +1061,7 @@ my $c = [];
 my $d = \[];
 ####
 # SKIP ?$] < 5.010 && "smartmatch and given/when not implemented on this Perl version"
-# CONTEXT use feature ':5.10'; no warnings 'experimental::smartmatch';
+# CONTEXT use feature ':5.10'; no warnings 'deprecated';
 # implicit smartmatch in given/when
 given ('foo') {
     when ('bar') { continue; }
@@ -1624,7 +1624,7 @@ my @a;
 $a[0] = 1;
 ####
 # feature features without feature
-# CONTEXT no warnings 'experimental::smartmatch';
+# CONTEXT no warnings 'deprecated';
 CORE::state $x;
 CORE::say $x;
 CORE::given ($x) {
@@ -1640,7 +1640,7 @@ CORE::evalbytes '';
 () = CORE::fc $x;
 ####
 # feature features when feature has been disabled by use VERSION
-# CONTEXT no warnings 'experimental::smartmatch';
+# CONTEXT no warnings 'deprecated';
 use feature (sprintf(":%vd", $^V));
 use 1;
 CORE::say $_;
@@ -1670,7 +1670,7 @@ CORE::evalbytes '';
 () = CORE::__SUB__;
 ####
 # (the above test with CONTEXT, and the output is equivalent but different)
-# CONTEXT use feature ':5.10'; no warnings 'experimental::smartmatch';
+# CONTEXT use feature ':5.10'; no warnings 'deprecated';
 # feature features when feature has been disabled by use VERSION
 use feature (sprintf(":%vd", $^V));
 use 1;
@@ -1704,7 +1704,7 @@ CORE::evalbytes '';
 ####
 # SKIP ?$] < 5.017004 && "lexical subs not implemented on this Perl version"
 # lexical subroutines and keywords of the same name
-# CONTEXT use feature 'lexical_subs', 'switch'; no warnings 'experimental';
+# CONTEXT use feature 'lexical_subs', 'switch'; no warnings 'experimental'; no warnings 'deprecated';
 my sub default;
 my sub else;
 my sub elsif;
