@@ -1,7 +1,11 @@
 #!/usr/bin/perl
 
 BEGIN {
-  @INC = '..' if -f '../TestInit.pm';
+  if (-f './TestInit.pm') {
+    @INC = '.';
+  } elsif (-f '../TestInit.pm') {
+    @INC = '..';
+  }
 }
 use TestInit qw(T); # T is chdir to the top level
 
