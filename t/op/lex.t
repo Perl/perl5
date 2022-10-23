@@ -135,8 +135,7 @@ SKIP: {
     skip "Different output on EBCDIC (presumably)", 3 if $::IS_EBCDIC;
     fresh_perl_is(
       qq'"ab}"ax;&\0z\x8Ao}\x82x;', <<gibberish,
-Bareword found where operator expected at - line 1, near ""ab}"ax"
-	(Missing operator before ax?)
+Bareword found where operator expected (Missing operator before "ax"?) at - line 1, near ""ab}"ax"
 syntax error at - line 1, near ""ab}"ax"
 Execution of - aborted due to compilation errors.
 gibberish
@@ -145,8 +144,7 @@ gibberish
     );
     fresh_perl_is(
       qq'"ab}"ax;&{+z}\x8Ao}\x82x;', <<gibberish,
-Bareword found where operator expected at - line 1, near ""ab}"ax"
-	(Missing operator before ax?)
+Bareword found where operator expected (Missing operator before "ax"?) at - line 1, near ""ab}"ax"
 syntax error at - line 1, near ""ab}"ax"
 Execution of - aborted due to compilation errors.
 gibberish

@@ -127,8 +127,7 @@ my $x = atan2(FOO 1, 2);
 # atan2() above) could end up calling newGVREF(), producing an unexpected error message.
 EXPECT
 OPTIONS fatal
-Number found where operator expected at - line 2, near "FOO 1"
-	(Do you need to predeclare FOO?)
+Number found where operator expected (Do you need to predeclare "FOO"?) at - line 2, near "FOO 1"
 Missing comma after first argument to atan2 function at - line 2, near "2)"
 Execution of - aborted due to compilation errors.
 ########

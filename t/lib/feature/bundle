@@ -107,6 +107,5 @@ Assigning non-zero to $[ is no longer possible at - line 3.
 eval 'BEGIN { $^H |= 0x3c020000 } $_ = evalbytes 12345';
 print $_||$@;
 EXPECT
-Number found where operator expected at (eval 1) line 1, near "evalbytes 12345"
-	(Do you need to predeclare evalbytes?)
+Number found where operator expected (Do you need to predeclare "evalbytes"?) at (eval 1) line 1, near "evalbytes 12345"
 syntax error at (eval 1) line 1, near "evalbytes 12345"
