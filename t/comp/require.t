@@ -16,7 +16,7 @@ sub do_require {
 # don't make this lexical
 $i = 1;
 
-my @files_to_delete = qw (bleah.pm bleah.do bleah.flg urkkk.pm urkkk.pmc
+my @files_to_delete = qw (bleah.pm bleah.do bleah.flg bleahp.pm urkkk.pm urkkk.pmc
 krunch.pm krunch.pmc whap.pm whap.pmc);
 
 # there may be another copy of this test script running, or the files may
@@ -386,7 +386,7 @@ if (defined &DynaLoader::boot_DynaLoader) {
 {
     BEGIN { ${^OPEN} = ":utf8\0"; }
     %INC = ();
-    write_file('bleah.pm',"package bleah;\nuse feature 'module_true';\nsub bar{}; return 'some_true_value';\n");
+    write_file('bleahp.pm',"package bleahp;\nuse feature 'module_true';\nsub foop{}; return 'some_true_value';\n");
     my ($return_val, $rv2);
     my $not = eval "\$return_val = require 'bleah.pm'; 1" ? "" : "not ";
     $i++;

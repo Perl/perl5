@@ -4788,7 +4788,7 @@ PP(pp_leaveeval)
     /* did require return a false value?
        check if use feature 'module_true' is enabled where it matters
      */
-    bool failed = false;
+    int failed = 0;
 
     if (CxOLD_OP_TYPE(cx) == OP_REQUIRE) {
         bool module_true = false;
@@ -4809,7 +4809,7 @@ PP(pp_leaveeval)
         if (module_true) {
             (void)POPs;
             PUSHs(&PL_sv_yes);
-            failed = false;
+            failed = 0;
         }
         else {
             failed = !(gimme == G_SCALAR
