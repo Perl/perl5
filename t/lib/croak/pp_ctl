@@ -41,7 +41,7 @@ EXPECT
 Can't find label foo at - line 3.
 ########
 # NAME when outside given
-use 5.01; no warnings 'experimental::smartmatch';
+use 5.01; no warnings 'deprecated';
 when(undef){}
 EXPECT
 Can't "when" outside a topicalizer at - line 2.
