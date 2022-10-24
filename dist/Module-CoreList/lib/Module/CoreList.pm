@@ -398,6 +398,7 @@ sub changes_between {
     5.037003 => '2022-08-20',
     5.037004 => '2022-09-20',
     5.037005 => '2022-10-20',
+    5.037006 => '2022-10-24',
   );
 
 for my $version ( sort { $a <=> $b } keys %released ) {
@@ -19789,6 +19790,30 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         removed => {
         }
     },
+    5.037006 => {
+        delta_from => 5.037005,
+        changed => {
+            'B::Op_private'         => '5.037006',
+            'Config'                => '5.037006',
+            'ExtUtils::CBuilder'    => '0.280238',
+            'ExtUtils::CBuilder::Base'=> '0.280238',
+            'ExtUtils::CBuilder::Platform::Unix'=> '0.280238',
+            'ExtUtils::CBuilder::Platform::VMS'=> '0.280238',
+            'ExtUtils::CBuilder::Platform::Windows'=> '0.280238',
+            'ExtUtils::CBuilder::Platform::Windows::BCC'=> '0.280238',
+            'ExtUtils::CBuilder::Platform::Windows::GCC'=> '0.280238',
+            'ExtUtils::CBuilder::Platform::Windows::MSVC'=> '0.280238',
+            'ExtUtils::CBuilder::Platform::aix'=> '0.280238',
+            'ExtUtils::CBuilder::Platform::android'=> '0.280238',
+            'ExtUtils::CBuilder::Platform::cygwin'=> '0.280238',
+            'ExtUtils::CBuilder::Platform::darwin'=> '0.280238',
+            'ExtUtils::CBuilder::Platform::dec_osf'=> '0.280238',
+            'ExtUtils::CBuilder::Platform::os2'=> '0.280238',
+            'Time::HiRes'           => '1.9772',
+        },
+        removed => {
+        }
+    },
 );
 
 sub is_core
@@ -21129,6 +21154,13 @@ sub is_core
     },
     5.037005 => {
         delta_from => 5.037004,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.037006 => {
+        delta_from => 5.037005,
         changed => {
         },
         removed => {
