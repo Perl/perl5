@@ -1932,7 +1932,7 @@ sub watchdog ($;$)
         while (     $watchdog_thread->is_running()
                && ! $watchdog_thread->is_detached())
         {
-            sleep 0;    # Relinquishes control, with minimal delay
+            'threads'->yield();
         }
 
         return;
