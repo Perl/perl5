@@ -11,14 +11,12 @@ no warnings 'deprecated';
 goto f;
 CORE::given(1){f:}
 EXPECT
-given is experimental at - line 3.
 Can't "goto" into a "given" block at - line 3.
 ########
 # NAME goto from given topic expression
 no warnings 'deprecated';
 CORE::given(goto f){f:}
 EXPECT
-given is experimental at - line 2.
 Can't "goto" into a "given" block at - line 2.
 ########
 # NAME goto into expression
