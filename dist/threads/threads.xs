@@ -241,7 +241,9 @@ S_ithread_clear(pTHX_ ithread *thread)
     S_block_most_signals(&origmask);
 #endif
 
+#if PERL_VERSION_GE(5, 37, 5)
     int save_veto = PL_veto_switch_non_tTHX_context;
+#endif
 
     interp = thread->interp;
     if (interp) {
@@ -251,7 +253,9 @@ S_ithread_clear(pTHX_ ithread *thread)
          * which doesn't work with things that don't rely on tTHX during
          * tear-down, as they will tend to rely on a mapping from the tTHX
          * structure, and that structure is being destroyed. */
+#if PERL_VERSION_GE(5, 37, 5)
         PL_veto_switch_non_tTHX_context = true;
+#endif
 
         PERL_SET_CONTEXT(interp);
 
@@ -271,7 +275,9 @@ S_ithread_clear(pTHX_ ithread *thread)
     }
 
     PERL_SET_CONTEXT(aTHX);
+#if PERL_VERSION_GE(5, 37, 5)
     PL_veto_switch_non_tTHX_context = save_veto;
+#endif
 
 #ifdef THREAD_SIGNAL_BLOCKING
     S_set_sigmask(&origmask);
