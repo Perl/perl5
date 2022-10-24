@@ -5,6 +5,13 @@ Revision history for the Perl extension Time::HiRes.
  - Remove obsolete vms code
  - Use core version compare
  - Use GIMME_V instead of the deprecated GIMME
+ - t/utime.t: dragonflybsd has only microsecond precision
+ - t/utime.t: dragonflybsd is noatime by default
+ - t/stat.t: skip testing access times on HaikuOS, it doesn't support
+   atime
+ - darwin: make sure the compiler can find the system perl headers
+   https://github.com/Perl/perl5/issues/20362
+ - darwin: make sure PERL_DARWIN is defined on darwin.
 
 1.9764 [2020-08-10]
  - Fix a bunch of repeated-word typos

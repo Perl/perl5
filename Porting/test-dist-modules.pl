@@ -6,17 +6,60 @@ use warnings;
 use File::Temp "tempdir";
 use ExtUtils::Manifest "maniread";
 use Cwd "getcwd";
+use Getopt::Long;
+use Config;
+
+my $continue;
+my $separate;
+GetOptions("c|continue" => \$continue,
+           "s|separate" => \$separate,
+           "h|help"     => \&usage)
+  or die "Unknown options\n";
+
+$|++;
 
 -f "Configure"
   or die "Expected to be run from a perl checkout";
 
+my $github_ci = $ENV{'GITHUB_SHA'} ? 1 : 0;
+
 my $manifest = maniread();
+my @failures = ();
+
+my @config;
+my $install_path;
+if ($separate) {
+    # require EU::MM 6.31 or later
+    my $install_base = tempdir( CLEANUP => 1 );
+    push @config, "INSTALL_BASE=$install_base";
+    $ENV{PERL5LIB} .= $Config{path_sep} if $ENV{PERL5LIB};
+    $ENV{PERL5LIB} .= join $Config{path_sep},
+      "$install_base/lib/perl5/$Config{archname}",
+      "$install_base/lib/perl5";
+}
+
+my %dist_config = (
+    # these are defined by the modules as distributed on CPAN
+    # I don't know why their Makefile.PLs aren't in core
+    "threads"        => [ "DEFINE=-DHAS_PPPORT_H" ],
+    "threads-shared" => [ "DEFINE=-DHAS_PPPORT_H" ],
+   );
 
 my $start = getcwd()
   or die "Cannot fetch current directory: $!\n";
 
 # get ppport.h
 my $pppdir = test_dist("Devel-PPPort");
+
+if (@failures) {
+    if ($github_ci) {
+        # GitHub may show STDERR before STDOUT.. despite autoflush
+        # being enabled.. Make sure it detects the 'endgroup' before
+        # the `die` statement.
+        print STDERR "::endgroup::\n";
+    }
+    die "Devel-PPPort failed, aborting other tests.\n";
+}
 
 my $pppfile = "$pppdir/ppport.h";
 
@@ -25,10 +68,18 @@ my $pppfile = "$pppdir/ppport.h";
 
 # Devel-PPPort is manually processed before anything else to ensure we
 # have an up to date ppport.h
-opendir my $distdir, "dist"
-  or die "Cannot opendir 'dist': $!\n";
-my @dists = sort { lc $a cmp lc $b } grep { /^\w/ && $_ ne "Devel-PPPort" } readdir $distdir;
-closedir $distdir;
+my @dists = @ARGV;
+if (@dists) {
+    for my $dist (@dists) {
+        -d "dist/$dist" or die "dist/$dist not a directory\n";
+    }
+}
+else {
+    opendir my $distdir, "dist"
+      or die "Cannot opendir 'dist': $!\n";
+    @dists = sort { lc $a cmp lc $b } grep { /^\w/ && $_ ne "Devel-PPPort" } readdir $distdir;
+    closedir $distdir;
+}
 
 # These may end up being included if their problems are resolved
 {
@@ -44,27 +95,46 @@ for my $dist (@dists) {
     test_dist($dist);
 }
 
+if (@failures) {
+    if ($github_ci) {
+        # GitHub may show STDERR before STDOUT.. despite autoflush
+        # being enabled.. Make sure it detects the 'endgroup' before
+        # the `die` statement.
+        print STDERR "::endgroup::\n";
+    }
+    my $msg = join("\n", map { "\t'$_->[0]' failed at $_->[1]" } @failures);
+    die "Following dists had failures:\n$msg\n";
+}
+
 sub test_dist {
     my ($name) = @_;
 
+    print "::group::Testing $name\n" if $github_ci;
     print "*** Testing $name ***\n";
     my $dir = tempdir( CLEANUP => 1);
-    system "cp", "-a", "dist/$name/.", "$dir/."
-      and die "Cannot copy dist files to working directory\n";
+    run("cp", "-a", "dist/$name/.", "$dir/.")
+      or die "Cannot copy dist files to working directory\n";
     chdir $dir
       or die "Cannot chdir to dist working directory '$dir': $!\n";
     if ($pppfile) {
-        system "cp", $pppfile, "."
-          and die "Cannot copy $pppfile to .\n";
+        run("cp", $pppfile, ".")
+          or die "Cannot copy $pppfile to .\n";
     }
     if ($name eq "IO" || $name eq "threads" || $name eq "threads-shared") {
         write_testpl();
+    }
+    if ($name eq "threads" || $name eq "threads-shared") {
+        write_threads_h();
+    }
+    if ($name eq "threads-shared") {
+        write_shared_h();
     }
     unless (-f "Makefile.PL") {
         print "  Creating Makefile.PL for $name\n";
         my $key = "ABSTRACT_FROM";
         my @parts = split /-/, $name;
         my $last = $parts[-1];
+        my $module = join "::", @parts;
         my $fromname;
         for my $check ("$last.pm", join("/", "lib", @parts) . ".pm") {
             if (-f $check) {
@@ -78,7 +148,7 @@ sub test_dist {
         open my $fh, ">", "Makefile.PL"
           or die "Cannot create Makefile.PL: $!\n";
         # adapted from make_ext.pl
-        printf $fh <<'EOM', $name, $fromname, $key, $value;
+        printf $fh <<'EOM', $module, $fromname, $key, $value;
 use strict;
 use ExtUtils::MakeMaker;
 
@@ -127,18 +197,36 @@ WriteMakefile(
 EOM
         close $fh;
     }
-    system $^X, "Makefile.PL"
-      and die "$name: Makefile.PL failed\n";
 
-    my $verbose = 0;
-    system "make", "test", "TEST_VERBOSE=$verbose"
-      and die "$name: make test failed\n";
-
-    system "make", "install"
-      and die "$name: make install failed\n";
+    my $verbose = $github_ci && $ENV{'RUNNER_DEBUG'} ? 1 : 0;
+    my $failed = "";
+    my @my_config = @config;
+    if (my $cfg = $dist_config{$name}) {
+        push @my_config, @$cfg;
+    }
+    if (!run($^X, "Makefile.PL", @my_config)) {
+        $failed = "Makefile.PL";
+        die "$name: Makefile.PL failed\n" unless $continue;
+    }
+    elsif (!run("make", "test", "TEST_VERBOSE=$verbose")) {
+        $failed = "make test";
+        die "$name: make test failed\n" unless $continue;
+    }
+    elsif (!run("make", "install")) {
+        $failed = "make install";
+        die "$name: make install failed\n" unless $continue;
+    }
 
     chdir $start
       or die "Cannot return to $start: $!\n";
+
+    if ($github_ci) {
+        print "::endgroup::\n";
+    }
+    if ($continue && $failed) {
+        print "::error ::$name failed at $failed\n" if $github_ci;
+        push @failures, [ $name, $failed ];
+    }
 
     $dir;
 }
@@ -147,13 +235,88 @@ EOM
 # and bundle their own test.pl when distributed on CPAN.
 # The test.pl source below is from the IO distribution but so far seems sufficient
 # for threads and threads-shared.
-#
-# This might be better as a file in Porting/ rather than embedded here.
 sub write_testpl {
-    open my $fh, ">", "t/test.pl"
-      or die "Cannot create t/test.pl: $!";
-    # the blead t/test.pl uses modern features and can't be used here.
-    print $fh <<'EOS';
+    _write_from_data("t/test.pl");
+}
+
+# threads and threads-shared bundle this file, which isn't needed in core
+sub write_threads_h {
+    _write_from_data("threads.h");
+}
+
+# threads-shared bundles this file, which isn't needed in core
+sub write_shared_h {
+    _write_from_data("shared.h");
+}
+
+# file data read from <DATA>
+my %file_data;
+
+sub _write_from_data {
+    my ($want_name) = @_;
+
+    unless (keys %file_data) {
+        my $name;
+        while (<DATA>) {
+            if (/^-- (\S+) --/) {
+                $name = $1;
+            }
+            else {
+                $file_data{$name} .= $_;
+            }
+        }
+        close DATA;
+    }
+
+    my $data = $file_data{$want_name} or die "No data found for $want_name";
+    open my $fh, ">", $want_name
+      or die "Cannot create $want_name: $!\n";
+    print $fh $data;
+    close $fh
+      or die "Cannot close $want_name: $!\n";
+}
+
+sub run {
+    my (@cmd) = @_;
+
+    print "\$ @cmd\n";
+    my $result = system(@cmd);
+    if ($result < 0) {
+        print "Failed: $!\n";
+    }
+    elsif ($result) {
+        printf "Failed: %d (%#x)\n", $result, $?;
+    }
+    return $result == 0;
+}
+
+sub usage {
+    print <<EOS;
+Usage: $^X $0 [options] [distnames]
+ -c | -continue
+     Continue processing after failures
+     Devel::PPPort must successfully build to continue.
+ -s | -separate
+     Install to a work path, not to perl's site_perl.
+ -h | -help
+     Display this message.
+
+Optional distnames should be names of the distributions under dist/ to
+test.  If omitted all of the distributions under dist/ are tested.
+Devel-PPPort is always tested.
+
+Test all of the distributions, stop on the first failure:
+
+   $^X $0 -s
+
+Test the various threads distributions, continue on failure:
+
+   $^X $0 -s -c threads threads-shared Thread-Queue Thread-Semaphore
+EOS
+}
+
+__DATA__
+-- t/test.pl --
 #
 # t/test.pl - most of Test::More functionality without the fuss
  
@@ -1094,6 +1257,51 @@ sub watchdog ($)
 }
  
 1;
-EOS
-    close $fh;
-}
+-- threads.h --
+#ifndef _THREADS_H_
+#define _THREADS_H_
+
+/* Needed for 5.8.0 */
+#ifndef CLONEf_JOIN_IN
+#  define CLONEf_JOIN_IN        8
+#endif
+#ifndef SAVEBOOL
+#  define SAVEBOOL(a)
+#endif
+
+/* Added in 5.11.x */
+#ifndef G_WANT
+#  define G_WANT                (128|1)
+#endif
+
+/* Added in 5.24.x */
+#ifndef PERL_TSA_RELEASE
+#  define PERL_TSA_RELEASE(x)
+#endif
+#ifndef PERL_TSA_EXCLUDES
+#  define PERL_TSA_EXCLUDES(x)
+#endif
+#ifndef CLANG_DIAG_IGNORE
+#  define CLANG_DIAG_IGNORE(x)
+#endif
+#ifndef CLANG_DIAG_RESTORE
+#  define CLANG_DIAG_RESTORE
+#endif
+
+/* Added in 5.38 */
+#ifndef PERL_SRAND_OVERRIDE_NEXT_PARENT
+#  define PERL_SRAND_OVERRIDE_NEXT_PARENT()
+#endif
+
+#endif
+-- shared.h --
+#ifndef _SHARED_H_
+#define _SHARED_H_
+
+#include "ppport.h"
+
+#ifndef HvNAME_get
+#  define HvNAME_get(hv)        (0 + ((XPVHV*)SvANY(hv))->xhv_name)
+#endif
+
+#endif
