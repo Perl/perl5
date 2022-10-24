@@ -183,6 +183,9 @@ given/when construct.
 See L<perlsyn/"Switch Statements"> for details.
 
 This feature is available starting with Perl 5.10.
+It is deprecated starting with Perl 5.38, and using
+C<given>, C<when> or smartmatch will throw a warning.
+It will be removed in Perl 5.42.
 
 =head2 The 'unicode_strings' feature
 
