@@ -64,7 +64,7 @@ inline void MEMODSlx(char *str, long x)
 
 /* 
  * Pass all memory requests through to the compiler's msvcr*.dll.
- * Optionaly track by using a doubly linked header.
+ * Optionally track by using a doubly linked header.
  */
 
 #ifdef _USE_LINKED_LIST

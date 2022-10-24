@@ -583,7 +583,7 @@ static const u_short buck_size[MAX_BUCKET_BY_TABLE + 1] =
  *
  * This allows for an additional optimization: the above scheme leads
  * to giant overheads for sizes 128 or more (one whole chunk needs to
- * be sacrifised to keep INDEX).  Instead we use chunks not of size
+ * be sacrificed to keep INDEX).  Instead we use chunks not of size
  * 2^k, but of size 2^k-ALIGN.  If we pack these chunks at the end of
  * the arena, then the beginnings are still in different 2^k-long
  * sections of the arena if k>=7 for ALIGN==4, and k>=8 if ALIGN=8.

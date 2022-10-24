@@ -3629,7 +3629,7 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 
 /* HAS_WCSXFRM:
  *	This symbol, if defined, indicates that the wcsxfrm routine is
- *	available to tranform a wide character string for wcscmp().
+ *	available to transform a wide character string for wcscmp().
  */
 #$d_wcsxfrm HAS_WCSXFRM	/**/
 

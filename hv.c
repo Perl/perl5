@@ -593,7 +593,7 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
                 for (i = 0; i < klen; ++i)
                     if (isLOWER(key[i])) {
                         /* Would be nice if we had a routine to do the
-                           copy and upercase in a single pass through.  */
+                           copy and uppercase in a single pass through.  */
                         const char * const nkey = strupr(savepvn(key,klen));
                         /* Note that this fetch is for nkey (the uppercased
                            key) whereas the store is for key (the original)  */
@@ -2226,7 +2226,7 @@ void
 Perl_hv_undef_flags(pTHX_ HV *hv, U32 flags)
 {
     bool save;
-    SSize_t orig_ix = PL_tmps_ix; /* silence compiler warning about unitialized vars */
+    SSize_t orig_ix = PL_tmps_ix; /* silence compiler warning about uninitialized vars */
 
     if (!hv)
         return;
@@ -3365,7 +3365,7 @@ S_share_hek_flags(pTHX_ const char *str, STRLEN len, U32 hash, int flags)
     if (!entry) {
         /* What used to be head of the list.
            If this is NULL, then we're the first entry for this slot, which
-           means we need to increate fill.  */
+           means we need to create fill.  */
         struct shared_he *new_entry;
         HEK *hek;
         char *k;
@@ -4016,7 +4016,7 @@ Upon return, C<*flags> will be set to either C<SVf_UTF8> or 0.
 Alternatively, use the macro C<L</CopLABEL_len_flags>>;
 or if you don't need to know if the label is UTF-8 or not, the macro
 C<L</CopLABEL_len>>;
-or if you additionally dont need to know the length, C<L</CopLABEL>>.
+or if you additionally don't need to know the length, C<L</CopLABEL>>.
 
 =cut
 */

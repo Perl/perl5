@@ -302,7 +302,7 @@ void
 Perl_cv_undef_flags(pTHX_ CV *cv, U32 flags)
 {
     CV cvbody;/*CV body will never be realloced inside this func,
-               so dont read it more than once, use fake CV so existing macros
+               so don't read it more than once, use fake CV so existing macros
                will work, the indirection and CV head struct optimized away*/
     SvANY(&cvbody) = SvANY(cv);
 
@@ -357,7 +357,7 @@ Perl_cv_undef_flags(pTHX_ CV *cv, U32 flags)
 #endif
         }
     }
-    else { /* dont bother checking if CvXSUB(cv) is true, less branching */
+    else { /* don't bother checking if CvXSUB(cv) is true, less branching */
         CvXSUB(&cvbody) = NULL;
     }
     SvPOK_off(MUTABLE_SV(cv));		/* forget prototype */
@@ -2106,7 +2106,7 @@ S_cv_clone_pad(pTHX_ CV *proto, CV *cv, CV *outside, HV *cloned,
 
     if (CvCONST(cv)) {
         /* Constant sub () { $x } closing over $x:
-         * The prototype was marked as a candiate for const-ization,
+         * The prototype was marked as a candidate for const-ization,
          * so try to grab the current const value, and if successful,
          * turn into a const sub:
          */

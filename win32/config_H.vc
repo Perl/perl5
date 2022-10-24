@@ -3595,7 +3595,7 @@
 
 /* HAS_WCSXFRM:
  *	This symbol, if defined, indicates that the wcsxfrm routine is
- *	available to tranform a wide character string for wcscmp().
+ *	available to transform a wide character string for wcscmp().
  */
 #define HAS_WCSXFRM	/**/
 

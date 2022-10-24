@@ -95,7 +95,7 @@
  *          #ifndef PERL_IN_XSUB_RE
  *          ...
  *          #endif
- *      blocks, so there is only one defintion for them in the whole
+ *      blocks, so there is only one definition for them in the whole
  *      executable, the one in regcomp.c (or regexec.c).  The implication of
  *      that is any debugging info that comes from them is controlled only by
  *      -Dr.  Further, any static function they call will also be the version
@@ -243,7 +243,7 @@ struct RExC_state_t {
     int		code_index;		/* next code_blocks[] slot */
     struct reg_code_blocks *code_blocks;/* positions of literal (?{})
                                             within pattern */
-    SSize_t     maxlen;                        /* mininum possible number of chars in string to match */
+    SSize_t     maxlen;                        /* minimum possible number of chars in string to match */
     scan_frame *frame_head;
     scan_frame *frame_last;
     U32         frame_count;
@@ -511,7 +511,7 @@ struct RExC_state_t {
 #define TRYAGAIN	0x10	/* Weeded out a declaration. */
 #define RESTART_PARSE   0x20    /* Need to redo the parse */
 #define NEED_UTF8       0x40    /* In conjunction with RESTART_PARSE, need to
-                                   calcuate sizes as UTF-8 */
+                                   calculate sizes as UTF-8 */
 
 #define REG_NODE_NUM(x) ((x) ? (int)((x)-RExC_emit_start) : -1)
 
@@ -1579,7 +1579,7 @@ S_edit_distance(const UV* src,
 
     PERL_ARGS_ASSERT_EDIT_DISTANCE;
 
-    /* intialize matrix start values */
+    /* initialize matrix start values */
     Newx(scores, ( (x + 2) * (y + 2)), UV);
     scores[0] = score_ceil;
     scores[1 * (y + 2) + 0] = score_ceil;
@@ -2711,7 +2711,7 @@ which prints out 'word' three times, but
 
  'words'=~/(word|word|word)(?{ print $1 })S/
 
-which doesnt print it out at all. This is due to other optimisations kicking in.
+which doesn't print it out at all. This is due to other optimisations kicking in.
 
 Example of what happens on a structural level:
 
@@ -3203,7 +3203,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
         is a form that cannot be used to construct with but has memory
         properties similar to the list form and access properties similar
         to the table form making it both suitable for fast searches and
-        small enough that its feasable to store for the duration of a program.
+        small enough that its feasible to store for the duration of a program.
 
         See the comment in the code where the compressed table is produced
         inplace from the flat tabe representation for an explanation of how
@@ -3283,7 +3283,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
                             charid=(U16)SvIV( *svpp );
                         }
                     }
-                    /* charid is now 0 if we dont know the char read, or
+                    /* charid is now 0 if we don't know the char read, or
                      * nonzero if we do */
                     if ( charid ) {
 
@@ -3426,7 +3426,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
         /*
            Second Pass -- Flat Table Representation.
 
-           we dont use the 0 slot of either trans[] or states[] so we add 1 to
+           we don't use the 0 slot of either trans[] or states[] so we add 1 to
            each.  We know that we will need Charcount+1 trans at most to store
            the data (one row per char at worst case) So we preallocate both
            structures assuming worst case.
@@ -3526,7 +3526,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
                     } else {
                         Perl_croak( aTHX_ "panic! In trie construction, no char mapping for %" IVdf, uvc );
                     }
-                    /* charid is now 0 if we dont know the char read, or
+                    /* charid is now 0 if we don't know the char read, or
                      * nonzero if we do */
                 }
             } else {
@@ -3598,7 +3598,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
            This pointer is independent of the main pointer and scans forward
            looking for null transitions that are allocated to a state. When it
            finds one it writes the single transition into the "hole".  If the
-           pointer doesnt find one the single transition is appended as normal.
+           pointer doesn't find one the single transition is appended as normal.
 
            - Once compressed we can Renew/realloc the structures to release the
            excess space.
@@ -3695,7 +3695,7 @@ S_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
         /*
            This means we convert either the first branch or the first Exact,
            depending on whether the thing following (in 'last') is a branch
-           or not and whther first is the startbranch (ie is it a sub part of
+           or not and whether first is the startbranch (ie is it a sub part of
            the alternation or is it the whole thing.)
            Assuming its a sub part we convert the EXACT otherwise we convert
            the whole branch sequence, including the first.
@@ -4836,7 +4836,7 @@ S_study_chunk(pTHX_
             DEBUG_PEEP("next", next, depth, flags);
 
             /* we suppose the run is continuous, last=next...
-             * NOTE we dont use the return here! */
+             * NOTE we don't use the return here! */
             /* DEFINEP study_chunk() recursion */
             (void)study_chunk(pRExC_state, &scan, &minlen,
                               &deltanext, next, &data_fake, stopparen,
@@ -4856,7 +4856,7 @@ S_study_chunk(pTHX_
              * have "BRANCH-BRANCH", "BRANCHJ-BRANCHJ", "IFTHEN-IFTHEN"
              * IFTHEN is special as it might not appear in pairs.
              * Not sure whether BRANCH-BRANCHJ is possible, regardless
-             * we dont handle it cleanly. */
+             * we don't handle it cleanly. */
             if (OP(next) == code || code == IFTHEN) {
                 /* NOTE - There is similar code to this block below for
                  * handling TRIE nodes on a re-study.  If you change stuff here
@@ -5140,7 +5140,7 @@ S_study_chunk(pTHX_
                                  ? EXACTFLU8                                \
                                  : 0 )
 
-                        /* dont use tail as the end marker for this traverse */
+                        /* don't use tail as the end marker for this traverse */
                         for ( cur = startbranch ; cur != scan ; cur = regnext( cur ) ) {
                             regnode * const noper = REGNODE_AFTER( cur );
                             U8 noper_type = OP( noper );
@@ -5186,7 +5186,7 @@ S_study_chunk(pTHX_
 #endif
                                   && count < U16_MAX)
                             {
-                                /* Handle mergable triable node Either we are
+                                /* Handle mergeable triable node Either we are
                                  * the first node in a new trieable sequence,
                                  * in which case we do some bookkeeping,
                                  * otherwise we update the end pointer. */
@@ -5217,9 +5217,9 @@ S_study_chunk(pTHX_
                                 }
                                 if (first)
                                     count++;
-                            } /* end handle mergable triable node */
+                            } /* end handle mergeable triable node */
                             else {
-                                /* handle unmergable node -
+                                /* handle unmergeable node -
                                  * noper may either be a triable node which can
                                  * not be tried together with the current trie,
                                  * or a non triable node */
@@ -5238,7 +5238,7 @@ S_study_chunk(pTHX_
                                                 count, trietype, depth+1 );
                                     prev = NULL; /* note: we clear/update
                                                     first, trietype etc below,
-                                                    so we dont do it here */
+                                                    so we don't do it here */
                                 }
                                 if ( noper_trietype
 #ifdef NOJUMPTRIE
@@ -5258,7 +5258,7 @@ S_study_chunk(pTHX_
                                     first = NULL;
                                     trietype = 0;
                                 }
-                            } /* end handle unmergable node */
+                            } /* end handle unmergeable node */
                         } /* loop over branches */
                         DEBUG_TRIE_COMPILE_r({
                             regprop(RExC_rx, RExC_mysv, cur, NULL, pRExC_state);
@@ -5409,7 +5409,7 @@ S_study_chunk(pTHX_
                         ssc_anything(data->start_class);
                     flags &= ~SCF_DO_STCLASS;
 
-                    start= NULL; /* reset start so we dont recurse later on. */
+                    start= NULL; /* reset start so we don't recurse later on. */
                 }
             } else {
                 paren = stopparen;
@@ -6846,7 +6846,7 @@ S_study_chunk(pTHX_
         and we now need to account for it in both min and delta.
         Consider that in a pattern /AB/ normally the min length it can
         match can be computed as min(A)+min(B). But (*ACCEPT) means
-        that it might be something else, not even neccesarily min(A) at
+        that it might be something else, not even necessarily min(A) at
         all. Consider
 
              A  = /(foo(*ACCEPT)|x+)/
@@ -6879,7 +6879,7 @@ S_study_chunk(pTHX_
         delta of 3 for "foobar" even though technically "foobar" isn't
         possible. ACCEPT affects some aspects of the optimizer, like
         length computations and mandatory substring optimizations, but
-        there are other optimzations this routine perfoms that are not
+        there are other optimzations this routine performs that are not
         affected and this compromise simplifies implementation.
 
         It might be helpful to consider that this C function is called
@@ -7890,7 +7890,7 @@ S_set_regex_pv(pTHX_ RExC_state_t *pRExC_state, REGEXP *Rx)
  * Now, an initial crude guess as to the size needed is made, based on the
  * length of the pattern.  Patches welcome to improve that guess.  That amount
  * of space is malloc'd and then immediately freed, and then clawed back node
- * by node.  This design is to minimze, to the extent possible, memory churn
+ * by node.  This design is to minimize, to the extent possible, memory churn
  * when doing the reallocs.
  *
  * A separate parentheses counting pass may be needed in some cases.
@@ -9922,7 +9922,7 @@ Perl__invlist_search(SV* const invlist, const UV cp)
         high--;
         low = mid + 1;
     }
-    else { /* cp < aray[mid] */
+    else { /* cp < array[mid] */
         if (cp < array[0]) { /* Fail if outside the array */
             return -1;
         }
@@ -10412,7 +10412,7 @@ Perl__invlist_intersection_maybe_complement_2nd(pTHX_ SV* const a, SV* const b,
 
     /* Above we incremented 'count' if the exhausted list was in its set.  This
      * has made it so that 'count' being below 2 means there is nothing left to
-     * output; otheriwse what's left to add to the intersection is precisely
+     * output; otherwise what's left to add to the intersection is precisely
      * that which is left in the non-exhausted input list.
      *
      * To see why, note first that the exhausted input obviously has nothing
@@ -11509,7 +11509,7 @@ S_handle_named_backref(pTHX_ RExC_state_t *pRExC_state,
 
 /* reg_la_NOTHING()
  *
- * Maybe parse a parenthezised lookaround construct that is equivalent to a
+ * Maybe parse a parenthesized lookaround construct that is equivalent to a
  * NOTHING regop when the construct is empty.
  *
  * Calls skip_to_be_ignored_text() before checking if the construct is empty.
@@ -11559,7 +11559,7 @@ S_reg_la_NOTHING(pTHX_ RExC_state_t *pRExC_state, U32 flags,
 
 /* reg_la_OPFAIL()
  *
- * Maybe parse a parenthezised lookaround construct that is equivalent to a
+ * Maybe parse a parenthesized lookaround construct that is equivalent to a
  * OPFAIL regop when the construct is empty.
  *
  * Calls skip_to_be_ignored_text() before checking if the construct is empty.
@@ -12717,7 +12717,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                      * */
                     Newxz(RExC_close_parens, RExC_parens_buf_size,
                             regnode_offset);
-                    /* we dont know where end op starts yet, so we dont need to
+                    /* we don't know where end op starts yet, so we don't need to
                      * set RExC_close_parens[0] like we do RExC_open_parens[0]
                      * above */
                 }
@@ -14049,7 +14049,7 @@ S_backref_value(char *p, char *e)
                 cases for each unambiguous special:
                     handle this special;
                     break;
-                cases for each ambigous special/literal:
+                cases for each ambiguous special/literal:
                     disambiguate;
                     if (special)  handle here
                     else goto defchar;
@@ -17014,7 +17014,7 @@ S_handle_regex_sets(pTHX_ RExC_state_t *pRExC_state, SV** return_invlist,
      * with pronouncing it called it Reverse Polish instead, but now that YOU
      * know how to pronounce it you can use the correct term, thus giving due
      * credit to the person who invented it, and impressing your geek friends.
-     * Wikipedia says that the pronounciation of "Ł" has been changing so that
+     * Wikipedia says that the pronunciation of "Ł" has been changing so that
      * it is now more like an English initial W (as in wonk) than an L.)
      *
      * This means that, for example, 'a | b & c' is stored on the stack as
@@ -18000,7 +18000,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 
     /* In a range, if one of the endpoints is non-character-set portable,
      * meaning that it hard-codes a code point that may mean a different
-     * charactger in ASCII vs. EBCDIC, as opposed to, say, a literal 'A' or a
+     * character in ASCII vs. EBCDIC, as opposed to, say, a literal 'A' or a
      * mnemonic '\t' which each mean the same character no matter which
      * character set the platform is on. */
     unsigned int non_portable_endpoint = 0;
@@ -20074,7 +20074,7 @@ S_optimize_regclass(pTHX_
                     }
                     else {
 
-                        /* Here, the only possible fold lowest_cp particpates in
+                        /* Here, the only possible fold lowest_cp participates in
                          * is with start[1].  /i or not isn't relevant */
                         op = EXACTFU;
                     }
@@ -20094,7 +20094,7 @@ S_optimize_regclass(pTHX_
                  * look like they could be a single character that is the fold
                  * of the lowest one is in the always-match list.  This test
                  * quickly excludes most of the false positives when there are
-                 * /d UTF-8 depdendent matches.  These are like LATIN CAPITAL
+                 * /d UTF-8 dependent matches.  These are like LATIN CAPITAL
                  * LETTER A WITH GRAVE matching LATIN SMALL LETTER A WITH GRAVE
                  * iff the target string is UTF-8.  (We don't have to worry
                  * above about exceeding the array bounds of PL_fold_latin1[]
@@ -22651,7 +22651,7 @@ Perl_regfree_internal(pTHX_ REGEXP * const rx)
                         /* we should only ever get called once, so
                          * assert as much, and also guard the free
                          * which /might/ happen twice. At the least
-                         * it will make code anlyzers happy and it
+                         * it will make code analyzers happy and it
                          * doesn't cost much. - Yves */
                         assert(ri->regstclass);
                         if (ri->regstclass) {
@@ -24645,7 +24645,7 @@ S_parse_uniprop_string(pTHX_
             &&  name[i] != '+'
             &&  name[i] != '_'
             &&  name[i] != '{'
-                /* A backslash means the real delimitter is the next character,
+                /* A backslash means the real delimiter is the next character,
                  * but it must be punctuation */
             && (name[i] != '\\' || (i < name_len && isPUNCT_A(name[i+1]))))
         {
@@ -24664,7 +24664,7 @@ S_parse_uniprop_string(pTHX_
                 const char * const * prop_values;
                 bool escaped = 0;
 
-                /* Backslash => delimitter is the character following.  We
+                /* Backslash => delimiter is the character following.  We
                  * already checked that it is punctuation */
                 if (open == '\\') {
                     open = name[i++];
@@ -25129,7 +25129,7 @@ S_parse_uniprop_string(pTHX_
         &&  name[non_pkg_begin+0] == 'I'
         && (name[non_pkg_begin+1] == 'n' || name[non_pkg_begin+1] == 's'))
     {
-        /* Names that start with In have different characterstics than those
+        /* Names that start with In have different characteristics than those
          * that start with Is */
         if (name[non_pkg_begin+1] == 's') {
             starts_with_Is = TRUE;

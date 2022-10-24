@@ -1500,7 +1500,7 @@ object type. Exposed to perl code via Internals::SvREADONLY().
 =for apidoc Am|void|SvPV_renew|SV* sv|STRLEN len
 Low level micro optimization of C<L</SvGROW>>.  It is generally better to use
 C<SvGROW> instead.  This is because C<SvPV_renew> ignores potential issues that
-C<SvGROW> handles.  C<sv> needs to have a real C<PV> that is unencombered by
+C<SvGROW> handles.  C<sv> needs to have a real C<PV> that is unencumbered by
 things like COW.  Using C<SV_CHECK_THINKFIRST> or
 C<SV_CHECK_THINKFIRST_COW_DROP> before calling this should clean it up, but
 why not just use C<SvGROW> if you're not sure about the provenance?
@@ -1517,7 +1517,7 @@ why not just use C<SvGROW> if you're not sure about the provenance?
 =for apidoc Am|void|SvPV_shrink_to_cur|SV* sv
 
 Trim any trailing unused memory in the PV of C<sv>, which needs to have a real
-C<PV> that is unencombered by things like COW.  Think first before using this
+C<PV> that is unencumbered by things like COW.  Think first before using this
 functionality.  Is the space saving really worth giving up COW?  Will the
 needed size of C<sv> stay the same?
 
@@ -1817,7 +1817,7 @@ As of 5.38, all forms are guaranteed to evaluate C<sv> exactly once.  For
 earlier Perls, use a form whose name ends with C<x> for single evaluation.
 
 C<SvPVutf8> is like C<SvPV>, but converts C<sv> to UTF-8 first if not already
-UTF-8.  Similiarly, the other forms with C<utf8> in their names correspond to
+UTF-8.  Similarly, the other forms with C<utf8> in their names correspond to
 their respective forms without.
 
 C<SvPVutf8_or_null> and C<SvPVutf8_or_null_nomg> don't have corresponding
@@ -1826,7 +1826,7 @@ undef, they return C<NULL>.
 
 C<SvPVbyte> is like C<SvPV>, but converts C<sv> to byte representation first if
 currently encoded as UTF-8.  If C<sv> cannot be downgraded from UTF-8, it
-croaks.  Similiarly, the other forms with C<byte> in their names correspond to
+croaks.  Similarly, the other forms with C<byte> in their names correspond to
 their respective forms without.
 
 C<SvPVbyte_or_null> doesn't have a corresponding non-C<byte> form.  Instead it

@@ -817,7 +817,7 @@ struct block_loop {
         } lazyiv;
         struct { /* CXt_LOOP_LAZYSV C<for ('a'..'z')> */
             SV * cur;
-            SV * end; /* maxiumum value (or minimum in reverse) */
+            SV * end; /* maximum value (or minimum in reverse) */
         } lazysv;
     } state_u;
 #ifdef USE_ITHREADS

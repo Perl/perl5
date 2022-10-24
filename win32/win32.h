@@ -24,7 +24,7 @@
 /* less I/O calls during each require */
 #  define PERL_DISABLE_PMC
 
-/* unnecessery for miniperl to lookup anything from an "installed" perl */
+/* unnecessary for miniperl to lookup anything from an "installed" perl */
 #  define WIN32_NO_REGISTRY
 
 /* allow minitest to work */

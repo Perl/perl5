@@ -1441,7 +1441,7 @@ PerlIO_resolve_layers(pTHX_ const char *layers,
             }
             /*
              * Don't fail if handler cannot be found :via(...) etc. may do
-             * something sensible else we will just stringfy and open
+             * something sensible else we will just stringify and open
              * resulting string.
              */
         }

@@ -12,7 +12,7 @@
  *
  * To summarize, the way it works is:
  * To convert an EBCDIC code point to UTF-EBCDIC:
- *  1)	convert to Unicode.  No conversion is necesary for code points above
+ *  1)	convert to Unicode.  No conversion is necessary for code points above
  *      255, as Unicode and EBCDIC are identical in this range.  For smaller
  *      code points, the conversion is done by lookup in the PL_e2a table (with
  *      inverse PL_a2e) in the generated file 'ebcdic_tables.h'.  The 'a'

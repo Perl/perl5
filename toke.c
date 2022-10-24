@@ -3207,7 +3207,7 @@ S_scan_const(pTHX_ char *start)
 #endif
                     /* The tests here for being above Latin1 and similar ones
                      * in the following 'else' suffice to find all such
-                     * occurences in the constant, except those added by a
+                     * occurrences in the constant, except those added by a
                      * backslash escape sequence, like \x{100}.  Mostly, those
                      * set 'has_above_latin1' as appropriate */
                     if (s_is_utf8 && UTF8_IS_ABOVE_LATIN1(*s)) {
@@ -8886,7 +8886,7 @@ yyl_try(pTHX_ char *s)
                             && strchr(PL_splitstr + 1, *PL_splitstr))
                         {
                             /* strchr is ok, because -F pattern can't contain
-                             * embeddded NULs */
+                             * embedded NULs */
                             Perl_sv_catpvf(aTHX_ PL_linestr, "our @F=split(%s);", PL_splitstr);
                         }
                         else {
@@ -11055,7 +11055,7 @@ S_scan_heredoc(pTHX_ char *s)
             }
         } /* while */
 
-        /* avoid sv_setsv() as we dont wan't to COW here */
+        /* avoid sv_setsv() as we don't wan't to COW here */
         sv_setpvn(tmpstr,SvPVX(newstr),SvCUR(newstr));
         Safefree(indent);
         SvREFCNT_dec_NN(newstr);
@@ -11164,7 +11164,7 @@ S_scan_inputsymbol(pTHX_ char *start)
         return s;
     }
     else {
-        bool readline_overriden = FALSE;
+        bool readline_overridden = FALSE;
         GV *gv_readline;
         /* we're in a filehandle read situation */
         d = PL_tokenbuf;
@@ -11173,9 +11173,9 @@ S_scan_inputsymbol(pTHX_ char *start)
         if (!len)
             Copy("ARGV",d,5,char);
 
-        /* Check whether readline() is overriden */
+        /* Check whether readline() is overridden */
         if ((gv_readline = gv_override("readline",8)))
-            readline_overriden = TRUE;
+            readline_overridden = TRUE;
 
         /* if <$fh>, create the ops to turn the variable into a
            filehandle
@@ -11198,7 +11198,7 @@ S_scan_inputsymbol(pTHX_ char *start)
                 else {
                     OP * const o = newOP(OP_PADSV, 0);
                     o->op_targ = tmp;
-                    PL_lex_op = readline_overriden
+                    PL_lex_op = readline_overridden
                         ? newUNOP(OP_ENTERSUB, OPf_STACKED,
                                 op_append_elem(OP_LIST, o,
                                     newCVREF(0, newGVOP(OP_GV,0,gv_readline))))
@@ -11212,7 +11212,7 @@ S_scan_inputsymbol(pTHX_ char *start)
                 gv = gv_fetchpv(d,
                                 GV_ADDMULTI | ( UTF ? SVf_UTF8 : 0 ),
                                 SVt_PV);
-                PL_lex_op = readline_overriden
+                PL_lex_op = readline_overridden
                     ? newUNOP(OP_ENTERSUB, OPf_STACKED,
                             op_append_elem(OP_LIST,
                                 newUNOP(OP_RV2SV, 0, newGVOP(OP_GV, 0, gv)),
@@ -11229,7 +11229,7 @@ S_scan_inputsymbol(pTHX_ char *start)
            (<Foo::BAR> or <FOO>) so build a simple readline OP */
         else {
             GV * const gv = gv_fetchpv(d, GV_ADD | ( UTF ? SVf_UTF8 : 0 ), SVt_PVIO);
-            PL_lex_op = readline_overriden
+            PL_lex_op = readline_overridden
                 ? newUNOP(OP_ENTERSUB, OPf_STACKED,
                         op_append_elem(OP_LIST,
                             newGVOP(OP_GV, 0, gv),
@@ -11423,7 +11423,7 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
                            : * (U8 *) close_delim_str;
     }
     else {  /* Here, the delimiter isn't paired, hence the close is the same as
-               the open; and has aready been set up.  But make sure it isn't
+               the open; and has already been set up.  But make sure it isn't
                deprecated to use this particular delimiter, as we plan
                eventually to make it paired. */
         if (ninstr(deprecated_opening_delims, deprecated_delims_end,
@@ -11435,7 +11435,7 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
         }
 
         /* Note that a NUL may be used as a delimiter, and this happens when
-         * delimitting an empty string, and no special handling for it is
+         * delimiting an empty string, and no special handling for it is
          * needed, as ninstr() calls are used */
     }
 
