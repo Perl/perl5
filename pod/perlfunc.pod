@@ -7538,7 +7538,10 @@ argument is given.  Returns the integer number of seconds actually slept.
 
 EXPR should be a positive integer. If called with a negative integer,
 L<C<sleep>|/sleep EXPR> does not sleep but instead emits a warning, sets
-$! (C<errno>), and returns zero.
+C<$!> (C<errno>), and returns zero.
+
+If called with a non-integer, the fractional part is ignored.
+
 
 C<sleep 0> is permitted, but a function call to the underlying platform
 implementation still occurs, with any side effects that may have.
