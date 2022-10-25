@@ -461,6 +461,15 @@ You may also need to regen opcodes:
 
  $ ./perl -Ilib regen/opcode.pl
 
+B<IMPORTANT>: When the version number is bumped, you must also update
+Module::CoreList (as described below in L<"update Module::CoreList">) to
+reflect the new version number. In particular if you do not run the
+
+    $ ./perl -Ilib Porting/corelist.pl cpan
+
+step or its equivalent (see the actual text in the section), then tests
+will fail.
+
 Test your changes:
 
  $ git clean -xdf   # careful if you don't have local files to keep!
@@ -483,9 +492,6 @@ At this point you may want to compare the commit with a previous bump to
 see if they look similar.  See commit f7cf42bb69 for an example of a
 previous version bump.
 
-When the version number is bumped, you should also update Module::CoreList
-(as described below in L<"update Module::CoreList">) to reflect the new
-version number.
 
 =head3 update INSTALL
 
@@ -1616,4 +1622,3 @@ L<http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2009-05/msg00608.html>,
 plus a whole bunch of other sources, including private correspondence.
 
 =cut
-
