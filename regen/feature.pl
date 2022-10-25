@@ -305,8 +305,13 @@ for (@HintedBundles) {
 print $h <<'EOH';
 #define FEATURE_BUNDLE_CUSTOM	(HINT_FEATURE_MASK >> HINT_FEATURE_SHIFT)
 
-#define CURRENT_HINTS \
+/* this is preserved for testing and asserts */
+#define OLD_CURRENT_HINTS \
     (PL_curcop == &PL_compiling ? PL_hints : PL_curcop->cop_hints)
+/* this is the same thing, but simpler (no if) as PL_hints expands
+   to PL_compiling.cop_hints */
+#define CURRENT_HINTS \
+    PL_curcop->cop_hints
 #define CURRENT_FEATURE_BUNDLE \
     ((CURRENT_HINTS & HINT_FEATURE_MASK) >> HINT_FEATURE_SHIFT)
 
