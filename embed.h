@@ -586,6 +586,7 @@
 #define sv_dec(a)		Perl_sv_dec(aTHX_ a)
 #define sv_dec_nomg(a)		Perl_sv_dec_nomg(aTHX_ a)
 #define sv_derived_from(a,b)	Perl_sv_derived_from(aTHX_ a,b)
+#define sv_derived_from_hv(a,b)	Perl_sv_derived_from_hv(aTHX_ a,b)
 #define sv_derived_from_pv(a,b,c)	Perl_sv_derived_from_pv(aTHX_ a,b,c)
 #define sv_derived_from_pvn(a,b,c,d)	Perl_sv_derived_from_pvn(aTHX_ a,b,c,d)
 #define sv_derived_from_sv(a,b,c)	Perl_sv_derived_from_sv(aTHX_ a,b,c)

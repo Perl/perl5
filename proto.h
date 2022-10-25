@@ -3897,6 +3897,11 @@ PERL_CALLCONV bool	Perl_sv_derived_from(pTHX_ SV* sv, const char *const name)
 #define PERL_ARGS_ASSERT_SV_DERIVED_FROM	\
 	assert(sv); assert(name)
 
+PERL_CALLCONV bool	Perl_sv_derived_from_hv(pTHX_ SV* sv, HV *hv)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_SV_DERIVED_FROM_HV	\
+	assert(sv); assert(hv)
+
 PERL_CALLCONV bool	Perl_sv_derived_from_pv(pTHX_ SV* sv, const char *const name, U32 flags)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_SV_DERIVED_FROM_PV	\
