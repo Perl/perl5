@@ -1882,6 +1882,7 @@ Apd	|void	|sv_dump_depth	|NULLOK SV* sv|I32 depth
 Apd	|void	|av_dump	|NULLOK AV* av
 Apd	|void	|hv_dump	|NULLOK HV* hv
 ApdR	|bool	|sv_derived_from|NN SV* sv|NN const char *const name
+ApdR	|bool	|sv_derived_from_hv|NN SV* sv|NN HV *hv
 ApdR	|bool	|sv_derived_from_sv|NN SV* sv|NN SV *namesv|U32 flags
 ApdR	|bool	|sv_derived_from_pv|NN SV* sv|NN const char *const name|U32 flags
 ApdR	|bool	|sv_derived_from_pvn|NN SV* sv|NN const char *const name \

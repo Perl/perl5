@@ -189,6 +189,27 @@ Perl_sv_derived_from_pvn(pTHX_ SV *sv, const char *const name, const STRLEN len,
 }
 
 /*
+=for apidoc sv_derived_from_hv
+
+Exactly like L</sv_derived_from_pvn>, but takes the name string as the
+C<HvNAME> of the given HV (which would presumably represent a stash).
+
+=cut
+*/
+
+bool
+Perl_sv_derived_from_hv(pTHX_ SV *sv, HV *hv)
+{
+    PERL_ARGS_ASSERT_SV_DERIVED_FROM_HV;
+
+    const char *hvname = HvNAME(hv);
+    if(!hvname)
+        return FALSE;
+
+    return sv_derived_from_svpvn(sv, NULL, hvname, HvNAMELEN(hv), HvNAMEUTF8(hv) ? SVf_UTF8 : 0);
+}
+
+/*
 =for apidoc sv_isa_sv
 
 Returns a boolean indicating whether the SV is an object reference and is
