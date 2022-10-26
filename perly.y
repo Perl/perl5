@@ -552,6 +552,7 @@ barestmt:	PLUGSTMT
 			}
 	|	YADAYADA PERLY_SEMICOLON
 			{
+                          /* diag_listed_as: Unimplemented */
 			  $$ = newLISTOP(OP_DIE, 0, newOP(OP_PUSHMARK, 0),
 				newSVOP(OP_CONST, 0, newSVpvs("Unimplemented")));
 			}
