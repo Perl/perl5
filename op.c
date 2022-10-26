@@ -10818,7 +10818,10 @@ S_process_special_blocks(pTHX_ I32 floor, const char *const fullname,
                 sv_setiv(max_nest_sv, max_nest_iv);
             }
 
-            if (PL_eval_begin_nest_depth >= max_nest_iv) {
+            /* (UV) below is just to silence a compiler warning, and should be
+             * effectively a no-op, as max_nest_iv will never be negative here.
+             */
+            if (PL_eval_begin_nest_depth >= (UV)max_nest_iv) {
                 Perl_croak(aTHX_ "Too many nested BEGIN blocks, maximum of %" IVdf " allowed",
                              max_nest_iv);
             }
