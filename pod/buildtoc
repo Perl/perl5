@@ -206,7 +206,7 @@ sub podset {
     local $/ = '';
 
     while(<$fh>) {
-	tr/\015//d;
+	s/\r$//;
 	if (s/^=head1 (NAME)\s*/=head2 /) {
 	    unhead1();
 	    $OUT .= "\n\n=head2 ";
