@@ -748,7 +748,7 @@ X<block>
 A BLOCK by itself (labeled or not) is semantically equivalent to a
 loop that executes once.  Thus you can use any of the loop control
 statements in it to leave or restart the block.  (Note that this is
-I<NOT> true in C<eval{}>, C<sub{}>, or contrary to popular belief
+I<NOT> true in C<eval{}>, C<sub{}>, or, contrary to popular belief,
 C<do{}> blocks, which do I<NOT> count as loops.)  The C<continue>
 block is optional.
 
