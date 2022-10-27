@@ -4834,6 +4834,7 @@ PP(pp_leaveeval)
     PERL_CONTEXT *cx;
     OP *retop;
     int failed;
+    bool override_return = FALSE; /* is feature 'module_true' in effect? */
     CV *evalcv;
     bool keep;
 
@@ -4845,8 +4846,55 @@ PP(pp_leaveeval)
     oldsp = PL_stack_base + cx->blk_oldsp;
     gimme = cx->blk_gimme;
 
-    /* did require return a false value? */
-    failed =    CxOLD_OP_TYPE(cx) == OP_REQUIRE
+    bool is_require= CxOLD_OP_TYPE(cx) == OP_REQUIRE;
+    if (is_require) {
+        /* We are in an require. Check if use feature 'module_true' is enabled,
+         * and if so later on correct any returns from the require. */
+
+        /* we might be called for an OP_LEAVEEVAL or OP_RETURN opcode
+         * and the parse tree will look different for either case.
+         * so find the right op to check later */
+        if (OP_TYPE_IS_OR_WAS(PL_op, OP_RETURN)) {
+            if (PL_op->op_flags & OPf_SPECIAL)
+                override_return = true;
+        }
+        else if ((PL_op->op_flags & OPf_KIDS) && OP_TYPE_IS_OR_WAS(PL_op, OP_LEAVEEVAL)){
+            COP *old_pl_curcop = PL_curcop;
+            OP *check = cUNOPx(PL_op)->op_first;
+
+            /* ok, we found something to check, we need to scan through
+             * it and find the last OP_NEXTSTATE it contains and then read the
+             * feature state out of the COP data it contains.
+             */
+            if (check) {
+                const OP *kid = cLISTOPx(check)->op_first;
+                const OP *last_state = NULL;
+
+                for (; kid; kid = OpSIBLING(kid)) {
+                    if (
+                           OP_TYPE_IS_OR_WAS(kid, OP_NEXTSTATE)
+                        || OP_TYPE_IS_OR_WAS(kid, OP_DBSTATE)
+                    ){
+                        last_state = kid;
+                    }
+                }
+                if (last_state) {
+                    PL_curcop = cCOPx(last_state);
+                    if (FEATURE_MODULE_TRUE_IS_ENABLED) {
+                        override_return = TRUE;
+                    }
+                } else {
+                    NOT_REACHED; /* NOTREACHED */
+                }
+            } else {
+                NOT_REACHED; /* NOTREACHED */
+            }
+            PL_curcop = old_pl_curcop;
+        }
+    }
+
+    /* we might override this later if 'module_true' is enabled */
+    failed =    is_require
              && !(gimme == G_SCALAR
                     ? SvTRUE_NN(*PL_stack_sp)
                     : PL_stack_sp > oldsp);
@@ -4875,6 +4923,19 @@ PP(pp_leaveeval)
     assert(CvDEPTH(evalcv) == 1);
 #endif
     CvDEPTH(evalcv) = 0;
+
+    if (override_return) {
+        /* make sure that we use a standard return when feature 'module_load'
+         * is enabled. Returns from require are problematic (consider what happens
+         * when it is called twice) */
+        if (gimme == G_SCALAR) {
+            /* this following is an optimization of POPs()/PUSHs().
+             * and does the same thing with less bookkeeping */
+            *PL_stack_sp = &PL_sv_yes;
+        }
+        assert(gimme == G_VOID || gimme == G_SCALAR);
+        failed = 0;
+    }
 
     /* pop the CXt_EVAL, and if a require failed, croak */
     S_pop_eval_context_maybe_croak(aTHX_ cx, NULL, failed);

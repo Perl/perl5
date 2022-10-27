@@ -5225,6 +5225,10 @@ OP *
 Perl_op_convert_list(pTHX_ I32 type, I32 flags, OP *o)
 {
     if (type < 0) type = -type, flags |= OPf_SPECIAL;
+    if (type == OP_RETURN) {
+        if (FEATURE_MODULE_TRUE_IS_ENABLED)
+            flags |= OPf_SPECIAL;
+    }
     if (!o || o->op_type != OP_LIST)
         o = force_list(o, FALSE);
     else

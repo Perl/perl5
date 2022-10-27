@@ -115,6 +115,14 @@ release manager will have to investigate the situation carefully.)
 
 =item *
 
+Support for RFC-18, C<use feature "module_true";> has been added to
+the default feature bundle for 5.37 and later. It may also be used
+explicitly. When enabled inside of a module the module does not need
+to return true explicitly, and in fact the return will be forced to
+a simple true value regardless of what it originally was.
+
+=item *
+
 XXX Remove this section if not applicable.
 
 =back
