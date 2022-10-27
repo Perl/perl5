@@ -108,6 +108,34 @@ blindly casts away const.
 #define MUTABLE_IO(p)	((IO *)MUTABLE_PTR(p))
 #define MUTABLE_SV(p)	((SV *)MUTABLE_PTR(p))
 
+/*
+=for apidoc_section $SV
+=for apidoc   Am |AV *|AV_FROM_REF|SV * ref
+=for apidoc_item |CV *|CV_FROM_REF|SV * ref
+=for apidoc_item |HV *|HV_FROM_REF|SV * ref
+
+The C<I<*>V_FROM_REF> macros extract the C<SvRV()> from a given reference SV
+and return a suitably-cast to pointer to the referenced SV. When running
+under C<-DDEBUGGING>, assertions are also applied that check that I<ref> is
+definitely a reference SV that refers to an SV of the right type.
+
+=cut
+*/
+
+#if defined(DEBUGGING) && defined(PERL_USE_GCC_BRACE_GROUPS)
+#  define xV_FROM_REF(XV, ref)  \
+    ({ SV *_ref = ref; \
+       assert(SvROK(_ref)); \
+       assert(SvTYPE(SvRV(_ref)) == SVt_PV ## XV); \
+       (XV *)(SvRV(_ref)); })
+#else
+#  define xV_FROM_REF(XV, ref)  ((XV *)(SvRV(ref)))
+#endif
+
+#define AV_FROM_REF(ref)  xV_FROM_REF(AV, ref)
+#define CV_FROM_REF(ref)  xV_FROM_REF(CV, ref)
+#define HV_FROM_REF(ref)  xV_FROM_REF(HV, ref)
+
 #ifndef __cplusplus
 #  include <stdbool.h>
 #endif
