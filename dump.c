@@ -804,8 +804,7 @@ Perl_dump_sub_perl(pTHX_ const GV *gv, bool justperl)
 
     PERL_ARGS_ASSERT_DUMP_SUB_PERL;
 
-    cv = isGV_with_GP(gv) ? GvCV(gv) :
-            (assert(SvROK((SV*)gv)), (CV*)SvRV((SV*)gv));
+    cv = isGV_with_GP(gv) ? GvCV(gv) : CV_FROM_REF((SV*)gv);
     if (justperl && (CvISXSUB(cv) || !CvROOT(cv)))
         return;
 
@@ -877,10 +876,8 @@ S_gv_display(pTHX_ GV *gv)
         if (isGV_with_GP(gv))
             gv_fullname3(raw, gv, NULL);
         else {
-            assert(SvROK(gv));
-            assert(SvTYPE(SvRV(gv)) == SVt_PVCV);
             Perl_sv_catpvf(aTHX_ raw, "cv ref: %s",
-                    SvPV_nolen_const(cv_name((CV *)SvRV(gv), name, 0)));
+                    SvPV_nolen_const(cv_name(CV_FROM_REF(gv), name, 0)));
         }
         rawpv = SvPV_const(raw, len);
         generic_pv_escape(name, rawpv, len, SvUTF8(raw));
