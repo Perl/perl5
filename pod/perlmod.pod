@@ -183,7 +183,7 @@ refer to the same scalar value. This means that the following code:
         print $foo;     # Prints '1'!
     }
 
-Would print '1', because C<$foo> holds a reference to the I<original>
+would print '1', because C<$foo> holds a reference to the I<original>
 C<$bar>. The one that was stuffed away by C<local()> and which will be
 restored when the block ends. Because variables are accessed through the
 typeglob, you can use C<*foo = *bar> to create an alias which can be

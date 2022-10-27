@@ -2088,7 +2088,7 @@ L<C<keys>|/keys HASH>, L<C<values>|/values HASH> and
 L<C<each>|/each HASH> to repeatedly return the same order
 as each other.  See L<perlsec/"Algorithmic Complexity Attacks"> for
 details on why hash order is randomized.  Aside from the guarantees
-provided here the exact details of Perl's hash algorithm and the hash
+provided here, the exact details of Perl's hash algorithm and the hash
 traversal order are subject to change in any release of Perl.
 
 After L<C<each>|/each HASH> has returned all entries from the hash or
@@ -2581,7 +2581,7 @@ expanding wildcards or splitting up words with whitespace in them.
     exec { $args[0] } @args;  # safe even with one-arg list
 
 The first version, the one without the indirect object, ran the I<echo>
-program, passing it C<"surprise"> an argument.  The second version didn't;
+program, passing it C<"surprise"> as an argument.  The second version didn't;
 it tried to run a program named I<"echo surprise">, didn't find it, and set
 L<C<$?>|perlvar/$?> to a non-zero value indicating failure.
 
@@ -3865,7 +3865,7 @@ L<C<keys>|/keys HASH>, L<C<values>|/values HASH> and L<C<each>|/each
 HASH> to repeatedly return the same order
 as each other.  See L<perlsec/"Algorithmic Complexity Attacks"> for
 details on why hash order is randomized.  Aside from the guarantees
-provided here the exact details of Perl's hash algorithm and the hash
+provided here, the exact details of Perl's hash algorithm and the hash
 traversal order are subject to change in any release of Perl.  Tied hashes
 may behave differently to Perl's hashes with respect to changes in order on
 insertion and deletion of items.
@@ -5295,7 +5295,7 @@ package variables spring into existence when first used.
     print $Foo::foo; # prints 23
 
 Because the variable becomes legal immediately under C<use strict 'vars'>, so
-long as there is no variable with that name is already in scope, you can then
+long as there is no variable with that name already in scope, you can then
 reference the package variable again even within the same statement.
 
     package Foo;
@@ -10287,7 +10287,7 @@ infrastructure, this feature is now little used in practice and should be
 avoided in newly-written code.
 
 Care should be taken when using the C<no VERSION> form, as it is I<only>
-meant to be used to assert that the running Perl is of a earlier version
+meant to be used to assert that the running Perl is of an earlier version
 than its argument and I<not> to undo the feature-enabling side effects
 of C<use VERSION>.
 
@@ -10362,7 +10362,7 @@ L<C<keys>|/keys HASH>, L<C<values>|/values HASH> and
 L<C<each>|/each HASH> to repeatedly return the same order
 as each other.  See L<perlsec/"Algorithmic Complexity Attacks"> for
 details on why hash order is randomized.  Aside from the guarantees
-provided here the exact details of Perl's hash algorithm and the hash
+provided here, the exact details of Perl's hash algorithm and the hash
 traversal order are subject to change in any release of Perl.  Tied hashes
 may behave differently to Perl's hashes with respect to changes in order on
 insertion and deletion of items.
