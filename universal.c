@@ -593,11 +593,21 @@ XS(XS_utf8_upgrade)
         croak_xs_usage(cv, "sv");
     else {
         SV * const sv = ST(0);
-        STRLEN	RETVAL;
+        STRLEN	RETVAL = 0;
         dXSTARG;
 
-        RETVAL = sv_utf8_upgrade(sv);
-        XSprePUSH; PUSHi((IV)RETVAL);
+        XSprePUSH;
+        if (UNLIKELY(! sv)) {
+            XSRETURN_UNDEF;
+        }
+
+        SvGETMAGIC(sv);
+        if (UNLIKELY(! SvOK(sv))) {
+            XSRETURN_UNDEF;
+        }
+
+        RETVAL = sv_utf8_upgrade_nomg(sv);
+        PUSHi( (IV) RETVAL);
     }
     XSRETURN(1);
 }
