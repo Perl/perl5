@@ -3032,7 +3032,11 @@ Perl_rpeep(pTHX_ OP *o)
 
             /* Two NEXTSTATEs in a row serve no purpose. Except if they happen
                to carry two labels. For now, take the easier option, and skip
-               this optimisation if the first NEXTSTATE has a label.  */
+               this optimisation if the first NEXTSTATE has a label.
+               Yves asked what about if they have different hints or features?
+               Tony thinks that as we remove the first of the pair it should
+               be fine.
+            */
             if (!CopLABEL((COP*)o) && !PERLDB_NOOPT) {
                 OP *nextop = o->op_next;
                 while (nextop) {
