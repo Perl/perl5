@@ -206,9 +206,6 @@ Perl_newGP(pTHX_ GV *const gv)
     U32 hash;
     const char *file;
     STRLEN len;
-#ifndef USE_ITHREADS
-    GV *filegv;
-#endif
 
     PERL_ARGS_ASSERT_NEWGP;
     Newxz(gp, 1, GP);
@@ -222,19 +219,13 @@ Perl_newGP(pTHX_ GV *const gv)
        frees INIT before looking up DESTROY (and creating *DESTROY)
     */
     if (PL_curcop) {
+        char *tmp= CopFILE(PL_curcop);
         gp->gp_line = CopLINE(PL_curcop); /* 0 otherwise Newxz */
-#ifdef USE_ITHREADS
-        if (CopFILE(PL_curcop)) {
-            file = CopFILE(PL_curcop);
-            len = strlen(file);
+
+        if (tmp) {
+            file = tmp;
+            len = CopFILE_LEN(PL_curcop);
         }
-#else
-        filegv = CopFILEGV(PL_curcop);
-        if (filegv) {
-            file = GvNAME(filegv)+2;
-            len = GvNAMELEN(filegv)-2;
-        }
-#endif
         else goto no_file;
     }
     else {
@@ -2804,9 +2795,11 @@ Perl_gv_check(pTHX_ HV *stash)
                 if (SvTYPE(gv) != SVt_PVGV || GvMULTI(gv))
                     continue;
                 file = GvFILE(gv);
+                assert(PL_curcop == &PL_compiling);
                 CopLINE_set(PL_curcop, GvLINE(gv));
 #ifdef USE_ITHREADS
-                CopFILE(PL_curcop) = (char *)file;	/* set for warning */
+                SAVECOPFILE_FREE(PL_curcop);
+                CopFILE_set(PL_curcop, (char *)file);	/* set for warning */
 #else
                 CopFILEGV(PL_curcop)
                     = gv_fetchfile_flags(file, HEK_LEN(GvFILE_HEK(gv)), 0);

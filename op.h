@@ -619,6 +619,7 @@ typedef enum {
  * The same mutex is used to protect the refcounts of the reg_trie_data
  * and reg_ac_data structures, which are shared between duplicated
  * regexes.
+ * The same mutex is used to protect the refcounts for RCPV objects.
  */
 
 #ifdef USE_ITHREADS
@@ -1168,6 +1169,7 @@ struct op_argcheck_aux {
 };
 
 #define MI_INIT_WORKAROUND_PACK "Module::Install::DSL"
+
 
 /*
  * ex: set ts=8 sts=4 sw=4 et:

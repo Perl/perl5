@@ -15069,6 +15069,7 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
     const GV *gv;
     const AV *av;
     const HV *hv;
+    char *pv; /* no const deliberately */
     void* ptr;
     int intval;
     long longval;
@@ -15129,6 +15130,18 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
                 SvREFCNT_inc_simple_void((SV *)TOPPTR(nss,ix));
             ptr = POPPTR(ss,ix);
             TOPPTR(nss,ix) = svp_dup_inc((SV**)ptr, proto_perl);/* XXXXX */
+            /* this feels very strange, we have a **SV from one thread,
+             * we copy the SV, but dont change the **SV. But in this thread
+             * the target of the **SV could be something from the *other* thread.
+             * So how can this possibly work correctly? */
+            break;
+        case SAVEt_RCPV_FREE:
+            pv = (char *)POPPTR(ss,ix);
+            TOPPTR(nss,ix) = rcpv_copy(pv);
+            ptr = POPPTR(ss,ix);
+            (void)rcpv_copy(*((char **)ptr));
+            TOPPTR(nss,ix) = ptr;
+            /* XXXXX: see comment above. */
             break;
         case SAVEt_GVSLOT:		/* any slot in GV */
             sv = (const SV *)POPPTR(ss,ix);
@@ -15758,9 +15771,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 
     Zero(PL_sv_consts, SV_CONSTS_COUNT, SV*);
 
-    /* This PV will be free'd special way so must set it same way op.c does */
-    PL_compiling.cop_file    = savesharedpv(PL_compiling.cop_file);
-    ptr_table_store(PL_ptr_table, proto_perl->Icompiling.cop_file, PL_compiling.cop_file);
+    PL_compiling.cop_file    = rcpv_copy(proto_perl->Icompiling.cop_file);
 
     ptr_table_store(PL_ptr_table, &proto_perl->Icompiling, &PL_compiling);
     PL_compiling.cop_warnings = DUP_WARNINGS(PL_compiling.cop_warnings);

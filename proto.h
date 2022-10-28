@@ -3259,6 +3259,15 @@ PERL_CALLCONV char*	Perl_pv_uni_display(pTHX_ SV *dsv, const U8 *spv, STRLEN len
 PERL_CALLCONV void	Perl_qerror(pTHX_ SV* err);
 #define PERL_ARGS_ASSERT_QERROR	\
 	assert(err)
+PERL_CALLCONV char*	Perl_rcpv_copy(pTHX_ char *const pv);
+#define PERL_ARGS_ASSERT_RCPV_COPY
+PERL_CALLCONV char*	Perl_rcpv_free(pTHX_ char *const pv);
+#define PERL_ARGS_ASSERT_RCPV_FREE
+PERL_CALLCONV char*	Perl_rcpv_new(pTHX_ const char *const pv, STRLEN len, U32 flags)
+			__attribute__malloc__
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_RCPV_NEW
+
 PERL_CALLCONV REGEXP*	Perl_re_compile(pTHX_ SV * const pattern, U32 orig_rx_flags);
 #define PERL_ARGS_ASSERT_RE_COMPILE	\
 	assert(pattern)
@@ -3532,6 +3541,9 @@ PERL_CALLCONV void	Perl_save_pushptr(pTHX_ void *const ptr, const int type);
 #define PERL_ARGS_ASSERT_SAVE_PUSHPTR
 PERL_CALLCONV void	Perl_save_pushptrptr(pTHX_ void *const ptr1, void *const ptr2, const int type);
 #define PERL_ARGS_ASSERT_SAVE_PUSHPTRPTR
+PERL_CALLCONV void	Perl_save_rcpv_free(pTHX_ char** ppv);
+#define PERL_ARGS_ASSERT_SAVE_RCPV_FREE	\
+	assert(ppv)
 PERL_CALLCONV void	Perl_save_re_context(pTHX);
 #define PERL_ARGS_ASSERT_SAVE_RE_CONTEXT
 PERL_CALLCONV SV*	Perl_save_scalar(pTHX_ GV* gv);

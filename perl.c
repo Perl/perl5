@@ -407,6 +407,10 @@ perl_construct(pTHXx)
         hv_ksplit(PL_strtab, 1 << 11);
     }
 
+#ifdef USE_ITHREADS
+    PL_compiling.cop_file = NULL;
+#endif
+
     Zero(PL_sv_consts, SV_CONSTS_COUNT, SV*);
 
 #ifndef PERL_MICRO

@@ -8250,7 +8250,7 @@ Perl_newSTATEOP(pTHX_ I32 flags, char *label, OP *o)
         PL_parser->copline = NOLINE;
     }
 #ifdef USE_ITHREADS
-    CopFILE_set(cop, CopFILE(PL_curcop));	/* XXX share in a pvtable? */
+    CopFILE_copy(cop, PL_curcop);
 #else
     CopFILEGV_set(cop, CopFILEGV(PL_curcop));
 #endif
@@ -15243,6 +15243,120 @@ Perl_dup_warnings(pTHX_ STRLEN* warnings)
     new_warnings = (STRLEN*)PerlMemShared_malloc(size);
     Copy(warnings, new_warnings, size, char);
     return new_warnings;
+}
+
+/*
+=for apidoc rcpv_new
+
+Create a new shared memory refcounted string from the argument. If flags is set 
+to RCPVf_USE_STRLEN then the len argument is ignored and set using strlen(pv). 
+If the pv is NULL returns NULL. The newly created string will have a refcount 
+of 1, and is suitable for passing into rcpv_copy() and rcpv_free(). To access
+the RCPV * from the returned value use the RCPVx() macro.
+
+Note that rcpv_new() does NOT use a hash table or anything like that to dedupe
+inputs given the same text content. Each call with a non-null pv parameter
+will produce a distinct pointer with its own refcount regardless of the input
+content.
+
+=cut
+*/
+
+char *
+Perl_rcpv_new(pTHX_ const char *pv, STRLEN len, U32 flags) {
+    RCPV *rcpv;
+
+    PERL_ARGS_ASSERT_RCPV_NEW;
+
+    PERL_UNUSED_CONTEXT;
+
+    if (!pv)
+        return NULL;
+
+    if (flags & RCPVf_USE_STRLEN)
+        len = strlen(pv);
+
+    rcpv = (RCPV *)PerlMemShared_malloc(sizeof(struct rcpv) + len + 1);
+    if (!rcpv)
+        croak_no_mem();
+
+    rcpv->len = len;
+    rcpv->refcount = 1;
+
+    (void)memcpy(rcpv->pv, pv, len);
+    rcpv->pv[len]= '\0';
+    return rcpv->pv;
+}
+
+/*
+=for apidoc rcpv_free
+
+refcount decrement a shared memory refcounted string, and when
+the refcount goes to 0 free it using perlmemshared_free().
+
+it is the callers responsibility to ensure that the pv is the
+result of a rcpv_new() call.
+
+Always returns NULL so it can be used like this:
+
+    thing = rcpv_free(thing);
+
+=cut
+*/
+
+char *
+Perl_rcpv_free(pTHX_ char *pv) {
+
+    PERL_ARGS_ASSERT_RCPV_FREE;
+
+    PERL_UNUSED_CONTEXT;
+
+    if (!pv)
+        return NULL;
+    RCPV *rcpv = RCPVx(pv);
+
+    assert(rcpv->len);
+
+    OP_REFCNT_LOCK;
+    if (--rcpv->refcount == 0) {
+        rcpv->len = 0;
+        PerlMemShared_free(rcpv);
+    }
+    OP_REFCNT_UNLOCK;
+    return NULL;
+}
+
+/*
+=for apidoc rcpv_copy
+
+refcount increment a shared memory refcounted string, and when
+the refcount goes to 0 free it using PerlMemShared_free().
+
+It is the callers responsibility to ensure that the pv is the
+result of a rcpv_new() call.
+
+Returns the same pointer that was passed in.
+
+    new = rcpv_copy(pv);
+
+=cut
+*/
+
+
+char *
+Perl_rcpv_copy(pTHX_ char *pv) {
+
+    PERL_ARGS_ASSERT_RCPV_COPY;
+
+    PERL_UNUSED_CONTEXT;
+
+    if (!pv)
+        return NULL;
+    RCPV *rcpv = RCPVx(pv);
+    OP_REFCNT_LOCK;
+    rcpv->refcount++;
+    OP_REFCNT_UNLOCK;
+    return pv;
 }
 
 /*

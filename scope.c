@@ -324,6 +324,26 @@ Perl_save_generic_svref(pTHX_ SV **sptr)
     save_pushptrptr(sptr, SvREFCNT_inc(*sptr), SAVEt_GENERIC_SVREF);
 }
 
+
+/*
+=for apidoc save_rcpv_free
+
+Implements C<SAVERCPVFREE>.
+
+Saves and restores a refcounted string, similar to what
+save_generic_svref would do for a SV*. Can be used to restore
+a refcounted string to its previous state. Performs the 
+appropriate refcount counting so that nothing should leak
+or be prematurel freed.
+
+=cut
+ */
+void
+Perl_save_rcpv_free(pTHX_ char **ppv) {
+    PERL_ARGS_ASSERT_SAVE_RCPV_FREE;
+    save_pushptrptr(ppv, rcpv_copy(*ppv), SAVEt_RCPV_FREE);
+}
+
 /*
 =for apidoc_section $callback
 =for apidoc save_generic_pvref
@@ -1065,6 +1085,7 @@ static const U8 arg_counts[] = {
     2, /* SAVEt_VPTR               */
     2, /* SAVEt_ADELETE            */
     2, /* SAVEt_APTR               */
+    2, /* SAVEt_RCPV_FREE          */
     3, /* SAVEt_HELEM              */
     3, /* SAVEt_PADSV_AND_MORTALIZE*/
     3, /* SAVEt_SET_SVFLAGS        */
@@ -1182,6 +1203,7 @@ Perl_leave_scope(pTHX_ I32 base)
             a0.any_svp = &GvSV(a0.any_gv);
             goto restore_svp;
 
+
         case SAVEt_GENERIC_SVREF:		/* generic sv */
             a0 = ap[0]; a1 = ap[1];
         restore_svp:
@@ -1191,6 +1213,16 @@ Perl_leave_scope(pTHX_ I32 base)
             *a0.any_svp = a1.any_sv;
             SvREFCNT_dec(sv);
             SvREFCNT_dec(a1.any_sv);
+            break;
+        }
+
+        case SAVEt_RCPV_FREE:           /* like generic sv, but for struct rcpv */
+        {
+            a0 = ap[0]; a1 = ap[1];
+            char *old = *a0.any_pvp;
+            *a0.any_pvp = a1.any_pv;
+            (void)rcpv_free(old);
+            (void)rcpv_free(a1.any_pv);
             break;
         }
 
