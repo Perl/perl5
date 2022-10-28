@@ -1715,6 +1715,10 @@ Apda	|char*	|savesharedpv	|NULLOK const char* pv
 : NULLOK only to suppress a compiler warning
 Apda	|char*	|savesharedpvn	|NULLOK const char *const pv \
 				|const STRLEN len
+Apda	|char*  |rcpv_new	|NULLOK const char *const pv \
+				|STRLEN len|U32 flags
+Apd	|char*  |rcpv_copy	|NULLOK char *const pv
+Apd	|char*  |rcpv_free	|NULLOK char *const pv
 Apda	|char*	|savesharedsvpv	|NN SV *sv
 Apda	|char*	|savesvpv	|NN SV* sv
 Cp	|void	|savestack_grow
@@ -1737,6 +1741,7 @@ CpMb	|void	|save_freesv	|NULLOK SV* sv
 CpMb	|void	|save_freeop	|NULLOK OP* o
 CpMb	|void	|save_freepv	|NULLOK char* pv
 Cpd	|void	|save_generic_svref|NN SV** sptr
+Cpd	|void	|save_rcpv_free	|NN char** ppv
 Cpd	|void	|save_generic_pvref|NN char** str
 Cpd	|void	|save_shared_pvref|NN char** str
 Adp	|void	|save_gp	|NN GV* gv|I32 empty

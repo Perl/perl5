@@ -547,7 +547,7 @@ static const struct OP_methods {
 #ifdef USE_ITHREADS
   { STR_WITH_LEN("pmoffset"),IVp,     STRUCT_OFFSET(struct pmop, op_pmoffset),},/*20*/
   { STR_WITH_LEN("filegv"),  op_offset_special, 0,                     },/*21*/
-  { STR_WITH_LEN("file"),    char_pp, STRUCT_OFFSET(struct cop, cop_file),  },/*22*/
+  { STR_WITH_LEN("file"),    char_pp, STRUCT_OFFSET(struct cop, cop_file),  }, /*22*/
   { STR_WITH_LEN("stash"),   op_offset_special, 0,                     },/*23*/
   { STR_WITH_LEN("stashpv"), op_offset_special, 0,                     },/*24*/
   { STR_WITH_LEN("stashoff"),PADOFFSETp,STRUCT_OFFSET(struct cop,cop_stashoff),},/*25*/
@@ -902,11 +902,9 @@ next(o)
 		ret = make_sv_object(aTHX_ (SV *)CopFILEGV((COP*)o));
 		break;
 #endif
-#ifndef USE_ITHREADS
 	    case 22: /* B::COP::file */
 		ret = sv_2mortal(newSVpv(CopFILE((COP*)o), 0));
 		break;
-#endif
 #ifdef USE_ITHREADS
 	    case 23: /* B::COP::stash */
 		ret = make_sv_object(aTHX_ (SV *)CopSTASH((COP*)o));

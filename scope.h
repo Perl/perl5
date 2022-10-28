@@ -67,16 +67,17 @@
 #define SAVEt_VPTR		46
 #define SAVEt_ADELETE		47
 #define SAVEt_APTR		48
+#define SAVEt_RCPV_FREE         49
 
 /* three args */
 
-#define SAVEt_HELEM		49
-#define SAVEt_PADSV_AND_MORTALIZE 50
-#define SAVEt_SET_SVFLAGS	51
-#define SAVEt_GVSLOT		52
-#define SAVEt_AELEM		53
-#define SAVEt_DELETE		54
-#define SAVEt_HINTS_HH		55
+#define SAVEt_HELEM             50
+#define SAVEt_PADSV_AND_MORTALIZE 51
+#define SAVEt_SET_SVFLAGS       52
+#define SAVEt_GVSLOT            53
+#define SAVEt_AELEM             54
+#define SAVEt_DELETE            55
+#define SAVEt_HINTS_HH          56
 
 
 #define SAVEf_SETMAGIC		1
@@ -246,6 +247,7 @@ scope has the given name. C<name> must be a literal string.
 #define SAVECLEARSV(sv)             save_clearsv((SV**)&(sv))
 #define SAVEGENERICSV(s)            save_generic_svref((SV**)&(s))
 #define SAVEGENERICPV(s)            save_generic_pvref((char**)&(s))
+#define SAVERCPVFREE(s)             save_rcpv_free((char**)&(s))
 #define SAVESHAREDPV(s)             save_shared_pvref((char**)&(s))
 #define SAVESETSVFLAGS(sv,mask,val) save_set_svflags(sv,mask,val)
 #define SAVEFREECOPHH(h)            save_pushptr((void *)(h), SAVEt_FREECOPHH)
@@ -294,8 +296,18 @@ scope has the given name. C<name> must be a literal string.
 
 #ifdef USE_ITHREADS
 #  define SAVECOPSTASH_FREE(c)	SAVEIV((c)->cop_stashoff)
-#  define SAVECOPFILE(c)	SAVEPPTR(CopFILE(c))
-#  define SAVECOPFILE_FREE(c)	SAVESHAREDPV(CopFILE(c))
+#  define SAVECOPFILE_x(c)      SAVEPPTR((c)->cop_file)
+#  define SAVECOPFILE(c)                \
+    STMT_START {                        \
+        SAVECOPFILE_x(c);               \
+        CopFILE_debug((c),"SAVECOPFILE",0);   \
+    } STMT_END
+#  define SAVECOPFILE_FREE_x(c) SAVERCPVFREE((c)->cop_file)
+#  define SAVECOPFILE_FREE(c)           \
+    STMT_START {                        \
+        SAVECOPFILE_FREE_x(c);          \
+        CopFILE_debug((c),"SAVECOPFILE_FREE",0);   \
+    } STMT_END
 #else
 #  /* XXX not refcounted */
 #  define SAVECOPSTASH_FREE(c)	SAVESPTR(CopSTASH(c))
