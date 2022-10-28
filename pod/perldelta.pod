@@ -45,6 +45,12 @@ XXX For a release on a stable branch, this section aspires to be:
 
 [ List each incompatible change as a =head2 entry ]
 
+=head2 L<C<utf8::upgrade()>|utf8/Utility functions>
+
+Starting in this release, if the input string is C<undef>, it remains
+C<undef>.  Previously it would be changed into a defined, zero-length
+string.
+
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.
