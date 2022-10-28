@@ -6746,11 +6746,17 @@ would have semantics similar to the following:
 Note that the file will not be included twice under the same specified
 name.
 
-The file must return true as the last statement to indicate
+Historically the file must return true as the last statement to indicate
 successful execution of any initialization code, so it's customary to
 end such a file with C<1;> unless you're sure it'll return true
 otherwise.  But it's better just to put the C<1;>, in case you add more
-statements.
+statements. As of 5.37.6 this requirement may be avoided by enabling
+the 'module_true' feature, which is enabled by default in modern
+version bundles. Thus code with C<use v5.37;> no longer needs to concern
+itself with this issue. See L<feature> for more details. Note that this
+affects the compilation unit within which the feature is used, and using
+it before requiring a module will not change the behavior of existing
+modules that do not themselves also use it.
 
 If EXPR is a bareword, L<C<require>|/require VERSION> assumes a F<.pm>
 extension and replaces C<::> with C</> in the filename for you,
