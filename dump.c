@@ -2667,6 +2667,19 @@ otherwise it will dump only the top level item, which
 means that it will not dump the contents of an AV * or
 HV *. For that use C<av_dump()> or C<hv_dump()>.
 
+=for apidoc sv_dump_depth
+
+Dumps the contents of an SV to the C<STDERR> filehandle
+to the depth requested. This function can be used on any
+SV derived type (GV, HV, AV) with an appropriate cast.
+This is a more flexible variant of sv_dump(). For example
+
+    HV *hv = ...;
+    sv_dump_depth((SV*)hv, 2);
+
+would dump the hv, its keys and values, but would not recurse
+into any RV values.
+
 =for apidoc av_dump
 
 Dumps the contents of an AV to the C<STDERR> filehandle,
