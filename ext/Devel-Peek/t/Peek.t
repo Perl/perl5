@@ -1516,6 +1516,7 @@ dumpindent is 4 at -e line 1.
      |   FLAGS = (VOID,SLABBED,MORESIB)
      |   LINE = 1
      |   PACKAGE = "t"
+     |   HINTS = 00000100
      |     |   
 5    +--entersub UNOP(0xNNN) ===> 1 [leave 0xNNN]
          TARG = 1

@@ -1338,6 +1338,11 @@ S_do_op_dump_bar(pTHX_ I32 level, UV bar, PerlIO *file, const OP *o)
                                 generic_pv_escape( tmpsv, label, label_len,
                                            (label_flags & SVf_UTF8)));
         }
+        /* add hints and features if set */
+        if (cCOPo->cop_hints)
+            S_opdump_indent(aTHX_ o, level, bar, file, "HINTS = %08x\n",cCOPo->cop_hints);
+        if (cCOPo->cop_features)
+            S_opdump_indent(aTHX_ o, level, bar, file, "FEATS = %08x\n",cCOPo->cop_features);
 
         S_opdump_indent(aTHX_ o, level, bar, file, "SEQ = %u\n",
                          (unsigned int)cCOPo->cop_seq);
