@@ -1452,7 +1452,6 @@ cpan/Math-BigRat/t/new-mbr.t
 cpan/Math-BigRat/t/requirer.t		see if require works properly
 cpan/Math-BigRat/t/rt121139.t
 cpan/Math-BigRat/t/trap.t		see if trap_nan and trap_inf work
-cpan/Memoize/inc/boilerplate.pl
 cpan/Memoize/Memoize.pm			Memoize
 cpan/Memoize/Memoize/AnyDBM_File.pm	Memoize glue layer for AnyDBM_File
 cpan/Memoize/Memoize/Expire.pm		Memoize expiry manager example
