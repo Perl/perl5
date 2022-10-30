@@ -1811,8 +1811,7 @@ for example, C<"C:/">.
 
 C<$osVolName> is a scalar to be set to the string representing the
 volume name, also called the file system label.  C<$lVolName> is the
-number of bytes to allocate for the C<$osVolName> buffer [see
-L<Buffer Sizes> for more information].
+number of bytes to allocate for the C<$osVolName> buffer.
 
 C<$ouSerialNum> is C<[]> [for C<NULL>] or will be set to the numeric
 value of the volume's serial number.
@@ -1822,8 +1821,7 @@ length allowed for a file name or directory name within the file system.
 
 C<$osFsType> is a scalar to be set to the string representing the
 file system type, such as C<"FAT"> or C<"NTFS">.  C<$lFsType> is the
-number of bytes to allocate for the C<$osFsType> buffer [see
-L<Buffer Sizes> for more information].
+number of bytes to allocate for the C<$osFsType> buffer.
 
 C<$ouFsFlags> is C<[]> [for C<NULL>] or will be set to an unsigned integer
 with bits set indicating properties of the file system:
@@ -2038,7 +2036,7 @@ at the end of the whole string [see C<GetLogicalDriveStrings> for
 a sample of this format].
 
 C<$lTargetBuf> is the size [in bytes] of the buffer to allocate for
-C<$osTargetPath>.  See L<Buffer Sizes> for more information.
+C<$osTargetPath>.
 
 C<$olTargetLen> is set to the number of bytes written to
 C<$osTargetPath> but you can also use C<length($osTargetPath)>
