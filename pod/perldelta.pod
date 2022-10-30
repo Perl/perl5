@@ -27,6 +27,11 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 New global variable C<${^FORCE_UPGRADE}>
+
+This variable contains the empty string, and can be used to force a string
+or pattern to be upgraded via concatenation.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security

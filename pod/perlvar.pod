@@ -504,6 +504,19 @@ mode is turned on.  See L<perlrun|perlrun/-a> for the B<-a> switch.  This
 array is package-specific, and must be declared or given a full package
 name if not in package main when running under C<strict 'vars'>.
 
+=item ${^FORCE_UPGRADE}
+
+This contains an empty string which when concatenated with any other
+string will cause the result to be an upgraded string. Eg:
+
+    print "ss"=~/\xDF/i ? "yes" : "no";
+    no
+
+but
+
+    print "ss"=~/\xDF${^FORCE_UPGRADE}/i ? "yes" : "no";
+    yes
+
 =item @INC
 X<@INC>
 

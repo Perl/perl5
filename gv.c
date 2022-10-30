@@ -2211,6 +2211,16 @@ S_gv_magicalize(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len,
                 if (memEQs(name, len, "\005NCODING"))
                     goto magicalize;
                 break;
+            case '\006':
+                if (memEQs(name, len, "\006ORCE_UPGRADE")) { /* ${^FORCE_UPGRADE} */
+                    /* empty string which is marked as UTF8 on */
+                    SV *sv= GvSVn(gv);
+                    sv_setpvs(sv,"");
+                    SvUTF8_on(sv);
+                    SvREADONLY_on(sv);
+                }
+                break;
+
             case '\007':	/* $^GLOBAL_PHASE */
                 if (memEQs(name, len, "\007LOBAL_PHASE"))
                     goto ro_magicalize;

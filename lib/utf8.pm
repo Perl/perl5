@@ -5,7 +5,7 @@ use warnings;
 
 our $hint_bits = 0x00800000;
 
-our $VERSION = '1.24';
+our $VERSION = '1.25';
 our $AUTOLOAD;
 
 sub import {
@@ -132,6 +132,13 @@ For example:
   utf8::upgrade($x);
   $x =~ /ss/i;       # matches
   my $z = uc($x);    # converts to "SS"
+
+As of 5.37.6 there is also the global variable C<${^FORCE_UPGRADE}>
+which contains an empty string which when concatenated with any other
+string causes the result to be an upgraded string. This can be helpful
+in some contexts where explicitly calling this function might be
+awkward. A similar effect can also be produced by using a C<\N{U+...}>
+style escape for one of the characters in the string.
 
 B<Note that this function does not handle arbitrary encodings>;
 use L<Encode> instead.
