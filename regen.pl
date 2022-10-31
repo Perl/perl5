@@ -30,3 +30,4 @@ regcomp.pl
 warnings.pl
 embed.pl
 feature.pl
+scope_types.pl
