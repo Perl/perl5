@@ -4371,6 +4371,8 @@ union any {
     UV          any_uv;
     long        any_long;
     bool        any_bool;
+    Size_t      any_size;
+    SSize_t     any_ssize;
     void        (*any_dptr) (void*);
     void        (*any_dxptr) (pTHX_ void*);
 };
