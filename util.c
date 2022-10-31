@@ -2391,10 +2391,7 @@ Perl_new_warnings_bitfield(pTHX_ STRLEN *buffer, const char *const bits,
     PERL_UNUSED_CONTEXT;
     PERL_ARGS_ASSERT_NEW_WARNINGS_BITFIELD;
 
-    buffer = (STRLEN*)
-        (specialWARN(buffer) ?
-         PerlMemShared_malloc(len_wanted) :
-         PerlMemShared_realloc(buffer, len_wanted));
+    buffer = (STRLEN*)rcpv_new(NULL, len_wanted, RCPVf_NO_COPY);
     buffer[0] = size;
     Copy(bits, (buffer + 1), size, char);
     if (size < WARNsize)

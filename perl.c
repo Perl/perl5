@@ -409,6 +409,7 @@ perl_construct(pTHXx)
 
 #ifdef USE_ITHREADS
     PL_compiling.cop_file = NULL;
+    PL_compiling.cop_warnings = NULL;
 #endif
 
     Zero(PL_sv_consts, SV_CONSTS_COUNT, SV*);

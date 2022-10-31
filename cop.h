@@ -447,7 +447,17 @@ struct cop {
     U32		cop_hints;	/* hints bits from pragmata */
     U32		cop_seq;	/* parse sequence number */
     /* Beware. mg.c and warnings.pl assume the type of this is STRLEN *:  */
-    STRLEN *	cop_warnings;	/* lexical warnings bitmask */
+    STRLEN *    cop_warnings;   /* Lexical warnings bitmask vector.
+                                   Munged copy of ${^WARNING_BITS}.
+                                   This is not actually an array of STRLEN,
+                                   it is a STRLEN followed by a certain
+                                   number of bytes, as determined by the
+                                   initial STRLEN. The pointer is either
+                                   to constant storage, or it is a rcpv
+                                   (refcounted string) style pointer similar
+                                   to cop_file under threads. The value
+                                   is read-only as it is shared amongst
+                                   many COP structures */
     /* compile time state of %^H.  See the comment in op.c for how this is
        used to recreate a hash to return from caller.  */
     COPHH *	cop_hints_hash;
@@ -543,6 +553,7 @@ struct rcpv {
 typedef struct rcpv RCPV;
 
 #define RCPVf_USE_STRLEN 1
+#define RCPVf_NO_COPY 2
 #define RCPVx(pv_arg)       ((RCPV *)((pv_arg) - STRUCT_OFFSET(struct rcpv, pv)))
 #define RCPV_REFCOUNT(pv)   (RCPVx(pv)->refcount)
 #define RCPV_LEN(pv)        (RCPVx(pv)->len)
