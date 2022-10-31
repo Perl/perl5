@@ -4373,6 +4373,7 @@ union any {
     bool        any_bool;
     Size_t      any_size;
     SSize_t     any_ssize;
+    STRLEN      any_strlen;
     void        (*any_dptr) (void*);
     void        (*any_dxptr) (pTHX_ void*);
 };
