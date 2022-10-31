@@ -8,77 +8,7 @@
  *
  */
 
-/* *** Update arg_counts[] in scope.c if you modify these */
-
-/* zero args */
-
-#define SAVEt_ALLOC		0
-#define SAVEt_CLEARPADRANGE	1
-#define SAVEt_CLEARSV		2
-#define SAVEt_REGCONTEXT	3
-
-/* one arg */
-
-#define SAVEt_TMPSFLOOR		4
-#define SAVEt_BOOL		5
-#define SAVEt_COMPILE_WARNINGS	6
-#define SAVEt_COMPPAD		7
-#define SAVEt_FREECOPHH		8
-#define SAVEt_FREEOP		9
-#define SAVEt_FREEPV		10
-#define SAVEt_FREESV		11
-#define SAVEt_I16		12
-#define SAVEt_I32_SMALL		13
-#define SAVEt_I8		14
-#define SAVEt_INT_SMALL		15
-#define SAVEt_MORTALIZESV	16
-#define SAVEt_NSTAB		17
-#define SAVEt_OP		18
-#define SAVEt_PARSER		19
-#define SAVEt_STACK_POS		20
-#define SAVEt_READONLY_OFF	21
-#define SAVEt_FREEPADNAME	22
-#define SAVEt_STRLEN_SMALL      23
-
-/* two args */
-
-#define SAVEt_AV		24
-#define SAVEt_DESTRUCTOR	25
-#define SAVEt_DESTRUCTOR_X	26
-#define SAVEt_GENERIC_PVREF	27
-#define SAVEt_GENERIC_SVREF	28
-#define SAVEt_GP		29
-#define SAVEt_GVSV		30
-#define SAVEt_HINTS		31
-#define SAVEt_HPTR		32
-#define SAVEt_HV		33
-#define SAVEt_I32		34
-#define SAVEt_INT		35
-#define SAVEt_ITEM		36
-#define SAVEt_IV		37
-#define SAVEt_LONG		38
-#define SAVEt_PPTR		39
-#define SAVEt_SAVESWITCHSTACK	40
-#define SAVEt_SHARED_PVREF	41
-#define SAVEt_SPTR		42
-#define SAVEt_STRLEN		43
-#define SAVEt_SV		44
-#define SAVEt_SVREF		45
-#define SAVEt_VPTR		46
-#define SAVEt_ADELETE		47
-#define SAVEt_APTR		48
-#define SAVEt_RCPV_FREE         49
-
-/* three args */
-
-#define SAVEt_HELEM             50
-#define SAVEt_PADSV_AND_MORTALIZE 51
-#define SAVEt_SET_SVFLAGS       52
-#define SAVEt_GVSLOT            53
-#define SAVEt_AELEM             54
-#define SAVEt_DELETE            55
-#define SAVEt_HINTS_HH          56
-
+#include "scope_types.h"
 
 #define SAVEf_SETMAGIC		1
 #define SAVEf_KEEPOLDELEM	2

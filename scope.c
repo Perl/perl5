@@ -1035,66 +1035,6 @@ Perl_save_alloc(pTHX_ I32 size, I32 pad)
 }
 
 
-static const U8 arg_counts[] = {
-    0, /* SAVEt_ALLOC              */
-    0, /* SAVEt_CLEARPADRANGE      */
-    0, /* SAVEt_CLEARSV            */
-    0, /* SAVEt_REGCONTEXT         */
-    1, /* SAVEt_TMPSFLOOR          */
-    1, /* SAVEt_BOOL               */
-    1, /* SAVEt_COMPILE_WARNINGS   */
-    1, /* SAVEt_COMPPAD            */
-    1, /* SAVEt_FREECOPHH          */
-    1, /* SAVEt_FREEOP             */
-    1, /* SAVEt_FREEPV             */
-    1, /* SAVEt_FREESV             */
-    1, /* SAVEt_I16                */
-    1, /* SAVEt_I32_SMALL          */
-    1, /* SAVEt_I8                 */
-    1, /* SAVEt_INT_SMALL          */
-    1, /* SAVEt_MORTALIZESV        */
-    1, /* SAVEt_NSTAB              */
-    1, /* SAVEt_OP                 */
-    1, /* SAVEt_PARSER             */
-    1, /* SAVEt_STACK_POS          */
-    1, /* SAVEt_READONLY_OFF       */
-    1, /* SAVEt_FREEPADNAME        */
-    1, /* SAVEt_STRLEN_SMALL       */
-    2, /* SAVEt_AV                 */
-    2, /* SAVEt_DESTRUCTOR         */
-    2, /* SAVEt_DESTRUCTOR_X       */
-    2, /* SAVEt_GENERIC_PVREF      */
-    2, /* SAVEt_GENERIC_SVREF      */
-    2, /* SAVEt_GP                 */
-    2, /* SAVEt_GVSV               */
-    2, /* SAVEt_HINTS              */
-    2, /* SAVEt_HPTR               */
-    2, /* SAVEt_HV                 */
-    2, /* SAVEt_I32                */
-    2, /* SAVEt_INT                */
-    2, /* SAVEt_ITEM               */
-    2, /* SAVEt_IV                 */
-    2, /* SAVEt_LONG               */
-    2, /* SAVEt_PPTR               */
-    2, /* SAVEt_SAVESWITCHSTACK    */
-    2, /* SAVEt_SHARED_PVREF       */
-    2, /* SAVEt_SPTR               */
-    2, /* SAVEt_STRLEN             */
-    2, /* SAVEt_SV                 */
-    2, /* SAVEt_SVREF              */
-    2, /* SAVEt_VPTR               */
-    2, /* SAVEt_ADELETE            */
-    2, /* SAVEt_APTR               */
-    2, /* SAVEt_RCPV_FREE          */
-    3, /* SAVEt_HELEM              */
-    3, /* SAVEt_PADSV_AND_MORTALIZE*/
-    3, /* SAVEt_SET_SVFLAGS        */
-    3, /* SAVEt_GVSLOT             */
-    3, /* SAVEt_AELEM              */
-    3, /* SAVEt_DELETE             */
-    3  /* SAVEt_HINTS_HH           */
-};
-
 
 /*
 =for apidoc_section $callback
@@ -1130,7 +1070,7 @@ Perl_leave_scope(pTHX_ I32 base)
             ap = &PL_savestack[ix];
             uv = ap->any_uv;
             type = (U8)uv & SAVE_MASK;
-            argcount = arg_counts[type];
+            argcount = leave_scope_arg_counts[type];
             PL_savestack_ix = ix - argcount;
             ap -= argcount;
         }

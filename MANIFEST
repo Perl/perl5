@@ -5545,6 +5545,7 @@ runtests.SH			A script that generates runtests
 sbox32_hash.h			SBox hash code (32 Bit SBOX based hash function)
 scope.c				Scope entry and exit code
 scope.h				Scope entry and exit header
+scope_types.h			Types used to manage the save stack
 SECURITY.md			Add Security Policy for GitHub
 sv.c				Scalar value code
 sv.h				Scalar value header
