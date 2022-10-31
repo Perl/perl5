@@ -4356,7 +4356,7 @@ void init_os_extras(void);
 UNION_ANY_DEFINITION;
 #else
 union any {
-    void*	any_ptr;
+    void*       any_ptr;
     SV*         any_sv;
     SV**        any_svp;
     GV*         any_gv;
@@ -4365,14 +4365,14 @@ union any {
     OP*         any_op;
     char*       any_pv;
     char**      any_pvp;
-    I32		any_i32;
-    U32		any_u32;
-    IV		any_iv;
-    UV		any_uv;
-    long	any_long;
-    bool	any_bool;
-    void	(*any_dptr) (void*);
-    void	(*any_dxptr) (pTHX_ void*);
+    I32         any_i32;
+    U32         any_u32;
+    IV          any_iv;
+    UV          any_uv;
+    long        any_long;
+    bool        any_bool;
+    void        (*any_dptr) (void*);
+    void        (*any_dxptr) (pTHX_ void*);
 };
 #endif
 
