@@ -5,7 +5,7 @@
 
 package warnings;
 
-our $VERSION = "1.62";
+our $VERSION = "1.63";
 
 # Verify that we're called correctly so that warnings will work.
 # Can't use Carp, since Carp uses us!
@@ -443,7 +443,7 @@ sub __chk
             unless defined $offset;
     }
     else {
-        $category = (caller(1))[0] ;
+        $category = caller(1);
         $offset = $Offsets{$category};
         Croaker("package '$category' not registered for warnings")
             unless defined $offset ;

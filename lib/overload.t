@@ -1100,7 +1100,7 @@ is("a$utfvar", "a".200.2.1); # 224 - overload via sv_2pv_flags
 # were to eval the overload code in the caller's namespace, the privatisation
 # would be quite transparent.
 package Hderef;
-use overload '%{}' => sub { (caller(0))[0] eq 'Foo' ? $_[0] : die "zap" };
+use overload '%{}' => sub { caller(0) eq 'Foo' ? $_[0] : die "zap" };
 package Foo;
 @Foo::ISA = 'Hderef';
 sub new { bless {}, shift }
