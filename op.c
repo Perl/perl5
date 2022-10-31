@@ -1331,7 +1331,8 @@ S_cop_free(pTHX_ COP* cop)
     }
     CopFILE_free(cop);
     if (! specialWARN(cop->cop_warnings))
-        PerlMemShared_free(cop->cop_warnings);
+        cop->cop_warnings = (STRLEN*)rcpv_free((char*)cop->cop_warnings);
+
     cophh_free(CopHINTHASH_get(cop));
     if (PL_curcop == cop)
        PL_curcop = NULL;
@@ -15232,17 +15233,10 @@ const_av_xsub(pTHX_ CV* cv)
 STRLEN*
 Perl_dup_warnings(pTHX_ STRLEN* warnings)
 {
-    Size_t size;
-    STRLEN *new_warnings;
-
     if (warnings == NULL || specialWARN(warnings))
         return warnings;
 
-    size = sizeof(*warnings) + *warnings;
-
-    new_warnings = (STRLEN*)PerlMemShared_malloc(size);
-    Copy(warnings, new_warnings, size, char);
-    return new_warnings;
+    return (STRLEN*)rcpv_copy((char*)warnings);
 }
 
 /*
@@ -15270,7 +15264,7 @@ Perl_rcpv_new(pTHX_ const char *pv, STRLEN len, U32 flags) {
 
     PERL_UNUSED_CONTEXT;
 
-    if (!pv)
+    if (!pv && (flags & RCPVf_NO_COPY) == 0)
         return NULL;
 
     if (flags & RCPVf_USE_STRLEN)
@@ -15283,8 +15277,10 @@ Perl_rcpv_new(pTHX_ const char *pv, STRLEN len, U32 flags) {
     rcpv->len = len;
     rcpv->refcount = 1;
 
-    (void)memcpy(rcpv->pv, pv, len);
-    rcpv->pv[len]= '\0';
+    if ((flags & RCPVf_NO_COPY) == 0) {
+        (void)memcpy(rcpv->pv, pv, len);
+        rcpv->pv[len]= '\0';
+    }
     return rcpv->pv;
 }
 

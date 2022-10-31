@@ -3033,9 +3033,11 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
                         STRLEN len;
                         const char *const p = SvPV_const(sv, len);
 
-                        PL_compiling.cop_warnings
-                            = Perl_new_warnings_bitfield(aTHX_ PL_compiling.cop_warnings,
-                                                     p, len);
+                        free_and_set_cop_warnings(
+                            &PL_compiling,
+                            Perl_new_warnings_bitfield(aTHX_ PL_compiling.cop_warnings,
+                                                     p, len)
+                        );
 
                         if (isWARN_on(PL_compiling.cop_warnings, WARN_ONCE))
                             PL_dowarn |= G_WARN_ONCE ;
