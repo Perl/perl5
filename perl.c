@@ -3823,12 +3823,12 @@ Perl_moreswitches(pTHX_ const char *s)
         return s;
     case 'W':
         PL_dowarn = G_WARN_ALL_ON|G_WARN_ON;
-    free_and_set_cop_warnings(&PL_compiling, pWARN_ALL);
+        free_and_set_cop_warnings(&PL_compiling, pWARN_ALL);
         s++;
         return s;
     case 'X':
         PL_dowarn = G_WARN_ALL_OFF;
-    free_and_set_cop_warnings(&PL_compiling, pWARN_NONE);
+        free_and_set_cop_warnings(&PL_compiling, pWARN_NONE);
         s++;
         return s;
     case '*':

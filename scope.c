@@ -1668,7 +1668,7 @@ Perl_leave_scope(pTHX_ I32 base)
 
         case SAVEt_COMPILE_WARNINGS:
             a0 = ap[0];
-        free_and_set_cop_warnings(&PL_compiling, (STRLEN*) a0.any_ptr);
+            free_and_set_cop_warnings(&PL_compiling, (STRLEN*) a0.any_ptr);
             break;
 
         case SAVEt_PARSER:
