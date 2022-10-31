@@ -1247,7 +1247,12 @@ S_emulate_setlocale_i(pTHX_
                                    line, basis_obj));
         }
 
-        /* Ready to create a new locale by modification of the exising one */
+        /* Ready to create a new locale by modification of the exising one.
+         *
+         * NOTE: This code may incorrectly show up as a leak under the address
+         * sanitizer. We do not free this object under normal teardown, however
+         * you can set PERL_DESTRUCT_LEVEL=2 to cause it to be freed.
+         */
         new_obj = newlocale(mask, new_locale, basis_obj);
 
         if (! new_obj) {
@@ -1878,7 +1883,12 @@ S_new_numeric(pTHX_ const char *newnum)
 
 #  ifdef USE_POSIX_2008_LOCALE
 
-    /* We keep a special object for easy switching to */
+    /* We keep a special object for easy switching to.
+     *
+     * NOTE: This code may incorrectly show up as a leak under the address
+     * sanitizer. We do not free this object under normal teardown, however
+     * you can set PERL_DESTRUCT_LEVEL=2 to cause it to be freed.
+     */
     PL_underlying_numeric_obj = newlocale(LC_NUMERIC_MASK,
                                           PL_numeric_name,
                                           PL_underlying_numeric_obj);
