@@ -3,7 +3,7 @@ package overload;
 use strict;
 no strict 'refs';
 
-our $VERSION = '1.36';
+our $VERSION = '1.37';
 
 our %ops = (
     with_assign         => "+ - * / % ** << >> x .",
@@ -54,14 +54,14 @@ sub OVERLOAD {
 }
 
 sub import {
-    my $package = (caller())[0];
+    my $package = caller();
     # *{$package . "::OVERLOAD"} = \&OVERLOAD;
     shift;
     $package->overload::OVERLOAD(@_);
 }
 
 sub unimport {
-    my $package = (caller())[0];
+    my $package = caller();
     shift;
     *{$package . "::(("} = \&nil;
     for (@_) {

@@ -16,7 +16,7 @@
 #
 # This script is normally invoked from regen.pl.
 
-$VERSION = '1.62';
+$VERSION = '1.63';
 
 BEGIN {
     require './regen/regen_lib.pl';
@@ -849,7 +849,7 @@ sub __chk
             unless defined $offset;
     }
     else {
-        $category = (caller(1))[0] ;
+        $category = caller(1);
         $offset = $Offsets{$category};
         Croaker("package '$category' not registered for warnings")
             unless defined $offset ;

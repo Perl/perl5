@@ -14,7 +14,7 @@ require Exporter;
 @ISA = qw(Exporter);
 @EXPORT = qw(struct);
 
-$VERSION = '0.67';
+$VERSION = '0.68';
 
 my $print = 0;
 sub printem {
@@ -84,7 +84,7 @@ sub struct {
     }
     else {
         $base_type = 'ARRAY';
-        $class = (caller())[0];
+        $class = caller();
         @decls = @_;
     }
 
