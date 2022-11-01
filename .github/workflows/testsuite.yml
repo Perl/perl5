@@ -52,11 +52,11 @@ name: testsuite
 on:
   push:
     branches:
-      - "blead"
-      - "maint-*"
+      - "**"
     tags-ignore:
       - "*"
   pull_request:
+      - "*:*"
 
 # I don't think that we can (safely) set TEST_JOBS=2 in the global environment,
 # because on Win32 the various Makefile's `test` target is actually ./harness,

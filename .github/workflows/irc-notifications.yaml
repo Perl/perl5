@@ -1,5 +1,5 @@
 name: "Push Notification"
-on: [pull_request]
+on: [push, pull_request]
 # add create for tracking tags
 
 # IRC colors: https://modern.ircdocs.horse/formatting.html
