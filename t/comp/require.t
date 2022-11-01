@@ -371,6 +371,7 @@ BEGIN {
             'feature "module_true"',
         );
     my @module_code = (
+            undef,
             '',
             'sub foo {};',
             'sub foo {}; 0;',
@@ -425,7 +426,10 @@ BEGIN {
     foreach my $tuple (@module_true_tests) {
         my ($pack_name, $param_str, $mod_code, $eval_code)= @$tuple;
 
-        write_file("$pack_name.pm","package $pack_name;\nuse $param_str;\n$mod_code\n");
+        write_file("$pack_name.pm",
+            defined($mod_code)
+            ? "package $pack_name;\nuse $param_str;\n$mod_code\n"
+            : "");
         %INC = ();
         # these might be assigned to in the $eval_code
         my $return_val;
@@ -434,7 +438,7 @@ BEGIN {
         $^P = 0; # turn the debugger off after the eval.
         $i++;
         print "${not}ok $i - use $param_str did not blow up for `",
-            $mod_code || "#no body", "` via `$eval_code`\n";
+            ($mod_code // "# empty file") || "#no body", "` via `$eval_code`\n";
         if ($not) {
             # we died, show the error:
             print "# $_\n" for split /\n/, $@;
