@@ -5,7 +5,7 @@
 
 package warnings;
 
-our $VERSION = "1.60";
+our $VERSION = "1.61";
 
 # Verify that we're called correctly so that warnings will work.
 # Can't use Carp, since Carp uses us!

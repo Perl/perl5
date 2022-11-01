@@ -188,7 +188,7 @@ make_temp_object(pTHX_ SV *temp)
 static SV *
 make_warnings_object(pTHX_ const COP *const cop)
 {
-    const STRLEN *const warnings = cop->cop_warnings;
+    const char *const warnings = cop->cop_warnings;
     const char *type = 0;
     dMY_CXT;
     IV iv = sizeof(specialsv_list)/sizeof(SV*);
@@ -210,7 +210,7 @@ make_warnings_object(pTHX_ const COP *const cop)
     } else {
 	/* B assumes that warnings are a regular SV. Seems easier to keep it
 	   happy by making them into a regular SV.  */
-	return make_temp_object(aTHX_ newSVpvn((char *)(warnings + 1), *warnings));
+        return make_temp_object(aTHX_ newSVpvn(warnings, RCPV_LEN(warnings)));
     }
 }
 

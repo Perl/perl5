@@ -3725,7 +3725,7 @@ S	|bool	|ckwarn_common	|U32 w
 CpoP	|bool	|ckwarn		|U32 w
 CpoP	|bool	|ckwarn_d	|U32 w
 : FIXME - exported for ByteLoader - public or private?
-XEopxR	|STRLEN *|new_warnings_bitfield|NULLOK STRLEN *buffer \
+XEopxR	|char *|new_warnings_bitfield|NULLOK char *buffer \
 				|NN const char *const bits|STRLEN size
 
 AMpTdf	|int	|my_snprintf	|NN char *buffer|const Size_t len|NN const char *format|...
@@ -3883,7 +3883,7 @@ XEop	|void   |dtrace_probe_op   |NN const OP *op
 XEop	|void   |dtrace_probe_phase|enum perl_phase phase
 #endif
 
-XEop	|STRLEN*|dup_warnings	|NULLOK STRLEN* warnings
+XEop	|char  *|dup_warnings	|NULLOK char* warnings
 
 #ifndef USE_ITHREADS
 Amd	|void	|CopFILEGV_set	|NN COP * c|NN GV * gv

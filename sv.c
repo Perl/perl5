@@ -15336,7 +15336,7 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
             break;
         case SAVEt_COMPILE_WARNINGS:
             ptr = POPPTR(ss,ix);
-            TOPPTR(nss,ix) = DUP_WARNINGS((STRLEN*)ptr);
+            TOPPTR(nss,ix) = DUP_WARNINGS((char*)ptr);
             break;
         case SAVEt_PARSER:
             ptr = POPPTR(ss,ix);
