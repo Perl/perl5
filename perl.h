@@ -3267,6 +3267,9 @@ typedef AV PAD;
 typedef struct padnamelist PADNAMELIST;
 typedef struct padname PADNAME;
 
+typedef SSize_t PADOFFSET; /* signed so that -1 is a valid value */
+#define NOT_IN_PAD ((PADOFFSET) -1)
+
 /* always enable PERL_OP_PARENT  */
 #if !defined(PERL_OP_PARENT)
 #  define PERL_OP_PARENT
