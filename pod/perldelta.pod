@@ -328,6 +328,14 @@ source tree.
 
 =over 4
 
+=item Windows
+
+stat() now works on AF_UNIX socket files. [github #20204]
+
+readlink() now returns the C<PrintName> from a symbolic link reparse
+point instead of the C<SubstituteName>, which should make it better
+match the name the link was created with.  [github #20271]
+
 =item XXX-some-platform
 
 XXX
