@@ -18,7 +18,7 @@ sub do_require {
 }
 
 # don't make this lexical
-$i = 1;
+our $i = 1;
 
 our @module_true_tests; # this is set up in a BEGIN later on.
 our $module_true_test_count; # this is set up in a BEGIN later on.
@@ -201,6 +201,7 @@ print "ok $i - require() context\n";
 1;
 **BLEAH**
 );
+my ($foo,@foo);
                               delete $INC{"bleah.pm"}; ++$::i;
 $foo = eval q{require bleah}; delete $INC{"bleah.pm"}; ++$::i;
 @foo = eval q{require bleah}; delete $INC{"bleah.pm"}; ++$::i;
@@ -365,24 +366,26 @@ BEGIN {
     # etc. so we set up the test set here.
 
     my @params = (
-            'v5.37',
-            'feature ":5.38"',
-            'feature ":all"',
-            'feature "module_true"',
+            'use v5.37',
+            'use feature ":5.38"',
+            'use feature ":all"',
+            'use feature "module_true"',
+            'no feature "module_true"',
+            '',
         );
     my @module_code = (
-            undef,
             '',
             'sub foo {};',
             'sub foo {}; 0;',
             'sub foo {}; return 0;',
-            'sub foo {}; return (0,0,0);',
-            'sub foo {}; return (1,1,1);',
+            'sub foo {}; return (0,0,"some_true_value");',
+            'sub foo {}; return ("some_true_value",1,1);',
             'sub foo {}; (0, return 0);',
             'sub foo {}; "some_true_value";',
             'sub foo {}; return "some_true_value";',
             'sub foo {}; (0, return "some_true_value");',
             'sub foo {}; (0, return "some_true_value");',
+            undef,
         );
     my @eval_code = (
             'use PACK;',
@@ -398,6 +401,7 @@ BEGIN {
     # indent level reasonable for the main test loop, but we could
     # compute this at BEGIN time and then add the number of tests
     # to the total count
+    my %seen;
     foreach my $debugger_state (0,0xA) {
         foreach my $param_str (@params) {
             foreach my $mod_code (@module_code) {
@@ -410,9 +414,27 @@ BEGIN {
                     $eval_code_munged= '$^P = ' . $debugger_state .
                                        '; ' . $eval_code_munged
                         if $debugger_state;
+
+                    my $param_str_munged = $param_str;
+                    $param_str_munged .= ";\n" if $param_str;
+
+                    my $this_code= defined($mod_code)
+                        ? "package PACK;\n$param_str_munged$mod_code\n"
+                        : "";
+
+                    next if $seen{$eval_code_munged . "|" . $this_code}++;
+                    $this_code=~s/PACK/$pack_name/g;
+
                     push @module_true_tests,
-                        [$pack_name, $param_str, $mod_code, $eval_code_munged];
-                    $module_true_test_count += ($eval_code=~/return_val/ ? 2 : 1);
+                        [$pack_name, $param_str, $this_code, $mod_code, $eval_code_munged];
+
+                    if ($this_code!~/use/ and $this_code !~ /some_true_value/) {
+                        $module_true_test_count += 2;
+                    } elsif ($eval_code_munged=~/return_val/) {
+                        $module_true_test_count += 2;
+                    } else {
+                        $module_true_test_count += 1;
+                    }
                 }
             }
         }
@@ -424,36 +446,68 @@ BEGIN {
 
 {
     foreach my $tuple (@module_true_tests) {
-        my ($pack_name, $param_str, $mod_code, $eval_code)= @$tuple;
+        my ($pack_name, $param_str, $this_code, $mod_code, $eval_code)= @$tuple;
 
-        write_file("$pack_name.pm",
-            defined($mod_code)
-            ? "package $pack_name;\nuse $param_str;\n$mod_code\n"
-            : "");
+        write_file("$pack_name.pm", $this_code);
         %INC = ();
         # these might be assigned to in the $eval_code
         my $return_val;
         my @return_val;
+
+        my $descr= !$this_code ? "empty file loaded" :
+                  !$mod_code ? "default behavior with `$mod_code`" :
+                  "`$param_str` with `$mod_code`";
+        $descr .= " via `$eval_code`";
+
         my $not = eval "$eval_code 1" ? "" : "not ";
+        my $err= $not ? $@ : "";
         $^P = 0; # turn the debugger off after the eval.
-        $i++;
-        print "${not}ok $i - use $param_str did not blow up for `",
-            ($mod_code // "# empty file") || "#no body", "` via `$eval_code`\n";
-        if ($not) {
-            # we died, show the error:
-            print "# $_\n" for split /\n/, $@;
-        }
-        if ($eval_code=~/\$return_val/) {
-            $not = ($return_val && $return_val eq '1') ? "" : "not ";
+
+        if ($this_code=~/use/) {
+            # test the various ways the feature can be turned on
             $i++;
-            print "${not}ok $i - use $param_str ensures scalar return value "
-                  . "is simple true value <$return_val>\n";
-        }
-        elsif ($eval_code=~/\@return_val/) {
-            $not = (@return_val && $return_val[0] eq '1') ? "" : "not ";
+            print "${not}ok $i - (AA) $descr did not blow up\n";
+            if ($not) {
+                # we died, show the error:
+                print "# error: $_\n" for split /\n/, $err;
+            }
+            if ($eval_code=~/\$return_val/) {
+                $not = ($return_val && $return_val eq '1') ? "" : "not ";
+                $i++;
+                print "${not}ok $i - (AB) scalar return value "
+                      . "is simple true value <$return_val>\n";
+            }
+            elsif ($eval_code=~/\@return_val/) {
+                $not = (@return_val && $return_val[0] eq '1') ? "" : "not ";
+                $i++;
+                print "${not}ok $i - (AB) list return value "
+                      . "is simple true value <$return_val[0]>\n";
+            }
+        } elsif ($this_code!~/some_true_value/) {
+            # test cases where the feature is not on and return false
+            my $not= $not ? "" : "not ";
             $i++;
-            print "${not}ok $i - use $param_str ensures list return value "
-                  . "is simple true value <$return_val[0]>\n";
+            print "${not}ok $i - (BA) $descr should die\n";
+            if ($not) {
+                print "# error: $_\n" for split /\n/, $err;
+                print "# code: $_\n" for split /\n/, $this_code || "NO CODE";
+            }
+            $not= $err=~/did not return a true value/ ? "" : "not ";
+            $i++;
+            print "${not}ok $i - (BB) saw expected error\n";
+        } else {
+            #test cases where the feature is not on and return true
+            $i++;
+            print "${not}ok $i - (CA) $descr should not die\n";
+            if ($eval_code=~/return_val/) {
+                $not = ($return_val || @return_val) ? "" : "not ";
+                $i++;
+                print "${not}ok $i - (CB) returned expected value\n";
+            }
+            if ($not) {
+                print "# error: $_\n" for split /\n/, $err;
+                print "# code: $_\n" for split /\n/, $this_code || "NO CODE";
+            }
         }
     }
 
@@ -477,7 +531,7 @@ BEGIN {
         local $@;
         my $result = 0;
         eval "\$result = require 'blunge.pm'; 1";
-        $not = $result == 3 ? '' : 'not ';
+        my $not = $result == 3 ? '' : 'not ';
         $i++;
         print "${not}ok $i - disabling 'module_true' and should not override module's return value ($result)\n";
         $not = $@ eq '' ? '' : 'not ';
