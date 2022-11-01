@@ -34,7 +34,7 @@ push @files_to_delete, "$_->[0].pm" for @module_true_tests;
 # to why there might be multiple execution of this test file, I don't
 # know; but this is an experiment to see if random smoke failures go away.
 
-if (grep -e, @files_to_delete) {
+if (!$ENV{NO_SLEEP} and grep -e, @files_to_delete) {
     print "# Sleeping for 20 secs waiting for other process to finish\n";
     sleep 20;
 }
