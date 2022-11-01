@@ -4377,6 +4377,7 @@ union any {
     Size_t      any_size;
     SSize_t     any_ssize;
     STRLEN      any_strlen;
+    PADOFFSET   any_padix;
     void        (*any_dptr) (void*);
     void        (*any_dxptr) (pTHX_ void*);
 };
