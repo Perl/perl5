@@ -90,7 +90,7 @@ our @EXPORT_OK = qw($Bin $Script $RealBin $RealScript $Dir $RealDir);
 our %EXPORT_TAGS = (ALL => [qw($Bin $Script $RealBin $RealScript $Dir $RealDir)]);
 our @ISA = qw(Exporter);
 
-our $VERSION = "1.53";
+our $VERSION = "1.54";
 
 # needed for VMS-specific filename translation
 if( $^O eq 'VMS' ) {
