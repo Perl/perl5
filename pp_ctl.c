@@ -2074,7 +2074,7 @@ PP(pp_caller)
     mPUSHi(CopHINTS_get(cx->blk_oldcop));
     {
         SV * mask ;
-        STRLEN * const old_warnings = cx->blk_oldcop->cop_warnings ;
+        char *old_warnings = cx->blk_oldcop->cop_warnings;
 
         if  (old_warnings == pWARN_NONE)
             mask = newSVpvn(WARN_NONEstring, WARNsize) ;
@@ -2085,7 +2085,7 @@ PP(pp_caller)
             mask = newSVpvn(WARN_ALLstring, WARNsize) ;
         }
         else
-            mask = newSVpvn((char *) (old_warnings + 1), old_warnings[0]);
+            mask = newSVpvn(old_warnings, RCPV_LEN(old_warnings));
         mPUSHs(mask);
     }
 

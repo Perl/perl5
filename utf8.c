@@ -45,17 +45,6 @@ characters in the ASCII range are unmodified, and a zero byte never appears
 within non-zero characters.
 */
 
-/* helper for Perl__force_out_malformed_utf8_message(). Like
- * SAVECOMPILEWARNINGS(), but works with PL_curcop rather than
- * PL_compiling */
-
-static void
-S_restore_cop_warnings(pTHX_ void *p)
-{
-    free_and_set_cop_warnings(PL_curcop, (STRLEN*) p);
-}
-
-
 void
 Perl__force_out_malformed_utf8_message(pTHX_
             const U8 *const p,      /* First byte in UTF-8 sequence */
@@ -89,8 +78,7 @@ Perl__force_out_malformed_utf8_message(pTHX_
     if (PL_curcop) {
         /* this is like SAVECOMPILEWARNINGS() except with PL_curcop rather
          * than PL_compiling */
-        SAVEDESTRUCTOR_X(S_restore_cop_warnings,
-                (void*)PL_curcop->cop_warnings);
+        SAVECOPWARNINGS(PL_curcop);
         PL_curcop->cop_warnings = pWARN_ALL;
     }
 

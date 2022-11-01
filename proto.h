@@ -1219,7 +1219,7 @@ PERL_CALLCONV void	Perl_dump_sub_perl(pTHX_ const GV* gv, bool justperl)
 PERL_CALLCONV void	Perl_dump_vindent(pTHX_ I32 level, PerlIO *file, const char* pat, va_list *args);
 #define PERL_ARGS_ASSERT_DUMP_VINDENT	\
 	assert(file); assert(pat)
-PERL_CALLCONV STRLEN*	Perl_dup_warnings(pTHX_ STRLEN* warnings);
+PERL_CALLCONV char  *	Perl_dup_warnings(pTHX_ char* warnings);
 #define PERL_ARGS_ASSERT_DUP_WARNINGS
 PERL_CALLCONV void	Perl_emulate_cop_io(pTHX_ const COP *const c, SV *const sv);
 #define PERL_ARGS_ASSERT_EMULATE_COP_IO	\
@@ -2954,7 +2954,7 @@ PERL_CALLCONV PERL_SI*	Perl_new_stackinfo(pTHX_ I32 stitems, I32 cxitems)
 PERL_CALLCONV SV*	Perl_new_version(pTHX_ SV *ver);
 #define PERL_ARGS_ASSERT_NEW_VERSION	\
 	assert(ver)
-PERL_CALLCONV STRLEN *	Perl_new_warnings_bitfield(pTHX_ STRLEN *buffer, const char *const bits, STRLEN size)
+PERL_CALLCONV char *	Perl_new_warnings_bitfield(pTHX_ char *buffer, const char *const bits, STRLEN size)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_NEW_WARNINGS_BITFIELD	\
 	assert(bits)

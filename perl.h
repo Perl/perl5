@@ -5405,9 +5405,9 @@ Indices outside the range 0..31 result in (bad) undedefined behavior.
 EXTCONST char PL_hexdigit[]
   INIT("0123456789abcdef0123456789ABCDEF");
 
-EXTCONST STRLEN PL_WARN_ALL
+EXT char PL_WARN_ALL
   INIT(0);
-EXTCONST STRLEN PL_WARN_NONE
+EXT char PL_WARN_NONE
   INIT(0);
 
 /* This is constant on most architectures, a global on OS/2 */

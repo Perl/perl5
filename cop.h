@@ -446,18 +446,13 @@ struct cop {
 #endif
     U32		cop_hints;	/* hints bits from pragmata */
     U32		cop_seq;	/* parse sequence number */
-    /* Beware. mg.c and warnings.pl assume the type of this is STRLEN *:  */
-    STRLEN *    cop_warnings;   /* Lexical warnings bitmask vector.
-                                   Munged copy of ${^WARNING_BITS}.
-                                   This is not actually an array of STRLEN,
-                                   it is a STRLEN followed by a certain
-                                   number of bytes, as determined by the
-                                   initial STRLEN. The pointer is either
-                                   to constant storage, or it is a rcpv
-                                   (refcounted string) style pointer similar
-                                   to cop_file under threads. The value
-                                   is read-only as it is shared amongst
-                                   many COP structures */
+    char *      cop_warnings;   /* Lexical warnings bitmask vector.
+                                   Refcounted shared copy of ${^WARNING_BITS}.
+                                   This pointer either points at one of the
+                                   magic values for warnings, or it points
+                                   at a buffer constructed with rcpv_new().
+                                   Use the RCPV_LEN() macro to get its length.
+                                 */
     /* compile time state of %^H.  See the comment in op.c for how this is
        used to recreate a hash to return from caller.  */
     COPHH *	cop_hints_hash;

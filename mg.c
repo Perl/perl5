@@ -1082,8 +1082,8 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
                 sv_setpvn(sv, WARN_ALLstring, WARNsize);
             }
             else {
-                sv_setpvn(sv, (char *) (PL_compiling.cop_warnings + 1),
-                          *PL_compiling.cop_warnings);
+                sv_setpvn(sv, PL_compiling.cop_warnings,
+                        RCPV_LEN(PL_compiling.cop_warnings));
             }
         }
         break;

@@ -16,7 +16,7 @@
 #
 # This script is normally invoked from regen.pl.
 
-$VERSION = '1.60';
+$VERSION = '1.61';
 
 BEGIN {
     require './regen/regen_lib.pl';
@@ -541,7 +541,6 @@ sub warnings_h_boilerplate_1 { return <<'EOM'; }
 #define Perl_Warn_Bit_(x)           (1 << ((x) % 8))
 #define PerlWarnIsSet_(a, x)        ((a)[Perl_Warn_Off_(x)] & Perl_Warn_Bit_(x))
 
-
 #define G_WARN_OFF		0 	/* $^W == 0 */
 #define G_WARN_ON		1	/* -w flag and $^W != 0 */
 #define G_WARN_ALL_ON		2	/* -W flag */
@@ -550,8 +549,8 @@ sub warnings_h_boilerplate_1 { return <<'EOM'; }
 #define G_WARN_ALL_MASK		(G_WARN_ALL_ON|G_WARN_ALL_OFF)
 
 #define pWARN_STD		NULL
-#define pWARN_ALL		(STRLEN *) &PL_WARN_ALL    /* use warnings 'all' */
-#define pWARN_NONE		(STRLEN *) &PL_WARN_NONE   /* no  warnings 'all' */
+#define pWARN_ALL               &PL_WARN_ALL    /* use warnings 'all' */
+#define pWARN_NONE              &PL_WARN_NONE   /* no  warnings 'all' */
 
 #define specialWARN(x)		((x) == pWARN_STD || (x) == pWARN_ALL ||	\
                                  (x) == pWARN_NONE)
@@ -569,18 +568,18 @@ sub warnings_h_boilerplate_2 { return <<'EOM'; }
 #define isLEXWARN_off \
         cBOOL(!PL_curcop || PL_curcop->cop_warnings == pWARN_STD)
 #define isWARN_ONCE	(PL_dowarn & (G_WARN_ON|G_WARN_ONCE))
-#define hasWARNBIT(c,x)     ((c)[0] > (2*(x)/8))
+#define hasWARNBIT(c,x) (RCPV_LEN(c) > (2*(x)/8))
 #define isWARN_on(c,x)  (hasWARNBIT(c,x) \
-                        ? PerlWarnIsSet_((U8 *)((c) + 1), 2*(x)) \
+                        ? PerlWarnIsSet_((U8 *)(c), 2*(x)) \
                         : 0)
 #define isWARNf_on(c,x) (hasWARNBIT(c,x) \
-                        ? PerlWarnIsSet_((U8 *)((c) + 1), 2*(x)+1) \
+                        ? PerlWarnIsSet_((U8 *)(c), 2*(x)+1) \
                         : 0)
 
 #define DUP_WARNINGS(p) Perl_dup_warnings(aTHX_ p)
 
 #define free_and_set_cop_warnings(cmp,w) STMT_START { \
-  if (!specialWARN((cmp)->cop_warnings)) rcpv_free((char*)((cmp)->cop_warnings)); \
+  if (!specialWARN((cmp)->cop_warnings)) rcpv_free((cmp)->cop_warnings); \
   (cmp)->cop_warnings = w; \
 } STMT_END
 
