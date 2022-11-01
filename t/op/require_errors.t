@@ -9,7 +9,7 @@ BEGIN {
 use strict;
 use warnings;
 
-plan(tests => 57);
+plan(tests => 58);
 
 my $nonfile = tempfile();
 
@@ -282,4 +282,11 @@ like $@, qr/^Can't locate \Q$nonsearch\E at/,
     ok(!eval { require CannotParse; },
        "check the second attempt also fails");
     like $@, qr/Attempt to reload/, "check we failed for the right reason";
+}
+
+{
+    fresh_perl_like(
+        'unshift @INC, sub { sub { 0 } }; require "asdasd";',
+        qr/asdasd did not return a true value/,
+        { }, '@INC hook blocks do not cause segfault');
 }

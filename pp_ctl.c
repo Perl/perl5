@@ -4867,24 +4867,26 @@ PP(pp_leaveeval)
              * feature state out of the COP data it contains.
              */
             if (check) {
-                const OP *kid = cLISTOPx(check)->op_first;
-                const OP *last_state = NULL;
+                if (!OP_TYPE_IS(check,OP_STUB)) {
+                    const OP *kid = cLISTOPx(check)->op_first;
+                    const OP *last_state = NULL;
 
-                for (; kid; kid = OpSIBLING(kid)) {
-                    if (
-                           OP_TYPE_IS_OR_WAS(kid, OP_NEXTSTATE)
-                        || OP_TYPE_IS_OR_WAS(kid, OP_DBSTATE)
-                    ){
-                        last_state = kid;
+                    for (; kid; kid = OpSIBLING(kid)) {
+                        if (
+                               OP_TYPE_IS_OR_WAS(kid, OP_NEXTSTATE)
+                            || OP_TYPE_IS_OR_WAS(kid, OP_DBSTATE)
+                        ){
+                            last_state = kid;
+                        }
                     }
-                }
-                if (last_state) {
-                    PL_curcop = cCOPx(last_state);
-                    if (FEATURE_MODULE_TRUE_IS_ENABLED) {
-                        override_return = TRUE;
+                    if (last_state) {
+                        PL_curcop = cCOPx(last_state);
+                        if (FEATURE_MODULE_TRUE_IS_ENABLED) {
+                            override_return = TRUE;
+                        }
+                    } else {
+                        NOT_REACHED; /* NOTREACHED */
                     }
-                } else {
-                    NOT_REACHED; /* NOTREACHED */
                 }
             } else {
                 NOT_REACHED; /* NOTREACHED */
