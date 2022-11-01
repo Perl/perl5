@@ -52,7 +52,8 @@ name: testsuite
 on:
   push:
     branches:
-      - "**"
+      - "blead"
+      - "maint-*"
     tags-ignore:
       - "*"
   pull_request:
