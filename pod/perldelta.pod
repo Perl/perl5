@@ -385,6 +385,13 @@ A new magic type C<PERL_MAGIC_extvalue> has been added. This is available for
 use like C<PERL_MAGIC_ext>, but is a value magic: upon localization the new
 value will not be magical.
 
+=item *
+
+The C<SSNEW()>, C<SSNEWt()>, C<SSNEWa()> and C<SSNEWat()> APIs now
+return a C<SSize_t> value.  The C<SSPTR()> and C<SSPTRt()> macros now
+expect a C<SSize_t> parameter, and enforce that on debugging builds.
+[github #20411]
+
 =back
 
 =head1 Selected Bug Fixes
