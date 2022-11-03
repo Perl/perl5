@@ -1325,12 +1325,12 @@ test-prep : all utils ../pod/perltoc.pod
 
 test : test-prep
 	cd ..\t
-	perl.exe harness $(TEST_SWITCHES) $(TEST_FILES)
+	perl.exe harness $(TEST_ARGS) $(TEST_SWITCHES) $(TEST_FILES)
 	cd ..\win32
 
 test_porting : test-prep
 	cd ..\t
-	perl.exe harness $(TEST_SWITCHES) porting\*.t ..\lib\diagnostics.t
+	perl.exe harness $(TEST_ARGS) $(TEST_SWITCHES) porting\*.t ..\lib\diagnostics.t
 	cd ..\win32
 
 test-reonly : reonly utils
@@ -1349,7 +1349,7 @@ regen :
 test-notty : test-prep
 	set PERL_SKIP_TTY_TEST=1
 	cd ..\t
-	perl.exe harness $(TEST_SWITCHES) $(TEST_FILES)
+	perl.exe harness $(TEST_ARGS) $(TEST_SWITCHES) $(TEST_FILES)
 	cd ..\win32
 
 _test : 
@@ -1357,7 +1357,7 @@ _test :
        $(XCOPY) $(PERLDLL) ..\t\$(NULL)
        $(XCOPY) $(GLOBEXE) ..\t\$(NULL)
        cd ..\t
-       perl.exe harness $(TEST_SWITCHES) $(TEST_FILES)
+       perl.exe harness $(TEST_ARGS) $(TEST_SWITCHES) $(TEST_FILES)
        cd ..\win32
 
 _clean :
