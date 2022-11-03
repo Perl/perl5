@@ -1819,11 +1819,11 @@ endif
 
 test : test-prep
 	set PERL_STATIC_EXT=$(STATIC_EXT) && \
-	    cd ..\t && perl.exe harness $(TEST_SWITCHES) $(TEST_FILES)
+	    cd ..\t && perl.exe harness $(TEST_ARGS) $(TEST_SWITCHES) $(TEST_FILES)
 
 test_porting : test-prep
 	set PERL_STATIC_EXT=$(STATIC_EXT) && \
-	    cd ..\t && perl.exe harness $(TEST_SWITCHES) porting\*.t ..\lib\diagnostics.t
+	    cd ..\t && perl.exe harness $(TEST_ARGS) $(TEST_SWITCHES) porting\*.t ..\lib\diagnostics.t
 
 test-reonly : reonly utils
 	$(XCOPY) $(PERLEXE) ..\t\$(NULL)
@@ -1837,14 +1837,14 @@ regen :
 test-notty : test-prep
 	set PERL_STATIC_EXT=$(STATIC_EXT) && \
 	    set PERL_SKIP_TTY_TEST=1 && \
-	    cd ..\t && perl.exe harness $(TEST_SWITCHES) $(TEST_FILES)
+	    cd ..\t && perl.exe harness $(TEST_ARGS) $(TEST_SWITCHES) $(TEST_FILES)
 
 _test :
 	$(XCOPY) $(PERLEXE) ..\t\$(NULL)
 	$(XCOPY) $(PERLDLL) ..\t\$(NULL)
 	$(XCOPY) $(GLOBEXE) ..\t\$(NULL)
 	set PERL_STATIC_EXT=$(STATIC_EXT) && \
-	    cd ..\t && perl.exe harness $(TEST_SWITCHES) $(TEST_FILES)
+	    cd ..\t && perl.exe harness $(TEST_ARGS) $(TEST_SWITCHES) $(TEST_FILES)
 
 _clean :
 	-@erase miniperlmain$(o)
