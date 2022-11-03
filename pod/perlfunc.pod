@@ -4584,7 +4584,7 @@ Reading from a file:
         or die "Can't open < input.txt: $!";
 
     # Process every line in input.txt
-    while (my $line = <$fh>) {
+    while (my $line = readline($fh)) {
         #
         # ... do something interesting with $line here ...
         #
