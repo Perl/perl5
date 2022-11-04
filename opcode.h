@@ -145,2136 +145,2118 @@
 
 START_EXTERN_C
 
-#ifndef DOINIT
-EXTCONST char* const PL_op_name[];
-#else
-EXTCONST char* const PL_op_name[] = {
-	"null",
-	"stub",
-	"scalar",
-	"pushmark",
-	"wantarray",
-	"const",
-	"gvsv",
-	"gv",
-	"gelem",
-	"padsv",
-	"padsv_store",
-	"padav",
-	"padhv",
-	"padany",
-	"rv2gv",
-	"rv2sv",
-	"av2arylen",
-	"rv2cv",
-	"anoncode",
-	"prototype",
-	"refgen",
-	"srefgen",
-	"ref",
-	"bless",
-	"backtick",
-	"glob",
-	"readline",
-	"rcatline",
-	"regcmaybe",
-	"regcreset",
-	"regcomp",
-	"match",
-	"qr",
-	"subst",
-	"substcont",
-	"trans",
-	"transr",
-	"sassign",
-	"aassign",
-	"chop",
-	"schop",
-	"chomp",
-	"schomp",
-	"defined",
-	"undef",
-	"study",
-	"pos",
-	"preinc",
-	"i_preinc",
-	"predec",
-	"i_predec",
-	"postinc",
-	"i_postinc",
-	"postdec",
-	"i_postdec",
-	"pow",
-	"multiply",
-	"i_multiply",
-	"divide",
-	"i_divide",
-	"modulo",
-	"i_modulo",
-	"repeat",
-	"add",
-	"i_add",
-	"subtract",
-	"i_subtract",
-	"concat",
-	"multiconcat",
-	"stringify",
-	"left_shift",
-	"right_shift",
-	"lt",
-	"i_lt",
-	"gt",
-	"i_gt",
-	"le",
-	"i_le",
-	"ge",
-	"i_ge",
-	"eq",
-	"i_eq",
-	"ne",
-	"i_ne",
-	"ncmp",
-	"i_ncmp",
-	"slt",
-	"sgt",
-	"sle",
-	"sge",
-	"seq",
-	"sne",
-	"scmp",
-	"bit_and",
-	"bit_xor",
-	"bit_or",
-	"nbit_and",
-	"nbit_xor",
-	"nbit_or",
-	"sbit_and",
-	"sbit_xor",
-	"sbit_or",
-	"negate",
-	"i_negate",
-	"not",
-	"complement",
-	"ncomplement",
-	"scomplement",
-	"smartmatch",
-	"atan2",
-	"sin",
-	"cos",
-	"rand",
-	"srand",
-	"exp",
-	"log",
-	"sqrt",
-	"int",
-	"hex",
-	"oct",
-	"abs",
-	"length",
-	"substr",
-	"vec",
-	"index",
-	"rindex",
-	"sprintf",
-	"formline",
-	"ord",
-	"chr",
-	"crypt",
-	"ucfirst",
-	"lcfirst",
-	"uc",
-	"lc",
-	"quotemeta",
-	"rv2av",
-	"aelemfast",
-	"aelemfast_lex",
-	"aelemfastlex_store",
-	"aelem",
-	"aslice",
-	"kvaslice",
-	"aeach",
-	"avalues",
-	"akeys",
-	"each",
-	"values",
-	"keys",
-	"delete",
-	"exists",
-	"rv2hv",
-	"helem",
-	"hslice",
-	"kvhslice",
-	"multideref",
-	"unpack",
-	"pack",
-	"split",
-	"join",
-	"list",
-	"lslice",
-	"anonlist",
-	"anonhash",
-	"emptyavhv",
-	"splice",
-	"push",
-	"pop",
-	"shift",
-	"unshift",
-	"sort",
-	"reverse",
-	"grepstart",
-	"grepwhile",
-	"mapstart",
-	"mapwhile",
-	"range",
-	"flip",
-	"flop",
-	"and",
-	"or",
-	"xor",
-	"dor",
-	"cond_expr",
-	"andassign",
-	"orassign",
-	"dorassign",
-	"entersub",
-	"leavesub",
-	"leavesublv",
-	"argcheck",
-	"argelem",
-	"argdefelem",
-	"caller",
-	"warn",
-	"die",
-	"reset",
-	"lineseq",
-	"nextstate",
-	"dbstate",
-	"unstack",
-	"enter",
-	"leave",
-	"scope",
-	"enteriter",
-	"iter",
-	"enterloop",
-	"leaveloop",
-	"return",
-	"last",
-	"next",
-	"redo",
-	"dump",
-	"goto",
-	"exit",
-	"method",
-	"method_named",
-	"method_super",
-	"method_redir",
-	"method_redir_super",
-	"entergiven",
-	"leavegiven",
-	"enterwhen",
-	"leavewhen",
-	"break",
-	"continue",
-	"open",
-	"close",
-	"pipe_op",
-	"fileno",
-	"umask",
-	"binmode",
-	"tie",
-	"untie",
-	"tied",
-	"dbmopen",
-	"dbmclose",
-	"sselect",
-	"select",
-	"getc",
-	"read",
-	"enterwrite",
-	"leavewrite",
-	"prtf",
-	"print",
-	"say",
-	"sysopen",
-	"sysseek",
-	"sysread",
-	"syswrite",
-	"eof",
-	"tell",
-	"seek",
-	"truncate",
-	"fcntl",
-	"ioctl",
-	"flock",
-	"send",
-	"recv",
-	"socket",
-	"sockpair",
-	"bind",
-	"connect",
-	"listen",
-	"accept",
-	"shutdown",
-	"gsockopt",
-	"ssockopt",
-	"getsockname",
-	"getpeername",
-	"lstat",
-	"stat",
-	"ftrread",
-	"ftrwrite",
-	"ftrexec",
-	"fteread",
-	"ftewrite",
-	"fteexec",
-	"ftis",
-	"ftsize",
-	"ftmtime",
-	"ftatime",
-	"ftctime",
-	"ftrowned",
-	"fteowned",
-	"ftzero",
-	"ftsock",
-	"ftchr",
-	"ftblk",
-	"ftfile",
-	"ftdir",
-	"ftpipe",
-	"ftsuid",
-	"ftsgid",
-	"ftsvtx",
-	"ftlink",
-	"fttty",
-	"fttext",
-	"ftbinary",
-	"chdir",
-	"chown",
-	"chroot",
-	"unlink",
-	"chmod",
-	"utime",
-	"rename",
-	"link",
-	"symlink",
-	"readlink",
-	"mkdir",
-	"rmdir",
-	"open_dir",
-	"readdir",
-	"telldir",
-	"seekdir",
-	"rewinddir",
-	"closedir",
-	"fork",
-	"wait",
-	"waitpid",
-	"system",
-	"exec",
-	"kill",
-	"getppid",
-	"getpgrp",
-	"setpgrp",
-	"getpriority",
-	"setpriority",
-	"time",
-	"tms",
-	"localtime",
-	"gmtime",
-	"alarm",
-	"sleep",
-	"shmget",
-	"shmctl",
-	"shmread",
-	"shmwrite",
-	"msgget",
-	"msgctl",
-	"msgsnd",
-	"msgrcv",
-	"semop",
-	"semget",
-	"semctl",
-	"require",
-	"dofile",
-	"hintseval",
-	"entereval",
-	"leaveeval",
-	"entertry",
-	"leavetry",
-	"ghbyname",
-	"ghbyaddr",
-	"ghostent",
-	"gnbyname",
-	"gnbyaddr",
-	"gnetent",
-	"gpbyname",
-	"gpbynumber",
-	"gprotoent",
-	"gsbyname",
-	"gsbyport",
-	"gservent",
-	"shostent",
-	"snetent",
-	"sprotoent",
-	"sservent",
-	"ehostent",
-	"enetent",
-	"eprotoent",
-	"eservent",
-	"gpwnam",
-	"gpwuid",
-	"gpwent",
-	"spwent",
-	"epwent",
-	"ggrnam",
-	"ggrgid",
-	"ggrent",
-	"sgrent",
-	"egrent",
-	"getlogin",
-	"syscall",
-	"lock",
-	"once",
-	"custom",
-	"coreargs",
-	"avhvswitch",
-	"runcv",
-	"fc",
-	"padcv",
-	"introcv",
-	"clonecv",
-	"padrange",
-	"refassign",
-	"lvref",
-	"lvrefslice",
-	"lvavref",
-	"anonconst",
-	"isa",
-	"cmpchain_and",
-	"cmpchain_dup",
-	"entertrycatch",
-	"leavetrycatch",
-	"poptry",
-	"catch",
-	"pushdefer",
-	"is_bool",
-	"is_weak",
-	"weaken",
-	"unweaken",
-	"blessed",
-	"refaddr",
-	"reftype",
-	"ceil",
-	"floor",
-	"is_tainted",
-        "freed",
-};
-#endif
+EXTCONST char* const PL_op_name[] INIT({
+	[OP_NULL]               = "null",
+	[OP_STUB]               = "stub",
+	[OP_SCALAR]             = "scalar",
+	[OP_PUSHMARK]           = "pushmark",
+	[OP_WANTARRAY]          = "wantarray",
+	[OP_CONST]              = "const",
+	[OP_GVSV]               = "gvsv",
+	[OP_GV]                 = "gv",
+	[OP_GELEM]              = "gelem",
+	[OP_PADSV]              = "padsv",
+	[OP_PADSV_STORE]        = "padsv_store",
+	[OP_PADAV]              = "padav",
+	[OP_PADHV]              = "padhv",
+	[OP_PADANY]             = "padany",
+	[OP_RV2GV]              = "rv2gv",
+	[OP_RV2SV]              = "rv2sv",
+	[OP_AV2ARYLEN]          = "av2arylen",
+	[OP_RV2CV]              = "rv2cv",
+	[OP_ANONCODE]           = "anoncode",
+	[OP_PROTOTYPE]          = "prototype",
+	[OP_REFGEN]             = "refgen",
+	[OP_SREFGEN]            = "srefgen",
+	[OP_REF]                = "ref",
+	[OP_BLESS]              = "bless",
+	[OP_BACKTICK]           = "backtick",
+	[OP_GLOB]               = "glob",
+	[OP_READLINE]           = "readline",
+	[OP_RCATLINE]           = "rcatline",
+	[OP_REGCMAYBE]          = "regcmaybe",
+	[OP_REGCRESET]          = "regcreset",
+	[OP_REGCOMP]            = "regcomp",
+	[OP_MATCH]              = "match",
+	[OP_QR]                 = "qr",
+	[OP_SUBST]              = "subst",
+	[OP_SUBSTCONT]          = "substcont",
+	[OP_TRANS]              = "trans",
+	[OP_TRANSR]             = "transr",
+	[OP_SASSIGN]            = "sassign",
+	[OP_AASSIGN]            = "aassign",
+	[OP_CHOP]               = "chop",
+	[OP_SCHOP]              = "schop",
+	[OP_CHOMP]              = "chomp",
+	[OP_SCHOMP]             = "schomp",
+	[OP_DEFINED]            = "defined",
+	[OP_UNDEF]              = "undef",
+	[OP_STUDY]              = "study",
+	[OP_POS]                = "pos",
+	[OP_PREINC]             = "preinc",
+	[OP_I_PREINC]           = "i_preinc",
+	[OP_PREDEC]             = "predec",
+	[OP_I_PREDEC]           = "i_predec",
+	[OP_POSTINC]            = "postinc",
+	[OP_I_POSTINC]          = "i_postinc",
+	[OP_POSTDEC]            = "postdec",
+	[OP_I_POSTDEC]          = "i_postdec",
+	[OP_POW]                = "pow",
+	[OP_MULTIPLY]           = "multiply",
+	[OP_I_MULTIPLY]         = "i_multiply",
+	[OP_DIVIDE]             = "divide",
+	[OP_I_DIVIDE]           = "i_divide",
+	[OP_MODULO]             = "modulo",
+	[OP_I_MODULO]           = "i_modulo",
+	[OP_REPEAT]             = "repeat",
+	[OP_ADD]                = "add",
+	[OP_I_ADD]              = "i_add",
+	[OP_SUBTRACT]           = "subtract",
+	[OP_I_SUBTRACT]         = "i_subtract",
+	[OP_CONCAT]             = "concat",
+	[OP_MULTICONCAT]        = "multiconcat",
+	[OP_STRINGIFY]          = "stringify",
+	[OP_LEFT_SHIFT]         = "left_shift",
+	[OP_RIGHT_SHIFT]        = "right_shift",
+	[OP_LT]                 = "lt",
+	[OP_I_LT]               = "i_lt",
+	[OP_GT]                 = "gt",
+	[OP_I_GT]               = "i_gt",
+	[OP_LE]                 = "le",
+	[OP_I_LE]               = "i_le",
+	[OP_GE]                 = "ge",
+	[OP_I_GE]               = "i_ge",
+	[OP_EQ]                 = "eq",
+	[OP_I_EQ]               = "i_eq",
+	[OP_NE]                 = "ne",
+	[OP_I_NE]               = "i_ne",
+	[OP_NCMP]               = "ncmp",
+	[OP_I_NCMP]             = "i_ncmp",
+	[OP_SLT]                = "slt",
+	[OP_SGT]                = "sgt",
+	[OP_SLE]                = "sle",
+	[OP_SGE]                = "sge",
+	[OP_SEQ]                = "seq",
+	[OP_SNE]                = "sne",
+	[OP_SCMP]               = "scmp",
+	[OP_BIT_AND]            = "bit_and",
+	[OP_BIT_XOR]            = "bit_xor",
+	[OP_BIT_OR]             = "bit_or",
+	[OP_NBIT_AND]           = "nbit_and",
+	[OP_NBIT_XOR]           = "nbit_xor",
+	[OP_NBIT_OR]            = "nbit_or",
+	[OP_SBIT_AND]           = "sbit_and",
+	[OP_SBIT_XOR]           = "sbit_xor",
+	[OP_SBIT_OR]            = "sbit_or",
+	[OP_NEGATE]             = "negate",
+	[OP_I_NEGATE]           = "i_negate",
+	[OP_NOT]                = "not",
+	[OP_COMPLEMENT]         = "complement",
+	[OP_NCOMPLEMENT]        = "ncomplement",
+	[OP_SCOMPLEMENT]        = "scomplement",
+	[OP_SMARTMATCH]         = "smartmatch",
+	[OP_ATAN2]              = "atan2",
+	[OP_SIN]                = "sin",
+	[OP_COS]                = "cos",
+	[OP_RAND]               = "rand",
+	[OP_SRAND]              = "srand",
+	[OP_EXP]                = "exp",
+	[OP_LOG]                = "log",
+	[OP_SQRT]               = "sqrt",
+	[OP_INT]                = "int",
+	[OP_HEX]                = "hex",
+	[OP_OCT]                = "oct",
+	[OP_ABS]                = "abs",
+	[OP_LENGTH]             = "length",
+	[OP_SUBSTR]             = "substr",
+	[OP_VEC]                = "vec",
+	[OP_INDEX]              = "index",
+	[OP_RINDEX]             = "rindex",
+	[OP_SPRINTF]            = "sprintf",
+	[OP_FORMLINE]           = "formline",
+	[OP_ORD]                = "ord",
+	[OP_CHR]                = "chr",
+	[OP_CRYPT]              = "crypt",
+	[OP_UCFIRST]            = "ucfirst",
+	[OP_LCFIRST]            = "lcfirst",
+	[OP_UC]                 = "uc",
+	[OP_LC]                 = "lc",
+	[OP_QUOTEMETA]          = "quotemeta",
+	[OP_RV2AV]              = "rv2av",
+	[OP_AELEMFAST]          = "aelemfast",
+	[OP_AELEMFAST_LEX]      = "aelemfast_lex",
+	[OP_AELEMFASTLEX_STORE] = "aelemfastlex_store",
+	[OP_AELEM]              = "aelem",
+	[OP_ASLICE]             = "aslice",
+	[OP_KVASLICE]           = "kvaslice",
+	[OP_AEACH]              = "aeach",
+	[OP_AVALUES]            = "avalues",
+	[OP_AKEYS]              = "akeys",
+	[OP_EACH]               = "each",
+	[OP_VALUES]             = "values",
+	[OP_KEYS]               = "keys",
+	[OP_DELETE]             = "delete",
+	[OP_EXISTS]             = "exists",
+	[OP_RV2HV]              = "rv2hv",
+	[OP_HELEM]              = "helem",
+	[OP_HSLICE]             = "hslice",
+	[OP_KVHSLICE]           = "kvhslice",
+	[OP_MULTIDEREF]         = "multideref",
+	[OP_UNPACK]             = "unpack",
+	[OP_PACK]               = "pack",
+	[OP_SPLIT]              = "split",
+	[OP_JOIN]               = "join",
+	[OP_LIST]               = "list",
+	[OP_LSLICE]             = "lslice",
+	[OP_ANONLIST]           = "anonlist",
+	[OP_ANONHASH]           = "anonhash",
+	[OP_EMPTYAVHV]          = "emptyavhv",
+	[OP_SPLICE]             = "splice",
+	[OP_PUSH]               = "push",
+	[OP_POP]                = "pop",
+	[OP_SHIFT]              = "shift",
+	[OP_UNSHIFT]            = "unshift",
+	[OP_SORT]               = "sort",
+	[OP_REVERSE]            = "reverse",
+	[OP_GREPSTART]          = "grepstart",
+	[OP_GREPWHILE]          = "grepwhile",
+	[OP_MAPSTART]           = "mapstart",
+	[OP_MAPWHILE]           = "mapwhile",
+	[OP_RANGE]              = "range",
+	[OP_FLIP]               = "flip",
+	[OP_FLOP]               = "flop",
+	[OP_AND]                = "and",
+	[OP_OR]                 = "or",
+	[OP_XOR]                = "xor",
+	[OP_DOR]                = "dor",
+	[OP_COND_EXPR]          = "cond_expr",
+	[OP_ANDASSIGN]          = "andassign",
+	[OP_ORASSIGN]           = "orassign",
+	[OP_DORASSIGN]          = "dorassign",
+	[OP_ENTERSUB]           = "entersub",
+	[OP_LEAVESUB]           = "leavesub",
+	[OP_LEAVESUBLV]         = "leavesublv",
+	[OP_ARGCHECK]           = "argcheck",
+	[OP_ARGELEM]            = "argelem",
+	[OP_ARGDEFELEM]         = "argdefelem",
+	[OP_CALLER]             = "caller",
+	[OP_WARN]               = "warn",
+	[OP_DIE]                = "die",
+	[OP_RESET]              = "reset",
+	[OP_LINESEQ]            = "lineseq",
+	[OP_NEXTSTATE]          = "nextstate",
+	[OP_DBSTATE]            = "dbstate",
+	[OP_UNSTACK]            = "unstack",
+	[OP_ENTER]              = "enter",
+	[OP_LEAVE]              = "leave",
+	[OP_SCOPE]              = "scope",
+	[OP_ENTERITER]          = "enteriter",
+	[OP_ITER]               = "iter",
+	[OP_ENTERLOOP]          = "enterloop",
+	[OP_LEAVELOOP]          = "leaveloop",
+	[OP_RETURN]             = "return",
+	[OP_LAST]               = "last",
+	[OP_NEXT]               = "next",
+	[OP_REDO]               = "redo",
+	[OP_DUMP]               = "dump",
+	[OP_GOTO]               = "goto",
+	[OP_EXIT]               = "exit",
+	[OP_METHOD]             = "method",
+	[OP_METHOD_NAMED]       = "method_named",
+	[OP_METHOD_SUPER]       = "method_super",
+	[OP_METHOD_REDIR]       = "method_redir",
+	[OP_METHOD_REDIR_SUPER] = "method_redir_super",
+	[OP_ENTERGIVEN]         = "entergiven",
+	[OP_LEAVEGIVEN]         = "leavegiven",
+	[OP_ENTERWHEN]          = "enterwhen",
+	[OP_LEAVEWHEN]          = "leavewhen",
+	[OP_BREAK]              = "break",
+	[OP_CONTINUE]           = "continue",
+	[OP_OPEN]               = "open",
+	[OP_CLOSE]              = "close",
+	[OP_PIPE_OP]            = "pipe_op",
+	[OP_FILENO]             = "fileno",
+	[OP_UMASK]              = "umask",
+	[OP_BINMODE]            = "binmode",
+	[OP_TIE]                = "tie",
+	[OP_UNTIE]              = "untie",
+	[OP_TIED]               = "tied",
+	[OP_DBMOPEN]            = "dbmopen",
+	[OP_DBMCLOSE]           = "dbmclose",
+	[OP_SSELECT]            = "sselect",
+	[OP_SELECT]             = "select",
+	[OP_GETC]               = "getc",
+	[OP_READ]               = "read",
+	[OP_ENTERWRITE]         = "enterwrite",
+	[OP_LEAVEWRITE]         = "leavewrite",
+	[OP_PRTF]               = "prtf",
+	[OP_PRINT]              = "print",
+	[OP_SAY]                = "say",
+	[OP_SYSOPEN]            = "sysopen",
+	[OP_SYSSEEK]            = "sysseek",
+	[OP_SYSREAD]            = "sysread",
+	[OP_SYSWRITE]           = "syswrite",
+	[OP_EOF]                = "eof",
+	[OP_TELL]               = "tell",
+	[OP_SEEK]               = "seek",
+	[OP_TRUNCATE]           = "truncate",
+	[OP_FCNTL]              = "fcntl",
+	[OP_IOCTL]              = "ioctl",
+	[OP_FLOCK]              = "flock",
+	[OP_SEND]               = "send",
+	[OP_RECV]               = "recv",
+	[OP_SOCKET]             = "socket",
+	[OP_SOCKPAIR]           = "sockpair",
+	[OP_BIND]               = "bind",
+	[OP_CONNECT]            = "connect",
+	[OP_LISTEN]             = "listen",
+	[OP_ACCEPT]             = "accept",
+	[OP_SHUTDOWN]           = "shutdown",
+	[OP_GSOCKOPT]           = "gsockopt",
+	[OP_SSOCKOPT]           = "ssockopt",
+	[OP_GETSOCKNAME]        = "getsockname",
+	[OP_GETPEERNAME]        = "getpeername",
+	[OP_LSTAT]              = "lstat",
+	[OP_STAT]               = "stat",
+	[OP_FTRREAD]            = "ftrread",
+	[OP_FTRWRITE]           = "ftrwrite",
+	[OP_FTREXEC]            = "ftrexec",
+	[OP_FTEREAD]            = "fteread",
+	[OP_FTEWRITE]           = "ftewrite",
+	[OP_FTEEXEC]            = "fteexec",
+	[OP_FTIS]               = "ftis",
+	[OP_FTSIZE]             = "ftsize",
+	[OP_FTMTIME]            = "ftmtime",
+	[OP_FTATIME]            = "ftatime",
+	[OP_FTCTIME]            = "ftctime",
+	[OP_FTROWNED]           = "ftrowned",
+	[OP_FTEOWNED]           = "fteowned",
+	[OP_FTZERO]             = "ftzero",
+	[OP_FTSOCK]             = "ftsock",
+	[OP_FTCHR]              = "ftchr",
+	[OP_FTBLK]              = "ftblk",
+	[OP_FTFILE]             = "ftfile",
+	[OP_FTDIR]              = "ftdir",
+	[OP_FTPIPE]             = "ftpipe",
+	[OP_FTSUID]             = "ftsuid",
+	[OP_FTSGID]             = "ftsgid",
+	[OP_FTSVTX]             = "ftsvtx",
+	[OP_FTLINK]             = "ftlink",
+	[OP_FTTTY]              = "fttty",
+	[OP_FTTEXT]             = "fttext",
+	[OP_FTBINARY]           = "ftbinary",
+	[OP_CHDIR]              = "chdir",
+	[OP_CHOWN]              = "chown",
+	[OP_CHROOT]             = "chroot",
+	[OP_UNLINK]             = "unlink",
+	[OP_CHMOD]              = "chmod",
+	[OP_UTIME]              = "utime",
+	[OP_RENAME]             = "rename",
+	[OP_LINK]               = "link",
+	[OP_SYMLINK]            = "symlink",
+	[OP_READLINK]           = "readlink",
+	[OP_MKDIR]              = "mkdir",
+	[OP_RMDIR]              = "rmdir",
+	[OP_OPEN_DIR]           = "open_dir",
+	[OP_READDIR]            = "readdir",
+	[OP_TELLDIR]            = "telldir",
+	[OP_SEEKDIR]            = "seekdir",
+	[OP_REWINDDIR]          = "rewinddir",
+	[OP_CLOSEDIR]           = "closedir",
+	[OP_FORK]               = "fork",
+	[OP_WAIT]               = "wait",
+	[OP_WAITPID]            = "waitpid",
+	[OP_SYSTEM]             = "system",
+	[OP_EXEC]               = "exec",
+	[OP_KILL]               = "kill",
+	[OP_GETPPID]            = "getppid",
+	[OP_GETPGRP]            = "getpgrp",
+	[OP_SETPGRP]            = "setpgrp",
+	[OP_GETPRIORITY]        = "getpriority",
+	[OP_SETPRIORITY]        = "setpriority",
+	[OP_TIME]               = "time",
+	[OP_TMS]                = "tms",
+	[OP_LOCALTIME]          = "localtime",
+	[OP_GMTIME]             = "gmtime",
+	[OP_ALARM]              = "alarm",
+	[OP_SLEEP]              = "sleep",
+	[OP_SHMGET]             = "shmget",
+	[OP_SHMCTL]             = "shmctl",
+	[OP_SHMREAD]            = "shmread",
+	[OP_SHMWRITE]           = "shmwrite",
+	[OP_MSGGET]             = "msgget",
+	[OP_MSGCTL]             = "msgctl",
+	[OP_MSGSND]             = "msgsnd",
+	[OP_MSGRCV]             = "msgrcv",
+	[OP_SEMOP]              = "semop",
+	[OP_SEMGET]             = "semget",
+	[OP_SEMCTL]             = "semctl",
+	[OP_REQUIRE]            = "require",
+	[OP_DOFILE]             = "dofile",
+	[OP_HINTSEVAL]          = "hintseval",
+	[OP_ENTEREVAL]          = "entereval",
+	[OP_LEAVEEVAL]          = "leaveeval",
+	[OP_ENTERTRY]           = "entertry",
+	[OP_LEAVETRY]           = "leavetry",
+	[OP_GHBYNAME]           = "ghbyname",
+	[OP_GHBYADDR]           = "ghbyaddr",
+	[OP_GHOSTENT]           = "ghostent",
+	[OP_GNBYNAME]           = "gnbyname",
+	[OP_GNBYADDR]           = "gnbyaddr",
+	[OP_GNETENT]            = "gnetent",
+	[OP_GPBYNAME]           = "gpbyname",
+	[OP_GPBYNUMBER]         = "gpbynumber",
+	[OP_GPROTOENT]          = "gprotoent",
+	[OP_GSBYNAME]           = "gsbyname",
+	[OP_GSBYPORT]           = "gsbyport",
+	[OP_GSERVENT]           = "gservent",
+	[OP_SHOSTENT]           = "shostent",
+	[OP_SNETENT]            = "snetent",
+	[OP_SPROTOENT]          = "sprotoent",
+	[OP_SSERVENT]           = "sservent",
+	[OP_EHOSTENT]           = "ehostent",
+	[OP_ENETENT]            = "enetent",
+	[OP_EPROTOENT]          = "eprotoent",
+	[OP_ESERVENT]           = "eservent",
+	[OP_GPWNAM]             = "gpwnam",
+	[OP_GPWUID]             = "gpwuid",
+	[OP_GPWENT]             = "gpwent",
+	[OP_SPWENT]             = "spwent",
+	[OP_EPWENT]             = "epwent",
+	[OP_GGRNAM]             = "ggrnam",
+	[OP_GGRGID]             = "ggrgid",
+	[OP_GGRENT]             = "ggrent",
+	[OP_SGRENT]             = "sgrent",
+	[OP_EGRENT]             = "egrent",
+	[OP_GETLOGIN]           = "getlogin",
+	[OP_SYSCALL]            = "syscall",
+	[OP_LOCK]               = "lock",
+	[OP_ONCE]               = "once",
+	[OP_CUSTOM]             = "custom",
+	[OP_COREARGS]           = "coreargs",
+	[OP_AVHVSWITCH]         = "avhvswitch",
+	[OP_RUNCV]              = "runcv",
+	[OP_FC]                 = "fc",
+	[OP_PADCV]              = "padcv",
+	[OP_INTROCV]            = "introcv",
+	[OP_CLONECV]            = "clonecv",
+	[OP_PADRANGE]           = "padrange",
+	[OP_REFASSIGN]          = "refassign",
+	[OP_LVREF]              = "lvref",
+	[OP_LVREFSLICE]         = "lvrefslice",
+	[OP_LVAVREF]            = "lvavref",
+	[OP_ANONCONST]          = "anonconst",
+	[OP_ISA]                = "isa",
+	[OP_CMPCHAIN_AND]       = "cmpchain_and",
+	[OP_CMPCHAIN_DUP]       = "cmpchain_dup",
+	[OP_ENTERTRYCATCH]      = "entertrycatch",
+	[OP_LEAVETRYCATCH]      = "leavetrycatch",
+	[OP_POPTRY]             = "poptry",
+	[OP_CATCH]              = "catch",
+	[OP_PUSHDEFER]          = "pushdefer",
+	[OP_IS_BOOL]            = "is_bool",
+	[OP_IS_WEAK]            = "is_weak",
+	[OP_WEAKEN]             = "weaken",
+	[OP_UNWEAKEN]           = "unweaken",
+	[OP_BLESSED]            = "blessed",
+	[OP_REFADDR]            = "refaddr",
+	[OP_REFTYPE]            = "reftype",
+	[OP_CEIL]               = "ceil",
+	[OP_FLOOR]              = "floor",
+	[OP_IS_TAINTED]         = "is_tainted",
+    [OP_max] = "freed",
+});
 
-#ifndef DOINIT
-EXTCONST char* const PL_op_desc[];
-#else
-EXTCONST char* const PL_op_desc[] = {
-	"null operation",
-	"stub",
-	"scalar",
-	"pushmark",
-	"wantarray",
-	"constant item",
-	"scalar variable",
-	"glob value",
-	"glob elem",
-	"private variable",
-	"padsv scalar assignment",
-	"private array",
-	"private hash",
-	"private value",
-	"ref-to-glob cast",
-	"scalar dereference",
-	"array length",
-	"subroutine dereference",
-	"anonymous subroutine",
-	"subroutine prototype",
-	"reference constructor",
-	"single ref constructor",
-	"reference-type operator",
-	"bless",
-	"quoted execution (``, qx)",
-	"glob",
-	"<HANDLE>",
-	"append I/O operator",
-	"regexp internal guard",
-	"regexp internal reset",
-	"regexp compilation",
-	"pattern match (m//)",
-	"pattern quote (qr//)",
-	"substitution (s///)",
-	"substitution iterator",
-	"transliteration (tr///)",
-	"transliteration (tr///)",
-	"scalar assignment",
-	"list assignment",
-	"chop",
-	"scalar chop",
-	"chomp",
-	"scalar chomp",
-	"defined operator",
-	"undef operator",
-	"study",
-	"match position",
-	"preincrement (++)",
-	"integer preincrement (++)",
-	"predecrement (--)",
-	"integer predecrement (--)",
-	"postincrement (++)",
-	"integer postincrement (++)",
-	"postdecrement (--)",
-	"integer postdecrement (--)",
-	"exponentiation (**)",
-	"multiplication (*)",
-	"integer multiplication (*)",
-	"division (/)",
-	"integer division (/)",
-	"modulus (%)",
-	"integer modulus (%)",
-	"repeat (x)",
-	"addition (+)",
-	"integer addition (+)",
-	"subtraction (-)",
-	"integer subtraction (-)",
-	"concatenation (.) or string",
-	"concatenation (.) or string",
-	"string",
-	"left bitshift (<<)",
-	"right bitshift (>>)",
-	"numeric lt (<)",
-	"integer lt (<)",
-	"numeric gt (>)",
-	"integer gt (>)",
-	"numeric le (<=)",
-	"integer le (<=)",
-	"numeric ge (>=)",
-	"integer ge (>=)",
-	"numeric eq (==)",
-	"integer eq (==)",
-	"numeric ne (!=)",
-	"integer ne (!=)",
-	"numeric comparison (<=>)",
-	"integer comparison (<=>)",
-	"string lt",
-	"string gt",
-	"string le",
-	"string ge",
-	"string eq",
-	"string ne",
-	"string comparison (cmp)",
-	"bitwise and (&)",
-	"bitwise xor (^)",
-	"bitwise or (|)",
-	"numeric bitwise and (&)",
-	"numeric bitwise xor (^)",
-	"numeric bitwise or (|)",
-	"string bitwise and (&.)",
-	"string bitwise xor (^.)",
-	"string bitwise or (|.)",
-	"negation (-)",
-	"integer negation (-)",
-	"not",
-	"1's complement (~)",
-	"numeric 1's complement (~)",
-	"string 1's complement (~)",
-	"smart match",
-	"atan2",
-	"sin",
-	"cos",
-	"rand",
-	"srand",
-	"exp",
-	"log",
-	"sqrt",
-	"int",
-	"hex",
-	"oct",
-	"abs",
-	"length",
-	"substr",
-	"vec",
-	"index",
-	"rindex",
-	"sprintf",
-	"formline",
-	"ord",
-	"chr",
-	"crypt",
-	"ucfirst",
-	"lcfirst",
-	"uc",
-	"lc",
-	"quotemeta",
-	"array dereference",
-	"constant array element",
-	"constant lexical array element",
-	"const lexical array element store",
-	"array element",
-	"array slice",
-	"index/value array slice",
-	"each on array",
-	"values on array",
-	"keys on array",
-	"each",
-	"values",
-	"keys",
-	"delete",
-	"exists",
-	"hash dereference",
-	"hash element",
-	"hash slice",
-	"key/value hash slice",
-	"array or hash lookup",
-	"unpack",
-	"pack",
-	"split",
-	"join or string",
-	"list",
-	"list slice",
-	"anonymous array ([])",
-	"anonymous hash ({})",
-	"empty anon hash/array",
-	"splice",
-	"push",
-	"pop",
-	"shift",
-	"unshift",
-	"sort",
-	"reverse",
-	"grep",
-	"grep iterator",
-	"map",
-	"map iterator",
-	"flipflop",
-	"range (or flip)",
-	"range (or flop)",
-	"logical and (&&)",
-	"logical or (||)",
-	"logical xor",
-	"defined or (//)",
-	"conditional expression",
-	"logical and assignment (&&=)",
-	"logical or assignment (||=)",
-	"defined or assignment (//=)",
-	"subroutine entry",
-	"subroutine exit",
-	"lvalue subroutine return",
-	"check subroutine arguments",
-	"subroutine argument",
-	"subroutine argument default value",
-	"caller",
-	"warn",
-	"die",
-	"symbol reset",
-	"line sequence",
-	"next statement",
-	"debug next statement",
-	"iteration finalizer",
-	"block entry",
-	"block exit",
-	"block",
-	"foreach loop entry",
-	"foreach loop iterator",
-	"loop entry",
-	"loop exit",
-	"return",
-	"last",
-	"next",
-	"redo",
-	"dump",
-	"goto",
-	"exit",
-	"method lookup",
-	"method with known name",
-	"super with known name",
-	"redirect method with known name",
-	"redirect super method with known name",
-	"given()",
-	"leave given block",
-	"when()",
-	"leave when block",
-	"break",
-	"continue",
-	"open",
-	"close",
-	"pipe",
-	"fileno",
-	"umask",
-	"binmode",
-	"tie",
-	"untie",
-	"tied",
-	"dbmopen",
-	"dbmclose",
-	"select system call",
-	"select",
-	"getc",
-	"read",
-	"write",
-	"write exit",
-	"printf",
-	"print",
-	"say",
-	"sysopen",
-	"sysseek",
-	"sysread",
-	"syswrite",
-	"eof",
-	"tell",
-	"seek",
-	"truncate",
-	"fcntl",
-	"ioctl",
-	"flock",
-	"send",
-	"recv",
-	"socket",
-	"socketpair",
-	"bind",
-	"connect",
-	"listen",
-	"accept",
-	"shutdown",
-	"getsockopt",
-	"setsockopt",
-	"getsockname",
-	"getpeername",
-	"lstat",
-	"stat",
-	"-R",
-	"-W",
-	"-X",
-	"-r",
-	"-w",
-	"-x",
-	"-e",
-	"-s",
-	"-M",
-	"-A",
-	"-C",
-	"-O",
-	"-o",
-	"-z",
-	"-S",
-	"-c",
-	"-b",
-	"-f",
-	"-d",
-	"-p",
-	"-u",
-	"-g",
-	"-k",
-	"-l",
-	"-t",
-	"-T",
-	"-B",
-	"chdir",
-	"chown",
-	"chroot",
-	"unlink",
-	"chmod",
-	"utime",
-	"rename",
-	"link",
-	"symlink",
-	"readlink",
-	"mkdir",
-	"rmdir",
-	"opendir",
-	"readdir",
-	"telldir",
-	"seekdir",
-	"rewinddir",
-	"closedir",
-	"fork",
-	"wait",
-	"waitpid",
-	"system",
-	"exec",
-	"kill",
-	"getppid",
-	"getpgrp",
-	"setpgrp",
-	"getpriority",
-	"setpriority",
-	"time",
-	"times",
-	"localtime",
-	"gmtime",
-	"alarm",
-	"sleep",
-	"shmget",
-	"shmctl",
-	"shmread",
-	"shmwrite",
-	"msgget",
-	"msgctl",
-	"msgsnd",
-	"msgrcv",
-	"semop",
-	"semget",
-	"semctl",
-	"require",
-	"do \"file\"",
-	"eval hints",
-	"eval \"string\"",
-	"eval \"string\" exit",
-	"eval {block}",
-	"eval {block} exit",
-	"gethostbyname",
-	"gethostbyaddr",
-	"gethostent",
-	"getnetbyname",
-	"getnetbyaddr",
-	"getnetent",
-	"getprotobyname",
-	"getprotobynumber",
-	"getprotoent",
-	"getservbyname",
-	"getservbyport",
-	"getservent",
-	"sethostent",
-	"setnetent",
-	"setprotoent",
-	"setservent",
-	"endhostent",
-	"endnetent",
-	"endprotoent",
-	"endservent",
-	"getpwnam",
-	"getpwuid",
-	"getpwent",
-	"setpwent",
-	"endpwent",
-	"getgrnam",
-	"getgrgid",
-	"getgrent",
-	"setgrent",
-	"endgrent",
-	"getlogin",
-	"syscall",
-	"lock",
-	"once",
-	"unknown custom operator",
-	"CORE:: subroutine",
-	"Array/hash switch",
-	"__SUB__",
-	"fc",
-	"private subroutine",
-	"private subroutine",
-	"private subroutine",
-	"list of private variables",
-	"lvalue ref assignment",
-	"lvalue ref assignment",
-	"lvalue ref assignment",
-	"lvalue array reference",
-	"anonymous constant",
-	"derived class test",
-	"comparison chaining",
-	"comparand shuffling",
-	"try {block}",
-	"try {block} exit",
-	"pop try",
-	"catch {} block",
-	"push defer {} block",
-	"boolean type test",
-	"weakref type test",
-	"reference weaken",
-	"reference unweaken",
-	"blessed",
-	"refaddr",
-	"reftype",
-	"ceil",
-	"floor",
-	"is_tainted",
-        "freed op",
-};
-#endif
+EXTCONST char* const PL_op_desc[] INIT({
+	[OP_NULL]               = "null operation",
+	[OP_STUB]               = "stub",
+	[OP_SCALAR]             = "scalar",
+	[OP_PUSHMARK]           = "pushmark",
+	[OP_WANTARRAY]          = "wantarray",
+	[OP_CONST]              = "constant item",
+	[OP_GVSV]               = "scalar variable",
+	[OP_GV]                 = "glob value",
+	[OP_GELEM]              = "glob elem",
+	[OP_PADSV]              = "private variable",
+	[OP_PADSV_STORE]        = "padsv scalar assignment",
+	[OP_PADAV]              = "private array",
+	[OP_PADHV]              = "private hash",
+	[OP_PADANY]             = "private value",
+	[OP_RV2GV]              = "ref-to-glob cast",
+	[OP_RV2SV]              = "scalar dereference",
+	[OP_AV2ARYLEN]          = "array length",
+	[OP_RV2CV]              = "subroutine dereference",
+	[OP_ANONCODE]           = "anonymous subroutine",
+	[OP_PROTOTYPE]          = "subroutine prototype",
+	[OP_REFGEN]             = "reference constructor",
+	[OP_SREFGEN]            = "single ref constructor",
+	[OP_REF]                = "reference-type operator",
+	[OP_BLESS]              = "bless",
+	[OP_BACKTICK]           = "quoted execution (``, qx)",
+	[OP_GLOB]               = "glob",
+	[OP_READLINE]           = "<HANDLE>",
+	[OP_RCATLINE]           = "append I/O operator",
+	[OP_REGCMAYBE]          = "regexp internal guard",
+	[OP_REGCRESET]          = "regexp internal reset",
+	[OP_REGCOMP]            = "regexp compilation",
+	[OP_MATCH]              = "pattern match (m//)",
+	[OP_QR]                 = "pattern quote (qr//)",
+	[OP_SUBST]              = "substitution (s///)",
+	[OP_SUBSTCONT]          = "substitution iterator",
+	[OP_TRANS]              = "transliteration (tr///)",
+	[OP_TRANSR]             = "transliteration (tr///)",
+	[OP_SASSIGN]            = "scalar assignment",
+	[OP_AASSIGN]            = "list assignment",
+	[OP_CHOP]               = "chop",
+	[OP_SCHOP]              = "scalar chop",
+	[OP_CHOMP]              = "chomp",
+	[OP_SCHOMP]             = "scalar chomp",
+	[OP_DEFINED]            = "defined operator",
+	[OP_UNDEF]              = "undef operator",
+	[OP_STUDY]              = "study",
+	[OP_POS]                = "match position",
+	[OP_PREINC]             = "preincrement (++)",
+	[OP_I_PREINC]           = "integer preincrement (++)",
+	[OP_PREDEC]             = "predecrement (--)",
+	[OP_I_PREDEC]           = "integer predecrement (--)",
+	[OP_POSTINC]            = "postincrement (++)",
+	[OP_I_POSTINC]          = "integer postincrement (++)",
+	[OP_POSTDEC]            = "postdecrement (--)",
+	[OP_I_POSTDEC]          = "integer postdecrement (--)",
+	[OP_POW]                = "exponentiation (**)",
+	[OP_MULTIPLY]           = "multiplication (*)",
+	[OP_I_MULTIPLY]         = "integer multiplication (*)",
+	[OP_DIVIDE]             = "division (/)",
+	[OP_I_DIVIDE]           = "integer division (/)",
+	[OP_MODULO]             = "modulus (%)",
+	[OP_I_MODULO]           = "integer modulus (%)",
+	[OP_REPEAT]             = "repeat (x)",
+	[OP_ADD]                = "addition (+)",
+	[OP_I_ADD]              = "integer addition (+)",
+	[OP_SUBTRACT]           = "subtraction (-)",
+	[OP_I_SUBTRACT]         = "integer subtraction (-)",
+	[OP_CONCAT]             = "concatenation (.) or string",
+	[OP_MULTICONCAT]        = "concatenation (.) or string",
+	[OP_STRINGIFY]          = "string",
+	[OP_LEFT_SHIFT]         = "left bitshift (<<)",
+	[OP_RIGHT_SHIFT]        = "right bitshift (>>)",
+	[OP_LT]                 = "numeric lt (<)",
+	[OP_I_LT]               = "integer lt (<)",
+	[OP_GT]                 = "numeric gt (>)",
+	[OP_I_GT]               = "integer gt (>)",
+	[OP_LE]                 = "numeric le (<=)",
+	[OP_I_LE]               = "integer le (<=)",
+	[OP_GE]                 = "numeric ge (>=)",
+	[OP_I_GE]               = "integer ge (>=)",
+	[OP_EQ]                 = "numeric eq (==)",
+	[OP_I_EQ]               = "integer eq (==)",
+	[OP_NE]                 = "numeric ne (!=)",
+	[OP_I_NE]               = "integer ne (!=)",
+	[OP_NCMP]               = "numeric comparison (<=>)",
+	[OP_I_NCMP]             = "integer comparison (<=>)",
+	[OP_SLT]                = "string lt",
+	[OP_SGT]                = "string gt",
+	[OP_SLE]                = "string le",
+	[OP_SGE]                = "string ge",
+	[OP_SEQ]                = "string eq",
+	[OP_SNE]                = "string ne",
+	[OP_SCMP]               = "string comparison (cmp)",
+	[OP_BIT_AND]            = "bitwise and (&)",
+	[OP_BIT_XOR]            = "bitwise xor (^)",
+	[OP_BIT_OR]             = "bitwise or (|)",
+	[OP_NBIT_AND]           = "numeric bitwise and (&)",
+	[OP_NBIT_XOR]           = "numeric bitwise xor (^)",
+	[OP_NBIT_OR]            = "numeric bitwise or (|)",
+	[OP_SBIT_AND]           = "string bitwise and (&.)",
+	[OP_SBIT_XOR]           = "string bitwise xor (^.)",
+	[OP_SBIT_OR]            = "string bitwise or (|.)",
+	[OP_NEGATE]             = "negation (-)",
+	[OP_I_NEGATE]           = "integer negation (-)",
+	[OP_NOT]                = "not",
+	[OP_COMPLEMENT]         = "1's complement (~)",
+	[OP_NCOMPLEMENT]        = "numeric 1's complement (~)",
+	[OP_SCOMPLEMENT]        = "string 1's complement (~)",
+	[OP_SMARTMATCH]         = "smart match",
+	[OP_ATAN2]              = "atan2",
+	[OP_SIN]                = "sin",
+	[OP_COS]                = "cos",
+	[OP_RAND]               = "rand",
+	[OP_SRAND]              = "srand",
+	[OP_EXP]                = "exp",
+	[OP_LOG]                = "log",
+	[OP_SQRT]               = "sqrt",
+	[OP_INT]                = "int",
+	[OP_HEX]                = "hex",
+	[OP_OCT]                = "oct",
+	[OP_ABS]                = "abs",
+	[OP_LENGTH]             = "length",
+	[OP_SUBSTR]             = "substr",
+	[OP_VEC]                = "vec",
+	[OP_INDEX]              = "index",
+	[OP_RINDEX]             = "rindex",
+	[OP_SPRINTF]            = "sprintf",
+	[OP_FORMLINE]           = "formline",
+	[OP_ORD]                = "ord",
+	[OP_CHR]                = "chr",
+	[OP_CRYPT]              = "crypt",
+	[OP_UCFIRST]            = "ucfirst",
+	[OP_LCFIRST]            = "lcfirst",
+	[OP_UC]                 = "uc",
+	[OP_LC]                 = "lc",
+	[OP_QUOTEMETA]          = "quotemeta",
+	[OP_RV2AV]              = "array dereference",
+	[OP_AELEMFAST]          = "constant array element",
+	[OP_AELEMFAST_LEX]      = "constant lexical array element",
+	[OP_AELEMFASTLEX_STORE] = "const lexical array element store",
+	[OP_AELEM]              = "array element",
+	[OP_ASLICE]             = "array slice",
+	[OP_KVASLICE]           = "index/value array slice",
+	[OP_AEACH]              = "each on array",
+	[OP_AVALUES]            = "values on array",
+	[OP_AKEYS]              = "keys on array",
+	[OP_EACH]               = "each",
+	[OP_VALUES]             = "values",
+	[OP_KEYS]               = "keys",
+	[OP_DELETE]             = "delete",
+	[OP_EXISTS]             = "exists",
+	[OP_RV2HV]              = "hash dereference",
+	[OP_HELEM]              = "hash element",
+	[OP_HSLICE]             = "hash slice",
+	[OP_KVHSLICE]           = "key/value hash slice",
+	[OP_MULTIDEREF]         = "array or hash lookup",
+	[OP_UNPACK]             = "unpack",
+	[OP_PACK]               = "pack",
+	[OP_SPLIT]              = "split",
+	[OP_JOIN]               = "join or string",
+	[OP_LIST]               = "list",
+	[OP_LSLICE]             = "list slice",
+	[OP_ANONLIST]           = "anonymous array ([])",
+	[OP_ANONHASH]           = "anonymous hash ({})",
+	[OP_EMPTYAVHV]          = "empty anon hash/array",
+	[OP_SPLICE]             = "splice",
+	[OP_PUSH]               = "push",
+	[OP_POP]                = "pop",
+	[OP_SHIFT]              = "shift",
+	[OP_UNSHIFT]            = "unshift",
+	[OP_SORT]               = "sort",
+	[OP_REVERSE]            = "reverse",
+	[OP_GREPSTART]          = "grep",
+	[OP_GREPWHILE]          = "grep iterator",
+	[OP_MAPSTART]           = "map",
+	[OP_MAPWHILE]           = "map iterator",
+	[OP_RANGE]              = "flipflop",
+	[OP_FLIP]               = "range (or flip)",
+	[OP_FLOP]               = "range (or flop)",
+	[OP_AND]                = "logical and (&&)",
+	[OP_OR]                 = "logical or (||)",
+	[OP_XOR]                = "logical xor",
+	[OP_DOR]                = "defined or (//)",
+	[OP_COND_EXPR]          = "conditional expression",
+	[OP_ANDASSIGN]          = "logical and assignment (&&=)",
+	[OP_ORASSIGN]           = "logical or assignment (||=)",
+	[OP_DORASSIGN]          = "defined or assignment (//=)",
+	[OP_ENTERSUB]           = "subroutine entry",
+	[OP_LEAVESUB]           = "subroutine exit",
+	[OP_LEAVESUBLV]         = "lvalue subroutine return",
+	[OP_ARGCHECK]           = "check subroutine arguments",
+	[OP_ARGELEM]            = "subroutine argument",
+	[OP_ARGDEFELEM]         = "subroutine argument default value",
+	[OP_CALLER]             = "caller",
+	[OP_WARN]               = "warn",
+	[OP_DIE]                = "die",
+	[OP_RESET]              = "symbol reset",
+	[OP_LINESEQ]            = "line sequence",
+	[OP_NEXTSTATE]          = "next statement",
+	[OP_DBSTATE]            = "debug next statement",
+	[OP_UNSTACK]            = "iteration finalizer",
+	[OP_ENTER]              = "block entry",
+	[OP_LEAVE]              = "block exit",
+	[OP_SCOPE]              = "block",
+	[OP_ENTERITER]          = "foreach loop entry",
+	[OP_ITER]               = "foreach loop iterator",
+	[OP_ENTERLOOP]          = "loop entry",
+	[OP_LEAVELOOP]          = "loop exit",
+	[OP_RETURN]             = "return",
+	[OP_LAST]               = "last",
+	[OP_NEXT]               = "next",
+	[OP_REDO]               = "redo",
+	[OP_DUMP]               = "dump",
+	[OP_GOTO]               = "goto",
+	[OP_EXIT]               = "exit",
+	[OP_METHOD]             = "method lookup",
+	[OP_METHOD_NAMED]       = "method with known name",
+	[OP_METHOD_SUPER]       = "super with known name",
+	[OP_METHOD_REDIR]       = "redirect method with known name",
+	[OP_METHOD_REDIR_SUPER] = "redirect super method with known name",
+	[OP_ENTERGIVEN]         = "given()",
+	[OP_LEAVEGIVEN]         = "leave given block",
+	[OP_ENTERWHEN]          = "when()",
+	[OP_LEAVEWHEN]          = "leave when block",
+	[OP_BREAK]              = "break",
+	[OP_CONTINUE]           = "continue",
+	[OP_OPEN]               = "open",
+	[OP_CLOSE]              = "close",
+	[OP_PIPE_OP]            = "pipe",
+	[OP_FILENO]             = "fileno",
+	[OP_UMASK]              = "umask",
+	[OP_BINMODE]            = "binmode",
+	[OP_TIE]                = "tie",
+	[OP_UNTIE]              = "untie",
+	[OP_TIED]               = "tied",
+	[OP_DBMOPEN]            = "dbmopen",
+	[OP_DBMCLOSE]           = "dbmclose",
+	[OP_SSELECT]            = "select system call",
+	[OP_SELECT]             = "select",
+	[OP_GETC]               = "getc",
+	[OP_READ]               = "read",
+	[OP_ENTERWRITE]         = "write",
+	[OP_LEAVEWRITE]         = "write exit",
+	[OP_PRTF]               = "printf",
+	[OP_PRINT]              = "print",
+	[OP_SAY]                = "say",
+	[OP_SYSOPEN]            = "sysopen",
+	[OP_SYSSEEK]            = "sysseek",
+	[OP_SYSREAD]            = "sysread",
+	[OP_SYSWRITE]           = "syswrite",
+	[OP_EOF]                = "eof",
+	[OP_TELL]               = "tell",
+	[OP_SEEK]               = "seek",
+	[OP_TRUNCATE]           = "truncate",
+	[OP_FCNTL]              = "fcntl",
+	[OP_IOCTL]              = "ioctl",
+	[OP_FLOCK]              = "flock",
+	[OP_SEND]               = "send",
+	[OP_RECV]               = "recv",
+	[OP_SOCKET]             = "socket",
+	[OP_SOCKPAIR]           = "socketpair",
+	[OP_BIND]               = "bind",
+	[OP_CONNECT]            = "connect",
+	[OP_LISTEN]             = "listen",
+	[OP_ACCEPT]             = "accept",
+	[OP_SHUTDOWN]           = "shutdown",
+	[OP_GSOCKOPT]           = "getsockopt",
+	[OP_SSOCKOPT]           = "setsockopt",
+	[OP_GETSOCKNAME]        = "getsockname",
+	[OP_GETPEERNAME]        = "getpeername",
+	[OP_LSTAT]              = "lstat",
+	[OP_STAT]               = "stat",
+	[OP_FTRREAD]            = "-R",
+	[OP_FTRWRITE]           = "-W",
+	[OP_FTREXEC]            = "-X",
+	[OP_FTEREAD]            = "-r",
+	[OP_FTEWRITE]           = "-w",
+	[OP_FTEEXEC]            = "-x",
+	[OP_FTIS]               = "-e",
+	[OP_FTSIZE]             = "-s",
+	[OP_FTMTIME]            = "-M",
+	[OP_FTATIME]            = "-A",
+	[OP_FTCTIME]            = "-C",
+	[OP_FTROWNED]           = "-O",
+	[OP_FTEOWNED]           = "-o",
+	[OP_FTZERO]             = "-z",
+	[OP_FTSOCK]             = "-S",
+	[OP_FTCHR]              = "-c",
+	[OP_FTBLK]              = "-b",
+	[OP_FTFILE]             = "-f",
+	[OP_FTDIR]              = "-d",
+	[OP_FTPIPE]             = "-p",
+	[OP_FTSUID]             = "-u",
+	[OP_FTSGID]             = "-g",
+	[OP_FTSVTX]             = "-k",
+	[OP_FTLINK]             = "-l",
+	[OP_FTTTY]              = "-t",
+	[OP_FTTEXT]             = "-T",
+	[OP_FTBINARY]           = "-B",
+	[OP_CHDIR]              = "chdir",
+	[OP_CHOWN]              = "chown",
+	[OP_CHROOT]             = "chroot",
+	[OP_UNLINK]             = "unlink",
+	[OP_CHMOD]              = "chmod",
+	[OP_UTIME]              = "utime",
+	[OP_RENAME]             = "rename",
+	[OP_LINK]               = "link",
+	[OP_SYMLINK]            = "symlink",
+	[OP_READLINK]           = "readlink",
+	[OP_MKDIR]              = "mkdir",
+	[OP_RMDIR]              = "rmdir",
+	[OP_OPEN_DIR]           = "opendir",
+	[OP_READDIR]            = "readdir",
+	[OP_TELLDIR]            = "telldir",
+	[OP_SEEKDIR]            = "seekdir",
+	[OP_REWINDDIR]          = "rewinddir",
+	[OP_CLOSEDIR]           = "closedir",
+	[OP_FORK]               = "fork",
+	[OP_WAIT]               = "wait",
+	[OP_WAITPID]            = "waitpid",
+	[OP_SYSTEM]             = "system",
+	[OP_EXEC]               = "exec",
+	[OP_KILL]               = "kill",
+	[OP_GETPPID]            = "getppid",
+	[OP_GETPGRP]            = "getpgrp",
+	[OP_SETPGRP]            = "setpgrp",
+	[OP_GETPRIORITY]        = "getpriority",
+	[OP_SETPRIORITY]        = "setpriority",
+	[OP_TIME]               = "time",
+	[OP_TMS]                = "times",
+	[OP_LOCALTIME]          = "localtime",
+	[OP_GMTIME]             = "gmtime",
+	[OP_ALARM]              = "alarm",
+	[OP_SLEEP]              = "sleep",
+	[OP_SHMGET]             = "shmget",
+	[OP_SHMCTL]             = "shmctl",
+	[OP_SHMREAD]            = "shmread",
+	[OP_SHMWRITE]           = "shmwrite",
+	[OP_MSGGET]             = "msgget",
+	[OP_MSGCTL]             = "msgctl",
+	[OP_MSGSND]             = "msgsnd",
+	[OP_MSGRCV]             = "msgrcv",
+	[OP_SEMOP]              = "semop",
+	[OP_SEMGET]             = "semget",
+	[OP_SEMCTL]             = "semctl",
+	[OP_REQUIRE]            = "require",
+	[OP_DOFILE]             = "do \"file\"",
+	[OP_HINTSEVAL]          = "eval hints",
+	[OP_ENTEREVAL]          = "eval \"string\"",
+	[OP_LEAVEEVAL]          = "eval \"string\" exit",
+	[OP_ENTERTRY]           = "eval {block}",
+	[OP_LEAVETRY]           = "eval {block} exit",
+	[OP_GHBYNAME]           = "gethostbyname",
+	[OP_GHBYADDR]           = "gethostbyaddr",
+	[OP_GHOSTENT]           = "gethostent",
+	[OP_GNBYNAME]           = "getnetbyname",
+	[OP_GNBYADDR]           = "getnetbyaddr",
+	[OP_GNETENT]            = "getnetent",
+	[OP_GPBYNAME]           = "getprotobyname",
+	[OP_GPBYNUMBER]         = "getprotobynumber",
+	[OP_GPROTOENT]          = "getprotoent",
+	[OP_GSBYNAME]           = "getservbyname",
+	[OP_GSBYPORT]           = "getservbyport",
+	[OP_GSERVENT]           = "getservent",
+	[OP_SHOSTENT]           = "sethostent",
+	[OP_SNETENT]            = "setnetent",
+	[OP_SPROTOENT]          = "setprotoent",
+	[OP_SSERVENT]           = "setservent",
+	[OP_EHOSTENT]           = "endhostent",
+	[OP_ENETENT]            = "endnetent",
+	[OP_EPROTOENT]          = "endprotoent",
+	[OP_ESERVENT]           = "endservent",
+	[OP_GPWNAM]             = "getpwnam",
+	[OP_GPWUID]             = "getpwuid",
+	[OP_GPWENT]             = "getpwent",
+	[OP_SPWENT]             = "setpwent",
+	[OP_EPWENT]             = "endpwent",
+	[OP_GGRNAM]             = "getgrnam",
+	[OP_GGRGID]             = "getgrgid",
+	[OP_GGRENT]             = "getgrent",
+	[OP_SGRENT]             = "setgrent",
+	[OP_EGRENT]             = "endgrent",
+	[OP_GETLOGIN]           = "getlogin",
+	[OP_SYSCALL]            = "syscall",
+	[OP_LOCK]               = "lock",
+	[OP_ONCE]               = "once",
+	[OP_CUSTOM]             = "unknown custom operator",
+	[OP_COREARGS]           = "CORE:: subroutine",
+	[OP_AVHVSWITCH]         = "Array/hash switch",
+	[OP_RUNCV]              = "__SUB__",
+	[OP_FC]                 = "fc",
+	[OP_PADCV]              = "private subroutine",
+	[OP_INTROCV]            = "private subroutine",
+	[OP_CLONECV]            = "private subroutine",
+	[OP_PADRANGE]           = "list of private variables",
+	[OP_REFASSIGN]          = "lvalue ref assignment",
+	[OP_LVREF]              = "lvalue ref assignment",
+	[OP_LVREFSLICE]         = "lvalue ref assignment",
+	[OP_LVAVREF]            = "lvalue array reference",
+	[OP_ANONCONST]          = "anonymous constant",
+	[OP_ISA]                = "derived class test",
+	[OP_CMPCHAIN_AND]       = "comparison chaining",
+	[OP_CMPCHAIN_DUP]       = "comparand shuffling",
+	[OP_ENTERTRYCATCH]      = "try {block}",
+	[OP_LEAVETRYCATCH]      = "try {block} exit",
+	[OP_POPTRY]             = "pop try",
+	[OP_CATCH]              = "catch {} block",
+	[OP_PUSHDEFER]          = "push defer {} block",
+	[OP_IS_BOOL]            = "boolean type test",
+	[OP_IS_WEAK]            = "weakref type test",
+	[OP_WEAKEN]             = "reference weaken",
+	[OP_UNWEAKEN]           = "reference unweaken",
+	[OP_BLESSED]            = "blessed",
+	[OP_REFADDR]            = "refaddr",
+	[OP_REFTYPE]            = "reftype",
+	[OP_CEIL]               = "ceil",
+	[OP_FLOOR]              = "floor",
+	[OP_IS_TAINTED]         = "is_tainted",
+    [OP_max] = "freed op",
+});
 
 END_EXTERN_C
 
 START_EXTERN_C
 
 EXT Perl_ppaddr_t PL_ppaddr[] /* or perlvars.h */
-#if defined(DOINIT)
-= {
-	Perl_pp_null,
-	Perl_pp_stub,
-	Perl_pp_scalar,	/* implemented by Perl_pp_null */
-	Perl_pp_pushmark,
-	Perl_pp_wantarray,
-	Perl_pp_const,
-	Perl_pp_gvsv,
-	Perl_pp_gv,
-	Perl_pp_gelem,
-	Perl_pp_padsv,
-	Perl_pp_padsv_store,
-	Perl_pp_padav,
-	Perl_pp_padhv,
-	Perl_pp_padany,	/* implemented by Perl_unimplemented_op */
-	Perl_pp_rv2gv,
-	Perl_pp_rv2sv,
-	Perl_pp_av2arylen,
-	Perl_pp_rv2cv,
-	Perl_pp_anoncode,
-	Perl_pp_prototype,
-	Perl_pp_refgen,
-	Perl_pp_srefgen,
-	Perl_pp_ref,
-	Perl_pp_bless,
-	Perl_pp_backtick,
-	Perl_pp_glob,
-	Perl_pp_readline,
-	Perl_pp_rcatline,
-	Perl_pp_regcmaybe,	/* implemented by Perl_pp_null */
-	Perl_pp_regcreset,
-	Perl_pp_regcomp,
-	Perl_pp_match,
-	Perl_pp_qr,
-	Perl_pp_subst,
-	Perl_pp_substcont,
-	Perl_pp_trans,
-	Perl_pp_transr,	/* implemented by Perl_pp_trans */
-	Perl_pp_sassign,
-	Perl_pp_aassign,
-	Perl_pp_chop,
-	Perl_pp_schop,
-	Perl_pp_chomp,	/* implemented by Perl_pp_chop */
-	Perl_pp_schomp,	/* implemented by Perl_pp_schop */
-	Perl_pp_defined,
-	Perl_pp_undef,
-	Perl_pp_study,
-	Perl_pp_pos,
-	Perl_pp_preinc,
-	Perl_pp_i_preinc,	/* implemented by Perl_pp_preinc */
-	Perl_pp_predec,
-	Perl_pp_i_predec,	/* implemented by Perl_pp_predec */
-	Perl_pp_postinc,
-	Perl_pp_i_postinc,	/* implemented by Perl_pp_postinc */
-	Perl_pp_postdec,
-	Perl_pp_i_postdec,	/* implemented by Perl_pp_postdec */
-	Perl_pp_pow,
-	Perl_pp_multiply,
-	Perl_pp_i_multiply,
-	Perl_pp_divide,
-	Perl_pp_i_divide,
-	Perl_pp_modulo,
-	Perl_pp_i_modulo,
-	Perl_pp_repeat,
-	Perl_pp_add,
-	Perl_pp_i_add,
-	Perl_pp_subtract,
-	Perl_pp_i_subtract,
-	Perl_pp_concat,
-	Perl_pp_multiconcat,
-	Perl_pp_stringify,
-	Perl_pp_left_shift,
-	Perl_pp_right_shift,
-	Perl_pp_lt,
-	Perl_pp_i_lt,
-	Perl_pp_gt,
-	Perl_pp_i_gt,
-	Perl_pp_le,
-	Perl_pp_i_le,
-	Perl_pp_ge,
-	Perl_pp_i_ge,
-	Perl_pp_eq,
-	Perl_pp_i_eq,
-	Perl_pp_ne,
-	Perl_pp_i_ne,
-	Perl_pp_ncmp,
-	Perl_pp_i_ncmp,
-	Perl_pp_slt,	/* implemented by Perl_pp_sle */
-	Perl_pp_sgt,	/* implemented by Perl_pp_sle */
-	Perl_pp_sle,
-	Perl_pp_sge,	/* implemented by Perl_pp_sle */
-	Perl_pp_seq,
-	Perl_pp_sne,
-	Perl_pp_scmp,
-	Perl_pp_bit_and,
-	Perl_pp_bit_xor,	/* implemented by Perl_pp_bit_or */
-	Perl_pp_bit_or,
-	Perl_pp_nbit_and,
-	Perl_pp_nbit_xor,	/* implemented by Perl_pp_nbit_or */
-	Perl_pp_nbit_or,
-	Perl_pp_sbit_and,
-	Perl_pp_sbit_xor,	/* implemented by Perl_pp_sbit_or */
-	Perl_pp_sbit_or,
-	Perl_pp_negate,
-	Perl_pp_i_negate,
-	Perl_pp_not,
-	Perl_pp_complement,
-	Perl_pp_ncomplement,
-	Perl_pp_scomplement,
-	Perl_pp_smartmatch,
-	Perl_pp_atan2,
-	Perl_pp_sin,
-	Perl_pp_cos,	/* implemented by Perl_pp_sin */
-	Perl_pp_rand,
-	Perl_pp_srand,
-	Perl_pp_exp,	/* implemented by Perl_pp_sin */
-	Perl_pp_log,	/* implemented by Perl_pp_sin */
-	Perl_pp_sqrt,	/* implemented by Perl_pp_sin */
-	Perl_pp_int,
-	Perl_pp_hex,	/* implemented by Perl_pp_oct */
-	Perl_pp_oct,
-	Perl_pp_abs,
-	Perl_pp_length,
-	Perl_pp_substr,
-	Perl_pp_vec,
-	Perl_pp_index,
-	Perl_pp_rindex,	/* implemented by Perl_pp_index */
-	Perl_pp_sprintf,
-	Perl_pp_formline,
-	Perl_pp_ord,
-	Perl_pp_chr,
-	Perl_pp_crypt,
-	Perl_pp_ucfirst,
-	Perl_pp_lcfirst,	/* implemented by Perl_pp_ucfirst */
-	Perl_pp_uc,
-	Perl_pp_lc,
-	Perl_pp_quotemeta,
-	Perl_pp_rv2av,
-	Perl_pp_aelemfast,
-	Perl_pp_aelemfast_lex,	/* implemented by Perl_pp_aelemfast */
-	Perl_pp_aelemfastlex_store,
-	Perl_pp_aelem,
-	Perl_pp_aslice,
-	Perl_pp_kvaslice,
-	Perl_pp_aeach,
-	Perl_pp_avalues,	/* implemented by Perl_pp_akeys */
-	Perl_pp_akeys,
-	Perl_pp_each,
-	Perl_pp_values,	/* implemented by Perl_do_kv */
-	Perl_pp_keys,	/* implemented by Perl_do_kv */
-	Perl_pp_delete,
-	Perl_pp_exists,
-	Perl_pp_rv2hv,	/* implemented by Perl_pp_rv2av */
-	Perl_pp_helem,
-	Perl_pp_hslice,
-	Perl_pp_kvhslice,
-	Perl_pp_multideref,
-	Perl_pp_unpack,
-	Perl_pp_pack,
-	Perl_pp_split,
-	Perl_pp_join,
-	Perl_pp_list,
-	Perl_pp_lslice,
-	Perl_pp_anonlist,
-	Perl_pp_anonhash,
-	Perl_pp_emptyavhv,
-	Perl_pp_splice,
-	Perl_pp_push,
-	Perl_pp_pop,	/* implemented by Perl_pp_shift */
-	Perl_pp_shift,
-	Perl_pp_unshift,
-	Perl_pp_sort,
-	Perl_pp_reverse,
-	Perl_pp_grepstart,
-	Perl_pp_grepwhile,
-	Perl_pp_mapstart,	/* implemented by Perl_pp_grepstart */
-	Perl_pp_mapwhile,
-	Perl_pp_range,
-	Perl_pp_flip,
-	Perl_pp_flop,
-	Perl_pp_and,
-	Perl_pp_or,
-	Perl_pp_xor,
-	Perl_pp_dor,	/* implemented by Perl_pp_defined */
-	Perl_pp_cond_expr,
-	Perl_pp_andassign,	/* implemented by Perl_pp_and */
-	Perl_pp_orassign,	/* implemented by Perl_pp_or */
-	Perl_pp_dorassign,	/* implemented by Perl_pp_defined */
-	Perl_pp_entersub,
-	Perl_pp_leavesub,
-	Perl_pp_leavesublv,
-	Perl_pp_argcheck,
-	Perl_pp_argelem,
-	Perl_pp_argdefelem,
-	Perl_pp_caller,
-	Perl_pp_warn,
-	Perl_pp_die,
-	Perl_pp_reset,
-	Perl_pp_lineseq,	/* implemented by Perl_pp_null */
-	Perl_pp_nextstate,
-	Perl_pp_dbstate,
-	Perl_pp_unstack,
-	Perl_pp_enter,
-	Perl_pp_leave,
-	Perl_pp_scope,	/* implemented by Perl_pp_null */
-	Perl_pp_enteriter,
-	Perl_pp_iter,
-	Perl_pp_enterloop,
-	Perl_pp_leaveloop,
-	Perl_pp_return,
-	Perl_pp_last,
-	Perl_pp_next,
-	Perl_pp_redo,
-	Perl_pp_dump,	/* implemented by Perl_pp_goto */
-	Perl_pp_goto,
-	Perl_pp_exit,
-	Perl_pp_method,
-	Perl_pp_method_named,
-	Perl_pp_method_super,
-	Perl_pp_method_redir,
-	Perl_pp_method_redir_super,
-	Perl_pp_entergiven,
-	Perl_pp_leavegiven,
-	Perl_pp_enterwhen,
-	Perl_pp_leavewhen,
-	Perl_pp_break,
-	Perl_pp_continue,
-	Perl_pp_open,
-	Perl_pp_close,
-	Perl_pp_pipe_op,
-	Perl_pp_fileno,
-	Perl_pp_umask,
-	Perl_pp_binmode,
-	Perl_pp_tie,
-	Perl_pp_untie,
-	Perl_pp_tied,
-	Perl_pp_dbmopen,
-	Perl_pp_dbmclose,	/* implemented by Perl_pp_untie */
-	Perl_pp_sselect,
-	Perl_pp_select,
-	Perl_pp_getc,
-	Perl_pp_read,	/* implemented by Perl_pp_sysread */
-	Perl_pp_enterwrite,
-	Perl_pp_leavewrite,
-	Perl_pp_prtf,
-	Perl_pp_print,
-	Perl_pp_say,	/* implemented by Perl_pp_print */
-	Perl_pp_sysopen,
-	Perl_pp_sysseek,
-	Perl_pp_sysread,
-	Perl_pp_syswrite,
-	Perl_pp_eof,
-	Perl_pp_tell,
-	Perl_pp_seek,	/* implemented by Perl_pp_sysseek */
-	Perl_pp_truncate,
-	Perl_pp_fcntl,	/* implemented by Perl_pp_ioctl */
-	Perl_pp_ioctl,
-	Perl_pp_flock,
-	Perl_pp_send,	/* implemented by Perl_pp_syswrite */
-	Perl_pp_recv,	/* implemented by Perl_pp_sysread */
-	Perl_pp_socket,
-	Perl_pp_sockpair,
-	Perl_pp_bind,
-	Perl_pp_connect,	/* implemented by Perl_pp_bind */
-	Perl_pp_listen,
-	Perl_pp_accept,
-	Perl_pp_shutdown,
-	Perl_pp_gsockopt,	/* implemented by Perl_pp_ssockopt */
-	Perl_pp_ssockopt,
-	Perl_pp_getsockname,	/* implemented by Perl_pp_getpeername */
-	Perl_pp_getpeername,
-	Perl_pp_lstat,	/* implemented by Perl_pp_stat */
-	Perl_pp_stat,
-	Perl_pp_ftrread,
-	Perl_pp_ftrwrite,	/* implemented by Perl_pp_ftrread */
-	Perl_pp_ftrexec,	/* implemented by Perl_pp_ftrread */
-	Perl_pp_fteread,	/* implemented by Perl_pp_ftrread */
-	Perl_pp_ftewrite,	/* implemented by Perl_pp_ftrread */
-	Perl_pp_fteexec,	/* implemented by Perl_pp_ftrread */
-	Perl_pp_ftis,
-	Perl_pp_ftsize,	/* implemented by Perl_pp_ftis */
-	Perl_pp_ftmtime,	/* implemented by Perl_pp_ftis */
-	Perl_pp_ftatime,	/* implemented by Perl_pp_ftis */
-	Perl_pp_ftctime,	/* implemented by Perl_pp_ftis */
-	Perl_pp_ftrowned,
-	Perl_pp_fteowned,	/* implemented by Perl_pp_ftrowned */
-	Perl_pp_ftzero,	/* implemented by Perl_pp_ftrowned */
-	Perl_pp_ftsock,	/* implemented by Perl_pp_ftrowned */
-	Perl_pp_ftchr,	/* implemented by Perl_pp_ftrowned */
-	Perl_pp_ftblk,	/* implemented by Perl_pp_ftrowned */
-	Perl_pp_ftfile,	/* implemented by Perl_pp_ftrowned */
-	Perl_pp_ftdir,	/* implemented by Perl_pp_ftrowned */
-	Perl_pp_ftpipe,	/* implemented by Perl_pp_ftrowned */
-	Perl_pp_ftsuid,	/* implemented by Perl_pp_ftrowned */
-	Perl_pp_ftsgid,	/* implemented by Perl_pp_ftrowned */
-	Perl_pp_ftsvtx,	/* implemented by Perl_pp_ftrowned */
-	Perl_pp_ftlink,
-	Perl_pp_fttty,
-	Perl_pp_fttext,
-	Perl_pp_ftbinary,	/* implemented by Perl_pp_fttext */
-	Perl_pp_chdir,
-	Perl_pp_chown,
-	Perl_pp_chroot,
-	Perl_pp_unlink,	/* implemented by Perl_pp_chown */
-	Perl_pp_chmod,	/* implemented by Perl_pp_chown */
-	Perl_pp_utime,	/* implemented by Perl_pp_chown */
-	Perl_pp_rename,
-	Perl_pp_link,
-	Perl_pp_symlink,	/* implemented by Perl_pp_link */
-	Perl_pp_readlink,
-	Perl_pp_mkdir,
-	Perl_pp_rmdir,
-	Perl_pp_open_dir,
-	Perl_pp_readdir,
-	Perl_pp_telldir,
-	Perl_pp_seekdir,
-	Perl_pp_rewinddir,
-	Perl_pp_closedir,
-	Perl_pp_fork,
-	Perl_pp_wait,
-	Perl_pp_waitpid,
-	Perl_pp_system,
-	Perl_pp_exec,
-	Perl_pp_kill,	/* implemented by Perl_pp_chown */
-	Perl_pp_getppid,
-	Perl_pp_getpgrp,
-	Perl_pp_setpgrp,
-	Perl_pp_getpriority,
-	Perl_pp_setpriority,
-	Perl_pp_time,
-	Perl_pp_tms,
-	Perl_pp_localtime,	/* implemented by Perl_pp_gmtime */
-	Perl_pp_gmtime,
-	Perl_pp_alarm,
-	Perl_pp_sleep,
-	Perl_pp_shmget,	/* implemented by Perl_pp_semget */
-	Perl_pp_shmctl,	/* implemented by Perl_pp_semctl */
-	Perl_pp_shmread,	/* implemented by Perl_pp_shmwrite */
-	Perl_pp_shmwrite,
-	Perl_pp_msgget,	/* implemented by Perl_pp_semget */
-	Perl_pp_msgctl,	/* implemented by Perl_pp_semctl */
-	Perl_pp_msgsnd,	/* implemented by Perl_pp_shmwrite */
-	Perl_pp_msgrcv,	/* implemented by Perl_pp_shmwrite */
-	Perl_pp_semop,	/* implemented by Perl_pp_shmwrite */
-	Perl_pp_semget,
-	Perl_pp_semctl,
-	Perl_pp_require,
-	Perl_pp_dofile,	/* implemented by Perl_pp_require */
-	Perl_pp_hintseval,
-	Perl_pp_entereval,
-	Perl_pp_leaveeval,
-	Perl_pp_entertry,
-	Perl_pp_leavetry,
-	Perl_pp_ghbyname,	/* implemented by Perl_pp_ghostent */
-	Perl_pp_ghbyaddr,	/* implemented by Perl_pp_ghostent */
-	Perl_pp_ghostent,
-	Perl_pp_gnbyname,	/* implemented by Perl_pp_gnetent */
-	Perl_pp_gnbyaddr,	/* implemented by Perl_pp_gnetent */
-	Perl_pp_gnetent,
-	Perl_pp_gpbyname,	/* implemented by Perl_pp_gprotoent */
-	Perl_pp_gpbynumber,	/* implemented by Perl_pp_gprotoent */
-	Perl_pp_gprotoent,
-	Perl_pp_gsbyname,	/* implemented by Perl_pp_gservent */
-	Perl_pp_gsbyport,	/* implemented by Perl_pp_gservent */
-	Perl_pp_gservent,
-	Perl_pp_shostent,
-	Perl_pp_snetent,	/* implemented by Perl_pp_shostent */
-	Perl_pp_sprotoent,	/* implemented by Perl_pp_shostent */
-	Perl_pp_sservent,	/* implemented by Perl_pp_shostent */
-	Perl_pp_ehostent,
-	Perl_pp_enetent,	/* implemented by Perl_pp_ehostent */
-	Perl_pp_eprotoent,	/* implemented by Perl_pp_ehostent */
-	Perl_pp_eservent,	/* implemented by Perl_pp_ehostent */
-	Perl_pp_gpwnam,	/* implemented by Perl_pp_gpwent */
-	Perl_pp_gpwuid,	/* implemented by Perl_pp_gpwent */
-	Perl_pp_gpwent,
-	Perl_pp_spwent,	/* implemented by Perl_pp_ehostent */
-	Perl_pp_epwent,	/* implemented by Perl_pp_ehostent */
-	Perl_pp_ggrnam,	/* implemented by Perl_pp_ggrent */
-	Perl_pp_ggrgid,	/* implemented by Perl_pp_ggrent */
-	Perl_pp_ggrent,
-	Perl_pp_sgrent,	/* implemented by Perl_pp_ehostent */
-	Perl_pp_egrent,	/* implemented by Perl_pp_ehostent */
-	Perl_pp_getlogin,
-	Perl_pp_syscall,
-	Perl_pp_lock,
-	Perl_pp_once,
-	Perl_pp_custom,	/* implemented by Perl_unimplemented_op */
-	Perl_pp_coreargs,
-	Perl_pp_avhvswitch,
-	Perl_pp_runcv,
-	Perl_pp_fc,
-	Perl_pp_padcv,
-	Perl_pp_introcv,
-	Perl_pp_clonecv,
-	Perl_pp_padrange,
-	Perl_pp_refassign,
-	Perl_pp_lvref,
-	Perl_pp_lvrefslice,
-	Perl_pp_lvavref,
-	Perl_pp_anonconst,
-	Perl_pp_isa,
-	Perl_pp_cmpchain_and,
-	Perl_pp_cmpchain_dup,
-	Perl_pp_entertrycatch,
-	Perl_pp_leavetrycatch,
-	Perl_pp_poptry,
-	Perl_pp_catch,
-	Perl_pp_pushdefer,
-	Perl_pp_is_bool,
-	Perl_pp_is_weak,
-	Perl_pp_weaken,
-	Perl_pp_unweaken,
-	Perl_pp_blessed,
-	Perl_pp_refaddr,
-	Perl_pp_reftype,
-	Perl_pp_ceil,
-	Perl_pp_floor,
-	Perl_pp_is_tainted,
-}
-#endif
-;
+INIT({
+	[OP_NULL]               = Perl_pp_null,
+	[OP_STUB]               = Perl_pp_stub,
+	[OP_SCALAR]             = Perl_pp_scalar,	/* implemented by Perl_pp_null */
+	[OP_PUSHMARK]           = Perl_pp_pushmark,
+	[OP_WANTARRAY]          = Perl_pp_wantarray,
+	[OP_CONST]              = Perl_pp_const,
+	[OP_GVSV]               = Perl_pp_gvsv,
+	[OP_GV]                 = Perl_pp_gv,
+	[OP_GELEM]              = Perl_pp_gelem,
+	[OP_PADSV]              = Perl_pp_padsv,
+	[OP_PADSV_STORE]        = Perl_pp_padsv_store,
+	[OP_PADAV]              = Perl_pp_padav,
+	[OP_PADHV]              = Perl_pp_padhv,
+	[OP_PADANY]             = Perl_pp_padany,	/* implemented by Perl_unimplemented_op */
+	[OP_RV2GV]              = Perl_pp_rv2gv,
+	[OP_RV2SV]              = Perl_pp_rv2sv,
+	[OP_AV2ARYLEN]          = Perl_pp_av2arylen,
+	[OP_RV2CV]              = Perl_pp_rv2cv,
+	[OP_ANONCODE]           = Perl_pp_anoncode,
+	[OP_PROTOTYPE]          = Perl_pp_prototype,
+	[OP_REFGEN]             = Perl_pp_refgen,
+	[OP_SREFGEN]            = Perl_pp_srefgen,
+	[OP_REF]                = Perl_pp_ref,
+	[OP_BLESS]              = Perl_pp_bless,
+	[OP_BACKTICK]           = Perl_pp_backtick,
+	[OP_GLOB]               = Perl_pp_glob,
+	[OP_READLINE]           = Perl_pp_readline,
+	[OP_RCATLINE]           = Perl_pp_rcatline,
+	[OP_REGCMAYBE]          = Perl_pp_regcmaybe,	/* implemented by Perl_pp_null */
+	[OP_REGCRESET]          = Perl_pp_regcreset,
+	[OP_REGCOMP]            = Perl_pp_regcomp,
+	[OP_MATCH]              = Perl_pp_match,
+	[OP_QR]                 = Perl_pp_qr,
+	[OP_SUBST]              = Perl_pp_subst,
+	[OP_SUBSTCONT]          = Perl_pp_substcont,
+	[OP_TRANS]              = Perl_pp_trans,
+	[OP_TRANSR]             = Perl_pp_transr,	/* implemented by Perl_pp_trans */
+	[OP_SASSIGN]            = Perl_pp_sassign,
+	[OP_AASSIGN]            = Perl_pp_aassign,
+	[OP_CHOP]               = Perl_pp_chop,
+	[OP_SCHOP]              = Perl_pp_schop,
+	[OP_CHOMP]              = Perl_pp_chomp,	/* implemented by Perl_pp_chop */
+	[OP_SCHOMP]             = Perl_pp_schomp,	/* implemented by Perl_pp_schop */
+	[OP_DEFINED]            = Perl_pp_defined,
+	[OP_UNDEF]              = Perl_pp_undef,
+	[OP_STUDY]              = Perl_pp_study,
+	[OP_POS]                = Perl_pp_pos,
+	[OP_PREINC]             = Perl_pp_preinc,
+	[OP_I_PREINC]           = Perl_pp_i_preinc,	/* implemented by Perl_pp_preinc */
+	[OP_PREDEC]             = Perl_pp_predec,
+	[OP_I_PREDEC]           = Perl_pp_i_predec,	/* implemented by Perl_pp_predec */
+	[OP_POSTINC]            = Perl_pp_postinc,
+	[OP_I_POSTINC]          = Perl_pp_i_postinc,	/* implemented by Perl_pp_postinc */
+	[OP_POSTDEC]            = Perl_pp_postdec,
+	[OP_I_POSTDEC]          = Perl_pp_i_postdec,	/* implemented by Perl_pp_postdec */
+	[OP_POW]                = Perl_pp_pow,
+	[OP_MULTIPLY]           = Perl_pp_multiply,
+	[OP_I_MULTIPLY]         = Perl_pp_i_multiply,
+	[OP_DIVIDE]             = Perl_pp_divide,
+	[OP_I_DIVIDE]           = Perl_pp_i_divide,
+	[OP_MODULO]             = Perl_pp_modulo,
+	[OP_I_MODULO]           = Perl_pp_i_modulo,
+	[OP_REPEAT]             = Perl_pp_repeat,
+	[OP_ADD]                = Perl_pp_add,
+	[OP_I_ADD]              = Perl_pp_i_add,
+	[OP_SUBTRACT]           = Perl_pp_subtract,
+	[OP_I_SUBTRACT]         = Perl_pp_i_subtract,
+	[OP_CONCAT]             = Perl_pp_concat,
+	[OP_MULTICONCAT]        = Perl_pp_multiconcat,
+	[OP_STRINGIFY]          = Perl_pp_stringify,
+	[OP_LEFT_SHIFT]         = Perl_pp_left_shift,
+	[OP_RIGHT_SHIFT]        = Perl_pp_right_shift,
+	[OP_LT]                 = Perl_pp_lt,
+	[OP_I_LT]               = Perl_pp_i_lt,
+	[OP_GT]                 = Perl_pp_gt,
+	[OP_I_GT]               = Perl_pp_i_gt,
+	[OP_LE]                 = Perl_pp_le,
+	[OP_I_LE]               = Perl_pp_i_le,
+	[OP_GE]                 = Perl_pp_ge,
+	[OP_I_GE]               = Perl_pp_i_ge,
+	[OP_EQ]                 = Perl_pp_eq,
+	[OP_I_EQ]               = Perl_pp_i_eq,
+	[OP_NE]                 = Perl_pp_ne,
+	[OP_I_NE]               = Perl_pp_i_ne,
+	[OP_NCMP]               = Perl_pp_ncmp,
+	[OP_I_NCMP]             = Perl_pp_i_ncmp,
+	[OP_SLT]                = Perl_pp_slt,	/* implemented by Perl_pp_sle */
+	[OP_SGT]                = Perl_pp_sgt,	/* implemented by Perl_pp_sle */
+	[OP_SLE]                = Perl_pp_sle,
+	[OP_SGE]                = Perl_pp_sge,	/* implemented by Perl_pp_sle */
+	[OP_SEQ]                = Perl_pp_seq,
+	[OP_SNE]                = Perl_pp_sne,
+	[OP_SCMP]               = Perl_pp_scmp,
+	[OP_BIT_AND]            = Perl_pp_bit_and,
+	[OP_BIT_XOR]            = Perl_pp_bit_xor,	/* implemented by Perl_pp_bit_or */
+	[OP_BIT_OR]             = Perl_pp_bit_or,
+	[OP_NBIT_AND]           = Perl_pp_nbit_and,
+	[OP_NBIT_XOR]           = Perl_pp_nbit_xor,	/* implemented by Perl_pp_nbit_or */
+	[OP_NBIT_OR]            = Perl_pp_nbit_or,
+	[OP_SBIT_AND]           = Perl_pp_sbit_and,
+	[OP_SBIT_XOR]           = Perl_pp_sbit_xor,	/* implemented by Perl_pp_sbit_or */
+	[OP_SBIT_OR]            = Perl_pp_sbit_or,
+	[OP_NEGATE]             = Perl_pp_negate,
+	[OP_I_NEGATE]           = Perl_pp_i_negate,
+	[OP_NOT]                = Perl_pp_not,
+	[OP_COMPLEMENT]         = Perl_pp_complement,
+	[OP_NCOMPLEMENT]        = Perl_pp_ncomplement,
+	[OP_SCOMPLEMENT]        = Perl_pp_scomplement,
+	[OP_SMARTMATCH]         = Perl_pp_smartmatch,
+	[OP_ATAN2]              = Perl_pp_atan2,
+	[OP_SIN]                = Perl_pp_sin,
+	[OP_COS]                = Perl_pp_cos,	/* implemented by Perl_pp_sin */
+	[OP_RAND]               = Perl_pp_rand,
+	[OP_SRAND]              = Perl_pp_srand,
+	[OP_EXP]                = Perl_pp_exp,	/* implemented by Perl_pp_sin */
+	[OP_LOG]                = Perl_pp_log,	/* implemented by Perl_pp_sin */
+	[OP_SQRT]               = Perl_pp_sqrt,	/* implemented by Perl_pp_sin */
+	[OP_INT]                = Perl_pp_int,
+	[OP_HEX]                = Perl_pp_hex,	/* implemented by Perl_pp_oct */
+	[OP_OCT]                = Perl_pp_oct,
+	[OP_ABS]                = Perl_pp_abs,
+	[OP_LENGTH]             = Perl_pp_length,
+	[OP_SUBSTR]             = Perl_pp_substr,
+	[OP_VEC]                = Perl_pp_vec,
+	[OP_INDEX]              = Perl_pp_index,
+	[OP_RINDEX]             = Perl_pp_rindex,	/* implemented by Perl_pp_index */
+	[OP_SPRINTF]            = Perl_pp_sprintf,
+	[OP_FORMLINE]           = Perl_pp_formline,
+	[OP_ORD]                = Perl_pp_ord,
+	[OP_CHR]                = Perl_pp_chr,
+	[OP_CRYPT]              = Perl_pp_crypt,
+	[OP_UCFIRST]            = Perl_pp_ucfirst,
+	[OP_LCFIRST]            = Perl_pp_lcfirst,	/* implemented by Perl_pp_ucfirst */
+	[OP_UC]                 = Perl_pp_uc,
+	[OP_LC]                 = Perl_pp_lc,
+	[OP_QUOTEMETA]          = Perl_pp_quotemeta,
+	[OP_RV2AV]              = Perl_pp_rv2av,
+	[OP_AELEMFAST]          = Perl_pp_aelemfast,
+	[OP_AELEMFAST_LEX]      = Perl_pp_aelemfast_lex,	/* implemented by Perl_pp_aelemfast */
+	[OP_AELEMFASTLEX_STORE] = Perl_pp_aelemfastlex_store,
+	[OP_AELEM]              = Perl_pp_aelem,
+	[OP_ASLICE]             = Perl_pp_aslice,
+	[OP_KVASLICE]           = Perl_pp_kvaslice,
+	[OP_AEACH]              = Perl_pp_aeach,
+	[OP_AVALUES]            = Perl_pp_avalues,	/* implemented by Perl_pp_akeys */
+	[OP_AKEYS]              = Perl_pp_akeys,
+	[OP_EACH]               = Perl_pp_each,
+	[OP_VALUES]             = Perl_pp_values,	/* implemented by Perl_do_kv */
+	[OP_KEYS]               = Perl_pp_keys,	/* implemented by Perl_do_kv */
+	[OP_DELETE]             = Perl_pp_delete,
+	[OP_EXISTS]             = Perl_pp_exists,
+	[OP_RV2HV]              = Perl_pp_rv2hv,	/* implemented by Perl_pp_rv2av */
+	[OP_HELEM]              = Perl_pp_helem,
+	[OP_HSLICE]             = Perl_pp_hslice,
+	[OP_KVHSLICE]           = Perl_pp_kvhslice,
+	[OP_MULTIDEREF]         = Perl_pp_multideref,
+	[OP_UNPACK]             = Perl_pp_unpack,
+	[OP_PACK]               = Perl_pp_pack,
+	[OP_SPLIT]              = Perl_pp_split,
+	[OP_JOIN]               = Perl_pp_join,
+	[OP_LIST]               = Perl_pp_list,
+	[OP_LSLICE]             = Perl_pp_lslice,
+	[OP_ANONLIST]           = Perl_pp_anonlist,
+	[OP_ANONHASH]           = Perl_pp_anonhash,
+	[OP_EMPTYAVHV]          = Perl_pp_emptyavhv,
+	[OP_SPLICE]             = Perl_pp_splice,
+	[OP_PUSH]               = Perl_pp_push,
+	[OP_POP]                = Perl_pp_pop,	/* implemented by Perl_pp_shift */
+	[OP_SHIFT]              = Perl_pp_shift,
+	[OP_UNSHIFT]            = Perl_pp_unshift,
+	[OP_SORT]               = Perl_pp_sort,
+	[OP_REVERSE]            = Perl_pp_reverse,
+	[OP_GREPSTART]          = Perl_pp_grepstart,
+	[OP_GREPWHILE]          = Perl_pp_grepwhile,
+	[OP_MAPSTART]           = Perl_pp_mapstart,	/* implemented by Perl_pp_grepstart */
+	[OP_MAPWHILE]           = Perl_pp_mapwhile,
+	[OP_RANGE]              = Perl_pp_range,
+	[OP_FLIP]               = Perl_pp_flip,
+	[OP_FLOP]               = Perl_pp_flop,
+	[OP_AND]                = Perl_pp_and,
+	[OP_OR]                 = Perl_pp_or,
+	[OP_XOR]                = Perl_pp_xor,
+	[OP_DOR]                = Perl_pp_dor,	/* implemented by Perl_pp_defined */
+	[OP_COND_EXPR]          = Perl_pp_cond_expr,
+	[OP_ANDASSIGN]          = Perl_pp_andassign,	/* implemented by Perl_pp_and */
+	[OP_ORASSIGN]           = Perl_pp_orassign,	/* implemented by Perl_pp_or */
+	[OP_DORASSIGN]          = Perl_pp_dorassign,	/* implemented by Perl_pp_defined */
+	[OP_ENTERSUB]           = Perl_pp_entersub,
+	[OP_LEAVESUB]           = Perl_pp_leavesub,
+	[OP_LEAVESUBLV]         = Perl_pp_leavesublv,
+	[OP_ARGCHECK]           = Perl_pp_argcheck,
+	[OP_ARGELEM]            = Perl_pp_argelem,
+	[OP_ARGDEFELEM]         = Perl_pp_argdefelem,
+	[OP_CALLER]             = Perl_pp_caller,
+	[OP_WARN]               = Perl_pp_warn,
+	[OP_DIE]                = Perl_pp_die,
+	[OP_RESET]              = Perl_pp_reset,
+	[OP_LINESEQ]            = Perl_pp_lineseq,	/* implemented by Perl_pp_null */
+	[OP_NEXTSTATE]          = Perl_pp_nextstate,
+	[OP_DBSTATE]            = Perl_pp_dbstate,
+	[OP_UNSTACK]            = Perl_pp_unstack,
+	[OP_ENTER]              = Perl_pp_enter,
+	[OP_LEAVE]              = Perl_pp_leave,
+	[OP_SCOPE]              = Perl_pp_scope,	/* implemented by Perl_pp_null */
+	[OP_ENTERITER]          = Perl_pp_enteriter,
+	[OP_ITER]               = Perl_pp_iter,
+	[OP_ENTERLOOP]          = Perl_pp_enterloop,
+	[OP_LEAVELOOP]          = Perl_pp_leaveloop,
+	[OP_RETURN]             = Perl_pp_return,
+	[OP_LAST]               = Perl_pp_last,
+	[OP_NEXT]               = Perl_pp_next,
+	[OP_REDO]               = Perl_pp_redo,
+	[OP_DUMP]               = Perl_pp_dump,	/* implemented by Perl_pp_goto */
+	[OP_GOTO]               = Perl_pp_goto,
+	[OP_EXIT]               = Perl_pp_exit,
+	[OP_METHOD]             = Perl_pp_method,
+	[OP_METHOD_NAMED]       = Perl_pp_method_named,
+	[OP_METHOD_SUPER]       = Perl_pp_method_super,
+	[OP_METHOD_REDIR]       = Perl_pp_method_redir,
+	[OP_METHOD_REDIR_SUPER] = Perl_pp_method_redir_super,
+	[OP_ENTERGIVEN]         = Perl_pp_entergiven,
+	[OP_LEAVEGIVEN]         = Perl_pp_leavegiven,
+	[OP_ENTERWHEN]          = Perl_pp_enterwhen,
+	[OP_LEAVEWHEN]          = Perl_pp_leavewhen,
+	[OP_BREAK]              = Perl_pp_break,
+	[OP_CONTINUE]           = Perl_pp_continue,
+	[OP_OPEN]               = Perl_pp_open,
+	[OP_CLOSE]              = Perl_pp_close,
+	[OP_PIPE_OP]            = Perl_pp_pipe_op,
+	[OP_FILENO]             = Perl_pp_fileno,
+	[OP_UMASK]              = Perl_pp_umask,
+	[OP_BINMODE]            = Perl_pp_binmode,
+	[OP_TIE]                = Perl_pp_tie,
+	[OP_UNTIE]              = Perl_pp_untie,
+	[OP_TIED]               = Perl_pp_tied,
+	[OP_DBMOPEN]            = Perl_pp_dbmopen,
+	[OP_DBMCLOSE]           = Perl_pp_dbmclose,	/* implemented by Perl_pp_untie */
+	[OP_SSELECT]            = Perl_pp_sselect,
+	[OP_SELECT]             = Perl_pp_select,
+	[OP_GETC]               = Perl_pp_getc,
+	[OP_READ]               = Perl_pp_read,	/* implemented by Perl_pp_sysread */
+	[OP_ENTERWRITE]         = Perl_pp_enterwrite,
+	[OP_LEAVEWRITE]         = Perl_pp_leavewrite,
+	[OP_PRTF]               = Perl_pp_prtf,
+	[OP_PRINT]              = Perl_pp_print,
+	[OP_SAY]                = Perl_pp_say,	/* implemented by Perl_pp_print */
+	[OP_SYSOPEN]            = Perl_pp_sysopen,
+	[OP_SYSSEEK]            = Perl_pp_sysseek,
+	[OP_SYSREAD]            = Perl_pp_sysread,
+	[OP_SYSWRITE]           = Perl_pp_syswrite,
+	[OP_EOF]                = Perl_pp_eof,
+	[OP_TELL]               = Perl_pp_tell,
+	[OP_SEEK]               = Perl_pp_seek,	/* implemented by Perl_pp_sysseek */
+	[OP_TRUNCATE]           = Perl_pp_truncate,
+	[OP_FCNTL]              = Perl_pp_fcntl,	/* implemented by Perl_pp_ioctl */
+	[OP_IOCTL]              = Perl_pp_ioctl,
+	[OP_FLOCK]              = Perl_pp_flock,
+	[OP_SEND]               = Perl_pp_send,	/* implemented by Perl_pp_syswrite */
+	[OP_RECV]               = Perl_pp_recv,	/* implemented by Perl_pp_sysread */
+	[OP_SOCKET]             = Perl_pp_socket,
+	[OP_SOCKPAIR]           = Perl_pp_sockpair,
+	[OP_BIND]               = Perl_pp_bind,
+	[OP_CONNECT]            = Perl_pp_connect,	/* implemented by Perl_pp_bind */
+	[OP_LISTEN]             = Perl_pp_listen,
+	[OP_ACCEPT]             = Perl_pp_accept,
+	[OP_SHUTDOWN]           = Perl_pp_shutdown,
+	[OP_GSOCKOPT]           = Perl_pp_gsockopt,	/* implemented by Perl_pp_ssockopt */
+	[OP_SSOCKOPT]           = Perl_pp_ssockopt,
+	[OP_GETSOCKNAME]        = Perl_pp_getsockname,	/* implemented by Perl_pp_getpeername */
+	[OP_GETPEERNAME]        = Perl_pp_getpeername,
+	[OP_LSTAT]              = Perl_pp_lstat,	/* implemented by Perl_pp_stat */
+	[OP_STAT]               = Perl_pp_stat,
+	[OP_FTRREAD]            = Perl_pp_ftrread,
+	[OP_FTRWRITE]           = Perl_pp_ftrwrite,	/* implemented by Perl_pp_ftrread */
+	[OP_FTREXEC]            = Perl_pp_ftrexec,	/* implemented by Perl_pp_ftrread */
+	[OP_FTEREAD]            = Perl_pp_fteread,	/* implemented by Perl_pp_ftrread */
+	[OP_FTEWRITE]           = Perl_pp_ftewrite,	/* implemented by Perl_pp_ftrread */
+	[OP_FTEEXEC]            = Perl_pp_fteexec,	/* implemented by Perl_pp_ftrread */
+	[OP_FTIS]               = Perl_pp_ftis,
+	[OP_FTSIZE]             = Perl_pp_ftsize,	/* implemented by Perl_pp_ftis */
+	[OP_FTMTIME]            = Perl_pp_ftmtime,	/* implemented by Perl_pp_ftis */
+	[OP_FTATIME]            = Perl_pp_ftatime,	/* implemented by Perl_pp_ftis */
+	[OP_FTCTIME]            = Perl_pp_ftctime,	/* implemented by Perl_pp_ftis */
+	[OP_FTROWNED]           = Perl_pp_ftrowned,
+	[OP_FTEOWNED]           = Perl_pp_fteowned,	/* implemented by Perl_pp_ftrowned */
+	[OP_FTZERO]             = Perl_pp_ftzero,	/* implemented by Perl_pp_ftrowned */
+	[OP_FTSOCK]             = Perl_pp_ftsock,	/* implemented by Perl_pp_ftrowned */
+	[OP_FTCHR]              = Perl_pp_ftchr,	/* implemented by Perl_pp_ftrowned */
+	[OP_FTBLK]              = Perl_pp_ftblk,	/* implemented by Perl_pp_ftrowned */
+	[OP_FTFILE]             = Perl_pp_ftfile,	/* implemented by Perl_pp_ftrowned */
+	[OP_FTDIR]              = Perl_pp_ftdir,	/* implemented by Perl_pp_ftrowned */
+	[OP_FTPIPE]             = Perl_pp_ftpipe,	/* implemented by Perl_pp_ftrowned */
+	[OP_FTSUID]             = Perl_pp_ftsuid,	/* implemented by Perl_pp_ftrowned */
+	[OP_FTSGID]             = Perl_pp_ftsgid,	/* implemented by Perl_pp_ftrowned */
+	[OP_FTSVTX]             = Perl_pp_ftsvtx,	/* implemented by Perl_pp_ftrowned */
+	[OP_FTLINK]             = Perl_pp_ftlink,
+	[OP_FTTTY]              = Perl_pp_fttty,
+	[OP_FTTEXT]             = Perl_pp_fttext,
+	[OP_FTBINARY]           = Perl_pp_ftbinary,	/* implemented by Perl_pp_fttext */
+	[OP_CHDIR]              = Perl_pp_chdir,
+	[OP_CHOWN]              = Perl_pp_chown,
+	[OP_CHROOT]             = Perl_pp_chroot,
+	[OP_UNLINK]             = Perl_pp_unlink,	/* implemented by Perl_pp_chown */
+	[OP_CHMOD]              = Perl_pp_chmod,	/* implemented by Perl_pp_chown */
+	[OP_UTIME]              = Perl_pp_utime,	/* implemented by Perl_pp_chown */
+	[OP_RENAME]             = Perl_pp_rename,
+	[OP_LINK]               = Perl_pp_link,
+	[OP_SYMLINK]            = Perl_pp_symlink,	/* implemented by Perl_pp_link */
+	[OP_READLINK]           = Perl_pp_readlink,
+	[OP_MKDIR]              = Perl_pp_mkdir,
+	[OP_RMDIR]              = Perl_pp_rmdir,
+	[OP_OPEN_DIR]           = Perl_pp_open_dir,
+	[OP_READDIR]            = Perl_pp_readdir,
+	[OP_TELLDIR]            = Perl_pp_telldir,
+	[OP_SEEKDIR]            = Perl_pp_seekdir,
+	[OP_REWINDDIR]          = Perl_pp_rewinddir,
+	[OP_CLOSEDIR]           = Perl_pp_closedir,
+	[OP_FORK]               = Perl_pp_fork,
+	[OP_WAIT]               = Perl_pp_wait,
+	[OP_WAITPID]            = Perl_pp_waitpid,
+	[OP_SYSTEM]             = Perl_pp_system,
+	[OP_EXEC]               = Perl_pp_exec,
+	[OP_KILL]               = Perl_pp_kill,	/* implemented by Perl_pp_chown */
+	[OP_GETPPID]            = Perl_pp_getppid,
+	[OP_GETPGRP]            = Perl_pp_getpgrp,
+	[OP_SETPGRP]            = Perl_pp_setpgrp,
+	[OP_GETPRIORITY]        = Perl_pp_getpriority,
+	[OP_SETPRIORITY]        = Perl_pp_setpriority,
+	[OP_TIME]               = Perl_pp_time,
+	[OP_TMS]                = Perl_pp_tms,
+	[OP_LOCALTIME]          = Perl_pp_localtime,	/* implemented by Perl_pp_gmtime */
+	[OP_GMTIME]             = Perl_pp_gmtime,
+	[OP_ALARM]              = Perl_pp_alarm,
+	[OP_SLEEP]              = Perl_pp_sleep,
+	[OP_SHMGET]             = Perl_pp_shmget,	/* implemented by Perl_pp_semget */
+	[OP_SHMCTL]             = Perl_pp_shmctl,	/* implemented by Perl_pp_semctl */
+	[OP_SHMREAD]            = Perl_pp_shmread,	/* implemented by Perl_pp_shmwrite */
+	[OP_SHMWRITE]           = Perl_pp_shmwrite,
+	[OP_MSGGET]             = Perl_pp_msgget,	/* implemented by Perl_pp_semget */
+	[OP_MSGCTL]             = Perl_pp_msgctl,	/* implemented by Perl_pp_semctl */
+	[OP_MSGSND]             = Perl_pp_msgsnd,	/* implemented by Perl_pp_shmwrite */
+	[OP_MSGRCV]             = Perl_pp_msgrcv,	/* implemented by Perl_pp_shmwrite */
+	[OP_SEMOP]              = Perl_pp_semop,	/* implemented by Perl_pp_shmwrite */
+	[OP_SEMGET]             = Perl_pp_semget,
+	[OP_SEMCTL]             = Perl_pp_semctl,
+	[OP_REQUIRE]            = Perl_pp_require,
+	[OP_DOFILE]             = Perl_pp_dofile,	/* implemented by Perl_pp_require */
+	[OP_HINTSEVAL]          = Perl_pp_hintseval,
+	[OP_ENTEREVAL]          = Perl_pp_entereval,
+	[OP_LEAVEEVAL]          = Perl_pp_leaveeval,
+	[OP_ENTERTRY]           = Perl_pp_entertry,
+	[OP_LEAVETRY]           = Perl_pp_leavetry,
+	[OP_GHBYNAME]           = Perl_pp_ghbyname,	/* implemented by Perl_pp_ghostent */
+	[OP_GHBYADDR]           = Perl_pp_ghbyaddr,	/* implemented by Perl_pp_ghostent */
+	[OP_GHOSTENT]           = Perl_pp_ghostent,
+	[OP_GNBYNAME]           = Perl_pp_gnbyname,	/* implemented by Perl_pp_gnetent */
+	[OP_GNBYADDR]           = Perl_pp_gnbyaddr,	/* implemented by Perl_pp_gnetent */
+	[OP_GNETENT]            = Perl_pp_gnetent,
+	[OP_GPBYNAME]           = Perl_pp_gpbyname,	/* implemented by Perl_pp_gprotoent */
+	[OP_GPBYNUMBER]         = Perl_pp_gpbynumber,	/* implemented by Perl_pp_gprotoent */
+	[OP_GPROTOENT]          = Perl_pp_gprotoent,
+	[OP_GSBYNAME]           = Perl_pp_gsbyname,	/* implemented by Perl_pp_gservent */
+	[OP_GSBYPORT]           = Perl_pp_gsbyport,	/* implemented by Perl_pp_gservent */
+	[OP_GSERVENT]           = Perl_pp_gservent,
+	[OP_SHOSTENT]           = Perl_pp_shostent,
+	[OP_SNETENT]            = Perl_pp_snetent,	/* implemented by Perl_pp_shostent */
+	[OP_SPROTOENT]          = Perl_pp_sprotoent,	/* implemented by Perl_pp_shostent */
+	[OP_SSERVENT]           = Perl_pp_sservent,	/* implemented by Perl_pp_shostent */
+	[OP_EHOSTENT]           = Perl_pp_ehostent,
+	[OP_ENETENT]            = Perl_pp_enetent,	/* implemented by Perl_pp_ehostent */
+	[OP_EPROTOENT]          = Perl_pp_eprotoent,	/* implemented by Perl_pp_ehostent */
+	[OP_ESERVENT]           = Perl_pp_eservent,	/* implemented by Perl_pp_ehostent */
+	[OP_GPWNAM]             = Perl_pp_gpwnam,	/* implemented by Perl_pp_gpwent */
+	[OP_GPWUID]             = Perl_pp_gpwuid,	/* implemented by Perl_pp_gpwent */
+	[OP_GPWENT]             = Perl_pp_gpwent,
+	[OP_SPWENT]             = Perl_pp_spwent,	/* implemented by Perl_pp_ehostent */
+	[OP_EPWENT]             = Perl_pp_epwent,	/* implemented by Perl_pp_ehostent */
+	[OP_GGRNAM]             = Perl_pp_ggrnam,	/* implemented by Perl_pp_ggrent */
+	[OP_GGRGID]             = Perl_pp_ggrgid,	/* implemented by Perl_pp_ggrent */
+	[OP_GGRENT]             = Perl_pp_ggrent,
+	[OP_SGRENT]             = Perl_pp_sgrent,	/* implemented by Perl_pp_ehostent */
+	[OP_EGRENT]             = Perl_pp_egrent,	/* implemented by Perl_pp_ehostent */
+	[OP_GETLOGIN]           = Perl_pp_getlogin,
+	[OP_SYSCALL]            = Perl_pp_syscall,
+	[OP_LOCK]               = Perl_pp_lock,
+	[OP_ONCE]               = Perl_pp_once,
+	[OP_CUSTOM]             = Perl_pp_custom,	/* implemented by Perl_unimplemented_op */
+	[OP_COREARGS]           = Perl_pp_coreargs,
+	[OP_AVHVSWITCH]         = Perl_pp_avhvswitch,
+	[OP_RUNCV]              = Perl_pp_runcv,
+	[OP_FC]                 = Perl_pp_fc,
+	[OP_PADCV]              = Perl_pp_padcv,
+	[OP_INTROCV]            = Perl_pp_introcv,
+	[OP_CLONECV]            = Perl_pp_clonecv,
+	[OP_PADRANGE]           = Perl_pp_padrange,
+	[OP_REFASSIGN]          = Perl_pp_refassign,
+	[OP_LVREF]              = Perl_pp_lvref,
+	[OP_LVREFSLICE]         = Perl_pp_lvrefslice,
+	[OP_LVAVREF]            = Perl_pp_lvavref,
+	[OP_ANONCONST]          = Perl_pp_anonconst,
+	[OP_ISA]                = Perl_pp_isa,
+	[OP_CMPCHAIN_AND]       = Perl_pp_cmpchain_and,
+	[OP_CMPCHAIN_DUP]       = Perl_pp_cmpchain_dup,
+	[OP_ENTERTRYCATCH]      = Perl_pp_entertrycatch,
+	[OP_LEAVETRYCATCH]      = Perl_pp_leavetrycatch,
+	[OP_POPTRY]             = Perl_pp_poptry,
+	[OP_CATCH]              = Perl_pp_catch,
+	[OP_PUSHDEFER]          = Perl_pp_pushdefer,
+	[OP_IS_BOOL]            = Perl_pp_is_bool,
+	[OP_IS_WEAK]            = Perl_pp_is_weak,
+	[OP_WEAKEN]             = Perl_pp_weaken,
+	[OP_UNWEAKEN]           = Perl_pp_unweaken,
+	[OP_BLESSED]            = Perl_pp_blessed,
+	[OP_REFADDR]            = Perl_pp_refaddr,
+	[OP_REFTYPE]            = Perl_pp_reftype,
+	[OP_CEIL]               = Perl_pp_ceil,
+	[OP_FLOOR]              = Perl_pp_floor,
+	[OP_IS_TAINTED]         = Perl_pp_is_tainted,
+});
 
 EXT Perl_check_t PL_check[] /* or perlvars.h */
-#if defined(DOINIT)
-= {
-	Perl_ck_null,		/* null */
-	Perl_ck_null,		/* stub */
-	Perl_ck_fun,		/* scalar */
-	Perl_ck_null,		/* pushmark */
-	Perl_ck_null,		/* wantarray */
-	Perl_ck_svconst,	/* const */
-	Perl_ck_null,		/* gvsv */
-	Perl_ck_null,		/* gv */
-	Perl_ck_null,		/* gelem */
-	Perl_ck_null,		/* padsv */
-	Perl_ck_sassign,	/* padsv_store */
-	Perl_ck_null,		/* padav */
-	Perl_ck_null,		/* padhv */
-	Perl_ck_null,		/* padany */
-	Perl_ck_rvconst,	/* rv2gv */
-	Perl_ck_rvconst,	/* rv2sv */
-	Perl_ck_null,		/* av2arylen */
-	Perl_ck_rvconst,	/* rv2cv */
-	Perl_ck_anoncode,	/* anoncode */
-	Perl_ck_prototype,	/* prototype */
-	Perl_ck_spair,		/* refgen */
-	Perl_ck_null,		/* srefgen */
-	Perl_ck_fun,		/* ref */
-	Perl_ck_fun,		/* bless */
-	Perl_ck_backtick,	/* backtick */
-	Perl_ck_glob,		/* glob */
-	Perl_ck_readline,	/* readline */
-	Perl_ck_null,		/* rcatline */
-	Perl_ck_fun,		/* regcmaybe */
-	Perl_ck_fun,		/* regcreset */
-	Perl_ck_null,		/* regcomp */
-	Perl_ck_match,		/* match */
-	Perl_ck_match,		/* qr */
-	Perl_ck_match,		/* subst */
-	Perl_ck_null,		/* substcont */
-	Perl_ck_match,		/* trans */
-	Perl_ck_match,		/* transr */
-	Perl_ck_sassign,	/* sassign */
-	Perl_ck_null,		/* aassign */
-	Perl_ck_spair,		/* chop */
-	Perl_ck_null,		/* schop */
-	Perl_ck_spair,		/* chomp */
-	Perl_ck_null,		/* schomp */
-	Perl_ck_defined,	/* defined */
-	Perl_ck_fun,		/* undef */
-	Perl_ck_fun,		/* study */
-	Perl_ck_fun,		/* pos */
-	Perl_ck_lfun,		/* preinc */
-	Perl_ck_lfun,		/* i_preinc */
-	Perl_ck_lfun,		/* predec */
-	Perl_ck_lfun,		/* i_predec */
-	Perl_ck_lfun,		/* postinc */
-	Perl_ck_lfun,		/* i_postinc */
-	Perl_ck_lfun,		/* postdec */
-	Perl_ck_lfun,		/* i_postdec */
-	Perl_ck_null,		/* pow */
-	Perl_ck_null,		/* multiply */
-	Perl_ck_null,		/* i_multiply */
-	Perl_ck_null,		/* divide */
-	Perl_ck_null,		/* i_divide */
-	Perl_ck_null,		/* modulo */
-	Perl_ck_null,		/* i_modulo */
-	Perl_ck_repeat,		/* repeat */
-	Perl_ck_null,		/* add */
-	Perl_ck_null,		/* i_add */
-	Perl_ck_null,		/* subtract */
-	Perl_ck_null,		/* i_subtract */
-	Perl_ck_concat,		/* concat */
-	Perl_ck_null,		/* multiconcat */
-	Perl_ck_stringify,	/* stringify */
-	Perl_ck_bitop,		/* left_shift */
-	Perl_ck_bitop,		/* right_shift */
-	Perl_ck_cmp,		/* lt */
-	Perl_ck_cmp,		/* i_lt */
-	Perl_ck_cmp,		/* gt */
-	Perl_ck_cmp,		/* i_gt */
-	Perl_ck_cmp,		/* le */
-	Perl_ck_cmp,		/* i_le */
-	Perl_ck_cmp,		/* ge */
-	Perl_ck_cmp,		/* i_ge */
-	Perl_ck_cmp,		/* eq */
-	Perl_ck_cmp,		/* i_eq */
-	Perl_ck_cmp,		/* ne */
-	Perl_ck_cmp,		/* i_ne */
-	Perl_ck_null,		/* ncmp */
-	Perl_ck_null,		/* i_ncmp */
-	Perl_ck_null,		/* slt */
-	Perl_ck_null,		/* sgt */
-	Perl_ck_null,		/* sle */
-	Perl_ck_null,		/* sge */
-	Perl_ck_null,		/* seq */
-	Perl_ck_null,		/* sne */
-	Perl_ck_null,		/* scmp */
-	Perl_ck_bitop,		/* bit_and */
-	Perl_ck_bitop,		/* bit_xor */
-	Perl_ck_bitop,		/* bit_or */
-	Perl_ck_bitop,		/* nbit_and */
-	Perl_ck_bitop,		/* nbit_xor */
-	Perl_ck_bitop,		/* nbit_or */
-	Perl_ck_bitop,		/* sbit_and */
-	Perl_ck_bitop,		/* sbit_xor */
-	Perl_ck_bitop,		/* sbit_or */
-	Perl_ck_null,		/* negate */
-	Perl_ck_null,		/* i_negate */
-	Perl_ck_null,		/* not */
-	Perl_ck_bitop,		/* complement */
-	Perl_ck_bitop,		/* ncomplement */
-	Perl_ck_null,		/* scomplement */
-	Perl_ck_smartmatch,	/* smartmatch */
-	Perl_ck_fun,		/* atan2 */
-	Perl_ck_fun,		/* sin */
-	Perl_ck_fun,		/* cos */
-	Perl_ck_fun,		/* rand */
-	Perl_ck_fun,		/* srand */
-	Perl_ck_fun,		/* exp */
-	Perl_ck_fun,		/* log */
-	Perl_ck_fun,		/* sqrt */
-	Perl_ck_fun,		/* int */
-	Perl_ck_fun,		/* hex */
-	Perl_ck_fun,		/* oct */
-	Perl_ck_fun,		/* abs */
-	Perl_ck_length,		/* length */
-	Perl_ck_substr,		/* substr */
-	Perl_ck_fun,		/* vec */
-	Perl_ck_index,		/* index */
-	Perl_ck_index,		/* rindex */
-	Perl_ck_lfun,		/* sprintf */
-	Perl_ck_fun,		/* formline */
-	Perl_ck_fun,		/* ord */
-	Perl_ck_fun,		/* chr */
-	Perl_ck_fun,		/* crypt */
-	Perl_ck_fun,		/* ucfirst */
-	Perl_ck_fun,		/* lcfirst */
-	Perl_ck_fun,		/* uc */
-	Perl_ck_fun,		/* lc */
-	Perl_ck_fun,		/* quotemeta */
-	Perl_ck_rvconst,	/* rv2av */
-	Perl_ck_null,		/* aelemfast */
-	Perl_ck_null,		/* aelemfast_lex */
-	Perl_ck_null,		/* aelemfastlex_store */
-	Perl_ck_null,		/* aelem */
-	Perl_ck_null,		/* aslice */
-	Perl_ck_null,		/* kvaslice */
-	Perl_ck_each,		/* aeach */
-	Perl_ck_each,		/* avalues */
-	Perl_ck_each,		/* akeys */
-	Perl_ck_each,		/* each */
-	Perl_ck_each,		/* values */
-	Perl_ck_each,		/* keys */
-	Perl_ck_delete,		/* delete */
-	Perl_ck_exists,		/* exists */
-	Perl_ck_rvconst,	/* rv2hv */
-	Perl_ck_null,		/* helem */
-	Perl_ck_null,		/* hslice */
-	Perl_ck_null,		/* kvhslice */
-	Perl_ck_null,		/* multideref */
-	Perl_ck_fun,		/* unpack */
-	Perl_ck_fun,		/* pack */
-	Perl_ck_split,		/* split */
-	Perl_ck_join,		/* join */
-	Perl_ck_null,		/* list */
-	Perl_ck_null,		/* lslice */
-	Perl_ck_fun,		/* anonlist */
-	Perl_ck_fun,		/* anonhash */
-	Perl_ck_fun,		/* emptyavhv */
-	Perl_ck_fun,		/* splice */
-	Perl_ck_fun,		/* push */
-	Perl_ck_shift,		/* pop */
-	Perl_ck_shift,		/* shift */
-	Perl_ck_fun,		/* unshift */
-	Perl_ck_sort,		/* sort */
-	Perl_ck_fun,		/* reverse */
-	Perl_ck_grep,		/* grepstart */
-	Perl_ck_null,		/* grepwhile */
-	Perl_ck_grep,		/* mapstart */
-	Perl_ck_null,		/* mapwhile */
-	Perl_ck_null,		/* range */
-	Perl_ck_null,		/* flip */
-	Perl_ck_null,		/* flop */
-	Perl_ck_null,		/* and */
-	Perl_ck_null,		/* or */
-	Perl_ck_null,		/* xor */
-	Perl_ck_null,		/* dor */
-	Perl_ck_null,		/* cond_expr */
-	Perl_ck_null,		/* andassign */
-	Perl_ck_null,		/* orassign */
-	Perl_ck_null,		/* dorassign */
-	Perl_ck_subr,		/* entersub */
-	Perl_ck_null,		/* leavesub */
-	Perl_ck_null,		/* leavesublv */
-	Perl_ck_null,		/* argcheck */
-	Perl_ck_null,		/* argelem */
-	Perl_ck_null,		/* argdefelem */
-	Perl_ck_fun,		/* caller */
-	Perl_ck_fun,		/* warn */
-	Perl_ck_fun,		/* die */
-	Perl_ck_fun,		/* reset */
-	Perl_ck_null,		/* lineseq */
-	Perl_ck_null,		/* nextstate */
-	Perl_ck_null,		/* dbstate */
-	Perl_ck_null,		/* unstack */
-	Perl_ck_null,		/* enter */
-	Perl_ck_null,		/* leave */
-	Perl_ck_null,		/* scope */
-	Perl_ck_null,		/* enteriter */
-	Perl_ck_null,		/* iter */
-	Perl_ck_null,		/* enterloop */
-	Perl_ck_null,		/* leaveloop */
-	Perl_ck_return,		/* return */
-	Perl_ck_null,		/* last */
-	Perl_ck_null,		/* next */
-	Perl_ck_null,		/* redo */
-	Perl_ck_null,		/* dump */
-	Perl_ck_null,		/* goto */
-	Perl_ck_fun,		/* exit */
-	Perl_ck_method,		/* method */
-	Perl_ck_null,		/* method_named */
-	Perl_ck_null,		/* method_super */
-	Perl_ck_null,		/* method_redir */
-	Perl_ck_null,		/* method_redir_super */
-	Perl_ck_null,		/* entergiven */
-	Perl_ck_null,		/* leavegiven */
-	Perl_ck_null,		/* enterwhen */
-	Perl_ck_null,		/* leavewhen */
-	Perl_ck_null,		/* break */
-	Perl_ck_null,		/* continue */
-	Perl_ck_open,		/* open */
-	Perl_ck_fun,		/* close */
-	Perl_ck_fun,		/* pipe_op */
-	Perl_ck_fun,		/* fileno */
-	Perl_ck_fun,		/* umask */
-	Perl_ck_fun,		/* binmode */
-	Perl_ck_fun,		/* tie */
-	Perl_ck_fun,		/* untie */
-	Perl_ck_fun,		/* tied */
-	Perl_ck_fun,		/* dbmopen */
-	Perl_ck_fun,		/* dbmclose */
-	Perl_ck_select,		/* sselect */
-	Perl_ck_select,		/* select */
-	Perl_ck_eof,		/* getc */
-	Perl_ck_fun,		/* read */
-	Perl_ck_fun,		/* enterwrite */
-	Perl_ck_null,		/* leavewrite */
-	Perl_ck_listiob,	/* prtf */
-	Perl_ck_listiob,	/* print */
-	Perl_ck_listiob,	/* say */
-	Perl_ck_fun,		/* sysopen */
-	Perl_ck_fun,		/* sysseek */
-	Perl_ck_fun,		/* sysread */
-	Perl_ck_fun,		/* syswrite */
-	Perl_ck_eof,		/* eof */
-	Perl_ck_tell,		/* tell */
-	Perl_ck_tell,		/* seek */
-	Perl_ck_trunc,		/* truncate */
-	Perl_ck_fun,		/* fcntl */
-	Perl_ck_fun,		/* ioctl */
-	Perl_ck_fun,		/* flock */
-	Perl_ck_fun,		/* send */
-	Perl_ck_fun,		/* recv */
-	Perl_ck_fun,		/* socket */
-	Perl_ck_fun,		/* sockpair */
-	Perl_ck_fun,		/* bind */
-	Perl_ck_fun,		/* connect */
-	Perl_ck_fun,		/* listen */
-	Perl_ck_fun,		/* accept */
-	Perl_ck_fun,		/* shutdown */
-	Perl_ck_fun,		/* gsockopt */
-	Perl_ck_fun,		/* ssockopt */
-	Perl_ck_fun,		/* getsockname */
-	Perl_ck_fun,		/* getpeername */
-	Perl_ck_ftst,		/* lstat */
-	Perl_ck_ftst,		/* stat */
-	Perl_ck_ftst,		/* ftrread */
-	Perl_ck_ftst,		/* ftrwrite */
-	Perl_ck_ftst,		/* ftrexec */
-	Perl_ck_ftst,		/* fteread */
-	Perl_ck_ftst,		/* ftewrite */
-	Perl_ck_ftst,		/* fteexec */
-	Perl_ck_ftst,		/* ftis */
-	Perl_ck_ftst,		/* ftsize */
-	Perl_ck_ftst,		/* ftmtime */
-	Perl_ck_ftst,		/* ftatime */
-	Perl_ck_ftst,		/* ftctime */
-	Perl_ck_ftst,		/* ftrowned */
-	Perl_ck_ftst,		/* fteowned */
-	Perl_ck_ftst,		/* ftzero */
-	Perl_ck_ftst,		/* ftsock */
-	Perl_ck_ftst,		/* ftchr */
-	Perl_ck_ftst,		/* ftblk */
-	Perl_ck_ftst,		/* ftfile */
-	Perl_ck_ftst,		/* ftdir */
-	Perl_ck_ftst,		/* ftpipe */
-	Perl_ck_ftst,		/* ftsuid */
-	Perl_ck_ftst,		/* ftsgid */
-	Perl_ck_ftst,		/* ftsvtx */
-	Perl_ck_ftst,		/* ftlink */
-	Perl_ck_ftst,		/* fttty */
-	Perl_ck_ftst,		/* fttext */
-	Perl_ck_ftst,		/* ftbinary */
-	Perl_ck_trunc,		/* chdir */
-	Perl_ck_fun,		/* chown */
-	Perl_ck_fun,		/* chroot */
-	Perl_ck_fun,		/* unlink */
-	Perl_ck_fun,		/* chmod */
-	Perl_ck_fun,		/* utime */
-	Perl_ck_fun,		/* rename */
-	Perl_ck_fun,		/* link */
-	Perl_ck_fun,		/* symlink */
-	Perl_ck_fun,		/* readlink */
-	Perl_ck_fun,		/* mkdir */
-	Perl_ck_fun,		/* rmdir */
-	Perl_ck_fun,		/* open_dir */
-	Perl_ck_fun,		/* readdir */
-	Perl_ck_fun,		/* telldir */
-	Perl_ck_fun,		/* seekdir */
-	Perl_ck_fun,		/* rewinddir */
-	Perl_ck_fun,		/* closedir */
-	Perl_ck_null,		/* fork */
-	Perl_ck_null,		/* wait */
-	Perl_ck_fun,		/* waitpid */
-	Perl_ck_exec,		/* system */
-	Perl_ck_exec,		/* exec */
-	Perl_ck_fun,		/* kill */
-	Perl_ck_null,		/* getppid */
-	Perl_ck_fun,		/* getpgrp */
-	Perl_ck_fun,		/* setpgrp */
-	Perl_ck_fun,		/* getpriority */
-	Perl_ck_fun,		/* setpriority */
-	Perl_ck_null,		/* time */
-	Perl_ck_null,		/* tms */
-	Perl_ck_fun,		/* localtime */
-	Perl_ck_fun,		/* gmtime */
-	Perl_ck_fun,		/* alarm */
-	Perl_ck_fun,		/* sleep */
-	Perl_ck_fun,		/* shmget */
-	Perl_ck_fun,		/* shmctl */
-	Perl_ck_fun,		/* shmread */
-	Perl_ck_fun,		/* shmwrite */
-	Perl_ck_fun,		/* msgget */
-	Perl_ck_fun,		/* msgctl */
-	Perl_ck_fun,		/* msgsnd */
-	Perl_ck_fun,		/* msgrcv */
-	Perl_ck_fun,		/* semop */
-	Perl_ck_fun,		/* semget */
-	Perl_ck_fun,		/* semctl */
-	Perl_ck_require,	/* require */
-	Perl_ck_fun,		/* dofile */
-	Perl_ck_svconst,	/* hintseval */
-	Perl_ck_eval,		/* entereval */
-	Perl_ck_null,		/* leaveeval */
-	Perl_ck_eval,		/* entertry */
-	Perl_ck_null,		/* leavetry */
-	Perl_ck_fun,		/* ghbyname */
-	Perl_ck_fun,		/* ghbyaddr */
-	Perl_ck_null,		/* ghostent */
-	Perl_ck_fun,		/* gnbyname */
-	Perl_ck_fun,		/* gnbyaddr */
-	Perl_ck_null,		/* gnetent */
-	Perl_ck_fun,		/* gpbyname */
-	Perl_ck_fun,		/* gpbynumber */
-	Perl_ck_null,		/* gprotoent */
-	Perl_ck_fun,		/* gsbyname */
-	Perl_ck_fun,		/* gsbyport */
-	Perl_ck_null,		/* gservent */
-	Perl_ck_fun,		/* shostent */
-	Perl_ck_fun,		/* snetent */
-	Perl_ck_fun,		/* sprotoent */
-	Perl_ck_fun,		/* sservent */
-	Perl_ck_null,		/* ehostent */
-	Perl_ck_null,		/* enetent */
-	Perl_ck_null,		/* eprotoent */
-	Perl_ck_null,		/* eservent */
-	Perl_ck_fun,		/* gpwnam */
-	Perl_ck_fun,		/* gpwuid */
-	Perl_ck_null,		/* gpwent */
-	Perl_ck_null,		/* spwent */
-	Perl_ck_null,		/* epwent */
-	Perl_ck_fun,		/* ggrnam */
-	Perl_ck_fun,		/* ggrgid */
-	Perl_ck_null,		/* ggrent */
-	Perl_ck_null,		/* sgrent */
-	Perl_ck_null,		/* egrent */
-	Perl_ck_null,		/* getlogin */
-	Perl_ck_fun,		/* syscall */
-	Perl_ck_rfun,		/* lock */
-	Perl_ck_null,		/* once */
-	Perl_ck_null,		/* custom */
-	Perl_ck_null,		/* coreargs */
-	Perl_ck_null,		/* avhvswitch */
-	Perl_ck_null,		/* runcv */
-	Perl_ck_fun,		/* fc */
-	Perl_ck_null,		/* padcv */
-	Perl_ck_null,		/* introcv */
-	Perl_ck_null,		/* clonecv */
-	Perl_ck_null,		/* padrange */
-	Perl_ck_refassign,	/* refassign */
-	Perl_ck_null,		/* lvref */
-	Perl_ck_null,		/* lvrefslice */
-	Perl_ck_null,		/* lvavref */
-	Perl_ck_null,		/* anonconst */
-	Perl_ck_isa,		/* isa */
-	Perl_ck_null,		/* cmpchain_and */
-	Perl_ck_null,		/* cmpchain_dup */
-	Perl_ck_trycatch,	/* entertrycatch */
-	Perl_ck_null,		/* leavetrycatch */
-	Perl_ck_null,		/* poptry */
-	Perl_ck_null,		/* catch */
-	Perl_ck_null,		/* pushdefer */
-	Perl_ck_null,		/* is_bool */
-	Perl_ck_null,		/* is_weak */
-	Perl_ck_null,		/* weaken */
-	Perl_ck_null,		/* unweaken */
-	Perl_ck_null,		/* blessed */
-	Perl_ck_null,		/* refaddr */
-	Perl_ck_null,		/* reftype */
-	Perl_ck_null,		/* ceil */
-	Perl_ck_null,		/* floor */
-	Perl_ck_null,		/* is_tainted */
-}
-#endif
-;
+INIT({
+	[OP_NULL]               = Perl_ck_null,
+	[OP_STUB]               = Perl_ck_null,
+	[OP_SCALAR]             = Perl_ck_fun,
+	[OP_PUSHMARK]           = Perl_ck_null,
+	[OP_WANTARRAY]          = Perl_ck_null,
+	[OP_CONST]              = Perl_ck_svconst,
+	[OP_GVSV]               = Perl_ck_null,
+	[OP_GV]                 = Perl_ck_null,
+	[OP_GELEM]              = Perl_ck_null,
+	[OP_PADSV]              = Perl_ck_null,
+	[OP_PADSV_STORE]        = Perl_ck_sassign,
+	[OP_PADAV]              = Perl_ck_null,
+	[OP_PADHV]              = Perl_ck_null,
+	[OP_PADANY]             = Perl_ck_null,
+	[OP_RV2GV]              = Perl_ck_rvconst,
+	[OP_RV2SV]              = Perl_ck_rvconst,
+	[OP_AV2ARYLEN]          = Perl_ck_null,
+	[OP_RV2CV]              = Perl_ck_rvconst,
+	[OP_ANONCODE]           = Perl_ck_anoncode,
+	[OP_PROTOTYPE]          = Perl_ck_prototype,
+	[OP_REFGEN]             = Perl_ck_spair,
+	[OP_SREFGEN]            = Perl_ck_null,
+	[OP_REF]                = Perl_ck_fun,
+	[OP_BLESS]              = Perl_ck_fun,
+	[OP_BACKTICK]           = Perl_ck_backtick,
+	[OP_GLOB]               = Perl_ck_glob,
+	[OP_READLINE]           = Perl_ck_readline,
+	[OP_RCATLINE]           = Perl_ck_null,
+	[OP_REGCMAYBE]          = Perl_ck_fun,
+	[OP_REGCRESET]          = Perl_ck_fun,
+	[OP_REGCOMP]            = Perl_ck_null,
+	[OP_MATCH]              = Perl_ck_match,
+	[OP_QR]                 = Perl_ck_match,
+	[OP_SUBST]              = Perl_ck_match,
+	[OP_SUBSTCONT]          = Perl_ck_null,
+	[OP_TRANS]              = Perl_ck_match,
+	[OP_TRANSR]             = Perl_ck_match,
+	[OP_SASSIGN]            = Perl_ck_sassign,
+	[OP_AASSIGN]            = Perl_ck_null,
+	[OP_CHOP]               = Perl_ck_spair,
+	[OP_SCHOP]              = Perl_ck_null,
+	[OP_CHOMP]              = Perl_ck_spair,
+	[OP_SCHOMP]             = Perl_ck_null,
+	[OP_DEFINED]            = Perl_ck_defined,
+	[OP_UNDEF]              = Perl_ck_fun,
+	[OP_STUDY]              = Perl_ck_fun,
+	[OP_POS]                = Perl_ck_fun,
+	[OP_PREINC]             = Perl_ck_lfun,
+	[OP_I_PREINC]           = Perl_ck_lfun,
+	[OP_PREDEC]             = Perl_ck_lfun,
+	[OP_I_PREDEC]           = Perl_ck_lfun,
+	[OP_POSTINC]            = Perl_ck_lfun,
+	[OP_I_POSTINC]          = Perl_ck_lfun,
+	[OP_POSTDEC]            = Perl_ck_lfun,
+	[OP_I_POSTDEC]          = Perl_ck_lfun,
+	[OP_POW]                = Perl_ck_null,
+	[OP_MULTIPLY]           = Perl_ck_null,
+	[OP_I_MULTIPLY]         = Perl_ck_null,
+	[OP_DIVIDE]             = Perl_ck_null,
+	[OP_I_DIVIDE]           = Perl_ck_null,
+	[OP_MODULO]             = Perl_ck_null,
+	[OP_I_MODULO]           = Perl_ck_null,
+	[OP_REPEAT]             = Perl_ck_repeat,
+	[OP_ADD]                = Perl_ck_null,
+	[OP_I_ADD]              = Perl_ck_null,
+	[OP_SUBTRACT]           = Perl_ck_null,
+	[OP_I_SUBTRACT]         = Perl_ck_null,
+	[OP_CONCAT]             = Perl_ck_concat,
+	[OP_MULTICONCAT]        = Perl_ck_null,
+	[OP_STRINGIFY]          = Perl_ck_stringify,
+	[OP_LEFT_SHIFT]         = Perl_ck_bitop,
+	[OP_RIGHT_SHIFT]        = Perl_ck_bitop,
+	[OP_LT]                 = Perl_ck_cmp,
+	[OP_I_LT]               = Perl_ck_cmp,
+	[OP_GT]                 = Perl_ck_cmp,
+	[OP_I_GT]               = Perl_ck_cmp,
+	[OP_LE]                 = Perl_ck_cmp,
+	[OP_I_LE]               = Perl_ck_cmp,
+	[OP_GE]                 = Perl_ck_cmp,
+	[OP_I_GE]               = Perl_ck_cmp,
+	[OP_EQ]                 = Perl_ck_cmp,
+	[OP_I_EQ]               = Perl_ck_cmp,
+	[OP_NE]                 = Perl_ck_cmp,
+	[OP_I_NE]               = Perl_ck_cmp,
+	[OP_NCMP]               = Perl_ck_null,
+	[OP_I_NCMP]             = Perl_ck_null,
+	[OP_SLT]                = Perl_ck_null,
+	[OP_SGT]                = Perl_ck_null,
+	[OP_SLE]                = Perl_ck_null,
+	[OP_SGE]                = Perl_ck_null,
+	[OP_SEQ]                = Perl_ck_null,
+	[OP_SNE]                = Perl_ck_null,
+	[OP_SCMP]               = Perl_ck_null,
+	[OP_BIT_AND]            = Perl_ck_bitop,
+	[OP_BIT_XOR]            = Perl_ck_bitop,
+	[OP_BIT_OR]             = Perl_ck_bitop,
+	[OP_NBIT_AND]           = Perl_ck_bitop,
+	[OP_NBIT_XOR]           = Perl_ck_bitop,
+	[OP_NBIT_OR]            = Perl_ck_bitop,
+	[OP_SBIT_AND]           = Perl_ck_bitop,
+	[OP_SBIT_XOR]           = Perl_ck_bitop,
+	[OP_SBIT_OR]            = Perl_ck_bitop,
+	[OP_NEGATE]             = Perl_ck_null,
+	[OP_I_NEGATE]           = Perl_ck_null,
+	[OP_NOT]                = Perl_ck_null,
+	[OP_COMPLEMENT]         = Perl_ck_bitop,
+	[OP_NCOMPLEMENT]        = Perl_ck_bitop,
+	[OP_SCOMPLEMENT]        = Perl_ck_null,
+	[OP_SMARTMATCH]         = Perl_ck_smartmatch,
+	[OP_ATAN2]              = Perl_ck_fun,
+	[OP_SIN]                = Perl_ck_fun,
+	[OP_COS]                = Perl_ck_fun,
+	[OP_RAND]               = Perl_ck_fun,
+	[OP_SRAND]              = Perl_ck_fun,
+	[OP_EXP]                = Perl_ck_fun,
+	[OP_LOG]                = Perl_ck_fun,
+	[OP_SQRT]               = Perl_ck_fun,
+	[OP_INT]                = Perl_ck_fun,
+	[OP_HEX]                = Perl_ck_fun,
+	[OP_OCT]                = Perl_ck_fun,
+	[OP_ABS]                = Perl_ck_fun,
+	[OP_LENGTH]             = Perl_ck_length,
+	[OP_SUBSTR]             = Perl_ck_substr,
+	[OP_VEC]                = Perl_ck_fun,
+	[OP_INDEX]              = Perl_ck_index,
+	[OP_RINDEX]             = Perl_ck_index,
+	[OP_SPRINTF]            = Perl_ck_lfun,
+	[OP_FORMLINE]           = Perl_ck_fun,
+	[OP_ORD]                = Perl_ck_fun,
+	[OP_CHR]                = Perl_ck_fun,
+	[OP_CRYPT]              = Perl_ck_fun,
+	[OP_UCFIRST]            = Perl_ck_fun,
+	[OP_LCFIRST]            = Perl_ck_fun,
+	[OP_UC]                 = Perl_ck_fun,
+	[OP_LC]                 = Perl_ck_fun,
+	[OP_QUOTEMETA]          = Perl_ck_fun,
+	[OP_RV2AV]              = Perl_ck_rvconst,
+	[OP_AELEMFAST]          = Perl_ck_null,
+	[OP_AELEMFAST_LEX]      = Perl_ck_null,
+	[OP_AELEMFASTLEX_STORE] = Perl_ck_null,
+	[OP_AELEM]              = Perl_ck_null,
+	[OP_ASLICE]             = Perl_ck_null,
+	[OP_KVASLICE]           = Perl_ck_null,
+	[OP_AEACH]              = Perl_ck_each,
+	[OP_AVALUES]            = Perl_ck_each,
+	[OP_AKEYS]              = Perl_ck_each,
+	[OP_EACH]               = Perl_ck_each,
+	[OP_VALUES]             = Perl_ck_each,
+	[OP_KEYS]               = Perl_ck_each,
+	[OP_DELETE]             = Perl_ck_delete,
+	[OP_EXISTS]             = Perl_ck_exists,
+	[OP_RV2HV]              = Perl_ck_rvconst,
+	[OP_HELEM]              = Perl_ck_null,
+	[OP_HSLICE]             = Perl_ck_null,
+	[OP_KVHSLICE]           = Perl_ck_null,
+	[OP_MULTIDEREF]         = Perl_ck_null,
+	[OP_UNPACK]             = Perl_ck_fun,
+	[OP_PACK]               = Perl_ck_fun,
+	[OP_SPLIT]              = Perl_ck_split,
+	[OP_JOIN]               = Perl_ck_join,
+	[OP_LIST]               = Perl_ck_null,
+	[OP_LSLICE]             = Perl_ck_null,
+	[OP_ANONLIST]           = Perl_ck_fun,
+	[OP_ANONHASH]           = Perl_ck_fun,
+	[OP_EMPTYAVHV]          = Perl_ck_fun,
+	[OP_SPLICE]             = Perl_ck_fun,
+	[OP_PUSH]               = Perl_ck_fun,
+	[OP_POP]                = Perl_ck_shift,
+	[OP_SHIFT]              = Perl_ck_shift,
+	[OP_UNSHIFT]            = Perl_ck_fun,
+	[OP_SORT]               = Perl_ck_sort,
+	[OP_REVERSE]            = Perl_ck_fun,
+	[OP_GREPSTART]          = Perl_ck_grep,
+	[OP_GREPWHILE]          = Perl_ck_null,
+	[OP_MAPSTART]           = Perl_ck_grep,
+	[OP_MAPWHILE]           = Perl_ck_null,
+	[OP_RANGE]              = Perl_ck_null,
+	[OP_FLIP]               = Perl_ck_null,
+	[OP_FLOP]               = Perl_ck_null,
+	[OP_AND]                = Perl_ck_null,
+	[OP_OR]                 = Perl_ck_null,
+	[OP_XOR]                = Perl_ck_null,
+	[OP_DOR]                = Perl_ck_null,
+	[OP_COND_EXPR]          = Perl_ck_null,
+	[OP_ANDASSIGN]          = Perl_ck_null,
+	[OP_ORASSIGN]           = Perl_ck_null,
+	[OP_DORASSIGN]          = Perl_ck_null,
+	[OP_ENTERSUB]           = Perl_ck_subr,
+	[OP_LEAVESUB]           = Perl_ck_null,
+	[OP_LEAVESUBLV]         = Perl_ck_null,
+	[OP_ARGCHECK]           = Perl_ck_null,
+	[OP_ARGELEM]            = Perl_ck_null,
+	[OP_ARGDEFELEM]         = Perl_ck_null,
+	[OP_CALLER]             = Perl_ck_fun,
+	[OP_WARN]               = Perl_ck_fun,
+	[OP_DIE]                = Perl_ck_fun,
+	[OP_RESET]              = Perl_ck_fun,
+	[OP_LINESEQ]            = Perl_ck_null,
+	[OP_NEXTSTATE]          = Perl_ck_null,
+	[OP_DBSTATE]            = Perl_ck_null,
+	[OP_UNSTACK]            = Perl_ck_null,
+	[OP_ENTER]              = Perl_ck_null,
+	[OP_LEAVE]              = Perl_ck_null,
+	[OP_SCOPE]              = Perl_ck_null,
+	[OP_ENTERITER]          = Perl_ck_null,
+	[OP_ITER]               = Perl_ck_null,
+	[OP_ENTERLOOP]          = Perl_ck_null,
+	[OP_LEAVELOOP]          = Perl_ck_null,
+	[OP_RETURN]             = Perl_ck_return,
+	[OP_LAST]               = Perl_ck_null,
+	[OP_NEXT]               = Perl_ck_null,
+	[OP_REDO]               = Perl_ck_null,
+	[OP_DUMP]               = Perl_ck_null,
+	[OP_GOTO]               = Perl_ck_null,
+	[OP_EXIT]               = Perl_ck_fun,
+	[OP_METHOD]             = Perl_ck_method,
+	[OP_METHOD_NAMED]       = Perl_ck_null,
+	[OP_METHOD_SUPER]       = Perl_ck_null,
+	[OP_METHOD_REDIR]       = Perl_ck_null,
+	[OP_METHOD_REDIR_SUPER] = Perl_ck_null,
+	[OP_ENTERGIVEN]         = Perl_ck_null,
+	[OP_LEAVEGIVEN]         = Perl_ck_null,
+	[OP_ENTERWHEN]          = Perl_ck_null,
+	[OP_LEAVEWHEN]          = Perl_ck_null,
+	[OP_BREAK]              = Perl_ck_null,
+	[OP_CONTINUE]           = Perl_ck_null,
+	[OP_OPEN]               = Perl_ck_open,
+	[OP_CLOSE]              = Perl_ck_fun,
+	[OP_PIPE_OP]            = Perl_ck_fun,
+	[OP_FILENO]             = Perl_ck_fun,
+	[OP_UMASK]              = Perl_ck_fun,
+	[OP_BINMODE]            = Perl_ck_fun,
+	[OP_TIE]                = Perl_ck_fun,
+	[OP_UNTIE]              = Perl_ck_fun,
+	[OP_TIED]               = Perl_ck_fun,
+	[OP_DBMOPEN]            = Perl_ck_fun,
+	[OP_DBMCLOSE]           = Perl_ck_fun,
+	[OP_SSELECT]            = Perl_ck_select,
+	[OP_SELECT]             = Perl_ck_select,
+	[OP_GETC]               = Perl_ck_eof,
+	[OP_READ]               = Perl_ck_fun,
+	[OP_ENTERWRITE]         = Perl_ck_fun,
+	[OP_LEAVEWRITE]         = Perl_ck_null,
+	[OP_PRTF]               = Perl_ck_listiob,
+	[OP_PRINT]              = Perl_ck_listiob,
+	[OP_SAY]                = Perl_ck_listiob,
+	[OP_SYSOPEN]            = Perl_ck_fun,
+	[OP_SYSSEEK]            = Perl_ck_fun,
+	[OP_SYSREAD]            = Perl_ck_fun,
+	[OP_SYSWRITE]           = Perl_ck_fun,
+	[OP_EOF]                = Perl_ck_eof,
+	[OP_TELL]               = Perl_ck_tell,
+	[OP_SEEK]               = Perl_ck_tell,
+	[OP_TRUNCATE]           = Perl_ck_trunc,
+	[OP_FCNTL]              = Perl_ck_fun,
+	[OP_IOCTL]              = Perl_ck_fun,
+	[OP_FLOCK]              = Perl_ck_fun,
+	[OP_SEND]               = Perl_ck_fun,
+	[OP_RECV]               = Perl_ck_fun,
+	[OP_SOCKET]             = Perl_ck_fun,
+	[OP_SOCKPAIR]           = Perl_ck_fun,
+	[OP_BIND]               = Perl_ck_fun,
+	[OP_CONNECT]            = Perl_ck_fun,
+	[OP_LISTEN]             = Perl_ck_fun,
+	[OP_ACCEPT]             = Perl_ck_fun,
+	[OP_SHUTDOWN]           = Perl_ck_fun,
+	[OP_GSOCKOPT]           = Perl_ck_fun,
+	[OP_SSOCKOPT]           = Perl_ck_fun,
+	[OP_GETSOCKNAME]        = Perl_ck_fun,
+	[OP_GETPEERNAME]        = Perl_ck_fun,
+	[OP_LSTAT]              = Perl_ck_ftst,
+	[OP_STAT]               = Perl_ck_ftst,
+	[OP_FTRREAD]            = Perl_ck_ftst,
+	[OP_FTRWRITE]           = Perl_ck_ftst,
+	[OP_FTREXEC]            = Perl_ck_ftst,
+	[OP_FTEREAD]            = Perl_ck_ftst,
+	[OP_FTEWRITE]           = Perl_ck_ftst,
+	[OP_FTEEXEC]            = Perl_ck_ftst,
+	[OP_FTIS]               = Perl_ck_ftst,
+	[OP_FTSIZE]             = Perl_ck_ftst,
+	[OP_FTMTIME]            = Perl_ck_ftst,
+	[OP_FTATIME]            = Perl_ck_ftst,
+	[OP_FTCTIME]            = Perl_ck_ftst,
+	[OP_FTROWNED]           = Perl_ck_ftst,
+	[OP_FTEOWNED]           = Perl_ck_ftst,
+	[OP_FTZERO]             = Perl_ck_ftst,
+	[OP_FTSOCK]             = Perl_ck_ftst,
+	[OP_FTCHR]              = Perl_ck_ftst,
+	[OP_FTBLK]              = Perl_ck_ftst,
+	[OP_FTFILE]             = Perl_ck_ftst,
+	[OP_FTDIR]              = Perl_ck_ftst,
+	[OP_FTPIPE]             = Perl_ck_ftst,
+	[OP_FTSUID]             = Perl_ck_ftst,
+	[OP_FTSGID]             = Perl_ck_ftst,
+	[OP_FTSVTX]             = Perl_ck_ftst,
+	[OP_FTLINK]             = Perl_ck_ftst,
+	[OP_FTTTY]              = Perl_ck_ftst,
+	[OP_FTTEXT]             = Perl_ck_ftst,
+	[OP_FTBINARY]           = Perl_ck_ftst,
+	[OP_CHDIR]              = Perl_ck_trunc,
+	[OP_CHOWN]              = Perl_ck_fun,
+	[OP_CHROOT]             = Perl_ck_fun,
+	[OP_UNLINK]             = Perl_ck_fun,
+	[OP_CHMOD]              = Perl_ck_fun,
+	[OP_UTIME]              = Perl_ck_fun,
+	[OP_RENAME]             = Perl_ck_fun,
+	[OP_LINK]               = Perl_ck_fun,
+	[OP_SYMLINK]            = Perl_ck_fun,
+	[OP_READLINK]           = Perl_ck_fun,
+	[OP_MKDIR]              = Perl_ck_fun,
+	[OP_RMDIR]              = Perl_ck_fun,
+	[OP_OPEN_DIR]           = Perl_ck_fun,
+	[OP_READDIR]            = Perl_ck_fun,
+	[OP_TELLDIR]            = Perl_ck_fun,
+	[OP_SEEKDIR]            = Perl_ck_fun,
+	[OP_REWINDDIR]          = Perl_ck_fun,
+	[OP_CLOSEDIR]           = Perl_ck_fun,
+	[OP_FORK]               = Perl_ck_null,
+	[OP_WAIT]               = Perl_ck_null,
+	[OP_WAITPID]            = Perl_ck_fun,
+	[OP_SYSTEM]             = Perl_ck_exec,
+	[OP_EXEC]               = Perl_ck_exec,
+	[OP_KILL]               = Perl_ck_fun,
+	[OP_GETPPID]            = Perl_ck_null,
+	[OP_GETPGRP]            = Perl_ck_fun,
+	[OP_SETPGRP]            = Perl_ck_fun,
+	[OP_GETPRIORITY]        = Perl_ck_fun,
+	[OP_SETPRIORITY]        = Perl_ck_fun,
+	[OP_TIME]               = Perl_ck_null,
+	[OP_TMS]                = Perl_ck_null,
+	[OP_LOCALTIME]          = Perl_ck_fun,
+	[OP_GMTIME]             = Perl_ck_fun,
+	[OP_ALARM]              = Perl_ck_fun,
+	[OP_SLEEP]              = Perl_ck_fun,
+	[OP_SHMGET]             = Perl_ck_fun,
+	[OP_SHMCTL]             = Perl_ck_fun,
+	[OP_SHMREAD]            = Perl_ck_fun,
+	[OP_SHMWRITE]           = Perl_ck_fun,
+	[OP_MSGGET]             = Perl_ck_fun,
+	[OP_MSGCTL]             = Perl_ck_fun,
+	[OP_MSGSND]             = Perl_ck_fun,
+	[OP_MSGRCV]             = Perl_ck_fun,
+	[OP_SEMOP]              = Perl_ck_fun,
+	[OP_SEMGET]             = Perl_ck_fun,
+	[OP_SEMCTL]             = Perl_ck_fun,
+	[OP_REQUIRE]            = Perl_ck_require,
+	[OP_DOFILE]             = Perl_ck_fun,
+	[OP_HINTSEVAL]          = Perl_ck_svconst,
+	[OP_ENTEREVAL]          = Perl_ck_eval,
+	[OP_LEAVEEVAL]          = Perl_ck_null,
+	[OP_ENTERTRY]           = Perl_ck_eval,
+	[OP_LEAVETRY]           = Perl_ck_null,
+	[OP_GHBYNAME]           = Perl_ck_fun,
+	[OP_GHBYADDR]           = Perl_ck_fun,
+	[OP_GHOSTENT]           = Perl_ck_null,
+	[OP_GNBYNAME]           = Perl_ck_fun,
+	[OP_GNBYADDR]           = Perl_ck_fun,
+	[OP_GNETENT]            = Perl_ck_null,
+	[OP_GPBYNAME]           = Perl_ck_fun,
+	[OP_GPBYNUMBER]         = Perl_ck_fun,
+	[OP_GPROTOENT]          = Perl_ck_null,
+	[OP_GSBYNAME]           = Perl_ck_fun,
+	[OP_GSBYPORT]           = Perl_ck_fun,
+	[OP_GSERVENT]           = Perl_ck_null,
+	[OP_SHOSTENT]           = Perl_ck_fun,
+	[OP_SNETENT]            = Perl_ck_fun,
+	[OP_SPROTOENT]          = Perl_ck_fun,
+	[OP_SSERVENT]           = Perl_ck_fun,
+	[OP_EHOSTENT]           = Perl_ck_null,
+	[OP_ENETENT]            = Perl_ck_null,
+	[OP_EPROTOENT]          = Perl_ck_null,
+	[OP_ESERVENT]           = Perl_ck_null,
+	[OP_GPWNAM]             = Perl_ck_fun,
+	[OP_GPWUID]             = Perl_ck_fun,
+	[OP_GPWENT]             = Perl_ck_null,
+	[OP_SPWENT]             = Perl_ck_null,
+	[OP_EPWENT]             = Perl_ck_null,
+	[OP_GGRNAM]             = Perl_ck_fun,
+	[OP_GGRGID]             = Perl_ck_fun,
+	[OP_GGRENT]             = Perl_ck_null,
+	[OP_SGRENT]             = Perl_ck_null,
+	[OP_EGRENT]             = Perl_ck_null,
+	[OP_GETLOGIN]           = Perl_ck_null,
+	[OP_SYSCALL]            = Perl_ck_fun,
+	[OP_LOCK]               = Perl_ck_rfun,
+	[OP_ONCE]               = Perl_ck_null,
+	[OP_CUSTOM]             = Perl_ck_null,
+	[OP_COREARGS]           = Perl_ck_null,
+	[OP_AVHVSWITCH]         = Perl_ck_null,
+	[OP_RUNCV]              = Perl_ck_null,
+	[OP_FC]                 = Perl_ck_fun,
+	[OP_PADCV]              = Perl_ck_null,
+	[OP_INTROCV]            = Perl_ck_null,
+	[OP_CLONECV]            = Perl_ck_null,
+	[OP_PADRANGE]           = Perl_ck_null,
+	[OP_REFASSIGN]          = Perl_ck_refassign,
+	[OP_LVREF]              = Perl_ck_null,
+	[OP_LVREFSLICE]         = Perl_ck_null,
+	[OP_LVAVREF]            = Perl_ck_null,
+	[OP_ANONCONST]          = Perl_ck_null,
+	[OP_ISA]                = Perl_ck_isa,
+	[OP_CMPCHAIN_AND]       = Perl_ck_null,
+	[OP_CMPCHAIN_DUP]       = Perl_ck_null,
+	[OP_ENTERTRYCATCH]      = Perl_ck_trycatch,
+	[OP_LEAVETRYCATCH]      = Perl_ck_null,
+	[OP_POPTRY]             = Perl_ck_null,
+	[OP_CATCH]              = Perl_ck_null,
+	[OP_PUSHDEFER]          = Perl_ck_null,
+	[OP_IS_BOOL]            = Perl_ck_null,
+	[OP_IS_WEAK]            = Perl_ck_null,
+	[OP_WEAKEN]             = Perl_ck_null,
+	[OP_UNWEAKEN]           = Perl_ck_null,
+	[OP_BLESSED]            = Perl_ck_null,
+	[OP_REFADDR]            = Perl_ck_null,
+	[OP_REFTYPE]            = Perl_ck_null,
+	[OP_CEIL]               = Perl_ck_null,
+	[OP_FLOOR]              = Perl_ck_null,
+	[OP_IS_TAINTED]         = Perl_ck_null,
+});
 
-#ifndef DOINIT
-EXTCONST U32 PL_opargs[];
-#else
-EXTCONST U32 PL_opargs[] = {
-	0x00000000,	/* null */
-	0x00000000,	/* stub */
-	0x00001b04,	/* scalar */
-	0x00000004,	/* pushmark */
-	0x00000004,	/* wantarray */
-	0x00000604,	/* const */
-	0x00000644,	/* gvsv */
-	0x00000644,	/* gv */
-	0x00011244,	/* gelem */
-	0x00000044,	/* padsv */
-	0x00011104,	/* padsv_store */
-	0x00000040,	/* padav */
-	0x00000040,	/* padhv */
-	0x00000040,	/* padany */
-	0x00000144,	/* rv2gv */
-	0x00000144,	/* rv2sv */
-	0x00000104,	/* av2arylen */
-	0x00000140,	/* rv2cv */
-	0x00000604,	/* anoncode */
-	0x00009b84,	/* prototype */
-	0x00002101,	/* refgen */
-	0x00001106,	/* srefgen */
-	0x00009b8c,	/* ref */
-	0x00091404,	/* bless */
-	0x00009b88,	/* backtick */
-	0x00009408,	/* glob */
-	0x0000eb08,	/* readline */
-	0x00000608,	/* rcatline */
-	0x00001104,	/* regcmaybe */
-	0x00001104,	/* regcreset */
-	0x00001304,	/* regcomp */
-	0x00000500,	/* match */
-	0x00000504,	/* qr */
-	0x00001504,	/* subst */
-	0x00000304,	/* substcont */
-	0x00001804,	/* trans */
-	0x00001804,	/* transr */
-	0x00011204,	/* sassign */
-	0x00022208,	/* aassign */
-	0x00002b0d,	/* chop */
-	0x00009b8c,	/* schop */
-	0x00002b1d,	/* chomp */
-	0x00009b9c,	/* schomp */
-	0x00009b84,	/* defined */
-	0x0000fb04,	/* undef */
-	0x00009b84,	/* study */
-	0x0000fb8c,	/* pos */
-	0x00001164,	/* preinc */
-	0x00001144,	/* i_preinc */
-	0x00001164,	/* predec */
-	0x00001144,	/* i_predec */
-	0x0000112c,	/* postinc */
-	0x0000110c,	/* i_postinc */
-	0x0000112c,	/* postdec */
-	0x0000110c,	/* i_postdec */
-	0x0001121e,	/* pow */
-	0x0001123e,	/* multiply */
-	0x0001121e,	/* i_multiply */
-	0x0001123e,	/* divide */
-	0x0001121e,	/* i_divide */
-	0x0001123e,	/* modulo */
-	0x0001121e,	/* i_modulo */
-	0x0001220b,	/* repeat */
-	0x0001123e,	/* add */
-	0x0001121e,	/* i_add */
-	0x0001123e,	/* subtract */
-	0x0001121e,	/* i_subtract */
-	0x0001121e,	/* concat */
-	0x00000f1c,	/* multiconcat */
-	0x0000141e,	/* stringify */
-	0x0001121e,	/* left_shift */
-	0x0001121e,	/* right_shift */
-	0x00011226,	/* lt */
-	0x00011206,	/* i_lt */
-	0x00011226,	/* gt */
-	0x00011206,	/* i_gt */
-	0x00011226,	/* le */
-	0x00011206,	/* i_le */
-	0x00011226,	/* ge */
-	0x00011206,	/* i_ge */
-	0x00011226,	/* eq */
-	0x00011206,	/* i_eq */
-	0x00011226,	/* ne */
-	0x00011206,	/* i_ne */
-	0x0001122e,	/* ncmp */
-	0x0001120e,	/* i_ncmp */
-	0x00011206,	/* slt */
-	0x00011206,	/* sgt */
-	0x00011206,	/* sle */
-	0x00011206,	/* sge */
-	0x00011206,	/* seq */
-	0x00011206,	/* sne */
-	0x0001120e,	/* scmp */
-	0x0001120e,	/* bit_and */
-	0x0001120e,	/* bit_xor */
-	0x0001120e,	/* bit_or */
-	0x0001121e,	/* nbit_and */
-	0x0001121e,	/* nbit_xor */
-	0x0001121e,	/* nbit_or */
-	0x0001120e,	/* sbit_and */
-	0x0001120e,	/* sbit_xor */
-	0x0001120e,	/* sbit_or */
-	0x0000112e,	/* negate */
-	0x0000110e,	/* i_negate */
-	0x00001106,	/* not */
-	0x0000110e,	/* complement */
-	0x0000111e,	/* ncomplement */
-	0x0000111e,	/* scomplement */
-	0x00000204,	/* smartmatch */
-	0x0001141e,	/* atan2 */
-	0x00009b9e,	/* sin */
-	0x00009b9e,	/* cos */
-	0x00009b1c,	/* rand */
-	0x00009b1c,	/* srand */
-	0x00009b9e,	/* exp */
-	0x00009b9e,	/* log */
-	0x00009b9e,	/* sqrt */
-	0x00009b9e,	/* int */
-	0x00009b9e,	/* hex */
-	0x00009b9e,	/* oct */
-	0x00009b9e,	/* abs */
-	0x00009b9e,	/* length */
-	0x0991140c,	/* substr */
-	0x0011140c,	/* vec */
-	0x0091141c,	/* index */
-	0x0091141c,	/* rindex */
-	0x0002140f,	/* sprintf */
-	0x00021405,	/* formline */
-	0x00009b9e,	/* ord */
-	0x00009b9e,	/* chr */
-	0x0001141e,	/* crypt */
-	0x00009b8e,	/* ucfirst */
-	0x00009b8e,	/* lcfirst */
-	0x00009b8e,	/* uc */
-	0x00009b8e,	/* lc */
-	0x00009b8e,	/* quotemeta */
-	0x00000148,	/* rv2av */
-	0x00013644,	/* aelemfast */
-	0x00013040,	/* aelemfast_lex */
-	0x00013140,	/* aelemfastlex_store */
-	0x00013204,	/* aelem */
-	0x00023401,	/* aslice */
-	0x00023401,	/* kvaslice */
-	0x00003b40,	/* aeach */
-	0x00003b48,	/* avalues */
-	0x00003b08,	/* akeys */
-	0x00004b40,	/* each */
-	0x00004b48,	/* values */
-	0x00004b08,	/* keys */
-	0x00001b00,	/* delete */
-	0x00001b04,	/* exists */
-	0x00000148,	/* rv2hv */
-	0x00014204,	/* helem */
-	0x00024401,	/* hslice */
-	0x00024401,	/* kvhslice */
-	0x00000f44,	/* multideref */
-	0x00091480,	/* unpack */
-	0x0002140f,	/* pack */
-	0x00111508,	/* split */
-	0x0002140f,	/* join */
-	0x00002401,	/* list */
-	0x00224200,	/* lslice */
-	0x00002405,	/* anonlist */
-	0x00002405,	/* anonhash */
-	0x0000241c,	/* emptyavhv */
-	0x02993401,	/* splice */
-	0x0002341d,	/* push */
-	0x0000bb04,	/* pop */
-	0x0000bb04,	/* shift */
-	0x0002341d,	/* unshift */
-	0x0002d401,	/* sort */
-	0x00002409,	/* reverse */
-	0x00025401,	/* grepstart */
-	0x00000308,	/* grepwhile */
-	0x00025401,	/* mapstart */
-	0x00000308,	/* mapwhile */
-	0x00011300,	/* range */
-	0x00011100,	/* flip */
-	0x00000100,	/* flop */
-	0x00000300,	/* and */
-	0x00000300,	/* or */
-	0x00011206,	/* xor */
-	0x00000300,	/* dor */
-	0x00000300,	/* cond_expr */
-	0x00000304,	/* andassign */
-	0x00000304,	/* orassign */
-	0x00000304,	/* dorassign */
-	0x00002141,	/* entersub */
-	0x00000100,	/* leavesub */
-	0x00000100,	/* leavesublv */
-	0x00000f00,	/* argcheck */
-	0x00000f00,	/* argelem */
-	0x00000300,	/* argdefelem */
-	0x00009b08,	/* caller */
-	0x0000240d,	/* warn */
-	0x0000240d,	/* die */
-	0x00009b04,	/* reset */
-	0x00000400,	/* lineseq */
-	0x00000a04,	/* nextstate */
-	0x00000a04,	/* dbstate */
-	0x00000004,	/* unstack */
-	0x00000000,	/* enter */
-	0x00000400,	/* leave */
-	0x00000400,	/* scope */
-	0x00000940,	/* enteriter */
-	0x00000000,	/* iter */
-	0x00000940,	/* enterloop */
-	0x00000200,	/* leaveloop */
-	0x00002401,	/* return */
-	0x00000d04,	/* last */
-	0x00000d04,	/* next */
-	0x00000d04,	/* redo */
-	0x00000d44,	/* dump */
-	0x00000d04,	/* goto */
-	0x00009b04,	/* exit */
-	0x00000e40,	/* method */
-	0x00000e40,	/* method_named */
-	0x00000e40,	/* method_super */
-	0x00000e40,	/* method_redir */
-	0x00000e40,	/* method_redir_super */
-	0x00000340,	/* entergiven */
-	0x00000100,	/* leavegiven */
-	0x00000340,	/* enterwhen */
-	0x00000100,	/* leavewhen */
-	0x00000000,	/* break */
-	0x00000000,	/* continue */
-	0x0029640d,	/* open */
-	0x0000eb04,	/* close */
-	0x00066404,	/* pipe_op */
-	0x00006b0c,	/* fileno */
-	0x00009b0c,	/* umask */
-	0x00096404,	/* binmode */
-	0x00217445,	/* tie */
-	0x00007b04,	/* untie */
-	0x00007b44,	/* tied */
-	0x00114404,	/* dbmopen */
-	0x00004b04,	/* dbmclose */
-	0x01111408,	/* sselect */
-	0x0000e40c,	/* select */
-	0x0000eb0c,	/* getc */
-	0x0917640d,	/* read */
-	0x0000eb04,	/* enterwrite */
-	0x00000100,	/* leavewrite */
-	0x0002e405,	/* prtf */
-	0x0002e405,	/* print */
-	0x0002e405,	/* say */
-	0x09116404,	/* sysopen */
-	0x00116404,	/* sysseek */
-	0x0917640d,	/* sysread */
-	0x0991640d,	/* syswrite */
-	0x0000eb04,	/* eof */
-	0x0000eb0c,	/* tell */
-	0x00116404,	/* seek */
-	0x00011404,	/* truncate */
-	0x0011640c,	/* fcntl */
-	0x0011640c,	/* ioctl */
-	0x0001641c,	/* flock */
-	0x0911640d,	/* send */
-	0x0117640d,	/* recv */
-	0x01116404,	/* socket */
-	0x11166404,	/* sockpair */
-	0x00016404,	/* bind */
-	0x00016404,	/* connect */
-	0x00016404,	/* listen */
-	0x0006640c,	/* accept */
-	0x0001640c,	/* shutdown */
-	0x00116404,	/* gsockopt */
-	0x01116404,	/* ssockopt */
-	0x00006b04,	/* getsockname */
-	0x00006b04,	/* getpeername */
-	0x0000ec80,	/* lstat */
-	0x0000ec80,	/* stat */
-	0x00006c84,	/* ftrread */
-	0x00006c84,	/* ftrwrite */
-	0x00006c84,	/* ftrexec */
-	0x00006c84,	/* fteread */
-	0x00006c84,	/* ftewrite */
-	0x00006c84,	/* fteexec */
-	0x00006c84,	/* ftis */
-	0x00006c8c,	/* ftsize */
-	0x00006c8c,	/* ftmtime */
-	0x00006c8c,	/* ftatime */
-	0x00006c8c,	/* ftctime */
-	0x00006c84,	/* ftrowned */
-	0x00006c84,	/* fteowned */
-	0x00006c84,	/* ftzero */
-	0x00006c84,	/* ftsock */
-	0x00006c84,	/* ftchr */
-	0x00006c84,	/* ftblk */
-	0x00006c84,	/* ftfile */
-	0x00006c84,	/* ftdir */
-	0x00006c84,	/* ftpipe */
-	0x00006c84,	/* ftsuid */
-	0x00006c84,	/* ftsgid */
-	0x00006c84,	/* ftsvtx */
-	0x00006c84,	/* ftlink */
-	0x00006c04,	/* fttty */
-	0x00006c84,	/* fttext */
-	0x00006c84,	/* ftbinary */
-	0x00009b1c,	/* chdir */
-	0x0000241d,	/* chown */
-	0x00009b9c,	/* chroot */
-	0x0000249d,	/* unlink */
-	0x0000241d,	/* chmod */
-	0x0000241d,	/* utime */
-	0x0001141c,	/* rename */
-	0x0001141c,	/* link */
-	0x0001141c,	/* symlink */
-	0x00009b8c,	/* readlink */
-	0x0009949c,	/* mkdir */
-	0x00009b9c,	/* rmdir */
-	0x00016404,	/* open_dir */
-	0x00006b00,	/* readdir */
-	0x00006b0c,	/* telldir */
-	0x00016404,	/* seekdir */
-	0x00006b04,	/* rewinddir */
-	0x00006b04,	/* closedir */
-	0x0000000c,	/* fork */
-	0x0000001c,	/* wait */
-	0x0001141c,	/* waitpid */
-	0x0002941d,	/* system */
-	0x0002941d,	/* exec */
-	0x0000241d,	/* kill */
-	0x0000001c,	/* getppid */
-	0x00009b1c,	/* getpgrp */
-	0x0009941c,	/* setpgrp */
-	0x0001141c,	/* getpriority */
-	0x0011141c,	/* setpriority */
-	0x0000001c,	/* time */
-	0x00000000,	/* tms */
-	0x00009b08,	/* localtime */
-	0x00009b08,	/* gmtime */
-	0x00009b8c,	/* alarm */
-	0x00009b1c,	/* sleep */
-	0x0011140d,	/* shmget */
-	0x0011140d,	/* shmctl */
-	0x0111140d,	/* shmread */
-	0x0111140d,	/* shmwrite */
-	0x0001140d,	/* msgget */
-	0x0011140d,	/* msgctl */
-	0x0011140d,	/* msgsnd */
-	0x1111140d,	/* msgrcv */
-	0x0001140d,	/* semop */
-	0x0011140d,	/* semget */
-	0x0111140d,	/* semctl */
-	0x00009bc4,	/* require */
-	0x00001140,	/* dofile */
-	0x00000604,	/* hintseval */
-	0x00009bc0,	/* entereval */
-	0x00001100,	/* leaveeval */
-	0x00000340,	/* entertry */
-	0x00000400,	/* leavetry */
-	0x00001b00,	/* ghbyname */
-	0x00011400,	/* ghbyaddr */
-	0x00000000,	/* ghostent */
-	0x00001b00,	/* gnbyname */
-	0x00011400,	/* gnbyaddr */
-	0x00000000,	/* gnetent */
-	0x00001b00,	/* gpbyname */
-	0x00001400,	/* gpbynumber */
-	0x00000000,	/* gprotoent */
-	0x00011400,	/* gsbyname */
-	0x00011400,	/* gsbyport */
-	0x00000000,	/* gservent */
-	0x00001b04,	/* shostent */
-	0x00001b04,	/* snetent */
-	0x00001b04,	/* sprotoent */
-	0x00001b04,	/* sservent */
-	0x00000004,	/* ehostent */
-	0x00000004,	/* enetent */
-	0x00000004,	/* eprotoent */
-	0x00000004,	/* eservent */
-	0x00001b00,	/* gpwnam */
-	0x00001b00,	/* gpwuid */
-	0x00000000,	/* gpwent */
-	0x00000004,	/* spwent */
-	0x00000004,	/* epwent */
-	0x00001b00,	/* ggrnam */
-	0x00001b00,	/* ggrgid */
-	0x00000000,	/* ggrent */
-	0x00000004,	/* sgrent */
-	0x00000004,	/* egrent */
-	0x0000000c,	/* getlogin */
-	0x0002140d,	/* syscall */
-	0x00007b04,	/* lock */
-	0x00000300,	/* once */
-	0x00000000,	/* custom */
-	0x00000600,	/* coreargs */
-	0x00000108,	/* avhvswitch */
-	0x00000004,	/* runcv */
-	0x00009b8e,	/* fc */
-	0x00000040,	/* padcv */
-	0x00000040,	/* introcv */
-	0x00000040,	/* clonecv */
-	0x00000040,	/* padrange */
-	0x00000244,	/* refassign */
-	0x00000b40,	/* lvref */
-	0x00000440,	/* lvrefslice */
-	0x00000b40,	/* lvavref */
-	0x00000144,	/* anonconst */
-	0x00000204,	/* isa */
-	0x00000300,	/* cmpchain_and */
-	0x00000100,	/* cmpchain_dup */
-	0x00000300,	/* entertrycatch */
-	0x00000400,	/* leavetrycatch */
-	0x00000400,	/* poptry */
-	0x00000300,	/* catch */
-	0x00000300,	/* pushdefer */
-	0x00000106,	/* is_bool */
-	0x00000106,	/* is_weak */
-	0x00000100,	/* weaken */
-	0x00000100,	/* unweaken */
-	0x00000106,	/* blessed */
-	0x0000011e,	/* refaddr */
-	0x0000011e,	/* reftype */
-	0x0000011e,	/* ceil */
-	0x0000011e,	/* floor */
-	0x00000106,	/* is_tainted */
-};
-#endif
+EXTCONST U32 PL_opargs[] INIT({
+	[OP_NULL]               = 0x00000000,
+	[OP_STUB]               = 0x00000000,
+	[OP_SCALAR]             = 0x00001b04,
+	[OP_PUSHMARK]           = 0x00000004,
+	[OP_WANTARRAY]          = 0x00000004,
+	[OP_CONST]              = 0x00000604,
+	[OP_GVSV]               = 0x00000644,
+	[OP_GV]                 = 0x00000644,
+	[OP_GELEM]              = 0x00011244,
+	[OP_PADSV]              = 0x00000044,
+	[OP_PADSV_STORE]        = 0x00011104,
+	[OP_PADAV]              = 0x00000040,
+	[OP_PADHV]              = 0x00000040,
+	[OP_PADANY]             = 0x00000040,
+	[OP_RV2GV]              = 0x00000144,
+	[OP_RV2SV]              = 0x00000144,
+	[OP_AV2ARYLEN]          = 0x00000104,
+	[OP_RV2CV]              = 0x00000140,
+	[OP_ANONCODE]           = 0x00000604,
+	[OP_PROTOTYPE]          = 0x00009b84,
+	[OP_REFGEN]             = 0x00002101,
+	[OP_SREFGEN]            = 0x00001106,
+	[OP_REF]                = 0x00009b8c,
+	[OP_BLESS]              = 0x00091404,
+	[OP_BACKTICK]           = 0x00009b88,
+	[OP_GLOB]               = 0x00009408,
+	[OP_READLINE]           = 0x0000eb08,
+	[OP_RCATLINE]           = 0x00000608,
+	[OP_REGCMAYBE]          = 0x00001104,
+	[OP_REGCRESET]          = 0x00001104,
+	[OP_REGCOMP]            = 0x00001304,
+	[OP_MATCH]              = 0x00000500,
+	[OP_QR]                 = 0x00000504,
+	[OP_SUBST]              = 0x00001504,
+	[OP_SUBSTCONT]          = 0x00000304,
+	[OP_TRANS]              = 0x00001804,
+	[OP_TRANSR]             = 0x00001804,
+	[OP_SASSIGN]            = 0x00011204,
+	[OP_AASSIGN]            = 0x00022208,
+	[OP_CHOP]               = 0x00002b0d,
+	[OP_SCHOP]              = 0x00009b8c,
+	[OP_CHOMP]              = 0x00002b1d,
+	[OP_SCHOMP]             = 0x00009b9c,
+	[OP_DEFINED]            = 0x00009b84,
+	[OP_UNDEF]              = 0x0000fb04,
+	[OP_STUDY]              = 0x00009b84,
+	[OP_POS]                = 0x0000fb8c,
+	[OP_PREINC]             = 0x00001164,
+	[OP_I_PREINC]           = 0x00001144,
+	[OP_PREDEC]             = 0x00001164,
+	[OP_I_PREDEC]           = 0x00001144,
+	[OP_POSTINC]            = 0x0000112c,
+	[OP_I_POSTINC]          = 0x0000110c,
+	[OP_POSTDEC]            = 0x0000112c,
+	[OP_I_POSTDEC]          = 0x0000110c,
+	[OP_POW]                = 0x0001121e,
+	[OP_MULTIPLY]           = 0x0001123e,
+	[OP_I_MULTIPLY]         = 0x0001121e,
+	[OP_DIVIDE]             = 0x0001123e,
+	[OP_I_DIVIDE]           = 0x0001121e,
+	[OP_MODULO]             = 0x0001123e,
+	[OP_I_MODULO]           = 0x0001121e,
+	[OP_REPEAT]             = 0x0001220b,
+	[OP_ADD]                = 0x0001123e,
+	[OP_I_ADD]              = 0x0001121e,
+	[OP_SUBTRACT]           = 0x0001123e,
+	[OP_I_SUBTRACT]         = 0x0001121e,
+	[OP_CONCAT]             = 0x0001121e,
+	[OP_MULTICONCAT]        = 0x00000f1c,
+	[OP_STRINGIFY]          = 0x0000141e,
+	[OP_LEFT_SHIFT]         = 0x0001121e,
+	[OP_RIGHT_SHIFT]        = 0x0001121e,
+	[OP_LT]                 = 0x00011226,
+	[OP_I_LT]               = 0x00011206,
+	[OP_GT]                 = 0x00011226,
+	[OP_I_GT]               = 0x00011206,
+	[OP_LE]                 = 0x00011226,
+	[OP_I_LE]               = 0x00011206,
+	[OP_GE]                 = 0x00011226,
+	[OP_I_GE]               = 0x00011206,
+	[OP_EQ]                 = 0x00011226,
+	[OP_I_EQ]               = 0x00011206,
+	[OP_NE]                 = 0x00011226,
+	[OP_I_NE]               = 0x00011206,
+	[OP_NCMP]               = 0x0001122e,
+	[OP_I_NCMP]             = 0x0001120e,
+	[OP_SLT]                = 0x00011206,
+	[OP_SGT]                = 0x00011206,
+	[OP_SLE]                = 0x00011206,
+	[OP_SGE]                = 0x00011206,
+	[OP_SEQ]                = 0x00011206,
+	[OP_SNE]                = 0x00011206,
+	[OP_SCMP]               = 0x0001120e,
+	[OP_BIT_AND]            = 0x0001120e,
+	[OP_BIT_XOR]            = 0x0001120e,
+	[OP_BIT_OR]             = 0x0001120e,
+	[OP_NBIT_AND]           = 0x0001121e,
+	[OP_NBIT_XOR]           = 0x0001121e,
+	[OP_NBIT_OR]            = 0x0001121e,
+	[OP_SBIT_AND]           = 0x0001120e,
+	[OP_SBIT_XOR]           = 0x0001120e,
+	[OP_SBIT_OR]            = 0x0001120e,
+	[OP_NEGATE]             = 0x0000112e,
+	[OP_I_NEGATE]           = 0x0000110e,
+	[OP_NOT]                = 0x00001106,
+	[OP_COMPLEMENT]         = 0x0000110e,
+	[OP_NCOMPLEMENT]        = 0x0000111e,
+	[OP_SCOMPLEMENT]        = 0x0000111e,
+	[OP_SMARTMATCH]         = 0x00000204,
+	[OP_ATAN2]              = 0x0001141e,
+	[OP_SIN]                = 0x00009b9e,
+	[OP_COS]                = 0x00009b9e,
+	[OP_RAND]               = 0x00009b1c,
+	[OP_SRAND]              = 0x00009b1c,
+	[OP_EXP]                = 0x00009b9e,
+	[OP_LOG]                = 0x00009b9e,
+	[OP_SQRT]               = 0x00009b9e,
+	[OP_INT]                = 0x00009b9e,
+	[OP_HEX]                = 0x00009b9e,
+	[OP_OCT]                = 0x00009b9e,
+	[OP_ABS]                = 0x00009b9e,
+	[OP_LENGTH]             = 0x00009b9e,
+	[OP_SUBSTR]             = 0x0991140c,
+	[OP_VEC]                = 0x0011140c,
+	[OP_INDEX]              = 0x0091141c,
+	[OP_RINDEX]             = 0x0091141c,
+	[OP_SPRINTF]            = 0x0002140f,
+	[OP_FORMLINE]           = 0x00021405,
+	[OP_ORD]                = 0x00009b9e,
+	[OP_CHR]                = 0x00009b9e,
+	[OP_CRYPT]              = 0x0001141e,
+	[OP_UCFIRST]            = 0x00009b8e,
+	[OP_LCFIRST]            = 0x00009b8e,
+	[OP_UC]                 = 0x00009b8e,
+	[OP_LC]                 = 0x00009b8e,
+	[OP_QUOTEMETA]          = 0x00009b8e,
+	[OP_RV2AV]              = 0x00000148,
+	[OP_AELEMFAST]          = 0x00013644,
+	[OP_AELEMFAST_LEX]      = 0x00013040,
+	[OP_AELEMFASTLEX_STORE] = 0x00013140,
+	[OP_AELEM]              = 0x00013204,
+	[OP_ASLICE]             = 0x00023401,
+	[OP_KVASLICE]           = 0x00023401,
+	[OP_AEACH]              = 0x00003b40,
+	[OP_AVALUES]            = 0x00003b48,
+	[OP_AKEYS]              = 0x00003b08,
+	[OP_EACH]               = 0x00004b40,
+	[OP_VALUES]             = 0x00004b48,
+	[OP_KEYS]               = 0x00004b08,
+	[OP_DELETE]             = 0x00001b00,
+	[OP_EXISTS]             = 0x00001b04,
+	[OP_RV2HV]              = 0x00000148,
+	[OP_HELEM]              = 0x00014204,
+	[OP_HSLICE]             = 0x00024401,
+	[OP_KVHSLICE]           = 0x00024401,
+	[OP_MULTIDEREF]         = 0x00000f44,
+	[OP_UNPACK]             = 0x00091480,
+	[OP_PACK]               = 0x0002140f,
+	[OP_SPLIT]              = 0x00111508,
+	[OP_JOIN]               = 0x0002140f,
+	[OP_LIST]               = 0x00002401,
+	[OP_LSLICE]             = 0x00224200,
+	[OP_ANONLIST]           = 0x00002405,
+	[OP_ANONHASH]           = 0x00002405,
+	[OP_EMPTYAVHV]          = 0x0000241c,
+	[OP_SPLICE]             = 0x02993401,
+	[OP_PUSH]               = 0x0002341d,
+	[OP_POP]                = 0x0000bb04,
+	[OP_SHIFT]              = 0x0000bb04,
+	[OP_UNSHIFT]            = 0x0002341d,
+	[OP_SORT]               = 0x0002d401,
+	[OP_REVERSE]            = 0x00002409,
+	[OP_GREPSTART]          = 0x00025401,
+	[OP_GREPWHILE]          = 0x00000308,
+	[OP_MAPSTART]           = 0x00025401,
+	[OP_MAPWHILE]           = 0x00000308,
+	[OP_RANGE]              = 0x00011300,
+	[OP_FLIP]               = 0x00011100,
+	[OP_FLOP]               = 0x00000100,
+	[OP_AND]                = 0x00000300,
+	[OP_OR]                 = 0x00000300,
+	[OP_XOR]                = 0x00011206,
+	[OP_DOR]                = 0x00000300,
+	[OP_COND_EXPR]          = 0x00000300,
+	[OP_ANDASSIGN]          = 0x00000304,
+	[OP_ORASSIGN]           = 0x00000304,
+	[OP_DORASSIGN]          = 0x00000304,
+	[OP_ENTERSUB]           = 0x00002141,
+	[OP_LEAVESUB]           = 0x00000100,
+	[OP_LEAVESUBLV]         = 0x00000100,
+	[OP_ARGCHECK]           = 0x00000f00,
+	[OP_ARGELEM]            = 0x00000f00,
+	[OP_ARGDEFELEM]         = 0x00000300,
+	[OP_CALLER]             = 0x00009b08,
+	[OP_WARN]               = 0x0000240d,
+	[OP_DIE]                = 0x0000240d,
+	[OP_RESET]              = 0x00009b04,
+	[OP_LINESEQ]            = 0x00000400,
+	[OP_NEXTSTATE]          = 0x00000a04,
+	[OP_DBSTATE]            = 0x00000a04,
+	[OP_UNSTACK]            = 0x00000004,
+	[OP_ENTER]              = 0x00000000,
+	[OP_LEAVE]              = 0x00000400,
+	[OP_SCOPE]              = 0x00000400,
+	[OP_ENTERITER]          = 0x00000940,
+	[OP_ITER]               = 0x00000000,
+	[OP_ENTERLOOP]          = 0x00000940,
+	[OP_LEAVELOOP]          = 0x00000200,
+	[OP_RETURN]             = 0x00002401,
+	[OP_LAST]               = 0x00000d04,
+	[OP_NEXT]               = 0x00000d04,
+	[OP_REDO]               = 0x00000d04,
+	[OP_DUMP]               = 0x00000d44,
+	[OP_GOTO]               = 0x00000d04,
+	[OP_EXIT]               = 0x00009b04,
+	[OP_METHOD]             = 0x00000e40,
+	[OP_METHOD_NAMED]       = 0x00000e40,
+	[OP_METHOD_SUPER]       = 0x00000e40,
+	[OP_METHOD_REDIR]       = 0x00000e40,
+	[OP_METHOD_REDIR_SUPER] = 0x00000e40,
+	[OP_ENTERGIVEN]         = 0x00000340,
+	[OP_LEAVEGIVEN]         = 0x00000100,
+	[OP_ENTERWHEN]          = 0x00000340,
+	[OP_LEAVEWHEN]          = 0x00000100,
+	[OP_BREAK]              = 0x00000000,
+	[OP_CONTINUE]           = 0x00000000,
+	[OP_OPEN]               = 0x0029640d,
+	[OP_CLOSE]              = 0x0000eb04,
+	[OP_PIPE_OP]            = 0x00066404,
+	[OP_FILENO]             = 0x00006b0c,
+	[OP_UMASK]              = 0x00009b0c,
+	[OP_BINMODE]            = 0x00096404,
+	[OP_TIE]                = 0x00217445,
+	[OP_UNTIE]              = 0x00007b04,
+	[OP_TIED]               = 0x00007b44,
+	[OP_DBMOPEN]            = 0x00114404,
+	[OP_DBMCLOSE]           = 0x00004b04,
+	[OP_SSELECT]            = 0x01111408,
+	[OP_SELECT]             = 0x0000e40c,
+	[OP_GETC]               = 0x0000eb0c,
+	[OP_READ]               = 0x0917640d,
+	[OP_ENTERWRITE]         = 0x0000eb04,
+	[OP_LEAVEWRITE]         = 0x00000100,
+	[OP_PRTF]               = 0x0002e405,
+	[OP_PRINT]              = 0x0002e405,
+	[OP_SAY]                = 0x0002e405,
+	[OP_SYSOPEN]            = 0x09116404,
+	[OP_SYSSEEK]            = 0x00116404,
+	[OP_SYSREAD]            = 0x0917640d,
+	[OP_SYSWRITE]           = 0x0991640d,
+	[OP_EOF]                = 0x0000eb04,
+	[OP_TELL]               = 0x0000eb0c,
+	[OP_SEEK]               = 0x00116404,
+	[OP_TRUNCATE]           = 0x00011404,
+	[OP_FCNTL]              = 0x0011640c,
+	[OP_IOCTL]              = 0x0011640c,
+	[OP_FLOCK]              = 0x0001641c,
+	[OP_SEND]               = 0x0911640d,
+	[OP_RECV]               = 0x0117640d,
+	[OP_SOCKET]             = 0x01116404,
+	[OP_SOCKPAIR]           = 0x11166404,
+	[OP_BIND]               = 0x00016404,
+	[OP_CONNECT]            = 0x00016404,
+	[OP_LISTEN]             = 0x00016404,
+	[OP_ACCEPT]             = 0x0006640c,
+	[OP_SHUTDOWN]           = 0x0001640c,
+	[OP_GSOCKOPT]           = 0x00116404,
+	[OP_SSOCKOPT]           = 0x01116404,
+	[OP_GETSOCKNAME]        = 0x00006b04,
+	[OP_GETPEERNAME]        = 0x00006b04,
+	[OP_LSTAT]              = 0x0000ec80,
+	[OP_STAT]               = 0x0000ec80,
+	[OP_FTRREAD]            = 0x00006c84,
+	[OP_FTRWRITE]           = 0x00006c84,
+	[OP_FTREXEC]            = 0x00006c84,
+	[OP_FTEREAD]            = 0x00006c84,
+	[OP_FTEWRITE]           = 0x00006c84,
+	[OP_FTEEXEC]            = 0x00006c84,
+	[OP_FTIS]               = 0x00006c84,
+	[OP_FTSIZE]             = 0x00006c8c,
+	[OP_FTMTIME]            = 0x00006c8c,
+	[OP_FTATIME]            = 0x00006c8c,
+	[OP_FTCTIME]            = 0x00006c8c,
+	[OP_FTROWNED]           = 0x00006c84,
+	[OP_FTEOWNED]           = 0x00006c84,
+	[OP_FTZERO]             = 0x00006c84,
+	[OP_FTSOCK]             = 0x00006c84,
+	[OP_FTCHR]              = 0x00006c84,
+	[OP_FTBLK]              = 0x00006c84,
+	[OP_FTFILE]             = 0x00006c84,
+	[OP_FTDIR]              = 0x00006c84,
+	[OP_FTPIPE]             = 0x00006c84,
+	[OP_FTSUID]             = 0x00006c84,
+	[OP_FTSGID]             = 0x00006c84,
+	[OP_FTSVTX]             = 0x00006c84,
+	[OP_FTLINK]             = 0x00006c84,
+	[OP_FTTTY]              = 0x00006c04,
+	[OP_FTTEXT]             = 0x00006c84,
+	[OP_FTBINARY]           = 0x00006c84,
+	[OP_CHDIR]              = 0x00009b1c,
+	[OP_CHOWN]              = 0x0000241d,
+	[OP_CHROOT]             = 0x00009b9c,
+	[OP_UNLINK]             = 0x0000249d,
+	[OP_CHMOD]              = 0x0000241d,
+	[OP_UTIME]              = 0x0000241d,
+	[OP_RENAME]             = 0x0001141c,
+	[OP_LINK]               = 0x0001141c,
+	[OP_SYMLINK]            = 0x0001141c,
+	[OP_READLINK]           = 0x00009b8c,
+	[OP_MKDIR]              = 0x0009949c,
+	[OP_RMDIR]              = 0x00009b9c,
+	[OP_OPEN_DIR]           = 0x00016404,
+	[OP_READDIR]            = 0x00006b00,
+	[OP_TELLDIR]            = 0x00006b0c,
+	[OP_SEEKDIR]            = 0x00016404,
+	[OP_REWINDDIR]          = 0x00006b04,
+	[OP_CLOSEDIR]           = 0x00006b04,
+	[OP_FORK]               = 0x0000000c,
+	[OP_WAIT]               = 0x0000001c,
+	[OP_WAITPID]            = 0x0001141c,
+	[OP_SYSTEM]             = 0x0002941d,
+	[OP_EXEC]               = 0x0002941d,
+	[OP_KILL]               = 0x0000241d,
+	[OP_GETPPID]            = 0x0000001c,
+	[OP_GETPGRP]            = 0x00009b1c,
+	[OP_SETPGRP]            = 0x0009941c,
+	[OP_GETPRIORITY]        = 0x0001141c,
+	[OP_SETPRIORITY]        = 0x0011141c,
+	[OP_TIME]               = 0x0000001c,
+	[OP_TMS]                = 0x00000000,
+	[OP_LOCALTIME]          = 0x00009b08,
+	[OP_GMTIME]             = 0x00009b08,
+	[OP_ALARM]              = 0x00009b8c,
+	[OP_SLEEP]              = 0x00009b1c,
+	[OP_SHMGET]             = 0x0011140d,
+	[OP_SHMCTL]             = 0x0011140d,
+	[OP_SHMREAD]            = 0x0111140d,
+	[OP_SHMWRITE]           = 0x0111140d,
+	[OP_MSGGET]             = 0x0001140d,
+	[OP_MSGCTL]             = 0x0011140d,
+	[OP_MSGSND]             = 0x0011140d,
+	[OP_MSGRCV]             = 0x1111140d,
+	[OP_SEMOP]              = 0x0001140d,
+	[OP_SEMGET]             = 0x0011140d,
+	[OP_SEMCTL]             = 0x0111140d,
+	[OP_REQUIRE]            = 0x00009bc4,
+	[OP_DOFILE]             = 0x00001140,
+	[OP_HINTSEVAL]          = 0x00000604,
+	[OP_ENTEREVAL]          = 0x00009bc0,
+	[OP_LEAVEEVAL]          = 0x00001100,
+	[OP_ENTERTRY]           = 0x00000340,
+	[OP_LEAVETRY]           = 0x00000400,
+	[OP_GHBYNAME]           = 0x00001b00,
+	[OP_GHBYADDR]           = 0x00011400,
+	[OP_GHOSTENT]           = 0x00000000,
+	[OP_GNBYNAME]           = 0x00001b00,
+	[OP_GNBYADDR]           = 0x00011400,
+	[OP_GNETENT]            = 0x00000000,
+	[OP_GPBYNAME]           = 0x00001b00,
+	[OP_GPBYNUMBER]         = 0x00001400,
+	[OP_GPROTOENT]          = 0x00000000,
+	[OP_GSBYNAME]           = 0x00011400,
+	[OP_GSBYPORT]           = 0x00011400,
+	[OP_GSERVENT]           = 0x00000000,
+	[OP_SHOSTENT]           = 0x00001b04,
+	[OP_SNETENT]            = 0x00001b04,
+	[OP_SPROTOENT]          = 0x00001b04,
+	[OP_SSERVENT]           = 0x00001b04,
+	[OP_EHOSTENT]           = 0x00000004,
+	[OP_ENETENT]            = 0x00000004,
+	[OP_EPROTOENT]          = 0x00000004,
+	[OP_ESERVENT]           = 0x00000004,
+	[OP_GPWNAM]             = 0x00001b00,
+	[OP_GPWUID]             = 0x00001b00,
+	[OP_GPWENT]             = 0x00000000,
+	[OP_SPWENT]             = 0x00000004,
+	[OP_EPWENT]             = 0x00000004,
+	[OP_GGRNAM]             = 0x00001b00,
+	[OP_GGRGID]             = 0x00001b00,
+	[OP_GGRENT]             = 0x00000000,
+	[OP_SGRENT]             = 0x00000004,
+	[OP_EGRENT]             = 0x00000004,
+	[OP_GETLOGIN]           = 0x0000000c,
+	[OP_SYSCALL]            = 0x0002140d,
+	[OP_LOCK]               = 0x00007b04,
+	[OP_ONCE]               = 0x00000300,
+	[OP_CUSTOM]             = 0x00000000,
+	[OP_COREARGS]           = 0x00000600,
+	[OP_AVHVSWITCH]         = 0x00000108,
+	[OP_RUNCV]              = 0x00000004,
+	[OP_FC]                 = 0x00009b8e,
+	[OP_PADCV]              = 0x00000040,
+	[OP_INTROCV]            = 0x00000040,
+	[OP_CLONECV]            = 0x00000040,
+	[OP_PADRANGE]           = 0x00000040,
+	[OP_REFASSIGN]          = 0x00000244,
+	[OP_LVREF]              = 0x00000b40,
+	[OP_LVREFSLICE]         = 0x00000440,
+	[OP_LVAVREF]            = 0x00000b40,
+	[OP_ANONCONST]          = 0x00000144,
+	[OP_ISA]                = 0x00000204,
+	[OP_CMPCHAIN_AND]       = 0x00000300,
+	[OP_CMPCHAIN_DUP]       = 0x00000100,
+	[OP_ENTERTRYCATCH]      = 0x00000300,
+	[OP_LEAVETRYCATCH]      = 0x00000400,
+	[OP_POPTRY]             = 0x00000400,
+	[OP_CATCH]              = 0x00000300,
+	[OP_PUSHDEFER]          = 0x00000300,
+	[OP_IS_BOOL]            = 0x00000106,
+	[OP_IS_WEAK]            = 0x00000106,
+	[OP_WEAKEN]             = 0x00000100,
+	[OP_UNWEAKEN]           = 0x00000100,
+	[OP_BLESSED]            = 0x00000106,
+	[OP_REFADDR]            = 0x0000011e,
+	[OP_REFTYPE]            = 0x0000011e,
+	[OP_CEIL]               = 0x0000011e,
+	[OP_FLOOR]              = 0x0000011e,
+	[OP_IS_TAINTED]         = 0x00000106,
+});
 
 END_EXTERN_C
 
@@ -2544,424 +2526,424 @@ EXTCONST I16 PL_op_private_bitfields[] = {
  * in PL_op_private_bitdefs.  If -1, the op has no bits defined */
 
 EXTCONST I16  PL_op_private_bitdef_ix[] = {
-      -1, /* null */
-      -1, /* stub */
-       0, /* scalar */
-       1, /* pushmark */
-       3, /* wantarray */
-       4, /* const */
-       9, /* gvsv */
-      11, /* gv */
-      12, /* gelem */
-      13, /* padsv */
-      16, /* padsv_store */
-      19, /* padav */
-      24, /* padhv */
-      -1, /* padany */
-      31, /* rv2gv */
-      38, /* rv2sv */
-      43, /* av2arylen */
-      45, /* rv2cv */
-      -1, /* anoncode */
-       0, /* prototype */
-       0, /* refgen */
-       0, /* srefgen */
-      52, /* ref */
-      55, /* bless */
-      56, /* backtick */
-      55, /* glob */
-       0, /* readline */
-      -1, /* rcatline */
-       0, /* regcmaybe */
-       0, /* regcreset */
-       0, /* regcomp */
-      -1, /* match */
-      -1, /* qr */
-      61, /* subst */
-       0, /* substcont */
-      62, /* trans */
-      62, /* transr */
-      69, /* sassign */
-      72, /* aassign */
-       0, /* chop */
-       0, /* schop */
-      78, /* chomp */
-      78, /* schomp */
-       0, /* defined */
-      80, /* undef */
-       0, /* study */
-      85, /* pos */
-       0, /* preinc */
-       0, /* i_preinc */
-       0, /* predec */
-       0, /* i_predec */
-       0, /* postinc */
-       0, /* i_postinc */
-       0, /* postdec */
-       0, /* i_postdec */
-      88, /* pow */
-      88, /* multiply */
-      88, /* i_multiply */
-      88, /* divide */
-      88, /* i_divide */
-      88, /* modulo */
-      88, /* i_modulo */
-      90, /* repeat */
-      88, /* add */
-      88, /* i_add */
-      88, /* subtract */
-      88, /* i_subtract */
-      92, /* concat */
-      95, /* multiconcat */
-     101, /* stringify */
-     103, /* left_shift */
-     103, /* right_shift */
-      12, /* lt */
-      12, /* i_lt */
-      12, /* gt */
-      12, /* i_gt */
-      12, /* le */
-      12, /* i_le */
-      12, /* ge */
-      12, /* i_ge */
-      12, /* eq */
-      12, /* i_eq */
-      12, /* ne */
-      12, /* i_ne */
-      12, /* ncmp */
-      12, /* i_ncmp */
-      12, /* slt */
-      12, /* sgt */
-      12, /* sle */
-      12, /* sge */
-      12, /* seq */
-      12, /* sne */
-      12, /* scmp */
-     105, /* bit_and */
-     105, /* bit_xor */
-     105, /* bit_or */
-     103, /* nbit_and */
-     103, /* nbit_xor */
-     103, /* nbit_or */
-     105, /* sbit_and */
-     105, /* sbit_xor */
-     105, /* sbit_or */
-       0, /* negate */
-       0, /* i_negate */
-       0, /* not */
-     105, /* complement */
-     103, /* ncomplement */
-      78, /* scomplement */
-      12, /* smartmatch */
-     101, /* atan2 */
-      78, /* sin */
-      78, /* cos */
-     101, /* rand */
-     101, /* srand */
-      78, /* exp */
-      78, /* log */
-      78, /* sqrt */
-      78, /* int */
-      78, /* hex */
-      78, /* oct */
-      78, /* abs */
-     106, /* length */
-     109, /* substr */
-     112, /* vec */
-     114, /* index */
-     114, /* rindex */
-      55, /* sprintf */
-      55, /* formline */
-      78, /* ord */
-      78, /* chr */
-     101, /* crypt */
-       0, /* ucfirst */
-       0, /* lcfirst */
-       0, /* uc */
-       0, /* lc */
-       0, /* quotemeta */
-     118, /* rv2av */
-     125, /* aelemfast */
-     125, /* aelemfast_lex */
-     125, /* aelemfastlex_store */
-     126, /* aelem */
-     131, /* aslice */
-     134, /* kvaslice */
-       0, /* aeach */
-       0, /* avalues */
-      43, /* akeys */
-       0, /* each */
-      43, /* values */
-      43, /* keys */
-     135, /* delete */
-     139, /* exists */
-     141, /* rv2hv */
-     126, /* helem */
-     131, /* hslice */
-     134, /* kvhslice */
-     149, /* multideref */
-      55, /* unpack */
-      55, /* pack */
-     156, /* split */
-      55, /* join */
-     161, /* list */
-      12, /* lslice */
-      55, /* anonlist */
-      55, /* anonhash */
-     163, /* emptyavhv */
-      55, /* splice */
-     101, /* push */
-       0, /* pop */
-       0, /* shift */
-     101, /* unshift */
-     168, /* sort */
-     173, /* reverse */
-       0, /* grepstart */
-     175, /* grepwhile */
-       0, /* mapstart */
-       0, /* mapwhile */
-       0, /* range */
-     177, /* flip */
-     177, /* flop */
-       0, /* and */
-       0, /* or */
-      12, /* xor */
-       0, /* dor */
-     179, /* cond_expr */
-       0, /* andassign */
-       0, /* orassign */
-       0, /* dorassign */
-     181, /* entersub */
-     188, /* leavesub */
-     188, /* leavesublv */
-       0, /* argcheck */
-     190, /* argelem */
-       0, /* argdefelem */
-     192, /* caller */
-      55, /* warn */
-      55, /* die */
-      55, /* reset */
-      -1, /* lineseq */
-     194, /* nextstate */
-     194, /* dbstate */
-      -1, /* unstack */
-      -1, /* enter */
-     195, /* leave */
-      -1, /* scope */
-     197, /* enteriter */
-     201, /* iter */
-      -1, /* enterloop */
-     202, /* leaveloop */
-      -1, /* return */
-     204, /* last */
-     204, /* next */
-     204, /* redo */
-     204, /* dump */
-     204, /* goto */
-      55, /* exit */
-       0, /* method */
-       0, /* method_named */
-       0, /* method_super */
-       0, /* method_redir */
-       0, /* method_redir_super */
-       0, /* entergiven */
-       0, /* leavegiven */
-       0, /* enterwhen */
-       0, /* leavewhen */
-      -1, /* break */
-      -1, /* continue */
-     206, /* open */
-      55, /* close */
-      55, /* pipe_op */
-      55, /* fileno */
-      55, /* umask */
-      55, /* binmode */
-      55, /* tie */
-       0, /* untie */
-       0, /* tied */
-      55, /* dbmopen */
-       0, /* dbmclose */
-      55, /* sselect */
-      55, /* select */
-      55, /* getc */
-      55, /* read */
-      55, /* enterwrite */
-     188, /* leavewrite */
-      -1, /* prtf */
-      -1, /* print */
-      -1, /* say */
-      55, /* sysopen */
-      55, /* sysseek */
-      55, /* sysread */
-      55, /* syswrite */
-      55, /* eof */
-      55, /* tell */
-      55, /* seek */
-      55, /* truncate */
-      55, /* fcntl */
-      55, /* ioctl */
-     101, /* flock */
-      55, /* send */
-      55, /* recv */
-      55, /* socket */
-      55, /* sockpair */
-      55, /* bind */
-      55, /* connect */
-      55, /* listen */
-      55, /* accept */
-      55, /* shutdown */
-      55, /* gsockopt */
-      55, /* ssockopt */
-       0, /* getsockname */
-       0, /* getpeername */
-       0, /* lstat */
-       0, /* stat */
-     211, /* ftrread */
-     211, /* ftrwrite */
-     211, /* ftrexec */
-     211, /* fteread */
-     211, /* ftewrite */
-     211, /* fteexec */
-     216, /* ftis */
-     216, /* ftsize */
-     216, /* ftmtime */
-     216, /* ftatime */
-     216, /* ftctime */
-     216, /* ftrowned */
-     216, /* fteowned */
-     216, /* ftzero */
-     216, /* ftsock */
-     216, /* ftchr */
-     216, /* ftblk */
-     216, /* ftfile */
-     216, /* ftdir */
-     216, /* ftpipe */
-     216, /* ftsuid */
-     216, /* ftsgid */
-     216, /* ftsvtx */
-     216, /* ftlink */
-     216, /* fttty */
-     216, /* fttext */
-     216, /* ftbinary */
-     101, /* chdir */
-     101, /* chown */
-      78, /* chroot */
-     101, /* unlink */
-     101, /* chmod */
-     101, /* utime */
-     101, /* rename */
-     101, /* link */
-     101, /* symlink */
-       0, /* readlink */
-     101, /* mkdir */
-      78, /* rmdir */
-      55, /* open_dir */
-       0, /* readdir */
-       0, /* telldir */
-      55, /* seekdir */
-       0, /* rewinddir */
-       0, /* closedir */
-      -1, /* fork */
-     220, /* wait */
-     101, /* waitpid */
-     101, /* system */
-     101, /* exec */
-     101, /* kill */
-     220, /* getppid */
-     101, /* getpgrp */
-     101, /* setpgrp */
-     101, /* getpriority */
-     101, /* setpriority */
-     220, /* time */
-      -1, /* tms */
-       0, /* localtime */
-      55, /* gmtime */
-       0, /* alarm */
-     101, /* sleep */
-      55, /* shmget */
-      55, /* shmctl */
-      55, /* shmread */
-      55, /* shmwrite */
-      55, /* msgget */
-      55, /* msgctl */
-      55, /* msgsnd */
-      55, /* msgrcv */
-      55, /* semop */
-      55, /* semget */
-      55, /* semctl */
-       0, /* require */
-       0, /* dofile */
-      -1, /* hintseval */
-     221, /* entereval */
-     188, /* leaveeval */
-       0, /* entertry */
-      -1, /* leavetry */
-       0, /* ghbyname */
-      55, /* ghbyaddr */
-      -1, /* ghostent */
-       0, /* gnbyname */
-      55, /* gnbyaddr */
-      -1, /* gnetent */
-       0, /* gpbyname */
-      55, /* gpbynumber */
-      -1, /* gprotoent */
-      55, /* gsbyname */
-      55, /* gsbyport */
-      -1, /* gservent */
-       0, /* shostent */
-       0, /* snetent */
-       0, /* sprotoent */
-       0, /* sservent */
-      -1, /* ehostent */
-      -1, /* enetent */
-      -1, /* eprotoent */
-      -1, /* eservent */
-       0, /* gpwnam */
-       0, /* gpwuid */
-      -1, /* gpwent */
-      -1, /* spwent */
-      -1, /* epwent */
-       0, /* ggrnam */
-       0, /* ggrgid */
-      -1, /* ggrent */
-      -1, /* sgrent */
-      -1, /* egrent */
-      -1, /* getlogin */
-      55, /* syscall */
-       0, /* lock */
-       0, /* once */
-      -1, /* custom */
-     227, /* coreargs */
-     231, /* avhvswitch */
-       3, /* runcv */
-       0, /* fc */
-      -1, /* padcv */
-      -1, /* introcv */
-      -1, /* clonecv */
-     233, /* padrange */
-     235, /* refassign */
-     241, /* lvref */
-     247, /* lvrefslice */
-      16, /* lvavref */
-       0, /* anonconst */
-      12, /* isa */
-       0, /* cmpchain_and */
-       0, /* cmpchain_dup */
-       0, /* entertrycatch */
-      -1, /* leavetrycatch */
-      -1, /* poptry */
-       0, /* catch */
-     248, /* pushdefer */
-       0, /* is_bool */
-       0, /* is_weak */
-       0, /* weaken */
-       0, /* unweaken */
-      52, /* blessed */
-      78, /* refaddr */
-      78, /* reftype */
-      78, /* ceil */
-      78, /* floor */
-       0, /* is_tainted */
+	[OP_NULL]               =   -1,
+	[OP_STUB]               =   -1,
+	[OP_SCALAR]             =    0,
+	[OP_PUSHMARK]           =    1,
+	[OP_WANTARRAY]          =    3,
+	[OP_CONST]              =    4,
+	[OP_GVSV]               =    9,
+	[OP_GV]                 =   11,
+	[OP_GELEM]              =   12,
+	[OP_PADSV]              =   13,
+	[OP_PADSV_STORE]        =   16,
+	[OP_PADAV]              =   19,
+	[OP_PADHV]              =   24,
+	[OP_PADANY]             =   -1,
+	[OP_RV2GV]              =   31,
+	[OP_RV2SV]              =   38,
+	[OP_AV2ARYLEN]          =   43,
+	[OP_RV2CV]              =   45,
+	[OP_ANONCODE]           =   -1,
+	[OP_PROTOTYPE]          =    0,
+	[OP_REFGEN]             =    0,
+	[OP_SREFGEN]            =    0,
+	[OP_REF]                =   52,
+	[OP_BLESS]              =   55,
+	[OP_BACKTICK]           =   56,
+	[OP_GLOB]               =   55,
+	[OP_READLINE]           =    0,
+	[OP_RCATLINE]           =   -1,
+	[OP_REGCMAYBE]          =    0,
+	[OP_REGCRESET]          =    0,
+	[OP_REGCOMP]            =    0,
+	[OP_MATCH]              =   -1,
+	[OP_QR]                 =   -1,
+	[OP_SUBST]              =   61,
+	[OP_SUBSTCONT]          =    0,
+	[OP_TRANS]              =   62,
+	[OP_TRANSR]             =   62,
+	[OP_SASSIGN]            =   69,
+	[OP_AASSIGN]            =   72,
+	[OP_CHOP]               =    0,
+	[OP_SCHOP]              =    0,
+	[OP_CHOMP]              =   78,
+	[OP_SCHOMP]             =   78,
+	[OP_DEFINED]            =    0,
+	[OP_UNDEF]              =   80,
+	[OP_STUDY]              =    0,
+	[OP_POS]                =   85,
+	[OP_PREINC]             =    0,
+	[OP_I_PREINC]           =    0,
+	[OP_PREDEC]             =    0,
+	[OP_I_PREDEC]           =    0,
+	[OP_POSTINC]            =    0,
+	[OP_I_POSTINC]          =    0,
+	[OP_POSTDEC]            =    0,
+	[OP_I_POSTDEC]          =    0,
+	[OP_POW]                =   88,
+	[OP_MULTIPLY]           =   88,
+	[OP_I_MULTIPLY]         =   88,
+	[OP_DIVIDE]             =   88,
+	[OP_I_DIVIDE]           =   88,
+	[OP_MODULO]             =   88,
+	[OP_I_MODULO]           =   88,
+	[OP_REPEAT]             =   90,
+	[OP_ADD]                =   88,
+	[OP_I_ADD]              =   88,
+	[OP_SUBTRACT]           =   88,
+	[OP_I_SUBTRACT]         =   88,
+	[OP_CONCAT]             =   92,
+	[OP_MULTICONCAT]        =   95,
+	[OP_STRINGIFY]          =  101,
+	[OP_LEFT_SHIFT]         =  103,
+	[OP_RIGHT_SHIFT]        =  103,
+	[OP_LT]                 =   12,
+	[OP_I_LT]               =   12,
+	[OP_GT]                 =   12,
+	[OP_I_GT]               =   12,
+	[OP_LE]                 =   12,
+	[OP_I_LE]               =   12,
+	[OP_GE]                 =   12,
+	[OP_I_GE]               =   12,
+	[OP_EQ]                 =   12,
+	[OP_I_EQ]               =   12,
+	[OP_NE]                 =   12,
+	[OP_I_NE]               =   12,
+	[OP_NCMP]               =   12,
+	[OP_I_NCMP]             =   12,
+	[OP_SLT]                =   12,
+	[OP_SGT]                =   12,
+	[OP_SLE]                =   12,
+	[OP_SGE]                =   12,
+	[OP_SEQ]                =   12,
+	[OP_SNE]                =   12,
+	[OP_SCMP]               =   12,
+	[OP_BIT_AND]            =  105,
+	[OP_BIT_XOR]            =  105,
+	[OP_BIT_OR]             =  105,
+	[OP_NBIT_AND]           =  103,
+	[OP_NBIT_XOR]           =  103,
+	[OP_NBIT_OR]            =  103,
+	[OP_SBIT_AND]           =  105,
+	[OP_SBIT_XOR]           =  105,
+	[OP_SBIT_OR]            =  105,
+	[OP_NEGATE]             =    0,
+	[OP_I_NEGATE]           =    0,
+	[OP_NOT]                =    0,
+	[OP_COMPLEMENT]         =  105,
+	[OP_NCOMPLEMENT]        =  103,
+	[OP_SCOMPLEMENT]        =   78,
+	[OP_SMARTMATCH]         =   12,
+	[OP_ATAN2]              =  101,
+	[OP_SIN]                =   78,
+	[OP_COS]                =   78,
+	[OP_RAND]               =  101,
+	[OP_SRAND]              =  101,
+	[OP_EXP]                =   78,
+	[OP_LOG]                =   78,
+	[OP_SQRT]               =   78,
+	[OP_INT]                =   78,
+	[OP_HEX]                =   78,
+	[OP_OCT]                =   78,
+	[OP_ABS]                =   78,
+	[OP_LENGTH]             =  106,
+	[OP_SUBSTR]             =  109,
+	[OP_VEC]                =  112,
+	[OP_INDEX]              =  114,
+	[OP_RINDEX]             =  114,
+	[OP_SPRINTF]            =   55,
+	[OP_FORMLINE]           =   55,
+	[OP_ORD]                =   78,
+	[OP_CHR]                =   78,
+	[OP_CRYPT]              =  101,
+	[OP_UCFIRST]            =    0,
+	[OP_LCFIRST]            =    0,
+	[OP_UC]                 =    0,
+	[OP_LC]                 =    0,
+	[OP_QUOTEMETA]          =    0,
+	[OP_RV2AV]              =  118,
+	[OP_AELEMFAST]          =  125,
+	[OP_AELEMFAST_LEX]      =  125,
+	[OP_AELEMFASTLEX_STORE] =  125,
+	[OP_AELEM]              =  126,
+	[OP_ASLICE]             =  131,
+	[OP_KVASLICE]           =  134,
+	[OP_AEACH]              =    0,
+	[OP_AVALUES]            =    0,
+	[OP_AKEYS]              =   43,
+	[OP_EACH]               =    0,
+	[OP_VALUES]             =   43,
+	[OP_KEYS]               =   43,
+	[OP_DELETE]             =  135,
+	[OP_EXISTS]             =  139,
+	[OP_RV2HV]              =  141,
+	[OP_HELEM]              =  126,
+	[OP_HSLICE]             =  131,
+	[OP_KVHSLICE]           =  134,
+	[OP_MULTIDEREF]         =  149,
+	[OP_UNPACK]             =   55,
+	[OP_PACK]               =   55,
+	[OP_SPLIT]              =  156,
+	[OP_JOIN]               =   55,
+	[OP_LIST]               =  161,
+	[OP_LSLICE]             =   12,
+	[OP_ANONLIST]           =   55,
+	[OP_ANONHASH]           =   55,
+	[OP_EMPTYAVHV]          =  163,
+	[OP_SPLICE]             =   55,
+	[OP_PUSH]               =  101,
+	[OP_POP]                =    0,
+	[OP_SHIFT]              =    0,
+	[OP_UNSHIFT]            =  101,
+	[OP_SORT]               =  168,
+	[OP_REVERSE]            =  173,
+	[OP_GREPSTART]          =    0,
+	[OP_GREPWHILE]          =  175,
+	[OP_MAPSTART]           =    0,
+	[OP_MAPWHILE]           =    0,
+	[OP_RANGE]              =    0,
+	[OP_FLIP]               =  177,
+	[OP_FLOP]               =  177,
+	[OP_AND]                =    0,
+	[OP_OR]                 =    0,
+	[OP_XOR]                =   12,
+	[OP_DOR]                =    0,
+	[OP_COND_EXPR]          =  179,
+	[OP_ANDASSIGN]          =    0,
+	[OP_ORASSIGN]           =    0,
+	[OP_DORASSIGN]          =    0,
+	[OP_ENTERSUB]           =  181,
+	[OP_LEAVESUB]           =  188,
+	[OP_LEAVESUBLV]         =  188,
+	[OP_ARGCHECK]           =    0,
+	[OP_ARGELEM]            =  190,
+	[OP_ARGDEFELEM]         =    0,
+	[OP_CALLER]             =  192,
+	[OP_WARN]               =   55,
+	[OP_DIE]                =   55,
+	[OP_RESET]              =   55,
+	[OP_LINESEQ]            =   -1,
+	[OP_NEXTSTATE]          =  194,
+	[OP_DBSTATE]            =  194,
+	[OP_UNSTACK]            =   -1,
+	[OP_ENTER]              =   -1,
+	[OP_LEAVE]              =  195,
+	[OP_SCOPE]              =   -1,
+	[OP_ENTERITER]          =  197,
+	[OP_ITER]               =  201,
+	[OP_ENTERLOOP]          =   -1,
+	[OP_LEAVELOOP]          =  202,
+	[OP_RETURN]             =   -1,
+	[OP_LAST]               =  204,
+	[OP_NEXT]               =  204,
+	[OP_REDO]               =  204,
+	[OP_DUMP]               =  204,
+	[OP_GOTO]               =  204,
+	[OP_EXIT]               =   55,
+	[OP_METHOD]             =    0,
+	[OP_METHOD_NAMED]       =    0,
+	[OP_METHOD_SUPER]       =    0,
+	[OP_METHOD_REDIR]       =    0,
+	[OP_METHOD_REDIR_SUPER] =    0,
+	[OP_ENTERGIVEN]         =    0,
+	[OP_LEAVEGIVEN]         =    0,
+	[OP_ENTERWHEN]          =    0,
+	[OP_LEAVEWHEN]          =    0,
+	[OP_BREAK]              =   -1,
+	[OP_CONTINUE]           =   -1,
+	[OP_OPEN]               =  206,
+	[OP_CLOSE]              =   55,
+	[OP_PIPE_OP]            =   55,
+	[OP_FILENO]             =   55,
+	[OP_UMASK]              =   55,
+	[OP_BINMODE]            =   55,
+	[OP_TIE]                =   55,
+	[OP_UNTIE]              =    0,
+	[OP_TIED]               =    0,
+	[OP_DBMOPEN]            =   55,
+	[OP_DBMCLOSE]           =    0,
+	[OP_SSELECT]            =   55,
+	[OP_SELECT]             =   55,
+	[OP_GETC]               =   55,
+	[OP_READ]               =   55,
+	[OP_ENTERWRITE]         =   55,
+	[OP_LEAVEWRITE]         =  188,
+	[OP_PRTF]               =   -1,
+	[OP_PRINT]              =   -1,
+	[OP_SAY]                =   -1,
+	[OP_SYSOPEN]            =   55,
+	[OP_SYSSEEK]            =   55,
+	[OP_SYSREAD]            =   55,
+	[OP_SYSWRITE]           =   55,
+	[OP_EOF]                =   55,
+	[OP_TELL]               =   55,
+	[OP_SEEK]               =   55,
+	[OP_TRUNCATE]           =   55,
+	[OP_FCNTL]              =   55,
+	[OP_IOCTL]              =   55,
+	[OP_FLOCK]              =  101,
+	[OP_SEND]               =   55,
+	[OP_RECV]               =   55,
+	[OP_SOCKET]             =   55,
+	[OP_SOCKPAIR]           =   55,
+	[OP_BIND]               =   55,
+	[OP_CONNECT]            =   55,
+	[OP_LISTEN]             =   55,
+	[OP_ACCEPT]             =   55,
+	[OP_SHUTDOWN]           =   55,
+	[OP_GSOCKOPT]           =   55,
+	[OP_SSOCKOPT]           =   55,
+	[OP_GETSOCKNAME]        =    0,
+	[OP_GETPEERNAME]        =    0,
+	[OP_LSTAT]              =    0,
+	[OP_STAT]               =    0,
+	[OP_FTRREAD]            =  211,
+	[OP_FTRWRITE]           =  211,
+	[OP_FTREXEC]            =  211,
+	[OP_FTEREAD]            =  211,
+	[OP_FTEWRITE]           =  211,
+	[OP_FTEEXEC]            =  211,
+	[OP_FTIS]               =  216,
+	[OP_FTSIZE]             =  216,
+	[OP_FTMTIME]            =  216,
+	[OP_FTATIME]            =  216,
+	[OP_FTCTIME]            =  216,
+	[OP_FTROWNED]           =  216,
+	[OP_FTEOWNED]           =  216,
+	[OP_FTZERO]             =  216,
+	[OP_FTSOCK]             =  216,
+	[OP_FTCHR]              =  216,
+	[OP_FTBLK]              =  216,
+	[OP_FTFILE]             =  216,
+	[OP_FTDIR]              =  216,
+	[OP_FTPIPE]             =  216,
+	[OP_FTSUID]             =  216,
+	[OP_FTSGID]             =  216,
+	[OP_FTSVTX]             =  216,
+	[OP_FTLINK]             =  216,
+	[OP_FTTTY]              =  216,
+	[OP_FTTEXT]             =  216,
+	[OP_FTBINARY]           =  216,
+	[OP_CHDIR]              =  101,
+	[OP_CHOWN]              =  101,
+	[OP_CHROOT]             =   78,
+	[OP_UNLINK]             =  101,
+	[OP_CHMOD]              =  101,
+	[OP_UTIME]              =  101,
+	[OP_RENAME]             =  101,
+	[OP_LINK]               =  101,
+	[OP_SYMLINK]            =  101,
+	[OP_READLINK]           =    0,
+	[OP_MKDIR]              =  101,
+	[OP_RMDIR]              =   78,
+	[OP_OPEN_DIR]           =   55,
+	[OP_READDIR]            =    0,
+	[OP_TELLDIR]            =    0,
+	[OP_SEEKDIR]            =   55,
+	[OP_REWINDDIR]          =    0,
+	[OP_CLOSEDIR]           =    0,
+	[OP_FORK]               =   -1,
+	[OP_WAIT]               =  220,
+	[OP_WAITPID]            =  101,
+	[OP_SYSTEM]             =  101,
+	[OP_EXEC]               =  101,
+	[OP_KILL]               =  101,
+	[OP_GETPPID]            =  220,
+	[OP_GETPGRP]            =  101,
+	[OP_SETPGRP]            =  101,
+	[OP_GETPRIORITY]        =  101,
+	[OP_SETPRIORITY]        =  101,
+	[OP_TIME]               =  220,
+	[OP_TMS]                =   -1,
+	[OP_LOCALTIME]          =    0,
+	[OP_GMTIME]             =   55,
+	[OP_ALARM]              =    0,
+	[OP_SLEEP]              =  101,
+	[OP_SHMGET]             =   55,
+	[OP_SHMCTL]             =   55,
+	[OP_SHMREAD]            =   55,
+	[OP_SHMWRITE]           =   55,
+	[OP_MSGGET]             =   55,
+	[OP_MSGCTL]             =   55,
+	[OP_MSGSND]             =   55,
+	[OP_MSGRCV]             =   55,
+	[OP_SEMOP]              =   55,
+	[OP_SEMGET]             =   55,
+	[OP_SEMCTL]             =   55,
+	[OP_REQUIRE]            =    0,
+	[OP_DOFILE]             =    0,
+	[OP_HINTSEVAL]          =   -1,
+	[OP_ENTEREVAL]          =  221,
+	[OP_LEAVEEVAL]          =  188,
+	[OP_ENTERTRY]           =    0,
+	[OP_LEAVETRY]           =   -1,
+	[OP_GHBYNAME]           =    0,
+	[OP_GHBYADDR]           =   55,
+	[OP_GHOSTENT]           =   -1,
+	[OP_GNBYNAME]           =    0,
+	[OP_GNBYADDR]           =   55,
+	[OP_GNETENT]            =   -1,
+	[OP_GPBYNAME]           =    0,
+	[OP_GPBYNUMBER]         =   55,
+	[OP_GPROTOENT]          =   -1,
+	[OP_GSBYNAME]           =   55,
+	[OP_GSBYPORT]           =   55,
+	[OP_GSERVENT]           =   -1,
+	[OP_SHOSTENT]           =    0,
+	[OP_SNETENT]            =    0,
+	[OP_SPROTOENT]          =    0,
+	[OP_SSERVENT]           =    0,
+	[OP_EHOSTENT]           =   -1,
+	[OP_ENETENT]            =   -1,
+	[OP_EPROTOENT]          =   -1,
+	[OP_ESERVENT]           =   -1,
+	[OP_GPWNAM]             =    0,
+	[OP_GPWUID]             =    0,
+	[OP_GPWENT]             =   -1,
+	[OP_SPWENT]             =   -1,
+	[OP_EPWENT]             =   -1,
+	[OP_GGRNAM]             =    0,
+	[OP_GGRGID]             =    0,
+	[OP_GGRENT]             =   -1,
+	[OP_SGRENT]             =   -1,
+	[OP_EGRENT]             =   -1,
+	[OP_GETLOGIN]           =   -1,
+	[OP_SYSCALL]            =   55,
+	[OP_LOCK]               =    0,
+	[OP_ONCE]               =    0,
+	[OP_CUSTOM]             =   -1,
+	[OP_COREARGS]           =  227,
+	[OP_AVHVSWITCH]         =  231,
+	[OP_RUNCV]              =    3,
+	[OP_FC]                 =    0,
+	[OP_PADCV]              =   -1,
+	[OP_INTROCV]            =   -1,
+	[OP_CLONECV]            =   -1,
+	[OP_PADRANGE]           =  233,
+	[OP_REFASSIGN]          =  235,
+	[OP_LVREF]              =  241,
+	[OP_LVREFSLICE]         =  247,
+	[OP_LVAVREF]            =   16,
+	[OP_ANONCONST]          =    0,
+	[OP_ISA]                =   12,
+	[OP_CMPCHAIN_AND]       =    0,
+	[OP_CMPCHAIN_DUP]       =    0,
+	[OP_ENTERTRYCATCH]      =    0,
+	[OP_LEAVETRYCATCH]      =   -1,
+	[OP_POPTRY]             =   -1,
+	[OP_CATCH]              =    0,
+	[OP_PUSHDEFER]          =  248,
+	[OP_IS_BOOL]            =    0,
+	[OP_IS_WEAK]            =    0,
+	[OP_WEAKEN]             =    0,
+	[OP_UNWEAKEN]           =    0,
+	[OP_BLESSED]            =   52,
+	[OP_REFADDR]            =   78,
+	[OP_REFTYPE]            =   78,
+	[OP_CEIL]               =   78,
+	[OP_FLOOR]              =   78,
+	[OP_IS_TAINTED]         =    0,
 
 };
 
@@ -3063,424 +3045,424 @@ EXTCONST U16  PL_op_private_bitdefs[] = {
  * flags bits in op_private are legal */
 
 EXTCONST U8 PL_op_private_valid[] = {
-    /* NULL       */ (0xff),
-    /* STUB       */ (0),
-    /* SCALAR     */ (OPpARG1_MASK),
-    /* PUSHMARK   */ (OPpPAD_STATE|OPpLVAL_INTRO),
-    /* WANTARRAY  */ (OPpOFFBYONE),
-    /* CONST      */ (OPpCONST_NOVER|OPpCONST_SHORTCIRCUIT|OPpCONST_STRICT|OPpCONST_ENTERED|OPpCONST_BARE),
-    /* GVSV       */ (OPpOUR_INTRO|OPpLVAL_INTRO),
-    /* GV         */ (OPpEARLY_CV),
-    /* GELEM      */ (OPpARG2_MASK),
-    /* PADSV      */ (OPpDEREF|OPpPAD_STATE|OPpLVAL_INTRO),
-    /* PADSV_STORE */ (OPpARG1_MASK|OPpPAD_STATE|OPpLVAL_INTRO),
-    /* PADAV      */ (OPpSLICEWARNING|OPpMAYBE_LVSUB|OPpTRUEBOOL|OPpPAD_STATE|OPpLVAL_INTRO),
-    /* PADHV      */ (OPpPADHV_ISKEYS|OPpSLICEWARNING|OPpMAYBE_LVSUB|OPpMAYBE_TRUEBOOL|OPpTRUEBOOL|OPpPAD_STATE|OPpLVAL_INTRO),
-    /* PADANY     */ (0),
-    /* RV2GV      */ (OPpARG1_MASK|OPpHINT_STRICT_REFS|OPpDONT_INIT_GV|OPpMAYBE_LVSUB|OPpDEREF|OPpALLOW_FAKE|OPpLVAL_INTRO),
-    /* RV2SV      */ (OPpARG1_MASK|OPpHINT_STRICT_REFS|OPpDEREF|OPpOUR_INTRO|OPpLVAL_INTRO),
-    /* AV2ARYLEN  */ (OPpARG1_MASK|OPpMAYBE_LVSUB),
-    /* RV2CV      */ (OPpARG1_MASK|OPpHINT_STRICT_REFS|OPpENTERSUB_HASTARG|OPpENTERSUB_AMPER|OPpMAY_RETURN_CONSTANT|OPpENTERSUB_DB|OPpENTERSUB_NOPAREN),
-    /* ANONCODE   */ (0),
-    /* PROTOTYPE  */ (OPpARG1_MASK),
-    /* REFGEN     */ (OPpARG1_MASK),
-    /* SREFGEN    */ (OPpARG1_MASK),
-    /* REF        */ (OPpARG1_MASK|OPpMAYBE_TRUEBOOL|OPpTRUEBOOL),
-    /* BLESS      */ (OPpARG4_MASK),
-    /* BACKTICK   */ (OPpARG1_MASK|OPpOPEN_IN_RAW|OPpOPEN_IN_CRLF|OPpOPEN_OUT_RAW|OPpOPEN_OUT_CRLF),
-    /* GLOB       */ (OPpARG4_MASK),
-    /* READLINE   */ (OPpARG1_MASK),
-    /* RCATLINE   */ (0),
-    /* REGCMAYBE  */ (OPpARG1_MASK),
-    /* REGCRESET  */ (OPpARG1_MASK),
-    /* REGCOMP    */ (OPpARG1_MASK),
-    /* MATCH      */ (0),
-    /* QR         */ (0),
-    /* SUBST      */ (OPpTRUEBOOL),
-    /* SUBSTCONT  */ (OPpARG1_MASK),
-    /* TRANS      */ (OPpTRANS_CAN_FORCE_UTF8|OPpTRANS_USE_SVOP|OPpTRANS_IDENTICAL|OPpTRANS_SQUASH|OPpTRANS_COMPLEMENT|OPpTRANS_GROWS|OPpTRANS_DELETE),
-    /* TRANSR     */ (OPpTRANS_CAN_FORCE_UTF8|OPpTRANS_USE_SVOP|OPpTRANS_IDENTICAL|OPpTRANS_SQUASH|OPpTRANS_COMPLEMENT|OPpTRANS_GROWS|OPpTRANS_DELETE),
-    /* SASSIGN    */ (OPpARG2_MASK|OPpASSIGN_BACKWARDS|OPpASSIGN_CV_TO_GV),
-    /* AASSIGN    */ (OPpARG2_MASK|OPpASSIGN_TRUEBOOL|OPpMAYBE_LVSUB|OPpASSIGN_COMMON_AGG|OPpASSIGN_COMMON_RC1|OPpASSIGN_COMMON_SCALAR),
-    /* CHOP       */ (OPpARG1_MASK),
-    /* SCHOP      */ (OPpARG1_MASK),
-    /* CHOMP      */ (OPpARG1_MASK|OPpTARGET_MY),
-    /* SCHOMP     */ (OPpARG1_MASK|OPpTARGET_MY),
-    /* DEFINED    */ (OPpARG1_MASK),
-    /* UNDEF      */ (OPpARG1_MASK|OPpTARGET_MY|OPpUNDEF_KEEP_PV|OPpPAD_STATE|OPpLVAL_INTRO),
-    /* STUDY      */ (OPpARG1_MASK),
-    /* POS        */ (OPpARG1_MASK|OPpMAYBE_LVSUB|OPpTRUEBOOL),
-    /* PREINC     */ (OPpARG1_MASK),
-    /* I_PREINC   */ (OPpARG1_MASK),
-    /* PREDEC     */ (OPpARG1_MASK),
-    /* I_PREDEC   */ (OPpARG1_MASK),
-    /* POSTINC    */ (OPpARG1_MASK),
-    /* I_POSTINC  */ (OPpARG1_MASK),
-    /* POSTDEC    */ (OPpARG1_MASK),
-    /* I_POSTDEC  */ (OPpARG1_MASK),
-    /* POW        */ (OPpARG2_MASK|OPpTARGET_MY),
-    /* MULTIPLY   */ (OPpARG2_MASK|OPpTARGET_MY),
-    /* I_MULTIPLY */ (OPpARG2_MASK|OPpTARGET_MY),
-    /* DIVIDE     */ (OPpARG2_MASK|OPpTARGET_MY),
-    /* I_DIVIDE   */ (OPpARG2_MASK|OPpTARGET_MY),
-    /* MODULO     */ (OPpARG2_MASK|OPpTARGET_MY),
-    /* I_MODULO   */ (OPpARG2_MASK|OPpTARGET_MY),
-    /* REPEAT     */ (OPpARG2_MASK|OPpREPEAT_DOLIST),
-    /* ADD        */ (OPpARG2_MASK|OPpTARGET_MY),
-    /* I_ADD      */ (OPpARG2_MASK|OPpTARGET_MY),
-    /* SUBTRACT   */ (OPpARG2_MASK|OPpTARGET_MY),
-    /* I_SUBTRACT */ (OPpARG2_MASK|OPpTARGET_MY),
-    /* CONCAT     */ (OPpARG2_MASK|OPpTARGET_MY|OPpCONCAT_NESTED),
-    /* MULTICONCAT */ (OPpARG1_MASK|OPpMULTICONCAT_STRINGIFY|OPpTARGET_MY|OPpMULTICONCAT_FAKE|OPpMULTICONCAT_APPEND|OPpLVAL_INTRO),
-    /* STRINGIFY  */ (OPpARG4_MASK|OPpTARGET_MY),
-    /* LEFT_SHIFT */ (OPpUSEINT|OPpTARGET_MY),
-    /* RIGHT_SHIFT */ (OPpUSEINT|OPpTARGET_MY),
-    /* LT         */ (OPpARG2_MASK),
-    /* I_LT       */ (OPpARG2_MASK),
-    /* GT         */ (OPpARG2_MASK),
-    /* I_GT       */ (OPpARG2_MASK),
-    /* LE         */ (OPpARG2_MASK),
-    /* I_LE       */ (OPpARG2_MASK),
-    /* GE         */ (OPpARG2_MASK),
-    /* I_GE       */ (OPpARG2_MASK),
-    /* EQ         */ (OPpARG2_MASK),
-    /* I_EQ       */ (OPpARG2_MASK),
-    /* NE         */ (OPpARG2_MASK),
-    /* I_NE       */ (OPpARG2_MASK),
-    /* NCMP       */ (OPpARG2_MASK),
-    /* I_NCMP     */ (OPpARG2_MASK),
-    /* SLT        */ (OPpARG2_MASK),
-    /* SGT        */ (OPpARG2_MASK),
-    /* SLE        */ (OPpARG2_MASK),
-    /* SGE        */ (OPpARG2_MASK),
-    /* SEQ        */ (OPpARG2_MASK),
-    /* SNE        */ (OPpARG2_MASK),
-    /* SCMP       */ (OPpARG2_MASK),
-    /* BIT_AND    */ (OPpUSEINT),
-    /* BIT_XOR    */ (OPpUSEINT),
-    /* BIT_OR     */ (OPpUSEINT),
-    /* NBIT_AND   */ (OPpUSEINT|OPpTARGET_MY),
-    /* NBIT_XOR   */ (OPpUSEINT|OPpTARGET_MY),
-    /* NBIT_OR    */ (OPpUSEINT|OPpTARGET_MY),
-    /* SBIT_AND   */ (OPpUSEINT),
-    /* SBIT_XOR   */ (OPpUSEINT),
-    /* SBIT_OR    */ (OPpUSEINT),
-    /* NEGATE     */ (OPpARG1_MASK),
-    /* I_NEGATE   */ (OPpARG1_MASK),
-    /* NOT        */ (OPpARG1_MASK),
-    /* COMPLEMENT */ (OPpUSEINT),
-    /* NCOMPLEMENT */ (OPpUSEINT|OPpTARGET_MY),
-    /* SCOMPLEMENT */ (OPpARG1_MASK|OPpTARGET_MY),
-    /* SMARTMATCH */ (OPpARG2_MASK),
-    /* ATAN2      */ (OPpARG4_MASK|OPpTARGET_MY),
-    /* SIN        */ (OPpARG1_MASK|OPpTARGET_MY),
-    /* COS        */ (OPpARG1_MASK|OPpTARGET_MY),
-    /* RAND       */ (OPpARG4_MASK|OPpTARGET_MY),
-    /* SRAND      */ (OPpARG4_MASK|OPpTARGET_MY),
-    /* EXP        */ (OPpARG1_MASK|OPpTARGET_MY),
-    /* LOG        */ (OPpARG1_MASK|OPpTARGET_MY),
-    /* SQRT       */ (OPpARG1_MASK|OPpTARGET_MY),
-    /* INT        */ (OPpARG1_MASK|OPpTARGET_MY),
-    /* HEX        */ (OPpARG1_MASK|OPpTARGET_MY),
-    /* OCT        */ (OPpARG1_MASK|OPpTARGET_MY),
-    /* ABS        */ (OPpARG1_MASK|OPpTARGET_MY),
-    /* LENGTH     */ (OPpARG1_MASK|OPpTARGET_MY|OPpTRUEBOOL),
-    /* SUBSTR     */ (OPpARG3_MASK|OPpMAYBE_LVSUB|OPpSUBSTR_REPL_FIRST),
-    /* VEC        */ (OPpARG2_MASK|OPpMAYBE_LVSUB),
-    /* INDEX      */ (OPpARG4_MASK|OPpTARGET_MY|OPpTRUEBOOL|OPpINDEX_BOOLNEG),
-    /* RINDEX     */ (OPpARG4_MASK|OPpTARGET_MY|OPpTRUEBOOL|OPpINDEX_BOOLNEG),
-    /* SPRINTF    */ (OPpARG4_MASK),
-    /* FORMLINE   */ (OPpARG4_MASK),
-    /* ORD        */ (OPpARG1_MASK|OPpTARGET_MY),
-    /* CHR        */ (OPpARG1_MASK|OPpTARGET_MY),
-    /* CRYPT      */ (OPpARG4_MASK|OPpTARGET_MY),
-    /* UCFIRST    */ (OPpARG1_MASK),
-    /* LCFIRST    */ (OPpARG1_MASK),
-    /* UC         */ (OPpARG1_MASK),
-    /* LC         */ (OPpARG1_MASK),
-    /* QUOTEMETA  */ (OPpARG1_MASK),
-    /* RV2AV      */ (OPpARG1_MASK|OPpHINT_STRICT_REFS|OPpSLICEWARNING|OPpMAYBE_LVSUB|OPpTRUEBOOL|OPpOUR_INTRO|OPpLVAL_INTRO),
-    /* AELEMFAST  */ (255),
-    /* AELEMFAST_LEX */ (255),
-    /* AELEMFASTLEX_STORE */ (255),
-    /* AELEM      */ (OPpARG2_MASK|OPpMAYBE_LVSUB|OPpDEREF|OPpLVAL_DEFER|OPpLVAL_INTRO),
-    /* ASLICE     */ (OPpSLICEWARNING|OPpMAYBE_LVSUB|OPpLVAL_INTRO),
-    /* KVASLICE   */ (OPpMAYBE_LVSUB),
-    /* AEACH      */ (OPpARG1_MASK),
-    /* AVALUES    */ (OPpARG1_MASK),
-    /* AKEYS      */ (OPpARG1_MASK|OPpMAYBE_LVSUB),
-    /* EACH       */ (OPpARG1_MASK),
-    /* VALUES     */ (OPpARG1_MASK|OPpMAYBE_LVSUB),
-    /* KEYS       */ (OPpARG1_MASK|OPpMAYBE_LVSUB),
-    /* DELETE     */ (OPpARG1_MASK|OPpKVSLICE|OPpSLICE|OPpLVAL_INTRO),
-    /* EXISTS     */ (OPpARG1_MASK|OPpEXISTS_SUB),
-    /* RV2HV      */ (OPpRV2HV_ISKEYS|OPpHINT_STRICT_REFS|OPpSLICEWARNING|OPpMAYBE_LVSUB|OPpMAYBE_TRUEBOOL|OPpTRUEBOOL|OPpOUR_INTRO|OPpLVAL_INTRO),
-    /* HELEM      */ (OPpARG2_MASK|OPpMAYBE_LVSUB|OPpDEREF|OPpLVAL_DEFER|OPpLVAL_INTRO),
-    /* HSLICE     */ (OPpSLICEWARNING|OPpMAYBE_LVSUB|OPpLVAL_INTRO),
-    /* KVHSLICE   */ (OPpMAYBE_LVSUB),
-    /* MULTIDEREF */ (OPpARG1_MASK|OPpHINT_STRICT_REFS|OPpMAYBE_LVSUB|OPpMULTIDEREF_EXISTS|OPpMULTIDEREF_DELETE|OPpLVAL_DEFER|OPpLVAL_INTRO),
-    /* UNPACK     */ (OPpARG4_MASK),
-    /* PACK       */ (OPpARG4_MASK),
-    /* SPLIT      */ (OPpSPLIT_IMPLIM|OPpSPLIT_LEX|OPpSPLIT_ASSIGN|OPpOUR_INTRO|OPpLVAL_INTRO),
-    /* JOIN       */ (OPpARG4_MASK),
-    /* LIST       */ (OPpLIST_GUESSED|OPpLVAL_INTRO),
-    /* LSLICE     */ (OPpARG2_MASK),
-    /* ANONLIST   */ (OPpARG4_MASK),
-    /* ANONHASH   */ (OPpARG4_MASK),
-    /* EMPTYAVHV  */ (OPpARG4_MASK|OPpTARGET_MY|OPpEMPTYAVHV_IS_HV|OPpPAD_STATE|OPpLVAL_INTRO),
-    /* SPLICE     */ (OPpARG4_MASK),
-    /* PUSH       */ (OPpARG4_MASK|OPpTARGET_MY),
-    /* POP        */ (OPpARG1_MASK),
-    /* SHIFT      */ (OPpARG1_MASK),
-    /* UNSHIFT    */ (OPpARG4_MASK|OPpTARGET_MY),
-    /* SORT       */ (OPpSORT_NUMERIC|OPpSORT_INTEGER|OPpSORT_REVERSE|OPpSORT_INPLACE|OPpSORT_DESCEND),
-    /* REVERSE    */ (OPpARG1_MASK|OPpREVERSE_INPLACE),
-    /* GREPSTART  */ (OPpARG1_MASK),
-    /* GREPWHILE  */ (OPpARG1_MASK|OPpTRUEBOOL),
-    /* MAPSTART   */ (OPpARG1_MASK),
-    /* MAPWHILE   */ (OPpARG1_MASK),
-    /* RANGE      */ (OPpARG1_MASK),
-    /* FLIP       */ (OPpARG1_MASK|OPpFLIP_LINENUM),
-    /* FLOP       */ (OPpARG1_MASK|OPpFLIP_LINENUM),
-    /* AND        */ (OPpARG1_MASK),
-    /* OR         */ (OPpARG1_MASK),
-    /* XOR        */ (OPpARG2_MASK),
-    /* DOR        */ (OPpARG1_MASK),
-    /* COND_EXPR  */ (OPpARG1_MASK|OPpLVAL_INTRO),
-    /* ANDASSIGN  */ (OPpARG1_MASK),
-    /* ORASSIGN   */ (OPpARG1_MASK),
-    /* DORASSIGN  */ (OPpARG1_MASK),
-    /* ENTERSUB   */ (OPpENTERSUB_INARGS|OPpHINT_STRICT_REFS|OPpENTERSUB_HASTARG|OPpENTERSUB_AMPER|OPpDEREF|OPpENTERSUB_DB|OPpLVAL_INTRO),
-    /* LEAVESUB   */ (OPpARG1_MASK|OPpREFCOUNTED),
-    /* LEAVESUBLV */ (OPpARG1_MASK|OPpREFCOUNTED),
-    /* ARGCHECK   */ (OPpARG1_MASK),
-    /* ARGELEM    */ (OPpARG1_MASK|OPpARGELEM_MASK),
-    /* ARGDEFELEM */ (OPpARG1_MASK),
-    /* CALLER     */ (OPpARG4_MASK|OPpOFFBYONE),
-    /* WARN       */ (OPpARG4_MASK),
-    /* DIE        */ (OPpARG4_MASK),
-    /* RESET      */ (OPpARG4_MASK),
-    /* LINESEQ    */ (0),
-    /* NEXTSTATE  */ (OPpHUSH_VMSISH),
-    /* DBSTATE    */ (OPpHUSH_VMSISH),
-    /* UNSTACK    */ (0),
-    /* ENTER      */ (0),
-    /* LEAVE      */ (OPpREFCOUNTED|OPpLVALUE),
-    /* SCOPE      */ (0),
-    /* ENTERITER  */ (OPpITER_REVERSED|OPpITER_DEF|OPpOUR_INTRO|OPpLVAL_INTRO),
-    /* ITER       */ (OPpITER_REVERSED),
-    /* ENTERLOOP  */ (0),
-    /* LEAVELOOP  */ (OPpARG2_MASK|OPpLVALUE),
-    /* RETURN     */ (0),
-    /* LAST       */ (OPpARG1_MASK|OPpPV_IS_UTF8),
-    /* NEXT       */ (OPpARG1_MASK|OPpPV_IS_UTF8),
-    /* REDO       */ (OPpARG1_MASK|OPpPV_IS_UTF8),
-    /* DUMP       */ (OPpARG1_MASK|OPpPV_IS_UTF8),
-    /* GOTO       */ (OPpARG1_MASK|OPpPV_IS_UTF8),
-    /* EXIT       */ (OPpARG4_MASK),
-    /* METHOD     */ (OPpARG1_MASK),
-    /* METHOD_NAMED */ (OPpARG1_MASK),
-    /* METHOD_SUPER */ (OPpARG1_MASK),
-    /* METHOD_REDIR */ (OPpARG1_MASK),
-    /* METHOD_REDIR_SUPER */ (OPpARG1_MASK),
-    /* ENTERGIVEN */ (OPpARG1_MASK),
-    /* LEAVEGIVEN */ (OPpARG1_MASK),
-    /* ENTERWHEN  */ (OPpARG1_MASK),
-    /* LEAVEWHEN  */ (OPpARG1_MASK),
-    /* BREAK      */ (0),
-    /* CONTINUE   */ (0),
-    /* OPEN       */ (OPpARG4_MASK|OPpOPEN_IN_RAW|OPpOPEN_IN_CRLF|OPpOPEN_OUT_RAW|OPpOPEN_OUT_CRLF),
-    /* CLOSE      */ (OPpARG4_MASK),
-    /* PIPE_OP    */ (OPpARG4_MASK),
-    /* FILENO     */ (OPpARG4_MASK),
-    /* UMASK      */ (OPpARG4_MASK),
-    /* BINMODE    */ (OPpARG4_MASK),
-    /* TIE        */ (OPpARG4_MASK),
-    /* UNTIE      */ (OPpARG1_MASK),
-    /* TIED       */ (OPpARG1_MASK),
-    /* DBMOPEN    */ (OPpARG4_MASK),
-    /* DBMCLOSE   */ (OPpARG1_MASK),
-    /* SSELECT    */ (OPpARG4_MASK),
-    /* SELECT     */ (OPpARG4_MASK),
-    /* GETC       */ (OPpARG4_MASK),
-    /* READ       */ (OPpARG4_MASK),
-    /* ENTERWRITE */ (OPpARG4_MASK),
-    /* LEAVEWRITE */ (OPpARG1_MASK|OPpREFCOUNTED),
-    /* PRTF       */ (0),
-    /* PRINT      */ (0),
-    /* SAY        */ (0),
-    /* SYSOPEN    */ (OPpARG4_MASK),
-    /* SYSSEEK    */ (OPpARG4_MASK),
-    /* SYSREAD    */ (OPpARG4_MASK),
-    /* SYSWRITE   */ (OPpARG4_MASK),
-    /* EOF        */ (OPpARG4_MASK),
-    /* TELL       */ (OPpARG4_MASK),
-    /* SEEK       */ (OPpARG4_MASK),
-    /* TRUNCATE   */ (OPpARG4_MASK),
-    /* FCNTL      */ (OPpARG4_MASK),
-    /* IOCTL      */ (OPpARG4_MASK),
-    /* FLOCK      */ (OPpARG4_MASK|OPpTARGET_MY),
-    /* SEND       */ (OPpARG4_MASK),
-    /* RECV       */ (OPpARG4_MASK),
-    /* SOCKET     */ (OPpARG4_MASK),
-    /* SOCKPAIR   */ (OPpARG4_MASK),
-    /* BIND       */ (OPpARG4_MASK),
-    /* CONNECT    */ (OPpARG4_MASK),
-    /* LISTEN     */ (OPpARG4_MASK),
-    /* ACCEPT     */ (OPpARG4_MASK),
-    /* SHUTDOWN   */ (OPpARG4_MASK),
-    /* GSOCKOPT   */ (OPpARG4_MASK),
-    /* SSOCKOPT   */ (OPpARG4_MASK),
-    /* GETSOCKNAME */ (OPpARG1_MASK),
-    /* GETPEERNAME */ (OPpARG1_MASK),
-    /* LSTAT      */ (OPpARG1_MASK),
-    /* STAT       */ (OPpARG1_MASK),
-    /* FTRREAD    */ (OPpARG1_MASK|OPpFT_ACCESS|OPpFT_STACKED|OPpFT_STACKING|OPpFT_AFTER_t),
-    /* FTRWRITE   */ (OPpARG1_MASK|OPpFT_ACCESS|OPpFT_STACKED|OPpFT_STACKING|OPpFT_AFTER_t),
-    /* FTREXEC    */ (OPpARG1_MASK|OPpFT_ACCESS|OPpFT_STACKED|OPpFT_STACKING|OPpFT_AFTER_t),
-    /* FTEREAD    */ (OPpARG1_MASK|OPpFT_ACCESS|OPpFT_STACKED|OPpFT_STACKING|OPpFT_AFTER_t),
-    /* FTEWRITE   */ (OPpARG1_MASK|OPpFT_ACCESS|OPpFT_STACKED|OPpFT_STACKING|OPpFT_AFTER_t),
-    /* FTEEXEC    */ (OPpARG1_MASK|OPpFT_ACCESS|OPpFT_STACKED|OPpFT_STACKING|OPpFT_AFTER_t),
-    /* FTIS       */ (OPpARG1_MASK|OPpFT_STACKED|OPpFT_STACKING|OPpFT_AFTER_t),
-    /* FTSIZE     */ (OPpARG1_MASK|OPpFT_STACKED|OPpFT_STACKING|OPpFT_AFTER_t),
-    /* FTMTIME    */ (OPpARG1_MASK|OPpFT_STACKED|OPpFT_STACKING|OPpFT_AFTER_t),
-    /* FTATIME    */ (OPpARG1_MASK|OPpFT_STACKED|OPpFT_STACKING|OPpFT_AFTER_t),
-    /* FTCTIME    */ (OPpARG1_MASK|OPpFT_STACKED|OPpFT_STACKING|OPpFT_AFTER_t),
-    /* FTROWNED   */ (OPpARG1_MASK|OPpFT_STACKED|OPpFT_STACKING|OPpFT_AFTER_t),
-    /* FTEOWNED   */ (OPpARG1_MASK|OPpFT_STACKED|OPpFT_STACKING|OPpFT_AFTER_t),
-    /* FTZERO     */ (OPpARG1_MASK|OPpFT_STACKED|OPpFT_STACKING|OPpFT_AFTER_t),
-    /* FTSOCK     */ (OPpARG1_MASK|OPpFT_STACKED|OPpFT_STACKING|OPpFT_AFTER_t),
-    /* FTCHR      */ (OPpARG1_MASK|OPpFT_STACKED|OPpFT_STACKING|OPpFT_AFTER_t),
-    /* FTBLK      */ (OPpARG1_MASK|OPpFT_STACKED|OPpFT_STACKING|OPpFT_AFTER_t),
-    /* FTFILE     */ (OPpARG1_MASK|OPpFT_STACKED|OPpFT_STACKING|OPpFT_AFTER_t),
-    /* FTDIR      */ (OPpARG1_MASK|OPpFT_STACKED|OPpFT_STACKING|OPpFT_AFTER_t),
-    /* FTPIPE     */ (OPpARG1_MASK|OPpFT_STACKED|OPpFT_STACKING|OPpFT_AFTER_t),
-    /* FTSUID     */ (OPpARG1_MASK|OPpFT_STACKED|OPpFT_STACKING|OPpFT_AFTER_t),
-    /* FTSGID     */ (OPpARG1_MASK|OPpFT_STACKED|OPpFT_STACKING|OPpFT_AFTER_t),
-    /* FTSVTX     */ (OPpARG1_MASK|OPpFT_STACKED|OPpFT_STACKING|OPpFT_AFTER_t),
-    /* FTLINK     */ (OPpARG1_MASK|OPpFT_STACKED|OPpFT_STACKING|OPpFT_AFTER_t),
-    /* FTTTY      */ (OPpARG1_MASK|OPpFT_STACKED|OPpFT_STACKING|OPpFT_AFTER_t),
-    /* FTTEXT     */ (OPpARG1_MASK|OPpFT_STACKED|OPpFT_STACKING|OPpFT_AFTER_t),
-    /* FTBINARY   */ (OPpARG1_MASK|OPpFT_STACKED|OPpFT_STACKING|OPpFT_AFTER_t),
-    /* CHDIR      */ (OPpARG4_MASK|OPpTARGET_MY),
-    /* CHOWN      */ (OPpARG4_MASK|OPpTARGET_MY),
-    /* CHROOT     */ (OPpARG1_MASK|OPpTARGET_MY),
-    /* UNLINK     */ (OPpARG4_MASK|OPpTARGET_MY),
-    /* CHMOD      */ (OPpARG4_MASK|OPpTARGET_MY),
-    /* UTIME      */ (OPpARG4_MASK|OPpTARGET_MY),
-    /* RENAME     */ (OPpARG4_MASK|OPpTARGET_MY),
-    /* LINK       */ (OPpARG4_MASK|OPpTARGET_MY),
-    /* SYMLINK    */ (OPpARG4_MASK|OPpTARGET_MY),
-    /* READLINK   */ (OPpARG1_MASK),
-    /* MKDIR      */ (OPpARG4_MASK|OPpTARGET_MY),
-    /* RMDIR      */ (OPpARG1_MASK|OPpTARGET_MY),
-    /* OPEN_DIR   */ (OPpARG4_MASK),
-    /* READDIR    */ (OPpARG1_MASK),
-    /* TELLDIR    */ (OPpARG1_MASK),
-    /* SEEKDIR    */ (OPpARG4_MASK),
-    /* REWINDDIR  */ (OPpARG1_MASK),
-    /* CLOSEDIR   */ (OPpARG1_MASK),
-    /* FORK       */ (0),
-    /* WAIT       */ (OPpTARGET_MY),
-    /* WAITPID    */ (OPpARG4_MASK|OPpTARGET_MY),
-    /* SYSTEM     */ (OPpARG4_MASK|OPpTARGET_MY),
-    /* EXEC       */ (OPpARG4_MASK|OPpTARGET_MY),
-    /* KILL       */ (OPpARG4_MASK|OPpTARGET_MY),
-    /* GETPPID    */ (OPpTARGET_MY),
-    /* GETPGRP    */ (OPpARG4_MASK|OPpTARGET_MY),
-    /* SETPGRP    */ (OPpARG4_MASK|OPpTARGET_MY),
-    /* GETPRIORITY */ (OPpARG4_MASK|OPpTARGET_MY),
-    /* SETPRIORITY */ (OPpARG4_MASK|OPpTARGET_MY),
-    /* TIME       */ (OPpTARGET_MY),
-    /* TMS        */ (0),
-    /* LOCALTIME  */ (OPpARG1_MASK),
-    /* GMTIME     */ (OPpARG4_MASK),
-    /* ALARM      */ (OPpARG1_MASK),
-    /* SLEEP      */ (OPpARG4_MASK|OPpTARGET_MY),
-    /* SHMGET     */ (OPpARG4_MASK),
-    /* SHMCTL     */ (OPpARG4_MASK),
-    /* SHMREAD    */ (OPpARG4_MASK),
-    /* SHMWRITE   */ (OPpARG4_MASK),
-    /* MSGGET     */ (OPpARG4_MASK),
-    /* MSGCTL     */ (OPpARG4_MASK),
-    /* MSGSND     */ (OPpARG4_MASK),
-    /* MSGRCV     */ (OPpARG4_MASK),
-    /* SEMOP      */ (OPpARG4_MASK),
-    /* SEMGET     */ (OPpARG4_MASK),
-    /* SEMCTL     */ (OPpARG4_MASK),
-    /* REQUIRE    */ (OPpARG1_MASK),
-    /* DOFILE     */ (OPpARG1_MASK),
-    /* HINTSEVAL  */ (0),
-    /* ENTEREVAL  */ (OPpARG1_MASK|OPpEVAL_HAS_HH|OPpEVAL_UNICODE|OPpEVAL_BYTES|OPpEVAL_COPHH|OPpEVAL_RE_REPARSING),
-    /* LEAVEEVAL  */ (OPpARG1_MASK|OPpREFCOUNTED),
-    /* ENTERTRY   */ (OPpARG1_MASK),
-    /* LEAVETRY   */ (0),
-    /* GHBYNAME   */ (OPpARG1_MASK),
-    /* GHBYADDR   */ (OPpARG4_MASK),
-    /* GHOSTENT   */ (0),
-    /* GNBYNAME   */ (OPpARG1_MASK),
-    /* GNBYADDR   */ (OPpARG4_MASK),
-    /* GNETENT    */ (0),
-    /* GPBYNAME   */ (OPpARG1_MASK),
-    /* GPBYNUMBER */ (OPpARG4_MASK),
-    /* GPROTOENT  */ (0),
-    /* GSBYNAME   */ (OPpARG4_MASK),
-    /* GSBYPORT   */ (OPpARG4_MASK),
-    /* GSERVENT   */ (0),
-    /* SHOSTENT   */ (OPpARG1_MASK),
-    /* SNETENT    */ (OPpARG1_MASK),
-    /* SPROTOENT  */ (OPpARG1_MASK),
-    /* SSERVENT   */ (OPpARG1_MASK),
-    /* EHOSTENT   */ (0),
-    /* ENETENT    */ (0),
-    /* EPROTOENT  */ (0),
-    /* ESERVENT   */ (0),
-    /* GPWNAM     */ (OPpARG1_MASK),
-    /* GPWUID     */ (OPpARG1_MASK),
-    /* GPWENT     */ (0),
-    /* SPWENT     */ (0),
-    /* EPWENT     */ (0),
-    /* GGRNAM     */ (OPpARG1_MASK),
-    /* GGRGID     */ (OPpARG1_MASK),
-    /* GGRENT     */ (0),
-    /* SGRENT     */ (0),
-    /* EGRENT     */ (0),
-    /* GETLOGIN   */ (0),
-    /* SYSCALL    */ (OPpARG4_MASK),
-    /* LOCK       */ (OPpARG1_MASK),
-    /* ONCE       */ (OPpARG1_MASK),
-    /* CUSTOM     */ (0xff),
-    /* COREARGS   */ (OPpCOREARGS_DEREF1|OPpCOREARGS_DEREF2|OPpCOREARGS_SCALARMOD|OPpCOREARGS_PUSHMARK),
-    /* AVHVSWITCH */ (OPpAVHVSWITCH_MASK|OPpMAYBE_LVSUB),
-    /* RUNCV      */ (OPpOFFBYONE),
-    /* FC         */ (OPpARG1_MASK),
-    /* PADCV      */ (0),
-    /* INTROCV    */ (0),
-    /* CLONECV    */ (0),
-    /* PADRANGE   */ (OPpPADRANGE_COUNTMASK|OPpLVAL_INTRO),
-    /* REFASSIGN  */ (OPpARG2_MASK|OPpLVREF_ELEM|OPpLVREF_ITER|OPpLVREF_TYPE|OPpPAD_STATE|OPpLVAL_INTRO),
-    /* LVREF      */ (OPpARG1_MASK|OPpLVREF_ELEM|OPpLVREF_ITER|OPpLVREF_TYPE|OPpPAD_STATE|OPpLVAL_INTRO),
-    /* LVREFSLICE */ (OPpLVAL_INTRO),
-    /* LVAVREF    */ (OPpARG1_MASK|OPpPAD_STATE|OPpLVAL_INTRO),
-    /* ANONCONST  */ (OPpARG1_MASK),
-    /* ISA        */ (OPpARG2_MASK),
-    /* CMPCHAIN_AND */ (OPpARG1_MASK),
-    /* CMPCHAIN_DUP */ (OPpARG1_MASK),
-    /* ENTERTRYCATCH */ (OPpARG1_MASK),
-    /* LEAVETRYCATCH */ (0),
-    /* POPTRY     */ (0),
-    /* CATCH      */ (OPpARG1_MASK),
-    /* PUSHDEFER  */ (OPpARG1_MASK|OPpDEFER_FINALLY),
-    /* IS_BOOL    */ (OPpARG1_MASK),
-    /* IS_WEAK    */ (OPpARG1_MASK),
-    /* WEAKEN     */ (OPpARG1_MASK),
-    /* UNWEAKEN   */ (OPpARG1_MASK),
-    /* BLESSED    */ (OPpARG1_MASK|OPpMAYBE_TRUEBOOL|OPpTRUEBOOL),
-    /* REFADDR    */ (OPpARG1_MASK|OPpTARGET_MY),
-    /* REFTYPE    */ (OPpARG1_MASK|OPpTARGET_MY),
-    /* CEIL       */ (OPpARG1_MASK|OPpTARGET_MY),
-    /* FLOOR      */ (OPpARG1_MASK|OPpTARGET_MY),
-    /* IS_TAINTED */ (OPpARG1_MASK),
+	[OP_NULL]               = (0xff),
+	[OP_STUB]               = (0),
+	[OP_SCALAR]             = (OPpARG1_MASK),
+	[OP_PUSHMARK]           = (OPpPAD_STATE|OPpLVAL_INTRO),
+	[OP_WANTARRAY]          = (OPpOFFBYONE),
+	[OP_CONST]              = (OPpCONST_NOVER|OPpCONST_SHORTCIRCUIT|OPpCONST_STRICT|OPpCONST_ENTERED|OPpCONST_BARE),
+	[OP_GVSV]               = (OPpOUR_INTRO|OPpLVAL_INTRO),
+	[OP_GV]                 = (OPpEARLY_CV),
+	[OP_GELEM]              = (OPpARG2_MASK),
+	[OP_PADSV]              = (OPpDEREF|OPpPAD_STATE|OPpLVAL_INTRO),
+	[OP_PADSV_STORE]        = (OPpARG1_MASK|OPpPAD_STATE|OPpLVAL_INTRO),
+	[OP_PADAV]              = (OPpSLICEWARNING|OPpMAYBE_LVSUB|OPpTRUEBOOL|OPpPAD_STATE|OPpLVAL_INTRO),
+	[OP_PADHV]              = (OPpPADHV_ISKEYS|OPpSLICEWARNING|OPpMAYBE_LVSUB|OPpMAYBE_TRUEBOOL|OPpTRUEBOOL|OPpPAD_STATE|OPpLVAL_INTRO),
+	[OP_PADANY]             = (0),
+	[OP_RV2GV]              = (OPpARG1_MASK|OPpHINT_STRICT_REFS|OPpDONT_INIT_GV|OPpMAYBE_LVSUB|OPpDEREF|OPpALLOW_FAKE|OPpLVAL_INTRO),
+	[OP_RV2SV]              = (OPpARG1_MASK|OPpHINT_STRICT_REFS|OPpDEREF|OPpOUR_INTRO|OPpLVAL_INTRO),
+	[OP_AV2ARYLEN]          = (OPpARG1_MASK|OPpMAYBE_LVSUB),
+	[OP_RV2CV]              = (OPpARG1_MASK|OPpHINT_STRICT_REFS|OPpENTERSUB_HASTARG|OPpENTERSUB_AMPER|OPpMAY_RETURN_CONSTANT|OPpENTERSUB_DB|OPpENTERSUB_NOPAREN),
+	[OP_ANONCODE]           = (0),
+	[OP_PROTOTYPE]          = (OPpARG1_MASK),
+	[OP_REFGEN]             = (OPpARG1_MASK),
+	[OP_SREFGEN]            = (OPpARG1_MASK),
+	[OP_REF]                = (OPpARG1_MASK|OPpMAYBE_TRUEBOOL|OPpTRUEBOOL),
+	[OP_BLESS]              = (OPpARG4_MASK),
+	[OP_BACKTICK]           = (OPpARG1_MASK|OPpOPEN_IN_RAW|OPpOPEN_IN_CRLF|OPpOPEN_OUT_RAW|OPpOPEN_OUT_CRLF),
+	[OP_GLOB]               = (OPpARG4_MASK),
+	[OP_READLINE]           = (OPpARG1_MASK),
+	[OP_RCATLINE]           = (0),
+	[OP_REGCMAYBE]          = (OPpARG1_MASK),
+	[OP_REGCRESET]          = (OPpARG1_MASK),
+	[OP_REGCOMP]            = (OPpARG1_MASK),
+	[OP_MATCH]              = (0),
+	[OP_QR]                 = (0),
+	[OP_SUBST]              = (OPpTRUEBOOL),
+	[OP_SUBSTCONT]          = (OPpARG1_MASK),
+	[OP_TRANS]              = (OPpTRANS_CAN_FORCE_UTF8|OPpTRANS_USE_SVOP|OPpTRANS_IDENTICAL|OPpTRANS_SQUASH|OPpTRANS_COMPLEMENT|OPpTRANS_GROWS|OPpTRANS_DELETE),
+	[OP_TRANSR]             = (OPpTRANS_CAN_FORCE_UTF8|OPpTRANS_USE_SVOP|OPpTRANS_IDENTICAL|OPpTRANS_SQUASH|OPpTRANS_COMPLEMENT|OPpTRANS_GROWS|OPpTRANS_DELETE),
+	[OP_SASSIGN]            = (OPpARG2_MASK|OPpASSIGN_BACKWARDS|OPpASSIGN_CV_TO_GV),
+	[OP_AASSIGN]            = (OPpARG2_MASK|OPpASSIGN_TRUEBOOL|OPpMAYBE_LVSUB|OPpASSIGN_COMMON_AGG|OPpASSIGN_COMMON_RC1|OPpASSIGN_COMMON_SCALAR),
+	[OP_CHOP]               = (OPpARG1_MASK),
+	[OP_SCHOP]              = (OPpARG1_MASK),
+	[OP_CHOMP]              = (OPpARG1_MASK|OPpTARGET_MY),
+	[OP_SCHOMP]             = (OPpARG1_MASK|OPpTARGET_MY),
+	[OP_DEFINED]            = (OPpARG1_MASK),
+	[OP_UNDEF]              = (OPpARG1_MASK|OPpTARGET_MY|OPpUNDEF_KEEP_PV|OPpPAD_STATE|OPpLVAL_INTRO),
+	[OP_STUDY]              = (OPpARG1_MASK),
+	[OP_POS]                = (OPpARG1_MASK|OPpMAYBE_LVSUB|OPpTRUEBOOL),
+	[OP_PREINC]             = (OPpARG1_MASK),
+	[OP_I_PREINC]           = (OPpARG1_MASK),
+	[OP_PREDEC]             = (OPpARG1_MASK),
+	[OP_I_PREDEC]           = (OPpARG1_MASK),
+	[OP_POSTINC]            = (OPpARG1_MASK),
+	[OP_I_POSTINC]          = (OPpARG1_MASK),
+	[OP_POSTDEC]            = (OPpARG1_MASK),
+	[OP_I_POSTDEC]          = (OPpARG1_MASK),
+	[OP_POW]                = (OPpARG2_MASK|OPpTARGET_MY),
+	[OP_MULTIPLY]           = (OPpARG2_MASK|OPpTARGET_MY),
+	[OP_I_MULTIPLY]         = (OPpARG2_MASK|OPpTARGET_MY),
+	[OP_DIVIDE]             = (OPpARG2_MASK|OPpTARGET_MY),
+	[OP_I_DIVIDE]           = (OPpARG2_MASK|OPpTARGET_MY),
+	[OP_MODULO]             = (OPpARG2_MASK|OPpTARGET_MY),
+	[OP_I_MODULO]           = (OPpARG2_MASK|OPpTARGET_MY),
+	[OP_REPEAT]             = (OPpARG2_MASK|OPpREPEAT_DOLIST),
+	[OP_ADD]                = (OPpARG2_MASK|OPpTARGET_MY),
+	[OP_I_ADD]              = (OPpARG2_MASK|OPpTARGET_MY),
+	[OP_SUBTRACT]           = (OPpARG2_MASK|OPpTARGET_MY),
+	[OP_I_SUBTRACT]         = (OPpARG2_MASK|OPpTARGET_MY),
+	[OP_CONCAT]             = (OPpARG2_MASK|OPpTARGET_MY|OPpCONCAT_NESTED),
+	[OP_MULTICONCAT]        = (OPpARG1_MASK|OPpMULTICONCAT_STRINGIFY|OPpTARGET_MY|OPpMULTICONCAT_FAKE|OPpMULTICONCAT_APPEND|OPpLVAL_INTRO),
+	[OP_STRINGIFY]          = (OPpARG4_MASK|OPpTARGET_MY),
+	[OP_LEFT_SHIFT]         = (OPpUSEINT|OPpTARGET_MY),
+	[OP_RIGHT_SHIFT]        = (OPpUSEINT|OPpTARGET_MY),
+	[OP_LT]                 = (OPpARG2_MASK),
+	[OP_I_LT]               = (OPpARG2_MASK),
+	[OP_GT]                 = (OPpARG2_MASK),
+	[OP_I_GT]               = (OPpARG2_MASK),
+	[OP_LE]                 = (OPpARG2_MASK),
+	[OP_I_LE]               = (OPpARG2_MASK),
+	[OP_GE]                 = (OPpARG2_MASK),
+	[OP_I_GE]               = (OPpARG2_MASK),
+	[OP_EQ]                 = (OPpARG2_MASK),
+	[OP_I_EQ]               = (OPpARG2_MASK),
+	[OP_NE]                 = (OPpARG2_MASK),
+	[OP_I_NE]               = (OPpARG2_MASK),
+	[OP_NCMP]               = (OPpARG2_MASK),
+	[OP_I_NCMP]             = (OPpARG2_MASK),
+	[OP_SLT]                = (OPpARG2_MASK),
+	[OP_SGT]                = (OPpARG2_MASK),
+	[OP_SLE]                = (OPpARG2_MASK),
+	[OP_SGE]                = (OPpARG2_MASK),
+	[OP_SEQ]                = (OPpARG2_MASK),
+	[OP_SNE]                = (OPpARG2_MASK),
+	[OP_SCMP]               = (OPpARG2_MASK),
+	[OP_BIT_AND]            = (OPpUSEINT),
+	[OP_BIT_XOR]            = (OPpUSEINT),
+	[OP_BIT_OR]             = (OPpUSEINT),
+	[OP_NBIT_AND]           = (OPpUSEINT|OPpTARGET_MY),
+	[OP_NBIT_XOR]           = (OPpUSEINT|OPpTARGET_MY),
+	[OP_NBIT_OR]            = (OPpUSEINT|OPpTARGET_MY),
+	[OP_SBIT_AND]           = (OPpUSEINT),
+	[OP_SBIT_XOR]           = (OPpUSEINT),
+	[OP_SBIT_OR]            = (OPpUSEINT),
+	[OP_NEGATE]             = (OPpARG1_MASK),
+	[OP_I_NEGATE]           = (OPpARG1_MASK),
+	[OP_NOT]                = (OPpARG1_MASK),
+	[OP_COMPLEMENT]         = (OPpUSEINT),
+	[OP_NCOMPLEMENT]        = (OPpUSEINT|OPpTARGET_MY),
+	[OP_SCOMPLEMENT]        = (OPpARG1_MASK|OPpTARGET_MY),
+	[OP_SMARTMATCH]         = (OPpARG2_MASK),
+	[OP_ATAN2]              = (OPpARG4_MASK|OPpTARGET_MY),
+	[OP_SIN]                = (OPpARG1_MASK|OPpTARGET_MY),
+	[OP_COS]                = (OPpARG1_MASK|OPpTARGET_MY),
+	[OP_RAND]               = (OPpARG4_MASK|OPpTARGET_MY),
+	[OP_SRAND]              = (OPpARG4_MASK|OPpTARGET_MY),
+	[OP_EXP]                = (OPpARG1_MASK|OPpTARGET_MY),
+	[OP_LOG]                = (OPpARG1_MASK|OPpTARGET_MY),
+	[OP_SQRT]               = (OPpARG1_MASK|OPpTARGET_MY),
+	[OP_INT]                = (OPpARG1_MASK|OPpTARGET_MY),
+	[OP_HEX]                = (OPpARG1_MASK|OPpTARGET_MY),
+	[OP_OCT]                = (OPpARG1_MASK|OPpTARGET_MY),
+	[OP_ABS]                = (OPpARG1_MASK|OPpTARGET_MY),
+	[OP_LENGTH]             = (OPpARG1_MASK|OPpTARGET_MY|OPpTRUEBOOL),
+	[OP_SUBSTR]             = (OPpARG3_MASK|OPpMAYBE_LVSUB|OPpSUBSTR_REPL_FIRST),
+	[OP_VEC]                = (OPpARG2_MASK|OPpMAYBE_LVSUB),
+	[OP_INDEX]              = (OPpARG4_MASK|OPpTARGET_MY|OPpTRUEBOOL|OPpINDEX_BOOLNEG),
+	[OP_RINDEX]             = (OPpARG4_MASK|OPpTARGET_MY|OPpTRUEBOOL|OPpINDEX_BOOLNEG),
+	[OP_SPRINTF]            = (OPpARG4_MASK),
+	[OP_FORMLINE]           = (OPpARG4_MASK),
+	[OP_ORD]                = (OPpARG1_MASK|OPpTARGET_MY),
+	[OP_CHR]                = (OPpARG1_MASK|OPpTARGET_MY),
+	[OP_CRYPT]              = (OPpARG4_MASK|OPpTARGET_MY),
+	[OP_UCFIRST]            = (OPpARG1_MASK),
+	[OP_LCFIRST]            = (OPpARG1_MASK),
+	[OP_UC]                 = (OPpARG1_MASK),
+	[OP_LC]                 = (OPpARG1_MASK),
+	[OP_QUOTEMETA]          = (OPpARG1_MASK),
+	[OP_RV2AV]              = (OPpARG1_MASK|OPpHINT_STRICT_REFS|OPpSLICEWARNING|OPpMAYBE_LVSUB|OPpTRUEBOOL|OPpOUR_INTRO|OPpLVAL_INTRO),
+	[OP_AELEMFAST]          = (255),
+	[OP_AELEMFAST_LEX]      = (255),
+	[OP_AELEMFASTLEX_STORE] = (255),
+	[OP_AELEM]              = (OPpARG2_MASK|OPpMAYBE_LVSUB|OPpDEREF|OPpLVAL_DEFER|OPpLVAL_INTRO),
+	[OP_ASLICE]             = (OPpSLICEWARNING|OPpMAYBE_LVSUB|OPpLVAL_INTRO),
+	[OP_KVASLICE]           = (OPpMAYBE_LVSUB),
+	[OP_AEACH]              = (OPpARG1_MASK),
+	[OP_AVALUES]            = (OPpARG1_MASK),
+	[OP_AKEYS]              = (OPpARG1_MASK|OPpMAYBE_LVSUB),
+	[OP_EACH]               = (OPpARG1_MASK),
+	[OP_VALUES]             = (OPpARG1_MASK|OPpMAYBE_LVSUB),
+	[OP_KEYS]               = (OPpARG1_MASK|OPpMAYBE_LVSUB),
+	[OP_DELETE]             = (OPpARG1_MASK|OPpKVSLICE|OPpSLICE|OPpLVAL_INTRO),
+	[OP_EXISTS]             = (OPpARG1_MASK|OPpEXISTS_SUB),
+	[OP_RV2HV]              = (OPpRV2HV_ISKEYS|OPpHINT_STRICT_REFS|OPpSLICEWARNING|OPpMAYBE_LVSUB|OPpMAYBE_TRUEBOOL|OPpTRUEBOOL|OPpOUR_INTRO|OPpLVAL_INTRO),
+	[OP_HELEM]              = (OPpARG2_MASK|OPpMAYBE_LVSUB|OPpDEREF|OPpLVAL_DEFER|OPpLVAL_INTRO),
+	[OP_HSLICE]             = (OPpSLICEWARNING|OPpMAYBE_LVSUB|OPpLVAL_INTRO),
+	[OP_KVHSLICE]           = (OPpMAYBE_LVSUB),
+	[OP_MULTIDEREF]         = (OPpARG1_MASK|OPpHINT_STRICT_REFS|OPpMAYBE_LVSUB|OPpMULTIDEREF_EXISTS|OPpMULTIDEREF_DELETE|OPpLVAL_DEFER|OPpLVAL_INTRO),
+	[OP_UNPACK]             = (OPpARG4_MASK),
+	[OP_PACK]               = (OPpARG4_MASK),
+	[OP_SPLIT]              = (OPpSPLIT_IMPLIM|OPpSPLIT_LEX|OPpSPLIT_ASSIGN|OPpOUR_INTRO|OPpLVAL_INTRO),
+	[OP_JOIN]               = (OPpARG4_MASK),
+	[OP_LIST]               = (OPpLIST_GUESSED|OPpLVAL_INTRO),
+	[OP_LSLICE]             = (OPpARG2_MASK),
+	[OP_ANONLIST]           = (OPpARG4_MASK),
+	[OP_ANONHASH]           = (OPpARG4_MASK),
+	[OP_EMPTYAVHV]          = (OPpARG4_MASK|OPpTARGET_MY|OPpEMPTYAVHV_IS_HV|OPpPAD_STATE|OPpLVAL_INTRO),
+	[OP_SPLICE]             = (OPpARG4_MASK),
+	[OP_PUSH]               = (OPpARG4_MASK|OPpTARGET_MY),
+	[OP_POP]                = (OPpARG1_MASK),
+	[OP_SHIFT]              = (OPpARG1_MASK),
+	[OP_UNSHIFT]            = (OPpARG4_MASK|OPpTARGET_MY),
+	[OP_SORT]               = (OPpSORT_NUMERIC|OPpSORT_INTEGER|OPpSORT_REVERSE|OPpSORT_INPLACE|OPpSORT_DESCEND),
+	[OP_REVERSE]            = (OPpARG1_MASK|OPpREVERSE_INPLACE),
+	[OP_GREPSTART]          = (OPpARG1_MASK),
+	[OP_GREPWHILE]          = (OPpARG1_MASK|OPpTRUEBOOL),
+	[OP_MAPSTART]           = (OPpARG1_MASK),
+	[OP_MAPWHILE]           = (OPpARG1_MASK),
+	[OP_RANGE]              = (OPpARG1_MASK),
+	[OP_FLIP]               = (OPpARG1_MASK|OPpFLIP_LINENUM),
+	[OP_FLOP]               = (OPpARG1_MASK|OPpFLIP_LINENUM),
+	[OP_AND]                = (OPpARG1_MASK),
+	[OP_OR]                 = (OPpARG1_MASK),
+	[OP_XOR]                = (OPpARG2_MASK),
+	[OP_DOR]                = (OPpARG1_MASK),
+	[OP_COND_EXPR]          = (OPpARG1_MASK|OPpLVAL_INTRO),
+	[OP_ANDASSIGN]          = (OPpARG1_MASK),
+	[OP_ORASSIGN]           = (OPpARG1_MASK),
+	[OP_DORASSIGN]          = (OPpARG1_MASK),
+	[OP_ENTERSUB]           = (OPpENTERSUB_INARGS|OPpHINT_STRICT_REFS|OPpENTERSUB_HASTARG|OPpENTERSUB_AMPER|OPpDEREF|OPpENTERSUB_DB|OPpLVAL_INTRO),
+	[OP_LEAVESUB]           = (OPpARG1_MASK|OPpREFCOUNTED),
+	[OP_LEAVESUBLV]         = (OPpARG1_MASK|OPpREFCOUNTED),
+	[OP_ARGCHECK]           = (OPpARG1_MASK),
+	[OP_ARGELEM]            = (OPpARG1_MASK|OPpARGELEM_MASK),
+	[OP_ARGDEFELEM]         = (OPpARG1_MASK),
+	[OP_CALLER]             = (OPpARG4_MASK|OPpOFFBYONE),
+	[OP_WARN]               = (OPpARG4_MASK),
+	[OP_DIE]                = (OPpARG4_MASK),
+	[OP_RESET]              = (OPpARG4_MASK),
+	[OP_LINESEQ]            = (0),
+	[OP_NEXTSTATE]          = (OPpHUSH_VMSISH),
+	[OP_DBSTATE]            = (OPpHUSH_VMSISH),
+	[OP_UNSTACK]            = (0),
+	[OP_ENTER]              = (0),
+	[OP_LEAVE]              = (OPpREFCOUNTED|OPpLVALUE),
+	[OP_SCOPE]              = (0),
+	[OP_ENTERITER]          = (OPpITER_REVERSED|OPpITER_DEF|OPpOUR_INTRO|OPpLVAL_INTRO),
+	[OP_ITER]               = (OPpITER_REVERSED),
+	[OP_ENTERLOOP]          = (0),
+	[OP_LEAVELOOP]          = (OPpARG2_MASK|OPpLVALUE),
+	[OP_RETURN]             = (0),
+	[OP_LAST]               = (OPpARG1_MASK|OPpPV_IS_UTF8),
+	[OP_NEXT]               = (OPpARG1_MASK|OPpPV_IS_UTF8),
+	[OP_REDO]               = (OPpARG1_MASK|OPpPV_IS_UTF8),
+	[OP_DUMP]               = (OPpARG1_MASK|OPpPV_IS_UTF8),
+	[OP_GOTO]               = (OPpARG1_MASK|OPpPV_IS_UTF8),
+	[OP_EXIT]               = (OPpARG4_MASK),
+	[OP_METHOD]             = (OPpARG1_MASK),
+	[OP_METHOD_NAMED]       = (OPpARG1_MASK),
+	[OP_METHOD_SUPER]       = (OPpARG1_MASK),
+	[OP_METHOD_REDIR]       = (OPpARG1_MASK),
+	[OP_METHOD_REDIR_SUPER] = (OPpARG1_MASK),
+	[OP_ENTERGIVEN]         = (OPpARG1_MASK),
+	[OP_LEAVEGIVEN]         = (OPpARG1_MASK),
+	[OP_ENTERWHEN]          = (OPpARG1_MASK),
+	[OP_LEAVEWHEN]          = (OPpARG1_MASK),
+	[OP_BREAK]              = (0),
+	[OP_CONTINUE]           = (0),
+	[OP_OPEN]               = (OPpARG4_MASK|OPpOPEN_IN_RAW|OPpOPEN_IN_CRLF|OPpOPEN_OUT_RAW|OPpOPEN_OUT_CRLF),
+	[OP_CLOSE]              = (OPpARG4_MASK),
+	[OP_PIPE_OP]            = (OPpARG4_MASK),
+	[OP_FILENO]             = (OPpARG4_MASK),
+	[OP_UMASK]              = (OPpARG4_MASK),
+	[OP_BINMODE]            = (OPpARG4_MASK),
+	[OP_TIE]                = (OPpARG4_MASK),
+	[OP_UNTIE]              = (OPpARG1_MASK),
+	[OP_TIED]               = (OPpARG1_MASK),
+	[OP_DBMOPEN]            = (OPpARG4_MASK),
+	[OP_DBMCLOSE]           = (OPpARG1_MASK),
+	[OP_SSELECT]            = (OPpARG4_MASK),
+	[OP_SELECT]             = (OPpARG4_MASK),
+	[OP_GETC]               = (OPpARG4_MASK),
+	[OP_READ]               = (OPpARG4_MASK),
+	[OP_ENTERWRITE]         = (OPpARG4_MASK),
+	[OP_LEAVEWRITE]         = (OPpARG1_MASK|OPpREFCOUNTED),
+	[OP_PRTF]               = (0),
+	[OP_PRINT]              = (0),
+	[OP_SAY]                = (0),
+	[OP_SYSOPEN]            = (OPpARG4_MASK),
+	[OP_SYSSEEK]            = (OPpARG4_MASK),
+	[OP_SYSREAD]            = (OPpARG4_MASK),
+	[OP_SYSWRITE]           = (OPpARG4_MASK),
+	[OP_EOF]                = (OPpARG4_MASK),
+	[OP_TELL]               = (OPpARG4_MASK),
+	[OP_SEEK]               = (OPpARG4_MASK),
+	[OP_TRUNCATE]           = (OPpARG4_MASK),
+	[OP_FCNTL]              = (OPpARG4_MASK),
+	[OP_IOCTL]              = (OPpARG4_MASK),
+	[OP_FLOCK]              = (OPpARG4_MASK|OPpTARGET_MY),
+	[OP_SEND]               = (OPpARG4_MASK),
+	[OP_RECV]               = (OPpARG4_MASK),
+	[OP_SOCKET]             = (OPpARG4_MASK),
+	[OP_SOCKPAIR]           = (OPpARG4_MASK),
+	[OP_BIND]               = (OPpARG4_MASK),
+	[OP_CONNECT]            = (OPpARG4_MASK),
+	[OP_LISTEN]             = (OPpARG4_MASK),
+	[OP_ACCEPT]             = (OPpARG4_MASK),
+	[OP_SHUTDOWN]           = (OPpARG4_MASK),
+	[OP_GSOCKOPT]           = (OPpARG4_MASK),
+	[OP_SSOCKOPT]           = (OPpARG4_MASK),
+	[OP_GETSOCKNAME]        = (OPpARG1_MASK),
+	[OP_GETPEERNAME]        = (OPpARG1_MASK),
+	[OP_LSTAT]              = (OPpARG1_MASK),
+	[OP_STAT]               = (OPpARG1_MASK),
+	[OP_FTRREAD]            = (OPpARG1_MASK|OPpFT_ACCESS|OPpFT_STACKED|OPpFT_STACKING|OPpFT_AFTER_t),
+	[OP_FTRWRITE]           = (OPpARG1_MASK|OPpFT_ACCESS|OPpFT_STACKED|OPpFT_STACKING|OPpFT_AFTER_t),
+	[OP_FTREXEC]            = (OPpARG1_MASK|OPpFT_ACCESS|OPpFT_STACKED|OPpFT_STACKING|OPpFT_AFTER_t),
+	[OP_FTEREAD]            = (OPpARG1_MASK|OPpFT_ACCESS|OPpFT_STACKED|OPpFT_STACKING|OPpFT_AFTER_t),
+	[OP_FTEWRITE]           = (OPpARG1_MASK|OPpFT_ACCESS|OPpFT_STACKED|OPpFT_STACKING|OPpFT_AFTER_t),
+	[OP_FTEEXEC]            = (OPpARG1_MASK|OPpFT_ACCESS|OPpFT_STACKED|OPpFT_STACKING|OPpFT_AFTER_t),
+	[OP_FTIS]               = (OPpARG1_MASK|OPpFT_STACKED|OPpFT_STACKING|OPpFT_AFTER_t),
+	[OP_FTSIZE]             = (OPpARG1_MASK|OPpFT_STACKED|OPpFT_STACKING|OPpFT_AFTER_t),
+	[OP_FTMTIME]            = (OPpARG1_MASK|OPpFT_STACKED|OPpFT_STACKING|OPpFT_AFTER_t),
+	[OP_FTATIME]            = (OPpARG1_MASK|OPpFT_STACKED|OPpFT_STACKING|OPpFT_AFTER_t),
+	[OP_FTCTIME]            = (OPpARG1_MASK|OPpFT_STACKED|OPpFT_STACKING|OPpFT_AFTER_t),
+	[OP_FTROWNED]           = (OPpARG1_MASK|OPpFT_STACKED|OPpFT_STACKING|OPpFT_AFTER_t),
+	[OP_FTEOWNED]           = (OPpARG1_MASK|OPpFT_STACKED|OPpFT_STACKING|OPpFT_AFTER_t),
+	[OP_FTZERO]             = (OPpARG1_MASK|OPpFT_STACKED|OPpFT_STACKING|OPpFT_AFTER_t),
+	[OP_FTSOCK]             = (OPpARG1_MASK|OPpFT_STACKED|OPpFT_STACKING|OPpFT_AFTER_t),
+	[OP_FTCHR]              = (OPpARG1_MASK|OPpFT_STACKED|OPpFT_STACKING|OPpFT_AFTER_t),
+	[OP_FTBLK]              = (OPpARG1_MASK|OPpFT_STACKED|OPpFT_STACKING|OPpFT_AFTER_t),
+	[OP_FTFILE]             = (OPpARG1_MASK|OPpFT_STACKED|OPpFT_STACKING|OPpFT_AFTER_t),
+	[OP_FTDIR]              = (OPpARG1_MASK|OPpFT_STACKED|OPpFT_STACKING|OPpFT_AFTER_t),
+	[OP_FTPIPE]             = (OPpARG1_MASK|OPpFT_STACKED|OPpFT_STACKING|OPpFT_AFTER_t),
+	[OP_FTSUID]             = (OPpARG1_MASK|OPpFT_STACKED|OPpFT_STACKING|OPpFT_AFTER_t),
+	[OP_FTSGID]             = (OPpARG1_MASK|OPpFT_STACKED|OPpFT_STACKING|OPpFT_AFTER_t),
+	[OP_FTSVTX]             = (OPpARG1_MASK|OPpFT_STACKED|OPpFT_STACKING|OPpFT_AFTER_t),
+	[OP_FTLINK]             = (OPpARG1_MASK|OPpFT_STACKED|OPpFT_STACKING|OPpFT_AFTER_t),
+	[OP_FTTTY]              = (OPpARG1_MASK|OPpFT_STACKED|OPpFT_STACKING|OPpFT_AFTER_t),
+	[OP_FTTEXT]             = (OPpARG1_MASK|OPpFT_STACKED|OPpFT_STACKING|OPpFT_AFTER_t),
+	[OP_FTBINARY]           = (OPpARG1_MASK|OPpFT_STACKED|OPpFT_STACKING|OPpFT_AFTER_t),
+	[OP_CHDIR]              = (OPpARG4_MASK|OPpTARGET_MY),
+	[OP_CHOWN]              = (OPpARG4_MASK|OPpTARGET_MY),
+	[OP_CHROOT]             = (OPpARG1_MASK|OPpTARGET_MY),
+	[OP_UNLINK]             = (OPpARG4_MASK|OPpTARGET_MY),
+	[OP_CHMOD]              = (OPpARG4_MASK|OPpTARGET_MY),
+	[OP_UTIME]              = (OPpARG4_MASK|OPpTARGET_MY),
+	[OP_RENAME]             = (OPpARG4_MASK|OPpTARGET_MY),
+	[OP_LINK]               = (OPpARG4_MASK|OPpTARGET_MY),
+	[OP_SYMLINK]            = (OPpARG4_MASK|OPpTARGET_MY),
+	[OP_READLINK]           = (OPpARG1_MASK),
+	[OP_MKDIR]              = (OPpARG4_MASK|OPpTARGET_MY),
+	[OP_RMDIR]              = (OPpARG1_MASK|OPpTARGET_MY),
+	[OP_OPEN_DIR]           = (OPpARG4_MASK),
+	[OP_READDIR]            = (OPpARG1_MASK),
+	[OP_TELLDIR]            = (OPpARG1_MASK),
+	[OP_SEEKDIR]            = (OPpARG4_MASK),
+	[OP_REWINDDIR]          = (OPpARG1_MASK),
+	[OP_CLOSEDIR]           = (OPpARG1_MASK),
+	[OP_FORK]               = (0),
+	[OP_WAIT]               = (OPpTARGET_MY),
+	[OP_WAITPID]            = (OPpARG4_MASK|OPpTARGET_MY),
+	[OP_SYSTEM]             = (OPpARG4_MASK|OPpTARGET_MY),
+	[OP_EXEC]               = (OPpARG4_MASK|OPpTARGET_MY),
+	[OP_KILL]               = (OPpARG4_MASK|OPpTARGET_MY),
+	[OP_GETPPID]            = (OPpTARGET_MY),
+	[OP_GETPGRP]            = (OPpARG4_MASK|OPpTARGET_MY),
+	[OP_SETPGRP]            = (OPpARG4_MASK|OPpTARGET_MY),
+	[OP_GETPRIORITY]        = (OPpARG4_MASK|OPpTARGET_MY),
+	[OP_SETPRIORITY]        = (OPpARG4_MASK|OPpTARGET_MY),
+	[OP_TIME]               = (OPpTARGET_MY),
+	[OP_TMS]                = (0),
+	[OP_LOCALTIME]          = (OPpARG1_MASK),
+	[OP_GMTIME]             = (OPpARG4_MASK),
+	[OP_ALARM]              = (OPpARG1_MASK),
+	[OP_SLEEP]              = (OPpARG4_MASK|OPpTARGET_MY),
+	[OP_SHMGET]             = (OPpARG4_MASK),
+	[OP_SHMCTL]             = (OPpARG4_MASK),
+	[OP_SHMREAD]            = (OPpARG4_MASK),
+	[OP_SHMWRITE]           = (OPpARG4_MASK),
+	[OP_MSGGET]             = (OPpARG4_MASK),
+	[OP_MSGCTL]             = (OPpARG4_MASK),
+	[OP_MSGSND]             = (OPpARG4_MASK),
+	[OP_MSGRCV]             = (OPpARG4_MASK),
+	[OP_SEMOP]              = (OPpARG4_MASK),
+	[OP_SEMGET]             = (OPpARG4_MASK),
+	[OP_SEMCTL]             = (OPpARG4_MASK),
+	[OP_REQUIRE]            = (OPpARG1_MASK),
+	[OP_DOFILE]             = (OPpARG1_MASK),
+	[OP_HINTSEVAL]          = (0),
+	[OP_ENTEREVAL]          = (OPpARG1_MASK|OPpEVAL_HAS_HH|OPpEVAL_UNICODE|OPpEVAL_BYTES|OPpEVAL_COPHH|OPpEVAL_RE_REPARSING),
+	[OP_LEAVEEVAL]          = (OPpARG1_MASK|OPpREFCOUNTED),
+	[OP_ENTERTRY]           = (OPpARG1_MASK),
+	[OP_LEAVETRY]           = (0),
+	[OP_GHBYNAME]           = (OPpARG1_MASK),
+	[OP_GHBYADDR]           = (OPpARG4_MASK),
+	[OP_GHOSTENT]           = (0),
+	[OP_GNBYNAME]           = (OPpARG1_MASK),
+	[OP_GNBYADDR]           = (OPpARG4_MASK),
+	[OP_GNETENT]            = (0),
+	[OP_GPBYNAME]           = (OPpARG1_MASK),
+	[OP_GPBYNUMBER]         = (OPpARG4_MASK),
+	[OP_GPROTOENT]          = (0),
+	[OP_GSBYNAME]           = (OPpARG4_MASK),
+	[OP_GSBYPORT]           = (OPpARG4_MASK),
+	[OP_GSERVENT]           = (0),
+	[OP_SHOSTENT]           = (OPpARG1_MASK),
+	[OP_SNETENT]            = (OPpARG1_MASK),
+	[OP_SPROTOENT]          = (OPpARG1_MASK),
+	[OP_SSERVENT]           = (OPpARG1_MASK),
+	[OP_EHOSTENT]           = (0),
+	[OP_ENETENT]            = (0),
+	[OP_EPROTOENT]          = (0),
+	[OP_ESERVENT]           = (0),
+	[OP_GPWNAM]             = (OPpARG1_MASK),
+	[OP_GPWUID]             = (OPpARG1_MASK),
+	[OP_GPWENT]             = (0),
+	[OP_SPWENT]             = (0),
+	[OP_EPWENT]             = (0),
+	[OP_GGRNAM]             = (OPpARG1_MASK),
+	[OP_GGRGID]             = (OPpARG1_MASK),
+	[OP_GGRENT]             = (0),
+	[OP_SGRENT]             = (0),
+	[OP_EGRENT]             = (0),
+	[OP_GETLOGIN]           = (0),
+	[OP_SYSCALL]            = (OPpARG4_MASK),
+	[OP_LOCK]               = (OPpARG1_MASK),
+	[OP_ONCE]               = (OPpARG1_MASK),
+	[OP_CUSTOM]             = (0xff),
+	[OP_COREARGS]           = (OPpCOREARGS_DEREF1|OPpCOREARGS_DEREF2|OPpCOREARGS_SCALARMOD|OPpCOREARGS_PUSHMARK),
+	[OP_AVHVSWITCH]         = (OPpAVHVSWITCH_MASK|OPpMAYBE_LVSUB),
+	[OP_RUNCV]              = (OPpOFFBYONE),
+	[OP_FC]                 = (OPpARG1_MASK),
+	[OP_PADCV]              = (0),
+	[OP_INTROCV]            = (0),
+	[OP_CLONECV]            = (0),
+	[OP_PADRANGE]           = (OPpPADRANGE_COUNTMASK|OPpLVAL_INTRO),
+	[OP_REFASSIGN]          = (OPpARG2_MASK|OPpLVREF_ELEM|OPpLVREF_ITER|OPpLVREF_TYPE|OPpPAD_STATE|OPpLVAL_INTRO),
+	[OP_LVREF]              = (OPpARG1_MASK|OPpLVREF_ELEM|OPpLVREF_ITER|OPpLVREF_TYPE|OPpPAD_STATE|OPpLVAL_INTRO),
+	[OP_LVREFSLICE]         = (OPpLVAL_INTRO),
+	[OP_LVAVREF]            = (OPpARG1_MASK|OPpPAD_STATE|OPpLVAL_INTRO),
+	[OP_ANONCONST]          = (OPpARG1_MASK),
+	[OP_ISA]                = (OPpARG2_MASK),
+	[OP_CMPCHAIN_AND]       = (OPpARG1_MASK),
+	[OP_CMPCHAIN_DUP]       = (OPpARG1_MASK),
+	[OP_ENTERTRYCATCH]      = (OPpARG1_MASK),
+	[OP_LEAVETRYCATCH]      = (0),
+	[OP_POPTRY]             = (0),
+	[OP_CATCH]              = (OPpARG1_MASK),
+	[OP_PUSHDEFER]          = (OPpARG1_MASK|OPpDEFER_FINALLY),
+	[OP_IS_BOOL]            = (OPpARG1_MASK),
+	[OP_IS_WEAK]            = (OPpARG1_MASK),
+	[OP_WEAKEN]             = (OPpARG1_MASK),
+	[OP_UNWEAKEN]           = (OPpARG1_MASK),
+	[OP_BLESSED]            = (OPpARG1_MASK|OPpMAYBE_TRUEBOOL|OPpTRUEBOOL),
+	[OP_REFADDR]            = (OPpARG1_MASK|OPpTARGET_MY),
+	[OP_REFTYPE]            = (OPpARG1_MASK|OPpTARGET_MY),
+	[OP_CEIL]               = (OPpARG1_MASK|OPpTARGET_MY),
+	[OP_FLOOR]              = (OPpARG1_MASK|OPpTARGET_MY),
+	[OP_IS_TAINTED]         = (OPpARG1_MASK),
 
 };
 
