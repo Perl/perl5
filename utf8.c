@@ -76,9 +76,7 @@ Perl__force_out_malformed_utf8_message(pTHX_
 
     PL_dowarn = G_WARN_ALL_ON|G_WARN_ON;
     if (PL_curcop) {
-        /* this is like SAVECOMPILEWARNINGS() except with PL_curcop rather
-         * than PL_compiling */
-        SAVECOPWARNINGS(PL_curcop);
+        SAVECURCOPWARNINGS();
         PL_curcop->cop_warnings = pWARN_ALL;
     }
 

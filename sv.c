@@ -15334,6 +15334,8 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
             sv = (const SV *)POPPTR(ss,ix);
             TOPPTR(nss,ix) = sv_dup(sv, param);
             break;
+        case SAVEt_CURCOP_WARNINGS:
+            /* FALLTHROUGH */
         case SAVEt_COMPILE_WARNINGS:
             ptr = POPPTR(ss,ix);
             TOPPTR(nss,ix) = DUP_WARNINGS((char*)ptr);

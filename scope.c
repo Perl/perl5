@@ -1639,8 +1639,19 @@ Perl_leave_scope(pTHX_ I32 base)
             break;
 
         case SAVEt_COMPILE_WARNINGS:
-            a0 = ap[0]; a1 = ap[1];
-            free_and_set_cop_warnings((COP*)a0.any_ptr, a1.any_pv);
+            /* NOTE: we can't put &PL_compiling or PL_curcop on the save
+             *       stack directly, as we currently cannot translate
+             *       them to the correct addresses after a thread start
+             *       or win32 fork start. - Yves
+             */
+            a0 = ap[0];
+            free_and_set_cop_warnings(&PL_compiling, a0.any_pv);
+            break;
+
+        case SAVEt_CURCOP_WARNINGS:
+            /* NOTE: see comment above about SAVEt_COMPILE_WARNINGS */
+            a0 = ap[0];
+            free_and_set_cop_warnings(PL_curcop, a0.any_pv);
             break;
 
         case SAVEt_PARSER:
