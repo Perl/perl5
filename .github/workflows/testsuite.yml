@@ -166,18 +166,18 @@ jobs:
           CI_FORCE_DIST_MODULES: ${{ secrets.CI_FORCE_DIST_MODULES }}
         run: |
           echo '::echo::on'
-          [[ -n "${CI_SKIP_SANITY}"        ]] && [[ "${CI_SKIP_SANITY%[!0 ]*}"        != "${CI_SKIP_SANITY}"        ]] && echo "::set-output name=ci_skip_sanity::true"
-          [[ -n "${CI_FORCE_LINUX}"        ]] && [[ "${CI_FORCE_LINUX%[!0 ]*}"        != "${CI_FORCE_LINUX}"        ]] && echo "::set-output name=ci_force_linux::true"
-          [[ -n "${CI_FORCE_LINUX_I386}"   ]] && [[ "${CI_FORCE_LINUX_I386%[!0 ]*}"   != "${CI_FORCE_LINUX_I386}"   ]] && echo "::set-output name=ci_force_linux_i386::true"
-          [[ -n "${CI_FORCE_INSTALL}"      ]] && [[ "${CI_FORCE_INSTALL%[!0 ]*}"      != "${CI_FORCE_INSTALL}"      ]] && echo "::set-output name=ci_force_install::true"
-          [[ -n "${CI_FORCE_MACOS}"        ]] && [[ "${CI_FORCE_MACOS%[!0 ]*}"        != "${CI_FORCE_MACOS}"        ]] && echo "::set-output name=ci_force_macos::true"
-          [[ -n "${CI_FORCE_MSVC142}"      ]] && [[ "${CI_FORCE_MSVC142%[!0 ]*}"      != "${CI_FORCE_MSVC142}"      ]] && echo "::set-output name=ci_force_msvc142::true"
-          [[ -n "${CI_FORCE_MINGW64}"      ]] && [[ "${CI_FORCE_MINGW64%[!0 ]*}"      != "${CI_FORCE_MINGW64}"      ]] && echo "::set-output name=ci_force_mingw64::true"
-          [[ -n "${CI_FORCE_CYGWIN}"       ]] && [[ "${CI_FORCE_CYGWIN%[!0 ]*}"       != "${CI_FORCE_CYGWIN}"       ]] && echo "::set-output name=ci_force_cygwin::true"
-          [[ -n "${CI_FORCE_MINITEST}"     ]] && [[ "${CI_FORCE_MINITEST%[!0 ]*}"     != "${CI_FORCE_MINITEST}"     ]] && echo "::set-output name=ci_force_minitest::true"
-          [[ -n "${CI_FORCE_ASAN}"         ]] && [[ "${CI_FORCE_ASAN%[!0 ]*}"         != "${CI_FORCE_ASAN}"         ]] && echo "::set-output name=ci_force_asan::true"
-          [[ -n "${CI_FORCE_PERL_UNICODE}" ]] && [[ "${CI_FORCE_PERL_UNICODE%[!0 ]*}" != "${CI_FORCE_PERL_UNICODE}" ]] && echo "::set-output name=ci_force_perl_unicode::true"
-          [[ -n "${CI_FORCE_DIST_MODULES}" ]] && [[ "${CI_FORCE_DIST_MODULES%[!0 ]*}" != "${CI_FORCE_DIST_MODULES}" ]] && echo "::set-output name=ci_force_dist_modules::true"
+          [[ -n "${CI_SKIP_SANITY}"        ]] && [[ "${CI_SKIP_SANITY%[!0 ]*}"        != "${CI_SKIP_SANITY}"        ]] && echo "ci_skip_sanity=true" >> "$GITHUB_OUTPUT"
+          [[ -n "${CI_FORCE_LINUX}"        ]] && [[ "${CI_FORCE_LINUX%[!0 ]*}"        != "${CI_FORCE_LINUX}"        ]] && echo "ci_force_linux=true" >> "$GITHUB_OUTPUT"
+          [[ -n "${CI_FORCE_LINUX_I386}"   ]] && [[ "${CI_FORCE_LINUX_I386%[!0 ]*}"   != "${CI_FORCE_LINUX_I386}"   ]] && echo "ci_force_linux_i386=true" >> "$GITHUB_OUTPUT"
+          [[ -n "${CI_FORCE_INSTALL}"      ]] && [[ "${CI_FORCE_INSTALL%[!0 ]*}"      != "${CI_FORCE_INSTALL}"      ]] && echo "ci_force_install=true" >> "$GITHUB_OUTPUT"
+          [[ -n "${CI_FORCE_MACOS}"        ]] && [[ "${CI_FORCE_MACOS%[!0 ]*}"        != "${CI_FORCE_MACOS}"        ]] && echo "ci_force_macos=true" >> "$GITHUB_OUTPUT"
+          [[ -n "${CI_FORCE_MSVC142}"      ]] && [[ "${CI_FORCE_MSVC142%[!0 ]*}"      != "${CI_FORCE_MSVC142}"      ]] && echo "ci_force_msvc142=true" >> "$GITHUB_OUTPUT"
+          [[ -n "${CI_FORCE_MINGW64}"      ]] && [[ "${CI_FORCE_MINGW64%[!0 ]*}"      != "${CI_FORCE_MINGW64}"      ]] && echo "ci_force_mingw64=true" >> "$GITHUB_OUTPUT"
+          [[ -n "${CI_FORCE_CYGWIN}"       ]] && [[ "${CI_FORCE_CYGWIN%[!0 ]*}"       != "${CI_FORCE_CYGWIN}"       ]] && echo "ci_force_cygwin=true" >> "$GITHUB_OUTPUT"
+          [[ -n "${CI_FORCE_MINITEST}"     ]] && [[ "${CI_FORCE_MINITEST%[!0 ]*}"     != "${CI_FORCE_MINITEST}"     ]] && echo "ci_force_minitest=true" >> "$GITHUB_OUTPUT"
+          [[ -n "${CI_FORCE_ASAN}"         ]] && [[ "${CI_FORCE_ASAN%[!0 ]*}"         != "${CI_FORCE_ASAN}"         ]] && echo "ci_force_asan=true" >> "$GITHUB_OUTPUT"
+          [[ -n "${CI_FORCE_PERL_UNICODE}" ]] && [[ "${CI_FORCE_PERL_UNICODE%[!0 ]*}" != "${CI_FORCE_PERL_UNICODE}" ]] && echo "ci_force_perl_unicode=true" >> "$GITHUB_OUTPUT"
+          [[ -n "${CI_FORCE_DIST_MODULES}" ]] && [[ "${CI_FORCE_DIST_MODULES%[!0 ]*}" != "${CI_FORCE_DIST_MODULES}" ]] && echo "ci_force_dist_modules=true" >> "$GITHUB_OUTPUT"
           echo '::echo::off'
       - name: Install System dependencies
         if: steps.ci_config.outputs.ci_skip_sanity != 'true'
@@ -222,13 +222,13 @@ jobs:
         run: |
           if [[ "${CURRENT_REPOSITORY}" = 'Perl/perl5' ]]; then
             echo "Running all test jobs"
-            echo "::set-output name=run_all_jobs::true"
+            echo "run_all_jobs=true" >> "$GITHUB_OUTPUT"
           elif [[ -n "${EXTENDED_TESTING}" ]] && [[ "${EXTENDED_TESTING%[!0 ]*}" != "${EXTENDED_TESTING}" ]]; then
             echo "Running all test jobs"
-            echo "::set-output name=run_all_jobs::true"
+            echo "run_all_jobs=true" >> "$GITHUB_OUTPUT"
           else
             echo "Skipping extended test jobs."
-            echo "::set-output name=run_all_jobs::false"
+            echo "run_all_jobs=false" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Run Porting Tests (t/porting)
