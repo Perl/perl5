@@ -1064,52 +1064,52 @@ END
 my $ARGBITS = 32;
 
 my %argnum = (
-    'S',  1,		# scalar
-    'L',  2,		# list
-    'A',  3,		# array value
-    'H',  4,		# hash value
-    'C',  5,		# code value
-    'F',  6,		# file value
-    'R',  7,		# scalar reference
+    'S',  1,        # scalar
+    'L',  2,        # list
+    'A',  3,        # array value
+    'H',  4,        # hash value
+    'C',  5,        # code value
+    'F',  6,        # file value
+    'R',  7,        # scalar reference
 );
 
 my %opclass = (
-    '0',  0,		# baseop
-    '1',  1,		# unop
-    '2',  2,		# binop
-    '|',  3,		# logop
-    '@',  4,		# listop
-    '/',  5,		# pmop
-    '$',  6,		# svop_or_padop
-    '#',  7,		# padop
-    '"',  8,		# pvop_or_svop
-    '{',  9,		# loop
-    ';',  10,		# cop
-    '%',  11,		# baseop_or_unop
-    '-',  12,		# filestatop
-    '}',  13,		# loopexop
-    '.',  14,		# methop
-    '+',  15,		# unop_aux
+    '0',  0,        # baseop
+    '1',  1,        # unop
+    '2',  2,        # binop
+    '|',  3,        # logop
+    '@',  4,        # listop
+    '/',  5,        # pmop
+    '$',  6,        # svop_or_padop
+    '#',  7,        # padop
+    '"',  8,        # pvop_or_svop
+    '{',  9,        # loop
+    ';',  10,       # cop
+    '%',  11,       # baseop_or_unop
+    '-',  12,       # filestatop
+    '}',  13,       # loopexop
+    '.',  14,       # methop
+    '+',  15,       # unop_aux
 );
 
 my %opflags = (
-    'm' =>   1,		# needs stack mark
-    'f' =>   2,		# fold constants
-    's' =>   4,		# always produces scalar
-    't' =>   8,		# needs target scalar
-    'T' =>   8 | 16,	# ... which may be lexical
-    'i' =>   0,		# always produces integer (unused since e7311069)
-    'I' =>  32,		# has corresponding int op
-    'd' =>  64,		# danger, make temp copy in list assignment
-    'u' => 128,		# defaults to $_
+    'm' =>   1,     # needs stack mark
+    'f' =>   2,     # fold constants
+    's' =>   4,     # always produces scalar
+    't' =>   8,     # needs target scalar
+    'T' =>   8 | 16,    # ... which may be lexical
+    'i' =>   0,     # always produces integer (unused since e7311069)
+    'I' =>  32,     # has corresponding int op
+    'd' =>  64,     # danger, make temp copy in list assignment
+    'u' => 128,     # defaults to $_
 );
 
-my %OP_IS_SOCKET;	# /Fs/
-my %OP_IS_FILETEST;	# /F-/
-my %OP_IS_FT_ACCESS;	# /F-+/
-my %OP_IS_NUMCOMPARE;	# /S</
-my %OP_IS_DIRHOP;	# /Fd/
-my %OP_IS_INFIX_BIT;	# /S\|/
+my %OP_IS_SOCKET;   # /Fs/
+my %OP_IS_FILETEST; # /F-/
+my %OP_IS_FT_ACCESS;    # /F-+/
+my %OP_IS_NUMCOMPARE;   # /S</
+my %OP_IS_DIRHOP;   # /Fd/
+my %OP_IS_INFIX_BIT;    # /S\|/
 
 my $OCSHIFT = 8;
 my $OASHIFT = 12;
@@ -1190,10 +1190,10 @@ sub gen_op_is_macro {
             $op_is->{$a} <=> $op_is->{$b}
         } keys %$op_is;
         
-        my $last = pop @rest;	# @rest slurped, get its last
+        my $last = pop @rest;   # @rest slurped, get its last
         die "Invalid range of ops: $first .. $last\n" unless $last;
 
-        print $on "\n#define $macname(op)	\\\n\t(";
+        print $on "\n#define $macname(op)   \\\n\t(";
 
         # verify that op-ct matches 1st..last range (and fencepost)
         # (we know there are no dups)
