@@ -1331,7 +1331,7 @@ S_cop_free(pTHX_ COP* cop)
     }
     CopFILE_free(cop);
     if (! specialWARN(cop->cop_warnings))
-        cop->cop_warnings = rcpv_free(cop->cop_warnings);
+        cop->cop_warnings = (STRLEN*)rcpv_free((char*)cop->cop_warnings);
 
     cophh_free(CopHINTHASH_get(cop));
     if (PL_curcop == cop)
@@ -15233,13 +15233,13 @@ const_av_xsub(pTHX_ CV* cv)
  * This is the e implementation for the DUP_WARNINGS() macro
  */
 
-char *
-Perl_dup_warnings(pTHX_ char* warnings)
+STRLEN*
+Perl_dup_warnings(pTHX_ STRLEN* warnings)
 {
     if (warnings == NULL || specialWARN(warnings))
         return warnings;
 
-    return rcpv_copy(warnings);
+    return (STRLEN*)rcpv_copy((char*)warnings);
 }
 
 /*
