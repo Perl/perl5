@@ -220,8 +220,7 @@ scope has the given name. C<name> must be a literal string.
    could have done savefreesharedpvREF, but this way actually seems cleaner,
    as it simplifies the code that does the saves, and reduces the load on the
    save stack.  */
-#define SAVECOPWARNINGS(cop) save_pushptrptr((cop),(cop)->cop_warnings, SAVEt_COMPILE_WARNINGS)
-#define SAVECOMPILEWARNINGS() SAVECOPWARNINGS(&PL_compiling)
+#define SAVECOMPILEWARNINGS() save_pushptr(PL_compiling.cop_warnings, SAVEt_COMPILE_WARNINGS)
 
 #define SAVEPARSER(p) save_pushptr((p), SAVEt_PARSER)
 
