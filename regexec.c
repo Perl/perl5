@@ -234,7 +234,7 @@ S_regcppush(pTHX_ const regexp *rex, I32 parenfloor, U32 maxopenparen _pDEPTH)
     const int paren_elems_to_push = (paren_bytes_to_push + sizeof(*PL_savestack) - 1) / sizeof(*PL_savestack);
     const UV total_elems = paren_elems_to_push + REGCP_OTHER_ELEMS;
     const UV elems_shifted = total_elems << SAVE_TIGHT_SHIFT;
-    I32 p;
+
     DECLARE_AND_GET_RE_DEBUG_FLAGS;
 
     PERL_ARGS_ASSERT_REGCPPUSH;
@@ -267,7 +267,8 @@ S_regcppush(pTHX_ const regexp *rex, I32 parenfloor, U32 maxopenparen _pDEPTH)
     memcpy(&PL_savestack[PL_savestack_ix], rex->offs + parenfloor + 1, paren_bytes_to_push);
     PL_savestack_ix += paren_elems_to_push;
 
-    DEBUG_BUFFERS_r(
+    DEBUG_BUFFERS_r({
+	I32 p;
         for (p = parenfloor + 1; p <= (I32)maxopenparen; p++) {
             Perl_re_exec_indentf(aTHX_
                 "    \\%" UVuf ": %" IVdf "(%" IVdf ")..%" IVdf "\n",
@@ -278,7 +279,7 @@ S_regcppush(pTHX_ const regexp *rex, I32 parenfloor, U32 maxopenparen _pDEPTH)
                 (IV)rex->offs[p].end
             );
         }
-    );
+    });
 
 /* REGCP_OTHER_ELEMS are pushed in any case, parentheses or no. */
     SSPUSHINT(maxopenparen);
