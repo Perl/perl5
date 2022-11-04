@@ -4722,7 +4722,7 @@ S_study_chunk(pTHX_
 
     /* vars about capture buffers in the pattern */
     I32 pars = 0;       /* count of OPEN opcodes */
-    I32 is_par = OP(scan) == OPEN ? ARG(scan) : 0; /* is this op an OPEN? */
+    I32 is_par = OP(scan) == OPEN ? PARNO(scan) : 0; /* is this op an OPEN? */
 
     /* vars about whether this pattern contains something that can match
      * infinitely long strings, eg, X* or X+ */
@@ -5838,13 +5838,13 @@ S_study_chunk(pTHX_
                     if (RExC_open_parens) {
 
                         /*open->CURLYM*/
-                        RExC_open_parens[ARG(nxt1)] = REGNODE_OFFSET(oscan);
+                        RExC_open_parens[PARNO(nxt1)] = REGNODE_OFFSET(oscan);
 
                         /*close->while*/
-                        RExC_close_parens[ARG(nxt1)] = REGNODE_OFFSET(nxt) + 2;
+                        RExC_close_parens[PARNO(nxt1)] = REGNODE_OFFSET(nxt) + 2;
                     }
                     /* Now we know that nxt2 is the only contents: */
-                    oscan->flags = (U8)ARG(nxt);
+                    oscan->flags = (U8)PARNO(nxt);
                     OP(oscan) = CURLYN;
                     OP(nxt1) = NOTHING;	/* was OPEN. */
 
@@ -5886,13 +5886,13 @@ S_study_chunk(pTHX_
                         /* note that we have changed the type of oscan to CURLYM here */
                         regnode *nxt1 = REGNODE_AFTER_type(oscan, tregnode_CURLYM); /* OPEN*/
 
-                        oscan->flags = (U8)ARG(nxt);
+                        oscan->flags = (U8)PARNO(nxt);
                         if (RExC_open_parens) {
                              /*open->CURLYM*/
-                            RExC_open_parens[ARG(nxt1)] = REGNODE_OFFSET(oscan);
+                            RExC_open_parens[PARNO(nxt1)] = REGNODE_OFFSET(oscan);
 
                             /*close->NOTHING*/
-                            RExC_close_parens[ARG(nxt1)] = REGNODE_OFFSET(nxt2)
+                            RExC_close_parens[PARNO(nxt1)] = REGNODE_OFFSET(nxt2)
                                                          + 1;
                         }
                         OP(nxt1) = OPTIMIZED;	/* was OPEN. */
@@ -6558,21 +6558,21 @@ S_study_chunk(pTHX_
 #endif
         }
         else if (OP(scan) == OPEN) {
-            if (stopparen != (I32)ARG(scan))
+            if (stopparen != (I32)PARNO(scan))
                 pars++;
         }
         else if (OP(scan) == CLOSE) {
-            if (stopparen == (I32)ARG(scan)) {
+            if (stopparen == (I32)PARNO(scan)) {
                 break;
             }
-            if ((I32)ARG(scan) == is_par) {
+            if ((I32)PARNO(scan) == is_par) {
                 next = regnext(scan);
 
                 if ( next && (OP(next) != WHILEM) && next < last)
                     is_par = 0;		/* Disable optimization */
             }
             if (data) {
-                *(data->last_closep) = ARG(scan);
+                *(data->last_closep) = PARNO(scan);
                 *(data->last_close_opp) = scan;
             }
         }
@@ -21973,7 +21973,9 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
              || k == GROUPP || op == ACCEPT)
     {
         AV *name_list= NULL;
-        U32 parno= op == ACCEPT ? (U32)ARG2L(o) : ARG(o);
+        U32 parno= (op == ACCEPT)              ? (U32)ARG2L(o) :
+                   (op == OPEN || op == CLOSE) ? (U32)PARNO(o) :
+                                                 (U32)ARG(o);
         Perl_sv_catpvf(aTHX_ sv, "%" UVuf, (UV)parno);        /* Parenth number */
         if ( RXp_PAREN_NAMES(prog) ) {
             name_list= MUTABLE_AV(progi->data->data[progi->name_list_idx]);

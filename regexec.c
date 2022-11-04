@@ -183,7 +183,7 @@ static const char non_utf8_target_but_utf8_required[]
 #define JUMPABLE(rn) (                                                             \
     OP(rn) == OPEN ||                                                              \
     (OP(rn) == CLOSE &&                                                            \
-     !EVAL_CLOSE_PAREN_IS(cur_eval,ARG(rn)) ) ||                                   \
+     !EVAL_CLOSE_PAREN_IS(cur_eval,PARNO(rn)) ) ||                                 \
     OP(rn) == EVAL ||                                                              \
     OP(rn) == SUSPEND || OP(rn) == IFMATCH ||                                      \
     OP(rn) == PLUS || OP(rn) == MINMOD ||                                          \
@@ -8455,7 +8455,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 #undef ST
 
         case OPEN: /*  (  */
-            n = ARG(scan);  /* which paren pair */
+            n = PARNO(scan);  /* which paren pair */
             rex->offs[n].start_tmp = locinput - reginfo->strbeg;
             if (n > maxopenparen)
                 maxopenparen = n;
@@ -8477,7 +8477,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
 
         case CLOSE:  /*  )  */
-            n = ARG(scan);  /* which paren pair */
+            n = PARNO(scan);  /* which paren pair */
             CLOSE_CAPTURE(n, rex->offs[n].start_tmp,
                              locinput - reginfo->strbeg);
             if ( EVAL_CLOSE_PAREN_IS( cur_eval, n ) )
@@ -8513,7 +8513,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                     if ( OP(cursor) != CLOSE )
                         continue;
 
-                    n = ARG(cursor);
+                    n = PARNO(cursor);
 
                     if ( n > lastopen ) /* might be OPEN/CLOSE in the way */
                         continue;       /* so skip this one */

@@ -386,6 +386,8 @@ struct regnode_ssc {
                                     ((struct regnode_string *)p)->string)
 #define	OPERANDs(p)	STRINGs(p)
 
+#define PARNO(p)        ARG(p)          /* APPLIES for OPEN and CLOSE only */
+
 /* Long strings.  Currently limited to length 18 bits, which handles a 262000
  * byte string.  The limiting factor is the 16 bit 'next_off' field, which
  * points to the next regnode, so the furthest away it can be is 2**16.  On
@@ -435,6 +437,7 @@ struct regnode_ssc {
 #define	ARG1_LOC(p)	(((struct regnode_2 *)p)->arg1)
 #define	ARG2_LOC(p)	(((struct regnode_2 *)p)->arg2)
 #define ARG2L_LOC(p)	(((struct regnode_2L *)p)->arg2)
+
 
 /* These should no longer be used directly in most cases. Please use
  * the REGNODE_AFTER() macros instead. */
