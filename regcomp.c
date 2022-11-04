@@ -12180,14 +12180,15 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                             SvIV_set(sv_dat, 1);
                         }
 #ifdef DEBUGGING
-                        /* Yes this does cause a memory leak in debugging Perls
-                         * */
+                        /* No, this does not cause a memory leak under
+                         * debugging. RExC_paren_name_list is freed later
+                         * on in the dump process. - Yves
+                         */
                         if (!av_store(RExC_paren_name_list,
                                       RExC_npar, SvREFCNT_inc_NN(svname)))
                             SvREFCNT_dec_NN(svname);
 #endif
 
-                        /*sv_dump(sv_dat);*/
                     }
                     nextchar(pRExC_state);
                     paren = 1;
