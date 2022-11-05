@@ -457,7 +457,9 @@ Now a no-op.
  * marking unused variables (they need e.g. a #pragma) and therefore
  * cpp macros like PERL_UNUSED_DECL cannot work for this purpose, even
  * if it were PERL_UNUSED_DECL(x), which it cannot be (see above).
+*/
 
+/*
 =for apidoc_section $directives
 =for apidoc AmnU||PERL_UNUSED_DECL
 Tells the compiler that the parameter in the function prototype just before it
@@ -476,7 +478,7 @@ Example usage:
 =back
 
 =cut
- */
+*/
 
 #ifndef PERL_UNUSED_DECL
 #  define PERL_UNUSED_DECL __attribute__unused__
@@ -486,7 +488,8 @@ Example usage:
  * for silencing unused variables that are actually used most of the time,
  * but we cannot quite get rid of, such as "ax" in PPCODE+noargs xsubs,
  * or variables/arguments that are used only in certain configurations.
-
+ */
+/*
 =for apidoc Am;||PERL_UNUSED_ARG|void x
 This is used to suppress compiler warnings that a parameter to a function is
 not used.  This situation can arise, for example, when a parameter is needed
@@ -504,7 +507,7 @@ This situation can arise, for example, when a C preprocessor conditional
 compilation causes it be used just some times.
 
 =cut
- */
+*/
 #ifndef PERL_UNUSED_ARG
 #  define PERL_UNUSED_ARG(x) ((void)sizeof(x))
 #endif
@@ -1394,7 +1397,9 @@ EXTERN_C int usleep(unsigned int);
 
 /* Macros for correct constant construction.  These are in C99 <stdint.h>
  * (so they will not be available in strict C89 mode), but they are nice, so
- * let's define them if necessary.
+ * let's define them if necessary. */
+
+/*
 =for apidoc_section $integer
 =for apidoc    Am|I16|INT16_C|number
 =for apidoc_item |I32|INT32_C|number
