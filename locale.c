@@ -1660,19 +1660,19 @@ S_calculate_LC_ALL(pTHX_ const char ** individ_locales)
      * categories, adding new ones as they show up on obscure platforms.
      */
 
-    unsigned int i;
     Size_t names_len = 0;
     bool are_all_categories_the_same_locale = TRUE;
     char * aggregate_locale;
     char * previous_start = NULL;
     char * this_start = NULL;
-    Size_t entry_len = 0;
+    SSize_t entry_len = 0;
+    SSize_t prev_entry_len;
 
     PERL_ARGS_ASSERT_CALCULATE_LC_ALL;
 
     /* First calculate the needed size for the string listing the categories
      * and their locales. */
-    for (i = 0; i < NOMINAL_LC_ALL_INDEX; i++) {
+    for (unsigned i = 0; i < NOMINAL_LC_ALL_INDEX; i++) {
 
 #  ifdef USE_QUERYLOCALE
         const char * entry = querylocale_l(i, cur_obj);
@@ -1683,16 +1683,14 @@ S_calculate_LC_ALL(pTHX_ const char ** individ_locales)
         names_len += strlen(category_names[i])
                   + 1                           /* '=' */
                   + strlen(entry)
-                  + 1;                          /* ';' */
+                  + 1;                          /* ';' or terminating NUL */
     }
-
-    names_len++;    /* Trailing '\0' */
 
     /* Allocate enough space for the aggregated string */
     SAVEFREEPV(Newxz(aggregate_locale, names_len, char));
 
     /* Then fill it in */
-    for (i = 0; i < NOMINAL_LC_ALL_INDEX; i++) {
+    for (unsigned i = 0; i < NOMINAL_LC_ALL_INDEX; i++) {
         Size_t new_len;
 
 #  ifdef USE_QUERYLOCALE
@@ -1707,23 +1705,26 @@ S_calculate_LC_ALL(pTHX_ const char ** individ_locales)
         assert(new_len <= names_len);
 
         this_start = aggregate_locale + strlen(aggregate_locale);
-        entry_len = strlen(entry);
-
+        SSize_t save_len = new_len;
         new_len = my_strlcat(aggregate_locale, entry, names_len);
-        assert(new_len <= names_len);
+        entry_len = new_len - save_len;
+
+        assert(entry_len > 0);
         new_len = my_strlcat(aggregate_locale, ";", names_len);
         assert(new_len <= names_len);
-        PERL_UNUSED_VAR(new_len);   /* Only used in DEBUGGING */
 
         if (   i > 0
             && are_all_categories_the_same_locale
-            && memNE(previous_start, this_start, entry_len + 1))
+            && (   prev_entry_len != entry_len
+                || memNE(previous_start, this_start, entry_len)))
         {
             are_all_categories_the_same_locale = FALSE;
         }
         else {
             previous_start = this_start;
         }
+
+        prev_entry_len = entry_len;
     }
 
     /* If they are all the same, just return any one of them */
