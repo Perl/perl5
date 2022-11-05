@@ -545,26 +545,20 @@ points.
 
 =head2 great_circle_distance
 
-You can compute spherical distances, called B<great circle distances>,
-by importing the great_circle_distance() function:
+Returns the great circle distance between two points on a sphere.
 
-  use Math::Trig 'great_circle_distance';
+    $distance = great_circle_distance($theta0, $phi0, $theta1, $phi1, [, $rho]);
 
-  $distance = great_circle_distance($theta0, $phi0, $theta1, $phi1, [, $rho]);
-
-The I<great circle distance> is the shortest distance between two
-points on a sphere.  The distance is in C<$rho> units.  The C<$rho> is
-optional, it defaults to 1 (the unit sphere), therefore the distance
+Where ($theta0, $phi0) and ($theta1, $phi1) are the spherical coordinates of
+the two points, respectively. The distance is in C<$rho> units. The C<$rho>
+is optional. It defaults to 1 (the unit sphere), therefore the distance
 defaults to radians.
 
-If you think geographically the I<theta> are longitudes: zero at the
-Greenwhich meridian, eastward positive, westward negative -- and the
-I<phi> are latitudes: zero at the North Pole, northward positive,
-southward negative.  B<NOTE>: this formula thinks in mathematics, not
-geographically: the I<phi> zero is at the North Pole, not at the
-Equator on the west coast of Africa (Bay of Guinea).  You need to
-subtract your geographical coordinates from I<pi/2> (also known as 90
-degrees).
+If you are using geographic coordinates, latitude and longitude, you need to
+adjust for the fact that latitude is zero at the equator increasing towards
+the north and decreasing towards the south. Assuming ($lat0, $lon0) and
+($lat1, $lon1) are the geographic coordinates in radians of the two points,
+the distance can be computed with
 
   $distance = great_circle_distance($lon0, pi/2 - $lat0,
                                     $lon1, pi/2 - $lat1, $rho);
