@@ -551,8 +551,7 @@ Returns the great circle distance between two points on a sphere.
 
 Where ($theta0, $phi0) and ($theta1, $phi1) are the spherical coordinates of
 the two points, respectively. The distance is in C<$rho> units. The C<$rho>
-is optional. It defaults to 1 (the unit sphere), therefore the distance
-defaults to radians.
+is optional. It defaults to 1 (the unit sphere).
 
 If you are using geographic coordinates, latitude and longitude, you need to
 adjust for the fact that latitude is zero at the equator increasing towards
