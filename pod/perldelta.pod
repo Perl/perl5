@@ -133,9 +133,15 @@ XXX Remove this section if not applicable.
 
 =item *
 
-L<XXX> has been upgraded from version A.xx to B.yy.
+L<Storable> has been upgraded from version 3.27 to 3.28.
 
-If there was something important to note about this change, include that here.
+The C<STORABLE_freeze> callback now supports regular expression
+objects.
+
+The error message when Storable attempts to call C<STORABLE_freeze>
+for an unsupported type such as GLOBs has been improved from
+C<"Unexpected object type (8) in store_hook()"> to indicate the perl
+object type and the class.
 
 =back
 
@@ -405,7 +411,20 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-XXX
+Fixes to memory handling for C<PL_splitstr>:
+
+=over
+
+=item *
+
+If a thread was created the allocated string would be freed twice.
+
+=item *
+
+If two C<-F> switches were supplied the memory allocated for the first
+switch wouldn't be freed.
+
+=back
 
 =back
 
