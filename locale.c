@@ -2665,7 +2665,7 @@ S_win32_setlocale(pTHX_ int category, const char* locale)
         PL_cur_LC_ALL = savepv(result);
     }
     else {
-        PL_cur_LC_ALL = savepv(setlocale(LC_ALL, NULL));
+        PL_cur_LC_ALL = savepv(wrap_wsetlocale(LC_ALL, NULL));
     }
 
 #  endif
