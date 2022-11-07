@@ -11,7 +11,7 @@ CODE:
    ++x;
 }
 
-#endif
+#else
 
 void
 do(dbh)
@@ -21,3 +21,4 @@ CODE:
    int x;
    ++x;
 }
+#endif

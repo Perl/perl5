@@ -705,6 +705,8 @@ sub blurt {
 sub death {
   my $self = shift;
   $self->Warn(@_);
+  use Carp qw(confess);
+  confess("in death do we part");
   exit 1;
 }
 

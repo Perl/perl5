@@ -192,24 +192,28 @@ like $stderr, '/No INPUT definition/', "Exercise typemap error";
 
 { # fourth block: https://github.com/Perl/perl5/issues/19661
   my $pxs = ExtUtils::ParseXS->new;
-  tie *FH, 'Foo';
+  my $buf = "";
+  open my $fh,">", \$buf
+    or die "Failed to open scalar buffer:$!";
   my ($stderr, $filename);
   {
     $filename = 'XSFalsePositive.xs';
-    $stderr = PrimitiveCapture::capture_stderr(sub {
-      $pxs->process_file(filename => $filename, output => \*FH, prototypes => 1);
-    });
+    #$stderr = PrimitiveCapture::capture_stderr(sub {
+      $pxs->process_file(filename => $filename, output => $fh, prototypes => 1);
+    #});
+    diag "stderr: $stderr\n";
     TODO: {
       local $TODO = 'GH 19661';
       unlike $stderr,
         qr/Warning: duplicate function definition 'do' detected in $filename\.xs/,
         "No 'duplicate function definition' warning observed in $filename";
-      }
+    }
   }
+
   {
     $filename = 'XSFalsePositive2.xs';
     $stderr = PrimitiveCapture::capture_stderr(sub {
-      $pxs->process_file(filename => $filename, output => \*FH, prototypes => 1);
+      $pxs->process_file(filename => $filename, output => $fh, prototypes => 1);
     });
     TODO: {
       local $TODO = 'GH 19661';
