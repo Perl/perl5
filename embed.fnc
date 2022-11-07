@@ -3368,8 +3368,7 @@ So	|void	|restore_toggled_locale_i|const unsigned cat_index	\
 S	|bool	|is_locale_utf8	|NN const char * locale
 #    if (defined(HAS_LOCALECONV) || defined(HAS_LOCALECONV_L))		\
      && (defined(USE_LOCALE_MONETARY) || defined(USE_LOCALE_NUMERIC))
-S	|HV *	|my_localeconv|const int item				\
-			      |const locale_utf8ness_t locale_is_utf8
+S	|HV *	|my_localeconv|const int item
 S	|HV *	|populate_localeconv|NN const struct lconv *lcbuf	\
 			|const int unused				\
 			|const locale_utf8ness_t numeric_locale_is_utf8	\

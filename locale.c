@@ -3122,7 +3122,7 @@ Perl_localeconv(pTHX)
 
 #else
 
-    return my_localeconv(0, LOCALE_UTF8NESS_UNKNOWN);
+    return my_localeconv(0);
 
 #endif
 
@@ -3132,7 +3132,7 @@ Perl_localeconv(pTHX)
  && (defined(USE_LOCALE_MONETARY) || defined(USE_LOCALE_NUMERIC))
 
 HV *
-S_my_localeconv(pTHX_ const int item, const locale_utf8ness_t locale_is_utf8)
+S_my_localeconv(pTHX_ const int item)
 {
     HV * retval;
     locale_utf8ness_t numeric_locale_is_utf8  = LOCALE_UTF8NESS_UNKNOWN;
@@ -3166,10 +3166,7 @@ S_my_localeconv(pTHX_ const int item, const locale_utf8ness_t locale_is_utf8)
 #  ifdef HAS_SOME_LANGINFO
 
     PERL_UNUSED_ARG(item);
-    PERL_UNUSED_ARG(locale_is_utf8);
 
-    /* When there is a nl_langinfo, we will only be called for localeconv
-     * numeric purposes. */
     const bool is_localeconv_call = true;
 
 #  else
@@ -3207,7 +3204,6 @@ S_my_localeconv(pTHX_ const int item, const locale_utf8ness_t locale_is_utf8)
 
     else {
         copy_localeconv = S_get_nl_item_from_localeconv;
-        numeric_locale_is_utf8 = locale_is_utf8;
     }
 
 #  endif
@@ -4123,7 +4119,7 @@ S_my_langinfo_i(pTHX_
       case CRNCYSTR:
       case THOUSEP:
         {
-            SV * string = (SV *) my_localeconv(item, LOCALE_UTF8NESS_UNKNOWN);
+            SV * string = (SV *) my_localeconv(item);
 
             retval = save_to_buffer(SvPV_nolen(string), retbufp, retbuf_sizep);
 

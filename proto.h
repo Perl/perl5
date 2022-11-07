@@ -5108,7 +5108,7 @@ PERL_CALLCONV bool	Perl_do_exec3(pTHX_ const char *incmd, int fd, int do_report)
 #if (defined(HAS_LOCALECONV) || defined(HAS_LOCALECONV_L))		     && (defined(USE_LOCALE_MONETARY) || defined(USE_LOCALE_NUMERIC))
 #  if defined(PERL_IN_LOCALE_C)
 #    if defined(USE_LOCALE)
-STATIC HV *	S_my_localeconv(pTHX_ const int item, const locale_utf8ness_t locale_is_utf8);
+STATIC HV *	S_my_localeconv(pTHX_ const int item);
 #define PERL_ARGS_ASSERT_MY_LOCALECONV
 STATIC HV *	S_populate_localeconv(pTHX_ const struct lconv *lcbuf, const int unused, const locale_utf8ness_t numeric_locale_is_utf8, const locale_utf8ness_t monetary_locale_is_utf8);
 #define PERL_ARGS_ASSERT_POPULATE_LOCALECONV	\

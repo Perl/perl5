@@ -1611,7 +1611,7 @@
 #  if (defined(HAS_LOCALECONV) || defined(HAS_LOCALECONV_L))		     && (defined(USE_LOCALE_MONETARY) || defined(USE_LOCALE_NUMERIC))
 #    if defined(PERL_IN_LOCALE_C)
 #      if defined(USE_LOCALE)
-#define my_localeconv(a,b)	S_my_localeconv(aTHX_ a,b)
+#define my_localeconv(a)	S_my_localeconv(aTHX_ a)
 #define populate_localeconv(a,b,c,d)	S_populate_localeconv(aTHX_ a,b,c,d)
 #      endif
 #    endif
