@@ -1328,7 +1328,7 @@ Perl_sv_grow(pTHX_ SV *const sv, STRLEN newlen)
 
     if (newlen > SvLEN(sv)) {		/* need more room? */
         STRLEN minlen = SvCUR(sv);
-        minlen += (minlen >> PERL_STRLEN_EXPAND_SHIFT) + 10;
+        minlen += (minlen >> PERL_STRLEN_EXPAND_SHIFT) + PERL_STRLEN_NEW_MIN;
         if (newlen < minlen)
             newlen = minlen;
 #ifndef PERL_UNWARANTED_CHUMMINESS_WITH_MALLOC
@@ -1402,10 +1402,8 @@ Perl_sv_grow_fresh(pTHX_ SV *const sv, STRLEN newlen)
         newlen++;
 #endif
 
-    /* 10 is a longstanding, hardcoded minimum length in sv_grow. */
-    /* Just doing the same here for consistency. */
-    if (newlen < 10)
-        newlen = 10;
+    if (newlen < PERL_STRLEN_NEW_MIN)
+        newlen = PERL_STRLEN_NEW_MIN;
 
     s = (char*)safemalloc(newlen);
     SvPV_set(sv, s);

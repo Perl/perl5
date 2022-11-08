@@ -177,7 +177,8 @@ Perl_av_extend_guts(pTHX_ AV *av, SSize_t key, SSize_t *maxp, SV ***allocp,
                 PL_stack_max = PL_stack_base + newmax;
             }
         } else { /* there is no SV* array yet */
-            *maxp = key < 3 ? 3 : key;
+            *maxp = key < PERL_ARRAY_NEW_MIN_KEY ?
+                          PERL_ARRAY_NEW_MIN_KEY : key;
             {
                 /* see comment above about newmax+1*/
                 MEM_WRAP_CHECK_s(*maxp, SV*,
