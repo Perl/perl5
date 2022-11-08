@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 use strict;
-use Test::More tests => 20;
+use Test::More tests => 22;
 use Config;
 use DynaLoader;
 use ExtUtils::CBuilder;
@@ -218,6 +218,24 @@ like $stderr, '/No INPUT definition/', "Exercise typemap error";
         "No 'duplicate function definition' warning observed in $filename";
       }
   }
+}
+
+#####################################################################
+
+{ # tight cpp directives
+  my $pxs = ExtUtils::ParseXS->new;
+  tie *FH, 'Foo';
+  my $stderr = PrimitiveCapture::capture_stderr(sub {
+    $pxs->process_file(
+      filename => 'XSTightDirectives.xs',
+      output => \*FH,
+      prototypes => 1);
+  });
+  my $content = tied(*FH)->{buf};
+  my $count = 0;
+  $count++ while $content=~/^XS_EUPXS\(XS_My_do\)\n\{/mg;
+  is $stderr, undef, "No error expected from TightDirectives.xs";
+  is $count, 2, "Saw XS_MY_do definition the expected number of times";
 }
 
 #####################################################################
