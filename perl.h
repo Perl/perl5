@@ -1593,6 +1593,23 @@ Use L</UV> to declare variables of the maximum usable size on this platform.
 
 #define MEM_SIZE Size_t
 
+/* av_extend and analogues enforce a minimum number of array elements.
+ * This has been 4 elements (so a minimum key size of 3) for a long
+ * time, but the rationale behind this seems to have been lost to the
+ * mists of time. */
+#ifndef PERL_ARRAY_NEW_MIN_KEY
+#define PERL_ARRAY_NEW_MIN_KEY 3
+#endif
+
+/* Functions like Perl_sv_grow mandate a minimum string size.
+ * This was 10 bytes for a long time, the rationale for which seems lost
+ * to the mists of time. However, since this does not correlate to what
+ * modern malloc implementations will actually return, it can be revised
+ * to be more appropriate. */
+#ifndef PERL_STRLEN_NEW_MIN
+#define PERL_STRLEN_NEW_MIN 10
+#endif
+
 /* Round all values passed to malloc up, by default to a multiple of
    sizeof(size_t)
 */
