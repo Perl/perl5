@@ -1311,6 +1311,9 @@ sub get_aliases {
   my ($line) = @_;
   my ($orig) = $line;
 
+  # we use this later for symbolic aliases
+  my $fname = $self->{Packprefix} . $self->{func_name};
+
   # Parse alias definitions
   # format is
   #    alias = value Pack::alias = value ...
@@ -1335,10 +1338,13 @@ sub get_aliases {
     if ($is_symbolic) {
       my $orig_value = $value;
       $value = $self->{Packprefix} . $value if $value !~ /::/;
-      if (!defined $self->{XsubAliases}->{$value}) {
+      if (defined $self->{XsubAliases}->{$value}) {
+        $value = $self->{XsubAliases}->{$value};
+      } elsif ($value eq $fname) {
+        $value = 0;
+      } else {
         blurt( $self, "Error: Unknown alias '$value' in symbolic definition for '$orig_alias'");
       }
-      $value = $self->{XsubAliases}->{$value};
     }
 
     # check for duplicate alias name & duplicate value
@@ -1359,6 +1365,10 @@ sub get_aliases {
     # it is NOT a mistake.
     unless ($is_symbolic) {
       my @keys= sort keys %{$self->{XsubAliasValues}->{$value}||{}};
+      # deal with an alias of 0, which might not be in the XsubAlias dataset
+      # yet as 0 is the default for the base function ($fname)
+      push @keys, $fname
+        if $value eq "0" and !defined $self->{XsubAlias}{$fname};
       if (@keys) {
         @keys= map { "'$_'" }
                map { my $copy= $_;
@@ -1368,7 +1378,10 @@ sub get_aliases {
         WarnHint( $self,
                   "Warning: Aliases '$orig_alias' and "
                   . join(", ", @keys)
-                  . " have identical values",
+                  . " have identical values of $value"
+                  . ( $value eq "0"
+                      ? " - the base function"
+                      : "" ),
                   !$self->{XsubAliasValueClashHinted}++
                   ? "If this is deliberate use a symbolic alias instead."
                   : undef

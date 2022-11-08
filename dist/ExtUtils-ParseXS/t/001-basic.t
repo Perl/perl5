@@ -252,12 +252,14 @@ like $stderr, '/No INPUT definition/', "Exercise typemap error";
   $count++ while $content=~/^XS_EUPXS\(XS_My_do\)\n\{/mg;
   is $stderr,
     "Warning: Aliases 'pox' and 'dox', 'lox' have"
-    . " identical values in XSAlias.xs, line 9\n"
+    . " identical values of 1 in XSAlias.xs, line 9\n"
     . "    (If this is deliberate use a symbolic alias instead.)\n"
     . "Warning: Conflicting duplicate alias 'pox' changes"
     . " definition from '1' to '2' in XSAlias.xs, line 10\n"
     . "Warning: Aliases 'docks' and 'dox', 'lox' have"
-    . " identical values in XSAlias.xs, line 11\n",
+    . " identical values of 1 in XSAlias.xs, line 11\n"
+    . "Warning: Aliases 'xunx' and 'do' have identical values"
+    . " of 0 - the base function in XSAlias.xs, line 13\n",
     "Saw expected warnings from XSAlias.xs";
 
   my $expect = quotemeta(<<'EOF_CONTENT');
@@ -273,6 +275,10 @@ like $stderr, '/No INPUT definition/', "Exercise typemap error";
          XSANY.any_i32 = 1;
          cv = newXSproto_portable("My::pox", XS_My_do, file, "$");
          XSANY.any_i32 = 2;
+         cv = newXSproto_portable("My::xukes", XS_My_do, file, "$");
+         XSANY.any_i32 = 0;
+         cv = newXSproto_portable("My::xunx", XS_My_do, file, "$");
+         XSANY.any_i32 = 0;
 EOF_CONTENT
   $expect=~s/(?:\\[ ])+/\\s+/g;
   $expect=qr/$expect/;
