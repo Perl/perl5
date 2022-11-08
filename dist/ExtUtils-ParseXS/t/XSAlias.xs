@@ -10,6 +10,8 @@ ALIAS:
     pox = 2
     docks = 1
     dachs => lox
+    xunx = 0
+    xukes => do
 CODE:
 {
    int x;
