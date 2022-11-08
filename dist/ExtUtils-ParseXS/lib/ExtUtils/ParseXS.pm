@@ -1800,11 +1800,17 @@ sub fetch_para {
     $self->_process_module_xs_line($1, $2, $3);
   }
 
+  # count how many #ifdef levels we see in this paragraph
+  # decrementing when we see an endif. if we see an elsif
+  # or endif without a corresponding #ifdef then we dont
+  # consider it part of this paragraph.
+  my $if_level = 0;
   for (;;) {
     $self->_maybe_skip_pod;
 
     $self->_maybe_parse_typemap_block;
 
+    my $final;
     if ($self->{lastline} !~ /^\s*#/ # not a CPP directive
         # CPP directives:
         #    ANSI:    if ifdef ifndef elif else endif define undef
@@ -1825,6 +1831,31 @@ sub fetch_para {
     )
     {
       last if $self->{lastline} =~ /^\S/ && @{ $self->{line} } && $self->{line}->[-1] eq "";
+      if ($self->{lastline}=~/^#[ \t]*(if|ifn?def|elif|else|endif)\b/) {
+        my $type = $1; # highest defined capture buffer, "if" for any if like condition
+        if ($type =~ /^if/) {
+          if (@{$self->{line}}) {
+            # increment level
+            $if_level++;
+          } else {
+            $final = 1;
+          }
+        } elsif ($type eq "endif") {
+          if ($if_level) { # are we in an if that was started in this paragraph?
+            $if_level--;   # yep- so decrement to end this if block
+          } else {
+            $final = 1;
+          }
+        } elsif (!$if_level) {
+          # not in an #ifdef from this paragraph, thus
+          # this directive should not be part of this paragraph.
+          $final = 1;
+        }
+      }
+      if ($final and @{$self->{line}}) {
+        return 1;
+      }
+
       push(@{ $self->{line} }, $self->{lastline});
       push(@{ $self->{line_no} }, $self->{lastline_no});
     }
@@ -1838,6 +1869,9 @@ sub fetch_para {
 
     chomp $self->{lastline};
     $self->{lastline} =~ s/^\s+$//;
+    if ($final) {
+      last;
+    }
   }
 
   # Nuke trailing "line" entries until there's one that's not empty
