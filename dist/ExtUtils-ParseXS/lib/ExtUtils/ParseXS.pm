@@ -873,7 +873,7 @@ EOF
        "        (void)$self->{newXS}(\"$self->{pname}\", XS_$self->{Full_func_name}$self->{file}$self->{proto});\n");
     }
 
-    for my $operator (keys %{ $self->{OverloadsThisXSUB} }) {
+    for my $operator (sort keys %{ $self->{OverloadsThisXSUB} }) {
       $self->{Overloaded}->{$self->{Package}} = $self->{Packid};
       my $overload = "$self->{Package}\::($operator";
       push(@{ $self->{InitFileCode} },
@@ -881,7 +881,7 @@ EOF
     }
   } # END 'PARAGRAPH' 'while' loop
 
-  for my $package (keys %{ $self->{Overloaded} }) { # make them findable with fetchmethod
+  for my $package (sort keys %{ $self->{Overloaded} }) { # make them findable with fetchmethod
     my $packid = $self->{Overloaded}->{$package};
     print Q(<<"EOF");
 #XS_EUPXS(XS_${packid}_nil); /* prototype to pass -Wmissing-prototypes */
@@ -968,7 +968,7 @@ EOF
 #
 EOF
 
-  if (%{ $self->{Overloaded} }) {
+  if (keys %{ $self->{Overloaded} }) {
     # once if any overloads
     print Q(<<"EOF");
 #    /* register the overloading (type 'A') magic */
@@ -976,7 +976,7 @@ EOF
 #    PL_amagic_generation++;
 ##endif
 EOF
-    for my $package (keys %{ $self->{Overloaded} }) {
+    for my $package (sort keys %{ $self->{Overloaded} }) {
       # once for each package with overloads
       my $fallback = $self->{Fallback}->{$package} || "&PL_sv_undef";
       print Q(<<"EOF");
