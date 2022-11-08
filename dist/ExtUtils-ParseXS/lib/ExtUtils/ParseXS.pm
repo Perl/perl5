@@ -31,6 +31,7 @@ use ExtUtils::ParseXS::Utilities qw(
   analyze_preprocessor_statements
   set_cond
   Warn
+  WarnHint
   current_line_number
   blurt
   death
@@ -1312,24 +1313,71 @@ sub get_aliases {
 
   # Parse alias definitions
   # format is
-  #    alias = value alias = value ...
+  #    alias = value Pack::alias = value ...
+  # or
+  #    alias => other
+  # or
+  #    alias => Pack::other
+  # or
+  #    Pack::alias => Other::alias
 
-  while ($line =~ s/^\s*([\w:]+)\s*=\s*(\w+)\s*//) {
-    my ($alias, $value) = ($1, $2);
+  while ($line =~ s/^\s*([\w:]+)\s*=(>?)\s*([\w:]+)\s*//) {
+    my ($alias, $is_symbolic, $value) = ($1, $2, $3);
     my $orig_alias = $alias;
+
+    blurt( $self, "Error: In alias definition for '$alias' the value may not"
+                  . " contain ':' unless it is symbolic.")
+        if !$is_symbolic and $value=~/:/;
 
     # check for optional package definition in the alias
     $alias = $self->{Packprefix} . $alias if $alias !~ /::/;
 
-    # check for duplicate alias name & duplicate value
-    Warn( $self, "Warning: Ignoring duplicate alias '$orig_alias'")
-      if defined $self->{XsubAliases}->{$alias};
+    if ($is_symbolic) {
+      my $orig_value = $value;
+      $value = $self->{Packprefix} . $value if $value !~ /::/;
+      if (!defined $self->{XsubAliases}->{$value}) {
+        blurt( $self, "Error: Unknown alias '$value' in symbolic definition for '$orig_alias'");
+      }
+      $value = $self->{XsubAliases}->{$value};
+    }
 
-    Warn( $self, "Warning: Aliases '$orig_alias' and '$self->{XsubAliasValues}->{$value}' have identical values")
-      if $self->{XsubAliasValues}->{$value};
+    # check for duplicate alias name & duplicate value
+    my $prev_value = $self->{XsubAliases}->{$alias};
+    if (defined $prev_value) {
+      if ($prev_value eq $value) {
+        Warn( $self, "Warning: Ignoring duplicate alias '$orig_alias'")
+      } else {
+        Warn( $self, "Warning: Conflicting duplicate alias '$orig_alias'"
+                     . " changes definition from '$prev_value' to '$value'");
+        delete $self->{XsubAliasValues}->{$prev_value}{$alias};
+      }
+    }
+
+    # Check and see if this alias results in two aliases having the same
+    # value, we only check non-symbolic definitions as the whole point of
+    # symbolic definitions is to say we want to duplicate the value and
+    # it is NOT a mistake.
+    unless ($is_symbolic) {
+      my @keys= sort keys %{$self->{XsubAliasValues}->{$value}||{}};
+      if (@keys) {
+        @keys= map { "'$_'" }
+               map { my $copy= $_;
+                     $copy=~s/^$self->{Packprefix}//;
+                     $copy
+                   } @keys;
+        WarnHint( $self,
+                  "Warning: Aliases '$orig_alias' and "
+                  . join(", ", @keys)
+                  . " have identical values",
+                  !$self->{XsubAliasValueClashHinted}++
+                  ? "If this is deliberate use a symbolic alias instead."
+                  : undef
+        );
+      }
+    }
 
     $self->{XsubAliases}->{$alias} = $value;
-    $self->{XsubAliasValues}->{$value} = $orig_alias;
+    $self->{XsubAliasValues}->{$value}{$alias}++;
   }
 
   blurt( $self, "Error: Cannot parse ALIAS definitions from '$orig'")
