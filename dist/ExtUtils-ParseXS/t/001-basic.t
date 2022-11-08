@@ -202,9 +202,9 @@ like $stderr, '/No INPUT definition/', "Exercise typemap error";
     TODO: {
       local $TODO = 'GH 19661';
       unlike $stderr,
-        qr/Warning: duplicate function definition 'do' detected in $filename\.xs/,
+        qr/Warning: duplicate function definition 'do' detected in \Q$filename\E/,
         "No 'duplicate function definition' warning observed in $filename";
-      }
+    }
   }
   {
     $filename = 'XSFalsePositive2.xs';
@@ -214,7 +214,7 @@ like $stderr, '/No INPUT definition/', "Exercise typemap error";
     TODO: {
       local $TODO = 'GH 19661';
       unlike $stderr,
-        qr/Warning: duplicate function definition 'do' detected in $filename\.xs/,
+        qr/Warning: duplicate function definition 'do' detected in \Q$filename\E/,
         "No 'duplicate function definition' warning observed in $filename";
       }
   }
