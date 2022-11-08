@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 use strict;
-use Test::More tests => 22;
+use Test::More tests => 24;
 use Config;
 use DynaLoader;
 use ExtUtils::CBuilder;
@@ -238,6 +238,48 @@ like $stderr, '/No INPUT definition/', "Exercise typemap error";
   is $count, 2, "Saw XS_MY_do definition the expected number of times";
 }
 
+{ # Alias check
+  my $pxs = ExtUtils::ParseXS->new;
+  tie *FH, 'Foo';
+  my $stderr = PrimitiveCapture::capture_stderr(sub {
+    $pxs->process_file(
+      filename => 'XSAlias.xs',
+      output => \*FH,
+      prototypes => 1);
+  });
+  my $content = tied(*FH)->{buf};
+  my $count = 0;
+  $count++ while $content=~/^XS_EUPXS\(XS_My_do\)\n\{/mg;
+  is $stderr,
+    "Warning: Aliases 'pox' and 'dox', 'lox' have"
+    . " identical values in XSAlias.xs, line 9\n"
+    . "    (If this is deliberate use a symbolic alias instead.)\n"
+    . "Warning: Conflicting duplicate alias 'pox' changes"
+    . " definition from '1' to '2' in XSAlias.xs, line 10\n"
+    . "Warning: Aliases 'docks' and 'dox', 'lox' have"
+    . " identical values in XSAlias.xs, line 11\n",
+    "Saw expected warnings from XSAlias.xs";
+
+  my $expect = quotemeta(<<'EOF_CONTENT');
+         cv = newXSproto_portable("My::dachs", XS_My_do, file, "$");
+         XSANY.any_i32 = 1;
+         cv = newXSproto_portable("My::do", XS_My_do, file, "$");
+         XSANY.any_i32 = 0;
+         cv = newXSproto_portable("My::docks", XS_My_do, file, "$");
+         XSANY.any_i32 = 1;
+         cv = newXSproto_portable("My::dox", XS_My_do, file, "$");
+         XSANY.any_i32 = 1;
+         cv = newXSproto_portable("My::lox", XS_My_do, file, "$");
+         XSANY.any_i32 = 1;
+         cv = newXSproto_portable("My::pox", XS_My_do, file, "$");
+         XSANY.any_i32 = 2;
+EOF_CONTENT
+  $expect=~s/(?:\\[ ])+/\\s+/g;
+  $expect=qr/$expect/;
+  like $content, $expect, "Saw expected alias initialization";
+
+  #diag $content;
+}
 #####################################################################
 
 sub Foo::TIEHANDLE { bless {}, 'Foo' }

@@ -21,6 +21,7 @@ our (@ISA, @EXPORT_OK);
   analyze_preprocessor_statements
   set_cond
   Warn
+  WarnHint
   current_line_number
   blurt
   death
@@ -654,18 +655,56 @@ sub current_line_number {
 
 =item * Purpose
 
+Print warnings with line number details at the end.
+
 =item * Arguments
 
+List of text to output.
+
 =item * Return Value
+
+None.
 
 =back
 
 =cut
 
 sub Warn {
+  my ($self)=shift;
+  $self->WarnHint(@_,undef);
+}
+
+=head2 C<WarnHint()>
+
+=over 4
+
+=item * Purpose
+
+Prints warning with line number details. The last argument is assumed
+to be a hint string.
+
+=item * Arguments
+
+List of strings to warn, followed by one argument representing a hint.
+If that argument is defined then it will be split on newlines and output
+line by line after the main warning.
+
+=item * Return Value
+
+None.
+
+=back
+
+=cut
+
+sub WarnHint {
   my $self = shift;
+  my $hint = pop;
   my $warn_line_number = $self->current_line_number();
-  print STDERR "@_ in $self->{filename}, line $warn_line_number\n";
+  print STDERR join("",@_), " in $self->{filename}, line $warn_line_number\n";
+  if ($hint) {
+    print STDERR "    ($_)\n" for split /\n/, $hint;
+  }
 }
 
 =head2 C<blurt()>
