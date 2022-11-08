@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 use strict;
-use Test::More tests => 24;
+use Test::More tests => 26;
 use Config;
 use DynaLoader;
 use ExtUtils::CBuilder;
@@ -288,6 +288,24 @@ EOF_CONTENT
 
   #diag $content;
 }
+{
+    my $file = $INC{"ExtUtils/ParseXS.pm"};
+    $file=~s!ExtUtils/ParseXS\.pm\z!perlxs.pod!;
+    open my $fh, "<", $file
+        or die "Failed to open '$file' for read:$!";
+    my $pod_version = "";
+    while (defined(my $line= readline($fh))) {
+        if ($line=~/\(also known as C<xsubpp>\)\s+(\d+\.\d+)/) {
+            $pod_version = $1;
+            last;
+        }
+    }
+    close $fh;
+    ok($pod_version, "Found the version from perlxs.pod");
+    is($pod_version, $ExtUtils::ParseXS::VERSION,
+        "The version in perlxs.pod should match the version of ExtUtils::ParseXS");
+}
+
 #####################################################################
 
 sub Foo::TIEHANDLE { bless {}, 'Foo' }
