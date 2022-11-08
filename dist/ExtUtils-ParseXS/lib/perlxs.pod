@@ -2409,7 +2409,7 @@ or use the methods given in L<perlcall>.
 =head1 XS VERSION
 
 This document covers features supported by C<ExtUtils::ParseXS>
-(also known as C<xsubpp>) 3.13_01.
+(also known as C<xsubpp>) 3.48
 
 =head1 AUTHOR
 
