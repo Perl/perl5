@@ -59,6 +59,7 @@
 #define _utf8n_to_uvchr_msgs_helper	Perl__utf8n_to_uvchr_msgs_helper
 #define amagic_call(a,b,c,d)	Perl_amagic_call(aTHX_ a,b,c,d)
 #define amagic_deref_call(a,b)	Perl_amagic_deref_call(aTHX_ a,b)
+#define amagic_find(a,b,c)	Perl_amagic_find(aTHX_ a,b,c)
 #define apply_attrs_string(a,b,c,d)	Perl_apply_attrs_string(aTHX_ a,b,c,d)
 #define apply_builtin_cv_attributes(a,b)	Perl_apply_builtin_cv_attributes(aTHX_ a,b)
 #define atfork_lock		Perl_atfork_lock
