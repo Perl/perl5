@@ -3377,6 +3377,48 @@ Perl_try_amagic_un(pTHX_ int method, int flags) {
 }
 
 
+/*
+=for apidoc amagic_find
+
+Check C<sv> for the overloaded (active magic) operation C<method>, and
+return the C<CV *> or C<NULL>.
+
+C<method> is one of the values found in F<overload.h>.
+
+C<flags> are available for future use.
+
+=cut
+*/
+CV *
+Perl_amagic_find(pTHX_ SV *sv, int method, int flags)
+{
+    PERL_ARGS_ASSERT_AMAGIC_FIND;
+    PERL_UNUSED_VAR(flags);
+
+    assert(method >= 0 && method < NofAMmeth);
+
+    if (!SvAMAGIC(sv))
+        return NULL;
+
+    HV *stash = SvSTASH(SvRV(sv));
+    if (!Gv_AMG(stash))
+        return NULL;
+
+    MAGIC *mg = mg_find((const SV *)stash, PERL_MAGIC_overload_table);
+    if (!mg)
+        return NULL;
+
+    CV **cvp = NULL;
+    if (AMT_AMAGIC((AMT *)mg->mg_ptr))
+        cvp = ((AMT *)mg->mg_ptr)->table;
+    if (!cvp)
+        return NULL;
+
+    CV *cv = cvp[method];
+    return cv;
+}
+
+
 /* Implement tryAMAGICbin_MG macro.
    Do get magic, then see if the two stack args are overloaded and if so
    call it.
