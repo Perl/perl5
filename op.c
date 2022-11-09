@@ -2125,6 +2125,7 @@ Perl_scalarvoid(pTHX_ OP *arg)
         case OP_REF:
         case OP_REFGEN:
         case OP_SREFGEN:
+        case OP_ANONCODE:
         case OP_DEFINED:
         case OP_HEX:
         case OP_OCT:
