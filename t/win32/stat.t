@@ -105,6 +105,9 @@ if (system("mklink $tmpfile1 win32\\stat.t") == 0) {
     # our hard link no longer exists, check that is reflected in nlink
     is($st[3], $nlink-1, "check nlink updated");
 
+    is((lstat($tmpfile1))[7], length(readlink($tmpfile1)),
+       "check size matches length of link");
+
     unlink($tmpfile1);
 }
 
@@ -128,6 +131,10 @@ if (system("mklink /d $tmpfile1 win32") == 0) {
 
 if (system("mklink /j $tmpfile1 win32") == 0) {
     ok(-l $tmpfile1, "lstat sees a symlink on the directory junction");
+
+    my @st = lstat($tmpfile1);
+    is($st[7], length(readlink($tmpfile1)),
+       "check returned length matches POSIX");
 
     rmdir( $tmpfile1 );
 }

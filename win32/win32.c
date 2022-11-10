@@ -1879,7 +1879,6 @@ translate_to_errno(void)
     }
 }
 
-
 static BOOL
 is_symlink(HANDLE h) {
     MY_REPARSE_DATA_BUFFER linkdata;
@@ -1916,41 +1915,21 @@ is_symlink_name(const char *name) {
     return result;
 }
 
-DllExport int
-win32_readlink(const char *pathname, char *buf, size_t bufsiz) {
+static int
+do_readlink_handle(HANDLE hlink, char *buf, size_t bufsiz, bool *is_symlink) {
     MY_REPARSE_DATA_BUFFER linkdata;
-    HANDLE hlink;
-    DWORD fileattr = GetFileAttributes(pathname);
     DWORD linkdata_returned;
-    int bytes_out;
-    BOOL used_default;
 
-    if (fileattr == INVALID_FILE_ATTRIBUTES) {
-        translate_to_errno();
-        return -1;
-    }
-
-    if (!(fileattr & FILE_ATTRIBUTE_REPARSE_POINT)) {
-        /* not a symbolic link */
-        errno = EINVAL;
-        return -1;
-    }
-
-    hlink =
-        CreateFileA(pathname, GENERIC_READ, 0, NULL, OPEN_EXISTING,
-                    FILE_FLAG_OPEN_REPARSE_POINT|FILE_FLAG_BACKUP_SEMANTICS, 0);
-    if (hlink == INVALID_HANDLE_VALUE) {
-        translate_to_errno();
-        return -1;
-    }
+    if (is_symlink)
+        *is_symlink = FALSE;
 
     if (!DeviceIoControl(hlink, FSCTL_GET_REPARSE_POINT, NULL, 0, &linkdata, sizeof(linkdata), &linkdata_returned, NULL)) {
         translate_to_errno();
-        CloseHandle(hlink);
         return -1;
     }
-    CloseHandle(hlink);
 
+    int bytes_out;
+    BOOL used_default;
     switch (linkdata.ReparseTag) {
     case IO_REPARSE_TAG_SYMLINK:
         {
@@ -1965,6 +1944,8 @@ win32_readlink(const char *pathname, char *buf, size_t bufsiz) {
                                     sd->PathBuffer + sd->PrintNameOffset/2,
                                     sd->PrintNameLength/2,
                                     buf, (int)bufsiz, NULL, &used_default);
+            if (is_symlink)
+                *is_symlink = TRUE;
         }
         break;
     case IO_REPARSE_TAG_MOUNT_POINT:
@@ -1980,6 +1961,8 @@ win32_readlink(const char *pathname, char *buf, size_t bufsiz) {
                                     rd->PathBuffer + rd->PrintNameOffset/2,
                                     rd->PrintNameLength/2,
                                     buf, (int)bufsiz, NULL, &used_default);
+            if (is_symlink)
+                *is_symlink = TRUE;
         }
         break;
 
@@ -1993,6 +1976,47 @@ win32_readlink(const char *pathname, char *buf, size_t bufsiz) {
         errno = EINVAL;
         return -1;
     }
+
+    return bytes_out;
+}
+
+DllExport int
+win32_readlink(const char *pathname, char *buf, size_t bufsiz) {
+    if (pathname == NULL || buf == NULL) {
+        errno = EFAULT;
+        return -1;
+    }
+    if (bufsiz <= 0) {
+        errno = EINVAL;
+        return -1;
+    }
+
+    DWORD fileattr = GetFileAttributes(pathname);
+    if (fileattr == INVALID_FILE_ATTRIBUTES) {
+        translate_to_errno();
+        return -1;
+    }
+
+    if (!(fileattr & FILE_ATTRIBUTE_REPARSE_POINT)) {
+        /* not a symbolic link */
+        errno = EINVAL;
+        return -1;
+    }
+
+    HANDLE hlink =
+        CreateFileA(pathname, GENERIC_READ, 0, NULL, OPEN_EXISTING,
+                    FILE_FLAG_OPEN_REPARSE_POINT|FILE_FLAG_BACKUP_SEMANTICS, 0);
+    if (hlink == INVALID_HANDLE_VALUE) {
+        translate_to_errno();
+        return -1;
+    }
+    int bytes_out = do_readlink_handle(hlink, buf, bufsiz, NULL);
+    CloseHandle(hlink);
+    if (bytes_out < 0) {
+        /* errno already set */
+        return -1;
+    }
+
     if ((size_t)bytes_out > bufsiz) {
         errno = EINVAL;
         return -1;
@@ -2023,18 +2047,25 @@ win32_lstat(const char *path, Stat_t *sbuf)
         translate_to_errno();
         return -1;
     }
-
-    if (!is_symlink(f)) {
+    bool is_symlink;
+    int size = do_readlink_handle(f, NULL, 0, &is_symlink);
+    if (!is_symlink) {
+        /* it isn't a symlink, fallback to normal stat */
         CloseHandle(f);
         return win32_stat(path, sbuf);
     }
-
+    else if (size < 0) {
+        /* some other error, errno already set */
+        CloseHandle(f);
+        return -1;
+    }
     result = win32_stat_low(f, NULL, 0, sbuf, 0);
-    CloseHandle(f);
 
     if (result != -1){
         sbuf->st_mode = (sbuf->st_mode & ~_S_IFMT) | _S_IFLNK;
+        sbuf->st_size = size;
     }
+    CloseHandle(f);
 
     return result;
 }
