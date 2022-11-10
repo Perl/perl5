@@ -3108,9 +3108,11 @@ S_ft_return_true(pTHX_ SV *ret) {
 #define FT_RETURNUNDEF	return S_ft_return_false(aTHX_ &PL_sv_undef)
 #define FT_RETURNYES	return S_ft_return_true(aTHX_ &PL_sv_yes)
 
+/* NB: OPf_REF implies '-X _' and thus no arg on the stack */
 #define tryAMAGICftest_MG(chr) STMT_START { \
-        if ( (SvFLAGS(*PL_stack_sp) & (SVf_ROK|SVs_GMG)) \
-                && PL_op->op_flags & OPf_KIDS) {     \
+        if (   !(PL_op->op_flags & OPf_REF)                   \
+            && (SvFLAGS(*PL_stack_sp) & (SVf_ROK|SVs_GMG)))   \
+        {                                                     \
             OP *next = S_try_amagic_ftest(aTHX_ chr);	\
             if (next) return next;			  \
         }						   \
