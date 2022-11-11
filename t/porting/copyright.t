@@ -31,7 +31,9 @@ my ($opt) = @ARGV;
 my $readme_year = readme_year();
 my $v_year = v_year();
 my $gh_readme_year;
-if (-e "../.github/README.md")
+# git on windows renders symbolic links as a file containing
+# the file linked to
+if (-e "../.github/README.md" && -s "../.github/README.md" > 80)
 {
   $gh_readme_year = readme_year(".github/README.md");
 }
