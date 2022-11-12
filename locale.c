@@ -2938,10 +2938,10 @@ S_save_to_buffer(const char * string, const char **buf, Size_t *buf_size)
 }
 
 STATIC utf8ness_t
-S_get_locale_string_utf8ness_i(pTHX_ const char * locale,
-                                     const unsigned cat_index,
-                                     const char * string,
-                                     const locale_utf8ness_t known_utf8)
+S_get_locale_string_utf8ness_i(pTHX_ const char * string,
+                                     const locale_utf8ness_t known_utf8,
+                                     const char * locale,
+                                     const unsigned cat_index)
 {
     PERL_ARGS_ASSERT_GET_LOCALE_STRING_UTF8NESS_I;
     assert(cat_index <= NOMINAL_LC_ALL_INDEX);
@@ -3044,7 +3044,7 @@ Perl_get_win32_message_utf8ness(pTHX_ const char * string)
      * locale and category completely.
      *
      * This is because Windows doesn't have LC_MESSAGES */
-    return get_locale_string_utf8ness_i(NULL, 0, string, LOCALE_IS_UTF8);
+    return get_locale_string_utf8ness_i(string, LOCALE_IS_UTF8, NULL, 0);
 }
 
 #  endif
@@ -3522,10 +3522,10 @@ S_populate_localeconv(pTHX_ const struct lconv *lcbuf,
             const char *value = *((const char **)(ptr + strings->offset));
             if (value) {
                 bool is_utf8 =  /* Only make UTF-8 if required to */
-                    (UTF8NESS_YES == (get_locale_string_utf8ness_i(locale,
-                                                              cat_index,
-                                                              value,
-                                                              locale_is_utf8)));
+                  (UTF8NESS_YES == (get_locale_string_utf8ness_i(value,
+                                                                 locale_is_utf8,
+                                                                 locale,
+                                                                 cat_index)));
                 (void) hv_store(retval,
                                 strings->name,
                                 strlen(strings->name),
@@ -3978,8 +3978,9 @@ S_my_langinfo_i(pTHX_
     retval = save_to_buffer(nl_langinfo_l(item, cur), retbufp, retbuf_sizep);
 
     if (utf8ness) {
-        *utf8ness = get_locale_string_utf8ness_i(locale, cat_index, retval,
-                                                 LOCALE_UTF8NESS_UNKNOWN);
+        *utf8ness = get_locale_string_utf8ness_i(retval,
+                                                 LOCALE_UTF8NESS_UNKNOWN,
+                                                 locale, cat_index);
     }
 
     freelocale(cur);
@@ -4005,8 +4006,9 @@ S_my_langinfo_i(pTHX_
     gwLOCALE_UNLOCK;
 
     if (utf8ness) {
-        *utf8ness = get_locale_string_utf8ness_i(locale, cat_index,
-                                               retval, LOCALE_UTF8NESS_UNKNOWN);
+        *utf8ness = get_locale_string_utf8ness_i(retval,
+                                                 LOCALE_UTF8NESS_UNKNOWN,
+                                                 locale, cat_index);
     }
 
     restore_toggled_locale_i(cat_index, orig_switched_locale);
@@ -4099,9 +4101,9 @@ S_my_langinfo_i(pTHX_
                 Safefree(floatbuf);
 
                 if (utf8ness) {
-                    is_utf8 = get_locale_string_utf8ness_i(locale, cat_index,
-                                                           retval,
-                                                       LOCALE_UTF8NESS_UNKNOWN);
+                    is_utf8 = get_locale_string_utf8ness_i(retval,
+                                                        LOCALE_UTF8NESS_UNKNOWN,
+                                                        locale, cat_index);
                 }
 
                 break;
@@ -4137,8 +4139,9 @@ S_my_langinfo_i(pTHX_
             retval = save_to_buffer(SvPV_nolen(string), retbufp, retbuf_sizep);
 
             if (utf8ness) {
-                is_utf8 = get_locale_string_utf8ness_i(locale, cat_index, retval,
-                                                       LOCALE_UTF8NESS_UNKNOWN);
+                is_utf8 = get_locale_string_utf8ness_i(retval,
+                                                       LOCALE_UTF8NESS_UNKNOWN,
+                                                       locale, cat_index);
             }
 
             SvREFCNT_dec_NN(string);
@@ -4553,8 +4556,9 @@ Perl_my_strftime8(pTHX_ const char *fmt, int sec, int min, int hour, int mday,
     if (utf8ness) {
 
 #ifdef USE_LOCALE_TIME
-        *utf8ness = get_locale_string_utf8ness_i(NULL, LC_TIME_INDEX_,
-                                               retval, LOCALE_UTF8NESS_UNKNOWN);
+        *utf8ness = get_locale_string_utf8ness_i(retval,
+                                                 LOCALE_UTF8NESS_UNKNOWN,
+                                                 NULL, LC_TIME_INDEX_);
 #else
         *utf8ness = UTF8NESS_IMMATERIAL;
 #endif
@@ -6387,8 +6391,8 @@ Perl_my_strerror(pTHX_ const int errnum, utf8ness_t * utf8ness)
                                : use_curlocale_scratch();
 
     const char *errstr = savepv(strerror_l(errnum, which_obj));
-    *utf8ness = get_locale_string_utf8ness_i(NULL, WHICH_LC_INDEX, errstr,
-                                             LOCALE_UTF8NESS_UNKNOWN);
+    *utf8ness = get_locale_string_utf8ness_i(errstr, LOCALE_UTF8NESS_UNKNOWN,
+                                             NULL, WHICH_LC_INDEX);
     DEBUG_STRERROR_RETURN(errstr, utf8ness);
 
     SAVEFREEPV(errstr);
@@ -6417,8 +6421,9 @@ Perl_my_strerror(pTHX_ const int errnum, utf8ness_t * utf8ness)
 
         cur = newlocale(LC_CTYPE_MASK, querylocale_c(LC_MESSAGES), cur);
         errstr = savepv(strerror_l(errnum, cur));
-        *utf8ness = get_locale_string_utf8ness_i(NULL, LC_MESSAGES_INDEX_,
-                                               errstr, LOCALE_UTF8NESS_UNKNOWN);
+        *utf8ness = get_locale_string_utf8ness_i(errstr,
+                                                 LOCALE_UTF8NESS_UNKNOWN,
+                                                 NULL, LC_MESSAGES_INDEX_);
         freelocale(cur);
     }
 
@@ -6468,8 +6473,9 @@ Perl_my_strerror(pTHX_ const int errnum, utf8ness_t * utf8ness)
     const char *errstr;
     if (IN_LC(categories[WHICH_LC_INDEX])) {
         errstr = savepv(Strerror(errnum));
-        *utf8ness = get_locale_string_utf8ness_i(NULL, WHICH_LC_INDEX, errstr,
-                                                 LOCALE_UTF8NESS_UNKNOWN);
+        *utf8ness = get_locale_string_utf8ness_i(errstr,
+                                                 LOCALE_UTF8NESS_UNKNOWN,
+                                                 NULL, WHICH_LC_INDEX);
     }
     else {
 
@@ -6523,8 +6529,8 @@ Perl_my_strerror(pTHX_ const int errnum, utf8ness_t * utf8ness)
 
     SETLOCALE_UNLOCK;
 
-    *utf8ness = get_locale_string_utf8ness_i(NULL, LC_MESSAGES_INDEX_, errstr,
-                                             LOCALE_UTF8NESS_UNKNOWN);
+    *utf8ness = get_locale_string_utf8ness_i(errstr, LOCALE_UTF8NESS_UNKNOWN,
+                                             NULL, LC_MESSAGES_INDEX_);
     DEBUG_STRERROR_RETURN(errstr, utf8ness);
 
     SAVEFREEPV(errstr);
