@@ -5739,7 +5739,7 @@ PERL_CALLCONV SV*	Perl_hfree_next_entry(pTHX_ HV *hv, STRLEN *indexp)
 #  if defined(USE_LOCALE)
 STATIC unsigned int	S_get_category_index(const int category, const char * locale);
 #define PERL_ARGS_ASSERT_GET_CATEGORY_INDEX
-STATIC utf8ness_t	S_get_locale_string_utf8ness_i(pTHX_ const char * locale, const unsigned cat_index, const char * string, const locale_utf8ness_t known_utf8);
+STATIC utf8ness_t	S_get_locale_string_utf8ness_i(pTHX_ const char * string, const locale_utf8ness_t known_utf8, const char * locale, const unsigned cat_index);
 #define PERL_ARGS_ASSERT_GET_LOCALE_STRING_UTF8NESS_I
 STATIC bool	S_is_locale_utf8(pTHX_ const char * locale);
 #define PERL_ARGS_ASSERT_IS_LOCALE_UTF8	\
