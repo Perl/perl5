@@ -1955,7 +1955,7 @@ END_EXTERN_C
     Perl_SvPV_helper(aTHX_ sv, &len, SV_GMAGIC, SvPVutf8_type_,             \
                      Perl_sv_2pvutf8_flags, FALSE, 0)
 #define SvPVutf8_nomg(sv, len)                                              \
-    Perl_SvPV_helper(aTHX_ sv, NULL, 0, SvPVutf8_type_,                     \
+    Perl_SvPV_helper(aTHX_ sv, &len, 0, SvPVutf8_type_,                     \
                      Perl_sv_2pvutf8_flags, FALSE, 0)
 #define SvPVutf8_nolen(sv)                                                  \
     Perl_SvPV_helper(aTHX_ sv, NULL, SV_GMAGIC, SvPVutf8_type_,             \
