@@ -69,12 +69,21 @@
 : macros can't be generated in such situations.
 :
 : WARNING: Any macro created in a header file is visible to XS code, unless
-: care is taken to wrap it within something like #ifdef PERL_CORE..#endif.
-: This has had to be done with things like MAX and MIN, but nearly everything
-: else has been created without regard to the namespace pollution problem.
+: care is taken to wrap it within something like #ifdef PERL_CORE..#endif or
+: more commonly PERL_IN_FILE_C (with FILE_C appropriately replaced).  Most (if
+: not all) C files define such a symbol before importing perl.h.  In general you
+: should restrict the exposure of your exports as much as possible, although
+: older code may not do so.  Be aware that non-static exports can be "over
+: exported" and things work out fine, but inline and static macros will cause
+: errors unless restricted to the specific file they are intended for, and the
+: generated PERL_ARGS_ macros will only be available to inline functions in the
+: appropriate context.  This why you will see sections listing each file in
+: turn, and is also why the file favours use of '#if defined()' form of
+: conditions instead of '#ifdef' as the latter only works with one symbol and
+: the former can be combined.  It is also why you will often see functions with
+: an 's' or 'i' export type grouped together into a single conditional block
+: separate from the functions from the same file with 'p' in them.
 :
-: Here's what else you need to know about using this file with regards to name
-: space pollution:
 :
 : The A flag is used to make a function and its short name visible everywhere
 :	     on all platforms.  This should be used to make it part of Perl's
