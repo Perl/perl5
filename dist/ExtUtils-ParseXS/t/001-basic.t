@@ -15,7 +15,9 @@ require_ok( 'ExtUtils::ParseXS' );
 chdir('t') if -d 't';
 push @INC, '.';
 
-use Carp; $SIG{__WARN__} = \&Carp::cluck;
+$ExtUtils::ParseXS::DIE_ON_ERROR = 1;
+
+use Carp; #$SIG{__WARN__} = \&Carp::cluck;
 
 # The linker on some platforms doesn't like loading libraries using relative
 # paths. Android won't find relative paths, and system perl on macOS will
@@ -225,12 +227,12 @@ like $stderr, '/No INPUT definition/', "Exercise typemap error";
 { # tight cpp directives
   my $pxs = ExtUtils::ParseXS->new;
   tie *FH, 'Foo';
-  my $stderr = PrimitiveCapture::capture_stderr(sub {
+  my $stderr = PrimitiveCapture::capture_stderr(sub { eval {
     $pxs->process_file(
       filename => 'XSTightDirectives.xs',
       output => \*FH,
       prototypes => 1);
-  });
+  } or warn $@ });
   my $content = tied(*FH)->{buf};
   my $count = 0;
   $count++ while $content=~/^XS_EUPXS\(XS_My_do\)\n\{/mg;

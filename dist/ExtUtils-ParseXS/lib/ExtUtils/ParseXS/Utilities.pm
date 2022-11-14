@@ -698,13 +698,42 @@ None.
 =cut
 
 sub WarnHint {
+  warn _MsgHint(@_);
+}
+
+=head2 C<_MsgHint()>
+
+=over 4
+
+=item * Purpose
+
+Constructs an exception message with line number details. The last argument is
+assumed to be a hint string.
+
+=item * Arguments
+
+List of strings to warn, followed by one argument representing a hint.
+If that argument is defined then it will be split on newlines and concatenated
+line by line (parenthesized) after the main message.
+
+=item * Return Value
+
+The constructed string.
+
+=back
+
+=cut
+
+
+sub _MsgHint {
   my $self = shift;
   my $hint = pop;
   my $warn_line_number = $self->current_line_number();
-  print STDERR join("",@_), " in $self->{filename}, line $warn_line_number\n";
+  my $ret = join("",@_) . " in $self->{filename}, line $warn_line_number\n";
   if ($hint) {
-    print STDERR "    ($_)\n" for split /\n/, $hint;
+    $ret .= "    ($_)\n" for split /\n/, $hint;
   }
+  return $ret;
 }
 
 =head2 C<blurt()>
@@ -742,8 +771,13 @@ sub blurt {
 =cut
 
 sub death {
-  my $self = shift;
-  $self->Warn(@_);
+  my $self = (@_);
+  my $message = _MsgHint(@_,"");
+  if ($self->{die_on_error}) {
+    die $message;
+  } else {
+    warn $message;
+  }
   exit 1;
 }
 
