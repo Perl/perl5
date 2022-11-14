@@ -48,7 +48,7 @@ our @EXPORT_OK = qw(
 
 ##############################
 # A number of "constants"
-
+our $DIE_ON_ERROR;
 our ($C_group_rex, $C_arg);
 # Group in C (no support for comments or literals)
 $C_group_rex = qr/ [({\[]
@@ -104,6 +104,7 @@ sub process_file {
     typemap         => [],
     versioncheck    => 1,
     FH              => Symbol::gensym(),
+    die_on_error    => $DIE_ON_ERROR, # if true we die() and not exit() after errors
     %options,
   );
   $args{except} = $args{except} ? ' TRY' : '';
@@ -133,6 +134,8 @@ sub process_file {
   $self->{WantVersionChk} = $args{versioncheck};
   $self->{WantLineNumbers} = $args{linenumbers};
   $self->{IncludedFiles} = {};
+
+  $self->{die_on_error} = $args{die_on_error};
 
   die "Missing required parameter 'filename'" unless $args{filename};
   $self->{filepathname} = $args{filename};
