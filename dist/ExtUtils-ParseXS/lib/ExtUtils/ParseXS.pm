@@ -1881,7 +1881,7 @@ sub fetch_para {
         #   others:    ident (gcc notes that some cpps have this one)
         || $self->{lastline} =~ /^\#[ \t]*
                                   (?:
-                                        (?:if|ifn?def|elif|else|endif|
+                                        (?:if|ifn?def|elif|else|endif|elifn?def|
                                            define|undef|pragma|error|
                                            warning|line\s+\d+|ident)
                                         \b
@@ -1892,7 +1892,7 @@ sub fetch_para {
     )
     {
       last if $self->{lastline} =~ /^\S/ && @{ $self->{line} } && $self->{line}->[-1] eq "";
-      if ($self->{lastline}=~/^#[ \t]*(if|ifn?def|elif|else|endif)\b/) {
+      if ($self->{lastline}=~/^#[ \t]*(if|ifn?def|elif|else|endif|elifn?def)\b/) {
         my $type = $1; # highest defined capture buffer, "if" for any if like condition
         if ($type =~ /^if/) {
           if (@{$self->{line}}) {
