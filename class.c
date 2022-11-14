@@ -379,14 +379,22 @@ apply_class_attribute_isa(pTHX_ HV *stash, SV *value)
      * You'd think that GvAV() of hv_fetchs() would do it, but no, because it
      * won't lazily create a proper (magical) GV if one didn't already exist.
      */
-    AV *isa;
     {
         SV *isaname = newSVpvf("%" HEKf "::ISA", HvNAME_HEK(stash));
         sv_2mortal(isaname);
 
-        isa = get_av(SvPV_nolen(isaname), GV_ADD | (SvFLAGS(isaname) & SVf_UTF8));
+        AV *isa = get_av(SvPV_nolen(isaname), GV_ADD | (SvFLAGS(isaname) & SVf_UTF8));
+
+        ENTER;
+
+        /* Temporarily remove the SVf_READONLY flag */
+        SAVESETSVFLAGS((SV *)isa, SVf_READONLY|SVf_PROTECT, SVf_READONLY|SVf_PROTECT);
+        SvREADONLY_off((SV *)isa);
+
+        av_push(isa, newSVsv(value));
+
+        LEAVE;
     }
-    av_push(isa, newSVsv(value));
 
     aux->xhv_class_superclass = (HV *)SvREFCNT_inc(superstash);
 

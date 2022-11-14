@@ -28,6 +28,8 @@ no warnings 'experimental::class';
     ok($obj isa Test1B, 'Object is its own class');
     ok($obj isa Test1A, 'Object is also its base class');
 
+    ok(eq_array(\@Test1B::ISA, ["Test1A"]), '@Test1B::ISA is set correctly');
+
     is($obj->y, "derived class", 'Object has derived class field');
 
     can_ok($obj, "x");
