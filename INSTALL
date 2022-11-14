@@ -1286,6 +1286,13 @@ options.  Try
 
 for a listing.
 
+Unrecognized arguments with a double dash prefix produce an error.
+
+Any other arguments are passed through to C<Configure>, so you could
+build a threaded perl with:
+
+        CC=gcc ./configure.gnu -Dusethreads
+
 (The file is called configure.gnu to avoid problems on systems
 that would not distinguish the files "Configure" and "configure".)
 
