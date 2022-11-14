@@ -73,3 +73,10 @@ class XXX {}
 class XXX {}
 EXPECT
 Cannot reopen existing class "XXX" at - line 4.
+########
+no warnings 'experimental::class';
+use feature 'class';
+class XXX {}
+push @XXX::ISA, q(Another);
+EXPECT
+Modification of a read-only value attempted at - line 4.
