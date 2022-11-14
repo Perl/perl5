@@ -283,8 +283,8 @@ casts it to a pointer of that C<type>.
     (I32)(align - ((size_t)((caddr_t)&PL_savestack[PL_savestack_ix]) % align)) % align)
 #define SSNEWat(n,t,align)	SSNEWa((n)*sizeof(t), align)
 
-#define SSPTR(off,type)         (assert(sizeof(off) == sizeof(SSize_t)), (type)  ((char*)PL_savestack + off))
-#define SSPTRt(off,type)        (assert(sizeof(off) == sizeof(SSize_t)), (type*) ((char*)PL_savestack + off))
+#define SSPTR(off,type)         (assert(sizeof(off) >= sizeof(SSize_t)), (type)  ((char*)PL_savestack + off))
+#define SSPTRt(off,type)        (assert(sizeof(off) >= sizeof(SSize_t)), (type*) ((char*)PL_savestack + off))
 
 #define save_freesv(op)		save_pushptr((void *)(op), SAVEt_FREESV)
 #define save_mortalizesv(op)	save_pushptr((void *)(op), SAVEt_MORTALIZESV)
