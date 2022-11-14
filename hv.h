@@ -57,7 +57,8 @@ struct hek {
      * dont work on aligned platforms like HPUX
      * Also beware, the last byte of the hek_key buffer is a
      * hidden flags byte about the key. */
-     char       hek_key[1];        /* variable-length hash key */
+     /* IMPLIED:
+     char       hek_key[1];        *//* variable-length hash key */
     /* the hash-key is \0-terminated */
     /* after the \0 there is a byte for flags, such as whether the key
        is UTF-8 or WAS-UTF-8, or an SV */
@@ -433,10 +434,10 @@ whether it is valid to call C<HvAUX()>.
 #ifndef PERL_CORE
 #  define Nullhek Null(HEK*)
 #endif
-#define HEK_BASESIZE		STRUCT_OFFSET(HEK, hek_key[0])
+#define HEK_BASESIZE		sizeof(HEK)
 #define HEK_HASH(hek)		(hek)->hek_hash
 #define HEK_LEN(hek)		(hek)->hek_len
-#define HEK_KEY(hek)		(hek)->hek_key
+#define HEK_KEY(hek)		(((char *)(hek))+sizeof(HEK))
 #define HEK_FLAGS(hek)	(*((unsigned char *)(HEK_KEY(hek))+HEK_LEN(hek)+1))
 
 #define HVhek_UTF8	0x01 /* Key is utf8 encoded. */

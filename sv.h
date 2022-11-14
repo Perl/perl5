@@ -2037,7 +2037,7 @@ END_EXTERN_C
 #define SvIsCOW_static(sv)       ((SvFLAGS(sv) & (SVf_IsCOW|SVppv_STATIC)) == (SVf_IsCOW|SVppv_STATIC))
 
 #define SvSHARED_HEK_FROM_PV(pvx) \
-        ((struct hek*)(pvx - STRUCT_OFFSET(struct hek, hek_key)))
+        ((struct hek*)(pvx - sizeof(struct hek)))
 /*
 =for apidoc Am|struct hek*|SvSHARED_HASH|SV * sv
 Returns the hash for C<sv> created by C<L</newSVpvn_share>>.

@@ -3379,8 +3379,7 @@ S_share_hek_flags(pTHX_ const char *str, STRLEN len, U32 hash, int flags)
            HE directly from the HEK.
         */
 
-        Newx(k, STRUCT_OFFSET(struct shared_he,
-                                shared_he_hek.hek_key[0]) + len + 2, char);
+        Newx(k, sizeof(struct shared_he) + len + 2, char);
         new_entry = (struct shared_he *)k;
         entry = &(new_entry->shared_he_he);
         hek = &(new_entry->shared_he_hek);
