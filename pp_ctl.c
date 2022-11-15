@@ -2282,6 +2282,7 @@ PP(pp_enteriter)
         SV * const sv = POPs;
         itervarp = (void *)sv;
         if (LIKELY(isGV(sv))) {		/* symbol table variable */
+            SvREFCNT_inc_simple_void(sv);
             itersave = GvSV(sv);
             SvREFCNT_inc_simple_void(itersave);
             cxflags = CXp_FOR_GV;
@@ -2294,6 +2295,7 @@ PP(pp_enteriter)
             assert(SvMAGIC(sv)->mg_type == PERL_MAGIC_lvref);
             itersave = NULL;
             cxflags = CXp_FOR_LVREF;
+            SvREFCNT_inc_simple_void(sv);
         }
     }
     /* OPpITER_DEF (implicit $_) should only occur with a GV iter var */
