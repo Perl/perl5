@@ -4340,30 +4340,44 @@ OUTPUT:
     RETVAL
 
 char *
-SvPVbyte(SV *sv)
+SvPVbyte(SV *sv, OUT STRLEN len)
+CODE:
+    RETVAL = SvPVbyte(sv, len);
+OUTPUT:
+    RETVAL
+
+char *
+SvPVbyte_nolen(SV *sv)
 CODE:
     RETVAL = SvPVbyte_nolen(sv);
 OUTPUT:
     RETVAL
 
 char *
-SvPVbyte_nomg(SV *sv)
+SvPVbyte_nomg(SV *sv, OUT STRLEN len)
 CODE:
-    RETVAL = SvPVbyte_nomg(sv, PL_na);
+    RETVAL = SvPVbyte_nomg(sv, len);
 OUTPUT:
     RETVAL
 
 char *
-SvPVutf8(SV *sv)
+SvPVutf8(SV *sv, OUT STRLEN len)
+CODE:
+    RETVAL = SvPVutf8(sv, len);
+OUTPUT:
+    RETVAL
+
+char *
+SvPVutf8_nolen(SV *sv)
 CODE:
     RETVAL = SvPVutf8_nolen(sv);
 OUTPUT:
     RETVAL
 
 char *
-SvPVutf8_nomg(SV *sv)
+SvPVutf8_nomg(SV *sv, OUT STRLEN len)
 CODE:
-    RETVAL = SvPVutf8_nomg(sv, PL_na);
+    RETVAL = SvPVutf8_nomg(sv, len);
 OUTPUT:
     RETVAL
 
