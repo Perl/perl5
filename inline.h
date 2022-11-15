@@ -3057,6 +3057,8 @@ Perl_cx_poploop(pTHX_ PERL_CONTEXT *cx)
         cx->blk_loop.itersave = NULL;
         SvREFCNT_dec(cursv);
     }
+    if (cx->cx_type & (CXp_FOR_GV|CXp_FOR_LVREF))
+        SvREFCNT_dec(cx->blk_loop.itervar_u.svp);
 }
 
 
