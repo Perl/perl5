@@ -938,7 +938,7 @@ Then delete the temporary installation.
 
 =head3 create the release tag
 
-Create the tag identifying this release (e.g.):
+Create the I<annotated> tag identifying this release (e.g.):
 
  $ git tag v5.11.0 -m 'First release of the v5.11 series!'
 
@@ -947,6 +947,16 @@ your git changes to the Perl master repository.  If anything goes
 wrong before you publish your newly-created tag, you can delete
 and recreate it.  Once you push your tag, we're stuck with it
 and you'll need to use a new version number for your release.
+
+Verify that your tag is annotated:
+
+ $ git show v5.11.0
+
+The output must look similar to the following:
+
+ tag v5.11.0
+ Tagger: Jesse Vincent <jesse@bestpractical.com>
+ Date:   Fri Oct 2 16:29:56 2009 -0400
 
 =head3 build the tarball
 
