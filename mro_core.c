@@ -28,6 +28,7 @@ Also see L<perlmroapi>.
 
 #include "EXTERN.h"
 #define PERL_IN_MRO_C
+#define PERL_IN_MRO_CORE_C
 #include "perl.h"
 
 static const struct mro_alg dfs_alg =
