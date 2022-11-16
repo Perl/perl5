@@ -6748,8 +6748,7 @@ PP(pp_coreargs)
        to come in between two things this function does (stack reset and
        arg pushing).  This seems the easiest way to do it. */
     if (pushmark) {
-        PUTBACK;
-        (void)Perl_pp_pushmark(aTHX);
+        PUSHMARK(SP);
     }
 
     EXTEND(SP, maxargs == I32_MAX ? numargs : maxargs);
