@@ -11,7 +11,7 @@ use Symbol;
 
 our $VERSION;
 BEGIN {
-  $VERSION = '3.48';
+  $VERSION = '3.49';
   require ExtUtils::ParseXS::Constants; ExtUtils::ParseXS::Constants->VERSION($VERSION);
   require ExtUtils::ParseXS::CountLines; ExtUtils::ParseXS::CountLines->VERSION($VERSION);
   require ExtUtils::ParseXS::Utilities; ExtUtils::ParseXS::Utilities->VERSION($VERSION);
@@ -49,6 +49,9 @@ our @EXPORT_OK = qw(
 ##############################
 # A number of "constants"
 our $DIE_ON_ERROR;
+our $AUTHOR_WARNINGS;
+$AUTHOR_WARNINGS = ($ENV{AUTHOR_WARNINGS} || 0)
+    unless defined $AUTHOR_WARNINGS;
 our ($C_group_rex, $C_arg);
 # Group in C (no support for comments or literals)
 $C_group_rex = qr/ [({\[]
@@ -105,6 +108,7 @@ sub process_file {
     versioncheck    => 1,
     FH              => Symbol::gensym(),
     die_on_error    => $DIE_ON_ERROR, # if true we die() and not exit() after errors
+    author_warnings    => $AUTHOR_WARNINGS,
     %options,
   );
   $args{except} = $args{except} ? ' TRY' : '';
@@ -136,6 +140,7 @@ sub process_file {
   $self->{IncludedFiles} = {};
 
   $self->{die_on_error} = $args{die_on_error};
+  $self->{author_warnings} = $args{author_warnings};
 
   die "Missing required parameter 'filename'" unless $args{filename};
   $self->{filepathname} = $args{filename};
@@ -1372,7 +1377,10 @@ sub get_aliases {
       # yet as 0 is the default for the base function ($fname)
       push @keys, $fname
         if $value eq "0" and !defined $self->{XsubAlias}{$fname};
-      if (@keys) {
+      if (@keys and $self->{author_warnings}) {
+        # We do not warn about value collisions unless author_warnings
+        # are enabled. They aren't helpful to a module consumer, only
+        # the module author.
         @keys= map { "'$_'" }
                map { my $copy= $_;
                      $copy=~s/^$self->{Packprefix}//;
