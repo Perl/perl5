@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 use strict;
-use Test::More tests => 26;
+use Test::More tests => 28;
 use Config;
 use DynaLoader;
 use ExtUtils::CBuilder;
@@ -16,6 +16,7 @@ chdir('t') if -d 't';
 push @INC, '.';
 
 $ExtUtils::ParseXS::DIE_ON_ERROR = 1;
+$ExtUtils::ParseXS::AUTHOR_WARNINGS = 1;
 
 use Carp; #$SIG{__WARN__} = \&Carp::cluck;
 
@@ -262,6 +263,48 @@ like $stderr, '/No INPUT definition/', "Exercise typemap error";
     . " identical values of 1 in XSAlias.xs, line 11\n"
     . "Warning: Aliases 'xunx' and 'do' have identical values"
     . " of 0 - the base function in XSAlias.xs, line 13\n",
+    "Saw expected warnings from XSAlias.xs in AUTHOR_WARNINGS mode";
+
+  my $expect = quotemeta(<<'EOF_CONTENT');
+         cv = newXSproto_portable("My::dachs", XS_My_do, file, "$");
+         XSANY.any_i32 = 1;
+         cv = newXSproto_portable("My::do", XS_My_do, file, "$");
+         XSANY.any_i32 = 0;
+         cv = newXSproto_portable("My::docks", XS_My_do, file, "$");
+         XSANY.any_i32 = 1;
+         cv = newXSproto_portable("My::dox", XS_My_do, file, "$");
+         XSANY.any_i32 = 1;
+         cv = newXSproto_portable("My::lox", XS_My_do, file, "$");
+         XSANY.any_i32 = 1;
+         cv = newXSproto_portable("My::pox", XS_My_do, file, "$");
+         XSANY.any_i32 = 2;
+         cv = newXSproto_portable("My::xukes", XS_My_do, file, "$");
+         XSANY.any_i32 = 0;
+         cv = newXSproto_portable("My::xunx", XS_My_do, file, "$");
+         XSANY.any_i32 = 0;
+EOF_CONTENT
+  $expect=~s/(?:\\[ ])+/\\s+/g;
+  $expect=qr/$expect/;
+  like $content, $expect, "Saw expected alias initialization";
+
+  #diag $content;
+}
+{ # Alias check with no dev warnings.
+  my $pxs = ExtUtils::ParseXS->new;
+  tie *FH, 'Foo';
+  my $stderr = PrimitiveCapture::capture_stderr(sub {
+    $pxs->process_file(
+      filename => 'XSAlias.xs',
+      output => \*FH,
+      prototypes => 1,
+      author_warnings => 0);
+  });
+  my $content = tied(*FH)->{buf};
+  my $count = 0;
+  $count++ while $content=~/^XS_EUPXS\(XS_My_do\)\n\{/mg;
+  is $stderr,
+    "Warning: Conflicting duplicate alias 'pox' changes"
+    . " definition from '1' to '2' in XSAlias.xs, line 10\n",
     "Saw expected warnings from XSAlias.xs";
 
   my $expect = quotemeta(<<'EOF_CONTENT');

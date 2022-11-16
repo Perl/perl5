@@ -2409,7 +2409,18 @@ or use the methods given in L<perlcall>.
 =head1 XS VERSION
 
 This document covers features supported by C<ExtUtils::ParseXS>
-(also known as C<xsubpp>) 3.48
+(also known as C<xsubpp>) 3.49
+
+=head1 AUTHOR DIAGNOSTICS
+
+As of version 3.49 certain warnings are disabled by default. While developing
+you can set C<$ENV{AUTHOR_WARNINGS}> to true in your environment or in your
+Makefile.PL, or set C<$ExtUtils::ParseXS::AUTHOR_WARNINGS> to true via code, or
+pass C<< author_warnings=>1 >> into process_file() explicitly.  Currently this will
+enable stricter alias checking but more warnings might be added in the future.
+The kind of warnings this will enable are only helpful to the author of the XS
+file, and the diagnostics produced will not include installation specific
+details so they are only useful to the maintainer of the XS code itself.
 
 =head1 AUTHOR
 
