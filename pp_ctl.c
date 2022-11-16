@@ -978,8 +978,8 @@ PP(pp_grepstart)
         RETURNOP(PL_op->op_next->op_next);
     }
     PL_stack_sp = PL_stack_base + TOPMARK + 1;
-    Perl_pp_pushmark(aTHX);				/* push dst */
-    Perl_pp_pushmark(aTHX);				/* push src */
+    PUSHMARK(PL_stack_sp);				/* push dst */
+    PUSHMARK(PL_stack_sp);				/* push src */
     ENTER_with_name("grep");					/* enter outer scope */
 
     SAVETMPS;
@@ -997,7 +997,7 @@ PP(pp_grepstart)
 
     PUTBACK;
     if (PL_op->op_type == OP_MAPSTART)
-        Perl_pp_pushmark(aTHX);			/* push top */
+        PUSHMARK(PL_stack_sp);			/* push top */
     return cLOGOPx(PL_op->op_next)->op_other;
 }
 
