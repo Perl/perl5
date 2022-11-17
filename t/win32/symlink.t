@@ -74,10 +74,18 @@ close $fh if $fh;
 ok(symlink($tmpfile1, $tmpfile2), "link to it");
 ok(-l $tmpfile2, "-l sees a link");
 ok(!-f _, "-f on the lstat result is false");
-ok(-f $tmpfile2, "normal -d sees it as a file");
+ok(-f $tmpfile2, "normal -f sees it as a file");
 is(readlink($tmpfile2), $tmpfile1, "readlink works");
 check_stat($tmpfile1, $tmpfile2, "check file and link stat are the same");
 ok(unlink($tmpfile2), "unlink the symlink");
+
+# make a relative link
+unlike($tmpfile1, qr([\\/]), "temp filename has no path");
+ok(symlink("./$tmpfile1", $tmpfile2), "UNIX (/) relative link to the file");
+ok(-f $tmpfile2, "we can see it through the link");
+system "dir";
+ok(unlink($tmpfile2), "unlink the symlink");
+
 ok(unlink($tmpfile1), "and the file");
 
 # test we don't treat directory junctions like symlinks
