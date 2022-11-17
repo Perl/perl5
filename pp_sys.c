@@ -1348,7 +1348,7 @@ PP(pp_select)
     if (!egv)
         egv = PL_defoutgv;
     hv = isGV_with_GP(egv) ? GvSTASH(egv) : NULL;
-    gvp = hv && HvENAME(hv)
+    gvp = hv && HvHasENAME(hv)
                 ? (GV**)hv_fetch(hv, GvNAME(egv), HEK_UTF8(GvNAME_HEK(egv)) ? -GvNAMELEN(egv) : GvNAMELEN(egv), FALSE)
                 : NULL;
     if (gvp && *gvp == egv) {

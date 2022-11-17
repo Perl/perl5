@@ -1439,7 +1439,7 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
         /* If this is a stash and the key ends with ::, then someone is 
          * deleting a package.
          */
-        if (sv && SvTYPE(sv) == SVt_PVGV && HvENAME_get(hv)) {
+        if (sv && SvTYPE(sv) == SVt_PVGV && HvHasENAME(hv)) {
                 gv = (GV *)sv;
                 if ((
                      (klen > 1 && key[klen-2] == ':' && key[klen-1] == ':')
@@ -1448,7 +1448,7 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
                     )
                  && (klen != 6 || hv!=PL_defstash || memNE(key,"main::",6))
                  && (stash = GvHV((GV *)gv))
-                 && HvENAME_get(stash)) {
+                 && HvHasENAME(stash)) {
                         /* A previous version of this code checked that the
                          * GV was still in the symbol table by fetching the
                          * GV with its name. That is not necessary (and
@@ -1537,7 +1537,7 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
         if (sv) {
             /* deletion of method from stash */
             if (isGV(sv) && isGV_with_GP(sv) && GvCVu(sv)
-             && HvENAME_get(hv))
+             && HvHasENAME(hv))
                 mro_method_changed_in(hv);
 
             if (d_flags & G_DISCARD) {
@@ -2190,9 +2190,9 @@ Perl_hfree_next_entry(pTHX_ HV *hv, STRLEN *indexp)
     array[*indexp] = HeNEXT(entry);
     ((XPVHV*) SvANY(hv))->xhv_keys--;
 
-    if (   PL_phase != PERL_PHASE_DESTRUCT && HvENAME(hv)
+    if (   PL_phase != PERL_PHASE_DESTRUCT && HvHasENAME(hv)
         && HeVAL(entry) && isGV(HeVAL(entry))
-        && GvHV(HeVAL(entry)) && HvENAME(GvHV(HeVAL(entry)))
+        && GvHV(HeVAL(entry)) && HvHasENAME(GvHV(HeVAL(entry)))
     ) {
         STRLEN klen;
         const char * const key = HePV(entry,klen);
@@ -2243,7 +2243,7 @@ Perl_hv_undef_flags(pTHX_ HV *hv, U32 flags)
        if they will be freed anyway. */
     /* note that the code following prior to hv_free_entries is duplicated
      * in sv_clear(), and changes here should be done there too */
-    if (PL_phase != PERL_PHASE_DESTRUCT && HvNAME(hv)) {
+    if (PL_phase != PERL_PHASE_DESTRUCT && HvHasNAME(hv)) {
         if (PL_stashcache) {
             DEBUG_o(Perl_deb(aTHX_ "hv_undef_flags clearing PL_stashcache for '%"
                              HEKf "'\n", HEKfARG(HvNAME_HEK(hv))));
@@ -2281,7 +2281,7 @@ Perl_hv_undef_flags(pTHX_ HV *hv, U32 flags)
       struct mro_meta *meta;
       const char *name;
 
-      if (HvENAME_get(hv)) {
+      if (HvHasENAME(hv)) {
         if (PL_phase != PERL_PHASE_DESTRUCT)
             mro_isa_changed_in(hv);
         if (PL_stashcache) {

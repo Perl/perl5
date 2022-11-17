@@ -4310,7 +4310,7 @@ CODE:
 SV *
 HvENAME(HV *hv)
 CODE:
-    RETVAL = hv && HvENAME(hv)
+    RETVAL = hv && HvHasENAME(hv)
               ? newSVpvn_flags(
                   HvENAME(hv),HvENAMELEN(hv),
                   (HvENAMEUTF8(hv) ? SVf_UTF8 : 0)

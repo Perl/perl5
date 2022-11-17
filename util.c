@@ -5933,7 +5933,7 @@ S_gv_has_usable_name(pTHX_ GV *gv)
 {
     GV **gvp;
     return GvSTASH(gv)
-        && HvENAME(GvSTASH(gv))
+        && HvHasENAME(GvSTASH(gv))
         && (gvp = (GV **)hv_fetchhek(
                         GvSTASH(gv), GvNAME_HEK(gv), 0
            ))
