@@ -3705,6 +3705,24 @@ win32_symlink(const char *oldfile, const char *newfile)
     */
     newfile = PerlDir_mapA(newfile);
 
+    if (strchr(oldfile, '/')) {
+        /* Win32 (or perhaps NTFS) won't follow symlinks containing
+           /, so replace any with \\
+        */
+        char *temp = savepv(oldfile);
+        SAVEFREEPV(temp);
+        char *p = temp;
+        while (*p) {
+            if (*p == '/') {
+                *p = '\\';
+            }
+            ++p;
+        }
+        *p = 0;
+        oldfile = temp;
+        oldfile_len = p - temp;
+    }
+
     /* are we linking to a directory?
        CreateSymlinkA() needs to know if the target is a directory,
        If it looks like a directory name:
