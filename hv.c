@@ -2286,8 +2286,8 @@ Perl_hv_undef_flags(pTHX_ HV *hv, U32 flags)
             mro_isa_changed_in(hv);
         if (PL_stashcache) {
             DEBUG_o(Perl_deb(aTHX_ "hv_undef_flags clearing PL_stashcache for effective name '%"
-                             HEKf "'\n", HEKfARG(HvENAME_HEK(hv))));
-            (void)hv_deletehek(PL_stashcache, HvENAME_HEK(hv), G_DISCARD);
+                             HEKf "'\n", HEKfARG(HvENAME_HEK_NN(hv))));
+            (void)hv_deletehek(PL_stashcache, HvENAME_HEK_NN(hv), G_DISCARD);
         }
       }
 
@@ -2300,8 +2300,8 @@ Perl_hv_undef_flags(pTHX_ HV *hv, U32 flags)
       {
         if (name && PL_stashcache) {
             DEBUG_o(Perl_deb(aTHX_ "hv_undef_flags clearing PL_stashcache for name '%"
-                             HEKf "'\n", HEKfARG(HvNAME_HEK(hv))));
-            (void)hv_deletehek(PL_stashcache, HvNAME_HEK(hv), G_DISCARD);
+                             HEKf "'\n", HEKfARG(HvNAME_HEK_NN(hv))));
+            (void)hv_deletehek(PL_stashcache, HvNAME_HEK_NN(hv), G_DISCARD);
         }
         hv_name_set(hv, NULL, 0, flags);
       }

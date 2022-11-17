@@ -1327,16 +1327,17 @@ via, C<mro::method_changed_in(classname)>.
 void
 Perl_mro_method_changed_in(pTHX_ HV *stash)
 {
-    const char * const stashname = HvENAME_get(stash);
-    const STRLEN stashname_len = HvENAMELEN_get(stash);
-
-    SV ** const svp = hv_fetchhek(PL_isarev, HvENAME_HEK(stash), 0);
-    HV * const isarev = svp ? MUTABLE_HV(*svp) : NULL;
-
     PERL_ARGS_ASSERT_MRO_METHOD_CHANGED_IN;
+
+    const char * const stashname = HvENAME_get(stash);
 
     if(!stashname)
         Perl_croak(aTHX_ "Can't call mro_method_changed_in() on anonymous symbol table");
+
+    const STRLEN stashname_len = HvENAMELEN_get(stash);
+
+    SV ** const svp = hv_fetchhek(PL_isarev, HvENAME_HEK_NN(stash), 0);
+    HV * const isarev = svp ? MUTABLE_HV(*svp) : NULL;
 
     /* Inc the package generation, since a local method changed */
     HvMROMETA(stash)->pkg_gen++;
