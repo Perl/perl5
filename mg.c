@@ -1858,7 +1858,7 @@ Perl_magic_clearisa(pTHX_ SV *sv, MAGIC *mg)
         I32 items = AvFILLp((AV *)mg->mg_obj) + 1;
         while (items--) {
             stash = GvSTASH((GV *)*svp++);
-            if (stash && HvENAME(stash)) mro_isa_changed_in(stash);
+            if (stash && HvHasENAME(stash)) mro_isa_changed_in(stash);
         }
 
         return 0;
@@ -1870,7 +1870,7 @@ Perl_magic_clearisa(pTHX_ SV *sv, MAGIC *mg)
 
     /* The stash may have been detached from the symbol table, so check its
        name before doing anything. */
-    if (stash && HvENAME_get(stash))
+    if (stash && HvHasENAME(stash))
         mro_isa_changed_in(stash);
 
     return 0;

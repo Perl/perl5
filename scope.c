@@ -451,7 +451,7 @@ Perl_save_gp(pTHX_ GV *gv, I32 empty)
         HV * const stash = GvSTASH(gv);
         bool isa_changed = 0;
 
-        if (stash && HvENAME(stash)) {
+        if (stash && HvHasENAME(stash)) {
             if (memEQs(GvNAME(gv), GvNAMELEN(gv), "ISA"))
                 isa_changed = TRUE;
             else if (GvCVu(gv))
@@ -1171,7 +1171,7 @@ Perl_leave_scope(pTHX_ I32 base)
             HV * hv;
             a0 = ap[0]; a1 = ap[1]; a2 = ap[2];
             hv = GvSTASH(a0.any_gv);
-            if (hv && HvENAME(hv) && (
+            if (hv && HvHasENAME(hv) && (
                     (a2.any_sv && SvTYPE(a2.any_sv) == SVt_PVCV)
                  || (*a1.any_svp && SvTYPE(*a1.any_svp) == SVt_PVCV)
                ))
@@ -1286,7 +1286,7 @@ Perl_leave_scope(pTHX_ I32 base)
             had_method = cBOOL(GvCVu(a0.any_gv));
             gp_free(a0.any_gv);
             GvGP_set(a0.any_gv, (GP*)a1.any_ptr);
-            if ((hv=GvSTASH(a0.any_gv)) && HvENAME_get(hv)) {
+            if ((hv=GvSTASH(a0.any_gv)) && HvHasENAME(hv)) {
                 if (memEQs(GvNAME(a0.any_gv), GvNAMELEN(a0.any_gv), "ISA"))
                     mro_isa_changed_in(hv);
                 else if (had_method || GvCVu(a0.any_gv))

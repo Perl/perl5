@@ -425,8 +425,8 @@ Perl_mro_get_linear_isa(pTHX_ HV *stash)
 
     if (meta->mro_which != &dfs_alg) { /* skip for dfs, for speed */
         SV * const namesv =
-            (HvENAME(stash)||HvNAME(stash))
-              ? newSVhek(HvENAME_HEK(stash)
+            (HvHasENAME_HEK(stash) || HvHasNAME(stash))
+              ? newSVhek(HvHasENAME_HEK(stash)
                           ? HvENAME_HEK(stash)
                           : HvNAME_HEK(stash))
               : NULL;
@@ -787,7 +787,7 @@ Perl_mro_package_moved(pTHX_ HV * const stash, HV * const oldstash,
     if(!(flags & 1)) {
         SV **svp;
         if(
-         !GvSTASH(gv) || !HvENAME(GvSTASH(gv)) ||
+         !GvSTASH(gv) || !HvHasENAME(GvSTASH(gv)) ||
          !(svp = hv_fetchhek(GvSTASH(gv), GvNAME_HEK(gv), 0)) ||
          *svp != (SV *)gv
         ) return;
@@ -903,7 +903,7 @@ S_mro_gather_and_rename(pTHX_ HV * const stashes, HV * const seen_stashes,
     HE *entry;
     I32 riter = -1;
     I32 items = 0;
-    const bool stash_had_name = stash && HvENAME(stash);
+    const bool stash_had_name = stash && HvHasENAME(stash);
     bool fetched_isarev = FALSE;
     HV *seen = NULL;
     HV *isarev = NULL;
@@ -1163,7 +1163,7 @@ S_mro_gather_and_rename(pTHX_ HV * const stashes, HV * const seen_stashes,
                             stashentry && *stashentry && isGV(*stashentry)
                          && (substash = GvHV(*stashentry))
                         )
-                     || (oldsubstash && HvENAME_get(oldsubstash))
+                     || (oldsubstash && HvHasENAME(oldsubstash))
                     )
                     {
                         /* Add :: and the key (minus the trailing ::)

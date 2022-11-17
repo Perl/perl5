@@ -3728,7 +3728,7 @@ S_glob_assign_glob(pTHX_ SV *const dsv, SV *const ssv, const int dtype)
         /* If source has a real method, then a method is
            going to change */
         else if(
-         GvCV((const GV *)ssv) && GvSTASH(dsv) && HvENAME(GvSTASH(dsv))
+         GvCV((const GV *)ssv) && GvSTASH(dsv) && HvHasENAME(GvSTASH(dsv))
         ) {
             mro_changes = 1;
         }
@@ -3737,7 +3737,7 @@ S_glob_assign_glob(pTHX_ SV *const dsv, SV *const ssv, const int dtype)
     /* If dest already had a real method, that's a change as well */
     if(
         !mro_changes && GvGP(MUTABLE_GV(dsv)) && GvCVu((const GV *)dsv)
-     && GvSTASH(dsv) && HvENAME(GvSTASH(dsv))
+     && GvSTASH(dsv) && HvHasENAME(GvSTASH(dsv))
     ) {
         mro_changes = 1;
     }
@@ -3750,7 +3750,7 @@ S_glob_assign_glob(pTHX_ SV *const dsv, SV *const ssv, const int dtype)
         if(memEQs(name, len, "ISA")
          /* The stash may have been detached from the symbol table, so
             check its name. */
-         && GvSTASH(dsv) && HvENAME(GvSTASH(dsv))
+         && GvSTASH(dsv) && HvHasENAME(GvSTASH(dsv))
         )
             mro_changes = 2;
         else {
@@ -3808,7 +3808,7 @@ S_glob_assign_glob(pTHX_ SV *const dsv, SV *const ssv, const int dtype)
     }
     else if(mro_changes == 3) {
         HV * const stash = GvHV(dsv);
-        if(old_stash ? (HV *)HvENAME_get(old_stash) : stash)
+        if(old_stash ? HvHasENAME(old_stash) : cBOOL(stash))
             mro_package_moved(
                 stash, old_stash,
                 (GV *)dsv, 0
@@ -3958,7 +3958,7 @@ Perl_gv_setref(pTHX_ SV *const dsv, SV *const ssv)
                    (len > 1 && name[len-2] == ':' && name[len-1] == ':')
                 || (len == 1 && name[0] == ':')
                 )
-             && (!dref || HvENAME_get(dref))
+             && (!dref || HvHasENAME(dref))
             ) {
                 mro_package_moved(
                     (HV *)sref, (HV *)dref,
@@ -3971,7 +3971,7 @@ Perl_gv_setref(pTHX_ SV *const dsv, SV *const ssv)
          && memEQs(GvNAME((GV*)dsv), GvNAMELEN((GV*)dsv), "ISA")
          /* The stash may have been detached from the symbol table, so
             check its name before doing anything. */
-         && GvSTASH(dsv) && HvENAME(GvSTASH(dsv))
+         && GvSTASH(dsv) && HvHasENAME(GvSTASH(dsv))
         ) {
             MAGIC *mg;
             MAGIC * const omg = dref && SvSMAGICAL(dref)
@@ -4432,7 +4432,7 @@ Perl_sv_setsv_flags(pTHX_ SV *dsv, SV* ssv, const I32 flags)
                 if (reset_isa) {
                     HV * const stash = GvHV(dsv);
                     if(
-                        old_stash ? (HV *)HvENAME_get(old_stash) : stash
+                        old_stash ? HvHasENAME(old_stash) : cBOOL(stash)
                     )
                         mro_package_moved(
                          stash, old_stash,
@@ -6558,7 +6558,7 @@ S_anonymise_cv_maybe(pTHX_ GV *gv, CV* cv)
     }
 
     /* if not, anonymise: */
-    gvname = (GvSTASH(gv) && HvNAME(GvSTASH(gv)) && HvENAME(GvSTASH(gv)))
+    gvname = (GvSTASH(gv) && HvHasNAME(GvSTASH(gv)) && HvHasENAME(GvSTASH(gv)))
                     ? newSVhek(HvENAME_HEK(GvSTASH(gv)))
                     : newSVpvn_flags( "__ANON__", 8, 0 );
     sv_catpvs(gvname, "::__ANON__");
@@ -6793,7 +6793,7 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
         case SVt_PVGV:
             if (isGV_with_GP(sv)) {
                 if(GvCVu((const GV *)sv) && (stash = GvSTASH(MUTABLE_GV(sv)))
-                   && HvENAME_get(stash))
+                   && HvHasENAME(stash))
                     mro_method_changed_in(stash);
                 gp_free(MUTABLE_GV(sv));
                 if (GvNAME_HEK(sv))
@@ -10082,7 +10082,7 @@ Perl_sv_resetpvn(pTHX_ const char *s, STRLEN len, HV * const stash)
                 if (GvAV(gv)) {
                     av_clear(GvAV(gv));
                 }
-                if (GvHV(gv) && !HvNAME_get(GvHV(gv))) {
+                if (GvHV(gv) && !HvHasNAME(GvHV(gv))) {
                     hv_clear(GvHV(gv));
                 }
             }
@@ -10458,9 +10458,10 @@ Perl_sv_ref(pTHX_ SV *dst, const SV *const sv, const int ob)
         dst = sv_newmortal();
 
     if (ob && SvOBJECT(sv)) {
-        HvNAME_get(SvSTASH(sv))
-                    ? sv_sethek(dst, HvNAME_HEK(SvSTASH(sv)))
-                    : sv_setpvs(dst, "__ANON__");
+        if (HvHasNAME(SvSTASH(sv)))
+            sv_sethek(dst, HvNAME_HEK(SvSTASH(sv)));
+        else
+            sv_setpvs(dst, "__ANON__");
     }
     else {
         const char * reftype = sv_reftype(sv, 0);
@@ -10774,7 +10775,7 @@ S_sv_unglob(pTHX_ SV *const sv, U32 flags)
     SvREFCNT_inc_simple_void_NN(sv_2mortal(sv));
     if (GvGP(sv)) {
         if(GvCVu((const GV *)sv) && (stash = GvSTASH(MUTABLE_GV(sv)))
-           && HvNAME_get(stash))
+           && HvHasNAME(stash))
             mro_method_changed_in(stash);
         gp_free(MUTABLE_GV(sv));
     }

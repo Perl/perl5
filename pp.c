@@ -943,7 +943,7 @@ PP(pp_undef)
             /* undef *Pkg::meth_name ... */
             bool method_changed
              =   GvCVu((const GV *)sv) && (stash = GvSTASH((const GV *)sv))
-              && HvENAME_get(stash);
+              && HvHasENAME(stash);
             /* undef *Foo:: */
             if((stash = GvHV((const GV *)sv))) {
                 if(HvENAME_get(stash))
@@ -968,7 +968,7 @@ PP(pp_undef)
             /* undef *Foo::ISA */
             if( strEQ(GvNAME((const GV *)sv), "ISA")
              && (stash = GvSTASH((const GV *)sv))
-             && (method_changed || HvENAME(stash)) )
+             && (method_changed || HvHasENAME(stash)) )
                 mro_isa_changed_in(stash);
             else if(method_changed)
                 mro_method_changed_in(

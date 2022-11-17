@@ -1628,7 +1628,7 @@ S_gv_stashpvn_internal(pTHX_ const char *name, U32 namelen, I32 flags)
     stash = GvHV(tmpgv);
     if (!(flags & ~GV_NOADD_MASK) && !stash) return NULL;
     assert(stash);
-    if (!HvNAME_get(stash)) {
+    if (!HvHasNAME(stash)) {
         hv_name_set(stash, name, namelen, flags & SVf_UTF8 ? SVf_UTF8 : 0 );
 
         /* FIXME: This is a repeat of logic in gv_fetchpvn_flags */
@@ -1834,7 +1834,7 @@ S_parse_gv_stash_name(pTHX_ HV **stash, GV **gv, const char **name,
 
                 if (!(*stash = GvHV(*gv))) {
                     *stash = GvHV(*gv) = newHV();
-                    if (!HvNAME_get(*stash)) {
+                    if (!HvHasNAME(*stash)) {
                         if (GvSTASH(*gv) == PL_defstash && *len == 6
                             && strBEGINs(*name, "CORE"))
                             hv_name_sets(*stash, "CORE", 0);
@@ -1848,7 +1848,7 @@ S_parse_gv_stash_name(pTHX_ HV **stash, GV **gv, const char **name,
                         mro_package_moved(*stash, NULL, *gv, 1);
                     }
                 }
-                else if (!HvNAME_get(*stash))
+                else if (!HvHasNAME(*stash))
                     hv_name_set(*stash, nambeg, name_cursor - nambeg, is_utf8);
             }
 
@@ -3298,7 +3298,7 @@ Perl_gv_handler(pTHX_ HV *stash, I32 id)
     U32 newgen;
     struct mro_meta* stash_meta;
 
-    if (!stash || !HvNAME_get(stash))
+    if (!stash || !HvHasNAME(stash))
         return NULL;
 
     stash_meta = HvMROMETA(stash);
