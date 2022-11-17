@@ -1702,7 +1702,7 @@ Perl_do_gv_dump(pTHX_ I32 level, PerlIO *file, const char *name, GV *sv)
     PERL_ARGS_ASSERT_DO_GV_DUMP;
 
     Perl_dump_indent(aTHX_ level, file, "%s = 0x%" UVxf, name, PTR2UV(sv));
-    if (sv && GvNAME(sv)) {
+    if (sv) {
         SV * const tmpsv = newSVpvs("");
         PerlIO_printf(file, "\t\"%s\"\n",
                               generic_pv_escape( tmpsv, GvNAME(sv), GvNAMELEN(sv), GvNAMEUTF8(sv) ));
@@ -1717,7 +1717,7 @@ Perl_do_gvgv_dump(pTHX_ I32 level, PerlIO *file, const char *name, GV *sv)
     PERL_ARGS_ASSERT_DO_GVGV_DUMP;
 
     Perl_dump_indent(aTHX_ level, file, "%s = 0x%" UVxf, name, PTR2UV(sv));
-    if (sv && GvNAME(sv)) {
+    if (sv) {
        SV *tmp = newSVpvs_flags("", SVs_TEMP);
         const char *hvname;
         HV * const stash = GvSTASH(sv);
