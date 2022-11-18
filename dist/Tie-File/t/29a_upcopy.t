@@ -131,7 +131,7 @@ sub try {
 
   my $o = tie my @lines, 'Tie::File', $file or die $!;
   local $SIG{ALRM} = sub { die "Alarm clock" };
-  my $a_retval = eval { alarm(5) unless $^P; $o->_upcopy($src, $dst, $len) };
+  my $a_retval = eval { alarm(10) unless $^P; $o->_upcopy($src, $dst, $len) };
   my $err = $@;
   undef $o; untie @lines; alarm(0);
   if ($err) {
