@@ -157,7 +157,9 @@ sub try {
   unless ($alen == $xlen) {
     print "# try(@_) expected file length $xlen, actual $alen!\n";
   }
-  print $actual eq $expected ? "ok $N\n" : "not ok $N\n";
+  my $desc = sprintf "try(%d, %d, %s)",
+                $src, $dst, (defined $len ? $len : "undef");
+  print $actual eq $expected ? "ok $N - $desc\n" : "not ok $N - $desc\n";
   $N++;
 }
 
