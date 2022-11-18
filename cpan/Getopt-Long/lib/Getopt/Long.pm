@@ -4,12 +4,14 @@
 # Author          : Johan Vromans
 # Created On      : Tue Sep 11 15:00:12 1990
 # Last Modified By: Johan Vromans
-# Last Modified On: Tue Nov 15 14:16:18 2022
-# Update Count    : 1776
+# Last Modified On: Thu Nov 17 17:45:27 2022
+# Update Count    : 1777
 # Status          : Released
 
 ################ Module Preamble ################
 
+# There are no CPAN testers for very old versions of Perl.
+# Getopt::Long is reported to run under 5.8.
 use 5.004;
 
 use strict;
@@ -18,10 +20,10 @@ use warnings;
 package Getopt::Long;
 
 use vars qw($VERSION);
-$VERSION        =  2.53;
+$VERSION        =  2.54;
 # For testing versions only.
 use vars qw($VERSION_STRING);
-$VERSION_STRING = "2.53";
+$VERSION_STRING = "2.54";
 
 use Exporter;
 use vars qw(@ISA @EXPORT @EXPORT_OK);
@@ -1544,7 +1546,9 @@ sub setup_pa_args($@) {
 
     if ( UNIVERSAL::isa($pa, 'HASH') ) {
 	# Get rid of -msg vs. -message ambiguity.
-	$pa->{-message} //= delete($pa->{-msg});
+	if (!defined $pa->{-message}) {
+	    $pa->{-message} = delete($pa->{-msg});
+	}
     }
     elsif ( $pa =~ /^-?\d+$/ ) {
 	$pa = { -exitval => $pa };
