@@ -30,6 +30,7 @@ SKIP:
 {
   $have_config or skip "Can't check if we have threads", 1;
   $Config::Config{usethreads} or skip "No threads", 1;
+  is_miniperl() and skip "threads module not available under miniperl", 1;
   # this would only fail under valgrind/ASAN
   fresh_perl_is('print $F[1]; threads->new(sub {})->join', "b",
                 {
