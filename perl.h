@@ -1603,11 +1603,20 @@ Use L</UV> to declare variables of the maximum usable size on this platform.
 
 /* Functions like Perl_sv_grow mandate a minimum string size.
  * This was 10 bytes for a long time, the rationale for which seems lost
- * to the mists of time. However, since this does not correlate to what
- * modern malloc implementations will actually return, it can be revised
- * to be more appropriate. */
+ * to the mists of time. However, this does not correlate to what modern
+ * malloc implementations will actually return, in particular the fact
+ * that chunks are almost certainly some multiple of pointer size. The
+ * default has therefore been revised to a more useful approximation.
+ * Notes: The following is specifically conservative for 64 bit, since
+ * most dlmalloc derivatives seem to serve a 3xPTRSIZE minimum chunk,
+ * so the below perhaps should be:
+ *     ((PTRSIZE == 4) ? 12 : 24)
+ * Configure probes for malloc_good_size, malloc_actual_size etc.
+ * could be revised to record the actual minimum chunk size, to which
+ * PERL_STRLEN_NEW_MIN could then be set.
+ */
 #ifndef PERL_STRLEN_NEW_MIN
-#define PERL_STRLEN_NEW_MIN 10
+#define PERL_STRLEN_NEW_MIN ((PTRSIZE == 4) ? 12 : 16)
 #endif
 
 /* Round all values passed to malloc up, by default to a multiple of
