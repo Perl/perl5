@@ -7244,14 +7244,20 @@ PP(pp_argdefelem)
     assert(ix <= SSize_t_MAX);
 #endif
 
-    if (AvFILL(defav) >= ix) {
-        dSP;
-        SV **svp = av_fetch(defav, ix, FALSE);
-        SV  *val = svp ? *svp : &PL_sv_undef;
-        XPUSHs(val);
-        RETURN;
-    }
-    return cLOGOPo->op_other;
+    if (AvFILL(defav) < ix)
+        return cLOGOPo->op_other;
+
+    SV **svp = av_fetch(defav, ix, FALSE);
+    SV  *val = svp ? *svp : &PL_sv_undef;
+
+    if ((PL_op->op_private & OPpARG_IF_UNDEF) && !SvOK(val))
+        return cLOGOPo->op_other;
+    if ((PL_op->op_private & OPpARG_IF_FALSE) && !SvTRUE(val))
+        return cLOGOPo->op_other;
+
+    dSP;
+    XPUSHs(val);
+    RETURN;
 }
 
 

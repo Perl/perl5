@@ -1460,6 +1460,7 @@ p	|void	|my_unexec
 ApR	|OP*	|newANONLIST	|NULLOK OP* o
 ApR	|OP*	|newANONHASH	|NULLOK OP* o
 Ap	|OP*	|newANONSUB	|I32 floor|NULLOK OP* proto|NULLOK OP* block
+ApdR	|OP*	|newARGDEFELEMOP|I32 flags|NN OP* expr|I32 argindex
 ApdR	|OP*	|newASSIGNOP	|I32 flags|NULLOK OP* left|I32 optype|NULLOK OP* right
 ApdR	|OP*	|newCONDOP	|I32 flags|NN OP* first|NULLOK OP* trueop|NULLOK OP* falseop
 Apd	|CV*	|newCONSTSUB	|NULLOK HV* stash|NULLOK const char* name|NULLOK SV* sv

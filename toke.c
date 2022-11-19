@@ -5090,7 +5090,23 @@ yyl_sigvar(pTHX_ char *s)
             PL_oldbufptr = s;
 
             ++s;
-            NEXTVAL_NEXTTOKE.ival = 0;
+            NEXTVAL_NEXTTOKE.ival = OP_SASSIGN;
+            force_next(ASSIGNOP);
+            PL_expect = XTERM;
+        }
+        else if(*s == '/' && s[1] == '/' && s[2] == '=') {
+            PL_oldbufptr = s;
+
+            s += 3;
+            NEXTVAL_NEXTTOKE.ival = OP_DORASSIGN;
+            force_next(ASSIGNOP);
+            PL_expect = XTERM;
+        }
+        else if(*s == '|' && s[1] == '|' && s[2] == '=') {
+            PL_oldbufptr = s;
+
+            s += 3;
+            NEXTVAL_NEXTTOKE.ival = OP_ORASSIGN;
             force_next(ASSIGNOP);
             PL_expect = XTERM;
         }

@@ -749,15 +749,15 @@ sigslurpsigil:
 /* @, %, @foo, %foo */
 sigslurpelem: sigslurpsigil sigvarname sigdefault/* def only to catch errors */ 
                         {
-                            I32 sigil   = $sigslurpsigil;
-                            OP *var     = $sigvarname;
-                            OP *defexpr = $sigdefault;
+                            I32 sigil = $sigslurpsigil;
+                            OP *var   = $sigvarname;
+                            OP *defop = $sigdefault;
 
                             if (parser->sig_slurpy)
                                 yyerror("Multiple slurpy parameters not allowed");
                             parser->sig_slurpy = (char)sigil;
 
-                            if (defexpr)
+                            if (defop)
                                 yyerror("A slurpy parameter may not have "
                                         "a default value");
 
@@ -769,25 +769,34 @@ sigslurpelem: sigslurpsigil sigvarname sigdefault/* def only to catch errors */
 sigdefault
 	:	empty
         |       ASSIGNOP
-                        { $$ = newOP(OP_NULL, 0); }
+                        { $$ = newARGDEFELEMOP(0, newOP(OP_NULL, 0), parser->sig_elems); }
         |       ASSIGNOP term
-                        { $$ = $term; }
+                        {
+                            I32 flags = 0;
+                            if ($ASSIGNOP == OP_DORASSIGN)
+                                flags |= OPpARG_IF_UNDEF << 8;
+                            if ($ASSIGNOP == OP_ORASSIGN)
+                                flags |= OPpARG_IF_FALSE << 8;
+                            $$ = newARGDEFELEMOP(flags, $term, parser->sig_elems);
+                        }
 
 
 /* subroutine signature scalar element: e.g. '$x', '$=', '$x = $default' */
 sigscalarelem:
                 PERLY_DOLLAR sigvarname sigdefault
                         {
-                            OP *var     = $sigvarname;
-                            OP *defexpr = $sigdefault;
+                            OP *var   = $sigvarname;
+                            OP *defop = $sigdefault;
 
                             if (parser->sig_slurpy)
                                 yyerror("Slurpy parameter not last");
 
                             parser->sig_elems++;
 
-                            if (defexpr) {
+                            if (defop) {
                                 parser->sig_optelems++;
+
+                                OP *defexpr = cLOGOPx(defop)->op_first;
 
                                 if (   defexpr->op_type == OP_NULL
                                     && !(defexpr->op_flags & OPf_KIDS))
@@ -796,17 +805,10 @@ sigscalarelem:
                                     if (var)
                                         yyerror("Optional parameter "
                                                     "lacks default expression");
-                                    op_free(defexpr);
+                                    op_free(defop);
                                 }
                                 else { 
                                     /* a normal '=default' expression */ 
-                                    OP *defop = (OP*)alloc_LOGOP(OP_ARGDEFELEM,
-                                                        defexpr,
-                                                        LINKLIST(defexpr));
-                                    /* re-purpose op_targ to hold @_ index */
-                                    defop->op_targ =
-                                        (PADOFFSET)(parser->sig_elems - 1);
-
                                     if (var) {
                                         var->op_flags |= OPf_STACKED;
                                         (void)op_sibling_splice(var,

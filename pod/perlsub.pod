@@ -401,6 +401,24 @@ one parameter vary according to the earlier parameters.  For example,
 	print "$first_name $surname is known as \"$nickname\"";
     }
 
+A default value expression can also be written using the C<//=> operator,
+where it will be evaluated and used if the caller omitted a value or the
+value provided was C<undef>.
+
+    sub foo ($name //= "world") {
+        print "Hello, $name";
+    }
+
+    foo(undef);  # will print "Hello, world"
+
+Similarly, the C<||=> operator can be used to provide a default
+expression to be used whenever the caller provided a false value (and
+remember that a missing or C<undef> value are also false).
+
+    sub foo ($x ||= 10) {
+	return 5 + $x;
+    }
+
 An optional parameter can be nameless just like a mandatory parameter.
 For example,
 
