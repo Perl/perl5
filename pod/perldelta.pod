@@ -27,6 +27,14 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 Defined-or and logical-or assignment default expressions to signatures
+
+The default expression for a subroutine signature parameter can now be
+assigned using the C<//=> or C<||=> operators, to apply the defaults whenever
+the caller provided an undefined or false value (respectively), rather than
+simply when the parameter is missing entirely.  For more detail see the
+documentation in L<perlsub>.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security

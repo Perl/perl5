@@ -20,15 +20,14 @@
 #define YYUNDEFTOK  2
 #define YYMAXUTOK   369
 
-
 /* YYTRANSLATE(TOKEN-NUM) -- Symbol number corresponding to TOKEN-NUM
    as returned by yylex, with out-of-bounds checking.  */
 #define YYTRANSLATE(YYX)                                                \
-  (0 <= (YYX) && (YYX) <= YYMAXUTOK ? yytranslate[YYX] : YYUNDEFTOK)
+  ((unsigned) (YYX) <= YYMAXUTOK ? yytranslate[YYX] : YYUNDEFTOK)
 
 /* YYTRANSLATE[TOKEN-NUM] -- Symbol number corresponding to TOKEN-NUM
    as returned by yylex.  */
-static const yytype_int8 yytranslate[] =
+static const yytype_uint8 yytranslate[] =
 {
        0,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
@@ -71,7 +70,7 @@ static const yytype_int8 yytranslate[] =
 
 #if YYDEBUG
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
-static const yytype_int16 yyrline[] =
+static const yytype_uint16 yyrline[] =
 {
        0,   153,   153,   152,   164,   163,   174,   173,   187,   186,
      200,   199,   213,   212,   223,   222,   235,   243,   247,   254,
@@ -84,26 +83,26 @@ static const yytype_int16 yyrline[] =
      609,   615,   616,   621,   632,   633,   638,   640,   645,   652,
      653,   657,   661,   665,   670,   674,   678,   679,   682,   688,
      693,   699,   700,   705,   706,   711,   712,   719,   724,   726,
-     737,   739,   744,   746,   750,   770,   771,   773,   779,   844,
-     846,   852,   854,   858,   864,   865,   870,   871,   875,   879,
-     879,   946,   947,   952,   964,   965,   969,   980,   982,   984,
-     988,   990,   995,   999,  1003,  1007,  1013,  1018,  1024,  1030,
-    1032,  1034,  1037,  1036,  1047,  1048,  1052,  1056,  1059,  1064,
-    1069,  1072,  1076,  1080,  1086,  1094,  1101,  1107,  1109,  1111,
-    1116,  1118,  1120,  1125,  1127,  1129,  1131,  1133,  1135,  1137,
-    1139,  1141,  1143,  1145,  1149,  1151,  1153,  1155,  1159,  1161,
-    1165,  1167,  1169,  1171,  1175,  1177,  1182,  1184,  1187,  1189,
-    1191,  1194,  1197,  1208,  1211,  1219,  1221,  1223,  1226,  1232,
-    1234,  1238,  1239,  1240,  1241,  1242,  1244,  1246,  1248,  1250,
-    1252,  1254,  1256,  1258,  1260,  1262,  1264,  1266,  1268,  1278,
-    1288,  1298,  1308,  1310,  1312,  1315,  1320,  1324,  1326,  1328,
-    1330,  1333,  1335,  1338,  1340,  1342,  1344,  1346,  1348,  1350,
-    1352,  1354,  1357,  1359,  1361,  1363,  1365,  1367,  1371,  1374,
-    1373,  1386,  1387,  1388,  1393,  1395,  1397,  1399,  1404,  1406,
-    1409,  1411,  1413,  1419,  1420,  1424,  1425,  1429,  1430,  1435,
-    1440,  1442,  1446,  1449,  1453,  1454,  1455,  1458,  1459,  1462,
-    1463,  1466,  1470,  1474,  1480,  1486,  1488,  1492,  1496,  1497,
-    1501,  1502,  1506,  1507,  1512,  1514,  1516,  1519
+     737,   739,   744,   746,   750,   770,   771,   773,   786,   846,
+     848,   854,   856,   860,   866,   867,   872,   873,   877,   881,
+     881,   948,   949,   954,   966,   967,   971,   982,   984,   986,
+     990,   992,   997,  1001,  1005,  1009,  1015,  1020,  1026,  1032,
+    1034,  1036,  1039,  1038,  1049,  1050,  1054,  1058,  1061,  1066,
+    1071,  1074,  1078,  1082,  1088,  1096,  1103,  1109,  1111,  1113,
+    1118,  1120,  1122,  1127,  1129,  1131,  1133,  1135,  1137,  1139,
+    1141,  1143,  1145,  1147,  1151,  1153,  1155,  1157,  1161,  1163,
+    1167,  1169,  1171,  1173,  1177,  1179,  1184,  1186,  1189,  1191,
+    1193,  1196,  1199,  1210,  1213,  1221,  1223,  1225,  1228,  1234,
+    1236,  1240,  1241,  1242,  1243,  1244,  1246,  1248,  1250,  1252,
+    1254,  1256,  1258,  1260,  1262,  1264,  1266,  1268,  1270,  1280,
+    1290,  1300,  1310,  1312,  1314,  1317,  1322,  1326,  1328,  1330,
+    1332,  1335,  1337,  1340,  1342,  1344,  1346,  1348,  1350,  1352,
+    1354,  1356,  1359,  1361,  1363,  1365,  1367,  1369,  1373,  1376,
+    1375,  1388,  1389,  1390,  1395,  1397,  1399,  1401,  1406,  1408,
+    1411,  1413,  1415,  1421,  1422,  1426,  1427,  1431,  1432,  1437,
+    1442,  1444,  1448,  1451,  1455,  1456,  1457,  1460,  1461,  1464,
+    1465,  1468,  1472,  1476,  1482,  1488,  1490,  1494,  1498,  1499,
+    1503,  1504,  1508,  1509,  1514,  1516,  1518,  1521
 };
 #endif
 
@@ -158,7 +157,7 @@ static const char *const yytname[] =
 # ifdef YYPRINT
 /* YYTOKNUM[NUM] -- (External) token number corresponding to the
    (internal) symbol number NUM (which must be that of a token).  */
-static const yytype_int16 yytoknum[] =
+static const yytype_uint16 yytoknum[] =
 {
        0,   256,   257,   258,   259,   260,   261,   262,   263,   264,
      265,   266,   267,   268,   269,   270,   271,   272,   273,   274,
@@ -175,15 +174,15 @@ static const yytype_int16 yytoknum[] =
 };
 # endif
 
-#define YYPACT_NINF (-507)
+#define YYPACT_NINF -507
 
-#define yypact_value_is_default(Yyn) \
-  ((Yyn) == YYPACT_NINF)
+#define yypact_value_is_default(Yystate) \
+  (!!((Yystate) == (-507)))
 
-#define YYTABLE_NINF (-303)
+#define YYTABLE_NINF -303
 
-#define yytable_value_is_error(Yyn) \
-  ((Yyn) == YYTABLE_NINF)
+#define yytable_value_is_error(Yytable_value) \
+  (!!((Yytable_value) == (-303)))
 
   /* YYPACT[STATE-NUM] -- Index in YYTABLE of the portion describing
      STATE-NUM.  */
@@ -256,7 +255,7 @@ static const yytype_int16 yypact[] =
   /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
      Performed when YYTABLE does not specify something else to do.  Zero
      means the default is an error.  */
-static const yytype_int16 yydefact[] =
+static const yytype_uint16 yydefact[] =
 {
        0,     2,     4,     6,     8,    10,    12,    14,     0,    19,
       17,     0,     0,     0,    17,   129,     1,    17,     0,    17,
@@ -1068,7 +1067,7 @@ static const yytype_uint8 yyr1[] =
 };
 
   /* YYR2[YYN] -- Number of symbols on the right hand side of rule YYN.  */
-static const yytype_int8 yyr2[] =
+static const yytype_uint8 yyr2[] =
 {
        0,     2,     0,     4,     0,     3,     0,     3,     0,     3,
        0,     3,     0,     3,     0,     3,     4,     0,     7,     0,
@@ -1153,6 +1152,6 @@ static const toketypes yy_type_tab[] =
 };
 
 /* Generated from:
- * b4fc8c1d307bdc8f64eba56825513a87509f0ed05acf77fb0e96c7e5a1d41802 perly.y
+ * d3f87734f869a9179fa48a601c04af8339f2360e854d5e6f2e8107a579d753a1 perly.y
  * acf1cbfd2545faeaaa58b1cf0cf9d7f98b5be0752eb7a54528ef904a9e2e1ca7 regen_perly.pl
  * ex: set ro: */

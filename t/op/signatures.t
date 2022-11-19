@@ -598,6 +598,18 @@ Mandatory parameter follows optional parameter at foo line 8, near "\$c,"
 Mandatory parameter follows optional parameter at foo line 8, near "\$d) "
 EOF
 
+sub t206 ($x, $y //= 3) { return $x + $y }
+is eval("t206(5,4)"),     9, '//= present';
+is eval("t206(5)"),       8, '//= absent';
+is eval("t206(4,undef)"), 7, '//= undef';
+is eval("t206(4,0)"),     4, '//= zero';
+
+sub t207 ($x, $y ||= 3) { return $x + $y }
+is eval("t207(5,4)"),     9, '||= present';
+is eval("t207(5)"),       8, '||= absent';
+is eval("t207(4,undef)"), 7, '||= undef';
+is eval("t207(4,0)"),     7, '||= zero';
+
 sub t034 (@abc) { join("/", @abc).";".scalar(@abc) }
 is prototype(\&t034), undef;
 is eval("t034()"), ";0";

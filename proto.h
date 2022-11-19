@@ -2591,6 +2591,11 @@ PERL_CALLCONV OP*	Perl_newANONLIST(pTHX_ OP* o)
 
 PERL_CALLCONV OP*	Perl_newANONSUB(pTHX_ I32 floor, OP* proto, OP* block);
 #define PERL_ARGS_ASSERT_NEWANONSUB
+PERL_CALLCONV OP*	Perl_newARGDEFELEMOP(pTHX_ I32 flags, OP* expr, I32 argindex)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_NEWARGDEFELEMOP	\
+	assert(expr)
+
 PERL_CALLCONV OP*	Perl_newASSIGNOP(pTHX_ I32 flags, OP* left, I32 optype, OP* right)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_NEWASSIGNOP

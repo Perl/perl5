@@ -867,6 +867,11 @@ addbits('emptyavhv',
   # 4       OPpTARGET_MY
 );
 
+addbits('argdefelem',
+    7 => qw(OPpARG_IF_UNDEF  IF_UNDEF),
+    6 => qw(OPpARG_IF_FALSE  IF_FALSE),
+);
+
 1;
 
 # ex: set ts=8 sts=4 sw=4 et:
