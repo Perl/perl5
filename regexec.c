@@ -262,7 +262,7 @@ S_regcppush(pTHX_ const regexp *rex, I32 parenfloor, U32 maxopenparen _pDEPTH)
             );
     );
 
-    SSGROW(total_elems + REGCP_FRAME_ELEMS);
+    SSCHECK(total_elems + REGCP_FRAME_ELEMS);
 
     /* memcpy the offs inside the stack - it's faster than for loop */
     memcpy(&PL_savestack[PL_savestack_ix], rex->offs + parenfloor + 1, paren_bytes_to_push);
