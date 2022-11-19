@@ -336,6 +336,7 @@
 #define newANONHASH(a)		Perl_newANONHASH(aTHX_ a)
 #define newANONLIST(a)		Perl_newANONLIST(aTHX_ a)
 #define newANONSUB(a,b,c)	Perl_newANONSUB(aTHX_ a,b,c)
+#define newARGDEFELEMOP(a,b,c)	Perl_newARGDEFELEMOP(aTHX_ a,b,c)
 #define newASSIGNOP(a,b,c,d)	Perl_newASSIGNOP(aTHX_ a,b,c,d)
 #define newAVREF(a)		Perl_newAVREF(aTHX_ a)
 #define newAVav(a)		Perl_newAVav(aTHX_ a)
