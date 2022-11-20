@@ -17,6 +17,24 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.37.6 - N. K. Jemisin - The City We Became
+
+L<Announced on 2022-11-20 by Max Maischein|https://www.nntp.perl.org/group/perl.perl5.porters/2022/11/msg265080.html>
+
+Queens sighs with the air of someone who is used to not being
+understood. She takes out her phone and starts texting someone,
+her bottom lip poked out a little.
+
+Brooklyn's expression turns grim. To Broca she says, "You said
+becoming a city punches through other universes."
+So she's not stupid. Bronca inclined her head to the woman, in
+respect if not in approval. "Yes".
+
+"Okay, so." Brooklyn visibly braces herself. "So what
+happens to those universes that our city punches through?"
+
+                      The City We Became - N.K. Jemisin
+
 =head2 v5.37.5 - Nori - The Lord of the Rings: The Rings of Power
 
 L<Announced on 2022-10-20 by Todd Rinaldo|https://www.nntp.perl.org/group/perl.perl5.porters/2022/10/msg264959.html>
