@@ -4,7 +4,7 @@ use strict;
 our ( %released, %version, %families, %upstream, %bug_tracker, %deprecated, %delta );
 
 use version;
-our $VERSION = '5.20221020';
+our $VERSION = '5.20221120';
 
 sub PKG_PATTERN () { q#\A[a-zA-Z_][0-9a-zA-Z_]*(?:(::|')[0-9a-zA-Z_]+)*\z# }
 sub _looks_like_invocant ($) { local $@; !!eval { $_[0]->isa(__PACKAGE__) } }
@@ -398,7 +398,7 @@ sub changes_between {
     5.037003 => '2022-08-20',
     5.037004 => '2022-09-20',
     5.037005 => '2022-10-20',
-    5.037006 => '2022-10-24',
+    5.037006 => '2022-11-20',
   );
 
 for my $version ( sort { $a <=> $b } keys %released ) {
@@ -19793,8 +19793,13 @@ for my $version ( sort { $a <=> $b } keys %released ) {
     5.037006 => {
         delta_from => 5.037005,
         changed => {
+            'Attribute::Handlers'   => '1.03',
+            'B'                     => '1.87',
+            'B::Deparse'            => '1.71',
             'B::Op_private'         => '5.037006',
             'Config'                => '5.037006',
+            'Data::Dumper'          => '2.187',
+            'Devel::PPPort'         => '3.69',
             'ExtUtils::CBuilder'    => '0.280238',
             'ExtUtils::CBuilder::Base'=> '0.280238',
             'ExtUtils::CBuilder::Platform::Unix'=> '0.280238',
@@ -19809,7 +19814,36 @@ for my $version ( sort { $a <=> $b } keys %released ) {
             'ExtUtils::CBuilder::Platform::darwin'=> '0.280238',
             'ExtUtils::CBuilder::Platform::dec_osf'=> '0.280238',
             'ExtUtils::CBuilder::Platform::os2'=> '0.280238',
+            'ExtUtils::ParseXS'     => '3.48',
+            'ExtUtils::ParseXS::Constants'=> '3.48',
+            'ExtUtils::ParseXS::CountLines'=> '3.48',
+            'ExtUtils::ParseXS::Eval'=> '3.48',
+            'ExtUtils::ParseXS::Utilities'=> '3.48',
+            'ExtUtils::Typemaps'    => '3.48',
+            'ExtUtils::Typemaps::Cmd'=> '3.48',
+            'ExtUtils::Typemaps::InputMap'=> '3.48',
+            'ExtUtils::Typemaps::OutputMap'=> '3.48',
+            'ExtUtils::Typemaps::Type'=> '3.48',
+            'Getopt::Long'          => '2.54',
+            'Memoize'               => '1.15',
+            'Memoize::AnyDBM_File'  => '1.15',
+            'Memoize::Expire'       => '1.15',
+            'Memoize::NDBM_File'    => '1.15',
+            'Memoize::SDBM_File'    => '1.15',
+            'Memoize::Storable'     => '1.15',
+            'Module::CoreList'      => '5.20221120',
+            'Module::CoreList::Utils'=> '5.20221120',
+            'Opcode'                => '1.62',
+            'POSIX'                 => '2.08',
+            'Storable'              => '3.28',
             'Time::HiRes'           => '1.9772',
+            'XS::APItest'           => '1.27',
+            'experimental'          => '0.029',
+            'feature'               => '1.77',
+            'overload'              => '1.36',
+            'threads'               => '2.32',
+            'utf8'                  => '1.25',
+            'warnings'              => '1.61',
         },
         removed => {
         }
