@@ -6592,10 +6592,6 @@ Perl_switch_to_global_locale(pTHX)
     }
     POSIX_SETLOCALE_UNLOCK;
 
-    for (unsigned int i = 0; i < NOMINAL_LC_ALL_INDEX; i++) {
-        Safefree(curlocales[i]);
-    }
-
 #    else
 #      error Unexpected Configuration
 #    endif
