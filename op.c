@@ -3454,7 +3454,16 @@ Perl_op_lvalue_flags(pTHX_ OP *o, I32 type, U32 flags)
          * set flag here.
          *   See also https://github.com/Perl/perl5/issues/20384
          */
-        goto nomod;
+
+        // Perl always sets OPf_REF as of 5.37.5.
+        //
+        if (LIKELY(o->op_flags & OPf_REF)) goto nomod;
+
+        // If we got here, then our op came from an XS module that predates
+        // 5.37.5’s change to the op tree, which we have to handle a bit
+        // diffrently to preserve backward compatibility.
+        //
+        goto do_next;
     }
 
     /* [20011101.069 (#7861)] File test operators interpret OPf_REF to mean that
