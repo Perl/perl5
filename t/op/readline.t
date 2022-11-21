@@ -295,6 +295,9 @@ SKIP:
     my $tmpfile = tempfile();
     open my $fh, ">", $tmpfile
         or die "Cannot open $tmpfile: $!";
+    my @layers = PerlIO::get_layers($fh);
+    skip "fgetc doesn't set error flag on failure on solaris likes", 4
+        if $^O eq 'solaris' && $layers[-1] eq 'stdio';
     ok(!$fh->error, "no error before we try to read");
     ok(!<$fh>, "fail to readline file opened for write");
     ok($fh->error, "error after trying to readline file opened for write");
