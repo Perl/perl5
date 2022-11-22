@@ -534,7 +534,10 @@ string pv created with C<rcpv_new()>.
 Returns the refcount for a pv created with C<rcpv_new()>. 
 
 =for apidoc Am|RCPV *|RCPV_LEN|char *pv
-Returns the length of a pv created with C<rcpv_new()>. 
+Returns the length of a pv created with C<rcpv_new()>.
+Note that this reflects the length of the string from the callers
+point of view, it does not include the mandatory null which is
+always injected at the end of the string by rcpv_new().
 
 =cut
 */
@@ -542,16 +545,19 @@ Returns the length of a pv created with C<rcpv_new()>.
 struct rcpv {
     STRLEN  refcount;  /* UV would mean a 64 refcnt on
                           32 bit builds with -Duse64bitint */
-    STRLEN  len;
+    STRLEN  len;       /* length of string including mandatory
+                          null byte at end */
     char    pv[1];
 };
 typedef struct rcpv RCPV;
 
-#define RCPVf_USE_STRLEN 1
-#define RCPVf_NO_COPY 2
+#define RCPVf_USE_STRLEN    (1 << 0)
+#define RCPVf_NO_COPY       (1 << 1)
+#define RCPVf_ALLOW_EMPTY   (1 << 2)
+
 #define RCPVx(pv_arg)       ((RCPV *)((pv_arg) - STRUCT_OFFSET(struct rcpv, pv)))
 #define RCPV_REFCOUNT(pv)   (RCPVx(pv)->refcount)
-#define RCPV_LEN(pv)        (RCPVx(pv)->len)
+#define RCPV_LEN(pv)        (RCPVx(pv)->len-1) /* len always includes space for a null */
 
 #ifdef USE_ITHREADS
 
