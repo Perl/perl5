@@ -9,7 +9,7 @@ BEGIN {
 use strict;
 use warnings;
 
-plan(tests => 58);
+plan(tests => 59);
 
 my $nonfile = tempfile();
 
@@ -289,4 +289,17 @@ like $@, qr/^Can't locate \Q$nonsearch\E at/,
         'unshift @INC, sub { sub { 0 } }; require "asdasd";',
         qr/asdasd did not return a true value/,
         { }, '@INC hook blocks do not cause segfault');
+}
+
+{
+    # make sure that modifications to %INC during an INC hooks lifetime
+    # don't result in us having an empty string for the cop_file.
+    # Older perls will output "error at  line 1".
+
+    fresh_perl_like(
+        'use lib qq(./lib); BEGIN{ unshift @INC, sub { if ($_[1] eq "CannotParse.pm" and !$seen++) { '
+       .'eval q(require $_[1]); warn $@; my $code= qq[die qq(error)];'
+       .'open my $fh,"<", q(lib/Dies.pm); return $fh } } } require CannotParse;',
+        qr!\Asyntax error.*?^error at /loader/0x[A-Fa-f0-9]+/CannotParse\.pm line 1\.!ms,
+        { }, 'Inc hooks have the correct cop_file');
 }

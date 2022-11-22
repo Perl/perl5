@@ -5676,6 +5676,7 @@ t/lib/Devel/nodb.pm		Module for t/run/switchd.t
 t/lib/Devel/switchd.pm		Module for t/run/switchd.t
 t/lib/Devel/switchd_empty.pm	Module for t/run/switchd.t
 t/lib/Devel/switchd_goto.pm	Module for t/run/switchd.t
+t/lib/Dies.pm			For test case in op/require_errors.t
 t/lib/feature/api		Test API for checking features enabled/disabled
 t/lib/feature/bareword_filehandles	Tests for enabling/disabling bareword_filehandles feature
 t/lib/feature/bits		Tests for feature bit handling
