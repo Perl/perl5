@@ -4382,8 +4382,24 @@ S_require_file(pTHX_ SV *sv)
                     /* Adjust file name if the hook has set an %INC entry.
                        This needs to happen after the FREETMPS above.  */
                     svp = hv_fetch(GvHVn(PL_incgv), name, len, 0);
-                    if (svp)
-                        tryname = SvPV_nolen_const(*svp);
+                    /* we have to make sure that the value is not undef
+                     * or the empty string, if it is then we should not
+                     * set tryname to it as this will break error messages.
+                     *
+                     * This might happen if an @INC hook evals the module
+                     * which was required in the first place and which
+                     * triggered the @INC hook, and that eval dies.
+                     * See https://github.com/Perl/perl5/issues/20535
+                     */
+                    if (svp && SvOK(*svp)) {
+                        STRLEN len;
+                        const char *tmp_pv = SvPV_const(*svp,len);
+                        /* we also guard against the deliberate empty string.
+                         * We do not guard against '0', if people want to set their
+                         * file name to 0 that is up to them. */
+                        if (len)
+                            tryname = tmp_pv;
+                    }
 
                     if (tryrsfp) {
                         hook_sv = dirsv;
