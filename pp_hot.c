@@ -4782,6 +4782,57 @@ PP(pp_subst)
 
 PP(pp_grepwhile)
 {
+    /* Understanding the stack during a grep.
+     *
+     * 'grep expr, args' is implemented in the form of
+     *     grepstart;
+     *     do {
+     *          expr;
+     *          grepwhile;
+     *     } while (args);
+     *
+     * The stack examples below are in the form of 'perl -Ds' output,
+     * where any stack element indexed by PL_markstack_ptr[i] has a star
+     * just to the right of it.  In addition, the corresponding i value
+     * is displayed under the indexed stack element.
+     *
+     * On entry to grepwhile, the stack looks like this:
+     *
+     *      =>   *  M1..Mn  X1  *  X2..Xn  C  *  R1..Rn  BOOL
+     *       [-2]          [-1]           [0]
+     *
+     * where:
+     *   M1..Mn   Accumulated args which have been matched so far.
+     *   X1..Xn   Random discardable elements from previous iterations.
+     *   C        The current (just processed) arg, still aliased to $_.
+     *   R1..Rn   The args remaining to be processed.
+     *   BOOL     the result of the just-executed grep expression.
+     *
+     * Note that it is easiest to think of the top two stack marks as both
+     * being one too high, and so it would make more sense to have had the
+     * marks like this:
+     *
+     *      =>   *  M1..Mn  *  X1..Xn  *  C  R1..Rn  BOOL
+     *      [-2]       [-1]        [0]
+     *
+     * where the stack is divided neatly into 3 groups:
+     *   - matched,
+     *   - discarded,
+     *   - being, or yet to be, processed.
+     * But off-by-one is the way it is currently, and it works as long as
+     * we keep it consistent and bear it in mind.
+     *
+     * pp_grepwhile() does the following:
+     *
+     * - for a match, replace the X1 pointer with a pointer to C and bump
+     *     PL_markstack_ptr[-1]
+     * - if more args to process, bump PL_markstack_ptr[0] and update the
+     *     $_ alias, else
+     * - remove top 3 MARKs and return M1..Mn, or a scalar,
+     *     or void as appropriate.
+     *
+     */
+
     dSP;
     dPOPss;
 

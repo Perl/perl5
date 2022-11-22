@@ -968,6 +968,11 @@ PP(pp_formline)
 /* also used for: pp_mapstart() */
 PP(pp_grepstart)
 {
+    /* See the code comments at the start of pp_grepwhile() and
+     * pp_mapwhile() for an explanation of how the stack is used
+     * during a grep or map.
+     */
+
     dSP;
     SV *src;
 
@@ -1005,6 +1010,62 @@ PP(pp_grepstart)
 
 PP(pp_mapwhile)
 {
+    /* Understanding the stack during a map.
+     *
+     * 'map expr, args' is implemented in the form of
+     *
+     *     grepstart; // which handles map too
+     *     do {
+     *          expr;
+     *          mapwhile;
+     *     } while (args);
+     *
+     * The stack examples below are in the form of 'perl -Ds' output,
+     * where any stack element indexed by PL_markstack_ptr[i] has a star
+     * just to the right of it.  In addition, the corresponding i value
+     * is displayed under the indexed stack element.
+     *
+     * On entry to mapwhile, the stack looks like this:
+     *
+     *      =>   *  A1..An  X1  *  X2..Xn  C  *  R1..Rn  *  E1..En
+     *      [-3]           [-2]          [-1]        [0]
+     *
+     * where:
+     *   A1..An   Accumulated results from all previous iterations of expr
+     *   X1..Xn   Random garbage
+     *   C        The current (just processed) arg, still aliased to $_.
+     *   R1..Rn   The args remaining to be processed.
+     *   E1..En   the (list) result of the just-executed map expression.
+     *
+     * Note that it is easiest to think of stack marks [-1] and [-2] as both
+     * being one too high, and so it would make more sense to have had the
+     * marks like this:
+     *
+     *      =>   *  A1..An  *  X1..Xn  *  C  R1..Rn  *  E1..En
+     *      [-3]       [-2]       [-1]           [0]
+     *
+     * where the stack is divided neatly into 4 groups:
+     *   - accumulated results
+     *   - discards and/or holes proactively created for later result storage
+     *   - being, or yet to be, processed,
+     *   - results of last expr
+     * But off-by-one is the way it is currently, and it works as long as
+     * we keep it consistent and bear it in mind.
+     *
+     * pp_mapwhile() does the following:
+     *
+     * - If there isn't enough space in the X1..Xn zone to insert the
+     *   expression results, grow the stack and shift up everything above C.
+     * - move E1..En to just above An
+     * - at the same time, manipulate the tmps stack so that temporaries
+     *   from executing expr can be freed without prematurely freeing
+     *   E1..En.
+     * - if on last iteration, pop all the marks, reset the stack pointer
+     *   and update the return args based on caller context.
+     * - else alias $_ to the next arg.
+     *
+     */
+
     dSP;
     const U8 gimme = GIMME_V;
     I32 items = (SP - PL_stack_base) - TOPMARK; /* how many new items */
