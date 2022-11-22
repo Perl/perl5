@@ -2389,7 +2389,9 @@ Perl_new_warnings_bitfield(pTHX_ char *buffer, const char *const bits,
     PERL_UNUSED_CONTEXT;
     PERL_ARGS_ASSERT_NEW_WARNINGS_BITFIELD;
 
-    buffer = rcpv_new(buffer, len_wanted, RCPVf_NO_COPY);
+    /* pass in null as the source string as we will do the
+     * copy ourselves. */
+    buffer = rcpv_new(NULL, len_wanted, RCPVf_NO_COPY);
     Copy(bits, buffer, size, char);
     if (size < WARNsize)
         Zero(buffer + size, WARNsize - size, char);
