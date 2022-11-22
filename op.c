@@ -15255,16 +15255,32 @@ Perl_dup_warnings(pTHX_ char* warnings)
 /*
 =for apidoc rcpv_new
 
-Create a new shared memory refcounted string from the argument. If flags is set 
-to RCPVf_USE_STRLEN then the len argument is ignored and set using strlen(pv). 
-If the pv is NULL returns NULL. The newly created string will have a refcount 
-of 1, and is suitable for passing into rcpv_copy() and rcpv_free(). To access
-the RCPV * from the returned value use the RCPVx() macro.
+Create a new shared memory refcounted string with the requested size, and
+with the requested initialization and a refcount of 1. The actual space
+allocated will be 1 byte more than requested and rcpv_new() will ensure that
+the extra byte is a null regardless of any flags settings.
 
-Note that rcpv_new() does NOT use a hash table or anything like that to dedupe
-inputs given the same text content. Each call with a non-null pv parameter
-will produce a distinct pointer with its own refcount regardless of the input
-content.
+If the RCPVf_NO_COPY flag is set then the pv argument will be
+ignored, otherwise the contents of the pv pointer will be copied into
+the new buffer or if it is NULL the function will do nothing and return NULL.
+
+If the RCPVf_USE_STRLEN flag is set then the len argument is ignored and
+recomputed using C<strlen(pv)>. It is an error to combine RCPVf_USE_STRLEN
+and RCPVf_NO_COPY at the same time.
+
+Under DEBUGGING rcpv_new() will assert() if it is asked to create a 0 length
+shared string unless the RCPVf_ALLOW_EMPTY flag is set.
+
+The return value from the function is suitable for passing into rcpv_copy() and
+rcpv_free(). To access the RCPV * from the returned value use the RCPVx() macro.
+The 'len' member of the RCPV struct stores the allocated length (including the
+extra byte), but the RCPV_LEN() macro returns the requested length (not
+including the extra byte).
+
+Note that rcpv_new() does NOT use a hash table or anything like that to
+dedupe inputs given the same text content. Each call with a non-null pv
+parameter will produce a distinct pointer with its own refcount regardless of
+the input content.
 
 =cut
 */
@@ -15277,23 +15293,32 @@ Perl_rcpv_new(pTHX_ const char *pv, STRLEN len, U32 flags) {
 
     PERL_UNUSED_CONTEXT;
 
+    /* Musn't use both at the same time */
+    assert((flags & (RCPVf_NO_COPY|RCPVf_USE_STRLEN))!=
+                    (RCPVf_NO_COPY|RCPVf_USE_STRLEN));
+
     if (!pv && (flags & RCPVf_NO_COPY) == 0)
         return NULL;
 
     if (flags & RCPVf_USE_STRLEN)
         len = strlen(pv);
 
-    rcpv = (RCPV *)PerlMemShared_malloc(sizeof(struct rcpv) + len + 1);
+    assert(len || (flags & RCPVf_ALLOW_EMPTY));
+
+    len++; /* add one for the null we will add to the end */
+
+    rcpv = (RCPV *)PerlMemShared_malloc(sizeof(struct rcpv) + len);
     if (!rcpv)
         croak_no_mem();
 
-    rcpv->len = len;
+    rcpv->len = len;    /* store length including null,
+                           RCPV_LEN() subtracts 1 to account for this */
     rcpv->refcount = 1;
 
     if ((flags & RCPVf_NO_COPY) == 0) {
-        (void)memcpy(rcpv->pv, pv, len);
-        rcpv->pv[len]= '\0';
+        (void)memcpy(rcpv->pv, pv, len-1);
     }
+    rcpv->pv[len-1]= '\0'; /* the last byte should always be null */
     return rcpv->pv;
 }
 
@@ -15324,6 +15349,7 @@ Perl_rcpv_free(pTHX_ char *pv) {
         return NULL;
     RCPV *rcpv = RCPVx(pv);
 
+    assert(rcpv->refcount);
     assert(rcpv->len);
 
     OP_REFCNT_LOCK;
