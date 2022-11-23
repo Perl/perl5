@@ -7,6 +7,7 @@ BEGIN {
 }
 
 use Errno;
+use Cwd qw(getcwd);
 
 Win32::FsType() eq 'NTFS'
     or skip_all("need NTFS");
@@ -83,7 +84,6 @@ ok(unlink($tmpfile2), "unlink the symlink");
 unlike($tmpfile1, qr([\\/]), "temp filename has no path");
 ok(symlink("./$tmpfile1", $tmpfile2), "UNIX (/) relative link to the file");
 ok(-f $tmpfile2, "we can see it through the link");
-system "dir";
 ok(unlink($tmpfile2), "unlink the symlink");
 
 ok(unlink($tmpfile1), "and the file");
@@ -101,6 +101,16 @@ if (system("mklink /j $tmpfile2 $tmpfile1") == 0) {
     ok(unlink($tmpfile2), "unlink magic for junctions");
 }
 rmdir($tmpfile1);
+
+{
+    # link to an absolute path to a directory
+    # 20533
+    my $cwd = getcwd();
+    ok(symlink($cwd, $tmpfile1),
+       "symlink to an absolute path to cwd");
+    ok(-d $tmpfile1, "the link looks like a directory");
+    unlink $tmpfile1;
+}
 
 done_testing();
 
