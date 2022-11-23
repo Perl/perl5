@@ -3740,7 +3740,6 @@ win32_symlink(const char *oldfile, const char *newfile)
         strEQ(oldfile, ".") ||
         (isSLASH(oldfile[oldfile_len-2]) && oldfile[oldfile_len-1] == '.') ||
         strEQ(oldfile+oldfile_len-3, "\\..") ||
-        strEQ(oldfile+oldfile_len-3, "/..") ||
         (oldfile_len == 2 && oldfile[1] == ':')) {
         create_flags |= SYMBOLIC_LINK_FLAG_DIRECTORY;
     }
@@ -3753,7 +3752,7 @@ win32_symlink(const char *oldfile, const char *newfile)
             /* relative to current directory on a drive, or absolute */
             /* dest_path = oldfile; already done */
         }
-        else if (oldfile[0] != '\\' && oldfile[0] != '/') {
+        else if (oldfile[0] != '\\') {
             size_t newfile_len = strlen(newfile);
             char *last_slash = strrchr(newfile, '/');
             char *last_bslash = strrchr(newfile, '\\');
