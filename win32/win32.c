@@ -3749,8 +3749,8 @@ win32_symlink(const char *oldfile, const char *newfile)
         const char *dest_path = oldfile;
         char szTargetName[MAX_PATH+1];
 
-        if (oldfile_len >= 3 && oldfile[1] == ':' && oldfile[2] != '\\' && oldfile[2] != '/') {
-            /* relative to current directory on a drive */
+        if (oldfile_len >= 3 && oldfile[1] == ':') {
+            /* relative to current directory on a drive, or absolute */
             /* dest_path = oldfile; already done */
         }
         else if (oldfile[0] != '\\' && oldfile[0] != '/') {
