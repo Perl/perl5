@@ -1113,6 +1113,13 @@ PP(pp_mapwhile)
             *PL_markstack_ptr += shift;
             while (count--)
                 *dst-- = *src--;
+#ifdef PERL_RC_STACK
+            /* zero out the hole just created, so that on a
+             * reference-counted stack, so that the just-shifted SVs
+             * aren't counted twice.
+             */
+            Zero(src+1, (dst-src), SV*);
+#endif
         }
         /* copy the new items down to the destination list */
         dst = PL_stack_base + (PL_markstack_ptr[-2] += items) - 1;
