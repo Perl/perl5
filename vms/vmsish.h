@@ -244,15 +244,9 @@
  */
 #define ALTERNATE_SHEBANG "$"
 
-/* Macros to set errno using the VAX thread-safe calls, if present */
-#if (defined(__DECC) || defined(__DECCXX)) && !defined(__ALPHA)
-#  define set_errno(v)      (cma$tis_errno_set_value(v))
-   void cma$tis_errno_set_value(int __value);  /* missing in some errno.h */
-#  define set_vaxc_errno(v) (vaxc$errno = (v))
-#else
-#  define set_errno(v)      (errno = (v))
-#  define set_vaxc_errno(v) (vaxc$errno = (v))
-#endif
+/* Macros to set errno.  */
+#define set_errno(v)      (errno = (v))
+#define set_vaxc_errno(v) (vaxc$errno = (v))
 
 /* Support for 'vmsish' behaviors enabled with C<use vmsish> pragma */
 
