@@ -2725,25 +2725,33 @@ S_unwind_loop(pTHX)
                 OP_NAME(PL_op));
     }
     else {
-        dSP;
         STRLEN label_len;
-        const char * const label =
-            PL_op->op_flags & OPf_STACKED
-                ? SvPV(TOPs,label_len)
-                : (label_len = strlen(cPVOP->op_pv), cPVOP->op_pv);
-        const U32 label_flags =
-            PL_op->op_flags & OPf_STACKED
-                ? SvUTF8(POPs)
-                : (cPVOP->op_private & OPpPV_IS_UTF8) ? SVf_UTF8 : 0;
-        PUTBACK;
+        const char * label;
+        U32 label_flags;
+        SV *sv;
+
+        if (PL_op->op_flags & OPf_STACKED) {
+            dSP;
+            sv = POPs;
+            PUTBACK;
+            label       = SvPV(sv, label_len);
+            label_flags = SvUTF8(sv);
+        }
+        else {
+            sv          = NULL; /* not needed, but shuts up compiler warn */
+            label       = cPVOP->op_pv;
+            label_len   = strlen(label);
+            label_flags = (cPVOP->op_private & OPpPV_IS_UTF8) ? SVf_UTF8 : 0;
+        }
+
         cxix = dopoptolabel(label, label_len, label_flags);
         if (cxix < 0)
             /* diag_listed_as: Label not found for "last %s" */
             Perl_croak(aTHX_ "Label not found for \"%s %" SVf "\"",
                                        OP_NAME(PL_op),
                                        SVfARG(PL_op->op_flags & OPf_STACKED
-                                              && !SvGMAGICAL(TOPp1s)
-                                              ? TOPp1s
+                                              && !SvGMAGICAL(sv)
+                                              ? sv
                                               : newSVpvn_flags(label,
                                                     label_len,
                                                     label_flags | SVs_TEMP)));
