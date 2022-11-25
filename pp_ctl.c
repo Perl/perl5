@@ -4294,7 +4294,7 @@ S_require_file(pTHX_ SV *sv)
                         SvSetSV_nosteal(nsv,sv);
                     }
 
-                    ENTER_with_name("call_INC");
+                    ENTER_with_name("call_INC_hook");
                     SAVETMPS;
                     EXTEND(SP, 2);
 
@@ -4374,7 +4374,7 @@ S_require_file(pTHX_ SV *sv)
 
                     PUTBACK;
                     FREETMPS;
-                    LEAVE_with_name("call_INC");
+                    LEAVE_with_name("call_INC_hook");
 
                     /* Now re-mortalize it. */
                     sv_2mortal(filter_cache);
