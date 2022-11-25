@@ -330,7 +330,6 @@ like $@, qr/^Can't locate \Q$nonsearch\E at/,
         { }, 'INC hooks that overwrite @INC continue as expected (skips a and z)');
 }
 {
-    local $::TODO = "Pending new feature \$INC";
     # as of 5.37.7
     fresh_perl_like(
         '@INC = (sub { @INC=qw(a b); undef $INC }, "z"); '

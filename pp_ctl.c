@@ -4307,6 +4307,9 @@ S_require_file(pTHX_ SV *sv)
                         SvSetSV_nosteal(nsv,sv);
                     }
 
+                    SV * inc_idx_sv = save_scalar(PL_incgv);
+                    sv_setiv(inc_idx_sv,inc_idx);
+
                     ENTER_with_name("call_INC_hook");
                     SAVETMPS;
                     EXTEND(SP, 2);
@@ -4411,6 +4414,21 @@ S_require_file(pTHX_ SV *sv)
 
                     /* FREETMPS may free our filter_cache */
                     SvREFCNT_inc_simple_void(filter_cache);
+
+                    /*
+                     Let the hook override which @INC entry we visit
+                     next by setting $INC to a different value than it
+                     was before we called the hook. If they have
+                     completely rewritten the array they might want us
+                     to start traversing from the beginning, which is
+                     represented by -1. We use undef as an equivalent of
+                     -1. This can't be used as a way to call a hook
+                     twice, as we still dedupe.
+                     We have to do this before we LEAVE, as we localized
+                     $INC before we called the hook.
+                    */
+                    inc_idx_sv = GvSVn(PL_incgv);
+                    inc_idx = SvOK(inc_idx_sv) ? SvIV(inc_idx_sv) : -1;
 
                     PUTBACK;
                     FREETMPS;
