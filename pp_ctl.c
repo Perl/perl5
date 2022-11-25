@@ -4265,13 +4265,39 @@ S_require_file(pTHX_ SV *sv)
         if (vms_unixname)
 #endif
         {
+            HV *inc_seen_hv = (HV*)sv_2mortal((SV*)newHV());
             SV *nsv = sv;
             namesv = newSV_type(SVt_PV);
             AV *inc_ar = GvAVn(PL_incgv);
             for (inc_idx = 0; inc_idx <= AvFILL(inc_ar); inc_idx++) {
                 SV * const dirsv = *av_fetch(inc_ar, inc_idx, TRUE);
+                UV diruv= 0;
+                SV **seen_svp = NULL;
 
                 SvGETMAGIC(dirsv);
+                if (!SvOK(dirsv))
+                    continue;
+
+                /* use the refaddr of the RV for the key for refs */
+                if (SvROK(dirsv)) {
+                    diruv = PTR2UV(SvRV(dirsv));
+                    seen_svp = hv_fetch(inc_seen_hv, (char*)&diruv, sizeof(UV), 1);
+                } else {
+                    /* use the string itself as the key */
+                    STRLEN dirlen;
+                    const char * dirpv= SvPV_const(dirsv, dirlen);
+                    seen_svp = hv_fetch(inc_seen_hv, dirpv, dirlen, 1);
+                }
+
+                if (!seen_svp)
+                    croak_no_mem();
+
+                /* is this a new path or callback? */
+                if (!SvOK(*seen_svp))
+                    sv_setiv(*seen_svp,1);
+                else /* we have seen this already, so we can */
+                    continue;
+
                 if (SvROK(dirsv)) {
                     int count;
                     SV **svp;
