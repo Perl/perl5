@@ -337,7 +337,6 @@ like $@, qr/^Can't locate \Q$nonsearch\E at/,
         { }, 'INC hooks that overwrite @INC and undef $INC continue at start');
 }
 {
-    local $::TODO = "Pending new feature: INCDIR";
     # as of 5.37.7
     fresh_perl_like(
         'sub CB::INCDIR { return "b", "c","d" }; '
@@ -397,7 +396,6 @@ like $@, qr/^Can't locate \Q$nonsearch\E at/,
         { }, 'Blessed objects with no hook methods in array form produce expected exception');
 }
 {
-    local $::TODO = "Pending new feature: INCDIR";
     # as of 5.37.7
     fresh_perl_like(
         'sub CB::INCDIR { "i" } sub CB2::INCDIR { }'
@@ -407,7 +405,6 @@ like $@, qr/^Can't locate \Q$nonsearch\E at/,
         { }, 'Blessed subs with INCDIR methods call INCDIR');
 }
 {
-    local $::TODO = "Pending new feature: INCDIR";
     # as of 5.37.7
     fresh_perl_like(
         'sub CB::INCDIR { return @{$_[2]} }'

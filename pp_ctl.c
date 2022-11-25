@@ -4267,13 +4267,33 @@ S_require_file(pTHX_ SV *sv)
 #endif
         {
             HV *inc_seen_hv = (HV*)sv_2mortal((SV*)newHV());
+            AV *incdir_av = (AV*)sv_2mortal((SV*)newAV());
             SV *nsv = sv;
             namesv = newSV_type(SVt_PV);
             AV *inc_ar = GvAVn(PL_incgv);
-            for (inc_idx = 0; inc_idx <= AvFILL(inc_ar); inc_idx++) {
-                SV *dirsv = *av_fetch(inc_ar, inc_idx, TRUE);
-                UV diruv= 0;
+            SSize_t incdir_continue_inc_idx = -1;
+
+            for (
+                inc_idx = 0;
+                (AvFILL(incdir_av)>=0 /* we have INCDIR items pending */
+                    || inc_idx <= AvFILL(inc_ar));  /* @INC entries remain */
+                inc_idx++
+            ) {
+                SV *dirsv;
+                UV diruv = 0;
                 SV **seen_svp = NULL;
+                /* do we have any pending INCDIR items? */
+                if (AvFILL(incdir_av)>=0) {
+                    /* yep, shift it out */
+                    dirsv = av_shift(incdir_av);
+                    if (AvFILL(incdir_av)<0) {
+                        /* incdir is now empty, continue from where
+                         * we left off after we process this entry  */
+                        inc_idx = incdir_continue_inc_idx;
+                    }
+                } else {
+                    dirsv = *av_fetch(inc_ar, inc_idx, TRUE);
+                }
 
                 if (SvGMAGICAL(dirsv)) {
                     /* have to do this *after* diruv is set up,
@@ -4336,6 +4356,7 @@ S_require_file(pTHX_ SV *sv)
                     }
 
                     const char *method = NULL;
+                    bool is_incdir = FALSE;
                     SV * inc_idx_sv = save_scalar(PL_incgv);
                     sv_setiv(inc_idx_sv,inc_idx);
                     if (sv_isobject(loader)) {
@@ -4346,6 +4367,12 @@ S_require_file(pTHX_ SV *sv)
                         GV * gv = gv_fetchmethod_pvn_flags(pkg, "INC", 3, 0);
                         if (gv && isGV(gv)) {
                             method = "INC";
+                        } else {
+                            gv = gv_fetchmethod_pvn_flags(pkg, "INCDIR", 6, 0);
+                            if (gv && isGV(gv)) {
+                                method = "INCDIR";
+                                is_incdir = TRUE;
+                            }
                         }
                         if (!method) {
                             if (SvTYPE(SvRV(loader)) != SVt_PVCV) {
@@ -4383,6 +4410,48 @@ S_require_file(pTHX_ SV *sv)
                         SV *arg;
 
                         SP -= count - 1;
+
+                        if (is_incdir) {
+                            /* push the stringified returned items into the
+                             * incdir_av array for processing immediately
+                             * afterwards. we deliberately stringify or copy
+                             * "special" arguments, so that overload logic for
+                             * instance applies, but so that the end result is
+                             * stable. We speficially do *not* support returning
+                             * coderefs from an INCDIR call. */
+                            while (count-->0) {
+                                arg = SP[i++];
+                                SvGETMAGIC(arg);
+                                if (!SvOK(arg))
+                                    continue;
+                                if (SvROK(arg)) {
+                                    STRLEN l;
+                                    char *pv = SvPV(arg,l);
+                                    arg = newSVpvn(pv,l);
+                                }
+                                else if (SvGMAGICAL(arg)) {
+                                    arg = newSVsv_nomg(arg);
+                                }
+                                else {
+                                    SvREFCNT_inc(arg);
+                                }
+                                av_push(incdir_av, arg);
+                            }
+                            /* We copy $SIG into incdir_continue_inc_idx
+                             * so that when we finish processing the items
+                             * we just inserted into incdir_av we can continue
+                             * as though we had just finished executing the INCDIR
+                             * hook. We honour $SIG here just like we would for
+                             * an INC hook, the hook might have rewritten @INC
+                             * at the same time as returning something to us.
+                             */
+                            inc_idx_sv = GvSVn(PL_incgv);
+                            incdir_continue_inc_idx = SvOK(inc_idx_sv)
+                                                      ? SvIV(inc_idx_sv) : -1;
+
+                            goto done_hook;
+                        }
+
                         arg = SP[i++];
 
                         if (SvROK(arg) && (SvTYPE(SvRV(arg)) <= SVt_PVLV)
@@ -4431,6 +4500,7 @@ S_require_file(pTHX_ SV *sv)
                             tryrsfp = PerlIO_open(BIT_BUCKET,
                                                   PERL_SCRIPT_MODE);
                         }
+                        done_hook:
                         SP--;
                     } else {
                         SV *errsv= ERRSV;
