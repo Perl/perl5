@@ -9479,7 +9479,7 @@ S_xs_version_bootcheck(pTHX_ U32 items, U32 ax, const char *xs_p, STRLEN xs_len)
 
 # if defined(PERL_MEM_LOG) && !defined(PERL_MEM_LOG_NOIMPL)
 STATIC void
-S_mem_log_common(enum mem_log_type mlt, const UV n, const UV typesize, const char *type_name, const SV *sv, Malloc_t oldalloc, Malloc_t newalloc, const char *filename, const int linenumber, const char *funcname);
+S_mem_log_common(enum mem_log_type mlt, const UV n, const UV typesize, const char *type_name, const SV *sv, const Malloc_t oldalloc, Malloc_t newalloc, const char *filename, const int linenumber, const char *funcname);
 #   define PERL_ARGS_ASSERT_MEM_LOG_COMMON      \
         assert(type_name); assert(filename); assert(funcname)
 
@@ -9513,7 +9513,7 @@ Perl_mem_log_new_sv(const SV *sv, const char *filename, int linenumber, const ch
         assert(sv); assert(filename); assert(funcname)
 
 PERL_CALLCONV Malloc_t
-Perl_mem_log_realloc(const UV n, const UV typesize, const char *type_name, Malloc_t oldalloc, Malloc_t newalloc, const char *filename, const int linenumber, const char *funcname);
+Perl_mem_log_realloc(const UV n, const UV typesize, const char *type_name, const Malloc_t oldalloc, Malloc_t newalloc, const char *filename, const int linenumber, const char *funcname);
 # define PERL_ARGS_ASSERT_MEM_LOG_REALLOC       \
         assert(type_name); assert(filename); assert(funcname)
 
