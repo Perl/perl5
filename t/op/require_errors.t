@@ -388,7 +388,6 @@ like $@, qr/^Can't locate \Q$nonsearch\E at/,
         { }, 'Blessed subs that die produce expected extra message');
 }
 {
-    local $::TODO = "Pending better error messages (eval)";
     # as of 5.37.7
     fresh_perl_like(
         'sub CB::INC { die "bad mojo" } '
