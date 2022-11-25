@@ -4461,6 +4461,14 @@ and you mentioned a variable that starts with 0 that has more than one
 digit. You probably want to remove the leading 0, or if the intent was
 to express a variable name in octal you should convert to decimal.
 
+=item Object with arguments in @INC does not support a hook method
+
+(F) You pushed an array reference hook into C<@INC> which has an object
+as the first argument, but the object doesn't support any known hooks.
+Since you used the array form of creating a hook, you should have supplied
+an object that supports either the C<INC> or C<INCDIR> methods. You
+could also use a coderef instead of an object.
+
 =item Octal number > 037777777777 non-portable
 
 (W portable) The octal number you specified is larger than 2**32-1
