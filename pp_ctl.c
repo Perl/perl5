@@ -4319,11 +4319,6 @@ S_require_file(pTHX_ SV *sv)
                         SvGETMAGIC(loader);
                     }
 
-                    Perl_sv_setpvf(aTHX_ namesv, "/loader/0x%" UVxf "/%s",
-                                   diruv, name);
-                    tryname = SvPVX_const(namesv);
-                    tryrsfp = NULL;
-
                     if (SvPADTMP(nsv)) {
                         nsv = sv_newmortal();
                         SvSetSV_nosteal(nsv,sv);
@@ -4369,6 +4364,11 @@ S_require_file(pTHX_ SV *sv)
                             }
                         }
                     }
+
+                    Perl_sv_setpvf(aTHX_ namesv, "/loader/0x%" UVxf "/%s",
+                                   diruv, name);
+                    tryname = SvPVX_const(namesv);
+                    tryrsfp = NULL;
 
                     ENTER_with_name("call_INC_hook");
                     SAVETMPS;
