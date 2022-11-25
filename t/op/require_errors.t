@@ -310,7 +310,6 @@ like $@, qr/^Can't locate \Q$nonsearch\E at/,
         { }, 'Inc hooks have the correct cop_file');
 }
 {
-    local $::TODO = "Pending segfault fix";
     # this can segfault or assert prior to @INC hardening.
     fresh_perl_like(
         'unshift @INC, sub { *INC=["a","b"] }; '
@@ -319,7 +318,6 @@ like $@, qr/^Can't locate \Q$nonsearch\E at/,
         { }, 'INC hooks do not segfault when overwritten');
 }
 {
-    local $::TODO = "Pending error message improvement";
     # this is the defined behavior, but in older perls the error message
     # would lie and say "contains: a b", which is true in the sense that
     # it is the value of @INC after the require, but not the directory
