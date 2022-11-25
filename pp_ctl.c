@@ -4335,25 +4335,43 @@ S_require_file(pTHX_ SV *sv)
                         SvSetSV_nosteal(nsv,sv);
                     }
 
+                    const char *method = NULL;
                     SV * inc_idx_sv = save_scalar(PL_incgv);
                     sv_setiv(inc_idx_sv,inc_idx);
+                    if (sv_isobject(loader)) {
+                        /* if it is an object and it has an INC method, then
+                         * call the method. Otherwise assume its a blessed coderef.
+                         */
+                        HV *pkg = SvSTASH(SvRV(loader));
+                        GV * gv = gv_fetchmethod_pvn_flags(pkg, "INC", 3, 0);
+                        if (gv && isGV(gv)) {
+                            method = "INC";
+                        }
+                        if (!method) {
+                            if (SvTYPE(SvRV(loader)) != SVt_PVCV) {
+                                if (dirsv != loader)
+                                    croak("Object with arguments in @INC does not support a hook method");
+                                else
+                                    goto treat_as_string;
+                            }
+                        }
+                    }
 
                     ENTER_with_name("call_INC_hook");
                     SAVETMPS;
-                    EXTEND(SP, 2);
-
+                    EXTEND(SP, 2 + ((method && (loader != dirsv)) ? 1 : 0));
                     PUSHMARK(SP);
-                    PUSHs(dirsv);
+                    PUSHs(method ? loader : dirsv); /* always use the object for method calls */
                     PUSHs(nsv);
+                    if (method && (loader != dirsv)) /* add the args array for method calls */
+                        PUSHs(dirsv);
                     PUTBACK;
                     if (SvGMAGICAL(loader)) {
                         SV *l = sv_newmortal();
                         sv_setsv_nomg(l, loader);
                         loader = l;
                     }
-                    const char *method = NULL;
-                    if (sv_isobject(loader)) {
-                        method = "INC";
+                    if (method) {
                         count = call_method(method, G_LIST|G_EVAL);
                     } else {
                         count = call_sv(loader, G_LIST|G_EVAL);
@@ -4510,12 +4528,13 @@ S_require_file(pTHX_ SV *sv)
                         filter_sub = NULL;
                     }
                 }
-                else if (path_searchable) {
+                else
+                    treat_as_string:
+                    if (path_searchable) {
                     /* match against a plain @INC element (non-searchable
                      * paths are only matched against refs in @INC) */
                     const char *dir;
                     STRLEN dirlen;
-
                     if (SvOK(dirsv)) {
                         dir = SvPV_nomg_const(dirsv, dirlen);
                     } else {
