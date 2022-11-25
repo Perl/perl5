@@ -144,6 +144,7 @@ my $memory_scn = 'Memory Management';
 my $MRO_scn = 'MRO';
 my $multicall_scn = 'Multicall Functions';
 my $numeric_scn = 'Numeric Functions';
+my $rpp_scn = 'Reference-counted stack manipulation';
 
 # Now combined, as unclear which functions go where, but separate names kept
 # to avoid 1) other code changes; 2) in case it seems better to split again
@@ -324,6 +325,14 @@ my %valid_sections = (
         header => <<~"EOT",
             These are used in the simple report generation feature of Perl.
             See L<perlform>.
+            EOT
+      },
+    $rpp_scn => {
+        header => <<~'EOT',
+            Functions for pushing and pulling items on the stack when the
+            stack is reference counted. They are intended as replacements
+            for the old PUSHs, POPi, EXTEND etc pp macros within pp
+            functions.
             EOT
       },
     $signals_scn => {},
@@ -1724,7 +1733,7 @@ sub output {
 
         # We allow empty sections in perlintern.
         if (! $section_info && $podname eq 'perlapi') {
-            warn "Empty section '$section_name'; skipped";
+            warn "Empty section '$section_name' for $podname; skipped";
             next;
         }
 

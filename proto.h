@@ -9741,6 +9741,79 @@ Perl_newSV_type_mortal(pTHX_ const svtype type)
         __attribute__always_inline__;
 # define PERL_ARGS_ASSERT_NEWSV_TYPE_MORTAL
 
+PERL_STATIC_INLINE void
+Perl_rpp_extend(pTHX_ SSize_t n);
+# define PERL_ARGS_ASSERT_RPP_EXTEND
+
+PERL_STATIC_INLINE bool
+Perl_rpp_is_lone(pTHX_ SV *sv);
+# define PERL_ARGS_ASSERT_RPP_IS_LONE           \
+        assert(sv)
+
+PERL_STATIC_INLINE SV *
+Perl_rpp_pop_1_norc(pTHX);
+# define PERL_ARGS_ASSERT_RPP_POP_1_NORC
+
+PERL_STATIC_INLINE void
+Perl_rpp_popfree_1(pTHX);
+# define PERL_ARGS_ASSERT_RPP_POPFREE_1
+
+PERL_STATIC_INLINE void
+Perl_rpp_popfree_2(pTHX);
+# define PERL_ARGS_ASSERT_RPP_POPFREE_2
+
+PERL_STATIC_INLINE void
+Perl_rpp_popfree_to(pTHX_ SV **sp);
+# define PERL_ARGS_ASSERT_RPP_POPFREE_TO        \
+        assert(sp)
+
+PERL_STATIC_INLINE void
+Perl_rpp_push_1(pTHX_ SV *sv);
+# define PERL_ARGS_ASSERT_RPP_PUSH_1            \
+        assert(sv)
+
+PERL_STATIC_INLINE void
+Perl_rpp_push_1_norc(pTHX_ SV *sv);
+# define PERL_ARGS_ASSERT_RPP_PUSH_1_NORC       \
+        assert(sv)
+
+PERL_STATIC_INLINE void
+Perl_rpp_push_2(pTHX_ SV *sv1, SV *sv2);
+# define PERL_ARGS_ASSERT_RPP_PUSH_2            \
+        assert(sv1); assert(sv2)
+
+PERL_STATIC_INLINE void
+Perl_rpp_replace_1_1(pTHX_ SV *sv);
+# define PERL_ARGS_ASSERT_RPP_REPLACE_1_1       \
+        assert(sv)
+
+PERL_STATIC_INLINE void
+Perl_rpp_replace_2_1(pTHX_ SV *sv);
+# define PERL_ARGS_ASSERT_RPP_REPLACE_2_1       \
+        assert(sv)
+
+PERL_STATIC_INLINE bool
+Perl_rpp_stack_is_rc(pTHX);
+# define PERL_ARGS_ASSERT_RPP_STACK_IS_RC
+
+PERL_STATIC_INLINE bool
+Perl_rpp_try_AMAGIC_1(pTHX_ int method, int flags);
+# define PERL_ARGS_ASSERT_RPP_TRY_AMAGIC_1
+
+PERL_STATIC_INLINE bool
+Perl_rpp_try_AMAGIC_2(pTHX_ int method, int flags);
+# define PERL_ARGS_ASSERT_RPP_TRY_AMAGIC_2
+
+PERL_STATIC_INLINE void
+Perl_rpp_xpush_1(pTHX_ SV *sv);
+# define PERL_ARGS_ASSERT_RPP_XPUSH_1           \
+        assert(sv)
+
+PERL_STATIC_INLINE void
+Perl_rpp_xpush_2(pTHX_ SV *sv1, SV *sv2);
+# define PERL_ARGS_ASSERT_RPP_XPUSH_2           \
+        assert(sv1); assert(sv2)
+
 PERL_STATIC_INLINE char *
 Perl_savepv(pTHX_ const char *pv)
         __attribute__malloc__
