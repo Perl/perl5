@@ -17,7 +17,8 @@ use feature 'state';
 
 my %known_bad_locales = (   # XXX eventually will need version info if and
                             # when these get fixed.
-                        );
+    solaris => [ 'vi_VN.UTF-8', ],  # Use of U+A8 segfaults: GH #20578
+);
 
 eval { require POSIX; import POSIX 'locale_h'; };
 my $has_locale_h = ! $@;
