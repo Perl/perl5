@@ -399,7 +399,6 @@ if ($can_fork) {
 }
 SKIP:{
     skip "need fork",1 unless $can_fork;
-    local $::TODO = "Pending";
     fresh_perl_like('@INC=("A",bless({},"Hook"),"D"); '
                  .'sub Hook::INCDIR { return "B","C"} '
                  .'eval "require Frobnitz" or print $@;',
