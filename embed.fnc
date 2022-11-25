@@ -6026,7 +6026,7 @@ ST	|void	|mem_log_common |enum mem_log_type mlt			\
 				|const UV typesize			\
 				|NN const char *type_name		\
 				|NULLOK const SV *sv			\
-				|Malloc_t oldalloc			\
+				|const Malloc_t oldalloc		\
 				|Malloc_t newalloc			\
 				|NN const char *filename		\
 				|const int linenumber			\
@@ -6061,7 +6061,7 @@ CTp	|Malloc_t|mem_log_realloc					\
 				|const UV n				\
 				|const UV typesize			\
 				|NN const char *type_name		\
-				|Malloc_t oldalloc			\
+				|const Malloc_t oldalloc		\
 				|Malloc_t newalloc			\
 				|NN const char *filename		\
 				|const int linenumber			\

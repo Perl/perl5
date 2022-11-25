@@ -4951,7 +4951,7 @@ Perl_debug_hash_seed(pTHX_ bool via_debug_h)
 static void
 S_mem_log_common(enum mem_log_type mlt, const UV n, 
                  const UV typesize, const char *type_name, const SV *sv,
-                 Malloc_t oldalloc, Malloc_t newalloc,
+                 const Malloc_t oldalloc, Malloc_t newalloc,
                  const char *filename, const int linenumber,
                  const char *funcname)
 {
@@ -5099,7 +5099,7 @@ Perl_mem_log_alloc(const UV n, const UV typesize, const char *type_name,
 
 Malloc_t
 Perl_mem_log_realloc(const UV n, const UV typesize, const char *type_name,
-                     Malloc_t oldalloc, Malloc_t newalloc, 
+                     const Malloc_t oldalloc, Malloc_t newalloc,
                      const char *filename, const int linenumber, 
                      const char *funcname)
 {
