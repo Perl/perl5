@@ -596,30 +596,46 @@ sub is_locale_utf8 ($) { # Return a boolean as to if core Perl thinks the input
     return $ret;
 }
 
-sub find_utf8_ctype_locales (;$) { # Return the names of the locales that core
-                                  # Perl thinks are UTF-8 LC_CTYPE locales.
-                                  # Optional parameter is a reference to a
-                                  # list of locales to try; if omitted, this
-                                  # tries all locales it can find on the
-                                  # platform
+sub classify_locales_wrt_utf8ness($) {
+
+    # Takes the input list of locales, and returns two lists split apart from
+    # it: the UTF-8 ones, and the non-UTF-8 ones.
+
+    my $locales_ref = shift;
+    my (@utf8, @non_utf8);
+
+    if (! locales_enabled('LC_CTYPE')) {  # No CTYPE implies all are non-UTF-8
+        @non_utf8 = $locales_ref->@*;
+        return ( \@utf8, \@non_utf8 );
+    }
+
+    foreach my $locale (@$locales_ref) {
+        my $which = (is_locale_utf8($locale)) ? \@utf8 : \@non_utf8;
+        push $which->@*, $locale;
+    }
+
+    return ( \@utf8, \@non_utf8 );
+}
+
+sub find_utf8_ctype_locales (;$) {
+
+    # Return the names of the locales that core Perl thinks are UTF-8 LC_CTYPE
+    # locales.  Optional parameter is a reference to a list of locales to try;
+    # if omitted, this tries all locales it can find on the platform
+
     return unless locales_enabled('LC_CTYPE');
 
     my $locales_ref = shift;
-    my @return;
-
     if (! defined $locales_ref) {
 
         my @locales = find_locales(&POSIX::LC_CTYPE());
         $locales_ref = \@locales;
     }
 
-    foreach my $locale (@$locales_ref) {
-        push @return, $locale if is_locale_utf8($locale);
-    }
-
-    return @return;
+    my ($utf8_ref, undef) = classify_locales_wrt_utf8ness($locales_ref);
+    return unless $utf8_ref;
+    return $utf8_ref->@*;
 }
-
 
 sub find_utf8_ctype_locale (;$) { # Return the name of a locale that core Perl
                                   # thinks is a UTF-8 LC_CTYPE non-turkic
