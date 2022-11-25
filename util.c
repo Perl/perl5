@@ -2494,12 +2494,7 @@ Perl_my_setenv(pTHX_ const char *nam, const char *val)
         char *new_env = S_env_alloc(NULL, nlen, vlen, 2, 1);
         /* all that work just for this */
         my_setenv_format(new_env, nam, nlen, val, vlen);
-#    ifndef WIN32
         putenv(new_env);
-#    else
-        PerlEnv_putenv(new_env);
-        safesysfree(new_env);
-#    endif
 
 #  endif /* HAS_SETENV */
 }
