@@ -232,6 +232,37 @@ XXX Changes (i.e. rewording) of diagnostic messages go here
 
 =item *
 
+The error message that is produced when a C<require> or C<use> statement
+fails has been changed. It used to contain the words C<@INC contains:>,
+and it used to show the state of C<@INC> *after* the require had
+completed and failed. The error message has been changed to say C<@INC
+entries checked:> and to reflect the actual directories or hooks that
+were executed during the require statement. For example:
+
+    perl -e'push @INC, sub {@INC=()}; eval "require Frobnitz"
+        or die $@'
+    Can't locate Frobnitz.pm in @INC (you may need to install the
+    Frobnitz module) (@INC contains:) at (eval 1) line 1.
+
+Will change to (with some output elided for clarity):
+
+    perl -e'push @INC, sub {@INC=()}; eval "require Frobnitz"
+        or die $@'
+    Can't locate Frobnitz.pm in @INC (you may need to install the
+    Frobnitz module) (@INC entries checked:
+    .../site_perl/5.37.7/x86_64-linux .../site_perl/5.37.7
+    .../5.37.7/x86_64-linux .../5.37.7 CODE(0x562745e684b8))
+    at (eval 1) line 1.
+
+thus showing the actual directories checked. Code that checks for
+C<@INC contains:> in error messages should be hardened against any future
+wording changes between the C<@INC> and C<:>, for instance use
+C<qr/\@INC[ \w]+:/> instead of using C<qr/\@INC contains:/> or
+C<qr/\@INC entries checked:/> in tests as this will ensure both forward
+and backward compatibility.
+
+=item *
+
 XXX Describe change here
 
 =back

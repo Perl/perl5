@@ -294,18 +294,14 @@ SKIP: {
     $$t = sub { $called ++; !1 };
     delete $INC{'foo.pm'}; # in case another test uses foo
     eval { require foo };
-    { local $::TODO = "Will be fixed in a follow up patch";
     is $INCtie::count, 1,
         'FETCH is called once on undef scalar-tied @INC elem';
-    }
     is $called, 1, 'sub in scalar-tied @INC elem is called';
     () = "$INC[0]"; # force a fetch, so the SV is ROK
     $INCtie::count = 0;
     eval { require foo };
-    { local $::TODO = "Will be fixed in a follow up patch";
     is $INCtie::count, 1,
         'FETCH is called once on scalar-tied @INC elem holding ref';
-    }
     is $called, 2, 'sub in scalar-tied @INC elem holding ref is called';
     $$t = [];
     $INCtie::count = 0;
@@ -315,10 +311,8 @@ SKIP: {
     $$t = "string";
     $INCtie::count = 0;
     eval { require foo };
-    { local $::TODO = "Will be fixed in a follow up patch";
     is $INCtie::count, 1,
        'FETCH called once on scalar-tied @INC elem returning string';
-    }
 }
 
 
@@ -409,7 +403,7 @@ SKIP:{
     fresh_perl_like('@INC=("A",bless({},"Hook"),"D"); '
                  .'sub Hook::INCDIR { return "B","C"} '
                  .'eval "require Frobnitz" or print $@;',
-                  qr/\(\@INC contains: A Hook=HASH\(0x[A-Fa-f0-9]+\) B C D\)/,
+                  qr/\(\@INC[\w ]+: A Hook=HASH\(0x[A-Fa-f0-9]+\) B C D\)/,
                   {},
                   "Check if INCDIR hook works as expected");
 }
