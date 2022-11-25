@@ -4398,7 +4398,6 @@ ext/Pod-Html/corpus/perlvar-copy.pod
 ext/Pod-Html/lib/Pod/Html.pm	Convert POD data to HTML
 ext/Pod-Html/lib/Pod/Html/Util.pm	Helper functions for Pod-Html
 ext/Pod-Html/t/anchorify.t
-ext/Pod-Html/t/anchorify-536.t	Test Pod-Html utility functions during perl-5.36
 ext/Pod-Html/t/cache.pod
 ext/Pod-Html/t/cache.t
 ext/Pod-Html/t/crossref.pod

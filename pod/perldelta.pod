@@ -137,6 +137,12 @@ L<XXX> has been upgraded from version A.xx to B.yy.
 
 If there was something important to note about this change, include that here.
 
+=item *
+
+L<Pod::Html> has been upgraded from version 1.33 to 1.34.  Three auxiliary
+subroutines previously importable from Pod::Html must now be imported from
+Pod::Html::Util.
+
 =back
 
 =head2 Removed Modules and Pragmata
