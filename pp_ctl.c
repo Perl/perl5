@@ -4307,10 +4307,13 @@ S_require_file(pTHX_ SV *sv)
                         sv_setsv_nomg(l, loader);
                         loader = l;
                     }
-                    if (sv_isobject(loader))
-                        count = call_method("INC", G_LIST);
-                    else
-                        count = call_sv(loader, G_LIST);
+                    const char *method = NULL;
+                    if (sv_isobject(loader)) {
+                        method = "INC";
+                        count = call_method(method, G_LIST|G_EVAL);
+                    } else {
+                        count = call_sv(loader, G_LIST|G_EVAL);
+                    }
                     SPAGAIN;
 
                     if (count > 0) {
@@ -4367,6 +4370,30 @@ S_require_file(pTHX_ SV *sv)
                                                   PERL_SCRIPT_MODE);
                         }
                         SP--;
+                    } else {
+                        SV *errsv= ERRSV;
+                        if (SvTRUE(errsv) && !SvROK(errsv)) {
+                            STRLEN l;
+                            char *pv= SvPV(errsv,l);
+                            /* Heuristic to tell if this error message
+                             * includes the standard line number info:
+                             * check if the line ends in digit dot newline.
+                             * If it does then we add some extra info so
+                             * its obvious this is coming from a hook.
+                             * If it is a user generated error we try to
+                             * leave it alone. l>12 is to ensure the
+                             * other checks are in string, but also
+                             * accounts for "at ... line 1.\n" to a
+                             * certain extent. Really we should check
+                             * further, but this is good enough for back
+                             * compat I think.
+                             */
+                            if (l>=12 && pv[l-1] == '\n' && pv[l-2] == '.' && isDIGIT(pv[l-3]))
+                                sv_catpvf(errsv, "%s %s hook died--halting @INC search",
+                                          method ? method : "INC",
+                                          method ? "method" : "sub");
+                            croak_sv(errsv);
+                        }
                     }
 
                     /* FREETMPS may free our filter_cache */
