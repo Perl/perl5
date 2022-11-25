@@ -348,7 +348,6 @@ like $@, qr/^Can't locate \Q$nonsearch\E at/,
         { }, 'INCDIR works as expected');
 }
 {
-    local $::TODO = "Pending object handling improvements";
     # as of 5.37.7
     fresh_perl_like(
         '@INC = ("a",bless({},"CB"),"e");'
@@ -357,7 +356,6 @@ like $@, qr/^Can't locate \Q$nonsearch\E at/,
         { }, 'Objects with no INC or INCDIR method are stringified');
 }
 {
-    local $::TODO = "Pending object handling improvements";
     # as of 5.37.7
     fresh_perl_like(
         '{package CB; use overload qw("")=>sub { "blorg"};} '
@@ -367,7 +365,6 @@ like $@, qr/^Can't locate \Q$nonsearch\E at/,
         { }, 'Objects with overload and no INC or INCDIR method are stringified');
 }
 {
-    local $::TODO = "Pending object handling improvments";
     # as of 5.37.7
     fresh_perl_like(
         '@INC = ("a",bless(sub { warn "blessed sub called" },"CB"),"e");'
@@ -376,7 +373,6 @@ like $@, qr/^Can't locate \Q$nonsearch\E at/,
         { }, 'Blessed subs with no hook methods are executed');
 }
 {
-    local $::TODO = "Pending better error messages (eval)";
     # as of 5.37.7
     fresh_perl_like(
         '@INC = ("a",bless(sub { die "blessed sub called" },"CB"),"e");'
@@ -394,7 +390,6 @@ like $@, qr/^Can't locate \Q$nonsearch\E at/,
         { }, 'Blessed subs with methods call method and produce expected message');
 }
 {
-    local $::TODO = "Pending object handling improvments";
     # as of 5.37.7
     fresh_perl_like(
         '@INC = ("a",[bless([],"CB"),1],"e");'

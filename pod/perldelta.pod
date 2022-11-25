@@ -210,6 +210,11 @@ and New Warnings
 
 =item *
 
+L<Object with arguments in @INC does not support a hook method
+ |perldiag/"Object with arguments in @INC does not support a hook method">
+
+=item *
+
 XXX L<message|perldiag/"message">
 
 =back
