@@ -3496,7 +3496,7 @@ S_populate_localeconv(pTHX_ const struct lconv *lcbuf,
 
         while (strings->name) {
             const char *value = *((const char **)(ptr + strings->offset));
-            if (value && *value) {
+            if (value) {
                 bool is_utf8 =  /* Only make UTF-8 if required to */
                     (UTF8NESS_YES == (get_locale_string_utf8ness_i(locale,
                                                               cat_index,
@@ -3516,8 +3516,7 @@ S_populate_localeconv(pTHX_ const struct lconv *lcbuf,
     while (integers->name) {
         const char value = *((const char *)(ptr + integers->offset));
 
-        if (value != CHAR_MAX)
-            (void) hv_store(retval, integers->name,
+        (void) hv_store(retval, integers->name,
                             strlen(integers->name), newSViv(value), 0);
         integers++;
     }
