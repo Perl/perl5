@@ -395,6 +395,369 @@ Perl_POPMARK(pTHX)
     return *PL_markstack_ptr--;
 }
 
+/*
+=for apidoc_section $rpp
+
+=for apidoc rpp_extend
+Ensures that there is space on the stack to push C<n> items, extending it
+if necessary.
+
+=cut
+*/
+
+PERL_STATIC_INLINE void
+Perl_rpp_extend(pTHX_ SSize_t n)
+{
+    PERL_ARGS_ASSERT_RPP_EXTEND;
+
+    EXTEND_HWM_SET(PL_stack_sp, n);
+#ifndef STRESS_REALLOC
+    if (UNLIKELY(_EXTEND_NEEDS_GROW(PL_stack_sp, n)))
+#endif
+    {
+        (void)stack_grow(PL_stack_sp, PL_stack_sp, n);
+    }
+}
+
+
+/*
+=for apidoc rpp_popfree_to
+
+Pop and free all items on the argument stack above C<sp>. On return,
+C<PL_stack_sp> will be equal to C<sp>.
+
+=cut
+*/
+
+PERL_STATIC_INLINE void
+Perl_rpp_popfree_to(pTHX_ SV **sp)
+{
+    PERL_ARGS_ASSERT_RPP_POPFREE_TO;
+
+    assert(sp <= PL_stack_sp);
+#ifdef PERL_RC_STACK
+#  ifdef PERL_XXX_TMP_NORC
+    PL_stack_sp = sp;
+#  else
+    while (PL_stack_sp > sp) {
+        SV *sv = *PL_stack_sp--;
+        SvREFCNT_dec(sv);
+    }
+
+#  endif
+#else
+    PL_stack_sp = sp;
+#endif
+}
+
+
+/*
+=for apidoc rpp_popfree_1
+
+Pop and free the top item on the argument stack and update C<PL_stack_sp>.
+
+=cut
+*/
+
+PERL_STATIC_INLINE void
+Perl_rpp_popfree_1(pTHX)
+{
+    PERL_ARGS_ASSERT_RPP_POPFREE_1;
+
+#ifdef PERL_RC_STACK
+#  ifdef PERL_XXX_TMP_NORC
+    PL_stack_sp--;
+#  else
+    SV *sv = *PL_stack_sp--;
+    SvREFCNT_dec(sv);
+#  endif
+#else
+    PL_stack_sp--;
+#endif
+}
+
+
+/*
+=for apidoc rpp_popfree_2
+
+Pop and free the top two items on the argument stack and update
+C<PL_stack_sp>.
+
+=cut
+*/
+
+
+PERL_STATIC_INLINE void
+Perl_rpp_popfree_2(pTHX)
+{
+    PERL_ARGS_ASSERT_RPP_POPFREE_2;
+
+#ifdef PERL_RC_STACK
+#  ifdef PERL_XXX_TMP_NORC
+    PL_stack_sp -= 2;
+#  else
+    for (int i = 0; i < 2; i++) {
+        SV *sv = *PL_stack_sp--;
+        SvREFCNT_dec(sv);
+    }
+#  endif
+#else
+    PL_stack_sp -= 2;
+#endif
+}
+
+/*
+=for apidoc rpp_pop_1_norc
+
+Pop and return the top item off the argument stack and update
+C<PL_stack_sp>. It's similar to rpp_popfree_1(), except that it actually
+returns a value, and it I<doesn't> decrement the SV's reference count.
+On non-C<PERL_RC_STACK> builds it actually increments the SV's reference
+count.
+
+This is useful in cases where the popped value is immediately embedded
+somewhere e.g. via av_store(), allowing you skip decrementing and then
+immediately incrementing the reference count again (and risk prematurely
+freeing the SV if it had a RC of 1). On non-RC builds, the reference count
+bookkeeping still works too, which is why it should be used rather than
+a simple C<*PL_stack_sp-->.
+
+=cut
+*/
+
+PERL_STATIC_INLINE SV*
+Perl_rpp_pop_1_norc(pTHX)
+{
+    PERL_ARGS_ASSERT_RPP_POP_1_NORC
+
+    SV *sv = *PL_stack_sp--;
+
+#ifndef PERL_RC_STACK
+    SvREFCNT_inc(sv);
+#else
+#  ifdef PERL_XXX_TMP_NORC
+    SvREFCNT_inc(sv);
+#  endif
+#endif
+    return sv;
+}
+
+
+
+/*
+=for apidoc      rpp_push_1
+=for apidoc_item rpp_push_2
+=for apidoc_item rpp_xpush_1
+=for apidoc_item rpp_xpush_2
+
+Push one or two SVs onto the stack, incrementing their reference counts
+and updating C<PL_stack_sp>. With the C<x> variants, it extends the stack
+first.
+
+=cut
+*/
+
+PERL_STATIC_INLINE void
+Perl_rpp_push_1(pTHX_ SV *sv)
+{
+    PERL_ARGS_ASSERT_RPP_PUSH_1;
+
+    *++PL_stack_sp = sv;
+#ifdef PERL_RC_STACK
+#  ifndef PERL_XXX_TMP_NORC
+    SvREFCNT_inc_simple_void_NN(sv);
+#  endif
+#endif
+}
+
+PERL_STATIC_INLINE void
+Perl_rpp_push_2(pTHX_ SV *sv1, SV *sv2)
+{
+    PERL_ARGS_ASSERT_RPP_PUSH_2;
+
+    *++PL_stack_sp = sv1;
+    *++PL_stack_sp = sv2;
+#ifdef PERL_RC_STACK
+#  ifndef PERL_XXX_TMP_NORC
+    SvREFCNT_inc_simple_void_NN(sv1);
+    SvREFCNT_inc_simple_void_NN(sv2);
+#  endif
+#endif
+}
+
+PERL_STATIC_INLINE void
+Perl_rpp_xpush_1(pTHX_ SV *sv)
+{
+    PERL_ARGS_ASSERT_RPP_XPUSH_1;
+
+    rpp_extend(1);
+    rpp_push_1(sv);
+}
+
+PERL_STATIC_INLINE void
+Perl_rpp_xpush_2(pTHX_ SV *sv1, SV *sv2)
+{
+    PERL_ARGS_ASSERT_RPP_XPUSH_2;
+
+    rpp_extend(2);
+    rpp_push_2(sv1, sv2);
+}
+
+
+/*
+=for apidoc rpp_push_1_norc
+
+Push C<sv> onto the stack without incrementing its reference count, and
+update C<PL_stack_sp>. On non-PERL_RC_STACK builds, mortalise too.
+
+This is most useful where an SV has just been created and already has a
+reference count of 1, but has not yet been anchored anywhere.
+
+=cut
+*/
+
+PERL_STATIC_INLINE void
+Perl_rpp_push_1_norc(pTHX_ SV *sv)
+{
+    PERL_ARGS_ASSERT_RPP_PUSH_1;
+
+    *++PL_stack_sp = sv;
+#if defined(PERL_RC_STACK) && !defined(PERL_XXX_TMP_NORC)
+#else
+    sv_2mortal(sv);
+#endif
+}
+
+
+/*
+=for apidoc rpp_replace_1_1
+
+Replace the current top stack item with C<sv>, while suitably adjusting
+reference counts. Equivalent to rpp_popfree_1(); rpp_push_1(sv), but
+is more efficient and handles both SVs being the same.
+
+=cut
+*/
+
+PERL_STATIC_INLINE void
+Perl_rpp_replace_1_1(pTHX_ SV *sv)
+{
+    PERL_ARGS_ASSERT_RPP_REPLACE_1_1;
+#if defined(PERL_RC_STACK) && !defined(PERL_XXX_TMP_NORC)
+    SV *oldsv = *PL_stack_sp;
+    *PL_stack_sp = sv;
+    SvREFCNT_inc_simple_void_NN(sv);
+    SvREFCNT_dec(oldsv);
+#else
+    *PL_stack_sp = sv;
+#endif
+}
+
+
+/*
+=for apidoc rpp_replace_2_1
+
+Replace the current top two stack items with C<sv>, while suitably
+adjusting reference counts. Equivalent to rpp_popfree_2();
+rpp_push_1(sv), but is more efficient and handles SVs being the same.
+
+=cut
+*/
+
+PERL_STATIC_INLINE void
+Perl_rpp_replace_2_1(pTHX_ SV *sv)
+{
+    PERL_ARGS_ASSERT_RPP_REPLACE_2_1;
+
+#if defined(PERL_RC_STACK) && !defined(PERL_XXX_TMP_NORC)
+    /* replace PL_stack_sp[-1] first; leave PL_stack_sp[0] in place while
+     * we free [-1], so if an exception occurs, [0] will still be freed.
+     */
+    SV *oldsv = PL_stack_sp[-1];
+    PL_stack_sp[-1] = sv;
+    SvREFCNT_inc_simple_void_NN(sv);
+    SvREFCNT_dec(oldsv);
+    oldsv = *PL_stack_sp--;
+    SvREFCNT_dec(oldsv);
+#else
+    *--PL_stack_sp = sv;
+#endif
+}
+
+
+/*
+=for apidoc      rpp_try_AMAGIC_1
+=for apidoc_item rpp_try_AMAGIC_2
+
+Check whether either of the one or two SVs at the top of the stack is
+magical or a ref, and in either case handle it specially: invoke get
+magic, call an overload method, or replace a ref with a temporary numeric
+value, as appropriate. If this function returns true, it indicates that
+the correct return value is already on the stack. Intended to be used at
+the beginning of the PP function for unary or binary ops.
+
+=cut
+*/
+
+PERL_STATIC_INLINE bool
+Perl_rpp_try_AMAGIC_1(pTHX_ int method, int flags)
+{
+    return    UNLIKELY((SvFLAGS(*PL_stack_sp) & (SVf_ROK|SVs_GMG)))
+           && Perl_try_amagic_un(aTHX_ method, flags);
+}
+
+PERL_STATIC_INLINE bool
+Perl_rpp_try_AMAGIC_2(pTHX_ int method, int flags)
+{
+    return    UNLIKELY(((SvFLAGS(PL_stack_sp[-1])|SvFLAGS(PL_stack_sp[0]))
+                     & (SVf_ROK|SVs_GMG)))
+           && Perl_try_amagic_bin(aTHX_ method, flags);
+}
+
+
+/*
+=for apidoc rpp_stack_is_rc
+
+Returns a boolean value indicating whether the stack is currently
+reference-counted. Note that if the stack is split (bottom half RC, top
+half non-RC), this function returns false, even if the top half currently
+contains zero items.
+
+=cut
+*/
+
+PERL_STATIC_INLINE bool
+Perl_rpp_stack_is_rc(pTHX)
+{
+    return 0;
+}
+
+
+/*
+=for apidoc rpp_is_lone
+
+Indicates whether the stacked SV C<sv> (assumed to be not yet popped off
+the stack) is only kept alive due to a single reference from the argument
+stack and/or and the temps stack.
+
+This can used for example to decide whether the copying of return values in rvalue
+context can be skipped, or whether it shouldn't be assigned to in lvalue
+context.
+
+=cut
+*/
+
+
+PERL_STATIC_INLINE bool
+Perl_rpp_is_lone(pTHX_ SV *sv)
+{
+    /* XXX doesn't handle a reference-counted stack yet */
+    return  SvTEMP(sv) && SvREFCNT(sv) <=
+            1
+    ;
+}
+
+
 /* ----------------------------- regexp.h ----------------------------- */
 
 /* PVLVs need to act as a superset of all scalar types - they are basically
