@@ -105,7 +105,7 @@ PERLVAR(G, locale_mutex, perl_mutex)   /* Mutex related to locale handling */
 #endif
 
 #ifdef USE_POSIX_2008_LOCALE
-PERLVAR(G, C_locale_obj, locale_t)
+PERLVARI(G, C_locale_obj, locale_t, NULL)
 #endif
 
 PERLVARI(G, watch_pvx,	char *, NULL)
