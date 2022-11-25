@@ -147,7 +147,8 @@ sub _trylocale ($$$$) { # For use only by other functions in this file!
     my $list = shift;
     my $allow_incompatible = shift;
 
-    return if ! $locale || grep { $locale eq $_ } @$list;
+    my $normalized_locale = lc ($locale =~ s/\W//gr);
+    return if ! $locale || grep { $normalized_locale eq lc ($_ =~ s/\W//gr) } @$list;
 
     # This is a toy (pig latin) locale that is not fully implemented on some
     # systems
