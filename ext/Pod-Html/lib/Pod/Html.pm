@@ -708,8 +708,16 @@ sub resolve_pod_page_link {
         $path = $self->pages->{$to};
     }
 
+    #print STDERR "AAA: htmlroot:    $self->htmlroot\n";
+print STDERR "AAA: htmlroot:    <", $self->htmlroot, ">\n";
+print STDERR "BBB: htmlfileurl: <", $self->htmlfileurl, ">\n";
+print STDERR "CCC: htmldir:     <", $self->htmldir, ">\n";
+print STDERR "DDD: path:        $path\n";
+print STDERR "EEE: section:     $section\n";
+
     my $url = File::Spec::Unix->catfile(Pod::Html::Util::unixify($self->htmlroot),
                                         $path);
+print STDERR "FFF: url (1):     $url\n";
 
     if ($self->htmlfileurl ne '') {
         # then $self->htmlroot eq '' (by definition of htmlfileurl) so
@@ -720,8 +728,12 @@ sub resolve_pod_page_link {
             $self->htmlfileurl # already unixified
         );
     }
+print STDERR "FFF: url (2):     $url\n";
 
-    return $url . ".html$section";
+#return $url . ".html$section";
+    my $rv = $url . ".html$section";
+print STDERR "GGG: rv:          $rv\n";
+    return $rv;
 }
 
 1;
