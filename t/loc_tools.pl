@@ -15,6 +15,10 @@ use strict;
 use warnings;
 use feature 'state';
 
+my %known_bad_locales = (   # XXX eventually will need version info if and
+                            # when these get fixed.
+                        );
+
 eval { require POSIX; import POSIX 'locale_h'; };
 my $has_locale_h = ! $@;
 
@@ -156,6 +160,11 @@ sub _trylocale ($$$$) { # For use only by other functions in this file!
     # locales, as it may work out for them (or not).
     return if    defined $Config{d_setlocale_accepts_any_locale_name}
               && $locale !~ / ^ (?: C | POSIX | C\.UTF-8 ) $/ix;
+
+    if (exists $known_bad_locales{$^O}) {
+        my @bad_locales = $known_bad_locales{$^O}->@*;
+        return if grep { $locale eq $_ } @bad_locales;
+    }
 
     $categories = [ $categories ] unless ref $categories;
 
