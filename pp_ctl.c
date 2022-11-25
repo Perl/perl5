@@ -4259,6 +4259,7 @@ S_require_file(pTHX_ SV *sv)
      *
      * For searchable paths, just search @INC normally
      */
+    AV *inc_checked = (AV*)sv_2mortal((SV*)newAV());
     if (!tryrsfp && !(errno == EACCES && !path_searchable)) {
         SSize_t inc_idx;
 #ifdef VMS
@@ -4269,9 +4270,21 @@ S_require_file(pTHX_ SV *sv)
             namesv = newSV_type(SVt_PV);
             AV *inc_ar = GvAVn(PL_incgv);
             for (inc_idx = 0; inc_idx <= AvFILL(inc_ar); inc_idx++) {
-                SV * const dirsv = *av_fetch(inc_ar, inc_idx, TRUE);
+                SV *dirsv = *av_fetch(inc_ar, inc_idx, TRUE);
 
-                SvGETMAGIC(dirsv);
+                if (SvGMAGICAL(dirsv)) {
+                    SvGETMAGIC(dirsv);
+                    dirsv = newSVsv_nomg(dirsv);
+                } else {
+                    /* on the other hand, since we aren't copying we do need
+                     * to increment */
+                    SvREFCNT_inc(dirsv);
+                }
+                if (!SvOK(dirsv))
+                    continue;
+
+                av_push(inc_checked, dirsv);
+
                 if (SvROK(dirsv)) {
                     int count;
                     SV **svp;
@@ -4536,14 +4549,15 @@ S_require_file(pTHX_ SV *sv)
                 DIE(aTHX_ "Can't locate %s:   %s: %s",
                     name, tryname, Strerror(saved_errno));
             } else {
-                if (path_searchable) {		/* did we lookup @INC? */
-                    AV * const ar = GvAVn(PL_incgv);
+                if (path_searchable) {          /* did we lookup @INC? */
                     SSize_t i;
                     SV *const msg = newSVpvs_flags("", SVs_TEMP);
                     SV *const inc = newSVpvs_flags("", SVs_TEMP);
-                    for (i = 0; i <= AvFILL(ar); i++) {
+                    for (i = 0; i <= AvFILL(inc_checked); i++) {
+                        SV **svp= av_fetch(inc_checked, i, TRUE);
+                        if (!svp || !*svp) continue;
                         sv_catpvs(inc, " ");
-                        sv_catsv(inc, *av_fetch(ar, i, TRUE));
+                        sv_catsv(inc, *svp);
                     }
                     if (memENDPs(name, len, ".pm")) {
                         const char *e = name + len - (sizeof(".pm") - 1);
@@ -4597,7 +4611,7 @@ S_require_file(pTHX_ SV *sv)
 
                     /* diag_listed_as: Can't locate %s */
                     DIE(aTHX_
-                        "Can't locate %s in @INC%" SVf " (@INC contains:%" SVf ")",
+                        "Can't locate %s in @INC%" SVf " (@INC entries checked:%" SVf ")",
                         name, msg, inc);
                 }
             }
