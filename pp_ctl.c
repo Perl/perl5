@@ -4260,7 +4260,6 @@ S_require_file(pTHX_ SV *sv)
      * For searchable paths, just search @INC normally
      */
     if (!tryrsfp && !(errno == EACCES && !path_searchable)) {
-        AV * const inc_ar = GvAVn(PL_incgv);
         SSize_t inc_idx;
 #ifdef VMS
         if (vms_unixname)
@@ -4268,6 +4267,7 @@ S_require_file(pTHX_ SV *sv)
         {
             SV *nsv = sv;
             namesv = newSV_type(SVt_PV);
+            AV *inc_ar = GvAVn(PL_incgv);
             for (inc_idx = 0; inc_idx <= AvFILL(inc_ar); inc_idx++) {
                 SV * const dirsv = *av_fetch(inc_ar, inc_idx, TRUE);
 
@@ -4375,6 +4375,13 @@ S_require_file(pTHX_ SV *sv)
                     PUTBACK;
                     FREETMPS;
                     LEAVE_with_name("call_INC_hook");
+
+                    /*
+                     It is possible that @INC has been replaced and that inc_ar
+                     now points at a freed AV. So we have to refresh it from
+                     the GV to be sure.
+                    */
+                    inc_ar = GvAVn(PL_incgv);
 
                     /* Now re-mortalize it. */
                     sv_2mortal(filter_cache);
