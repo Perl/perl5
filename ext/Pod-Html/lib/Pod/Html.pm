@@ -708,7 +708,6 @@ sub resolve_pod_page_link {
         $path = $self->pages->{$to};
     }
 
-    #print STDERR "AAA: htmlroot:    $self->htmlroot\n";
 print STDERR "AAA: htmlroot:    <", $self->htmlroot, ">\n";
 print STDERR "BBB: htmlfileurl: <", $self->htmlfileurl, ">\n";
 print STDERR "CCC: htmldir:     <", $self->htmldir, ">\n";
@@ -730,7 +729,7 @@ print STDERR "FFF: url (1):     $url\n";
     }
 print STDERR "FFF: url (2):     $url\n";
 
-#return $url . ".html$section";
+    #return $url . ".html$section";
     my $rv = $url . ".html$section";
 print STDERR "GGG: rv:          $rv\n";
     return $rv;
