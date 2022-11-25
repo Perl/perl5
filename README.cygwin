@@ -206,7 +206,10 @@ build perl from sources.
 
 Simply run I<make> and wait:
 
-  make 2>&1 | tee log.make
+  make -jn 2>&1 | tee log.make
+
+where I<n> is the maximum number of simultaneous compilations you want;
+omitting this parameter is the same as specifying C<-j1>.
 
 =head1 TEST ON CYGWIN
 
@@ -217,7 +220,12 @@ There are two steps to running the test suite:
   cd t; ./perl harness 2>&1 | tee ../log.harness
 
 The same tests are run both times, but more information is provided when
-running as C<./perl harness>.
+running as C<./perl harness>, and you can run the tests in parallel by
+instead specifying
+
+  cd t; TEST_JOBS=n ./perl harness 2>&1 | tee ../log.harness
+
+where I<n> is the maximum number of tests to run simulataneously.
 
 Test results vary depending on your host system and your Cygwin
 configuration.  If a test can pass in some Cygwin setup, it is always
