@@ -4260,16 +4260,16 @@ S_require_file(pTHX_ SV *sv)
      * For searchable paths, just search @INC normally
      */
     if (!tryrsfp && !(errno == EACCES && !path_searchable)) {
-        AV * const ar = GvAVn(PL_incgv);
-        SSize_t i;
+        AV * const inc_ar = GvAVn(PL_incgv);
+        SSize_t inc_idx;
 #ifdef VMS
         if (vms_unixname)
 #endif
         {
             SV *nsv = sv;
             namesv = newSV_type(SVt_PV);
-            for (i = 0; i <= AvFILL(ar); i++) {
-                SV * const dirsv = *av_fetch(ar, i, TRUE);
+            for (inc_idx = 0; inc_idx <= AvFILL(inc_ar); inc_idx++) {
+                SV * const dirsv = *av_fetch(inc_ar, inc_idx, TRUE);
 
                 SvGETMAGIC(dirsv);
                 if (SvROK(dirsv)) {
