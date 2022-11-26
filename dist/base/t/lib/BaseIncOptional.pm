@@ -1,4 +1,7 @@
 package BaseIncOptional;
+BEGIN { 
+    eval "require Frobnitz;"; # ensure that any hooks clear themselves
+}
 
 BEGIN { package main;
     is $INC[-1], '.', 'trailing dot remains in @INC during optional module load from base';
