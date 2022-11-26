@@ -4467,7 +4467,7 @@ S_my_langinfo_i(pTHX_
         retval++;
 
         /* And stop before any '@' */
-        char * modifier = strchr(retval, '@');
+        const char * modifier = strchr(retval, '@');
         if (modifier) {
             char * code_set_name;
             const Size_t name_len = modifier - retval;
