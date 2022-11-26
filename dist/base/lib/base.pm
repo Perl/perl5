@@ -103,6 +103,9 @@ sub base::__inc::hidden_dot::new {
     return $self;
 }
 
+{ package base::__inc::hidden_dot; use Scalar::Util qw(refaddr); 
+  use overload qw("") => sub { "." }, qw(0+)=> sub { refaddr($_[0]) }, fallback => 1; }
+
 sub base::__inc::hidden_dot::add_frame {
     my ($self, $rlevel, $rdot_hidden)= @_;
     push @$self, [$rlevel, $rdot_hidden];

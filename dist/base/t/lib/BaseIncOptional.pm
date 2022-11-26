@@ -1,5 +1,7 @@
 package BaseIncOptional;
+
 BEGIN { 
+    warn "@INC";
     eval "require Frobnitz;"; # ensure that any hooks clear themselves
 }
 
