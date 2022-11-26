@@ -35,6 +35,37 @@ the caller provided an undefined or false value (respectively), rather than
 simply when the parameter is missing entirely.  For more detail see the
 documentation in L<perlsub>.
 
+=head2 @INC Hook Enhancements and $INC and INCDIR
+
+The internals for C<@INC> hooks have been hardened to handle various
+edge cases and should no longer segfault or throw assert failures when
+hooks modify C<@INC> during a require operation.  As part of this we
+now ensure that any given hook is executed at most once during a require
+call, and that any duplicate directories do not trigger additional
+directories probes.
+
+To provide developers more control over dynamic module lookup a new hook
+method C<INCDIR> is now supported. An object supporting this method may be
+injected into the C<@INC> array, and when it is encountered in the module
+search process it will be executed, just like how INC hooks are executed,
+and its return value used as a list of directories to search for the
+module. Returning an empty list acts as a no-op. Note that any references
+returned by this hook will be stringified and used as strings, you may not
+return a hook to be executed later via this API.
+
+When an C<@INC> hook (either C<INC> or C<INCDIR>) is called during
+require the C<$INC> variable will be localized to be the value of the
+index of C<@INC> that the hook came from. If the hook wishes to override
+what the "next" index in C<@INC> should be it may update C<$INC> to be one
+less than the desired index (C<undef> is equivalent to C<-1>). This
+allows an C<@INC> hook to completely rewrite the C<@INC> array and have
+perl restart its directory probes from the beginning of C<@INC>.
+
+Blessed CODE references in C<@INC> that do not support the C<INC> or
+C<INCDIR> methods will no longer trigger an exception, and instead will
+be treated the same as unblessed coderefs are, and executed as though
+they were an C<INC> hook.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
