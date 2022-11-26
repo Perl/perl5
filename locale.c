@@ -156,6 +156,15 @@ static int debug_initialization = 0;
 #  include <wctype.h>
 #endif
 
+/* If we have any of these library functions, we can reliably determine is a
+ * locale is a UTF-8 one or not.  And if we aren't using locales at all, we act
+ * as if everything is the C locale, so the answer there is always "No, it
+ * isn't UTF-8"; this too is reliably accurate */
+#if   defined(HAS_SOME_LANGINFO) || defined(HAS_MBTOWC) || defined(HAS_MBRTOWC) \
+ || ! defined(USE_LOCALE)
+#  define HAS_RELIABLE_UTF8NESS_DETERMINATION
+#endif
+
 #ifdef USE_LOCALE
 
 PERL_STATIC_INLINE const char *
@@ -2978,7 +2987,7 @@ S_get_locale_string_utf8ness_i(pTHX_ const char * locale,
         }
     }
 
-#  if defined(HAS_SOME_LANGINFO) || defined(HAS_MBTOWC) || defined(HAS_MBRTOWC)
+#  ifdef HAS_RELIABLE_UTF8NESS_DETERMINATION
 
     /* Here, we have available the libc functions that can be used to
      * accurately determine the UTF8ness of the underlying locale.  If it is a
