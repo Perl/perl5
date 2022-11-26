@@ -9,7 +9,13 @@ BEGIN {
 use strict;
 use warnings;
 
-plan(tests => 59);
+plan(tests => 71);
+
+
+# Dedupe @INC. In a future patch we /may/ refuse to process items
+# more than once and deduping here will prevent the tests from failing
+# should we make that change.
+my %seen; @INC = grep {!$seen{$_}++} @INC;
 
 my $nonfile = tempfile();
 
@@ -297,9 +303,126 @@ like $@, qr/^Can't locate \Q$nonsearch\E at/,
     # Older perls will output "error at  line 1".
 
     fresh_perl_like(
-        'use lib qq(./lib); BEGIN{ unshift @INC, sub { if ($_[1] eq "CannotParse.pm" and !$seen++) { '
+        'use lib qq(./lib); BEGIN{ unshift @INC, '
+       .'sub { if ($_[1] eq "CannotParse.pm" and !$seen++) { '
        .'eval q(require $_[1]); warn $@; my $code= qq[die qq(error)];'
        .'open my $fh,"<", q(lib/Dies.pm); return $fh } } } require CannotParse;',
         qr!\Asyntax error.*?^error at /loader/0x[A-Fa-f0-9]+/CannotParse\.pm line 1\.!ms,
         { }, 'Inc hooks have the correct cop_file');
+}
+{
+    local $::TODO = "Pending segfault fix";
+    # this can segfault or assert prior to @INC hardening.
+    fresh_perl_like(
+        'unshift @INC, sub { *INC=["a","b"] }; '
+       .'eval "require Frobnitz" or print $@',
+        qr!\(\@INC contains: CODE\(0x[A-Fa-f0-9]+\) b\)!,
+        { }, 'INC hooks do not segfault when overwritten');
+}
+{
+    local $::TODO = "Pending error message improvement";
+    # this is the defined behavior, but in older perls the error message
+    # would lie and say "contains: a b", which is true in the sense that
+    # it is the value of @INC after the require, but not the directory
+    # list that was looked at.
+    fresh_perl_like(
+        '@INC = (sub { @INC=("a","b"); () }, "z"); '
+       .'eval "require Frobnitz" or print $@',
+        qr!\(\@INC contains: CODE\(0x[A-Fa-f0-9]+\) b\)!,
+        { }, 'INC hooks that overwrite @INC continue as expected (skips a and z)');
+}
+{
+    local $::TODO = "Pending new feature \$INC";
+    # as of 5.37.7
+    fresh_perl_like(
+        '@INC = (sub { @INC=qw(a b); undef $INC }, "z"); '
+       .'eval "require Frobnitz" or print $@',
+        qr!\(\@INC contains: CODE\(0x[A-Fa-f0-9]+\) a b\)!,
+        { }, 'INC hooks that overwrite @INC and undef $INC continue at start');
+}
+{
+    local $::TODO = "Pending new feature: INCDIR";
+    # as of 5.37.7
+    fresh_perl_like(
+        'sub CB::INCDIR { return "b", "c","d" }; '
+       .'@INC = ("a",bless({},"CB"),"e");'
+       .'eval "require Frobnitz" or print $@',
+        qr!\(\@INC contains: a CB=HASH\(0x[A-Fa-f0-9]+\) b c d e\)!,
+        { }, 'INCDIR works as expected');
+}
+{
+    local $::TODO = "Pending object handling improvements";
+    # as of 5.37.7
+    fresh_perl_like(
+        '@INC = ("a",bless({},"CB"),"e");'
+       .'eval "require Frobnitz" or print $@',
+        qr!\(\@INC contains: a CB=HASH\(0x[A-Fa-f0-9]+\) e\)!,
+        { }, 'Objects with no INC or INCDIR method are stringified');
+}
+{
+    local $::TODO = "Pending object handling improvements";
+    # as of 5.37.7
+    fresh_perl_like(
+        '{package CB; use overload qw("")=>sub { "blorg"};} '
+       .'@INC = ("a",bless({},"CB"),"e");'
+       .'eval "require Frobnitz" or print $@',
+        qr!\(\@INC contains: a blorg e\)!,
+        { }, 'Objects with overload and no INC or INCDIR method are stringified');
+}
+{
+    local $::TODO = "Pending object handling improvments";
+    # as of 5.37.7
+    fresh_perl_like(
+        '@INC = ("a",bless(sub { warn "blessed sub called" },"CB"),"e");'
+       .'eval "require Frobnitz" or print $@',
+        qr!blessed sub called.*\(\@INC contains: a CB=CODE\(0x[a-fA-F0-9]+\) e\)!s,
+        { }, 'Blessed subs with no hook methods are executed');
+}
+{
+    local $::TODO = "Pending better error messages (eval)";
+    # as of 5.37.7
+    fresh_perl_like(
+        '@INC = ("a",bless(sub { die "blessed sub called" },"CB"),"e");'
+       .'eval "require Frobnitz" or print $@',
+        qr!INC sub hook died--halting \@INC search!s,
+        { }, 'Blessed subs that die produce expected extra message');
+}
+{
+    local $::TODO = "Pending better error messages (eval)";
+    # as of 5.37.7
+    fresh_perl_like(
+        'sub CB::INC { die "bad mojo" } '
+       .'@INC = ("a",bless(sub { die "blessed sub called" },"CB"),"e");'
+       .'eval "require Frobnitz" or print $@',
+        qr!bad mojo.*INC method hook died--halting \@INC search!s,
+        { }, 'Blessed subs with methods call method and produce expected message');
+}
+{
+    local $::TODO = "Pending object handling improvments";
+    # as of 5.37.7
+    fresh_perl_like(
+        '@INC = ("a",[bless([],"CB"),1],"e");'
+       .'eval "require Frobnitz" or print $@',
+        qr!Object with arguments in \@INC does not support a hook method!s,
+        { }, 'Blessed objects with no hook methods in array form produce expected exception');
+}
+{
+    local $::TODO = "Pending new feature: INCDIR";
+    # as of 5.37.7
+    fresh_perl_like(
+        'sub CB::INCDIR { "i" } sub CB2::INCDIR { }'
+       .'@INC = ("a",bless(sub{"b"},"CB"),bless(sub{"c"},"CB2"),"e");'
+       .'eval "require Frobnitz" or print $@',
+        qr!\(\@INC contains: a CB=CODE\(0x[a-fA-F0-9]+\) i CB2=CODE\(0x[a-fA-F0-9]+\) e\)!s,
+        { }, 'Blessed subs with INCDIR methods call INCDIR');
+}
+{
+    local $::TODO = "Pending new feature: INCDIR";
+    # as of 5.37.7
+    fresh_perl_like(
+        'sub CB::INCDIR { return @{$_[2]} }'
+       .'@INC = ("a",[bless([],"CB"),"b"],"c");'
+       .'eval "require Frobnitz" or print $@',
+        qr!\(\@INC contains: a ARRAY\(0x[a-fA-F0-9]+\) CB=ARRAY\(0x[a-fA-F0-9]+\) b c\)!s,
+        { }, 'INCDIR ref returns are stringified');
 }

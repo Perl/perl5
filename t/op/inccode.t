@@ -21,7 +21,7 @@ unless (is_miniperl()) {
 
 use strict;
 
-plan(tests => 68 + !is_miniperl() * (3 + 14 * $can_fork));
+plan(tests => 68 + !is_miniperl() * (4 + 14 * $can_fork));
 
 sub get_temp_fh {
     my $f = tempfile();
@@ -294,14 +294,18 @@ SKIP: {
     $$t = sub { $called ++; !1 };
     delete $INC{'foo.pm'}; # in case another test uses foo
     eval { require foo };
-    is $INCtie::count, 2, # 2nd time for "Can't locate" -- XXX correct?
+    { local $::TODO = "Will be fixed in a follow up patch";
+    is $INCtie::count, 1,
         'FETCH is called once on undef scalar-tied @INC elem';
+    }
     is $called, 1, 'sub in scalar-tied @INC elem is called';
     () = "$INC[0]"; # force a fetch, so the SV is ROK
     $INCtie::count = 0;
     eval { require foo };
-    is $INCtie::count, 2,
+    { local $::TODO = "Will be fixed in a follow up patch";
+    is $INCtie::count, 1,
         'FETCH is called once on scalar-tied @INC elem holding ref';
+    }
     is $called, 2, 'sub in scalar-tied @INC elem holding ref is called';
     $$t = [];
     $INCtie::count = 0;
@@ -311,8 +315,10 @@ SKIP: {
     $$t = "string";
     $INCtie::count = 0;
     eval { require foo };
-    is $INCtie::count, 2,
+    { local $::TODO = "Will be fixed in a follow up patch";
+    is $INCtie::count, 1,
        'FETCH called once on scalar-tied @INC elem returning string';
+    }
 }
 
 
@@ -396,4 +402,14 @@ if ($can_fork) {
     require BBBLPLAST5;
 
     is ("@::bbblplast", "0 1 2 3 4 5", "All ran with a filter");
+}
+SKIP:{
+    skip "need fork",1 unless $can_fork;
+    local $::TODO = "Pending";
+    fresh_perl_like('@INC=("A",bless({},"Hook"),"D"); '
+                 .'sub Hook::INCDIR { return "B","C"} '
+                 .'eval "require Frobnitz" or print $@;',
+                  qr/\(\@INC contains: A Hook=HASH\(0x[A-Fa-f0-9]+\) B C D\)/,
+                  {},
+                  "Check if INCDIR hook works as expected");
 }
