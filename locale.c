@@ -2869,94 +2869,13 @@ Perl_setlocale(const int category, const char * locale)
 
 }
 
-#ifdef USE_LOCALE
-
-STATIC const char *
-S_save_to_buffer(const char * string, const char **buf, Size_t *buf_size)
-{
-    /* Copy the NUL-terminated 'string' to a buffer whose address before this
-     * call began at *buf, and whose available length before this call was
-     * *buf_size.
-     *
-     * If the length of 'string' is greater than the space available, the
-     * buffer is grown accordingly, which may mean that it gets relocated.
-     * *buf and *buf_size will be updated to reflect this.
-     *
-     * Regardless, the function returns a pointer to where 'string' is now
-     * stored.
-     *
-     * 'string' may be NULL, which means no action gets taken, and NULL is
-     * returned.
-     *
-     * If *buf or 'buf_size' are NULL or *buf_size is 0, the buffer is assumed
-     * empty, and memory is malloc'd.   'buf-size' being NULL is to be used
-     * when this is a single use buffer, which will shortly be freed by the
-     * caller.
-     */
-
-    Size_t string_size;
-
-    PERL_ARGS_ASSERT_SAVE_TO_BUFFER;
-
-    if (! string) {
-        return NULL;
-    }
-
-    /* No-op to copy over oneself */
-    if (string == *buf) {
-        return string;
-    }
-
-    string_size = strlen(string) + 1;
-
-    if (buf_size == NULL) {
-        Newx(*buf, string_size, char);
-    }
-    else if (*buf_size == 0) {
-        Newx(*buf, string_size, char);
-        *buf_size = string_size;
-    }
-    else if (string_size > *buf_size) {
-        Renew(*buf, string_size, char);
-        *buf_size = string_size;
-    }
-
-    {
-        dTHX_DEBUGGING;
-        DEBUG_Lv(PerlIO_printf(Perl_debug_log,
-                         "Copying '%s' to %p\n",
-                         ((is_utf8_string((U8 *) string, 0))
-                          ? string
-                          :_byte_dump_string((U8 *) string, strlen(string), 0)),
-                          *buf));
-    }
-
-#    ifdef DEBUGGING
-
-    /* Catch glitches.  Usually this is because LC_CTYPE needs to be the same
-     * locale as whatever is being worked on */
-    if (UNLIKELY(instr(string, REPLACEMENT_CHARACTER_UTF8))) {
-        dTHX_DEBUGGING;
-
-        locale_panic_(Perl_form(aTHX_
-                                "Unexpected REPLACEMENT_CHARACTER in '%s'\n%s",
-                                string, get_LC_ALL_display()));
-    }
-
-#    endif
-
-    Copy(string, *buf, string_size, char);
-    return *buf;
-}
-
-#endif
-
 STATIC utf8ness_t
 S_get_locale_string_utf8ness_i(pTHX_ const char * string,
                                      const locale_utf8ness_t known_utf8,
                                      const char * locale,
                                      const unsigned cat_index)
 {
+    PERL_ARGS_ASSERT_GET_LOCALE_STRING_UTF8NESS_I;
 
 #ifndef USE_LOCALE
 
@@ -3059,7 +2978,130 @@ S_get_locale_string_utf8ness_i(pTHX_ const char * string,
 
 }
 
+STATIC bool
+S_is_locale_utf8(pTHX_ const char * locale)
+{
+    /* Returns TRUE if the locale 'locale' is UTF-8; FALSE otherwise.  It uses
+     * my_langinfo(), which employs various methods to get this information
+     * if nl_langinfo() isn't available, using heuristics as a last resort, in
+     * which case, the result will very likely be correct for locales for
+     * languages that have commonly used non-ASCII characters, but for notably
+     * English, it comes down to if the locale's name ends in something like
+     * "UTF-8".  It errs on the side of not being a UTF-8 locale. */
+
+#  if ! defined(USE_LOCALE_CTYPE)                                             \
+   ||   defined(EBCDIC) /* There aren't any real UTF-8 locales at this time */
+
+    PERL_UNUSED_ARG(locale);
+
+    return FALSE;
+
+#  else
+
+    const char * scratch_buffer = NULL;
+    const char * codeset;
+    bool retval;
+
+    PERL_ARGS_ASSERT_IS_LOCALE_UTF8;
+
+    if (strEQ(locale, PL_ctype_name)) {
+        return PL_in_utf8_CTYPE_locale;
+    }
+
+    codeset = my_langinfo_c(CODESET, LC_CTYPE, locale,
+                            &scratch_buffer, NULL, NULL);
+    retval = is_codeset_name_UTF8(codeset);
+
+    DEBUG_Lv(PerlIO_printf(Perl_debug_log,
+                           "found codeset=%s, is_utf8=%d\n", codeset, retval));
+
+    Safefree(scratch_buffer);
+    return retval;
+
+#  endif
+
+}
+
 #ifdef USE_LOCALE
+
+STATIC const char *
+S_save_to_buffer(const char * string, const char **buf, Size_t *buf_size)
+{
+    /* Copy the NUL-terminated 'string' to a buffer whose address before this
+     * call began at *buf, and whose available length before this call was
+     * *buf_size.
+     *
+     * If the length of 'string' is greater than the space available, the
+     * buffer is grown accordingly, which may mean that it gets relocated.
+     * *buf and *buf_size will be updated to reflect this.
+     *
+     * Regardless, the function returns a pointer to where 'string' is now
+     * stored.
+     *
+     * 'string' may be NULL, which means no action gets taken, and NULL is
+     * returned.
+     *
+     * If *buf or 'buf_size' are NULL or *buf_size is 0, the buffer is assumed
+     * empty, and memory is malloc'd.   'buf-size' being NULL is to be used
+     * when this is a single use buffer, which will shortly be freed by the
+     * caller.
+     */
+
+    Size_t string_size;
+
+    PERL_ARGS_ASSERT_SAVE_TO_BUFFER;
+
+    if (! string) {
+        return NULL;
+    }
+
+    /* No-op to copy over oneself */
+    if (string == *buf) {
+        return string;
+    }
+
+    string_size = strlen(string) + 1;
+
+    if (buf_size == NULL) {
+        Newx(*buf, string_size, char);
+    }
+    else if (*buf_size == 0) {
+        Newx(*buf, string_size, char);
+        *buf_size = string_size;
+    }
+    else if (string_size > *buf_size) {
+        Renew(*buf, string_size, char);
+        *buf_size = string_size;
+    }
+
+    {
+        dTHX_DEBUGGING;
+        DEBUG_Lv(PerlIO_printf(Perl_debug_log,
+                         "Copying '%s' to %p\n",
+                         ((is_utf8_string((U8 *) string, 0))
+                          ? string
+                          :_byte_dump_string((U8 *) string, strlen(string), 0)),
+                          *buf));
+    }
+
+#    ifdef DEBUGGING
+
+    /* Catch glitches.  Usually this is because LC_CTYPE needs to be the same
+     * locale as whatever is being worked on */
+    if (UNLIKELY(instr(string, REPLACEMENT_CHARACTER_UTF8))) {
+        dTHX_DEBUGGING;
+
+        locale_panic_(Perl_form(aTHX_
+                                "Unexpected REPLACEMENT_CHARACTER in '%s'\n%s",
+                                string, get_LC_ALL_display()));
+    }
+
+#    endif
+
+    Copy(string, *buf, string_size, char);
+    return *buf;
+}
+
 #  ifdef WIN32
 
 bool
@@ -6255,52 +6297,7 @@ S_is_codeset_name_UTF8(const char * name)
             && (len == 4 || name[3] == '-'));
 }
 
-#endif
-
-STATIC bool
-S_is_locale_utf8(pTHX_ const char * locale)
-{
-    /* Returns TRUE if the locale 'locale' is UTF-8; FALSE otherwise.  It uses
-     * my_langinfo(), which employs various methods to get this information
-     * if nl_langinfo() isn't available, using heuristics as a last resort, in
-     * which case, the result will very likely be correct for locales for
-     * languages that have commonly used non-ASCII characters, but for notably
-     * English, it comes down to if the locale's name ends in something like
-     * "UTF-8".  It errs on the side of not being a UTF-8 locale. */
-
-#  if ! defined(USE_LOCALE_CTYPE)                                             \
-   ||   defined(EBCDIC) /* There aren't any real UTF-8 locales at this time */
-
-    PERL_UNUSED_ARG(locale);
-
-    return FALSE;
-
-#  else
-
-    const char * scratch_buffer = NULL;
-    const char * codeset;
-    bool retval;
-
-    PERL_ARGS_ASSERT_IS_LOCALE_UTF8;
-
-    if (strEQ(locale, PL_ctype_name)) {
-        return PL_in_utf8_CTYPE_locale;
-    }
-
-    codeset = my_langinfo_c(CODESET, LC_CTYPE, locale,
-                            &scratch_buffer, NULL, NULL);
-    retval = is_codeset_name_UTF8(codeset);
-
-    DEBUG_Lv(PerlIO_printf(Perl_debug_log,
-                           "found codeset=%s, is_utf8=%d\n", codeset, retval));
-
-    Safefree(scratch_buffer);
-    return retval;
-
 #  endif
-
-}
-
 #endif  /* USE_LOCALE */
 
 bool
