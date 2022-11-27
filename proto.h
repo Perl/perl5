@@ -430,6 +430,11 @@ PERL_CALLCONV void	Perl_boot_core_mro(pTHX)
 			__attribute__visibility__("hidden");
 #define PERL_ARGS_ASSERT_BOOT_CORE_MRO
 
+PERL_CALLCONV OP *	Perl_build_infix_plugin(pTHX_ OP *lhs, OP *rhs, void *tokendata)
+			__attribute__visibility__("hidden");
+#define PERL_ARGS_ASSERT_BUILD_INFIX_PLUGIN	\
+	assert(lhs); assert(rhs); assert(tokendata)
+
 PERL_CALLCONV int	Perl_bytes_cmp_utf8(pTHX_ const U8 *b, STRLEN blen, const U8 *u, STRLEN ulen);
 #define PERL_ARGS_ASSERT_BYTES_CMP_UTF8	\
 	assert(b); assert(u)
@@ -1777,6 +1782,9 @@ PERL_CALLCONV void	Perl_hv_undef_flags(pTHX_ HV *hv, U32 flags);
 
 /* PERL_CALLCONV I32	ibcmp_utf8(pTHX_ const char *s1, char **pe1, UV l1, bool u1, const char *s2, char **pe2, UV l2, bool u2); */
 #define PERL_ARGS_ASSERT_IBCMP_UTF8
+PERL_CALLCONV STRLEN	Perl_infix_plugin_standard(pTHX_ char* operator_ptr, STRLEN operator_len, struct Perl_custom_infix** def);
+#define PERL_ARGS_ASSERT_INFIX_PLUGIN_STANDARD	\
+	assert(operator_ptr); assert(def)
 PERL_CALLCONV void	Perl_init_argv_symbols(pTHX_ int argc, char **argv)
 			__attribute__visibility__("hidden");
 #define PERL_ARGS_ASSERT_INIT_ARGV_SYMBOLS	\
@@ -4642,6 +4650,9 @@ PERL_CALLCONV I32	Perl_whichsig_pvn(pTHX_ const char* sig, STRLEN len);
 PERL_CALLCONV I32	Perl_whichsig_sv(pTHX_ SV* sigsv);
 #define PERL_ARGS_ASSERT_WHICHSIG_SV	\
 	assert(sigsv)
+PERL_CALLCONV void	Perl_wrap_infix_plugin(pTHX_ Perl_infix_plugin_t new_plugin, Perl_infix_plugin_t *old_plugin_p);
+#define PERL_ARGS_ASSERT_WRAP_INFIX_PLUGIN	\
+	assert(new_plugin); assert(old_plugin_p)
 PERL_CALLCONV void	Perl_wrap_keyword_plugin(pTHX_ Perl_keyword_plugin_t new_plugin, Perl_keyword_plugin_t *old_plugin_p);
 #define PERL_ARGS_ASSERT_WRAP_KEYWORD_PLUGIN	\
 	assert(new_plugin); assert(old_plugin_p)

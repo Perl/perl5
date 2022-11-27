@@ -1572,6 +1572,7 @@ Apd	|void	|cv_set_call_checker_flags|NN CV *cv \
 					  |NN Perl_call_checker ckfun \
 					  |NN SV *ckobj|U32 ckflags
 Apd	|void	|wrap_op_checker|Optype opcode|NN Perl_check_t new_checker|NN Perl_check_t *old_checker_p
+Axpd	|void	|wrap_infix_plugin|NN Perl_infix_plugin_t new_plugin|NN Perl_infix_plugin_t *old_plugin_p
 Axpd	|void	|wrap_keyword_plugin|NN Perl_keyword_plugin_t new_plugin|NN Perl_keyword_plugin_t *old_plugin_p
 CpR	|PERL_SI*|new_stackinfo|I32 stitems|I32 cxitems
 Apd	|char*	|scan_vstring	|NN const char *s|NN const char *const e \
@@ -1600,6 +1601,7 @@ p	|void	|opslab_force_free|NN OPSLAB *slab
 #endif
 : Used in perly.y
 p	|void	|package	|NN OP* o
+p	|OP *	|build_infix_plugin|NN OP *lhs|NN OP *rhs|NN void *tokendata
 : Used in perly.y
 p	|void	|package_version|NN OP* v
 : Used in toke.c and perly.y
@@ -3820,6 +3822,8 @@ Apxd	|void|cop_store_label \
 		|NN COP *const cop|NN const char *label|STRLEN len|U32 flags
 
 epo	|int	|keyword_plugin_standard|NN char* keyword_ptr|STRLEN keyword_len|NN OP** op_ptr
+
+epo	|STRLEN	|infix_plugin_standard|NN char* operator_ptr|STRLEN operator_len|NN struct Perl_custom_infix** def
 
 #if defined(USE_ITHREADS)
 #  if defined(PERL_IN_SV_C)

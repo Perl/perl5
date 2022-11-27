@@ -115,6 +115,15 @@ static const char ident_var_zero_multi_digit[] = "Numeric variables with more th
  * 1999-02-27 mjd-perl-patch@plover.com */
 #define isCONTROLVAR(x) (isUPPER(x) || memCHRs("[\\]^_?", (x)))
 
+/* Non-identifier plugin infix operators are allowed any printing character
+ * except spaces, digits, or identifier chars
+ */
+#define isPLUGINFIX(c) (c && !isSPACE(c) && !isDIGIT(c) && !isALPHA(c))
+/* Plugin infix operators may not begin with a quote symbol */
+#define isPLUGINFIX_FIRST(c) (isPLUGINFIX(c) && c != '"' && c != '\'')
+
+#define PLUGINFIX_IS_ENABLED  UNLIKELY(PL_infix_plugin != &Perl_infix_plugin_standard)
+
 #define SPACE_OR_TAB(c) isBLANK_A(c)
 
 #define HEXFP_PEEK(s)     \
@@ -491,6 +500,12 @@ static struct debug_tokens {
     DEBUG_TOKEN (IVAL,  PERLY_TILDE),
     DEBUG_TOKEN (OPVAL, PLUGEXPR),
     DEBUG_TOKEN (OPVAL, PLUGSTMT),
+    DEBUG_TOKEN (PVAL,  PLUGADDOP),
+    DEBUG_TOKEN (PVAL,  PLUGHIGHOP),
+    DEBUG_TOKEN (PVAL,  PLUGLOWOP),
+    DEBUG_TOKEN (PVAL,  PLUGMULOP),
+    DEBUG_TOKEN (PVAL,  PLUGPOWOP),
+    DEBUG_TOKEN (PVAL,  PLUGRELOP),
     DEBUG_TOKEN (OPVAL, PMFUNC),
     DEBUG_TOKEN (NONE,  POSTJOIN),
     DEBUG_TOKEN (NONE,  POSTDEC),
@@ -8703,6 +8718,41 @@ yyl_key_core(pTHX_ char *s, STRLEN len, struct code c)
     return yyl_word_or_keyword(aTHX_ s, len, key, orig_keyword, c);
 }
 
+struct Perl_custom_infix_result {
+    struct Perl_custom_infix *def;
+    SV                       *parsedata;
+};
+
+static enum yytokentype tokentype_for_plugop(struct Perl_custom_infix *def)
+{
+    enum Perl_custom_infix_precedence prec = def->prec;
+    if(prec <= INFIX_PREC_LOW)
+        return PLUGLOWOP;
+    if(prec <= INFIX_PREC_REL)
+        return PLUGRELOP;
+    if(prec <= INFIX_PREC_ADD)
+        return PLUGADDOP;
+    if(prec <= INFIX_PREC_MUL)
+        return PLUGMULOP;
+    if(prec <= INFIX_PREC_POW)
+        return PLUGPOWOP;
+    return PLUGHIGHOP;
+}
+
+OP *
+Perl_build_infix_plugin(pTHX_ OP *lhs, OP *rhs, void *tokendata)
+{
+    PERL_ARGS_ASSERT_BUILD_INFIX_PLUGIN;
+
+    struct Perl_custom_infix_result *result = (struct Perl_custom_infix_result *)tokendata;
+    SAVEFREEPV(result);
+    if(result->parsedata)
+        SAVEFREESV(result->parsedata);
+
+    return (*result->def->build_op)(aTHX_
+        &result->parsedata, lhs, rhs, result->def);
+}
+
 static int
 yyl_keylookup(pTHX_ char *s, GV *gv)
 {
@@ -8760,6 +8810,30 @@ yyl_keylookup(pTHX_ char *s, GV *gv)
             return REPORT(PLUGEXPR);
         } else {
             Perl_croak(aTHX_ "Bad plugin affecting keyword '%s'", PL_tokenbuf);
+        }
+    }
+
+    /* Check for plugged-in named operator */
+    if(PLUGINFIX_IS_ENABLED) {
+        struct Perl_custom_infix *def;
+        STRLEN result;
+        result = PL_infix_plugin(aTHX_ PL_tokenbuf, len, &def);
+        if(result) {
+            if(result != len)
+                Perl_croak(aTHX_ "Bad infix plugin result (%zd) - did not consume entire identifier <%s>\n",
+                    result, PL_tokenbuf);
+            PL_bufptr = s = d;
+            struct Perl_custom_infix_result *result;
+            Newx(result, 1, struct Perl_custom_infix_result);
+            result->def = def;
+            result->parsedata = NULL;
+            if(def->parse) {
+                (*def->parse)(aTHX_ &result->parsedata, def);
+                s = PL_bufptr; /* restore local s variable */
+            }
+            pl_yylval.pval = (char *)result;
+            CLINE;
+            OPERATOR(tokentype_for_plugop(def));
         }
     }
 
@@ -8841,6 +8915,34 @@ yyl_try(pTHX_ char *s)
     int tok;
 
   retry:
+    /* Check for plugged-in symbolic operator */
+    if(PLUGINFIX_IS_ENABLED && isPLUGINFIX_FIRST(*s)) {
+        struct Perl_custom_infix *def;
+        char *s_end = s, *d = PL_tokenbuf;
+        STRLEN len;
+
+        /* Copy the longest sequence of isPLUGINFIX() chars into PL_tokenbuf */
+        while(s_end < PL_bufend && d < PL_tokenbuf+sizeof(PL_tokenbuf)-1 && isPLUGINFIX(*s_end))
+            *d++ = *s_end++;
+        *d = '\0';
+
+        if((len = (*PL_infix_plugin)(aTHX_ PL_tokenbuf, s_end - s, &def))) {
+            s += len;
+            struct Perl_custom_infix_result *result;
+            Newx(result, 1, struct Perl_custom_infix_result);
+            result->def = def;
+            result->parsedata = NULL;
+            if(def->parse) {
+                PL_bufptr = s;
+                (*def->parse)(aTHX_ &result->parsedata, def);
+                s = PL_bufptr; /* restore local s variable */
+            }
+            pl_yylval.pval = (char *)result;
+            CLINE;
+            OPERATOR(tokentype_for_plugop(def));
+        }
+    }
+
     switch (*s) {
     default:
         if (UTF ? isIDFIRST_utf8_safe(s, PL_bufend) : isALNUMC(*s)) {
@@ -13135,6 +13237,18 @@ Perl_keyword_plugin_standard(pTHX_
     return KEYWORD_PLUGIN_DECLINE;
 }
 
+STRLEN
+Perl_infix_plugin_standard(pTHX_
+        char *operator_ptr, STRLEN operator_len, struct Perl_custom_infix **def)
+{
+    PERL_ARGS_ASSERT_INFIX_PLUGIN_STANDARD;
+    PERL_UNUSED_CONTEXT;
+    PERL_UNUSED_ARG(operator_ptr);
+    PERL_UNUSED_ARG(operator_len);
+    PERL_UNUSED_ARG(def);
+    return 0;
+}
+
 /*
 =for apidoc_section $lexer
 =for apidoc wrap_keyword_plugin
@@ -13204,6 +13318,24 @@ Perl_wrap_keyword_plugin(pTHX_
     if (!*old_plugin_p) {
         *old_plugin_p = PL_keyword_plugin;
         PL_keyword_plugin = new_plugin;
+    }
+    KEYWORD_PLUGIN_MUTEX_UNLOCK;
+}
+
+void
+Perl_wrap_infix_plugin(pTHX_
+    Perl_infix_plugin_t new_plugin, Perl_infix_plugin_t *old_plugin_p)
+{
+
+    PERL_UNUSED_CONTEXT;
+    PERL_ARGS_ASSERT_WRAP_INFIX_PLUGIN;
+    if (*old_plugin_p) return;
+    /* We use the same mutex as for PL_keyword_plugin as it's so rare either
+     * of them is actually updated; no need for a dedicated one each */
+    KEYWORD_PLUGIN_MUTEX_LOCK;
+    if (!*old_plugin_p) {
+        *old_plugin_p = PL_infix_plugin;
+        PL_infix_plugin = new_plugin;
     }
     KEYWORD_PLUGIN_MUTEX_UNLOCK;
 }

@@ -235,9 +235,11 @@ Instead, use the function L</wrap_keyword_plugin>.
 */
 
 #if defined(USE_ITHREADS)
-PERLVAR(G, keyword_plugin_mutex, perl_mutex)   /* Mutex for PL_keyword_plugin */
+PERLVAR(G, keyword_plugin_mutex, perl_mutex)   /* Mutex for PL_keyword_plugin and PL_infix_plugin */
 #endif
 PERLVARI(G, keyword_plugin, Perl_keyword_plugin_t, Perl_keyword_plugin_standard)
+
+PERLVARI(G, infix_plugin, Perl_infix_plugin_t, Perl_infix_plugin_standard)
 
 PERLVARI(G, op_sequence, HV *, NULL)	/* dump.c */
 PERLVARI(G, op_seq,	UV,	0)	/* dump.c */

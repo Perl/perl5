@@ -455,6 +455,13 @@ This message can be seen quite often with DB_File on systems with "hard"
 dynamic linking, like C<AIX> and C<OS/2>.  It is a bug of C<Berkeley DB>
 which is left unnoticed if C<DB> uses I<forgiving> system malloc().
 
+=item Bad infix plugin result (%zd) - did not consume entire identifier <%s>
+
+(F) A plugin using the C<PL_infix_plugin> mechanism to parse an infix
+keyword consumed part of a named identifier operator name but did not
+consume all of it.  This is not permitted as it leads to fragile parsing
+results.
+
 =item Badly placed ()'s
 
 (A) You've accidentally run your script through B<csh> instead
