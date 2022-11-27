@@ -2949,13 +2949,25 @@ S_save_to_buffer(const char * string, const char **buf, Size_t *buf_size)
     return *buf;
 }
 
+#endif
+
 STATIC utf8ness_t
 S_get_locale_string_utf8ness_i(pTHX_ const char * string,
                                      const locale_utf8ness_t known_utf8,
                                      const char * locale,
                                      const unsigned cat_index)
 {
-    PERL_ARGS_ASSERT_GET_LOCALE_STRING_UTF8NESS_I;
+
+#ifndef USE_LOCALE
+
+    return UTF8NESS_NO;
+    PERL_UNUSED_ARG(string);
+    PERL_UNUSED_ARG(known_utf8);
+    PERL_UNUSED_ARG(locale);
+    PERL_UNUSED_ARG(cat_index);
+
+#else
+
     assert(cat_index <= NOMINAL_LC_ALL_INDEX);
 
     /* Return to indicate if 'string' in the locale given by the input
@@ -3043,9 +3055,11 @@ S_get_locale_string_utf8ness_i(pTHX_ const char * string,
     return UTF8NESS_YES;
 
 #  endif
+#endif
 
 }
 
+#ifdef USE_LOCALE
 #  ifdef WIN32
 
 bool
