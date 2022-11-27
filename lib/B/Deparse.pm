@@ -23,6 +23,7 @@ use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
          OPpCONCAT_NESTED
          OPpMULTICONCAT_APPEND OPpMULTICONCAT_STRINGIFY OPpMULTICONCAT_FAKE
          OPpTRUEBOOL OPpINDEX_BOOLNEG OPpDEFER_FINALLY
+         OPpARG_IF_UNDEF OPpARG_IF_FALSE
 	 SVf_IOK SVf_NOK SVf_ROK SVf_POK SVf_FAKE SVs_RMG SVs_SMG
 	 SVs_PADTMP
          CVf_NOWARN_AMBIGUOUS CVf_LVALUE
@@ -1261,7 +1262,10 @@ sub deparse_argops {
                 return unless $$kid and $kid->name eq 'argdefelem';
                 my $def = $self->deparse($kid->first, 7);
                 $def = "($def)" if $kid->first->flags & OPf_PARENS;
-                $var .= " = $def";
+                my $assign = "=";
+                $assign = "//=" if $kid->private & OPpARG_IF_UNDEF;
+                $assign = "||=" if $kid->private & OPpARG_IF_FALSE;
+                $var .= " $assign $def";
             }
             push @sig, $var;
         }

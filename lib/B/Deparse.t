@@ -2752,6 +2752,22 @@ sub ($a, $=) {
 }
 ;
 ####
+# defined-or default
+no warnings;
+use feature 'signatures';
+sub ($a //= 'default') {
+    $a;
+}
+;
+####
+# logical-or default
+no warnings;
+use feature 'signatures';
+sub ($a ||= 'default') {
+    $a;
+}
+;
+####
 # padrange op within pattern code blocks
 /(?{ my($x, $y) = (); })/;
 my $a;
