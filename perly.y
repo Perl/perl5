@@ -86,10 +86,13 @@
 %token <opval> LABEL
 %token <ival> LOOPEX DOTDOT YADAYADA
 %token <ival> FUNC0 FUNC1 FUNC UNIOP LSTOP
-%token <ival> MULOP ADDOP
+%token <ival> POWOP MULOP ADDOP
 %token <ival> DOLSHARP HASHBRACK NOAMP
 %token <ival> COLONATTR FORMLBRACK FORMRBRACK
 %token <ival> SUBLEXSTART SUBLEXEND
+
+/* Pluggable infix operators */
+%token <pval> PLUGLOWOP PLUGRELOP PLUGADDOP PLUGMULOP PLUGPOWOP PLUGHIGHOP
 
 %type <ival> grammar remember mremember
 %type <ival>  startsub startanonsub startformsub
@@ -118,6 +121,7 @@
 %nonassoc <ival> PREC_LOW
 %nonassoc LOOPEX
 
+%nonassoc PLUGLOWOP
 %left <ival> OROP
 %left <ival> ANDOP
 %right <ival> NOTOP
@@ -132,15 +136,17 @@
 %left <ival> BITANDOP
 %left <ival> CHEQOP NCEQOP
 %left <ival> CHRELOP NCRELOP
+%nonassoc PLUGRELOP
 %nonassoc UNIOP UNIOPSUB
 %nonassoc KW_REQUIRE
 %left <ival> SHIFTOP
-%left ADDOP
-%left MULOP
+%left ADDOP PLUGADDOP
+%left MULOP PLUGMULOP
 %left <ival> MATCHOP
 %right <ival> PERLY_EXCLAMATION_MARK PERLY_TILDE UMINUS REFGEN
-%right <ival> POWOP
+%right POWOP PLUGPOWOP
 %nonassoc <ival> PREINC PREDEC POSTINC POSTDEC POSTJOIN
+%nonassoc PLUGHIGHOP
 %left <ival> ARROW
 %nonassoc <ival> PERLY_PAREN_CLOSE
 %left <ival> PERLY_PAREN_OPEN
@@ -1115,17 +1121,25 @@ subscripted:    gelem PERLY_BRACE_OPEN expr PERLY_SEMICOLON PERLY_BRACE_CLOSE   
     ;
 
 /* Binary operators between terms */
-termbinop:	term[lhs] ASSIGNOP term[rhs]                     /* $x = $y, $x += $y */
+termbinop:	term[lhs] PLUGHIGHOP[op] term[rhs]
+			{ $$ = build_infix_plugin($lhs, $rhs, $op); }
+	|	term[lhs] ASSIGNOP term[rhs]                     /* $x = $y, $x += $y */
 			{ $$ = newASSIGNOP(OPf_STACKED, $lhs, $ASSIGNOP, $rhs); }
 	|	term[lhs] POWOP term[rhs]                        /* $x ** $y */
 			{ $$ = newBINOP($POWOP, 0, scalar($lhs), scalar($rhs)); }
+	|	term[lhs] PLUGPOWOP[op] term[rhs]
+			{ $$ = build_infix_plugin($lhs, $rhs, $op); }
 	|	term[lhs] MULOP term[rhs]                        /* $x * $y, $x x $y */
 			{   if ($MULOP != OP_REPEAT)
 				scalar($lhs);
 			    $$ = newBINOP($MULOP, 0, $lhs, scalar($rhs));
 			}
+	|	term[lhs] PLUGMULOP[op] term[rhs]
+			{ $$ = build_infix_plugin($lhs, $rhs, $op); }
 	|	term[lhs] ADDOP term[rhs]                        /* $x + $y */
 			{ $$ = newBINOP($ADDOP, 0, scalar($lhs), scalar($rhs)); }
+	|	term[lhs] PLUGADDOP[op] term[rhs]
+			{ $$ = build_infix_plugin($lhs, $rhs, $op); }
 	|	term[lhs] SHIFTOP term[rhs]                      /* $x >> $y, $x << $y */
 			{ $$ = newBINOP($SHIFTOP, 0, scalar($lhs), scalar($rhs)); }
 	|	termrelop %prec PREC_LOW               /* $x > $y, etc. */
@@ -1146,6 +1160,8 @@ termbinop:	term[lhs] ASSIGNOP term[rhs]                     /* $x = $y, $x += $y
 			{ $$ = newLOGOP(OP_DOR, 0, $lhs, $rhs); }
 	|	term[lhs] MATCHOP term[rhs]                      /* $x =~ /$y/ */
 			{ $$ = bind_match($MATCHOP, $lhs, $rhs); }
+	|	term[lhs] PLUGLOWOP[op] term[rhs]
+			{ $$ = build_infix_plugin($lhs, $rhs, $op); }
     ;
 
 termrelop:	relopchain %prec PREC_LOW
@@ -1156,6 +1172,8 @@ termrelop:	relopchain %prec PREC_LOW
 			{ yyerror("syntax error"); YYERROR; }
 	|	termrelop CHRELOP
 			{ yyerror("syntax error"); YYERROR; }
+	|	term[lhs] PLUGRELOP[op] term[rhs]
+			{ $$ = build_infix_plugin($lhs, $rhs, $op); }
 	;
 
 relopchain:	term[lhs] CHRELOP term[rhs]

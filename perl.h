@@ -6003,10 +6003,27 @@ typedef void (*XSINIT_t) (pTHX);
 typedef void (*ATEXIT_t) (pTHX_ void*);
 typedef void (*XSUBADDR_t) (pTHX_ CV *);
 
+/* TODO: find somewhere to store this */
+enum Perl_custom_infix_precedence {
+    INFIX_PREC_LOW  =  10, /* non-associative */
+    INFIX_PREC_REL  =  30, /* non-associative, just below `==` */
+    INFIX_PREC_ADD  =  50, /* left-associative, same precedence as `+` */
+    INFIX_PREC_MUL  =  70, /* left-associative, same precedence as `*` */
+    INFIX_PREC_POW  =  90, /* right-associative, same precedence as `**` */
+    INFIX_PREC_HIGH = 110, /* non-associative */
+};
+struct Perl_custom_infix;
+struct Perl_custom_infix {
+    enum Perl_custom_infix_precedence prec;
+    void (*parse)(pTHX_ SV **opdata, struct Perl_custom_infix *);  /* optional */
+    OP *(*build_op)(pTHX_ SV **opdata, OP *lhs, OP *rhs, struct Perl_custom_infix *);
+};
+
 typedef OP* (*Perl_ppaddr_t)(pTHX);
 typedef OP* (*Perl_check_t) (pTHX_ OP*);
 typedef void(*Perl_ophook_t)(pTHX_ OP*);
 typedef int (*Perl_keyword_plugin_t)(pTHX_ char*, STRLEN, OP**);
+typedef STRLEN (*Perl_infix_plugin_t)(pTHX_ char*, STRLEN, struct Perl_custom_infix **);
 typedef void(*Perl_cpeep_t)(pTHX_ OP *, OP *);
 
 typedef void(*globhook_t)(pTHX);
