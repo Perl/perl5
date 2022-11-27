@@ -3330,17 +3330,18 @@ SG   |bool   |sv_derived_from_svpvn  |NULLOK SV *sv			\
 #endif
 
 #if defined(PERL_IN_LOCALE_C)
+S	|utf8ness_t|get_locale_string_utf8ness_i			\
+				|NULLOK const char * string		\
+				|const locale_utf8ness_t known_utf8	\
+				|NULLOK const char * locale		\
+				|const unsigned cat_index
+S	|bool	|is_locale_utf8	|NN const char * locale
 #  ifdef USE_LOCALE
 iR	|const char *|mortalized_pv_copy|NULLOK const char * const pv
 ST	|const char *|save_to_buffer|NULLOK const char * string	\
 				    |NULLOK const char **buf	\
 				    |NULLOK Size_t *buf_size
 ST	|unsigned int|get_category_index|const int category|NULLOK const char * locale
-S	|utf8ness_t|get_locale_string_utf8ness_i			\
-				|NULLOK const char * string		\
-				|const locale_utf8ness_t known_utf8	\
-				|NULLOK const char * locale		\
-				|const unsigned cat_index
 #    ifdef USE_LOCALE_CTYPE
 S	|void	|new_ctype	|NN const char* newctype
 ST	|bool	|is_codeset_name_UTF8|NN const char * name
@@ -3365,7 +3366,6 @@ So	|const char *|toggle_locale_i|const unsigned switch_cat_index	\
 So	|void	|restore_toggled_locale_i|const unsigned cat_index	\
                                 |NULLOK const char * original_locale    \
 				|const line_t caller_line
-S	|bool	|is_locale_utf8	|NN const char * locale
 #    if (defined(HAS_LOCALECONV) || defined(HAS_LOCALECONV_L))		\
      && (defined(USE_LOCALE_MONETARY) || defined(USE_LOCALE_NUMERIC))
 S	|HV *	|my_localeconv|const int item
