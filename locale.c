@@ -4071,9 +4071,7 @@ S_my_langinfo_i(pTHX_
             /* Everything in between is the radix string */
             if (LIKELY(s < e)) {
                 *s = '\0';
-                retval = save_to_buffer(item_start,
-                                        (const char **) &PL_langinfo_buf,
-                                        &PL_langinfo_bufsize);
+                retval = save_to_buffer(item_start, retbufp, retbuf_sizep);
                 Safefree(floatbuf);
 
                 if (utf8ness) {
