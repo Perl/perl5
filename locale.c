@@ -2986,7 +2986,8 @@ S_is_locale_utf8(pTHX_ const char * locale)
      * English, it comes down to if the locale's name ends in something like
      * "UTF-8".  It errs on the side of not being a UTF-8 locale. */
 
-#  if ! defined(USE_LOCALE_CTYPE)                                             \
+#  if ! defined(USE_LOCALE)                                                   \
+   || ! defined(USE_LOCALE_CTYPE)                                             \
    ||   defined(EBCDIC) /* There aren't any real UTF-8 locales at this time */
 
     PERL_UNUSED_ARG(locale);
