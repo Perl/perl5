@@ -1854,9 +1854,8 @@ PP(pp_sysread)
            reading to:  */
         SvCUR_set(bufsv, offset);
 
-        read_target = sv_newmortal();
-        SvUPGRADE(read_target, SVt_PV);
-        buffer = SvGROW(read_target, (STRLEN)(length + 1));
+        read_target = newSV_type_mortal(SVt_PV);
+        buffer = sv_grow_fresh(read_target, (STRLEN)(length + 1));
     }
 
     if (PL_op->op_type == OP_SYSREAD) {

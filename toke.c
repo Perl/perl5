@@ -11488,7 +11488,7 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
     /* create a new SV to hold the contents.  79 is the SV's initial length.
        What a random number. */
     sv = newSV_type(SVt_PVIV);
-    SvGROW(sv, 79);
+    sv_grow_fresh(sv, 79);
     SvIV_set(sv, close_delim_code);
     (void)SvPOK_only(sv);		/* validate pointer */
 
