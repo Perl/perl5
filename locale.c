@@ -3193,8 +3193,7 @@ HV *
 Perl_localeconv(pTHX)
 {
 
-#if  ! defined(HAS_LOCALECONV)                                          \
- || (! defined(USE_LOCALE_MONETARY) && ! defined(USE_LOCALE_NUMERIC))
+#if  ! defined(HAS_LOCALECONV)
 
     return newHV();
 
@@ -3206,141 +3205,453 @@ Perl_localeconv(pTHX)
 
 }
 
-#if  defined(HAS_LOCALECONV)                                            \
- && (defined(USE_LOCALE_MONETARY) || defined(USE_LOCALE_NUMERIC))
+#if  defined(HAS_LOCALECONV)
 
 HV *
 S_my_localeconv(pTHX_ const int item)
 {
-    HV * retval;
-    locale_utf8ness_t numeric_locale_is_utf8  = LOCALE_UTF8NESS_UNKNOWN;
-    locale_utf8ness_t monetary_locale_is_utf8 = LOCALE_UTF8NESS_UNKNOWN;
-    HV * (*copy_localeconv)(pTHX_ const struct lconv *,
-                                  const int,
-                                  const locale_utf8ness_t,
-                                  const locale_utf8ness_t);
+    PERL_ARGS_ASSERT_MY_LOCALECONV;
 
-    /* A thread-safe locale_conv().  The locking mechanisms vary greatly
-     * depending on platform capabilities.  They all share this common set up
-     * code for the function, and then conditional compilations choose one of
-     * several terminations.
+    /* This returns a mortalized hash containing all or one of the elements
+     * returned by localeconv().  It is used by Perl_localeconv() and
+     * POSIX::localeconv() and is thread-safe.
      *
      * There are two use cases:
-     * 1) Called from POSIX::locale_conv().  This returns lconv() copied to
-     *    a hash, based on the current underlying locale.
+     * 1) Called from POSIX::locale_conv().  This returns the lconv structure
+     *    copied to a hash, based on the current underlying locales for
+     *    LC_NUMERIC and LC_MONETARY. An input item==0 signifies this case, or
+     *    on many platforms it is the only use case compiled.
      * 2) Certain items that nl_langinfo() provides are also derivable from
      *    the return of localeconv().  Windows notably doesn't have
      *    nl_langinfo(), so on that, and actually any platform lacking it,
-     *    my_localeconv() is used to emulate it for those particular items.
-     *    The code to do this is compiled only on such platforms.  Rather than
-     *    going to the expense of creating a full hash when only one item is
-     *    needed, just the desired item is returned, in an SV cast to an HV.
+     *    my_localeconv() is used also to emulate it for those particular
+     *    items.  The code to do this is compiled only on such platforms.
+     *    Rather than going to the expense of creating a full hash when only
+     *    one item is needed, the returned hash has just the desired item in
+     *    it.
      *
-     * There is a helper function to accomplish each of the two tasks.  The
-     * function pointer just below is set to the appropriate one, and is called
-     * from each of the various implementations, in the middle of whatever
-     * necessary locking/locale swapping have been done. */
+     * To access all the localeconv() struct lconv fields, there is a data
+     * structure that contains every commonly documented field in it.  (Maybe
+     * some minority platforms have extra fields.  Those could be added here
+     * without harm; they would just be ignored on platforms lacking them.)
+     *
+     * Our structure is compiled to make looping through the fields easier by
+     * pointing each name to its value's offset within lconv, e.g.,
+        { "thousands_sep", STRUCT_OFFSET(struct lconv, thousands_sep) }
+     */
+#  define LCONV_ENTRY(name)                                           \
+                {STRINGIFY(name), STRUCT_OFFSET(struct lconv, name)}
+
+    /* These synonyms are just for clarity, and to make it easier in case
+     * something needs to change in the future */
+#  define LCONV_NUMERIC_ENTRY(name)  LCONV_ENTRY(name)
+#  define LCONV_MONETARY_ENTRY(name) LCONV_ENTRY(name)
+
+    /* There are just a few fields for NUMERIC strings */
+    const lconv_offset_t lconv_numeric_strings[] = {
+#  ifndef NO_LOCALECONV_GROUPING
+        LCONV_NUMERIC_ENTRY(grouping),
+#   endif
+        LCONV_NUMERIC_ENTRY(thousands_sep),
+        LCONV_NUMERIC_ENTRY(decimal_point),
+        {NULL, 0}
+    };
+
+    /* When used to implement nl_langinfo(), we save time by only populating
+     * the hash with the field(s) needed.  Thus we would need a data structure
+     * of just:
+     *  LCONV_NUMERIC_ENTRY(decimal_point),
+     *  {NULL, 0}
+     *
+     * By placing the decimal_point field last in the full structure, we can
+     * use just the tail for this bit of it, saving space.  This macro yields
+     * the address of the sub structure. */
+#  define DECIMAL_POINT_ADDRESS                                             \
+        &lconv_numeric_strings[(C_ARRAY_LENGTH(lconv_numeric_strings) - 2)]
+
+    /* And the MONETARY string fields */
+    const lconv_offset_t lconv_monetary_strings[] = {
+        LCONV_MONETARY_ENTRY(int_curr_symbol),
+        LCONV_MONETARY_ENTRY(mon_decimal_point),
+#  ifndef NO_LOCALECONV_MON_THOUSANDS_SEP
+        LCONV_MONETARY_ENTRY(mon_thousands_sep),
+#  endif
+#  ifndef NO_LOCALECONV_MON_GROUPING
+        LCONV_MONETARY_ENTRY(mon_grouping),
+#  endif
+        LCONV_MONETARY_ENTRY(positive_sign),
+        LCONV_MONETARY_ENTRY(negative_sign),
+        LCONV_MONETARY_ENTRY(currency_symbol),
+        {NULL, 0}
+    };
+
+    /* Like above, this field being last can be used as a sub structure */
+#  define CURRENCY_SYMBOL_ADDRESS                                            \
+      &lconv_monetary_strings[(C_ARRAY_LENGTH(lconv_monetary_strings) - 2)]
+
+    /* Finally there are integer fields, all are for monetary purposes */
+    const lconv_offset_t lconv_integers[] = {
+        LCONV_ENTRY(int_frac_digits),
+        LCONV_ENTRY(frac_digits),
+        LCONV_ENTRY(p_sep_by_space),
+        LCONV_ENTRY(n_cs_precedes),
+        LCONV_ENTRY(n_sep_by_space),
+        LCONV_ENTRY(p_sign_posn),
+        LCONV_ENTRY(n_sign_posn),
+#  ifdef HAS_LC_MONETARY_2008
+        LCONV_ENTRY(int_p_cs_precedes),
+        LCONV_ENTRY(int_p_sep_by_space),
+        LCONV_ENTRY(int_n_cs_precedes),
+        LCONV_ENTRY(int_n_sep_by_space),
+        LCONV_ENTRY(int_p_sign_posn),
+        LCONV_ENTRY(int_n_sign_posn),
+#  endif
+        LCONV_ENTRY(p_cs_precedes),
+        {NULL, 0}
+    };
+
+    /* Like above, this field being last can be used as a sub structure */
+#  define P_CS_PRECEDES_ADDRESS                                       \
+      &lconv_integers[(C_ARRAY_LENGTH(lconv_integers) - 2)]
+
+    /* If we aren't paying attention to a given category, use LC_CTYPE instead;
+     * If not paying attention to that either, the code below should end up not
+     * using this.  Make sure that things blow up if that avoidance gets lost,
+     * by setting the category to -1 */
+    unsigned int numeric_index;
+    unsigned int monetary_index;
+
+#  ifdef USE_LOCALE_NUMERIC
+    numeric_index = LC_NUMERIC_INDEX_;
+#  elif defined(USE_LOCALE_CTYPE)
+    numeric_index = LC_CTYPE_INDEX_;
+#  else
+    numeric_index = (unsigned) -1;
+#  endif
+#  ifdef USE_LOCALE_MONETARY
+    monetary_index = LC_MONETARY_INDEX_;
+#  elif defined(USE_LOCALE_CTYPE)
+    monetary_index = LC_CTYPE_INDEX_;
+#  else
+    monetary_index = (unsigned) -1;
+#  endif
+
+    /* Some platforms, for correct non-mojibake results, require LC_CTYPE's
+     * locale to match LC_NUMERIC's for the numeric fields, and LC_MONETARY's
+     * for the monetary ones.  What happens if LC_NUMERIC and LC_MONETARY
+     * aren't compatible?  Wrong results.  To avoid that, we call localeconv()
+     * twice, once for each locale, setting LC_CTYPE to match the category.
+     * But if the locales of both categories are the same, there is no need for
+     * a second call.  Assume this is the case unless overridden below */
+    bool requires_2nd_localeconv = false;
+
+    /* The actual hash populating is done by S_populate_hash_from_localeconv().
+     * It gets passed an array of length two containing the data structure it
+     * is supposed to use to get the key names to fill the hash with.  One
+     * element is alwasy for the NUMERIC strings (or NULL if none to use), and
+     * the other element similarly for the MONETARY ones. */
+#    define NUMERIC_STRING_OFFSET   0
+#    define MONETARY_STRING_OFFSET  1
+    const lconv_offset_t * strings[2] = { NULL, NULL };
+
+    /* This is a mask, with one bit to tell S_populate_hash_from_localeconv to
+     * populate the NUMERIC items; another bit for the MONETARY ones.  This way
+     * it can choose which (or both) to populate from */
+    U32 index_bits = 0;
+
+    /* This converts from a locale index to its bit position in the above mask.
+     * */
+#  define INDEX_TO_BIT(i)  (1 << (i))
+
+    /* The two categories can have disparate locales.  Initialize them to C and
+     * override later whichever one(s) we pay attention to */
+    const char * numeric_locale = "C";
+    const char * monetary_locale = "C";
+
+    /* This will be either 'numeric_locale' or 'monetary_locale' depending on
+     * what we are working on at the moment */
+    const char * locale;
+
+    /* The LC_MONETARY category also has some integer-valued fields, whose
+     * information is kept in a separate list */
+    const lconv_offset_t * integers;
 
 #  ifdef HAS_SOME_LANGINFO
 
+    /* If the only use-case for this is the full localeconv(), the 'item'
+     * parameter is ignored. */
     PERL_UNUSED_ARG(item);
-
-    const bool is_localeconv_call = true;
 
 #  else
 
-    /* Note we use this sentinel; this works because this only gets compiled
-     * when our perl_langinfo.h is used, and that uses negative numbers for all
-     * the items */
-    const bool is_localeconv_call = (item == 0);
+    /* This only gets compiled for the use-case of using localeconv() to
+     * emulate an nl_langinfo() missing from the platform.
+     *
+     * We need this substructure to only return this field for the THOUSEP
+     * item.  The other items also need substructures, but they were handled
+     * above by placing the substructure's item at the end of the full one, so
+     * the data structure could do double duty.  However, both this and
+     * RADIXCHAR would need to be in the final position of the same full
+     * structure; an impossibility.  So make this into a separate structure */
+    const lconv_offset_t  thousands_sep_string[] = {
+        LCONV_NUMERIC_ENTRY(thousands_sep),
+        {NULL, 0}
+    };
 
-#  endif
-
-    if (is_localeconv_call) {
-        copy_localeconv = S_populate_localeconv;
+    /* End of all the initialization of datastructures.  Now for actual code.
+     *
+     * Without nl_langinfo(), the call to my_localeconv() could be for just one
+     * of the following 3 items to emulate nl_langinfo().  This is compiled
+     * only when using perl_langinfo.h, which we control, and it has been
+     * constructed so that no item is numbered 0.
+     *
+     * For each, setup the appropriate parameters for the call below to
+     * S_populate_hash_from_localeconv() */
+    if (item != 0) switch (item) {
+      default:
+        locale_panic_(Perl_form(aTHX_
+                    "Unexpected item passed to my_localeconv: %d", item));
+        break;
 
 #    ifdef USE_LOCALE_NUMERIC
 
-        /* Get the UTF8ness of the locales now to avoid repeating this for each
-         * string returned by localeconv() */
-        numeric_locale_is_utf8 = (is_locale_utf8(PL_numeric_name))
-                                  ? LOCALE_IS_UTF8
-                                  : LOCALE_NOT_UTF8;
+      case RADIXCHAR:
+        locale = numeric_locale = PL_numeric_name;
+        index_bits = INDEX_TO_BIT(LC_NUMERIC_INDEX_);
+        strings[NUMERIC_STRING_OFFSET] = DECIMAL_POINT_ADDRESS;
+        integers = NULL;
+        break;
+
+      case THOUSEP:
+        index_bits = INDEX_TO_BIT(LC_NUMERIC_INDEX_);
+        locale = numeric_locale = PL_numeric_name;
+        strings[NUMERIC_STRING_OFFSET] = thousands_sep_string;
+        integers = NULL;
+        break;
 
 #    endif
 #    ifdef USE_LOCALE_MONETARY
 
-        monetary_locale_is_utf8 = (is_locale_utf8(querylocale_c(LC_MONETARY)))
-                                  ? LOCALE_IS_UTF8
-                                  : LOCALE_NOT_UTF8;
+      case CRNCYSTR:
+        index_bits = INDEX_TO_BIT(LC_MONETARY_INDEX_);
+        locale = monetary_locale = querylocale_i(LC_MONETARY_INDEX_);
+
+        /* This item needs the values for both the currency symbol, and another
+         * one used to construct the nl_langino()-compatible return */
+        strings[MONETARY_STRING_OFFSET] = CURRENCY_SYMBOL_ADDRESS;
+        integers = P_CS_PRECEDES_ADDRESS;
+        break;
+
+#    endif
+
+    } /* End of switch() */
+
+    else    /* End of for just one item to emulate nl_langinfo() */
 
 #  endif
 
+    {   /* Here, the call is for all of localeconv().  It has a bunch of
+         * items.  As in the individual item case, set up the parameters for
+         * S_populate_hash_from_localeconv(); */
+
+#  ifdef USE_LOCALE_NUMERIC
+        numeric_locale = PL_numeric_name;
+#  elif defined(USE_LOCALE_CTYPE)
+        numeric_locale = querylocale_i(numeric_index);
+#  endif
+#  if defined(USE_LOCALE_MONETARY) || defined(USE_LOCALE_CTYPE)
+        monetary_locale = querylocale_i(monetary_index);
+#  endif
+
+        /* The first call to S_populate_hash_from_localeconv() will be for the
+         * MONETARY values */
+        index_bits = INDEX_TO_BIT(monetary_index);
+        locale = monetary_locale;
+
+        /* And if the locales for the two categories are the same, we can also
+         * do the NUMERIC values in the same call */
+        if (strEQ(numeric_locale, monetary_locale)) {
+            index_bits |= INDEX_TO_BIT(numeric_index);
+        }
+        else {
+            requires_2nd_localeconv = true;
+        }
+
+        /* We always pass both sets of strings. 'index_bits' tells
+         * S_populate_hash_from_localeconv which to actually look at */
+        strings[NUMERIC_STRING_OFFSET] = lconv_numeric_strings;
+        strings[MONETARY_STRING_OFFSET] = lconv_monetary_strings;
+
+        /* And pass the integer values to populate; again 'index_bits' will
+         * say to use them or not */
+        integers = lconv_integers;
+
+    }   /* End of call is for localeconv() */
+
+    /* The code above has determined the parameters to
+       S_populate_hash_from_localeconv() for both cases of an individual item
+       and for the entire structure.  Below is code common to both */
+
+    HV * hv = newHV();      /* The returned hash, initially empty */
+    sv_2mortal((SV*)hv);
+
+    /* Call localeconv() and copy its results into the hash.  All the
+     * parameters have been initialized above */
+    populate_hash_from_localeconv(hv,
+                                  locale,
+                                  index_bits,
+                                  strings,
+                                  integers
+                                 );
+
+    /* The above call may have done all the hash fields, but not always, as
+     * already explained.  If we need a second call it is always for the
+     * NUMERIC fields */
+    if (requires_2nd_localeconv) {
+        populate_hash_from_localeconv(hv,
+                                      numeric_locale,
+                                      INDEX_TO_BIT(numeric_index),
+                                      strings,
+                                      NULL      /* There are No NUMERIC integer
+                                                   fields */
+                                     );
     }
 
-#  ifndef HAS_SOME_LANGINFO
+    /* Here, the hash has been completely populated.
+     *
+     * Now go through all the string items and see if they should be marked as
+     * UTF-8 or not.  This would have been more convenient and faster to do
+     * while populating the hash in the first place, but that operation has to
+     * be done within a critical section, keeping other threads from executing,
+     * so only the minimal amount of work necessary is done at that time.
+     *
+     * XXX On unthreaded perls, and on platforms where localeconv (or
+     * localeconv_l if present) this code could be #ifdef'd out, and the
+     * UTF8ness determined at hash population time, at an extra maintenance
+     * cost which khw doesn't think is worth it
+     */
+    for (unsigned int i = 0; i < 2; i++) {  /* Try both types of strings */
+        if (! strings[i]) {     /* Skip if no strings of this type */
+            continue;
+        }
 
-    else {
-        copy_localeconv = S_get_nl_item_from_localeconv;
-    }
+        locale = (i == NUMERIC_STRING_OFFSET)
+                 ? numeric_locale
+                 : monetary_locale;
+
+        locale_utf8ness_t locale_is_utf8 = LOCALE_UTF8NESS_UNKNOWN;
+
+#  ifdef HAS_RELIABLE_UTF8NESS_DETERMINATION
+
+        /* It saves time in the loop below to have predetermined the UTF8ness
+         * of the locale.  But only do so if the platform reliably has this
+         * information; otherwise to do it, this could recurse indefinitely.
+         *
+         * When we don't do it here, it will be done on a per-element basis in
+         * the loop.  The per-element check is intelligent enough to not
+         * recurse */
+
+        locale_is_utf8 = (is_locale_utf8(locale))
+                         ? LOCALE_IS_UTF8
+                         : LOCALE_NOT_UTF8;
+
+        if (locale_is_utf8 == LOCALE_NOT_UTF8) {
+            continue;   /* No string can be UTF-8 if the locale isn't */
+        }
 
 #  endif
 
-    PERL_ARGS_ASSERT_MY_LOCALECONV;
-/*--------------------------------------------------------------------------*/
-/* Here, we are done with the common beginning of all the implementations of
- * my_localeconv().  Below are the two terminations of the function (except
- * the closing '}'.  They are separated out because the preprocessor directives
- * were making the simple logic hard to follow.  Each implementation ends with
- * the same few lines.  khw decided to keep those separate because he thought
- * it was clearer to the reader.
- *--------------------------------------------------------------------------*/
-#  if ! defined(TS_W32_BROKEN_LOCALECONV)  /* Regular lconv() */
+        /* Examine each string */
+        while (1) {
+            const char * name = strings[i]->name;
 
-    /* There are so many locks because localeconv() deals with two
-     * categories, and returns in a single global static buffer.  Some
-     * locks might be no-ops on this platform, but not others.  We need to
-     * lock if any one isn't a no-op. */
+            if (! name) {   /* Reached the end */
+                break;
+            }
 
-#    ifdef USE_LOCALE_NUMERIC
+            /* 'value' will contain the string that may need to be marked as
+             * UTF-8 */
+            SV ** value = hv_fetch(hv, name, strlen(name), true);
+            if (! value) {
+                continue;
+            }
 
-    LC_NUMERIC_LOCK(0);
-    const char * orig_switched_locale = NULL;
+            /* Determine if the string should be marked as UTF-8. */
+            if (UTF8NESS_YES == (get_locale_string_utf8ness_i(SvPVX(*value),
+                                                              locale_is_utf8,
+                                                              NULL, 0)))
+            {
+                SvUTF8_on(*value);
+            }
 
-    /* When called internally, are already switched into the proper numeric
-     * locale; otherwise must toggle to it */
-    if (is_localeconv_call) {
-        orig_switched_locale = toggle_locale_c(LC_NUMERIC, PL_numeric_name);
+            strings[i]++;   /* Iterate */
+        }
+    }   /* End of fixing up UTF8ness */
+
+    return hv;
+}
+
+STATIC void
+S_populate_hash_from_localeconv(pTHX_ HV * hv,
+
+                                      /* Switch to this locale to run
+                                       * localeconv() from */
+                                      const char * locale,
+
+                                      /* bit mask of which categories to
+                                       * populate */
+                                      const U32 which_mask,
+
+                                      /* strings[0] points the the numeric
+                                       * string fields; [1] to the monetary */
+                                      const lconv_offset_t * strings[2],
+
+                                      /* And to the monetary integer fields */
+                                      const lconv_offset_t * integers)
+{
+    PERL_ARGS_ASSERT_POPULATE_HASH_FROM_LOCALECONV;
+    PERL_UNUSED_ARG(which_mask);    /* Some configurations don't use this;
+                                       complicated to figure out which */
+
+    /* Run localeconv() and copy some or all of its results to the input 'hv'
+     * hash.  Most localeconv() implementations return the values in a global
+     * static buffer, so the operation must be performed in a critical section,
+     * ending only after the copy is completed.  There are so many locks
+     * because localeconv() deals with two categories, and returns in a single
+     * global static buffer.  Some locks might be no-ops on this platform, but
+     * not others.  We need to lock if any one isn't a no-op. */
+
+#  ifdef USE_LOCALE_CTYPE
+
+    /* Some platforms require LC_CTYPE to be congruent with the category we are
+     * looking for */
+    const char * orig_CTYPE_locale = toggle_locale_c(LC_CTYPE, locale);
+
+#  endif
+#  ifdef USE_LOCALE_NUMERIC
+
+    /* We need to toggle to the underlying NUMERIC locale if we are getting
+     * NUMERIC strings */
+    const char * orig_NUMERIC_locale = NULL;
+    if (which_mask & INDEX_TO_BIT(LC_NUMERIC_INDEX_)) {
+        LC_NUMERIC_LOCK(0);
+        orig_NUMERIC_locale = toggle_locale_i(LC_NUMERIC_INDEX_, locale);
     }
 
 #    endif
 
+    /* Finally ready to do the actual localeconv().  Lock to prevent other
+     * accesses until we have made a copy of its returned static buffer */
     gwLOCALE_LOCK;
-    retval = copy_localeconv(aTHX_ localeconv(),
-                                   item,
-                                   numeric_locale_is_utf8,
-                                   monetary_locale_is_utf8);
-    gwLOCALE_UNLOCK;
 
-#    ifdef USE_LOCALE_NUMERIC
+#  ifdef TS_W32_BROKEN_LOCALECONV
 
-    if (orig_switched_locale) {
-        restore_toggled_locale_c(LC_NUMERIC, orig_switched_locale);
-    }
-    LC_NUMERIC_UNLOCK;
-
-#    endif
-
-    return retval;
-
-/*--------------------------------------------------------------------------*/
-#  else /* defined(TS_W32_BROKEN_LOCALECONV) */
-
-    /* Last is a workaround for the broken localeconv() on Windows with
-     * thread-safe locales prior to VS 15.  It looks at the global locale
-     * instead of the thread one.  As a work-around, we toggle to the global
-     * locale; populate the return; then toggle back.  We have to use LC_ALL
-     * instead of the individual categories because of another bug in Windows.
+    /* This is a workaround for another bug in Windows.  localeconv() was
+     * broken with thread-safe locales prior to VS 15.  It looks at the global
+     * locale instead of the thread one.  As a work-around, we toggle to the
+     * global locale; populate the return; then toggle back.  We have to use
+     * LC_ALL instead of the individual categories because of yet another bug
+     * in Windows.  And this all has to be done in a critical section.
      *
      * This introduces a potential race with any other thread that has also
      * converted to use the global locale, and doesn't protect its locale calls
@@ -3349,24 +3660,10 @@ S_my_localeconv(pTHX_ const int item)
      * if the code is ported from working on another platform where there might
      * be some reason to do this.  But this is typically due to some
      * alien-to-Perl library that thinks it owns locale setting.  Such a
-     * library usn't likely to exist on Windows, so such an application is
+     * library isn't likely to exist on Windows, so such an application is
      * unlikely to be run on Windows
      */
     bool restore_per_thread = FALSE;
-
-#    ifdef USE_LOCALE_NUMERIC
-
-    const char * orig_switched_locale = NULL;
-
-    LC_NUMERIC_LOCK(0);
-
-    /* When called internally, are already switched into the proper numeric
-     * locale; otherwise must toggle to it */
-    if (is_localeconv_call) {
-        orig_switched_locale = toggle_locale_c(LC_NUMERIC, PL_numeric_name);
-    }
-
-#    endif
 
     /* Save the per-thread locale state */
     const char * save_thread = querylocale_c(LC_ALL);
@@ -3383,13 +3680,79 @@ S_my_localeconv(pTHX_ const int item)
     const char * save_global = querylocale_c(LC_ALL);
     void_setlocale_c(LC_ALL, save_thread);
 
-    /* Safely stash the desired data */
-    gwLOCALE_LOCK;
-    retval = copy_localeconv(aTHX_ localeconv(),
-                                   item,
-                                   numeric_locale_is_utf8,
-                                   monetary_locale_is_utf8);
-    gwLOCALE_UNLOCK;
+#  endif  /* TS_W32_BROKEN_LOCALECONV */
+
+    /* Finally, do the actual localeconv */
+    const char *lcbuf_as_string = (const char *) localeconv();
+
+    /* Fill in the string fields of the HV* */
+    for (unsigned int i = 0; i < 2; i++) {
+
+#  ifdef USE_LOCALE_NUMERIC
+
+        /* One iteration is only for the numeric string fields */
+        if (   i == NUMERIC_STRING_OFFSET
+            && (which_mask & INDEX_TO_BIT(LC_NUMERIC_INDEX_))  == 0)
+        {
+            continue;
+        }
+
+#  endif
+#  ifdef USE_LOCALE_MONETARY
+
+        /* The other iteration is only for the monetary string fields */
+        if (   i == MONETARY_STRING_OFFSET
+            && (which_mask & INDEX_TO_BIT(LC_MONETARY_INDEX_)) == 0)
+        {
+            continue;
+        }
+
+#  endif
+
+        /* For each field for the given category ... */
+        const lconv_offset_t * category_strings = strings[i];
+        while (1) {
+            const char * name = category_strings->name;
+            if (! name) {   /* Quit at the end */
+                break;
+            }
+
+            /* we have set things up so that we know where in the returned
+             * structure, when viewed as a string, the corresponding value is.
+             * */
+            const char *value = *((const char **)(  lcbuf_as_string
+                                                  + category_strings->offset));
+
+            /* Set to get next string on next iteration */
+            category_strings++;
+
+            /* Skip if this platform doesn't have this field. */
+            if (! value) {
+                continue;
+            }
+
+            /* Copy to the hash */
+            (void) hv_store(hv,
+                            name, strlen(name),
+                            newSVpv(value, strlen(value)),
+                            0);
+        }
+
+        /* Add any int fields to the HV* */
+        if (i == MONETARY_STRING_OFFSET && integers) {
+            while (integers->name) {
+                const char value = *((const char *)(  lcbuf_as_string
+                                                    + integers->offset));
+                (void) hv_store(hv, integers->name,
+                                strlen(integers->name), newSViv(value), 0);
+                integers++;
+            }
+        }
+    }   /* End of loop through the fields */
+
+    /* Done with copying to the hash.  Can unwind the critical section locks */
+
+#  ifdef TS_W32_BROKEN_LOCALECONV
 
     /* Restore the global locale's prior state */
     void_setlocale_c(LC_ALL, save_global);
@@ -3402,251 +3765,28 @@ S_my_localeconv(pTHX_ const int item)
     /* Restore the per-thread locale state */
     void_setlocale_c(LC_ALL, save_thread);
 
-#    ifdef USE_LOCALE_NUMERIC
+#  endif  /* TS_W32_BROKEN_LOCALECONV */
 
-    if (orig_switched_locale) {
-        restore_toggled_locale_c(LC_NUMERIC, orig_switched_locale);
-    }
-    LC_NUMERIC_UNLOCK;
-
-#    endif
-
-    return retval;
-
-#  endif
-/*--------------------------------------------------------------------------*/
-}
-
-STATIC HV *
-S_populate_localeconv(pTHX_ const struct lconv *lcbuf,
-                            const int unused,
-                            const locale_utf8ness_t numeric_locale_is_utf8,
-                            const locale_utf8ness_t monetary_locale_is_utf8)
-{
-    /* This returns a mortalized hash containing all the elements returned by
-     * localeconv().  It is used by Perl_localeconv() and POSIX::localeconv()
-     */
-    PERL_UNUSED_ARG(unused);
-
-    struct lconv_offset {
-        const char *name;
-        size_t offset;
-    };
-
-    /* Create e.g.,
-        {"thousands_sep", STRUCT_OFFSET(struct lconv, thousands_sep)},
-     */
-#  define LCONV_ENTRY(name)                                         \
-            {STRINGIFY(name), STRUCT_OFFSET(struct lconv, name)}
-
-    /* Set up structures containing the documented fields.  One structure for
-     * LC_NUMERIC-controlled strings; one for LC_MONETARY ones, and a final one
-     * of just numerics. */
-#  ifdef USE_LOCALE_NUMERIC
-
-    static const struct lconv_offset lconv_numeric_strings[] = {
-        LCONV_ENTRY(decimal_point),
-        LCONV_ENTRY(thousands_sep),
-#    ifndef NO_LOCALECONV_GROUPING
-        LCONV_ENTRY(grouping),
-#    endif
-        {NULL, 0}
-    };
-
-#  endif
-#  ifdef USE_LOCALE_MONETARY
-
-    static const struct lconv_offset lconv_monetary_strings[] = {
-        LCONV_ENTRY(int_curr_symbol),
-        LCONV_ENTRY(currency_symbol),
-        LCONV_ENTRY(mon_decimal_point),
-#    ifndef NO_LOCALECONV_MON_THOUSANDS_SEP
-        LCONV_ENTRY(mon_thousands_sep),
-#    endif
-#    ifndef NO_LOCALECONV_MON_GROUPING
-        LCONV_ENTRY(mon_grouping),
-#    endif
-        LCONV_ENTRY(positive_sign),
-        LCONV_ENTRY(negative_sign),
-        {NULL, 0}
-    };
-
-#  endif
-
-    static const struct lconv_offset lconv_integers[] = {
-#  ifdef USE_LOCALE_MONETARY
-        LCONV_ENTRY(int_frac_digits),
-        LCONV_ENTRY(frac_digits),
-        LCONV_ENTRY(p_cs_precedes),
-        LCONV_ENTRY(p_sep_by_space),
-        LCONV_ENTRY(n_cs_precedes),
-        LCONV_ENTRY(n_sep_by_space),
-        LCONV_ENTRY(p_sign_posn),
-        LCONV_ENTRY(n_sign_posn),
-#    ifdef HAS_LC_MONETARY_2008
-        LCONV_ENTRY(int_p_cs_precedes),
-        LCONV_ENTRY(int_p_sep_by_space),
-        LCONV_ENTRY(int_n_cs_precedes),
-        LCONV_ENTRY(int_n_sep_by_space),
-        LCONV_ENTRY(int_p_sign_posn),
-        LCONV_ENTRY(int_n_sign_posn),
-#    endif
-#  endif
-        {NULL, 0}
-    };
-
-    static const unsigned category_indices[] = {
-#  ifdef USE_LOCALE_NUMERIC
-        LC_NUMERIC_INDEX_,
-#  endif
-#  ifdef USE_LOCALE_MONETARY
-        LC_MONETARY_INDEX_,
-#  endif
-        (unsigned) -1   /* Just so the previous element can always end with a
-                           comma => subtract 1 below for the max loop index */
-    };
-
-    const char *ptr = (const char *) lcbuf;
-    const struct lconv_offset *integers = lconv_integers;
-
-    HV * retval = newHV();
-    sv_2mortal((SV*)retval);
-
-    PERL_ARGS_ASSERT_POPULATE_LOCALECONV;
-
-    /* For each enabled category ... */
-    for (PERL_UINT_FAST8_T i = 0; i < C_ARRAY_LENGTH(category_indices) - 1; i++) {
-        const unsigned cat_index = category_indices[i];
-        locale_utf8ness_t locale_is_utf8 = LOCALE_UTF8NESS_UNKNOWN;
-        const char *locale;
-
-        /* ( = NULL silences a compiler warning; would segfault if it could
-         * actually happen.) */
-        const struct lconv_offset *strings = NULL;
+    gwLOCALE_UNLOCK;    /* Finished with the critical section of a
+                           globally-accessible buffer */
 
 #  ifdef USE_LOCALE_NUMERIC
-        if (cat_index == LC_NUMERIC_INDEX_) {
-            locale_is_utf8 = numeric_locale_is_utf8;
-            strings = lconv_numeric_strings;
-        }
-#  else
-        PERL_UNUSED_ARG(numeric_locale_is_utf8);
+
+    restore_toggled_locale_i(LC_NUMERIC_INDEX_, orig_NUMERIC_locale);
+    if (which_mask & INDEX_TO_BIT(LC_NUMERIC_INDEX_)) {
+        LC_NUMERIC_UNLOCK;
+    }
+
 #  endif
-#  ifdef USE_LOCALE_MONETARY
-        if (cat_index == LC_MONETARY_INDEX_) {
-            locale_is_utf8 = monetary_locale_is_utf8;
-            strings = lconv_monetary_strings;
-        }
-#  else
-        PERL_UNUSED_ARG(monetary_locale_is_utf8);
+#  ifdef USE_LOCALE_CTYPE
+
+    restore_toggled_locale_c(LC_CTYPE, orig_CTYPE_locale);
+
 #  endif
 
-        assert(locale_is_utf8 != LOCALE_UTF8NESS_UNKNOWN);
-
-        /* Iterate over the strings structure for this category */
-        locale = querylocale_i(cat_index);
-
-        while (strings->name) {
-            const char *value = *((const char **)(ptr + strings->offset));
-            if (value) {
-                bool is_utf8 =  /* Only make UTF-8 if required to */
-                  (UTF8NESS_YES == (get_locale_string_utf8ness_i(value,
-                                                                 locale_is_utf8,
-                                                                 locale,
-                                                                 cat_index)));
-                (void) hv_store(retval,
-                                strings->name,
-                                strlen(strings->name),
-                                newSVpvn_utf8(value, strlen(value), is_utf8),
-                                0);
-            }
-
-            strings++;
-        }
-    }
-
-    while (integers->name) {
-        const char value = *((const char *)(ptr + integers->offset));
-
-        (void) hv_store(retval, integers->name,
-                            strlen(integers->name), newSViv(value), 0);
-        integers++;
-    }
-
-    return retval;
 }
 
-#  ifndef HAS_SOME_LANGINFO
-
-STATIC HV *
-S_get_nl_item_from_localeconv(pTHX_ const struct lconv *lcbuf,
-                                    const int item,
-                                    const locale_utf8ness_t unused1,
-                                    const locale_utf8ness_t unused2)
-{
-    /* This is a helper function for my_localeconv(), which is called from
-     * my_langinfo() to emulate the libc nl_langinfo() function on platforms
-     * that don't have it available.
-     *
-     * This function acts as an extension to my_langinfo(), the intermediate
-     * my_localeconv() call is to set up the locks and switch into the proper
-     * locale.  That logic exists for other reasons, and by doing it this way,
-     * it doesn't have to be duplicated.
-     *
-     * This function extracts the current value of 'item' in the current locale
-     * using the localconv() result also passed in, via 'lcbuf'.  The other
-     * parameter is unused, a placeholder so the signature of this function
-     * matches another that does need it, and so the two functions can be
-     * referred to by a single function pointer, to simplify the code below */
-
-    const char * prefix = "";
-    const char * temp = NULL;
-
-    PERL_ARGS_ASSERT_GET_NL_ITEM_FROM_LOCALECONV;
-    PERL_UNUSED_ARG(unused1);
-    PERL_UNUSED_ARG(unused2);
-
-    switch (item) {
-      case CRNCYSTR:
-        temp = lcbuf->currency_symbol;
-
-        if (lcbuf->p_cs_precedes) {
-
-            /* khw couldn't find any documentation that CHAR_MAX is the signal,
-             * but cygwin uses it thusly */
-            if (lcbuf->p_cs_precedes == CHAR_MAX) {
-                prefix = ".";
-            }
-            else {
-                prefix = "-";
-            }
-        }
-        else {
-            prefix = "+";
-        }
-
-        break;
-
-      case RADIXCHAR:
-        temp = lcbuf->decimal_point;
-        break;
-
-      case THOUSEP:
-        temp = lcbuf->thousands_sep;
-        break;
-
-      default:
-        locale_panic_(Perl_form(aTHX_
-                    "Unexpected item passed to populate_localeconv: %d", item));
-    }
-
-    return (HV *) Perl_newSVpvf(aTHX_ "%s%s", prefix, temp);
-}
-
-#  endif    /* ! Has some form of langinfo() */
-#endif      /*   Has some form of localeconv() and paying attn to a category it
-                 traffics in */
-
+#endif /* defined(HAS_LOCALECONV) */
 #ifndef HAS_SOME_LANGINFO
 
 typedef int nl_item;    /* Substitute 'int' for emulated nl_langinfo() */
@@ -4158,23 +4298,77 @@ S_my_langinfo_i(pTHX_
      * TS_W32_BROKEN_LOCALECONV, one could use GetNumberFormat and
      * GetCurrencyFormat; patches welcome) */
 
+#    define P_CS_PRECEDES    "p_cs_precedes"
+#    define CURRENCY_SYMBOL  "currency_symbol"
+
    /* case RADIXCHAR:   // May drop down to here in some configurations */
-      case CRNCYSTR:
       case THOUSEP:
-        {
-            SV * string = (SV *) my_localeconv(item);
+      case CRNCYSTR:
+       {
 
-            retval = save_to_buffer(SvPV_nolen(string), retbufp, retbuf_sizep);
+        /* The hash gets populated with just the field(s) related to 'item'. */
+        HV * result_hv = my_localeconv(item);
 
-            if (utf8ness) {
-                is_utf8 = get_locale_string_utf8ness_i(retval,
-                                                       LOCALE_UTF8NESS_UNKNOWN,
-                                                       locale, cat_index);
+        SV* string;
+        if (item != CRNCYSTR) {
+
+            /* These items have been populated with just one key => value */
+            (void) hv_iterinit(result_hv);
+            HE * entry = hv_iternext(result_hv);
+            string = hv_iterval(result_hv, entry);
+        }
+        else {
+
+            /* But CRNCYSTR localeconv() returns a slightly different value
+             * than the nl_langinfo() API calls for, so have to modify this one
+             * to conform.  We need another value from localeconv() to know
+             * what to change it to.  my_localeconv() has populated the hash
+             * with exactly both fields.  Delete this one, leaving just the
+             * CRNCYSTR one in the hash */
+            SV* precedes = hv_delete(result_hv,
+                                     P_CS_PRECEDES, STRLENs(P_CS_PRECEDES),
+                                     0);
+            if (! precedes) {
+                    locale_panic_("my_localeconv() unexpectedly didn't return"
+                                  " a value for " P_CS_PRECEDES);
             }
 
-            SvREFCNT_dec_NN(string);
-            break;
+            /* The modification is to prefix the localeconv() return with a
+             * single byte, calculated as follows: */
+            char prefix = (LIKELY(SvIV(precedes) != CHAR_MAX))
+                          ? ((precedes != 0) ?  '-' : '+')
+
+                            /* khw couldn't find any documentation that
+                             * CHAR_MAX is the signal, but cygwin uses it
+                             * thusly, and it makes sense given that CHAR_MAX
+                             * indicates the value isn't used, so it neither
+                             * precedes nor succeeds */
+                          : '.';
+
+            /* Now get CRNCYSTR */
+            (void) hv_iterinit(result_hv);
+            HE * entry = hv_iternext(result_hv);
+            string = hv_iterval(result_hv, entry);
+
+            /* And perform the modification */
+            Perl_sv_setpvf(aTHX_ string, "%c%s", prefix, SvPV_nolen(string));
         }
+
+        /* Here, 'string' contains the value we want to return */
+        retval = save_to_buffer(SvPV_nolen(string), retbufp, retbuf_sizep);
+
+        if (utf8ness) {
+            is_utf8 = (SvUTF8(string))
+                      ? UTF8NESS_YES
+                      : (is_utf8_invariant_string( (U8 *) retval,
+                                                  strlen(retval)))
+                        ? UTF8NESS_IMMATERIAL
+                        : UTF8NESS_NO;
+        }
+
+        break;
+
+       }
 
 #    endif  /* Some form of localeconv */
 #    ifdef HAS_STRFTIME

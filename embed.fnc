@@ -3336,6 +3336,15 @@ S	|utf8ness_t|get_locale_string_utf8ness_i			\
 				|NULLOK const char * locale		\
 				|const unsigned cat_index
 S	|bool	|is_locale_utf8	|NN const char * locale
+#  ifdef HAS_LOCALECONV
+S	|HV *	|my_localeconv	|const int item
+S	|void	|populate_hash_from_localeconv				\
+				|NN HV * hv				\
+				|NN const char * locale			\
+				|const U32 which_mask			\
+                                |NN const lconv_offset_t * strings[2]	\
+				|NULLOK const lconv_offset_t * integers
+#  endif
 #  ifdef USE_LOCALE
 iR	|const char *|mortalized_pv_copy|NULLOK const char * const pv
 ST	|const char *|save_to_buffer|NULLOK const char * string	\
@@ -3366,21 +3375,6 @@ So	|const char *|toggle_locale_i|const unsigned switch_cat_index	\
 So	|void	|restore_toggled_locale_i|const unsigned cat_index	\
                                 |NULLOK const char * original_locale    \
 				|const line_t caller_line
-#    if (defined(HAS_LOCALECONV) || defined(HAS_LOCALECONV_L))		\
-     && (defined(USE_LOCALE_MONETARY) || defined(USE_LOCALE_NUMERIC))
-S	|HV *	|my_localeconv|const int item
-S	|HV *	|populate_localeconv|NN const struct lconv *lcbuf	\
-			|const int unused				\
-			|const locale_utf8ness_t numeric_locale_is_utf8	\
-			|const locale_utf8ness_t monetary_locale_is_utf8
-#      if ! defined(HAS_NL_LANGINFO_L) && ! defined(HAS_NL_LANGINFO)
-S	|HV *	|get_nl_item_from_localeconv				\
-				|NN const struct lconv *lcbuf		\
-                                |const int item				\
-                                |const locale_utf8ness_t unused1	\
-                                |const locale_utf8ness_t unused2
-#      endif
-#    endif
 #    if defined(USE_POSIX_2008_LOCALE)
 S	|const char*|emulate_setlocale_i|const unsigned int index	\
 				    |NULLOK const char* new_locale	\

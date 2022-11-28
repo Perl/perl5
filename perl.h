@@ -1330,6 +1330,12 @@ typedef enum {  /* Is the locale UTF8? */
     LOCALE_UTF8NESS_UNKNOWN
 } locale_utf8ness_t;
 
+typedef struct {
+    const char *name;
+    size_t offset;
+} lconv_offset_t;
+
+
 #endif
 
 #include <setjmp.h>

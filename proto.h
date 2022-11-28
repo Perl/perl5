@@ -4687,17 +4687,6 @@ PERL_STATIC_INLINE void *	S_my_memrchr(const char * s, const char c, const STRLE
 	assert(s)
 #endif
 #endif
-#if ! defined(HAS_NL_LANGINFO_L) && ! defined(HAS_NL_LANGINFO)
-#  if (defined(HAS_LOCALECONV) || defined(HAS_LOCALECONV_L))		     && (defined(USE_LOCALE_MONETARY) || defined(USE_LOCALE_NUMERIC))
-#    if defined(PERL_IN_LOCALE_C)
-#      if defined(USE_LOCALE)
-STATIC HV *	S_get_nl_item_from_localeconv(pTHX_ const struct lconv *lcbuf, const int item, const locale_utf8ness_t unused1, const locale_utf8ness_t unused2);
-#define PERL_ARGS_ASSERT_GET_NL_ITEM_FROM_LOCALECONV	\
-	assert(lcbuf)
-#      endif
-#    endif
-#  endif
-#endif
 #if !(!defined(PERL_EXT_RE_BUILD))
 #  if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C)
 PERL_CALLCONV SV*	Perl_get_re_gclass_aux_data(pTHX_ const regexp *prog, const struct regnode *node, bool doinit, SV **listsvp, SV **lonly_utf8_locale, SV **output_invlist)
@@ -5105,17 +5094,6 @@ PERL_CALLCONV bool	Perl_do_exec3(pTHX_ const char *incmd, int fd, int do_report)
 	assert(incmd)
 
 #endif
-#if (defined(HAS_LOCALECONV) || defined(HAS_LOCALECONV_L))		     && (defined(USE_LOCALE_MONETARY) || defined(USE_LOCALE_NUMERIC))
-#  if defined(PERL_IN_LOCALE_C)
-#    if defined(USE_LOCALE)
-STATIC HV *	S_my_localeconv(pTHX_ const int item);
-#define PERL_ARGS_ASSERT_MY_LOCALECONV
-STATIC HV *	S_populate_localeconv(pTHX_ const struct lconv *lcbuf, const int unused, const locale_utf8ness_t numeric_locale_is_utf8, const locale_utf8ness_t monetary_locale_is_utf8);
-#define PERL_ARGS_ASSERT_POPULATE_LOCALECONV	\
-	assert(lcbuf)
-#    endif
-#  endif
-#endif
 #if 0	/* Not currently used, but may be needed in the future */
 #  if defined(PERL_IN_UTF8_C)
 STATIC void	S_warn_on_first_deprecated_use(pTHX_ const char * const name, const char * const alternative, const bool use_locale, const char * const file, const unsigned line);
@@ -5270,6 +5248,15 @@ PERL_CALLCONV void	Perl_dump_sv_child(pTHX_ SV *sv)
 #define PERL_ARGS_ASSERT_DUMP_SV_CHILD	\
 	assert(sv)
 
+#endif
+#if defined(HAS_LOCALECONV)
+#  if defined(PERL_IN_LOCALE_C)
+STATIC HV *	S_my_localeconv(pTHX_ const int item);
+#define PERL_ARGS_ASSERT_MY_LOCALECONV
+STATIC void	S_populate_hash_from_localeconv(pTHX_ HV * hv, const char * locale, const U32 which_mask, const lconv_offset_t * strings[2], const lconv_offset_t * integers);
+#define PERL_ARGS_ASSERT_POPULATE_HASH_FROM_LOCALECONV	\
+	assert(hv); assert(locale); assert(strings)
+#  endif
 #endif
 #if defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM)
 PERL_CALLCONV I32	Perl_do_ipcctl(pTHX_ I32 optype, SV** mark, SV** sp)
