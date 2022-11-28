@@ -1492,15 +1492,6 @@
 #define yyparse(a)		Perl_yyparse(aTHX_ a)
 #define yyquit()		Perl_yyquit(aTHX)
 #define yyunlex()		Perl_yyunlex(aTHX)
-#  if ! defined(HAS_NL_LANGINFO_L) && ! defined(HAS_NL_LANGINFO)
-#    if (defined(HAS_LOCALECONV) || defined(HAS_LOCALECONV_L))		     && (defined(USE_LOCALE_MONETARY) || defined(USE_LOCALE_NUMERIC))
-#      if defined(PERL_IN_LOCALE_C)
-#        if defined(USE_LOCALE)
-#define get_nl_item_from_localeconv(a,b,c,d)	S_get_nl_item_from_localeconv(aTHX_ a,b,c,d)
-#        endif
-#      endif
-#    endif
-#  endif
 #  if !(defined(DEBUGGING))
 #    if !defined(NV_PRESERVES_UV)
 #      if defined(PERL_IN_SV_C)
@@ -1608,14 +1599,6 @@
 #  if !defined(WIN32)
 #define do_exec3(a,b,c)		Perl_do_exec3(aTHX_ a,b,c)
 #  endif
-#  if (defined(HAS_LOCALECONV) || defined(HAS_LOCALECONV_L))		     && (defined(USE_LOCALE_MONETARY) || defined(USE_LOCALE_NUMERIC))
-#    if defined(PERL_IN_LOCALE_C)
-#      if defined(USE_LOCALE)
-#define my_localeconv(a)	S_my_localeconv(aTHX_ a)
-#define populate_localeconv(a,b,c,d)	S_populate_localeconv(aTHX_ a,b,c,d)
-#      endif
-#    endif
-#  endif
 #  if 0	/* Not currently used, but may be needed in the future */
 #    if defined(PERL_IN_UTF8_C)
 #define warn_on_first_deprecated_use(a,b,c,d,e)	S_warn_on_first_deprecated_use(aTHX_ a,b,c,d,e)
@@ -1660,6 +1643,12 @@
 #  endif
 #  if defined(DEBUG_LEAKING_SCALARS_FORK_DUMP)
 #define dump_sv_child(a)	Perl_dump_sv_child(aTHX_ a)
+#  endif
+#  if defined(HAS_LOCALECONV)
+#    if defined(PERL_IN_LOCALE_C)
+#define my_localeconv(a)	S_my_localeconv(aTHX_ a)
+#define populate_hash_from_localeconv(a,b,c,d,e)	S_populate_hash_from_localeconv(aTHX_ a,b,c,d,e)
+#    endif
 #  endif
 #  if defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM)
 #define do_ipcctl(a,b,c)	Perl_do_ipcctl(aTHX_ a,b,c)
