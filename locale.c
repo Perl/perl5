@@ -215,9 +215,6 @@ static const char C_thousands_sep[] = "";
 #if defined(HAS_NL_LANGINFO_L) || defined(HAS_NL_LANGINFO)
 #  define HAS_SOME_LANGINFO
 #endif
-#if defined(HAS_LOCALECONV) || defined(HAS_LOCALECONV_L)
-#  define HAS_SOME_LOCALECONV
-#endif
 
 #define my_langinfo_c(item, category, locale, retbufp, retbuf_sizep, utf8ness) \
             my_langinfo_i(item, category##_INDEX_, locale, retbufp,            \
@@ -1822,7 +1819,7 @@ S_setlocale_failure_panic_i(pTHX_
 
 /* Any of these will allow us to find the RADIX */
 #  if defined(USE_LOCALE_NUMERIC) && (   defined(HAS_SOME_LANGINFO)         \
-                                      || defined(HAS_SOME_LOCALECONV)       \
+                                      || defined(HAS_LOCALECONV)            \
                                       || defined(HAS_SNPRINTF))
 #    define CAN_CALCULATE_RADIX
 #  endif
@@ -3196,7 +3193,7 @@ HV *
 Perl_localeconv(pTHX)
 {
 
-#if  ! defined(HAS_SOME_LOCALECONV)                                     \
+#if  ! defined(HAS_LOCALECONV)                                          \
  || (! defined(USE_LOCALE_MONETARY) && ! defined(USE_LOCALE_NUMERIC))
 
     return newHV();
@@ -3209,7 +3206,7 @@ Perl_localeconv(pTHX)
 
 }
 
-#if  defined(HAS_SOME_LOCALECONV)                                   \
+#if  defined(HAS_LOCALECONV)                                            \
  && (defined(USE_LOCALE_MONETARY) || defined(USE_LOCALE_NUMERIC))
 
 HV *
@@ -3292,50 +3289,13 @@ S_my_localeconv(pTHX_ const int item)
     PERL_ARGS_ASSERT_MY_LOCALECONV;
 /*--------------------------------------------------------------------------*/
 /* Here, we are done with the common beginning of all the implementations of
- * my_localeconv().  Below are the various terminations of the function (except
+ * my_localeconv().  Below are the two terminations of the function (except
  * the closing '}'.  They are separated out because the preprocessor directives
  * were making the simple logic hard to follow.  Each implementation ends with
  * the same few lines.  khw decided to keep those separate because he thought
  * it was clearer to the reader.
- *
- * The first distinct termination (of the above common code) are the
- * implementations when we have locale_conv_l() and can use it.  These are the
- * simplest cases, without any locking needed. */
-#  if defined(USE_POSIX_2008_LOCALE) && defined(HAS_LOCALECONV_L)
-
-     /* And there are two sub-cases: First (by far the most common) is where we
-      * are compiled to pay attention to LC_NUMERIC */
-#    ifdef USE_LOCALE_NUMERIC
-
-    const locale_t cur = use_curlocale_scratch();
-    locale_t with_numeric = duplocale(cur);
-
-    /* Just create a new locale object with what we've got, but using the
-     * underlying LC_NUMERIC locale */
-    with_numeric = newlocale(LC_NUMERIC_MASK, PL_numeric_name, with_numeric);
-
-    retval = copy_localeconv(aTHX_ localeconv_l(with_numeric),
-                                   item,
-                                   numeric_locale_is_utf8,
-                                   monetary_locale_is_utf8);
-    freelocale(with_numeric);
-
-    return retval;
-
-/*--------------------------------------------------------------------------*/
-#    else   /* Below not paying attention to LC_NUMERIC */
-
-    const locale_t cur = use_curlocale_scratch();
-
-    retval = copy_localeconv(aTHX_ localeconv_l(cur),
-                                   item,
-                                   numeric_locale_is_utf8,
-                                   monetary_locale_is_utf8);
-    return retval;
-
-#    endif  /* Above, using lconv_l(); below plain lconv() */
-/*--------------------------------------------------------------------------*/
-#  elif ! defined(TS_W32_BROKEN_LOCALECONV)  /* Next is regular lconv() */
+ *--------------------------------------------------------------------------*/
+#  if ! defined(TS_W32_BROKEN_LOCALECONV)  /* Regular lconv() */
 
     /* There are so many locks because localeconv() deals with two
      * categories, and returns in a single global static buffer.  Some
@@ -3845,7 +3805,7 @@ Perl_langinfo8(const nl_item item, utf8ness_t * utf8ness)
       case CRNCYSTR:
 
 #if  defined(USE_LOCALE_MONETARY)                                   \
- && (defined(HAS_SOME_LANGINFO) || defined(HAS_SOME_LOCALECONV))
+ && (defined(HAS_SOME_LANGINFO) || defined(HAS_LOCALECONV))
 
         cat_index = LC_MONETARY_INDEX_;
         break;
@@ -3866,7 +3826,7 @@ Perl_langinfo8(const nl_item item, utf8ness_t * utf8ness)
       case THOUSEP:
 
 #if  defined(USE_LOCALE_NUMERIC)                                    \
- && (defined(HAS_SOME_LANGINFO) || defined(HAS_SOME_LOCALECONV))
+ && (defined(HAS_SOME_LANGINFO) || defined(HAS_LOCALECONV))
 
         cat_index = LC_NUMERIC_INDEX_;
         break;
@@ -4116,7 +4076,7 @@ S_my_langinfo_i(pTHX_
       case RADIXCHAR:
 
 #    if      defined(HAS_SNPRINTF)                                              \
-       && (! defined(HAS_SOME_LOCALECONV) || defined(TS_W32_BROKEN_LOCALECONV))
+       && (! defined(HAS_LOCALECONV) || defined(TS_W32_BROKEN_LOCALECONV))
 
         {
             /* snprintf() can be used to find the radix character by outputting
@@ -4180,8 +4140,8 @@ S_my_langinfo_i(pTHX_
             Safefree(floatbuf);
         }
 
-#      ifdef HAS_SOME_LOCALECONV /* snprintf() failed; drop down to use
-                                    localeconv() */
+#      ifdef HAS_LOCALECONV /* snprintf() failed; drop down to use
+                               localeconv() */
 
         /* FALLTHROUGH */
 
@@ -4192,7 +4152,7 @@ S_my_langinfo_i(pTHX_
 
 #      endif
 #    endif
-#    ifdef HAS_SOME_LOCALECONV
+#    ifdef HAS_LOCALECONV
 
     /* These items are available from localeconv().  (To avoid using
      * TS_W32_BROKEN_LOCALECONV, one could use GetNumberFormat and
@@ -4436,7 +4396,7 @@ S_my_langinfo_i(pTHX_
         utf8ness_t is_utf8 = UTF8NESS_UNKNOWN;
         const char * scratch_buf = NULL;
 
-#      if defined(USE_LOCALE_MONETARY) && defined(HAS_SOME_LOCALECONV)
+#      if defined(USE_LOCALE_MONETARY) && defined(HAS_LOCALECONV)
 
         /* Can't use this method unless localeconv() is available, as that's
          * the way we find out the currency symbol. */
