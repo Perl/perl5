@@ -7056,7 +7056,7 @@ the plain locale pragma without a parameter (S<C<use locale>>) is in effect.
 #define locale_panic_(m)  Perl_locale_panic((m), __FILE__, __LINE__, errno)
 
 /* Locale/thread synchronization macros. */
-#if ! defined(USE_LOCALE) || ! defined(USE_LOCALE_THREADS)
+#if ! defined(USE_LOCALE_THREADS)
 #  define LOCALE_LOCK_(cond)  NOOP
 #  define LOCALE_UNLOCK_      NOOP
 #  define LOCALE_INIT
