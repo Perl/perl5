@@ -276,13 +276,14 @@
  * initialization.  This is done before option parsing, and before any thread
  * creation, so can be a file-level static.  (Must come before #including
  * perl.h) */
+#include "config.h"
 #ifdef DEBUGGING
 static int debug_initialization = 0;
 #  define DEBUG_INITIALIZATION_set(v) (debug_initialization = v)
 #  define DEBUG_LOCALE_INITIALIZATION_  debug_initialization
-#  ifdef USE_LOCALE_THREADS
+#  if defined(USE_ITHREADS) && ! defined(NO_LOCALE_THREADS)
 #    define DEBUG_PRE_STMTS                                                     \
-     dSAVE_ERRNO; dTHX; PerlIO_printf(Perl_debug_log,"\n%s: %" LINE_Tf ": %p: ",\
+     dSAVE_ERRNO; dTHX; PerlIO_printf(Perl_debug_log,"\n%s: %" LINE_Tf ": 0x%p: ",\
                                       __FILE__, (line_t)__LINE__, aTHX);
 #  else
 #    define DEBUG_PRE_STMTS                                                     \
