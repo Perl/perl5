@@ -25,6 +25,7 @@ __END__
 embed.pl
 feature.pl
 mg_vtable.pl
+miniperlmain.pl
 opcode.pl
 overload.pl
 reentr.pl
