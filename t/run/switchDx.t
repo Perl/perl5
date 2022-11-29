@@ -4,6 +4,7 @@ BEGIN {
     @INC = '../lib';
     require './test.pl';
     skip_all_if_miniperl();
+    skip_all("because of special debug");
 }
 
 use Config;

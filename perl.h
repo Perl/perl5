@@ -4995,6 +4995,23 @@ Gid_t getegid (void);
  * compiled in; they will be executed only for the DEBUG statements whose flags
  * are turned on.
  */
+#if ! defined(DEBUG_PRE_STMTS) && ! defined(PERL_IN_REGEX_ENGINE)
+#ifdef DEBUGGING
+#  if defined(MULTIPLICITY) && ! defined(NO_LOCALE_THREADS)
+#    define DEBUG_PRE_STMTS                                                     \
+     dSAVE_ERRNO; dTHX; PerlIO_printf(Perl_debug_log,"\n%s: %" LINE_Tf ": 0x%p: ",\
+                                      __FILE__, (line_t)__LINE__, aTHX);
+#  else
+#    define DEBUG_PRE_STMTS                                                     \
+     dSAVE_ERRNO; dTHX; PerlIO_printf(Perl_debug_log, "\n%s: %" LINE_Tf ": ",   \
+                                      __FILE__, (line_t)__LINE__);
+#  endif
+#  define DEBUG_POST_STMTS  RESTORE_ERRNO;
+#else
+#  define DEBUG_PRE_STMTS
+#  define DEBUG_POST_STMTS
+#endif
+#endif
 #ifndef DEBUG_PRE_STMTS
 #  define DEBUG_PRE_STMTS
 #endif
