@@ -3131,21 +3131,21 @@ i	|HV*	|opmethod_stash	|NN SV* meth
 #endif
 
 #if defined(PERL_IN_PP_SORT_C)
-I	|I32	|sv_ncmp	|NN SV *const a|NN SV *const b
-I	|I32	|sv_ncmp_desc	|NN SV *const a|NN SV *const b
-I	|I32	|sv_i_ncmp	|NN SV *const a|NN SV *const b
-I	|I32	|sv_i_ncmp_desc	|NN SV *const a|NN SV *const b
-I	|I32	|amagic_ncmp	|NN SV *const a|NN SV *const b
-I	|I32	|amagic_ncmp_desc	|NN SV *const a|NN SV *const b
-I	|I32	|amagic_i_ncmp	|NN SV *const a|NN SV *const b
-I	|I32	|amagic_i_ncmp_desc	|NN SV *const a|NN SV *const b
-I	|I32	|amagic_cmp	|NN SV *const str1|NN SV *const str2
-I	|I32	|amagic_cmp_desc	|NN SV *const str1|NN SV *const str2
-I	|I32	|cmp_desc	|NN SV *const str1|NN SV *const str2
+i	|I32	|sv_ncmp	|NN SV *const a|NN SV *const b
+i	|I32	|sv_ncmp_desc	|NN SV *const a|NN SV *const b
+i	|I32	|sv_i_ncmp	|NN SV *const a|NN SV *const b
+i	|I32	|sv_i_ncmp_desc	|NN SV *const a|NN SV *const b
+i	|I32	|amagic_ncmp	|NN SV *const a|NN SV *const b
+i	|I32	|amagic_ncmp_desc	|NN SV *const a|NN SV *const b
+i	|I32	|amagic_i_ncmp	|NN SV *const a|NN SV *const b
+i	|I32	|amagic_i_ncmp_desc	|NN SV *const a|NN SV *const b
+i	|I32	|amagic_cmp	|NN SV *const str1|NN SV *const str2
+i	|I32	|amagic_cmp_desc	|NN SV *const str1|NN SV *const str2
+i	|I32	|cmp_desc	|NN SV *const str1|NN SV *const str2
 #  ifdef USE_LOCALE_COLLATE
-I	|I32	|amagic_cmp_locale     |NN SV *const str1|NN SV *const str2
-I	|I32	|amagic_cmp_locale_desc|NN SV *const str1|NN SV *const str2
-I	|I32	|cmp_locale_desc|NN SV *const str1|NN SV *const str2
+i	|I32	|amagic_cmp_locale     |NN SV *const str1|NN SV *const str2
+i	|I32	|amagic_cmp_locale_desc|NN SV *const str1|NN SV *const str2
+i	|I32	|cmp_locale_desc|NN SV *const str1|NN SV *const str2
 #  endif
 S	|I32	|sortcv		|NN SV *const a|NN SV *const b
 S	|I32	|sortcv_xsub	|NN SV *const a|NN SV *const b

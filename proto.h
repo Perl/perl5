@@ -6312,54 +6312,40 @@ STATIC SSize_t	S_unpack_rec(pTHX_ struct tempsym* symptr, const char *s, const c
 #endif
 #if defined(PERL_IN_PP_SORT_C)
 #ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_FORCE_INLINE I32	S_amagic_cmp(pTHX_ SV *const str1, SV *const str2)
-			__attribute__always_inline__;
+PERL_STATIC_INLINE I32	S_amagic_cmp(pTHX_ SV *const str1, SV *const str2);
 #define PERL_ARGS_ASSERT_AMAGIC_CMP	\
 	assert(str1); assert(str2)
 #endif
-
 #ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_FORCE_INLINE I32	S_amagic_cmp_desc(pTHX_ SV *const str1, SV *const str2)
-			__attribute__always_inline__;
+PERL_STATIC_INLINE I32	S_amagic_cmp_desc(pTHX_ SV *const str1, SV *const str2);
 #define PERL_ARGS_ASSERT_AMAGIC_CMP_DESC	\
 	assert(str1); assert(str2)
 #endif
-
 #ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_FORCE_INLINE I32	S_amagic_i_ncmp(pTHX_ SV *const a, SV *const b)
-			__attribute__always_inline__;
+PERL_STATIC_INLINE I32	S_amagic_i_ncmp(pTHX_ SV *const a, SV *const b);
 #define PERL_ARGS_ASSERT_AMAGIC_I_NCMP	\
 	assert(a); assert(b)
 #endif
-
 #ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_FORCE_INLINE I32	S_amagic_i_ncmp_desc(pTHX_ SV *const a, SV *const b)
-			__attribute__always_inline__;
+PERL_STATIC_INLINE I32	S_amagic_i_ncmp_desc(pTHX_ SV *const a, SV *const b);
 #define PERL_ARGS_ASSERT_AMAGIC_I_NCMP_DESC	\
 	assert(a); assert(b)
 #endif
-
 #ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_FORCE_INLINE I32	S_amagic_ncmp(pTHX_ SV *const a, SV *const b)
-			__attribute__always_inline__;
+PERL_STATIC_INLINE I32	S_amagic_ncmp(pTHX_ SV *const a, SV *const b);
 #define PERL_ARGS_ASSERT_AMAGIC_NCMP	\
 	assert(a); assert(b)
 #endif
-
 #ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_FORCE_INLINE I32	S_amagic_ncmp_desc(pTHX_ SV *const a, SV *const b)
-			__attribute__always_inline__;
+PERL_STATIC_INLINE I32	S_amagic_ncmp_desc(pTHX_ SV *const a, SV *const b);
 #define PERL_ARGS_ASSERT_AMAGIC_NCMP_DESC	\
 	assert(a); assert(b)
 #endif
-
 #ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_FORCE_INLINE I32	S_cmp_desc(pTHX_ SV *const str1, SV *const str2)
-			__attribute__always_inline__;
+PERL_STATIC_INLINE I32	S_cmp_desc(pTHX_ SV *const str1, SV *const str2);
 #define PERL_ARGS_ASSERT_CMP_DESC	\
 	assert(str1); assert(str2)
 #endif
-
 STATIC I32	S_sortcv(pTHX_ SV *const a, SV *const b);
 #define PERL_ARGS_ASSERT_SORTCV	\
 	assert(a); assert(b)
@@ -6377,55 +6363,41 @@ PERL_STATIC_FORCE_INLINE void	S_sortsv_flags_impl(pTHX_ SV** array, size_t num_e
 #endif
 
 #ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_FORCE_INLINE I32	S_sv_i_ncmp(pTHX_ SV *const a, SV *const b)
-			__attribute__always_inline__;
+PERL_STATIC_INLINE I32	S_sv_i_ncmp(pTHX_ SV *const a, SV *const b);
 #define PERL_ARGS_ASSERT_SV_I_NCMP	\
 	assert(a); assert(b)
 #endif
-
 #ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_FORCE_INLINE I32	S_sv_i_ncmp_desc(pTHX_ SV *const a, SV *const b)
-			__attribute__always_inline__;
+PERL_STATIC_INLINE I32	S_sv_i_ncmp_desc(pTHX_ SV *const a, SV *const b);
 #define PERL_ARGS_ASSERT_SV_I_NCMP_DESC	\
 	assert(a); assert(b)
 #endif
-
 #ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_FORCE_INLINE I32	S_sv_ncmp(pTHX_ SV *const a, SV *const b)
-			__attribute__always_inline__;
+PERL_STATIC_INLINE I32	S_sv_ncmp(pTHX_ SV *const a, SV *const b);
 #define PERL_ARGS_ASSERT_SV_NCMP	\
 	assert(a); assert(b)
 #endif
-
 #ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_FORCE_INLINE I32	S_sv_ncmp_desc(pTHX_ SV *const a, SV *const b)
-			__attribute__always_inline__;
+PERL_STATIC_INLINE I32	S_sv_ncmp_desc(pTHX_ SV *const a, SV *const b);
 #define PERL_ARGS_ASSERT_SV_NCMP_DESC	\
 	assert(a); assert(b)
 #endif
-
 #  if defined(USE_LOCALE_COLLATE)
 #ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_FORCE_INLINE I32	S_amagic_cmp_locale(pTHX_ SV *const str1, SV *const str2)
-			__attribute__always_inline__;
+PERL_STATIC_INLINE I32	S_amagic_cmp_locale(pTHX_ SV *const str1, SV *const str2);
 #define PERL_ARGS_ASSERT_AMAGIC_CMP_LOCALE	\
 	assert(str1); assert(str2)
 #endif
-
 #ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_FORCE_INLINE I32	S_amagic_cmp_locale_desc(pTHX_ SV *const str1, SV *const str2)
-			__attribute__always_inline__;
+PERL_STATIC_INLINE I32	S_amagic_cmp_locale_desc(pTHX_ SV *const str1, SV *const str2);
 #define PERL_ARGS_ASSERT_AMAGIC_CMP_LOCALE_DESC	\
 	assert(str1); assert(str2)
 #endif
-
 #ifndef PERL_NO_INLINE_FUNCTIONS
-PERL_STATIC_FORCE_INLINE I32	S_cmp_locale_desc(pTHX_ SV *const str1, SV *const str2)
-			__attribute__always_inline__;
+PERL_STATIC_INLINE I32	S_cmp_locale_desc(pTHX_ SV *const str1, SV *const str2);
 #define PERL_ARGS_ASSERT_CMP_LOCALE_DESC	\
 	assert(str1); assert(str2)
 #endif
-
 #  endif
 #endif
 #if defined(PERL_IN_PP_SYS_C)
