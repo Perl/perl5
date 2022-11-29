@@ -109,8 +109,29 @@ main(int argc, char **argv, char **env)
 	PL_perl_destruct_level = 0;
     }
     PL_exit_flags |= PERL_EXIT_DESTRUCT_END;
-    if (!perl_parse(my_perl, xs_init, argc, argv, (char **)NULL))
+    if (!perl_parse(my_perl, xs_init, argc, argv, (char **)NULL)) {
+
+        /* perl_parse() may end up starting its own run loops, which
+         * might end up "leaking" PL_restartop from the parse phase into
+         * the run phase which then ends up confusing run_body(). This
+         * leakage shouldn't happen and if it does its a bug.
+         *
+         * Note we do not do this assert in perl_run() or perl_parse()
+         * as there are modules out there which explicitly set
+         * PL_restartop before calling perl_run() directly from XS code
+         * (Coro), and it is conceivable PL_restartop could be set prior
+         * to calling perl_parse() by XS code as well.
+         *
+         * What we want to check is that the top level perl_parse(),
+         * perl_run() pairing does not allow a leaking PL_restartop, as
+         * that indicates a bug in perl. By putting the assert here we
+         * can validate that Perl itself is operating correctly without
+         * risking breakage to XS code under DEBUGGING. - Yves
+         */
+        assert(!PL_restartop);
+
         perl_run(my_perl);
+    }
 
 #ifndef PERL_MICRO
     /* Unregister our signal handler before destroying my_perl */
