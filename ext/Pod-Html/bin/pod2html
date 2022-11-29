@@ -25,6 +25,52 @@ pod2html takes the following arguments:
 
 =over 4
 
+=item backlink
+
+  --backlink
+
+Turn =head1 directives into links pointing to the top of the HTML file.
+
+=item nobacklink
+
+  --nobacklink
+
+Do not turn =head1 directives into links pointing to the top of the HTML file
+(default behaviour).
+
+=item cachedir
+
+  --cachedir=name
+
+Specify which directory is used for storing cache. Default directory is the
+current working directory.
+
+=item css
+
+  --css=URL
+
+Specify the URL of cascading style sheet to link from resulting HTML file.
+Default is none style sheet.
+
+=item flush
+
+  --flush
+
+Flush the cache.
+
+=item header
+
+  --header
+
+Create header and footer blocks containing the text of the "NAME" section.
+
+=item noheader
+
+  --noheader
+
+Do not create header and footer blocks containing the text of the "NAME"
+section (default behaviour).
+
 =item help
 
   --help
@@ -53,6 +99,18 @@ Do not use this if relative links are desired: use --htmldir instead.
 
 Do not pass both this and --htmldir to pod2html; they are mutually exclusive.
 
+=item index
+
+  --index
+
+Generate an index at the top of the HTML file (default behaviour).
+
+=item noindex
+
+  --noindex
+
+Do not generate an index at the top of the HTML file.
+
 =item infile
 
   --infile=name
@@ -66,58 +124,6 @@ infile is specified.
 
 Specify the HTML file to create.  Output goes to STDOUT if no outfile
 is specified.
-
-=item podroot
-
-  --podroot=name
-
-Specify the base directory for finding library pods.
-
-=item podpath
-
-  --podpath=name:...:name
-
-Specify which subdirectories of the podroot contain pod files whose
-HTML converted forms can be linked-to in cross-references.
-
-=item cachedir
-
-  --cachedir=name
-
-Specify which directory is used for storing cache. Default directory is the
-current working directory.
-
-=item flush
-
-  --flush
-
-Flush the cache.
-
-=item backlink
-
-  --backlink
-
-Turn =head1 directives into links pointing to the top of the HTML file.
-
-=item nobacklink
-
-  --nobacklink
-
-Do not turn =head1 directives into links pointing to the top of the HTML file
-(default behaviour).
-
-=item header
-
-  --header
-
-Create header and footer blocks containing the text of the "NAME" section.
-
-=item noheader
-
-  --noheader
-
-Do not create header and footer blocks containing the text of the "NAME"
-section (default behaviour).
 
 =item poderrors
 
@@ -133,43 +139,18 @@ the infile (default behaviour).
 Do not include a "POD ERRORS" section in the outfile if there were any POD
 errors in the infile.
 
-=item index
+=item podpath
 
-  --index
+  --podpath=name:...:name
 
-Generate an index at the top of the HTML file (default behaviour).
+Specify which subdirectories of the podroot contain pod files whose
+HTML converted forms can be linked-to in cross-references.
 
-=item noindex
+=item podroot
 
-  --noindex
+  --podroot=name
 
-Do not generate an index at the top of the HTML file.
-
-
-=item recurse
-
-  --recurse
-
-Recurse into subdirectories specified in podpath (default behaviour).
-
-=item norecurse
-
-  --norecurse
-
-Do not recurse into subdirectories specified in podpath.
-
-=item css
-
-  --css=URL
-
-Specify the URL of cascading style sheet to link from resulting HTML file.
-Default is none style sheet.
-
-=item title
-
-  --title=title
-
-Specify the title of the resulting HTML file.
+Specify the base directory for finding library pods.
 
 =item quiet
 
@@ -183,6 +164,24 @@ Don't display mostly harmless warning messages.
 
 Display mostly harmless warning messages (default behaviour). But this is not
 the same as "verbose" mode.
+
+=item recurse
+
+  --recurse
+
+Recurse into subdirectories specified in podpath (default behaviour).
+
+=item norecurse
+
+  --norecurse
+
+Do not recurse into subdirectories specified in podpath.
+
+=item title
+
+  --title=title
+
+Specify the title of the resulting HTML file.
 
 =item verbose
 
