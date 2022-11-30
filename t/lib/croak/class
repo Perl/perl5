@@ -80,3 +80,10 @@ class XXX {}
 push @XXX::ISA, q(Another);
 EXPECT
 Modification of a read-only value attempted at - line 4.
+########
+no warnings 'experimental::class';
+use feature 'class';
+BEGIN { push @XXX::ISA, q(Another); }
+class XXX {}
+EXPECT
+Cannot create class XXX as it already has a non-empty @ISA at - line 4.
