@@ -258,6 +258,17 @@ Perl_class_setup_stash(pTHX_ HV *stash)
             HvNAMEfARG(stash));
     }
 
+    {
+        SV *isaname = newSVpvf("%" HEKf "::ISA", HvNAME_HEK(stash));
+        sv_2mortal(isaname);
+
+        AV *isa = get_av(SvPV_nolen(isaname), (SvFLAGS(isaname) & SVf_UTF8));
+
+        if(isa && av_count(isa) > 0)
+            croak("Cannot create class %" HEKf " as it already has a non-empty @ISA",
+                HvNAME_HEK(stash));
+    }
+
     char *classname = HvNAME(stash);
     U32 nameflags = HvNAMEUTF8(stash) ? SVf_UTF8 : 0;
 
