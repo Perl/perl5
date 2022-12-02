@@ -5555,6 +5555,7 @@ regen/embed.pl			Produces {embed,embedvar,proto}.h
 regen/embed_lib.pl		Reads embed.fnc and regen/opcodes
 regen/feature.pl		Generates feature.pm
 regen/genpacksizetables.pl	Generate the size tables for pack/unpack
+regen/HeaderParser.pm		Module used to parse header files
 regen/keywords.pl		Program to write keywords.h
 regen/lib_cleanup.pl		Generate lib/.gitignore from MANIFEST
 regen/mg_vtable.pl		generate mg_vtable.h
@@ -5572,6 +5573,7 @@ regen/regcharclass_multi_char_folds.pl	Generate input for regcharclass.pl
 regen/regcomp.pl		Builder of regnodes.h
 regen/regen_lib.pl		Common file routines for generator scripts
 regen/scope_types.pl		Regenerate scope_types.h
+regen/tidy_embed.pl		Program to clean up embed.fnc manually
 regen/uconfig_h.pl		generate uconfig.h (requires /bin/sh)
 regen/unicode_constants.pl	generate unicode_constants.h
 regen/warnings.pl		Program to write warnings.h and lib/warnings.pm
@@ -6118,6 +6120,7 @@ t/porting/extrefs.t		Check perl headers don't make extern refs
 t/porting/filenames.t		Check the MANIFEST for filename portability.
 t/porting/FindExt.t		Test win32/FindExt.pm
 t/porting/globvar.t		Check that globvar.sym is sane
+t/porting/header_parser.t	Check that regen/HeaderParser.pm works as expected
 t/porting/known_pod_issues.dat	Data file for porting/podcheck.t
 t/porting/libperl.t		Check libperl.a sanity
 t/porting/maintainers.t		Test that Porting/Maintainers.pl is up to date
