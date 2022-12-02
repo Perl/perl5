@@ -688,7 +688,7 @@ Perl_sortsv(pTHX_ SV **array, size_t nmemb, SVCOMPARE_t cmp)
 
 PP(pp_sort)
 {
-    dSP; dMARK; dORIGMARK;
+    dMARK; dORIGMARK;
     SV **p1 = ORIGMARK+1, **p2;
     SSize_t max, i;
     AV* av = NULL;
@@ -709,9 +709,9 @@ PP(pp_sort)
         descending = 1;
 
     if (gimme != G_LIST) {
-        SP = MARK;
-        EXTEND(SP,1);
-        RETPUSHUNDEF;
+        rpp_popfree_to(mark);
+        rpp_xpush_1(&PL_sv_undef);
+        return NORMAL;
     }
 
     ENTER;
@@ -741,9 +741,23 @@ PP(pp_sort)
             PL_sortcop = nullop->op_next;
         }
         else {
+            /* sort <function_name> list */
             GV *autogv = NULL;
             HV *stash;
-            cv = sv_2cv(*++MARK, &stash, &gv, GV_ADD);
+            SV *fn = *++MARK;
+            cv = sv_2cv(fn, &stash, &gv, GV_ADD);
+
+            /* want to remove the function name from the stack,
+             * but mustn't trigger cv being freed at the same time.
+             * Normally the name is a PV while cv is CV (duh!) but
+             * for lexical subs, fn can already be the CV (but is kept
+             * alive by a reference from the pad */
+#if defined(PERL_RC_STACK) && ! defined(PERL_XXX_TMP_NORC)
+            assert(fn != (SV*)cv || SvREFCNT(fn) > 1);
+            SvREFCNT_dec(fn);
+#endif
+            *MARK = NULL;
+
           check_cv:
             if (cv && SvPOK(cv)) {
                 const char * const proto = SvPV_nolen_const(MUTABLE_SV(cv));
@@ -796,69 +810,103 @@ PP(pp_sort)
      * push (@a) onto stack, then assign result back to @a at the end of
      * this function */
     if (priv & OPpSORT_INPLACE) {
-        assert( MARK+1 == SP && *SP && SvTYPE(*SP) == SVt_PVAV);
+        assert(    MARK+1 == PL_stack_sp
+                && *PL_stack_sp
+                && SvTYPE(*PL_stack_sp) == SVt_PVAV);
         (void)POPMARK; /* remove mark associated with ex-OP_AASSIGN */
-        av = MUTABLE_AV((*SP));
+        av = MUTABLE_AV((*PL_stack_sp));
         if (SvREADONLY(av))
             Perl_croak_no_modify();
         max = AvFILL(av) + 1;
-        MEXTEND(SP, max);
+
+        I32 oldmark = MARK - PL_stack_base;
+        rpp_extend(max);
+        MARK = PL_stack_base + oldmark;
+
         if (SvMAGICAL(av)) {
             for (i=0; i < max; i++) {
                 SV **svp = av_fetch(av, i, FALSE);
-                *SP++ = (svp) ? *svp : NULL;
+                SV *sv;
+                if (svp) {
+                    sv = *svp;
+#if defined(PERL_RC_STACK) && !defined(PERL_XXX_TMP_NORC)
+                    SvREFCNT_inc_simple_void_NN(sv);
+#endif
+                }
+                else
+                    sv = NULL;
+                *++PL_stack_sp = sv;
             }
         }
         else {
             SV **svp = AvARRAY(av);
             assert(svp || max == 0);
-            for (i = 0; i < max; i++)
-                *SP++ = *svp++;
+            for (i = 0; i < max; i++) {
+                SV *sv = *svp++;
+#if defined(PERL_RC_STACK) && !defined(PERL_XXX_TMP_NORC)
+                SvREFCNT_inc_simple_void(sv);
+#endif
+                *++PL_stack_sp = sv;
+            }
         }
-        SP--;
-        p1 = p2 = SP - (max-1);
+        p1 = p2 = PL_stack_sp - (max-1);
+        /* we've kept av on the stacck (just below the pushed contents) so
+         * that a reference-counted stack keeps a reference to it for now
+         */
+        assert((SV*)av == p1[-1]);
     }
     else {
         p2 = MARK+1;
-        max = SP - MARK;
+        max = PL_stack_sp - MARK;
     }
 
     /* shuffle stack down, removing optional initial cv (p1!=p2), plus
      * any nulls; also stringify or converting to integer or number as
      * required any args */
+
+    /* no ref-counted SVs at base to be overwritten */
+    assert(p1 == p2 || (p1+1 == p2 && !*p1));
+
     copytmps = cBOOL(PL_sortcop);
     for (i=max; i > 0 ; i--) {
-        if ((*p1 = *p2++)) {                    /* Weed out nulls. */
-            if (copytmps && SvPADTMP(*p1)) {
-                *p1 = sv_mortalcopy(*p1);
+        SV *sv = *p2++;
+        if (sv) {                    /* Weed out nulls. */
+            if (copytmps && SvPADTMP(sv)) {
+                SV *nsv = sv_mortalcopy(sv);
+#if defined(PERL_RC_STACK) && !defined(PERL_XXX_TMP_NORC)
+                SvREFCNT_dec_NN(sv);
+                SvREFCNT_inc_simple_void_NN(nsv);
+#endif
+                sv = nsv;
             }
-            SvTEMP_off(*p1);
+            SvTEMP_off(sv);
             if (!PL_sortcop) {
                 if (priv & OPpSORT_NUMERIC) {
                     if (priv & OPpSORT_INTEGER) {
-                        if (!SvIOK(*p1))
-                            (void)sv_2iv_flags(*p1, SV_GMAGIC|SV_SKIP_OVERLOAD);
+                        if (!SvIOK(sv))
+                            (void)sv_2iv_flags(sv, SV_GMAGIC|SV_SKIP_OVERLOAD);
                     }
                     else {
-                        if (!SvNSIOK(*p1))
-                            (void)sv_2nv_flags(*p1, SV_GMAGIC|SV_SKIP_OVERLOAD);
-                        if (all_SIVs && !SvSIOK(*p1))
+                        if (!SvNSIOK(sv))
+                            (void)sv_2nv_flags(sv, SV_GMAGIC|SV_SKIP_OVERLOAD);
+                        if (all_SIVs && !SvSIOK(sv))
                             all_SIVs = 0;
                     }
                 }
                 else {
-                    if (!SvPOK(*p1))
-                        (void)sv_2pv_flags(*p1, 0,
+                    if (!SvPOK(sv))
+                        (void)sv_2pv_flags(sv, 0,
                             SV_GMAGIC|SV_CONST_RETURN|SV_SKIP_OVERLOAD);
                 }
-                if (SvAMAGIC(*p1))
+                if (SvAMAGIC(sv))
                     overloading = 1;
             }
-            p1++;
+            *p1++ = sv;
         }
         else
             max--;
     }
+
     if (max > 1) {
         SV **start;
         if (PL_sortcop) {
@@ -869,8 +917,15 @@ PP(pp_sort)
             SAVEOP();
 
             CATCH_SET(TRUE);
-            PUSHSTACKi(PERLSI_SORT);
+            {
+
+                dSP; /* XXX PUSHSTACKi assumes sp is gettable/settable */
+                PUSHSTACKi(PERLSI_SORT);
+                PUTBACK;
+            }
+
             if (!hasargs && !is_xsub) {
+                /* standard perl sub with values passed as $a and $b */
                 SAVEGENERICSV(PL_firstgv);
                 SAVEGENERICSV(PL_secondgv);
                 PL_firstgv = MUTABLE_GV(SvREFCNT_inc(
@@ -923,7 +978,10 @@ PP(pp_sort)
             /* Reset cx, in case the context stack has been reallocated. */
             cx = CX_CUR();
 
-            PL_stack_sp = PL_stack_base + cx->blk_oldsp;
+            /* the code used to think this could be > 0 */
+            assert(cx->blk_oldsp == 0);
+
+            rpp_popfree_to(PL_stack_base);
 
             CX_LEAVE_SCOPE(cx);
             if (!(flags & OPf_SPECIAL)) {
@@ -940,8 +998,13 @@ PP(pp_sort)
             CATCH_SET(oldcatch);
         }
         else {
-            MEXTEND(SP, 20);    /* Can't afford stack realloc on signal. */
-            start = ORIGMARK+1;
+            /* call one of the built-in sort functions */
+
+            /* XXX this extend has been here since perl5.000. With safe
+             * signals, I don't think it's needed any more - DAPM.
+            MEXTEND(SP, 20); Can't afford stack realloc on signal.
+            */
+            start = p1 - max;
             if (priv & OPpSORT_NUMERIC) {
                 if ((priv & OPpSORT_INTEGER) || all_SIVs) {
                     if (overloading)
@@ -1005,13 +1068,29 @@ PP(pp_sort)
         }
     }
 
-    if (av) {
-        /* copy back result to the array */
-        SV** const base = MARK+1;
+    if (!av) {
+        LEAVE;
+        PL_stack_sp = ORIGMARK +  max;
+        return nextop;
+    }
+
+    /* OPpSORT_INPLACE: copy back result to the array */
+    {
+        SV** const base = MARK+2;
         SSize_t max_minus_one = max - 1; /* attempt to work around mingw bug */
+
+        /* we left the AV there so on a refcounted stack it wouldn't be
+         * prematurely freed */
+        assert(base[-1] == (SV*)av);
+
         if (SvMAGICAL(av)) {
-            for (i = 0; i <= max_minus_one; i++)
-                base[i] = newSVsv(base[i]);
+            for (i = 0; i <= max_minus_one; i++) {
+                SV *sv = base[i];
+                base[i] = newSVsv(sv);
+#if defined(PERL_RC_STACK) && !defined(PERL_XXX_TMP_NORC)
+                SvREFCNT_dec_NN(sv);
+#endif
+            }
             av_clear(av);
             if (max_minus_one >= 0)
                 av_extend(av, max_minus_one);
@@ -1020,24 +1099,45 @@ PP(pp_sort)
                 SV ** const didstore = av_store(av, i, sv);
                 if (SvSMAGICAL(sv))
                     mg_set(sv);
+#if defined(PERL_RC_STACK) && !defined(PERL_XXX_TMP_NORC)
+                if (didstore)
+                    SvREFCNT_inc_simple_void_NN(sv);
+#else
                 if (!didstore)
                     sv_2mortal(sv);
+#endif
             }
         }
         else {
             /* the elements of av are likely to be the same as the
              * (non-refcounted) elements on the stack, just in a different
              * order. However, its possible that someone's messed with av
-             * in the meantime. So bump and unbump the relevant refcounts
-             * first.
+             * in the meantime.
+             * So to avoid freeing most/all the stack elements when
+             * doing av_clear(), first bump the count on each element.
+             * In addition, normally a *copy* of each sv should be
+             * assigned to each array element; but if the only reference
+             * to that sv was from the array, then we can skip the copy.
+             *
+             * For a refcounted stack, it's not necessary to bump the
+             * refcounts initially, as the stack itself keeps the
+             * elements alive during av_clear().
+             *
              */
             for (i = 0; i <= max_minus_one; i++) {
                 SV *sv = base[i];
                 assert(sv);
+#if defined(PERL_RC_STACK) && !defined(PERL_XXX_TMP_NORC)
+                if (SvREFCNT(sv) > 2) {
+                    base[i] = newSVsv(sv);
+                    SvREFCNT_dec_NN(sv);
+                }
+#else
                 if (SvREFCNT(sv) > 1)
                     base[i] = newSVsv(sv);
                 else
                     SvREFCNT_inc_simple_void_NN(sv);
+#endif
             }
             av_clear(av);
             if (max_minus_one >= 0) {
@@ -1047,11 +1147,26 @@ PP(pp_sort)
             AvFILLp(av) = max_minus_one;
             AvREIFY_off(av);
             AvREAL_on(av);
+#if defined(PERL_RC_STACK) && !defined(PERL_XXX_TMP_NORC)
+            /* the AV now contributes 1 refcnt to each element */
+            for (i = 0; i <= max_minus_one; i++)
+                SvREFCNT_inc_void_NN(base[i]);
+#endif
         }
+        /* sort is only ever optimised with OPpSORT_INPLACE when the
+         * (@a = sort @a) is in void context. (As an aside: the context
+         * flag aught to be copied to the sort op: then we could assert
+         * here that it's void).
+         * Thus we can simply discard the stack elements now: their
+         * reference counts have already claimed by av.
+         */
+        PL_stack_sp = ORIGMARK;
+#if defined(PERL_RC_STACK) && !defined(PERL_XXX_TMP_NORC)
+        SvREFCNT_dec_NN(av);
+#endif
+        LEAVE;
+        return nextop;
     }
-    LEAVE;
-    PL_stack_sp = ORIGMARK +  max;
-    return nextop;
 }
 
 static I32

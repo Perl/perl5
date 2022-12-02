@@ -7,7 +7,7 @@ BEGIN {
     set_up_inc('../lib');
 }
 use warnings;
-plan(tests => 203);
+plan(tests => 204);
 use Tie::Array; # we need to test sorting tied arrays
 
 # these shouldn't hang
@@ -1231,3 +1231,8 @@ SKIP:
     eval 'my @s = (sort); 1';
     like($@, qr/Not enough arguments for sort/, 'empty (sort); not allowed');
 }
+
+# check that lexical sort subs are ok
+
+my sub lexcmp { $a <=> $b }
+is join('', sort lexcmp 3,4,1,2), "1234", "lexical sort sub" ;
