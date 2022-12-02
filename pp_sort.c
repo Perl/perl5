@@ -716,6 +716,24 @@ PP(pp_sort)
 
     ENTER;
     SAVEVPTR(PL_sortcop);
+
+    /* Important flag meanings:
+     *
+     *  OPf_STACKED        sort <function_name> args
+     *
+     * (OPf_STACKED
+     * |OPf_SPECIAL)       sort { <block> } args
+     *
+     *  ----               standard block; e.g. sort { $a <=> $b } args
+     *
+     *
+     *  OPpSORT_NUMERIC    { $a <=> $b } (as opposed to $a cmp $b)
+     *  OPpSORT_INTEGER    ditto in scope of 'use integer'
+     *  OPpSORT_DESCEND    { $b <=> $a }
+     *  OPpSORT_REVERSE    @a= reverse sort ....;
+     *  OPpSORT_INPLACE    @a = sort @a;
+     */
+
     if (flags & OPf_STACKED) {
         if (flags & OPf_SPECIAL) {
             OP *nullop = OpSIBLING(cLISTOP->op_first);  /* pass pushmark */
