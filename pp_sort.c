@@ -906,10 +906,10 @@ PP(pp_sort)
 
                     if (hasargs) {
                         /* This is mostly copied from pp_entersub */
-                        AV * const av = MUTABLE_AV(PAD_SVl(0));
+                        AV * const av0 = MUTABLE_AV(PAD_SVl(0));
 
                         cx->blk_sub.savearray = GvAV(PL_defgv);
-                        GvAV(PL_defgv) = MUTABLE_AV(SvREFCNT_inc_simple(av));
+                        GvAV(PL_defgv) = MUTABLE_AV(SvREFCNT_inc_simple(av0));
                     }
 
                 }
