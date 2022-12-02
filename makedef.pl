@@ -153,14 +153,14 @@ if ($define{USE_ITHREADS} && ! $define{NO_LOCALE_THREADS}) {
 }
 
 if (   $define{HAS_POSIX_2008_LOCALE}
-    && (  ! $define{HAS_SETLOCALE} || (     $define{USE_LOCALE_THREADS}
-                                       && ! $define{NO_POSIX_2008_LOCALE})))
+    && (! $define{HAS_SETLOCALE} || (     $define{USE_LOCALE_THREADS}
+                                     && ! $define{NO_POSIX_2008_LOCALE})
+                                     && ! $define{NO_THREAD_SAFE_LOCALE}))
 {
     $define{USE_POSIX_2008_LOCALE} = 1;
 }
 
-if ($define{USE_LOCALE_THREADS} && ! $define{NO_THREAD_SAFE_LOCALE})
-{
+if ($define{USE_LOCALE_THREADS} && ! $define{NO_THREAD_SAFE_LOCALE}) {
     if (    $define{USE_POSIX_2008_LOCALE}
         || ($define{WIN32} && (   $cctype !~ /\D/
                                && $cctype >= 80)))

@@ -1263,9 +1263,11 @@ typedef enum {
    /* Use POSIX 2008 locales if available, and no alternative exists
     * ('setlocale()' is the alternative); or is threaded and not forbidden to
     * use them */
-#  if defined(HAS_POSIX_2008_LOCALE) && (  ! defined(HAS_SETLOCALE)            \
-                                         || (     defined(USE_LOCALE_THREADS)  \
-                                             && ! defined(NO_POSIX_2008_LOCALE)))
+#  if (       defined(HAS_POSIX_2008_LOCALE)                                \
+       && (    ! defined(HAS_SETLOCALE)                                     \
+           || (     defined(USE_LOCALE_THREADS)                             \
+               && ! defined(NO_POSIX_2008_LOCALE)))                         \
+               && ! defined(NO_THREAD_SAFE_LOCALE))
 #    define USE_POSIX_2008_LOCALE
 #  endif
 
