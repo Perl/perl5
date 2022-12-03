@@ -1169,6 +1169,9 @@ PP(pp_sort)
     }
 }
 
+
+/* call a traditional perl compare function, setting $a and $b */
+
 static I32
 S_sortcv(pTHX_ SV *const a, SV *const b)
 {
@@ -1180,13 +1183,17 @@ S_sortcv(pTHX_ SV *const a, SV *const b)
  
     PERL_ARGS_ASSERT_SORTCV;
 
+#if defined(PERL_RC_STACK) && !defined(PERL_XXX_TMP_NORC)
+    assert(rpp_stack_is_rc());
+#endif
+
     olda = GvSV(PL_firstgv);
     GvSV(PL_firstgv) = SvREFCNT_inc_simple_NN(a);
     SvREFCNT_dec(olda);
     oldb = GvSV(PL_secondgv);
     GvSV(PL_secondgv) = SvREFCNT_inc_simple_NN(b);
     SvREFCNT_dec(oldb);
-    PL_stack_sp = PL_stack_base;
+    assert(PL_stack_sp == PL_stack_base);
     PL_op = PL_sortcop;
     CALLRUNOPS(aTHX);
     PL_curcop = cop;
@@ -1194,11 +1201,15 @@ S_sortcv(pTHX_ SV *const a, SV *const b)
      * simplifies converting a '()' return into undef in scalar context */
     assert(PL_stack_sp > PL_stack_base || *PL_stack_base == &PL_sv_undef);
     result = SvIV(*PL_stack_sp);
+    rpp_popfree_to(PL_stack_base);
 
     LEAVE_SCOPE(oldsaveix);
     PL_curpm = pm;
     return result;
 }
+
+
+/* call a perl compare function that has a ($$) prototype, setting @_ */
 
 static I32
 S_sortcv_stacked(pTHX_ SV *const a, SV *const b)
@@ -1210,6 +1221,10 @@ S_sortcv_stacked(pTHX_ SV *const a, SV *const b)
     COP * const cop = PL_curcop;
 
     PERL_ARGS_ASSERT_SORTCV_STACKED;
+
+#if defined(PERL_RC_STACK) && !defined(PERL_XXX_TMP_NORC)
+    assert(rpp_stack_is_rc());
+#endif
 
     if (AvREAL(av)) {
         av_clear(av);
@@ -1233,7 +1248,7 @@ S_sortcv_stacked(pTHX_ SV *const a, SV *const b)
 
     AvARRAY(av)[0] = a;
     AvARRAY(av)[1] = b;
-    PL_stack_sp = PL_stack_base;
+    assert(PL_stack_sp == PL_stack_base);
     PL_op = PL_sortcop;
     CALLRUNOPS(aTHX);
     PL_curcop = cop;
@@ -1241,16 +1256,20 @@ S_sortcv_stacked(pTHX_ SV *const a, SV *const b)
      * simplifies converting a '()' return into undef in scalar context */
     assert(PL_stack_sp > PL_stack_base || *PL_stack_base == &PL_sv_undef);
     result = SvIV(*PL_stack_sp);
+    rpp_popfree_to(PL_stack_base);
 
     LEAVE_SCOPE(oldsaveix);
     PL_curpm = pm;
     return result;
 }
 
+
+/* call an XS compare function. (The two args are always passed on the
+ * stack, regardless of whether it has a ($$) prototype or not.) */
+
 static I32
 S_sortcv_xsub(pTHX_ SV *const a, SV *const b)
 {
-    dSP;
     const I32 oldsaveix = PL_savestack_ix;
     CV * const cv=MUTABLE_CV(PL_sortcop);
     I32 result;
@@ -1258,17 +1277,25 @@ S_sortcv_xsub(pTHX_ SV *const a, SV *const b)
 
     PERL_ARGS_ASSERT_SORTCV_XSUB;
 
-    SP = PL_stack_base;
-    PUSHMARK(SP);
-    EXTEND(SP, 2);
-    *++SP = a;
-    *++SP = b;
-    PUTBACK;
+#if defined(PERL_RC_STACK) && !defined(PERL_XXX_TMP_NORC)
+    assert(rpp_stack_is_rc());
+#endif
+
+    assert(PL_stack_sp == PL_stack_base);
+    PUSHMARK(PL_stack_sp);
+    rpp_xpush_2(a, b);
+
+#ifdef PERL_RC_STACK
+    Perl_xs_wrap(aTHX_ CvXSUB(cv), cv);
+#else
     (void)(*CvXSUB(cv))(aTHX_ cv);
+#endif
+
     /* entry zero of a stack is always PL_sv_undef, which
      * simplifies converting a '()' return into undef in scalar context */
     assert(PL_stack_sp > PL_stack_base || *PL_stack_base == &PL_sv_undef);
     result = SvIV(*PL_stack_sp);
+    rpp_popfree_to(PL_stack_base);
 
     LEAVE_SCOPE(oldsaveix);
     PL_curpm = pm;
