@@ -3,7 +3,7 @@ use strict;
 use Exporter;
 
 
-our $VERSION = '3.86';
+our $VERSION = '3.88';
 my $xs_version = $VERSION;
 $VERSION =~ tr/_//d;
 
@@ -200,6 +200,7 @@ sub _backtick_pwd {
     # anything absolute. Perhaps "/" would be better.
     local $ENV{PATH}= "/usr/bin"
         if $^O ne "vms" and $^O ne "amigaos";
+    local $ENV{PATH} if $^O eq "vms";
     
     my $cwd = `$pwd_cmd`;
     # Belt-and-suspenders in case someone said "undef $/".
