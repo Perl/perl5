@@ -395,6 +395,12 @@ Also, embedded C<NUL> characters are now allowed in the input.
 If locale collation is not enabled on the platform (C<LC_COLLATE>), the
 input is returned unchanged.
 
+=item *
+
+Double FETCH during stringification of tied scalars returning an
+overloaded object have been fixed. The FETCH method should only be
+called once, but prior to this release was actually called twice.
+
 =back
 
 =head1 Known Problems

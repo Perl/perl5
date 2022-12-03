@@ -1906,7 +1906,7 @@ foreach my $op (qw(<=> == != < <= > >=)) {
 
 	# eval should do tie, overload on its arg before checking taint */
 	push @tests, [ '1;', 'eval q(eval %s); $@ =~ /Insecure/',
-		'("")', '("")', [ 1, 2, 0 ], 0 ];
+		'("")', '("")', [ 1, 1, 0 ], 0 ];
 
 
 	for my $sub (keys %subs) {

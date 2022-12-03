@@ -2830,21 +2830,28 @@ char *
 Perl_sv_2pv_flags(pTHX_ SV *const sv, STRLEN *const lp, const U32 flags)
 {
     char *s;
+    bool done_gmagic = FALSE;
 
     PERL_ARGS_ASSERT_SV_2PV_FLAGS;
 
     assert (SvTYPE(sv) != SVt_PVAV && SvTYPE(sv) != SVt_PVHV
          && SvTYPE(sv) != SVt_PVFM);
-    if (SvGMAGICAL(sv) && (flags & SV_GMAGIC))
+    if (SvGMAGICAL(sv) && (flags & SV_GMAGIC)) {
         mg_get(sv);
+        done_gmagic = TRUE;
+    }
+
     if (SvROK(sv)) {
         if (SvAMAGIC(sv)) {
             SV *tmpstr;
+            SV *nsv= (SV *)sv;
             if (flags & SV_SKIP_OVERLOAD)
                 return NULL;
-            tmpstr = AMG_CALLunary(sv, string_amg);
+            if (done_gmagic)
+                nsv = sv_mortalcopy_flags(sv,0);
+            tmpstr = AMG_CALLunary(nsv, string_amg);
             TAINT_IF(tmpstr && SvTAINTED(tmpstr));
-            if (tmpstr && (!SvROK(tmpstr) || (SvRV(tmpstr) != SvRV(sv)))) {
+            if (tmpstr && (!SvROK(tmpstr) || (SvRV(tmpstr) != SvRV(nsv)))) {
                 /* Unwrap this:  */
                 /* char *pv = lp ? SvPV(tmpstr, *lp) : SvPV_nolen(tmpstr);
                  */
