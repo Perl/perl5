@@ -1,5 +1,9 @@
 Revision history for Perl distribution PathTools.
 
+3.87-3.88
+
+- Fix handling of empty path, VMS fixes.
+
 3.86
 
 - Fix compilation warning on illumos based platforms
