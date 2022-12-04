@@ -2425,7 +2425,7 @@ S_outside_integer(pTHX_ SV *sv)
 
 PP(pp_enteriter)
 {
-    dSP; dMARK;
+    dMARK;
     PERL_CONTEXT *cx;
     const U8 gimme = GIMME_V;
     void *itervarp; /* GV or pad slot of the iteration variable */
@@ -2446,10 +2446,9 @@ PP(pp_enteriter)
         cxflags = CXp_FOR_PAD;
     }
     else {
-        SV * const sv = POPs;
+        SV * const sv = *PL_stack_sp;
         itervarp = (void *)sv;
         if (LIKELY(isGV(sv))) {		/* symbol table variable */
-            SvREFCNT_inc_simple_void(sv);
             itersave = GvSV(sv);
             SvREFCNT_inc_simple_void(itersave);
             cxflags = CXp_FOR_GV;
@@ -2462,8 +2461,10 @@ PP(pp_enteriter)
             assert(SvMAGIC(sv)->mg_type == PERL_MAGIC_lvref);
             itersave = NULL;
             cxflags = CXp_FOR_LVREF;
-            SvREFCNT_inc_simple_void(sv);
         }
+        /* we transfer ownership of 1 ref count of itervarp from the stack
+         * to the CX entry, so no SvREFCNT_dec() needed */
+        (void)rpp_pop_1_norc();
     }
     /* OPpITER_DEF (implicit $_) should only occur with a GV iter var */
     assert((cxflags & CXp_FOR_GV) || !(PL_op->op_private & OPpITER_DEF));
@@ -2480,10 +2481,10 @@ PP(pp_enteriter)
         /* OPf_STACKED implies either a single array: for(@), with a
          * single AV on the stack, or a range: for (1..5), with 1 and 5 on
          * the stack */
-        SV *maybe_ary = POPs;
+        SV *maybe_ary = *PL_stack_sp;
         if (SvTYPE(maybe_ary) != SVt_PVAV) {
             /* range */
-            dPOPss;
+            SV* sv = PL_stack_sp[-1];
             SV * const right = maybe_ary;
             if (UNLIKELY(cxflags & CXp_FOR_LVREF))
                 DIE(aTHX_ "Assigned value is not a reference");
@@ -2496,12 +2497,18 @@ PP(pp_enteriter)
                     DIE(aTHX_ "Range iterator outside integer range");
                 cx->blk_loop.state_u.lazyiv.cur = SvIV_nomg(sv);
                 cx->blk_loop.state_u.lazyiv.end = SvIV_nomg(right);
+                rpp_popfree_2();
             }
             else {
                 cx->cx_type |= CXt_LOOP_LAZYSV;
                 cx->blk_loop.state_u.lazysv.cur = newSVsv(sv);
                 cx->blk_loop.state_u.lazysv.end = right;
-                SvREFCNT_inc_simple_void_NN(right);
+
+                /* we transfer ownership of 1 ref count of right from the
+                 * stack to the CX .end entry, so no SvREFCNT_dec() needed */
+                (void)rpp_pop_1_norc();
+
+                rpp_popfree_1(); /* free the (now copied) start SV */
                 (void) SvPV_force_nolen(cx->blk_loop.state_u.lazysv.cur);
                 /* This will do the upgrade to SVt_PV, and warn if the value
                    is uninitialised.  */
@@ -2518,17 +2525,19 @@ PP(pp_enteriter)
             /* for (@array) {} */
             cx->cx_type |= CXt_LOOP_ARY;
             cx->blk_loop.state_u.ary.ary = MUTABLE_AV(maybe_ary);
-            SvREFCNT_inc_simple_void_NN(maybe_ary);
+            /* we transfer ownership of 1 ref count of the av from the
+             * stack to the CX .ary entry, so no SvREFCNT_dec() needed */
+            (void)rpp_pop_1_norc();
             cx->blk_loop.state_u.ary.ix =
                 (PL_op->op_private & OPpITER_REVERSED) ?
                 AvFILL(cx->blk_loop.state_u.ary.ary) + 1 :
                 -1;
         }
-        /* EXTEND(SP, 1) not needed in this branch because we just did POPs */
+        /* rpp_extend(1) not needed in this branch because we just did POPs */
     }
     else { /* iterating over items on the stack */
         cx->cx_type |= CXt_LOOP_LIST;
-        cx->blk_oldsp = SP - PL_stack_base;
+        cx->blk_oldsp = PL_stack_sp - PL_stack_base;
         cx->blk_loop.state_u.stack.basesp = MARK - PL_stack_base;
         cx->blk_loop.state_u.stack.ix =
             (PL_op->op_private & OPpITER_REVERSED)
@@ -2536,10 +2545,10 @@ PP(pp_enteriter)
                 : cx->blk_loop.state_u.stack.basesp;
         /* pre-extend stack so pp_iter doesn't have to check every time
          * it pushes yes/no */
-        EXTEND(SP, 1);
+        rpp_extend(1);
     }
 
-    RETURN;
+    return NORMAL;
 }
 
 PP(pp_enterloop)
@@ -2569,7 +2578,7 @@ PP(pp_leaveloop)
     gimme = cx->blk_gimme;
 
     if (gimme == G_VOID)
-        PL_stack_sp = base;
+        rpp_popfree_to(base);
     else
         leave_adjust_stacks(oldsp, base, gimme,
                                 PL_op->op_private & OPpLVALUE ? 3 : 1);
