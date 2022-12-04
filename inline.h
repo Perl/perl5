@@ -3179,8 +3179,7 @@ Perl_cx_topblock(pTHX_ PERL_CONTEXT *cx)
     PL_markstack_ptr = PL_markstack + cx->blk_oldmarksp;
     PL_scopestack_ix = cx->blk_oldscopesp;
     PL_curpm         = cx->blk_oldpm;
-
-    PL_stack_sp      = PL_stack_base + cx->blk_oldsp;
+    Perl_rpp_popfree_to(aTHX_ PL_stack_base + cx->blk_oldsp);
 }
 
 
