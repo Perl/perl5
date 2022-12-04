@@ -2861,9 +2861,7 @@ S_unwind_loop(pTHX)
         SV *sv;
 
         if (PL_op->op_flags & OPf_STACKED) {
-            dSP;
-            sv = POPs;
-            PUTBACK;
+            sv          = *PL_stack_sp;
             label       = SvPV(sv, label_len);
             label_flags = SvUTF8(sv);
         }
@@ -2885,7 +2883,10 @@ S_unwind_loop(pTHX)
                                               : newSVpvn_flags(label,
                                                     label_len,
                                                     label_flags | SVs_TEMP)));
+        if (PL_op->op_flags & OPf_STACKED)
+            rpp_popfree_1();
     }
+
     if (cxix < cxstack_ix) {
         I32 i;
         /* Check for  defer { last ... } etc */
@@ -2910,11 +2911,11 @@ PP(pp_last)
     cx = S_unwind_loop(aTHX);
 
     assert(CxTYPE_is_LOOP(cx));
-    PL_stack_sp = PL_stack_base
+    rpp_popfree_to(PL_stack_base
                 + (CxTYPE(cx) == CXt_LOOP_LIST
                     ?  cx->blk_loop.state_u.stack.basesp
                     : cx->blk_oldsp
-                );
+                ));
 
     TAINT_NOT;
 
