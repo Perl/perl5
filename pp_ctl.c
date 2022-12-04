@@ -3084,7 +3084,6 @@ S_check_op_type(pTHX_ OP * const o)
 
 PP(pp_goto)
 {
-    dSP;
     OP *retop = NULL;
     I32 ix;
     PERL_CONTEXT *cx;
@@ -3098,7 +3097,7 @@ PP(pp_goto)
     if (PL_op->op_flags & OPf_STACKED) {
         /* goto EXPR  or  goto &foo */
 
-        SV * const sv = POPs;
+        SV * const sv = *PL_stack_sp;
         SvGETMAGIC(sv);
 
         if (SvROK(sv) && SvTYPE(SvRV(sv)) == SVt_PVCV) {
@@ -3157,13 +3156,14 @@ PP(pp_goto)
             /* First do some returnish stuff. */
 
             SvREFCNT_inc_simple_void(cv); /* avoid premature free during unwind */
+            rpp_popfree_1(); /* safe to free original sv now */
+
             FREETMPS;
             if (cxix < cxstack_ix) {
                 dounwind(cxix);
             }
             cx = CX_CUR();
             cx_topblock(cx);
-            SPAGAIN;
 
             /* protect @_ during save stack unwind. */
             if (arg)
@@ -3234,10 +3234,9 @@ PP(pp_goto)
                     SAVEFREESV(old_cv); /* ditto, deferred freeing of old CV */
 
                 /* put GvAV(defgv) back onto stack */
-                if (items) {
-                    EXTEND(SP, items+1); /* @_ could have been extended. */
-                }
-                mark = SP;
+                if (items)
+                    rpp_extend(items + 1); /* @_ could have been extended. */
+                mark = PL_stack_sp;
                 if (items) {
                     SSize_t index;
                     bool r = cBOOL(AvREAL(arg));
@@ -3249,12 +3248,16 @@ PP(pp_goto)
                             sv = svp ? *svp : NULL;
                         }
                         else sv = AvARRAY(arg)[index];
-                        SP[index+1] = sv
+
+
+                        rpp_push_1(
+                            sv
                             ? r ? SvREFCNT_inc_NN(sv_2mortal(sv)) : sv
-                            : sv_2mortal(newSVavdefelem(arg, index, 1));
+                            : sv_2mortal(newSVavdefelem(arg, index, 1))
+                        );
                     }
                 }
-                SP += items;
+
                 if (CxTYPE(cx) == CXt_SUB && CxHASARGS(cx)) {
                     /* Restore old @_ */
                     CX_POP_SAVEARRAY(cx);
@@ -3288,10 +3291,13 @@ PP(pp_goto)
 
                 /* Push a mark for the start of arglist */
                 PUSHMARK(mark);
-                PUTBACK;
+#ifdef PERL_RC_STACK
+                Perl_xs_wrap(aTHX_ CvXSUB(cv), cv);
+#else
                 (void)(*CvXSUB(cv))(aTHX_ cv);
+#endif
                 LEAVE;
-                goto _return;
+                goto finish;
             }
             else {
                 PADLIST * const padlist = CvPADLIST(cv);
@@ -3312,6 +3318,7 @@ PP(pp_goto)
                 }
                 PL_curcop = cx->blk_oldcop;
                 PAD_SET_CUR_NOSAVE(padlist, CvDEPTH(cv));
+
                 if (CxHASARGS(cx))
                 {
                     /* second half of donating @_ from the old sub to the
@@ -3346,11 +3353,15 @@ PP(pp_goto)
                     }
                 }
                 retop = CvSTART(cv);
-                goto putback_return;
+                goto finish;
             }
         }
         else {
             /* goto EXPR */
+            /* avoid premature free of label before popping it off stack */
+            SvREFCNT_inc_NN(sv);
+            sv_2mortal(sv);
+            rpp_popfree_1();
             label       = SvPV_nomg_const(sv, label_len);
             label_flags = SvUTF8(sv);
         }
@@ -3511,9 +3522,7 @@ PP(pp_goto)
         PL_do_undump = FALSE;
     }
 
-    putback_return:
-    PL_stack_sp = sp;
-    _return:
+  finish:
     PERL_ASYNC_CHECK();
     return retop;
 }
