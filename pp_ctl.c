@@ -77,7 +77,6 @@ PP(pp_regcreset)
 
 PP(pp_regcomp)
 {
-    dSP;
     PMOP *pm = cPMOPx(cLOGOP->op_other);
     SV **args;
     int nargs;
@@ -88,20 +87,18 @@ PP(pp_regcomp)
 
     if (PL_op->op_flags & OPf_STACKED) {
         dMARK;
-        nargs = SP - MARK;
+        nargs = PL_stack_sp - MARK;
         args  = ++MARK;
     }
     else {
         nargs = 1;
-        args  = SP;
+        args  = PL_stack_sp;
     }
 
     /* prevent recompiling under /o and ithreads. */
 #if defined(USE_ITHREADS)
-    if (pm->op_pmflags & PMf_KEEP && PM_GETRE(pm)) {
-        SP = args-1;
-        RETURN;
-    }
+    if (pm->op_pmflags & PMf_KEEP && PM_GETRE(pm))
+        goto finish;
 #endif
 
     re = PM_GETRE(pm);
@@ -180,8 +177,11 @@ PP(pp_regcomp)
     }
 #endif
 
-    SP = args-1;
-    RETURN;
+#if defined(USE_ITHREADS)
+  finish:
+#endif
+    rpp_popfree_to(args - 1);
+    return NORMAL;
 }
 
 
