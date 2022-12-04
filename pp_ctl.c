@@ -986,19 +986,20 @@ PP(pp_grepstart)
      * pp_mapwhile() for an explanation of how the stack is used
      * during a grep or map.
      */
-
-    dSP;
     SV *src;
+    SV **svp;
 
-    if (PL_stack_base + TOPMARK == SP) {
+    if (PL_stack_base + TOPMARK == PL_stack_sp) {
         (void)POPMARK;
-        if (GIMME_V == G_SCALAR)
-            XPUSHs(&PL_sv_zero);
-        RETURNOP(PL_op->op_next->op_next);
+        if (GIMME_V == G_SCALAR) {
+            rpp_extend(1);
+            *++PL_stack_sp = &PL_sv_zero;
+        }
+        return PL_op->op_next->op_next;
     }
-    PL_stack_sp = PL_stack_base + TOPMARK + 1;
-    PUSHMARK(PL_stack_sp);				/* push dst */
-    PUSHMARK(PL_stack_sp);				/* push src */
+    svp = PL_stack_base + TOPMARK + 1;
+    PUSHMARK(svp);				/* push dst */
+    PUSHMARK(svp);				/* push src */
     ENTER_with_name("grep");					/* enter outer scope */
 
     SAVETMPS;
@@ -1008,13 +1009,18 @@ PP(pp_grepstart)
 
     src = PL_stack_base[TOPMARK];
     if (SvPADTMP(src)) {
-        src = PL_stack_base[TOPMARK] = sv_mortalcopy(src);
+        SV *newsrc = sv_mortalcopy(src);
         PL_tmps_floor++;
+        PL_stack_base[TOPMARK] = newsrc;
+#if defined(PERL_RC_STACK) && ! defined(PERL_XXX_TMP_NORC)
+        SvREFCNT_inc_simple_void_NN(newsrc);
+        SvREFCNT_dec(src);
+#endif
+        src = newsrc;
     }
     SvTEMP_off(src);
     DEFSV_set(src);
 
-    PUTBACK;
     if (PL_op->op_type == OP_MAPSTART)
         PUSHMARK(PL_stack_sp);			/* push top */
     return cLOGOPx(PL_op->op_next)->op_other;
@@ -1080,13 +1086,26 @@ PP(pp_mapwhile)
      *
      */
 
-    dSP;
     const U8 gimme = GIMME_V;
-    I32 items = (SP - PL_stack_base) - TOPMARK; /* how many new items */
+    I32 items = (PL_stack_sp - PL_stack_base) - TOPMARK; /* how many new items */
     I32 count;
     I32 shift;
     SV** src;
     SV** dst;
+
+#ifdef PERL_RC_STACK
+    /* for ref-counted stack, we need to account for the currently-aliased
+     * stack element, as it might (or might not) get over-written when
+     * copying values from the expr to the end of the accumulated results
+     * section of the list. By RC--ing and zeroing out the stack entry, we
+     * ensure consistent handling.
+     */
+    dst = PL_stack_base + PL_markstack_ptr[-1];
+#  ifndef PERL_XXX_TMP_NORC
+    SvREFCNT_dec_NN(*dst);
+#  endif
+    *dst = NULL;
+#endif
 
     /* first, move source pointer to the next item in the source list */
     ++PL_markstack_ptr[-1];
@@ -1106,7 +1125,7 @@ PP(pp_mapwhile)
             shift = items - (PL_markstack_ptr[-1] - PL_markstack_ptr[-2]);
 
             /* items to shift up (accounting for the moved source pointer) */
-            count = (SP - PL_stack_base) - (PL_markstack_ptr[-1] - 1);
+            count = (PL_stack_sp - PL_stack_base) - (PL_markstack_ptr[-1] - 1);
 
             /* This optimization is by Ben Tilly and it does
              * things differently from what Sarathy (gsar)
@@ -1119,9 +1138,10 @@ PP(pp_mapwhile)
             if (shift < count)
                 shift = count; /* Avoid shifting too often --Ben Tilly */
 
-            EXTEND(SP,shift);
-            src = SP;
-            dst = (SP += shift);
+            rpp_extend(shift);
+            src = PL_stack_sp;
+            PL_stack_sp += shift;
+            dst = PL_stack_sp;
             PL_markstack_ptr[-1] += shift;
             *PL_markstack_ptr += shift;
             while (count--)
@@ -1135,7 +1155,8 @@ PP(pp_mapwhile)
 #endif
         }
         /* copy the new items down to the destination list */
-        dst = PL_stack_base + (PL_markstack_ptr[-2] += items) - 1;
+        PL_markstack_ptr[-2] += items;
+        dst = PL_stack_base + PL_markstack_ptr[-2] - 1;
         if (gimme == G_LIST) {
             /* add returned items to the collection (making mortal copies
              * if necessary), then clear the current temps stack frame
@@ -1159,10 +1180,30 @@ PP(pp_mapwhile)
             PL_tmps_ix += items;
 
             while (i-- > 0) {
-                SV *sv = POPs;
+#ifdef PERL_RC_STACK
+                SV *sv = *PL_stack_sp;
+                assert(!*dst); /* not overwriting ptrs to refcnted SVs */
+                if (!SvTEMP(sv)) {
+                    sv = sv_mortalcopy(sv);
+                    /* NB - don't really need the mortalising above.
+                     * A simple copy would suffice */
+                    *dst-- = sv;
+#  ifndef PERL_XXX_TMP_NORC
+                    SvREFCNT_inc_simple_void_NN(sv);
+#  endif
+                    rpp_popfree_1();
+                }
+                else {
+                    *dst-- = sv;
+                    PL_stack_sp--;
+                }
+
+#else
+                SV *sv = *PL_stack_sp--;
                 if (!SvTEMP(sv))
                     sv = sv_mortalcopy(sv);
                 *dst-- = sv;
+#endif
                 PL_tmps_stack[tmpsbase++] = SvREFCNT_inc_simple(sv);
             }
             /* clear the stack frame except for the items */
@@ -1177,14 +1218,16 @@ PP(pp_mapwhile)
             /* scalar context: we don't care about which values map returns
              * (we use undef here). And so we certainly don't want to do mortal
              * copies of meaningless values. */
-            while (items-- > 0) {
-                (void)POPs;
-                *dst-- = &PL_sv_undef;
-            }
+            *(dst - items + 1) = &PL_sv_undef;
+            rpp_popfree_to(PL_stack_sp - items);
             FREETMPS;
         }
     }
     else {
+        if (items) {
+            assert(gimme == G_VOID);
+            rpp_popfree_to(PL_stack_sp - items);
+        }
         FREETMPS;
     }
     LEAVE_with_name("grep_item");					/* exit inner scope */
@@ -1197,14 +1240,17 @@ PP(pp_mapwhile)
         (void)POPMARK;				/* pop src */
         items = --*PL_markstack_ptr - PL_markstack_ptr[-1];
         (void)POPMARK;				/* pop dst */
-        SP = PL_stack_base + POPMARK;		/* pop original mark */
+        SV **svp = PL_stack_base + POPMARK; /* pop original mark */
+        if (gimme == G_LIST)
+            svp += items;
+        rpp_popfree_to(svp);
         if (gimme == G_SCALAR) {
-                dTARGET;
-                XPUSHi(items);
+            dTARGET;
+            TARGi(items, 1);
+            /* XXX is the extend necessary? */
+            rpp_xpush_1(targ);
         }
-        else if (gimme == G_LIST)
-            SP += items;
-        RETURN;
+        return NORMAL;
     }
     else {
         SV *src;
@@ -1215,12 +1261,21 @@ PP(pp_mapwhile)
         /* set $_ to the new source item */
         src = PL_stack_base[PL_markstack_ptr[-1]];
         if (SvPADTMP(src)) {
+            SV *newsrc = sv_mortalcopy(src);
+            PL_stack_base[PL_markstack_ptr[-1]] = newsrc;
+#if defined(PERL_RC_STACK) && ! defined(PERL_XXX_TMP_NORC)
+            SvREFCNT_inc_simple_void_NN(newsrc);
+            SvREFCNT_dec(src);
+#endif
+            src = newsrc;
+        }
+        if (SvPADTMP(src)) {
             src = sv_mortalcopy(src);
         }
         SvTEMP_off(src);
         DEFSV_set(src);
 
-        RETURNOP(cLOGOP->op_other);
+        return cLOGOP->op_other;
     }
 }
 
