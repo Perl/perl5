@@ -5606,19 +5606,17 @@ PP(pp_leavetry)
 
 PP(pp_entergiven)
 {
-    dSP;
     PERL_CONTEXT *cx;
     const U8 gimme = GIMME_V;
     SV *origsv = DEFSV;
-    SV *newsv = POPs;
     
     assert(!PL_op->op_targ); /* used to be set for lexical $_ */
-    GvSV(PL_defgv) = SvREFCNT_inc(newsv);
+    GvSV(PL_defgv) = rpp_pop_1_norc();
 
-    cx = cx_pushblock(CXt_GIVEN, gimme, SP, PL_savestack_ix);
+    cx = cx_pushblock(CXt_GIVEN, gimme, PL_stack_sp, PL_savestack_ix);
     cx_pushgiven(cx, origsv);
 
-    RETURN;
+    return NORMAL;
 }
 
 PP(pp_leavegiven)
@@ -5634,7 +5632,7 @@ PP(pp_leavegiven)
     gimme = cx->blk_gimme;
 
     if (gimme == G_VOID)
-        PL_stack_sp = oldsp;
+        rpp_popfree_to(oldsp);
     else
         leave_adjust_stacks(oldsp, oldsp, gimme, 1);
 
@@ -6180,7 +6178,6 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other, const bool copied)
 
 PP(pp_enterwhen)
 {
-    dSP;
     PERL_CONTEXT *cx;
     const U8 gimme = GIMME_V;
 
@@ -6188,18 +6185,21 @@ PP(pp_enterwhen)
        fails, we don't want to push a context and then
        pop it again right away, so we skip straight
        to the op that follows the leavewhen.
-       RETURNOP calls PUTBACK which restores the stack pointer after the POPs.
     */
-    if (!(PL_op->op_flags & OPf_SPECIAL) && !SvTRUEx(POPs)) {
-        if (gimme == G_SCALAR)
-            PUSHs(&PL_sv_undef);
-        RETURNOP(cLOGOP->op_other->op_next);
+    if (!(PL_op->op_flags & OPf_SPECIAL)) { /* SPECIAL implies no condition */
+        bool tr = SvTRUEx(*PL_stack_sp);
+        rpp_popfree_1();
+        if (!tr) {
+            if (gimme == G_SCALAR)
+                *++PL_stack_sp = &PL_sv_undef;
+            return cLOGOP->op_other->op_next;
+        }
     }
 
-    cx = cx_pushblock(CXt_WHEN, gimme, SP, PL_savestack_ix);
+    cx = cx_pushblock(CXt_WHEN, gimme, PL_stack_sp, PL_savestack_ix);
     cx_pushwhen(cx);
 
-    RETURN;
+    return NORMAL;
 }
 
 PP(pp_leavewhen)
@@ -6221,7 +6221,7 @@ PP(pp_leavewhen)
 
     oldsp = PL_stack_base + cx->blk_oldsp;
     if (gimme == G_VOID)
-        PL_stack_sp = oldsp;
+        rpp_popfree_to(oldsp);
     else
         leave_adjust_stacks(oldsp, oldsp, gimme, 1);
 
@@ -6261,7 +6261,7 @@ PP(pp_continue)
     
     cx = CX_CUR();
     assert(CxTYPE(cx) == CXt_WHEN);
-    PL_stack_sp = PL_stack_base + cx->blk_oldsp;
+    rpp_popfree_to(PL_stack_base + cx->blk_oldsp);
     CX_LEAVE_SCOPE(cx);
     cx_popwhen(cx);
     cx_popblock(cx);
@@ -6289,7 +6289,7 @@ PP(pp_break)
 
     /* Restore the sp at the time we entered the given block */
     cx = CX_CUR();
-    PL_stack_sp = PL_stack_base + cx->blk_oldsp;
+    rpp_popfree_to(PL_stack_base + cx->blk_oldsp);
 
     return cx->blk_givwhen.leave_op;
 }
