@@ -1957,27 +1957,27 @@ END_EXTERN_C
  * The first two aren't in C89, so the fallback is to use the non-locale
  * sensitive versions; these are the same for all platforms */
 #if defined(HAS_ISASCII)
-#   define is_base_ASCII(c) isascii((U8) (c))
+#   define is_posix_ASCII(c) isascii((U8) (c))
 #else
-#   define is_base_ASCII(c) isASCII(c)
+#   define is_posix_ASCII(c) isASCII(c)
 #endif
 
 #if defined(HAS_ISBLANK)
-#   define is_base_BLANK(c) isblank((U8) (c))
+#   define is_posix_BLANK(c) isblank((U8) (c))
 #else
-#   define is_base_BLANK(c) isBLANK(c)
+#   define is_posix_BLANK(c) isBLANK(c)
 #endif
 
 /* The next few are the same in all platforms. */
-#define is_base_CNTRL(c)     iscntrl((U8) (c))
-#define is_base_IDFIRST(c)  (UNLIKELY((c) == '_') || is_base_ALPHA(c))
-#define is_base_SPACE(c)     isspace((U8) (c))
-#define is_base_WORDCHAR(c) (UNLIKELY((c) == '_') || is_base_ALPHANUMERIC(c))
+#define is_posix_CNTRL(c)     iscntrl((U8) (c))
+#define is_posix_IDFIRST(c)  (UNLIKELY((c) == '_') || is_posix_ALPHA(c))
+#define is_posix_SPACE(c)     isspace((U8) (c))
+#define is_posix_WORDCHAR(c) (UNLIKELY((c) == '_') || is_posix_ALPHANUMERIC(c))
 
 /* The base-level case changing macros are also the same in all platforms */
-#define to_base_LOWER(c)     tolower((U8) (c))
-#define to_base_UPPER(c)     toupper((U8) (c))
-#define to_base_FOLD(c)      to_base_LOWER(c)
+#define to_posix_LOWER(c)     tolower((U8) (c))
+#define to_posix_UPPER(c)     toupper((U8) (c))
+#define to_posix_FOLD(c)      to_posix_LOWER(c)
 
 #ifdef WIN32
 
@@ -1991,48 +1991,48 @@ END_EXTERN_C
  * ispunct(), and things that are \W, like ispunct(), arent't controls.  Not
  * all possible weirdnesses are checked for, just ones that were detected on
  * actual Microsoft code pages */
-#  define is_base_ALPHA(c)                                          \
-                          (isalpha((U8) (c)) && ! is_base_PUNCT(c))
-#  define is_base_ALPHANUMERIC(c)                                   \
-                          (isalnum((U8) (c)) && ! is_base_PUNCT(c))
-#  define is_base_CASED(c)                                          \
-   ((isupper((U8) (c)) || islower((U8) (c))) && ! is_base_PUNCT(c))
-#  define is_base_DIGIT(c)                                          \
-                          (isdigit((U8) (c)) && ! is_base_PUNCT(c))
-#  define is_base_GRAPH(c)                                          \
-                          (isgraph((U8) (c)) && ! is_base_CNTRL(c))
-#  define is_base_LOWER(c)                                          \
-                          (islower((U8) (c)) && ! is_base_PUNCT(c))
-#  define is_base_PRINT(c)                                          \
-                          (isprint((U8) (c)) && ! is_base_CNTRL(c))
-#  define is_base_PUNCT(c)                                          \
-                          (ispunct((U8) (c)) && ! is_base_CNTRL(c))
-#  define is_base_UPPER(c)                                          \
-                          (isupper((U8) (c)) && ! is_base_PUNCT(c))
-#  define is_base_XDIGIT(c)                                         \
-                         (isxdigit((U8) (c)) && ! is_base_PUNCT(c))
+#  define is_posix_ALPHA(c)                                          \
+                          (isalpha((U8) (c)) && ! is_posix_PUNCT(c))
+#  define is_posix_ALPHANUMERIC(c)                                   \
+                          (isalnum((U8) (c)) && ! is_posix_PUNCT(c))
+#  define is_posix_CASED(c)                                          \
+   ((isupper((U8) (c)) || islower((U8) (c))) && ! is_posix_PUNCT(c))
+#  define is_posix_DIGIT(c)                                          \
+                          (isdigit((U8) (c)) && ! is_posix_PUNCT(c))
+#  define is_posix_GRAPH(c)                                          \
+                          (isgraph((U8) (c)) && ! is_posix_CNTRL(c))
+#  define is_posix_LOWER(c)                                          \
+                          (islower((U8) (c)) && ! is_posix_PUNCT(c))
+#  define is_posix_PRINT(c)                                          \
+                          (isprint((U8) (c)) && ! is_posix_CNTRL(c))
+#  define is_posix_PUNCT(c)                                          \
+                          (ispunct((U8) (c)) && ! is_posix_CNTRL(c))
+#  define is_posix_UPPER(c)                                          \
+                          (isupper((U8) (c)) && ! is_posix_PUNCT(c))
+#  define is_posix_XDIGIT(c)                                         \
+                         (isxdigit((U8) (c)) && ! is_posix_PUNCT(c))
 #else
 
 /* For all other platforms, as far as we know, isdigit(), etc. work sanely
  * enough */
-#  define is_base_ALPHA(c)         isalpha((U8) (c))
-#  define is_base_ALPHANUMERIC(c)  isalnum((U8) (c))
-#  define is_base_CASED(c)        (islower((U8) (c)) || isupper((U8) (c)))
-#  define is_base_DIGIT(c)         isdigit((U8) (c))
+#  define is_posix_ALPHA(c)         isalpha((U8) (c))
+#  define is_posix_ALPHANUMERIC(c)  isalnum((U8) (c))
+#  define is_posix_CASED(c)        (islower((U8) (c)) || isupper((U8) (c)))
+#  define is_posix_DIGIT(c)         isdigit((U8) (c))
 
      /* ... But it seems that IBM products treat NBSP as both a space and a
       * graphic; these are the two platforms that we have active test beds for.
       */
 #  if defined(OS390) || defined(_AIX)
-#    define is_base_GRAPH(c)      (isgraph((U8) (c)) && ! isspace((U8) (c)))
+#    define is_posix_GRAPH(c)      (isgraph((U8) (c)) && ! isspace((U8) (c)))
 #  else
-#    define is_base_GRAPH(c)       isgraph((U8) (c))
+#    define is_posix_GRAPH(c)       isgraph((U8) (c))
 #  endif
-#  define is_base_LOWER(c)         islower((U8) (c))
-#  define is_base_PRINT(c)         isprint((U8) (c))
-#  define is_base_PUNCT(c)         ispunct((U8) (c))
-#  define is_base_UPPER(c)         isupper((U8) (c))
-#  define is_base_XDIGIT(c)        isxdigit((U8) (c))
+#  define is_posix_LOWER(c)         islower((U8) (c))
+#  define is_posix_PRINT(c)         isprint((U8) (c))
+#  define is_posix_PUNCT(c)         ispunct((U8) (c))
+#  define is_posix_UPPER(c)         isupper((U8) (c))
+#  define is_posix_XDIGIT(c)        isxdigit((U8) (c))
 #endif
 
 /* Below is the next level up, which currently expands to nothing more
@@ -2047,28 +2047,28 @@ END_EXTERN_C
  * (Note, proper general operation of the bare libc functons requires you to
  * cast to U8.  These do that for you automatically.) */
 
-#  define WRAP_U8_LC_(c, classnum, base)  base(c)
+#  define WRAP_U8_LC_(c, classnum, posix)  posix(c)
 
 #define isU8_ALPHANUMERIC_LC(c)                                                \
-              WRAP_U8_LC_((c), CC_ALPHANUMERIC_, is_base_ALPHANUMERIC)
-#define isU8_ALPHA_LC(c)    WRAP_U8_LC_((c), CC_ALPHA_, is_base_ALPHA)
-#define isU8_ASCII_LC(c)    WRAP_U8_LC_((c), CC_ASCII_, is_base_ASCII)
-#define isU8_BLANK_LC(c)    WRAP_U8_LC_((c), CC_BLANK_, is_base_BLANK)
-#define isU8_CASED_LC(c)    WRAP_U8_LC_((c), CC_CASED_, is_base_CASED)
-#define isU8_CNTRL_LC(c)    WRAP_U8_LC_((c), CC_CNTRL_, is_base_CNTRL)
-#define isU8_DIGIT_LC(c)    WRAP_U8_LC_((c), CC_DIGIT_, is_base_DIGIT)
-#define isU8_GRAPH_LC(c)    WRAP_U8_LC_((c), CC_GRAPH_, is_base_GRAPH)
-#define isU8_IDFIRST_LC(c)  WRAP_U8_LC_((c), CC_IDFIRST_, is_base_IDFIRST)
-#define isU8_LOWER_LC(c)    WRAP_U8_LC_((c), CC_LOWER_, is_base_LOWER)
-#define isU8_PRINT_LC(c)    WRAP_U8_LC_((c), CC_PRINT_, is_base_PRINT)
-#define isU8_PUNCT_LC(c)    WRAP_U8_LC_((c), CC_PUNCT_, is_base_PUNCT)
-#define isU8_SPACE_LC(c)    WRAP_U8_LC_((c), CC_SPACE_, is_base_SPACE)
-#define isU8_UPPER_LC(c)    WRAP_U8_LC_((c), CC_UPPER_, is_base_UPPER)
-#define isU8_WORDCHAR_LC(c) WRAP_U8_LC_((c), CC_WORDCHAR_, is_base_WORDCHAR)
-#define isU8_XDIGIT_LC(c)   WRAP_U8_LC_((c), CC_XDIGIT_, is_base_XDIGIT)
+              WRAP_U8_LC_((c), CC_ALPHANUMERIC_, is_posix_ALPHANUMERIC)
+#define isU8_ALPHA_LC(c)    WRAP_U8_LC_((c), CC_ALPHA_, is_posix_ALPHA)
+#define isU8_ASCII_LC(c)    WRAP_U8_LC_((c), CC_ASCII_, is_posix_ASCII)
+#define isU8_BLANK_LC(c)    WRAP_U8_LC_((c), CC_BLANK_, is_posix_BLANK)
+#define isU8_CASED_LC(c)    WRAP_U8_LC_((c), CC_CASED_, is_posix_CASED)
+#define isU8_CNTRL_LC(c)    WRAP_U8_LC_((c), CC_CNTRL_, is_posix_CNTRL)
+#define isU8_DIGIT_LC(c)    WRAP_U8_LC_((c), CC_DIGIT_, is_posix_DIGIT)
+#define isU8_GRAPH_LC(c)    WRAP_U8_LC_((c), CC_GRAPH_, is_posix_GRAPH)
+#define isU8_IDFIRST_LC(c)  WRAP_U8_LC_((c), CC_IDFIRST_, is_posix_IDFIRST)
+#define isU8_LOWER_LC(c)    WRAP_U8_LC_((c), CC_LOWER_, is_posix_LOWER)
+#define isU8_PRINT_LC(c)    WRAP_U8_LC_((c), CC_PRINT_, is_posix_PRINT)
+#define isU8_PUNCT_LC(c)    WRAP_U8_LC_((c), CC_PUNCT_, is_posix_PUNCT)
+#define isU8_SPACE_LC(c)    WRAP_U8_LC_((c), CC_SPACE_, is_posix_SPACE)
+#define isU8_UPPER_LC(c)    WRAP_U8_LC_((c), CC_UPPER_, is_posix_UPPER)
+#define isU8_WORDCHAR_LC(c) WRAP_U8_LC_((c), CC_WORDCHAR_, is_posix_WORDCHAR)
+#define isU8_XDIGIT_LC(c)   WRAP_U8_LC_((c), CC_XDIGIT_, is_posix_XDIGIT)
 
-#define toU8_LOWER_LC(c)    WRAP_U8_LC_((c), CC_TOLOWER_, to_base_LOWER)
-#define toU8_UPPER_LC(c)    WRAP_U8_LC_((c), CC_TOUPPER_, to_base_UPPER)
+#define toU8_LOWER_LC(c)    WRAP_U8_LC_((c), CC_TOLOWER_, to_posix_LOWER)
+#define toU8_UPPER_LC(c)    WRAP_U8_LC_((c), CC_TOUPPER_, to_posix_UPPER)
 #define toU8_FOLD_LC(c)     toU8_LOWER_LC(c)
 
 /* The definitions below use the ones above to create versions in which the
