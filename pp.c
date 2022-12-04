@@ -6658,15 +6658,14 @@ PP_wrapped(pp_split,
 
 PP(pp_once)
 {
-    dSP;
     SV *const sv = PAD_SVl(PL_op->op_targ);
 
     if (SvPADSTALE(sv)) {
         /* First time. */
         SvPADSTALE_off(sv);
-        RETURNOP(cLOGOP->op_other);
+        return cLOGOP->op_other;
     }
-    RETURNOP(cLOGOP->op_next);
+    return cLOGOP->op_next;
 }
 
 PP_wrapped(pp_lock, 1, 0)
@@ -6894,9 +6893,8 @@ PP_wrapped(pp_coreargs, 0, 0)
 
 PP(pp_avhvswitch)
 {
-    dSP;
     return PL_ppaddr[
-                (SvTYPE(TOPs) == SVt_PVAV ? OP_AEACH : OP_EACH)
+                (SvTYPE(*PL_stack_sp) == SVt_PVAV ? OP_AEACH : OP_EACH)
                     + (PL_op->op_private & OPpAVHVSWITCH_MASK)
            ](aTHX);
 }
