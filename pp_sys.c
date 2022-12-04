@@ -1441,26 +1441,35 @@ S_doform(pTHX_ CV *cv, GV *gv, OP *retop)
     return CvSTART(cv);
 }
 
+
 PP(pp_enterwrite)
 {
-    dSP;
     GV *gv;
     IO *io;
     GV *fgv;
     CV *cv = NULL;
 
     if (MAXARG == 0) {
-        EXTEND(SP, 1);
+        rpp_extend(1);
         gv = PL_defoutgv;
     }
     else {
-        gv = MUTABLE_GV(POPs);
+        gv = MUTABLE_GV(*PL_stack_sp);
+        /* NB: in principle, decrementing gv's ref count could free it,
+         * and we aught to make the gv field of the struct block_format
+         * reference counted to compensate; in practice, since formats
+         * invariably use named GVs in the source which link to the GV,
+         * it's almost impossible to free a GV during format processing.
+         */
+        rpp_popfree_1();
         if (!gv)
             gv = PL_defoutgv;
     }
     io = GvIO(gv);
     if (!io) {
-        RETPUSHNO;
+        *++PL_stack_sp = &PL_sv_no;
+	return NORMAL;
+
     }
     if (IoFMT_GV(io))
         fgv = IoFMT_GV(io);
@@ -1476,12 +1485,12 @@ PP(pp_enterwrite)
         DIE(aTHX_ "Undefined format \"%" SVf "\" called", SVfARG(tmpsv));
     }
     IoFLAGS(io) &= ~IOf_DIDTOP;
-    RETURNOP(doform(cv,gv,PL_op->op_next));
+    return doform(cv,gv,PL_op->op_next);
 }
+
 
 PP(pp_leavewrite)
 {
-    dSP;
     GV * const gv = CX_CUR()->blk_format.gv;
     IO * const io = GvIOp(gv);
     PerlIO *ofp;
@@ -1565,46 +1574,47 @@ PP(pp_leavewrite)
   forget_top:
     cx = CX_CUR();
     assert(CxTYPE(cx) == CXt_FORMAT);
-    SP = PL_stack_base + cx->blk_oldsp; /* ignore retval of formline */
+    rpp_popfree_to(PL_stack_base + cx->blk_oldsp); /* ignore retval of formline */
     CX_LEAVE_SCOPE(cx);
     cx_popformat(cx);
     cx_popblock(cx);
     retop = cx->blk_sub.retop;
     CX_POP(cx);
 
-    EXTEND(SP, 1);
+    rpp_extend(1);
 
     if (is_return)
         /* XXX the semantics of doing 'return' in a format aren't documented.
          * Currently we ignore any args to 'return' and just return
          * a single undef in both scalar and list contexts
          */
-        PUSHs(&PL_sv_undef);
+        *++PL_stack_sp = &PL_sv_undef;
     else if (!io || !(fp = IoOFP(io))) {
         if (io && IoIFP(io))
             report_wrongway_fh(gv, '<');
         else
             report_evil_fh(gv);
-        PUSHs(&PL_sv_no);
+        *++PL_stack_sp = &PL_sv_no;
     }
     else {
         if ((IoLINES_LEFT(io) -= FmLINES(PL_formtarget)) < 0) {
             Perl_ck_warner(aTHX_ packWARN(WARN_IO), "page overflow");
         }
         if (!do_print(PL_formtarget, fp))
-            PUSHs(&PL_sv_no);
+            *++PL_stack_sp = &PL_sv_no;
         else {
             FmLINES(PL_formtarget) = 0;
             SvCUR_set(PL_formtarget, 0);
             *SvEND(PL_formtarget) = '\0';
             if (IoFLAGS(io) & IOf_FLUSH)
                 (void)PerlIO_flush(fp);
-            PUSHs(&PL_sv_yes);
+            *++PL_stack_sp = &PL_sv_yes;
         }
     }
     PL_formtarget = PL_bodytarget;
-    RETURNOP(retop);
+    return retop;
 }
+
 
 PP_wrapped(pp_prtf, 0, 1)
 {
