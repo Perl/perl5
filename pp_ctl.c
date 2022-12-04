@@ -2389,7 +2389,7 @@ PP(pp_leave)
     gimme = cx->blk_gimme;
 
     if (gimme == G_VOID)
-        PL_stack_sp = oldsp;
+        rpp_popfree_to(oldsp);
     else
         leave_adjust_stacks(oldsp, oldsp, gimme,
                                 PL_op->op_private & OPpLVALUE ? 3 : 1);
@@ -2623,7 +2623,7 @@ PP(pp_leavesublv)
     oldsp = PL_stack_base + cx->blk_oldsp; /* last arg of previous frame */
 
     if (gimme == G_VOID)
-        PL_stack_sp = oldsp;
+        rpp_popfree_to(oldsp);
     else {
         U8   lval    = CxLVAL(cx);
         bool is_lval = (lval && !(lval & OPpENTERSUB_INARGS));
@@ -2655,12 +2655,11 @@ PP(pp_leavesublv)
 
             if (lval & OPpDEREF) {
                 /* lval_sub()->{...} and similar */
-                dSP;
-                SvGETMAGIC(TOPs);
-                if (!SvOK(TOPs)) {
-                    TOPs = vivify_ref(TOPs, CxLVAL(cx) & OPpDEREF);
+                SvGETMAGIC(*PL_stack_sp);
+                if (!SvOK(*PL_stack_sp)) {
+                    SV *sv = vivify_ref(*PL_stack_sp, CxLVAL(cx) & OPpDEREF);
+                    rpp_replace_1_1(sv);
                 }
-                PUTBACK;
             }
         }
         else {
@@ -2709,7 +2708,7 @@ static const char *S_defer_blockname(PERL_CONTEXT *cx)
 
 PP(pp_return)
 {
-    dSP; dMARK;
+    dMARK;
     PERL_CONTEXT *cx;
     I32 cxix = dopopto_cursub();
 
@@ -2742,12 +2741,16 @@ PP(pp_return)
                 /* See comment below about context popping. Since we know
                  * we're scalar and not lvalue, we can preserve the return
                  * value in a simpler fashion than there. */
-                SV *sv = *SP;
+                SV *sv = *PL_stack_sp;
                 assert(cxstack[0].blk_gimme == G_SCALAR);
-                if (   (sp != PL_stack_base)
+                if (   (PL_stack_sp != PL_stack_base)
                     && !(SvFLAGS(sv) & (SVs_TEMP|SVs_PADTMP))
                 )
-                    *SP = sv_mortalcopy(sv);
+#ifdef PERL_RC_STACK
+                    rpp_replace_1_1(newSVsv(sv));
+#else
+                    *PL_stack_sp = sv_mortalcopy(sv);
+#endif
                 dounwind(0);
             }
             /* caller responsible for popping cxstack[0] */
@@ -2769,13 +2772,11 @@ PP(pp_return)
          * isn't as inefficient as it sounds.
          */
         cx = &cxstack[cxix];
-        PUTBACK;
         if (cx->blk_gimme != G_VOID)
             leave_adjust_stacks(MARK, PL_stack_base + cx->blk_oldsp,
                     cx->blk_gimme,
                     CxTYPE(cx) == CXt_SUB && CvLVALUE(cx->blk_sub.cv)
                         ? 3 : 0);
-        SPAGAIN;
         dounwind(cxix);
         cx = &cxstack[cxix]; /* CX stack may have been realloced */
     }
@@ -2789,23 +2790,37 @@ PP(pp_return)
          * context we can leave as-is (pp_leavesub will later return the
          * top stack element). But for an  empty arg list, e.g.
          *    for (1,2) { return }
-         * we need to set sp = oldsp so that pp_leavesub knows to push
-         * &PL_sv_undef onto the stack.
+         * we need to set PL_stack_sp = oldsp so that pp_leavesub knows to
+         * push &PL_sv_undef onto the stack.
          */
         SV **oldsp;
         cx = &cxstack[cxix];
         oldsp = PL_stack_base + cx->blk_oldsp;
         if (oldsp != MARK) {
-            SSize_t nargs = SP - MARK;
+            SSize_t nargs = PL_stack_sp - MARK;
             if (nargs) {
                 if (cx->blk_gimme == G_LIST) {
                     /* shift return args to base of call stack frame */
+#ifdef PERL_RC_STACK
+                    /* free the items on the stack that will get
+                     * overwritten */
+                    SV **p;
+                    for (p = MARK; p > oldsp; p--) {
+#  ifdef PERL_XXX_TMP_NORC
+                        *p = NULL;
+#  else
+                        SV *sv = *p;
+                        *p = NULL;
+                        SvREFCNT_dec(sv);
+#  endif
+                    }
+#endif
                     Move(MARK + 1, oldsp + 1, nargs, SV*);
                     PL_stack_sp  = oldsp + nargs;
                 }
             }
             else
-                PL_stack_sp  = oldsp;
+                rpp_popfree_to(oldsp);
         }
     }
 

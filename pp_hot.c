@@ -5158,7 +5158,6 @@ PP(pp_grepwhile)
 void
 Perl_leave_adjust_stacks(pTHX_ SV **from_sp, SV **to_sp, U8 gimme, int pass)
 {
-    dSP;
     SSize_t tmps_base; /* lowest index into tmps stack that needs freeing now */
     SSize_t nargs;
 
@@ -5167,22 +5166,41 @@ Perl_leave_adjust_stacks(pTHX_ SV **from_sp, SV **to_sp, U8 gimme, int pass)
     TAINT_NOT;
 
     if (gimme == G_LIST) {
-        nargs = SP - from_sp;
+        nargs = PL_stack_sp - from_sp;
         from_sp++;
     }
     else {
         assert(gimme == G_SCALAR);
-        if (UNLIKELY(from_sp >= SP)) {
+        if (UNLIKELY(from_sp >= PL_stack_sp)) {
             /* no return args */
-            assert(from_sp == SP);
-            EXTEND(SP, 1);
-            *++SP = &PL_sv_undef;
+            assert(from_sp == PL_stack_sp);
+            rpp_extend(1);
+            *++PL_stack_sp = &PL_sv_undef;
         }
-        from_sp = SP;
+        from_sp = PL_stack_sp;
         nargs   = 1;
     }
 
     /* common code for G_SCALAR and G_LIST */
+
+#ifdef PERL_RC_STACK
+    {
+        /* free any items from the stack which are about to get
+         * over-written */
+        SV **p = from_sp - 1;
+        assert(p >= to_sp);
+        while (p > to_sp) {
+#  ifdef PERL_XXX_TMP_NORC
+            *p-- = NULL;
+#  else
+            SV *sv = *p;
+            *p-- = NULL;
+            SvREFCNT_dec(sv);
+#  endif
+        }
+    }
+#endif
+
 
     tmps_base = PL_tmps_floor + 1;
 
@@ -5239,6 +5257,10 @@ Perl_leave_adjust_stacks(pTHX_ SV **from_sp, SV **to_sp, U8 gimme, int pass)
             {
                 /* pass through: skip copy for logic or optimisation
                  * reasons; instead mortalise it, except that ... */
+
+#ifdef PERL_RC_STACK
+                from_sp[-1] = NULL;
+#endif
                 *++to_sp = sv;
 
                 if (SvTEMP(sv)) {
@@ -5316,7 +5338,6 @@ Perl_leave_adjust_stacks(pTHX_ SV **from_sp, SV **to_sp, U8 gimme, int pass)
                 PL_tmps_stack[++PL_tmps_ix] = *tmps_basep;
                 /* put it on the tmps stack early so it gets freed if we die */
                 *tmps_basep++ = newsv;
-                *++to_sp = newsv;
 
                 if (SvTYPE(sv) <= SVt_IV) {
                     /* arg must be one of undef, IV/UV, or RV: skip
@@ -5369,6 +5390,21 @@ Perl_leave_adjust_stacks(pTHX_ SV **from_sp, SV **to_sp, U8 gimme, int pass)
                     tmps_basep = PL_tmps_stack + old_base;
                     TAINT_NOT;	/* Each item is independent */
                 }
+
+
+#ifdef PERL_RC_STACK
+                from_sp[-1] = NULL;
+#  ifndef PERL_XXX_TMP_NORC
+                SvREFCNT_dec_NN(sv);
+#  endif
+                assert(!to_sp[1]);
+                *++to_sp = newsv;
+#  ifndef PERL_XXX_TMP_NORC
+                SvREFCNT_inc_simple_void_NN(newsv);
+#  endif
+#else
+                *++to_sp = newsv;
+#endif
 
             }
         } while (--nargs);
@@ -5436,7 +5472,7 @@ PP(pp_leavesub)
     oldsp = PL_stack_base + cx->blk_oldsp; /* last arg of previous frame */
 
     if (gimme == G_VOID)
-        PL_stack_sp = oldsp;
+        rpp_popfree_to(oldsp);
     else
         leave_adjust_stacks(oldsp, oldsp, gimme, 0);
 
