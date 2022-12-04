@@ -4962,6 +4962,7 @@ PP_wrapped(pp_subst, ((PL_op->op_flags & OPf_STACKED) ? 2 : 1), 0)
     RETURN;
 }
 
+
 PP(pp_grepwhile)
 {
     /* Understanding the stack during a grep.
@@ -5015,17 +5016,32 @@ PP(pp_grepwhile)
      *
      */
 
-    dSP;
-    dPOPss;
+    bool match = SvTRUE_NN(*PL_stack_sp);
+    rpp_popfree_1();
 
-    if (SvTRUE_NN(sv))
-        PL_stack_base[PL_markstack_ptr[-1]++] = PL_stack_base[*PL_markstack_ptr];
+    if (match) {
+        SV **from_p = PL_stack_base + PL_markstack_ptr[0];
+        SV **to_p   = PL_stack_base + PL_markstack_ptr[-1]++;
+        SV *from    = *from_p;
+        SV *to      = *to_p;
+
+        if (from != to) {
+            *to_p = from;
+#ifdef PERL_RC_STACK
+#  ifndef PERL_XXX_TMP_NORC
+            SvREFCNT_inc_simple_void_NN(from);
+            SvREFCNT_dec(to);
+#  endif
+#endif
+        }
+    }
+
     ++*PL_markstack_ptr;
     FREETMPS;
     LEAVE_with_name("grep_item");					/* exit inner scope */
 
     /* All done yet? */
-    if (UNLIKELY(PL_stack_base + *PL_markstack_ptr > SP)) {
+    if (UNLIKELY(PL_stack_base + *PL_markstack_ptr > PL_stack_sp)) {
         I32 items;
         const U8 gimme = GIMME_V;
 
@@ -5033,18 +5049,24 @@ PP(pp_grepwhile)
         (void)POPMARK;				/* pop src */
         items = --*PL_markstack_ptr - PL_markstack_ptr[-1];
         (void)POPMARK;				/* pop dst */
-        SP = PL_stack_base + POPMARK;		/* pop original mark */
-        if (gimme == G_SCALAR) {
-            if (PL_op->op_private & OPpTRUEBOOL)
-                PUSHs(items ? &PL_sv_yes : &PL_sv_zero);
-            else {
-                dTARGET;
-                PUSHi(items);
+        SV **base = PL_stack_base + POPMARK;	/* pop original mark */
+
+        if (gimme == G_LIST)
+            rpp_popfree_to(base + items);
+        else {
+            rpp_popfree_to(base);
+            if (gimme == G_SCALAR) {
+                if (PL_op->op_private & OPpTRUEBOOL)
+                    rpp_push_1(items ? &PL_sv_yes : &PL_sv_zero);
+                else {
+                    dTARGET;
+                    TARGi(items,1);
+                    rpp_push_1(TARG);
+                }
             }
         }
-        else if (gimme == G_LIST)
-            SP += items;
-        RETURN;
+
+        return NORMAL;
     }
     else {
         SV *src;
@@ -5054,15 +5076,24 @@ PP(pp_grepwhile)
 
         src = PL_stack_base[TOPMARK];
         if (SvPADTMP(src)) {
-            src = PL_stack_base[TOPMARK] = sv_mortalcopy(src);
+            SV *newsrc = sv_mortalcopy(src);
+             PL_stack_base[TOPMARK] = newsrc;
+#ifdef PERL_RC_STACK
+#  ifndef PERL_XXX_TMP_NORC
+            SvREFCNT_inc_simple_void_NN(newsrc);
+            SvREFCNT_dec(src);
+#  endif
+#endif
+            src = newsrc;
             PL_tmps_floor++;
         }
         SvTEMP_off(src);
         DEFSV_set(src);
 
-        RETURNOP(cLOGOP->op_other);
+        return cLOGOP->op_other;
     }
 }
+
 
 /* leave_adjust_stacks():
  *
