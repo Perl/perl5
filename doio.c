@@ -2264,7 +2264,6 @@ Perl_do_print(pTHX_ SV *sv, PerlIO *fp)
 I32
 Perl_my_stat_flags(pTHX_ const U32 flags)
 {
-    dSP;
     IO *io;
     GV* gv;
 
@@ -2304,7 +2303,7 @@ Perl_my_stat_flags(pTHX_ const U32 flags)
              == OPpFT_STACKED)
         return PL_laststatval;
     else {
-        SV* const sv = TOPs;
+        SV* const sv = *PL_stack_sp;
         const char *s, *d;
         STRLEN len;
         if ((gv = MAYBE_DEREF_GV_flags(sv,flags))) {
@@ -2341,10 +2340,9 @@ I32
 Perl_my_lstat_flags(pTHX_ const U32 flags)
 {
     static const char* const no_prev_lstat = "The stat preceding -l _ wasn't an lstat";
-    dSP;
     const char *file;
     STRLEN len;
-    SV* const sv = TOPs;
+    SV* const sv = *PL_stack_sp;
     bool isio = FALSE;
     if (PL_op->op_flags & OPf_REF) {
         if (cGVOP_gv == PL_defgv) {
