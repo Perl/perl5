@@ -4605,10 +4605,13 @@ S_require_file(pTHX_ SV *sv)
         (void)hv_store(GvHVn(PL_incgv),
                        unixname, unixlen, newSVpv(tryname,0),0);
     } else {
+        /* store the hook in the sv, note we have to *copy* hook_sv,
+         * we don't want modifications to it to change @INC - see GH #20577
+         */
         SV** const svp = hv_fetch(GvHVn(PL_incgv), unixname, unixlen, 0);
         if (!svp)
             (void)hv_store(GvHVn(PL_incgv),
-                           unixname, unixlen, SvREFCNT_inc_simple(hook_sv), 0 );
+                           unixname, unixlen, newSVsv(hook_sv), 0 );
     }
 
     /* Now parse the file */
