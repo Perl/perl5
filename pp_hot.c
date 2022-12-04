@@ -198,7 +198,7 @@ PP(pp_nextstate)
 {
     PL_curcop = (COP*)PL_op;
     TAINT_NOT;		/* Each statement is presumed innocent */
-    PL_stack_sp = PL_stack_base + CX_CUR()->blk_oldsp;
+    rpp_popfree_to(PL_stack_base + CX_CUR()->blk_oldsp);
     FREETMPS;
     PERL_ASYNC_CHECK();
     return NORMAL;
@@ -490,7 +490,7 @@ PP(pp_unstack)
     PERL_ASYNC_CHECK();
     TAINT_NOT;		/* Each statement is presumed innocent */
     cx  = CX_CUR();
-    PL_stack_sp = PL_stack_base + cx->blk_oldsp;
+    rpp_popfree_to(PL_stack_base + CX_CUR()->blk_oldsp);
     FREETMPS;
     if (!(PL_op->op_flags & OPf_SPECIAL)) {
         assert(CxTYPE(cx) == CXt_BLOCK || CxTYPE_is_LOOP(cx));

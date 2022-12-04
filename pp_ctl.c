@@ -2224,7 +2224,7 @@ PP(pp_dbstate)
 {
     PL_curcop = (COP*)PL_op;
     TAINT_NOT;		/* Each statement is presumed innocent */
-    PL_stack_sp = PL_stack_base + CX_CUR()->blk_oldsp;
+    rpp_popfree_to(PL_stack_base + CX_CUR()->blk_oldsp);
     FREETMPS;
 
     PERL_ASYNC_CHECK();
@@ -2232,7 +2232,6 @@ PP(pp_dbstate)
     if (PL_op->op_flags & OPf_SPECIAL /* breakpoint */
             || PL_DBsingle_iv || PL_DBsignal_iv || PL_DBtrace_iv)
     {
-        dSP;
         PERL_CONTEXT *cx;
         const U8 gimme = G_LIST;
         GV * const gv = PL_DBgv;
@@ -2272,14 +2271,19 @@ PP(pp_dbstate)
             SAVESTACK_POS();
 #endif
             SAVETMPS;
-            PUSHMARK(SP);
-            (void)(*CvXSUB(cv))(aTHX_ cv);
+            PUSHMARK(PL_stack_sp);
+#ifdef PERL_RC_STACK
+            Perl_xs_wrap(aTHX_ CvXSUB(cv), cv);
+#else
+            CvXSUB(cv)(aTHX_ cv);
+#endif
+
             FREETMPS;
             LEAVE;
             return NORMAL;
         }
         else {
-            cx = cx_pushblock(CXt_SUB, gimme, SP, PL_savestack_ix);
+            cx = cx_pushblock(CXt_SUB, gimme, PL_stack_sp, PL_savestack_ix);
             cx_pushsub(cx, cv, PL_op->op_next, 0);
             /* OP_DBSTATE's op_private holds hint bits rather than
              * the lvalue-ish flags seen in OP_ENTERSUB. So cancel
@@ -2296,7 +2300,7 @@ PP(pp_dbstate)
             if (CvDEPTH(cv) >= 2)
                 pad_push(CvPADLIST(cv), CvDEPTH(cv));
             PAD_SET_CUR_NOSAVE(CvPADLIST(cv), CvDEPTH(cv));
-            RETURNOP(CvSTART(cv));
+            return CvSTART(cv);
         }
     }
     else
