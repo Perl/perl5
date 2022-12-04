@@ -6001,6 +6001,8 @@ Cipx	|U8	|gimme_V
 EXopx	|OP *	|pp_wrap	|NN Perl_ppaddr_t real_pp_fn		\
 				|I32 nargs				\
 				|int nlists
+EXopx	|void	|xs_wrap	|NN XSUBADDR_t xsub			\
+				|NN CV *cv
 #endif
 #if defined(PERL_USE_3ARG_SIGHANDLER)
 CTp	|Signal_t|csighandler	|int sig				\

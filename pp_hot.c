@@ -119,7 +119,70 @@ Perl_pp_wrap(pTHX_ Perl_ppaddr_t real_pp_fn, I32 nargs, int nlists)
     return next_op;
 }
 
+
+/* xs_wrap():
+ * similar in concept to pp_wrap: make a non-referenced-counted copy of
+ * a (not refcount aware) XS sub's args, call the XS subs, then bump any
+ * return values and free the original args */
+
+void
+Perl_xs_wrap(pTHX_ XSUBADDR_t xsub, CV *cv)
+{
+    PERL_ARGS_ASSERT_XS_WRAP;
+
+    I32 nret;
+    I32 old_sp = (I32)(PL_stack_sp - PL_stack_base);
+    I32 mark  = PL_markstack_ptr[0];
+    I32 nargs = (PL_stack_sp - PL_stack_base) - mark;
+
+    PL_markstack_ptr[0]  += nargs;
+
+    if (nargs) {
+        /* duplicate all the arg pointers further up the stack */
+        rpp_extend(nargs);
+        Copy(PL_stack_sp - nargs + 1, PL_stack_sp + 1, nargs, SV*);
+        PL_stack_sp += nargs;
+    }
+
+    xsub(aTHX_ cv);
+
+    nret = (I32)(PL_stack_sp - PL_stack_base) - old_sp;
+    assert(nret >= 0);
+
+    /* bump any returned values */
+    if (nret) {
+        SV **svp = PL_stack_sp - nret + 1;
+        while (svp <= PL_stack_sp) {
+#ifndef PERL_XXX_TMP_NORC
+            SvREFCNT_inc(*svp);
 #endif
+            svp++;
+        }
+    }
+
+    /* free the original args and shift the returned valued down */
+    if (nargs) {
+        SV **svp = PL_stack_sp - nret;
+        I32 i = nargs;
+        while (i--) {
+#ifndef PERL_XXX_TMP_NORC
+            SvREFCNT_dec(*svp);
+#endif
+            *svp = NULL;
+            svp--;
+        }
+
+        if (nret) {
+            Move(PL_stack_sp - nret + 1,
+                 PL_stack_sp - nret - nargs + 1,
+                 nret, SV*);
+        }
+        PL_stack_sp -= nargs;
+    }
+}
+
+#endif
+
 
 /* ----------------------------------------------------------- */
 
@@ -5382,11 +5445,11 @@ Perl_clear_defarray(pTHX_ AV* av, bool abandon)
 
 PP(pp_entersub)
 {
-    dSP; dPOPss;
     GV *gv;
     CV *cv;
     PERL_CONTEXT *cx;
     I32 old_savestack_ix;
+    SV *sv = *PL_stack_sp;
 
     if (UNLIKELY(!sv))
         goto do_die;
@@ -5434,7 +5497,6 @@ PP(pp_entersub)
               do_ref:
                 if (UNLIKELY(SvAMAGIC(sv))) {
                     sv = amagic_deref_call(sv, to_cv_amg);
-                    /* Don't SPAGAIN here.  */
                 }
             }
             else {
@@ -5528,6 +5590,8 @@ PP(pp_entersub)
             DIE(aTHX_ "No DB::sub routine defined");
     }
 
+    rpp_popfree_1(); /* finished with sv now */
+
     if (!(CvISXSUB(cv))) {
         /* This path taken at least 75% of the time   */
         dMARK;
@@ -5543,12 +5607,22 @@ PP(pp_entersub)
          */
         {
             SV **svp = MARK;
-            while (svp < SP) {
+            while (svp < PL_stack_sp) {
                 SV *sv = *++svp;
                 if (!sv)
                     continue;
-                if (SvPADTMP(sv))
-                    *svp = sv = sv_mortalcopy(sv);
+                if (SvPADTMP(sv)) {
+                    SV *newsv = sv_mortalcopy(sv);
+                    *svp = newsv;
+#ifdef PERL_RC_STACK
+#  ifndef PERL_XXX_TMP_NORC
+                    /* should just skip the mortalisation instead */
+                    SvREFCNT_inc_simple_void_NN(newsv);
+                    SvREFCNT_dec_NN(sv);
+#  endif
+#endif
+                    sv = newsv;
+                }
                 SvTEMP_off(sv);
             }
         }
@@ -5576,7 +5650,7 @@ PP(pp_entersub)
              * done by cx_popsub() */
             assert(!AvREAL(av) && AvFILLp(av) == -1);
 
-            items = SP - MARK;
+            items = PL_stack_sp - MARK;
             if (UNLIKELY(items - 1 > AvMAX(av))) {
                 SV **ary = AvALLOC(av);
                 Renew(ary, items, SV*);
@@ -5588,6 +5662,10 @@ PP(pp_entersub)
             if (items)
                 Copy(MARK+1,AvARRAY(av),items,SV*);
             AvFILLp(av) = items - 1;
+#ifdef PERL_RC_STACK
+            /* transfer ownership of the arguments' refcounts to av */
+            PL_stack_sp = MARK;
+#endif
         }
         if (UNLIKELY((cx->blk_u16 & OPpENTERSUB_LVAL_MASK) == OPpLVAL_INTRO &&
             !CvLVALUE(cv)))
@@ -5601,7 +5679,7 @@ PP(pp_entersub)
                 && ckWARN(WARN_RECURSION)
                 && !(PERLDB_SUB && cv == GvCV(PL_DBsub))))
             sub_crush_depth(cv);
-        RETURNOP(CvSTART(cv));
+        return CvSTART(cv);
     }
     else {
         SSize_t markix = TOPMARK;
@@ -5612,7 +5690,6 @@ PP(pp_entersub)
         PL_scopestack[PL_scopestack_ix - 1] = old_savestack_ix;
 
         SAVETMPS;
-        PUTBACK;
 
         if (UNLIKELY(((PL_op->op_private
                & CX_PUSHSUB_GET_LVALUE_MASK(Perl_is_lvalue_sub)
@@ -5632,7 +5709,7 @@ PP(pp_entersub)
                 SSize_t i = 0;
                 const bool m = cBOOL(SvRMAGICAL(av));
                 /* Mark is at the end of the stack. */
-                EXTEND(SP, items);
+                rpp_extend(items);
                 for (; i < items; ++i)
                 {
                     SV *sv;
@@ -5640,26 +5717,33 @@ PP(pp_entersub)
                         SV ** const svp = av_fetch(av, i, 0);
                         sv = svp ? *svp : NULL;
                     }
-                    else sv = AvARRAY(av)[i];
-                    if (sv) SP[i+1] = sv;
-                    else {
-                        SP[i+1] = av_nonelem(av, i);
-                    }
+                    else
+                        sv = AvARRAY(av)[i];
+
+                    rpp_push_1(sv ? sv : av_nonelem(av, i));
                 }
-                SP += items;
-                PUTBACK ;		
             }
         }
         else {
             SV **mark = PL_stack_base + markix;
-            SSize_t items = SP - mark;
+            SSize_t items = PL_stack_sp - mark;
             while (items--) {
                 mark++;
                 if (*mark && SvPADTMP(*mark)) {
-                    *mark = sv_mortalcopy(*mark);
+                    SV *oldsv = *mark;
+                    SV *newsv = sv_mortalcopy(oldsv);
+                    *mark = newsv;
+#ifdef PERL_RC_STACK
+#  ifndef PERL_XXX_TMP_NORC
+                    /* should just skip the mortalisation instead */
+                    SvREFCNT_inc_simple_void_NN(newsv);
+                    SvREFCNT_dec_NN(oldsv);
+#  endif
+#endif
                 }
             }
         }
+
         /* We assume first XSUB in &DB::sub is the called one. */
         if (UNLIKELY(PL_curcopdb)) {
             SAVEVPTR(PL_curcop);
@@ -5674,7 +5758,12 @@ PP(pp_entersub)
 
         /* CvXSUB(cv) must not be NULL because newXS() refuses NULL xsub address */
         assert(CvXSUB(cv));
+
+#ifdef PERL_RC_STACK
+        Perl_xs_wrap(aTHX_ CvXSUB(cv), cv);
+#else
         CvXSUB(cv)(aTHX_ cv);
+#endif
 
 #if defined DEBUGGING && !defined DEBUGGING_RE_ONLY
         /* This duplicates the check done in runops_debug(), but provides more
@@ -5695,8 +5784,21 @@ PP(pp_entersub)
         if (is_scalar) {
             SV **svp = PL_stack_base + markix + 1;
             if (svp != PL_stack_sp) {
+#ifdef PERL_RC_STACK
+                if (svp < PL_stack_sp) {
+                    /* move return value to bottom of stack frame
+                     * and free everything else */
+                    SV* retsv = *PL_stack_sp;
+                    *PL_stack_sp = *svp;
+                    *svp = retsv;
+                    rpp_popfree_to(svp);
+                }
+                else
+                    *++PL_stack_sp = &PL_sv_undef;
+#else
                 *svp = svp > PL_stack_sp ? &PL_sv_undef : *PL_stack_sp;
                 PL_stack_sp = svp;
+#endif
             }
         }
         LEAVE;
