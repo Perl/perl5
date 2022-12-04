@@ -3088,9 +3088,7 @@ PP_wrapped(pp_stat, !(PL_op->op_flags & OPf_REF), 0)
 /* All filetest ops avoid manipulating the perl stack pointer in their main
    bodies (since commit d2c4d2d1e22d3125), and return using either
    S_ft_return_false() or S_ft_return_true().  These two helper functions are
-   the only two which manipulate the perl stack.  To ensure that no stack
-   manipulation macros are used, the filetest ops avoid defining a local copy
-   of the stack pointer with dSP.  */
+   the only two which manipulate the perl stack. */
 
 /* If the next filetest is stacked up with this one
    (PL_op->op_private & OPpFT_STACKING), we leave
@@ -3102,11 +3100,12 @@ PP_wrapped(pp_stat, !(PL_op->op_flags & OPf_REF), 0)
 static OP *
 S_ft_return_false(pTHX_ SV *ret) {
     OP *next = NORMAL;
-    dSP;
 
-    if (PL_op->op_flags & OPf_REF) XPUSHs(ret);
-    else			   SETs(ret);
-    PUTBACK;
+    if (PL_op->op_flags & OPf_REF) {
+        rpp_xpush_1(ret);
+    }
+    else
+        rpp_replace_1_1(ret);
 
     if (PL_op->op_private & OPpFT_STACKING) {
         while (next && OP_IS_FILETEST(next->op_type)
@@ -3118,12 +3117,12 @@ S_ft_return_false(pTHX_ SV *ret) {
 
 PERL_STATIC_INLINE OP *
 S_ft_return_true(pTHX_ SV *ret) {
-    dSP;
-    if (PL_op->op_flags & OPf_REF)
-        XPUSHs(PL_op->op_private & OPpFT_STACKING ? (SV *)cGVOP_gv : (ret));
+    if (PL_op->op_flags & OPf_REF) {
+        rpp_xpush_1((PL_op->op_private & OPpFT_STACKING)
+                    ? (SV*)cGVOP_gv : ret);
+    }
     else if (!(PL_op->op_private & OPpFT_STACKING))
-        SETs(ret);
-    PUTBACK;
+        rpp_replace_1_1(ret);
     return NORMAL;
 }
 
