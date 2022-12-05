@@ -4666,21 +4666,6 @@ case "$gccversion" in
     $rm -f try try.*
 esac
 
-# gcc 4.9 by default does some optimizations that break perl.
-# see ticket 121505.
-#
-# The -fwrapv disables those optimizations (and probably others,) so
-# for gcc 4.9 (and later, since the optimizations probably won't go
-# away), add -fwrapv unless the user requests -fno-wrapv, which
-# disables -fwrapv, or if the user requests -fsanitize=undefined,
-# which turns the overflows -fwrapv ignores into runtime errors.
-case "$gccversion" in
-4.[3-9].*|4.[1-9][0-9]*|[5-9].*|[1-9][0-9]*)
-    case "$ccflags" in
-    *-fno-wrapv*|*-fsanitize=undefined*|*-fwrapv*) ;;
-    *) ccflags="$ccflags -fwrapv" ;;
-    esac
-esac
 
 # Really old versions of gcc default to C89 and will error for this code.
 # See if the compiler (gcc or otherwise) needs a flag to compile C99 code

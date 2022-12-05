@@ -572,17 +572,6 @@ MINIBUILDOPT    += -D__USE_MINGW_ANSI_STDIO
 endif
 
 
-# By default add -fwrapv, since we depend on 2's complement behaviour
-# for signed numbers.
-# See https://github.com/Perl/perl5/issues/13690
-#
-GCCWRAPV := define
-
-ifeq ($(GCCWRAPV),define)
-BUILDOPT        += -fwrapv
-MINIBUILDOPT    += -fwrapv
-endif
-
 i = .i
 o = .o
 a = .a
