@@ -8842,7 +8842,7 @@ Here's an example showing the behavior for boundary cases:
 An alternative to using
 L<C<substr>|/substr EXPR,OFFSET,LENGTH,REPLACEMENT> as an lvalue is to
 specify the
-replacement string as the 4th argument.  This allows you to replace
+REPLACEMENT string as the 4th argument.  This allows you to replace
 parts of the EXPR and return what was there before in one operation,
 just as you can with
 L<C<splice>|/splice ARRAY,OFFSET,LENGTH,LIST>.
