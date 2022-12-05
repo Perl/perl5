@@ -1129,6 +1129,9 @@ violations are fatal.
 #   if !defined(NO_LOCALE_TELEPHONE) && defined(LC_TELEPHONE)
 #	define USE_LOCALE_TELEPHONE
 #   endif
+#   if !defined(NO_LOCALE_NAME) && defined(LC_NAME)
+#	define USE_LOCALE_NAME
+#   endif
 #   if !defined(NO_LOCALE_SYNTAX) && defined(LC_SYNTAX)
 #	define USE_LOCALE_SYNTAX
 #   endif
@@ -1203,11 +1206,17 @@ violations are fatal.
 #  else
 #    define PERL_DUMMY_TELEPHONE_       PERL_DUMMY_PAPER_
 #  endif
+#  ifdef USE_LOCALE_NAME
+#    define LC_NAME_INDEX_              PERL_DUMMY_TELEPHONE_ + 1
+#    define PERL_DUMMY_NAME_            LC_NAME_INDEX_
+#  else
+#    define PERL_DUMMY_NAME_            PERL_DUMMY_TELEPHONE_
+#  endif
 #  ifdef USE_LOCALE_SYNTAX
-#    define LC_SYNTAX_INDEX_            PERL_DUMMY_TELEPHONE_ + 1
+#    define LC_SYNTAX_INDEX_            PERL_DUMMY_NAME + 1
 #    define PERL_DUMMY_SYNTAX_          LC_SYNTAX_INDEX_
 #  else
-#    define PERL_DUMMY_SYNTAX_          PERL_DUMMY_TELEPHONE_
+#    define PERL_DUMMY_SYNTAX_          PERL_DUMMY_NAME_
 #  endif
 #  ifdef USE_LOCALE_TOD
 #    define LC_TOD_INDEX_               PERL_DUMMY_SYNTAX_ + 1
