@@ -307,7 +307,7 @@ my %default_export_tags = ( # cf. exports policy below
 
     locale_h =>	[qw(LC_ALL LC_COLLATE LC_CTYPE LC_MESSAGES
 		    LC_MONETARY LC_NUMERIC LC_TIME LC_IDENTIFICATION
-                    LC_MEASUREMENT LC_PAPER LC_TELEPHONE LC_ADDRESS
+                    LC_MEASUREMENT LC_PAPER LC_TELEPHONE LC_ADDRESS LC_NAME
                     LC_SYNTAX LC_TOD NULL
 		    localeconv setlocale)],
 

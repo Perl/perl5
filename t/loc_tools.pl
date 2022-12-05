@@ -26,7 +26,7 @@ my $has_locale_h = ! $@;
 my @known_categories = ( qw(LC_ALL LC_COLLATE LC_CTYPE LC_MESSAGES LC_MONETARY
                             LC_NUMERIC LC_TIME LC_ADDRESS LC_IDENTIFICATION
                             LC_MEASUREMENT LC_PAPER LC_TELEPHONE LC_SYNTAX
-                            LC_TOD));
+                            LC_TOD LC_NAME));
 my @platform_categories;
 
 sub category_excluded($) {

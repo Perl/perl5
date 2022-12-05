@@ -283,6 +283,9 @@ STATIC const int categories[] = {
 #    ifdef USE_LOCALE_TELEPHONE
                              LC_TELEPHONE,
 #    endif
+#    ifdef USE_LOCALE_NAME
+                             LC_NAME,
+#    endif
 #    ifdef USE_LOCALE_SYNTAX
                              LC_SYNTAX,
 #    endif
@@ -335,6 +338,9 @@ STATIC const char * const category_names[] = {
 #    ifdef USE_LOCALE_TELEPHONE
                                  "LC_TELEPHONE",
 #    endif
+#    ifdef USE_LOCALE_NAME
+                                 "LC_NAME",
+#    endif
 #    ifdef USE_LOCALE_SYNTAX
                                  "LC_SYNTAX",
 #    endif
@@ -384,6 +390,9 @@ STATIC void (*update_functions[]) (pTHX_ const char *) = {
                                 NULL,
 #  endif
 #  ifdef USE_LOCALE_TELEPHONE
+                                NULL,
+#  endif
+#  ifdef USE_LOCALE_NAME
                                 NULL,
 #  endif
 #  ifdef USE_LOCALE_SYNTAX
@@ -793,6 +802,9 @@ STATIC const int category_masks[] = {
 #  endif
 #  ifdef USE_LOCALE_TELEPHONE
                                 LC_TELEPHONE_MASK,
+#  endif
+#  ifdef USE_LOCALE_NAME
+                                LC_NAME_MASK,
 #  endif
 #  ifdef USE_LOCALE_SYNTAX
                                 LC_SYNTAX_MASK,
@@ -4803,6 +4815,13 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
     assert(strEQ(category_names[LC_TELEPHONE_INDEX_], "LC_TELEPHONE"));
 #      ifdef USE_POSIX_2008_LOCALE
     assert(category_masks[LC_TELEPHONE_INDEX_] == LC_TELEPHONE_MASK);
+#      endif
+#    endif
+#    ifdef USE_LOCALE_NAME
+    assert(categories[LC_NAME_INDEX_] == LC_NAME);
+    assert(strEQ(category_names[LC_NAME_INDEX_], "LC_NAME"));
+#      ifdef USE_POSIX_2008_LOCALE
+    assert(category_masks[LC_NAME_INDEX_] == LC_NAME_MASK);
 #      endif
 #    endif
 #    ifdef USE_LOCALE_SYNTAX
