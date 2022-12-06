@@ -44,13 +44,36 @@ Perl_newSVobject(pTHX_ Size_t fieldcount)
     return sv;
 }
 
-#define make_instance_fields(stash, instance)  S_make_instance_fields(aTHX_ stash, instance)
-static void S_make_instance_fields(pTHX_ HV *stash, SV *instance)
+XS(initfields);
+XS(initfields)
 {
+    dXSARGS;
+    assert(items == 1);
+
+    SV *instance = POPs;
+
+    HV *stash = (HV *)XSANY.any_ptr;
+    assert(HvSTASH_IS_CLASS(stash));
+
     struct xpvhv_aux *aux = HvAUX(stash);
 
     if(aux->xhv_class_superclass) {
-        make_instance_fields(aux->xhv_class_superclass, instance);
+        struct xpvhv_aux *superaux = HvAUX(aux->xhv_class_superclass);
+
+        ENTER;
+        SAVETMPS;
+
+        EXTEND(SP, 1);
+        PUSHMARK(SP);
+        PUSHs(instance);
+        PUTBACK;
+
+        call_sv((SV *)superaux->xhv_class_initfields_cv, G_VOID);
+
+        SPAGAIN;
+
+        FREETMPS;
+        LEAVE;
     }
 
     SV **fields = ObjectFIELDS(instance);
@@ -123,7 +146,23 @@ XS(injected_constructor)
     SvOBJECT_on(instance);
     SvSTASH_set(instance, MUTABLE_HV(SvREFCNT_inc_simple(stash)));
 
-    make_instance_fields(stash, instance);
+    assert(aux->xhv_class_initfields_cv);
+    {
+        ENTER;
+        SAVETMPS;
+
+        EXTEND(SP, 1);
+        PUSHMARK(SP);
+        PUSHs(instance);
+        PUTBACK;
+
+        call_sv((SV *)aux->xhv_class_initfields_cv, G_VOID);
+
+        SPAGAIN;
+
+        FREETMPS;
+        LEAVE;
+    }
 
     SV *self = sv_2mortal(newRV_noinc(instance));
 
@@ -293,6 +332,7 @@ Perl_class_setup_stash(pTHX_ HV *stash)
 
     struct xpvhv_aux *aux = HvAUX(stash);
     aux->xhv_class_superclass    = NULL;
+    aux->xhv_class_initfields_cv = NULL;
     aux->xhv_class_adjust_blocks = NULL;
     aux->xhv_class_fields        = NULL;
     aux->xhv_class_next_fieldix  = 0;
@@ -512,7 +552,15 @@ Perl_class_seal_stash(pTHX_ HV *stash)
 {
     PERL_ARGS_ASSERT_CLASS_SEAL_STASH;
 
-    /* TODO: anything? */
+    assert(HvSTASH_IS_CLASS(stash));
+    struct xpvhv_aux *aux = HvAUX(stash);
+
+    {
+        CV *newcv = newXS_flags(NULL, initfields, __FILE__, NULL, 0);
+        CvXSUBANY(newcv).any_ptr = stash;
+
+        aux->xhv_class_initfields_cv = newcv;
+    }
 }
 
 void
