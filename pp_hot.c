@@ -1658,13 +1658,18 @@ PP_wrapped(pp_defined, 1, 0)
 
 
 
-PP_wrapped(pp_add, 2, 0)
+PP(pp_add)
 {
-    dSP; dATARGET; bool useleft; SV *svl, *svr;
+    bool useleft; SV *svl, *svr;
+    SV *targ = (PL_op->op_flags & OPf_STACKED)
+                    ? PL_stack_sp[-1]
+                    : PAD_SV(PL_op->op_targ);
 
-    tryAMAGICbin_MG(add_amg, AMGf_assign|AMGf_numeric);
-    svr = TOPs;
-    svl = TOPm1s;
+    if (rpp_try_AMAGIC_2(add_amg, AMGf_assign|AMGf_numeric))
+        return NORMAL;
+
+    svr = PL_stack_sp[0];
+    svl = PL_stack_sp[-1];
 
 #ifdef PERL_PRESERVE_IVUV
 
@@ -1685,10 +1690,9 @@ PP_wrapped(pp_add, 2, 0)
              * simple integer add: if the top of both numbers
              * are 00  or 11, then it's safe */
             if (!( ((topl+1) | (topr+1)) & 2)) {
-                SP--;
                 TARGi(il + ir, 0); /* args not GMG, so can't be tainted */
-                SETs(TARG);
-                RETURN;
+                rpp_replace_2_1(targ);
+                return NORMAL;
             }
             goto generic;
         }
@@ -1701,10 +1705,9 @@ PP_wrapped(pp_add, 2, 0)
                 /* nothing was lost by converting to IVs */
                 goto do_iv;
             }
-            SP--;
             TARGn(nl + nr, 0); /* args not GMG, so can't be tainted */
-            SETs(TARG);
-            RETURN;
+            rpp_replace_2_1(targ);
+            return NORMAL;
         }
     }
 
@@ -1769,8 +1772,9 @@ PP_wrapped(pp_add, 2, 0)
             auv = 0;
             a_valid = auvok = 1;
             /* left operand is undef, treat as zero. + 0 is identity,
-               Could SETi or SETu right now, but space optimise by not adding
-               lots of code to speed up what is probably a rarish case.  */
+               Could TARGi or TARGu right now, but space optimise by not
+               adding lots of code to speed up what is probably a rare-ish
+               case. */
         } else {
             /* Left operand is defined, so is it IV? */
             if (SvIV_please_nomg(svl)) {
@@ -1839,20 +1843,20 @@ PP_wrapped(pp_add, 2, 0)
                     result_good = 1;
             }
             if (result_good) {
-                SP--;
                 if (auvok)
-                    SETu( result );
+                    TARGu(result,1);
                 else {
                     /* Negate result */
                     if (result <= (UV)IV_MIN)
-                        SETi(result == (UV)IV_MIN
-                                ? IV_MIN : -(IV)result);
+                        TARGi(result == (UV)IV_MIN
+                                ? IV_MIN : -(IV)result, 1);
                     else {
                         /* result valid, but out of range for IV.  */
-                        SETn( -(NV)result );
+                        TARGn(-(NV)result, 1);
                     }
                 }
-                RETURN;
+                rpp_replace_2_1(targ);
+                return NORMAL;
             } /* Overflow, drop through to NVs.  */
         }
     }
@@ -1863,14 +1867,15 @@ PP_wrapped(pp_add, 2, 0)
 
     {
         NV value = SvNV_nomg(svr);
-        (void)POPs;
         if (!useleft) {
             /* left operand is undef, treat as zero. + 0.0 is identity. */
-            SETn(value);
-            RETURN;
+            TARGn(value, 1);
         }
-        SETn( value + SvNV_nomg(svl) );
-        RETURN;
+        else {
+            TARGn(value + SvNV_nomg(svl), 1);
+        }
+        rpp_replace_2_1(targ);
+        return NORMAL;
     }
 }
 
