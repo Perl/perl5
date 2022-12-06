@@ -1135,7 +1135,8 @@ package My::Pod::Checker {      # Extend Pod::Checker
 
             $self->poderror({ -line => $start_line{$addr} + $i,
                 -msg => $line_length,
-                parameter => "+$exceeds (including " . ($indent - $INDENT) . " from =over's)",
+                parameter => "+$exceeds (including " . ($indent - $INDENT) .
+                             " from =over's and $INDENT as base indent)",
             });
         }
 
