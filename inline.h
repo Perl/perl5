@@ -3086,6 +3086,36 @@ Perl_cx_popgiven(pTHX_ PERL_CONTEXT *cx)
     SvREFCNT_dec(sv);
 }
 
+/*
+=for apidoc newPADxVOP
+
+Constructs, checks and returns an op containing a pad offset.  C<type> is
+the opcode, which should be one of C<OP_PADSV>, C<OP_PADAV>, C<OP_PADHV>
+or C<OP_PADCV>.  The returned op will have the C<op_targ> field set by
+the C<padix> argument.
+
+This is convenient when constructing a large optree in nested function
+calls, as it avoids needing to store the pad op directly to set the
+C<op_targ> field as a side-effect. For example
+
+    o = op_append_elem(OP_LINESEQ, o,
+        newPADxVOP(OP_PADSV, 0, padix));
+
+=cut
+*/
+
+PERL_STATIC_INLINE OP *
+Perl_newPADxVOP(pTHX_ I32 type, I32 flags, PADOFFSET padix)
+{
+    PERL_ARGS_ASSERT_NEWPADXVOP;
+
+    assert(type == OP_PADSV || type == OP_PADAV || type == OP_PADHV
+            || type == OP_PADCV);
+    OP *o = newOP(type, flags);
+    o->op_targ = padix;
+    return o;
+}
+
 /* ------------------ util.h ------------------------------------------- */
 
 /*

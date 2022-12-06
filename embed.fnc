@@ -1519,6 +1519,7 @@ AxpdRT	|PADNAMELIST *|newPADNAMELIST|size_t max
 #ifdef USE_ITHREADS
 ApdR	|OP*	|newPADOP	|I32 type|I32 flags|NN SV* sv
 #endif
+ApdRi	|OP*	|newPADxVOP	|I32 type|I32 flags|PADOFFSET padix
 ApdR	|OP*	|newPMOP	|I32 type|I32 flags
 ApdR	|OP*	|newPVOP	|I32 type|I32 flags|NULLOK char* pv
 ApdR	|SV*	|newRV		|NN SV *const sv
