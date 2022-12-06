@@ -619,19 +619,6 @@ EXPECT
 -w
 "x" =~ /(\G?x)?/;
 ########
-# Bug 20010515.004 (#6998)
-my @h = 1 .. 10;
-bad(@h);
-sub bad {
-   undef @h;
-   warn "O\n";
-   print for @_;
-   warn "K\n";
-}
-EXPECT
-O
-Use of freed value in iteration at - line 7.
-########
 # Bug 20010506.041 (#6952)
 "abcd\x{1234}" =~ /(a)(b[c])(d+)?/i and print "ok\n";
 EXPECT
