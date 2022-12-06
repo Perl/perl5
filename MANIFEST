@@ -1838,6 +1838,7 @@ cpan/Pod-Usage/t/pod/testcmp.pl
 cpan/Pod-Usage/t/pod/testp2pt.pl
 cpan/Pod-Usage/t/pod/usage.pod
 cpan/Pod-Usage/t/pod/usage2.pod
+cpan/podlators/docs/docknot.yaml
 cpan/podlators/lib/Pod/Man.pm			Convert POD data to *roff
 cpan/podlators/lib/Pod/ParseLink.pm		Perl an L<> formatting code in POD text
 cpan/podlators/lib/Pod/Text.pm			Pod-Parser - convert POD data to formatted ASCII text
@@ -1853,7 +1854,12 @@ cpan/podlators/t/data/basic.man			podlators test
 cpan/podlators/t/data/basic.ovr			podlators test
 cpan/podlators/t/data/basic.pod			podlators test
 cpan/podlators/t/data/basic.txt			podlators test
+cpan/podlators/t/data/man/encoding.groff
+cpan/podlators/t/data/man/encoding.pod
+cpan/podlators/t/data/man/encoding.roff
+cpan/podlators/t/data/man/encoding.utf8
 cpan/podlators/t/data/perl.conf			podlators test
+cpan/podlators/t/data/regenerate-data
 cpan/podlators/t/data/snippets/color/escape-wrapping
 cpan/podlators/t/data/snippets/color/tag-width
 cpan/podlators/t/data/snippets/color/tag-wrapping
@@ -1877,9 +1883,19 @@ cpan/podlators/t/data/snippets/man/eth
 cpan/podlators/t/data/snippets/man/fixed-font
 cpan/podlators/t/data/snippets/man/fixed-font-in-item
 cpan/podlators/t/data/snippets/man/for-blocks
+cpan/podlators/t/data/snippets/man/guesswork
+cpan/podlators/t/data/snippets/man/guesswork-all
+cpan/podlators/t/data/snippets/man/guesswork-no-quoting
+cpan/podlators/t/data/snippets/man/guesswork-none
+cpan/podlators/t/data/snippets/man/guesswork-partial
+cpan/podlators/t/data/snippets/man/guesswork-quoting
 cpan/podlators/t/data/snippets/man/hyphen-in-s
 cpan/podlators/t/data/snippets/man/iso-8859-1
+cpan/podlators/t/data/snippets/man/iso-8859-1-error-die
+cpan/podlators/t/data/snippets/man/iso-8859-1-error-pod
+cpan/podlators/t/data/snippets/man/iso-8859-1-roff
 cpan/podlators/t/data/snippets/man/item-fonts
+cpan/podlators/t/data/snippets/man/language
 cpan/podlators/t/data/snippets/man/link-quoting
 cpan/podlators/t/data/snippets/man/link-to-url
 cpan/podlators/t/data/snippets/man/long-quote
@@ -1887,29 +1903,32 @@ cpan/podlators/t/data/snippets/man/lquote-and-quote
 cpan/podlators/t/data/snippets/man/lquote-rquote
 cpan/podlators/t/data/snippets/man/markup-in-name
 cpan/podlators/t/data/snippets/man/multiline-x
+cpan/podlators/t/data/snippets/man/naive
+cpan/podlators/t/data/snippets/man/naive-groff
 cpan/podlators/t/data/snippets/man/name-guesswork
+cpan/podlators/t/data/snippets/man/name-quotes
+cpan/podlators/t/data/snippets/man/name-quotes-none
 cpan/podlators/t/data/snippets/man/nested-lists
 cpan/podlators/t/data/snippets/man/newlines-in-c
 cpan/podlators/t/data/snippets/man/non-ascii
+cpan/podlators/t/data/snippets/man/nonbreaking-space-l
 cpan/podlators/t/data/snippets/man/not-bullet
 cpan/podlators/t/data/snippets/man/not-numbers
 cpan/podlators/t/data/snippets/man/nourls
-cpan/podlators/t/data/snippets/man/paired-quotes
 cpan/podlators/t/data/snippets/man/periods
 cpan/podlators/t/data/snippets/man/quote-escaping
 cpan/podlators/t/data/snippets/man/rquote-none
-cpan/podlators/t/data/snippets/man/small-caps-magic
 cpan/podlators/t/data/snippets/man/soft-hyphens
 cpan/podlators/t/data/snippets/man/trailing-space
 cpan/podlators/t/data/snippets/man/true-false
-cpan/podlators/t/data/snippets/man/uppercase-license
 cpan/podlators/t/data/snippets/man/utf8-nonbreaking
 cpan/podlators/t/data/snippets/man/utf8-verbatim
 cpan/podlators/t/data/snippets/man/x-whitespace
 cpan/podlators/t/data/snippets/man/x-whitespace-entry
+cpan/podlators/t/data/snippets/man/zero-width-space
 cpan/podlators/t/data/snippets/overstrike/tag-width
 cpan/podlators/t/data/snippets/overstrike/wrapping
-cpan/podlators/t/data/snippets/README			podlators test
+cpan/podlators/t/data/snippets/README.md
 cpan/podlators/t/data/snippets/termcap/escape-wrapping
 cpan/podlators/t/data/snippets/termcap/tag-width
 cpan/podlators/t/data/snippets/termcap/tag-wrapping
@@ -1929,11 +1948,19 @@ cpan/podlators/t/data/snippets/text/error-stderr
 cpan/podlators/t/data/snippets/text/error-stderr-opt
 cpan/podlators/t/data/snippets/text/for
 cpan/podlators/t/data/snippets/text/iso-8859-1
+cpan/podlators/t/data/snippets/text/iso-8859-1-error-die
+cpan/podlators/t/data/snippets/text/iso-8859-1-error-pod
+cpan/podlators/t/data/snippets/text/iso-8859-1-utf8
 cpan/podlators/t/data/snippets/text/late-encoding
 cpan/podlators/t/data/snippets/text/link-rt
 cpan/podlators/t/data/snippets/text/link-url
 cpan/podlators/t/data/snippets/text/margin
+cpan/podlators/t/data/snippets/text/naive
+cpan/podlators/t/data/snippets/text/name-quotes
+cpan/podlators/t/data/snippets/text/name-quotes-none
+cpan/podlators/t/data/snippets/text/non-latin
 cpan/podlators/t/data/snippets/text/nonbreaking-space
+cpan/podlators/t/data/snippets/text/nonbreaking-space-l
 cpan/podlators/t/data/snippets/text/nourls
 cpan/podlators/t/data/snippets/text/periods
 cpan/podlators/t/data/snippets/text/quotes-opt
@@ -1943,6 +1970,7 @@ cpan/podlators/t/data/snippets/text/utf8
 cpan/podlators/t/data/snippets/text/utf8-iso
 cpan/podlators/t/data/snippets/text/verbatim
 cpan/podlators/t/data/termcap			podlators test
+cpan/podlators/t/docs/changes.t
 cpan/podlators/t/docs/pod.t			podlators test
 cpan/podlators/t/docs/pod-spelling.t			podlators test
 cpan/podlators/t/docs/spdx-license.t			podlators test
@@ -1957,6 +1985,7 @@ cpan/podlators/t/lib/Test/RRA/ModuleVersion.pm		podlators test
 cpan/podlators/t/man/devise-date.t			podlators test
 cpan/podlators/t/man/devise-title.t			podlators test
 cpan/podlators/t/man/empty.t			podlators test
+cpan/podlators/t/man/encoding.t
 cpan/podlators/t/man/heading.t			podlators test
 cpan/podlators/t/man/iso-8859-1.t		podlators test
 cpan/podlators/t/man/no-encode.t		podlators test

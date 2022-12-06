@@ -983,19 +983,11 @@ use File::Glob qw(:case);
     },
 
     'podlators' => {
-        'DISTRIBUTION' => 'RRA/podlators-4.14.tar.gz',
+        'DISTRIBUTION' => 'RRA/podlators-5.00.tar.gz',
         'MAIN_MODULE'  => 'Pod::Man',
         'FILES'        => q[cpan/podlators pod/perlpodstyle.pod],
         'EXCLUDED'     => [
-            qr{^docs/metadata/},
-        ],
-
-        # https://github.com/rra/podlators/pull/15
-        'CUSTOMIZED' => [
-            't/general/basic.t',
-            't/man/empty.t',
-            't/man/no-encode.t',
-            't/text/invalid.t',
+            qr{^\.github/workflows/build\.yaml},
         ],
 
         'MAP' => {

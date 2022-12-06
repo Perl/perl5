@@ -280,8 +280,7 @@ sub test_snippet {
     $got =~ s{ \n\s+ \z }{\n}xms;
 
     # Check the output, errors, and any exception.
-    my $expected = decode($encoding, $data_ref->{output});
-    is($got, $expected, "$data_ref->{name}: output");
+    is($got, $data_ref->{output}, "$data_ref->{name}: output");
     if ($data_ref->{errors} || $stderr) {
         is($stderr, $data_ref->{errors} || q{}, "$data_ref->{name}: errors");
     }
@@ -304,7 +303,9 @@ sub test_snippet {
 # $snippet     - Path to the snippet file defining the test
 # $options_ref - Hash of options with the following keys:
 #   encoding    - Expect the snippet to be in this non-standard encoding
-#   perlio_utf8 - Set to 1 to set a PerlIO UTF-8 encoding on the output file
+#   perlio_utf8 - Set to 1 to set PerlIO UTF-8 encoding on the output file
+#   perlio_iso  - Set to 1 to set PerlIO ISO 8859-1 encoding on the output file
+#   output      - Expect the output to be in this non-standard encoding
 sub test_snippet_with_io {
     my ($class, $snippet, $options_ref) = @_;
     my $data_ref = read_snippet($snippet);
@@ -315,6 +316,19 @@ sub test_snippet_with_io {
         $encoding = $options_ref->{encoding};
     }
     $encoding ||= 'UTF-8';
+
+    # Determine the encoding to expect for the actual output.
+    my $outencoding;
+    if (defined($options_ref)) {
+        $outencoding = $options_ref->{output};
+    }
+    $outencoding ||= 'UTF-8';
+
+    # Additional test output based on whether we're using PerlIO.
+    my $perlio = q{};
+    if ($options_ref->{perlio_utf8} || $options_ref->{perlio_iso}) {
+        $perlio = ' (PerlIO)';
+    }
 
     # Create the formatter object.
     my $parser = $class->new(%{ $data_ref->{options} }, name => 'TEST');
@@ -342,20 +356,40 @@ sub test_snippet_with_io {
         ## no critic (ValuesAndExpressions::RequireInterpolationOfMetachars)
         eval 'binmode($output, ":encoding(utf-8)")';
         ## use critic
+    } elsif ($options_ref->{perlio_iso}) {
+        ## no critic (BuiltinFunctions::ProhibitStringyEval)
+        ## no critic (ValuesAndExpressions::RequireInterpolationOfMetachars)
+        eval 'binmode($output, ":encoding(iso-8859-1)")';
+        ## use critic
     }
 
     # Parse the input file into the output file.
     $parser->parse_from_file($input_file, $output);
     close($output) or BAIL_OUT("cannot flush output to $output_file: $!");
 
-    # Read back in the results.  For Pod::Man, also ensure that we didn't
-    # output the accent definitions if we wrote UTF-8 output.
+    # Read back in the results.  For Pod::Man, also check the coding line, and
+    # ensure that we didn't output the accent definitions if we wrote UTF-8
+    # output.
     open(my $results, '<', $output_file)
       or BAIL_OUT("cannot open $output_file: $!");
     my ($line, $saw_accents);
     if ($class eq 'Pod::Man') {
+        $line = <$results>;
+        my $coding = lc($outencoding);
+        if ($outencoding eq 'ascii') {
+            unlike(
+                $line, qr{ mode: [ ] troff }xms,
+                "$data_ref->{name}: no preconv coding line$perlio"
+            );
+        } else {
+            is(
+                $line,
+                qq{.\\\" -*- mode: troff; coding: $coding -*-\n},
+                "$data_ref->{name}: preconv coding line$perlio"
+            );
+        }
         while (defined($line = <$results>)) {
-            $line = decode('UTF-8', $line);
+            $line = decode($outencoding, $line);
             if ($line =~ m{ Accent [ ] mark [ ] definitions }xms) {
                 $saw_accents = 1;
             }
@@ -363,7 +397,7 @@ sub test_snippet_with_io {
         }
     }
     my $saw = do { local $/ = undef; <$results> };
-    $saw = decode('UTF-8', $saw);
+    $saw = decode($outencoding, $saw);
     $saw =~ s{ \n\s+ \z }{\n}xms;
     close($results) or BAIL_OUT("cannot close output file: $!");
 
@@ -371,11 +405,10 @@ sub test_snippet_with_io {
     unlink($input_file, $output_file);
 
     # Check the accent definitions and the output.
-    my $perlio = $options_ref->{perlio_utf8} ? ' (PerlIO)' : q{};
     if ($class eq 'Pod::Man') {
         is(
             $saw_accents,
-            $data_ref->{options}{utf8} ? undef : 1,
+            ($data_ref->{options}{encoding} || q{}) eq 'roff' ? 1 : undef,
             "$data_ref->{name}: accent definitions$perlio"
         );
     }
@@ -513,11 +546,34 @@ the output portion of the snippet.
 
 The same as test_snippet(), except, rather than parsing the input into a
 string buffer, this function uses real, temporary input and output files.
-This can be used to test I/O layer handling and proper encoding.
+This can be used to test I/O layer handling and proper encoding.  It also
+does additional tests for the preamble to the *roff output.
 
-OPTIONS, if present, is a reference to a hash of options.  Currently, only one
-key is supported: C<perlio_utf8>, which, if set to true, will set a PerlIO
-UTF-8 encoding layer on the output file before writing to it.
+OPTIONS, if present, is a reference to a hash of options chosen from the
+following:
+
+=over 4
+
+=item encoding
+
+The encoding to expect from the snippet file.  Default if not specified is
+UTF-8.
+
+=item output
+
+The encoding to expect from the output.  Default if not specified is UTF-8.
+
+=item perlio_iso
+
+If set to true, set a PerlIO ISO-8859-1 encoding layer on the output file
+before writing to it.
+
+=item perlio_utf8
+
+If set to true, set a PerlIO UTF-8 encoding layer on the output file before
+writing to it.
+
+=back
 
 =back
 
@@ -527,7 +583,7 @@ Russ Allbery <rra@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright 2015-2016, 2018-2020 Russ Allbery <rra@cpan.org>
+Copyright 2015-2016, 2018-2020, 2022 Russ Allbery <rra@cpan.org>
 
 This program is free software; you may redistribute it and/or modify it
 under the same terms as Perl itself.
