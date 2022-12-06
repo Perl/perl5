@@ -1,6 +1,9 @@
 [name]
 E<agrave>
 
+[options]
+encoding roff
+
 [input]
 =head1 agrave
 

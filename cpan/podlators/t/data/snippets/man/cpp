@@ -15,6 +15,6 @@ Other mentions of C++.
 [output]
 .SH "NAME"
 gcc \- GNU project C and C++ compiler
-.SH "\*(C+ NOTES"
-.IX Header " NOTES"
-Other mentions of \*(C+.
+.SH "C++ NOTES"
+.IX Header "C++ NOTES"
+Other mentions of C++.

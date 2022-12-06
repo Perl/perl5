@@ -2,7 +2,7 @@
 #
 # Test Pod::Man with a document that produces only errors.
 #
-# Copyright 2013, 2016, 2018-2019 Russ Allbery <rra@cpan.org>
+# Copyright 2013, 2016, 2018-2019, 2022 Russ Allbery <rra@cpan.org>
 #
 # This program is free software; you may redistribute it and/or modify it
 # under the same terms as Perl itself.
@@ -31,12 +31,10 @@ local $SIG{__WARN__} = sub { croak($_[0]) };
 
 # Try a POD document where the only command is invalid.  Make sure it succeeds
 # and doesn't throw an exception.
-## no critic (ValuesAndExpressions::ProhibitEscapedCharacters)
-my $invalid_char = chr utf8::unicode_to_native(0xa0);
+my $invalid_char = chr(utf8::unicode_to_native(0xa0));
 ok(eval { $parser->parse_string_document("=$invalid_char") },
     'Parsed invalid document');
 is($@, q{}, '...with no errors');
-## use critic
 
 # With recent Pod::Simple, there will be a POD ERRORS section.  With older
 # versions of Pod::Simple, we have to skip the test since it doesn't trigger

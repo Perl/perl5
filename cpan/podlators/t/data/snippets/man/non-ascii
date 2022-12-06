@@ -1,6 +1,9 @@
 [name]
 Non-ASCII character
 
+[options]
+encoding roff
+
 [input]
 =head1 YEN
 
