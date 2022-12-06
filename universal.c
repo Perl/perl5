@@ -782,6 +782,23 @@ XS(XS_Internals_hv_clear_placehold)
     }
 }
 
+XS(XS_Internals_stack_refcounted); /* prototype to pass -Wmissing-prototypes */
+XS(XS_Internals_stack_refcounted)
+{
+    dXSARGS;
+    UV val = 0;
+
+    if (items != 0)
+        croak_xs_usage(cv, "");
+#ifdef PERL_RC_STACK
+    val |= 1;
+#  ifdef PERL_XXX_TMP_NORC
+    val |= 2;
+#  endif
+#endif
+    XSRETURN_UV(val);
+}
+
 XS(XS_PerlIO_get_layers); /* prototype to pass -Wmissing-prototypes */
 XS(XS_PerlIO_get_layers)
 {
@@ -1333,6 +1350,7 @@ static const struct xsub_details these_details[] = {
     {"Internals::SvREADONLY", XS_Internals_SvREADONLY, "\\[$%@];$", 0 },
     {"Internals::SvREFCNT", XS_Internals_SvREFCNT, "\\[$%@];$", 0 },
     {"Internals::hv_clear_placeholders", XS_Internals_hv_clear_placehold, "\\%", 0 },
+    {"Internals::stack_refcounted", XS_Internals_stack_refcounted, NULL, 0 },
     {"constant::_make_const", XS_constant__make_const, "\\[$@]", 0 },
     {"PerlIO::get_layers", XS_PerlIO_get_layers, "*;@", 0 },
     {"re::is_regexp", XS_re_is_regexp, "$", 0 },
