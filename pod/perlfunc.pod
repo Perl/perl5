@@ -6716,8 +6716,14 @@ would have semantics similar to the following:
             croak "Compilation failed in require";
         }
 
-        foreach $prefix (@INC) {
-            if (ref($prefix)) {
+        local $INC;
+        # this type of loop lets a hook overwrite $INC if they wish
+        for($INC = 0; $INC < @INC; $INC++) {
+            my $prefix = $INC[$INC];
+            if (!defined $prefix) {
+                next;
+            }
+            if (ref $prefix) {
                 #... do other stuff - see text below ....
             }
             # (see text below about possible appending of .pmc
@@ -6800,16 +6806,20 @@ F<.pmc> extension.  If this file is found, it will be loaded in place of
 any file ending in a F<.pm> extension. This applies to both the explicit
 C<require "Foo/Bar.pm";> form and the C<require Foo::Bar;> form.
 
-You can also insert hooks into the import facility by putting Perl code
-directly into the L<C<@INC>|perlvar/@INC> array.  There are three forms
-of hooks: subroutine references, array references, and blessed objects.
+You can also insert hooks into the import facility by putting Perl
+coderefs or objects directly into the L<C<@INC>|perlvar/@INC> array.
+There are two types of hooks, INC filters, and INCDIR hooks, and there
+are three forms of representing a hook: subroutine references, array
+references, and blessed objects.
 
 Subroutine references are the simplest case.  When the inclusion system
-walks through L<C<@INC>|perlvar/@INC> and encounters a subroutine, this
-subroutine gets called with two parameters, the first a reference to
-itself, and the second the name of the file to be included (e.g.,
-F<Foo/Bar.pm>).  The subroutine should return either nothing or else a
-list of up to four values in the following order:
+walks through L<C<@INC>|perlvar/@INC> and encounters a subroutine, unless
+this subroutine is blessed and supports an INCDIR hook this
+subroutine will be assumed to be an INC hook will be called with two
+parameters, the first a reference to itself, and the second the name of
+the file to be included (e.g., F<Foo/Bar.pm>).  The subroutine should
+return either nothing or else a list of up to four values in the
+following order:
 
 =over
 
@@ -6848,10 +6858,37 @@ Note that this filehandle must be a real filehandle (strictly a typeglob
 or reference to a typeglob, whether blessed or unblessed); tied filehandles
 will be ignored and processing will stop there.
 
-If the hook is an array reference, its first element must be a subroutine
-reference.  This subroutine is called as above, but the first parameter is
-the array reference.  This lets you indirectly pass arguments to
-the subroutine.
+If the hook is an object, it should provide an C<INC> or C<INCDIR>
+method that will be called as above, the first parameter being the
+object itself. If it does not provide either method, and the object is
+not CODE ref then an exception will be thrown, otherwise it will simply
+be executed like an unblessed CODE ref would. Note that you must fully
+qualify the method name when you declare an C<INC> sub (unlike the
+C<INCDIR> sub), as the unqualified symbol C<INC> is always forced into
+package C<main>.  Here is a typical code layout for an C<INC> hook:
+
+    # In Foo.pm
+    package Foo;
+    sub new { ... }
+    sub Foo::INC {
+        my ($self, $filename) = @_;
+        ...
+    }
+
+    # In the main program
+    push @INC, Foo->new(...);
+
+If the hook is an array reference, its first element must be a
+subroutine reference or an object as described above. When the first
+element is an object that supports an C<INC> or C<INCDIR> method then
+the method will be called with the object as the first argument, the
+filename requested as the second, and the hook array reference as the
+the third. When the first element is a subroutine then it will be
+called with the array as the first argument, and the filename as the
+second, no third parameter will be passed in. In both forms you can
+modify the contents of the array to provide state between calls, or
+whatever you like.
+
 
 In other words, you can write:
 
@@ -6871,24 +6908,66 @@ or:
         ...
     }
 
-If the hook is an object, it must provide an C<INC> method that will be
-called as above, the first parameter being the object itself.  (Note that
-you must fully qualify the sub's name, as unqualified C<INC> is always forced
-into package C<main>.)  Here is a typical code layout:
+or:
 
-    # In Foo.pm
-    package Foo;
-    sub new { ... }
-    sub Foo::INC {
-        my ($self, $filename) = @_;
+    push @INC, [ HookObj->new(), $x, $y, ... ];
+    sub HookObj::INC {
+        my ($self, $filename, $arrayref)= @_;
+        my (undef, @parameters) = @$arrayref;
         ...
     }
 
-    # In the main program
-    push @INC, Foo->new(...);
-
 These hooks are also permitted to set the L<C<%INC>|perlvar/%INC> entry
 corresponding to the files they have loaded.  See L<perlvar/%INC>.
+Should an C<INC> hook not do this then perl will set the C<%INC> entry
+to be the hook reference itself.
+
+A hook may also be used to rewrite the C<@INC> array. While this might
+sound strange, there are situations where it can be very useful to do
+this. Such hooks usually just return undef and do not mix filtering and
+C<@INC> modifications. While in older versions of perl having a hook
+modify C<@INC> was fraught with issues and could even result in
+segfaults or assert failures, as of 5.37.7 the logic has been made much
+more robust and the hook now has control over the loop iteration if it
+wishes to do so.
+
+There is a now a facility to control the iterator for the C<@INC> array
+traversal that is performed during require. The C<$INC> variable will be
+initialized with the index of the currently executing hook. Once the
+hook returns the next slot in C<@INC> that will be checked will be the
+integer successor of value in C<$INC> (or -1 if it is undef). For example
+the following code
+
+    push @INC, sub {
+        splice @INC, $INC, 1; # remove this hook from @INC
+        unshift @INC, sub { warn "A" };
+        undef $INC; # reset the $INC iterator so we
+                    # execute the newly installed sub
+                    # immediately.
+    };
+
+would install a sub into C<@INC> that when executed as a hook (by for
+instance a require of a file that does not exist), the hook will splice
+itself out of C<@INC>, and add a new sub to the front that will warn
+whenever someone does a require operation that requires an C<@INC>
+search, and then immediately execute that hook.
+
+Prior to 5.37.7, there was no way to cause perl to use the newly
+installed hook immediately, or to inspect any changed items in C<@INC> to
+the left of the iterator, and so the warning would only be generated on
+the second call to require. In more recent perl the presence of the last
+statement which undefines C<$INC> will cause perl to restart the
+traversal of the C<@INC> array at the beginning and execute the newly
+installed sub immediately.
+
+Whatever value C<$INC> held, if any, will be restored at the end of the
+require. Any changes made to C<$INC> during the lifetime of the hook
+will be unrolled after the hook exits, and its value only has meaning
+immediately after execution of the hook, thus setting C<$INC> to some
+value prior to executing a C<require> will have no effect on how the
+require executes at all.
+
+As of 5.37.7 C<@INC> values of undef will be silently ignored.
 
 For a yet-more-powerful import facility, see
 L<C<use>|/use Module VERSION LIST> and L<perlmod>.
