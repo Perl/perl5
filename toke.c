@@ -10157,7 +10157,7 @@ S_parse_ident(pTHX_ char **s, char **d, char * const e, int allow_package,
             break;
     }
     if (UNLIKELY(tick_warn && saw_tick && PL_lex_state == LEX_INTERPNORMAL
-              && !PL_lex_brackets && ckWARN(WARN_SYNTAX))) {
+              && !PL_lex_brackets && ckWARN_d(WARN_SYNTAX))) {
         char *this_d;
         char *d2;
         Newx(this_d, *s - olds + saw_tick + 2, char); /* +2 for $# */
