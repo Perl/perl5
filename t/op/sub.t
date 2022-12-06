@@ -6,7 +6,7 @@ BEGIN {
     set_up_inc('../lib');
 }
 
-plan(tests => 63);
+plan(tests => 64);
 
 sub empty_sub {}
 
@@ -432,4 +432,14 @@ fresh_perl_like(
     qr/^syntax error/,
     {},
     "GH Issue #16944 - Syntax error with sub and shift causes segfault"
+);
+
+# Bug 20010515.004 (#6998)
+# freeing array used as args to sub
+
+fresh_perl_like(
+    q{my @h = 1 .. 10; bad(@h); sub bad { undef @h; warn "O\n"; print for @_; warn "K\n";}},
+    qr/Use of freed value in iteration/,
+    {},
+    "#6998 freeing array used as args to sub",
 );
