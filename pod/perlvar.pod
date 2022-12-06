@@ -542,6 +542,23 @@ by default inserted into C<%INC> in place of a filename.  Note, however,
 that the hook may have set the C<%INC> entry by itself to provide some more
 specific info.
 
+=item $INC
+X<$INC>
+
+As of 5.37.7 when an C<@INC> hook is executed the index of the C<@INC>
+array that holds the hook will be localized into the C<$INC> variable.
+When the hook returns the integer successor of its value will be used to
+determine the next index in C<@INC> that will be checked, thus if it is
+set to -1 (or C<undef>) the traversal over the C<@INC> array will be
+restarted from its beginning.
+
+Normally traversal through the C<@INC> array is from beginning to end
+(C<0 .. $#INC>), and if the C<@INC> array is modified by the hook the
+iterator may be left in a state where newly added entries are skipped.
+Changing this value allows an C<@INC> hook to rewrite the C<@INC> array
+and tell Perl where to continue afterwards. See L<perlfunc/require> for
+details on C<@INC> hooks.
+
 =item $INPLACE_EDIT
 
 =item $^I
