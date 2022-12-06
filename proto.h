@@ -2763,6 +2763,12 @@ PERL_CALLCONV PADNAME *	Perl_newPADNAMEpvn(const char *s, STRLEN len)
 #define PERL_ARGS_ASSERT_NEWPADNAMEPVN	\
 	assert(s)
 
+#ifndef PERL_NO_INLINE_FUNCTIONS
+PERL_STATIC_INLINE OP*	Perl_newPADxVOP(pTHX_ I32 type, I32 flags, PADOFFSET padix)
+			__attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_NEWPADXVOP
+#endif
+
 PERL_CALLCONV OP*	Perl_newPMOP(pTHX_ I32 type, I32 flags)
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_NEWPMOP
