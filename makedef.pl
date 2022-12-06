@@ -73,7 +73,7 @@ require "./$ARGS{TARG_DIR}regen/embed_lib.pl";
 # Is the following guard strictly necessary? Added during refactoring
 # to keep the same behaviour when merging other code into here.
 process_cc_flags(@Config{qw(ccflags optimize)})
-    if $ARGS{PLATFORM} ne 'win32';
+    if PLATFORM ne 'win32';
 
 # Add the compile-time options that miniperl was built with to %define.
 # On Win32 these are not the same options as perl itself will be built
@@ -85,7 +85,7 @@ process_cc_flags(@Config{qw(ccflags optimize)})
 # minimal configs that don't include any of those options.
 
 my @options = sort(Config::bincompat_options(), Config::non_bincompat_options());
-print STDERR "Options: (@options)\n" unless $ARGS{PLATFORM} eq 'test';
+print STDERR "Options: (@options)\n" unless PLATFORM eq 'test';
 $define{$_} = 1 foreach @options;
 
 my %exportperlmalloc =
@@ -96,7 +96,7 @@ my %exportperlmalloc =
        Perl_calloc		=>	"calloc",
     );
 
-my $exportperlmalloc = $ARGS{PLATFORM} eq 'os2';
+my $exportperlmalloc = PLATFORM eq 'os2';
 
 my $config_h = 'config.h';
 open(CFG, '<', $config_h) || die "Cannot open $config_h: $!\n";
@@ -120,7 +120,7 @@ $define{MULTIPLICITY} ||=
     $define{USE_ITHREADS} ||
     $define{PERL_IMPLICIT_CONTEXT} ;
 
-if ($define{USE_ITHREADS} && $ARGS{PLATFORM} ne 'win32') {
+if ($define{USE_ITHREADS} && PLATFORM ne 'win32') {
     $define{USE_REENTRANT_API} = 1;
 }
 
@@ -155,7 +155,7 @@ if (   $define{HAS_POSIX_2008_LOCALE}
 if ($define{USE_LOCALE_THREADS} && ! $define{NO_THREAD_SAFE_LOCALE})
 {
     if (    $define{USE_POSIX_2008_LOCALE}
-        || ($ARGS{PLATFORM} eq 'win32' && (   $cctype !~ /\D/
+        || (PLATFORM eq 'win32' && (   $cctype !~ /\D/
                                            && $cctype >= 80)))
     {
         $define{USE_THREAD_SAFE_LOCALE} = 1;
@@ -175,7 +175,7 @@ if ($define{USE_POSIX_2008_LOCALE} && ! $define{USE_QUERYLOCALE})
     $define{USE_PL_CUR_LC_ALL} = 1;
 }
 
-if ($ARGS{PLATFORM} eq 'win32' && $define{USE_THREAD_SAFE_LOCALE})
+if (PLATFORM eq 'win32' && $define{USE_THREAD_SAFE_LOCALE})
 {
     $define{USE_PL_CUR_LC_ALL} = 1;
 
@@ -185,8 +185,8 @@ if ($ARGS{PLATFORM} eq 'win32' && $define{USE_THREAD_SAFE_LOCALE})
 }
 
 if ($define{MULTIPLICITY} && (   $define{USE_POSIX_2008_LOCALE}
-                                || (   $define{WIN32}
-                                    && $define{USE_THREAD_SAFE_LOCALE})))
+                              || (   PLATFORM eq 'win32'
+                                  && $define{USE_THREAD_SAFE_LOCALE})))
 {
     $define{USE_PERL_SWITCH_LOCALE_CONTEXT}
 }
@@ -195,12 +195,12 @@ if ($define{MULTIPLICITY} && (   $define{USE_POSIX_2008_LOCALE}
 #==========================================================================
 
 print STDERR "Defines: (" . join(' ', sort keys %define) . ")\n"
-     unless $ARGS{PLATFORM} eq 'test';
+     unless PLATFORM eq 'test';
 
 my $sym_ord = 0;
 my %ordinal;
 
-if ($ARGS{PLATFORM} eq 'os2') {
+if (PLATFORM eq 'os2') {
     if (open my $fh, '<', 'perl5.def') {
       while (<$fh>) {
 	last if /^\s*EXPORTS\b/;
@@ -250,7 +250,7 @@ sub readvar {
     }
 }
 
-if ($ARGS{PLATFORM} ne 'os2') {
+if (PLATFORM ne 'os2') {
     ++$skip{$_} foreach qw(
 		     PL_opsave
 		     Perl_dump_fds
@@ -263,7 +263,7 @@ if ($ARGS{PLATFORM} ne 'os2') {
 		     Perl_my_ntohl
 		     Perl_my_swap
 			 );
-    if ($ARGS{PLATFORM} eq 'vms') {
+    if (PLATFORM eq 'vms') {
 	++$skip{PL_statusvalue_posix};
         # This is a wrapper if we have symlink, not a replacement
         # if we don't.
@@ -271,7 +271,7 @@ if ($ARGS{PLATFORM} ne 'os2') {
     } else {
 	++$skip{PL_statusvalue_vms};
 	++$skip{PL_perllib_sep};
-	if ($ARGS{PLATFORM} ne 'aix') {
+	if (PLATFORM ne 'aix') {
 	    ++$skip{$_} foreach qw(
 				PL_DBcv
 				PL_generation
@@ -283,14 +283,14 @@ if ($ARGS{PLATFORM} ne 'os2') {
     }
 }
 
-if ($ARGS{PLATFORM} ne 'vms') {
+if (PLATFORM ne 'vms') {
     # VMS does its own thing for these symbols.
     ++$skip{$_} foreach qw(
 			PL_sig_handlers_initted
 			PL_sig_ignoring
 			PL_sig_defaulting
 			 );
-    if ($ARGS{PLATFORM} ne 'win32') {
+    if (PLATFORM ne 'win32') {
 	++$skip{$_} foreach qw(
 			    Perl_do_spawn
 			    Perl_do_spawn_nowait
@@ -299,7 +299,7 @@ if ($ARGS{PLATFORM} ne 'vms') {
     }
 }
 
-if ($ARGS{PLATFORM} ne 'win32') {
+if (PLATFORM ne 'win32') {
     ++$skip{$_} foreach qw(
 		    Perl_get_win32_message_utf8ness
 		    Perl_Win_utf8_string_to_wstring
@@ -550,14 +550,14 @@ unless ($define{HAS_MMAP}) {
 if ($define{HAS_SIGACTION}) {
     ++$skip{PL_sig_trapped};
 
-    if ($ARGS{PLATFORM} eq 'vms') {
+    if (PLATFORM eq 'vms') {
         # FAKE_PERSISTENT_SIGNAL_HANDLERS defined as !defined(HAS_SIGACTION)
         ++$skip{PL_sig_ignoring};
         ++$skip{PL_sig_handlers_initted} unless $define{KILL_BY_SIGPRC};
     }
 }
 
-if ($ARGS{PLATFORM} eq 'vms' && !$define{KILL_BY_SIGPRC}) {
+if (PLATFORM eq 'vms' && !$define{KILL_BY_SIGPRC}) {
     # FAKE_DEFAULT_SIGNAL_HANDLERS defined as KILL_BY_SIGPRC
     ++$skip{Perl_csighandler_init};
     ++$skip{Perl_my_kill};
@@ -793,7 +793,7 @@ try_symbols(qw(
 		    PerlIO_tmpfile
 	     ));
 
-if ($ARGS{PLATFORM} eq 'win32') {
+if (PLATFORM eq 'win32') {
     try_symbols(qw(
 		    win32_free_childdir
 		    win32_free_childenv
@@ -958,7 +958,7 @@ if ($ARGS{PLATFORM} eq 'win32') {
                     win32_readlink
 		 ));
 }
-elsif ($ARGS{PLATFORM} eq 'vms') {
+elsif (PLATFORM eq 'vms') {
     try_symbols(qw(
 		      Perl_cando
 		      Perl_cando_by_name
@@ -1043,7 +1043,7 @@ elsif ($ARGS{PLATFORM} eq 'vms') {
 		      PerlIO_openn
 		 ));
 }
-elsif ($ARGS{PLATFORM} eq 'os2') {
+elsif (PLATFORM eq 'os2') {
     try_symbols(qw(
 		      ctermid
 		      get_sysinfo
@@ -1119,7 +1119,7 @@ elsif ($ARGS{PLATFORM} eq 'os2') {
 # static extensions with -fPIC, but links them to perl, not libperl.so
 # The VMS build scripts don't yet implement static extensions at all.
 
-if ($ARGS{PLATFORM} eq 'win32') {
+if (PLATFORM eq 'win32') {
     # records of type boot_module for statically linked modules (except Dynaloader)
     my $static_ext = $Config{static_ext} // "";
     $static_ext =~ s/\//__/g;
@@ -1128,7 +1128,7 @@ if ($ARGS{PLATFORM} eq 'win32') {
     try_symbols("init_Win32CORE") if $static_ext =~ /\bWin32CORE\b/;
 }
 
-if ($ARGS{PLATFORM} eq 'os2') {
+if (PLATFORM eq 'os2') {
     my (%mapped, @missing);
     open MAP, '<', 'miniperl.map' or die 'Cannot read miniperl.map';
     /^\s*[\da-f:]+\s+(\w+)/i and $mapped{$1}++ foreach <MAP>;
@@ -1146,7 +1146,7 @@ if ($ARGS{PLATFORM} eq 'os2') {
 
 # Start with platform specific headers:
 
-if ($ARGS{PLATFORM} eq 'win32') {
+if (PLATFORM eq 'win32') {
     my $dll = $define{PERL_DLL} ? $define{PERL_DLL} =~ s/\.dll$//ir
 	: "perl$Config{api_revision}$Config{api_version}";
     print "LIBRARY $dll\n";
@@ -1157,7 +1157,7 @@ if ($ARGS{PLATFORM} eq 'win32') {
     }
     print "EXPORTS\n";
 }
-elsif ($ARGS{PLATFORM} eq 'os2') {
+elsif (PLATFORM eq 'os2') {
     (my $v = $]) =~ s/(\d\.\d\d\d)(\d\d)$/$1_$2/;
     $v .= '-thread' if $Config{archname} =~ /-thread/;
     (my $dll = $define{PERL_DLL}) =~ s/\.dll$//i;
@@ -1173,7 +1173,7 @@ DATA LOADONCALL NONSHARED MULTIPLE
 EXPORTS
 ---EOP---
 }
-elsif ($ARGS{PLATFORM} eq 'aix') {
+elsif (PLATFORM eq 'aix') {
     my $OSVER = `uname -v`;
     chop $OSVER;
     my $OSREL = `uname -r`;
@@ -1212,7 +1212,7 @@ foreach my $symbol (@symbols) {
 
 # Then platform specific footers.
 
-if ($ARGS{PLATFORM} eq 'os2') {
+if (PLATFORM eq 'os2') {
     print <<EOP;
     dll_perlmain=main
     fill_extLibpath
