@@ -1,3 +1,31 @@
+#define PERL_IN_THREADS_XS
+#ifdef USE_POSIX_2008_LOCALE
+#    undef DEBUG_PRE_STMTS
+#    define DEBUG_PRE_STMTS   dSAVE_ERRNO; dTHX;                               \
+        if (PL_cur_locale_obj == uselocale(0)) {                               \
+            PerlIO_printf(Perl_debug_log, "%s: %" LINE_Tf ": tid=%ld, state=%d, aTHX=%p, current locale=%p: ", __FILE__, __LINE__, thread->tid, thread->state, aTHX, PL_cur_locale_obj); \
+        }                                                                       \
+        else {                                                                  \
+            PerlIO_printf(Perl_debug_log, "%s: %" LINE_Tf ": tid=%ld, state=%d, aTHX=%p, PL_cur_locale_obj=%p, DIFFERS FROM actual=%p: ", __FILE__, __LINE__, thread->tid, thread->state, aTHX, PL_cur_locale_obj, uselocale(0));                   \
+        }
+#    undef DEBUG_POST_STMTS
+#    define DEBUG_POST_STMTS  RESTORE_ERRNO;
+#endif
+#if 0
+#ifdef USE_PL_CUR_LC_ALL
+#    undef DEBUG_PRE_STMTS
+#    define DEBUG_PRE_STMTS   dSAVE_ERRNO; dTHX;                               \
+        if (PL_cur_locale_obj == uselocale(0)) {                               \
+            PerlIO_printf(Perl_debug_log, "%s: %" LINE_Tf ": tid=%ld, state=%d, aTHX=%p, current locale=%p: ", __FILE__, __LINE__, thread->tid, thread->state, aTHX, PL_cur_locale_obj); \
+        }                                                                       \
+        else {                                                                  \
+            PerlIO_printf(Perl_debug_log, "%s: %" LINE_Tf ": tid=%ld, state=%d, aTHX=%p, PL_cur_locale_obj=%p, DIFFERS FROM actual=%p: ", __FILE__, __LINE__, thread->tid, thread->state, aTHX, PL_cur_locale_obj, uselocale(0));                   \
+        }
+#    undef DEBUG_POST_STMTS
+#    define DEBUG_POST_STMTS  RESTORE_ERRNO;
+#endif
+#endif
+
 #define PERL_NO_GET_CONTEXT
 /* Tell XSUB.h not to redefine common functions. Its setjmp() override has a
  * circular definition in Perls < 5.40. */
@@ -217,6 +245,7 @@ S_ithread_clear(pTHX_ ithread *thread)
 #ifndef WIN32
     sigset_t origmask;
 #endif
+    DEBUG_U(PerlIO_printf(Perl_debug_log, "Entering clear\n"));
 
     assert(((thread->state & PERL_ITHR_FINISHED) &&
             (thread->state & PERL_ITHR_UNCALLABLE))
@@ -237,7 +266,9 @@ S_ithread_clear(pTHX_ ithread *thread)
 
     interp = thread->interp;
     if (interp) {
+        DEBUG_U(PerlIO_printf(Perl_debug_log, "clear: About to destroy current thread\n"));
         dTHXa(interp);
+        DEBUG_U(PerlIO_printf(Perl_debug_log, "clear: new aTHX, about to set context\n"));
 
         /* We will pretend to be a thread that we are not by switching tTHX,
          * which doesn't work with things that don't rely on tTHX during
@@ -249,7 +280,9 @@ S_ithread_clear(pTHX_ ithread *thread)
 
         PERL_SET_CONTEXT(interp);
 
+        DEBUG_U(PerlIO_printf(Perl_debug_log, "clear: Context set\n"));
         S_ithread_set(aTHX_ thread);
+        DEBUG_U(PerlIO_printf(Perl_debug_log, "clear: thread set\n"));
 
         SvREFCNT_dec(thread->params);
         thread->params = NULL;
@@ -288,16 +321,20 @@ S_ithread_free(pTHX_ ithread *thread)
 #endif
     dMY_POOL;
 
+     DEBUG_U(PerlIO_printf(Perl_debug_log, "Entering ithread_free\n"));
+
     if (! (thread->state & PERL_ITHR_NONVIABLE)) {
         assert(thread->count > 0);
         if (--thread->count > 0) {
             MUTEX_UNLOCK(&thread->mutex);
+             DEBUG_U(PerlIO_printf(Perl_debug_log, "thread Mutex unlocked, returning without doing anything else, thread_count=%d\n", thread->count));
             return;
         }
         assert((thread->state & PERL_ITHR_FINISHED) &&
                (thread->state & PERL_ITHR_UNCALLABLE));
     }
     MUTEX_UNLOCK(&thread->mutex);
+     DEBUG_U(PerlIO_printf(Perl_debug_log, "thread Mutex unlocked\n"));
 
     /* Main thread (0) is immortal and should never get here */
     assert(thread->tid != 0);
@@ -312,7 +349,9 @@ S_ithread_free(pTHX_ ithread *thread)
     MUTEX_UNLOCK(&MY_POOL.create_destruct_mutex);
 
     /* Thread is now disowned */
+     DEBUG_U(PerlIO_printf(Perl_debug_log, "thread Mutex locking\n"));
     MUTEX_LOCK(&thread->mutex);
+     DEBUG_U(PerlIO_printf(Perl_debug_log, "free: thread is disowned: thread=%p\n", thread));
     S_ithread_clear(aTHX_ thread);
 
 #ifdef WIN32
@@ -320,6 +359,7 @@ S_ithread_free(pTHX_ ithread *thread)
     thread->handle = NULL;
 #endif
     MUTEX_UNLOCK(&thread->mutex);
+     DEBUG_U(PerlIO_printf(Perl_debug_log, "thread Mutex unlocked\n"));
     MUTEX_DESTROY(&thread->mutex);
 
 #ifdef WIN32
@@ -328,6 +368,7 @@ S_ithread_free(pTHX_ ithread *thread)
     }
 #endif
 
+     DEBUG_U(PerlIO_printf(Perl_debug_log, "ithread_free: freeing, then locking/unlocuking mutex, then return\n"));
     PerlMemShared_free(thread);
 
     /* total_threads >= 1 is used to veto cleanup by the main thread,
@@ -346,9 +387,11 @@ static void
 S_ithread_count_inc(pTHX_ ithread *thread)
   PERL_TSA_EXCLUDES(thread->mutex)
 {
+     DEBUG_U(PerlIO_printf(Perl_debug_log, "thread locking mutex\n"));
     MUTEX_LOCK(&thread->mutex);
     thread->count++;
     MUTEX_UNLOCK(&thread->mutex);
+     DEBUG_U(PerlIO_printf(Perl_debug_log, "thread Mutex unlocked\n"));
 }
 
 
@@ -407,6 +450,7 @@ ithread_mg_free(pTHX_ SV *sv, MAGIC *mg)
 {
     ithread *thread = (ithread *)mg->mg_ptr;
     PERL_UNUSED_ARG(sv);
+    DEBUG_U(PerlIO_printf(Perl_debug_log, "mg_free thread locking Mutex\n"));
     MUTEX_LOCK(&thread->mutex);
     S_ithread_free(aTHX_ thread);   /* Releases MUTEX */
     return (0);
@@ -579,6 +623,7 @@ S_ithread_run(void * arg)
 
     PERL_SET_CONTEXT(thread->interp);
     S_ithread_set(aTHX_ thread);
+     DEBUG_U(PerlIO_printf(Perl_debug_log, "thread lock then unlock, context set\n"));
 
 #ifdef THREAD_SIGNAL_BLOCKING
     /* Thread starts with most signals blocked - restore the signal mask from
@@ -687,6 +732,7 @@ S_ithread_run(void * arg)
         MY_POOL.joinable_threads++;
     }
     MUTEX_UNLOCK(&thread->mutex);
+     DEBUG_U(PerlIO_printf(Perl_debug_log, "thread Mutex unlocked\n"));
     MUTEX_UNLOCK(&MY_POOL.create_destruct_mutex);
 
     thread_locale_term();
@@ -703,6 +749,7 @@ S_ithread_run(void * arg)
      */
     aTHX = MY_POOL.main_thread.interp;
 
+     DEBUG_U(PerlIO_printf(Perl_debug_log, "run: thread is finished, calling free from potentially new aTHX\n"));
     MUTEX_LOCK(&thread->mutex);
     S_ithread_free(aTHX_ thread);   /* Releases MUTEX */
 
@@ -1108,6 +1155,7 @@ ithread_create(...)
             stack_size = thread->stack_size;
             exit_opt = thread->state & PERL_ITHR_THREAD_EXIT_ONLY;
             MUTEX_UNLOCK(&thread->mutex);
+    DEBUG_U(PerlIO_printf(Perl_debug_log, "thread Mutex unlocked\n"));
         } else {
             /* threads->create() */
             classname = (char *)SvPV_nolen(ST(0));
@@ -1203,6 +1251,7 @@ ithread_create(...)
         CLANG_DIAG_IGNORE_STMT(-Wthread-safety);
         /* warning: releasing mutex 'thread->mutex' that was not held [-Wthread-safety-analysis] */
         MUTEX_UNLOCK(&thread->mutex);
+        DEBUG_U(PerlIO_printf(Perl_debug_log, "thread Mutex unlocked\n"));
         CLANG_DIAG_RESTORE_STMT;
         /* XSRETURN(1); - implied */
 
@@ -1241,6 +1290,7 @@ ithread_list(...)
             MUTEX_LOCK(&thread->mutex);
             state = thread->state;
             MUTEX_UNLOCK(&thread->mutex);
+    DEBUG_U(PerlIO_printf(Perl_debug_log, "thread Mutex unlocked\n"));
 
             /* Ignore detached or joined threads */
             if (state & PERL_ITHR_UNCALLABLE) {
@@ -1329,17 +1379,20 @@ ithread_join(...)
         MUTEX_LOCK(&thread->mutex);
         if ((join_err = (thread->state & PERL_ITHR_UNCALLABLE))) {
             MUTEX_UNLOCK(&thread->mutex);
+            DEBUG_U(PerlIO_printf(Perl_debug_log, "join: thread Mutex unlocked, thread=%ld, current_thread=%ld\n", thread->tid, current_thread->tid));
             Perl_croak(aTHX_ (join_err & PERL_ITHR_DETACHED)
                                 ? "Cannot join a detached thread"
                                 : "Thread already joined");
         } else if (thread->tid == current_thread->tid) {
             MUTEX_UNLOCK(&thread->mutex);
+            DEBUG_U(PerlIO_printf(Perl_debug_log, "join thread Mutex unlocked thread and current thread are the same\n"));
             Perl_croak(aTHX_ "Cannot join self");
         }
 
         /* Mark as joined */
         thread->state |= PERL_ITHR_JOINED;
         MUTEX_UNLOCK(&thread->mutex);
+        DEBUG_U(PerlIO_printf(Perl_debug_log, "thread Mutex unlocked\n"));
 
         MUTEX_LOCK(&MY_POOL.create_destruct_mutex);
         MY_POOL.joinable_threads--;
@@ -1411,6 +1464,7 @@ ithread_join(...)
 
         /* If thread didn't die, then we can free its interpreter */
         if (! (thread->state & PERL_ITHR_DIED)) {
+            DEBUG_U(PerlIO_printf(Perl_debug_log, "join: thread didn't die: call clear\n"));
             S_ithread_clear(aTHX_ thread);
         }
         S_ithread_free(aTHX_ thread);   /* Releases MUTEX */
@@ -1467,6 +1521,7 @@ ithread_detach(...)
             }
         }
         MUTEX_UNLOCK(&thread->mutex);
+        DEBUG_U(PerlIO_printf(Perl_debug_log, "detach: thread Mutex unlocked\n"));
         MUTEX_UNLOCK(&MY_POOL.create_destruct_mutex);
 
         if (detach_err) {
@@ -1477,10 +1532,12 @@ ithread_detach(...)
 
         /* If thread is finished and didn't die,
          * then we can free its interpreter */
+        DEBUG_U(PerlIO_printf(Perl_debug_log, "detach: locking mutex\n"));
         MUTEX_LOCK(&thread->mutex);
         if ((thread->state & PERL_ITHR_FINISHED) &&
             ! (thread->state & PERL_ITHR_DIED))
         {
+            DEBUG_U(PerlIO_printf(Perl_debug_log, "detach: thread is finished and didn't die\n"));
             S_ithread_clear(aTHX_ thread);
         }
         S_ithread_free(aTHX_ thread);   /* Releases MUTEX */
@@ -1532,6 +1589,7 @@ ithread_kill(...)
             no_handler = 0;
         }
         MUTEX_UNLOCK(&thread->mutex);
+    DEBUG_U(PerlIO_printf(Perl_debug_log, "kill: thread Mutex unlocked\n"));
 
         if (no_handler) {
             Perl_croak(aTHX_ "Signal %s received in thread %" UVuf
@@ -1625,6 +1683,7 @@ ithread_object(...)
                     MUTEX_LOCK(&thread->mutex);
                     state = thread->state;
                     MUTEX_UNLOCK(&thread->mutex);
+                    DEBUG_U(PerlIO_printf(Perl_debug_log, "thread object: Mutex unlocked\n"));
                     if (! (state & PERL_ITHR_UNCALLABLE)) {
                         /* Put object on stack */
                         ST(0) = sv_2mortal(S_ithread_to_SV(aTHX_ Nullsv, thread, classname, TRUE));
@@ -1712,6 +1771,7 @@ ithread_is_running(...)
         MUTEX_LOCK(&thread->mutex);
         ST(0) = (thread->state & PERL_ITHR_FINISHED) ? &PL_sv_no : &PL_sv_yes;
         MUTEX_UNLOCK(&thread->mutex);
+        DEBUG_U(PerlIO_printf(Perl_debug_log, "is_running thread Mutex unlocked\n"));
         /* XSRETURN(1); - implied */
 
 
@@ -1725,6 +1785,7 @@ ithread_is_detached(...)
         MUTEX_LOCK(&thread->mutex);
         ST(0) = (thread->state & PERL_ITHR_DETACHED) ? &PL_sv_yes : &PL_sv_no;
         MUTEX_UNLOCK(&thread->mutex);
+        DEBUG_U(PerlIO_printf(Perl_debug_log, "is_detatched: thread Mutex unlocked\n"));
         /* XSRETURN(1); - implied */
 
 
@@ -1744,6 +1805,7 @@ ithread_is_joinable(...)
                  ! (thread->state & PERL_ITHR_UNCALLABLE))
             ? &PL_sv_yes : &PL_sv_no;
         MUTEX_UNLOCK(&thread->mutex);
+    DEBUG_U(PerlIO_printf(Perl_debug_log, "is_joinable: thread Mutex unlocked\n"));
         /* XSRETURN(1); - implied */
 
 
@@ -1776,6 +1838,7 @@ ithread_set_thread_exit_only(...)
             thread->state &= ~PERL_ITHR_THREAD_EXIT_ONLY;
         }
         MUTEX_UNLOCK(&thread->mutex);
+    DEBUG_U(PerlIO_printf(Perl_debug_log, "set_thread_exit_only: thread Mutex unlocked\n"));
 
 
 void
@@ -1849,6 +1912,7 @@ ithread_error(...)
         }
 
         MUTEX_UNLOCK(&thread->mutex);
+        DEBUG_U(PerlIO_printf(Perl_debug_log, "ithread_error: thread Mutex unlocked\n"));
 
         if (! err) {
             XSRETURN_UNDEF;
