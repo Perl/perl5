@@ -66,7 +66,12 @@ BEGIN {
     die "PLATFORM must be one of: @PLATFORM\n"
 	unless exists $PLATFORM{$ARGS{PLATFORM}};
 }
+
 use constant PLATFORM => $ARGS{PLATFORM};
+
+# This makes us able to use, e.g., $define{WIN32}, so you don't have to
+# remember what things came from %ARGS.
+$define{uc $ARGS{'PLATFORM'}} = 1;
 
 require "./$ARGS{TARG_DIR}regen/embed_lib.pl";
 
@@ -110,6 +115,7 @@ close(CFG);
 #==========================================================================
 # perl.h logic duplication begins
 
+
 if ($define{USE_ITHREADS}) {
     if (!$define{MULTIPLICITY}) {
         $define{MULTIPLICITY} = 1;
@@ -120,7 +126,7 @@ $define{MULTIPLICITY} ||=
     $define{USE_ITHREADS} ||
     $define{PERL_IMPLICIT_CONTEXT} ;
 
-if ($define{USE_ITHREADS} && PLATFORM ne 'win32') {
+if ($define{USE_ITHREADS} && ! $define{WIN32}) {
     $define{USE_REENTRANT_API} = 1;
 }
 
@@ -155,8 +161,8 @@ if (   $define{HAS_POSIX_2008_LOCALE}
 if ($define{USE_LOCALE_THREADS} && ! $define{NO_THREAD_SAFE_LOCALE})
 {
     if (    $define{USE_POSIX_2008_LOCALE}
-        || (PLATFORM eq 'win32' && (   $cctype !~ /\D/
-                                           && $cctype >= 80)))
+        || ($define{WIN32} && (   $cctype !~ /\D/
+                               && $cctype >= 80)))
     {
         $define{USE_THREAD_SAFE_LOCALE} = 1;
     }
@@ -175,7 +181,7 @@ if ($define{USE_POSIX_2008_LOCALE} && ! $define{USE_QUERYLOCALE})
     $define{USE_PL_CUR_LC_ALL} = 1;
 }
 
-if (PLATFORM eq 'win32' && $define{USE_THREAD_SAFE_LOCALE})
+if ($define{WIN32} && $define{USE_THREAD_SAFE_LOCALE})
 {
     $define{USE_PL_CUR_LC_ALL} = 1;
 
@@ -185,7 +191,7 @@ if (PLATFORM eq 'win32' && $define{USE_THREAD_SAFE_LOCALE})
 }
 
 if ($define{MULTIPLICITY} && (   $define{USE_POSIX_2008_LOCALE}
-                              || (   PLATFORM eq 'win32'
+                              || (   $define{WIN32}
                                   && $define{USE_THREAD_SAFE_LOCALE})))
 {
     $define{USE_PERL_SWITCH_LOCALE_CONTEXT}
