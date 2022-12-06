@@ -11236,8 +11236,7 @@ S_scan_inputsymbol(pTHX_ char *start)
                     goto intro_sym;
                 }
                 else {
-                    OP * const o = newOP(OP_PADSV, 0);
-                    o->op_targ = tmp;
+                    OP * const o = newPADxVOP(OP_PADSV, 0, tmp);
                     PL_lex_op = readline_overriden
                         ? newUNOP(OP_ENTERSUB, OPf_STACKED,
                                 op_append_elem(OP_LIST, o,

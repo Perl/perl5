@@ -3839,8 +3839,7 @@ S_apply_attrs_my(pTHX_ HV *stash, OP *target, OP *attrs, OP **imopsp)
     /* Build up the real arg-list. */
     stashsv = newSVhek(HvNAME_HEK(stash));
 
-    arg = newOP(OP_PADSV, 0);
-    arg->op_targ = target->op_targ;
+    arg = newPADxVOP(OP_PADSV, 0, target->op_targ);
     arg = op_prepend_elem(OP_LIST,
                        newSVOP(OP_CONST, 0, stashsv),
                        op_prepend_elem(OP_LIST,
@@ -13270,10 +13269,9 @@ Perl_ck_sort(pTHX_ OP *o)
                     kSVOP->op_sv = fq;
                 }
                 else {
-                    OP * const padop = newOP(OP_PADCV, 0);
-                    padop->op_targ = off;
                     /* replace the const op with the pad op */
-                    op_sibling_splice(firstkid, NULL, 1, padop);
+                    op_sibling_splice(firstkid, NULL, 1,
+                        newPADxVOP(OP_PADCV, 0, off));
                     op_free(kid);
                 }
             }
