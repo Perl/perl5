@@ -416,7 +416,7 @@ use warnings 'syntax';
 () = "$foo'bar";
 () = "@foo'bar";
 () = "$#foo'bar";
-no warnings 'syntax' ;
+no warnings 'syntax', 'deprecated' ;
 () = "$foo'bar";
 () = "@foo'bar";
 () = "$#foo'bar";
@@ -439,7 +439,7 @@ use warnings 'syntax'; use utf8;
 () = "$fooл'barл";
 () = "@fooл'barл";
 () = "$#fooл'barл";
-no warnings 'syntax' ;
+no warnings 'syntax', 'deprecated' ;
 () = "$fooл'barл";
 () = "@fooл'barл";
 () = "$#fooл'barл";
@@ -450,6 +450,19 @@ Old package separator used in string at - line 4.
 	(Did you mean "@fooл\'barл" instead?)
 Old package separator used in string at - line 5.
 	(Did you mean "$#fooл\'barл" instead?)
+########
+# NAME deprecation of ' in names
+sub foo'bar { 1 }
+$a'b = 1;
+@a'c = ();
+%a'd = ();
+package a'e;
+EXPECT
+Old package separator "'" deprecated at - line 1.
+Old package separator "'" deprecated at - line 2.
+Old package separator "'" deprecated at - line 3.
+Old package separator "'" deprecated at - line 4.
+Old package separator "'" deprecated at - line 5.
 ########
 # toke.c
 use warnings 'ambiguous' ;

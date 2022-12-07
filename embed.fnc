@@ -3366,7 +3366,8 @@ EXpx	|char * |scan_word	|NN char *s				\
 				|NN char *dest				\
 				|STRLEN destlen 			\
 				|int allow_package			\
-				|NN STRLEN *slp
+				|NN STRLEN *slp 			\
+				|bool warn_tick
 EXpxR	|char * |skipspace_flags|NN char *s				\
 				|U32 flags
 EdXxp	|bool	|validate_proto |NN SV *name				\
