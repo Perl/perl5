@@ -2845,5 +2845,90 @@ Perl_padname_dup(pTHX_ PADNAME *src, CLONE_PARAMS *param)
 #endif /* USE_ITHREADS */
 
 /*
+=for apidoc_section $lexer
+=for apidoc suspend_compcv
+
+Implements part of the concept of a "suspended complication CV", which can be
+used to pause the parser and compiler during parsing a CV in order to come
+back to it later on.
+
+This function saves the current state of the subroutine under compilation
+(C<PL_compcv>) into the supplied buffer.  This should be used initially to
+create the state in the buffer, as the final thing before a C<LEAVE> within a
+block.
+
+    ENTER;
+    start_subparse(0);
+    ...
+
+    suspend_compcv(&buffer);
+    LEAVE;
+
+Once suspended, the C<resume_compcv> or C<resume_compcv_and_save> function can
+later be used to continue the parsing from the point this stopped.
+
+=cut
+*/
+
+void
+Perl_suspend_compcv(pTHX_ struct suspended_compcv *buffer)
+{
+    PERL_ARGS_ASSERT_SUSPEND_COMPCV;
+
+    buffer->compcv = PL_compcv;
+
+    buffer->padix             = PL_padix;
+    buffer->constpadix        = PL_constpadix;
+
+    buffer->comppad_name_fill = PL_comppad_name_fill;
+    buffer->min_intro_pending = PL_min_intro_pending;
+    buffer->max_intro_pending = PL_max_intro_pending;
+
+    buffer->cv_has_eval       = PL_cv_has_eval;
+    buffer->pad_reset_pending = PL_pad_reset_pending;
+}
+
+/*
+=for apidoc resume_compcv_final
+
+Resumes the parser state previously saved using the C<suspend_compcv> function
+for a final time before being compiled into a full CV.  This should be used
+within an C<ENTER>/C<LEAVE> scoped pair.
+
+=for apidoc resume_compcv_and_save
+
+Resumes a buffer previously suspended by the C<suspend_compcv> function, in a
+way that will be re-suspended at the end of the scope so it can be used again
+later.  This should be used within an C<ENTER>/C<LEAVE> scoped pair.
+
+=cut
+*/
+
+void
+Perl_resume_compcv(pTHX_ struct suspended_compcv *buffer, bool save)
+{
+    PERL_ARGS_ASSERT_RESUME_COMPCV;
+
+    SAVESPTR(PL_compcv);
+    PL_compcv = buffer->compcv;
+    PAD_SET_CUR(CvPADLIST(PL_compcv), 1);
+
+    SAVESPTR(PL_comppad_name);
+    PL_comppad_name = PadlistNAMES(CvPADLIST(PL_compcv));
+
+    SAVESTRLEN(PL_padix);             PL_padix             = buffer->padix;
+    SAVESTRLEN(PL_constpadix);        PL_constpadix        = buffer->constpadix;
+    SAVESTRLEN(PL_comppad_name_fill); PL_comppad_name_fill = buffer->comppad_name_fill;
+    SAVESTRLEN(PL_min_intro_pending); PL_min_intro_pending = buffer->min_intro_pending;
+    SAVESTRLEN(PL_max_intro_pending); PL_max_intro_pending = buffer->max_intro_pending;
+
+    SAVEBOOL(PL_cv_has_eval);       PL_cv_has_eval       = buffer->cv_has_eval;
+    SAVEBOOL(PL_pad_reset_pending); PL_pad_reset_pending = buffer->pad_reset_pending;
+
+    if(save)
+        SAVEDESTRUCTOR_X(&Perl_suspend_compcv, buffer);
+}
+
+/*
  * ex: set ts=8 sts=4 sw=4 et:
  */

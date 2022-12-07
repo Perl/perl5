@@ -526,6 +526,18 @@ instead of a string/length pair.
 #define pad_findmy_pvs(name,flags) \
     Perl_pad_findmy_pvn(aTHX_ STR_WITH_LEN(name), flags)
 
+struct suspended_compcv
+{
+    CV *compcv;
+    STRLEN padix, constpadix;
+    STRLEN comppad_name_fill;
+    STRLEN min_intro_pending, max_intro_pending;
+    bool cv_has_eval, pad_reset_pending;
+};
+
+#define resume_compcv_final(buffer)     Perl_resume_compcv(aTHX_ buffer, false)
+#define resume_compcv_and_save(buffer)  Perl_resume_compcv(aTHX_ buffer, true)
+
 /*
  * ex: set ts=8 sts=4 sw=4 et:
  */

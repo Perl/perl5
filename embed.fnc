@@ -2405,6 +2405,13 @@ Apd	|OP *	|apply_builtin_cv_attributes				\
 				|NULLOK OP *attrlist
 Xp	|void	|init_named_cv	|NN CV *cv				\
 				|NN OP *nameop
+Apd	|void	|suspend_compcv |NN struct suspended_compcv *buffer
+AMp	|void	|resume_compcv	|NN struct suspended_compcv *buffer	\
+				|bool save
+md	|void	|resume_compcv_and_save 				\
+				|NN struct suspended_compcv *buffer
+md	|void	|resume_compcv_final					\
+				|NN struct suspended_compcv *buffer
 : Used in pp_ctl.c
 p	|void	|sub_crush_depth|NN CV *cv
 CpbMd	|bool	|sv_2bool	|NN SV * const sv

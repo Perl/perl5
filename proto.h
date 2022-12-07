@@ -3792,6 +3792,19 @@ Perl_require_pv(pTHX_ const char *pv);
 #define PERL_ARGS_ASSERT_REQUIRE_PV             \
         assert(pv)
 
+PERL_CALLCONV void
+Perl_resume_compcv(pTHX_ struct suspended_compcv *buffer, bool save);
+#define PERL_ARGS_ASSERT_RESUME_COMPCV          \
+        assert(buffer)
+
+/* PERL_CALLCONV void
+resume_compcv_and_save(pTHX_ struct suspended_compcv *buffer); */
+#define PERL_ARGS_ASSERT_RESUME_COMPCV_AND_SAVE
+
+/* PERL_CALLCONV void
+resume_compcv_final(pTHX_ struct suspended_compcv *buffer); */
+#define PERL_ARGS_ASSERT_RESUME_COMPCV_FINAL
+
 PERL_CALLCONV char *
 Perl_rninstr(const char *big, const char *bigend, const char *little, const char *lend)
         __attribute__warn_unused_result__
@@ -4268,6 +4281,11 @@ Perl_sub_crush_depth(pTHX_ CV *cv)
         __attribute__visibility__("hidden");
 #define PERL_ARGS_ASSERT_SUB_CRUSH_DEPTH        \
         assert(cv)
+
+PERL_CALLCONV void
+Perl_suspend_compcv(pTHX_ struct suspended_compcv *buffer);
+#define PERL_ARGS_ASSERT_SUSPEND_COMPCV         \
+        assert(buffer)
 
 PERL_CALLCONV bool
 Perl_sv_2bool_flags(pTHX_ SV *sv, I32 flags);
