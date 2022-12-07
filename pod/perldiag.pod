@@ -4517,12 +4517,20 @@ C<sysread()>ing a file, or when seeking past the end of a scalar opened
 for I/O (in anticipation of future reads and to imitate the behavior
 with real files).
 
+=item Old package separator "'" deprecated
+
+(W deprecated, syntax) You used the old package separator "'" in a
+variable, subroutine or package name.  Support for the old package
+separator will be removed in Perl 5.40.
+
 =item Old package separator used in string
 
-(W syntax) You used the old package separator, "'", in a variable
+(W deprecated, syntax) You used the old package separator, "'", in a variable
 named inside a double-quoted string; e.g., C<"In $name's house">.  This
 is equivalent to C<"In $name::s house">.  If you meant the former, put
 a backslash before the apostrophe (C<"In $name\'s house">).
+
+Support for the old package separator will be removed in Perl 5.40.
 
 =item %s() on unopened %s
 

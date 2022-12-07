@@ -1697,7 +1697,7 @@
 #   define reg_temp_copy(a,b)                   Perl_reg_temp_copy(aTHX_ a,b)
 #   define report_uninit(a)                     Perl_report_uninit(aTHX_ a)
 #   define scan_str(a,b,c,d,e)                  Perl_scan_str(aTHX_ a,b,c,d,e)
-#   define scan_word(a,b,c,d,e)                 Perl_scan_word(aTHX_ a,b,c,d,e)
+#   define scan_word(a,b,c,d,e,f)               Perl_scan_word(aTHX_ a,b,c,d,e,f)
 #   define skipspace_flags(a,b)                 Perl_skipspace_flags(aTHX_ a,b)
 #   define sv_magicext_mglob(a)                 Perl_sv_magicext_mglob(aTHX_ a)
 #   define sv_only_taint_gmagic                 Perl_sv_only_taint_gmagic
