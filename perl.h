@@ -7109,10 +7109,10 @@ the plain locale pragma without a parameter (S<C<use locale>>) is in effect.
                 MUTEX_UNLOCK(&PL_locale_mutex);                             \
             }                                                               \
             else if (PL_locale_mutex_depth <= 0) {                          \
-                DEBUG_L(PerlIO_printf(Perl_debug_log,                       \
-                        "%s: %d: ignored attempt to unlock already"         \
-                        " unlocked locale; depth unchanged at %d\n",        \
-                       __FILE__, __LINE__, PL_locale_mutex_depth));         \
+                Perl_croak_nocontext("panic: %s: %d: attempting to unlock"  \
+                                     " already unlocked locale; depth was"  \
+                                     " %d\n", __FILE__, __LINE__,           \
+                                     PL_locale_mutex_depth);                \
             }                                                               \
             else {                                                          \
                 PL_locale_mutex_depth--;                                    \
