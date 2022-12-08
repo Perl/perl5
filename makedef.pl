@@ -33,6 +33,7 @@
 
 use strict;
 use Config;
+use warnings;
 
 my $fold;
 my %ARGS;
