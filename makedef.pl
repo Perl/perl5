@@ -195,7 +195,7 @@ if ($define{MULTIPLICITY} && (   $define{USE_POSIX_2008_LOCALE}
                               || (   $define{WIN32}
                                   && $define{USE_THREAD_SAFE_LOCALE})))
 {
-    $define{USE_PERL_SWITCH_LOCALE_CONTEXT}
+    $define{USE_PERL_SWITCH_LOCALE_CONTEXT} = 1;
 }
 
 # perl.h logic duplication ends
