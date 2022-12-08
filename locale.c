@@ -1146,9 +1146,11 @@ S_emulate_setlocale_i(pTHX_
     /* Here, trying to change the locale, but it is a no-op if the new boss is
      * the same as the old boss.  Except this routine is called when converting
      * from the global locale, so in that case we will create a per-thread
-     * locale below (with the current values).  Bitter experience also
-     * indicates that newlocale() can free up the basis locale memory if we
-     * call it with the new and old being the same. */
+     * locale below (with the current values).  It also seemed that newlocale()
+     * could free up the basis locale memory if we called it with the new and
+     * old being the same, but khw now thinks that this was due to some other
+     * bug, since fixed, as there are other places where newlocale() gets
+     * similarly called without problems. */
     if (   entry_obj != LC_GLOBAL_LOCALE
         && locale_on_entry
         && strEQ(new_locale, locale_on_entry))
