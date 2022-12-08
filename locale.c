@@ -4146,7 +4146,7 @@ S_my_langinfo_i(pTHX_
     const char * retval = NULL;
 
     PERL_ARGS_ASSERT_MY_LANGINFO_I;
-    assert(cat_index <= NOMINAL_LC_ALL_INDEX);
+    assert(cat_index < NOMINAL_LC_ALL_INDEX);
 
     DEBUG_Lv(PerlIO_printf(Perl_debug_log,
                            "Entering my_langinfo item=%ld, using locale %s\n",
