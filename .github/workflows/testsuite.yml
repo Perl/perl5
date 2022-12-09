@@ -86,7 +86,7 @@ jobs:
         env:
           GITHUB_CONTEXT: ${{ toJson(github) }}
         run: echo "$GITHUB_CONTEXT"
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 1000
       - name: git setup
@@ -184,7 +184,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y libgdbm-dev libdb-dev
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 0
         if: steps.ci_config.outputs.ci_skip_sanity != 'true'
@@ -266,7 +266,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y libgdbm-dev libdb-dev
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: git cfg
         run: |
           git config diff.renameLimit 999999
@@ -318,7 +318,7 @@ jobs:
         run: |
           apt-get update
           apt-get install -y build-essential git-core libgdbm-dev libdb-dev
-      # actions/checkout@v2 doesn't work in a i386 container: the GitHub runner
+      # actions/checkout@v3 doesn't work in a i386 container: the GitHub runner
       # uses `node` that is installed on the host inside the container. The host
       # is (likely) running x86_64 and using a binary build for x86_64 inside a
       # i386 container just doesn't work.
@@ -366,7 +366,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y libgdbm-dev libdb-dev
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: git cfg
         run: |
           git config diff.renameLimit 999999
@@ -418,7 +418,7 @@ jobs:
           - "-Duseithreads -Duseshrplib"
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Configure
         run: |
           sh ./Configure -des -Dusedevel ${{ matrix.CONFIGURE_ARGS }}
@@ -447,7 +447,7 @@ jobs:
 
     steps:
       - run: git config --global core.autocrlf false
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       #- name: Install clcache
       #  shell: cmd
       #  run: |
@@ -503,7 +503,7 @@ jobs:
 
     steps:
       - run: git config --global core.autocrlf false
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Set up Perl build environment
         run: |
           # skip installing perl if it is already installed.
@@ -555,7 +555,7 @@ jobs:
       # we use Cygwin git, so no need to configure git here.
 
       - name: Set up Cygwin
-        uses: cygwin/cygwin-install-action@v2
+        uses: cygwin/cygwin-install-action@v3
         with:
           packages: >
               cygwin-devel gcc-core gcc-g++ make w32api-headers binutils libtool
@@ -648,7 +648,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y libgdbm-dev libdb-dev
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: git cfg
         run: |
           git config diff.renameLimit 999999
@@ -699,7 +699,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y libgdbm-dev libdb-dev
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: git cfg
         run: |
           git config diff.renameLimit 999999
@@ -747,7 +747,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y libgdbm-dev libdb-dev
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: git cfg
         run: |
           git config diff.renameLimit 999999
@@ -801,7 +801,7 @@ jobs:
       image: perldocker/perl-tester:${{ matrix.perl-version }}
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: perl -V
         run: perl -V
       - name: Build and test dist modules
@@ -826,7 +826,7 @@ jobs:
       fail-fast: false
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: perl -V
         run: /usr/bin/perl -V
       - name: Build and test dist modules
