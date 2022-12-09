@@ -1685,7 +1685,7 @@ END_EXTERN_C
 #   endif
 
     /* Participates in a single-character fold with a character above 255 */
-#   if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C)
+#   if defined(PERL_IN_REGCOMP_ANY) || defined(PERL_IN_REGEXEC_C)
 #     define HAS_NONLATIN1_SIMPLE_FOLD_CLOSURE(c)                           \
         ((   ! cBOOL(FITS_IN_8_BITS(c)))                                    \
           || (PL_charclass[(U8) (c)] & CC_mask_(CC_NONLATIN1_SIMPLE_FOLD_)))

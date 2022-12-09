@@ -64,7 +64,7 @@
 typedef struct regexp_internal {
         regnode *regstclass;    /* Optional startclass as identified or constructed
                                    by the optimiser */
-        struct reg_data *data;  /* Additional miscellaneous data used by the program.
+        struct reg_data *data;	/* Additional miscellaneous data used by the program.
                                    Used to make it easier to clone and free arbitrary
                                    data that the regops need. Often the ARG field of
                                    a regop is an index into this structure. NOTE the
@@ -76,10 +76,10 @@ typedef struct regexp_internal {
                                    only valid when RXp_PAREN_NAMES(prog) is true,
                                    0 means "no value" like any other index into the
                                    data array.*/
-        regnode program[1];     /* Unwarranted chumminess with compiler. */
+        regnode program[1];	/* Unwarranted chumminess with compiler. */
 } regexp_internal;
 
-#define RXi_SET(x,y) (x)->pprivate = (void*)(y)
+#define RXi_SET(x,y) (x)->pprivate = (void*)(y)   
 #define RXi_GET(x)   ((regexp_internal *)((x)->pprivate))
 #define RXi_GET_DECL(r,ri) regexp_internal *ri = RXi_GET(r)
 #define RXi_GET_DECL_NULL(r,ri) regexp_internal *ri = (r) ? RXi_GET(r) : NULL
@@ -92,12 +92,12 @@ typedef struct regexp_internal {
 #define RXp_INTFLAGS(rx)        ((rx)->intflags)
 #define RX_INTFLAGS(prog)        RXp_INTFLAGS(ReANY(prog))
 
-#define PREGf_SKIP              0x00000001
-#define PREGf_IMPLICIT          0x00000002 /* Converted .* to ^.* */
-#define PREGf_NAUGHTY           0x00000004 /* how exponential is this pattern? */
-#define PREGf_VERBARG_SEEN      0x00000008
-#define PREGf_CUTGROUP_SEEN     0x00000010
-#define PREGf_USE_RE_EVAL       0x00000020 /* compiled with "use re 'eval'" */
+#define PREGf_SKIP		0x00000001
+#define PREGf_IMPLICIT		0x00000002 /* Converted .* to ^.* */
+#define PREGf_NAUGHTY		0x00000004 /* how exponential is this pattern? */
+#define PREGf_VERBARG_SEEN	0x00000008
+#define PREGf_CUTGROUP_SEEN	0x00000010
+#define PREGf_USE_RE_EVAL	0x00000020 /* compiled with "use re 'eval'" */
 /* these used to be extflags, but are now intflags */
 #define PREGf_NOSCAN            0x00000040
                                 /* spare */
@@ -154,14 +154,14 @@ typedef struct regexp_internal {
  */
 
 struct regnode_string {
-    U8  str_len;
+    U8	str_len;
     U8  type;
     U16 next_off;
     char string[1];
 };
 
 struct regnode_lstring { /* Constructed this way to keep the string aligned. */
-    U8  flags;
+    U8	flags;
     U8  type;
     U16 next_off;
     U32 str_len;    /* Only 18 bits allowed before would overflow 'next_off' */
@@ -169,17 +169,17 @@ struct regnode_lstring { /* Constructed this way to keep the string aligned. */
 };
 
 struct regnode_anyofhs { /* Constructed this way to keep the string aligned. */
-    U8  str_len;
+    U8	str_len;
     U8  type;
     U16 next_off;
     U32 arg1;                           /* set by set_ANYOF_arg() */
     char string[1];
 };
 
-/* Argument bearing node - workhorse,
+/* Argument bearing node - workhorse, 
    arg1 is often for the data field */
 struct regnode_1 {
-    U8  flags;
+    U8	flags;
     U8  type;
     U16 next_off;
     U32 arg1;
@@ -201,7 +201,7 @@ struct regnode_1 {
  * then use inline functions to copy the data in or out.
  * */
 struct regnode_p {
-    U8  flags;
+    U8	flags;
     U8  type;
     U16 next_off;
     char arg1_sv_ptr_bytes[sizeof(SV *)];
@@ -209,7 +209,7 @@ struct regnode_p {
 
 /* Similar to a regnode_1 but with an extra signed argument */
 struct regnode_2L {
-    U8  flags;
+    U8	flags;
     U8  type;
     U16 next_off;
     U32 arg1;
@@ -218,7 +218,7 @@ struct regnode_2L {
 
 /* 'Two field' -- Two 16 bit unsigned args */
 struct regnode_2 {
-    U8  flags;
+    U8	flags;
     U8  type;
     U16 next_off;
     U16 arg1;
@@ -233,13 +233,13 @@ struct regnode_2 {
  * The array is a bitmap capable of representing any possible continuation
  * byte. */
 struct regnode_bbm {
-    U8  first_byte;
+    U8	first_byte;
     U8  type;
     U16 next_off;
     U8 bitmap[REGNODE_BBM_BITMAP_LEN];
 };
 
-#define ANYOF_BITMAP_SIZE       (NUM_ANYOF_CODE_POINTS / CHARBITS)
+#define ANYOF_BITMAP_SIZE	(NUM_ANYOF_CODE_POINTS / CHARBITS)
 
 /* Note that these form structs which are supersets of the next smaller one, by
  * appending fields.  Alignment problems can occur if one of those optional
@@ -254,21 +254,21 @@ struct regnode_bbm {
 
 /* also used by trie */
 struct regnode_charclass {
-    U8  flags;
+    U8	flags;
     U8  type;
     U16 next_off;
     U32 arg1;                           /* set by set_ANYOF_arg() */
-    char bitmap[ANYOF_BITMAP_SIZE];     /* only compile-time */
+    char bitmap[ANYOF_BITMAP_SIZE];	/* only compile-time */
 };
 
 /* has runtime (locale) \d, \w, ..., [:posix:] classes */
 struct regnode_charclass_posixl {
-    U8  flags;                      /* ANYOF_MATCHES_POSIXL bit must go here */
+    U8	flags;                      /* ANYOF_MATCHES_POSIXL bit must go here */
     U8  type;
     U16 next_off;
     U32 arg1;
-    char bitmap[ANYOF_BITMAP_SIZE];             /* both compile-time ... */
-    U32 classflags;                             /* and run-time */
+    char bitmap[ANYOF_BITMAP_SIZE];		/* both compile-time ... */
+    U32 classflags;	                        /* and run-time */
 };
 
 /* A synthetic start class (SSC); is a regnode_charclass_posixl_fold, plus an
@@ -285,12 +285,12 @@ struct regnode_charclass_posixl {
  * never a next node.
  */
 struct regnode_ssc {
-    U8  flags;                      /* ANYOF_MATCHES_POSIXL bit must go here */
+    U8	flags;                      /* ANYOF_MATCHES_POSIXL bit must go here */
     U8  type;
     U16 next_off;
     U32 arg1;
-    char bitmap[ANYOF_BITMAP_SIZE];     /* both compile-time ... */
-    U32 classflags;                     /* ... and run-time */
+    char bitmap[ANYOF_BITMAP_SIZE];	/* both compile-time ... */
+    U32 classflags;	                /* ... and run-time */
 
     /* Auxiliary, only used during construction; NULL afterwards: list of code
      * points matched */
@@ -376,15 +376,15 @@ struct regnode_ssc {
 #undef OPERAND
 #undef STRING
 
-#define OP(p)           ((p)->type)
-#define FLAGS(p)        ((p)->flags)    /* Caution: Doesn't apply to all      \
+#define	OP(p)		((p)->type)
+#define FLAGS(p)	((p)->flags)	/* Caution: Doesn't apply to all      \
                                            regnode types.  For some, it's the \
                                            character set of the regnode */
-#define STR_LENs(p)     (__ASSERT_(OP(p) != LEXACT && OP(p) != LEXACT_REQ8)  \
+#define	STR_LENs(p)	(__ASSERT_(OP(p) != LEXACT && OP(p) != LEXACT_REQ8)  \
                                     ((struct regnode_string *)p)->str_len)
-#define STRINGs(p)      (__ASSERT_(OP(p) != LEXACT && OP(p) != LEXACT_REQ8)  \
+#define	STRINGs(p)	(__ASSERT_(OP(p) != LEXACT && OP(p) != LEXACT_REQ8)  \
                                     ((struct regnode_string *)p)->string)
-#define OPERANDs(p)     STRINGs(p)
+#define	OPERANDs(p)	STRINGs(p)
 
 #define PARNO(p)        ARG(p)          /* APPLIES for OPEN and CLOSE only */
 
@@ -400,21 +400,21 @@ struct regnode_ssc {
  * node to be an ARG2L, using the second 32 bit field for the length, and not
  * using the flags nor next_off fields at all.  One could have an llstring node
  * and even an lllstring type. */
-#define STR_LENl(p)     (__ASSERT_(OP(p) == LEXACT || OP(p) == LEXACT_REQ8)  \
+#define	STR_LENl(p)	(__ASSERT_(OP(p) == LEXACT || OP(p) == LEXACT_REQ8)  \
                                     (((struct regnode_lstring *)p)->str_len))
-#define STRINGl(p)      (__ASSERT_(OP(p) == LEXACT || OP(p) == LEXACT_REQ8)  \
+#define	STRINGl(p)	(__ASSERT_(OP(p) == LEXACT || OP(p) == LEXACT_REQ8)  \
                                     (((struct regnode_lstring *)p)->string))
-#define OPERANDl(p)     STRINGl(p)
+#define	OPERANDl(p)	STRINGl(p)
 
-#define STR_LEN(p)      ((OP(p) == LEXACT || OP(p) == LEXACT_REQ8)           \
+#define	STR_LEN(p)	((OP(p) == LEXACT || OP(p) == LEXACT_REQ8)           \
                                                ? STR_LENl(p) : STR_LENs(p))
-#define STRING(p)       ((OP(p) == LEXACT || OP(p) == LEXACT_REQ8)           \
+#define	STRING(p)	((OP(p) == LEXACT || OP(p) == LEXACT_REQ8)           \
                                                ? STRINGl(p)  : STRINGs(p))
-#define OPERAND(p)      STRING(p)
+#define	OPERAND(p)	STRING(p)
 
 /* The number of (smallest) regnode equivalents that a string of length l bytes
  * occupies - Used by the REGNODE_AFTER() macros and functions. */
-#define STR_SZ(l)       (((l) + sizeof(regnode) - 1) / sizeof(regnode))
+#define STR_SZ(l)	(((l) + sizeof(regnode) - 1) / sizeof(regnode))
 
 #define setSTR_LEN(p,v)                                                     \
     STMT_START{                                                             \
@@ -431,18 +431,18 @@ struct regnode_ssc {
 #undef NODE_ALIGN
 #undef ARG_LOC
 
-#define NODE_ALIGN(node)
-#define ARG_LOC(p)      (((struct regnode_1 *)p)->arg1)
+#define	NODE_ALIGN(node)
+#define	ARG_LOC(p)	(((struct regnode_1 *)p)->arg1)
 #define ARGp_BYTES_LOC(p)  (((struct regnode_p *)p)->arg1_sv_ptr_bytes)
-#define ARG1_LOC(p)     (((struct regnode_2 *)p)->arg1)
-#define ARG2_LOC(p)     (((struct regnode_2 *)p)->arg2)
-#define ARG2L_LOC(p)    (((struct regnode_2L *)p)->arg2)
+#define	ARG1_LOC(p)	(((struct regnode_2 *)p)->arg1)
+#define	ARG2_LOC(p)	(((struct regnode_2 *)p)->arg2)
+#define ARG2L_LOC(p)	(((struct regnode_2L *)p)->arg2)
 
 
 /* These should no longer be used directly in most cases. Please use
  * the REGNODE_AFTER() macros instead. */
-#define NODE_STEP_REGNODE       1       /* sizeof(regnode)/sizeof(regnode) */
-#define EXTRA_STEP_2ARGS        EXTRA_SIZE(struct regnode_2)
+#define NODE_STEP_REGNODE	1	/* sizeof(regnode)/sizeof(regnode) */
+#define EXTRA_STEP_2ARGS	EXTRA_SIZE(struct regnode_2)
 
 /* Core macros for computing "the regnode after this one". See also
  * Perl_regnode_after() in reginline.h
@@ -735,7 +735,7 @@ ARGp_SET_inline(struct regnode *node, SV *ptr) {
 
 /* If this is set, the result of the match should be complemented.  regexec.c
  * is expecting this to be in the low bit.  Never in an SSC */
-#define ANYOF_INVERT                            0x01
+#define ANYOF_INVERT		                0x01
 
 /* For the SSC node only, which cannot be inverted, so is shared with that bit.
  * This is used only during regex compilation. */
@@ -799,7 +799,7 @@ ARGp_SET_inline(struct regnode *node, SV *ptr) {
 #define ANYOFD_NON_UTF8_MATCHES_ALL_NON_ASCII__shared 0x80
 #define ANYOF_WARN_SUPER__shared                      0x80
 
-#define ANYOF_FLAGS_ALL         ((U8) ~(0x10|0x20))
+#define ANYOF_FLAGS_ALL		((U8) ~(0x10|0x20))
 
 #define ANYOF_LOCALE_FLAGS (  ANYOFL_FOLD               \
                             | ANYOF_MATCHES_POSIXL      \
@@ -868,44 +868,44 @@ ARGp_SET_inline(struct regnode *node, SV *ptr) {
 #   error Problem with handy.h CC_foo_ #defines
 #endif
 
-#define ANYOF_HORIZWS   ((ANYOF_POSIXL_MAX)+2) /* = (ANYOF_NVERTWS + 1) */
-#define ANYOF_NHORIZWS  ((ANYOF_POSIXL_MAX)+3)
+#define ANYOF_HORIZWS	((ANYOF_POSIXL_MAX)+2) /* = (ANYOF_NVERTWS + 1) */
+#define ANYOF_NHORIZWS	((ANYOF_POSIXL_MAX)+3)
 
 #define ANYOF_UNIPROP   ((ANYOF_POSIXL_MAX)+4)  /* Used to indicate a Unicode
                                                    property: \p{} or \P{} */
 
 /* Backward source code compatibility. */
 
-#define ANYOF_ALNUML     ANYOF_ALNUM
-#define ANYOF_NALNUML    ANYOF_NALNUM
-#define ANYOF_SPACEL     ANYOF_SPACE
-#define ANYOF_NSPACEL    ANYOF_NSPACE
+#define ANYOF_ALNUML	 ANYOF_ALNUM
+#define ANYOF_NALNUML	 ANYOF_NALNUM
+#define ANYOF_SPACEL	 ANYOF_SPACE
+#define ANYOF_NSPACEL	 ANYOF_NSPACE
 #define ANYOF_ALNUM ANYOF_WORDCHAR
 #define ANYOF_NALNUM ANYOF_NWORDCHAR
 
 /* Utility macros for the bitmap and classes of ANYOF */
 
-#define BITMAP_BYTE(p, c)       (( (U8*) (p)) [ ( ( (UV) (c)) >> 3) ] )
-#define BITMAP_BIT(c)           (1U << ((c) & 7))
-#define BITMAP_TEST(p, c)       (BITMAP_BYTE(p, c) & BITMAP_BIT((U8)(c)))
+#define BITMAP_BYTE(p, c)	(( (U8*) (p)) [ ( ( (UV) (c)) >> 3) ] )
+#define BITMAP_BIT(c)	        (1U << ((c) & 7))
+#define BITMAP_TEST(p, c)	(BITMAP_BYTE(p, c) & BITMAP_BIT((U8)(c)))
 
-#define ANYOF_FLAGS(p)          ((p)->flags)
+#define ANYOF_FLAGS(p)		((p)->flags)
 
-#define ANYOF_BIT(c)            BITMAP_BIT(c)
+#define ANYOF_BIT(c)		BITMAP_BIT(c)
 
 #define ANYOF_POSIXL_BITMAP(p)  (((regnode_charclass_posixl*) (p))->classflags)
 
-#define POSIXL_SET(field, c)    ((field) |= (1U << (c)))
-#define ANYOF_POSIXL_SET(p, c)  POSIXL_SET(ANYOF_POSIXL_BITMAP(p), (c))
+#define POSIXL_SET(field, c)	((field) |= (1U << (c)))
+#define ANYOF_POSIXL_SET(p, c)	POSIXL_SET(ANYOF_POSIXL_BITMAP(p), (c))
 
 #define POSIXL_CLEAR(field, c) ((field) &= ~ (1U <<(c)))
 #define ANYOF_POSIXL_CLEAR(p, c) POSIXL_CLEAR(ANYOF_POSIXL_BITMAP(p), (c))
 
-#define POSIXL_TEST(field, c)   ((field) & (1U << (c)))
-#define ANYOF_POSIXL_TEST(p, c) POSIXL_TEST(ANYOF_POSIXL_BITMAP(p), (c))
+#define POSIXL_TEST(field, c)	((field) & (1U << (c)))
+#define ANYOF_POSIXL_TEST(p, c)	POSIXL_TEST(ANYOF_POSIXL_BITMAP(p), (c))
 
-#define POSIXL_ZERO(field)      STMT_START { (field) = 0; } STMT_END
-#define ANYOF_POSIXL_ZERO(ret)  POSIXL_ZERO(ANYOF_POSIXL_BITMAP(ret))
+#define POSIXL_ZERO(field)	STMT_START { (field) = 0; } STMT_END
+#define ANYOF_POSIXL_ZERO(ret)	POSIXL_ZERO(ANYOF_POSIXL_BITMAP(ret))
 
 #define ANYOF_POSIXL_SET_TO_BITMAP(p, bits)                                 \
                 STMT_START { ANYOF_POSIXL_BITMAP(p) = (bits); } STMT_END
@@ -938,25 +938,25 @@ ARGp_SET_inline(struct regnode *node, SV *ptr) {
 
 #define ANYOF_POSIXL_AND(source, dest) STMT_START { (dest)->classflags &= (source)->classflags ; } STMT_END
 
-#define ANYOF_BITMAP_ZERO(ret)  Zero(((regnode_charclass*)(ret))->bitmap, ANYOF_BITMAP_SIZE, char)
-#define ANYOF_BITMAP(p)         ((regnode_charclass*)(p))->bitmap
-#define ANYOF_BITMAP_BYTE(p, c) BITMAP_BYTE(ANYOF_BITMAP(p), c)
-#define ANYOF_BITMAP_SET(p, c)  (ANYOF_BITMAP_BYTE(p, c) |=  ANYOF_BIT(c))
-#define ANYOF_BITMAP_CLEAR(p,c) (ANYOF_BITMAP_BYTE(p, c) &= ~ANYOF_BIT(c))
-#define ANYOF_BITMAP_TEST(p, c) cBOOL(ANYOF_BITMAP_BYTE(p, c) & ANYOF_BIT(c))
+#define ANYOF_BITMAP_ZERO(ret)	Zero(((regnode_charclass*)(ret))->bitmap, ANYOF_BITMAP_SIZE, char)
+#define ANYOF_BITMAP(p)		((regnode_charclass*)(p))->bitmap
+#define ANYOF_BITMAP_BYTE(p, c)	BITMAP_BYTE(ANYOF_BITMAP(p), c)
+#define ANYOF_BITMAP_SET(p, c)	(ANYOF_BITMAP_BYTE(p, c) |=  ANYOF_BIT(c))
+#define ANYOF_BITMAP_CLEAR(p,c)	(ANYOF_BITMAP_BYTE(p, c) &= ~ANYOF_BIT(c))
+#define ANYOF_BITMAP_TEST(p, c)	cBOOL(ANYOF_BITMAP_BYTE(p, c) & ANYOF_BIT(c))
 
-#define ANYOF_BITMAP_SETALL(p)          \
+#define ANYOF_BITMAP_SETALL(p)		\
         memset (ANYOF_BITMAP(p), 255, ANYOF_BITMAP_SIZE)
-#define ANYOF_BITMAP_CLEARALL(p)        \
+#define ANYOF_BITMAP_CLEARALL(p)	\
         Zero (ANYOF_BITMAP(p), ANYOF_BITMAP_SIZE)
 
 /*
  * Utility definitions.
  */
 #ifndef CHARMASK
-#  define UCHARAT(p)    ((int)*(const U8*)(p))
+#  define UCHARAT(p)	((int)*(const U8*)(p))
 #else
-#  define UCHARAT(p)    ((int)*(p)&CHARMASK)
+#  define UCHARAT(p)	((int)*(p)&CHARMASK)
 #endif
 
 /* Number of regnode equivalents that 'guy' occupies beyond the size of the
@@ -991,11 +991,11 @@ START_EXTERN_C
 #ifndef DOINIT
 EXTCONST regexp_engine PL_core_reg_engine;
 #else /* DOINIT */
-EXTCONST regexp_engine PL_core_reg_engine = {
+EXTCONST regexp_engine PL_core_reg_engine = { 
         Perl_re_compile,
         Perl_regexec_flags,
         Perl_re_intuit_start,
-        Perl_re_intuit_string,
+        Perl_re_intuit_string, 
         Perl_regfree_internal,
         Perl_reg_numbered_buff_fetch,
         Perl_reg_numbered_buff_store,
@@ -1003,9 +1003,9 @@ EXTCONST regexp_engine PL_core_reg_engine = {
         Perl_reg_named_buff,
         Perl_reg_named_buff_iter,
         Perl_reg_qr_package,
-#if defined(USE_ITHREADS)
+#if defined(USE_ITHREADS)        
         Perl_regdupe_internal,
-#endif
+#endif        
         Perl_re_op_compile
 };
 #endif /* DOINIT */
@@ -1058,10 +1058,10 @@ struct reg_data {
 #define check_offset_max substrs->data[2].max_offset
 #define check_end_shift substrs->data[2].end_shift
 
-#define RX_ANCHORED_SUBSTR(rx)  (ReANY(rx)->anchored_substr)
-#define RX_ANCHORED_UTF8(rx)    (ReANY(rx)->anchored_utf8)
-#define RX_FLOAT_SUBSTR(rx)     (ReANY(rx)->float_substr)
-#define RX_FLOAT_UTF8(rx)       (ReANY(rx)->float_utf8)
+#define RX_ANCHORED_SUBSTR(rx)	(ReANY(rx)->anchored_substr)
+#define RX_ANCHORED_UTF8(rx)	(ReANY(rx)->anchored_utf8)
+#define RX_FLOAT_SUBSTR(rx)	(ReANY(rx)->float_substr)
+#define RX_FLOAT_UTF8(rx)	(ReANY(rx)->float_utf8)
 
 /* trie related stuff */
 
@@ -1099,12 +1099,12 @@ struct _reg_trie_state {
 
 /* info per word; indexed by wordnum */
 typedef struct {
-    U16  prev;  /* previous word in acceptance chain; eg in
+    U16  prev;	/* previous word in acceptance chain; eg in
                  * zzz|abc|ab/ after matching the chars abc, the
                  * accepted word is #2, and the previous accepted
                  * word is #3 */
-    U32 len;    /* how many chars long is this word? */
-    U32 accept; /* accept state for this word */
+    U32 len;	/* how many chars long is this word? */
+    U32 accept;	/* accept state for this word */
 } reg_trie_wordinfo;
 
 
@@ -1123,7 +1123,7 @@ struct _reg_trie_data {
     reg_trie_state  *states;         /* state data */
     reg_trie_trans  *trans;          /* array of transition elements */
     char            *bitmap;         /* stclass bitmap */
-    U16             *jump;           /* optional 1 indexed array of offsets before tail
+    U16 	    *jump;           /* optional 1 indexed array of offsets before tail 
                                         for the node following a given word. */
     reg_trie_wordinfo *wordinfo;     /* array of info per word */
     U16             uniquecharcount; /* unique chars in trie (width of trans table) */
@@ -1131,7 +1131,7 @@ struct _reg_trie_data {
     STRLEN          minlen;          /* minimum length of words in trie - build/opt only? */
     STRLEN          maxlen;          /* maximum length of words in trie - build/opt only? */
     U32             prefixlen;       /* #chars in common prefix */
-    U32             statecount;      /* Build only - number of states in the states array
+    U32             statecount;      /* Build only - number of states in the states array 
                                         (including the unused zero state) */
     U32             wordcount;       /* Build only */
 #ifdef DEBUGGING
@@ -1166,11 +1166,11 @@ typedef struct _reg_ac_data reg_ac_data;
    This is simpler than refactoring all of it as wed end up with
    three different sets... */
 
-#define TRIE_BITMAP(p)          (((reg_trie_data *)(p))->bitmap)
-#define TRIE_BITMAP_BYTE(p, c)  BITMAP_BYTE(TRIE_BITMAP(p), c)
-#define TRIE_BITMAP_SET(p, c)   (TRIE_BITMAP_BYTE(p, c) |=  ANYOF_BIT((U8)c))
-#define TRIE_BITMAP_CLEAR(p,c)  (TRIE_BITMAP_BYTE(p, c) &= ~ANYOF_BIT((U8)c))
-#define TRIE_BITMAP_TEST(p, c)  (TRIE_BITMAP_BYTE(p, c) &   ANYOF_BIT((U8)c))
+#define TRIE_BITMAP(p)		(((reg_trie_data *)(p))->bitmap)
+#define TRIE_BITMAP_BYTE(p, c)	BITMAP_BYTE(TRIE_BITMAP(p), c)
+#define TRIE_BITMAP_SET(p, c)	(TRIE_BITMAP_BYTE(p, c) |=  ANYOF_BIT((U8)c))
+#define TRIE_BITMAP_CLEAR(p,c)	(TRIE_BITMAP_BYTE(p, c) &= ~ANYOF_BIT((U8)c))
+#define TRIE_BITMAP_TEST(p, c)	(TRIE_BITMAP_BYTE(p, c) &   ANYOF_BIT((U8)c))
 
 #define IS_ANYOF_TRIE(op) ((op)==TRIEC || (op)==AHOCORASICKC)
 #define IS_TRIE_AC(op) ((op)>=AHOCORASICK)
@@ -1201,7 +1201,7 @@ The three groups are: Compile, Execute, Extra. There is room for a
 further group, as currently only the low three bytes are used.
 
     Compile Options:
-
+    
     PARSE
     PEEP
     TRIE
@@ -1363,7 +1363,7 @@ re.pm, especially to the documentation.
 
 #define RE_SV_DUMPLEN(ItEm) (SvCUR(ItEm) - (SvTAIL(ItEm)!=0))
 #define RE_SV_TAIL(ItEm) (SvTAIL(ItEm) ? "$" : "")
-
+    
 #else /* if not DEBUGGING */
 
 #define DECLARE_AND_GET_RE_DEBUG_FLAGS  dNOOP
@@ -1423,7 +1423,7 @@ typedef enum {
 #define REGNODE_ARG_LEN_VARIES(node)    (PL_regnode_info[(node)].arg_len_varies)
 #define REGNODE_NAME(node)              (PL_regnode_name[(node)])
 
-#if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C)
+#if defined(PERL_IN_REGEX_ENGINE)
 #include "reginline.h"
 #endif
 

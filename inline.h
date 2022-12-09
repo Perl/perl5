@@ -2639,7 +2639,7 @@ S_lossless_NV_to_IV(const NV nv, IV *ivp)
 
 /* ------------------ pp.c, regcomp.c, toke.c, universal.c ------------ */
 
-#if defined(PERL_IN_PP_C) || defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_TOKE_C) || defined(PERL_IN_UNIVERSAL_C)
+#if defined(PERL_IN_PP_C) || defined(PERL_IN_REGCOMP_ANY) || defined(PERL_IN_TOKE_C) || defined(PERL_IN_UNIVERSAL_C)
 
 #define MAX_CHARSET_NAME_LENGTH 2
 

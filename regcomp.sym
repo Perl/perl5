@@ -1,6 +1,6 @@
 # regcomp.sym
 #
-# File has two sections, divided by a line of dashes '-'.
+# File has two sections, divided by a line of dashes '-'. 
 #
 # Lines beginning with # are ignored, except for those that start with #*
 # which are included in pod/perldebguts.pod.  # within a line may be part
@@ -10,7 +10,7 @@
 #
 # Note that the order in this file is important.
 #
-# Format for first section:
+# Format for first section: 
 # NAME \s+ TYPE, arg-description [struct regnode suffix] [flags] [longjump] ; DESCRIPTION
 #   arg-description is currently unused
 #   suffix is appended to 'struct_regnode_' giving which one to use.  If empty,
@@ -278,8 +278,8 @@ GOSUB       GOSUB,      num/ofs 2L    ; recurse to paren arg1 at (signed) ofs ar
 
 #*Special conditionals
 GROUPPN     GROUPPN,    no-sv 1   ; Whether the group matched.
-INSUBP      INSUBP,     num 1     ; Whether we are in a specific recurse.
-DEFINEP     DEFINEP,    none 1    ; Never execute directly.
+INSUBP      INSUBP,     num 1     ; Whether we are in a specific recurse.  
+DEFINEP     DEFINEP,    none 1    ; Never execute directly.               
 
 #*Backtracking Verbs
 ENDLIKE     ENDLIKE,    none      ; Used only for the type field of verbs
@@ -288,7 +288,7 @@ ACCEPT      ENDLIKE,    no-sv/num 2L   ; Accepts the current matched string, wit
 
 #*Verbs With Arguments
 VERB        VERB,       no-sv 1   ; Used only for the type field of verbs
-PRUNE       VERB,       no-sv 1   ; Pattern fails at this startpoint if no-backtracking through this
+PRUNE       VERB,       no-sv 1   ; Pattern fails at this startpoint if no-backtracking through this 
 MARKPOINT   VERB,       no-sv 1   ; Push the current location for rollback by cut.
 SKIP        VERB,       no-sv 1   ; On failure skip forward (to the mark) before retrying
 COMMIT      VERB,       no-sv 1   ; Pattern fails outright if backtracking through this

@@ -838,7 +838,7 @@
 #define dump_mstats(a)		Perl_dump_mstats(aTHX_ a)
 #define get_mstats(a,b,c)	Perl_get_mstats(aTHX_ a,b,c)
 #endif
-#if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C)
+#if defined(PERL_IN_REGEX_ENGINE)
 #define check_regnode_after(a,b)	Perl_check_regnode_after(aTHX_ a,b)
 #define regnext(a)		Perl_regnext(aTHX_ a)
 #define regnode_after(a,b)	Perl_regnode_after(aTHX_ a,b)
@@ -964,12 +964,12 @@
 #define my_memrchr		S_my_memrchr
 #  endif
 #  if !(!defined(PERL_EXT_RE_BUILD))
-#    if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C)
+#    if defined(PERL_IN_REGEX_ENGINE)
 #define get_re_gclass_aux_data(a,b,c,d,e,f)	Perl_get_re_gclass_aux_data(aTHX_ a,b,c,d,e,f)
 #    endif
 #  endif
 #  if !defined(PERL_EXT_RE_BUILD)
-#    if defined(PERL_IN_REGCOMP_C)
+#    if defined(PERL_IN_REGCOMP_INVLIST_C)
 #define _append_range_to_invlist(a,b,c)	S__append_range_to_invlist(aTHX_ a,b,c)
 #define _invlist_array_init	S__invlist_array_init
 #define get_invlist_previous_index_addr	S_get_invlist_previous_index_addr
@@ -980,26 +980,12 @@
 #define invlist_set_previous_index	S_invlist_set_previous_index
 #define invlist_trim		S_invlist_trim
 #    endif
-#    if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C)
+#    if defined(PERL_IN_REGEX_ENGINE)
 #define get_regclass_aux_data(a,b,c,d,e,f)	Perl_get_regclass_aux_data(aTHX_ a,b,c,d,e,f)
 #    endif
 #  endif
 #  if defined(DEBUGGING)
 #    if defined(PERL_IN_REGCOMP_C)
-#define dump_trie(a,b,c,d)	S_dump_trie(aTHX_ a,b,c,d)
-#define dump_trie_interim_list(a,b,c,d,e)	S_dump_trie_interim_list(aTHX_ a,b,c,d,e)
-#define dump_trie_interim_table(a,b,c,d,e)	S_dump_trie_interim_table(aTHX_ a,b,c,d,e)
-#define dumpuntil(a,b,c,d,e,f,g,h)	S_dumpuntil(aTHX_ a,b,c,d,e,f,g,h)
-#define put_charclass_bitmap_innards(a,b,c,d,e,f,g)	S_put_charclass_bitmap_innards(aTHX_ a,b,c,d,e,f,g)
-#define put_charclass_bitmap_innards_common(a,b,c,d,e,f)	S_put_charclass_bitmap_innards_common(aTHX_ a,b,c,d,e,f)
-#define put_charclass_bitmap_innards_invlist(a,b)	S_put_charclass_bitmap_innards_invlist(aTHX_ a,b)
-#define put_code_point(a,b)	S_put_code_point(aTHX_ a,b)
-#define put_range(a,b,c,d)	S_put_range(aTHX_ a,b,c,d)
-#if !defined(MULTIPLICITY) || defined(PERL_CORE)
-#define re_indentf(a,...)	Perl_re_indentf(aTHX_ a,__VA_ARGS__)
-#endif
-#define regdump_extflags(a,b)	S_regdump_extflags(aTHX_ a,b)
-#define regdump_intflags(a,b)	S_regdump_intflags(aTHX_ a,b)
 #define regnode_guts_debug(a,b,c)	S_regnode_guts_debug(aTHX_ a,b,c)
 #define regtail_study(a,b,c,d)	S_regtail_study(aTHX_ a,b,c,d)
 #    endif
@@ -1035,20 +1021,80 @@
 #define mem_collxfrm_(a,b,c,d)	Perl_mem_collxfrm_(aTHX_ a,b,c,d)
 #    endif
 #  endif
+#  if defined(PERL_IN_REGCOMP_ANY)
+#define add_above_Latin1_folds(a,b,c)	Perl_add_above_Latin1_folds(aTHX_ a,b,c)
+#define construct_ahocorasick_from_trie(a,b,c)	Perl_construct_ahocorasick_from_trie(aTHX_ a,b,c)
+#define get_ANYOFHbbm_contents(a)	Perl_get_ANYOFHbbm_contents(aTHX_ a)
+#define get_ANYOFM_contents(a)	Perl_get_ANYOFM_contents(aTHX_ a)
+#define invlist_contents(a,b)	S_invlist_contents(aTHX_ a,b)
+#define invlist_highest_range_start	S_invlist_highest_range_start
+#define invlist_is_iterating	S_invlist_is_iterating
+#define invlist_lowest		S_invlist_lowest
+#define is_ssc_worth_it		Perl_is_ssc_worth_it
+#define join_exact(a,b,c,d,e,f,g)	Perl_join_exact(aTHX_ a,b,c,d,e,f,g)
+#define make_trie(a,b,c,d,e,f,g,h)	Perl_make_trie(aTHX_ a,b,c,d,e,f,g,h)
+#define populate_anyof_bitmap_from_invlist(a,b)	Perl_populate_anyof_bitmap_from_invlist(aTHX_ a,b)
+#define reg_add_data		Perl_reg_add_data
+#define scan_commit(a,b,c,d)	Perl_scan_commit(aTHX_ a,b,c,d)
+#define set_ANYOF_arg(a,b,c,d,e)	Perl_set_ANYOF_arg(aTHX_ a,b,c,d,e)
+#define ssc_finalize(a,b)	Perl_ssc_finalize(aTHX_ a,b)
+#define ssc_init(a,b)		Perl_ssc_init(aTHX_ a,b)
+#define study_chunk(a,b,c,d,e,f,g,h,i,j,k,l)	Perl_study_chunk(aTHX_ a,b,c,d,e,f,g,h,i,j,k,l)
+#    if defined(PERL_IN_REGCOMP_TRIE_C) && defined(DEBUGGING)
+#define dump_trie(a,b,c,d)	S_dump_trie(aTHX_ a,b,c,d)
+#define dump_trie_interim_list(a,b,c,d,e)	S_dump_trie_interim_list(aTHX_ a,b,c,d,e)
+#define dump_trie_interim_table(a,b,c,d,e)	S_dump_trie_interim_table(aTHX_ a,b,c,d,e)
+#    endif
+#  endif
+#  if defined(PERL_IN_REGCOMP_ANY) || defined (PERL_IN_DUMP_C) || defined(PERL_IN_OP_C)
+#define _invlist_dump(a,b,c,d)	Perl__invlist_dump(aTHX_ a,b,c,d)
+#  endif
+#  if defined(PERL_IN_REGCOMP_ANY) || defined(PERL_IN_DOOP_C) || defined(PERL_IN_OP_C)
+#define add_cp_to_invlist(a,b)	S_add_cp_to_invlist(aTHX_ a,b)
+#define invlist_extend(a,b)	S_invlist_extend(aTHX_ a,b)
+#define invlist_highest		S_invlist_highest
+#define invlist_set_len(a,b,c)	S_invlist_set_len(aTHX_ a,b,c)
+#  endif
+#  if defined(PERL_IN_REGCOMP_ANY) || defined(PERL_IN_DOOP_C) || defined(PERL_IN_OP_C) || defined(PERL_IN_UTF8_C)
+#define _add_range_to_invlist(a,b,c)	Perl__add_range_to_invlist(aTHX_ a,b,c)
+#define _invlist_intersection_maybe_complement_2nd(a,b,c,d)	Perl__invlist_intersection_maybe_complement_2nd(aTHX_ a,b,c,d)
+#define _invlist_invert(a)	Perl__invlist_invert(aTHX_ a)
+#define _invlist_union_maybe_complement_2nd(a,b,c,d)	Perl__invlist_union_maybe_complement_2nd(aTHX_ a,b,c,d)
+#define _new_invlist(a)		Perl__new_invlist(aTHX_ a)
+#define _setup_canned_invlist(a,b,c)	Perl__setup_canned_invlist(aTHX_ a,b,c)
+#  endif
+#  if defined(PERL_IN_REGCOMP_ANY) || defined(PERL_IN_OP_C)
+#define get_invlist_iter_addr	S_get_invlist_iter_addr
+#define invlist_iterfinish	S_invlist_iterfinish
+#define invlist_iterinit	S_invlist_iterinit
+#define invlist_iternext	S_invlist_iternext
+#  endif
+#  if defined(PERL_IN_REGCOMP_ANY) || defined(PERL_IN_PERL_C) || defined(PERL_IN_UTF8_C)
+#define _invlistEQ(a,b,c)	Perl__invlistEQ(aTHX_ a,b,c)
+#define _new_invlist_C_array(a)	Perl__new_invlist_C_array(aTHX_ a)
+#  endif
+#  if defined(PERL_IN_REGCOMP_ANY) || defined(PERL_IN_PP_C) || defined(PERL_IN_TOKE_C) || defined(PERL_IN_UNIVERSAL_C)
+#define get_regex_charset_name	S_get_regex_charset_name
+#  endif
+#  if defined(PERL_IN_REGCOMP_ANY) || defined(PERL_IN_REGEXEC_C)	 || defined(PERL_IN_PP_C) || defined(PERL_IN_OP_C)		 || defined(PERL_IN_TOKE_C) || defined(PERL_IN_UTF8_C)		 || defined(PERL_IN_DOOP_C)
+#define _invlist_contains_cp	S__invlist_contains_cp
+#define _invlist_len		S__invlist_len
+#define _invlist_search		Perl__invlist_search
+#define get_invlist_offset_addr	S_get_invlist_offset_addr
+#define invlist_array		S_invlist_array
+#define is_invlist		S_is_invlist
+#  endif
+#  if defined(PERL_IN_REGCOMP_ANY) || defined(PERL_IN_SV_C)
+#define invlist_clone(a,b)	Perl_invlist_clone(aTHX_ a,b)
+#  endif
 #  if defined(PERL_IN_REGCOMP_C)
-#define add_above_Latin1_folds(a,b,c)	S_add_above_Latin1_folds(aTHX_ a,b,c)
-#define add_data		S_add_data
 #define add_multi_match(a,b,c)	S_add_multi_match(aTHX_ a,b,c)
 #define change_engine_size(a,b)	S_change_engine_size(aTHX_ a,b)
 #define compile_wildcard(a,b,c)	S_compile_wildcard(aTHX_ a,b,c)
 #define compute_EXACTish	S_compute_EXACTish
-#define construct_ahocorasick_from_trie(a,b,c)	S_construct_ahocorasick_from_trie(aTHX_ a,b,c)
 #define edit_distance		S_edit_distance
 #define execute_wildcard(a,b,c,d,e,f,g)	S_execute_wildcard(aTHX_ a,b,c,d,e,f,g)
 #define find_first_differing_byte_pos	S_find_first_differing_byte_pos
-#define get_ANYOFHbbm_contents(a)	S_get_ANYOFHbbm_contents(aTHX_ a)
-#define get_ANYOFM_contents(a)	S_get_ANYOFM_contents(aTHX_ a)
-#define get_ANYOF_cp_list_for_ssc(a,b)	S_get_ANYOF_cp_list_for_ssc(aTHX_ a,b)
 #define get_quantifier_value(a,b,c)	S_get_quantifier_value(aTHX_ a,b,c)
 #define grok_bslash_N(a,b,c,d,e,f,g)	S_grok_bslash_N(aTHX_ a,b,c,d,e,f,g)
 #define handle_named_backref(a,b,c,d)	S_handle_named_backref(aTHX_ a,b,c,d)
@@ -1056,23 +1102,11 @@
 #define handle_possible_posix(a,b,c,d,e)	S_handle_possible_posix(aTHX_ a,b,c,d,e)
 #define handle_regex_sets(a,b,c,d)	S_handle_regex_sets(aTHX_ a,b,c,d)
 #define handle_user_defined_property(a,b,c,d,e,f,g,h,i,j)	S_handle_user_defined_property(aTHX_ a,b,c,d,e,f,g,h,i,j)
-#define invlist_contents(a,b)	S_invlist_contents(aTHX_ a,b)
-#define invlist_highest_range_start	S_invlist_highest_range_start
-#define invlist_is_iterating	S_invlist_is_iterating
-#define invlist_lowest		S_invlist_lowest
-#define is_ssc_worth_it		S_is_ssc_worth_it
-#define join_exact(a,b,c,d,e,f,g)	S_join_exact(aTHX_ a,b,c,d,e,f,g)
-#define make_exactf_invlist(a,b)	S_make_exactf_invlist(aTHX_ a,b)
-#define make_trie(a,b,c,d,e,f,g,h)	S_make_trie(aTHX_ a,b,c,d,e,f,g,h)
 #define nextchar(a)		S_nextchar(aTHX_ a)
 #define optimize_regclass(a,b,c,d,e,f,g,h,i,j)	S_optimize_regclass(aTHX_ a,b,c,d,e,f,g,h,i,j)
 #define output_posix_warnings(a,b)	S_output_posix_warnings(aTHX_ a,b)
 #define parse_lparen_question_flags(a)	S_parse_lparen_question_flags(aTHX_ a)
 #define parse_uniprop_string(a,b,c,d,e,f,g,h,i,j)	S_parse_uniprop_string(aTHX_ a,b,c,d,e,f,g,h,i,j)
-#define populate_anyof_bitmap_from_invlist(a,b)	S_populate_anyof_bitmap_from_invlist(aTHX_ a,b)
-#define populate_bitmap_from_invlist(a,b,c,d)	S_populate_bitmap_from_invlist(aTHX_ a,b,c,d)
-#define populate_invlist_from_bitmap(a,b,c,d)	S_populate_invlist_from_bitmap(aTHX_ a,b,c,d)
-#define rck_elide_nothing(a)	S_rck_elide_nothing(aTHX_ a)
 #define reg(a,b,c,d)		S_reg(aTHX_ a,b,c,d)
 #define reg2Lanode(a,b,c,d)	S_reg2Lanode(aTHX_ a,b,c,d)
 #define reg_la_NOTHING(a,b,c)	S_reg_la_NOTHING(aTHX_ a,b,c)
@@ -1090,40 +1124,8 @@
 #define regpiece(a,b,c)		S_regpiece(aTHX_ a,b,c)
 #define regpnode(a,b,c)		S_regpnode(aTHX_ a,b,c)
 #define regtail(a,b,c,d)	S_regtail(aTHX_ a,b,c,d)
-#define scan_commit(a,b,c,d)	S_scan_commit(aTHX_ a,b,c,d)
-#define set_ANYOF_arg(a,b,c,d,e)	S_set_ANYOF_arg(aTHX_ a,b,c,d,e)
 #define set_regex_pv(a,b)	S_set_regex_pv(aTHX_ a,b)
 #define skip_to_be_ignored_text(a,b,c)	S_skip_to_be_ignored_text(aTHX_ a,b,c)
-#define ssc_add_range(a,b,c)	S_ssc_add_range(aTHX_ a,b,c)
-#define ssc_and(a,b,c)		S_ssc_and(aTHX_ a,b,c)
-#define ssc_anything(a)		S_ssc_anything(aTHX_ a)
-#define ssc_clear_locale	S_ssc_clear_locale
-#define ssc_cp_and(a,b)		S_ssc_cp_and(aTHX_ a,b)
-#define ssc_finalize(a,b)	S_ssc_finalize(aTHX_ a,b)
-#define ssc_init(a,b)		S_ssc_init(aTHX_ a,b)
-#define ssc_intersection(a,b,c)	S_ssc_intersection(aTHX_ a,b,c)
-#define ssc_is_anything		S_ssc_is_anything
-#define ssc_is_cp_posixl_init	S_ssc_is_cp_posixl_init
-#define ssc_or(a,b,c)		S_ssc_or(aTHX_ a,b,c)
-#define ssc_union(a,b,c)	S_ssc_union(aTHX_ a,b,c)
-#define study_chunk(a,b,c,d,e,f,g,h,i,j,k,l)	S_study_chunk(aTHX_ a,b,c,d,e,f,g,h,i,j,k,l)
-#  endif
-#  if defined(PERL_IN_REGCOMP_C) || defined (PERL_IN_DUMP_C) || defined(PERL_IN_OP_C)
-#define _invlist_dump(a,b,c,d)	Perl__invlist_dump(aTHX_ a,b,c,d)
-#  endif
-#  if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_DOOP_C) || defined(PERL_IN_OP_C)
-#define add_cp_to_invlist(a,b)	S_add_cp_to_invlist(aTHX_ a,b)
-#define invlist_extend(a,b)	S_invlist_extend(aTHX_ a,b)
-#define invlist_highest		S_invlist_highest
-#define invlist_set_len(a,b,c)	S_invlist_set_len(aTHX_ a,b,c)
-#  endif
-#  if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_DOOP_C) || defined(PERL_IN_OP_C) || defined(PERL_IN_UTF8_C)
-#define _add_range_to_invlist(a,b,c)	Perl__add_range_to_invlist(aTHX_ a,b,c)
-#define _invlist_intersection_maybe_complement_2nd(a,b,c,d)	Perl__invlist_intersection_maybe_complement_2nd(aTHX_ a,b,c,d)
-#define _invlist_invert(a)	Perl__invlist_invert(aTHX_ a)
-#define _invlist_union_maybe_complement_2nd(a,b,c,d)	Perl__invlist_union_maybe_complement_2nd(aTHX_ a,b,c,d)
-#define _new_invlist(a)		Perl__new_invlist(aTHX_ a)
-#define _setup_canned_invlist(a,b,c)	Perl__setup_canned_invlist(aTHX_ a,b,c)
 #  endif
 #  if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_DQUOTE_C) || defined(PERL_IN_TOKE_C)
 #define form_alien_digit_msg(a,b,c,d,e,f)	Perl_form_alien_digit_msg(aTHX_ a,b,c,d,e,f)
@@ -1134,44 +1136,43 @@
 #  if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_DQUOTE_C) || defined(PERL_IN_TOKE_C) || defined(PERL_IN_UTF8_C)
 #define form_cp_too_large_msg(a,b,c,d)	Perl_form_cp_too_large_msg(aTHX_ a,b,c,d)
 #  endif
-#  if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_OP_C)
-#define get_invlist_iter_addr	S_get_invlist_iter_addr
-#define invlist_iterfinish	S_invlist_iterfinish
-#define invlist_iterinit	S_invlist_iterinit
-#define invlist_iternext	S_invlist_iternext
-#  endif
-#  if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_PERL_C) || defined(PERL_IN_UTF8_C)
-#define _invlistEQ(a,b,c)	Perl__invlistEQ(aTHX_ a,b,c)
-#define _new_invlist_C_array(a)	Perl__new_invlist_C_array(aTHX_ a)
-#  endif
-#  if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_PP_C) || defined(PERL_IN_TOKE_C) || defined(PERL_IN_UNIVERSAL_C)
-#define get_regex_charset_name	S_get_regex_charset_name
-#  endif
-#  if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C)
-#if !defined(MULTIPLICITY) || defined(PERL_CORE)
-#define re_printf(...)		Perl_re_printf(aTHX_ __VA_ARGS__)
-#endif
-#define regprop(a,b,c,d,e)	Perl_regprop(aTHX_ a,b,c,d,e)
-#  endif
-#  if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C)	 || defined(PERL_IN_PP_C) || defined(PERL_IN_OP_C)		 || defined(PERL_IN_TOKE_C) || defined(PERL_IN_UTF8_C)		 || defined(PERL_IN_DOOP_C)
-#define _invlist_contains_cp	S__invlist_contains_cp
-#define _invlist_len		S__invlist_len
-#define _invlist_search		Perl__invlist_search
-#define get_invlist_offset_addr	S_get_invlist_offset_addr
-#define invlist_array		S_invlist_array
-#define is_invlist		S_is_invlist
-#  endif
 #  if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C) || defined(PERL_IN_TOKE_C)
 #define is_grapheme(a,b,c,d)	Perl_is_grapheme(aTHX_ a,b,c,d)
 #  endif
 #  if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C) || defined(PERL_IN_UTF8_C)
 #define _to_fold_latin1		Perl__to_fold_latin1
 #  endif
-#  if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_SV_C)
-#define invlist_clone(a,b)	Perl_invlist_clone(aTHX_ a,b)
-#  endif
 #  if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_TOKE_C)
 #define regcurly		Perl_regcurly
+#  endif
+#  if defined(PERL_IN_REGCOMP_DEBUG_C) && defined(DEBUGGING)
+#define put_charclass_bitmap_innards(a,b,c,d,e,f,g)	S_put_charclass_bitmap_innards(aTHX_ a,b,c,d,e,f,g)
+#define put_charclass_bitmap_innards_common(a,b,c,d,e,f)	S_put_charclass_bitmap_innards_common(aTHX_ a,b,c,d,e,f)
+#define put_charclass_bitmap_innards_invlist(a,b)	S_put_charclass_bitmap_innards_invlist(aTHX_ a,b)
+#define put_code_point(a,b)	S_put_code_point(aTHX_ a,b)
+#define put_range(a,b,c,d)	S_put_range(aTHX_ a,b,c,d)
+#define regdump_extflags(a,b)	S_regdump_extflags(aTHX_ a,b)
+#define regdump_intflags(a,b)	S_regdump_intflags(aTHX_ a,b)
+#  endif
+#  if defined(PERL_IN_REGCOMP_INVLIST_C) || defined(PERL_IN_REGCOMP_C)
+#define populate_bitmap_from_invlist(a,b,c,d)	Perl_populate_bitmap_from_invlist(aTHX_ a,b,c,d)
+#define populate_invlist_from_bitmap(a,b,c,d)	Perl_populate_invlist_from_bitmap(aTHX_ a,b,c,d)
+#  endif
+#  if defined(PERL_IN_REGCOMP_STUDY_C)
+#define get_ANYOF_cp_list_for_ssc(a,b)	S_get_ANYOF_cp_list_for_ssc(aTHX_ a,b)
+#define make_exactf_invlist(a,b)	S_make_exactf_invlist(aTHX_ a,b)
+#define rck_elide_nothing(a)	S_rck_elide_nothing(aTHX_ a)
+#define ssc_add_range(a,b,c)	S_ssc_add_range(aTHX_ a,b,c)
+#define ssc_and(a,b,c)		S_ssc_and(aTHX_ a,b,c)
+#define ssc_anything(a)		S_ssc_anything(aTHX_ a)
+#define ssc_clear_locale	S_ssc_clear_locale
+#define ssc_cp_and(a,b)		S_ssc_cp_and(aTHX_ a,b)
+#define ssc_intersection(a,b,c)	S_ssc_intersection(aTHX_ a,b,c)
+#define ssc_is_anything		S_ssc_is_anything
+#define ssc_is_cp_posixl_init	S_ssc_is_cp_posixl_init
+#define ssc_or(a,b,c)		S_ssc_or(aTHX_ a,b,c)
+#define ssc_union(a,b,c)	S_ssc_union(aTHX_ a,b,c)
+#define unwind_scan_frames(a)	S_unwind_scan_frames(aTHX_ a)
 #  endif
 #  if defined(PERL_IN_REGEXEC_C)
 #define advance_one_LB(a,b,c)	S_advance_one_LB(aTHX_ a,b,c)
@@ -1205,6 +1206,19 @@
 #define regtry(a,b)		S_regtry(aTHX_ a,b)
 #define to_byte_substr(a)	S_to_byte_substr(aTHX_ a)
 #define to_utf8_substr(a)	S_to_utf8_substr(aTHX_ a)
+#  endif
+#  if defined(PERL_IN_REGEX_ENGINE) && defined(DEBUGGING)
+#define debug_peep(a,b,c,d,e)	Perl_debug_peep(aTHX_ a,b,c,d,e)
+#define debug_show_study_flags(a,b,c)	Perl_debug_show_study_flags(aTHX_ a,b,c)
+#define debug_studydata(a,b,c,d,e,f,g)	Perl_debug_studydata(aTHX_ a,b,c,d,e,f,g)
+#define dumpuntil(a,b,c,d,e,f,g,h)	Perl_dumpuntil(aTHX_ a,b,c,d,e,f,g,h)
+#if !defined(MULTIPLICITY) || defined(PERL_CORE)
+#define re_indentf(a,...)	Perl_re_indentf(aTHX_ a,__VA_ARGS__)
+#endif
+#if !defined(MULTIPLICITY) || defined(PERL_CORE)
+#define re_printf(...)		Perl_re_printf(aTHX_ __VA_ARGS__)
+#endif
+#define regprop(a,b,c,d,e)	Perl_regprop(aTHX_ a,b,c,d,e)
 #  endif
 #endif
 #ifdef PERL_CORE
@@ -1570,7 +1584,7 @@
 #    endif
 #  endif
 #  if !defined(PERL_EXT_RE_BUILD)
-#    if defined(PERL_IN_REGCOMP_C)
+#    if defined(PERL_IN_REGCOMP_INVLIST_C)
 #define initialize_invlist_guts(a,b)	S_initialize_invlist_guts(aTHX_ a,b)
 #    endif
 #  endif
