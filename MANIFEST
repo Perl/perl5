@@ -4454,6 +4454,8 @@ ext/Pod-Html/t/feature.pod
 ext/Pod-Html/t/feature.t
 ext/Pod-Html/t/feature2.pod
 ext/Pod-Html/t/feature2.t
+ext/Pod-Html/t/feature3.pod
+ext/Pod-Html/t/feature3.t
 ext/Pod-Html/t/htmldir1.pod
 ext/Pod-Html/t/htmldir1.t
 ext/Pod-Html/t/htmldir2.pod
