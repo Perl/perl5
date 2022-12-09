@@ -216,6 +216,21 @@ Perl_av_new_alloc(pTHX_ SSize_t size, bool zeroflag)
 }
 
 
+/* remove (AvARRAY(av) - AvALLOC(av)) offset from empty array */
+
+PERL_STATIC_INLINE void
+Perl_av_remove_offset(pTHX_ AV *av)
+{
+    PERL_ARGS_ASSERT_AV_REMOVE_OFFSET;
+    assert(AvFILLp(av) == -1);
+    SSize_t i = AvARRAY(av) - AvALLOC(av);
+    if (i) {
+        AvARRAY(av) = AvALLOC(av);
+        AvMAX(av)   += i;
+    }
+}
+
+
 /* ------------------------------- cv.h ------------------------------- */
 
 /*
