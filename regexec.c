@@ -2,7 +2,7 @@
  */
 
 /*
- *	One Ring to rule them all, One Ring to find them
+ *      One Ring to rule them all, One Ring to find them
  *
  *     [p.v of _The Lord of the Rings_, opening poem]
  *     [p.50 of _The Lord of the Rings_, I/iii: "The Shadow of the Past"]
@@ -40,22 +40,22 @@
 /*
  * pregcomp and pregexec -- regsub and regerror are not used in perl
  *
- *	Copyright (c) 1986 by University of Toronto.
- *	Written by Henry Spencer.  Not derived from licensed software.
+ *      Copyright (c) 1986 by University of Toronto.
+ *      Written by Henry Spencer.  Not derived from licensed software.
  *
- *	Permission is granted to anyone to use this software for any
- *	purpose on any computer system, and to redistribute it freely,
- *	subject to the following restrictions:
+ *      Permission is granted to anyone to use this software for any
+ *      purpose on any computer system, and to redistribute it freely,
+ *      subject to the following restrictions:
  *
- *	1. The author is not responsible for the consequences of use of
- *		this software, no matter how awful, even if they arise
- *		from defects in it.
+ *      1. The author is not responsible for the consequences of use of
+ *              this software, no matter how awful, even if they arise
+ *              from defects in it.
  *
- *	2. The origin of this software must not be misrepresented, either
- *		by explicit claim or by omission.
+ *      2. The origin of this software must not be misrepresented, either
+ *              by explicit claim or by omission.
  *
- *	3. Altered versions must be plainly marked as such, and must not
- *		be misrepresented as being the original software.
+ *      3. Altered versions must be plainly marked as such, and must not
+ *              be misrepresented as being the original software.
  *
  ****    Alterations to Henry's code are...
  ****
@@ -119,7 +119,7 @@ static const char non_utf8_target_but_utf8_required[]
 } STMT_END
 
 #ifndef STATIC
-#define	STATIC	static
+#define STATIC  static
 #endif
 
 /*
@@ -138,8 +138,8 @@ static const char non_utf8_target_but_utf8_required[]
 #define HOPBACK3(pos, off, lim) \
         (reginfo->is_utf8_target                          \
             ? reghopmaybe3((U8*)pos, (SSize_t)0-off, (U8*)(lim)) \
-            : (pos - off >= lim)	                         \
-                ? (U8*)pos - off		                 \
+            : (pos - off >= lim)                                 \
+                ? (U8*)pos - off                                 \
                 : NULL)
 
 #define HOPBACKc(pos, off) ((char*)HOPBACK3(pos, off, reginfo->strbeg))
@@ -167,7 +167,7 @@ static const char non_utf8_target_but_utf8_required[]
     : (U8*)(pos + off))
 #define HOP4c(pos,off,llim, rlim) ((char*)HOP4(pos,off,llim, rlim))
 
-#define PLACEHOLDER	/* Something for the preprocessor to grab onto */
+#define PLACEHOLDER     /* Something for the preprocessor to grab onto */
 /* TODO: Combine JUMPABLE and HAS_TEXT to cache OP(rn) */
 
 /* for use after a quantifier and before an EXACT-like node -- japhy */
@@ -268,7 +268,7 @@ S_regcppush(pTHX_ const regexp *rex, I32 parenfloor, U32 maxopenparen _pDEPTH)
     PL_savestack_ix += paren_elems_to_push;
 
     DEBUG_BUFFERS_r({
-	I32 p;
+        I32 p;
         for (p = parenfloor + 1; p <= (I32)maxopenparen; p++) {
             Perl_re_exec_indentf(aTHX_
                 "    \\%" UVuf ": %" IVdf "(%" IVdf ")..%" IVdf "\n",
@@ -441,7 +441,7 @@ S_regcp_restore(pTHX_ regexp *rex, I32 ix, U32 *maxopenparen_p _pDEPTH)
     PL_savestack_ix = tmpix;
 }
 
-#define regcpblow(cp) LEAVE_SCOPE(cp)	/* Ignores regcppush()ed data. */
+#define regcpblow(cp) LEAVE_SCOPE(cp)   /* Ignores regcppush()ed data. */
 
 STATIC bool
 S_isFOO_lc(pTHX_ const U8 classnum, const U8 character)
@@ -889,7 +889,7 @@ Perl_re_intuit_start(pTHX_
     U8   other_ix = 1 - prog->substrs->check_ix;
     bool ml_anch = 0;
     char *other_last = strpos;/* latest pos 'other' substr already checked to */
-    char *check_at = NULL;		/* check substr found at this pos */
+    char *check_at = NULL;              /* check substr found at this pos */
     const I32 multiline = prog->extflags & RXf_PMf_MULTILINE;
     RXi_GET_DECL(prog,progi);
     regmatch_info reginfo_buf;  /* create some info to pass to find_byclass */
@@ -1067,7 +1067,7 @@ Perl_re_intuit_start(pTHX_
 
     end_shift = prog->check_end_shift;
 
-#ifdef DEBUGGING	/* 7/99: reports of failure (with the older version) */
+#ifdef DEBUGGING        /* 7/99: reports of failure (with the older version) */
     if (end_shift < 0)
         Perl_croak(aTHX_ "panic: end_shift: %" IVdf " pattern:\n%s\n ",
                    (IV)end_shift, RX_PRECOMP(rx));
@@ -1306,7 +1306,7 @@ Perl_re_intuit_start(pTHX_
         }
 
         s = HOP3c(rx_origin, other->min_offset, strend);
-        if (s < other_last)	/* These positions already checked */
+        if (s < other_last)     /* These positions already checked */
             s = other_last;
 
         must = utf8_target ? other->utf8_substr : other->substr;
@@ -1665,7 +1665,7 @@ Perl_re_intuit_start(pTHX_
            cannot start at strpos. */
 
         DEBUG_EXECUTE_r(Perl_re_printf( aTHX_  "  try at offset...\n"));
-        ++BmUSEFUL(utf8_target ? prog->check_utf8 : prog->check_substr);	/* hooray/5 */
+        ++BmUSEFUL(utf8_target ? prog->check_utf8 : prog->check_substr);        /* hooray/5 */
     }
     else {
         /* The found rx_origin position does not prohibit matching at
@@ -1674,11 +1674,11 @@ Perl_re_intuit_start(pTHX_
          * zero, free it.  */
         if (!(prog->intflags & PREGf_NAUGHTY)
             && (utf8_target ? (
-                prog->check_utf8		/* Could be deleted already */
+                prog->check_utf8                /* Could be deleted already */
                 && --BmUSEFUL(prog->check_utf8) < 0
                 && (prog->check_utf8 == prog->float_utf8)
             ) : (
-                prog->check_substr		/* Could be deleted already */
+                prog->check_substr              /* Could be deleted already */
                 && --BmUSEFUL(prog->check_substr) < 0
                 && (prog->check_substr == prog->float_substr)
             )))
@@ -1688,9 +1688,9 @@ Perl_re_intuit_start(pTHX_
             /* XXX Does the destruction order has to change with utf8_target? */
             SvREFCNT_dec(utf8_target ? prog->check_utf8 : prog->check_substr);
             SvREFCNT_dec(utf8_target ? prog->check_substr : prog->check_utf8);
-            prog->check_substr = prog->check_utf8 = NULL;	/* disable */
-            prog->float_substr = prog->float_utf8 = NULL;	/* clear */
-            check = NULL;			/* abort */
+            prog->check_substr = prog->check_utf8 = NULL;       /* disable */
+            prog->float_substr = prog->float_utf8 = NULL;       /* clear */
+            check = NULL;                       /* abort */
             /* XXXX This is a remnant of the old implementation.  It
                     looks wasteful, since now INTUIT can use many
                     other heuristics. */
@@ -1704,8 +1704,8 @@ Perl_re_intuit_start(pTHX_
 
     return rx_origin;
 
-  fail_finish:				/* Substring not found */
-    if (prog->check_substr || prog->check_utf8)		/* could be removed already */
+  fail_finish:                          /* Substring not found */
+    if (prog->check_substr || prog->check_utf8)         /* could be removed already */
         BmUSEFUL(utf8_target ? prog->check_utf8 : prog->check_substr) += 5; /* hooray */
   fail:
     DEBUG_EXECUTE_r(Perl_re_printf( aTHX_  "%sMatch rejected by optimizer%s\n",
@@ -2202,8 +2202,8 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
     const I32 doevery = (prog->intflags & PREGf_SKIP) == 0;
 
     char *pat_string;   /* The pattern's exactish string */
-    char *pat_end;	    /* ptr to end char of pat_string */
-    re_fold_t folder;	/* Function for computing non-utf8 folds */
+    char *pat_end;          /* ptr to end char of pat_string */
+    re_fold_t folder;   /* Function for computing non-utf8 folds */
     const U8 *fold_array;   /* array for folding ords < 256 */
     STRLEN ln;
     STRLEN lnc;
@@ -2473,7 +2473,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
          * Unicode semantics and the german sharp ss, which hence should not be
          * compiled into a node that gets here. */
         pat_string = STRINGs(c);
-        ln  = STR_LENs(c);	/* length to match in octets/bytes */
+        ln  = STR_LENs(c);      /* length to match in octets/bytes */
 
         /* We know that we have to match at least 'ln' bytes (which is the same
          * as characters, since not utf8).  If we have to match 3 characters,
@@ -2598,7 +2598,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
              * can have the same fold, or portion of a fold, or different-
              * length fold */
             pat_string = STRINGs(c);
-            ln  = STR_LENs(c);	/* length to match in octets/bytes */
+            ln  = STR_LENs(c);  /* length to match in octets/bytes */
             pat_end = pat_string + ln;
             lnc = is_utf8_pat       /* length to match in characters */
                   ? utf8_length((U8 *) pat_string, (U8 *) pat_end)
@@ -3600,8 +3600,8 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
     char *s;
     regnode *c;
     char *startpos;
-    SSize_t minlen;		/* must match at least this many chars */
-    SSize_t dontbother = 0;	/* how many characters not to try at end */
+    SSize_t minlen;             /* must match at least this many chars */
+    SSize_t dontbother = 0;     /* how many characters not to try at end */
     const bool utf8_target = cBOOL(DO_UTF8(sv));
     I32 multiline;
     RXi_GET_DECL(prog,progi);
@@ -3755,7 +3755,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
     RXp_MATCH_TAINTED_off(prog);
     RXp_MATCH_UTF8_set(prog, utf8_target);
 
-    reginfo->prog = rx;	 /* Yes, sorry that this is confusing.  */
+    reginfo->prog = rx;  /* Yes, sorry that this is confusing.  */
     reginfo->intuit = 0;
     reginfo->is_utf8_pat = cBOOL(RX_UTF8(rx));
     reginfo->warned = FALSE;
@@ -3964,7 +3964,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
         SSize_t back_max;
         SSize_t back_min;
         char *last;
-        char *last1;		/* Last position checked before */
+        char *last1;            /* Last position checked before */
 #ifdef DEBUGGING
         int did_match = 0;
 #endif
@@ -4006,14 +4006,14 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
         if (back_min<0) {
             last = strend;
         } else {
-            last = HOP3c(strend,	/* Cannot start after this */
+            last = HOP3c(strend,        /* Cannot start after this */
                   -(SSize_t)(CHR_SVLEN(must)
                          - (SvTAIL(must) != 0) + back_min), strbeg);
         }
         if (s > reginfo->strbeg)
             last1 = HOPc(s, -1);
         else
-            last1 = s - 1;	/* bogus */
+            last1 = s - 1;      /* bogus */
 
         /* XXXX check_substr already used to find "s", can optimize if
            check_substr==must. */
@@ -4169,7 +4169,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
                     if (len)
                         last = rninstr(s, strend, little, little + len);
                     else
-                        last = strend;	/* matching "$" */
+                        last = strend;  /* matching "$" */
             }
             if (!last) {
                 /* at one point this block contained a comment which was
@@ -4188,7 +4188,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
         }
         if (minlen && (dontbother < minlen))
             dontbother = minlen - 1;
-        strend -= dontbother; 		   /* this one's always in bytes! */
+        strend -= dontbother;              /* this one's always in bytes! */
         /* We don't know much -- general case. */
         if (utf8_target) {
             for (;;) {
@@ -4275,16 +4275,16 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
  * Do inc before dec, in case old and new rex are the same */
 #define SET_reg_curpm(Re2)                          \
     if (reginfo->info_aux_eval) {                   \
-        (void)ReREFCNT_inc(Re2);		    \
-        ReREFCNT_dec(PM_GETRE(PL_reg_curpm));	    \
-        PM_SETRE((PL_reg_curpm), (Re2));	    \
+        (void)ReREFCNT_inc(Re2);                    \
+        ReREFCNT_dec(PM_GETRE(PL_reg_curpm));       \
+        PM_SETRE((PL_reg_curpm), (Re2));            \
     }
 
 
 /*
  - regtry - try match at specific point
  */
-STATIC bool			/* 0 failure, 1 success */
+STATIC bool                     /* 0 failure, 1 success */
 S_regtry(pTHX_ regmatch_info *reginfo, char **startposp)
 {
     CHECKPOINT lastcp;
@@ -6366,7 +6366,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
     /* cache heavy used fields of st in registers */
     regnode *scan;
     regnode *next;
-    U32 n = 0;	/* general value; init to avoid compiler warning */
+    U32 n = 0;  /* general value; init to avoid compiler warning */
     U32 utmp = 0;  /* tmp variable - valid for at most one opcode */
     SSize_t ln = 0; /* len or last;  init to avoid compiler warning */
     SSize_t endref = 0; /* offset of end of backref when ln is start */
@@ -6378,7 +6378,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
     PERL_INT_FAST16_T nextbyte;   /* is always set to UCHARAT(locinput), or -1
                                      at EOS */
 
-    bool result = 0;	    /* return value of S_regmatch */
+    bool result = 0;        /* return value of S_regmatch */
     U32 depth = 0;            /* depth of backtrack stack */
     U32 nochange_depth = 0; /* depth of GOSUB recursion with nochange */
     const U32 max_nochange_depth =
@@ -6406,9 +6406,9 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
      * the very next op. They have a useful lifetime of exactly one loop
      * iteration, and are not preserved or restored by state pushes/pops
      */
-    bool sw = 0;	    /* the condition value in (?(cond)a|b) */
-    bool minmod = 0;	    /* the next "{n,m}" is a "{n,m}?" */
-    int logical = 0;	    /* the following EVAL is:
+    bool sw = 0;            /* the condition value in (?(cond)a|b) */
+    bool minmod = 0;        /* the next "{n,m}" is a "{n,m}?" */
+    int logical = 0;        /* the following EVAL is:
                                 0: (?{...})
                                 1: (?(?{...})X|Y)
                                 2: (??{...})
@@ -6419,8 +6419,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
     PAD* last_pad = NULL;
     dMULTICALL;
     U8 gimme = G_SCALAR;
-    CV *caller_cv = NULL;	/* who called us */
-    CV *last_pushed_cv = NULL;	/* most recently called (?{}) CV */
+    CV *caller_cv = NULL;       /* who called us */
+    CV *last_pushed_cv = NULL;  /* most recently called (?{}) CV */
     U32 maxopenparen = 0;       /* max '(' index seen so far */
     int to_complement;  /* Invert the result? */
     char_class_number_ classnum;
@@ -7790,7 +7790,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
                 /* Match either CR LF  or '.', as all the other possibilities
                  * require utf8 */
-                locinput++;	    /* Match the . or CR */
+                locinput++;         /* Match the . or CR */
                 if (nextbyte == '\r' /* And if it was CR, and the next is LF,
                                        match the LF */
                     && locinput <  loceol
@@ -7924,12 +7924,12 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             endref = rex->offs[n].end;
             reginfo->poscache_iter = reginfo->poscache_maxiter; /* Void cache */
             if (rex->lastparen < n || ln == -1 || endref == -1)
-                sayNO;			/* Do not match unless seen CLOSEn. */
+                sayNO;                  /* Do not match unless seen CLOSEn. */
             if (ln == endref)
                 break;
 
             s = reginfo->strbeg + ln;
-            if (type != REF	/* REF can do byte comparison */
+            if (type != REF     /* REF can do byte comparison */
                 && (utf8_target || type == REFFU || type == REFFL))
             {
                 char * limit = loceol;
@@ -8202,7 +8202,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                  * the savestack frame */
                 before = (IV)(SP-PL_stack_base);
                 PL_op = nop;
-                CALLRUNOPS(aTHX);			/* Scalar context. */
+                CALLRUNOPS(aTHX);                       /* Scalar context. */
                 SPAGAIN;
                 if ((IV)(SP-PL_stack_base) == before)
                     ret = &PL_sv_undef;   /* protect against empty (?{}) blocks. */
@@ -8674,7 +8674,7 @@ NULL
             ST.B = next;
             ST.minmod = minmod;
             minmod = 0;
-            ST.count = -1;	/* this will be updated by WHILEM */
+            ST.count = -1;      /* this will be updated by WHILEM */
             ST.lastloc = NULL;  /* this will be updated by WHILEM */
 
             PUSH_YES_STATE_GOTO(CURLYX_end, REGNODE_BEFORE(next), locinput, loceol,
@@ -8916,13 +8916,13 @@ NULL
 #undef  ST
 #define ST st->u.branch
 
-        case BRANCHJ:	    /*  /(...|A|...)/ with long next pointer */
+        case BRANCHJ:       /*  /(...|A|...)/ with long next pointer */
             next = scan + ARG(scan);
             if (next == scan)
                 next = NULL;
             /* FALLTHROUGH */
 
-        case BRANCH:	    /*  /(...|A|...)/ */
+        case BRANCH:        /*  /(...|A|...)/ */
             scan = REGNODE_AFTER_opcode(scan,state_num); /* scan now points to inner node */
             assert(scan);
             ST.lastparen = rex->lastparen;
@@ -8988,7 +8988,7 @@ NULL
 #undef  ST
 #define ST st->u.curlym
 
-        case CURLYM:	/* /A{m,n}B/ where A is fixed-length */
+        case CURLYM:    /* /A{m,n}B/ where A is fixed-length */
 
             /* This is an optimisation of CURLYX that enables us to push
              * only a single backtracking state, no matter how many matches
@@ -9172,22 +9172,22 @@ NULL
         } \
     }
 
-        case STAR:		/*  /A*B/ where A is width 1 char */
+        case STAR:              /*  /A*B/ where A is width 1 char */
             ST.paren = 0;
             ST.min = 0;
             ST.max = REG_INFTY;
             scan = REGNODE_AFTER_type(scan,tregnode_STAR);
             goto repeat;
 
-        case PLUS:		/*  /A+B/ where A is width 1 char */
+        case PLUS:              /*  /A+B/ where A is width 1 char */
             ST.paren = 0;
             ST.min = 1;
             ST.max = REG_INFTY;
             scan = REGNODE_AFTER_type(scan,tregnode_PLUS);
             goto repeat;
 
-        case CURLYN:		/*  /(A){m,n}B/ where A is width 1 char */
-            ST.paren = scan->flags;	/* Which paren to set */
+        case CURLYN:            /*  /(A){m,n}B/ where A is width 1 char */
+            ST.paren = scan->flags;     /* Which paren to set */
             ST.lastparen      = rex->lastparen;
             ST.lastcloseparen = rex->lastcloseparen;
             if (ST.paren > maxopenparen)
@@ -9208,7 +9208,7 @@ NULL
 
             goto repeat;
 
-        case CURLY:		/*  /A{m,n}B/ where A is width 1 char */
+        case CURLY:             /*  /A{m,n}B/ where A is width 1 char */
             ST.paren = 0;
             ST.min = ARG1(scan);  /* min to match */
             ST.max = ARG2(scan);  /* max to match */
@@ -9471,7 +9471,7 @@ NULL
                 /* we've just finished A in /(??{A})B/; now continue with B */
                 is_accepted= false;
                 SET_RECURSE_LOCINPUT("FAKE-END[before]", CUR_EVAL.prev_recurse_locinput);
-                st->u.eval.prev_rex = rex_sv;		/* inner */
+                st->u.eval.prev_rex = rex_sv;           /* inner */
 
                 /* Save *all* the positions. */
                 st->u.eval.cp = regcppush(rex, 0, maxopenparen);
@@ -9513,9 +9513,9 @@ NULL
                                       (long)(reginfo->till - startpos),
                                       PL_colors[5]));
 
-                sayNO_SILENT;		/* Cannot match: too short. */
+                sayNO_SILENT;           /* Cannot match: too short. */
             }
-            sayYES;			/* Success! */
+            sayYES;                     /* Success! */
 
         case LOOKBEHIND_END: /* validate that *lookbehind* UNLESSM/IFMATCH
                                 matches end at the right spot, required for
@@ -9536,23 +9536,23 @@ NULL
             Perl_re_exec_indentf( aTHX_
                 "%sSUCCEED: subpattern success...%s\n",
                 depth, PL_colors[4], PL_colors[5]));
-            sayYES;			/* Success! */
+            sayYES;                     /* Success! */
 
 #undef  ST
 #define ST st->u.ifmatch
 
-        case SUSPEND:	/* (?>A) */
+        case SUSPEND:   /* (?>A) */
             ST.wanted = 1;
             ST.start = locinput;
             ST.end = loceol;
             ST.count = 1;
             goto do_ifmatch;
 
-        case UNLESSM:	/* -ve lookaround: (?!A), or with 'flags', (?<!A) */
+        case UNLESSM:   /* -ve lookaround: (?!A), or with 'flags', (?<!A) */
             ST.wanted = 0;
             goto ifmatch_trivial_fail_test;
 
-        case IFMATCH:	/* +ve lookaround: (?=A), or with 'flags', (?<=A) */
+        case IFMATCH:   /* +ve lookaround: (?=A), or with 'flags', (?<=A) */
             ST.wanted = 1;
           ifmatch_trivial_fail_test:
             ST.prev_match_end= match_end;

@@ -30,7 +30,7 @@ struct regnode_meta {
 };
 
 struct regnode {
-    U8	flags;
+    U8  flags;
     U8  type;
     U16 next_off;
 };
@@ -47,13 +47,13 @@ struct regexp;
 struct reg_substr_datum {
     SSize_t min_offset; /* min pos (in chars) that substr must appear */
     SSize_t max_offset; /* max pos (in chars) that substr must appear */
-    SV *substr;		/* non-utf8 variant */
-    SV *utf8_substr;	/* utf8 variant */
+    SV *substr;         /* non-utf8 variant */
+    SV *utf8_substr;    /* utf8 variant */
     SSize_t end_shift;  /* how many fixed chars must end the string */
 };
 struct reg_substr_data {
     U8      check_ix;   /* index into data[] of check substr */
-    struct reg_substr_datum data[3];	/* Actual array */
+    struct reg_substr_datum data[3];    /* Actual array */
 };
 
 #  ifdef PERL_ANY_COW
@@ -70,7 +70,7 @@ typedef struct regexp_paren_pair {
     /* 'start_tmp' records a new opening position before the matching end
      * has been found, so that the old start and end values are still
      * valid, e.g.
-     *	  "abc" =~ /(.(?{print "[$1]"}))+/
+     *    "abc" =~ /(.(?{print "[$1]"}))+/
      *outputs [][a][b]
      * This field is not part of the API.  */
     SSize_t start_tmp;
@@ -174,13 +174,13 @@ typedef struct regexp {
 } regexp;
 
 
-#  define RXp_PAREN_NAMES(rx)	((rx)->paren_names)
+#  define RXp_PAREN_NAMES(rx)   ((rx)->paren_names)
 
 /* used for high speed searches */
 typedef struct re_scream_pos_data_s
 {
-    char **scream_olds;		/* match pos */
-    SSize_t *scream_pos;	/* Internal iterator of scream. */
+    char **scream_olds;         /* match pos */
+    SSize_t *scream_pos;        /* Internal iterator of scream. */
 } re_scream_pos_data;
 
 /* regexp_engine structure. This is the dispatch table for regexes.
@@ -302,7 +302,7 @@ and check for NULL.
 
 #  include "op_reg_common.h"
 
-#  define RXf_PMf_STD_PMMOD	(RXf_PMf_MULTILINE|RXf_PMf_SINGLELINE|RXf_PMf_FOLD|RXf_PMf_EXTENDED|RXf_PMf_EXTENDED_MORE|RXf_PMf_NOCAPTURE)
+#  define RXf_PMf_STD_PMMOD     (RXf_PMf_MULTILINE|RXf_PMf_SINGLELINE|RXf_PMf_FOLD|RXf_PMf_EXTENDED|RXf_PMf_EXTENDED_MORE|RXf_PMf_NOCAPTURE)
 
 #  define CASE_STD_PMMOD_FLAGS_PARSE_SET(pmfl, x_count)                       \
     case IGNORE_PAT_MOD:    *(pmfl) |= RXf_PMf_FOLD;       break;           \
@@ -372,7 +372,7 @@ and check for NULL.
 #  define INT_PAT_MODS    STD_PAT_MODS    KEEPCOPY_PAT_MODS
 
 #  define EXT_PAT_MODS    ONCE_PAT_MODS   KEEPCOPY_PAT_MODS  NOCAPTURE_PAT_MODS
-#  define QR_PAT_MODS     STD_PAT_MODS    EXT_PAT_MODS	   CHARSET_PAT_MODS
+#  define QR_PAT_MODS     STD_PAT_MODS    EXT_PAT_MODS     CHARSET_PAT_MODS
 #  define M_PAT_MODS      QR_PAT_MODS     LOOP_PAT_MODS
 #  define S_PAT_MODS      M_PAT_MODS      EXEC_PAT_MODS      NONDESTRUCT_PAT_MODS
 
@@ -425,38 +425,38 @@ and check for NULL.
 
 /* What we have seen */
 #  define RXf_NO_INPLACE_SUBST  (1U<<(RXf_BASE_SHIFT+2))
-#  define RXf_EVAL_SEEN   	(1U<<(RXf_BASE_SHIFT+3))
+#  define RXf_EVAL_SEEN         (1U<<(RXf_BASE_SHIFT+3))
 
 /* Special */
 #  define RXf_UNBOUNDED_QUANTIFIER_SEEN   (1U<<(RXf_BASE_SHIFT+4))
-#  define RXf_CHECK_ALL   	(1U<<(RXf_BASE_SHIFT+5))
+#  define RXf_CHECK_ALL         (1U<<(RXf_BASE_SHIFT+5))
 
 /* UTF8 related */
-#  define RXf_MATCH_UTF8  	(1U<<(RXf_BASE_SHIFT+6)) /* $1 etc are utf8 */
+#  define RXf_MATCH_UTF8        (1U<<(RXf_BASE_SHIFT+6)) /* $1 etc are utf8 */
 
 /* Intuit related */
-#  define RXf_USE_INTUIT_NOML	(1U<<(RXf_BASE_SHIFT+7))
-#  define RXf_USE_INTUIT_ML	(1U<<(RXf_BASE_SHIFT+8))
-#  define RXf_INTUIT_TAIL 	(1U<<(RXf_BASE_SHIFT+9))
+#  define RXf_USE_INTUIT_NOML   (1U<<(RXf_BASE_SHIFT+7))
+#  define RXf_USE_INTUIT_ML     (1U<<(RXf_BASE_SHIFT+8))
+#  define RXf_INTUIT_TAIL       (1U<<(RXf_BASE_SHIFT+9))
 #  define RXf_USE_INTUIT        (RXf_USE_INTUIT_NOML|RXf_USE_INTUIT_ML)
 
 /* Do we have some sort of anchor? */
 #  define RXf_IS_ANCHORED       (1U<<(RXf_BASE_SHIFT+10))
 
 /* Copy and tainted info */
-#  define RXf_COPY_DONE   	(1U<<(RXf_BASE_SHIFT+11))
+#  define RXf_COPY_DONE         (1U<<(RXf_BASE_SHIFT+11))
 
 /* post-execution: $1 et al are tainted */
-#  define RXf_TAINTED_SEEN	(1U<<(RXf_BASE_SHIFT+12))
+#  define RXf_TAINTED_SEEN      (1U<<(RXf_BASE_SHIFT+12))
 /* this pattern was tainted during compilation */
-#  define RXf_TAINTED		(1U<<(RXf_BASE_SHIFT+13))
+#  define RXf_TAINTED           (1U<<(RXf_BASE_SHIFT+13))
 
 /* Flags indicating special patterns */
 #  define RXf_START_ONLY        (1U<<(RXf_BASE_SHIFT+14)) /* Pattern is /^/ */
 #  define RXf_SKIPWHITE         (1U<<(RXf_BASE_SHIFT+15)) /* Pattern is for a */
                                                           /* split " " */
-#  define RXf_WHITE		(1U<<(RXf_BASE_SHIFT+16)) /* Pattern is /\s+/ */
-#  define RXf_NULL		(1U<<(RXf_BASE_SHIFT+17)) /* Pattern is // */
+#  define RXf_WHITE             (1U<<(RXf_BASE_SHIFT+16)) /* Pattern is /\s+/ */
+#  define RXf_NULL              (1U<<(RXf_BASE_SHIFT+17)) /* Pattern is // */
 
 /* See comments at the beginning of these defines about adding bits.  The
  * highest bit position should be used, so that if RXf_BASE_SHIFT gets
@@ -619,35 +619,35 @@ and check for NULL.
                                         on second iteration */
 
 #if defined(PERL_USE_GCC_BRACE_GROUPS)
-#  define ReREFCNT_inc(re)						\
-    ({									\
-        /* This is here to generate a casting warning if incorrect.  */	\
-        REGEXP *const _rerefcnt_inc = (re);				\
-        assert(SvTYPE(_rerefcnt_inc) == SVt_REGEXP);			\
-        SvREFCNT_inc(_rerefcnt_inc);					\
-        _rerefcnt_inc;							\
+#  define ReREFCNT_inc(re)                                              \
+    ({                                                                  \
+        /* This is here to generate a casting warning if incorrect.  */ \
+        REGEXP *const _rerefcnt_inc = (re);                             \
+        assert(SvTYPE(_rerefcnt_inc) == SVt_REGEXP);                    \
+        SvREFCNT_inc(_rerefcnt_inc);                                    \
+        _rerefcnt_inc;                                                  \
     })
-#  define ReREFCNT_dec(re)						\
-    ({									\
-        /* This is here to generate a casting warning if incorrect.  */	\
-        REGEXP *const _rerefcnt_dec = (re);				\
-        SvREFCNT_dec(_rerefcnt_dec);					\
+#  define ReREFCNT_dec(re)                                              \
+    ({                                                                  \
+        /* This is here to generate a casting warning if incorrect.  */ \
+        REGEXP *const _rerefcnt_dec = (re);                             \
+        SvREFCNT_dec(_rerefcnt_dec);                                    \
     })
 #else
-#  define ReREFCNT_dec(re)	SvREFCNT_dec(re)
-#  define ReREFCNT_inc(re)	((REGEXP *) SvREFCNT_inc(re))
+#  define ReREFCNT_dec(re)      SvREFCNT_dec(re)
+#  define ReREFCNT_inc(re)      ((REGEXP *) SvREFCNT_inc(re))
 #endif
-#define ReANY(re)		Perl_ReANY((const REGEXP *)(re))
+#define ReANY(re)               Perl_ReANY((const REGEXP *)(re))
 
 /* FIXME for plugins. */
 
-#define FBMcf_TAIL_DOLLAR	1
-#define FBMcf_TAIL_DOLLARM	2
-#define FBMcf_TAIL_Z		4
-#define FBMcf_TAIL_z		8
-#define FBMcf_TAIL		(FBMcf_TAIL_DOLLAR|FBMcf_TAIL_DOLLARM|FBMcf_TAIL_Z|FBMcf_TAIL_z)
+#define FBMcf_TAIL_DOLLAR       1
+#define FBMcf_TAIL_DOLLARM      2
+#define FBMcf_TAIL_Z            4
+#define FBMcf_TAIL_z            8
+#define FBMcf_TAIL              (FBMcf_TAIL_DOLLAR|FBMcf_TAIL_DOLLARM|FBMcf_TAIL_Z|FBMcf_TAIL_z)
 
-#define FBMrf_MULTILINE	1
+#define FBMrf_MULTILINE 1
 
 struct regmatch_state;
 struct regmatch_slab;
@@ -681,7 +681,7 @@ typedef struct {
     regmatch_info_aux_eval *info_aux_eval;
     struct regmatch_state *old_regmatch_state; /* saved PL_regmatch_state */
     struct regmatch_slab  *old_regmatch_slab;  /* saved PL_regmatch_slab */
-    char *poscache;	/* S-L cache of fail positions of WHILEMs */
+    char *poscache;     /* S-L cache of fail positions of WHILEMs */
 } regmatch_info_aux;
 
 
@@ -753,8 +753,8 @@ struct next_matchable_info {
 typedef I32 CHECKPOINT;
 
 typedef struct regmatch_state {
-    int resume_state;		/* where to jump to on return */
-    char *locinput;		/* where to backtrack in string on failure */
+    int resume_state;           /* where to jump to on return */
+    char *locinput;             /* where to backtrack in string on failure */
     char *loceol;
     U8 *sr0;                    /* position of start of script run, or NULL */
 
@@ -819,14 +819,14 @@ typedef struct regmatch_state {
             U32 lastcloseparen;
             CHECKPOINT cp;
 
-            U32		accepted; /* how many accepting states left */
-            bool	longfold;/* saw a fold with a 1->n char mapping */
+            U32         accepted; /* how many accepting states left */
+            bool        longfold;/* saw a fold with a 1->n char mapping */
             U16         *jump;  /* positive offsets from me */
-            regnode	*me;	/* Which node am I - needed for jump tries*/
-            U8		*firstpos;/* pos in string of first trie match */
-            U32		firstchars;/* len in chars of firstpos from start */
-            U16		nextword;/* next word to try */
-            U16		topword; /* longest accepted word */
+            regnode     *me;    /* Which node am I - needed for jump tries*/
+            U8          *firstpos;/* pos in string of first trie match */
+            U32         firstchars;/* len in chars of firstpos from start */
+            U16         nextword;/* next word to try */
+            U16         topword; /* longest accepted word */
         } trie;
 
         /* special types - these members are used to store state for special
@@ -836,11 +836,11 @@ typedef struct regmatch_state {
             struct regmatch_state *prev_yes_state;
             struct regmatch_state *prev_curlyx;
             struct regmatch_state *prev_eval;
-            REGEXP	*prev_rex;
-            CHECKPOINT	cp;	/* remember current savestack indexes */
-            CHECKPOINT	lastcp;
+            REGEXP      *prev_rex;
+            CHECKPOINT  cp;     /* remember current savestack indexes */
+            CHECKPOINT  lastcp;
             U32         close_paren; /* which close bracket is our end (+1) */
-            regnode	*B;	/* the node following us  */
+            regnode     *B;     /* the node following us  */
             char        *prev_recurse_locinput;
         } eval;
 
@@ -848,7 +848,7 @@ typedef struct regmatch_state {
             /* this first element must match u.yes */
             struct regmatch_state *prev_yes_state;
             I32 wanted;
-            I32 logical;	/* saved copy of 'logical' var */
+            I32 logical;        /* saved copy of 'logical' var */
             U8  count;          /* number of beginning positions */
             char *start;
             char *end;
@@ -874,26 +874,26 @@ typedef struct regmatch_state {
             /* this first element must match u.yes */
             struct regmatch_state *prev_yes_state;
             struct regmatch_state *prev_curlyx; /* previous cur_curlyx */
-            regnode	*me;	/* the CURLYX node  */
-            regnode	*B;	/* the B node in /A*B/  */
-            CHECKPOINT	cp;	/* remember current savestack index */
-            bool	minmod;
-            int		parenfloor;/* how far back to strip paren data */
+            regnode     *me;    /* the CURLYX node  */
+            regnode     *B;     /* the B node in /A*B/  */
+            CHECKPOINT  cp;     /* remember current savestack index */
+            bool        minmod;
+            int         parenfloor;/* how far back to strip paren data */
 
             /* these two are modified by WHILEM */
-            int		count;	/* how many instances of A we've matched */
-            char	*lastloc;/* where previous A matched (0-len detect) */
+            int         count;  /* how many instances of A we've matched */
+            char        *lastloc;/* where previous A matched (0-len detect) */
         } curlyx;
 
         struct {
             /* this first element must match u.yes */
             struct regmatch_state *prev_yes_state;
             struct regmatch_state *save_curlyx;
-            CHECKPOINT	cp;	/* remember current savestack indexes */
-            CHECKPOINT	lastcp;
-            char	*save_lastloc;	/* previous curlyx.lastloc */
-            I32		cache_offset;
-            I32		cache_mask;
+            CHECKPOINT  cp;     /* remember current savestack indexes */
+            CHECKPOINT  lastcp;
+            char        *save_lastloc;  /* previous curlyx.lastloc */
+            I32         cache_offset;
+            I32         cache_mask;
         } whilem;
 
         struct {
@@ -902,11 +902,11 @@ typedef struct regmatch_state {
             CHECKPOINT cp;
             U32 lastparen;
             U32 lastcloseparen;
-            I32 alen;		/* length of first-matched A string */
+            I32 alen;           /* length of first-matched A string */
             I32 count;
             bool minmod;
-            regnode *A, *B;	/* the nodes corresponding to /A*B/  */
-            regnode *me;	/* the curlym node */
+            regnode *A, *B;     /* the nodes corresponding to /A*B/  */
+            regnode *me;        /* the curlym node */
             struct next_matchable_info Binfo;
         } curlym;
 
@@ -915,11 +915,11 @@ typedef struct regmatch_state {
             CHECKPOINT cp;
             U32 lastparen;
             U32 lastcloseparen;
-            char *maxpos;	/* highest possible point in string to match */
-            char *oldloc;	/* the previous locinput */
+            char *maxpos;       /* highest possible point in string to match */
+            char *oldloc;       /* the previous locinput */
             int count;
-            int min, max;	/* {m,n} */
-            regnode *A, *B;	/* the nodes corresponding to /A*B/  */
+            int min, max;       /* {m,n} */
+            regnode *A, *B;     /* the nodes corresponding to /A*B/  */
             struct next_matchable_info Binfo;
         } curly; /* and CURLYN/PLUS/STAR */
 
