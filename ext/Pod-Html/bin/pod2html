@@ -30,8 +30,9 @@ pod2html takes the following arguments:
     --backlink
     --nobacklink
 
-Turn =head1 directives into links pointing to the top of the HTML file.
---nobacklink (which is the default behavior) does not create these backlinks.
+Turn C<=head1> directives into links pointing to the top of the HTML file. By
+default, no backlinks are generated (though this may be explicitly specified
+with C<--nobacklink>).
 
 =item cachedir
 
