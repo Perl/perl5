@@ -68,7 +68,8 @@ with C<--nobacklink>).
 
     --cachedir=name
 
-Creates the directory cache in the given directory.
+Specify directory to be used for storing cache. Default directory is the
+current working directory.
 
 =item css
 

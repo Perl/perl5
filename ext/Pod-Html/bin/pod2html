@@ -38,7 +38,7 @@ with C<--nobacklink>).
 
     --cachedir=name
 
-Specify which directory is used for storing cache. Default directory is the
+Specify directory to be used for storing cache. Default directory is the
 current working directory.
 
 =item css
