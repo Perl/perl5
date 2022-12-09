@@ -941,6 +941,10 @@ NOOP		= @rem
 MICROCORE_SRC	=		\
 		..\toke.c	\
 		..\regcomp.c	\
+		..\regcomp_trie.c	\
+		..\regcomp_debug.c	\
+		..\regcomp_invlist.c	\
+		..\regcomp_study.c	\
 		..\regexec.c	\
 		..\op.c		\
 		..\sv.c		\
@@ -1017,6 +1021,7 @@ CORE_NOCFG_H	=		\
 		..\pp.h		\
 		..\proto.h	\
 		..\regcomp.h	\
+		..\regcomp_internal.h	\
 		..\regexp.h	\
 		..\scope.h	\
 		..\sv.h		\
@@ -1154,7 +1159,15 @@ ifeq ($(CCTYPE),)
 endif
 
 
-..\regcomp$(o) : ..\regnodes.h ..\regcharclass.h
+..\regcomp$(o) : ..\regcomp.h ..\regcomp_internal.h ..\regnodes.h ..\regcharclass.h
+
+..\regcomp_debug$(o) : ..\regcomp.h ..\regcomp_internal.h ..\regnodes.h ..\regcharclass.h
+
+..\regcomp_invlist$(o) : ..\regcomp.h ..\regcomp_internal.h ..\regnodes.h ..\regcharclass.h
+
+..\regcomp_study$(o) : ..\regcomp.h ..\regcomp_internal.h ..\regnodes.h ..\regcharclass.h
+
+..\regcomp_trie$(o) : ..\regcomp.h ..\regcomp_internal.h ..\regnodes.h ..\regcharclass.h
 
 ..\regexec$(o) : ..\regnodes.h ..\regcharclass.h
 
@@ -1894,4 +1907,3 @@ nok: utils $(PERLEXE) $(PERLDLL) Extensions_nonxs Extensions
 
 nokfile: utils $(PERLEXE) $(PERLDLL) Extensions_nonxs Extensions
 	$(PERLEXE) ..\utils\perlbug -nok -s "(UNINSTALLED)" -F perl.nok
-

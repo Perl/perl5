@@ -103,7 +103,7 @@ bytes.
 #      define DEPRECATED_OPENING_NON_UTF8_BRACKETS "\xAB\xBB"
 #   endif
 
-#   ifdef PERL_IN_REGCOMP_C
+#   ifdef PERL_IN_REGCOMP_ANY
 #     define MAX_PRINT_A  0x7E   /* The max code point that isPRINT_A */
 #   endif
 #endif	/* ASCII/Latin1 */
@@ -164,7 +164,7 @@ bytes.
 #      define DEPRECATED_OPENING_NON_UTF8_BRACKETS "\x8A\x8B"
 #   endif
 
-#   ifdef PERL_IN_REGCOMP_C
+#   ifdef PERL_IN_REGCOMP_ANY
 #     define MAX_PRINT_A  0xF9   /* The max code point that isPRINT_A */
 #   endif
 #endif	/* EBCDIC 1047 */
@@ -225,13 +225,13 @@ bytes.
 #      define DEPRECATED_OPENING_NON_UTF8_BRACKETS "\x8A\x8B"
 #   endif
 
-#   ifdef PERL_IN_REGCOMP_C
+#   ifdef PERL_IN_REGCOMP_ANY
 #     define MAX_PRINT_A  0xF9   /* The max code point that isPRINT_A */
 #   endif
 #endif	/* EBCDIC 037 */
 
 /* The number of code points not matching \pC */
-#ifdef PERL_IN_REGCOMP_C
+#ifdef PERL_IN_REGCOMP_ANY
 #  define NON_OTHER_COUNT  149016
 #endif
 
