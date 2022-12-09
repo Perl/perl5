@@ -9599,6 +9599,11 @@ Perl_av_push_simple(pTHX_ AV *av, SV *val);
 # define PERL_ARGS_ASSERT_AV_PUSH_SIMPLE        \
         assert(av); assert(val)
 
+PERL_STATIC_INLINE void
+Perl_av_remove_offset(pTHX_ AV *av);
+# define PERL_ARGS_ASSERT_AV_REMOVE_OFFSET      \
+        assert(av)
+
 PERL_STATIC_INLINE SV **
 Perl_av_store_simple(pTHX_ AV *av, SSize_t key, SV *val);
 # define PERL_ARGS_ASSERT_AV_STORE_SIMPLE       \

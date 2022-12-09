@@ -42,8 +42,8 @@ Perl_av_reify(pTHX_ AV *av)
             SvREFCNT_inc_simple_void(sv);
     }
     key = AvARRAY(av) - AvALLOC(av);
-    while (key)
-        AvALLOC(av)[--key] = NULL;
+    if (key)
+        Zero(AvALLOC(av), key, SV*);
     AvREIFY_off(av);
     AvREAL_on(av);
 }
@@ -633,7 +633,6 @@ to it.
 void
 Perl_av_clear(pTHX_ AV *av)
 {
-    SSize_t extra;
     bool real;
     SSize_t orig_ix = 0;
 
@@ -678,12 +677,9 @@ Perl_av_clear(pTHX_ AV *av)
             SvREFCNT_dec(sv);
         }
     }
-    extra = AvARRAY(av) - AvALLOC(av);
-    if (extra) {
-        AvMAX(av) += extra;
-        AvARRAY(av) = AvALLOC(av);
-    }
     AvFILLp(av) = -1;
+    av_remove_offset(av);
+
     if (real) {
         /* disarm av's premature free guard */
         if (LIKELY(PL_tmps_ix == orig_ix))

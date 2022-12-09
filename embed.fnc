@@ -691,6 +691,8 @@ Adip	|void	|av_push_simple |NN AV *av				\
 				|NN SV *val
 : Used in scope.c, and by Data::Alias
 EXp	|void	|av_reify	|NN AV *av
+ipx	|void	|av_remove_offset					\
+				|NN AV *av
 ARdp	|SV *	|av_shift	|NN AV *av
 Adp	|SV **	|av_store	|NN AV *av				\
 				|SSize_t key				\
