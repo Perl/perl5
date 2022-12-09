@@ -27,36 +27,36 @@ pod2html takes the following arguments:
 
 =item backlink
 
-  --backlink
-  --nobacklink
+    --backlink
+    --nobacklink
 
 Turn =head1 directives into links pointing to the top of the HTML file.
 --nobacklink (which is the default behavior) does not create these backlinks.
 
 =item cachedir
 
-  --cachedir=name
+    --cachedir=name
 
 Specify which directory is used for storing cache. Default directory is the
 current working directory.
 
 =item css
 
-  --css=URL
+    --css=URL
 
 Specify the URL of cascading style sheet to link from resulting HTML file.
 Default is none style sheet.
 
 =item flush
 
-  --flush
+    --flush
 
 Flush the cache.
 
 =item header
 
-  --header
-  --noheader
+    --header
+    --noheader
 
 Create header and footer blocks containing the text of the "NAME" section.
 --noheader -- which is the default behavior -- does not create header or footer
@@ -64,13 +64,13 @@ blocks.
 
 =item help
 
-  --help
+    --help
 
 Displays the usage message.
 
 =item htmldir
 
-  --htmldir=name
+    --htmldir=name
 
 Sets the directory to which all cross references in the resulting HTML file
 will be relative. Not passing this causes all links to be absolute since this
@@ -81,7 +81,7 @@ exclusive.
 
 =item htmlroot
 
-  --htmlroot=URL
+    --htmlroot=URL
 
 Sets the base URL for the HTML files.  When cross-references are made, the
 HTML root is prepended to the URL.
@@ -92,7 +92,7 @@ Do not pass both this and --htmldir to pod2html; they are mutually exclusive.
 
 =item index
 
-  --index
+    --index
 
 Generate an index at the top of the HTML file (default behaviour).
 
@@ -100,7 +100,7 @@ Generate an index at the top of the HTML file (default behaviour).
 
 =item noindex
 
-  --noindex
+    --noindex
 
 Do not generate an index at the top of the HTML file.
 
@@ -108,22 +108,22 @@ Do not generate an index at the top of the HTML file.
 
 =item infile
 
-  --infile=name
+    --infile=name
 
 Specify the pod file to convert.  Input is taken from STDIN if no
 infile is specified.
 
 =item outfile
 
-  --outfile=name
+    --outfile=name
 
 Specify the HTML file to create.  Output goes to STDOUT if no outfile
 is specified.
 
 =item poderrors
 
-  --poderrors
-  --nopoderrors
+    --poderrors
+    --nopoderrors
 
 Include a "POD ERRORS" section in the outfile if there were any POD errors in
 the infile (default behaviour).  --nopoderrors does not create this "POD
@@ -131,21 +131,21 @@ ERRORS" section.
 
 =item podpath
 
-  --podpath=name:...:name
+    --podpath=name:...:name
 
 Specify which subdirectories of the podroot contain pod files whose
 HTML converted forms can be linked-to in cross-references.
 
 =item podroot
 
-  --podroot=name
+    --podroot=name
 
 Specify the base directory for finding library pods.
 
 =item quiet
 
-  --quiet
-  --noquiet
+    --quiet
+    --noquiet
 
 Don't display mostly harmless warning messages.  --noquiet -- which is the
 default behavior -- I<does> display these mostly harmless warning messages (but
@@ -153,22 +153,22 @@ this is not the same as "verbose" mode).
 
 =item recurse
 
-  --recurse
-  --norecurse
+    --recurse
+    --norecurse
 
 Recurse into subdirectories specified in podpath (default behaviour).
 --norecurse does not recurse into these subdirectories.
 
 =item title
 
-  --title=title
+    --title=title
 
 Specify the title of the resulting HTML file.
 
 =item verbose
 
-  --verbose
-  --noverbose
+    --verbose
+    --noverbose
 
 Display progress messages. --noverbose -- which is the default behavior --
 does not display these progress messages.
