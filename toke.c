@@ -13322,6 +13322,27 @@ Perl_wrap_keyword_plugin(pTHX_
     KEYWORD_PLUGIN_MUTEX_UNLOCK;
 }
 
+/*
+=for apidoc wrap_infix_plugin
+
+B<NOTE:> This API exists entirely for the purpose of making the CPAN module
+C<XS::Parse::Infix> work. It is not expected that additional modules will make
+use of it; rather, that they should use C<XS::Parse::Infix> to provide parsing
+of new infix operators.
+
+Puts a C function into the chain of infix plugins.  This is the preferred
+way to manipulate the L</PL_infix_plugin> variable.  C<new_plugin> is a
+pointer to the C function that is to be added to the infix plugin chain, and
+C<old_plugin_p> points to a storage location where a pointer to the next
+function in the chain will be stored.  The value of C<new_plugin> is written
+into the L</PL_infix_plugin> variable, while the value previously stored there
+is written to C<*old_plugin_p>.
+
+Direct access to L</PL_infix_plugin> should be avoided.
+
+=cut
+*/
+
 void
 Perl_wrap_infix_plugin(pTHX_
     Perl_infix_plugin_t new_plugin, Perl_infix_plugin_t *old_plugin_p)
