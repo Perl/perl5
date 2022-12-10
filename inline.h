@@ -227,6 +227,9 @@ Perl_av_remove_offset(pTHX_ AV *av)
     if (i) {
         AvARRAY(av) = AvALLOC(av);
         AvMAX(av)   += i;
+#ifdef PERL_RC_STACK
+        Zero(AvALLOC(av), i, SV*);
+#endif
     }
 }
 
