@@ -972,6 +972,10 @@ Issues the warning:
 
 if the variable did not exist before the function was called.
 
+=item GV_CARET
+
+If you want to create a GV which starts with a caret you must set this.
+
 =back
 
 If you do not specify a package name, the variable is created in the current

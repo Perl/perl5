@@ -2494,6 +2494,16 @@ S_maybe_multimagic_gv(pTHX_ GV *gv, const char *name, const svtype sv_type)
     }
 }
 
+PERL_STATIC_INLINE char *
+S_is_internal_caret_name(char *name, STRLEN *lenp, char *tmp_buf) {
+    if (*lenp > 1 && name[1] == '_')
+        return name;
+    switch(*lenp) {
+#       include "caret_vars.inc"
+    }
+    return NULL;
+}
+
 /*
 =for apidoc gv_fetchpv
 =for apidoc_item |GV *|gv_fetchpvn|const char * nambeg|STRLEN full_len|I32 flags|const svtype sv_type
@@ -2600,9 +2610,27 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
     if (!stash && !find_default_stash(&stash, name, len, is_utf8, add, sv_type)) {
         return NULL;
     }
+    char tmp[30];
+    char *use_name = (char*)name;
+    STRLEN use_len = len;
+
+    if (((U8)name[0]) < 32) {
+        use_name = S_is_internal_caret_name(use_name, &use_len, tmp);
+        if (!use_name) {
+            warn("Caret variable %c%s^%c%.*s%s does not exist and is reserved for Perl internal use",
+                    sv_type == SVt_PVGV ? '*' :
+                    sv_type == SVt_PVAV ? '@' :
+                    sv_type == SVt_PVHV ? '%' : '$',
+                    len > 1 ? "{" : "",
+                    name[0]+64, (int)len-1, name+1,
+                    len > 1 ? "}" : ""
+                );
+            use_name = name;
+        }
+    }
 
     /* By this point we should have a stash and a name */
-    gvp = (GV**)hv_fetch(stash,name,is_utf8 ? -(I32)len : (I32)len,add);
+    gvp = (GV**)hv_fetch(stash,use_name,is_utf8 ? -(I32)use_len : (I32)use_len,add);
     if (!gvp || *gvp == (const GV *)&PL_sv_undef) {
         if (addmg) gv = (GV *)newSV_type(SVt_NULL);     /* tentatively */
         else return NULL;
@@ -2631,10 +2659,10 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
                exist, then (say) referencing $! first, and %! second would
                mean that %! was not handled correctly.  */
             if (len == 1 && stash == PL_defstash) {
-                maybe_multimagic_gv(gv, name, sv_type);
+                maybe_multimagic_gv(gv, use_name, sv_type);
             }
             else if (sv_type == SVt_PVAV
-                  && memEQs(name, len, "ISA")
+                  && memEQs(use_name, use_len, "ISA")
                   && (!GvAV(gv) || !SvSMAGICAL(GvAV(gv))))
                 gv_magicalize_isa(gv);
         }
@@ -2667,25 +2695,25 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
         Perl_ck_warner_d(aTHX_ packWARN(WARN_INTERNAL),
                 "Had to create %" UTF8f " unexpectedly",
                  UTF8fARG(is_utf8, name_end-nambeg, nambeg));
-    gv_init_pvn(gv, stash, name, len, (add & GV_ADDMULTI)|is_utf8);
+    gv_init_pvn(gv, stash, use_name, use_len, (add & GV_ADDMULTI)|is_utf8);
 
     if (   full_len != 0
-        && isIDFIRST_lazy_if_safe(name, name + full_len, is_utf8)
+        && isIDFIRST_lazy_if_safe(use_name, use_name + full_len, is_utf8)
         && !ckWARN(WARN_ONCE) )
     {
         GvMULTI_on(gv) ;
     }
 
     /* set up magic where warranted */
-    if ( gv_magicalize(gv, stash, name, len, sv_type) ) {
+    if ( gv_magicalize(gv, stash, use_name, use_len, sv_type) ) {
         /* See 23496c6 */
         if (addmg) {
-                /* gv_magicalize magicalised this gv, so we want it
-                 * stored in the symtab.
-                 * Effectively the caller is asking, ‘Does this gv exist?’
-                 * And we respond, ‘Er, *now* it does!’
-                 */
-                (void)hv_store(stash,name,len,(SV *)gv,0);
+            /* gv_magicalize magicalised this gv, so we want it
+             * stored in the symtab.
+             * Effectively the caller is asking, ‘Does this gv exist?’
+             * And we respond, ‘Er, *now* it does!’
+             */
+            (void)hv_store(stash,use_name,use_len,(SV *)gv,0);
         }
     }
     else if (addmg) {
