@@ -128,8 +128,8 @@ exclusive.
     --index
     --noindex
 
-Generate an index at the top of the HTML file.  This is the default
-behaviour.
+Generate an index at the top of the HTML file with C<--index>.  This is the default
+behavior; use C<--noindex> to suppress generation of an index.
 
 =item infile
 

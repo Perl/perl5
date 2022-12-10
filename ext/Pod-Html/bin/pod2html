@@ -85,18 +85,20 @@ mutually exclusive.
 
     --htmlroot=URL
 
-Sets the base URL for the HTML files.  When cross-references are made, the
+Set the base URL for the HTML files.  When cross-references are made, the
 HTML root is prepended to the URL.
 
-Do not use this if relative links are desired: use --htmldir instead.
+Do not use this if relative links are desired: use C<--htmldir> instead.
 
-Do not pass both this and --htmldir to pod2html; they are mutually exclusive.
+Do not pass both this and C<--htmldir> to F<pod2html>; they are mutually exclusive.
 
 =item index
 
     --index
+    --noindex
 
-Generate an index at the top of the HTML file (default behaviour).
+Generate an index at the top of the HTML file with C<--index>.  This is the default
+behavior; use C<--noindex> to suppress generation of an index.
 
 =over 4
 
