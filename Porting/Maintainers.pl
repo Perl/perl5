@@ -711,23 +711,6 @@ use File::Glob qw(:case);
             qr(^demos/),
             qr(^t/external/),
         ],
-         # https://github.com/steve-m-hay/perl-libnet/pull/45
-        'CUSTOMIZED' => [
-            'lib/Net/Cmd.pm',
-            'lib/Net/Config.pm',
-            'lib/Net/Domain.pm',
-            'lib/Net/FTP.pm',
-            'lib/Net/FTP/A.pm',
-            'lib/Net/FTP/E.pm',
-            'lib/Net/FTP/I.pm',
-            'lib/Net/FTP/L.pm',
-            'lib/Net/FTP/dataconn.pm',
-            'lib/Net/NNTP.pm',
-            'lib/Net/Netrc.pm',
-            'lib/Net/POP3.pm',
-            'lib/Net/SMTP.pm',
-            'lib/Net/Time.pm',
-        ],
     },
 
     'Locale::Maketext' => {
