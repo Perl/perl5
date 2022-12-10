@@ -51,7 +51,7 @@ __DATA__
 <title>a title</title>
 <link rel="stylesheet" href="style.css" type="text/css" />
 <meta http-equiv="content-type" content="text/html; charset=utf-8" />
-<link rev="made" href="mailto:jkeenan@zareason.(none)" />
+<link rev="made" href="mailto:[PERLADMIN]" />
 </head>
 
 <body>
