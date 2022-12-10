@@ -5501,6 +5501,9 @@ Perl_clear_defarray(pTHX_ AV* av, bool abandon)
 
     if (LIKELY(!abandon && SvREFCNT(av) == 1 && !SvMAGICAL(av))) {
         av_clear(av);
+#ifdef PERL_RC_STACK
+        av_remove_offset(av);
+#endif
         AvREIFY_only(av);
     }
     else {
