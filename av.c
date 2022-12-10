@@ -882,6 +882,9 @@ Perl_av_unshift(pTHX_ AV *av, SSize_t num)
         AvMAX(av) += i;
         AvFILLp(av) += i;
         AvARRAY(av) = AvARRAY(av) - i;
+#ifdef PERL_RC_STACK
+        Zero(AvARRAY(av), i, SV*);
+#endif
     }
     if (num) {
         SV **ary;
@@ -935,8 +938,10 @@ Perl_av_shift(pTHX_ AV *av)
     if (AvFILL(av) < 0)
       return &PL_sv_undef;
     retval = *AvARRAY(av);
+#ifndef PERL_RC_STACK
     if (AvREAL(av))
         *AvARRAY(av) = NULL;
+#endif
     AvARRAY(av) = AvARRAY(av) + 1;
     AvMAX(av)--;
     AvFILLp(av)--;
