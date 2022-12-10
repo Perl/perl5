@@ -564,6 +564,7 @@ EXTCONST char* const PL_op_name[] INIT({
 	[OP_CEIL]               = "ceil",
 	[OP_FLOOR]              = "floor",
 	[OP_IS_TAINTED]         = "is_tainted",
+	[OP_HELEMEXISTSOR]      = "helemexistsor",
     [OP_max] = "freed",
 });
 
@@ -986,6 +987,7 @@ EXTCONST char* const PL_op_desc[] INIT({
 	[OP_CEIL]               = "ceil",
 	[OP_FLOOR]              = "floor",
 	[OP_IS_TAINTED]         = "is_tainted",
+	[OP_HELEMEXISTSOR]      = "hash element exists or",
     [OP_max] = "freed op",
 });
 
@@ -1413,6 +1415,7 @@ INIT({
 	[OP_CEIL]               = Perl_pp_ceil,
 	[OP_FLOOR]              = Perl_pp_floor,
 	[OP_IS_TAINTED]         = Perl_pp_is_tainted,
+	[OP_HELEMEXISTSOR]      = Perl_pp_helemexistsor,
 });
 
 EXT Perl_check_t PL_check[] /* or perlvars.h */
@@ -1835,6 +1838,7 @@ INIT({
 	[OP_CEIL]               = Perl_ck_null,
 	[OP_FLOOR]              = Perl_ck_null,
 	[OP_IS_TAINTED]         = Perl_ck_null,
+	[OP_HELEMEXISTSOR]      = Perl_ck_helemexistsor,
 });
 
 EXTCONST U32 PL_opargs[] INIT({
@@ -2256,6 +2260,7 @@ EXTCONST U32 PL_opargs[] INIT({
 	[OP_CEIL]               = 0x0000011e,
 	[OP_FLOOR]              = 0x0000011e,
 	[OP_IS_TAINTED]         = 0x00000106,
+	[OP_HELEMEXISTSOR]      = 0x00011300,
 });
 
 END_EXTERN_C
@@ -2369,6 +2374,7 @@ END_EXTERN_C
 #define OPpCOREARGS_PUSHMARK    0x80
 #define OPpDEFER_FINALLY        0x80
 #define OPpENTERSUB_NOPAREN     0x80
+#define OPpHELEMEXISTSOR_DELETE 0x80
 #define OPpLVALUE               0x80
 #define OPpLVAL_INTRO           0x80
 #define OPpOFFBYONE             0x80
@@ -2948,6 +2954,7 @@ EXTCONST I16  PL_op_private_bitdef_ix[] = {
 	[OP_CEIL]               =   78,
 	[OP_FLOOR]              =   78,
 	[OP_IS_TAINTED]         =    0,
+	[OP_HELEMEXISTSOR]      =  253,
 
 };
 
@@ -3042,6 +3049,7 @@ EXTCONST U16  PL_op_private_bitdefs[] = {
     0x353c, 0x4638, 0x04f6, 0x2f0c, 0x1ac8, 0x0003, /* lvref */
     0x353d, /* lvrefslice */
     0x1dfc, 0x0003, /* pushdefer */
+    0x131c, 0x0003, /* helemexistsor */
 
 };
 
@@ -3468,6 +3476,7 @@ EXTCONST U8 PL_op_private_valid[] = {
 	[OP_CEIL]               = (OPpARG1_MASK|OPpTARGET_MY),
 	[OP_FLOOR]              = (OPpARG1_MASK|OPpTARGET_MY),
 	[OP_IS_TAINTED]         = (OPpARG1_MASK),
+	[OP_HELEMEXISTSOR]      = (OPpARG1_MASK|OPpHELEMEXISTSOR_DELETE),
 
 };
 

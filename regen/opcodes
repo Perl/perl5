@@ -597,3 +597,6 @@ reftype		reftype			ck_null		fsT1
 ceil		ceil			ck_null		fsT1
 floor		floor			ck_null		fsT1
 is_tainted	is_tainted		ck_null		fs1
+
+# exists-or; not currently exposed as a Perl-callable op
+helemexistsor	hash element exists or	ck_helemexistsor	|	S S

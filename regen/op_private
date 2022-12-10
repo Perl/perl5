@@ -872,6 +872,10 @@ addbits('argdefelem',
     6 => qw(OPpARG_IF_FALSE  IF_FALSE),
 );
 
+addbits('helemexistsor',
+    7 => qw(OPpHELEMEXISTSOR_DELETE DELETE),
+);
+
 1;
 
 # ex: set ts=8 sts=4 sw=4 et:

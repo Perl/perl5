@@ -5380,6 +5380,78 @@ PP(pp_exists)
     RETPUSHNO;
 }
 
+/* OP_HELEMEXISTSOR is a LOGOP not currently available to pure Perl code, but
+ * is defined for use by the core for new features, optimisations, or XS
+ * modules.
+ *
+ * Constructing it consumes two optrees, the first of which must be an
+ * OP_HELEM.
+ *
+ *   OP *o = newLOGOP(OP_HELEMEXISTSOR, 0, helemop, otherop);
+ *
+ * If the hash element exists (by the same rules as OP_EXISTS would find
+ * true) the op pushes it to the stack in the same way as a regular OP_HELEM
+ * and invokes op_next. If the element does not exist, then op_other is
+ * invoked instead. This is roughly equivalent to the perl code
+ *
+ *   exists $hash{$key} ? $hash{$key} : OTHER
+ *
+ * Except that any expressions or side-effects involved in obtaining the HV
+ * or the key are only invoked once, and it is a little more efficient when
+ * run on regular (non-magical) HVs.
+ *
+ * Combined with the OPpHELEMEXISTSOR_DELETE flag in op_private, this
+ * additionally deletes the element if found.
+ *
+ * On a tied HV, the 'EXISTS' method will be run as expected. If the method
+ * returns true then either the 'FETCH' or 'DELETE' method will also be run
+ * as required.
+ */
+
+PP(pp_helemexistsor)
+{
+    dSP;
+    SV *keysv = POPs;
+    HV *hv = MUTABLE_HV(POPs);
+    bool is_delete = PL_op->op_private & OPpHELEMEXISTSOR_DELETE;
+
+    assert(SvTYPE(hv) == SVt_PVHV);
+
+    bool hv_is_magical = UNLIKELY(SvMAGICAL(hv));
+
+    SV *val = NULL;
+
+    /* For magical HVs we have to ensure we invoke the EXISTS method first.
+     * For regular HVs we can just skip this and use the "pointer or NULL"
+     * result of the real hv_* functions
+     */
+    if(hv_is_magical && !hv_exists_ent(hv, keysv, 0))
+        goto other;
+
+    if(is_delete) {
+        val = hv_delete_ent(hv, keysv, 0, 0);
+    }
+    else {
+        HE *he = hv_fetch_ent(hv, keysv, 0, 0);
+        val = he ? HeVAL(he) : NULL;
+
+        /* A magical HV hasn't yet actually invoked the FETCH method. We must
+         * ask it to do so now
+         */
+        if(hv_is_magical && val)
+            SvGETMAGIC(val);
+    }
+
+    if(!val) {
+other:
+        PUTBACK;
+        return cLOGOP->op_other;
+    }
+
+    PUSHs(val);
+    RETURN;
+}
+
 PP(pp_hslice)
 {
     dSP; dMARK; dORIGMARK;
