@@ -573,7 +573,7 @@ S_tokereport(pTHX_ I32 rv, const YYSTYPE* lvalp)
                                     PL_op_name[lvalp->ival]);
             break;
         case TOKENTYPE_PVAL:
-            Perl_sv_catpvf(aTHX_ report, "(pval=\"%s\")", lvalp->pval);
+            Perl_sv_catpvf(aTHX_ report, "(pval=%p)", lvalp->pval);
             break;
         case TOKENTYPE_OPVAL:
             if (lvalp->opval) {
@@ -8831,7 +8831,7 @@ yyl_keylookup(pTHX_ char *s, GV *gv)
                 (*def->parse)(aTHX_ &result->parsedata, def);
                 s = PL_bufptr; /* restore local s variable */
             }
-            pl_yylval.pval = (char *)result;
+            pl_yylval.pval = result;
             CLINE;
             OPERATOR(tokentype_for_plugop(def));
         }
@@ -8937,7 +8937,7 @@ yyl_try(pTHX_ char *s)
                 (*def->parse)(aTHX_ &result->parsedata, def);
                 s = PL_bufptr; /* restore local s variable */
             }
-            pl_yylval.pval = (char *)result;
+            pl_yylval.pval = result;
             CLINE;
             OPERATOR(tokentype_for_plugop(def));
         }
