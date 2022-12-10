@@ -135,7 +135,7 @@ behavior; use C<--noindex> to suppress generation of an index.
 
     --infile=name
 
-Specify the pod file to convert.  Input is taken from STDIN if no
+Specify the POD file to convert.  Input is taken from C<STDIN> if no
 infile is specified.
 
 =item outfile
