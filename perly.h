@@ -209,7 +209,7 @@ union YYSTYPE
 
     I32	ival; /* __DEFAULT__ (marker for regen_perly.pl;
 				must always be 1st union member) */
-    char *pval;
+    void *pval;
     OP *opval;
     GV *gvval;
 
@@ -226,6 +226,6 @@ int yyparse (void);
 
 
 /* Generated from:
- * 21f50be92bd623859b76b35d4165bcd0fbe33785929bfc0a6a522d266e86de40 perly.y
+ * d159cbbb0bfd3916708be07894588433a9434f9ade8adce98532533a9ea86747 perly.y
  * acf1cbfd2545faeaaa58b1cf0cf9d7f98b5be0752eb7a54528ef904a9e2e1ca7 regen_perly.pl
  * ex: set ro: */
