@@ -30,6 +30,16 @@ $args = {
 
 xconvert($args);
 
+$args = {
+    poderrors => 1,
+    podstub => "poderr",
+    description => "pod error section explicit",
+    expect => $expect_raw,
+    debug => 1,
+};
+
+xconvert($args);
+
 done_testing;
 
 __DATA__
