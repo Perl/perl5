@@ -173,9 +173,9 @@ current working directory.
     --quiet
     --noquiet
 
-Don't display I<mostly harmless> warning messages.  These messages
-will be displayed by default.  But this is not the same as C<verbose>
-mode.
+Suppress I<mostly harmless> warning messages.  Such messages will be displayed
+by default (and can be explicitly requested with C<--noquiet>).  Note that
+C<--noquiet> is not the same as C<--verbose>.
 
 =item recurse
 
