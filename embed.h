@@ -1262,6 +1262,7 @@
 #define ck_fun(a)		Perl_ck_fun(aTHX_ a)
 #define ck_glob(a)		Perl_ck_glob(aTHX_ a)
 #define ck_grep(a)		Perl_ck_grep(aTHX_ a)
+#define ck_helemexistsor(a)	Perl_ck_helemexistsor(aTHX_ a)
 #define ck_index(a)		Perl_ck_index(aTHX_ a)
 #define ck_isa(a)		Perl_ck_isa(aTHX_ a)
 #define ck_join(a)		Perl_ck_join(aTHX_ a)

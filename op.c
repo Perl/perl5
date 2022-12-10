@@ -12227,6 +12227,36 @@ Perl_ck_exists(pTHX_ OP *o)
 }
 
 OP *
+Perl_ck_helemexistsor(pTHX_ OP *o)
+{
+    PERL_ARGS_ASSERT_CK_HELEMEXISTSOR;
+
+    o = ck_fun(o);
+
+    OP *first;
+    if(!(o->op_flags & OPf_KIDS) ||
+        !(first = cLOGOPo->op_first) ||
+        first->op_type != OP_HELEM)
+        /* As this opcode isn't currently exposed to pure-perl, only core or XS
+         * authors are ever going to see this message. We don't need to list it
+         * in perldiag as to do so would require documenting OP_HELEMEXISTSOR
+         * itself
+         */
+        /* diag_listed_as: SKIPME */
+        croak("OP_HELEMEXISTSOR argument is not a HASH element");
+
+    OP *hvop  = cBINOPx(first)->op_first;
+    OP *keyop = OpSIBLING(hvop);
+    assert(!OpSIBLING(keyop));
+
+    op_null(first); // null out the OP_HELEM
+
+    keyop->op_next = o;
+
+    return o;
+}
+
+OP *
 Perl_ck_rvconst(pTHX_ OP *o)
 {
     SVOP * const kid = cSVOPx(cUNOPo->op_first);

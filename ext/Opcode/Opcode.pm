@@ -1,4 +1,4 @@
-package Opcode 1.62;
+package Opcode 1.63;
 
 use strict;
 
@@ -332,6 +332,7 @@ invert_opset function.
     list lslice splice push pop shift unshift reverse
 
     cond_expr flip flop andassign orassign dorassign and or dor xor
+    helemexistsor
 
     warn die lineseq nextstate scope enter leave
 
