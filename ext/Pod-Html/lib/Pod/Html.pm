@@ -83,21 +83,22 @@ avoid conflicts).  Default is no style sheet.
 
     --flush
 
-Flushes the directory cache.
+Flush the directory cache.
 
 =item header
 
     --header
     --noheader
 
-Creates header and footer blocks containing the text of the C<NAME>
-section.  By default, no headers are generated.
+Create header and footer blocks containing the text of the C<NAME> section.
+By default, no header or footer is generated (though this may be explicitly
+specified with C<--noheader>).
 
 =item help
 
     --help
 
-Displays the usage message.
+Display the usage message.
 
 =item htmldir
 
