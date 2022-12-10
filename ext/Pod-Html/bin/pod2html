@@ -46,7 +46,8 @@ current working directory.
     --css=URL
 
 Specify the URL of cascading style sheet to link from resulting HTML file.
-Default is none style sheet.
+Also disables all HTML/CSS C<style> attributes that are output by default (to
+avoid conflicts).  Default is no style sheet.
 
 =item flush
 
