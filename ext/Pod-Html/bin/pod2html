@@ -134,7 +134,8 @@ HTML converted forms can be linked-to in cross-references.
 
     --podroot=name
 
-Specify the base directory for finding library pods.
+Specify the base directory for finding library pods. Default is the
+current working directory.
 
 =item quiet
 
