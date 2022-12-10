@@ -104,12 +104,11 @@ Display the usage message.
 
     --htmldir=name
 
-Sets the directory to which all cross references in the resulting
-html file will be relative. Not passing this causes all links to be
-absolute since this is the value that tells Pod::Html the root of the 
-documentation tree.
+Set the directory to which all cross references in the resulting HTML file
+will be relative. Not passing this causes all links to be absolute since this
+is the value which tells F<Pod::Html> the root of the documentation tree.
 
-Do not use this and --htmlroot in the same call to pod2html; they are
+Do not use this and C<--htmlroot> in the same call to F<pod2html>; they are
 mutually exclusive.
 
 =item htmlroot
