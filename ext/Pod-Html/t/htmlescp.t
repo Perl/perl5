@@ -29,6 +29,18 @@ $args = {
 
 xconvert($args);
 
+$args = {
+    podstub => "htmlescp",
+    description => "html escape noquiet explicit",
+    expect => $expect_raw,
+    debug => $debug,
+    p2h => {
+        noquiet => 1,
+    },
+};
+
+xconvert($args);
+
 done_testing;
 
 __DATA__
