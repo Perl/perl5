@@ -50,6 +50,22 @@ like($warn,
     )x,
     "misc pod-html --verbose warnings");
 
+$args = {
+    podstub => "feature2",
+    description => "misc pod-html features 2 explicit index",
+    expect => $expect_raw,
+    p2h => {
+        backlink    => 1,
+        header      => 1,
+        index       => 1,
+        podpath     => '.',
+        podroot     => $cwd,
+        norecurse   => 1,
+    },
+    debug => $debug,
+};
+xconvert($args);
+
 done_testing;
 
 __DATA__
