@@ -150,8 +150,9 @@ is specified.
     --poderrors
     --nopoderrors
 
-Include a "POD ERRORS" section in the outfile if there were any POD 
-errors in the infile. This section is included by default.
+Include a C<POD ERRORS> section in the outfile if there were any POD errors in
+the C<infile> (default behaviour).  C<--nopoderrors> suppresses creation of
+this C<POD ERRORS> section.
 
 =item podpath
 
