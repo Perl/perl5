@@ -127,8 +127,9 @@ this C<POD ERRORS> section.
 
     --podpath=name:...:name
 
-Specify which subdirectories of the podroot contain pod files whose
-HTML converted forms can be linked-to in cross-references.
+Specify which subdirectories (if any) of the C<podroot> contain POD files
+whose HTML-converted forms can be linked to in cross-references. Value is a
+colon-delimited list and is empty by default.
 
 =item podroot
 
