@@ -183,6 +183,7 @@ C<--noquiet> is not the same as C<--verbose>.
     --norecurse
 
 Recurse into subdirectories specified in podpath (default behaviour).
+C<--norecurse> does not recurse into these subdirectories.
 
 =item title
 
@@ -195,7 +196,8 @@ Specify the title of the resulting HTML file.
     --verbose
     --noverbose
 
-Display progress messages.  By default, they won't be displayed.
+Display progress messages. C<--noverbose> -- which is the default behavior --
+does not display these progress messages.
 
 =back
 
