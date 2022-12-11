@@ -11,6 +11,7 @@ use Testing qw( setup_testing_dir xconvert );
 use Cwd;
 use File::Spec::Functions;
 use Pod::Html::Util qw(
+    process_command_line
     unixify
 );
 
@@ -35,12 +36,13 @@ is(-f $cachefile, undef, "No cache file to start");
 is(-f $tcachefile, undef, "No cache file to start");
 
 # test podpath and podroot
-Pod::Html::pod2html(
+my @switches = (
     "--infile=$infile",
     "--outfile=$outfile",
     "--podpath=scooby:shaggy:fred:velma:daphne",
     "--podroot=$cwd",
-    );
+);
+Pod::Html::pod2html(@switches);
 is(-f $cachefile, 1, "Cache created");
 open(my $cache, '<', $cachefile) or die "Cannot open cache file: $!";
 chomp(my $podpath = <$cache>);
@@ -49,7 +51,25 @@ close $cache;
 is($podpath, "scooby:shaggy:fred:velma:daphne", "podpath");
 is($podroot, "$cwd", "podroot");
 
-# test cache contents
+# At this point, to test the '--flush' option, we have to deviate from our
+# practice of only calling through Pod::Html::pod2html() and create a new
+# Pod::Html object, call two methods on it, one of which will manually process
+# a set of command-line switches, then confirm that $cachefile no longer
+# exists.
+
+{
+    local @ARGV = map { split('=',$_) } @switches;
+    my $self = Pod::Html->new();
+    $self->init_globals();
+    ok(-f $cachefile, "Original cachefile still exists");
+
+    push @ARGV, '--flush';
+    my $opts = process_command_line();
+    $self->process_options($opts);
+    ok(! -f $cachefile, "Original cachefile has been flushed");
+}
+
+# test cache contents: non-default cachedir
 Pod::Html::pod2html(
     "--infile=$infile",
     "--outfile=$outfile",
@@ -57,7 +77,7 @@ Pod::Html::pod2html(
     "--podpath=$cachedir", # Use 't' to simplify test setup
     "--htmldir=$cwd",
     );
-is(-f $tcachefile, 1, "Cache created");
+is(-f $tcachefile, 1, "Cache file created in non-default cachedir");
 open($cache, '<', $tcachefile) or die "Cannot open cache file: $!";
 chomp($podpath = <$cache>);
 chomp($podroot = <$cache>);
