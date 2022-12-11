@@ -9,6 +9,7 @@ use warnings;
 use Test::More;
 use Testing qw( setup_testing_dir xconvert );
 use Cwd;
+use File::Spec::Functions;
 use Pod::Html::Util qw(
     unixify
 );
@@ -23,10 +24,11 @@ my $tdir = setup_testing_dir( {
 } );
 
 my $cwd = unixify(Cwd::cwd());
-my $infile = catfile('t', 'cache.pod');
+my $cachedir = 't';
+my $infile = catfile($cachedir, 'cache.pod');
 my $outfile = "cacheout.html";
 my $cachefile = "pod2htmd.tmp";
-my $tcachefile = catfile('t', 'pod2htmd.tmp');
+my $tcachefile = catfile($cachedir, 'pod2htmd.tmp');
 
 unlink $cachefile, $tcachefile;
 is(-f $cachefile, undef, "No cache file to start");
@@ -51,21 +53,21 @@ is($podroot, "$cwd", "podroot");
 Pod::Html::pod2html(
     "--infile=$infile",
     "--outfile=$outfile",
-    "--cachedir=t",
-    "--podpath=t",
+    "--cachedir=$cachedir",
+    "--podpath=$cachedir", # Use 't' to simplify test setup
     "--htmldir=$cwd",
     );
 is(-f $tcachefile, 1, "Cache created");
 open($cache, '<', $tcachefile) or die "Cannot open cache file: $!";
 chomp($podpath = <$cache>);
 chomp($podroot = <$cache>);
-is($podpath, "t", "podpath");
+is($podpath, $cachedir, "podpath identified");
 my %pages;
 while (<$cache>) {
     /(.*?) (.*)$/;
     $pages{$1} = $2;
 }
-chdir("t");
+chdir($cachedir);
 my %expected_pages = 
     # chop off the .pod and set the path
     map { my $f = substr($_, 0, -4); $f => "t/$f" }
