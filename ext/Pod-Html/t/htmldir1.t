@@ -27,13 +27,14 @@ my $relcwd = join '/', @dirs;
 
 $args = {
     podstub => "htmldir1",
-    description => "test --htmldir and --htmlroot 1a",
+    description => "test --htmldir and --htmlroot 1a; noheader",
     expect => $expect_raw,
     p2h => {
         podpath => File::Spec::Unix->catdir($relcwd, 't') . ":" .
                    File::Spec::Unix->catdir($relcwd, 'corpus/test.lib'),
         podroot => catpath($v, '/', ''),
         htmldir => 't',
+        noheader => 1,
         quiet   => 1,
     },
     debug => $debug,
