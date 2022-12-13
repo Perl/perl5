@@ -1645,6 +1645,9 @@
 #     define padlist_dup(a,b)                   Perl_padlist_dup(aTHX_ a,b)
 #     define padname_dup(a,b)                   Perl_padname_dup(aTHX_ a,b)
 #     define padnamelist_dup(a,b)               Perl_padnamelist_dup(aTHX_ a,b)
+#     if !defined(PERL_IMPLICIT_SYS)
+#       define PerlEnv_putenv(a)                Perl_PerlEnv_putenv(aTHX_ a)
+#     endif /* !defined(PERL_IMPLICIT_SYS) */
 #   endif /* defined(USE_ITHREADS) */
 #   if defined(USE_LOCALE_COLLATE)
 #     define magic_freecollxfrm(a,b)            Perl_magic_freecollxfrm(aTHX_ a,b)

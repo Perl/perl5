@@ -6195,6 +6195,13 @@ Perl_my_popen(pTHX_ const char *cmd, const char *mode);
 # define PERL_ARGS_ASSERT_MY_POPEN              \
         assert(cmd); assert(mode)
 
+# if defined(USE_ITHREADS)
+STATIC bool
+Perl_PerlEnv_putenv(pTHX_ char *str);
+#   define PERL_ARGS_ASSERT_PERLENV_PUTENV      \
+        assert(str)
+
+# endif /* defined(USE_ITHREADS) */
 #endif /* !defined(PERL_IMPLICIT_SYS) */
 #if defined(PERL_IN_AV_C)
 STATIC MAGIC *

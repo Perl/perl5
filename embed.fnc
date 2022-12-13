@@ -3940,6 +3940,9 @@ CTo	|PerlInterpreter *|perl_clone_using				\
 Adp	|I32	|my_pclose	|NULLOK PerlIO *ptr
 Adp	|PerlIO *|my_popen	|NN const char *cmd			\
 				|NN const char *mode
+# if defined(USE_ITHREADS)
+si	|bool	|PerlEnv_putenv |NN char *str
+# endif /* defined(USE_ITHREADS) */
 #endif /* !defined(PERL_IMPLICIT_SYS) */
 #if defined(PERL_IN_AV_C)
 S	|MAGIC *|get_aux_mg	|NN AV *av
