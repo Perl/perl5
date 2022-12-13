@@ -221,24 +221,28 @@ if (@ARGV) {
 
     unless (@tests) {
         my @seq = <base/*.t>;
+        push @tests, @seq;
 
-        my @last;
-        my @next = qw(comp run cmd);
+        my (@next, @last);
 
         # The remaining core tests are either intermixed with the non-core for
         # more parallelism (if PERL_TEST_HARNESS_ASAP is set non-zero) or done
         # after the above basic sanity tests, before any non-core ones.
         my $which = $ENV{PERL_TEST_HARNESS_ASAP} ? \@last : \@next;
 
+        push @$which, qw(comp run cmd);
         push @$which, qw(io re opbasic op uni mro lib porting perf);
         push @$which, 'japh' if $torture;
         push @$which, 'win32' if $^O eq 'MSWin32';
         push @$which, 'benchmark' if $ENV{PERL_BENCHMARK};
         push @$which, 'bigmem' if $ENV{PERL_TEST_MEMORY};
 
-        my $next = { par => '{' . join (',', @next) . '}/*.t' };
-        @tests = _extract_tests ($next);
-        push @seq, _compute_tests_and_ordering(\@tests)->@*;
+        if (@next) {
+            my $next = { par => '{' . join (',', @next) . '}/*.t' };
+            @next = _extract_tests ($next);
+            push @tests, @next;
+            push @seq, _compute_tests_and_ordering(\@next)->@*;
+        }
 
         my $last = { par => '{' . join (',', @last) . '}/*.t' };
         @last = _extract_tests ($last);
