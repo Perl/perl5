@@ -8,6 +8,9 @@ BEGIN {
     @INC = '../lib';              # pick up only this build's lib
 }
 
+my %must_be_executed_serially = map { $_ => 1 }
+                                    qw(../cpan/IO-Zlib/t ../ext/File-Find/t);
+
 my $torture; # torture testing?
 
 use TAP::Harness 3.13;
@@ -200,25 +203,21 @@ if (@ARGV) {
                 my $name = $2;
 
                 $all_dirs{$path} = 1;
-                $serials{$path} = 1 if $name =~ / \A 0 /x;
                 $map_file_to_dir{$file} = $path;
+
+                if ($name =~ / \A 0 /x) {
+                    $serials{$path} = 1;
+                }
+                elsif (defined $must_be_executed_serially{$path}) {
+                    $serials{$path} = 1;
+                    delete $must_be_executed_serially{$path};
+                }
             }
         }
 
         # We assume that the reason a test file's name begins with a 0 is to
         # order its execution among the tests in its directory.  Hence, a
         # directory containing such files should be tested in serial order.
-        #
-        # Add exceptions to the above rule
-        for (qw(../cpan/IO-Zlib/t ../ext/File-Find/t)) {
-            $serials{$_} = 1;
-        }
-
-        my @nonexistent_serials = grep { not exists $all_dirs{$_} } keys %serials;
-        if (@nonexistent_serials) {
-            die "These directories to be run serially don't exist."
-              . "  Check your spelling:\n" . join "\n", @nonexistent_serials;
-        }
 
         for my $file (@last) {
             my $file_dir = $map_file_to_dir{$file};
@@ -249,6 +248,12 @@ if (@ARGV) {
                                                                      keys %dir
                             ]
                    };
+
+        if (%must_be_executed_serially) {
+            die "These directories to be run serially don't exist.  Check your"
+            . " spelling:\n"
+            . join "\n", sort keys %must_be_executed_serially;
+        }
 
         $rules = { seq => \@seq };
     }
