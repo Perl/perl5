@@ -190,7 +190,7 @@ if (@ARGV) {
             if ( m! \A (?: \.\. / )?
                                 ( .*? )         # $1 is the directory path name
                             /
-                                ( [^/]* \.t )   # $2 is the .t name
+                               ( [^/]* \. (?: t | pl ) ) # $2 is the test name
                     \z !x)
             {
                 my $path = $1;
