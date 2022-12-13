@@ -39,6 +39,36 @@ my (@tests, @re, @anti_re);
 # [.VMS]TEST.COM calls harness with empty arguments, so clean-up @ARGV
 @ARGV = grep $_ && length( $_ ) => @ARGV;
 
+while ($ARGV[0] && $ARGV[0]=~/^-(n?)re/) {
+    my $ary= $1 ? \@anti_re : \@re;
+
+    if ( $ARGV[0] !~ /=/ ) {
+        shift @ARGV;
+        while (@ARGV and $ARGV[0] !~ /^-/) {
+            push @$ary, shift @ARGV;
+        }
+    } else {
+        push @$ary, (split/=/,shift @ARGV)[1];
+    }
+}
+
+my $jobs = $ENV{TEST_JOBS};
+my ($rules, $state, $color);
+
+if ($ENV{HARNESS_OPTIONS}) {
+    for my $opt ( split /:/, $ENV{HARNESS_OPTIONS} ) {
+        if ( $opt =~ /^j(\d*)$/ ) {
+            $jobs ||= $1 || 9;
+        }
+        elsif ( $opt eq 'c' ) {
+            $color = 1;
+        }
+        else {
+            die "Unknown HARNESS_OPTIONS item: $opt\n";
+        }
+    }
+}
+
 sub _extract_tests;
 sub _extract_tests {
     # This can probably be done more tersely with a map, but I doubt that it
@@ -59,35 +89,6 @@ sub _extract_tests {
         }
     }
     @results;
-}
-
-while ($ARGV[0] && $ARGV[0]=~/^-(n?)re/) {
-    my $ary= $1 ? \@anti_re : \@re;
-
-    if ( $ARGV[0] !~ /=/ ) {
-        shift @ARGV;
-        while (@ARGV and $ARGV[0] !~ /^-/) {
-            push @$ary, shift @ARGV;
-        }
-    } else {
-        push @$ary, (split/=/,shift @ARGV)[1];
-    }
-}
-
-my $jobs = $ENV{TEST_JOBS};
-my ($rules, $state, $color);
-if ($ENV{HARNESS_OPTIONS}) {
-    for my $opt ( split /:/, $ENV{HARNESS_OPTIONS} ) {
-        if ( $opt =~ /^j(\d*)$/ ) {
-            $jobs ||= $1 || 9;
-        }
-        elsif ( $opt eq 'c' ) {
-            $color = 1;
-        }
-        else {
-            die "Unknown HARNESS_OPTIONS item: $opt\n";
-        }
-    }
 }
 
 my %total_time;
