@@ -3525,6 +3525,80 @@ Perl_clear_defarray_simple(pTHX_ AV *av)
     Perl_av_remove_offset(aTHX_ av);
 }
 
+/* switch to a different argument stack */
+
+PERL_STATIC_INLINE void
+Perl_switch_argstack(pTHX_ AV *to)
+{
+    PERL_ARGS_ASSERT_SWITCH_ARGSTACK;
+
+    AvFILLp(PL_curstack) = PL_stack_sp - PL_stack_base;
+    PL_stack_base = AvARRAY(to);
+    PL_stack_max  = PL_stack_base + AvMAX(to);
+    PL_stack_sp   = PL_stack_base + AvFILLp(to);
+    PL_curstack   = to;
+}
+
+
+/* Push, and switch to a new stackinfo, allocating one if none are spare,
+ * to get a fresh set of stacks.
+ * Update all the interpreter variables like PL_curstackinfo,
+ * PL_stack_sp, etc. */
+
+PERL_STATIC_INLINE void
+Perl_push_stackinfo(pTHX_ I32 type)
+{
+    PERL_ARGS_ASSERT_PUSH_STACKINFO;
+
+    PERL_SI *next = PL_curstackinfo->si_next;
+    DEBUG_l({
+        int i = 0; PERL_SI *p = PL_curstackinfo;
+        while (p) { i++; p = p->si_prev; }
+        Perl_deb(aTHX_ "push STACKINFO %d in %s at %s:%d\n",
+                     i, SAFE_FUNCTION__, __FILE__, __LINE__);
+    })
+
+    if (!next) {
+        next = new_stackinfo(32, 2048/sizeof(PERL_CONTEXT) - 1);
+        next->si_prev = PL_curstackinfo;
+        PL_curstackinfo->si_next = next;
+    }
+    next->si_type = type;
+    next->si_cxix = -1;
+    next->si_cxsubix = -1;
+    PUSHSTACK_INIT_HWM(next);
+    AvFILLp(next->si_stack) = 0;
+    switch_argstack(next->si_stack);
+    PL_curstackinfo = next;
+    SET_MARK_OFFSET;
+}
+
+
+/* Pop, then switch to the previous stackinfo and set of stacks.
+ * Update all the interpreter variables like PL_curstackinfo,
+ * PL_stack_sp, etc. */
+
+PERL_STATIC_INLINE void
+Perl_pop_stackinfo(pTHX)
+{
+    PERL_ARGS_ASSERT_POP_STACKINFO;
+
+    PERL_SI * const prev = PL_curstackinfo->si_prev;
+    DEBUG_l({
+        int i = -1; PERL_SI *p = PL_curstackinfo;
+        while (p) { i++; p = p->si_prev; }
+        Perl_deb(aTHX_ "pop  STACKINFO %d in %s at %s:%d\n",
+                     i, SAFE_FUNCTION__, __FILE__, __LINE__);})
+    if (!prev) {
+        Perl_croak_popstack();
+    }
+
+    switch_argstack(prev->si_stack);
+    /* don't free prev here, free them all at the END{} */
+    PL_curstackinfo = prev;
+}
+
+
 
 /*
 =for apidoc newPADxVOP

@@ -9747,6 +9747,14 @@ Perl_newSV_type_mortal(pTHX_ const svtype type)
 # define PERL_ARGS_ASSERT_NEWSV_TYPE_MORTAL
 
 PERL_STATIC_INLINE void
+Perl_pop_stackinfo(pTHX);
+# define PERL_ARGS_ASSERT_POP_STACKINFO
+
+PERL_STATIC_INLINE void
+Perl_push_stackinfo(pTHX_ I32 type);
+# define PERL_ARGS_ASSERT_PUSH_STACKINFO
+
+PERL_STATIC_INLINE void
 Perl_rpp_extend(pTHX_ SSize_t n);
 # define PERL_ARGS_ASSERT_RPP_EXTEND
 
@@ -9869,6 +9877,11 @@ PERL_STATIC_INLINE char  *
 Perl_sv_setpv_freshbuf(pTHX_ SV * const sv);
 # define PERL_ARGS_ASSERT_SV_SETPV_FRESHBUF     \
         assert(sv)
+
+PERL_STATIC_INLINE void
+Perl_switch_argstack(pTHX_ AV *to);
+# define PERL_ARGS_ASSERT_SWITCH_ARGSTACK       \
+        assert(to)
 
 PERL_STATIC_INLINE IV
 Perl_utf8_distance(pTHX_ const U8 *a, const U8 *b)
