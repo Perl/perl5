@@ -205,6 +205,10 @@ if (@ARGV) {
                 $all_dirs{$path} = 1;
                 $map_file_to_dir{$file} = $path;
 
+                # We assume that the reason a test file's name begins with a 0
+                # is to order its execution among the tests in its directory.
+                # Hence, a directory containing such files should be tested in
+                # serial order, with some exceptions hard-coded in.
                 if ($name =~ / \A 0 /x) {
                     $serials{$path} = 1;
                 }
@@ -214,10 +218,6 @@ if (@ARGV) {
                 }
             }
         }
-
-        # We assume that the reason a test file's name begins with a 0 is to
-        # order its execution among the tests in its directory.  Hence, a
-        # directory containing such files should be tested in serial order.
 
         for my $file (@last) {
             my $file_dir = $map_file_to_dir{$file};
