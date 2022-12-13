@@ -496,6 +496,7 @@
 # define perly_sighandler                       Perl_perly_sighandler
 # define pmop_dump(a)                           Perl_pmop_dump(aTHX_ a)
 # define pop_scope()                            Perl_pop_scope(aTHX)
+# define pop_stackinfo()                        Perl_pop_stackinfo(aTHX)
 # define pregcomp(a,b)                          Perl_pregcomp(aTHX_ a,b)
 # define pregexec(a,b,c,d,e,f,g)                Perl_pregexec(aTHX_ a,b,c,d,e,f,g)
 # define pregfree(a)                            Perl_pregfree(aTHX_ a)
@@ -507,6 +508,7 @@
 # define ptr_table_split(a)                     Perl_ptr_table_split(aTHX_ a)
 # define ptr_table_store(a,b,c)                 Perl_ptr_table_store(aTHX_ a,b,c)
 # define push_scope()                           Perl_push_scope(aTHX)
+# define push_stackinfo(a)                      Perl_push_stackinfo(aTHX_ a)
 # define pv_display(a,b,c,d,e)                  Perl_pv_display(aTHX_ a,b,c,d,e)
 # define pv_escape(a,b,c,d,e,f)                 Perl_pv_escape(aTHX_ a,b,c,d,e,f)
 # define pv_pretty(a,b,c,d,e,f,g)               Perl_pv_pretty(aTHX_ a,b,c,d,e,f,g)
@@ -748,6 +750,7 @@
 # define sv_vsetpvf(a,b,c)                      Perl_sv_vsetpvf(aTHX_ a,b,c)
 # define sv_vsetpvf_mg(a,b,c)                   Perl_sv_vsetpvf_mg(aTHX_ a,b,c)
 # define sv_vsetpvfn(a,b,c,d,e,f,g)             Perl_sv_vsetpvfn(aTHX_ a,b,c,d,e,f,g)
+# define switch_argstack(a)                     Perl_switch_argstack(aTHX_ a)
 # define switch_to_global_locale()              Perl_switch_to_global_locale(aTHX)
 # define sync_locale()                          Perl_sync_locale(aTHX)
 # define taint_env()                            Perl_taint_env(aTHX)

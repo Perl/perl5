@@ -1294,49 +1294,25 @@ typedef struct stackinfo PERL_SI;
 #  define PUSHSTACK_INIT_HWM(si) NOOP
 #endif
 
+/* for backcompat; use push_stackinfo() instead */
+
 #define PUSHSTACKi(type) \
-    STMT_START {							\
-        PERL_SI *next = PL_curstackinfo->si_next;			\
-        DEBUG_l({							\
-            int i = 0; PERL_SI *p = PL_curstackinfo;			\
-            while (p) { i++; p = p->si_prev; }				\
-            Perl_deb(aTHX_ "push STACKINFO %d in %s at %s:%d\n",        \
-                         i, SAFE_FUNCTION__, __FILE__, __LINE__);})        \
-        if (!next) {							\
-            next = new_stackinfo(32, 2048/sizeof(PERL_CONTEXT) - 1);	\
-            next->si_prev = PL_curstackinfo;				\
-            PL_curstackinfo->si_next = next;				\
-        }								\
-        next->si_type = type;						\
-        next->si_cxix = -1;						\
-        next->si_cxsubix = -1;						\
-        PUSHSTACK_INIT_HWM(next);                                       \
-        AvFILLp(next->si_stack) = 0;					\
-        SWITCHSTACK(PL_curstack,next->si_stack);			\
-        PL_curstackinfo = next;						\
-        SET_MARK_OFFSET;						\
+    STMT_START {		\
+        PL_stack_sp = sp;       \
+        push_stackinfo(type);   \
+        sp = PL_stack_sp ;      \
     } STMT_END
 
 #define PUSHSTACK PUSHSTACKi(PERLSI_UNKNOWN)
 
-/* POPSTACK works with PL_stack_sp, so it may need to be bracketed by
+
+/* for backcompat; use pop_stackinfo() instead.
+ *
+ * POPSTACK works with PL_stack_sp, so it may need to be bracketed by
  * PUTBACK/SPAGAIN to flush/refresh any local SP that may be active */
-#define POPSTACK \
-    STMT_START {							\
-        dSP;								\
-        PERL_SI * const prev = PL_curstackinfo->si_prev;		\
-        DEBUG_l({							\
-            int i = -1; PERL_SI *p = PL_curstackinfo;			\
-            while (p) { i++; p = p->si_prev; }				\
-            Perl_deb(aTHX_ "pop  STACKINFO %d in %s at %s:%d\n",        \
-                         i, SAFE_FUNCTION__, __FILE__, __LINE__);})        \
-        if (!prev) {							\
-            Perl_croak_popstack();					\
-        }								\
-        SWITCHSTACK(PL_curstack,prev->si_stack);			\
-        /* don't free prev here, free them all at the END{} */		\
-        PL_curstackinfo = prev;						\
-    } STMT_END
+
+#define POPSTACK pop_stackinfo()
+
 
 #define POPSTACK_TO(s) \
     STMT_START {							\

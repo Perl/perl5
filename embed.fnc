@@ -2523,6 +2523,7 @@ p	|OP *	|pmruntime	|NN OP *o				\
 				|I32 floor
 Xiop	|I32	|POPMARK
 Cdp	|void	|pop_scope
+Cipx	|void	|pop_stackinfo
 
 : Used in perl.c and toke.c
 Fop	|void	|populate_isa	|NN const char *name			\
@@ -2556,6 +2557,7 @@ Adp	|void	|ptr_table_store|NN PTR_TBL_t * const tbl		\
 				|NULLOK const void * const oldsv	\
 				|NN void * const newsv
 Cdp	|void	|push_scope
+Cipx	|void	|push_stackinfo |I32 type
 Adp	|char * |pv_display	|NN SV *dsv				\
 				|NN const char *pv			\
 				|STRLEN cur				\
@@ -3456,6 +3458,7 @@ Adp	|void	|sv_vsetpvfn	|NN SV * const sv			\
 				|NULLOK SV ** const svargs		\
 				|const Size_t sv_count			\
 				|NULLOK bool * const maybe_tainted
+Cipx	|void	|switch_argstack|NN AV *to
 Adp	|void	|switch_to_global_locale
 Adp	|bool	|sync_locale
 CTop	|void	|sys_init	|NN int *argc				\

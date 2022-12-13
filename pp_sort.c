@@ -917,12 +917,7 @@ PP(pp_sort)
             SAVEOP();
 
             CATCH_SET(TRUE);
-            {
-
-                dSP; /* XXX PUSHSTACKi assumes sp is gettable/settable */
-                PUSHSTACKi(PERLSI_SORT);
-                PUTBACK;
-            }
+            push_stackinfo(PERLSI_SORT);
 
             if (!hasargs && !is_xsub) {
                 /* standard perl sub with values passed as $a and $b */
