@@ -96,6 +96,101 @@ sub _extract_tests {
 
 my %total_time;
 
+sub _compute_tests_and_ordering($) {
+    my @tests = $_[0]->@*;
+
+    my %dir;
+    my %serials;
+    my %all_dirs;
+    my %map_file_to_dir;
+
+    if ($jobs) {
+        require App::Prove::State;
+        $state = App::Prove::State->new({ store => 'test_state' });
+        $state->apply_switch('slow', 'save');
+        # For some reason get_tests returns *all* the tests previously run,
+        # (in the right order), not simply the selection in @tests
+        # (in the right order). Not sure if this is a bug or a feature.
+        # Whatever, *we* are only interested in the ones that are in @tests
+        my %seen;
+        @seen{@tests} = ();
+        @tests = grep {exists $seen{$_} } $state->get_tests(0, @tests);
+    }
+
+    my %times;
+    if ($state) {
+        # Where known, collate the elapsed times by test name
+        foreach ($state->results->tests()) {
+            $times{$_->name} = $_->elapsed();
+        }
+    }
+
+    # Preprocess the list of tests
+    for my $file (@tests) {
+        if ($^O eq 'MSWin32') {
+            $file =~ s,\\,/,g; # canonicalize path
+        };
+
+        # Keep a list of the distinct directory names, and another list of
+        # those which contain a file whose name begins with a 0
+        if ($file =~ m! \A ( (?: \.\. / )?
+                                .*?
+                            )             # $1 is the directory path name
+                            /
+                            ( [^/]* \. (?: t | pl ) ) # $2 is the test name
+                        \z !x)
+        {
+            my $path = $1;
+            my $name = $2;
+
+            $all_dirs{$path} = 1;
+            $map_file_to_dir{$file} = $path;
+
+            # We assume that the reason a test file's name begins with a 0
+            # is to order its execution among the tests in its directory.
+            # Hence, a directory containing such files should be tested in
+            # serial order, with some exceptions hard-coded in.
+            if ($name =~ / \A 0 /x) {
+                $serials{$path} = 1;
+            }
+            elsif (defined $must_be_executed_serially{$path}) {
+                $serials{$path} = 1;
+                delete $must_be_executed_serially{$path};
+            }
+        }
+    }
+
+    for my $file (@tests) {
+        my $file_dir = $map_file_to_dir{$file};
+
+        # Treat every file in each non-serial directory as its own
+        # "directory", so that it can be executed in parallel
+        if (! defined $serials{$file_dir}) {
+            $dir{$file} = { seq => $file };
+            $total_time{$file} = $times{$file} || 0;
+        }
+        else {  # Serial.  This file contributes time to the total needed
+                # for its directory as a whole
+            $dir{$file_dir} = { seq => "$file_dir/*" };
+            $total_time{$file_dir} += $times{$file} || 0;
+        }
+    }
+
+    undef %all_dirs;
+    undef %serials;
+
+    #print STDERR __LINE__, join "\n", sort sort_by_execution_order keys %dir
+
+    # Generate T::H schedule rules that run the contents of each directory
+    # sequentially.
+    my @seq = { par => [ map { $dir{$_} } sort sort_by_execution_order
+                                                                    keys %dir
+                        ]
+               };
+
+    return \@seq;
+}
+
 sub sort_by_execution_order {
     # Directories, ordered by total time descending then name ascending
     return $total_time{$b} <=> $total_time{$a} || lc $a cmp lc $b;
@@ -154,100 +249,13 @@ if (@ARGV) {
         # This is a bit of a game, because we only want to sort these tests in
         # speed order. base/*.t wants to run first, and ext,lib etc last and in
         # MANIFEST order
-        if ($jobs) {
-            require App::Prove::State;
-            $state = App::Prove::State->new({ store => 'test_state' });
-            $state->apply_switch('slow', 'save');
-            # For some reason get_tests returns *all* the tests previously run,
-            # (in the right order), not simply the selection in @tests
-            # (in the right order). Not sure if this is a bug or a feature.
-            # Whatever, *we* are only interested in the ones that are in @tests
-            my %seen;
-            @seen{@tests} = ();
-            @tests = grep {exists $seen{$_} } $state->get_tests(0, @tests);
-        }
         @tests = (@seq, @tests);
         push @seq, $next;
 
         push @last,
           _tests_from_manifest($Config{extensions}, $Config{known_extensions});
-        my %times;
-        if ($state) {
-            # Where known, collate the elapsed times by test name
-            foreach ($state->results->tests()) {
-                $times{$_->name} = $_->elapsed();
-            }
-        }
 
-        my %dir;
-        my %serials;
-        my %all_dirs;
-        my %map_file_to_dir;
-
-        # Preprocess the list of tests
-        for my $file (@last) {
-            if ($^O eq 'MSWin32') {
-                $file =~ s,\\,/,g; # canonicalize path
-            };
-
-            # Keep a list of the distinct directory names, and another list of
-            # those which contain a file whose name begins with a 0
-            if ($file =~ m! \A ( (?: \.\. / )?
-                                 .*?
-                               )             # $1 is the directory path name
-                               /
-                               ( [^/]* \. (?: t | pl ) ) # $2 is the test name
-                         \z !x)
-            {
-                my $path = $1;
-                my $name = $2;
-
-                $all_dirs{$path} = 1;
-                $map_file_to_dir{$file} = $path;
-
-                # We assume that the reason a test file's name begins with a 0
-                # is to order its execution among the tests in its directory.
-                # Hence, a directory containing such files should be tested in
-                # serial order, with some exceptions hard-coded in.
-                if ($name =~ / \A 0 /x) {
-                    $serials{$path} = 1;
-                }
-                elsif (defined $must_be_executed_serially{$path}) {
-                    $serials{$path} = 1;
-                    delete $must_be_executed_serially{$path};
-                }
-            }
-        }
-
-        for my $file (@last) {
-            my $file_dir = $map_file_to_dir{$file};
-
-            # Treat every file in each non-serial directory as its own
-            # "directory", so that it can be executed in parallel
-            if (! defined $serials{$file_dir}) {
-                $dir{$file} = { seq => $file };
-                $total_time{$file} = $times{$file} || 0;
-            }
-            else {  # Serial.  This file contributes time to the total needed
-                    # for its directory as a whole
-                $dir{$file_dir} = { seq => "$file_dir/*" };
-                $total_time{$file_dir} += $times{$file} || 0;
-            }
-        }
-
-        undef %all_dirs;
-        undef %serials;
-
-        #print STDERR __LINE__, join "\n", sort sort_by_execution_order keys %dir
-
-        push @tests, @last;
-
-        # Generate T::H schedule rules that run the contents of each directory
-        # sequentially.
-        push @seq, { par => [ map { $dir{$_} } sort sort_by_execution_order
-                                                                     keys %dir
-                            ]
-                   };
+        push @seq, _compute_tests_and_ordering(\@last)->@*;
 
         if (%must_be_executed_serially) {
             die "These directories to be run serially don't exist.  Check your"
