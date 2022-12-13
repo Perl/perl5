@@ -194,9 +194,10 @@ if (@ARGV) {
                     \z !x)
             {
                 my $path = $1;
+                my $name = $2;
 
                 $all_dirs{$path} = 1;
-                $serials{$path} = 1 if $2 =~ / \A 0 /x;
+                $serials{$path} = 1 if $name =~ / \A 0 /x;
             }
         }
 
