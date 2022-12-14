@@ -274,6 +274,7 @@ Perl_safesysrealloc(Malloc_t where,MEM_SIZE size)
 #ifdef DEBUGGING
         if ((SSize_t)size < 0)
             Perl_croak_nocontext("panic: realloc, size=%" UVuf, (UV)size);
+        UV was_where = PTR2UV(where);
 #endif
 #ifdef PERL_DEBUG_READONLY_COW
         if ((ptr = mmap(0, size, PROT_READ|PROT_WRITE,
@@ -326,7 +327,7 @@ Perl_safesysrealloc(Malloc_t where,MEM_SIZE size)
     /* In particular, must do that fixup above before logging anything via
      *printf(), as it can reallocate memory, which can cause SEGVs.  */
 
-        DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%" UVxf ": (%05ld) rfree\n",PTR2UV(where),(long)PL_an++));
+        DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%" UVxf ": (%05ld) rfree\n",was_where,(long)PL_an++));
         DEBUG_m(PerlIO_printf(Perl_debug_log, "0x%" UVxf ": (%05ld) realloc %ld bytes\n",PTR2UV(ptr),(long)PL_an++,(long)size));
 
         if (ptr == NULL) {
