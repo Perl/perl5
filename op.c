@@ -9674,6 +9674,9 @@ Perl_newDEFEROP(pTHX_ I32 flags, OP *block)
 
     PERL_ARGS_ASSERT_NEWDEFEROP;
 
+    forbid_outofblock_ops(block,
+        (flags & (OPpDEFER_FINALLY << 8)) ? "a \"finally\" block" : "a \"defer\" block");
+
     start = LINKLIST(block);
 
     /* Hide the block inside an OP_NULL with no exection */

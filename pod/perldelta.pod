@@ -66,6 +66,18 @@ C<INCDIR> methods will no longer trigger an exception, and instead will
 be treated the same as unblessed coderefs are, and executed as though
 they were an C<INC> hook.
 
+=head2 Forbidden control flow out of C<defer> or C<finally> now detected at compile-time
+
+It is forbidden to attempt to leave a C<defer> or C<finally> block by means
+of control flow such as C<return> or C<goto>. Previous versions of perl could
+only detect this when actually attempted at runtime.
+
+This version of perl adds compile-time detection for many cases that can be
+statically determined. This may mean that code which compiled successfully on
+a previous version of perl is now reported as a compile-time error with this
+one. This only happens in cases where it would have been an error to actually
+execute the code anyway; the error simply happens at an earlier time.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
