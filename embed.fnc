@@ -1114,6 +1114,7 @@ Cp	|I32	|foldEQ_utf8_flags |NN const char *s1|NULLOK char **pe1|UV l1 \
 				|bool u1|NN const char *s2|NULLOK char **pe2 \
 				|UV l2|bool u2|U32 flags
 Cip	|I32	|foldEQ_latin1	|NN const char* a|NN const char* b|I32 len
+Apdx	|void	|forbid_outofblock_ops|NN OP *o|NN const char *blockname
 #if defined(PERL_IN_DOIO_C)
 SR	|bool	|ingroup	|Gid_t testgid|bool effective
 #endif

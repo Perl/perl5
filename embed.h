@@ -182,6 +182,7 @@
 #define foldEQ_latin1(a,b,c)	Perl_foldEQ_latin1(aTHX_ a,b,c)
 #define foldEQ_locale(a,b,c)	Perl_foldEQ_locale(aTHX_ a,b,c)
 #define foldEQ_utf8_flags(a,b,c,d,e,f,g,h,i)	Perl_foldEQ_utf8_flags(aTHX_ a,b,c,d,e,f,g,h,i)
+#define forbid_outofblock_ops(a,b)	Perl_forbid_outofblock_ops(aTHX_ a,b)
 #if !defined(MULTIPLICITY) || defined(PERL_CORE)
 #define form(...)		Perl_form(aTHX_ __VA_ARGS__)
 #endif

@@ -5106,6 +5106,148 @@ S_gen_constant_list(pTHX_ OP *o)
 =for apidoc_section $optree_manipulation
 */
 
+enum {
+    FORBID_LOOPEX_DEFAULT = (1<<0),
+};
+
+static void walk_ops_forbid(pTHX_ OP *o, U32 flags, HV *permittedloops, const char *blockname)
+{
+    bool is_loop = FALSE;
+    SV *labelsv = NULL;
+
+    switch(o->op_type) {
+        case OP_NEXTSTATE:
+        case OP_DBSTATE:
+            PL_curcop = (COP *)o;
+            return;
+
+        case OP_RETURN:
+            goto forbid;
+
+        case OP_GOTO:
+            /* TODO: This might be safe, depending on the target */
+            goto forbid;
+
+        case OP_NEXT:
+        case OP_LAST:
+        case OP_REDO:
+            {
+                /* OPf_SPECIAL means this is a default loopex */
+                if(o->op_flags & OPf_SPECIAL) {
+                    if(flags & FORBID_LOOPEX_DEFAULT)
+                        goto forbid;
+
+                    break;
+                }
+                /* OPf_STACKED means it's a dynamically computed label */
+                if(o->op_flags & OPf_STACKED)
+                    goto forbid;
+
+                SV *target = newSVpv(cPVOPo->op_pv, strlen(cPVOPo->op_pv));
+                if(cPVOPo->op_private & OPpPV_IS_UTF8)
+                    SvUTF8_on(target);
+                SAVEFREESV(target);
+
+                if(hv_fetch_ent(permittedloops, target, FALSE, 0))
+                    break;
+
+                goto forbid;
+            }
+
+        case OP_LEAVELOOP:
+            {
+                STRLEN label_len;
+                U32 label_flags;
+                const char *label_pv = CopLABEL_len_flags(PL_curcop, &label_len, &label_flags);
+
+                if(label_pv) {
+                    labelsv = newSVpvn(label_pv, label_len);
+                    if(label_flags & SVf_UTF8)
+                        SvUTF8_on(labelsv);
+                    SAVEFREESV(labelsv);
+
+                    sv_inc(HeVAL(hv_fetch_ent(permittedloops, labelsv, TRUE, 0)));
+                }
+
+                is_loop = TRUE;
+                break;
+            }
+
+forbid:
+            /* diag_listed_as: Can't "%s" out of a "defer" block */
+            /* diag_listed_as: Can't "%s" out of a "finally" block */
+            croak("Can't \"%s\" out of %s", PL_op_name[o->op_type], blockname);
+
+        default:
+            break;
+    }
+
+    if(!(o->op_flags & OPf_KIDS))
+        return;
+
+    OP *kid = cUNOPo->op_first;
+    while(kid) {
+        walk_ops_forbid(aTHX_ kid, flags, permittedloops, blockname);
+        kid = OpSIBLING(kid);
+
+        if(is_loop) {
+            /* Now in the body of the loop; we can permit loopex default */
+            flags &= ~FORBID_LOOPEX_DEFAULT;
+        }
+    }
+
+    if(is_loop && labelsv) {
+        HE *he = hv_fetch_ent(permittedloops, labelsv, FALSE, 0);
+        if(SvIV(HeVAL(he)) > 1)
+            sv_dec(HeVAL(he));
+        else
+            hv_delete_ent(permittedloops, labelsv, 0, 0);
+    }
+}
+
+/*
+=for apidoc forbid_outofblock_ops
+
+Checks an optree that implements a block, to ensure there are no control-flow
+ops that attempt to leave the block.  Any C<OP_RETURN> is forbidden, as is any
+C<OP_GOTO>. Loops are analysed, so any LOOPEX op (C<OP_NEXT>, C<OP_LAST> or
+C<OP_REDO>) that affects a loop that contains it within the block are
+permitted, but those that do not are forbidden.
+
+If any of these forbidden constructions are detected, an exception is thrown
+by using the op name and the blockname argument to construct a suitable
+message.
+
+This function alone is not sufficient to ensure the optree does not perform
+any of these forbidden activities during runtime, as it might call a different
+function that performs a non-local LOOPEX, or a string-eval() that performs a
+C<goto>, or various other things. It is intended purely as a compile-time
+check for those that could be detected statically. Additional runtime checks
+may be required depending on the circumstance it is used for.
+
+Note currently that I<all> C<OP_GOTO> ops are forbidden, even in cases where
+they might otherwise be safe to execute.  This may be permitted in a later
+version.
+
+=cut
+*/
+
+void
+Perl_forbid_outofblock_ops(pTHX_ OP *o, const char *blockname)
+{
+    PERL_ARGS_ASSERT_FORBID_OUTOFBLOCK_OPS;
+
+    ENTER;
+    SAVEVPTR(PL_curcop);
+
+    HV *looplabels = newHV();
+    SAVEFREESV((SV *)looplabels);
+
+    walk_ops_forbid(aTHX_ o, FORBID_LOOPEX_DEFAULT, looplabels, blockname);
+
+    LEAVE;
+}
+
 /* List constructors */
 
 /*

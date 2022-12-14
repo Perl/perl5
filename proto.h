@@ -1301,6 +1301,9 @@ PERL_STATIC_INLINE I32	Perl_foldEQ_locale(pTHX_ const char* a, const char* b, I3
 PERL_CALLCONV I32	Perl_foldEQ_utf8_flags(pTHX_ const char *s1, char **pe1, UV l1, bool u1, const char *s2, char **pe2, UV l2, bool u2, U32 flags);
 #define PERL_ARGS_ASSERT_FOLDEQ_UTF8_FLAGS	\
 	assert(s1); assert(s2)
+PERL_CALLCONV void	Perl_forbid_outofblock_ops(pTHX_ OP *o, const char *blockname);
+#define PERL_ARGS_ASSERT_FORBID_OUTOFBLOCK_OPS	\
+	assert(o); assert(blockname)
 PERL_CALLCONV void	Perl_force_locale_unlock(void)
 			__attribute__visibility__("hidden");
 #define PERL_ARGS_ASSERT_FORCE_LOCALE_UNLOCK
