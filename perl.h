@@ -6003,8 +6003,12 @@ typedef void (*XSINIT_t) (pTHX);
 typedef void (*ATEXIT_t) (pTHX_ void*);
 typedef void (*XSUBADDR_t) (pTHX_ CV *);
 
-/* TODO: find somewhere to store this */
 enum Perl_custom_infix_precedence {
+    /* These numbers are spaced out to give room to insert new values as
+     * required. They form part of the ABI contract with XS::Parse::Infix so
+     * they should not be changed within a stable release cycle, but they can
+     * be freely altered during a development cycle because no ABI guarantees
+     * are made at that time */
     INFIX_PREC_LOW  =  10, /* non-associative */
     INFIX_PREC_REL  =  30, /* non-associative, just below `==` */
     INFIX_PREC_ADD  =  50, /* left-associative, same precedence as `+` */
