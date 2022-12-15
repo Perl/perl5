@@ -429,7 +429,9 @@ well.
 
 =item *
 
-XXX
+The regex engine compilation code was split up into smaller sized compilation
+units. No functionality changes were made. This was just to make it easier
+to maintain the codebase.
 
 =back
 
