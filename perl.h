@@ -6009,12 +6009,19 @@ enum Perl_custom_infix_precedence {
      * they should not be changed within a stable release cycle, but they can
      * be freely altered during a development cycle because no ABI guarantees
      * are made at that time */
-    INFIX_PREC_LOW  =  10, /* non-associative */
-    INFIX_PREC_REL  =  30, /* non-associative, just below `==` */
-    INFIX_PREC_ADD  =  50, /* left-associative, same precedence as `+` */
-    INFIX_PREC_MUL  =  70, /* left-associative, same precedence as `*` */
-    INFIX_PREC_POW  =  90, /* right-associative, same precedence as `**` */
-    INFIX_PREC_HIGH = 110, /* non-associative */
+    INFIX_PREC_LOW             =  10, /* non-associative */
+    INFIX_PREC_LOGICAL_OR_LOW  =  30, /* left-associative, as `or` */
+    INFIX_PREC_LOGICAL_AND_LOW =  40, /* left-associative, as `and` */
+    INFIX_PREC_ASSIGN          =  50, /* right-associative, as `=` */
+    INFIX_PREC_LOGICAL_OR      =  70, /* left-associative, as `||` */
+    INFIX_PREC_LOGICAL_AND     =  80, /* left-associative, as `&&` */
+    INFIX_PREC_REL             =  90, /* non-associative, just below `==` */
+    INFIX_PREC_ADD             = 110, /* left-associative, as `+` */
+    INFIX_PREC_MUL             = 130, /* left-associative, as `*` */
+    INFIX_PREC_POW             = 150, /* right-associative, as `**` */
+    INFIX_PREC_HIGH            = 170, /* non-associative */
+    /* Try to keep within the range of a U8 in case we need to split the field
+     * and add flags */
 };
 struct Perl_custom_infix;
 struct Perl_custom_infix {
