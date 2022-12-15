@@ -500,12 +500,17 @@ static struct debug_tokens {
     DEBUG_TOKEN (IVAL,  PERLY_TILDE),
     DEBUG_TOKEN (OPVAL, PLUGEXPR),
     DEBUG_TOKEN (OPVAL, PLUGSTMT),
-    DEBUG_TOKEN (PVAL,  PLUGADDOP),
-    DEBUG_TOKEN (PVAL,  PLUGHIGHOP),
-    DEBUG_TOKEN (PVAL,  PLUGLOWOP),
-    DEBUG_TOKEN (PVAL,  PLUGMULOP),
-    DEBUG_TOKEN (PVAL,  PLUGPOWOP),
-    DEBUG_TOKEN (PVAL,  PLUGRELOP),
+    DEBUG_TOKEN (PVAL,  PLUGIN_ADD_OP),
+    DEBUG_TOKEN (PVAL,  PLUGIN_ASSIGN_OP),
+    DEBUG_TOKEN (PVAL,  PLUGIN_HIGH_OP),
+    DEBUG_TOKEN (PVAL,  PLUGIN_LOGICAL_AND_OP),
+    DEBUG_TOKEN (PVAL,  PLUGIN_LOGICAL_OR_OP),
+    DEBUG_TOKEN (PVAL,  PLUGIN_LOGICAL_AND_LOW_OP),
+    DEBUG_TOKEN (PVAL,  PLUGIN_LOGICAL_OR_LOW_OP),
+    DEBUG_TOKEN (PVAL,  PLUGIN_LOW_OP),
+    DEBUG_TOKEN (PVAL,  PLUGIN_MUL_OP),
+    DEBUG_TOKEN (PVAL,  PLUGIN_POW_OP),
+    DEBUG_TOKEN (PVAL,  PLUGIN_REL_OP),
     DEBUG_TOKEN (OPVAL, PMFUNC),
     DEBUG_TOKEN (NONE,  POSTJOIN),
     DEBUG_TOKEN (NONE,  POSTDEC),
@@ -8727,16 +8732,26 @@ static enum yytokentype tokentype_for_plugop(struct Perl_custom_infix *def)
 {
     enum Perl_custom_infix_precedence prec = def->prec;
     if(prec <= INFIX_PREC_LOW)
-        return PLUGLOWOP;
+        return PLUGIN_LOW_OP;
+    if(prec <= INFIX_PREC_LOGICAL_OR_LOW)
+        return PLUGIN_LOGICAL_OR_LOW_OP;
+    if(prec <= INFIX_PREC_LOGICAL_AND_LOW)
+        return PLUGIN_LOGICAL_AND_LOW_OP;
+    if(prec <= INFIX_PREC_ASSIGN)
+        return PLUGIN_ASSIGN_OP;
+    if(prec <= INFIX_PREC_LOGICAL_OR)
+        return PLUGIN_LOGICAL_OR_OP;
+    if(prec <= INFIX_PREC_LOGICAL_AND)
+        return PLUGIN_LOGICAL_AND_OP;
     if(prec <= INFIX_PREC_REL)
-        return PLUGRELOP;
+        return PLUGIN_REL_OP;
     if(prec <= INFIX_PREC_ADD)
-        return PLUGADDOP;
+        return PLUGIN_ADD_OP;
     if(prec <= INFIX_PREC_MUL)
-        return PLUGMULOP;
+        return PLUGIN_MUL_OP;
     if(prec <= INFIX_PREC_POW)
-        return PLUGPOWOP;
-    return PLUGHIGHOP;
+        return PLUGIN_POW_OP;
+    return PLUGIN_HIGH_OP;
 }
 
 OP *

@@ -91,9 +91,6 @@
 %token <ival> COLONATTR FORMLBRACK FORMRBRACK
 %token <ival> SUBLEXSTART SUBLEXEND
 
-/* Pluggable infix operators */
-%token <pval> PLUGLOWOP PLUGRELOP PLUGADDOP PLUGMULOP PLUGPOWOP PLUGHIGHOP
-
 %type <ival> grammar remember mremember
 %type <ival>  startsub startanonsub startformsub
 
@@ -121,32 +118,32 @@
 %nonassoc <ival> PREC_LOW
 %nonassoc LOOPEX
 
-%nonassoc PLUGLOWOP
-%left <ival> OROP
-%left <ival> ANDOP
+%nonassoc <pval> PLUGIN_LOW_OP
+%left <ival> OROP <pval> PLUGIN_LOGICAL_OR_LOW_OP
+%left <ival> ANDOP <pval> PLUGIN_LOGICAL_AND_LOW_OP
 %right <ival> NOTOP
 %nonassoc LSTOP LSTOPSUB
 %left PERLY_COMMA
-%right <ival> ASSIGNOP
+%right <ival> ASSIGNOP <pval> PLUGIN_ASSIGN_OP
 %right <ival> PERLY_QUESTION_MARK PERLY_COLON
 %nonassoc DOTDOT
-%left <ival> OROR DORDOR
-%left <ival> ANDAND
+%left <ival> OROR DORDOR <pval> PLUGIN_LOGICAL_OR_OP
+%left <ival> ANDAND <pval> PLUGIN_LOGICAL_AND_OP
 %left <ival> BITOROP
 %left <ival> BITANDOP
 %left <ival> CHEQOP NCEQOP
 %left <ival> CHRELOP NCRELOP
-%nonassoc PLUGRELOP
+%nonassoc <pval> PLUGIN_REL_OP
 %nonassoc UNIOP UNIOPSUB
 %nonassoc KW_REQUIRE
 %left <ival> SHIFTOP
-%left ADDOP PLUGADDOP
-%left MULOP PLUGMULOP
+%left ADDOP <pval> PLUGIN_ADD_OP
+%left MULOP <pval> PLUGIN_MUL_OP
 %left <ival> MATCHOP
 %right <ival> PERLY_EXCLAMATION_MARK PERLY_TILDE UMINUS REFGEN
-%right POWOP PLUGPOWOP
+%right POWOP <pval> PLUGIN_POW_OP
 %nonassoc <ival> PREINC PREDEC POSTINC POSTDEC POSTJOIN
-%nonassoc PLUGHIGHOP
+%nonassoc <pval> PLUGIN_HIGH_OP
 %left <ival> ARROW
 %nonassoc <ival> PERLY_PAREN_CLOSE
 %left <ival> PERLY_PAREN_OPEN
@@ -987,8 +984,12 @@ sigsubbody:	remember optsubsignature PERLY_BRACE_OPEN stmtseq PERLY_BRACE_CLOSE
 /* Ordinary expressions; logical combinations */
 expr	:	expr[lhs] ANDOP expr[rhs]
 			{ $$ = newLOGOP(OP_AND, 0, $lhs, $rhs); }
+	|	expr[lhs] PLUGIN_LOGICAL_AND_LOW_OP[op] expr[rhs]
+			{ $$ = build_infix_plugin($lhs, $rhs, $op); }
 	|	expr[lhs] OROP[operator] expr[rhs]
 			{ $$ = newLOGOP($operator, 0, $lhs, $rhs); }
+	|	expr[lhs] PLUGIN_LOGICAL_OR_LOW_OP[op] expr[rhs]
+			{ $$ = build_infix_plugin($lhs, $rhs, $op); }
 	|	listexpr %prec PREC_LOW
 	;
 
@@ -1121,24 +1122,26 @@ subscripted:    gelem PERLY_BRACE_OPEN expr PERLY_SEMICOLON PERLY_BRACE_CLOSE   
     ;
 
 /* Binary operators between terms */
-termbinop:	term[lhs] PLUGHIGHOP[op] term[rhs]
+termbinop:	term[lhs] PLUGIN_HIGH_OP[op] term[rhs]
 			{ $$ = build_infix_plugin($lhs, $rhs, $op); }
 	|	term[lhs] ASSIGNOP term[rhs]                     /* $x = $y, $x += $y */
 			{ $$ = newASSIGNOP(OPf_STACKED, $lhs, $ASSIGNOP, $rhs); }
+	|	term[lhs] PLUGIN_ASSIGN_OP[op] term[rhs]
+			{ $$ = build_infix_plugin($lhs, $rhs, $op); }
 	|	term[lhs] POWOP term[rhs]                        /* $x ** $y */
 			{ $$ = newBINOP($POWOP, 0, scalar($lhs), scalar($rhs)); }
-	|	term[lhs] PLUGPOWOP[op] term[rhs]
+	|	term[lhs] PLUGIN_POW_OP[op] term[rhs]
 			{ $$ = build_infix_plugin($lhs, $rhs, $op); }
 	|	term[lhs] MULOP term[rhs]                        /* $x * $y, $x x $y */
 			{   if ($MULOP != OP_REPEAT)
 				scalar($lhs);
 			    $$ = newBINOP($MULOP, 0, $lhs, scalar($rhs));
 			}
-	|	term[lhs] PLUGMULOP[op] term[rhs]
+	|	term[lhs] PLUGIN_MUL_OP[op] term[rhs]
 			{ $$ = build_infix_plugin($lhs, $rhs, $op); }
 	|	term[lhs] ADDOP term[rhs]                        /* $x + $y */
 			{ $$ = newBINOP($ADDOP, 0, scalar($lhs), scalar($rhs)); }
-	|	term[lhs] PLUGADDOP[op] term[rhs]
+	|	term[lhs] PLUGIN_ADD_OP[op] term[rhs]
 			{ $$ = build_infix_plugin($lhs, $rhs, $op); }
 	|	term[lhs] SHIFTOP term[rhs]                      /* $x >> $y, $x << $y */
 			{ $$ = newBINOP($SHIFTOP, 0, scalar($lhs), scalar($rhs)); }
@@ -1154,13 +1157,17 @@ termbinop:	term[lhs] PLUGHIGHOP[op] term[rhs]
 			{ $$ = newRANGE($DOTDOT, scalar($lhs), scalar($rhs)); }
 	|	term[lhs] ANDAND term[rhs]                       /* $x && $y */
 			{ $$ = newLOGOP(OP_AND, 0, $lhs, $rhs); }
+	|	term[lhs] PLUGIN_LOGICAL_AND_OP[op] term[rhs]
+			{ $$ = build_infix_plugin($lhs, $rhs, $op); }
 	|	term[lhs] OROR term[rhs]                         /* $x || $y */
 			{ $$ = newLOGOP(OP_OR, 0, $lhs, $rhs); }
+	|	term[lhs] PLUGIN_LOGICAL_OR_OP[op] term[rhs]
+			{ $$ = build_infix_plugin($lhs, $rhs, $op); }
 	|	term[lhs] DORDOR term[rhs]                       /* $x // $y */
 			{ $$ = newLOGOP(OP_DOR, 0, $lhs, $rhs); }
 	|	term[lhs] MATCHOP term[rhs]                      /* $x =~ /$y/ */
 			{ $$ = bind_match($MATCHOP, $lhs, $rhs); }
-	|	term[lhs] PLUGLOWOP[op] term[rhs]
+	|	term[lhs] PLUGIN_LOW_OP[op] term[rhs]
 			{ $$ = build_infix_plugin($lhs, $rhs, $op); }
     ;
 
@@ -1172,7 +1179,7 @@ termrelop:	relopchain %prec PREC_LOW
 			{ yyerror("syntax error"); YYERROR; }
 	|	termrelop CHRELOP
 			{ yyerror("syntax error"); YYERROR; }
-	|	term[lhs] PLUGRELOP[op] term[rhs]
+	|	term[lhs] PLUGIN_REL_OP[op] term[rhs]
 			{ $$ = build_infix_plugin($lhs, $rhs, $op); }
 	;
 
