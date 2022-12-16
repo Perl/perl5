@@ -1232,7 +1232,7 @@
 #   endif /* defined(PERL_IN_CLASS_C) || defined(PERL_IN_GLOBALS_C) ||
              defined(PERL_IN_OP_C)    || defined(PERL_IN_PEEP_C) */
 #   if defined(PERL_IN_DEB_C)
-#     define deb_stack_n(a,b,c,d,e)             S_deb_stack_n(aTHX_ a,b,c,d,e)
+#     define deb_stack_n(a,b,c,d,e,f)           S_deb_stack_n(aTHX_ a,b,c,d,e,f)
 #   endif
 #   if defined(PERL_IN_DOIO_C)
 #     define argvout_final(a,b,c)               S_argvout_final(aTHX_ a,b,c)

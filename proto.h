@@ -6599,7 +6599,7 @@ Perl_croak_kw_unless_class(pTHX_ const char *kw);
           defined(PERL_IN_TOKE_C) */
 #if defined(PERL_IN_DEB_C)
 STATIC void
-S_deb_stack_n(pTHX_ SV **stack_base, I32 stack_min, I32 stack_max, I32 mark_min, I32 mark_max);
+S_deb_stack_n(pTHX_ SV **stack_base, I32 stack_min, I32 stack_max, I32 mark_min, I32 mark_max, I32 nonrc_base);
 # define PERL_ARGS_ASSERT_DEB_STACK_N           \
         assert(stack_base)
 
