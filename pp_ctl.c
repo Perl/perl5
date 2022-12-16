@@ -2724,8 +2724,15 @@ PP(pp_next)
 
 PP(pp_redo)
 {
-    PERL_CONTEXT *cx = S_unwind_loop(aTHX);
-    OP* redo_op = cx->blk_loop.my_op->op_redoop;
+    PERL_CONTEXT *cx;
+    OP* redo_op;
+
+    /* if not a bare 'redo' in the main scope, search for it */
+    cx = CX_CUR();
+    if (!((PL_op->op_flags & OPf_SPECIAL) && CxTYPE_is_LOOP(cx)))
+        cx = S_unwind_loop(aTHX);
+
+    redo_op = cx->blk_loop.my_op->op_redoop;
 
     if (redo_op->op_type == OP_ENTER) {
         /* pop one less context to avoid $x being freed in while (my $x..) */

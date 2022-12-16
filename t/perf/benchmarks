@@ -2185,6 +2185,12 @@
         code    => 'for my $x (@a) {next}',
     },
 
+    'loop::for::redo4' => {
+        desc    => 'loop hitting redo a bunch of times',
+        setup   => 'my ($y, $x);',
+        code    => '$y = 0; $x = 2; out: $x--; while ($x) { goto out if $y++ > 4; redo; }',
+    },
+
     'loop::grep::expr_3int' => {
         desc    => 'grep $_ > 0, 1,2,3',
         setup   => 'my @a',
