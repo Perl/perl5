@@ -451,11 +451,13 @@ BOOT:
     {
 	dMY_CXT;
 	MY_CXT.x_GLOB_ENTRIES = NULL;
-	MY_CXT.x_GLOB_OLD_OPHOOK = PL_opfreehook;
 #ifdef USE_ITHREADS
         MY_CXT.interp = aTHX;
 #endif
-	PL_opfreehook = glob_ophook;
+	if(!MY_CXT.x_GLOB_OLD_OPHOOK) {
+	    MY_CXT.x_GLOB_OLD_OPHOOK = PL_opfreehook;
+	    PL_opfreehook = glob_ophook;
+	}
     }  
 }
 
