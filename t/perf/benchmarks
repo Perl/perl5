@@ -2191,6 +2191,12 @@
         code    => '$y = 0; $x = 2; out: $x--; while ($x) { goto out if $y++ > 4; redo; }',
     },
 
+    'loop::for::last4' => {
+        desc    => 'for loop containing for loop with a last',
+        setup   => '',
+        code    => 'for (1..4) { for (1..2) { last; } }',
+    },
+
     'loop::grep::expr_3int' => {
         desc    => 'grep $_ > 0, 1,2,3',
         setup   => 'my @a',

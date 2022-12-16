@@ -2686,7 +2686,10 @@ PP(pp_last)
     PERL_CONTEXT *cx;
     OP* nextop;
 
-    cx = S_unwind_loop(aTHX);
+    /* if not a bare 'last' in the main scope, search for it */
+    cx = CX_CUR();
+    if (!((PL_op->op_flags & OPf_SPECIAL) && CxTYPE_is_LOOP(cx)))
+        cx = S_unwind_loop(aTHX);
 
     assert(CxTYPE_is_LOOP(cx));
     PL_stack_sp = PL_stack_base
