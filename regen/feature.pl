@@ -11,8 +11,9 @@
 # This script is normally invoked from regen.pl.
 
 BEGIN {
-    require './regen/regen_lib.pl';
     push @INC, './lib';
+    require './regen/regen_lib.pl';
+    require './regen/HeaderParser.pm';
 }
 
 use strict;
@@ -150,12 +151,15 @@ for my $bund (
 my $HintShift;
 my $HintMask;
 my $Uni8Bit;
+my $hp = HeaderParser->new()->read_file("perl.h");
 
-open "perl.h", "<", "perl.h" or die "$0 cannot open perl.h: $!";
-while (readline "perl.h") {
-    next unless /#\s*define\s+(HINT_FEATURE_MASK|HINT_UNI_8_BIT)/;
+foreach my $line_data (@{$hp->lines}) {
+    next unless $line_data->{type} eq "content"
+            and $line_data->{sub_type} eq "#define";
+    my $line = $line_data->{line};
+    next unless $line=~/^\s*#\s*define\s+(HINT_FEATURE_MASK|HINT_UNI_8_BIT)/;
     my $is_u8b = $1 =~ 8;
-    /(0x[A-Fa-f0-9]+)/ or die "No hex number in:\n\n$_\n ";
+    $line=~/(0x[A-Fa-f0-9]+)/ or die "No hex number in:\n\n$line\n ";
     if ($is_u8b) {
 	$Uni8Bit = $1;
     }
@@ -163,20 +167,18 @@ while (readline "perl.h") {
 	my $hex = $HintMask = $1;
 	my $bits = sprintf "%b", oct $1;
 	$bits =~ /^0*1+(0*)\z/
-	 or die "Non-contiguous bits in $bits (binary for $hex):\n\n$_\n ";
+         or die "Non-contiguous bits in $bits (binary for $hex):\n\n$line\n ";
 	$HintShift = length $1;
 	my $bits_needed =
 	    length sprintf "%b", scalar keys %UniqueBundles;
 	$bits =~ /1{$bits_needed}/
 	    or die "Not enough bits (need $bits_needed)"
-		 . " in $bits (binary for $hex):\n\n$_\n ";
+                 . " in $bits (binary for $hex):\n\n$line\n ";
     }
     if ($Uni8Bit && $HintMask) { last }
 }
 die "No HINT_FEATURE_MASK defined in perl.h" unless $HintMask;
 die "No HINT_UNI_8_BIT defined in perl.h"    unless $Uni8Bit;
-
-close "perl.h";
 
 my @HintedBundles =
     ('default', grep !/[^\d.]/, sort values %UniqueBundles);
