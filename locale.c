@@ -6786,10 +6786,9 @@ Perl_switch_to_global_locale(pTHX)
 
 #ifdef USE_LOCALE
 
-    bool perl_controls = false;
-
     DEBUG_L(PerlIO_printf(Perl_debug_log, "Entering switch_to_global; %s\n",
                                           get_LC_ALL_display()));
+    bool perl_controls = false;
 
 #  ifdef USE_THREAD_SAFE_LOCALE
 
@@ -6798,11 +6797,11 @@ Perl_switch_to_global_locale(pTHX)
 
 #    ifdef USE_POSIX_2008_LOCALE
 
-    perl_controls = LC_GLOBAL_LOCALE != uselocale((locale_t) 0);
+    perl_controls = (LC_GLOBAL_LOCALE != uselocale((locale_t) 0));
 
 #    elif defined(WIN32)
 
-    perl_controls = _configthreadlocale(0) == _ENABLE_PER_THREAD_LOCALE;
+    perl_controls = (_configthreadlocale(0) == _ENABLE_PER_THREAD_LOCALE);
 
 #    else
 #      error Unexpected Configuration
@@ -6821,19 +6820,21 @@ Perl_switch_to_global_locale(pTHX)
 
 #    elif defined(USE_POSIX_2008_LOCALE)
 
-    const char * curlocales[NOMINAL_LC_ALL_INDEX + 1];
+    const char * cur_thread_locales[NOMINAL_LC_ALL_INDEX + 1];
 
-    /* Save each category's current state */
+    /* Save each category's current per-thread state */
     for (unsigned i = 0; i < NOMINAL_LC_ALL_INDEX; i++) {
-        curlocales[i] = querylocale_i(i);
+        cur_thread_locales[i] = querylocale_i(i);
     }
 
-    /* Switch to global */
+    /* Now switch to global */
+
     locale_t old_locale = uselocale(LC_GLOBAL_LOCALE);
     if (! old_locale) {
         locale_panic_(Perl_form(aTHX_ "Could not change to global locale"));
     }
 
+    /* Free the per-thread memory */
     if (old_locale != LC_GLOBAL_LOCALE && old_locale != PL_C_locale_obj) {
         freelocale(old_locale);
     }
@@ -6841,7 +6842,7 @@ Perl_switch_to_global_locale(pTHX)
     /* Set the global to what was our per-thread state */
     POSIX_SETLOCALE_LOCK;
     for (unsigned int i = 0; i < NOMINAL_LC_ALL_INDEX; i++) {
-        posix_setlocale(categories[i], curlocales[i]);
+        posix_setlocale(categories[i], cur_thread_locales[i]);
     }
     POSIX_SETLOCALE_UNLOCK;
 
