@@ -4069,7 +4069,8 @@ S	|void	|deb_stack_n	|NN SV **stack_base			\
 				|I32 stack_min				\
 				|I32 stack_max				\
 				|I32 mark_min				\
-				|I32 mark_max
+				|I32 mark_max				\
+				|I32 nonrc_base
 #endif
 #if defined(PERL_IN_DOIO_C)
 S	|bool	|argvout_final	|NN MAGIC *mg				\
