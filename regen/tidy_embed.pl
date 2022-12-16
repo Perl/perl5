@@ -39,7 +39,7 @@ while ($lines->[-1]{type} eq "content" and
 
 my $grouped_content_ary= $parser->group_content();
 push @$grouped_content_ary, @tail;
-my $grouped_content_txt= $parser->normalized_content($grouped_content_ary);
+my $grouped_content_txt= $parser->lines_as_str($grouped_content_ary);
 if ($grouped_content_txt ne $parser->{orig_content}) {
     if ($tap) {
         print "not ok - $0 $file\n";

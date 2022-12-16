@@ -749,11 +749,13 @@ unless ($Config{d_wcrtomb}) {
 
 {
     my %seen;
-    my ($embed) = setup_embed($ARGS{TARG_DIR});
+    my ($embed_array) = setup_embed($ARGS{TARG_DIR});
     my $excludedre = $define{'NO_MATHOMS'} ? qr/[emiIsb]/ : qr/[emiIs]/;
 
-    foreach (@$embed) {
-	my ($flags, $retval, $func, @args) = @$_;
+    foreach (@$embed_array) {
+        my $embed= $_->{embed}
+            or next;
+	my ($flags, $retval, $func, $args) = @{$embed}{qw(flags return_type name args)};
 	next unless $func;
 	if (($flags =~ /[AXC]/ && $flags !~ $excludedre)
             || (!$define{'NO_MATHOMS'} && $flags =~ /b/))
