@@ -1777,14 +1777,16 @@ sub output {
 }
 
 foreach (@{(setup_embed())[0]}) {
-    next if @$_ < 2;
-    my ($flags, $ret_type, $func, @args) = @$_;
-    s/\b(?:NN|NULLOK)\b\s+//g for @args;
+    my $embed= $_->{embed}
+        or next;
+    my ($flags, $ret_type, $func, $args) = @{$embed}{qw(flags return_type name args)};
+    my @munged_args= @$args;
+    s/\b(?:NN|NULLOK)\b\s+//g for @munged_args;
 
     $funcflags{$func} = {
                          flags => $flags,
                          ret_type => $ret_type,
-                         args => \@args,
+                         args => \@munged_args,
                         };
 }
 

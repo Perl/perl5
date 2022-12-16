@@ -3,6 +3,7 @@ use strict;
 our (@Changed, $TAP);
 use File::Compare;
 use Symbol;
+use Carp;
 use Text::Wrap();
 
 # Common functions needed by the regen scripts
@@ -175,6 +176,7 @@ EOM
 sub read_only_bottom_close_and_rename {
     my ($fh, $sources) = @_;
     my ($name, $lang, $final_name) = @{*{$fh}}{qw(name lang final_name)};
+    confess "bad fh in read_only_bottom_close_and_rename" unless $name;
     die "No final name specified at open time for $name"
         unless $final_name;
 
