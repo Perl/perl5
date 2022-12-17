@@ -11,13 +11,15 @@ skip_all("locales not available") unless locales_enabled('LC_NUMERIC');
 my @locales = eval { find_locales( &LC_NUMERIC ) };
 skip_all("no LC_NUMERIC locales available") unless @locales;
 
-my $non_dot_locale;
-for (@locales) {
+my $comma_locale;
+for my $locale (@locales) {
+    use POSIX;
     use locale;
-    setlocale(LC_NUMERIC, $_) or next;
+    setlocale(LC_NUMERIC, $locale) or next;
     my $in = 4.2; # avoid any constant folding bugs
-    if (sprintf("%g", $in) ne "4.2") {
-        $non_dot_locale = $_;
+    my $s = sprintf("%g", $in);
+    if ($s eq "4,2")  {
+        $comma_locale = $locale;
         last;
     }
 }
