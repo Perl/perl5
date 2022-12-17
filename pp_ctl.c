@@ -5400,13 +5400,15 @@ Perl_delete_eval_scope(pTHX)
 /* Common-ish code salvaged from Perl_call_sv and pp_entertry, because it was
    also needed by Perl_fold_constants.  */
 void
-Perl_create_eval_scope(pTHX_ OP *retop, U32 flags)
+Perl_create_eval_scope(pTHX_ OP *retop, SV **sp, U32 flags)
 {
     PERL_CONTEXT *cx;
     const U8 gimme = GIMME_V;
+
+    PERL_ARGS_ASSERT_CREATE_EVAL_SCOPE;
         
     cx = cx_pushblock((CXt_EVAL|CXp_EVALBLOCK), gimme,
-                    PL_stack_sp, PL_savestack_ix);
+                    sp, PL_savestack_ix);
     cx_pusheval(cx, retop, NULL);
 
     PL_in_eval = EVAL_INEVAL;
@@ -5435,7 +5437,7 @@ PP(pp_entertry)
 
     assert(!CATCH_GET);
 
-    create_eval_scope(retop, 0);
+    create_eval_scope(retop, PL_stack_sp, 0);
 
     return PL_op->op_next;
 }

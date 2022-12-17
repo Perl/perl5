@@ -841,6 +841,7 @@ p	|OP *	|coresub_op	|NN SV * const coreargssv		\
 : Used in op.c and perl.c
 px	|void	|create_eval_scope					\
 				|NULLOK OP *retop			\
+				|NN SV **sp				\
 				|U32 flags
 : croak()'s first parm can be NULL.  Otherwise, mod_perl breaks.
 Adfpr	|void	|croak		|NULLOK const char *pat 		\

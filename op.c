@@ -4949,7 +4949,7 @@ S_fold_constants(pTHX_ OP *const o)
     PL_op = curop;
 
     old_cxix = cxstack_ix;
-    create_eval_scope(NULL, G_FAKINGEVAL);
+    create_eval_scope(NULL, PL_stack_sp, G_FAKINGEVAL);
 
     /* Verify that we don't need to save it:  */
     assert(PL_curcop == &PL_compiling);
@@ -5066,7 +5066,7 @@ S_gen_constant_list(pTHX_ OP *o)
     PL_op = curop;
 
     old_cxix = cxstack_ix;
-    create_eval_scope(NULL, G_FAKINGEVAL);
+    create_eval_scope(NULL, PL_stack_sp, G_FAKINGEVAL);
 
     old_curcop = PL_curcop;
     StructCopy(old_curcop, &not_compiling, COP);
