@@ -355,7 +355,7 @@ STATIC const char * const category_names[] = {
 
 /* A few categories require additional setup when they are changed.  This table
  * points to the functions that do that setup */
-STATIC void (*update_functions[]) (pTHX_ const char *) = {
+STATIC void (*update_functions[]) (pTHX_ const char *, bool force) = {
 #  ifdef USE_LOCALE_CTYPE
                                 S_new_ctype,
 #  endif
@@ -1826,7 +1826,7 @@ S_setlocale_failure_panic_i(pTHX_
 #  ifdef USE_LOCALE_NUMERIC
 
 STATIC void
-S_new_numeric(pTHX_ const char *newnum)
+S_new_numeric(pTHX_ const char *newnum, bool force)
 {
     PERL_ARGS_ASSERT_NEW_NUMERIC;
 
@@ -1880,8 +1880,10 @@ S_new_numeric(pTHX_ const char *newnum)
                            "Called new_numeric with %s, PL_numeric_name=%s\n",
                            newnum, PL_numeric_name));
 
-    /* If this isn't actually a change, do nothing */
-    if (strEQ(PL_numeric_name, newnum)) {
+    /* If not forcing this procedure, and there isn't actually a change from
+     * our records, do nothing.  (Our records can be wrong when sync'ing to the
+     * locale set up by an external library, hence the 'force' parameter) */
+    if (! force && strEQ(PL_numeric_name, newnum)) {
         return;
     }
 
@@ -2040,9 +2042,10 @@ Perl_set_numeric_underlying(pTHX)
 #  ifdef USE_LOCALE_CTYPE
 
 STATIC void
-S_new_ctype(pTHX_ const char *newctype)
+S_new_ctype(pTHX_ const char *newctype, bool force)
 {
     PERL_ARGS_ASSERT_NEW_CTYPE;
+    PERL_UNUSED_ARG(force);
 
     /* Called after each libc setlocale() call affecting LC_CTYPE, to tell
      * core Perl this and that 'newctype' is the name of the new locale.
@@ -2473,18 +2476,17 @@ Perl__warn_problematic_locale()
 }
 
 STATIC void
-S_new_LC_ALL(pTHX_ const char *unused)
+S_new_LC_ALL(pTHX_ const char *unused, bool force)
 {
-    unsigned int i;
+    PERL_ARGS_ASSERT_NEW_LC_ALL;
+    PERL_UNUSED_ARG(unused);
 
     /* LC_ALL updates all the things we care about. */
 
-    PERL_UNUSED_ARG(unused);
-
-    for (i = 0; i < NOMINAL_LC_ALL_INDEX; i++) {
+    for (unsigned int i = 0; i < NOMINAL_LC_ALL_INDEX; i++) {
         if (update_functions[i]) {
             const char * this_locale = querylocale_i(i);
-            update_functions[i](aTHX_ this_locale);
+            update_functions[i](aTHX_ this_locale, force);
         }
     }
 }
@@ -2492,9 +2494,10 @@ S_new_LC_ALL(pTHX_ const char *unused)
 #  ifdef USE_LOCALE_COLLATE
 
 STATIC void
-S_new_collate(pTHX_ const char *newcoll)
+S_new_collate(pTHX_ const char *newcoll, bool force)
 {
     PERL_ARGS_ASSERT_NEW_COLLATE;
+    PERL_UNUSED_ARG(force);
 
     /* Called after each libc setlocale() call affecting LC_COLLATE, to tell
      * core Perl this and that 'newcoll' is the name of the new locale.
@@ -2855,7 +2858,7 @@ Perl_setlocale(const int category, const char * locale)
     /* Now that have changed locales, we have to update our records to
      * correspond.  Only certain categories have extra work to update. */
     if (update_functions[cat_index]) {
-        update_functions[cat_index](aTHX_ retval);
+        update_functions[cat_index](aTHX_ retval, false);
     }
 
     DEBUG_L(PerlIO_printf(Perl_debug_log, "returning '%s'\n", retval));
@@ -5110,19 +5113,19 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
     PL_numeric_radix_sv    = newSV(1);
     PL_underlying_radix_sv = newSV(1);
     Newxz(PL_numeric_name, 1, char);    /* Single NUL character */
-    new_numeric("C");
+    new_numeric("C", false);
 
 #  endif
 #  ifdef USE_LOCALE_COLLATE
 
     Newxz(PL_collation_name, 1, char);
-    new_collate("C");
+    new_collate("C", false);
 
 #  endif
 #  ifdef USE_LOCALE_CTYPE
 
     Newxz(PL_ctype_name, 1, char);
-    new_ctype("C");
+    new_ctype("C", false);
 
 #  endif
 #  ifdef USE_PL_CURLOCALES
@@ -5441,7 +5444,7 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 #  endif
 
     /* Done with finding the locales; update the auxiliary records */
-    new_LC_ALL(NULL);
+    new_LC_ALL(NULL, false);
 
     for (i = 0; i < NOMINAL_LC_ALL_INDEX; i++) {
         Safefree(curlocales[i]);
@@ -6816,9 +6819,11 @@ Perl_switch_to_global_locale(pTHX)
 #  ifdef USE_THREAD_SAFE_LOCALE
 #    if defined(WIN32)
 
+    const char * thread_locale = posix_setlocale(LC_ALL, NULL);
     _configthreadlocale(_DISABLE_PER_THREAD_LOCALE);
+    posix_setlocale(LC_ALL, thread_locale);
 
-#    elif defined(USE_POSIX_2008_LOCALE)
+#    else   /* Must be USE_POSIX_2008_LOCALE) */
 
     const char * cur_thread_locales[NOMINAL_LC_ALL_INDEX + 1];
 
@@ -6828,6 +6833,7 @@ Perl_switch_to_global_locale(pTHX)
     }
 
     /* Now switch to global */
+    DEBUG_Lv(PerlIO_printf(Perl_debug_log, "Switching to global locale\n"));
 
     locale_t old_locale = uselocale(LC_GLOBAL_LOCALE);
     if (! old_locale) {
@@ -6846,8 +6852,6 @@ Perl_switch_to_global_locale(pTHX)
     }
     POSIX_SETLOCALE_UNLOCK;
 
-#    else
-#      error Unexpected Configuration
 #    endif
 #  endif
 #  ifdef USE_LOCALE_NUMERIC
@@ -6919,30 +6923,45 @@ Perl_sync_locale(pTHX)
 #  ifdef USE_THREAD_SAFE_LOCALE
 #    if defined(WIN32)
 
-    was_in_global = _configthreadlocale(_ENABLE_PER_THREAD_LOCALE)
-                                    == _DISABLE_PER_THREAD_LOCALE;
+    was_in_global = _configthreadlocale(_DISABLE_PER_THREAD_LOCALE)
+                                     == _DISABLE_PER_THREAD_LOCALE;
 
 #    elif defined(USE_POSIX_2008_LOCALE)
 
-    was_in_global = LC_GLOBAL_LOCALE == uselocale((locale_t) 0);
+    was_in_global = (LC_GLOBAL_LOCALE == uselocale((locale_t) 0));
 
 #    else
 #      error Unexpected Configuration
 #    endif
 #  endif    /* USE_THREAD_SAFE_LOCALE */
-#  ifdef LC_ALL
 
-    /* Use the external interface Perl_setlocale() to make sure all setup gets
-     * done */
-    Perl_setlocale(LC_ALL, stdized_setlocale(LC_ALL, NULL));
-
-#  else
-
+    /* Here, we are in the global locale.  Get and save the values for each
+     * category. */
+    const char * current_globals[NOMINAL_LC_ALL_INDEX];
     for (unsigned i = 0; i < NOMINAL_LC_ALL_INDEX; i++) {
-        Perl_setlocale(categories[i], stdized_setlocale(categories[i], NULL));
+        POSIX_SETLOCALE_LOCK;
+        current_globals[i] = savepv(stdized_setlocale(categories[i], NULL));
+        POSIX_SETLOCALE_UNLOCK;
     }
 
+    /* Now we have to convert the current thread to use them */
+
+#  if defined(WIN32)
+
+    /* On Windows, convert to per-thread behavior.  This isn't necessary in
+     * POSIX 2008, as the conversion gets done automatically in the loop below.
+     * */
+    _configthreadlocale(_ENABLE_PER_THREAD_LOCALE);
+
 #  endif
+
+    for (unsigned i = 0; i < NOMINAL_LC_ALL_INDEX; i++) {
+        setlocale_i(i, current_globals[i]);
+        Safefree(current_globals[i]);
+    }
+
+    /* And update our remaining records.  'true' => force recalculation */
+    new_LC_ALL(NULL, true);
 
     return was_in_global;
 

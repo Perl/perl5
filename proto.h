@@ -5730,7 +5730,7 @@ PERL_STATIC_INLINE const char *	S_mortalized_pv_copy(pTHX_ const char * const pv
 #define PERL_ARGS_ASSERT_MORTALIZED_PV_COPY
 #endif
 
-STATIC void	S_new_LC_ALL(pTHX_ const char* unused);
+STATIC void	S_new_LC_ALL(pTHX_ const char* unused, bool force);
 #define PERL_ARGS_ASSERT_NEW_LC_ALL
 STATIC void	S_restore_toggled_locale_i(pTHX_ const unsigned cat_index, const char * original_locale, const line_t caller_line);
 #define PERL_ARGS_ASSERT_RESTORE_TOGGLED_LOCALE_I
@@ -5747,7 +5747,7 @@ STATIC const char *	S_toggle_locale_i(pTHX_ const unsigned switch_cat_index, con
 #define PERL_ARGS_ASSERT_TOGGLE_LOCALE_I	\
 	assert(new_locale)
 #    if defined(USE_LOCALE_COLLATE)
-STATIC void	S_new_collate(pTHX_ const char* newcoll);
+STATIC void	S_new_collate(pTHX_ const char* newcoll, bool force);
 #define PERL_ARGS_ASSERT_NEW_COLLATE	\
 	assert(newcoll)
 #    endif
@@ -5755,12 +5755,12 @@ STATIC void	S_new_collate(pTHX_ const char* newcoll);
 STATIC bool	S_is_codeset_name_UTF8(const char * name);
 #define PERL_ARGS_ASSERT_IS_CODESET_NAME_UTF8	\
 	assert(name)
-STATIC void	S_new_ctype(pTHX_ const char* newctype);
+STATIC void	S_new_ctype(pTHX_ const char* newctype, bool force);
 #define PERL_ARGS_ASSERT_NEW_CTYPE	\
 	assert(newctype)
 #    endif
 #    if defined(USE_LOCALE_NUMERIC)
-STATIC void	S_new_numeric(pTHX_ const char* newnum);
+STATIC void	S_new_numeric(pTHX_ const char* newnum, bool force);
 #define PERL_ARGS_ASSERT_NEW_NUMERIC	\
 	assert(newnum)
 #    endif

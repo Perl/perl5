@@ -1777,19 +1777,19 @@
 #    if defined(USE_LOCALE)
 #define get_category_index	S_get_category_index
 #define mortalized_pv_copy(a)	S_mortalized_pv_copy(aTHX_ a)
-#define new_LC_ALL(a)		S_new_LC_ALL(aTHX_ a)
+#define new_LC_ALL(a,b)		S_new_LC_ALL(aTHX_ a,b)
 #define save_to_buffer		S_save_to_buffer
 #define setlocale_failure_panic_i(a,b,c,d,e)	S_setlocale_failure_panic_i(aTHX_ a,b,c,d,e)
 #define stdize_locale(a,b,c,d,e)	S_stdize_locale(aTHX_ a,b,c,d,e)
 #      if defined(USE_LOCALE_COLLATE)
-#define new_collate(a)		S_new_collate(aTHX_ a)
+#define new_collate(a,b)	S_new_collate(aTHX_ a,b)
 #      endif
 #      if defined(USE_LOCALE_CTYPE)
 #define is_codeset_name_UTF8	S_is_codeset_name_UTF8
-#define new_ctype(a)		S_new_ctype(aTHX_ a)
+#define new_ctype(a,b)		S_new_ctype(aTHX_ a,b)
 #      endif
 #      if defined(USE_LOCALE_NUMERIC)
-#define new_numeric(a)		S_new_numeric(aTHX_ a)
+#define new_numeric(a,b)	S_new_numeric(aTHX_ a,b)
 #      endif
 #      if defined(USE_POSIX_2008_LOCALE)
 #define emulate_setlocale_i(a,b,c,d)	S_emulate_setlocale_i(aTHX_ a,b,c,d)
