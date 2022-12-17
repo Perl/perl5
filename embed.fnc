@@ -3388,13 +3388,13 @@ ST	|const char *|save_to_buffer|NULLOK const char * string	\
 				    |NULLOK Size_t *buf_size
 ST	|unsigned int|get_category_index|const int category|NULLOK const char * locale
 #    ifdef USE_LOCALE_CTYPE
-S	|void	|new_ctype	|NN const char* newctype
+S	|void	|new_ctype	|NN const char* newctype|bool force
 ST	|bool	|is_codeset_name_UTF8|NN const char * name
 #    endif
 #    ifdef USE_LOCALE_NUMERIC
-S	|void	|new_numeric	|NN const char* newnum
+S	|void	|new_numeric	|NN const char* newnum|bool force
 #    endif
-S	|void	|new_LC_ALL	|NULLOK const char* unused
+S	|void	|new_LC_ALL	|NULLOK const char* unused|bool force
 S	|const char*|stdize_locale|const int category			\
 				|NULLOK const char* input_locale	\
 				|NULLOK const char **buf		\
@@ -3458,7 +3458,7 @@ S	|const char *|calculate_LC_ALL|NN const char ** individ_locales
 #      endif
 #    endif
 #    ifdef USE_LOCALE_COLLATE
-S	|void	|new_collate	|NN const char* newcoll
+S	|void	|new_collate	|NN const char* newcoll|bool force
 #      ifdef DEBUGGING
 S	|void	|print_collxfrm_input_and_return		\
 			    |NN const char * s			\

@@ -62,12 +62,8 @@ SKIP: {
        "comma recognized in global comma locale for SvNV");
     isnt(sync_locale, 0, "sync_locale() returns that was in the global locale");
 
-    TODO: {
-        local $TODO = "GH #20565";
-
-        is(check_in_bounds(newSvNV("4.888"), 4.88, 4.89), 1,
-        "dot recognized in perl-controlled comma locale for SvNV");
-    }
+    is(check_in_bounds(newSvNV("4.888"), 4.88, 4.89), 1,
+    "dot recognized in perl-controlled comma locale for SvNV");
 }
 
 my %correct_C_responses = (
