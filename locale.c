@@ -3523,15 +3523,21 @@ S_my_localeconv(pTHX_ const int item)
 
     /* Here, the hash has been completely populated.
      *
-     * Now go through all the string items and see if they should be marked as
-     * UTF-8 or not.  This would have been more convenient and faster to do
-     * while populating the hash in the first place, but that operation has to
-     * be done within a critical section, keeping other threads from executing,
-     * so only the minimal amount of work necessary is done at that time.
+     * Now go through all the items and:
+     *  a) For string items, see if they should be marked as UTF-8 or not.
+     *     This would have been more convenient and faster to do while
+     *     populating the hash in the first place, but that operation has to be
+     *     done within a critical section, keeping other threads from
+     *     executing, so only the minimal amount of work necessary is done at
+     *     that time.
+     *  b) For integer items, convert the C CHAR_MAX value into -1.  Again,
+     *     this could have been done in the critical section, but was deferred
+     *     to here to keep to the bare minimum amount the time spent owning the
+     *     processor. CHAR_MAX is a C concept for an 8-bit character type.
+     *     Perl has no such type; the closest fit is a -1.
      *
-     * XXX On unthreaded perls, and on platforms where localeconv (or
-     * localeconv_l if present) this code could be #ifdef'd out, and the
-     * UTF8ness determined at hash population time, at an extra maintenance
+     * XXX On unthreaded perls, this code could be #ifdef'd out, and the
+     * corrections determined at hash population time, at an extra maintenance
      * cost which khw doesn't think is worth it
      */
     for (unsigned int i = 0; i < 2; i++) {  /* Try both types of strings */
@@ -3591,6 +3597,28 @@ S_my_localeconv(pTHX_ const int item)
             strings[i]++;   /* Iterate */
         }
     }   /* End of fixing up UTF8ness */
+
+
+    /* Examine each integer */
+    if (integers) while (1) {
+        const char * name = integers->name;
+
+        if (! name) {   /* Reached the end */
+            break;
+        }
+
+        SV ** value = hv_fetch(hv, name, strlen(name), true);
+        if (! value) {
+            continue;
+        }
+
+        /* Change CHAR_MAX to -1 */
+        if (SvIV(*value) == CHAR_MAX) {
+            sv_setiv(*value, -1);
+        }
+
+        integers++;   /* Iterate */
+    }
 
     return hv;
 }
@@ -4339,14 +4367,14 @@ S_my_langinfo_i(pTHX_
 
             /* The modification is to prefix the localeconv() return with a
              * single byte, calculated as follows: */
-            char prefix = (LIKELY(SvIV(precedes) != CHAR_MAX))
+            char prefix = (LIKELY(SvIV(precedes) != -1))
                           ? ((precedes != 0) ?  '-' : '+')
 
                             /* khw couldn't find any documentation that
-                             * CHAR_MAX is the signal, but cygwin uses it
-                             * thusly, and it makes sense given that CHAR_MAX
-                             * indicates the value isn't used, so it neither
-                             * precedes nor succeeds */
+                             * CHAR_MAX (which we modify to -1) is the signal,
+                             * but cygwin uses it thusly, and it makes sense
+                             * given that CHAR_MAX indicates the value isn't
+                             * used, so it neither precedes nor succeeds */
                           : '.';
 
             /* Now get CRNCYSTR */
