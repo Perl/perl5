@@ -1015,6 +1015,18 @@ Here is how to query the database for the B<de> (Deutsch or German) locale.
 The members whose names begin with C<int_p_> and C<int_n_> were added by
 POSIX.1-2008 and are only available on systems that support them.
 
+A value of -1 returned for numeric entries indicates that the field is
+not applicable to the locale.  This is rare except in the C and related
+locales, which don't have most monetary values defined.  It can also
+happen, quirkily, in fields that are otherwise boolean to indicate that
+the value is kind of neither true nor false.  This happens in C<p_cs_precedes>
+and C<int_p_cs_precedes> when the currency symbol neither precedes nor
+succeeds a positive value but is infixed, by replacing the radix
+character.
+
+Prior to Perl v5.37.7, empty string fields and numeric fields with value
+-1 were omittted from the returned hash.
+
 =item C<localtime>
 
 This is identical to Perl's builtin C<localtime()> function for

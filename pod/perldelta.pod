@@ -198,6 +198,13 @@ L<parent> has been upgraded to version 2.39.
 
 L<podlators> has been upgraded to version 5.00.
 
+=item *
+
+L<POSIX> has been upgraded from version 2.09 to 2.10.  All fields known
+to the platform in L<localeconv(3)> are now returned by
+L<POSIX/localeconv>.  Previously, empty string fields and numeric fields
+that aren't applicable to the current locale were omitted.
+
 =back
 
 =head2 Removed Modules and Pragmata
