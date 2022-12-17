@@ -2764,6 +2764,9 @@ Perl_cx_pushblock(pTHX_ U8 type, U8 gimme, SV** sp, I32 saveix)
     cx->blk_gimme      = gimme;
     cx->blk_oldsaveix  = saveix;
     cx->blk_oldsp      = (I32)(sp - PL_stack_base);
+    assert(cxstack_ix <= 0
+            || CxTYPE(cx-1) == CXt_SUBST
+            || cx->blk_oldsp >= (cx-1)->blk_oldsp);
     cx->blk_oldcop     = PL_curcop;
     cx->blk_oldmarksp  = (I32)(PL_markstack_ptr - PL_markstack);
     cx->blk_oldscopesp = PL_scopestack_ix;
