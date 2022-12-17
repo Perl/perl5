@@ -595,9 +595,10 @@ Perl_coresub_op(pTHX_ SV * const coreargssv, const int code, const int opnum)
         assert(coreargssv)
 
 PERL_CALLCONV void
-Perl_create_eval_scope(pTHX_ OP *retop, U32 flags)
+Perl_create_eval_scope(pTHX_ OP *retop, SV **sp, U32 flags)
         __attribute__visibility__("hidden");
-#define PERL_ARGS_ASSERT_CREATE_EVAL_SCOPE
+#define PERL_ARGS_ASSERT_CREATE_EVAL_SCOPE      \
+        assert(sp)
 
 PERL_CALLCONV_NO_RET void
 Perl_croak(pTHX_ const char *pat, ...)

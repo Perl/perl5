@@ -881,7 +881,7 @@
 #   define cmpchain_start(a,b,c)                Perl_cmpchain_start(aTHX_ a,b,c)
 #   define core_prototype(a,b,c,d)              Perl_core_prototype(aTHX_ a,b,c,d)
 #   define coresub_op(a,b,c)                    Perl_coresub_op(aTHX_ a,b,c)
-#   define create_eval_scope(a,b)               Perl_create_eval_scope(aTHX_ a,b)
+#   define create_eval_scope(a,b,c)             Perl_create_eval_scope(aTHX_ a,b,c)
 #   define croak_caller                         Perl_croak_caller
 #   define croak_no_mem                         Perl_croak_no_mem
 #   define croak_popstack                       Perl_croak_popstack

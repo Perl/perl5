@@ -3138,7 +3138,7 @@ Perl_call_sv(pTHX_ SV *sv, volatile I32 flags)
         myop.op_other = (OP*)&myop;
         (void)POPMARK;
         old_cxix = cxstack_ix;
-        create_eval_scope(NULL, flags|G_FAKINGEVAL);
+        create_eval_scope(NULL, PL_stack_sp, flags|G_FAKINGEVAL);
         INCMARK;
 
         JMPENV_PUSH(ret);
