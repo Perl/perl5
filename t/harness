@@ -178,6 +178,7 @@ if (@ARGV) {
         my %dir;
         my %serials;
         my %all_dirs;
+        my %map_file_to_dir;
 
         # Preprocess the list of tests
         for my $file (@last) {
@@ -199,6 +200,7 @@ if (@ARGV) {
 
                 $all_dirs{$path} = 1;
                 $serials{$path} = 1 if $name =~ / \A 0 /x;
+                $map_file_to_dir{$file} = $path;
             }
         }
 
@@ -217,34 +219,33 @@ if (@ARGV) {
               . "  Check your spelling:\n" . join "\n", @nonexistent_serials;
         }
 
-        # Remove the serial testing directories from the list of all
-        # directories.  The remaining ones are testable in parallel.  Make the
-        # parallel list a scalar with names separated by '|' so that below
-        # they will be added to a regular expression.
-        my $non_serials = join "|", grep { not exists $serials{$_} } keys %all_dirs;
+        for my $file (@last) {
+            my $file_dir = $map_file_to_dir{$file};
+
+            # Treat every file in each non-serial directory as its own
+            # "directory", so that it can be executed in parallel
+            if (! defined $serials{$file_dir}) {
+                $dir{$file} = { seq => $file };
+                $total_time{$file} = $times{$file} || 0;
+            }
+            else {  # Serial.  This file contributes time to the total needed
+                    # for its directory as a whole
+                $dir{$file_dir} = { seq => "$file_dir/*" };
+                $total_time{$file_dir} += $times{$file} || 0;
+            }
+        }
+
         undef %all_dirs;
         undef %serials;
 
-        for my $file (@last) {
-            # Treat every file in each non-serial directory as its own
-            # "directory", so that it can be executed in parallel
-            $file =~ m! \A ( (?: \.\. / )? (?: $non_serials )
-                         / [^/]+ \.t \z | .* [/] ) !x
-                or die "'$file'";
-            push @{$dir{$1}}, $file;
-
-            # This file contributes time to the total needed for the directory
-            # as a whole
-            $total_time{$1} += $times{$file} || 0;
-        }
         #print STDERR __LINE__, join "\n", sort sort_by_execution_order keys %dir
 
         push @tests, @last;
 
         # Generate T::H schedule rules that run the contents of each directory
         # sequentially.
-        push @seq, { par => [ map { s!/$!/*!; { seq => $_ } } sort
-                                                sort_by_execution_order keys %dir
+        push @seq, { par => [ map { $dir{$_} } sort sort_by_execution_order
+                                                                     keys %dir
                             ]
                    };
 
