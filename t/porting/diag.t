@@ -220,7 +220,10 @@ my %specialformats = (IVdf => 'd',
 		      SVf  => 's',
 		      SVf_QUOTEDPREFIX  => 'S',
                       PVf_QUOTEDPREFIX  => 'S',
-		      PNf  => 's');
+		      PNf  => 's',
+                      HvNAMEf => 's',
+                      HvNAMEf_QUOTEDPREFIX => 's',
+                  );
 
 my $format_modifiers = qr/ [#0\ +-]*              # optional flags
 			  (?: [1-9][0-9]* | \* )? # optional field width

@@ -4147,6 +4147,8 @@ out there, Solaris being the most prominent.
 #define PNf UTF8f
 #define PNfARG(pn) (int)1, (UV)PadnameLEN(pn), (void *)PadnamePV(pn)
 
+#define HvNAMEf "6p"
+#define HvNAMEf_QUOTEDPREFIX "10p"
 
 #ifdef PERL_CORE
 /* not used; but needed for backward compatibility with XS code? - RMB

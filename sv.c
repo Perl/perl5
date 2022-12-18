@@ -12651,6 +12651,8 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
              *                   rather than here.
              * %d%lu%9p  (UTF8f_QUOTEDPREFIX) .. but escaped and quoted.
              *
+             * %6p       (HvNAMEf) Like %s, but using the HvNAME() and HvNAMELEN()
+             * %10p      (HvNAMEf_QUOTEDPREFIX) ... but escaped and quoted
              *
              * %<num>p   where num is > 9: reserved for future
              *           extensions. Warns, but then is treated as a
@@ -12706,6 +12708,17 @@ Perl_sv_vcatpvfn_flags(pTHX_ SV *const sv, const char *const pat, const STRLEN p
                     eptr = va_arg(*args,char *);
                     elen = strlen(eptr);
                     escape_it = TRUE;
+                    width = 0;
+                    goto string;
+                }
+                else if (width == 6 || width == 10) {
+                    HV *hv = va_arg(*args, HV *);
+                    eptr = HvNAME(hv);
+                    elen = HvNAMELEN(hv);
+                    if (HvNAMEUTF8(hv))
+                        is_utf8 = TRUE;
+                    if (width == 10)
+                        escape_it = TRUE;
                     width = 0;
                     goto string;
                 }

@@ -350,6 +350,12 @@ well.
 
 XXX
 
+=item *
+
+Added HvNAMEf and HvNAMEf_QUOTEDPREFIX special formats. They take an HV *
+as an argument and use C<HvNAME()> and related macros to determine the string,
+its length, and whether it is utf8.
+
 =back
 
 =head1 Selected Bug Fixes
