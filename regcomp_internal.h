@@ -599,7 +599,8 @@ struct scan_data_substrs {
     I32 flags;          /* per substring SF_* and SCF_* flags */
 };
 
-typedef struct scan_data_t {
+/* this is typedef'ed in perl.h */
+struct scan_data_t {
     /*I32 len_min;      unused */
     /*I32 len_delta;    unused */
     SSize_t pos_min;
@@ -623,7 +624,7 @@ typedef struct scan_data_t {
                                  pointer - the op may have been optimized
                                  away */
     regnode_ssc *start_class;
-} scan_data_t;
+};
 
 /*
  * Forward declarations for pregcomp()'s friends.
