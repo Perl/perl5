@@ -4316,7 +4316,12 @@ S_require_file(pTHX_ SV *sv)
                         && !SvOBJECT(SvRV(loader)))
                     {
                         loader = *av_fetch(MUTABLE_AV(SvRV(loader)), 0, TRUE);
-                        SvGETMAGIC(loader);
+                        if (SvGMAGICAL(loader)) {
+                            SvGETMAGIC(loader);
+                            SV *l = sv_newmortal();
+                            sv_setsv_nomg(l, loader);
+                            loader = l;
+                        }
                     }
 
                     if (SvPADTMP(nsv)) {
@@ -4357,10 +4362,18 @@ S_require_file(pTHX_ SV *sv)
                          */
                         if (!method) {
                             if (SvTYPE(SvRV(loader)) != SVt_PVCV) {
-                                if (dirsv != loader)
-                                    croak("Object with arguments in @INC does not support a hook method");
-                                else
+                                if (amagic_applies(loader,string_amg,AMGf_unary))
                                     goto treat_as_string;
+                                else {
+                                    croak("Can't locate object method \"INC\", nor"
+                                          " \"INCDIR\" nor string overload via"
+                                          " package %" HvNAMEf_QUOTEDPREFIX " %s"
+                                          " in @INC", pkg,
+                                          dirsv == loader
+                                          ? "in object hook"
+                                          : "in object in ARRAY hook"
+                                    );
+                                }
                             }
                         }
                     }
@@ -4379,11 +4392,6 @@ S_require_file(pTHX_ SV *sv)
                     if (method && (loader != dirsv)) /* add the args array for method calls */
                         PUSHs(dirsv);
                     PUTBACK;
-                    if (SvGMAGICAL(loader)) {
-                        SV *l = sv_newmortal();
-                        sv_setsv_nomg(l, loader);
-                        loader = l;
-                    }
                     if (method) {
                         count = call_method(method, G_LIST|G_EVAL);
                     } else {
