@@ -4676,6 +4676,27 @@ test_MAX_types()
     OUTPUT:
         RETVAL
 
+SV *
+test_HvNAMEf(sv)
+    SV *sv
+    CODE:
+        if (!sv_isobject(sv)) XSRETURN_UNDEF;
+        HV *pkg = SvSTASH(SvRV(sv));
+        RETVAL = newSVpvf("class='%" HvNAMEf "'", pkg);
+    OUTPUT:
+        RETVAL
+
+SV *
+test_HvNAMEf_QUOTEDPREFIX(sv)
+    SV *sv
+    CODE:
+        if (!sv_isobject(sv)) XSRETURN_UNDEF;
+        HV *pkg = SvSTASH(SvRV(sv));
+        RETVAL = newSVpvf("class=%" HvNAMEf_QUOTEDPREFIX, pkg);
+    OUTPUT:
+        RETVAL
+
+
 bool
 sv_numeq(SV *sv1, SV *sv2)
     CODE:
