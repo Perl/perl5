@@ -1183,6 +1183,14 @@ to load "%s"?)
 could not be found in UNIVERSAL.  This often means that a method
 requires a package that has not been loaded.
 
+=item Can't locate object method "INC", nor "INCDIR" nor string overload via package %s %s in @INC
+
+(F) You pushed an object, either directly or via an array reference hook,
+into C<@INC>, but the object doesn't support any known hook methods, nor
+a string overload and is also not a blessed CODE reference. In short the
+C<require> function does not know what to do with the object.
+See also L<perlfunc/require>.
+
 =item Can't locate package %s for @%s::ISA
 
 (W syntax) The @ISA array contained the name of another package that
@@ -4460,14 +4468,6 @@ report.  This limit is typically 2GB.
 and you mentioned a variable that starts with 0 that has more than one
 digit. You probably want to remove the leading 0, or if the intent was
 to express a variable name in octal you should convert to decimal.
-
-=item Object with arguments in @INC does not support a hook method
-
-(F) You pushed an array reference hook into C<@INC> which has an object
-as the first argument, but the object doesn't support any known hooks.
-Since you used the array form of creating a hook, you should have supplied
-an object that supports either the C<INC> or C<INCDIR> methods. You
-could also use a coderef instead of an object.
 
 =item Octal number > 037777777777 non-portable
 

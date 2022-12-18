@@ -9,7 +9,7 @@ BEGIN {
 use strict;
 use warnings;
 
-plan(tests => 71);
+plan(tests => 73);
 
 
 # Dedupe @INC. In a future patch we /may/ refuse to process items
@@ -351,8 +351,24 @@ like $@, qr/^Can't locate \Q$nonsearch\E at/,
     fresh_perl_like(
         '@INC = ("a",bless({},"CB"),"e");'
        .'eval "require Frobnitz" or print $@',
-        qr!\(\@INC[\w ]+: a CB=HASH\(0x[A-Fa-f0-9]+\) e\)!,
-        { }, 'Objects with no INC or INCDIR method are stringified');
+        qr!Can't locate object method "INC", nor "INCDIR" nor string overload via package "CB" in object hook in \@INC!,
+        { }, 'Objects with no INC or INCDIR method and no overload throw an error');
+}
+{
+    # as of 5.37.7
+    fresh_perl_like(
+        'package CB { use overload q("") => sub { "Fnorble" };} @INC = ("a",bless({},"CB"),"e");'
+       .'eval "require Frobnitz" or print $@',
+        qr!\(\@INC[\w ]+: a Fnorble e\)!,
+        { }, 'Objects with no INC or INCDIR method but with an overload are stringified');
+}
+{
+    # as of 5.37.7
+    fresh_perl_like(
+        'package CB { use overload q(0+) => sub { 12345 }, fallback=>1;} @INC = ("a",bless({},"CB"),"e");'
+       .'eval "require Frobnitz" or print $@',
+        qr!\(\@INC[\w ]+: a 12345 e\)!,
+        { }, 'Objects with no INC or INCDIR method but with an overload with fallback are stringified');
 }
 {
     # as of 5.37.7
@@ -393,7 +409,7 @@ like $@, qr/^Can't locate \Q$nonsearch\E at/,
     fresh_perl_like(
         '@INC = ("a",[bless([],"CB"),1],"e");'
        .'eval "require Frobnitz" or print $@',
-        qr!Object with arguments in \@INC does not support a hook method!s,
+        qr!Can't locate object method "INC", nor "INCDIR" nor string overload via package "CB" in object in ARRAY hook in \@INC!s,
         { }, 'Blessed objects with no hook methods in array form produce expected exception');
 }
 {
