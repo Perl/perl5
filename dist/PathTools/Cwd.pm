@@ -199,8 +199,7 @@ sub _backtick_pwd {
     # executable, but it will blow up anyway under taint. We could set it to
     # anything absolute. Perhaps "/" would be better.
     local $ENV{PATH}= "/usr/bin"
-        if $^O ne "vms" and $^O ne "amigaos";
-    local $ENV{PATH} if $^O eq "vms";
+        if $^O ne "amigaos";
     
     my $cwd = `$pwd_cmd`;
     # Belt-and-suspenders in case someone said "undef $/".
