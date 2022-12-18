@@ -90,6 +90,13 @@ if ($ENV{HARNESS_OPTIONS}) {
     }
 }
 
+my %total_time;
+
+sub sort_by_execution_order {
+    # Directories, ordered by total time descending then name ascending
+    return $total_time{$b} <=> $total_time{$a} || lc $a cmp lc $b;
+}
+
 if (@ARGV) {
     # If you want these run in speed order, just use prove
 
@@ -169,7 +176,6 @@ if (@ARGV) {
 	}
 
 	my %dir;
-	my %total_time;
         my %serials;
         my %all_dirs;
 
@@ -229,16 +235,16 @@ if (@ARGV) {
             # as a whole
 	    $total_time{$1} += $times{$_} || 0;
 	}
-        #print STDERR __LINE__, join "\n", sort { $total_time{$b} <=> $total_time{$a} } keys %dir, "  ";
+        #print STDERR __LINE__, join "\n", sort sort_by_execution_order keys %dir
 
 	push @tests, @last;
 
 	# Generate T::H schedule rules that run the contents of each directory
 	# sequentially.
-	push @seq, { par => [ map { s!/$!/*!; { seq => $_ } } sort {
-	    # Directories, ordered by total time descending then name ascending
-	    $total_time{$b} <=> $total_time{$a} || lc $a cmp lc $b
-	} keys %dir ] };
+	push @seq, { par => [ map { s!/$!/*!; { seq => $_ } } sort
+                                                sort_by_execution_order keys %dir
+                            ]
+                   };
 
 	$rules = { seq => \@seq };
     }
