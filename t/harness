@@ -8,8 +8,14 @@ BEGIN {
     @INC = '../lib';              # pick up only this build's lib
 }
 
-my %must_be_executed_serially = map { $_ => 1 }
-                                    qw(../cpan/IO-Zlib/t ../ext/File-Find/t);
+my %must_be_executed_serially =
+    map { $_ => 1 } (
+                     '../cpan/IO-Zlib/t',
+                     '../ext/File-Find/t',
+                     '../lib/DBM_Filter/t',  # Multiple test files in this
+                                             # directory use the same
+                                             # hard-coded temp file name
+                    );
 
 my $torture; # torture testing?
 
@@ -103,6 +109,7 @@ sub _compute_tests_and_ordering($) {
     my %serials;
     my %all_dirs;
     my %map_file_to_dir;
+    my %numbered_tests;
 
     if ($jobs > 1) {
         require App::Prove::State;
@@ -143,29 +150,78 @@ sub _compute_tests_and_ordering($) {
             my $path = $1;
             my $name = $2;
 
-            $all_dirs{$path} = 1;
+            $all_dirs{$path}++;
             $map_file_to_dir{$file} = $path;
 
-            # We assume that the reason a test file's name begins with a 0
-            # is to order its execution among the tests in its directory.
-            # Hence, a directory containing such files should be tested in
-            # serial order, with some exceptions hard-coded in.
-            if ($name =~ / \A 0 /x) {
-                $serials{$path} = 1;
-            }
-            elsif (defined $must_be_executed_serially{$path}) {
+            if (defined $must_be_executed_serially{$path}) {
                 $serials{$path} = 1;
                 delete $must_be_executed_serially{$path};
+            }
+            elsif ($name =~ / \A \d /x) {
+                # We assume that the reason a test file's name begins with a 0
+                # is to order its execution among the tests in its directory.
+                # Hence, a directory containing such files should be tested in
+                # serial order, with some exceptions hard-coded in.
+                $numbered_tests{$path}++;
+                $serials{$path} = 1 if $name =~ / \A 0 /x;
             }
         }
     }
 
+    # Some test directories that have an execution order (by virtue of at
+    # least one file having a name with a leading 0) also have files that
+    # aren't numbered.  We assume that those can be executed in parallel,
+    # after all the numbered ones are done.
+    my %partial_serials;
+    for my $serial_dir (keys %serials) {
+
+        # Don't touch serially executed directories that don't have a numbered
+        # ordering.
+        next unless defined $numbered_tests{$serial_dir};
+
+        # $all_dirs{$serial_dir} contains the count of test files in it.
+        # Subtracting the count of numbered tests yields the number of
+        # non-numbered tests.  These may be executed in parallel, but no gain
+        # if there's only one to execute.
+        next if $all_dirs{$serial_dir} - $numbered_tests{$serial_dir} < 2;
+
+        $partial_serials{$serial_dir} = 1;
+    }
+
+    my %split_partial_serials;
+
+    # Ready to figure out the timings.
     for my $file (@tests) {
         my $file_dir = $map_file_to_dir{$file};
 
-        # Treat every file in each non-serial directory as its own
-        # "directory", so that it can be executed in parallel
-        if (! defined $serials{$file_dir}) {
+        # Special handling is needed for a directory that has some test files
+        # to execute serially, and some to execute in parallel.  This loop
+        # gathers information that a later loop will process.
+        if (defined $partial_serials{$file_dir}) {
+            if ($file =~ m! ^ (*atomic: .* / )  # Ignore the directory path
+                              ( \d+ )           # Grab the sequence number
+                          !x
+            ) {
+                # This is a file to execute serially.  Its time contributes
+                # directly to the total time for this directory.
+                $total_time{$file_dir} += $times{$file} || 0;
+
+                # Save the sequence number with the file for now; below we
+                # will come back to it.
+                push $split_partial_serials{$file_dir}{seq}->@*, [ $1, $file ];
+            }
+            else {
+                # This is a file to execute in parallel after all the
+                # sequential ones are done.  Save its time in the hash to
+                # later calculate its time contribution.
+                push $split_partial_serials{$file_dir}{par}->@*, $file;
+                $total_time{$file} = $times{$file} || 0;
+            }
+        }
+        elsif (! defined $serials{$file_dir}) {
+
+            # Treat every file in each non-serial directory as its own
+            # "directory", so that it can be executed in parallel
             $dir{$file} = { seq => $file };
             $total_time{$file} = $times{$file} || 0;
         }
@@ -178,6 +234,58 @@ sub _compute_tests_and_ordering($) {
 
     undef %all_dirs;
     undef %serials;
+
+
+    # Here, everything is complete except for the directories that have both
+    # serial components and parallel components.  The loop just above gathered
+    # the information required to finish setting those up, which we now do.
+    for my $partial_serial_dir (keys %split_partial_serials) {
+
+        # Look at just the serial portion for now.
+        my @seq_list = $split_partial_serials{$partial_serial_dir}{seq}->@*;
+
+        # The 0th element contains the sequence number; the 1th element the
+        # file name.  Get the name, sorted first by the number, then by the
+        # name.  Doing it this way allows sequence numbers to be varying
+        # length, and still get a numeric sort
+        my @sorted_seq_list = map { $_->[1] }
+                                sort {    $a->[0] <=>    $b->[0]
+                                    or lc $a->[1] cmp lc $b->[1] } @seq_list;
+
+        # Now look at the tests to run in parallel.  Sort in descending order
+        # of execution time.
+        my @par_list = sort sort_by_execution_order
+                        $split_partial_serials{$partial_serial_dir}{par}->@*;
+
+        # The total time to execute this directory is the serial time (already
+        # calculated in the previous loop) plus the parallel time.  To
+        # calculate an approximate parallel time, note that the minimum
+        # parallel time is the maximum of each of the test files run in
+        # parallel.  If the number of parallel jobs J is more than the number
+        # of such files, N, it could be that all N get executed in parallel,
+        # so that maximum is the actual value.  But if N > J, a second, or
+        # third, ...  round will be required.  The code below just takes the
+        # longest-running time for each round and adds that to the previous
+        # total.  It is an imperfect estimate, but not unreasonable.
+        my $par_time = 0;
+        for (my $i = 0; $i < @par_list; $i += $jobs) {
+            $par_time += $times{$par_list[$i]} || 0;
+        }
+        $total_time{$partial_serial_dir} += $par_time;
+
+        # Now construct the rules.  Each of the parallel tests is made into a
+        # single element 'seq' structure, like is done for all the other
+        # parallel tests.
+        @par_list = map { { seq => $_ } } @par_list;
+
+        # Then the directory is ordered to have the sequential tests executed
+        # first (serially), then the parallel tests (in parallel)
+        $dir{$partial_serial_dir} =
+                                { 'seq' => [ { seq => [ @sorted_seq_list ] },
+                                             { par => [ @par_list        ] },
+                                           ],
+                                };
+    }
 
     #print STDERR __LINE__, join "\n", sort sort_by_execution_order keys %dir
 
