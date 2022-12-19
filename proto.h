@@ -1290,11 +1290,6 @@ Perl_get_sv(pTHX_ const char *name, I32 flags);
 #define PERL_ARGS_ASSERT_GET_SV                 \
         assert(name)
 
-PERL_CALLCONV MGVTBL *
-Perl_get_vtbl(pTHX_ int vtbl_id)
-        __attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT_GET_VTBL
-
 PERL_CALLCONV int
 Perl_getcwd_sv(pTHX_ SV *sv);
 #define PERL_ARGS_ASSERT_GETCWD_SV              \
@@ -9727,6 +9722,11 @@ PERL_STATIC_INLINE I32
 Perl_foldEQ_locale(pTHX_ const char *a, const char *b, I32 len);
 # define PERL_ARGS_ASSERT_FOLDEQ_LOCALE         \
         assert(a); assert(b)
+
+PERL_STATIC_INLINE MGVTBL *
+Perl_get_vtbl(pTHX_ int vtbl_id)
+        __attribute__warn_unused_result__;
+# define PERL_ARGS_ASSERT_GET_VTBL
 
 PERL_STATIC_INLINE Size_t
 Perl_isC9_STRICT_UTF8_CHAR(const U8 * const s0, const U8 * const e)
