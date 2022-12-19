@@ -3756,9 +3756,12 @@ S_populate_hash_from_localeconv(pTHX_ HV * hv,
     const char * save_thread = querylocale_c(LC_ALL);
 
     /* Change to the global locale, and note if we already were there */
-    if (_configthreadlocale(_DISABLE_PER_THREAD_LOCALE)
-                         != _DISABLE_PER_THREAD_LOCALE)
-    {
+    int config_return = _configthreadlocale(_DISABLE_PER_THREAD_LOCALE);
+    if (config_return != _DISABLE_PER_THREAD_LOCALE) {
+        if (config_return == -1) {
+            locale_panic_("_configthreadlocale returned an error");
+        }
+
         restore_per_thread = TRUE;
     }
 
@@ -3846,7 +3849,9 @@ S_populate_hash_from_localeconv(pTHX_ HV * hv,
 
     /* And back to per-thread locales */
     if (restore_per_thread) {
-        _configthreadlocale(_ENABLE_PER_THREAD_LOCALE);
+        if (_configthreadlocale(_ENABLE_PER_THREAD_LOCALE) == -1) {
+            locale_panic_("_configthreadlocale returned an error");
+        }
     }
 
     /* Restore the per-thread locale state */
@@ -5292,7 +5297,9 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 #  ifdef USE_THREAD_SAFE_LOCALE
 #    ifdef WIN32
 
-    _configthreadlocale(_ENABLE_PER_THREAD_LOCALE);
+    if (_configthreadlocale(_ENABLE_PER_THREAD_LOCALE) == -1) {
+        locale_panic_("_configthreadlocale returned an error");
+    }
 
 #    endif
 #  endif
@@ -7026,7 +7033,11 @@ Perl_switch_to_global_locale(pTHX)
 
 #    elif defined(WIN32)
 
-    perl_controls = (_configthreadlocale(0) == _ENABLE_PER_THREAD_LOCALE);
+    int config_return = _configthreadlocale(0);
+    if (config_return == -1) {
+        locale_panic_("_configthreadlocale returned an error");
+    }
+    perl_controls = (config_return == _ENABLE_PER_THREAD_LOCALE);
 
 #    else
 #      error Unexpected Configuration
@@ -7042,7 +7053,9 @@ Perl_switch_to_global_locale(pTHX)
 #    if defined(WIN32)
 
     const char * thread_locale = posix_setlocale(LC_ALL, NULL);
-    _configthreadlocale(_DISABLE_PER_THREAD_LOCALE);
+    if (_configthreadlocale(_DISABLE_PER_THREAD_LOCALE) == -1) {
+        locale_panic_("_configthreadlocale returned an error");
+    }
     posix_setlocale(LC_ALL, thread_locale);
 
 #    else   /* Must be USE_POSIX_2008_LOCALE) */
@@ -7145,8 +7158,11 @@ Perl_sync_locale(pTHX)
 #  ifdef USE_THREAD_SAFE_LOCALE
 #    if defined(WIN32)
 
-    was_in_global = _configthreadlocale(_DISABLE_PER_THREAD_LOCALE)
-                                     == _DISABLE_PER_THREAD_LOCALE;
+    int config_return = _configthreadlocale(_DISABLE_PER_THREAD_LOCALE);
+    if (config_return == -1) {
+        locale_panic_("_configthreadlocale returned an error");
+    }
+    was_in_global = (config_return == _DISABLE_PER_THREAD_LOCALE);
 
 #    elif defined(USE_POSIX_2008_LOCALE)
 
@@ -7168,12 +7184,14 @@ Perl_sync_locale(pTHX)
 
     /* Now we have to convert the current thread to use them */
 
-#  if defined(WIN32)
+#  if defined(USE_THREAD_SAFE_LOCALE) && defined(WIN32)
 
     /* On Windows, convert to per-thread behavior.  This isn't necessary in
      * POSIX 2008, as the conversion gets done automatically in the loop below.
      * */
-    _configthreadlocale(_ENABLE_PER_THREAD_LOCALE);
+    if (_configthreadlocale(_ENABLE_PER_THREAD_LOCALE) == -1) {
+        locale_panic_("_configthreadlocale returned an error");
+    }
 
 #  endif
 
@@ -7313,7 +7331,9 @@ Perl_thread_locale_init(pTHX)
 #  elif defined(WIN32)
 
     /* On Windows, make sure new thread has per-thread locales enabled */
-    _configthreadlocale(_ENABLE_PER_THREAD_LOCALE);
+    if (_configthreadlocale(_ENABLE_PER_THREAD_LOCALE) == -1) {
+        locale_panic_("_configthreadlocale returned an error");
+    }
     void_setlocale_c(LC_ALL, "C");
 
 #  endif
