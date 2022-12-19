@@ -3697,16 +3697,6 @@ Perl_getenv_len(pTHX_ const char *env_elem, unsigned long *len)
 }
 #endif
 
-
-MGVTBL*
-Perl_get_vtbl(pTHX_ int vtbl_id)
-{
-    PERL_UNUSED_CONTEXT;
-
-    return (vtbl_id < 0 || vtbl_id >= magic_vtable_max)
-        ? NULL : (MGVTBL*)PL_magic_vtables + vtbl_id;
-}
-
 /*
 =for apidoc_section $io
 =for apidoc my_fflush_all

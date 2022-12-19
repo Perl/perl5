@@ -1214,7 +1214,7 @@ ERTXp	|const char * const *|get_prop_values				\
 EXopx	|REGEXP *|get_re_arg	|NULLOK SV *sv
 AOdp	|SV *	|get_sv 	|NN const char *name			\
 				|I32 flags
-CRpx	|MGVTBL *|get_vtbl	|int vtbl_id
+CRipx	|MGVTBL *|get_vtbl	|int vtbl_id
 Cp	|void	|gp_free	|NULLOK GV *gv
 Cp	|GP *	|gp_ref 	|NULLOK GP *gp
 ATdp	|bool	|grok_atoUV	|NN const char *pv			\
