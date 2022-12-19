@@ -3506,6 +3506,124 @@ Perl_padname_refcnt_inc(PADNAME *pn)
     return pn;
 }
 
+/* copy a string to a safe spot */
+
+/*
+=for apidoc_section $string
+=for apidoc savepv
+
+Perl's version of C<strdup()>.  Returns a pointer to a newly allocated
+string which is a duplicate of C<pv>.  The size of the string is
+determined by C<strlen()>, which means it may not contain embedded C<NUL>
+characters and must have a trailing C<NUL>.  To prevent memory leaks, the
+memory allocated for the new string needs to be freed when no longer needed.
+This can be done with the C<L</Safefree>> function, or
+L<C<SAVEFREEPV>|perlguts/SAVEFREEPV(p)>.
+
+On some platforms, Windows for example, all allocated memory owned by a thread
+is deallocated when that thread ends.  So if you need that not to happen, you
+need to use the shared memory functions, such as C<L</savesharedpv>>.
+
+=cut
+*/
+
+PERL_STATIC_INLINE char *
+Perl_savepv(pTHX_ const char *pv)
+{
+    PERL_UNUSED_CONTEXT;
+    if (!pv)
+        return NULL;
+    else {
+        char *newaddr;
+        const STRLEN pvlen = strlen(pv)+1;
+        Newx(newaddr, pvlen, char);
+        return (char*)memcpy(newaddr, pv, pvlen);
+    }
+}
+
+/* same thing but with a known length */
+
+/*
+=for apidoc savepvn
+
+Perl's version of what C<strndup()> would be if it existed.  Returns a
+pointer to a newly allocated string which is a duplicate of the first
+C<len> bytes from C<pv>, plus a trailing
+C<NUL> byte.  The memory allocated for
+the new string can be freed with the C<Safefree()> function.
+
+On some platforms, Windows for example, all allocated memory owned by a thread
+is deallocated when that thread ends.  So if you need that not to happen, you
+need to use the shared memory functions, such as C<L</savesharedpvn>>.
+
+=cut
+*/
+
+PERL_STATIC_INLINE char *
+Perl_savepvn(pTHX_ const char *pv, Size_t len)
+{
+    char *newaddr;
+    PERL_UNUSED_CONTEXT;
+
+    Newx(newaddr,len+1,char);
+    /* Give a meaning to NULL pointer mainly for the use in sv_magic() */
+    if (pv) {
+        /* might not be null terminated */
+        newaddr[len] = '\0';
+        return (char *) CopyD(pv,newaddr,len,char);
+    }
+    else {
+        return (char *) ZeroD(newaddr,len+1,char);
+    }
+}
+
+/*
+=for apidoc savesvpv
+
+A version of C<savepv()>/C<savepvn()> which gets the string to duplicate from
+the passed in SV using C<SvPV()>
+
+On some platforms, Windows for example, all allocated memory owned by a thread
+is deallocated when that thread ends.  So if you need that not to happen, you
+need to use the shared memory functions, such as C<L</savesharedsvpv>>.
+
+=cut
+*/
+
+PERL_STATIC_INLINE char *
+Perl_savesvpv(pTHX_ SV *sv)
+{
+    STRLEN len;
+    const char * const pv = SvPV_const(sv, len);
+    char *newaddr;
+
+    PERL_ARGS_ASSERT_SAVESVPV;
+
+    ++len;
+    Newx(newaddr,len,char);
+    return (char *) CopyD(pv,newaddr,len,char);
+}
+
+/*
+=for apidoc savesharedsvpv
+
+A version of C<savesharedpv()> which allocates the duplicate string in
+memory which is shared between threads.
+
+=cut
+*/
+
+PERL_STATIC_INLINE char *
+Perl_savesharedsvpv(pTHX_ SV *sv)
+{
+    STRLEN len;
+    const char * const pv = SvPV_const(sv, len);
+
+    PERL_ARGS_ASSERT_SAVESHAREDSVPV;
+
+    return savesharedpvn(pv, len);
+}
+
 /*
  * ex: set ts=8 sts=4 sw=4 et:
  */

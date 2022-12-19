@@ -1715,8 +1715,8 @@ p	|void	|rxres_save	|NN void **rsp|NN REGEXP *rx
 : Used in pp_sys.c
 p	|I32	|same_dirent	|NN const char* a|NN const char* b
 #endif
-Apda	|char*	|savepv		|NULLOK const char* pv
-Apda	|char*	|savepvn	|NULLOK const char* pv|Size_t len
+Asda	|char*	|savepv		|NULLOK const char* pv
+Asda	|char*	|savepvn	|NULLOK const char* pv|Size_t len
 Apda	|char*	|savesharedpv	|NULLOK const char* pv
 
 : NULLOK only to suppress a compiler warning
@@ -1726,8 +1726,8 @@ Apda	|char*  |rcpv_new	|NULLOK const char *const pv \
 				|STRLEN len|U32 flags
 Apd	|char*  |rcpv_copy	|NULLOK char *const pv
 Apd	|char*  |rcpv_free	|NULLOK char *const pv
-Apda	|char*	|savesharedsvpv	|NN SV *sv
-Apda	|char*	|savesvpv	|NN SV* sv
+Asda	|char*	|savesharedsvpv	|NN SV *sv
+Asda	|char*	|savesvpv	|NN SV* sv
 Cp	|void	|savestack_grow
 Cp	|void	|savestack_grow_cnt	|I32 need
 Amd	|void	|save_aelem	|NN AV* av|SSize_t idx|NN SV **sptr
