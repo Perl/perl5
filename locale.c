@@ -2633,8 +2633,9 @@ S_wrap_wsetlocale(pTHX_ const int category, const char *locale)
     const char * result = Win_wstring_to_utf8_string(wresult);
     WSETLOCALE_UNLOCK;
 
-    SAVEFREEPV(result); /* is there something better we can do here? */
-
+    SAVEFREEPV(result); /* is there something better we can do here?  Answer:
+                           Without restructuring, returning a unique value each
+                           call is required.  See GH #20434 */
     return result;
 }
 
