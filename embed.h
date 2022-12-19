@@ -59,7 +59,6 @@
 #define _utf8n_to_uvchr_msgs_helper	Perl__utf8n_to_uvchr_msgs_helper
 #define amagic_call(a,b,c,d)	Perl_amagic_call(aTHX_ a,b,c,d)
 #define amagic_deref_call(a,b)	Perl_amagic_deref_call(aTHX_ a,b)
-#define amagic_find(a,b,c)	Perl_amagic_find(aTHX_ a,b,c)
 #define apply_attrs_string(a,b,c,d)	Perl_apply_attrs_string(aTHX_ a,b,c,d)
 #define apply_builtin_cv_attributes(a,b)	Perl_apply_builtin_cv_attributes(aTHX_ a,b)
 #define atfork_lock		Perl_atfork_lock
@@ -926,6 +925,7 @@
 #if defined(PERL_CORE) || defined(PERL_EXT)
 #define _byte_dump_string(a,b,c)	Perl__byte_dump_string(aTHX_ a,b,c)
 #define _inverse_folds(a,b,c)	Perl__inverse_folds(aTHX_ a,b,c)
+#define amagic_find(a,b,c)	Perl_amagic_find(aTHX_ a,b,c)
 #define append_utf8_from_native_byte	Perl_append_utf8_from_native_byte
 #define av_reify(a)		Perl_av_reify(aTHX_ a)
 #define cntrl_to_mnemonic	Perl_cntrl_to_mnemonic

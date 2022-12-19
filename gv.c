@@ -3380,7 +3380,7 @@ Perl_try_amagic_un(pTHX_ int method, int flags) {
 /*
 =for apidoc amagic_find
 
-Check C<sv> for the overloaded (active magic) operation C<method>, and
+Check C<sv> for the overloaded (active magic) operation C<*method>, and
 return the C<CV *> or C<NULL>.
 
 C<method> is one of the values found in F<overload.h>.
@@ -3390,12 +3390,12 @@ C<flags> are available for future use.
 =cut
 */
 CV *
-Perl_amagic_find(pTHX_ SV *sv, int method, int flags)
+Perl_amagic_find(pTHX_ SV *sv, int *method, int flags)
 {
     PERL_ARGS_ASSERT_AMAGIC_FIND;
     PERL_UNUSED_VAR(flags);
 
-    assert(method >= 0 && method < NofAMmeth);
+    assert(*method >= 0 && *method < NofAMmeth);
 
     if (!SvAMAGIC(sv))
         return NULL;
@@ -3414,7 +3414,7 @@ Perl_amagic_find(pTHX_ SV *sv, int method, int flags)
     if (!cvp)
         return NULL;
 
-    CV *cv = cvp[method];
+    CV *cv = cvp[*method];
     return cv;
 }
 
