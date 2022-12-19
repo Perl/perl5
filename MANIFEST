@@ -5786,6 +5786,10 @@ t/io/tell.t				See if file seeking works
 t/io/through.t				See if pipe passes data intact
 t/io/utf8.t				See if file seeking works
 t/japh/abigail.t			Obscure tests
+t/lib/caller/Apack.pm			test Module for caller.t
+t/lib/caller/Bpack.pm			test Module for caller.t
+t/lib/caller/Cpack.pm			test Module for caller.t
+t/lib/caller/Foo.pm			test Module for caller.t
 t/lib/CannotParse.pm			For test case in op/require_errors.t
 t/lib/charnames/alias			Tests of "use charnames" with aliases.
 t/lib/Cname.pm				Test charnames in regexes (op/pat.t)
@@ -5825,10 +5829,6 @@ t/lib/feature/nonesuch			Tests for enabling/disabling nonexistent feature
 t/lib/feature/removed			Tests for enabling/disabling removed feature
 t/lib/feature/say			Tests for enabling/disabling say feature
 t/lib/feature/switch			Tests for enabling/disabling switch feature
-t/lib/GH_15109/Apack.pm			test Module for caller.t
-t/lib/GH_15109/Bpack.pm			test Module for caller.t
-t/lib/GH_15109/Cpack.pm			test Module for caller.t
-t/lib/GH_15109/Foo.pm			test Module for caller.t
 t/lib/h2ph.h				Test header file for h2ph
 t/lib/h2ph.pht				Generated output from h2ph.h by h2ph, for comparison
 t/lib/locale/latin1			Part of locale.t in Latin 1
