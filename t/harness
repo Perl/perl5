@@ -55,7 +55,7 @@ while ($ARGV[0] && $ARGV[0]=~/^-(n?)re/) {
     }
 }
 
-my $jobs = $ENV{TEST_JOBS};
+my $jobs = $ENV{TEST_JOBS} || 1;
 my ($rules, $state, $color);
 
 if ($ENV{HARNESS_OPTIONS}) {
@@ -104,7 +104,7 @@ sub _compute_tests_and_ordering($) {
     my %all_dirs;
     my %map_file_to_dir;
 
-    if ($jobs) {
+    if ($jobs > 1) {
         require App::Prove::State;
         $state = App::Prove::State->new({ store => 'test_state' });
         $state->apply_switch('slow', 'save');
