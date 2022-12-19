@@ -15894,6 +15894,9 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_diehook		= sv_dup_inc(proto_perl->Idiehook, param);
     PL_warnhook		= sv_dup_inc(proto_perl->Iwarnhook, param);
 
+    PL_hook__require__before = sv_dup_inc(proto_perl->Ihook__require__before, param);
+    PL_hook__require__after  = sv_dup_inc(proto_perl->Ihook__require__after, param);
+
     /* switches */
     PL_patchlevel	= sv_dup_inc(proto_perl->Ipatchlevel, param);
     PL_inplace		= SAVEPV(proto_perl->Iinplace);

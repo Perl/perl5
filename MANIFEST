@@ -5787,10 +5787,13 @@ t/io/tell.t				See if file seeking works
 t/io/through.t				See if pipe passes data intact
 t/io/utf8.t				See if file seeking works
 t/japh/abigail.t			Obscure tests
-t/lib/caller/Apack.pm			test Module for caller.t
-t/lib/caller/Bpack.pm			test Module for caller.t
-t/lib/caller/Cpack.pm			test Module for caller.t
-t/lib/caller/Foo.pm			test Module for caller.t
+t/lib/caller/Apack.pm			test Module for caller.t and t/op/hook/require.t
+t/lib/caller/Bicycle.pm			test Module for t/op/hook/require.t (cyclic)
+t/lib/caller/Bpack.pm			test Module for caller.t and t/op/hook/require.t
+t/lib/caller/Cpack.pm			test Module for caller.t and t/op/hook/require.t
+t/lib/caller/Cycle.pm			test Module for t/op/hook/require.t (cyclic)
+t/lib/caller/Foo.pm			test Module for caller.t and t/op/hook/require.t
+t/lib/caller/Tricycle.pm		test Module for t/op/hook/require.t (cyclic)
 t/lib/CannotParse.pm			For test case in op/require_errors.t
 t/lib/charnames/alias			Tests of "use charnames" with aliases.
 t/lib/Cname.pm				Test charnames in regexes (op/pat.t)
@@ -6045,6 +6048,7 @@ t/op/hashassign.t			See if hash assignments work
 t/op/hashwarn.t				See if warnings for bad hash assignments work
 t/op/heredoc.t				See if heredoc edge and corner cases work
 t/op/hexfp.t				See if hexadecimal float literals work
+t/op/hook/require.t			See if require hooks work properly.
 t/op/inc.t				See if inc/dec of integers near 32 bit limit work
 t/op/inccode.t				See if coderefs work in @INC
 t/op/inccode-tie.t			See if tie to @INC works

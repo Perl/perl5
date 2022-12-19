@@ -337,7 +337,7 @@ if (@ARGV) {
         my $which = $ENV{PERL_TEST_HARNESS_ASAP} ? \@last : \@next;
 
         push @$which, qw(comp run cmd);
-        push @$which, qw(io re opbasic op uni mro lib class porting perf test_pl);
+        push @$which, qw(io re opbasic op op/hook uni mro lib class porting perf test_pl);
         push @$which, 'japh' if $torture;
         push @$which, 'win32' if $^O eq 'MSWin32';
         push @$which, 'benchmark' if $ENV{PERL_BENCHMARK};

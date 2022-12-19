@@ -2219,6 +2219,13 @@ S_gv_magicalize(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len,
                 if (memEQs(name, len, "\007LOBAL_PHASE"))
                     goto ro_magicalize;
                 break;
+            case '\010':        /* %{^HOOK} */
+                if (memEQs(name, len, "\010OOK")) {
+                    GvMULTI_on(gv);
+                    HV *hv = GvHVn(gv);
+                    hv_magic(hv, NULL, PERL_MAGIC_hook);
+                }
+                break;
             case '\014':
                 if ( memEQs(name, len, "\014AST_FH") ||               /* ${^LAST_FH} */
                      memEQs(name, len, "\014AST_SUCCESSFUL_PATTERN")) /* ${^LAST_SUCCESSFUL_PATTERN} */

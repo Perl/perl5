@@ -1789,6 +1789,11 @@ dp	|int	|magic_clearhint|NN SV *sv				\
 dp	|int	|magic_clearhints					\
 				|NN SV *sv				\
 				|NN MAGIC *mg
+p	|int	|magic_clearhook|NULLOK SV *sv				\
+				|NN MAGIC *mg
+p	|int	|magic_clearhookall					\
+				|NULLOK SV *sv				\
+				|NN MAGIC *mg
 p	|int	|magic_clearisa |NULLOK SV *sv				\
 				|NN MAGIC *mg
 p	|int	|magic_clearpack|NN SV *sv				\
@@ -1888,6 +1893,11 @@ p	|int	|magic_setdefelem					\
 p	|int	|magic_setenv	|NN SV *sv				\
 				|NN MAGIC *mg
 dp	|int	|magic_sethint	|NN SV *sv				\
+				|NN MAGIC *mg
+p	|int	|magic_sethook	|NULLOK SV *sv				\
+				|NN MAGIC *mg
+p	|int	|magic_sethookall					\
+				|NN SV *sv				\
 				|NN MAGIC *mg
 p	|int	|magic_setisa	|NN SV *sv				\
 				|NN MAGIC *mg

@@ -168,10 +168,17 @@ my %mg =
                      desc => 'Tied scalar or handle' },
      qr => { char => 'r', vtable => 'regexp', value_magic => 1, 
              readonly_acceptable => 1, desc => 'Precompiled qr// regex' },
+
+     hook => { char => 'Z',
+         vtable => 'hook', desc => '%{^HOOK} hash' },
+     hookelem => { char => 'z',
+         vtable => 'hookelem', desc => '%{^HOOK} hash element' },
+
      sig => { char => 'S', vtable => 'sig',
 		      desc => '%SIG hash' },
      sigelem => { char => 's', vtable => 'sigelem',
                   desc => '%SIG hash element' },
+
      taint => { char => 't', vtable => 'taint', value_magic => 1,
                 desc => 'Taintedness' },
      uvar => { char => 'U', vtable => 'uvar',
@@ -262,6 +269,10 @@ my %vtable_conf =
      'sig' => { set => 'setsigall' },
      'sigelem' => {get => 'getsig', set => 'setsig', clear => 'clearsig',
                    cond => '#ifndef PERL_MICRO'},
+
+     'hook' => { set => 'sethookall', clear => 'clearhookall' },
+     'hookelem' => {set => 'sethook', clear => 'clearhook'},
+
      'pack' => {len => 'sizepack', clear => 'wipepack'},
      'packelem' => {get => 'getpack', set => 'setpack', clear => 'clearpack'},
      'dbline' => {set => 'setdbline'},
