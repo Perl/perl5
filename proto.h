@@ -3598,12 +3598,12 @@ PERL_CALLCONV SV*	Perl_save_svref(pTHX_ SV** sptr);
 PERL_CALLCONV void	Perl_save_vptr(pTHX_ void *ptr);
 #define PERL_ARGS_ASSERT_SAVE_VPTR	\
 	assert(ptr)
-PERL_CALLCONV char*	Perl_savepv(pTHX_ const char* pv)
+STATIC char*	Perl_savepv(pTHX_ const char* pv)
 			__attribute__malloc__
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_SAVEPV
 
-PERL_CALLCONV char*	Perl_savepvn(pTHX_ const char* pv, Size_t len)
+STATIC char*	Perl_savepvn(pTHX_ const char* pv, Size_t len)
 			__attribute__malloc__
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_SAVEPVN
@@ -3618,7 +3618,7 @@ PERL_CALLCONV char*	Perl_savesharedpvn(pTHX_ const char *const pv, const STRLEN 
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_SAVESHAREDPVN
 
-PERL_CALLCONV char*	Perl_savesharedsvpv(pTHX_ SV *sv)
+STATIC char*	Perl_savesharedsvpv(pTHX_ SV *sv)
 			__attribute__malloc__
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_SAVESHAREDSVPV	\
@@ -3628,7 +3628,7 @@ PERL_CALLCONV void	Perl_savestack_grow(pTHX);
 #define PERL_ARGS_ASSERT_SAVESTACK_GROW
 PERL_CALLCONV void	Perl_savestack_grow_cnt(pTHX_ I32 need);
 #define PERL_ARGS_ASSERT_SAVESTACK_GROW_CNT
-PERL_CALLCONV char*	Perl_savesvpv(pTHX_ SV* sv)
+STATIC char*	Perl_savesvpv(pTHX_ SV* sv)
 			__attribute__malloc__
 			__attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_SAVESVPV	\
