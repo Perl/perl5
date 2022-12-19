@@ -1,5 +1,5 @@
 package experimental;
-$experimental::VERSION = '0.029';
+$experimental::VERSION = '0.030';
 use strict;
 use warnings;
 use version ();
@@ -140,7 +140,7 @@ experimental - Experimental features made easy
 
 =head1 VERSION
 
-version 0.029
+version 0.030
 
 =head1 SYNOPSIS
 
@@ -255,9 +255,13 @@ This was added in perl 5.20.0.
 This was added in perl 5.10.0, but it should be noted there are significant
 incompatibilities between 5.10.0 and 5.10.1.
 
+The feature is going to be deprecated in perl 5.38.0, and removed in 5.42.0.
+
 =item * C<switch> - allow the use of C<~~>, given, and when
 
 This was added in perl 5.10.0.
+
+The feature is going to be deprecated in perl 5.38.0, and removed in 5.42.0.
 
 =item * C<try> - allow the use of C<try> and C<catch>
 
