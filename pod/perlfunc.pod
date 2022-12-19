@@ -7064,7 +7064,69 @@ require executes at all.
 
 As of 5.37.7 C<@INC> values of undef will be silently ignored.
 
-For a yet-more-powerful import facility, see
+The function C<require()> is difficult to wrap properly. Many modules
+consult the stack to find information about their caller, and injecting
+a new stack frame by wrapping C<require()> often breaks things.
+Nevertheless it can be very helpful to have the ability to perform
+actions before and after a C<require>, for instance for trace utilities
+like C<Devel::TraceUse> or to measure time to load and the memory
+consumption of the require graph. Because of the difficulties in safely
+creating a C<require()> wrapper in 5.37.10 we introduced a new mechanism.
+
+As of 5.37.10, prior to any other actions it performs, C<require> will
+check if C<${^HOOK}{require__before}> contains a coderef, and if it does
+it will be called with the filename form of the item being loaded. The hook
+may modify C<$_[0]> to load a different filename, or it may throw a fatal
+exception to cause the require to fail, which will be treated as though the
+required code itself had thrown an exception.
+
+The C<${^HOOK}{require__before}> hook may return a code reference, in
+which case the code reference will be executed (in an eval with the
+filname as a parameter) after the require completes. It will be executed
+regardless of how the compilation completed, and even if the require
+throws a fatal exception.  The function may consult C<%INC> to determine
+if the require failed or not.  For instance the following code will print
+some diagnostics before and after every C<require> statement.  The
+example also includes logic to chain the signal, so that multiple
+signals can cooperate. Well behaved C<${^HOOK}{require__before}>
+handlers should always take this into account.
+
+    {
+        use Scalar::Util qw(reftype);
+        my $old_hook = ${^HOOK}{require__before};
+        local ${^HOOK}{require__before} = sub {
+            my ($name) = @_;
+            my $old_hook_ret;
+            $old_hook_ret = $old_hook->($name) if $old_hook;
+            warn "Requiring: $name\n";
+            return sub {
+                $old_hook_ret->() if ref($old_hook_ret)
+                                  && reftype($old_hook_ret) eq "CODE";
+                warn sprintf "Finished requiring %s: %s\n",
+                        $name, $INC{$name} ? "loaded" :"failed";
+            };
+        };
+        require Whatever;
+    }
+
+This hook executes for ALL C<require> statements, unlike C<INC> and
+C<INCDIR> hooks, which are only executed for relative file names, and it
+executes first before any other special behaviour inside of require.
+Note that the initial hook in C<${^HOOK}{require__before}> is *not*
+executed inside of an eval, and throwing an exception will stop further
+processing, but the after hook it may return is executed inside of an
+eval, and any exceptions it throws will be silently ignored.  This is
+because it executes inside of the scope cleanup logic that is triggered
+after the require completes, and an exception at this time would not
+stop the module from being loaded, etc.
+
+There is a similar hook that fires after require completes,
+C<${^HOOK}{require__after}>, which will be called after each require statement
+completes, either via an exception or successfully. It will be called with
+the filename of the most recently executed require statement. It is executed
+in an eval, and will not in any way affect execution.
+
+For a yet-more-powerful import facility built around C<require>, see
 L<C<use>|/use Module VERSION LIST> and L<perlmod>.
 
 =item reset EXPR

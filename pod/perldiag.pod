@@ -2263,6 +2263,18 @@ the C<encoding> pragma, is no longer supported as of Perl 5.26.0.
 Setting it to anything other than C<undef> is a fatal error as of Perl
 5.28.
 
+=item ${^HOOK}{%s} may only be a CODE reference or undef
+
+(F) You attempted to assign something other than undef or a CODE ref to
+C<%{^HOOK}>. Hooks may only be CODE refs. See L<perlvar/%{^HOOK}> for
+details.
+
+=item Attempt to set unknown hook '%s' in %{^HOOK}
+
+(F) You attempted to assign something other than undef or a CODE ref to
+C<%{^HOOK}>. Hooks may only be CODE refs. See L<perlvar/%{^HOOK}> for
+details.
+
 =item entering effective %s failed
 
 (F) While under the C<use filetest> pragma, switching the real and
@@ -3961,10 +3973,16 @@ can vary from one line to the next.
 
 =item Missing or undefined argument to %s
 
-(F) You tried to call require or do with no argument or with an undefined
-value as an argument.  Require expects either a package name or a
-file-specification as an argument; do expects a filename.  See
+(F) You tried to call C<require> or C<do> with no argument or with an
+undefined value as an argument.  Require expects either a package name or
+a file-specification as an argument; do expects a filename.  See
 L<perlfunc/require EXPR> and L<perlfunc/do EXPR>.
+
+=item Missing or undefined argument to %s via %{^HOOK}{require__before}
+
+(F) A C<%{^HOOK}{require__before}> hook rewrote the name of the file being
+compiled with C<require> or C<do> with an empty string an undefined value
+which is forbidden.  See L<perlvar/%{^HOOK}> and L<perlfunc/require EXPR>.
 
 =item Missing right brace on \%c{} in regex; marked by S<<-- HERE> in m/%s/
 

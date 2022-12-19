@@ -1748,7 +1748,8 @@ Perl_magic_setsig(pTHX_ SV *sv, MAGIC *mg)
                For magic_clearsig, we don't change the warnings handler if it's
                set to the &PL_warnhook.  */
             svp = &PL_warnhook;
-        } else if (sv) {
+        }
+        else if (sv) {
             SV *tmp = sv_newmortal();
             Perl_croak(aTHX_ "No such hook: %s",
                                 pv_pretty(tmp, s, len, 0, NULL, NULL, 0));
@@ -1820,8 +1821,9 @@ Perl_magic_setsig(pTHX_ SV *sv, MAGIC *mg)
         if (i) {
             (void)rsignal(i, PL_csighandlerp);
         }
-        else
+        else {
             *svp = SvREFCNT_inc_simple_NN(sv);
+        }
     } else {
         if (sv && SvOK(sv)) {
             s = SvPV_force(sv, len);
@@ -1890,6 +1892,92 @@ Perl_magic_setsigall(pTHX_ SV* sv, MAGIC* mg)
     }
     return 0;
 }
+
+int
+Perl_magic_clearhook(pTHX_ SV *sv, MAGIC *mg)
+{
+    PERL_ARGS_ASSERT_MAGIC_CLEARHOOK;
+
+    magic_sethook(NULL, mg);
+    return sv_unmagic(sv, mg->mg_type);
+}
+
+/* sv of NULL signifies that we're acting as magic_clearhook.  */
+int
+Perl_magic_sethook(pTHX_ SV *sv, MAGIC *mg)
+{
+    SV** svp = NULL;
+    STRLEN len;
+    const char *s = MgPV_const(mg,len);
+
+    PERL_ARGS_ASSERT_MAGIC_SETHOOK;
+
+    if (memEQs(s, len, "require__before")) {
+        svp = &PL_hook__require__before;
+    }
+    else if (memEQs(s, len, "require__after")) {
+        svp = &PL_hook__require__after;
+    }
+    else {
+        SV *tmp = sv_newmortal();
+        Perl_croak(aTHX_ "Attempt to set unknown hook '%s' in %%{^HOOK}",
+                            pv_pretty(tmp, s, len, 0, NULL, NULL, 0));
+    }
+    if (sv && SvOK(sv) && (!SvROK(sv) || SvTYPE(SvRV(sv))!= SVt_PVCV))
+        croak("${^HOOK}{%.*s} may only be a CODE reference or undef", (int)len, s);
+
+    if (svp) {
+        if (*svp)
+            SvREFCNT_dec(*svp);
+
+        if (sv)
+            *svp = SvREFCNT_inc_simple_NN(sv);
+        else
+            *svp = NULL;
+    }
+
+    return 0;
+}
+
+int
+Perl_magic_sethookall(pTHX_ SV* sv, MAGIC* mg)
+{
+    PERL_ARGS_ASSERT_MAGIC_SETHOOKALL;
+    PERL_UNUSED_ARG(mg);
+
+    if (PL_localizing == 1) {
+        SAVEGENERICSV(PL_hook__require__before);
+        PL_hook__require__before = NULL;
+        SAVEGENERICSV(PL_hook__require__after);
+        PL_hook__require__after = NULL;
+    }
+    else
+    if (PL_localizing == 2) {
+        HV* hv = (HV*)sv;
+        HE* current;
+        hv_iterinit(hv);
+        while ((current = hv_iternext(hv))) {
+            SV* hookelem = hv_iterval(hv, current);
+            mg_set(hookelem);
+        }
+    }
+    return 0;
+}
+
+int
+Perl_magic_clearhookall(pTHX_ SV* sv, MAGIC* mg)
+{
+    PERL_ARGS_ASSERT_MAGIC_CLEARHOOKALL;
+    PERL_UNUSED_ARG(mg);
+    PERL_UNUSED_ARG(sv);
+
+    SvREFCNT_dec_set_NULL(PL_hook__require__before);
+
+    SvREFCNT_dec_set_NULL(PL_hook__require__after);
+
+    return 0;
+}
+
 
 int
 Perl_magic_setisa(pTHX_ SV *sv, MAGIC *mg)

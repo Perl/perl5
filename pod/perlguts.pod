@@ -1555,6 +1555,8 @@ will be lost.
  y  PERL_MAGIC_defelem        vtbl_defelem   Shadow "foreach" iterator
                                              variable / smart parameter
                                              vivification
+ Z  PERL_MAGIC_hook           vtbl_hook      %{^HOOK} hash
+ z  PERL_MAGIC_hookelem       vtbl_hookelem  %{^HOOK} hash element
  \  PERL_MAGIC_lvref          vtbl_lvref     Lvalue reference
                                              constructor
  ]  PERL_MAGIC_checkcall      vtbl_checkcall Inlining/mutation of call
@@ -1584,6 +1586,8 @@ will be lost.
 =for apidoc_item ||PERL_MAGIC_fm
 =for apidoc_item ||PERL_MAGIC_hints
 =for apidoc_item ||PERL_MAGIC_hintselem
+=for apidoc_item ||PERL_MAGIC_hook
+=for apidoc_item ||PERL_MAGIC_hookelem
 =for apidoc_item ||PERL_MAGIC_isa
 =for apidoc_item ||PERL_MAGIC_isaelem
 =for apidoc_item ||PERL_MAGIC_lvref

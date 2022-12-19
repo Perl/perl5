@@ -4233,6 +4233,46 @@ S_require_file(pTHX_ SV *sv)
     if (!(name && len > 0 && *name))
         DIE(aTHX_ "Missing or undefined argument to %s", op_name);
 
+    if (
+        PL_hook__require__before
+        && SvROK(PL_hook__require__before)
+        && SvTYPE(SvRV(PL_hook__require__before)) == SVt_PVCV
+    ) {
+        SV* name_sv = sv_mortalcopy(sv);
+        SV *post_hook__require__before_sv = NULL;
+
+        ENTER_with_name("call_PRE_REQUIRE");
+        SAVETMPS;
+        EXTEND(SP, 1);
+        PUSHMARK(SP);
+        PUSHs(name_sv); /* always use the object for method calls */
+        PUTBACK;
+        int count = call_sv(PL_hook__require__before, G_SCALAR);
+        SPAGAIN;
+        if (count && SvOK(*SP) && SvROK(*SP) && SvTYPE(SvRV(*SP)) == SVt_PVCV)
+            post_hook__require__before_sv = SvREFCNT_inc_simple_NN(*SP);
+        if (!sv_streq(name_sv,sv)) {
+            /* they modified the name argument, so do some sleight of hand */
+            name = SvPV_nomg_const(name_sv, len);
+            if (!(name && len > 0 && *name))
+                DIE(aTHX_ "Missing or undefined argument to %s via %%{^HOOK}{require__before}",
+                        op_name);
+            sv = SvREFCNT_inc_simple_NN(name_sv);
+        }
+        FREETMPS;
+        LEAVE_with_name("call_PRE_REQUIRE");
+        if (post_hook__require__before_sv) {
+            MORTALDESTRUCTOR_SV(post_hook__require__before_sv, newSVsv(sv));
+        }
+    }
+    if (
+        PL_hook__require__after
+        && SvROK(PL_hook__require__after)
+        && SvTYPE(SvRV(PL_hook__require__after)) == SVt_PVCV
+    ) {
+        MORTALDESTRUCTOR_SV(PL_hook__require__after, newSVsv(sv));
+    }
+
 #ifndef VMS
         /* try to return earlier (save the SAFE_PATHNAME check) if INC already got the name */
         if (op_is_require) {

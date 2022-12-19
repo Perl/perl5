@@ -56,6 +56,8 @@
 #define PERL_MAGIC_nonelem        'Y' /* Array element that does not exist */
 #define PERL_MAGIC_defelem        'y' /* Shadow "foreach" iterator variable /
                                          smart parameter vivification */
+#define PERL_MAGIC_hook           'Z' /* %{^HOOK} hash */
+#define PERL_MAGIC_hookelem       'z' /* %{^HOOK} hash element */
 #define PERL_MAGIC_lvref          '\\' /* Lvalue reference constructor */
 #define PERL_MAGIC_checkcall      ']' /* Inlining/mutation of call to this CV */
 #define PERL_MAGIC_extvalue       '^' /* Value magic available for use by extensions */
@@ -75,6 +77,8 @@ enum {		/* pass one of these to get_vtbl */
     want_vtbl_envelem,
     want_vtbl_hints,
     want_vtbl_hintselem,
+    want_vtbl_hook,
+    want_vtbl_hookelem,
     want_vtbl_isa,
     want_vtbl_isaelem,
     want_vtbl_lvref,
@@ -114,6 +118,8 @@ EXTCONST char * const PL_magic_vtable_names[magic_vtable_max] = {
     "envelem",
     "hints",
     "hintselem",
+    "hook",
+    "hookelem",
     "isa",
     "isaelem",
     "lvref",
@@ -176,6 +182,8 @@ EXT_MGVTBL PL_magic_vtables[magic_vtable_max] = {
   { 0, Perl_magic_setenv, 0, Perl_magic_clearenv, 0, 0, 0, 0 },
   { 0, 0, 0, Perl_magic_clearhints, 0, 0, 0, 0 },
   { 0, Perl_magic_sethint, 0, Perl_magic_clearhint, 0, 0, 0, 0 },
+  { 0, Perl_magic_sethookall, 0, Perl_magic_clearhookall, 0, 0, 0, 0 },
+  { 0, Perl_magic_sethook, 0, Perl_magic_clearhook, 0, 0, 0, 0 },
   { 0, Perl_magic_setisa, 0, Perl_magic_clearisa, 0, 0, 0, 0 },
   { 0, Perl_magic_setisa, 0, 0, 0, 0, 0, 0 },
   { 0, Perl_magic_setlvref, 0, 0, 0, 0, 0, 0 },
@@ -224,6 +232,8 @@ EXT_MGVTBL PL_magic_vtables[magic_vtable_max];
 #define PL_vtbl_fm PL_magic_vtables[want_vtbl_fm]
 #define PL_vtbl_hints PL_magic_vtables[want_vtbl_hints]
 #define PL_vtbl_hintselem PL_magic_vtables[want_vtbl_hintselem]
+#define PL_vtbl_hook PL_magic_vtables[want_vtbl_hook]
+#define PL_vtbl_hookelem PL_magic_vtables[want_vtbl_hookelem]
 #define PL_vtbl_isa PL_magic_vtables[want_vtbl_isa]
 #define PL_vtbl_isaelem PL_magic_vtables[want_vtbl_isaelem]
 #define PL_vtbl_lvref PL_magic_vtables[want_vtbl_lvref]

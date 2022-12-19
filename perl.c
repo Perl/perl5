@@ -932,6 +932,10 @@ perl_destruct(pTHXx)
     PL_warnhook = NULL;
     SvREFCNT_dec(PL_diehook);
     PL_diehook = NULL;
+    SvREFCNT_dec(PL_hook__require__before);
+    PL_hook__require__before = NULL;
+    SvREFCNT_dec(PL_hook__require__after);
+    PL_hook__require__after = NULL;
 
     /* call exit list functions */
     while (PL_exitlistlen-- > 0)

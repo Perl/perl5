@@ -2058,6 +2058,18 @@ Perl_magic_clearhints(pTHX_ SV *sv, MAGIC *mg)
         assert(sv); assert(mg)
 
 PERL_CALLCONV int
+Perl_magic_clearhook(pTHX_ SV *sv, MAGIC *mg)
+        __attribute__visibility__("hidden");
+#define PERL_ARGS_ASSERT_MAGIC_CLEARHOOK        \
+        assert(mg)
+
+PERL_CALLCONV int
+Perl_magic_clearhookall(pTHX_ SV *sv, MAGIC *mg)
+        __attribute__visibility__("hidden");
+#define PERL_ARGS_ASSERT_MAGIC_CLEARHOOKALL     \
+        assert(mg)
+
+PERL_CALLCONV int
 Perl_magic_clearisa(pTHX_ SV *sv, MAGIC *mg)
         __attribute__visibility__("hidden");
 #define PERL_ARGS_ASSERT_MAGIC_CLEARISA         \
@@ -2275,6 +2287,18 @@ PERL_CALLCONV int
 Perl_magic_sethint(pTHX_ SV *sv, MAGIC *mg)
         __attribute__visibility__("hidden");
 #define PERL_ARGS_ASSERT_MAGIC_SETHINT          \
+        assert(sv); assert(mg)
+
+PERL_CALLCONV int
+Perl_magic_sethook(pTHX_ SV *sv, MAGIC *mg)
+        __attribute__visibility__("hidden");
+#define PERL_ARGS_ASSERT_MAGIC_SETHOOK          \
+        assert(mg)
+
+PERL_CALLCONV int
+Perl_magic_sethookall(pTHX_ SV *sv, MAGIC *mg)
+        __attribute__visibility__("hidden");
+#define PERL_ARGS_ASSERT_MAGIC_SETHOOKALL       \
         assert(sv); assert(mg)
 
 PERL_CALLCONV int

@@ -779,6 +779,71 @@ and use an C<END{}> or CORE::GLOBAL::die override instead.
 See L<perlfunc/die>, L<perlfunc/warn>, L<perlfunc/eval>, and
 L<warnings> for additional information.
 
+=item %{^HOOK}
+X<%{^HOOK}>
+
+This hash contains coderefs which are called when various perl keywords
+which are hard or impossible to wrap are called. The keys of this hash
+are named after the keyword that is being hooked, followed by two
+underbars and then a phase term; either "before" or "after".
+
+Perl will throw an error if you attempt modify a key which is not
+documented to exist, or if you attempt to store anything other than a
+code reference or undef in the hash.  If you wish to use an object to
+implement a hook you can use currying to embed the object into an
+anonymous code reference.
+
+Currently there is only one keyword which can be hooked, C<require>, but
+it is expected that in future releases there will be additional keywords
+with hook support.
+
+=over 4
+
+=item require__before
+
+The routine indicated by C<${^HOOK}{require__before}> is called by
+C<require> B<before> it checks C<%INC>, looks up C<@INC>, calls INC
+hooks, or compiles any code.  It is called with a single argument, the
+filename for the item being required (package names are converted to
+paths).  It may alter this filename to change what file is loaded.  If
+the hook dies during execution then it will block the require from executing.
+
+In order to make it easy to perform an action with shared state both
+before and after the require keyword was executed the C<require__before>
+hook may return a "post-action" coderef which will in turn be executed when
+the C<require> completes.  This coderef will be executed regardless as to
+whether the require completed succesfully or threw an exception.  It will
+be called with the filename that was required.  You can check %INC to
+determine if the require was successful.  Any other return from the
+C<require__before> hook will be silently ignored.
+
+C<require__before> hooks are called in FIFO order, and if the hook
+returns a code reference those code references will be called in FILO
+order.  In other words if A requires B requires C, then
+C<require__before> will be called first for A, then B and then C, and
+the post-action code reference will executed first for C, then B and
+then finally A.
+
+Well behaved code should ensure that when setting up a
+C<require__before> hook that any prior installed hook will be called,
+and that their return value, if a code reference, will be called as
+well.  See L<perlfunc/require> for an example implementation.
+
+=item require__after
+
+The routine indicated by C<${^HOOK}{require__after}> is called by
+C<require> B<after> the require completes.  It is called with a single
+argument, the filename for the item being required (package names are
+converted to paths).  It is executed when the C<require> completes,
+either via exception or via completion of the require statement, and you
+can check C<%INC> to determine if the require was successful.
+
+The C<require__after> hook is called for each required file in FILO
+order. In other words if A requires B requires C, then C<require__after>
+will be called first for C, then B and then A.
+
+=back
+
 =item $BASETIME
 
 =item $^T

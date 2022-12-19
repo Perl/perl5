@@ -130,7 +130,8 @@ thread's copy.
 =cut
 */
 
-PERLVAR(I, localizing,	U8)		/* are we processing a local() list? */
+PERLVAR(I, localizing,  U8)             /* are we processing a local() list?
+                                           0 = no, 1 = localizing, 2 = delocalizing */
 PERLVAR(I, in_eval,	U8)		/* trap "fatal" errors? */
 PERLVAR(I, defgv,	GV *)           /* the *_ glob */
 
@@ -495,6 +496,9 @@ PERLVAR(I, origfilename, char *)
 PERLVARI(I, xsubfilename, const char *, NULL)
 PERLVAR(I, diehook,	SV *)
 PERLVAR(I, warnhook,	SV *)
+/* keyword hooks*/
+PERLVARI(I, hook__require__before, SV *,NULL)
+PERLVARI(I, hook__require__after, SV *,NULL)
 
 /* switches */
 PERLVAR(I, patchlevel,	SV *)
