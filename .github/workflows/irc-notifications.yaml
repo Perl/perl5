@@ -16,7 +16,8 @@ jobs:
     env:
       server: ssl.irc.perl.org
       port: 7062
-      channel: "#p5p-commits"
+      channel_p5p: "#p5p"
+      channel_noise: "#p5p-commits"
 
     steps:
       - name: Dump GitHub context
@@ -89,7 +90,7 @@ jobs:
         with:
           server: ${{ env.server }}
           port: ${{ env.port }}
-          channel: ${{ env.channel }}
+          channel: ${{ env.channel_noise }}
           nickname: Commit
           message:
             "\x037${{ github.actor }}\x0F pushed to branch \x033${{ env.ref }}\x0F\n\
@@ -102,7 +103,7 @@ jobs:
         with:
           server: ${{ env.server }}
           port: ${{ env.port }}
-          channel: ${{ env.channel }}
+          channel: ${{ env.channel_noise }}
           nickname: inBlead
           message:
             "\x0313[blead]\x0F \x037${{ github.actor }}\x0F pushed to blead\n\
@@ -151,12 +152,24 @@ jobs:
         with:
           server: ${{ env.server }}
           port: ${{ env.port }}
-          channel: ${{ env.channel }}
+          channel: ${{ env.channel_p5p }}
           nickname: Pull-Request
           message:
             "\x037${{ github.actor }}\x0F opened PR #${{ github.event.pull_request.number }}\n\
             ${{ env.TITLE }}\n\
-            ${{ env.BODY }}\n\
+            ${{ github.event.pull_request.html_url }}"
+
+      - name: irc closed pull request
+        uses: rectalogic/notify-irc@v2
+        if: github.event_name == 'pull_request' && github.event.action == 'closed'
+        with:
+          server: ${{ env.server }}
+          port: ${{ env.port }}
+          channel: ${{ env.channel_p5p }}
+          nickname: Pull-Request
+          message:
+            "\x037${{ github.actor }}\x0F close PR #${{ github.event.pull_request.number }}\n\
+            ${{ env.TITLE }}\n\
             ${{ github.event.pull_request.html_url }}"
 
       - name: irc synchronize pull request
@@ -165,7 +178,7 @@ jobs:
         with:
           server: ${{ env.server }}
           port: ${{ env.port }}
-          channel: ${{ env.channel }}
+          channel: ${{ env.channel_noise }}
           nickname: Pull-Request
           message:
             "\x037${{ github.actor }}\x0F updated PR #${{ github.event.pull_request.number }}\n\
