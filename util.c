@@ -4093,109 +4093,112 @@ and LC_TIME are not the same locale.
 
 =cut
  */
+    PERL_ARGS_ASSERT_MY_STRFTIME;
 
-  char *buf;
-  int buflen;
-  struct tm mytm;
-  int len;
+    /* Set mytm to now */
+    struct tm mytm;
+    init_tm(&mytm);	/* XXX workaround - see init_tm() above */
 
-  PERL_ARGS_ASSERT_MY_STRFTIME;
+    /* Override with the passed-in values */
+    mytm.tm_sec = sec;
+    mytm.tm_min = min;
+    mytm.tm_hour = hour;
+    mytm.tm_mday = mday;
+    mytm.tm_mon = mon;
+    mytm.tm_year = year;
+    mytm.tm_wday = wday;
+    mytm.tm_yday = yday;
+    mytm.tm_isdst = isdst;
+    mini_mktime(&mytm);
 
-  init_tm(&mytm);	/* XXX workaround - see init_tm() above */
-  mytm.tm_sec = sec;
-  mytm.tm_min = min;
-  mytm.tm_hour = hour;
-  mytm.tm_mday = mday;
-  mytm.tm_mon = mon;
-  mytm.tm_year = year;
-  mytm.tm_wday = wday;
-  mytm.tm_yday = yday;
-  mytm.tm_isdst = isdst;
-  mini_mktime(&mytm);
-  /* use libc to get the values for tm_gmtoff and tm_zone [perl #18238] */
+    /* use libc to get the values for tm_gmtoff and tm_zone on platforms that
+     * have them [perl #18238] */
 #if defined(HAS_MKTIME) && (defined(HAS_TM_TM_GMTOFF) || defined(HAS_TM_TM_ZONE))
-  STMT_START {
     struct tm mytm2;
     mytm2 = mytm;
     MKTIME_LOCK;
     mktime(&mytm2);
     MKTIME_UNLOCK;
-#ifdef HAS_TM_TM_GMTOFF
+#  ifdef HAS_TM_TM_GMTOFF
     mytm.tm_gmtoff = mytm2.tm_gmtoff;
-#endif
-#ifdef HAS_TM_TM_ZONE
+#  endif
+#  ifdef HAS_TM_TM_ZONE
     mytm.tm_zone = mytm2.tm_zone;
+#  endif
 #endif
-  } STMT_END;
-#endif
-  buflen = 64;
-  Newx(buf, buflen, char);
+    int buflen = 64;
+    char *buf;
+    Newx(buf, buflen, char);
 
-  GCC_DIAG_IGNORE_STMT(-Wformat-nonliteral); /* fmt checked by caller */
+    GCC_DIAG_IGNORE_STMT(-Wformat-nonliteral); /* fmt checked by caller */
 
-  STRFTIME_LOCK;
-  len = strftime(buf, buflen, fmt, &mytm);
-  STRFTIME_UNLOCK;
+    STRFTIME_LOCK;
+    int len = strftime(buf, buflen, fmt, &mytm);
+    STRFTIME_UNLOCK;
 
-  GCC_DIAG_RESTORE_STMT;
+    GCC_DIAG_RESTORE_STMT;
 
-  /*
-  ** The following is needed to handle the situation where
-  ** tmpbuf overflows.  Basically we want to allocate a buffer
-  ** and try repeatedly, until it's large enough.  The reason why it is so
-  ** complicated ** is that getting a return value of 0 from strftime can
-  ** indicate one of the following:
-  ** 1. buffer overflowed,
-  ** 2. illegal conversion specifier, or
-  ** 3. the format string specifies nothing to be returned (which isn't an
-  **    an error).  This could be because the format is an empty string
-  **    or it specifies %p which yields an empty string in some locales.
-  ** If there is a better way to make it portable, go ahead by
-  ** all means.
-  */
-  if (inRANGE(len, 1, buflen - 1) || (len == 0 && *fmt == '\0'))
-    return buf;
-  else {
-    /* Possibly buf overflowed - try again with a bigger buf */
-    const int fmtlen = strlen(fmt);
-    int bufsize = fmtlen + buflen;
+    /*
+    ** The following is needed to handle the situation where
+    ** tmpbuf overflows.  Basically we want to allocate a buffer
+    ** and try repeatedly, until it's large enough.  The reason why it is so
+    ** complicated is that getting a return value of 0 from strftime can
+    ** indicate one of the following:
+    ** 1. buffer overflowed,
+    ** 2. illegal conversion specifier, or
+    ** 3. the format string specifies nothing to be returned (which isn't an
+    **    an error).  This could be because the format is an empty string
+    **    or it specifies %p which yields an empty string in some locales.
+    ** If there is a better way to make it portable, go ahead by
+    ** all means.
+    */
+    if (inRANGE(len, 1, buflen - 1) || (len == 0 && *fmt == '\0'))
+        return buf;
+    else {
+        /* Possibly buf overflowed - try again with a bigger buf */
+        const int fmtlen = strlen(fmt);
+        int bufsize = fmtlen + buflen;
+  
+        Renew(buf, bufsize, char);
+        while (buf) {
+  
+            GCC_DIAG_IGNORE_STMT(-Wformat-nonliteral); /* fmt checked by caller
+                                                        */
+            STRFTIME_LOCK;
+            buflen = strftime(buf, bufsize, fmt, &mytm);
+            STRFTIME_UNLOCK;
+            GCC_DIAG_RESTORE_STMT;
+    
+            if (inRANGE(buflen, 1, bufsize - 1))
+                break;
 
-    Renew(buf, bufsize, char);
-    while (buf) {
+            /* heuristic to prevent out-of-memory errors */
+            if (bufsize > 100*fmtlen) {
+    
+                /* "%p" can legally return nothing, assume that was the case if
+                 * we can't make the buffer large enough to get a non-zero
+                 * return.  For any other formats, assume it is an error
+                 * (probably it is an illegal conversion specifier.) */
+                if (strEQ(fmt, "%p")) {
+                    Renew(buf, 1, char);
+                    *buf = '\0';
+                }
+                else {
+                    Safefree(buf);
+                    buf = NULL;
+                }
 
-      GCC_DIAG_IGNORE_STMT(-Wformat-nonliteral); /* fmt checked by caller */
-      STRFTIME_LOCK;
-      buflen = strftime(buf, bufsize, fmt, &mytm);
-      STRFTIME_UNLOCK;
-      GCC_DIAG_RESTORE_STMT;
-
-      if (inRANGE(buflen, 1, bufsize - 1))
-        break;
-      /* heuristic to prevent out-of-memory errors */
-      if (bufsize > 100*fmtlen) {
-
-        /* "%p" can legally return nothing, assume that was the case if we
-         * can't make the buffer large enough to get a non-zero return.  For
-         * any other formats, assume it is an error (probably it is an illegal
-         * conversion specifier.) */
-        if (strEQ(fmt, "%p")) {
-            Renew(buf, 1, char);
-            *buf = '\0';
+                break;
+            }
+            bufsize *= 2;
+            Renew(buf, bufsize, char);
         }
-        else {
-            Safefree(buf);
-            buf = NULL;
-        }
-        break;
-      }
-      bufsize *= 2;
-      Renew(buf, bufsize, char);
+        return buf;
     }
-    return buf;
-  }
+
 #else
-  Perl_croak(aTHX_ "panic: no strftime");
-  return NULL;
+    Perl_croak(aTHX_ "panic: no strftime");
+    return NULL;
 #endif
 }
 
