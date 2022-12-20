@@ -44,7 +44,7 @@ you should reset the version numbers to the next blead series.
   2022-09-20  5.37.4  ✓       Karen Etheridge
   2022-10-20  5.37.5  ✓       Todd Rinaldo
   2022-11-20  5.37.6  ✓       Max Maischein
-  2022-12-20  5.37.7          Richard Leach
+  2022-12-20  5.37.7  ✓       Richard Leach
   2023-01-20  5.37.8          Renée Bäcker
   2023-02-20  5.37.9          ?                 Contentious changes freeze
   2023-03-20  5.37.10         ?                 User-visible changes to
