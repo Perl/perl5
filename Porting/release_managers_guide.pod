@@ -257,9 +257,12 @@ F<Porting/Maintainers.pl>, as well as checksums updated via:
 
 In most cases, once a new version of a distribution shipped with core has been
 uploaded to CPAN, the core version thereof can be synchronized automatically
-with the program F<Porting/sync-with-cpan>.  (But see the comments at the
-beginning of that program.  In particular, it has not yet been exercised on
-Windows as much as it has on Unix-like platforms.)
+with the program F<Porting/sync-with-cpan>. For example:
+
+ perl Porting/sync-with-cpan Archive::Tar
+
+(But see the comments at the beginning of that program.  In particular, it has
+not yet been exercised on Windows as much as it has on Unix-like platforms.)
 
 If, however, F<Porting/sync-with-cpan> does not provide good results, follow
 the steps below.
@@ -520,10 +523,10 @@ version number.
 
 Review and update INSTALL to account for the change in version number.
 INSTALL for a BLEAD-POINT release should already contain the expected version.
-The lines in F<INSTALL> about "is not binary compatible with" may require a
-correct choice of earlier version to declare incompatibility with. These are
-in the "Changes and Incompatibilities" and "Coexistence with earlier versions
-of perl 5" sections.
+For MAINT releases, the lines in F<INSTALL> about "is not binary compatible
+with" may require a correct choice of earlier version to declare
+incompatibility with. These are in the "Changes and Incompatibilities" and
+"Coexistence with earlier versions of perl 5" sections.
 
 Be particularly careful with the section "Upgrading from 5.X.Y or earlier".
 The "X.Y" needs to be changed to the most recent version that we are
@@ -747,7 +750,11 @@ will be automatically filled in below in L</finalize perldelta>.
 =head4 Update C<%Module::CoreList::released>
 
 For any release except an RC: Update this version's entry in the C<%released>
-hash with today's date.
+hash within dist/Module-Corelist/lib/Module/Corelist.pm with today's date.
+
+(BLEAD-POINT releases that happen on the expected date may not have to make
+any changes to this file at this point. If the release happens not on the
+scheduled day, the date may require manually changing.)
 
 =head4 Commit Module::CoreList changes
 
@@ -772,8 +779,8 @@ section, which can be generated with something like:
 
  $ perl Porting/acknowledgements.pl v5.LAST..HEAD
 
-Fill in the "New/Updated Modules" sections now that Module::CoreList is
-updated:
+For non-MAINT releases, fill in the "New/Updated Modules" sections now
+that Module::CoreList is updated:
 
  $ ./perl -Ilib Porting/corelist-perldelta.pl \
      --mode=update pod/perldelta.pod
