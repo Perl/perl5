@@ -18,6 +18,8 @@ jobs:
       port: 7062
       channel_p5p: "#p5p"
       channel_noise: "#p5p-commits"
+      color_orange: "\x037"
+      color_clear: "\x0F"
 
     steps:
       - name: Dump GitHub context
@@ -154,10 +156,10 @@ jobs:
           port: ${{ env.port }}
           channel: ${{ env.channel_p5p }}
           nickname: Pull-Request
-          message:
-            "\x037${{ github.actor }}\x0F opened PR #${{ github.event.pull_request.number }}\n\
-            ${{ env.TITLE }}\n\
-            ${{ github.event.pull_request.html_url }}"
+          message: |
+            ${{ env.color_orange }}${{ github.actor }}${{ env.color_clear }} opened PR #${{ github.event.pull_request.number }}
+            ${{ env.TITLE }}
+            ${{ github.event.pull_request.html_url }}
 
       - name: irc merged pull request
         uses: rectalogic/notify-irc@v2
@@ -167,10 +169,10 @@ jobs:
           port: ${{ env.port }}
           channel: ${{ env.channel_p5p }}
           nickname: Pull-Request
-          message:
-            "\x037${{ github.actor }}\x0F merged PR #${{ github.event.pull_request.number }}\n\
-            ${{ env.TITLE }}\n\
-            ${{ github.event.pull_request.html_url }}"
+          message: |
+            ${{ env.color_orange }}${{ github.actor }}${{ env.color_clear }} merged PR #${{ github.event.pull_request.number }}
+            ${{ env.TITLE }}
+            ${{ github.event.pull_request.html_url }}
 
       - name: irc closed pull request
         uses: rectalogic/notify-irc@v2
@@ -180,10 +182,10 @@ jobs:
           port: ${{ env.port }}
           channel: ${{ env.channel_p5p }}
           nickname: Pull-Request
-          message:
-            "\x037${{ github.actor }}\x0F closed PR #${{ github.event.pull_request.number }}\n\
-            ${{ env.TITLE }}\n\
-            ${{ github.event.pull_request.html_url }}"
+          message: |
+            ${{ env.color_orange }}${{ github.actor }}${{ env.color_clear }} closed PR #${{ github.event.pull_request.number }}
+            ${{ env.TITLE }}
+            ${{ github.event.pull_request.html_url }}
 
       - name: irc synchronize pull request
         uses: rectalogic/notify-irc@v2
@@ -193,7 +195,7 @@ jobs:
           port: ${{ env.port }}
           channel: ${{ env.channel_noise }}
           nickname: Pull-Request
-          message:
-            "\x037${{ github.actor }}\x0F updated PR #${{ github.event.pull_request.number }}\n\
-            ${{ env.TITLE }}\n\
-            ${{ github.event.pull_request.html_url }}"
+          message: |
+            ${{ env.color_orange }}${{ github.actor }}${{ env.color_clear }} updated PR #${{ github.event.pull_request.number }}
+            ${{ env.TITLE }}
+            ${{ github.event.pull_request.html_url }}
