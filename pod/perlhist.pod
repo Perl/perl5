@@ -742,6 +742,7 @@ the strings?).
  Ether     5.37.4       2022-Sep-20
  Todd R    5.37.5       2022-Oct-20
  Max M     5.37.6       2022-Nov-20
+ Richard L 5.37.7       2022-Dec-20
 
 =head2 SELECTED RELEASE SIZES
 
