@@ -84,7 +84,7 @@ jobs:
           echo "SUMUP: $SUMUP"
 
       - name: irc push
-        uses: rectalogic/notify-irc@v1
+        uses: rectalogic/notify-irc@v2
         if: github.event_name == 'push' && github.ref != 'refs/heads/blead'
         with:
           server: ${{ env.server }}
@@ -97,7 +97,7 @@ jobs:
             ${{ github.event.compare }}"
 
       - name: irc push to blead
-        uses: rectalogic/notify-irc@v1
+        uses: rectalogic/notify-irc@v2
         if: github.event_name == 'push' && github.ref == 'refs/heads/blead'
         with:
           server: ${{ env.server }}
@@ -146,7 +146,7 @@ jobs:
           echo "TITLE: $TITLE"
 
       - name: irc opened pull request
-        uses: rectalogic/notify-irc@v1
+        uses: rectalogic/notify-irc@v2
         if: github.event_name == 'pull_request' && github.event.action == 'opened'
         with:
           server: ${{ env.server }}
@@ -160,7 +160,7 @@ jobs:
             ${{ github.event.pull_request.html_url }}"
 
       - name: irc synchronize pull request
-        uses: rectalogic/notify-irc@v1
+        uses: rectalogic/notify-irc@v2
         if: github.event_name == 'pull_request' && github.event.action == 'synchronize'
         with:
           server: ${{ env.server }}
