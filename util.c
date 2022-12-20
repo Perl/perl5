@@ -4095,6 +4095,14 @@ and LC_TIME are not the same locale.
  */
     PERL_ARGS_ASSERT_MY_STRFTIME;
 
+    /* An empty format yields an empty result */
+    const int fmtlen = strlen(fmt);
+    if (fmtlen == 0) {
+        char *ret;
+        Newxz (ret, 1, char);
+        return ret;
+    }
+
     /* Set mytm to now */
     struct tm mytm;
     init_tm(&mytm);	/* XXX workaround - see init_tm() above */
@@ -4146,17 +4154,15 @@ and LC_TIME are not the same locale.
     ** indicate one of the following:
     ** 1. buffer overflowed,
     ** 2. illegal conversion specifier, or
-    ** 3. the format string specifies nothing to be returned (which isn't an
-    **    an error).  This could be because the format is an empty string
-    **    or it specifies %p which yields an empty string in some locales.
+    ** 3. the format string is %p which yields an empty string in some locales.
+    **    (which isn't an error).
     ** If there is a better way to make it portable, go ahead by
     ** all means.
     */
-    if (inRANGE(len, 1, buflen - 1) || (len == 0 && *fmt == '\0'))
+    if (inRANGE(len, 1, buflen - 1))
         return buf;
     else {
         /* Possibly buf overflowed - try again with a bigger buf */
-        const int fmtlen = strlen(fmt);
         int bufsize = fmtlen + buflen;
   
         Renew(buf, bufsize, char);
