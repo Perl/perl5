@@ -17,6 +17,13 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.37.7 - Terry Pratchett, "Hogfather"
+
+L<Announced on 2022-12-20 by Richard Leach|https://www.nntp.perl.org/group/perl.perl5.porters/2022/12/msg265263.html>
+
+TO THE HOGFATHER, ALL PORK PIES ARE AS ONE PORK PIE.
+EXCEPT THE ONE LIKE A TURNIP.
+
 =head2 v5.37.6 - N. K. Jemisin - The City We Became
 
 L<Announced on 2022-11-20 by Max Maischein|https://www.nntp.perl.org/group/perl.perl5.porters/2022/11/msg265080.html>
