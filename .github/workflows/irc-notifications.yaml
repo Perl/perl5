@@ -159,16 +159,29 @@ jobs:
             ${{ env.TITLE }}\n\
             ${{ github.event.pull_request.html_url }}"
 
-      - name: irc closed pull request
+      - name: irc merged pull request
         uses: rectalogic/notify-irc@v2
-        if: github.event_name == 'pull_request' && github.event.action == 'closed'
+        if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true
         with:
           server: ${{ env.server }}
           port: ${{ env.port }}
           channel: ${{ env.channel_p5p }}
           nickname: Pull-Request
           message:
-            "\x037${{ github.actor }}\x0F close PR #${{ github.event.pull_request.number }}\n\
+            "\x037${{ github.actor }}\x0F merged PR #${{ github.event.pull_request.number }}\n\
+            ${{ env.TITLE }}\n\
+            ${{ github.event.pull_request.html_url }}"
+
+      - name: irc closed pull request
+        uses: rectalogic/notify-irc@v2
+        if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == false
+        with:
+          server: ${{ env.server }}
+          port: ${{ env.port }}
+          channel: ${{ env.channel_p5p }}
+          nickname: Pull-Request
+          message:
+            "\x037${{ github.actor }}\x0F closed PR #${{ github.event.pull_request.number }}\n\
             ${{ env.TITLE }}\n\
             ${{ github.event.pull_request.html_url }}"
 
