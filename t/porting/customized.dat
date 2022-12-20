@@ -6,10 +6,6 @@ ExtUtils::Constant cpan/ExtUtils-Constant/lib/ExtUtils/Constant/Base.pm 7560e101
 ExtUtils::Constant cpan/ExtUtils-Constant/t/Constant.t 165e9c7132b003fd192d32a737b0f51f9ba4999e
 Filter::Util::Call pod/perlfilter.pod 545265af2f45741a0e59eecdd0cfc0c9e490c1e8
 Locale::Maketext::Simple cpan/Locale-Maketext-Simple/lib/Locale/Maketext/Simple.pm 57ed38905791a17c150210cd6f42ead22a7707b6
-Math::Complex dist/Math-Complex/lib/Math/Complex.pm 66f28a17647e2de166909ca66e4ced26f8a0a62e
-Math::Complex dist/Math-Complex/t/Complex.t 17039e03ee798539e770ea9a0d19a99364278306
-Math::Complex dist/Math-Complex/t/Trig.t 508f8e27373c08228be13ca5d42b28812ab0e020
-Math::Complex dist/Math-Complex/t/underbar.t 97e7b9615658eefc67a710d4b258349cc5bace63
 Net::Ping dist/Net-Ping/t/000_load.t deff5dc2ca54dae28cb19d3631427db127279ac2
 Net::Ping dist/Net-Ping/t/001_new.t 7b24e05672e22edfe3e6b5cc0277f815efe557e5
 Net::Ping dist/Net-Ping/t/010_pingecho.t 74437379673c8ba82f81574fd7e652f41a65c993
@@ -34,8 +30,4 @@ libnet cpan/libnet/lib/Net/NNTP.pm 4349ac4c908e6dbcfb16ec77eaf1a9a00d7c6e57
 libnet cpan/libnet/lib/Net/POP3.pm 55a74121d7e6a122f63a12cec945777f6b8aa80b
 libnet cpan/libnet/lib/Net/SMTP.pm 33efbd55e75486fe8201f9c63cf3f0704310a7b6
 libnet cpan/libnet/lib/Net/Time.pm 3c86cd4d4db9ae207070d2e54f4d523b9ad58230
-podlators cpan/podlators/t/general/basic.t 603125aa84703f7bc2c4c838c42f95b26a72eb0a
-podlators cpan/podlators/t/man/empty.t c1c7eac7a3479a2f11fdbdd0914bc2af70489b72
-podlators cpan/podlators/t/man/no-encode.t 80eb9de201bdc0b7170d9cbde856dc32e37378a0
-podlators cpan/podlators/t/text/invalid.t 3d48179b7a0fd3cddb74c18e4f1cd6f66a0a7609
 version cpan/version/lib/version.pm a963b513cf812bd7f4d28b3422efd9904e70a34c
