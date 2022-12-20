@@ -4134,78 +4134,68 @@ and LC_TIME are not the same locale.
     mytm.tm_zone = mytm2.tm_zone;
 #  endif
 #endif
-    int buflen = 64;
-    char *buf;
-    Newx(buf, buflen, char);
 
-    GCC_DIAG_IGNORE_STMT(-Wformat-nonliteral); /* fmt checked by caller */
+    /* Guess an initial size for the returned string based on an expansion
+     * factor of the input format, but with a minimum that should handle most
+     * common cases.  If this guess is too small, we will try again with a
+     * larger one */
+    int bufsize = MAX(fmtlen * 2, 64);
 
-    STRFTIME_LOCK;
-    int len = strftime(buf, buflen, fmt, &mytm);
-    STRFTIME_UNLOCK;
-
-    GCC_DIAG_RESTORE_STMT;
-
-    /*
-    ** The following is needed to handle the situation where
-    ** tmpbuf overflows.  Basically we want to allocate a buffer
-    ** and try repeatedly, until it's large enough.  The reason why it is so
-    ** complicated is that getting a return value of 0 from strftime can
-    ** indicate one of the following:
-    ** 1. buffer overflowed,
-    ** 2. illegal conversion specifier, or
-    ** 3. the format string is %p which yields an empty string in some locales.
-    **    (which isn't an error).
-    ** If there is a better way to make it portable, go ahead by
-    ** all means.
-    */
-    if (inRANGE(len, 1, buflen - 1))
-        return buf;
-    else {
-        /* Possibly buf overflowed - try again with a bigger buf */
-        int bufsize = fmtlen + buflen;
-  
+    char *buf = NULL;   /* Makes Renew() act as Newx() on the first iteration */
+    do {
         Renew(buf, bufsize, char);
-        while (buf) {
-  
-            GCC_DIAG_IGNORE_STMT(-Wformat-nonliteral); /* fmt checked by caller
-                                                        */
-            STRFTIME_LOCK;
-            buflen = strftime(buf, bufsize, fmt, &mytm);
-            STRFTIME_UNLOCK;
-            GCC_DIAG_RESTORE_STMT;
-    
-            if (inRANGE(buflen, 1, bufsize - 1))
-                break;
 
-            /* heuristic to prevent out-of-memory errors */
-            if (bufsize > 100*fmtlen) {
-    
-                /* "%p" can legally return nothing, assume that was the case if
-                 * we can't make the buffer large enough to get a non-zero
-                 * return.  For any other formats, assume it is an error
-                 * (probably it is an illegal conversion specifier.) */
-                if (strEQ(fmt, "%p")) {
-                    Renew(buf, 1, char);
-                    *buf = '\0';
-                }
-                else {
-                    Safefree(buf);
-                    buf = NULL;
-                }
+        GCC_DIAG_IGNORE_STMT(-Wformat-nonliteral); /* fmt checked by caller */
 
-                break;
-            }
-            bufsize *= 2;
-            Renew(buf, bufsize, char);
+        STRFTIME_LOCK;
+        int len = strftime(buf, bufsize, fmt, &mytm);
+        STRFTIME_UNLOCK;
+
+        GCC_DIAG_RESTORE_STMT;
+
+        /* A non-zero return indicates success.  But to make sure we're not
+         * dealing with some rogue strftime that returns how much space it
+         * needs instead of 0 when there isn't enough, check that the return
+         * indicates we have at least one byte of spare space (which will be
+         * used for the terminating NUL). */
+        if (inRANGE(len, 1, bufsize - 1)) {
+            return buf;
         }
+
+        /* There are several possible reasons for a 0 return code for a
+         * non-empty format, and they are not trivial to tease apart.  What we
+         * do is to assume that the reason is not enough space in the buffer,
+         * so increase it and try again. */
+        bufsize *= 2;
+
+        /* But don't just keep increasing the size indefinitely.  Stop when it
+         * becomes obvious that the reason for failure is something besides not
+         * enough space.  This heuristic has long been in effect successfully.
+         * */
+    } while (bufsize < 100 * fmtlen);
+
+    /* Here, strftime() returned 0, and it wasn't for lack of space.  There
+     * are two possible reasons:
+     *
+     * First is that the result is legitimately 0 length.  This can happen
+     * when the format is precisely "%p".  That is the only documented format
+     * that can have an empty result. */
+    if (strEQ(fmt, "%p")) {
+        Renew(buf, 1, char);
+        *buf = '\0';
         return buf;
     }
+
+    /* The other reason is that the format string is malformed.  Probably it is
+     * an illegal conversion specifier.) */
+    Safefree(buf);
+    return NULL;
 
 #else
     Perl_croak(aTHX_ "panic: no strftime");
     return NULL;
 #endif
+
 }
 
 
