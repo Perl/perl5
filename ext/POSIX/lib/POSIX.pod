@@ -1854,6 +1854,9 @@ The given arguments are made consistent as though by calling
 C<mktime()> before calling your system's C<strftime()> function,
 except that the C<isdst> value is not affected.
 
+Note that mojibake can result on some platforms if LC_TIME and LC_CTYPE
+are not the same locale.
+
 The string for Tuesday, December 12, 1995.
 
 	$str = POSIX::strftime( "%A, %B %d, %Y",

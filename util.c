@@ -4088,7 +4088,8 @@ Note that yday and wday effectively are ignored by these functions, as
 mini_mktime() overwrites them
 
 Also note that they are always executed in the underlying locale of the program,
-giving localized results.
+giving localized results.  Mojibake can result on some platforms if LC_CTYPE
+and LC_TIME are not the same locale.
 
 =cut
  */
