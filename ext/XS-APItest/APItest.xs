@@ -1717,6 +1717,18 @@ test_uvchr_to_utf8_flags_msgs(uv, flags)
 MODULE = XS::APItest:Overload   PACKAGE = XS::APItest::Overload
 
 void
+does_amagic_apply(sv, method, flags)
+    SV *sv
+    int method
+    int flags
+    PPCODE:
+        if(Perl_amagic_applies(aTHX_ sv, method, flags))
+            XSRETURN_YES;
+        else
+            XSRETURN_NO;
+
+
+void
 amagic_deref_call(sv, what)
         SV *sv
         int what
