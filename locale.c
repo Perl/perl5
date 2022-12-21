@@ -4867,6 +4867,11 @@ and LC_TIME are not the same locale.
     mytm.tm_zone = mytm2.tm_zone;
 #  endif
 #endif
+#if defined(USE_LOCALE_CTYPE) && defined(USE_LOCALE_TIME)
+
+    const char * orig_CTYPE_LOCALE = toggle_locale_c(LC_CTYPE,
+                                                     querylocale_c(LC_TIME));
+#endif
 
     /* Guess an initial size for the returned string based on an expansion
      * factor of the input format, but with a minimum that should handle most
@@ -4892,7 +4897,7 @@ and LC_TIME are not the same locale.
          * indicates we have at least one byte of spare space (which will be
          * used for the terminating NUL). */
         if (inRANGE(len, 1, bufsize - 1)) {
-            return buf;
+            goto strftime_success;
         }
 
         /* There are several possible reasons for a 0 return code for a
@@ -4916,13 +4921,22 @@ and LC_TIME are not the same locale.
     if (strEQ(fmt, "%p")) {
         Renew(buf, 1, char);
         *buf = '\0';
-        return buf;
+        goto strftime_success;
     }
 
     /* The other reason is that the format string is malformed.  Probably it is
      * an illegal conversion specifier.) */
     Safefree(buf);
     return NULL;
+
+  strftime_success:
+
+#if defined(USE_LOCALE_CTYPE) && defined(USE_LOCALE_TIME)
+
+    restore_toggled_locale_c(LC_CTYPE, orig_CTYPE_LOCALE);
+
+#endif
+    return buf;
 
 #else
     Perl_croak(aTHX_ "panic: no strftime");
