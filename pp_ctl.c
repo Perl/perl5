@@ -2227,7 +2227,25 @@ PP(pp_dbstate)
             ENTER;
             SAVEI32(PL_debug);
             PL_debug = 0;
+            /* I suspect that saving the stack position is no longer
+             * required. It was added in 5.001 by:
+             * 
+             *     NETaa13155: &DB::DB left trash on the stack.
+             *     From: Thomas Koenig
+             *     Files patched: lib/perl5db.pl pp_ctl.c
+             *      The call by pp_dbstate() to &DB::DB left trash on the
+             *      stack.  It now calls DB in list context, and DB returns
+             *      ().
+             *
+             * but the details of what bug it fixed are long lost to
+             * history.  SAVESTACK_POS() doesn't work well with stacks
+             * which may be split into partly reference-counted and partly
+             * not halves, so skip it and hope it doesn't cause any
+             * problems.
+             */
+#ifndef PERL_RC_STACK
             SAVESTACK_POS();
+#endif
             SAVETMPS;
             PUSHMARK(SP);
             (void)(*CvXSUB(cv))(aTHX_ cv);
@@ -2245,7 +2263,10 @@ PP(pp_dbstate)
 
             SAVEI32(PL_debug);
             PL_debug = 0;
+            /* see comment above about SAVESTACK_POS */
+#ifndef PERL_RC_STACK
             SAVESTACK_POS();
+#endif
             CvDEPTH(cv)++;
             if (CvDEPTH(cv) >= 2)
                 pad_push(CvPADLIST(cv), CvDEPTH(cv));

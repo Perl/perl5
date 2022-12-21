@@ -1525,6 +1525,14 @@ Perl_leave_scope(pTHX_ I32 base)
             break;
 
         case SAVEt_STACK_POS:		/* Position on Perl stack */
+#ifdef PERL_RC_STACK
+            /* DAPM Jan 2023. I don't think this save type is used any
+             * more, but if some XS code uses it, fail it for now, as
+             * it's not clear to me what perl should be doing to stack ref
+             * counts when arbitrarily resetting the stack pointer.
+             */
+            assert(0);
+#endif
             a0 = ap[0];
             PL_stack_sp = PL_stack_base + a0.any_i32;
             break;
