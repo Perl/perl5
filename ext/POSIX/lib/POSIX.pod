@@ -1840,7 +1840,7 @@ about these and the other arguments.
 
 If you want your code to be portable, your format (C<fmt>) argument
 should use only the conversion specifiers defined by the ANSI C
-standard (C89, to play safe).  These are C<aAbBcdHIjmMpSUwWxXyYZ%>.
+standard (C99, to play safe).  These are C<aAbBcdHIjmMpSUwWxXyYZ%>.
 But even then, the B<results> of some of the conversion specifiers are
 non-portable.  For example, the specifiers C<aAbBcpZ> change according
 to the locale settings of the user, and both how to set locales (the
