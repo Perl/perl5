@@ -635,7 +635,7 @@ XEop	|bool	|try_amagic_bin	|int method|int flags
 XEop	|bool	|try_amagic_un	|int method|int flags
 Apd	|SV*	|amagic_call	|NN SV* left|NN SV* right|int method|int dir
 Apd	|SV *	|amagic_deref_call|NN SV *ref|int method
-Apd	|CV *	|amagic_find	|NN SV *sv|int method|int flags
+Xpd	|bool	|amagic_applies	|NN SV *sv|int method|int flags
 p	|bool	|amagic_is_enabled|int method
 Apd	|int	|Gv_AMupdate	|NN HV* stash|bool destructing
 CpdR	|CV*	|gv_handler	|NULLOK HV* stash|I32 id

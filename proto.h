@@ -246,15 +246,15 @@ PERL_CALLCONV PADOFFSET	Perl_allocmy(pTHX_ const char *const name, const STRLEN 
 #define PERL_ARGS_ASSERT_ALLOCMY	\
 	assert(name)
 
+PERL_CALLCONV bool	Perl_amagic_applies(pTHX_ SV *sv, int method, int flags);
+#define PERL_ARGS_ASSERT_AMAGIC_APPLIES	\
+	assert(sv)
 PERL_CALLCONV SV*	Perl_amagic_call(pTHX_ SV* left, SV* right, int method, int dir);
 #define PERL_ARGS_ASSERT_AMAGIC_CALL	\
 	assert(left); assert(right)
 PERL_CALLCONV SV *	Perl_amagic_deref_call(pTHX_ SV *ref, int method);
 #define PERL_ARGS_ASSERT_AMAGIC_DEREF_CALL	\
 	assert(ref)
-PERL_CALLCONV CV *	Perl_amagic_find(pTHX_ SV *sv, int method, int flags);
-#define PERL_ARGS_ASSERT_AMAGIC_FIND	\
-	assert(sv)
 PERL_CALLCONV bool	Perl_amagic_is_enabled(pTHX_ int method)
 			__attribute__visibility__("hidden");
 #define PERL_ARGS_ASSERT_AMAGIC_IS_ENABLED
