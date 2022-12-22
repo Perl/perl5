@@ -158,18 +158,21 @@ sub _compute_tests_and_ordering($) {
                 delete $must_be_executed_serially{$path};
             }
             elsif ($name =~ / \A \d /x) {
-                # We assume that the reason a test file's name begins with a 0
-                # is to order its execution among the tests in its directory.
+                # We assume that the reason a test file's name begins with a digit
+                # is to order its execution among the tests in its directory. This
+                # has a few false positives, but we used to check for 0 and it also
+                # had false-negatives. Performing tests early in series is better
+                # than not recognizing they need to be in series.
                 # Hence, a directory containing such files should be tested in
                 # serial order, with some exceptions hard-coded in.
                 $numbered_tests{$path}++;
-                $serials{$path} = 1 if $name =~ / \A 0 /x;
+                $serials{$path} = 1;
             }
         }
     }
 
     # Some test directories that have an execution order (by virtue of at
-    # least one file having a name with a leading 0) also have files that
+    # least one file having a name with a leading digit) also have files that
     # aren't numbered.  We assume that those can be executed in parallel,
     # after all the numbered ones are done.
     my %partial_serials;
