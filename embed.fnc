@@ -3780,11 +3780,11 @@ FXpoT	|I32	|xs_handshake	|const U32 key|NN void * v_my_perl\
 				|NN const char * file| ...
 Xp	|void	|xs_boot_epilog	|const I32 ax
 #ifndef HAS_STRLCAT
-AsTd	|Size_t	|my_strlcat	|NULLOK char *dst|NULLOK const char *src|Size_t size
+ApTd	|Size_t	|my_strlcat	|NULLOK char *dst|NULLOK const char *src|Size_t size
 #endif
 
 #ifndef HAS_STRLCPY
-AsTd	|Size_t |my_strlcpy     |NULLOK char *dst|NULLOK const char *src|Size_t size
+ApTd	|Size_t |my_strlcpy     |NULLOK char *dst|NULLOK const char *src|Size_t size
 #endif
 
 #ifndef HAS_STRNLEN
