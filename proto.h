@@ -4860,11 +4860,11 @@ PERL_CALLCONV int	Perl_signbit(NV f)
 
 #endif
 #if !defined(HAS_STRLCAT)
-STATIC Size_t	Perl_my_strlcat(char *dst, const char *src, Size_t size);
+PERL_CALLCONV Size_t	Perl_my_strlcat(char *dst, const char *src, Size_t size);
 #define PERL_ARGS_ASSERT_MY_STRLCAT
 #endif
 #if !defined(HAS_STRLCPY)
-STATIC Size_t	Perl_my_strlcpy(char *dst, const char *src, Size_t size);
+PERL_CALLCONV Size_t	Perl_my_strlcpy(char *dst, const char *src, Size_t size);
 #define PERL_ARGS_ASSERT_MY_STRLCPY
 #endif
 #if !defined(HAS_STRNLEN)
