@@ -1991,8 +1991,7 @@ Perl_set_numeric_standard(pTHX)
 
 #  ifdef USE_LOCALE_NUMERIC
 
-    /* Unconditionally toggle the LC_NUMERIC locale to the current underlying
-     * default.
+    /* Unconditionally toggle the LC_NUMERIC locale to the C locale
      *
      * Most code should use the macro SET_NUMERIC_STANDARD() in perl.h
      * instead of calling this directly.  The macro avoids calling this routine
