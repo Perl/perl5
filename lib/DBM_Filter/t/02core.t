@@ -46,8 +46,8 @@ BEGIN {
 };
 BEGIN { use_ok('Fcntl') };
 
-unlink <Op_dbmx*>;
-END { unlink <Op_dbmx*>; }
+unlink <coreOp_dbmx*>;
+END { unlink <coreOp_dbmx*>; }
 
 writeFile('times_ten', <<'EOM');
     package DBM_Filter::times_ten;
@@ -161,7 +161,7 @@ sub checkRaw
     my %h;
 
     # read the dbm file without the filter
-    ok tie(%h, $db_file,'Op_dbmx', O_RDWR|O_CREAT, 0640), "tied to $db_file";
+    ok tie(%h, $db_file,'coreOp_dbmx', O_RDWR|O_CREAT, 0640), "tied to $db_file";
 
     my %bad = ();
     while (my ($k, $v) = each %h) {
@@ -191,14 +191,14 @@ sub checkRaw
         eval { untie %h };
         is $@, '', "untie without inner references" ;
     }
-    unlink <Op_dbmx*>;
+    unlink <coreOp_dbmx*>;
 }
 
 {
     #diag "Test Set: Key and Value Filter, no stacking, no closure";
 
     my %h = () ;
-    my $db = tie(%h, $db_file,'Op_dbmx', O_RDWR|O_CREAT, 0640) ;
+    my $db = tie(%h, $db_file,'coreOp_dbmx', O_RDWR|O_CREAT, 0640) ;
     ok $db, "tied to $db_file";
     
     doPreData(\%h);
@@ -215,7 +215,7 @@ sub checkRaw
         is $@, '', "untie without inner references" ;
     }
 
-    checkRaw 'Op_dbmx', 
+    checkRaw 'coreOp_dbmx',
 	    'abc'	=> 'def',
 	    '123'	=> '456',
 	    'A'	=> 'A',
@@ -228,7 +228,7 @@ sub checkRaw
     #diag "Test Set: Key Only Filter, no stacking, no closure";
 
     my %h = () ;
-    my $db = tie(%h, $db_file,'Op_dbmx', O_RDWR|O_CREAT, 0640) ;
+    my $db = tie(%h, $db_file,'coreOp_dbmx', O_RDWR|O_CREAT, 0640) ;
     ok $db, "tied to $db_file";
     
     doPreData(\%h);
@@ -245,7 +245,7 @@ sub checkRaw
         is $@, '', "untie without inner references" ;
     }
 
-    checkRaw 'Op_dbmx', 
+    checkRaw 'coreOp_dbmx',
 	    'abc'	=> 'def',
 	    '123'	=> '456',
 	    'A'	=> '',
@@ -258,7 +258,7 @@ sub checkRaw
     #diag "Test Set: Value Only Filter, no stacking, no closure";
 
     my %h = () ;
-    my $db = tie(%h, $db_file,'Op_dbmx', O_RDWR|O_CREAT, 0640) ;
+    my $db = tie(%h, $db_file,'coreOp_dbmx', O_RDWR|O_CREAT, 0640) ;
     ok $db, "tied to $db_file";
     
     doPreData(\%h);
@@ -275,7 +275,7 @@ sub checkRaw
         is $@, '', "untie without inner references" ;
     }
 
-    checkRaw 'Op_dbmx', 
+    checkRaw 'coreOp_dbmx',
 	    'abc'	=> 'def',
 	    '123'	=> '456',
 	    ''	=> 'A',
@@ -288,7 +288,7 @@ sub checkRaw
     #diag "Test Set: Key and Value Filter, with stacking, no closure";
 
     my %h = () ;
-    my $db = tie(%h, $db_file,'Op_dbmx', O_RDWR|O_CREAT, 0640) ;
+    my $db = tie(%h, $db_file,'coreOp_dbmx', O_RDWR|O_CREAT, 0640) ;
     ok $db, "tied to $db_file";
     
     doPreData(\%h);
@@ -308,7 +308,7 @@ sub checkRaw
         is $@, '', "untie without inner references" ;
     }
 
-    checkRaw 'Op_dbmx', 
+    checkRaw 'coreOp_dbmx',
 	    'abc'	=> 'def',
 	    '123'	=> '456',
 	    'AB'	=> 'AB',
@@ -321,7 +321,7 @@ sub checkRaw
     #diag "Test Set: Key Filter != Value Filter, with stacking, no closure";
 
     my %h = () ;
-    my $db = tie(%h, $db_file,'Op_dbmx', O_RDWR|O_CREAT, 0640) ;
+    my $db = tie(%h, $db_file,'coreOp_dbmx', O_RDWR|O_CREAT, 0640) ;
     ok $db, "tied to $db_file";
     
     doPreData(\%h);
@@ -347,7 +347,7 @@ sub checkRaw
         is $@, '', "untie without inner references" ;
     }
 
-    checkRaw 'Op_dbmx', 
+    checkRaw 'coreOp_dbmx',
 	    'abc'	=> 'def',
 	    '123'	=> '456',
 	    'BD'	=> 'AC',
@@ -360,7 +360,7 @@ sub checkRaw
     #diag "Test Set: Key only Filter, with stacking, no closure";
 
     my %h = () ;
-    my $db = tie(%h, $db_file,'Op_dbmx', O_RDWR|O_CREAT, 0640) ;
+    my $db = tie(%h, $db_file,'coreOp_dbmx', O_RDWR|O_CREAT, 0640) ;
     ok $db, "tied to $db_file";
     
     doPreData(\%h);
@@ -380,7 +380,7 @@ sub checkRaw
         is $@, '', "untie without inner references" ;
     }
 
-    checkRaw 'Op_dbmx', 
+    checkRaw 'coreOp_dbmx',
 	    'abc'	=> 'def',
 	    '123'	=> '456',
 	    'BD'	=> '',
@@ -393,7 +393,7 @@ sub checkRaw
     #diag "Test Set: Value only Filter, with stacking, no closure";
 
     my %h = () ;
-    my $db = tie(%h, $db_file,'Op_dbmx', O_RDWR|O_CREAT, 0640) ;
+    my $db = tie(%h, $db_file,'coreOp_dbmx', O_RDWR|O_CREAT, 0640) ;
     ok $db, "tied to $db_file";
     
     doPreData(\%h);
@@ -413,7 +413,7 @@ sub checkRaw
         is $@, '', "untie without inner references" ;
     }
 
-    checkRaw 'Op_dbmx', 
+    checkRaw 'coreOp_dbmx',
 	    'abc'	=> 'def',
 	    '123'	=> '456',
 	    ''	=> 'AC',
@@ -426,7 +426,7 @@ sub checkRaw
     #diag "Test Set: Combination Key/Value + Key Filter != Value Filter, with stacking, no closure";
 
     my %h = () ;
-    my $db = tie(%h, $db_file,'Op_dbmx', O_RDWR|O_CREAT, 0640) ;
+    my $db = tie(%h, $db_file,'coreOp_dbmx', O_RDWR|O_CREAT, 0640) ;
     ok $db, "tied to $db_file";
     
     doPreData(\%h);
@@ -449,7 +449,7 @@ sub checkRaw
         is $@, '', "untie without inner references" ;
     }
 
-    checkRaw 'Op_dbmx', 
+    checkRaw 'coreOp_dbmx',
 	    'abc'	=> 'def',
 	    '123'	=> '456',
 	    'AD'	=> 'AC',
@@ -462,7 +462,7 @@ sub checkRaw
     #diag "Test Set: Combination Key/Value + Key + Key/Value, no closure";
 
     my %h = () ;
-    my $db = tie(%h, $db_file,'Op_dbmx', O_RDWR|O_CREAT, 0640) ;
+    my $db = tie(%h, $db_file,'coreOp_dbmx', O_RDWR|O_CREAT, 0640) ;
     ok $db, "tied to $db_file";
     
     doPreData(\%h);
@@ -485,7 +485,7 @@ sub checkRaw
         is $@, '', "untie without inner references" ;
     }
 
-    checkRaw 'Op_dbmx', 
+    checkRaw 'coreOp_dbmx',
 	    'abc'	=> 'def',
 	    '123'	=> '456',
 	    'ABC'	=> 'AC',
@@ -498,7 +498,7 @@ sub checkRaw
     #diag "Test Set: Combination Key/Value + Key + Key/Value, with closure";
 
     my %h = () ;
-    my $db = tie(%h, $db_file,'Op_dbmx', O_RDWR|O_CREAT, 0640) ;
+    my $db = tie(%h, $db_file,'coreOp_dbmx', O_RDWR|O_CREAT, 0640) ;
     ok $db, "tied to $db_file";
     
     doPreData(\%h);
@@ -521,7 +521,7 @@ sub checkRaw
         is $@, '', "untie without inner references" ;
     }
 
-    checkRaw 'Op_dbmx', 
+    checkRaw 'coreOp_dbmx',
 	    'abc'	=> 'def',
 	    '123'	=> '456',
 	    'ABC'	=> 'AC',
@@ -534,7 +534,7 @@ sub checkRaw
     #diag "Test Set: Combination Key/Value + Key + Key/Value, immediate";
 
     my %h = () ;
-    my $db = tie(%h, $db_file,'Op_dbmx', O_RDWR|O_CREAT, 0640) ;
+    my $db = tie(%h, $db_file,'coreOp_dbmx', O_RDWR|O_CREAT, 0640) ;
     ok $db, "tied to $db_file";
     
     doPreData(\%h);
@@ -566,7 +566,7 @@ sub checkRaw
         is $@, '', "untie without inner references" ;
     }
 
-    checkRaw 'Op_dbmx', 
+    checkRaw 'coreOp_dbmx',
 	    'abc'	=> 'def',
 	    '123'	=> '456',
 	    'ABC'	=> 'AC',
@@ -579,7 +579,7 @@ sub checkRaw
     #diag "Test Set: Combination Key/Value + Key + Key/Value, immediate, closure";
 
     my %h = () ;
-    my $db = tie(%h, $db_file,'Op_dbmx', O_RDWR|O_CREAT, 0640) ;
+    my $db = tie(%h, $db_file,'coreOp_dbmx', O_RDWR|O_CREAT, 0640) ;
     ok $db, "tied to $db_file";
     
     doPreData(\%h);
@@ -605,7 +605,7 @@ sub checkRaw
         is $@, '', "untie without inner references" ;
     }
 
-    checkRaw 'Op_dbmx', 
+    checkRaw 'coreOp_dbmx',
 	    'abc'	=> 'def',
 	    '123'	=> '456',
 	    'ABC'	=> 'AC',
@@ -618,7 +618,7 @@ sub checkRaw
     #diag "Test Set: Filtered & Filter_Pop";
 
     my %h = () ;
-    my $db = tie(%h, $db_file,'Op_dbmx', O_RDWR|O_CREAT, 0640) ;
+    my $db = tie(%h, $db_file,'coreOp_dbmx', O_RDWR|O_CREAT, 0640) ;
     ok $db, "tied to $db_file";
     
     doPreData(\%h);
@@ -679,7 +679,7 @@ sub checkRaw
         is $@, '', "untie without inner references" ;
     }
 
-    checkRaw 'Op_dbmx', 
+    checkRaw 'coreOp_dbmx',
 	    'abc'	=> 'def',
 	    '123'	=> '456',
 	    'ABC'	=> 'AC',
@@ -702,7 +702,7 @@ sub checkRaw
     }
     
     my %h = () ;
-    my $db = tie(%h, $db_file,'Op_dbmx', O_RDWR|O_CREAT, 0640) ;
+    my $db = tie(%h, $db_file,'coreOp_dbmx', O_RDWR|O_CREAT, 0640) ;
     ok $db, "tied to $db_file";
     
     doPreData(\%h);
@@ -719,7 +719,7 @@ sub checkRaw
         is $@, '', "untie without inner references" ;
     }
 
-    checkRaw 'Op_dbmx', 
+    checkRaw 'coreOp_dbmx',
 	    'abc'	=> 'def',
 	    '123'	=> '456',
 	    'X'  	=> 'X',
