@@ -3764,12 +3764,12 @@ pR	|int	|PerlSock_accept_cloexec				\
 				|NULLOK Sock_size_t *addrlen
 #endif /* defined(HAS_SOCKET) */
 #if !defined(HAS_STRLCAT)
-ApTd	|Size_t |my_strlcat	|NULLOK char *dst			\
+AsTd	|Size_t |my_strlcat	|NULLOK char *dst			\
 				|NULLOK const char *src 		\
 				|Size_t size
 #endif /* !defined(HAS_STRLCAT) */
 #if !defined(HAS_STRLCPY)
-ApTd	|Size_t |my_strlcpy	|NULLOK char *dst			\
+AsTd	|Size_t |my_strlcpy	|NULLOK char *dst			\
 				|NULLOK const char *src 		\
 				|Size_t size
 #endif /* !defined(HAS_STRLCPY) */

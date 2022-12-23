@@ -5543,13 +5543,13 @@ Perl_PerlSock_socket_cloexec(pTHX_ int domain, int type, int protocol)
 
 #endif /* defined(HAS_SOCKET) */
 #if !defined(HAS_STRLCAT)
-PERL_CALLCONV Size_t
+STATIC Size_t
 Perl_my_strlcat(char *dst, const char *src, Size_t size);
 # define PERL_ARGS_ASSERT_MY_STRLCAT
 
 #endif /* !defined(HAS_STRLCAT) */
 #if !defined(HAS_STRLCPY)
-PERL_CALLCONV Size_t
+STATIC Size_t
 Perl_my_strlcpy(char *dst, const char *src, Size_t size);
 # define PERL_ARGS_ASSERT_MY_STRLCPY
 
