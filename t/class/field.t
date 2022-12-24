@@ -117,11 +117,11 @@ no warnings 'experimental::class';
 # fields of multiple unit classes are distinct
 {
     class Test6::A;
-    field $x; ADJUST { $x = "A" }
+    field $x = "A";
     method m { return "unit-$x" }
 
     class Test6::B;
-    field $x; ADJUST { $x = "B" }
+    field $x = "B";
     method m { return "unit-$x" }
 
     package main;
