@@ -1270,7 +1270,7 @@ S_emulate_setlocale_i(pTHX_
                                    line, basis_obj));
         }
 
-        /* Ready to create a new locale by modification of the exising one.
+        /* Ready to create a new locale by modification of the existing one.
          *
          * NOTE: This code may incorrectly show up as a leak under the address
          * sanitizer. We do not free this object under normal teardown, however
@@ -2503,7 +2503,7 @@ S_new_collate(pTHX_ const char *newcoll, bool force)
      * core Perl this and that 'newcoll' is the name of the new locale.
      *
      * The design of locale collation is that every locale change is given an
-     * index 'PL_collation_ix'.  The first time a string particpates in an
+     * index 'PL_collation_ix'.  The first time a string participates in an
      * operation that requires collation while locale collation is active, it
      * is given PERL_MAGIC_collxfrm magic (via sv_collxfrm_flags()).  That
      * magic includes the collation index, and the transformation of the string
@@ -4927,7 +4927,7 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
      * effectively initializing perl's db to what the locale already is.
      *
      * We play the same trick with NULL if a LC_ALL succeeds.  We call
-     * setlocale() on the individual categores with NULL to get their existing
+     * setlocale() on the individual categories with NULL to get their existing
      * values for our db, instead of trying to change them.
      * */
 
@@ -5553,7 +5553,7 @@ S_compute_collxfrm_coefficients(pTHX)
      * strxfrm() again, but it is better to get it right the first time to
      * avoid wasted expensive string transformations.
      *
-     * We use the string below to find how long the tranformation of it is.
+     * We use the string below to find how long the transformation of it is.
      * Almost all locales are supersets of ASCII, or at least the ASCII
      * letters.  We use all of them, half upper half lower, because if we used
      * fewer, we might hit just the ones that are outliers in a particular
