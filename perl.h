@@ -4150,6 +4150,8 @@ out there, Solaris being the most prominent.
 #define HvNAMEf "6p"
 #define HvNAMEf_QUOTEDPREFIX "10p"
 
+#define HvNAMEfARG(hv) ((void*)(hv))
+
 #ifdef PERL_CORE
 /* not used; but needed for backward compatibility with XS code? - RMB
 =for apidoc_section $io_formats
