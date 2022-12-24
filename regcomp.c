@@ -91,7 +91,7 @@
  *          #ifndef PERL_IN_XSUB_RE
  *          ...
  *          #endif
- *      blocks, so there is only one defintion for them in the whole
+ *      blocks, so there is only one definition for them in the whole
  *      executable, the one in regcomp.c (or regexec.c).  The implication of
  *      that is any debugging info that comes from them is controlled only by
  *      -Dr.  Further, any static function they call will also be the version
@@ -238,7 +238,7 @@ S_edit_distance(const UV* src,
 
     PERL_ARGS_ASSERT_EDIT_DISTANCE;
 
-    /* intialize matrix start values */
+    /* initialize matrix start values */
     Newx(scores, ( (x + 2) * (y + 2)), UV);
     scores[0] = score_ceil;
     scores[1 * (y + 2) + 0] = score_ceil;
@@ -1252,7 +1252,7 @@ S_set_regex_pv(pTHX_ RExC_state_t *pRExC_state, REGEXP *Rx)
  * Now, an initial crude guess as to the size needed is made, based on the
  * length of the pattern.  Patches welcome to improve that guess.  That amount
  * of space is malloc'd and then immediately freed, and then clawed back node
- * by node.  This design is to minimze, to the extent possible, memory churn
+ * by node.  This design is to minimize, to the extent possible, memory churn
  * when doing the reallocs.
  *
  * A separate parentheses counting pass may be needed in some cases.
@@ -2720,7 +2720,7 @@ S_handle_named_backref(pTHX_ RExC_state_t *pRExC_state,
 
 /* reg_la_NOTHING()
  *
- * Maybe parse a parenthezised lookaround construct that is equivalent to a
+ * Maybe parse a parenthesized lookaround construct that is equivalent to a
  * NOTHING regop when the construct is empty.
  *
  * Calls skip_to_be_ignored_text() before checking if the construct is empty.
@@ -2770,7 +2770,7 @@ S_reg_la_NOTHING(pTHX_ RExC_state_t *pRExC_state, U32 flags,
 
 /* reg_la_OPFAIL()
  *
- * Maybe parse a parenthezised lookaround construct that is equivalent to a
+ * Maybe parse a parenthesized lookaround construct that is equivalent to a
  * OPFAIL regop when the construct is empty.
  *
  * Calls skip_to_be_ignored_text() before checking if the construct is empty.
@@ -3929,7 +3929,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                      * */
                     Newxz(RExC_close_parens, RExC_parens_buf_size,
                             regnode_offset);
-                    /* we dont know where end op starts yet, so we dont need to
+                    /* we don't know where end op starts yet, so we don't need to
                      * set RExC_close_parens[0] like we do RExC_open_parens[0]
                      * above */
                 }
@@ -5253,7 +5253,7 @@ S_backref_value(char *p, char *e)
                 cases for each unambiguous special:
                     handle this special;
                     break;
-                cases for each ambigous special/literal:
+                cases for each ambiguous special/literal:
                     disambiguate;
                     if (special)  handle here
                     else goto defchar;
@@ -8218,7 +8218,7 @@ S_handle_regex_sets(pTHX_ RExC_state_t *pRExC_state, SV** return_invlist,
      * with pronouncing it called it Reverse Polish instead, but now that YOU
      * know how to pronounce it you can use the correct term, thus giving due
      * credit to the person who invented it, and impressing your geek friends.
-     * Wikipedia says that the pronounciation of "Ł" has been changing so that
+     * Wikipedia says that the pronunciation of "Ł" has been changing so that
      * it is now more like an English initial W (as in wonk) than an L.)
      *
      * This means that, for example, 'a | b & c' is stored on the stack as
@@ -9204,7 +9204,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 
     /* In a range, if one of the endpoints is non-character-set portable,
      * meaning that it hard-codes a code point that may mean a different
-     * charactger in ASCII vs. EBCDIC, as opposed to, say, a literal 'A' or a
+     * character in ASCII vs. EBCDIC, as opposed to, say, a literal 'A' or a
      * mnemonic '\t' which each mean the same character no matter which
      * character set the platform is on. */
     unsigned int non_portable_endpoint = 0;
@@ -11278,7 +11278,7 @@ S_optimize_regclass(pTHX_
                     }
                     else {
 
-                        /* Here, the only possible fold lowest_cp particpates in
+                        /* Here, the only possible fold lowest_cp participates in
                          * is with start[1].  /i or not isn't relevant */
                         op = EXACTFU;
                     }
@@ -14374,7 +14374,7 @@ S_parse_uniprop_string(pTHX_
             &&  name[i] != '+'
             &&  name[i] != '_'
             &&  name[i] != '{'
-                /* A backslash means the real delimitter is the next character,
+                /* A backslash means the real delimiter is the next character,
                  * but it must be punctuation */
             && (name[i] != '\\' || (i < name_len && isPUNCT_A(name[i+1]))))
         {
@@ -14393,7 +14393,7 @@ S_parse_uniprop_string(pTHX_
                 const char * const * prop_values;
                 bool escaped = 0;
 
-                /* Backslash => delimitter is the character following.  We
+                /* Backslash => delimiter is the character following.  We
                  * already checked that it is punctuation */
                 if (open == '\\') {
                     open = name[i++];
@@ -14858,7 +14858,7 @@ S_parse_uniprop_string(pTHX_
         &&  name[non_pkg_begin+0] == 'I'
         && (name[non_pkg_begin+1] == 'n' || name[non_pkg_begin+1] == 's'))
     {
-        /* Names that start with In have different characterstics than those
+        /* Names that start with In have different characteristics than those
          * that start with Is */
         if (name[non_pkg_begin+1] == 's') {
             starts_with_Is = TRUE;
