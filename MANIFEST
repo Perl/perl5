@@ -18,6 +18,7 @@ caretx.c		C file to create $^X
 cflags.SH		A script that emits C compilation flags per file
 Changes			Describe how to peruse changes between releases
 charclass_invlists.h	Compiled-in inversion lists
+class.c			Internals of the `use feature 'class'` object system
 CODE_OF_CONDUCT.md	Information on where to find the Standards of Conduct
 config_h.SH		Produces config.h
 configpm		Produces lib/Config.pm
@@ -5638,6 +5639,12 @@ t/bigmem/regexp.t		Test regular expressions with large strings
 t/bigmem/subst.t		Test s/// with large strings
 t/bigmem/vec.t			Check vec() handles large offsets
 t/charset_tools.pl		To aid in portable testing across platforms with different character sets
+t/class/class.t			See if class declarations work
+t/class/construct.t		See if class constructors work
+t/class/destruct.t		See if class destruction works
+t/class/field.t			See if class field declarations work
+t/class/method.t		See if class method declarations work
+t/class/phasers.t		See if class phaser blocks work
 t/cmd/elsif.t			See if else-if works
 t/cmd/for.t			See if for loops work
 t/cmd/mod.t			See if statement modifiers work
@@ -5721,6 +5728,7 @@ t/lib/common.pl			Helper for lib/{warnings,feature}.t
 t/lib/commonsense.t		See if configuration meets basic needs
 t/lib/Count.pm			Helper for t/op/method.t
 t/lib/croak.t			Test calls to Perl_croak() in the C source.
+t/lib/croak/class		Test croak calls from class.c
 t/lib/croak/gv			Test croak calls from gv.c
 t/lib/croak/mg			Test croak calls from mg.c
 t/lib/croak/op			Test croak calls from op.c
@@ -5787,6 +5795,7 @@ t/lib/warnings/9enabled		Tests warnings
 t/lib/warnings/9uninit		Tests "Use of uninitialized" warnings
 t/lib/warnings/av		Tests for av.c for warnings.t
 t/lib/warnings/builtin		Tests for builtin.c for warnings.t
+t/lib/warnings/class		Tests for class.c for warnings.t
 t/lib/warnings/doio		Tests for doio.c for warnings.t
 t/lib/warnings/gv		Tests for gv.c for warnings.t
 t/lib/warnings/hv		Tests for hv.c for warnings.t

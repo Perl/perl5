@@ -1,0 +1,68 @@
+__END__
+# Method calls on no args
+no warnings 'experimental::class';
+use feature 'class';
+class XXX { method m { } }
+XXX::m()
+EXPECT
+Cannot invoke method "m" on a non-instance at - line 5.
+########
+# Method calls on non-ref
+no warnings 'experimental::class';
+use feature 'class';
+class XXX { method m { } }
+XXX::m(123)
+EXPECT
+Cannot invoke method "m" on a non-instance at - line 5.
+########
+# Method calls on non-object
+no warnings 'experimental::class';
+use feature 'class';
+class XXX { method m { } }
+XXX::m([])
+EXPECT
+Cannot invoke method "m" on a non-instance at - line 5.
+########
+# Method calls from a different class
+no warnings 'experimental::class';
+use feature 'class';
+class XXX { method m { } }
+class YYY {}
+YYY->new->XXX::m();
+EXPECT
+Cannot invoke a method of "XXX" on an instance of "YYY" at - line 6.
+########
+no warnings 'experimental::class';
+use feature 'class';
+class XXX { method m { } }
+(bless {}, "XXX")->m()
+EXPECT
+Cannot invoke method "m" on a non-instance at - line 4.
+########
+no warnings 'experimental::class';
+use feature 'class';
+class XXX { field $zz; $zz = 123; }
+EXPECT
+Field $zz is not accessible outside a method at - line 3.
+########
+no warnings 'experimental::class';
+use feature 'class';
+class XXX { field $x; sub f { print $x } }
+EXPECT
+Field $x is not accessible outside a method at - line 3.
+########
+no warnings 'experimental::class';
+use feature 'class';
+class XXX {
+  field $x;
+  class YYY { method m { print $x } }
+}
+EXPECT
+Field $x of "XXX" is not accessible in a method of "YYY" at - line 5.
+########
+no warnings 'experimental::class';
+use feature 'class';
+class XXX {}
+class XXX {}
+EXPECT
+Cannot reopen existing class "XXX" at - line 4.

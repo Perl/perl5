@@ -4,13 +4,14 @@
 # Any changes made here will be lost!
 
 package feature;
-our $VERSION = '1.79';
+our $VERSION = '1.80';
 
 our %feature = (
     fc                      => 'feature_fc',
     isa                     => 'feature_isa',
     say                     => 'feature_say',
     try                     => 'feature_try',
+    class                   => 'feature_class',
     defer                   => 'feature_defer',
     state                   => 'feature_state',
     switch                  => 'feature_switch',
@@ -38,7 +39,7 @@ our %feature_bundle = (
     "5.27"    => [qw(bareword_filehandles bitwise current_sub evalbytes fc indirect multidimensional postderef_qq say state switch unicode_eval unicode_strings)],
     "5.35"    => [qw(bareword_filehandles bitwise current_sub evalbytes fc isa postderef_qq say signatures state unicode_eval unicode_strings)],
     "5.37"    => [qw(bitwise current_sub evalbytes fc isa module_true postderef_qq say signatures state unicode_eval unicode_strings)],
-    "all"     => [qw(bareword_filehandles bitwise current_sub declared_refs defer evalbytes extra_paired_delimiters fc indirect isa module_true multidimensional postderef_qq refaliasing say signatures state switch try unicode_eval unicode_strings)],
+    "all"     => [qw(bareword_filehandles bitwise class current_sub declared_refs defer evalbytes extra_paired_delimiters fc indirect isa module_true multidimensional postderef_qq refaliasing say signatures state switch try unicode_eval unicode_strings)],
     "default" => [qw(bareword_filehandles indirect multidimensional)],
 );
 
@@ -875,6 +876,17 @@ loaded with C<require> or C<use>. Any errors during compilation will cause
 failures, but reaching the end of the module when this feature is in effect
 will prevent C<perl> from throwing an exception that the module "did not return
 a true value".
+
+=head2 The 'class' feature
+
+B<WARNING>: This feature is still experimental and the implementation may
+change or be removed in future versions of Perl.  For this reason, Perl will
+warn when you use the feature, unless you have explicitly disabled the warning:
+
+    no warnings "experimental::class";
+
+This feature enables the C<class> block syntax and other associated keywords
+which implement the "new" object system, previously codenamed "Corinna".
 
 =head1 FEATURE BUNDLES
 

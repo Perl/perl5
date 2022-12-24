@@ -108,7 +108,7 @@ See L<perlguts/Autoloading with XSUBs>.
         )
 
 /* CV has the `:method` attribute. This used to be called CVf_METHOD but is
- * renamed to avoid collision with an upcoming feature */
+ * renamed to avoid collision with CVf_IsMETHOD */
 #define CVf_NOWARN_AMBIGUOUS	0x0001
 
 #define CVf_LVALUE	0x0002  /* CV return value can be used as lvalue */
@@ -135,6 +135,9 @@ See L<perlguts/Autoloading with XSUBs>.
 #define CVf_ANONCONST	0x20000 /* :const - create anonconst op */
 #define CVf_SIGNATURE   0x40000 /* CV uses a signature */
 #define CVf_REFCOUNTED_ANYSV 0x80000 /* CvXSUBANY().any_sv is refcounted */
+#define CVf_IsMETHOD    0x100000 /* CV is a (real) method of a real class. Not
+                                   to be confused with what used to be called
+                                   CVf_METHOD; now CVf_NOWARN_AMBIGUOUS */
 
 /* This symbol for optimised communication between toke.c and op.c: */
 #define CVf_BUILTIN_ATTRS	(CVf_NOWARN_AMBIGUOUS|CVf_LVALUE|CVf_ANONCONST)
@@ -256,6 +259,10 @@ Helper macro to turn off the C<CvREFCOUNTED_ANYSV> flag.
 #define CvREFCOUNTED_ANYSV(cv)          (CvFLAGS(cv) & CVf_REFCOUNTED_ANYSV)
 #define CvREFCOUNTED_ANYSV_on(cv)       (CvFLAGS(cv) |= CVf_REFCOUNTED_ANYSV)
 #define CvREFCOUNTED_ANYSV_off(cv)      (CvFLAGS(cv) &= ~CVf_REFCOUNTED_ANYSV)
+
+#define CvIsMETHOD(cv)		(CvFLAGS(cv) & CVf_IsMETHOD)
+#define CvIsMETHOD_on(cv)	(CvFLAGS(cv) |= CVf_IsMETHOD)
+#define CvIsMETHOD_off(cv)	(CvFLAGS(cv) &= ~CVf_IsMETHOD)
 
 /* Back-compat */
 #ifndef PERL_CORE

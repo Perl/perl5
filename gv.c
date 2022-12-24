@@ -605,23 +605,28 @@ S_maybe_add_coresub(pTHX_ HV * const stash, GV *gv,
     switch (code < 0 ? -code : code) {
      /* no support for \&CORE::infix;
         no support for funcs that do not parse like funcs */
-    case KEY___DATA__: case KEY___END__: case KEY_and: case KEY_AUTOLOAD:
-    case KEY_BEGIN   : case KEY_CHECK  : case KEY_catch : case KEY_cmp:
-    case KEY_default : case KEY_defer  : case KEY_DESTROY:
+    case KEY___DATA__: case KEY___END__ :
+    case KEY_ADJUST  : case KEY_AUTOLOAD: case KEY_BEGIN : case KEY_CHECK :
+    case KEY_DESTROY : case KEY_END     : case KEY_INIT  : case KEY_UNITCHECK:
+    case KEY_and     : case KEY_catch  : case KEY_class  :
+    case KEY_cmp     : case KEY_default: case KEY_defer :
     case KEY_do      : case KEY_dump   : case KEY_else  : case KEY_elsif  :
-    case KEY_END     : case KEY_eq     : case KEY_eval  : case KEY_finally:
+    case KEY_eq     : case KEY_eval  : case KEY_field  :
+    case KEY_finally:
     case KEY_for     : case KEY_foreach: case KEY_format: case KEY_ge     :
     case KEY_given   : case KEY_goto   : case KEY_grep  : case KEY_gt     :
-    case KEY_if      : case KEY_isa    : case KEY_INIT  : case KEY_last   :
+    case KEY_if      : case KEY_isa    : 
+    case KEY_last   :
     case KEY_le      : case KEY_local  : case KEY_lt    : case KEY_m      :
-    case KEY_map     : case KEY_my:
+    case KEY_map     : case KEY_method : case KEY_my    :
     case KEY_ne   : case KEY_next : case KEY_no: case KEY_or: case KEY_our:
     case KEY_package: case KEY_print: case KEY_printf:
     case KEY_q    : case KEY_qq   : case KEY_qr     : case KEY_qw    :
     case KEY_qx   : case KEY_redo : case KEY_require: case KEY_return:
     case KEY_s    : case KEY_say  : case KEY_sort   :
     case KEY_state: case KEY_sub  :
-    case KEY_tr   : case KEY_try  : case KEY_UNITCHECK: case KEY_unless:
+    case KEY_tr   : case KEY_try  :
+    case KEY_unless:
     case KEY_until: case KEY_use  : case KEY_when     : case KEY_while :
     case KEY_x    : case KEY_xor  : case KEY_y        :
         return NULL;

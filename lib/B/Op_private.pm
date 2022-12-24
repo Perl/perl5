@@ -443,6 +443,7 @@ $bits{method_named}{0} = $bf[0];
 $bits{method_redir}{0} = $bf[0];
 $bits{method_redir_super}{0} = $bf[0];
 $bits{method_super}{0} = $bf[0];
+$bits{methstart}{0} = $bf[0];
 @{$bits{mkdir}}{3,2,1,0} = ($bf[4], $bf[4], $bf[4], $bf[4]);
 @{$bits{modulo}}{1,0} = ($bf[1], $bf[1]);
 @{$bits{msgctl}}{3,2,1,0} = ($bf[4], $bf[4], $bf[4], $bf[4]);

@@ -50,6 +50,12 @@ letter.
 to check the return value of your socket() call?  See
 L<perlfunc/accept>.
 
+=item ADJUST is experimental
+
+(S experimental::class) This warning is emitted if you use the C<ADJUST>
+keyword of C<use feature 'class'>.  This keyword is currently
+experimental and its behaviour may change in future releases of Perl.
+
 =item Aliasing via reference is experimental
 
 (S experimental::refaliasing) This warning is emitted if you use
@@ -705,6 +711,18 @@ be directly assigned to.
 (S io) You tried to apply an encoding that did not exist to a filehandle,
 either with open() or binmode().
 
+=item Cannot invoke a method of "%s" on an instance of "%s"
+
+(F) You tried to directly call a C<method> subroutine of one class by passing
+in a value that is an instance of a different class.  This is not permitted,
+as the method would not have access to the correct instance fields.
+
+=item Cannot invoke method on a non-instance
+
+(F) You tried to directly call a C<method> subroutine of a class by passing
+in a value that is not an instance of that class.  This is not permitted, as
+the method would not then have access to its instance fields.
+
 =item Cannot open %s as a dirhandle: it is already open as a filehandle
 
 (F) You tried to use opendir() to associate a dirhandle to a symbol (glob
@@ -719,6 +737,11 @@ or scalar) that already holds a dirhandle.  Since this idiom might render
 your code confusing, it was deprecated in Perl 5.10.  As of Perl 5.28, it
 is a fatal error.
 
+=item Cannot '%s' outside of a 'class'
+
+(F) You attempted to use one of the keywords that only makes sense inside
+a C<class> definition, at a location that is not inside such a class.
+
 =item Cannot pack %f with '%c'
 
 (F) You tried converting an infinity or not-a-number to an integer,
@@ -728,6 +751,11 @@ which makes no sense.
 
 (F) You tried printing an infinity or not-a-number as a character (%c),
 which makes no sense.  Maybe you meant '%s', or just stringifying it?
+
+=item Cannot reopen existing class "%s"
+
+(F) You tried to begin a C<class> definition for a class that already exists.
+A class may only have one definition block.
 
 =item Cannot set tied @DB::args
 
@@ -1720,6 +1748,12 @@ is better written as simply itself, perhaps preceded by a backslash
 for non-word characters.  Doing it the way you did is not portable
 between ASCII and EBCDIC platforms.
 
+=item class is experimental
+
+(S experimental::class) This warning is emitted if you use the C<class>
+keyword of C<use feature 'class'>.  This keyword is currently
+experimental and its behaviour may change in future releases of Perl.
+
 =item Cloning substitution context is unimplemented
 
 (F) Creating a new thread inside the C<s///> operator is not supported.
@@ -2404,6 +2438,25 @@ PDP-11 or something?
 
 (F) A tied array claimed to have a negative number of elements, which
 is not possible.
+
+=item field is experimental
+
+(S experimental::class) This warning is emitted if you use the C<field>
+keyword of C<use feature 'class'>.  This keyword is currently
+experimental and its behaviour may change in future releases of Perl.
+
+=item Field %s is not accessible outside a method
+
+(F) An attempt was made to access a field variable of a class from code
+that does not appear inside the body of a C<method> subroutine.  This is not
+permitted, as only methods will have access to the fields of an instance.
+
+=item Field %s of "%s" is not accessible in a method of "%s"
+
+(F) An attempt was made to access a field variable of a class, from a
+method of another class nested inside the one that actually defined it.
+This is not permitted, as only methods defined by a given class are
+permitted to access fields of that class.
 
 =item Field too wide in 'u' format in pack
 
@@ -3734,9 +3787,24 @@ See L<perlfunc/unpack>.
 (F) An attempt was made to specify an entry in an overloading table that
 doesn't resolve to a valid subroutine.  See L<overload>.
 
+=item method is experimental
+
+(S experimental::class) This warning is emitted if you use the C<method>
+keyword of C<use feature 'class'>.  This keyword is currently
+experimental and its behaviour may change in future releases of Perl.
+
 =item Method %s not permitted
 
 See L</500 Server error>.
+
+=item Method %s redefined
+
+(W redefine) You redefined a method.  To suppress this warning, say
+
+    {
+	no warnings 'redefine';
+	*name = method { ... };
+    }
 
 =item Might be a runaway multi-line %s string starting on line %d
 

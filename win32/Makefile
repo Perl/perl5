@@ -671,6 +671,7 @@ DEL		= del
 MICROCORE_SRC	=		\
 		..\av.c		\
 		..\caretx.c	\
+		..\class.c	\
 		..\builtin.c	\
 		..\deb.c	\
 		..\doio.c	\

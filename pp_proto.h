@@ -175,6 +175,7 @@ PERL_CALLCONV OP *Perl_pp_method_named(pTHX) __attribute__visibility__("hidden")
 PERL_CALLCONV OP *Perl_pp_method_redir(pTHX) __attribute__visibility__("hidden");
 PERL_CALLCONV OP *Perl_pp_method_redir_super(pTHX) __attribute__visibility__("hidden");
 PERL_CALLCONV OP *Perl_pp_method_super(pTHX) __attribute__visibility__("hidden");
+PERL_CALLCONV OP *Perl_pp_methstart(pTHX) __attribute__visibility__("hidden");
 PERL_CALLCONV OP *Perl_pp_mkdir(pTHX) __attribute__visibility__("hidden");
 PERL_CALLCONV OP *Perl_pp_modulo(pTHX) __attribute__visibility__("hidden");
 PERL_CALLCONV OP *Perl_pp_multiconcat(pTHX) __attribute__visibility__("hidden");
