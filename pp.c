@@ -768,7 +768,7 @@ S_do_chomp(pTHX_ SV *retval, SV *sv, bool chomping)
                         if (is_utf8) {
                             /* Cannot downgrade, therefore cannot possibly match.
                                At this point, temp_buffer is not alloced, and
-                               is the buffer inside PL_rs, so dont free it.
+                               is the buffer inside PL_rs, so don't free it.
                              */
                             assert (temp_buffer == rsptr);
                             goto nope_free_sv;
@@ -3243,7 +3243,7 @@ PP(pp_length)
             SvSETMAGIC(TARG);
         }
         else
-            /* TARG is on stack at this point and is overwriten by SETs.
+            /* TARG is on stack at this point and is overwritten by SETs.
              * This branch is the odd one out, so put TARG by default on
              * stack earlier to let local SP go out of liveness sooner */
             SETs(&PL_sv_undef);

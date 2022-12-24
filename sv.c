@@ -685,7 +685,7 @@ Perl_sv_free_arenas(pTHX)
 /*
   Historically, here were mid-level routines that manage the
   allocation of bodies out of the various arenas. Some of these
-  routines and related definitions remain here, but otherse were
+  routines and related definitions remain here, but others were
   moved into sv_inline.h to facilitate inlining of newSV_type().
 
   There are 4 kinds of arenas:
@@ -698,7 +698,7 @@ Perl_sv_free_arenas(pTHX)
   Arena types 2 & 3 are chained by body-type off an array of
   arena-root pointers, which is indexed by svtype.  Some of the
   larger/less used body types are malloced singly, since a large
-  unused block of them is wasteful.  Also, several svtypes dont have
+  unused block of them is wasteful.  Also, several svtypes don't have
   bodies; the data fits into the sv-head itself.  The arena-root
   pointer thus has a few unused root-pointers (which may be hijacked
   later for arena type 4)
@@ -4938,7 +4938,7 @@ embedded C<NUL> characters.
 
 In the plain C<pv> forms, C<ptr> points to a NUL-terminated C string.  That is,
 it points to the first byte of the string, and the copy proceeds up through the
-first enountered C<NUL> byte.
+first encountered C<NUL> byte.
 
 In the forms that take a C<ptr> argument, if it is NULL, the SV will become
 undefined.
@@ -5793,7 +5793,7 @@ Perl_sv_magicext(pTHX_ SV *const sv, SV *const obj, const int how,
             mg->mg_ptr = savepvn(name, namlen);
         else if (namlen == HEf_SVKEY) {
             /* Yes, this is casting away const. This is only for the case of
-               HEf_SVKEY. I think we need to document this aberation of the
+               HEf_SVKEY. I think we need to document this aberration of the
                constness of the API, rather than making name non-const, as
                that change propagating outwards a long way.  */
             mg->mg_ptr = (char*)SvREFCNT_inc_simple_NN((SV *)name);
@@ -8682,7 +8682,7 @@ Perl_sv_gets(pTHX_ SV *const sv, PerlIO *const fp, I32 append)
     SvPOK_only(sv);
     if (!append) {
         /* not appending - "clear" the string by setting SvCUR to 0,
-         * the pv is still avaiable. */
+         * the pv is still available. */
         SvCUR_set(sv,0);
     }
     if (PerlIO_isutf8(fp))
@@ -8929,7 +8929,7 @@ Perl_sv_gets(pTHX_ SV *const sv, PerlIO *const fp, I32 append)
         }
 
         if (shortbuffered) {		/* oh well, must extend */
-            /* we didnt have enough room to fit the line into the target buffer
+            /* we didn't have enough room to fit the line into the target buffer
              * so we must extend the target buffer and keep going */
             cnt = shortbuffered;
             shortbuffered = 0;
@@ -9520,7 +9520,7 @@ Perl_newSVpvn_flags(pTHX_ const char *const s, const STRLEN len, const U32 flags
      * sv_2mortal() and do what it does ourselves here.  Since we have asserted
      * that flags can only have the SVf_UTF8 and/or SVs_TEMP flags set above we
      * can use it to enable the sv flags directly (bypassing SvTEMP_on), which
-     * in turn means we dont need to mask out the SVf_UTF8 flag below, which
+     * in turn means we don't need to mask out the SVf_UTF8 flag below, which
      * means that we eliminate quite a few steps than it looks - Yves
      * (explaining patch by gfx) */
 
@@ -9676,7 +9676,7 @@ Perl_newSVhek(pTHX_ const HEK *const hek)
                 SvUTF8_on (sv);
             return sv;
         }
-        /* This will be overwhelminly the most common case.  */
+        /* This will be overwhelmingly the most common case.  */
         {
             /* Inline most of newSVpvn_share(), because share_hek_hek() is far
                more efficient than sharepvn().  */
@@ -14811,7 +14811,7 @@ S_sv_dup_common(pTHX_ const SV *const ssv, CLONE_PARAMS *const param)
                         padlist = padlist_dup(padlist, param);
                     CvPADLIST_set(dsv, padlist);
                 } else
-/* unthreaded perl can't sv_dup so we dont support unthreaded's CvHSCXT */
+/* unthreaded perl can't sv_dup so we don't support unthreaded's CvHSCXT */
                     PoisonPADLIST(dsv);
 
                 CvOUTSIDE(dsv)	=
@@ -15040,7 +15040,7 @@ Perl_si_dup(pTHX_ PERL_SI *si, CLONE_PARAMS* param)
 #define pv_dup(p)	SAVEPV(p)
 #define svp_dup_inc(p,pp)	any_dup(p,pp)
 
-/* map any object to the new equivent - either something in the
+/* map any object to the new equivalent - either something in the
  * ptr table, or something in the interpreter structure
  */
 

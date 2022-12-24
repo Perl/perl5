@@ -2667,7 +2667,7 @@ win32_async_check(pTHX)
     MSG msg;
     HWND hwnd = w32_message_hwnd;
 
-    /* Reset w32_poll_count before doing anything else, incase we dispatch
+    /* Reset w32_poll_count before doing anything else, in case we dispatch
      * messages that end up calling back into perl */
     w32_poll_count = 0;
 
@@ -2951,7 +2951,7 @@ DllExport unsigned int
 win32_alarm(unsigned int sec)
 {
     /*
-     * the 'obvious' implentation is SetTimer() with a callback
+     * the 'obvious' implementation is SetTimer() with a callback
      * which does whatever receiving SIGALRM would do
      * we cannot use SIGALRM even via raise() as it is not
      * one of the supported codes in <signal.h>

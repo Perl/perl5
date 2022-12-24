@@ -681,7 +681,7 @@ S_does_utf8_overflow(const U8 * const s,
         return 1;
     }
 
-    /* Here, it could be the overlong malformation, and might not actuallly
+    /* Here, it could be the overlong malformation, and might not actually
      * overflow if you were to calculate it out.
      *
      * See if it actually is overlong */
@@ -1511,7 +1511,7 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
 
     /* A well-formed UTF-8 character, as the vast majority of calls to this
      * function will be for, has this expected length.  For efficiency, set
-     * things up here to return it.  It will be overriden only in those rare
+     * things up here to return it.  It will be overridden only in those rare
      * cases where a malformation is found */
     if (retlen) {
         *retlen = expectlen;
@@ -1710,7 +1710,7 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s,
      * uv                   contains the code point the input sequence
      *                      represents; or if there is a problem that prevents
      *                      a well-defined value from being computed, it is
-     *                      some subsitute value, typically the REPLACEMENT
+     *                      some substitute value, typically the REPLACEMENT
      *                      CHARACTER.
      * s0                   points to the first byte of the character
      * s                    points to just after where we left off processing

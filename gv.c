@@ -1194,12 +1194,12 @@ Perl_gv_fetchmethod_pvn_flags(pTHX_ HV *stash, const char *name, const STRLEN le
         }
         else if ( sep_len >= 7 &&
                  strBEGINs(last_separator - 7, "::SUPER")) {
-            /* don't autovifify if ->NoSuchStash::SUPER::method */
+            /* don't autovivify if ->NoSuchStash::SUPER::method */
             stash = gv_stashpvn(origname, sep_len - 7, is_utf8);
             if (stash) flags |= GV_SUPER;
         }
         else {
-            /* don't autovifify if ->NoSuchStash::method */
+            /* don't autovivify if ->NoSuchStash::method */
             stash = gv_stashpvn(origname, sep_len, is_utf8);
         }
         ostash = stash;
@@ -2939,12 +2939,12 @@ Perl_gp_free(pTHX_ GV *gv)
          simple problems likely found by fuzzers but never written by humans,
          whilst leaving working code unchanged. */
       if (sv) {
-          SV *referant;
+          SV *referent;
           if (SvREFCNT(sv) > 1 || SvOBJECT(sv) || UNLIKELY(in_global_destruction)) {
               SvREFCNT_dec_NN(sv);
               sv = NULL;
-          } else if (SvROK(sv) && (referant = SvRV(sv))
-                     && (SvREFCNT(referant) > 1 || SvOBJECT(referant))) {
+          } else if (SvROK(sv) && (referent = SvRV(sv))
+                     && (SvREFCNT(referent) > 1 || SvOBJECT(referent))) {
               SvREFCNT_dec_NN(sv);
               sv = NULL;
           } else {
@@ -3134,7 +3134,7 @@ Perl_Gv_AMupdate(pTHX_ HV *stash, bool destructing)
       sv_unmagic(MUTABLE_SV(stash), PERL_MAGIC_overload_table);
   }
 
-  DEBUG_o( Perl_deb(aTHX_ "Recalcing overload magic in package %s\n",HvNAME_get(stash)) );
+  DEBUG_o( Perl_deb(aTHX_ "Recalculating overload magic in package %s\n",HvNAME_get(stash)) );
 
   Zero(&amt,1,AMT);
   amt.was_ok_sub = newgen;
@@ -4028,7 +4028,7 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
   }
 #endif
     /* Since we use shallow copy during assignment, we need
-     * to dublicate the contents, probably calling user-supplied
+     * to duplicate the contents, probably calling user-supplied
      * version of copy operator
      */
     /* We need to copy in following cases:

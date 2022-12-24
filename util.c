@@ -557,7 +557,7 @@ Free_t   Perl_mfree (Malloc_t where)
 /* This is the value stored in *retlen in the two delimcpy routines below when
  * there wasn't enough room in the destination to store everything it was asked
  * to.  The value is deliberately very large so that hopefully if code uses it
- * unquestioninly to access memory, it will likely segfault.  And it is small
+ * unquestioningly to access memory, it will likely segfault.  And it is small
  * enough that if the caller does some arithmetic on it before accessing, it
  * won't overflow into a small legal number. */
 #define DELIMCPY_OUT_OF_BOUNDS_RET  I32_MAX
@@ -3609,7 +3609,7 @@ Perl_set_context(void *t)
     cthread_set_data(cthread_self(), t);
 #  else
     /* We set thread-specific value always, as C++ code has to read it with
-     * pthreads, beacuse the declaration syntax for thread local storage for C11
+     * pthreads, because the declaration syntax for thread local storage for C11
      * is incompatible with C++, meaning that we can't expose the thread local
      * variable to C++ code. */
     {
@@ -4397,7 +4397,7 @@ S_socketpair_udp (int fd[2]) {
 
         addresses[i].sin_family = AF_INET;
         addresses[i].sin_addr.s_addr = htonl(INADDR_LOOPBACK);
-        addresses[i].sin_port = 0;	/* kernel choses port.  */
+        addresses[i].sin_port = 0;	/* kernel chooses port.  */
         if (PerlSock_bind(sockets[i], (struct sockaddr *) &addresses[i],
                 sizeof(struct sockaddr_in)) == -1)
             goto tidy_up_and_fail;
@@ -4569,7 +4569,7 @@ Perl_my_socketpair (int family, int type, int protocol, int fd[2]) {
     memset(&listen_addr, 0, sizeof(listen_addr));
     listen_addr.sin_family = AF_INET;
     listen_addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
-    listen_addr.sin_port = 0;	/* kernel choses port.  */
+    listen_addr.sin_port = 0;	/* kernel chooses port.  */
     if (PerlSock_bind(listener, (struct sockaddr *) &listen_addr,
             sizeof(listen_addr)) == -1)
         goto tidy_up_and_fail;
