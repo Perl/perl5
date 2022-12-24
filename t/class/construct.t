@@ -15,13 +15,12 @@ use builtin qw( blessed reftype );
 
 {
     class Test1 {
-        field $x;
-        ADJUST { $x = 123; }
+        field $x :param;
         method x { return $x; }
     }
 
-    my $obj = Test1->new();
-    is($obj->x, 123, 'Value of $x set by ADJUST');
+    my $obj = Test1->new(x => 123);
+    is($obj->x, 123, 'Value of $x set by constructor');
 
     # The following tests aren't really related to construction, just the
     # general nature of object instance refs. If this test file gets too long
@@ -34,7 +33,7 @@ use builtin qw( blessed reftype );
     is($obj+0, builtin::refaddr($obj), 'numified object');
     like("$obj", qr/^Test1=OBJECT\(0x[[:xdigit:]]+\)$/, 'stringified object' );
 
-    ok(!eval { Test1->new(y => 456); 1 }, 'Unrecognised parameter fails');
+    ok(!eval { Test1->new(x => 123, y => 456); 1 }, 'Unrecognised parameter fails');
     like($@, qr/^Unrecognised parameters for "Test1" constructor: y at /,
         'Exception thrown by constructor for unrecogniser parameter');
 }
