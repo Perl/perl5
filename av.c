@@ -287,11 +287,11 @@ Perl_av_fetch(pTHX_ AV *av, SSize_t key, I32 lval)
     if ((Size_t)key >= (Size_t)size) {
         if (UNLIKELY(neg))
             return NULL;
-        goto emptyness;
+        goto emptiness;
     }
 
     if (!AvARRAY(av)[key]) {
-      emptyness:
+      emptiness:
         return lval ? av_store(av,key,newSV_type(SVt_NULL)) : NULL;
     }
 
@@ -655,7 +655,7 @@ void
 Perl_av_undef(pTHX_ AV *av)
 {
     bool real;
-    SSize_t orig_ix = PL_tmps_ix; /* silence bogus warning about possible unitialized use */
+    SSize_t orig_ix = PL_tmps_ix; /* silence bogus warning about possible uninitialized use */
 
     PERL_ARGS_ASSERT_AV_UNDEF;
     assert(SvTYPE(av) == SVt_PVAV);

@@ -1329,7 +1329,7 @@ re.pm, especially to the documentation.
                      /* get_sv() can return NULL during global destruction. */ \
         re_debug_flags_sv = PL_curcop ? get_sv(RE_DEBUG_FLAGS, GV_ADD) : NULL; \
         if (re_debug_flags_sv) {                                               \
-            if (!SvIOK(re_debug_flags_sv)) /* If doesnt exist set to default */\
+            if (!SvIOK(re_debug_flags_sv)) /* If doesn't exist set to default */\
                 sv_setuv(re_debug_flags_sv,                                    \
                         /* These defaults should be kept in sync with re.pm */ \
                             RE_DEBUG_COMPILE_DUMP | RE_DEBUG_EXECUTE_MASK );   \

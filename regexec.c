@@ -178,7 +178,7 @@ static const char non_utf8_target_but_utf8_required[]
  * VERBS must NOT be included. JUMPABLE is used to determine  if we can ignore a
  * node that is in between two EXACT like nodes when ascertaining what the required
  * "follow" character is. This should probably be moved to regex compile time
- * although it may be done at run time beause of the REF possibility - more
+ * although it may be done at run time because of the REF possibility - more
  * investigation required. -- demerphq
 */
 #define JUMPABLE(rn) (                                                             \
@@ -2212,7 +2212,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
     U8 c2;
     char *e = NULL;
 
-    /* In some cases we accept only the first occurence of 'x' in a sequence of
+    /* In some cases we accept only the first occurrence of 'x' in a sequence of
      * them.  This variable points to just beyond the end of the previous
      * occurrence of 'x', hence we can tell if we are in a sequence.  (Having
      * it point to beyond the 'x' allows us to work for UTF-8 without having to
@@ -2478,7 +2478,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
 
         /* We know that we have to match at least 'ln' bytes (which is the same
          * as characters, since not utf8).  If we have to match 3 characters,
-         * and there are only 2 availabe, we know without trying that it will
+         * and there are only 2 available, we know without trying that it will
          * fail; so don't start a match past the required minimum number from
          * the far end */
         e = HOP3c(strend, -((SSize_t)ln), s);
@@ -5367,7 +5367,7 @@ S_isLB(pTHX_ LB_enum before,
 
             /* Here, we have the character preceding the span of spaces all set
              * up.  We follow LB18: "Break after spaces" unless the table shows
-             * that is overriden */
+             * that is overridden */
             return LB_table[prev][after] != LB_NOBREAK_EVEN_WITH_SP_BETWEEN;
 
         case LB_CM_ZWJ_foo:
@@ -5380,7 +5380,7 @@ S_isLB(pTHX_ LB_enum before,
             while (prev == LB_Combining_Mark || prev == LB_ZWJ);
 
             /* Here, 'prev' is that first earlier non-CM character.  If the CM
-             * attatches to it, then it inherits the behavior of 'prev'.  If it
+             * attaches to it, then it inherits the behavior of 'prev'.  If it
              * doesn't attach, it is to be treated as an AL */
             if (! LB_CM_ATTACHES_TO(prev)) {
                 prev = LB_Alphabetic;
@@ -5801,7 +5801,7 @@ S_backup_one_SB(pTHX_ const U8 * const strbeg, U8 ** curpos, const bool utf8_tar
         }
 
         /* Back up over Extend and Format.  curpos is always just to the right
-         * of the characater whose value we are getting */
+         * of the character whose value we are getting */
         do {
             U8 * prev_prev_char_pos;
             if ((prev_prev_char_pos = reghopmaybe3((U8 *) prev_char_pos, -1,
@@ -6101,7 +6101,7 @@ S_backup_one_WB(pTHX_ WB_enum * previous, const U8 * const strbeg, U8 ** curpos,
         }
 
         /* Back up over Extend and Format.  curpos is always just to the right
-         * of the characater whose value we are getting */
+         * of the character whose value we are getting */
         do {
             U8 * prev_prev_char_pos;
             if ((prev_prev_char_pos = reghopmaybe3((U8 *) prev_char_pos,
@@ -6147,7 +6147,7 @@ S_backup_one_WB(pTHX_ WB_enum * previous, const U8 * const strbeg, U8 ** curpos,
 #define sayNO goto no
 #define sayNO_SILENT goto no_silent
 
-/* we dont use STMT_START/END here because it leads to
+/* we don't use STMT_START/END here because it leads to
    "unreachable code" warnings, which are bogus, but distracting. */
 #define CACHEsayNO \
     if (ST.cache_mask) \
@@ -6943,7 +6943,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
             /* Complete checking would involve going through every character
              * matched by the string to see if any is above latin1.  But the
-             * comparision otherwise might very well be a fast assembly
+             * comparison otherwise might very well be a fast assembly
              * language routine, and I (khw) don't think slowing things down
              * just to check for this warning is worth it.  So this just checks
              * the first character */
@@ -8746,7 +8746,7 @@ NULL
              * The idea here is that for certain types of CURLYX/WHILEM -
              * principally those whose upper bound is infinity (and
              * excluding regexes that have things like \1 and other very
-             * non-regular expresssiony things), then if a pattern like
+             * non-regular expressiony things), then if a pattern like
              * /....A*.../ fails and we backtrack to the WHILEM, then we
              * make a note that this particular WHILEM op was at string
              * position 47 (say) when the rest of pattern failed. Then, if
@@ -9926,7 +9926,7 @@ NULL
          * When popping the save stack, all these locals would be undone;
          * bypass this by setting the outermost saved $^R to the latest
          * value */
-        /* I dont know if this is needed or works properly now.
+        /* I don't know if this is needed or works properly now.
          * see code related to PL_replgv elsewhere in this file.
          * Yves
          */
@@ -11552,7 +11552,7 @@ Perl_isSCRIPT_RUN(pTHX_ const U8 * s, const U8 * send, const bool utf8_target)
          *
          * Negative script numbers signify that the value may be any of several
          * scripts, and we need to look at auxiliary information to make our
-         * deterimination.  But if both are non-negative, we can fail now */
+         * determination.  But if both are non-negative, we can fail now */
         if (LIKELY(script_of_char >= 0)) {
             const SCX_enum * search_in;
             PERL_UINT_FAST8_T search_in_len;

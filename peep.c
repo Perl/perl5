@@ -715,7 +715,7 @@ S_maybe_multiconcat(pTHX_ OP *o)
      *
      * During the conversion process, EXPR ops are stripped from the tree
      * and unshifted onto o. Finally, any of o's remaining original
-     * childen are discarded and o is converted into an OP_MULTICONCAT.
+     * children are discarded and o is converted into an OP_MULTICONCAT.
      *
      * In this middle of this, o may contain both: unshifted args on the
      * left, and some remaining original args on the right. lastkidop
@@ -1990,7 +1990,7 @@ S_maybe_multideref(pTHX_ OP *start, OP *orig_o, UV orig_action, U8 hints)
 
                 /* for N levels of aggregate lookup, we normally expect
                  * that the first N-1 [ah]elem ops will be flagged as
-                 * /DEREF (so they autovivifiy if necessary), and the last
+                 * /DEREF (so they autovivify if necessary), and the last
                  * lookup op not to be.
                  * For other things (like @{$h{k1}{k2}}) extra scope or
                  * leave ops can appear, so abandon the effort in that
@@ -3223,7 +3223,7 @@ Perl_rpeep(pTHX_ OP *o)
              * any other pad ops, and possibly some trailing ops.
              * Note that we don't null() the skipped ops, to make it
              * easier for Deparse to undo this optimisation (and none of
-             * the skipped ops are holding any resourses). It also makes
+             * the skipped ops are holding any resources). It also makes
              * it easier for find_uninit_var(), as it can just ignore
              * padrange, and examine the original pad ops.
              */

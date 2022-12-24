@@ -1454,7 +1454,7 @@ Perl_is_utf8_string_loclen(const U8 *s, STRLEN len, const U8 **ep, STRLEN *el)
  * This uses adaptations of the table and algorithm given in
  * https://bjoern.hoehrmann.de/utf-8/decoder/dfa/, which provides comprehensive
  * documentation of the original version.  A copyright notice for the original
- * version is given at the beginning of this file.  The Perl adapations are
+ * version is given at the beginning of this file.  The Perl adaptations are
  * documented at the definition of PL_extended_utf8_dfa_tab[].
  *
  * This dfa is fast.  There are three exit conditions:
@@ -1567,7 +1567,7 @@ machines) is a valid UTF-8 character.
 This uses an adaptation of the table and algorithm given in
 https://bjoern.hoehrmann.de/utf-8/decoder/dfa/, which provides comprehensive
 documentation of the original version.  A copyright notice for the original
-version is given at the beginning of this file.  The Perl adapation is
+version is given at the beginning of this file.  The Perl adaptation is
 documented at the definition of PL_extended_utf8_dfa_tab[].
 */
 
@@ -1636,7 +1636,7 @@ C<L</is_strict_utf8_string_loclen>> to check entire strings.
 This uses an adaptation of the tables and algorithm given in
 https://bjoern.hoehrmann.de/utf-8/decoder/dfa/, which provides comprehensive
 documentation of the original version.  A copyright notice for the original
-version is given at the beginning of this file.  The Perl adapation is
+version is given at the beginning of this file.  The Perl adaptation is
 documented at the definition of strict_extended_utf8_dfa_tab[].
 
 */
@@ -1691,7 +1691,7 @@ C<L</is_c9strict_utf8_string_loclen>> to check entire strings.
 This uses an adaptation of the tables and algorithm given in
 https://bjoern.hoehrmann.de/utf-8/decoder/dfa/, which provides comprehensive
 documentation of the original version.  A copyright notice for the original
-version is given at the beginning of this file.  The Perl adapation is
+version is given at the beginning of this file.  The Perl adaptation is
 documented at the definition of PL_c9_utf8_dfa_tab[].
 
 */
@@ -2428,7 +2428,7 @@ Perl_utf8n_to_uvchr_msgs(const U8 *s,
      * https://bjoern.hoehrmann.de/utf-8/decoder/dfa/, which provides
      * comprehensive documentation of the original version.  A copyright notice
      * for the original version is given at the beginning of this file.  The
-     * Perl adapation is documented at the definition of PL_strict_utf8_dfa_tab[].
+     * Perl adaptation is documented at the definition of PL_strict_utf8_dfa_tab[].
      */
 
     const U8 * const s0 = s;

@@ -6098,7 +6098,7 @@ S_pmtrans(pTHX_ OP *o, OP *expr, OP *repl)
      * of UTF-8 bytes to represent as every other code point in the same
      * partition.
      *
-     * This partioning has been pre-compiled.  Copy it to initialize */
+     * This partitioning has been pre-compiled.  Copy it to initialize */
     len = C_ARRAY_LENGTH(PL_partition_by_byte_length);
     invlist_extend(t_invlist, len);
     t_array = invlist_array(t_invlist);
@@ -8911,7 +8911,7 @@ Perl_newRANGE(pTHX_ I32 flags, OP *left, OP *right)
     flip->op_private =  left->op_type == OP_CONST ? OPpFLIP_LINENUM : 0;
     flop->op_private = right->op_type == OP_CONST ? OPpFLIP_LINENUM : 0;
 
-    /* check barewords before they might be optimized aways */
+    /* check barewords before they might be optimized away */
     if (flip->op_private && cSVOPx(left)->op_private & OPpCONST_STRICT)
         no_bareword_allowed(left);
     if (flop->op_private && cSVOPx(right)->op_private & OPpCONST_STRICT)
@@ -9679,7 +9679,7 @@ Perl_newDEFEROP(pTHX_ I32 flags, OP *block)
 
     start = LINKLIST(block);
 
-    /* Hide the block inside an OP_NULL with no exection */
+    /* Hide the block inside an OP_NULL with no execution */
     block = newUNOP(OP_NULL, 0, block);
     block->op_next = block;
 

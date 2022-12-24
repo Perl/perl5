@@ -2794,7 +2794,7 @@ nothing in the core.
                         {
                                 /* Under AmigaOS4 unlink only 'fails' if the filename is invalid */
                                 /* It may not remove the file if it's Locked, so check if it's still */
-                                /* arround */
+                                /* around */
                                 if((access(s,F_OK) != -1))
                                 {
                                         tot--;

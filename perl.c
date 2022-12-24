@@ -388,7 +388,7 @@ perl_construct(pTHXx)
             PERL_HASH_WITH_STATE(PL_hash_state,PL_hash_chars[256],str,0);
         }
 #endif
-        /* at this point we have initialezed the hash function, and we can start
+        /* at this point we have initialized the hash function, and we can start
          * constructing hashes */
         PL_hash_seed_set= TRUE;
     }
@@ -3475,7 +3475,7 @@ Perl_get_debug_opts(pTHX_ const char **s, bool givehelp)
          * If there is a free slot available marked with '?' feel
          * free to reuse it for something else.
          *
-         * Regardles remember to update DEBUG_MASK in perl.h, and
+         * Regardless remember to update DEBUG_MASK in perl.h, and
          * update the documentation above AND in pod/perlrun.pod.
          *
          * Note that the ? indicates an unused slot. As the code below

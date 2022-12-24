@@ -4444,7 +4444,7 @@ typedef        struct crypt_data {     /* straight from /usr/include/crypt.h */
 #define FAKE_BIT_BUCKET
 #endif
 
-/* [perl #22371] Algorimic Complexity Attack on Perl 5.6.1, 5.8.0.
+/* [perl #22371] Algorithmic Complexity Attack on Perl 5.6.1, 5.8.0.
  * Note that the USE_HASH_SEED and similar defines are *NOT* defined by
  * Configure, despite their names being similar to other defines like
  * USE_ITHREADS.  Configure in fact knows nothing about the randomised

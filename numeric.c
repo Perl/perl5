@@ -1277,7 +1277,7 @@ no leading zeros).  Otherwise it returns TRUE, and sets C<*valptr> to that
 value.
 
 If you constrain the portion of C<pv> that is looked at by this function (by
-passing a non-NULL C<endptr>), and if the intial bytes of that portion form a
+passing a non-NULL C<endptr>), and if the initial bytes of that portion form a
 valid value, it will return TRUE, setting C<*endptr> to the byte following the
 final digit of the value.  But if there is no constraint at what's looked at,
 all of C<pv> must be valid in order for TRUE to be returned.  C<*endptr> is
