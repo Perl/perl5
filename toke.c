@@ -11321,7 +11321,7 @@ S_scan_inputsymbol(pTHX_ char *start)
         return s;
     }
     else {
-        bool readline_overriden = FALSE;
+        bool readline_overridden = FALSE;
         GV *gv_readline;
         /* we're in a filehandle read situation */
         d = PL_tokenbuf;
@@ -11330,9 +11330,9 @@ S_scan_inputsymbol(pTHX_ char *start)
         if (!len)
             Copy("ARGV",d,5,char);
 
-        /* Check whether readline() is overriden */
+        /* Check whether readline() is overridden */
         if ((gv_readline = gv_override("readline",8)))
-            readline_overriden = TRUE;
+            readline_overridden = TRUE;
 
         /* if <$fh>, create the ops to turn the variable into a
            filehandle
@@ -11354,7 +11354,7 @@ S_scan_inputsymbol(pTHX_ char *start)
                 }
                 else {
                     OP * const o = newPADxVOP(OP_PADSV, 0, tmp);
-                    PL_lex_op = readline_overriden
+                    PL_lex_op = readline_overridden
                         ? newUNOP(OP_ENTERSUB, OPf_STACKED,
                                 op_append_elem(OP_LIST, o,
                                     newCVREF(0, newGVOP(OP_GV,0,gv_readline))))
@@ -11368,7 +11368,7 @@ S_scan_inputsymbol(pTHX_ char *start)
                 gv = gv_fetchpv(d,
                                 GV_ADDMULTI | ( UTF ? SVf_UTF8 : 0 ),
                                 SVt_PV);
-                PL_lex_op = readline_overriden
+                PL_lex_op = readline_overridden
                     ? newUNOP(OP_ENTERSUB, OPf_STACKED,
                             op_append_elem(OP_LIST,
                                 newUNOP(OP_RV2SV, 0, newGVOP(OP_GV, 0, gv)),
@@ -11385,7 +11385,7 @@ S_scan_inputsymbol(pTHX_ char *start)
            (<Foo::BAR> or <FOO>) so build a simple readline OP */
         else {
             GV * const gv = gv_fetchpv(d, GV_ADD | ( UTF ? SVf_UTF8 : 0 ), SVt_PVIO);
-            PL_lex_op = readline_overriden
+            PL_lex_op = readline_overridden
                 ? newUNOP(OP_ENTERSUB, OPf_STACKED,
                         op_append_elem(OP_LIST,
                             newGVOP(OP_GV, 0, gv),
