@@ -645,7 +645,7 @@ C<l1> gives the number of bytes in C<s1>.
 Returns true or false.
 
 =for apidoc Am|bool|memCHRs|"list"|char c
-Returns the position of the first occurence of the byte C<c> in the literal
+Returns the position of the first occurrence of the byte C<c> in the literal
 string C<"list">, or NULL if C<c> doesn't appear in C<"list">.  All bytes are
 treated as unsigned char.  Thus this macro can be used to determine if C<c> is
 in a set of particular characters.  Unlike L<strchr(3)>, it works even if C<c>
@@ -2044,7 +2044,7 @@ END_EXTERN_C
  * has names like isALPHA_LC.  They deal with larger-than-byte inputs, and
  * UTF-8 locales.
  *
- * (Note, proper general operation of the bare libc functons requires you to
+ * (Note, proper general operation of the bare libc functions requires you to
  * cast to U8.  These do that for you automatically.) */
 
 #  define WRAP_U8_LC_(c, classnum, posix)  posix(c)
