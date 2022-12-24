@@ -5354,6 +5354,7 @@ pod/perlboot.pod
 pod/perlbot.pod			
 pod/perlcall.pod		Perl calling conventions from C
 pod/perlcheat.pod		Perl cheat sheet
+pod/perlclass.pod		Perl class syntax
 pod/perlclib.pod		Internal replacements for standard C library functions
 pod/perlcommunity.pod		Perl community information
 pod/perldata.pod		Perl data structures

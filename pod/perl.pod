@@ -111,6 +111,7 @@ aux h2ph h2xs perlbug pl2pm pod2html pod2man splain xsubpp
     perlform		Perl formats
     perlobj		Perl objects
     perltie		Perl objects hidden behind simple variables
+    perlclass           Perl class syntax
       perldbmfilter	Perl DBM filters
 
     perlipc		Perl interprocess communication
