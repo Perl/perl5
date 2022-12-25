@@ -15,7 +15,7 @@ use ExtUtils::MakeMaker qw($Verbose neatvalue _sprintf562);
 
 # If we make $VERSION an our variable parse_version() breaks
 use vars qw($VERSION);
-$VERSION = '7.64';
+$VERSION = '7.66';
 $VERSION =~ tr/_//d;
 
 require ExtUtils::MM_Any;
@@ -38,9 +38,12 @@ BEGIN {
                    grep( $^O eq $_, qw(bsdos interix dragonfly) )
                   );
     $Is{Android} = $^O =~ /android/;
-    if ( $^O eq 'darwin' && $^X eq '/usr/bin/perl' ) {
+    if ( $^O eq 'darwin' ) {
       my @osvers = split /\./, $Config{osvers};
-      $Is{ApplCor} = ( $osvers[0] >= 18 );
+      if ( $^X eq '/usr/bin/perl' ) {
+        $Is{ApplCor} = ( $osvers[0] >= 18 );
+      }
+      $Is{AppleRPath} = ( $osvers[0] >= 9 );
     }
 }
 
@@ -1054,7 +1057,7 @@ sub xs_make_dynamic_lib {
         if ( $Is{IRIX} ) {
             $ldrun = qq{-rpath "$self->{LD_RUN_PATH}"};
         }
-        elsif ( $^O eq 'darwin' ) {
+        elsif ( $^O eq 'darwin' && $Is{AppleRPath} ) {
             # both clang and gcc support -Wl,-rpath, but only clang supports
             # -rpath so by using -Wl,-rpath we avoid having to check for the
             # type of compiler

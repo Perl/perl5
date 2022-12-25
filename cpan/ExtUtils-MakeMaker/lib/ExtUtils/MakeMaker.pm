@@ -25,7 +25,7 @@ my %Recognized_Att_Keys;
 our %macro_fsentity; # whether a macro is a filesystem name
 our %macro_dep; # whether a macro is a dependency
 
-our $VERSION = '7.64';
+our $VERSION = '7.66';
 $VERSION =~ tr/_//d;
 
 # Emulate something resembling CVS $Revision$
@@ -1151,19 +1151,20 @@ sub check_hints {
 }
 
 sub _run_hintfile {
-    my ($self, $hint_file) = @_;
+    our $self;
+    local($self) = shift;       # make $self available to the hint file.
+    my($hint_file) = shift;
 
     local($@, $!);
     print "Processing hints file $hint_file\n" if $Verbose;
 
-    if(open(my $fh, '<', $hint_file)) {
-        my $hints_content = do { local $/; <$fh> };
-        no strict;
-        eval $hints_content;
-        warn "Failed to run hint file $hint_file: $@" if $@;
-    }
-    else {
-        warn "Could not open $hint_file for read: $!";
+    # Just in case the ./ isn't on the hint file, which File::Spec can
+    # often strip off, we bung the curdir into @INC
+    local @INC = (File::Spec->curdir, @INC);
+    my $ret = do $hint_file;
+    if( !defined $ret ) {
+        my $error = $@ || $!;
+        warn $error;
     }
 }
 
@@ -1262,6 +1263,7 @@ sub write_file_via_tmp {
     die "write_file_via_tmp: 2nd arg must be ref" unless ref $contents;
     for my $chunk (@$contents) {
         my $to_write = $chunk;
+        $to_write = '' unless defined $to_write;
         utf8::encode $to_write if !$CAN_DECODE && "$]" > 5.008;
         print $fh "$to_write\n" or die "Can't write to MakeMaker.tmp: $!";
     }
@@ -3297,7 +3299,7 @@ are generated when F<Makefile.PL> generates a F<Makefile> (if L<CPAN::Meta>
 is installed).  Clients like L<CPAN> or L<CPANPLUS> will read these
 files to see what prerequisites must be fulfilled before building or testing
 the distribution.  If you wish to shut this feature off, set the C<NO_MYMETA>
-C<WriteMakeFile()> flag to true.
+C<WriteMakefile()> flag to true.
 
 =head2 Disabling an extension
 
