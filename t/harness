@@ -55,7 +55,7 @@ while ($ARGV[0] && $ARGV[0]=~/^-(n?)re/) {
     }
 }
 
-my $jobs = $ENV{TEST_JOBS} || 1;
+my $jobs = $ENV{TEST_JOBS};
 my ($rules, $state, $color);
 
 if ($ENV{HARNESS_OPTIONS}) {
@@ -71,6 +71,8 @@ if ($ENV{HARNESS_OPTIONS}) {
         }
     }
 }
+
+$jobs ||= 1;
 
 sub _extract_tests;
 sub _extract_tests {
