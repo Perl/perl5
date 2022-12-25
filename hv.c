@@ -3365,7 +3365,7 @@ S_share_hek_flags(pTHX_ const char *str, STRLEN len, U32 hash, int flags)
     if (!entry) {
         /* What used to be head of the list.
            If this is NULL, then we're the first entry for this slot, which
-           means we need to create fill.  */
+           means we need to increase fill.  */
         struct shared_he *new_entry;
         HEK *hek;
         char *k;
