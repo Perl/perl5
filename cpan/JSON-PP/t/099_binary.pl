@@ -3,7 +3,15 @@
 use strict;
 use warnings;
 use Test::More;
-BEGIN { plan tests => 24576 };
+BEGIN {
+    if (defined(my $n= $ENV{JSONPP_CHUNK})) {
+        $ENV{JSONPP_FROM}= 1 + $n * 48;
+        $ENV{JSONPP_TO}= (1 + $n) * 48;
+    }
+    $ENV{JSONPP_FROM} = 1 unless defined $ENV{JSONPP_FROM};
+    $ENV{JSONPP_TO}   = 768 unless defined $ENV{JSONPP_TO};
+}
+BEGIN { plan tests => 32 * ($ENV{JSONPP_TO} - $ENV{JSONPP_FROM} + 1) };
 
 BEGIN { $ENV{PERL_JSON_BACKEND} = 0; }
 
@@ -34,12 +42,11 @@ sub test($) {
    ok ($_[0] eq JSON::PP->new->shrink->decode ($js)->[0], " - 7");
 }
 
-srand 0; # doesn't help too much, but its at least more deterministic
+srand $ENV{JSONPP_FROM}; # doesn't help too much, but its at least more deterministic
 
-for (1..768) {
+for ($ENV{JSONPP_FROM} .. $ENV{JSONPP_TO}) {
    test join "", map chr ($_ & 255), 0..$_;
    test join "", map chr rand 255, 0..$_;
    test join "", map chr ($_ * 97 & ~0x4000), 0..$_;
    test join "", map chr (rand (2**20) & ~0x800), 0..$_;
 }
-
