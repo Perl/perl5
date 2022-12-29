@@ -3106,6 +3106,11 @@ Perl_new_stackinfo(pTHX_ I32 stitems, I32 cxitems)
         __attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_NEW_STACKINFO
 
+PERL_CALLCONV PERL_SI *
+Perl_new_stackinfo_flags(pTHX_ I32 stitems, I32 cxitems, UV flags)
+        __attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_NEW_STACKINFO_FLAGS
+
 PERL_CALLCONV SV *
 Perl_new_version(pTHX_ SV *ver);
 #define PERL_ARGS_ASSERT_NEW_VERSION            \
@@ -9751,7 +9756,7 @@ Perl_pop_stackinfo(pTHX);
 # define PERL_ARGS_ASSERT_POP_STACKINFO
 
 PERL_STATIC_INLINE void
-Perl_push_stackinfo(pTHX_ I32 type);
+Perl_push_stackinfo(pTHX_ I32 type, UV flags);
 # define PERL_ARGS_ASSERT_PUSH_STACKINFO
 
 PERL_STATIC_INLINE void
