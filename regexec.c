@@ -9050,6 +9050,14 @@ NULL
                           depth, (IV) ST.count, (IV)ST.alen)
             );
 
+            if (ST.me->flags) {
+                /* emulate CLOSE: mark current A as captured */
+                U32 paren = (U32)ST.me->flags;
+                CLOSE_CAPTURE(paren,
+                    HOPc(locinput, -ST.alen) - reginfo->strbeg,
+                    locinput - reginfo->strbeg);
+            }
+
             if (EVAL_CLOSE_PAREN_IS_TRUE(cur_eval,(U32)ST.me->flags))
                 goto fake_end;
 
