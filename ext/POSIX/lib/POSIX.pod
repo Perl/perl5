@@ -501,7 +501,7 @@ than the explicit two operations [C99].  Added in Perl v5.22.
 Maximum of C<x> and C<y>, except when either is C<NaN>, returns the other [C99].
 Added in Perl v5.22.
 
- my $min = POSIX::fmax($x, $y);
+ my $max = POSIX::fmax($x, $y);
 
 =item C<fmin>
 
