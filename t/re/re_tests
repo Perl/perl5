@@ -2112,7 +2112,20 @@ AB\s+\x{100}	AB \x{100}X	y	-	-
 
 \p{nv=-0}	\x{660}	y	$&	\x{660}
 (?:a|xx){0,4}?b	aaaaab 	y	$&	aaaab		# Bug is GH #8369; test is GH #19781
-
+(?|(?<a>a)|(?<b>b))\1(?&a)(?&b)	bbab 	y	$&	bbab		# GH 20653
+(?|(?<a>a)|(?<b>b))(?(<a>)x|y)\1	byb 	y	$&	byb		# GH 20653
+(?|(?<a>a)|(?<b>b))(?(<a>)x|y)\1	bxb 	n	-	-		# GH 20653
+(?|(?<a>a)|(?<b>b))(?(<a>)x|y)\1	axa 	y	$&	axa		# GH 20653
+(?|(?<a>a)|(?<b>b))(?(<a>)x|y)\1	aya 	n	-	-		# GH 20653
+(?|(?<a>a)|(?<b>b))	a 	y	$1-$+{a}-$+{b}	a-a-		# GH 20653
+(?|(?<a>a)|(?<b>b))	b 	y	$1-$+{a}-$+{b}	b--b		# GH 20653
+(?<pre>pre)(?|(?<a>a)(?<b>b)(?<c>c)|(?<d>d)(?<e>e)|(?<f>f))(?<post>post)	preabcpost 	y	$2-$3-$4	a-b-c		# GH 20653
+(?<pre>pre)(?|(?<a>a)(?<b>b)(?<c>c)|(?<d>d)(?<e>e)|(?<f>f))(?<post>post)	predepost 	y	$2-$3-$4	d-e-		# GH 20653
+(?<pre>pre)(?|(?<a>a)(?<b>b)(?<c>c)|(?<d>d)(?<e>e)|(?<f>f))(?<post>post)	prefpost 	y	$2-$3-$4	f--		# GH 20653
+(?<pre>pre)(?|(?<a>a)(?<b>b)(?<c>c)|(?<d>d)(?<e>e)|(?<f>f))(?<post>post)	preabcpost 	y	$+{a}-$+{b}-$+{c}	a-b-c		# GH 20653
+((?|(?<a>a)(?-1)|(?<b>b)(?-1)|(?<c>c)(?-1)))	aa 	y	$1	aa		# GH 20653
+((?|(?<a>a)(?-1)|(?<b>b)(?-1)|(?<c>c)(?-1)))	bb 	y	$1	bb		# GH 20653
+((?|(?<a>a)(?-1)|(?<b>b)(?-1)|(?<c>c)(?-1)))	cc 	y	$1	cc		# GH 20653
 # Keep these lines at the end of the file
 # pat	string	y/n/etc	expr	expected-expr	skip-reason	comment
 # vim: softtabstop=0 noexpandtab

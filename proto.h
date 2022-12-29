@@ -3722,9 +3722,14 @@ Perl_reg_named_buff_scalar(pTHX_ REGEXP * const rx, const U32 flags);
         assert(rx)
 
 PERL_CALLCONV void
-Perl_reg_numbered_buff_fetch(pTHX_ REGEXP * const rx, const I32 paren, SV * const sv);
+Perl_reg_numbered_buff_fetch(pTHX_ REGEXP * const re, const I32 paren, SV * const sv);
 #define PERL_ARGS_ASSERT_REG_NUMBERED_BUFF_FETCH \
-        assert(rx)
+        assert(re)
+
+PERL_CALLCONV void
+Perl_reg_numbered_buff_fetch_flags(pTHX_ REGEXP * const re, const I32 paren, SV * const sv, U32 flags);
+#define PERL_ARGS_ASSERT_REG_NUMBERED_BUFF_FETCH_FLAGS \
+        assert(re)
 
 PERL_CALLCONV I32
 Perl_reg_numbered_buff_length(pTHX_ REGEXP * const rx, const SV * const sv, const I32 paren);

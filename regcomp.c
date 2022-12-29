@@ -1427,7 +1427,10 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     RExC_use_BRANCHJ = 0;
     RExC_warned_WARN_EXPERIMENTAL__VLB = 0;
     RExC_warned_WARN_EXPERIMENTAL__REGEX_SETS = 0;
+    RExC_logical_total_parens = 0;
     RExC_total_parens = 0;
+    RExC_logical_to_parno = NULL;
+    RExC_parno_to_logical = NULL;
     RExC_open_parens = NULL;
     RExC_close_parens = NULL;
     RExC_paren_names = NULL;
@@ -1612,6 +1615,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 
     RExC_naughty = 0;
     RExC_npar = 1;
+    RExC_logical_npar = 1;
     RExC_parens_buf_size = 0;
     RExC_emit_start = RExC_rxi->program;
     pRExC_state->code_index = 0;
@@ -1630,6 +1634,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 
         /* We have that number in RExC_npar */
         RExC_total_parens = RExC_npar;
+        RExC_logical_total_parens = RExC_logical_npar;
     }
     else if (! MUST_RESTART(flags)) {
         ReREFCNT_dec(Rx);
@@ -1674,6 +1679,9 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 
             Renew(RExC_close_parens, RExC_total_parens, regnode_offset);
             Zero(RExC_close_parens, RExC_total_parens, regnode_offset);
+            /* we do NOT reinitialize  RExC_logical_to_parno and
+             * RExC_parno_to_logical here. We need their data on the second
+             * pass */
         }
         else { /* Parse did not complete.  Reinitialize the parentheses
                   structures */
@@ -1685,6 +1693,14 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
             if (RExC_close_parens) {
                 Safefree(RExC_close_parens);
                 RExC_close_parens = NULL;
+            }
+            if (RExC_logical_to_parno) {
+                Safefree(RExC_logical_to_parno);
+                RExC_logical_to_parno = NULL;
+            }
+            if (RExC_parno_to_logical) {
+                Safefree(RExC_parno_to_logical);
+                RExC_parno_to_logical = NULL;
             }
         }
 
@@ -1702,6 +1718,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     set_regex_pv(pRExC_state, Rx);
 
     RExC_rx->nparens = RExC_total_parens - 1;
+    RExC_rx->logical_nparens = RExC_logical_total_parens - 1;
 
     /* Uses the upper 4 bits of the FLAGS field, so keep within that size */
     if (RExC_whilem_seen > 15)
@@ -2245,6 +2262,31 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
         assert(scan && OP(scan) == GOSUB);
         ARG2L_SET( scan, RExC_open_parens[ARG(scan)] - REGNODE_OFFSET(scan));
     }
+    if (RExC_logical_total_parens != RExC_total_parens) {
+        Newxz(RExC_parno_to_logical_next, RExC_total_parens, I32);
+        /* we rebuild this below */
+        Zero(RExC_logical_to_parno, RExC_total_parens, I32);
+        for( int parno = RExC_total_parens-1 ; parno > 0 ; parno-- ) {
+            int logical_parno= RExC_parno_to_logical[parno];
+            assert(logical_parno);
+            RExC_parno_to_logical_next[parno]= RExC_logical_to_parno[logical_parno];
+            RExC_logical_to_parno[logical_parno] = parno;
+        }
+        if (0)
+        for( int parno = 1; parno < RExC_total_parens ; parno++ )
+            PerlIO_printf(Perl_debug_log,"%d -> %d -> %d\n",
+                    parno, RExC_parno_to_logical[parno], RExC_parno_to_logical_next[parno]);
+        RExC_rx->logical_to_parno = RExC_logical_to_parno;
+        RExC_rx->parno_to_logical = RExC_parno_to_logical;
+        RExC_rx->parno_to_logical_next = RExC_parno_to_logical_next;
+        RExC_logical_to_parno = NULL;
+        RExC_parno_to_logical = NULL;
+        RExC_parno_to_logical_next = NULL;
+    } else {
+        RExC_rx->logical_to_parno = NULL;
+        RExC_rx->parno_to_logical = NULL;
+        RExC_rx->parno_to_logical_next = NULL;
+    }
 
     Newxz(RExC_rx->offs, RExC_total_parens, regexp_paren_pair);
     /* assume we don't need to swap parens around before we match */
@@ -2265,6 +2307,14 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     if (RExC_close_parens) {
         Safefree(RExC_close_parens);
         RExC_close_parens = NULL;
+    }
+    if (RExC_logical_to_parno) {
+        Safefree(RExC_logical_to_parno);
+        RExC_logical_to_parno = NULL;
+    }
+    if (RExC_parno_to_logical) {
+        Safefree(RExC_parno_to_logical);
+        RExC_parno_to_logical = NULL;
     }
 
 #ifdef USE_ITHREADS
@@ -2883,6 +2933,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
     regnode_offset br;
     regnode_offset lastbr;
     regnode_offset ender = 0;
+    I32 logical_parno = 0;
     I32 parno = 0;
     I32 flags;
     U32 oregflags = RExC_flags;
@@ -3419,7 +3470,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                 /* branch reset, behave like a (?:...) except that
                    buffers in alternations share the same numbers */
                 paren = ':';
-                after_freeze = freeze_paren = RExC_npar;
+                after_freeze = freeze_paren = RExC_logical_npar;
 
                 /* XXX This construct currently requires an extra pass.
                  * Investigation would be required to see if that could be
@@ -3508,7 +3559,6 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                 if (*RExC_parse!=')')
                     vFAIL("Expecting close bracket");
 
-              gen_recurse_regop:
                 if (paren == '-' || paren == '+') {
 
                     /* Don't overflow */
@@ -3545,7 +3595,26 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                         vFAIL(non_existent_group_msg);
                     }
                 }
+                else
+                if (num && num < RExC_logical_npar) {
+                    num = RExC_logical_to_parno[num];
+                }
+                else
+                if (ALL_PARENS_COUNTED) {
+                    if (num < RExC_logical_total_parens) {
+                        num = RExC_logical_to_parno[num];
+                    }
+                    else {
+                        RExC_parse_inc_by(1);
+                        vFAIL(non_existent_group_msg);
+                    }
+                }
+                else {
+                    REQUIRE_PARENS_PASS;
+                }
 
+
+              gen_recurse_regop:
                 if (num >= RExC_npar) {
 
                     /* It might be a forward reference; we can't fail until we
@@ -3906,6 +3975,8 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
           capturing_parens:
             parno = RExC_npar;
             RExC_npar++;
+            logical_parno = RExC_logical_npar;
+            RExC_logical_npar++;
             if (! ALL_PARENS_COUNTED) {
                 /* If we are in our first pass through (and maybe only pass),
                  * we  need to allocate memory for the capturing parentheses
@@ -3932,6 +4003,9 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                     /* we don't know where end op starts yet, so we don't need to
                      * set RExC_close_parens[0] like we do RExC_open_parens[0]
                      * above */
+
+                    Newxz(RExC_logical_to_parno, RExC_parens_buf_size, I32);
+                    Newxz(RExC_parno_to_logical, RExC_parens_buf_size, I32);
                 }
                 else if (RExC_npar > RExC_parens_buf_size) {
                     I32 old_size = RExC_parens_buf_size;
@@ -3947,6 +4021,14 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                             regnode_offset);
                     Zero(RExC_close_parens + old_size,
                             RExC_parens_buf_size - old_size, regnode_offset);
+
+                    Renew(RExC_logical_to_parno, RExC_parens_buf_size, I32);
+                    Zero(RExC_logical_to_parno + old_size,
+                         RExC_parens_buf_size - old_size, I32);
+
+                    Renew(RExC_parno_to_logical, RExC_parens_buf_size, I32);
+                    Zero(RExC_parno_to_logical + old_size,
+                         RExC_parens_buf_size - old_size, I32);
                 }
             }
 
@@ -3961,7 +4043,11 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                     (IV)parno, ret));
                 RExC_open_parens[parno]= ret;
             }
-
+            if (RExC_parno_to_logical) {
+                RExC_parno_to_logical[parno] = logical_parno;
+                if (RExC_logical_to_parno && !RExC_logical_to_parno[logical_parno])
+                    RExC_logical_to_parno[logical_parno] = parno;
+            }
             is_open = 1;
         } else {
             /* with RXf_PMf_NOCAPTURE treat (...) as (?:...) */
@@ -4018,9 +4104,9 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
         }
         nextchar(pRExC_state);
         if (freeze_paren) {
-            if (RExC_npar > after_freeze)
-                after_freeze = RExC_npar;
-            RExC_npar = freeze_paren;
+            if (RExC_logical_npar > after_freeze)
+                after_freeze = RExC_logical_npar;
+            RExC_logical_npar = freeze_paren;
         }
         br = regbranch(pRExC_state, &flags, 0, depth+1);
 
@@ -4221,8 +4307,8 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
         NOT_REACHED; /* NOTREACHED */
     }
 
-    if (after_freeze > RExC_npar)
-        RExC_npar = after_freeze;
+    if (after_freeze > RExC_logical_npar)
+        RExC_logical_npar = after_freeze;
 
     RExC_in_lookaround = was_in_lookaround;
 
@@ -5787,6 +5873,21 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                         if (num < 1)
                             vFAIL("Reference to nonexistent or unclosed group");
                     }
+                    else
+                    if (num < RExC_logical_npar) {
+                        num = RExC_logical_to_parno[num];
+                    }
+                    else
+                    if (ALL_PARENS_COUNTED)  {
+                        if (num < RExC_logical_total_parens)
+                            num = RExC_logical_to_parno[num];
+                        else {
+                            num = -1;
+                        }
+                    }
+                    else{
+                        REQUIRE_PARENS_PASS;
+                    }
                 }
                 else {
                     num = S_backref_value(RExC_parse, RExC_end);
@@ -5800,7 +5901,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                     if (    /* any numeric escape < 10 is always a backref */
                            num > 9
                             /* any numeric escape < RExC_npar is a backref */
-                        && num >= RExC_npar
+                        && num >= RExC_logical_npar
                             /* cannot be an octal escape if it starts with [89]
                              * */
                         && ! inRANGE(*RExC_parse, '8', '9')
@@ -5811,6 +5912,19 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                          * octal escapes in patterns is problematic. - Yves */
                         RExC_parse_set(atom_parse_start);
                         goto defchar;
+                    }
+                    if (num < RExC_logical_npar) {
+                        num = RExC_logical_to_parno[num];
+                    }
+                    else
+                    if (ALL_PARENS_COUNTED) {
+                        if (num < RExC_logical_total_parens) {
+                            num = RExC_logical_to_parno[num];
+                        } else {
+                            num = -1;
+                        }
+                    } else {
+                        REQUIRE_PARENS_PASS;
                     }
                 }
 
@@ -5828,9 +5942,10 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                 else while (isDIGIT(*RExC_parse)) {
                     RExC_parse_inc_by(1);
                 }
+                if (num < 0)
+                    vFAIL("Reference to nonexistent group");
 
                 if (num >= (I32)RExC_npar) {
-
                     /* It might be a forward reference; we can't fail until we
                      * know, by completing the parse to get all the groups, and
                      * then reparsing */
@@ -12946,6 +13061,12 @@ Perl_pregfree2(pTHX_ REGEXP *rx)
     SvREFCNT_dec(r->saved_copy);
 #endif
     Safefree(r->offs);
+    if (r->logical_to_parno) {
+        Safefree(r->logical_to_parno);
+        Safefree(r->parno_to_logical);
+        Safefree(r->parno_to_logical_next);
+    }
+
     SvREFCNT_dec(r->qr_anoncv);
     if (r->recurse_locinput)
         Safefree(r->recurse_locinput);
@@ -13043,6 +13164,7 @@ Perl_reg_temp_copy(pTHX_ REGEXP *dsv, REGEXP *ssv)
      */
     memcpy(&(drx->xpv_cur), &(srx->xpv_cur),
            sizeof(regexp) - STRUCT_OFFSET(regexp, xpv_cur));
+
     if (!islv)
         SvLEN_set(dsv, 0);
     if (srx->offs) {
@@ -13063,6 +13185,23 @@ Perl_reg_temp_copy(pTHX_ REGEXP *dsv, REGEXP *ssv)
         /* check_substr and check_utf8, if non-NULL, point to either their
            anchored or float namesakes, and don't hold a second reference.  */
     }
+    if (srx->logical_to_parno) {
+        NewCopy(srx->logical_to_parno,
+                drx->logical_to_parno,
+                srx->nparens, I32);
+        NewCopy(srx->parno_to_logical,
+                drx->parno_to_logical,
+                srx->nparens, I32);
+        NewCopy(srx->parno_to_logical_next,
+                drx->parno_to_logical_next,
+                srx->nparens, I32);
+    } else {
+        drx->logical_to_parno = NULL;
+        drx->parno_to_logical = NULL;
+        drx->parno_to_logical_next = NULL;
+    }
+    drx->logical_nparens = srx->logical_nparens;
+
     RX_MATCH_COPIED_off(dsv);
 #ifdef PERL_ANY_COW
     drx->saved_copy = NULL;
@@ -13295,6 +13434,19 @@ Perl_re_dup_guts(pTHX_ const REGEXP *sstr, REGEXP *dstr, CLONE_PARAMS *param)
 #ifdef PERL_ANY_COW
     ret->saved_copy = NULL;
 #endif
+
+    if (r->logical_to_parno) {
+        /* we use total_parens for all three just for symmetry */
+        ret->logical_to_parno = (I32*)SAVEPVN((char*)(r->logical_to_parno), r->nparens * sizeof(I32));
+        ret->parno_to_logical = (I32*)SAVEPVN((char*)(r->parno_to_logical), r->nparens * sizeof(I32));
+        ret->parno_to_logical_next = (I32*)SAVEPVN((char*)(r->parno_to_logical_next), r->nparens * sizeof(I32));
+    } else {
+        ret->logical_to_parno = NULL;
+        ret->parno_to_logical = NULL;
+        ret->parno_to_logical_next = NULL;
+    }
+
+    ret->logical_nparens = r->logical_nparens;
 
     /* Whether mother_re be set or no, we need to copy the string.  We
        cannot refrain from copying it when the storage points directly to

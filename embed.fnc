@@ -2811,8 +2811,14 @@ Cp	|SV *	|reg_named_buff_all					\
 				|const U32 flags
 
 : FIXME - is anything in re using this now?
+EXp	|void	|reg_numbered_buff_fetch_flags				\
+				|NN REGEXP * const re			\
+				|const I32 paren			\
+				|NULLOK SV * const sv			\
+				|U32 flags
+: FIXME - is anything in re using this now?
 EXp	|void	|reg_numbered_buff_fetch				\
-				|NN REGEXP * const rx			\
+				|NN REGEXP * const re			\
 				|const I32 paren			\
 				|NULLOK SV * const sv
 : FIXME - is anything in re using this now?

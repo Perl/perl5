@@ -1688,6 +1688,7 @@
 #   define reg_named_buff(a,b,c,d)              Perl_reg_named_buff(aTHX_ a,b,c,d)
 #   define reg_named_buff_iter(a,b,c)           Perl_reg_named_buff_iter(aTHX_ a,b,c)
 #   define reg_numbered_buff_fetch(a,b,c)       Perl_reg_numbered_buff_fetch(aTHX_ a,b,c)
+#   define reg_numbered_buff_fetch_flags(a,b,c,d) Perl_reg_numbered_buff_fetch_flags(aTHX_ a,b,c,d)
 #   define reg_numbered_buff_length(a,b,c)      Perl_reg_numbered_buff_length(aTHX_ a,b,c)
 #   define reg_numbered_buff_store(a,b,c)       Perl_reg_numbered_buff_store(aTHX_ a,b,c)
 #   define reg_qr_package(a)                    Perl_reg_qr_package(aTHX_ a)

@@ -125,13 +125,22 @@ typedef struct regexp {
      * Information about the match that the perl core uses to manage things
      */
 
+    /* see comment in regcomp_internal.h about branch reset to understand
+       the distinction between physical and logical capture buffers */
+    U32 nparens;                    /* physical number of capture buffers */
+    U32 logical_nparens;            /* logical_number of capture buffers */
+    I32 *logical_to_parno;          /* map logical parno to first physcial */
+    I32 *parno_to_logical;          /* map every physical parno to logical */
+    I32 *parno_to_logical_next;     /* map every physical parno to the next
+                                       physical with the same logical id */
+
     U32 extflags;      /* Flags used both externally and internally */
-    U32 nparens;       /* number of capture buffers */
     SSize_t minlen;    /* minimum possible number of chars in string to match */
     SSize_t minlenret; /* minimum possible number of chars in $& */
     STRLEN gofs;       /* chars left of pos that we search from */
                        /* substring data about strings that must appear in
                         * the final match, used for optimisations */
+
     struct reg_substr_data *substrs;
 
     /* private engine specific data */
@@ -148,6 +157,7 @@ typedef struct regexp {
     regexp_paren_pair *offs; /* Array of offsets for (@-) and (@+) */
     char **recurse_locinput; /* used to detect infinite recursion, XXX: move to internal */
     U32 lastcloseparen;      /* last close paren matched ($^N) */
+
 
     /*---------------------------------------------------------------------- */
 
@@ -551,6 +561,14 @@ and check for NULL.
 #  define RX_SUBCOFFSET(rx_sv)            (ReANY(rx_sv)->subcoffset)
 #  define RXp_OFFSp(prog)                 (prog->offs)
 #  define RX_OFFSp(rx_sv)                 (RXp_OFFSp(ReANY(rx_sv)))
+#  define RXp_LOGICAL_NPARENS(prog)       (prog->logical_nparens)
+#  define RX_LOGICAL_NPARENS(rx_sv)       (RXp_LOGICAL_NPARENS(ReANY(rx_sv)))
+#  define RXp_LOGICAL_TO_PARNO(prog)      (prog->logical_to_parno)
+#  define RX_LOGICAL_TO_PARNO(rx_sv)      (RXp_LOGICAL_TO_PARNO(ReANY(rx_sv)))
+#  define RXp_PARNO_TO_LOGICAL(prog)      (prog->parno_to_logical)
+#  define RX_PARNO_TO_LOGICAL(rx_sv)      (RXp_PARNO_TO_LOGICAL(ReANY(rx_sv)))
+#  define RXp_PARNO_TO_LOGICAL_NEXT(prog) (prog->parno_to_logical_next)
+#  define RX_PARNO_TO_LOGICAL_NEXT(rx_sv) (RXp_PARNO_TO_LOGICAL_NEXT(ReANY(rx_sv)))
 #  define RXp_NPARENS(prog)               (prog->nparens)
 #  define RX_NPARENS(rx_sv)               (RXp_NPARENS(ReANY(rx_sv)))
 #  define RX_SUBLEN(rx_sv)                (ReANY(rx_sv)->sublen)
@@ -952,6 +970,7 @@ typedef struct regmatch_slab {
 } regmatch_slab;
 
 
+#define REG_FETCH_ABSOLUTE 1
 
 /*
  * ex: set ts=8 sts=4 sw=4 et:
