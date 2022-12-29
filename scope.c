@@ -69,13 +69,25 @@ Perl_stack_grow(pTHX_ SV **sp, SV **p, SSize_t n)
 #define GROW(old) ((old) * 3 / 2)
 #endif
 
+/* for backcomp */
 PERL_SI *
 Perl_new_stackinfo(pTHX_ I32 stitems, I32 cxitems)
+{
+    return new_stackinfo_flags(stitems, cxitems, 0);
+}
+
+/* current flag meanings:
+ *   1 make the new arg stack AvREAL
+ */
+
+PERL_SI *
+Perl_new_stackinfo_flags(pTHX_ I32 stitems, I32 cxitems, UV flags)
 {
     PERL_SI *si;
     Newx(si, 1, PERL_SI);
     si->si_stack = newAV();
-    AvREAL_off(si->si_stack);
+    if (!(flags & 1))
+        AvREAL_off(si->si_stack);
     av_extend(si->si_stack, stitems > 0 ? stitems-1 : 0);
     AvALLOC(si->si_stack)[0] = &PL_sv_undef;
     AvFILLp(si->si_stack) = 0;

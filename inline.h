@@ -3543,10 +3543,14 @@ Perl_switch_argstack(pTHX_ AV *to)
 /* Push, and switch to a new stackinfo, allocating one if none are spare,
  * to get a fresh set of stacks.
  * Update all the interpreter variables like PL_curstackinfo,
- * PL_stack_sp, etc. */
+ * PL_stack_sp, etc.
+ * current flag meanings:
+ *   1 make the new arg stack AvREAL
+ */
+
 
 PERL_STATIC_INLINE void
-Perl_push_stackinfo(pTHX_ I32 type)
+Perl_push_stackinfo(pTHX_ I32 type, UV flags)
 {
     PERL_ARGS_ASSERT_PUSH_STACKINFO;
 
@@ -3559,7 +3563,7 @@ Perl_push_stackinfo(pTHX_ I32 type)
     })
 
     if (!next) {
-        next = new_stackinfo(32, 2048/sizeof(PERL_CONTEXT) - 1);
+        next = new_stackinfo_flags(32, 2048/sizeof(PERL_CONTEXT) - 1, flags);
         next->si_prev = PL_curstackinfo;
         PL_curstackinfo->si_next = next;
     }
@@ -3567,6 +3571,10 @@ Perl_push_stackinfo(pTHX_ I32 type)
     next->si_cxix = -1;
     next->si_cxsubix = -1;
     PUSHSTACK_INIT_HWM(next);
+    if (flags & 1)
+        AvREAL_on(next->si_stack);
+    else
+        AvREAL_off(next->si_stack);
     AvFILLp(next->si_stack) = 0;
     switch_argstack(next->si_stack);
     PL_curstackinfo = next;

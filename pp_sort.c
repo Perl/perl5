@@ -917,7 +917,7 @@ PP(pp_sort)
             SAVEOP();
 
             CATCH_SET(TRUE);
-            push_stackinfo(PERLSI_SORT);
+            push_stackinfo(PERLSI_SORT, 0);
 
             if (!hasargs && !is_xsub) {
                 /* standard perl sub with values passed as $a and $b */
@@ -989,7 +989,7 @@ PP(pp_sort)
 
             cx_popblock(cx);
             CX_POP(cx);
-            POPSTACK;
+            pop_stackinfo();
             CATCH_SET(oldcatch);
         }
         else {

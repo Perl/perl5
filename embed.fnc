@@ -2233,6 +2233,10 @@ ARdp	|OP *	|newSLICEOP	|I32 flags				\
 				|NULLOK OP *listop
 CRp	|PERL_SI *|new_stackinfo|I32 stitems				\
 				|I32 cxitems
+CRp	|PERL_SI *|new_stackinfo_flags					\
+				|I32 stitems				\
+				|I32 cxitems				\
+				|UV flags
 ARdp	|OP *	|newSTATEOP	|I32 flags				\
 				|NULLOK char *label			\
 				|NULLOK OP *o
@@ -2557,7 +2561,8 @@ Adp	|void	|ptr_table_store|NN PTR_TBL_t * const tbl		\
 				|NULLOK const void * const oldsv	\
 				|NN void * const newsv
 Cdp	|void	|push_scope
-Cipx	|void	|push_stackinfo |I32 type
+Cipx	|void	|push_stackinfo |I32 type				\
+				|UV flags
 Adp	|char * |pv_display	|NN SV *dsv				\
 				|NN const char *pv			\
 				|STRLEN cur				\

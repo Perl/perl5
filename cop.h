@@ -1299,7 +1299,7 @@ typedef struct stackinfo PERL_SI;
 #define PUSHSTACKi(type) \
     STMT_START {		\
         PL_stack_sp = sp;       \
-        push_stackinfo(type);   \
+        push_stackinfo(type, 0);\
         sp = PL_stack_sp ;      \
     } STMT_END
 
