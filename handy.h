@@ -2674,6 +2674,10 @@ C<CopyD> is like C<Copy> but returns C<dest>.  Useful
 for encouraging compilers to tail-call
 optimise.
 
+=for apidoc    Am|void  |NewCopy |void* src|void* dest|int nitems|type
+Combines Newx() and Copy() into a single macro. Dest will be allocated
+using Newx() and then src will be copied into it.
+
 =for apidoc    Am|void  |Zero |void* dest|int nitems|type
 =for apidoc_item |void *|ZeroD|void* dest|int nitems|type
 
@@ -2880,6 +2884,11 @@ enum mem_log_type {
 #define MoveD(s,d,n,t)	(MEM_WRAP_CHECK_(n,t) perl_assert_ptr(d), perl_assert_ptr(s), memmove((char*)(d),(const char*)(s), (n) * sizeof(t)))
 #define CopyD(s,d,n,t)	(MEM_WRAP_CHECK_(n,t) perl_assert_ptr(d), perl_assert_ptr(s), memcpy((char*)(d),(const char*)(s), (n) * sizeof(t)))
 #define ZeroD(d,n,t)	(MEM_WRAP_CHECK_(n,t) perl_assert_ptr(d), memzero((char*)(d), (n) * sizeof(t)))
+
+#define NewCopy(s,d,n,t) STMT_START {   \
+    Newx(d,n,t);                        \
+    Copy(s,d,n,t);                      \
+} STMT_END
 
 #define PoisonWith(d,n,t,b)	(MEM_WRAP_CHECK_(n,t) (void)memset((char*)(d), (U8)(b), (n) * sizeof(t)))
 #define PoisonNew(d,n,t)	PoisonWith(d,n,t,0xAB)
