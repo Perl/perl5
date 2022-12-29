@@ -357,6 +357,16 @@ sub is ($$@) {
     unless ($pass) {
 	unshift(@mess, "#      got "._qq($got)."\n",
 		       "# expected "._qq($expected)."\n");
+        if (defined $got and defined $expected and
+            (length($got)>20 or length($expected)>20))
+        {
+            my $p = 0;
+            $p++ while substr($got,$p,1) eq substr($expected,$p,1);
+            push @mess,"#  diff at $p\n";
+            push @mess,"#    after "._qq(substr($got,$p-40<0 ? 0 : $p-40,40))."\n";
+            push @mess,"#     have "._qq(substr($got,$p,40))."\n";
+            push @mess,"#     want "._qq(substr($expected,$p,40))."\n";
+        }
     }
     _ok($pass, _where(), $name, @mess);
 }
@@ -1093,6 +1103,7 @@ sub fresh_perl {
     # it feels like the least-worse thing is to assume that auto-vivification
     # works. At least, this is only going to be a run-time failure, so won't
     # affect tests using this file but not this function.
+    my $trim= delete $runperl_args->{rtrim_result}; # hide from runperl
     $runperl_args->{progfile} ||= $tmpfile;
     $runperl_args->{stderr}     = 1 unless exists $runperl_args->{stderr};
 
@@ -1104,7 +1115,7 @@ sub fresh_perl {
     my $results = runperl(%$runperl_args);
     my $status = $?;    # Not necessary to save this, but it makes it clear to
                         # future maintainers.
-
+    $results=~s/[ \t]+\n/\n/g if $trim;
     # Clean up the results into something a bit more predictable.
     $results  =~ s/\n+$//;
     $results =~ s/at\s+$::tempfile_regexp\s+line/at - line/g;
@@ -1129,6 +1140,11 @@ sub fresh_perl {
 
 sub _fresh_perl {
     my($prog, $action, $expect, $runperl_args, $name) = @_;
+
+    local $Level = $Level + 1;
+
+    # strip trailing whitespace if requested - makes some tests easier
+    $expect=~s/[[:blank:]]+\n/\n/g if $runperl_args->{rtrim_result};
 
     my $results = fresh_perl($prog, $runperl_args);
     my $status = $?;
@@ -1173,7 +1189,7 @@ sub fresh_perl_is {
     # This will make it so the test author doesn't have to know that.
     $expected =~ s/\n+$//;
 
-    local $Level = 2;
+    local $Level = $Level + 1;
     _fresh_perl($prog, 'eq', $expected, $runperl_args, $name);
 }
 
@@ -1185,7 +1201,7 @@ sub fresh_perl_is {
 
 sub fresh_perl_like {
     my($prog, $expected, $runperl_args, $name) = @_;
-    local $Level = 2;
+    local $Level = $Level + 1;
     _fresh_perl($prog, '=~', $expected, $runperl_args, $name);
 }
 
