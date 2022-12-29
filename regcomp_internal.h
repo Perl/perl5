@@ -66,15 +66,57 @@ struct RExC_state_t {
      * independent warning is raised for any given spot */
     Size_t      latest_warn_offset;
 
+    /* Branch reset /(?|...|...)/ gives us two concepts of capture buffer id.
+     * "Logical Parno" is the user visible view with branch reset taken into
+     * account. "Parno" (or physical parno) is the actual capture buffers in
+     * the pattern *NOT* taking into account branch reset. We also maintain
+     * a map of "next" pointers which allow us to skip to the next physical
+     * capture buffer with the same logical id, with 0 representing "none".
+     *
+     * As we compile we keep track of the two different counts using the
+     * 'logical_npar' and 'npar' members, and we keep track of the upper bound
+     * of both in 'total_par' and 'logical_total_par', we also populate
+     * the 'logical_to_parno' map, which gives us the first physical parno
+     * for a given logical parno, and the `parno_to_logical` array which gives
+     * us the logical id for each physical parno. When compilation is
+     * completed we construct the 'parno_to_logical_next' array from the
+     * 'parno_to_logical' array. (We do not bother constructing it during
+     * compilation as we do not need it, and we can construct it in O(N) time
+     * once we are done, but would need more complicated logic during the
+     * compile, because we want the next pointers to go from smallest to
+     * largest, eg, left to right.)
+     *
+     * Logical: $1      $2  $3  $4    $2  $3    $2    $5
+     * Physical: 1       2   3   4     5   6     7     8
+     * Next:     0       5   6   0     7   0     0     0
+     * Pattern /(a) (?| (b) (c) (d) | (e) (f) | (g) ) (h)/
+     *
+     * As much as possible the internals use and store the physical id of
+     * of capture buffers. We decode the physical to the logical only when
+     * we need to, for instance when someone use $2.
+     *
+     * Note that when branch reset is not used logical and physical are the
+     * same and the next data would be all zero. So when branch reset is not
+     * used we do not need to populate this data into the final regexp.
+     *
+     */
+    I32         *logical_to_parno;        /* logical_parno to parno */
+    I32         *parno_to_logical;        /* parno to logical_parno */
+    I32         *parno_to_logical_next;   /* parno to next (greater value)
+                                             parno with the same
+                                             logical_parno as parno.*/
+
     I32         npar;                   /* Capture buffer count so far in the
                                            parse, (OPEN) plus one. ("par" 0 is
                                            the whole pattern)*/
+    I32         logical_npar;           /* Logical version of npar */
     I32         total_par;              /* During initial parse, is either 0,
                                            or -1; the latter indicating a
                                            reparse is needed.  After that pass,
                                            it is what 'npar' became after the
                                            pass.  Hence, it being > 0 indicates
                                            we are in a reparse situation */
+    I32         logical_total_par;      /* Logical version to total par */
     I32         nestroot;               /* root parens we are in - used by
                                            accept */
     I32         seen_zerolen;
@@ -157,6 +199,11 @@ struct RExC_state_t {
 #define RExC_seen       (pRExC_state->seen)
 #define RExC_size       (pRExC_state->size)
 #define RExC_maxlen        (pRExC_state->maxlen)
+#define RExC_logical_npar           (pRExC_state->logical_npar)
+#define RExC_logical_total_parens   (pRExC_state->logical_total_par)
+#define RExC_logical_to_parno       (pRExC_state->logical_to_parno)
+#define RExC_parno_to_logical       (pRExC_state->parno_to_logical)
+#define RExC_parno_to_logical_next  (pRExC_state->parno_to_logical_next)
 #define RExC_npar       (pRExC_state->npar)
 #define RExC_total_parens       (pRExC_state->total_par)
 #define RExC_parens_buf_size    (pRExC_state->parens_buf_size)
@@ -1193,5 +1240,6 @@ static const scan_data_t zero_scan_data = {
 #define DUMPUNTIL(b,e)                                          \
     CLEAR_OPTSTART;                                             \
     node = dumpuntil(r,start,(b),(e),last,sv,indent+1,depth+1);
+
 
 #endif /* REGCOMP_INTERNAL_H */

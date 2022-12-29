@@ -1508,19 +1508,25 @@ sub run_tests {
     }
 
     {
-        my $res="";
+        no warnings 'uninitialized';
+        my $res = "";
 
         if ('1' =~ /(?|(?<digit>1)|(?<digit>2))/) {
             $res = "@{$- {digit}}";
         }
-        is($res, "1",
-	   "Check that (?|...) doesnt cause dupe entries in the names array");
+        is($res, "1 ",
+	   "Check that repeated named captures in branch reset (?|...) work as expected");
+        if ('2' =~ /(?|(?<digit>1)|(?<digit>2))/) {
+            $res = "@{$- {digit}}";
+        }
+        is($res, " 2",
+	   "Check that repeated named captures in branch reset (?|...) work as expected");
 
         $res = "";
         if ('11' =~ /(?|(?<digit>1)|(?<digit>2))(?&digit)/) {
             $res = "@{$- {digit}}";
         }
-        is($res, "1",
+        is($res, "1 ",
 	   "Check that (?&..) to a buffer inside a (?|...) goes to the leftmost");
     }
 
@@ -2586,12 +2592,13 @@ Starting parse and generation
                 |    |                atom   
 <>              |   8|            tail~ OPEN1 'b' (4) -> REFN
                 |    |            Setting close paren #1 to 8
-                |  10|          lsbr~ tying lastbr REFN0 (6) to ender CLOSE1 'b' (8) offset 2
-                |    |            tail~ REFN0 (6) -> CLOSE
+                |  10|          lsbr~ tying lastbr REFN (6) to ender CLOSE1 'b' (8) offset 2
+                |    |            tail~ REFN (6) -> CLOSE
 Unmatched ( in regex; marked by <-- HERE in m/(?{a})( <-- HERE ?<b>\g{c}/ at - line 1.
 Freeing REx: "(?{a})(?<b>\g{c}"
 EOF_DEBUG_OUT
-                      {}, "Github Issue #19350, assert fail in "
+                      {rtrim_result=>1},
+                      "Github Issue #19350, assert fail in "
                           . "Debug => 'ALL' from malformed qr// (heisenbug try $try)");
     }
     {   # Related to GH $19350 but segfaults instead of asserts, and does so reliably, not randomly.
@@ -2612,8 +2619,8 @@ Starting parse and generation
                 |    |              piec   
                 |    |                atom   
 <)(?<c>x)(?&b)> |   5|            tail~ OPEN1 'b' (1) -> REFN
-                |   7|          lsbr~ tying lastbr REFN0 (3) to ender CLOSE1 'b' (5) offset 2
-                |    |            tail~ REFN0 (3) -> CLOSE
+                |   7|          lsbr~ tying lastbr REFN (3) to ender CLOSE1 'b' (5) offset 2
+                |    |            tail~ REFN (3) -> CLOSE
 <(?<c>x)(?&b)>  |    |      piec   
                 |    |        atom   
 <?<c>x)(?&b)>   |    |          reg    
@@ -2624,7 +2631,7 @@ Starting parse and generation
                 |  13|          lsbr~ tying lastbr EXACT <x> (9) to ender CLOSE2 'c' (11) offset 2
                 |    |            tail~ EXACT <x> (9) -> CLOSE
 <(?&b)>         |    |      tail~ OPEN1 'b' (1)  
-                |    |          ~ REFN0 (3)  
+                |    |          ~ REFN (3)
                 |    |          ~ CLOSE1 'b' (5) -> OPEN
                 |    |      piec   
                 |    |        atom   
@@ -2634,7 +2641,7 @@ Starting parse and generation
                 |    |          ~ CLOSE2 'c' (11) -> GOSUB
                 |  17|  lsbr~ tying lastbr OPEN1 'b' (1) to ender END (16) offset 15
                 |    |    tail~ OPEN1 'b' (1)  
-                |    |        ~ REFN0 (3)  
+                |    |        ~ REFN (3)
                 |    |        ~ CLOSE1 'b' (5)  
                 |    |        ~ OPEN2 'c' (7)  
                 |    |        ~ EXACT <x> (9)  
@@ -2652,8 +2659,8 @@ Starting parse and generation
                 |    |              piec   
                 |    |                atom   
 <)(?<c>x)(?&b)> |   5|            tail~ OPEN1 'b' (1) -> REFN
-                |   7|          lsbr~ tying lastbr REFN12 'c' (3) to ender CLOSE1 'b' (5) offset 2
-                |    |            tail~ REFN12 'c' (3) -> CLOSE
+                |   7|          lsbr~ tying lastbr REFN2 'c' (3) to ender CLOSE1 'b' (5) offset 2
+                |    |            tail~ REFN2 'c' (3) -> CLOSE
 <(?<c>x)(?&b)>  |    |      piec   
                 |    |        atom   
 <?<c>x)(?&b)>   |    |          reg    
@@ -2664,7 +2671,7 @@ Starting parse and generation
                 |  13|          lsbr~ tying lastbr EXACT <x> (9) to ender CLOSE2 'c' (11) offset 2
                 |    |            tail~ EXACT <x> (9) -> CLOSE
 <(?&b)>         |    |      tail~ OPEN1 'b' (1)  
-                |    |          ~ REFN12 'c' (3)  
+                |    |          ~ REFN2 'c' (3)
                 |    |          ~ CLOSE1 'b' (5) -> OPEN
                 |    |      piec   
                 |    |        atom   
@@ -2674,7 +2681,7 @@ Starting parse and generation
                 |    |          ~ CLOSE2 'c' (11) -> GOSUB
                 |  17|  lsbr~ tying lastbr OPEN1 'b' (1) to ender END (16) offset 15
                 |    |    tail~ OPEN1 'b' (1)  
-                |    |        ~ REFN12 'c' (3)  
+                |    |        ~ REFN2 'c' (3)
                 |    |        ~ CLOSE1 'b' (5)  
                 |    |        ~ OPEN2 'c' (7)  
                 |    |        ~ EXACT <x> (9)  
@@ -2684,7 +2691,8 @@ Required size 16 nodes
 first at 3
 Freeing REx: "(?<b>\g{c})(?<c>x)(?&b)"
 EOF_DEBUG_OUT
-                      {}, "Related to Github Issue #19350, forward \\g{x} pattern segv under use re Debug => 'PARSE'");
+                      {rtrim_result=>1},
+                      "Related to Github Issue #19350, forward \\g{x} pattern segv under use re Debug => 'PARSE'");
     }
 
     {   # GH 20009

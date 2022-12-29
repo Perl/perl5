@@ -7920,6 +7920,18 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
           do_ref:
             type = OP(scan);
             n = ARG(scan);  /* which paren pair */
+            if (rex->logical_to_parno) {
+                n = rex->logical_to_parno[n];
+                do {
+                    if (rex->lastparen < n || rex->offs[n].start == -1 || rex->offs[n].end == -1) {
+                        n = rex->parno_to_logical_next[n];
+                    }
+                    else {
+                        break;
+                    }
+                } while(n);
+                if (!n) sayNO;
+            }
 
           do_nref_ref_common:
             ln = rex->offs[n].start;
@@ -11818,7 +11830,7 @@ Perl_reg_named_buff_fetch(pTHX_ REGEXP * const r, SV * const namesv,
                     && RXp_OFFS_VALID(rx,nums[i]))
                 {
                     ret = newSVpvs("");
-                    CALLREG_NUMBUF_FETCH(r, nums[i], ret);
+                    Perl_reg_numbered_buff_fetch_flags(aTHX_ r, nums[i], ret, REG_FETCH_ABSOLUTE);
                     if (!retarray)
                         return ret;
                 } else {
@@ -11971,16 +11983,24 @@ Perl_reg_named_buff_all(pTHX_ REGEXP * const r, const U32 flags)
 }
 
 void
-Perl_reg_numbered_buff_fetch(pTHX_ REGEXP * const r, const I32 paren,
+Perl_reg_numbered_buff_fetch(pTHX_ REGEXP * const re, const I32 paren,
                              SV * const sv)
 {
-    struct regexp *const rx = ReANY(r);
+    PERL_ARGS_ASSERT_REG_NUMBERED_BUFF_FETCH;
+    Perl_reg_numbered_buff_fetch_flags(aTHX_ re, paren, sv, 0);
+}
+
+void
+Perl_reg_numbered_buff_fetch_flags(pTHX_ REGEXP * const re, const I32 paren,
+                                   SV * const sv, U32 flags)
+{
+    struct regexp *const rx = ReANY(re);
     char *s = NULL;
     SSize_t i,t = 0;
     SSize_t s1, t1;
     I32 n = paren;
 
-    PERL_ARGS_ASSERT_REG_NUMBERED_BUFF_FETCH;
+    PERL_ARGS_ASSERT_REG_NUMBERED_BUFF_FETCH_FLAGS;
 
     if (      n == RX_BUFF_IDX_CARET_PREMATCH
            || n == RX_BUFF_IDX_CARET_FULLMATCH
@@ -11993,7 +12013,7 @@ Perl_reg_numbered_buff_fetch(pTHX_ REGEXP * const r, const I32 paren,
              *    $r = qr/.../;
              *    /$qr/p;
              * the KEEPCOPY is set on the PMOP rather than the regex */
-            if (PL_curpm && r == PM_GETRE(PL_curpm))
+            if (PL_curpm && re == PM_GETRE(PL_curpm))
                  keepcopy = cBOOL(PL_curpm->op_pmflags & PMf_KEEPCOPY);
         }
         if (!keepcopy)
@@ -12021,18 +12041,32 @@ Perl_reg_numbered_buff_fetch(pTHX_ REGEXP * const r, const I32 paren,
         s = rx->subbeg - rx->suboffset + t;
         i = rx->sublen + rx->suboffset - t;
     }
-    else
-    if (inRANGE(n, 0, (I32)rx->nparens) &&
-        ((s1 = RXp_OFFS_START(rx,n)) != -1  &&
-         (t1 = RXp_OFFS_END(rx,n))   != -1))
-    {
-        /* $&, ${^MATCH},  $1 ... */
-        i = t1 - s1;
-        s = rx->subbeg + s1 - rx->suboffset;
+    else /* when flags is true we do an absolute lookup, and compare against rx->nparens */
+    if (inRANGE(n, 0, flags ? (I32)rx->nparens : (I32)rx->logical_nparens)) {
+        I32 *map = (!flags && n) ? rx->logical_to_parno : NULL;
+        I32 true_parno = map ? map[n] : n;
+        do {
+            if (((s1 = RXp_OFFS_START(rx,true_parno)) != -1)  &&
+                ((t1 = RXp_OFFS_END(rx,true_parno)) != -1))
+            {
+                /* $&, ${^MATCH}, $1 ... */
+                i = t1 - s1;
+                s = rx->subbeg + s1 - rx->suboffset;
+                goto found_it;
+            }
+            else if (map) {
+                true_parno = rx->parno_to_logical_next[true_parno];
+            }
+            else {
+                break;
+            }
+        } while (true_parno);
+        goto ret_undef;
     } else {
         goto ret_undef;
     }
 
+  found_it:
     assert(s >= rx->subbeg);
     assert((STRLEN)rx->sublen >= (STRLEN)((s - rx->subbeg) + i) );
     if (i >= 0) {
@@ -12120,7 +12154,7 @@ Perl_reg_numbered_buff_length(pTHX_ REGEXP * const r, const SV * const sv,
     switch (paren) {
       case RX_BUFF_IDX_CARET_PREMATCH: /* ${^PREMATCH} */
       case RX_BUFF_IDX_PREMATCH:       /* $` */
-        if ( (i= RXp_OFFS_START(rx,0)) != -1) {
+        if ( (i = RXp_OFFS_START(rx,0)) != -1) {
             if (i > 0) {
                 s1 = 0;
                 t1 = i;
@@ -12131,29 +12165,38 @@ Perl_reg_numbered_buff_length(pTHX_ REGEXP * const r, const SV * const sv,
 
       case RX_BUFF_IDX_CARET_POSTMATCH: /* ${^POSTMATCH} */
       case RX_BUFF_IDX_POSTMATCH:       /* $' */
-        if ( (i = RXp_OFFS_END(rx,0)) != -1) {
+        if ( (i = RXp_OFFS_END(rx,0)) != -1 ) {
             i = rx->sublen - i;
             if (i > 0) {
-                    s1 = RXp_OFFS_END(rx,0);
-                    t1 = rx->sublen;
-                    goto getlen;
+                s1 = rx->offs[0].end;
+                t1 = rx->sublen;
+                goto getlen;
             }
         }
         return 0;
 
       default: /* $& / ${^MATCH}, $1, $2, ... */
-        if (paren <= (I32)rx->nparens &&
-            (s1 = RXp_OFFS_START(rx,paren)) != -1 &&
-            (t1 = RXp_OFFS_END(rx,paren))   != -1)
-        {
-            i = t1 - s1;
-            goto getlen;
-        } else {
-          warn_undef:
-            if (ckWARN(WARN_UNINITIALIZED))
-                report_uninit((const SV *)sv);
-            return 0;
+        if (paren <= (I32)rx->logical_nparens) {
+            I32 true_paren = rx->logical_to_parno
+                             ? rx->logical_to_parno[paren]
+                             : paren;
+            do {
+                if (((s1 = RXp_OFFS_START(rx,true_paren)) != -1) &&
+                    ((t1 = RXp_OFFS_END(rx,true_paren)) != -1))
+                {
+                    i = t1 - s1;
+                    goto getlen;
+                } else if (rx->parno_to_logical_next) {
+                    true_paren = rx->parno_to_logical_next[true_paren];
+                } else {
+                    break;
+                }
+            } while(true_paren);
         }
+      warn_undef:
+        if (ckWARN(WARN_UNINITIALIZED))
+            report_uninit((const SV *)sv);
+        return 0;
     }
   getlen:
     if (i > 0 && RXp_MATCH_UTF8(rx)) {

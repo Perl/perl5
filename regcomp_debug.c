@@ -478,7 +478,6 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
         U32 parno= (op == ACCEPT)              ? (U32)ARG2L(o) :
                    (op == OPEN || op == CLOSE) ? (U32)PARNO(o) :
                                                  (U32)ARG(o);
-        Perl_sv_catpvf(aTHX_ sv, "%" UVuf, (UV)parno);        /* Parenth number */
         if ( RXp_PAREN_NAMES(prog) ) {
             name_list= MUTABLE_AV(progi->data->data[progi->name_list_idx]);
         } else if ( pRExC_state ) {
@@ -486,6 +485,14 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
         }
         if ( name_list ) {
             if ( k != REF || (op < REFN)) {
+                UV logical_parno = parno;
+                if (prog->parno_to_logical)
+                    logical_parno = prog->parno_to_logical[parno];
+
+                Perl_sv_catpvf(aTHX_ sv, "%" UVuf, (UV)logical_parno);     /* Parenth number */
+                if (parno != logical_parno)
+                    Perl_sv_catpvf(aTHX_ sv, "/%" UVuf, (UV)parno);        /* Parenth number */
+
                 SV **name= av_fetch_simple(name_list, parno, 0 );
                 if (name)
                     Perl_sv_catpvf(aTHX_ sv, " '%" SVf "'", SVfARG(*name));
@@ -511,6 +518,15 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
                     Perl_sv_catpvf(aTHX_ sv, " '%" SVf "'", SVfARG(*name));
                 }
             }
+        } else if (parno>0) {
+            UV logical_parno = parno;
+            if (prog->parno_to_logical)
+                logical_parno = prog->parno_to_logical[parno];
+
+            Perl_sv_catpvf(aTHX_ sv, "%" UVuf, (UV)logical_parno);     /* Parenth number */
+            if (logical_parno != parno)
+                Perl_sv_catpvf(aTHX_ sv, "/%" UVuf, (UV)parno);     /* Parenth number */
+
         }
         if ( k == REF && reginfo) {
             U32 n = ARG(o);  /* which paren pair */
@@ -528,6 +544,10 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
         }
     } else if (k == GOSUB) {
         AV *name_list= NULL;
+        IV parno = ARG(o);
+        IV logical_parno = (parno && prog->parno_to_logical)
+                         ? prog->parno_to_logical[parno]
+                         : parno;
         if ( RXp_PAREN_NAMES(prog) ) {
             name_list= MUTABLE_AV(progi->data->data[progi->name_list_idx]);
         } else if ( pRExC_state ) {
@@ -535,7 +555,11 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
         }
 
         /* Paren and offset */
-        Perl_sv_catpvf(aTHX_ sv, "%d[%+d:%d]", (int)ARG(o),(int)ARG2L(o),
+        Perl_sv_catpvf(aTHX_ sv, "%" IVdf, logical_parno);
+        if (logical_parno != parno)
+            Perl_sv_catpvf(aTHX_ sv, "/%" IVdf, parno);
+
+        Perl_sv_catpvf(aTHX_ sv, "[%+d:%d]", (int)ARG2L(o),
                 (int)((o + (int)ARG2L(o)) - progi->program) );
         if (name_list) {
             SV **name= av_fetch_simple(name_list, ARG(o), 0 );

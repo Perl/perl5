@@ -638,13 +638,15 @@ Perl_magic_regdata_cnt(pTHX_ SV *sv, MAGIC *mg)
             const SSize_t n = (SSize_t)mg->mg_obj;
             if (n == '+') {          /* @+ */
                 /* return the number possible */
-                return RX_NPARENS(rx);
+                return RX_LOGICAL_NPARENS(rx);
             } else {   /* @- @^CAPTURE  @{^CAPTURE} */
                 I32 paren = RX_LASTPAREN(rx);
 
                 /* return the last filled */
                 while ( paren >= 0 && !RX_OFFS_VALID(rx,paren) )
                     paren--;
+                if (paren && RX_PARNO_TO_LOGICAL(rx))
+                    paren = RX_PARNO_TO_LOGICAL(rx)[paren];
                 if (n == '-') {
                     /* @- */
                     return (U32)paren;
@@ -665,21 +667,28 @@ int
 Perl_magic_regdatum_get(pTHX_ SV *sv, MAGIC *mg)
 {
     PERL_ARGS_ASSERT_MAGIC_REGDATUM_GET;
+    REGEXP * const rx = PL_curpm ? PM_GETRE(PL_curpm) : NULL;
 
-    if (PL_curpm) {
-        REGEXP * const rx = PM_GETRE(PL_curpm);
-        if (rx) {
-            const SSize_t n = (SSize_t)mg->mg_obj;
-            /* @{^CAPTURE} does not contain $&, so we need to increment by 1 */
-            const I32 paren = mg->mg_len
-                            + (n == '\003' ? 1 : 0);
-            SSize_t s;
-            SSize_t t;
-            if (paren < 0)
-                return 0;
-            if (paren <= (I32)RX_NPARENS(rx) &&
-                ((s = RX_OFFS_START(rx,paren)) != -1) &&
-                ((t = RX_OFFS_END(rx,paren))   != -1))
+    if (rx) {
+        const SSize_t n = (SSize_t)mg->mg_obj;
+        /* @{^CAPTURE} does not contain $&, so we need to increment by 1 */
+        const I32 paren = mg->mg_len
+                        + (n == '\003' ? 1 : 0);
+        SSize_t s;
+        SSize_t t;
+        if (paren < 0)
+            return 0;
+        if (n != '+' && n != '-') {
+            CALLREG_NUMBUF_FETCH(rx,paren,sv);
+            return 0;
+        }
+        if (paren <= (I32)RX_LOGICAL_NPARENS(rx)) {
+            I32 true_paren = RX_LOGICAL_TO_PARNO(rx)
+                             ? RX_LOGICAL_TO_PARNO(rx)[paren]
+                             : paren;
+            do {
+                if (((s = RX_OFFS_START(rx,true_paren)) != -1) &&
+                    ((t = RX_OFFS_END(rx,true_paren)) != -1))
                 {
                     SSize_t i;
 
@@ -687,10 +696,6 @@ Perl_magic_regdatum_get(pTHX_ SV *sv, MAGIC *mg)
                         i = t;
                     else if (n == '-')           /* @- */
                         i = s;
-                    else {                        /* @^CAPTURE @{^CAPTURE} */
-                        CALLREG_NUMBUF_FETCH(rx,paren,sv);
-                        return 0;
-                    }
 
                     if (RX_MATCH_UTF8(rx)) {
                         const char * const b = RX_SUBBEG(rx);
@@ -703,6 +708,11 @@ Perl_magic_regdatum_get(pTHX_ SV *sv, MAGIC *mg)
                     sv_setuv(sv, i);
                     return 0;
                 }
+                if (RX_PARNO_TO_LOGICAL_NEXT(rx))
+                    true_paren = RX_PARNO_TO_LOGICAL_NEXT(rx)[true_paren];
+                else
+                    break;
+            } while (true_paren);
         }
     }
     sv_set_undef(sv);
@@ -1095,6 +1105,8 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
     case '\016':		/* ^N */
         if (PL_curpm && (rx = PM_GETRE(PL_curpm))) {
             paren = RX_LASTCLOSEPAREN(rx);
+            if (RX_PARNO_TO_LOGICAL(rx))
+                paren = RX_PARNO_TO_LOGICAL(rx)[paren];
             if (paren)
                 goto do_numbuf_fetch;
         }
