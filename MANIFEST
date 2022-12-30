@@ -6216,6 +6216,7 @@ t/re/rxcode.t			See if /(?{ code })/ works
 t/re/script_run.t		See if script runs works
 t/re/speed.t			See if optimisations are keeping things fast
 t/re/speed_thr.t		ditto under threads
+t/re/stclass_threads.t		Test if stclass is preserved across threads
 t/re/subst.t			See if substitution works
 t/re/subst_amp.t		See if $&-related substitution works
 t/re/subst_wamp.t		See if substitution works with $& present

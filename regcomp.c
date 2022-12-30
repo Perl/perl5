@@ -13436,6 +13436,15 @@ Perl_regdupe_internal(pTHX_ REGEXP * const rx, CLONE_PARAMS *param)
     else
         reti->data = NULL;
 
+    if (ri->regstclass && !reti->regstclass) {
+        /* Assume that the regstclass is a regnode which is inside of the
+         * program which we have to copy over */
+        regnode *node= ri->regstclass;
+        assert(node >= ri->program && (node - ri->program) < len);
+        reti->regstclass = reti->program + (node - ri->program);
+    }
+
+
     reti->name_list_idx = ri->name_list_idx;
 
     SetProgLen(reti, len);
