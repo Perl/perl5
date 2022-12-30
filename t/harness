@@ -30,7 +30,7 @@ my %must_be_executed_serially = map { $_ => 1 } @_must_be_executed_serially;
 # Test files which must be executed alone.
 #
 # List files which cannot be run at the same time as any other test. Typically
-# this is used to handle tests which are senstivie to load and which might
+# this is used to handle tests which are sensitive to load and which might
 # fail if they were run at the same time as something load intensive.
 #
 # Example: ../dist/threads-shared/t/waithires.t
@@ -293,7 +293,7 @@ sub _compute_tests_and_ordering($) {
     # and lastly add in the files which must be run by themselves without
     # any other tests /at all/ running at the same time.
     push @seq, map { +{ seq => $_ } } sort @alone_files if @alone_files;
-    
+
     return \@seq;
 }
 
