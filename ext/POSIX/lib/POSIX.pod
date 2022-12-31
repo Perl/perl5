@@ -1146,9 +1146,10 @@ parameter is stored.  The optional third parameter is ignored if it is
 larger than the actual length of the second parameter string.
 
 Use C<undef> as the second parameter to this function to get the effect
-of passing NULL as the second parameter to C<mbtowc>.  This resets any
-shift state to its initial value.  The return value is undefined if
-C<mbrtowc> was substituted, so you should never rely on it.
+of passing NULL as the second parameter to C<mbtowc>.  This ignores the
+first parameter, and resets any shift state to its initial value.  The
+return value is undefined if C<mbrtowc> was substituted, so you should
+never rely on it.
 
 When the second parameter is a scalar containing a value that either is
 a PV string or can be forced into one, the return value is the number of
@@ -2214,9 +2215,10 @@ L</mblen> and L</mbtowc> may be used to roll your own decoding/encoding
 of other types of multi-byte locales.
 
 Use C<undef> as the first parameter to this function to get the effect
-of passing NULL as the first parameter to C<wctomb>.  This resets any
-shift state to its initial value.  The return value is undefined if
-C<wcrtomb> was substituted, so you should never rely on it.
+of passing NULL as the first parameter to C<wctomb>.  This ignores the
+second parameter, and resets any shift state to its initial value.  The
+return value is undefined if C<wcrtomb> was substituted, so you should
+never rely on it.
 
 When the first parameter is a scalar, the code point contained in the
 scalar second parameter is converted into a multi-byte string and stored
