@@ -1,16 +1,20 @@
 use strict;
 use warnings;
-use Carp;
 
 BEGIN {
     chdir 't' if -d 't';
     @INC = qw(. ../lib);
 }
 
-our $db ;
+use Carp;
+use File::Temp qw(tempdir);
 
+my $tempdir;
 {
-    chdir 't' if -d 't';
+    $tempdir = tempdir( "./DBMFXXXXXXXX", CLEANUP => 1);
+    push @INC, $tempdir;
+    chdir $tempdir or die "Failed to chdir to '$tempdir': $!";
+    @INC[-1] = "../../lib";
     if ( ! -d 'DBM_Filter')
     {
         mkdir 'DBM_Filter', 0777 
@@ -18,7 +22,9 @@ our $db ;
     }
 }
 
-END { rmdir 'DBM_Filter' }
+##### Keep above code identical to 02core.t #####
+
+our $db;
 
 sub writeFile
 {
@@ -34,7 +40,7 @@ sub runFilter
     my $name = shift ;
     my $filter = shift ;
 
-print "# runFilter $name\n" ;
+    #print "# runFilter $name\n" ;
     my $filename = "DBM_Filter/$name.pm";
     $filter = "package DBM_Filter::$name ;\n$filter"
         unless $filter =~ /^\s*package/ ;
