@@ -67,12 +67,6 @@ static I32 read_e_script(pTHX_ int idx, SV *buf_sv, int maxlen);
 #  define validate_suid(rsfp) S_validate_suid(aTHX_ rsfp)
 #endif
 
-#define CALL_BODY_SUB(myop) \
-    if (PL_op == (myop)) \
-        PL_op = PL_ppaddr[OP_ENTERSUB](aTHX); \
-    if (PL_op) \
-        CALLRUNOPS(aTHX);
-
 #define CALL_LIST_BODY(cv) \
     PUSHMARK(PL_stack_sp); \
     call_sv(MUTABLE_SV((cv)), G_EVAL|G_DISCARD|G_VOID);
@@ -3087,6 +3081,8 @@ Perl_call_sv(pTHX_ SV *sv, volatile I32 flags)
     if (!(flags & G_NOARGS))
         myop.op_flags |= OPf_STACKED;
     myop.op_flags |= OP_GIMME_REVERSE(flags);
+    myop.op_ppaddr = PL_ppaddr[OP_ENTERSUB];
+    myop.op_type = OP_ENTERSUB;
     SAVEOP();
     PL_op = (OP*)&myop;
 
@@ -3119,13 +3115,11 @@ Perl_call_sv(pTHX_ SV *sv, volatile I32 flags)
             method_op.op_ppaddr = PL_ppaddr[OP_METHOD];
             method_op.op_type = OP_METHOD;
         }
-        myop.op_ppaddr = PL_ppaddr[OP_ENTERSUB];
-        myop.op_type = OP_ENTERSUB;
     }
 
     if (!(flags & G_EVAL)) {
         CATCH_SET(TRUE);
-        CALL_BODY_SUB((OP*)&myop);
+        CALLRUNOPS(aTHX);
         retval = PL_stack_sp - (PL_stack_base + oldmark);
         CATCH_SET(oldcatch);
     }
@@ -3142,7 +3136,7 @@ Perl_call_sv(pTHX_ SV *sv, volatile I32 flags)
         switch (ret) {
         case 0:
  redo_body:
-            CALL_BODY_SUB((OP*)&myop);
+            CALLRUNOPS(aTHX);
             retval = PL_stack_sp - (PL_stack_base + oldmark);
             if (!(flags & G_KEEPERR)) {
                 CLEAR_ERRSV();
