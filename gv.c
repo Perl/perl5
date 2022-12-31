@@ -4079,7 +4079,7 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
 
   {
     dSP;
-    BINOP myop;
+    UNOP myop;
     SV* res;
     const bool oldcatch = CATCH_GET;
     I32 oldmark, nret;
@@ -4091,10 +4091,11 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
                     ? G_SCALAR : GIMME_V;
 
     CATCH_SET(TRUE);
-    Zero(&myop, 1, BINOP);
-    myop.op_last = (OP *) &myop;
-    myop.op_next = NULL;
+    Zero(&myop, 1, UNOP);
     myop.op_flags = OPf_STACKED;
+    myop.op_ppaddr = PL_ppaddr[OP_ENTERSUB];
+    myop.op_type = OP_ENTERSUB;
+
 
     switch (gimme) {
         case G_VOID:
@@ -4134,9 +4135,7 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
     PUSHs(MUTABLE_SV(cv));
     PUTBACK;
     oldmark = TOPMARK;
-
-    if ((PL_op = PL_ppaddr[OP_ENTERSUB](aTHX)))
-      CALLRUNOPS(aTHX);
+    CALLRUNOPS(aTHX);
     LEAVE;
     SPAGAIN;
     nret = SP - (PL_stack_base + oldmark);
