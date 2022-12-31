@@ -1,14 +1,20 @@
-
 use strict;
 use warnings;
-use Carp;
 
-my %files = ();
-
-use lib '.';
-
-{
+BEGIN {
     chdir 't' if -d 't';
+    @INC = qw(. ../lib);
+}
+
+use Carp;
+use File::Temp qw(tempdir);
+
+my $tempdir;
+{
+    $tempdir = tempdir( "./DBMFXXXXXXXX", CLEANUP => 1);
+    push @INC, $tempdir;
+    chdir $tempdir or die "Failed to chdir to '$tempdir': $!";
+    @INC[-1] = "../../lib";
     if ( ! -d 'DBM_Filter')
     {
         mkdir 'DBM_Filter', 0777 
@@ -16,7 +22,10 @@ use lib '.';
     }
 }
 
-END { rmdir 'DBM_Filter' }
+##### Keep above code identical to 01error.t #####
+
+our $db;
+my %files = ();
 
 sub writeFile
 {
@@ -27,8 +36,6 @@ sub writeFile
     close F;
     $files{"DBM_Filter/$filename.pm"} ++;
 }
-
-END { unlink keys %files if keys %files }
 
 use Test::More;
 
