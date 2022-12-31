@@ -7989,23 +7989,20 @@ S_assert_uft8_cache_coherent(pTHX_ const char *const func, STRLEN from_cache,
 }
 
 /*
-=for apidoc sv_eq
+=for apidoc      sv_eq
+=for apidoc_item sv_eq_flags
 
-Returns a boolean indicating whether the strings in the two SVs are
-identical.  Is UTF-8 and S<C<'use bytes'>> aware, handles get magic, and will
-coerce its args to strings if necessary.
+These each return a boolean indicating whether or not the strings in the two
+SVs are equal.  If S<C<'use bytes'>> is in effect, the comparison is
+byte-by-byte; otherwise character-by-character.  Each will coerce its args to
+strings if necessary.
 
-This function does not handle operator overloading. For a version that does,
-see instead C<sv_streq>.
+They differ only in that C<sv_eq> always processes get magic, while
+C<sv_eq_flags> processes get magic only when the C<flags> parameter has the
+C<SV_GMAGIC> bit set.
 
-=for apidoc sv_eq_flags
-
-Returns a boolean indicating whether the strings in the two SVs are
-identical.  Is UTF-8 and S<C<'use bytes'>> aware and coerces its args to strings
-if necessary.  If the flags has the C<SV_GMAGIC> bit set, it handles get-magic, too.
-
-This function does not handle operator overloading. For a version that does,
-see instead C<sv_streq_flags>.
+These functions do not handle operator overloading.  For versions that do,
+see instead C<L</sv_streq>> or C<L</sv_streq_flags>>.
 
 =cut
 */
