@@ -1246,6 +1246,11 @@ typedef enum {
 } locale_category_index;
 
 #ifdef USE_LOCALE
+
+/* And a count of all the individual locale categories, mainly for use in array
+ * declarations */
+#  define LOCALE_CATEGORIES_COUNT_        LC_ALL_INDEX_
+
 #  if defined(USE_ITHREADS) && ! defined(NO_LOCALE_THREADS)
 #    define USE_LOCALE_THREADS
 #  endif
