@@ -123,9 +123,7 @@ if ($define{USE_ITHREADS}) {
     }
 }
 
-$define{MULTIPLICITY} ||=
-    $define{USE_ITHREADS} ||
-    $define{PERL_IMPLICIT_CONTEXT} ;
+$define{MULTIPLICITY} ||= $define{PERL_IMPLICIT_CONTEXT} ;
 
 if ($define{USE_ITHREADS} && ! $define{WIN32}) {
     $define{USE_REENTRANT_API} = 1;
