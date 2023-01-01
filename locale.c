@@ -1712,7 +1712,8 @@ S_calculate_LC_ALL(pTHX_ const char ** individ_locales)
     names_len++;    /* Trailing '\0' */
 
     /* Allocate enough space for the aggregated string */
-    SAVEFREEPV(Newxz(aggregate_locale, names_len, char));
+    Newxz(aggregate_locale, names_len, char);
+    SAVEFREEPV(aggregate_locale);
 
     /* Then fill it in */
     for (i = 0; i < NOMINAL_LC_ALL_INDEX; i++) {
@@ -6475,10 +6476,8 @@ S_get_displayable_string(pTHX_
      * If UTF-8, all are the largest possible code point; otherwise all are a
      * single byte.  '(2 + 1)'  is from each byte takes 2 characters to
      * display, and a blank (or NUL for the final one) after it */
-    SAVEFREEPV(Newxz(ret,
-                     (e - s) * (2 + 1)
-                             * ((is_utf8) ? UVSIZE : 1),
-                     char));
+    Newxz(ret, (e - s) * (2 + 1) * ((is_utf8) ? UVSIZE : 1), char);
+    SAVEFREEPV(ret);
 
     while (t < e) {
         UV cp = (is_utf8)
