@@ -146,11 +146,15 @@ if (! $define{NO_LOCALE}) {
 
 # https://en.wikipedia.org/wiki/Microsoft_Visual_C%2B%2B#Internal_version_numbering
 my $cctype = $ARGS{CCTYPE} =~ s/MSVC//r;
-if ($define{USE_ITHREADS} && ! $define{NO_LOCALE_THREADS}) {
+if (   $define{USE_ITHREADS}
+    && $define{USE_LOCALE}
+    && ! $define{NO_LOCALE_THREADS})
+{
     $define{USE_LOCALE_THREADS} = 1;
 }
 
 if (   $define{HAS_POSIX_2008_LOCALE}
+    && $define{USE_LOCALE}
     && (! $define{HAS_SETLOCALE} || (     $define{USE_LOCALE_THREADS}
                                      && ! $define{NO_POSIX_2008_LOCALE})
                                      && ! $define{NO_THREAD_SAFE_LOCALE}))
