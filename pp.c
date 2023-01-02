@@ -2592,14 +2592,11 @@ PP_wrapped(pp_negate, 1, 0)
     return NORMAL;
 }
 
-PP_wrapped(pp_not, 2, 0)
+PP(pp_not)
 {
-    dSP;
-    SV *sv;
-
-    tryAMAGICun_MG(not_amg, 0);
-    sv = *PL_stack_sp;
-    *PL_stack_sp = boolSV(!SvTRUE_nomg_NN(sv));
+    if (rpp_try_AMAGIC_1(not_amg, 0))
+        return NORMAL;
+    rpp_replace_1_1(boolSV(!SvTRUE_nomg_NN(*PL_stack_sp)));
     return NORMAL;
 }
 
