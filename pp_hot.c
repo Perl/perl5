@@ -314,7 +314,7 @@ PP(pp_sassign)
 
     }
     if (
-      UNLIKELY(SvTEMP(left)) && !SvSMAGICAL(left) && SvREFCNT(left) == 1 &&
+      rpp_is_lone(left) && !SvSMAGICAL(left) &&
       (!isGV_with_GP(left) || SvFAKE(left)) && ckWARN(WARN_MISC)
     )
         Perl_warner(aTHX_
@@ -2499,7 +2499,7 @@ PP(pp_aassign)
                 for (svp = relem; svp <= lastrelem; svp++) {
                     SV *rsv = *svp;
 
-                    if (SvTEMP(rsv) && !SvGMAGICAL(rsv) && SvREFCNT(rsv) == 1) {
+                    if (rpp_is_lone(rsv) && !SvGMAGICAL(rsv)) {
                         /* can skip the copy */
                         SvREFCNT_inc_simple_void_NN(rsv);
                         SvTEMP_off(rsv);
@@ -2620,7 +2620,7 @@ PP(pp_aassign)
             for (svp = relem + 1; svp <= lastrelem; svp += 2) {
                 SV *rsv = *svp;
 
-                if (SvTEMP(rsv) && !SvGMAGICAL(rsv) && SvREFCNT(rsv) == 1) {
+                if (rpp_is_lone(rsv) && !SvGMAGICAL(rsv)) {
                     /* can skip the copy */
                     SvREFCNT_inc_simple_void_NN(rsv);
                     SvTEMP_off(rsv);
@@ -2783,7 +2783,7 @@ PP(pp_aassign)
                 SV *ref;
 
                 if (UNLIKELY(
-                  SvTEMP(lsv) && !SvSMAGICAL(lsv) && SvREFCNT(lsv) == 1 &&
+                    rpp_is_lone(lsv) && !SvSMAGICAL(lsv) &&
                   (!isGV_with_GP(lsv) || SvFAKE(lsv)) && ckWARN(WARN_MISC)
                 ))
                     Perl_warner(aTHX_
@@ -5016,7 +5016,7 @@ Perl_leave_adjust_stacks(pTHX_ SV **from_sp, SV **to_sp, U8 gimme, int pass)
 #endif
 
             if (
-               pass == 0 ? (SvTEMP(sv) && !SvMAGICAL(sv) && SvREFCNT(sv) == 1)
+               pass == 0 ? (rpp_is_lone(sv) && !SvMAGICAL(sv))
              : pass == 1 ? ((SvTEMP(sv) || SvPADTMP(sv)) && !SvMAGICAL(sv) && SvREFCNT(sv) == 1)
              : pass == 2 ? (!SvPADTMP(sv))
              : 1)
