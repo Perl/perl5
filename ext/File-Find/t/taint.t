@@ -1,5 +1,6 @@
 #!./perl -T
 use strict;
+use lib qw( ./t/lib );
 
 BEGIN {
     require File::Spec;
@@ -18,16 +19,10 @@ BEGIN {
     require File::Find;
     import File::Find;
 }
-
 use Test::More;
-BEGIN {
-    plan(
-        ${^TAINT}
-        ? (tests => 45)
-        : (skip_all => "A perl without taint support") 
-    );
-}
-use lib qw( ./t/lib );
+use File::Find;
+use File::Spec;
+use Cwd;
 use Testing qw(
     create_file_ok
     mkdir_ok
@@ -36,21 +31,21 @@ use Testing qw(
     file_path
 );
 use Errno ();
+use Config;
+
+BEGIN {
+    plan(
+        ${^TAINT}
+        ? (tests => 45)
+        : (skip_all => "A perl without taint support")
+    );
+}
 
 my %Expect_File = (); # what we expect for $_
 my %Expect_Name = (); # what we expect for $File::Find::name/fullname
 my %Expect_Dir  = (); # what we expect for $File::Find::dir
 my ($cwd, $cwd_untainted);
 
-BEGIN {
-    require File::Spec;
-    if ($ENV{PERL_CORE}) {
-        # May be doing dynamic loading while @INC is all relative
-        @INC = map { $_ = File::Spec->rel2abs($_); /(.*)/; $1 } @INC;
-    }
-}
-
-use Config;
 
 BEGIN {
     if ($^O ne 'VMS') {
@@ -77,10 +72,6 @@ BEGIN {
 }
 
 my $symlink_exists = eval { symlink("",""); 1 };
-
-use File::Find;
-use File::Spec;
-use Cwd;
 
 my $orig_dir = cwd();
 ( my $orig_dir_untainted ) = $orig_dir =~ m|^(.+)$|; # untaint it
