@@ -3356,10 +3356,11 @@ Perl_gv_handler(pTHX_ HV *stash, I32 id)
 */
 
 bool
-Perl_try_amagic_un(pTHX_ int method, int flags) {
-    dSP;
+Perl_try_amagic_un(pTHX_ int method, int flags)
+{
     SV* tmpsv;
-    SV* const arg = TOPs;
+    SV* const arg = PL_stack_sp[0];
+    bool is_rc = rpp_stack_is_rc();
 
     SvGETMAGIC(arg);
 
@@ -3372,22 +3373,33 @@ Perl_try_amagic_un(pTHX_ int method, int flags) {
          * then assign the returned value to targ and return that;
          * otherwise return the value directly
          */
+        SV *targ = tmpsv;
         if (   (PL_opargs[PL_op->op_type] & OA_TARGLEX)
             && (PL_op->op_private & OPpTARGET_MY))
         {
-            dTARGET;
-            sv_setsv(TARG, tmpsv);
-            SETTARG;
+            targ = PAD_SV(PL_op->op_targ);
+            sv_setsv(targ, tmpsv);
+            SvSETMAGIC(targ);
         }
-        else
-            SETs(tmpsv);
+        if (targ != arg) {
+            *PL_stack_sp = targ;
+            if (is_rc) {
+                SvREFCNT_inc_NN(targ);
+                SvREFCNT_dec_NN(arg);
+            }
+        }
 
-        PUTBACK;
         return TRUE;
     }
 
-    if ((flags & AMGf_numeric) && SvROK(arg))
-        *sp = sv_2num(arg);
+    if ((flags & AMGf_numeric) && SvROK(arg)) {
+        PL_stack_sp[0] = tmpsv = sv_2num(arg);
+        if (is_rc) {
+            SvREFCNT_inc_NN(tmpsv);
+            SvREFCNT_dec_NN(arg);
+        }
+    }
+
     return FALSE;
 }
 
@@ -3548,10 +3560,11 @@ Perl_amagic_applies(pTHX_ SV *sv, int method, int flags)
 */
 
 bool
-Perl_try_amagic_bin(pTHX_ int method, int flags) {
-    dSP;
-    SV* const left = TOPm1s;
-    SV* const right = TOPs;
+Perl_try_amagic_bin(pTHX_ int method, int flags)
+{
+    SV* left  = PL_stack_sp[-1];
+    SV* right = PL_stack_sp[0];
+    bool is_rc = rpp_stack_is_rc();
 
     SvGETMAGIC(left);
     if (left != right)
@@ -3566,50 +3579,77 @@ Perl_try_amagic_bin(pTHX_ int method, int flags) {
                     (mutator ? AMGf_assign: 0)
                   | (flags & AMGf_numarg));
         if (tmpsv) {
-            (void)POPs;
+            PL_stack_sp--;
+            if (is_rc)
+                SvREFCNT_dec_NN(right);
             /* where the op is one of the two forms:
              *    $x op= $y
              *    $lex = $x op $y (where the assign is optimised away)
              * then assign the returned value to targ and return that;
              * otherwise return the value directly
              */
+            SV *targ = tmpsv;;
             if (   mutator
                 || (   (PL_opargs[PL_op->op_type] & OA_TARGLEX)
                     && (PL_op->op_private & OPpTARGET_MY)))
             {
-                dTARG;
-                TARG = mutator ? *SP : PAD_SV(PL_op->op_targ);
-                sv_setsv(TARG, tmpsv);
-                SETTARG;
+                targ = mutator ? left : PAD_SV(PL_op->op_targ);
+                sv_setsv(targ, tmpsv);
+                SvSETMAGIC(targ);
             }
-            else
-                SETs(tmpsv);
+            if (targ != left) {
+                *PL_stack_sp = targ;
+                if (is_rc) {
+                    SvREFCNT_inc_NN(targ);
+                    SvREFCNT_dec_NN(left);
+                }
+            }
 
-            PUTBACK;
             return TRUE;
         }
     }
 
-    if(left==right && SvGMAGICAL(left)) {
-        SV * const left = sv_newmortal();
-        *(sp-1) = left;
+    /* if the same magic value appears on both sides, replace the LH one
+     * with a copy and call get magic on the RH one, so that magic gets
+     * called twice with possibly two different returned values */
+    if (left == right && SvGMAGICAL(left)) {
+        SV * const tmpsv = is_rc ? newSV_type(SVt_NULL) : sv_newmortal();
         /* Print the uninitialized warning now, so it includes the vari-
            able name. */
         if (!SvOK(right)) {
-            if (ckWARN(WARN_UNINITIALIZED)) report_uninit(right);
-            sv_setbool(left, FALSE);
+            if (ckWARN(WARN_UNINITIALIZED))
+                report_uninit(right);
+            sv_setbool(tmpsv, FALSE);
         }
-        else sv_setsv_flags(left, right, 0);
+        else
+            sv_setsv_flags(tmpsv, right, 0);
+        if (is_rc)
+            SvREFCNT_dec_NN(left);
+        left = PL_stack_sp[-1] = tmpsv;
         SvGETMAGIC(right);
     }
+
     if (flags & AMGf_numeric) {
-        if (SvROK(TOPm1s))
-            *(sp-1) = sv_2num(TOPm1s);
-        if (SvROK(right))
-            *sp     = sv_2num(right);
+        SV *tmpsv;
+        if (SvROK(left)) {
+            PL_stack_sp[-1] = tmpsv = sv_2num(left);
+            if (is_rc) {
+                SvREFCNT_inc_NN(tmpsv);
+                SvREFCNT_dec_NN(left);
+            }
+        }
+        if (SvROK(right)) {
+            PL_stack_sp[0]  = tmpsv = sv_2num(right);
+            if (is_rc) {
+                SvREFCNT_inc_NN(tmpsv);
+                SvREFCNT_dec_NN(right);
+            }
+        }
     }
+
     return FALSE;
 }
+
 
 /*
 =for apidoc amagic_deref_call
