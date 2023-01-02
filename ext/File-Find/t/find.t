@@ -35,6 +35,7 @@ use Testing qw(
     file_path
 );
 use Errno ();
+use File::Temp qw(tempdir);
 
 my %Expect_File = (); # what we expect for $_
 my %Expect_Name = (); # what we expect for $File::Find::name/fullname
@@ -235,6 +236,9 @@ sub my_postprocess {
 *file_path_name = \&file_path;
 
 ##### Create directories, files and symlinks used in testing #####
+my $root_dir = cwd();
+my $test_dir = tempdir("FF_find_t_XXXXXX",CLEANUP=>1);
+chdir $test_dir;
 
 mkdir_ok( dir_path('for_find'), 0770 );
 ok( chdir( dir_path('for_find')), "Able to chdir to 'for_find'")
@@ -1111,5 +1115,5 @@ if ($^O eq 'MSWin32') {
     like($@, qr/invalid top directory/,
         "find() correctly died due to undefined top directory");
 }
-
+chdir $root_dir; # let File::Temp cleanup - Switch to `defer {}` one day
 done_testing();

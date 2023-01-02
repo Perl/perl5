@@ -8,7 +8,6 @@ BEGIN {
         # May be doing dynamic loading while @INC is all relative
         @INC = map { $_ = File::Spec->rel2abs($_); /(.*)/; $1 } @INC;
     }
-
     if ($^O eq 'MSWin32' || $^O eq 'cygwin' || $^O eq 'VMS') {
         # This is a hack - at present File::Find does not produce native names
         # on Win32 or VMS, so force File::Spec to use Unix names.
@@ -32,6 +31,7 @@ use Testing qw(
 );
 use Errno ();
 use Config;
+use File::Temp qw(tempdir);
 
 BEGIN {
     plan(
@@ -45,7 +45,6 @@ my %Expect_File = (); # what we expect for $_
 my %Expect_Name = (); # what we expect for $File::Find::name/fullname
 my %Expect_Dir  = (); # what we expect for $File::Find::dir
 my ($cwd, $cwd_untainted);
-
 
 BEGIN {
     if ($^O ne 'VMS') {
@@ -167,6 +166,16 @@ sub simple_wanted {
 
 *file_path_name = \&file_path;
 
+##### Create directories, files and symlinks used in testing #####
+my $root_dir_tainted = cwd();
+my $root_dir;
+if ($root_dir_tainted=~/^(.*)$/) {
+    $root_dir = $1;
+} else {
+    die "Failed to untaint root dir of test";
+}
+my $test_dir = tempdir("FF_taint_t_XXXXXX",CLEANUP=>1);
+chdir $test_dir;
 
 mkdir_ok( dir_path('for_find_taint'), 0770 );
 ok( chdir( dir_path('for_find_taint')), 'successful chdir() to for_find_taint' );
@@ -333,3 +342,4 @@ SKIP: {
 
     chdir($cwd_untainted);
 }
+chdir $root_dir; # let File::Temp cleanup - Switch to `defer {}` one day
