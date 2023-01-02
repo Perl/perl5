@@ -245,7 +245,7 @@ sub try {
   binmode F;
 
   # The record has exactly 17 characters.  This will help ensure that
-  # even if _downcoopy screws up, the data doesn't coincidentally
+  # even if _downcopy screws up, the data doesn't coincidentally
   # look good because the remainder accidentally lines up.
   my $d = substr("0123456789abcdef$:", -17);
   my $recs = defined($FLEN) ?
