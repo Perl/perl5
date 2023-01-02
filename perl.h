@@ -53,7 +53,7 @@
  * still not yet "ref count aware".
  */
 #ifdef PERL_RC_STACK
-#  define PERL_XXX_TMP_NORC
+/* XXX #  define PERL_XXX_TMP_NORC */
 # endif
 
 #include "config.h"
