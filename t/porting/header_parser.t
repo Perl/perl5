@@ -57,6 +57,7 @@ is($lines_as_str,<<~'DUMP_EOF', "Simple data structure as expected") or show_tex
             "line" => "#if defined(A)\n",
             "n_lines" => 1,
             "raw" => "#ifdef A\n",
+            "source" => "(buffer)",
             "start_line_num" => 1,
             "sub_type" => "#if",
             "type" => "cond"
@@ -75,6 +76,7 @@ is($lines_as_str,<<~'DUMP_EOF', "Simple data structure as expected") or show_tex
             "line" => "# if defined(B)\n",
             "n_lines" => 1,
             "raw" => "#ifdef B\n",
+            "source" => "(buffer)",
             "start_line_num" => 2,
             "sub_type" => "#if",
             "type" => "cond"
@@ -93,6 +95,7 @@ is($lines_as_str,<<~'DUMP_EOF', "Simple data structure as expected") or show_tex
             "line" => "#   define AB\n",
             "n_lines" => 1,
             "raw" => "#define AB\n",
+            "source" => "(buffer)",
             "start_line_num" => 3,
             "sub_type" => "#define",
             "type" => "content"
@@ -111,6 +114,7 @@ is($lines_as_str,<<~'DUMP_EOF', "Simple data structure as expected") or show_tex
             "line" => "content 1\n",
             "n_lines" => 1,
             "raw" => "content 1\n",
+            "source" => "(buffer)",
             "start_line_num" => 4,
             "sub_type" => "text",
             "type" => "content"
@@ -129,6 +133,7 @@ is($lines_as_str,<<~'DUMP_EOF', "Simple data structure as expected") or show_tex
             "line" => "# endif /* defined(B) */\n",
             "n_lines" => 1,
             "raw" => "#endif\n",
+            "source" => "(buffer)",
             "start_line_num" => 5,
             "sub_type" => "#endif",
             "type" => "cond"
@@ -144,6 +149,7 @@ is($lines_as_str,<<~'DUMP_EOF', "Simple data structure as expected") or show_tex
             "line" => "content 2\n",
             "n_lines" => 1,
             "raw" => "content 2\n",
+            "source" => "(buffer)",
             "start_line_num" => 6,
             "sub_type" => "text",
             "type" => "content"
@@ -159,6 +165,7 @@ is($lines_as_str,<<~'DUMP_EOF', "Simple data structure as expected") or show_tex
             "line" => "# define A\n",
             "n_lines" => 1,
             "raw" => "#define A\n",
+            "source" => "(buffer)",
             "start_line_num" => 7,
             "sub_type" => "#define",
             "type" => "content"
@@ -174,6 +181,7 @@ is($lines_as_str,<<~'DUMP_EOF', "Simple data structure as expected") or show_tex
             "line" => "#endif /* defined(A) */\n",
             "n_lines" => 1,
             "raw" => "#endif\n",
+            "source" => "(buffer)",
             "start_line_num" => 8,
             "sub_type" => "#endif",
             "type" => "cond"
@@ -185,6 +193,7 @@ is($lines_as_str,<<~'DUMP_EOF', "Simple data structure as expected") or show_tex
             "line" => "/*comment\n  line */\n",
             "n_lines" => 2,
             "raw" => "/*comment\n  line */\n",
+            "source" => "(buffer)",
             "start_line_num" => 9,
             "sub_type" => "text",
             "type" => "content"
@@ -196,6 +205,7 @@ is($lines_as_str,<<~'DUMP_EOF', "Simple data structure as expected") or show_tex
             "line" => "#define C /* this is\n             a hidden line continuation */ D\n",
             "n_lines" => 2,
             "raw" => "#define C /* this is\n             a hidden line continuation */ D\n",
+            "source" => "(buffer)",
             "start_line_num" => 11,
             "sub_type" => "#define",
             "type" => "content"
