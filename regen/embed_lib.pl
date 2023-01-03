@@ -60,7 +60,8 @@ sub setup_embed {
                 line => "pR|OP *|$check|NN OP *o",
                 type => "content",
                 level => 1,
-                start_line_num => $lines + $line_num,
+                source => 'regen/opcodes',
+                start_line_num => $line_num,
             );
             $parser->tidy_embed_fnc_entry($new);
             push @$lines, $new;
