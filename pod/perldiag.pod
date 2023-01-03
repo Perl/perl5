@@ -1183,7 +1183,7 @@ to load "%s"?)
 could not be found in UNIVERSAL.  This often means that a method
 requires a package that has not been loaded.
 
-=item Can't locate object method "INC", nor "INCDIR" nor string overload via package %s %s in @INC
+=item Can't locate object method "INC", nor "INCDIR" nor string overload via package "%s" %s in @INC
 
 (F) You pushed an object, either directly or via an array reference hook,
 into C<@INC>, but the object doesn't support any known hook methods, nor
