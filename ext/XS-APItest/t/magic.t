@@ -76,4 +76,54 @@ is $@, "", 'PERL_MAGIC_ext is permitted on read-only things';
     is($i, 0, "hash () with set magic");
 }
 
+{
+    # check if set magic triggered by av_store() via aassign results in
+    # unreferenced scalars being freed. IOW, results in a double store
+    # without a corresponding refcount bump. If things work properly this
+    # should not warn. If there is an issue it will.
+    my @warn;
+    local $SIG{__WARN__}= sub { push @warn, $_[0] };
+    {
+        my (@a, $i);
+        sv_magic_myset_dies(\@a, $i);
+        eval {
+            $i = 0;
+            @a = (1);
+        };
+    }
+    is(0+@warn, 0,
+        "If AV set magic dies via aassign it should not warn about double free");
+    @warn = ();
+    {
+        my (@a, $i, $j);
+        sv_magic_myset_dies(\@a, $i);
+        eval {
+            $j = "blorp";
+            my_av_store(\@a,0,$j);
+        };
+        my $base_refcount = 2; # not sure where these come from.
+        if (\$a[0] == \$j) {
+            # in this case we expect to have an extra 2 refcounts,
+            # one from $a[0] and one from $j itself.
+            is( sv_refcnt($j), $base_refcount + 2,
+                "\$a[0] is \$j, so refcount(\$j) should be 4");
+        } else {
+            # Note this branch isn't exercised. Whether by design
+            # or not. I leave it here because it is a possible valid
+            # outcome. It is marked TODO so if we start going down
+            # this path we do so knowingly.
+            diag "av_store has changed behavior - please review this test";
+            TODO:{
+                local $TODO = "av_store bug stores even if it dies during magic";
+                # in this case we expect to have only 1 extra refcount,
+                # from $j itself.
+                is( sv_refcnt($j), $base_refcount + 1,
+                    "\$a[0] is not \$j, so refcount(\$j) should be 3");
+            }
+        }
+    }
+    is(0+@warn, 0,
+        "AV set magic that dies via av_store should not warn about double free");
+}
+
 done_testing;
