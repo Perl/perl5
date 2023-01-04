@@ -3266,6 +3266,7 @@ static int store_code(pTHX_ stcxt_t *cxt, CV *cv)
         CROAK(("Unexpected return value from B::Deparse::coderef2text\n"));
 
     text = POPs;
+    PUTBACK;
     len = SvCUR(text);
     reallen = strlen(SvPV_nolen(text));
 
