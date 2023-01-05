@@ -4969,7 +4969,11 @@ S_fold_constants(pTHX_ OP *const o)
 
     switch (ret) {
     case 0:
-        sv = *(PL_stack_sp--);
+        sv = *PL_stack_sp;
+        if (rpp_stack_is_rc())
+            SvREFCNT_dec(sv);
+        PL_stack_sp--;
+
         if (o->op_targ && sv == PAD_SV(o->op_targ)) {	/* grab pad temp? */
             pad_swipe(o->op_targ,  FALSE);
         }
