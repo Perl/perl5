@@ -4514,6 +4514,8 @@ ext/re/re.pm			re extension Perl module
 ext/re/re.xs			re extension external subroutines
 ext/re/re_comp.h		re extension wrapper for regcomp.h
 ext/re/re_top.h			re extension symbol hiding header
+ext/re/t/intflags.pl		Program used by intflags.t
+ext/re/t/intflags.t		Test that intflags are serialized properly
 ext/re/t/lexical_debug.pl	generate debug output for lexical re 'debug'
 ext/re/t/lexical_debug.t	test that lexical re 'debug' works
 ext/re/t/qr.t			test that qr// is a Regexp

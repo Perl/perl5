@@ -2862,24 +2862,25 @@ EXTCONST char * const PL_reg_extflags_name[] = {
 EXTCONST char * PL_reg_intflags_name[];
 #else
 EXTCONST char * const PL_reg_intflags_name[] = {
-	"SKIP",                       /* 0x00000001 - PREGf_SKIP */
-	"IMPLICIT",                   /* 0x00000002 - PREGf_IMPLICIT -  Converted .* to ^.*  */
-	"NAUGHTY",                    /* 0x00000004 - PREGf_NAUGHTY -  how exponential is this pattern?  */
-	"VERBARG_SEEN",               /* 0x00000008 - PREGf_VERBARG_SEEN */
-	"CUTGROUP_SEEN",              /* 0x00000010 - PREGf_CUTGROUP_SEEN */
-	"USE_RE_EVAL",                /* 0x00000020 - PREGf_USE_RE_EVAL -  compiled with "use re 'eval'"  */
-	"NOSCAN",                     /* 0x00000040 - PREGf_NOSCAN */
-	"GPOS_SEEN",                  /* 0x00000100 - PREGf_GPOS_SEEN */
-	"GPOS_FLOAT",                 /* 0x00000200 - PREGf_GPOS_FLOAT */
-	"ANCH_MBOL",                  /* 0x00000400 - PREGf_ANCH_MBOL */
-	"ANCH_SBOL",                  /* 0x00000800 - PREGf_ANCH_SBOL */
-	"ANCH_GPOS",                  /* 0x00001000 - PREGf_ANCH_GPOS */
-	"RECURSE_SEEN",               /* 0x00002000 - PREGf_RECURSE_SEEN */
+	"SKIP",                       /* (1<< 0) - 0x00000001 - PREGf_SKIP */
+	"IMPLICIT",                   /* (1<< 1) - 0x00000002 - PREGf_IMPLICIT -  Converted .* to ^.*  */
+	"NAUGHTY",                    /* (1<< 2) - 0x00000004 - PREGf_NAUGHTY -  how exponential is this pattern?  */
+	"VERBARG_SEEN",               /* (1<< 3) - 0x00000008 - PREGf_VERBARG_SEEN */
+	"CUTGROUP_SEEN",              /* (1<< 4) - 0x00000010 - PREGf_CUTGROUP_SEEN */
+	"USE_RE_EVAL",                /* (1<< 5) - 0x00000020 - PREGf_USE_RE_EVAL -  compiled with "use re 'eval'"  */
+	"NOSCAN",                     /* (1<< 6) - 0x00000040 - PREGf_NOSCAN */
+	"",                           /* (1<< 7) - 0x00000080 - *UNUSED* */
+	"GPOS_SEEN",                  /* (1<< 8) - 0x00000100 - PREGf_GPOS_SEEN */
+	"GPOS_FLOAT",                 /* (1<< 9) - 0x00000200 - PREGf_GPOS_FLOAT */
+	"ANCH_MBOL",                  /* (1<<10) - 0x00000400 - PREGf_ANCH_MBOL */
+	"ANCH_SBOL",                  /* (1<<11) - 0x00000800 - PREGf_ANCH_SBOL */
+	"ANCH_GPOS",                  /* (1<<12) - 0x00001000 - PREGf_ANCH_GPOS */
+	"RECURSE_SEEN",               /* (1<<13) - 0x00002000 - PREGf_RECURSE_SEEN */
 };
 #endif /* DOINIT */
 
 #ifdef DEBUGGING
-#  define REG_INTFLAGS_NAME_SIZE 13
+#  define REG_INTFLAGS_NAME_SIZE 14
 #endif
 
 /* The following have no fixed length. U8 so we can do strchr() on it. */
