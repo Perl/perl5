@@ -27,6 +27,20 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 Optimistic Eval in Patterns
+
+The use of C<(?{ ... })> and C<(??{ ... })> in a pattern disables various
+optimizations globally in that pattern. This may or may not be desired by the
+programmer. This release adds the C<(*{ ... })> and C<(**{ ... })>
+equivalents. The only difference is that they do not and will never disable
+any optimisations in the regex engine. This may make them more unstable in the
+sense that they may be called more or less times in the future, however the
+number of times they execute will truly match how the regex engine functions.
+For example, certain types of optmisation are disabled when C<(?{ ... })> is
+included in a pattern, so that patterns which are O(N) in normal use become
+O(N*N) with a C<(?{ ... })> pattern in them. Switching to C<(*{ ... })> means
+the pattern will stay O(N).
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security

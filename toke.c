@@ -3076,7 +3076,7 @@ Perl_get_and_check_backslash_N_name(pTHX_ const char* s,
     stops on:
         @ and $ where it appears to be a var, but not for $ as tail anchor
         \l \L \u \U \Q \E
-        (?{  or  (??{
+        (?{  or  (??{ or (*{ or (**{
 
   In transliterations:
     characters are VERY literal, except for - not at the start or end
@@ -3113,7 +3113,7 @@ Perl_get_and_check_backslash_N_name(pTHX_ const char* s,
   The structure of the code is
       while (there's a character to process) {
           handle transliteration ranges
-          skip regexp comments /(?#comment)/ and codes /(?{code})/
+          skip regexp comments /(?#comment)/ and codes /(?{code})/ ((*{code})/
           skip #-initiated comments in //x patterns
           check for embedded arrays
           check for embedded scalars
@@ -3636,9 +3636,9 @@ S_scan_const(pTHX_ char *start)
         }
             /* skip for regexp comments /(?#comment)/, except for the last
              * char, which will be done separately.  Stop on (?{..}) and
-             * friends */
-        else if (*s == '(' && PL_lex_inpat && s[1] == '?' && !in_charclass) {
-            if (s[2] == '#') {
+             * friends (??{ ... }) or (*{ ... }) or (**{ ... }) */
+        else if (*s == '(' && PL_lex_inpat && (s[1] == '?' || s[1] == '*') && !in_charclass) {
+            if (s[1] == '?' && s[2] == '#') {
                 if (s_is_utf8) {
                     PERL_UINT_FAST8_T  len = UTF8SKIP(s);
 
@@ -3654,8 +3654,11 @@ S_scan_const(pTHX_ char *start)
                 }
             }
             else if (!PL_lex_casemods
-                     && (    s[2] == '{' /* This should match regcomp.c */
-                         || (s[2] == '?' && s[3] == '{')))
+                     && ( (s[1] == '?' && ( s[2] == '{' /* This should match regcomp.c */
+                           || (s[2] == '?' && s[3] == '{'))) || /* (?{ ... }) (??{ ... }) */
+                          (s[1] == '*' && ( s[2] == '{'
+                           || (s[2] == '*' && s[3] == '{'))) )  /* (*{ ... }) (**{ ... }) */
+                 )
             {
                 break;
             }
@@ -9575,7 +9578,7 @@ Perl_yylex(pTHX)
             NEXTVAL_NEXTTOKE.ival = OP_JOIN;	/* emulate join($", ...) */
             force_next(FUNC);
         }
-        /* Convert (?{...}) and friends to 'do {...}' */
+        /* Convert (?{...}) or (*{...}) and friends to 'do {...}' */
         if (PL_lex_inpat && *PL_bufptr == '(') {
             PL_parser->lex_shared->re_eval_start = PL_bufptr;
             PL_bufptr += 2;
@@ -10601,9 +10604,12 @@ S_scan_pat(pTHX_ char *start, I32 type)
         char *e, *p = SvPV(PL_lex_stuff, len);
         e = p + len;
         for (; p < e; p++) {
-            if (p[0] == '(' && p[1] == '?'
-                && (p[2] == '{' || (p[2] == '?' && p[3] == '{')))
-            {
+            if (p[0] == '(' && (
+                (p[1] == '?' && (p[2] == '{' ||
+                                (p[2] == '?' && p[3] == '{'))) ||
+                (p[1] == '*' && (p[2] == '{' ||
+                                (p[2] == '*' && p[3] == '{')))
+            )){
                 pm->op_pmflags |= PMf_HAS_CV;
                 break;
             }

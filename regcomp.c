@@ -1902,7 +1902,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
             !sawlookahead &&
             (OP(first) == STAR &&
             REGNODE_TYPE(OP(REGNODE_AFTER(first))) == REG_ANY) &&
-            !(RExC_rx->intflags & PREGf_ANCH) && !pRExC_state->code_blocks)
+            !(RExC_rx->intflags & PREGf_ANCH) && !(RExC_seen & REG_PESSIMIZE_SEEN))
         {
             /* turn .* into ^.* with an implied $*=1 */
             const int type =
@@ -1915,7 +1915,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
         }
         if (sawplus && !sawminmod && !sawlookahead
             && (!sawopen || !RExC_sawback)
-            && !pRExC_state->code_blocks) /* May examine pos and $& */
+            && !(RExC_seen & REG_PESSIMIZE_SEEN)) /* May examine pos and $& */
             /* x+ must match at the 1st pos of run of x's */
             RExC_rx->intflags |= PREGf_SKIP;
 
@@ -2167,20 +2167,27 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     }
     if (RExC_seen & REG_GPOS_SEEN)
         RExC_rx->intflags |= PREGf_GPOS_SEEN;
+
+    if (RExC_seen & REG_PESSIMIZE_SEEN)
+        RExC_rx->intflags |= PREGf_PESSIMIZE_SEEN;
+
     if (RExC_seen & REG_LOOKBEHIND_SEEN)
         RExC_rx->extflags |= RXf_NO_INPLACE_SUBST; /* inplace might break the
                                                 lookbehind */
     if (pRExC_state->code_blocks)
         RExC_rx->extflags |= RXf_EVAL_SEEN;
-    if (RExC_seen & REG_VERBARG_SEEN)
-    {
+
+    if (RExC_seen & REG_VERBARG_SEEN) {
         RExC_rx->intflags |= PREGf_VERBARG_SEEN;
         RExC_rx->extflags |= RXf_NO_INPLACE_SUBST; /* don't understand this! Yves */
     }
+
     if (RExC_seen & REG_CUTGROUP_SEEN)
         RExC_rx->intflags |= PREGf_CUTGROUP_SEEN;
+
     if (pm_flags & PMf_USE_RE_EVAL)
         RExC_rx->intflags |= PREGf_USE_RE_EVAL;
+
     if (RExC_paren_names)
         RXp_PAREN_NAMES(RExC_rx) = MUTABLE_HV(SvREFCNT_inc(RExC_paren_names));
     else
@@ -2944,6 +2951,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
     I32 num; /* numeric backreferences */
     SV * max_open;  /* Max number of unclosed parens */
     I32 was_in_lookaround = RExC_in_lookaround;
+    I32 fake_eval = 0; /* matches paren */
 
     /* The difference between the following variables can be seen with  *
      * the broken pattern /(?:foo/ where segment_parse_start will point *
@@ -3000,6 +3008,16 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
             goto parse_rest;
         }
         else if ( *RExC_parse == '*') { /* (*VERB:ARG), (*construct:...) */
+            if (RExC_parse[1] == '{') {
+                fake_eval = '{';
+                goto handle_qmark;
+            }
+            else
+            if ( RExC_parse[1] == '*' && RExC_parse[2] == '{' ) {
+                fake_eval = '?';
+                goto handle_qmark;
+            }
+
             char *start_verb = RExC_parse + 1;
             STRLEN verb_len;
             char *start_arg = NULL;
@@ -3310,7 +3328,9 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
             return ret;
         }
         else if (*RExC_parse == '?') { /* (?...) */
-            bool is_logical = 0;
+          handle_qmark:
+            ; /* make sure the label has a statement associated with it*/
+            bool is_logical = 0, is_optimistic = 0;
             const char * const seqstart = RExC_parse;
             const char * endptr;
             const char non_existent_group_msg[]
@@ -3323,8 +3343,14 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
             }
 
             RExC_parse_inc_by(1);   /* past the '?' */
-            paren = *RExC_parse;    /* might be a trailing NUL, if not
-                                       well-formed */
+            if (!fake_eval) {
+                paren = *RExC_parse;    /* might be a trailing NUL, if not
+                                           well-formed */
+                is_optimistic = 0;
+            } else {
+                is_optimistic = 1;
+                paren = fake_eval;
+            }
             RExC_parse_inc();
             if (RExC_parse > RExC_end) {
                 paren = '\0';
@@ -3705,10 +3731,13 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                 }
                 pRExC_state->code_index++;
                 nextchar(pRExC_state);
+                if (!is_optimistic)
+                    RExC_seen |= REG_PESSIMIZE_SEEN;
 
                 if (is_logical) {
                     regnode_offset eval;
                     ret = reg_node(pRExC_state, LOGICAL);
+                    FLAGS(REGNODE_p(ret)) = 2;
 
                     eval = reg2Lanode(pRExC_state, EVAL,
                                        n,
@@ -3717,13 +3746,15 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                                         * return value */
                                        RExC_flags & RXf_PMf_COMPILETIME
                                       );
-                    FLAGS(REGNODE_p(ret)) = 2;
+                    FLAGS(REGNODE_p(eval)) = is_optimistic * EVAL_OPTIMISTIC_FLAG;
                     if (! REGTAIL(pRExC_state, ret, eval)) {
                         REQUIRE_BRANCHJ(flagp, 0);
                     }
                     return ret;
                 }
                 ret = reg2Lanode(pRExC_state, EVAL, n, 0);
+                FLAGS(REGNODE_p(ret)) = is_optimistic * EVAL_OPTIMISTIC_FLAG;
+
                 return ret;
             }
             case '(':           /* (?(?{...})...) and (?(?=...)...) */
@@ -3737,7 +3768,8 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                                 || RExC_parse[1] == '<'
                                 || RExC_parse[1] == '{'))
                         || (       RExC_parse[0] == '*'        /* (?(*...)) */
-                            && (   memBEGINs(RExC_parse + 1,
+                            && (   RExC_parse[1] == '{'
+                            || (   memBEGINs(RExC_parse + 1,
                                          (Size_t) (RExC_end - (RExC_parse + 1)),
                                          "pla:")
                                 || memBEGINs(RExC_parse + 1,
@@ -3760,7 +3792,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                                          "negative_lookahead:")
                                 || memBEGINs(RExC_parse + 1,
                                          (Size_t) (RExC_end - (RExC_parse + 1)),
-                                         "negative_lookbehind:"))))
+                                         "negative_lookbehind:")))))
                 ) { /* Lookahead or eval. */
                     I32 flag;
                     regnode_offset tail;
