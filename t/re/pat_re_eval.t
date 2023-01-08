@@ -168,7 +168,9 @@ sub run_tests {
             [ 1, qr#^((??{"(?:bla|)"}))((??{$nested_tags}))$#, "bla blubb <bla><blubb></blubb></bla>", "a b <bla><blubb></blubb></bla>" ],
             [ 1, qr#^((??{"(?!)?"}))((??{$nested_tags}))$#, "bla blubb <bla><blubb></blubb></bla>", "a b <bla><blubb></blubb></bla>" ],
             [ 1, qr#^((??{"(?:|<(/?bla)>)"}))((??{$nested_tags}))\1$#, "bla blubb <bla><blubb></blubb></bla>", "a b <bla><blubb></blubb></bla>" ],
-            [ 0, qr#^((??{"(?!)"}))?((??{$nested_tags}))(?!)$#, "bla blubb undef", "a b undef" ],
+            [ 0, qr#^((??{"(?!)"}))?((??{$nested_tags}))(?!)$#, # changed in perl 5.37.7
+                 "bla blubb blub blu bl b bl b undef",
+                 "a b b u l b l b undef" ],
 
         ) { #"#silence vim highlighting
             $c++;

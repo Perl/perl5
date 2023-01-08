@@ -2688,23 +2688,26 @@ Perl_study_chunk(pTHX_
                         stopmin = min;
                     DEBUG_STUDYDATA("after-whilem accept", data, depth, is_inf, min, stopmin, delta);
                 }
+                DEBUG_STUDYDATA("PRE CURLYX_TO_CURLYN", data, depth, is_inf, min, stopmin, delta);
                 /* Try powerful optimization CURLYX => CURLYN. */
                 if ( RE_OPTIMIZE_CURLYX_TO_CURLYN
                      && OP(oscan) == CURLYX
                      && data
-                     && data->flags & SF_IN_PAR
-                     && !(data->flags & SF_HAS_EVAL)
+                     && !pRExC_state->code_blocks /* XXX: for now disable whenever eval
+                                                     is seen anywhere. We need a better
+                                                     way. */
+                     && ( ( data->flags & (SF_IN_PAR|SF_HAS_EVAL) ) == SF_IN_PAR )
                      && !deltanext
                      && minnext == 1
                      && mutate_ok
                 ) {
+                    DEBUG_STUDYDATA("CURLYX_TO_CURLYN", data, depth, is_inf, min, stopmin, delta);
                     /* Try to optimize to CURLYN.  */
                     regnode *nxt = REGNODE_AFTER_type(oscan, tregnode_CURLYX);
                     regnode * const nxt1 = nxt;
 #ifdef DEBUGGING
                     regnode *nxt2;
 #endif
-
                     /* Skip open. */
                     nxt = regnext(nxt);
                     if (!REGNODE_SIMPLE(OP(nxt))
@@ -2741,10 +2744,15 @@ Perl_study_chunk(pTHX_
                 }
               nogo:
 
+                DEBUG_STUDYDATA("PRE CURLYX_TO_CURLYM", data, depth, is_inf, min, stopmin, delta);
+
                 /* Try optimization CURLYX => CURLYM. */
                 if ( RE_OPTIMIZE_CURLYX_TO_CURLYM
                      && OP(oscan) == CURLYX
                      && data
+                     && !pRExC_state->code_blocks /* XXX: for now disable whenever eval
+                                                     is seen anywhere. We need a better
+                                                     way. */
                      && !(data->flags & (SF_HAS_PAR|SF_HAS_EVAL))
                      && !deltanext     /* atom is fixed width */
                      && minnext != 0  /* CURLYM can't handle zero width */
@@ -2753,6 +2761,7 @@ Perl_study_chunk(pTHX_
                      && !(RExC_seen & REG_UNFOLDED_MULTI_SEEN)
                      && mutate_ok
                 ) {
+                    DEBUG_STUDYDATA("CURLYX_TO_CURLYM", data, depth, is_inf, min, stopmin, delta);
                     /* XXXX How to optimize if data == 0? */
                     /* Optimize to a simpler form.  */
                     regnode *nxt = REGNODE_AFTER_type(oscan, tregnode_CURLYX); /* OPEN */
