@@ -83,8 +83,12 @@ Perl_debug_studydata(pTHX_ const char *where, scan_data_t *data,
     DECLARE_AND_GET_RE_DEBUG_FLAGS;
 
     DEBUG_OPTIMISE_MORE_r({
-        if (!data)
+        if (!data) {
+            Perl_re_indentf(aTHX_  "%s: NO DATA",
+                depth,
+                where);
             return;
+        }
         Perl_re_indentf(aTHX_  "%s: M/S/D: %" IVdf "/%" IVdf "/%" IVdf " Pos:%" IVdf "/%" IVdf " Flags: 0x%" UVXf,
             depth,
             where,
