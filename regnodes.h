@@ -2876,11 +2876,12 @@ EXTCONST char * const PL_reg_intflags_name[] = {
 	"ANCH_SBOL",                  /* (1<<11) - 0x00000800 - PREGf_ANCH_SBOL */
 	"ANCH_GPOS",                  /* (1<<12) - 0x00001000 - PREGf_ANCH_GPOS */
 	"RECURSE_SEEN",               /* (1<<13) - 0x00002000 - PREGf_RECURSE_SEEN */
+	"PESSIMIZE_SEEN",             /* (1<<14) - 0x00004000 - PREGf_PESSIMIZE_SEEN */
 };
 #endif /* DOINIT */
 
 #ifdef DEBUGGING
-#  define REG_INTFLAGS_NAME_SIZE 14
+#  define REG_INTFLAGS_NAME_SIZE 15
 #endif
 
 /* The following have no fixed length. U8 so we can do strchr() on it. */

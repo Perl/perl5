@@ -1193,6 +1193,9 @@ static const scan_data_t zero_scan_data = {
             if (RExC_seen & REG_UNBOUNDED_QUANTIFIER_SEEN)                  \
                 Perl_re_printf( aTHX_ "REG_UNBOUNDED_QUANTIFIER_SEEN ");    \
                                                                             \
+            if (RExC_seen & REG_PESSIMIZE_SEEN)                             \
+                Perl_re_printf( aTHX_ "REG_PESSIMIZE_SEEN ");               \
+                                                                            \
             Perl_re_printf( aTHX_ "\n");                                    \
         });
 

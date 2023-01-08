@@ -174,7 +174,7 @@ S_regdump_intflags(pTHX_ const char *lead, const U32 flags)
 
     ASSUME(REG_INTFLAGS_NAME_SIZE <= sizeof(flags)*8);
 
-    for (bit=0; bit<REG_INTFLAGS_NAME_SIZE; bit++) {
+    for (bit=0; bit<=REG_INTFLAGS_NAME_SIZE; bit++) {
         if (flags & (1<<bit)) {
             if (!set++ && lead)
                 Perl_re_printf( aTHX_  "%s", lead);
@@ -871,6 +871,10 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
     }
     else if (op == SBOL)
         Perl_sv_catpvf(aTHX_ sv, " /%s/", o->flags ? "\\A" : "^");
+    else if (op == EVAL) {
+        if (o->flags & EVAL_OPTIMISTIC_FLAG)
+            Perl_sv_catpvf(aTHX_ sv, " optimistic");
+    }
 
     /* add on the verb argument if there is one */
     if ( ( k == VERB || op == ACCEPT || op == OPFAIL ) && o->flags) {

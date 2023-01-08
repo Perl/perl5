@@ -2693,10 +2693,10 @@ Perl_study_chunk(pTHX_
                 if ( RE_OPTIMIZE_CURLYX_TO_CURLYN
                      && OP(oscan) == CURLYX
                      && data
-                     && !pRExC_state->code_blocks /* XXX: for now disable whenever eval
-                                                     is seen anywhere. We need a better
-                                                     way. */
-                     && ( ( data->flags & (SF_IN_PAR|SF_HAS_EVAL) ) == SF_IN_PAR )
+                     && !(RExC_seen & REG_PESSIMIZE_SEEN) /* XXX: for now disable whenever a
+                                                            non optimistic eval is seen
+                                                            anywhere.*/
+                     && ( data->flags & SF_IN_PAR ) /* has parens */
                      && !deltanext
                      && minnext == 1
                      && mutate_ok
@@ -2750,10 +2750,10 @@ Perl_study_chunk(pTHX_
                 if ( RE_OPTIMIZE_CURLYX_TO_CURLYM
                      && OP(oscan) == CURLYX
                      && data
-                     && !pRExC_state->code_blocks /* XXX: for now disable whenever eval
-                                                     is seen anywhere. We need a better
-                                                     way. */
-                     && !(data->flags & (SF_HAS_PAR|SF_HAS_EVAL))
+                     && !(RExC_seen & REG_PESSIMIZE_SEEN) /* XXX: for now disable whenever a
+                                                            non optimistic eval is seen
+                                                            anywhere.*/
+                     && !(data->flags & SF_HAS_PAR) /* no parens! */
                      && !deltanext     /* atom is fixed width */
                      && minnext != 0  /* CURLYM can't handle zero width */
                          /* Nor characters whose fold at run-time may be
@@ -3469,7 +3469,7 @@ Perl_study_chunk(pTHX_
             }
         }
         else if (OP(scan) == EVAL) {
-            if (data)
+            if (data && !(scan->flags & EVAL_OPTIMISTIC_FLAG) )
                 data->flags |= SF_HAS_EVAL;
         }
         else if ( REGNODE_TYPE(OP(scan)) == ENDLIKE ) {

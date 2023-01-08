@@ -108,6 +108,7 @@ typedef struct regexp_internal {
 #define PREGf_ANCH_SBOL         0x00000800
 #define PREGf_ANCH_GPOS         0x00001000
 #define PREGf_RECURSE_SEEN      0x00002000
+#define PREGf_PESSIMIZE_SEEN    0x00004000
 
 #define PREGf_ANCH              \
     ( PREGf_ANCH_SBOL | PREGf_ANCH_GPOS | PREGf_ANCH_MBOL )
@@ -976,6 +977,7 @@ ARGp_SET_inline(struct regnode *node, SV *ptr) {
 #define REG_UNFOLDED_MULTI_SEEN             0x00000400
 /* spare */
 #define REG_UNBOUNDED_QUANTIFIER_SEEN       0x00001000
+#define REG_PESSIMIZE_SEEN                  0x00002000
 
 
 START_EXTERN_C
@@ -1425,6 +1427,9 @@ typedef enum {
 #if defined(PERL_IN_REGEX_ENGINE)
 #include "reginline.h"
 #endif
+
+#define EVAL_OPTIMISTIC_FLAG    128
+#define EVAL_FLAGS_MASK         (EVAL_OPTIMISTIC_FLAG-1)
 
 #endif /* PERL_REGCOMP_H_ */
 
