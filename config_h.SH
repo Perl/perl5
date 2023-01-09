@@ -3178,10 +3178,16 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 
 /* HAS_NL_LANGINFO:
  *	This symbol, if defined, indicates that the nl_langinfo routine is
- *	available to return local data.  You will also need <langinfo.h>
+ *	available to return locale data.  You will also need <langinfo.h>
+ *	and therefore I_LANGINFO.
+ */
+/* HAS_NL_LANGINFO_L:
+ *	This symbol, if defined, indicates that the nl_langinfo_l routine is
+ *	available to return locale data.  You will also need <langinfo.h>
  *	and therefore I_LANGINFO.
  */
 #$d_nl_langinfo HAS_NL_LANGINFO		/**/
+#$d_nl_langinfo_l HAS_NL_LANGINFO_L		/**/
 
 /* HAS_OFF64_T:
  *	This symbol will be defined if the C compiler supports off64_t.
@@ -4990,17 +4996,6 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	available to convert a multi-byte character into a wide character.
  */
 #$d_mbrtowc HAS_MBRTOWC	/**/
-
-/* HAS_NL_LANGINFO_L:
- *	This symbol, when defined, indicates presence of the nl_langinfo_l()
- *	function
- */
-/* HAS_THREAD_SAFE_NL_LANGINFO_L:
- *	This symbol, when defined, indicates presence of the nl_langinfo_l()
- *	function, and that it is thread-safe.
- */
-#$d_nl_langinfo_l HAS_NL_LANGINFO_L	/**/
-#$d_thread_safe_nl_langinfo_l HAS_THREAD_SAFE_NL_LANGINFO_L	/**/
 
 /* OLD_PTHREAD_CREATE_JOINABLE:
  *	This symbol, if defined, indicates how to create pthread
