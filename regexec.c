@@ -3499,7 +3499,7 @@ S_reg_set_capture_string(pTHX_ REGEXP * const rx,
                 }
                 if (max == -1)
                     max = (PL_sawampersand & SAWAMPERSAND_LEFT)
-                            ? prog->offs[0].start
+                            ? RXp_OFFS_START(prog,0)
                             : 0;
                 assert(max >= 0 && max <= strend - strbeg);
             }
@@ -3514,17 +3514,18 @@ S_reg_set_capture_string(pTHX_ REGEXP * const rx,
                  * by a capture. Due to lookbehind, this may be to
                  * the left of $&, so we have to scan all captures */
                 while (min && n <= prog->lastparen) {
-                    if (   prog->offs[n].start != -1
-                        && prog->offs[n].start < min)
+                    I32 start = RXp_OFFS_START(prog,n);
+                    if (   start != -1
+                        && start < min)
                     {
-                        min = prog->offs[n].start;
+                        min = start;
                     }
                     n++;
                 }
                 if ((PL_sawampersand & SAWAMPERSAND_RIGHT)
-                    && min >  prog->offs[0].end
+                    && min >  RXp_OFFS_END(prog,0)
                 )
-                    min = prog->offs[0].end;
+                    min = RXp_OFFS_END(prog,0);
 
             }
 
@@ -4215,7 +4216,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
     /* s/// doesn't like it if $& is earlier than where we asked it to
      * start searching (which can happen on something like /.\G/) */
     if (       (flags & REXEC_FAIL_ON_UNDERFLOW)
-            && (prog->offs[0].start < stringarg - strbeg))
+            && (RXp_OFFS_START(prog,0) < stringarg - strbeg))
     {
         /* this should only be possible under \G */
         assert(prog->intflags & PREGf_GPOS_SEEN);
@@ -4513,7 +4514,7 @@ S_reg_check_named_buff_matched(const regexp *rex, const regnode *scan)
 
     for ( n=0; n<SvIVX(sv_dat); n++ ) {
         if ((I32)rex->lastparen >= nums[n] &&
-            rex->offs[nums[n]].end != -1)
+            RXp_OFFS_END(rex,nums[n]) != -1)
         {
             return nums[n];
         }
@@ -8531,7 +8532,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
         case GROUPP:  /*  (?(1))  */
             n = ARG(scan);  /* which paren pair */
-            sw = cBOOL(rex->lastparen >= n && rex->offs[n].end != -1);
+            sw = cBOOL(rex->lastparen >= n && RXp_OFFS_END(rex,n) != -1);
             break;
 
         case GROUPPN:  /*  (?(<name>))  */
@@ -11814,8 +11815,7 @@ Perl_reg_named_buff_fetch(pTHX_ REGEXP * const r, SV * const namesv,
             AV * const retarray = (flags & RXapif_ALL) ? newAV_alloc_x(SvIVX(sv_dat)) : NULL;
             for ( i=0; i<SvIVX(sv_dat); i++ ) {
                 if ((I32)(rx->nparens) >= nums[i]
-                    && rx->offs[nums[i]].start != -1
-                    && rx->offs[nums[i]].end != -1)
+                    && RXp_OFFS_VALID(rx,nums[i]))
                 {
                     ret = newSVpvs("");
                     CALLREG_NUMBUF_FETCH(r, nums[i], ret);
@@ -11894,8 +11894,7 @@ Perl_reg_named_buff_nextkey(pTHX_ REGEXP * const r, const U32 flags)
             I32 *nums = (I32*)SvPVX(sv_dat);
             for ( i = 0; i < SvIVX(sv_dat); i++ ) {
                 if ((I32)(rx->lastparen) >= nums[i] &&
-                    rx->offs[nums[i]].start != -1 &&
-                    rx->offs[nums[i]].end != -1)
+                    RXp_OFFS_VALID(rx,nums[i]))
                 {
                     parno = nums[i];
                     break;
@@ -11956,8 +11955,7 @@ Perl_reg_named_buff_all(pTHX_ REGEXP * const r, const U32 flags)
             I32 *nums = (I32*)SvPVX(sv_dat);
             for ( i = 0; i < SvIVX(sv_dat); i++ ) {
                 if ((I32)(rx->lastparen) >= nums[i] &&
-                    rx->offs[nums[i]].start != -1 &&
-                    rx->offs[nums[i]].end != -1)
+                    RXp_OFFS_VALID(rx,nums[i]))
                 {
                     parno = nums[i];
                     break;
@@ -11978,7 +11976,7 @@ Perl_reg_numbered_buff_fetch(pTHX_ REGEXP * const r, const I32 paren,
 {
     struct regexp *const rx = ReANY(r);
     char *s = NULL;
-    SSize_t i = 0;
+    SSize_t i,t = 0;
     SSize_t s1, t1;
     I32 n = paren;
 
@@ -12010,24 +12008,23 @@ Perl_reg_numbered_buff_fetch(pTHX_ REGEXP * const r, const I32 paren,
         n = RX_BUFF_IDX_FULLMATCH;
 
     if ((n == RX_BUFF_IDX_PREMATCH || n == RX_BUFF_IDX_CARET_PREMATCH)
-        && rx->offs[0].start != -1)
+        && (i = RXp_OFFS_START(rx,0)) != -1)
     {
         /* $`, ${^PREMATCH} */
-        i = rx->offs[0].start;
         s = rx->subbeg;
     }
     else
     if ((n == RX_BUFF_IDX_POSTMATCH || n == RX_BUFF_IDX_CARET_POSTMATCH)
-        && rx->offs[0].end != -1)
+        && (t = RXp_OFFS_END(rx,0)) != -1)
     {
         /* $', ${^POSTMATCH} */
-        s = rx->subbeg - rx->suboffset + rx->offs[0].end;
-        i = rx->sublen + rx->suboffset - rx->offs[0].end;
+        s = rx->subbeg - rx->suboffset + t;
+        i = rx->sublen + rx->suboffset - t;
     }
     else
     if (inRANGE(n, 0, (I32)rx->nparens) &&
-        (s1 = rx->offs[n].start) != -1  &&
-        (t1 = rx->offs[n].end) != -1)
+        ((s1 = RXp_OFFS_START(rx,n)) != -1  &&
+         (t1 = RXp_OFFS_END(rx,n))   != -1))
     {
         /* $&, ${^MATCH},  $1 ... */
         i = t1 - s1;
@@ -12123,33 +12120,32 @@ Perl_reg_numbered_buff_length(pTHX_ REGEXP * const r, const SV * const sv,
     switch (paren) {
       case RX_BUFF_IDX_CARET_PREMATCH: /* ${^PREMATCH} */
       case RX_BUFF_IDX_PREMATCH:       /* $` */
-        if (rx->offs[0].start != -1) {
-                        i = rx->offs[0].start;
-                        if (i > 0) {
-                                s1 = 0;
-                                t1 = i;
-                                goto getlen;
-                        }
+        if ( (i= RXp_OFFS_START(rx,0)) != -1) {
+            if (i > 0) {
+                s1 = 0;
+                t1 = i;
+                goto getlen;
             }
+        }
         return 0;
 
       case RX_BUFF_IDX_CARET_POSTMATCH: /* ${^POSTMATCH} */
       case RX_BUFF_IDX_POSTMATCH:       /* $' */
-            if (rx->offs[0].end != -1) {
-                        i = rx->sublen - rx->offs[0].end;
-                        if (i > 0) {
-                                s1 = rx->offs[0].end;
-                                t1 = rx->sublen;
-                                goto getlen;
-                        }
+        if ( (i = RXp_OFFS_END(rx,0)) != -1) {
+            i = rx->sublen - i;
+            if (i > 0) {
+                    s1 = RXp_OFFS_END(rx,0);
+                    t1 = rx->sublen;
+                    goto getlen;
             }
+        }
         return 0;
 
       default: /* $& / ${^MATCH}, $1, $2, ... */
-            if (paren <= (I32)rx->nparens &&
-            (s1 = rx->offs[paren].start) != -1 &&
-            (t1 = rx->offs[paren].end) != -1)
-            {
+        if (paren <= (I32)rx->nparens &&
+            (s1 = RXp_OFFS_START(rx,paren)) != -1 &&
+            (t1 = RXp_OFFS_END(rx,paren))   != -1)
+        {
             i = t1 - s1;
             goto getlen;
         } else {

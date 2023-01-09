@@ -174,7 +174,18 @@ typedef struct regexp {
 } regexp;
 
 
-#  define RXp_PAREN_NAMES(rx)	((rx)->paren_names)
+#define RXp_PAREN_NAMES(rx)    ((rx)->paren_names)
+
+#define RXp_OFFS_START(rx,n)   ((rx)->offs[(n)].start)
+
+#define RXp_OFFS_END(rx,n)     ((rx)->offs[(n)].end)
+
+#define RXp_OFFS_VALID(rx,n) \
+    ( (rx)->offs[(n)].end != -1 && (rx)->offs[(n)].start != -1 )
+
+#define RX_OFFS_START(rx_sv,n)  RXp_OFFS_START(ReANY(rx_sv),n)
+#define RX_OFFS_END(rx_sv,n)    RXp_OFFS_END(ReANY(rx_sv),n)
+#define RX_OFFS_VALID(rx_sv,n)  RXp_OFFS_VALID(ReANY(rx_sv),n)
 
 /* used for high speed searches */
 typedef struct re_scream_pos_data_s
@@ -538,8 +549,8 @@ and check for NULL.
 #  define RXp_SUBOFFSET(prog)             (prog->suboffset)
 #  define RX_SUBOFFSET(rx_sv)             (RXp_SUBOFFSET(ReANY(rx_sv)))
 #  define RX_SUBCOFFSET(rx_sv)            (ReANY(rx_sv)->subcoffset)
-#  define RXp_OFFS(prog)                  (prog->offs)
-#  define RX_OFFS(rx_sv)                  (RXp_OFFS(ReANY(rx_sv)))
+#  define RXp_OFFSp(prog)                 (prog->offs)
+#  define RX_OFFSp(rx_sv)                 (RXp_OFFSp(ReANY(rx_sv)))
 #  define RXp_NPARENS(prog)               (prog->nparens)
 #  define RX_NPARENS(rx_sv)               (RXp_NPARENS(ReANY(rx_sv)))
 #  define RX_SUBLEN(rx_sv)                (ReANY(rx_sv)->sublen)
@@ -555,8 +566,8 @@ and check for NULL.
 #  define RX_SAVED_COPY(rx_sv)            (RXp_SAVED_COPY(ReANY(rx_sv)))
 /* last match was zero-length */
 #  define RXp_ZERO_LEN(prog) \
-        (RXp_OFFS(prog)[0].start + (SSize_t)RXp_GOFS(prog) \
-          == RXp_OFFS(prog)[0].end)
+        (RXp_OFFS_START(prog,0) + (SSize_t)RXp_GOFS(prog) \
+          == RXp_OFFS_END(prog,0))
 #  define RX_ZERO_LEN(rx_sv)              (RXp_ZERO_LEN(ReANY(rx_sv)))
 
 #endif /* PLUGGABLE_RE_EXTENSION */

@@ -15718,9 +15718,9 @@ S_handle_names_wildcard(pTHX_ const char * wname, /* wildcard name to match */
              * so we could match anywhere in that string.  We have to rule out
              * matching a code point line */
             char * this_name_start = all_names_start
-                                                + RX_OFFS(subpattern_re)->start;
+                                                + RX_OFFS_START(subpattern_re,0);
             char * this_name_end   = all_names_start
-                                                + RX_OFFS(subpattern_re)->end;
+                                                + RX_OFFS_END(subpattern_re,0);
             char * cp_start;
             char * cp_end;
             UV cp = 0;      /* Silences some compilers */
