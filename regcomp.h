@@ -216,13 +216,13 @@ struct regnode_2L {
     I32 arg2;
 };
 
-/* 'Two field' -- Two 16 bit unsigned args */
+/* 'Two field' -- Two 32 bit signed args */
 struct regnode_2 {
     U8	flags;
     U8  type;
     U16 next_off;
-    U16 arg1;
-    U16 arg2;
+    I32 arg1;
+    I32 arg2;
 };
 
 #define REGNODE_BBM_BITMAP_LEN                                                  \
@@ -317,22 +317,22 @@ struct regnode_ssc {
    Impose a limit of REG_INFTY on various pattern matching operations
    to limit stack growth and to avoid "infinite" recursions.
 */
-/* The default size for REG_INFTY is U16_MAX, which is the same as
-   USHORT_MAX (see perl.h).  Unfortunately U16 isn't necessarily 16 bits
-   (see handy.h).  On the Cray C90, sizeof(short)==4 and hence U16_MAX is
-   ((1<<32)-1), while on the Cray T90, sizeof(short)==8 and U16_MAX is
-   ((1<<64)-1).  To limit stack growth to reasonable sizes, supply a
+/* The default size for REG_INFTY is I32_MAX, which is the same as UINT_MAX
+   (see perl.h). Unfortunately I32 isn't necessarily 32 bits (see handy.h).
+   On the Cray C90, or Cray T90, I32_MAX is considerably larger than it
+   might be elsewhere. To limit stack growth to reasonable sizes, supply a
    smaller default.
         --Andy Dougherty  11 June 1998
+        --Amended by Yves Orton 15 Jan 2023
 */
-#if SHORTSIZE > 2
+#if INTSIZE > 4
 #  ifndef REG_INFTY
-#    define REG_INFTY  nBIT_UMAX(16)
+#    define REG_INFTY  nBIT_IMAX(32)
 #  endif
 #endif
 
 #ifndef REG_INFTY
-#  define REG_INFTY U16_MAX
+#  define REG_INFTY I32_MAX
 #endif
 
 #define ARG_VALUE(arg) (arg)

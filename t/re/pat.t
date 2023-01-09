@@ -350,7 +350,7 @@ sub run_tests {
 
 	#  Defaults assumed if this fails
 	eval { require Config; };
-        $::reg_infty   = $Config::Config{reg_infty} // 65535;
+        $::reg_infty   = $Config::Config{reg_infty} // ((1<<31)-1);
         $::reg_infty_m = $::reg_infty - 1;
         $::reg_infty_p = $::reg_infty + 1;
         $::reg_infty_m = $::reg_infty_m;   # Suppress warning.
@@ -358,23 +358,28 @@ sub run_tests {
         # As well as failing if the pattern matches do unexpected things, the
         # next three tests will fail if you should have picked up a lower-than-
         # default value for $reg_infty from Config.pm, but have not.
+        SKIP: {
+            skip "REG_INFTY too big to test ($::reg_infty)", 7
+                if $::reg_infty > (1<<16);
 
-        is(eval q{('aaa' =~ /(a{1,$::reg_infty_m})/)[0]}, 'aaa', $message);
-        is($@, '', $message);
-        is(eval q{('a' x $::reg_infty_m) =~ /a{$::reg_infty_m}/}, 1, $message);
-        is($@, '', $message);
-        isnt(q{('a' x ($::reg_infty_m - 1)) !~ /a{$::reg_infty_m}/}, 1, $message);
-        is($@, '', $message);
+            is(eval q{('aaa' =~ /(a{1,$::reg_infty_m})/)[0]}, 'aaa', $message);
+            is($@, '', $message);
+            is(eval q{('a' x $::reg_infty_m) =~ /a{$::reg_infty_m}/}, 1, $message);
+            is($@, '', $message);
+            isnt(q{('a' x ($::reg_infty_m - 1)) !~ /a{$::reg_infty_m}/}, 1, $message);
+            is($@, '', $message);
+
+            # It should be 'a' x 2147483647, but that exhausts memory on
+            # reasonably sized modern machines
+            like('a' x $::reg_infty_m, qr/a{1,}/,
+                 "{1,} matches more times than REG_INFTY");
+        }
 
         eval "'aaa' =~ /a{1,$::reg_infty}/";
         like($@, qr/^\QQuantifier in {,} bigger than/, $message);
         eval "'aaa' =~ /a{1,$::reg_infty_p}/";
         like($@, qr/^\QQuantifier in {,} bigger than/, $message);
 
-        # It should be 'a' x 2147483647, but that exhausts memory on
-        # reasonably sized modern machines
-        like('a' x $::reg_infty_p, qr/a{1,}/,
-             "{1,} matches more times than REG_INFTY");
     }
 
     {
@@ -393,12 +398,17 @@ sub run_tests {
 
         for my $l (@trials) { # Ordered to free memory
             my $a = 'a' x $l;
-	    my $message = "Long monster, length = $l";
-	    like("ba$a=", qr/a$a=/, $message);
-            unlike("b$a=", qr/a$a=/, $message);
-            like("b$a=", qr/ba+=/, $message);
-
-	    like("ba$a=", qr/b(?:a|b)+=/, $message);
+            # we do not use like() or unlike() here as the string
+            # is very long and is not useful if the match fails,
+            # the useful part
+	    ok("ba$a=" =~ m/a$a=/, sprintf
+                'Long monster: ("ba".("a" x %d)."=") =~ m/aa...a=/', $l);
+            ok("b$a="  !~ m/a$a=/, sprintf
+                'Long monster: ("b" .("a" x %d)."=") !~ m/aa...a=/', $l);
+            ok("b$a="  =~ m/ba+=/, sprintf
+                'Long monster: ("b" .("a" x %d)."=") =~ m/ba+=/', $l);
+	    ok("ba$a=" =~ m/b(?:a|b)+=/, sprintf
+                'Long monster: ("ba".("a" x %d)."=") =~ m/b(?:a|b)+=/', $l);
         }
     }
 

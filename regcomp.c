@@ -4738,13 +4738,13 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
         if (RExC_use_BRANCHJ) {
             reginsert(pRExC_state, LONGJMP, ret, depth+1);
             reginsert(pRExC_state, NOTHING, ret, depth+1);
-            NEXT_OFF(REGNODE_p(ret)) = 3;        /* Go over LONGJMP. */
+            REGNODE_STEP_OVER(ret,tregnode_NOTHING,tregnode_LONGJMP);
         }
         reginsert(pRExC_state, CURLYX, ret, depth+1);
-
         if (RExC_use_BRANCHJ)
-            NEXT_OFF(REGNODE_p(ret)) = 3;   /* Go over NOTHING to
-                                               LONGJMP. */
+            /* Go over NOTHING to LONGJMP. */
+            REGNODE_STEP_OVER(ret,tregnode_CURLYX,tregnode_NOTHING);
+
         if (! REGTAIL(pRExC_state, ret, reg_node(pRExC_state,
                                                   NOTHING)))
         {
@@ -4757,8 +4757,8 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
     /* Finish up the CURLY/CURLYX case */
     FLAGS(REGNODE_p(ret)) = 0;
 
-    ARG1_SET(REGNODE_p(ret), (U16)min);
-    ARG2_SET(REGNODE_p(ret), (U16)max);
+    ARG1_SET(REGNODE_p(ret), min);
+    ARG2_SET(REGNODE_p(ret), max);
 
   done_main_op:
 
