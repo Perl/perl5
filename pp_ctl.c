@@ -382,9 +382,9 @@ Perl_rxres_save(pTHX_ void **rsp, REGEXP *rx)
     /* deal with regexp_paren_pair items */
     if (!p || p[1] < RX_NPARENS(rx)) {
 #ifdef PERL_ANY_COW
-        i = 7 + (RX_NPARENS(rx)+1) * 2;
+        i = 7 + (RX_NPARENS(rx)+1) * 4;
 #else
-        i = 6 + (RX_NPARENS(rx)+1) * 2;
+        i = 6 + (RX_NPARENS(rx)+1) * 4;
 #endif
         if (!p)
             Newx(p, i, UV);
@@ -410,6 +410,8 @@ Perl_rxres_save(pTHX_ void **rsp, REGEXP *rx)
     for (i = 0; i <= RX_NPARENS(rx); ++i) {
         *p++ = (UV)RX_OFFSp(rx)[i].start;
         *p++ = (UV)RX_OFFSp(rx)[i].end;
+        *p++ = (UV)RX_OFFSp(rx)[i].start_new;
+        *p++ = (UV)RX_OFFSp(rx)[i].end_new;
     }
 }
 
@@ -441,6 +443,8 @@ S_rxres_restore(pTHX_ void **rsp, REGEXP *rx)
     for (i = 0; i <= RX_NPARENS(rx); ++i) {
         RX_OFFSp(rx)[i].start = (I32)(*p++);
         RX_OFFSp(rx)[i].end = (I32)(*p++);
+        RX_OFFSp(rx)[i].start_new = (I32)(*p++);
+        RX_OFFSp(rx)[i].end_new = (I32)(*p++);
     }
 }
 

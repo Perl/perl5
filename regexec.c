@@ -273,12 +273,14 @@ S_regcppush(pTHX_ const regexp *rex, I32 parenfloor, U32 maxopenparen comma_pDEP
 	I32 p;
         for (p = parenfloor + 1; p <= (I32)maxopenparen; p++) {
             Perl_re_exec_indentf(aTHX_
-                "    \\%" UVuf " %" IVdf " (%" IVdf ") .. %" IVdf " (regcppush)\n",
+                "    \\%" UVuf " %" IVdf " (%" IVdf ") .. %" IVdf " new %" IVdf " .. %" IVdf " (regcppush)\n",
                 depth,
                 (UV)p,
                 (IV)RXp_OFFSp(rex)[p].start,
                 (IV)RXp_OFFSp(rex)[p].start_tmp,
-                (IV)RXp_OFFSp(rex)[p].end
+                (IV)RXp_OFFSp(rex)[p].end,
+                (IV)RXp_OFFSp(rex)[p].start_new,
+                (IV)RXp_OFFSp(rex)[p].end_new
             );
         }
     });
@@ -322,8 +324,8 @@ S_regcppush(pTHX_ const regexp *rex, I32 parenfloor, U32 maxopenparen comma_pDEP
 
 /* set the start and end positions of capture ix */
 #define CLOSE_ANY_CAPTURE(rex, ix, s, e)                                    \
-    RXp_OFFSp(rex)[(ix)].start = (s);                                       \
-    RXp_OFFSp(rex)[(ix)].end = (e)
+    RXp_OFFSp(rex)[(ix)].start_new = (s);                                   \
+    RXp_OFFSp(rex)[(ix)].end_new = (e)
 
 #define CLOSE_CAPTURE(rex, ix, s, e)                                        \
     CLOSE_ANY_CAPTURE(rex, ix, s, e);                                       \
@@ -336,8 +338,8 @@ S_regcppush(pTHX_ const regexp *rex, I32 parenfloor, U32 maxopenparen comma_pDEP
         PTR2UV(rex),                                                        \
         PTR2UV(RXp_OFFSp(rex)),                                             \
         (UV)(ix),                                                           \
-        (IV)RXp_OFFSp(rex)[ix].start,                                       \
-        (IV)RXp_OFFSp(rex)[ix].end,                                         \
+        (IV)RXp_OFFSp(rex)[ix].start_new,                                   \
+        (IV)RXp_OFFSp(rex)[ix].end_new,                                     \
         (UV)RXp_LASTPAREN(rex)                                              \
     ))
 
@@ -363,11 +365,54 @@ S_unwind_paren(pTHX_ regexp *rex, U32 lp, U32 lcp comma_pDEPTH) {
     ));
     for (n = RXp_LASTPAREN(rex); n > lp; n--) {
         RXp_OFFSp(rex)[n].end = -1;
+        RXp_OFFSp(rex)[n].end_new = -1;
     }
     RXp_LASTPAREN(rex) = n;
     RXp_LASTCLOSEPAREN(rex) = lcp;
 }
 #define UNWIND_PAREN(lp,lcp) unwind_paren(rex,lp,lcp)
+
+#define CAPTURE_COMMIT(from_ix, to_ix, force, str) STMT_START {         \
+    U16 my_ix;                                                          \
+    if (force || from_ix) {                                             \
+        for ( my_ix = from_ix; my_ix <= to_ix; my_ix++ ) {              \
+            DEBUG_BUFFERS_r(Perl_re_exec_indentf( aTHX_                 \
+                    "CAPTURE_COMMIT " str ": \\%" IVdf                  \
+                    " std %" IVdf " .. %" IVdf                          \
+                    " ; new: %" IVdf " .. %" IVdf                       \
+                    " ; tmp: %" IVdf                                    \
+                    "\n",                                               \
+            depth, (IV)my_ix,                                           \
+            (IV)RXp_OFFSp(rex)[my_ix].start,                            \
+            (IV)RXp_OFFSp(rex)[my_ix].end,                              \
+            (IV)RXp_OFFSp(rex)[my_ix].start_new,                        \
+            (IV)RXp_OFFSp(rex)[my_ix].end_new,                          \
+            (IV)RXp_OFFSp(rex)[my_ix].start_tmp));                      \
+                                                                        \
+            RXp_OFFSp(rex)[my_ix].start = RXp_OFFSp(rex)[my_ix].start_new;  \
+            RXp_OFFSp(rex)[my_ix].end = RXp_OFFSp(rex)[my_ix].end_new;      \
+        }                                                               \
+    }                                                                   \
+} STMT_END
+
+#define CAPTURE_DUMP(from_ix, to_ix, str) STMT_START {                  \
+    U16 my_ix;                                                          \
+    DEBUG_BUFFERS_r(if (from_ix) {                                      \
+        for ( my_ix = from_ix; my_ix <= to_ix; my_ix++ ) {              \
+            Perl_re_exec_indentf( aTHX_                                 \
+                    "CAPTURE_DUMP " str ": \\%" IVdf " std %" IVdf      \
+                    " .. %" IVdf " ; new %" IVdf " .. %" IVdf           \
+                    " : tmp %" IVdf "\n",                               \
+            depth, (IV)my_ix,                                           \
+            (IV)RXp_OFFSp(rex)[my_ix].start,                            \
+            (IV)RXp_OFFSp(rex)[my_ix].end,                              \
+            (IV)RXp_OFFSp(rex)[my_ix].start_new,                        \
+            (IV)RXp_OFFSp(rex)[my_ix].end_new,                          \
+            (IV)RXp_OFFSp(rex)[my_ix].start_tmp);                       \
+        }                                                               \
+    });                                                                 \
+} STMT_END
+
 
 PERL_STATIC_INLINE void
 S_capture_clear(pTHX_ regexp *rex, U16 from_ix, U16 to_ix, const char *str comma_pDEPTH) {
@@ -382,13 +427,13 @@ S_capture_clear(pTHX_ regexp *rex, U16 from_ix, U16 to_ix, const char *str comma
                 "%" IVdf "(%" IVdf ") .. %" IVdf
                 "\n",
             depth, str, (IV)my_ix,
-            (IV)RXp_OFFSp(rex)[my_ix].start,
+            (IV)RXp_OFFSp(rex)[my_ix].start_new,
             (IV)RXp_OFFSp(rex)[my_ix].start_tmp,
-            (IV)RXp_OFFSp(rex)[my_ix].end,
+            (IV)RXp_OFFSp(rex)[my_ix].end_new,
             (IV)-1, (IV)-1, (IV)-1));
-        RXp_OFFSp(rex)[my_ix].start = -1;
+        RXp_OFFSp(rex)[my_ix].start_new = -1;
         RXp_OFFSp(rex)[my_ix].start_tmp = -1;
-        RXp_OFFSp(rex)[my_ix].end = -1;
+        RXp_OFFSp(rex)[my_ix].end_new = -1;
     }
 }
 
@@ -451,13 +496,15 @@ S_regcppop(pTHX_ regexp *rex, U32 *maxopenparen_p comma_pDEPTH)
     DEBUG_BUFFERS_r(
         for (; paren <= *maxopenparen_p; ++paren) {
             Perl_re_exec_indentf(aTHX_
-                "    \\%" UVuf " %" IVdf "(%" IVdf ") .. %" IVdf " %s (regcppop)\n",
+                "    \\%" UVuf " %" IVdf " (%" IVdf ") .. %" IVdf " new %" IVdf " .. %" IVdf " (regcppop)\n",
                 depth,
                 (UV)paren,
                 (IV)RXp_OFFSp(rex)[paren].start,
                 (IV)RXp_OFFSp(rex)[paren].start_tmp,
                 (IV)RXp_OFFSp(rex)[paren].end,
-                (paren > RXp_LASTPAREN(rex) ? "(skipped)" : ""));
+                (IV)RXp_OFFSp(rex)[paren].start_new,
+                (IV)RXp_OFFSp(rex)[paren].end_new
+            );
         }
     );
 #if 1
@@ -473,8 +520,10 @@ S_regcppop(pTHX_ regexp *rex, U32 *maxopenparen_p comma_pDEPTH)
     for (i = RXp_LASTPAREN(rex) + 1; i <= rex->nparens; i++) {
         if (i > *maxopenparen_p) {
             RXp_OFFSp(rex)[i].start = -1;
+            RXp_OFFSp(rex)[i].start_new = -1;
         }
         RXp_OFFSp(rex)[i].end = -1;
+        RXp_OFFSp(rex)[i].end_new = -1;
         DEBUG_BUFFERS_r( Perl_re_exec_indentf( aTHX_
             "    \\%" UVuf ": %s   ..-1 undeffing (regcppop)\n",
             depth,
@@ -4366,7 +4415,7 @@ S_regtry(pTHX_ regmatch_info *reginfo, char **startposp)
 
     reginfo->cutpoint=NULL;
 
-    RXp_OFFSp(prog)[0].start = *startposp - reginfo->strbeg;
+    RXp_OFFSp(prog)[0].start_new = *startposp - reginfo->strbeg;
     RXp_LASTPAREN(prog) = 0;
     RXp_LASTCLOSEPAREN(prog) = 0;
 
@@ -4399,13 +4448,15 @@ S_regtry(pTHX_ regmatch_info *reginfo, char **startposp)
             ++pp;
             pp->start = -1;
             pp->end = -1;
+            pp->start_new = -1;
+            pp->end_new = -1;
         }
     }
 #endif
     REGCP_SET(lastcp);
     result = regmatch(reginfo, *startposp, progi->program + 1);
     if (result != -1) {
-        RXp_OFFSp(prog)[0].end = result;
+        RXp_OFFSp(prog)[0].end_new = result;
         return 1;
     }
     if (reginfo->cutpoint)
@@ -6582,14 +6633,14 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
         case KEEPS: /*   \K  */
             /* update the startpoint */
             st->u.keeper.val = RXp_OFFS_START(rex,0);
-            RXp_OFFSp(rex)[0].start = locinput - reginfo->strbeg;
+            RXp_OFFSp(rex)[0].start_new = locinput - reginfo->strbeg;
             PUSH_STATE_GOTO(KEEPS_next, next, locinput, loceol,
                             script_run_begin);
             NOT_REACHED; /* NOTREACHED */
 
         case KEEPS_next_fail:
             /* rollback the start point change */
-            RXp_OFFSp(rex)[0].start = st->u.keeper.val;
+            RXp_OFFSp(rex)[0].start_new = st->u.keeper.val;
             sayNO_SILENT;
             NOT_REACHED; /* NOTREACHED */
 
@@ -8033,9 +8084,13 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             if (RXp_LASTPAREN(rex) < n)
                 sayNO;
 
-            ln = RXp_OFFSp(rex)[n].start;
-            endref = RXp_OFFSp(rex)[n].end;
-            if (ln == -1 || endref == -1)
+            ln = RXp_OFFSp(rex)[n].start_new;
+            endref = RXp_OFFSp(rex)[n].end_new;
+            if (ln < 0 || endref < 0) {
+                ln = RXp_OFFSp(rex)[n].start;
+                endref = RXp_OFFSp(rex)[n].end;
+            }
+            if (ln < 0 || endref < 0)
                 sayNO;			/* Do not match unless seen CLOSEn. */
 
             if (ln == endref)
@@ -8162,6 +8217,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             /* Save all the positions seen so far. */
             ST.cp = regcppush(rex, 0, maxopenparen);
             REGCP_SET(ST.lastcp);
+            /* CAPTURE_COMMIT(0,maxopenparen,1,"GOSUB commit"); */
 
             /* and then jump to the code we share with EVAL */
             goto eval_recurse_doit;
@@ -8316,7 +8372,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 DEBUG_STATE_r( Perl_re_printf( aTHX_
                     "  re EVAL PL_op=0x%" UVxf "\n", PTR2UV(nop)) );
 
-                RXp_OFFSp(rex)[0].end = locinput - reginfo->strbeg;
+                RXp_OFFSp(rex)[0].end_new = locinput - reginfo->strbeg;
                 if (reginfo->info_aux_eval->pos_magic)
                     MgBYTEPOS_set(reginfo->info_aux_eval->pos_magic,
                                   reginfo->sv, reginfo->strbeg,
@@ -8667,7 +8723,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
         case GROUPP:  /*  (?(1))  */
             n = ARG1u(scan);  /* which paren pair */
-            sw = cBOOL(RXp_LASTPAREN(rex) >= n && RXp_OFFS_END(rex,n) != -1);
+            sw = cBOOL(RXp_LASTPAREN(rex) >= n && RXp_OFFS_END(rex,n) >= 0 );
             break;
 
         case GROUPPN:  /*  (?(<name>))  */
@@ -8839,20 +8895,23 @@ NULL
             /* see the discussion above about CURLYX/WHILEM */
             I32 n;
             int min, max;
-            /* U16 first_paren, last_paren; */
+            U16 first_paren, last_paren;
             regnode *A;
 
             assert(cur_curlyx); /* keep Coverity happy */
 
             min = ARG1i(cur_curlyx->u.curlyx.me);
             max = ARG2i(cur_curlyx->u.curlyx.me);
-            /* first_paren = ARG3a(cur_curlyx->u.curlyx.me); */
-            /* last_paren = ARG3b(cur_curlyx->u.curlyx.me);  */
+            first_paren = ARG3a(cur_curlyx->u.curlyx.me);
+            last_paren = ARG3b(cur_curlyx->u.curlyx.me);
             A = REGNODE_AFTER(cur_curlyx->u.curlyx.me);
             n = ++cur_curlyx->u.curlyx.count; /* how many A's matched */
             ST.save_lastloc = cur_curlyx->u.curlyx.lastloc;
             ST.cache_offset = 0;
             ST.cache_mask = 0;
+
+            if (n)
+                CAPTURE_COMMIT(first_paren,last_paren,0,"WHILEM");
 
             DEBUG_EXECUTE_r( Perl_re_exec_indentf( aTHX_  "WHILEM: matched %ld out of %d..%d\n",
                   depth, (long)n, min, max)
@@ -8863,6 +8922,9 @@ NULL
                 ST.cp = regcppush(rex, cur_curlyx->u.curlyx.parenfloor, maxopenparen);
                 cur_curlyx->u.curlyx.lastloc = locinput;
                 REGCP_SET(ST.lastcp);
+
+                if (n)
+                    CAPTURE_CLEAR(first_paren,last_paren,"WHILEM min");
 
                 PUSH_STATE_GOTO(WHILEM_A_pre, A, locinput, loceol,
                                 script_run_begin);
@@ -8875,6 +8937,7 @@ NULL
                 DEBUG_EXECUTE_r( Perl_re_exec_indentf( aTHX_  "WHILEM: empty match detected, trying continuation...\n",
                    depth)
                 );
+                CAPTURE_DUMP(first_paren,last_paren,"empty");
                 goto do_whilem_B_max;
             }
 
@@ -8984,6 +9047,7 @@ NULL
                             maxopenparen);
                 cur_curlyx->u.curlyx.lastloc = locinput;
                 REGCP_SET(ST.lastcp);
+                CAPTURE_CLEAR(first_paren,last_paren,"WHILEM max");
                 PUSH_STATE_GOTO(WHILEM_A_max, A, locinput, loceol,
                                 script_run_begin);
                 NOT_REACHED; /* NOTREACHED */
@@ -9283,7 +9347,7 @@ NULL
                         locinput - reginfo->strbeg);
                 }
                 else
-                    RXp_OFFSp(rex)[paren].end = -1;
+                    RXp_OFFSp(rex)[paren].end_new = -1;
 
                 if (EVAL_CLOSE_PAREN_IS_TRUE(cur_eval,(U32)FLAGS(ST.me)))
                 {
@@ -9327,7 +9391,7 @@ NULL
                                  locinput - reginfo->strbeg);               \
         }                                                                   \
         else {                                                              \
-            RXp_OFFSp(rex)[paren].end = -1;                                 \
+            RXp_OFFSp(rex)[paren].end_new = -1;                             \
             RXp_LASTPAREN(rex)  = ST.lastparen;                             \
             RXp_LASTCLOSEPAREN(rex) = ST.lastcloseparen;                    \
         }                                                                   \
@@ -9647,6 +9711,8 @@ NULL
 #undef ST
 
         case END: /*  last op of main pattern  */
+            if (rex->nparens)
+                CAPTURE_COMMIT(0,(int)rex->nparens,1,"END commit");
           fake_end:
             if (cur_eval) {
                 /* we've just finished A in /(??{A})B/; now continue with B */

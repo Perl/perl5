@@ -1308,8 +1308,6 @@ sub run_tests {
     }
 
     {
-        local $::TODO = "[perl #38133]";
-
         "A" =~ /(((?:A))?)+/;
         my $first = $2;
 
@@ -2434,33 +2432,26 @@ SKIP:
         ok( "aaa" =~ /(?:((?{})a)?\1)+/,
             "GH Issue #18865 'aaa' - deoptimized pattern matches");
         $y = "($-[0],$+[0])";
-        {
-            local $::TODO = "Not Yet Implemented";
-            is( $y, $x,
-                "GH Issue #18865 'aaa' - test optimization");
-        }
+        is( $y, $x,
+            "GH Issue #18865 'aaa' - test optimization");
+
         ok( "ababab" =~ /(?:(?:(ab))?\1)+/,
             "GH Issue #18865 'ababab' - pattern matches");
         $x = "($-[0],$+[0])";
         ok( "ababab" =~ /(?:(?:((?{})ab))?\1)+/,
             "GH Issue #18865 'ababab' - deoptimized pattern matches");
         $y = "($-[0],$+[0])";
-        {
-            local $::TODO = "Not Yet Implemented";
-            is( $y, $x,
-                "GH Issue #18865 'ababab' - test optimization");
-        }
+        is( $y, $x,
+            "GH Issue #18865 'ababab' - test optimization");
+
         ok( "XaaXbbXb" =~ /(?:X([ab])?\1)+/,
             "GH Issue #18865 'XaaXbbXb' - pattern matches");
         $x = "($-[0],$+[0])";
         ok( "XaaXbbXb" =~ /(?:X((?{})[ab])?\1)+/,
             "GH Issue #18865 'XaaXbbXb' - deoptimized pattern matches");
         $y = "($-[0],$+[0])";
-        {
-            local $::TODO = "Not Yet Implemented";
-            is( $y, $x,
-                "GH Issue #18865 'XaaXbbXb' - test optimization");
-        }
+        is( $y, $x,
+            "GH Issue #18865 'XaaXbbXb' - test optimization");
     }
     {
         # Test that ${^LAST_SUCCESSFUL_PATTERN} works as expected.

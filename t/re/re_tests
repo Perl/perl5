@@ -2137,8 +2137,8 @@ AB\s+\x{100}	AB \x{100}X	y	-	-
 (?|(a)(?{$::caret_n_got=$^N})|(b)(?{$::caret_n_got=$^N}))	a	y	$::caret_n_got	a		# GH 20912
 
 /(([ab]+)|([cd]+)|([ef]+))+/	ace	y	$1-$2-$3-$4=$&	e---e=ace
-/(([ab]+)|([cd]+)|([ef]+))+/	aceb	Ty	$1-$2-$3-$4=$&	b-b--=aceb
-/(([ab]+)|([cd]+)|([ef]+))+/	acebd	Ty	$1-$2-$3-$4=$&	d--d-=acebd
+/(([ab]+)|([cd]+)|([ef]+))+/	aceb	y	$1-$2-$3-$4=$&	b-b--=aceb
+/(([ab]+)|([cd]+)|([ef]+))+/	acebd	y	$1-$2-$3-$4=$&	d--d-=acebd
 /(([ab]+)|([cd]+)|([ef]+))+/	acebdf	y	$1-$2-$3-$4=$&	f---f=acebdf
 /((a)(b)(c)|(a)(b)|(a))+/	abcaba	y	$1+$2-$3-$4+$5-$6+$7=$&	a+--+-+a=abcaba
 
