@@ -330,9 +330,10 @@ L</Modules and Pragmata> section.
 
 =over 4
 
-=item XXX-some-platform
+=item Windows
 
-XXX
+lstat() on Windows now returns the length of the link target as the
+size of the file, as it does on POSIX systems.  [github #20476]
 
 =back
 
