@@ -9,8 +9,8 @@
 
 /* Package name      : perl5
  * Source directory  : 
- * Configuration time: Sat Sep 18 00:33:40 2021
- * Configured by     : xenu
+ * Configuration time: Fri Jan 13 10:13:47 2023
+ * Configured by     : khw
  * Target system     : 
  */
 
@@ -1038,18 +1038,6 @@
 #define HAS_STATIC_INLINE				/**/
 #define PERL_STATIC_INLINE static __inline	/**/
 
-/* PERL_THREAD_LOCAL:
- *	This symbol, if defined, gives a linkage specification for thread-local
- *	storage. For example, for a C11 compiler this will be _Thread_local.
- *	Beware, some compilers are sensitive to the C language standard they are
- *	told to parse. For example, suncc defaults to C11, so our probe will
- *	report that _Thread_local can be used. However, if the -std=c99 is later
- *	added to the compiler flags, then _Thread_local will become a syntax
- *	error. Hence it is important for these flags to be consistent between
- *	probing and use.
- */
-/*#define PERL_THREAD_LOCAL 	/ **/
-
 /* USE_STDIO_PTR:
  *	This symbol is defined if the _ptr and _cnt fields (or similar)
  *	of the stdio FILE structure can be used to access the stdio buffer
@@ -1381,7 +1369,7 @@
  *	feature tests from Configure are generally more reliable.
  */
 #define OSNAME "MSWin32"		/**/
-#define OSVERS "10.0.19043.1237"		/**/
+#define OSVERS "10.0.22621.1105"		/**/
 
 /* CAT2:
  *	This macro concatenates 2 tokens together.
@@ -1472,6 +1460,10 @@
  *	Can we handle GCC attribute for functions that should always be
  *	inlined.
  */
+/* HASATTRIBUTE_VISIBILITY:
+ *	Can we handle GCC attribute for functions that should have a
+ *	different visibility.
+ */
 /*#define HASATTRIBUTE_DEPRECATED	/ **/
 /*#define HASATTRIBUTE_FORMAT	/ **/
 /*#define PRINTF_FORMAT_NULL_OK	/ **/
@@ -1482,6 +1474,7 @@
 /*#define HASATTRIBUTE_UNUSED	/ **/
 /*#define HASATTRIBUTE_WARN_UNUSED_RESULT	/ **/
 /*#define HASATTRIBUTE_ALWAYS_INLINE	/ **/
+/*#define HASATTRIBUTE_VISIBILITY	/ **/
 
 /* HAS_BACKTRACE:
  *	This symbol, if defined, indicates that the backtrace() routine is
@@ -3271,6 +3264,12 @@
  */
 /*#define HAS_SENDMSG		/ **/
 
+/* HAS_SETENV:
+ *	This symbol, if defined, indicates that the setenv routine is
+ *	available for use.
+ */
+/*#define HAS_SETENV		/ **/
+
 /* HAS_SETITIMER:
  *	This symbol, if defined, indicates that the setitimer routine is
  *	available to set interval timers.
@@ -3377,9 +3376,9 @@
  *	does have the f_flags member containing the mount flags of
  *	the filesystem containing the file.
  *	This kind of struct statfs is coming from <sys/mount.h> (BSD 4.3),
- *	not from <sys/statfs.h> (SYSV).  Older BSDs (like Ultrix) do not
- *	have statfs() and struct statfs, they have ustat() and getmnt()
- *	with struct ustat and struct fs_data.
+ *	not from <sys/statfs.h> (SYSV).  Older BSDs do not have statfs() and
+ *	struct statfs, they have ustat() and getmnt() with struct ustat and
+ *	struct fs_data.
  */
 /*#define HAS_STRUCT_STATFS_F_FLAGS		/ **/
 
@@ -4207,6 +4206,9 @@
  *	This symbol holds the signedness of struct stat's st_dev.
  *	1 for unsigned, -1 for signed.
  */
+#define ST_DEV_SIGN 1	/* st_dev sign */
+#define ST_DEV_SIZE 4	/* st_dev size */
+
 /* ST_INO_SIZE:
  *	This variable contains the size of struct stat's st_ino in bytes.
  */
@@ -4214,8 +4216,6 @@
  *	This symbol holds the signedness of struct stat's st_ino.
  *	1 for unsigned, -1 for signed.
  */
-#define ST_DEV_SIGN 1	/* st_dev sign */
-#define ST_DEV_SIZE 4	/* st_dev size */
 #define ST_INO_SIGN 1	/* st_ino sign */
 #define ST_INO_SIZE 8	/* st_ino size */
 
@@ -5176,6 +5176,18 @@
  *	available to convert strings to long doubles.
  */
 /*#define HAS_STRTOLD_L		/ **/
+
+/* PERL_THREAD_LOCAL:
+ *	This symbol, if defined, gives a linkage specification for thread-local
+ *	storage. For example, for a C11 compiler this will be _Thread_local.
+ *	Beware, some compilers are sensitive to the C language standard they are
+ *	told to parse. For example, suncc defaults to C11, so our probe will
+ *	report that _Thread_local can be used. However, if the -std=c99 is later
+ *	added to the compiler flags, then _Thread_local will become a syntax
+ *	error. Hence it is important for these flags to be consistent between
+ *	probing and use.
+ */
+/*#define PERL_THREAD_LOCAL 	/ **/
 
 /* HAS_TMPNAM_R:
  *	This symbol, if defined, indicates that the tmpnam_r routine
