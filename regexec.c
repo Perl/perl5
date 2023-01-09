@@ -313,21 +313,24 @@ S_regcppush(pTHX_ const regexp *rex, I32 parenfloor, U32 maxopenparen _pDEPTH)
     regcpblow(cp)
 
 /* set the start and end positions of capture ix */
-#define CLOSE_CAPTURE(ix, s, e)                                            \
-    rex->offs[ix].start = s;                                               \
-    rex->offs[ix].end = e;                                                 \
-    if (ix > rex->lastparen)                                               \
-        rex->lastparen = ix;                                               \
-    rex->lastcloseparen = ix;                                              \
-    DEBUG_BUFFERS_r(Perl_re_exec_indentf( aTHX_                            \
+#define CLOSE_ANY_CAPTURE(rex, ix, s, e)                                    \
+    (rex)->offs[(ix)].start = (s);                                      \
+    (rex)->offs[(ix)].end = (e)
+
+#define CLOSE_CAPTURE(rex, ix, s, e)                                        \
+    CLOSE_ANY_CAPTURE(rex, ix, s, e);                                       \
+    if (ix > (rex)->lastparen)                                              \
+        (rex)->lastparen = (ix);                                            \
+    (rex)->lastcloseparen = (ix);                                           \
+    DEBUG_BUFFERS_r(Perl_re_exec_indentf( aTHX_                             \
         "CLOSE: rex=0x%" UVxf " offs=0x%" UVxf ": \\%" UVuf ": set %" IVdf "..%" IVdf " max: %" UVuf "\n", \
-        depth,                                                             \
-        PTR2UV(rex),                                                       \
-        PTR2UV(rex->offs),                                                 \
-        (UV)ix,                                                            \
-        (IV)rex->offs[ix].start,                                           \
-        (IV)rex->offs[ix].end,                                             \
-        (UV)rex->lastparen                                                 \
+        depth,                                                              \
+        PTR2UV(rex),                                                        \
+        PTR2UV(rex->offs),                                                  \
+        (UV)(ix),                                                           \
+        (IV)(rex)->offs[ix].start,                                          \
+        (IV)(rex)->offs[ix].end,                                            \
+        (UV)(rex)->lastparen                                                \
     ))
 
 #define UNWIND_PAREN(lp, lcp)               \
@@ -3728,10 +3731,11 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
              * Let @-, @+, $^N know */
             prog->lastparen = prog->lastcloseparen = 0;
             RXp_MATCH_UTF8_set(prog, utf8_target);
-            prog->offs[0].start = s - strbeg;
-            prog->offs[0].end = utf8_target
+            SSize_t match_start = s - strbeg;
+            SSize_t match_end = utf8_target
                 ? (char*)utf8_hop_forward((U8*)s, prog->minlenret, (U8 *) strend) - strbeg
                 : s - strbeg + prog->minlenret;
+            CLOSE_ANY_CAPTURE(prog, 0, match_start, match_end);
             if ( !(flags & REXEC_NOT_FIRST) )
                 S_reg_set_capture_string(aTHX_ rx,
                                         strbeg, strend,
@@ -8492,7 +8496,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
         case CLOSE:  /*  )  */
             n = PARNO(scan);  /* which paren pair */
-            CLOSE_CAPTURE(n, rex->offs[n].start_tmp,
+            CLOSE_CAPTURE(rex, n, rex->offs[n].start_tmp,
                              locinput - reginfo->strbeg);
             if ( EVAL_CLOSE_PAREN_IS( cur_eval, n ) )
                 goto fake_end;
@@ -8532,7 +8536,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                     if ( n > lastopen ) /* might be OPEN/CLOSE in the way */
                         continue;       /* so skip this one */
 
-                    CLOSE_CAPTURE(n, rex->offs[n].start_tmp,
+                    CLOSE_CAPTURE(rex, n, rex->offs[n].start_tmp,
                                      locinput - reginfo->strbeg);
 
                     if ( n == utmp || EVAL_CLOSE_PAREN_IS(cur_eval, n) )
@@ -9066,7 +9070,7 @@ NULL
             if (ST.me->flags) {
                 /* emulate CLOSE: mark current A as captured */
                 U32 paren = (U32)ST.me->flags;
-                CLOSE_CAPTURE(paren,
+                CLOSE_CAPTURE(rex, paren,
                     HOPc(locinput, -ST.alen) - reginfo->strbeg,
                     locinput - reginfo->strbeg);
             }
@@ -9140,7 +9144,7 @@ NULL
                 /* emulate CLOSE: mark current A as captured */
                 U32 paren = (U32)ST.me->flags;
                 if (ST.count || is_accepted) {
-                    CLOSE_CAPTURE(paren,
+                    CLOSE_CAPTURE(rex, paren,
                         HOPc(locinput, -ST.alen) - reginfo->strbeg,
                         locinput - reginfo->strbeg);
                 }
@@ -9184,7 +9188,7 @@ NULL
 #define CURLY_SETPAREN(paren, success) \
     if (paren) { \
         if (success) { \
-            CLOSE_CAPTURE(paren, HOPc(locinput, -1) - reginfo->strbeg, \
+            CLOSE_CAPTURE(rex, paren, HOPc(locinput, -1) - reginfo->strbeg, \
                                  locinput - reginfo->strbeg); \
         } \
         else { \
