@@ -831,6 +831,8 @@ typedef struct regmatch_state {
             U32 lastparen;
             U32 lastcloseparen;
             CHECKPOINT cp;
+            U16 before_paren;
+            U16 after_paren;
 
         } branchlike;
 
@@ -840,6 +842,8 @@ typedef struct regmatch_state {
             U32 lastparen;
             U32 lastcloseparen;
             CHECKPOINT cp;
+            U16 before_paren;
+            U16 after_paren;
 
             regnode *next_branch; /* next branch node */
         } branch;
@@ -850,10 +854,14 @@ typedef struct regmatch_state {
             U32 lastparen;
             U32 lastcloseparen;
             CHECKPOINT cp;
+            U16 before_paren;
+            U16 after_paren;
 
             U32		accepted; /* how many accepting states left */
             bool	longfold;/* saw a fold with a 1->n char mapping */
             U16         *jump;  /* positive offsets from me */
+            U16         *j_before_paren;
+            U16         *j_after_paren;
             regnode	*me;	/* Which node am I - needed for jump tries*/
             U8		*firstpos;/* pos in string of first trie match */
             U32		firstchars;/* len in chars of firstpos from start */

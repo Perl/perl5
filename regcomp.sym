@@ -140,7 +140,7 @@ CLUMP       CLUMP,      no 0 V    ; Match any extended grapheme cluster sequence
 #*               pointer of each individual branch points; each branch
 #*               starts with the operand node of a BRANCH node.
 #*
-BRANCH      BRANCH,     node 0 V  ; Match this alternative, or the next...
+BRANCH      BRANCH,     node 1 V  ; Match this alternative, or the next...
 
 #*Literals
 # NOTE: the relative ordering of these types is important do not change it
@@ -252,7 +252,7 @@ REFFAN      REF,        num   1 V ; Match already matched string, using /aai rul
 
 #*Support for long RE
 LONGJMP     LONGJMP,    off 1 . 1 ; Jump far away.
-BRANCHJ     BRANCHJ,    off 1 V 1 ; BRANCH with long offset.
+BRANCHJ     BRANCHJ,    off 2L V 1 ; BRANCH with long offset.
 
 #*Special Case Regops
 IFMATCH     BRANCHJ,    off 1 . 1 ; Succeeds if the following matches; non-zero flags "f", next_off "o" means lookbehind assertion starting "f..(f-o)" characters before current

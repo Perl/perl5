@@ -478,7 +478,7 @@ a(?:b|c|d)+(.)	acdbcdbe	y	$1	e
 a(?:b|c|d){2}(.)	acdbcdbe	y	$1	b
 a(?:b|c|d){4,5}(.)	acdbcdbe	y	$1	b
 a(?:b|c|d){4,5}?(.)	acdbcdbe	y	$1	d
-((foo)|(bar))*	foobar	Ty	$1-$2-$3	bar--bar		# was bar-foo-bar prior to 5.37.7
+((foo)|(bar))*	foobar	y	$1-$2-$3	bar--bar		# was bar-foo-bar prior to 5.37.7
 :(?:	-	c	-	Sequence (? incomplete
 a(?:b|c|d){6,7}(.)	acdbcdbe	y	$1	e
 a(?:b|c|d){6,7}?(.)	acdbcdbe	y	$1	e
@@ -501,7 +501,7 @@ a(?:b|(c|e){1,2}?|d)+?(.)	ace	y	$1$2	ce
 ((a{4})+)	aaaaaaaaa	y	$1	aaaaaaaa
 (((aa){2})+)	aaaaaaaaaa	y	$1	aaaaaaaa
 (((a{2}){2})+)	aaaaaaaaaa	y	$1	aaaaaaaa
-(?:(f)(o)(o)|(b)(a)(r))*	foobar	Ty	$1:$2:$3:$4:$5:$6	:::b:a:r
+(?:(f)(o)(o)|(b)(a)(r))*	foobar	y	$1:$2:$3:$4:$5:$6	:::b:a:r
 (?<=a)b	ab	y	$&	b
 (?<=af?)b	ab	y	$&	b
 (?<=a)b	cb	n	-	-
@@ -964,8 +964,8 @@ tt+$	xxxtt	y	-	-
 (?i)		y	-	-
 (?a:((?u)\w)\W)	\xC0\xC0	y	$&	\xC0\xC0
 '(?!\A)x'm	a\nxb\n	y	-	-
-^(a(b)?)+$	aba	y	-$1-$2-	-a--		# !normal
-^(aa(bb)?)+$	aabbaa	y	-$1-$2-	-aa--		# !normal
+^(a(b)?)+$	aba	y	-$1-$2-	-a--		
+^(aa(bb)?)+$	aabbaa	y	-$1-$2-	-aa--		
 '^.{9}abc.*\n'm	123\nabcabcabcabc\n	y	-	-
 ^(a)?a$	a	y	-$1-	--
 ^(a)?(?(1)a|b)+$	a	n	-	-
@@ -2139,7 +2139,8 @@ AB\s+\x{100}	AB \x{100}X	y	-	-
 /(([ab]+)|([cd]+)|([ef]+))+/	ace	y	$1-$2-$3-$4=$&	e---e=ace
 /(([ab]+)|([cd]+)|([ef]+))+/	aceb	Ty	$1-$2-$3-$4=$&	b-b--=aceb
 /(([ab]+)|([cd]+)|([ef]+))+/	acebd	Ty	$1-$2-$3-$4=$&	d--d-=acebd
-/(([ab]+)|([cd]+)|([ef]+))+/	acebdf	Ty	$1-$2-$3-$4=$&	f---f=acebdf
+/(([ab]+)|([cd]+)|([ef]+))+/	acebdf	y	$1-$2-$3-$4=$&	f---f=acebdf
+/((a)(b)(c)|(a)(b)|(a))+/	abcaba	y	$1+$2-$3-$4+$5-$6+$7=$&	a+--+-+a=abcaba
 # Keep these lines at the end of the file
 # pat	string	y/n/etc	expr	expected-expr	skip-reason	comment
 # vim: softtabstop=0 noexpandtab

@@ -668,7 +668,7 @@ will be lost.
  #               pointer of each individual branch points; each branch
  #               starts with the operand node of a BRANCH node.
  #
- BRANCH           node       Match this alternative, or the next...
+ BRANCH           node 1     Match this alternative, or the next...
 
  # Literals
 
@@ -796,7 +796,7 @@ will be lost.
 
  # Support for long RE
  LONGJMP          off 1 1    Jump far away.
- BRANCHJ          off 1 1    BRANCH with long offset.
+ BRANCHJ          off 2L 1   BRANCH with long offset.
 
  # Special Case Regops
  IFMATCH          off 1 1    Succeeds if the following matches; non-zero

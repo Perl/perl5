@@ -29,8 +29,8 @@ typedef struct regnode                           tregnode_BOUND;
 typedef struct regnode                           tregnode_BOUNDA;
 typedef struct regnode                           tregnode_BOUNDL;
 typedef struct regnode                           tregnode_BOUNDU;
-typedef struct regnode                           tregnode_BRANCH;
-typedef struct regnode_1                         tregnode_BRANCHJ;
+typedef struct regnode_1                         tregnode_BRANCH;
+typedef struct regnode_2L                        tregnode_BRANCHJ;
 typedef struct regnode_1                         tregnode_CLOSE;
 typedef struct regnode                           tregnode_CLUMP;
 typedef struct regnode_1                         tregnode_COMMIT;
@@ -2026,7 +2026,7 @@ EXTCONST struct regnode_meta PL_regnode_info[] = {
     {
         /* #40 op BRANCH */
         .type = BRANCH,
-        .arg_len = 0,
+        .arg_len = EXTRA_SIZE(tregnode_BRANCH),
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
