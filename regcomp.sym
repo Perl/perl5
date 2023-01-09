@@ -217,10 +217,10 @@ TAIL        NOTHING,    no        ; Match empty string. Can jump here from outsi
 STAR        STAR,       node 0 V  ; Match this (simple) thing 0 or more times: /A{0,}B/ where A is width 1 char
 PLUS        PLUS,       node 0 V  ; Match this (simple) thing 1 or more times: /A{1,}B/ where A is width 1 char
 
-CURLY       CURLY,      sv 2 V    ; Match this (simple) thing {n,m} times: /A{m,n}B/ where A is width 1 char
-CURLYN      CURLY,      no 2 V    ; Capture next-after-this simple thing: /(A){m,n}B/ where A is width 1 char
-CURLYM      CURLY,      no 2 V    ; Capture this medium-complex thing {n,m} times: /(A){m,n}B/ where A is fixed-length
-CURLYX      CURLY,      sv 2 V    ; Match/Capture this complex thing {n,m} times.
+CURLY       CURLY,      sv 4 V    ; Match this (simple) thing {n,m} times: /A{m,n}B/ where A is width 1 char
+CURLYN      CURLY,      no 4 V    ; Capture next-after-this simple thing: /(A){m,n}B/ where A is width 1 char
+CURLYM      CURLY,      no 4 V    ; Capture this medium-complex thing {n,m} times: /(A){m,n}B/ where A is fixed-length
+CURLYX      CURLY,      sv 4 V    ; Match/Capture this complex thing {n,m} times.
 
 #*This terminator creates a loop structure for CURLYX
 WHILEM      WHILEM,     no 0 V    ; Do curly processing and see if rest matches.

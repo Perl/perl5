@@ -752,13 +752,13 @@ will be lost.
  PLUS             node       Match this (simple) thing 1 or more times:
                              /A{1,}B/ where A is width 1 char
 
- CURLY            sv 2       Match this (simple) thing {n,m} times:
+ CURLY            sv 4       Match this (simple) thing {n,m} times:
                              /A{m,n}B/ where A is width 1 char
- CURLYN           no 2       Capture next-after-this simple thing:
+ CURLYN           no 4       Capture next-after-this simple thing:
                              /(A){m,n}B/ where A is width 1 char
- CURLYM           no 2       Capture this medium-complex thing {n,m}
+ CURLYM           no 4       Capture this medium-complex thing {n,m}
                              times: /(A){m,n}B/ where A is fixed-length
- CURLYX           sv 2       Match/Capture this complex thing {n,m}
+ CURLYX           sv 4       Match/Capture this complex thing {n,m}
                              times.
 
  # This terminator creates a loop structure for CURLYX

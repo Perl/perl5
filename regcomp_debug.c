@@ -464,6 +464,8 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
         }
     } else if (k == CURLY) {
         U32 lo = ARG1(o), hi = ARG2(o);
+        if (ARG3(o) || ARG4(o))
+            Perl_sv_catpvf(aTHX_ sv, "<%d:%d>", ARG3(o),ARG4(o)); /* paren before, paren after */
         if (op == CURLYM || op == CURLYN || op == CURLYX)
             Perl_sv_catpvf(aTHX_ sv, "[%d]", o->flags); /* Parenth number */
         Perl_sv_catpvf(aTHX_ sv, "{%u,", (unsigned) lo);
