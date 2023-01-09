@@ -442,7 +442,6 @@ struct regnode_ssc {
 /* These should no longer be used directly in most cases. Please use
  * the REGNODE_AFTER() macros instead. */
 #define NODE_STEP_REGNODE	1	/* sizeof(regnode)/sizeof(regnode) */
-#define EXTRA_STEP_2ARGS	EXTRA_SIZE(struct regnode_2)
 
 /* Core macros for computing "the regnode after this one". See also
  * Perl_regnode_after() in reginline.h

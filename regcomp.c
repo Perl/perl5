@@ -12712,7 +12712,6 @@ S_reginsert(pTHX_ RExC_state_t *pRExC_state, const U8 op,
     PERL_ARGS_ASSERT_REGINSERT;
     PERL_UNUSED_CONTEXT;
     PERL_UNUSED_ARG(depth);
-/* (REGNODE_TYPE((U8)op) == CURLY ? EXTRA_STEP_2ARGS : 0); */
     DEBUG_PARSE_FMT("inst"," - %s", REGNODE_NAME(op));
     assert(!RExC_study_started); /* I believe we should never use reginsert once we have started
                                     studying. If this is wrong then we need to adjust RExC_recurse
