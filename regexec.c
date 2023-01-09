@@ -8520,7 +8520,10 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 for (
                     cursor = scan;
                     cursor && ( OP(cursor) != END );
-                    cursor = ( REGNODE_TYPE( OP(cursor) ) == END )
+                    cursor = (
+                               REGNODE_TYPE( OP(cursor) ) == END
+                               || REGNODE_TYPE( OP(cursor) ) == WHILEM
+                             )
                              ? REGNODE_AFTER(cursor)
                              : regnext(cursor)
                 ){
@@ -8734,7 +8737,6 @@ NULL
             );
 
             /* First just match a string of min A's. */
-
             if (n < min) {
                 ST.cp = regcppush(rex, cur_curlyx->u.curlyx.parenfloor, maxopenparen);
                 cur_curlyx->u.curlyx.lastloc = locinput;

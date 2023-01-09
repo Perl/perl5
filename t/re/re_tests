@@ -964,8 +964,8 @@ tt+$	xxxtt	y	-	-
 (?i)		y	-	-
 (?a:((?u)\w)\W)	\xC0\xC0	y	$&	\xC0\xC0
 '(?!\A)x'm	a\nxb\n	y	-	-
-^(a(b)?)+$	aba	y	-$1-$2-	-a--
-^(aa(bb)?)+$	aabbaa	y	-$1-$2-	-aa--
+^(a(b)?)+$	aba	y	-$1-$2-	-a--		# !normal
+^(aa(bb)?)+$	aabbaa	y	-$1-$2-	-aa--		# !normal
 '^.{9}abc.*\n'm	123\nabcabcabcabc\n	y	-	-
 ^(a)?a$	a	y	-$1-	--
 ^(a)?(?(1)a|b)+$	a	n	-	-
