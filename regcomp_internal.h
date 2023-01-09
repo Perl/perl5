@@ -3,6 +3,12 @@
 #ifndef STATIC
 #define STATIC  static
 #endif
+#ifndef RE_OPTIMIZE_CURLYX_TO_CURLYM
+#define RE_OPTIMIZE_CURLYX_TO_CURLYM 1
+#endif
+#ifndef RE_OPTIMIZE_CURLYX_TO_CURLYN
+#define RE_OPTIMIZE_CURLYX_TO_CURLYN 1
+#endif
 
 /* this is a chain of data about sub patterns we are processing that
    need to be handled separately/specially in study_chunk. Its so
