@@ -332,8 +332,25 @@ L</Modules and Pragmata> section.
 
 =item Windows
 
+=over
+
+=item *
+
 lstat() on Windows now returns the length of the link target as the
 size of the file, as it does on POSIX systems.  [github #20476]
+
+=item *
+
+symlink() on Windows now replaces any C</> in the target with C<\>,
+since Windows does not recognize C</> in symbolic links.  The reverse
+translation is B<not> done by readlink().  [github #20506]
+
+=item *
+
+symlink() where the target was an absolute path to a directory was
+incorrectly created as a file symbolic link.  [github #20533]
+
+=back
 
 =back
 
