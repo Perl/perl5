@@ -408,8 +408,13 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
     sv_catpv(sv, REGNODE_NAME(op)); /* Take off const! */
 
     k = REGNODE_TYPE(op);
-
-    if (k == EXACT) {
+    if (op == BRANCH) {
+        Perl_sv_catpvf(aTHX_ sv, " (buf:%" IVdf "/%" IVdf ")", (IV)ARGa(o),(IV)ARGb(o));
+    }
+    else if (op == BRANCHJ) {
+        Perl_sv_catpvf(aTHX_ sv, " (buf:%" IVdf "/%" IVdf ")", (IV)ARG2La(o),(IV)ARG2Lb(o));
+    }
+    else if (k == EXACT) {
         sv_catpvs(sv, " ");
         /* Using is_utf8_string() (via PERL_PV_UNI_DETECT)
          * is a crude hack but it may be the best for now since
@@ -462,6 +467,9 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
                                                );
             sv_catpvs(sv, "]");
         }
+        if (trie->before_paren || trie->after_paren)
+            Perl_sv_catpvf(aTHX_ sv, " (buf:%" IVdf "/%" IVdf ")",
+                    (IV)trie->before_paren,(IV)trie->after_paren);
     } else if (k == CURLY) {
         U32 lo = ARG1(o), hi = ARG2(o);
         if (ARG3(o) || ARG4(o))

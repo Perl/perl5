@@ -183,7 +183,13 @@ struct regnode_1 {
     U8	flags;
     U8  type;
     U16 next_off;
-    U32 arg1;
+    union {
+        U32 arg1;
+        struct {
+            U16 arg1a;
+            U16 arg1b;
+        };
+    };
 };
 
 /* Node whose argument is 'SV *'.  This needs to be used very carefully in
@@ -214,7 +220,13 @@ struct regnode_2L {
     U8  type;
     U16 next_off;
     U32 arg1;
-    I32 arg2;
+    union {
+        I32 arg2;
+        struct {
+            U16 arg2a;
+            U16 arg2b;
+        };
+    };
 };
 
 /* 'Two field' -- Two 32 bit signed args.
@@ -361,18 +373,26 @@ struct regnode_ssc {
 
 #define ARG(p) ARG_VALUE(ARG_LOC(p))
 #define ARGp(p) ARGp_VALUE_inline(p)
+#define ARGa(p) ARG_VALUE(ARGa_LOC(p))
+#define ARGb(p) ARG_VALUE(ARGb_LOC(p))
 #define ARG1(p) ARG_VALUE(ARG1_LOC(p))
 #define ARG2(p) ARG_VALUE(ARG2_LOC(p))
 #define ARG3(p) ARG_VALUE(ARG3_LOC(p))
 #define ARG4(p) ARG_VALUE(ARG4_LOC(p))
 #define ARG2L(p) ARG_VALUE(ARG2L_LOC(p))
+#define ARG2La(p) ARG_VALUE(ARG2La_LOC(p))
+#define ARG2Lb(p) ARG_VALUE(ARG2Lb_LOC(p))
 
 #define ARG_SET(p, val) ARG__SET(ARG_LOC(p), (val))
+#define ARGa_SET(p, val) ARG__SET(ARGa_LOC(p), (val))
+#define ARGb_SET(p, val) ARG__SET(ARGb_LOC(p), (val))
 #define ARG1_SET(p, val) ARG__SET(ARG1_LOC(p), (val))
 #define ARG2_SET(p, val) ARG__SET(ARG2_LOC(p), (val))
 #define ARG3_SET(p, val) ARG__SET(ARG3_LOC(p), (val))
 #define ARG4_SET(p, val) ARG__SET(ARG4_LOC(p), (val))
 #define ARG2L_SET(p, val) ARG__SET(ARG2L_LOC(p), (val))
+#define ARG2La_SET(p, val) ARG__SET(ARG2La_LOC(p), (val))
+#define ARG2Lb_SET(p, val) ARG__SET(ARG2Lb_LOC(p), (val))
 #define ARGp_SET(p, val) ARGp_SET_inline((p),(val))
 
 #undef NEXT_OFF
@@ -454,13 +474,16 @@ struct regnode_ssc {
 
 #define	NODE_ALIGN(node)
 #define	ARG_LOC(p)	(((struct regnode_1 *)p)->arg1)
+#define ARGa_LOC(p)     (((struct regnode_1 *)p)->arg1a)
+#define ARGb_LOC(p)     (((struct regnode_1 *)p)->arg1b)
 #define ARGp_BYTES_LOC(p)  (((struct regnode_p *)p)->arg1_sv_ptr_bytes)
 #define	ARG1_LOC(p)	(((struct regnode_2 *)p)->arg1)
 #define	ARG2_LOC(p)	(((struct regnode_2 *)p)->arg2)
 #define ARG3_LOC(p)     (((struct regnode_4 *)p)->arg3)
 #define ARG4_LOC(p)     (((struct regnode_4 *)p)->arg4)
 #define ARG2L_LOC(p)	(((struct regnode_2L *)p)->arg2)
-
+#define ARG2La_LOC(p)   (((struct regnode_2L *)p)->arg2a)
+#define ARG2Lb_LOC(p)   (((struct regnode_2L *)p)->arg2b)
 
 /* These should no longer be used directly in most cases. Please use
  * the REGNODE_AFTER() macros instead. */
@@ -1148,6 +1171,11 @@ struct _reg_trie_data {
     char            *bitmap;         /* stclass bitmap */
     U16 	    *jump;           /* optional 1 indexed array of offsets before tail 
                                         for the node following a given word. */
+    U16             *j_before_paren; /* optional 1 indexed array of parno reset data
+                                        for the given jump. */
+    U16             *j_after_paren;  /* optional 1 indexed array of parno reset data
+                                        for the given jump. */
+
     reg_trie_wordinfo *wordinfo;     /* array of info per word */
     U16             uniquecharcount; /* unique chars in trie (width of trans table) */
     U32             startstate;      /* initial state - used for common prefix optimisation */
@@ -1157,6 +1185,8 @@ struct _reg_trie_data {
     U32             statecount;      /* Build only - number of states in the states array 
                                         (including the unused zero state) */
     U32             wordcount;       /* Build only */
+    U16             before_paren;
+    U16             after_paren;
 #ifdef DEBUGGING
     STRLEN          charcount;       /* Build only */
 #endif
