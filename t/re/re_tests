@@ -1951,7 +1951,7 @@ A+(*PRUNE)BC(?{})	AAABC	y	$&	AAABC
 /^(.\2?)(.)(?1)$/	abcb	y	$2	b
 /^(.\1?)(?1)$/	aba	y	$1	a
 /^ (\3(?2)\3)? ((.)) (?1) $/x	aaba	y	$2	a
-/^ (a|\3(?1)\2|(?2)) ((b|c)(?4)?) (?1) (d(?1)) $/x	abbcdcabbda	y	$2	b
+/^ (a|\3(?1)\2|(?2)) ((b|c)(?4)?) (?1) (d(?1)) $/x	abbcdcabbda	y	$1-$2-$3-$4	a-b-b-da
 
 # RT #121321 - perl 5.19.10 infinite loops on backrefs > number of capture buffers (npar) where npar>9
 /(a)\2/	a\2	c	-	Reference to nonexistent group in regex
