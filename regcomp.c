@@ -4386,9 +4386,8 @@ S_regbranch(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, I32 first, U32 depth)
             ret = chain;
     }
     if (c == 1) {
-        *flagp |= flags&SIMPLE;
+        *flagp |= flags & SIMPLE;
     }
-
     return ret;
 }
 
