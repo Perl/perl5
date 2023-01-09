@@ -6207,6 +6207,7 @@ t/re/regex_sets_compat.t	Test (?[ ]) is compatible with old [ ]
 t/re/regexp.t			See if regular expressions work
 t/re/regexp_noamp.t		See if regular expressions work with optimizations
 t/re/regexp_nonull.t		See if regexps work without trailing nulls
+t/re/regexp_normal.t		See if regexps work when expressions are normalized in various ways
 t/re/regexp_notrie.t		See if regular expressions work without trie optimisation
 t/re/regexp_qr.t		See if regular expressions work as qr//
 t/re/regexp_qr_embed.t		See if regular expressions work with embedded qr//

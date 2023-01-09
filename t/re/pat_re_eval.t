@@ -24,7 +24,7 @@ BEGIN {
 
 our @global;
 
-plan tests => 508;  # Update this when adding/deleting tests.
+plan tests => 510;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -126,7 +126,13 @@ sub run_tests {
                "Postponed UTF-8 string in non-UTF-8 re doesn't match non-UTF-8";
         }
     }
-
+    {
+        our $this_counter;
+        ok( "ABDE" =~ /(A(A|B(*ACCEPT)|C)+D)(E)(?{ $this_counter++ })/,
+            "ACCEPT/CURLYX/EVAL - pattern should match");
+        is( "$1-$2", "AB-B",
+            "Make sure that ACCEPT works in CURLYX by using EVAL");
+    }
 
     {
         # Test if $^N and $+ work in (?{})
