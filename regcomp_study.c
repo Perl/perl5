@@ -2689,11 +2689,14 @@ Perl_study_chunk(pTHX_
                     DEBUG_STUDYDATA("after-whilem accept", data, depth, is_inf, min, stopmin, delta);
                 }
                 /* Try powerful optimization CURLYX => CURLYN. */
-                if (  OP(oscan) == CURLYX && data
-                      && data->flags & SF_IN_PAR
-                      && !(data->flags & SF_HAS_EVAL)
-                      && !deltanext && minnext == 1
-                      && mutate_ok
+                if ( RE_OPTIMIZE_CURLYX_TO_CURLYN
+                     && OP(oscan) == CURLYX
+                     && data
+                     && data->flags & SF_IN_PAR
+                     && !(data->flags & SF_HAS_EVAL)
+                     && !deltanext
+                     && minnext == 1
+                     && mutate_ok
                 ) {
                     /* Try to optimize to CURLYN.  */
                     regnode *nxt = REGNODE_AFTER_type(oscan, tregnode_CURLYX);
@@ -2739,15 +2742,16 @@ Perl_study_chunk(pTHX_
               nogo:
 
                 /* Try optimization CURLYX => CURLYM. */
-                if (  OP(oscan) == CURLYX && data
-                      && !(data->flags & SF_HAS_PAR)
-                      && !(data->flags & SF_HAS_EVAL)
-                      && !deltanext     /* atom is fixed width */
-                      && minnext != 0   /* CURLYM can't handle zero width */
+                if ( RE_OPTIMIZE_CURLYX_TO_CURLYM
+                     && OP(oscan) == CURLYX
+                     && data
+                     && !(data->flags & (SF_HAS_PAR|SF_HAS_EVAL))
+                     && !deltanext     /* atom is fixed width */
+                     && minnext != 0  /* CURLYM can't handle zero width */
                          /* Nor characters whose fold at run-time may be
                           * multi-character */
-                      && ! (RExC_seen & REG_UNFOLDED_MULTI_SEEN)
-                      && mutate_ok
+                     && !(RExC_seen & REG_UNFOLDED_MULTI_SEEN)
+                     && mutate_ok
                 ) {
                     /* XXXX How to optimize if data == 0? */
                     /* Optimize to a simpler form.  */
