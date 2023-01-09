@@ -3189,7 +3189,7 @@ PP(pp_match)
     if (global && (gimme != G_LIST || (dynpm->op_pmflags & PMf_CONTINUE))) {
         if (!mg)
             mg = sv_magicext_mglob(TARG);
-        MgBYTEPOS_set(mg, TARG, truebase, RXp_OFFS(prog)[0].end);
+        MgBYTEPOS_set(mg, TARG, truebase, RXp_OFFS_END(prog,0));
         if (RXp_ZERO_LEN(prog))
             mg->mg_flags |= MGf_MINMATCH;
         else
@@ -3211,20 +3211,16 @@ PP(pp_match)
         EXTEND(SP, nparens + i);
         EXTEND_MORTAL(nparens + i);
         for (i = !i; i <= nparens; i++) {
-            if (LIKELY((RXp_OFFS(prog)[i].start != -1)
-                     && RXp_OFFS(prog)[i].end   != -1 ))
+            if (LIKELY(RXp_OFFS_VALID(prog,i)))
             {
-                const I32 len = RXp_OFFS(prog)[i].end - RXp_OFFS(prog)[i].start;
-                const char * const s = RXp_OFFS(prog)[i].start + truebase;
-                if (UNLIKELY(  RXp_OFFS(prog)[i].end   < 0
-                            || RXp_OFFS(prog)[i].start < 0
-                            || len < 0
-                            || len > strend - s)
+                const I32 len = RXp_OFFS_END(prog,i) - RXp_OFFS_START(prog,i);
+                const char * const s = RXp_OFFS_START(prog,i) + truebase;
+                if ( UNLIKELY( len < 0 || len > strend - s)
                 )
                     DIE(aTHX_ "panic: pp_match start/end pointers, i=%ld, "
                         "start=%ld, end=%ld, s=%p, strend=%p, len=%" UVuf,
-                        (long) i, (long) RXp_OFFS(prog)[i].start,
-                        (long)RXp_OFFS(prog)[i].end, s, strend, (UV) len);
+                        (long) i, (long) RXp_OFFS_START(prog,i),
+                        (long)RXp_OFFS_END(prog,i), s, strend, (IV) len);
                 PUSHs(newSVpvn_flags(s, len,
                     (DO_UTF8(TARG))
                     ? SVf_UTF8|SVs_TEMP
@@ -3235,7 +3231,7 @@ PP(pp_match)
             }
         }
         if (global) {
-            curpos = (UV)RXp_OFFS(prog)[0].end;
+            curpos = (UV)RXp_OFFS_END(prog,0);
             had_zerolen = RXp_ZERO_LEN(prog);
             PUTBACK;			/* EVAL blocks may use stack */
             r_flags |= REXEC_IGNOREPOS | REXEC_NOT_FIRST;
@@ -4519,8 +4515,8 @@ PP(pp_subst)
             char *d, *m;
             if (RXp_MATCH_TAINTED(prog)) /* run time pattern taint, eg locale */
                 rxtainted |= SUBST_TAINT_PAT;
-            m = orig + RXp_OFFS(prog)[0].start;
-            d = orig + RXp_OFFS(prog)[0].end;
+            m = orig + RXp_OFFS_START(prog,0);
+            d = orig + RXp_OFFS_END(prog,0);
             s = orig;
             if (m - s > strend - d) {  /* faster to shorten from end */
                 I32 i;
@@ -4550,7 +4546,7 @@ PP(pp_subst)
         }
         else {
             char *d, *m;
-            d = s = RXp_OFFS(prog)[0].start + orig;
+            d = s = RXp_OFFS_START(prog,0) + orig;
             do {
                 I32 i;
                 if (UNLIKELY(iters++ > maxiters))
@@ -4558,7 +4554,7 @@ PP(pp_subst)
                 /* run time pattern taint, eg locale */
                 if (UNLIKELY(RXp_MATCH_TAINTED(prog)))
                     rxtainted |= SUBST_TAINT_PAT;
-                m = RXp_OFFS(prog)[0].start + orig;
+                m = RXp_OFFS_START(prog,0) + orig;
                 if ((i = m - s)) {
                     if (s != d)
                         Move(s, d, i, char);
@@ -4568,7 +4564,7 @@ PP(pp_subst)
                     Copy(c, d, clen, char);
                     d += clen;
                 }
-                s = RXp_OFFS(prog)[0].end + orig;
+                s = RXp_OFFS_END(prog,0) + orig;
             } while (CALLREGEXEC(rx, s, strend, orig,
                                  s == m, /* don't match same null twice */
                                  TARG, NULL,
@@ -4611,7 +4607,7 @@ PP(pp_subst)
         if (RXp_MATCH_TAINTED(prog)) /* run time pattern taint, eg locale */
             rxtainted |= SUBST_TAINT_PAT;
         repl = dstr;
-        s = RXp_OFFS(prog)[0].start + orig;
+        s = RXp_OFFS_START(prog,0) + orig;
         dstr = newSVpvn_flags(orig, s-orig,
                     SVs_TEMP | (DO_UTF8(TARG) ? SVf_UTF8 : 0));
         if (!c) {
@@ -4641,9 +4637,9 @@ PP(pp_subst)
                 s = orig + (old_s - old_orig);
                 strend = s + (strend - old_s);
             }
-            m = RXp_OFFS(prog)[0].start + orig;
+            m = RXp_OFFS_START(prog,0) + orig;
             sv_catpvn_nomg_maybeutf8(dstr, s, m - s, DO_UTF8(TARG));
-            s = RXp_OFFS(prog)[0].end + orig;
+            s = RXp_OFFS_END(prog,0) + orig;
             if (first) {
                 /* replacement already stringified */
               if (clen)

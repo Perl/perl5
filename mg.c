@@ -643,9 +643,7 @@ Perl_magic_regdata_cnt(pTHX_ SV *sv, MAGIC *mg)
                 I32 paren = RX_LASTPAREN(rx);
 
                 /* return the last filled */
-                while ( paren >= 0
-                        && (RX_OFFS(rx)[paren].start == -1
-                            || RX_OFFS(rx)[paren].end == -1) )
+                while ( paren >= 0 && !RX_OFFS_VALID(rx,paren) )
                     paren--;
                 if (n == '-') {
                     /* @- */
@@ -680,8 +678,8 @@ Perl_magic_regdatum_get(pTHX_ SV *sv, MAGIC *mg)
             if (paren < 0)
                 return 0;
             if (paren <= (I32)RX_NPARENS(rx) &&
-                (s = RX_OFFS(rx)[paren].start) != -1 &&
-                (t = RX_OFFS(rx)[paren].end) != -1)
+                ((s = RX_OFFS_START(rx,paren)) != -1) &&
+                ((t = RX_OFFS_END(rx,paren))   != -1))
                 {
                     SSize_t i;
 
