@@ -2131,6 +2131,7 @@ AB\s+\x{100}	AB \x{100}X	y	-	-
 /(([ab]+)|([cd]+)|([ef]+))+/	aceb	y	$1-$2-$3-$4=$&	b-b--=aceb
 /(([ab]+)|([cd]+)|([ef]+))+/	acebd	y	$1-$2-$3-$4=$&	d--d-=acebd
 /(([ab]+)|([cd]+)|([ef]+))+/	acebdf	y	$1-$2-$3-$4=$&	f---f=acebdf
+/((a)(b)(c)|(a)(b)|(a))+/	abcaba	y	$1+$2-$3-$4+$5-$6+$7=$&	a+--+-+a=abcaba
 # Keep these lines at the end of the file
 # pat	string	y/n/etc	expr	expected-expr	skip-reason	comment
 # vim: softtabstop=0 noexpandtab

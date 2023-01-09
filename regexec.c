@@ -6707,6 +6707,11 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 /* what trie are we using right now */
                 reg_trie_data * const trie
                     = (reg_trie_data*)rexi->data->data[ ARG( scan ) ];
+                ST.before_paren = trie->before_paren;
+                ST.after_paren = trie->after_paren;
+                assert(ST.before_paren<=rex->nparens);
+                assert(ST.after_paren<=rex->nparens);
+
                 HV * widecharmap = MUTABLE_HV(rexi->data->data[ ARG( scan ) + 1 ]);
                 U32 state = trie->startstate;
 
@@ -6756,6 +6761,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 U32 accepted = 0; /* have we seen any accepting states? */
 
                 ST.jump = trie->jump;
+                ST.j_before_paren = trie->j_before_paren;
+                ST.j_after_paren= trie->j_after_paren;
                 ST.me = scan;
                 ST.firstpos = NULL;
                 ST.longfold = FALSE; /* char longer if folded => it's harder */
@@ -6867,6 +6874,10 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                  * rest of the branch */
                 REGCP_UNWIND(ST.cp);
                 UNWIND_PAREN(ST.lastparen, ST.lastcloseparen);
+                if (ST.after_paren) {
+                    assert(ST.before_paren<=rex->nparens && ST.after_paren<=rex->nparens);
+                    CAPTURE_CLEAR(ST.before_paren+1, ST.after_paren,"TRIE_next_fail");
+                }
             }
             if (!--ST.accepted) {
                 DEBUG_EXECUTE_r({
@@ -6956,10 +6967,16 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                         uc += chars;
                 }
             }
+            if (ST.jump && ST.jump[ST.nextword]) {
+                scan = ST.me + ST.jump[ST.nextword];
+                ST.before_paren = ST.j_before_paren[ST.nextword];
+                assert(ST.before_paren <= rex->nparens);
+                ST.after_paren = ST.j_after_paren[ST.nextword];
+                assert(ST.after_paren <= rex->nparens);
+            } else {
+                scan = ST.me + NEXT_OFF(ST.me);
+            }
 
-            scan = ST.me + ((ST.jump && ST.jump[ST.nextword])
-                            ? ST.jump[ST.nextword]
-                            : NEXT_OFF(ST.me));
 
             DEBUG_EXECUTE_r({
                 Perl_re_exec_indentf( aTHX_  "%sTRIE matched word #%d, continuing%s\n",
@@ -9037,9 +9054,15 @@ NULL
             next = scan + ARG(scan);
             if (next == scan)
                 next = NULL;
-            /* FALLTHROUGH */
+            ST.before_paren = ARG2La(scan);
+            ST.after_paren = ARG2Lb(scan);
+            goto branch_logic;
+            NOT_REACHED; /* NOTREACHED */
 
         case BRANCH:	    /*  /(...|A|...)/ */
+            ST.before_paren = ARGa(scan);
+            ST.after_paren = ARGb(scan);
+          branch_logic:
             scan = REGNODE_AFTER_opcode(scan,state_num); /* scan now points to inner node */
             assert(scan);
             ST.lastparen = rex->lastparen;
@@ -9084,6 +9107,7 @@ NULL
             }
             REGCP_UNWIND(ST.cp);
             UNWIND_PAREN(ST.lastparen, ST.lastcloseparen);
+            CAPTURE_CLEAR(ST.before_paren+1,ST.after_paren,"BRANCH_next_fail");
             scan = ST.next_branch;
             /* no more branches? */
             if (!scan || (OP(scan) != BRANCH && OP(scan) != BRANCHJ)) {
