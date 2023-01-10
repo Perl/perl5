@@ -750,6 +750,8 @@ an answer instead of giving a fatal runtime error.
 
 Do not attempt navigation using these formulas.
 
+=head1 SEE ALSO
+
 L<Math::Complex>
 
 =head1 AUTHORS
