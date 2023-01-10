@@ -80,6 +80,51 @@ and has been removed in 5.37.9. It was only ever present in a single
 dev release and has never been released as part of a production perl,
 thus no deprecation cycle has been performed.
 
+=head2 Fixed regex engine capture buffer reset bugs and inconsistencies.
+
+Historically the exact rules of what should happen with quantified expressions
+that contain capture buffers were not clear, and the regex engine has been
+somewhat inconsistent in how it reset capture buffers inside of quantified
+groups. This meant that the state of the capture buffer variables $1, $2 could
+change when making supposedly minor and inconsequential changes to a pattern.
+
+After this release the capture buffers in the different branches of a match
+will be consistently mutually exclusive with each other, with the sole exception
+of the case of branch reset C</(?|...)/> which has its own special rules. In
+addition the final state of the capture buffers defined within a quantified
+group will consistently reflect the last successful iteration of the quantifier.
+
+For instance, after executing
+
+    "abcaba" =~ / ( (a) (b) (c) | (a) (b) | (a) )+ /x
+
+the pattern will match and leave C<$1> and C<$7> set to C<"a">, and C<$2>
+through C<$6> will be C<undef>. C<$&> will be the expected C<"abcaba">.
+
+In older perls this expression would result in C<$1> through C<$7> being
+set, with values from the first, second and third iterations of the quantifier
+set at the same time.
+
+An example of the discrepancy in behavior in older perls would be this:
+
+ "ababab" =~ /(?:(?:(ab))?\1)+/      and print "$&";
+ # output 'abab'
+ "ababab" =~ /(?:(?:((?{})ab))?\1)+/ and print "$&";
+ # outputs 'ababab'
+
+Another is this:
+
+ "A" =~ /(((?:A))?)+/;
+ my $first = $2;
+
+ "A" =~ /(((A))?)+/;
+ my $second = $2;
+
+in older perls $first and $second would not be the same. In newer perls they
+will.
+
+This may break code that was depending on the older inconsistent behaviour.
+
 =head1 Deprecations
 
 =head2 Use of C<'> as a package name separator is deprecated
