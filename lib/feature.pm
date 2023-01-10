@@ -4,7 +4,7 @@
 # Any changes made here will be lost!
 
 package feature;
-our $VERSION = '1.78';
+our $VERSION = '1.79';
 
 our %feature = (
     fc                      => 'feature_fc',
@@ -366,7 +366,7 @@ warn when you use the feature, unless you have explicitly disabled the warning:
     no warnings "experimental::declared_refs";
 
 This allows a reference to a variable to be declared with C<my>, C<state>,
-our C<our>, or localized with C<local>.  It is intended mainly for use in
+or C<our>, or localized with C<local>.  It is intended mainly for use in
 conjunction with the "refaliasing" feature.  See L<perlref/Declaring a
 Reference to a Variable> for examples.
 
