@@ -73,7 +73,7 @@ current working directory.
 
 =item css
 
-    --css=stylesheet
+    --css=URL
 
 Specify the URL of cascading style sheet to link from resulting HTML file.
 Also disables all HTML/CSS C<style> attributes that are output by default (to
@@ -113,14 +113,14 @@ mutually exclusive.
 
 =item htmlroot
 
-    --htmlroot=name
+    --htmlroot=URL
 
-Sets the base URL for the HTML files.  When cross-references are made,
-the HTML root is prepended to the URL.
+Set the base URL for the HTML files.  When cross-references are made, the HTML
+root is prepended to the URL.
 
-Do not use this if relative links are desired: use --htmldir instead.
+Do not use this if relative links are desired: use C<--htmldir> instead.
 
-Do not pass both this and --htmldir to pod2html; they are mutually
+Do not pass both this and C<--htmldir> to F<pod2html>; they are mutually
 exclusive.
 
 =item index
