@@ -2914,10 +2914,10 @@ PP(pp_sin)
               (op_type == OP_LOG ? (value <= 0.0) : (value < 0.0)))
           {
               char * mesg;
-              SETLOCALE_LOCK;
+              LC_NUMERIC_LOCK(0);
               SET_NUMERIC_STANDARD();
               mesg = Perl_form(aTHX_ "Can't take %s of %" NVgf, neg_report, value);
-              SETLOCALE_UNLOCK;
+              LC_NUMERIC_UNLOCK;
 
               /* diag_listed_as: Can't take log of %g */
               DIE(aTHX_ "%s", mesg);
