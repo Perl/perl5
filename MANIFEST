@@ -4466,6 +4466,7 @@ ext/Pod-Html/t/htmldir4.pod
 ext/Pod-Html/t/htmldir4.t
 ext/Pod-Html/t/htmldir5.pod
 ext/Pod-Html/t/htmldir5.t
+ext/Pod-Html/t/htmldir6.t
 ext/Pod-Html/t/htmlescp.pod	pod2html escape test input data
 ext/Pod-Html/t/htmlescp.t	pod2html escape test
 ext/Pod-Html/t/htmllink.pod	pod2html link test input data

@@ -27,7 +27,7 @@ my $relcwd = join '/', @dirs;
 
 $args = {
     podstub => "htmldir1",
-    description => "test --htmldir 1a; noheader",
+    description => "test --htmldir 6; noheader",
     expect => $expect_raw,
     p2h => {
         podpath => File::Spec::Unix->catdir($relcwd, 't') . ":" .
@@ -43,12 +43,12 @@ xconvert($args);
 
 $args = {
     podstub => "htmldir1",
-    description => "test --htmldir 1b",
+    description => "test --htmlroot 6",
     expect => $expect_raw,
     p2h => {
         podpath     => $relcwd,
         podroot     => catpath($v, '/', ''),
-        htmldir     => catdir($relcwd, 't'),
+        htmlroot    => '/',
         quiet       => 1,
     },
     debug => $debug,
