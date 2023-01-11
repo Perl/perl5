@@ -2566,19 +2566,27 @@ test_EXTEND(max_offset, nsv, use_ss)
     SV  *nsv;
     bool use_ss;
 PREINIT:
-    SV **sp = PL_stack_max + max_offset;
+    SV **new_sp = PL_stack_max + max_offset;
+    SSize_t new_offset = new_sp - PL_stack_base;
 PPCODE:
     if (use_ss) {
         SSize_t n = (SSize_t)SvIV(nsv);
-        EXTEND(sp, n);
-        *(sp + n) = NULL;
+        EXTEND(new_sp, n);
+        new_sp = PL_stack_base + new_offset;
+        assert(new_sp + n <= PL_stack_max);
+        if ((new_sp + n) > PL_stack_sp)
+            *(new_sp + n) = NULL;
     }
     else {
         IV n = SvIV(nsv);
-        EXTEND(sp, n);
-        *(sp + n) = NULL;
+        EXTEND(new_sp, n);
+        new_sp = PL_stack_base + new_offset;
+        assert(new_sp + n <= PL_stack_max);
+        if ((new_sp + n) > PL_stack_sp)
+            *(new_sp + n) = NULL;
     }
-    *PL_stack_max = NULL;
+    if (PL_stack_max > PL_stack_sp)
+        *PL_stack_max = NULL;
 
 
 void
