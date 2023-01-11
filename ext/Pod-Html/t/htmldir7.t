@@ -27,12 +27,12 @@ my $cwd = catdir cwd(); # catdir converts path separators to that of the OS
 
 $args = {
     podstub => "htmldir5",
-    description => "test --htmldir and --htmlroot 5",
+    description => "test --htmlroot 7",
     expect => $expect_raw,
     p2h => {
         podpath     => 't:corpus/test.lib',
         podroot     => $cwd,
-        htmldir     => $cwd,
+        htmlroot    => '/',
         quiet       => 1,
     },
     debug => $debug,
@@ -68,13 +68,13 @@ __DATA__
 
 <p>Normal text, a <a>link</a> to nowhere,</p>
 
-<p>a link to <a href="../corpus/test.lib/var-copy.html">var-copy</a>,</p>
+<p>a link to <a href="/corpus/test.lib/var-copy.html">var-copy</a>,</p>
 
-<p><a href="./htmlescp.html">htmlescp</a>,</p>
+<p><a href="/t/htmlescp.html">htmlescp</a>,</p>
 
-<p><a href="./feature.html#Another-Head-1">&quot;Another Head 1&quot; in feature</a>,</p>
+<p><a href="/t/feature.html#Another-Head-1">&quot;Another Head 1&quot; in feature</a>,</p>
 
-<p>and another <a href="./feature.html#Another-Head-1">&quot;Another Head 1&quot; in feature</a>.</p>
+<p>and another <a href="/t/feature.html#Another-Head-1">&quot;Another Head 1&quot; in feature</a>.</p>
 
 
 </body>
