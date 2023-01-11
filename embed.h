@@ -1264,6 +1264,7 @@
 #     endif /* defined(HAS_LOCALECONV) */
 #     if defined(USE_LOCALE)
 #       define get_category_index               S_get_category_index
+#       define get_category_index_nowarn        S_get_category_index_nowarn
 #       define mortalized_pv_copy(a)            S_mortalized_pv_copy(aTHX_ a)
 #       define new_LC_ALL(a,b)                  S_new_LC_ALL(aTHX_ a,b)
 #       define save_to_buffer                   S_save_to_buffer

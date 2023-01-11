@@ -433,19 +433,16 @@ STATIC void (*update_functions[]) (pTHX_ const char *, bool force) = {
  * checked for at compile time by using the #define LC_ALL_INDEX_ which is only
  * defined if we do have LC_ALL. */
 
-STATIC unsigned int
-S_get_category_index(const int category, const char * locale)
+STATIC int
+S_get_category_index_nowarn(const int category)
 {
     /* Given a category, return the equivalent internal index we generally use
-     * instead.
-     *
-     * 'locale' is for use in any generated diagnostics, and may be NULL
+     * instead, or negative if not found.
      *
      * Some sort of hash could be used instead of this loop, but the number of
      * elements is so far at most 12 */
 
     unsigned int i;
-    const char * conditional_warn_text = "; can't set it to ";
 
     PERL_ARGS_ASSERT_GET_CATEGORY_INDEX;
 
@@ -462,6 +459,25 @@ S_get_category_index(const int category, const char * locale)
                                    category, category_names[i], i));
             return i;
         }
+    }
+
+    return -1;
+}
+
+STATIC unsigned int
+S_get_category_index(const int category, const char * locale)
+{
+    /* Given a category, return the equivalent internal index we generally use
+     * instead.
+     *
+     * 'locale' is for use in any generated diagnostics, and may be NULL
+     */
+
+    const char * conditional_warn_text = "; can't set it to ";
+    const int index = get_category_index_nowarn(category);
+
+    if (index >= 0) {
+        return index;
     }
 
     /* Here, we don't know about this category, so can't handle it. */

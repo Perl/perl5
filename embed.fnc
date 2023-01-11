@@ -4313,6 +4313,8 @@ S	|void	|populate_hash_from_localeconv				\
 ST	|unsigned int|get_category_index				\
 				|const int category			\
 				|NULLOK const char *locale
+ST	|int	|get_category_index_nowarn				\
+				|const int category
 Ri	|const char *|mortalized_pv_copy				\
 				|NULLOK const char * const pv
 S	|void	|new_LC_ALL	|NULLOK const char *unused		\

@@ -7050,6 +7050,10 @@ STATIC unsigned int
 S_get_category_index(const int category, const char *locale);
 #   define PERL_ARGS_ASSERT_GET_CATEGORY_INDEX
 
+STATIC int
+S_get_category_index_nowarn(const int category);
+#   define PERL_ARGS_ASSERT_GET_CATEGORY_INDEX_NOWARN
+
 STATIC void
 S_new_LC_ALL(pTHX_ const char *unused, bool force);
 #   define PERL_ARGS_ASSERT_NEW_LC_ALL
