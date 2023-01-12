@@ -457,6 +457,7 @@
 # define op_contextualize(a,b)                  Perl_op_contextualize(aTHX_ a,b)
 # define op_convert_list(a,b,c)                 Perl_op_convert_list(aTHX_ a,b,c)
 # define op_dump(a)                             Perl_op_dump(aTHX_ a)
+# define op_force_list(a)                       Perl_op_force_list(aTHX_ a)
 # define op_free(a)                             Perl_op_free(aTHX_ a)
 # define op_linklist(a)                         Perl_op_linklist(aTHX_ a)
 # define op_null(a)                             Perl_op_null(aTHX_ a)

@@ -3202,6 +3202,10 @@ Perl_op_dump(pTHX_ const OP *o);
 #define PERL_ARGS_ASSERT_OP_DUMP                \
         assert(o)
 
+PERL_CALLCONV OP *
+Perl_op_force_list(pTHX_ OP *o);
+#define PERL_ARGS_ASSERT_OP_FORCE_LIST
+
 PERL_CALLCONV void
 Perl_op_free(pTHX_ OP *arg);
 #define PERL_ARGS_ASSERT_OP_FREE

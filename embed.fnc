@@ -2354,6 +2354,8 @@ p	|OP *	|sawparens	|NULLOK OP *o
 Apd	|OP *	|op_contextualize					\
 				|NN OP *o				\
 				|I32 context
+; Used in op.c
+Apd	|OP *	|op_force_list	|NULLOK OP *o
 : Used in perly.y
 p	|OP *	|scalar 	|NULLOK OP *o
 : Used in pp_ctl.c
