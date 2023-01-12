@@ -875,15 +875,16 @@ PP(pp_formline)
             {
                 Size_t max = SvLEN(PL_formtarget) - (t - SvPVX(PL_formtarget));
                 int len;
-                DECLARATION_FOR_LC_NUMERIC_MANIPULATION;
-                STORE_LC_NUMERIC_SET_TO_NEEDED();
                 arg &= ~(FORM_NUM_POINT|FORM_NUM_BLANK);
 #ifdef USE_QUADMATH
                 {
                     int len;
                     if (!quadmath_format_valid(fmt))
                         Perl_croak_nocontext("panic: quadmath invalid format \"%s\"", fmt);
-                    len = quadmath_snprintf(t, max, fmt, (int) fieldsize, (int) arg, value);
+                    WITH_LC_NUMERIC_SET_TO_NEEDED(
+                        len = quadmath_snprintf(t, max, fmt, (int) fieldsize,
+                                               (int) arg, value);
+                    );
                     if (len == -1)
                         Perl_croak_nocontext("panic: quadmath_snprintf failed, format \"%s\"", fmt);
                 }
@@ -894,7 +895,6 @@ PP(pp_formline)
                 GCC_DIAG_RESTORE_STMT;
 #endif
                 PERL_MY_SNPRINTF_POST_GUARD(len, max);
-                RESTORE_LC_NUMERIC();
             }
             t += fieldsize;
             break;
