@@ -957,7 +957,7 @@ PP(pp_multiconcat)
         /* Note that we iterate the loop nargs+1 times: to append nargs
          * arguments and nargs+1 constant strings. For example, "-$a-$b-"
          */
-        svpv_p = svpv_base - 1;
+        svpv_p = svpv_base;
 
         for (;;) {
             SSize_t len = (const_lens++)->ssize;
@@ -969,7 +969,7 @@ PP(pp_multiconcat)
                 const_pv += len;
             }
 
-            if (++svpv_p == svpv_end)
+            if (svpv_p == svpv_end)
                 break;
 
             /* append next arg */
@@ -997,6 +997,7 @@ PP(pp_multiconcat)
                     targ_pv += len;
             }
 
+            ++svpv_p;
         }
     }
 
