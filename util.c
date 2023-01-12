@@ -5284,33 +5284,37 @@ Perl_my_vsnprintf(char *buffer, const Size_t len, const char *format, va_list ap
     return 0;
 #else
     int retval;
-#ifdef NEED_VA_COPY
+
+#  ifdef NEED_VA_COPY
     va_list apc;
 
     PERL_ARGS_ASSERT_MY_VSNPRINTF;
     Perl_va_copy(ap, apc);
-# ifdef HAS_VSNPRINTF
+#    ifdef HAS_VSNPRINTF
     retval = vsnprintf(buffer, len, format, apc);
-# else
+#    else
+
     PERL_UNUSED_ARG(len);
     retval = vsprintf(buffer, format, apc);
-# endif
+#    endif
+
     va_end(apc);
-#else
-# ifdef HAS_VSNPRINTF
+#  else
+#    ifdef HAS_VSNPRINTF
     retval = vsnprintf(buffer, len, format, ap);
-# else
+#    else
     PERL_UNUSED_ARG(len);
     retval = vsprintf(buffer, format, ap);
-# endif
-#endif /* #ifdef NEED_VA_COPY */
+#    endif
+#  endif /* #ifdef NEED_VA_COPY */
+
     /* vsprintf() shows failure with < 0 */
     if (retval < 0
-#ifdef HAS_VSNPRINTF
+#  ifdef HAS_VSNPRINTF
     /* vsnprintf() shows failure with >= len */
         ||
         (len > 0 && (Size_t)retval >= len)
-#endif
+#  endif
     )
         Perl_croak_nocontext("panic: my_vsnprintf buffer overflow");
     return retval;
