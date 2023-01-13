@@ -1094,6 +1094,59 @@ L<GH issue 20261|https://github.com/Perl/perl5/issues/20261>
 
 =back
 
+=head2 When did perl stop emitting warnings when running on certain code?
+
+=over 4
+
+=item * Background
+
+Most of the time, we bisect in order to identify the first "bad" commit:  the
+first time code failed to compile; the first time the code emitted warnings;
+and so forth.
+
+Some times, however, we want to identify the first "good" commit:  the point
+where the code began to compile; the point where the code no longer emitted
+warnings; etc.
+
+We can use this program for that purpose, but we have to reverse our sense of
+"good" and "bad" commits.  In this case, F<git> will label the healing commit
+as "bad" (or label a breaking commit as "good"), so we have to invoke the
+program such that we do a C<die> when we reach the healing commit.
+
+=item * Problem
+
+It was reported that in an older version of Perl, a warning was being emitted
+when a program was using the F<bigrat> module and
+C<Scalar::Util::looks_like_number()> was called passing a non-integral number
+(I<i.e.,> a rational).
+
+    $ perl -wE 'use Scalar::Util; use bigrat;
+      say "mercy" if Scalar::Util::looks_like_number(1/9);'
+
+In perl-5.32, this emitted:
+
+    $ Argument "1/9" isn't numeric in addition (+) at
+      /usr/local/lib/perl5/5.32/Math/BigRat.pm line 1955.
+      mercy
+
+But it was observed that there was no warning in perl-5.36.
+
+=item * Solution
+
+    $ perl Porting/bisect.pl \
+        --start=5624cfff8f \
+        --end=b80b9f7fc6 \
+        -we 'use Scalar::Util; use bigrat; my @w;
+            local $SIG{__WARN__} = sub { push @w, $_; };
+            print "mercy\n" if Scalar::Util::looks_like_number(1/9);
+            die unless @w;'
+
+=item * Reference
+
+L<GH issue 20685|https://github.com/Perl/perl5/issues/20685>
+
+=back
+
 =cut
 
 # Ensure we always exit with 255, to cause git bisect to abort.
