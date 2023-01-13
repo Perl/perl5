@@ -864,6 +864,10 @@ static const scan_data_t zero_scan_data = {
             SAVEFREEPV(RExC_open_parens);                                   \
         if (RExC_close_parens)                                              \
             SAVEFREEPV(RExC_close_parens);                                  \
+        if (RExC_logical_to_parno)                                          \
+            SAVEFREEPV(RExC_logical_to_parno);                              \
+        if (RExC_parno_to_logical)                                          \
+            SAVEFREEPV(RExC_parno_to_logical);                              \
     } STMT_END
 
 /*
