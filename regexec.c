@@ -9316,7 +9316,10 @@ NULL
                 /* avoid taking address of locinput, so it can remain
                  * a register var */
                 char *li = locinput;
-                ST.count = regrepeat(rex, &li, ST.A, loceol, reginfo, ST.max);
+                if (ST.max)
+                    ST.count = regrepeat(rex, &li, ST.A, loceol, reginfo, ST.max);
+                else
+                    ST.count = 0;
                 if (ST.count < ST.min)
                     sayNO;
                 SET_locinput(li);
@@ -10057,6 +10060,8 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
     bool utf8_target = reginfo->is_utf8_target;
     unsigned int to_complement = 0;  /* Invert the result? */
     char_class_number_ classnum;
+
+    assert(max);
 
     PERL_ARGS_ASSERT_REGREPEAT;
 
