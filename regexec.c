@@ -10061,8 +10061,6 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
     unsigned int to_complement = 0;  /* Invert the result? */
     char_class_number_ classnum;
 
-    assert(max);
-
     PERL_ARGS_ASSERT_REGREPEAT;
 
     /* This routine is structured so that we switch on the input OP.  Each OP
