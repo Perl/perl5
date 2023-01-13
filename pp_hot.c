@@ -5894,7 +5894,19 @@ S_opmethod_stash(pTHX_ SV* meth)
             ob = LvTARG(ob);
             assert(ob);
         }
-        *(PL_stack_base + TOPMARK + 1) = sv_2mortal(newRV(ob));
+        /* Replace the object at the base of the stack frame.
+         * This is "below" whatever pp_wrap has wrapped, so needs freeing.
+         */
+        SV *newsv = sv_2mortal(newRV(ob));
+        SV **svp = (PL_stack_base + TOPMARK + 1);
+#if defined(PERL_RC_STACK) && !defined(PERL_XXX_TMP_NORC)
+        SV *oldsv = *svp;
+#endif
+        *svp = newsv;
+#if defined(PERL_RC_STACK) && !defined(PERL_XXX_TMP_NORC)
+        SvREFCNT_inc_simple_void_NN(newsv);
+        SvREFCNT_dec_NN(oldsv);
+#endif
     }
     else {
         /* this isn't a reference */
@@ -5922,8 +5934,20 @@ S_opmethod_stash(pTHX_ SV* meth)
             if (stash) return stash;
             else return MUTABLE_HV(sv);
         }
-        /* it _is_ a filehandle name -- replace with a reference */
-        *(PL_stack_base + TOPMARK + 1) = sv_2mortal(newRV(MUTABLE_SV(iogv)));
+        /* it _is_ a filehandle name -- replace with a reference.
+         * Replace the object at the base of the stack frame.
+         * This is "below" whatever pp_wrap has wrapped, so needs freeing.
+         */
+        SV *newsv = sv_2mortal(newRV(MUTABLE_SV(iogv)));
+        SV **svp = (PL_stack_base + TOPMARK + 1);
+#if defined(PERL_RC_STACK) && !defined(PERL_XXX_TMP_NORC)
+        SV *oldsv = *svp;
+#endif
+        *svp = newsv;
+#if defined(PERL_RC_STACK) && !defined(PERL_XXX_TMP_NORC)
+        SvREFCNT_inc_simple_void_NN(newsv);
+        SvREFCNT_dec_NN(oldsv);
+#endif
     }
 
     /* if we got here, ob should be an object or a glob */
