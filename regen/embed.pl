@@ -222,6 +222,7 @@ sub generate_proto_h {
                 }
                 my $nn = ( $arg =~ s/\s*\bNN\b\s+// );
                 push( @nonnull, $n ) if $nn;
+                my $nz = ( $arg =~ s/\s*\bNZ\b\s+// );
 
                 my $nullok = ( $arg =~ s/\s*\bNULLOK\b\s+// ); # strip NULLOK with no effect
 
@@ -234,7 +235,7 @@ sub generate_proto_h {
                      && ($temp_arg !~ /\w+\s+(\w+)(?:\[\d+\])?\s*$/) ) {
                     die_at_end "$func: $arg ($n) doesn't have a name\n";
                 }
-                if (defined $1 && $nn && !($commented_out && !$binarycompat)) {
+                if (defined $1 && ($nn||$nz) && !($commented_out && !$binarycompat)) {
                     push @names_of_nn, $1;
                 }
             }

@@ -600,6 +600,9 @@
 : know "I have defined whether NULL is OK or not" rather than having neither
 : NULL or NULLOK, which is ambiguous.
 :
+: Numeric arguments may also be prefixed with NZ, which will cause the
+: appropriate asserts to be generated to validate that this is the case.
+:
 : Flags should be sorted asciibetically.
 :
 : Please keep the next line *BLANK*
@@ -5321,7 +5324,7 @@ WERS	|I32	|regrepeat	|NN regexp *prog			\
 				|NN const regnode *p			\
 				|NN char *loceol			\
 				|NN regmatch_info * const reginfo	\
-				|I32 max
+				|NZ I32 max
 ERS	|bool	|regtry 	|NN regmatch_info *reginfo		\
 				|NN char **startposp
 ERS	|bool	|reginclass	|NULLOK regexp * const prog		\

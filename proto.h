@@ -8819,7 +8819,8 @@ STATIC I32
 S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p, char *loceol, regmatch_info * const reginfo, I32 max _pDEPTH)
         __attribute__warn_unused_result__;
 # define PERL_ARGS_ASSERT_REGREPEAT             \
-        assert(prog); assert(startposp); assert(p); assert(loceol); assert(reginfo)
+        assert(prog); assert(startposp); assert(p); assert(loceol); assert(reginfo); \
+        assert(max)
 
 STATIC bool
 S_regtry(pTHX_ regmatch_info *reginfo, char **startposp)
