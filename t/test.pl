@@ -274,8 +274,8 @@ sub _ok {
 }
 
 sub _where {
-    my @caller = caller($Level);
-    return "at $caller[1] line $caller[2]";
+    my (undef, $filename, $lineno) = caller($Level);
+    return "at $filename line $lineno";
 }
 
 # DON'T use this for matches. Use like() instead.
