@@ -369,7 +369,10 @@ PerlIO_debug(const char *fmt, ...)
            should be, otherwise the system isn't likely to support quadmath.
            Nothing should be calling PerlIO_debug() with floating point anyway.
         */
+        DECLARATION_FOR_LC_NUMERIC_MANIPULATION;
+        STORE_LC_NUMERIC_SET_TO_NEEDED();
         const STRLEN len2 = vsnprintf(buffer + len1, sizeof(buffer) - len1, fmt, ap);
+        RESTORE_LC_NUMERIC();
 #    else
         STATIC_ASSERT_STMT(0);
 #    endif
