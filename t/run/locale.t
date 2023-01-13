@@ -38,7 +38,7 @@ if (defined $ARGV[0] && $ARGV[0] ne "") {
     }
     $debug = 1;
 }
-$switches = "switches => [ '-DLv' ]" if $debug;
+$switches = "switches => [ '-DULv' ]" if $debug;
 
 # reset the locale environment
 delete local @ENV{'LANGUAGE', 'LANG', (grep /^LC_[A-Z]+$/, keys %ENV)};
@@ -590,7 +590,7 @@ SKIP: {   # GH #20085
 
     local $ENV{LC_CTYPE} = $utf8_locales[0];
     local $ENV{LC_ALL} = undef;
-    fresh_perl_is(<<~'EOF', "ok\n", {}, "check that setlocale overrides startup");
+    fresh_perl_is(<<~'EOF', "ok\n", { eval $switches }, "check that setlocale overrides startup");
         use POSIX;
 
         my $a_acute = "\N{LATIN SMALL LETTER A WITH ACUTE}";
@@ -627,7 +627,8 @@ SKIP: {   # GH #20054
                         system "\$^X -e1";
                     EOT
                     qr/Falling back to the $fallback locale/,
-                    {}, "check that illegal startup environment falls back");
+                    { eval $switches },
+                    "check that illegal startup environment falls back");
 }
 
 done_testing();
