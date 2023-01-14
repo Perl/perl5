@@ -7721,7 +7721,7 @@ undefined.
 If SUBNAME or BLOCK is omitted, L<C<sort>|/sort SUBNAME LIST>s in
 standard string comparison
 order.  If SUBNAME is specified, it gives the name of a subroutine
-that returns an integer less than, equal to, or greater than C<0>,
+that returns a numeric value less than, equal to, or greater than C<0>,
 depending on how the elements of the list are to be ordered.  (The
 C<< <=> >> and C<cmp> operators are extremely useful in such routines.)
 SUBNAME may be a scalar variable name (unsubscripted), in which case
