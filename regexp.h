@@ -958,7 +958,7 @@ typedef struct regmatch_state {
         struct {
             U32 paren;
             CHECKPOINT cp;
-            CHECKPOINT	lastcp;	/* remember current savestack index */
+            CHECKPOINT lastcp;  /* remember current savestack index */
             U32 lastparen;
             U32 lastcloseparen;
             char *maxpos;	/* highest possible point in string to match */
@@ -969,6 +969,10 @@ typedef struct regmatch_state {
             struct next_matchable_info Binfo;
         } curly; /* and CURLYN/PLUS/STAR */
 
+        struct {
+            CHECKPOINT cp;
+            CHECKPOINT lastcp;
+        } backref; /* REF and friends */
     } u;
 } regmatch_state;
 
