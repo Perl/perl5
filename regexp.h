@@ -840,6 +840,7 @@ typedef struct regmatch_state {
             U32 lastparen;
             U32 lastcloseparen;
             CHECKPOINT cp;
+            CHECKPOINT lastcp;
             U16 before_paren;
             U16 after_paren;
 
@@ -851,6 +852,7 @@ typedef struct regmatch_state {
             U32 lastparen;
             U32 lastcloseparen;
             CHECKPOINT cp;
+            CHECKPOINT lastcp;
             U16 before_paren;
             U16 after_paren;
 
@@ -863,6 +865,7 @@ typedef struct regmatch_state {
             U32 lastparen;
             U32 lastcloseparen;
             CHECKPOINT cp;
+            CHECKPOINT lastcp;
             U16 before_paren;
             U16 after_paren;
 
@@ -926,6 +929,7 @@ typedef struct regmatch_state {
             regnode	*me;	/* the CURLYX node  */
             regnode	*B;	/* the B node in /A*B/  */
             CHECKPOINT	cp;	/* remember current savestack index */
+            CHECKPOINT	lastcp;	/* remember current savestack index */
             bool	minmod;
             int		parenfloor;/* how far back to strip paren data */
 
@@ -949,6 +953,7 @@ typedef struct regmatch_state {
             /* this first element must match u.yes */
             struct regmatch_state *prev_yes_state;
             CHECKPOINT cp;
+            CHECKPOINT	lastcp;	/* remember current savestack index */
             U32 lastparen;
             U32 lastcloseparen;
             I32 alen;		/* length of first-matched A string */
@@ -962,6 +967,7 @@ typedef struct regmatch_state {
         struct {
             U32 paren;
             CHECKPOINT cp;
+            CHECKPOINT	lastcp;	/* remember current savestack index */
             U32 lastparen;
             U32 lastcloseparen;
             char *maxpos;	/* highest possible point in string to match */
