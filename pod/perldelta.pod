@@ -129,6 +129,14 @@ L<XXX> has been upgraded from version A.xx to B.yy.
 
 If there was something important to note about this change, include that here.
 
+=item *
+
+Modules in the Math-Complex distribution have been uniformly upgraded to
+version 1.60.  L<Math::Complex> has been upgraded from version 1.59_03 (with
+no other code changes).  L<Math::Trig> has been upgraded from version 1.23_01
+with documentation improvements and code improvements in the calculation of
+C<great_circle_distance()>.
+
 =back
 
 =head2 Removed Modules and Pragmata
