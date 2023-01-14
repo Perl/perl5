@@ -716,8 +716,7 @@ Perl_do_join(pTHX_ SV *sv, SV *delim, SV **mark, SV **sp)
 
     /* stringify once and use that unless the delim has concat_amg */
     if (!delim_has_concat) {
-        delim = newSVpvn_utf8(delims, delimlen, SvUTF8(delim));
-        SAVEFREESV(delim);
+        delim = newSVpvn_flags(delims, delimlen, SVs_TEMP | SvUTF8(delim));
     }
 
     mark++;
