@@ -536,10 +536,12 @@ Perl_sv_peek(pTHX_ SV *sv)
                 break;
             }
         }
-        if (is_tmp || SvREFCNT(sv) > 1) {
+        if (is_tmp || SvREFCNT(sv) > 1 || SvPADTMP(sv)) {
             Perl_sv_catpvf(aTHX_ t, "<");
             if (SvREFCNT(sv) > 1)
                 Perl_sv_catpvf(aTHX_ t, "%" UVuf, (UV)SvREFCNT(sv));
+            if (SvPADTMP(sv))
+                Perl_sv_catpvf(aTHX_ t, "%s",  "P");
             if (is_tmp)
                 Perl_sv_catpvf(aTHX_ t, "%s", SvTEMP(t) ? "T" : "t");
             Perl_sv_catpvf(aTHX_ t, ">");
