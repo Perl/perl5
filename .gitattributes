@@ -21,3 +21,4 @@ warnings.h linguist-generated
 *.pl linguist-language=Perl
 *.pm linguist-language=Perl
 *.t linguist-language=Perl
+*.h linguist-language=C
