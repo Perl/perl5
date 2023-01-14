@@ -6039,6 +6039,8 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                                        ? REFFL
                                        : REFF),
                                 num);
+                if (RExC_nestroot && num >= RExC_nestroot)
+                    REGNODE_p(ret)->flags = VOLATILE_REF;
                 if (OP(REGNODE_p(ret)) == REFF) {
                     RExC_seen_d_op = TRUE;
                 }
