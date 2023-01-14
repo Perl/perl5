@@ -1258,4 +1258,6 @@ static const scan_data_t zero_scan_data = {
 #define REGNODE_STEP_OVER(ret,t1,t2) \
     NEXT_OFF(REGNODE_p(ret)) = ((sizeof(t1)+sizeof(t2))/sizeof(regnode))
 
+#define VOLATILE_REF 1
+
 #endif /* REGCOMP_INTERNAL_H */

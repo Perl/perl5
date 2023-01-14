@@ -128,7 +128,7 @@ typedef struct regnode                           tregnode_WHILEM;
 /* Regops and State definitions */
 
 #define REGNODE_MAX           	111
-#define REGMATCH_STATE_MAX    	151
+#define REGMATCH_STATE_MAX    	153
 
 /* -- For regexec.c to switch on target being utf8 (t8) or not (tb, b='byte'); */
 #define with_t_UTF8ness(op, t_utf8) (((op) << 1) + (cBOOL(t_utf8)))
@@ -1573,6 +1573,22 @@ typedef struct regnode                           tregnode_WHILEM;
 #define KEEPS_next_fail_t8_pb             606  /*      0x25e */
 #define KEEPS_next_fail_t8_p8             607  /*      0x25f */
 
+#define REF_next                    152        /* 0x98 state for REF */
+#define REF_next_tb                    304     /*      0x130 */
+#define REF_next_t8                    305     /*      0x131 */
+#define REF_next_tb_pb                    608  /*      0x260 */
+#define REF_next_tb_p8                    609  /*      0x261 */
+#define REF_next_t8_pb                    610  /*      0x262 */
+#define REF_next_t8_p8                    611  /*      0x263 */
+
+#define REF_next_fail               153        /* 0x99 state for REF */
+#define REF_next_fail_tb               306     /*      0x132 */
+#define REF_next_fail_t8               307     /*      0x133 */
+#define REF_next_fail_tb_pb               612  /*      0x264 */
+#define REF_next_fail_tb_p8               613  /*      0x265 */
+#define REF_next_fail_t8_pb               614  /*      0x266 */
+#define REF_next_fail_t8_p8               615  /*      0x267 */
+
 
 /* PL_regnode_name[] - Opcode/state names in string form, for debugging */
 
@@ -1733,6 +1749,8 @@ EXTCONST char * const PL_regnode_name[] = {
 	"CUTGROUP_next_fail",    	/* REGNODE_MAX +0x26 */
 	"KEEPS_next",            	/* REGNODE_MAX +0x27 */
 	"KEEPS_next_fail",       	/* REGNODE_MAX +0x28 */
+	"REF_next",              	/* REGNODE_MAX +0x29 */
+	"REF_next_fail",         	/* REGNODE_MAX +0x2a */
 };
 #endif /* DOINIT */
 
@@ -2803,6 +2821,20 @@ EXTCONST struct regnode_meta PL_regnode_info[] = {
     {
         /* #151 state KEEPS_next_fail */
         .type = KEEPS,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #152 state REF_next */
+        .type = REF,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #153 state REF_next_fail */
+        .type = REF,
         .arg_len = 0,
         .arg_len_varies = 0,
         .off_by_arg = 0

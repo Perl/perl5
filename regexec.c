@@ -6885,8 +6885,10 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
         case TRIE_next_fail: /* we failed - try next alternative */
         {
             U8 *uc;
-            REGCP_UNWIND(ST.lastcp);
-            regcppop(rex,&maxopenparen);
+            if (RE_PESSIMISTIC_PARENS) {
+                REGCP_UNWIND(ST.lastcp);
+                regcppop(rex,&maxopenparen);
+            }
             if ( ST.jump ) {
                 /* undo any captures done in the tail part of a branch,
                  * e.g.
@@ -7009,8 +7011,10 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             });
 
             if ( ST.accepted > 1 || has_cutgroup || ST.jump ) {
-                (void)regcppush(rex, 0, maxopenparen);
-                REGCP_SET(ST.lastcp);
+                if (RE_PESSIMISTIC_PARENS) {
+                    (void)regcppush(rex, 0, maxopenparen);
+                    REGCP_SET(ST.lastcp);
+                }
                 PUSH_STATE_GOTO(TRIE_next, scan, (char*)uc, loceol,
                                 script_run_begin);
                 NOT_REACHED; /* NOTREACHED */
@@ -8027,6 +8031,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             utf8_fold_flags = 0;
             goto do_ref;
 
+#undef  ST
+#define ST st->u.backref
         case REF:  /*  /\1/    */
             folder = NULL;
             fold_array = NULL;
@@ -8066,8 +8072,9 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             }
             if (ln == -1 || endref == -1)
                 sayNO;			/* Do not match unless seen CLOSEn. */
+
             if (ln == endref)
-                break;
+                goto ref_yes;
 
             s = reginfo->strbeg + ln;
             if (type != REF	/* REF can do byte comparison */
@@ -8086,7 +8093,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                     sayNO;
                 }
                 locinput = limit;
-                break;
+                goto ref_yes;
             }
 
             /* Not utf8:  Inline the first character, for speed. */
@@ -8106,8 +8113,26 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                            : ! folder(aTHX_ locinput, s, ln)))
                 sayNO;
             locinput += ln;
-            break;
         }
+        ref_yes:
+            if (scan->flags) { /* == VOLATILE_REF but only other value is 0 */
+                ST.cp = regcppush(rex, 0, maxopenparen);
+                REGCP_SET(ST.lastcp);
+                PUSH_STATE_GOTO(REF_next, next, locinput, loceol,
+                                script_run_begin);
+            }
+            break;
+            NOT_REACHED; /* NOTREACHED */
+
+        case REF_next:
+            sayYES;
+            break;
+
+        case REF_next_fail:
+            REGCP_UNWIND(ST.lastcp);
+            regcppop(rex, &maxopenparen);
+            sayNO;
+            break;
 
         case NOTHING: /* null op; e.g. the 'nothing' following
                        * the '*' in m{(a+|b)*}' */
@@ -9062,8 +9087,7 @@ NULL
             );
             /* Try grabbing another A and see if it helps. */
             cur_curlyx->u.curlyx.lastloc = locinput;
-            ST.cp = regcppush(rex, cur_curlyx->u.curlyx.parenfloor,
-                            maxopenparen);
+            ST.cp = regcppush(rex, cur_curlyx->u.curlyx.parenfloor, maxopenparen);
             REGCP_SET(ST.lastcp);
             PUSH_STATE_GOTO(WHILEM_A_min,
                 /*A*/ REGNODE_AFTER(ST.save_curlyx->u.curlyx.me),
@@ -9092,8 +9116,10 @@ NULL
             ST.lastcloseparen = rex->lastcloseparen;
             ST.next_branch = next;
             REGCP_SET(ST.cp);
-            regcppush(rex, 0, maxopenparen);
-            REGCP_SET(ST.lastcp);
+            if (RE_PESSIMISTIC_PARENS) {
+                regcppush(rex, 0, maxopenparen);
+                REGCP_SET(ST.lastcp);
+            }
 
             /* Now go into the branch */
             if (has_cutgroup) {
@@ -9130,8 +9156,10 @@ NULL
                 do_cutgroup = 0;
                 no_final = 0;
             }
-            REGCP_UNWIND(ST.lastcp);
-            regcppop(rex,&maxopenparen);
+            if (RE_PESSIMISTIC_PARENS) {
+                REGCP_UNWIND(ST.lastcp);
+                regcppop(rex,&maxopenparen);
+            }
             REGCP_UNWIND(ST.cp);
             UNWIND_PAREN(ST.lastparen, ST.lastcloseparen);
             CAPTURE_CLEAR(ST.before_paren+1,ST.after_paren,"BRANCH_next_fail");
@@ -9496,8 +9524,10 @@ NULL
 
         case CURLY_B_min_fail:
             /* failed to find B in a non-greedy match. */
-            REGCP_UNWIND(ST.lastcp);
-            regcppop(rex, &maxopenparen); /* Restore some previous $<digit>s? */
+            if (RE_PESSIMISTIC_PARENS) {
+                REGCP_UNWIND(ST.lastcp);
+                regcppop(rex, &maxopenparen); /* Restore some previous $<digit>s? */
+            }
             REGCP_UNWIND(ST.cp);
             if (ST.paren) {
                 UNWIND_PAREN(ST.lastparen, ST.lastcloseparen);
@@ -9610,8 +9640,10 @@ NULL
             }
 
           curly_try_B_min:
-            (void)regcppush(rex, 0, maxopenparen);
-            REGCP_SET(ST.lastcp);
+            if (RE_PESSIMISTIC_PARENS) {
+                (void)regcppush(rex, 0, maxopenparen);
+                REGCP_SET(ST.lastcp);
+            }
             CURLY_SETPAREN(ST.paren, ST.count);
             PUSH_STATE_GOTO(CURLY_B_min, ST.B, locinput, loceol,
                             script_run_begin);
@@ -9625,8 +9657,10 @@ NULL
                     &&  locinput + ST.Binfo.min_length <= loceol
                     &&  S_test_EXACTISH_ST(locinput, ST.Binfo)))
             {
-                (void)regcppush(rex, 0, maxopenparen);
-                REGCP_SET(ST.lastcp);
+                if (RE_PESSIMISTIC_PARENS) {
+                    (void)regcppush(rex, 0, maxopenparen);
+                    REGCP_SET(ST.lastcp);
+                }
                 CURLY_SETPAREN(ST.paren, ST.count);
                 PUSH_STATE_GOTO(CURLY_B_max, ST.B, locinput, loceol,
                                 script_run_begin);
@@ -9638,8 +9672,10 @@ NULL
         case CURLY_B_max_fail:
             /* failed to find B in a greedy match */
 
-            REGCP_UNWIND(ST.lastcp);
-            regcppop(rex, &maxopenparen); /* Restore some previous $<digit>s? */
+            if (RE_PESSIMISTIC_PARENS) {
+                REGCP_UNWIND(ST.lastcp);
+                regcppop(rex, &maxopenparen); /* Restore some previous $<digit>s? */
+            }
           CURLY_B_all_failed:
             REGCP_UNWIND(ST.cp);
             if (ST.paren) {

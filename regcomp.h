@@ -13,6 +13,12 @@
 
 #define PERL_REGCOMP_H_
 
+/* define this to 1 if you want to enable a really aggressive and inefficient
+ * paren cleanup during backtracking. We should pass test with this as 0. */
+#ifndef RE_PESSIMISTIC_PARENS
+#define RE_PESSIMISTIC_PARENS 0
+#endif
+
 #include "regcharclass.h"
 
 /* Convert branch sequences to more efficient trie ops? */
@@ -1482,6 +1488,8 @@ typedef enum {
 
 #define EVAL_OPTIMISTIC_FLAG    128
 #define EVAL_FLAGS_MASK         (EVAL_OPTIMISTIC_FLAG-1)
+
+
 
 #endif /* PERL_REGCOMP_H_ */
 
