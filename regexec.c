@@ -289,6 +289,13 @@ S_regcppush(pTHX_ const regexp *rex, I32 parenfloor, U32 maxopenparen _pDEPTH)
     SSPUSHINT(rex->lastcloseparen);
     SSPUSHUV(SAVEt_REGCONTEXT | elems_shifted); /* Magic cookie. */
 
+
+    DEBUG_BUFFERS_r({
+        Perl_re_exec_indentf(aTHX_
+                "finished regcppush returning %" IVdf " cur: %" IVdf "\n",
+                depth, retval, PL_savestack_ix);
+    });
+
     return retval;
 }
 
@@ -383,6 +390,13 @@ S_regcppop(pTHX_ regexp *rex, U32 *maxopenparen_p _pDEPTH)
 
     PERL_ARGS_ASSERT_REGCPPOP;
 
+
+    DEBUG_BUFFERS_r({
+        Perl_re_exec_indentf(aTHX_
+                "starting regcppop at %" IVdf "\n",
+                depth, PL_savestack_ix);
+    });
+
     /* Pop REGCP_OTHER_ELEMS before the parentheses loop starts. */
     i = SSPOPUV;
     assert((i & SAVE_MASK) == SAVEt_REGCONTEXT); /* Check that the magic cookie is there. */
@@ -455,6 +469,11 @@ S_regcppop(pTHX_ regexp *rex, U32 *maxopenparen_p _pDEPTH)
         ));
     }
 #endif
+    DEBUG_BUFFERS_r({
+        Perl_re_exec_indentf(aTHX_
+                "finished regcppop at %" IVdf "\n",
+                depth, PL_savestack_ix);
+    });
 }
 
 /* restore the parens and associated vars at savestack position ix,
@@ -6822,6 +6841,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
         case TRIE_next_fail: /* we failed - try next alternative */
         {
             U8 *uc;
+            REGCP_UNWIND(ST.lastcp);
+            regcppop(rex,&maxopenparen);
             if ( ST.jump ) {
                 /* undo any captures done in the tail part of a branch,
                  * e.g.
@@ -6944,6 +6965,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             });
 
             if ( ST.accepted > 1 || has_cutgroup || ST.jump ) {
+                (void)regcppush(rex, 0, maxopenparen);
+                REGCP_SET(ST.lastcp);
                 PUSH_STATE_GOTO(TRIE_next, scan, (char*)uc, loceol,
                                 script_run_begin);
                 NOT_REACHED; /* NOTREACHED */
@@ -9012,6 +9035,8 @@ NULL
             ST.lastcloseparen = rex->lastcloseparen;
             ST.next_branch = next;
             REGCP_SET(ST.cp);
+            regcppush(rex, 0, maxopenparen);
+            REGCP_SET(ST.lastcp);
 
             /* Now go into the branch */
             if (has_cutgroup) {
@@ -9048,6 +9073,8 @@ NULL
                 do_cutgroup = 0;
                 no_final = 0;
             }
+            REGCP_UNWIND(ST.lastcp);
+            regcppop(rex,&maxopenparen);
             REGCP_UNWIND(ST.cp);
             UNWIND_PAREN(ST.lastparen, ST.lastcloseparen);
             CAPTURE_CLEAR(ST.before_paren+1,ST.after_paren,"BRANCH_next_fail");
@@ -9412,7 +9439,8 @@ NULL
 
         case CURLY_B_min_fail:
             /* failed to find B in a non-greedy match. */
-
+            REGCP_UNWIND(ST.lastcp);
+            regcppop(rex, &maxopenparen); /* Restore some previous $<digit>s? */
             REGCP_UNWIND(ST.cp);
             if (ST.paren) {
                 UNWIND_PAREN(ST.lastparen, ST.lastcloseparen);
@@ -9525,6 +9553,8 @@ NULL
             }
 
           curly_try_B_min:
+            (void)regcppush(rex, 0, maxopenparen);
+            REGCP_SET(ST.lastcp);
             CURLY_SETPAREN(ST.paren, ST.count);
             PUSH_STATE_GOTO(CURLY_B_min, ST.B, locinput, loceol,
                             script_run_begin);
@@ -9538,16 +9568,22 @@ NULL
                     &&  locinput + ST.Binfo.min_length <= loceol
                     &&  S_test_EXACTISH_ST(locinput, ST.Binfo)))
             {
+                (void)regcppush(rex, 0, maxopenparen);
+                REGCP_SET(ST.lastcp);
                 CURLY_SETPAREN(ST.paren, ST.count);
                 PUSH_STATE_GOTO(CURLY_B_max, ST.B, locinput, loceol,
                                 script_run_begin);
                 NOT_REACHED; /* NOTREACHED */
             }
-            /* FALLTHROUGH */
+            goto CURLY_B_all_failed;
+            NOT_REACHED; /* NOTREACHED */
 
         case CURLY_B_max_fail:
             /* failed to find B in a greedy match */
 
+            REGCP_UNWIND(ST.lastcp);
+            regcppop(rex, &maxopenparen); /* Restore some previous $<digit>s? */
+          CURLY_B_all_failed:
             REGCP_UNWIND(ST.cp);
             if (ST.paren) {
                 UNWIND_PAREN(ST.lastparen, ST.lastcloseparen);
