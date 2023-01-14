@@ -4677,6 +4677,7 @@ ext/XS-APItest/t/refs.t		Test typemap ref handling
 ext/XS-APItest/t/rmagical.t	XS::APItest extension
 ext/XS-APItest/t/rv2cv_op_cv.t	test rv2cv_op_cv() API
 ext/XS-APItest/t/savehints.t	test SAVEHINTS() API
+ext/XS-APItest/t/savestack.t	test savestack behavior, currently only in the regex engine
 ext/XS-APItest/t/scopelessblock.t	test recursive descent statement-sequence parsing
 ext/XS-APItest/t/sort.t		Test sort(xs_cmp ...)
 ext/XS-APItest/t/stmtasexpr.t	test recursive descent statement parsing

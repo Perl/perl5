@@ -8072,7 +8072,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 CV *newcv;
 
                 /* save *all* paren positions */
-                regcppush(rex, 0, maxopenparen);
+                ST.cp = regcppush(rex, 0, maxopenparen);
                 REGCP_SET(ST.lastcp);
 
                 if (!caller_cv)
@@ -8349,9 +8349,11 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 EVAL_CLOSE_PAREN_CLEAR(st); /* ST.close_paren = 0;
                                              * close_paren only for GOSUB */
                 ST.prev_recurse_locinput= NULL; /* only used for GOSUB */
-                /* Save all the seen positions so far. */
+
+                /* note we saved the paren state earlier:
                 ST.cp = regcppush(rex, 0, maxopenparen);
                 REGCP_SET(ST.lastcp);
+                */
                 /* and set maxopenparen to 0, since we are starting a "fresh" match */
                 maxopenparen = 0;
                 /* run the pattern returned from (??{...}) */
@@ -8441,6 +8443,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
         case EVAL_B_fail: /* unsuccessful B in (?{...})B */
             REGCP_UNWIND(ST.lastcp);
+            regcppop(rex, &maxopenparen);
             sayNO;
 
         case EVAL_postponed_AB_fail: /* unsuccessfully ran A or B in (??{A})B */
