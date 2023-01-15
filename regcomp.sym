@@ -233,22 +233,22 @@ CLOSE       CLOSE,      num 1     ; Close corresponding OPEN of #n.
 SROPEN      SROPEN,     none      ; Same as OPEN, but for script run
 SRCLOSE     SRCLOSE,    none      ; Close preceding SROPEN
 
-REF         REF,        num 1 V   ; Match some already matched string
-REFF        REF,        num 1 V   ; Match already matched string, using /di rules.
-REFFL       REF,        num 1 V   ; Match already matched string, using /li rules.
+REF         REF,        num 2 V   ; Match some already matched string
+REFF        REF,        num 2 V   ; Match already matched string, using /di rules.
+REFFL       REF,        num 2 V   ; Match already matched string, using /li rules.
 # N?REFF[AU] could have been implemented using the FLAGS field of the
 # regnode, but by having a separate node type, we can use the existing switch
 # statement to avoid some tests
-REFFU       REF,        num 1 V   ; Match already matched string, usng /ui.
-REFFA       REF,        num 1 V   ; Match already matched string, using /aai rules.
+REFFU       REF,        num 2 V   ; Match already matched string, usng /ui.
+REFFA       REF,        num 2 V   ; Match already matched string, using /aai rules.
 
 #*Named references.  Code in regcomp.c assumes that these all are after
 #*the numbered references
-REFN        REF,        no-sv 1 V ; Match some already matched string
-REFFN       REF,        no-sv 1 V ; Match already matched string, using /di rules.
-REFFLN      REF,        no-sv 1 V ; Match already matched string, using /li rules.
-REFFUN      REF,        num   1 V ; Match already matched string, using /ui rules.
-REFFAN      REF,        num   1 V ; Match already matched string, using /aai rules.
+REFN        REF,        no-sv 2 V ; Match some already matched string
+REFFN       REF,        no-sv 2 V ; Match already matched string, using /di rules.
+REFFLN      REF,        no-sv 2 V ; Match already matched string, using /li rules.
+REFFUN      REF,        num   2 V ; Match already matched string, using /ui rules.
+REFFAN      REF,        num   2 V ; Match already matched string, using /aai rules.
 
 #*Support for long RE
 LONGJMP     LONGJMP,    off 1 . 1 ; Jump far away.

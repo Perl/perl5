@@ -773,25 +773,25 @@ will be lost.
  SROPEN           none       Same as OPEN, but for script run
  SRCLOSE          none       Close preceding SROPEN
 
- REF              num 1      Match some already matched string
- REFF             num 1      Match already matched string, using /di
+ REF              num 2      Match some already matched string
+ REFF             num 2      Match already matched string, using /di
                              rules.
- REFFL            num 1      Match already matched string, using /li
+ REFFL            num 2      Match already matched string, using /li
                              rules.
- REFFU            num 1      Match already matched string, usng /ui.
- REFFA            num 1      Match already matched string, using /aai
+ REFFU            num 2      Match already matched string, usng /ui.
+ REFFA            num 2      Match already matched string, using /aai
                              rules.
 
  # Named references.  Code in regcomp.c assumes that these all are after
  # the numbered references
- REFN             no-sv 1    Match some already matched string
- REFFN            no-sv 1    Match already matched string, using /di
+ REFN             no-sv 2    Match some already matched string
+ REFFN            no-sv 2    Match already matched string, using /di
                              rules.
- REFFLN           no-sv 1    Match already matched string, using /li
+ REFFLN           no-sv 2    Match already matched string, using /li
                              rules.
- REFFUN           num 1      Match already matched string, using /ui
+ REFFUN           num 2      Match already matched string, using /ui
                              rules.
- REFFAN           num 1      Match already matched string, using /aai
+ REFFAN           num 2      Match already matched string, using /aai
                              rules.
 
  # Support for long RE
