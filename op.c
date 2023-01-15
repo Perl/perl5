@@ -4697,10 +4697,12 @@ Perl_newPROG(pTHX_ OP *o)
         if (PERLDB_INTER) {
             CV * const cv = get_cvs("DB::postponed", 0);
             if (cv) {
-                dSP;
-                PUSHMARK(SP);
-                XPUSHs(MUTABLE_SV(CopFILEGV(&PL_compiling)));
-                PUTBACK;
+                PUSHMARK(PL_stack_sp);
+                SV *comp = MUTABLE_SV(CopFILEGV(&PL_compiling));
+#if defined(PERL_RC_STACK) && !defined(PERL_XXX_TMP_NORC)
+                assert(rpp_stack_is_rc());
+#endif
+                rpp_xpush_1(comp);
                 call_sv(MUTABLE_SV(cv), G_DISCARD);
             }
         }
@@ -10374,10 +10376,11 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
             if (HvTOTALKEYS(hv) > 0 && hv_exists_ent(hv, tmpstr, 0)) {
                 CV * const pcv = GvCV(db_postponed);
                 if (pcv) {
-                    dSP;
-                    PUSHMARK(SP);
-                    XPUSHs(tmpstr);
-                    PUTBACK;
+                    PUSHMARK(PL_stack_sp);
+#if defined(PERL_RC_STACK) && !defined(PERL_XXX_TMP_NORC)
+                    assert(rpp_stack_is_rc());
+#endif
+                    rpp_xpush_1(tmpstr);
                     call_sv(MUTABLE_SV(pcv), G_DISCARD);
                 }
             }
@@ -10977,10 +10980,11 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
             if (HvTOTALKEYS(hv) > 0 && hv_exists_ent(hv, tmpstr, 0)) {
                 CV * const pcv = GvCV(db_postponed);
                 if (pcv) {
-                    dSP;
-                    PUSHMARK(SP);
-                    XPUSHs(tmpstr);
-                    PUTBACK;
+                    PUSHMARK(PL_stack_sp);
+#if defined(PERL_RC_STACK) && !defined(PERL_XXX_TMP_NORC)
+                    assert(rpp_stack_is_rc());
+#endif
+                    rpp_xpush_1(tmpstr);
                     call_sv(MUTABLE_SV(pcv), G_DISCARD);
                 }
             }
