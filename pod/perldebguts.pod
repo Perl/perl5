@@ -752,13 +752,13 @@ will be lost.
  PLUS             node       Match this (simple) thing 1 or more times:
                              /A{1,}B/ where A is width 1 char
 
- CURLY            sv 4       Match this (simple) thing {n,m} times:
+ CURLY            sv 3       Match this (simple) thing {n,m} times:
                              /A{m,n}B/ where A is width 1 char
- CURLYN           no 4       Capture next-after-this simple thing:
+ CURLYN           no 3       Capture next-after-this simple thing:
                              /(A){m,n}B/ where A is width 1 char
- CURLYM           no 4       Capture this medium-complex thing {n,m}
+ CURLYM           no 3       Capture this medium-complex thing {n,m}
                              times: /(A){m,n}B/ where A is fixed-length
- CURLYX           sv 4       Match/Capture this complex thing {n,m}
+ CURLYX           sv 3       Match/Capture this complex thing {n,m}
                              times.
 
  # This terminator creates a loop structure for CURLYX
@@ -796,7 +796,7 @@ will be lost.
 
  # Support for long RE
  LONGJMP          off 1 1    Jump far away.
- BRANCHJ          off 2L 1   BRANCH with long offset.
+ BRANCHJ          off 2 1    BRANCH with long offset.
 
  # Special Case Regops
  IFMATCH          off 1 1    Succeeds if the following matches; non-zero
@@ -814,7 +814,7 @@ will be lost.
  # The heavy worker
 
  EVAL             evl/flags  Execute some Perl code.
-                  2L
+                  2
 
  # Modifiers
 
@@ -825,7 +825,7 @@ will be lost.
  RENUM            off 1 1    Group with independently numbered parens.
 
  # Regex Subroutines
- GOSUB            num/ofs 2L recurse to paren arg1 at (signed) ofs arg2
+ GOSUB            num/ofs 2  recurse to paren arg1 at (signed) ofs arg2
 
  # Special conditionals
  GROUPPN          no-sv 1    Whether the group matched.
@@ -836,7 +836,7 @@ will be lost.
  ENDLIKE          none       Used only for the type field of verbs
  OPFAIL           no-sv 1    Same as (?!), but with verb arg
  ACCEPT           no-sv/num  Accepts the current matched string, with
-                  2L         verbar
+                  2          verbar
 
  # Verbs With Arguments
  VERB             no-sv 1    Used only for the type field of verbs
