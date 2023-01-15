@@ -489,9 +489,9 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
              || k == GROUPP || op == ACCEPT)
     {
         AV *name_list= NULL;
-        U32 parno= (op == ACCEPT)              ? (U32)ARG2i(o) :
-                   (op == OPEN || op == CLOSE) ? (U32)PARNO(o) :
-                                                 (U32)ARG1u(o);
+        U32 parno= (op == ACCEPT)              ? ARG2u(o) :
+                   (op == OPEN || op == CLOSE) ? PARNO(o) :
+                                                 ARG1u(o);
         if ( RXp_PAREN_NAMES(prog) ) {
             name_list= MUTABLE_AV(progi->data->data[progi->name_list_idx]);
         } else if ( pRExC_state ) {
@@ -541,6 +541,9 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
             if (logical_parno != parno)
                 Perl_sv_catpvf(aTHX_ sv, "/%" UVuf, (UV)parno);     /* Parenth number */
 
+        }
+        if ( k == REF ) {
+            Perl_sv_catpvf(aTHX_ sv, " <%" IVdf ">", (IV)ARG2i(o));
         }
         if ( k == REF && reginfo) {
             U32 n = ARG1u(o);  /* which paren pair */

@@ -2754,7 +2754,7 @@ S_handle_named_backref(pTHX_ RExC_state_t *pRExC_state,
         SvREFCNT_inc_simple_void_NN(sv_dat);
     }
     RExC_sawback = 1;
-    ret = reg1node(pRExC_state,
+    ret = reg2node(pRExC_state,
                    ((! FOLD)
                      ? REFN
                      : (ASCII_FOLD_RESTRICTED)
@@ -2764,7 +2764,9 @@ S_handle_named_backref(pTHX_ RExC_state_t *pRExC_state,
                          : (LOC)
                            ? REFFLN
                            : REFFN),
-                    num);
+                    num, RExC_nestroot);
+    if (RExC_nestroot && num >= (U32)RExC_nestroot)
+        REGNODE_p(ret)->flags = VOLATILE_REF;
     *flagp |= HASWIDTH;
 
     nextchar(pRExC_state);
@@ -6028,7 +6030,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                     }
                 }
                 RExC_sawback = 1;
-                ret = reg1node(pRExC_state,
+                ret = reg2node(pRExC_state,
                                ((! FOLD)
                                  ? REF
                                  : (ASCII_FOLD_RESTRICTED)
@@ -6038,7 +6040,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                                      : (LOC)
                                        ? REFFL
                                        : REFF),
-                                num);
+                                num, RExC_nestroot);
                 if (RExC_nestroot && num >= RExC_nestroot)
                     REGNODE_p(ret)->flags = VOLATILE_REF;
                 if (OP(REGNODE_p(ret)) == REFF) {

@@ -8068,7 +8068,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
         }
         ref_yes:
             if (scan->flags) { /* == VOLATILE_REF but only other value is 0 */
-                ST.cp = regcppush(rex, 0, maxopenparen);
+                ST.cp = regcppush(rex, ARG2u(scan) - 1, maxopenparen);
                 REGCP_SET(ST.lastcp);
                 PUSH_STATE_GOTO(REF_next, next, locinput, loceol,
                                 script_run_begin);
@@ -8105,7 +8105,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             U32 arg;
 
         case GOSUB: /*    /(...(?1))/   /(...(?&foo))/   */
-            arg= (U32)ARG1u(scan);
+            arg = ARG1u(scan);
             if (cur_eval && cur_eval->locinput == locinput) {
                 if ( ++nochange_depth > max_nochange_depth )
                     Perl_croak(aTHX_
@@ -8620,7 +8620,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             is_accepted = true;
             if (scan->flags)
                 sv_yes_mark = MUTABLE_SV(rexi->data->data[ ARG1u( scan ) ]);
-            utmp = (U32)ARG2i(scan);
+            utmp = ARG2u(scan);
 
             if ( utmp ) {
                 regnode *cursor;
