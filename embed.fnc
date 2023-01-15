@@ -5141,9 +5141,6 @@ ES	|regnode_offset|reg	|NN RExC_state_t *pRExC_state		\
 				|I32 paren				\
 				|NN I32 *flagp				\
 				|U32 depth
-ES	|regnode_offset|reganode|NN RExC_state_t *pRExC_state		\
-				|U8 op					\
-				|U32 arg
 ES	|regnode_offset|regatom |NN RExC_state_t *pRExC_state		\
 				|NN I32 *flagp				\
 				|U32 depth
@@ -5167,11 +5164,6 @@ ES	|void	|reginsert	|NN RExC_state_t *pRExC_state		\
 				|const U8 op				\
 				|const regnode_offset operand		\
 				|const U32 depth
-ES	|regnode_offset|reg2Lanode					\
-				|NN RExC_state_t *pRExC_state		\
-				|const U8 op				\
-				|const U32 arg1 			\
-				|const I32 arg2
 ES	|regnode_offset|reg_la_NOTHING					\
 				|NN RExC_state_t *pRExC_state		\
 				|U32 flags				\
@@ -5180,6 +5172,13 @@ ES	|regnode_offset|reg_la_OPFAIL					\
 				|NN RExC_state_t *pRExC_state		\
 				|U32 flags				\
 				|NN const char *type
+ES	|regnode_offset|reg1node|NN RExC_state_t *pRExC_state		\
+				|U8 op					\
+				|U32 arg
+ES	|regnode_offset|reg2node|NN RExC_state_t *pRExC_state		\
+				|const U8 op				\
+				|const U32 arg1 			\
+				|const I32 arg2
 ES	|regnode_offset|reg_node|NN RExC_state_t *pRExC_state		\
 				|U8 op
 ES	|regnode_offset|regnode_guts					\

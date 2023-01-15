@@ -8382,8 +8382,13 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth);
         assert(pRExC_state); assert(flagp)
 
 STATIC regnode_offset
-S_reg2Lanode(pTHX_ RExC_state_t *pRExC_state, const U8 op, const U32 arg1, const I32 arg2);
-# define PERL_ARGS_ASSERT_REG2LANODE            \
+S_reg1node(pTHX_ RExC_state_t *pRExC_state, U8 op, U32 arg);
+# define PERL_ARGS_ASSERT_REG1NODE              \
+        assert(pRExC_state)
+
+STATIC regnode_offset
+S_reg2node(pTHX_ RExC_state_t *pRExC_state, const U8 op, const U32 arg1, const I32 arg2);
+# define PERL_ARGS_ASSERT_REG2NODE              \
         assert(pRExC_state)
 
 STATIC regnode_offset
@@ -8404,11 +8409,6 @@ S_reg_node(pTHX_ RExC_state_t *pRExC_state, U8 op);
 STATIC SV *
 S_reg_scan_name(pTHX_ RExC_state_t *pRExC_state, U32 flags);
 # define PERL_ARGS_ASSERT_REG_SCAN_NAME         \
-        assert(pRExC_state)
-
-STATIC regnode_offset
-S_reganode(pTHX_ RExC_state_t *pRExC_state, U8 op, U32 arg);
-# define PERL_ARGS_ASSERT_REGANODE              \
         assert(pRExC_state)
 
 STATIC regnode_offset

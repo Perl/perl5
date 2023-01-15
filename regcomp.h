@@ -179,18 +179,28 @@ struct regnode_anyofhs { /* Constructed this way to keep the string aligned. */
     U8	str_len;
     U8  type;
     U16 next_off;
-    U32 arg1;                           /* set by set_ANYOF_arg() */
+    union {
+        U32 arg1u;
+        I32 arg1i;
+        struct {
+            U16 arg1a;
+            U16 arg1b;
+        };
+    };
     char string[1];
 };
 
-/* Argument bearing node - workhorse, 
-   arg1 is often for the data field */
+/* Argument bearing node - workhorse, arg1u is often for the data field
+ * Can store either a signed value via ARG1i() or unsigned 32 bit value
+ * via ARG1u(), or two unsigned 16 bit values via ARG1a() or ARG1b()
+ */
 struct regnode_1 {
     U8	flags;
     U8  type;
     U16 next_off;
     union {
-        U32 arg1;
+        U32 arg1u;
+        I32 arg1i;
         struct {
             U16 arg1a;
             U16 arg1b;
@@ -220,14 +230,25 @@ struct regnode_p {
     char arg1_sv_ptr_bytes[sizeof(SV *)];
 };
 
-/* Similar to a regnode_1 but with an extra signed argument */
-struct regnode_2L {
+/* "Two Node" - similar to a regnode_1 but with space for an extra 32
+ * bit value, or two 16 bit valus. The first fields must match regnode_1.
+ * Extra field can be accessed as (U32)ARG2u() (I32)ARG2i() or (U16)ARG2a()
+ * and (U16)ARG2b() */
+struct regnode_2 {
     U8	flags;
     U8  type;
     U16 next_off;
-    U32 arg1;
     union {
-        I32 arg2;
+        U32 arg1u;
+        I32 arg1i;
+        struct {
+            U16 arg1a;
+            U16 arg1b;
+        };
+    };
+    union {
+        U32 arg2u;
+        I32 arg2i;
         struct {
             U16 arg2a;
             U16 arg2b;
@@ -235,29 +256,42 @@ struct regnode_2L {
     };
 };
 
-/* 'Two field' -- Two 32 bit signed args.
- *  First fields must match regnode. Currently unused except to
- *  facilitate regnode_4 behavior. Not simplifying that as this
- *  node type could still be useful for other regops. */
-struct regnode_2 {
-    U8	flags;
-    U8  type;
-    U16 next_off;
-    I32 arg1;
-    I32 arg2;
-};
-
-/* 'Four field' -- Two 32 bit signed args, Two 16 bit unsigned args
- * Used for CURLY and CURLYX node types to track min/max and
- * first_paren/last_paren. First fields must match regnode_2 */
-struct regnode_4 {
+/* "Three Node" - similar to a regnode_2 but with space for an additional
+ * 32 bit value, or two 16 bit values. The first fields must match regnode_2.
+ * The extra field can be accessed as (U32)ARG3u() (I32)ARG3i() or (U16)ARG3a()
+ * and (U16)ARG3b().
+ * Currently used for the CURLY style regops used to represent quantifers,
+ * storing the min and of the quantifier via ARG1i() and ARG2i(), along with
+ * ARG3a() and ARG3b() which are used to store information about the number of
+ * parens before and inside the quantified expression. */
+struct regnode_3 {
     U8  flags;
     U8  type;
     U16 next_off;
-    I32 arg1;
-    I32 arg2;
-    U16 arg3;
-    U16 arg4;
+    union {
+        I32 arg1i;
+        U32 arg1u;
+        struct {
+            U16 arg1a;
+            U16 arg1b;
+        };
+    };
+    union {
+        I32 arg2i;
+        U32 arg2u;
+        struct {
+            U16 arg2a;
+            U16 arg2b;
+        };
+    };
+    union {
+        struct {
+            U16 arg3a;
+            U16 arg3b;
+        };
+        I32 arg3i;
+        U32 arg3u;
+    };
 };
 
 #define REGNODE_BBM_BITMAP_LEN                                                  \
@@ -292,7 +326,14 @@ struct regnode_charclass {
     U8	flags;
     U8  type;
     U16 next_off;
-    U32 arg1;                           /* set by set_ANYOF_arg() */
+    union {
+        I32 arg1i;
+        U32 arg1u;
+        struct {
+            U16 arg1a;
+            U16 arg2a;
+        };
+    };
     char bitmap[ANYOF_BITMAP_SIZE];	/* only compile-time */
 };
 
@@ -301,7 +342,14 @@ struct regnode_charclass_posixl {
     U8	flags;                      /* ANYOF_MATCHES_POSIXL bit must go here */
     U8  type;
     U16 next_off;
-    U32 arg1;
+    union {
+        I32 arg1i;
+        U32 arg1u;
+        struct {
+            U16 arg1a;
+            U16 arg2a;
+        };
+    };
     char bitmap[ANYOF_BITMAP_SIZE];		/* both compile-time ... */
     U32 classflags;	                        /* and run-time */
 };
@@ -323,7 +371,14 @@ struct regnode_ssc {
     U8	flags;                      /* ANYOF_MATCHES_POSIXL bit must go here */
     U8  type;
     U16 next_off;
-    U32 arg1;
+    union {
+        I32 arg1i;
+        U32 arg1u;
+        struct {
+            U16 arg1a;
+            U16 arg2a;
+        };
+    };
     char bitmap[ANYOF_BITMAP_SIZE];	/* both compile-time ... */
     U32 classflags;	                /* ... and run-time */
 
@@ -377,28 +432,46 @@ struct regnode_ssc {
 #undef ARG1
 #undef ARG2
 
-#define ARG(p) ARG_VALUE(ARG_LOC(p))
-#define ARGp(p) ARGp_VALUE_inline(p)
-#define ARGa(p) ARG_VALUE(ARGa_LOC(p))
-#define ARGb(p) ARG_VALUE(ARGb_LOC(p))
-#define ARG1(p) ARG_VALUE(ARG1_LOC(p))
-#define ARG2(p) ARG_VALUE(ARG2_LOC(p))
-#define ARG3(p) ARG_VALUE(ARG3_LOC(p))
-#define ARG4(p) ARG_VALUE(ARG4_LOC(p))
-#define ARG2L(p) ARG_VALUE(ARG2L_LOC(p))
-#define ARG2La(p) ARG_VALUE(ARG2La_LOC(p))
-#define ARG2Lb(p) ARG_VALUE(ARG2Lb_LOC(p))
+/* convention: each arg is is 32 bits, with the "u" suffix
+ * being unsigned 32 bits, the "i" suffix being signed 32 bits,
+ * and the "a" and "b" suffixes being unsigned 16 bit fields.
+ *
+ * We provide all 4 macros for each case for consistency, even
+ * though they arent all used.
+ */
 
-#define ARG_SET(p, val) ARG__SET(ARG_LOC(p), (val))
-#define ARGa_SET(p, val) ARG__SET(ARGa_LOC(p), (val))
-#define ARGb_SET(p, val) ARG__SET(ARGb_LOC(p), (val))
-#define ARG1_SET(p, val) ARG__SET(ARG1_LOC(p), (val))
-#define ARG2_SET(p, val) ARG__SET(ARG2_LOC(p), (val))
-#define ARG3_SET(p, val) ARG__SET(ARG3_LOC(p), (val))
-#define ARG4_SET(p, val) ARG__SET(ARG4_LOC(p), (val))
-#define ARG2L_SET(p, val) ARG__SET(ARG2L_LOC(p), (val))
-#define ARG2La_SET(p, val) ARG__SET(ARG2La_LOC(p), (val))
-#define ARG2Lb_SET(p, val) ARG__SET(ARG2Lb_LOC(p), (val))
+#define ARG1u(p) ARG_VALUE(ARG1u_LOC(p))
+#define ARG1i(p) ARG_VALUE(ARG1i_LOC(p))
+#define ARG1a(p) ARG_VALUE(ARG1a_LOC(p))
+#define ARG1b(p) ARG_VALUE(ARG1b_LOC(p))
+
+#define ARG2u(p) ARG_VALUE(ARG2u_LOC(p))
+#define ARG2i(p) ARG_VALUE(ARG2i_LOC(p))
+#define ARG2a(p) ARG_VALUE(ARG2a_LOC(p))
+#define ARG2b(p) ARG_VALUE(ARG2b_LOC(p))
+
+#define ARG3u(p) ARG_VALUE(ARG3u_LOC(p))
+#define ARG3i(p) ARG_VALUE(ARG3i_LOC(p))
+#define ARG3a(p) ARG_VALUE(ARG3a_LOC(p))
+#define ARG3b(p) ARG_VALUE(ARG3b_LOC(p))
+
+#define ARGp(p) ARGp_VALUE_inline(p)
+
+#define ARG1u_SET(p, val) ARG__SET(ARG1u_LOC(p), (val))
+#define ARG1i_SET(p, val) ARG__SET(ARG1i_LOC(p), (val))
+#define ARG1a_SET(p, val) ARG__SET(ARG1a_LOC(p), (val))
+#define ARG1b_SET(p, val) ARG__SET(ARG1b_LOC(p), (val))
+
+#define ARG2u_SET(p, val) ARG__SET(ARG2u_LOC(p), (val))
+#define ARG2i_SET(p, val) ARG__SET(ARG2i_LOC(p), (val))
+#define ARG2a_SET(p, val) ARG__SET(ARG2a_LOC(p), (val))
+#define ARG2b_SET(p, val) ARG__SET(ARG2b_LOC(p), (val))
+
+#define ARG3u_SET(p, val) ARG__SET(ARG3u_LOC(p), (val))
+#define ARG3i_SET(p, val) ARG__SET(ARG3i_LOC(p), (val))
+#define ARG3a_SET(p, val) ARG__SET(ARG3a_LOC(p), (val))
+#define ARG3b_SET(p, val) ARG__SET(ARG3b_LOC(p), (val))
+
 #define ARGp_SET(p, val) ARGp_SET_inline((p),(val))
 
 #undef NEXT_OFF
@@ -433,7 +506,7 @@ struct regnode_ssc {
                                     ((struct regnode_string *)p)->string)
 #define	OPERANDs(p)	STRINGs(p)
 
-#define PARNO(p)        ARG(p)          /* APPLIES for OPEN and CLOSE only */
+#define PARNO(p)        ARG1u(p)          /* APPLIES for OPEN and CLOSE only */
 
 /* Long strings.  Currently limited to length 18 bits, which handles a 262000
  * byte string.  The limiting factor is the 16 bit 'next_off' field, which
@@ -472,24 +545,26 @@ struct regnode_ssc {
     } STMT_END
 
 #define ANYOFR_BASE_BITS    20
-#define ANYOFRbase(p)   (ARG(p) & nBIT_MASK(ANYOFR_BASE_BITS))
-#define ANYOFRdelta(p)  (ARG(p) >> ANYOFR_BASE_BITS)
+#define ANYOFRbase(p)   (ARG1u(p) & nBIT_MASK(ANYOFR_BASE_BITS))
+#define ANYOFRdelta(p)  (ARG1u(p) >> ANYOFR_BASE_BITS)
 
 #undef NODE_ALIGN
 #undef ARG_LOC
 
 #define	NODE_ALIGN(node)
-#define	ARG_LOC(p)	(((struct regnode_1 *)p)->arg1)
-#define ARGa_LOC(p)     (((struct regnode_1 *)p)->arg1a)
-#define ARGb_LOC(p)     (((struct regnode_1 *)p)->arg1b)
 #define ARGp_BYTES_LOC(p)  (((struct regnode_p *)p)->arg1_sv_ptr_bytes)
-#define	ARG1_LOC(p)	(((struct regnode_2 *)p)->arg1)
-#define	ARG2_LOC(p)	(((struct regnode_2 *)p)->arg2)
-#define ARG3_LOC(p)     (((struct regnode_4 *)p)->arg3)
-#define ARG4_LOC(p)     (((struct regnode_4 *)p)->arg4)
-#define ARG2L_LOC(p)	(((struct regnode_2L *)p)->arg2)
-#define ARG2La_LOC(p)   (((struct regnode_2L *)p)->arg2a)
-#define ARG2Lb_LOC(p)   (((struct regnode_2L *)p)->arg2b)
+#define ARG1u_LOC(p)    (((struct regnode_1 *)p)->arg1u)
+#define ARG1i_LOC(p)    (((struct regnode_1 *)p)->arg1i)
+#define ARG1a_LOC(p)    (((struct regnode_1 *)p)->arg1a)
+#define ARG1b_LOC(p)    (((struct regnode_1 *)p)->arg1b)
+#define ARG2u_LOC(p)    (((struct regnode_2 *)p)->arg2u)
+#define ARG2i_LOC(p)    (((struct regnode_2 *)p)->arg2i)
+#define ARG2a_LOC(p)    (((struct regnode_2 *)p)->arg2a)
+#define ARG2b_LOC(p)    (((struct regnode_2 *)p)->arg2b)
+#define ARG3u_LOC(p)    (((struct regnode_3 *)p)->arg3u)
+#define ARG3i_LOC(p)    (((struct regnode_3 *)p)->arg3i)
+#define ARG3a_LOC(p)    (((struct regnode_3 *)p)->arg3a)
+#define ARG3b_LOC(p)    (((struct regnode_3 *)p)->arg3b)
 
 /* These should no longer be used directly in most cases. Please use
  * the REGNODE_AFTER() macros instead. */
@@ -608,24 +683,24 @@ struct regnode_ssc {
                     FILL_NODE(offset, op);                              \
                     (offset)++;                                         \
     } STMT_END
-#define FILL_ADVANCE_NODE_ARG(offset, op, arg)                          \
+#define FILL_ADVANCE_NODE_ARG1u(offset, op, arg)                        \
     STMT_START {                                                        \
-                    ARG_SET(REGNODE_p(offset), arg);                    \
+                    ARG1u_SET(REGNODE_p(offset), arg);                  \
                     FILL_ADVANCE_NODE(offset, op);                      \
                     /* This is used generically for other operations    \
                      * that have a longer argument */                   \
-                    (offset) += REGNODE_ARG_LEN(op);                          \
+                    (offset) += REGNODE_ARG_LEN(op);                    \
     } STMT_END
-#define FILL_ADVANCE_NODE_ARGp(offset, op, arg)                          \
+#define FILL_ADVANCE_NODE_ARGp(offset, op, arg)                         \
     STMT_START {                                                        \
-                    ARGp_SET(REGNODE_p(offset), arg);                    \
+                    ARGp_SET(REGNODE_p(offset), arg);                   \
                     FILL_ADVANCE_NODE(offset, op);                      \
-                    (offset) += REGNODE_ARG_LEN(op);                          \
+                    (offset) += REGNODE_ARG_LEN(op);                    \
     } STMT_END
-#define FILL_ADVANCE_NODE_2L_ARG(offset, op, arg1, arg2)                \
+#define FILL_ADVANCE_NODE_2ui_ARG(offset, op, arg1, arg2)               \
     STMT_START {                                                        \
-                    ARG_SET(REGNODE_p(offset), arg1);                   \
-                    ARG2L_SET(REGNODE_p(offset), arg2);                 \
+                    ARG1u_SET(REGNODE_p(offset), arg1);                 \
+                    ARG2i_SET(REGNODE_p(offset), arg2);                 \
                     FILL_ADVANCE_NODE(offset, op);                      \
                     (offset) += 2;                                      \
     } STMT_END
@@ -665,16 +740,16 @@ ARGp_SET_inline(struct regnode *node, SV *ptr) {
 
 #define ANYOF_MATCHES_ALL_OUTSIDE_BITMAP_VALUE   U32_MAX
 #define ANYOF_MATCHES_ALL_OUTSIDE_BITMAP(node)                              \
-                    (ARG(node) == ANYOF_MATCHES_ALL_OUTSIDE_BITMAP_VALUE)
+                    (ARG1u(node) == ANYOF_MATCHES_ALL_OUTSIDE_BITMAP_VALUE)
 
 #define ANYOF_MATCHES_NONE_OUTSIDE_BITMAP_VALUE                             \
    /* Assumes ALL is odd */  (ANYOF_MATCHES_ALL_OUTSIDE_BITMAP_VALUE - 1)
 #define ANYOF_MATCHES_NONE_OUTSIDE_BITMAP(node)                             \
-                    (ARG(node) == ANYOF_MATCHES_NONE_OUTSIDE_BITMAP_VALUE)
+                    (ARG1u(node) == ANYOF_MATCHES_NONE_OUTSIDE_BITMAP_VALUE)
 
 #define ANYOF_ONLY_HAS_BITMAP_MASK  ANYOF_MATCHES_NONE_OUTSIDE_BITMAP_VALUE
 #define ANYOF_ONLY_HAS_BITMAP(node)                                         \
-  ((ARG(node) & ANYOF_ONLY_HAS_BITMAP_MASK) == ANYOF_ONLY_HAS_BITMAP_MASK)
+  ((ARG1u(node) & ANYOF_ONLY_HAS_BITMAP_MASK) == ANYOF_ONLY_HAS_BITMAP_MASK)
 
 #define ANYOF_HAS_AUX(node)  (! ANYOF_ONLY_HAS_BITMAP(node))
 
