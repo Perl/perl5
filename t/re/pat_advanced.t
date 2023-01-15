@@ -2590,10 +2590,10 @@ Starting parse and generation
 <\g{c}>         |   6|            brnc   
                 |    |              piec   
                 |    |                atom   
-<>              |   8|            tail~ OPEN1 'b' (4) -> REFN
-                |    |            Setting close paren #1 to 8
-                |  10|          lsbr~ tying lastbr REFN (6) to ender CLOSE1 'b' (8) offset 2
-                |    |            tail~ REFN (6) -> CLOSE
+<>              |   9|            tail~ OPEN1 'b' (4) -> REFN
+                |    |            Setting close paren #1 to 9
+                |  11|          lsbr~ tying lastbr REFN <1> (6) to ender CLOSE1 'b' (9) offset 3
+                |    |            tail~ REFN <1> (6) -> CLOSE
 Unmatched ( in regex; marked by <-- HERE in m/(?{a})( <-- HERE ?<b>\g{c}/ at - line 1.
 Freeing REx: "(?{a})(?<b>\g{c}"
 EOF_DEBUG_OUT
@@ -2618,35 +2618,35 @@ Starting parse and generation
 <\g{c})(?<c>>...|   3|            brnc   
                 |    |              piec   
                 |    |                atom   
-<)(?<c>x)(?&b)> |   5|            tail~ OPEN1 'b' (1) -> REFN
-                |   7|          lsbr~ tying lastbr REFN (3) to ender CLOSE1 'b' (5) offset 2
-                |    |            tail~ REFN (3) -> CLOSE
+<)(?<c>x)(?&b)> |   6|            tail~ OPEN1 'b' (1) -> REFN
+                |   8|          lsbr~ tying lastbr REFN <1> (3) to ender CLOSE1 'b' (6) offset 3
+                |    |            tail~ REFN <1> (3) -> CLOSE
 <(?<c>x)(?&b)>  |    |      piec   
                 |    |        atom   
 <?<c>x)(?&b)>   |    |          reg    
-<x)(?&b)>       |   9|            brnc   
+<x)(?&b)>       |  10|            brnc
                 |    |              piec   
                 |    |                atom   
-<)(?&b)>        |  11|            tail~ OPEN2 'c' (7) -> EXACT
-                |  13|          lsbr~ tying lastbr EXACT <x> (9) to ender CLOSE2 'c' (11) offset 2
-                |    |            tail~ EXACT <x> (9) -> CLOSE
+<)(?&b)>        |  12|            tail~ OPEN2 'c' (8) -> EXACT
+                |  14|          lsbr~ tying lastbr EXACT <x> (10) to ender CLOSE2 'c' (12) offset 2
+                |    |            tail~ EXACT <x> (10) -> CLOSE
 <(?&b)>         |    |      tail~ OPEN1 'b' (1)  
-                |    |          ~ REFN (3)
-                |    |          ~ CLOSE1 'b' (5) -> OPEN
+                |    |          ~ REFN <1> (3)
+                |    |          ~ CLOSE1 'b' (6) -> OPEN
                 |    |      piec   
                 |    |        atom   
 <?&b)>          |    |          reg    
-<>              |  16|      tail~ OPEN2 'c' (7)  
-                |    |          ~ EXACT <x> (9)  
-                |    |          ~ CLOSE2 'c' (11) -> GOSUB
-                |  17|  lsbr~ tying lastbr OPEN1 'b' (1) to ender END (16) offset 15
+<>              |  17|      tail~ OPEN2 'c' (8)
+                |    |          ~ EXACT <x> (10)
+                |    |          ~ CLOSE2 'c' (12) -> GOSUB
+                |  18|  lsbr~ tying lastbr OPEN1 'b' (1) to ender END (17) offset 16
                 |    |    tail~ OPEN1 'b' (1)  
-                |    |        ~ REFN (3)
-                |    |        ~ CLOSE1 'b' (5)  
-                |    |        ~ OPEN2 'c' (7)  
-                |    |        ~ EXACT <x> (9)  
-                |    |        ~ CLOSE2 'c' (11)  
-                |    |        ~ GOSUB1[+0:13] 'b' (13) -> END
+                |    |        ~ REFN <1> (3)
+                |    |        ~ CLOSE1 'b' (6)
+                |    |        ~ OPEN2 'c' (8)
+                |    |        ~ EXACT <x> (10)
+                |    |        ~ CLOSE2 'c' (12)
+                |    |        ~ GOSUB1[+0:14] 'b' (14) -> END
 Need to redo parse
 Freeing REx: "(?<b>\g{c})(?<c>x)(?&b)"
 Starting parse and generation
@@ -2658,36 +2658,36 @@ Starting parse and generation
 <\g{c})(?<c>>...|   3|            brnc   
                 |    |              piec   
                 |    |                atom   
-<)(?<c>x)(?&b)> |   5|            tail~ OPEN1 'b' (1) -> REFN
-                |   7|          lsbr~ tying lastbr REFN2 'c' (3) to ender CLOSE1 'b' (5) offset 2
-                |    |            tail~ REFN2 'c' (3) -> CLOSE
+<)(?<c>x)(?&b)> |   6|            tail~ OPEN1 'b' (1) -> REFN
+                |   8|          lsbr~ tying lastbr REFN2 'c' <1> (3) to ender CLOSE1 'b' (6) offset 3
+                |    |            tail~ REFN2 'c' <1> (3) -> CLOSE
 <(?<c>x)(?&b)>  |    |      piec   
                 |    |        atom   
 <?<c>x)(?&b)>   |    |          reg    
-<x)(?&b)>       |   9|            brnc   
+<x)(?&b)>       |  10|            brnc
                 |    |              piec   
                 |    |                atom   
-<)(?&b)>        |  11|            tail~ OPEN2 'c' (7) -> EXACT
-                |  13|          lsbr~ tying lastbr EXACT <x> (9) to ender CLOSE2 'c' (11) offset 2
-                |    |            tail~ EXACT <x> (9) -> CLOSE
+<)(?&b)>        |  12|            tail~ OPEN2 'c' (8) -> EXACT
+                |  14|          lsbr~ tying lastbr EXACT <x> (10) to ender CLOSE2 'c' (12) offset 2
+                |    |            tail~ EXACT <x> (10) -> CLOSE
 <(?&b)>         |    |      tail~ OPEN1 'b' (1)  
-                |    |          ~ REFN2 'c' (3)
-                |    |          ~ CLOSE1 'b' (5) -> OPEN
+                |    |          ~ REFN2 'c' <1> (3)
+                |    |          ~ CLOSE1 'b' (6) -> OPEN
                 |    |      piec   
                 |    |        atom   
 <?&b)>          |    |          reg    
-<>              |  16|      tail~ OPEN2 'c' (7)  
-                |    |          ~ EXACT <x> (9)  
-                |    |          ~ CLOSE2 'c' (11) -> GOSUB
-                |  17|  lsbr~ tying lastbr OPEN1 'b' (1) to ender END (16) offset 15
+<>              |  17|      tail~ OPEN2 'c' (8)
+                |    |          ~ EXACT <x> (10)
+                |    |          ~ CLOSE2 'c' (12) -> GOSUB
+                |  18|  lsbr~ tying lastbr OPEN1 'b' (1) to ender END (17) offset 16
                 |    |    tail~ OPEN1 'b' (1)  
-                |    |        ~ REFN2 'c' (3)
-                |    |        ~ CLOSE1 'b' (5)  
-                |    |        ~ OPEN2 'c' (7)  
-                |    |        ~ EXACT <x> (9)  
-                |    |        ~ CLOSE2 'c' (11)  
-                |    |        ~ GOSUB1[+0:13] 'b' (13) -> END
-Required size 16 nodes
+                |    |        ~ REFN2 'c' <1> (3)
+                |    |        ~ CLOSE1 'b' (6)
+                |    |        ~ OPEN2 'c' (8)
+                |    |        ~ EXACT <x> (10)
+                |    |        ~ CLOSE2 'c' (12)
+                |    |        ~ GOSUB1[+0:14] 'b' (14) -> END
+Required size 17 nodes
 first at 3
 Freeing REx: "(?<b>\g{c})(?<c>x)(?&b)"
 EOF_DEBUG_OUT
