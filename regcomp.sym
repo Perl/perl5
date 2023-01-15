@@ -217,10 +217,10 @@ TAIL        NOTHING,    no        ; Match empty string. Can jump here from outsi
 STAR        STAR,       node 0 V  ; Match this (simple) thing 0 or more times: /A{0,}B/ where A is width 1 char
 PLUS        PLUS,       node 0 V  ; Match this (simple) thing 1 or more times: /A{1,}B/ where A is width 1 char
 
-CURLY       CURLY,      sv 4 V    ; Match this (simple) thing {n,m} times: /A{m,n}B/ where A is width 1 char
-CURLYN      CURLY,      no 4 V    ; Capture next-after-this simple thing: /(A){m,n}B/ where A is width 1 char
-CURLYM      CURLY,      no 4 V    ; Capture this medium-complex thing {n,m} times: /(A){m,n}B/ where A is fixed-length
-CURLYX      CURLY,      sv 4 V    ; Match/Capture this complex thing {n,m} times.
+CURLY       CURLY,      sv 3 V    ; Match this (simple) thing {n,m} times: /A{m,n}B/ where A is width 1 char
+CURLYN      CURLY,      no 3 V    ; Capture next-after-this simple thing: /(A){m,n}B/ where A is width 1 char
+CURLYM      CURLY,      no 3 V    ; Capture this medium-complex thing {n,m} times: /(A){m,n}B/ where A is fixed-length
+CURLYX      CURLY,      sv 3 V    ; Match/Capture this complex thing {n,m} times.
 
 #*This terminator creates a loop structure for CURLYX
 WHILEM      WHILEM,     no 0 V    ; Do curly processing and see if rest matches.
@@ -252,7 +252,7 @@ REFFAN      REF,        num   1 V ; Match already matched string, using /aai rul
 
 #*Support for long RE
 LONGJMP     LONGJMP,    off 1 . 1 ; Jump far away.
-BRANCHJ     BRANCHJ,    off 2L V 1 ; BRANCH with long offset.
+BRANCHJ     BRANCHJ,    off 2 V 1 ; BRANCH with long offset.
 
 #*Special Case Regops
 IFMATCH     BRANCHJ,    off 1 . 1 ; Succeeds if the following matches; non-zero flags "f", next_off "o" means lookbehind assertion starting "f..(f-o)" characters before current
@@ -263,7 +263,7 @@ GROUPP      GROUPP,     num 1     ; Whether the group matched.
 
 #*The heavy worker
 
-EVAL        EVAL,       evl/flags 2L ; Execute some Perl code.
+EVAL        EVAL,       evl/flags 2 ; Execute some Perl code.
 
 #*Modifiers
 
@@ -274,7 +274,7 @@ LOGICAL     LOGICAL,    no        ; Next opcode should set the flag only.
 RENUM       BRANCHJ,    off 1 . 1 ; Group with independently numbered parens.
 
 #*Regex Subroutines
-GOSUB       GOSUB,      num/ofs 2L    ; recurse to paren arg1 at (signed) ofs arg2
+GOSUB       GOSUB,      num/ofs 2    ; recurse to paren arg1 at (signed) ofs arg2
 
 #*Special conditionals
 GROUPPN     GROUPPN,    no-sv 1   ; Whether the group matched.
@@ -284,7 +284,7 @@ DEFINEP     DEFINEP,    none 1    ; Never execute directly.
 #*Backtracking Verbs
 ENDLIKE     ENDLIKE,    none      ; Used only for the type field of verbs
 OPFAIL      ENDLIKE,    no-sv 1   ; Same as (?!), but with verb arg
-ACCEPT      ENDLIKE,    no-sv/num 2L   ; Accepts the current matched string, with verbar
+ACCEPT      ENDLIKE,    no-sv/num 2   ; Accepts the current matched string, with verbar
 
 #*Verbs With Arguments
 VERB        VERB,       no-sv 1   ; Used only for the type field of verbs

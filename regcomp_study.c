@@ -49,7 +49,7 @@ S_rck_elide_nothing(pTHX_ regnode *node)
                         ? I32_MAX
                           /* I32 may be smaller than U16 on CRAYs! */
                         : (I32_MAX < U16_MAX ? I32_MAX : U16_MAX));
-        int off = (REGNODE_OFF_BY_ARG(OP(node)) ? ARG(node) : NEXT_OFF(node));
+        int off = (REGNODE_OFF_BY_ARG(OP(node)) ? ARG1u(node) : NEXT_OFF(node));
         int noff;
         regnode *n = node;
 
@@ -58,14 +58,14 @@ S_rck_elide_nothing(pTHX_ regnode *node)
             (n = regnext(n))
             && (
                 (REGNODE_TYPE(OP(n)) == NOTHING && (noff = NEXT_OFF(n)))
-                || ((OP(n) == LONGJMP) && (noff = ARG(n)))
+                || ((OP(n) == LONGJMP) && (noff = ARG1u(n)))
             )
             && off + noff < max
         ) {
             off += noff;
         }
         if (REGNODE_OFF_BY_ARG(OP(node)))
-            ARG(node) = off;
+            ARG1u(node) = off;
         else
             NEXT_OFF(node) = off;
     }
@@ -368,7 +368,7 @@ Perl_ssc_init(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc)
 
     Zero(ssc, 1, regnode_ssc);
     set_ANYOF_SYNTHETIC(ssc);
-    ARG_SET(ssc, ANYOF_MATCHES_ALL_OUTSIDE_BITMAP_VALUE);
+    ARG1u_SET(ssc, ANYOF_MATCHES_ALL_OUTSIDE_BITMAP_VALUE);
     ssc_anything(ssc);
 
     /* If any portion of the regex is to operate under locale rules that aren't
@@ -445,7 +445,7 @@ S_get_ANYOF_cp_list_for_ssc(pTHX_ const RExC_state_t *pRExC_state,
         invlist = _add_range_to_invlist(invlist, NUM_ANYOF_CODE_POINTS, UV_MAX);
     }
     else if (ANYOF_HAS_AUX(node)) {
-        const U32 n = ARG(node);
+        const U32 n = ARG1u(node);
         SV * const rv = MUTABLE_SV(RExC_rxi->data->data[n]);
         AV * const av = MUTABLE_AV(SvRV(rv));
         SV **const ary = AvARRAY(av);
@@ -1328,7 +1328,7 @@ Perl_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan,
         if (flags && !NEXT_OFF(n)) {
             DEBUG_PEEP("atch", val, depth, 0);
             if (REGNODE_OFF_BY_ARG(OP(n))) {
-                ARG_SET(n, val - n);
+                ARG1u_SET(n, val - n);
             }
             else {
                 NEXT_OFF(n) = val - n;
@@ -2213,8 +2213,8 @@ Perl_study_chunk(pTHX_
                  * the rest of this block. Specifically setting
                  * RExC_recurse[] must happen at least once during
                  * study_chunk(). */
-                paren = ARG(scan);
-                RExC_recurse[ARG2L(scan)] = scan;
+                paren = ARG1u(scan);
+                RExC_recurse[ARG2i(scan)] = scan;
                 start = REGNODE_p(RExC_open_parens[paren]);
                 end   = REGNODE_p(RExC_close_parens[paren]);
 
@@ -2409,7 +2409,7 @@ Perl_study_chunk(pTHX_
                 U8 mask = ~ ('A' ^ 'a'); /* These differ in just one bit */
 
                 OP(scan) = ANYOFM;
-                ARG_SET(scan, *s & mask);
+                ARG1u_SET(scan, *s & mask);
                 FLAGS(scan) = mask;
                 /* We're not EXACTFish any more, so restudy.
                  * Search for "restudy" in this file to find
@@ -2536,7 +2536,7 @@ Perl_study_chunk(pTHX_
                     * case, and the lowest code point of the
                     * pair (which the '&' forces) */
                     OP(next) = ANYOFM;
-                    ARG_SET(next, *STRING(next) & mask);
+                    ARG1u_SET(next, *STRING(next) & mask);
                     FLAGS(next) = mask;
                 }
 
@@ -2562,8 +2562,8 @@ Perl_study_chunk(pTHX_
                     mincount = 1;
                     maxcount = 1;
                 } else {
-                    mincount = ARG1(scan);
-                    maxcount = ARG2(scan);
+                    mincount = ARG1i(scan);
+                    maxcount = ARG2i(scan);
                 }
                 next = regnext(scan);
                 if (OP(scan) == CURLYX) {
@@ -2801,7 +2801,7 @@ Perl_study_chunk(pTHX_
                             regnode *nnxt = regnext(nxt1);
                             if (nnxt == nxt) {
                                 if (REGNODE_OFF_BY_ARG(OP(nxt1)))
-                                    ARG_SET(nxt1, nxt2 - nxt1);
+                                    ARG1u_SET(nxt1, nxt2 - nxt1);
                                 else if (nxt2 - nxt1 < U16_MAX)
                                     NEXT_OFF(nxt1) = nxt2 - nxt1;
                                 else
@@ -2831,7 +2831,7 @@ Perl_study_chunk(pTHX_
                     regnode *nxt = oscan + NEXT_OFF(oscan);
 
                     if (OP(REGNODE_BEFORE(nxt)) == NOTHING) /* LONGJMP */
-                        nxt += ARG(nxt);
+                        nxt += ARG1u(nxt);
                     nxt = REGNODE_BEFORE(nxt);
                     if (nxt->flags & 0xf) {
                         /* we've already set whilem count on this node */
@@ -3528,7 +3528,7 @@ Perl_study_chunk(pTHX_
                check there too. */
             regnode *trie_node= scan;
             regnode *tail= regnext(scan);
-            reg_trie_data *trie = (reg_trie_data*)RExC_rxi->data->data[ ARG(scan) ];
+            reg_trie_data *trie = (reg_trie_data*)RExC_rxi->data->data[ ARG1u(scan) ];
             SSize_t max1 = 0, min1 = OPTIMIZE_INFTY;
             regnode_ssc accum;
 
@@ -3657,7 +3657,7 @@ Perl_study_chunk(pTHX_
         }
 #else
         else if (REGNODE_TYPE(OP(scan)) == TRIE) {
-            reg_trie_data *trie = (reg_trie_data*)RExC_rxi->data->data[ ARG(scan) ];
+            reg_trie_data *trie = (reg_trie_data*)RExC_rxi->data->data[ ARG1u(scan) ];
             U8*bang=NULL;
 
             min += trie->minlen;

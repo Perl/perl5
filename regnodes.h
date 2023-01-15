@@ -10,7 +10,7 @@
 
 /* typedefs for regex nodes - one typedef per node type */
 
-typedef struct regnode_2L                        tregnode_ACCEPT;
+typedef struct regnode_2                         tregnode_ACCEPT;
 typedef struct regnode_1                         tregnode_AHOCORASICK;
 typedef struct regnode_charclass                 tregnode_AHOCORASICKC;
 typedef struct regnode_charclass                 tregnode_ANYOF;
@@ -30,20 +30,20 @@ typedef struct regnode                           tregnode_BOUNDA;
 typedef struct regnode                           tregnode_BOUNDL;
 typedef struct regnode                           tregnode_BOUNDU;
 typedef struct regnode_1                         tregnode_BRANCH;
-typedef struct regnode_2L                        tregnode_BRANCHJ;
+typedef struct regnode_2                         tregnode_BRANCHJ;
 typedef struct regnode_1                         tregnode_CLOSE;
 typedef struct regnode                           tregnode_CLUMP;
 typedef struct regnode_1                         tregnode_COMMIT;
-typedef struct regnode_4                         tregnode_CURLY;
-typedef struct regnode_4                         tregnode_CURLYM;
-typedef struct regnode_4                         tregnode_CURLYN;
-typedef struct regnode_4                         tregnode_CURLYX;
+typedef struct regnode_3                         tregnode_CURLY;
+typedef struct regnode_3                         tregnode_CURLYM;
+typedef struct regnode_3                         tregnode_CURLYN;
+typedef struct regnode_3                         tregnode_CURLYX;
 typedef struct regnode_1                         tregnode_CUTGROUP;
 typedef struct regnode_1                         tregnode_DEFINEP;
 typedef struct regnode                           tregnode_END;
 typedef struct regnode                           tregnode_ENDLIKE;
 typedef struct regnode                           tregnode_EOS;
-typedef struct regnode_2L                        tregnode_EVAL;
+typedef struct regnode_2                         tregnode_EVAL;
 typedef struct regnode                           tregnode_EXACT;
 typedef struct regnode                           tregnode_EXACTF;
 typedef struct regnode                           tregnode_EXACTFAA;
@@ -56,7 +56,7 @@ typedef struct regnode                           tregnode_EXACTFU_REQ8;
 typedef struct regnode                           tregnode_EXACTFU_S_EDGE;
 typedef struct regnode                           tregnode_EXACTL;
 typedef struct regnode                           tregnode_EXACT_REQ8;
-typedef struct regnode_2L                        tregnode_GOSUB;
+typedef struct regnode_2                         tregnode_GOSUB;
 typedef struct regnode                           tregnode_GPOS;
 typedef struct regnode_1                         tregnode_GROUPP;
 typedef struct regnode_1                         tregnode_GROUPPN;

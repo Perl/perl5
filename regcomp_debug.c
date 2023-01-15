@@ -409,10 +409,10 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
 
     k = REGNODE_TYPE(op);
     if (op == BRANCH) {
-        Perl_sv_catpvf(aTHX_ sv, " (buf:%" IVdf "/%" IVdf ")", (IV)ARGa(o),(IV)ARGb(o));
+        Perl_sv_catpvf(aTHX_ sv, " (buf:%" IVdf "/%" IVdf ")", (IV)ARG1a(o),(IV)ARG1b(o));
     }
     else if (op == BRANCHJ) {
-        Perl_sv_catpvf(aTHX_ sv, " (buf:%" IVdf "/%" IVdf ")", (IV)ARG2La(o),(IV)ARG2Lb(o));
+        Perl_sv_catpvf(aTHX_ sv, " (buf:%" IVdf "/%" IVdf ")", (IV)ARG2a(o),(IV)ARG2b(o));
     }
     else if (k == EXACT) {
         sv_catpvs(sv, " ");
@@ -431,7 +431,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
     } else if (k == TRIE) {
         /* print the details of the trie in dumpuntil instead, as
          * progi->data isn't available here */
-        const U32 n = ARG(o);
+        const U32 n = ARG1u(o);
         const reg_ac_data * const ac = IS_TRIE_AC(op) ?
                (reg_ac_data *)progi->data->data[n] :
                NULL;
@@ -471,9 +471,9 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
             Perl_sv_catpvf(aTHX_ sv, " (buf:%" IVdf "/%" IVdf ")",
                     (IV)trie->before_paren,(IV)trie->after_paren);
     } else if (k == CURLY) {
-        U32 lo = ARG1(o), hi = ARG2(o);
-        if (ARG3(o) || ARG4(o))
-            Perl_sv_catpvf(aTHX_ sv, "<%d:%d>", ARG3(o),ARG4(o)); /* paren before, paren after */
+        U32 lo = ARG1i(o), hi = ARG2i(o);
+        if (ARG3u(o)) /* check both ARG3a and ARG3b at the same time */
+            Perl_sv_catpvf(aTHX_ sv, "<%d:%d>", ARG3a(o),ARG3b(o)); /* paren before, paren after */
         if (op == CURLYM || op == CURLYN || op == CURLYX)
             Perl_sv_catpvf(aTHX_ sv, "[%d]", o->flags); /* Parenth number */
         Perl_sv_catpvf(aTHX_ sv, "{%u,", (unsigned) lo);
@@ -489,9 +489,9 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
              || k == GROUPP || op == ACCEPT)
     {
         AV *name_list= NULL;
-        U32 parno= (op == ACCEPT)              ? (U32)ARG2L(o) :
+        U32 parno= (op == ACCEPT)              ? (U32)ARG2i(o) :
                    (op == OPEN || op == CLOSE) ? (U32)PARNO(o) :
-                                                 (U32)ARG(o);
+                                                 (U32)ARG1u(o);
         if ( RXp_PAREN_NAMES(prog) ) {
             name_list= MUTABLE_AV(progi->data->data[progi->name_list_idx]);
         } else if ( pRExC_state ) {
@@ -543,7 +543,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
 
         }
         if ( k == REF && reginfo) {
-            U32 n = ARG(o);  /* which paren pair */
+            U32 n = ARG1u(o);  /* which paren pair */
             I32 ln = RXp_OFFS_START(prog,n);
             if (prog->lastparen < n || ln == -1 || RXp_OFFS_END(prog,n) == -1)
                 Perl_sv_catpvf(aTHX_ sv, ": FAIL");
@@ -558,7 +558,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
         }
     } else if (k == GOSUB) {
         AV *name_list= NULL;
-        IV parno = ARG(o);
+        IV parno = ARG1u(o);
         IV logical_parno = (parno && prog->parno_to_logical)
                          ? prog->parno_to_logical[parno]
                          : parno;
@@ -573,10 +573,10 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
         if (logical_parno != parno)
             Perl_sv_catpvf(aTHX_ sv, "/%" IVdf, parno);
 
-        Perl_sv_catpvf(aTHX_ sv, "[%+d:%d]", (int)ARG2L(o),
-                (int)((o + (int)ARG2L(o)) - progi->program) );
+        Perl_sv_catpvf(aTHX_ sv, "[%+d:%d]", (int)ARG2i(o),
+                (int)((o + (int)ARG2i(o)) - progi->program) );
         if (name_list) {
-            SV **name= av_fetch_simple(name_list, ARG(o), 0 );
+            SV **name= av_fetch_simple(name_list, ARG1u(o), 0 );
             if (name)
                 Perl_sv_catpvf(aTHX_ sv, " '%" SVf "'", SVfARG(*name));
         }
@@ -888,9 +888,9 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
 
     /* add on the verb argument if there is one */
     if ( ( k == VERB || op == ACCEPT || op == OPFAIL ) && o->flags) {
-        if ( ARG(o) )
+        if ( ARG1u(o) )
             Perl_sv_catpvf(aTHX_ sv, ":%" SVf,
-                       SVfARG((MUTABLE_SV(progi->data->data[ ARG( o ) ]))));
+                       SVfARG((MUTABLE_SV(progi->data->data[ ARG1u( o ) ]))));
         else
             sv_catpvs(sv, ":NULL");
     }
@@ -1585,7 +1585,7 @@ Perl_dumpuntil(pTHX_ const regexp *r, const regnode *start, const regnode *node,
         }
         else if ( REGNODE_TYPE(op)  == TRIE ) {
             const regnode *this_trie = node;
-            const U32 n = ARG(node);
+            const U32 n = ARG1u(node);
             const reg_ac_data * const ac = op>=AHOCORASICK ?
                (reg_ac_data *)ri->data->data[n] :
                NULL;

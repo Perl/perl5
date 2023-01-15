@@ -189,7 +189,7 @@ static const char non_utf8_target_but_utf8_required[]
     OP(rn) == SUSPEND || OP(rn) == IFMATCH ||                                      \
     OP(rn) == PLUS || OP(rn) == MINMOD ||                                          \
     OP(rn) == KEEPS ||                                                             \
-    (REGNODE_TYPE(OP(rn)) == CURLY && ARG1(rn) > 0)                                  \
+    (REGNODE_TYPE(OP(rn)) == CURLY && ARG1i(rn) > 0)                                  \
 )
 #define IS_EXACT(rn) (REGNODE_TYPE(OP(rn)) == EXACT)
 
@@ -207,7 +207,7 @@ static const char non_utf8_target_but_utf8_required[]
         else if (type == PLUS) \
             rn = REGNODE_AFTER_type(rn,tregnode_PLUS); \
         else if (type == IFMATCH) \
-            rn = (rn->flags == 0) ? REGNODE_AFTER_type(rn,tregnode_IFMATCH) : rn + ARG(rn); \
+            rn = (rn->flags == 0) ? REGNODE_AFTER_type(rn,tregnode_IFMATCH) : rn + ARG1u(rn); \
         else rn += NEXT_OFF(rn); \
     } \
 } STMT_END
@@ -2329,10 +2329,10 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
         }
         break;
 
-      case ANYOFM_tb_pb: /* ARG() is the base byte; FLAGS() the mask byte */
+      case ANYOFM_tb_pb: /* ARG1u() is the base byte; FLAGS() the mask byte */
       case ANYOFM_tb_p8:
         REXEC_FBC_NON_UTF8_FIND_NEXT_SCAN(
-             find_next_masked((U8 *) s, (U8 *) strend, (U8) ARG(c), FLAGS(c)));
+             find_next_masked((U8 *) s, (U8 *) strend, (U8) ARG1u(c), FLAGS(c)));
         break;
 
       case ANYOFM_t8_pb:
@@ -2341,13 +2341,13 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
          * we do anyway for performance reasons, as otherwise we would have to
          * examine all the continuation characters */
         REXEC_FBC_UTF8_FIND_NEXT_SCAN(
-             find_next_masked((U8 *) s, (U8 *) strend, (U8) ARG(c), FLAGS(c)));
+             find_next_masked((U8 *) s, (U8 *) strend, (U8) ARG1u(c), FLAGS(c)));
         break;
 
       case NANYOFM_tb_pb:
       case NANYOFM_tb_p8:
         REXEC_FBC_NON_UTF8_FIND_NEXT_SCAN(
-           find_span_end_mask((U8 *) s, (U8 *) strend, (U8) ARG(c), FLAGS(c)));
+           find_span_end_mask((U8 *) s, (U8 *) strend, (U8) ARG1u(c), FLAGS(c)));
         break;
 
       case NANYOFM_t8_pb:
@@ -2355,7 +2355,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
                                   variants. */
         REXEC_FBC_UTF8_FIND_NEXT_SCAN(
                         (char *) find_span_end_mask((U8 *) s, (U8 *) strend,
-                                                    (U8) ARG(c), FLAGS(c)));
+                                                    (U8) ARG1u(c), FLAGS(c)));
         break;
 
       /* These nodes all require at least one code point to be in UTF-8 to
@@ -3229,7 +3229,7 @@ S_find_byclass(pTHX_ regexp * prog, const regnode *c, char *s,
         {
             DECL_TRIE_TYPE(c);
             /* what trie are we using right now */
-            reg_ac_data *aho = (reg_ac_data*)progi->data->data[ ARG( c ) ];
+            reg_ac_data *aho = (reg_ac_data*)progi->data->data[ ARG1u( c ) ];
             reg_trie_data *trie = (reg_trie_data*)progi->data->data[aho->trie];
             HV *widecharmap = MUTABLE_HV(progi->data->data[ aho->trie + 1 ]);
 
@@ -4546,7 +4546,7 @@ S_dump_exec_pos(pTHX_ const char *locinput,
 /* reg_check_named_buff_matched()
  * Checks to see if a named buffer has matched. The data array of
  * buffer numbers corresponding to the buffer is expected to reside
- * in the regexp->data->data array in the slot stored in the ARG() of
+ * in the regexp->data->data array in the slot stored in the ARG1u() of
  * node involved. Note that this routine doesn't actually care about the
  * name, that information is not preserved from compilation to execution.
  * Returns the index of the leftmost defined buffer with the given name
@@ -4557,7 +4557,7 @@ S_reg_check_named_buff_matched(const regexp *rex, const regnode *scan)
 {
     I32 n;
     RXi_GET_DECL(rex,rexi);
-    SV *sv_dat= MUTABLE_SV(rexi->data->data[ ARG( scan ) ]);
+    SV *sv_dat= MUTABLE_SV(rexi->data->data[ ARG1u( scan ) ]);
     I32 *nums=(I32*)SvPVX(sv_dat);
 
     PERL_ARGS_ASSERT_REG_CHECK_NAMED_BUFF_MATCHED;
@@ -6681,13 +6681,13 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
                 /* what trie are we using right now */
                 reg_trie_data * const trie
-                    = (reg_trie_data*)rexi->data->data[ ARG( scan ) ];
+                    = (reg_trie_data*)rexi->data->data[ ARG1u( scan ) ];
                 ST.before_paren = trie->before_paren;
                 ST.after_paren = trie->after_paren;
                 assert(ST.before_paren<=rex->nparens);
                 assert(ST.after_paren<=rex->nparens);
 
-                HV * widecharmap = MUTABLE_HV(rexi->data->data[ ARG( scan ) + 1 ]);
+                HV * widecharmap = MUTABLE_HV(rexi->data->data[ ARG1u( scan ) + 1 ]);
                 U32 state = trie->startstate;
 
                 if (scan->flags == EXACTL || scan->flags == EXACTFLU8) {
@@ -6874,7 +6874,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 U16 word;
                 U16 const nextword = ST.nextword;
                 reg_trie_wordinfo * const wordinfo
-                    = ((reg_trie_data*)rexi->data->data[ARG(ST.me)])->wordinfo;
+                    = ((reg_trie_data*)rexi->data->data[ARG1u(ST.me)])->wordinfo;
                 for (word=ST.topword; word; word=wordinfo[word].prev) {
                     if (word > nextword && (!min || word < min))
                         min = word;
@@ -6898,7 +6898,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             {
                 U32 chars; /* how many chars to skip */
                 reg_trie_data * const trie
-                    = (reg_trie_data*)rexi->data->data[ARG(ST.me)];
+                    = (reg_trie_data*)rexi->data->data[ARG1u(ST.me)];
 
                 assert((trie->wordinfo[ST.nextword].len - trie->prefixlen)
                             >=  ST.firstchars);
@@ -6978,7 +6978,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             /* only one choice left - just continue */
             DEBUG_EXECUTE_r({
                 AV *const trie_words
-                    = MUTABLE_AV(rexi->data->data[ARG(ST.me)+TRIE_WORDS_OFFSET]);
+                    = MUTABLE_AV(rexi->data->data[ARG1u(ST.me)+TRIE_WORDS_OFFSET]);
                 SV ** const tmp = trie_words
                         ? av_fetch(trie_words, ST.nextword - 1, 0) : NULL;
                 SV *sv= tmp ? sv_newmortal() : NULL;
@@ -7540,7 +7540,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
         case ANYOFM:
             if (   NEXTCHR_IS_EOS
-                || (UCHARAT(locinput) & FLAGS(scan)) != ARG(scan)
+                || (UCHARAT(locinput) & FLAGS(scan)) != ARG1u(scan)
                 || locinput >= loceol)
             {
                 sayNO;
@@ -7550,7 +7550,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
         case NANYOFM:
             if (   NEXTCHR_IS_EOS
-                || (UCHARAT(locinput) & FLAGS(scan)) == ARG(scan)
+                || (UCHARAT(locinput) & FLAGS(scan)) == ARG1u(scan)
                 || locinput >= loceol)
             {
                 sayNO;
@@ -7996,7 +7996,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
           do_ref:
             type = OP(scan);
-            n = ARG(scan);  /* which paren pair */
+            n = ARG1u(scan);  /* which paren pair */
             if (rex->logical_to_parno) {
                 n = rex->logical_to_parno[n];
                 do {
@@ -8105,7 +8105,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             U32 arg;
 
         case GOSUB: /*    /(...(?1))/   /(...(?&foo))/   */
-            arg= (U32)ARG(scan);
+            arg= (U32)ARG1u(scan);
             if (cur_eval && cur_eval->locinput == locinput) {
                 if ( ++nochange_depth > max_nochange_depth )
                     Perl_croak(aTHX_
@@ -8117,7 +8117,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             re_sv = rex_sv;
             re = rex;
             rei = rexi;
-            startpoint = scan + ARG2L(scan);
+            startpoint = scan + ARG2i(scan);
             EVAL_CLOSE_PAREN_SET( st, arg );
             /* Detect infinite recursion
              *
@@ -8178,7 +8178,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 if (!caller_cv)
                     caller_cv = find_runcv(NULL);
 
-                n = ARG(scan);
+                n = ARG1u(scan);
 
                 if (rexi->data->what[n] == 'r') { /* code from an external qr */
                     newcv = (ReANY(
@@ -8418,7 +8418,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                         re_sv = rex->engine->op_comp(aTHX_ &ret, 1, NULL,
                                     rex->engine, NULL, NULL,
                                     /* copy /msixn etc to inner pattern */
-                                    ARG2L(scan),
+                                    ARG2i(scan),
                                     pm_flags);
 
                         if (!(SvFLAGS(ret)
@@ -8619,8 +8619,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
         case ACCEPT:  /*  (*ACCEPT)  */
             is_accepted = true;
             if (scan->flags)
-                sv_yes_mark = MUTABLE_SV(rexi->data->data[ ARG( scan ) ]);
-            utmp = (U32)ARG2L(scan);
+                sv_yes_mark = MUTABLE_SV(rexi->data->data[ ARG1u( scan ) ]);
+            utmp = (U32)ARG2i(scan);
 
             if ( utmp ) {
                 regnode *cursor;
@@ -8653,7 +8653,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             /* NOTREACHED */
 
         case GROUPP:  /*  (?(1))  */
-            n = ARG(scan);  /* which paren pair */
+            n = ARG1u(scan);  /* which paren pair */
             sw = cBOOL(rex->lastparen >= n && RXp_OFFS_END(rex,n) != -1);
             break;
 
@@ -8663,7 +8663,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             break;
 
         case INSUBP:   /*  (?(R))  */
-            n = ARG(scan);
+            n = ARG1u(scan);
             /* this does not need to use EVAL_CLOSE_PAREN macros, as the arg
              * of SCAN is already set up as matches a eval.close_paren */
             sw = cur_eval && (n == 0 || CUR_EVAL.close_paren == n);
@@ -8678,7 +8678,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             if (sw)
                 next = REGNODE_AFTER_type(scan,tregnode_IFTHEN);
             else {
-                next = scan + ARG(scan);
+                next = scan + ARG1u(scan);
                 if (OP(next) == IFTHEN) /* Fake one. */
                     next = REGNODE_AFTER_type(next,tregnode_IFTHEN);
             }
@@ -8780,7 +8780,7 @@ NULL
 
             assert(next); /* keep Coverity happy */
             if (OP(REGNODE_BEFORE(next)) == NOTHING) /* LONGJMP */
-                next += ARG(next);
+                next += ARG1u(next);
 
             /* XXXX Probably it is better to teach regpush to support
                parenfloor > maxopenparen ... */
@@ -8826,15 +8826,15 @@ NULL
             /* see the discussion above about CURLYX/WHILEM */
             I32 n;
             int min, max;
-            // U16 first_paren, last_paren;
+            /* U16 first_paren, last_paren; */
             regnode *A;
 
             assert(cur_curlyx); /* keep Coverity happy */
 
-            min = ARG1(cur_curlyx->u.curlyx.me);
-            max = ARG2(cur_curlyx->u.curlyx.me);
-            // first_paren = ARG3(cur_curlyx->u.curlyx.me);
-            // last_paren = ARG4(cur_curlyx->u.curlyx.me);
+            min = ARG1i(cur_curlyx->u.curlyx.me);
+            max = ARG2i(cur_curlyx->u.curlyx.me);
+            /* first_paren = ARG3a(cur_curlyx->u.curlyx.me); */
+            /* last_paren = ARG3b(cur_curlyx->u.curlyx.me);  */
             A = REGNODE_AFTER(cur_curlyx->u.curlyx.me);
             n = ++cur_curlyx->u.curlyx.count; /* how many A's matched */
             ST.save_lastloc = cur_curlyx->u.curlyx.lastloc;
@@ -9020,7 +9020,7 @@ NULL
         case WHILEM_B_min_fail: /* just failed to match B in a minimal match */
             cur_curlyx = ST.save_curlyx;
 
-            if (cur_curlyx->u.curlyx.count >= /*max*/ARG2(cur_curlyx->u.curlyx.me)) {
+            if (cur_curlyx->u.curlyx.count >= /*max*/ARG2i(cur_curlyx->u.curlyx.me)) {
                 /* Maximum greed exceeded */
                 cur_curlyx->u.curlyx.count--;
                 CACHEsayNO;
@@ -9041,17 +9041,17 @@ NULL
 #define ST st->u.branch
 
         case BRANCHJ:	    /*  /(...|A|...)/ with long next pointer */
-            next = scan + ARG(scan);
+            next = scan + ARG1u(scan);
             if (next == scan)
                 next = NULL;
-            ST.before_paren = ARG2La(scan);
-            ST.after_paren = ARG2Lb(scan);
+            ST.before_paren = ARG2a(scan);
+            ST.after_paren = ARG2b(scan);
             goto branch_logic;
             NOT_REACHED; /* NOTREACHED */
 
         case BRANCH:	    /*  /(...|A|...)/ */
-            ST.before_paren = ARGa(scan);
-            ST.after_paren = ARGb(scan);
+            ST.before_paren = ARG1a(scan);
+            ST.after_paren = ARG1b(scan);
           branch_logic:
             scan = REGNODE_AFTER_opcode(scan,state_num); /* scan now points to inner node */
             assert(scan);
@@ -9076,7 +9076,7 @@ NULL
 
         case CUTGROUP:  /*  /(*THEN)/  */
             sv_yes_mark = st->u.mark.mark_name = scan->flags
-                ? MUTABLE_SV(rexi->data->data[ ARG( scan ) ])
+                ? MUTABLE_SV(rexi->data->data[ ARG1u( scan ) ])
                 : NULL;
             PUSH_STATE_GOTO(CUTGROUP_next, next, locinput, loceol,
                             script_run_begin);
@@ -9158,7 +9158,7 @@ NULL
             ST.Binfo.count = -1;
             REGCP_SET(ST.cp);
 
-            if (!(ST.minmod ? ARG1(ST.me) : ARG2(ST.me))) /* min/max */
+            if (!(ST.minmod ? ARG1i(ST.me) : ARG2i(ST.me))) /* min/max */
                 goto curlym_do_B;
 
           curlym_do_A: /* execute the A in /A{m,n}B/  */
@@ -9181,7 +9181,7 @@ NULL
                     ST.alen = locinput - st->locinput;
                 }
                 if (ST.alen == 0)
-                    ST.count = ST.minmod ? ARG1(ST.me) : ARG2(ST.me);
+                    ST.count = ST.minmod ? ARG1i(ST.me) : ARG2i(ST.me);
             }
             DEBUG_EXECUTE_r(
                 Perl_re_exec_indentf( aTHX_  "CURLYM now matched %" IVdf " times, len=%" IVdf "...\n",
@@ -9201,7 +9201,7 @@ NULL
 
 
             if (!is_accepted) {
-                I32 max = (ST.minmod ? ARG1(ST.me) : ARG2(ST.me));
+                I32 max = (ST.minmod ? ARG1i(ST.me) : ARG2i(ST.me));
                 if ( max == REG_INFTY || ST.count < max )
                     goto curlym_do_A; /* try to match another A */
             }
@@ -9211,7 +9211,7 @@ NULL
             REGCP_UNWIND(ST.cp);
 
 
-            if (ST.minmod || ST.count < ARG1(ST.me) /* min*/
+            if (ST.minmod || ST.count < ARG1i(ST.me) /* min*/
                 || EVAL_CLOSE_PAREN_IS_TRUE(cur_eval,(U32)ST.me->flags))
                 sayNO;
 
@@ -9291,13 +9291,13 @@ NULL
             REGCP_UNWIND(ST.cp);
             UNWIND_PAREN(ST.lastparen, ST.lastcloseparen);
             if (ST.minmod) {
-                I32 max = ARG2(ST.me);
+                I32 max = ARG2i(ST.me);
                 if (max != REG_INFTY && ST.count == max)
                     sayNO;
                 goto curlym_do_A; /* try to match a further A */
             }
             /* backtrack one A */
-            if (ST.count == ARG1(ST.me) /* min */)
+            if (ST.count == ARG1i(ST.me) /* min */)
                 sayNO;
             ST.count--;
             SET_locinput(HOPc(locinput, -ST.alen));
@@ -9339,8 +9339,8 @@ NULL
             ST.lastcloseparen = rex->lastcloseparen;
             if (ST.paren > maxopenparen)
                 maxopenparen = ST.paren;
-            ST.min = ARG1(scan);  /* min to match */
-            ST.max = ARG2(scan);  /* max to match */
+            ST.min = ARG1i(scan);  /* min to match */
+            ST.max = ARG2i(scan);  /* max to match */
             scan = regnext(REGNODE_AFTER_type(scan, tregnode_CURLYN));
 
             /* handle the single-char capture called as a GOSUB etc */
@@ -9357,8 +9357,8 @@ NULL
 
         case CURLY:		/*  /A{m,n}B/ where A is width 1 char */
             ST.paren = 0;
-            ST.min = ARG1(scan);  /* min to match */
-            ST.max = ARG2(scan);  /* max to match */
+            ST.min = ARG1i(scan);  /* min to match */
+            ST.max = ARG2i(scan);  /* max to match */
             scan = REGNODE_AFTER_type(scan, tregnode_CURLY);
           repeat:
             /*
@@ -9762,7 +9762,7 @@ NULL
                     sayNO;
 
                 /* Here, we didn't want it to match, so is actually success */
-                next = scan + ARG(scan);
+                next = scan + ARG1u(scan);
                 if (next == scan)
                     next = NULL;
                 break;
@@ -9812,7 +9812,7 @@ NULL
                 loceol = st->loceol;
                 script_run_begin = st->sr0;
             }
-            scan = ST.me + ARG(ST.me);
+            scan = ST.me + ARG1u(ST.me);
             if (scan == ST.me)
                 scan = NULL;
             continue; /* execute B */
@@ -9822,7 +9822,7 @@ NULL
 
         case LONGJMP: /*  alternative with many branches compiles to
                        * (BRANCHJ; EXACT ...; LONGJMP ) x N */
-            next = scan + ARG(scan);
+            next = scan + ARG1u(scan);
             if (next == scan)
                 next = NULL;
             break;
@@ -9833,7 +9833,7 @@ NULL
 
         case PRUNE:   /*  (*PRUNE)   */
             if (scan->flags)
-                sv_yes_mark = sv_commit = MUTABLE_SV(rexi->data->data[ ARG( scan ) ]);
+                sv_yes_mark = sv_commit = MUTABLE_SV(rexi->data->data[ ARG1u( scan ) ]);
             PUSH_STATE_GOTO(COMMIT_next, next, locinput, loceol,
                             script_run_begin);
             NOT_REACHED; /* NOTREACHED */
@@ -9846,7 +9846,7 @@ NULL
 
         case OPFAIL:   /* (*FAIL)  */
             if (scan->flags)
-                sv_commit = MUTABLE_SV(rexi->data->data[ ARG( scan ) ]);
+                sv_commit = MUTABLE_SV(rexi->data->data[ ARG1u( scan ) ]);
             if (logical) {
                 /* deal with (?(?!)X|Y) properly,
                  * make sure we trigger the no branch
@@ -9862,7 +9862,7 @@ NULL
         case MARKPOINT: /*  (*MARK:foo)  */
             ST.prev_mark = mark_state;
             ST.mark_name = sv_commit = sv_yes_mark
-                = MUTABLE_SV(rexi->data->data[ ARG( scan ) ]);
+                = MUTABLE_SV(rexi->data->data[ ARG1u( scan ) ]);
             mark_state = st;
             ST.mark_loc = locinput;
             PUSH_YES_STATE_GOTO(MARKPOINT_next, next, locinput, loceol,
@@ -9906,7 +9906,7 @@ NULL
                    otherwise do nothing.  Meaning we need to scan
                  */
                 regmatch_state *cur = mark_state;
-                SV *find = MUTABLE_SV(rexi->data->data[ ARG( scan ) ]);
+                SV *find = MUTABLE_SV(rexi->data->data[ ARG1u( scan ) ]);
 
                 while (cur) {
                     if ( sv_eq( cur->u.mark.mark_name,
@@ -10494,13 +10494,13 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
 
       case ANYOFM_tb:
         scan = (char *) find_span_end_mask((U8 *) scan, (U8 *) this_eol,
-                                           (U8) ARG(p), FLAGS(p));
+                                           (U8) ARG1u(p), FLAGS(p));
         break;
 
       case NANYOFM_t8:
         while (     hardcount < max
                &&   scan < this_eol
-               &&  (*scan & FLAGS(p)) != ARG(p))
+               &&  (*scan & FLAGS(p)) != ARG1u(p))
         {
             scan += UTF8SKIP(scan);
             hardcount++;
@@ -10509,7 +10509,7 @@ S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p,
 
       case NANYOFM_tb:
         scan = (char *) find_next_masked((U8 *) scan, (U8 *) this_eol,
-                                         (U8) ARG(p), FLAGS(p));
+                                         (U8) ARG1u(p), FLAGS(p));
         break;
 
       case ANYOFH_tb: /* ANYOFH only can match UTF-8 targets */
@@ -10965,7 +10965,7 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
         {
             /* In this case, the ARG is set up so that the final bit indicates
              * whether it matches or not */
-            match = ARG(n) & 1;
+            match = ARG1u(n) & 1;
         }
         else
             /* Here, the main way it could match is if the code point is
