@@ -600,16 +600,26 @@ S_ithread_run(void * arg)
         int ii;
         int jmp_rc;
 
-        dSP;
+#if defined(PERL_RC_STACK) && !defined(PERL_XXX_TMP_NORC)
+        assert(rpp_stack_is_rc());
+#endif
+
         ENTER;
         SAVETMPS;
 
         /* Put args on the stack */
-        PUSHMARK(SP);
+        PUSHMARK(PL_stack_sp);
         for (ii=0; ii < len; ii++) {
-            XPUSHs(av_shift(params));
+            SV *sv = av_shift(params);
+#ifdef PERL_RC_STACK
+            rpp_xpush_1(sv);
+#else
+            /* temporary workaround until rpp_* are in ppport.h */
+            dSP;
+            XPUSHs(sv);
+            PUTBACK;
+#endif
         }
-        PUTBACK;
 
         jmp_rc = S_jmpenv_run(aTHX_ 0, thread, &len, &exit_app, &exit_code);
 
@@ -622,12 +632,17 @@ S_ithread_run(void * arg)
 #endif
 
         /* Remove args from stack and put back in params array */
-        SPAGAIN;
         for (ii=len-1; ii >= 0; ii--) {
-            SV *sv = POPs;
+            SV *sv = *PL_stack_sp;
             if (jmp_rc == 0 && (thread->gimme & G_WANT) != G_VOID) {
                 av_store(params, ii, SvREFCNT_inc(sv));
             }
+#ifdef PERL_RC_STACK
+            rpp_popfree_1();
+#else
+            /* temporary workaround until rpp_* are in ppport.h */
+            PL_stack_sp--;
+#endif
         }
 
         FREETMPS;
