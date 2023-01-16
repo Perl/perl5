@@ -856,7 +856,7 @@ previous versions it was simply on all the time.
 You can use the L<bareword::filehandles> module on CPAN to disable
 bareword filehandles for older versions of perl.
 
-=head2 The 'try' feature.
+=head2 The 'try' feature
 
 B<WARNING>: This feature is still experimental and the implementation may
 change or be removed in future versions of Perl.  For this reason, Perl will
