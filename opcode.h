@@ -1,4 +1,4 @@
-/* -*- buffer-read-only: t -*-
+/* -*- mode: C; buffer-read-only: t -*-
  *
  *    opcode.h
  *
@@ -3508,4 +3508,4 @@ END_EXTERN_C
 
 
 
-/* ex: set ro: */
+/* ex: set ro ft=C: */

@@ -1,4 +1,4 @@
-/* -*- buffer-read-only: t -*-
+/* -*- mode: C; buffer-read-only: t -*-
  *
  *    embed.h
  *
@@ -2162,4 +2162,4 @@
 # endif /* defined(VMS) || defined(WIN32) */
 #endif /* !defined(PERL_NO_SHORT_NAMES) */
 
-/* ex: set ro: */
+/* ex: set ro ft=C: */

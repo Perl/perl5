@@ -1,4 +1,4 @@
-# -*- buffer-read-only: t -*-
+# -*- mode: Perl; buffer-read-only: t -*-
 #
 #    lib/B/Op_private.pm
 #
@@ -928,4 +928,4 @@ $ops_using{OPpTRANS_IDENTICAL} = $ops_using{OPpTRANS_CAN_FORCE_UTF8};
 $ops_using{OPpTRANS_SQUASH} = $ops_using{OPpTRANS_CAN_FORCE_UTF8};
 $ops_using{OPpTRANS_USE_SVOP} = $ops_using{OPpTRANS_CAN_FORCE_UTF8};
 
-# ex: set ro:
+# ex: set ro ft=Perl:

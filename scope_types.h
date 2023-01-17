@@ -1,4 +1,4 @@
-/* -*- buffer-read-only: t -*-
+/* -*- mode: C; buffer-read-only: t -*-
 
       Copyright (C) 2022 by Larry Wall and others
 
@@ -146,4 +146,4 @@ static const U8 leave_scope_arg_counts[] = {
 
 #define MAX_SAVEt 57
 
-/* ex: set ro: */
+/* ex: set ro ft=C: */
