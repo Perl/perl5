@@ -7927,10 +7927,10 @@ $cat >malloc.c <<END
 #include <stdlib.h>
 #endif
 #ifdef TRY_MALLOC
-void *malloc();
+void *malloc(size_t);
 #endif
 #ifdef TRY_FREE
-void free();
+void free(void *);
 #endif
 END
 case "$malloctype" in
