@@ -1,4 +1,4 @@
-/* -*- buffer-read-only: t -*-
+/* -*- mode: C; buffer-read-only: t -*-
  *
  *    embedvar.h
  *
@@ -366,4 +366,4 @@
 # endif /* !defined(PL_sawampersand) */
 #endif /* defined(MULTIPLICITY) */
 
-/* ex: set ro: */
+/* ex: set ro ft=C: */

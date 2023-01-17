@@ -108,7 +108,7 @@ OUTER: foreach my $file (@files) {
     }
     my @bad;
     while (<$fh>) {
-	last if /ex: set ro:/;
+	last if /ex:[^:]+:/;
 	unless (/^(?: \* | #)([0-9a-f]+) (\S+)$/) {
 	    chomp $_;
 	    fail("Bad line in $file: '$_'");

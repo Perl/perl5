@@ -138,7 +138,8 @@ sub read_only_top {
         unless exists $lang_opener{$lang};
     my $style = $args{style} ? " $args{style} " : '   ';
 
-    my $raw = "-*- buffer-read-only: t -*-\n";
+    # Generate the "modeline" for syntax highlighting based on the language
+    my $raw = "-*- mode: $lang; buffer-read-only: t -*-\n";
 
     if ($args{file}) {
         $raw .= "\n   $args{file}\n";
@@ -202,7 +203,7 @@ sub read_only_bottom_close_and_rename {
             $comment .= "$digest $file\n";
         }
     }
-    $comment .= "ex: set ro:";
+    $comment .= "ex: set ro ft=$lang:";
 
     if (defined $lang && $lang eq 'Perl') {
         $comment =~ s/^/# /mg;
