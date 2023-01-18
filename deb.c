@@ -320,7 +320,10 @@ Perl_deb_stack_all(pTHX)
                     }
                     if (CxTYPE(&(si_n->si_cxstack[i])) == CXt_SUBST)
                         continue;
-                    cx_n = &(si_n->si_cxstack[i]);
+                    if (si_n->si_cxix >= 0)
+                        cx_n = &(si_n->si_cxstack[i]);
+                    else
+                        cx_n = NULL;
                     break;
                 }
 
