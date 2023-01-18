@@ -1109,9 +1109,8 @@ where the code began to compile; the point where the code no longer emitted
 warnings; etc.
 
 We can use this program for that purpose, but we have to reverse our sense of
-"good" and "bad" commits.  In this case, F<git> will label the healing commit
-as "bad" (or label a breaking commit as "good"), so we have to invoke the
-program such that we do a C<die> when we reach the healing commit.
+"good" and "bad" commits.  We use the C<--expect-fail> option to do that
+reversal.
 
 =item * Problem
 
@@ -1136,10 +1135,10 @@ But it was observed that there was no warning in perl-5.36.
     $ perl Porting/bisect.pl \
         --start=5624cfff8f \
         --end=b80b9f7fc6 \
+        --expect-fail \
         -we 'use Scalar::Util; use bigrat; my @w;
-            local $SIG{__WARN__} = sub { push @w, $_; };
-            print "mercy\n" if Scalar::Util::looks_like_number(1/9);
-            die unless @w;'
+            local $SIG{__WARN__} = sub { die };
+            print "mercy\n" if Scalar::Util::looks_like_number(1/9)'
 
 =item * Reference
 
