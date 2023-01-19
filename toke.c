@@ -5042,7 +5042,32 @@ Perl_filter_read(pTHX_ int idx, SV *buf_sv, int maxlen)
     /* Return: <0:error, =0:eof, >0:not eof 		*/
     ENTER;
     save_scalar(PL_errgv);
+
+    /* although this calls out to a random C function, there's a good
+     * chance that that function will call back into perl (e.g. using
+     * Filter::Util::Call). So downgrade the stack to
+     * non-reference-counted for backwards compatibility - i.e. do the
+     * equivalent of xs_wrap(), but this time we know there are no
+     * args to be passed or returned on the stack, simplifying it.
+     */
+#ifdef PERL_RC_STACK
+    assert(AvREAL(PL_curstack));
+    I32 oldbase = PL_curstackinfo->si_stack_nonrc_base;
+    I32 oldsp   = PL_stack_sp - PL_stack_base;
+    if (!oldbase)
+        PL_curstackinfo->si_stack_nonrc_base = oldsp + 1;
+#endif
+
     ret = (*funcp)(aTHX_ idx, buf_sv, correct_length);
+
+#ifdef PERL_RC_STACK
+    assert(oldsp == PL_stack_sp - PL_stack_base);
+    assert(AvREAL(PL_curstack));
+    assert(PL_curstackinfo->si_stack_nonrc_base ==
+                                        oldbase ? oldbase : oldsp + 1);
+    PL_curstackinfo->si_stack_nonrc_base = oldbase;
+#endif
+
     LEAVE;
     return ret;
 }
