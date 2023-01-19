@@ -1324,6 +1324,7 @@ cpan/JSON-PP/t/117_numbers.t
 cpan/JSON-PP/t/118_boolean_values.t
 cpan/JSON-PP/t/119_incr_parse_utf8.t
 cpan/JSON-PP/t/120_incr_parse_truncated.t
+cpan/JSON-PP/t/core_bools.t
 cpan/JSON-PP/t/gh_28_json_test_suite.t
 cpan/JSON-PP/t/gh_29_trailing_false_value.t
 cpan/JSON-PP/t/rt_116998_wrong_character_offset.t
