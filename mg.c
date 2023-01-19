@@ -638,7 +638,7 @@ Perl_magic_regdata_cnt(pTHX_ SV *sv, MAGIC *mg)
             const SSize_t n = (SSize_t)mg->mg_obj;
             if (n == '+') {          /* @+ */
                 /* return the number possible */
-                return RX_LOGICAL_NPARENS(rx);
+                return RX_LOGICAL_NPARENS(rx) ? RX_LOGICAL_NPARENS(rx) : RX_NPARENS(rx);
             } else {   /* @- @^CAPTURE  @{^CAPTURE} */
                 I32 paren = RX_LASTPAREN(rx);
 
@@ -674,15 +674,22 @@ Perl_magic_regdatum_get(pTHX_ SV *sv, MAGIC *mg)
         /* @{^CAPTURE} does not contain $&, so we need to increment by 1 */
         const I32 paren = mg->mg_len
                         + (n == '\003' ? 1 : 0);
-        SSize_t s;
-        SSize_t t;
+        
         if (paren < 0)
             return 0;
+
+        SSize_t s;
+        SSize_t t;
+        I32 logical_nparens = (I32)RX_LOGICAL_NPARENS(rx);
+
+        if (!logical_nparens) 
+            logical_nparens = (I32)RX_NPARENS(rx);
+
         if (n != '+' && n != '-') {
             CALLREG_NUMBUF_FETCH(rx,paren,sv);
             return 0;
         }
-        if (paren <= (I32)RX_LOGICAL_NPARENS(rx)) {
+        if (paren <= (I32)logical_nparens) {
             I32 true_paren = RX_LOGICAL_TO_PARNO(rx)
                              ? RX_LOGICAL_TO_PARNO(rx)[paren]
                              : paren;
@@ -692,9 +699,9 @@ Perl_magic_regdatum_get(pTHX_ SV *sv, MAGIC *mg)
                 {
                     SSize_t i;
 
-                    if (n == '+')                /* @+ */
+                    if (n == '+')               /* @+ */
                         i = t;
-                    else if (n == '-')           /* @- */
+                    else                        /* @- */
                         i = s;
 
                     if (RX_MATCH_UTF8(rx)) {

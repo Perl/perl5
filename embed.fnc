@@ -2759,7 +2759,7 @@ Cp	|void	|regfree_internal					\
 EXp	|regexp_engine const *|current_re_engine
 Apdh	|REGEXP *|pregcomp	|NN SV * const pattern			\
 				|const U32 flags
-p	|REGEXP *|re_op_compile |NULLOK SV ** const patternp		\
+Xp	|REGEXP *|re_op_compile |NULLOK SV ** const patternp		\
 				|int pat_count				\
 				|NULLOK OP *expr			\
 				|NN const regexp_engine *eng		\

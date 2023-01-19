@@ -3616,8 +3616,7 @@ Perl_re_intuit_string(pTHX_ REGEXP  * const r);
         assert(r)
 
 PERL_CALLCONV REGEXP *
-Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count, OP *expr, const regexp_engine *eng, REGEXP *old_re, bool *is_bare_re, const U32 rx_flags, const U32 pm_flags)
-        __attribute__visibility__("hidden");
+Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count, OP *expr, const regexp_engine *eng, REGEXP *old_re, bool *is_bare_re, const U32 rx_flags, const U32 pm_flags);
 #define PERL_ARGS_ASSERT_RE_OP_COMPILE          \
         assert(eng)
 
