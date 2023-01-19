@@ -739,6 +739,8 @@ addbits('entereval',
     3 => qw(OPpEVAL_BYTES        BYTES  ),
     4 => qw(OPpEVAL_COPHH        COPHH  ), # Construct %^H from COP hints
     5 => qw(OPpEVAL_RE_REPARSING REPARSE), # eval_sv(..., G_RE_REPARSING)
+    6 => qw(OPpEVAL_EVALSV       EVALSV ), # called from eval_sv()
+
 );
 
 

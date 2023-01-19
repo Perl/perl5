@@ -3226,6 +3226,9 @@ Perl_eval_sv(pTHX_ SV *sv, I32 flags)
     SAVEOP();
     PL_op = (OP*)&myop;
     Zero(&myop, 1, UNOP);
+    myop.op_ppaddr = PL_ppaddr[OP_ENTEREVAL];
+    myop.op_type = OP_ENTEREVAL;
+
     {
         dSP;
         oldmark = SP - PL_stack_base;
@@ -3241,8 +3244,9 @@ Perl_eval_sv(pTHX_ SV *sv, I32 flags)
     if (flags & G_KEEPERR)
         myop.op_flags |= OPf_SPECIAL;
 
+    myop.op_private = (OPpEVAL_EVALSV); /* tell pp_entereval we're the caller */
     if (flags & G_RE_REPARSING)
-        myop.op_private = (OPpEVAL_COPHH | OPpEVAL_RE_REPARSING);
+        myop.op_private |= (OPpEVAL_COPHH | OPpEVAL_RE_REPARSING);
 
     /* fail now; otherwise we could fail after the JMPENV_PUSH but
      * before a cx_pusheval(), which corrupts the stack after a croak */
@@ -3251,13 +3255,15 @@ Perl_eval_sv(pTHX_ SV *sv, I32 flags)
     JMPENV_PUSH(ret);
     switch (ret) {
     case 0:
- redo_body:
-        if (PL_op == (OP*)(&myop)) {
-            PL_op = PL_ppaddr[OP_ENTEREVAL](aTHX);
-            if (!PL_op)
-                goto fail; /* failed in compilation */
-        }
         CALLRUNOPS(aTHX);
+        if (!*PL_stack_sp) {
+            /* In the presence of the OPpEVAL_EVALSV flag,
+             * pp_entereval() pushes a NULL pointer onto the stack to
+             * indicate compilation failure */
+            PL_stack_sp--;
+            goto fail;
+        }
+     redone_body:
         retval = PL_stack_sp - (PL_stack_base + oldmark);
         if (!(flags & G_KEEPERR)) {
             CLEAR_ERRSV();
@@ -3278,14 +3284,19 @@ Perl_eval_sv(pTHX_ SV *sv, I32 flags)
             PL_restartjmpenv = NULL;
             PL_op = PL_restartop;
             PL_restartop = 0;
-            goto redo_body;
+            CALLRUNOPS(aTHX);
+            goto redone_body;
         }
       fail:
         if (flags & G_RETHROW) {
             JMPENV_POP;
             croak_sv(ERRSV);
         }
-
+        /* Should be nothing left in stack frame apart from a possible
+         * scalar context undef. Assert it's safe to reset the stack */
+        assert(     PL_stack_sp == PL_stack_base + oldmark
+                || (PL_stack_sp == PL_stack_base + oldmark + 1
+                    && *PL_stack_sp == &PL_sv_undef));
         PL_stack_sp = PL_stack_base + oldmark;
         if ((flags & G_WANT) == G_LIST)
             retval = 0;
