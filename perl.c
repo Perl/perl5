@@ -3258,13 +3258,13 @@ Perl_eval_sv(pTHX_ SV *sv, I32 flags)
     myop.op_ppaddr = PL_ppaddr[OP_ENTEREVAL];
     myop.op_type = OP_ENTEREVAL;
 
-    {
-        dSP;
-        oldmark = SP - PL_stack_base;
-        EXTEND(SP, 1);
-        PUSHs(sv);
-        PUTBACK;
-    }
+    oldmark = PL_stack_sp - PL_stack_base;
+    rpp_extend(1);
+    *++PL_stack_sp = sv;
+#if defined PERL_RC_STACK && !defined PERL_XXX_TMP_NORC
+    if (rpp_stack_is_rc())
+        SvREFCNT_inc_simple_void_NN(sv);
+#endif
 
     if (!(flags & G_NOARGS))
         myop.op_flags = OPf_STACKED;
@@ -3345,7 +3345,12 @@ Perl_eval_sv(pTHX_ SV *sv, I32 flags)
 
     JMPENV_POP;
     if (flags & G_DISCARD) {
-        PL_stack_sp = PL_stack_base + oldmark;
+#if defined PERL_RC_STACK && !defined PERL_XXX_TMP_NORC
+        if (rpp_stack_is_rc())
+            rpp_popfree_to(PL_stack_base + oldmark);
+        else
+#endif
+            PL_stack_sp = PL_stack_base + oldmark;
         retval = 0;
         FREETMPS;
         LEAVE;
