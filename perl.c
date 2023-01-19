@@ -3138,7 +3138,7 @@ Perl_call_sv(pTHX_ SV *sv, volatile I32 flags)
         myop.op_other = (OP*)&myop;
         (void)POPMARK;
         old_cxix = cxstack_ix;
-        create_eval_scope(NULL, PL_stack_sp, flags|G_FAKINGEVAL);
+        create_eval_scope( NULL, PL_stack_base + oldmark, flags|G_FAKINGEVAL);
         INCMARK;
 
         JMPENV_PUSH(ret);
@@ -3169,6 +3169,11 @@ Perl_call_sv(pTHX_ SV *sv, volatile I32 flags)
                 PL_restartop = 0;
                 goto redo_body;
             }
+            /* Should be nothing left in stack frame apart from a possible
+             * scalar context undef. Assert it's safe to reset the stack */
+            assert(     PL_stack_sp == PL_stack_base + oldmark
+                    || (PL_stack_sp == PL_stack_base + oldmark + 1
+                        && *PL_stack_sp == &PL_sv_undef));
             PL_stack_sp = PL_stack_base + oldmark;
             if ((flags & G_WANT) == G_LIST)
                 retval = 0;
