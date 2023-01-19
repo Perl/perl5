@@ -5116,6 +5116,9 @@ PP(pp_entereval)
         } else if (!saved_delete) {
             (void)hv_delete(PL_defstash, tmpbuf, len, G_DISCARD);
         }
+        if (PL_op->op_private & OPpEVAL_EVALSV)
+            /* signal compiletime failure to our eval_sv() caller */
+            *++PL_stack_sp = NULL;
         return PL_op->op_next;
     }
 }
