@@ -663,7 +663,7 @@ use File::Glob qw(:case);
     },
 
     'IO::Zlib' => {
-        'DISTRIBUTION' => 'TOMHUGHES/IO-Zlib-1.12.tar.gz',
+        'DISTRIBUTION' => 'TOMHUGHES/IO-Zlib-1.14.tar.gz',
         'FILES'        => q[cpan/IO-Zlib],
     },
 
