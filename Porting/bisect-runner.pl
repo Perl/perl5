@@ -844,6 +844,29 @@ Display the usage information and exit.
 
 =back
 
+=head1 ABOUT BISECTION
+
+The process is all about identifying the commit that caused some change
+in behaviour - maybe good, maybe bad. But it is built around C<git bisect>,
+which is much more specifically aimed at finding "what broke the build".
+C<git> terminology embeds that assumption - commits earlier than the
+target commit are "good" commits, those at or later than the target commit
+are "bad" commits.
+
+The default behaviour of F<bisect.pl> mimics this - you supply some code
+that I<fails> with a perl built B<at or after> the target commit and
+I<succeeds> with a perl built B<before> the target commit, and F<bisect.pl>
+will find the target commit.
+
+The F<bisect.pl> option C<--expect-fail> reverses those expectations
+(and changes nothing else). So with C<--expect-fail>, you should supply
+code that I<fails> only with a perl built B<before> the target commit,
+and I<succeeds> with a perl built B<at or after> the target commit.
+
+By default, I<failure> is a piece of perl code that terminates with
+a non-zero exit code, e.g. by calling C<die()>. Options that change what
+is interpreted as failure include C<--crash>, C<--test-build> and C<--match>.
+
 =head1 EXAMPLES
 
 =head2 Code has started to crash under C<miniperl>
