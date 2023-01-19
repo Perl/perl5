@@ -2978,16 +2978,23 @@ Perl_call_argv(pTHX_ const char *sub_name, I32 flags, char **argv)
                         /* See G_* flags in cop.h */
                         /* null terminated arg list */
 {
-    dSP;
-
     PERL_ARGS_ASSERT_CALL_ARGV;
 
-    PUSHMARK(SP);
+    bool is_rc =
+#if defined PERL_RC_STACK && !defined PERL_XXX_TMP_NORC
+                rpp_stack_is_rc();
+#else
+                0;
+#endif
+    PUSHMARK(PL_stack_sp);
     while (*argv) {
-        mXPUSHs(newSVpv(*argv,0));
+        SV *newsv = newSVpv(*argv,0);
+        rpp_extend(1);
+        *++PL_stack_sp = newsv;
+        if (!is_rc)
+            sv_2mortal(newsv);
         argv++;
     }
-    PUTBACK;
     return call_pv(sub_name, flags);
 }
 
@@ -3097,10 +3104,12 @@ Perl_call_sv(pTHX_ SV *sv, volatile I32 flags)
     PL_op = (OP*)&myop;
 
     if (!(flags & G_METHOD_NAMED)) {
-        dSP;
-        EXTEND(SP, 1);
-        PUSHs(sv);
-        PUTBACK;
+        rpp_extend(1);
+        *++PL_stack_sp = sv;
+#if defined PERL_RC_STACK && !defined PERL_XXX_TMP_NORC
+        if (rpp_stack_is_rc())
+            SvREFCNT_inc_simple_void_NN(sv);
+#endif
     }
     oldmark = TOPMARK;
 
@@ -3195,7 +3204,12 @@ Perl_call_sv(pTHX_ SV *sv, volatile I32 flags)
     }
 
     if (flags & G_DISCARD) {
-        PL_stack_sp = PL_stack_base + oldmark;
+#if defined PERL_RC_STACK && !defined PERL_XXX_TMP_NORC
+        if (rpp_stack_is_rc())
+            rpp_popfree_to(PL_stack_base + oldmark);
+        else
+#endif
+            PL_stack_sp = PL_stack_base + oldmark;
         retval = 0;
         FREETMPS;
         LEAVE;
@@ -3364,11 +3378,16 @@ Perl_eval_pv(pTHX_ const char *p, I32 croak_on_error)
         SvREFCNT_dec(sv);
     }
 
-    {
-        dSP;
-        sv = POPs;
-        PUTBACK;
+    sv = *PL_stack_sp;
+
+#if defined PERL_RC_STACK && !defined PERL_XXX_TMP_NORC
+    if (rpp_stack_is_rc()) {
+        SvREFCNT_inc_NN(sv_2mortal(sv));
+        rpp_popfree_1();
     }
+    else
+#endif
+        PL_stack_sp--;
 
     return sv;
 }
