@@ -847,18 +847,18 @@ Display the usage information and exit.
 =head1 ABOUT BISECTION
 
 The process is all about identifying the commit that caused some change
-in behaviour - maybe good, maybe bad. But it is built around the
-C<git-bisect> tool, which is much more specifically oriented around
-finding "what broke the build". C<git> terminology embeds that assumption -
-commits earlier than the target commit are "good" commits, those later
-than the target commit are "bad" commits.
+in behaviour - maybe good, maybe bad. But it is built around C<git bisect>,
+which is much more specifically aimed at finding "what broke the build".
+C<git> terminology embeds that assumption - commits earlier than the
+target commit are "good" commits, those at or later than the target commit
+are "bad" commits.
 
-The default behaviour of C<bisect.pl> mimics this - you supply some code
+The default behaviour of F<bisect.pl> mimics this - you supply some code
 that I<fails> with a perl built B<at or after> the target commit and
-I<succeeds> with a perl built B<before> the target commit, and C<bisect.pl>
+I<succeeds> with a perl built B<before> the target commit, and F<bisect.pl>
 will find the target commit.
 
-The C<bisect.pl> option C<--expect-fail> reverses those expectations
+The F<bisect.pl> option C<--expect-fail> reverses those expectations
 (and changes nothing else). So with C<--expect-fail>, you should supply
 code that I<fails> only with a perl built B<before> the target commit,
 and I<succeeds> with a perl built B<at or after> the target commit.
