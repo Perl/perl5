@@ -12011,6 +12011,7 @@ Perl_reg_numbered_buff_fetch_flags(pTHX_ REGEXP * const re, const I32 paren,
     SSize_t i,t = 0;
     SSize_t s1, t1;
     I32 n = paren;
+    I32 logical_nparens = rx->logical_nparens ? rx->logical_nparens : rx->nparens;
 
     PERL_ARGS_ASSERT_REG_NUMBERED_BUFF_FETCH_FLAGS;
 
@@ -12054,7 +12055,7 @@ Perl_reg_numbered_buff_fetch_flags(pTHX_ REGEXP * const re, const I32 paren,
         i = rx->sublen + rx->suboffset - t;
     }
     else /* when flags is true we do an absolute lookup, and compare against rx->nparens */
-    if (inRANGE(n, 0, flags ? (I32)rx->nparens : (I32)rx->logical_nparens)) {
+    if (inRANGE(n, 0, flags ? (I32)rx->nparens : logical_nparens)) {
         I32 *map = (!flags && n) ? rx->logical_to_parno : NULL;
         I32 true_parno = map ? map[n] : n;
         do {
@@ -12141,6 +12142,7 @@ Perl_reg_numbered_buff_length(pTHX_ REGEXP * const r, const SV * const sv,
     struct regexp *const rx = ReANY(r);
     I32 i;
     I32 s1, t1;
+    I32 logical_nparens = rx->logical_nparens ? rx->logical_nparens : rx->nparens;
 
     PERL_ARGS_ASSERT_REG_NUMBERED_BUFF_LENGTH;
 
@@ -12188,7 +12190,7 @@ Perl_reg_numbered_buff_length(pTHX_ REGEXP * const r, const SV * const sv,
         return 0;
 
       default: /* $& / ${^MATCH}, $1, $2, ... */
-        if (paren <= (I32)rx->logical_nparens) {
+        if (paren <= logical_nparens) {
             I32 true_paren = rx->logical_to_parno
                              ? rx->logical_to_parno[paren]
                              : paren;
