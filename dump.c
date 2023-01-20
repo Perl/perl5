@@ -2603,12 +2603,48 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
                 Perl_dump_indent(aTHX_ level, file, "  INTFLAGS = 0x%" UVxf " (%s)\n",
                                 (UV)(r->intflags), SvPVX_const(d));
             } else {
-                Perl_dump_indent(aTHX_ level, file, "  INTFLAGS = 0x%" UVxf "\n",
+                Perl_dump_indent(aTHX_ level, file, "  INTFLAGS = 0x%" UVxf "(Plug in)\n",
                                 (UV)(r->intflags));
             }
 #undef SV_SET_STRINGIFY_REGEXP_FLAGS
             Perl_dump_indent(aTHX_ level, file, "  NPARENS = %" UVuf "\n",
                                 (UV)(r->nparens));
+            Perl_dump_indent(aTHX_ level, file, "  LOGICAL_NPARENS = %" UVuf "\n",
+                                (UV)(r->logical_nparens));
+
+#define SV_SET_STRINGIFY_I32_PAREN_ARRAY(d,count,ary)     \
+    STMT_START {                                    \
+        U32 n;                                      \
+        sv_setpv(d,"{ ");                           \
+        /* 0 element is irrelevant */               \
+        for(n=0; n <= count; n++)                   \
+            sv_catpvf(d,"%" IVdf "%s",              \
+                (IV)ary[n],                         \
+                n == count ? "" : ", ");            \
+        sv_catpvs(d," }\n");                        \
+    } STMT_END
+
+            Perl_dump_indent(aTHX_ level, file, "  LOGICAL_TO_PARNO = 0x%" UVxf "\n",
+                                PTR2UV(r->logical_to_parno));
+            if (r->logical_to_parno) {
+                SV_SET_STRINGIFY_I32_PAREN_ARRAY(d, r->logical_nparens, r->logical_to_parno);
+                Perl_dump_indent(aTHX_ level, file, "    %" SVf, d);
+            }
+            Perl_dump_indent(aTHX_ level, file, "  PARNO_TO_LOGICAL = 0x%" UVxf "\n",
+                                PTR2UV(r->parno_to_logical));
+            if (r->parno_to_logical) {
+                SV_SET_STRINGIFY_I32_PAREN_ARRAY(d, r->nparens, r->parno_to_logical);
+                Perl_dump_indent(aTHX_ level, file, "    %" SVf, d);
+            }
+
+            Perl_dump_indent(aTHX_ level, file, "  PARNO_TO_LOGICAL_NEXT = 0x%" UVxf "\n",
+                                PTR2UV(r->parno_to_logical_next));
+            if (r->parno_to_logical_next) {
+                SV_SET_STRINGIFY_I32_PAREN_ARRAY(d, r->nparens, r->parno_to_logical_next);
+                Perl_dump_indent(aTHX_ level, file, "    %" SVf, d);
+            }
+#undef SV_SET_STRINGIFY_I32_ARRAY
+
             Perl_dump_indent(aTHX_ level, file, "  LASTPAREN = %" UVuf "\n",
                                 (UV)(r->lastparen));
             Perl_dump_indent(aTHX_ level, file, "  LASTCLOSEPAREN = %" UVuf "\n",
@@ -2633,11 +2669,6 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
                             pv_display(d, r->subbeg, r->sublen, 50, pvlim));
             else
                 Perl_dump_indent(aTHX_ level, file, "  SUBBEG = 0x0\n");
-            Perl_dump_indent(aTHX_ level, file, "  MOTHER_RE = 0x%" UVxf "\n",
-                                PTR2UV(r->mother_re));
-            if (nest < maxnest && r->mother_re)
-                do_sv_dump(level+1, file, (SV *)r->mother_re, nest+1,
-                           maxnest, dumpops, pvlim);
             Perl_dump_indent(aTHX_ level, file, "  PAREN_NAMES = 0x%" UVxf "\n",
                                 PTR2UV(r->paren_names));
             Perl_dump_indent(aTHX_ level, file, "  SUBSTRS = 0x%" UVxf "\n",
@@ -2646,12 +2677,31 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
                                 PTR2UV(r->pprivate));
             Perl_dump_indent(aTHX_ level, file, "  OFFS = 0x%" UVxf "\n",
                                 PTR2UV(r->offs));
+            if (r->offs) {
+                U32 n;
+                sv_setpvs(d,"[ ");
+                /* note offs[0] is for the whole match, and
+                 * the data for $1 is in offs[1]. Thus we have to
+                 * show one more than we have nparens. */
+                for(n = 0; n <= r->nparens; n++) {
+                    sv_catpvf(d,"%" IVdf ":%" IVdf "%s",
+                        r->offs[n].start, r->offs[n].end,
+                        n+1 > r->nparens ? " ]\n" : ", ");
+                }
+                Perl_dump_indent(aTHX_ level, file, "    %" SVf, d);
+            }
             Perl_dump_indent(aTHX_ level, file, "  QR_ANONCV = 0x%" UVxf "\n",
                                 PTR2UV(r->qr_anoncv));
 #ifdef PERL_ANY_COW
             Perl_dump_indent(aTHX_ level, file, "  SAVED_COPY = 0x%" UVxf "\n",
                                 PTR2UV(r->saved_copy));
 #endif
+            /* this should go LAST or the output gets really confusing */
+            Perl_dump_indent(aTHX_ level, file, "  MOTHER_RE = 0x%" UVxf "\n",
+                                PTR2UV(r->mother_re));
+            if (nest < maxnest && r->mother_re)
+                do_sv_dump(level+1, file, (SV *)r->mother_re, nest+1,
+                           maxnest, dumpops, pvlim);
         }
         break;
     }
