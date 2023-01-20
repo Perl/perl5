@@ -39,7 +39,7 @@ Instead use one of the version comparison macros.  See C<L</PERL_VERSION_EQ>>.
 
 #define PERL_REVISION	5		/* age */
 #define PERL_VERSION	37		/* epoch */
-#define PERL_SUBVERSION	8		/* generation */
+#define PERL_SUBVERSION	9		/* generation */
 
 /* The following numbers describe the earliest compatible version of
    Perl ("compatibility" here being defined as sufficient binary/API
@@ -60,7 +60,7 @@ Instead use one of the version comparison macros.  See C<L</PERL_VERSION_EQ>>.
 */
 #define PERL_API_REVISION	5
 #define PERL_API_VERSION	37
-#define PERL_API_SUBVERSION	8
+#define PERL_API_SUBVERSION	9
 /*
    XXX Note:  The selection of non-default Configure options, such
    as -Duselonglong may invalidate these settings.  Currently, Configure
