@@ -10,6 +10,8 @@ lib/warnings.pm linguist-generated
 feature.h linguist-generated
 opcode.h linguist-generated
 opnames.h linguist-generated
+overload.h linguist-generated
+overload.inc linguist-generated
 perly.act linguist-generated
 perly.h linguist-generated
 perly.tab linguist-generated
