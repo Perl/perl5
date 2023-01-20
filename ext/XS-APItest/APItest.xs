@@ -690,16 +690,20 @@ THX_run_cleanup(pTHX_ void *cleanup_code_ref)
     POPSTACK;
 }
 
+/* Note that this is a pp function attached to an OP */
+
 STATIC OP *
 THX_pp_establish_cleanup(pTHX)
 {
-    dSP;
     SV *cleanup_code_ref;
-    cleanup_code_ref = newSVsv(POPs);
+    cleanup_code_ref = newSVsv(*PL_stack_sp);
+    rpp_popfree_1();
     SAVEFREESV(cleanup_code_ref);
     SAVEDESTRUCTOR_X(THX_run_cleanup, cleanup_code_ref);
-    if(GIMME_V != G_VOID) PUSHs(&PL_sv_undef);
-    RETURN;
+    if(GIMME_V != G_VOID)
+        rpp_push_1(&PL_sv_undef);
+    return NORMAL;
+    ;
 }
 
 STATIC OP *
@@ -4130,7 +4134,7 @@ CODE:
         interp_dup->Iop = interp_dup->Iop->op_next;
 
     /* run with new perl */
-    Perl_runops_standard(interp_dup);
+    CALLRUNOPS(interp_dup);
 
     /* We may have additional unclosed scopes if fork() was called
      * from within a BEGIN block.  See perlfork.pod for more details.
