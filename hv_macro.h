@@ -20,9 +20,9 @@
  * The following 3 macros are defined in this section. The other macros defined
  * are only needed to help derive these 3.
  *
- * U8TO16_LE(x)   Read a little endian unsigned 32-bit int
+ * U8TO16_LE(x)   Read a little endian unsigned 16-bit int
  * U8TO32_LE(x)   Read a little endian unsigned 32-bit int
- * U8TO28_LE(x)   Read a little endian unsigned 32-bit int
+ * U8TO64_LE(x)   Read a little endian unsigned 64-bit int
  * ROTL32(x,r)      Rotate x left by r bits
  * ROTL64(x,r)      Rotate x left by r bits
  * ROTR32(x,r)      Rotate x right by r bits
