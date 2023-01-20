@@ -13218,13 +13218,13 @@ Perl_reg_temp_copy(pTHX_ REGEXP *dsv, REGEXP *ssv)
     if (srx->logical_to_parno) {
         NewCopy(srx->logical_to_parno,
                 drx->logical_to_parno,
-                srx->nparens, I32);
+                srx->nparens+1, I32);
         NewCopy(srx->parno_to_logical,
                 drx->parno_to_logical,
-                srx->nparens, I32);
+                srx->nparens+1, I32);
         NewCopy(srx->parno_to_logical_next,
                 drx->parno_to_logical_next,
-                srx->nparens, I32);
+                srx->nparens+1, I32);
     } else {
         drx->logical_to_parno = NULL;
         drx->parno_to_logical = NULL;
@@ -13467,9 +13467,9 @@ Perl_re_dup_guts(pTHX_ const REGEXP *sstr, REGEXP *dstr, CLONE_PARAMS *param)
 
     if (r->logical_to_parno) {
         /* we use total_parens for all three just for symmetry */
-        ret->logical_to_parno = (I32*)SAVEPVN((char*)(r->logical_to_parno), r->nparens * sizeof(I32));
-        ret->parno_to_logical = (I32*)SAVEPVN((char*)(r->parno_to_logical), r->nparens * sizeof(I32));
-        ret->parno_to_logical_next = (I32*)SAVEPVN((char*)(r->parno_to_logical_next), r->nparens * sizeof(I32));
+        ret->logical_to_parno = (I32*)SAVEPVN((char*)(r->logical_to_parno), (1+r->nparens) * sizeof(I32));
+        ret->parno_to_logical = (I32*)SAVEPVN((char*)(r->parno_to_logical), (1+r->nparens) * sizeof(I32));
+        ret->parno_to_logical_next = (I32*)SAVEPVN((char*)(r->parno_to_logical_next), (1+r->nparens) * sizeof(I32));
     } else {
         ret->logical_to_parno = NULL;
         ret->parno_to_logical = NULL;
