@@ -139,7 +139,7 @@ pod2man - Convert POD data to formatted *roff input
 pod2man [B<--center>=I<string>] [B<--date>=I<string>]
     [B<--encoding>=I<encoding>] [B<--errors>=I<style>] [B<--fixed>=I<font>]
     [B<--fixedbold>=I<font>] [B<--fixeditalic>=I<font>]
-    [B<--fixedbolditalic>=I<font>] [B<--guesswork>=I<rule>[,I<rule>...]
+    [B<--fixedbolditalic>=I<font>] [B<--guesswork>=I<rule>[,I<rule>...]]
     [B<--name>=I<name>] [B<--nourls>] [B<--official>]
     [B<--release>=I<version>] [B<--section>=I<manext>]
     [B<--quotes>=I<quotes>] [B<--lquote>=I<quote>] [B<--rquote>=I<quote>]

@@ -82,9 +82,9 @@ my $stdin;
 my %options;
 Getopt::Long::config ('bundling');
 GetOptions (\%options, 'alt|a', 'code', 'color|c', 'encoding|e=s', 'errors=s',
-            'help|h', 'indent|i=i', 'loose|l', 'margin|left-margin|m=i',
-            'nourls', 'overstrike|o', 'quotes|q=s', 'sentence|s', 'stderr',
-            'termcap|t', 'utf8|u', 'width|w=i')
+            'guesswork=s', 'help|h', 'indent|i=i', 'loose|l',
+            'margin|left-margin|m=i', 'nourls', 'overstrike|o', 'quotes|q=s',
+            'sentence|s', 'stderr', 'termcap|t', 'utf8|u', 'width|w=i')
     or exit 1;
 pod2usage (1) if $options{help};
 
@@ -142,7 +142,8 @@ pod2text - Convert POD data to formatted ASCII text
 =head1 SYNOPSIS
 
 pod2text [B<-aclostu>] [B<--code>] S<[B<-e> I<encoding>]>
-    [B<--errors>=I<style>] [B<-i> I<indent>] S<[B<-q> I<quotes>]>
+    [B<--errors>=I<style>] [B<--guesswork>=I<rule>[,I<rule>...]]
+    S<[B<-i> I<indent>]> S<[B<-q> I<quotes>]>
     [B<--nourls>] [B<--stderr>] S<[B<-w> I<width>]> [I<input> [I<output> ...]]
 
 pod2text B<-h>
@@ -216,6 +217,34 @@ the resulting documentation summarizing the errors.  C<none> ignores POD
 errors entirely, as much as possible.
 
 The default is C<die>.
+
+=item B<--guesswork>=I<rule>[,I<rule>...]
+
+[5.01] By default, B<pod2text> applies some default formatting rules based on
+guesswork and regular expressions that are intended to make writing Perl
+documentation easier and require less explicit markup.  These rules may not
+always be appropriate, particularly for documentation that isn't about Perl.
+This option allows turning all or some of it off.
+
+The special rule C<all> enables all guesswork.  This is also the default for
+backward compatibility reasons.  The special rule C<none> disables all
+guesswork.  Otherwise, the value of this option should be a comma-separated
+list of one or more of the following keywords:
+
+=over 4
+
+=item quoting
+
+If no guesswork is enabled, any text enclosed in CZ<><> is surrounded by
+double quotes in nroff (terminal) output unless the contents are already
+quoted.  When this guesswork is enabled, quote marks will also be suppressed
+for Perl variables, function names, function calls, numbers, and hex
+constants.
+
+=back
+
+Any unknown guesswork name is silently ignored (for potential future
+compatibility), so be careful about spelling.
 
 =item B<-i> I<indent>, B<--indent=>I<indent>
 

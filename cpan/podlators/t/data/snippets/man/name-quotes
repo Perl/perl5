@@ -11,5 +11,5 @@ rquote '
 C</etc/blah> - config file for I<blah(1)>
 
 [output]
-.SH "NAME"
+.SH NAME
 \&'/etc/blah' \- config file for blah(1)

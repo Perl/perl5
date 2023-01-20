@@ -1876,6 +1876,8 @@ cpan/podlators/t/data/man/encoding.pod
 cpan/podlators/t/data/man/encoding.roff
 cpan/podlators/t/data/man/encoding.utf8
 cpan/podlators/t/data/perl.conf			podlators test
+cpan/podlators/t/data/perlcriticrc
+cpan/podlators/t/data/perltidyrc
 cpan/podlators/t/data/regenerate-data
 cpan/podlators/t/data/snippets/color/escape-wrapping
 cpan/podlators/t/data/snippets/color/tag-width
@@ -1964,6 +1966,8 @@ cpan/podlators/t/data/snippets/text/error-pod
 cpan/podlators/t/data/snippets/text/error-stderr
 cpan/podlators/t/data/snippets/text/error-stderr-opt
 cpan/podlators/t/data/snippets/text/for
+cpan/podlators/t/data/snippets/text/guesswork-no-quoting
+cpan/podlators/t/data/snippets/text/guesswork-quoting
 cpan/podlators/t/data/snippets/text/iso-8859-1
 cpan/podlators/t/data/snippets/text/iso-8859-1-error-die
 cpan/podlators/t/data/snippets/text/iso-8859-1-error-pod
@@ -2009,6 +2013,8 @@ cpan/podlators/t/man/no-encode.t		podlators test
 cpan/podlators/t/man/snippets.t			podlators test
 cpan/podlators/t/man/utf8-io.t			podlators test
 cpan/podlators/t/parselink/basic.t			podlators test
+cpan/podlators/t/style/critic.t
+cpan/podlators/t/style/kwalitee.t
 cpan/podlators/t/style/minimum-version.t			podlators test
 cpan/podlators/t/style/module-version.t			podlators test
 cpan/podlators/t/style/obsolete-strings.t

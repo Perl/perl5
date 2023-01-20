@@ -11,8 +11,8 @@ function() - man(1) $variable
 function() - man(1) $variable
 
 [output]
-.SH "NAME"
+.SH NAME
 function() \- man(1) $variable
-.SS "THINGS"
+.SS THINGS
 .IX Subsection "THINGS"
 \&\fBfunction()\fR \- \fBman\fR\|(1) \f(CW$variable\fR

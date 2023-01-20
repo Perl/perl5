@@ -18,7 +18,7 @@ Beyoncé!  Beyoncé!  Beyoncé!!
 Older versions didn't convert Beyoncé in verbatim.
 
 [output]
-.SH "ACCENTS"
+.SH ACCENTS
 .IX Header "ACCENTS"
 Beyonce\*'!  Beyonce\*'!  Beyonce\*'!!
 .PP

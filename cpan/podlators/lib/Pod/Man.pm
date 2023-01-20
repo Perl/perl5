@@ -30,7 +30,7 @@ BEGIN {
 }
 
 our @ISA = qw(Pod::Simple);
-our $VERSION = '5.00';
+our $VERSION = '5.01';
 
 # Ensure that $Pod::Simple::nbsp and $Pod::Simple::shy are available.  Code
 # taken from Pod::Simple 3.32, but was only added in 3.30.
@@ -47,9 +47,6 @@ if ($Pod::Simple::VERSION ge 3.30) {
 # ASCII-based universe (including such things as ISO 8859-1 and UTF-8), and is
 # generally only false for EBCDIC.
 BEGIN { *ASCII = \&Pod::Simple::ASCII }
-
-# Pretty-print a data structure.  Only used for debugging.
-BEGIN { *pretty = \&Pod::Simple::pretty }
 
 # Formatting instructions for various types of blocks.  cleanup makes hyphens
 # hard, adds spaces between consecutive underscores, and escapes backslashes.
@@ -143,6 +140,20 @@ my %ESCAPES;
 ##############################################################################
 # Utility functions
 ##############################################################################
+
+# Quote an argument to a macro.
+#
+# $arg - Intended argument to the macro
+#
+# Returns: $arg suitably escaped and quoted
+sub _quote_macro_argument {
+    my ($arg) = @_;
+    if (length($arg) > 0 && $arg !~ m{ [\s\"] }xms) {
+        return $arg;
+    }
+    $arg =~ s{ \" }{""}xmsg;
+    return qq("$arg");
+}
 
 # Returns whether the given encoding needs a call to Encode::encode.
 sub _needs_encode {
@@ -275,29 +286,41 @@ sub init_fonts {
 
     # Figure out the fixed-width font.  If user-supplied, make sure that they
     # are the right length.
-    for (qw/fixed fixedbold fixeditalic fixedbolditalic/) {
+    for (qw(fixed fixedbold fixeditalic fixedbolditalic)) {
         my $font = $self->{"opt_$_"};
-        if (defined ($font) && (length ($font) < 1 || length ($font) > 2)) {
-            croak qq(roff font should be 1 or 2 chars, not "$font");
+        if (defined($font) && (length($font) < 1 || length($font) > 2)) {
+            croak(qq(roff font should be 1 or 2 chars, not "$font"));
         }
     }
 
     # Set the default fonts.  We can't be sure portably across different
     # implementations what fixed bold-italic may be called (if it's even
     # available), so default to just bold.
+    #<<<
     $self->{opt_fixed}           ||= 'CW';
     $self->{opt_fixedbold}       ||= 'CB';
     $self->{opt_fixeditalic}     ||= 'CI';
     $self->{opt_fixedbolditalic} ||= 'CB';
+    #>>>
 
     # Set up a table of font escapes.  First number is fixed-width, second is
     # bold, third is italic.
-    $$self{FONTS} = { '000' => '\fR', '001' => '\fI',
-                      '010' => '\fB', '011' => '\f(BI',
-                      '100' => toescape ($self->{opt_fixed}),
-                      '101' => toescape ($self->{opt_fixeditalic}),
-                      '110' => toescape ($self->{opt_fixedbold}),
-                      '111' => toescape ($self->{opt_fixedbolditalic}) };
+    $self->{FONTS} = {
+        '000' => '\fR',
+        '001' => '\fI',
+        '010' => '\fB',
+        '011' => '\f(BI',
+        '100' => toescape($self->{opt_fixed}),
+        '101' => toescape($self->{opt_fixeditalic}),
+        '110' => toescape($self->{opt_fixedbold}),
+        '111' => toescape($self->{opt_fixedbolditalic}),
+    };
+
+    # Precalculate a regex that matches all fixed-width fonts, which will be
+    # used later by switchquotes.
+    my @fixedpat = map { quotemeta($self->{FONTS}{$_}) } qw(100 101 110 111);
+    my $fixedpat = join('|', @fixedpat);
+    $self->{FIXEDPAT} = qr{ $fixedpat }xms;
 }
 
 # Initialize the quotes that we'll be using for C<> text.  This requires some
@@ -330,12 +353,6 @@ sub init_quotes {
         $self->{opt_rquote} = q{} if $self->{opt_rquote} eq 'none';
         $$self{RQUOTE} = $self->{opt_rquote};
     }
-
-    # Double the first quote; note that this should not be s///g as two double
-    # quotes is represented in *roff as three double quotes, not four.  Weird,
-    # I know.
-    $$self{LQUOTE} =~ s/\"/\"\"/;
-    $$self{RQUOTE} =~ s/\"/\"\"/;
 }
 
 # Initialize the page title information and indentation from our arguments.
@@ -352,11 +369,6 @@ sub init_page {
     $self->{opt_center}  //= 'User Contributed Perl Documentation';
     $self->{opt_release} //= 'perl v' . $version;
     $self->{opt_indent}  //= 4;
-
-    # Double quotes in things that will be quoted.
-    for (qw/center release/) {
-        $self->{"opt_$_"} =~ s/\"/\"\"/g if $self->{"opt_$_"};
-    }
 }
 
 ##############################################################################
@@ -512,9 +524,7 @@ sub quote_literal {
     # If in NAME section, just return an ASCII quoted string to avoid
     # confusing tools like whatis.
     if ($$self{IN_NAME}) {
-        my $lquote = $$self{LQUOTE} eq '""' ? '"' : $$self{LQUOTE};
-        my $rquote = $$self{RQUOTE} eq '""' ? '"' : $$self{RQUOTE};
-        return $lquote . $_ . $rquote;
+        return $self->{LQUOTE} . $_ . $self->{RQUOTE};
     }
 
     # A regex that matches the portion of a variable reference that's the
@@ -559,8 +569,7 @@ sub quote_literal {
 # formatting codes added.  This is the code that marks up various Perl
 # constructs and things commonly used in man pages without requiring the user
 # to add any explicit markup, and is applied to all non-literal text.  Note
-# that the inserted font sequences must be treated later with mapfonts or
-# textmapfonts.
+# that the inserted font sequences must be treated later with mapfonts.
 #
 # This method is very fragile, both in the regular expressions it uses and in
 # the ordering of those modifications.  Care and testing is required when
@@ -648,72 +657,52 @@ sub guesswork {
 # the right start and end codes.
 #
 # We add this level of complexity because the old pod2man didn't get code like
-# B<someI<thing> else> right; after I<> it switched back to normal text rather
-# than bold.  We take care of this by using variables that state whether bold,
-# italic, or fixed are turned on as a combined pointer to our current font
-# sequence, and set each to the number of current nestings of start tags for
-# that font.
+# B<< someI<thing> else>> right.  After I<> it switched back to normal text
+# rather than bold.  We take care of this by using variables that state
+# whether bold, italic, or fixed are turned on as a combined pointer to our
+# current font sequence, and set each to the number of current nestings of
+# start tags for that font.
 #
-# \fP changes to the previous font, but only one previous font is kept.  We
-# don't know what the outside level font is; normally it's R, but if we're
-# inside a heading it could be something else.  So arrange things so that the
-# outside font is always the "previous" font and end with \fP instead of \fR.
-# Idea from Zack Weinberg.
+# The base font must be either \fP or \fR.  \fP changes to the previous font,
+# but only one previous font is kept.  Unfortunately, there is a bug in
+# Solaris 2.6 nroff (not present in GNU groff) where the sequence
+# \fB\fP\f(CW\fP leaves the font set to B rather than R, presumably because
+# \f(CW doesn't actually do a font change.  Because of this, we prefer to use
+# \fR where possible.
+#
+# Unfortunately, this isn't possible for arguments to heading macros, since
+# there we don't know what the outside level font is.  In that case, arrange
+# things so that the outside font is always the "previous" font and end with
+# \fP instead of \fR.  Idea from Zack Weinberg.
+#
+# This function used to be much simpler outside of macro arguments because it
+# went directly from \fB to \f(CW and relied on \f(CW clearing bold since it
+# wasn't \f(CB.  Unfortunately, while this works for mandoc, this is not how
+# groff works; \fBfoo\f(CWbar still prints bar in bold.  Therefore, we force
+# the font back to the base font before each font change.
 sub mapfonts {
-    my ($self, $text) = @_;
-    my ($fixed, $bold, $italic) = (0, 0, 0);
-    my %magic = (F => \$fixed, B => \$bold, I => \$italic);
-    my $last = '\fR';
-    $text =~ s{
-        \\f\((.)(.)
-    }{
-        my $sequence = '';
-        my $f;
-        if ($last ne '\fR') { $sequence = '\fP' }
-        ${ $magic{$1} } += ($2 eq 'S') ? 1 : -1;
-        $f = $$self{FONTS}{ ($fixed && 1) . ($bold && 1) . ($italic && 1) };
-        if ($f eq $last) {
-            '';
-        } else {
-            if ($f ne '\fR') { $sequence .= $f }
-            $last = $f;
-            $sequence;
-        }
-    }gxe;
-    return $text;
-}
+    my ($self, $text, $base) = @_;
 
-# Unfortunately, there is a bug in Solaris 2.6 nroff (not present in GNU
-# groff) where the sequence \fB\fP\f(CW\fP leaves the font set to B rather
-# than R, presumably because \f(CW doesn't actually do a font change.  To work
-# around this, use a separate textmapfonts for text blocks that uses \fR
-# instead of \fP.
-#
-# Originally, this function was much simpler because it went directly from \fB
-# to \f(CW and relied on \f(CW clearing bold since it wasn't \f(CB.
-# Unfortunately, while this works for mandoc, this is not how groff works;
-# \fBfoo\f(CWbar still prints bar in bold.  Therefore, we force the font back
-# to the default before each font change.
-sub textmapfonts {
-    my ($self, $text) = @_;
+    # The closure used to process each font escape, expected to be called from
+    # the right-hand side of an s/// expression.
     my ($fixed, $bold, $italic) = (0, 0, 0);
     my %magic = (F => \$fixed, B => \$bold, I => \$italic);
     my $last = '\fR';
-    $text =~ s{
-        \\f\((.)(.)
-    }{
-        my $sequence = q{};
-        if ($last ne '\fR') { $sequence = '\fR' }
-        ${ $magic{$1} } += ($2 eq 'S') ? 1 : -1;
-        my $f = $$self{FONTS}{ ($fixed && 1) . ($bold && 1) . ($italic && 1) };
-        if ($f eq $last) {
-            '';
-        } else {
-            if ($f ne '\fR') { $sequence .= $f }
-            $last = $f;
-            $sequence;
+    my $process = sub {
+        my ($style, $start_stop) = @_;
+        my $sequence = ($last ne '\fR') ? $base : q{};
+        ${ $magic{$style} } += ($start_stop eq 'S') ? 1 : -1;
+        my $f = $self->{FONTS}{($fixed && 1) . ($bold && 1) . ($italic && 1)};
+        return q{} if ($f eq $last);
+        if ($f ne '\fR') {
+            $sequence .= $f;
         }
-    }gxe;
+        $last = $f;
+        return $sequence;
+    };
+
+    # Now, do the actual work.
+    $text =~ s{ \\f\((.)(.) }{$process->($1, $2)}xmsge;
 
     # We can do a bit of cleanup by collapsing sequences like \fR\fB\fR\fI
     # into just \fI.
@@ -723,57 +712,51 @@ sub textmapfonts {
 }
 
 # Given a command and a single argument that may or may not contain double
-# quotes, handle double-quote formatting for it.  If there are no double
-# quotes, just return the command followed by the argument in double quotes.
-# If there are double quotes, use an if statement to test for nroff, and for
-# nroff output the command followed by the argument in double quotes with
-# embedded double quotes doubled.  For other formatters, remap paired double
-# quotes to LQUOTE and RQUOTE.
+# quotes and fixed-width text, handle double-quote formatting for it.  If
+# there is no fixed-width text, just return the command followed by the
+# argument with proper quoting.  If there is fixed-width text, work around a
+# Solaris nroff bug with fixed-width fonts by converting fixed-width to
+# regular fonts (nroff sees no difference).
 sub switchquotes {
     my ($self, $command, $text, $extra) = @_;
-    $text =~ s/\\\*\([LR]\"/\"/g;
 
-    # We also have to deal with \*C` and \*C', which are used to add the
-    # quotes around C<> text, since they may expand to " and if they do this
-    # confuses the .SH macros and the like no end.  Expand them ourselves.
-    # Also separate troff from nroff if there are any fixed-width fonts in use
-    # to work around problems with Solaris nroff.
-    my $c_is_quote = ($$self{LQUOTE} =~ /\"/) || ($$self{RQUOTE} =~ /\"/);
-    my $fixedpat = join '|', @{ $$self{FONTS} }{'100', '101', '110', '111'};
-    $fixedpat =~ s/\\/\\\\/g;
-    $fixedpat =~ s/\(/\\\(/g;
-    if ($text =~ m/\"/ || $text =~ m/$fixedpat/) {
-        $text =~ s/\"/\"\"/g;
+    # Separate troff from nroff if there are any fixed-width fonts in use to
+    # work around problems with Solaris nroff.
+    if ($text =~ $self->{FIXEDPAT}) {
         my $nroff = $text;
         my $troff = $text;
-        $troff =~ s/\"\"([^\"]*)\"\"/\`\`$1\'\'/g;
-        if ($c_is_quote and $text =~ m/\\\*\(C[\'\`]/) {
-            $nroff =~ s/\\\*\(C\`/$$self{LQUOTE}/g;
-            $nroff =~ s/\\\*\(C\'/$$self{RQUOTE}/g;
-            $troff =~ s/\\\*\(C[\'\`]//g;
-        }
-        $nroff = qq("$nroff") . ($extra ? " $extra" : '');
-        $troff = qq("$troff") . ($extra ? " $extra" : '');
 
         # Work around the Solaris nroff bug where \f(CW\fP leaves the font set
         # to Roman rather than the actual previous font when used in headings.
         # troff output may still be broken, but at least we can fix nroff by
         # just switching the font changes to the non-fixed versions.
-        my $font_end = "(?:\\f[PR]|\Q$$self{FONTS}{100}\E)";
-        $nroff =~ s/\Q$$self{FONTS}{100}\E(.*?)\\f([PR])/$1/g;
-        $nroff =~ s/\Q$$self{FONTS}{101}\E(.*?)$font_end/\\fI$1\\fP/g;
-        $nroff =~ s/\Q$$self{FONTS}{110}\E(.*?)$font_end/\\fB$1\\fP/g;
-        $nroff =~ s/\Q$$self{FONTS}{111}\E(.*?)$font_end/\\f\(BI$1\\fP/g;
+        my $font_end = qr{ (?: \\f[PR] | \Q$self->{FONTS}{100}\E ) }xms;
+        $nroff =~ s{\Q$self->{FONTS}{100}\E(.*?)\\f([PR])}{$1}xmsg;
+        $nroff =~ s{\Q$self->{FONTS}{101}\E}{\\fI}xmsg;
+        $nroff =~ s{\Q$self->{FONTS}{110}\E}{\\fB}xmsg;
+        $nroff =~ s{\Q$self->{FONTS}{111}\E}{\\f\(BI}xmsg;
+
+        # We have to deal with \*C` and \*C', which are used to add the quotes
+        # around C<> text, since they may expand to " and if they do this
+        # confuses the .SH macros and the like no end.  Expand them ourselves.
+        my $c_is_quote = index("$self->{LQUOTE}$self->{RQUOTE}", qq(\")) != -1;
+        if ($c_is_quote && $text =~ m{ \\[*]\(C[\'\`] }xms) {
+            $nroff =~ s{ \\[*]\(C\` }{$self->{LQUOTE}}xmsg;
+            $nroff =~ s{ \\[*]\(C\' }{$self->{RQUOTE}}xmsg;
+            $troff =~ s{ \\[*]\(C[\'\`] }{}xmsg;
+        }
 
         # Now finally output the command.  Bother with .ie only if the nroff
         # and troff output aren't the same.
+        $nroff = _quote_macro_argument($nroff) . ($extra ? " $extra" : '');
+        $troff = _quote_macro_argument($troff) . ($extra ? " $extra" : '');
         if ($nroff ne $troff) {
             return ".ie n $command $nroff\n.el $command $troff\n";
         } else {
             return "$command $nroff\n";
         }
     } else {
-        $text = qq("$text") . ($extra ? " $extra" : '');
+        $text = _quote_macro_argument($text) . ($extra ? " $extra" : '');
         return "$command $text\n";
     }
 }
@@ -1070,47 +1053,49 @@ sub preamble {
     my ($self, $name, $section, $date) = @_;
     my $preamble = $self->preamble_template();
 
-    # Build the index line and make sure that it will be syntactically valid.
-    my $index = "$name $section";
-    $index =~ s/\"/\"\"/g;
-
-    # If name or section contain spaces, quote them (section really never
-    # should, but we may as well be cautious).
-    for ($name, $section) {
-        if (/\s/) {
-            s/\"/\"\"/g;
-            $_ = '"' . $_ . '"';
-        }
-    }
-
-    # Double quotes in date, since it will be quoted.
-    $date =~ s/\"/\"\"/g;
-
-    # Substitute into the preamble the configuration options.
-    $preamble =~ s/\@CFONT\@/$self->{opt_fixed}/;
-    $preamble =~ s/\@LQUOTE\@/$$self{LQUOTE}/;
-    $preamble =~ s/\@RQUOTE\@/$$self{RQUOTE}/;
-    chomp $preamble;
-
-    # Get the version information.
-    my $version = $self->version_report;
-
     # groff's preconv script will use this line to correctly determine the
     # input encoding if the encoding is one of the ones it recognizes.  It
     # must be the first or second line.
     #
     # If the output encoding is some version of Unicode, we could also add a
-    # Unicode Byte Order Mark to the start of the file, but I am concerned
-    # that may break a *roff implementation that might otherwise cope with
-    # Unicode.  Revisit this if someone files a bug report about it.
+    # Unicode Byte Order Mark to the start of the file, but the BOM is now
+    # deprecated and I am concerned that may break a *roff implementation that
+    # might otherwise cope with Unicode.  Revisit this if someone files a bug
+    # report about it.
     if (_needs_encode($$self{ENCODING})) {
         my $normalized = lc($$self{ENCODING});
         $normalized =~ s{-}{}g;
         my $coding = $ENCODINGS{$normalized} || lc($$self{ENCODING});
         if ($coding ne 'us-ascii') {
-            $self->output (qq{.\\\" -*- mode: troff; coding: $coding -*-\n});
+            $self->output(qq{.\\\" -*- mode: troff; coding: $coding -*-\n});
         }
     }
+
+    # Substitute into the preamble the configuration options.  Because it's
+    # used as the argument to defining a string, any leading double quote (but
+    # no other double quotes) in LQUOTE and RQUOTE has to be doubled.
+    $preamble =~ s{ [@] CFONT [@] }{$self->{opt_fixed}}xms;
+    my $lquote = $self->{LQUOTE};
+    my $rquote = $self->{RQUOTE};
+    $lquote =~ s{ \A \" }{""}xms;
+    $rquote =~ s{ \A \" }{""}xms;
+    $preamble =~ s{ [@] LQUOTE [@] }{$lquote}xms;
+    $preamble =~ s{ [@] RQUOTE [@] }{$rquote}xms;
+    chomp($preamble);
+
+    # Get the version information.
+    my $version = $self->version_report();
+
+    # Build the index line and make sure that it will be syntactically valid.
+    my $index = _quote_macro_argument("$name $section");
+
+    # Quote the arguments to the .TH macro.  (Section should never require
+    # this, but we may as well be cautious.)
+    $name = _quote_macro_argument($name);
+    $section = _quote_macro_argument($section);
+    $date = _quote_macro_argument($date);
+    my $center = _quote_macro_argument($self->{opt_center});
+    my $release = _quote_macro_argument($self->{opt_release});
 
     # Output the majority of the preamble.
     $self->output (<<"----END OF HEADER----");
@@ -1121,8 +1106,8 @@ sub preamble {
 $preamble
 .\\" ========================================================================
 .\\"
-.IX Title "$index"
-.TH $name $section "$date" "$self->{opt_release}" "$self->{opt_center}"
+.IX Title $index
+.TH $name $section $date $release $center
 .\\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\\" way too many mistakes in technical documents.
 .if n .ad l
@@ -1167,8 +1152,8 @@ sub cmd_para {
     $text = reverse $text;
 
     # Output the paragraph.
-    $self->output ($self->protect ($self->textmapfonts ($text)));
-    $self->outindex;
+    $self->output($self->protect($self->mapfonts($text, '\fR')));
+    $self->outindex();
     $$self{NEEDSPACE} = 1;
     return '';
 }
@@ -1180,45 +1165,44 @@ sub cmd_verbatim {
     my ($self, $attrs, $text) = @_;
 
     # Ignore an empty verbatim paragraph.
-    return unless $text =~ /\S/;
+    return if $text !~ m{ \S }xms;
 
     # Force exactly one newline at the end and strip unwanted trailing
-    # whitespace at the end.  Reverse the text first, to avoid having to scan
-    # the entire paragraph.
-    $text = reverse $text;
-    $text =~ s/\A\s*/\n/;
-    $text = reverse $text;
+    # whitespace at the end.
+    $text =~ s{ \s* \z }{\n}xms;
 
     # Get a count of the number of lines before the first blank line, which
     # we'll pass to .Vb as its parameter.  This tells *roff to keep that many
     # lines together.  We don't want to tell *roff to keep huge blocks
     # together.
-    my @lines = split (/\n/, $text);
+    my @lines = split (m{ \n }xms, $text);
     my $unbroken = 0;
-    for (@lines) {
-        last if /^\s*$/;
+    for my $line (@lines) {
+        last if $line =~ m{ \A \s* \z }xms;
         $unbroken++;
     }
-    $unbroken = 10 if ($unbroken > 12 && !$$self{MAGIC_VNOPAGEBREAK_LIMIT});
+    if ($unbroken > 12) {
+        $unbroken = 10;
+    }
 
-    # Prepend a null token to each line.
-    $text =~ s/^/\\&/gm;
+    # Prepend a null token to each line to preserve indentation.
+    $text =~ s{ ^ }{\\&}xmsg;
 
     # Output the results.
-    $self->makespace;
-    $self->output (".Vb $unbroken\n$text.Ve\n");
+    $self->makespace();
+    $self->output(".Vb $unbroken\n$text.Ve\n");
     $$self{NEEDSPACE} = 1;
-    return '';
+    return q{};
 }
 
 # Handle literal text (produced by =for and similar constructs).  Just output
 # it with the minimum of changes.
 sub cmd_data {
     my ($self, $attrs, $text) = @_;
-    $text =~ s/^\n+//;
-    $text =~ s/\n{0,2}$/\n/;
-    $self->output ($text);
-    return '';
+    $text =~ s{ \A \n+ }{}xms;
+    $text =~ s{ \n{0,2} \z }{\n}xms;
+    $self->output($text);
+    return q{};
 }
 
 ##############################################################################
@@ -1252,7 +1236,7 @@ sub cmd_head1 {
     $text =~ s/\\s-?\d//g;
     $text = $self->heading_common ($text, $$attrs{start_line});
     my $isname = ($text eq 'NAME' || $text =~ /\(NAME\)/);
-    $self->output ($self->switchquotes ('.SH', $self->mapfonts ($text)));
+    $self->output($self->switchquotes('.SH', $self->mapfonts($text, '\fP')));
     $self->outindex ('Header', $text) unless $isname;
     $$self{NEEDSPACE} = 0;
     $$self{IN_NAME} = $isname;
@@ -1263,7 +1247,7 @@ sub cmd_head1 {
 sub cmd_head2 {
     my ($self, $attrs, $text) = @_;
     $text = $self->heading_common ($text, $$attrs{start_line});
-    $self->output ($self->switchquotes ('.SS', $self->mapfonts ($text)));
+    $self->output($self->switchquotes('.SS', $self->mapfonts($text, '\fP')));
     $self->outindex ('Subsection', $text);
     $$self{NEEDSPACE} = 0;
     return '';
@@ -1275,7 +1259,7 @@ sub cmd_head3 {
     my ($self, $attrs, $text) = @_;
     $text = $self->heading_common ($text, $$attrs{start_line});
     $self->makespace;
-    $self->output ($self->textmapfonts ('\f(IS' . $text . '\f(IE') . "\n");
+    $self->output($self->mapfonts('\f(IS' . $text . '\f(IE', '\fR') . "\n");
     $self->outindex ('Subsection', $text);
     $$self{NEEDSPACE} = 1;
     return '';
@@ -1287,7 +1271,7 @@ sub cmd_head4 {
     my ($self, $attrs, $text) = @_;
     $text = $self->heading_common ($text, $$attrs{start_line});
     $self->makespace;
-    $self->output ($self->textmapfonts ($text) . "\n");
+    $self->output($self->mapfonts($text, '\fR') . "\n");
     $self->outindex ('Subsection', $text);
     $$self{NEEDSPACE} = 1;
     return '';
@@ -1454,8 +1438,8 @@ sub item_common {
     $self->output (".PD 0\n") if ($$self{ITEMS} == 1);
 
     # Now, output the item tag itself.
-    $item = $self->textmapfonts ($item);
-    $self->output ($self->switchquotes ('.IP', $item, $$self{INDENT}));
+    $item = $self->mapfonts($item, '\fR');
+    $self->output($self->switchquotes('.IP', $item, $$self{INDENT}));
     $$self{NEEDSPACE} = 0;
     $$self{ITEMS}++;
     $$self{SHIFTWAIT} = 0;
@@ -1464,7 +1448,7 @@ sub item_common {
     if ($text) {
         $text =~ s/\s*$/\n/;
         $self->makespace;
-        $self->output ($self->protect ($self->textmapfonts ($text)));
+        $self->output($self->protect($self->mapfonts($text, '\fR')));
         $$self{NEEDSPACE} = 1;
     }
     $self->outindex ($index ? ('Item', $index) : ());

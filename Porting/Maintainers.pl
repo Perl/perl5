@@ -983,10 +983,11 @@ use File::Glob qw(:case);
     },
 
     'podlators' => {
-        'DISTRIBUTION' => 'RRA/podlators-5.00.tar.gz',
+        'DISTRIBUTION' => 'RRA/podlators-5.01.tar.gz',
         'MAIN_MODULE'  => 'Pod::Man',
         'FILES'        => q[cpan/podlators pod/perlpodstyle.pod],
         'EXCLUDED'     => [
+            qr{^\.github/dependabot\.yml},
             qr{^\.github/workflows/build\.yaml},
         ],
 
