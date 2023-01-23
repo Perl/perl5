@@ -538,6 +538,7 @@
 # define rninstr                                Perl_rninstr
 # define rpp_extend(a)                          Perl_rpp_extend(aTHX_ a)
 # define rpp_is_lone(a)                         Perl_rpp_is_lone(aTHX_ a)
+# define rpp_obliterate_stack_to(a)             Perl_rpp_obliterate_stack_to(aTHX_ a)
 # define rpp_pop_1_norc()                       Perl_rpp_pop_1_norc(aTHX)
 # define rpp_popfree_1()                        Perl_rpp_popfree_1(aTHX)
 # define rpp_popfree_2()                        Perl_rpp_popfree_2(aTHX)
@@ -556,6 +557,7 @@
 # define rsignal_state(a)                       Perl_rsignal_state(aTHX_ a)
 # define runops_debug()                         Perl_runops_debug(aTHX)
 # define runops_standard()                      Perl_runops_standard(aTHX)
+# define runops_wrap()                          Perl_runops_wrap(aTHX)
 # define rv2cv_op_cv(a,b)                       Perl_rv2cv_op_cv(aTHX_ a,b)
 # define safesyscalloc                          Perl_safesyscalloc
 # define safesysfree                            Perl_safesysfree

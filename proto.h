@@ -3823,6 +3823,10 @@ Perl_rpeep(pTHX_ OP *o)
         __attribute__visibility__("hidden");
 #define PERL_ARGS_ASSERT_RPEEP
 
+PERL_CALLCONV void
+Perl_rpp_obliterate_stack_to(pTHX_ I32 ix);
+#define PERL_ARGS_ASSERT_RPP_OBLITERATE_STACK_TO
+
 PERL_CALLCONV Sighandler_t
 Perl_rsignal(pTHX_ int i, Sighandler_t t);
 #define PERL_ARGS_ASSERT_RSIGNAL
@@ -3849,6 +3853,10 @@ Perl_runops_debug(pTHX);
 PERL_CALLCONV int
 Perl_runops_standard(pTHX);
 #define PERL_ARGS_ASSERT_RUNOPS_STANDARD
+
+PERL_CALLCONV int
+Perl_runops_wrap(pTHX);
+#define PERL_ARGS_ASSERT_RUNOPS_WRAP
 
 PERL_CALLCONV CV *
 Perl_rv2cv_op_cv(pTHX_ OP *cvop, U32 flags);

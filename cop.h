@@ -1232,6 +1232,15 @@ struct stackinfo {
     I32			si_markoff;	/* offset where markstack begins for us.
                                          * currently used only with DEBUGGING,
                                          * but not #ifdef-ed for bincompat */
+
+#ifdef PERL_RC_STACK
+                                        /* index of first entry in the argument
+                                           stack which is not ref-counted. If
+                                           set to 0 (default), all stack
+                                           elements are ref-counted */
+    I32                 si_stack_nonrc_base;
+#endif
+
 #if defined DEBUGGING && !defined DEBUGGING_RE_ONLY
 /* high water mark: for checking if the stack was correctly extended /
  * tested for extension by each pp function */
@@ -1289,6 +1298,7 @@ typedef struct stackinfo PERL_SI;
     STMT_START {							\
         while (PL_curstack != s) {					\
             dounwind(-1);						\
+            rpp_obliterate_stack_to(0);					\
             POPSTACK;							\
         }								\
     } STMT_END

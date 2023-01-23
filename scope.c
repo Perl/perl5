@@ -91,6 +91,9 @@ Perl_new_stackinfo_flags(pTHX_ I32 stitems, I32 cxitems, UV flags)
     av_extend(si->si_stack, stitems > 0 ? stitems-1 : 0);
     AvALLOC(si->si_stack)[0] = &PL_sv_undef;
     AvFILLp(si->si_stack) = 0;
+#ifdef PERL_RC_STACK
+    si->si_stack_nonrc_base = 0;
+#endif
     si->si_prev = 0;
     si->si_next = 0;
     si->si_cxmax = cxitems - 1;

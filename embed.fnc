@@ -2741,6 +2741,8 @@ APTdp	|char * |rninstr	|NN const char *big			\
 p	|void	|rpeep		|NULLOK OP *o
 Adipx	|void	|rpp_extend	|SSize_t n
 Adipx	|bool	|rpp_is_lone	|NN SV *sv
+Cpx	|void	|rpp_obliterate_stack_to				\
+				|I32 ix
 Adipx	|void	|rpp_popfree_1
 Adipx	|void	|rpp_popfree_2
 Adipx	|void	|rpp_popfree_to |NN SV **sp
@@ -2774,6 +2776,7 @@ Adp	|Sighandler_t|rsignal_state					\
 				|int i
 Cdhp	|int	|runops_debug
 Cdhp	|int	|runops_standard
+Cpx	|int	|runops_wrap
 Adp	|CV *	|rv2cv_op_cv	|NN OP *cvop				\
 				|U32 flags
 : Used in pp_hot.c
