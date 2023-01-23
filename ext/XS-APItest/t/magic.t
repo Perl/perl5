@@ -101,12 +101,17 @@ is $@, "", 'PERL_MAGIC_ext is permitted on read-only things';
             $j = "blorp";
             my_av_store(\@a,0,$j);
         };
-        my $base_refcount = 2; # not sure where these come from.
-        if (\$a[0] == \$j) {
-            # in this case we expect to have an extra 2 refcounts,
+
+        # Evaluate this boolean as a separate statement, so the two
+        # temporary \ refs are freed before we start comparing reference
+        # counts
+        my $is_same_SV = \$a[0] == \$j;
+
+        if ($is_same_SV) {
+            # in this case we expect to have 2 refcounts,
             # one from $a[0] and one from $j itself.
-            is( sv_refcnt($j), $base_refcount + 2,
-                "\$a[0] is \$j, so refcount(\$j) should be 4");
+            is( sv_refcnt($j), 2,
+                "\$a[0] is \$j, so refcount(\$j) should be 2");
         } else {
             # Note this branch isn't exercised. Whether by design
             # or not. I leave it here because it is a possible valid
@@ -115,10 +120,10 @@ is $@, "", 'PERL_MAGIC_ext is permitted on read-only things';
             diag "av_store has changed behavior - please review this test";
             TODO:{
                 local $TODO = "av_store bug stores even if it dies during magic";
-                # in this case we expect to have only 1 extra refcount,
+                # in this case we expect to have only 1 refcount,
                 # from $j itself.
-                is( sv_refcnt($j), $base_refcount + 1,
-                    "\$a[0] is not \$j, so refcount(\$j) should be 3");
+                is( sv_refcnt($j), 1,
+                    "\$a[0] is not \$j, so refcount(\$j) should be 1");
             }
         }
     }
