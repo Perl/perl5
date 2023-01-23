@@ -807,6 +807,8 @@ Adfp	|void	|ck_warner_d	|U32 err				\
 
 Cp	|void	|clear_defarray |NN AV *av				\
 				|bool abandon
+Cipx	|void	|clear_defarray_simple					\
+				|NN AV *av
 p	|const COP *|closest_cop|NN const COP *cop			\
 				|NULLOK const OP *o			\
 				|NULLOK const OP *curop 		\
