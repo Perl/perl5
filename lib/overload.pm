@@ -3,7 +3,7 @@ package overload;
 use strict;
 no strict 'refs';
 
-our $VERSION = '1.36';
+our $VERSION = '1.37';
 
 our %ops = (
     with_assign         => "+ - * / % ** << >> x .",
@@ -15,6 +15,7 @@ our %ops = (
     unary               => "neg ! ~ ~.",
     mutators            => '++ --',
     func                => "atan2 cos sin exp abs log sqrt int",
+    stringy             => "substr",
     conversion          => 'bool "" 0+ qr',
     iterators           => '<>',
     filetest            => "-X",
