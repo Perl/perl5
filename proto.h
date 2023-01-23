@@ -9610,6 +9610,11 @@ Perl_av_store_simple(pTHX_ AV *av, SSize_t key, SV *val);
 # define PERL_ARGS_ASSERT_AV_STORE_SIMPLE       \
         assert(av)
 
+PERL_STATIC_INLINE void
+Perl_clear_defarray_simple(pTHX_ AV *av);
+# define PERL_ARGS_ASSERT_CLEAR_DEFARRAY_SIMPLE \
+        assert(av)
+
 PERL_STATIC_INLINE I32
 Perl_foldEQ(pTHX_ const char *a, const char *b, I32 len);
 # define PERL_ARGS_ASSERT_FOLDEQ                \

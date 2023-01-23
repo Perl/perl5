@@ -5499,19 +5499,25 @@ Perl_clear_defarray(pTHX_ AV* av, bool abandon)
 {
     PERL_ARGS_ASSERT_CLEAR_DEFARRAY;
 
-    if (LIKELY(!abandon && SvREFCNT(av) == 1 && !SvMAGICAL(av))) {
-        av_clear(av);
-#ifdef PERL_RC_STACK
-        av_remove_offset(av);
+    if (LIKELY(!abandon && SvREFCNT(av) == 1 && !SvMAGICAL(av))
+#ifndef PERL_RC_STACK
+        && !AvREAL(av)
 #endif
+    ) {
+        clear_defarray_simple(av);
+#ifndef PERL_RC_STACK
         AvREIFY_only(av);
+#endif
     }
     else {
+        /* abandon */
         const SSize_t size = AvFILLp(av) + 1;
         /* The ternary gives consistency with av_extend() */
         AV *newav = newAV_alloc_x(size < PERL_ARRAY_NEW_MIN_KEY ?
                                          PERL_ARRAY_NEW_MIN_KEY : size);
+#ifndef PERL_RC_STACK
         AvREIFY_only(newav);
+#endif
         PAD_SVl(0) = MUTABLE_SV(newav);
         SvREFCNT_dec_NN(av);
     }
@@ -5723,7 +5729,13 @@ PP(pp_entersub)
             /* it's the responsibility of whoever leaves a sub to ensure
              * that a clean, empty AV is left in pad[0]. This is normally
              * done by cx_popsub() */
-            assert(!AvREAL(av) && AvFILLp(av) == -1);
+
+#ifdef PERL_RC_STACK
+            assert(AvREAL(av));
+#else
+            assert(!AvREAL(av));
+#endif
+            assert(AvFILLp(av) == -1);
 
             items = PL_stack_sp - MARK;
             if (UNLIKELY(items - 1 > AvMAX(av))) {
@@ -5739,6 +5751,10 @@ PP(pp_entersub)
             AvFILLp(av) = items - 1;
 #ifdef PERL_RC_STACK
             /* transfer ownership of the arguments' refcounts to av */
+#  ifdef PERL_XXX_TMP_NORC
+            for (int i = 1; i <= items; i++)
+                SvREFCNT_inc(MARK[i]); /* account for AvREAL */
+#  endif
             PL_stack_sp = MARK;
 #endif
         }

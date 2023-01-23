@@ -889,12 +889,14 @@ struct block_format {
     } STMT_END
 
 /* junk in @_ spells trouble when cloning CVs and in pp_caller(), so don't
- * leave any (a fast av_clear(ary), basically) */
+ * leave any (a fast av_clear(ary), basically).
+ * New code should probably be using Perl_clear_defarray_simple()
+ * and/or Perl_clear_defarray()
+ */
 #define CLEAR_ARGARRAY(ary) \
     STMT_START {							\
-        AvMAX(ary) += AvARRAY(ary) - AvALLOC(ary);			\
-        AvARRAY(ary) = AvALLOC(ary);					\
         AvFILLp(ary) = -1;						\
+        av_remove_offset(ary);                                          \
     } STMT_END
 
 

@@ -440,7 +440,9 @@ fresh_perl_like(
 
 fresh_perl_like(
     q{my @h = 1 .. 10; bad(@h); sub bad { undef @h; warn "O\n"; print for @_; warn "K\n";}},
-    qr/Use of freed value in iteration/,
+    (Internals::stack_refcounted() & 1)
+        ? qr/^O\nK/
+        : qr/Use of freed value in iteration/,
     {},
     "#6998 freeing array used as args to sub",
 );
