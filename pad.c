@@ -229,7 +229,9 @@ Perl_pad_new(pTHX_ int flags)
     if (flags & padnew_CLONE) {
         AV * const a0 = newAV();			/* will be @_ */
         AvARRAY(pad)[0] = MUTABLE_SV(a0);
+#ifndef PERL_RC_STACK
         AvREIFY_only(a0);
+#endif
 
         PadnamelistREFCNT(padname = PL_comppad_name)++;
     }
@@ -1718,7 +1720,9 @@ Perl_pad_tidy(pTHX_ padtidy_type type)
     else if (type == padtidy_SUB) {
         AV * const av = newAV();			/* Will be @_ */
         av_store(PL_comppad, 0, MUTABLE_SV(av));
+#ifndef PERL_RC_STACK
         AvREIFY_only(av);
+#endif
     }
 
     if (type == padtidy_SUB || type == padtidy_FORMAT) {
@@ -2473,7 +2477,9 @@ Perl_pad_push(pTHX_ PADLIST *padlist, int depth)
         }
         av = newAV();
         AvARRAY(newpad)[0] = MUTABLE_SV(av);
+#ifndef PERL_RC_STACK
         AvREIFY_only(av);
+#endif
 
         padlist_store(padlist, depth, newpad);
     }
@@ -2586,7 +2592,9 @@ Perl_padlist_dup(pTHX_ PADLIST *srcpad, CLONE_PARAMS *param)
 
             if (oldpad[0]) {
                 args = newAV();			/* Will be @_ */
+#ifndef PERL_RC_STACK
                 AvREIFY_only(args);
+#endif
                 pad1a[0] = (SV *)args;
             }
         }

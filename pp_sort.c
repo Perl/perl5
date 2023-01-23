@@ -697,7 +697,7 @@ PP(pp_sort)
     U8 gimme = GIMME_V;
     OP* const nextop = PL_op->op_next;
     I32 overloading = 0;
-    bool hasargs = FALSE;
+    bool hasargs = FALSE; /* the sort sub has proto($$)?  */
     bool copytmps;
     I32 is_xsub = 0;
     const U8 priv = PL_op->op_private;
@@ -1226,11 +1226,17 @@ S_sortcv_stacked(pTHX_ SV *const a, SV *const b)
     assert(rpp_stack_is_rc());
 #endif
 
+#ifdef PERL_RC_STACK
+    assert(AvREAL(av));
+    av_clear(av);
+#else
     if (AvREAL(av)) {
         av_clear(av);
         AvREAL_off(av);
         AvREIFY_on(av);
     }
+#endif
+
     if (AvMAX(av) < 1) {
         SV **ary = AvALLOC(av);
         if (AvARRAY(av) != ary) {
@@ -1248,6 +1254,10 @@ S_sortcv_stacked(pTHX_ SV *const a, SV *const b)
 
     AvARRAY(av)[0] = a;
     AvARRAY(av)[1] = b;
+#ifdef PERL_RC_STACK
+    SvREFCNT_inc_simple_void_NN(a);
+    SvREFCNT_inc_simple_void_NN(b);
+#endif
     assert(PL_stack_sp == PL_stack_base);
     PL_op = PL_sortcop;
     CALLRUNOPS(aTHX);

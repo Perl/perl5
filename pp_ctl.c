@@ -3185,9 +3185,15 @@ PP(pp_goto)
                  * unless pad[0] and @_ differ (e.g. if the old sub did
                  * local *_ = []); in which case clear the old pad[0]
                  * array in the usual way */
-                if (av == arg || AvREAL(av))
+
+                if (av != arg && !SvMAGICAL(av) && SvREFCNT(av) == 1
+#ifndef PERL_RC_STACK
+                    && !AvREAL(av)
+#endif
+                )
+                    clear_defarray_simple(av);
+                else
                     clear_defarray(av, av == arg);
-                else CLEAR_ARGARRAY(av);
             }
 
             /* don't restore PL_comppad here. It won't be needed if the
@@ -3239,7 +3245,11 @@ PP(pp_goto)
                 mark = PL_stack_sp;
                 if (items) {
                     SSize_t index;
+#if defined(PERL_RC_STACK) && !defined(PERL_XXX_TMP_NORC)
+                    assert(AvREAL(arg));
+#else
                     bool r = cBOOL(AvREAL(arg));
+#endif
                     for (index=0; index<items; index++)
                     {
                         SV *sv;
@@ -3252,8 +3262,14 @@ PP(pp_goto)
 
                         rpp_push_1(
                             sv
-                            ? r ? SvREFCNT_inc_NN(sv_2mortal(sv)) : sv
+                            ?
+#if defined(PERL_RC_STACK) && !defined(PERL_XXX_TMP_NORC)
+                              sv
+                            : newSVavdefelem(arg, index, 1)
+#else
+                              (r ? SvREFCNT_inc_NN(sv_2mortal(sv)) : sv)
                             : sv_2mortal(newSVavdefelem(arg, index, 1))
+#endif
                         );
                     }
                 }

@@ -3241,12 +3241,15 @@ Perl_cx_popsub_args(pTHX_ PERL_CONTEXT *cx)
 
     CX_POP_SAVEARRAY(cx);
     av = MUTABLE_AV(PAD_SVl(0));
-    if (UNLIKELY(AvREAL(av)))
+    if (!SvMAGICAL(av) && SvREFCNT(av) == 1
+#ifndef PERL_RC_STACK
+        && !AvREAL(av)
+#endif
+    )
+        clear_defarray_simple(av);
+    else
         /* abandon @_ if it got reified */
         clear_defarray(av, 0);
-    else {
-        CLEAR_ARGARRAY(av);
-    }
 }
 
 
@@ -3489,6 +3492,39 @@ Perl_cx_popgiven(pTHX_ PERL_CONTEXT *cx)
     cx->blk_givwhen.defsv_save = NULL;
     SvREFCNT_dec(sv);
 }
+
+
+/* Make @_ empty in-place in simple cases: a cheap av_clear().
+ * See Perl_clear_defarray() for non-simple cases */
+
+
+PERL_STATIC_INLINE void
+Perl_clear_defarray_simple(pTHX_ AV *av)
+{
+    PERL_ARGS_ASSERT_CLEAR_DEFARRAY_SIMPLE;
+
+    assert(SvTYPE(av) == SVt_PVAV);
+    assert(!SvREADONLY(av));
+    assert(!SvMAGICAL(av));
+    assert(SvREFCNT(av) == 1);
+
+#ifdef PERL_RC_STACK
+    assert(AvREAL(av));
+    /* this code assumes that destructors called here can't free av
+     * itself, because pad[0] and/or CX pointers will keep it alive */
+    SSize_t i = AvFILLp(av);
+    while (i >= 0) {
+        SV *sv = AvARRAY(av)[i];
+        AvARRAY(av)[i--] = NULL;
+        SvREFCNT_dec(sv);
+    }
+#else
+    assert(!AvREAL(av));
+#endif
+    AvFILLp(av) = -1;
+    Perl_av_remove_offset(aTHX_ av);
+}
+
 
 /*
 =for apidoc newPADxVOP
