@@ -732,7 +732,12 @@ contains zero items.
 PERL_STATIC_INLINE bool
 Perl_rpp_stack_is_rc(pTHX)
 {
+#if defined(PERL_RC_STACK) && !defined(PERL_XXX_TMP_NORC)
+    return AvREAL(PL_curstack) && !PL_curstackinfo->si_stack_nonrc_base;
+#else
     return 0;
+#endif
+
 }
 
 
@@ -754,9 +759,12 @@ context.
 PERL_STATIC_INLINE bool
 Perl_rpp_is_lone(pTHX_ SV *sv)
 {
-    /* XXX doesn't handle a reference-counted stack yet */
     return  SvTEMP(sv) && SvREFCNT(sv) <=
+#if defined(PERL_RC_STACK) && !defined(PERL_XXX_TMP_NORC)
+            2
+#else
             1
+#endif
     ;
 }
 
@@ -3525,7 +3533,12 @@ Perl_clear_defarray_simple(pTHX_ AV *av)
     Perl_av_remove_offset(aTHX_ av);
 }
 
-/* switch to a different argument stack */
+/* Switch to a different argument stack.
+ *
+ * Note that it doesn't update PL_curstackinfo->si_stack_nonrc_base,
+ * so this should only be used as part of a general switching between
+ * stackinfos.
+ */
 
 PERL_STATIC_INLINE void
 Perl_switch_argstack(pTHX_ AV *to)
@@ -3571,6 +3584,9 @@ Perl_push_stackinfo(pTHX_ I32 type, UV flags)
     next->si_cxix = -1;
     next->si_cxsubix = -1;
     PUSHSTACK_INIT_HWM(next);
+#ifdef PERL_RC_STACK
+    next->si_stack_nonrc_base = 0;
+#endif
     if (flags & 1)
         AvREAL_on(next->si_stack);
     else

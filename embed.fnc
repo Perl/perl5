@@ -2759,6 +2759,8 @@ APTdp	|char * |rninstr	|NN const char *big			\
 p	|void	|rpeep		|NULLOK OP *o
 Adipx	|void	|rpp_extend	|SSize_t n
 Adipx	|bool	|rpp_is_lone	|NN SV *sv
+Cpx	|void	|rpp_obliterate_stack_to				\
+				|I32 ix
 Adipx	|void	|rpp_popfree_1
 Adipx	|void	|rpp_popfree_2
 Adipx	|void	|rpp_popfree_to |NN SV **sp
@@ -6011,6 +6013,7 @@ Cipx	|U8	|gimme_V
 EXopx	|OP *	|pp_wrap	|NN Perl_ppaddr_t real_pp_fn		\
 				|I32 nargs				\
 				|int nlists
+Cpx	|int	|runops_wrap
 EXopx	|void	|xs_wrap	|NN XSUBADDR_t xsub			\
 				|NN CV *cv
 #endif

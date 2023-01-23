@@ -3064,7 +3064,13 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
                      * of pack() (and all copies of the result) are
                      * gone.
                      */
-                    if (((SvTEMP(fromstr) && SvREFCNT(fromstr) == 1)
+                    if (((SvTEMP(fromstr) && SvREFCNT(fromstr) <=
+#if defined(PERL_RC_STACK) && !defined(PERL_XXX_TMP_NORC)
+                            2
+#else
+                            1
+#endif
+                        )
                          || (SvPADTMP(fromstr) &&
                              !SvREADONLY(fromstr)))) {
                         Perl_ck_warner(aTHX_ packWARN(WARN_PACK),

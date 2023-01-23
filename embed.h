@@ -539,6 +539,7 @@
 # define rninstr                                Perl_rninstr
 # define rpp_extend(a)                          Perl_rpp_extend(aTHX_ a)
 # define rpp_is_lone(a)                         Perl_rpp_is_lone(aTHX_ a)
+# define rpp_obliterate_stack_to(a)             Perl_rpp_obliterate_stack_to(aTHX_ a)
 # define rpp_pop_1_norc()                       Perl_rpp_pop_1_norc(aTHX)
 # define rpp_popfree_1()                        Perl_rpp_popfree_1(aTHX)
 # define rpp_popfree_2()                        Perl_rpp_popfree_2(aTHX)
@@ -2098,6 +2099,9 @@
 #   define cx_topblock(a)                       Perl_cx_topblock(aTHX_ a)
 #   define gimme_V()                            Perl_gimme_V(aTHX)
 # endif /* !defined(PERL_NO_INLINE_FUNCTIONS) */
+# if defined(PERL_RC_STACK)
+#   define runops_wrap()                        Perl_runops_wrap(aTHX)
+# endif
 # if defined(PERL_USE_3ARG_SIGHANDLER)
 #   define csighandler                          Perl_csighandler
 # else

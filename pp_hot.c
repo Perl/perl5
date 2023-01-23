@@ -56,12 +56,19 @@ Perl_pp_wrap(pTHX_ Perl_ppaddr_t real_pp_fn, I32 nargs, int nlists)
 {
     PERL_ARGS_ASSERT_PP_WRAP;
 
+    if (!rpp_stack_is_rc())
+        /* stack-already non-RC; nothing needing wrapping */
+        return real_pp_fn(aTHX);
+
     OP *next_op;
     I32 nret;
     I32 old_sp = (I32)(PL_stack_sp - PL_stack_base);
 
     assert(nargs  >= 0);
     assert(nlists >= 0);
+    assert(AvREAL(PL_curstack));
+
+    PL_curstackinfo->si_stack_nonrc_base = PL_stack_sp - PL_stack_base + 1;
 
     if (nlists) {
         assert(nargs == 0);
@@ -84,6 +91,10 @@ Perl_pp_wrap(pTHX_ Perl_ppaddr_t real_pp_fn, I32 nargs, int nlists)
 
     nret = (I32)(PL_stack_sp - PL_stack_base) - old_sp;
     assert(nret >= 0);
+
+    /* we should still be a split stack */
+    assert(AvREAL(PL_curstack));
+    assert(PL_curstackinfo->si_stack_nonrc_base);
 
     /* bump any returned values */
     if (nret) {
@@ -116,6 +127,8 @@ Perl_pp_wrap(pTHX_ Perl_ppaddr_t real_pp_fn, I32 nargs, int nlists)
         PL_stack_sp -= nargs;
     }
 
+    PL_curstackinfo->si_stack_nonrc_base = 0;
+
     return next_op;
 }
 
@@ -134,6 +147,12 @@ Perl_xs_wrap(pTHX_ XSUBADDR_t xsub, CV *cv)
     I32 old_sp = (I32)(PL_stack_sp - PL_stack_base);
     I32 mark  = PL_markstack_ptr[0];
     I32 nargs = (PL_stack_sp - PL_stack_base) - mark;
+
+    /* we should be a fully refcounted stack */
+    assert(AvREAL(PL_curstack));
+    assert(!PL_curstackinfo->si_stack_nonrc_base);
+
+    PL_curstackinfo->si_stack_nonrc_base = PL_stack_sp - PL_stack_base + 1;
 
     PL_markstack_ptr[0]  += nargs;
 
@@ -179,6 +198,7 @@ Perl_xs_wrap(pTHX_ XSUBADDR_t xsub, CV *cv)
         }
         PL_stack_sp -= nargs;
     }
+    PL_curstackinfo->si_stack_nonrc_base = 0;
 }
 
 #endif
