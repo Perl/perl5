@@ -9761,12 +9761,19 @@ X<unshift>
 
 =for Pod::Functions prepend more elements to the beginning of a list
 
-Does the opposite of a L<C<shift>|/shift ARRAY>.  Or the opposite of a
-L<C<push>|/push ARRAY,LIST>,
-depending on how you look at it.  Prepends list to the front of the
-array and returns the new number of elements in the array.
+Add one or more elements to the B<beginning> of an array. This is the
+opposite of a L<C<shift>|/shift ARRAY>. Returns the new number of elements
+in the updated array.
 
-    unshift(@ARGV, '-e') unless $ARGV[0] =~ /^-/;
+    my @animals = ("cat");
+    unshift(@animals, "mouse"); # ("mouse", "cat")
+
+    my @colors = ("red");
+    unshift(@colors, ("blue", "green"); # ("blue", "green", "red")
+
+    # Return value is the number of items in the updated array
+    my $color_count = unshift(@colors, ("yellow", "purple");
+    say "There are $color_count colors in the updated array";
 
 Note the LIST is prepended whole, not one element at a time, so the
 prepended elements stay in the same order.  Use
