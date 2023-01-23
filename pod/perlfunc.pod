@@ -6156,6 +6156,23 @@ X<push> X<stack>
 
 =for Pod::Functions append one or more elements to an array
 
+Adds one or more items to the B<end> of an array.
+
+	my @animals = ("cat");
+	push(@animals, "mouse"); # ("cat", "mouse")
+
+	my @colors = ("red");
+	push(@colors, ("blue", "green"); # ("red", "blue", "green")
+
+	# Return value is the number of items in the updated array
+	my $color_count = push(@colors, ("yellow", "purple");
+	say "There are $color_count colors in the updated array";
+
+Returns the number of elements in the array following the completed
+L<C<push>|/push ARRAY,LIST>.
+
+A more technical explanation:
+
 Treats ARRAY as a stack by appending the values of LIST to the end of
 ARRAY.  The length of ARRAY increases by the length of LIST.  Has the same
 effect as
@@ -6164,8 +6181,7 @@ effect as
         $ARRAY[++$#ARRAY] = $value;
     }
 
-but is more efficient.  Returns the number of elements in the array following
-the completed L<C<push>|/push ARRAY,LIST>.
+but is more efficient.
 
 Starting with Perl 5.14, an experimental feature allowed
 L<C<push>|/push ARRAY,LIST> to take a
