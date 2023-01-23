@@ -4483,10 +4483,15 @@ Perl_init_stacks(pTHX)
 {
     SSize_t size;
 
+#ifdef PERL_RC_STACK
+    const UV make_real = 1;
+#else
+    const UV make_real = 0;
+#endif
     /* start with 128-item stack and 8K cxstack */
     PL_curstackinfo = new_stackinfo_flags(REASONABLE(128),
                                  REASONABLE(8192/sizeof(PERL_CONTEXT) - 1),
-                                 0);
+                                 make_real);
     PL_curstackinfo->si_type = PERLSI_MAIN;
 #if defined DEBUGGING && !defined DEBUGGING_RE_ONLY
     PL_curstackinfo->si_stack_hwm = 0;
@@ -5467,8 +5472,8 @@ S_my_exit_jump(pTHX)
     POPSTACK_TO(PL_mainstack);
     if (cxstack_ix >= 0) {
         dounwind(-1);
-        cx_popblock(cxstack);
     }
+    rpp_obliterate_stack_to(0);
     LEAVE_SCOPE(0);
 
     JMPENV_JUMP(2);

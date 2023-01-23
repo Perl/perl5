@@ -1793,6 +1793,39 @@ Perl_dounwind(pTHX_ I32 cxix)
 
 }
 
+
+/* Like rpp_popfree_to(), but takes an offset rather than a pointer,
+ * and frees everything above ix appropriately, *regardless* of the
+ * refcountedness of the stack. If necessary it removes any split stack.
+ * Intended for use during exit() and die() and similar.
+*/
+void
+Perl_rpp_obliterate_stack_to(pTHX_ I32 ix)
+{
+#ifdef PERL_RC_STACK
+    I32 nonrc_base = PL_curstackinfo->si_stack_nonrc_base;
+    assert(ix >= 0);
+    assert(ix <= PL_stack_sp - PL_stack_base);
+    assert(nonrc_base <= PL_stack_sp - PL_stack_base + 1);
+
+    if (nonrc_base && nonrc_base > ix) {
+        /* abandon any non-refcounted stuff */
+        PL_stack_sp = PL_stack_base + nonrc_base - 1;
+        /* and mark the stack as fully refcounted again */
+        PL_curstackinfo->si_stack_nonrc_base = 0;
+    }
+
+    if (rpp_stack_is_rc())
+        rpp_popfree_to(PL_stack_base + ix);
+    else
+        PL_stack_sp = PL_stack_base + ix;
+#else
+    PL_stack_sp = PL_stack_base + ix;
+#endif
+
+}
+
+
 void
 Perl_qerror(pTHX_ SV *err)
 {
@@ -1966,12 +1999,12 @@ Perl_die_unwind(pTHX_ SV *msv)
                && PL_curstackinfo->si_prev)
         {
             dounwind(-1);
+            rpp_obliterate_stack_to(0);
             POPSTACK;
         }
 
         if (cxix >= 0) {
             PERL_CONTEXT *cx;
-            SV **oldsp;
             U8 gimme;
             JMPENV *restartjmpenv;
             OP *restartop;
@@ -1982,12 +2015,16 @@ Perl_die_unwind(pTHX_ SV *msv)
             cx = CX_CUR();
             assert(CxTYPE(cx) == CXt_EVAL);
 
+            rpp_obliterate_stack_to(cx->blk_oldsp);
+
             /* return false to the caller of eval */
-            oldsp = PL_stack_base + cx->blk_oldsp;
             gimme = cx->blk_gimme;
-            if (gimme == G_SCALAR)
-                *++oldsp = &PL_sv_undef;
-            PL_stack_sp = oldsp;
+            if (gimme == G_SCALAR) {
+                if (rpp_stack_is_rc())
+                    rpp_push_1(&PL_sv_undef);
+                else
+                    *++PL_stack_sp = &PL_sv_undef;
+            }
 
             restartjmpenv = cx->blk_eval.cur_top_env;
             restartop     = cx->blk_eval.retop;
@@ -2338,6 +2375,9 @@ PP(pp_dbstate)
             return NORMAL;
         }
         else {
+#ifdef PERL_RC_STACK
+            assert(!PL_curstackinfo->si_stack_nonrc_base);
+#endif
             cx = cx_pushblock(CXt_SUB, gimme, PL_stack_sp, PL_savestack_ix);
             cx_pushsub(cx, cv, PL_op->op_next, 0);
             /* OP_DBSTATE's op_private holds hint bits rather than

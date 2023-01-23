@@ -652,6 +652,7 @@ unless ($define{PERL_RC_STACK}) {
     ++$skip{$_} foreach qw(
 		    Perl_pp_wrap
 		    Perl_xs_wrap
+                    Perl_runops_wrap
 			 );
 }
 
