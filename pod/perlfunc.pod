@@ -9762,8 +9762,7 @@ X<unshift>
 =for Pod::Functions prepend more elements to the beginning of a list
 
 Add one or more elements to the B<beginning> of an array. This is the
-opposite of a L<C<shift>|/shift ARRAY>. Returns the new number of elements
-in the updated array.
+opposite of a L<C<shift>|/shift ARRAY>.
 
     my @animals = ("cat");
     unshift(@animals, "mouse"); # ("mouse", "cat")
@@ -9771,8 +9770,11 @@ in the updated array.
     my @colors = ("red");
     unshift(@colors, ("blue", "green"); # ("blue", "green", "red")
 
+Returns the new number of elements in the updated array.
+
     # Return value is the number of items in the updated array
     my $color_count = unshift(@colors, ("yellow", "purple");
+
     say "There are $color_count colors in the updated array";
 
 Note the LIST is prepended whole, not one element at a time, so the
