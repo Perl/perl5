@@ -363,7 +363,10 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-XXX
+Writing to a magic variables associated with the selected output
+handle, C<$^>, C<$~>, C<$=>, C<$-> and C<$%>, no longer crashes perl
+if the IO object has been cleared from the selected output
+handle. [github #20733]
 
 =back
 
