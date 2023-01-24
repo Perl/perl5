@@ -6172,18 +6172,6 @@ L<C<push>|/push ARRAY,LIST>.
 
 	say "There are $color_count colors in the updated array";
 
-A more technical explanation:
-
-Treats ARRAY as a stack by appending the values of LIST to the end of
-ARRAY.  The length of ARRAY increases by the length of LIST.  Has the same
-effect as
-
-    for my $value (LIST) {
-        $ARRAY[++$#ARRAY] = $value;
-    }
-
-but is more efficient.
-
 Starting with Perl 5.14, an experimental feature allowed
 L<C<push>|/push ARRAY,LIST> to take a
 scalar expression. This experiment has been deemed unsuccessful, and was
