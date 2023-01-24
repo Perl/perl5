@@ -9768,12 +9768,12 @@ opposite of a L<C<shift>|/shift ARRAY>.
     unshift(@animals, "mouse"); # ("mouse", "cat")
 
     my @colors = ("red");
-    unshift(@colors, ("blue", "green"); # ("blue", "green", "red")
+    unshift(@colors, ("blue", "green")); # ("blue", "green", "red")
 
 Returns the new number of elements in the updated array.
 
     # Return value is the number of items in the updated array
-    my $color_count = unshift(@colors, ("yellow", "purple");
+    my $color_count = unshift(@colors, ("yellow", "purple"));
 
     say "There are $color_count colors in the updated array";
 
