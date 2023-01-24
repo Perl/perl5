@@ -6162,13 +6162,12 @@ Adds one or more items to the B<end> of an array.
 	push(@animals, "mouse"); # ("cat", "mouse")
 
 	my @colors = ("red");
-	push(@colors, ("blue", "green"); # ("red", "blue", "green")
+	push(@colors, ("blue", "green")); # ("red", "blue", "green")
 
 Returns the number of elements in the array following the completed
 L<C<push>|/push ARRAY,LIST>.
 
-	# Return value is the number of items in the updated array
-	my $color_count = push(@colors, ("yellow", "purple");
+	my $color_count = push(@colors, ("yellow", "purple"));
 
 	say "There are $color_count colors in the updated array";
 
