@@ -1230,6 +1230,76 @@ cpan/IO-Socket-IP/t/22timeout.t
 cpan/IO-Socket-IP/t/30nonblocking-connect.t		IO::Socket::IP tests
 cpan/IO-Socket-IP/t/31nonblocking-connect-internet.t	IO::Socket::IP tests
 cpan/IO-Socket-IP/t/99pod.t				IO::Socket::IP tests
+cpan/IO-Socket-SSL/lib/IO/Socket/SSL.pm
+cpan/IO-Socket-SSL/lib/IO/Socket/SSL.pod
+cpan/IO-Socket-SSL/lib/IO/Socket/SSL/Intercept.pm
+cpan/IO-Socket-SSL/lib/IO/Socket/SSL/PublicSuffix.pm
+cpan/IO-Socket-SSL/lib/IO/Socket/SSL/Utils.pm
+cpan/IO-Socket-SSL/t/01loadmodule.t
+cpan/IO-Socket-SSL/t/acceptSSL-timeout.t
+cpan/IO-Socket-SSL/t/alpn.t
+cpan/IO-Socket-SSL/t/auto_verify_hostname.t
+cpan/IO-Socket-SSL/t/cert_formats.t
+cpan/IO-Socket-SSL/t/cert_no_file.t
+cpan/IO-Socket-SSL/t/certs/client-cert.pem
+cpan/IO-Socket-SSL/t/certs/client-key.enc
+cpan/IO-Socket-SSL/t/certs/client-key.pem
+cpan/IO-Socket-SSL/t/certs/create-certs.pl
+cpan/IO-Socket-SSL/t/certs/proxyca.pem
+cpan/IO-Socket-SSL/t/certs/server.p12
+cpan/IO-Socket-SSL/t/certs/server-cert.der
+cpan/IO-Socket-SSL/t/certs/server-cert.pem
+cpan/IO-Socket-SSL/t/certs/server-ecc-cert.pem
+cpan/IO-Socket-SSL/t/certs/server-ecc-key.pem
+cpan/IO-Socket-SSL/t/certs/server-key.der
+cpan/IO-Socket-SSL/t/certs/server-key.enc
+cpan/IO-Socket-SSL/t/certs/server-key.pem
+cpan/IO-Socket-SSL/t/certs/server-wildcard.pem
+cpan/IO-Socket-SSL/t/certs/server2-cert.pem
+cpan/IO-Socket-SSL/t/certs/server2-key.pem
+cpan/IO-Socket-SSL/t/certs/server_enc.p12
+cpan/IO-Socket-SSL/t/certs/sub-server.pem
+cpan/IO-Socket-SSL/t/certs/test-ca.pem
+cpan/IO-Socket-SSL/t/certs/test-subca.pem
+cpan/IO-Socket-SSL/t/compatibility.t
+cpan/IO-Socket-SSL/t/connectSSL-timeout.t
+cpan/IO-Socket-SSL/t/core.t
+cpan/IO-Socket-SSL/t/dhe.t
+cpan/IO-Socket-SSL/t/ecdhe.t
+cpan/IO-Socket-SSL/t/external/fingerprint.pl
+cpan/IO-Socket-SSL/t/external/ocsp.t
+cpan/IO-Socket-SSL/t/external/usable_ca.t
+cpan/IO-Socket-SSL/t/io-socket-inet6.t
+cpan/IO-Socket-SSL/t/io-socket-ip.t
+cpan/IO-Socket-SSL/t/memleak_bad_handshake.t
+cpan/IO-Socket-SSL/t/mitm.t
+cpan/IO-Socket-SSL/t/multiple-cert-rsa-ecc.t
+cpan/IO-Socket-SSL/t/nonblock.t
+cpan/IO-Socket-SSL/t/npn.t
+cpan/IO-Socket-SSL/t/plain_upgrade_downgrade.t
+cpan/IO-Socket-SSL/t/protocol_version.t
+cpan/IO-Socket-SSL/t/public_suffix_lib.pl
+cpan/IO-Socket-SSL/t/public_suffix_lib_encode_idn.t
+cpan/IO-Socket-SSL/t/public_suffix_lib_libidn.t
+cpan/IO-Socket-SSL/t/public_suffix_lib_uri.t
+cpan/IO-Socket-SSL/t/public_suffix_ssl.t
+cpan/IO-Socket-SSL/t/readline.t
+cpan/IO-Socket-SSL/t/session_cache.t
+cpan/IO-Socket-SSL/t/session_ticket.t
+cpan/IO-Socket-SSL/t/sessions.t
+cpan/IO-Socket-SSL/t/set_curves.t
+cpan/IO-Socket-SSL/t/signal-readline.t
+cpan/IO-Socket-SSL/t/sni.t
+cpan/IO-Socket-SSL/t/sni_verify.t
+cpan/IO-Socket-SSL/t/start-stopssl.t
+cpan/IO-Socket-SSL/t/startssl.t
+cpan/IO-Socket-SSL/t/startssl-failed.t
+cpan/IO-Socket-SSL/t/sysread_write.t
+cpan/IO-Socket-SSL/t/testlib.pl
+cpan/IO-Socket-SSL/t/verify_fingerprint.t
+cpan/IO-Socket-SSL/t/verify_hostname.t
+cpan/IO-Socket-SSL/t/verify_hostname_standalone.t
+cpan/IO-Socket-SSL/t/verify_partial_chain.t
 cpan/IO-Zlib/t/basic.t		Tests for IO::Zlib
 cpan/IO-Zlib/t/external.t	Tests for IO::Zlib
 cpan/IO-Zlib/t/getc.t		Tests for IO::Zlib

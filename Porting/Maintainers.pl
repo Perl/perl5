@@ -662,6 +662,17 @@ use File::Glob qw(:case);
         ],
     },
 
+    'IO::Socket::SSL' => {
+        'DISTRIBUTION' => 'SULLR/IO-Socket-SSL-2.080.tar.gz',
+        'FILES'        => q[cpan/IO-Socket-SSL],
+        'EXCLUDED'     => [
+            qr[^example/],
+            qr[^docs/],
+            q[README],
+            q[README.Win32],
+        ],
+    },
+
     'IO::Zlib' => {
         'DISTRIBUTION' => 'TOMHUGHES/IO-Zlib-1.14.tar.gz',
         'FILES'        => q[cpan/IO-Zlib],
