@@ -2295,7 +2295,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
         RExC_rx->parno_to_logical_next = NULL;
     }
 
-    Newxz(RExC_rx->offs, RExC_total_parens, regexp_paren_pair);
+    Newxz(RXp_OFFSp(RExC_rx), RExC_total_parens, regexp_paren_pair);
     /* assume we don't need to swap parens around before we match */
     DEBUG_TEST_r({
         Perl_re_printf( aTHX_ "study_chunk_recursed_count: %lu\n",
@@ -13136,7 +13136,7 @@ Perl_pregfree2(pTHX_ REGEXP *rx)
 #ifdef PERL_ANY_COW
     SvREFCNT_dec(r->saved_copy);
 #endif
-    Safefree(r->offs);
+    Safefree(RXp_OFFSp(r));
     if (r->logical_to_parno) {
         Safefree(r->logical_to_parno);
         Safefree(r->parno_to_logical);
@@ -13243,10 +13243,9 @@ Perl_reg_temp_copy(pTHX_ REGEXP *dsv, REGEXP *ssv)
 
     if (!islv)
         SvLEN_set(dsv, 0);
-    if (srx->offs) {
+    if (RXp_OFFSp(srx)) {
         const I32 npar = srx->nparens+1;
-        Newx(drx->offs, npar, regexp_paren_pair);
-        Copy(srx->offs, drx->offs, npar, regexp_paren_pair);
+        NewCopy(RXp_OFFSp(srx), RXp_OFFSp(drx), npar, regexp_paren_pair);
     }
     if (srx->substrs) {
         int i;
@@ -13451,8 +13450,7 @@ Perl_re_dup_guts(pTHX_ const REGEXP *sstr, REGEXP *dstr, CLONE_PARAMS *param)
     PERL_ARGS_ASSERT_RE_DUP_GUTS;
 
     npar = r->nparens+1;
-    Newx(ret->offs, npar, regexp_paren_pair);
-    Copy(r->offs, ret->offs, npar, regexp_paren_pair);
+    NewCopy(RXp_OFFSp(r), RXp_OFFSp(ret), npar, regexp_paren_pair);
 
     if (ret->substrs) {
         /* Do it this way to avoid reading from *r after the StructCopy().
