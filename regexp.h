@@ -188,13 +188,13 @@ typedef struct regexp {
 #define RXp_PAREN_NAMES(rx) ((rx)->paren_names)
 
 #define RXp_OFFS_START(rx,n) \
-     (rx)->offs[(n)].start
+     RXp_OFFSp(rx)[(n)].start 
 
 #define RXp_OFFS_END(rx,n) \
-     (rx)->offs[(n)].end
+     RXp_OFFSp(rx)[(n)].end 
 
 #define RXp_OFFS_VALID(rx,n) \
-     ((rx)->offs[(n)].end >= 0 && (rx)->offs[(n)].start >= 0 )
+     (RXp_OFFSp(rx)[(n)].end != -1 && RXp_OFFSp(rx)[(n)].start != -1 )
 
 #define RX_OFFS_START(rx_sv,n)  RXp_OFFS_START(ReANY(rx_sv),n)
 #define RX_OFFS_END(rx_sv,n)    RXp_OFFS_END(ReANY(rx_sv),n)

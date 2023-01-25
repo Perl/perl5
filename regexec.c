@@ -229,7 +229,7 @@ S_regcppush(pTHX_ const regexp *rex, I32 parenfloor, U32 maxopenparen _pDEPTH)
 {
     const int retval = PL_savestack_ix;
     /* Number of bytes about to be stored in the stack */
-    const SSize_t paren_bytes_to_push = sizeof(*rex->offs) * (maxopenparen - parenfloor);
+    const SSize_t paren_bytes_to_push = sizeof(*RXp_OFFSp(rex)) * (maxopenparen - parenfloor);
     /* Number of savestack[] entries to be filled by the paren data */
     /* Rounding is performed in case we are few elements short */
     const int paren_elems_to_push = (paren_bytes_to_push + sizeof(*PL_savestack) - 1) / sizeof(*PL_savestack);
@@ -258,7 +258,7 @@ S_regcppush(pTHX_ const regexp *rex, I32 parenfloor, U32 maxopenparen _pDEPTH)
                 "rex=0x%" UVxf " offs=0x%" UVxf ": saving capture indices:\n",
                 depth,
                 PTR2UV(rex),
-                PTR2UV(rex->offs)
+                PTR2UV(RXp_OFFSp(rex))
             );
     );
 
@@ -266,19 +266,19 @@ S_regcppush(pTHX_ const regexp *rex, I32 parenfloor, U32 maxopenparen _pDEPTH)
     assert((IV)PL_savestack_max > (IV)(total_elems + REGCP_FRAME_ELEMS));
 
     /* memcpy the offs inside the stack - it's faster than for loop */
-    memcpy(&PL_savestack[PL_savestack_ix], rex->offs + parenfloor + 1, paren_bytes_to_push);
+    memcpy(&PL_savestack[PL_savestack_ix], RXp_OFFSp(rex) + parenfloor + 1, paren_bytes_to_push);
     PL_savestack_ix += paren_elems_to_push;
 
     DEBUG_BUFFERS_r({
 	I32 p;
         for (p = parenfloor + 1; p <= (I32)maxopenparen; p++) {
             Perl_re_exec_indentf(aTHX_
-                "    \\%" UVuf " std %" IVdf " .. %" IVdf " tmp %" IVdf " (regcppush)\n",
+                "    \\%" UVuf " %" IVdf " (%" IVdf ") .. %" IVdf " (regcppush)\n",
                 depth,
                 (UV)p,
-                (IV)rex->offs[p].start,
-                (IV)rex->offs[p].end,
-                (IV)rex->offs[p].start_tmp
+                (IV)RXp_OFFSp(rex)[p].start,
+                (IV)RXp_OFFSp(rex)[p].start_tmp,
+                (IV)RXp_OFFSp(rex)[p].end
             );
         }
     });
@@ -322,8 +322,8 @@ S_regcppush(pTHX_ const regexp *rex, I32 parenfloor, U32 maxopenparen _pDEPTH)
 
 /* set the start and end positions of capture ix */
 #define CLOSE_ANY_CAPTURE(rex, ix, s, e)                                    \
-    (rex)->offs[(ix)].start = (s);                                          \
-    (rex)->offs[(ix)].end = (e)
+    RXp_OFFSp(rex)[(ix)].start = (s);                                       \
+    RXp_OFFSp(rex)[(ix)].end = (e)
 
 #define CLOSE_CAPTURE(rex, ix, s, e)                                        \
     CLOSE_ANY_CAPTURE(rex, ix, s, e);                                       \
@@ -331,13 +331,13 @@ S_regcppush(pTHX_ const regexp *rex, I32 parenfloor, U32 maxopenparen _pDEPTH)
         (rex)->lastparen = (ix);                                            \
     (rex)->lastcloseparen = (ix);                                           \
     DEBUG_BUFFERS_r(Perl_re_exec_indentf( aTHX_                             \
-        "CLOSE: rex=0x%" UVxf " offs=0x%" UVxf ": \\%" UVuf ": set %" IVdf "..%" IVdf " max: %" UVuf "\n", \
+        "CLOSE: rex=0x%" UVxf " offs=0x%" UVxf ": \\%" UVuf ": set %" IVdf " .. %" IVdf " max: %" UVuf "\n", \
         depth,                                                              \
         PTR2UV(rex),                                                        \
-        PTR2UV(rex->offs),                                                  \
+        PTR2UV(RXp_OFFSp(rex)),                                             \
         (UV)(ix),                                                           \
-        (IV)(rex)->offs[ix].start,                                          \
-        (IV)(rex)->offs[ix].end,                                            \
+        (IV)RXp_OFFSp(rex)[ix].start,                                       \
+        (IV)RXp_OFFSp(rex)[ix].end,                                         \
         (UV)(rex)->lastparen                                                \
     ))
 
@@ -346,13 +346,13 @@ S_regcppush(pTHX_ const regexp *rex, I32 parenfloor, U32 maxopenparen _pDEPTH)
         "UNWIND_PAREN: rex=0x%" UVxf " offs=0x%" UVxf ": invalidate (%" UVuf "..%" UVuf "] set lcp: %" UVuf "\n", \
         depth,                              \
         PTR2UV(rex),                        \
-        PTR2UV(rex->offs),                  \
+        PTR2UV(RXp_OFFSp(rex)),                  \
         (UV)(lp),                           \
         (UV)(rex->lastparen),               \
         (UV)(lcp)                           \
     ));                                     \
     for (n = rex->lastparen; n > lp; n--) { \
-        rex->offs[n].end = -1;              \
+        RXp_OFFSp(rex)[n].end = -1;              \
     }                                       \
     rex->lastparen = n;                     \
     rex->lastcloseparen = lcp;
@@ -369,13 +369,13 @@ STMT_START {                                                            \
                     "%" IVdf "(%" IVdf ") .. %" IVdf                    \
                     "\n",                                               \
                 depth, str, (IV)my_ix,                                  \
-                (IV)rex->offs[my_ix].start,                             \
-                (IV)rex->offs[my_ix].start_tmp,                         \
-                (IV)rex->offs[my_ix].end,                               \
+                (IV)RXp_OFFSp(rex)[my_ix].start,                        \
+                (IV)RXp_OFFSp(rex)[my_ix].start_tmp,                    \
+                (IV)RXp_OFFSp(rex)[my_ix].end,                          \
                 (IV)-1, (IV)-1, (IV)-1));                               \
-            rex->offs[my_ix].start = -1;                                \
-            rex->offs[my_ix].start_tmp = -1;                            \
-            rex->offs[my_ix].end = -1;                                  \
+            RXp_OFFSp(rex)[my_ix].start = -1;                           \
+            RXp_OFFSp(rex)[my_ix].start_tmp = -1;                       \
+            RXp_OFFSp(rex)[my_ix].end = -1;                             \
         }                                                               \
     }                                                                   \
 } STMT_END
@@ -413,18 +413,18 @@ S_regcppop(pTHX_ regexp *rex, U32 *maxopenparen_p _pDEPTH)
                 "rex=0x%" UVxf " offs=0x%" UVxf ": restoring capture indices to:\n",
                 depth,
                 PTR2UV(rex),
-                PTR2UV(rex->offs)
+                PTR2UV(RXp_OFFSp(rex))
             );
     );
     /* substract remaining elements from the stack */
     PL_savestack_ix -= i;
 
     /* static assert that offs struc size is not less than stack elem size */
-    STATIC_ASSERT_STMT(sizeof(*rex->offs) >= sizeof(*PL_savestack));
+    STATIC_ASSERT_STMT(sizeof(*RXp_OFFSp(rex)) >= sizeof(*PL_savestack));
 
     /* calculate actual number of offs/capture groups stored */
     /* by doing integer division (leaving potential alignment aside) */
-    i = (i * sizeof(*PL_savestack)) / sizeof(*rex->offs);
+    i = (i * sizeof(*PL_savestack)) / sizeof(*RXp_OFFSp(rex));
 
     /* calculate paren starting point */
     /* i is our number of entries which we are subtracting from *maxopenparen_p */
@@ -432,17 +432,17 @@ S_regcppop(pTHX_ regexp *rex, U32 *maxopenparen_p _pDEPTH)
     paren = *maxopenparen_p - i + 1;
 
     /* restore them */
-    memcpy(rex->offs + paren, &PL_savestack[PL_savestack_ix], i * sizeof(*rex->offs));
+    memcpy(RXp_OFFSp(rex) + paren, &PL_savestack[PL_savestack_ix], i * sizeof(*RXp_OFFSp(rex)));
 
     DEBUG_BUFFERS_r(
         for (; paren <= *maxopenparen_p; ++paren) {
             Perl_re_exec_indentf(aTHX_
-                "    \\%" UVuf " std %" IVdf " .. %" IVdf " tmp %" IVdf "%s (regcppop)\n",
+                "    \\%" UVuf " %" IVdf "(%" IVdf ") .. %" IVdf " %s (regcppop)\n",
                 depth,
                 (UV)paren,
-                (IV)rex->offs[paren].start,
-                (IV)rex->offs[paren].end,
-                (IV)rex->offs[paren].start_tmp,
+                (IV)RXp_OFFSp(rex)[paren].start,
+                (IV)RXp_OFFSp(rex)[paren].start_tmp,
+                (IV)RXp_OFFSp(rex)[paren].end,
                 (paren > rex->lastparen ? "(skipped)" : ""));
         }
     );
@@ -458,9 +458,9 @@ S_regcppop(pTHX_ regexp *rex, U32 *maxopenparen_p _pDEPTH)
      * --jhi updated by dapm */
     for (i = rex->lastparen + 1; i <= rex->nparens; i++) {
         if (i > *maxopenparen_p) {
-            rex->offs[i].start = -1;
+            RXp_OFFSp(rex)[i].start = -1;
         }
-        rex->offs[i].end = -1;
+        RXp_OFFSp(rex)[i].end = -1;
         DEBUG_BUFFERS_r( Perl_re_exec_indentf( aTHX_
             "    \\%" UVuf ": %s   ..-1 undeffing (regcppop)\n",
             depth,
@@ -3886,16 +3886,16 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
            to the re, and switch the buffer each match. If we fail,
            we switch it back; otherwise we leave it swapped.
         */
-        swap = prog->offs;
+        swap = RXp_OFFSp(prog);
         /* avoid leak if we die, or clean up anyway if match completes */
         SAVEFREEPV(swap);
-        Newxz(prog->offs, (prog->nparens + 1), regexp_paren_pair);
+        Newxz(RXp_OFFSp(prog), (prog->nparens + 1), regexp_paren_pair);
         DEBUG_BUFFERS_r(Perl_re_exec_indentf( aTHX_
             "rex=0x%" UVxf " saving  offs: orig=0x%" UVxf " new=0x%" UVxf "\n",
             0,
             PTR2UV(prog),
             PTR2UV(swap),
-            PTR2UV(prog->offs)
+            PTR2UV(RXp_OFFSp(prog))
         ));
     }
 
@@ -4306,11 +4306,11 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
             "rex=0x%" UVxf " rolling back offs: 0x%" UVxf " will be freed; restoring data to =0x%" UVxf "\n",
             0,
             PTR2UV(prog),
-            PTR2UV(prog->offs),
+            PTR2UV(RXp_OFFSp(prog)),
             PTR2UV(swap)
         ));
 
-        Copy(swap, prog->offs, prog->nparens + 1, regexp_paren_pair);
+        Copy(swap, RXp_OFFSp(prog), prog->nparens + 1, regexp_paren_pair);
     }
 
     /* clean up; this will trigger destructors that will free all slabs
@@ -4353,7 +4353,7 @@ S_regtry(pTHX_ regmatch_info *reginfo, char **startposp)
 
     reginfo->cutpoint=NULL;
 
-    prog->offs[0].start = *startposp - reginfo->strbeg;
+    RXp_OFFSp(prog)[0].start = *startposp - reginfo->strbeg;
     prog->lastparen = 0;
     prog->lastcloseparen = 0;
 
@@ -4380,7 +4380,7 @@ S_regtry(pTHX_ regmatch_info *reginfo, char **startposp)
      * places it is called, and related regcp() routines. - Yves */
 #if 1
     if (prog->nparens) {
-        regexp_paren_pair *pp = prog->offs;
+        regexp_paren_pair *pp = RXp_OFFSp(prog);
         I32 i;
         for (i = prog->nparens; i > (I32)prog->lastparen; i--) {
             ++pp;
@@ -4392,7 +4392,7 @@ S_regtry(pTHX_ regmatch_info *reginfo, char **startposp)
     REGCP_SET(lastcp);
     result = regmatch(reginfo, *startposp, progi->program + 1);
     if (result != -1) {
-        prog->offs[0].end = result;
+        RXp_OFFSp(prog)[0].end = result;
         return 1;
     }
     if (reginfo->cutpoint)
@@ -6569,14 +6569,14 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
         case KEEPS: /*   \K  */
             /* update the startpoint */
             st->u.keeper.val = RXp_OFFS_START(rex,0);
-            rex->offs[0].start = locinput - reginfo->strbeg;
+            RXp_OFFSp(rex)[0].start = locinput - reginfo->strbeg;
             PUSH_STATE_GOTO(KEEPS_next, next, locinput, loceol,
                             script_run_begin);
             NOT_REACHED; /* NOTREACHED */
 
         case KEEPS_next_fail:
             /* rollback the start point change */
-            rex->offs[0].start = st->u.keeper.val;
+            RXp_OFFSp(rex)[0].start = st->u.keeper.val;
             sayNO_SILENT;
             NOT_REACHED; /* NOTREACHED */
 
@@ -8020,8 +8020,8 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             if (rex->lastparen < n)
                 sayNO;
 
-            ln = rex->offs[n].start;
-            endref = rex->offs[n].end;
+            ln = RXp_OFFSp(rex)[n].start;
+            endref = RXp_OFFSp(rex)[n].end;
             if (ln == -1 || endref == -1)
                 sayNO;			/* Do not match unless seen CLOSEn. */
 
@@ -8303,7 +8303,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 DEBUG_STATE_r( Perl_re_printf( aTHX_
                     "  re EVAL PL_op=0x%" UVxf "\n", PTR2UV(nop)) );
 
-                rex->offs[0].end = locinput - reginfo->strbeg;
+                RXp_OFFSp(rex)[0].end = locinput - reginfo->strbeg;
                 if (reginfo->info_aux_eval->pos_magic)
                     MgBYTEPOS_set(reginfo->info_aux_eval->pos_magic,
                                   reginfo->sv, reginfo->strbeg,
@@ -8577,16 +8577,16 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
         case OPEN: /*  (  */
             n = PARNO(scan);  /* which paren pair */
-            rex->offs[n].start_tmp = locinput - reginfo->strbeg;
+            RXp_OFFSp(rex)[n].start_tmp = locinput - reginfo->strbeg;
             if (n > maxopenparen)
                 maxopenparen = n;
             DEBUG_BUFFERS_r(Perl_re_exec_indentf( aTHX_
                 "OPEN: rex=0x%" UVxf " offs=0x%" UVxf ": \\%" UVuf ": set %" IVdf " tmp; maxopenparen=%" UVuf "\n",
                 depth,
                 PTR2UV(rex),
-                PTR2UV(rex->offs),
+                PTR2UV(RXp_OFFSp(rex)),
                 (UV)n,
-                (IV)rex->offs[n].start_tmp,
+                (IV)RXp_OFFSp(rex)[n].start_tmp,
                 (UV)maxopenparen
             ));
             lastopen = n;
@@ -8599,7 +8599,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
         case CLOSE:  /*  )  */
             n = PARNO(scan);  /* which paren pair */
-            CLOSE_CAPTURE(rex, n, rex->offs[n].start_tmp,
+            CLOSE_CAPTURE(rex, n, RXp_OFFSp(rex)[n].start_tmp,
                              locinput - reginfo->strbeg);
             if ( EVAL_CLOSE_PAREN_IS( cur_eval, n ) )
                 goto fake_end;
@@ -8642,7 +8642,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                     if ( n > lastopen ) /* might be OPEN/CLOSE in the way */
                         continue;       /* so skip this one */
 
-                    CLOSE_CAPTURE(rex, n, rex->offs[n].start_tmp,
+                    CLOSE_CAPTURE(rex, n, RXp_OFFSp(rex)[n].start_tmp,
                                      locinput - reginfo->strbeg);
 
                     if ( n == utmp || EVAL_CLOSE_PAREN_IS(cur_eval, n) )
@@ -9270,7 +9270,8 @@ NULL
                         locinput - reginfo->strbeg);
                 }
                 else
-                    rex->offs[paren].end = -1;
+                    RXp_OFFSp(rex)[paren].end = -1;
+
                 if (EVAL_CLOSE_PAREN_IS_TRUE(cur_eval,(U32)ST.me->flags))
                 {
                     if (ST.count || is_accepted)
@@ -9306,17 +9307,17 @@ NULL
 #undef ST
 #define ST st->u.curly
 
-#define CURLY_SETPAREN(paren, success) \
-    if (paren) { \
-        if (success) { \
+#define CURLY_SETPAREN(paren, success)                                      \
+    if (paren) {                                                            \
+        if (success) {                                                      \
             CLOSE_CAPTURE(rex, paren, HOPc(locinput, -1) - reginfo->strbeg, \
-                                 locinput - reginfo->strbeg); \
-        } \
-        else { \
-            rex->offs[paren].end = -1; \
-            rex->lastparen      = ST.lastparen; \
-            rex->lastcloseparen = ST.lastcloseparen; \
-        } \
+                                 locinput - reginfo->strbeg);               \
+        }                                                                   \
+        else {                                                              \
+            RXp_OFFSp(rex)[paren].end = -1;                                 \
+            rex->lastparen      = ST.lastparen;                             \
+            rex->lastcloseparen = ST.lastcloseparen;                        \
+        }                                                                   \
     }
 
         case STAR:		/*  /A*B/ where A is width 1 char */
