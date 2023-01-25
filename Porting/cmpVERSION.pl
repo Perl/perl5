@@ -250,6 +250,12 @@ foreach my $pm_file (sort keys %module_diffs) {
     if (!defined $orig_pm_version || $orig_pm_version eq 'undef') { # sigh
         print "ok $count - SKIP Can't parse \$VERSION in $pm_file\n"
           if $tap;
+
+        # Behave like a version bump if the orig version could not be parsed,
+        # but the current file could
+        if (defined $pm_version && $pm_version ne 'undef' && $pm_file =~ m!^((?:dist|ext|cpan)/[^/]+)/!) {
+            $dist_bumped{$1}++;
+        }
     } elsif (!defined $pm_version || $pm_version eq 'undef') {
         my $nok = "not ok $count - in $pm_file version was $orig_pm_version, now unparsable\n";
         print $nok if $tap;
