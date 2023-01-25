@@ -8197,7 +8197,6 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             /* Save all the positions seen so far. */
             ST.cp = regcppush(rex, 0, maxopenparen);
             REGCP_SET(ST.lastcp);
-            /* CAPTURE_COMMIT(0,maxopenparen,1,"GOSUB commit"); */
 
             /* and then jump to the code we share with EVAL */
             goto eval_recurse_doit;
@@ -8917,7 +8916,7 @@ NULL
                 DEBUG_EXECUTE_r( Perl_re_exec_indentf( aTHX_  "WHILEM: empty match detected, trying continuation...\n",
                    depth)
                 );
-                CAPTURE_DUMP(first_paren,last_paren,"empty");
+                DEBUG_r(CAPTURE_DUMP(first_paren,last_paren,"empty"));
                 goto do_whilem_B_max;
             }
 
