@@ -884,6 +884,25 @@ use File::Glob qw(:case);
         ],
     },
 
+    'Net::SSLeay' => {
+        'DISTRIBUTION' => 'CHRISN/Net-SSLeay-1.92.tar.gz',
+        'FILES'        => q[cpan/Net-SSLeay],
+        'EXCLUDED'     => [
+          qr[^README],
+          q[Credits],
+          q[QuickRef],
+          q[t/local/01_pod.t],
+          q[t/local/02_pod_coverage.t],
+          q[t/local/kwalitee.t],
+        ],
+        'CUSTOMIZED' => [
+            qw[
+                SSLeay.xs
+                Makefile.PL
+              ],
+        ],
+    },
+
     'NEXT' => {
         'DISTRIBUTION' => 'NEILB/NEXT-0.69.tar.gz',
         'FILES'        => q[cpan/NEXT],

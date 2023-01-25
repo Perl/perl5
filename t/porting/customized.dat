@@ -12,6 +12,8 @@ Net::Ping dist/Net-Ping/t/010_pingecho.t 74437379673c8ba82f81574fd7e652f41a65c99
 Net::Ping dist/Net-Ping/t/450_service.t 4963cd2240f1e583aa950f2bbe8c478ceba3b949
 Net::Ping dist/Net-Ping/t/500_ping_icmp.t 3eeb60181c01b85f876bd6658644548fdf2e24d4
 Net::Ping dist/Net-Ping/t/501_ping_icmpv6.t cd719bca662b054b676dd2ee6e0c73c7a5e50cf9
+Net::SSLeay cpan/Net-SSLeay/Makefile.PL bd163542bf6e53a0cd80d0f89def699d40a52c69
+Net::SSLeay cpan/Net-SSLeay/SSLeay.xs 6043459ee265e5adddb40031b52f3ef0382061d5
 Pod::Perldoc cpan/Pod-Perldoc/lib/Pod/Perldoc.pm 582be34c077c9ff44d99914724a0cc2140bcd48c
 Test::Harness cpan/Test-Harness/t/harness.t 38b13cfc479d37d91c104b97dd364a74dfde0f2f
 Win32API::File cpan/Win32API-File/File.pm 8fd212857f821cb26648878b96e57f13bf21b99e
