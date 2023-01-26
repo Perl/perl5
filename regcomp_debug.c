@@ -548,7 +548,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
         if ( k == REF && reginfo) {
             U32 n = ARG1u(o);  /* which paren pair */
             I32 ln = RXp_OFFS_START(prog,n);
-            if (prog->lastparen < n || ln == -1 || RXp_OFFS_END(prog,n) == -1)
+            if (RXp_LASTPAREN(prog) < n || ln == -1 || RXp_OFFS_END(prog,n) == -1)
                 Perl_sv_catpvf(aTHX_ sv, ": FAIL");
             else if (ln == RXp_OFFS_END(prog,n))
                 Perl_sv_catpvf(aTHX_ sv, ": ACCEPT - EMPTY STRING");
