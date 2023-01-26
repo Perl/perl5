@@ -622,7 +622,7 @@ and check for NULL.
 #ifdef PERL_ANY_COW
 #  define RXp_MATCH_COPY_FREE(prog)                                 \
     STMT_START {                                                    \
-        if (RXp_SAVED_COPY(prog)) {                                 \
+        if (RXp_RXMO(prog) && RXp_SAVED_COPY(prog)) {               \
             SV_CHECK_THINKFIRST_COW_DROP(RXp_SAVED_COPY(prog));     \
         }                                                           \
         if (RXp_MATCH_COPIED(prog)) {                               \
