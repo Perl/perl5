@@ -2663,7 +2663,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
                                 (IV)(RXp_SUBOFFSET(r)));
             Perl_dump_indent(aTHX_ level, file, "  SUBCOFFSET = %" IVdf "\n",
                                 (IV)(RXp_SUBCOFFSET(r)));
-            if (r->subbeg)
+            if (RXp_SUBBEG(r))
                 Perl_dump_indent(aTHX_ level, file, "  SUBBEG = 0x%" UVxf " %s\n",
                             PTR2UV(RXp_SUBBEG(r)),
                             pv_display(d, RXp_SUBBEG(r), RXp_SUBLEN(r), 50, pvlim));
