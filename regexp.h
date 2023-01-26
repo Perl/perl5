@@ -135,6 +135,7 @@ typedef struct regexp {
                                        physical with the same logical id */
 
     U32 extflags;      /* Flags used both externally and internally */
+    SSize_t maxlen;    /* maximum possible number of chars in string to match */
     SSize_t minlen;    /* minimum possible number of chars in string to match */
     SSize_t minlenret; /* minimum possible number of chars in $& */
     STRLEN gofs;       /* chars left of pos that we search from */
@@ -175,7 +176,6 @@ typedef struct regexp {
     SSize_t sublen;     /* Length of string pointed by subbeg */
     SSize_t suboffset;  /* byte offset of subbeg from logical start of str */
     SSize_t subcoffset; /* suboffset equiv, but in chars (for @-/@+) */
-    SSize_t maxlen;  /* minimum possible number of chars in string to match */
 
     /*---------------------------------------------------------------------- */
 
