@@ -13275,7 +13275,7 @@ Perl_reg_temp_copy(pTHX_ REGEXP *dsv, REGEXP *ssv)
 
     RX_MATCH_COPIED_off(dsv);
 #ifdef PERL_ANY_COW
-    drx->saved_copy = NULL;
+    RXp_SAVED_COPY(drx) = NULL;
 #endif
     drx->mother_re = ReREFCNT_inc(srx->mother_re ? srx->mother_re : ssv);
     SvREFCNT_inc_void(drx->qr_anoncv);
@@ -13500,11 +13500,11 @@ Perl_re_dup_guts(pTHX_ const REGEXP *sstr, REGEXP *dstr, CLONE_PARAMS *param)
         RXi_SET(ret, CALLREGDUPE_PVT(dstr, param));
 
     if (RX_MATCH_COPIED(dstr))
-        ret->subbeg  = SAVEPVN(ret->subbeg, ret->sublen);
+        RXp_SUBBEG(ret)  = SAVEPVN(RXp_SUBBEG(ret), RXp_SUBLEN(ret));
     else
-        ret->subbeg = NULL;
+        RXp_SUBBEG(ret) = NULL;
 #ifdef PERL_ANY_COW
-    ret->saved_copy = NULL;
+    RXp_SAVED_COPY(ret) = NULL;
 #endif
 
     if (r->logical_to_parno) {
