@@ -286,7 +286,7 @@ S_regcppush(pTHX_ const regexp *rex, I32 parenfloor, U32 maxopenparen _pDEPTH)
 /* REGCP_OTHER_ELEMS are pushed in any case, parentheses or no. */
     SSPUSHINT(maxopenparen);
     SSPUSHINT(RXp_LASTPAREN(rex));
-    SSPUSHINT(rex->lastcloseparen);
+    SSPUSHINT(RXp_LASTCLOSEPAREN(rex));
     SSPUSHUV(SAVEt_REGCONTEXT | elems_shifted); /* Magic cookie. */
 
 
@@ -329,7 +329,7 @@ S_regcppush(pTHX_ const regexp *rex, I32 parenfloor, U32 maxopenparen _pDEPTH)
     CLOSE_ANY_CAPTURE(rex, ix, s, e);                                       \
     if (ix > RXp_LASTPAREN(rex))                                            \
         RXp_LASTPAREN(rex) = (ix);                                          \
-    (rex)->lastcloseparen = (ix);                                           \
+    RXp_LASTCLOSEPAREN(rex) = (ix);                                         \
     DEBUG_BUFFERS_r(Perl_re_exec_indentf( aTHX_                             \
         "CLOSE: rex=0x%" UVxf " offs=0x%" UVxf ": \\%" UVuf ": set %" IVdf " .. %" IVdf " max: %" UVuf "\n", \
         depth,                                                              \
@@ -355,7 +355,7 @@ S_regcppush(pTHX_ const regexp *rex, I32 parenfloor, U32 maxopenparen _pDEPTH)
         RXp_OFFSp(rex)[n].end = -1;              \
     }                                       \
     RXp_LASTPAREN(rex) = n;                     \
-    rex->lastcloseparen = lcp;
+    RXp_LASTCLOSEPAREN(rex) = lcp;
 
 #define CAPTURE_CLEAR(from_ix, to_ix, str)                              \
 STMT_START {                                                            \
@@ -401,7 +401,7 @@ S_regcppop(pTHX_ regexp *rex, U32 *maxopenparen_p _pDEPTH)
     i = SSPOPUV;
     assert((i & SAVE_MASK) == SAVEt_REGCONTEXT); /* Check that the magic cookie is there. */
     i >>= SAVE_TIGHT_SHIFT; /* Parentheses elements to pop. */
-    rex->lastcloseparen = SSPOPINT;
+    RXp_LASTCLOSEPAREN(rex) = SSPOPINT;
     RXp_LASTPAREN(rex) = SSPOPINT;
     *maxopenparen_p = SSPOPINT;
 
@@ -3775,7 +3775,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
 
             /* match via INTUIT shouldn't have any captures.
              * Let @-, @+, $^N know */
-            RXp_LASTPAREN(prog) = prog->lastcloseparen = 0;
+            RXp_LASTPAREN(prog) = RXp_LASTCLOSEPAREN(prog) = 0;
             RXp_MATCH_UTF8_set(prog, utf8_target);
             SSize_t match_start = s - strbeg;
             SSize_t match_end = utf8_target
@@ -4355,7 +4355,7 @@ S_regtry(pTHX_ regmatch_info *reginfo, char **startposp)
 
     RXp_OFFSp(prog)[0].start = *startposp - reginfo->strbeg;
     RXp_LASTPAREN(prog) = 0;
-    prog->lastcloseparen = 0;
+    RXp_LASTCLOSEPAREN(prog) = 0;
 
     /* XXXX What this code is doing here?!!!  There should be no need
        to do this again and again, RXp_LASTPAREN(prog) should take care of
@@ -6890,7 +6890,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
             if ( ST.jump ) {
                 ST.lastparen = RXp_LASTPAREN(rex);
-                ST.lastcloseparen = rex->lastcloseparen;
+                ST.lastcloseparen = RXp_LASTCLOSEPAREN(rex);
                 REGCP_SET(ST.cp);
             }
 
@@ -8439,7 +8439,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 re->suboffset = rex->suboffset;
                 re->subcoffset = rex->subcoffset;
                 RXp_LASTPAREN(re) = 0;
-                re->lastcloseparen = 0;
+                RXp_LASTCLOSEPAREN(re) = 0;
                 rei = RXi_GET(re);
                 DEBUG_EXECUTE_r(
                     debug_start_match(re_sv, utf8_target, locinput,
@@ -9056,7 +9056,7 @@ NULL
             scan = REGNODE_AFTER_opcode(scan,state_num); /* scan now points to inner node */
             assert(scan);
             ST.lastparen = RXp_LASTPAREN(rex);
-            ST.lastcloseparen = rex->lastcloseparen;
+            ST.lastcloseparen = RXp_LASTCLOSEPAREN(rex);
             ST.next_branch = next;
             REGCP_SET(ST.cp);
             if (RE_PESSIMISTIC_PARENS) {
@@ -9139,7 +9139,7 @@ NULL
             scan = REGNODE_AFTER_type(scan, tregnode_CURLYM);
 
             ST.lastparen      = RXp_LASTPAREN(rex);
-            ST.lastcloseparen = rex->lastcloseparen;
+            ST.lastcloseparen = RXp_LASTCLOSEPAREN(rex);
 
             /* if paren positive, emulate an OPEN/CLOSE around A */
             if (ST.me->flags) {
@@ -9316,8 +9316,7 @@ NULL
         else {                                                              \
             RXp_OFFSp(rex)[paren].end = -1;                                 \
             RXp_LASTPAREN(rex)  = ST.lastparen;                             \
-            rex->lastparen      = ST.lastparen;                             \
-            rex->lastcloseparen = ST.lastcloseparen;                        \
+            RXp_LASTCLOSEPAREN(rex) = ST.lastcloseparen;                    \
         }                                                                   \
     }
 
@@ -9338,7 +9337,7 @@ NULL
         case CURLYN:		/*  /(A){m,n}B/ where A is width 1 char */
             ST.paren = scan->flags;	/* Which paren to set */
             ST.lastparen      = RXp_LASTPAREN(rex);
-            ST.lastcloseparen = rex->lastcloseparen;
+            ST.lastcloseparen = RXp_LASTCLOSEPAREN(rex);
             if (ST.paren > maxopenparen)
                 maxopenparen = ST.paren;
             ST.min = ARG1i(scan);  /* min to match */
