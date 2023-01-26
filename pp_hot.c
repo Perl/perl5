@@ -3205,30 +3205,86 @@ PP(pp_match)
     /* push captures on stack */
 
     {
-        const I32 nparens = RXp_NPARENS(prog);
-        I32 i = (global && !nparens) ? 1 : 0;
+        const I32 logical_nparens = RXp_LOGICAL_NPARENS(prog);
+        /* This following statement is *devious* code. If we are in a global
+           match and the pattern has no parens in it we should return $&
+           (offset pair 0). So we set logical_paren to 1 when we should return
+           $&, otherwise we set it to 0.
+
+           This allows us to simply add logical_nparens to logical_paren to
+           compute the number of elements we are going to return.
+
+           In the loop intit we "not" it with: logical_paren = !logical_paren
+           which results in it being 0 inside the loop when we want to return
+           $&, and results in it being 1 when we want to return the parens.
+           Thus we either loop over 1..logical_nparens, or just over 0.
+
+           This is an elegant way to do this code wise, but is super devious
+           and potentially confusing. When I first saw this logic I thought
+           "WTF?". But it makes sense after you poke it a while.
+
+           Frankly I probably would have done it differently, but it works so
+           I am leaving it. - Yves */
+        I32 logical_paren = (global && !logical_nparens) ? 1 : 0;
+        I32 *l2p = RXp_LOGICAL_TO_PARNO(prog);
+        /* this is used to step through the physical parens associated
+         * with a given logical paren. */
+        I32 *p2l_next = RXp_PARNO_TO_LOGICAL_NEXT(prog);
 
         SPAGAIN;			/* EVAL blocks could move the stack. */
-        EXTEND(SP, nparens + i);
-        EXTEND_MORTAL(nparens + i);
-        for (i = !i; i <= nparens; i++) {
-            if (LIKELY(RXp_OFFS_VALID(prog,i)))
-            {
-                const I32 len = RXp_OFFS_END(prog,i) - RXp_OFFS_START(prog,i);
-                const char * const s = RXp_OFFS_START(prog,i) + truebase;
-                if ( UNLIKELY( len < 0 || len > strend - s)
-                )
-                    DIE(aTHX_ "panic: pp_match start/end pointers, i=%ld, "
-                        "start=%ld, end=%ld, s=%p, strend=%p, len=%" UVuf,
-                        (long) i, (long) RXp_OFFS_START(prog,i),
-                        (long)RXp_OFFS_END(prog,i), s, strend, (IV) len);
-                PUSHs(newSVpvn_flags(s, len,
-                    (DO_UTF8(TARG))
-                    ? SVf_UTF8|SVs_TEMP
-                    : SVs_TEMP)
-                );
-            } else {
-                PUSHs(sv_newmortal());
+        EXTEND(SP, logical_nparens + logical_paren);    /* devious code ... */
+        EXTEND_MORTAL(logical_nparens + logical_paren); /* ... see above */
+
+        /* loop over the logical parens in the pattern. This may not
+           correspond to the actual paren checked, as branch reset may
+           mean that there is more than one paren "behind" the logical
+           parens. Eg, in /(?|(a)|(b))/ there are two parens, but one
+           logical paren. */
+        for (logical_paren = !logical_paren;
+             logical_paren <= logical_nparens;
+             logical_paren++)
+        {
+            /* now convert the logical_paren to the physical parens which
+               are "behind" it. If branch reset was not used then
+               physical_paren and logical_paren are the same as each other
+               and we will only perform one iteration of the loop */
+            I32 phys_paren = l2p ? l2p[logical_paren] : logical_paren;
+            SSize_t offs_start, offs_end;
+            /* We check the loop invariants below and break out of the loop
+               explicitly if our checks fail, so we use while (1) here to
+               avoid double testing a conditional. */
+            while (1) {
+                /* Check end offset first, as the start might be >=0 even
+                   though the end is -1, so testing the end first helps
+                   use avoid the start check.  Really we should be able to
+                   get away with ONLY testing the end, but testing both
+                   doesn't hurt much and preserves sanity. */
+                if (((offs_end   = RXp_OFFS_END(prog, phys_paren))   != -1) &&
+                    ((offs_start = RXp_OFFS_START(prog, phys_paren)) != -1))
+                {
+                    const SSize_t len = offs_end - offs_start;
+                    const char * const s = offs_start + truebase;
+                    if ( UNLIKELY( len < 0 || len > strend - s) ) {
+                        DIE(aTHX_ "panic: pp_match start/end pointers, paren=%" I32df ", "
+                            "start=%zd, end=%zd, s=%p, strend=%p, len=%zd",
+                            phys_paren, offs_start, offs_end, s, strend, len);
+                    }
+                    PUSHs(newSVpvn_flags(s, len,
+                        (DO_UTF8(TARG))
+                        ? SVf_UTF8|SVs_TEMP
+                        : SVs_TEMP)
+                    );
+                    break;
+                } else if (!p2l_next || !(phys_paren = p2l_next[phys_paren])) {
+                    /* Either logical_paren and phys_paren are the same and
+                       we won't have a p2l_next, or they aren't the same (and
+                       we do have a p2l_next) but we have exhausted the list
+                       of physical parens associated with this logical paren.
+                       Either way we are done, and we can push undef and break
+                       out of the loop. */
+                    PUSHs(sv_newmortal());
+                    break;
+                }
             }
         }
         if (global) {

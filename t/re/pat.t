@@ -27,7 +27,7 @@ skip_all_without_unicode_tables();
 
 my $has_locales = locales_enabled('LC_CTYPE');
 
-plan tests => 1214;  # Update this when adding/deleting tests.
+plan tests => 1230;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -2383,6 +2383,36 @@ SKIP:
         }, 'ok', {}, 'gh17743: test regexp corruption (2)');
     }
 
+    {
+        # Test branch reset (?|...|...) in list context. This was reported
+        # in GH Issue #20710, in relation to breaking App::pl. See
+        # https://github.com/Perl/perl5/issues/20710#issuecomment-1404549785
+        my $ok = 0;
+        my ($w,$x,$y,$z);
+        $ok = ($x,$y) = "ab"=~/(?|(p)(q)|(x)(y)|(a)(b))/;
+        ok($ok,"Branch reset pattern 1 matched as expected");
+        is($x,"a","Branch reset in list context check 1 (a)");
+        is($y,"b","Branch reset in list context check 2 (b)");
+
+        $ok = ($x,$y,$z) = "xyz"=~/(?|(p)(q)|(x)(y)|(a)(b))(z)/;
+        ok($ok,"Branch reset pattern 2 matched as expected");
+        is($x,"x","Branch reset in list context check 3 (x)");
+        is($y,"y","Branch reset in list context check 4 (y)");
+        is($z,"z","Branch reset in list context check 5 (z)");
+
+        $ok = ($w,$x,$y) = "wpq"=~/(w)(?|(p)(q)|(x)(y)|(a)(b))/;
+        ok($ok,"Branch reset pattern 3 matched as expected");
+        is($w,"w","Branch reset in list context check 6 (w)");
+        is($x,"p","Branch reset in list context check 7 (p)");
+        is($y,"q","Branch reset in list context check 8 (q)");
+
+        $ok = ($w,$x,$y,$z) = "wabz"=~/(w)(?|(p)(q)|(x)(y)|(a)(b))(z)/;
+        ok($ok,"Branch reset pattern 4 matched as expected");
+        is($w,"w","Branch reset in list context check 9  (w)");
+        is($x,"a","Branch reset in list context check 10 (a)");
+        is($y,"b","Branch reset in list context check 11 (b)");
+        is($z,"z","Branch reset in list context check 12 (z)");
+    }
 } # End of sub run_tests
 
 1;
