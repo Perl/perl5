@@ -2653,7 +2653,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 #undef SV_SET_STRINGIFY_I32_ARRAY
 
             Perl_dump_indent(aTHX_ level, file, "  LASTPAREN = %" UVuf "\n",
-                                (UV)(r->lastparen));
+                                (UV)(RXp_LASTPAREN(r)));
             Perl_dump_indent(aTHX_ level, file, "  LASTCLOSEPAREN = %" UVuf "\n",
                                 (UV)(r->lastcloseparen));
             Perl_dump_indent(aTHX_ level, file, "  MINLEN = %" IVdf "\n",
