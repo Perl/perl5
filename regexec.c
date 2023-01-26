@@ -3563,7 +3563,7 @@ S_reg_set_capture_string(pTHX_ REGEXP * const rx,
             }
             RXp_SUBBEG(prog) = (char *)SvPVX_const(prog->saved_copy);
             assert (SvPOKp(prog->saved_copy));
-            prog->sublen  = strend - strbeg;
+            RXp_SUBLEN(prog) = strend - strbeg;
             prog->suboffset = 0;
             prog->subcoffset = 0;
         } else
@@ -3624,7 +3624,7 @@ S_reg_set_capture_string(pTHX_ REGEXP * const rx,
             sublen = max - min;
 
             if (RXp_MATCH_COPIED(prog)) {
-                if (sublen > prog->sublen)
+                if (sublen > RXp_SUBLEN(prog))
                     RXp_SUBBEG(prog) =
                             (char*)saferealloc(RXp_SUBBEG(prog), sublen+1);
             }
@@ -3633,7 +3633,7 @@ S_reg_set_capture_string(pTHX_ REGEXP * const rx,
             Copy(strbeg + min, RXp_SUBBEG(prog), sublen, char);
             RXp_SUBBEG(prog)[sublen] = '\0';
             prog->suboffset = min;
-            prog->sublen = sublen;
+            RXp_SUBLEN(prog) = sublen;
             RXp_MATCH_COPIED_on(prog);
         }
         prog->subcoffset = prog->suboffset;
@@ -3665,7 +3665,7 @@ S_reg_set_capture_string(pTHX_ REGEXP * const rx,
         RXp_SUBBEG(prog) = strbeg;
         prog->suboffset = 0;
         prog->subcoffset = 0;
-        prog->sublen = strend - strbeg;
+        RXp_SUBLEN(prog) = strend - strbeg;
     }
 }
 
@@ -8483,7 +8483,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 }
                 RXp_MATCH_COPIED_off(re);
                 RXp_SUBBEG(re) = RXp_SUBBEG(rex);
-                re->sublen = rex->sublen;
+                RXp_SUBLEN(re) = RXp_SUBLEN(rex);
                 re->suboffset = rex->suboffset;
                 re->subcoffset = rex->subcoffset;
                 RXp_LASTPAREN(re) = 0;
@@ -11318,7 +11318,7 @@ S_setup_eval_state(pTHX_ regmatch_info *const reginfo)
             since it may be needed if this match fails.  Thus
             $` inside (?{}) could fail... */
         eval_state->subbeg     = RXp_SUBBEG(rex);
-        eval_state->sublen     = rex->sublen;
+        eval_state->sublen     = RXp_SUBLEN(rex);
         eval_state->suboffset  = rex->suboffset;
         eval_state->subcoffset = rex->subcoffset;
 #ifdef PERL_ANY_COW
@@ -11331,7 +11331,7 @@ S_setup_eval_state(pTHX_ regmatch_info *const reginfo)
     RXp_SUBBEG(rex) = (char *)reginfo->strbeg;
     rex->suboffset = 0;
     rex->subcoffset = 0;
-    rex->sublen = reginfo->strend - reginfo->strbeg;
+    RXp_SUBLEN(rex) = reginfo->strend - reginfo->strbeg;
 }
 
 
@@ -11353,7 +11353,7 @@ S_cleanup_regmatch_info_aux(pTHX_ void *arg)
         if (eval_state->subbeg) {
             regexp * const rex = eval_state->rex;
             RXp_SUBBEG(rex) = eval_state->subbeg;
-            rex->sublen     = eval_state->sublen;
+            RXp_SUBLEN(rex)     = eval_state->sublen;
             rex->suboffset  = eval_state->suboffset;
             rex->subcoffset = eval_state->subcoffset;
 #ifdef PERL_ANY_COW
@@ -12245,7 +12245,7 @@ Perl_reg_numbered_buff_fetch_flags(pTHX_ REGEXP * const re, const I32 paren,
     {
         /* $', ${^POSTMATCH} */
         s = RXp_SUBBEG(rx) - rx->suboffset + t;
-        i = rx->sublen + rx->suboffset - t;
+        i = RXp_SUBLEN(rx) + rx->suboffset - t;
     }
     else /* when flags is true we do an absolute lookup, and compare against rx->nparens */
     if (inRANGE(n, 0, flags ? (I32)rx->nparens : logical_nparens)) {
@@ -12274,7 +12274,7 @@ Perl_reg_numbered_buff_fetch_flags(pTHX_ REGEXP * const re, const I32 paren,
 
   found_it:
     assert(s >= RXp_SUBBEG(rx));
-    assert((STRLEN)rx->sublen >= (STRLEN)((s - RXp_SUBBEG(rx)) + i) );
+    assert((STRLEN)RXp_SUBLEN(rx) >= (STRLEN)((s - RXp_SUBBEG(rx)) + i) );
     if (i >= 0) {
 #ifdef NO_TAINT_SUPPORT
         sv_setpvn(sv, s, i);
@@ -12375,10 +12375,10 @@ Perl_reg_numbered_buff_length(pTHX_ REGEXP * const r, const SV * const sv,
       case RX_BUFF_IDX_CARET_POSTMATCH: /* ${^POSTMATCH} */
       case RX_BUFF_IDX_POSTMATCH:       /* $' */
         if ( (j = RXp_OFFS_END(rx,0)) != -1 ) {
-            i = rx->sublen - j;
+            i = RXp_SUBLEN(rx) - j;
             if (i > 0) {
                 s1 = j;
-                t1 = rx->sublen;
+                t1 = RXp_SUBLEN(rx);
                 goto getlen;
             }
         }
