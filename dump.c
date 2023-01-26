@@ -2815,6 +2815,12 @@ Perl_runops_debug(pTHX)
     PL_curstackinfo->si_stack_hwm = PL_stack_sp - PL_stack_base;
 #endif
 
+#ifdef PERL_RC_STACK
+    assert(rpp_stack_is_rc());
+    assert(PL_stack_base + PL_curstackinfo->si_stack_nonrc_base
+                <= PL_stack_sp);
+#endif
+
     if (!PL_op) {
         Perl_ck_warner_d(aTHX_ packWARN(WARN_DEBUGGING), "NULL OP IN RUN");
         return 0;
