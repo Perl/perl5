@@ -3501,12 +3501,12 @@ S_reg_set_capture_string(pTHX_ REGEXP * const rx,
             /* Create a new COW SV to share the match string and store
              * in saved_copy, unless the current COW SV in saved_copy
              * is valid and suitable for our purpose */
-            if ((   prog->saved_copy
-                 && SvIsCOW(prog->saved_copy)
-                 && SvPOKp(prog->saved_copy)
+            if ((   RXp_SAVED_COPY(prog)
+                 && SvIsCOW(RXp_SAVED_COPY(prog))
+                 && SvPOKp(RXp_SAVED_COPY(prog))
                  && SvIsCOW(sv)
                  && SvPOKp(sv)
-                 && SvPVX(sv) == SvPVX(prog->saved_copy)))
+                 && SvPVX(sv) == SvPVX(RXp_SAVED_COPY(prog))))
             {
                 /* just reuse saved_copy SV */
                 if (RXp_MATCH_COPIED(prog)) {
@@ -3517,10 +3517,10 @@ S_reg_set_capture_string(pTHX_ REGEXP * const rx,
             else {
                 /* create new COW SV to share string */
                 RXp_MATCH_COPY_FREE(prog);
-                prog->saved_copy = sv_setsv_cow(prog->saved_copy, sv);
+                RXp_SAVED_COPY(prog) = sv_setsv_cow(RXp_SAVED_COPY(prog), sv);
             }
-            RXp_SUBBEG(prog) = (char *)SvPVX_const(prog->saved_copy);
-            assert (SvPOKp(prog->saved_copy));
+            RXp_SUBBEG(prog) = (char *)SvPVX_const(RXp_SAVED_COPY(prog));
+            assert (SvPOKp(RXp_SAVED_COPY(prog)));
             RXp_SUBLEN(prog)  = strend - strbeg;
             RXp_SUBOFFSET(prog) = 0;
             RXp_SUBCOFFSET(prog) = 0;
@@ -11265,7 +11265,7 @@ S_setup_eval_state(pTHX_ regmatch_info *const reginfo)
         eval_state->suboffset  = RXp_SUBOFFSET(rex);
         eval_state->subcoffset = RXp_SUBCOFFSET(rex);
 #ifdef PERL_ANY_COW
-        eval_state->saved_copy = rex->saved_copy;
+        eval_state->saved_copy = RXp_SAVED_COPY(rex);
 #endif
         RXp_MATCH_COPIED_off(rex);
     }
@@ -11300,7 +11300,7 @@ S_cleanup_regmatch_info_aux(pTHX_ void *arg)
             RXp_SUBOFFSET(rex)  = eval_state->suboffset;
             RXp_SUBCOFFSET(rex) = eval_state->subcoffset;
 #ifdef PERL_ANY_COW
-            rex->saved_copy = eval_state->saved_copy;
+            RXp_SAVED_COPY(rex) = eval_state->saved_copy;
 #endif
             RXp_MATCH_COPIED_on(rex);
         }
