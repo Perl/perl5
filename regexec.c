@@ -3521,8 +3521,8 @@ S_reg_set_capture_string(pTHX_ REGEXP * const rx,
             }
             RXp_SUBBEG(prog) = (char *)SvPVX_const(prog->saved_copy);
             assert (SvPOKp(prog->saved_copy));
-            RXp_SUBLEN(prog) = strend - strbeg;
-            prog->suboffset = 0;
+            RXp_SUBLEN(prog)  = strend - strbeg;
+            RXp_SUBOFFSET(prog) = 0;
             prog->subcoffset = 0;
         } else
 #endif
@@ -3590,12 +3590,12 @@ S_reg_set_capture_string(pTHX_ REGEXP * const rx,
                 RXp_SUBBEG(prog) = (char*)safemalloc(sublen+1);
             Copy(strbeg + min, RXp_SUBBEG(prog), sublen, char);
             RXp_SUBBEG(prog)[sublen] = '\0';
-            prog->suboffset = min;
+            RXp_SUBOFFSET(prog) = min;
             RXp_SUBLEN(prog) = sublen;
             RXp_MATCH_COPIED_on(prog);
         }
-        prog->subcoffset = prog->suboffset;
-        if (prog->suboffset && utf8_target) {
+        prog->subcoffset = RXp_SUBOFFSET(prog);
+        if (RXp_SUBOFFSET(prog) && utf8_target) {
             /* Convert byte offset to chars.
              * XXX ideally should only compute this if @-/@+
              * has been seen, a la PL_sawampersand ??? */
@@ -3615,13 +3615,13 @@ S_reg_set_capture_string(pTHX_ REGEXP * const rx,
                                                 SV_GMAGIC|SV_CONST_RETURN);
             else
                 prog->subcoffset = utf8_length((U8*)strbeg,
-                                    (U8*)(strbeg+prog->suboffset));
+                                    (U8*)(strbeg+RXp_SUBOFFSET(prog)));
         }
     }
     else {
         RXp_MATCH_COPY_FREE(prog);
         RXp_SUBBEG(prog) = strbeg;
-        prog->suboffset = 0;
+        RXp_SUBOFFSET(prog) = 0;
         prog->subcoffset = 0;
         RXp_SUBLEN(prog) = strend - strbeg;
     }
@@ -8436,7 +8436,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 RXp_MATCH_COPIED_off(re);
                 RXp_SUBBEG(re) = RXp_SUBBEG(rex);
                 RXp_SUBLEN(re) = RXp_SUBLEN(rex);
-                re->suboffset = rex->suboffset;
+                RXp_SUBOFFSET(re) = RXp_SUBOFFSET(rex);
                 re->subcoffset = rex->subcoffset;
                 RXp_LASTPAREN(re) = 0;
                 RXp_LASTCLOSEPAREN(re) = 0;
@@ -11262,7 +11262,7 @@ S_setup_eval_state(pTHX_ regmatch_info *const reginfo)
             $` inside (?{}) could fail... */
         eval_state->subbeg     = RXp_SUBBEG(rex);
         eval_state->sublen     = RXp_SUBLEN(rex);
-        eval_state->suboffset  = rex->suboffset;
+        eval_state->suboffset  = RXp_SUBOFFSET(rex);
         eval_state->subcoffset = rex->subcoffset;
 #ifdef PERL_ANY_COW
         eval_state->saved_copy = rex->saved_copy;
@@ -11272,7 +11272,7 @@ S_setup_eval_state(pTHX_ regmatch_info *const reginfo)
     else
         eval_state->subbeg = NULL;
     RXp_SUBBEG(rex) = (char *)reginfo->strbeg;
-    rex->suboffset = 0;
+    RXp_SUBOFFSET(rex) = 0;
     rex->subcoffset = 0;
     RXp_SUBLEN(rex) = reginfo->strend - reginfo->strbeg;
 }
@@ -11297,7 +11297,7 @@ S_cleanup_regmatch_info_aux(pTHX_ void *arg)
             regexp * const rex = eval_state->rex;
             RXp_SUBBEG(rex) = eval_state->subbeg;
             RXp_SUBLEN(rex)     = eval_state->sublen;
-            rex->suboffset  = eval_state->suboffset;
+            RXp_SUBOFFSET(rex)  = eval_state->suboffset;
             rex->subcoffset = eval_state->subcoffset;
 #ifdef PERL_ANY_COW
             rex->saved_copy = eval_state->saved_copy;
@@ -12187,8 +12187,8 @@ Perl_reg_numbered_buff_fetch_flags(pTHX_ REGEXP * const re, const I32 paren,
         && (t = RXp_OFFS_END(rx,0)) != -1)
     {
         /* $', ${^POSTMATCH} */
-        s = RXp_SUBBEG(rx) - rx->suboffset + t;
-        i = RXp_SUBLEN(rx) + rx->suboffset - t;
+        s = RXp_SUBBEG(rx) - RXp_SUBOFFSET(rx) + t;
+        i = RXp_SUBLEN(rx) + RXp_SUBOFFSET(rx) - t;
     }
     else /* when flags is true we do an absolute lookup, and compare against rx->nparens */
     if (inRANGE(n, 0, flags ? (I32)rx->nparens : logical_nparens)) {
@@ -12200,7 +12200,7 @@ Perl_reg_numbered_buff_fetch_flags(pTHX_ REGEXP * const re, const I32 paren,
             {
                 /* $&, ${^MATCH}, $1 ... */
                 i = t1 - s1;
-                s = RXp_SUBBEG(rx) + s1 - rx->suboffset;
+                s = RXp_SUBBEG(rx) + s1 - RXp_SUBOFFSET(rx);
                 goto found_it;
             }
             else if (map) {
@@ -12352,7 +12352,7 @@ Perl_reg_numbered_buff_length(pTHX_ REGEXP * const r, const SV * const sv,
     }
   getlen:
     if (i > 0 && RXp_MATCH_UTF8(rx)) {
-        const char * const s = RXp_SUBBEG(rx) - rx->suboffset + s1;
+        const char * const s = RXp_SUBBEG(rx) - RXp_SUBOFFSET(rx) + s1;
         const U8 *ep;
         STRLEN el;
 
