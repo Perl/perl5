@@ -2655,33 +2655,33 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
             Perl_dump_indent(aTHX_ level, file, "  LASTPAREN = %" UVuf "\n",
                                 (UV)(RXp_LASTPAREN(r)));
             Perl_dump_indent(aTHX_ level, file, "  LASTCLOSEPAREN = %" UVuf "\n",
-                                (UV)(r->lastcloseparen));
+                                (UV)(RXp_LASTCLOSEPAREN(r)));
             Perl_dump_indent(aTHX_ level, file, "  MINLEN = %" IVdf "\n",
-                                (IV)(r->minlen));
+                                (IV)(RXp_MINLEN(r)));
             Perl_dump_indent(aTHX_ level, file, "  MINLENRET = %" IVdf "\n",
-                                (IV)(r->minlenret));
+                                (IV)(RXp_MINLENRET(r)));
             Perl_dump_indent(aTHX_ level, file, "  GOFS = %" UVuf "\n",
-                                (UV)(r->gofs));
+                                (UV)(RXp_GOFS(r)));
             Perl_dump_indent(aTHX_ level, file, "  PRE_PREFIX = %" UVuf "\n",
-                                (UV)(r->pre_prefix));
+                                (UV)(RXp_PRE_PREFIX(r)));
             Perl_dump_indent(aTHX_ level, file, "  SUBLEN = %" IVdf "\n",
-                                (IV)(r->sublen));
+                                (IV)(RXp_SUBLEN(r)));
             Perl_dump_indent(aTHX_ level, file, "  SUBOFFSET = %" IVdf "\n",
-                                (IV)(r->suboffset));
+                                (IV)(RXp_SUBOFFSET(r)));
             Perl_dump_indent(aTHX_ level, file, "  SUBCOFFSET = %" IVdf "\n",
-                                (IV)(r->subcoffset));
-            if (r->subbeg)
+                                (IV)(RXp_SUBCOFFSET(r)));
+            if (RXp_SUBBEG(r))
                 Perl_dump_indent(aTHX_ level, file, "  SUBBEG = 0x%" UVxf " %s\n",
-                            PTR2UV(r->subbeg),
-                            pv_display(d, r->subbeg, r->sublen, 50, pvlim));
+                            PTR2UV(RXp_SUBBEG(r)),
+                            pv_display(d, RXp_SUBBEG(r), RXp_SUBLEN(r), 50, pvlim));
             else
                 Perl_dump_indent(aTHX_ level, file, "  SUBBEG = 0x0\n");
             Perl_dump_indent(aTHX_ level, file, "  PAREN_NAMES = 0x%" UVxf "\n",
-                                PTR2UV(r->paren_names));
+                                PTR2UV(RXp_PAREN_NAMES(r)));
             Perl_dump_indent(aTHX_ level, file, "  SUBSTRS = 0x%" UVxf "\n",
-                                PTR2UV(r->substrs));
+                                PTR2UV(RXp_SUBSTRS(r)));
             Perl_dump_indent(aTHX_ level, file, "  PPRIVATE = 0x%" UVxf "\n",
-                                PTR2UV(r->pprivate));
+                                PTR2UV(RXp_PPRIVATE(r)));
             Perl_dump_indent(aTHX_ level, file, "  OFFS = 0x%" UVxf "\n",
                                 PTR2UV(RXp_OFFSp(r)));
             if (RXp_OFFSp(r)) {
@@ -2698,16 +2698,16 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
                 Perl_dump_indent(aTHX_ level, file, "    %" SVf, d);
             }
             Perl_dump_indent(aTHX_ level, file, "  QR_ANONCV = 0x%" UVxf "\n",
-                                PTR2UV(r->qr_anoncv));
+                                PTR2UV(RXp_QR_ANONCV(r)));
 #ifdef PERL_ANY_COW
             Perl_dump_indent(aTHX_ level, file, "  SAVED_COPY = 0x%" UVxf "\n",
-                                PTR2UV(r->saved_copy));
+                                PTR2UV(RXp_SAVED_COPY(r)));
 #endif
             /* this should go LAST or the output gets really confusing */
             Perl_dump_indent(aTHX_ level, file, "  MOTHER_RE = 0x%" UVxf "\n",
-                                PTR2UV(r->mother_re));
-            if (nest < maxnest && r->mother_re)
-                do_sv_dump(level+1, file, (SV *)r->mother_re, nest+1,
+                                PTR2UV(RXp_MOTHER_RE(r)));
+            if (nest < maxnest && RXp_MOTHER_RE(r))
+                do_sv_dump(level+1, file, (SV *)RXp_MOTHER_RE(r), nest+1,
                            maxnest, dumpops, pvlim);
         }
         break;
