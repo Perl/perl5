@@ -3523,7 +3523,7 @@ S_reg_set_capture_string(pTHX_ REGEXP * const rx,
             assert (SvPOKp(prog->saved_copy));
             RXp_SUBLEN(prog)  = strend - strbeg;
             RXp_SUBOFFSET(prog) = 0;
-            prog->subcoffset = 0;
+            RXp_SUBCOFFSET(prog) = 0;
         } else
 #endif
         {
@@ -3594,7 +3594,7 @@ S_reg_set_capture_string(pTHX_ REGEXP * const rx,
             RXp_SUBLEN(prog) = sublen;
             RXp_MATCH_COPIED_on(prog);
         }
-        prog->subcoffset = RXp_SUBOFFSET(prog);
+        RXp_SUBCOFFSET(prog) = RXp_SUBOFFSET(prog);
         if (RXp_SUBOFFSET(prog) && utf8_target) {
             /* Convert byte offset to chars.
              * XXX ideally should only compute this if @-/@+
@@ -3611,10 +3611,10 @@ S_reg_set_capture_string(pTHX_ REGEXP * const rx,
              *   $x = "\x{100}" x 1E6; 1 while $x =~ /(.)/g;
              * from going quadratic */
             if (SvPOKp(sv) && SvPVX(sv) == strbeg)
-                prog->subcoffset = sv_pos_b2u_flags(sv, prog->subcoffset,
+                RXp_SUBCOFFSET(prog) = sv_pos_b2u_flags(sv, RXp_SUBCOFFSET(prog),
                                                 SV_GMAGIC|SV_CONST_RETURN);
             else
-                prog->subcoffset = utf8_length((U8*)strbeg,
+                RXp_SUBCOFFSET(prog) = utf8_length((U8*)strbeg,
                                     (U8*)(strbeg+RXp_SUBOFFSET(prog)));
         }
     }
@@ -3622,7 +3622,7 @@ S_reg_set_capture_string(pTHX_ REGEXP * const rx,
         RXp_MATCH_COPY_FREE(prog);
         RXp_SUBBEG(prog) = strbeg;
         RXp_SUBOFFSET(prog) = 0;
-        prog->subcoffset = 0;
+        RXp_SUBCOFFSET(prog) = 0;
         RXp_SUBLEN(prog) = strend - strbeg;
     }
 }
@@ -8437,7 +8437,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 RXp_SUBBEG(re) = RXp_SUBBEG(rex);
                 RXp_SUBLEN(re) = RXp_SUBLEN(rex);
                 RXp_SUBOFFSET(re) = RXp_SUBOFFSET(rex);
-                re->subcoffset = rex->subcoffset;
+                RXp_SUBCOFFSET(re) = RXp_SUBCOFFSET(rex);
                 RXp_LASTPAREN(re) = 0;
                 RXp_LASTCLOSEPAREN(re) = 0;
                 rei = RXi_GET(re);
@@ -11263,7 +11263,7 @@ S_setup_eval_state(pTHX_ regmatch_info *const reginfo)
         eval_state->subbeg     = RXp_SUBBEG(rex);
         eval_state->sublen     = RXp_SUBLEN(rex);
         eval_state->suboffset  = RXp_SUBOFFSET(rex);
-        eval_state->subcoffset = rex->subcoffset;
+        eval_state->subcoffset = RXp_SUBCOFFSET(rex);
 #ifdef PERL_ANY_COW
         eval_state->saved_copy = rex->saved_copy;
 #endif
@@ -11273,7 +11273,7 @@ S_setup_eval_state(pTHX_ regmatch_info *const reginfo)
         eval_state->subbeg = NULL;
     RXp_SUBBEG(rex) = (char *)reginfo->strbeg;
     RXp_SUBOFFSET(rex) = 0;
-    rex->subcoffset = 0;
+    RXp_SUBCOFFSET(rex) = 0;
     RXp_SUBLEN(rex) = reginfo->strend - reginfo->strbeg;
 }
 
@@ -11298,7 +11298,7 @@ S_cleanup_regmatch_info_aux(pTHX_ void *arg)
             RXp_SUBBEG(rex) = eval_state->subbeg;
             RXp_SUBLEN(rex)     = eval_state->sublen;
             RXp_SUBOFFSET(rex)  = eval_state->suboffset;
-            rex->subcoffset = eval_state->subcoffset;
+            RXp_SUBCOFFSET(rex) = eval_state->subcoffset;
 #ifdef PERL_ANY_COW
             rex->saved_copy = eval_state->saved_copy;
 #endif
