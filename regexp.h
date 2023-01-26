@@ -561,7 +561,8 @@ and check for NULL.
 #  define RX_SUBBEG(rx_sv)                (RXp_SUBBEG(ReANY(rx_sv)))
 #  define RXp_SUBOFFSET(prog)             ((prog)->suboffset)
 #  define RX_SUBOFFSET(rx_sv)             (RXp_SUBOFFSET(ReANY(rx_sv)))
-#  define RX_SUBCOFFSET(rx_sv)            (ReANY(rx_sv)->subcoffset)
+#  define RXp_SUBCOFFSET(prog)            ((prog)->subcoffset)
+#  define RX_SUBCOFFSET(rx_sv)            (RXp_SUBCOFFSET(ReANY(rx_sv)))
 #  define RXp_OFFSp(prog)                 ((prog)->offs)
 #  define RX_OFFSp(rx_sv)                 (RXp_OFFSp(ReANY(rx_sv)))
 #  define RXp_LOGICAL_NPARENS(prog)       ((prog)->logical_nparens)
@@ -574,7 +575,8 @@ and check for NULL.
 #  define RX_PARNO_TO_LOGICAL_NEXT(rx_sv) (RXp_PARNO_TO_LOGICAL_NEXT(ReANY(rx_sv)))
 #  define RXp_NPARENS(prog)               ((prog)->nparens)
 #  define RX_NPARENS(rx_sv)               (RXp_NPARENS(ReANY(rx_sv)))
-#  define RX_SUBLEN(rx_sv)                (ReANY(rx_sv)->sublen)
+#  define RXp_SUBLEN(prog)                ((prog)->sublen)
+#  define RX_SUBLEN(rx_sv)                (RXp_SUBLEN(ReANY(rx_sv)))
 #  define RXp_MINLEN(prog)                ((prog)->minlen)
 #  define RX_MINLEN(rx_sv)                (RXp_MINLEN(ReANY(rx_sv)))
 #  define RXp_MINLENRET(prog)             ((prog)->minlenret)
@@ -587,6 +589,17 @@ and check for NULL.
 #  define RX_LASTCLOSEPAREN(rx_sv)        (RXp_LASTCLOSEPAREN(ReANY(rx_sv)))
 #  define RXp_SAVED_COPY(prog)            ((prog)->saved_copy)
 #  define RX_SAVED_COPY(rx_sv)            (RXp_SAVED_COPY(ReANY(rx_sv)))
+#  define RXp_SUBSTRS(prog)               ((prog)->substrs)
+#  define RX_SUBSTRS(rx_sv)               (RXp_SUBSTRS(ReANY(rx_sv)))
+#  define RXp_PPRIVATE(prog)              ((prog)->pprivate)
+#  define RX_PPRIVATE(rx_sv)              (RXp_PPRIVATE(ReANY(rx_sv)))
+#  define RXp_QR_ANONCV(prog)             ((prog)->qr_anoncv)
+#  define RX_QR_ANONCV(rx_sv)             (RXp_QR_ANONCV(ReANY(rx_sv)))
+#  define RXp_MOTHER_RE(prog)             ((prog)->mother_re)
+#  define RX_MOTHER_RE(rx_sv)             (RXp_MOTHER_RE(ReANY(rx_sv)))
+#  define RXp_PRE_PREFIX(prog)            ((prog)->pre_prefix)
+#  define RX_PRE_PREFIX(rx_sv)            (RXp_PRE_PREFIX(ReANY(rx_sv)))
+
 /* last match was zero-length */
 #  define RXp_ZERO_LEN(prog) \
         (RXp_OFFS_START(prog,0) + (SSize_t)RXp_GOFS(prog) \
