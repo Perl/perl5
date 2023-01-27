@@ -24071,8 +24071,16 @@ set wchar.h i_wchar
 eval $inhdr
 
 : see if openssl/ssl.h is available
+: right now, we cannot compile Net::SSLeay with a c++ compiler
 set openssl/ssl.h i_ssl
 eval $inhdr
+case "$i_ssl" in
+"$define")
+	case "$d_cplusplus" in
+	"$define") i_ssl="$undef" ;;
+	esac
+	;;
+esac
 
 : Check extensions
 echo " "
