@@ -2020,6 +2020,7 @@ Perl_die_unwind(pTHX_ SV *msv)
             /* return false to the caller of eval */
             gimme = cx->blk_gimme;
             if (gimme == G_SCALAR) {
+                rpp_extend(1);
                 if (rpp_stack_is_rc())
                     rpp_push_1(&PL_sv_undef);
                 else
