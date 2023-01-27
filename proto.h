@@ -1127,8 +1127,7 @@ Perl_filter_read(pTHX_ int idx, SV *buf_sv, int maxlen)
         assert(buf_sv)
 
 PERL_CALLCONV void
-Perl_finalize_optree(pTHX_ OP *o)
-        __attribute__visibility__("hidden");
+Perl_finalize_optree(pTHX_ OP *o);
 #define PERL_ARGS_ASSERT_FINALIZE_OPTREE        \
         assert(o)
 
@@ -3263,6 +3262,11 @@ Perl_op_wrap_finally(pTHX_ OP *block, OP *finally)
         __attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_OP_WRAP_FINALLY        \
         assert(block); assert(finally)
+
+PERL_CALLCONV void
+Perl_optimize_optree(pTHX_ OP *o);
+#define PERL_ARGS_ASSERT_OPTIMIZE_OPTREE        \
+        assert(o)
 
 PERL_CALLCONV void
 Perl_package(pTHX_ OP *o)
@@ -7477,12 +7481,6 @@ PERL_CALLCONV SV *
 Perl_op_varname(pTHX_ const OP *o)
         __attribute__visibility__("hidden");
 # define PERL_ARGS_ASSERT_OP_VARNAME            \
-        assert(o)
-
-PERL_CALLCONV void
-Perl_optimize_optree(pTHX_ OP *o)
-        __attribute__visibility__("hidden");
-# define PERL_ARGS_ASSERT_OPTIMIZE_OPTREE       \
         assert(o)
 
 PERL_CALLCONV void

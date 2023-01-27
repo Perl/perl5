@@ -1802,7 +1802,8 @@ Axmd	|OP *	|op_lvalue	|NULLOK OP *o				\
 poX	|OP *	|op_lvalue_flags|NULLOK OP *o				\
 				|I32 type				\
 				|U32 flags
-pd	|void	|finalize_optree|NN OP *o
+Apd	|void	|optimize_optree|NN OP *o
+Apd	|void	|finalize_optree|NN OP *o
 : Used in op.c and pp_sys.c
 p	|int	|mode_from_discipline					\
 				|NULLOK const char *s			\
@@ -4585,7 +4586,6 @@ p	|void	|check_hash_fields_and_hekify				\
 				|NULLOK SVOP *key_op			\
 				|int real
 p	|SV *	|op_varname	|NN const OP *o
-pd	|void	|optimize_optree|NN OP *o
 p	|void	|warn_elem_scalar_context				\
 				|NN const OP *o 			\
 				|NN SV *name				\
