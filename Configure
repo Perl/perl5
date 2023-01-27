@@ -1093,6 +1093,7 @@ i_utime=''
 i_vfork=''
 i_wchar=''
 i_wctype=''
+i_ssl=''
 d_inc_version_list=''
 inc_version_list=''
 inc_version_list_init=''
@@ -24069,6 +24070,10 @@ esac
 set wchar.h i_wchar
 eval $inhdr
 
+: see if openssl/ssl.h is available
+set openssl/ssl.h i_ssl
+eval $inhdr
+
 : Check extensions
 echo " "
 echo "Looking for extensions..." >&4
@@ -24171,6 +24176,11 @@ for xxx in $xs_extensions ; do
 		: XXX Do we need a useipcsysv variable here
 		case "${d_msg}${d_sem}${d_shm}" in
 		*"${define}"*) avail_ext="$avail_ext $xxx" ;;
+		esac
+		;;
+	Net/SSLeay|net/ssleay)
+		case "$i_ssl" in
+		$define) avail_ext="$avail_ext $xxx" ;;
 		esac
 		;;
 	NDBM_File|ndbm_fil)
@@ -24317,6 +24327,11 @@ esac
 nonxs_ext=''
 for xxx in $nonxs_extensions ; do
 	case "$xxx" in
+	IO/Socket/SSL|io/socket/ssl)
+		case "$i_ssl" in
+		$define) nonxs_ext="$nonxs_ext $xxx" ;;
+		esac
+		;;
 	VMS*)
 		;;
 	*)	nonxs_ext="$nonxs_ext $xxx"
