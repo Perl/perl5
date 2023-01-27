@@ -759,11 +759,9 @@ context.
 PERL_STATIC_INLINE bool
 Perl_rpp_is_lone(pTHX_ SV *sv)
 {
-    return  SvTEMP(sv) && SvREFCNT(sv) <=
+    return SvREFCNT(sv) <= cBOOL(SvTEMP(sv))
 #if defined(PERL_RC_STACK) && !defined(PERL_XXX_TMP_NORC)
-            2
-#else
-            1
+                         + 1
 #endif
     ;
 }
