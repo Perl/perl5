@@ -106,6 +106,27 @@ struct reg_code_blocks {
     struct reg_code_block *cb; /* array of reg_code_block's */
 };
 
+typedef struct regexp_matched_offsets {
+    /*----------------------------------------------------------------------
+     * Data about the last/current match. These are modified during matching
+     */
+
+    U32 lastparen;           /* highest close paren matched ($+) */
+    U32 lastcloseparen;      /* last close paren matched ($^N) */
+
+    /*---------------------------------------------------------------------- */
+
+    char *subbeg;       /* saved or original string so \digit works forever. */
+    SV_SAVED_COPY       /* If non-NULL, SV which is COW from original */
+    SSize_t sublen;     /* Length of string pointed by subbeg */
+    SSize_t suboffset;  /* byte offset of subbeg from logical start of str */
+    SSize_t subcoffset; /* suboffset equiv, but in chars (for @-/@+) */
+
+    /*---------------------------------------------------------------------- */
+
+    regexp_paren_pair *offs; /* Array of offsets for (@-) and (@+) */
+} regexp_matched_offsets;
+
 
 /*
 = for apidoc AyT||regexp
@@ -154,16 +175,6 @@ typedef struct regexp {
                         * created this object. */
     U32 intflags;      /* Engine Specific Internal flags */
 
-    /*----------------------------------------------------------------------
-     * Data about the last/current match. These are modified during matching
-     */
-
-    U32 lastparen;           /* highest close paren matched ($+) */
-    regexp_paren_pair *offs; /* Array of offsets for (@-) and (@+) */
-    char **recurse_locinput; /* used to detect infinite recursion, XXX: move to internal */
-    U32 lastcloseparen;      /* last close paren matched ($^N) */
-
-
     /*---------------------------------------------------------------------- */
 
     /* offset from wrapped to the start of precomp */
@@ -172,20 +183,11 @@ typedef struct regexp {
     /* original flags used to compile the pattern, may differ from
      * extflags in various ways */
     PERL_BITFIELD32 compflags:9;
-
-    /*---------------------------------------------------------------------- */
-
-    char *subbeg;       /* saved or original string so \digit works forever. */
-    SV_SAVED_COPY       /* If non-NULL, SV which is COW from original */
-    SSize_t sublen;     /* Length of string pointed by subbeg */
-    SSize_t suboffset;  /* byte offset of subbeg from logical start of str */
-    SSize_t subcoffset; /* suboffset equiv, but in chars (for @-/@+) */
-    SSize_t maxlen;  /* minimum possible number of chars in string to match */
-
-    /*---------------------------------------------------------------------- */
-
-
     CV *qr_anoncv;      /* the anon sub wrapped round qr/(?{..})/ */
+
+    char **recurse_locinput; /* used to detect infinite recursion, XXX: move to internal */
+
+    regexp_matched_offsets *rxmo;
 } regexp;
 
 
@@ -558,6 +560,9 @@ and check for NULL.
 #  define RX_PRELEN(rx_sv)                (RX_WRAPLEN(rx_sv) \
                                             - ReANY(rx_sv)->pre_prefix - 1)
 
+#  define RXp_RXMO(prog)                  ((prog)->rxmo)
+#  define RX_RXMO(rx_sv)                  (RXp_RXMO(ReANY(rx_sv)))
+
 #  define RX_WRAPPED(rx_sv)               SvPVX(rx_sv)
 #  define RX_WRAPPED_const(rx_sv)         SvPVX_const(rx_sv)
 #  define RX_WRAPLEN(rx_sv)               SvCUR(rx_sv)
@@ -567,13 +572,13 @@ and check for NULL.
 #  define RX_COMPFLAGS(rx_sv)             RXp_COMPFLAGS(ReANY(rx_sv))
 #  define RXp_ENGINE(prog)                ((prog)->engine)
 #  define RX_ENGINE(rx_sv)                (RXp_ENGINE(ReANY(rx_sv)))
-#  define RXp_SUBBEG(prog)                ((prog)->subbeg)
+#  define RXp_SUBBEG(prog)                (RXp_RXMO(prog)->subbeg)
 #  define RX_SUBBEG(rx_sv)                (RXp_SUBBEG(ReANY(rx_sv)))
-#  define RXp_SUBOFFSET(prog)             ((prog)->suboffset)
+#  define RXp_SUBOFFSET(prog)             (RXp_RXMO(prog)->suboffset)
 #  define RX_SUBOFFSET(rx_sv)             (RXp_SUBOFFSET(ReANY(rx_sv)))
-#  define RXp_SUBCOFFSET(prog)            ((prog)->subcoffset)
+#  define RXp_SUBCOFFSET(prog)            (RXp_RXMO(prog)->subcoffset)
 #  define RX_SUBCOFFSET(rx_sv)            (RXp_SUBCOFFSET(ReANY(rx_sv)))
-#  define RXp_OFFSp(prog)                 ((prog)->offs)
+#  define RXp_OFFSp(prog)                 (RXp_RXMO(prog)->offs)
 #  define RX_OFFSp(rx_sv)                 (RXp_OFFSp(ReANY(rx_sv)))
 #  define RXp_LOGICAL_NPARENS(prog)       ((prog)->logical_nparens)
 #  define RX_LOGICAL_NPARENS(rx_sv)       (RXp_LOGICAL_NPARENS(ReANY(rx_sv)))
@@ -585,7 +590,7 @@ and check for NULL.
 #  define RX_PARNO_TO_LOGICAL_NEXT(rx_sv) (RXp_PARNO_TO_LOGICAL_NEXT(ReANY(rx_sv)))
 #  define RXp_NPARENS(prog)               ((prog)->nparens)
 #  define RX_NPARENS(rx_sv)               (RXp_NPARENS(ReANY(rx_sv)))
-#  define RXp_SUBLEN(prog)                ((prog)->sublen)
+#  define RXp_SUBLEN(prog)                (RXp_RXMO(prog)->sublen)
 #  define RX_SUBLEN(rx_sv)                (RXp_SUBLEN(ReANY(rx_sv)))
 #  define RXp_MINLEN(prog)                ((prog)->minlen)
 #  define RX_MINLEN(rx_sv)                (RXp_MINLEN(ReANY(rx_sv)))
@@ -593,11 +598,11 @@ and check for NULL.
 #  define RX_MINLENRET(rx_sv)             (RXp_MINLENRET(ReANY(rx_sv)))
 #  define RXp_GOFS(prog)                  ((prog)->gofs)
 #  define RX_GOFS(rx_sv)                  (RXp_GOFS(ReANY(rx_sv)))
-#  define RXp_LASTPAREN(prog)             ((prog)->lastparen)
+#  define RXp_LASTPAREN(prog)             (RXp_RXMO(prog)->lastparen)
 #  define RX_LASTPAREN(rx_sv)             (RXp_LASTPAREN(ReANY(rx_sv)))
-#  define RXp_LASTCLOSEPAREN(prog)        ((prog)->lastcloseparen)
+#  define RXp_LASTCLOSEPAREN(prog)        (RXp_RXMO(prog)->lastcloseparen)
 #  define RX_LASTCLOSEPAREN(rx_sv)        (RXp_LASTCLOSEPAREN(ReANY(rx_sv)))
-#  define RXp_SAVED_COPY(prog)            ((prog)->saved_copy)
+#  define RXp_SAVED_COPY(prog)            (RXp_RXMO(prog)->saved_copy)
 #  define RX_SAVED_COPY(rx_sv)            (RXp_SAVED_COPY(ReANY(rx_sv)))
 #  define RXp_SUBSTRS(prog)               ((prog)->substrs)
 #  define RX_SUBSTRS(rx_sv)               (RXp_SUBSTRS(ReANY(rx_sv)))
@@ -609,6 +614,7 @@ and check for NULL.
 #  define RX_MOTHER_RE(rx_sv)             (RXp_MOTHER_RE(ReANY(rx_sv)))
 #  define RXp_PRE_PREFIX(prog)            ((prog)->pre_prefix)
 #  define RX_PRE_PREFIX(rx_sv)            (RXp_PRE_PREFIX(ReANY(rx_sv)))
+
 
 /* last match was zero-length */
 #  define RXp_ZERO_LEN(prog) \
