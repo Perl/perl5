@@ -1126,11 +1126,6 @@ Perl_filter_read(pTHX_ int idx, SV *buf_sv, int maxlen)
 #define PERL_ARGS_ASSERT_FILTER_READ            \
         assert(buf_sv)
 
-PERL_CALLCONV void
-Perl_finalize_optree(pTHX_ OP *o);
-#define PERL_ARGS_ASSERT_FINALIZE_OPTREE        \
-        assert(o)
-
 PERL_CALLCONV CV *
 Perl_find_lexical_cv(pTHX_ PADOFFSET off)
         __attribute__visibility__("hidden");
@@ -3262,11 +3257,6 @@ Perl_op_wrap_finally(pTHX_ OP *block, OP *finally)
         __attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_OP_WRAP_FINALLY        \
         assert(block); assert(finally)
-
-PERL_CALLCONV void
-Perl_optimize_optree(pTHX_ OP *o);
-#define PERL_ARGS_ASSERT_OPTIMIZE_OPTREE        \
-        assert(o)
 
 PERL_CALLCONV void
 Perl_package(pTHX_ OP *o)
@@ -6143,6 +6133,18 @@ S_my_memrchr(const char *s, const char c, const STRLEN len);
 #   endif /* !defined(HAS_MEMRCHR) */
 # endif /* !defined(PERL_NO_INLINE_FUNCTIONS) */
 #endif /* defined(PERL_CORE) || defined(PERL_EXT) */
+#if defined(PERL_CORE) || defined(PERL_USE_VOLATILE_API)
+PERL_CALLCONV void
+Perl_finalize_optree(pTHX_ OP *o);
+# define PERL_ARGS_ASSERT_FINALIZE_OPTREE       \
+        assert(o)
+
+PERL_CALLCONV void
+Perl_optimize_optree(pTHX_ OP *o);
+# define PERL_ARGS_ASSERT_OPTIMIZE_OPTREE       \
+        assert(o)
+
+#endif /* defined(PERL_CORE) || defined(PERL_USE_VOLATILE_API) */
 #if defined(PERL_DEBUG_READONLY_COW)
 PERL_CALLCONV void
 Perl_sv_buf_to_ro(pTHX_ SV *sv)

@@ -1802,8 +1802,6 @@ Axmd	|OP *	|op_lvalue	|NULLOK OP *o				\
 poX	|OP *	|op_lvalue_flags|NULLOK OP *o				\
 				|I32 type				\
 				|U32 flags
-Apd	|void	|optimize_optree|NN OP *o
-Apd	|void	|finalize_optree|NN OP *o
 : Used in op.c and pp_sys.c
 p	|int	|mode_from_discipline					\
 				|NULLOK const char *s			\
@@ -3900,6 +3898,10 @@ EeiT	|void * |my_memrchr	|NN const char *s			\
 				|const STRLEN len
 # endif /* !defined(HAS_MEMRCHR) */
 #endif /* defined(PERL_CORE) || defined(PERL_EXT) */
+#if defined(PERL_CORE) || defined(PERL_USE_VOLATILE_API)
+Apd	|void	|optimize_optree|NN OP *o
+Apd	|void	|finalize_optree|NN OP *o
+#endif /* defined(PERL_CORE) || defined(PERL_USE_VOLATILE_API) */
 #if defined(PERL_DEBUG_READONLY_COW)
 p	|void	|sv_buf_to_ro	|NN SV *sv
 #endif /* defined(PERL_DEBUG_READONLY_COW) */
