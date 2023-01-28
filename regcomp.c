@@ -2300,6 +2300,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
      * RXp_OFFSp() as the offset data is stored in the regexp_matched_offsets
      * structure. */
     Newxz(RXp_RXMO(RExC_rx), 1, regexp_matched_offsets);
+    RXp_RXMO(RExC_rx)->owner_rxsv = Rx;
 
     /* and allocate the offset arrays */
     Newxz(RXp_OFFSp(RExC_rx), RExC_total_parens, regexp_paren_pair);
@@ -13189,7 +13190,7 @@ Perl_pregfree2(pTHX_ REGEXP *rx)
     The solution is to make a lightweight copy of the regexp structure
     when a qr// is returned from the code executed by (??{$qr}) this
     lightweight copy doesn't actually own any of its data except for
-    the starp/end and the actual regexp structure itself.
+    the start/end and the actual regexp structure itself.
 
 */
 
@@ -13264,7 +13265,11 @@ Perl_reg_temp_copy(pTHX_ REGEXP *dsv, REGEXP *ssv)
 
     if (!islv)
         SvLEN_set(dsv, 0);
+
     NewCopy(RXp_RXMO(srx),RXp_RXMO(drx), 1, regexp_matched_offsets);
+    RXp_RXMO(drx)->owner_rxsv = dsv; /* make sure match object can find
+                                        the pattern it is for */
+
     if (RXp_OFFSp(srx)) { /* why do we check this? We should always
                              have an RXp_OFFSp(rx) */
         const I32 npar = srx->nparens+1;

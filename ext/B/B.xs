@@ -33,6 +33,7 @@ static const char* const svclassnames[] = {
     "B::PVNV",
     "B::PVMG",
     "B::REGEXP",
+    "B::RXMO",
     "B::GV",
     "B::PVLV",
     "B::AV",

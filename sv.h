@@ -149,16 +149,17 @@ typedef enum {
         SVt_PVNV,	/* 6 */
         SVt_PVMG,	/* 7 */
         SVt_REGEXP,	/* 8 */
+        SVt_RXMO,       /* 9 - reg_match_offsets */
         /* PVBM was here, before BIND replaced it.  */
-        SVt_PVGV,	/* 9 */
-        SVt_PVLV,	/* 10 */
-        SVt_PVAV,	/* 11 */
-        SVt_PVHV,	/* 12 */
-        SVt_PVCV,	/* 13 */
-        SVt_PVFM,	/* 14 */
-        SVt_PVIO,	/* 15 */
-        SVt_PVOBJ,      /* 16 */
-                        /* 17-31: Unused, though one should be reserved for a
+        SVt_PVGV,	/* 10 */
+        SVt_PVLV,	/* 11 */
+        SVt_PVAV,	/* 12 */
+        SVt_PVHV,	/* 13 */
+        SVt_PVCV,	/* 14 */
+        SVt_PVFM,	/* 15 */
+        SVt_PVIO,	/* 16 */
+        SVt_PVOBJ,      /* 17 */
+                        /* 18-31: Unused, though one should be reserved for a
                          * freed sv, if the other 3 bits below the flags ones
                          * get allocated */
         SVt_LAST	/* keep last in enum. used to size arrays */
@@ -274,6 +275,11 @@ struct io {
 
 struct p5rx {
     _SV_HEAD(struct regexp*);	/* pointer to regexp body */
+    _SV_HEAD_UNION;
+};
+
+struct p5rxmo {
+    _SV_HEAD(struct reg_match_offsets*);
     _SV_HEAD_UNION;
 };
 

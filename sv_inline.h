@@ -141,6 +141,7 @@ struct body_details {
     } ALIGNED_TYPE_NAME(name)
 
 ALIGNED_TYPE(regexp);
+ALIGNED_TYPE(regexp_matched_offsets);
 ALIGNED_TYPE(XPVGV);
 ALIGNED_TYPE(XPVLV);
 ALIGNED_TYPE(XPVAV);
@@ -244,6 +245,13 @@ static const struct body_details bodies_by_type[] = {
       0,
       SVt_REGEXP, TRUE, NONV, HASARENA,
       FIT_ARENA(0, sizeof(ALIGNED_TYPE_NAME(regexp)))
+    },
+
+    { sizeof(ALIGNED_TYPE_NAME(regexp_matched_offsets)),
+      sizeof(regexp_matched_offsets),
+      0,
+      SVt_RXMO, TRUE, NONV, HASARENA,
+      FIT_ARENA(0, sizeof(ALIGNED_TYPE_NAME(regexp_matched_offsets)))
     },
 
     { sizeof(ALIGNED_TYPE_NAME(XPVGV)), sizeof(XPVGV), 0, SVt_PVGV, TRUE, HADNV,
