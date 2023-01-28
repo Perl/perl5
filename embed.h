@@ -227,7 +227,6 @@
 # define filter_add(a,b)                        Perl_filter_add(aTHX_ a,b)
 # define filter_del(a)                          Perl_filter_del(aTHX_ a)
 # define filter_read(a,b,c)                     Perl_filter_read(aTHX_ a,b,c)
-# define finalize_optree(a)                     Perl_finalize_optree(aTHX_ a)
 # define find_runcv(a)                          Perl_find_runcv(aTHX_ a)
 # define find_rundefsv()                        Perl_find_rundefsv(aTHX)
 # define foldEQ(a,b,c)                          Perl_foldEQ(aTHX_ a,b,c)
@@ -469,7 +468,6 @@
 # define op_scope(a)                            Perl_op_scope(aTHX_ a)
 # define op_sibling_splice                      Perl_op_sibling_splice
 # define op_wrap_finally(a,b)                   Perl_op_wrap_finally(aTHX_ a,b)
-# define optimize_optree(a)                     Perl_optimize_optree(aTHX_ a)
 # define packlist(a,b,c,d,e)                    Perl_packlist(aTHX_ a,b,c,d,e)
 # define pad_add_anon(a,b)                      Perl_pad_add_anon(aTHX_ a,b)
 # define pad_add_name_pv(a,b,c,d)               Perl_pad_add_name_pv(aTHX_ a,b,c,d)
@@ -1965,6 +1963,10 @@
                defined(DEBUGGING) */
 #   endif /* defined(PERL_IN_REGEXEC_C) */
 # endif /* defined(PERL_CORE) || defined(PERL_EXT) */
+# if defined(PERL_CORE) || defined(PERL_USE_VOLATILE_API)
+#   define finalize_optree(a)                   Perl_finalize_optree(aTHX_ a)
+#   define optimize_optree(a)                   Perl_optimize_optree(aTHX_ a)
+# endif /* defined(PERL_CORE) || defined(PERL_USE_VOLATILE_API) */
 # if !defined(PERL_IMPLICIT_SYS)
 #   define my_pclose(a)                         Perl_my_pclose(aTHX_ a)
 #   define my_popen(a,b)                        Perl_my_popen(aTHX_ a,b)
