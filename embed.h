@@ -711,6 +711,7 @@
 # define sv_string_from_errnum(a,b)             Perl_sv_string_from_errnum(aTHX_ a,b)
 # define sv_tainted(a)                          Perl_sv_tainted(aTHX_ a)
 # define sv_true(a)                             Perl_sv_true(aTHX_ a)
+# define sv_type_name                           Perl_sv_type_name
 # define sv_uni_display(a,b,c,d)                Perl_sv_uni_display(aTHX_ a,b,c,d)
 # define sv_unmagic(a,b)                        Perl_sv_unmagic(aTHX_ a,b)
 # define sv_unmagicext(a,b,c)                   Perl_sv_unmagicext(aTHX_ a,b,c)

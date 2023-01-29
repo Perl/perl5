@@ -4900,6 +4900,11 @@ PERL_CALLCONV I32
 Perl_sv_true(pTHX_ SV * const sv);
 #define PERL_ARGS_ASSERT_SV_TRUE
 
+PERL_CALLCONV const char *
+Perl_sv_type_name(U8 type, bool longname)
+        __attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_SV_TYPE_NAME
+
 PERL_CALLCONV char *
 Perl_sv_uni_display(pTHX_ SV *dsv, SV *ssv, STRLEN pvlim, UV flags)
         __attribute__warn_unused_result__;

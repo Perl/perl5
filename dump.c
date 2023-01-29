@@ -72,10 +72,22 @@ static const char* const svshorttypenames[SVt_LAST] = {
     "OBJ",
 };
 
+static const char unknowntypename[] = "UNKNOWN";
+
 struct flag_to_name {
     U32 flag;
     const char *name;
 };
+
+const char *
+Perl_sv_type_name(U8 type, bool long_name) {
+    if (type > SVt_LAST)
+        return unknowntypename;
+    if (long_name)
+        return svtypenames[type];
+    else
+        return svshorttypenames[type];
+}
 
 static void
 S_append_flags(pTHX_ SV *sv, U32 flags, const struct flag_to_name *start,
