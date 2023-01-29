@@ -516,8 +516,12 @@ Perl_newSV_type(pTHX_ const svtype type)
         sv->sv_u.svu_rv = NULL;
         break;
     default:
-        Perl_croak(aTHX_ "panic: sv_upgrade to unknown type %lu",
-                   (unsigned long)type);
+        if (type >= SVt_LAST)
+            Perl_croak(aTHX_ "panic: newSV_type() with illegal type %lu, expecting value < %lu",
+                   (unsigned long)type, (unsigned long)SVt_LAST);
+        else
+            Perl_croak(aTHX_ "panic: newSV_type() with unknown type %lu: SVt_%s",
+                   (unsigned long)type, sv_type_name(type,TRUE));
     }
 
     return sv;

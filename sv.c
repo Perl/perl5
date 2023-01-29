@@ -1192,8 +1192,12 @@ Perl_sv_upgrade(pTHX_ SV *const sv, svtype new_type)
         }
         break;
     default:
-        Perl_croak(aTHX_ "panic: sv_upgrade to unknown type %lu",
-                   (unsigned long)new_type);
+        if (new_type >= SVt_LAST)
+            Perl_croak(aTHX_ "panic: sv_upgrade() to illegal type %lu, expecting value < %lu",
+                   (unsigned long)new_type, (unsigned long)SVt_LAST);
+        else
+            Perl_croak(aTHX_ "panic: sv_upgrade to unknown type %lu: SVt_%s",
+                   (unsigned long)new_type,sv_type_name(new_type,TRUE));
     }
 
     /* if this is zero, this is a body-less SVt_NULL, SVt_IV/SVt_RV,
