@@ -1,7 +1,7 @@
 use strict; use warnings;
 
 package Memoize::NDBM_File;
-our $VERSION = '1.15';
+our $VERSION = '1.16';
 
 use NDBM_File;
 our @ISA = qw(NDBM_File);
