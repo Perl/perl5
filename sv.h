@@ -138,37 +138,39 @@ Type flag for object instances.  See L</svtype>.
 
 
 typedef enum {
-        SVt_NULL,	/* 0 */
+        SVt_NULL,       /*  0 - 0x00 */
         /* BIND was here, before INVLIST replaced it.  */
-        SVt_IV,		/* 1 */
-        SVt_NV,		/* 2 */
+        SVt_IV,         /*  1 - 0x01 */
+        SVt_NV,         /*  2 - 0x02 */
         /* RV was here, before it was merged with IV.  */
-        SVt_PV,		/* 3 */
-        SVt_INVLIST,	/* 4, implemented as a PV */
-        SVt_PVIV,	/* 5 */
-        SVt_PVNV,	/* 6 */
-        SVt_PVMG,	/* 7 */
-        SVt_REGEXP,	/* 8 */
-        SVt_RXMO,       /* 9 - reg_match_offsets */
+        SVt_PV,         /*  3 - 0x03 */
+        SVt_INVLIST,    /*  4 - 0x04 - implemented as a PV */
+        SVt_PVIV,       /*  5 - 0x05 */
+        SVt_PVNV,       /*  6 - 0x06 */
+        SVt_PVMG,       /*  7 - 0x07 */
+        SVt_REGEXP,     /*  8 - 0x08 */
         /* PVBM was here, before BIND replaced it.  */
-        SVt_PVGV,	/* 10 */
-        SVt_PVLV,	/* 11 */
-        SVt_PVAV,	/* 12 */
-        SVt_PVHV,	/* 13 */
-        SVt_PVCV,	/* 14 */
-        SVt_PVFM,	/* 15 */
-        SVt_PVIO,	/* 16 */
-        SVt_PVOBJ,      /* 17 */
-                        /* 18-31: Unused, though one should be reserved for a
-                         * freed sv, if the other 3 bits below the flags ones
-                         * get allocated */
+        SVt_PVGV,       /*  9 - 0x09 */
+        SVt_PVLV,       /* 10 - 0x0A */
+        SVt_PVAV,       /* 11 - 0x0B */
+        SVt_PVHV,       /* 12 - 0x0C */
+        SVt_PVCV,       /* 13 - 0x0D */
+        SVt_PVFM,       /* 14 - 0x0E */
+        SVt_PVIO,       /* 15 - 0x0F */
+        SVt_PVOBJ,      /* 16 - 0x10 */
+        SVt_RXMO,       /* 17 - 0x11 - reg_match_offsets */
+                        /* 18-31 - 0x12-0x1F : Unused, though one should be
+                         * reserved for a freed sv, if the other 3 bits below
+                         * the flags bits get allocated */
         SVt_LAST	/* keep last in enum. used to size arrays */
 } svtype;
 
 /* *** any alterations to the SV types above need to be reflected in
  * SVt_MASK and the various PL_valid_types_* tables.  As of this writing those
  * tables are in perl.h.  There are also two affected names tables in dump.c,
- * one in B.xs, and 'bodies_by_type[]' in sv_inline.h.
+ * one in B.xs, and 'bodies_by_type[]' in sv_inline.h. If you add a new type
+ * you will need to update newSV_type() in sv_inline.c and sv_upgrade() in
+ * sv.c, and teach dump.c how to handle it overall.
  *
  * The bits that match 0xe0 are CURRENTLY UNUSED
  * The bits above that are for flags, like SVf_IOK */
@@ -2472,6 +2474,7 @@ Returns a boolean as to whether or not C<sv> is a GV with a pointer to a GP
     (SvTYPE(sv) == SVt_REGEXP				      \
      || (SvFLAGS(sv) & (SVTYPEMASK|SVpgv_GP|SVf_FAKE))        \
          == (SVt_PVLV|SVf_FAKE))
+#define isRXMO(sv) (SvTYPE(sv) == SVt_RXMO)
 
 
 #ifdef PERL_ANY_COW

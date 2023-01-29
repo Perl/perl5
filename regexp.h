@@ -126,6 +126,9 @@ typedef struct regexp_matched_offsets {
     /*---------------------------------------------------------------------- */
 
     regexp_paren_pair *offs; /* Array of offsets for (@-) and (@+) */
+
+    U32 nparens;        /* The number elements in offs.
+                           Must match nparens in owner_rxsv */
 } regexp_matched_offsets;
 
 
@@ -561,9 +564,6 @@ and check for NULL.
 #  define RX_PRELEN(rx_sv)                (RX_WRAPLEN(rx_sv) \
                                             - ReANY(rx_sv)->pre_prefix - 1)
 
-#  define RXp_RXMO(prog)                  ((prog)->rxmo)
-#  define RX_RXMO(rx_sv)                  (RXp_RXMO(ReANY(rx_sv)))
-
 #  define RX_WRAPPED(rx_sv)               SvPVX(rx_sv)
 #  define RX_WRAPPED_const(rx_sv)         SvPVX_const(rx_sv)
 #  define RX_WRAPLEN(rx_sv)               SvCUR(rx_sv)
@@ -573,14 +573,6 @@ and check for NULL.
 #  define RX_COMPFLAGS(rx_sv)             RXp_COMPFLAGS(ReANY(rx_sv))
 #  define RXp_ENGINE(prog)                ((prog)->engine)
 #  define RX_ENGINE(rx_sv)                (RXp_ENGINE(ReANY(rx_sv)))
-#  define RXp_SUBBEG(prog)                (RXp_RXMO(prog)->subbeg)
-#  define RX_SUBBEG(rx_sv)                (RXp_SUBBEG(ReANY(rx_sv)))
-#  define RXp_SUBOFFSET(prog)             (RXp_RXMO(prog)->suboffset)
-#  define RX_SUBOFFSET(rx_sv)             (RXp_SUBOFFSET(ReANY(rx_sv)))
-#  define RXp_SUBCOFFSET(prog)            (RXp_RXMO(prog)->subcoffset)
-#  define RX_SUBCOFFSET(rx_sv)            (RXp_SUBCOFFSET(ReANY(rx_sv)))
-#  define RXp_OFFSp(prog)                 (RXp_RXMO(prog)->offs)
-#  define RX_OFFSp(rx_sv)                 (RXp_OFFSp(ReANY(rx_sv)))
 #  define RXp_LOGICAL_NPARENS(prog)       ((prog)->logical_nparens)
 #  define RX_LOGICAL_NPARENS(rx_sv)       (RXp_LOGICAL_NPARENS(ReANY(rx_sv)))
 #  define RXp_LOGICAL_TO_PARNO(prog)      ((prog)->logical_to_parno)
@@ -591,20 +583,12 @@ and check for NULL.
 #  define RX_PARNO_TO_LOGICAL_NEXT(rx_sv) (RXp_PARNO_TO_LOGICAL_NEXT(ReANY(rx_sv)))
 #  define RXp_NPARENS(prog)               ((prog)->nparens)
 #  define RX_NPARENS(rx_sv)               (RXp_NPARENS(ReANY(rx_sv)))
-#  define RXp_SUBLEN(prog)                (RXp_RXMO(prog)->sublen)
-#  define RX_SUBLEN(rx_sv)                (RXp_SUBLEN(ReANY(rx_sv)))
 #  define RXp_MINLEN(prog)                ((prog)->minlen)
 #  define RX_MINLEN(rx_sv)                (RXp_MINLEN(ReANY(rx_sv)))
 #  define RXp_MINLENRET(prog)             ((prog)->minlenret)
 #  define RX_MINLENRET(rx_sv)             (RXp_MINLENRET(ReANY(rx_sv)))
 #  define RXp_GOFS(prog)                  ((prog)->gofs)
 #  define RX_GOFS(rx_sv)                  (RXp_GOFS(ReANY(rx_sv)))
-#  define RXp_LASTPAREN(prog)             (RXp_RXMO(prog)->lastparen)
-#  define RX_LASTPAREN(rx_sv)             (RXp_LASTPAREN(ReANY(rx_sv)))
-#  define RXp_LASTCLOSEPAREN(prog)        (RXp_RXMO(prog)->lastcloseparen)
-#  define RX_LASTCLOSEPAREN(rx_sv)        (RXp_LASTCLOSEPAREN(ReANY(rx_sv)))
-#  define RXp_SAVED_COPY(prog)            (RXp_RXMO(prog)->saved_copy)
-#  define RX_SAVED_COPY(rx_sv)            (RXp_SAVED_COPY(ReANY(rx_sv)))
 #  define RXp_SUBSTRS(prog)               ((prog)->substrs)
 #  define RX_SUBSTRS(rx_sv)               (RXp_SUBSTRS(ReANY(rx_sv)))
 #  define RXp_PPRIVATE(prog)              ((prog)->pprivate)
@@ -615,6 +599,47 @@ and check for NULL.
 #  define RX_MOTHER_RE(rx_sv)             (RXp_MOTHER_RE(ReANY(rx_sv)))
 #  define RXp_PRE_PREFIX(prog)            ((prog)->pre_prefix)
 #  define RX_PRE_PREFIX(rx_sv)            (RXp_PRE_PREFIX(ReANY(rx_sv)))
+
+#  define RXp_RXMO(prog)                  ((prog)->rxmo)
+#  define RX_RXMO(rx_sv)                  (RXp_RXMO(ReANY(rx_sv)))
+
+#  define RXp_SUBBEG(prog)                (RXp_RXMO(prog)->subbeg)
+#  define RX_SUBBEG(rx_sv)                (RXp_SUBBEG(ReANY(rx_sv)))
+#  define RXp_SUBOFFSET(prog)             (RXp_RXMO(prog)->suboffset)
+#  define RX_SUBOFFSET(rx_sv)             (RXp_SUBOFFSET(ReANY(rx_sv)))
+#  define RXp_SUBCOFFSET(prog)            (RXp_RXMO(prog)->subcoffset)
+#  define RX_SUBCOFFSET(rx_sv)            (RXp_SUBCOFFSET(ReANY(rx_sv)))
+#  define RXp_OFFSp(prog)                 (RXp_RXMO(prog)->offs)
+#  define RX_OFFSp(rx_sv)                 (RXp_OFFSp(ReANY(rx_sv)))
+#  define RXp_SUBLEN(prog)                (RXp_RXMO(prog)->sublen)
+#  define RX_SUBLEN(rx_sv)                (RXp_SUBLEN(ReANY(rx_sv)))
+#  define RXp_LASTPAREN(prog)             (RXp_RXMO(prog)->lastparen)
+#  define RX_LASTPAREN(rx_sv)             (RXp_LASTPAREN(ReANY(rx_sv)))
+#  define RXp_LASTCLOSEPAREN(prog)        (RXp_RXMO(prog)->lastcloseparen)
+#  define RX_LASTCLOSEPAREN(rx_sv)        (RXp_LASTCLOSEPAREN(ReANY(rx_sv)))
+#  define RXp_SAVED_COPY(prog)            (RXp_RXMO(prog)->saved_copy)
+#  define RX_SAVED_COPY(rx_sv)            (RXp_SAVED_COPY(ReANY(rx_sv)))
+
+#  define RXMOp_SUBBEG(rxmo)                ((rxmo)->subbeg)
+#  define RXMO_SUBBEG(rxmo_sv)              (RXMOp_SUBBEG(RxmoANY(rxmo_sv)))
+#  define RXMOp_SUBOFFSET(rxmo)             ((rxmo)->suboffset)
+#  define RXMO_SUBOFFSET(rxmo_sv)           (RXMOp_SUBOFFSET(RxmoANY(rxmo_sv)))
+#  define RXMOp_SUBCOFFSET(rxmo)            ((rxmo)->subcoffset)
+#  define RXMO_SUBCOFFSET(rxmo_sv)          (RXMOp_SUBCOFFSET(RxmoANY(rxmo_sv)))
+#  define RXMOp_OFFSp(rxmo)                 ((rxmo)->offs)
+#  define RXMO_OFFSp(rxmo_sv)               (RXMOp_OFFSp(RxmoANY(rxmo_sv)))
+#  define RXMOp_SUBLEN(rxmo)                ((rxmo)->sublen)
+#  define RXMO_SUBLEN(rxmo_sv)              (RXMOp_SUBLEN(RxmoANY(rxmo_sv)))
+#  define RXMOp_LASTPAREN(rxmo)             ((rxmo)->lastparen)
+#  define RXMO_LASTPAREN(rxmo_sv)           (RXMOp_LASTPAREN(RxmoANY(rxmo_sv)))
+#  define RXMOp_LASTCLOSEPAREN(rxmo)        ((rxmo)->lastcloseparen)
+#  define RXMO_LASTCLOSEPAREN(rxmo_sv)      (RXMOp_LASTCLOSEPAREN(RxmoANY(rxmo_sv)))
+#  define RXMOp_SAVED_COPY(rxmo)            ((rxmo)->saved_copy)
+#  define RXMO_SAVED_COPY(rxmo_sv)          (RXMOp_SAVED_COPY(RxmoANY(rxmo_sv)))
+#  define RXMOp_NPARENS(rxmo)               ((rxmo)->nparens)
+#  define RXMO_NPARENS(rxmo_sv)             (RXMOp_NPARENS(RxmoANY(rxmo_sv)))
+#  define RXMOp_OWNER_RXSV(rxmo)            ((rxmo)->owner_rxsv)
+#  define RXMO_OWNER_RXSV(rxmo_sv)          (RXMOp_OWNER_RXSV(RxmoANY(rxmo_sv)))
 
 
 /* last match was zero-length */
@@ -701,7 +726,9 @@ and check for NULL.
 #  define ReREFCNT_dec(re)	SvREFCNT_dec(re)
 #  define ReREFCNT_inc(re)	((REGEXP *) SvREFCNT_inc(re))
 #endif
-#define ReANY(re)		Perl_ReANY((const REGEXP *)(re))
+
+#define ReANY(sv_rx)		Perl_ReANY((const REGEXP *)(sv_rx))
+#define RxmoANY(sv_rxmo)        ((struct regexp_matched_offsets *)SvANY((const RXMO *)(sv_rxmo)))
 
 /* FIXME for plugins. */
 

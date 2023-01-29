@@ -7940,3 +7940,16 @@ get_savestack_ix()
         RETVAL = PL_savestack_ix;
     OUTPUT:
         RETVAL
+
+MODULE = XS::APItest            PACKAGE = XS::APItest::rxmo
+
+IV
+test_rxmo()
+    CODE:
+    {
+        SV *rxmo = newSV_type(SVt_RXMO);
+        sv_dump(rxmo);
+        RETVAL = 0;
+    }
+    OUTPUT:
+        RETVAL

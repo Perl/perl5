@@ -247,13 +247,6 @@ static const struct body_details bodies_by_type[] = {
       FIT_ARENA(0, sizeof(ALIGNED_TYPE_NAME(regexp)))
     },
 
-    { sizeof(ALIGNED_TYPE_NAME(regexp_matched_offsets)),
-      sizeof(regexp_matched_offsets),
-      0,
-      SVt_RXMO, TRUE, NONV, HASARENA,
-      FIT_ARENA(0, sizeof(ALIGNED_TYPE_NAME(regexp_matched_offsets)))
-    },
-
     { sizeof(ALIGNED_TYPE_NAME(XPVGV)), sizeof(XPVGV), 0, SVt_PVGV, TRUE, HADNV,
       HASARENA, FIT_ARENA(0, sizeof(ALIGNED_TYPE_NAME(XPVGV))) },
 
@@ -295,6 +288,12 @@ static const struct body_details bodies_by_type[] = {
       0,
       SVt_PVOBJ, TRUE, NONV, HASARENA,
       FIT_ARENA(0, sizeof(ALIGNED_TYPE_NAME(XPVOBJ))) },
+
+    { sizeof(ALIGNED_TYPE_NAME(regexp_matched_offsets)),
+      sizeof(regexp_matched_offsets),
+      0,
+      SVt_RXMO, TRUE, NONV, HASARENA,
+      FIT_ARENA(0, sizeof(ALIGNED_TYPE_NAME(regexp_matched_offsets))) },
 };
 
 #define new_body_allocated(sv_type)            \
@@ -464,6 +463,7 @@ Perl_newSV_type(pTHX_ const svtype type)
     case SVt_PVLV:
     case SVt_INVLIST:
     case SVt_REGEXP:
+    case SVt_RXMO:
     case SVt_PVMG:
     case SVt_PVNV:
     case SVt_PV:

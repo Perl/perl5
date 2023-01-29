@@ -6269,19 +6269,19 @@ EXTCONST U8 PL_magic_data[256];
 #endif
 
 #ifdef DOINIT
-                        /* NL IV NV PV INV PI PN MG RX MO GV LV AV HV CV FM IO OBJ */
+                        /* NL IV NV PV INV PI PN MG RX GV LV AV HV CV FM IO OBJ MO */
 EXTCONST bool
-PL_valid_types_IVX[]    = { 0, 1, 0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0 };
+PL_valid_types_IVX[]    = { 0, 1, 0, 0, 0, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0,  0 };
 EXTCONST bool
-PL_valid_types_NVX[]    = { 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0 };
+PL_valid_types_NVX[]    = { 0, 0, 1, 0, 0, 0, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0,  0 };
 EXTCONST bool
-PL_valid_types_PVX[]    = { 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 0 };
+PL_valid_types_PVX[]    = { 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 0,  0 };
 EXTCONST bool
-PL_valid_types_RV[]     = { 0, 1, 0, 1, 0, 1, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 1, 0 };
+PL_valid_types_RV[]     = { 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0,  0 };
 EXTCONST bool
-PL_valid_types_IV_set[] = { 0, 1, 0, 0, 0, 1, 1, 1, 1, 0, 1, 1, 0, 0, 0, 1, 1, 0 };
+PL_valid_types_IV_set[] = { 0, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 0,  0 };
 EXTCONST bool
-PL_valid_types_NV_set[] = { 0, 0, 1, 0, 0, 0, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0 };
+PL_valid_types_NV_set[] = { 0, 0, 1, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0,  0 };
 
 EXTCONST U8
 PL_deBruijn_bitpos_tab32[] = {
