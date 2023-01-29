@@ -6320,7 +6320,16 @@ _invoke_defer_block(pTHX_ U8 type, void *_arg)
         cx = CX_CUR();
         assert(CxTYPE(cx) == CXt_DEFER);
 
-        PL_stack_sp = PL_stack_base + cx->blk_oldsp;
+        /* since we're called during a scope cleanup (including after
+         * a croak), theere's no guarantee thr stack is currently
+         * ref-counted */
+#if defined PERL_RC_STACK && !defined PERL_XXX_TMP_NORC
+        if (rpp_stack_is_rc())
+            rpp_popfree_to(PL_stack_base + cx->blk_oldsp);
+        else
+#endif
+            PL_stack_sp = PL_stack_base + cx->blk_oldsp;
+
 
         CX_LEAVE_SCOPE(cx);
         cx_popblock(cx);
