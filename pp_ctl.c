@@ -99,7 +99,7 @@ PP(pp_regcomp)
     /* prevent recompiling under /o and ithreads. */
 #if defined(USE_ITHREADS)
     if (pm->op_pmflags & PMf_KEEP && PM_GETRE(pm)) {
-        SP = args-1;
+        SP = args - 1;
         RETURN;
     }
 #endif
@@ -153,7 +153,7 @@ PP(pp_regcomp)
 
     if (re != new_re) {
         ReREFCNT_dec(re);
-        PM_SETRE(pm, new_re);
+        PM_SETRE(pm, RX_RXMO(new_re)); /* XXX RXMO - Why no refcnt inc here?*/
     }
 
 
@@ -203,7 +203,7 @@ PP(pp_substcont)
     if(old != rx) {
         if(old)
             ReREFCNT_dec(old);
-        PM_SETRE(pm,ReREFCNT_inc(rx));
+        PM_SETRE(pm,RX_RXMO(ReREFCNT_inc(rx))); /* XXX RXMO - refcount? */
     }
 
     rxres_restore(&cx->sb_rxres, rx);
@@ -5379,7 +5379,7 @@ S_make_matcher(pTHX_ REGEXP *re)
 
     PERL_ARGS_ASSERT_MAKE_MATCHER;
 
-    PM_SETRE(matcher, ReREFCNT_inc(re));
+    PM_SETRE(matcher, RX_RXMO(ReREFCNT_inc(re))); /* XXX RXMO - refcnt inc */
 
     SAVEFREEOP((OP *) matcher);
     ENTER_with_name("matcher"); SAVETMPS;

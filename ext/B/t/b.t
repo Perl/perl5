@@ -362,9 +362,9 @@ SKIP: {
 }
 
 my $pmop = B::svref_2object(sub{ qr/fit/ })->ROOT->first->first->sibling;
-$regexp = $pmop->pmregexp;
-is B::class($regexp), 'REGEXP', 'B::PMOP::pmregexp returns a regexp';
-is $regexp->precomp, 'fit', 'pmregexp returns the right regexp';
+$regexp = $pmop->pmrxmo;
+is B::class($regexp), 'REGEXP', 'B::PMOP::pmrxmo returns a regexp';
+is $regexp->precomp, 'fit', 'pmrxmo returns the right regexp';
 
 
 # Test $B::overlay
@@ -380,7 +380,7 @@ is $regexp->precomp, 'fit', 'pmregexp returns the right regexp';
 	OP    =>  [ qw(desc flags name next opt ppaddr private sibling
 		       size spare targ type) ],
 	PADOP =>  [ qw(gv padix sv) ],
-	PMOP  =>  [ qw(code_list pmflags pmoffset pmreplroot pmreplstart pmstash pmstashpv precomp reflags) ],
+	PMOP  =>  [ qw(code_list pmflags pmrxmo_offset pmreplroot pmreplstart pmstash pmstashpv precomp reflags) ],
 	PVOP  =>  [ qw(pv) ],
 	SVOP  =>  [ qw(gv sv) ],
 	UNOP  =>  [ qw(first) ],

@@ -1179,7 +1179,7 @@ Perl_op_clear(pTHX_ OP *o)
          */
 #ifdef USE_ITHREADS
         if(PL_regex_pad) {        /* We could be in destruction */
-            const IV offset = (cPMOPo)->op_pmoffset;
+            const IV offset = (cPMOPo)->op_pmrxmo_offset;
             ReREFCNT_dec(PM_GETRE(cPMOPo));
             PL_regex_pad[offset] = &PL_sv_undef;
             sv_catpvn_nomg(PL_regex_pad[0], (const char *)&offset,
@@ -7122,13 +7122,13 @@ Perl_newPMOP(pTHX_ I32 type, I32 flags)
 
         SvEND_set(repointer_list, p);
 
-        pmop->op_pmoffset = offset;
+        pmop->op_pmrxmo_offset = offset;
         /* This slot should be free, so assert this:  */
         assert(PL_regex_pad[offset] == &PL_sv_undef);
     } else {
         SV * const repointer = &PL_sv_undef;
         av_push(PL_regex_padav, repointer);
-        pmop->op_pmoffset = av_top_index(PL_regex_padav);
+        pmop->op_pmrxmo_offset = av_top_index(PL_regex_padav);
         PL_regex_pad = AvARRAY(PL_regex_padav);
     }
 #endif
@@ -7343,13 +7343,12 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, OP *repl, UV flags, I32 floor)
                 return o;
             }
 
-            PM_SETRE(pm,
-                eng->op_comp
+            REGEXP *rxsv = eng->op_comp
                     ? eng->op_comp(aTHX_ NULL, 0, expr, eng, NULL, NULL,
                                         rx_flags, pm->op_pmflags)
                     : Perl_re_op_compile(aTHX_ NULL, 0, expr, eng, NULL, NULL,
-                                        rx_flags, pm->op_pmflags)
-            );
+                                        rx_flags, pm->op_pmflags);
+            PM_SETRE(pm,RX_RXMO(rxsv));
             op_free(expr);
         }
         else {
@@ -7367,7 +7366,7 @@ Perl_pmruntime(pTHX_ OP *o, OP *expr, OP *repl, UV flags, I32 floor)
                         (pm->op_pmflags |
                             ((PL_hints & HINT_RE_EVAL) ? PMf_USE_RE_EVAL : 0))
                     );
-            PM_SETRE(pm, re);
+            PM_SETRE(pm, RX_RXMO(re));
             if (pm->op_pmflags & PMf_HAS_CV) {
                 CV *cv;
                 /* this QR op (and the anon sub we embed it in) is never

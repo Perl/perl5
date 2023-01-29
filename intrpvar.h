@@ -891,7 +891,7 @@ PERLVAR(I, body_arenas, void *)		/* pointer to list of body-arenas */
 PERLVAR(I, regex_pad,     SV **)	/* Shortcut into the array of
                                            regex_padav */
 PERLVAR(I, regex_padav,   AV *)		/* All regex objects, indexed via the
-                                           values in op_pmoffset of pmop.
+                                           values in op_pmrxmo_offset of pmop.
                                            Entry 0 is an SV whose PV is a
                                            "packed" list of IVs listing
                                            the now-free slots in the array */

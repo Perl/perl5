@@ -191,30 +191,38 @@ typedef struct regexp {
 
     char **recurse_locinput; /* used to detect infinite recursion, XXX: move to internal */
 
-    regexp_matched_offsets *rxmo;
+    RXMO *rxmo;
 } regexp;
 
 
 #define RXp_PAREN_NAMES(rx) ((rx)->paren_names)
 
-#define RXp_OFFS_START(rx,n) \
-    ((RXp_OFFSp(rx)[(n)].end_new == -1 || RXp_OFFSp(rx)[(n)].start_new == -1 ) \
-     ? RXp_OFFSp(rx)[(n)].start \
-     : RXp_OFFSp(rx)[(n)].start_new )
+#define RXMOp_OFFS_START(rx,n) \
+    ((RXMOp_OFFSp(rx)[(n)].end_new == -1 || RXMOp_OFFSp(rx)[(n)].start_new == -1 ) \
+     ? RXMOp_OFFSp(rx)[(n)].start \
+     : RXMOp_OFFSp(rx)[(n)].start_new )
 
-#define RXp_OFFS_END(rx,n) \
-    ((RXp_OFFSp(rx)[(n)].end_new == -1 || RXp_OFFSp(rx)[(n)].start_new == -1 ) \
-     ? RXp_OFFSp(rx)[(n)].end \
-     : RXp_OFFSp(rx)[(n)].end_new )
+#define RXMOp_OFFS_END(rx,n) \
+    ((RXMOp_OFFSp(rx)[(n)].end_new == -1 || RXMOp_OFFSp(rx)[(n)].start_new == -1 ) \
+     ? RXMOp_OFFSp(rx)[(n)].end \
+     : RXMOp_OFFSp(rx)[(n)].end_new )
 
-#define RXp_OFFS_VALID(rx,n) \
-    ((RXp_OFFSp(rx)[(n)].end_new != -1 && RXp_OFFSp(rx)[(n)].start_new != -1 )  \
+#define RXMOp_OFFS_VALID(rx,n) \
+    ((RXMOp_OFFSp(rx)[(n)].end_new != -1 && RXMOp_OFFSp(rx)[(n)].start_new != -1 )  \
       ||                                                              \
-     (RXp_OFFSp(rx)[(n)].end != -1 && RXp_OFFSp(rx)[(n)].start != -1 ))
+     (RXMOp_OFFSp(rx)[(n)].end != -1 && RXMOp_OFFSp(rx)[(n)].start != -1 ))
 
-#define RX_OFFS_START(rx_sv,n)  RXp_OFFS_START(ReANY(rx_sv),n)
-#define RX_OFFS_END(rx_sv,n)    RXp_OFFS_END(ReANY(rx_sv),n)
-#define RX_OFFS_VALID(rx_sv,n)  RXp_OFFS_VALID(ReANY(rx_sv),n)
+#define RXMO_OFFS_START(rxmo_sv,n)  RXMOp_OFFS_START(RxmoANY(rxmo_sv),n)
+#define RXMO_OFFS_END(rxmo_sv,n)    RXMOp_OFFS_END(RxmoANY(rxmo_sv),n)
+#define RXMO_OFFS_VALID(rxmo_sv,n)  RXMOp_OFFS_VALID(RxmoANY(rxmo_sv),n)
+
+#define RXp_OFFS_START(rx,n)        RXMO_OFFS_START(RXp_RXMO(rx),n)
+#define RXp_OFFS_END(rx,n)          RXMO_OFFS_END(RXp_RXMO(rx),n)
+#define RXp_OFFS_VALID(rx,n)        RXMO_OFFS_VALID(RXp_RXMO(rx),n)
+
+#define RX_OFFS_START(rx_sv,n)      RXp_OFFS_START(ReANY(rx_sv),n)
+#define RX_OFFS_END(rx_sv,n)        RXp_OFFS_END(ReANY(rx_sv),n)
+#define RX_OFFS_VALID(rx_sv,n)      RXp_OFFS_VALID(ReANY(rx_sv),n)
 
 /* used for high speed searches */
 typedef struct re_scream_pos_data_s
@@ -600,25 +608,6 @@ and check for NULL.
 #  define RXp_PRE_PREFIX(prog)            ((prog)->pre_prefix)
 #  define RX_PRE_PREFIX(rx_sv)            (RXp_PRE_PREFIX(ReANY(rx_sv)))
 
-#  define RXp_RXMO(prog)                  ((prog)->rxmo)
-#  define RX_RXMO(rx_sv)                  (RXp_RXMO(ReANY(rx_sv)))
-
-#  define RXp_SUBBEG(prog)                (RXp_RXMO(prog)->subbeg)
-#  define RX_SUBBEG(rx_sv)                (RXp_SUBBEG(ReANY(rx_sv)))
-#  define RXp_SUBOFFSET(prog)             (RXp_RXMO(prog)->suboffset)
-#  define RX_SUBOFFSET(rx_sv)             (RXp_SUBOFFSET(ReANY(rx_sv)))
-#  define RXp_SUBCOFFSET(prog)            (RXp_RXMO(prog)->subcoffset)
-#  define RX_SUBCOFFSET(rx_sv)            (RXp_SUBCOFFSET(ReANY(rx_sv)))
-#  define RXp_OFFSp(prog)                 (RXp_RXMO(prog)->offs)
-#  define RX_OFFSp(rx_sv)                 (RXp_OFFSp(ReANY(rx_sv)))
-#  define RXp_SUBLEN(prog)                (RXp_RXMO(prog)->sublen)
-#  define RX_SUBLEN(rx_sv)                (RXp_SUBLEN(ReANY(rx_sv)))
-#  define RXp_LASTPAREN(prog)             (RXp_RXMO(prog)->lastparen)
-#  define RX_LASTPAREN(rx_sv)             (RXp_LASTPAREN(ReANY(rx_sv)))
-#  define RXp_LASTCLOSEPAREN(prog)        (RXp_RXMO(prog)->lastcloseparen)
-#  define RX_LASTCLOSEPAREN(rx_sv)        (RXp_LASTCLOSEPAREN(ReANY(rx_sv)))
-#  define RXp_SAVED_COPY(prog)            (RXp_RXMO(prog)->saved_copy)
-#  define RX_SAVED_COPY(rx_sv)            (RXp_SAVED_COPY(ReANY(rx_sv)))
 
 #  define RXMOp_SUBBEG(rxmo)                ((rxmo)->subbeg)
 #  define RXMO_SUBBEG(rxmo_sv)              (RXMOp_SUBBEG(RxmoANY(rxmo_sv)))
@@ -641,6 +630,25 @@ and check for NULL.
 #  define RXMOp_OWNER_RXSV(rxmo)            ((rxmo)->owner_rxsv)
 #  define RXMO_OWNER_RXSV(rxmo_sv)          (RXMOp_OWNER_RXSV(RxmoANY(rxmo_sv)))
 
+#  define RXp_RXMO(prog)                  ((prog)->rxmo)
+#  define RX_RXMO(rx_sv)                  (RXp_RXMO(ReANY(rx_sv)))
+
+#  define RXp_SUBBEG(prog)                (RXMO_SUBBEG(RXp_RXMO(prog)))
+#  define RX_SUBBEG(rx_sv)                (RXp_SUBBEG(ReANY(rx_sv)))
+#  define RXp_SUBOFFSET(prog)             (RXMO_SUBOFFSET(RXp_RXMO(prog)))
+#  define RX_SUBOFFSET(rx_sv)             (RXp_SUBOFFSET(ReANY(rx_sv)))
+#  define RXp_SUBCOFFSET(prog)            (RXMO_SUBCOFFSET(RXp_RXMO(prog)))
+#  define RX_SUBCOFFSET(rx_sv)            (RXp_SUBCOFFSET(ReANY(rx_sv)))
+#  define RXp_OFFSp(prog)                 (RXMO_OFFSp(RXp_RXMO(prog)))
+#  define RX_OFFSp(rx_sv)                 (RXp_OFFSp(ReANY(rx_sv)))
+#  define RXp_SUBLEN(prog)                (RXMO_SUBLEN(RXp_RXMO(prog)))
+#  define RX_SUBLEN(rx_sv)                (RXp_SUBLEN(ReANY(rx_sv)))
+#  define RXp_LASTPAREN(prog)             (RXMO_LASTPAREN(RXp_RXMO(prog)))
+#  define RX_LASTPAREN(rx_sv)             (RXp_LASTPAREN(ReANY(rx_sv)))
+#  define RXp_LASTCLOSEPAREN(prog)        (RXMO_LASTCLOSEPAREN(RXp_RXMO(prog)))
+#  define RX_LASTCLOSEPAREN(rx_sv)        (RXp_LASTCLOSEPAREN(ReANY(rx_sv)))
+#  define RXp_SAVED_COPY(prog)            (RXMO_SAVED_COPY(RXp_RXMO(prog)))
+#  define RX_SAVED_COPY(rx_sv)            (RXp_SAVED_COPY(ReANY(rx_sv)))
 
 /* last match was zero-length */
 #  define RXp_ZERO_LEN(prog) \

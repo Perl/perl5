@@ -2299,8 +2299,8 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
      * information about successful matches. Has to be before the setup of
      * RXp_OFFSp() as the offset data is stored in the regexp_matched_offsets
      * structure. */
-    Newxz(RXp_RXMO(RExC_rx), 1, regexp_matched_offsets);
-    RXp_RXMO(RExC_rx)->owner_rxsv = Rx;
+    RXp_RXMO(RExC_rx) = (RXMO *)newSV_type(SVt_RXMO);
+    RXMO_OWNER_RXSV(RXp_RXMO(RExC_rx))= Rx;
 
     /* and allocate the offset arrays */
     Newxz(RXp_OFFSp(RExC_rx), RExC_total_parens, regexp_paren_pair);
@@ -13156,8 +13156,9 @@ Perl_pregfree2(pTHX_ REGEXP *rx)
 #ifdef PERL_ANY_COW
         SvREFCNT_dec(RXp_SAVED_COPY(r));
 #endif
-        Safefree(RXp_OFFSp(r));
-        Safefree(RXp_RXMO(r));
+        /* RXMO XXX: Safefree(RXp_OFFSp(r)); 
+           When we free an SVt_RXMO sv we should free the offsets */
+        SvREFCNT_dec(RXp_RXMO(r));
     }
     if (r->logical_to_parno) {
         Safefree(r->logical_to_parno);
@@ -13266,9 +13267,11 @@ Perl_reg_temp_copy(pTHX_ REGEXP *dsv, REGEXP *ssv)
     if (!islv)
         SvLEN_set(dsv, 0);
 
-    NewCopy(RXp_RXMO(srx),RXp_RXMO(drx), 1, regexp_matched_offsets);
-    RXp_RXMO(drx)->owner_rxsv = dsv; /* make sure match object can find
-                                        the pattern it is for */
+    /* This entire sub should go away now that we have SVt_RXMO */
+    RXp_RXMO(drx)= (RXMO *)newSV_type(SVt_RXMO);
+    Copy(SvANY(RXp_RXMO(srx)),SvANY(RXp_RXMO(drx)), 1, regexp_matched_offsets);
+    RXMO_OWNER_RXSV(RXp_RXMO(drx)) = dsv; /* make sure match object can find
+                                               the pattern it is for */
 
     if (RXp_OFFSp(srx)) { /* why do we check this? We should always
                              have an RXp_OFFSp(rx) */
@@ -13477,13 +13480,16 @@ Perl_re_dup_guts(pTHX_ const REGEXP *sstr, REGEXP *dstr, CLONE_PARAMS *param)
 
     PERL_ARGS_ASSERT_RE_DUP_GUTS;
 
-    /* copy the regexp_matched_offsets data. */
-    NewCopy(RXp_RXMO(r), RXp_RXMO(ret), 1, regexp_matched_offsets);
+    /* copy the regexp_matched_offsets data contained in the RXMO. */
+    RXp_RXMO(ret)= (RXMO *)newSV_type(SVt_RXMO);
+    Copy(RXp_RXMO(r), RXp_RXMO(ret), 1, regexp_matched_offsets);
+    RXMO_OWNER_RXSV(RXp_RXMO(ret)) = dstr; /* make sure match object can find
+                                                the pattern it is for */
 
     /* and set up the regexp_paren_data that it contains. Note the
      * macros hide this relationship. We no longer store offsets data
      * directly in the regexp struct. */
-    npar = r->nparens+1;
+    npar = RXp_NPARENS(r) + 1;
     NewCopy(RXp_OFFSp(r), RXp_OFFSp(ret), npar, regexp_paren_pair);
 
     if (ret->substrs) {

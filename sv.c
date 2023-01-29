@@ -10083,7 +10083,7 @@ Perl_sv_resetpvn(pTHX_ const char *s, STRLEN len, HV * const stash)
 
             while (pmp < end) {
 #ifdef USE_ITHREADS
-                SvREADONLY_off(PL_regex_pad[(*pmp)->op_pmoffset]);
+                SvREADONLY_off(PL_regex_pad[(*pmp)->op_pmrxmo_offset]);
 #else
                 (*pmp)->op_pmflags &= ~PMf_USED;
 #endif

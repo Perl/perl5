@@ -4371,7 +4371,7 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
     if (reginfo->info_aux_eval) {                   \
         (void)ReREFCNT_inc(Re2);		    \
         ReREFCNT_dec(PM_GETRE(PL_reg_curpm));	    \
-        PM_SETRE((PL_reg_curpm), (Re2));	    \
+        PM_SETRE((PL_reg_curpm), RX_RXMO(Re2));	    \
     }
 
 
@@ -11304,7 +11304,7 @@ S_setup_eval_state(pTHX_ regmatch_info *const reginfo)
             /* this regexp is also owned by the new PL_reg_curpm, which
                will try to free it.  */
             av_push(PL_regex_padav, repointer);
-            PL_reg_curpm->op_pmoffset = av_top_index(PL_regex_padav);
+            PL_reg_curpm->op_pmrxmo_offset = av_top_index(PL_regex_padav);
             PL_regex_pad = AvARRAY(PL_regex_padav);
         }
 #endif

@@ -999,7 +999,7 @@ S_pm_description(pTHX_ const PMOP *pm)
     if (pmflags & PMf_ONCE)
         sv_catpvs(desc, ",ONCE");
 #ifdef USE_ITHREADS
-    if (SvREADONLY(PL_regex_pad[pm->op_pmoffset]))
+    if (SvREADONLY(PL_regex_pad[pm->op_pmrxmo_offset]))
         sv_catpvs(desc, ":USED");
 #else
     if (pmflags & PMf_USED)
