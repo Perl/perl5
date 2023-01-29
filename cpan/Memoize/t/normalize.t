@@ -1,6 +1,6 @@
 use strict; use warnings;
 use Memoize;
-use Test::More tests => 10;
+use Test::More tests => 11;
 
 sub n_null { '' }
 
@@ -59,3 +59,8 @@ sub f { 1 }
 memoize('f', NORMALIZER => 'n');
 my $s = f 'scalar';
 my @a = f 'list';
+
+sub args { scalar @_ }
+sub null_args { join chr(28), splice @_ }
+memoize('args', NORMALIZER => 'null_args');
+ok args(1), 'original @_ is protected from normalizer';
