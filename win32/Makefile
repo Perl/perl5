@@ -887,6 +887,7 @@ perlglob$(o)  : perlglob.c
 
 ..\config.sh : $(CFGSH_TMPL) config_sh.PL FindExt.pm $(MINIPERL)
 	$(MINIPERL) -I..\lib config_sh.PL $(CFG_VARS) $(CFGSH_TMPL) > ..\config.sh.tmp
+	if exist ..\config.sh del /f ..\config.sh
 	rename ..\config.sh.tmp config.sh
 
 # This target is for when changes to the main config.sh happen.
