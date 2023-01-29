@@ -23778,7 +23778,7 @@ EOF
 for i in \`$cc -v -c tmp.c 2>&1 $postprocess_cc_v\`
 do
 	case "\$i" in
-	-D*) echo "\$i" | $sed 's/^-D//';;
+	-D*) echo "\$i" | $sed 's/^-D//;s/['\''\"]//g';;
 	-A*) $test "$gccversion" && echo "\$i" | $sed 's/^-A//' | $sed 's/\(.*\)(\(.*\))/\1=\2/';;
 	esac
 done
