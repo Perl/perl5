@@ -72,11 +72,6 @@ BEGIN {
 
 my $symlink_exists = eval { symlink("",""); 1 };
 
-my $orig_dir = cwd();
-( my $orig_dir_untainted ) = $orig_dir =~ m|^(.+)$|; # untaint it
-
-cleanup();
-
 my $found;
 find({wanted => sub { ++$found if $_ eq 'taint.t' },
                 untaint => 1, untaint_pattern => qr|^(.+)$|}, File::Spec->curdir);
@@ -92,8 +87,22 @@ is($found, 1, 'taint.t found once again');
 my $case = 2;
 my $FastFileTests_OK = 0;
 
+my $test_root_dir; # where we are when this test starts
+my $test_root_dir_tainted = cwd();
+if ($test_root_dir_tainted =~ /^(.*)$/) {
+    $test_root_dir = $1;
+} else {
+    die "Failed to untaint root dir of test";
+}
+my $test_temp_dir = tempdir("FF_taint_t_XXXXXX",CLEANUP=>1);
+chdir($test_temp_dir) or die "Failed to chdir to '$test_temp_dir': $!";
+
 sub cleanup {
-    chdir($orig_dir_untainted);
+    # doing this in two steps avoids the need to know about
+    # directory separators, which is helpful as we override
+    # the File::Spec heirarchy, so we can't ask it to help us here.
+    chdir($test_root_dir) or die "Failed to chdir to '$test_root_dir': $!";
+    chdir($test_temp_dir) or die "Failed to chdir to '$test_temp_dir': $!";
     my $need_updir = 0;
     if (-d dir_path('for_find_taint')) {
         $need_updir = 1 if chdir(dir_path('for_find_taint'));
@@ -120,6 +129,7 @@ sub cleanup {
     if (-d dir_path('for_find_taint')) {
         rmdir dir_path('for_find_taint') or print "# Can't rmdir for_find_taint: $!\n";
     }
+    chdir($test_root_dir) or die "Failed to chdir to '$test_root_dir': $!";
 }
 
 END {
@@ -167,16 +177,6 @@ sub simple_wanted {
 *file_path_name = \&file_path;
 
 ##### Create directories, files and symlinks used in testing #####
-my $root_dir_tainted = cwd();
-my $root_dir;
-if ($root_dir_tainted=~/^(.*)$/) {
-    $root_dir = $1;
-} else {
-    die "Failed to untaint root dir of test";
-}
-my $test_dir = tempdir("FF_taint_t_XXXXXX",CLEANUP=>1);
-chdir $test_dir;
-
 mkdir_ok( dir_path('for_find_taint'), 0770 );
 ok( chdir( dir_path('for_find_taint')), 'successful chdir() to for_find_taint' );
 
@@ -342,4 +342,3 @@ SKIP: {
 
     chdir($cwd_untainted);
 }
-chdir $root_dir; # let File::Temp cleanup - Switch to `defer {}` one day
