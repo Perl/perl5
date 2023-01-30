@@ -537,6 +537,9 @@
 # define runops_debug()                         Perl_runops_debug(aTHX)
 # define runops_standard()                      Perl_runops_standard(aTHX)
 # define rv2cv_op_cv(a,b)                       Perl_rv2cv_op_cv(aTHX_ a,b)
+# define rxmo_dup_guts(a,b,c)                   Perl_rxmo_dup_guts(aTHX_ a,b,c)
+# define rxmo_free(a)                           Perl_rxmo_free(aTHX_ a)
+# define rxmo_free2(a)                          Perl_rxmo_free2(aTHX_ a)
 # define safesyscalloc                          Perl_safesyscalloc
 # define safesysfree                            Perl_safesysfree
 # define safesysmalloc                          Perl_safesysmalloc

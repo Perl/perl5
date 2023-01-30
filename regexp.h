@@ -192,7 +192,7 @@ typedef struct regexp {
 
     char **recurse_locinput; /* used to detect infinite recursion, XXX: move to internal */
 
-    RXMO *rxmo;
+    // RXMO *rxmo;
 } regexp;
 
 

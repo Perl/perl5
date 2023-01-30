@@ -2516,6 +2516,7 @@ Adhp	|I32	|pregexec	|NN REGEXP * const prog 		\
 				|U32 nosave
 Cp	|void	|pregfree	|NULLOK REGEXP *r
 Cp	|void	|pregfree2	|NN REGEXP *rx
+
 Adp	|const char *|prescan_version					\
 				|NN const char *s			\
 				|bool strict				\
@@ -2742,6 +2743,11 @@ Cdhp	|int	|runops_debug
 Cdhp	|int	|runops_standard
 Adp	|CV *	|rv2cv_op_cv	|NN OP *cvop				\
 				|U32 flags
+Adp	|void	|rxmo_dup_guts	|NN const RXMO *srxmo			\
+				|NN RXMO *drxmo 			\
+				|NN CLONE_PARAMS *param
+Cp	|void	|rxmo_free	|NULLOK RXMO *rxmo
+Cp	|void	|rxmo_free2	|NN RXMOG *rxmo
 : Used in pp_hot.c
 p	|void	|rxres_save	|NN void **rsp				\
 				|NN REGEXP *rx

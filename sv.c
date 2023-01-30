@@ -14710,6 +14710,9 @@ S_sv_dup_common(pTHX_ const SV *const ssv, CLONE_PARAMS *const param)
                 break;
             case SVt_PVMG:
                 break;
+            case SVt_RXMO:
+                rxmo_dup_guts((RXMO*) ssv, (RXMO*) dsv, param);
+                break;
             case SVt_REGEXP:
               duprex:
                 /* FIXME for plugins */

@@ -3849,6 +3849,20 @@ Perl_rv2cv_op_cv(pTHX_ OP *cvop, U32 flags);
         assert(cvop)
 
 PERL_CALLCONV void
+Perl_rxmo_dup_guts(pTHX_ const RXMO *srxmo, RXMO *drxmo, CLONE_PARAMS *param);
+#define PERL_ARGS_ASSERT_RXMO_DUP_GUTS          \
+        assert(srxmo); assert(drxmo); assert(param)
+
+PERL_CALLCONV void
+Perl_rxmo_free(pTHX_ RXMO *rxmo);
+#define PERL_ARGS_ASSERT_RXMO_FREE
+
+PERL_CALLCONV void
+Perl_rxmo_free2(pTHX_ RXMOG *rxmo);
+#define PERL_ARGS_ASSERT_RXMO_FREE2             \
+        assert(rxmo)
+
+PERL_CALLCONV void
 Perl_rxres_save(pTHX_ void **rsp, REGEXP *rx)
         __attribute__visibility__("hidden");
 #define PERL_ARGS_ASSERT_RXRES_SAVE             \

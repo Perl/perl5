@@ -2295,17 +2295,8 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
         RExC_rx->parno_to_logical_next = NULL;
     }
 
-    /* allocate a new struct regexp_matched_offsets to use to store
-     * information about successful matches. Has to be before the setup of
-     * RXp_OFFSp() as the offset data is stored in the regexp_matched_offsets
-     * structure. */
-    RXp_RXMO(RExC_rx) = (RXMO *)newSV_type(SVt_RXMO);
-    RXMO_OWNER_RXSV(RXp_RXMO(RExC_rx))= Rx;
-
-    /* and allocate the offset arrays */
-    Newxz(RXp_OFFSp(RExC_rx), RExC_total_parens, regexp_paren_pair);
-
     /* assume we don't need to swap parens around before we match */
+    /* what does that mean? - yves */
     DEBUG_TEST_r({
         Perl_re_printf( aTHX_ "study_chunk_recursed_count: %lu\n",
             (unsigned long)RExC_study_chunk_recursed_count);
@@ -13143,23 +13134,6 @@ Perl_pregfree2(pTHX_ REGEXP *rx)
 
     RX_MATCH_COPY_FREE(rx);
 
-    /* Note that this sub might get called if we throw an exception during
-     * compilation and RXp_RXMO(r) is set up late, so it is quite possible it
-     * won't be set up when we get here. RXp_OFFSp(r) lives in the RXp_RXMO
-     * object, and thus we can't just Safefree it directly. We need to make
-     * sure the intermediate object actually exists before we can free the
-     * offsets structure. Ideally in the future we wont have to deal with
-     * offsets as a separate structure. As we will embed it in the RXMO
-     * structure directly And allocate both at once.
-     */
-    if (RXp_RXMO(r)) {
-#ifdef PERL_ANY_COW
-        SvREFCNT_dec(RXp_SAVED_COPY(r));
-#endif
-        /* RXMO XXX: Safefree(RXp_OFFSp(r)); 
-           When we free an SVt_RXMO sv we should free the offsets */
-        SvREFCNT_dec(RXp_RXMO(r));
-    }
     if (r->logical_to_parno) {
         Safefree(r->logical_to_parno);
         Safefree(r->parno_to_logical);
@@ -13170,6 +13144,48 @@ Perl_pregfree2(pTHX_ REGEXP *rx)
     if (r->recurse_locinput)
         Safefree(r->recurse_locinput);
 }
+
+void
+Perl_rxmo_free(pTHX_ RXMO *rxmo) {
+    PERL_ARGS_ASSERT_RXMO_FREE2;
+    SvREFCNT_dec(rxmo);
+}
+
+void
+Perl_rxmo_free2(pTHX_ RXMO *rxmo)
+{
+    PERL_ARGS_ASSERT_RXMO_FREE2;
+    regexp_matched_offsets *mo;
+
+#ifdef PERL_ANY_COW
+    SvREFCNT_dec(RXMOp_SAVED_COPY(mo));
+#endif
+    Safefree(RXMOp_OFFSp(mo));
+
+}
+
+#if defined(USE_ITHREADS)
+#if !defined(PERL_IN_XSUB_RE)
+void
+Perl_rxmo_dup_guts(pTHX_ RXMO *srxmo, RXMO *drxmo, CLONE_PARAMS *param)
+{
+    PERL_ARGS_ASSERT_RXMO_DUP_GUTS;
+#if 0
+    /* copy the regexp_matched_offsets data contained in the RXMO. */
+    RXp_RXMO(ret)= (RXMO *)newSV_type(SVt_RXMO);
+    Copy(RXp_RXMO(r), RXp_RXMO(ret), 1, regexp_matched_offsets);
+    RXMO_OWNER_RXSV(RXp_RXMO(ret)) = dstr; /* make sure match object can find
+                                                the pattern it is for */
+
+    /* and set up the regexp_paren_data that it contains. Note the
+     * macros hide this relationship. We no longer store offsets data
+     * directly in the regexp struct. */
+    npar = RXp_NPARENS(r) + 1;
+    NewCopy(RXp_OFFSp(r), RXp_OFFSp(ret), npar, regexp_paren_pair);
+#endif
+}
+#endif
+#endif
 
 
 /*  reg_temp_copy()
@@ -13267,17 +13283,6 @@ Perl_reg_temp_copy(pTHX_ REGEXP *dsv, REGEXP *ssv)
     if (!islv)
         SvLEN_set(dsv, 0);
 
-    /* This entire sub should go away now that we have SVt_RXMO */
-    RXp_RXMO(drx)= (RXMO *)newSV_type(SVt_RXMO);
-    Copy(SvANY(RXp_RXMO(srx)),SvANY(RXp_RXMO(drx)), 1, regexp_matched_offsets);
-    RXMO_OWNER_RXSV(RXp_RXMO(drx)) = dsv; /* make sure match object can find
-                                               the pattern it is for */
-
-    if (RXp_OFFSp(srx)) { /* why do we check this? We should always
-                             have an RXp_OFFSp(rx) */
-        const I32 npar = srx->nparens+1;
-        NewCopy(RXp_OFFSp(srx), RXp_OFFSp(drx), npar, regexp_paren_pair);
-    }
     if (srx->substrs) {
         int i;
         Newx(drx->substrs, 1, struct reg_substr_data);
@@ -13480,17 +13485,6 @@ Perl_re_dup_guts(pTHX_ const REGEXP *sstr, REGEXP *dstr, CLONE_PARAMS *param)
 
     PERL_ARGS_ASSERT_RE_DUP_GUTS;
 
-    /* copy the regexp_matched_offsets data contained in the RXMO. */
-    RXp_RXMO(ret)= (RXMO *)newSV_type(SVt_RXMO);
-    Copy(RXp_RXMO(r), RXp_RXMO(ret), 1, regexp_matched_offsets);
-    RXMO_OWNER_RXSV(RXp_RXMO(ret)) = dstr; /* make sure match object can find
-                                                the pattern it is for */
-
-    /* and set up the regexp_paren_data that it contains. Note the
-     * macros hide this relationship. We no longer store offsets data
-     * directly in the regexp struct. */
-    npar = RXp_NPARENS(r) + 1;
-    NewCopy(RXp_OFFSp(r), RXp_OFFSp(ret), npar, regexp_paren_pair);
 
     if (ret->substrs) {
         /* Do it this way to avoid reading from *r after the StructCopy().

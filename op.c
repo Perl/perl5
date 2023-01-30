@@ -1179,11 +1179,16 @@ Perl_op_clear(pTHX_ OP *o)
          */
 #ifdef USE_ITHREADS
         if(PL_regex_pad) {        /* We could be in destruction */
-            const IV offset = (cPMOPo)->op_pmrxmo_offset;
+            const IV re_offset = (cPMOPo)->op_pmre_offset;
             ReREFCNT_dec(PM_GETRE(cPMOPo));
-            PL_regex_pad[offset] = &PL_sv_undef;
-            sv_catpvn_nomg(PL_regex_pad[0], (const char *)&offset,
-                           sizeof(offset));
+            PL_regex_pad[re_offset] = &PL_sv_undef;
+            sv_catpvn_nomg(PL_regex_pad[0], (const char *)&re_offset,
+                           sizeof(re_offset));
+            const IV rxmo_offset = (cPMOPo)->op_pmrxmo_offset;
+            ReREFCNT_dec(PM_GETRXMO(cPMOPo));
+            PL_regex_pad[rxmo_offset] = &PL_sv_undef;
+            sv_catpvn_nomg(PL_regex_pad[0], (const char *)&rxmo_offset,
+                           sizeof(rxmo_offset));
         }
 #else
         ReREFCNT_dec(PM_GETRE(cPMOPo));
