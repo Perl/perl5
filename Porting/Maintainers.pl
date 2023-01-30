@@ -142,7 +142,7 @@ use File::Glob qw(:case);
     },
 
     'autodie' => {
-        'DISTRIBUTION' => 'TODDR/autodie-2.34.tar.gz',
+        'DISTRIBUTION' => 'TODDR/autodie-2.36.tar.gz',
         'FILES'        => q[cpan/autodie],
         'EXCLUDED'     => [
             qr{benchmarks},
