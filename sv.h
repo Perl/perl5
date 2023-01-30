@@ -165,12 +165,18 @@ typedef enum {
         SVt_LAST	/* keep last in enum. used to size arrays */
 } svtype;
 
-/* *** any alterations to the SV types above need to be reflected in
- * SVt_MASK and the various PL_valid_types_* tables.  As of this writing those
- * tables are in perl.h.  There are also two affected names tables in dump.c,
- * one in B.xs, and 'bodies_by_type[]' in sv_inline.h. If you add a new type
- * you will need to update newSV_type() in sv_inline.c and sv_upgrade() in
- * sv.c, and teach dump.c how to handle it overall.
+/* *** any alterations to the SV types above need to be reflected in SVt_MASK
+ * and the various PL_valid_types_* tables. As of this writing those tables
+ * are in perl.h. There are also two affected names tables in dump.c, one in
+ * B.xs, and 'bodies_by_type[]' in sv_inline.h. 
+ *
+ * If you add a new type you will need to update newSV_type() in sv_inline.c
+ * and sv_upgrade() in sv.c, and teach dump.c how to handle it overall.
+ *
+ * Note that for SVt_ >= PVMG likely the new structure will need to have an
+ * _XPV_HEAD in it at the top, if you see weird issues related to MAGIC in
+ * sv_dump()ing the new type then this is a good candidate for being the cause.
+ * See struct regexp for an example.
  *
  * The bits that match 0xe0 are CURRENTLY UNUSED
  * The bits above that are for flags, like SVf_IOK */

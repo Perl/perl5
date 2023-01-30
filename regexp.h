@@ -107,6 +107,7 @@ struct reg_code_blocks {
 };
 
 typedef struct regexp_matched_offsets {
+    _XPV_HEAD;
     REGEXP *owner_rxsv;
     /*----------------------------------------------------------------------
      * Data about the last/current match. These are modified during matching
