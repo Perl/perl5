@@ -128,12 +128,7 @@ sub generate_proto_h {
         die_at_end "$plain_func: u flag only usable with m" if $flags =~ /u/
                                                             && $flags !~ /m/;
 
-        my ($static_flag, @extra_static_flags)= do {
-            # the seen filter can be removed once flag dedupe
-            # is done in tidy_embed.pl
-            my %seen;
-            grep !$seen{$_}++, $flags =~/([SsIi])/g;
-        };
+        my ($static_flag, @extra_static_flags)= $flags =~/([SsIi])/g;
 
         if (@extra_static_flags) {
             my $flags_str = join ", ", $static_flag, @extra_static_flags;

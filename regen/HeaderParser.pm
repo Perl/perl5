@@ -502,7 +502,7 @@ sub _normalize_if_elif {
 # calls parse_fh()
 sub parse_text {
     my ($self, $text)= @_;
-    local $self->{parse_source} = "(buffer)";
+    local $self->{parse_source}= "(buffer)";
     open my $fh, "<", \$text
         or die "Failed to open buffer for read: $!";
     return $self->parse_fh($fh);
@@ -517,7 +517,7 @@ sub parse_fh {
     my @cond;
     my @cond_line;
     my $last_cond;
-    local $self->{parse_source} = $self->{parse_source} || "(unknown)";
+    local $self->{parse_source}= $self->{parse_source} || "(unknown)";
     my $cb= $self->{pre_process_content};
     $self->{orig_content}= "";
     my $line_num= 1;
@@ -689,6 +689,20 @@ sub tidy_embed_fnc_entry {
     $line =~ s/\s+\z//;
     ($line)= expand($line);
     my ($flags, $ret, $name, @args)= split /\s*\|\s*/, $line;
+    my %flag_seen;
+    $flags= join "", grep !$flag_seen{$_}++, sort split //, $flags;
+    if ($flags =~ s/^#//) {
+        $flags .= "#";
+    }
+    if ($flags eq "#") {
+        die "Not allowed to use only '#' for flags"
+            . "in 'embed.fnc' at line $line_data->{start_line_num}";
+    }
+    if (!$flags) {
+        die "Missing flags in function definition"
+            . " in 'embed.fnc' at line $line_data->{start_line_num}\n"
+            . "Did you a forget a line continuation on the previous line?\n";
+    }
     for ($ret, @args) {
         s/(\w)\*/$1 */g;
         s/\*\s+(\w)/*$1/g;
