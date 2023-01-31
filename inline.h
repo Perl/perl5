@@ -287,7 +287,7 @@ S_strip_spaces(pTHX_ const char * orig, STRLEN * const len)
 /* Otherwise this function is implemented as macros in iperlsys.h */
 
 PERL_STATIC_INLINE bool
-Perl_PerlEnv_putenv(pTHX_ char * str)
+S_PerlEnv_putenv(pTHX_ char * str)
 {
     PERL_ARGS_ASSERT_PERLENV_PUTENV;
 
