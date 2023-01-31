@@ -4065,18 +4065,6 @@ Perl_save_vptr(pTHX_ void *ptr);
 #define PERL_ARGS_ASSERT_SAVE_VPTR              \
         assert(ptr)
 
-STATIC char *
-Perl_savepv(pTHX_ const char *pv)
-        __attribute__malloc__
-        __attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT_SAVEPV
-
-STATIC char *
-Perl_savepvn(pTHX_ const char *pv, Size_t len)
-        __attribute__malloc__
-        __attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT_SAVEPVN
-
 PERL_CALLCONV char *
 Perl_savesharedpv(pTHX_ const char *pv)
         __attribute__malloc__
@@ -4089,13 +4077,6 @@ Perl_savesharedpvn(pTHX_ const char * const pv, const STRLEN len)
         __attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_SAVESHAREDPVN
 
-STATIC char *
-Perl_savesharedsvpv(pTHX_ SV *sv)
-        __attribute__malloc__
-        __attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT_SAVESHAREDSVPV         \
-        assert(sv)
-
 PERL_CALLCONV void
 Perl_savestack_grow(pTHX);
 #define PERL_ARGS_ASSERT_SAVESTACK_GROW
@@ -4103,13 +4084,6 @@ Perl_savestack_grow(pTHX);
 PERL_CALLCONV void
 Perl_savestack_grow_cnt(pTHX_ I32 need);
 #define PERL_ARGS_ASSERT_SAVESTACK_GROW_CNT
-
-STATIC char *
-Perl_savesvpv(pTHX_ SV *sv)
-        __attribute__malloc__
-        __attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT_SAVESVPV               \
-        assert(sv)
 
 PERL_CALLCONV void
 Perl_savetmps(pTHX);
@@ -5562,12 +5536,6 @@ Perl_PerlSock_socket_cloexec(pTHX_ int domain, int type, int protocol)
 # define PERL_ARGS_ASSERT_PERLSOCK_SOCKET_CLOEXEC
 
 #endif /* defined(HAS_SOCKET) */
-#if !defined(HAS_STRLCAT)
-STATIC Size_t
-Perl_my_strlcat(char *dst, const char *src, Size_t size);
-# define PERL_ARGS_ASSERT_MY_STRLCAT
-
-#endif /* !defined(HAS_STRLCAT) */
 #if !defined(HAS_STRLCPY)
 STATIC Size_t
 Perl_my_strlcpy(char *dst, const char *src, Size_t size);
@@ -9871,6 +9839,32 @@ Perl_newSV_type_mortal(pTHX_ const svtype type)
         __attribute__always_inline__;
 # define PERL_ARGS_ASSERT_NEWSV_TYPE_MORTAL
 
+PERL_STATIC_INLINE char *
+Perl_savepv(pTHX_ const char *pv)
+        __attribute__malloc__
+        __attribute__warn_unused_result__;
+# define PERL_ARGS_ASSERT_SAVEPV
+
+PERL_STATIC_INLINE char *
+Perl_savepvn(pTHX_ const char *pv, Size_t len)
+        __attribute__malloc__
+        __attribute__warn_unused_result__;
+# define PERL_ARGS_ASSERT_SAVEPVN
+
+PERL_STATIC_INLINE char *
+Perl_savesharedsvpv(pTHX_ SV *sv)
+        __attribute__malloc__
+        __attribute__warn_unused_result__;
+# define PERL_ARGS_ASSERT_SAVESHAREDSVPV        \
+        assert(sv)
+
+PERL_STATIC_INLINE char *
+Perl_savesvpv(pTHX_ SV *sv)
+        __attribute__malloc__
+        __attribute__warn_unused_result__;
+# define PERL_ARGS_ASSERT_SAVESVPV              \
+        assert(sv)
+
 PERL_STATIC_INLINE unsigned
 Perl_single_1bit_pos32(U32 word)
         __attribute__warn_unused_result__;
@@ -10041,6 +10035,12 @@ PERL_STATIC_INLINE U8
 Perl_gimme_V(pTHX);
 # define PERL_ARGS_ASSERT_GIMME_V
 
+# if !defined(HAS_STRLCAT)
+PERL_STATIC_INLINE Size_t
+Perl_my_strlcat(char *dst, const char *src, Size_t size);
+#   define PERL_ARGS_ASSERT_MY_STRLCAT
+
+# endif /* !defined(HAS_STRLCAT) */
 # if !defined(HAS_STRNLEN)
 PERL_STATIC_INLINE Size_t
 Perl_my_strnlen(const char *str, Size_t maxlen);

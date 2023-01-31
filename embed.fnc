@@ -2820,8 +2820,8 @@ Cdp	|void	|save_pushptr	|NULLOK void * const ptr		\
 Cp	|void	|save_pushptrptr|NULLOK void * const ptr1		\
 				|NULLOK void * const ptr2		\
 				|const int type
-Aads	|char * |savepv 	|NULLOK const char *pv
-Aads	|char * |savepvn	|NULLOK const char *pv			\
+Aadip	|char * |savepv 	|NULLOK const char *pv
+Aadip	|char * |savepvn	|NULLOK const char *pv			\
 				|Size_t len
 Cdp	|void	|save_rcpv_free |NN char **ppv
 Cp	|void	|save_re_context
@@ -2837,13 +2837,13 @@ Aadp	|char * |savesharedpvn	|NULLOK const char * const pv		\
 				|const STRLEN len
 Cdp	|void	|save_shared_pvref					\
 				|NN char **str
-Aads	|char * |savesharedsvpv |NN SV *sv
+Aadip	|char * |savesharedsvpv |NN SV *sv
 Cp	|void	|save_sptr	|NN SV **sptr
 Cp	|void	|savestack_grow
 Cp	|void	|savestack_grow_cnt					\
 				|I32 need
 Xp	|void	|save_strlen	|NN STRLEN *ptr
-Aads	|char * |savesvpv	|NN SV *sv
+Aadip	|char * |savesvpv	|NN SV *sv
 Adhp	|SV *	|save_svref	|NN SV **sptr
 Aopx	|void	|savetmps
 Cdp	|void	|save_vptr	|NN void *ptr
@@ -3782,7 +3782,7 @@ Rp	|int	|PerlSock_socket_cloexec				\
 				|int protocol
 #endif /* defined(HAS_SOCKET) */
 #if !defined(HAS_STRLCAT)
-ATds	|Size_t |my_strlcat	|NULLOK char *dst			\
+ATdip	|Size_t |my_strlcat	|NULLOK char *dst			\
 				|NULLOK const char *src 		\
 				|Size_t size
 #endif /* !defined(HAS_STRLCAT) */
