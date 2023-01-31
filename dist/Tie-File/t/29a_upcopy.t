@@ -130,13 +130,15 @@ sub try {
   }
 
   my $o = tie my @lines, 'Tie::File', $file or die $!;
+  # allocate more time for the test if we are running parallel tests
+  my $alarm_time = ($ENV{TEST_JOBS} || $ENV{HARNESS_OPTIONS}) ? 20 : 10;
   local $SIG{ALRM} = sub { die "Alarm clock" };
-  my $a_retval = eval { alarm(10) unless $^P; $o->_upcopy($src, $dst, $len) };
+  my $a_retval = eval { alarm($alarm_time) unless $^P; $o->_upcopy($src, $dst, $len) };
   my $err = $@;
   undef $o; untie @lines; alarm(0);
   if ($err) {
     if ($err =~ /^Alarm clock/) {
-      print STDERR "# $0 Timeout at test $N\n";
+      print STDERR "# $0 Timeout after $alarm_time seconds at test $N\n";
       print "not ok $N\n"; $N++;
       return;
     } else {
@@ -173,4 +175,3 @@ sub ctrlfix {
 END {
   1 while unlink $file;
 }
-
