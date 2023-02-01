@@ -3913,7 +3913,7 @@ Perl_gv_setref(pTHX_ SV *const dsv, SV *const ssv)
                     {
                         SV * const new_const_sv =
                             CvCONST((const CV *)sref)
-                                 ? cv_const_sv((const CV *)sref)
+                                 ? cv_const_sv_or_av((const CV *)sref)
                                  : NULL;
                         HV * const stash = GvSTASH((const GV *)dsv);
                         report_redefined_cv(
