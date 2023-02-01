@@ -10661,7 +10661,9 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
             if (ckWARN(WARN_REDEFINE)
              || (  ckWARN_d(WARN_REDEFINE)
                 && (  !const_sv || SvRV(gv) == const_sv
-                   || sv_cmp(SvRV(gv), const_sv)  ))) {
+                      || SvTYPE(const_sv) == SVt_PVAV
+                      || SvTYPE(SvRV(gv)) == SVt_PVAV
+                      || sv_cmp(SvRV(gv), const_sv)  ))) {
                 assert(cSVOPo);
                 Perl_warner(aTHX_ packWARN(WARN_REDEFINE),
                           "Constant subroutine %" SVf " redefined",
