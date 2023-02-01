@@ -1025,6 +1025,13 @@ EXPECT
 OPTIONS regex
 Constant subroutine main::fred redefined at .*lib/constant\.pm line \d+
 ########
+# op.c related to github #20742
+# produced an assertion failure
+use constant x => 1, 2;
+sub x () { 1 }
+EXPECT
+Constant subroutine x redefined at - line 4.
+########
 # op.c
 use feature "lexical_subs", "state";
 my sub fred () { 1 }
