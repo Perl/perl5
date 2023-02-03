@@ -10,7 +10,7 @@ package Math::Complex;
 { use 5.006; }
 use strict;
 
-our $VERSION = 1.60;
+our $VERSION = 1.61;
 
 use Config;
 
