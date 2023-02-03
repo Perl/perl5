@@ -1198,11 +1198,6 @@ Perl_get_av(pTHX_ const char *name, I32 flags);
 #define PERL_ARGS_ASSERT_GET_AV                 \
         assert(name)
 
-PERL_CALLCONV void *
-Perl_get_context(void)
-        __attribute__warn_unused_result__;
-#define PERL_ARGS_ASSERT_GET_CONTEXT
-
 PERL_CALLCONV CV *
 Perl_get_cv(pTHX_ const char *name, I32 flags);
 #define PERL_ARGS_ASSERT_GET_CV                 \
@@ -10095,6 +10090,13 @@ S_PerlEnv_putenv(pTHX_ char *str);
 
 #   endif /* !defined(PERL_IMPLICIT_SYS) */
 # endif /* defined(USE_ITHREADS) */
+# if !defined(WIN32)
+PERL_STATIC_INLINE void *
+Perl_get_context(void)
+        __attribute__warn_unused_result__;
+#   define PERL_ARGS_ASSERT_GET_CONTEXT
+
+# endif /* !defined(WIN32) */
 #endif /* !defined(PERL_NO_INLINE_FUNCTIONS) */
 #if defined(PERL_USE_3ARG_SIGHANDLER)
 PERL_CALLCONV Signal_t
@@ -10498,6 +10500,11 @@ Perl_do_spawn_nowait(pTHX_ char *cmd);
 
 #endif /* defined(VMS) || defined(WIN32) */
 #if defined(WIN32)
+PERL_CALLCONV void *
+Perl_get_context(void)
+        __attribute__warn_unused_result__;
+# define PERL_ARGS_ASSERT_GET_CONTEXT
+
 PERL_CALLCONV bool
 Perl_get_win32_message_utf8ness(pTHX_ const char *string)
         __attribute__visibility__("hidden");

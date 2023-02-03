@@ -3652,6 +3652,39 @@ Perl_savesharedsvpv(pTHX_ SV *sv)
     return savesharedpvn(pv, len);
 }
 
+#ifndef PERL_GET_CONTEXT_DEFINED
+
+/*
+=for apidoc_section $embedding
+=for apidoc get_context
+
+Implements L<perlapi/C<PERL_GET_CONTEXT>>, which you should use instead.
+
+=cut
+*/
+
+PERL_STATIC_INLINE void *
+Perl_get_context(void)
+{
+#  if defined(USE_ITHREADS)
+#    ifdef OLD_PTHREADS_API
+    pthread_addr_t t;
+    int error = pthread_getspecific(PL_thr_key, &t);
+    if (error)
+        Perl_croak_nocontext("panic: pthread_getspecific, error=%d", error);
+    return (void*)t;
+#    elif defined(I_MACH_CTHREADS)
+    return (void*)cthread_data(cthread_self());
+#    else
+    return (void*)PTHREAD_GETSPECIFIC(PL_thr_key);
+#    endif
+#  else
+    return (void*)NULL;
+#  endif
+}
+
+#endif
+
 PERL_STATIC_INLINE MGVTBL*
 Perl_get_vtbl(pTHX_ int vtbl_id)
 {

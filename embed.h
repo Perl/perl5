@@ -236,7 +236,6 @@
 # define forbid_outofblock_ops(a,b)             Perl_forbid_outofblock_ops(aTHX_ a,b)
 # define free_tmps()                            Perl_free_tmps(aTHX)
 # define get_av(a,b)                            Perl_get_av(aTHX_ a,b)
-# define get_context                            Perl_get_context
 # define get_cv(a,b)                            Perl_get_cv(aTHX_ a,b)
 # define get_cvn_flags(a,b,c)                   Perl_get_cvn_flags(aTHX_ a,b,c)
 # define get_hv(a,b)                            Perl_get_hv(aTHX_ a,b)
@@ -2162,6 +2161,11 @@
 #   define do_spawn(a)                          Perl_do_spawn(aTHX_ a)
 #   define do_spawn_nowait(a)                   Perl_do_spawn_nowait(aTHX_ a)
 # endif /* defined(VMS) || defined(WIN32) */
+# if defined(WIN32)
+#   define get_context                          Perl_get_context
+# else /* if !defined(WIN32) */
+#   define get_context                          Perl_get_context
+# endif /* !defined(WIN32) */
 #endif /* !defined(PERL_NO_SHORT_NAMES) */
 
 /* ex: set ro ft=C: */

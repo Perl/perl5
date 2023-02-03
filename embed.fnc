@@ -1184,8 +1184,6 @@ ERXp	|SV *	|get_and_check_backslash_N_name 			\
 				|NN const char **error_msg
 AOdp	|AV *	|get_av 	|NN const char *name			\
 				|I32 flags
-
-CRTdp	|void * |get_context
 AOdp	|CV *	|get_cv 	|NN const char *name			\
 				|I32 flags
 Adp	|CV *	|get_cvn_flags	|NN const char *name			\
@@ -6152,6 +6150,7 @@ Cp	|int	|do_spawn	|NN char *cmd
 Cp	|int	|do_spawn_nowait|NN char *cmd
 #endif /* defined(VMS) || defined(WIN32) */
 #if defined(WIN32)
+CRTdp	|void * |get_context
 p	|bool	|get_win32_message_utf8ness				\
 				|NULLOK const char *string
 Teor	|void	|win32_croak_not_implemented				\
@@ -6160,6 +6159,7 @@ Teor	|void	|win32_croak_not_implemented				\
 p	|bool	|do_exec3	|NN const char *incmd			\
 				|int fd 				\
 				|int do_report
+CRTdip	|void * |get_context
 #endif /* !defined(WIN32) */
 
 : ex: set ts=8 sts=4 sw=4 noet:
