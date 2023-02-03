@@ -41,6 +41,51 @@
 
 #ifdef PERL_RC_STACK
 
+/* common code for pp_wrap() and xs_wrap():
+ * free any original arguments, and bump and shift down any return
+ * args
+ */
+
+STATIC void
+S_pp_xs_wrap_return(pTHX_ I32 nargs, I32 old_sp)
+{
+    I32 nret = (I32)(PL_stack_sp - PL_stack_base) - old_sp;
+    assert(nret >= 0);
+
+    /* bump any returned values */
+    if (nret) {
+        SV **svp = PL_stack_sp - nret + 1;
+        while (svp <= PL_stack_sp) {
+#ifndef PERL_XXX_TMP_NORC
+            SvREFCNT_inc(*svp);
+#endif
+            svp++;
+        }
+    }
+
+    /* free the original args and shift the returned valued down */
+    if (nargs) {
+        SV **svp = PL_stack_sp - nret;
+        I32 i = nargs;
+        while (i--) {
+#ifndef PERL_XXX_TMP_NORC
+            SvREFCNT_dec(*svp);
+#endif
+            *svp = NULL;
+            svp--;
+        }
+
+        if (nret) {
+            Move(PL_stack_sp - nret + 1,
+                 PL_stack_sp - nret - nargs + 1,
+                 nret, SV*);
+        }
+        PL_stack_sp -= nargs;
+    }
+    PL_curstackinfo->si_stack_nonrc_base = 0;
+
+}
+
 /* pp_wrap():
  * wrapper function for pp() functions to turn them into functions
  * that can operate on a reference-counted stack, by taking a non-
@@ -61,7 +106,6 @@ Perl_pp_wrap(pTHX_ Perl_ppaddr_t real_pp_fn, I32 nargs, int nlists)
         return real_pp_fn(aTHX);
 
     OP *next_op;
-    I32 nret;
     I32 old_sp = (I32)(PL_stack_sp - PL_stack_base);
 
     assert(nargs  >= 0);
@@ -89,45 +133,11 @@ Perl_pp_wrap(pTHX_ Perl_ppaddr_t real_pp_fn, I32 nargs, int nlists)
 
     next_op = real_pp_fn(aTHX);
 
-    nret = (I32)(PL_stack_sp - PL_stack_base) - old_sp;
-    assert(nret >= 0);
-
     /* we should still be a split stack */
     assert(AvREAL(PL_curstack));
     assert(PL_curstackinfo->si_stack_nonrc_base);
 
-    /* bump any returned values */
-    if (nret) {
-        SV **svp = PL_stack_sp - nret + 1;
-        while (svp <= PL_stack_sp) {
-#ifndef PERL_XXX_TMP_NORC
-            SvREFCNT_inc(*svp);
-#endif
-            svp++;
-        }
-    }
-
-    /* free the original args and shift the returned valued down */
-    if (nargs) {
-        SV **svp = PL_stack_sp - nret;
-        I32 i = nargs;
-        while (i--) {
-#ifndef PERL_XXX_TMP_NORC
-            SvREFCNT_dec(*svp);
-#endif
-            *svp = NULL;
-            svp--;
-        }
-
-        if (nret) {
-            Move(PL_stack_sp - nret + 1,
-                 PL_stack_sp - nret - nargs + 1,
-                 nret, SV*);
-        }
-        PL_stack_sp -= nargs;
-    }
-
-    PL_curstackinfo->si_stack_nonrc_base = 0;
+    S_pp_xs_wrap_return(aTHX_ nargs, old_sp);
 
     return next_op;
 }
@@ -143,7 +153,6 @@ Perl_xs_wrap(pTHX_ XSUBADDR_t xsub, CV *cv)
 {
     PERL_ARGS_ASSERT_XS_WRAP;
 
-    I32 nret;
     I32 old_sp = (I32)(PL_stack_sp - PL_stack_base);
     I32 mark  = PL_markstack_ptr[0];
     I32 nargs = (PL_stack_sp - PL_stack_base) - mark;
@@ -165,40 +174,7 @@ Perl_xs_wrap(pTHX_ XSUBADDR_t xsub, CV *cv)
 
     xsub(aTHX_ cv);
 
-    nret = (I32)(PL_stack_sp - PL_stack_base) - old_sp;
-    assert(nret >= 0);
-
-    /* bump any returned values */
-    if (nret) {
-        SV **svp = PL_stack_sp - nret + 1;
-        while (svp <= PL_stack_sp) {
-#ifndef PERL_XXX_TMP_NORC
-            SvREFCNT_inc(*svp);
-#endif
-            svp++;
-        }
-    }
-
-    /* free the original args and shift the returned valued down */
-    if (nargs) {
-        SV **svp = PL_stack_sp - nret;
-        I32 i = nargs;
-        while (i--) {
-#ifndef PERL_XXX_TMP_NORC
-            SvREFCNT_dec(*svp);
-#endif
-            *svp = NULL;
-            svp--;
-        }
-
-        if (nret) {
-            Move(PL_stack_sp - nret + 1,
-                 PL_stack_sp - nret - nargs + 1,
-                 nret, SV*);
-        }
-        PL_stack_sp -= nargs;
-    }
-    PL_curstackinfo->si_stack_nonrc_base = 0;
+    S_pp_xs_wrap_return(aTHX_ nargs, old_sp);
 }
 
 #endif
