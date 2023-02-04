@@ -38,9 +38,11 @@ The types are:
     SVt_PVCV
     SVt_PVFM
     SVt_PVIO
+    SVt_PVOBJ
 
 These are most easily explained from the bottom up.
 
+C<SVt_PVOBJ> is for object instances of the new `use feature 'class'` kind.
 C<SVt_PVIO> is for I/O objects, C<SVt_PVFM> for formats, C<SVt_PVCV> for
 subroutines, C<SVt_PVHV> for hashes and C<SVt_PVAV> for arrays.
 
@@ -120,6 +122,9 @@ Type flag for formats.  See L</svtype>.
 =for apidoc AmnU||SVt_PVIO
 Type flag for I/O objects.  See L</svtype>.
 
+=for apidoc AmnUx||SVt_PVOBJ
+Type flag for object instances.  See L</svtype>.
+
 =cut
 
   These are ordered so that the simpler types have a lower value; SvUPGRADE
@@ -149,7 +154,8 @@ typedef enum {
         SVt_PVCV,	/* 13 */
         SVt_PVFM,	/* 14 */
         SVt_PVIO,	/* 15 */
-                        /* 16-31: Unused, though one should be reserved for a
+        SVt_PVOBJ,      /* 16 */
+                        /* 17-31: Unused, though one should be reserved for a
                          * freed sv, if the other 3 bits below the flags ones
                          * get allocated */
         SVt_LAST	/* keep last in enum. used to size arrays */
@@ -270,6 +276,11 @@ struct p5rx {
 
 struct invlist {
     _SV_HEAD(XINVLIST*);       /* pointer to xpvinvlist body */
+    _SV_HEAD_UNION;
+};
+
+struct object {
+    _SV_HEAD(XPVOBJ*);          /* pointer to xobject body */
     _SV_HEAD_UNION;
 };
 
@@ -666,6 +677,18 @@ struct xpvio {
 #define IOf_NOLINE	32	/* slurped a pseudo-line from empty file */
 #define IOf_FAKE_DIRP	64	/* xio_dirp is fake (source filters kludge)
                                    Also, when this is set, SvPVX() is valid */
+
+struct xobject {
+    HV*         xmg_stash;
+    union _xmgu xmg_u;
+    SSize_t     xobject_maxfield;
+    SSize_t     xobject_iter_sv_at; /* this is only used by Perl_sv_clear() */
+    SV**        xobject_fields;
+};
+
+#define ObjectMAXFIELD(inst)  ((XPVOBJ *)SvANY(inst))->xobject_maxfield
+#define ObjectITERSVAT(inst)  ((XPVOBJ *)SvANY(inst))->xobject_iter_sv_at
+#define ObjectFIELDS(inst)    ((XPVOBJ *)SvANY(inst))->xobject_fields
 
 /* The following macros define implementation-independent predicates on SVs. */
 

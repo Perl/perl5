@@ -30,6 +30,20 @@ Perl_croak_kw_unless_class(pTHX_ const char *kw)
         croak("Cannot '%s' outside of a 'class'", kw);
 }
 
+#define newSVobject(fieldcount)  Perl_newSVobject(aTHX_ fieldcount)
+SV *
+Perl_newSVobject(pTHX_ Size_t fieldcount)
+{
+    SV *sv = newSV_type(SVt_PVOBJ);
+
+    Newx(ObjectFIELDS(sv), fieldcount, SV *);
+    ObjectMAXFIELD(sv) = fieldcount - 1;
+
+    Zero(ObjectFIELDS(sv), fieldcount, SV *);
+
+    return sv;
+}
+
 XS(injected_constructor);
 XS(injected_constructor)
 {
@@ -65,9 +79,11 @@ XS(injected_constructor)
         }
     }
 
-    AV *fields = newAV();
-    SV *self = sv_2mortal(newRV_noinc((SV *)fields));
+    SV *instance = newSVobject(aux->xhv_class_next_fieldix);
+    SV *self = sv_2mortal(newRV_noinc(instance));
     sv_bless(self, stash);
+
+    SV **fields = ObjectFIELDS(instance);
 
     /* create fields */
     for(PADOFFSET fieldix = 0; fieldix < aux->xhv_class_next_fieldix; fieldix++) {
@@ -93,7 +109,7 @@ XS(injected_constructor)
                 NOT_REACHED;
         }
 
-        av_push(fields, val);
+        fields[fieldix] = val;
     }
 
     if(aux->xhv_class_adjust_blocks) {
@@ -164,7 +180,7 @@ PP(pp_methstart)
 
     if(!SvROK(self) ||
         !SvOBJECT((rv = SvRV(self))) ||
-        SvTYPE(rv) != SVt_PVAV) { /* TODO: SVt_INSTANCE */
+        SvTYPE(rv) != SVt_PVOBJ) {
         HEK *namehek = CvGvNAME_HEK(curcv);
         croak(
             namehek ? "Cannot invoke method %" HEKf_QUOTEDPREFIX " on a non-instance" :
@@ -182,14 +198,14 @@ PP(pp_methstart)
 
     UNOP_AUX_item *aux = cUNOP_AUX->op_aux;
     if(aux) {
-        assert(SvTYPE(SvRV(self)) == SVt_PVAV);
-        AV *fields = MUTABLE_AV(SvRV(self));
-        SV **fieldp = AvARRAY(fields);
+        assert(SvTYPE(SvRV(self)) == SVt_PVOBJ);
+        SV *instance = SvRV(self);
+        SV **fieldp = ObjectFIELDS(instance);
 
         U32 fieldcount = (aux++)->uv;
         U32 max_fieldix = (aux++)->uv;
 
-        assert(av_count(fields) > max_fieldix);
+        assert(ObjectMAXFIELD(instance)+1 > max_fieldix);
         PERL_UNUSED_VAR(max_fieldix);
 
         for(Size_t i = 0; i < fieldcount; i++) {

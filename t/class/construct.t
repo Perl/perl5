@@ -28,11 +28,11 @@ use builtin qw( blessed reftype );
     # they could be moved to their own file.
     is(ref $obj, "Test1", 'ref of $obj');
     is(blessed $obj, "Test1", 'blessed of $obj');
-    is(reftype $obj, "ARRAY", 'reftype of $obj');
+    is(reftype $obj, "OBJECT", 'reftype of $obj');
 
     # num/stringification of object without overload
     is($obj+0, builtin::refaddr($obj), 'numified object');
-    like("$obj", qr/^Test1=ARRAY\(0x[[:xdigit:]]+\)$/, 'stringified object' );
+    like("$obj", qr/^Test1=OBJECT\(0x[[:xdigit:]]+\)$/, 'stringified object' );
 
     ok(!eval { Test1->new(y => 456); 1 }, 'Unrecognised parameter fails');
     like($@, qr/^Unrecognised parameters for "Test1" constructor: y at /,

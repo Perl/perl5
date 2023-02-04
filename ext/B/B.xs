@@ -40,6 +40,7 @@ static const char* const svclassnames[] = {
     "B::CV",
     "B::FM",
     "B::IO",
+    "B::OBJ",
 };
 
 
