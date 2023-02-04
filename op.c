@@ -898,6 +898,12 @@ Perl_op_free(pTHX_ OP *o)
         /* free child ops before ourself, (then free ourself "on the
          * way back up") */
 
+        /* Ensure the caller maintains the relationship between OPf_KIDS and
+         * op_first != NULL when restructuring the tree
+         *   https://github.com/Perl/perl5/issues/20764
+         */
+        assert(!(o->op_flags & OPf_KIDS) || cUNOPo->op_first);
+
         if (!went_up && o->op_flags & OPf_KIDS) {
             next_op = cUNOPo->op_first;
             continue;
