@@ -849,6 +849,15 @@ S_op_destroy(pTHX_ OP *o)
 Free an op and its children. Only use this when an op is no longer linked
 to from any optree.
 
+Remember that any op with C<OPf_KIDS> set is expected to have a valid
+C<op_first> pointer.  If you are attempting to free an op but preserve its
+child op, make sure to clear that flag before calling C<op_free()>.  For
+example:
+
+    OP *kid = o->op_first; o->op_first = NULL;
+    o->op_flags &= ~OPf_KIDS;
+    op_free(o);
+
 =cut
 */
 
