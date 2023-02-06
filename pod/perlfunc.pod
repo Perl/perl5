@@ -6894,6 +6894,9 @@ Optional state for the subroutine.  The state is passed in as C<$_[1]>.
 
 =back
 
+C<AUTOLOAD> cannot be used to resolve the C<INCDIR> method, C<INC> is
+checked first, and C<AUTOLOAD> would resolve that.
+
 If an empty list, L<C<undef>|/undef EXPR>, or nothing that matches the
 first 3 values above is returned, then L<C<require>|/require VERSION>
 looks at the remaining elements of L<C<@INC>|perlvar/@INC>.
