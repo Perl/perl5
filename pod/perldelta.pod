@@ -37,13 +37,13 @@ L</Selected Bug Fixes> section.
 
 =head1 Incompatible Changes
 
-XXX For a release on a stable branch, this section aspires to be:
+=head2 (**{ ... }) removed from the regex engine.
 
-    There are no changes intentionally incompatible with 5.XXX.XXX
-    If any exist, they are bugs, and we request that you submit a
-    report.  See L</Reporting Bugs> below.
-
-[ List each incompatible change as a =head2 entry ]
+This feature was released as part of 5.37.8, after some use and
+discussion it was seen as more problematic than understood at first
+and has been removed in 5.37.9. It was only ever present in a single
+dev release and has never been released as part of a production perl,
+thus no deprecation cycle has been performed.
 
 =head1 Deprecations
 

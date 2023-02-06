@@ -28,6 +28,9 @@ included in a pattern, so that patterns which are O(N) in normal use become
 O(N*N) with a C<(?{ ... })> pattern in them. Switching to C<(*{ ... })> means
 the pattern will stay O(N).
 
+B<NOTE> the C<(**{ ... })> was removed in 5.37.9 as it didn't quite work out
+as planned.
+
 =head1 Modules and Pragmata
 
 =head2 Updated Modules and Pragmata
