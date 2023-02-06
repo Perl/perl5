@@ -2060,18 +2060,7 @@ at which that happens is compiled into perl, so it can be changed with a
 custom build.
 
 The use of this construct disables some optimisations globally in the pattern,
-and the pattern may execute much slower as a consequence. Use a C<*> instead
-of the C<?> to create an optimistic form of this construct: C<(**{...})>
-maybe used as a replacement and should not disable any optimisations, but is
-likely to be even more volatile from perl version to perl version than
-C<(??{...})> is.
-
-=item C<(**{ I<code> })>
-X<(**{})> X<regex, postponed optimistic>
-
-This is exactly the same as C<(??{ I<code> })> however it does not disable
-B<any> optimisations. It is even more likely to change from version to version
-of perl. In a failing match it may not even be executed at all.
+and the pattern may execute much slower as a consequence.
 
 =item C<(?I<PARNO>)> C<(?-I<PARNO>)> C<(?+I<PARNO>)> C<(?R)> C<(?0)>
 X<(?PARNO)> X<(?1)> X<(?R)> X<(?0)> X<(?-1)> X<(?+1)> X<(?-PARNO)> X<(?+PARNO)>
@@ -3328,8 +3317,8 @@ part of this regular expression needs to be converted explicitly
 =head2 Embedded Code Execution Frequency
 
 The exact rules for how often C<(?{})> and C<(??{})> are executed in a pattern
-are unspecified, as are their even less well defined equivalents C<(*{})> and
-C<(**{})>. In the case of a successful match you can assume that they DWIM and
+are unspecified, and this is even more true of C<(*{})>.
+In the case of a successful match you can assume that they DWIM and
 will be executed in left to right order the appropriate number of times in the
 accepting path of the pattern as would any other meta-pattern. How non-
 accepting pathways and match failures affect the number of times a pattern is
@@ -3363,10 +3352,10 @@ will output "o" twice.
 
 For historical and consistency reasons the use of normal code blocks
 anywhere in a pattern will disable certain optimisations. As of 5.37.7
-you can use an "optimistic" codeblock, C<(*{ ... })> or C<(**{ ... })>
-if you do *not* wish to disable these optimisations. This may result
-in code blocks being called less often than might have been had they
-not been optimistic.
+you can use an "optimistic" codeblock, C<(*{ ... })> as a replacement
+for C<(?{ ... })>, if you do *not* wish to disable these optimisations.
+This may result in the code block being called less often than it might
+have been had they not been optimistic.
 
 =head2 PCRE/Python Support
 

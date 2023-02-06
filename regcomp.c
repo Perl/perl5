@@ -3008,13 +3008,8 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
             goto parse_rest;
         }
         else if ( *RExC_parse == '*') { /* (*VERB:ARG), (*construct:...) */
-            if (RExC_parse[1] == '{') {
+            if (RExC_parse[1] == '{') { /* (*{ ... }) optimistic EVAL */
                 fake_eval = '{';
-                goto handle_qmark;
-            }
-            else
-            if ( RExC_parse[1] == '*' && RExC_parse[2] == '{' ) {
-                fake_eval = '?';
                 goto handle_qmark;
             }
 
