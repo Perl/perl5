@@ -419,7 +419,7 @@ use File::Glob qw(:case);
     },
 
     'Exporter' => {
-        'DISTRIBUTION' => 'TODDR/Exporter-5.74.tar.gz',
+        'DISTRIBUTION' => 'TODDR/Exporter-5.77.tar.gz',
         'FILES'        => q[dist/Exporter],
         'EXCLUDED' => [
             qw( t/pod.t
@@ -590,7 +590,7 @@ use File::Glob qw(:case);
     },
 
     'FindBin' => {
-        'DISTRIBUTION' => 'TODDR/FindBin-1.52.tar.gz',
+        'DISTRIBUTION' => 'TODDR/FindBin-1.53.tar.gz',
         'FILES'        => q[dist/FindBin],
     },
 
@@ -635,7 +635,7 @@ use File::Glob qw(:case);
     },
 
     'IO' => {
-        'DISTRIBUTION' => 'TODDR/IO-1.50.tar.gz',
+        'DISTRIBUTION' => 'TODDR/IO-1.51.tar.gz',
         'FILES'        => q[dist/IO],
         'EXCLUDED'     => ['t/test.pl'],
     },

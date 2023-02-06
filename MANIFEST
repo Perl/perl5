@@ -3781,6 +3781,7 @@ dist/Filter-Simple/t/lib/Filter/Simple/FilterOnlyTest.pm	Helper file for Filter:
 dist/Filter-Simple/t/lib/Filter/Simple/FilterTest.pm		Helper file for Filter::Simple tests
 dist/Filter-Simple/t/lib/Filter/Simple/ImportTest.pm		Helper file for Filter::Simple tests
 dist/Filter-Simple/t/no.t					See if Filter::Simple works
+dist/FindBin/Changes				Tracks changes made in blead
 dist/FindBin/lib/FindBin.pm			Find name of currently executing program
 dist/FindBin/t/FindBin.t			See if FindBin works
 dist/I18N-Collate/lib/I18N/Collate.pm		Routines to do strxfrm-based collation
