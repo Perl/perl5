@@ -6333,6 +6333,7 @@ t/win32/crypt.t			Test Win32 crypt for compatibility
 t/win32/fs.t			Test Win32 link for compatibility
 t/win32/popen.t			Test for stdout races in backticks, etc
 t/win32/runenv.t		Test if Win* perl honors its env variables
+t/win32/seekdir.t		Test that seekdir/readdir are restricted to relevant memory
 t/win32/signal.t		Test Win32 signal emulation
 t/win32/stat.t			Test Win32 stat emulation
 t/win32/symlink.t		Test Win32 symlink
