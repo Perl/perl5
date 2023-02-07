@@ -1,0 +1,226 @@
+=encoding utf8
+
+=head1 NAME
+
+perl5378delta - what is new for perl v5.37.8
+
+=head1 DESCRIPTION
+
+This document describes differences between the 5.37.7 release and the 5.37.8
+release.
+
+If you are upgrading from an earlier release such as 5.37.6, first read
+L<perl5377delta>, which describes differences between 5.37.6 and 5.37.7.
+
+=head1 Core Enhancements
+
+=head2 Optimistic Eval in Patterns
+
+The use of C<(?{ ... })> and C<(??{ ... })> in a pattern disables various
+optimisations globally in that pattern. This may or may not be desired by the
+programmer. This release adds the C<(*{ ... })> and C<(**{ ... })>
+equivalents. The only difference is that they do not and will never disable
+any optimisations in the regex engine. This may make them more unstable in the
+sense that they may be called more or less times in the future, however the
+number of times they execute will truly match how the regex engine functions.
+For example, certain types of optimisation are disabled when C<(?{ ... })> is
+included in a pattern, so that patterns which are O(N) in normal use become
+O(N*N) with a C<(?{ ... })> pattern in them. Switching to C<(*{ ... })> means
+the pattern will stay O(N).
+
+=head1 Modules and Pragmata
+
+=head2 Updated Modules and Pragmata
+
+=over 4
+
+=item *
+
+L<Config::Perl::V> has been upgraded from version 0.34 to 0.35.
+
+=item *
+
+L<ExtUtils::Install> has been upgraded from version 2.20 to 2.22.
+
+=item *
+
+L<ExtUtils::MakeMaker> has been upgraded from version 7.64 to 7.66.
+
+=item *
+
+L<feature> has been upgraded from version 1.78 to 1.79.
+
+=item *
+
+L<File::Find> has been upgraded from version 1.41 to 1.42.
+
+=item *
+
+L<IO::Zlib> has been upgraded from version 1.11 to 1.14.
+
+=item *
+
+L<JSON::PP> has been upgraded from version 4.12 to 4.16.
+
+=item *
+
+L<Math::Complex> has been upgraded from version 1.5903 to 1.6.
+
+Modules in the Math-Complex distribution have been uniformly upgraded to
+version 1.60.  L<Math::Complex> has been upgraded from version 1.59_03 (with
+no other code changes).
+
+=item *
+
+L<Math::Trig> has been upgraded from version 1.23_01
+with documentation improvements and code improvements in the calculation of
+C<great_circle_distance()>.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 5.20221220 to 5.20230120.
+
+=item *
+
+L<podlators> has been upgraded from version 5.00 to 5.01.
+
+=item *
+
+L<POSIX> has been upgraded from version 2.10 to 2.11.
+
+=item *
+
+L<re> has been upgraded from version 0.43 to 0.44.
+
+=item *
+
+L<Storable> has been upgraded from version 3.28 to 3.29.
+
+=item *
+
+L<threads> has been upgraded from version 2.33 to 2.34.
+
+=item *
+
+L<XS::APItest> has been upgraded from version 1.28 to 1.30.
+
+=back
+
+=head1 Documentation
+
+=head2 Changes to Existing Documentation
+
+We have attempted to update the documentation to reflect the changes
+listed in this document.  If you find any we have missed, open an issue
+at L<https://github.com/Perl/perl5/issues>.
+
+=head1 Platform Support
+
+=head2 Platform-Specific Notes
+
+=over 4
+
+=item Windows
+
+=over
+
+=item *
+
+lstat() on Windows now returns the length of the link target as the
+size of the file, as it does on POSIX systems.  [github #20476]
+
+=item *
+
+symlink() on Windows now replaces any C</> in the target with C<\>,
+since Windows does not recognise C</> in symbolic links.  The reverse
+translation is B<not> done by readlink().  [github #20506]
+
+=item *
+
+symlink() where the target was an absolute path to a directory was
+incorrectly created as a file symbolic link.  [github #20533]
+
+=back
+
+=back
+
+=head1 Internal Changes
+
+=over 4
+
+=item *
+
+Added HvNAMEf and HvNAMEf_QUOTEDPREFIX special formats. They take an HV *
+as an argument and use C<HvNAME()> and related macros to determine the string,
+its length, and whether it is utf8.
+
+=back
+
+=head1 Acknowledgements
+
+Perl 5.37.8 represents approximately 4 weeks of development since Perl
+5.37.7 and contains approximately 42,000 lines of changes across 350 files
+from 25 authors.
+
+Excluding auto-generated files, documentation and release tools, there were
+approximately 29,000 lines of changes to 220 .pm, .t, .c and .h files.
+
+Perl continues to flourish into its fourth decade thanks to a vibrant
+community of users and developers. The following people are known to have
+contributed the improvements that became Perl 5.37.8:
+
+Andrew Ruthven, Andy Lester, Benjamin Smith, Bram, Chris 'BinGOs' Williams,
+Dagfinn Ilmari Mannsåker, David Cantrell, David Mitchell, Elvin Aslanov,
+Ferenc Erki, Florian Weimer, James E Keenan, Karen Etheridge, Karl
+Williamson, Li Linjie, Max Maischein, Nicolas R, Paul Evans, Peter John
+Acklam, Peter Levine, Renee Baecker, Richard Leach, Tomasz Konojacki, Tony
+Cook, Yves Orton.
+
+The list above is almost certainly incomplete as it is automatically
+generated from version control history. In particular, it does not include
+the names of the (very much appreciated) contributors who reported issues to
+the Perl bug tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core. We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please
+see the F<AUTHORS> file in the Perl source distribution.
+
+=head1 Reporting Bugs
+
+If you find what you think is a bug, you might check the perl bug database
+at L<https://github.com/Perl/perl5/issues>.  There may also be information at
+L<http://www.perl.org/>, the Perl Home Page.
+
+If you believe you have an unreported bug, please open an issue at
+L<https://github.com/Perl/perl5/issues>.  Be sure to trim your bug down to a
+tiny but sufficient test case.
+
+If the bug you are reporting has security implications which make it
+inappropriate to send to a public issue tracker, then see
+L<perlsec/SECURITY VULNERABILITY CONTACT INFORMATION>
+for details of how to report the issue.
+
+=head1 Give Thanks
+
+If you wish to thank the Perl 5 Porters for the work we had done in Perl 5,
+you can do so by running the C<perlthanks> program:
+
+    perlthanks
+
+This will send an email to the Perl 5 Porters list with your show of thanks.
+
+=head1 SEE ALSO
+
+The F<Changes> file for an explanation of how to view exhaustive details on
+what changed.
+
+The F<INSTALL> file for how to build Perl.
+
+The F<README> file for general stuff.
+
+The F<Artistic> and F<Copying> files for copyright information.
+
+=cut

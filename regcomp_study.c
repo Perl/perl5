@@ -2688,20 +2688,26 @@ Perl_study_chunk(pTHX_
                         stopmin = min;
                     DEBUG_STUDYDATA("after-whilem accept", data, depth, is_inf, min, stopmin, delta);
                 }
+                DEBUG_STUDYDATA("PRE CURLYX_TO_CURLYN", data, depth, is_inf, min, stopmin, delta);
                 /* Try powerful optimization CURLYX => CURLYN. */
-                if (  OP(oscan) == CURLYX && data
-                      && data->flags & SF_IN_PAR
-                      && !(data->flags & SF_HAS_EVAL)
-                      && !deltanext && minnext == 1
-                      && mutate_ok
+                if ( RE_OPTIMIZE_CURLYX_TO_CURLYN
+                     && OP(oscan) == CURLYX
+                     && data
+                     && !(RExC_seen & REG_PESSIMIZE_SEEN) /* XXX: for now disable whenever a
+                                                            non optimistic eval is seen
+                                                            anywhere.*/
+                     && ( data->flags & SF_IN_PAR ) /* has parens */
+                     && !deltanext
+                     && minnext == 1
+                     && mutate_ok
                 ) {
+                    DEBUG_STUDYDATA("CURLYX_TO_CURLYN", data, depth, is_inf, min, stopmin, delta);
                     /* Try to optimize to CURLYN.  */
                     regnode *nxt = REGNODE_AFTER_type(oscan, tregnode_CURLYX);
                     regnode * const nxt1 = nxt;
 #ifdef DEBUGGING
                     regnode *nxt2;
 #endif
-
                     /* Skip open. */
                     nxt = regnext(nxt);
                     if (!REGNODE_SIMPLE(OP(nxt))
@@ -2738,17 +2744,24 @@ Perl_study_chunk(pTHX_
                 }
               nogo:
 
+                DEBUG_STUDYDATA("PRE CURLYX_TO_CURLYM", data, depth, is_inf, min, stopmin, delta);
+
                 /* Try optimization CURLYX => CURLYM. */
-                if (  OP(oscan) == CURLYX && data
-                      && !(data->flags & SF_HAS_PAR)
-                      && !(data->flags & SF_HAS_EVAL)
-                      && !deltanext     /* atom is fixed width */
-                      && minnext != 0   /* CURLYM can't handle zero width */
+                if ( RE_OPTIMIZE_CURLYX_TO_CURLYM
+                     && OP(oscan) == CURLYX
+                     && data
+                     && !(RExC_seen & REG_PESSIMIZE_SEEN) /* XXX: for now disable whenever a
+                                                            non optimistic eval is seen
+                                                            anywhere.*/
+                     && !(data->flags & SF_HAS_PAR) /* no parens! */
+                     && !deltanext     /* atom is fixed width */
+                     && minnext != 0  /* CURLYM can't handle zero width */
                          /* Nor characters whose fold at run-time may be
                           * multi-character */
-                      && ! (RExC_seen & REG_UNFOLDED_MULTI_SEEN)
-                      && mutate_ok
+                     && !(RExC_seen & REG_UNFOLDED_MULTI_SEEN)
+                     && mutate_ok
                 ) {
+                    DEBUG_STUDYDATA("CURLYX_TO_CURLYM", data, depth, is_inf, min, stopmin, delta);
                     /* XXXX How to optimize if data == 0? */
                     /* Optimize to a simpler form.  */
                     regnode *nxt = REGNODE_AFTER_type(oscan, tregnode_CURLYX); /* OPEN */
@@ -3456,7 +3469,7 @@ Perl_study_chunk(pTHX_
             }
         }
         else if (OP(scan) == EVAL) {
-            if (data)
+            if (data && !(scan->flags & EVAL_OPTIMISTIC_FLAG) )
                 data->flags |= SF_HAS_EVAL;
         }
         else if ( REGNODE_TYPE(OP(scan)) == ENDLIKE ) {

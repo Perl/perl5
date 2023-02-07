@@ -1126,12 +1126,6 @@ Perl_filter_read(pTHX_ int idx, SV *buf_sv, int maxlen)
 #define PERL_ARGS_ASSERT_FILTER_READ            \
         assert(buf_sv)
 
-PERL_CALLCONV void
-Perl_finalize_optree(pTHX_ OP *o)
-        __attribute__visibility__("hidden");
-#define PERL_ARGS_ASSERT_FINALIZE_OPTREE        \
-        assert(o)
-
 PERL_CALLCONV CV *
 Perl_find_lexical_cv(pTHX_ PADOFFSET off)
         __attribute__visibility__("hidden");
@@ -3202,6 +3196,10 @@ Perl_op_dump(pTHX_ const OP *o);
 #define PERL_ARGS_ASSERT_OP_DUMP                \
         assert(o)
 
+PERL_CALLCONV OP *
+Perl_op_force_list(pTHX_ OP *o);
+#define PERL_ARGS_ASSERT_OP_FORCE_LIST
+
 PERL_CALLCONV void
 Perl_op_free(pTHX_ OP *arg);
 #define PERL_ARGS_ASSERT_OP_FREE
@@ -3563,7 +3561,7 @@ Perl_pv_display(pTHX_ SV *dsv, const char *pv, STRLEN cur, STRLEN len, STRLEN pv
         assert(dsv); assert(pv)
 
 PERL_CALLCONV char *
-Perl_pv_escape(pTHX_ SV *dsv, char const * const str, const STRLEN count, const STRLEN max, STRLEN * const escaped, const U32 flags);
+Perl_pv_escape(pTHX_ SV *dsv, char const * const str, const STRLEN count, const STRLEN max, STRLEN * const escaped, U32 flags);
 #define PERL_ARGS_ASSERT_PV_ESCAPE              \
         assert(str)
 
@@ -3612,8 +3610,7 @@ Perl_re_intuit_string(pTHX_ REGEXP  * const r);
         assert(r)
 
 PERL_CALLCONV REGEXP *
-Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count, OP *expr, const regexp_engine *eng, REGEXP *old_re, bool *is_bare_re, const U32 rx_flags, const U32 pm_flags)
-        __attribute__visibility__("hidden");
+Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count, OP *expr, const regexp_engine *eng, REGEXP *old_re, bool *is_bare_re, const U32 rx_flags, const U32 pm_flags);
 #define PERL_ARGS_ASSERT_RE_OP_COMPILE          \
         assert(eng)
 
@@ -3722,9 +3719,14 @@ Perl_reg_named_buff_scalar(pTHX_ REGEXP * const rx, const U32 flags);
         assert(rx)
 
 PERL_CALLCONV void
-Perl_reg_numbered_buff_fetch(pTHX_ REGEXP * const rx, const I32 paren, SV * const sv);
+Perl_reg_numbered_buff_fetch(pTHX_ REGEXP * const re, const I32 paren, SV * const sv);
 #define PERL_ARGS_ASSERT_REG_NUMBERED_BUFF_FETCH \
-        assert(rx)
+        assert(re)
+
+PERL_CALLCONV void
+Perl_reg_numbered_buff_fetch_flags(pTHX_ REGEXP * const re, const I32 paren, SV * const sv, U32 flags);
+#define PERL_ARGS_ASSERT_REG_NUMBERED_BUFF_FETCH_FLAGS \
+        assert(re)
 
 PERL_CALLCONV I32
 Perl_reg_numbered_buff_length(pTHX_ REGEXP * const rx, const SV * const sv, const I32 paren);
@@ -4153,7 +4155,7 @@ Perl_scan_vstring(pTHX_ const char *s, const char * const e, SV *sv);
         assert(s); assert(e); assert(sv)
 
 PERL_CALLCONV char *
-Perl_scan_word(pTHX_ char *s, char *dest, STRLEN destlen, int allow_package, STRLEN *slp);
+Perl_scan_word(pTHX_ char *s, char *dest, STRLEN destlen, int allow_package, STRLEN *slp, bool warn_tick);
 #define PERL_ARGS_ASSERT_SCAN_WORD              \
         assert(s); assert(dest); assert(slp)
 
@@ -6131,6 +6133,18 @@ S_my_memrchr(const char *s, const char c, const STRLEN len);
 #   endif /* !defined(HAS_MEMRCHR) */
 # endif /* !defined(PERL_NO_INLINE_FUNCTIONS) */
 #endif /* defined(PERL_CORE) || defined(PERL_EXT) */
+#if defined(PERL_CORE) || defined(PERL_USE_VOLATILE_API)
+PERL_CALLCONV void
+Perl_finalize_optree(pTHX_ OP *o);
+# define PERL_ARGS_ASSERT_FINALIZE_OPTREE       \
+        assert(o)
+
+PERL_CALLCONV void
+Perl_optimize_optree(pTHX_ OP *o);
+# define PERL_ARGS_ASSERT_OPTIMIZE_OPTREE       \
+        assert(o)
+
+#endif /* defined(PERL_CORE) || defined(PERL_USE_VOLATILE_API) */
 #if defined(PERL_DEBUG_READONLY_COW)
 PERL_CALLCONV void
 Perl_sv_buf_to_ro(pTHX_ SV *sv)
@@ -7462,12 +7476,6 @@ PERL_CALLCONV SV *
 Perl_op_varname(pTHX_ const OP *o)
         __attribute__visibility__("hidden");
 # define PERL_ARGS_ASSERT_OP_VARNAME            \
-        assert(o)
-
-PERL_CALLCONV void
-Perl_optimize_optree(pTHX_ OP *o)
-        __attribute__visibility__("hidden");
-# define PERL_ARGS_ASSERT_OPTIMIZE_OPTREE       \
         assert(o)
 
 PERL_CALLCONV void
@@ -8803,7 +8811,8 @@ STATIC I32
 S_regrepeat(pTHX_ regexp *prog, char **startposp, const regnode *p, char *loceol, regmatch_info * const reginfo, I32 max _pDEPTH)
         __attribute__warn_unused_result__;
 # define PERL_ARGS_ASSERT_REGREPEAT             \
-        assert(prog); assert(startposp); assert(p); assert(loceol); assert(reginfo)
+        assert(prog); assert(startposp); assert(p); assert(loceol); assert(reginfo); \
+        assert(max)
 
 STATIC bool
 S_regtry(pTHX_ regmatch_info *reginfo, char **startposp)
@@ -9995,6 +10004,13 @@ Perl_cop_file_avn(pTHX_ const COP *cop);
 #   define PERL_ARGS_ASSERT_COP_FILE_AVN        \
         assert(cop)
 
+#   if !defined(PERL_IMPLICIT_SYS)
+PERL_STATIC_INLINE bool
+S_PerlEnv_putenv(pTHX_ char *str);
+#     define PERL_ARGS_ASSERT_PERLENV_PUTENV    \
+        assert(str)
+
+#   endif /* !defined(PERL_IMPLICIT_SYS) */
 # endif /* defined(USE_ITHREADS) */
 #endif /* !defined(PERL_NO_INLINE_FUNCTIONS) */
 #if defined(PERL_USE_3ARG_SIGHANDLER)

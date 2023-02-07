@@ -274,13 +274,15 @@ sub try {
   }
 
   my $o = tie my @lines, 'Tie::File', $file or die $!;
+  # allocate more time when are running tests in parallel
+  my $alarm_time = $ENV{TEST_JOBS} || $ENV{HARNESS_OPTIONS} ? 20 : 10;
   local $SIG{ALRM} = sub { die "Alarm clock" };
-  my $a_retval = eval { alarm(5) unless $^P; $o->_downcopy($newdata, $pos, $len) };
+  my $a_retval = eval { alarm($alarm_time) unless $^P; $o->_downcopy($newdata, $pos, $len) };
   my $err = $@;
   undef $o; untie @lines; alarm(0);
   if ($err) {
     if ($err =~ /^Alarm clock/) {
-      print STDERR "# $0 Timeout at test $N\n";
+      print STDERR "# $0 Timeout after $alarm_time seconds at test $N\n";
       print "not ok $N\n"; $N++;
       print "not ok $N\n"; $N++;
       if (defined $len) {

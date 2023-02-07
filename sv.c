@@ -14139,6 +14139,7 @@ struct ptr_tbl_arena {
 };
 
 /*
+=for apidoc_section $embedding
 =for apidoc ptr_table_new
 
 Create a new pointer-mapping table

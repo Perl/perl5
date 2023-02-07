@@ -31,7 +31,7 @@ C<5e-7>,
 C<0xdeadbeef>
 
 [output]
-.SH "QUOTING"
+.SH QUOTING
 .IX Header "QUOTING"
 Suppress quotes:
 \&\f(CW"foo"\fR,

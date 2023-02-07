@@ -186,7 +186,7 @@ my ($inhead1, $inhead2, $initem);
 sub podset {
     my ($pod, $file) = @_;
 
-    open my $fh, '<:raw', $file or my_die "Can't open file '$file' for $pod: $!";
+    open my $fh, '<:', $file or my_die "Can't open file '$file' for $pod: $!";
 
     local *_;
     my $found_pod;
@@ -206,7 +206,7 @@ sub podset {
     local $/ = '';
 
     while(<$fh>) {
-	tr/\015//d;
+	s/\r$//;
 	if (s/^=head1 (NAME)\s*/=head2 /) {
 	    unhead1();
 	    $OUT .= "\n\n=head2 ";

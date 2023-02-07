@@ -15,7 +15,7 @@ S<L<RFC3110|https://tools.ietf.org/html/rfc3110>>
 S<L<RFC4034|https://tools.ietf.org/html/rfc4034>>
 
 [output]
-.SH "URLS"
+.SH URLS
 .IX Header "URLS"
 S<> wrapping L<> should make the space between the anchor and URL
 non-breaking and thus keep them together.

@@ -8,6 +8,7 @@ require Test::More;
 *cmp_ok = \&Test::More::cmp_ok;
 
 no warnings "experimental::smartmatch";
+no if !exists $warnings::Offsets{"experimental::smartmatch"}, warnings => 'deprecated';
 
 my $warnings = warnings { cmp_ok(1, "~~", 1) };
 

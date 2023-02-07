@@ -17,6 +17,13 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.37.8 - Helmut Schmidt
+
+L<Announced on 2023-01-20 by Renee Baecker|https://www.nntp.perl.org/group/perl.perl5.porters/2023/01/msg265547.html>
+
+Honesty doesn't require saying everything you think. Honesty only
+requires that you don't say anything that you don't think.
+
 =head2 v5.37.7 - Terry Pratchett, "Hogfather"
 
 L<Announced on 2022-12-20 by Richard Leach|https://www.nntp.perl.org/group/perl.perl5.porters/2022/12/msg265263.html>

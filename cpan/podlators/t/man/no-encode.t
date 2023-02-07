@@ -10,9 +10,11 @@
 #
 # SPDX-License-Identifier: GPL-1.0-or-later OR Artistic-1.0-Perl
 
-use 5.008;
+use 5.010;
 use strict;
 use warnings;
+
+use Carp qw(croak);
 
 use Test::More tests => 8;
 
@@ -24,7 +26,7 @@ BEGIN {
     delete $INC{'Encode.pm'};
     my $reject_encode = sub {
         if ($_[1] eq 'Encode.pm') {
-            die "refusing to load Encode\n";
+            croak('refusing to load Encode');
         }
     };
     unshift(@INC, $reject_encode);
@@ -40,7 +42,7 @@ BEGIN {
 # is overridden below when we enable utf8 and do expect a warning.
 local $SIG{__WARN__} = sub {
     my @warnings = @_;
-    die join("\n", "No warnings expected; instead got:", @warnings);
+    croak(join("\n", 'No warnings expected; instead got:', @warnings));
 };
 
 # First, check that everything works properly if an encoding of roff is set.
@@ -55,7 +57,7 @@ $parser->parse_string_document($pod);
 like(
     $output,
     qr{ Beyonce\\[*]\' }xms,
-    'Works without Encode for roff encoding'
+    'Works without Encode for roff encoding',
 );
 
 # Likewise for an encoding of groff.
@@ -66,7 +68,7 @@ $parser->parse_string_document($pod);
 like(
     $output_groff,
     qr{ Beyonc\\\[u00E9\] }xms,
-    'Works without Encode for groff encoding'
+    'Works without Encode for groff encoding',
 );
 
 # The default output format is UTF-8, so it should produce an error message
@@ -76,7 +78,7 @@ like(
         like(
             $_[0],
             qr{ falling [ ] back [ ] to [ ] groff [ ] escapes }xms,
-            'Pod::Man warns with no Encode module'
+            'Pod::Man warns with no Encode module',
         );
     };
     $parser = Pod::Man->new(name => 'test');
@@ -93,7 +95,7 @@ is($output, $output_groff, 'Degraded gracefull to groff output');
         like(
             $_[0],
             qr{ falling [ ] back [ ] to [ ] groff [ ] escapes }xms,
-            'Pod::Man warns with no Encode module'
+            'Pod::Man warns with no Encode module',
         );
     };
     $parser = Pod::Man->new(name => 'test', encoding => 'iso-8859-1');
@@ -103,5 +105,5 @@ $parser->output_string(\$output);
 $parser->parse_string_document($pod);
 is(
     $output, $output_groff,
-    'Explicit degraded gracefully to groff output'
+    'Explicit degraded gracefully to groff output',
 );

@@ -600,6 +600,9 @@
 : know "I have defined whether NULL is OK or not" rather than having neither
 : NULL or NULLOK, which is ambiguous.
 :
+: Numeric arguments may also be prefixed with NZ, which will cause the
+: appropriate asserts to be generated to validate that this is the case.
+:
 : Flags should be sorted asciibetically.
 :
 : Please keep the next line *BLANK*
@@ -1799,7 +1802,6 @@ Axmd	|OP *	|op_lvalue	|NULLOK OP *o				\
 poX	|OP *	|op_lvalue_flags|NULLOK OP *o				\
 				|I32 type				\
 				|U32 flags
-pd	|void	|finalize_optree|NN OP *o
 : Used in op.c and pp_sys.c
 p	|int	|mode_from_discipline					\
 				|NULLOK const char *s			\
@@ -2354,6 +2356,8 @@ p	|OP *	|sawparens	|NULLOK OP *o
 Apd	|OP *	|op_contextualize					\
 				|NN OP *o				\
 				|I32 context
+; Used in op.c
+Apd	|OP *	|op_force_list	|NULLOK OP *o
 : Used in perly.y
 p	|OP *	|scalar 	|NULLOK OP *o
 : Used in pp_ctl.c
@@ -2754,7 +2758,7 @@ Cp	|void	|regfree_internal					\
 EXp	|regexp_engine const *|current_re_engine
 Apdh	|REGEXP *|pregcomp	|NN SV * const pattern			\
 				|const U32 flags
-p	|REGEXP *|re_op_compile |NULLOK SV ** const patternp		\
+Xp	|REGEXP *|re_op_compile |NULLOK SV ** const patternp		\
 				|int pat_count				\
 				|NULLOK OP *expr			\
 				|NN const regexp_engine *eng		\
@@ -2811,8 +2815,14 @@ Cp	|SV *	|reg_named_buff_all					\
 				|const U32 flags
 
 : FIXME - is anything in re using this now?
+EXp	|void	|reg_numbered_buff_fetch_flags				\
+				|NN REGEXP * const re			\
+				|const I32 paren			\
+				|NULLOK SV * const sv			\
+				|U32 flags
+: FIXME - is anything in re using this now?
 EXp	|void	|reg_numbered_buff_fetch				\
-				|NN REGEXP * const rx			\
+				|NN REGEXP * const re			\
 				|const I32 paren			\
 				|NULLOK SV * const sv
 : FIXME - is anything in re using this now?
@@ -3159,7 +3169,7 @@ Apd	|char * |pv_escape	|NULLOK SV *dsv 			\
 				|const STRLEN count			\
 				|const STRLEN max			\
 				|NULLOK STRLEN * const escaped		\
-				|const U32 flags
+				|U32 flags
 Apd	|char * |pv_pretty	|NN SV *dsv				\
 				|NN char const * const str		\
 				|const STRLEN count			\
@@ -3356,7 +3366,8 @@ EXpx	|char * |scan_word	|NN char *s				\
 				|NN char *dest				\
 				|STRLEN destlen 			\
 				|int allow_package			\
-				|NN STRLEN *slp
+				|NN STRLEN *slp 			\
+				|bool warn_tick
 EXpxR	|char * |skipspace_flags|NN char *s				\
 				|U32 flags
 EdXxp	|bool	|validate_proto |NN SV *name				\
@@ -3888,6 +3899,10 @@ EeiT	|void * |my_memrchr	|NN const char *s			\
 				|const STRLEN len
 # endif /* !defined(HAS_MEMRCHR) */
 #endif /* defined(PERL_CORE) || defined(PERL_EXT) */
+#if defined(PERL_CORE) || defined(PERL_USE_VOLATILE_API)
+Apd	|void	|optimize_optree|NN OP *o
+Apd	|void	|finalize_optree|NN OP *o
+#endif /* defined(PERL_CORE) || defined(PERL_USE_VOLATILE_API) */
 #if defined(PERL_DEBUG_READONLY_COW)
 p	|void	|sv_buf_to_ro	|NN SV *sv
 #endif /* defined(PERL_DEBUG_READONLY_COW) */
@@ -3934,6 +3949,9 @@ CTo	|PerlInterpreter *|perl_clone_using				\
 Adp	|I32	|my_pclose	|NULLOK PerlIO *ptr
 Adp	|PerlIO *|my_popen	|NN const char *cmd			\
 				|NN const char *mode
+# if defined(USE_ITHREADS)
+i	|bool	|PerlEnv_putenv |NN char *str
+# endif /* defined(USE_ITHREADS) */
 #endif /* !defined(PERL_IMPLICIT_SYS) */
 #if defined(PERL_IN_AV_C)
 S	|MAGIC *|get_aux_mg	|NN AV *av
@@ -4571,7 +4589,6 @@ p	|void	|check_hash_fields_and_hekify				\
 				|NULLOK SVOP *key_op			\
 				|int real
 p	|SV *	|op_varname	|NN const OP *o
-pd	|void	|optimize_optree|NN OP *o
 p	|void	|warn_elem_scalar_context				\
 				|NN const OP *o 			\
 				|NN SV *name				\
@@ -5310,7 +5327,7 @@ WERS	|I32	|regrepeat	|NN regexp *prog			\
 				|NN const regnode *p			\
 				|NN char *loceol			\
 				|NN regmatch_info * const reginfo	\
-				|I32 max
+				|NZ I32 max
 ERS	|bool	|regtry 	|NN regmatch_info *reginfo		\
 				|NN char **startposp
 ERS	|bool	|reginclass	|NULLOK regexp * const prog		\

@@ -1324,6 +1324,7 @@ cpan/JSON-PP/t/117_numbers.t
 cpan/JSON-PP/t/118_boolean_values.t
 cpan/JSON-PP/t/119_incr_parse_utf8.t
 cpan/JSON-PP/t/120_incr_parse_truncated.t
+cpan/JSON-PP/t/core_bools.t
 cpan/JSON-PP/t/gh_28_json_test_suite.t
 cpan/JSON-PP/t/gh_29_trailing_false_value.t
 cpan/JSON-PP/t/rt_116998_wrong_character_offset.t
@@ -1875,6 +1876,8 @@ cpan/podlators/t/data/man/encoding.pod
 cpan/podlators/t/data/man/encoding.roff
 cpan/podlators/t/data/man/encoding.utf8
 cpan/podlators/t/data/perl.conf			podlators test
+cpan/podlators/t/data/perlcriticrc
+cpan/podlators/t/data/perltidyrc
 cpan/podlators/t/data/regenerate-data
 cpan/podlators/t/data/snippets/color/escape-wrapping
 cpan/podlators/t/data/snippets/color/tag-width
@@ -1963,6 +1966,8 @@ cpan/podlators/t/data/snippets/text/error-pod
 cpan/podlators/t/data/snippets/text/error-stderr
 cpan/podlators/t/data/snippets/text/error-stderr-opt
 cpan/podlators/t/data/snippets/text/for
+cpan/podlators/t/data/snippets/text/guesswork-no-quoting
+cpan/podlators/t/data/snippets/text/guesswork-quoting
 cpan/podlators/t/data/snippets/text/iso-8859-1
 cpan/podlators/t/data/snippets/text/iso-8859-1-error-die
 cpan/podlators/t/data/snippets/text/iso-8859-1-error-pod
@@ -2008,6 +2013,8 @@ cpan/podlators/t/man/no-encode.t		podlators test
 cpan/podlators/t/man/snippets.t			podlators test
 cpan/podlators/t/man/utf8-io.t			podlators test
 cpan/podlators/t/parselink/basic.t			podlators test
+cpan/podlators/t/style/critic.t
+cpan/podlators/t/style/kwalitee.t
 cpan/podlators/t/style/minimum-version.t			podlators test
 cpan/podlators/t/style/module-version.t			podlators test
 cpan/podlators/t/style/obsolete-strings.t
@@ -3774,6 +3781,7 @@ dist/Filter-Simple/t/lib/Filter/Simple/FilterOnlyTest.pm	Helper file for Filter:
 dist/Filter-Simple/t/lib/Filter/Simple/FilterTest.pm		Helper file for Filter::Simple tests
 dist/Filter-Simple/t/lib/Filter/Simple/ImportTest.pm		Helper file for Filter::Simple tests
 dist/Filter-Simple/t/no.t					See if Filter::Simple works
+dist/FindBin/Changes				Tracks changes made in blead
 dist/FindBin/lib/FindBin.pm			Find name of currently executing program
 dist/FindBin/t/FindBin.t			See if FindBin works
 dist/I18N-Collate/lib/I18N/Collate.pm		Routines to do strxfrm-based collation
@@ -4677,6 +4685,7 @@ ext/XS-APItest/t/refs.t		Test typemap ref handling
 ext/XS-APItest/t/rmagical.t	XS::APItest extension
 ext/XS-APItest/t/rv2cv_op_cv.t	test rv2cv_op_cv() API
 ext/XS-APItest/t/savehints.t	test SAVEHINTS() API
+ext/XS-APItest/t/savestack.t	test savestack behavior, currently only in the regex engine
 ext/XS-APItest/t/scopelessblock.t	test recursive descent statement-sequence parsing
 ext/XS-APItest/t/sort.t		Test sort(xs_cmp ...)
 ext/XS-APItest/t/stmtasexpr.t	test recursive descent statement parsing
@@ -5324,6 +5333,7 @@ pod/perl5374delta.pod		Perl changes in version 5.37.4
 pod/perl5375delta.pod		Perl changes in version 5.37.5
 pod/perl5376delta.pod		Perl changes in version 5.37.6
 pod/perl5377delta.pod		Perl changes in version 5.37.7
+pod/perl5378delta.pod		Perl changes in version 5.37.8
 pod/perl561delta.pod		Perl changes in version 5.6.1
 pod/perl56delta.pod		Perl changes in version 5.6
 pod/perl581delta.pod		Perl changes in version 5.8.1
@@ -6206,6 +6216,7 @@ t/re/regex_sets_compat.t	Test (?[ ]) is compatible with old [ ]
 t/re/regexp.t			See if regular expressions work
 t/re/regexp_noamp.t		See if regular expressions work with optimizations
 t/re/regexp_nonull.t		See if regexps work without trailing nulls
+t/re/regexp_normal.t		See if regexps work when expressions are normalized in various ways
 t/re/regexp_notrie.t		See if regular expressions work without trie optimisation
 t/re/regexp_qr.t		See if regular expressions work as qr//
 t/re/regexp_qr_embed.t		See if regular expressions work with embedded qr//

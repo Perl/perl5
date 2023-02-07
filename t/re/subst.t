@@ -11,7 +11,7 @@ BEGIN {
     require './loc_tools.pl';
 }
 
-plan(tests => 278);
+plan(tests => 281);
 
 $_ = 'david';
 $a = s/david/rules/r;
@@ -1182,4 +1182,21 @@ __EOF__
 
 {
     fresh_perl_is("s//00000000000format            \0          '0000000\\x{800}/;eval", "", {}, "RT #133882");
+}
+
+{   # GH Issue 20690
+    my @ret;
+    my $str = "abc";
+    for my $upgrade (0,1) {
+        my $copy = $str;
+        utf8::upgrade($copy) if $upgrade;
+        my $r= $copy=~s/b{0}//gr;
+        push @ret, $r;
+    }
+    is( $ret[1], $ret[0], 
+        "Issue #20690 - s/b{0}//gr should work the same for utf8 and non-utf8 strings");
+    is( $ret[0], $str,
+        "Issue #20690 - s/b{0}//gr on non-utf8 string should not remove anything");
+    is( $ret[1], $str,
+        "Issue #20690 - s/b{0}//gr on utf8 string should not remove anything");
 }

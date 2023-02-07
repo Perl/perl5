@@ -844,6 +844,29 @@ Display the usage information and exit.
 
 =back
 
+=head1 ABOUT BISECTION
+
+The process is all about identifying the commit that caused some change
+in behaviour - maybe good, maybe bad. But it is built around C<git bisect>,
+which is much more specifically aimed at finding "what broke the build".
+C<git> terminology embeds that assumption - commits earlier than the
+target commit are "good" commits, those at or later than the target commit
+are "bad" commits.
+
+The default behaviour of F<bisect.pl> mimics this - you supply some code
+that I<fails> with a perl built B<at or after> the target commit and
+I<succeeds> with a perl built B<before> the target commit, and F<bisect.pl>
+will find the target commit.
+
+The F<bisect.pl> option C<--expect-fail> reverses those expectations
+(and changes nothing else). So with C<--expect-fail>, you should supply
+code that I<fails> only with a perl built B<before> the target commit,
+and I<succeeds> with a perl built B<at or after> the target commit.
+
+By default, I<failure> is a piece of perl code that terminates with
+a non-zero exit code, e.g. by calling C<die()>. Options that change what
+is interpreted as failure include C<--crash>, C<--test-build> and C<--match>.
+
 =head1 EXAMPLES
 
 =head2 Code has started to crash under C<miniperl>
@@ -1091,6 +1114,58 @@ with C<miniperl>, thereby shortening bisection time considerably.
 =item * Reference
 
 L<GH issue 20261|https://github.com/Perl/perl5/issues/20261>
+
+=back
+
+=head2 When did perl stop emitting warnings when running on certain code?
+
+=over 4
+
+=item * Background
+
+Most of the time, we bisect in order to identify the first "bad" commit:  the
+first time code failed to compile; the first time the code emitted warnings;
+and so forth.
+
+Some times, however, we want to identify the first "good" commit:  the point
+where the code began to compile; the point where the code no longer emitted
+warnings; etc.
+
+We can use this program for that purpose, but we have to reverse our sense of
+"good" and "bad" commits.  We use the C<--expect-fail> option to do that
+reversal.
+
+=item * Problem
+
+It was reported that in an older version of Perl, a warning was being emitted
+when a program was using the F<bigrat> module and
+C<Scalar::Util::looks_like_number()> was called passing a non-integral number
+(I<i.e.,> a rational).
+
+    $ perl -wE 'use Scalar::Util; use bigrat;
+      say "mercy" if Scalar::Util::looks_like_number(1/9);'
+
+In perl-5.32, this emitted:
+
+    $ Argument "1/9" isn't numeric in addition (+) at
+      /usr/local/lib/perl5/5.32/Math/BigRat.pm line 1955.
+      mercy
+
+But it was observed that there was no warning in perl-5.36.
+
+=item * Solution
+
+    $ perl Porting/bisect.pl \
+        --start=5624cfff8f \
+        --end=b80b9f7fc6 \
+        --expect-fail \
+        -we 'use Scalar::Util; use bigrat; my @w;
+            local $SIG{__WARN__} = sub { die };
+            print "mercy\n" if Scalar::Util::looks_like_number(1/9)'
+
+=item * Reference
+
+L<GH issue 20685|https://github.com/Perl/perl5/issues/20685>
 
 =back
 

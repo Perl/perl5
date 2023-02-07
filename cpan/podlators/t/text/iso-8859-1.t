@@ -46,7 +46,7 @@ eval 'binmode($builder->failure_output, ":encoding(iso-8859-1)")';
 # Test the snippet with ISO 8859-1 output with a PerlIO layer.
 test_snippet_with_io(
     'Pod::Text', 'text/iso-8859-1',
-    { encoding => 'iso-8859-1', output => 'iso-8859-1', perlio_iso => 1 }
+    { encoding => 'iso-8859-1', output => 'iso-8859-1', perlio_iso => 1 },
 );
 
 # Test the snippet with ISO 8859-1 input but an encoding forcing output to

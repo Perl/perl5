@@ -26,17 +26,17 @@ BEGIN {
 
 # List of snippets run by this test.
 my @snippets = qw(
-  agrave backslash-man-ref bullet-after-nonbullet bullets c-in-header
-  c-in-name dollar-magic error-die error-none error-normal error-pod
-  error-stderr error-stderr-opt eth fixed-font fixed-font-in-item for-blocks
-  guesswork guesswork-all guesswork-no-quoting guesswork-none
-  guesswork-partial guesswork-quoting hyphen-in-s item-fonts language
-  link-quoting link-to-url long-quote lquote-and-quote lquote-rquote
-  markup-in-name multiline-x naive naive-groff name-guesswork name-quotes
-  name-quotes-none nested-lists newlines-in-c non-ascii nonbreaking-space-l
-  not-bullet not-numbers nourls periods quote-escaping rquote-none
-  soft-hyphens trailing-space true-false x-whitespace x-whitespace-entry
-  zero-width-space
+    agrave backslash-man-ref bullet-after-nonbullet bullets c-in-header
+    c-in-name dollar-magic error-die error-none error-normal error-pod
+    error-stderr error-stderr-opt eth fixed-font fixed-font-in-item for-blocks
+    guesswork guesswork-all guesswork-no-quoting guesswork-none
+    guesswork-partial guesswork-quoting hyphen-in-s item-fonts language
+    link-quoting link-to-url long-quote lquote-and-quote lquote-rquote
+    markup-in-name multiline-x naive naive-groff name-guesswork name-quotes
+    name-quotes-none nested-lists newlines-in-c non-ascii nonbreaking-space-l
+    not-bullet not-numbers nourls periods quote-escaping rquote-none
+    soft-hyphens trailing-space true-false x-whitespace x-whitespace-entry
+    zero-width-space
 );
 
 # Run all the tests.

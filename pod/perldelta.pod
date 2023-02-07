@@ -5,15 +5,15 @@
 [ this is a template for a new perldelta file.  Any text flagged as XXX needs
 to be processed before release. ]
 
-perldelta - what is new for perl v5.37.8
+perldelta - what is new for perl v5.37.9
 
 =head1 DESCRIPTION
 
-This document describes differences between the 5.37.7 release and the 5.37.8
+This document describes differences between the 5.37.8 release and the 5.37.9
 release.
 
-If you are upgrading from an earlier release such as 5.37.6, first read
-L<perl5377delta>, which describes differences between 5.37.6 and 5.37.7.
+If you are upgrading from an earlier release such as 5.37.7, first read
+L<perl5378delta>, which describes differences between 5.37.7 and 5.37.8.
 
 =head1 Notice
 
@@ -47,7 +47,12 @@ XXX For a release on a stable branch, this section aspires to be:
 
 =head1 Deprecations
 
-XXX Any deprecated features, syntax, modules etc. should be listed here.
+=head2 Use of C<'> as a package name separator is deprecated
+
+Using C<'> as package separator in a variable named in a double-quoted
+string has warned since 5.28.  It is now deprecated in both string
+interpolation and non-interpolated contexts, and will be removed in
+Perl 5.40.
 
 =head2 Module removals
 
@@ -330,27 +335,9 @@ L</Modules and Pragmata> section.
 
 =over 4
 
-=item Windows
+=item XXX-some-platform
 
-=over
-
-=item *
-
-lstat() on Windows now returns the length of the link target as the
-size of the file, as it does on POSIX systems.  [github #20476]
-
-=item *
-
-symlink() on Windows now replaces any C</> in the target with C<\>,
-since Windows does not recognize C</> in symbolic links.  The reverse
-translation is B<not> done by readlink().  [github #20506]
-
-=item *
-
-symlink() where the target was an absolute path to a directory was
-incorrectly created as a file symbolic link.  [github #20533]
-
-=back
+XXX
 
 =back
 
@@ -368,12 +355,6 @@ well.
 
 XXX
 
-=item *
-
-Added HvNAMEf and HvNAMEf_QUOTEDPREFIX special formats. They take an HV *
-as an argument and use C<HvNAME()> and related macros to determine the string,
-its length, and whether it is utf8.
-
 =back
 
 =head1 Selected Bug Fixes
@@ -387,7 +368,10 @@ files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
 
 =item *
 
-XXX
+Writing to a magic variables associated with the selected output
+handle, C<$^>, C<$~>, C<$=>, C<$-> and C<$%>, no longer crashes perl
+if the IO object has been cleared from the selected output
+handle. [github #20733]
 
 =back
 
@@ -427,7 +411,7 @@ died, add a short obituary here.
 
 XXX Generate this with:
 
-  perl Porting/acknowledgements.pl v5.37.7..HEAD
+  perl Porting/acknowledgements.pl v5.37.8..HEAD
 
 =head1 Reporting Bugs
 

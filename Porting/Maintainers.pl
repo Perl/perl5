@@ -142,7 +142,7 @@ use File::Glob qw(:case);
     },
 
     'autodie' => {
-        'DISTRIBUTION' => 'TODDR/autodie-2.34.tar.gz',
+        'DISTRIBUTION' => 'TODDR/autodie-2.36.tar.gz',
         'FILES'        => q[cpan/autodie],
         'EXCLUDED'     => [
             qr{benchmarks},
@@ -230,7 +230,7 @@ use File::Glob qw(:case);
     },
 
     'Config::Perl::V' => {
-        'DISTRIBUTION' => 'HMBRAND/Config-Perl-V-0.34.tgz',
+        'DISTRIBUTION' => 'HMBRAND/Config-Perl-V-0.35.tgz',
         'FILES'        => q[cpan/Config-Perl-V],
         'EXCLUDED'     => [qw(
 		examples/show-v.pl
@@ -419,7 +419,7 @@ use File::Glob qw(:case);
     },
 
     'Exporter' => {
-        'DISTRIBUTION' => 'TODDR/Exporter-5.74.tar.gz',
+        'DISTRIBUTION' => 'TODDR/Exporter-5.77.tar.gz',
         'FILES'        => q[dist/Exporter],
         'EXCLUDED' => [
             qw( t/pod.t
@@ -590,7 +590,7 @@ use File::Glob qw(:case);
     },
 
     'FindBin' => {
-        'DISTRIBUTION' => 'TODDR/FindBin-1.52.tar.gz',
+        'DISTRIBUTION' => 'TODDR/FindBin-1.53.tar.gz',
         'FILES'        => q[dist/FindBin],
     },
 
@@ -635,7 +635,7 @@ use File::Glob qw(:case);
     },
 
     'IO' => {
-        'DISTRIBUTION' => 'TODDR/IO-1.50.tar.gz',
+        'DISTRIBUTION' => 'TODDR/IO-1.51.tar.gz',
         'FILES'        => q[dist/IO],
         'EXCLUDED'     => ['t/test.pl'],
     },
@@ -663,7 +663,7 @@ use File::Glob qw(:case);
     },
 
     'IO::Zlib' => {
-        'DISTRIBUTION' => 'TOMHUGHES/IO-Zlib-1.12.tar.gz',
+        'DISTRIBUTION' => 'TOMHUGHES/IO-Zlib-1.14.tar.gz',
         'FILES'        => q[cpan/IO-Zlib],
     },
 
@@ -683,7 +683,7 @@ use File::Glob qw(:case);
     },
 
     'JSON::PP' => {
-        'DISTRIBUTION' => 'ISHIGAKI/JSON-PP-4.13.tar.gz',
+        'DISTRIBUTION' => 'ISHIGAKI/JSON-PP-4.16.tar.gz',
         'FILES'        => q[cpan/JSON-PP],
     },
 
@@ -815,9 +815,9 @@ use File::Glob qw(:case);
     },
 
     'Memoize' => {
-        'DISTRIBUTION' => 'ARISTOTLE/Memoize-1.15.tar.gz',
+        'DISTRIBUTION' => 'ARISTOTLE/Memoize-1.16.tar.gz',
         'FILES'        => q[cpan/Memoize],
-        'EXCLUDED'     => [ qr{^inc/}, 'article.html' ],
+        'EXCLUDED'     => [ qr{^inc/} ],
     },
 
     'MIME::Base64' => {
@@ -827,7 +827,7 @@ use File::Glob qw(:case);
     },
 
     'Module::CoreList' => {
-        'DISTRIBUTION' => 'BINGOS/Module-CoreList-5.20221220.tar.gz',
+        'DISTRIBUTION' => 'BINGOS/Module-CoreList-5.20230120.tar.gz',
         'FILES'        => q[dist/Module-CoreList],
     },
 
@@ -983,10 +983,11 @@ use File::Glob qw(:case);
     },
 
     'podlators' => {
-        'DISTRIBUTION' => 'RRA/podlators-5.00.tar.gz',
+        'DISTRIBUTION' => 'RRA/podlators-5.01.tar.gz',
         'MAIN_MODULE'  => 'Pod::Man',
         'FILES'        => q[cpan/podlators pod/perlpodstyle.pod],
         'EXCLUDED'     => [
+            qr{^\.github/dependabot\.yml},
             qr{^\.github/workflows/build\.yaml},
         ],
 
@@ -1103,7 +1104,7 @@ use File::Glob qw(:case);
     },
 
     'Test::Simple' => {
-        'DISTRIBUTION' => 'EXODIST/Test-Simple-1.302191.tar.gz',
+        'DISTRIBUTION' => 'EXODIST/Test-Simple-1.302192.tar.gz',
         'FILES'        => q[cpan/Test-Simple],
         'EXCLUDED'     => [
             qr{^examples/},

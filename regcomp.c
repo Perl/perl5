@@ -1427,7 +1427,10 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     RExC_use_BRANCHJ = 0;
     RExC_warned_WARN_EXPERIMENTAL__VLB = 0;
     RExC_warned_WARN_EXPERIMENTAL__REGEX_SETS = 0;
+    RExC_logical_total_parens = 0;
     RExC_total_parens = 0;
+    RExC_logical_to_parno = NULL;
+    RExC_parno_to_logical = NULL;
     RExC_open_parens = NULL;
     RExC_close_parens = NULL;
     RExC_paren_names = NULL;
@@ -1612,6 +1615,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 
     RExC_naughty = 0;
     RExC_npar = 1;
+    RExC_logical_npar = 1;
     RExC_parens_buf_size = 0;
     RExC_emit_start = RExC_rxi->program;
     pRExC_state->code_index = 0;
@@ -1630,6 +1634,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 
         /* We have that number in RExC_npar */
         RExC_total_parens = RExC_npar;
+        RExC_logical_total_parens = RExC_logical_npar;
     }
     else if (! MUST_RESTART(flags)) {
         ReREFCNT_dec(Rx);
@@ -1674,6 +1679,9 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 
             Renew(RExC_close_parens, RExC_total_parens, regnode_offset);
             Zero(RExC_close_parens, RExC_total_parens, regnode_offset);
+            /* we do NOT reinitialize  RExC_logical_to_parno and
+             * RExC_parno_to_logical here. We need their data on the second
+             * pass */
         }
         else { /* Parse did not complete.  Reinitialize the parentheses
                   structures */
@@ -1685,6 +1693,14 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
             if (RExC_close_parens) {
                 Safefree(RExC_close_parens);
                 RExC_close_parens = NULL;
+            }
+            if (RExC_logical_to_parno) {
+                Safefree(RExC_logical_to_parno);
+                RExC_logical_to_parno = NULL;
+            }
+            if (RExC_parno_to_logical) {
+                Safefree(RExC_parno_to_logical);
+                RExC_parno_to_logical = NULL;
             }
         }
 
@@ -1702,6 +1718,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     set_regex_pv(pRExC_state, Rx);
 
     RExC_rx->nparens = RExC_total_parens - 1;
+    RExC_rx->logical_nparens = RExC_logical_total_parens - 1;
 
     /* Uses the upper 4 bits of the FLAGS field, so keep within that size */
     if (RExC_whilem_seen > 15)
@@ -1885,7 +1902,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
             !sawlookahead &&
             (OP(first) == STAR &&
             REGNODE_TYPE(OP(REGNODE_AFTER(first))) == REG_ANY) &&
-            !(RExC_rx->intflags & PREGf_ANCH) && !pRExC_state->code_blocks)
+            !(RExC_rx->intflags & PREGf_ANCH) && !(RExC_seen & REG_PESSIMIZE_SEEN))
         {
             /* turn .* into ^.* with an implied $*=1 */
             const int type =
@@ -1898,7 +1915,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
         }
         if (sawplus && !sawminmod && !sawlookahead
             && (!sawopen || !RExC_sawback)
-            && !pRExC_state->code_blocks) /* May examine pos and $& */
+            && !(RExC_seen & REG_PESSIMIZE_SEEN)) /* May examine pos and $& */
             /* x+ must match at the 1st pos of run of x's */
             RExC_rx->intflags |= PREGf_SKIP;
 
@@ -2150,20 +2167,27 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     }
     if (RExC_seen & REG_GPOS_SEEN)
         RExC_rx->intflags |= PREGf_GPOS_SEEN;
+
+    if (RExC_seen & REG_PESSIMIZE_SEEN)
+        RExC_rx->intflags |= PREGf_PESSIMIZE_SEEN;
+
     if (RExC_seen & REG_LOOKBEHIND_SEEN)
         RExC_rx->extflags |= RXf_NO_INPLACE_SUBST; /* inplace might break the
                                                 lookbehind */
     if (pRExC_state->code_blocks)
         RExC_rx->extflags |= RXf_EVAL_SEEN;
-    if (RExC_seen & REG_VERBARG_SEEN)
-    {
+
+    if (RExC_seen & REG_VERBARG_SEEN) {
         RExC_rx->intflags |= PREGf_VERBARG_SEEN;
         RExC_rx->extflags |= RXf_NO_INPLACE_SUBST; /* don't understand this! Yves */
     }
+
     if (RExC_seen & REG_CUTGROUP_SEEN)
         RExC_rx->intflags |= PREGf_CUTGROUP_SEEN;
+
     if (pm_flags & PMf_USE_RE_EVAL)
         RExC_rx->intflags |= PREGf_USE_RE_EVAL;
+
     if (RExC_paren_names)
         RXp_PAREN_NAMES(RExC_rx) = MUTABLE_HV(SvREFCNT_inc(RExC_paren_names));
     else
@@ -2245,6 +2269,31 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
         assert(scan && OP(scan) == GOSUB);
         ARG2L_SET( scan, RExC_open_parens[ARG(scan)] - REGNODE_OFFSET(scan));
     }
+    if (RExC_logical_total_parens != RExC_total_parens) {
+        Newxz(RExC_parno_to_logical_next, RExC_total_parens, I32);
+        /* we rebuild this below */
+        Zero(RExC_logical_to_parno, RExC_total_parens, I32);
+        for( int parno = RExC_total_parens-1 ; parno > 0 ; parno-- ) {
+            int logical_parno= RExC_parno_to_logical[parno];
+            assert(logical_parno);
+            RExC_parno_to_logical_next[parno]= RExC_logical_to_parno[logical_parno];
+            RExC_logical_to_parno[logical_parno] = parno;
+        }
+        if (0)
+        for( int parno = 1; parno < RExC_total_parens ; parno++ )
+            PerlIO_printf(Perl_debug_log,"%d -> %d -> %d\n",
+                    parno, RExC_parno_to_logical[parno], RExC_parno_to_logical_next[parno]);
+        RExC_rx->logical_to_parno = RExC_logical_to_parno;
+        RExC_rx->parno_to_logical = RExC_parno_to_logical;
+        RExC_rx->parno_to_logical_next = RExC_parno_to_logical_next;
+        RExC_logical_to_parno = NULL;
+        RExC_parno_to_logical = NULL;
+        RExC_parno_to_logical_next = NULL;
+    } else {
+        RExC_rx->logical_to_parno = NULL;
+        RExC_rx->parno_to_logical = NULL;
+        RExC_rx->parno_to_logical_next = NULL;
+    }
 
     Newxz(RExC_rx->offs, RExC_total_parens, regexp_paren_pair);
     /* assume we don't need to swap parens around before we match */
@@ -2265,6 +2314,14 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     if (RExC_close_parens) {
         Safefree(RExC_close_parens);
         RExC_close_parens = NULL;
+    }
+    if (RExC_logical_to_parno) {
+        Safefree(RExC_logical_to_parno);
+        RExC_logical_to_parno = NULL;
+    }
+    if (RExC_parno_to_logical) {
+        Safefree(RExC_parno_to_logical);
+        RExC_parno_to_logical = NULL;
     }
 
 #ifdef USE_ITHREADS
@@ -2883,6 +2940,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
     regnode_offset br;
     regnode_offset lastbr;
     regnode_offset ender = 0;
+    I32 logical_parno = 0;
     I32 parno = 0;
     I32 flags;
     U32 oregflags = RExC_flags;
@@ -2893,6 +2951,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
     I32 num; /* numeric backreferences */
     SV * max_open;  /* Max number of unclosed parens */
     I32 was_in_lookaround = RExC_in_lookaround;
+    I32 fake_eval = 0; /* matches paren */
 
     /* The difference between the following variables can be seen with  *
      * the broken pattern /(?:foo/ where segment_parse_start will point *
@@ -2949,6 +3008,16 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
             goto parse_rest;
         }
         else if ( *RExC_parse == '*') { /* (*VERB:ARG), (*construct:...) */
+            if (RExC_parse[1] == '{') {
+                fake_eval = '{';
+                goto handle_qmark;
+            }
+            else
+            if ( RExC_parse[1] == '*' && RExC_parse[2] == '{' ) {
+                fake_eval = '?';
+                goto handle_qmark;
+            }
+
             char *start_verb = RExC_parse + 1;
             STRLEN verb_len;
             char *start_arg = NULL;
@@ -3259,7 +3328,9 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
             return ret;
         }
         else if (*RExC_parse == '?') { /* (?...) */
-            bool is_logical = 0;
+          handle_qmark:
+            ; /* make sure the label has a statement associated with it*/
+            bool is_logical = 0, is_optimistic = 0;
             const char * const seqstart = RExC_parse;
             const char * endptr;
             const char non_existent_group_msg[]
@@ -3272,8 +3343,14 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
             }
 
             RExC_parse_inc_by(1);   /* past the '?' */
-            paren = *RExC_parse;    /* might be a trailing NUL, if not
-                                       well-formed */
+            if (!fake_eval) {
+                paren = *RExC_parse;    /* might be a trailing NUL, if not
+                                           well-formed */
+                is_optimistic = 0;
+            } else {
+                is_optimistic = 1;
+                paren = fake_eval;
+            }
             RExC_parse_inc();
             if (RExC_parse > RExC_end) {
                 paren = '\0';
@@ -3419,7 +3496,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                 /* branch reset, behave like a (?:...) except that
                    buffers in alternations share the same numbers */
                 paren = ':';
-                after_freeze = freeze_paren = RExC_npar;
+                after_freeze = freeze_paren = RExC_logical_npar;
 
                 /* XXX This construct currently requires an extra pass.
                  * Investigation would be required to see if that could be
@@ -3508,7 +3585,6 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                 if (*RExC_parse!=')')
                     vFAIL("Expecting close bracket");
 
-              gen_recurse_regop:
                 if (paren == '-' || paren == '+') {
 
                     /* Don't overflow */
@@ -3545,7 +3621,26 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                         vFAIL(non_existent_group_msg);
                     }
                 }
+                else
+                if (num && num < RExC_logical_npar) {
+                    num = RExC_logical_to_parno[num];
+                }
+                else
+                if (ALL_PARENS_COUNTED) {
+                    if (num < RExC_logical_total_parens) {
+                        num = RExC_logical_to_parno[num];
+                    }
+                    else {
+                        RExC_parse_inc_by(1);
+                        vFAIL(non_existent_group_msg);
+                    }
+                }
+                else {
+                    REQUIRE_PARENS_PASS;
+                }
 
+
+              gen_recurse_regop:
                 if (num >= RExC_npar) {
 
                     /* It might be a forward reference; we can't fail until we
@@ -3636,10 +3731,13 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                 }
                 pRExC_state->code_index++;
                 nextchar(pRExC_state);
+                if (!is_optimistic)
+                    RExC_seen |= REG_PESSIMIZE_SEEN;
 
                 if (is_logical) {
                     regnode_offset eval;
                     ret = reg_node(pRExC_state, LOGICAL);
+                    FLAGS(REGNODE_p(ret)) = 2;
 
                     eval = reg2Lanode(pRExC_state, EVAL,
                                        n,
@@ -3648,13 +3746,15 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                                         * return value */
                                        RExC_flags & RXf_PMf_COMPILETIME
                                       );
-                    FLAGS(REGNODE_p(ret)) = 2;
+                    FLAGS(REGNODE_p(eval)) = is_optimistic * EVAL_OPTIMISTIC_FLAG;
                     if (! REGTAIL(pRExC_state, ret, eval)) {
                         REQUIRE_BRANCHJ(flagp, 0);
                     }
                     return ret;
                 }
                 ret = reg2Lanode(pRExC_state, EVAL, n, 0);
+                FLAGS(REGNODE_p(ret)) = is_optimistic * EVAL_OPTIMISTIC_FLAG;
+
                 return ret;
             }
             case '(':           /* (?(?{...})...) and (?(?=...)...) */
@@ -3668,7 +3768,8 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                                 || RExC_parse[1] == '<'
                                 || RExC_parse[1] == '{'))
                         || (       RExC_parse[0] == '*'        /* (?(*...)) */
-                            && (   memBEGINs(RExC_parse + 1,
+                            && (   RExC_parse[1] == '{'
+                            || (   memBEGINs(RExC_parse + 1,
                                          (Size_t) (RExC_end - (RExC_parse + 1)),
                                          "pla:")
                                 || memBEGINs(RExC_parse + 1,
@@ -3691,7 +3792,7 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                                          "negative_lookahead:")
                                 || memBEGINs(RExC_parse + 1,
                                          (Size_t) (RExC_end - (RExC_parse + 1)),
-                                         "negative_lookbehind:"))))
+                                         "negative_lookbehind:")))))
                 ) { /* Lookahead or eval. */
                     I32 flag;
                     regnode_offset tail;
@@ -3906,6 +4007,8 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
           capturing_parens:
             parno = RExC_npar;
             RExC_npar++;
+            logical_parno = RExC_logical_npar;
+            RExC_logical_npar++;
             if (! ALL_PARENS_COUNTED) {
                 /* If we are in our first pass through (and maybe only pass),
                  * we  need to allocate memory for the capturing parentheses
@@ -3932,6 +4035,9 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                     /* we don't know where end op starts yet, so we don't need to
                      * set RExC_close_parens[0] like we do RExC_open_parens[0]
                      * above */
+
+                    Newxz(RExC_logical_to_parno, RExC_parens_buf_size, I32);
+                    Newxz(RExC_parno_to_logical, RExC_parens_buf_size, I32);
                 }
                 else if (RExC_npar > RExC_parens_buf_size) {
                     I32 old_size = RExC_parens_buf_size;
@@ -3947,6 +4053,14 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                             regnode_offset);
                     Zero(RExC_close_parens + old_size,
                             RExC_parens_buf_size - old_size, regnode_offset);
+
+                    Renew(RExC_logical_to_parno, RExC_parens_buf_size, I32);
+                    Zero(RExC_logical_to_parno + old_size,
+                         RExC_parens_buf_size - old_size, I32);
+
+                    Renew(RExC_parno_to_logical, RExC_parens_buf_size, I32);
+                    Zero(RExC_parno_to_logical + old_size,
+                         RExC_parens_buf_size - old_size, I32);
                 }
             }
 
@@ -3961,7 +4075,11 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
                     (IV)parno, ret));
                 RExC_open_parens[parno]= ret;
             }
-
+            if (RExC_parno_to_logical) {
+                RExC_parno_to_logical[parno] = logical_parno;
+                if (RExC_logical_to_parno && !RExC_logical_to_parno[logical_parno])
+                    RExC_logical_to_parno[logical_parno] = parno;
+            }
             is_open = 1;
         } else {
             /* with RXf_PMf_NOCAPTURE treat (...) as (?:...) */
@@ -4018,9 +4136,9 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
         }
         nextchar(pRExC_state);
         if (freeze_paren) {
-            if (RExC_npar > after_freeze)
-                after_freeze = RExC_npar;
-            RExC_npar = freeze_paren;
+            if (RExC_logical_npar > after_freeze)
+                after_freeze = RExC_logical_npar;
+            RExC_logical_npar = freeze_paren;
         }
         br = regbranch(pRExC_state, &flags, 0, depth+1);
 
@@ -4221,8 +4339,8 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
         NOT_REACHED; /* NOTREACHED */
     }
 
-    if (after_freeze > RExC_npar)
-        RExC_npar = after_freeze;
+    if (after_freeze > RExC_logical_npar)
+        RExC_logical_npar = after_freeze;
 
     RExC_in_lookaround = was_in_lookaround;
 
@@ -4300,9 +4418,8 @@ S_regbranch(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, I32 first, U32 depth)
             ret = chain;
     }
     if (c == 1) {
-        *flagp |= flags&SIMPLE;
+        *flagp |= flags & SIMPLE;
     }
-
     return ret;
 }
 
@@ -4653,13 +4770,13 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
         if (RExC_use_BRANCHJ) {
             reginsert(pRExC_state, LONGJMP, ret, depth+1);
             reginsert(pRExC_state, NOTHING, ret, depth+1);
-            NEXT_OFF(REGNODE_p(ret)) = 3;        /* Go over LONGJMP. */
+            REGNODE_STEP_OVER(ret,tregnode_NOTHING,tregnode_LONGJMP);
         }
         reginsert(pRExC_state, CURLYX, ret, depth+1);
-
         if (RExC_use_BRANCHJ)
-            NEXT_OFF(REGNODE_p(ret)) = 3;   /* Go over NOTHING to
-                                               LONGJMP. */
+            /* Go over NOTHING to LONGJMP. */
+            REGNODE_STEP_OVER(ret,tregnode_CURLYX,tregnode_NOTHING);
+
         if (! REGTAIL(pRExC_state, ret, reg_node(pRExC_state,
                                                   NOTHING)))
         {
@@ -4672,8 +4789,8 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
     /* Finish up the CURLY/CURLYX case */
     FLAGS(REGNODE_p(ret)) = 0;
 
-    ARG1_SET(REGNODE_p(ret), (U16)min);
-    ARG2_SET(REGNODE_p(ret), (U16)max);
+    ARG1_SET(REGNODE_p(ret), min);
+    ARG2_SET(REGNODE_p(ret), max);
 
   done_main_op:
 
@@ -5787,6 +5904,21 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                         if (num < 1)
                             vFAIL("Reference to nonexistent or unclosed group");
                     }
+                    else
+                    if (num < RExC_logical_npar) {
+                        num = RExC_logical_to_parno[num];
+                    }
+                    else
+                    if (ALL_PARENS_COUNTED)  {
+                        if (num < RExC_logical_total_parens)
+                            num = RExC_logical_to_parno[num];
+                        else {
+                            num = -1;
+                        }
+                    }
+                    else{
+                        REQUIRE_PARENS_PASS;
+                    }
                 }
                 else {
                     num = S_backref_value(RExC_parse, RExC_end);
@@ -5800,7 +5932,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                     if (    /* any numeric escape < 10 is always a backref */
                            num > 9
                             /* any numeric escape < RExC_npar is a backref */
-                        && num >= RExC_npar
+                        && num >= RExC_logical_npar
                             /* cannot be an octal escape if it starts with [89]
                              * */
                         && ! inRANGE(*RExC_parse, '8', '9')
@@ -5811,6 +5943,19 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                          * octal escapes in patterns is problematic. - Yves */
                         RExC_parse_set(atom_parse_start);
                         goto defchar;
+                    }
+                    if (num < RExC_logical_npar) {
+                        num = RExC_logical_to_parno[num];
+                    }
+                    else
+                    if (ALL_PARENS_COUNTED) {
+                        if (num < RExC_logical_total_parens) {
+                            num = RExC_logical_to_parno[num];
+                        } else {
+                            num = -1;
+                        }
+                    } else {
+                        REQUIRE_PARENS_PASS;
                     }
                 }
 
@@ -5828,9 +5973,10 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                 else while (isDIGIT(*RExC_parse)) {
                     RExC_parse_inc_by(1);
                 }
+                if (num < 0)
+                    vFAIL("Reference to nonexistent group");
 
                 if (num >= (I32)RExC_npar) {
-
                     /* It might be a forward reference; we can't fail until we
                      * know, by completing the parse to get all the groups, and
                      * then reparsing */
@@ -12597,7 +12743,6 @@ S_reginsert(pTHX_ RExC_state_t *pRExC_state, const U8 op,
     PERL_ARGS_ASSERT_REGINSERT;
     PERL_UNUSED_CONTEXT;
     PERL_UNUSED_ARG(depth);
-/* (REGNODE_TYPE((U8)op) == CURLY ? EXTRA_STEP_2ARGS : 0); */
     DEBUG_PARSE_FMT("inst"," - %s", REGNODE_NAME(op));
     assert(!RExC_study_started); /* I believe we should never use reginsert once we have started
                                     studying. If this is wrong then we need to adjust RExC_recurse
@@ -12946,6 +13091,12 @@ Perl_pregfree2(pTHX_ REGEXP *rx)
     SvREFCNT_dec(r->saved_copy);
 #endif
     Safefree(r->offs);
+    if (r->logical_to_parno) {
+        Safefree(r->logical_to_parno);
+        Safefree(r->parno_to_logical);
+        Safefree(r->parno_to_logical_next);
+    }
+
     SvREFCNT_dec(r->qr_anoncv);
     if (r->recurse_locinput)
         Safefree(r->recurse_locinput);
@@ -13043,6 +13194,7 @@ Perl_reg_temp_copy(pTHX_ REGEXP *dsv, REGEXP *ssv)
      */
     memcpy(&(drx->xpv_cur), &(srx->xpv_cur),
            sizeof(regexp) - STRUCT_OFFSET(regexp, xpv_cur));
+
     if (!islv)
         SvLEN_set(dsv, 0);
     if (srx->offs) {
@@ -13063,6 +13215,23 @@ Perl_reg_temp_copy(pTHX_ REGEXP *dsv, REGEXP *ssv)
         /* check_substr and check_utf8, if non-NULL, point to either their
            anchored or float namesakes, and don't hold a second reference.  */
     }
+    if (srx->logical_to_parno) {
+        NewCopy(srx->logical_to_parno,
+                drx->logical_to_parno,
+                srx->nparens+1, I32);
+        NewCopy(srx->parno_to_logical,
+                drx->parno_to_logical,
+                srx->nparens+1, I32);
+        NewCopy(srx->parno_to_logical_next,
+                drx->parno_to_logical_next,
+                srx->nparens+1, I32);
+    } else {
+        drx->logical_to_parno = NULL;
+        drx->parno_to_logical = NULL;
+        drx->parno_to_logical_next = NULL;
+    }
+    drx->logical_nparens = srx->logical_nparens;
+
     RX_MATCH_COPIED_off(dsv);
 #ifdef PERL_ANY_COW
     drx->saved_copy = NULL;
@@ -13295,6 +13464,19 @@ Perl_re_dup_guts(pTHX_ const REGEXP *sstr, REGEXP *dstr, CLONE_PARAMS *param)
 #ifdef PERL_ANY_COW
     ret->saved_copy = NULL;
 #endif
+
+    if (r->logical_to_parno) {
+        /* we use total_parens for all three just for symmetry */
+        ret->logical_to_parno = (I32*)SAVEPVN((char*)(r->logical_to_parno), (1+r->nparens) * sizeof(I32));
+        ret->parno_to_logical = (I32*)SAVEPVN((char*)(r->parno_to_logical), (1+r->nparens) * sizeof(I32));
+        ret->parno_to_logical_next = (I32*)SAVEPVN((char*)(r->parno_to_logical_next), (1+r->nparens) * sizeof(I32));
+    } else {
+        ret->logical_to_parno = NULL;
+        ret->parno_to_logical = NULL;
+        ret->parno_to_logical_next = NULL;
+    }
+
+    ret->logical_nparens = r->logical_nparens;
 
     /* Whether mother_re be set or no, we need to copy the string.  We
        cannot refrain from copying it when the storage points directly to
