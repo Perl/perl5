@@ -47,7 +47,12 @@ XXX For a release on a stable branch, this section aspires to be:
 
 =head1 Deprecations
 
-XXX Any deprecated features, syntax, modules etc. should be listed here.
+=head2 Use of C<'> as a package name separator is deprecated
+
+Using C<'> as package separator in a variable named in a double-quoted
+string has warned since 5.28.  It is now deprecated in both string
+interpolation and non-interpolated contexts, and will be removed in
+Perl 5.40.
 
 =head2 Module removals
 
