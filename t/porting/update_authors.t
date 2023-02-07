@@ -21,6 +21,7 @@ my $large_range= "6d02a9e121d037896df9b91ac623c1ab4c98c99a.."
                . "544171f79ec3e50bb5003007e9f4ebb9a7e9fe8";
 my $with_unknown_range= "96a91e01636d3050d38ae3373a362c7d47a6647e^^^.."
                       . "96a91e01636d3050d38ae3373a362c7d47a6647e";
+
 foreach my $tuple (
     [ "--who", $small_range,
                "James E Keenan, Karl Williamson, Mark Shelor." ],
@@ -35,9 +36,15 @@ foreach my $tuple (
     [ "--who" , $with_unknown_range, "Jarkko Hietaniemi.", "(no 'unknown' authors)" ],
 ) {
     my ($arg,$range,$expect, $msg_extra)= @$tuple;
-    my $parsed= `git rev-parse --verify -q $range`;
+    my $skip_it;
+    for my $endpoint (split /\.+/, $range) {
+        my $parsed= `git rev-parse --verify -q $endpoint\{commit}`;
+        if (!$parsed or $?) {
+            $skip_it = 1;
+        }
+    }
     SKIP: {
-        unless ($parsed) {
+        if ($skip_it) {
             skip "commit range '$range' not available (this happens in CI)", 1;
         }
         $msg_extra= $msg_extra ? " $msg_extra" : "";

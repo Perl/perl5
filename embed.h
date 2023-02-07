@@ -457,6 +457,7 @@
 # define op_contextualize(a,b)                  Perl_op_contextualize(aTHX_ a,b)
 # define op_convert_list(a,b,c)                 Perl_op_convert_list(aTHX_ a,b,c)
 # define op_dump(a)                             Perl_op_dump(aTHX_ a)
+# define op_force_list(a)                       Perl_op_force_list(aTHX_ a)
 # define op_free(a)                             Perl_op_free(aTHX_ a)
 # define op_linklist(a)                         Perl_op_linklist(aTHX_ a)
 # define op_null(a)                             Perl_op_null(aTHX_ a)
@@ -919,7 +920,6 @@
 #   define dump_all_perl(a)                     Perl_dump_all_perl(aTHX_ a)
 #   define dump_packsubs_perl(a,b)              Perl_dump_packsubs_perl(aTHX_ a,b)
 #   define dump_sub_perl(a,b)                   Perl_dump_sub_perl(aTHX_ a,b)
-#   define finalize_optree(a)                   Perl_finalize_optree(aTHX_ a)
 #   define find_lexical_cv(a)                   Perl_find_lexical_cv(aTHX_ a)
 #   define find_runcv_where(a,b,c)              Perl_find_runcv_where(aTHX_ a,b,c)
 #   define find_script(a,b,c,d)                 Perl_find_script(aTHX_ a,b,c,d)
@@ -1407,7 +1407,6 @@
 #     define no_bareword_allowed(a)             Perl_no_bareword_allowed(aTHX_ a)
 #     define op_prune_chain_head                Perl_op_prune_chain_head
 #     define op_varname(a)                      Perl_op_varname(aTHX_ a)
-#     define optimize_optree(a)                 Perl_optimize_optree(aTHX_ a)
 #     define warn_elem_scalar_context(a,b,c,d)  Perl_warn_elem_scalar_context(aTHX_ a,b,c,d)
 #     if defined(USE_ITHREADS)
 #       define op_relocate_sv(a,b)              Perl_op_relocate_sv(aTHX_ a,b)
@@ -1645,6 +1644,9 @@
 #     define padlist_dup(a,b)                   Perl_padlist_dup(aTHX_ a,b)
 #     define padname_dup(a,b)                   Perl_padname_dup(aTHX_ a,b)
 #     define padnamelist_dup(a,b)               Perl_padnamelist_dup(aTHX_ a,b)
+#     if !defined(PERL_IMPLICIT_SYS)
+#       define PerlEnv_putenv(a)                S_PerlEnv_putenv(aTHX_ a)
+#     endif /* !defined(PERL_IMPLICIT_SYS) */
 #   endif /* defined(USE_ITHREADS) */
 #   if defined(USE_LOCALE_COLLATE)
 #     define magic_freecollxfrm(a,b)            Perl_magic_freecollxfrm(aTHX_ a,b)
@@ -1688,13 +1690,14 @@
 #   define reg_named_buff(a,b,c,d)              Perl_reg_named_buff(aTHX_ a,b,c,d)
 #   define reg_named_buff_iter(a,b,c)           Perl_reg_named_buff_iter(aTHX_ a,b,c)
 #   define reg_numbered_buff_fetch(a,b,c)       Perl_reg_numbered_buff_fetch(aTHX_ a,b,c)
+#   define reg_numbered_buff_fetch_flags(a,b,c,d) Perl_reg_numbered_buff_fetch_flags(aTHX_ a,b,c,d)
 #   define reg_numbered_buff_length(a,b,c)      Perl_reg_numbered_buff_length(aTHX_ a,b,c)
 #   define reg_numbered_buff_store(a,b,c)       Perl_reg_numbered_buff_store(aTHX_ a,b,c)
 #   define reg_qr_package(a)                    Perl_reg_qr_package(aTHX_ a)
 #   define reg_temp_copy(a,b)                   Perl_reg_temp_copy(aTHX_ a,b)
 #   define report_uninit(a)                     Perl_report_uninit(aTHX_ a)
 #   define scan_str(a,b,c,d,e)                  Perl_scan_str(aTHX_ a,b,c,d,e)
-#   define scan_word(a,b,c,d,e)                 Perl_scan_word(aTHX_ a,b,c,d,e)
+#   define scan_word(a,b,c,d,e,f)               Perl_scan_word(aTHX_ a,b,c,d,e,f)
 #   define skipspace_flags(a,b)                 Perl_skipspace_flags(aTHX_ a,b)
 #   define sv_magicext_mglob(a)                 Perl_sv_magicext_mglob(aTHX_ a)
 #   define sv_only_taint_gmagic                 Perl_sv_only_taint_gmagic
@@ -1960,6 +1963,10 @@
                defined(DEBUGGING) */
 #   endif /* defined(PERL_IN_REGEXEC_C) */
 # endif /* defined(PERL_CORE) || defined(PERL_EXT) */
+# if defined(PERL_CORE) || defined(PERL_USE_VOLATILE_API)
+#   define finalize_optree(a)                   Perl_finalize_optree(aTHX_ a)
+#   define optimize_optree(a)                   Perl_optimize_optree(aTHX_ a)
+# endif /* defined(PERL_CORE) || defined(PERL_USE_VOLATILE_API) */
 # if !defined(PERL_IMPLICIT_SYS)
 #   define my_pclose(a)                         Perl_my_pclose(aTHX_ a)
 #   define my_popen(a,b)                        Perl_my_popen(aTHX_ a,b)

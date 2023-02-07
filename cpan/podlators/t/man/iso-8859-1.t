@@ -47,9 +47,9 @@ eval 'binmode($builder->failure_output, ":encoding(iso-8859-1)")';
 # Test the snippet with ISO 8859-1 output, with and without PerlIO layers.
 test_snippet_with_io(
     'Pod::Man', 'man/iso-8859-1',
-    { encoding => 'iso-8859-1', output => 'iso-latin-1' }
+    { encoding => 'iso-8859-1', output => 'iso-latin-1' },
 );
 test_snippet_with_io(
     'Pod::Man', 'man/iso-8859-1',
-    { encoding => 'iso-8859-1', perlio_iso => 1, output => 'iso-latin-1' }
+    { encoding => 'iso-8859-1', perlio_iso => 1, output => 'iso-latin-1' },
 );

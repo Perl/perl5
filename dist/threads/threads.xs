@@ -95,8 +95,8 @@ typedef perl_os_thread pthread_t;
 typedef struct _ithread {
     struct _ithread *next;      /* Next thread in the list */
     struct _ithread *prev;      /* Prev thread in the list */
-    PerlInterpreter *interp;    /* The threads interpreter */
-    UV tid;                     /* Threads module's thread id */
+    PerlInterpreter *interp;    /* The thread's interpreter */
+    UV tid;                     /* Thread's module's thread id */
     perl_mutex mutex;           /* Mutex for updating things in this struct */
     int count;                  /* Reference count. See S_ithread_create. */
     int state;                  /* Detached, joined, finished, etc. */

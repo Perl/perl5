@@ -128,8 +128,21 @@ sub generate_proto_h {
         die_at_end "$plain_func: u flag only usable with m" if $flags =~ /u/
                                                             && $flags !~ /m/;
 
+        my ($static_flag, @extra_static_flags)= do {
+            # the seen filter can be removed once flag dedupe
+            # is done in tidy_embed.pl
+            my %seen;
+            grep !$seen{$_}++, $flags =~/([SsIi])/g;
+        };
+
+        if (@extra_static_flags) {
+            my $flags_str = join ", ", $static_flag, @extra_static_flags;
+            $flags_str =~ s/, (\w)\z/ and $1/;
+            die_at_end "$plain_func: flags $flags_str are mutually exclusive\n";
+        }
+
         my $static_inline = 0;
-        if ($flags =~ /([SsIi])/) {
+        if ($static_flag) {
             my $type;
             if ($never_returns) {
                 $type = {
@@ -137,7 +150,7 @@ sub generate_proto_h {
                     's' => 'PERL_STATIC_NO_RET',
                     'i' => 'PERL_STATIC_INLINE_NO_RET',
                     'I' => 'PERL_STATIC_FORCE_INLINE_NO_RET'
-                }->{$1};
+                }->{$static_flag};
             }
             else {
                 $type = {
@@ -145,7 +158,7 @@ sub generate_proto_h {
                     's' => 'STATIC',
                     'i' => 'PERL_STATIC_INLINE',
                     'I' => 'PERL_STATIC_FORCE_INLINE'
-                }->{$1};
+                }->{$static_flag};
             }
             $retval = "$type $retval";
             die_at_end "Don't declare static function '$plain_func' pure" if $flags =~ /P/;
@@ -222,6 +235,7 @@ sub generate_proto_h {
                 }
                 my $nn = ( $arg =~ s/\s*\bNN\b\s+// );
                 push( @nonnull, $n ) if $nn;
+                my $nz = ( $arg =~ s/\s*\bNZ\b\s+// );
 
                 my $nullok = ( $arg =~ s/\s*\bNULLOK\b\s+// ); # strip NULLOK with no effect
 
@@ -234,7 +248,7 @@ sub generate_proto_h {
                      && ($temp_arg !~ /\w+\s+(\w+)(?:\[\d+\])?\s*$/) ) {
                     die_at_end "$func: $arg ($n) doesn't have a name\n";
                 }
-                if (defined $1 && $nn && !($commented_out && !$binarycompat)) {
+                if (defined $1 && ($nn||$nz) && !($commented_out && !$binarycompat)) {
                     push @names_of_nn, $1;
                 }
             }

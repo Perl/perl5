@@ -10,7 +10,7 @@
 use strict; use warnings;
 
 package Memoize;
-our $VERSION = '1.15';
+our $VERSION = '1.16';
 
 use Carp;
 use Scalar::Util 1.11 (); # for set_prototype
@@ -137,7 +137,7 @@ sub _wrap {
     my $argstr = do {
       no warnings 'uninitialized';
       defined $normalizer
-        ? ( wantarray ? ( &$normalizer )[0] : &$normalizer )
+        ? ( wantarray ? ( $normalizer->( @_ ) )[0] : $normalizer->( @_ ) )
           . '' # coerce undef to string while the warning is off
         : join chr(28), @_;
     };
@@ -909,11 +909,9 @@ C<"x"> to every key.
 
 =head1 SEE ALSO
 
-At
-L<https://perl.plover.com/MiniMemoize/> there is an article about
+At L<https://perl.plover.com/MiniMemoize/> there is an article about
 memoization and about the internals of Memoize that appeared in The
-Perl Journal, issue #13.  (This article is also included in the
-Memoize distribution as F<article.html>.)
+Perl Journal, issue #13.
 
 Mark-Jason Dominus's book I<Higher-Order Perl> (2005, ISBN 1558607013,
 published

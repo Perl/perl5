@@ -638,15 +638,15 @@ Perl_magic_regdata_cnt(pTHX_ SV *sv, MAGIC *mg)
             const SSize_t n = (SSize_t)mg->mg_obj;
             if (n == '+') {          /* @+ */
                 /* return the number possible */
-                return RX_NPARENS(rx);
+                return RX_LOGICAL_NPARENS(rx) ? RX_LOGICAL_NPARENS(rx) : RX_NPARENS(rx);
             } else {   /* @- @^CAPTURE  @{^CAPTURE} */
                 I32 paren = RX_LASTPAREN(rx);
 
                 /* return the last filled */
-                while ( paren >= 0
-                        && (RX_OFFS(rx)[paren].start == -1
-                            || RX_OFFS(rx)[paren].end == -1) )
+                while ( paren >= 0 && !RX_OFFS_VALID(rx,paren) )
                     paren--;
+                if (paren && RX_PARNO_TO_LOGICAL(rx))
+                    paren = RX_PARNO_TO_LOGICAL(rx)[paren];
                 if (n == '-') {
                     /* @- */
                     return (U32)paren;
@@ -667,32 +667,42 @@ int
 Perl_magic_regdatum_get(pTHX_ SV *sv, MAGIC *mg)
 {
     PERL_ARGS_ASSERT_MAGIC_REGDATUM_GET;
+    REGEXP * const rx = PL_curpm ? PM_GETRE(PL_curpm) : NULL;
 
-    if (PL_curpm) {
-        REGEXP * const rx = PM_GETRE(PL_curpm);
-        if (rx) {
-            const SSize_t n = (SSize_t)mg->mg_obj;
-            /* @{^CAPTURE} does not contain $&, so we need to increment by 1 */
-            const I32 paren = mg->mg_len
-                            + (n == '\003' ? 1 : 0);
-            SSize_t s;
-            SSize_t t;
-            if (paren < 0)
-                return 0;
-            if (paren <= (I32)RX_NPARENS(rx) &&
-                (s = RX_OFFS(rx)[paren].start) != -1 &&
-                (t = RX_OFFS(rx)[paren].end) != -1)
+    if (rx) {
+        const SSize_t n = (SSize_t)mg->mg_obj;
+        /* @{^CAPTURE} does not contain $&, so we need to increment by 1 */
+        const I32 paren = mg->mg_len
+                        + (n == '\003' ? 1 : 0);
+        
+        if (paren < 0)
+            return 0;
+
+        SSize_t s;
+        SSize_t t;
+        I32 logical_nparens = (I32)RX_LOGICAL_NPARENS(rx);
+
+        if (!logical_nparens) 
+            logical_nparens = (I32)RX_NPARENS(rx);
+
+        if (n != '+' && n != '-') {
+            CALLREG_NUMBUF_FETCH(rx,paren,sv);
+            return 0;
+        }
+        if (paren <= (I32)logical_nparens) {
+            I32 true_paren = RX_LOGICAL_TO_PARNO(rx)
+                             ? RX_LOGICAL_TO_PARNO(rx)[paren]
+                             : paren;
+            do {
+                if (((s = RX_OFFS_START(rx,true_paren)) != -1) &&
+                    ((t = RX_OFFS_END(rx,true_paren)) != -1))
                 {
                     SSize_t i;
 
-                    if (n == '+')                /* @+ */
+                    if (n == '+')               /* @+ */
                         i = t;
-                    else if (n == '-')           /* @- */
+                    else                        /* @- */
                         i = s;
-                    else {                        /* @^CAPTURE @{^CAPTURE} */
-                        CALLREG_NUMBUF_FETCH(rx,paren,sv);
-                        return 0;
-                    }
 
                     if (RX_MATCH_UTF8(rx)) {
                         const char * const b = RX_SUBBEG(rx);
@@ -705,6 +715,11 @@ Perl_magic_regdatum_get(pTHX_ SV *sv, MAGIC *mg)
                     sv_setuv(sv, i);
                     return 0;
                 }
+                if (RX_PARNO_TO_LOGICAL_NEXT(rx))
+                    true_paren = RX_PARNO_TO_LOGICAL_NEXT(rx)[true_paren];
+                else
+                    break;
+            } while (true_paren);
         }
     }
     sv_set_undef(sv);
@@ -1097,6 +1112,8 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
     case '\016':		/* ^N */
         if (PL_curpm && (rx = PM_GETRE(PL_curpm))) {
             paren = RX_LASTCLOSEPAREN(rx);
+            if (RX_PARNO_TO_LOGICAL(rx))
+                paren = RX_PARNO_TO_LOGICAL(rx)[paren];
             if (paren)
                 goto do_numbuf_fetch;
         }
@@ -3055,25 +3072,55 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
             IoLINES(GvIOp(PL_last_in_gv)) = SvIV(sv);
         break;
     case '^':
-        Safefree(IoTOP_NAME(GvIOp(PL_defoutgv)));
-        IoTOP_NAME(GvIOp(PL_defoutgv)) = savesvpv(sv);
-        IoTOP_GV(GvIOp(PL_defoutgv)) =  gv_fetchsv(sv, GV_ADD, SVt_PVIO);
+        {
+            IO * const io = GvIO(PL_defoutgv);
+            if (!io)
+                break;
+
+            Safefree(IoTOP_NAME(io));
+            IoTOP_NAME(io) = savesvpv(sv);
+            IoTOP_GV(io) =  gv_fetchsv(sv, GV_ADD, SVt_PVIO);
+        }
         break;
     case '~':
-        Safefree(IoFMT_NAME(GvIOp(PL_defoutgv)));
-        IoFMT_NAME(GvIOp(PL_defoutgv)) = savesvpv(sv);
-        IoFMT_GV(GvIOp(PL_defoutgv)) =  gv_fetchsv(sv, GV_ADD, SVt_PVIO);
+        {
+            IO * const io = GvIO(PL_defoutgv);
+            if (!io)
+                break;
+
+            Safefree(IoFMT_NAME(io));
+            IoFMT_NAME(io) = savesvpv(sv);
+            IoFMT_GV(io) =  gv_fetchsv(sv, GV_ADD, SVt_PVIO);
+        }
         break;
     case '=':
-        IoPAGE_LEN(GvIOp(PL_defoutgv)) = (SvIV(sv));
+        {
+            IO * const io = GvIO(PL_defoutgv);
+            if (!io)
+                break;
+
+            IoPAGE_LEN(io) = (SvIV(sv));
+        }
         break;
     case '-':
-        IoLINES_LEFT(GvIOp(PL_defoutgv)) = (SvIV(sv));
-        if (IoLINES_LEFT(GvIOp(PL_defoutgv)) < 0L)
-                IoLINES_LEFT(GvIOp(PL_defoutgv)) = 0L;
+        {
+            IO * const io = GvIO(PL_defoutgv);
+            if (!io)
+                break;
+
+            IoLINES_LEFT(io) = (SvIV(sv));
+            if (IoLINES_LEFT(io) < 0L)
+                IoLINES_LEFT(io) = 0L;
+        }
         break;
     case '%':
-        IoPAGE(GvIOp(PL_defoutgv)) = (SvIV(sv));
+        {
+            IO * const io = GvIO(PL_defoutgv);
+            if (!io)
+                break;
+
+            IoPAGE(io) = (SvIV(sv));
+        }
         break;
     case '|':
         {

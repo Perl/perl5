@@ -373,10 +373,47 @@ Perl_av_store(pTHX_ AV *av, SSize_t key, SV *val)
     }
     else if (AvREAL(av))
         SvREFCNT_dec(ary[key]);
+
+    /* store the val into the AV before we call magic so that the magic can
+     * "see" the new value. Especially set magic on the AV itself. */
     ary[key] = val;
+
     if (SvSMAGICAL(av)) {
         const MAGIC *mg = SvMAGIC(av);
         bool set = TRUE;
+        /* We have to increment the refcount on val before we call any magic,
+         * as it is now stored in the AV (just before this block), we will
+         * then call the magic handlers which might die/Perl_croak, and
+         * longjmp up the stack to the most recent exception trap. Which means
+         * the caller code that would be expected to handle the refcount
+         * increment likely would never be executed, leading to a double free.
+         * This can happen in a case like
+         *
+         * @ary = (1);
+         *
+         * or this:
+         *
+         * if (av_store(av,n,sv)) SvREFCNT_inc(sv);
+         *
+         * where @ary/av has set magic applied to it which can die. In the
+         * first case the sv representing 1 would be mortalized, so when the
+         * set magic threw an exception it would be freed as part of the
+         * normal stack unwind. However this leaves the av structure still
+         * holding a valid visible pointer to the now freed value. In practice
+         * the next SV created will reuse the same reference, but without the
+         * refcount to account for the previous ownership and we end up with
+         * warnings about a totally different variable being double freed in
+         * the form of "attempt to free unreferenced variable"
+         * warnings/errors.
+         *
+         * https://github.com/Perl/perl5/issues/20675
+         *
+         * Arguably the API for av_store is broken in the face of magic. Instead
+         * av_store should be responsible for the refcount increment, and only
+         * not do it when specifically told to do so (eg, when storing an
+         * otherwise unreferenced scalar into an AV).
+         */
+        SvREFCNT_inc(val);  /* see comment above */
         for (; mg; mg = mg->mg_moremagic) {
           if (!isUPPER(mg->mg_type)) continue;
           if (val) {
@@ -389,6 +426,10 @@ Perl_av_store(pTHX_ AV *av, SSize_t key, SV *val)
         }
         if (set)
            mg_set(MUTABLE_SV(av));
+        /* And now we are done the magic, we have to decrement it back as the av_store() api
+         * says the caller is responsible for the refcount increment, assuming
+         * av_store returns true. */
+        SvREFCNT_dec(val);
     }
     return &ary[key];
 }

@@ -1712,7 +1712,8 @@ S_calculate_LC_ALL(pTHX_ const char ** individ_locales)
     names_len++;    /* Trailing '\0' */
 
     /* Allocate enough space for the aggregated string */
-    SAVEFREEPV(Newxz(aggregate_locale, names_len, char));
+    Newxz(aggregate_locale, names_len, char);
+    SAVEFREEPV(aggregate_locale);
 
     /* Then fill it in */
     for (i = 0; i < NOMINAL_LC_ALL_INDEX; i++) {
@@ -1969,6 +1970,8 @@ S_new_numeric(pTHX_ const char *newnum, bool force)
                                                              NULL, NULL));
     Safefree(scratch_buffer);
 
+#    else
+    PERL_UNUSED_VAR(C_thousands_sep);
 #    endif
 
     PL_numeric_standard = PL_numeric_underlying_is_standard;
@@ -1991,8 +1994,7 @@ Perl_set_numeric_standard(pTHX)
 
 #  ifdef USE_LOCALE_NUMERIC
 
-    /* Unconditionally toggle the LC_NUMERIC locale to the current underlying
-     * default.
+    /* Unconditionally toggle the LC_NUMERIC locale to the C locale
      *
      * Most code should use the macro SET_NUMERIC_STANDARD() in perl.h
      * instead of calling this directly.  The macro avoids calling this routine
@@ -4146,7 +4148,7 @@ S_my_langinfo_i(pTHX_
     const char * retval = NULL;
 
     PERL_ARGS_ASSERT_MY_LANGINFO_I;
-    assert(cat_index <= NOMINAL_LC_ALL_INDEX);
+    assert(cat_index < NOMINAL_LC_ALL_INDEX);
 
     DEBUG_Lv(PerlIO_printf(Perl_debug_log,
                            "Entering my_langinfo item=%ld, using locale %s\n",
@@ -4797,6 +4799,154 @@ S_my_langinfo_i(pTHX_
 }   /* my_langinfo() */
 
 #endif      /* USE_LOCALE */
+
+char *
+Perl_my_strftime(pTHX_ const char *fmt, int sec, int min, int hour, int mday, int mon, int year, int wday, int yday, int isdst)
+{
+#ifdef HAS_STRFTIME
+
+/*
+=for apidoc_section $time
+=for apidoc      my_strftime
+=for apidoc_item my_strftime8
+
+strftime(), but with a different API so that the return value is a pointer
+to the formatted result (which MUST be arranged to be FREED BY THE
+CALLER).  This allows these functions to increase the buffer size as needed,
+so that the caller doesn't have to worry about that.
+
+C<my_strftime8> is the same as plain C<my_strftime>, but has an extra
+parameter, a pointer to a variable declared as L</C<utf8ness_t>>.
+Upon return, its variable will be set to indicate how the resultant string
+should be treated with regards to its UTF-8ness.
+
+Note that yday and wday effectively are ignored by these functions, as
+mini_mktime() overwrites them
+
+Also note that they are always executed in the underlying locale of the program,
+giving localized results.  Mojibake can result on some platforms if LC_CTYPE
+and LC_TIME are not the same locale.
+
+=cut
+ */
+    PERL_ARGS_ASSERT_MY_STRFTIME;
+
+    /* An empty format yields an empty result */
+    const int fmtlen = strlen(fmt);
+    if (fmtlen == 0) {
+        char *ret;
+        Newxz (ret, 1, char);
+        return ret;
+    }
+
+    /* Set mytm to now */
+    struct tm mytm;
+    init_tm(&mytm);	/* XXX workaround - see Perl_init_tm() */
+
+    /* Override with the passed-in values */
+    mytm.tm_sec = sec;
+    mytm.tm_min = min;
+    mytm.tm_hour = hour;
+    mytm.tm_mday = mday;
+    mytm.tm_mon = mon;
+    mytm.tm_year = year;
+    mytm.tm_wday = wday;
+    mytm.tm_yday = yday;
+    mytm.tm_isdst = isdst;
+    mini_mktime(&mytm);
+
+    /* use libc to get the values for tm_gmtoff and tm_zone on platforms that
+     * have them [perl #18238] */
+#if defined(HAS_MKTIME) && (defined(HAS_TM_TM_GMTOFF) || defined(HAS_TM_TM_ZONE))
+    struct tm mytm2;
+    mytm2 = mytm;
+    MKTIME_LOCK;
+    mktime(&mytm2);
+    MKTIME_UNLOCK;
+#  ifdef HAS_TM_TM_GMTOFF
+    mytm.tm_gmtoff = mytm2.tm_gmtoff;
+#  endif
+#  ifdef HAS_TM_TM_ZONE
+    mytm.tm_zone = mytm2.tm_zone;
+#  endif
+#endif
+#if defined(USE_LOCALE_CTYPE) && defined(USE_LOCALE_TIME)
+
+    const char * orig_CTYPE_LOCALE = toggle_locale_c(LC_CTYPE,
+                                                     querylocale_c(LC_TIME));
+#endif
+
+    /* Guess an initial size for the returned string based on an expansion
+     * factor of the input format, but with a minimum that should handle most
+     * common cases.  If this guess is too small, we will try again with a
+     * larger one */
+    int bufsize = MAX(fmtlen * 2, 64);
+
+    char *buf = NULL;   /* Makes Renew() act as Newx() on the first iteration */
+    do {
+        Renew(buf, bufsize, char);
+
+        GCC_DIAG_IGNORE_STMT(-Wformat-nonliteral); /* fmt checked by caller */
+
+        STRFTIME_LOCK;
+        int len = strftime(buf, bufsize, fmt, &mytm);
+        STRFTIME_UNLOCK;
+
+        GCC_DIAG_RESTORE_STMT;
+
+        /* A non-zero return indicates success.  But to make sure we're not
+         * dealing with some rogue strftime that returns how much space it
+         * needs instead of 0 when there isn't enough, check that the return
+         * indicates we have at least one byte of spare space (which will be
+         * used for the terminating NUL). */
+        if (inRANGE(len, 1, bufsize - 1)) {
+            goto strftime_success;
+        }
+
+        /* There are several possible reasons for a 0 return code for a
+         * non-empty format, and they are not trivial to tease apart.  What we
+         * do is to assume that the reason is not enough space in the buffer,
+         * so increase it and try again. */
+        bufsize *= 2;
+
+        /* But don't just keep increasing the size indefinitely.  Stop when it
+         * becomes obvious that the reason for failure is something besides not
+         * enough space.  This heuristic has long been in effect successfully.
+         * */
+    } while (bufsize < 100 * fmtlen);
+
+    /* Here, strftime() returned 0, and it wasn't for lack of space.  There
+     * are two possible reasons:
+     *
+     * First is that the result is legitimately 0 length.  This can happen
+     * when the format is precisely "%p".  That is the only documented format
+     * that can have an empty result. */
+    if (strEQ(fmt, "%p")) {
+        Renew(buf, 1, char);
+        *buf = '\0';
+        goto strftime_success;
+    }
+
+    /* The other reason is that the format string is malformed.  Probably it is
+     * an illegal conversion specifier.) */
+    Safefree(buf);
+    return NULL;
+
+  strftime_success:
+
+#if defined(USE_LOCALE_CTYPE) && defined(USE_LOCALE_TIME)
+
+    restore_toggled_locale_c(LC_CTYPE, orig_CTYPE_LOCALE);
+
+#endif
+    return buf;
+
+#else
+    Perl_croak(aTHX_ "panic: no strftime");
+    return NULL;
+#endif
+
+}
 
 char *
 Perl_my_strftime8(pTHX_ const char *fmt, int sec, int min, int hour, int mday,
@@ -6328,10 +6478,8 @@ S_get_displayable_string(pTHX_
      * If UTF-8, all are the largest possible code point; otherwise all are a
      * single byte.  '(2 + 1)'  is from each byte takes 2 characters to
      * display, and a blank (or NUL for the final one) after it */
-    SAVEFREEPV(Newxz(ret,
-                     (e - s) * (2 + 1)
-                             * ((is_utf8) ? UVSIZE : 1),
-                     char));
+    Newxz(ret, (e - s) * (2 + 1) * ((is_utf8) ? UVSIZE : 1), char);
+    SAVEFREEPV(ret);
 
     while (t < e) {
         UV cp = (is_utf8)

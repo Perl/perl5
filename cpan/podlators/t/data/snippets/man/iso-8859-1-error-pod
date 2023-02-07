@@ -15,7 +15,7 @@ error.
 ☺
 
 [output]
-.SH "INVALID"
+.SH INVALID
 .IX Header "INVALID"
 This character cannot be represented in ISO\-8859\-1, so should produce an
 error.

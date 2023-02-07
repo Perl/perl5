@@ -24,7 +24,7 @@ use Exporter ();
 use Pod::Simple ();
 
 our @ISA = qw(Pod::Simple Exporter);
-our $VERSION = '5.00';
+our $VERSION = '5.01';
 
 # We have to export pod2text for backward compatibility.
 our @EXPORT = qw(pod2text);
@@ -139,6 +139,17 @@ sub new {
         $$self{RQUOTE} = substr ($$self{opt_quotes}, $length);
     } else {
         croak qq(Invalid quote specification "$$self{opt_quotes}");
+    }
+
+    # Configure guesswork based on options.
+    my $guesswork = $self->{opt_guesswork} || q{};
+    my %guesswork = map { $_ => 1 } split(m{,}xms, $guesswork);
+    if (!%guesswork || $guesswork{all}) {
+        $$self{GUESSWORK} = {quoting => 1};
+    } elsif ($guesswork{none}) {
+        $$self{GUESSWORK} = {};
+    } else {
+        $$self{GUESSWORK} = {%guesswork};
     }
 
     # If requested, do something with the non-POD text.
@@ -622,23 +633,35 @@ sub cmd_c {
     # A regex that matches the portion of a variable reference that's the
     # array or hash index, separated out just because we want to use it in
     # several places in the following regex.
-    my $index = '(?: \[.*\] | \{.*\} )?';
+    my $index = '(?: \[[^]]+\] | \{[^}]+\} )?';
 
     # Check for things that we don't want to quote, and if we find any of
     # them, return the string with just a font change and no quoting.
+    #
+    # Traditionally, Pod::Text has not quoted Perl variables, functions,
+    # numbers, or hex constants, but this is not always desirable.  Make this
+    # optional on the quoting guesswork flag.
+    my $extra = qr{(?!)}xms;    # never matches
+    if ($$self{GUESSWORK}{quoting}) {
+        $extra = qr{
+             \$+ [\#^]? \S $index            # special ($^F, $")
+           | [\$\@%&*]+ \#? [:\'\w]+ $index  # plain var or func
+           | [\$\@%&*]* [:\'\w]+
+             (?: -> )? \(\s*[^\s,\)]*\s*\)   # 0/1-arg func call
+           | [+-]? ( \d[\d.]* | \.\d+ )
+             (?: [eE][+-]?\d+ )?             # a number
+           | 0x [a-fA-F\d]+                  # a hex constant
+         }xms;
+    }
     $text =~ m{
       ^\s*
       (?:
-         ( [\'\`\"] ) .* \1                             # already quoted
-       | \` .* \'                                       # `quoted'
-       | \$+ [\#^]? \S $index                           # special ($^Foo, $")
-       | [\$\@%&*]+ \#? [:\'\w]+ $index                 # plain var or func
-       | [\$\@%&*]* [:\'\w]+ (?: -> )? \(\s*[^\s,]\s*\) # 0/1-arg func call
-       | [+-]? ( \d[\d.]* | \.\d+ ) (?: [eE][+-]?\d+ )? # a number
-       | 0x [a-fA-F\d]+                                 # a hex constant
+         ( [\'\`\"] ) .* \1                  # already quoted
+       | \` .* \'                            # `quoted'
+       | $extra
       )
       \s*\z
-     }xo && return $text;
+     }xms and return $text;
 
     # If we didn't return, go ahead and quote the text.
     return $$self{opt_alt}
@@ -930,6 +953,34 @@ resulting documentation summarizing the errors.  C<none> ignores POD errors
 entirely, as much as possible.
 
 The default is C<pod>.
+
+=item guesswork
+
+[5.01] By default, Pod::Text applies some default formatting rules based on
+guesswork and regular expressions that are intended to make writing Perl
+documentation easier and require less explicit markup.  These rules may not
+always be appropriate, particularly for documentation that isn't about Perl.
+This option allows turning all or some of it off.
+
+The special value C<all> enables all guesswork.  This is also the default for
+backward compatibility reasons.  The special value C<none> disables all
+guesswork.  Otherwise, the value of this option should be a comma-separated
+list of one or more of the following keywords:
+
+=over 4
+
+=item quoting
+
+If no guesswork is enabled, any text enclosed in CZ<><> is surrounded by
+double quotes in nroff (terminal) output unless the contents are already
+quoted.  When this guesswork is enabled, quote marks will also be suppressed
+for Perl variables, function names, function calls, numbers, and hex
+constants.
+
+=back
+
+Any unknown guesswork name is silently ignored (for potential future
+compatibility), so be careful about spelling.
 
 =item indent
 

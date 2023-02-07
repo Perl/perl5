@@ -502,6 +502,7 @@ sub _normalize_if_elif {
 # calls parse_fh()
 sub parse_text {
     my ($self, $text)= @_;
+    local $self->{parse_source} = "(buffer)";
     open my $fh, "<", \$text
         or die "Failed to open buffer for read: $!";
     return $self->parse_fh($fh);
@@ -516,6 +517,7 @@ sub parse_fh {
     my @cond;
     my @cond_line;
     my $last_cond;
+    local $self->{parse_source} = $self->{parse_source} || "(unknown)";
     my $cb= $self->{pre_process_content};
     $self->{orig_content}= "";
     my $line_num= 1;
@@ -644,6 +646,7 @@ sub parse_fh {
             flat           => $flat,
             line           => $line,
             level          => $level,
+            source         => $self->{parse_source},
             start_line_num => $start_line_num,
             n_lines        => $line_num - $start_line_num,
         );
@@ -1223,7 +1226,7 @@ sub group_content {
 sub read_file {
     my ($self, $file_name, $callback)= @_;
     $self= $self->new() unless ref $self;
-    $self->{last_file_name}= $file_name;
+    local $self->{parse_source}= $file_name;
     open my $fh, "<", $file_name
         or confess "Failed to open '$file_name' for read: $!";
     my $lines= $self->parse_fh($fh);
@@ -1337,6 +1340,9 @@ based object which contains the following fields:
         raw      => $raw_content_of_line,
         line     => $normalized_content_of_line,
         level    => $level,
+        source         => $filename_or_string,
+        start_line_num => $line_num_for_first_line,
+        n_lines        => $line_num - $line_num_for_first_line,
     }, "HeaderLine"
 
 A "line" in this context is a logical line, and because of line continuations

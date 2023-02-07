@@ -6503,7 +6503,7 @@ PP(pp_split)
             /* we never pass the REXEC_COPY_STR flag, so it should
              * never get copied */
             assert(!RX_MATCH_COPIED(rx));
-            m = RX_OFFS(rx)[0].start + orig;
+            m = RX_OFFS_START(rx,0) + orig;
 
             if (gimme_scalar) {
                 iters++;
@@ -6518,8 +6518,8 @@ PP(pp_split)
             if (RX_NPARENS(rx)) {
                 I32 i;
                 for (i = 1; i <= (I32)RX_NPARENS(rx); i++) {
-                    s = RX_OFFS(rx)[i].start + orig;
-                    m = RX_OFFS(rx)[i].end + orig;
+                    s = orig + RX_OFFS_START(rx,i);
+                    m = orig + RX_OFFS_END(rx,i);
 
                     /* japhy (07/27/01) -- the (m && s) test doesn't catch
                        parens that didn't match -- they should be set to
@@ -6541,7 +6541,7 @@ PP(pp_split)
 
                 }
             }
-            s = RX_OFFS(rx)[0].end + orig;
+            s = RX_OFFS_END(rx,0) + orig;
         }
     }
 

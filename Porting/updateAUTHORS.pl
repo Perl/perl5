@@ -285,8 +285,8 @@ sub error_advice_for_uncommitted_changes {
     else {
         $extra .=
               "\nYou do not have any git user config set up, consider using\n\n"
-            . "    git config --set user.name 'Your Name'\n"
-            . "    git config --set user.email 'your\@email.com'\n\n";
+            . "    git config user.name 'Your Name'\n"
+            . "    git config user.email 'your\@email.com'\n\n";
     }
 
     my $props= "";
@@ -367,8 +367,8 @@ To resolve this you can perform one or more of these steps:
        havent configured your git details properly, in which case you
        can use something like the following commands:
 
-            git config --set user.name "Some Name"
-            git config --set user.email "somewhere\@provider"
+            git config user.name "Some Name"
+            git config user.email "somewhere\@provider"
 
        If you are known to the project already this is all you need to
        do. If you are not then you should perform option 2 or 4 as well

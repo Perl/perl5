@@ -318,19 +318,31 @@ jobs:
         run: |
           apt-get update
           apt-get install -y build-essential git-core libgdbm-dev libdb-dev
-      # actions/checkout@v3 doesn't work in a i386 container: the GitHub runner
-      # uses `node` that is installed on the host inside the container. The host
-      # is (likely) running x86_64 and using a binary build for x86_64 inside a
+      # actions/checkout@v2 and actions/checkout@v3 don't work in a i386 container:
+      # the GitHub runner uses `node` that is installed on the host inside the container.
+      # The host is (likely) running x86_64 and using a binary build for x86_64 inside a
       # i386 container just doesn't work.
       # Upstream reports:
       # - https://github.com/actions/checkout/issues/334#issuecomment-1241306390
       # - https://github.com/actions/runner/issues/2115
-      - uses: actions/checkout@v1
-        with:
-          fetch-depth: 1
-      - name: git cfg
+      #
+      # actions/checkout@v1 does work inside a container but that doesn't work
+      # so well with a shallow clone (`fetch-depth: 1`). It contains a race condition
+      # and makes it impossible to re-run an older job.
+      # Upstream report:
+      # - https://github.com/actions/runner/issues/2357
+      - name: Clone repo
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git config --global --add safe.directory /__w/perl5/perl5
+          git init
+          git remote add origin "https://$GITHUB_ACTOR:$GITHUB_TOKEN@github.com/$GITHUB_REPOSITORY"
+          git config --local gc.auto 0
+          git fetch origin --depth=1 "$GITHUB_SHA"
+          git checkout "$GITHUB_SHA"
+      - name: git cfg
+        run: |
           git config diff.renameLimit 999999
       - name: Configure
         run: |

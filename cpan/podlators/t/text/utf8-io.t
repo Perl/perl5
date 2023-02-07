@@ -42,7 +42,11 @@ for my $snippet (qw(late-encoding s-whitespace utf8)) {
 }
 
 # Load a snippet in ISO 8859-1 that forces the output to be in UTF-8.
-test_snippet_with_io('Pod::Text', 'text/utf8-iso',
-    { encoding => 'iso-8859-1' });
-test_snippet_with_io('Pod::Text', 'text/utf8-iso',
-    { encoding => 'iso-8859-1', perlio_utf8 => 1, output => 'utf-8' });
+test_snippet_with_io(
+    'Pod::Text', 'text/utf8-iso',
+    { encoding => 'iso-8859-1' },
+);
+test_snippet_with_io(
+    'Pod::Text', 'text/utf8-iso',
+    { encoding => 'iso-8859-1', perlio_utf8 => 1, output => 'utf-8' },
+);

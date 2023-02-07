@@ -61,7 +61,7 @@ PERLVARI(I, sub_generation, U32, 1)	/* incr to invalidate method cache */
 PERLVARI(I, hash_rand_bits_enabled, U8, 1) /* used to randomize hash stuff
                                               0. no-random
                                               1. random
-                                              2. determinsitic */
+                                              2. deterministic */
 #endif
 PERLVARI(I, hash_rand_bits, UV, 0)      /* used to randomize hash stuff */
 #endif

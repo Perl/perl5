@@ -387,7 +387,7 @@ if (@re or @anti_re) {
     @tests= @keepers;
 }
 
-# Allow eg ./perl t/harness t/op/lc.t
+# Allow e.g., ./perl t/harness t/op/lc.t
 for (@tests) {
     if (! -f $_ && !/^\.\./ && -f "../$_") {
         $_ = "../$_";

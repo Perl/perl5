@@ -726,8 +726,10 @@ EOP
     my %reverse;
     my $REG_INTFLAGS_NAME_SIZE= 0;
     my $hp= HeaderParser->new();
+    my $last_val = 0;
     foreach my $file ("regcomp.h") {
         $hp->read_file($file);
+        my @bit_tuples;
         foreach my $line_info (@{$hp->lines}) {
             next unless $line_info->{type}     eq "content"
                     and $line_info->{sub_type} eq "#define";
@@ -745,13 +747,26 @@ EOP
                 my $hex= $3;
                 my $comment= $4;
                 my $val= hex($hex);
+                my $bin= sprintf "%b", $val;
+                if ($bin=~/1.*?1/) { die "Not expecting multiple bits in PREGf" }
+                my $bit= length($bin) - 1 ;
                 $comment= $comment ? " - $comment" : "";
-
-                printf $out qq(\t%-30s/* 0x%08x - %s%s */\n), qq("$abbr",),
-                    $val, $define, $comment;
-                $REG_INTFLAGS_NAME_SIZE++;
+                if ($bit_tuples[$bit]) {
+                    die "Duplicate PREGf bit '$bit': $define $val ($hex)";
+                }
+                $bit_tuples[$bit]= [ $bit, $val, $abbr, $define, $comment ];
             }
         }
+        foreach my $i (0..$#bit_tuples) {
+            my $bit_tuple= $bit_tuples[$i];
+            if (!$bit_tuple) {
+                $bit_tuple= [ $i, 1<<$i, "", "", "*UNUSED*" ];
+            }
+            my ($bit, $val, $abbr, $define, $comment)= @$bit_tuple;
+            printf $out qq(\t%-30s/* (1<<%2d) - 0x%08x - %s%s */\n),
+                qq("$abbr",), $bit, $val, $define, $comment;
+        }
+        $REG_INTFLAGS_NAME_SIZE=0+@bit_tuples;
     }
 
     print $out <<EOP;

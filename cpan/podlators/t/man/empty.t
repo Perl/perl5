@@ -9,7 +9,7 @@
 #
 # SPDX-License-Identifier: GPL-1.0-or-later OR Artistic-1.0-Perl
 
-use 5.008;
+use 5.010;
 use strict;
 use warnings;
 
@@ -32,8 +32,10 @@ local $SIG{__WARN__} = sub { croak($_[0]) };
 # Try a POD document where the only command is invalid.  Make sure it succeeds
 # and doesn't throw an exception.
 my $invalid_char = chr(utf8::unicode_to_native(0xa0));
-ok(eval { $parser->parse_string_document("=$invalid_char") },
-    'Parsed invalid document');
+ok(
+    eval { $parser->parse_string_document("=$invalid_char") },
+    'Parsed invalid document',
+);
 is($@, q{}, '...with no errors');
 
 # With recent Pod::Simple, there will be a POD ERRORS section.  With older
@@ -46,7 +48,7 @@ SKIP: {
     like(
         $output,
         qr{ [.]SH [ ] "POD [ ] ERRORS" }xms,
-        '...and output contains a POD ERRORS section'
+        '...and output contains a POD ERRORS section',
     );
 }
 
@@ -62,6 +64,6 @@ SKIP: {
     like(
         $output,
         qr{ [.]SH [ ] "POD [ ] ERRORS" }xms,
-        '...and output contains a POD ERRORS section'
+        '...and output contains a POD ERRORS section',
     );
 }

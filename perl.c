@@ -3,7 +3,7 @@
  *
  *    Copyright (C) 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001
  *    2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012
- *    2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022
+ *    2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023
  *    by Larry Wall and others
  *
  *    You may distribute under the terms of either the GNU General Public
@@ -2845,7 +2845,8 @@ Returns the AV of the specified Perl global or package array with the given
 name (so it won't work on lexical variables).  C<flags> are passed
 to C<gv_fetchpv>.  If C<GV_ADD> is set and the
 Perl variable does not exist then it will be created.  If C<flags> is zero
-and the variable does not exist then NULL is returned.
+(ignoring C<SVf_UTF8>) and the variable does not exist then C<NULL> is
+returned.
 
 Perl equivalent: C<@{"$name"}>.
 
@@ -2859,7 +2860,7 @@ Perl_get_av(pTHX_ const char *name, I32 flags)
 
     PERL_ARGS_ASSERT_GET_AV;
 
-    if (flags)
+    if (flags & ~SVf_UTF8)
         return GvAVn(gv);
     if (gv)
         return GvAV(gv);
@@ -2874,7 +2875,8 @@ Perl_get_av(pTHX_ const char *name, I32 flags)
 Returns the HV of the specified Perl hash.  C<flags> are passed to
 C<gv_fetchpv>.  If C<GV_ADD> is set and the
 Perl variable does not exist then it will be created.  If C<flags> is zero
-and the variable does not exist then C<NULL> is returned.
+(ignoring C<SVf_UTF8>) and the variable does not exist then C<NULL> is
+returned.
 
 =cut
 */
@@ -2886,7 +2888,7 @@ Perl_get_hv(pTHX_ const char *name, I32 flags)
 
     PERL_ARGS_ASSERT_GET_HV;
 
-    if (flags)
+    if (flags & ~SVf_UTF8)
         return GvHVn(gv);
     if (gv)
         return GvHV(gv);
@@ -3920,7 +3922,7 @@ S_minus_v(pTHX)
 #endif
 
         PerlIO_printf(PIO_stdout,
-		      "\n\nCopyright 1987-2022, Larry Wall\n");
+		      "\n\nCopyright 1987-2023, Larry Wall\n");
 #ifdef OS2
         PerlIO_printf(PIO_stdout,
                       "\n\nOS/2 port Copyright (c) 1990, 1991, Raymond Chen, Kai Uwe Rommel\n"

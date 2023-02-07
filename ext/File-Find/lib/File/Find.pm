@@ -3,7 +3,7 @@ use 5.006;
 use strict;
 use warnings;
 use warnings::register;
-our $VERSION = '1.41';
+our $VERSION = '1.42';
 use Exporter 'import';
 require Cwd;
 
@@ -91,7 +91,10 @@ sub Follow_SymLink($) {
                 return undef;
             }
         }
-        $NewName= PathCombine($AbsName, readlink($AbsName));
+        my $Link = readlink($AbsName);
+        # canonicalize directory separators
+        $Link =~ s|\\|/|g if $Is_Win32;
+        $NewName= PathCombine($AbsName, $Link);
         unless(defined $NewName) {
             if ($follow_skip < 2) {
                 die "$AbsName is a recursive symbolic link";

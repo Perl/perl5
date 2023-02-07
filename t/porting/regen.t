@@ -109,8 +109,8 @@ foreach (@progs) {
     note("./perl $args");
     my $command = "$^X $args";
     system $command
-        and die <<~"HINT";
+        and die <<~'HINT';
     Hint:  A failure in this file can often be corrected by running:
-     ./perl -Ilib $_
+     make regen
 HINT
 }
