@@ -6244,6 +6244,11 @@ Perl_class_add_field(pTHX_ HV *stash, PADNAME *pn);
         assert(stash); assert(pn)
 
 PERL_CALLCONV void
+Perl_class_apply_attributes(pTHX_ HV *stash, OP *attrlist);
+# define PERL_ARGS_ASSERT_CLASS_APPLY_ATTRIBUTES \
+        assert(stash)
+
+PERL_CALLCONV void
 Perl_class_prepare_method_parse(pTHX_ CV *cv);
 # define PERL_ARGS_ASSERT_CLASS_PREPARE_METHOD_PARSE \
         assert(cv)
