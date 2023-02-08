@@ -3972,6 +3972,9 @@ Cp	|void	|class_add_ADJUST					\
 				|NN CV *cv
 Cp	|void	|class_add_field|NN HV *stash				\
 				|NN PADNAME *pn
+Cp	|void	|class_apply_attributes 				\
+				|NN HV *stash				\
+				|NULLOK OP *attrlist
 Cp	|void	|class_prepare_method_parse				\
 				|NN CV *cv
 Cp	|void	|class_seal_stash					\

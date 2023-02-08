@@ -602,13 +602,17 @@ barestmt:	PLUGSTMT
 			  if (parser->copline > (line_t)$PERLY_BRACE_OPEN)
 			      parser->copline = (line_t)$PERLY_BRACE_OPEN;
 			}
-	|	KW_CLASS BAREWORD[version] BAREWORD[package] PERLY_BRACE_OPEN remember
+	|	KW_CLASS BAREWORD[version] BAREWORD[package] subattrlist PERLY_BRACE_OPEN remember
 			{
 			  package($package);
+
 			  if ($version) {
 			      package_version($version);
 			  }
 			  class_setup_stash(PL_curstash);
+			  if ($subattrlist) {
+			      class_apply_attributes(PL_curstash, $subattrlist);
+			  }
 			}
 		stmtseq PERLY_BRACE_CLOSE
 			{

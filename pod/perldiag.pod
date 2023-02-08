@@ -1760,6 +1760,15 @@ is better written as simply itself, perhaps preceded by a backslash
 for non-word characters.  Doing it the way you did is not portable
 between ASCII and EBCDIC platforms.
 
+=item Class attribute %s requires a value
+
+(F) You specified an attribute for a class that would require a value to
+be passed in parentheses, but did not provide one.  Remember that
+whitespace is B<not> permitted between the attribute name and its value;
+you must write this as
+
+    class Example::Class :attr(VALUE) ...
+
 =item class is experimental
 
 (S experimental::class) This warning is emitted if you use the C<class>
@@ -7071,6 +7080,11 @@ subroutine.
 in your Perl script (or eval) near the specified column.  Perhaps you
 tried  to run a compressed script, a binary program, or a directory as
 a Perl program.
+
+=item Unrecognized class attribute %s
+
+(F) You attempted to add a named attribute to a C<class> definition, but
+perl does not recognise the name of the requested attribute.
 
 =item Unrecognized escape \%c in character class in regex; marked by
 S<<-- HERE> in m/%s/

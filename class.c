@@ -276,6 +276,71 @@ Perl_class_setup_stash(pTHX_ HV *stash)
     SAVEDESTRUCTOR_X(invoke_class_seal, stash);
 }
 
+static struct {
+    const char *name;
+    bool requires_value;
+    void (*apply)(pTHX_ HV *stash, SV *value);
+} const class_attributes[] = {
+    {0}
+};
+
+static void
+S_class_apply_attribute(pTHX_ HV *stash, OP *attr)
+{
+    assert(attr->op_type == OP_CONST);
+    SV *sv = cSVOPx_sv(attr);
+    STRLEN svlen = SvCUR(sv);
+
+    /* Split the sv into name + arguments. */
+    SV *name, *value = NULL;
+    char *paren_at = (char *)memchr(SvPVX(sv), '(', svlen);
+    if(paren_at) {
+        STRLEN namelen = paren_at - SvPVX(sv);
+
+        if(SvPVX(sv)[svlen-1] != ')')
+            /* Should be impossible to reach this by parsing regular perl code
+             * by as class_apply_attributes() is XS-visible API it might still
+             * be reachable
+             */
+            /* diag_listed_as: SKIPME */
+            croak("Malformed attribute string");
+        name = sv_2mortal(newSVpvn(SvPVX(sv), namelen));
+        value = sv_2mortal(newSVpvn(paren_at + 1, svlen - namelen - 2));
+    }
+    else {
+        name = sv;
+    }
+
+    for(int i = 0; class_attributes[i].name; i++) {
+        /* TODO: These attribute names are not UTF-8 aware */
+        if(!strEQ(SvPVX(name), class_attributes[i].name))
+            continue;
+
+        if(class_attributes[i].requires_value && !(value && SvOK(value)))
+            croak("Class attribute %" SVf " requires a value", SVfARG(name));
+
+        (*class_attributes[i].apply)(aTHX_ stash, value);
+        return;
+    }
+
+    croak("Unrecognized class attribute %" SVf, SVfARG(name));
+}
+
+void
+Perl_class_apply_attributes(pTHX_ HV *stash, OP *attrlist)
+{
+    if(attrlist->op_type == OP_LIST) {
+        OP *o = cLISTOPx(attrlist)->op_first;
+        assert(o->op_type == OP_PUSHMARK);
+        o = OpSIBLING(o);
+
+        for(; o; o = OpSIBLING(o))
+            S_class_apply_attribute(aTHX_ stash, o);
+    }
+    else
+        S_class_apply_attribute(aTHX_ stash, attrlist);
+}
+
 void
 Perl_class_seal_stash(pTHX_ HV *stash)
 {
