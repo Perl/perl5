@@ -3561,7 +3561,7 @@ Perl_pv_display(pTHX_ SV *dsv, const char *pv, STRLEN cur, STRLEN len, STRLEN pv
         assert(dsv); assert(pv)
 
 PERL_CALLCONV char *
-Perl_pv_escape(pTHX_ SV *dsv, char const * const str, const STRLEN count, const STRLEN max, STRLEN * const escaped, U32 flags);
+Perl_pv_escape(pTHX_ SV *dsv, char const * const str, const STRLEN count, STRLEN max, STRLEN * const escaped, U32 flags);
 #define PERL_ARGS_ASSERT_PV_ESCAPE              \
         assert(str)
 
