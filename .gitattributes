@@ -22,3 +22,4 @@ warnings.h linguist-generated
 *.pm linguist-language=Perl
 *.t linguist-language=Perl
 *.h linguist-language=C
+*.fnc linguist-language=Text
