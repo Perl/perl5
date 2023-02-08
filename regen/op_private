@@ -876,6 +876,11 @@ addbits('helemexistsor',
     7 => qw(OPpHELEMEXISTSOR_DELETE DELETE),
 );
 
+addbits('initfield',
+    1 => qw(OPpINITFIELD_AV INITFIELD_AV),
+    2 => qw(OPpINITFIELD_HV INITFIELD_HV),
+);
+
 1;
 
 # ex: set ts=8 sts=4 sw=4 et:

@@ -30,3 +30,14 @@ class C {
 }
 EXPECT
 "field" variable $x masks earlier declaration in same scope at - line 7.
+########
+# odd number of elements in field init
+use v5.36;
+use feature 'class';
+no warnings 'experimental::class';
+class C {
+  field %h = (1, 2, 3);
+}
+C->new;
+EXPECT
+Odd number of elements in hash field initialization at - line 6.

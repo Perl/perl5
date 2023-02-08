@@ -87,3 +87,22 @@ BEGIN { push @XXX::ISA, q(Another); }
 class XXX {}
 EXPECT
 Cannot create class XXX as it already has a non-empty @ISA at - line 4.
+########
+use strict;
+no warnings 'experimental::class';
+use feature 'class';
+class XXX {
+  field $x = $self + 1;
+}
+EXPECT
+Global symbol "$self" requires explicit package name (did you forget to declare "my $self"?) at - line 5.
+Execution of - aborted due to compilation errors.
+########
+use strict;
+no warnings 'experimental::class';
+use feature 'class';
+class XXX {
+  field $x = last;
+}
+EXPECT
+Can't "last" out of field initialiser expression at - line 5.

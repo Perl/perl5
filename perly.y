@@ -1550,6 +1550,18 @@ fielddecl
 			  parser->in_my = 0;
 			  $$ = newOP(OP_NULL, 0);
 			}
+	|	KW_FIELD fieldvar ASSIGNOP
+			{
+			  parser->in_my = 0;
+			  ENTER;
+			  class_prepare_initfield_parse();
+			}
+		term
+			{
+			  class_set_field_defop((PADNAME *)$fieldvar, $term);
+			  LEAVE;
+			  $$ = newOP(OP_NULL, 0);
+			}
 	;
 
 /* Basic list expressions */

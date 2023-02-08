@@ -2356,7 +2356,7 @@ p	|OP *	|sawparens	|NULLOK OP *o
 Apd	|OP *	|op_contextualize					\
 				|NN OP *o				\
 				|I32 context
-; Used in op.c
+; Used in op.c and class.c
 Apd	|OP *	|op_force_list	|NULLOK OP *o
 : Used in perly.y
 p	|OP *	|scalar 	|NULLOK OP *o
@@ -3975,12 +3975,16 @@ Cp	|void	|class_add_field|NN HV *stash				\
 Cp	|void	|class_apply_attributes 				\
 				|NN HV *stash				\
 				|NULLOK OP *attrlist
+Cp	|void	|class_prepare_initfield_parse
 Cp	|void	|class_prepare_method_parse				\
 				|NN CV *cv
 Cp	|void	|class_seal_stash					\
 				|NN HV *stash
 Cp	|void	|class_setup_stash					\
 				|NN HV *stash
+Cp	|void	|class_set_field_defop					\
+				|NN PADNAME *pn 			\
+				|NN OP *defop
 Cp	|OP *	|class_wrap_method_body 				\
 				|NULLOK OP *o
 Cp	|void	|croak_kw_unless_class					\

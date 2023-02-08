@@ -602,3 +602,4 @@ is_tainted	is_tainted		ck_null		fs1
 helemexistsor	hash element exists or	ck_helemexistsor	|	S S
 
 methstart	method start		ck_null		+
+initfield	initialise field	ck_null		+

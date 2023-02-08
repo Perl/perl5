@@ -13,15 +13,19 @@ no warnings 'experimental::class';
 
 {
     class Test1A {
-        field $x;
-        ADJUST { $x = "base class" }
-        method x { return $x; }
+        field $inita = "base";
+        method inita { return $inita; }
+        field $adja;
+        ADJUST { $adja = "base class" }
+        method adja { return $adja; }
     }
 
     class Test1B :isa(Test1A) {
-        field $y;
-        ADJUST { $y = "derived class" }
-        method y { return $y; }
+        field $initb = "derived";
+        method initb { return $initb; }
+        field $adjb;
+        ADJUST { $adjb = "derived class" }
+        method adjb { return $adjb; }
     }
 
     my $obj = Test1B->new;
@@ -30,10 +34,13 @@ no warnings 'experimental::class';
 
     ok(eq_array(\@Test1B::ISA, ["Test1A"]), '@Test1B::ISA is set correctly');
 
-    is($obj->y, "derived class", 'Object has derived class field');
+    is($obj->initb, "derived",       'Object has derived class initialised field');
+    is($obj->adjb,  "derived class", 'Object has derived class ADJUSTed field');
 
-    can_ok($obj, "x");
-    is($obj->x, "base class", 'Object has base class field');
+    can_ok($obj, "inita");
+    is($obj->inita, "base",      'Object has base class initialised field');
+    can_ok($obj, "adja");
+    is($obj->adja, "base class", 'Object has base class ADJUSTed field');
 
     class Test1C :isa(    Test1A    ) { }
 
