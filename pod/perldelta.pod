@@ -373,6 +373,17 @@ handle, C<$^>, C<$~>, C<$=>, C<$-> and C<$%>, no longer crashes perl
 if the IO object has been cleared from the selected output
 handle. [github #20733]
 
+=item *
+
+Redefining a C<use constant> list constant with C<use constant> now
+properly warns.  This changes the behaviour of C<use constant> but is
+a core change, not a change to F<constant.pm>.  [github #20742]
+
+=item *
+
+Redefining a C<use constant> list constant with an empty prototype
+constant sub would result in an assertion failure.  [github #20742]
+
 =back
 
 =head1 Known Problems
