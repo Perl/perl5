@@ -2479,6 +2479,15 @@ PDP-11 or something?
 (F) A tied array claimed to have a negative number of elements, which
 is not possible.
 
+=item Field attribute %s requires a value
+
+(F) You specified an attribute for a field that would require a value to
+be passed in parentheses, but did not provide one.  Remember that
+whitespace is B<not> permitted between the attribute name and its value;
+you must write this as
+
+    field $var :attr(VALUE) ...
+
 =item field is experimental
 
 (S experimental::class) This warning is emitted if you use the C<field>
@@ -7147,6 +7156,11 @@ S<<-- HERE> in m/%s/
 recognized by Perl.  The character(s) were understood literally, but
 this may change in a future version of Perl.  The S<<-- HERE> shows
 whereabouts in the regular expression the escape was discovered.
+
+=item Unrecognized field attribute %s
+
+(F) You attempted to add a named attribute to a C<field> definition, but
+perl does not recognise the name of the requested attribute.
 
 =item Unrecognized signal name "%s"
 

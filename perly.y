@@ -111,7 +111,7 @@
 %type <opval> list_of_scalars my_list_of_scalars refgen_topic formblock
 %type <opval> subattrlist myattrlist myattrterm myterm
 %type <pval>  fieldvar /* pval is PADNAME */
-%type <opval> fielddecl
+%type <opval> optfieldattrlist fielddecl
 %type <opval> termbinop termunop anonymous termdo
 %type <opval> termrelop relopchain termeqop eqopchain
 %type <ival>  sigslurpsigil
@@ -1544,15 +1544,27 @@ fieldvar:	scalar	%prec PERLY_PAREN_OPEN
 			{ $$ = PadnamelistARRAY(PL_comppad_name)[$ary->op_targ]; }
 	;
 
+optfieldattrlist:
+		COLONATTR THING
+			{ $$ = $THING; }
+	|	COLONATTR
+			{ $$ = NULL; }
+	|	empty
+	;
+
 fielddecl
-	:	KW_FIELD fieldvar
+	:	KW_FIELD fieldvar optfieldattrlist
 			{
 			  parser->in_my = 0;
+			  if($optfieldattrlist)
+			    class_apply_field_attributes((PADNAME *)$fieldvar, $optfieldattrlist);
 			  $$ = newOP(OP_NULL, 0);
 			}
-	|	KW_FIELD fieldvar ASSIGNOP
+	|	KW_FIELD fieldvar optfieldattrlist ASSIGNOP
 			{
 			  parser->in_my = 0;
+			  if($optfieldattrlist)
+			    class_apply_field_attributes((PADNAME *)$fieldvar, $optfieldattrlist);
 			  ENTER;
 			  class_prepare_initfield_parse();
 			}

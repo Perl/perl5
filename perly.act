@@ -2176,149 +2176,165 @@ case 2:
 
   case 297:
 #line 1549 "perly.y"
+    { (yyval.opval) = (ps[0].val.opval); }
+
+    break;
+
+  case 298:
+#line 1551 "perly.y"
+    { (yyval.opval) = NULL; }
+
+    break;
+
+  case 300:
+#line 1557 "perly.y"
     {
 			  parser->in_my = 0;
+			  if((ps[0].val.opval))
+			    class_apply_field_attributes((PADNAME *)(ps[-1].val.pval), (ps[0].val.opval));
 			  (yyval.opval) = newOP(OP_NULL, 0);
 			}
 
     break;
 
-  case 298:
-#line 1554 "perly.y"
+  case 301:
+#line 1564 "perly.y"
     {
 			  parser->in_my = 0;
+			  if((ps[-1].val.opval))
+			    class_apply_field_attributes((PADNAME *)(ps[-2].val.pval), (ps[-1].val.opval));
 			  ENTER;
 			  class_prepare_initfield_parse();
 			}
 
     break;
 
-  case 299:
-#line 1560 "perly.y"
+  case 302:
+#line 1572 "perly.y"
     {
-			  class_set_field_defop((PADNAME *)(ps[-3].val.pval), (ps[0].val.opval));
+			  class_set_field_defop((PADNAME *)(ps[-4].val.pval), (ps[0].val.opval));
 			  LEAVE;
 			  (yyval.opval) = newOP(OP_NULL, 0);
 			}
 
     break;
 
-  case 305:
-#line 1580 "perly.y"
+  case 308:
+#line 1592 "perly.y"
     { (yyval.opval) = (ps[0].val.opval); }
 
     break;
 
-  case 306:
-#line 1586 "perly.y"
+  case 309:
+#line 1598 "perly.y"
     { parser->in_my = 0; (yyval.opval) = my((ps[0].val.opval)); }
 
     break;
 
-  case 307:
-#line 1591 "perly.y"
+  case 310:
+#line 1603 "perly.y"
     { (yyval.opval) = (ps[-1].val.opval); }
 
     break;
 
-  case 308:
-#line 1593 "perly.y"
+  case 311:
+#line 1605 "perly.y"
     {
 			  (yyval.opval) = op_append_elem(OP_LIST, (ps[-2].val.opval), (ps[0].val.opval));
 			}
 
     break;
 
-  case 310:
-#line 1600 "perly.y"
+  case 313:
+#line 1612 "perly.y"
     { parser->in_my = 0; (yyval.opval) = (ps[0].val.opval); }
 
     break;
 
-  case 318:
-#line 1617 "perly.y"
+  case 321:
+#line 1629 "perly.y"
     { (yyval.opval) = newCVREF((ps[-1].val.ival),(ps[0].val.opval)); }
 
     break;
 
-  case 319:
-#line 1621 "perly.y"
+  case 322:
+#line 1633 "perly.y"
     { (yyval.opval) = newSVREF((ps[0].val.opval)); }
 
     break;
 
-  case 320:
-#line 1625 "perly.y"
+  case 323:
+#line 1637 "perly.y"
     { (yyval.opval) = newAVREF((ps[0].val.opval));
 			  if ((yyval.opval)) (yyval.opval)->op_private |= (ps[-1].val.ival);
 			}
 
     break;
 
-  case 321:
-#line 1631 "perly.y"
+  case 324:
+#line 1643 "perly.y"
     { (yyval.opval) = newHVREF((ps[0].val.opval));
 			  if ((yyval.opval)) (yyval.opval)->op_private |= (ps[-1].val.ival);
 			}
 
     break;
 
-  case 322:
-#line 1637 "perly.y"
+  case 325:
+#line 1649 "perly.y"
     { (yyval.opval) = newAVREF((ps[0].val.opval)); }
 
     break;
 
-  case 323:
-#line 1639 "perly.y"
+  case 326:
+#line 1651 "perly.y"
     { (yyval.opval) = newAVREF((ps[-3].val.opval)); }
 
     break;
 
-  case 324:
-#line 1643 "perly.y"
+  case 327:
+#line 1655 "perly.y"
     { (yyval.opval) = newGVREF(0,(ps[0].val.opval)); }
 
     break;
 
-  case 326:
-#line 1648 "perly.y"
+  case 329:
+#line 1660 "perly.y"
     { (yyval.opval) = newAVREF((ps[-2].val.opval)); }
 
     break;
 
-  case 328:
-#line 1653 "perly.y"
+  case 331:
+#line 1665 "perly.y"
     { (yyval.opval) = newHVREF((ps[-2].val.opval)); }
 
     break;
 
-  case 330:
-#line 1658 "perly.y"
+  case 333:
+#line 1670 "perly.y"
     { (yyval.opval) = newGVREF(0,(ps[-2].val.opval)); }
 
     break;
 
-  case 331:
-#line 1663 "perly.y"
+  case 334:
+#line 1675 "perly.y"
     { (yyval.opval) = scalar((ps[0].val.opval)); }
 
     break;
 
-  case 332:
-#line 1665 "perly.y"
+  case 335:
+#line 1677 "perly.y"
     { (yyval.opval) = scalar((ps[0].val.opval)); }
 
     break;
 
-  case 333:
-#line 1667 "perly.y"
+  case 336:
+#line 1679 "perly.y"
     { (yyval.opval) = op_scope((ps[0].val.opval)); }
 
     break;
 
-  case 334:
-#line 1670 "perly.y"
+  case 337:
+#line 1682 "perly.y"
     { (yyval.opval) = (ps[0].val.opval); }
 
     break;
@@ -2329,6 +2345,6 @@ case 2:
     
 
 /* Generated from:
- * 08fb2ffea2a176385e2bbb9b338514f0688b1927c2828648a98615b681eed455 perly.y
+ * cbe0c252d4da60dbe7511912aa9eeb8960b3a701c7273702cd4d180748105b8d perly.y
  * acf1cbfd2545faeaaa58b1cf0cf9d7f98b5be0752eb7a54528ef904a9e2e1ca7 regen_perly.pl
  * ex: set ro: */

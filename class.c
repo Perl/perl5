@@ -431,6 +431,46 @@ static void S_ensure_module_version(pTHX_ SV *module, SV *version)
     LEAVE;
 }
 
+#define split_attr_nameval(sv, namp, valp)  S_split_attr_nameval(aTHX_ sv, namp, valp)
+static void S_split_attr_nameval(pTHX_ SV *sv, SV **namp, SV **valp)
+{
+    STRLEN svlen = SvCUR(sv);
+    bool do_utf8 = SvUTF8(sv);
+
+    const char *paren_at = (const char *)memchr(SvPVX(sv), '(', svlen);
+    if(paren_at) {
+        STRLEN namelen = paren_at - SvPVX(sv);
+
+        if(SvPVX(sv)[svlen-1] != ')')
+            /* Should be impossible to reach this by parsing regular perl code
+             * by as class_apply_attributes() is XS-visible API it might still
+             * be reachable. As it's likely unreachable by normal perl code,
+             * don't bother listing it in perldiag.
+             */
+            /* diag_listed_as: SKIPME */
+            croak("Malformed attribute string");
+        *namp = sv_2mortal(newSVpvn_utf8(SvPVX(sv), namelen, do_utf8));
+
+        const char *value_at = paren_at + 1;
+        const char *value_max = SvPVX(sv) + svlen - 2;
+
+        /* TODO: We're only obeying ASCII whitespace here */
+
+        /* Trim whitespace at the start */
+        while(value_at < value_max && isSPACE(*value_at))
+            value_at += 1;
+        while(value_max > value_at && isSPACE(*value_max))
+            value_max -= 1;
+
+        if(value_max >= value_at)
+            *valp = sv_2mortal(newSVpvn_utf8(value_at, value_max - value_at + 1, do_utf8));
+    }
+    else {
+        *namp = sv;
+        *valp = NULL;
+    }
+}
+
 static void
 apply_class_attribute_isa(pTHX_ HV *stash, SV *value)
 {
@@ -512,42 +552,9 @@ static void
 S_class_apply_attribute(pTHX_ HV *stash, OP *attr)
 {
     assert(attr->op_type == OP_CONST);
-    SV *sv = cSVOPx_sv(attr);
-    STRLEN svlen = SvCUR(sv);
 
-    /* Split the sv into name + arguments. */
-    SV *name, *value = NULL;
-    char *paren_at = (char *)memchr(SvPVX(sv), '(', svlen);
-    if(paren_at) {
-        STRLEN namelen = paren_at - SvPVX(sv);
-
-        if(SvPVX(sv)[svlen-1] != ')')
-            /* Should be impossible to reach this by parsing regular perl code
-             * by as class_apply_attributes() is XS-visible API it might still
-             * be reachable. As it's likely unreachable by normal perl code,
-             * don't bother listing it in perldiag.
-             */
-            /* diag_listed_as: SKIPME */
-            croak("Malformed attribute string");
-        name = sv_2mortal(newSVpvn(SvPVX(sv), namelen));
-
-        char *value_at = paren_at + 1;
-        char *value_max = SvPVX(sv) + svlen - 2;
-
-        /* TODO: We're only obeying ASCII whitespace here */
-
-        /* Trim whitespace at the start */
-        while(value_at < value_max && isSPACE(*value_at))
-            value_at += 1;
-        while(value_max > value_at && isSPACE(*value_max))
-            value_max -= 1;
-
-        if(value_max >= value_at)
-            value = sv_2mortal(newSVpvn(value_at, value_max - value_at + 1));
-    }
-    else {
-        name = sv;
-    }
+    SV *name, *value;
+    split_attr_nameval(cSVOPx_sv(attr), &name, &value);
 
     for(int i = 0; class_attributes[i].name; i++) {
         /* TODO: These attribute names are not UTF-8 aware */
@@ -824,6 +831,57 @@ Perl_class_add_field(pTHX_ HV *stash, PADNAME *pn)
 
     padnamelist_store(aux->xhv_class_fields, PadnamelistMAX(aux->xhv_class_fields)+1, pn);
     PadnameREFCNT_inc(pn);
+}
+
+static struct {
+    const char *name;
+    bool requires_value;
+    void (*apply)(pTHX_ PADNAME *pn, SV *value);
+} const field_attributes[] = {
+    {0}
+};
+
+static void
+S_class_apply_field_attribute(pTHX_ PADNAME *pn, OP *attr)
+{
+    assert(attr->op_type == OP_CONST);
+
+    SV *name, *value;
+    split_attr_nameval(cSVOPx_sv(attr), &name, &value);
+
+    for(int i = 0; field_attributes[i].name; i++) {
+        /* TODO: These attribute names are not UTF-8 aware */
+        if(!strEQ(SvPVX(name), field_attributes[i].name))
+            continue;
+
+        if(field_attributes[i].requires_value && !(value && SvOK(value)))
+            croak("Field attribute %" SVf " requires a value", SVfARG(name));
+
+        (*field_attributes[i].apply)(aTHX_ pn, value);
+        return;
+    }
+
+    croak("Unrecognized field attribute %" SVf, SVfARG(name));
+}
+
+void
+Perl_class_apply_field_attributes(pTHX_ PADNAME *pn, OP *attrlist)
+{
+    PERL_ARGS_ASSERT_CLASS_APPLY_FIELD_ATTRIBUTES;
+
+    if(!attrlist || attrlist->op_type == OP_NULL)
+        return;
+
+    if(attrlist->op_type == OP_LIST) {
+        OP *o = cLISTOPx(attrlist)->op_first;
+        assert(o->op_type == OP_PUSHMARK);
+        o = OpSIBLING(o);
+
+        for(; o; o = OpSIBLING(o))
+            S_class_apply_field_attribute(aTHX_ pn, o);
+    }
+    else
+        S_class_apply_field_attribute(aTHX_ pn, attrlist);
 }
 
 void
