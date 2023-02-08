@@ -1977,6 +1977,7 @@
 #   define class_add_ADJUST(a,b)                Perl_class_add_ADJUST(aTHX_ a,b)
 #   define class_add_field(a,b)                 Perl_class_add_field(aTHX_ a,b)
 #   define class_apply_attributes(a,b)          Perl_class_apply_attributes(aTHX_ a,b)
+#   define class_apply_field_attributes(a,b)    Perl_class_apply_field_attributes(aTHX_ a,b)
 #   define class_prepare_initfield_parse()      Perl_class_prepare_initfield_parse(aTHX)
 #   define class_prepare_method_parse(a)        Perl_class_prepare_method_parse(aTHX_ a)
 #   define class_seal_stash(a)                  Perl_class_seal_stash(aTHX_ a)
