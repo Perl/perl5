@@ -6086,14 +6086,23 @@ X<pop> X<stack>
 
 =for Pod::Functions remove the last element from an array and return it
 
-Pops and returns the last value of the array, shortening the array by
+Removes and returns the B<last> element of the array, shortening the array by
 one element.
 
-Returns the undefined value if the array is empty, although this may
-also happen at other times.  If ARRAY is omitted, pops the
-L<C<@ARGV>|perlvar/@ARGV> array in the main program, but the
-L<C<@_>|perlvar/@_> array in subroutines, just like
-L<C<shift>|/shift ARRAY>.
+    my @arr  = ('cat', 'dog', 'mouse');
+    my $item = pop(@arr); # 'mouse'
+
+    # @arr is now ('cat', 'dog')
+
+Returns C<undef> if the array is empty. If ARRAY is omitted, C<pop> operates on
+the L<C<@ARGV>|perlvar/@ARGV> array in the main program, but the
+L<C<@_>|perlvar/@_> array in subroutines.
+
+B<Note:> C<pop> may also return C<undef> if the last element in the array
+is C<undef>.
+
+    my @arr  = ('one', 'two', undef);
+    my $item = pop(@arr); # undef
 
 Starting with Perl 5.14, an experimental feature allowed
 L<C<pop>|/pop ARRAY> to take a
