@@ -142,6 +142,7 @@ struct xpvhv_aux {
     AV          *xhv_class_adjust_blocks;      /* CVs containing the ADJUST blocks */
     PADNAMELIST *xhv_class_fields;             /* PADNAMEs with PadnameIsFIELD() */
     PADOFFSET    xhv_class_next_fieldix;
+    HV          *xhv_class_param_map;          /* Maps param names to field index stored in UV */
 
     struct suspended_compcv
                 *xhv_class_suspended_initfields_compcv;

@@ -106,3 +106,25 @@ class XXX {
 }
 EXPECT
 Can't "last" out of field initialiser expression at - line 5.
+########
+use strict;
+no warnings 'experimental::class';
+use feature 'class';
+class XXX {
+  field $x :param(p);
+  field $y :param(p);
+}
+EXPECT
+Cannot assign :param(p) to field $y because that name is already in use at - line 6.
+########
+use strict;
+no warnings 'experimental::class';
+use feature 'class';
+class XXX {
+  field $x :param(p);
+}
+class YYY :isa(XXX) {
+  field $y :param(p);
+}
+EXPECT
+Cannot assign :param(p) to field $y because that name is already in use at - line 8.

@@ -673,6 +673,12 @@ checking.  Alternatively, if you are certain that you're calling the
 function correctly, you may put an ampersand before the name to avoid
 the warning.  See L<perlsub>.
 
+=item Cannot assign :param(%s) to field %s because that name is already in use
+
+(F) An attempt was made to apply a parameter name to a field, when the name
+is already being used by another field in the same class, or one of its
+parent classes. This would cause a name clash so is not allowed.
+
 =item Cannot chr %f
 
 (F) You passed an invalid number (like an infinity or not-a-number) to C<chr>.
@@ -2478,6 +2484,11 @@ PDP-11 or something?
 
 (F) A tied array claimed to have a negative number of elements, which
 is not possible.
+
+=item Field already has a parameter name, cannot add another
+
+(F) A field may have at most one application of the C<:param> attribute to
+assign a parameter name to it; once applied a second one is not allowed.
 
 =item Field attribute %s requires a value
 
@@ -4661,6 +4672,11 @@ a backslash before the apostrophe (C<"In $name\'s house">).
 
 Support for the old package separator will be removed in Perl 5.40.
 
+=item Only scalar fields can take a :param attribute
+
+(F) You tried to apply the C<:param> attribute to an array or hash field.
+Currently this is not permitted.
+
 =item %s() on unopened %s
 
 (W unopened) An I/O operation was attempted on a filehandle that was
@@ -5660,6 +5676,11 @@ terminates.  You might use ^# instead.  See L<perlform>.
 (W misc) You have used a replacement list that is longer than the
 search list.  So the additional elements in the replacement list
 are meaningless.
+
+=item Required parameter '%s' is missing for %s constructor
+
+(F) You called the constructor for a class that has a required named
+parameter, but did not pass that parameter at all.
 
 =item '(*%s' requires a terminating ':' in regex; marked by <-- HERE in m/%s/
 

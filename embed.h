@@ -1981,7 +1981,7 @@
 #   define class_prepare_initfield_parse()      Perl_class_prepare_initfield_parse(aTHX)
 #   define class_prepare_method_parse(a)        Perl_class_prepare_method_parse(aTHX_ a)
 #   define class_seal_stash(a)                  Perl_class_seal_stash(aTHX_ a)
-#   define class_set_field_defop(a,b)           Perl_class_set_field_defop(aTHX_ a,b)
+#   define class_set_field_defop(a,b,c)         Perl_class_set_field_defop(aTHX_ a,b,c)
 #   define class_setup_stash(a)                 Perl_class_setup_stash(aTHX_ a)
 #   define class_wrap_method_body(a)            Perl_class_wrap_method_body(aTHX_ a)
 #   define croak_kw_unless_class(a)             Perl_croak_kw_unless_class(aTHX_ a)

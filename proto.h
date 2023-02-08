@@ -6268,7 +6268,7 @@ Perl_class_seal_stash(pTHX_ HV *stash);
         assert(stash)
 
 PERL_CALLCONV void
-Perl_class_set_field_defop(pTHX_ PADNAME *pn, OP *defop);
+Perl_class_set_field_defop(pTHX_ PADNAME *pn, OPCODE defmode, OP *defop);
 # define PERL_ARGS_ASSERT_CLASS_SET_FIELD_DEFOP \
         assert(pn); assert(defop)
 

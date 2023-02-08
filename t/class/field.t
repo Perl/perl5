@@ -209,4 +209,77 @@ no warnings 'experimental::class';
     ok(eq_array([$obj->six], [2, 3]), 'Array fields initialised from earlier fields');
 }
 
+# fields can take :param attributes to consume constructor parameters
+{
+    my $next_gamma = 4;
+
+    class Test10 {
+        field $alpha :param        = undef;
+        field $beta  :param        = 123;
+        field $gamma :param(delta) = $next_gamma++;
+
+        method values { return ($alpha, $beta, $gamma); }
+    }
+
+    my $obj = Test10->new(
+        alpha => "A",
+        beta  => "B",
+        delta => "G",
+    );
+    ok(eq_array([$obj->values], [qw(A B G)]),
+        'Field initialised by :params');
+    is($next_gamma, 4, 'Defaulting expression not evaluated for passed value');
+
+    $obj = Test10->new();
+    ok(eq_array([$obj->values], [undef, 123, 4]),
+        'Field initialised by defaulting expressions');
+    is($next_gamma, 5, 'Defaulting expression evaluated for missing value');
+}
+
+# fields can be made non-optional
+{
+    class Test11 {
+        field $x :param;
+        field $y :param;
+    }
+
+    Test11->new(x => 1, y => 1);
+
+    ok(!eval { Test11->new(x => 2) },
+        'Constructor fails without y');
+    like($@, qr/^Required parameter 'y' is missing for "Test11" constructor at /,
+        'Failure from missing y argument');
+}
+
+# field assignment expressions on :param can use //= and ||=
+{
+    class Test12 {
+        field $if_exists  :param(e)   = "DEF";
+        field $if_defined :param(d) //= "DEF";
+        field $if_true    :param(t) ||= "DEF";
+
+        method values { return ($if_exists, $if_defined, $if_true); }
+    }
+
+    ok(eq_array(
+        [Test12->new(e => "yes", d => "yes", t => "yes")->values],
+        ["yes", "yes", "yes"]),
+        'Values for "yes"');
+
+    ok(eq_array(
+        [Test12->new(e => 0, d => 0, t => 0)->values],
+        [0, 0, "DEF"]),
+        'Values for 0');
+
+    ok(eq_array(
+        [Test12->new(e => undef, d => undef, t => undef)->values],
+        [undef, "DEF", "DEF"]),
+        'Values for undef');
+
+    ok(eq_array(
+        [Test12->new()->values],
+        ["DEF", "DEF", "DEF"]),
+        'Values for missing');
+}
+
 done_testing;
