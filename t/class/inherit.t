@@ -59,4 +59,16 @@ no warnings 'experimental::class';
         'Exception thrown from :isa version test');
 }
 
+{
+    class Test3A {
+        field $x :param;
+        method x { return $x; }
+    }
+
+    class Test3B :isa(Test3A) {}
+
+    my $obj = Test3B->new(x => "X");
+    is($obj->x, "X", 'Constructor params passed through to superclass');
+}
+
 done_testing;

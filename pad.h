@@ -97,6 +97,9 @@ struct padname_fieldinfo {
     PADOFFSET  fieldix;    /* index of this field within ObjectFIELDS() array */
     HV        *fieldstash; /* original class package which added this field */
     OP        *defop;      /* optree fragment for defaulting expression */
+    SV        *paramname;  /* name of the :param to look for in constructor */
+    int        def_if_undef : 1; /* default op uses //= */
+    int        def_if_false : 1; /* default op uses ||= */
 };
 
 

@@ -1570,7 +1570,7 @@ fielddecl
 			}
 		term
 			{
-			  class_set_field_defop((PADNAME *)$fieldvar, $term);
+			  class_set_field_defop((PADNAME *)$fieldvar, $ASSIGNOP, $term);
 			  LEAVE;
 			  $$ = newOP(OP_NULL, 0);
 			}

@@ -6043,8 +6043,9 @@ yyl_colon(pTHX_ char *s)
         if (*s != ';'
             && *s != '}'
             && !(PL_expect == XOPERATOR
-                 ? (*s == '=' ||  *s == ')')
-                 : (*s == '{' ||  *s == '(')))
+                   /* if an operator is expected, permit =, //= and ||= or ) to end */
+                 ? (*s == '=' || *s == ')' || *s == '/' || *s == '|')
+                 : (*s == '{' || *s == '(')))
         {
             const char q = ((*s == '\'') ? '"' : '\'');
             /* If here for an expression, and parsed no attrs, back off. */

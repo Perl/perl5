@@ -3987,6 +3987,7 @@ Cp	|void	|class_setup_stash					\
 				|NN HV *stash
 Cp	|void	|class_set_field_defop					\
 				|NN PADNAME *pn 			\
+				|OPCODE defmode 			\
 				|NN OP *defop
 Cp	|OP *	|class_wrap_method_body 				\
 				|NULLOK OP *o
