@@ -7667,14 +7667,23 @@ X<shift>
 
 =for Pod::Functions remove the first element of an array, and return it
 
-Shifts the first value of the array off and returns it, shortening the
-array by 1 and moving everything down.  If there are no elements in the
-array, returns the undefined value.  If ARRAY is omitted, shifts the
-L<C<@_>|perlvar/@_> array within the lexical scope of subroutines and
-formats, and the L<C<@ARGV>|perlvar/@ARGV> array outside a subroutine
-and also within the lexical scopes
-established by the C<eval STRING>, C<BEGIN {}>, C<INIT {}>, C<CHECK {}>,
-C<UNITCHECK {}>, and C<END {}> constructs.
+Removes and returns the B<first> element of an array. This shortens the
+array by one and moves everything down.
+
+    my @arr  = ('cat', 'dog');
+    my $item = shift(@arr); # 'cat'
+
+    # @arr is now ('dog');
+
+Returns C<undef> if the array is empty. If ARRAY is omitted, C<shift>
+operates on the C<@ARGV> array in the main program, and the C<@_> array
+in subroutines.
+
+B<Note:> C<shift> may also return C<undef> if the first element in the array
+is C<undef>.
+
+    my @arr  = (undef, 'two', 'three');
+    my $item = shift(@arr); # undef
 
 Starting with Perl 5.14, an experimental feature allowed
 L<C<shift>|/shift ARRAY> to take a
