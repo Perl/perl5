@@ -972,7 +972,7 @@ objects.
 L<C<bless>|/bless REF,CLASSNAME> returns its first argument, the
 supplied reference, as the value of the function; since C<bless>
 is commonly the last thing executed in constructors, this means
-that the the reference to the object is returned as the
+that the reference to the object is returned as the
 constructor's value and allows the caller to immediately use
 this returned object in method calls.
 
