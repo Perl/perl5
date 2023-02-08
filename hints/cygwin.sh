@@ -85,7 +85,7 @@ else
   static_ext="$static_ext Win32CORE"
 fi
 
-# configury should not check for xlocale.h if it gets the API from locale.h
+# configure should not check for xlocale.h if it gets the API from locale.h
 i_xlocale='undef'
 
 # Win9x problem with non-blocking read from a closed pipe
