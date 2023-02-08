@@ -129,4 +129,84 @@ no warnings 'experimental::class';
         'Fields of multiple unit classes remain distinct');
 }
 
+# fields can be initialised with constant expressions
+{
+    class Test7 {
+        field $scalar = 123;
+        method scalar { return $scalar; }
+
+        field @array = (4, 5, 6);
+        method array { return @array; }
+
+        field %hash  = (7 => 89);
+        method hash { return %hash; }
+    }
+
+    my $obj = Test7->new;
+
+    is($obj->scalar, 123, 'Scalar field can be constant initialised');
+
+    ok(eq_array([$obj->array], [4, 5, 6]), 'Array field can be constant initialised');
+
+    ok(eq_hash({$obj->hash}, {7 => 89}), 'Hash field can be constant initialised');
+}
+
+# field initialiser expressions are evaluated within the constructor of each
+# instance
+{
+    my $next_x = 1;
+    my @items;
+    my %mappings;
+
+    class Test8 {
+        field $x = $next_x++;
+        method x { return $x; }
+
+        field @y = ("more", @items);
+        method y { return @y; }
+
+        field %z = (first => "value", %mappings);
+        method z { return %z; }
+    }
+
+    is($next_x, 1, '$next_x before any objects');
+
+    @items = ("values");
+    $mappings{second} = "here";
+
+    my $obj1 = Test8->new;
+    my $obj2 = Test8->new;
+
+    is($obj1->x, 1, 'Object 1 has x == 1');
+    is($obj2->x, 2, 'Object 2 has x == 2');
+
+    is($next_x, 3, '$next_x after constructing two');
+
+    ok(eq_array([$obj1->y], ["more", "values"]),
+        'Object 1 has correct array field');
+    ok(eq_hash({$obj1->z}, {first => "value", second => "here"}),
+        'Object 1 has correct hash field');
+}
+
+# fields are visible during initialiser expressions of later fields
+{
+    class Test9 {
+        field $one   = 1;
+        field $two   = $one + 1;
+        field $three = $two + 1;
+
+        field @four = $one;
+        field @five = (@four, $two, $three);
+        field @six  = grep { $_ > 1 } @five;
+
+        method three { return $three; }
+
+        method six { return @six; }
+    }
+
+    my $obj = Test9->new;
+    is($obj->three, 3, 'Scalar fields initialised from earlier fields');
+    ok(eq_array([$obj->six], [2, 3]), 'Array fields initialised from earlier fields');
+}
+
 done_testing;

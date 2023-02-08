@@ -112,6 +112,9 @@ union _xhvnameu {
     HEK **xhvnameu_names;	/* When xhv_name_count is non-0 */
 };
 
+/* A struct defined by pad.h and used within class.c */
+struct suspended_compcv;
+
 struct xpvhv_aux {
     union _xhvnameu xhv_name_u;	/* name, if a symbol table */
     AV		*xhv_backreferences; /* back references for weak references */
@@ -139,6 +142,9 @@ struct xpvhv_aux {
     AV          *xhv_class_adjust_blocks;      /* CVs containing the ADJUST blocks */
     PADNAMELIST *xhv_class_fields;             /* PADNAMEs with PadnameIsFIELD() */
     PADOFFSET    xhv_class_next_fieldix;
+
+    struct suspended_compcv
+                *xhv_class_suspended_initfields_compcv;
 };
 
 #define HvAUXf_SCAN_STASH   0x1   /* stash is being scanned by gv_check */

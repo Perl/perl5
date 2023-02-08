@@ -4620,6 +4620,13 @@ valid reference value.
 (W misc) You specified an odd number of elements to initialize a hash,
 which is odd, because hashes come in key/value pairs.
 
+=item Odd number of elements in hash field initialization
+
+(W misc) You specified an odd number of elements to initialise a hash
+field of an object.  Hashes are initialised from a list of key/value
+pairs so there must be a corresponding value to every key.  The final
+missing value will be filled in with undef instead.
+
 =item Offset outside string
 
 (F)(W layer) You tried to do a read/write/send/recv/seek operation

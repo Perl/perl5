@@ -6249,6 +6249,10 @@ Perl_class_apply_attributes(pTHX_ HV *stash, OP *attrlist);
         assert(stash)
 
 PERL_CALLCONV void
+Perl_class_prepare_initfield_parse(pTHX);
+# define PERL_ARGS_ASSERT_CLASS_PREPARE_INITFIELD_PARSE
+
+PERL_CALLCONV void
 Perl_class_prepare_method_parse(pTHX_ CV *cv);
 # define PERL_ARGS_ASSERT_CLASS_PREPARE_METHOD_PARSE \
         assert(cv)
@@ -6257,6 +6261,11 @@ PERL_CALLCONV void
 Perl_class_seal_stash(pTHX_ HV *stash);
 # define PERL_ARGS_ASSERT_CLASS_SEAL_STASH      \
         assert(stash)
+
+PERL_CALLCONV void
+Perl_class_set_field_defop(pTHX_ PADNAME *pn, OP *defop);
+# define PERL_ARGS_ASSERT_CLASS_SET_FIELD_DEFOP \
+        assert(pn); assert(defop)
 
 PERL_CALLCONV void
 Perl_class_setup_stash(pTHX_ HV *stash);
