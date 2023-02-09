@@ -28,6 +28,7 @@ use Testing qw(
     symlink_ok
     dir_path
     file_path
+    _cleanup_start
 );
 use Errno ();
 use Config;
@@ -36,7 +37,7 @@ use File::Temp qw(tempdir);
 BEGIN {
     plan(
         ${^TAINT}
-        ? (tests => 45)
+        ? (tests => 48)
         : (skip_all => "A perl without taint support")
     );
 }
@@ -72,6 +73,17 @@ BEGIN {
 
 my $symlink_exists = eval { symlink("",""); 1 };
 
+my $test_root_dir; # where we are when this test starts
+my $test_root_dir_tainted = cwd();
+if ($test_root_dir_tainted =~ /^(.*)$/) {
+    $test_root_dir = $1;
+} else {
+    die "Failed to untaint root dir of test";
+}
+ok($test_root_dir,"test_root_dir is set up as expected");
+my $test_temp_dir = tempdir("FF_taint_t_XXXXXX",CLEANUP=>1);
+ok($test_temp_dir,"test_temp_dir is set up as expected");
+
 my $found;
 find({wanted => sub { ++$found if $_ eq 'taint.t' },
                 untaint => 1, untaint_pattern => qr|^(.+)$|}, File::Spec->curdir);
@@ -87,22 +99,19 @@ is($found, 1, 'taint.t found once again');
 my $case = 2;
 my $FastFileTests_OK = 0;
 
-my $test_root_dir; # where we are when this test starts
-my $test_root_dir_tainted = cwd();
-if ($test_root_dir_tainted =~ /^(.*)$/) {
-    $test_root_dir = $1;
-} else {
-    die "Failed to untaint root dir of test";
-}
-my $test_temp_dir = tempdir("FF_taint_t_XXXXXX",CLEANUP=>1);
-chdir($test_temp_dir) or die "Failed to chdir to '$test_temp_dir': $!";
+my $chdir_error = "";
+chdir($test_temp_dir)
+    or $chdir_error = "Failed to chdir to '$test_temp_dir': $!";
+is($chdir_error,"","chdir to temp dir '$test_temp_dir' successful")
+    or die $chdir_error;
 
 sub cleanup {
-    # doing this in two steps avoids the need to know about
-    # directory separators, which is helpful as we override
-    # the File::Spec heirarchy, so we can't ask it to help us here.
-    chdir($test_root_dir) or die "Failed to chdir to '$test_root_dir': $!";
-    chdir($test_temp_dir) or die "Failed to chdir to '$test_temp_dir': $!";
+    # the following chdirs into $test_root_dir/$test_temp_dir but
+    # handles various possible edge case errors cleanly. If it returns
+    # false then we bail out of the cleanup.
+    _cleanup_start($test_root_dir, $test_temp_dir)
+        or return;
+
     my $need_updir = 0;
     if (-d dir_path('for_find_taint')) {
         $need_updir = 1 if chdir(dir_path('for_find_taint'));
