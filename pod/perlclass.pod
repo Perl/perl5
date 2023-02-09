@@ -57,4 +57,23 @@ list as far as the signature is concerned.
         }
     }
 
+Classes may inherit from B<one> superclass, by using the C<:isa> class
+attribute.
+
+  class Example::Base { ... }
+
+  class Example::Subclass :isa(Example::Base) { ... }
+
+Inherited methods are visible and may be invoked. Fields are always lexical
+and therefore not visible by inheritence.
+
+The C<:isa> attribute may request a minimum version of the base class; it is
+applied similar to C<use>; if the provided version is too low it will fail at
+compile time.
+
+  class Example::Subclass :isa(Example::Base 2.345) { ... }
+
+The C<:isa> attribute will attempt to C<require> the named module if it is not
+already loaded.
+
 =cut

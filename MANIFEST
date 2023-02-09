@@ -5644,6 +5644,7 @@ t/class/class.t			See if class declarations work
 t/class/construct.t		See if class constructors work
 t/class/destruct.t		See if class destruction works
 t/class/field.t			See if class field declarations work
+t/class/inherit.t		See if class inheritance works
 t/class/method.t		See if class method declarations work
 t/class/phasers.t		See if class phaser blocks work
 t/cmd/elsif.t			See if else-if works
