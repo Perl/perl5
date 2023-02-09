@@ -3076,7 +3076,7 @@ Perl_get_and_check_backslash_N_name(pTHX_ const char* s,
     stops on:
         @ and $ where it appears to be a var, but not for $ as tail anchor
         \l \L \u \U \Q \E
-        (?{  or  (??{ or (*{ or (**{
+        (?{  or  (??{ or (*{
 
   In transliterations:
     characters are VERY literal, except for - not at the start or end
@@ -3636,7 +3636,7 @@ S_scan_const(pTHX_ char *start)
         }
             /* skip for regexp comments /(?#comment)/, except for the last
              * char, which will be done separately.  Stop on (?{..}) and
-             * friends (??{ ... }) or (*{ ... }) or (**{ ... }) */
+             * friends (??{ ... }) or (*{ ... }) */
         else if (*s == '(' && PL_lex_inpat && (s[1] == '?' || s[1] == '*') && !in_charclass) {
             if (s[1] == '?' && s[2] == '#') {
                 if (s_is_utf8) {
@@ -3653,13 +3653,13 @@ S_scan_const(pTHX_ char *start)
                     *d++ = *s++;
                 }
             }
-            else if (!PL_lex_casemods
-                     && ( (s[1] == '?' && ( s[2] == '{' /* This should match regcomp.c */
-                           || (s[2] == '?' && s[3] == '{'))) || /* (?{ ... }) (??{ ... }) */
-                          (s[1] == '*' && ( s[2] == '{'
-                           || (s[2] == '*' && s[3] == '{'))) )  /* (*{ ... }) (**{ ... }) */
-                 )
-            {
+            else
+            if (!PL_lex_casemods &&
+                /* The following should match regcomp.c */
+                ((s[1] == '?' && (s[2] == '{'                        /* (?{ ... })  */
+                              || (s[2] == '?' && s[3] == '{'))) ||   /* (??{ ... }) */
+                 (s[1] == '*' && (s[2] == '{' )))                    /* (*{ ... })  */
+            ){
                 break;
             }
         }

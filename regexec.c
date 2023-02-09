@@ -8237,7 +8237,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 PL_op = NULL;
 
                 re_sv = NULL;
-                if (logical == 0) {       /*   (?{})/   */
+                if (logical == 0) {       /* /(?{ ... })/ and /(*{ ... })/ */
                     SV *replsv = save_scalar(PL_replgv);
                     sv_setsv(replsv, ret); /* $^R */
                     SvSETMAGIC(replsv);
@@ -8246,7 +8246,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                     sw = cBOOL(SvTRUE_NN(ret));
                     logical = 0;
                 }
-                else {                   /*  /(??{})  */
+                else {                   /*  /(??{ ... })  */
                     /*  if its overloaded, let the regex compiler handle
                      *  it; otherwise extract regex, or stringify  */
                     if (SvGMAGICAL(ret))
@@ -8289,7 +8289,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 }
             }
 
-                /* only /(??{})/  from now on */
+                /* only /(??{ ... })/  from now on */
                 logical = 0;
                 {
                     /* extract RE object from returned value; compiling if
@@ -12002,6 +12002,8 @@ Perl_reg_numbered_buff_fetch(pTHX_ REGEXP * const re, const I32 paren,
     Perl_reg_numbered_buff_fetch_flags(aTHX_ re, paren, sv, 0);
 }
 
+#ifndef PERL_IN_XSUB_RE
+
 void
 Perl_reg_numbered_buff_fetch_flags(pTHX_ REGEXP * const re, const I32 paren,
                                    SV * const sv, U32 flags)
@@ -12120,6 +12122,8 @@ Perl_reg_numbered_buff_fetch_flags(pTHX_ REGEXP * const re, const I32 paren,
         return;
     }
 }
+
+#endif
 
 void
 Perl_reg_numbered_buff_store(pTHX_ REGEXP * const rx, const I32 paren,

@@ -21,7 +21,7 @@ unless (is_miniperl()) {
 
 use strict;
 
-plan(tests => 68 + !is_miniperl() * (4 + 14 * $can_fork));
+plan(tests => 71 + !is_miniperl() * (4 + 14 * $can_fork));
 
 sub get_temp_fh {
     my $f = tempfile();
@@ -178,6 +178,26 @@ ok( ! ref $INC{'Toto.pm'},         q/  val Toto.pm isn't a ref in %INC/ );
 is( $INC{'Toto.pm'}, 'xyz',	   '  val Toto.pm is correct in %INC' );
 
 pop @INC;
+
+{
+    my $autoloaded;
+    package AutoInc {
+        sub AUTOLOAD {
+            my ($self, $filename) = @_;
+            $autoloaded = our $AUTOLOAD;
+            return ::get_temp_fh($filename);
+        }
+        sub DESTROY {}
+    }
+
+    push @INC, bless {}, "AutoInc";
+    $evalret = eval { require Quux3; 1 };
+    ok($evalret, "require Quux3 via AUTOLOADed INC");
+    ok(exists $INC{"Quux3.pm"}, "Quux3 in %INC");
+    is($autoloaded, "AutoInc::INC", "AUTOLOAD was called for INC");
+
+    pop @INC;
+}
 
 push @INC, sub {
     my ($self, $filename) = @_;

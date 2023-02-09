@@ -242,6 +242,7 @@ Perl_safesysrealloc(Malloc_t where,MEM_SIZE size)
     }
     else {
         dSAVE_ERRNO;
+        PERL_DEB(UV was_where = PTR2UV(where)); /* used in diags below */
 #ifdef USE_MDH
         where = (Malloc_t)((char*)where-PERL_MEMORY_DEBUG_HEADER_SIZE);
         if (size + PERL_MEMORY_DEBUG_HEADER_SIZE < size)
@@ -274,7 +275,6 @@ Perl_safesysrealloc(Malloc_t where,MEM_SIZE size)
 #ifdef DEBUGGING
         if ((SSize_t)size < 0)
             Perl_croak_nocontext("panic: realloc, size=%" UVuf, (UV)size);
-        UV was_where = PTR2UV(where);
 #endif
 #ifdef PERL_DEBUG_READONLY_COW
         if ((ptr = mmap(0, size, PROT_READ|PROT_WRITE,

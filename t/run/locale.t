@@ -165,8 +165,8 @@ EOF
     SKIP: {
         skip("no UTF-8 locale available where LC_NUMERIC radix isn't ASCII", 1 )
             unless $utf8_radix;
-        ok($radix_encoded_as_utf8 == 1, "UTF-8 locale '$utf8_radix' with non-ASCII"
-                                        . " radix is marked UTF-8");
+        is($radix_encoded_as_utf8, 1, "UTF-8 locale '$utf8_radix' with non-ASCII"
+                                    . " radix is marked UTF-8");
     }
 
     SKIP: {

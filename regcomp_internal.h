@@ -162,15 +162,6 @@ struct RExC_state_t {
     AV          *paren_name_list;       /* idx -> name */
     SV          *mysv1;
     SV          *mysv2;
-
-#define RExC_lastparse  (pRExC_state->lastparse)
-#define RExC_lastnum    (pRExC_state->lastnum)
-#define RExC_paren_name_list    (pRExC_state->paren_name_list)
-#define RExC_study_chunk_recursed_count    (pRExC_state->study_chunk_recursed_count)
-#define RExC_mysv       (pRExC_state->mysv1)
-#define RExC_mysv1      (pRExC_state->mysv1)
-#define RExC_mysv2      (pRExC_state->mysv2)
-
 #endif
     bool        seen_d_op;
     bool        strict;
@@ -180,6 +171,16 @@ struct RExC_state_t {
     bool        sWARN_EXPERIMENTAL__VLB;
     bool        sWARN_EXPERIMENTAL__REGEX_SETS;
 };
+
+#ifdef DEBUGGING
+#define RExC_lastparse  (pRExC_state->lastparse)
+#define RExC_lastnum    (pRExC_state->lastnum)
+#define RExC_paren_name_list    (pRExC_state->paren_name_list)
+#define RExC_study_chunk_recursed_count    (pRExC_state->study_chunk_recursed_count)
+#define RExC_mysv       (pRExC_state->mysv1)
+#define RExC_mysv1      (pRExC_state->mysv1)
+#define RExC_mysv2      (pRExC_state->mysv2)
+#endif
 
 #define RExC_flags      (pRExC_state->flags)
 #define RExC_pm_flags   (pRExC_state->pm_flags)

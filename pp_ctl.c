@@ -4338,10 +4338,11 @@ S_require_file(pTHX_ SV *sv)
                          * call the method.
                          */
                         HV *pkg = SvSTASH(SvRV(loader));
-                        GV * gv = gv_fetchmethod_pvn_flags(pkg, "INC", 3, 0);
+                        GV * gv = gv_fetchmethod_pvn_flags(pkg, "INC", 3, GV_AUTOLOAD);
                         if (gv && isGV(gv)) {
                             method = "INC";
                         } else {
+                            /* no point to autoload here, it would have been found above */
                             gv = gv_fetchmethod_pvn_flags(pkg, "INCDIR", 6, 0);
                             if (gv && isGV(gv)) {
                                 method = "INCDIR";

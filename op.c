@@ -10661,7 +10661,9 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
             if (ckWARN(WARN_REDEFINE)
              || (  ckWARN_d(WARN_REDEFINE)
                 && (  !const_sv || SvRV(gv) == const_sv
-                   || sv_cmp(SvRV(gv), const_sv)  ))) {
+                      || SvTYPE(const_sv) == SVt_PVAV
+                      || SvTYPE(SvRV(gv)) == SVt_PVAV
+                      || sv_cmp(SvRV(gv), const_sv)  ))) {
                 assert(cSVOPo);
                 Perl_warner(aTHX_ packWARN(WARN_REDEFINE),
                           "Constant subroutine %" SVf " redefined",
@@ -15321,7 +15323,7 @@ Perl_report_redefined_cv(pTHX_ const SV *name, const CV *old_cv,
 {
     const char *hvname;
     bool is_const = cBOOL(CvCONST(old_cv));
-    SV *old_const_sv = is_const ? cv_const_sv(old_cv) : NULL;
+    SV *old_const_sv = is_const ? cv_const_sv_or_av(old_cv) : NULL;
 
     PERL_ARGS_ASSERT_REPORT_REDEFINED_CV;
 
@@ -15344,14 +15346,20 @@ Perl_report_redefined_cv(pTHX_ const SV *name, const CV *old_cv,
         )
      || (is_const
          && ckWARN_d(WARN_REDEFINE)
-         && (!new_const_svp || sv_cmp(old_const_sv, *new_const_svp))
+         && (!new_const_svp ||
+             !*new_const_svp ||
+             !old_const_sv ||
+             SvTYPE(old_const_sv) == SVt_PVAV ||
+             SvTYPE(*new_const_svp) == SVt_PVAV ||
+             sv_cmp(old_const_sv, *new_const_svp))
         )
-    )
+        ) {
         Perl_warner(aTHX_ packWARN(WARN_REDEFINE),
                           is_const
                             ? "Constant subroutine %" SVf " redefined"
                             : "Subroutine %" SVf " redefined",
                           SVfARG(name));
+    }
 }
 
 /*

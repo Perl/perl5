@@ -161,8 +161,9 @@ typedef enum {
 
 /* Note: the following three macros are actually defined in scope.h, but
  * they are documented here for completeness, since they directly or
- * indirectly affect pads.
+ * indirectly affect pads. */
 
+/*
 =for apidoc m|void|SAVEPADSV	|PADOFFSET po
 Save a pad slot (used to restore after an iteration)
 
