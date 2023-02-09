@@ -1,4 +1,4 @@
-package Opcode 1.63;
+package Opcode 1.64;
 
 use strict;
 
@@ -312,7 +312,8 @@ invert_opset function.
 
     preinc i_preinc predec i_predec postinc i_postinc
     postdec i_postdec int hex oct abs pow multiply i_multiply
-    divide i_divide modulo i_modulo add i_add subtract i_subtract
+    f_multiply divide i_divide f_divide modulo i_modulo add i_add
+    f_add subtract i_subtract f_subtract
 
     left_shift right_shift bit_and bit_xor bit_or nbit_and
     nbit_xor nbit_or sbit_and sbit_xor sbit_or negate i_negate not

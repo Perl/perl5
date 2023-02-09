@@ -966,6 +966,7 @@ my %opflags = (
     'I' =>  32,     # has corresponding int op
     'd' =>  64,     # danger, make temp copy in list assignment
     'u' => 128,     # defaults to $_
+    'F' => 256,     # has corresponding float op
 );
 
 generate_opcode_h;
@@ -1154,8 +1155,8 @@ sub generate_opcode_h_pl_check {
 }
 
 sub generate_opcode_h_pl_opargs {
-    my $OCSHIFT = 8;
-    my $OASHIFT = 12;
+    my $OCSHIFT = 9;
+    my $OASHIFT = 13;
 
     print <<~'END';
 
