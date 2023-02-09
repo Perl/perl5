@@ -37,6 +37,14 @@ disabled I<even if you had previously written> C<use strict>. This was not
 the previous behaviour of C<use VERSION>, which at present will track
 explicitly-enabled strictness flags independently.
 
+=head3 Use of C<'> as a global name separator.
+
+Perl allows use of C<'> instead of C<::> to replace the parts of a
+package or global variable name, for example C<A::B> and C<A'B> are
+equivalent.
+
+C<'> will no longer be recognized as a name separator in Perl 5.40.
+
 =head2 Perl 5.38
 
 =head3 Pod::Html utility functions
