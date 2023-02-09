@@ -34,10 +34,17 @@ Cannot invoke a method of "XXX" on an instance of "YYY" at - line 6.
 ########
 no warnings 'experimental::class';
 use feature 'class';
-class XXX { method m { } }
-(bless {}, "XXX")->m()
+class XXX {}
+bless [], "XXX";
 EXPECT
-Cannot invoke method "m" on a non-instance at - line 4.
+Attempt to bless into a class at - line 4.
+########
+no warnings 'experimental::class';
+use feature 'class';
+class XXX {}
+bless(XXX->new, "main");
+EXPECT
+Can't bless an object reference at - line 4.
 ########
 no warnings 'experimental::class';
 use feature 'class';

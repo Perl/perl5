@@ -80,8 +80,10 @@ XS(injected_constructor)
     }
 
     SV *instance = newSVobject(aux->xhv_class_next_fieldix);
+    SvOBJECT_on(instance);
+    SvSTASH_set(instance, MUTABLE_HV(SvREFCNT_inc_simple(stash)));
+
     SV *self = sv_2mortal(newRV_noinc(instance));
-    sv_bless(self, stash);
 
     SV **fields = ObjectFIELDS(instance);
 

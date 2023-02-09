@@ -319,6 +319,13 @@ the current set of allowed keys of a restricted hash.
 the current package to be freed.  Perl cannot figure out what to
 do, so it throws up its hands in despair.
 
+=item Attempt to bless into a class
+
+(F) You are attempting to call C<bless> with a package name that is a
+new-style C<class>.  This is not necessary, as instances created by the
+constructor are already in the correct class.  Instances cannot be created
+by other means, such as C<bless>.
+
 =item Attempt to bless into a reference
 
 (F) The CLASSNAME argument to the bless() operator is expected to be
@@ -793,6 +800,11 @@ not permitted.
 
 (F) Similar to above, but involving a C<finally> block at the end of a
 C<try>/C<catch> construction rather than a C<defer> block.
+
+=item Can't bless an object reference
+
+(F) You attempted to call C<bless> on a value that already refers to a real
+object instance.
 
 =item Can't bless non-reference value
 
