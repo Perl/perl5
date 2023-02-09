@@ -6104,6 +6104,9 @@ is C<undef>.
     my @arr  = ('one', 'two', undef);
     my $item = pop(@arr); # undef
 
+C<pop> will operate on the C<@ARGV> array in C<eval STRING>,
+C<BEGIN {}>, C<INIT {}>, C<CHECK {}> blocks.
+
 Starting with Perl 5.14, an experimental feature allowed
 L<C<pop>|/pop ARRAY> to take a
 scalar expression. This experiment has been deemed unsuccessful, and was
