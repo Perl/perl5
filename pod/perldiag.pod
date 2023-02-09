@@ -1760,6 +1760,13 @@ is better written as simply itself, perhaps preceded by a backslash
 for non-word characters.  Doing it the way you did is not portable
 between ASCII and EBCDIC platforms.
 
+=item Class already has a superclass, cannot add another
+
+(F) You attempted to specify a second superclass for a C<class> by using
+the C<:isa> attribute, when one is already specified.  Unlike classes
+whose instances are created with C<bless>, classes created via the
+C<class> keyword cannot have more than one superclass.
+
 =item Class attribute %s requires a value
 
 (F) You specified an attribute for a class that would require a value to
@@ -1774,6 +1781,12 @@ you must write this as
 (S experimental::class) This warning is emitted if you use the C<class>
 keyword of C<use feature 'class'>.  This keyword is currently
 experimental and its behaviour may change in future releases of Perl.
+
+=item Class :isa attribute requires a class but "%s" is not one
+
+(F) When creating a subclass using the C<class> C<:isa> attribute, the
+named superclass must also be a real class created using the C<class>
+keyword.
 
 =item Cloning substitution context is unimplemented
 
@@ -6816,6 +6829,12 @@ within an inner pair of square brackets, like
 
 Another possibility is that you forgot a backslash.  Perl isn't smart
 enough to figure out what you really meant.
+
+=item Unexpected characters while parsing class :isa attribute: %s
+
+(F) You tried to specify something other than a single class name with an
+optional trailing verison number as the value for a C<class> C<:isa>
+attribute.  This confused the parser.
 
 =item Unexpected exit %u
 
