@@ -1517,6 +1517,43 @@ test_bool_internals_func(SV *true_sv, SV *false_sv, const char *msg) {
     SvREFCNT_dec(false_sv);
     return failed;
 }
+
+
+/* A simplified/fake replacement for pp_add, which tests the pp
+ * function wrapping API, XSPP_wrapped() for a fixed number of args*/
+
+XSPP_wrapped(my_pp_add, 2, 0)
+{
+    SV *ret;
+    dSP;
+    SV *r = POPs;
+    SV *l = TOPs;
+    if (SvROK(l))
+        l = SvRV(l);
+    if (SvROK(r))
+        r = SvRV(r);
+    ret = newSViv( SvIV(l) + SvIV(r));
+    sv_2mortal(ret);
+    SETs(ret);
+    RETURN;
+}
+
+
+/* A copy of pp_anonlist, which tests the pp
+ * function wrapping API, XSPP_wrapped()  for a list*/
+
+XSPP_wrapped(my_pp_anonlist, 0, 1)
+{
+    dSP; dMARK;
+    const I32 items = SP - MARK;
+    SV * const av = MUTABLE_SV(av_make(items, MARK+1));
+    SP = MARK;
+    mXPUSHs((PL_op->op_flags & OPf_SPECIAL)
+            ? newRV_noinc(av) : av);
+    RETURN;
+}
+
+
 #include "const-c.inc"
 
 void
@@ -4752,6 +4789,24 @@ sv_streq_flags(SV *sv1, SV *sv2, U32 flags)
         RETVAL = sv_streq_flags(sv1, sv2, flags);
     OUTPUT:
         RETVAL
+
+void
+set_custom_pp_func(sv)
+    SV *sv;
+    PPCODE:
+        /* replace the pp func of the next op */
+        OP* o = PL_op->op_next;
+        if (o->op_type == OP_ADD)
+            o->op_ppaddr = my_pp_add;
+        else if (o->op_type == OP_ANONLIST)
+            o->op_ppaddr = my_pp_anonlist;
+        else
+            croak("set_custom_pp_func: op_next is not an OP_ADD\n");
+
+        /* the single SV arg is passed through */
+        PERL_UNUSED_ARG(sv);
+        XSRETURN(1);
+
 
 MODULE = XS::APItest PACKAGE = XS::APItest::AUTOLOADtest
 
