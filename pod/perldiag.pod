@@ -713,6 +713,12 @@ no legal conversion from that type of reference to a typeglob.
 (P) Perl detected an attempt to copy a value to an internal type that cannot
 be directly assigned to.
 
+=item Cannot create class %s as it already has a non-empty @ISA
+
+(F) An attempt was made to create a class out of a package that already has
+an C<@ISA> array, and the array is not empty.  This is not permitted, as it
+would lead to a class with inconsistent inheritance.
+
 =item Cannot find encoding "%s"
 
 (S io) You tried to apply an encoding that did not exist to a filehandle,
@@ -1760,11 +1766,33 @@ is better written as simply itself, perhaps preceded by a backslash
 for non-word characters.  Doing it the way you did is not portable
 between ASCII and EBCDIC platforms.
 
+=item Class already has a superclass, cannot add another
+
+(F) You attempted to specify a second superclass for a C<class> by using
+the C<:isa> attribute, when one is already specified.  Unlike classes
+whose instances are created with C<bless>, classes created via the
+C<class> keyword cannot have more than one superclass.
+
+=item Class attribute %s requires a value
+
+(F) You specified an attribute for a class that would require a value to
+be passed in parentheses, but did not provide one.  Remember that
+whitespace is B<not> permitted between the attribute name and its value;
+you must write this as
+
+    class Example::Class :attr(VALUE) ...
+
 =item class is experimental
 
 (S experimental::class) This warning is emitted if you use the C<class>
 keyword of C<use feature 'class'>.  This keyword is currently
 experimental and its behaviour may change in future releases of Perl.
+
+=item Class :isa attribute requires a class but "%s" is not one
+
+(F) When creating a subclass using the C<class> C<:isa> attribute, the
+named superclass must also be a real class created using the C<class>
+keyword.
 
 =item Cloning substitution context is unimplemented
 
@@ -6808,6 +6836,12 @@ within an inner pair of square brackets, like
 Another possibility is that you forgot a backslash.  Perl isn't smart
 enough to figure out what you really meant.
 
+=item Unexpected characters while parsing class :isa attribute: %s
+
+(F) You tried to specify something other than a single class name with an
+optional trailing verison number as the value for a C<class> C<:isa>
+attribute.  This confused the parser.
+
 =item Unexpected exit %u
 
 (S) exit() was called or the script otherwise finished gracefully when
@@ -7071,6 +7105,11 @@ subroutine.
 in your Perl script (or eval) near the specified column.  Perhaps you
 tried  to run a compressed script, a binary program, or a directory as
 a Perl program.
+
+=item Unrecognized class attribute %s
+
+(F) You attempted to add a named attribute to a C<class> definition, but
+perl does not recognise the name of the requested attribute.
 
 =item Unrecognized escape \%c in character class in regex; marked by
 S<<-- HERE> in m/%s/

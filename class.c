@@ -44,6 +44,46 @@ Perl_newSVobject(pTHX_ Size_t fieldcount)
     return sv;
 }
 
+#define make_instance_fields(stash, instance)  S_make_instance_fields(aTHX_ stash, instance)
+static void S_make_instance_fields(pTHX_ HV *stash, SV *instance)
+{
+    struct xpvhv_aux *aux = HvAUX(stash);
+
+    if(aux->xhv_class_superclass) {
+        make_instance_fields(aux->xhv_class_superclass, instance);
+    }
+
+    SV **fields = ObjectFIELDS(instance);
+
+    PADNAMELIST *fieldnames = aux->xhv_class_fields;
+
+    for(U32 i = 0; fieldnames && i <= PadnamelistMAX(fieldnames); i++) {
+        PADNAME *pn = PadnamelistARRAY(fieldnames)[i];
+        PADOFFSET fieldix = PadnameFIELDINFO(pn)->fieldix;
+
+        SV *val = NULL;
+
+        switch(PadnamePV(pn)[0]) {
+            case '$':
+                val = newSV(0);
+                break;
+
+            case '@':
+                val = (SV *)newAV();
+                break;
+
+            case '%':
+                val = (SV *)newHV();
+                break;
+
+            default:
+                NOT_REACHED;
+        }
+
+        fields[fieldix] = val;
+    }
+}
+
 XS(injected_constructor);
 XS(injected_constructor)
 {
@@ -83,36 +123,9 @@ XS(injected_constructor)
     SvOBJECT_on(instance);
     SvSTASH_set(instance, MUTABLE_HV(SvREFCNT_inc_simple(stash)));
 
+    make_instance_fields(stash, instance);
+
     SV *self = sv_2mortal(newRV_noinc(instance));
-
-    SV **fields = ObjectFIELDS(instance);
-
-    /* create fields */
-    for(PADOFFSET fieldix = 0; fieldix < aux->xhv_class_next_fieldix; fieldix++) {
-        PADNAME *pn = PadnamelistARRAY(aux->xhv_class_fields)[fieldix];
-        assert(PadnameFIELDINFO(pn)->fieldix == fieldix);
-
-        SV *val = NULL;
-
-        switch(PadnamePV(pn)[0]) {
-            case '$':
-                val = newSV(0);
-                break;
-
-            case '@':
-                val = (SV *)newAV();
-                break;
-
-            case '%':
-                val = (SV *)newHV();
-                break;
-
-            default:
-                NOT_REACHED;
-        }
-
-        fields[fieldix] = val;
-    }
 
     if(aux->xhv_class_adjust_blocks) {
         CV **cvp = (CV **)AvARRAY(aux->xhv_class_adjust_blocks);
@@ -190,8 +203,8 @@ PP(pp_methstart)
             namehek);
     }
 
-    /* TODO: When we implement inheritence we'll have to do something fancier here */
-    if(CvSTASH(curcv) != SvSTASH(rv))
+    if(CvSTASH(curcv) != SvSTASH(rv) &&
+        !sv_derived_from_hv(self, CvSTASH(curcv)))
         croak("Cannot invoke a method of %" HvNAMEf_QUOTEDPREFIX " on an instance of %" HvNAMEf_QUOTEDPREFIX,
             HvNAMEfARG(CvSTASH(curcv)), HvNAMEfARG(SvSTASH(rv)));
 
@@ -245,6 +258,17 @@ Perl_class_setup_stash(pTHX_ HV *stash)
             HvNAMEfARG(stash));
     }
 
+    {
+        SV *isaname = newSVpvf("%" HEKf "::ISA", HvNAME_HEK(stash));
+        sv_2mortal(isaname);
+
+        AV *isa = get_av(SvPV_nolen(isaname), (SvFLAGS(isaname) & SVf_UTF8));
+
+        if(isa && av_count(isa) > 0)
+            croak("Cannot create class %" HEKf " as it already has a non-empty @ISA",
+                HvNAME_HEK(stash));
+    }
+
     char *classname = HvNAME(stash);
     U32 nameflags = HvNAMEUTF8(stash) ? SVf_UTF8 : 0;
 
@@ -267,13 +291,220 @@ Perl_class_setup_stash(pTHX_ HV *stash)
      *   DOES method
      */
 
-    HvAUX(stash)->xhv_class_adjust_blocks = NULL;
-    HvAUX(stash)->xhv_class_fields        = NULL;
-    HvAUX(stash)->xhv_class_next_fieldix  = 0;
+    struct xpvhv_aux *aux = HvAUX(stash);
+    aux->xhv_class_superclass    = NULL;
+    aux->xhv_class_adjust_blocks = NULL;
+    aux->xhv_class_fields        = NULL;
+    aux->xhv_class_next_fieldix  = 0;
 
-    HvAUX(stash)->xhv_aux_flags |= HvAUXf_IS_CLASS;
+    aux->xhv_aux_flags |= HvAUXf_IS_CLASS;
 
     SAVEDESTRUCTOR_X(invoke_class_seal, stash);
+}
+
+#define split_package_ver(value, pkgname, pkgversion)  S_split_package_ver(aTHX_ value, pkgname, pkgversion)
+static const char *S_split_package_ver(pTHX_ SV *value, SV *pkgname, SV *pkgversion)
+{
+    const char *start = SvPVX(value),
+               *p     = start,
+               *end   = start + SvCUR(value);
+
+    while(*p && !isSPACE_utf8_safe(p, end))
+        p += UTF8SKIP(p);
+
+    sv_setpvn(pkgname, start, p - start);
+    if(SvUTF8(value))
+        SvUTF8_on(pkgname);
+
+    while(*p && isSPACE_utf8_safe(p, end))
+        p += UTF8SKIP(p);
+
+    if(*p) {
+        /* scan_version() gets upset about trailing content. We need to extract
+         * exactly what it wants
+         */
+        start = p;
+        if(*p == 'v')
+            p++;
+        while(*p && strchr("0123456789._", *p))
+            p++;
+        SV *tmpsv = newSVpvn(start, p - start);
+        SAVEFREESV(tmpsv);
+
+        scan_version(SvPVX(tmpsv), pkgversion, FALSE);
+    }
+
+    while(*p && isSPACE_utf8_safe(p, end))
+        p += UTF8SKIP(p);
+
+    return p;
+}
+
+#define ensure_module_version(module, version)  S_ensure_module_version(aTHX_ module, version)
+static void S_ensure_module_version(pTHX_ SV *module, SV *version)
+{
+    dSP;
+
+    ENTER;
+
+    PUSHMARK(SP);
+    PUSHs(module);
+    PUSHs(version);
+    PUTBACK;
+
+    call_method("VERSION", G_VOID);
+
+    LEAVE;
+}
+
+static void
+apply_class_attribute_isa(pTHX_ HV *stash, SV *value)
+{
+    assert(HvSTASH_IS_CLASS(stash));
+    struct xpvhv_aux *aux = HvAUX(stash);
+
+    /* Parse `value` into name + version */
+    SV *superclassname = sv_newmortal(), *superclassver = sv_newmortal();
+    const char *end = split_package_ver(value, superclassname, superclassver);
+    if(*end)
+        croak("Unexpected characters while parsing class :isa attribute: %s", end);
+
+    if(aux->xhv_class_superclass)
+        croak("Class already has a superclass, cannot add another");
+
+    HV *superstash = gv_stashsv(superclassname, 0);
+    if(!superstash) {
+        /* Try to `require` the module then attempt a second time */
+        load_module(PERL_LOADMOD_NOIMPORT, newSVsv(superclassname), NULL, NULL);
+        superstash = gv_stashsv(superclassname, 0);
+    }
+    if(!superstash || !HvSTASH_IS_CLASS(superstash))
+        /* TODO: This would be a useful feature addition */
+        croak("Class :isa attribute requires a class but %" HvNAMEf_QUOTEDPREFIX " is not one",
+            HvNAMEfARG(superstash));
+
+    if(superclassver && SvOK(superclassver))
+        ensure_module_version(superclassname, superclassver);
+
+    /* TODO: Suuuurely there's a way to fetch this neatly with stash + "ISA"
+     * You'd think that GvAV() of hv_fetchs() would do it, but no, because it
+     * won't lazily create a proper (magical) GV if one didn't already exist.
+     */
+    {
+        SV *isaname = newSVpvf("%" HEKf "::ISA", HvNAME_HEK(stash));
+        sv_2mortal(isaname);
+
+        AV *isa = get_av(SvPV_nolen(isaname), GV_ADD | (SvFLAGS(isaname) & SVf_UTF8));
+
+        ENTER;
+
+        /* Temporarily remove the SVf_READONLY flag */
+        SAVESETSVFLAGS((SV *)isa, SVf_READONLY|SVf_PROTECT, SVf_READONLY|SVf_PROTECT);
+        SvREADONLY_off((SV *)isa);
+
+        av_push(isa, newSVsv(value));
+
+        LEAVE;
+    }
+
+    aux->xhv_class_superclass = (HV *)SvREFCNT_inc(superstash);
+
+    struct xpvhv_aux *superaux = HvAUX(superstash);
+
+    aux->xhv_class_next_fieldix = superaux->xhv_class_next_fieldix;
+
+    if(superaux->xhv_class_adjust_blocks) {
+        if(!aux->xhv_class_adjust_blocks)
+            aux->xhv_class_adjust_blocks = newAV();
+
+        for(U32 i = 0; i <= AvFILL(superaux->xhv_class_adjust_blocks); i++)
+            av_push(aux->xhv_class_adjust_blocks, AvARRAY(superaux->xhv_class_adjust_blocks)[i]);
+    }
+}
+
+static struct {
+    const char *name;
+    bool requires_value;
+    void (*apply)(pTHX_ HV *stash, SV *value);
+} const class_attributes[] = {
+    { .name           = "isa",
+      .requires_value = true,
+      .apply          = &apply_class_attribute_isa,
+    },
+    {0}
+};
+
+static void
+S_class_apply_attribute(pTHX_ HV *stash, OP *attr)
+{
+    assert(attr->op_type == OP_CONST);
+    SV *sv = cSVOPx_sv(attr);
+    STRLEN svlen = SvCUR(sv);
+
+    /* Split the sv into name + arguments. */
+    SV *name, *value = NULL;
+    char *paren_at = (char *)memchr(SvPVX(sv), '(', svlen);
+    if(paren_at) {
+        STRLEN namelen = paren_at - SvPVX(sv);
+
+        if(SvPVX(sv)[svlen-1] != ')')
+            /* Should be impossible to reach this by parsing regular perl code
+             * by as class_apply_attributes() is XS-visible API it might still
+             * be reachable. As it's likely unreachable by normal perl code,
+             * don't bother listing it in perldiag.
+             */
+            /* diag_listed_as: SKIPME */
+            croak("Malformed attribute string");
+        name = sv_2mortal(newSVpvn(SvPVX(sv), namelen));
+
+        char *value_at = paren_at + 1;
+        char *value_max = SvPVX(sv) + svlen - 2;
+
+        /* TODO: We're only obeying ASCII whitespace here */
+
+        /* Trim whitespace at the start */
+        while(value_at < value_max && isSPACE(*value_at))
+            value_at += 1;
+        while(value_max > value_at && isSPACE(*value_max))
+            value_max -= 1;
+
+        if(value_max >= value_at)
+            value = sv_2mortal(newSVpvn(value_at, value_max - value_at + 1));
+    }
+    else {
+        name = sv;
+    }
+
+    for(int i = 0; class_attributes[i].name; i++) {
+        /* TODO: These attribute names are not UTF-8 aware */
+        if(!strEQ(SvPVX(name), class_attributes[i].name))
+            continue;
+
+        if(class_attributes[i].requires_value && !(value && SvOK(value)))
+            croak("Class attribute %" SVf " requires a value", SVfARG(name));
+
+        (*class_attributes[i].apply)(aTHX_ stash, value);
+        return;
+    }
+
+    croak("Unrecognized class attribute %" SVf, SVfARG(name));
+}
+
+void
+Perl_class_apply_attributes(pTHX_ HV *stash, OP *attrlist)
+{
+    PERL_ARGS_ASSERT_CLASS_APPLY_ATTRIBUTES;
+
+    if(attrlist->op_type == OP_LIST) {
+        OP *o = cLISTOPx(attrlist)->op_first;
+        assert(o->op_type == OP_PUSHMARK);
+        o = OpSIBLING(o);
+
+        for(; o; o = OpSIBLING(o))
+            S_class_apply_attribute(aTHX_ stash, o);
+    }
+    else
+        S_class_apply_attribute(aTHX_ stash, attrlist);
 }
 
 void

@@ -1763,6 +1763,14 @@ S_gv_magicalize_isa(pTHX_ GV *gv)
     GvMULTI_on(gv);
     sv_magic(MUTABLE_SV(av), MUTABLE_SV(gv), PERL_MAGIC_isa,
              NULL, 0);
+
+    if(HvSTASH_IS_CLASS(GvSTASH(gv))) {
+        /* Don't permit modification of @ISA outside of the class management
+         * code. This is temporarily undone by class.c when fiddling with the
+         * array, so it knows it can be done safely.
+         */
+        SvREADONLY_on((SV *)av);
+    }
 }
 
 /* This function grabs name and tries to split a stash and glob

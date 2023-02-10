@@ -2431,8 +2431,8 @@ S_force_strict_version(pTHX_ char *s)
         s = (char *)scan_version(s, ver, 0);
         version = newSVOP(OP_CONST, 0, ver);
     }
-    else if ((*s != ';' && *s != '{' && *s != '}' )
-             && (s = skipspace(s), (*s != ';' && *s != '{' && *s != '}' )))
+    else if ((*s != ';' && *s != ':' && *s != '{' && *s != '}' )
+             && (s = skipspace(s), (*s != ';' && *s != ':' && *s != '{' && *s != '}' )))
     {
         PL_bufptr = s;
         if (errstr)
@@ -7882,7 +7882,8 @@ yyl_word_or_keyword(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct
         s = force_word(s,BAREWORD,FALSE,TRUE);
         s = skipspace(s);
         s = force_strict_version(s);
-        PREBLOCK(KW_CLASS);
+        PL_expect = XATTRBLOCK;
+        TOKEN(KW_CLASS);
 
     case KEY_continue:
         /* We have to disambiguate the two senses of
