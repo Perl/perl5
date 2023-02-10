@@ -1207,9 +1207,13 @@ require C<(??{})>.)
 
 Capture group contents are dynamically scoped and available to you outside the
 pattern until the end of the enclosing block or until the next successful
-match, whichever comes first.  (See L<perlsyn/"Compound Statements">.)
-You can refer to them by absolute number (using C<"$1"> instead of C<"\g1">,
-I<etc>); or by name via the C<%+> hash, using C<"$+{I<name>}">.
+match in the same scope, whichever comes first.
+See L<perlsyn/"Compound Statements"> and
+L<perlvar/"Scoping Rules of Regex Variables"> for more details.
+
+You can access the contents of a capture group by absolute number (using
+C<"$1"> instead of C<"\g1">, I<etc>); or by name via the C<%+> hash,
+using C<"$+{I<name>}">.
 
 Braces are required in referring to named capture groups, but are optional for
 absolute or relative numbered ones.  Braces are safer when creating a regex by
