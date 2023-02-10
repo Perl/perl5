@@ -4819,7 +4819,7 @@ Perl_filter_del(pTHX_ filter_t funcp)
     /* if filter is on top of stack (usual case) just pop it off */
     datasv = FILTER_DATA(AvFILLp(PL_rsfp_filters));
     if (IoANY(datasv) == FPTR2DPTR(void *, funcp)) {
-        sv_free(av_pop(PL_rsfp_filters));
+        SvREFCNT_dec(av_pop(PL_rsfp_filters));
 
         return;
     }
@@ -6016,7 +6016,8 @@ yyl_colon(pTHX_ char *s)
                 if (!d) {
                     if (attrs)
                         op_free(attrs);
-                    sv_free(sv);
+                    ASSUME(sv && SvREFCNT(sv) == 1);
+                    SvREFCNT_dec(sv);
                     Perl_croak(aTHX_ "Unterminated attribute parameter in attribute list");
                 }
                 COPLINE_SET_FROM_MULTI_END;
@@ -8937,7 +8938,8 @@ yyl_keylookup(pTHX_ char *s, GV *gv)
                                   SVt_PVCV);
                 c.off = 0;
                 if (!c.gv) {
-                    sv_free(c.sv);
+                    ASSUME(c.sv && SvREFCNT(c.sv) == 1);
+                    SvREFCNT_dec(c.sv);
                     c.sv = NULL;
                     return yyl_just_a_word(aTHX_ s, len, 0, c);
                 }
@@ -9080,7 +9082,7 @@ yyl_try(pTHX_ char *s)
                     ++svp;
                     sv_catpvs(PL_linestr, ";");
                 }
-                sv_free(MUTABLE_SV(PL_preambleav));
+                SvREFCNT_dec(MUTABLE_SV(PL_preambleav));
                 PL_preambleav = NULL;
             }
             if (PL_minus_E)
@@ -11792,7 +11794,8 @@ Perl_scan_str(pTHX_ char *start, int keep_bracketed_quoted, int keep_delims, int
         COPLINE_INC_WITH_HERELINES;
         PL_bufptr = PL_bufend;
         if (!lex_next_chunk(0)) {
-            sv_free(sv);
+            ASSUME(sv);
+            SvREFCNT_dec(sv);
             CopLINE_set(PL_curcop, (line_t)PL_multi_start);
             return NULL;
         }
