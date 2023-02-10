@@ -4944,6 +4944,7 @@ ext/XS-APItest/t/whichsig.t			XS::APItest: tests for whichsig() and variants
 ext/XS-APItest/t/win32.t			Test Win32 specific APIs
 ext/XS-APItest/t/xs_special_subs.t		Test that XS BEGIN/CHECK/INIT/END work
 ext/XS-APItest/t/xs_special_subs_require.t	for require too
+ext/XS-APItest/t/xsppwrap.t			Tests for XSPP_wrapped() macro
 ext/XS-APItest/t/xsub_h.t			Tests for XSUB.h
 ext/XS-APItest/typemap
 ext/XS-APItest/XSUB-redefined-macros.xs		XS code needing redefined macros.
