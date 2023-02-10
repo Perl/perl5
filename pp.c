@@ -3690,17 +3690,16 @@ PP_wrapped(pp_substr,
         }
 
         if (repl) {
-            SV* repl_sv_copy = NULL;
+            void * free_me = NULL;
 
             if (repl_need_utf8_upgrade) {
-                repl_sv_copy = newSVsv(repl_sv);
-                sv_utf8_upgrade(repl_sv_copy);
-                repl = SvPV_const(repl_sv_copy, repl_len);
+                repl = (char*)bytes_to_utf8_free_me(
+                                        (U8*)repl, &repl_len, &free_me);
             }
             if (!SvOK(sv))
                 SvPVCLEAR(sv);
             sv_insert_flags(sv, byte_pos, byte_len, repl, repl_len, 0);
-            SvREFCNT_dec(repl_sv_copy);
+            Safefree(free_me);
         }
     }
     if (PL_op->op_private & OPpSUBSTR_REPL_FIRST)
