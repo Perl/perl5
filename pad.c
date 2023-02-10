@@ -565,6 +565,10 @@ S_pad_alloc_name(pTHX_ PADNAME *name, U32 flags, HV *typestash,
     else if (flags & padadd_STATE) {
         PadnameFLAGS(name) |= PADNAMEf_STATE;
     }
+    if (flags & padadd_FIELD) {
+        assert(HvSTASH_IS_CLASS(PL_curstash));
+        class_add_field(PL_curstash, name);
+    }
 
     padnamelist_store(PL_comppad_name, offset, name);
     if (PadnameLEN(name) > 1)
@@ -589,6 +593,7 @@ flags can be OR'ed together:
  padadd_OUR          redundantly specifies if it's a package var
  padadd_STATE        variable will retain value persistently
  padadd_NO_DUP_CHECK skip check for lexical shadowing
+ padadd_FIELD        specifies that the lexical is a field for a class
 
 =cut
 */
@@ -602,7 +607,7 @@ Perl_pad_add_name_pvn(pTHX_ const char *namepv, STRLEN namelen,
 
     PERL_ARGS_ASSERT_PAD_ADD_NAME_PVN;
 
-    if (flags & ~(padadd_OUR|padadd_STATE|padadd_NO_DUP_CHECK))
+    if (flags & ~(padadd_OUR|padadd_STATE|padadd_NO_DUP_CHECK|padadd_FIELD))
         Perl_croak(aTHX_ "panic: pad_add_name_pvn illegal flag bits 0x%" UVxf,
                    (UV)flags);
 
@@ -612,7 +617,7 @@ Perl_pad_add_name_pvn(pTHX_ const char *namepv, STRLEN namelen,
         ENTER;
         SAVEFREEPADNAME(name); /* in case of fatal warnings */
         /* check for duplicate declaration */
-        pad_check_dup(name, flags & padadd_OUR, ourstash);
+        pad_check_dup(name, flags & (padadd_OUR|padadd_FIELD), ourstash);
         PadnameREFCNT_inc(name);
         LEAVE;
     }
@@ -864,12 +869,13 @@ S_pad_check_dup(pTHX_ PADNAME *name, U32 flags, const HV *ourstash)
     PADNAME	**svp;
     PADOFFSET	top, off;
     const U32	is_our = flags & padadd_OUR;
+    bool        is_field = flags & padadd_FIELD;
 
     PERL_ARGS_ASSERT_PAD_CHECK_DUP;
 
     ASSERT_CURPAD_ACTIVE("pad_check_dup");
 
-    assert((flags & ~padadd_OUR) == 0);
+    assert((flags & ~(padadd_OUR|padadd_FIELD)) == 0);
 
     if (PadnamelistMAX(PL_comppad_name) < 0 || !ckWARN(WARN_SHADOW))
         return; /* nothing to check */
@@ -888,12 +894,16 @@ S_pad_check_dup(pTHX_ PADNAME *name, U32 flags, const HV *ourstash)
         {
             if (is_our && (PadnameIsOUR(pn)))
                 break; /* "our" masking "our" */
+            if (is_field && PadnameIsFIELD(pn) &&
+                    PadnameFIELDINFO(pn)->fieldstash != PL_curstash)
+                break; /* field of a different class */
             /* diag_listed_as: "%s" variable %s masks earlier declaration in same %s */
             Perl_warner(aTHX_ packWARN(WARN_SHADOW),
                 "\"%s\" %s %" PNf " masks earlier declaration in same %s",
                 (   is_our                         ? "our"   :
                     PL_parser->in_my == KEY_my     ? "my"    :
                     PL_parser->in_my == KEY_sigvar ? "my"    :
+                    PL_parser->in_my == KEY_field  ? "field" :
                                                      "state" ),
                 *PadnamePV(pn) == '&' ? "subroutine" : "variable",
                 PNfARG(pn),
@@ -1094,10 +1104,11 @@ S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, U32 flags, const CV* cv,
     SV **new_capturep;
     const PADLIST * const padlist = CvPADLIST(cv);
     const bool staleok = cBOOL(flags & padadd_STALEOK);
+    const bool fieldok = cBOOL(flags & padfind_FIELD_OK);
 
     PERL_ARGS_ASSERT_PAD_FINDLEX;
 
-    flags &= ~ padadd_STALEOK; /* one-shot flag */
+    flags &= ~(padadd_STALEOK|padfind_FIELD_OK); /* one-shot flags */
     if (flags)
         Perl_croak(aTHX_ "panic: pad_findlex illegal flag bits 0x%" UVxf,
                    (UV)flags);
@@ -1135,6 +1146,10 @@ S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, U32 flags, const CV* cv,
             if (offset > 0) { /* not fake */
                 fake_offset = 0;
                 *out_name = name_p[offset]; /* return the name */
+
+                if (PadnameIsFIELD(*out_name) && !fieldok)
+                    croak("Field %" SVf " is not accessible outside a method",
+                            SVfARG(PadnameSV(*out_name)));
 
                 /* set PAD_FAKELEX_MULTI if this lex can have multiple
                  * instances. For now, we just test !CvUNIQUE(cv), but
@@ -1259,12 +1274,26 @@ S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, U32 flags, const CV* cv,
     new_capturep = out_capture ? out_capture :
                 CvLATE(cv) ? NULL : &new_capture;
 
-    offset = pad_findlex(namepv, namelen,
-                flags | padadd_STALEOK*(new_capturep == &new_capture),
+    U32 recurse_flags = flags;
+    if(new_capturep == &new_capture)
+        recurse_flags |= padadd_STALEOK;
+    if(CvIsMETHOD(cv))
+        recurse_flags |= padfind_FIELD_OK;
+
+    offset = pad_findlex(namepv, namelen, recurse_flags,
                 CvOUTSIDE(cv), CvOUTSIDE_SEQ(cv), 1,
                 new_capturep, out_name, out_flags);
     if (offset == NOT_IN_PAD)
         return NOT_IN_PAD;
+
+    if (PadnameIsFIELD(*out_name)) {
+        HV *fieldstash = PadnameFIELDINFO(*out_name)->fieldstash;
+
+        /* fields are only visible to the class that declared them */
+        if(fieldstash != PL_curstash)
+            croak("Field %" SVf " of %" HvNAMEf_QUOTEDPREFIX " is not accessible in a method of %" HvNAMEf_QUOTEDPREFIX,
+                SVfARG(PadnameSV(*out_name)), HvNAMEfARG(fieldstash), HvNAMEfARG(PL_curstash));
+    }
 
     /* found in an outer CV. Add appropriate fake entry to this pad */
 
@@ -2777,6 +2806,10 @@ Perl_newPADNAMEouter(PADNAME *outer)
        another entry.  The original pad name owns the buffer.  */
     PadnameREFCNT_inc(PADNAME_FROM_PV(PadnamePV(outer)));
     PadnameFLAGS(pn) = PADNAMEf_OUTER;
+    if(PadnameIsFIELD(outer)) {
+        PadnameFIELDINFO(pn) = PadnameFIELDINFO(outer);
+        PadnameFLAGS(pn) |= PADNAMEf_FIELD;
+    }
     PadnameLEN(pn) = PadnameLEN(outer);
     return pn;
 }

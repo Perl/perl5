@@ -3249,6 +3249,7 @@ typedef struct xpvcv XPVCV;
 typedef struct xpvbm XPVBM;
 typedef struct xpvfm XPVFM;
 typedef struct xpvio XPVIO;
+typedef struct xobject XPVOBJ;
 typedef struct mgvtbl MGVTBL;
 typedef union any ANY;
 typedef struct ptr_tbl_ent PTR_TBL_ENT_t;
@@ -6256,19 +6257,19 @@ EXTCONST U8 PL_magic_data[256];
 #endif
 
 #ifdef DOINIT
-                        /* NL IV NV PV INV PI PN MG RX GV LV AV HV CV FM IO */
+                        /* NL IV NV PV INV PI PN MG RX GV LV AV HV CV FM IO OBJ */
 EXTCONST bool
-PL_valid_types_IVX[]    = { 0, 1, 0, 0, 0, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0 };
+PL_valid_types_IVX[]    = { 0, 1, 0, 0, 0, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0 };
 EXTCONST bool
-PL_valid_types_NVX[]    = { 0, 0, 1, 0, 0, 0, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0 };
+PL_valid_types_NVX[]    = { 0, 0, 1, 0, 0, 0, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0 };
 EXTCONST bool
-PL_valid_types_PVX[]    = { 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1 };
+PL_valid_types_PVX[]    = { 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 0 };
 EXTCONST bool
-PL_valid_types_RV[]     = { 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1 };
+PL_valid_types_RV[]     = { 0, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0 };
 EXTCONST bool
-PL_valid_types_IV_set[] = { 0, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1 };
+PL_valid_types_IV_set[] = { 0, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 0 };
 EXTCONST bool
-PL_valid_types_NV_set[] = { 0, 0, 1, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0 };
+PL_valid_types_NV_set[] = { 0, 0, 1, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0 };
 
 EXTCONST U8
 PL_deBruijn_bitpos_tab32[] = {

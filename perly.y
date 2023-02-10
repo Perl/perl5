@@ -64,8 +64,8 @@
 %token <ival> PERLY_STAR
 
 /* Tokens emitted by toke.c on simple keywords */
-%token <ival> KW_FORMAT KW_PACKAGE 
-%token <ival> KW_LOCAL KW_MY
+%token <ival> KW_FORMAT KW_PACKAGE KW_CLASS
+%token <ival> KW_LOCAL KW_MY KW_FIELD
 %token <ival> KW_IF KW_ELSE KW_ELSIF KW_UNLESS
 %token <ival> KW_FOR KW_UNTIL KW_WHILE KW_CONTINUE
 %token <ival> KW_GIVEN KW_WHEN KW_DEFAULT
@@ -78,6 +78,7 @@
 /* The 'sub' keyword is a bit special; four different tokens depending on
  *   named-vs-anon, and whether signatures are in effect */
 %token <ival> KW_SUB_named KW_SUB_named_sig KW_SUB_anon KW_SUB_anon_sig
+%token <ival> KW_METHOD_named KW_METHOD_anon
 
 /* Tokens emitted in other situations */
 %token <opval> BAREWORD METHCALL0 METHCALL THING PMFUNC PRIVATEREF QWLIST
@@ -90,12 +91,14 @@
 %token <ival> DOLSHARP HASHBRACK NOAMP
 %token <ival> COLONATTR FORMLBRACK FORMRBRACK
 %token <ival> SUBLEXSTART SUBLEXEND
+%token <ival> PHASER
 
 %type <ival> grammar remember mremember
 %type <ival>  startsub startanonsub startformsub
 
 %type <ival> mintro
 
+%type <ival>  sigsub_or_method_named
 %type <opval> stmtseq fullstmt labfullstmt barestmt block mblock else finally
 %type <opval> expr term subscripted scalar ary hsh arylen star amper sideff
 %type <opval> condition
@@ -107,6 +110,8 @@
 %type <opval> formname subname proto cont my_scalar my_var
 %type <opval> list_of_scalars my_list_of_scalars refgen_topic formblock
 %type <opval> subattrlist myattrlist myattrterm myterm
+%type <pval>  fieldvar /* pval is PADNAME */
+%type <opval> fielddecl
 %type <opval> termbinop termunop anonymous termdo
 %type <opval> termrelop relopchain termeqop eqopchain
 %type <ival>  sigslurpsigil
@@ -232,6 +237,14 @@ grammar	:	GRAMPROG
 			  PL_eval_root = $subsigguts;
 			  $$ = 0;
 			}
+	;
+
+/* Either a signatured 'sub' or 'method' keyword */
+sigsub_or_method_named
+	:	KW_SUB_named_sig
+			{ $$ = KW_SUB_named_sig; }
+	|	KW_METHOD_named
+			{ $$ = KW_METHOD_named; }
 	;
 
 /* An ordinary block */
@@ -362,26 +375,62 @@ barestmt:	PLUGSTMT
 			  intro_my();
 			  parser->parsed_sub = 1;
 			}
-	|	KW_SUB_named_sig subname startsub
+	|	sigsub_or_method_named subname startsub
                     /* sub declaration or definition under 'use feature
                      * "signatures"'. (Note that a signature isn't
                      * allowed in a declaration)
                      */
 			{
                           init_named_cv(PL_compcv, $subname);
+			  if($sigsub_or_method_named == KW_METHOD_named) {
+			      croak_kw_unless_class("method");
+			      class_prepare_method_parse(PL_compcv);
+			  }
 			  parser->in_my = 0;
 			  parser->in_my_stash = NULL;
 			}
                     subattrlist optsigsubbody
 			{
+			  OP *body = $optsigsubbody;
+
 			  SvREFCNT_inc_simple_void(PL_compcv);
+			  if($sigsub_or_method_named == KW_METHOD_named) {
+			      body = class_wrap_method_body(body);
+			  }
 			  $subname->op_type == OP_CONST
-			      ? newATTRSUB($startsub, $subname, NULL, $subattrlist, $optsigsubbody)
-			      : newMYSUB(  $startsub, $subname, NULL, $subattrlist, $optsigsubbody)
+			      ? newATTRSUB($startsub, $subname, NULL, $subattrlist, body)
+			      : newMYSUB(  $startsub, $subname, NULL, $subattrlist, body)
 			  ;
 			  $$ = NULL;
 			  intro_my();
 			  parser->parsed_sub = 1;
+			}
+	|	PHASER startsub
+			{
+			  switch($PHASER) {
+			      case KEY_ADJUST:
+			         croak_kw_unless_class("ADJUST");
+			         class_prepare_method_parse(PL_compcv);
+			         break;
+			      default:
+			         NOT_REACHED;
+			  }
+			}
+		    optsubbody
+			{
+			  OP *body = $optsubbody;
+			  SvREFCNT_inc_simple_void(PL_compcv);
+
+			  CV *cv;
+
+			  switch($PHASER) {
+			      case KEY_ADJUST:
+			          body = class_wrap_method_body(body);
+			          cv = newATTRSUB($startsub, NULL, NULL, NULL, body);
+			          class_add_ADJUST(PL_curstash, cv);
+			          break;
+			  }
+			  $$ = NULL;
 			}
 	|	KW_PACKAGE BAREWORD[version] BAREWORD[package] PERLY_SEMICOLON
 		    /* version and package appear in the reverse order to what may be
@@ -393,6 +442,14 @@ barestmt:	PLUGSTMT
 			  if ($version)
 			      package_version($version);
 			  $$ = NULL;
+			}
+	|	KW_CLASS BAREWORD[version] BAREWORD[package] PERLY_SEMICOLON
+			{
+			  package($package);
+			  if ($version)
+			      package_version($version);
+			  $$ = NULL;
+			  class_setup_stash(PL_curstash);
 			}
 	|	KW_USE_or_NO startsub
 			{ CvSPECIAL_on(PL_compcv); /* It's a BEGIN {} */ }
@@ -544,6 +601,26 @@ barestmt:	PLUGSTMT
 				  NULL, block_end($remember, $stmtseq), NULL, 0);
 			  if (parser->copline > (line_t)$PERLY_BRACE_OPEN)
 			      parser->copline = (line_t)$PERLY_BRACE_OPEN;
+			}
+	|	KW_CLASS BAREWORD[version] BAREWORD[package] PERLY_BRACE_OPEN remember
+			{
+			  package($package);
+			  if ($version) {
+			      package_version($version);
+			  }
+			  class_setup_stash(PL_curstash);
+			}
+		stmtseq PERLY_BRACE_CLOSE
+			{
+			  /* a block is a loop that happens once */
+			  $$ = newWHILEOP(0, 1, NULL,
+				  NULL, block_end($remember, $stmtseq), NULL, 0);
+			  if (parser->copline > (line_t)$PERLY_BRACE_OPEN)
+			      parser->copline = (line_t)$PERLY_BRACE_OPEN;
+			}
+	|	fielddecl PERLY_SEMICOLON
+			{
+			  $$ = $fielddecl;
 			}
 	|	sideff PERLY_SEMICOLON
 			{
@@ -897,7 +974,7 @@ subsigguts:
                             struct op_argcheck_aux *aux;
                             OP            *check;
 
-			    if (!FEATURE_SIGNATURES_IS_ENABLED)
+			    if (!FEATURE_SIGNATURES_IS_ENABLED && !CvIsMETHOD(PL_compcv))
 			        Perl_croak(aTHX_ "Experimental "
                                     "subroutine signatures not enabled");
 
@@ -1253,6 +1330,19 @@ anonymous
 	|	KW_SUB_anon_sig startanonsub subattrlist sigsubbody %prec PERLY_PAREN_OPEN
 			{ SvREFCNT_inc_simple_void(PL_compcv);
 			  $$ = newANONATTRSUB($startanonsub, NULL, $subattrlist, $sigsubbody); }
+	|	KW_METHOD_anon startanonsub 
+			{
+			  croak_kw_unless_class("method");
+			  class_prepare_method_parse(PL_compcv);
+			}
+		    subattrlist sigsubbody %prec PERLY_PAREN_OPEN
+			{
+			  OP *body = $sigsubbody;
+
+			  SvREFCNT_inc_simple_void(PL_compcv);
+			  body = class_wrap_method_body(body);
+			  $$ = newANONATTRSUB($startanonsub, NULL, $subattrlist, body);
+			}
     ;
 
 /* Things called with "do" */
@@ -1439,6 +1529,23 @@ myterm	:	PERLY_PAREN_OPEN expr PERLY_PAREN_CLOSE
 			{ $$ = $hsh; }
 	|	ary 	%prec PERLY_PAREN_OPEN
 			{ $$ = $ary; }
+	;
+
+/* "field" declarations */
+fieldvar:	scalar	%prec PERLY_PAREN_OPEN
+			{ $$ = PadnamelistARRAY(PL_comppad_name)[$scalar->op_targ]; }
+	|	hsh 	%prec PERLY_PAREN_OPEN
+			{ $$ = PadnamelistARRAY(PL_comppad_name)[$hsh->op_targ]; }
+	|	ary 	%prec PERLY_PAREN_OPEN
+			{ $$ = PadnamelistARRAY(PL_comppad_name)[$ary->op_targ]; }
+	;
+
+fielddecl
+	:	KW_FIELD fieldvar
+			{
+			  parser->in_my = 0;
+			  $$ = newOP(OP_NULL, 0);
+			}
 	;
 
 /* Basic list expressions */

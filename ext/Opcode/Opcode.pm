@@ -1,4 +1,4 @@
-package Opcode 1.63;
+package Opcode 1.64;
 
 use strict;
 
@@ -350,6 +350,8 @@ invert_opset function.
 
     leaveeval -- needed for Safe to operate, is safe
 		 without entereval
+
+    methstart
 
 =item :base_mem
 

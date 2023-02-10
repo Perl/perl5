@@ -772,9 +772,15 @@ Perl_allocmy(pTHX_ const char *const name, const STRLEN len, const U32 flags)
 
     /* allocate a spare slot and store the name in that slot */
 
-    off = pad_add_name_pvn(name, len,
-                       (is_our ? padadd_OUR :
-                        PL_parser->in_my == KEY_state ? padadd_STATE : 0),
+    U32 addflags = 0;
+    if(is_our)
+        addflags |= padadd_OUR;
+    else if(PL_parser->in_my == KEY_state)
+        addflags |= padadd_STATE;
+    else if(PL_parser->in_my == KEY_field)
+        addflags |= padadd_FIELD;
+
+    off = pad_add_name_pvn(name, len, addflags,
                     PL_parser->in_my_stash,
                     (is_our
                         /* $_ is always in main::, even with our */
@@ -1311,6 +1317,14 @@ Perl_op_clear(pTHX_ OP *o)
             /* start of malloc is at op_aux[-1], where the length is
              * stored */
             PerlMemShared_free(cUNOP_AUXo->op_aux - 1);
+        }
+        break;
+
+    case OP_METHSTART:
+        {
+            UNOP_AUX_item *aux = cUNOP_AUXo->op_aux;
+            /* Every item in aux is a UV, so nothing in it to free */
+            Safefree(aux);
         }
         break;
     }
@@ -15357,7 +15371,9 @@ Perl_report_redefined_cv(pTHX_ const SV *name, const CV *old_cv,
         Perl_warner(aTHX_ packWARN(WARN_REDEFINE),
                           is_const
                             ? "Constant subroutine %" SVf " redefined"
-                            : "Subroutine %" SVf " redefined",
+                            : CvIsMETHOD(old_cv)
+                              ? "Method %" SVf " redefined"
+                              : "Subroutine %" SVf " redefined",
                           SVfARG(name));
     }
 }

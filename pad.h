@@ -55,6 +55,8 @@ struct padnamelist {
 #  define PERL_PADNAME_MINIMAL
 #endif
 
+struct padname_fieldinfo;
+
 #define _PADNAME_BASE \
     char *	xpadn_pv;		\
     HV *	xpadn_ourstash;		\
@@ -62,6 +64,7 @@ struct padnamelist {
         HV *	xpadn_typestash;	\
         CV *	xpadn_protocv;		\
     } xpadn_type_u;			\
+    struct padname_fieldinfo *xpadn_fieldinfo; \
     U32		xpadn_low;		\
     U32		xpadn_high;		\
     U32		xpadn_refcnt;		\
@@ -86,6 +89,14 @@ struct padname_with_str {
 
 #define PADNAME_FROM_PV(s) \
     ((PADNAME *)((s) - STRUCT_OFFSET(struct padname_with_str, xpadn_str)))
+
+/* Most padnames are not field names. Keep all the field-related info in its
+ * own substructure, stored in ->xpadn_fieldinfo.
+ */
+struct padname_fieldinfo {
+    PADOFFSET  fieldix;    /* index of this field within ObjectFIELDS() array */
+    HV        *fieldstash; /* original class package which added this field */
+};
 
 
 /* a value that PL_cop_seqmax is guaranteed never to be,
@@ -132,6 +143,8 @@ typedef enum {
 #define padadd_NO_DUP_CHECK	0x04	   /* skip warning on dups. */
 #define padadd_STALEOK		0x08	   /* allow stale lexical in active
                                             * sub, but only one level up */
+#define padadd_FIELD            0x10       /* set PADNAMEt_FIELD */
+#define padfind_FIELD_OK        0x20       /* pad_findlex is permitted to see fields */
 
 /* ASSERT_CURPAD_LEGAL and ASSERT_CURPAD_ACTIVE respectively determine
  * whether PL_comppad and PL_curpad are consistent and whether they have
@@ -244,6 +257,10 @@ are often referred to as 'fake'.
 =for apidoc m|bool|PadnameIsSTATE|PADNAME * pn
 Whether this is a "state" variable.
 
+=for apidoc m|bool|PadnameIsFIELD|PADNAME * pn
+Whether this is a "field" variable.  PADNAMEs where this is true will
+have additional information available via C<PadnameFIELDINFO>.
+
 =for apidoc m|HV *|PadnameTYPE|PADNAME * pn
 The stash associated with a typed lexical.  This returns the C<%Foo::> hash
 for C<my Foo $bar>.
@@ -330,9 +347,11 @@ Restore the old pad saved into the local variable C<opad> by C<PAD_SAVE_LOCAL()>
 #define PadnameREFCNT_dec(pn)	Perl_padname_free(aTHX_ pn)
 #define PadnameOURSTASH_set(pn,s) (PadnameOURSTASH(pn) = (s))
 #define PadnameTYPE_set(pn,s)	  (PadnameTYPE(pn) = (s))
+#define PadnameFIELDINFO(pn)    (pn)->xpadn_fieldinfo
 #define PadnameOUTER(pn)	(PadnameFLAGS(pn) & PADNAMEf_OUTER)
 #define PadnameIsSTATE(pn)	(PadnameFLAGS(pn) & PADNAMEf_STATE)
 #define PadnameLVALUE(pn)	(PadnameFLAGS(pn) & PADNAMEf_LVALUE)
+#define PadnameIsFIELD(pn)	(PadnameFLAGS(pn) & PADNAMEf_FIELD)
 
 #define PadnameLVALUE_on(pn)	(PadnameFLAGS(pn) |= PADNAMEf_LVALUE)
 #define PadnameIsSTATE_on(pn)	(PadnameFLAGS(pn) |= PADNAMEf_STATE)
@@ -342,6 +361,7 @@ Restore the old pad saved into the local variable C<opad> by C<PAD_SAVE_LOCAL()>
 #define PADNAMEf_LVALUE	0x04	/* used as lvalue */
 #define PADNAMEf_TYPED	0x08	/* for B; unused by core */
 #define PADNAMEf_OUR	0x10	/* for B; unused by core */
+#define PADNAMEf_FIELD  0x20    /* field var */
 
 /* backward compatibility */
 #ifndef PERL_CORE

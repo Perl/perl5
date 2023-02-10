@@ -131,6 +131,10 @@
 #define WARN_EXPERIMENTAL__EXTRA_PAIRED_DELIMITERS 70
 #define WARN_EXPERIMENTAL__FOR_LIST	 71
 #define WARN_SCALAR			 72
+
+/* Warnings Categories added in Perl 5.037 */
+
+#define WARN_EXPERIMENTAL__CLASS	 73
 #define WARNsize			 19
 #define WARN_ALLstring			 "\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125"
 #define WARN_NONEstring			 "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"
@@ -318,6 +322,7 @@ category parameters passed.
 =for apidoc Amnh||WARN_EXPERIMENTAL__EXTRA_PAIRED_DELIMITERS
 =for apidoc Amnh||WARN_EXPERIMENTAL__FOR_LIST
 =for apidoc Amnh||WARN_SCALAR
+=for apidoc Amnh||WARN_EXPERIMENTAL__CLASS
 
 =cut
 */

@@ -38,6 +38,8 @@ foreach (@{(setup_embed())[0]}) {
   my $embed= $_->{embed}
     or next;
   next unless $embed->{name}  =~ /warn|(?<!ov)err|(\b|_)die|croak/i;
+  # Skip some known exceptions
+  next if $embed->{name} =~ /croak_kw_unless_class/;
   # The flag p means that this function may have a 'Perl_' prefix
   # The flag S means that this function may have a 'S_' prefix
   push @functions, $embed->{name};

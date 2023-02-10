@@ -16,7 +16,7 @@
 #
 # This script is normally invoked from regen.pl.
 
-$VERSION = '1.61';
+$VERSION = '1.62';
 
 BEGIN {
     require './regen/regen_lib.pl';
@@ -146,6 +146,8 @@ my $TREE = {
                                     [ 5.035, DEFAULT_ON],
                                 'experimental::extra_paired_delimiters' =>
                                     [ 5.035, DEFAULT_ON],
+                                'experimental::class' =>
+                                    [ 5.037, DEFAULT_ON ],
                         }],
 
         'missing'       => [ 5.021, DEFAULT_OFF],

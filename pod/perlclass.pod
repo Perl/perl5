@@ -1,0 +1,60 @@
+=head1 NAME
+
+perlclass - Perl class syntax
+
+=head1 DESCRIPTION
+
+    use v5.36;
+    use feature 'class';
+
+    class My::Example 1.234 {
+        field $x;
+        ADJUST { $x = "Hello, world"; }
+
+        method print_message { say $x; }
+    }
+
+    My::Example->new->print_message;
+
+C<class> is like C<package>. Classes automatically get a C<new> method; you
+don't have to (and should not) write one.
+
+C<method> is like C<sub> but automatically gains a C<$self> lexical.
+
+C<ADJUST> blocks run during construction and are the way to add code that runs
+during the construction time of each instance. They also have a C<$self>
+lexical.
+
+C<field> is like C<my> but only visible within C<methods> and C<ADJUST>
+blocks.
+
+Instances get their own value storage for fields
+
+    class My::Counter {
+        field $count; ADJUST { $count = 0; }
+
+        method incr { $count++ }
+        method val  { return $count; }
+    }
+
+    my $ca = My::Counter->new;
+    $ca->incr; $ca->incr; $ca->incr;
+
+    my $cb = My::Counter->new;
+    $cb->incr;
+
+    say "Counter A is at ", $ca->val;
+    say "Counter B is at ", $cb->val;
+
+C<methods> always act as if C<use feature 'signatures'> is in effect. You do
+not need to worry about the C<$self> lexical: it is automatically created and
+populated with the object instance, which will not appear in the arguments
+list as far as the signature is concerned.
+
+    class Example::WithSignatures {
+        method greet($name = "someone") {
+            say "Hello, $name";
+        }
+    }
+
+=cut

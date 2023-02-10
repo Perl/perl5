@@ -3679,6 +3679,7 @@ XEop	|char  *|dup_warnings	|NULLOK char *warnings
 
 Amd	|const char * const|phase_name					\
 				|enum perl_phase
+
 #if ( defined(AF_INET) && defined(HAS_SOCKET) && defined(PF_INET) && \
     defined(SOCK_DGRAM) ) || defined(HAS_SOCKETPAIR)
 pR	|int	|PerlSock_socketpair_cloexec				\
@@ -3963,6 +3964,26 @@ i	|bool	|PerlEnv_putenv |NN char *str
 #if defined(PERL_IN_AV_C)
 S	|MAGIC *|get_aux_mg	|NN AV *av
 #endif /* defined(PERL_IN_AV_C) */
+#if defined(PERL_IN_CLASS_C) || defined(PERL_IN_PAD_C) || \
+    defined(PERL_IN_PERLY_C) || defined(PERL_IN_TOKE_C)
+; Functions in class.c that are called by the parser (perly.c, toke.c, pad.c)
+Cp	|void	|class_add_ADJUST					\
+				|NN HV *stash				\
+				|NN CV *cv
+Cp	|void	|class_add_field|NN HV *stash				\
+				|NN PADNAME *pn
+Cp	|void	|class_prepare_method_parse				\
+				|NN CV *cv
+Cp	|void	|class_seal_stash					\
+				|NN HV *stash
+Cp	|void	|class_setup_stash					\
+				|NN HV *stash
+Cp	|OP *	|class_wrap_method_body 				\
+				|NULLOK OP *o
+Cp	|void	|croak_kw_unless_class					\
+				|NN const char *kw
+#endif /* defined(PERL_IN_CLASS_C) || defined(PERL_IN_PAD_C) || \
+          defined(PERL_IN_PERLY_C) || defined(PERL_IN_TOKE_C) */
 #if defined(PERL_IN_DEB_C)
 S	|void	|deb_stack_n	|NN SV **stack_base			\
 				|I32 stack_min				\

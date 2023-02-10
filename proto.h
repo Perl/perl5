@@ -6231,6 +6231,44 @@ S_get_aux_mg(pTHX_ AV *av);
         assert(av)
 
 #endif /* defined(PERL_IN_AV_C) */
+#if defined(PERL_IN_CLASS_C) || defined(PERL_IN_PAD_C) || \
+    defined(PERL_IN_PERLY_C) || defined(PERL_IN_TOKE_C)
+PERL_CALLCONV void
+Perl_class_add_ADJUST(pTHX_ HV *stash, CV *cv);
+# define PERL_ARGS_ASSERT_CLASS_ADD_ADJUST      \
+        assert(stash); assert(cv)
+
+PERL_CALLCONV void
+Perl_class_add_field(pTHX_ HV *stash, PADNAME *pn);
+# define PERL_ARGS_ASSERT_CLASS_ADD_FIELD       \
+        assert(stash); assert(pn)
+
+PERL_CALLCONV void
+Perl_class_prepare_method_parse(pTHX_ CV *cv);
+# define PERL_ARGS_ASSERT_CLASS_PREPARE_METHOD_PARSE \
+        assert(cv)
+
+PERL_CALLCONV void
+Perl_class_seal_stash(pTHX_ HV *stash);
+# define PERL_ARGS_ASSERT_CLASS_SEAL_STASH      \
+        assert(stash)
+
+PERL_CALLCONV void
+Perl_class_setup_stash(pTHX_ HV *stash);
+# define PERL_ARGS_ASSERT_CLASS_SETUP_STASH     \
+        assert(stash)
+
+PERL_CALLCONV OP *
+Perl_class_wrap_method_body(pTHX_ OP *o);
+# define PERL_ARGS_ASSERT_CLASS_WRAP_METHOD_BODY
+
+PERL_CALLCONV void
+Perl_croak_kw_unless_class(pTHX_ const char *kw);
+# define PERL_ARGS_ASSERT_CROAK_KW_UNLESS_CLASS \
+        assert(kw)
+
+#endif /* defined(PERL_IN_CLASS_C) || defined(PERL_IN_PAD_C) || \
+          defined(PERL_IN_PERLY_C) || defined(PERL_IN_TOKE_C) */
 #if defined(PERL_IN_DEB_C)
 STATIC void
 S_deb_stack_n(pTHX_ SV **stack_base, I32 stack_min, I32 stack_max, I32 mark_min, I32 mark_max);
