@@ -6623,8 +6623,11 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
 
         assert(SvREFCNT(sv) == 0);
         assert(SvTYPE(sv) != (svtype)SVTYPEMASK);
-
+#if NVSIZE <= IVSIZE
+        if (type <= SVt_NV) {
+#else
         if (type <= SVt_IV) {
+#endif
             /* Historically this check on type was needed so that the code to
              * free bodies wasn't reached for these types, because the arena
              * slots were re-used for HEs and pointer table entries. The
@@ -6646,6 +6649,9 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
              * path, as SvPVX() doesn't point to valid memory.
              *
              * Hence this code is still the most efficient way to handle this.
+             *
+             * Additionally, for bodyless NVs, riding this branch is more
+             * efficient than stepping through the general logic.
              */
 
             if (SvROK(sv))
