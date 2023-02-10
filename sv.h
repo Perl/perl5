@@ -69,10 +69,13 @@ PVMG, we save memory by allocating smaller structs when possible.  All the
 other types are just simpler forms of C<SVt_PVMG>, with fewer internal fields.
 C<SVt_NULL> can only hold undef.  C<SVt_IV> can hold undef, an integer, or a
 reference.  (C<SVt_RV> is an alias for C<SVt_IV>, which exists for backward
-compatibility.)  C<SVt_NV> can hold any of those or a double.  C<SVt_PV> can only
-hold C<undef> or a string.  C<SVt_PVIV> is a superset of C<SVt_PV> and C<SVt_IV>.
-C<SVt_PVNV> is similar.  C<SVt_PVMG> can hold anything C<SVt_PVNV> can hold, but it
-can, but does not have to, be blessed or magical.
+compatibility.)  C<SVt_NV> can hold undef or a double. (In builds that support
+headless NVs, these could also hold a reference via a suitable offset, in the
+same way that SVt_IV does, but this is not currently supported and seems to
+be a rare use case.) C<SVt_PV> can hold C<undef>, a string, or a reference.
+C<SVt_PVIV> is a superset of C<SVt_PV> and C<SVt_IV>. C<SVt_PVNV> is similar.
+C<SVt_PVMG> can hold anything C<SVt_PVNV> can hold, but it can, but does not
+have to, be blessed or magical.
 
 =for apidoc AmnU||SVt_NULL
 Type flag for scalars.  See L</svtype>.
