@@ -6597,8 +6597,7 @@ and free the body itself.  The SV's head is I<not> freed, although
 its type is set to all 1's so that it won't inadvertently be assumed
 to be live during global destruction etc.
 This function should only be called when C<REFCNT> is zero.  Most of the time
-you'll want to call C<sv_free()> (or its macro wrapper C<SvREFCNT_dec>)
-instead.
+you'll want to call C<SvREFCNT_dec> instead.
 
 =cut
 */
