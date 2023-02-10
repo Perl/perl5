@@ -351,7 +351,7 @@ invert_opset function.
     leaveeval -- needed for Safe to operate, is safe
 		 without entereval
 
-    methstart
+    methstart initfield
 
 =item :base_mem
 

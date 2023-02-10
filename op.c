@@ -1327,6 +1327,14 @@ Perl_op_clear(pTHX_ OP *o)
             Safefree(aux);
         }
         break;
+
+    case OP_INITFIELD:
+        {
+            UNOP_AUX_item *aux = cUNOP_AUXo->op_aux;
+            /* Every item in aux is a UV, so nothing in it to free */
+            Safefree(aux);
+        }
+        break;
     }
 
     if (o->op_targ > 0) {

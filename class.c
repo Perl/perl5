@@ -18,7 +18,8 @@
 #include "XSUB.h"
 
 enum {
-    PADIX_SELF = 1,
+    PADIX_SELF   = 1,
+    PADIX_PARAMS = 2,
 };
 
 void
@@ -44,44 +45,83 @@ Perl_newSVobject(pTHX_ Size_t fieldcount)
     return sv;
 }
 
-#define make_instance_fields(stash, instance)  S_make_instance_fields(aTHX_ stash, instance)
-static void S_make_instance_fields(pTHX_ HV *stash, SV *instance)
+PP(pp_initfield)
 {
-    struct xpvhv_aux *aux = HvAUX(stash);
+    dSP;
+    UNOP_AUX_item *aux = cUNOP_AUX->op_aux;
 
-    if(aux->xhv_class_superclass) {
-        make_instance_fields(aux->xhv_class_superclass, instance);
-    }
+    SV *self = PAD_SVl(PADIX_SELF);
+    assert(SvTYPE(SvRV(self)) == SVt_PVOBJ);
+    SV *instance = SvRV(self);
 
     SV **fields = ObjectFIELDS(instance);
 
-    PADNAMELIST *fieldnames = aux->xhv_class_fields;
+    PADOFFSET fieldix = aux[0].uv;
 
-    for(U32 i = 0; fieldnames && i <= PadnamelistMAX(fieldnames); i++) {
-        PADNAME *pn = PadnamelistARRAY(fieldnames)[i];
-        PADOFFSET fieldix = PadnameFIELDINFO(pn)->fieldix;
+    SV *val = NULL;
 
-        SV *val = NULL;
-
-        switch(PadnamePV(pn)[0]) {
-            case '$':
+    switch(PL_op->op_private & (OPpINITFIELD_AV|OPpINITFIELD_HV)) {
+        case 0:
+            if(PL_op->op_flags & OPf_STACKED)
+                val = newSVsv(POPs);
+            else
                 val = newSV(0);
-                break;
+            break;
 
-            case '@':
-                val = (SV *)newAV();
-                break;
+        case OPpINITFIELD_AV:
+        {
+            AV *av;
+            if(PL_op->op_flags & OPf_STACKED) {
+                SV **svp = PL_stack_base + POPMARK + 1;
+                STRLEN count = SP - svp + 1;
 
-            case '%':
-                val = (SV *)newHV();
-                break;
+                av = newAV_alloc_x(count);
 
-            default:
-                NOT_REACHED;
+                av_extend(av, count);
+                while(svp <= SP) {
+                    av_push_simple(av, newSVsv(*svp));
+                    svp++;
+                }
+            }
+            else
+                av = newAV();
+            val = (SV *)av;
+            break;
         }
 
-        fields[fieldix] = val;
+        case OPpINITFIELD_HV:
+        {
+            HV *hv = newHV();
+            if(PL_op->op_flags & OPf_STACKED) {
+                SV **svp = PL_stack_base + POPMARK + 1;
+                STRLEN svcount = SP - svp + 1;
+
+                if(svcount % 2)
+                    Perl_warner(aTHX_
+                            packWARN(WARN_MISC), "Odd number of elements in hash field initialization");
+
+                while(svp <= SP) {
+                    SV *key = *svp; svp++;
+                    SV *val = svp <= SP ? *svp : &PL_sv_undef; svp++;
+
+                    hv_store_ent(hv, key, newSVsv(val), 0);
+                }
+            }
+            val = (SV *)hv;
+            break;
+        }
     }
+
+    fields[fieldix] = val;
+
+    PADOFFSET padix = PL_op->op_targ;
+    if(padix) {
+        SAVESPTR(PAD_SVl(padix));
+        SV *sv = PAD_SVl(padix) = SvREFCNT_inc(val);
+        save_freesv(sv);
+    }
+
+    RETURN;
 }
 
 XS(injected_constructor);
@@ -123,9 +163,29 @@ XS(injected_constructor)
     SvOBJECT_on(instance);
     SvSTASH_set(instance, MUTABLE_HV(SvREFCNT_inc_simple(stash)));
 
-    make_instance_fields(stash, instance);
-
     SV *self = sv_2mortal(newRV_noinc(instance));
+
+    assert(aux->xhv_class_initfields_cv);
+    {
+        ENTER;
+        SAVETMPS;
+
+        EXTEND(SP, 2);
+        PUSHMARK(SP);
+        PUSHs(self);
+        if(params)
+            PUSHs((SV *)params); // yes a raw HV
+        else
+            PUSHs(&PL_sv_undef);
+        PUTBACK;
+
+        call_sv((SV *)aux->xhv_class_initfields_cv, G_VOID);
+
+        SPAGAIN;
+
+        FREETMPS;
+        LEAVE;
+    }
 
     if(aux->xhv_class_adjust_blocks) {
         CV **cvp = (CV **)AvARRAY(aux->xhv_class_adjust_blocks);
@@ -136,7 +196,7 @@ XS(injected_constructor)
             SAVETMPS;
             SPAGAIN;
 
-            EXTEND(SP, 1);
+            EXTEND(SP, 2);
 
             PUSHMARK(SP);
             PUSHs(self);  /* I don't believe this needs to be an sv_mortalcopy() */
@@ -237,6 +297,15 @@ PP(pp_methstart)
         }
     }
 
+    if(PL_op->op_private & OPpINITFIELDS) {
+        SV *params = *av_fetch(GvAV(PL_defgv), 0, 0);
+        if(params && SvTYPE(params) == SVt_PVHV) {
+            SAVESPTR(PAD_SVl(PADIX_PARAMS));
+            PAD_SVl(PADIX_PARAMS) = SvREFCNT_inc(params);
+            save_freesv(params);
+        }
+    }
+
     return NORMAL;
 }
 
@@ -293,13 +362,38 @@ Perl_class_setup_stash(pTHX_ HV *stash)
 
     struct xpvhv_aux *aux = HvAUX(stash);
     aux->xhv_class_superclass    = NULL;
+    aux->xhv_class_initfields_cv = NULL;
     aux->xhv_class_adjust_blocks = NULL;
     aux->xhv_class_fields        = NULL;
     aux->xhv_class_next_fieldix  = 0;
+    aux->xhv_class_param_map     = NULL;
 
     aux->xhv_aux_flags |= HvAUXf_IS_CLASS;
 
     SAVEDESTRUCTOR_X(invoke_class_seal, stash);
+
+    /* Prepare a suspended compcv for parsing field init expressions */
+    {
+        I32 floor_ix = start_subparse(FALSE, 0);
+
+        CvIsMETHOD_on(PL_compcv);
+
+        /* We don't want to make `$self` visible during the expression but we
+         * still need to give it a name. Make it unusable from pure perl
+         */
+        PADOFFSET padix = pad_add_name_pvs("$(self)", 0, NULL, NULL);
+        assert(padix == PADIX_SELF);
+
+        padix = pad_add_name_pvs("%(params)", 0, NULL, NULL);
+        assert(padix == PADIX_PARAMS);
+
+        PERL_UNUSED_VAR(padix);
+
+        Newx(aux->xhv_class_suspended_initfields_compcv, 1, struct suspended_compcv);
+        suspend_compcv(aux->xhv_class_suspended_initfields_compcv);
+
+        LEAVE_SCOPE(floor_ix);
+    }
 }
 
 #define split_package_ver(value, pkgname, pkgversion)  S_split_package_ver(aTHX_ value, pkgname, pkgversion)
@@ -355,6 +449,46 @@ static void S_ensure_module_version(pTHX_ SV *module, SV *version)
     call_method("VERSION", G_VOID);
 
     LEAVE;
+}
+
+#define split_attr_nameval(sv, namp, valp)  S_split_attr_nameval(aTHX_ sv, namp, valp)
+static void S_split_attr_nameval(pTHX_ SV *sv, SV **namp, SV **valp)
+{
+    STRLEN svlen = SvCUR(sv);
+    bool do_utf8 = SvUTF8(sv);
+
+    const char *paren_at = (const char *)memchr(SvPVX(sv), '(', svlen);
+    if(paren_at) {
+        STRLEN namelen = paren_at - SvPVX(sv);
+
+        if(SvPVX(sv)[svlen-1] != ')')
+            /* Should be impossible to reach this by parsing regular perl code
+             * by as class_apply_attributes() is XS-visible API it might still
+             * be reachable. As it's likely unreachable by normal perl code,
+             * don't bother listing it in perldiag.
+             */
+            /* diag_listed_as: SKIPME */
+            croak("Malformed attribute string");
+        *namp = sv_2mortal(newSVpvn_utf8(SvPVX(sv), namelen, do_utf8));
+
+        const char *value_at = paren_at + 1;
+        const char *value_max = SvPVX(sv) + svlen - 2;
+
+        /* TODO: We're only obeying ASCII whitespace here */
+
+        /* Trim whitespace at the start */
+        while(value_at < value_max && isSPACE(*value_at))
+            value_at += 1;
+        while(value_max > value_at && isSPACE(*value_max))
+            value_max -= 1;
+
+        if(value_max >= value_at)
+            *valp = sv_2mortal(newSVpvn_utf8(value_at, value_max - value_at + 1, do_utf8));
+    }
+    else {
+        *namp = sv;
+        *valp = NULL;
+    }
 }
 
 static void
@@ -420,6 +554,10 @@ apply_class_attribute_isa(pTHX_ HV *stash, SV *value)
         for(U32 i = 0; i <= AvFILL(superaux->xhv_class_adjust_blocks); i++)
             av_push(aux->xhv_class_adjust_blocks, AvARRAY(superaux->xhv_class_adjust_blocks)[i]);
     }
+
+    if(superaux->xhv_class_param_map) {
+        aux->xhv_class_param_map = newHVhv(superaux->xhv_class_param_map);
+    }
 }
 
 static struct {
@@ -438,42 +576,9 @@ static void
 S_class_apply_attribute(pTHX_ HV *stash, OP *attr)
 {
     assert(attr->op_type == OP_CONST);
-    SV *sv = cSVOPx_sv(attr);
-    STRLEN svlen = SvCUR(sv);
 
-    /* Split the sv into name + arguments. */
-    SV *name, *value = NULL;
-    char *paren_at = (char *)memchr(SvPVX(sv), '(', svlen);
-    if(paren_at) {
-        STRLEN namelen = paren_at - SvPVX(sv);
-
-        if(SvPVX(sv)[svlen-1] != ')')
-            /* Should be impossible to reach this by parsing regular perl code
-             * by as class_apply_attributes() is XS-visible API it might still
-             * be reachable. As it's likely unreachable by normal perl code,
-             * don't bother listing it in perldiag.
-             */
-            /* diag_listed_as: SKIPME */
-            croak("Malformed attribute string");
-        name = sv_2mortal(newSVpvn(SvPVX(sv), namelen));
-
-        char *value_at = paren_at + 1;
-        char *value_max = SvPVX(sv) + svlen - 2;
-
-        /* TODO: We're only obeying ASCII whitespace here */
-
-        /* Trim whitespace at the start */
-        while(value_at < value_max && isSPACE(*value_at))
-            value_at += 1;
-        while(value_max > value_at && isSPACE(*value_max))
-            value_max -= 1;
-
-        if(value_max >= value_at)
-            value = sv_2mortal(newSVpvn(value_at, value_max - value_at + 1));
-    }
-    else {
-        name = sv;
-    }
+    SV *name, *value;
+    split_attr_nameval(cSVOPx_sv(attr), &name, &value);
 
     for(int i = 0; class_attributes[i].name; i++) {
         /* TODO: These attribute names are not UTF-8 aware */
@@ -507,12 +612,192 @@ Perl_class_apply_attributes(pTHX_ HV *stash, OP *attrlist)
         S_class_apply_attribute(aTHX_ stash, attrlist);
 }
 
+static OP *
+S_newCROAKOP(pTHX_ SV *message)
+{
+    OP *o = newLISTOP(OP_LIST, 0,
+            newOP(OP_PUSHMARK, 0),
+            newSVOP(OP_CONST, 0, message));
+    return op_convert_list(OP_DIE, 0, o);
+}
+#define newCROAKOP(message)  S_newCROAKOP(aTHX_ message)
+
 void
 Perl_class_seal_stash(pTHX_ HV *stash)
 {
     PERL_ARGS_ASSERT_CLASS_SEAL_STASH;
 
-    /* TODO: anything? */
+    assert(HvSTASH_IS_CLASS(stash));
+    struct xpvhv_aux *aux = HvAUX(stash);
+
+    /* generate initfields CV */
+    {
+        I32 floor_ix = PL_savestack_ix;
+        SAVEI32(PL_subline);
+        save_item(PL_subname);
+
+        resume_compcv_final(aux->xhv_class_suspended_initfields_compcv);
+
+        /* Some OP_INITFIELD ops will need to populate the pad with their
+         * result because later ops will rely on it. There's no need to do
+         * this for every op though. Store a mapping to work out which ones
+         * we'll need.
+         */
+        PADNAMELIST *pnl = PadlistNAMES(CvPADLIST(PL_compcv));
+        HV *fieldix_to_padix = newHV();
+        SAVEFREESV((SV *)fieldix_to_padix);
+
+        /* padix 0 == @_; padix 1 == $self. Start at 2 */
+        for(PADOFFSET padix = 2; padix <= PadnamelistMAX(pnl); padix++) {
+            PADNAME *pn = PadnamelistARRAY(pnl)[padix];
+            if(!pn || !PadnameIsFIELD(pn))
+                continue;
+
+            U32 fieldix = PadnameFIELDINFO(pn)->fieldix;
+            hv_store_ent(fieldix_to_padix, sv_2mortal(newSVuv(fieldix)), newSVuv(padix), 0);
+        }
+
+        OP *ops = NULL;
+
+        ops = op_append_list(OP_LINESEQ, ops,
+                newUNOP_AUX(OP_METHSTART, OPpINITFIELDS << 8, NULL, NULL));
+
+        if(aux->xhv_class_superclass) {
+            HV *superstash = aux->xhv_class_superclass;
+            assert(HvSTASH_IS_CLASS(superstash));
+            struct xpvhv_aux *superaux = HvAUX(superstash);
+
+            /* Build an OP_ENTERSUB */
+            OP *o = NULL;
+            o = op_append_list(OP_LIST, o,
+                newPADxVOP(OP_PADSV, 0, PADIX_SELF));
+            o = op_append_list(OP_LIST, o,
+                newPADxVOP(OP_PADHV, OPf_REF, PADIX_PARAMS));
+            /* TODO: This won't work at all well under `use threads` because
+             * it embeds the CV * to the superclass initfields CV right into
+             * the optree. Maybe we'll have to pop it in the pad or something
+             */
+            o = op_append_list(OP_LIST, o,
+                newSVOP(OP_CONST, 0, (SV *)superaux->xhv_class_initfields_cv));
+
+            ops = op_append_list(OP_LINESEQ, ops,
+                op_convert_list(OP_ENTERSUB, OPf_WANT_VOID|OPf_STACKED, o));
+        }
+
+        PADNAMELIST *fieldnames = aux->xhv_class_fields;
+
+        for(U32 i = 0; fieldnames && i <= PadnamelistMAX(fieldnames); i++) {
+            PADNAME *pn = PadnamelistARRAY(fieldnames)[i];
+            char sigil = PadnamePV(pn)[0];
+            PADOFFSET fieldix = PadnameFIELDINFO(pn)->fieldix;
+
+            /* Extract the OP_{NEXT,DB}STATE op from the defop so we can
+             * splice it in
+             */
+            OP *valop = PadnameFIELDINFO(pn)->defop;
+            if(valop && valop->op_type == OP_LINESEQ) {
+                OP *o = cLISTOPx(valop)->op_first;
+                cLISTOPx(valop)->op_first = NULL;
+                cLISTOPx(valop)->op_last = NULL;
+                /* have to clear the OPf_KIDS flag or op_free() will get upset */
+                valop->op_flags &= ~OPf_KIDS;
+                op_free(valop);
+                assert(valop->op_type == OP_FREED);
+
+                OP *fieldcop = o;
+                assert(fieldcop->op_type == OP_NEXTSTATE || fieldcop->op_type == OP_DBSTATE);
+                o = OpSIBLING(o);
+                OpLASTSIB_set(fieldcop, NULL);
+
+                valop = o;
+                OpLASTSIB_set(valop, NULL);
+
+                ops = op_append_list(OP_LINESEQ, ops, fieldcop);
+            }
+
+            SV *paramname = PadnameFIELDINFO(pn)->paramname;
+
+            U8 op_priv = 0;
+            switch(sigil) {
+                case '$':
+                    if(paramname) {
+                        if(!valop)
+                            valop = newCROAKOP(
+                                newSVpvf("Required parameter '%" SVf "' is missing for %" HvNAMEf_QUOTEDPREFIX " constructor",
+                                    SVfARG(paramname), HvNAMEfARG(stash))
+                            );
+
+                        OP *helemop =
+                            newBINOP(OP_HELEM, 0,
+                                newPADxVOP(OP_PADHV, OPf_REF, PADIX_PARAMS),
+                                newSVOP(OP_CONST, 0, SvREFCNT_inc(paramname)));
+
+                        if(PadnameFIELDINFO(pn)->def_if_undef) {
+                            /* delete $params{$paramname} // DEFOP */
+                            valop = newLOGOP(OP_DOR, 0,
+                                    newUNOP(OP_DELETE, 0, helemop), valop);
+                        }
+                        else if(PadnameFIELDINFO(pn)->def_if_false) {
+                            /* delete $params{$paramname} || DEFOP */
+                            valop = newLOGOP(OP_OR, 0,
+                                newUNOP(OP_DELETE, 0, helemop), valop);
+                        }
+                        else {
+                            /* exists $params{$paramname} ? delete $params{$paramname} : DEFOP */
+                            /* more efficient with the new OP_HELEMEXISTSOR */
+                            valop = newLOGOP(OP_HELEMEXISTSOR, OPpHELEMEXISTSOR_DELETE << 8,
+                                helemop, valop);
+                        }
+
+                        valop = op_contextualize(valop, G_SCALAR);
+                    }
+                    break;
+
+                case '@':
+                    op_priv = OPpINITFIELD_AV;
+                    break;
+
+                case '%':
+                    op_priv = OPpINITFIELD_HV;
+                    break;
+
+                default:
+                    NOT_REACHED;
+            }
+
+            UNOP_AUX_item *aux;
+            Newx(aux, 2, UNOP_AUX_item);
+
+            aux[0].uv = fieldix;
+
+            OP *fieldop = newUNOP_AUX(OP_INITFIELD, valop ? OPf_STACKED : 0, valop, aux);
+            fieldop->op_private = op_priv;
+
+            HE *he;
+            if((he = hv_fetch_ent(fieldix_to_padix, sv_2mortal(newSVuv(fieldix)), 0, 0)) &&
+                SvOK(HeVAL(he))) {
+                fieldop->op_targ = SvUV(HeVAL(he));
+            }
+
+            ops = op_append_list(OP_LINESEQ, ops, fieldop);
+        }
+
+        CV *initfields = newATTRSUB(floor_ix, NULL, NULL, NULL, ops);
+
+        aux->xhv_class_initfields_cv = initfields;
+    }
+}
+
+void
+Perl_class_prepare_initfield_parse(pTHX)
+{
+    PERL_ARGS_ASSERT_CLASS_PREPARE_INITFIELD_PARSE;
+
+    assert(HvSTASH_IS_CLASS(PL_curstash));
+    struct xpvhv_aux *aux = HvAUX(PL_curstash);
+
+    resume_compcv_and_save(aux->xhv_class_suspended_initfields_compcv);
+    CvOUTSIDE_SEQ(PL_compcv) = PL_cop_seqmax;
 }
 
 void
@@ -603,7 +888,7 @@ Perl_class_add_field(pTHX_ HV *stash, PADNAME *pn)
     PADOFFSET fieldix = aux->xhv_class_next_fieldix;
     aux->xhv_class_next_fieldix++;
 
-    Newx(PadnameFIELDINFO(pn), 1, struct padname_fieldinfo);
+    Newxz(PadnameFIELDINFO(pn), 1, struct padname_fieldinfo);
     PadnameFLAGS(pn) |= PADNAMEf_FIELD;
 
     PadnameFIELDINFO(pn)->fieldix = fieldix;
@@ -614,6 +899,129 @@ Perl_class_add_field(pTHX_ HV *stash, PADNAME *pn)
 
     padnamelist_store(aux->xhv_class_fields, PadnamelistMAX(aux->xhv_class_fields)+1, pn);
     PadnameREFCNT_inc(pn);
+}
+
+static void
+apply_field_attribute_param(pTHX_ PADNAME *pn, SV *value)
+{
+    if(!value)
+        /* Default to name minus the sigil */
+        value = newSVpvn_utf8(PadnamePV(pn) + 1, PadnameLEN(pn) - 1, PadnameUTF8(pn));
+
+    if(PadnamePV(pn)[0] != '$')
+        croak("Only scalar fields can take a :param attribute");
+
+    if(PadnameFIELDINFO(pn)->paramname)
+        croak("Field already has a parameter name, cannot add another");
+
+    HV *stash = PadnameFIELDINFO(pn)->fieldstash;
+    assert(HvSTASH_IS_CLASS(stash));
+    struct xpvhv_aux *aux = HvAUX(stash);
+
+    if(aux->xhv_class_param_map &&
+            hv_exists_ent(aux->xhv_class_param_map, value, 0))
+        croak("Cannot assign :param(%" SVf ") to field %" SVf " because that name is already in use",
+                SVfARG(value), SVfARG(PadnameSV(pn)));
+
+    PadnameFIELDINFO(pn)->paramname = SvREFCNT_inc(value);
+
+    if(!aux->xhv_class_param_map)
+        aux->xhv_class_param_map = newHV();
+
+    hv_store_ent(aux->xhv_class_param_map, value, newSVuv(PadnameFIELDINFO(pn)->fieldix), 0);
+}
+
+static struct {
+    const char *name;
+    bool requires_value;
+    void (*apply)(pTHX_ PADNAME *pn, SV *value);
+} const field_attributes[] = {
+    { .name           = "param",
+      .requires_value = false,
+      .apply          = &apply_field_attribute_param,
+    },
+    {0}
+};
+
+static void
+S_class_apply_field_attribute(pTHX_ PADNAME *pn, OP *attr)
+{
+    assert(attr->op_type == OP_CONST);
+
+    SV *name, *value;
+    split_attr_nameval(cSVOPx_sv(attr), &name, &value);
+
+    for(int i = 0; field_attributes[i].name; i++) {
+        /* TODO: These attribute names are not UTF-8 aware */
+        if(!strEQ(SvPVX(name), field_attributes[i].name))
+            continue;
+
+        if(field_attributes[i].requires_value && !(value && SvOK(value)))
+            croak("Field attribute %" SVf " requires a value", SVfARG(name));
+
+        (*field_attributes[i].apply)(aTHX_ pn, value);
+        return;
+    }
+
+    croak("Unrecognized field attribute %" SVf, SVfARG(name));
+}
+
+void
+Perl_class_apply_field_attributes(pTHX_ PADNAME *pn, OP *attrlist)
+{
+    PERL_ARGS_ASSERT_CLASS_APPLY_FIELD_ATTRIBUTES;
+
+    if(!attrlist || attrlist->op_type == OP_NULL)
+        return;
+
+    if(attrlist->op_type == OP_LIST) {
+        OP *o = cLISTOPx(attrlist)->op_first;
+        assert(o->op_type == OP_PUSHMARK);
+        o = OpSIBLING(o);
+
+        for(; o; o = OpSIBLING(o))
+            S_class_apply_field_attribute(aTHX_ pn, o);
+    }
+    else
+        S_class_apply_field_attribute(aTHX_ pn, attrlist);
+}
+
+void
+Perl_class_set_field_defop(pTHX_ PADNAME *pn, OPCODE defmode, OP *defop)
+{
+    PERL_ARGS_ASSERT_CLASS_SET_FIELD_DEFOP;
+
+    assert(defmode == 0 || defmode == OP_ORASSIGN || defmode == OP_DORASSIGN);
+
+    assert(HvSTASH_IS_CLASS(PL_curstash));
+
+    forbid_outofblock_ops(defop, "field initialiser expression");
+
+    if(PadnameFIELDINFO(pn)->defop)
+        op_free(PadnameFIELDINFO(pn)->defop);
+
+    char sigil = PadnamePV(pn)[0];
+    switch(sigil) {
+        case '$':
+            defop = op_contextualize(defop, G_SCALAR);
+            break;
+
+        case '@':
+        case '%':
+            defop = op_contextualize(op_force_list(defop), G_LIST);
+            break;
+    }
+
+    PadnameFIELDINFO(pn)->defop = newLISTOP(OP_LINESEQ, 0,
+        newSTATEOP(0, NULL, NULL), defop);
+    switch(defmode) {
+        case OP_DORASSIGN:
+            PadnameFIELDINFO(pn)->def_if_undef = true;
+            break;
+        case OP_ORASSIGN:
+            PadnameFIELDINFO(pn)->def_if_false = true;
+            break;
+    }
 }
 
 void

@@ -74,6 +74,12 @@ Additionally, in the class BLOCK you are allowed to declare fields and methods.
 
     field VARIABLE_NAME;
 
+    field VARIABLE_NAME = EXPR;
+
+    field VARIABLE_NAME : ATTRIBUTES;
+
+    field VARIABLE_NAME : ATTRIBUTES = EXPR;
+
 Fields are variables which are visible in the scope of the class - more
 specifically within L</method> and C<ADJUST> blocks. Each class instance get
 their own storage of fields, independent of each other.
@@ -84,16 +90,27 @@ accessible from the outside). The main difference is that different instances
 access different values in the same scope.
 
     class WithFields {
-        field $scalar;
-        field @array;
-        field %hash;
-
-        ADJUST {
-            $scalar = 42;
-            @array = qw(this is just an array);
-            %hash = (species => 'Marsian', planet => 'Mars');
-        }
+        field $scalar = 42;
+        field @array  = qw(this is just an array);
+        field %hash   = (species => 'Martian', planet => 'Mars');
     }
+
+Fields may optionally have initializing expressions. If present, the expression
+will be evaluated within the constructor of each object instance. During each
+evaluation, the expression can use the value of any previously-set field, as
+well as see any other variables in scope.
+
+    class WithACounter {
+        my $next_count = 1;
+        field $count = $next_count++;
+    }
+
+When combined with the C<:param> field attribute, the defaulting expression can
+use any of the C<=>, C<//=> or C<||=> operators. Expressions using C<=> will
+apply whenever the caller did not pass the corresponding parameter to the
+constructor at all. Expressions using C<//=> will also apply if the caller did
+pass the parameter but the value was undefined, and expressions using C<||=>
+will apply if the value was false.
 
 =head2 method
 
@@ -167,7 +184,19 @@ already loaded.
 
 =head2 Field attributes
 
-None yet.
+=head3 :param
+
+A scalar field with a C<:param> attribute will take its value from a named
+parameter passed to the constructor. By default the parameter will have the
+same name as the field (minus its leading C<$> sigil), but a different name
+can be specified in the attribute.
+
+    field $x :param;
+    field $y :param(the_y_value);
+
+If there is no defaulting expression then the parameter is required by the
+constructor; the caller must pass it or an exception is thrown. With a
+defaulting expression this becomes optional.
 
 =head2 Method attributes
 
@@ -208,6 +237,69 @@ C<'OBJECT'>.
 
 Just like with other references, when object reference count reaches zero it
 will automatically be destroyed.
+
+=head1 TODO
+
+This feature is still experimental and very incomplete. The following list
+gives some overview of the kinds of work still to be added or changed:
+
+=over 4
+
+=item * Roles
+
+Some syntax for declaring a role (likely a C<role> keyword), and for consuming
+a role into a class (likely a C<:does()> attribute).
+
+=item * Parameters to ADJUST blocks
+
+Some syntax for declaring that an C<ADJUST> block can consume named
+parameters, which become part of the class constructor's API. This might be
+inspired by a similar plan to add named arguments to subroutine signatures.
+
+    class X {
+        ADJUST (:$alpha, :$beta = 123) {
+           ...
+        }
+    }
+
+    my $obj = X->new(alpha => 456);
+
+=item * ADJUST blocks as true blocks
+
+Currently, every ADJUST block is wrapped in its own CV that gets invoked with
+the full ENTERSUB overhead. It should be possible to use the same mechanism
+that makes all field initializer expressions appear within the same CV on
+ADJUST blocks as well, merging them all into a single CV per class. This will
+make it faster to invoke if a class has more than one of them.
+
+=item * Accessor generator attributes
+
+Attributes to request that accessor methods be generated for fields. Likely
+C<:reader> and C<:writer>.
+
+    class X {
+        field $name :reader;
+    }
+
+Equivalent to
+
+    class X {
+        field $name;
+        method name { return $name; }
+    }
+
+=item * Metaprogramming
+
+An extension of the metaprogramming API (currently proposed by
+L<RFC0022|https://github.com/Perl/RFCs/pull/25>) which adds knowledge of
+classes, methods, fields, ADJUST blocks, and other such class-related details.
+
+=item * Extension Customisation
+
+Ways in which out-of-core modules can interact with the class system,
+including an ability for them to provide new class or field attributes.
+
+=back
 
 =head1 AUTHORS
 
