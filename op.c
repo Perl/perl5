@@ -4791,6 +4791,9 @@ S_op_integerize(pTHX_ OP *o)
     {
         o->op_ppaddr = PL_ppaddr[++(o->op_type)];
     }
+    else if ((PL_opargs[type] & OA_OTHERFLOAT) && FEATURE_FLOAT_IS_ENABLED) {
+        o->op_ppaddr = PL_ppaddr[o->op_type += 2];
+    }
 
     if (type == OP_NEGATE)
         /* XXX might want a ck_negate() for this */

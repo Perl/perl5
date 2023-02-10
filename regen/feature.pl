@@ -45,6 +45,7 @@ my %feature = (
     defer                   => 'defer',
     extra_paired_delimiters => 'more_delims',
     module_true             => 'module_true',
+    float                   => 'float',
 );
 
 # NOTE: If a feature is ever enabled in a non-contiguous range of Perl
@@ -500,7 +501,7 @@ read_only_bottom_close_and_rename($h);
 
 __END__
 package feature;
-our $VERSION = '1.79';
+our $VERSION = '1.80';
 
 FEATURES
 

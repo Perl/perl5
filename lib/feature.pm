@@ -4,7 +4,7 @@
 # Any changes made here will be lost!
 
 package feature;
-our $VERSION = '1.79';
+our $VERSION = '1.80';
 
 our %feature = (
     fc                      => 'feature_fc',
@@ -12,6 +12,7 @@ our %feature = (
     say                     => 'feature_say',
     try                     => 'feature_try',
     defer                   => 'feature_defer',
+    float                   => 'feature_float',
     state                   => 'feature_state',
     switch                  => 'feature_switch',
     bitwise                 => 'feature_bitwise',
@@ -38,7 +39,7 @@ our %feature_bundle = (
     "5.27"    => [qw(bareword_filehandles bitwise current_sub evalbytes fc indirect multidimensional postderef_qq say state switch unicode_eval unicode_strings)],
     "5.35"    => [qw(bareword_filehandles bitwise current_sub evalbytes fc isa postderef_qq say signatures state unicode_eval unicode_strings)],
     "5.37"    => [qw(bitwise current_sub evalbytes fc isa module_true postderef_qq say signatures state unicode_eval unicode_strings)],
-    "all"     => [qw(bareword_filehandles bitwise current_sub declared_refs defer evalbytes extra_paired_delimiters fc indirect isa module_true multidimensional postderef_qq refaliasing say signatures state switch try unicode_eval unicode_strings)],
+    "all"     => [qw(bareword_filehandles bitwise current_sub declared_refs defer evalbytes extra_paired_delimiters fc float indirect isa module_true multidimensional postderef_qq refaliasing say signatures state switch try unicode_eval unicode_strings)],
     "default" => [qw(bareword_filehandles indirect multidimensional)],
 );
 

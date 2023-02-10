@@ -7,7 +7,7 @@
 # This is based on the module of the same name by Malcolm Beattie,
 # but essentially none of his code remains.
 
-package B::Deparse 1.72;
+package B::Deparse 1.73;
 use strict;
 use Carp;
 use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
@@ -3000,12 +3000,12 @@ sub assoc_class {
 # $a + $b + $c is equivalent to ($a + $b) + $c
 
 BEGIN {
-    %left = ('multiply' => 19, 'i_multiply' => 19,
-	     'divide' => 19, 'i_divide' => 19,
+    %left = ('multiply' => 19, 'i_multiply' => 19, 'f_multiply' => 19,
+	     'divide' => 19, 'i_divide' => 19, 'f_divide' => 19,
 	     'modulo' => 19, 'i_modulo' => 19,
 	     'repeat' => 19,
-	     'add' => 18, 'i_add' => 18,
-	     'subtract' => 18, 'i_subtract' => 18,
+	     'add' => 18, 'i_add' => 18, 'f_add' => 18,
+	     'subtract' => 18, 'i_subtract' => 18, 'f_subtract' => 18,
 	     'concat' => 18,
 	     'left_shift' => 17, 'right_shift' => 17,
 	     'bit_and' => 13, 'nbit_and' => 13, 'sbit_and' => 13,
@@ -3035,12 +3035,12 @@ sub deparse_binop_left {
 BEGIN {
     %right = ('pow' => 22,
 	      'sassign=' => 7, 'aassign=' => 7,
-	      'multiply=' => 7, 'i_multiply=' => 7,
-	      'divide=' => 7, 'i_divide=' => 7,
+	      'multiply=' => 7, 'i_multiply=' => 7, 'f_multiply=' => 7,
+	      'divide=' => 7, 'i_divide=' => 7, 'f_divide=' => 7,
 	      'modulo=' => 7, 'i_modulo=' => 7,
 	      'repeat=' => 7, 'refassign' => 7, 'refassign=' => 7,
-	      'add=' => 7, 'i_add=' => 7,
-	      'subtract=' => 7, 'i_subtract=' => 7,
+	      'add=' => 7, 'i_add=' => 7, 'f_add=' => 7,
+	      'subtract=' => 7, 'i_subtract=' => 7, 'f_subtract=' => 7,
 	      'concat=' => 7,
 	      'left_shift=' => 7, 'right_shift=' => 7,
 	      'bit_and=' => 7, 'sbit_and=' => 7, 'nbit_and=' => 7,
@@ -3101,6 +3101,10 @@ sub pp_i_multiply { maybe_targmy(@_, \&binop, "*", 19, ASSIGN) }
 sub pp_i_subtract { maybe_targmy(@_, \&binop, "-", 18, ASSIGN) }
 sub pp_i_divide { maybe_targmy(@_, \&binop, "/", 19, ASSIGN) }
 sub pp_i_modulo { maybe_targmy(@_, \&binop, "%", 19, ASSIGN) }
+sub pp_f_add { maybe_targmy(@_, \&binop, "+", 18, ASSIGN) }
+sub pp_f_multiply { maybe_targmy(@_, \&binop, "*", 19, ASSIGN) }
+sub pp_f_subtract { maybe_targmy(@_, \&binop, "-", 18, ASSIGN) }
+sub pp_f_divide { maybe_targmy(@_, \&binop, "/", 19, ASSIGN) }
 sub pp_pow { maybe_targmy(@_, \&binop, "**", 22, ASSIGN) }
 
 sub pp_left_shift { maybe_targmy(@_, \&binop, "<<", 17, ASSIGN) }
