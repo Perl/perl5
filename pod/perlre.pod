@@ -453,7 +453,8 @@ L</Overview> above.
 
 A single C</x> tells
 the regular expression parser to ignore most whitespace that is neither
-backslashed nor within a bracketed character class.  You can use this to
+backslashed nor within a bracketed character class, nor within the characters
+of a multi-character metapattern like C<(?i: ... )>.  You can use this to
 break up your regular expression into more readable parts.
 Also, the C<"#"> character is treated as a metacharacter introducing a
 comment that runs up to the pattern's closing delimiter, or to the end
