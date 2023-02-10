@@ -27,6 +27,34 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 New C<class> Feature
+
+A new B<experimental> syntax is now available for defining object classes,
+where per-instance data is stored in "field" variables that behave like
+lexicals.
+
+    use feature 'class';
+
+    class Point
+    {
+        field $x;
+        field $y;
+
+        method zero { $x = $y = 0; }
+    }
+
+This is described in more detail in L<perlclass>.  Notes on the internals of
+its implementation and other related details can be found in L<perlclassguts>.
+
+This remains a new and experimental feature, and is very much still under
+development. It will be the subject of much further addition, refinement and
+alteration in future releases.  As it is experimental, it yields warnings in
+the C<experimental::class> category.  These can be silenced by a
+C<no warnings> statement.
+
+    use feature 'class';
+    no warnings 'experimental::class';
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
