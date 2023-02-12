@@ -9195,6 +9195,11 @@ S_sv_dup_common(pTHX_ const SV * const ssv, CLONE_PARAMS * const param)
 #   define PERL_ARGS_ASSERT_SV_DUP_COMMON       \
         assert(ssv); assert(param)
 
+STATIC void
+S_sv_dup_hvaux(pTHX_ const SV * const ssv, SV *dsv, CLONE_PARAMS * const param);
+#   define PERL_ARGS_ASSERT_SV_DUP_HVAUX        \
+        assert(ssv); assert(dsv); assert(param)
+
 STATIC SV **
 S_sv_dup_inc_multiple(pTHX_ SV * const *source, SV **dest, SSize_t items, CLONE_PARAMS * const param);
 #   define PERL_ARGS_ASSERT_SV_DUP_INC_MULTIPLE \
