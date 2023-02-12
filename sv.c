@@ -14556,7 +14556,7 @@ S_sv_dup_common(pTHX_ const SV *const ssv, CLONE_PARAMS *const param)
 
             switch (sv_type) {
             default:
-                Perl_croak(aTHX_ "Bizarre SvTYPE [%" IVdf "]", (IV)SvTYPE(ssv));
+                Perl_croak(param->proto_perl, "Bizarre SvTYPE [%" IVdf "]", (IV)SvTYPE(ssv));
                 NOT_REACHED; /* NOTREACHED */
                 break;
 
