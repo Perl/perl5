@@ -5656,6 +5656,9 @@ S	|SV **	|sv_dup_inc_multiple					\
 				|NN SV **dest				\
 				|SSize_t items				\
 				|NN CLONE_PARAMS * const param
+S	|void	|sv_dup_hvaux	|NN const SV * const ssv		\
+				|NN SV *dsv				\
+				|NN CLONE_PARAMS * const param
 SR	|SV *	|sv_dup_common	|NN const SV * const ssv		\
 				|NN CLONE_PARAMS * const param
 S	|void	|unreferenced_to_tmp_stack				\

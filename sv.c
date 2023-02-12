@@ -14423,6 +14423,72 @@ S_sv_dup_inc_multiple(pTHX_ SV *const *source, SV **dest,
     return dest;
 }
 
+/* duplicate the HvAUX of an HV */
+static void
+S_sv_dup_hvaux(pTHX_ const SV *const ssv, SV *dsv, CLONE_PARAMS *const param)
+{
+    PERL_ARGS_ASSERT_SV_DUP_HVAUX;
+
+    const struct xpvhv_aux * const saux = HvAUX(ssv);
+    struct xpvhv_aux * const daux = HvAUX(dsv);
+    /* This flag isn't copied.  */
+    SvOOK_on(dsv);
+
+    if (saux->xhv_name_count) {
+        HEK ** const sname = saux->xhv_name_u.xhvnameu_names;
+        const I32 count = saux->xhv_name_count < 0
+            ? -saux->xhv_name_count
+            :  saux->xhv_name_count;
+        HEK **shekp = sname + count;
+        HEK **dhekp;
+        Newx(daux->xhv_name_u.xhvnameu_names, count, HEK *);
+        dhekp = daux->xhv_name_u.xhvnameu_names + count;
+        while (shekp-- > sname) {
+            dhekp--;
+            *dhekp = hek_dup(*shekp, param);
+        }
+    }
+    else {
+        daux->xhv_name_u.xhvnameu_name = hek_dup(saux->xhv_name_u.xhvnameu_name, param);
+    }
+    daux->xhv_name_count = saux->xhv_name_count;
+
+    daux->xhv_aux_flags = saux->xhv_aux_flags;
+#ifdef PERL_HASH_RANDOMIZE_KEYS
+    daux->xhv_rand = saux->xhv_rand;
+    daux->xhv_last_rand = saux->xhv_last_rand;
+#endif
+    daux->xhv_riter = saux->xhv_riter;
+    daux->xhv_eiter = saux->xhv_eiter ? he_dup(saux->xhv_eiter, FALSE, param) : 0;
+    /* backref array needs refcnt=2; see sv_add_backref */
+    daux->xhv_backreferences =
+        (param->flags & CLONEf_JOIN_IN)
+            /* when joining, we let the individual GVs and
+             * CVs add themselves to backref as
+             * needed. This avoids pulling in stuff
+             * that isn't required, and simplifies the
+             * case where stashes aren't cloned back
+             * if they already exist in the parent
+             * thread */
+        ? NULL
+        : saux->xhv_backreferences
+            ? (SvTYPE(saux->xhv_backreferences) == SVt_PVAV)
+                ? MUTABLE_AV(SvREFCNT_inc(
+                      sv_dup_inc((const SV *)
+                        saux->xhv_backreferences, param)))
+                : MUTABLE_AV(sv_dup((const SV *)
+                        saux->xhv_backreferences, param))
+            : 0;
+
+    daux->xhv_mro_meta = saux->xhv_mro_meta
+        ? mro_meta_dup(saux->xhv_mro_meta, param)
+        : 0;
+
+    /* Record stashes for possible cloning in Perl_clone(). */
+    if (HvNAME(ssv))
+        av_push(param->stashes, dsv);
+}
+
 /* duplicate an SV of any type (including AV, HV etc) */
 
 static SV *
@@ -14731,70 +14797,8 @@ S_sv_dup_common(pTHX_ const SV *const ssv, CLONE_PARAMS *const param)
                             ? he_dup(source, FALSE, param) : 0;
                         ++i;
                     }
-                    if (HvHasAUX(ssv)) {
-                        const struct xpvhv_aux * const saux = HvAUX(ssv);
-                        struct xpvhv_aux * const daux = HvAUX(dsv);
-                        /* This flag isn't copied.  */
-                        SvOOK_on(dsv);
-
-                        if (saux->xhv_name_count) {
-                            HEK ** const sname = saux->xhv_name_u.xhvnameu_names;
-                            const I32 count
-                             = saux->xhv_name_count < 0
-                                ? -saux->xhv_name_count
-                                :  saux->xhv_name_count;
-                            HEK **shekp = sname + count;
-                            HEK **dhekp;
-                            Newx(daux->xhv_name_u.xhvnameu_names, count, HEK *);
-                            dhekp = daux->xhv_name_u.xhvnameu_names + count;
-                            while (shekp-- > sname) {
-                                dhekp--;
-                                *dhekp = hek_dup(*shekp, param);
-                            }
-                        }
-                        else {
-                            daux->xhv_name_u.xhvnameu_name
-                                = hek_dup(saux->xhv_name_u.xhvnameu_name,
-                                          param);
-                        }
-                        daux->xhv_name_count = saux->xhv_name_count;
-
-                        daux->xhv_aux_flags = saux->xhv_aux_flags;
-#ifdef PERL_HASH_RANDOMIZE_KEYS
-                        daux->xhv_rand = saux->xhv_rand;
-                        daux->xhv_last_rand = saux->xhv_last_rand;
-#endif
-                        daux->xhv_riter = saux->xhv_riter;
-                        daux->xhv_eiter = saux->xhv_eiter
-                            ? he_dup(saux->xhv_eiter, FALSE, param) : 0;
-                        /* backref array needs refcnt=2; see sv_add_backref */
-                        daux->xhv_backreferences =
-                            (param->flags & CLONEf_JOIN_IN)
-                                /* when joining, we let the individual GVs and
-                                 * CVs add themselves to backref as
-                                 * needed. This avoids pulling in stuff
-                                 * that isn't required, and simplifies the
-                                 * case where stashes aren't cloned back
-                                 * if they already exist in the parent
-                                 * thread */
-                            ? NULL
-                            : saux->xhv_backreferences
-                                ? (SvTYPE(saux->xhv_backreferences) == SVt_PVAV)
-                                    ? MUTABLE_AV(SvREFCNT_inc(
-                                          sv_dup_inc((const SV *)
-                                            saux->xhv_backreferences, param)))
-                                    : MUTABLE_AV(sv_dup((const SV *)
-                                            saux->xhv_backreferences, param))
-                                : 0;
-
-                        daux->xhv_mro_meta = saux->xhv_mro_meta
-                            ? mro_meta_dup(saux->xhv_mro_meta, param)
-                            : 0;
-
-                        /* Record stashes for possible cloning in Perl_clone(). */
-                        if (HvNAME(ssv))
-                            av_push(param->stashes, dsv);
-                    }
+                    if (HvHasAUX(ssv))
+                        sv_dup_hvaux(ssv, dsv, param);
                 }
                 else
                     HvARRAY(MUTABLE_HV(dsv)) = NULL;

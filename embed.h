@@ -2055,6 +2055,7 @@
 #     endif /* defined(PERL_DEBUG_READONLY_COW) */
 #     if defined(USE_ITHREADS)
 #       define sv_dup_common(a,b)               S_sv_dup_common(aTHX_ a,b)
+#       define sv_dup_hvaux(a,b,c)              S_sv_dup_hvaux(aTHX_ a,b,c)
 #       define sv_dup_inc_multiple(a,b,c,d)     S_sv_dup_inc_multiple(aTHX_ a,b,c,d)
 #       define unreferenced_to_tmp_stack(a)     S_unreferenced_to_tmp_stack(aTHX_ a)
 #     endif /* defined(USE_ITHREADS) */
