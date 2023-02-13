@@ -14487,6 +14487,15 @@ S_sv_dup_hvaux(pTHX_ const SV *const ssv, SV *dsv, CLONE_PARAMS *const param)
     /* Record stashes for possible cloning in Perl_clone(). */
     if (HvNAME(ssv))
         av_push(param->stashes, dsv);
+
+    if (HvSTASH_IS_CLASS(ssv)) {
+        daux->xhv_class_superclass    = hv_dup_inc(saux->xhv_class_superclass,    param);
+        daux->xhv_class_initfields_cv = cv_dup_inc(saux->xhv_class_initfields_cv, param);
+        daux->xhv_class_adjust_blocks = av_dup_inc(saux->xhv_class_adjust_blocks, param);
+        daux->xhv_class_fields        = padnamelist_dup_inc(saux->xhv_class_fields, param);
+        daux->xhv_class_next_fieldix  = saux->xhv_class_next_fieldix;
+        daux->xhv_class_param_map     = hv_dup_inc(saux->xhv_class_param_map,     param);
+    }
 }
 
 /* duplicate an SV of any type (including AV, HV etc) */
@@ -14623,6 +14632,7 @@ S_sv_dup_common(pTHX_ const SV *const ssv, CLONE_PARAMS *const param)
                     goto have_body;
                 }
                 /* FALLTHROUGH */
+            case SVt_PVOBJ:
             case SVt_PVGV:
             case SVt_PVIO:
             case SVt_PVFM:
@@ -14661,7 +14671,7 @@ S_sv_dup_common(pTHX_ const SV *const ssv, CLONE_PARAMS *const param)
                  sv_type_details->body_size + sv_type_details->offset, char);
 #endif
 
-            if (sv_type != SVt_PVAV && sv_type != SVt_PVHV
+            if (sv_type != SVt_PVAV && sv_type != SVt_PVHV && sv_type != SVt_PVOBJ
                 && !isGV_with_GP(dsv)
                 && !isREGEXP(dsv)
                 && !(sv_type == SVt_PVIO && !(IoFLAGS(dsv) & IOf_FAKE_DIRP)))
@@ -14854,6 +14864,16 @@ S_sv_dup_common(pTHX_ const SV *const ssv, CLONE_PARAMS *const param)
                     CvWEAKOUTSIDE(ssv)
                     ? cv_dup(    CvOUTSIDE(dsv), param)
                     : cv_dup_inc(CvOUTSIDE(dsv), param);
+                break;
+            case SVt_PVOBJ:
+                {
+                    Size_t fieldcount = ObjectMAXFIELD(ssv) + 1;
+
+                    Newx(ObjectFIELDS(dsv), fieldcount, SV *);
+                    ObjectMAXFIELD(dsv) = fieldcount - 1;
+
+                    sv_dup_inc_multiple(ObjectFIELDS(ssv), ObjectFIELDS(dsv), fieldcount, param);
+                }
                 break;
             }
         }
