@@ -2477,8 +2477,6 @@ Perl_pad_push(pTHX_ PADLIST *padlist, int depth)
 
 #if defined(USE_ITHREADS)
 
-#  define av_dup_inc(s,t)	MUTABLE_AV(sv_dup_inc((const SV *)s,t))
-
 /*
 =for apidoc padlist_dup
 
