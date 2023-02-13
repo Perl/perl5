@@ -13366,8 +13366,6 @@ Perl_regfree_internal(pTHX_ REGEXP * const rx)
     Safefree(ri);
 }
 
-#define av_dup_inc(s, t)	MUTABLE_AV(sv_dup_inc((const SV *)s, t))
-#define hv_dup_inc(s, t)	MUTABLE_HV(sv_dup_inc((const SV *)s, t))
 #define SAVEPVN(p, n)	((p) ? savepvn(p, n) : NULL)
 
 /*
