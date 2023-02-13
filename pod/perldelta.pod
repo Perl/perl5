@@ -287,7 +287,15 @@ L</Platform Support> section, instead.
 
 =item *
 
-XXX
+C<Configure> probed for the return type of malloc() and free() by
+testing whether declarations for those functions produced a function
+type mismatch with the implementation.  On Solaris, with a C++
+compiler, this check always failed, since Solaris instead imports
+malloc() and free() from C<std::> with C<using> for C++ builds.  Since
+the return types of malloc() and free() are well defined by the C
+standard, skip probing for them.  C<Configure> command-line arguments
+and hints can still override these type in the unlikely case that is
+needed.  [github #20806]
 
 =back
 
