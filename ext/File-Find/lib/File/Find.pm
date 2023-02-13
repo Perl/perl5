@@ -91,10 +91,7 @@ sub Follow_SymLink($) {
                 return undef;
             }
         }
-        my $Link = readlink($AbsName);
-        # canonicalize directory separators
-        $Link =~ s|\\|/|g if $Is_Win32;
-        $NewName= PathCombine($AbsName, $Link);
+        $NewName= PathCombine($AbsName, readlink($AbsName));
         unless(defined $NewName) {
             if ($follow_skip < 2) {
                 die "$AbsName is a recursive symbolic link";
