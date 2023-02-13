@@ -14432,7 +14432,7 @@ S_sv_dup_hvaux(pTHX_ const SV *const ssv, SV *dsv, CLONE_PARAMS *const param)
     const struct xpvhv_aux * const saux = HvAUX(ssv);
     struct xpvhv_aux * const daux = HvAUX(dsv);
     /* This flag isn't copied.  */
-    SvOOK_on(dsv);
+    SvFLAGS(dsv) |= SVphv_HasAUX;
 
     if (saux->xhv_name_count) {
         HEK ** const sname = saux->xhv_name_u.xhvnameu_names;
