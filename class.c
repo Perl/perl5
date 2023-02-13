@@ -129,7 +129,7 @@ XS(injected_constructor)
 {
     dXSARGS;
 
-    HV *stash = (HV *)XSANY.any_ptr;
+    HV *stash = (HV *)XSANY.any_sv;
     assert(HvSTASH_IS_CLASS(stash));
 
     struct xpvhv_aux *aux = HvAUX(stash);
@@ -353,7 +353,8 @@ Perl_class_setup_stash(pTHX_ HV *stash)
         SAVEFREESV(newname);
 
         CV *newcv = newXS_flags(SvPV_nolen(newname), injected_constructor, __FILE__, NULL, nameflags);
-        CvXSUBANY(newcv).any_ptr = stash;
+        CvXSUBANY(newcv).any_sv = (SV *)stash;
+        CvREFCOUNTED_ANYSV_on(newcv);
     }
 
     /* TODO:
