@@ -5648,6 +5648,7 @@ t/class/field.t			See if class field declarations work
 t/class/inherit.t		See if class inheritance works
 t/class/method.t		See if class method declarations work
 t/class/phasers.t		See if class phaser blocks work
+t/class/threads.t		See if classes work across multiple threads
 t/cmd/elsif.t			See if else-if works
 t/cmd/for.t			See if for loops work
 t/cmd/mod.t			See if statement modifiers work
