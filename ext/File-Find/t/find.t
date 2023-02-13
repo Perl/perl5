@@ -60,6 +60,8 @@ my $orig_dir = cwd();
 #     };
 # }
 
+cleanup();
+
 ##### Sanity checks #####
 # Do find() and finddepth() work correctly with an empty list of
 # directories?
@@ -87,16 +89,8 @@ is($::count_taint, 1, "'finddepth' found exactly 1 file named 'taint.t'");
 
 my $FastFileTests_OK = 0;
 
-my $test_root_dir = cwd();
-my $test_temp_dir = tempdir("FF_find_t_XXXXXX",CLEANUP=>1);
-chdir($test_temp_dir) or die "Failed to chdir to '$test_temp_dir': $!";
-
 sub cleanup {
-    # doing this in two steps avoids the need to know about
-    # directory separators, which is helpful as we override
-    # the File::Spec heirarchy, so we can't ask it to help us here.
-    chdir($test_root_dir) or die "Failed to chdir to '$test_root_dir': $!";
-    chdir($test_temp_dir) or die "Failed to chdir to '$test_temp_dir': $!";
+    chdir($orig_dir);
     my $need_updir = 0;
     if (-d dir_path('for_find')) {
         $need_updir = 1 if chdir(dir_path('for_find'));
@@ -145,7 +139,6 @@ sub cleanup {
     if (-d dir_path('for_find')) {
         rmdir dir_path('for_find') or print "# Can't rmdir for_find: $!\n";
     }
-    chdir($test_root_dir) or die "Failed to chdir to '$test_root_dir': $!";
 }
 
 END {
@@ -243,6 +236,10 @@ sub my_postprocess {
 *file_path_name = \&file_path;
 
 ##### Create directories, files and symlinks used in testing #####
+my $root_dir = cwd();
+my $test_dir = tempdir("FF_find_t_XXXXXX",CLEANUP=>1);
+chdir $test_dir;
+
 mkdir_ok( dir_path('for_find'), 0770 );
 ok( chdir( dir_path('for_find')), "Able to chdir to 'for_find'")
     or die("Unable to chdir to 'for_find'");
@@ -1118,4 +1115,5 @@ if ($^O eq 'MSWin32') {
     like($@, qr/invalid top directory/,
         "find() correctly died due to undefined top directory");
 }
+chdir $root_dir; # let File::Temp cleanup - Switch to `defer {}` one day
 done_testing();
