@@ -330,6 +330,7 @@ Restore the old pad saved into the local variable C<opad> by C<PAD_SAVE_LOCAL()>
 #define PadnamelistMAX(pnl)		(pnl)->xpadnl_fill
 #define PadnamelistMAXNAMED(pnl)	(pnl)->xpadnl_max_named
 #define PadnamelistREFCNT(pnl)		(pnl)->xpadnl_refcnt
+#define PadnamelistREFCNT_inc(pnl)      Perl_padnamelist_refcnt_inc(pnl)
 #define PadnamelistREFCNT_dec(pnl)	Perl_padnamelist_free(aTHX_ pnl)
 
 #define PadARRAY(pad)		AvARRAY(pad)
@@ -385,6 +386,11 @@ Restore the old pad saved into the local variable C<opad> by C<PAD_SAVE_LOCAL()>
 #  define PADNAMEt_LVALUE       PADNAMEf_LVALUE
 #  define PADNAMEt_TYPED        PADNAMEf_TYPED
 #  define PADNAMEt_OUR          PADNAMEf_OUR
+#endif
+
+#ifdef USE_ITHREADS
+#  define padnamelist_dup_inc(pnl,param)  PadnamelistREFCNT_inc(padnamelist_dup(pnl,param))
+#  define padname_dup_inc(pn,param)       PadnameREFCNT_inc(padname_dup(pn,param))
 #endif
 
 #ifdef DEBUGGING

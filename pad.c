@@ -2504,9 +2504,7 @@ Perl_padlist_dup(pTHX_ PADLIST *srcpad, CLONE_PARAMS *param)
     PadlistMAX(dstpad) = max;
     Newx(PadlistARRAY(dstpad), max + 1, PAD *);
 
-    PadlistARRAY(dstpad)[0] = (PAD *)
-            padnamelist_dup(PadlistNAMES(srcpad), param);
-    PadnamelistREFCNT(PadlistNAMES(dstpad))++;
+    PadlistARRAY(dstpad)[0] = (PAD *)padnamelist_dup_inc(PadlistNAMES(srcpad), param);
     if (cloneall) {
         PADOFFSET depth;
         for (depth = 1; depth <= max; ++depth)
@@ -2740,8 +2738,7 @@ Perl_padnamelist_dup(pTHX_ PADNAMELIST *srcpad, CLONE_PARAMS *param)
     for (; max >= 0; max--)
       if (PadnamelistARRAY(srcpad)[max]) {
         PadnamelistARRAY(dstpad)[max] =
-            padname_dup(PadnamelistARRAY(srcpad)[max], param);
-        PadnameREFCNT_inc(PadnamelistARRAY(dstpad)[max]);
+            padname_dup_inc(PadnamelistARRAY(srcpad)[max], param);
       }
 
     return dstpad;
