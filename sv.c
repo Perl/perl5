@@ -1084,6 +1084,7 @@ Perl_sv_upgrade(pTHX_ SV *const sv, svtype new_type)
             *((XPVOBJ*) SvANY(sv)) = (XPVOBJ) {
                 .xmg_stash = NULL, .xmg_u = {.xmg_magic = NULL},
                 .xobject_maxfield = -1,
+                .xobject_iter_sv_at = 0,
                 .xobject_fields = NULL,
             };
             break;
