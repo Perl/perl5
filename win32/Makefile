@@ -936,7 +936,7 @@ $(MINIDIR)\.exists : $(CFGH_TMPL)
 # real config.h used to build perl.exe is generated from the top-level
 # config_h.SH by config_h.PL (run by miniperl.exe).
 #
-	copy $(CFGH_TMPL) config.h
+	copy $(CFGH_TMPL) $(MINIDIR)\config.h
 	@(echo.&& \
 	echo #ifndef _config_h_footer_&& \
 	echo #define _config_h_footer_&& \
@@ -959,7 +959,7 @@ $(MINIDIR)\.exists : $(CFGH_TMPL)
 	echo #undef UVXf&& \
 	echo #undef USE_64_BIT_INT&& \
 	echo #undef USE_LONG_DOUBLE&& \
-	echo #undef USE_CPLUSPLUS)>> config.h
+	echo #undef USE_CPLUSPLUS)>> $(MINIDIR)\config.h
 !IF "$(CCTYPE)" != "MSVC120"
 	@(echo #undef FILE_ptr&& \
 	echo #undef FILE_cnt&& \
@@ -969,7 +969,7 @@ $(MINIDIR)\.exists : $(CFGH_TMPL)
 	echo #define FILE_cnt^(fp^) PERLIO_FILE_cnt^(fp^)&& \
 	echo #define FILE_base^(fp^) PERLIO_FILE_base^(fp^)&& \
 	echo #define FILE_bufsiz^(fp^) ^(PERLIO_FILE_cnt^(fp^) + PERLIO_FILE_ptr^(fp^) - PERLIO_FILE_base^(fp^)^)&& \
-	echo #define I_STDBOOL)>> config.h
+	echo #define I_STDBOOL)>> $(MINIDIR)\config.h
 !ENDIF
 !IF "$(WIN64)"=="define"
 	@(echo #define PTRSIZE ^8&& \
@@ -977,14 +977,14 @@ $(MINIDIR)\.exists : $(CFGH_TMPL)
 	echo #define HAS_ATOLL&& \
 	echo #define HAS_STRTOLL&& \
 	echo #define HAS_STRTOULL&& \
-	echo #define Size_t_size ^8)>> config.h
+	echo #define Size_t_size ^8)>> $(MINIDIR)\config.h
 !ELSE
 	@(echo #define PTRSIZE ^4&& \
 	echo #define SSize_t int&& \
 	echo #undef HAS_ATOLL&& \
 	echo #undef HAS_STRTOLL&& \
 	echo #undef HAS_STRTOULL&& \
-	echo #define Size_t_size ^4)>> config.h
+	echo #define Size_t_size ^4)>> $(MINIDIR)\config.h
 !ENDIF
 !IF "$(USE_64_BIT_INT)"=="define"
 	@(echo #define IVTYPE $(INT64)&& \
@@ -998,7 +998,7 @@ $(MINIDIR)\.exists : $(CFGH_TMPL)
 	echo #define UVof "I64o"&& \
 	echo #define UVxf "I64x"&& \
 	echo #define UVXf "I64X"&& \
-	echo #define USE_64_BIT_INT)>> config.h
+	echo #define USE_64_BIT_INT)>> $(MINIDIR)\config.h
 !ELSE
 	@(echo #define IVTYPE long&& \
 	echo #define UVTYPE unsigned long&& \
@@ -1011,23 +1011,23 @@ $(MINIDIR)\.exists : $(CFGH_TMPL)
 	echo #define UVof "lo"&& \
 	echo #define UVxf "lx"&& \
 	echo #define UVXf "lX"&& \
-	echo #undef USE_64_BIT_INT)>> config.h
+	echo #undef USE_64_BIT_INT)>> $(MINIDIR)\config.h
 !ENDIF
 !IF "$(USE_CPLUSPLUS)"=="define"
 	@(echo #define USE_CPLUSPLUS&& \
-	echo #endif)>> config.h
+	echo #endif)>> $(MINIDIR)\config.h
 !ELSE
 	@(echo #undef USE_CPLUSPLUS&& \
-	echo #endif)>> config.h
+	echo #endif)>> $(MINIDIR)\config.h
 !ENDIF
 #separate line since this is sentinal that this target is done
 	@rem. > $(MINIDIR)\.exists
 
 $(MINICORE_OBJ) : $(CORE_NOCFG_H)
-	$(CC) -c $(CFLAGS) -DPERL_EXTERNAL_GLOB -DPERL_IS_MINIPERL $(OBJOUT_FLAG)$@ ..\$(*F).c
+	$(CC) -c -Imini $(CFLAGS) -DPERL_EXTERNAL_GLOB -DPERL_IS_MINIPERL $(OBJOUT_FLAG)$@ ..\$(*F).c
 
 $(MINIWIN32_OBJ) : $(CORE_NOCFG_H)
-	$(CC) -c $(CFLAGS) -DPERL_IS_MINIPERL $(OBJOUT_FLAG)$@ $(*F).c
+	$(CC) -c -Imini $(CFLAGS) -DPERL_IS_MINIPERL $(OBJOUT_FLAG)$@ $(*F).c
 
 # -DPERL_IMPLICIT_SYS needs C++ for perllib.c
 # This is the only file that depends on perlhost.h, vmem.h, and vdir.h
