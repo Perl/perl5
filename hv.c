@@ -2278,6 +2278,7 @@ Perl_hv_undef_flags(pTHX_ HV *hv, U32 flags)
        meaning that this structure might be read again at any point in the
        future without further checks or reinitialisation. */
     if (HvHasAUX(hv)) {
+      struct xpvhv_aux *aux = HvAUX(hv);
       struct mro_meta *meta;
       const char *name;
 
@@ -2295,7 +2296,7 @@ Perl_hv_undef_flags(pTHX_ HV *hv, U32 flags)
        * effective names that need freeing, as well as the usual name. */
       name = HvNAME(hv);
       if (flags & HV_NAME_SETALL
-          ? cBOOL(HvAUX(hv)->xhv_name_u.xhvnameu_name)
+          ? cBOOL(aux->xhv_name_u.xhvnameu_name)
           : cBOOL(name))
       {
         if (name && PL_stashcache) {
@@ -2305,7 +2306,7 @@ Perl_hv_undef_flags(pTHX_ HV *hv, U32 flags)
         }
         hv_name_set(hv, NULL, 0, flags);
       }
-      if((meta = HvAUX(hv)->xhv_mro_meta)) {
+      if((meta = aux->xhv_mro_meta)) {
         if (meta->mro_linear_all) {
             SvREFCNT_dec_NN(meta->mro_linear_all);
             /* mro_linear_current is just acting as a shortcut pointer,
@@ -2319,7 +2320,20 @@ Perl_hv_undef_flags(pTHX_ HV *hv, U32 flags)
         SvREFCNT_dec(meta->isa);
         SvREFCNT_dec(meta->super);
         Safefree(meta);
-        HvAUX(hv)->xhv_mro_meta = NULL;
+        aux->xhv_mro_meta = NULL;
+      }
+
+      if(HvSTASH_IS_CLASS(hv)) {
+          SvREFCNT_dec(aux->xhv_class_superclass);
+          SvREFCNT_dec(aux->xhv_class_initfields_cv);
+          SvREFCNT_dec(aux->xhv_class_adjust_blocks);
+          if(aux->xhv_class_fields)
+            PadnamelistREFCNT_dec(aux->xhv_class_fields);
+          SvREFCNT_dec(aux->xhv_class_param_map);
+          Safefree(aux->xhv_class_suspended_initfields_compcv);
+          aux->xhv_class_suspended_initfields_compcv = NULL;
+
+          aux->xhv_aux_flags &= ~HvAUXf_IS_CLASS;
       }
     }
 

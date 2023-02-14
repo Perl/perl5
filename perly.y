@@ -1537,11 +1537,20 @@ myterm	:	PERLY_PAREN_OPEN expr PERLY_PAREN_CLOSE
 
 /* "field" declarations */
 fieldvar:	scalar	%prec PERLY_PAREN_OPEN
-			{ $$ = PadnamelistARRAY(PL_comppad_name)[$scalar->op_targ]; }
+			{
+			  $$ = PadnamelistARRAY(PL_comppad_name)[$scalar->op_targ];
+			  op_free($scalar);
+			}
 	|	hsh 	%prec PERLY_PAREN_OPEN
-			{ $$ = PadnamelistARRAY(PL_comppad_name)[$hsh->op_targ]; }
+			{
+			  $$ = PadnamelistARRAY(PL_comppad_name)[$hsh->op_targ];
+			  op_free($hsh);
+			}
 	|	ary 	%prec PERLY_PAREN_OPEN
-			{ $$ = PadnamelistARRAY(PL_comppad_name)[$ary->op_targ]; }
+			{
+			  $$ = PadnamelistARRAY(PL_comppad_name)[$ary->op_targ];
+			  op_free($ary);
+			}
 	;
 
 optfieldattrlist:
