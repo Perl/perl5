@@ -6786,6 +6786,7 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
                 iter_sv = sv;
                 goto get_next_sv;
             }
+            Safefree(ObjectFIELDS(sv));
             break;
         case SVt_PVLV:
             if (LvTYPE(sv) == 'T') { /* for tie: return HE to pool */
@@ -14495,6 +14496,11 @@ S_sv_dup_hvaux(pTHX_ const SV *const ssv, SV *dsv, CLONE_PARAMS *const param)
         daux->xhv_class_fields        = padnamelist_dup_inc(saux->xhv_class_fields, param);
         daux->xhv_class_next_fieldix  = saux->xhv_class_next_fieldix;
         daux->xhv_class_param_map     = hv_dup_inc(saux->xhv_class_param_map,     param);
+
+        /* TODO: This does mean that we can't compile more `field` expressions
+         * in the cloned thread, but surely we're done with compiletime now..?
+         */
+        daux->xhv_class_suspended_initfields_compcv = NULL;
     }
 }
 

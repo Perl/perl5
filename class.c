@@ -601,6 +601,13 @@ Perl_class_apply_attributes(pTHX_ HV *stash, OP *attrlist)
 {
     PERL_ARGS_ASSERT_CLASS_APPLY_ATTRIBUTES;
 
+    if(!attrlist)
+        return;
+    if(attrlist->op_type == OP_NULL) {
+        op_free(attrlist);
+        return;
+    }
+
     if(attrlist->op_type == OP_LIST) {
         OP *o = cLISTOPx(attrlist)->op_first;
         assert(o->op_type == OP_PUSHMARK);
@@ -611,6 +618,8 @@ Perl_class_apply_attributes(pTHX_ HV *stash, OP *attrlist)
     }
     else
         S_class_apply_attribute(aTHX_ stash, attrlist);
+
+    op_free(attrlist);
 }
 
 static OP *
@@ -892,6 +901,7 @@ Perl_class_add_field(pTHX_ HV *stash, PADNAME *pn)
     Newxz(PadnameFIELDINFO(pn), 1, struct padname_fieldinfo);
     PadnameFLAGS(pn) |= PADNAMEf_FIELD;
 
+    PadnameFIELDINFO(pn)->refcount = 1;
     PadnameFIELDINFO(pn)->fieldix = fieldix;
     PadnameFIELDINFO(pn)->fieldstash = (HV *)SvREFCNT_inc(stash);
 
@@ -972,8 +982,12 @@ Perl_class_apply_field_attributes(pTHX_ PADNAME *pn, OP *attrlist)
 {
     PERL_ARGS_ASSERT_CLASS_APPLY_FIELD_ATTRIBUTES;
 
-    if(!attrlist || attrlist->op_type == OP_NULL)
+    if(!attrlist)
         return;
+    if(attrlist->op_type == OP_NULL) {
+        op_free(attrlist);
+        return;
+    }
 
     if(attrlist->op_type == OP_LIST) {
         OP *o = cLISTOPx(attrlist)->op_first;
@@ -985,6 +999,8 @@ Perl_class_apply_field_attributes(pTHX_ PADNAME *pn, OP *attrlist)
     }
     else
         S_class_apply_field_attribute(aTHX_ pn, attrlist);
+
+    op_free(attrlist);
 }
 
 void

@@ -2803,6 +2803,7 @@ Perl_newPADNAMEouter(PADNAME *outer)
     PadnameFLAGS(pn) = PADNAMEf_OUTER;
     if(PadnameIsFIELD(outer)) {
         PadnameFIELDINFO(pn) = PadnameFIELDINFO(outer);
+        PadnameFIELDINFO(pn)->refcount++;
         PadnameFLAGS(pn) |= PADNAMEf_FIELD;
     }
     PadnameLEN(pn) = PadnameLEN(outer);
@@ -2822,6 +2823,16 @@ Perl_padname_free(pTHX_ PADNAME *pn)
         SvREFCNT_dec(PadnameOURSTASH(pn));
         if (PadnameOUTER(pn))
             PadnameREFCNT_dec(PADNAME_FROM_PV(PadnamePV(pn)));
+        if (PadnameIsFIELD(pn)) {
+            struct padname_fieldinfo *info = PadnameFIELDINFO(pn);
+            if(!--info->refcount) {
+                SvREFCNT_dec(info->fieldstash);
+                /* todo: something about defop */
+                SvREFCNT_dec(info->paramname);
+
+                Safefree(info);
+            }
+        }
         Safefree(pn);
     }
 }
@@ -2869,8 +2880,10 @@ Perl_padname_dup(pTHX_ PADNAME *src, CLONE_PARAMS *param)
         struct padname_fieldinfo *dinfo;
         Newxz(dinfo, 1, struct padname_fieldinfo);
 
+        dinfo->refcount   = 1;
         dinfo->fieldix    = sinfo->fieldix;
         dinfo->fieldstash = hv_dup_inc(sinfo->fieldstash, param);
+        dinfo->paramname  = sv_dup_inc(sinfo->paramname, param);
 
         PadnameFIELDINFO(dst) = dinfo;
     }
