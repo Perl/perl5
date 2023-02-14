@@ -5576,9 +5576,9 @@ regcomp.h			Private declarations for above
 regcomp.sym			Data for regnodes.h
 regcomp_debug.c			Regular expression compiler debug code
 regcomp_internal.h		Internal stuff for regex compiler
-regcomp_invlist.c		Invlist logic for regular expresion engine
-regcomp_study.c			Optimizer for regular expresion compiler
-regcomp_trie.c			Trie logic for regular expresion compiler
+regcomp_invlist.c		Invlist logic for regular expression engine
+regcomp_study.c			Optimizer for regular expression compiler
+regcomp_trie.c			Trie logic for regular expression compiler
 regen.pl			Run all scripts that (re)generate files
 regen/charset_translations.pl	Character set utilities
 regen/ebcdic.pl			Generates ebcdic_tables.h
