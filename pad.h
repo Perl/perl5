@@ -94,6 +94,7 @@ struct padname_with_str {
  * own substructure, stored in ->xpadn_fieldinfo.
  */
 struct padname_fieldinfo {
+    U32        refcount;
     PADOFFSET  fieldix;    /* index of this field within ObjectFIELDS() array */
     HV        *fieldstash; /* original class package which added this field */
     OP        *defop;      /* optree fragment for defaulting expression */
