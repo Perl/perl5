@@ -1023,11 +1023,15 @@ $(MINIDIR)\.exists : $(CFGH_TMPL)
 #separate line since this is sentinal that this target is done
 	@rem. > $(MINIDIR)\.exists
 
+.c{$(MINIDIR)}$(o):
+	$(CC) -c -Imini $(CFLAGS) -DPERL_EXTERNAL_GLOB -DPERL_IS_MINIPERL $(OBJOUT_FLAG)$@ $<
+
+{..\}.c{$(MINIDIR)}$(o):
+	$(CC) -c -Imini $(CFLAGS) -DPERL_EXTERNAL_GLOB -DPERL_IS_MINIPERL $(OBJOUT_FLAG)$@ $<
+
 $(MINICORE_OBJ) : $(CORE_NOCFG_H)
-	$(CC) -c -Imini $(CFLAGS) -DPERL_EXTERNAL_GLOB -DPERL_IS_MINIPERL $(OBJOUT_FLAG)$@ ..\$(*F).c
 
 $(MINIWIN32_OBJ) : $(CORE_NOCFG_H)
-	$(CC) -c -Imini $(CFLAGS) -DPERL_IS_MINIPERL $(OBJOUT_FLAG)$@ $(*F).c
 
 # -DPERL_IMPLICIT_SYS needs C++ for perllib.c
 # This is the only file that depends on perlhost.h, vmem.h, and vdir.h
@@ -1036,9 +1040,7 @@ perllib$(o)	: perllib.c .\perlhost.h .\vdir.h .\vmem.h
 	$(CC) -c -I. $(CFLAGS_O) $(CXX_FLAG) $(OBJOUT_FLAG)$@ perllib.c
 !ENDIF
 
-# 1. we don't want to rebuild miniperl.exe when config.h changes
-# 2. we don't want to rebuild miniperl.exe with non-default config.h
-# 3. we can't have miniperl.exe depend on git_version.h, as miniperl creates it
+# We can't have miniperl.exe depend on git_version.h, as miniperl creates it
 $(MINI_OBJ)	: $(MINIDIR)\.exists $(CORE_NOCFG_H)
 
 $(WIN32_OBJ)	: $(CORE_H)
