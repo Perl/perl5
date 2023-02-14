@@ -1247,7 +1247,7 @@ $(MINIDIR)\.exists : $(CFGH_TMPL)
 #
 # MINIDIR generates config.h so miniperl.exe is not rebuilt when the 2nd
 # config.h is generated in CONFIGPM target, see also the comments for $(MINI_OBJ).
-	copy $(CFGH_TMPL) config.h
+	copy $(CFGH_TMPL) $(MINIDIR)\config.h
 	@(echo.&& \
 	echo #ifndef _config_h_footer_&& \
 	echo #define _config_h_footer_&& \
@@ -1290,7 +1290,7 @@ $(MINIDIR)\.exists : $(CFGH_TMPL)
 	echo #undef USE_LONG_DOUBLE&& \
 	echo #undef I_QUADMATH&& \
 	echo #undef USE_QUADMATH&& \
-	echo #undef USE_CPLUSPLUS)>> config.h
+	echo #undef USE_CPLUSPLUS)>> $(MINIDIR)\config.h
 ifneq ($(CCTYPE),MSVC120)
 	@(echo #undef FILE_ptr&& \
 	echo #undef FILE_cnt&& \
@@ -1300,54 +1300,54 @@ ifneq ($(CCTYPE),MSVC120)
 	echo #define FILE_cnt^(fp^) PERLIO_FILE_cnt^(fp^)&& \
 	echo #define FILE_base^(fp^) PERLIO_FILE_base^(fp^)&& \
 	echo #define FILE_bufsiz^(fp^) ^(PERLIO_FILE_cnt^(fp^) + PERLIO_FILE_ptr^(fp^) - PERLIO_FILE_base^(fp^)^)&& \
-	echo #define I_STDBOOL)>> config.h
+	echo #define I_STDBOOL)>> $(MINIDIR)\config.h
 endif
 ifeq ($(WIN64),define)
 ifeq ($(CCTYPE),GCC)
-	@(echo #define LONG_DOUBLESIZE ^16)>> config.h
+	@(echo #define LONG_DOUBLESIZE ^16)>> $(MINIDIR)\config.h
 else
-	@(echo #define LONG_DOUBLESIZE ^8)>> config.h
+	@(echo #define LONG_DOUBLESIZE ^8)>> $(MINIDIR)\config.h
 endif
 	@(echo #define PTRSIZE ^8&& \
 	echo #define SSize_t $(INT64)&& \
 	echo #define HAS_ATOLL&& \
 	echo #define HAS_STRTOLL&& \
 	echo #define HAS_STRTOULL&& \
-	echo #define Size_t_size ^8)>> config.h
+	echo #define Size_t_size ^8)>> $(MINIDIR)\config.h
 else
 ifeq ($(CCTYPE),GCC)
-	@(echo #define LONG_DOUBLESIZE ^12)>> config.h
+	@(echo #define LONG_DOUBLESIZE ^12)>> $(MINIDIR)\config.h
 else
-	@(echo #define LONG_DOUBLESIZE ^8)>> config.h
+	@(echo #define LONG_DOUBLESIZE ^8)>> $(MINIDIR)\config.h
 endif
 	@(echo #define PTRSIZE ^4&& \
 	echo #define SSize_t int&& \
 	echo #undef HAS_ATOLL&& \
 	echo #undef HAS_STRTOLL&& \
 	echo #undef HAS_STRTOULL&& \
-	echo #define Size_t_size ^4)>> config.h
+	echo #define Size_t_size ^4)>> $(MINIDIR)\config.h
 endif
 ifeq ($(USE_64_BIT_INT),define)
 	@(echo #define IVTYPE $(INT64)&& \
 	echo #define UVTYPE unsigned $(INT64)&& \
 	echo #define IVSIZE ^8&& \
-	echo #define UVSIZE ^8)>> config.h
+	echo #define UVSIZE ^8)>> $(MINIDIR)\config.h
 ifeq ($(USE_LONG_DOUBLE),define)
 	@(echo #define NV_PRESERVES_UV&& \
-	echo #define NV_PRESERVES_UV_BITS 64)>> config.h
+	echo #define NV_PRESERVES_UV_BITS 64)>> $(MINIDIR)\config.h
 else ifeq ($(USE_QUADMATH),define)
 	@(echo #define NV_PRESERVES_UV&& \
-	echo #define NV_PRESERVES_UV_BITS 64)>> config.h
+	echo #define NV_PRESERVES_UV_BITS 64)>> $(MINIDIR)\config.h
 else
 	@(echo #undef NV_PRESERVES_UV&& \
-	echo #define NV_PRESERVES_UV_BITS 53)>> config.h
+	echo #define NV_PRESERVES_UV_BITS 53)>> $(MINIDIR)\config.h
 endif
 	@(echo #define IVdf "I64d"&& \
 	echo #define UVuf "I64u"&& \
 	echo #define UVof "I64o"&& \
 	echo #define UVxf "I64x"&& \
 	echo #define UVXf "I64X"&& \
-	echo #define USE_64_BIT_INT)>> config.h
+	echo #define USE_64_BIT_INT)>> $(MINIDIR)\config.h
 else
 	@(echo #define IVTYPE long&& \
 	echo #define UVTYPE unsigned long&& \
@@ -1360,7 +1360,7 @@ else
 	echo #define UVof "lo"&& \
 	echo #define UVxf "lx"&& \
 	echo #define UVXf "lX"&& \
-	echo #undef USE_64_BIT_INT)>> config.h
+	echo #undef USE_64_BIT_INT)>> $(MINIDIR)\config.h
 endif
 ifeq ($(USE_LONG_DOUBLE),define)
 	@(echo #define Gconvert^(x,n,t,b^) sprintf^(^(b^),"%%.*""Lg",^(n^),^(x^)^)&& \
@@ -1382,7 +1382,7 @@ ifeq ($(USE_LONG_DOUBLE),define)
 	echo #define NVgf "Lg"&& \
 	echo #undef I_QUADMATH&& \
 	echo #undef USE_QUADMATH&& \
-	echo #define USE_LONG_DOUBLE)>> config.h
+	echo #define USE_LONG_DOUBLE)>> $(MINIDIR)\config.h
 else ifeq ($(USE_QUADMATH),define)
 	@(echo #define Gconvert^(x,n,t,b^) sprintf^(^(b^),"%%.*""Lg",^(n^),^(x^)^)&& \
 	echo #define HAS_FREXPL&& \
@@ -1403,7 +1403,7 @@ else ifeq ($(USE_QUADMATH),define)
 	echo #define NVgf "Qg"&& \
 	echo #undef USE_LONG_DOUBLE&& \
 	echo #define I_QUADMATH&& \
-	echo #define USE_QUADMATH)>> config.h
+	echo #define USE_QUADMATH)>> $(MINIDIR)\config.h
 else
 	@(echo #define Gconvert^(x,n,t,b^) sprintf^(^(b^),"%%.*g",^(n^),^(x^)^)&& \
 	echo #undef HAS_FREXPL&& \
@@ -1424,23 +1424,23 @@ else
 	echo #define NVgf "g"&& \
 	echo #undef I_QUADMATH&& \
 	echo #undef USE_QUADMATH&& \
-	echo #undef USE_LONG_DOUBLE)>> config.h
+	echo #undef USE_LONG_DOUBLE)>> $(MINIDIR)\config.h
 endif
 ifeq ($(USE_CPLUSPLUS),define)
 	@(echo #define USE_CPLUSPLUS&& \
-	echo #endif)>> config.h
+	echo #endif)>> $(MINIDIR)\config.h
 else
 	@(echo #undef USE_CPLUSPLUS&& \
-	echo #endif)>> config.h
+	echo #endif)>> $(MINIDIR)\config.h
 endif
 #separate line since this is sentinal that this target is done
 	@rem. > $(MINIDIR)\.exists
 
 $(MINICORE_OBJ) : $(CORE_NOCFG_H)
-	$(CC) -c $(CFLAGS) $(MINIBUILDOPT) -DPERL_EXTERNAL_GLOB -DPERL_IS_MINIPERL $(OBJOUT_FLAG)$@ $(PDBOUT) ..\$(*F).c
+	$(CC) -c -I$(MINIDIR) $(CFLAGS) $(MINIBUILDOPT) -DPERL_EXTERNAL_GLOB -DPERL_IS_MINIPERL $(OBJOUT_FLAG)$@ $(PDBOUT) ..\$(*F).c
 
 $(MINIWIN32_OBJ) : $(CORE_NOCFG_H)
-	$(CC) -c $(CFLAGS) $(MINIBUILDOPT) -DPERL_IS_MINIPERL $(OBJOUT_FLAG)$@ $(PDBOUT) $(*F).c
+	$(CC) -c -I$(MINIDIR) $(CFLAGS) $(MINIBUILDOPT) -DPERL_IS_MINIPERL $(OBJOUT_FLAG)$@ $(PDBOUT) $(*F).c
 
 # -DPERL_IMPLICIT_SYS needs C++ for perllib.c
 # rules wrapped in .IFs break Win9X build (we end up with unbalanced []s
