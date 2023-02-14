@@ -3893,7 +3893,6 @@ S_try_run_unitcheck(pTHX_ OP* caller_op)
 STATIC bool
 S_doeval_compile(pTHX_ U8 gimme, CV* outside, U32 seq, HV *hh)
 {
-    dSP;
     OP * const saveop = PL_op;
     bool clear_hints = saveop->op_type != OP_ENTEREVAL;
     COP * const oldcurcop = PL_curcop;
@@ -3907,7 +3906,7 @@ S_doeval_compile(pTHX_ U8 gimme, CV* outside, U32 seq, HV *hh)
                         ((PL_op->op_private & OPpEVAL_RE_REPARSING)
                             ? EVAL_RE_REPARSING : 0)));
 
-    PUSHMARK(SP);
+    PUSHMARK(PL_stack_sp);
 
     evalcv = MUTABLE_CV(newSV_type(SVt_PVCV));
     CvEVAL_on(evalcv);
@@ -4042,7 +4041,7 @@ S_doeval_compile(pTHX_ U8 gimme, CV* outside, U32 seq, HV *hh)
                 op_free(PL_eval_root);
                 PL_eval_root = NULL;
             }
-            SP = PL_stack_base + POPMARK;	/* pop original mark */
+            rpp_popfree_to(PL_stack_base + POPMARK); /* pop original mark */
             cx = CX_CUR();
             assert(CxTYPE(cx) == CXt_EVAL);
             /* If we are in an eval we need to make sure that $SIG{__DIE__}
@@ -4051,6 +4050,7 @@ S_doeval_compile(pTHX_ U8 gimme, CV* outside, U32 seq, HV *hh)
              * so it will happen there. */
             /* pop the CXt_EVAL, and if was a require, croak */
             S_pop_eval_context_maybe_croak(aTHX_ cx, ERRSV, 2);
+
         }
 
         /* die_unwind() re-croaks when in require, having popped the
@@ -4062,9 +4062,15 @@ S_doeval_compile(pTHX_ U8 gimme, CV* outside, U32 seq, HV *hh)
         if (!*(SvPV_nolen_const(errsv)))
             sv_setpvs(errsv, "Compilation error");
 
-
-        if (gimme != G_LIST) PUSHs(&PL_sv_undef);
-        PUTBACK;
+        if (gimme == G_SCALAR) {
+            if (yystatus == 3) {
+                /* die_unwind already pushed undef in scalar context */
+                assert(*PL_stack_sp == &PL_sv_undef);
+            }
+            else {
+                rpp_xpush_1(&PL_sv_undef);
+            }
+        }
         return FALSE;
     }
 
@@ -4082,10 +4088,8 @@ S_doeval_compile(pTHX_ U8 gimme, CV* outside, U32 seq, HV *hh)
     if (PERLDB_INTER && saveop->op_type == OP_REQUIRE) {
         CV * const cv = get_cvs("DB::postponed", 0);
         if (cv) {
-            dSP;
-            PUSHMARK(SP);
-            XPUSHs(MUTABLE_SV(CopFILEGV(&PL_compiling)));
-            PUTBACK;
+            PUSHMARK(PL_stack_sp);
+            rpp_xpush_1(MUTABLE_SV(CopFILEGV(&PL_compiling)));
             call_sv(MUTABLE_SV(cv), G_DISCARD);
         }
     }
@@ -4111,21 +4115,21 @@ S_doeval_compile(pTHX_ U8 gimme, CV* outside, U32 seq, HV *hh)
                 sv_setpvs(errsv, "Unit check error");
             }
 
-            if (gimme != G_LIST) PUSHs(&PL_sv_undef);
-            PUTBACK;
+            if (gimme != G_LIST)
+                rpp_xpush_1(&PL_sv_undef);
             return FALSE;
         }
         PL_eval_start = es;
     }
 
     CvDEPTH(evalcv) = 1;
-    SP = PL_stack_base + POPMARK;		/* pop original mark */
+    rpp_popfree_to(PL_stack_base + POPMARK); /* pop original mark */
     PL_op = saveop;			/* The caller may need it. */
     PL_parser->lex_state = LEX_NOTPARSING;	/* $^S needs this. */
 
-    PUTBACK;
     return TRUE;
 }
+
 
 /* Return NULL if the file doesn't exist or isn't a file;
  * else return PerlIO_openn().
@@ -4269,9 +4273,9 @@ S_path_is_searchable(const char *name)
 static OP *
 S_require_version(pTHX_ SV *sv)
 {
-    dSP;
-
     sv = sv_2mortal(new_version(sv));
+    rpp_popfree_1();
+
     if (!Perl_sv_derived_from_pvn(aTHX_ PL_patchlevel, STR_WITH_LEN("version"), 0))
         upg_version(PL_patchlevel, TRUE);
     if (cUNOP->op_first->op_type == OP_CONST && cUNOP->op_first->op_private & OPpCONST_NOVER) {
@@ -4325,18 +4329,19 @@ S_require_version(pTHX_ SV *sv)
         }
     }
 
-    RETPUSHYES;
+    *++PL_stack_sp = &PL_sv_yes;
+    return NORMAL;
 }
+
 
 /* Handle C<require Foo::Bar>, C<require "Foo/Bar.pm"> and C<do "Foo.pm">.
  * The first form will have already been converted at compile time to
- * the second form */
+ * the second form.
+ * sv is still on the stack at this point. */
 
 static OP *
 S_require_file(pTHX_ SV *sv)
 {
-    dSP;
-
     PERL_CONTEXT *cx;
     const char *name;
     STRLEN len;
@@ -4383,15 +4388,17 @@ S_require_file(pTHX_ SV *sv)
 
         ENTER_with_name("call_PRE_REQUIRE");
         SAVETMPS;
-        EXTEND(SP, 1);
-        PUSHMARK(SP);
-        PUSHs(name_sv); /* always use the object for method calls */
-        PUTBACK;
+        PUSHMARK(PL_stack_sp);
+        rpp_xpush_1(name_sv); /* always use the object for method calls */
         int count = call_sv(PL_hook__require__before, G_SCALAR);
-        SPAGAIN;
-        if (count && SvOK(*SP) && SvROK(*SP) && SvTYPE(SvRV(*SP)) == SVt_PVCV)
-            /* the RC++ preserves it across the FREETMPS below */
-            post_hook__require__before_sv = SvREFCNT_inc_simple_NN(*SP);
+        SV *rsv = *PL_stack_sp;
+        assert(count == 1); /* scalar context */
+        if (SvOK(rsv) && SvROK(rsv) && SvTYPE(SvRV(rsv)) == SVt_PVCV) {
+            /* the RC++ preserves it across the popping and/or FREETMPS
+             * below */
+            post_hook__require__before_sv = SvREFCNT_inc_simple_NN(rsv);
+            rpp_popfree_1();
+        }
         if (!sv_streq(name_sv,sv)) {
             /* they modified the name argument, so do some sleight of hand */
             name = SvPV_nomg_const(name_sv, len);
@@ -4424,14 +4431,20 @@ S_require_file(pTHX_ SV *sv)
         if (op_is_require) {
                 /* can optimize to only perform one single lookup */
                 svp_cached = hv_fetch(GvHVn(PL_incgv), (char*) name, len, 0);
-                if ( svp_cached && (SvGETMAGIC(*svp_cached), SvOK(*svp_cached)) ) RETPUSHYES;
+                if (svp_cached &&
+                    (SvGETMAGIC(*svp_cached), SvOK(*svp_cached)))
+                {
+                    rpp_replace_1_1(&PL_sv_yes);
+                    return NORMAL;
+                }
         }
 #endif
 
     if (!IS_SAFE_PATHNAME(name, len, op_name)) {
         if (!op_is_require) {
             CLEAR_ERRSV();
-            RETPUSHUNDEF;
+            rpp_replace_1_1(&PL_sv_undef);
+            return NORMAL;
         }
         DIE(aTHX_ "Can't locate %s:   %s",
             pv_escape(newSVpvs_flags("",SVs_TEMP),name,len,len*2,
@@ -4472,8 +4485,10 @@ S_require_file(pTHX_ SV *sv)
             /* we already did a get magic if this was cached */
             if (!svp_cached)
                 SvGETMAGIC(*svp);
-            if (SvOK(*svp))
-                RETPUSHYES;
+            if (SvOK(*svp)) {
+                rpp_replace_1_1(&PL_sv_yes);
+                return NORMAL;
+            }
             else
                 DIE(aTHX_ "Attempt to reload %s aborted.\n"
                             "Compilation failed in require", unixname);
@@ -4671,25 +4686,27 @@ S_require_file(pTHX_ SV *sv)
 
                     ENTER_with_name("call_INC_hook");
                     SAVETMPS;
-                    EXTEND(SP, 2 + ((method && (loader != dirsv)) ? 1 : 0));
-                    PUSHMARK(SP);
-                    PUSHs(method ? loader : dirsv); /* always use the object for method calls */
-                    PUSHs(nsv);
-                    if (method && (loader != dirsv)) /* add the args array for method calls */
-                        PUSHs(dirsv);
-                    PUTBACK;
+                    PUSHMARK(PL_stack_sp);
+                    /* add the args array for method calls */
+                    bool add_dirsv = (method && (loader != dirsv));
+                    rpp_extend(2 + add_dirsv);
+                    rpp_push_2(
+                        /* always use the object for method calls */
+                        method ? loader : dirsv,
+                        nsv
+                    );
+                    if (add_dirsv)
+                        rpp_push_1(dirsv);
                     if (method) {
                         count = call_method(method, G_LIST|G_EVAL);
                     } else {
                         count = call_sv(loader, G_LIST|G_EVAL);
                     }
-                    SPAGAIN;
 
                     if (count > 0) {
                         int i = 0;
                         SV *arg;
-
-                        SP -= count - 1;
+                        SV **base = PL_stack_sp - count + 1;
 
                         if (is_incdir) {
                             /* push the stringified returned items into the
@@ -4700,7 +4717,7 @@ S_require_file(pTHX_ SV *sv)
                              * stable. We speficially do *not* support returning
                              * coderefs from an INCDIR call. */
                             while (count-->0) {
-                                arg = SP[i++];
+                                arg = base[i++];
                                 SvGETMAGIC(arg);
                                 if (!SvOK(arg))
                                     continue;
@@ -4732,14 +4749,14 @@ S_require_file(pTHX_ SV *sv)
                             goto done_hook;
                         }
 
-                        arg = SP[i++];
+                        arg = base[i++];
 
                         if (SvROK(arg) && (SvTYPE(SvRV(arg)) <= SVt_PVLV)
                             && !isGV_with_GP(SvRV(arg))) {
                             filter_cache = SvRV(arg);
 
                             if (i < count) {
-                                arg = SP[i++];
+                                arg = base[i++];
                             }
                         }
 
@@ -4762,7 +4779,7 @@ S_require_file(pTHX_ SV *sv)
                             }
 
                             if (i < count) {
-                                arg = SP[i++];
+                                arg = base[i++];
                             }
                         }
 
@@ -4771,7 +4788,7 @@ S_require_file(pTHX_ SV *sv)
                             SvREFCNT_inc_simple_void_NN(filter_sub);
 
                             if (i < count) {
-                                filter_state = SP[i];
+                                filter_state = base[i];
                                 SvREFCNT_inc_simple_void(filter_state);
                             }
                         }
@@ -4780,8 +4797,8 @@ S_require_file(pTHX_ SV *sv)
                             tryrsfp = PerlIO_open(BIT_BUCKET,
                                                   PERL_SCRIPT_MODE);
                         }
-                        done_hook:
-                        SP--;
+                      done_hook:
+                        rpp_popfree_to(base - 1);
                     } else {
                         SV *errsv= ERRSV;
                         if (SvTRUE(errsv) && !SvROK(errsv)) {
@@ -4826,7 +4843,6 @@ S_require_file(pTHX_ SV *sv)
                     inc_idx_sv = GvSVn(PL_incgv);
                     inc_idx = SvOK(inc_idx_sv) ? SvIV(inc_idx_sv) : -1;
 
-                    PUTBACK;
                     FREETMPS;
                     LEAVE_with_name("call_INC_hook");
 
@@ -5055,11 +5071,14 @@ S_require_file(pTHX_ SV *sv)
             }
 #endif
             CLEAR_ERRSV();
-            RETPUSHUNDEF;
+            rpp_replace_1_1(&PL_sv_undef);
+            return NORMAL;
         }
     }
     else
         SETERRNO(0, SS_NORMAL);
+
+    rpp_popfree_1(); /* finished with sv now */
 
     /* Update %INC. Assume success here to prevent recursive requirement. */
     /* name is never assigned to again, so len is still strlen(name)  */
@@ -5100,13 +5119,11 @@ S_require_file(pTHX_ SV *sv)
 
     /* switch to eval mode */
     assert(!CATCH_GET);
-    cx = cx_pushblock(CXt_EVAL, gimme, SP, old_savestack_ix);
+    cx = cx_pushblock(CXt_EVAL, gimme, PL_stack_sp, old_savestack_ix);
     cx_pusheval(cx, PL_op->op_next, newSVpv(name, 0));
 
     SAVECOPLINE(&PL_compiling);
     CopLINE_set(&PL_compiling, 0);
-
-    PUTBACK;
 
     if (doeval_compile(gimme, NULL, PL_curcop->cop_seq, NULL))
         op = PL_eval_start;
@@ -5134,10 +5151,10 @@ PP(pp_require)
         return docatch(Perl_pp_require);
 
     {
-        dSP;
-        SV *sv = POPs;
+        SV *sv = *PL_stack_sp;
         SvGETMAGIC(sv);
-        PUTBACK;
+        /* these tail-called subs are responsible for popping sv off the
+         * stack */
         return ((SvNIOKp(sv) || SvVOK(sv)) && PL_op->op_type != OP_DOFILE)
             ? S_require_version(aTHX_ sv)
             : S_require_file(aTHX_ sv);
@@ -5159,7 +5176,6 @@ PP_wrapped(pp_hintseval, 0, 0)
 
 PP(pp_entereval)
 {
-    dSP;
     PERL_CONTEXT *cx;
     SV *sv;
     U8 gimme;
@@ -5195,7 +5211,7 @@ PP(pp_entereval)
     bytes = PL_op->op_private & OPpEVAL_BYTES;
 
     if (PL_op->op_private & OPpEVAL_HAS_HH) {
-        saved_hh = MUTABLE_HV(SvREFCNT_inc(POPs));
+        saved_hh = MUTABLE_HV(rpp_pop_1_norc());
     }
     else if (PL_hints & HINT_LOCALIZE_HH || (
                 PL_op->op_private & OPpEVAL_COPHH
@@ -5204,7 +5220,7 @@ PP(pp_entereval)
         saved_hh = cop_hints_2hv(PL_curcop, 0);
         hv_magic(saved_hh, NULL, PERL_MAGIC_hints);
     }
-    sv = POPs;
+    sv = *PL_stack_sp;
     if (!SvPOK(sv)) {
         /* make sure we've got a plain PV (no overload etc) before testing
          * for taint. Making a copy here is probably overkill, but better
@@ -5238,6 +5254,8 @@ PP(pp_entereval)
                         )
              );
 
+    rpp_popfree_1(); /* can free sv now */
+
     /* switch to eval mode */
 
     if (PERLDB_NAMEEVAL && CopLINE(PL_curcop)) {
@@ -5262,7 +5280,8 @@ PP(pp_entereval)
     runcv = find_runcv(&seq);
 
     assert(!CATCH_GET);
-    cx = cx_pushblock((CXt_EVAL|CXp_REAL), gimme, SP, old_savestack_ix);
+    cx = cx_pushblock((CXt_EVAL|CXp_REAL),
+                        gimme, PL_stack_sp, old_savestack_ix);
     cx_pusheval(cx, PL_op->op_next, NULL);
 
     /* prepare to compile string */
@@ -5280,8 +5299,6 @@ PP(pp_entereval)
         saved_delete = TRUE;
     }
     
-    PUTBACK;
-
     if (doeval_compile(gimme, runcv, seq, saved_hh)) {
         if (was != PL_breakable_sub_gen /* Some subs defined here. */
             ?  PERLDB_LINE_OR_SAVESRC
@@ -5387,7 +5404,7 @@ PP(pp_leaveeval)
                     : PL_stack_sp > oldsp);
 
     if (gimme == G_VOID) {
-        PL_stack_sp = oldsp;
+        rpp_popfree_to(oldsp);
         /* free now to avoid late-called destructors clobbering $@ */
         FREETMPS;
     }
@@ -5571,7 +5588,7 @@ PP(pp_leavetry)
     gimme = cx->blk_gimme;
 
     if (gimme == G_VOID) {
-        PL_stack_sp = oldsp;
+        rpp_popfree_to(oldsp);
         /* free now to avoid late-called destructors clobbering $@ */
         FREETMPS;
     }
