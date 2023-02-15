@@ -30,8 +30,6 @@ BEGIN {
     my %all;
     for my $symbol (@Compress::Raw::Zlib::DEFLATE_CONSTANTS)
     {
-        next if $symbol eq 'Z_NULL';
-
         eval "defined Compress::Raw::Zlib::$symbol" ;
         $all{$symbol} = ! $@ ;
     }
