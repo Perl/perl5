@@ -794,6 +794,7 @@ cpan/Encode/Unicode/Makefile.PL		Encode extension
 cpan/Encode/Unicode/Unicode.pm		Encode extension
 cpan/Encode/Unicode/Unicode.xs		Encode extension
 cpan/experimental/lib/experimental.pm
+cpan/experimental/lib/stable.pm
 cpan/experimental/t/basic.t
 cpan/ExtUtils-Constant/lib/ExtUtils/Constant.pm			generate XS code to import C header constants
 cpan/ExtUtils-Constant/lib/ExtUtils/Constant/Base.pm		generate XS code to import C header constants

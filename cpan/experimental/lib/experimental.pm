@@ -1,5 +1,5 @@
 package experimental;
-$experimental::VERSION = '0.030';
+$experimental::VERSION = '0.031';
 use strict;
 use warnings;
 use version ();
@@ -29,7 +29,7 @@ my %min_version = (
 	declared_refs   => '5.26.0',
 	defer           => '5.35.4',
 	evalbytes       => '5.16.0',
-	extra_paired_delims => '5.35.9',
+	extra_paired_delimiters => '5.35.9',
 	fc              => '5.16.0',
 	for_list        => '5.35.5',
 	isa             => '5.31.7',
@@ -140,7 +140,7 @@ experimental - Experimental features made easy
 
 =head1 VERSION
 
-version 0.030
+version 0.031
 
 =head1 SYNOPSIS
 
@@ -205,7 +205,7 @@ This was added in perl 5.26.0.
 
 This was added in perl 5.36.0
 
-=item * C<extra_paired_delims> - enables the use of more paired string delimiters than the
+=item * C<extra_paired_delimiters> - enables the use of more paired string delimiters than the
 traditional four, S<C<< <  > >>>, S<C<( )>>, S<C<{ }>>, and S<C<[ ]>>.
 
 This was added in perl 5.36.
@@ -224,7 +224,7 @@ This was added in perl 5.10.0 and removed in perl 5.24.0.
 
 =item * C<lexical_subs> - allow the use of lexical subroutines.
 
-This was added in 5.18.0.
+This was added in 5.18.0, and became non-experimental (and always enabled) in 5.26.0.
 
 =item * C<postderef> - allow the use of postfix dereferencing expressions
 
