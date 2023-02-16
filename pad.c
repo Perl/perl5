@@ -2875,7 +2875,7 @@ Perl_padname_dup(pTHX_ PADNAME *src, CLONE_PARAMS *param)
     PadnameTYPE   (dst) = (HV *)sv_dup_inc((SV *)PadnameTYPE(src), param);
     PadnameOURSTASH(dst) = (HV *)sv_dup_inc((SV *)PadnameOURSTASH(src),
                                             param);
-    if(PadnameIsFIELD(src)) {
+    if(PadnameIsFIELD(src) && !PadnameOUTER(src)) {
         struct padname_fieldinfo *sinfo = PadnameFIELDINFO(src);
         struct padname_fieldinfo *dinfo;
         Newxz(dinfo, 1, struct padname_fieldinfo);
