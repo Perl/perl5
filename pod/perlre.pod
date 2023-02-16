@@ -1313,6 +1313,9 @@ array you must use demarcated curly brace notation:
 See L<perldata/"Demarcated variable names using braces"> for more on
 this notation.
 
+B<NOTE>: (.?) will always create a $<digit> (incrementing $#{^CAPTURE}.)
+(.)? will only create a $<digit> if it matches.
+
 B<NOTE>: Failed matches in Perl do not reset the match variables,
 which makes it easier to write code that tests for a series of more
 specific cases and remembers the best match.
