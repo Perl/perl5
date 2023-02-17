@@ -4146,6 +4146,10 @@ CODE:
     PerlInterpreter *interp_dup;    /* The duplicate interpreter */
     int oldscope = 1; /* We are responsible for all scopes */
 
+    /* push a ref-counted and non-RC stackinfo to see how they get cloned */
+    push_stackinfo(PERLSI_UNKNOWN, 1);
+    push_stackinfo(PERLSI_UNKNOWN, 0);
+
     interp_dup = perl_clone(interp, CLONEf_COPY_STACKS | CLONEf_CLONE_HOST );
 
     /* destroy old perl */
@@ -4165,6 +4169,16 @@ CODE:
 
     /* switch to new perl */
     PERL_SET_CONTEXT(interp_dup);
+
+    /* check and pop the stackinfo's pushed above */
+#ifdef PERL_RC_STACK
+    assert(!AvREAL(PL_curstack));
+#endif
+    pop_stackinfo();
+#ifdef PERL_RC_STACK
+    assert(AvREAL(PL_curstack));
+#endif
+    pop_stackinfo();
 
     /* continue after 'clone_with_stack' */
     if (interp_dup->Iop)
