@@ -210,7 +210,12 @@ Pops an unsigned long off the stack.
 #define RETURNOP(o)	return (PUTBACK, o)
 #define RETURNX(x)	return (x, PUTBACK, NORMAL)
 
-#define POPs		(*sp--)
+#if defined(PERL_RC_STACK) && defined(DEBUG_LEAKING_SCALARS)
+#  define POPs		(assert(!rpp_stack_is_rc()), *sp--)
+#else
+#  define POPs		(*sp--)
+#endif
+
 #define POPp		POPpx
 #define POPpx		(SvPVx_nolen(POPs))
 #define POPpconstx	(SvPVx_nolen_const(POPs))
@@ -538,7 +543,12 @@ Does not use C<TARG>.  See also C<L</XPUSHu>>, C<L</mPUSHu>> and C<L</PUSHu>>.
             sv_setnv_mg(targ, TARGn_nv);                                \
     } STMT_END
 
-#define PUSHs(s)	(*++sp = (s))
+#if defined(PERL_RC_STACK) && defined(DEBUG_LEAKING_SCALARS)
+#  define PUSHs(s)	(assert(!rpp_stack_is_rc()), *++sp = (s))
+#else
+#  define PUSHs(s)	(*++sp = (s))
+#endif
+
 #define PUSHTARG	STMT_START { SvSETMAGIC(TARG); PUSHs(TARG); } STMT_END
 #define PUSHp(p,l)	STMT_START { sv_setpvn(TARG, (p), (l)); PUSHTARG; } STMT_END
 #define PUSHpvs(s)      PUSHp("" s "", sizeof(s)-1)
@@ -546,7 +556,7 @@ Does not use C<TARG>.  See also C<L</XPUSHu>>, C<L</mPUSHu>> and C<L</PUSHu>>.
 #define PUSHi(i)	STMT_START { TARGi(i,1); PUSHs(TARG); } STMT_END
 #define PUSHu(u)	STMT_START { TARGu(u,1); PUSHs(TARG); } STMT_END
 
-#define XPUSHs(s)	STMT_START { EXTEND(sp,1); *++sp = (s); } STMT_END
+#define XPUSHs(s)	STMT_START { EXTEND(sp,1); PUSHs(s); } STMT_END
 #define XPUSHTARG	STMT_START { SvSETMAGIC(TARG); XPUSHs(TARG); } STMT_END
 #define XPUSHp(p,l)	STMT_START { sv_setpvn(TARG, (p), (l)); XPUSHTARG; } STMT_END
 #define XPUSHpvs(s)     XPUSHp("" s "", sizeof(s)-1)
