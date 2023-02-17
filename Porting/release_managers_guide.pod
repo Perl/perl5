@@ -81,7 +81,7 @@ needs to be taken when setting/pushing the tag and doing the merge
 
 =item Release Candidate (RC)
 
-A release candidate is an attempt to produce a tarball that is a close as
+A release candidate is an attempt to produce a tarball that is as close as
 possible to the final release. Indeed, unless critical faults are found
 during the RC testing, the final release will be identical to the RC
 barring a few minor fixups (updating the release date in F<perlhist.pod>,
