@@ -1345,6 +1345,9 @@ sub run_multiple_progs {
 	if (s/^(\s*-\w+)//) {
 	    $switch = $1;
 	}
+
+        s/^# NOTE.*\n//mg; # remove any NOTE comments in the content
+
 	my ($prog, $expected) = split(/\nEXPECT(?:\n|$)/, $_, 2);
 
 	my %reason;
