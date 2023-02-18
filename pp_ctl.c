@@ -1011,7 +1011,7 @@ PP(pp_grepstart)
         SV *newsrc = sv_mortalcopy(src);
         PL_tmps_floor++;
         PL_stack_base[TOPMARK] = newsrc;
-#if defined(PERL_RC_STACK) && ! defined(PERL_XXX_TMP_NORC)
+#ifdef PERL_RC_STACK
         SvREFCNT_inc_simple_void_NN(newsrc);
         SvREFCNT_dec(src);
 #endif
@@ -1100,9 +1100,7 @@ PP(pp_mapwhile)
      * ensure consistent handling.
      */
     dst = PL_stack_base + PL_markstack_ptr[-1];
-#  ifndef PERL_XXX_TMP_NORC
     SvREFCNT_dec_NN(*dst);
-#  endif
     *dst = NULL;
 #endif
 
@@ -1187,9 +1185,7 @@ PP(pp_mapwhile)
                     /* NB - don't really need the mortalising above.
                      * A simple copy would suffice */
                     *dst-- = sv;
-#  ifndef PERL_XXX_TMP_NORC
                     SvREFCNT_inc_simple_void_NN(sv);
-#  endif
                     rpp_popfree_1();
                 }
                 else {
@@ -1262,7 +1258,7 @@ PP(pp_mapwhile)
         if (SvPADTMP(src)) {
             SV *newsrc = sv_mortalcopy(src);
             PL_stack_base[PL_markstack_ptr[-1]] = newsrc;
-#if defined(PERL_RC_STACK) && ! defined(PERL_XXX_TMP_NORC)
+#ifdef PERL_RC_STACK
             SvREFCNT_inc_simple_void_NN(newsrc);
             SvREFCNT_dec(src);
 #endif
@@ -2826,13 +2822,9 @@ PP(pp_return)
                      * overwritten */
                     SV **p;
                     for (p = MARK; p > oldsp; p--) {
-#  ifdef PERL_XXX_TMP_NORC
-                        *p = NULL;
-#  else
                         SV *sv = *p;
                         *p = NULL;
                         SvREFCNT_dec(sv);
-#  endif
                     }
 #endif
                     Move(MARK + 1, oldsp + 1, nargs, SV*);
@@ -3265,7 +3257,7 @@ PP(pp_goto)
                 mark = PL_stack_sp;
                 if (items) {
                     SSize_t index;
-#if defined(PERL_RC_STACK) && !defined(PERL_XXX_TMP_NORC)
+#ifdef PERL_RC_STACK
                     assert(AvREAL(arg));
 #else
                     bool r = cBOOL(AvREAL(arg));
@@ -3283,7 +3275,7 @@ PP(pp_goto)
                         rpp_push_1(
                             sv
                             ?
-#if defined(PERL_RC_STACK) && !defined(PERL_XXX_TMP_NORC)
+#ifdef PERL_RC_STACK
                               sv
                             : newSVavdefelem(arg, index, 1)
 #else
@@ -6304,7 +6296,7 @@ _invoke_defer_block(pTHX_ U8 type, void *_arg)
         /* since we're called during a scope cleanup (including after
          * a croak), theere's no guarantee thr stack is currently
          * ref-counted */
-#if defined PERL_RC_STACK && !defined PERL_XXX_TMP_NORC
+#ifdef PERL_RC_STACK
         if (rpp_stack_is_rc())
             rpp_popfree_to(PL_stack_base + cx->blk_oldsp);
         else
