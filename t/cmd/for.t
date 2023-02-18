@@ -76,7 +76,7 @@ print $loop_count == 4 ? "ok" : "not ok", " 12\n";
 #  - unless the stack is reference-counted
 @a = (3,4);
 eval { @a = () for (1,2,@a) };
-print $@ =~   ((Internals::stack_refcounted() & 3) == 1
+print $@ =~   ((Internals::stack_refcounted() & 1)
                   ?  qr/^$/
                   : qr/Use of freed value in iteration/
               )

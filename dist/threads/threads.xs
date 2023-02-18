@@ -600,7 +600,7 @@ S_ithread_run(void * arg)
         int ii;
         int jmp_rc;
 
-#if defined(PERL_RC_STACK) && !defined(PERL_XXX_TMP_NORC)
+#ifdef PERL_RC_STACK
         assert(rpp_stack_is_rc());
 #endif
 

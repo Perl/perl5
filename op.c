@@ -4699,7 +4699,7 @@ Perl_newPROG(pTHX_ OP *o)
             if (cv) {
                 PUSHMARK(PL_stack_sp);
                 SV *comp = MUTABLE_SV(CopFILEGV(&PL_compiling));
-#if defined(PERL_RC_STACK) && !defined(PERL_XXX_TMP_NORC)
+#ifdef PERL_RC_STACK
                 assert(rpp_stack_is_rc());
 #endif
                 rpp_xpush_1(comp);
@@ -10377,7 +10377,7 @@ Perl_newMYSUB(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs, OP *block)
                 CV * const pcv = GvCV(db_postponed);
                 if (pcv) {
                     PUSHMARK(PL_stack_sp);
-#if defined(PERL_RC_STACK) && !defined(PERL_XXX_TMP_NORC)
+#ifdef PERL_RC_STACK
                     assert(rpp_stack_is_rc());
 #endif
                     rpp_xpush_1(tmpstr);
@@ -10981,7 +10981,7 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
                 CV * const pcv = GvCV(db_postponed);
                 if (pcv) {
                     PUSHMARK(PL_stack_sp);
-#if defined(PERL_RC_STACK) && !defined(PERL_XXX_TMP_NORC)
+#ifdef PERL_RC_STACK
                     assert(rpp_stack_is_rc());
 #endif
                     rpp_xpush_1(tmpstr);

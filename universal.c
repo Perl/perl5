@@ -792,9 +792,6 @@ XS(XS_Internals_stack_refcounted)
         croak_xs_usage(cv, "");
 #ifdef PERL_RC_STACK
     val |= 1;
-#  ifdef PERL_XXX_TMP_NORC
-    val |= 2;
-#  endif
 #endif
     XSRETURN_UV(val);
 }

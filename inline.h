@@ -439,9 +439,6 @@ Perl_rpp_popfree_to(pTHX_ SV **sp)
 
     assert(sp <= PL_stack_sp);
 #ifdef PERL_RC_STACK
-#  ifdef PERL_XXX_TMP_NORC
-    PL_stack_sp = sp;
-#  else
 #  ifdef DEBUG_LEAKING_SCALARS
     assert(rpp_stack_is_rc());
 #  endif
@@ -449,8 +446,6 @@ Perl_rpp_popfree_to(pTHX_ SV **sp)
         SV *sv = *PL_stack_sp--;
         SvREFCNT_dec(sv);
     }
-
-#  endif
 #else
     PL_stack_sp = sp;
 #endif
@@ -471,15 +466,11 @@ Perl_rpp_popfree_1(pTHX)
     PERL_ARGS_ASSERT_RPP_POPFREE_1;
 
 #ifdef PERL_RC_STACK
-#  ifdef PERL_XXX_TMP_NORC
-    PL_stack_sp--;
-#  else
 #  ifdef DEBUG_LEAKING_SCALARS
     assert(rpp_stack_is_rc());
 #  endif
     SV *sv = *PL_stack_sp--;
     SvREFCNT_dec(sv);
-#  endif
 #else
     PL_stack_sp--;
 #endif
@@ -502,9 +493,6 @@ Perl_rpp_popfree_2(pTHX)
     PERL_ARGS_ASSERT_RPP_POPFREE_2;
 
 #ifdef PERL_RC_STACK
-#  ifdef PERL_XXX_TMP_NORC
-    PL_stack_sp -= 2;
-#  else
 #  ifdef DEBUG_LEAKING_SCALARS
     assert(rpp_stack_is_rc());
 #  endif
@@ -512,7 +500,6 @@ Perl_rpp_popfree_2(pTHX)
         SV *sv = *PL_stack_sp--;
         SvREFCNT_dec(sv);
     }
-#  endif
 #else
     PL_stack_sp -= 2;
 #endif
@@ -550,9 +537,6 @@ Perl_rpp_pop_1_norc(pTHX)
 #  ifdef DEBUG_LEAKING_SCALARS
     assert(rpp_stack_is_rc());
 #  endif
-#  ifdef PERL_XXX_TMP_NORC
-    SvREFCNT_inc(sv);
-#  endif
 #endif
     return sv;
 }
@@ -582,9 +566,7 @@ Perl_rpp_push_1(pTHX_ SV *sv)
 #  ifdef DEBUG_LEAKING_SCALARS
     assert(rpp_stack_is_rc());
 #  endif
-#  ifndef PERL_XXX_TMP_NORC
     SvREFCNT_inc_simple_void_NN(sv);
-#  endif
 #endif
 }
 
@@ -599,10 +581,8 @@ Perl_rpp_push_2(pTHX_ SV *sv1, SV *sv2)
 #  ifdef DEBUG_LEAKING_SCALARS
     assert(rpp_stack_is_rc());
 #  endif
-#  ifndef PERL_XXX_TMP_NORC
     SvREFCNT_inc_simple_void_NN(sv1);
     SvREFCNT_inc_simple_void_NN(sv2);
-#  endif
 #endif
 }
 
@@ -643,7 +623,7 @@ Perl_rpp_push_1_norc(pTHX_ SV *sv)
     PERL_ARGS_ASSERT_RPP_PUSH_1;
 
     *++PL_stack_sp = sv;
-#if defined(PERL_RC_STACK) && !defined(PERL_XXX_TMP_NORC)
+#ifdef PERL_RC_STACK
 #  ifdef DEBUG_LEAKING_SCALARS
     assert(rpp_stack_is_rc());
 #  endif
@@ -668,7 +648,7 @@ Perl_rpp_replace_1_1(pTHX_ SV *sv)
 {
     PERL_ARGS_ASSERT_RPP_REPLACE_1_1;
 
-#if defined(PERL_RC_STACK) && !defined(PERL_XXX_TMP_NORC)
+#ifdef PERL_RC_STACK
 #  ifdef DEBUG_LEAKING_SCALARS
     assert(rpp_stack_is_rc());
 #  endif
@@ -697,7 +677,7 @@ Perl_rpp_replace_2_1(pTHX_ SV *sv)
 {
     PERL_ARGS_ASSERT_RPP_REPLACE_2_1;
 
-#if defined(PERL_RC_STACK) && !defined(PERL_XXX_TMP_NORC)
+#ifdef PERL_RC_STACK
 #  ifdef DEBUG_LEAKING_SCALARS
     assert(rpp_stack_is_rc());
 #  endif
@@ -760,7 +740,7 @@ contains zero items.
 PERL_STATIC_INLINE bool
 Perl_rpp_stack_is_rc(pTHX)
 {
-#if defined(PERL_RC_STACK) && !defined(PERL_XXX_TMP_NORC)
+#ifdef PERL_RC_STACK
     return AvREAL(PL_curstack) && !PL_curstackinfo->si_stack_nonrc_base;
 #else
     return 0;
@@ -797,7 +777,7 @@ Perl_rpp_is_lone(pTHX_ SV *sv)
 #  endif
 
     return SvREFCNT(sv) <= cBOOL(SvTEMP(sv))
-#if defined(PERL_RC_STACK) && !defined(PERL_XXX_TMP_NORC)
+#ifdef PERL_RC_STACK
                          + 1
 #endif
     ;

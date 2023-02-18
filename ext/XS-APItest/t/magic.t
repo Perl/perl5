@@ -104,7 +104,7 @@ is $@, "", 'PERL_MAGIC_ext is permitted on read-only things';
 
         # what extra refcount is added to the SV by virtue of being on the
         # stack?
-        my $extra = (Internals::stack_refcounted() & 3) == 1 ? 1 : 0;
+        my $extra = (Internals::stack_refcounted() & 1) ? 1 : 0;
 
         # Evaluate this boolean as a separate statement, so the two
         # temporary \ refs are freed before we start comparing reference

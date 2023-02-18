@@ -752,7 +752,7 @@ PP(pp_sort)
              * Normally the name is a PV while cv is CV (duh!) but
              * for lexical subs, fn can already be the CV (but is kept
              * alive by a reference from the pad */
-#if defined(PERL_RC_STACK) && ! defined(PERL_XXX_TMP_NORC)
+#ifdef PERL_RC_STACK
             assert(fn != (SV*)cv || SvREFCNT(fn) > 1);
             SvREFCNT_dec(fn);
 #endif
@@ -829,7 +829,7 @@ PP(pp_sort)
                 SV *sv;
                 if (svp) {
                     sv = *svp;
-#if defined(PERL_RC_STACK) && !defined(PERL_XXX_TMP_NORC)
+#ifdef PERL_RC_STACK
                     SvREFCNT_inc_simple_void_NN(sv);
 #endif
                 }
@@ -843,7 +843,7 @@ PP(pp_sort)
             assert(svp || max == 0);
             for (i = 0; i < max; i++) {
                 SV *sv = *svp++;
-#if defined(PERL_RC_STACK) && !defined(PERL_XXX_TMP_NORC)
+#ifdef PERL_RC_STACK
                 SvREFCNT_inc_simple_void(sv);
 #endif
                 *++PL_stack_sp = sv;
@@ -873,7 +873,7 @@ PP(pp_sort)
         if (sv) {                    /* Weed out nulls. */
             if (copytmps && SvPADTMP(sv)) {
                 SV *nsv = sv_mortalcopy(sv);
-#if defined(PERL_RC_STACK) && !defined(PERL_XXX_TMP_NORC)
+#ifdef PERL_RC_STACK
                 SvREFCNT_dec_NN(sv);
                 SvREFCNT_inc_simple_void_NN(nsv);
 #endif
@@ -1082,7 +1082,7 @@ PP(pp_sort)
             for (i = 0; i <= max_minus_one; i++) {
                 SV *sv = base[i];
                 base[i] = newSVsv(sv);
-#if defined(PERL_RC_STACK) && !defined(PERL_XXX_TMP_NORC)
+#ifdef PERL_RC_STACK
                 SvREFCNT_dec_NN(sv);
 #endif
             }
@@ -1094,7 +1094,7 @@ PP(pp_sort)
                 SV ** const didstore = av_store(av, i, sv);
                 if (SvSMAGICAL(sv))
                     mg_set(sv);
-#if defined(PERL_RC_STACK) && !defined(PERL_XXX_TMP_NORC)
+#ifdef PERL_RC_STACK
                 if (didstore)
                     SvREFCNT_inc_simple_void_NN(sv);
 #else
@@ -1122,7 +1122,7 @@ PP(pp_sort)
             for (i = 0; i <= max_minus_one; i++) {
                 SV *sv = base[i];
                 assert(sv);
-#if defined(PERL_RC_STACK) && !defined(PERL_XXX_TMP_NORC)
+#ifdef PERL_RC_STACK
                 if (SvREFCNT(sv) > 2) {
                     base[i] = newSVsv(sv);
                     SvREFCNT_dec_NN(sv);
@@ -1142,7 +1142,7 @@ PP(pp_sort)
             AvFILLp(av) = max_minus_one;
             AvREIFY_off(av);
             AvREAL_on(av);
-#if defined(PERL_RC_STACK) && !defined(PERL_XXX_TMP_NORC)
+#ifdef PERL_RC_STACK
             /* the AV now contributes 1 refcnt to each element */
             for (i = 0; i <= max_minus_one; i++)
                 SvREFCNT_inc_void_NN(base[i]);
@@ -1156,7 +1156,7 @@ PP(pp_sort)
          * reference counts have already claimed by av.
          */
         PL_stack_sp = ORIGMARK;
-#if defined(PERL_RC_STACK) && !defined(PERL_XXX_TMP_NORC)
+#ifdef PERL_RC_STACK
         SvREFCNT_dec_NN(av);
 #endif
         LEAVE;
@@ -1178,7 +1178,7 @@ S_sortcv(pTHX_ SV *const a, SV *const b)
  
     PERL_ARGS_ASSERT_SORTCV;
 
-#if defined(PERL_RC_STACK) && !defined(PERL_XXX_TMP_NORC)
+#ifdef PERL_RC_STACK
     assert(rpp_stack_is_rc());
 #endif
 
@@ -1217,7 +1217,7 @@ S_sortcv_stacked(pTHX_ SV *const a, SV *const b)
 
     PERL_ARGS_ASSERT_SORTCV_STACKED;
 
-#if defined(PERL_RC_STACK) && !defined(PERL_XXX_TMP_NORC)
+#ifdef PERL_RC_STACK
     assert(rpp_stack_is_rc());
 #endif
 
@@ -1282,7 +1282,7 @@ S_sortcv_xsub(pTHX_ SV *const a, SV *const b)
 
     PERL_ARGS_ASSERT_SORTCV_XSUB;
 
-#if defined(PERL_RC_STACK) && !defined(PERL_XXX_TMP_NORC)
+#ifdef PERL_RC_STACK
     assert(rpp_stack_is_rc());
 #endif
 
