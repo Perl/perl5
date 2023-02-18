@@ -1175,10 +1175,10 @@ newXS("Devel::PPPort::dAXMARK", XS_Devel__PPPort_dAXMARK, file);
 int
 OpSIBLING_tests()
 	PREINIT:
-		OP *x;
-		OP *kid;
-		OP *middlekid;
-		OP *lastkid;
+		OP *x = NULL;
+		OP *kid = NULL;
+		OP *middlekid = NULL;
+		OP *lastkid = NULL;
 		int count = 0;
 		int failures = 0;
 		int i;
