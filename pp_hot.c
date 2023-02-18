@@ -1873,12 +1873,7 @@ PP(pp_print)
 PERL_STATIC_INLINE OP*
 S_padhv_rv2hv_common(pTHX_ HV *hv, U8 gimme, bool is_keys, bool has_targ)
 {
-    bool is_tied;
-    bool is_bool;
-    MAGIC *mg;
     dSP;
-    IV  i;
-    SV *sv;
 
     assert(PL_op->op_type == OP_PADHV || PL_op->op_type == OP_RV2HV);
 
@@ -1894,12 +1889,17 @@ S_padhv_rv2hv_common(pTHX_ HV *hv, U8 gimme, bool is_keys, bool has_targ)
     if (gimme == G_VOID)
         return NORMAL;
 
-    is_bool = (     PL_op->op_private & OPpTRUEBOOL
-              || (  PL_op->op_private & OPpMAYBE_TRUEBOOL
-                  && block_gimme() == G_VOID));
-    is_tied = SvRMAGICAL(hv) && (mg = mg_find(MUTABLE_SV(hv), PERL_MAGIC_tied));
+    bool is_bool = (     PL_op->op_private & OPpTRUEBOOL
+                   || (  PL_op->op_private & OPpMAYBE_TRUEBOOL
+                      && block_gimme() == G_VOID));
 
-    if (UNLIKELY(is_tied)) {
+    MAGIC *is_tied_mg = SvRMAGICAL(hv)
+                        ? mg_find(MUTABLE_SV(hv), PERL_MAGIC_tied)
+                        : NULL;
+
+    IV  i = 0;
+    SV *sv = NULL;
+    if (UNLIKELY(is_tied_mg)) {
         if (is_keys && !is_bool) {
             i = 0;
             while (hv_iternext(hv))
@@ -1907,7 +1907,7 @@ S_padhv_rv2hv_common(pTHX_ HV *hv, U8 gimme, bool is_keys, bool has_targ)
             goto push_i;
         }
         else {
-            sv = magic_scalarpack(hv, mg);
+            sv = magic_scalarpack(hv, is_tied_mg);
             goto push_sv;
         }
     }
