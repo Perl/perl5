@@ -12101,7 +12101,7 @@ Perl_scan_num(pTHX_ const char *start, YYSTYPE* lvalp)
                     NV nv_mult = 1.0;
 #endif
                     bool accumulate = TRUE;
-                    U8 b;
+                    U8 b = 0; /* silence compiler warning */
                     int lim = 1 << shift;
                     for (h++; ((isXDIGIT(*h) && (b = XDIGIT_VALUE(*h)) < lim) ||
                                *h == '_'); h++) {
