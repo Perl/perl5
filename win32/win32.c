@@ -1016,7 +1016,12 @@ win32_telldir(DIR *dirp)
 DllExport void
 win32_seekdir(DIR *dirp, long loc)
 {
-    dirp->curr = loc == -1 ? NULL : dirp->start + loc;
+    /* Ensure dirp->curr remains within `dirp->start` buffer. */
+    if (loc >= 0 && dirp->end - dirp->start > (ptrdiff_t) loc) {
+        dirp->curr = dirp->start + loc;
+    } else {
+        dirp->curr = NULL;
+    }
 }
 
 /* Rewinddir resets the string pointer to the start */

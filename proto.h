@@ -1017,6 +1017,7 @@ Perl_dounwind(pTHX_ I32 cxix);
 
 PERL_CALLCONV U8
 Perl_dowantarray(pTHX)
+        __attribute__deprecated__
         __attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_DOWANTARRAY
 
@@ -3791,6 +3792,19 @@ Perl_require_pv(pTHX_ const char *pv);
 #define PERL_ARGS_ASSERT_REQUIRE_PV             \
         assert(pv)
 
+PERL_CALLCONV void
+Perl_resume_compcv(pTHX_ struct suspended_compcv *buffer, bool save);
+#define PERL_ARGS_ASSERT_RESUME_COMPCV          \
+        assert(buffer)
+
+/* PERL_CALLCONV void
+resume_compcv_and_save(pTHX_ struct suspended_compcv *buffer); */
+#define PERL_ARGS_ASSERT_RESUME_COMPCV_AND_SAVE
+
+/* PERL_CALLCONV void
+resume_compcv_final(pTHX_ struct suspended_compcv *buffer); */
+#define PERL_ARGS_ASSERT_RESUME_COMPCV_FINAL
+
 PERL_CALLCONV char *
 Perl_rninstr(const char *big, const char *bigend, const char *little, const char *lend)
         __attribute__warn_unused_result__
@@ -4267,6 +4281,11 @@ Perl_sub_crush_depth(pTHX_ CV *cv)
         __attribute__visibility__("hidden");
 #define PERL_ARGS_ASSERT_SUB_CRUSH_DEPTH        \
         assert(cv)
+
+PERL_CALLCONV void
+Perl_suspend_compcv(pTHX_ struct suspended_compcv *buffer);
+#define PERL_ARGS_ASSERT_SUSPEND_COMPCV         \
+        assert(buffer)
 
 PERL_CALLCONV bool
 Perl_sv_2bool_flags(pTHX_ SV *sv, I32 flags);
@@ -6212,6 +6231,63 @@ S_get_aux_mg(pTHX_ AV *av);
         assert(av)
 
 #endif /* defined(PERL_IN_AV_C) */
+#if defined(PERL_IN_CLASS_C) || defined(PERL_IN_PAD_C) || \
+    defined(PERL_IN_PERLY_C) || defined(PERL_IN_TOKE_C)
+PERL_CALLCONV void
+Perl_class_add_ADJUST(pTHX_ HV *stash, CV *cv);
+# define PERL_ARGS_ASSERT_CLASS_ADD_ADJUST      \
+        assert(stash); assert(cv)
+
+PERL_CALLCONV void
+Perl_class_add_field(pTHX_ HV *stash, PADNAME *pn);
+# define PERL_ARGS_ASSERT_CLASS_ADD_FIELD       \
+        assert(stash); assert(pn)
+
+PERL_CALLCONV void
+Perl_class_apply_attributes(pTHX_ HV *stash, OP *attrlist);
+# define PERL_ARGS_ASSERT_CLASS_APPLY_ATTRIBUTES \
+        assert(stash)
+
+PERL_CALLCONV void
+Perl_class_apply_field_attributes(pTHX_ PADNAME *pn, OP *attrlist);
+# define PERL_ARGS_ASSERT_CLASS_APPLY_FIELD_ATTRIBUTES \
+        assert(pn)
+
+PERL_CALLCONV void
+Perl_class_prepare_initfield_parse(pTHX);
+# define PERL_ARGS_ASSERT_CLASS_PREPARE_INITFIELD_PARSE
+
+PERL_CALLCONV void
+Perl_class_prepare_method_parse(pTHX_ CV *cv);
+# define PERL_ARGS_ASSERT_CLASS_PREPARE_METHOD_PARSE \
+        assert(cv)
+
+PERL_CALLCONV void
+Perl_class_seal_stash(pTHX_ HV *stash);
+# define PERL_ARGS_ASSERT_CLASS_SEAL_STASH      \
+        assert(stash)
+
+PERL_CALLCONV void
+Perl_class_set_field_defop(pTHX_ PADNAME *pn, OPCODE defmode, OP *defop);
+# define PERL_ARGS_ASSERT_CLASS_SET_FIELD_DEFOP \
+        assert(pn); assert(defop)
+
+PERL_CALLCONV void
+Perl_class_setup_stash(pTHX_ HV *stash);
+# define PERL_ARGS_ASSERT_CLASS_SETUP_STASH     \
+        assert(stash)
+
+PERL_CALLCONV OP *
+Perl_class_wrap_method_body(pTHX_ OP *o);
+# define PERL_ARGS_ASSERT_CLASS_WRAP_METHOD_BODY
+
+PERL_CALLCONV void
+Perl_croak_kw_unless_class(pTHX_ const char *kw);
+# define PERL_ARGS_ASSERT_CROAK_KW_UNLESS_CLASS \
+        assert(kw)
+
+#endif /* defined(PERL_IN_CLASS_C) || defined(PERL_IN_PAD_C) || \
+          defined(PERL_IN_PERLY_C) || defined(PERL_IN_TOKE_C) */
 #if defined(PERL_IN_DEB_C)
 STATIC void
 S_deb_stack_n(pTHX_ SV **stack_base, I32 stack_min, I32 stack_max, I32 mark_min, I32 mark_max);
@@ -9118,6 +9194,11 @@ S_sv_dup_common(pTHX_ const SV * const ssv, CLONE_PARAMS * const param)
         __attribute__warn_unused_result__;
 #   define PERL_ARGS_ASSERT_SV_DUP_COMMON       \
         assert(ssv); assert(param)
+
+STATIC void
+S_sv_dup_hvaux(pTHX_ const SV * const ssv, SV *dsv, CLONE_PARAMS * const param);
+#   define PERL_ARGS_ASSERT_SV_DUP_HVAUX        \
+        assert(ssv); assert(dsv); assert(param)
 
 STATIC SV **
 S_sv_dup_inc_multiple(pTHX_ SV * const *source, SV **dest, SSize_t items, CLONE_PARAMS * const param);

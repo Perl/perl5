@@ -1158,12 +1158,12 @@ like $@, qr'^Undefined format "STDOUT" called',
       File::Spec::Functions::updir,'regen','keywords.pl'
     );
   my %nottest_words = map { $_ => 1 } qw(
-    AUTOLOAD BEGIN CHECK CORE DESTROY END INIT UNITCHECK
+    ADJUST AUTOLOAD BEGIN CHECK CORE DESTROY END INIT UNITCHECK
     __DATA__ __END__
-    and catch cmp default defer do dump else elsif eq eval finally for foreach
-    format ge given goto grep gt if isa last le local lt m map my ne next no
-    or our package print printf q qq qr qw qx redo require return s say sort
-    state sub tr try unless until use when while x xor y
+    and catch class cmp default defer do dump else elsif eq eval field finally
+    for foreach format ge given goto grep gt if isa last le local lt m map
+    method my ne next no or our package print printf q qq qr qw qx redo require
+    return s say sort state sub tr try unless until use when while x xor y
   );
   open my $kh, $keywords_file
     or die "$0 cannot open $keywords_file: $!";

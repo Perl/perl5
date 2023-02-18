@@ -18,6 +18,7 @@ caretx.c		C file to create $^X
 cflags.SH		A script that emits C compilation flags per file
 Changes			Describe how to peruse changes between releases
 charclass_invlists.h	Compiled-in inversion lists
+class.c			Internals of the `use feature 'class'` object system
 CODE_OF_CONDUCT.md	Information on where to find the Standards of Conduct
 config_h.SH		Produces config.h
 configpm		Produces lib/Config.pm
@@ -793,6 +794,7 @@ cpan/Encode/Unicode/Makefile.PL		Encode extension
 cpan/Encode/Unicode/Unicode.pm		Encode extension
 cpan/Encode/Unicode/Unicode.xs		Encode extension
 cpan/experimental/lib/experimental.pm
+cpan/experimental/lib/stable.pm
 cpan/experimental/t/basic.t
 cpan/ExtUtils-Constant/lib/ExtUtils/Constant.pm			generate XS code to import C header constants
 cpan/ExtUtils-Constant/lib/ExtUtils/Constant/Base.pm		generate XS code to import C header constants
@@ -5353,6 +5355,8 @@ pod/perlboot.pod
 pod/perlbot.pod			
 pod/perlcall.pod		Perl calling conventions from C
 pod/perlcheat.pod		Perl cheat sheet
+pod/perlclass.pod		Perl class syntax
+pod/perlclassguts.pod		Internals of class syntax
 pod/perlclib.pod		Internal replacements for standard C library functions
 pod/perlcommunity.pod		Perl community information
 pod/perldata.pod		Perl data structures
@@ -5573,9 +5577,9 @@ regcomp.h			Private declarations for above
 regcomp.sym			Data for regnodes.h
 regcomp_debug.c			Regular expression compiler debug code
 regcomp_internal.h		Internal stuff for regex compiler
-regcomp_invlist.c		Invlist logic for regular expresion engine
-regcomp_study.c			Optimizer for regular expresion compiler
-regcomp_trie.c			Trie logic for regular expresion compiler
+regcomp_invlist.c		Invlist logic for regular expression engine
+regcomp_study.c			Optimizer for regular expression compiler
+regcomp_trie.c			Trie logic for regular expression compiler
 regen.pl			Run all scripts that (re)generate files
 regen/charset_translations.pl	Character set utilities
 regen/ebcdic.pl			Generates ebcdic_tables.h
@@ -5638,6 +5642,14 @@ t/bigmem/regexp.t		Test regular expressions with large strings
 t/bigmem/subst.t		Test s/// with large strings
 t/bigmem/vec.t			Check vec() handles large offsets
 t/charset_tools.pl		To aid in portable testing across platforms with different character sets
+t/class/class.t			See if class declarations work
+t/class/construct.t		See if class constructors work
+t/class/destruct.t		See if class destruction works
+t/class/field.t			See if class field declarations work
+t/class/inherit.t		See if class inheritance works
+t/class/method.t		See if class method declarations work
+t/class/phasers.t		See if class phaser blocks work
+t/class/threads.t		See if classes work across multiple threads
 t/cmd/elsif.t			See if else-if works
 t/cmd/for.t			See if for loops work
 t/cmd/mod.t			See if statement modifiers work
@@ -5721,6 +5733,7 @@ t/lib/common.pl			Helper for lib/{warnings,feature}.t
 t/lib/commonsense.t		See if configuration meets basic needs
 t/lib/Count.pm			Helper for t/op/method.t
 t/lib/croak.t			Test calls to Perl_croak() in the C source.
+t/lib/croak/class		Test croak calls from class.c
 t/lib/croak/gv			Test croak calls from gv.c
 t/lib/croak/mg			Test croak calls from mg.c
 t/lib/croak/op			Test croak calls from op.c
@@ -5787,6 +5800,7 @@ t/lib/warnings/9enabled		Tests warnings
 t/lib/warnings/9uninit		Tests "Use of uninitialized" warnings
 t/lib/warnings/av		Tests for av.c for warnings.t
 t/lib/warnings/builtin		Tests for builtin.c for warnings.t
+t/lib/warnings/class		Tests for class.c for warnings.t
 t/lib/warnings/doio		Tests for doio.c for warnings.t
 t/lib/warnings/gv		Tests for gv.c for warnings.t
 t/lib/warnings/hv		Tests for hv.c for warnings.t
@@ -6321,6 +6335,7 @@ t/win32/crypt.t			Test Win32 crypt for compatibility
 t/win32/fs.t			Test Win32 link for compatibility
 t/win32/popen.t			Test for stdout races in backticks, etc
 t/win32/runenv.t		Test if Win* perl honors its env variables
+t/win32/seekdir.t		Test that seekdir/readdir are restricted to relevant memory
 t/win32/signal.t		Test Win32 signal emulation
 t/win32/stat.t			Test Win32 stat emulation
 t/win32/symlink.t		Test Win32 symlink

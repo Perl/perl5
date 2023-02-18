@@ -38,9 +38,11 @@ The types are:
     SVt_PVCV
     SVt_PVFM
     SVt_PVIO
+    SVt_PVOBJ
 
 These are most easily explained from the bottom up.
 
+C<SVt_PVOBJ> is for object instances of the new `use feature 'class'` kind.
 C<SVt_PVIO> is for I/O objects, C<SVt_PVFM> for formats, C<SVt_PVCV> for
 subroutines, C<SVt_PVHV> for hashes and C<SVt_PVAV> for arrays.
 
@@ -67,10 +69,13 @@ PVMG, we save memory by allocating smaller structs when possible.  All the
 other types are just simpler forms of C<SVt_PVMG>, with fewer internal fields.
 C<SVt_NULL> can only hold undef.  C<SVt_IV> can hold undef, an integer, or a
 reference.  (C<SVt_RV> is an alias for C<SVt_IV>, which exists for backward
-compatibility.)  C<SVt_NV> can hold any of those or a double.  C<SVt_PV> can only
-hold C<undef> or a string.  C<SVt_PVIV> is a superset of C<SVt_PV> and C<SVt_IV>.
-C<SVt_PVNV> is similar.  C<SVt_PVMG> can hold anything C<SVt_PVNV> can hold, but it
-can, but does not have to, be blessed or magical.
+compatibility.)  C<SVt_NV> can hold undef or a double. (In builds that support
+headless NVs, these could also hold a reference via a suitable offset, in the
+same way that SVt_IV does, but this is not currently supported and seems to
+be a rare use case.) C<SVt_PV> can hold C<undef>, a string, or a reference.
+C<SVt_PVIV> is a superset of C<SVt_PV> and C<SVt_IV>. C<SVt_PVNV> is a
+superset of C<SVt_PV> and C<SVt_NV>. C<SVt_PVMG> can hold anything C<SVt_PVNV>
+can hold, but it may also be blessed or magical.
 
 =for apidoc AmnU||SVt_NULL
 Type flag for scalars.  See L</svtype>.
@@ -120,6 +125,9 @@ Type flag for formats.  See L</svtype>.
 =for apidoc AmnU||SVt_PVIO
 Type flag for I/O objects.  See L</svtype>.
 
+=for apidoc AmnUx||SVt_PVOBJ
+Type flag for object instances.  See L</svtype>.
+
 =cut
 
   These are ordered so that the simpler types have a lower value; SvUPGRADE
@@ -149,7 +157,8 @@ typedef enum {
         SVt_PVCV,	/* 13 */
         SVt_PVFM,	/* 14 */
         SVt_PVIO,	/* 15 */
-                        /* 16-31: Unused, though one should be reserved for a
+        SVt_PVOBJ,      /* 16 */
+                        /* 17-31: Unused, though one should be reserved for a
                          * freed sv, if the other 3 bits below the flags ones
                          * get allocated */
         SVt_LAST	/* keep last in enum. used to size arrays */
@@ -270,6 +279,11 @@ struct p5rx {
 
 struct invlist {
     _SV_HEAD(XINVLIST*);       /* pointer to xpvinvlist body */
+    _SV_HEAD_UNION;
+};
+
+struct object {
+    _SV_HEAD(XPVOBJ*);          /* pointer to xobject body */
     _SV_HEAD_UNION;
 };
 
@@ -666,6 +680,18 @@ struct xpvio {
 #define IOf_NOLINE	32	/* slurped a pseudo-line from empty file */
 #define IOf_FAKE_DIRP	64	/* xio_dirp is fake (source filters kludge)
                                    Also, when this is set, SvPVX() is valid */
+
+struct xobject {
+    HV*         xmg_stash;
+    union _xmgu xmg_u;
+    SSize_t     xobject_maxfield;
+    SSize_t     xobject_iter_sv_at; /* this is only used by Perl_sv_clear() */
+    SV**        xobject_fields;
+};
+
+#define ObjectMAXFIELD(inst)  ((XPVOBJ *)SvANY(inst))->xobject_maxfield
+#define ObjectITERSVAT(inst)  ((XPVOBJ *)SvANY(inst))->xobject_iter_sv_at
+#define ObjectFIELDS(inst)    ((XPVOBJ *)SvANY(inst))->xobject_fields
 
 /* The following macros define implementation-independent predicates on SVs. */
 
@@ -2645,6 +2671,24 @@ Create a new IO, setting the reference count to 1.
         SvANY(sv_) =   (XPVNV*)((char*)&(sv_->sv_u.svu_nv)  \
                     - STRUCT_OFFSET(XPVNV, xnv_u.xnv_nv));  \
     } STMT_END
+
+#if defined(PERL_CORE) && defined(USE_ITHREADS)
+/* Certain cases in Perl_ss_dup have been merged, by relying on the fact
+   that currently av_dup, gv_dup and hv_dup are the same as sv_dup.
+   If this changes, please unmerge ss_dup.
+   Likewise, sv_dup_inc_multiple() relies on this fact.  */
+#  define sv_dup_inc_NN(s,t)	SvREFCNT_inc_NN(sv_dup_inc(s,t))
+#  define av_dup(s,t)	MUTABLE_AV(sv_dup((const SV *)s,t))
+#  define av_dup_inc(s,t)	MUTABLE_AV(sv_dup_inc((const SV *)s,t))
+#  define hv_dup(s,t)	MUTABLE_HV(sv_dup((const SV *)s,t))
+#  define hv_dup_inc(s,t)	MUTABLE_HV(sv_dup_inc((const SV *)s,t))
+#  define cv_dup(s,t)	MUTABLE_CV(sv_dup((const SV *)s,t))
+#  define cv_dup_inc(s,t)	MUTABLE_CV(sv_dup_inc((const SV *)s,t))
+#  define io_dup(s,t)	MUTABLE_IO(sv_dup((const SV *)s,t))
+#  define io_dup_inc(s,t)	MUTABLE_IO(sv_dup_inc((const SV *)s,t))
+#  define gv_dup(s,t)	MUTABLE_GV(sv_dup((const SV *)s,t))
+#  define gv_dup_inc(s,t)	MUTABLE_GV(sv_dup_inc((const SV *)s,t))
+#endif
 
 /*
  * ex: set ts=8 sts=4 sw=4 et:

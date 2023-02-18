@@ -9,6 +9,7 @@ our @EXPORT_OK = qw(
     symlink_ok
     dir_path
     file_path
+    _cleanup_start
 );
 
 # Wrappers around Test::More::ok() for creation of files, directories and
@@ -94,6 +95,46 @@ sub file_path {
             $fname = VMS::Filespec::unixify($fname) if $^O eq 'VMS';
         return $fname;
     }
+}
+
+sub _something_wrong {
+    my ($message) = @_;
+    warn "in cleanup: $message\n" .
+         "Something seems to be very wrong. Possibly the directory\n" .
+         "we are testing in has been removed or wiped while we ran?\n";
+    return 0;
+}
+
+sub _cleanup_start {
+    my ($test_root_dir, $test_temp_dir)= @_;
+
+    # doing the following two chdirs (and their validation) in two
+    # distinct steps avoids the need to know about directory separators,
+    # or other FS specifics, which is helpful as the test files that use
+    # this function overrides the File::Spec heirarchy, so we can't ask it
+    # to help us here.
+
+    # chdir into the $test_root_dir to start the cleanup. But first validate.
+    if (!$test_root_dir) {
+        return _something_wrong("No test_root_dir?");
+    }
+    if (!-d $test_root_dir) {
+        return _something_wrong("test_root_dir '$test_root_dir' seems to have disappeared!");
+    }
+    chdir($test_root_dir)
+        or return _something_wrong("Failed to chdir to '$test_root_dir': $!");
+
+    # chdir into the $test_temp_dir to start the cleanup. But first validate.
+    if (!$test_temp_dir) {
+        return _something_wrong("No test_temp_dir?");
+    }
+    if (!-d $test_temp_dir) {
+        return _something_wrong("test_temp_dir '$test_temp_dir' seems to have disappeared!");
+    }
+    chdir($test_temp_dir)
+        or return _wrong("Failed to chdir to '$test_temp_dir': $!");
+
+    return 1;
 }
 
 1;

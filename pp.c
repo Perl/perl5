@@ -738,7 +738,6 @@ S_do_chomp(pTHX_ SV *retval, SV *sv, bool chomping)
     if (chomping) {
         if (s && len) {
             char *temp_buffer = NULL;
-            SV *svrecode = NULL;
             s += --len;
             if (RsPARA(PL_rs)) {
                 if (*s != '\n')
@@ -771,7 +770,7 @@ S_do_chomp(pTHX_ SV *retval, SV *sv, bool chomping)
                                is the buffer inside PL_rs, so don't free it.
                              */
                             assert (temp_buffer == rsptr);
-                            goto nope_free_sv;
+                            goto nope_free_nothing;
                         }
                         rsptr = temp_buffer;
                     }
@@ -804,8 +803,6 @@ S_do_chomp(pTHX_ SV *retval, SV *sv, bool chomping)
 
             nope_free_all:
             Safefree(temp_buffer);
-            nope_free_sv:
-            SvREFCNT_dec(svrecode);
             nope_free_nothing: ;
         }
     } else {
@@ -2914,10 +2911,10 @@ PP(pp_sin)
               (op_type == OP_LOG ? (value <= 0.0) : (value < 0.0)))
           {
               char * mesg;
-              SETLOCALE_LOCK;
+              LC_NUMERIC_LOCK(0);
               SET_NUMERIC_STANDARD();
               mesg = Perl_form(aTHX_ "Can't take %s of %" NVgf, neg_report, value);
-              SETLOCALE_UNLOCK;
+              LC_NUMERIC_UNLOCK;
 
               /* diag_listed_as: Can't take log of %g */
               DIE(aTHX_ "%s", mesg);

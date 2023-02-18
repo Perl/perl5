@@ -977,7 +977,7 @@ p	|void	|do_vop 	|I32 optype				\
 : Used in perly.y
 p	|OP *	|dofile 	|NN OP *term				\
 				|I32 force_builtin
-CdpR	|U8	|dowantarray
+CdpRD	|U8	|dowantarray
 Adp	|void	|dump_all
 p	|void	|dump_all_perl	|bool justperl
 Apdh	|void	|dump_eval
@@ -2356,7 +2356,7 @@ p	|OP *	|sawparens	|NULLOK OP *o
 Apd	|OP *	|op_contextualize					\
 				|NN OP *o				\
 				|I32 context
-; Used in op.c
+; Used in op.c and class.c
 Apd	|OP *	|op_force_list	|NULLOK OP *o
 : Used in perly.y
 p	|OP *	|scalar 	|NULLOK OP *o
@@ -2405,6 +2405,13 @@ Apd	|OP *	|apply_builtin_cv_attributes				\
 				|NULLOK OP *attrlist
 Xp	|void	|init_named_cv	|NN CV *cv				\
 				|NN OP *nameop
+Apd	|void	|suspend_compcv |NN struct suspended_compcv *buffer
+AMp	|void	|resume_compcv	|NN struct suspended_compcv *buffer	\
+				|bool save
+md	|void	|resume_compcv_and_save 				\
+				|NN struct suspended_compcv *buffer
+md	|void	|resume_compcv_final					\
+				|NN struct suspended_compcv *buffer
 : Used in pp_ctl.c
 p	|void	|sub_crush_depth|NN CV *cv
 CpbMd	|bool	|sv_2bool	|NN SV * const sv
@@ -3672,6 +3679,7 @@ XEop	|char  *|dup_warnings	|NULLOK char *warnings
 
 Amd	|const char * const|phase_name					\
 				|enum perl_phase
+
 #if ( defined(AF_INET) && defined(HAS_SOCKET) && defined(PF_INET) && \
     defined(SOCK_DGRAM) ) || defined(HAS_SOCKETPAIR)
 pR	|int	|PerlSock_socketpair_cloexec				\
@@ -3956,6 +3964,37 @@ i	|bool	|PerlEnv_putenv |NN char *str
 #if defined(PERL_IN_AV_C)
 S	|MAGIC *|get_aux_mg	|NN AV *av
 #endif /* defined(PERL_IN_AV_C) */
+#if defined(PERL_IN_CLASS_C) || defined(PERL_IN_PAD_C) || \
+    defined(PERL_IN_PERLY_C) || defined(PERL_IN_TOKE_C)
+; Functions in class.c that are called by the parser (perly.c, toke.c, pad.c)
+Cp	|void	|class_add_ADJUST					\
+				|NN HV *stash				\
+				|NN CV *cv
+Cp	|void	|class_add_field|NN HV *stash				\
+				|NN PADNAME *pn
+Cp	|void	|class_apply_attributes 				\
+				|NN HV *stash				\
+				|NULLOK OP *attrlist
+Cp	|void	|class_apply_field_attributes				\
+				|NN PADNAME *pn 			\
+				|NULLOK OP *attrlist
+Cp	|void	|class_prepare_initfield_parse
+Cp	|void	|class_prepare_method_parse				\
+				|NN CV *cv
+Cp	|void	|class_seal_stash					\
+				|NN HV *stash
+Cp	|void	|class_setup_stash					\
+				|NN HV *stash
+Cp	|void	|class_set_field_defop					\
+				|NN PADNAME *pn 			\
+				|OPCODE defmode 			\
+				|NN OP *defop
+Cp	|OP *	|class_wrap_method_body 				\
+				|NULLOK OP *o
+Cp	|void	|croak_kw_unless_class					\
+				|NN const char *kw
+#endif /* defined(PERL_IN_CLASS_C) || defined(PERL_IN_PAD_C) || \
+          defined(PERL_IN_PERLY_C) || defined(PERL_IN_TOKE_C) */
 #if defined(PERL_IN_DEB_C)
 S	|void	|deb_stack_n	|NN SV **stack_base			\
 				|I32 stack_min				\
@@ -5616,6 +5655,9 @@ S	|SV **	|sv_dup_inc_multiple					\
 				|NN SV * const *source			\
 				|NN SV **dest				\
 				|SSize_t items				\
+				|NN CLONE_PARAMS * const param
+S	|void	|sv_dup_hvaux	|NN const SV * const ssv		\
+				|NN SV *dsv				\
 				|NN CLONE_PARAMS * const param
 SR	|SV *	|sv_dup_common	|NN const SV * const ssv		\
 				|NN CLONE_PARAMS * const param

@@ -20,7 +20,7 @@ sub import {
 # walkoptree comes from B.xs
 
 BEGIN {
-    $B::VERSION = '1.87';
+    $B::VERSION = '1.88';
     @B::EXPORT_OK = ();
 
     # Our BOOT code needs $VERSION set, and will append to @EXPORT_OK.
@@ -62,6 +62,7 @@ push @B::EXPORT_OK, (qw(minus_c ppname save_BEGINs
 @B::CV::ISA = 'B::PVMG';
 @B::IO::ISA = 'B::PVMG';
 @B::FM::ISA = 'B::CV';
+@B::OBJ::ISA = 'B::PVMG';
 
 @B::OP::ISA = 'B::OBJECT';
 @B::UNOP::ISA = 'B::OP';

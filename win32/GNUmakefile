@@ -961,6 +961,7 @@ MICROCORE_SRC	=		\
 		..\av.c		\
 		..\builtin.c	\
 		..\caretx.c	\
+		..\class.c	\
 		..\deb.c	\
 		..\doio.c	\
 		..\doop.c	\

@@ -45,6 +45,7 @@ my %feature = (
     defer                   => 'defer',
     extra_paired_delimiters => 'more_delims',
     module_true             => 'module_true',
+    class                   => 'class',
 );
 
 # NOTE: If a feature is ever enabled in a non-contiguous range of Perl
@@ -500,7 +501,7 @@ read_only_bottom_close_and_rename($h);
 
 __END__
 package feature;
-our $VERSION = '1.79';
+our $VERSION = '1.80';
 
 FEATURES
 
@@ -1297,6 +1298,17 @@ loaded with C<require> or C<use>. Any errors during compilation will cause
 failures, but reaching the end of the module when this feature is in effect
 will prevent C<perl> from throwing an exception that the module "did not return
 a true value".
+
+=head2 The 'class' feature
+
+B<WARNING>: This feature is still experimental and the implementation may
+change or be removed in future versions of Perl.  For this reason, Perl will
+warn when you use the feature, unless you have explicitly disabled the warning:
+
+    no warnings "experimental::class";
+
+This feature enables the C<class> block syntax and other associated keywords
+which implement the "new" object system, previously codenamed "Corinna".
 
 =head1 FEATURE BUNDLES
 

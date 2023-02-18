@@ -602,6 +602,7 @@
 # define stack_grow(a,b,c)                      Perl_stack_grow(aTHX_ a,b,c)
 # define start_subparse(a,b)                    Perl_start_subparse(aTHX_ a,b)
 # define str_to_version(a)                      Perl_str_to_version(aTHX_ a)
+# define suspend_compcv(a)                      Perl_suspend_compcv(aTHX_ a)
 # define sv_2bool_flags(a,b)                    Perl_sv_2bool_flags(aTHX_ a,b)
 # define sv_2cv(a,b,c,d)                        Perl_sv_2cv(aTHX_ a,b,c,d)
 # define sv_2io(a)                              Perl_sv_2io(aTHX_ a)
@@ -1971,6 +1972,21 @@
 #   define my_pclose(a)                         Perl_my_pclose(aTHX_ a)
 #   define my_popen(a,b)                        Perl_my_popen(aTHX_ a,b)
 # endif /* !defined(PERL_IMPLICIT_SYS) */
+# if defined(PERL_IN_CLASS_C) || defined(PERL_IN_PAD_C) || \
+     defined(PERL_IN_PERLY_C) || defined(PERL_IN_TOKE_C)
+#   define class_add_ADJUST(a,b)                Perl_class_add_ADJUST(aTHX_ a,b)
+#   define class_add_field(a,b)                 Perl_class_add_field(aTHX_ a,b)
+#   define class_apply_attributes(a,b)          Perl_class_apply_attributes(aTHX_ a,b)
+#   define class_apply_field_attributes(a,b)    Perl_class_apply_field_attributes(aTHX_ a,b)
+#   define class_prepare_initfield_parse()      Perl_class_prepare_initfield_parse(aTHX)
+#   define class_prepare_method_parse(a)        Perl_class_prepare_method_parse(aTHX_ a)
+#   define class_seal_stash(a)                  Perl_class_seal_stash(aTHX_ a)
+#   define class_set_field_defop(a,b,c)         Perl_class_set_field_defop(aTHX_ a,b,c)
+#   define class_setup_stash(a)                 Perl_class_setup_stash(aTHX_ a)
+#   define class_wrap_method_body(a)            Perl_class_wrap_method_body(aTHX_ a)
+#   define croak_kw_unless_class(a)             Perl_croak_kw_unless_class(aTHX_ a)
+# endif /* defined(PERL_IN_CLASS_C) || defined(PERL_IN_PAD_C) || \
+           defined(PERL_IN_PERLY_C) || defined(PERL_IN_TOKE_C) */
 # if defined(PERL_IN_REGEX_ENGINE)
 #   define check_regnode_after(a,b)             Perl_check_regnode_after(aTHX_ a,b)
 #   define regnext(a)                           Perl_regnext(aTHX_ a)
@@ -2039,6 +2055,7 @@
 #     endif /* defined(PERL_DEBUG_READONLY_COW) */
 #     if defined(USE_ITHREADS)
 #       define sv_dup_common(a,b)               S_sv_dup_common(aTHX_ a,b)
+#       define sv_dup_hvaux(a,b,c)              S_sv_dup_hvaux(aTHX_ a,b,c)
 #       define sv_dup_inc_multiple(a,b,c,d)     S_sv_dup_inc_multiple(aTHX_ a,b,c,d)
 #       define unreferenced_to_tmp_stack(a)     S_unreferenced_to_tmp_stack(aTHX_ a)
 #     endif /* defined(USE_ITHREADS) */

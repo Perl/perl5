@@ -1041,6 +1041,7 @@ Perl_sv_upgrade(pTHX_ SV *const sv, svtype new_type)
         return;
     case SVt_PVHV:
     case SVt_PVAV:
+    case SVt_PVOBJ:
         assert(new_type_details->body_size);
 
 #ifndef PURIFY
@@ -1056,14 +1057,16 @@ Perl_sv_upgrade(pTHX_ SV *const sv, svtype new_type)
         new_body = new_NOARENAZ(new_type_details);
 #endif
         SvANY(sv) = new_body;
-        if (new_type == SVt_PVAV) {
+        switch(new_type) {
+        case SVt_PVAV:
             *((XPVAV*) SvANY(sv)) = (XPVAV) {
                 .xmg_stash = NULL, .xmg_u = {.xmg_magic = NULL},
                 .xav_fill = -1, .xav_max = -1, .xav_alloc = 0
                 };
 
             AvREAL_only(sv);
-        } else {
+            break;
+        case SVt_PVHV:
             *((XPVHV*) SvANY(sv)) = (XPVHV) {
                 .xmg_stash = NULL, .xmg_u = {.xmg_magic = NULL},
                 .xhv_keys = 0,
@@ -1076,6 +1079,17 @@ Perl_sv_upgrade(pTHX_ SV *const sv, svtype new_type)
 #ifndef NODEFAULT_SHAREKEYS
             HvSHAREKEYS_on(sv);         /* key-sharing on by default */
 #endif
+            break;
+        case SVt_PVOBJ:
+            *((XPVOBJ*) SvANY(sv)) = (XPVOBJ) {
+                .xmg_stash = NULL, .xmg_u = {.xmg_magic = NULL},
+                .xobject_maxfield = -1,
+                .xobject_iter_sv_at = 0,
+                .xobject_fields = NULL,
+            };
+            break;
+        default:
+            NOT_REACHED;
         }
 
         /* SVt_NULL isn't the only thing upgraded to AV or HV.
@@ -6584,8 +6598,7 @@ and free the body itself.  The SV's head is I<not> freed, although
 its type is set to all 1's so that it won't inadvertently be assumed
 to be live during global destruction etc.
 This function should only be called when C<REFCNT> is zero.  Most of the time
-you'll want to call C<sv_free()> (or its macro wrapper C<SvREFCNT_dec>)
-instead.
+you'll want to call C<SvREFCNT_dec> instead.
 
 =cut
 */
@@ -6611,8 +6624,11 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
 
         assert(SvREFCNT(sv) == 0);
         assert(SvTYPE(sv) != (svtype)SVTYPEMASK);
-
+#if NVSIZE <= IVSIZE
+        if (type <= SVt_NV) {
+#else
         if (type <= SVt_IV) {
+#endif
             /* Historically this check on type was needed so that the code to
              * free bodies wasn't reached for these types, because the arena
              * slots were re-used for HEs and pointer table entries. The
@@ -6634,6 +6650,9 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
              * path, as SvPVX() doesn't point to valid memory.
              *
              * Hence this code is still the most efficient way to handle this.
+             *
+             * Additionally, for bodyless NVs, riding this branch is more
+             * efficient than stepping through the general logic.
              */
 
             if (SvROK(sv))
@@ -6757,6 +6776,17 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
                 Safefree(AvALLOC(av));
             }
 
+            break;
+        case SVt_PVOBJ:
+            if(ObjectMAXFIELD(sv) > -1) {
+                next_sv = ObjectFIELDS(sv)[ObjectMAXFIELD(sv)--];
+                /* save old iter_sv in top-most field, and pray that it
+                 * doesn't get wiped in the meantime */
+                ObjectFIELDS(sv)[(ObjectITERSVAT(sv) = ObjectMAXFIELD(sv) + 1)] = iter_sv;
+                iter_sv = sv;
+                goto get_next_sv;
+            }
+            Safefree(ObjectFIELDS(sv));
             break;
         case SVt_PVLV:
             if (LvTYPE(sv) == 'T') { /* for tie: return HE to pool */
@@ -6942,6 +6972,17 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
                     /* restore previous value, squirrelled away */
                     iter_sv = AvARRAY(av)[AvMAX(av)];
                     Safefree(AvALLOC(av));
+                    goto free_body;
+                }
+            } else if (SvTYPE(iter_sv) == SVt_PVOBJ) {
+                if (ObjectMAXFIELD(iter_sv) > -1) {
+                    sv = ObjectFIELDS(iter_sv)[ObjectMAXFIELD(iter_sv)--];
+                }
+                else { /* no more fields in the current SV to free */
+                    sv = iter_sv;
+                    type = SvTYPE(sv);
+                    iter_sv = ObjectFIELDS(sv)[ObjectITERSVAT(sv)];
+                    Safefree(ObjectFIELDS(sv));
                     goto free_body;
                 }
             } else if (SvTYPE(iter_sv) == SVt_PVHV) {
@@ -10435,6 +10476,7 @@ Perl_sv_reftype(pTHX_ const SV *const sv, const int ob)
         case SVt_PVIO:		return "IO";
         case SVt_INVLIST:	return "INVLIST";
         case SVt_REGEXP:	return "REGEXP";
+        case SVt_PVOBJ:         return "OBJECT";
         default:		return "UNKNOWN";
         }
     }
@@ -10737,10 +10779,15 @@ Perl_sv_bless(pTHX_ SV *const sv, HV *const stash)
     SvGETMAGIC(sv);
     if (!SvROK(sv))
         Perl_croak(aTHX_ "Can't bless non-reference value");
+    if (HvSTASH_IS_CLASS(stash))
+        Perl_croak(aTHX_ "Attempt to bless into a class");
+
     tmpRef = SvRV(sv);
     if (SvFLAGS(tmpRef) & (SVs_OBJECT|SVf_READONLY|SVf_PROTECT)) {
         if (SvREADONLY(tmpRef))
             Perl_croak_no_modify();
+        if (SvTYPE(tmpRef) == SVt_PVOBJ)
+            Perl_croak(aTHX_ "Can't bless an object reference");
         if (SvOBJECT(tmpRef)) {
             oldstash = SvSTASH(tmpRef);
         }
@@ -13735,21 +13782,6 @@ ptr_table_* functions.
 #endif
 
 
-/* Certain cases in Perl_ss_dup have been merged, by relying on the fact
-   that currently av_dup, gv_dup and hv_dup are the same as sv_dup.
-   If this changes, please unmerge ss_dup.
-   Likewise, sv_dup_inc_multiple() relies on this fact.  */
-#define sv_dup_inc_NN(s,t)	SvREFCNT_inc_NN(sv_dup_inc(s,t))
-#define av_dup(s,t)	MUTABLE_AV(sv_dup((const SV *)s,t))
-#define av_dup_inc(s,t)	MUTABLE_AV(sv_dup_inc((const SV *)s,t))
-#define hv_dup(s,t)	MUTABLE_HV(sv_dup((const SV *)s,t))
-#define hv_dup_inc(s,t)	MUTABLE_HV(sv_dup_inc((const SV *)s,t))
-#define cv_dup(s,t)	MUTABLE_CV(sv_dup((const SV *)s,t))
-#define cv_dup_inc(s,t)	MUTABLE_CV(sv_dup_inc((const SV *)s,t))
-#define io_dup(s,t)	MUTABLE_IO(sv_dup((const SV *)s,t))
-#define io_dup_inc(s,t)	MUTABLE_IO(sv_dup_inc((const SV *)s,t))
-#define gv_dup(s,t)	MUTABLE_GV(sv_dup((const SV *)s,t))
-#define gv_dup_inc(s,t)	MUTABLE_GV(sv_dup_inc((const SV *)s,t))
 #define SAVEPV(p)	((p) ? savepv(p) : NULL)
 #define SAVEPVN(p,n)	((p) ? savepvn(p,n) : NULL)
 
@@ -14392,6 +14424,86 @@ S_sv_dup_inc_multiple(pTHX_ SV *const *source, SV **dest,
     return dest;
 }
 
+/* duplicate the HvAUX of an HV */
+static void
+S_sv_dup_hvaux(pTHX_ const SV *const ssv, SV *dsv, CLONE_PARAMS *const param)
+{
+    PERL_ARGS_ASSERT_SV_DUP_HVAUX;
+
+    const struct xpvhv_aux * const saux = HvAUX(ssv);
+    struct xpvhv_aux * const daux = HvAUX(dsv);
+    /* This flag isn't copied.  */
+    SvFLAGS(dsv) |= SVphv_HasAUX;
+
+    if (saux->xhv_name_count) {
+        HEK ** const sname = saux->xhv_name_u.xhvnameu_names;
+        const I32 count = saux->xhv_name_count < 0
+            ? -saux->xhv_name_count
+            :  saux->xhv_name_count;
+        HEK **shekp = sname + count;
+        HEK **dhekp;
+        Newx(daux->xhv_name_u.xhvnameu_names, count, HEK *);
+        dhekp = daux->xhv_name_u.xhvnameu_names + count;
+        while (shekp-- > sname) {
+            dhekp--;
+            *dhekp = hek_dup(*shekp, param);
+        }
+    }
+    else {
+        daux->xhv_name_u.xhvnameu_name = hek_dup(saux->xhv_name_u.xhvnameu_name, param);
+    }
+    daux->xhv_name_count = saux->xhv_name_count;
+
+    daux->xhv_aux_flags = saux->xhv_aux_flags;
+#ifdef PERL_HASH_RANDOMIZE_KEYS
+    daux->xhv_rand = saux->xhv_rand;
+    daux->xhv_last_rand = saux->xhv_last_rand;
+#endif
+    daux->xhv_riter = saux->xhv_riter;
+    daux->xhv_eiter = saux->xhv_eiter ? he_dup(saux->xhv_eiter, FALSE, param) : 0;
+    /* backref array needs refcnt=2; see sv_add_backref */
+    daux->xhv_backreferences =
+        (param->flags & CLONEf_JOIN_IN)
+            /* when joining, we let the individual GVs and
+             * CVs add themselves to backref as
+             * needed. This avoids pulling in stuff
+             * that isn't required, and simplifies the
+             * case where stashes aren't cloned back
+             * if they already exist in the parent
+             * thread */
+        ? NULL
+        : saux->xhv_backreferences
+            ? (SvTYPE(saux->xhv_backreferences) == SVt_PVAV)
+                ? MUTABLE_AV(SvREFCNT_inc(
+                      sv_dup_inc((const SV *)
+                        saux->xhv_backreferences, param)))
+                : MUTABLE_AV(sv_dup((const SV *)
+                        saux->xhv_backreferences, param))
+            : 0;
+
+    daux->xhv_mro_meta = saux->xhv_mro_meta
+        ? mro_meta_dup(saux->xhv_mro_meta, param)
+        : 0;
+
+    /* Record stashes for possible cloning in Perl_clone(). */
+    if (HvNAME(ssv))
+        av_push(param->stashes, dsv);
+
+    if (HvSTASH_IS_CLASS(ssv)) {
+        daux->xhv_class_superclass    = hv_dup_inc(saux->xhv_class_superclass,    param);
+        daux->xhv_class_initfields_cv = cv_dup_inc(saux->xhv_class_initfields_cv, param);
+        daux->xhv_class_adjust_blocks = av_dup_inc(saux->xhv_class_adjust_blocks, param);
+        daux->xhv_class_fields        = padnamelist_dup_inc(saux->xhv_class_fields, param);
+        daux->xhv_class_next_fieldix  = saux->xhv_class_next_fieldix;
+        daux->xhv_class_param_map     = hv_dup_inc(saux->xhv_class_param_map,     param);
+
+        /* TODO: This does mean that we can't compile more `field` expressions
+         * in the cloned thread, but surely we're done with compiletime now..?
+         */
+        daux->xhv_class_suspended_initfields_compcv = NULL;
+    }
+}
+
 /* duplicate an SV of any type (including AV, HV etc) */
 
 static SV *
@@ -14511,7 +14623,7 @@ S_sv_dup_common(pTHX_ const SV *const ssv, CLONE_PARAMS *const param)
 
             switch (sv_type) {
             default:
-                Perl_croak(aTHX_ "Bizarre SvTYPE [%" IVdf "]", (IV)SvTYPE(ssv));
+                Perl_croak(param->proto_perl, "Bizarre SvTYPE [%" IVdf "]", (IV)SvTYPE(ssv));
                 NOT_REACHED; /* NOTREACHED */
                 break;
 
@@ -14526,6 +14638,7 @@ S_sv_dup_common(pTHX_ const SV *const ssv, CLONE_PARAMS *const param)
                     goto have_body;
                 }
                 /* FALLTHROUGH */
+            case SVt_PVOBJ:
             case SVt_PVGV:
             case SVt_PVIO:
             case SVt_PVFM:
@@ -14564,7 +14677,7 @@ S_sv_dup_common(pTHX_ const SV *const ssv, CLONE_PARAMS *const param)
                  sv_type_details->body_size + sv_type_details->offset, char);
 #endif
 
-            if (sv_type != SVt_PVAV && sv_type != SVt_PVHV
+            if (sv_type != SVt_PVAV && sv_type != SVt_PVHV && sv_type != SVt_PVOBJ
                 && !isGV_with_GP(dsv)
                 && !isREGEXP(dsv)
                 && !(sv_type == SVt_PVIO && !(IoFLAGS(dsv) & IOf_FAKE_DIRP)))
@@ -14700,70 +14813,8 @@ S_sv_dup_common(pTHX_ const SV *const ssv, CLONE_PARAMS *const param)
                             ? he_dup(source, FALSE, param) : 0;
                         ++i;
                     }
-                    if (HvHasAUX(ssv)) {
-                        const struct xpvhv_aux * const saux = HvAUX(ssv);
-                        struct xpvhv_aux * const daux = HvAUX(dsv);
-                        /* This flag isn't copied.  */
-                        SvOOK_on(dsv);
-
-                        if (saux->xhv_name_count) {
-                            HEK ** const sname = saux->xhv_name_u.xhvnameu_names;
-                            const I32 count
-                             = saux->xhv_name_count < 0
-                                ? -saux->xhv_name_count
-                                :  saux->xhv_name_count;
-                            HEK **shekp = sname + count;
-                            HEK **dhekp;
-                            Newx(daux->xhv_name_u.xhvnameu_names, count, HEK *);
-                            dhekp = daux->xhv_name_u.xhvnameu_names + count;
-                            while (shekp-- > sname) {
-                                dhekp--;
-                                *dhekp = hek_dup(*shekp, param);
-                            }
-                        }
-                        else {
-                            daux->xhv_name_u.xhvnameu_name
-                                = hek_dup(saux->xhv_name_u.xhvnameu_name,
-                                          param);
-                        }
-                        daux->xhv_name_count = saux->xhv_name_count;
-
-                        daux->xhv_aux_flags = saux->xhv_aux_flags;
-#ifdef PERL_HASH_RANDOMIZE_KEYS
-                        daux->xhv_rand = saux->xhv_rand;
-                        daux->xhv_last_rand = saux->xhv_last_rand;
-#endif
-                        daux->xhv_riter = saux->xhv_riter;
-                        daux->xhv_eiter = saux->xhv_eiter
-                            ? he_dup(saux->xhv_eiter, FALSE, param) : 0;
-                        /* backref array needs refcnt=2; see sv_add_backref */
-                        daux->xhv_backreferences =
-                            (param->flags & CLONEf_JOIN_IN)
-                                /* when joining, we let the individual GVs and
-                                 * CVs add themselves to backref as
-                                 * needed. This avoids pulling in stuff
-                                 * that isn't required, and simplifies the
-                                 * case where stashes aren't cloned back
-                                 * if they already exist in the parent
-                                 * thread */
-                            ? NULL
-                            : saux->xhv_backreferences
-                                ? (SvTYPE(saux->xhv_backreferences) == SVt_PVAV)
-                                    ? MUTABLE_AV(SvREFCNT_inc(
-                                          sv_dup_inc((const SV *)
-                                            saux->xhv_backreferences, param)))
-                                    : MUTABLE_AV(sv_dup((const SV *)
-                                            saux->xhv_backreferences, param))
-                                : 0;
-
-                        daux->xhv_mro_meta = saux->xhv_mro_meta
-                            ? mro_meta_dup(saux->xhv_mro_meta, param)
-                            : 0;
-
-                        /* Record stashes for possible cloning in Perl_clone(). */
-                        if (HvNAME(ssv))
-                            av_push(param->stashes, dsv);
-                    }
+                    if (HvHasAUX(ssv))
+                        sv_dup_hvaux(ssv, dsv, param);
                 }
                 else
                     HvARRAY(MUTABLE_HV(dsv)) = NULL;
@@ -14819,6 +14870,16 @@ S_sv_dup_common(pTHX_ const SV *const ssv, CLONE_PARAMS *const param)
                     CvWEAKOUTSIDE(ssv)
                     ? cv_dup(    CvOUTSIDE(dsv), param)
                     : cv_dup_inc(CvOUTSIDE(dsv), param);
+                break;
+            case SVt_PVOBJ:
+                {
+                    Size_t fieldcount = ObjectMAXFIELD(ssv) + 1;
+
+                    Newx(ObjectFIELDS(dsv), fieldcount, SV *);
+                    ObjectMAXFIELD(dsv) = fieldcount - 1;
+
+                    sv_dup_inc_multiple(ObjectFIELDS(ssv), ObjectFIELDS(dsv), fieldcount, param);
+                }
                 break;
             }
         }

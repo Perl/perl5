@@ -3525,6 +3525,13 @@ Perl_padname_refcnt_inc(PADNAME *pn)
     return pn;
 }
 
+PERL_STATIC_INLINE PADNAMELIST *
+Perl_padnamelist_refcnt_inc(PADNAMELIST *pnl)
+{
+    PadnamelistREFCNT(pnl)++;
+    return pnl;
+}
+
 /* copy a string to a safe spot */
 
 /*

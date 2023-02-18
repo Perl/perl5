@@ -50,6 +50,12 @@ letter.
 to check the return value of your socket() call?  See
 L<perlfunc/accept>.
 
+=item ADJUST is experimental
+
+(S experimental::class) This warning is emitted if you use the C<ADJUST>
+keyword of C<use feature 'class'>.  This keyword is currently
+experimental and its behaviour may change in future releases of Perl.
+
 =item Aliasing via reference is experimental
 
 (S experimental::refaliasing) This warning is emitted if you use
@@ -312,6 +318,13 @@ the current set of allowed keys of a restricted hash.
 (F) You wrote C<bless $foo> with one argument after somehow causing
 the current package to be freed.  Perl cannot figure out what to
 do, so it throws up its hands in despair.
+
+=item Attempt to bless into a class
+
+(F) You are attempting to call C<bless> with a package name that is a
+new-style C<class>.  This is not necessary, as instances created by the
+constructor are already in the correct class.  Instances cannot be created
+by other means, such as C<bless>.
 
 =item Attempt to bless into a reference
 
@@ -660,6 +673,12 @@ checking.  Alternatively, if you are certain that you're calling the
 function correctly, you may put an ampersand before the name to avoid
 the warning.  See L<perlsub>.
 
+=item Cannot assign :param(%s) to field %s because that name is already in use
+
+(F) An attempt was made to apply a parameter name to a field, when the name
+is already being used by another field in the same class, or one of its
+parent classes. This would cause a name clash so is not allowed.
+
 =item Cannot chr %f
 
 (F) You passed an invalid number (like an infinity or not-a-number) to C<chr>.
@@ -700,10 +719,28 @@ no legal conversion from that type of reference to a typeglob.
 (P) Perl detected an attempt to copy a value to an internal type that cannot
 be directly assigned to.
 
+=item Cannot create class %s as it already has a non-empty @ISA
+
+(F) An attempt was made to create a class out of a package that already has
+an C<@ISA> array, and the array is not empty.  This is not permitted, as it
+would lead to a class with inconsistent inheritance.
+
 =item Cannot find encoding "%s"
 
 (S io) You tried to apply an encoding that did not exist to a filehandle,
 either with open() or binmode().
+
+=item Cannot invoke a method of "%s" on an instance of "%s"
+
+(F) You tried to directly call a C<method> subroutine of one class by passing
+in a value that is an instance of a different class.  This is not permitted,
+as the method would not have access to the correct instance fields.
+
+=item Cannot invoke method on a non-instance
+
+(F) You tried to directly call a C<method> subroutine of a class by passing
+in a value that is not an instance of that class.  This is not permitted, as
+the method would not then have access to its instance fields.
 
 =item Cannot open %s as a dirhandle: it is already open as a filehandle
 
@@ -719,6 +756,11 @@ or scalar) that already holds a dirhandle.  Since this idiom might render
 your code confusing, it was deprecated in Perl 5.10.  As of Perl 5.28, it
 is a fatal error.
 
+=item Cannot '%s' outside of a 'class'
+
+(F) You attempted to use one of the keywords that only makes sense inside
+a C<class> definition, at a location that is not inside such a class.
+
 =item Cannot pack %f with '%c'
 
 (F) You tried converting an infinity or not-a-number to an integer,
@@ -728,6 +770,11 @@ which makes no sense.
 
 (F) You tried printing an infinity or not-a-number as a character (%c),
 which makes no sense.  Maybe you meant '%s', or just stringifying it?
+
+=item Cannot reopen existing class "%s"
+
+(F) You tried to begin a C<class> definition for a class that already exists.
+A class may only have one definition block.
 
 =item Cannot set tied @DB::args
 
@@ -765,6 +812,11 @@ not permitted.
 
 (F) Similar to above, but involving a C<finally> block at the end of a
 C<try>/C<catch> construction rather than a C<defer> block.
+
+=item Can't bless an object reference
+
+(F) You attempted to call C<bless> on a value that already refers to a real
+object instance.
 
 =item Can't bless non-reference value
 
@@ -1720,6 +1772,34 @@ is better written as simply itself, perhaps preceded by a backslash
 for non-word characters.  Doing it the way you did is not portable
 between ASCII and EBCDIC platforms.
 
+=item Class already has a superclass, cannot add another
+
+(F) You attempted to specify a second superclass for a C<class> by using
+the C<:isa> attribute, when one is already specified.  Unlike classes
+whose instances are created with C<bless>, classes created via the
+C<class> keyword cannot have more than one superclass.
+
+=item Class attribute %s requires a value
+
+(F) You specified an attribute for a class that would require a value to
+be passed in parentheses, but did not provide one.  Remember that
+whitespace is B<not> permitted between the attribute name and its value;
+you must write this as
+
+    class Example::Class :attr(VALUE) ...
+
+=item class is experimental
+
+(S experimental::class) This warning is emitted if you use the C<class>
+keyword of C<use feature 'class'>.  This keyword is currently
+experimental and its behaviour may change in future releases of Perl.
+
+=item Class :isa attribute requires a class but "%s" is not one
+
+(F) When creating a subclass using the C<class> C<:isa> attribute, the
+named superclass must also be a real class created using the C<class>
+keyword.
+
 =item Cloning substitution context is unimplemented
 
 (F) Creating a new thread inside the C<s///> operator is not supported.
@@ -2404,6 +2484,39 @@ PDP-11 or something?
 
 (F) A tied array claimed to have a negative number of elements, which
 is not possible.
+
+=item Field already has a parameter name, cannot add another
+
+(F) A field may have at most one application of the C<:param> attribute to
+assign a parameter name to it; once applied a second one is not allowed.
+
+=item Field attribute %s requires a value
+
+(F) You specified an attribute for a field that would require a value to
+be passed in parentheses, but did not provide one.  Remember that
+whitespace is B<not> permitted between the attribute name and its value;
+you must write this as
+
+    field $var :attr(VALUE) ...
+
+=item field is experimental
+
+(S experimental::class) This warning is emitted if you use the C<field>
+keyword of C<use feature 'class'>.  This keyword is currently
+experimental and its behaviour may change in future releases of Perl.
+
+=item Field %s is not accessible outside a method
+
+(F) An attempt was made to access a field variable of a class from code
+that does not appear inside the body of a C<method> subroutine.  This is not
+permitted, as only methods will have access to the fields of an instance.
+
+=item Field %s of "%s" is not accessible in a method of "%s"
+
+(F) An attempt was made to access a field variable of a class, from a
+method of another class nested inside the one that actually defined it.
+This is not permitted, as only methods defined by a given class are
+permitted to access fields of that class.
 
 =item Field too wide in 'u' format in pack
 
@@ -3734,9 +3847,24 @@ See L<perlfunc/unpack>.
 (F) An attempt was made to specify an entry in an overloading table that
 doesn't resolve to a valid subroutine.  See L<overload>.
 
+=item method is experimental
+
+(S experimental::class) This warning is emitted if you use the C<method>
+keyword of C<use feature 'class'>.  This keyword is currently
+experimental and its behaviour may change in future releases of Perl.
+
 =item Method %s not permitted
 
 See L</500 Server error>.
+
+=item Method %s redefined
+
+(W redefine) You redefined a method.  To suppress this warning, say
+
+    {
+	no warnings 'redefine';
+	*name = method { ... };
+    }
 
 =item Might be a runaway multi-line %s string starting on line %d
 
@@ -4512,6 +4640,13 @@ valid reference value.
 (W misc) You specified an odd number of elements to initialize a hash,
 which is odd, because hashes come in key/value pairs.
 
+=item Odd number of elements in hash field initialization
+
+(W misc) You specified an odd number of elements to initialise a hash
+field of an object.  Hashes are initialised from a list of key/value
+pairs so there must be a corresponding value to every key.  The final
+missing value will be filled in with undef instead.
+
 =item Offset outside string
 
 (F)(W layer) You tried to do a read/write/send/recv/seek operation
@@ -4536,6 +4671,11 @@ is equivalent to C<"In $name::s house">.  If you meant the former, put
 a backslash before the apostrophe (C<"In $name\'s house">).
 
 Support for the old package separator will be removed in Perl 5.40.
+
+=item Only scalar fields can take a :param attribute
+
+(F) You tried to apply the C<:param> attribute to an array or hash field.
+Currently this is not permitted.
 
 =item %s() on unopened %s
 
@@ -5536,6 +5676,11 @@ terminates.  You might use ^# instead.  See L<perlform>.
 (W misc) You have used a replacement list that is longer than the
 search list.  So the additional elements in the replacement list
 are meaningless.
+
+=item Required parameter '%s' is missing for %s constructor
+
+(F) You called the constructor for a class that has a required named
+parameter, but did not pass that parameter at all.
 
 =item '(*%s' requires a terminating ':' in regex; marked by <-- HERE in m/%s/
 
@@ -6728,6 +6873,12 @@ within an inner pair of square brackets, like
 Another possibility is that you forgot a backslash.  Perl isn't smart
 enough to figure out what you really meant.
 
+=item Unexpected characters while parsing class :isa attribute: %s
+
+(F) You tried to specify something other than a single class name with an
+optional trailing verison number as the value for a C<class> C<:isa>
+attribute.  This confused the parser.
+
 =item Unexpected exit %u
 
 (S) exit() was called or the script otherwise finished gracefully when
@@ -6992,6 +7143,11 @@ in your Perl script (or eval) near the specified column.  Perhaps you
 tried  to run a compressed script, a binary program, or a directory as
 a Perl program.
 
+=item Unrecognized class attribute %s
+
+(F) You attempted to add a named attribute to a C<class> definition, but
+perl does not recognise the name of the requested attribute.
+
 =item Unrecognized escape \%c in character class in regex; marked by
 S<<-- HERE> in m/%s/
 
@@ -7021,6 +7177,11 @@ S<<-- HERE> in m/%s/
 recognized by Perl.  The character(s) were understood literally, but
 this may change in a future version of Perl.  The S<<-- HERE> shows
 whereabouts in the regular expression the escape was discovered.
+
+=item Unrecognized field attribute %s
+
+(F) You attempted to add a named attribute to a C<field> definition, but
+perl does not recognise the name of the requested attribute.
 
 =item Unrecognized signal name "%s"
 

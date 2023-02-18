@@ -481,8 +481,6 @@ Perl_xxx(aTHX_ ...) form for any API calls where it's used.
 #define gv_fetchpvs(namebeg, flags, sv_type) \
     Perl_gv_fetchpvn_flags(aTHX_ STR_WITH_LEN(namebeg), flags, sv_type)
 #define  gv_fetchpvn  gv_fetchpvn_flags
-#define sv_catxmlpvs(dsv, str, utf8) \
-    Perl_sv_catxmlpvn(aTHX_ dsv, STR_WITH_LEN(str), utf8)
 
 
 #define lex_stuff_pvs(pv,flags) Perl_lex_stuff_pvn(aTHX_ STR_WITH_LEN(pv), flags)

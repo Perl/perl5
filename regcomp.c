@@ -1833,7 +1833,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
          * properly currently.
          *
          */
-        while ((OP(first) == OPEN && (sawopen = 1)) ||
+        while ((OP(first) == OPEN && ((sawopen = 1)) ) ||
                /* An OR of *one* alternative - should not happen now. */
             (OP(first) == BRANCH && OP(first_next) != BRANCH) ||
             /* for now we can't handle lookbehind IFMATCH*/
@@ -13366,8 +13366,6 @@ Perl_regfree_internal(pTHX_ REGEXP * const rx)
     Safefree(ri);
 }
 
-#define av_dup_inc(s, t)	MUTABLE_AV(sv_dup_inc((const SV *)s, t))
-#define hv_dup_inc(s, t)	MUTABLE_HV(sv_dup_inc((const SV *)s, t))
 #define SAVEPVN(p, n)	((p) ? savepvn(p, n) : NULL)
 
 /*

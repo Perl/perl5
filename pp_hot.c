@@ -5041,6 +5041,13 @@ Perl_leave_adjust_stacks(pTHX_ SV **from_sp, SV **to_sp, U8 gimme, int pass)
                     }
                 }
             }
+            else if (SvIMMORTAL(sv)){
+                /* Since SvIMMORTALs are never freed, even when their
+                 * refcount drops to zero, there's no benefit in
+                 * creating a mortal copy.
+                 */
+                *++to_sp = sv;
+            }
             else {
                 /* Make a mortal copy of the SV.
                  * The following code is the equivalent of sv_mortalcopy()

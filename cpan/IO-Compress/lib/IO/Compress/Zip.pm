@@ -4,17 +4,17 @@ use strict ;
 use warnings;
 use bytes;
 
-use IO::Compress::Base::Common  2.201 qw(:Status );
-use IO::Compress::RawDeflate 2.201 ();
-use IO::Compress::Adapter::Deflate 2.201 ;
-use IO::Compress::Adapter::Identity 2.201 ;
-use IO::Compress::Zlib::Extra 2.201 ;
-use IO::Compress::Zip::Constants 2.201 ;
+use IO::Compress::Base::Common  2.204 qw(:Status );
+use IO::Compress::RawDeflate 2.204 ();
+use IO::Compress::Adapter::Deflate 2.204 ;
+use IO::Compress::Adapter::Identity 2.204 ;
+use IO::Compress::Zlib::Extra 2.204 ;
+use IO::Compress::Zip::Constants 2.204 ;
 
 use File::Spec();
 use Config;
 
-use Compress::Raw::Zlib  2.201 ();
+use Compress::Raw::Zlib  2.204 ();
 
 BEGIN
 {
@@ -47,7 +47,7 @@ require Exporter ;
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, %DEFLATE_CONSTANTS, $ZipError);
 
-$VERSION = '2.201';
+$VERSION = '2.204';
 $ZipError = '';
 
 @ISA = qw(IO::Compress::RawDeflate Exporter);
@@ -570,6 +570,8 @@ sub mkFinalTrailer
         $z64e .= U64::pack_V64 $entries   ; # entries in central dir
         $z64e .= U64::pack_V64 $cd_len    ; # size of central dir
         $z64e .= *$self->{ZipData}{Offset}->getPacked_V64() ; # offset to start central dir
+        $z64e .= *$self->{ZipData}{extrafieldzip64}  # otional extra field
+            if defined *$self->{ZipData}{extrafieldzip64} ;
 
         $z64e  = pack("V", ZIP64_END_CENTRAL_REC_HDR_SIG) # signature
               .  U64::pack_V64(length $z64e)
@@ -642,7 +644,7 @@ sub ckParams
     }
 
     *$self->{ZipData}{AnyZip64} = 1
-        if $got->getValue('zip64');
+        if $got->getValue('zip64') || $got->getValue('extrafieldzip64') ;
     *$self->{ZipData}{Zip64} = $got->getValue('zip64');
     *$self->{ZipData}{Stream} = $got->getValue('stream');
 
@@ -662,7 +664,7 @@ sub ckParams
 
     *$self->{ZipData}{ZipComment} = $got->getValue('zipcomment') ;
 
-    for my $name (qw( extrafieldlocal extrafieldcentral ))
+    for my $name (qw( extrafieldlocal extrafieldcentral extrafieldzip64))
     {
         my $data = $got->getValue($name) ;
         if (defined $data) {
@@ -671,6 +673,7 @@ sub ckParams
                 if $bad ;
 
             $got->setValue($name, $data) ;
+            *$self->{ZipData}{$name} = $data;
         }
     }
 
@@ -735,6 +738,7 @@ our %PARAMS = (
             'textflag'  => [IO::Compress::Base::Common::Parse_boolean,   0],
             'extrafieldlocal'  => [IO::Compress::Base::Common::Parse_any,    undef],
             'extrafieldcentral'=> [IO::Compress::Base::Common::Parse_any,    undef],
+            'extrafieldzip64'  => [IO::Compress::Base::Common::Parse_any,    undef],
 
             # Lzma
             'preset'   => [IO::Compress::Base::Common::Parse_unsigned, 6],
@@ -2162,7 +2166,7 @@ See the Changes file.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2005-2022 Paul Marquess. All rights reserved.
+Copyright (c) 2005-2023 Paul Marquess. All rights reserved.
 
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
