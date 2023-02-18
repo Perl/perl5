@@ -63,6 +63,8 @@ S_pp_xs_wrap_return(pTHX_ I32 nargs, I32 old_sp)
         }
     }
 
+    PL_curstackinfo->si_stack_nonrc_base = 0;
+
     /* free the original args and shift the returned valued down */
     if (nargs) {
         SV **svp = PL_stack_sp - nret;
@@ -82,8 +84,6 @@ S_pp_xs_wrap_return(pTHX_ I32 nargs, I32 old_sp)
         }
         PL_stack_sp -= nargs;
     }
-    PL_curstackinfo->si_stack_nonrc_base = 0;
-
 }
 
 /* pp_wrap():
@@ -163,13 +163,13 @@ Perl_xs_wrap(pTHX_ XSUBADDR_t xsub, CV *cv)
 
     PL_curstackinfo->si_stack_nonrc_base = PL_stack_sp - PL_stack_base + 1;
 
-    PL_markstack_ptr[0]  += nargs;
 
     if (nargs) {
         /* duplicate all the arg pointers further up the stack */
         rpp_extend(nargs);
         Copy(PL_stack_sp - nargs + 1, PL_stack_sp + 1, nargs, SV*);
         PL_stack_sp += nargs;
+        PL_markstack_ptr[0]  += nargs;
     }
 
     xsub(aTHX_ cv);
