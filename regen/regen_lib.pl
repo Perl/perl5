@@ -95,13 +95,21 @@ sub close_and_rename {
                 $fail = "'$name' and '$final_name' differ";
             }
         }
+        # If someone wants to run t/porting/regen.t and keep the
+        # changes then they can set this env var, otherwise we
+        # unlink the generated file regardless.
+        my $keep_changes= $ENV{"REGEN_T_KEEP_CHANGES"};
+        safer_unlink($name) unless $keep_changes;
         if ($fail) {
             print STDOUT "not ok - $0 $final_name\n";
             die "$fail\n";
         } else {
             print STDOUT "ok - $0 $final_name\n";
         }
-        safer_unlink($name);
+        # If we get here then the file hasn't changed, and we should
+        # delete the new version if they have requested we keep changes
+        # as we wont have deleted it above like we would normally.
+        safer_unlink($name) if $keep_changes;
         return;
     }
     unless ($force) {
