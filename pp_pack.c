@@ -3065,7 +3065,7 @@ S_pack_rec(pTHX_ SV *cat, tempsym_t* symptr, SV **beglist, SV **endlist )
                      * gone.
                      */
                     if (((SvTEMP(fromstr) && SvREFCNT(fromstr) <=
-#if defined(PERL_RC_STACK) && !defined(PERL_XXX_TMP_NORC)
+#ifdef PERL_RC_STACK
                             2
 #else
                             1

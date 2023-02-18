@@ -95,9 +95,7 @@ Perl_runops_wrap(pTHX)
     if (cut) {
         SV **svp = PL_stack_base + cut;
         while (svp <= PL_stack_sp) {
-#  ifndef PERL_XXX_TMP_NORC
             SvREFCNT_inc_simple_void(*svp);
-#  endif
             svp++;
         }
     }
@@ -131,10 +129,6 @@ Perl_runops_wrap(pTHX)
                 EXTEND_MORTAL(n);
                 Copy(PL_stack_base + cut, PL_tmps_stack + PL_tmps_ix + 1, n, SV*);
                 PL_tmps_ix += n;
-#  ifdef PERL_XXX_TMP_NORC
-                for (SV **svp = PL_stack_base + cut; svp <= PL_stack_sp; svp++)
-                    SvREFCNT_inc_simple_void(*svp);
-#  endif
             }
             I32 sp1 = PL_stack_sp - PL_stack_base + 1;
             PL_curstackinfo->si_stack_nonrc_base =

@@ -56,9 +56,7 @@ S_pp_xs_wrap_return(pTHX_ I32 nargs, I32 old_sp)
     if (nret) {
         SV **svp = PL_stack_sp - nret + 1;
         while (svp <= PL_stack_sp) {
-#ifndef PERL_XXX_TMP_NORC
             SvREFCNT_inc(*svp);
-#endif
             svp++;
         }
     }
@@ -70,9 +68,7 @@ S_pp_xs_wrap_return(pTHX_ I32 nargs, I32 old_sp)
         SV **svp = PL_stack_sp - nret;
         I32 i = nargs;
         while (i--) {
-#ifndef PERL_XXX_TMP_NORC
             SvREFCNT_dec(*svp);
-#endif
             *svp = NULL;
             svp--;
         }
@@ -5029,10 +5025,8 @@ PP(pp_grepwhile)
         if (from != to) {
             *to_p = from;
 #ifdef PERL_RC_STACK
-#  ifndef PERL_XXX_TMP_NORC
             SvREFCNT_inc_simple_void_NN(from);
             SvREFCNT_dec(to);
-#  endif
 #endif
         }
     }
@@ -5080,10 +5074,8 @@ PP(pp_grepwhile)
             SV *newsrc = sv_mortalcopy(src);
              PL_stack_base[TOPMARK] = newsrc;
 #ifdef PERL_RC_STACK
-#  ifndef PERL_XXX_TMP_NORC
             SvREFCNT_inc_simple_void_NN(newsrc);
             SvREFCNT_dec(src);
-#  endif
 #endif
             src = newsrc;
             PL_tmps_floor++;
@@ -5191,13 +5183,9 @@ Perl_leave_adjust_stacks(pTHX_ SV **from_sp, SV **to_sp, U8 gimme, int pass)
         SV **p = from_sp - 1;
         assert(p >= to_sp);
         while (p > to_sp) {
-#  ifdef PERL_XXX_TMP_NORC
-            *p-- = NULL;
-#  else
             SV *sv = *p;
             *p-- = NULL;
             SvREFCNT_dec(sv);
-#  endif
         }
     }
 #endif
@@ -5395,14 +5383,10 @@ Perl_leave_adjust_stacks(pTHX_ SV **from_sp, SV **to_sp, U8 gimme, int pass)
 
 #ifdef PERL_RC_STACK
                 from_sp[-1] = NULL;
-#  ifndef PERL_XXX_TMP_NORC
                 SvREFCNT_dec_NN(sv);
-#  endif
                 assert(!to_sp[1]);
                 *++to_sp = newsv;
-#  ifndef PERL_XXX_TMP_NORC
                 SvREFCNT_inc_simple_void_NN(newsv);
-#  endif
 #else
                 *++to_sp = newsv;
 #endif
@@ -5692,11 +5676,9 @@ PP(pp_entersub)
                     SV *newsv = sv_mortalcopy(sv);
                     *svp = newsv;
 #ifdef PERL_RC_STACK
-#  ifndef PERL_XXX_TMP_NORC
                     /* should just skip the mortalisation instead */
                     SvREFCNT_inc_simple_void_NN(newsv);
                     SvREFCNT_dec_NN(sv);
-#  endif
 #endif
                     sv = newsv;
                 }
@@ -5747,10 +5729,6 @@ PP(pp_entersub)
             AvFILLp(av) = items - 1;
 #ifdef PERL_RC_STACK
             /* transfer ownership of the arguments' refcounts to av */
-#  ifdef PERL_XXX_TMP_NORC
-            for (int i = 1; i <= items; i++)
-                SvREFCNT_inc(MARK[i]); /* account for AvREAL */
-#  endif
             PL_stack_sp = MARK;
 #endif
         }
@@ -5821,11 +5799,9 @@ PP(pp_entersub)
                     SV *newsv = sv_mortalcopy(oldsv);
                     *mark = newsv;
 #ifdef PERL_RC_STACK
-#  ifndef PERL_XXX_TMP_NORC
                     /* should just skip the mortalisation instead */
                     SvREFCNT_inc_simple_void_NN(newsv);
                     SvREFCNT_dec_NN(oldsv);
-#  endif
 #endif
                 }
             }
@@ -6088,11 +6064,11 @@ S_opmethod_stash(pTHX_ SV* meth)
          */
         SV *newsv = sv_2mortal(newRV(ob));
         SV **svp = (PL_stack_base + TOPMARK + 1);
-#if defined(PERL_RC_STACK) && !defined(PERL_XXX_TMP_NORC)
+#ifdef PERL_RC_STACK
         SV *oldsv = *svp;
 #endif
         *svp = newsv;
-#if defined(PERL_RC_STACK) && !defined(PERL_XXX_TMP_NORC)
+#ifdef PERL_RC_STACK
         SvREFCNT_inc_simple_void_NN(newsv);
         SvREFCNT_dec_NN(oldsv);
 #endif
@@ -6129,11 +6105,11 @@ S_opmethod_stash(pTHX_ SV* meth)
          */
         SV *newsv = sv_2mortal(newRV(MUTABLE_SV(iogv)));
         SV **svp = (PL_stack_base + TOPMARK + 1);
-#if defined(PERL_RC_STACK) && !defined(PERL_XXX_TMP_NORC)
+#ifdef PERL_RC_STACK
         SV *oldsv = *svp;
 #endif
         *svp = newsv;
-#if defined(PERL_RC_STACK) && !defined(PERL_XXX_TMP_NORC)
+#ifdef PERL_RC_STACK
         SvREFCNT_inc_simple_void_NN(newsv);
         SvREFCNT_dec_NN(oldsv);
 #endif

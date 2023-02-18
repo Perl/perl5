@@ -2981,7 +2981,7 @@ Perl_call_argv(pTHX_ const char *sub_name, I32 flags, char **argv)
     PERL_ARGS_ASSERT_CALL_ARGV;
 
     bool is_rc =
-#if defined PERL_RC_STACK && !defined PERL_XXX_TMP_NORC
+#ifdef PERL_RC_STACK
                 rpp_stack_is_rc();
 #else
                 0;
@@ -3106,7 +3106,7 @@ Perl_call_sv(pTHX_ SV *sv, volatile I32 flags)
     if (!(flags & G_METHOD_NAMED)) {
         rpp_extend(1);
         *++PL_stack_sp = sv;
-#if defined PERL_RC_STACK && !defined PERL_XXX_TMP_NORC
+#ifdef PERL_RC_STACK
         if (rpp_stack_is_rc())
             SvREFCNT_inc_simple_void_NN(sv);
 #endif
@@ -3204,7 +3204,7 @@ Perl_call_sv(pTHX_ SV *sv, volatile I32 flags)
     }
 
     if (flags & G_DISCARD) {
-#if defined PERL_RC_STACK && !defined PERL_XXX_TMP_NORC
+#ifdef PERL_RC_STACK
         if (rpp_stack_is_rc())
             rpp_popfree_to(PL_stack_base + oldmark);
         else
@@ -3261,7 +3261,7 @@ Perl_eval_sv(pTHX_ SV *sv, I32 flags)
     oldmark = PL_stack_sp - PL_stack_base;
     rpp_extend(1);
     *++PL_stack_sp = sv;
-#if defined PERL_RC_STACK && !defined PERL_XXX_TMP_NORC
+#ifdef PERL_RC_STACK
     if (rpp_stack_is_rc())
         SvREFCNT_inc_simple_void_NN(sv);
 #endif
@@ -3345,7 +3345,7 @@ Perl_eval_sv(pTHX_ SV *sv, I32 flags)
 
     JMPENV_POP;
     if (flags & G_DISCARD) {
-#if defined PERL_RC_STACK && !defined PERL_XXX_TMP_NORC
+#ifdef PERL_RC_STACK
         if (rpp_stack_is_rc())
             rpp_popfree_to(PL_stack_base + oldmark);
         else
@@ -3385,7 +3385,7 @@ Perl_eval_pv(pTHX_ const char *p, I32 croak_on_error)
 
     sv = *PL_stack_sp;
 
-#if defined PERL_RC_STACK && !defined PERL_XXX_TMP_NORC
+#ifdef PERL_RC_STACK
     if (rpp_stack_is_rc()) {
         SvREFCNT_inc_NN(sv_2mortal(sv));
         rpp_popfree_1();
