@@ -63,10 +63,10 @@ Perl_stack_grow(pTHX_ SV **sp, SV **p, SSize_t n)
     return PL_stack_sp;
 }
 
-#ifndef STRESS_REALLOC
-#define GROW(old) ((old) * 3 / 2)
-#else
+#ifdef STRESS_REALLOC
 #define GROW(old) ((old) + 1)
+#else
+#define GROW(old) ((old) * 3 / 2)
 #endif
 
 PERL_SI *
@@ -166,25 +166,44 @@ Perl_markstack_grow(pTHX)
 void
 Perl_savestack_grow(pTHX)
 {
-    IV new_max;
-#ifdef STRESS_REALLOC
-    new_max = PL_savestack_max + SS_MAXPUSH;
-#else
-    new_max = GROW(PL_savestack_max);
-#endif
-    /* Note that we allocate SS_MAXPUSH slots higher than ss_max
-     * so that SS_ADD_END(), SSGROW() etc can do a simper check */
-    Renew(PL_savestack, new_max + SS_MAXPUSH, ANY);
-    PL_savestack_max = new_max;
+    const I32 by = PL_savestack_max - PL_savestack_ix;
+    Perl_savestack_grow_cnt(aTHX_ by);
 }
 
 void
 Perl_savestack_grow_cnt(pTHX_ I32 need)
 {
-    const IV new_max = PL_savestack_ix + need;
-    /* Note that we allocate SS_MAXPUSH slots higher than ss_max
-     * so that SS_ADD_END(), SSGROW() etc can do a simper check */
-    Renew(PL_savestack, new_max + SS_MAXPUSH, ANY);
+    /* NOTE: PL_savestack_max and PL_savestack_ix are I32.
+     *
+     * This makes sense when you consider that having I32_MAX items on
+     * the stack would be quite large.
+     *
+     * However, we use IV here so that we can detect if the new requested
+     * amount is larger than I32_MAX.
+     */
+    const IV new_floor = PL_savestack_max + need; /* what we need */
+    /* the GROW() macro normally does scales by 1.5 but under
+     * STRESS_REALLOC it simply adds 1 */
+    IV new_max         = GROW(new_floor); /* and some extra */
+
+    /* the new_max < PL_savestack_max is for cases where IV is I32
+     * and we have rolled over from I32_MAX to a small value */
+    if (new_max > I32_MAX || new_max < PL_savestack_max) {
+        if (new_floor > I32_MAX || new_floor < PL_savestack_max) {
+            Perl_croak(aTHX_ "panic: savestack overflows I32_MAX");
+        }
+        new_max = new_floor;
+    }
+
+    /* Note that we add an additional SS_MAXPUSH slots on top of
+     * PL_savestack_max so that SS_ADD_END(), SSGROW() etc can do
+     * a simper check and if necessary realloc *after* apparently
+     * overwriting the current PL_savestack_max. See scope.h.
+     *
+     * The +1 is because new_max/PL_savestack_max is the highest
+     * index, by Renew needs the number of items, which is one
+     * larger than the highest index. */
+    Renew(PL_savestack, new_max + SS_MAXPUSH + 1, ANY);
     PL_savestack_max = new_max;
 }
 
@@ -633,7 +652,7 @@ Perl_save_iv(pTHX_ IV *ivp)
 {
     PERL_ARGS_ASSERT_SAVE_IV;
 
-    SSCHECK(3);
+    SSGROW(3);
     SSPUSHIV(*ivp);
     SSPUSHPTR(ivp);
     SSPUSHUV(SAVEt_IV);

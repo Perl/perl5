@@ -2413,8 +2413,7 @@ SKIP:
         is($y,"b","Branch reset in list context check 11 (b)");
         is($z,"z","Branch reset in list context check 12 (z)");
     }
-    TODO:{
-        local $::TODO = "Will be fixed next commit";
+    {
         # Test for GH Issue #20826. Save stack overflow introduced in
         # 92373dea9d7bcc0a017f20cb37192c1d8400767f PR #20530.
         # Note this test depends on an assert so it will only fail
