@@ -395,7 +395,12 @@ well.
 
 =item *
 
-XXX
+The underlying C<Perl_dowantarray> function implementing the
+long-deprecated L<C<GIMME>|perlapi/GIMME> macro has been marked as
+deprecated, so that use of the macro emits a compile-time warning.
+C<GIMME> has been documented as deprecated in favour of
+L<C<GIMME_V>|perlapi/GIMME_V> since Perl v5.6.0, but had not
+previously issued a warning.
 
 =back
 
