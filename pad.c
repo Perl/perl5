@@ -2899,7 +2899,7 @@ Perl_padname_dup(pTHX_ PADNAME *src, CLONE_PARAMS *param)
 =for apidoc_section $lexer
 =for apidoc suspend_compcv
 
-Implements part of the concept of a "suspended complication CV", which can be
+Implements part of the concept of a "suspended compilation CV", which can be
 used to pause the parser and compiler during parsing a CV in order to come
 back to it later on.
 
