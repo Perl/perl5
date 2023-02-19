@@ -431,6 +431,13 @@ a core change, not a change to F<constant.pm>.  [github #20742]
 Redefining a C<use constant> list constant with an empty prototype
 constant sub would result in an assertion failure.  [github #20742]
 
+=item *
+
+Fixed a regression where the C<INC> method for objects in C<@INC>
+would not be resolved by C<AUTOLOAD>, while it was in 5.36.  The
+C<INCDIR> method for objects in C<@INC> cannot be resolved by
+C<AUTOLOAD> as C<INC> would have been resolved first.  [github #20665]
+
 =back
 
 =head1 Known Problems
