@@ -623,7 +623,8 @@ circle arc through the starting point ($theta0, $phi0) and the end
 point ($theta1, $phi1) relative to the distance from the starting
 point to the end point. So $way = 0 gives the starting point, $way = 1
 gives the end point, $way < 0 gives a point "behind" the starting
-point, and $way > 1 gives a point beyond the end point.
+point, and $way > 1 gives a point beyond the end point. $way defaults
+to 0.5 if not given.
 
 Note that antipodal points (where their distance is I<pi> radians) do
 not have unique waypoints between them, and therefore C<undef> is
