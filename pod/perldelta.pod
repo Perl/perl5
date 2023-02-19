@@ -122,6 +122,12 @@ There may well be none in a stable release.
 
 =item *
 
+Temporary ("mortal") copies are no longer created during context exit for
+internal static SVs that are in no danger of being prematurely freed.
+[GH #20800]
+
+=item *
+
 XXX
 
 =back
