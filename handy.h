@@ -2868,8 +2868,8 @@ enum mem_log_type {
 #define Safefree(d)     safefree(MEM_LOG_FREE((Malloc_t)(d)))
 #endif
 
-/* assert that a valid ptr has been supplied - use this instead of assert(ptr)  *
- * as it handles cases like constant string arguments without throwing warnings *
+/* assert that a valid ptr has been supplied - use this instead of assert(ptr)
+ * as it handles cases like constant string arguments without throwing warnings
  * the cast is required, as is the inequality check, to avoid warnings          */
 #define perl_assert_ptr(p) assert( ((void*)(p)) != 0 )
 
