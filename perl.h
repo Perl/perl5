@@ -4374,26 +4374,26 @@ void init_os_extras(void);
 UNION_ANY_DEFINITION;
 #else
 union any {
-    void*       any_ptr;
-    SV*         any_sv;
-    SV**        any_svp;
-    GV*         any_gv;
-    AV*         any_av;
-    HV*         any_hv;
-    OP*         any_op;
-    char*       any_pv;
-    char**      any_pvp;
-    I32         any_i32;
-    U32         any_u32;
-    IV          any_iv;
-    UV          any_uv;
-    long        any_long;
-    bool        any_bool;
-    Size_t      any_size;
-    SSize_t     any_ssize;
-    STRLEN      any_strlen;
-    void        (*any_dptr) (void*);
-    void        (*any_dxptr) (pTHX_ void*);
+    void    *any_ptr;
+    SV      *any_sv;
+    SV      **any_svp;
+    GV      *any_gv;
+    AV      *any_av;
+    HV      *any_hv;
+    OP      *any_op;
+    char    *any_pv;
+    char    **any_pvp;
+    I32     any_i32;
+    U32     any_u32;
+    IV      any_iv;
+    UV      any_uv;
+    long    any_long;
+    bool    any_bool;
+    Size_t  any_size;
+    SSize_t any_ssize;
+    STRLEN  any_strlen;
+    void    (*any_dptr) (void*);
+    void    (*any_dxptr)(pTHX_ void*);
 };
 #endif
 
@@ -4413,14 +4413,14 @@ typedef I32 (*filter_t) (pTHX_ int, SV *, int);
 #if defined(USE_REENTRANT) || defined(_REENTRANT) || defined(_THREAD_SAFE)
 /* We cannot include <crypt.h> to get the struct crypt_data
  * because of setkey prototype problems when threading */
-typedef        struct crypt_data {     /* straight from /usr/include/crypt.h
+typedef struct crypt_data { /* straight from /usr/include/crypt.h
                                         */
     /* From OSF, Not needed in AIX char C[28], D[28];
      */
-    char E[48];
-    char KS[16][48];
-    char block[66];
-    char iobuf[16];
+    char    E[48];
+    char    KS[16][48];
+    char    block[66];
+    char    iobuf[16];
 } CRYPTD;
 #endif /* threading */
 #endif /* AIX */
@@ -4555,18 +4555,18 @@ typedef struct scan_data_t scan_data_t;
 #endif
 
 struct ptr_tbl_ent {
-    struct ptr_tbl_ent*         next;
-    const void*                 oldval;
-    void*                       newval;
+    struct ptr_tbl_ent  *next;
+    const void          *oldval;
+    void                *newval;
 };
 
 struct ptr_tbl {
-    struct ptr_tbl_ent**        tbl_ary;
-    UV                          tbl_max;
-    UV                          tbl_items;
-    struct ptr_tbl_arena        *tbl_arena;
-    struct ptr_tbl_ent          *tbl_arena_next;
-    struct ptr_tbl_ent          *tbl_arena_end;
+    struct ptr_tbl_ent      **tbl_ary;
+    UV                      tbl_max;
+    UV                      tbl_items;
+    struct ptr_tbl_arena    *tbl_arena;
+    struct ptr_tbl_ent      *tbl_arena_next;
+    struct ptr_tbl_ent      *tbl_arena_end;
 };
 
 #if defined(htonl) && !defined(HAS_HTONL)
@@ -5107,7 +5107,7 @@ Gid_t getegid (void);
 struct ufuncs {
     I32 (*uf_val)(pTHX_ IV, SV*);
     I32 (*uf_set)(pTHX_ IV, SV*);
-    IV uf_index;
+    IV  uf_index;
 };
 
 /* In pre-5.7-Perls the PERL_MAGIC_uvar magic didn't get the thread context.
@@ -5248,14 +5248,14 @@ EXTERN_C void PerlIO_teardown(void);
 
 struct perl_memory_debug_header;
 struct perl_memory_debug_header {
-  tTHX  interpreter;
+    tTHX                            interpreter;
 #  if defined(PERL_POISON) || defined(PERL_DEBUG_READONLY_COW)
-  MEM_SIZE size;
+    MEM_SIZE                        size;
 #  endif
-  struct perl_memory_debug_header *prev;
-  struct perl_memory_debug_header *next;
+    struct perl_memory_debug_header *prev;
+    struct perl_memory_debug_header *next;
 #  ifdef PERL_DEBUG_READONLY_COW
-  bool readonly;
+    bool                            readonly;
 #  endif
 };
 
@@ -5263,7 +5263,7 @@ struct perl_memory_debug_header {
 
 struct perl_memory_debug_header;
 struct perl_memory_debug_header {
-  MEM_SIZE size;
+    MEM_SIZE    size;
 };
 
 #endif
@@ -6011,7 +6011,7 @@ typedef enum {
  * debug output are included.  Needed always, not just when
  * DEBUGGING, though, because of the re extension.  c */
 struct perl_debug_pad {
-  SV pad[3];
+    SV  pad[3];
 };
 
 #define PERL_DEBUG_PAD(i) &(PL_debug_pad.pad[i])
@@ -6066,9 +6066,9 @@ enum Perl_custom_infix_precedence {
 struct Perl_custom_infix;
 struct Perl_custom_infix {
     enum Perl_custom_infix_precedence prec;
-    void (*parse)(pTHX_ SV **opdata, struct Perl_custom_infix *);  /* optional
-                                                                    */
-    OP *(*build_op)(pTHX_ SV **opdata, OP *lhs, OP *rhs, struct Perl_custom_infix *);
+    void                        (*parse)    (pTHX_ SV **opdata, struct Perl_custom_infix *);    /* optional
+                                                                                                 */
+    OP                          *(*build_op)(pTHX_ SV **opdata, OP *lhs, OP *rhs, struct Perl_custom_infix *);
 };
 
 typedef OP* (*Perl_ppaddr_t)(pTHX);
@@ -6086,8 +6086,8 @@ typedef void(*globhook_t)(pTHX);
 
 /* Interpreter exitlist entry */
 typedef struct exitlistentry {
-    void (*fn) (pTHX_ void*);
-    void *ptr;
+    void    (*fn)(pTHX_ void*);
+    void    *ptr;
 } PerlExitListEntry;
 
 /* if you only have signal() and it resets on each signal,
@@ -6105,7 +6105,7 @@ typedef struct exitlistentry {
 #if !defined(MULTIPLICITY)
 
 struct interpreter {
-    char broiled;
+    char    broiled;
 };
 
 #else
@@ -6768,17 +6768,17 @@ EXTCONST U8 PL_c9_utf8_dfa_tab[];
 END_EXTERN_C
 
 struct am_table {
-  U8 flags;
-  U8 fallback;
-  U16 spare;
-  U32 was_ok_sub;
-  CV* table[NofAMmeth];
+    U8  flags;
+    U8  fallback;
+    U16 spare;
+    U32 was_ok_sub;
+    CV  *table[NofAMmeth];
 };
 struct am_table_short {
-  U8 flags;
-  U8 fallback;
-  U16 spare;
-  U32 was_ok_sub;
+    U8  flags;
+    U8  fallback;
+    U16 spare;
+    U32 was_ok_sub;
 };
 typedef struct am_table AMT;
 typedef struct am_table_short AMTS;

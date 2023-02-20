@@ -10,18 +10,18 @@
  */
 
 struct gp {
-    SV *        gp_sv;          /* scalar value */
-    struct io * gp_io;          /* filehandle value */
-    CV *        gp_cv;          /* subroutine value */
-    U32         gp_cvgen;       /* generational validity of cached gp_cv */
-    U32         gp_refcnt;      /* how many globs point to this? */
-    HV *        gp_hv;          /* hash value */
-    AV *        gp_av;          /* array value */
-    CV *        gp_form;        /* format value */
-    GV *        gp_egv;         /* effective gv, if *glob */
-    PERL_BITFIELD32 gp_line:31; /* line first declared at (for -w) */
+    SV              *gp_sv;         /* scalar value */
+    struct io       *gp_io;         /* filehandle value */
+    CV              *gp_cv;         /* subroutine value */
+    U32             gp_cvgen;       /* generational validity of cached gp_cv */
+    U32             gp_refcnt;      /* how many globs point to this? */
+    HV              *gp_hv;         /* hash value */
+    AV              *gp_av;         /* array value */
+    CV              *gp_form;       /* format value */
+    GV              *gp_egv;        /* effective gv, if *glob */
+    PERL_BITFIELD32 gp_line:31;     /* line first declared at (for -w) */
     PERL_BITFIELD32 gp_flags:1;
-    HEK *       gp_file_hek;    /* file first declared in (for -w) */
+    HEK             *gp_file_hek;   /* file first declared in (for -w) */
 };
 
 #define GvXPVGV(gv)     ((XPVGV*)SvANY(gv))

@@ -7,48 +7,48 @@ typedef struct {
 } PerlIO_pair_t;
 
 struct PerlIO_list_s {
-    IV refcnt;
-    IV cur;
-    IV len;
-    PerlIO_pair_t *array;
+    IV              refcnt;
+    IV              cur;
+    IV              len;
+    PerlIO_pair_t   *array;
 };
 
 struct _PerlIO_funcs {
-    Size_t fsize;
-    const char *name;
-    Size_t size;
-    U32 kind;
-    IV (*Pushed) (pTHX_ PerlIO *f, const char *mode, SV *arg, PerlIO_funcs *tab);
-    IV (*Popped) (pTHX_ PerlIO *f);
-    PerlIO *(*Open) (pTHX_ PerlIO_funcs *tab,
-                     PerlIO_list_t *layers, IV n,
-                     const char *mode,
-                     int fd, int imode, int perm,
-                     PerlIO *old, int narg, SV **args);
-    IV (*Binmode)(pTHX_ PerlIO *f);
-    SV *(*Getarg) (pTHX_ PerlIO *f, CLONE_PARAMS *param, int flags);
-    IV (*Fileno) (pTHX_ PerlIO *f);
-    PerlIO *(*Dup) (pTHX_ PerlIO *f, PerlIO *o, CLONE_PARAMS *param, int flags);
+    Size_t      fsize;
+    const char  *name;
+    Size_t      size;
+    U32         kind;
+    IV          (*Pushed)    (pTHX_ PerlIO *f, const char *mode, SV *arg, PerlIO_funcs *tab);
+    IV          (*Popped)    (pTHX_ PerlIO *f);
+    PerlIO      *(*Open)     (pTHX_ PerlIO_funcs *tab,
+                              PerlIO_list_t *layers, IV n,
+                              const char *mode,
+                              int fd, int imode, int perm,
+                              PerlIO *old, int narg, SV **args);
+    IV          (*Binmode)   (pTHX_ PerlIO *f);
+    SV          *(*Getarg)   (pTHX_ PerlIO *f, CLONE_PARAMS *param, int flags);
+    IV          (*Fileno)    (pTHX_ PerlIO *f);
+    PerlIO      *(*Dup)      (pTHX_ PerlIO *f, PerlIO *o, CLONE_PARAMS *param, int flags);
     /* Unix-like functions - cf sfio line disciplines */
-     SSize_t(*Read) (pTHX_ PerlIO *f, void *vbuf, Size_t count);
-     SSize_t(*Unread) (pTHX_ PerlIO *f, const void *vbuf, Size_t count);
-     SSize_t(*Write) (pTHX_ PerlIO *f, const void *vbuf, Size_t count);
-    IV (*Seek) (pTHX_ PerlIO *f, Off_t offset, int whence);
-     Off_t(*Tell) (pTHX_ PerlIO *f);
-    IV (*Close) (pTHX_ PerlIO *f);
+    SSize_t     (*Read)      (pTHX_ PerlIO *f, void *vbuf, Size_t count);
+    SSize_t     (*Unread)    (pTHX_ PerlIO *f, const void *vbuf, Size_t count);
+    SSize_t     (*Write)     (pTHX_ PerlIO *f, const void *vbuf, Size_t count);
+    IV          (*Seek)      (pTHX_ PerlIO *f, Off_t offset, int whence);
+    Off_t       (*Tell)      (pTHX_ PerlIO *f);
+    IV          (*Close)     (pTHX_ PerlIO *f);
     /* Stdio-like buffered IO functions */
-    IV (*Flush) (pTHX_ PerlIO *f);
-    IV (*Fill) (pTHX_ PerlIO *f);
-    IV (*Eof) (pTHX_ PerlIO *f);
-    IV (*Error) (pTHX_ PerlIO *f);
-    void (*Clearerr) (pTHX_ PerlIO *f);
-    void (*Setlinebuf) (pTHX_ PerlIO *f);
+    IV          (*Flush)     (pTHX_ PerlIO *f);
+    IV          (*Fill)      (pTHX_ PerlIO *f);
+    IV          (*Eof)       (pTHX_ PerlIO *f);
+    IV          (*Error)     (pTHX_ PerlIO *f);
+    void        (*Clearerr)  (pTHX_ PerlIO *f);
+    void        (*Setlinebuf)(pTHX_ PerlIO *f);
     /* Perl's snooping functions */
-    STDCHAR *(*Get_base) (pTHX_ PerlIO *f);
-     Size_t(*Get_bufsiz) (pTHX_ PerlIO *f);
-    STDCHAR *(*Get_ptr) (pTHX_ PerlIO *f);
-     SSize_t(*Get_cnt) (pTHX_ PerlIO *f);
-    void (*Set_ptrcnt) (pTHX_ PerlIO *f, STDCHAR * ptr, SSize_t cnt);
+    STDCHAR     *(*Get_base) (pTHX_ PerlIO *f);
+    Size_t      (*Get_bufsiz)(pTHX_ PerlIO *f);
+    STDCHAR     *(*Get_ptr)  (pTHX_ PerlIO *f);
+    SSize_t     (*Get_cnt)   (pTHX_ PerlIO *f);
+    void        (*Set_ptrcnt)(pTHX_ PerlIO *f, STDCHAR * ptr, SSize_t cnt);
 };
 
 /*---------------------------------------------------------------------------*/
@@ -64,18 +64,18 @@ struct _PerlIO_funcs {
 
 /*---------------------------------------------------------------------------*/
 struct _PerlIO {
-    PerlIOl *next;              /* Lower layer */
-    PerlIO_funcs *tab;          /* Functions for this layer */
-    U32 flags;                  /* Various flags for state */
-    int err;                    /* Saved errno value */
+    PerlIOl         *next;  /* Lower layer */
+    PerlIO_funcs    *tab;   /* Functions for this layer */
+    U32             flags;  /* Various flags for state */
+    int             err;    /* Saved errno value */
 #ifdef VMS
-    unsigned os_err;            /* Saved vaxc$errno value */
+    unsigned        os_err; /* Saved vaxc$errno value */
 #elif defined (OS2)
-    unsigned long os_err;
+    unsigned long   os_err;
 #elif defined (WIN32)
-    DWORD os_err;               /* Saved GetLastError() value */
+    DWORD           os_err; /* Saved GetLastError() value */
 #endif
-    PerlIOl *head;              /* our ultimate parent pointer */
+    PerlIOl         *head;  /* our ultimate parent pointer */
 };
 
 /*---------------------------------------------------------------------------*/

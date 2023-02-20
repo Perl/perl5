@@ -31,12 +31,12 @@
  */
 
 struct jmpenv {
-    struct jmpenv *     je_prev;
-    Sigjmp_buf          je_buf;         /* uninit if je_prev is NULL */
-    int                 je_ret;         /* last exception thrown */
-    bool                je_mustcatch;   /* longjmp()s must be caught locally */
-    U16                 je_old_delaymagic; /* saved PL_delaymagic */
-    SSize_t             je_old_stack_hwm;
+    struct jmpenv   *je_prev;
+    Sigjmp_buf      je_buf;             /* uninit if je_prev is NULL */
+    int             je_ret;             /* last exception thrown */
+    bool            je_mustcatch;       /* longjmp()s must be caught locally */
+    U16             je_old_delaymagic;  /* saved PL_delaymagic */
+    SSize_t         je_old_stack_hwm;
 };
 
 typedef struct jmpenv JMPENV;
@@ -427,29 +427,29 @@ struct cop {
     BASEOP
     /* On LP64 putting this here takes advantage of the fact that BASEOP isn't
        an exact multiple of 8 bytes to save structure padding. */
-    line_t      cop_line;       /* line # of this command */
+    line_t      cop_line;           /* line # of this command */
     /* label for this construct is now stored in cop_hints_hash */
 #ifdef USE_ITHREADS
-    PADOFFSET   cop_stashoff;   /* offset into PL_stashpad, for the package
-                                   the line was compiled in */
-    char *      cop_file;       /* rcpv containing name of file
-                                   this command is from */
+    PADOFFSET   cop_stashoff;       /* offset into PL_stashpad, for the package
+                                       the line was compiled in */
+    char        *cop_file;          /* rcpv containing name of file
+                                       this command is from */
 #else
-    HV *        cop_stash;      /* package line was compiled in */
-    GV *        cop_filegv;     /* name of GV file this command is from */
+    HV          *cop_stash;         /* package line was compiled in */
+    GV          *cop_filegv;        /* name of GV file this command is from */
 #endif
-    U32         cop_hints;      /* hints bits from pragmata */
-    U32         cop_seq;        /* parse sequence number */
-    char *      cop_warnings;   /* Lexical warnings bitmask vector.  Refcounted
-                                   shared copy of ${^WARNING_BITS}.  This
-                                   pointer either points at one of the magic
-                                   values for warnings, or it points at a
-                                   buffer constructed with rcpv_new().  Use the
-                                   RCPV_LEN() macro to get its length.
-                                 */
+    U32         cop_hints;          /* hints bits from pragmata */
+    U32         cop_seq;            /* parse sequence number */
+    char        *cop_warnings;      /* Lexical warnings bitmask vector.  Refcounted
+                                       shared copy of ${^WARNING_BITS}.  This
+                                       pointer either points at one of the magic
+                                       values for warnings, or it points at a
+                                       buffer constructed with rcpv_new().  Use the
+                                       RCPV_LEN() macro to get its length.
+                                     */
     /* compile time state of %^H.  See the comment in op.c for how
        this is used to recreate a hash to return from caller. */
-    COPHH *     cop_hints_hash;
+    COPHH       *cop_hints_hash;
     /* for now just a bitmask stored here.  If we get sufficient features
        this may become a pointer.  How these flags are stored is subject
        to change without notice.  Use the macros to test for features.
@@ -536,10 +536,10 @@ is always injected at the end of the string by rcpv_new().
 */
 
 struct rcpv {
-    STRLEN  refcount;  /* UV would mean a 64 refcnt on 32 bit
-                          builds with -Duse64bitint */
-    STRLEN  len;       /* length of string including mandatory
-                          null byte at end */
+    STRLEN  refcount;   /* UV would mean a 64 refcnt on 32 bit
+                           builds with -Duse64bitint */
+    STRLEN  len;        /* length of string including mandatory
+                           null byte at end */
     char    pv[1];
 };
 typedef struct rcpv RCPV;
@@ -799,27 +799,27 @@ returned label, by setting C<*flags> to 0 or C<SVf_UTF8>.
 
 /* subroutine context */
 struct block_sub {
-    OP *        retop;  /* op to execute on exit from sub */
-    I32         old_cxsubix;  /* previous value of si_cxsubix */
+    OP  *retop;         /* op to execute on exit from sub */
+    I32 old_cxsubix;    /* previous value of si_cxsubix */
     /* Above here is the same for sub, format and eval. */
-    PAD         *prevcomppad; /* the caller's PL_comppad */
-    CV *        cv;
+    PAD *prevcomppad;   /* the caller's PL_comppad */
+    CV  *cv;
     /* Above here is the same for sub and format. */
-    I32         olddepth;
-    AV          *savearray;
+    I32 olddepth;
+    AV  *savearray;
 };
 
 
 /* format context */
 struct block_format {
-    OP *        retop;  /* op to execute on exit from sub */
-    I32         old_cxsubix;  /* previous value of si_cxsubix */
+    OP  *retop;         /* op to execute on exit from sub */
+    I32 old_cxsubix;    /* previous value of si_cxsubix */
     /* Above here is the same for sub, format and eval. */
-    PAD         *prevcomppad; /* the caller's PL_comppad */
-    CV *        cv;
+    PAD *prevcomppad;   /* the caller's PL_comppad */
+    CV  *cv;
     /* Above here is the same for sub and format. */
-    GV *        gv;
-    GV *        dfoutgv;
+    GV  *gv;
+    GV  *dfoutgv;
 };
 
 /* return a pointer to the current context */
@@ -873,14 +873,14 @@ struct block_format {
 
 /* eval context */
 struct block_eval {
-    OP *        retop;  /* op to execute on exit from eval */
-    I32         old_cxsubix;  /* previous value of si_cxsubix */
+    OP      *retop;         /* op to execute on exit from eval */
+    I32     old_cxsubix;    /* previous value of si_cxsubix */
     /* Above here is the same for sub, format and eval. */
-    SV *        old_namesv;
-    OP *        old_eval_root;
-    SV *        cur_text;
-    CV *        cv;
-    JMPENV *    cur_top_env; /* value of PL_top_env when eval CX created */
+    SV      *old_namesv;
+    OP      *old_eval_root;
+    SV      *cur_text;
+    CV      *cv;
+    JMPENV  *cur_top_env;   /* value of PL_top_env when eval CX created */
 };
 
 /* If we ever need more than 512 op types, change the shift from 7.  blku_gimme
@@ -895,32 +895,32 @@ struct block_eval {
 
 /* loop context */
 struct block_loop {
-    LOOP *      my_op;  /* My op, that contains redo, next and last ops. */
-    union {     /* different ways of locating the iteration variable */
-        SV      **svp; /* for lexicals: address of pad slot */
-        GV      *gv;   /* for package vars */
-    } itervar_u;
-    SV          *itersave; /* the original iteration var */
+    LOOP    *my_op;         /* My op, that contains redo, next and last ops. */
+    union { /* different ways of locating the iteration variable */
+        SV  **svp;  /* for lexicals: address of pad slot */
+        GV  *gv;    /* for package vars */
+    }       itervar_u;
+    SV      *itersave;      /* the original iteration var */
     union {
         struct { /* CXt_LOOP_ARY, C<for (@ary)> */
-            AV *ary; /* array being iterated over */
-            IV  ix;   /* index relative to base of array */
-        } ary;
+            AV  *ary;   /* array being iterated over */
+            IV  ix;     /* index relative to base of array */
+        }       ary;
         struct { /* CXt_LOOP_LIST, C<for (list)> */
             I32 basesp; /* first element of list on stack */
-            IV  ix;      /* index relative to basesp */
-        } stack;
+            IV  ix;     /* index relative to basesp */
+        }       stack;
         struct { /* CXt_LOOP_LAZYIV, C<for (1..9)> */
-            IV cur;
-            IV end;
-        } lazyiv;
+            IV  cur;
+            IV  end;
+        }       lazyiv;
         struct { /* CXt_LOOP_LAZYSV C<for ('a'..'z')> */
-            SV * cur;
-            SV * end; /* maximum value (or minimum in reverse) */
-        } lazysv;
-    } state_u;
+            SV  *cur;
+            SV  *end;   /* maximum value (or minimum in reverse) */
+        }       lazysv;
+    }       state_u;
 #ifdef USE_ITHREADS
-    PAD *oldcomppad; /* needed to map itervar_u.svp during thread clone */
+    PAD     *oldcomppad;    /* needed to map itervar_u.svp during thread clone */
 #endif
 };
 
@@ -954,25 +954,25 @@ struct block_loop {
 
 /* given/when context */
 struct block_givwhen {
-        OP *leave_op;
-        SV *defsv_save; /* the original $_ */
+    OP  *leave_op;
+    SV  *defsv_save;    /* the original $_ */
 };
 
 
 
 /* context common to subroutines, evals and loops */
 struct block {
-    U8          blku_type;      /* what kind of context this is */
-    U8          blku_gimme;     /* is this block running in list context? */
-    U16         blku_u16;       /* used by block_sub and block_eval (so far) */
-    I32         blku_oldsaveix; /* saved PL_savestack_ix */
+    U8      blku_type;          /* what kind of context this is */
+    U8      blku_gimme;         /* is this block running in list context? */
+    U16     blku_u16;           /* used by block_sub and block_eval (so far) */
+    I32     blku_oldsaveix;     /* saved PL_savestack_ix */
     /* all the fields above must be aligned with same-sized fields as sbu */
-    I32         blku_oldsp;     /* current sp floor: where nextstate pops to */
-    I32         blku_oldmarksp; /* mark stack index */
-    COP *       blku_oldcop;    /* old curcop pointer */
-    PMOP *      blku_oldpm;     /* values of pattern match vars */
-    SSize_t     blku_old_tmpsfloor;     /* saved PL_tmps_floor */
-    I32         blku_oldscopesp;        /* scope stack index */
+    I32     blku_oldsp;         /* current sp floor: where nextstate pops to */
+    I32     blku_oldmarksp;     /* mark stack index */
+    COP     *blku_oldcop;       /* old curcop pointer */
+    PMOP    *blku_oldpm;        /* values of pattern match vars */
+    SSize_t blku_old_tmpsfloor; /* saved PL_tmps_floor */
+    I32     blku_oldscopesp;    /* scope stack index */
 
     union {
         struct block_sub        blku_sub;
@@ -980,7 +980,7 @@ struct block {
         struct block_eval       blku_eval;
         struct block_loop       blku_loop;
         struct block_givwhen    blku_givwhen;
-    } blk_u;
+    }       blk_u;
 };
 #define blk_oldsp           cx_u.cx_blk.blku_oldsp
 #define blk_oldcop          cx_u.cx_blk.blku_oldcop
@@ -1013,21 +1013,21 @@ struct block {
 
 /* substitution context */
 struct subst {
-    U8          sbu_type;       /* same as blku_type */
-    U8          sbu_rflags;
-    U16         sbu_rxtainted;
-    I32         sbu_oldsaveix; /* same as blku_oldsaveix */
+    U8      sbu_type;       /* same as blku_type */
+    U8      sbu_rflags;
+    U16     sbu_rxtainted;
+    I32     sbu_oldsaveix;  /* same as blku_oldsaveix */
     /* all the fields above must be aligned with same-sized fields as blk_u */
-    SSize_t     sbu_iters;
-    SSize_t     sbu_maxiters;
-    char *      sbu_orig;
-    SV *        sbu_dstr;
-    SV *        sbu_targ;
-    char *      sbu_s;
-    char *      sbu_m;
-    char *      sbu_strend;
-    void *      sbu_rxres;
-    REGEXP *    sbu_rx;
+    SSize_t sbu_iters;
+    SSize_t sbu_maxiters;
+    char    *sbu_orig;
+    SV      *sbu_dstr;
+    SV      *sbu_targ;
+    char    *sbu_s;
+    char    *sbu_m;
+    char    *sbu_strend;
+    void    *sbu_rxres;
+    REGEXP  *sbu_rx;
 };
 
 #ifdef PERL_CORE
@@ -1083,7 +1083,7 @@ struct context {
     union {
         struct block    cx_blk;
         struct subst    cx_subst;
-    } cx_u;
+    }       cx_u;
 };
 #define cx_type             cx_u.cx_subst.sbu_type
 
@@ -1223,10 +1223,10 @@ struct context {
 #define PERLSI_REGCOMP          11
 
 struct stackinfo {
-    AV *                si_stack;       /* stack for current runlevel */
-    PERL_CONTEXT *      si_cxstack;     /* context stack for runlevel */
-    struct stackinfo *  si_prev;
-    struct stackinfo *  si_next;
+    AV                  *si_stack;      /* stack for current runlevel */
+    PERL_CONTEXT        *si_cxstack;    /* context stack for runlevel */
+    struct stackinfo    *si_prev;
+    struct stackinfo    *si_next;
     I32                 si_cxix;        /* current context index */
     I32                 si_cxmax;       /* maximum allocated index */
     I32                 si_cxsubix;     /* topmost sub/eval/format */
@@ -1236,7 +1236,7 @@ struct stackinfo {
                                          * with DEBUGGING, but not
                                          * #ifdef-ed for bincompat */
 #if defined DEBUGGING && !defined DEBUGGING_RE_ONLY
-/* high water mark: for checking if the stack was correctly
+    /* high water mark: for checking if the stack was correctly
  * extended / tested for extension by each pp function */
     SSize_t             si_stack_hwm;
 #endif

@@ -38,35 +38,34 @@
 
 
 /* entry in hash value chain */
-struct he {
-    /* Keep hent_next first in this structure, because
+struct he { /* Keep hent_next first in this structure, because
        sv_free_arenas take advantage of this to share code between
        the he arenas and the SV body arenas */
-    HE          *hent_next;     /* next entry in chain */
-    HEK         *hent_hek;      /* hash key */
+    HE      *hent_next; /* next entry in chain */
+    HEK     *hent_hek;  /* hash key */
     union {
         SV      *hent_val;      /* scalar value that was hashed */
         Size_t  hent_refcount;  /* references for this shared hash key */
-    } he_valu;
+    }       he_valu;
 };
 
 /* hash key -- defined separately for use as shared pointer */
 struct hek {
-    U32         hek_hash;        /* computed hash of key */
-    I32         hek_len;        /* length of the hash key */
+    U32     hek_hash;   /* computed hash of key */
+    I32     hek_len;    /* length of the hash key */
     /* Be careful! Sometimes we store a pointer in the hek_key buffer,
      * which means it must be 8 byte aligned or things dont work on
      * aligned platforms like HPUX Also beware, the last byte of the
      * hek_key buffer is a hidden flags byte about the key. */
-     char       hek_key[1];        /* variable-length hash key */
+    char    hek_key[1]; /* variable-length hash key */
     /* the hash-key is \0-terminated */
     /* after the \0 there is a byte for flags, such as whether
        the key is UTF-8 or WAS-UTF-8, or an SV */
 };
 
 struct shared_he {
-    struct he shared_he_he;
-    struct hek shared_he_hek;
+    struct he   shared_he_he;
+    struct hek  shared_he_hek;
 };
 
 /* Subject to change.  Don't access this directly.
@@ -74,28 +73,27 @@ struct shared_he {
  */
 
 struct mro_alg {
-    AV *(*resolve)(pTHX_ HV* stash, U32 level);
-    const char *name;
-    U16 length;
-    U16 kflags; /* For the hash API - set HVhek_UTF8 if name is UTF-8 */
-    U32 hash; /* or 0 */
+    AV          *(*resolve)(pTHX_ HV* stash, U32 level);
+    const char  *name;
+    U16         length;
+    U16         kflags;                     /* For the hash API - set HVhek_UTF8 if name is UTF-8 */
+    U32         hash;                       /* or 0 */
 };
 
-struct mro_meta {
-    /* a hash holding the different MROs private data. */
-    HV      *mro_linear_all;
+struct mro_meta { /* a hash holding the different MROs private data. */
+    HV                      *mro_linear_all;
     /* a pointer directly to the current MROs private data.  If mro_linear_all
        is NULL, this owns the SV reference, else it is just a pointer to a
        value stored in and owned by mro_linear_all. */
-    SV      *mro_linear_current;
-    HV      *mro_nextmethod; /* next::method caching */
-    U32     cache_gen;       /* Bumping this invalidates our method cache */
-    U32     pkg_gen;         /* Bumps when local methods/@ISA change */
-    const struct mro_alg *mro_which; /* which mro alg is in use? */
-    HV      *isa;            /* Everything this class @ISA */
-    HV      *super;          /* SUPER method cache */
-    CV      *destroy;        /* DESTROY method if destroy_gen non-zero */
-    U32     destroy_gen;     /* Generation number of DESTROY cache */
+    SV                      *mro_linear_current;
+    HV                      *mro_nextmethod;        /* next::method caching */
+    U32                     cache_gen;              /* Bumping this invalidates our method cache */
+    U32                     pkg_gen;                /* Bumps when local methods/@ISA change */
+    const struct mro_alg    *mro_which;             /* which mro alg is in use? */
+    HV                      *isa;                   /* Everything this class @ISA */
+    HV                      *super;                 /* SUPER method cache */
+    CV                      *destroy;               /* DESTROY method if destroy_gen non-zero */
+    U32                     destroy_gen;            /* Generation number of DESTROY cache */
 };
 
 #define MRO_GET_PRIVATE_DATA(smeta, which)                  \
@@ -107,50 +105,49 @@ struct mro_meta {
  */
 
 union _xhvnameu {
-    HEK *xhvnameu_name;         /* When xhv_name_count is 0 */
-    HEK **xhvnameu_names;       /* When xhv_name_count is non-0 */
+    HEK *xhvnameu_name;     /* When xhv_name_count is 0 */
+    HEK **xhvnameu_names;   /* When xhv_name_count is non-0 */
 };
 
 /* A struct defined by pad.h and used within class.c */
 struct suspended_compcv;
 
 struct xpvhv_aux {
-    union _xhvnameu xhv_name_u; /* name, if a symbol table */
-    AV          *xhv_backreferences; /* back references for weak references */
-    HE          *xhv_eiter;     /* current entry of iterator */
-    I32         xhv_riter;      /* current root of iterator */
+    union _xhvnameu         xhv_name_u;                 /* name, if a symbol table */
+    AV                      *xhv_backreferences;        /* back references for weak references */
+    HE                      *xhv_eiter;                 /* current entry of iterator */
+    I32                     xhv_riter;                  /* current root of iterator */
 
-/* Concerning xhv_name_count: When non-zero, xhv_name_u contains a pointer
+    /* Concerning xhv_name_count: When non-zero, xhv_name_u contains a pointer
  * to an array of HEK pointers, this being the length.  The first element is
  * the name of the stash, which may be NULL.  If xhv_name_count is positive,
  * then *xhv_name is one of the effective names.  If xhv_name_count is nega-
  * tive, then xhv_name_u.xhvnameu_names[1] is the first effective name.
  */
-    I32         xhv_name_count;
-    struct mro_meta *xhv_mro_meta;
+    I32                     xhv_name_count;
+    struct mro_meta         *xhv_mro_meta;
 #ifdef PERL_HASH_RANDOMIZE_KEYS
-    U32         xhv_rand;       /* random value for hash traversal */
-    U32         xhv_last_rand;  /* last random value for hash traversal,
-                                   used to detect each() after insert
-                                   for warnings */
+    U32                     xhv_rand;                   /* random value for hash traversal */
+    U32                     xhv_last_rand;              /* last random value for hash traversal,
+                                                           used to detect each() after insert
+                                                           for warnings */
 #endif
-    U32         xhv_aux_flags;      /* assorted extra flags */
+    U32                     xhv_aux_flags;              /* assorted extra flags */
 
     /* The following fields are only valid if
        we have the flag HvAUXf_IS_CLASS */
-    HV          *xhv_class_superclass;         /* STASH of the :isa()
-                                                  base class */
-    CV          *xhv_class_initfields_cv;      /* CV for running initfields */
-    AV          *xhv_class_adjust_blocks;      /* CVs containing the
-                                                  ADJUST blocks */
-    PADNAMELIST *xhv_class_fields;             /* PADNAMEs with
-                                                  PadnameIsFIELD() */
-    PADOFFSET    xhv_class_next_fieldix;
-    HV          *xhv_class_param_map;          /* Maps param names to field
-                                                  index stored in UV */
+    HV                      *xhv_class_superclass;      /* STASH of the :isa()
+                                                           base class */
+    CV                      *xhv_class_initfields_cv;   /* CV for running initfields */
+    AV                      *xhv_class_adjust_blocks;   /* CVs containing the
+                                                           ADJUST blocks */
+    PADNAMELIST             *xhv_class_fields;          /* PADNAMEs with
+                                                           PadnameIsFIELD() */
+    PADOFFSET               xhv_class_next_fieldix;
+    HV                      *xhv_class_param_map;       /* Maps param names to field
+                                                           index stored in UV */
 
-    struct suspended_compcv
-                *xhv_class_suspended_initfields_compcv;
+    struct suspended_compcv *xhv_class_suspended_initfields_compcv;
 };
 
 #define HvAUXf_SCAN_STASH           0x1     /* stash is being scanned by gv_check */
@@ -163,18 +160,18 @@ struct xpvhv_aux {
 /* hash structure: */
 /* This structure must match the beginning of struct xpvmg in sv.h. */
 struct xpvhv {
-    HV*         xmg_stash;      /* class package */
+    HV          *xmg_stash; /* class package */
     union _xmgu xmg_u;
-    STRLEN      xhv_keys;       /* total keys, including placeholders */
-    STRLEN      xhv_max;        /* subscript of last element of xhv_array */
+    STRLEN      xhv_keys;   /* total keys, including placeholders */
+    STRLEN      xhv_max;    /* subscript of last element of xhv_array */
 };
 
 struct xpvhv_with_aux {
-    HV         *xmg_stash;      /* class package */
-    union _xmgu xmg_u;
-    STRLEN      xhv_keys;       /* total keys, including placeholders */
-    STRLEN      xhv_max;        /* subscript of last element of xhv_array */
-    struct xpvhv_aux xhv_aux;
+    HV                  *xmg_stash; /* class package */
+    union _xmgu         xmg_u;
+    STRLEN              xhv_keys;   /* total keys, including placeholders */
+    STRLEN              xhv_max;    /* subscript of last element of xhv_array */
+    struct xpvhv_aux    xhv_aux;
 };
 
 /*
@@ -604,23 +601,23 @@ struct refcounted_he;
 
 /* Gosh.  This really isn't a good name any longer. */
 struct refcounted_he {
-    struct refcounted_he *refcounted_he_next;   /* next entry in chain */
+    struct refcounted_he    *refcounted_he_next;    /* next entry in chain */
 #ifdef USE_ITHREADS
-    U32                   refcounted_he_hash;
-    U32                   refcounted_he_keylen;
+    U32                     refcounted_he_hash;
+    U32                     refcounted_he_keylen;
 #else
-    HEK                  *refcounted_he_hek;    /* hint key */
+    HEK                     *refcounted_he_hek;     /* hint key */
 #endif
     union {
-        IV                refcounted_he_u_iv;
-        UV                refcounted_he_u_uv;
-        STRLEN            refcounted_he_u_len;
-        void             *refcounted_he_u_ptr;  /* Might be useful in future */
-    } refcounted_he_val;
-    U32                   refcounted_he_refcnt; /* reference count */
+        IV      refcounted_he_u_iv;
+        UV      refcounted_he_u_uv;
+        STRLEN  refcounted_he_u_len;
+        void    *refcounted_he_u_ptr;   /* Might be useful in future */
+    }                       refcounted_he_val;
+    U32                     refcounted_he_refcnt;   /* reference count */
     /* First byte is flags.  Then NUL-terminated value.
        Then for ithreads, non-NUL terminated key. */
-    char                  refcounted_he_data[1];
+    char                    refcounted_he_data[1];
 };
 
 /*

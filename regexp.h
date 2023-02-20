@@ -23,10 +23,10 @@
 typedef SSize_t regnode_offset;
 
 struct regnode_meta {
-    U8 type;
-    U8 arg_len;
-    U8 arg_len_varies;
-    U8 off_by_arg;
+    U8  type;
+    U8  arg_len;
+    U8  arg_len_varies;
+    U8  off_by_arg;
 };
 
 struct regnode {
@@ -45,14 +45,14 @@ struct regexp_engine;
 struct regexp;
 
 struct reg_substr_datum {
-    SSize_t min_offset; /* min pos (in chars) that substr must appear */
-    SSize_t max_offset; /* max pos (in chars) that substr must appear */
-    SV *substr;         /* non-utf8 variant */
-    SV *utf8_substr;    /* utf8 variant */
-    SSize_t end_shift;  /* how many fixed chars must end the string */
+    SSize_t min_offset;     /* min pos (in chars) that substr must appear */
+    SSize_t max_offset;     /* max pos (in chars) that substr must appear */
+    SV      *substr;        /* non-utf8 variant */
+    SV      *utf8_substr;   /* utf8 variant */
+    SSize_t end_shift;      /* how many fixed chars must end the string */
 };
 struct reg_substr_data {
-    U8      check_ix;   /* index into data[] of check substr */
+    U8                      check_ix;   /* index into data[] of check substr */
     struct reg_substr_datum data[3];    /* Actual array */
 };
 
@@ -90,18 +90,18 @@ typedef struct regexp_paren_pair {
 /* record the position of a (?{...}) within a pattern */
 
 struct reg_code_block {
-    STRLEN start;
-    STRLEN end;
-    OP     *block;
-    REGEXP *src_regex;
+    STRLEN  start;
+    STRLEN  end;
+    OP      *block;
+    REGEXP  *src_regex;
 };
 
 /* array of reg_code_block's plus header info */
 
 struct reg_code_blocks {
-    int refcnt; /* we may be pointed to from a regex and from the savestack */
-    int  count;    /* how many code blocks */
-    struct reg_code_block *cb; /* array of reg_code_block's */
+    int                     refcnt; /* we may be pointed to from a regex and from the savestack */
+    int                     count;  /* how many code blocks */
+    struct reg_code_block   *cb;    /* array of reg_code_block's */
 };
 
 
@@ -119,9 +119,9 @@ struct reg_code_blocks {
 
 typedef struct regexp {
     _XPV_HEAD;
-    const struct regexp_engine* engine; /* what engine created this regexp? */
-    REGEXP *mother_re; /* what re is this a lightweight copy of? */
-    HV *paren_names;   /* Optional hash of paren names */
+    const struct regexp_engine  *engine;                /* what engine created this regexp? */
+    REGEXP                      *mother_re;             /* what re is this a lightweight copy of? */
+    HV                          *paren_names;           /* Optional hash of paren names */
 
     /* ----------------------------------------------------------------------
      * Information about the match that the perl core uses to manage things
@@ -129,63 +129,63 @@ typedef struct regexp {
 
     /* see comment in regcomp_internal.h about branch reset to understand
        the distinction between physical and logical capture buffers */
-    U32 nparens;                    /* physical number of capture buffers */
-    U32 logical_nparens;            /* logical_number of capture buffers */
-    I32 *logical_to_parno;          /* map logical parno to first physcial */
-    I32 *parno_to_logical;          /* map every physical parno to logical */
-    I32 *parno_to_logical_next;     /* map every physical parno to the next
-                                       physical with the same logical id */
+    U32                         nparens;                /* physical number of capture buffers */
+    U32                         logical_nparens;        /* logical_number of capture buffers */
+    I32                         *logical_to_parno;      /* map logical parno to first physcial */
+    I32                         *parno_to_logical;      /* map every physical parno to logical */
+    I32                         *parno_to_logical_next; /* map every physical parno to the next
+                                                           physical with the same logical id */
 
-    U32 extflags;      /* Flags used both externally and internally */
-    SSize_t minlen;    /* minimum possible number of chars
-                          in string to match */
-    SSize_t minlenret; /* minimum possible number of chars in $& */
-    STRLEN gofs;       /* chars left of pos that we search from */
-                       /* substring data about strings that must appear in
+    U32                         extflags;               /* Flags used both externally and internally */
+    SSize_t                     minlen;                 /* minimum possible number of chars
+                                                           in string to match */
+    SSize_t                     minlenret;              /* minimum possible number of chars in $& */
+    STRLEN                      gofs;                   /* chars left of pos that we search from */
+    /* substring data about strings that must appear in
                         * the final match, used for optimisations */
 
-    struct reg_substr_data *substrs;
+    struct reg_substr_data      *substrs;
 
     /* private engine specific data */
 
-    void *pprivate;    /* Data private to the regex engine
-                        * which created this object. */
-    U32 intflags;      /* Engine Specific Internal flags */
+    void                        *pprivate;              /* Data private to the regex engine
+                                                         * which created this object. */
+    U32                         intflags;               /* Engine Specific Internal flags */
 
     /* ----------------------------------------------------------------------
      * Data about the last/current match.  These are modified during matching
      */
 
-    U32 lastparen;           /* highest close paren matched ($+) */
-    regexp_paren_pair *offs; /* Array of offsets for (@-) and (@+) */
-    char **recurse_locinput; /* used to detect infinite recursion,
-                                XXX: move to internal */
-    U32 lastcloseparen;      /* last close paren matched ($^N) */
+    U32                         lastparen;              /* highest close paren matched ($+) */
+    regexp_paren_pair           *offs;                  /* Array of offsets for (@-) and (@+) */
+    char                        **recurse_locinput;     /* used to detect infinite recursion,
+                                                           XXX: move to internal */
+    U32                         lastcloseparen;         /* last close paren matched ($^N) */
 
 
     /*---------------------------------------------------------------------- */
 
     /* offset from wrapped to the start of precomp */
-    PERL_BITFIELD32 pre_prefix:4;
+    PERL_BITFIELD32             pre_prefix:4;
 
     /* original flags used to compile the pattern, may
      * differ from extflags in various ways */
-    PERL_BITFIELD32 compflags:9;
+    PERL_BITFIELD32             compflags:9;
 
     /*---------------------------------------------------------------------- */
 
-    char *subbeg;       /* saved or original string so
-                           \digit works forever. */
-    SV_SAVED_COPY       /* If non-NULL, SV which is COW from original */
-    SSize_t sublen;     /* Length of string pointed by subbeg */
-    SSize_t suboffset;  /* byte offset of subbeg from logical start of str */
-    SSize_t subcoffset; /* suboffset equiv, but in chars (for @-/@+) */
-    SSize_t maxlen;  /* minimum possible number of chars in string to match */
+    char                        *subbeg;                /* saved or original string so
+                                                           \digit works forever. */
+    SV_SAVED_COPY                                       /* If non-NULL, SV which is COW from original */
+    SSize_t                     sublen;                 /* Length of string pointed by subbeg */
+    SSize_t                     suboffset;              /* byte offset of subbeg from logical start of str */
+    SSize_t                     subcoffset;             /* suboffset equiv, but in chars (for @-/@+) */
+    SSize_t                     maxlen;                 /* minimum possible number of chars in string to match */
 
     /*---------------------------------------------------------------------- */
 
 
-    CV *qr_anoncv;      /* the anon sub wrapped round qr/(?{..})/ */
+    CV                          *qr_anoncv;             /* the anon sub wrapped round qr/(?{..})/ */
 } regexp;
 
 
@@ -213,38 +213,38 @@ typedef struct re_scream_pos_data_s
  * regex engine implementation must be able to build one of these.
  */
 typedef struct regexp_engine {
-    REGEXP* (*comp) (pTHX_ SV * const pattern, U32 flags);
-    I32     (*exec) (pTHX_ REGEXP * const rx, char* stringarg, char* strend,
-                     char* strbeg, SSize_t minend, SV* sv,
-                     void* data, U32 flags);
-    char*   (*intuit) (pTHX_
-                        REGEXP * const rx,
-                        SV *sv,
-                        const char * const strbeg,
-                        char *strpos,
-                        char *strend,
-                        const U32 flags,
-                       re_scream_pos_data *data);
-    SV*     (*checkstr) (pTHX_ REGEXP * const rx);
-    void    (*rxfree) (pTHX_ REGEXP * const rx);
+    REGEXP  *(*comp)               (pTHX_ SV * const pattern, U32 flags);
+    I32     (*exec)                (pTHX_ REGEXP * const rx, char* stringarg, char* strend,
+                                                             char* strbeg, SSize_t minend, SV* sv,
+                                                             void* data, U32 flags);
+    char    *(*intuit)             (pTHX_
+                                    REGEXP * const rx,
+                                    SV *sv,
+                                    const char * const strbeg,
+                                    char *strpos,
+                                    char *strend,
+                                    const U32 flags,
+                                    re_scream_pos_data *data);
+    SV      *(*checkstr)           (pTHX_ REGEXP * const rx);
+    void    (*rxfree)              (pTHX_ REGEXP * const rx);
     void    (*numbered_buff_FETCH) (pTHX_ REGEXP * const rx, const I32 paren,
                                     SV * const sv);
     void    (*numbered_buff_STORE) (pTHX_ REGEXP * const rx, const I32 paren,
-                                   SV const * const value);
-    I32     (*numbered_buff_LENGTH) (pTHX_ REGEXP * const rx, const SV * const sv,
-                                    const I32 paren);
-    SV*     (*named_buff) (pTHX_ REGEXP * const rx, SV * const key,
-                           SV * const value, const U32 flags);
-    SV*     (*named_buff_iter) (pTHX_ REGEXP * const rx, const SV * const lastkey,
-                                const U32 flags);
-    SV*     (*qr_package)(pTHX_ REGEXP * const rx);
+                                    SV const * const value);
+    I32     (*numbered_buff_LENGTH)(pTHX_ REGEXP * const rx, const SV * const sv,
+                                                   const I32 paren);
+    SV      *(*named_buff)         (pTHX_ REGEXP * const rx, SV * const key,
+    SV * const value, const U32 flags);
+    SV      *(*named_buff_iter)    (pTHX_ REGEXP * const rx, const SV * const lastkey,
+                                                   const U32 flags);
+    SV      *(*qr_package)         (pTHX_ REGEXP * const rx);
 #  ifdef USE_ITHREADS
-    void*   (*dupe) (pTHX_ REGEXP * const rx, CLONE_PARAMS *param);
+    void    *(*dupe)               (pTHX_ REGEXP * const rx, CLONE_PARAMS *param);
 #  endif
-    REGEXP* (*op_comp) (pTHX_ SV ** const patternp, int pat_count,
-                    OP *expr, const struct regexp_engine* eng,
-                    REGEXP *old_re,
-                    bool *is_bare_re, U32 orig_rx_flags, U32 pm_flags);
+    REGEXP  *(*op_comp)            (pTHX_ SV ** const patternp, int pat_count,
+                                    OP *expr, const struct regexp_engine* eng,
+                                    REGEXP *old_re,
+                                    bool *is_bare_re, U32 orig_rx_flags, U32 pm_flags);
 } regexp_engine;
 
 /*
@@ -782,35 +782,34 @@ typedef struct {
 #define MAX_MATCHES     (MAX_FOLD_FROMS + 1 + 2)
 
 struct next_matchable_info {
-    U8     first_byte_mask;
-    U8     first_byte_anded;
-    U32    mask32;
-    U32    anded32;
-    PERL_INT_FAST8_T count; /* Negative means not initialized */
-    PERL_UINT_FAST8_T min_length;
-    PERL_UINT_FAST8_T max_length;
-    PERL_UINT_FAST8_T initial_definitive;
-    PERL_UINT_FAST8_T initial_exact;
-    PERL_UINT_FAST8_T lengths[MAX_MATCHES];
+    U8                  first_byte_mask;
+    U8                  first_byte_anded;
+    U32                 mask32;
+    U32                 anded32;
+    PERL_INT_FAST8_T    count;                  /* Negative means not initialized */
+    PERL_UINT_FAST8_T   min_length;
+    PERL_UINT_FAST8_T   max_length;
+    PERL_UINT_FAST8_T   initial_definitive;
+    PERL_UINT_FAST8_T   initial_exact;
+    PERL_UINT_FAST8_T   lengths[MAX_MATCHES];
 
     /* The size is from trial and error, and could change with new
      * Unicode standards, in which case there is an assertion that should
      * start failing.  This size could be calculated in one of the regen
      * scripts dealing with Unicode, but khw thinks the likelihood of it
      * changing is low enough that it isn't worth the effort. */
-    U8 matches[18];
+    U8                  matches[18];
 };
 
 typedef I32 CHECKPOINT;
 
 typedef struct regmatch_state {
-    int resume_state;           /* where to jump to on return */
-    char *locinput;             /* where to backtrack in string on failure */
-    char *loceol;
-    U8 *sr0;                    /* position of start of script run, or NULL */
+    int     resume_state;   /* where to jump to on return */
+    char    *locinput;      /* where to backtrack in string on failure */
+    char    *loceol;
+    U8      *sr0;           /* position of start of script run, or NULL */
 
     union {
-
         /* the 'info_aux' and 'info_aux_eval' union members are cuckoos in
          * the nest.  They aren't saved backtrack state; rather they
          * represent one or two extra chunks of data that need allocating at
@@ -828,150 +827,141 @@ typedef struct regmatch_state {
          * structs to avoid increasing the size of the union.
          */
 
-        regmatch_info_aux info_aux;
+        regmatch_info_aux       info_aux;
 
-        regmatch_info_aux_eval info_aux_eval;
+        regmatch_info_aux_eval  info_aux_eval;
 
         /* this is a fake union member that matches the first element of each
          * member that needs to store positive backtrack information */
         struct {
-            struct regmatch_state *prev_yes_state;
-        } yes;
+            struct regmatch_state   *prev_yes_state;
+        }                       yes;
 
         /* branchlike members */
         /* this is a fake union member that matches the first elements
          * of each member that needs to behave like a branch */
-        struct {
-            /* this first element must match u.yes */
-            struct regmatch_state *prev_yes_state;
-            U32 lastparen;
-            U32 lastcloseparen;
-            CHECKPOINT cp;
+        struct { /* this first element must match u.yes */
+            struct regmatch_state   *prev_yes_state;
+            U32                     lastparen;
+            U32                     lastcloseparen;
+            CHECKPOINT              cp;
 
-        } branchlike;
+        }                       branchlike;
 
-        struct {
-            /* the first elements must match u.branchlike */
-            struct regmatch_state *prev_yes_state;
-            U32 lastparen;
-            U32 lastcloseparen;
-            CHECKPOINT cp;
+        struct { /* the first elements must match u.branchlike */
+            struct regmatch_state   *prev_yes_state;
+            U32                     lastparen;
+            U32                     lastcloseparen;
+            CHECKPOINT              cp;
 
-            regnode *next_branch; /* next branch node */
-        } branch;
+            regnode                 *next_branch;       /* next branch node */
+        }                       branch;
 
-        struct {
-            /* the first elements must match u.branchlike */
-            struct regmatch_state *prev_yes_state;
-            U32 lastparen;
-            U32 lastcloseparen;
-            CHECKPOINT cp;
+        struct { /* the first elements must match u.branchlike */
+            struct regmatch_state   *prev_yes_state;
+            U32                     lastparen;
+            U32                     lastcloseparen;
+            CHECKPOINT              cp;
 
-            U32         accepted; /* how many accepting states left */
-            bool        longfold;/* saw a fold with a 1->n char mapping */
-            U16         *jump;  /* positive offsets from me */
-            regnode     *me;    /* Which node am I - needed for jump tries */
-            U8          *firstpos;/* pos in string of first trie match */
-            U32         firstchars;/* len in chars of firstpos from start */
-            U16         nextword;/* next word to try */
-            U16         topword; /* longest accepted word */
-        } trie;
+            U32                     accepted;           /* how many accepting states left */
+            bool                    longfold;           /* saw a fold with a 1->n char mapping */
+            U16                     *jump;              /* positive offsets from me */
+            regnode                 *me;                /* Which node am I - needed for jump tries */
+            U8                      *firstpos;          /* pos in string of first trie match */
+            U32                     firstchars;         /* len in chars of firstpos from start */
+            U16                     nextword;           /* next word to try */
+            U16                     topword;            /* longest accepted word */
+        }                       trie;
 
         /* special types - these members are used to store state for special
            regops like eval, if/then, lookaround and the markpoint state */
-        struct {
-            /* this first element must match u.yes */
-            struct regmatch_state *prev_yes_state;
-            struct regmatch_state *prev_curlyx;
-            struct regmatch_state *prev_eval;
-            REGEXP      *prev_rex;
-            CHECKPOINT  cp;     /* remember current savestack indexes */
-            CHECKPOINT  lastcp;
-            U32         close_paren; /* which close bracket is our end (+1) */
-            regnode     *B;     /* the node following us */
-            char        *prev_recurse_locinput;
-        } eval;
+        struct { /* this first element must match u.yes */
+            struct regmatch_state   *prev_yes_state;
+            struct regmatch_state   *prev_curlyx;
+            struct regmatch_state   *prev_eval;
+            REGEXP                  *prev_rex;
+            CHECKPOINT              cp;                     /* remember current savestack indexes */
+            CHECKPOINT              lastcp;
+            U32                     close_paren;            /* which close bracket is our end (+1) */
+            regnode                 *B;                     /* the node following us */
+            char                    *prev_recurse_locinput;
+        }                       eval;
 
-        struct {
-            /* this first element must match u.yes */
-            struct regmatch_state *prev_yes_state;
-            I32 wanted;
-            I32 logical;        /* saved copy of 'logical' var */
-            U8  count;          /* number of beginning positions */
-            char *start;
-            char *end;
-            regnode  *me; /* the IFMATCH/SUSPEND/UNLESSM node */
-            char *prev_match_end;
-        } ifmatch; /* and SUSPEND/UNLESSM */
+        struct { /* this first element must match u.yes */
+            struct regmatch_state   *prev_yes_state;
+            I32                     wanted;
+            I32                     logical;            /* saved copy of 'logical' var */
+            U8                      count;              /* number of beginning positions */
+            char                    *start;
+            char                    *end;
+            regnode                 *me;                /* the IFMATCH/SUSPEND/UNLESSM node */
+            char                    *prev_match_end;
+        }                       ifmatch;         /* and SUSPEND/UNLESSM */
 
-        struct {
-            /* this first element must match u.yes */
-            struct regmatch_state *prev_yes_state;
-            struct regmatch_state *prev_mark;
-            SV* mark_name;
-            char *mark_loc;
-        } mark;
+        struct { /* this first element must match u.yes */
+            struct regmatch_state   *prev_yes_state;
+            struct regmatch_state   *prev_mark;
+            SV                      *mark_name;
+            char                    *mark_loc;
+        }                       mark;
 
         struct {
             int val;
-        } keeper;
+        }                       keeper;
 
         /* quantifiers - these members are used for storing state
            for the regops used to implement quantifiers */
-        struct {
-            /* this first element must match u.yes */
-            struct regmatch_state *prev_yes_state;
-            struct regmatch_state *prev_curlyx; /* previous cur_curlyx */
-            regnode     *me;    /* the CURLYX node */
-            regnode     *B;     /* the B node in /A*B/ */
-            CHECKPOINT  cp;     /* remember current savestack index */
-            bool        minmod;
-            int         parenfloor;/* how far back to strip paren data */
+        struct { /* this first element must match u.yes */
+            struct regmatch_state   *prev_yes_state;
+            struct regmatch_state   *prev_curlyx;       /* previous cur_curlyx */
+            regnode                 *me;                /* the CURLYX node */
+            regnode                 *B;                 /* the B node in /A*B/ */
+            CHECKPOINT              cp;                 /* remember current savestack index */
+            bool                    minmod;
+            int                     parenfloor;         /* how far back to strip paren data */
 
             /* these two are modified by WHILEM */
-            int         count;  /* how many instances of A we've matched */
-            char        *lastloc;/* where previous A matched (0-len detect) */
-        } curlyx;
+            int                     count;              /* how many instances of A we've matched */
+            char                    *lastloc;           /* where previous A matched (0-len detect) */
+        }                       curlyx;
+
+        struct { /* this first element must match u.yes */
+            struct regmatch_state   *prev_yes_state;
+            struct regmatch_state   *save_curlyx;
+            CHECKPOINT              cp;                 /* remember current savestack indexes */
+            CHECKPOINT              lastcp;
+            char                    *save_lastloc;      /* previous curlyx.lastloc */
+            I32                     cache_offset;
+            I32                     cache_mask;
+        }                       whilem;
+
+        struct { /* this first element must match u.yes */
+            struct regmatch_state       *prev_yes_state;
+            CHECKPOINT                  cp;
+            U32                         lastparen;
+            U32                         lastcloseparen;
+            I32                         alen;               /* length of first-matched A string */
+            I32                         count;
+            bool                        minmod;
+            regnode                     *A, *B;             /* the nodes corresponding to /A*B/ */
+            regnode                     *me;                /* the curlym node */
+            struct next_matchable_info  Binfo;
+        }                       curlym;
 
         struct {
-            /* this first element must match u.yes */
-            struct regmatch_state *prev_yes_state;
-            struct regmatch_state *save_curlyx;
-            CHECKPOINT  cp;     /* remember current savestack indexes */
-            CHECKPOINT  lastcp;
-            char        *save_lastloc;  /* previous curlyx.lastloc */
-            I32         cache_offset;
-            I32         cache_mask;
-        } whilem;
+            U32                         paren;
+            CHECKPOINT                  cp;
+            U32                         lastparen;
+            U32                         lastcloseparen;
+            char                        *maxpos;        /* highest possible point in string to match */
+            char                        *oldloc;        /* the previous locinput */
+            int                         count;
+            int                         min, max;       /* {m,n} */
+            regnode                     *A, *B;         /* the nodes corresponding to /A*B/ */
+            struct next_matchable_info  Binfo;
+        }                       curly;           /* and CURLYN/PLUS/STAR */
 
-        struct {
-            /* this first element must match u.yes */
-            struct regmatch_state *prev_yes_state;
-            CHECKPOINT cp;
-            U32 lastparen;
-            U32 lastcloseparen;
-            I32 alen;           /* length of first-matched A string */
-            I32 count;
-            bool minmod;
-            regnode *A, *B;     /* the nodes corresponding to /A*B/ */
-            regnode *me;        /* the curlym node */
-            struct next_matchable_info Binfo;
-        } curlym;
-
-        struct {
-            U32 paren;
-            CHECKPOINT cp;
-            U32 lastparen;
-            U32 lastcloseparen;
-            char *maxpos;       /* highest possible point in string to match */
-            char *oldloc;       /* the previous locinput */
-            int count;
-            int min, max;       /* {m,n} */
-            regnode *A, *B;     /* the nodes corresponding to /A*B/ */
-            struct next_matchable_info Binfo;
-        } curly; /* and CURLYN/PLUS/STAR */
-
-    } u;
+    }       u;
 } regmatch_state;
 
 
@@ -984,8 +974,8 @@ typedef struct regmatch_state {
     ((4096 - 3 * sizeof (void*)) / sizeof(regmatch_state))
 
 typedef struct regmatch_slab {
-    regmatch_state states[PERL_REGMATCH_SLAB_SLOTS];
-    struct regmatch_slab *prev, *next;
+    regmatch_state          states[PERL_REGMATCH_SLAB_SLOTS];
+    struct regmatch_slab    *prev, *next;
 } regmatch_slab;
 
 

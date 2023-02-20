@@ -2,15 +2,15 @@
 #  define PERL_MALLOC_CTL_H_
 
 struct perl_mstats {
-    UV *nfree;
-    UV *ntotal;
-    IV topbucket, topbucket_ev, topbucket_odd, totfree, total, total_chain;
-    IV total_sbrk, sbrks, sbrk_good, sbrk_slack, start_slack, sbrked_remains;
-    IV minbucket;
+    UV  *nfree;
+    UV  *ntotal;
+    IV  topbucket, topbucket_ev, topbucket_odd, totfree, total, total_chain;
+    IV  total_sbrk, sbrks, sbrk_good, sbrk_slack, start_slack, sbrked_remains;
+    IV  minbucket;
     /* Level 1 info */
-    UV *bucket_mem_size;
-    UV *bucket_available_size;
-    UV nbuckets;
+    UV  *bucket_mem_size;
+    UV  *bucket_available_size;
+    UV  nbuckets;
 };
 typedef struct perl_mstats perl_mstats_t;
 

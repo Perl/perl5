@@ -32,98 +32,97 @@ typedef struct yy_lexshared {
 } LEXSHARED;
 
 typedef struct yy_parser {
-
     /* parser state */
 
-    struct yy_parser *old_parser; /* previous value of PL_parser */
-    YYSTYPE         yylval;     /* value of lookahead symbol, set by yylex() */
-    int             yychar;     /* The lookahead symbol. */
+    struct yy_parser    *old_parser;            /* previous value of PL_parser */
+    YYSTYPE             yylval;                 /* value of lookahead symbol, set by yylex() */
+    int                 yychar;                 /* The lookahead symbol. */
 
     /* Number of tokens to shift before error messages enabled. */
-    int             yyerrstatus;
+    int                 yyerrstatus;
 
-    yy_stack_frame  *stack;     /* base of stack */
-    yy_stack_frame  *stack_max1;/* (top-1)th element of allocated stack */
-    yy_stack_frame  *ps;        /* current stack frame */
-    int             yylen;      /* length of active reduction */
+    yy_stack_frame      *stack;                 /* base of stack */
+    yy_stack_frame      *stack_max1;            /* (top-1)th element of allocated stack */
+    yy_stack_frame      *ps;                    /* current stack frame */
+    int                 yylen;                  /* length of active reduction */
 
     /* lexer state */
 
-    I32         lex_formbrack;  /* bracket count at outer format level */
-    I32         lex_brackets;   /* square and curly bracket count */
-    I32         lex_casemods;   /* casemod count */
-    char        *lex_brackstack;/* what kind of brackets to pop */
-    char        *lex_casestack; /* what kind of case mods in effect */
-    U8          lex_defer;      /* state after determined token */
-    U8          lex_dojoin;     /* doing an array interpolation
-                                   1 = @{...}  2 = ->@ */
-    U8          expect;         /* how to interpret ambiguous tokens */
-    bool        preambled;
-    bool        sub_no_recover; /* can't recover from a sublex error */
-    U8          sub_error_count; /* the number of errors before sublexing */
-    OP          *lex_inpat;     /* in pattern $) and $| are special */
-    OP          *lex_op;        /* extra info to pass back on op */
-    SV          *lex_repl;      /* runtime replacement from s/// */
-    U16         lex_inwhat;     /* what kind of quoting are we in */
-    OPCODE      last_lop_op;    /* last named list or unary operator */
-    I32         lex_starts;     /* how many interps done on level */
-    SV          *lex_stuff;     /* runtime pattern from m// or s/// */
-    I32         multi_start;    /* 1st line of multi-line string */
-    I32         multi_end;      /* last line of multi-line string */
-    UV          multi_open;     /* delimiter code point of said string */
-    UV          multi_close;    /* delimiter code point of said string */
-    bool        lex_re_reparsing; /* we're doing G_RE_REPARSING */
-    U8          lex_super_state;/* lexer state to save */
-    U16         lex_sub_inwhat; /* "lex_inwhat" to use in sublex_push */
-    I32         lex_allbrackets;/* (), [], {}, ?: bracket count */
-    OP          *lex_sub_op;    /* current op in y/// or pattern */
-    SV          *lex_sub_repl;  /* repl of s/// used in sublex_push */
-    LEXSHARED   *lex_shared;
-    SV          *linestr;       /* current chunk of src text */
-    char        *bufptr;        /* carries the cursor (current parsing
-                                   position) from one invocation of
-                                   yylex to the next */
-    char        *oldbufptr;     /* in yylex, beginning of current token */
-    char        *oldoldbufptr;  /* in yylex, beginning of previous token */
-    char        *bufend;
-    char        *linestart;     /* beginning of most recently read line */
-    char        *last_uni;      /* position of last named-unary op */
-    char        *last_lop;      /* position of last list operator */
+    I32                 lex_formbrack;          /* bracket count at outer format level */
+    I32                 lex_brackets;           /* square and curly bracket count */
+    I32                 lex_casemods;           /* casemod count */
+    char                *lex_brackstack;        /* what kind of brackets to pop */
+    char                *lex_casestack;         /* what kind of case mods in effect */
+    U8                  lex_defer;              /* state after determined token */
+    U8                  lex_dojoin;             /* doing an array interpolation
+                                                   1 = @{...}  2 = ->@ */
+    U8                  expect;                 /* how to interpret ambiguous tokens */
+    bool                preambled;
+    bool                sub_no_recover;         /* can't recover from a sublex error */
+    U8                  sub_error_count;        /* the number of errors before sublexing */
+    OP                  *lex_inpat;             /* in pattern $) and $| are special */
+    OP                  *lex_op;                /* extra info to pass back on op */
+    SV                  *lex_repl;              /* runtime replacement from s/// */
+    U16                 lex_inwhat;             /* what kind of quoting are we in */
+    OPCODE              last_lop_op;            /* last named list or unary operator */
+    I32                 lex_starts;             /* how many interps done on level */
+    SV                  *lex_stuff;             /* runtime pattern from m// or s/// */
+    I32                 multi_start;            /* 1st line of multi-line string */
+    I32                 multi_end;              /* last line of multi-line string */
+    UV                  multi_open;             /* delimiter code point of said string */
+    UV                  multi_close;            /* delimiter code point of said string */
+    bool                lex_re_reparsing;       /* we're doing G_RE_REPARSING */
+    U8                  lex_super_state;        /* lexer state to save */
+    U16                 lex_sub_inwhat;         /* "lex_inwhat" to use in sublex_push */
+    I32                 lex_allbrackets;        /* (), [], {}, ?: bracket count */
+    OP                  *lex_sub_op;            /* current op in y/// or pattern */
+    SV                  *lex_sub_repl;          /* repl of s/// used in sublex_push */
+    LEXSHARED           *lex_shared;
+    SV                  *linestr;               /* current chunk of src text */
+    char                *bufptr;                /* carries the cursor (current parsing
+                                                   position) from one invocation of
+                                                   yylex to the next */
+    char                *oldbufptr;             /* in yylex, beginning of current token */
+    char                *oldoldbufptr;          /* in yylex, beginning of previous token */
+    char                *bufend;
+    char                *linestart;             /* beginning of most recently read line */
+    char                *last_uni;              /* position of last named-unary op */
+    char                *last_lop;              /* position of last list operator */
     /* copline is used to pass a specific line number to newSTATEOP.  It is a
        one-time line number, as newSTATEOP invalidates it (sets it to NOLINE)
        after using it.  The purpose of this is to report line num- bers in
        multiline constructs using the number of the first line. */
-    line_t      copline;
-    U16         in_my;          /* we're compiling a "my"/"our" declaration */
-    U8          lex_state;      /* next token is determined */
-    U8          error_count;    /* how many compile errors so far, max 10 */
-    HV          *in_my_stash;   /* declared class of this "my" declaration */
-    PerlIO      *rsfp;          /* current source file pointer */
-    AV          *rsfp_filters;  /* holds chain of active source filters */
+    line_t              copline;
+    U16                 in_my;                  /* we're compiling a "my"/"our" declaration */
+    U8                  lex_state;              /* next token is determined */
+    U8                  error_count;            /* how many compile errors so far, max 10 */
+    HV                  *in_my_stash;           /* declared class of this "my" declaration */
+    PerlIO              *rsfp;                  /* current source file pointer */
+    AV                  *rsfp_filters;          /* holds chain of active source filters */
 
-    YYSTYPE     nextval[5];     /* value of next token, if any */
-    I32         nexttype[5];    /* type of next token */
-    U8          nexttoke;
-    U8          form_lex_state; /* remember lex_state when parsing fmt */
-    U8          lex_fakeeof;    /* precedence at which to fake EOF */
-    U8          lex_flags;
-    COP         *saved_curcop;  /* the previous PL_curcop */
-    char        tokenbuf[256];
-    line_t      herelines;      /* number of lines in here-doc */
-    line_t      preambling;     /* line # when processing $ENV{PERL5DB} */
+    YYSTYPE             nextval[5];             /* value of next token, if any */
+    I32                 nexttype[5];            /* type of next token */
+    U8                  nexttoke;
+    U8                  form_lex_state;         /* remember lex_state when parsing fmt */
+    U8                  lex_fakeeof;            /* precedence at which to fake EOF */
+    U8                  lex_flags;
+    COP                 *saved_curcop;          /* the previous PL_curcop */
+    char                tokenbuf[256];
+    line_t              herelines;              /* number of lines in here-doc */
+    line_t              preambling;             /* line # when processing $ENV{PERL5DB} */
 
     /* these are valid while parsing a subroutine signature */
-    UV          sig_elems;      /* number of signature elements seen so far */
-    UV          sig_optelems;   /* number of optional signature elems seen */
-    char        sig_slurpy;     /* the sigil of the slurpy var (or null) */
-    bool        sig_seen;       /* the currently parsing sub has a signature */
+    UV                  sig_elems;              /* number of signature elements seen so far */
+    UV                  sig_optelems;           /* number of optional signature elems seen */
+    char                sig_slurpy;             /* the sigil of the slurpy var (or null) */
+    bool                sig_seen;               /* the currently parsing sub has a signature */
 
-    bool        recheck_utf8_validity;
+    bool                recheck_utf8_validity;
 
-    PERL_BITFIELD16     in_pod:1;      /* lexer is within a =pod section */
-    PERL_BITFIELD16     filtered:1;    /* source filters in evalbytes */
-    PERL_BITFIELD16     saw_infix_sigil:1; /* saw & or * or % operator */
-    PERL_BITFIELD16     parsed_sub:1;  /* last thing parsed was a sub */
+    PERL_BITFIELD16     in_pod:1;               /* lexer is within a =pod section */
+    PERL_BITFIELD16     filtered:1;             /* source filters in evalbytes */
+    PERL_BITFIELD16     saw_infix_sigil:1;      /* saw & or * or % operator */
+    PERL_BITFIELD16     parsed_sub:1;           /* last thing parsed was a sub */
 } yy_parser;
 
 /* flags for lexer API */

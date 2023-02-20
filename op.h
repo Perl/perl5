@@ -214,77 +214,76 @@ struct op {
 
 struct unop {
     BASEOP
-    OP *        op_first;
+    OP      *op_first;
 };
 
 struct unop_aux {
     BASEOP
-    OP            *op_first;
-    UNOP_AUX_item *op_aux;
+    OP              *op_first;
+    UNOP_AUX_item   *op_aux;
 };
 
 struct binop {
     BASEOP
-    OP *        op_first;
-    OP *        op_last;
+    OP      *op_first;
+    OP      *op_last;
 };
 
 struct logop {
     BASEOP
-    OP *        op_first;
+    OP      *op_first;
 
     /* Note that op->op_other is the *next* op in execution order of the
      * alternate branch, not the root of the subtree.  I.e.  imagine it being
      * called ->op_otherfirst.  To find the structural subtree root (what
      * could be called ->op_otherroot), use OpSIBLING of ->op_first */
-    OP *        op_other;
+    OP      *op_other;
 };
 
 struct listop {
     BASEOP
-    OP *        op_first;
-    OP *        op_last;
+    OP      *op_first;
+    OP      *op_last;
 };
 
 struct methop {
     BASEOP
-    union {
-        /* op_u.op_first *must* be aligned the same as the
+    union { /* op_u.op_first *must* be aligned the same as the
          * op_first field of the other op types */
-        OP* op_first;   /* optree for method name */
-        SV* op_meth_sv; /* static method name */
-    } op_u;
+        OP  *op_first;      /* optree for method name */
+        SV  *op_meth_sv;    /* static method name */
+    }           op_u;
 #ifdef USE_ITHREADS
-    PADOFFSET op_rclass_targ; /* pad index for redirect class */
+    PADOFFSET   op_rclass_targ; /* pad index for redirect class */
 #else
-    SV*       op_rclass_sv;   /* static redirect class $o->A::meth() */
+    SV          *op_rclass_sv;  /* static redirect class $o->A::meth() */
 #endif
 };
 
 struct pmop {
     BASEOP
-    OP *        op_first;
-    OP *        op_last;
+    OP          *op_first;
+    OP          *op_last;
 #ifdef USE_ITHREADS
     PADOFFSET   op_pmoffset;
 #else
-    REGEXP *    op_pmregexp;            /* compiled expression */
+    REGEXP      *op_pmregexp;       /* compiled expression */
 #endif
     U32         op_pmflags;
     union {
-        OP *    op_pmreplroot;          /* For OP_SUBST */
-        PADOFFSET op_pmtargetoff;       /* For OP_SPLIT lex ary or thr GV */
-        GV *    op_pmtargetgv;          /* For OP_SPLIT non-threaded GV */
-    }   op_pmreplrootu;
+        OP          *op_pmreplroot; /* For OP_SUBST */
+        PADOFFSET   op_pmtargetoff; /* For OP_SPLIT lex ary or thr GV */
+        GV          *op_pmtargetgv; /* For OP_SPLIT non-threaded GV */
+    }           op_pmreplrootu;
     union {
-        OP *    op_pmreplstart; /* Only used in OP_SUBST */
+        OP          *op_pmreplstart;    /* Only used in OP_SUBST */
 #ifdef USE_ITHREADS
-        PADOFFSET op_pmstashoff; /* Only used in OP_MATCH, with PMf_ONCE set */
+        PADOFFSET   op_pmstashoff;      /* Only used in OP_MATCH, with PMf_ONCE set */
 #else
-        HV *    op_pmstash;
+        HV          *op_pmstash;
 #endif
     }           op_pmstashstartu;
-    OP *        op_code_list;   /* list of (?{}) code blocks */
+    OP          *op_code_list;      /* list of (?{}) code blocks */
 };
 
 #ifdef USE_ITHREADS
@@ -428,7 +427,7 @@ struct pmop {
 
 struct svop {
     BASEOP
-    SV *        op_sv;
+    SV      *op_sv;
 };
 
 struct padop {
@@ -438,16 +437,16 @@ struct padop {
 
 struct pvop {
     BASEOP
-    char *      op_pv;
+    char    *op_pv;
 };
 
 struct loop {
     BASEOP
-    OP *        op_first;
-    OP *        op_last;
-    OP *        op_redoop;
-    OP *        op_nextop;
-    OP *        op_lastop;
+    OP      *op_first;
+    OP      *op_last;
+    OP      *op_redoop;
+    OP      *op_nextop;
+    OP      *op_lastop;
 };
 
 #define cUNOPx(o)       ((UNOP*)(o))
@@ -719,27 +718,27 @@ o->op_next >> is not already set, C<o> should be at least an C<UNOP>.
 
 #ifdef PERL_CORE
 struct opslot {
-    U16         opslot_size;        /* size of this slot (in pointers) */
-    U16         opslot_offset;      /* offset from start of slab
-                                       (in ptr units) */
-    OP          opslot_op;              /* the op itself */
+    U16 opslot_size;    /* size of this slot (in pointers) */
+    U16 opslot_offset;  /* offset from start of slab
+                           (in ptr units) */
+    OP  opslot_op;      /* the op itself */
 };
 
 struct opslab {
-    OPSLAB *    opslab_next;            /* next slab */
-    OPSLAB *    opslab_head;            /* first slab in chain */
-    OP **       opslab_freed;           /* array of sized chains of freed
-                                           ops (head only) */
-    size_t      opslab_refcnt;          /* number of ops (head slab only) */
-    U16         opslab_freed_size;      /* allocated size of opslab_freed */
-    U16         opslab_size;            /* size of slab in pointers,
-                                           including header */
-    U16         opslab_free_space;      /* space available in this slab for
-                                           allocating new ops (in ptr units) */
+    OPSLAB  *opslab_next;       /* next slab */
+    OPSLAB  *opslab_head;       /* first slab in chain */
+    OP      **opslab_freed;     /* array of sized chains of freed
+                                   ops (head only) */
+    size_t  opslab_refcnt;      /* number of ops (head slab only) */
+    U16     opslab_freed_size;  /* allocated size of opslab_freed */
+    U16     opslab_size;        /* size of slab in pointers,
+                                   including header */
+    U16     opslab_free_space;  /* space available in this slab for
+                                   allocating new ops (in ptr units) */
 # ifdef PERL_DEBUG_READONLY_OPS
-    bool        opslab_readonly;
+    bool    opslab_readonly;
 # endif
-    OPSLOT      opslab_slots;           /* slots begin here */
+    OPSLOT  opslab_slots;       /* slots begin here */
 };
 
 # define OPSLOT_HEADER   STRUCT_OFFSET(OPSLOT, opslot_op)
@@ -770,10 +769,10 @@ struct opslab {
 
 struct block_hooks {
     U32     bhk_flags;
-    void    (*bhk_start)        (pTHX_ int full);
-    void    (*bhk_pre_end)      (pTHX_ OP **seq);
-    void    (*bhk_post_end)     (pTHX_ OP **seq);
-    void    (*bhk_eval)         (pTHX_ OP *const saveop);
+    void    (*bhk_start)   (pTHX_ int full);
+    void    (*bhk_pre_end) (pTHX_ OP **seq);
+    void    (*bhk_post_end)(pTHX_ OP **seq);
+    void    (*bhk_eval)    (pTHX_ OP *const saveop);
 };
 
 /*
@@ -906,11 +905,11 @@ Reenable a member of the XOP which has been disabled.
 */
 
 struct custom_op {
-    U32             xop_flags;
-    const char     *xop_name;
-    const char     *xop_desc;
-    U32             xop_class;
-    void          (*xop_peep)(pTHX_ OP *o, OP *oldop);
+    U32         xop_flags;
+    const char  *xop_name;
+    const char  *xop_desc;
+    U32         xop_class;
+    void        (*xop_peep)(pTHX_ OP *o, OP *oldop);
 };
 
 /* return value of Perl_custom_op_get_field, similar to void *
@@ -1157,9 +1156,9 @@ C<L</op_sibling_splice>>.
 /* stuff for OP_ARGCHECK */
 
 struct op_argcheck_aux {
-    UV   params;     /* number of positional parameters */
-    UV   opt_params; /* number of optional positional parameters */
-    char slurpy;     /* presence of slurpy: may be '\0', '@' or '%' */
+    UV      params;     /* number of positional parameters */
+    UV      opt_params; /* number of optional positional parameters */
+    char    slurpy;     /* presence of slurpy: may be '\0', '@' or '%' */
 };
 
 #define MI_INIT_WORKAROUND_PACK     "Module::Install::DSL"
