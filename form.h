@@ -13,10 +13,10 @@
 #define FF_SKIP          3  /* skip <arg> chars in format */
 #define FF_FETCH         4  /* get next item and set field size to <arg> */
 #define FF_CHECKNL       5  /* find max len of item (up to
-                              \n) that fits field */
+                               \n) that fits field */
 #define FF_CHECKCHOP     6  /* like CHECKNL, but up to highest split point */
 #define FF_SPACE         7  /* append padding space (diff
-                              of field, item size) */
+                               of field, item size) */
 #define FF_HALFSPACE     8  /* like FF_SPACE, but only append half as many */
 #define FF_ITEM          9  /* append a text item, while blanking ctrl chars */
 #define FF_CHOP         10  /* (for ^*) chop the current item */

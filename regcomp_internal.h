@@ -15,11 +15,14 @@
    Its so we can simulate recursion without losing state. */
 struct scan_frame;
 typedef struct scan_frame {
-    regnode             *last_regnode;          /* last node to process in this frame */
-    regnode             *next_regnode;          /* next node to process when last is reached */
+    regnode             *last_regnode;          /* last node to process
+                                                   in this frame */
+    regnode             *next_regnode;          /* next node to process when
+                                                   last is reached */
     U32                 prev_recursed_depth;
     I32                 stopparen;              /* what stopparen do we use */
-    bool                in_gosub;               /* this or an outer frame is for GOSUB */
+    bool                in_gosub;               /* this or an outer frame
+                                                   is for GOSUB */
 
     struct scan_frame   *this_prev_frame;       /* this previous frame */
     struct scan_frame   *prev_frame;            /* previous frame */
@@ -32,39 +35,63 @@ typedef struct scan_frame {
 
 
 struct RExC_state_t {
-    U32                     flags;                      /* RXf_* are we folding,
+    U32                     flags;                      /* RXf_* are we
+                                                           folding,
                                                            multilining? */
-    U32                     pm_flags;                   /* PMf_* stuff from the calling PMOP */
-    char                    *precomp;                   /* uncompiled string. */
-    char                    *precomp_end;               /* pointer to end of uncompiled
+    U32                     pm_flags;                   /* PMf_* stuff from the
+                                                           calling PMOP */
+    char                    *precomp;                   /* uncompiled string.
+                                                         */
+    char                    *precomp_end;               /* pointer to end
+                                                           of uncompiled
                                                            string. */
-    REGEXP                  *rx_sv;                     /* The SV that is the regexp. */
-    regexp                  *rx;                        /* perl core regexp structure */
-    regexp_internal         *rxi;                       /* internal data for regexp object
+    REGEXP                  *rx_sv;                     /* The SV that is the
+                                                           regexp. */
+    regexp                  *rx;                        /* perl core regexp
+                                                           structure */
+    regexp_internal         *rxi;                       /* internal data for
+                                                           regexp object
                                                            pprivate field */
-    char                    *start;                     /* Start of input for compile */
-    char                    *end;                       /* End of input for compile */
-    char                    *parse;                     /* Input-scan pointer. */
-    char                    *copy_start;                /* start of copy of input within
-                                                           constructed parse string */
-    char                    *save_copy_start;           /* Provides one level of saving and
-                                                           restoring 'copy_start' */
-    char                    *copy_start_in_input;       /* Position in input string
-                                                           corresponding to copy_start */
-    SSize_t                 whilem_seen;                /* number of WHILEM in this expr */
-    regnode                 *emit_start;                /* Start of emitted-code area */
+    char                    *start;                     /* Start of input for
+                                                           compile */
+    char                    *end;                       /* End of input for
+                                                           compile */
+    char                    *parse;                     /* Input-scan pointer.
+                                                         */
+    char                    *copy_start;                /* start of copy of
+                                                           input within
+                                                           constructed
+                                                           parse string */
+    char                    *save_copy_start;           /* Provides one level
+                                                           of saving and
+                                                           restoring
+                                                           'copy_start' */
+    char                    *copy_start_in_input;       /* Position in input
+                                                           string corresponding
+                                                           to copy_start */
+    SSize_t                 whilem_seen;                /* number of WHILEM
+                                                           in this expr */
+    regnode                 *emit_start;                /* Start of
+                                                           emitted-code area */
     regnode_offset          emit;                       /* Code-emit pointer */
-    I32                     naughty;                    /* How bad is this pattern? */
+    I32                     naughty;                    /* How bad is this
+                                                           pattern? */
     I32                     sawback;                    /* Did we see \1, ...? */
-    SSize_t                 size;                       /* Number of regnode equivalents
-                                                           in pattern */
-    Size_t                  sets_depth;                 /* Counts recursion depth of already-
-                                                           compiled regex set patterns */
+    SSize_t                 size;                       /* Number of regnode
+                                                           equivalents in
+                                                           pattern */
+    Size_t                  sets_depth;                 /* Counts recursion
+                                                           depth of already-
+                                                           compiled regex
+                                                           set patterns */
     U32                     seen;
 
-    I32                     parens_buf_size;            /* #slots malloced open/close_parens */
-    regnode_offset          *open_parens;               /* offsets to open parens */
-    regnode_offset          *close_parens;              /* offsets to close parens */
+    I32                     parens_buf_size;            /* #slots malloced
+                                                           open/close_parens */
+    regnode_offset          *open_parens;               /* offsets to open
+                                                           parens */
+    regnode_offset          *close_parens;              /* offsets to close
+                                                           parens */
     HV                      *paren_names;               /* Paren names */
 
     /* position beyond 'precomp' of the warning message furthest away
@@ -108,57 +135,84 @@ struct RExC_state_t {
      * used we do not need to populate this data into the final regexp.
      *
      */
-    I32                     *logical_to_parno;          /* logical_parno to parno */
-    I32                     *parno_to_logical;          /* parno to logical_parno */
-    I32                     *parno_to_logical_next;     /* parno to next (greater value)
+    I32                     *logical_to_parno;          /* logical_parno
+                                                           to parno */
+    I32                     *parno_to_logical;          /* parno to
+                                                           logical_parno */
+    I32                     *parno_to_logical_next;     /* parno to next
+                                                           (greater value)
                                                            parno with the same
-                                                           logical_parno as parno. */
+                                                           logical_parno as
+                                                           parno. */
 
-    I32                     npar;                       /* Capture buffer count so far in the
-                                                           parse, (OPEN) plus one.  ("par" 0
-                                                           is the whole pattern) */
-    I32                     logical_npar;               /* Logical version of npar */
-    I32                     total_par;                  /* During initial parse, is either 0,
-                                                           or -1; the latter indicating a
-                                                           reparse is needed.  After that pass,
-                                                           it is what 'npar' became after the
-                                                           pass.  Hence, it being > 0 indicates
-                                                           we are in a reparse situation */
-    I32                     logical_total_par;          /* Logical version to total par */
-    I32                     nestroot;                   /* root parens we are in
-                                                           - used by accept */
+    I32                     npar;                       /* Capture buffer count
+                                                           so far in the parse,
+                                                           (OPEN) plus one.
+                                                           ("par" 0 is the
+                                                           whole pattern) */
+    I32                     logical_npar;               /* Logical version
+                                                           of npar */
+    I32                     total_par;                  /* During initial
+                                                           parse, is either 0,
+                                                           or -1; the latter
+                                                           indicating a
+                                                           reparse is needed.
+                                                           After that pass, it
+                                                           is what 'npar'
+                                                           became after the
+                                                           pass.  Hence, it
+                                                           being > 0 indicates
+                                                           we are in a reparse
+                                                           situation */
+    I32                     logical_total_par;          /* Logical version to
+                                                           total par */
+    I32                     nestroot;                   /* root parens we
+                                                           are in - used
+                                                           by accept */
     I32                     seen_zerolen;
-    regnode                 *end_op;                    /* END node in program */
-    I32                     utf8;                       /* whether the pattern is utf8 or not */
-    I32                     orig_utf8;                  /* whether the pattern was
-                                                           originally in utf8 */
+    regnode                 *end_op;                    /* END node in
+                                                           program */
+    I32                     utf8;                       /* whether the pattern
+                                                           is utf8 or not */
+    I32                     orig_utf8;                  /* whether the pattern
+                                                           was originally in
+                                                           utf8 */
     /* XXX use this for future optimisation of case
-                                 * where pattern must be upgraded to utf8. */
-    I32                     uni_semantics;              /* If a d charset modifier should use unicode
-                                                           rules, even if the pattern is not in utf8 */
+     * where pattern must be upgraded to utf8. */
+    I32                     uni_semantics;              /* If a d charset
+                                                           modifier should use
+                                                           unicode rules, even
+                                                           if the pattern is
+                                                           not in utf8 */
 
-    I32                     recurse_count;              /* Number of recurse regops
-                                                           we have generated */
+    I32                     recurse_count;              /* Number of recurse
+                                                           regops we have
+                                                           generated */
     regnode                 **recurse;                  /* Recurse regops */
-    U8                      *study_chunk_recursed;      /* bitmap of which subs we
-                                                           have moved through */
+    U8                      *study_chunk_recursed;      /* bitmap of which
+                                                           subs we have moved
+                                                           through */
     U32                     study_chunk_recursed_bytes; /* bytes in bitmap */
     I32                     in_lookaround;
     I32                     contains_locale;
     I32                     override_recoding;
     I32                     recode_x_to_native;
     I32                     in_multi_char_class;
-    int                     code_index;                 /* next code_blocks[] slot */
-    struct reg_code_blocks  *code_blocks;               /* positions of literal (?{})
-                                                           within pattern */
-    SSize_t                 maxlen;                     /* mininum possible number of
-                                                           chars in string to match */
+    int                     code_index;                 /* next code_blocks[]
+                                                           slot */
+    struct reg_code_blocks  *code_blocks;               /* positions of literal
+                                                           (?{}) within pattern
+                                                         */
+    SSize_t                 maxlen;                     /* mininum possible
+                                                           number of chars in
+                                                           string to match */
     scan_frame              *frame_head;
     scan_frame              *frame_last;
     U32                     frame_count;
     AV                      *warn_text;
     HV                      *unlexed_names;
-    SV                      *runtime_code_qr;           /* qr with the runtime code blocks */
+    SV                      *runtime_code_qr;           /* qr with the runtime
+                                                           code blocks */
 #ifdef DEBUGGING
     const char              *lastparse;
     I32                     lastnum;
@@ -202,8 +256,10 @@ struct RExC_state_t {
 #define RExC_parse                  (pRExC_state->parse)
 #define RExC_latest_warn_offset     (pRExC_state->latest_warn_offset )
 #define RExC_whilem_seen            (pRExC_state->whilem_seen)
-#define RExC_seen_d_op              (pRExC_state->seen_d_op) /* Seen something that differs
-                                                   under /d from /u ? */
+#define RExC_seen_d_op              (pRExC_state->seen_d_op) /* Seen something
+                                                                that differs
+                                                                under /d from
+                                                                /u ? */
 
 #define RExC_emit                   (pRExC_state->emit)
 #define RExC_emit_start             (pRExC_state->emit_start)
@@ -667,21 +723,29 @@ struct scan_data_t { /*I32 len_min; unused */
     SSize_t                     pos_min;
     SSize_t                     pos_delta;
     SV                          *last_found;
-    SSize_t                     last_end;           /* min value, <0 unless valid. */
+    SSize_t                     last_end;           /* min value, <0 unless
+                                                       valid. */
     SSize_t                     last_start_min;
     SSize_t                     last_start_max;
-    U8                          cur_is_floating;    /* whether the last_* values should be set as the
-                                                     * next fixed (0) or floating (1) substring */
+    U8                          cur_is_floating;    /* whether the last_*
+                                                     * values should be set
+                                                     * as the next fixed
+                                                     * (0) or floating (1)
+                                                     * substring */
 
     /* [0] is longest fixed substring so far, [1] is longest float so far */
     struct scan_data_substrs    substrs[2];
 
-    I32                         flags;              /* common SF_* and SCF_* flags */
+    I32                         flags;              /* common SF_* and
+                                                       SCF_* flags */
     I32                         whilem_c;
     SSize_t                     *last_closep;
-    regnode                     **last_close_opp;   /* pointer to pointer to last CLOSE regop seen.
-                                                       DO NOT DEREFERENCE the regnode pointer - the
-                                                       op may have been optimized away */
+    regnode                     **last_close_opp;   /* pointer to pointer to
+                                                       last CLOSE regop seen.
+                                                       DO NOT DEREFERENCE the
+                                                       regnode pointer - the
+                                                       op may have been
+                                                       optimized away */
     regnode_ssc                 *start_class;
 };
 
@@ -727,13 +791,15 @@ static const scan_data_t zero_scan_data = {
 #define SCF_DO_STCLASS  (SCF_DO_STCLASS_AND|SCF_DO_STCLASS_OR)
 #define SCF_WHILEM_VISITED_POS   0x2000
 
-#define SCF_TRIE_RESTUDY         0x4000     /* Need to do restudy in study_chunk()?
-                                          Search for "restudy" in this file to
-                                          find a detailed explanation. */
+#define SCF_TRIE_RESTUDY         0x4000     /* Need to do restudy in
+                                               study_chunk()? Search for
+                                               "restudy" in this file to find a
+                                               detailed explanation. */
 #define SCF_SEEN_ACCEPT          0x8000
-#define SCF_TRIE_DOING_RESTUDY  0x10000     /* Are we in restudy right now? Search
-                                          for "restudy" in this file to find
-                                          a detailed explanation. */
+#define SCF_TRIE_DOING_RESTUDY  0x10000     /* Are we in restudy right now?
+                                               Search for "restudy" in this
+                                               file to find a detailed
+                                               explanation. */
 #define SCF_IN_DEFINE           0x20000
 
 
@@ -779,7 +845,8 @@ static const scan_data_t zero_scan_data = {
  * at the top of t/op/regmesg.t, the tests in t/op/re_tests,
  * and those in op/pragma/warn/regcomp.
 */
-#define MARKER1     "<-- HERE"      /* marker as it appears in the description */
+#define MARKER1     "<-- HERE"      /* marker as it appears in
+                                       the description */
 #define MARKER2     " <-- HERE "    /* marker as it appears within the regex */
 
 #define REPORT_LOCATION             \

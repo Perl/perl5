@@ -1647,7 +1647,7 @@ END_EXTERN_C
 #   define isSPACE_A(c)            generic_isCC_A_(c, CC_SPACE_)
 #   define isWORDCHAR_A(c)         generic_isCC_A_(c, CC_WORDCHAR_)
 #   define isXDIGIT_A(c)           generic_isCC_(c, CC_XDIGIT_) /* No non-ASCII
-                                                          xdigits */
+                                                                   xdigits */
 #   define isIDFIRST_A(c)          generic_isCC_A_(c, CC_IDFIRST_)
 #   define isALPHA_L1(c)           generic_isCC_(c, CC_ALPHA_)
 #   define isALPHANUMERIC_L1(c)    generic_isCC_(c, CC_ALPHANUMERIC_)
@@ -1894,7 +1894,8 @@ END_EXTERN_C
     ((! FITS_IN_8_BITS(c))  \
     ? (c)                   \
     : PL_latin1_lc[ (U8) (c) ])
-#define toLOWER_L1(c)               toLOWER_LATIN1(c)       /* Synonym for consistency */
+#define toLOWER_L1(c)               toLOWER_LATIN1(c)       /* Synonym for
+                                                               consistency */
 
 /* Modified uc.  Is correct uc except for three non-ascii chars
  * which are all mapped to one of them, and these need special
@@ -2174,7 +2175,8 @@ END_EXTERN_C
 #define isALPHANUMERIC_uvchr(c)     generic_invlist_uvchr_(CC_ALPHANUMERIC_, c)
 #define isASCII_uvchr(c)            isASCII(c)
 #define isBLANK_uvchr(c)            generic_uvchr_(CC_BLANK_, is_HORIZWS_cp_high, c)
-#define isCNTRL_uvchr(c)            isCNTRL_L1(c)           /* All controls are in Latin1 */
+#define isCNTRL_uvchr(c)            isCNTRL_L1(c)           /* All controls are
+                                                               in Latin1 */
 #define isDIGIT_uvchr(c)            generic_invlist_uvchr_(CC_DIGIT_, c)
 #define isGRAPH_uvchr(c)            generic_invlist_uvchr_(CC_GRAPH_, c)
 #define isIDCONT_uvchr(c)   \
@@ -2522,7 +2524,7 @@ END_EXTERN_C
 #define isALNUM_LC_utf8(p,e)        isWORDCHAR_LC_utf8(p,e)
 #define isALNUM_LC_utf8_safe(p,e)   isWORDCHAR_LC_utf8_safe(p,e)
 #define isALNUMC_A(c)               isALPHANUMERIC_A(c)     /* Mnemonic: "C's
-                                                        alnum" */
+                                                               alnum" */
 #define isALNUMC_L1(c)              isALPHANUMERIC_L1(c)
 #define isALNUMC(c)                 isALPHANUMERIC(c)
 #define isALNUMC_LC(c)              isALPHANUMERIC_LC(c)

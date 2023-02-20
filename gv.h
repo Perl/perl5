@@ -232,9 +232,11 @@ Return the CV from the GV.
                                    time, so don't try to free what's there. */
 #define GV_ADDMULTI       0x02  /* add, pretending it has been added already;
                                    used also by gv_init_* */
-#define GV_ADDWARN        0x04  /* add, but warn if symbol wasn't already there */
-                /*   0x08 UNUSED */
-#define GV_NOINIT         0x10  /* add, but don't init symbol, if type != PVGV */
+#define GV_ADDWARN        0x04  /* add, but warn if symbol wasn't
+                                   already there */
+                /* 0x08 UNUSED */
+#define GV_NOINIT         0x10  /* add, but don't init symbol,
+                                   if type != PVGV */
 /* This is used by toke.c to avoid turing placeholder constants in the symbol
    table into full PVGVs with attached constant subroutines. */
 #define GV_NOADD_NOINIT   0x20  /* Don't add the symbol if it's not there.
@@ -258,8 +260,8 @@ Return the CV from the GV.
 /* Flags for gv_autoload_ */
 #define GV_AUTOLOAD_ISMETHOD      1 /* autoloading a method? */
 
-/*   SVf_UTF8 (more accurately the return value from SvUTF8) is also valid as
-     a flag to various gv_* functions, so ensure it lies outside this range.
+/* SVf_UTF8 (more accurately the return value from SvUTF8) is also valid as
+   a flag to various gv_* functions, so ensure it lies outside this range.
  */
 
 #define GV_NOADD_MASK   \

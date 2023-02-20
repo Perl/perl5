@@ -194,7 +194,7 @@ typedef enum {
 #endif
 #ifdef PERL_IN_SV_C
 #  define SVt_FIRST           SVt_NULL    /* the type of SV that new_SV()
-                                in sv.c returns */
+                                             in sv.c returns */
 #endif
 
 #define PERL_ARENA_ROOTS_SIZE       (SVt_LAST)
@@ -482,7 +482,7 @@ the upgrade if necessary.  See C<L</svtype>>.
 
 /* scalar SVs with SVp_POK */
 #define SVppv_STATIC    0x40000000  /* PV is pointer to static const;
-                                      must be set with SVf_IsCOW */
+                                       must be set with SVf_IsCOW */
 /* PVAV */
 #define SVpav_REAL      0x40000000  /* free old entries */
 /* PVHV */
@@ -580,16 +580,14 @@ struct xpvlv {
 
 struct xpvinvlist {
     _XPV_HEAD;
-    IV          prev_index; /* caches result of previous
-                               invlist_search() */
+    IV          prev_index; /* caches result of previous invlist_search() */
     STRLEN      iterator;   /* Stores where we are in iterating */
-    bool        is_offset;  /* The data structure for all inversion
-                               lists begins with an element for code
-                               point U+0000.  If this bool is set, the
-                               actual list contains that 0; otherwise,
-                               the list actually begins with the
-                               following element.  Thus to invert the
-                               list, merely toggle this flag */
+    bool        is_offset;  /* The data structure for all inversion lists
+                               begins with an element for code point U+0000.
+                               If this bool is set, the actual list contains
+                               that 0; otherwise, the list actually begins
+                               with the following element.  Thus to invert
+                               the list, merely toggle this flag */
 };
 
 /* This structure works in 2 ways - regular scalar, or GV with GP */
@@ -676,8 +674,8 @@ struct xpvio {
 #define IOf_DIDTOP       8  /* just did top of form */
 #define IOf_UNTAINT     16  /* consider this fp (and its data) "safe" */
 #define IOf_NOLINE      32  /* slurped a pseudo-line from empty file */
-#define IOf_FAKE_DIRP   64  /* xio_dirp is fake (source filters kludge)
-                                   Also, when this is set, SvPVX() is valid */
+#define IOf_FAKE_DIRP   64  /* xio_dirp is fake (source filters kludge) Also,
+                               when this is set, SvPVX() is valid */
 
 struct xobject {
     HV          *xmg_stash;

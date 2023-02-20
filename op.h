@@ -249,7 +249,7 @@ struct listop {
 struct methop {
     BASEOP
     union { /* op_u.op_first *must* be aligned the same as the
-         * op_first field of the other op types */
+             * op_first field of the other op types */
         OP  *op_first;      /* optree for method name */
         SV  *op_meth_sv;    /* static method name */
     }           op_u;
@@ -278,7 +278,8 @@ struct pmop {
     union {
         OP          *op_pmreplstart;    /* Only used in OP_SUBST */
 #ifdef USE_ITHREADS
-        PADOFFSET   op_pmstashoff;      /* Only used in OP_MATCH, with PMf_ONCE set */
+        PADOFFSET   op_pmstashoff;      /* Only used in OP_MATCH,
+                                           with PMf_ONCE set */
 #else
         HV          *op_pmstash;
 #endif
@@ -647,8 +648,8 @@ typedef enum {
 #define PERL_LOADMOD_DENY       0x1     /* no Module */
 #define PERL_LOADMOD_NOIMPORT   0x2     /* use Module () */
 #define PERL_LOADMOD_IMPORT_OPS 0x4     /* import arguments are passed
-                                                   as a sin- gle op tree, not
-                                                   a list of SVs */
+                                           as a sin- gle op tree, not
+                                           a list of SVs */
 
 #if defined(PERL_IN_PERLY_C) || defined(PERL_IN_OP_C) || defined(PERL_IN_TOKE_C)
 #define ref(o, type)    doref(o, type, TRUE)
@@ -719,8 +720,7 @@ o->op_next >> is not already set, C<o> should be at least an C<UNOP>.
 #ifdef PERL_CORE
 struct opslot {
     U16 opslot_size;    /* size of this slot (in pointers) */
-    U16 opslot_offset;  /* offset from start of slab
-                           (in ptr units) */
+    U16 opslot_offset;  /* offset from start of slab (in ptr units) */
     OP  opslot_op;      /* the op itself */
 };
 
@@ -733,8 +733,8 @@ struct opslab {
     U16     opslab_freed_size;  /* allocated size of opslab_freed */
     U16     opslab_size;        /* size of slab in pointers,
                                    including header */
-    U16     opslab_free_space;  /* space available in this slab for
-                                   allocating new ops (in ptr units) */
+    U16     opslab_free_space;  /* space available in this slab for allocating
+                                   new ops (in ptr units) */
 # ifdef PERL_DEBUG_READONLY_OPS
     bool    opslab_readonly;
 # endif
@@ -1120,7 +1120,8 @@ C<L</op_sibling_splice>>.
 
 /* key / index type */
 
-#define MDEREF_INDEX_none                   0x00    /* run external ops to generate index */
+#define MDEREF_INDEX_none                   0x00    /* run external ops to
+                                                       generate index */
 #define MDEREF_INDEX_const                  0x10    /* index is const PV/UV */
 #define MDEREF_INDEX_padsv                  0x20    /* index is lexical var */
 #define MDEREF_INDEX_gvsv                   0x30    /* index is GV */
@@ -1129,7 +1130,8 @@ C<L</op_sibling_splice>>.
 
 /* bit flags */
 
-#define MDEREF_FLAG_last                    0x40    /* the last [ah]elem; PL_op flags apply */
+#define MDEREF_FLAG_last                    0x40    /* the last [ah]elem; PL_op
+                                                       flags apply */
 
 #define MDEREF_MASK                         0x7F
 #define MDEREF_SHIFT                           7
@@ -1144,10 +1146,10 @@ C<L</op_sibling_splice>>.
 #  define TR_DELETE       (UV)-2
 #  define TR_R_EMPTY      (UV)-3          /* rhs (replacement) is empty */
 #  define TR_OOB          (UV)-4          /* Something that isn't one
-                                          of the others */
+                                             of the others */
 #  define TR_SPECIAL_HANDLING TR_DELETE    /* Can occupy same value */
 #  define TR_UNLISTED     TR_UNMAPPED     /* A synonym whose name is
-                                               clearer at times */
+                                             clearer at times */
 #endif
 #if defined(PERL_IN_OP_C) || defined(PERL_IN_TOKE_C)
 #define RANGE_INDICATOR     ILLEGAL_UTF8_BYTE

@@ -63,23 +63,29 @@
    private to the engine itself.  It now lives here. */
 
 typedef struct regexp_internal {
-    regnode                 *regstclass;    /* Optional startclass as identified or
-                                               constructed by the optimiser */
-    struct reg_data         *data;          /* Additional miscellaneous data used by
-                                               the program.  Used to make it easier to
-                                               clone and free arbitrary data that the
-                                               regops need.  Often the ARG field of a
-                                               regop is an index into this structure.
-                                               NOTE the 0th element of this structure
-                                               is NEVER used and is strictly reserved
-                                               for internal purposes. */
+    regnode                 *regstclass;    /* Optional startclass as
+                                               identified or constructed
+                                               by the optimiser */
+    struct reg_data         *data;          /* Additional miscellaneous data
+                                               used by the program.  Used to
+                                               make it easier to clone and free
+                                               arbitrary data that the regops
+                                               need.  Often the ARG field of a
+                                               regop is an index into this
+                                               structure.  NOTE the 0th element
+                                               of this structure is NEVER used
+                                               and is strictly reserved for
+                                               internal purposes. */
     struct reg_code_blocks  *code_blocks;   /* positions of literal (?{}) */
-    U32                     proglen;        /* size of the compiled program in regnodes */
-    U32                     name_list_idx;  /* Optional data index of an array of paren
-                                               names, only valid when RXp_PAREN_NAMES(prog)
-                                               is true, 0 means "no value" like any other
+    U32                     proglen;        /* size of the compiled program
+                                               in regnodes */
+    U32                     name_list_idx;  /* Optional data index of an array
+                                               of paren names, only valid when
+                                               RXp_PAREN_NAMES(prog) is true, 0
+                                               means "no value" like any other
                                                index into the data array. */
-    regnode                 program[1];     /* Unwarranted chumminess with compiler. */
+    regnode                 program[1];     /* Unwarranted chumminess
+                                               with compiler. */
 } regexp_internal;
 
 #define RXi_SET(x,y)        (x)->pprivate = (void*)(y)
@@ -97,8 +103,7 @@ typedef struct regexp_internal {
 
 #define PREGf_SKIP          0x00000001
 #define PREGf_IMPLICIT      0x00000002  /* Converted .* to ^.* */
-#define PREGf_NAUGHTY       0x00000004  /* how exponential is
-                                              this pattern? */
+#define PREGf_NAUGHTY       0x00000004  /* how exponential is this pattern? */
 #define PREGf_VERBARG_SEEN  0x00000008
 #define PREGf_CUTGROUP_SEEN 0x00000010
 #define PREGf_USE_RE_EVAL   0x00000020  /* compiled with "use re 'eval'" */
@@ -166,7 +171,8 @@ struct regnode_lstring { /* Constructed this way to keep
     U8      flags;
     U8      type;
     U16     next_off;
-    U32     str_len;    /* Only 18 bits allowed before would overflow 'next_off' */
+    U32     str_len;    /* Only 18 bits allowed before would
+                           overflow 'next_off' */
     char    string[1];
 };
 
@@ -265,7 +271,8 @@ struct regnode_charclass {
 
 /* has runtime (locale) \d, \w, ..., [:posix:] classes */
 struct regnode_charclass_posixl {
-    U8      flags;                      /* ANYOF_MATCHES_POSIXL bit must go here */
+    U8      flags;                      /* ANYOF_MATCHES_POSIXL
+                                           bit must go here */
     U8      type;
     U16     next_off;
     U32     arg1;
@@ -287,7 +294,8 @@ struct regnode_charclass_posixl {
  * is never a next node.
  */
 struct regnode_ssc {
-    U8      flags;                      /* ANYOF_MATCHES_POSIXL bit must go here */
+    U8      flags;                      /* ANYOF_MATCHES_POSIXL
+                                           bit must go here */
     U8      type;
     U16     next_off;
     U32     arg1;
@@ -385,7 +393,8 @@ struct regnode_ssc {
                 ((struct regnode_string *)p)->string)
 #define OPERANDs(p)         STRINGs(p)
 
-#define PARNO(p)            ARG(p)                  /* APPLIES for OPEN and CLOSE only */
+#define PARNO(p)            ARG(p)                  /* APPLIES for OPEN and
+                                                       CLOSE only */
 
 /* Long strings.  Currently limited to length 18 bits, which handles a 262000
  * byte string.  The limiting factor is the 16 bit 'next_off' field, which
@@ -817,16 +826,21 @@ ARGp_SET_inline(struct regnode *node, SV *ptr) {
 #define ANYOF_ALPHA                 ((CC_ALPHA_) * 2)
 #define ANYOF_NALPHA                ((ANYOF_ALPHA) + 1)
 #define ANYOF_ALPHANUMERIC          ((CC_ALPHANUMERIC_) * 2) /* [[:alnum:]]
-                                                         isalnum(3),
-                                                         utf8::IsAlnum */
+                                                                isalnum(3),
+                                                                utf8::IsAlnum
+                                                              */
 #define ANYOF_NALPHANUMERIC         ((ANYOF_ALPHANUMERIC) + 1)
 #define ANYOF_ASCII                 ((CC_ASCII_) * 2)
 #define ANYOF_NASCII                ((ANYOF_ASCII) + 1)
-#define ANYOF_BLANK                 ((CC_BLANK_) * 2)       /* GNU extension: space and tab:
-                                            non-vertical space */
+#define ANYOF_BLANK                 ((CC_BLANK_) * 2)       /* GNU extension:
+                                                               space and tab:
+                                                               non-vertical
+                                                               space */
 #define ANYOF_NBLANK                ((ANYOF_BLANK) + 1)
-#define ANYOF_CASED                 ((CC_CASED_) * 2)       /* Pseudo class for [:lower:]
-                                               or [:upper:] under /i */
+#define ANYOF_CASED                 ((CC_CASED_) * 2)       /* Pseudo class
+                                                               for [:lower:]
+                                                               or [:upper:]
+                                                               under /i */
 #define ANYOF_NCASED                ((ANYOF_CASED) + 1)
 #define ANYOF_CNTRL                 ((CC_CNTRL_) * 2)
 #define ANYOF_NCNTRL                ((ANYOF_CNTRL) + 1)
@@ -844,8 +858,10 @@ ARGp_SET_inline(struct regnode *node, SV *ptr) {
 #define ANYOF_NSPACE                ((ANYOF_SPACE) + 1)
 #define ANYOF_UPPER                 ((CC_UPPER_) * 2)
 #define ANYOF_NUPPER                ((ANYOF_UPPER) + 1)
-#define ANYOF_WORDCHAR              ((CC_WORDCHAR_) * 2)    /* \w, PL_utf8_alnum, utf8::IsWord,
-                                               ALNUM */
+#define ANYOF_WORDCHAR              ((CC_WORDCHAR_) * 2)    /* \w,
+                                                               PL_utf8_alnum,
+                                                               utf8::IsWord,
+                                                               ALNUM */
 #define ANYOF_NWORDCHAR             ((ANYOF_WORDCHAR) + 1)
 #define ANYOF_XDIGIT                ((CC_XDIGIT_) * 2)
 #define ANYOF_NXDIGIT               ((ANYOF_XDIGIT) + 1)
@@ -862,20 +878,28 @@ ARGp_SET_inline(struct regnode *node, SV *ptr) {
 #   error Problem with handy.h HIGHEST_REGCOMP_DOT_H_SYNC_ #define
 #endif
 
-#define ANYOF_POSIXL_MAX            (ANYOF_VERTWS)          /* So upper loop limit is written: '<
-                                         * ANYOF_MAX' Hence doesn't include
-                                         * VERTWS, as that is a pseudo class */
+#define ANYOF_POSIXL_MAX            (ANYOF_VERTWS)          /* So upper loop
+                                                             * limit is
+                                                             * written: '<
+                                                             * ANYOF_MAX' Hence
+                                                             * doesn't include
+                                                             * VERTWS, as that
+                                                             * is a pseudo
+                                                             * class */
 #define ANYOF_MAX                   ANYOF_POSIXL_MAX
 
 #if (ANYOF_POSIXL_MAX > 32)   /* Must fit in 32-bit word */
 #   error Problem with handy.h CC_foo_ #defines
 #endif
 
-#define ANYOF_HORIZWS               ((ANYOF_POSIXL_MAX)+2)  /* = (ANYOF_NVERTWS + 1) */
+#define ANYOF_HORIZWS               ((ANYOF_POSIXL_MAX)+2)  /* = (ANYOF_NVERTWS
+                                                               + 1) */
 #define ANYOF_NHORIZWS              ((ANYOF_POSIXL_MAX)+3)
 
-#define ANYOF_UNIPROP               ((ANYOF_POSIXL_MAX)+4)  /* Used to indicate a Unicode
-                                                   property: \p{} or \P{} */
+#define ANYOF_UNIPROP               ((ANYOF_POSIXL_MAX)+4)  /* Used to indicate
+                                                               a Unicode
+                                                               property: \p{}
+                                                               or \P{} */
 
 /* Backward source code compatibility. */
 
@@ -1123,9 +1147,9 @@ struct _reg_trie_data {
     reg_trie_state      *states;            /* state data */
     reg_trie_trans      *trans;             /* array of transition elements */
     char                *bitmap;            /* stclass bitmap */
-    U16                 *jump;              /* optional 1 indexed array of offsets
-                                               before tail for the node following
-                                               a given word. */
+    U16                 *jump;              /* optional 1 indexed array of
+                                               offsets before tail for the node
+                                               following a given word. */
     reg_trie_wordinfo   *wordinfo;          /* array of info per word */
     U16                 uniquecharcount;    /* unique chars in trie (width
                                                of trans table) */

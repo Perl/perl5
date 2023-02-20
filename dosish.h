@@ -22,7 +22,7 @@
 #  define PERL_SYS_INIT_BODY(c,v)   \
        MALLOC_CHECK_TAINT2(*c,*v); PERLIO_INIT
 #  define BIT_BUCKET  "\\dev\\nul"    /* "wanna be like, umm, Newlined,
-                                     or somethin?" */
+                                         or somethin?" */
 #endif
 
 /* Generally add things last-in first-terminated.  IO and memory

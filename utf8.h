@@ -545,7 +545,8 @@ code point if less than 255; a Unicode code point otherwise.
 */
 #define UVCHR_SKIP(uv)              OFFUNISKIP(NATIVE_TO_UNI(uv))
 
-#define NATIVE_SKIP(uv)             UVCHR_SKIP(uv)          /* Old terminology */
+#define NATIVE_SKIP(uv)             UVCHR_SKIP(uv)          /* Old terminology
+                                                             */
 
 /* Most code which says UNISKIP is really thinking in terms of native
  * code points (0-255) plus all those beyond.  This is an imprecise
@@ -1123,8 +1124,7 @@ bytes starting at C<s> comprise the code point's representation.
 /* Largest code point we accept from external sources */
 #define MAX_LEGAL_CP            ((UV)IV_MAX)
 
-#define UTF8_ALLOW_EMPTY    0x0001  /* Allow a zero length
-                                                   string */
+#define UTF8_ALLOW_EMPTY    0x0001  /* Allow a zero length string */
 #define UTF8_GOT_EMPTY  UTF8_ALLOW_EMPTY
 
 /* Allow first byte to be a continuation byte */
@@ -1289,7 +1289,8 @@ bytes starting at C<s> comprise the code point's representation.
 #define UNI_DISPLAY_ISPRINT                     0x0001
 #define UNI_DISPLAY_BACKSLASH                   0x0002
 #define UNI_DISPLAY_BACKSPACE                   0x0004  /* Allow \b when also
-                                           UNI_DISPLAY_BACKSLASH */
+                                                           UNI_DISPLAY_BACKSLASH
+                                                         */
 #define UNI_DISPLAY_QQ      \
     (UNI_DISPLAY_ISPRINT    \
     |UNI_DISPLAY_BACKSLASH  \

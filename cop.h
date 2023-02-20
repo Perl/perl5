@@ -440,11 +440,12 @@ struct cop {
 #endif
     U32         cop_hints;          /* hints bits from pragmata */
     U32         cop_seq;            /* parse sequence number */
-    char        *cop_warnings;      /* Lexical warnings bitmask vector.  Refcounted
-                                       shared copy of ${^WARNING_BITS}.  This
-                                       pointer either points at one of the magic
-                                       values for warnings, or it points at a
-                                       buffer constructed with rcpv_new().  Use the
+    char        *cop_warnings;      /* Lexical warnings bitmask vector.
+                                       Refcounted shared copy of
+                                       ${^WARNING_BITS}.  This pointer either
+                                       points at one of the magic values for
+                                       warnings, or it points at a buffer
+                                       constructed with rcpv_new().  Use the
                                        RCPV_LEN() macro to get its length.
                                      */
     /* compile time state of %^H.  See the comment in op.c for how
@@ -551,8 +552,8 @@ typedef struct rcpv RCPV;
 #define RCPVx(pv_arg)   \
     ((RCPV *)((pv_arg) - STRUCT_OFFSET(struct rcpv, pv)))
 #define RCPV_REFCOUNT(pv)   (RCPVx(pv)->refcount)
-#define RCPV_LEN(pv)        (RCPVx(pv)->len-1)      /* len always includes space
-                                                  for a null */
+#define RCPV_LEN(pv)        (RCPVx(pv)->len-1)      /* len always includes
+                                                       space for a null */
 
 #ifdef USE_ITHREADS
 
@@ -895,7 +896,8 @@ struct block_eval {
 
 /* loop context */
 struct block_loop {
-    LOOP    *my_op;         /* My op, that contains redo, next and last ops. */
+    LOOP    *my_op;         /* My op, that contains redo,
+                               next and last ops. */
     union { /* different ways of locating the iteration variable */
         SV  **svp;  /* for lexicals: address of pad slot */
         GV  *gv;    /* for package vars */
@@ -920,7 +922,8 @@ struct block_loop {
         }       lazysv;
     }       state_u;
 #ifdef USE_ITHREADS
-    PAD     *oldcomppad;    /* needed to map itervar_u.svp during thread clone */
+    PAD     *oldcomppad;    /* needed to map itervar_u.svp
+                               during thread clone */
 #endif
 };
 
@@ -1175,28 +1178,31 @@ struct context {
 
 /* extra flags for Perl_call_* routines */
 #define G_DISCARD              0x4  /* Call FREETMPS.  Don't change this
-                                   without consulting the hash
-                                   actions codes defined in hv.h */
-#define G_EVAL                 0x8  /* Assume eval {} around subroutine call. */
+                                       without consulting the hash
+                                       actions codes defined in hv.h */
+#define G_EVAL                 0x8  /* Assume eval {} around
+                                       subroutine call. */
 #define G_NOARGS              0x10  /* Don't construct a @_ array. */
 #define G_KEEPERR             0x20  /* Warn for errors, don't overwrite $@ */
 #define G_NODEBUG             0x40  /* Disable debugging at toplevel. */
 #define G_METHOD              0x80  /* Calling method. */
 #define G_FAKINGEVAL         0x100  /* Faking an eval context for call_sv
-                                   or fold_constants. */
+                                       or fold_constants. */
 #define G_UNDEF_FILL         0x200  /* Fill the stack with &PL_sv_undef
-                                   A special case for UNSHIFT in
-                                   Perl_magic_methcall(). */
+                                       A special case for UNSHIFT in
+                                       Perl_magic_methcall(). */
 #define G_WRITING_TO_STDERR  0x400  /* Perl_write_to_stderr() is calling
-                                     Perl_magic_methcall(). */
+                                       Perl_magic_methcall(). */
 #define G_RE_REPARSING       0x800  /* compiling a run-time /(?{..})/ */
-#define G_METHOD_NAMED      0x1000  /* calling named method, eg without :: or ' */
+#define G_METHOD_NAMED      0x1000  /* calling named method, eg
+                                       without :: or ' */
 #define G_RETHROW           0x2000  /* eval_sv(): re-throw any error */
 
 /* flag bits for PL_in_eval */
 #define EVAL_NULL                0  /* not in an eval */
 #define EVAL_INEVAL              1  /* some enclosing scope is an eval */
-#define EVAL_WARNONLY            2  /* used by yywarn() when calling yyerror() */
+#define EVAL_WARNONLY            2  /* used by yywarn() when
+                                       calling yyerror() */
 #define EVAL_KEEPERR             4  /* set by Perl_call_sv if G_KEEPERR */
 #define EVAL_INREQUIRE           8  /* The code is being required. */
 #define EVAL_RE_REPARSING     0x10  /* eval_sv() called with G_RE_REPARSING */
@@ -1237,7 +1243,7 @@ struct stackinfo {
                                          * #ifdef-ed for bincompat */
 #if defined DEBUGGING && !defined DEBUGGING_RE_ONLY
     /* high water mark: for checking if the stack was correctly
- * extended / tested for extension by each pp function */
+     * extended / tested for extension by each pp function */
     SSize_t             si_stack_hwm;
 #endif
 

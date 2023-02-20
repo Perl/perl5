@@ -950,7 +950,8 @@ that tainting violations are fatal.
 #   define TAINT               (PL_tainted = PL_tainting)
 
 #   define TAINT_NOT           (PL_tainted = FALSE)    /* Untaint */
-#   define TAINT_IF(c)         if (UNLIKELY(c)) { TAINT; } /* Conditionally taint */
+#   define TAINT_IF(c)         if (UNLIKELY(c)) { TAINT; } /* Conditionally
+                                                              taint */
 #   define TAINT_ENV()         if (UNLIKELY(PL_tainting)) { taint_env(); }
                                 /* croak or warn if tainting */
 #   define TAINT_PROPER(s)              \
@@ -959,7 +960,7 @@ that tainting violations are fatal.
         }
 #   define TAINT_set(s)        (PL_tainted = cBOOL(s))
 #   define TAINT_get           (cBOOL(UNLIKELY(PL_tainted))) /* Is something
-                                                                 tainted? */
+                                                                tainted? */
 #   define TAINTING_get        (cBOOL(UNLIKELY(PL_tainting)))
 #   define TAINTING_set(s)     (PL_tainting = cBOOL(s))
 #   define TAINT_WARN_get      (PL_taint_warn)
@@ -1589,13 +1590,15 @@ Use L</UV> to declare variables of the maximum usable size on this platform.
 
 #define PERL_MULTICONCAT_IX_NARGS         0     /* number of arguments */
 #define PERL_MULTICONCAT_IX_PLAIN_PV      1     /* non-utf8 constant string */
-#define PERL_MULTICONCAT_IX_PLAIN_LEN     2     /* non-utf8 constant string length */
+#define PERL_MULTICONCAT_IX_PLAIN_LEN     2     /* non-utf8 constant
+                                                   string length */
 #define PERL_MULTICONCAT_IX_UTF8_PV       3     /* utf8 constant string */
-#define PERL_MULTICONCAT_IX_UTF8_LEN      4     /* utf8 constant string length */
+#define PERL_MULTICONCAT_IX_UTF8_LEN      4     /* utf8 constant string
+                                                   length */
 #define PERL_MULTICONCAT_IX_LENGTHS       5     /* first of nargs+1 const
-                                           segment lens */
+                                                   segment lens */
 #define PERL_MULTICONCAT_HEADER_SIZE      5     /* The number of fields of a
-                                          multiconcat header */
+                                                   multiconcat header */
 
 /* We no longer default to creating a new SV
    for GvSV.  Do this before embed. */
@@ -2495,7 +2498,8 @@ You probably want to be using L<C</INT2PTR>> instead.
 #define PTR2IV(p)       INT2PTR(IV,p)
 #define PTR2UV(p)       INT2PTR(UV,p)
 #define PTR2NV(p)       NUM2PTR(NV,p)
-#define PTR2nat(p)      (PTRV)(p)               /* pointer to integer of PTRSIZE */
+#define PTR2nat(p)      (PTRV)(p)               /* pointer to integer
+                                                   of PTRSIZE */
 
 /* According to strict ANSI C89 one cannot freely cast between data pointers
  * and function (code) pointers.  There are at least two ways around this.
@@ -2506,8 +2510,10 @@ You probably want to be using L<C</INT2PTR>> instead.
  * feasible use is probably temporarily storing function pointers in a data
  * pointer (such as a void pointer). */
 
-#define DPTR2FPTR(t,p)  ((t)PTR2nat(p))         /* data pointer to function pointer */
-#define FPTR2DPTR(t,p)  ((t)PTR2nat(p))         /* function pointer to data pointer */
+#define DPTR2FPTR(t,p)  ((t)PTR2nat(p))         /* data pointer to function
+                                                   pointer */
+#define FPTR2DPTR(t,p)  ((t)PTR2nat(p))         /* function pointer to
+                                                   data pointer */
 
 #ifdef USE_LONG_DOUBLE
 #  if LONG_DOUBLESIZE == DOUBLESIZE
@@ -3056,7 +3062,9 @@ extern long double Perl_my_frexpl(long double x, int *e);
 #    elif defined(HAS_ISINFL) && defined(HAS_ISNANL)
 #        define Perl_isfinitel(x)       !(isinfl(x)||isnanl(x))
 #    else
-#        define Perl_isfinitel(x)       ((x) * 0 == 0)          /* See Perl_isfinite. */
+#        define Perl_isfinitel(x)       ((x) * 0 == 0)          /* See
+                                                                   Perl_isfinite.
+                                                                 */
 #    endif
 #endif
 
@@ -3385,10 +3393,12 @@ typedef struct padname PADNAME;
 #       define fopen       fopen64
 #   endif
 #   if defined(USE_FSEEK64)
-#       define fseek       fseek64         /* don't do fseeko here, see perlio.c */
+#       define fseek       fseek64         /* don't do fseeko here,
+                                              see perlio.c */
 #   endif
 #   if defined(USE_FTELL64)
-#       define ftell       ftell64         /* don't do ftello here, see perlio.c */
+#       define ftell       ftell64         /* don't do ftello here,
+                                              see perlio.c */
 #   endif
 #   if defined(USE_FSETPOS64)
 #       define fsetpos     fsetpos64
@@ -4026,9 +4036,9 @@ EXTERN_C int perl_tsa_mutex_unlock(perl_mutex* mutex)
 #define PERL_EXIT_EXPECTED  0x01
 #define PERL_EXIT_DESTRUCT_END 0x02  /* Run END in perl_destruct */
 #define PERL_EXIT_WARN      0x04    /* Warn if Perl_my_exit() or
-                                        Perl_my_failure_exit() called */
+                                       Perl_my_failure_exit() called */
 #define PERL_EXIT_ABORT     0x08    /* Call abort() if Perl_my_exit() or
-                                        Perl_my_failure_exit() called */
+                                       Perl_my_failure_exit() called */
 
 #ifndef PERL_CORE
 /* format to use for version numbers in file/directory names */
@@ -4413,8 +4423,7 @@ typedef I32 (*filter_t) (pTHX_ int, SV *, int);
 #if defined(USE_REENTRANT) || defined(_REENTRANT) || defined(_THREAD_SAFE)
 /* We cannot include <crypt.h> to get the struct crypt_data
  * because of setkey prototype problems when threading */
-typedef struct crypt_data { /* straight from /usr/include/crypt.h
-                                        */
+typedef struct crypt_data { /* straight from /usr/include/crypt.h */
     /* From OSF, Not needed in AIX char C[28], D[28];
      */
     char    E[48];
@@ -4819,8 +4828,7 @@ Gid_t getegid (void);
 #define DEBUG_MASK      0x1FFFEFFF  /* mask of all the standard flags */
 
 #define DEBUG_DB_RECURSE_FLAG 0x40000000
-#define DEBUG_TOP_FLAG  0x80000000  /* -D was given --> PL_debug
-                                              |= FLAG */
+#define DEBUG_TOP_FLAG  0x80000000  /* -D was given --> PL_debug |= FLAG */
 
 /* Both flags have to be set */
 #  define DEBUG_BOTH_FLAGS_TEST_(flag1, flag2)  \
@@ -4950,8 +4958,7 @@ Gid_t getegid (void);
     *                                                                               \
     * All DEBUG statements in the compiled scope will be have these extra           \
     * statements compiled in; they will be executed only for the DEBUG statements   \
-    * whose flags are turned on.                                                    \
-    */
+    * whose flags are turned on. */
 #ifndef DEBUG_PRE_STMTS
 #  define DEBUG_PRE_STMTS
 #endif
@@ -5912,7 +5919,8 @@ typedef enum {
     /* update exp_name[] in toke.c if adding to this enum */
 } expectation;
 
-#define KEY_sigvar                  0xFFFF  /* fake keyword representing a signature var */
+#define KEY_sigvar                  0xFFFF  /* fake keyword representing
+                                               a signature var */
 
 /* Hints are now stored in a dedicated U32, so the bottom 8 bits are no
    longer special and there is no need for HINT_PRIVATE_MASK for COPs.
@@ -5930,7 +5938,7 @@ typedef enum {
 #define HINT_LOCALE             0x00000004  /* locale pragma */
 #define HINT_BYTES              0x00000008  /* bytes pragma */
 #define HINT_LOCALE_PARTIAL     0x00000010  /* locale, but a subset
-                                              of categories */
+                                               of categories */
 
 #define HINT_EXPLICIT_STRICT_REFS 0x00000020 /* strict.pm */
 #define HINT_EXPLICIT_STRICT_SUBS 0x00000040 /* strict.pm */
@@ -6066,8 +6074,9 @@ enum Perl_custom_infix_precedence {
 struct Perl_custom_infix;
 struct Perl_custom_infix {
     enum Perl_custom_infix_precedence prec;
-    void                        (*parse)    (pTHX_ SV **opdata, struct Perl_custom_infix *);    /* optional
-                                                                                                 */
+    void                        (*parse)    (pTHX_ SV **opdata, struct Perl_custom_infix *);    \
+    /* optional
+     */
     OP                          *(*build_op)(pTHX_ SV **opdata, OP *lhs, OP *rhs, struct Perl_custom_infix *);
 };
 
@@ -6836,7 +6845,7 @@ typedef struct am_table_short AMTS;
 #define PERLDBf_LINE          0x02  /* Keep line # */
 #define PERLDBf_NOOPT         0x04  /* Switch off optimizations */
 #define PERLDBf_INTER         0x08  /* Preserve more data for
-                                           later inspections */
+                                       later inspections */
 #define PERLDBf_SUBLINE       0x10  /* Keep subr source lines */
 #define PERLDBf_SINGLE        0x20  /* Start with single-step on */
 #define PERLDBf_NONAME        0x40  /* For _SUB: no name of the subr */
@@ -6844,7 +6853,7 @@ typedef struct am_table_short AMTS;
 #define PERLDBf_NAMEEVAL     0x100  /* Informative names for evals */
 #define PERLDBf_NAMEANON     0x200  /* Informative names for anon subs */
 #define PERLDBf_SAVESRC      0x400  /* Save source lines into
-                                         @{"_<$filename"} */
+                                       @{"_<$filename"} */
 #define PERLDBf_SAVESRC_NOSUBS  0x800 /* Including evals that generate
                                          no subroutines */
 #define PERLDBf_SAVESRC_INVALID 0x1000 /* Save source that did not compile */
@@ -8065,9 +8074,8 @@ EXTERN_C int flock(int fd, int op);
 #define EXEC_ARGV_CAST(x)   (char **)x
 #endif
 
-#define IS_NUMBER_IN_UV     0x01    /* number within UV range (maybe
-                                              not int).  value returned in
-                                              pointed- to UV */
+#define IS_NUMBER_IN_UV     0x01    /* number within UV range (maybe not int).
+                                       value returned in pointed- to UV */
 #define IS_NUMBER_GREATER_THAN_UV_MAX 0x02 /* pointed to UV undefined */
 #define IS_NUMBER_NOT_INT   0x04    /* saw . or E notation or infnan */
 #define IS_NUMBER_NEG       0x08    /* leading minus sign */
@@ -8088,8 +8096,10 @@ A synonym for L</grok_numeric_radix>
 
 /* Number scan flags.  All are used for input,
  * the ones used for output are so marked */
-#define PERL_SCAN_ALLOW_UNDERSCORES     0x01    /* grok_??? accept _ in numbers */
-#define PERL_SCAN_DISALLOW_PREFIX       0x02    /* grok_??? reject 0x in hex etc */
+#define PERL_SCAN_ALLOW_UNDERSCORES     0x01    /* grok_??? accept _
+                                                   in numbers */
+#define PERL_SCAN_DISALLOW_PREFIX       0x02    /* grok_??? reject 0x
+                                                   in hex etc */
 
 /* grok_??? input: ignored; output: found overflow */
 #define PERL_SCAN_GREATER_THAN_UV_MAX   0x04
@@ -8100,8 +8110,8 @@ A synonym for L</grok_numeric_radix>
 #define PERL_SCAN_SILENT_ILLDIGIT       0x08
 
 #define PERL_SCAN_TRAILING              0x10    /* grok_number_flags() allow
-                                              trailing and set
-                                              IS_NUMBER_TRAILING */
+                                                   trailing and set
+                                                   IS_NUMBER_TRAILING */
 
 /* These are considered experimental, so not exposed publicly */
 #if defined(PERL_CORE) || defined(PERL_EXT)
@@ -8801,7 +8811,8 @@ END_EXTERN_C
      LONG_DOUBLEKIND == LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_BE_LE)
 #  define NV_NAN_QS_BIT_SHIFT     3   /* 0x08, but not via NV_NAN_BITS */
 #else
-#  define NV_NAN_QS_BIT_SHIFT     ((NV_NAN_BITS) % 8)     /* usually 3, or 0x08 */
+#  define NV_NAN_QS_BIT_SHIFT     ((NV_NAN_BITS) % 8)     /* usually 3, or
+                                                             0x08 */
 #endif
 #define NV_NAN_QS_BIT           (1 << (NV_NAN_QS_BIT_SHIFT))
 /* NV_NAN_QS_BIT_OFFSET is the bit offset from the beginning of a NV (bytes

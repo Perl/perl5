@@ -98,9 +98,12 @@ struct padname_fieldinfo {
     U32         refcount;
     PADOFFSET   fieldix;            /* index of this field within
                                        ObjectFIELDS() array */
-    HV          *fieldstash;        /* original class package which added this field */
-    OP          *defop;             /* optree fragment for defaulting expression */
-    SV          *paramname;         /* name of the :param to look for in constructor */
+    HV          *fieldstash;        /* original class package which
+                                       added this field */
+    OP          *defop;             /* optree fragment for defaulting
+                                       expression */
+    SV          *paramname;         /* name of the :param to look
+                                       for in constructor */
     int         def_if_undef : 1;   /* default op uses //= */
     int         def_if_false : 1;   /* default op uses ||= */
 };
@@ -127,13 +130,15 @@ struct padname_fieldinfo {
 /* Flags set in the SvIVX field of FAKE namesvs */
 
 #define PAD_FAKELEX_ANON       1    /* the lex is declared in an ANON, or ... */
-#define PAD_FAKELEX_MULTI      2    /* the lex can be instantiated multiple times */
+#define PAD_FAKELEX_MULTI      2    /* the lex can be instantiated
+                                       multiple times */
 
 /* flags for the pad_new() function */
 
 #define padnew_CLONE           1    /* this pad is for a cloned CV */
 #define padnew_SAVE            2    /* save old globals */
-#define padnew_SAVESUB         4    /* also save extra stuff for start of sub */
+#define padnew_SAVESUB         4    /* also save extra stuff
+                                       for start of sub */
 
 /* values for the pad_tidy() function */
 
@@ -148,11 +153,11 @@ typedef enum {
 #define padadd_OUR          0x01    /* our declaration. */
 #define padadd_STATE        0x02    /* state declaration. */
 #define padadd_NO_DUP_CHECK 0x04    /* skip warning on dups. */
-#define padadd_STALEOK      0x08    /* allow stale lexical in active
-                                            * sub, but only one level up */
+#define padadd_STALEOK      0x08    /* allow stale lexical in active sub,
+                                     * but only one level up */
 #define padadd_FIELD        0x10    /* set PADNAMEt_FIELD */
 #define padfind_FIELD_OK    0x20    /* pad_findlex is permitted
-                                        to see fields */
+                                       to see fields */
 
 /* ASSERT_CURPAD_LEGAL and ASSERT_CURPAD_ACTIVE respectively
  * determine whether PL_comppad and PL_curpad are consistent
