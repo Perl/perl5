@@ -159,35 +159,35 @@ is a lexical C<$_> in scope.
 
 #define dAX const I32 ax = (I32)(MARK - PL_stack_base + 1)
 
-#define dAXMARK                         \
-        I32 ax = POPMARK;       \
-        SV **mark = PL_stack_base + ax++
+#define dAXMARK         \
+    I32 ax = POPMARK;   \
+    SV **mark = PL_stack_base + ax++
 
 #define dITEMS I32 items = (I32)(SP - MARK)
 
 #define dXSARGS \
-        dSP; dAXMARK; dITEMS
+    dSP; dAXMARK; dITEMS
 /* These 3 macros are replacements for dXSARGS macro only in bootstrap.
    They factor out common code in every BOOT XSUB. Computation of vars mark
    and items will optimize away in most BOOT functions. Var ax can never be
    optimized away since BOOT must return &PL_sv_yes by default from xsubpp.
    Note these macros are not drop in replacements for dXSARGS since they set
    PL_xsubfilename. */
-#define dXSBOOTARGSXSAPIVERCHK  \
-        I32 ax = XS_BOTHVERSION_SETXSUBFN_POPMARK_BOOTCHECK;    \
-        SV **mark = PL_stack_base + ax - 1; dSP; dITEMS
-#define dXSBOOTARGSAPIVERCHK  \
-        I32 ax = XS_APIVERSION_SETXSUBFN_POPMARK_BOOTCHECK;     \
-        SV **mark = PL_stack_base + ax - 1; dSP; dITEMS
+#define dXSBOOTARGSXSAPIVERCHK                              \
+    I32 ax = XS_BOTHVERSION_SETXSUBFN_POPMARK_BOOTCHECK;    \
+    SV **mark = PL_stack_base + ax - 1; dSP; dITEMS
+#define dXSBOOTARGSAPIVERCHK                            \
+    I32 ax = XS_APIVERSION_SETXSUBFN_POPMARK_BOOTCHECK; \
+    SV **mark = PL_stack_base + ax - 1; dSP; dITEMS
 /* dXSBOOTARGSNOVERCHK has no API in xsubpp to choose it so do
 #undef dXSBOOTARGSXSAPIVERCHK
 #define dXSBOOTARGSXSAPIVERCHK dXSBOOTARGSNOVERCHK */
-#define dXSBOOTARGSNOVERCHK  \
-        I32 ax = XS_SETXSUBFN_POPMARK;  \
-        SV **mark = PL_stack_base + ax - 1; dSP; dITEMS
+#define dXSBOOTARGSNOVERCHK         \
+    I32 ax = XS_SETXSUBFN_POPMARK;  \
+    SV **mark = PL_stack_base + ax - 1; dSP; dITEMS
 
-#define dXSTARG  \
-    SV * const targ = ((PL_op->op_private & OPpENTERSUB_HASTARG)\
+#define dXSTARG                                                     \
+    SV * const targ = ((PL_op->op_private & OPpENTERSUB_HASTARG)    \
                  ? PAD_SV(PL_op->op_targ) : sv_newmortal())
 
 /* Should be used before final PUSHi etc. if not in PPCODE section. */
@@ -206,8 +206,8 @@ is a lexical C<$_> in scope.
 #endif
 #define dXSFUNCTION(ret)                XSINTERFACE_CVT(ret,XSFUNCTION)
 #define XSINTERFACE_FUNC(ret,cv,f)     ((XSINTERFACE_CVT_ANON(ret))(f))
-#define XSINTERFACE_FUNC_SET(cv,f)      \
-                CvXSUBANY(cv).any_dxptr = (void (*) (pTHX_ void*))(f)
+#define XSINTERFACE_FUNC_SET(cv,f)  \
+    CvXSUBANY(cv).any_dxptr = (void (*) (pTHX_ void*))(f)
 
 #define dUNDERBAR dNOOP
 #define UNDERBAR  find_rundefsv()
@@ -322,12 +322,12 @@ Rethrows a previously caught exception.  See L<perlguts/"Exception Handling">.
 #define XST_mYES(i)   (ST(i) = &PL_sv_yes  )
 #define XST_mUNDEF(i) (ST(i) = &PL_sv_undef)
 
-#define XSRETURN(off)                                   \
-    STMT_START {                                        \
-        const IV tmpXSoff = (off);                      \
-        assert(tmpXSoff >= 0);\
-        PL_stack_sp = PL_stack_base + ax + (tmpXSoff - 1);      \
-        return;                                         \
+#define XSRETURN(off)                                       \
+    STMT_START {                                            \
+        const IV tmpXSoff = (off);                          \
+        assert(tmpXSoff >= 0);                              \
+        PL_stack_sp = PL_stack_base + ax + (tmpXSoff - 1);  \
+        return;                                             \
     } STMT_END
 
 #define XSRETURN_IV(v)    STMT_START { XST_mIV(0,v);    XSRETURN(1); } STMT_END
@@ -343,47 +343,47 @@ Rethrows a previously caught exception.  See L<perlguts/"Exception Handling">.
 #define newXSproto(a,b,c,d)     newXS_flags(a,b,c,d,0)
 
 #ifdef XS_VERSION
-#  define XS_VERSION_BOOTCHECK                                          \
-    Perl_xs_handshake(HS_KEY(FALSE, FALSE, "", XS_VERSION), HS_CXT, __FILE__,   \
-        items, ax, XS_VERSION)
+#  define XS_VERSION_BOOTCHECK                                                      \
+       Perl_xs_handshake(HS_KEY(FALSE, FALSE, "", XS_VERSION), HS_CXT, __FILE__,    \
+           items, ax, XS_VERSION)
 #else
 #  define XS_VERSION_BOOTCHECK
 #endif
 
-#define XS_APIVERSION_BOOTCHECK                                         \
+#define XS_APIVERSION_BOOTCHECK                                                 \
     Perl_xs_handshake(HS_KEY(FALSE, FALSE, "v" PERL_API_VERSION_STRING, ""),    \
         HS_CXT, __FILE__, items, ax, "v" PERL_API_VERSION_STRING)
 /* public API, this is a combination of XS_VERSION_BOOTCHECK and
    XS_APIVERSION_BOOTCHECK in 1, and is backportable */
 #ifdef XS_VERSION
-#  define XS_BOTHVERSION_BOOTCHECK                                              \
-    Perl_xs_handshake(HS_KEY(FALSE, FALSE, "v" PERL_API_VERSION_STRING, XS_VERSION),    \
-        HS_CXT, __FILE__, items, ax, "v" PERL_API_VERSION_STRING, XS_VERSION)
+#  define XS_BOTHVERSION_BOOTCHECK                                                      \
+       Perl_xs_handshake(HS_KEY(FALSE, FALSE, "v" PERL_API_VERSION_STRING, XS_VERSION), \
+           HS_CXT, __FILE__, items, ax, "v" PERL_API_VERSION_STRING, XS_VERSION)
 #else
 /* should this be a #error? if you want both checked, you better supply XS_VERSION right? */
 #  define XS_BOTHVERSION_BOOTCHECK XS_APIVERSION_BOOTCHECK
 #endif
 
 /* private API */
-#define XS_APIVERSION_POPMARK_BOOTCHECK                                 \
-    Perl_xs_handshake(HS_KEY(FALSE, TRUE, "v" PERL_API_VERSION_STRING, ""),     \
+#define XS_APIVERSION_POPMARK_BOOTCHECK                                     \
+    Perl_xs_handshake(HS_KEY(FALSE, TRUE, "v" PERL_API_VERSION_STRING, ""), \
         HS_CXT, __FILE__, "v" PERL_API_VERSION_STRING)
 #ifdef XS_VERSION
-#  define XS_BOTHVERSION_POPMARK_BOOTCHECK                                      \
-    Perl_xs_handshake(HS_KEY(FALSE, TRUE, "v" PERL_API_VERSION_STRING, XS_VERSION),     \
-        HS_CXT, __FILE__, "v" PERL_API_VERSION_STRING, XS_VERSION)
+#  define XS_BOTHVERSION_POPMARK_BOOTCHECK                                              \
+       Perl_xs_handshake(HS_KEY(FALSE, TRUE, "v" PERL_API_VERSION_STRING, XS_VERSION),  \
+           HS_CXT, __FILE__, "v" PERL_API_VERSION_STRING, XS_VERSION)
 #else
 /* should this be a #error? if you want both checked, you better supply XS_VERSION right? */
 #  define XS_BOTHVERSION_POPMARK_BOOTCHECK XS_APIVERSION_POPMARK_BOOTCHECK
 #endif
 
-#define XS_APIVERSION_SETXSUBFN_POPMARK_BOOTCHECK                               \
-    Perl_xs_handshake(HS_KEY(TRUE, TRUE, "v" PERL_API_VERSION_STRING, ""),      \
+#define XS_APIVERSION_SETXSUBFN_POPMARK_BOOTCHECK                           \
+    Perl_xs_handshake(HS_KEY(TRUE, TRUE, "v" PERL_API_VERSION_STRING, ""),  \
         HS_CXT, __FILE__, "v" PERL_API_VERSION_STRING)
 #ifdef XS_VERSION
-#  define XS_BOTHVERSION_SETXSUBFN_POPMARK_BOOTCHECK                              \
-    Perl_xs_handshake(HS_KEY(TRUE, TRUE, "v" PERL_API_VERSION_STRING, XS_VERSION),\
-        HS_CXT, __FILE__, "v" PERL_API_VERSION_STRING, XS_VERSION)
+#  define XS_BOTHVERSION_SETXSUBFN_POPMARK_BOOTCHECK                                    \
+       Perl_xs_handshake(HS_KEY(TRUE, TRUE, "v" PERL_API_VERSION_STRING, XS_VERSION),   \
+           HS_CXT, __FILE__, "v" PERL_API_VERSION_STRING, XS_VERSION)
 #else
 /* should this be a #error? if you want both checked, you better supply XS_VERSION right? */
 #  define XS_BOTHVERSION_SETXSUBFN_POPMARK_BOOTCHECK XS_APIVERSION_SETXSUBFN_POPMARK_BOOTCHECK
@@ -393,7 +393,7 @@ Rethrows a previously caught exception.  See L<perlguts/"Exception Handling">.
    Useful for static XS modules or debugging/testing scenarios.
    If this macro gets heavily used in the future, it should separated into
    a separate function independent of Perl_xs_handshake for efficiency */
-#define XS_SETXSUBFN_POPMARK \
+#define XS_SETXSUBFN_POPMARK    \
     Perl_xs_handshake(HS_KEY(TRUE, TRUE, "", "") | HSf_NOCHK, HS_CXT, __FILE__)
 
 #ifdef NO_XSLOCKS
@@ -409,49 +409,49 @@ Rethrows a previously caught exception.  See L<perlguts/"Exception Handling">.
    the *DB*_File modules
 */
 
-#define DBM_setFilter(db_type,code)                             \
-        STMT_START {                                            \
-            if (db_type)                                        \
-                RETVAL = sv_mortalcopy(db_type);               \
-            ST(0) = RETVAL;                                    \
-            if (db_type && (code == &PL_sv_undef)) {            \
-                SvREFCNT_dec_NN(db_type);                      \
-                db_type = NULL;                                \
-            }                                                   \
-            else if (code) {                                    \
-                if (db_type)                                    \
-                    sv_setsv(db_type, code);                   \
-                else                                            \
-                    db_type = newSVsv(code);                   \
-            }                                                   \
-        } STMT_END
+#define DBM_setFilter(db_type,code)                 \
+    STMT_START {                                    \
+        if (db_type)                                \
+            RETVAL = sv_mortalcopy(db_type);        \
+        ST(0) = RETVAL;                             \
+        if (db_type && (code == &PL_sv_undef)) {    \
+            SvREFCNT_dec_NN(db_type);               \
+            db_type = NULL;                         \
+        }                                           \
+        else if (code) {                            \
+            if (db_type)                            \
+                sv_setsv(db_type, code);            \
+            else                                    \
+                db_type = newSVsv(code);            \
+        }                                           \
+    } STMT_END
 
-#define DBM_ckFilter(arg,type,name)                             \
-    STMT_START {                                                \
-        if (db->type) {                                         \
-            if (db->filtering) {                                \
-                croak("recursion detected in %s", name);       \
-            }                                                   \
-            ENTER;                                             \
-            SAVETMPS;                                          \
-            SAVEINT(db->filtering);                            \
-            db->filtering = TRUE;                              \
-            SAVE_DEFSV;                                        \
-            if (name[7] == 's')                                 \
-                arg = newSVsv(arg);                             \
-            DEFSV_set(arg);                                    \
-            SvTEMP_off(arg);                                   \
-            PUSHMARK(SP);                                      \
-            PUTBACK;                                           \
-            (void) perl_call_sv(db->type, G_DISCARD);           \
-            SPAGAIN;                                           \
-            PUTBACK;                                           \
-            FREETMPS;                                          \
-            LEAVE;                                             \
-            if (name[7] == 's'){                                \
-                arg = sv_2mortal(arg);                          \
-            }                                                   \
-        }                                                       \
+#define DBM_ckFilter(arg,type,name)                         \
+    STMT_START {                                            \
+        if (db->type) {                                     \
+            if (db->filtering) {                            \
+                croak("recursion detected in %s", name);    \
+            }                                               \
+            ENTER;                                          \
+            SAVETMPS;                                       \
+            SAVEINT(db->filtering);                         \
+            db->filtering = TRUE;                           \
+            SAVE_DEFSV;                                     \
+            if (name[7] == 's')                             \
+                arg = newSVsv(arg);                         \
+            DEFSV_set(arg);                                 \
+            SvTEMP_off(arg);                                \
+            PUSHMARK(SP);                                   \
+            PUTBACK;                                        \
+            (void) perl_call_sv(db->type, G_DISCARD);       \
+            SPAGAIN;                                        \
+            PUTBACK;                                        \
+            FREETMPS;                                       \
+            LEAVE;                                          \
+            if (name[7] == 's'){                            \
+                arg = sv_2mortal(arg);                      \
+            }                                               \
+        }                                                   \
     } STMT_END
 
 #if 1           /* for compatibility */

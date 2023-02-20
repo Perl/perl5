@@ -13,20 +13,20 @@
 
 
 #ifdef VMS
-#  define PERL_FILE_IS_ABSOLUTE(f) \
-        (*(f) == '/'                                                    \
-         || (strchr(f,':')                                              \
-             || ((*(f) == '[' || *(f) == '<')                           \
-                 && (isWORDCHAR((f)[1]) || memCHRs("$-_]>",(f)[1])))))
+#  define PERL_FILE_IS_ABSOLUTE(f)              \
+       (*(f) == '/'                             \
+        || (strchr(f,':')                       \
+            || ((*(f) == '[' || *(f) == '<')    \
+                && (isWORDCHAR((f)[1]) || memCHRs("$-_]>",(f)[1])))))
 
 #elif defined(WIN32) || defined(__CYGWIN__)
-#  define PERL_FILE_IS_ABSOLUTE(f) \
-        (*(f) == '/' || *(f) == '\\'            /* UNC/rooted path */   \
-         || ((f)[0] && (f)[1] == ':'))          /* drive name */
+#  define PERL_FILE_IS_ABSOLUTE(f)                                      \
+       (*(f) == '/' || *(f) == '\\'            /* UNC/rooted path */    \
+        || ((f)[0] && (f)[1] == ':'))          /* drive name */
 #elif defined(DOSISH)
-#  define PERL_FILE_IS_ABSOLUTE(f) \
-        (*(f) == '/'                                                    \
-         || ((f)[0] && (f)[1] == ':'))          /* drive name */
+#  define PERL_FILE_IS_ABSOLUTE(f)  \
+       (*(f) == '/'                 \
+        || ((f)[0] && (f)[1] == ':'))          /* drive name */
 #else   /* NOT DOSISH */
 #  define PERL_FILE_IS_ABSOLUTE(f)      (*(f) == '/')
 #endif
@@ -50,8 +50,8 @@ This is a synonym for S<C<(! foldEQ_utf8())>>
 */
 #define ibcmp(s1, s2, len)         cBOOL(! foldEQ(s1, s2, len))
 #define ibcmp_locale(s1, s2, len)  cBOOL(! foldEQ_locale(s1, s2, len))
-#define ibcmp_utf8(s1, pe1, l1, u1, s2, pe2, l2, u2) \
-                    cBOOL(! foldEQ_utf8(s1, pe1, l1, u1, s2, pe2, l2, u2))
+#define ibcmp_utf8(s1, pe1, l1, u1, s2, pe2, l2, u2)    \
+    cBOOL(! foldEQ_utf8(s1, pe1, l1, u1, s2, pe2, l2, u2))
 
 /* outside the core, perl.h undefs HAS_QUAD if IV isn't 64-bit
    We can't swap this to HAS_QUAD, because the logic here affects the type of
@@ -204,15 +204,15 @@ means arg not present, 1 is empty string/null byte */
 /* internal to util.h macro to create a packed handshake key, all args must be constants */
 /* U32 return = (U16 interpsize, bool cxt, bool setxsubfn, bool popmark,
    U5 (FIVE!) apiverlen, U8 xsverlen) */
-#define HS_KEYp(interpsize, cxt, setxsubfn, popmark, apiverlen, xsverlen) \
-    (((interpsize)  << 16) \
-    | ((xsverlen) > HS_XSVERLEN_MAX \
-        ? (Perl_croak_nocontext("panic: handshake overflow"), HS_XSVERLEN_MAX) \
-        : (xsverlen) << 8) \
-    | (cBOOL(setxsubfn) ? HSf_SETXSUBFN : 0) \
-    | (cBOOL(cxt) ? HSf_IMP_CXT : 0) \
-    | (cBOOL(popmark) ? HSf_POPMARK : 0) \
-    | ((apiverlen) > HS_APIVERLEN_MAX \
+#define HS_KEYp(interpsize, cxt, setxsubfn, popmark, apiverlen, xsverlen)       \
+    (((interpsize)  << 16)                                                      \
+    | ((xsverlen) > HS_XSVERLEN_MAX                                             \
+        ? (Perl_croak_nocontext("panic: handshake overflow"), HS_XSVERLEN_MAX)  \
+        : (xsverlen) << 8)                                                      \
+    | (cBOOL(setxsubfn) ? HSf_SETXSUBFN : 0)                                    \
+    | (cBOOL(cxt) ? HSf_IMP_CXT : 0)                                            \
+    | (cBOOL(popmark) ? HSf_POPMARK : 0)                                        \
+    | ((apiverlen) > HS_APIVERLEN_MAX                                           \
         ? (Perl_croak_nocontext("panic: handshake overflow"), HS_APIVERLEN_MAX) \
         : (apiverlen)))
 /* overflows above will optimize away unless they will execute */
@@ -222,14 +222,14 @@ means arg not present, 1 is empty string/null byte */
 /* U32 return = (bool setxsubfn, bool popmark, "litteral_string_api_ver",
    "litteral_string_xs_ver") */
 #ifdef MULTIPLICITY
-#  define HS_KEY(setxsubfn, popmark, apiver, xsver) \
-    HS_KEYp(sizeof(PerlInterpreter), TRUE, setxsubfn, popmark, \
-    sizeof("" apiver "")-1, sizeof("" xsver "")-1)
+#  define HS_KEY(setxsubfn, popmark, apiver, xsver)                 \
+       HS_KEYp(sizeof(PerlInterpreter), TRUE, setxsubfn, popmark,   \
+       sizeof("" apiver "")-1, sizeof("" xsver "")-1)
 #  define HS_CXT aTHX
 #else
-#  define HS_KEY(setxsubfn, popmark, apiver, xsver) \
-    HS_KEYp(sizeof(struct PerlHandShakeInterpreter), FALSE, setxsubfn, popmark, \
-    sizeof("" apiver "")-1, sizeof("" xsver "")-1)
+#  define HS_KEY(setxsubfn, popmark, apiver, xsver)                                 \
+       HS_KEYp(sizeof(struct PerlHandShakeInterpreter), FALSE, setxsubfn, popmark,  \
+       sizeof("" apiver "")-1, sizeof("" xsver "")-1)
 #  define HS_CXT cv
 #endif
 
@@ -246,11 +246,11 @@ returning NULL if not found.  The terminating NUL bytes are not compared.
 #define instr(haystack, needle) strstr((char *) haystack, (char *) needle)
 
 #ifdef HAS_MEMMEM
-#   define ninstr(big, bigend, little, lend)                                \
-            (__ASSERT_(bigend >= big)                                       \
-             __ASSERT_(lend >= little)                                      \
-             (char *) memmem((big), (bigend) - (big),                       \
-                             (little), (lend) - (little)))
+#   define ninstr(big, bigend, little, lend)        \
+        (__ASSERT_(bigend >= big)                   \
+         __ASSERT_(lend >= little)                  \
+         (char *) memmem((big), (bigend) - (big),   \
+                         (little), (lend) - (little)))
 #else
 #   define ninstr(a,b,c,d) Perl_ninstr(a,b,c,d)
 #endif

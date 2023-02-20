@@ -82,32 +82,32 @@
 #define SBOX32_STATE_BITS (SBOX32_STATE_BYTES * 8)
 #endif
 
-#define SBOX32_MIX4(v0,v1,v2,v3,text)  \
-    STMT_START {\
-        SBOX32_WARN5("v0=%08x v1=%08x v2=%08x v3=%08x - SBOX32_MIX4 %s\n", \
-                            (unsigned int)v0, (unsigned int)v1,    \
-                            (unsigned int)v2, (unsigned int)v3, text);   \
-        v0 = ROTL32(v0,13) - v3;    \
-        v1 ^= v2;                   \
-        v3 = ROTL32(v3, 9) + v1;    \
-        v2 ^= v0;                   \
-        v0 = ROTL32(v0,14) ^ v3;    \
-        v1 = ROTL32(v1,25) - v2;    \
-        v3 ^= v1;                   \
-        v2 = ROTL32(v2, 4) - v0;    \
-} STMT_END
+#define SBOX32_MIX4(v0,v1,v2,v3,text)                                       \
+    STMT_START {                                                            \
+        SBOX32_WARN5("v0=%08x v1=%08x v2=%08x v3=%08x - SBOX32_MIX4 %s\n",  \
+                            (unsigned int)v0, (unsigned int)v1,             \
+                            (unsigned int)v2, (unsigned int)v3, text);      \
+        v0 = ROTL32(v0,13) - v3;                                            \
+        v1 ^= v2;                                                           \
+        v3 = ROTL32(v3, 9) + v1;                                            \
+        v2 ^= v0;                                                           \
+        v0 = ROTL32(v0,14) ^ v3;                                            \
+        v1 = ROTL32(v1,25) - v2;                                            \
+        v3 ^= v1;                                                           \
+        v2 = ROTL32(v2, 4) - v0;                                            \
+    } STMT_END
 
-#define SBOX32_MIX3(v0,v1,v2,text)  \
-    STMT_START {\
-    SBOX32_WARN4("v0=%08x v1=%08x v2=%08x - SBOX32_MIX3 %s\n",              \
-            (unsigned int)v0,(unsigned int)v1,(unsigned int)v2, text );     \
-    v0 = ROTL32(v0,16) - v2;   \
-    v1 = ROTR32(v1,13) ^ v2;   \
-    v2 = ROTL32(v2,17) + v1;   \
-    v0 = ROTR32(v0, 2) + v1;   \
-    v1 = ROTR32(v1,17) - v0;   \
-    v2 = ROTR32(v2, 7) ^ v0;   \
-} STMT_END
+#define SBOX32_MIX3(v0,v1,v2,text)                                          \
+    STMT_START {                                                            \
+        SBOX32_WARN4("v0=%08x v1=%08x v2=%08x - SBOX32_MIX3 %s\n",          \
+                (unsigned int)v0,(unsigned int)v1,(unsigned int)v2, text ); \
+        v0 = ROTL32(v0,16) - v2;                                            \
+        v1 = ROTR32(v1,13) ^ v2;                                            \
+        v2 = ROTL32(v2,17) + v1;                                            \
+        v0 = ROTR32(v0, 2) + v1;                                            \
+        v1 = ROTR32(v1,17) - v0;                                            \
+        v2 = ROTR32(v2, 7) ^ v0;                                            \
+    } STMT_END
 
 #if SBOX32_MAX_LEN > 256
 #error "SBOX32_MAX_LEN is set too high!"
@@ -1392,19 +1392,19 @@
 #define case_1_SBOX32(hash,state,key) /**/
 #endif
 
-#define XORSHIFT128_set(r,x,y,z,w,t)  \
-    STMT_START {\
-    t = ( x ^ ( x << 5 ) );                             \
-    x = y; y = z; z = w;                                \
-    r = w = ( w ^ ( w >> 29 ) ) ^ ( t ^ ( t >> 12 ) );  \
-} STMT_END
+#define XORSHIFT128_set(r,x,y,z,w,t)                        \
+    STMT_START {                                            \
+        t = ( x ^ ( x << 5 ) );                             \
+        x = y; y = z; z = w;                                \
+        r = w = ( w ^ ( w >> 29 ) ) ^ ( t ^ ( t >> 12 ) );  \
+    } STMT_END
 
 #ifndef SBOX32_CHURN_ROUNDS
 #define SBOX32_CHURN_ROUNDS 128
 #endif
 
-#define _SBOX32_CASE(len,hash,state,key) \
-    /* FALLTHROUGH */ \
+#define _SBOX32_CASE(len,hash,state,key)    \
+    /* FALLTHROUGH */                       \
     case len: hash ^= state[ 1 + ( 256 * ( len - 1 ) ) + key[ len - 1 ] ];
 
 

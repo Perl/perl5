@@ -27,33 +27,33 @@ struct gp {
 
 
 #if defined (DEBUGGING) && defined(PERL_USE_GCC_BRACE_GROUPS) && !defined(__INTEL_COMPILER)
-#  define GvGP(gv)                                                      \
-        ((GP *)(*({GV *const _gvgp = (GV *) (gv);                               \
-            assert(SvTYPE(_gvgp) == SVt_PVGV || SvTYPE(_gvgp) == SVt_PVLV); \
-            assert(isGV_with_GP(_gvgp));                                \
-            &((_gvgp)->sv_u.svu_gp);})))
-#  define GvGP_set(gv,gp)                                               \
-        {GV *const _gvgp = (GV *) (gv);                         \
-            assert(SvTYPE(_gvgp) == SVt_PVGV || SvTYPE(_gvgp) == SVt_PVLV); \
-            assert(isGV_with_GP(_gvgp));                                \
-            (_gvgp)->sv_u.svu_gp = (gp); }
-#  define GvFLAGS(gv)                                                   \
-        (*({GV *const _gvflags = (GV *) (gv);                           \
-            assert(SvTYPE(_gvflags) == SVt_PVGV || SvTYPE(_gvflags) == SVt_PVLV); \
-            assert(isGV_with_GP(_gvflags));                             \
-            &(GvXPVGV(_gvflags)->xpv_cur);}))
-#  define GvSTASH(gv)                                                   \
-        (*({ GV * const _gvstash = (GV *) (gv);                         \
-            assert(isGV_with_GP(_gvstash));                             \
-            assert(SvTYPE(_gvstash) == SVt_PVGV || SvTYPE(_gvstash) >= SVt_PVLV); \
-            &(GvXPVGV(_gvstash)->xnv_u.xgv_stash);                      \
-         }))
-#  define GvNAME_HEK(gv)                                                \
-    (*({ GV * const _gvname_hek = (GV *) (gv);                          \
-           assert(isGV_with_GP(_gvname_hek));                           \
-           assert(SvTYPE(_gvname_hek) == SVt_PVGV || SvTYPE(_gvname_hek) >= SVt_PVLV); \
-           &(GvXPVGV(_gvname_hek)->xiv_u.xivu_namehek);                 \
-         }))
+#  define GvGP(gv)                                                          \
+       ((GP *)(*({GV *const _gvgp = (GV *) (gv);                            \
+           assert(SvTYPE(_gvgp) == SVt_PVGV || SvTYPE(_gvgp) == SVt_PVLV);  \
+           assert(isGV_with_GP(_gvgp));                                     \
+           &((_gvgp)->sv_u.svu_gp);})))
+#  define GvGP_set(gv,gp)                                                   \
+       {GV *const _gvgp = (GV *) (gv);                                      \
+           assert(SvTYPE(_gvgp) == SVt_PVGV || SvTYPE(_gvgp) == SVt_PVLV);  \
+           assert(isGV_with_GP(_gvgp));                                     \
+           (_gvgp)->sv_u.svu_gp = (gp); }
+#  define GvFLAGS(gv)                                                               \
+       (*({GV *const _gvflags = (GV *) (gv);                                        \
+           assert(SvTYPE(_gvflags) == SVt_PVGV || SvTYPE(_gvflags) == SVt_PVLV);    \
+           assert(isGV_with_GP(_gvflags));                                          \
+           &(GvXPVGV(_gvflags)->xpv_cur);}))
+#  define GvSTASH(gv)                                                               \
+       (*({ GV * const _gvstash = (GV *) (gv);                                      \
+           assert(isGV_with_GP(_gvstash));                                          \
+           assert(SvTYPE(_gvstash) == SVt_PVGV || SvTYPE(_gvstash) >= SVt_PVLV);    \
+           &(GvXPVGV(_gvstash)->xnv_u.xgv_stash);                                   \
+        }))
+#  define GvNAME_HEK(gv)                                                                    \
+       (*({ GV * const _gvname_hek = (GV *) (gv);                                           \
+              assert(isGV_with_GP(_gvname_hek));                                            \
+              assert(SvTYPE(_gvname_hek) == SVt_PVGV || SvTYPE(_gvname_hek) >= SVt_PVLV);   \
+              &(GvXPVGV(_gvname_hek)->xiv_u.xivu_namehek);                                  \
+            }))
 #  define GvNAME_get(gv)        ({ assert(GvNAME_HEK(gv)); (char *)HEK_KEY(GvNAME_HEK(gv)); })
 #  define GvNAMELEN_get(gv)     ({ assert(GvNAME_HEK(gv)); HEK_LEN(GvNAME_HEK(gv)); })
 #  define GvNAMEUTF8(gv)        ({ assert(GvNAME_HEK(gv)); HEK_UTF8(GvNAME_HEK(gv)); })
@@ -100,41 +100,41 @@ Return the CV from the GV.
 
 #define GvSV(gv)        (GvGP(gv)->gp_sv)
 #ifdef PERL_DONT_CREATE_GVSV
-#define GvSVn(gv)        \
-    (*(GvGP(gv)->gp_sv ?\
-     &(GvGP(gv)->gp_sv) : \
+#define GvSVn(gv)           \
+    (*(GvGP(gv)->gp_sv ?    \
+     &(GvGP(gv)->gp_sv) :   \
      &(GvGP(gv_SVadd(gv))->gp_sv)))
 #else
 #define GvSVn(gv)       GvSV(gv)
 #endif
 
 #define GvREFCNT(gv)    (GvGP(gv)->gp_refcnt)
-#define GvIO(gv)                         \
- (                                        \
-     (gv)                                  \
-  && (                                      \
-         SvTYPE((const SV*)(gv)) == SVt_PVGV \
-      || SvTYPE((const SV*)(gv)) == SVt_PVLV  \
-     )                                         \
-  && GvGP(gv)                                   \
-   ? GvIOp(gv)                                   \
-   : NULL                                         \
- )
+#define GvIO(gv)                                \
+    (                                           \
+        (gv)                                    \
+     && (                                       \
+            SvTYPE((const SV*)(gv)) == SVt_PVGV \
+         || SvTYPE((const SV*)(gv)) == SVt_PVLV \
+        )                                       \
+     && GvGP(gv)                                \
+      ? GvIOp(gv)                               \
+      : NULL                                    \
+    )
 #define GvIOp(gv)       (GvGP(gv)->gp_io)
 #define GvIOn(gv)       (GvIO(gv) ? GvIOp(gv) : GvIOp(gv_IOadd(gv)))
 
 #define GvFORM(gv)      (GvGP(gv)->gp_form)
 #define GvAV(gv)        (GvGP(gv)->gp_av)
 
-#define GvAVn(gv)        \
-    (GvGP(gv)->gp_av ?\
-     GvGP(gv)->gp_av : \
+#define GvAVn(gv)       \
+    (GvGP(gv)->gp_av ?  \
+     GvGP(gv)->gp_av :  \
      GvGP(gv_AVadd(gv))->gp_av)
 #define GvHV(gv)        ((GvGP(gv))->gp_hv)
 
-#define GvHVn(gv)        \
-    (GvGP(gv)->gp_hv ?\
-     GvGP(gv)->gp_hv : \
+#define GvHVn(gv)       \
+    (GvGP(gv)->gp_hv ?  \
+     GvGP(gv)->gp_hv :  \
      GvGP(gv_HVadd(gv))->gp_hv)
 
 #define GvCV(gv)        ((CV*)GvGP(gv)->gp_cv)
@@ -258,8 +258,8 @@ Return the CV from the GV.
         outside this range.
 */
 
-#define GV_NOADD_MASK \
-  (SVf_UTF8|GV_NOADD_NOINIT|GV_NOEXPAND|GV_NOTQUAL|GV_ADDMG|GV_NO_SVGMAGIC)
+#define GV_NOADD_MASK   \
+    (SVf_UTF8|GV_NOADD_NOINIT|GV_NOEXPAND|GV_NOTQUAL|GV_ADDMG|GV_NO_SVGMAGIC)
 /* The bit flags that don't cause gv_fetchpv() to add a symbol if not
    found (with the exception GV_ADDMG, which *might* cause the symbol
    to be added) */
@@ -271,8 +271,8 @@ Return the CV from the GV.
 #define gv_efullname3(sv,gv,prefix) gv_efullname4(sv,gv,prefix,TRUE)
 #define gv_fetchmethod(stash, name) gv_fetchmethod_autoload(stash, name, TRUE)
 #define gv_fetchsv_nomg(n,f,t) gv_fetchsv(n,(f)|GV_NO_SVGMAGIC,t)
-#define gv_init(gv,stash,name,len,multi) \
-        gv_init_pvn(gv,stash,name,len,GV_ADDMULTI*cBOOL(multi))
+#define gv_init(gv,stash,name,len,multi)    \
+    gv_init_pvn(gv,stash,name,len,GV_ADDMULTI*cBOOL(multi))
 #define gv_fetchmeth(stash,name,len,level) gv_fetchmeth_pvn(stash, name, len, level, 0)
 #define gv_fetchmeth_autoload(stash,name,len,level) gv_fetchmeth_pvn_autoload(stash, name, len, level, 0)
 #define gv_fetchmethod_flags(stash,name,flags) gv_fetchmethod_pv_flags(stash, name, flags)
@@ -283,15 +283,15 @@ Equivalent to C<L</gv_autoload_pvn>>.
 
 =cut
 */
-#define gv_autoload4(stash, name, len, autoload) \
-        gv_autoload_pvn(stash, name, len, cBOOL(autoload))
+#define gv_autoload4(stash, name, len, autoload)    \
+    gv_autoload_pvn(stash, name, len, cBOOL(autoload))
 #define newGVgen(pack)  newGVgen_flags(pack, 0)
-#define gv_method_changed(gv)               \
-    (                                        \
-        assert_(isGV_with_GP(gv))             \
-        GvREFCNT(gv) > 1                       \
-            ? (void)++PL_sub_generation         \
-            : mro_method_changed_in(GvSTASH(gv)) \
+#define gv_method_changed(gv)                       \
+    (                                               \
+        assert_(isGV_with_GP(gv))                   \
+        GvREFCNT(gv) > 1                            \
+            ? (void)++PL_sub_generation             \
+            : mro_method_changed_in(GvSTASH(gv))    \
     )
 
 /*

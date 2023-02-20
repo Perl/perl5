@@ -65,27 +65,27 @@ value for the OP, but some use it for other purposes.
 */
 #define TARG targ
 
-#define PUSHMARK(p) \
-    STMT_START {                                                      \
-        I32 * mark_stack_entry;                                       \
-        if (UNLIKELY((mark_stack_entry = ++PL_markstack_ptr)          \
-                                           == PL_markstack_max))      \
-            mark_stack_entry = markstack_grow();                      \
-        *mark_stack_entry  = (I32)((p) - PL_stack_base);              \
-        DEBUG_s(DEBUG_v(PerlIO_printf(Perl_debug_log,                 \
-                "MARK push %p %" IVdf "\n",                           \
-                PL_markstack_ptr, (IV)*mark_stack_entry)));           \
+#define PUSHMARK(p)                                                 \
+    STMT_START {                                                    \
+        I32 * mark_stack_entry;                                     \
+        if (UNLIKELY((mark_stack_entry = ++PL_markstack_ptr)        \
+                                           == PL_markstack_max))    \
+            mark_stack_entry = markstack_grow();                    \
+        *mark_stack_entry  = (I32)((p) - PL_stack_base);            \
+        DEBUG_s(DEBUG_v(PerlIO_printf(Perl_debug_log,               \
+                "MARK push %p %" IVdf "\n",                         \
+                PL_markstack_ptr, (IV)*mark_stack_entry)));         \
     } STMT_END
 
 #define TOPMARK Perl_TOPMARK(aTHX)
 #define POPMARK Perl_POPMARK(aTHX)
 
-#define INCMARK \
-    STMT_START {                                                      \
-        DEBUG_s(DEBUG_v(PerlIO_printf(Perl_debug_log,                 \
-                "MARK inc  %p %" IVdf "\n",                           \
-                (PL_markstack_ptr+1), (IV)*(PL_markstack_ptr+1))));   \
-        PL_markstack_ptr++;                                           \
+#define INCMARK                                                     \
+    STMT_START {                                                    \
+        DEBUG_s(DEBUG_v(PerlIO_printf(Perl_debug_log,               \
+                "MARK inc  %p %" IVdf "\n",                         \
+                (PL_markstack_ptr+1), (IV)*(PL_markstack_ptr+1)))); \
+        PL_markstack_ptr++;                                         \
     } STMT_END
 
 #define dSP             SV **sp = PL_stack_sp
@@ -332,12 +332,12 @@ Does not use C<TARG>.  See also C<L</XPUSHu>>, C<L</mPUSHu>> and C<L</PUSHu>>.
  * requested to be extended (which is likely to be less than PL_stack_max)
  */
 #if defined DEBUGGING && !defined DEBUGGING_RE_ONLY
-#  define EXTEND_HWM_SET(p, n)                                     \
-        STMT_START {                                               \
-            SSize_t extend_hwm_set_ix = (p) - PL_stack_base + (n); \
-            if (extend_hwm_set_ix > PL_curstackinfo->si_stack_hwm) \
-                PL_curstackinfo->si_stack_hwm = extend_hwm_set_ix; \
-        } STMT_END
+#  define EXTEND_HWM_SET(p, n)                                      \
+       STMT_START {                                                 \
+           SSize_t extend_hwm_set_ix = (p) - PL_stack_base + (n);   \
+           if (extend_hwm_set_ix > PL_curstackinfo->si_stack_hwm)   \
+               PL_curstackinfo->si_stack_hwm = extend_hwm_set_ix;   \
+       } STMT_END
 #else
 #  define EXTEND_HWM_SET(p, n) NOOP
 #endif
@@ -349,25 +349,25 @@ Does not use C<TARG>.  See also C<L</XPUSHu>>, C<L</mPUSHu>> and C<L</PUSHu>>.
  * can't happen.
  */
 
-#define _EXTEND_SAFE_N(n) \
-        (sizeof(n) > sizeof(SSize_t) && ((SSize_t)(n) != (n)) ? -1 : (n))
+#define _EXTEND_SAFE_N(n)   \
+    (sizeof(n) > sizeof(SSize_t) && ((SSize_t)(n) != (n)) ? -1 : (n))
 
 #ifdef STRESS_REALLOC
 # define EXTEND_SKIP(p, n) EXTEND_HWM_SET(p, n)
 
-# define EXTEND(p,n)    \
-    STMT_START {\
-        sp = stack_grow(sp,p,_EXTEND_SAFE_N(n));     \
-        PERL_UNUSED_VAR(sp);                         \
-    } STMT_END
+# define EXTEND(p,n)                                \
+      STMT_START {                                  \
+          sp = stack_grow(sp,p,_EXTEND_SAFE_N(n));  \
+          PERL_UNUSED_VAR(sp);                      \
+      } STMT_END
 /* Same thing, but update mark register too. */
-# define MEXTEND(p,n)    \
-    STMT_START {\
-        const SSize_t markoff = mark - PL_stack_base; \
-        sp = stack_grow(sp,p,_EXTEND_SAFE_N(n));    \
-        mark = PL_stack_base + markoff;             \
-        PERL_UNUSED_VAR(sp);                        \
-    } STMT_END
+# define MEXTEND(p,n)                                   \
+      STMT_START {                                      \
+          const SSize_t markoff = mark - PL_stack_base; \
+          sp = stack_grow(sp,p,_EXTEND_SAFE_N(n));      \
+          mark = PL_stack_base + markoff;               \
+          PERL_UNUSED_VAR(sp);                          \
+      } STMT_END
 #else
 
 /* _EXTEND_NEEDS_GROW(p,n): private helper macro for EXTEND().
@@ -397,83 +397,83 @@ Does not use C<TARG>.  See also C<L</XPUSHu>>, C<L</mPUSHu>> and C<L</PUSHu>>.
  * debugging mechanism which would otherwise whine
  */
 
-#  define EXTEND_SKIP(p, n)  \
-    STMT_START {\
-        EXTEND_HWM_SET(p, n);                   \
-        assert(!_EXTEND_NEEDS_GROW(p,n));       \
-    } STMT_END
+#  define EXTEND_SKIP(p, n)                     \
+       STMT_START {                             \
+           EXTEND_HWM_SET(p, n);                \
+           assert(!_EXTEND_NEEDS_GROW(p,n));    \
+       } STMT_END
 
 
-#  define EXTEND(p,n)    \
-    STMT_START {\
-     EXTEND_HWM_SET(p, n);                          \
-     if (UNLIKELY(_EXTEND_NEEDS_GROW(p,n))) {       \
-       sp = stack_grow(sp,p,_EXTEND_SAFE_N(n));     \
-       PERL_UNUSED_VAR(sp);                         \
-     }                                              \
-    } STMT_END
+#  define EXTEND(p,n)                                   \
+       STMT_START {                                     \
+           EXTEND_HWM_SET(p, n);                        \
+           if (UNLIKELY(_EXTEND_NEEDS_GROW(p,n))) {     \
+             sp = stack_grow(sp,p,_EXTEND_SAFE_N(n));   \
+             PERL_UNUSED_VAR(sp);                       \
+           }                                            \
+       } STMT_END
 /* Same thing, but update mark register too. */
-#  define MEXTEND(p,n)   \
-    STMT_START {\
-     EXTEND_HWM_SET(p, n);                          \
-     if (UNLIKELY(_EXTEND_NEEDS_GROW(p,n))) {       \
-       const SSize_t markoff = mark - PL_stack_base;\
-       sp = stack_grow(sp,p,_EXTEND_SAFE_N(n));     \
-       mark = PL_stack_base + markoff;              \
-       PERL_UNUSED_VAR(sp);                         \
-     }                                              \
-    } STMT_END
+#  define MEXTEND(p,n)                                      \
+       STMT_START {                                         \
+           EXTEND_HWM_SET(p, n);                            \
+           if (UNLIKELY(_EXTEND_NEEDS_GROW(p,n))) {         \
+             const SSize_t markoff = mark - PL_stack_base;  \
+             sp = stack_grow(sp,p,_EXTEND_SAFE_N(n));       \
+             mark = PL_stack_base + markoff;                \
+             PERL_UNUSED_VAR(sp);                           \
+           }                                                \
+       } STMT_END
 #endif
 
 
 /* set TARG to the IV value i. If do_taint is false,
  * assume that PL_tainted can never be true */
-#define TARGi(i, do_taint) \
-    STMT_START {                                                        \
-        IV TARGi_iv = i;                                                \
-        if (LIKELY(                                                     \
-              ((SvFLAGS(TARG) & (SVTYPEMASK|SVf_THINKFIRST|SVf_IVisUV)) == SVt_IV) \
-            & (do_taint ? !TAINT_get : 1)))                             \
-        {                                                               \
-            /* Cheap SvIOK_only().                                      \
-             * Assert that flags which SvIOK_only() would test or       \
-             * clear can't be set, because we're SVt_IV */              \
-            assert(!(SvFLAGS(TARG) &                                    \
-                (SVf_OOK|SVf_UTF8|(SVf_OK & ~(SVf_IOK|SVp_IOK)))));     \
-            SvFLAGS(TARG) |= (SVf_IOK|SVp_IOK);                         \
-            /* SvIV_set() where sv_any points to head */                \
-            TARG->sv_u.svu_iv = TARGi_iv;                               \
-        }                                                               \
-        else                                                            \
-            sv_setiv_mg(targ, TARGi_iv);                                \
+#define TARGi(i, do_taint)                                                          \
+    STMT_START {                                                                    \
+        IV TARGi_iv = i;                                                            \
+        if (LIKELY(                                                                 \
+              ((SvFLAGS(TARG) & (SVTYPEMASK|SVf_THINKFIRST|SVf_IVisUV)) == SVt_IV)  \
+            & (do_taint ? !TAINT_get : 1)))                                         \
+        {                                                                           \
+            /* Cheap SvIOK_only().                                                  \
+             * Assert that flags which SvIOK_only() would test or                   \
+             * clear can't be set, because we're SVt_IV */                          \
+            assert(!(SvFLAGS(TARG) &                                                \
+                (SVf_OOK|SVf_UTF8|(SVf_OK & ~(SVf_IOK|SVp_IOK)))));                 \
+            SvFLAGS(TARG) |= (SVf_IOK|SVp_IOK);                                     \
+            /* SvIV_set() where sv_any points to head */                            \
+            TARG->sv_u.svu_iv = TARGi_iv;                                           \
+        }                                                                           \
+        else                                                                        \
+            sv_setiv_mg(targ, TARGi_iv);                                            \
     } STMT_END
 
 /* set TARG to the UV value u. If do_taint is false,
  * assume that PL_tainted can never be true */
-#define TARGu(u, do_taint) \
-    STMT_START {                                                        \
-        UV TARGu_uv = u;                                                \
-        if (LIKELY(                                                     \
-              ((SvFLAGS(TARG) & (SVTYPEMASK|SVf_THINKFIRST|SVf_IVisUV)) == SVt_IV) \
-            & (do_taint ? !TAINT_get : 1)                               \
-            & (TARGu_uv <= (UV)IV_MAX)))                                \
-        {                                                               \
-            /* Cheap SvIOK_only().                                      \
-             * Assert that flags which SvIOK_only() would test or       \
-             * clear can't be set, because we're SVt_IV */              \
-            assert(!(SvFLAGS(TARG) &                                    \
-                (SVf_OOK|SVf_UTF8|(SVf_OK & ~(SVf_IOK|SVp_IOK)))));     \
-            SvFLAGS(TARG) |= (SVf_IOK|SVp_IOK);                         \
-            /* SvIV_set() where sv_any points to head */                \
-            TARG->sv_u.svu_iv = TARGu_uv;                               \
-        }                                                               \
-        else                                                            \
-            sv_setuv_mg(targ, TARGu_uv);                                \
+#define TARGu(u, do_taint)                                                          \
+    STMT_START {                                                                    \
+        UV TARGu_uv = u;                                                            \
+        if (LIKELY(                                                                 \
+              ((SvFLAGS(TARG) & (SVTYPEMASK|SVf_THINKFIRST|SVf_IVisUV)) == SVt_IV)  \
+            & (do_taint ? !TAINT_get : 1)                                           \
+            & (TARGu_uv <= (UV)IV_MAX)))                                            \
+        {                                                                           \
+            /* Cheap SvIOK_only().                                                  \
+             * Assert that flags which SvIOK_only() would test or                   \
+             * clear can't be set, because we're SVt_IV */                          \
+            assert(!(SvFLAGS(TARG) &                                                \
+                (SVf_OOK|SVf_UTF8|(SVf_OK & ~(SVf_IOK|SVp_IOK)))));                 \
+            SvFLAGS(TARG) |= (SVf_IOK|SVp_IOK);                                     \
+            /* SvIV_set() where sv_any points to head */                            \
+            TARG->sv_u.svu_iv = TARGu_uv;                                           \
+        }                                                                           \
+        else                                                                        \
+            sv_setuv_mg(targ, TARGu_uv);                                            \
     } STMT_END
 
 /* set TARG to the NV value n. If do_taint is false,
  * assume that PL_tainted can never be true */
-#define TARGn(n, do_taint) \
+#define TARGn(n, do_taint)                                              \
     STMT_START {                                                        \
         NV TARGn_nv = n;                                                \
         if (LIKELY(                                                     \
@@ -546,11 +546,11 @@ Does not use C<TARG>.  See also C<L</XPUSHu>>, C<L</mPUSHu>> and C<L</PUSHu>>.
 #define dPOPXnnrl(X)    NV right = POPn; NV left = CAT2(X,n)
 #define dPOPXiirl(X)    IV right = POPi; IV left = CAT2(X,i)
 
-#define USE_LEFT(sv) \
-        (SvOK(sv) || !(PL_op->op_flags & OPf_STACKED))
-#define dPOPXiirl_ul_nomg(X) \
-    IV right = (sp--, SvIV_nomg(TOPp1s));               \
-    SV *leftsv = CAT2(X,s);                             \
+#define USE_LEFT(sv)    \
+    (SvOK(sv) || !(PL_op->op_flags & OPf_STACKED))
+#define dPOPXiirl_ul_nomg(X)                \
+    IV right = (sp--, SvIV_nomg(TOPp1s));   \
+    SV *leftsv = CAT2(X,s);                 \
     IV left = USE_LEFT(leftsv) ? SvIV_nomg(leftsv) : 0
 
 #define dPOPPOPssrl     dPOPXssrl(POP)
@@ -559,11 +559,11 @@ Does not use C<TARG>.  See also C<L</XPUSHu>>, C<L</mPUSHu>> and C<L</PUSHu>>.
 
 #define dPOPTOPssrl     dPOPXssrl(TOP)
 #define dPOPTOPnnrl     dPOPXnnrl(TOP)
-#define dPOPTOPnnrl_nomg \
+#define dPOPTOPnnrl_nomg    \
     NV right = SvNV_nomg(TOPs); NV left = (sp--, SvNV_nomg(TOPs))
 #define dPOPTOPiirl     dPOPXiirl(TOP)
 #define dPOPTOPiirl_ul_nomg dPOPXiirl_ul_nomg(TOP)
-#define dPOPTOPiirl_nomg \
+#define dPOPTOPiirl_nomg    \
     IV right = SvIV_nomg(TOPs); IV left = (sp--, SvIV_nomg(TOPs))
 
 #define RETPUSHYES      RETURNX(PUSHs(&PL_sv_yes))
@@ -579,20 +579,20 @@ Does not use C<TARG>.  See also C<L</XPUSHu>>, C<L</mPUSHu>> and C<L</PUSHu>>.
 
 #define MAXARG          (PL_op->op_private & OPpARG4_MASK)
 
-#define SWITCHSTACK(f,t) \
-    STMT_START {                                                        \
-        AvFILLp(f) = sp - PL_stack_base;                                \
-        PL_stack_base = AvARRAY(t);                                     \
-        PL_stack_max = PL_stack_base + AvMAX(t);                        \
-        sp = PL_stack_sp = PL_stack_base + AvFILLp(t);                  \
-        PL_curstack = t;                                                \
+#define SWITCHSTACK(f,t)                                \
+    STMT_START {                                        \
+        AvFILLp(f) = sp - PL_stack_base;                \
+        PL_stack_base = AvARRAY(t);                     \
+        PL_stack_max = PL_stack_base + AvMAX(t);        \
+        sp = PL_stack_sp = PL_stack_base + AvFILLp(t);  \
+        PL_curstack = t;                                \
     } STMT_END
 
-#define EXTEND_MORTAL(n) \
-    STMT_START {                                                \
-        SSize_t eMiX = PL_tmps_ix + (n);                        \
-        if (UNLIKELY(eMiX >= PL_tmps_max))                      \
-            (void)Perl_tmps_grow_p(aTHX_ eMiX);                 \
+#define EXTEND_MORTAL(n)                        \
+    STMT_START {                                \
+        SSize_t eMiX = PL_tmps_ix + (n);        \
+        if (UNLIKELY(eMiX >= PL_tmps_max))      \
+            (void)Perl_tmps_grow_p(aTHX_ eMiX); \
     } STMT_END
 
 #define AMGf_noright    1
@@ -607,20 +607,20 @@ Does not use C<TARG>.  See also C<L</XPUSHu>>, C<L</mPUSHu>> and C<L</PUSHu>>.
 
 /* do SvGETMAGIC on the stack args before checking for overload */
 
-#define tryAMAGICun_MG(method, flags)  \
-    STMT_START {\
-        if ( UNLIKELY((SvFLAGS(TOPs) & (SVf_ROK|SVs_GMG))) \
+#define tryAMAGICun_MG(method, flags)                       \
+    STMT_START {                                            \
+        if ( UNLIKELY((SvFLAGS(TOPs) & (SVf_ROK|SVs_GMG)))  \
                 && Perl_try_amagic_un(aTHX_ method, flags)) \
-            return NORMAL; \
+            return NORMAL;                                  \
     } STMT_END
-#define tryAMAGICbin_MG(method, flags)  \
-    STMT_START {\
-        if ( UNLIKELY(((SvFLAGS(TOPm1s)|SvFLAGS(TOPs)) & (SVf_ROK|SVs_GMG))) \
-                && Perl_try_amagic_bin(aTHX_ method, flags)) \
-            return NORMAL; \
+#define tryAMAGICbin_MG(method, flags)                                          \
+    STMT_START {                                                                \
+        if ( UNLIKELY(((SvFLAGS(TOPm1s)|SvFLAGS(TOPs)) & (SVf_ROK|SVs_GMG)))    \
+                && Perl_try_amagic_bin(aTHX_ method, flags))                    \
+            return NORMAL;                                                      \
     } STMT_END
 
-#define AMG_CALLunary(sv,meth) \
+#define AMG_CALLunary(sv,meth)  \
     amagic_call(sv,&PL_sv_undef, meth, AMGf_noright | AMGf_unary)
 
 /* No longer used in core. Use AMG_CALLunary instead */
@@ -631,7 +631,7 @@ Does not use C<TARG>.  See also C<L</XPUSHu>>, C<L</mPUSHu>> and C<L</PUSHu>>.
         dSP;                                                    \
         SV *tmpsv;                                              \
         SV *arg= *sp;                                           \
-        U8 gimme = GIMME_V;                                    \
+        U8 gimme = GIMME_V;                                     \
         if (UNLIKELY(SvAMAGIC(arg) &&                           \
             (tmpsv = amagic_call(arg, &PL_sv_undef, meth,       \
                                  AMGf_want_list | AMGf_noright  \
@@ -664,7 +664,7 @@ Does not use C<TARG>.  See also C<L</XPUSHu>>, C<L</mPUSHu>> and C<L</PUSHu>>.
                 while (jump_o->op_type == OP_NULL)              \
                     jump_o = jump_o->op_next;                   \
                 assert(jump_o->op_type == OP_ENTERSUB);         \
-                (void)POPMARK;                                        \
+                (void)POPMARK;                                  \
                 return jump_o->op_next;                         \
             }                                                   \
             return NORMAL;                                      \
@@ -673,10 +673,10 @@ Does not use C<TARG>.  See also C<L</XPUSHu>>, C<L</mPUSHu>> and C<L</PUSHu>>.
 
 /* This is no longer used anywhere in the core. You might wish to consider
    calling amagic_deref_call() directly, as it has a cleaner interface.  */
-#define tryAMAGICunDEREF(meth)                                          \
-    STMT_START {                                                        \
-        sv = amagic_deref_call(*sp, CAT2(meth,_amg));                   \
-        SPAGAIN;                                                        \
+#define tryAMAGICunDEREF(meth)                          \
+    STMT_START {                                        \
+        sv = amagic_deref_call(*sp, CAT2(meth,_amg));   \
+        SPAGAIN;                                        \
     } STMT_END
 
 
@@ -690,14 +690,14 @@ True if this op will be the return value of an lvalue subroutine
 =cut */
 #define LVRET ((PL_op->op_private & OPpMAYBE_LVSUB) && is_lvalue_sub())
 
-#define SvCANEXISTDELETE(sv) \
- (!SvRMAGICAL(sv)            \
-  || !(mg = mg_find((const SV *) sv, PERL_MAGIC_tied))           \
-  || (   (stash = SvSTASH(SvRV(SvTIED_obj(MUTABLE_SV(sv), mg)))) \
-      && gv_fetchmethod_autoload(stash, "EXISTS", TRUE)          \
-      && gv_fetchmethod_autoload(stash, "DELETE", TRUE)          \
-     )                       \
-  )
+#define SvCANEXISTDELETE(sv)                                        \
+    (!SvRMAGICAL(sv)                                                \
+     || !(mg = mg_find((const SV *) sv, PERL_MAGIC_tied))           \
+     || (   (stash = SvSTASH(SvRV(SvTIED_obj(MUTABLE_SV(sv), mg)))) \
+         && gv_fetchmethod_autoload(stash, "EXISTS", TRUE)          \
+         && gv_fetchmethod_autoload(stash, "DELETE", TRUE)          \
+        )                                                           \
+     )
 
 #ifdef PERL_CORE
 
@@ -709,16 +709,16 @@ True if this op will be the return value of an lvalue subroutine
 #  define TIED_METHOD_SAY                       0x10
 
 /* Used in various places that need to dereference a glob or globref */
-#  define MAYBE_DEREF_GV_flags(sv,phlags)                          \
-    (                                                               \
-        (void)(((phlags) & SV_GMAGIC) && (SvGETMAGIC(sv),0)),        \
-        isGV_with_GP(sv)                                              \
-          ? (GV *)(sv)                                                \
-          : SvROK(sv) && SvTYPE(SvRV(sv)) <= SVt_PVLV &&               \
-            (SvGETMAGIC(SvRV(sv)), isGV_with_GP(SvRV(sv)))              \
-             ? (GV *)SvRV(sv)                                            \
-             : NULL                                                       \
-    )
+#  define MAYBE_DEREF_GV_flags(sv,phlags)                           \
+       (                                                            \
+           (void)(((phlags) & SV_GMAGIC) && (SvGETMAGIC(sv),0)),    \
+           isGV_with_GP(sv)                                         \
+             ? (GV *)(sv)                                           \
+             : SvROK(sv) && SvTYPE(SvRV(sv)) <= SVt_PVLV &&         \
+               (SvGETMAGIC(SvRV(sv)), isGV_with_GP(SvRV(sv)))       \
+                ? (GV *)SvRV(sv)                                    \
+                : NULL                                              \
+       )
 #  define MAYBE_DEREF_GV(sv)      MAYBE_DEREF_GV_flags(sv,SV_GMAGIC)
 #  define MAYBE_DEREF_GV_nomg(sv) MAYBE_DEREF_GV_flags(sv,0)
 

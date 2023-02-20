@@ -41,11 +41,11 @@ static const char * Perl_prescan_version2(pTHX_ const char *s, bool strict, cons
 #  define VCMP(a,b)             Perl_vcmp2(aTHX_ a,b)
 #  define PRESCAN_VERSION(a,b,c,d,e,f,g)        Perl_prescan_version2(aTHX_ a,b,c,d,e,f,g)
 #  undef is_LAX_VERSION
-#  define is_LAX_VERSION(a,b) \
-        (a != Perl_prescan_version2(aTHX_ a, FALSE, b, NULL, NULL, NULL, NULL))
+#  define is_LAX_VERSION(a,b)   \
+       (a != Perl_prescan_version2(aTHX_ a, FALSE, b, NULL, NULL, NULL, NULL))
 #  undef is_STRICT_VERSION
-#  define is_STRICT_VERSION(a,b) \
-        (a != Perl_prescan_version2(aTHX_ a, TRUE, b, NULL, NULL, NULL, NULL))
+#  define is_STRICT_VERSION(a,b)    \
+       (a != Perl_prescan_version2(aTHX_ a, TRUE, b, NULL, NULL, NULL, NULL))
 
 #else
 
@@ -71,44 +71,44 @@ const char * Perl_prescan_version(pTHX_ const char *s, bool strict, const char**
 #  define PRESCAN_VERSION(a,b,c,d,e,f,g)        Perl_prescan_version(aTHX_ a,b,c,d,e,f,g)
 #  ifndef is_LAX_VERSION
 #    define is_LAX_VERSION(a,b) \
-        (a != Perl_prescan_version(aTHX_ a, FALSE, b, NULL, NULL, NULL, NULL))
+         (a != Perl_prescan_version(aTHX_ a, FALSE, b, NULL, NULL, NULL, NULL))
 #  endif
 #  ifndef is_STRICT_VERSION
-#    define is_STRICT_VERSION(a,b) \
-        (a != Perl_prescan_version(aTHX_ a, TRUE, b, NULL, NULL, NULL, NULL))
+#    define is_STRICT_VERSION(a,b)  \
+         (a != Perl_prescan_version(aTHX_ a, TRUE, b, NULL, NULL, NULL, NULL))
 #  endif
 
 #endif
 
 #if PERL_VERSION_LT(5,11,4)
 #  define BADVERSION(a,b,c) \
-        if (b) { \
-            *b = c; \
-        } \
-        return a;
+       if (b) {             \
+           *b = c;          \
+       }                    \
+       return a;
 
-#  define PERL_ARGS_ASSERT_PRESCAN_VERSION      \
-        assert(s); assert(sqv); assert(ssaw_decimal);\
-        assert(swidth); assert(salpha);
+#  define PERL_ARGS_ASSERT_PRESCAN_VERSION              \
+       assert(s); assert(sqv); assert(ssaw_decimal);    \
+       assert(swidth); assert(salpha);
 
 #  define PERL_ARGS_ASSERT_SCAN_VERSION \
-        assert(s); assert(rv)
+       assert(s); assert(rv)
 #  define PERL_ARGS_ASSERT_NEW_VERSION  \
-        assert(ver)
+       assert(ver)
 #  define PERL_ARGS_ASSERT_UPG_VERSION  \
-        assert(ver)
-#  define PERL_ARGS_ASSERT_VVERIFY      \
-        assert(vs)
-#  define PERL_ARGS_ASSERT_VNUMIFY      \
-        assert(vs)
-#  define PERL_ARGS_ASSERT_VNORMAL      \
-        assert(vs)
+       assert(ver)
+#  define PERL_ARGS_ASSERT_VVERIFY  \
+       assert(vs)
+#  define PERL_ARGS_ASSERT_VNUMIFY  \
+       assert(vs)
+#  define PERL_ARGS_ASSERT_VNORMAL  \
+       assert(vs)
 #  define PERL_ARGS_ASSERT_VSTRINGIFY   \
-        assert(vs)
+       assert(vs)
 #  define PERL_ARGS_ASSERT_VCMP \
-        assert(lhv); assert(rhv)
-#  define PERL_ARGS_ASSERT_CK_WARNER      \
-        assert(pat)
+       assert(lhv); assert(rhv)
+#  define PERL_ARGS_ASSERT_CK_WARNER    \
+       assert(pat)
 #endif
 
 /* ex: set ro: */

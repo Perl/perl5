@@ -47,29 +47,29 @@ typedef PERL_BITFIELD16 Optype;
 #ifdef BASEOP_DEFINITION
 #define BASEOP BASEOP_DEFINITION
 #else
-#define BASEOP                          \
-    OP*         op_next;                \
-    OP*         op_sibparent;           \
-    OP*         (*op_ppaddr)(pTHX);     \
-    PADOFFSET   op_targ;                \
-    PERL_BITFIELD16 op_type:9;          \
-    PERL_BITFIELD16 op_opt:1;           \
-    PERL_BITFIELD16 op_slabbed:1;       \
-    PERL_BITFIELD16 op_savefree:1;      \
-    PERL_BITFIELD16 op_static:1;        \
-    PERL_BITFIELD16 op_folded:1;        \
-    PERL_BITFIELD16 op_moresib:1;       \
-    PERL_BITFIELD16 op_spare:1;         \
-    U8          op_flags;               \
+#define BASEOP                      \
+    OP*         op_next;            \
+    OP*         op_sibparent;       \
+    OP*         (*op_ppaddr)(pTHX); \
+    PADOFFSET   op_targ;            \
+    PERL_BITFIELD16 op_type:9;      \
+    PERL_BITFIELD16 op_opt:1;       \
+    PERL_BITFIELD16 op_slabbed:1;   \
+    PERL_BITFIELD16 op_savefree:1;  \
+    PERL_BITFIELD16 op_static:1;    \
+    PERL_BITFIELD16 op_folded:1;    \
+    PERL_BITFIELD16 op_moresib:1;   \
+    PERL_BITFIELD16 op_spare:1;     \
+    U8          op_flags;           \
     U8          op_private;
 #endif
 
-#define OpTYPE_set(o,type)                      \
-    STMT_START {                                \
-        OP *o_ = (OP *)o;                       \
-        OPCODE type_ = type;                    \
-        o_->op_type = type_;                    \
-        o_->op_ppaddr = PL_ppaddr[type_];       \
+#define OpTYPE_set(o,type)                  \
+    STMT_START {                            \
+        OP *o_ = (OP *)o;                   \
+        OPCODE type_ = type;                \
+        o_->op_type = type_;                \
+        o_->op_ppaddr = PL_ppaddr[type_];   \
     } STMT_END
 
 /* If op_type:9 is changed to :10, also change cx_pusheval()
@@ -78,8 +78,8 @@ typedef PERL_BITFIELD16 Optype;
    types too to let VC pack them into the same 4 byte integer.*/
 
 /* for efficiency, requires OPf_WANT_VOID == G_VOID etc */
-#define OP_GIMME(op,dfl) \
-        (((op)->op_flags & OPf_WANT) ? ((op)->op_flags & OPf_WANT) : dfl)
+#define OP_GIMME(op,dfl)    \
+    (((op)->op_flags & OPf_WANT) ? ((op)->op_flags & OPf_WANT) : dfl)
 
 #define OP_GIMME_REVERSE(flags) ((flags) & G_WANT)
 
@@ -174,12 +174,12 @@ Deprecated.  Use C<GIMME_V> instead.
 #define OPf_KNOW        OPf_WANT
 
 #if !defined(PERL_CORE) && !defined(PERL_EXT)
-#  define GIMME \
-          (PL_op->op_flags & OPf_WANT                                   \
-           ? ((PL_op->op_flags & OPf_WANT) == OPf_WANT_LIST             \
-              ? G_LIST                                                  \
-              : G_SCALAR)                                               \
-           : dowantarray())
+#  define GIMME                                             \
+       (PL_op->op_flags & OPf_WANT                          \
+        ? ((PL_op->op_flags & OPf_WANT) == OPf_WANT_LIST    \
+           ? G_LIST                                         \
+           : G_SCALAR)                                      \
+        : dowantarray())
 #endif
 
 
@@ -297,8 +297,8 @@ struct pmop {
 };
 
 #ifdef USE_ITHREADS
-#define PM_GETRE(o)      \
-    (SvTYPE(PL_regex_pad[(o)->op_pmoffset]) == SVt_REGEXP\
+#define PM_GETRE(o)                                         \
+    (SvTYPE(PL_regex_pad[(o)->op_pmoffset]) == SVt_REGEXP   \
      ? (REGEXP*)(PL_regex_pad[(o)->op_pmoffset]) : NULL)
 /* The assignment is just to enforce type safety (or at least get a warning).
  */
@@ -308,10 +308,10 @@ struct pmop {
    more complex, and we'd have an AV with (SV*)NULL in it, which feels bad */
 /* BEWARE - something that calls this macro passes (r) which has a side
    effect.  */
-#define PM_SETRE(o,r)    \
-    STMT_START {\
-        REGEXP *const _pm_setre = (r);              \
-        assert(_pm_setre);                          \
+#define PM_SETRE(o,r)                                           \
+    STMT_START {                                                \
+        REGEXP *const _pm_setre = (r);                          \
+        assert(_pm_setre);                                      \
         PL_regex_pad[(o)->op_pmoffset] = MUTABLE_SV(_pm_setre); \
     } STMT_END
 #else
@@ -410,23 +410,23 @@ struct pmop {
 
 #ifdef USE_ITHREADS
 
-#  define PmopSTASH(o)          \
-    ((o)->op_pmflags & PMf_ONCE\
-     ? PL_stashpad[(o)->op_pmstashstartu.op_pmstashoff]   \
-     : NULL)
-#  define PmopSTASH_set(o,hv)   \
-        (assert_((o)->op_pmflags & PMf_ONCE)                            \
-         (o)->op_pmstashstartu.op_pmstashoff =                          \
-            (hv) ? alloccopstash(hv) : 0)
+#  define PmopSTASH(o)                                      \
+       ((o)->op_pmflags & PMf_ONCE                          \
+        ? PL_stashpad[(o)->op_pmstashstartu.op_pmstashoff]  \
+        : NULL)
+#  define PmopSTASH_set(o,hv)                   \
+       (assert_((o)->op_pmflags & PMf_ONCE)     \
+        (o)->op_pmstashstartu.op_pmstashoff =   \
+           (hv) ? alloccopstash(hv) : 0)
 #else
-#  define PmopSTASH(o)                                                  \
-    (((o)->op_pmflags & PMf_ONCE) ? (o)->op_pmstashstartu.op_pmstash : NULL)
+#  define PmopSTASH(o)  \
+       (((o)->op_pmflags & PMf_ONCE) ? (o)->op_pmstashstartu.op_pmstash : NULL)
 #  if defined (DEBUGGING) && defined(PERL_USE_GCC_BRACE_GROUPS)
-#    define PmopSTASH_set(o,hv)          \
-    ({\
-        assert((o)->op_pmflags & PMf_ONCE);                             \
-        ((o)->op_pmstashstartu.op_pmstash = (hv));                      \
-    })
+#    define PmopSTASH_set(o,hv)                         \
+         ({                                             \
+             assert((o)->op_pmflags & PMf_ONCE);        \
+             ((o)->op_pmstashstartu.op_pmstash = (hv)); \
+         })
 #  else
 #    define PmopSTASH_set(o,hv) ((o)->op_pmstashstartu.op_pmstash = (hv))
 #  endif
@@ -534,18 +534,18 @@ typedef enum {
 #  define       cGVOPx_gv(o)    ((GV*)PAD_SVl(cPADOPx(o)->op_padix))
 #  ifndef PERL_CORE
 #    define     IS_PADGV(v)     (v && isGV(v))
-#    define     IS_PADCONST(v) \
-        (v && (SvREADONLY(v) || (SvIsCOW(v) && !SvLEN(v))))
+#    define     IS_PADCONST(v)  \
+         (v && (SvREADONLY(v) || (SvIsCOW(v) && !SvLEN(v))))
 #  endif
-#  define       cSVOPx_sv(v)     \
-    (cSVOPx(v)->op_sv\
-     ? cSVOPx(v)->op_sv : PAD_SVl((v)->op_targ))
-#  define       cSVOPx_svp(v)    \
-    (cSVOPx(v)->op_sv\
-     ? &cSVOPx(v)->op_sv : &PAD_SVl((v)->op_targ))
-#  define       cMETHOPx_meth(v)  \
-    (cMETHOPx(v)->op_u.op_meth_sv\
-     ? cMETHOPx(v)->op_u.op_meth_sv : PAD_SVl((v)->op_targ))
+#  define       cSVOPx_sv(v)    \
+       (cSVOPx(v)->op_sv        \
+        ? cSVOPx(v)->op_sv : PAD_SVl((v)->op_targ))
+#  define       cSVOPx_svp(v)   \
+       (cSVOPx(v)->op_sv        \
+        ? &cSVOPx(v)->op_sv : &PAD_SVl((v)->op_targ))
+#  define       cMETHOPx_meth(v)        \
+       (cMETHOPx(v)->op_u.op_meth_sv    \
+        ? cMETHOPx(v)->op_u.op_meth_sv : PAD_SVl((v)->op_targ))
 #  define       cMETHOPx_rclass(v) PAD_SVl(cMETHOPx(v)->op_rclass_targ)
 #else
 #  define       cGVOPx_gv(o)    ((GV*)cSVOPx(o)->op_sv)
@@ -695,8 +695,8 @@ least an C<UNOP>.
 
 /* no longer used anywhere in core */
 #ifndef PERL_CORE
-#define cv_ckproto(cv, gv, p) \
-   cv_ckproto_len_flags((cv), (gv), (p), (p) ? strlen(p) : 0, 0)
+#define cv_ckproto(cv, gv, p)   \
+    cv_ckproto_len_flags((cv), (gv), (p), (p) ? strlen(p) : 0, 0)
 #endif
 
 #ifdef PERL_CORE
@@ -707,10 +707,10 @@ least an C<UNOP>.
 #include "reentr.h"
 #endif
 
-#define NewOp(m,var,c,type)     \
-        (var = (type *) Perl_Slab_Alloc(aTHX_ c*sizeof(type)))
-#define NewOpSz(m,var,size)     \
-        (var = (OP *) Perl_Slab_Alloc(aTHX_ size))
+#define NewOp(m,var,c,type) \
+    (var = (type *) Perl_Slab_Alloc(aTHX_ c*sizeof(type)))
+#define NewOpSz(m,var,size) \
+    (var = (OP *) Perl_Slab_Alloc(aTHX_ size))
 #define FreeOp(p) Perl_Slab_Free(aTHX_ p)
 
 /*
@@ -758,29 +758,29 @@ struct opslab {
 };
 
 # define OPSLOT_HEADER          STRUCT_OFFSET(OPSLOT, opslot_op)
-# define OpSLOT(o)               \
-    (assert_(o->op_slabbed)\
-     (OPSLOT *)(((char *)o)-OPSLOT_HEADER))
+# define OpSLOT(o)              \
+      (assert_(o->op_slabbed)   \
+       (OPSLOT *)(((char *)o)-OPSLOT_HEADER))
 
 /* the slab that owns this op */
-# define OpMySLAB(o) \
-    ((OPSLAB*)((char *)((I32**)OpSLOT(o) - OpSLOT(o)->opslot_offset)-STRUCT_OFFSET(struct opslab, opslab_slots)))
+# define OpMySLAB(o)    \
+      ((OPSLAB*)((char *)((I32**)OpSLOT(o) - OpSLOT(o)->opslot_offset)-STRUCT_OFFSET(struct opslab, opslab_slots)))
 /* the first (head) opslab of the chain in which this op is allocated */
-# define OpSLAB(o) \
-    (OpMySLAB(o)->opslab_head)
+# define OpSLAB(o)  \
+      (OpMySLAB(o)->opslab_head)
 /* calculate the slot given the owner slab and an offset */
 #define OpSLOToff(slab, offset) \
     ((OPSLOT*)(((I32 **)&(slab)->opslab_slots)+(offset)))
 
-# define OpslabREFCNT_dec(slab)      \
-        (((slab)->opslab_refcnt == 1) \
-         ? opslab_free_nopad(slab)     \
-         : (void)--(slab)->opslab_refcnt)
+# define OpslabREFCNT_dec(slab)     \
+      (((slab)->opslab_refcnt == 1) \
+       ? opslab_free_nopad(slab)    \
+       : (void)--(slab)->opslab_refcnt)
   /* Variant that does not null out the pads */
-# define OpslabREFCNT_dec_padok(slab) \
-        (((slab)->opslab_refcnt == 1)  \
-         ? opslab_free(slab)            \
-         : (void)--(slab)->opslab_refcnt)
+# define OpslabREFCNT_dec_padok(slab)   \
+      (((slab)->opslab_refcnt == 1)     \
+       ? opslab_free(slab)              \
+       : (void)--(slab)->opslab_refcnt)
 #endif
 
 struct block_hooks {
@@ -836,41 +836,41 @@ preprocessing token; the type of C<arg> depends on C<which>.
 #define BhkENTRY(hk, which) \
     ((BhkFLAGS(hk) & BHKf_ ## which) ? ((hk)->which) : NULL)
 
-#define BhkENABLE(hk, which) \
-    STMT_START { \
+#define BhkENABLE(hk, which)            \
+    STMT_START {                        \
         BhkFLAGS(hk) |= BHKf_ ## which; \
-        assert(BhkENTRY(hk, which)); \
+        assert(BhkENTRY(hk, which));    \
     } STMT_END
 
-#define BhkDISABLE(hk, which) \
-    STMT_START { \
-        BhkFLAGS(hk) &= ~(BHKf_ ## which); \
+#define BhkDISABLE(hk, which)               \
+    STMT_START {                            \
+        BhkFLAGS(hk) &= ~(BHKf_ ## which);  \
     } STMT_END
 
-#define BhkENTRY_set(hk, which, ptr) \
-    STMT_START { \
-        (hk)->which = ptr; \
-        BhkENABLE(hk, which); \
+#define BhkENTRY_set(hk, which, ptr)    \
+    STMT_START {                        \
+        (hk)->which = ptr;              \
+        BhkENABLE(hk, which);           \
     } STMT_END
 
-#define CALL_BLOCK_HOOKS(which, arg) \
-    STMT_START { \
-        if (PL_blockhooks) { \
-            SSize_t i; \
-            for (i = av_top_index(PL_blockhooks); i >= 0; i--) { \
-                SV *sv = AvARRAY(PL_blockhooks)[i]; \
-                BHK *hk; \
-                \
-                assert(SvIOK(sv)); \
-                if (SvUOK(sv)) \
-                    hk = INT2PTR(BHK *, SvUVX(sv)); \
-                else \
-                    hk = INT2PTR(BHK *, SvIVX(sv)); \
-                \
-                if (BhkENTRY(hk, which)) \
-                    BhkENTRY(hk, which)(aTHX_ arg); \
-            } \
-        } \
+#define CALL_BLOCK_HOOKS(which, arg)                                \
+    STMT_START {                                                    \
+        if (PL_blockhooks) {                                        \
+            SSize_t i;                                              \
+            for (i = av_top_index(PL_blockhooks); i >= 0; i--) {    \
+                SV *sv = AvARRAY(PL_blockhooks)[i];                 \
+                BHK *hk;                                            \
+                                                                    \
+                assert(SvIOK(sv));                                  \
+                if (SvUOK(sv))                                      \
+                    hk = INT2PTR(BHK *, SvUVX(sv));                 \
+                else                                                \
+                    hk = INT2PTR(BHK *, SvIVX(sv));                 \
+                                                                    \
+                if (BhkENTRY(hk, which))                            \
+                    BhkENTRY(hk, which)(aTHX_ arg);                 \
+            }                                                       \
+        }                                                           \
     } STMT_END
 
 /* flags for rv2cv_op_cv */
@@ -963,26 +963,26 @@ typedef enum {
 #define XOPd_xop_class  OA_BASEOP
 #define XOPd_xop_peep   ((Perl_cpeep_t)0)
 
-#define XopENTRY_set(xop, which, to) \
-    STMT_START { \
-        (xop)->which = (to); \
+#define XopENTRY_set(xop, which, to)        \
+    STMT_START {                            \
+        (xop)->which = (to);                \
         (xop)->xop_flags |= XOPf_ ## which; \
     } STMT_END
 
-#define XopENTRY(xop, which) \
+#define XopENTRY(xop, which)    \
     ((XopFLAGS(xop) & XOPf_ ## which) ? (xop)->which : XOPd_ ## which)
 
-#define XopENTRYCUSTOM(o, which) \
+#define XopENTRYCUSTOM(o, which)    \
     (Perl_custom_op_get_field(aTHX_ o, XOPe_ ## which).which)
 
 #define XopDISABLE(xop, which) ((xop)->xop_flags &= ~XOPf_ ## which)
-#define XopENABLE(xop, which) \
-    STMT_START { \
+#define XopENABLE(xop, which)               \
+    STMT_START {                            \
         (xop)->xop_flags |= XOPf_ ## which; \
-        assert(XopENTRY(xop, which)); \
+        assert(XopENTRY(xop, which));       \
     } STMT_END
 
-#define Perl_custom_op_xop(x) \
+#define Perl_custom_op_xop(x)   \
     (Perl_custom_op_get_field(x, XOPe_xop_ptr).xop_ptr)
 
 /*
@@ -1048,16 +1048,16 @@ C<sib> is non-null. For a higher-level interface, see C<L</op_sibling_splice>>.
 =cut
 */
 
-#define OP_NAME(o)  \
-    ((o)->op_type == OP_CUSTOM\
-     ? XopENTRYCUSTOM(o, xop_name) \
+#define OP_NAME(o)                  \
+    ((o)->op_type == OP_CUSTOM      \
+     ? XopENTRYCUSTOM(o, xop_name)  \
      : PL_op_name[(o)->op_type])
-#define OP_DESC(o)  \
-    ((o)->op_type == OP_CUSTOM\
-     ? XopENTRYCUSTOM(o, xop_desc) \
+#define OP_DESC(o)                  \
+    ((o)->op_type == OP_CUSTOM      \
+     ? XopENTRYCUSTOM(o, xop_desc)  \
      : PL_op_desc[(o)->op_type])
-#define OP_CLASS(o)  \
-    ((o)->op_type == OP_CUSTOM\
+#define OP_CLASS(o)                 \
+    ((o)->op_type == OP_CUSTOM      \
      ? XopENTRYCUSTOM(o, xop_class) \
      : (PL_opargs[(o)->op_type] & OA_CLASS_MASK))
 
@@ -1066,19 +1066,19 @@ C<sib> is non-null. For a higher-level interface, see C<L</op_sibling_splice>>.
 #define OP_TYPE_ISNT(o, type) ((o) && (o)->op_type != (type))
 #define OP_TYPE_ISNT_NN(o, type) ((o)->op_type != (type))
 
-#define OP_TYPE_IS_OR_WAS_NN(o, type) \
-    ( ((o)->op_type == OP_NULL \
-       ? (o)->op_targ \
-       : (o)->op_type) \
+#define OP_TYPE_IS_OR_WAS_NN(o, type)   \
+    ( ((o)->op_type == OP_NULL          \
+       ? (o)->op_targ                   \
+       : (o)->op_type)                  \
       == (type) )
 
-#define OP_TYPE_IS_OR_WAS(o, type) \
+#define OP_TYPE_IS_OR_WAS(o, type)  \
     ( (o) && OP_TYPE_IS_OR_WAS_NN(o, type) )
 
-#define OP_TYPE_ISNT_AND_WASNT_NN(o, type) \
-    ( ((o)->op_type == OP_NULL \
-       ? (o)->op_targ \
-       : (o)->op_type) \
+#define OP_TYPE_ISNT_AND_WASNT_NN(o, type)  \
+    ( ((o)->op_type == OP_NULL              \
+       ? (o)->op_targ                       \
+       : (o)->op_type)                      \
       != (type) )
 
 #define OP_TYPE_ISNT_AND_WASNT(o, type) \
@@ -1090,9 +1090,9 @@ C<sib> is non-null. For a higher-level interface, see C<L</op_sibling_splice>>.
 #define OpHAS_SIBLING(o)        (cBOOL((o)->op_moresib))
 #define OpSIBLING(o)            (0 + (o)->op_moresib ? (o)->op_sibparent : NULL)
 #define OpMORESIB_set(o, sib) ((o)->op_moresib = 1, (o)->op_sibparent = (sib))
-#define OpLASTSIB_set(o, parent) \
+#define OpLASTSIB_set(o, parent)    \
     ((o)->op_moresib = 0, (o)->op_sibparent = (parent))
-#define OpMAYBESIB_set(o, sib, parent) \
+#define OpMAYBESIB_set(o, sib, parent)  \
     ((o)->op_sibparent = ((o)->op_moresib = cBOOL(sib)) ? (sib) : (parent))
 
 #if !defined(PERL_CORE) && !defined(PERL_EXT)
@@ -1156,9 +1156,9 @@ C<sib> is non-null. For a higher-level interface, see C<L</op_sibling_splice>>.
 #define MDEREF_SHIFT           7
 
 #if defined(PERL_IN_DOOP_C) || defined(PERL_IN_PP_C)
-#   define FATAL_ABOVE_FF_MSG                                       \
-      "Use of strings with code points over 0xFF as arguments to "  \
-      "%s operator is not allowed"
+#   define FATAL_ABOVE_FF_MSG                                           \
+        "Use of strings with code points over 0xFF as arguments to "    \
+        "%s operator is not allowed"
 #endif
 #if defined(PERL_IN_OP_C) || defined(PERL_IN_DOOP_C) || defined(PERL_IN_PERL_C)
 #  define TR_UNMAPPED           (UV)-1

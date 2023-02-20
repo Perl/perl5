@@ -14,13 +14,13 @@
 #endif
 
 #ifdef WIN32
-#  define PERL_SYS_INIT_BODY(c,v)                                       \
-      MALLOC_CHECK_TAINT2(*c,*v) Perl_win32_init(c,v); PERLIO_INIT
+#  define PERL_SYS_INIT_BODY(c,v)   \
+       MALLOC_CHECK_TAINT2(*c,*v) Perl_win32_init(c,v); PERLIO_INIT
 #  define PERL_SYS_TERM_BODY()   Perl_win32_term()
 #  define BIT_BUCKET "nul"
 #else
-#  define PERL_SYS_INIT_BODY(c,v)               \
-    MALLOC_CHECK_TAINT2(*c,*v); PERLIO_INIT
+#  define PERL_SYS_INIT_BODY(c,v)   \
+       MALLOC_CHECK_TAINT2(*c,*v); PERLIO_INIT
 #  define BIT_BUCKET "\\dev\\nul" /* "wanna be like, umm, Newlined, or somethin?" */
 #endif
 
@@ -30,11 +30,11 @@
  * BEWARE that using PerlIO in these will be using freed memory, so may appear
  * to work, but must NOT be retained in production code. */
 #ifndef PERL_SYS_TERM_BODY
-#  define PERL_SYS_TERM_BODY()                         \
-    ENV_TERM; USER_PROP_MUTEX_TERM; LOCALE_TERM;       \
-    HINTS_REFCNT_TERM; KEYWORD_PLUGIN_MUTEX_TERM;      \
-    OP_CHECK_MUTEX_TERM; OP_REFCNT_TERM;               \
-    PERLIO_TERM; MALLOC_TERM;
+#  define PERL_SYS_TERM_BODY()                          \
+       ENV_TERM; USER_PROP_MUTEX_TERM; LOCALE_TERM;     \
+       HINTS_REFCNT_TERM; KEYWORD_PLUGIN_MUTEX_TERM;    \
+       OP_CHECK_MUTEX_TERM; OP_REFCNT_TERM;             \
+       PERLIO_TERM; MALLOC_TERM;
 #endif
 #define dXSUB_SYS dNOOP
 

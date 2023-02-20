@@ -190,7 +190,7 @@ typedef struct regexp {
 
 #define RXp_OFFS_END(rx,n)     ((rx)->offs[(n)].end)
 
-#define RXp_OFFS_VALID(rx,n) \
+#define RXp_OFFS_VALID(rx,n)    \
     ( (rx)->offs[(n)].end != -1 && (rx)->offs[(n)].start != -1 )
 
 #define RX_OFFS_START(rx_sv,n)  RXp_OFFS_START(ReANY(rx_sv),n)
@@ -325,24 +325,24 @@ and check for NULL.
 
 #  define RXf_PMf_STD_PMMOD     (RXf_PMf_MULTILINE|RXf_PMf_SINGLELINE|RXf_PMf_FOLD|RXf_PMf_EXTENDED|RXf_PMf_EXTENDED_MORE|RXf_PMf_NOCAPTURE)
 
-#  define CASE_STD_PMMOD_FLAGS_PARSE_SET(pmfl, x_count)                       \
-    case IGNORE_PAT_MOD:    *(pmfl) |= RXf_PMf_FOLD;       break;           \
-    case MULTILINE_PAT_MOD: *(pmfl) |= RXf_PMf_MULTILINE;  break;           \
-    case SINGLE_PAT_MOD:    *(pmfl) |= RXf_PMf_SINGLELINE; break;           \
-    case XTENDED_PAT_MOD:   if (x_count == 0) {                             \
-                                *(pmfl) |= RXf_PMf_EXTENDED;                \
-                                *(pmfl) &= ~RXf_PMf_EXTENDED_MORE;          \
-                            }                                               \
-                            else {                                          \
-                                *(pmfl) |= RXf_PMf_EXTENDED                 \
-                                          |RXf_PMf_EXTENDED_MORE;           \
-                            }                                               \
-                            (x_count)++; break;                             \
-    case NOCAPTURE_PAT_MOD: *(pmfl) |= RXf_PMf_NOCAPTURE; break;
+#  define CASE_STD_PMMOD_FLAGS_PARSE_SET(pmfl, x_count)                 \
+       case IGNORE_PAT_MOD:    *(pmfl) |= RXf_PMf_FOLD;       break;    \
+       case MULTILINE_PAT_MOD: *(pmfl) |= RXf_PMf_MULTILINE;  break;    \
+       case SINGLE_PAT_MOD:    *(pmfl) |= RXf_PMf_SINGLELINE; break;    \
+       case XTENDED_PAT_MOD:   if (x_count == 0) {                      \
+                                   *(pmfl) |= RXf_PMf_EXTENDED;         \
+                                   *(pmfl) &= ~RXf_PMf_EXTENDED_MORE;   \
+                               }                                        \
+                               else {                                   \
+                                   *(pmfl) |= RXf_PMf_EXTENDED          \
+                                             |RXf_PMf_EXTENDED_MORE;    \
+                               }                                        \
+                               (x_count)++; break;                      \
+       case NOCAPTURE_PAT_MOD: *(pmfl) |= RXf_PMf_NOCAPTURE; break;
 
 /* Note, includes charset ones, assumes 0 is the default for them */
-#  define STD_PMMOD_FLAGS_CLEAR(pmfl)                        \
-    *(pmfl) &= ~(RXf_PMf_FOLD|RXf_PMf_MULTILINE|RXf_PMf_SINGLELINE|RXf_PMf_EXTENDED|RXf_PMf_EXTENDED_MORE|RXf_PMf_CHARSET|RXf_PMf_NOCAPTURE)
+#  define STD_PMMOD_FLAGS_CLEAR(pmfl)   \
+       *(pmfl) &= ~(RXf_PMf_FOLD|RXf_PMf_MULTILINE|RXf_PMf_SINGLELINE|RXf_PMf_EXTENDED|RXf_PMf_EXTENDED_MORE|RXf_PMf_CHARSET|RXf_PMf_NOCAPTURE)
 
 /* chars and strings used as regex pattern modifiers
  * Singular is a 'c'har, plural is a "string"
@@ -517,10 +517,10 @@ and check for NULL.
 
 #  define RXp_HAS_CUTGROUP(prog)          ((prog)->intflags & PREGf_CUTGROUP_SEEN)
 
-#  define RX_MATCH_TAINTED_set(rx_sv, t)   \
-    ((t)\
-                                        ? RX_MATCH_TAINTED_on(rx_sv) \
-                                        : RX_MATCH_TAINTED_off(rx_sv))
+#  define RX_MATCH_TAINTED_set(rx_sv, t)                                \
+       ((t)                                                             \
+                                           ? RX_MATCH_TAINTED_on(rx_sv) \
+                                           : RX_MATCH_TAINTED_off(rx_sv))
 
 #  define RXp_MATCH_COPIED(prog)          (RXp_EXTFLAGS(prog) & RXf_COPY_DONE)
 #  define RX_MATCH_COPIED(rx_sv)          (RX_EXTFLAGS(rx_sv) & RXf_COPY_DONE)
@@ -528,27 +528,27 @@ and check for NULL.
 #  define RX_MATCH_COPIED_on(rx_sv)       (RX_EXTFLAGS(rx_sv) |= RXf_COPY_DONE)
 #  define RXp_MATCH_COPIED_off(prog)      (RXp_EXTFLAGS(prog) &= ~RXf_COPY_DONE)
 #  define RX_MATCH_COPIED_off(rx_sv)      (RX_EXTFLAGS(rx_sv) &= ~RXf_COPY_DONE)
-#  define RX_MATCH_COPIED_set(rx_sv,t)     \
-    ((t)\
-                                         ? RX_MATCH_COPIED_on(rx_sv) \
-                                         : RX_MATCH_COPIED_off(rx_sv))
+#  define RX_MATCH_COPIED_set(rx_sv,t)                                  \
+       ((t)                                                             \
+                                            ? RX_MATCH_COPIED_on(rx_sv) \
+                                            : RX_MATCH_COPIED_off(rx_sv))
 
 #  define RXp_EXTFLAGS(rx)                ((rx)->extflags)
 #  define RXp_COMPFLAGS(rx)               ((rx)->compflags)
 
 /* For source compatibility. We used to store these explicitly.  */
-#  define RX_PRECOMP(rx_sv)               \
-    (RX_WRAPPED(rx_sv)\
-       + ReANY(rx_sv)->pre_prefix)
-#  define RX_PRECOMP_const(rx_sv)         \
-    (RX_WRAPPED_const(rx_sv)\
-       + ReANY(rx_sv)->pre_prefix)
+#  define RX_PRECOMP(rx_sv) \
+       (RX_WRAPPED(rx_sv)   \
+          + ReANY(rx_sv)->pre_prefix)
+#  define RX_PRECOMP_const(rx_sv)   \
+       (RX_WRAPPED_const(rx_sv)     \
+          + ReANY(rx_sv)->pre_prefix)
 /* FIXME? Are we hardcoding too much here and constraining plugin extension
    writers? Specifically, the value 1 assumes that the wrapped version always
    has exactly one character at the end, a ')'. Will that always be true?  */
-#  define RX_PRELEN(rx_sv)                 \
-    (RX_WRAPLEN(rx_sv)\
-      - ReANY(rx_sv)->pre_prefix - 1)
+#  define RX_PRELEN(rx_sv)  \
+       (RX_WRAPLEN(rx_sv)   \
+         - ReANY(rx_sv)->pre_prefix - 1)
 
 #  define RX_WRAPPED(rx_sv)               SvPVX(rx_sv)
 #  define RX_WRAPPED_const(rx_sv)         SvPVX_const(rx_sv)
@@ -588,9 +588,9 @@ and check for NULL.
 #  define RXp_SAVED_COPY(prog)            (prog->saved_copy)
 #  define RX_SAVED_COPY(rx_sv)            (RXp_SAVED_COPY(ReANY(rx_sv)))
 /* last match was zero-length */
-#  define RXp_ZERO_LEN(prog) \
-        (RXp_OFFS_START(prog,0) + (SSize_t)RXp_GOFS(prog) \
-          == RXp_OFFS_END(prog,0))
+#  define RXp_ZERO_LEN(prog)                                \
+       (RXp_OFFS_START(prog,0) + (SSize_t)RXp_GOFS(prog)    \
+         == RXp_OFFS_END(prog,0))
 #  define RX_ZERO_LEN(rx_sv)              (RXp_ZERO_LEN(ReANY(rx_sv)))
 
 #endif /* PLUGGABLE_RE_EXTENSION */
@@ -599,23 +599,23 @@ and check for NULL.
 
 #ifdef PERL_ANY_COW
 #  define RXp_MATCH_COPY_FREE(prog)                                 \
-    STMT_START {                                                    \
-        if (RXp_SAVED_COPY(prog)) {                                 \
-            SV_CHECK_THINKFIRST_COW_DROP(RXp_SAVED_COPY(prog));     \
-        }                                                           \
-        if (RXp_MATCH_COPIED(prog)) {                               \
-            Safefree(RXp_SUBBEG(prog));                             \
-            RXp_MATCH_COPIED_off(prog);                             \
-        }                                                           \
-    } STMT_END
+       STMT_START {                                                 \
+           if (RXp_SAVED_COPY(prog)) {                              \
+               SV_CHECK_THINKFIRST_COW_DROP(RXp_SAVED_COPY(prog));  \
+           }                                                        \
+           if (RXp_MATCH_COPIED(prog)) {                            \
+               Safefree(RXp_SUBBEG(prog));                          \
+               RXp_MATCH_COPIED_off(prog);                          \
+           }                                                        \
+       } STMT_END
 #else
-#  define RXp_MATCH_COPY_FREE(prog)                     \
-    STMT_START {                                        \
-        if (RXp_MATCH_COPIED(prog)) {                   \
-            Safefree(RXp_SUBBEG(prog));                 \
-            RXp_MATCH_COPIED_off(prog);                 \
-        }                                               \
-    } STMT_END
+#  define RXp_MATCH_COPY_FREE(prog)         \
+       STMT_START {                         \
+           if (RXp_MATCH_COPIED(prog)) {    \
+               Safefree(RXp_SUBBEG(prog));  \
+               RXp_MATCH_COPIED_off(prog);  \
+           }                                \
+       } STMT_END
 #endif
 #define RX_MATCH_COPY_FREE(rx_sv)       RXp_MATCH_COPY_FREE(ReANY(rx_sv))
 
@@ -625,9 +625,9 @@ and check for NULL.
 #define RX_MATCH_UTF8_on(rx_sv)         (RXp_MATCH_UTF8_on(ReANY(rx_sv)))
 #define RXp_MATCH_UTF8_off(prog)        (RXp_EXTFLAGS(prog) &= ~RXf_MATCH_UTF8)
 #define RX_MATCH_UTF8_off(rx_sv)        (RXp_MATCH_UTF8_off(ReANY(rx_sv))
-#define RXp_MATCH_UTF8_set(prog, t)      \
-    ((t)\
-    ? RXp_MATCH_UTF8_on(prog) \
+#define RXp_MATCH_UTF8_set(prog, t) \
+    ((t)                            \
+    ? RXp_MATCH_UTF8_on(prog)       \
     : RXp_MATCH_UTF8_off(prog))
 #define RX_MATCH_UTF8_set(rx_sv, t)     (RXp_MATCH_UTF8_set(ReANY(rx_sv), t))
 
@@ -654,20 +654,20 @@ and check for NULL.
                                         on second iteration */
 
 #if defined(PERL_USE_GCC_BRACE_GROUPS)
-#  define ReREFCNT_inc(re)                                              \
-    ({                                                                  \
-        /* This is here to generate a casting warning if incorrect.  */ \
-        REGEXP *const _rerefcnt_inc = (re);                             \
-        assert(SvTYPE(_rerefcnt_inc) == SVt_REGEXP);                    \
-        SvREFCNT_inc(_rerefcnt_inc);                                    \
-        _rerefcnt_inc;                                                  \
-    })
-#  define ReREFCNT_dec(re)                                              \
-    ({                                                                  \
-        /* This is here to generate a casting warning if incorrect.  */ \
-        REGEXP *const _rerefcnt_dec = (re);                             \
-        SvREFCNT_dec(_rerefcnt_dec);                                    \
-    })
+#  define ReREFCNT_inc(re)                                                  \
+       ({                                                                   \
+           /* This is here to generate a casting warning if incorrect.  */  \
+           REGEXP *const _rerefcnt_inc = (re);                              \
+           assert(SvTYPE(_rerefcnt_inc) == SVt_REGEXP);                     \
+           SvREFCNT_inc(_rerefcnt_inc);                                     \
+           _rerefcnt_inc;                                                   \
+       })
+#  define ReREFCNT_dec(re)                                                  \
+       ({                                                                   \
+           /* This is here to generate a casting warning if incorrect.  */  \
+           REGEXP *const _rerefcnt_dec = (re);                              \
+           SvREFCNT_dec(_rerefcnt_dec);                                     \
+       })
 #else
 #  define ReREFCNT_dec(re)      SvREFCNT_dec(re)
 #  define ReREFCNT_inc(re)      ((REGEXP *) SvREFCNT_inc(re))
@@ -967,7 +967,7 @@ typedef struct regmatch_state {
  * We do it in 4K blocks for efficiency. The "3" is 2 for the next/prev
  * pointers, plus 1 for any mythical malloc overhead. */
 
-#define PERL_REGMATCH_SLAB_SLOTS \
+#define PERL_REGMATCH_SLAB_SLOTS    \
     ((4096 - 3 * sizeof (void*)) / sizeof(regmatch_state))
 
 typedef struct regmatch_slab {

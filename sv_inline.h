@@ -38,9 +38,9 @@
    unreferenced scalars
 #  define POISON_SV_HEAD(sv)    PoisonNew(sv, 1, struct STRUCT_SV)
 */
-#  define POISON_SV_HEAD(sv)     \
-    PoisonNew(&SvANY(sv), 1, void *),\
-    PoisonNew(&SvREFCNT(sv), 1, U32)
+#  define POISON_SV_HEAD(sv)                \
+       PoisonNew(&SvANY(sv), 1, void *),    \
+       PoisonNew(&SvREFCNT(sv), 1, U32)
 #else
 #  define SvARENA_CHAIN(sv)     SvANY(sv)
 #  define SvARENA_CHAIN_SET(sv,val)     SvANY(sv) = (void *)(val)
@@ -49,19 +49,19 @@
 
 #ifdef PERL_MEM_LOG
 #  define MEM_LOG_NEW_SV(sv, file, line, func)  \
-            Perl_mem_log_new_sv(sv, file, line, func)
+       Perl_mem_log_new_sv(sv, file, line, func)
 #  define MEM_LOG_DEL_SV(sv, file, line, func)  \
-            Perl_mem_log_del_sv(sv, file, line, func)
+       Perl_mem_log_del_sv(sv, file, line, func)
 #else
 #  define MEM_LOG_NEW_SV(sv, file, line, func)  NOOP
 #  define MEM_LOG_DEL_SV(sv, file, line, func)  NOOP
 #endif
 
-#define uproot_SV(p) \
-    STMT_START {                                        \
-        (p) = PL_sv_root;                               \
-        PL_sv_root = MUTABLE_SV(SvARENA_CHAIN(p));              \
-        ++PL_sv_count;                                  \
+#define uproot_SV(p)                                \
+    STMT_START {                                    \
+        (p) = PL_sv_root;                           \
+        PL_sv_root = MUTABLE_SV(SvARENA_CHAIN(p));  \
+        ++PL_sv_count;                              \
     } STMT_END
 
 /* Perl_more_sv lives in sv.c, we don't want to inline it.
@@ -106,17 +106,17 @@ S_new_SV(pTHX_ const char *file, int line, const char *func)
 #  define new_SV(p) (p)=S_new_SV(aTHX_ __FILE__, __LINE__, FUNCTION__)
 
 #else
-#  define new_SV(p) \
-    STMT_START {                                       \
-        if (PL_sv_root)                                        \
-            uproot_SV(p);                              \
-        else                                           \
-            (p) = Perl_more_sv(aTHX);                     \
-        SvANY(p) = 0;                                  \
-        SvREFCNT(p) = 1;                               \
-        SvFLAGS(p) = 0;                                        \
-        MEM_LOG_NEW_SV(p, __FILE__, __LINE__, FUNCTION__);  \
-    } STMT_END
+#  define new_SV(p)                                             \
+       STMT_START {                                             \
+           if (PL_sv_root)                                      \
+               uproot_SV(p);                                    \
+           else                                                 \
+               (p) = Perl_more_sv(aTHX);                        \
+           SvANY(p) = 0;                                        \
+           SvREFCNT(p) = 1;                                     \
+           SvFLAGS(p) = 0;                                      \
+           MEM_LOG_NEW_SV(p, __FILE__, __LINE__, FUNCTION__);   \
+       } STMT_END
 #endif
 
 
@@ -134,11 +134,11 @@ struct body_details {
 };
 
 #define ALIGNED_TYPE_NAME(name) name##_aligned
-#define ALIGNED_TYPE(name)             \
-    typedef union {    \
-        name align_me;                         \
-        NV nv;                         \
-        IV iv;                         \
+#define ALIGNED_TYPE(name)  \
+    typedef union {         \
+        name align_me;      \
+        NV nv;              \
+        IV iv;              \
     } ALIGNED_TYPE_NAME(name)
 
 ALIGNED_TYPE(regexp);
@@ -173,24 +173,24 @@ ALIGNED_TYPE(XPVOBJ);
    limited by PERL_ARENA_SIZE, so we can safely oversize the
    declarations.
  */
-#define FIT_ARENA0(body_size)                          \
+#define FIT_ARENA0(body_size)   \
     ((size_t)(PERL_ARENA_SIZE / body_size) * body_size)
-#define FIT_ARENAn(count,body_size)                    \
-    ( count * body_size <= PERL_ARENA_SIZE)            \
-    ? count * body_size                                        \
+#define FIT_ARENAn(count,body_size)         \
+    ( count * body_size <= PERL_ARENA_SIZE) \
+    ? count * body_size                     \
     : FIT_ARENA0 (body_size)
-#define FIT_ARENA(count,body_size)                     \
-   (U32)(count                                                 \
-    ? FIT_ARENAn (count, body_size)                    \
-    : FIT_ARENA0 (body_size))
+#define FIT_ARENA(count,body_size)      \
+    (U32)(count                         \
+     ? FIT_ARENAn (count, body_size)    \
+     : FIT_ARENA0 (body_size))
 
 /* Calculate the length to copy. Specifically work out the length less any
    final padding the compiler needed to add.  See the comment in sv_upgrade
    for why copying the padding proved to be a bug.  */
 
-#define copy_length(type, last_member) \
-        STRUCT_OFFSET(type, last_member) \
-        + sizeof (((type*)SvANY((const SV *)0))->last_member)
+#define copy_length(type, last_member)  \
+    STRUCT_OFFSET(type, last_member)    \
+    + sizeof (((type*)SvANY((const SV *)0))->last_member)
 
 static const struct body_details bodies_by_type[] = {
     /* HEs use this offset for their arena.  */
@@ -290,8 +290,8 @@ static const struct body_details bodies_by_type[] = {
       FIT_ARENA(0, sizeof(ALIGNED_TYPE_NAME(XPVOBJ))) },
 };
 
-#define new_body_allocated(sv_type)            \
-    (void *)((char *)S_new_body(aTHX_ sv_type) \
+#define new_body_allocated(sv_type)             \
+    (void *)((char *)S_new_body(aTHX_ sv_type)  \
              - bodies_by_type[sv_type].offset)
 
 #ifdef PURIFY
@@ -311,30 +311,30 @@ static const struct body_details bodies_by_type[] = {
 #define new_XPVNV()    new_body_allocated(SVt_PVNV)
 #define new_XPVMG()    new_body_allocated(SVt_PVMG)
 
-#define del_body_by_type(p, type)                               \
-    del_body(p + bodies_by_type[(type)].offset,                 \
+#define del_body_by_type(p, type)               \
+    del_body(p + bodies_by_type[(type)].offset, \
              &PL_body_roots[(type)])
 
 #endif /* PURIFY */
 
 /* no arena for you! */
 
-#define new_NOARENA(details) \
-        safemalloc((details)->body_size + (details)->offset)
-#define new_NOARENAZ(details) \
-        safecalloc((details)->body_size + (details)->offset, 1)
+#define new_NOARENA(details)    \
+    safemalloc((details)->body_size + (details)->offset)
+#define new_NOARENAZ(details)   \
+    safecalloc((details)->body_size + (details)->offset, 1)
 
 #ifndef PURIFY
 
 /* grab a new thing from the arena's free list, allocating more if necessary. */
-#define new_body_from_arena(xpv, root_index, type_meta) \
-    STMT_START { \
-        void ** const r3wt = &PL_body_roots[root_index]; \
-        xpv = (PTR_TBL_ENT_t*) (*((void **)(r3wt))      \
-          ? *((void **)(r3wt)) : Perl_more_bodies(aTHX_ root_index, \
-                                             type_meta.body_size,\
-                                             type_meta.arena_size)); \
-        *(r3wt) = *(void**)(xpv); \
+#define new_body_from_arena(xpv, root_index, type_meta)                 \
+    STMT_START {                                                        \
+        void ** const r3wt = &PL_body_roots[root_index];                \
+        xpv = (PTR_TBL_ENT_t*) (*((void **)(r3wt))                      \
+          ? *((void **)(r3wt)) : Perl_more_bodies(aTHX_ root_index,     \
+                                             type_meta.body_size,       \
+                                             type_meta.arena_size));    \
+        *(r3wt) = *(void**)(xpv);                                       \
     } STMT_END
 
 PERL_STATIC_INLINE void *

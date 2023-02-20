@@ -77,55 +77,55 @@
 /* This is two marsaglia xor-shift permutes, with a prime-multiple
  * sandwiched inside. The end result of doing this twice with different
  * primes is a completely avalanched v.  */
-#define ZAPHOD32_SCRAMBLE32(v,prime)  \
-    STMT_START {\
-    v ^= (v>>9);                        \
-    v ^= (v<<21);                       \
-    v ^= (v>>16);                       \
-    v *= prime;                         \
-    v ^= (v>>17);                       \
-    v ^= (v<<15);                       \
-    v ^= (v>>23);                       \
-} STMT_END
+#define ZAPHOD32_SCRAMBLE32(v,prime)    \
+    STMT_START {                        \
+        v ^= (v>>9);                    \
+        v ^= (v<<21);                   \
+        v ^= (v>>16);                   \
+        v *= prime;                     \
+        v ^= (v>>17);                   \
+        v ^= (v<<15);                   \
+        v ^= (v>>23);                   \
+    } STMT_END
 
-#define ZAPHOD32_FINALIZE(v0,v1,v2)  \
-    STMT_START {\
-    ZAPHOD32_WARN3("v0=%08x v1=%08x v2=%08x - ZAPHOD32 FINALIZE\n", \
-            (unsigned int)v0, (unsigned int)v1, (unsigned int)v2);  \
-    v2 += v0;                       \
-    v1 -= v2;                       \
-    v1 = ROTL32(v1,  6);           \
-    v2 ^= v1;                       \
-    v2 = ROTL32(v2, 28);           \
-    v1 ^= v2;                       \
-    v0 += v1;                       \
-    v1 = ROTL32(v1, 24);           \
-    v2 += v1;                       \
-    v2 = ROTL32(v2, 18) + v1;      \
-    v0 ^= v2;                       \
-    v0 = ROTL32(v0, 20);           \
-    v2 += v0;                       \
-    v1 ^= v2;                       \
-    v0 += v1;                       \
-    v0 = ROTL32(v0,  5);           \
-    v2 += v0;                       \
-    v2 = ROTL32(v2, 22);           \
-    v0 -= v1;                       \
-    v1 -= v2;                       \
-    v1 = ROTL32(v1, 17);           \
-} STMT_END
+#define ZAPHOD32_FINALIZE(v0,v1,v2)                                     \
+    STMT_START {                                                        \
+        ZAPHOD32_WARN3("v0=%08x v1=%08x v2=%08x - ZAPHOD32 FINALIZE\n", \
+                (unsigned int)v0, (unsigned int)v1, (unsigned int)v2);  \
+        v2 += v0;                                                       \
+        v1 -= v2;                                                       \
+        v1 = ROTL32(v1,  6);                                            \
+        v2 ^= v1;                                                       \
+        v2 = ROTL32(v2, 28);                                            \
+        v1 ^= v2;                                                       \
+        v0 += v1;                                                       \
+        v1 = ROTL32(v1, 24);                                            \
+        v2 += v1;                                                       \
+        v2 = ROTL32(v2, 18) + v1;                                       \
+        v0 ^= v2;                                                       \
+        v0 = ROTL32(v0, 20);                                            \
+        v2 += v0;                                                       \
+        v1 ^= v2;                                                       \
+        v0 += v1;                                                       \
+        v0 = ROTL32(v0,  5);                                            \
+        v2 += v0;                                                       \
+        v2 = ROTL32(v2, 22);                                            \
+        v0 -= v1;                                                       \
+        v1 -= v2;                                                       \
+        v1 = ROTL32(v1, 17);                                            \
+    } STMT_END
 
-#define ZAPHOD32_MIX(v0,v1,v2,text)  \
-    STMT_START {\
-    ZAPHOD32_WARN4("v0=%08x v1=%08x v2=%08x - ZAPHOD32 %s MIX\n",                   \
-            (unsigned int)v0,(unsigned int)v1,(unsigned int)v2, text );  \
-    v0 = ROTL32(v0,16) - v2;   \
-    v1 = ROTR32(v1,13) ^ v2;   \
-    v2 = ROTL32(v2,17) + v1;   \
-    v0 = ROTR32(v0, 2) + v1;   \
-    v1 = ROTR32(v1,17) - v0;   \
-    v2 = ROTR32(v2, 7) ^ v0;   \
-} STMT_END
+#define ZAPHOD32_MIX(v0,v1,v2,text)                                         \
+    STMT_START {                                                            \
+        ZAPHOD32_WARN4("v0=%08x v1=%08x v2=%08x - ZAPHOD32 %s MIX\n",       \
+                (unsigned int)v0,(unsigned int)v1,(unsigned int)v2, text ); \
+        v0 = ROTL32(v0,16) - v2;                                            \
+        v1 = ROTR32(v1,13) ^ v2;                                            \
+        v2 = ROTL32(v2,17) + v1;                                            \
+        v0 = ROTR32(v0, 2) + v1;                                            \
+        v1 = ROTR32(v1,17) - v0;                                            \
+        v2 = ROTR32(v2, 7) ^ v0;                                            \
+    } STMT_END
 
 
 ZAPHOD32_STATIC_INLINE

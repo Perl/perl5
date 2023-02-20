@@ -57,19 +57,19 @@ struct padnamelist {
 
 struct padname_fieldinfo;
 
-#define _PADNAME_BASE \
-    char *      xpadn_pv;               \
-    HV *        xpadn_ourstash;         \
-    union {                             \
-        HV *    xpadn_typestash;        \
-        CV *    xpadn_protocv;          \
-    } xpadn_type_u;                     \
-    struct padname_fieldinfo *xpadn_fieldinfo; \
-    U32         xpadn_low;              \
-    U32         xpadn_high;             \
-    U32         xpadn_refcnt;           \
-    int         xpadn_gen;              \
-    U8          xpadn_len;              \
+#define _PADNAME_BASE                           \
+    char *      xpadn_pv;                       \
+    HV *        xpadn_ourstash;                 \
+    union {                                     \
+        HV *    xpadn_typestash;                \
+        CV *    xpadn_protocv;                  \
+    } xpadn_type_u;                             \
+    struct padname_fieldinfo *xpadn_fieldinfo;  \
+    U32         xpadn_low;                      \
+    U32         xpadn_high;                     \
+    U32         xpadn_refcnt;                   \
+    int         xpadn_gen;                      \
+    U8          xpadn_len;                      \
     U8          xpadn_flags
 
 struct padname {
@@ -87,7 +87,7 @@ struct padname_with_str {
 
 #undef _PADNAME_BASE
 
-#define PADNAME_FROM_PV(s) \
+#define PADNAME_FROM_PV(s)  \
     ((PADNAME *)((s) - STRUCT_OFFSET(struct padname_with_str, xpadn_str)))
 
 /* Most padnames are not field names. Keep all the field-related info in its
@@ -108,9 +108,9 @@ struct padname_fieldinfo {
  * flagging that a lexical is being introduced, or has not yet left scope
  */
 #define PERL_PADSEQ_INTRO  U32_MAX
-#define COP_SEQMAX_INC \
-        (PL_cop_seqmax++, \
-         (void)(PL_cop_seqmax == PERL_PADSEQ_INTRO && PL_cop_seqmax++))
+#define COP_SEQMAX_INC  \
+    (PL_cop_seqmax++,   \
+     (void)(PL_cop_seqmax == PERL_PADSEQ_INTRO && PL_cop_seqmax++))
 
 
 /* B.xs needs these for the benefit of B::Deparse */
@@ -158,18 +158,18 @@ typedef enum {
 #  define pad_peg(label)
 
 #ifdef DEBUGGING
-#  define ASSERT_CURPAD_LEGAL(label) \
-    pad_peg(label); \
-    if (PL_comppad ? (AvARRAY(PL_comppad) != PL_curpad) : (PL_curpad != 0))  \
-        Perl_croak(aTHX_ "panic: illegal pad in %s: 0x%" UVxf "[0x%" UVxf "]",\
-            label, PTR2UV(PL_comppad), PTR2UV(PL_curpad));
+#  define ASSERT_CURPAD_LEGAL(label)                                                \
+       pad_peg(label);                                                              \
+       if (PL_comppad ? (AvARRAY(PL_comppad) != PL_curpad) : (PL_curpad != 0))      \
+           Perl_croak(aTHX_ "panic: illegal pad in %s: 0x%" UVxf "[0x%" UVxf "]",   \
+               label, PTR2UV(PL_comppad), PTR2UV(PL_curpad));
 
 
-#  define ASSERT_CURPAD_ACTIVE(label) \
-    pad_peg(label); \
-    if (!PL_comppad || (AvARRAY(PL_comppad) != PL_curpad))                \
-        Perl_croak(aTHX_ "panic: invalid pad in %s: 0x%" UVxf "[0x%" UVxf "]",\
-            label, PTR2UV(PL_comppad), PTR2UV(PL_curpad));
+#  define ASSERT_CURPAD_ACTIVE(label)                                               \
+       pad_peg(label);                                                              \
+       if (!PL_comppad || (AvARRAY(PL_comppad) != PL_curpad))                       \
+           Perl_croak(aTHX_ "panic: invalid pad in %s: 0x%" UVxf "[0x%" UVxf "]",   \
+               label, PTR2UV(PL_comppad), PTR2UV(PL_curpad));
 #else
 #  define ASSERT_CURPAD_LEGAL(label)
 #  define ASSERT_CURPAD_ACTIVE(label)
@@ -340,8 +340,8 @@ Restore the old pad saved into the local variable C<opad> by C<PAD_SAVE_LOCAL()>
 #define PadnamePV(pn)           (pn)->xpadn_pv
 #define PadnameLEN(pn)          (pn)->xpadn_len
 #define PadnameUTF8(pn)         1
-#define PadnameSV(pn) \
-        newSVpvn_flags(PadnamePV(pn), PadnameLEN(pn), SVs_TEMP|SVf_UTF8)
+#define PadnameSV(pn)   \
+    newSVpvn_flags(PadnamePV(pn), PadnameLEN(pn), SVs_TEMP|SVf_UTF8)
 #define PadnameFLAGS(pn)        (pn)->xpadn_flags
 #define PadnameIsOUR(pn)        cBOOL((pn)->xpadn_ourstash)
 #define PadnameOURSTASH(pn)     (pn)->xpadn_ourstash
@@ -404,45 +404,45 @@ Restore the old pad saved into the local variable C<opad> by C<PAD_SAVE_LOCAL()>
 
 #define PAD_SVl(po)       (PL_curpad[po])
 
-#define PAD_BASE_SV(padlist, po) \
-        (PadlistARRAY(padlist)[1])                                      \
-            ? AvARRAY(MUTABLE_AV((PadlistARRAY(padlist)[1])))[po] \
-            : NULL;
+#define PAD_BASE_SV(padlist, po)                                \
+    (PadlistARRAY(padlist)[1])                                  \
+        ? AvARRAY(MUTABLE_AV((PadlistARRAY(padlist)[1])))[po]   \
+        : NULL;
 
 
-#define PAD_SET_CUR_NOSAVE(padlist,nth) \
-        PL_comppad = (PAD*) (PadlistARRAY(padlist)[nth]);       \
-        PL_curpad = AvARRAY(PL_comppad);                        \
-        DEBUG_Xv(PerlIO_printf(Perl_debug_log,                  \
-              "Pad 0x%" UVxf "[0x%" UVxf "] set_cur    depth=%d\n",     \
-              PTR2UV(PL_comppad), PTR2UV(PL_curpad), (int)(nth)));
+#define PAD_SET_CUR_NOSAVE(padlist,nth)                         \
+    PL_comppad = (PAD*) (PadlistARRAY(padlist)[nth]);           \
+    PL_curpad = AvARRAY(PL_comppad);                            \
+    DEBUG_Xv(PerlIO_printf(Perl_debug_log,                      \
+          "Pad 0x%" UVxf "[0x%" UVxf "] set_cur    depth=%d\n", \
+          PTR2UV(PL_comppad), PTR2UV(PL_curpad), (int)(nth)));
 
 
-#define PAD_SET_CUR(padlist,nth) \
-        SAVECOMPPAD();                                          \
-        PAD_SET_CUR_NOSAVE(padlist,nth);
+#define PAD_SET_CUR(padlist,nth)    \
+    SAVECOMPPAD();                  \
+    PAD_SET_CUR_NOSAVE(padlist,nth);
 
 
-#define PAD_SAVE_SETNULLPAD()    \
-    SAVECOMPPAD();\
+#define PAD_SAVE_SETNULLPAD()                   \
+    SAVECOMPPAD();                              \
         PL_comppad = NULL; PL_curpad = NULL;    \
         DEBUG_Xv(PerlIO_printf(Perl_debug_log, "Pad set_null\n"));
 
-#define PAD_SAVE_LOCAL(opad,npad) \
-        opad = PL_comppad;                                      \
-        PL_comppad = (npad);                                    \
-        PL_curpad =  PL_comppad ? AvARRAY(PL_comppad) : NULL;   \
-        DEBUG_Xv(PerlIO_printf(Perl_debug_log,                  \
-              "Pad 0x%" UVxf "[0x%" UVxf "] save_local\n",              \
-              PTR2UV(PL_comppad), PTR2UV(PL_curpad)));
+#define PAD_SAVE_LOCAL(opad,npad)                           \
+    opad = PL_comppad;                                      \
+    PL_comppad = (npad);                                    \
+    PL_curpad =  PL_comppad ? AvARRAY(PL_comppad) : NULL;   \
+    DEBUG_Xv(PerlIO_printf(Perl_debug_log,                  \
+          "Pad 0x%" UVxf "[0x%" UVxf "] save_local\n",      \
+          PTR2UV(PL_comppad), PTR2UV(PL_curpad)));
 
-#define PAD_RESTORE_LOCAL(opad) \
-        assert(!opad || !SvIS_FREED(opad));                                     \
-        PL_comppad = opad;                                              \
-        PL_curpad =  PL_comppad ? AvARRAY(PL_comppad) : NULL;   \
-        DEBUG_Xv(PerlIO_printf(Perl_debug_log,                  \
-              "Pad 0x%" UVxf "[0x%" UVxf "] restore_local\n",   \
-              PTR2UV(PL_comppad), PTR2UV(PL_curpad)));
+#define PAD_RESTORE_LOCAL(opad)                             \
+    assert(!opad || !SvIS_FREED(opad));                     \
+    PL_comppad = opad;                                      \
+    PL_curpad =  PL_comppad ? AvARRAY(PL_comppad) : NULL;   \
+    DEBUG_Xv(PerlIO_printf(Perl_debug_log,                  \
+          "Pad 0x%" UVxf "[0x%" UVxf "] restore_local\n",   \
+          PTR2UV(PL_comppad), PTR2UV(PL_curpad)));
 
 
 /*
@@ -498,10 +498,10 @@ ling pad (lvalue) to C<gen>.
 
 #define PAD_COMPNAME_OURSTASH(po)  (PadnameOURSTASH(PAD_COMPNAME_SV(po)))
 
-#define PAD_COMPNAME_GEN(po) \
+#define PAD_COMPNAME_GEN(po)    \
     ((STRLEN)PadnamelistARRAY(PL_comppad_name)[po]->xpadn_gen)
 
-#define PAD_COMPNAME_GEN_set(po, gen) \
+#define PAD_COMPNAME_GEN_set(po, gen)   \
     (PadnamelistARRAY(PL_comppad_name)[po]->xpadn_gen = (gen))
 
 
@@ -555,7 +555,7 @@ instead of a string/length pair.
 =cut
 */
 
-#define pad_findmy_pvs(name,flags) \
+#define pad_findmy_pvs(name,flags)  \
     Perl_pad_findmy_pvn(aTHX_ STR_WITH_LEN(name), flags)
 
 struct suspended_compcv

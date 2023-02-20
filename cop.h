@@ -42,11 +42,11 @@ typedef struct jmpenv JMPENV;
 
 #if defined DEBUGGING && !defined DEBUGGING_RE_ONLY
 #  define JE_OLD_STACK_HWM_zero      PL_start_env.je_old_stack_hwm = 0
-#  define JE_OLD_STACK_HWM_save(je)  \
-        (je).je_old_stack_hwm = PL_curstackinfo->si_stack_hwm
-#  define JE_OLD_STACK_HWM_restore(je)  \
-        if (PL_curstackinfo->si_stack_hwm < (je).je_old_stack_hwm) \
-            PL_curstackinfo->si_stack_hwm = (je).je_old_stack_hwm
+#  define JE_OLD_STACK_HWM_save(je) \
+       (je).je_old_stack_hwm = PL_curstackinfo->si_stack_hwm
+#  define JE_OLD_STACK_HWM_restore(je)                              \
+       if (PL_curstackinfo->si_stack_hwm < (je).je_old_stack_hwm)   \
+           PL_curstackinfo->si_stack_hwm = (je).je_old_stack_hwm
 #else
 #  define JE_OLD_STACK_HWM_zero        NOOP
 #  define JE_OLD_STACK_HWM_save(je)    NOOP
@@ -63,15 +63,15 @@ typedef struct jmpenv JMPENV;
  * that thread the C stack of last thread to do an eval {}!
  */
 
-#define JMPENV_BOOTSTRAP \
-    STMT_START {                                \
-        PERL_POISON_EXPR(PoisonNew(&PL_start_env, 1, JMPENV));\
-        PL_top_env = &PL_start_env;             \
-        PL_start_env.je_prev = NULL;            \
-        PL_start_env.je_ret = -1;               \
-        PL_start_env.je_mustcatch = TRUE;       \
-        PL_start_env.je_old_delaymagic = 0;     \
-        JE_OLD_STACK_HWM_zero;                  \
+#define JMPENV_BOOTSTRAP                                        \
+    STMT_START {                                                \
+        PERL_POISON_EXPR(PoisonNew(&PL_start_env, 1, JMPENV));  \
+        PL_top_env = &PL_start_env;                             \
+        PL_start_env.je_prev = NULL;                            \
+        PL_start_env.je_ret = -1;                               \
+        PL_start_env.je_mustcatch = TRUE;                       \
+        PL_start_env.je_old_delaymagic = 0;                     \
+        JE_OLD_STACK_HWM_zero;                                  \
     } STMT_END
 
 /*
@@ -110,78 +110,78 @@ typedef struct jmpenv JMPENV;
 
 #define dJMPENV         JMPENV cur_env
 
-#define JMPENV_PUSH(v)                                                  \
-    STMT_START {                                                        \
-        DEBUG_l({                                                       \
-            int i = 0;                                                  \
-            JMPENV *p = PL_top_env;                                     \
-            while (p) { i++; p = p->je_prev; }                          \
-            Perl_deb(aTHX_ "JMPENV_PUSH pre level=%d in %s at %s:%d\n", \
-                         i,  SAFE_FUNCTION__, __FILE__, __LINE__);      \
-        });                                                             \
-        cur_env.je_prev = PL_top_env;                                   \
-        JE_OLD_STACK_HWM_save(cur_env);                                 \
-        /* setjmp() is callable in limited contexts which does not */   \
-        /* include assignment, so switch() instead */                   \
-        switch (PerlProc_setjmp(cur_env.je_buf, SCOPE_SAVES_SIGNAL_MASK)) { \
-        case 0: cur_env.je_ret = 0; break;                              \
-        case 1: cur_env.je_ret = 1; break;                              \
-        case 2: cur_env.je_ret = 2; break;                              \
-        case 3: cur_env.je_ret = 3; break;                              \
-        default: Perl_croak(aTHX_ "panic: unexpected setjmp() result\n"); \
-        }                                                               \
-        JE_OLD_STACK_HWM_restore(cur_env);                              \
-        PL_top_env = &cur_env;                                          \
-        cur_env.je_mustcatch = FALSE;                                   \
-        cur_env.je_old_delaymagic = PL_delaymagic;                      \
-        DEBUG_l({                                                       \
-            int i = 0;                                                  \
-            JMPENV *p = PL_top_env;                                     \
-            while (p) { i++; p = p->je_prev; }                          \
-            Perl_deb(aTHX_ "JMPENV_PUSH level=%d ret=%d in %s at %s:%d\n",    \
-                         i, cur_env.je_ret, SAFE_FUNCTION__,  __FILE__, __LINE__); \
-        });                                                             \
-        (v) = cur_env.je_ret;                                           \
+#define JMPENV_PUSH(v)                                                              \
+    STMT_START {                                                                    \
+        DEBUG_l({                                                                   \
+            int i = 0;                                                              \
+            JMPENV *p = PL_top_env;                                                 \
+            while (p) { i++; p = p->je_prev; }                                      \
+            Perl_deb(aTHX_ "JMPENV_PUSH pre level=%d in %s at %s:%d\n",             \
+                         i,  SAFE_FUNCTION__, __FILE__, __LINE__);                  \
+        });                                                                         \
+        cur_env.je_prev = PL_top_env;                                               \
+        JE_OLD_STACK_HWM_save(cur_env);                                             \
+        /* setjmp() is callable in limited contexts which does not */               \
+        /* include assignment, so switch() instead */                               \
+        switch (PerlProc_setjmp(cur_env.je_buf, SCOPE_SAVES_SIGNAL_MASK)) {         \
+        case 0: cur_env.je_ret = 0; break;                                          \
+        case 1: cur_env.je_ret = 1; break;                                          \
+        case 2: cur_env.je_ret = 2; break;                                          \
+        case 3: cur_env.je_ret = 3; break;                                          \
+        default: Perl_croak(aTHX_ "panic: unexpected setjmp() result\n");           \
+        }                                                                           \
+        JE_OLD_STACK_HWM_restore(cur_env);                                          \
+        PL_top_env = &cur_env;                                                      \
+        cur_env.je_mustcatch = FALSE;                                               \
+        cur_env.je_old_delaymagic = PL_delaymagic;                                  \
+        DEBUG_l({                                                                   \
+            int i = 0;                                                              \
+            JMPENV *p = PL_top_env;                                                 \
+            while (p) { i++; p = p->je_prev; }                                      \
+            Perl_deb(aTHX_ "JMPENV_PUSH level=%d ret=%d in %s at %s:%d\n",          \
+                         i, cur_env.je_ret, SAFE_FUNCTION__,  __FILE__, __LINE__);  \
+        });                                                                         \
+        (v) = cur_env.je_ret;                                                       \
     } STMT_END
 
-#define JMPENV_POP \
-    STMT_START {                                                        \
-        DEBUG_l({                                                       \
-            int i = -1; JMPENV *p = PL_top_env;                         \
-            while (p) { i++; p = p->je_prev; }                          \
-            Perl_deb(aTHX_ "JMPENV_POP level=%d in %s at %s:%d\n",        \
-                         i, SAFE_FUNCTION__, __FILE__, __LINE__);})        \
-        assert(PL_top_env == &cur_env);                                 \
-        PL_delaymagic = cur_env.je_old_delaymagic;                      \
-        PL_top_env = cur_env.je_prev;                                   \
+#define JMPENV_POP                                                  \
+    STMT_START {                                                    \
+        DEBUG_l({                                                   \
+            int i = -1; JMPENV *p = PL_top_env;                     \
+            while (p) { i++; p = p->je_prev; }                      \
+            Perl_deb(aTHX_ "JMPENV_POP level=%d in %s at %s:%d\n",  \
+                         i, SAFE_FUNCTION__, __FILE__, __LINE__);}) \
+        assert(PL_top_env == &cur_env);                             \
+        PL_delaymagic = cur_env.je_old_delaymagic;                  \
+        PL_top_env = cur_env.je_prev;                               \
     } STMT_END
 
-#define JMPENV_JUMP(v) \
-    STMT_START {                                                \
-        DEBUG_l({                                               \
-            int i = -1; JMPENV *p = PL_top_env;                 \
-            while (p) { i++; p = p->je_prev; }                  \
+#define JMPENV_JUMP(v)                                                          \
+    STMT_START {                                                                \
+        DEBUG_l({                                                               \
+            int i = -1; JMPENV *p = PL_top_env;                                 \
+            while (p) { i++; p = p->je_prev; }                                  \
             Perl_deb(aTHX_ "JMPENV_JUMP(%d) level=%d in %s at %s:%d\n",         \
                          (int)(v), i, SAFE_FUNCTION__, __FILE__, __LINE__);})   \
-        if (PL_top_env->je_prev) {                              \
-            assert((v) >= 0 && (v) <= 3);                       \
-            PerlProc_longjmp(PL_top_env->je_buf, (v));          \
-        }                                                       \
-        if ((v) == 2)                                           \
-            PerlProc_exit(STATUS_EXIT);                         \
-        PerlIO_printf(PerlIO_stderr(), "panic: top_env, v=%d\n", (int)(v)); \
-        PerlProc_exit(1);                                       \
+        if (PL_top_env->je_prev) {                                              \
+            assert((v) >= 0 && (v) <= 3);                                       \
+            PerlProc_longjmp(PL_top_env->je_buf, (v));                          \
+        }                                                                       \
+        if ((v) == 2)                                                           \
+            PerlProc_exit(STATUS_EXIT);                                         \
+        PerlIO_printf(PerlIO_stderr(), "panic: top_env, v=%d\n", (int)(v));     \
+        PerlProc_exit(1);                                                       \
     } STMT_END
 
 #define CATCH_GET               (PL_top_env->je_mustcatch)
-#define CATCH_SET(v) \
-    STMT_START {                                                        \
-        DEBUG_l(                                                        \
-            Perl_deb(aTHX_                                              \
+#define CATCH_SET(v)                                                        \
+    STMT_START {                                                            \
+        DEBUG_l(                                                            \
+            Perl_deb(aTHX_                                                  \
                 "JUMPLEVEL set catch %d => %d (for %p) in %s at %s:%d\n",   \
-                 PL_top_env->je_mustcatch, (v), (void*)PL_top_env,      \
-                 SAFE_FUNCTION__, __FILE__, __LINE__);)                 \
-        PL_top_env->je_mustcatch = (v);                                 \
+                 PL_top_env->je_mustcatch, (v), (void*)PL_top_env,          \
+                 SAFE_FUNCTION__, __FILE__, __LINE__);)                     \
+        PL_top_env->je_mustcatch = (v);                                     \
     } STMT_END
 
 /*
@@ -228,20 +228,20 @@ the octets.
 
 */
 
-#define cophh_fetch_pvn(cophh, key, keylen, hash, flags)                    \
-    Perl_refcounted_he_fetch_pvn(aTHX_ cophh, key, keylen, hash,            \
+#define cophh_fetch_pvn(cophh, key, keylen, hash, flags)            \
+    Perl_refcounted_he_fetch_pvn(aTHX_ cophh, key, keylen, hash,    \
                                        (flags & COPHH_KEY_UTF8))
 
-#define cophh_fetch_pvs(cophh, key, flags)                                  \
-    Perl_refcounted_he_fetch_pvn(aTHX_ cophh, STR_WITH_LEN(key), 0,         \
+#define cophh_fetch_pvs(cophh, key, flags)                          \
+    Perl_refcounted_he_fetch_pvn(aTHX_ cophh, STR_WITH_LEN(key), 0, \
                                        (flags & COPHH_KEY_UTF8))
 
-#define cophh_fetch_pv(cophh, key, hash, flags)                             \
-    Perl_refcounted_he_fetch_pv(aTHX_ cophh, key, hash,                     \
+#define cophh_fetch_pv(cophh, key, hash, flags)         \
+    Perl_refcounted_he_fetch_pv(aTHX_ cophh, key, hash, \
                                       (flags & COPHH_KEY_UTF8))
 
-#define cophh_fetch_sv(cophh, key, hash, flags)                             \
-    Perl_refcounted_he_fetch_sv(aTHX_ cophh, key, hash,                     \
+#define cophh_fetch_sv(cophh, key, hash, flags)         \
+    Perl_refcounted_he_fetch_sv(aTHX_ cophh, key, hash, \
                                       (flags & COPHH_KEY_UTF8))
 
 /*
@@ -272,16 +272,16 @@ the octets.
 =cut
 */
 
-#define cophh_exists_pvn(cophh, key, keylen, hash, flags) \
+#define cophh_exists_pvn(cophh, key, keylen, hash, flags)   \
     cBOOL(Perl_refcounted_he_fetch_pvn(aTHX_ cophh, key, keylen, hash, flags | COPHH_EXISTS))
 
 #define cophh_exists_pvs(cophh, key, flags) \
     cBOOL(Perl_refcounted_he_fetch_pvn(aTHX_ cophh, STR_WITH_LEN(key), 0, flags | COPHH_EXISTS))
 
-#define cophh_exists_pv(cophh, key, hash, flags) \
+#define cophh_exists_pv(cophh, key, hash, flags)    \
     cBOOL(Perl_refcounted_he_fetch_pv(aTHX_ cophh, key, hash, flags | COPHH_EXISTS))
 
-#define cophh_exists_sv(cophh, key, hash, flags) \
+#define cophh_exists_sv(cophh, key, hash, flags)    \
     cBOOL(Perl_refcounted_he_fetch_sv(aTHX_ cophh, key, hash, flags | COPHH_EXISTS))
 
 /*
@@ -371,13 +371,13 @@ the octets.
 #define cophh_store_pvn(cophh, key, keylen, hash, value, flags) \
     Perl_refcounted_he_new_pvn(aTHX_ cophh, key, keylen, hash, value, flags)
 
-#define cophh_store_pvs(cophh, key, value, flags) \
+#define cophh_store_pvs(cophh, key, value, flags)   \
     Perl_refcounted_he_new_pvn(aTHX_ cophh, STR_WITH_LEN(key), 0, value, flags)
 
-#define cophh_store_pv(cophh, key, hash, value, flags) \
+#define cophh_store_pv(cophh, key, hash, value, flags)  \
     Perl_refcounted_he_new_pv(aTHX_ cophh, key, hash, value, flags)
 
-#define cophh_store_sv(cophh, key, hash, value, flags) \
+#define cophh_store_sv(cophh, key, hash, value, flags)  \
     Perl_refcounted_he_new_sv(aTHX_ cophh, key, hash, value, flags)
 
 /*
@@ -414,18 +414,18 @@ the octets.
 =cut
 */
 
-#define cophh_delete_pvn(cophh, key, keylen, hash, flags) \
-    Perl_refcounted_he_new_pvn(aTHX_ cophh, key, keylen, hash, \
+#define cophh_delete_pvn(cophh, key, keylen, hash, flags)       \
+    Perl_refcounted_he_new_pvn(aTHX_ cophh, key, keylen, hash,  \
         (SV *)NULL, flags)
 
-#define cophh_delete_pvs(cophh, key, flags) \
-    Perl_refcounted_he_new_pvn(aTHX_ cophh, STR_WITH_LEN(key), 0, \
+#define cophh_delete_pvs(cophh, key, flags)                         \
+    Perl_refcounted_he_new_pvn(aTHX_ cophh, STR_WITH_LEN(key), 0,   \
         (SV *)NULL, flags)
 
-#define cophh_delete_pv(cophh, key, hash, flags) \
+#define cophh_delete_pv(cophh, key, hash, flags)    \
     Perl_refcounted_he_new_pv(aTHX_ cophh, key, hash, (SV *)NULL, flags)
 
-#define cophh_delete_sv(cophh, key, hash, flags) \
+#define cophh_delete_sv(cophh, key, hash, flags)    \
     Perl_refcounted_he_new_sv(aTHX_ cophh, key, hash, (SV *)NULL, flags)
 
 #include "mydtrace.h"
@@ -563,9 +563,9 @@ typedef struct rcpv RCPV;
 
 #  define CopFILE(c)            ((c)->cop_file)
 #  define CopFILE_LEN(c)        (CopFILE(c) ? RCPV_LEN(CopFILE(c)) : 0)
-#  define CopFILEGV(c)           \
-    (CopFILE(c)\
-     ? gv_fetchfile(CopFILE(c)) : NULL)
+#  define CopFILEGV(c)  \
+       (CopFILE(c)      \
+        ? gv_fetchfile(CopFILE(c)) : NULL)
 
 #  define CopFILE_set_x(c,pv)       ((c)->cop_file = rcpv_new((pv),0,RCPVf_USE_STRLEN))
 #  define CopFILE_setn_x(c,pv,l)    ((c)->cop_file = rcpv_new((pv),(l),0))
@@ -573,57 +573,57 @@ typedef struct rcpv RCPV;
 #  define CopFILE_copy_x(dst,src)   ((dst)->cop_file = rcpv_copy((src)->cop_file))
 
 /* change condition to 1 && to enable this debugging */
-#  define CopFILE_debug(c,t,rk)                 \
-    if (0 && (c)->cop_file)                     \
-        PerlIO_printf(Perl_debug_log,           \
-            "%-14s THX:%p OP:%p PV:%p rc: "     \
-            "%6zu fn: '%.*s' at %s line %d\n",  \
-            (t), aTHX, (c), (c)->cop_file,      \
-            RCPV_REFCOUNT((c)->cop_file)-rk,    \
-            (int)RCPV_LEN((c)->cop_file),       \
-            (c)->cop_file,__FILE__,__LINE__)    \
+#  define CopFILE_debug(c,t,rk)                     \
+       if (0 && (c)->cop_file)                      \
+           PerlIO_printf(Perl_debug_log,            \
+               "%-14s THX:%p OP:%p PV:%p rc: "      \
+               "%6zu fn: '%.*s' at %s line %d\n",   \
+               (t), aTHX, (c), (c)->cop_file,       \
+               RCPV_REFCOUNT((c)->cop_file)-rk,     \
+               (int)RCPV_LEN((c)->cop_file),        \
+               (c)->cop_file,__FILE__,__LINE__)     \
 
 
 #  define CopFILE_set(c,pv)                     \
-    STMT_START {                                \
-        CopFILE_set_x(c,pv);                    \
-        CopFILE_debug(c,"CopFILE_set", 0);      \
-    } STMT_END
+       STMT_START {                             \
+           CopFILE_set_x(c,pv);                 \
+           CopFILE_debug(c,"CopFILE_set", 0);   \
+       } STMT_END
 
 #  define CopFILE_setn(c,pv,l)                  \
-    STMT_START {                                \
-        CopFILE_setn_x(c,pv,l);                 \
-        CopFILE_debug(c,"CopFILE_setn", 0);     \
-    } STMT_END
+       STMT_START {                             \
+           CopFILE_setn_x(c,pv,l);              \
+           CopFILE_debug(c,"CopFILE_setn", 0);  \
+       } STMT_END
 
-#  define CopFILE_copy(dst,src)                 \
-    STMT_START {                                \
-        CopFILE_copy_x((dst),(src));            \
-        CopFILE_debug((dst),"CopFILE_copy", 0); \
-    } STMT_END
+#  define CopFILE_copy(dst,src)                     \
+       STMT_START {                                 \
+           CopFILE_copy_x((dst),(src));             \
+           CopFILE_debug((dst),"CopFILE_copy", 0);  \
+       } STMT_END
 
-#  define CopFILE_free(c)                       \
-    STMT_START {                                \
-        CopFILE_debug((c),"CopFILE_free", 1);   \
-        CopFILE_free_x(c);                      \
-    } STMT_END
+#  define CopFILE_free(c)                           \
+       STMT_START {                                 \
+           CopFILE_debug((c),"CopFILE_free", 1);    \
+           CopFILE_free_x(c);                       \
+       } STMT_END
 
 
-#  define CopFILESV(c)           \
-    (CopFILE(c)\
-     ? GvSV(gv_fetchfile(CopFILE(c))) : NULL)
-#  define CopFILEAV(c)           \
-    (CopFILE(c)\
-     ? GvAV(gv_fetchfile(CopFILE(c))) : NULL)
-#  define CopFILEAVx(c)          \
-    (assert_(CopFILE(c))\
-       GvAV(gv_fetchfile(CopFILE(c))))
+#  define CopFILESV(c)  \
+       (CopFILE(c)      \
+        ? GvSV(gv_fetchfile(CopFILE(c))) : NULL)
+#  define CopFILEAV(c)  \
+       (CopFILE(c)      \
+        ? GvAV(gv_fetchfile(CopFILE(c))) : NULL)
+#  define CopFILEAVx(c)     \
+       (assert_(CopFILE(c)) \
+          GvAV(gv_fetchfile(CopFILE(c))))
 #  define CopFILEAVn(c)         (cop_file_avn(c))
 #  define CopSTASH(c)           PL_stashpad[(c)->cop_stashoff]
-#  define CopSTASH_set(c,hv)     \
-    ((c)->cop_stashoff = (hv)\
-        ? alloccopstash(hv)                 \
-        : 0)
+#  define CopSTASH_set(c,hv)        \
+       ((c)->cop_stashoff = (hv)    \
+           ? alloccopstash(hv)      \
+           : 0)
 
 #else /* Above: yes threads; Below no threads */
 
@@ -640,12 +640,12 @@ typedef struct rcpv RCPV;
 #    define CopFILEAVx(c)       (GvAV(CopFILEGV(c)))
 # endif
 #  define CopFILEAVn(c)         (CopFILEGV(c) ? GvAVn(CopFILEGV(c)) : NULL)
-#  define CopFILE(c)             \
-    (CopFILEGV(c) /* +2 for '_<' */\
-        ? GvNAME(CopFILEGV(c))+2 : NULL)
-#  define CopFILE_LEN(c)         \
-    (CopFILEGV(c) /* -2 for '_<' */\
-        ? GvNAMELEN(CopFILEGV(c))-2 : 0)
+#  define CopFILE(c)                    \
+       (CopFILEGV(c) /* +2 for '_<' */  \
+           ? GvNAME(CopFILEGV(c))+2 : NULL)
+#  define CopFILE_LEN(c)                \
+       (CopFILEGV(c) /* -2 for '_<' */  \
+           ? GvNAMELEN(CopFILEGV(c))-2 : 0)
 #  define CopSTASH(c)           ((c)->cop_stash)
 #  define CopSTASH_set(c,hv)    ((c)->cop_stash = (hv))
 #  define CopFILE_free(c)       (SvREFCNT_dec(CopFILEGV(c)),(CopFILEGV(c) = NULL))
@@ -694,16 +694,16 @@ the octets.
 =cut
 */
 
-#define cop_hints_fetch_pvn(cop, key, keylen, hash, flags) \
+#define cop_hints_fetch_pvn(cop, key, keylen, hash, flags)  \
     cophh_fetch_pvn(CopHINTHASH_get(cop), key, keylen, hash, flags)
 
-#define cop_hints_fetch_pvs(cop, key, flags) \
+#define cop_hints_fetch_pvs(cop, key, flags)    \
     cophh_fetch_pvs(CopHINTHASH_get(cop), key, flags)
 
-#define cop_hints_fetch_pv(cop, key, hash, flags) \
+#define cop_hints_fetch_pv(cop, key, hash, flags)   \
     cophh_fetch_pv(CopHINTHASH_get(cop), key, hash, flags)
 
-#define cop_hints_fetch_sv(cop, key, hash, flags) \
+#define cop_hints_fetch_sv(cop, key, hash, flags)   \
     cophh_fetch_sv(CopHINTHASH_get(cop), key, hash, flags)
 
 /*
@@ -741,13 +741,13 @@ the octets.
 #define cop_hints_exists_pvn(cop, key, keylen, hash, flags) \
     cophh_exists_pvn(CopHINTHASH_get(cop), key, keylen, hash, flags)
 
-#define cop_hints_exists_pvs(cop, key, flags) \
+#define cop_hints_exists_pvs(cop, key, flags)   \
     cophh_exists_pvs(CopHINTHASH_get(cop), key, flags)
 
-#define cop_hints_exists_pv(cop, key, hash, flags) \
+#define cop_hints_exists_pv(cop, key, hash, flags)  \
     cophh_exists_pv(CopHINTHASH_get(cop), key, hash, flags)
 
-#define cop_hints_exists_sv(cop, key, hash, flags) \
+#define cop_hints_exists_sv(cop, key, hash, flags)  \
     cophh_exists_sv(CopHINTHASH_get(cop), key, hash, flags)
 
 /*
@@ -760,7 +760,7 @@ be zero.
 =cut
 */
 
-#define cop_hints_2hv(cop, flags) \
+#define cop_hints_2hv(cop, flags)   \
     cophh_2hv(CopHINTHASH_get(cop), flags)
 
 /*
@@ -794,9 +794,9 @@ by setting C<*flags> to 0 or C<SVf_UTF8>.
 #define OutCopFILE(c) CopFILE(c)
 
 #define CopHINTS_get(c)         ((c)->cop_hints + 0)
-#define CopHINTS_set(c, h)       \
-    STMT_START {\
-        (c)->cop_hints = (h);               \
+#define CopHINTS_set(c, h)      \
+    STMT_START {                \
+        (c)->cop_hints = (h);   \
     } STMT_END
 
 /*
@@ -840,40 +840,40 @@ struct block_format {
 /* on debugging builds, poison cx afterwards so we know no code
  * uses it - because after doing cxstack_ix--, any ties, exceptions etc
  * may overwrite the current stack frame */
-#  define CX_POP(cx)                                                   \
-        assert(CX_CUR() == cx);                                        \
-        cxstack_ix--;                                                  \
-        cx = NULL;
+#  define CX_POP(cx)            \
+       assert(CX_CUR() == cx);  \
+       cxstack_ix--;            \
+       cx = NULL;
 #else
 #  define CX_POP(cx) cxstack_ix--;
 #endif
 
-#define CX_PUSHSUB_GET_LVALUE_MASK(func) \
-        /* If the context is indeterminate, then only the lvalue */     \
-        /* flags that the caller also has are applicable.        */     \
-        (                                                               \
-           (PL_op->op_flags & OPf_WANT)                                 \
-               ? OPpENTERSUB_LVAL_MASK                                  \
-               : !(PL_op->op_private & OPpENTERSUB_LVAL_MASK)           \
-                   ? 0 : (U8)func(aTHX)                                 \
-        )
+#define CX_PUSHSUB_GET_LVALUE_MASK(func)                        \
+    /* If the context is indeterminate, then only the lvalue */ \
+    /* flags that the caller also has are applicable.        */ \
+    (                                                           \
+       (PL_op->op_flags & OPf_WANT)                             \
+           ? OPpENTERSUB_LVAL_MASK                              \
+           : !(PL_op->op_private & OPpENTERSUB_LVAL_MASK)       \
+               ? 0 : (U8)func(aTHX)                             \
+    )
 
 /* Restore old @_ */
-#define CX_POP_SAVEARRAY(cx)                                            \
-    STMT_START {                                                        \
-        AV *cx_pop_savearray_av = GvAV(PL_defgv);                       \
-        GvAV(PL_defgv) = cx->blk_sub.savearray;                         \
-        cx->blk_sub.savearray = NULL;                                   \
-        SvREFCNT_dec(cx_pop_savearray_av);                              \
+#define CX_POP_SAVEARRAY(cx)                        \
+    STMT_START {                                    \
+        AV *cx_pop_savearray_av = GvAV(PL_defgv);   \
+        GvAV(PL_defgv) = cx->blk_sub.savearray;     \
+        cx->blk_sub.savearray = NULL;               \
+        SvREFCNT_dec(cx_pop_savearray_av);          \
     } STMT_END
 
 /* junk in @_ spells trouble when cloning CVs and in pp_caller(), so don't
  * leave any (a fast av_clear(ary), basically) */
-#define CLEAR_ARGARRAY(ary) \
-    STMT_START {                                                        \
-        AvMAX(ary) += AvARRAY(ary) - AvALLOC(ary);                      \
-        AvARRAY(ary) = AvALLOC(ary);                                    \
-        AvFILLp(ary) = -1;                                              \
+#define CLEAR_ARGARRAY(ary)                         \
+    STMT_START {                                    \
+        AvMAX(ary) += AvARRAY(ary) - AvALLOC(ary);  \
+        AvARRAY(ary) = AvALLOC(ary);                \
+        AvFILLp(ary) = -1;                          \
     } STMT_END
 
 
@@ -930,12 +930,12 @@ struct block_loop {
 #endif
 };
 
-#define CxITERVAR(c)                                    \
-        (CxPADLOOP(c)                                   \
-            ? (c)->blk_loop.itervar_u.svp               \
-            : ((c)->cx_type & CXp_FOR_GV)               \
-                ? &GvSV((c)->blk_loop.itervar_u.gv)     \
-                : (SV **)&(c)->blk_loop.itervar_u.gv)
+#define CxITERVAR(c)                            \
+    (CxPADLOOP(c)                               \
+        ? (c)->blk_loop.itervar_u.svp           \
+        : ((c)->cx_type & CXp_FOR_GV)           \
+            ? &GvSV((c)->blk_loop.itervar_u.gv) \
+            : (SV **)&(c)->blk_loop.itervar_u.gv)
 
 #define CxLABEL(c)      (CopLABEL((c)->blk_oldcop))
 #define CxLABEL_len(c,len)      (CopLABEL_len((c)->blk_oldcop, len))
@@ -1002,16 +1002,16 @@ struct block {
 #define blk_loop        cx_u.cx_blk.blk_u.blku_loop
 #define blk_givwhen     cx_u.cx_blk.blk_u.blku_givwhen
 
-#define CX_DEBUG(cx, action)                                            \
-    DEBUG_l(                                                            \
-        Perl_deb(aTHX_ "CX %ld %s %s (scope %ld,%ld) (save %ld,%ld) in %s at %s:%d\n",\
-                    (long)cxstack_ix,                                   \
-                    action,                                             \
-                    PL_block_type[CxTYPE(cx)],                          \
-                    (long)PL_scopestack_ix,                             \
-                    (long)(cx->blk_oldscopesp),                         \
-                    (long)PL_savestack_ix,                              \
-                    (long)(cx->blk_oldsaveix),                          \
+#define CX_DEBUG(cx, action)                                                            \
+    DEBUG_l(                                                                            \
+        Perl_deb(aTHX_ "CX %ld %s %s (scope %ld,%ld) (save %ld,%ld) in %s at %s:%d\n",  \
+                    (long)cxstack_ix,                                                   \
+                    action,                                                             \
+                    PL_block_type[CxTYPE(cx)],                                          \
+                    (long)PL_scopestack_ix,                                             \
+                    (long)(cx->blk_oldscopesp),                                         \
+                    (long)PL_savestack_ix,                                              \
+                    (long)(cx->blk_oldsaveix),                                          \
                     SAFE_FUNCTION__, __FILE__, __LINE__));
 
 
@@ -1050,36 +1050,36 @@ struct subst {
 #define sb_rxres        cx_u.cx_subst.sbu_rxres
 #define sb_rx           cx_u.cx_subst.sbu_rx
 
-#  define CX_PUSHSUBST(cx)  \
-    CXINC, cx = CX_CUR(),\
-        cx->blk_oldsaveix = oldsave,                                    \
-        cx->sb_iters            = iters,                                \
-        cx->sb_maxiters         = maxiters,                             \
-        cx->sb_rflags           = r_flags,                              \
-        cx->sb_rxtainted        = rxtainted,                            \
-        cx->sb_orig             = orig,                                 \
-        cx->sb_dstr             = dstr,                                 \
-        cx->sb_targ             = targ,                                 \
-        cx->sb_s                = s,                                    \
-        cx->sb_m                = m,                                    \
-        cx->sb_strend           = strend,                               \
-        cx->sb_rxres            = NULL,                                 \
-        cx->sb_rx               = rx,                                   \
-        cx->cx_type             = CXt_SUBST | (once ? CXp_ONCE : 0);    \
-        rxres_save(&cx->sb_rxres, rx);                                  \
-        (void)ReREFCNT_inc(rx);                                         \
-        SvREFCNT_inc_void_NN(targ)
+#  define CX_PUSHSUBST(cx)                                              \
+       CXINC, cx = CX_CUR(),                                            \
+           cx->blk_oldsaveix = oldsave,                                 \
+           cx->sb_iters            = iters,                             \
+           cx->sb_maxiters         = maxiters,                          \
+           cx->sb_rflags           = r_flags,                           \
+           cx->sb_rxtainted        = rxtainted,                         \
+           cx->sb_orig             = orig,                              \
+           cx->sb_dstr             = dstr,                              \
+           cx->sb_targ             = targ,                              \
+           cx->sb_s                = s,                                 \
+           cx->sb_m                = m,                                 \
+           cx->sb_strend           = strend,                            \
+           cx->sb_rxres            = NULL,                              \
+           cx->sb_rx               = rx,                                \
+           cx->cx_type             = CXt_SUBST | (once ? CXp_ONCE : 0); \
+           rxres_save(&cx->sb_rxres, rx);                               \
+           (void)ReREFCNT_inc(rx);                                      \
+           SvREFCNT_inc_void_NN(targ)
 
-#  define CX_POPSUBST(cx) \
-    STMT_START {                                                        \
-        REGEXP *re;                                                     \
-        assert(CxTYPE(cx) == CXt_SUBST);                                \
-        rxres_free(&cx->sb_rxres);                                      \
-        re = cx->sb_rx;                                                 \
-        cx->sb_rx = NULL;                                               \
-        ReREFCNT_dec(re);                                               \
-        SvREFCNT_dec_NN(cx->sb_targ);                                   \
-    } STMT_END
+#  define CX_POPSUBST(cx)                   \
+       STMT_START {                         \
+           REGEXP *re;                      \
+           assert(CxTYPE(cx) == CXt_SUBST); \
+           rxres_free(&cx->sb_rxres);       \
+           re = cx->sb_rx;                  \
+           cx->sb_rx = NULL;                \
+           ReREFCNT_dec(re);                \
+           SvREFCNT_dec_NN(cx->sb_targ);    \
+       } STMT_END
 #endif
 
 #define CxONCE(cx)              ((cx)->cx_type & CXp_ONCE)
@@ -1146,21 +1146,21 @@ struct context {
 #define CXp_ONCE        0x10    /* What was sbu_once in struct subst */
 
 #define CxTYPE(c)       ((c)->cx_type & CXTYPEMASK)
-#define CxTYPE_is_LOOP(c)  \
-    (   CxTYPE(cx) >= CXt_LOOP_ARY\
+#define CxTYPE_is_LOOP(c)           \
+    (   CxTYPE(cx) >= CXt_LOOP_ARY  \
      && CxTYPE(cx) <= CXt_LOOP_PLAIN)
 #define CxMULTICALL(c)  ((c)->cx_type & CXp_MULTICALL)
-#define CxREALEVAL(c)    \
-    (((c)->cx_type & (CXTYPEMASK|CXp_REAL))\
+#define CxREALEVAL(c)                       \
+    (((c)->cx_type & (CXTYPEMASK|CXp_REAL)) \
      == (CXt_EVAL|CXp_REAL))
-#define CxEVALBLOCK(c)   \
-    (((c)->cx_type & (CXTYPEMASK|CXp_EVALBLOCK))\
+#define CxEVALBLOCK(c)                              \
+    (((c)->cx_type & (CXTYPEMASK|CXp_EVALBLOCK))    \
      == (CXt_EVAL|CXp_EVALBLOCK))
-#define CxTRY(c)         \
-    (((c)->cx_type & (CXTYPEMASK|CXp_TRY))\
+#define CxTRY(c)                            \
+    (((c)->cx_type & (CXTYPEMASK|CXp_TRY))  \
      == (CXt_EVAL|CXp_TRY))
-#define CxFOREACH(c)     \
-    (   CxTYPE(cx) >= CXt_LOOP_ARY\
+#define CxFOREACH(c)                \
+    (   CxTYPE(cx) >= CXt_LOOP_ARY  \
      && CxTYPE(cx) <= CXt_LOOP_LIST)
 
 /* private flags for CXt_DEFER */
@@ -1266,7 +1266,7 @@ typedef struct stackinfo PERL_SI;
 
 #ifdef DEBUGGING
 #  define       SET_MARK_OFFSET \
-    PL_curstackinfo->si_markoff = PL_markstack_ptr - PL_markstack
+       PL_curstackinfo->si_markoff = PL_markstack_ptr - PL_markstack
 #else
 #  define       SET_MARK_OFFSET NOOP
 #endif
@@ -1277,14 +1277,14 @@ typedef struct stackinfo PERL_SI;
 #  define PUSHSTACK_INIT_HWM(si) NOOP
 #endif
 
-#define PUSHSTACKi(type) \
+#define PUSHSTACKi(type)                                                \
     STMT_START {                                                        \
         PERL_SI *next = PL_curstackinfo->si_next;                       \
         DEBUG_l({                                                       \
             int i = 0; PERL_SI *p = PL_curstackinfo;                    \
             while (p) { i++; p = p->si_prev; }                          \
             Perl_deb(aTHX_ "push STACKINFO %d in %s at %s:%d\n",        \
-                         i, SAFE_FUNCTION__, __FILE__, __LINE__);})        \
+                         i, SAFE_FUNCTION__, __FILE__, __LINE__);})     \
         if (!next) {                                                    \
             next = new_stackinfo(32, 2048/sizeof(PERL_CONTEXT) - 1);    \
             next->si_prev = PL_curstackinfo;                            \
@@ -1304,29 +1304,29 @@ typedef struct stackinfo PERL_SI;
 
 /* POPSTACK works with PL_stack_sp, so it may need to be bracketed by
  * PUTBACK/SPAGAIN to flush/refresh any local SP that may be active */
-#define POPSTACK \
-    STMT_START {                                                        \
-        dSP;                                                            \
-        PERL_SI * const prev = PL_curstackinfo->si_prev;                \
-        DEBUG_l({                                                       \
-            int i = -1; PERL_SI *p = PL_curstackinfo;                   \
-            while (p) { i++; p = p->si_prev; }                          \
-            Perl_deb(aTHX_ "pop  STACKINFO %d in %s at %s:%d\n",        \
-                         i, SAFE_FUNCTION__, __FILE__, __LINE__);})        \
-        if (!prev) {                                                    \
-            Perl_croak_popstack();                                      \
-        }                                                               \
-        SWITCHSTACK(PL_curstack,prev->si_stack);                        \
-        /* don't free prev here, free them all at the END{} */          \
-        PL_curstackinfo = prev;                                         \
+#define POPSTACK                                                    \
+    STMT_START {                                                    \
+        dSP;                                                        \
+        PERL_SI * const prev = PL_curstackinfo->si_prev;            \
+        DEBUG_l({                                                   \
+            int i = -1; PERL_SI *p = PL_curstackinfo;               \
+            while (p) { i++; p = p->si_prev; }                      \
+            Perl_deb(aTHX_ "pop  STACKINFO %d in %s at %s:%d\n",    \
+                         i, SAFE_FUNCTION__, __FILE__, __LINE__);}) \
+        if (!prev) {                                                \
+            Perl_croak_popstack();                                  \
+        }                                                           \
+        SWITCHSTACK(PL_curstack,prev->si_stack);                    \
+        /* don't free prev here, free them all at the END{} */      \
+        PL_curstackinfo = prev;                                     \
     } STMT_END
 
-#define POPSTACK_TO(s) \
-    STMT_START {                                                        \
-        while (PL_curstack != s) {                                      \
-            dounwind(-1);                                               \
-            POPSTACK;                                                   \
-        }                                                               \
+#define POPSTACK_TO(s)              \
+    STMT_START {                    \
+        while (PL_curstack != s) {  \
+            dounwind(-1);           \
+            POPSTACK;               \
+        }                           \
     } STMT_END
 
 /*
@@ -1364,77 +1364,77 @@ See L<perlcall/LIGHTWEIGHT CALLBACKS>.
 =cut
 */
 
-#define dMULTICALL \
-    OP  *multicall_cop;                                                 \
+#define dMULTICALL      \
+    OP  *multicall_cop; \
     bool multicall_oldcatch
 
-#define PUSH_MULTICALL(the_cv) \
+#define PUSH_MULTICALL(the_cv)  \
     PUSH_MULTICALL_FLAGS(the_cv, 0)
 
 /* Like PUSH_MULTICALL, but allows you to specify extra flags
  * for the CX stack entry (this isn't part of the public API) */
 
-#define PUSH_MULTICALL_FLAGS(the_cv, flags) \
-    STMT_START {                                                        \
-        PERL_CONTEXT *cx;                                               \
-        CV * const _nOnclAshIngNamE_ = the_cv;                          \
-        CV * const cv = _nOnclAshIngNamE_;                              \
-        PADLIST * const padlist = CvPADLIST(cv);                        \
-        multicall_oldcatch = CATCH_GET;                                 \
-        CATCH_SET(TRUE);                                                \
-        PUSHSTACKi(PERLSI_MULTICALL);                                   \
-        cx = cx_pushblock((CXt_SUB|CXp_MULTICALL|flags), (U8)gimme,     \
-                  PL_stack_sp, PL_savestack_ix);                        \
-        cx_pushsub(cx, cv, NULL, 0);                                    \
-        SAVEOP();                                                       \
-        if (!(flags & CXp_SUB_RE_FAKE))                                 \
-            CvDEPTH(cv)++;                                              \
-        if (CvDEPTH(cv) >= 2)                                           \
-            Perl_pad_push(aTHX_ padlist, CvDEPTH(cv));                  \
-        PAD_SET_CUR_NOSAVE(padlist, CvDEPTH(cv));                       \
-        multicall_cop = CvSTART(cv);                                    \
+#define PUSH_MULTICALL_FLAGS(the_cv, flags)                         \
+    STMT_START {                                                    \
+        PERL_CONTEXT *cx;                                           \
+        CV * const _nOnclAshIngNamE_ = the_cv;                      \
+        CV * const cv = _nOnclAshIngNamE_;                          \
+        PADLIST * const padlist = CvPADLIST(cv);                    \
+        multicall_oldcatch = CATCH_GET;                             \
+        CATCH_SET(TRUE);                                            \
+        PUSHSTACKi(PERLSI_MULTICALL);                               \
+        cx = cx_pushblock((CXt_SUB|CXp_MULTICALL|flags), (U8)gimme, \
+                  PL_stack_sp, PL_savestack_ix);                    \
+        cx_pushsub(cx, cv, NULL, 0);                                \
+        SAVEOP();                                                   \
+        if (!(flags & CXp_SUB_RE_FAKE))                             \
+            CvDEPTH(cv)++;                                          \
+        if (CvDEPTH(cv) >= 2)                                       \
+            Perl_pad_push(aTHX_ padlist, CvDEPTH(cv));              \
+        PAD_SET_CUR_NOSAVE(padlist, CvDEPTH(cv));                   \
+        multicall_cop = CvSTART(cv);                                \
     } STMT_END
 
-#define MULTICALL \
-    STMT_START {                                                        \
-        PL_op = multicall_cop;                                          \
-        CALLRUNOPS(aTHX);                                               \
+#define MULTICALL               \
+    STMT_START {                \
+        PL_op = multicall_cop;  \
+        CALLRUNOPS(aTHX);       \
     } STMT_END
 
-#define POP_MULTICALL \
-    STMT_START {                                                        \
-        PERL_CONTEXT *cx;                                               \
-        cx = CX_CUR();                                                  \
-        CX_LEAVE_SCOPE(cx);                                             \
-        cx_popsub_common(cx);                                           \
-        gimme = cx->blk_gimme;                                          \
-        PERL_UNUSED_VAR(gimme); /* for API */                           \
-        cx_popblock(cx);                                                \
-        CX_POP(cx);                                                     \
-        POPSTACK;                                                       \
-        CATCH_SET(multicall_oldcatch);                                  \
-        SPAGAIN;                                                        \
+#define POP_MULTICALL                           \
+    STMT_START {                                \
+        PERL_CONTEXT *cx;                       \
+        cx = CX_CUR();                          \
+        CX_LEAVE_SCOPE(cx);                     \
+        cx_popsub_common(cx);                   \
+        gimme = cx->blk_gimme;                  \
+        PERL_UNUSED_VAR(gimme); /* for API */   \
+        cx_popblock(cx);                        \
+        CX_POP(cx);                             \
+        POPSTACK;                               \
+        CATCH_SET(multicall_oldcatch);          \
+        SPAGAIN;                                \
     } STMT_END
 
 /* Change the CV of an already-pushed MULTICALL CxSUB block.
  * (this isn't part of the public API) */
 
-#define CHANGE_MULTICALL_FLAGS(the_cv, flags) \
-    STMT_START {                                                        \
-        CV * const _nOnclAshIngNamE_ = the_cv;                          \
-        CV * const cv = _nOnclAshIngNamE_;                              \
-        PADLIST * const padlist = CvPADLIST(cv);                        \
-        PERL_CONTEXT *cx = CX_CUR();                                    \
-        assert(CxMULTICALL(cx));                                        \
-        cx_popsub_common(cx);                                           \
-        cx->cx_type = (CXt_SUB|CXp_MULTICALL|flags);                    \
-        cx_pushsub(cx, cv, NULL, 0);                                    \
-        if (!(flags & CXp_SUB_RE_FAKE))                                 \
-            CvDEPTH(cv)++;                                              \
-        if (CvDEPTH(cv) >= 2)                                           \
-            Perl_pad_push(aTHX_ padlist, CvDEPTH(cv));                  \
-        PAD_SET_CUR_NOSAVE(padlist, CvDEPTH(cv));                       \
-        multicall_cop = CvSTART(cv);                                    \
+#define CHANGE_MULTICALL_FLAGS(the_cv, flags)           \
+    STMT_START {                                        \
+        CV * const _nOnclAshIngNamE_ = the_cv;          \
+        CV * const cv = _nOnclAshIngNamE_;              \
+        PADLIST * const padlist = CvPADLIST(cv);        \
+        PERL_CONTEXT *cx = CX_CUR();                    \
+        assert(CxMULTICALL(cx));                        \
+        cx_popsub_common(cx);                           \
+        cx->cx_type = (CXt_SUB|CXp_MULTICALL|flags);    \
+        cx_pushsub(cx, cv, NULL, 0);                    \
+        if (!(flags & CXp_SUB_RE_FAKE))                 \
+            CvDEPTH(cv)++;                              \
+        if (CvDEPTH(cv) >= 2)                           \
+            Perl_pad_push(aTHX_ padlist, CvDEPTH(cv));  \
+        PAD_SET_CUR_NOSAVE(padlist, CvDEPTH(cv));       \
+        multicall_cop = CvSTART(cv);                    \
     } STMT_END
 /*
  * ex: set ts=8 sts=4 sw=4 et:

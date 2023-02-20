@@ -8,8 +8,8 @@
  *
  */
 
-#if ! defined(PERL_REGCOMP_H_) && (   defined(PERL_CORE)            \
-                                   || defined(PERL_EXT_RE_BUILD))
+#if ! defined(PERL_REGCOMP_H_) && (   defined(PERL_CORE)    \
+    || defined(PERL_EXT_RE_BUILD))
 
 #define PERL_REGCOMP_H_
 
@@ -110,7 +110,7 @@ typedef struct regexp_internal {
 #define PREGf_RECURSE_SEEN      0x00002000
 #define PREGf_PESSIMIZE_SEEN    0x00004000
 
-#define PREGf_ANCH              \
+#define PREGf_ANCH  \
     ( PREGf_ANCH_SBOL | PREGf_ANCH_GPOS | PREGf_ANCH_MBOL )
 
 /* this is where the old regcomp.h started */
@@ -226,9 +226,9 @@ struct regnode_2 {
     I32 arg2;
 };
 
-#define REGNODE_BBM_BITMAP_LEN                                                  \
-                      /* 6 info bits requires 64 bits; 5 => 32 */               \
-                    ((1 << (UTF_CONTINUATION_BYTE_INFO_BITS)) / CHARBITS)
+#define REGNODE_BBM_BITMAP_LEN                      \
+      /* 6 info bits requires 64 bits; 5 => 32 */   \
+    ((1 << (UTF_CONTINUATION_BYTE_INFO_BITS)) / CHARBITS)
 
 /* Used for matching any two-byte UTF-8 character whose start byte is known.
  * The array is a bitmap capable of representing any possible continuation
@@ -378,15 +378,15 @@ struct regnode_ssc {
 #undef STRING
 
 #define OP(p)           ((p)->type)
-#define FLAGS(p)         \
-    ((p)->flags)    /* Caution: Doesn't apply to all\
-                       regnode types.  For some, it's the \
+#define FLAGS(p)                                            \
+    ((p)->flags)    /* Caution: Doesn't apply to all        \
+                       regnode types.  For some, it's the   \
                        character set of the regnode */
-#define STR_LENs(p)      \
-    (__ASSERT_(OP(p) != LEXACT && OP(p) != LEXACT_REQ8)\
+#define STR_LENs(p)                                     \
+    (__ASSERT_(OP(p) != LEXACT && OP(p) != LEXACT_REQ8) \
                 ((struct regnode_string *)p)->str_len)
-#define STRINGs(p)       \
-    (__ASSERT_(OP(p) != LEXACT && OP(p) != LEXACT_REQ8)\
+#define STRINGs(p)                                      \
+    (__ASSERT_(OP(p) != LEXACT && OP(p) != LEXACT_REQ8) \
                 ((struct regnode_string *)p)->string)
 #define OPERANDs(p)     STRINGs(p)
 
@@ -404,19 +404,19 @@ struct regnode_ssc {
  * node to be an ARG2L, using the second 32 bit field for the length, and not
  * using the flags nor next_off fields at all.  One could have an llstring node
  * and even an lllstring type. */
-#define STR_LENl(p)      \
-    (__ASSERT_(OP(p) == LEXACT || OP(p) == LEXACT_REQ8)\
+#define STR_LENl(p)                                     \
+    (__ASSERT_(OP(p) == LEXACT || OP(p) == LEXACT_REQ8) \
                 (((struct regnode_lstring *)p)->str_len))
-#define STRINGl(p)       \
-    (__ASSERT_(OP(p) == LEXACT || OP(p) == LEXACT_REQ8)\
+#define STRINGl(p)                                      \
+    (__ASSERT_(OP(p) == LEXACT || OP(p) == LEXACT_REQ8) \
                 (((struct regnode_lstring *)p)->string))
 #define OPERANDl(p)     STRINGl(p)
 
-#define STR_LEN(p)       \
-    ((OP(p) == LEXACT || OP(p) == LEXACT_REQ8)\
+#define STR_LEN(p)                              \
+    ((OP(p) == LEXACT || OP(p) == LEXACT_REQ8)  \
                            ? STR_LENl(p) : STR_LENs(p))
-#define STRING(p)        \
-    ((OP(p) == LEXACT || OP(p) == LEXACT_REQ8)\
+#define STRING(p)                               \
+    ((OP(p) == LEXACT || OP(p) == LEXACT_REQ8)  \
                            ? STRINGl(p)  : STRINGs(p))
 #define OPERAND(p)      STRING(p)
 
@@ -424,12 +424,12 @@ struct regnode_ssc {
  * occupies - Used by the REGNODE_AFTER() macros and functions. */
 #define STR_SZ(l)       (((l) + sizeof(regnode) - 1) / sizeof(regnode))
 
-#define setSTR_LEN(p,v)                                                     \
-    STMT_START{                                                             \
-        if (OP(p) == LEXACT || OP(p) == LEXACT_REQ8)                        \
-            ((struct regnode_lstring *)(p))->str_len = (v);                 \
-        else                                                                \
-            ((struct regnode_string *)(p))->str_len = (v);                  \
+#define setSTR_LEN(p,v)                                     \
+    STMT_START{                                             \
+        if (OP(p) == LEXACT || OP(p) == LEXACT_REQ8)        \
+            ((struct regnode_lstring *)(p))->str_len = (v); \
+        else                                                \
+            ((struct regnode_string *)(p))->str_len = (v);  \
     } STMT_END
 
 #define ANYOFR_BASE_BITS    20
@@ -525,7 +525,7 @@ struct regnode_ssc {
  * don't have to implement different versions for DEBUGGING and not DEBUGGING,
  * and explains why all the macros use REGNODE_AFTER_PLUS_DEBUG() under the
  * hood. */
-#define REGNODE_AFTER_PLUS_DEBUG(p,extra) \
+#define REGNODE_AFTER_PLUS_DEBUG(p,extra)   \
     (assert_(check_regnode_after(p,extra))  REGNODE_AFTER_PLUS((p),(extra)))
 
 /* find the regnode after this p by using the opcode we previously extracted
@@ -550,40 +550,40 @@ struct regnode_ssc {
  * things go wrong the opcode should be illegal or say the item should be larger
  * than it is, etc. */
 #define        REGNODE_BEFORE_BASE(p)        ((p) - NODE_STEP_REGNODE)
-#define        REGNODE_BEFORE_BASE_DEBUG(p)        \
+#define        REGNODE_BEFORE_BASE_DEBUG(p) \
     (assert_(check_regnode_after(REGNODE_BEFORE_BASE(p),0))  REGNODE_BEFORE_BASE(p))
 #define REGNODE_BEFORE(p) REGNODE_BEFORE_BASE_DEBUG(p)
 
-#define FILL_NODE(offset, op)                                           \
-    STMT_START {                                                        \
-                    OP(REGNODE_p(offset)) = op;                         \
-                    NEXT_OFF(REGNODE_p(offset)) = 0;                    \
+#define FILL_NODE(offset, op)               \
+    STMT_START {                            \
+        OP(REGNODE_p(offset)) = op;         \
+        NEXT_OFF(REGNODE_p(offset)) = 0;    \
     } STMT_END
-#define FILL_ADVANCE_NODE(offset, op)                                   \
-    STMT_START {                                                        \
-                    FILL_NODE(offset, op);                              \
-                    (offset)++;                                         \
+#define FILL_ADVANCE_NODE(offset, op)   \
+    STMT_START {                        \
+        FILL_NODE(offset, op);          \
+        (offset)++;                     \
     } STMT_END
-#define FILL_ADVANCE_NODE_ARG(offset, op, arg)                          \
-    STMT_START {                                                        \
-                    ARG_SET(REGNODE_p(offset), arg);                    \
-                    FILL_ADVANCE_NODE(offset, op);                      \
-                    /* This is used generically for other operations    \
-                     * that have a longer argument */                   \
-                    (offset) += REGNODE_ARG_LEN(op);                          \
+#define FILL_ADVANCE_NODE_ARG(offset, op, arg)              \
+    STMT_START {                                            \
+        ARG_SET(REGNODE_p(offset), arg);                    \
+        FILL_ADVANCE_NODE(offset, op);                      \
+        /* This is used generically for other operations    \
+         * that have a longer argument */                   \
+        (offset) += REGNODE_ARG_LEN(op);                    \
     } STMT_END
-#define FILL_ADVANCE_NODE_ARGp(offset, op, arg)                          \
-    STMT_START {                                                        \
-                    ARGp_SET(REGNODE_p(offset), arg);                    \
-                    FILL_ADVANCE_NODE(offset, op);                      \
-                    (offset) += REGNODE_ARG_LEN(op);                          \
+#define FILL_ADVANCE_NODE_ARGp(offset, op, arg) \
+    STMT_START {                                \
+        ARGp_SET(REGNODE_p(offset), arg);       \
+        FILL_ADVANCE_NODE(offset, op);          \
+        (offset) += REGNODE_ARG_LEN(op);        \
     } STMT_END
-#define FILL_ADVANCE_NODE_2L_ARG(offset, op, arg1, arg2)                \
-    STMT_START {                                                        \
-                    ARG_SET(REGNODE_p(offset), arg1);                   \
-                    ARG2L_SET(REGNODE_p(offset), arg2);                 \
-                    FILL_ADVANCE_NODE(offset, op);                      \
-                    (offset) += 2;                                      \
+#define FILL_ADVANCE_NODE_2L_ARG(offset, op, arg1, arg2)    \
+    STMT_START {                                            \
+        ARG_SET(REGNODE_p(offset), arg1);                   \
+        ARG2L_SET(REGNODE_p(offset), arg2);                 \
+        FILL_ADVANCE_NODE(offset, op);                      \
+        (offset) += 2;                                      \
     } STMT_END
 
 /* define these after we define the normal macros, so we can use
@@ -620,17 +620,17 @@ ARGp_SET_inline(struct regnode *node, SV *ptr) {
  * set to the following: */
 
 #define ANYOF_MATCHES_ALL_OUTSIDE_BITMAP_VALUE   U32_MAX
-#define ANYOF_MATCHES_ALL_OUTSIDE_BITMAP(node)                              \
-                    (ARG(node) == ANYOF_MATCHES_ALL_OUTSIDE_BITMAP_VALUE)
+#define ANYOF_MATCHES_ALL_OUTSIDE_BITMAP(node)  \
+    (ARG(node) == ANYOF_MATCHES_ALL_OUTSIDE_BITMAP_VALUE)
 
-#define ANYOF_MATCHES_NONE_OUTSIDE_BITMAP_VALUE                             \
-   /* Assumes ALL is odd */  (ANYOF_MATCHES_ALL_OUTSIDE_BITMAP_VALUE - 1)
-#define ANYOF_MATCHES_NONE_OUTSIDE_BITMAP(node)                             \
-                    (ARG(node) == ANYOF_MATCHES_NONE_OUTSIDE_BITMAP_VALUE)
+#define ANYOF_MATCHES_NONE_OUTSIDE_BITMAP_VALUE \
+    /* Assumes ALL is odd */  (ANYOF_MATCHES_ALL_OUTSIDE_BITMAP_VALUE - 1)
+#define ANYOF_MATCHES_NONE_OUTSIDE_BITMAP(node) \
+    (ARG(node) == ANYOF_MATCHES_NONE_OUTSIDE_BITMAP_VALUE)
 
 #define ANYOF_ONLY_HAS_BITMAP_MASK  ANYOF_MATCHES_NONE_OUTSIDE_BITMAP_VALUE
-#define ANYOF_ONLY_HAS_BITMAP(node)                                         \
-  ((ARG(node) & ANYOF_ONLY_HAS_BITMAP_MASK) == ANYOF_ONLY_HAS_BITMAP_MASK)
+#define ANYOF_ONLY_HAS_BITMAP(node) \
+    ((ARG(node) & ANYOF_ONLY_HAS_BITMAP_MASK) == ANYOF_ONLY_HAS_BITMAP_MASK)
 
 #define ANYOF_HAS_AUX(node)  (! ANYOF_ONLY_HAS_BITMAP(node))
 
@@ -809,8 +809,8 @@ ARGp_SET_inline(struct regnode *node, SV *ptr) {
 #define ANYOF_FLAGS_ALL         ((U8) ~(0x10|0x20))
 
 #define ANYOF_LOCALE_FLAGS  \
-    (  ANYOFL_FOLD\
-     | ANYOF_MATCHES_POSIXL      \
+    (  ANYOFL_FOLD          \
+     | ANYOF_MATCHES_POSIXL \
      | ANYOFL_UTF8_LOCALE_REQD)
 
 /* These are the flags that apply to both regular ANYOF nodes and synthetic
@@ -915,32 +915,32 @@ ARGp_SET_inline(struct regnode *node, SV *ptr) {
 #define POSIXL_ZERO(field)      STMT_START { (field) = 0; } STMT_END
 #define ANYOF_POSIXL_ZERO(ret)  POSIXL_ZERO(ANYOF_POSIXL_BITMAP(ret))
 
-#define ANYOF_POSIXL_SET_TO_BITMAP(p, bits)                                 \
-                STMT_START { ANYOF_POSIXL_BITMAP(p) = (bits); } STMT_END
+#define ANYOF_POSIXL_SET_TO_BITMAP(p, bits) \
+    STMT_START { ANYOF_POSIXL_BITMAP(p) = (bits); } STMT_END
 
 /* Shifts a bit to get, eg. 0x4000_0000, then subtracts 1 to get 0x3FFF_FFFF */
-#define ANYOF_POSIXL_SETALL(ret)                                            \
-                STMT_START {                                                \
-                    ANYOF_POSIXL_BITMAP(ret) = nBIT_MASK(ANYOF_POSIXL_MAX); \
-                } STMT_END
+#define ANYOF_POSIXL_SETALL(ret)                                \
+    STMT_START {                                                \
+        ANYOF_POSIXL_BITMAP(ret) = nBIT_MASK(ANYOF_POSIXL_MAX); \
+    } STMT_END
 #define ANYOF_CLASS_SETALL(ret) ANYOF_POSIXL_SETALL(ret)
 
-#define ANYOF_POSIXL_TEST_ANY_SET(p)                               \
-        ((ANYOF_FLAGS(p) & ANYOF_MATCHES_POSIXL) && ANYOF_POSIXL_BITMAP(p))
+#define ANYOF_POSIXL_TEST_ANY_SET(p)    \
+    ((ANYOF_FLAGS(p) & ANYOF_MATCHES_POSIXL) && ANYOF_POSIXL_BITMAP(p))
 #define ANYOF_CLASS_TEST_ANY_SET(p) ANYOF_POSIXL_TEST_ANY_SET(p)
 
 /* Since an SSC always has this field, we don't have to test for that; nor do
  * we want to because the bit isn't set for SSC during its construction */
-#define ANYOF_POSIXL_SSC_TEST_ANY_SET(p)                               \
-                            cBOOL(((regnode_ssc*)(p))->classflags)
-#define ANYOF_POSIXL_SSC_TEST_ALL_SET(p)  \
-    /* Are all bits set? */\
-        (((regnode_ssc*) (p))->classflags                              \
+#define ANYOF_POSIXL_SSC_TEST_ANY_SET(p)    \
+    cBOOL(((regnode_ssc*)(p))->classflags)
+#define ANYOF_POSIXL_SSC_TEST_ALL_SET(p)    \
+    /* Are all bits set? */                 \
+        (((regnode_ssc*) (p))->classflags   \
                                         == nBIT_MASK(ANYOF_POSIXL_MAX))
 
-#define ANYOF_POSIXL_TEST_ALL_SET(p)                                   \
-        ((ANYOF_FLAGS(p) & ANYOF_MATCHES_POSIXL)                       \
-         && ANYOF_POSIXL_BITMAP(p) == nBIT_MASK(ANYOF_POSIXL_MAX))
+#define ANYOF_POSIXL_TEST_ALL_SET(p)            \
+    ((ANYOF_FLAGS(p) & ANYOF_MATCHES_POSIXL)    \
+     && ANYOF_POSIXL_BITMAP(p) == nBIT_MASK(ANYOF_POSIXL_MAX))
 
 #define ANYOF_POSIXL_OR(source, dest) STMT_START { (dest)->classflags |= (source)->classflags; } STMT_END
 #define ANYOF_CLASS_OR(source, dest) ANYOF_POSIXL_OR((source), (dest))
@@ -954,10 +954,10 @@ ARGp_SET_inline(struct regnode *node, SV *ptr) {
 #define ANYOF_BITMAP_CLEAR(p,c) (ANYOF_BITMAP_BYTE(p, c) &= ~ANYOF_BIT(c))
 #define ANYOF_BITMAP_TEST(p, c) cBOOL(ANYOF_BITMAP_BYTE(p, c) & ANYOF_BIT(c))
 
-#define ANYOF_BITMAP_SETALL(p)          \
-        memset (ANYOF_BITMAP(p), 255, ANYOF_BITMAP_SIZE)
-#define ANYOF_BITMAP_CLEARALL(p)        \
-        Zero (ANYOF_BITMAP(p), ANYOF_BITMAP_SIZE)
+#define ANYOF_BITMAP_SETALL(p)  \
+    memset (ANYOF_BITMAP(p), 255, ANYOF_BITMAP_SIZE)
+#define ANYOF_BITMAP_CLEARALL(p)    \
+    Zero (ANYOF_BITMAP(p), ANYOF_BITMAP_SIZE)
 
 /*
  * Utility definitions.
@@ -1263,89 +1263,89 @@ re.pm, especially to the documentation.
 #define RE_DEBUG_FLAG(x) (re_debug_flags & (x))
 /* Compile */
 #define DEBUG_COMPILE_r(x)  \
-    DEBUG_r(\
+    DEBUG_r(                \
     if (DEBUG_v_TEST || RE_DEBUG_FLAG(RE_DEBUG_COMPILE_MASK)) x  )
-#define DEBUG_PARSE_r(x)  \
-    DEBUG_r(\
+#define DEBUG_PARSE_r(x)    \
+    DEBUG_r(                \
     if (DEBUG_v_TEST || RE_DEBUG_FLAG(RE_DEBUG_COMPILE_PARSE)) x  )
-#define DEBUG_OPTIMISE_r(x)  \
-    DEBUG_r(\
+#define DEBUG_OPTIMISE_r(x) \
+    DEBUG_r(                \
     if (DEBUG_v_TEST || RE_DEBUG_FLAG(RE_DEBUG_COMPILE_OPTIMISE)) x  )
-#define DEBUG_DUMP_r(x)  \
-    DEBUG_r(\
+#define DEBUG_DUMP_r(x) \
+    DEBUG_r(            \
     if (DEBUG_v_TEST || RE_DEBUG_FLAG(RE_DEBUG_COMPILE_DUMP)) x  )
-#define DEBUG_TRIE_COMPILE_r(x)  \
-    DEBUG_r(\
+#define DEBUG_TRIE_COMPILE_r(x) \
+    DEBUG_r(                    \
     if (DEBUG_v_TEST || RE_DEBUG_FLAG(RE_DEBUG_COMPILE_TRIE)) x )
-#define DEBUG_FLAGS_r(x)  \
-    DEBUG_r(\
+#define DEBUG_FLAGS_r(x)    \
+    DEBUG_r(                \
     if (DEBUG_v_TEST || RE_DEBUG_FLAG(RE_DEBUG_COMPILE_FLAGS)) x )
-#define DEBUG_TEST_r(x)  \
-    DEBUG_r(\
+#define DEBUG_TEST_r(x) \
+    DEBUG_r(            \
     if (DEBUG_v_TEST || RE_DEBUG_FLAG(RE_DEBUG_COMPILE_TEST)) x )
 /* Execute */
 #define DEBUG_EXECUTE_r(x)  \
-    DEBUG_r(\
+    DEBUG_r(                \
     if (DEBUG_v_TEST || RE_DEBUG_FLAG(RE_DEBUG_EXECUTE_MASK)) x  )
-#define DEBUG_INTUIT_r(x)  \
-    DEBUG_r(\
+#define DEBUG_INTUIT_r(x)   \
+    DEBUG_r(                \
     if (DEBUG_v_TEST || RE_DEBUG_FLAG(RE_DEBUG_EXECUTE_INTUIT)) x  )
-#define DEBUG_MATCH_r(x)  \
-    DEBUG_r(\
+#define DEBUG_MATCH_r(x)    \
+    DEBUG_r(                \
     if (DEBUG_v_TEST || RE_DEBUG_FLAG(RE_DEBUG_EXECUTE_MATCH)) x  )
-#define DEBUG_TRIE_EXECUTE_r(x)  \
-    DEBUG_r(\
+#define DEBUG_TRIE_EXECUTE_r(x) \
+    DEBUG_r(                    \
     if (DEBUG_v_TEST || RE_DEBUG_FLAG(RE_DEBUG_EXECUTE_TRIE)) x )
 
 /* Extra */
-#define DEBUG_EXTRA_r(x)  \
-    DEBUG_r(\
+#define DEBUG_EXTRA_r(x)    \
+    DEBUG_r(                \
     if (DEBUG_v_TEST || RE_DEBUG_FLAG(RE_DEBUG_EXTRA_MASK)) x  )
-#define DEBUG_STATE_r(x)  \
-    DEBUG_r(\
+#define DEBUG_STATE_r(x)    \
+    DEBUG_r(                \
     if (DEBUG_v_TEST || RE_DEBUG_FLAG(RE_DEBUG_EXTRA_STATE)) x )
-#define DEBUG_STACK_r(x)  \
-    DEBUG_r(\
+#define DEBUG_STACK_r(x)    \
+    DEBUG_r(                \
     if (DEBUG_v_TEST || RE_DEBUG_FLAG(RE_DEBUG_EXTRA_STACK)) x )
 #define DEBUG_BUFFERS_r(x)  \
-    DEBUG_r(\
+    DEBUG_r(                \
     if (DEBUG_v_TEST || RE_DEBUG_FLAG(RE_DEBUG_EXTRA_BUFFERS)) x )
 
-#define DEBUG_OPTIMISE_MORE_r(x)  \
-    DEBUG_r(\
+#define DEBUG_OPTIMISE_MORE_r(x)                                                \
+    DEBUG_r(                                                                    \
     if (DEBUG_v_TEST || ((RE_DEBUG_EXTRA_OPTIMISE|RE_DEBUG_COMPILE_OPTIMISE) == \
          RE_DEBUG_FLAG(RE_DEBUG_EXTRA_OPTIMISE|RE_DEBUG_COMPILE_OPTIMISE))) x )
-#define DEBUG_TRIE_COMPILE_MORE_r(x)  \
-    DEBUG_TRIE_COMPILE_r(\
+#define DEBUG_TRIE_COMPILE_MORE_r(x)    \
+    DEBUG_TRIE_COMPILE_r(               \
     if (DEBUG_v_TEST || RE_DEBUG_FLAG(RE_DEBUG_EXTRA_TRIE)) x )
-#define DEBUG_TRIE_EXECUTE_MORE_r(x)  \
-    DEBUG_TRIE_EXECUTE_r(\
+#define DEBUG_TRIE_EXECUTE_MORE_r(x)    \
+    DEBUG_TRIE_EXECUTE_r(               \
     if (DEBUG_v_TEST || RE_DEBUG_FLAG(RE_DEBUG_EXTRA_TRIE)) x )
 
-#define DEBUG_TRIE_r(x)  \
-    DEBUG_r(\
+#define DEBUG_TRIE_r(x)                                     \
+    DEBUG_r(                                                \
     if (DEBUG_v_TEST || RE_DEBUG_FLAG(RE_DEBUG_COMPILE_TRIE \
         | RE_DEBUG_EXECUTE_TRIE )) x )
-#define DEBUG_GPOS_r(x)  \
-    DEBUG_r(\
+#define DEBUG_GPOS_r(x) \
+    DEBUG_r(            \
     if (DEBUG_v_TEST || RE_DEBUG_FLAG(RE_DEBUG_EXTRA_GPOS)) x )
 
-#define DEBUG_DUMP_PRE_OPTIMIZE_r(x)  \
-    DEBUG_r(\
+#define DEBUG_DUMP_PRE_OPTIMIZE_r(x)    \
+    DEBUG_r(                            \
     if (DEBUG_v_TEST || RE_DEBUG_FLAG(RE_DEBUG_EXTRA_DUMP_PRE_OPTIMIZE)) x )
 
 /* initialization */
 /* Get the debug flags for code not in regcomp.c nor regexec.c.  This doesn't
  * initialize the variable if it isn't already there, instead it just assumes
  * the flags are 0 */
-#define DECLARE_AND_GET_RE_DEBUG_FLAGS_NON_REGEX                               \
-    volatile IV re_debug_flags = 0;  PERL_UNUSED_VAR(re_debug_flags);          \
-    STMT_START {                                                               \
-        SV * re_debug_flags_sv = NULL;                                         \
-                     /* get_sv() can return NULL during global destruction. */ \
-        re_debug_flags_sv = PL_curcop ? get_sv(RE_DEBUG_FLAGS, GV_ADD) : NULL; \
-        if (re_debug_flags_sv && SvIOK(re_debug_flags_sv))                     \
-            re_debug_flags=SvIV(re_debug_flags_sv);                            \
+#define DECLARE_AND_GET_RE_DEBUG_FLAGS_NON_REGEX                                \
+    volatile IV re_debug_flags = 0;  PERL_UNUSED_VAR(re_debug_flags);           \
+    STMT_START {                                                                \
+        SV * re_debug_flags_sv = NULL;                                          \
+                     /* get_sv() can return NULL during global destruction. */  \
+        re_debug_flags_sv = PL_curcop ? get_sv(RE_DEBUG_FLAGS, GV_ADD) : NULL;  \
+        if (re_debug_flags_sv && SvIOK(re_debug_flags_sv))                      \
+            re_debug_flags=SvIV(re_debug_flags_sv);                             \
     } STMT_END
 
 
@@ -1353,28 +1353,28 @@ re.pm, especially to the documentation.
 
 /* For use in regcomp.c and regexec.c,  Get the debug flags, and initialize to
  * the defaults if not done already */
-#define DECLARE_AND_GET_RE_DEBUG_FLAGS                                         \
-    volatile IV re_debug_flags = 0;  PERL_UNUSED_VAR(re_debug_flags);          \
-    DEBUG_r({                              \
-        SV * re_debug_flags_sv = NULL;                                         \
-                     /* get_sv() can return NULL during global destruction. */ \
-        re_debug_flags_sv = PL_curcop ? get_sv(RE_DEBUG_FLAGS, GV_ADD) : NULL; \
-        if (re_debug_flags_sv) {                                               \
-            if (!SvIOK(re_debug_flags_sv)) /* If doesn't exist set to default */\
-                sv_setuv(re_debug_flags_sv,                                    \
-                        /* These defaults should be kept in sync with re.pm */ \
-                            RE_DEBUG_COMPILE_DUMP | RE_DEBUG_EXECUTE_MASK );   \
-            re_debug_flags=SvIV(re_debug_flags_sv);                            \
-        }                                                                      \
+#define DECLARE_AND_GET_RE_DEBUG_FLAGS                                              \
+    volatile IV re_debug_flags = 0;  PERL_UNUSED_VAR(re_debug_flags);               \
+    DEBUG_r({                                                                       \
+        SV * re_debug_flags_sv = NULL;                                              \
+                     /* get_sv() can return NULL during global destruction. */      \
+        re_debug_flags_sv = PL_curcop ? get_sv(RE_DEBUG_FLAGS, GV_ADD) : NULL;      \
+        if (re_debug_flags_sv) {                                                    \
+            if (!SvIOK(re_debug_flags_sv)) /* If doesn't exist set to default */    \
+                sv_setuv(re_debug_flags_sv,                                         \
+                        /* These defaults should be kept in sync with re.pm */      \
+                            RE_DEBUG_COMPILE_DUMP | RE_DEBUG_EXECUTE_MASK );        \
+            re_debug_flags=SvIV(re_debug_flags_sv);                                 \
+        }                                                                           \
     })
 
 #define isDEBUG_WILDCARD (DEBUG_v_TEST || RE_DEBUG_FLAG(RE_DEBUG_EXTRA_WILDCARD))
 
-#define RE_PV_COLOR_DECL(rpv,rlen,isuni,dsv,pv,l,m,c1,c2)   \
-    const char * const rpv =                                \
-        pv_pretty((dsv), (pv), (l), (m),                    \
-            PL_colors[(c1)],PL_colors[(c2)],                \
-            PERL_PV_ESCAPE_RE|PERL_PV_ESCAPE_NONASCII |((isuni) ? PERL_PV_ESCAPE_UNI : 0) );         \
+#define RE_PV_COLOR_DECL(rpv,rlen,isuni,dsv,pv,l,m,c1,c2)                                       \
+    const char * const rpv =                                                                    \
+        pv_pretty((dsv), (pv), (l), (m),                                                        \
+            PL_colors[(c1)],PL_colors[(c2)],                                                    \
+            PERL_PV_ESCAPE_RE|PERL_PV_ESCAPE_NONASCII |((isuni) ? PERL_PV_ESCAPE_UNI : 0) );    \
     const int rlen = SvCUR(dsv)
 
 /* This is currently unsed in the core */
@@ -1384,12 +1384,12 @@ re.pm, especially to the documentation.
             PL_colors[(c1)],PL_colors[(c2)],                        \
             PERL_PV_ESCAPE_RE|PERL_PV_ESCAPE_NONASCII |((isuni) ? PERL_PV_ESCAPE_UNI : 0) )
 
-#define RE_PV_QUOTED_DECL(rpv,isuni,dsv,pv,l,m)                     \
-    const char * const rpv =                                        \
-        pv_pretty((dsv), (pv), (l), (m),                            \
-            PL_colors[0], PL_colors[1],                             \
-            ( PERL_PV_PRETTY_QUOTE | PERL_PV_ESCAPE_RE | PERL_PV_ESCAPE_NONASCII | PERL_PV_PRETTY_ELLIPSES | \
-              ((isuni) ? PERL_PV_ESCAPE_UNI : 0))                  \
+#define RE_PV_QUOTED_DECL(rpv,isuni,dsv,pv,l,m)                                                                 \
+    const char * const rpv =                                                                                    \
+        pv_pretty((dsv), (pv), (l), (m),                                                                        \
+            PL_colors[0], PL_colors[1],                                                                         \
+            ( PERL_PV_PRETTY_QUOTE | PERL_PV_ESCAPE_RE | PERL_PV_ESCAPE_NONASCII | PERL_PV_PRETTY_ELLIPSES |    \
+              ((isuni) ? PERL_PV_ESCAPE_UNI : 0))                                                               \
         )
 
 #define RE_SV_DUMPLEN(ItEm) (SvCUR(ItEm) - (SvTAIL(ItEm)!=0))
@@ -1438,9 +1438,9 @@ typedef enum {
 #  define MAX_ANYOF_HRx_BYTE  0xEF
 #endif
 #define LOWEST_ANYOF_HRx_BYTE(b) (((b) >> 2) + 0xC0)
-#define HIGHEST_ANYOF_HRx_BYTE(b)                                           \
-                                  (LOWEST_ANYOF_HRx_BYTE(b)                 \
-          + ((MAX_ANYOF_HRx_BYTE - LOWEST_ANYOF_HRx_BYTE(b)) >> ((b) & 3)))
+#define HIGHEST_ANYOF_HRx_BYTE(b)                       \
+                            (LOWEST_ANYOF_HRx_BYTE(b)   \
+    + ((MAX_ANYOF_HRx_BYTE - LOWEST_ANYOF_HRx_BYTE(b)) >> ((b) & 3)))
 
 #if !defined(PERL_IN_XSUB_RE) || defined(PLUGGABLE_RE_EXTENSION)
 #  define GET_REGCLASS_AUX_DATA(a,b,c,d,e,f)  get_regclass_aux_data(a,b,c,d,e,f)

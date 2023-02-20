@@ -227,15 +227,15 @@ struct RExC_state_t {
 #define RExC_recurse_count      (pRExC_state->recurse_count)
 #define RExC_sets_depth         (pRExC_state->sets_depth)
 #define RExC_study_chunk_recursed        (pRExC_state->study_chunk_recursed)
-#define RExC_study_chunk_recursed_bytes  \
-                                   (pRExC_state->study_chunk_recursed_bytes)
+#define RExC_study_chunk_recursed_bytes \
+    (pRExC_state->study_chunk_recursed_bytes)
 #define RExC_in_lookaround      (pRExC_state->in_lookaround)
 #define RExC_contains_locale    (pRExC_state->contains_locale)
 #define RExC_recode_x_to_native (pRExC_state->recode_x_to_native)
 
 #ifdef EBCDIC
-#  define SET_recode_x_to_native(x)                                         \
-                    STMT_START { RExC_recode_x_to_native = (x); } STMT_END
+#  define SET_recode_x_to_native(x) \
+       STMT_START { RExC_recode_x_to_native = (x); } STMT_END
 #else
 #  define SET_recode_x_to_native(x) NOOP
 #endif
@@ -285,10 +285,10 @@ struct RExC_state_t {
  * RExC_parse to ensure that when processing UTF-8 we would not read
  * past the end of the string.
  */
-#define RExC_parse_incf(flag)  \
-    STMT_START {\
-    RExC_parse += (flag) ? UTF8SKIP(RExC_parse) : 1;    \
-} STMT_END
+#define RExC_parse_incf(flag)                               \
+    STMT_START {                                            \
+        RExC_parse += (flag) ? UTF8SKIP(RExC_parse) : 1;    \
+    } STMT_END
 
 /* RExC_parse_inc_safef(flag)
  *
@@ -302,10 +302,10 @@ struct RExC_state_t {
  *
  * NOTE: Will NOT read past RExC_end when content is UTF-8.
  */
-#define RExC_parse_inc_safef(flag)  \
-    STMT_START {\
-    RExC_parse += (flag) ? UTF8_SAFE_SKIP(RExC_parse,RExC_end) : 1; \
-} STMT_END
+#define RExC_parse_inc_safef(flag)                                      \
+    STMT_START {                                                        \
+        RExC_parse += (flag) ? UTF8_SAFE_SKIP(RExC_parse,RExC_end) : 1; \
+    } STMT_END
 
 /* RExC_parse_inc()
  *
@@ -346,10 +346,10 @@ struct RExC_state_t {
  * to ensure that when processing UTF-8 we would not read past the end
  * of the string.
  */
-#define RExC_parse_inc_utf8()  \
-    STMT_START {\
-    RExC_parse += UTF8SKIP(RExC_parse);     \
-} STMT_END
+#define RExC_parse_inc_utf8()               \
+    STMT_START {                            \
+        RExC_parse += UTF8SKIP(RExC_parse); \
+    } STMT_END
 
 /* RExC_parse_inc_if_char()
  *
@@ -366,10 +366,10 @@ struct RExC_state_t {
  * UTF macro which is defined as cBOOL(RExC_parse_utf8), thus this
  * macro operates on the pRExC_state structure only.
  */
-#define RExC_parse_inc_if_char()  \
-    STMT_START {\
-    RExC_parse += SKIP_IF_CHAR(RExC_parse,RExC_end);  \
-} STMT_END
+#define RExC_parse_inc_if_char()                            \
+    STMT_START {                                            \
+        RExC_parse += SKIP_IF_CHAR(RExC_parse,RExC_end);    \
+    } STMT_END
 
 /* RExC_parse_inc_by(n_octets)
  *
@@ -382,10 +382,10 @@ struct RExC_state_t {
  *
  * Typically used to advanced past previously analyzed content.
  */
-#define RExC_parse_inc_by(n_octets)  \
-    STMT_START {\
-    RExC_parse += (n_octets);                     \
-} STMT_END
+#define RExC_parse_inc_by(n_octets) \
+    STMT_START {                    \
+        RExC_parse += (n_octets);   \
+    } STMT_END
 
 /* RExC_parse_set(to_ptr)
  *
@@ -393,9 +393,9 @@ struct RExC_state_t {
  * argument. No validation whatsoever is performed on the to pointer.
  */
 #define RExC_parse_set(to_ptr)  \
-    STMT_START {\
-    RExC_parse = (to_ptr);                  \
-} STMT_END
+    STMT_START {                \
+        RExC_parse = (to_ptr);  \
+    } STMT_END
 
 /**********************************************************************/
 
@@ -406,16 +406,16 @@ struct RExC_state_t {
  */
 #define RExC_naughty    (pRExC_state->naughty)
 #define TOO_NAUGHTY (10)
-#define MARK_NAUGHTY(add) \
+#define MARK_NAUGHTY(add)           \
     if (RExC_naughty < TOO_NAUGHTY) \
         RExC_naughty += (add)
-#define MARK_NAUGHTY_EXP(exp, add) \
+#define MARK_NAUGHTY_EXP(exp, add)  \
     if (RExC_naughty < TOO_NAUGHTY) \
         RExC_naughty += RExC_naughty / (exp) + (add)
 
 #define isNON_BRACE_QUANTIFIER(c)   ((c) == '*' || (c) == '+' || (c) == '?')
-#define isQUANTIFIER(s,e)   \
-    (   isNON_BRACE_QUANTIFIER(*s)\
+#define isQUANTIFIER(s,e)           \
+    (   isNON_BRACE_QUANTIFIER(*s)  \
      || ((*s) == '{' && regcurly(s, e, NULL)))
 
 /*
@@ -470,20 +470,20 @@ struct RExC_state_t {
 #define PBITVAL(paren) (1 << ((paren) & 7))
 #define PAREN_OFFSET(depth) \
     (RExC_study_chunk_recursed + (depth) * RExC_study_chunk_recursed_bytes)
-#define PAREN_TEST(depth, paren) \
+#define PAREN_TEST(depth, paren)    \
     (PBYTE(PAREN_OFFSET(depth), paren) & PBITVAL(paren))
 #define PAREN_SET(depth, paren) \
     (PBYTE(PAREN_OFFSET(depth), paren) |= PBITVAL(paren))
-#define PAREN_UNSET(depth, paren) \
+#define PAREN_UNSET(depth, paren)   \
     (PBYTE(PAREN_OFFSET(depth), paren) &= ~PBITVAL(paren))
 
-#define REQUIRE_UTF8(flagp)  \
-    STMT_START {\
-             if (!UTF) {                           \
-                 *flagp = RESTART_PARSE|NEED_UTF8; \
-                 return 0;                         \
-             }                                     \
-     } STMT_END
+#define REQUIRE_UTF8(flagp)                     \
+    STMT_START {                                \
+        if (!UTF) {                             \
+            *flagp = RESTART_PARSE|NEED_UTF8;   \
+            return 0;                           \
+        }                                       \
+    } STMT_END
 
 /* /u is to be chosen if we are supposed to use Unicode rules, or if the
  * pattern is in UTF-8.  This latter condition is in case the outermost rules
@@ -494,27 +494,27 @@ struct RExC_state_t {
  * a flag that indicates we need to override /d with /u as a result of
  * something in the pattern.  It should only be used in regards to calling
  * set_regex_charset() or get_regex_charset() */
-#define REQUIRE_UNI_RULES(flagp, restart_retval)                            \
-    STMT_START {                                                            \
-            if (DEPENDS_SEMANTICS) {                                        \
-                set_regex_charset(&RExC_flags, REGEX_UNICODE_CHARSET);      \
-                RExC_uni_semantics = 1;                                     \
-                if (RExC_seen_d_op && LIKELY(! IN_PARENS_PASS)) {           \
-                    /* No need to restart the parse if we haven't seen      \
-                     * anything that differs between /u and /d, and no need \
-                     * to restart immediately if we're going to reparse     \
-                     * anyway to count parens */                            \
-                    *flagp |= RESTART_PARSE;                                \
-                    return restart_retval;                                  \
-                }                                                           \
-            }                                                               \
+#define REQUIRE_UNI_RULES(flagp, restart_retval)                        \
+    STMT_START {                                                        \
+        if (DEPENDS_SEMANTICS) {                                        \
+            set_regex_charset(&RExC_flags, REGEX_UNICODE_CHARSET);      \
+            RExC_uni_semantics = 1;                                     \
+            if (RExC_seen_d_op && LIKELY(! IN_PARENS_PASS)) {           \
+                /* No need to restart the parse if we haven't seen      \
+                 * anything that differs between /u and /d, and no need \
+                 * to restart immediately if we're going to reparse     \
+                 * anyway to count parens */                            \
+                *flagp |= RESTART_PARSE;                                \
+                return restart_retval;                                  \
+            }                                                           \
+        }                                                               \
     } STMT_END
 
-#define REQUIRE_BRANCHJ(flagp, restart_retval)                              \
-    STMT_START {                                                            \
-                RExC_use_BRANCHJ = 1;                                       \
-                *flagp |= RESTART_PARSE;                                    \
-                return restart_retval;                                      \
+#define REQUIRE_BRANCHJ(flagp, restart_retval)  \
+    STMT_START {                                \
+        RExC_use_BRANCHJ = 1;                   \
+        *flagp |= RESTART_PARSE;                \
+        return restart_retval;                  \
     } STMT_END
 
 /* Until we have completed the parse, we leave RExC_total_parens at 0 or
@@ -524,9 +524,9 @@ struct RExC_state_t {
  * parens to be properly handled.  And that means an extra pass will be
  * required after we've counted them all */
 #define ALL_PARENS_COUNTED (RExC_total_parens > 0)
-#define REQUIRE_PARENS_PASS                                                 \
-    STMT_START {  /* No-op if have completed a pass */                      \
-                    if (! ALL_PARENS_COUNTED) RExC_total_parens = -1;       \
+#define REQUIRE_PARENS_PASS                                 \
+    STMT_START {  /* No-op if have completed a pass */      \
+        if (! ALL_PARENS_COUNTED) RExC_total_parens = -1;   \
     } STMT_END
 #define IN_PARENS_PASS (RExC_total_parens < 0)
 
@@ -537,20 +537,20 @@ struct RExC_state_t {
  * additional flags that should cause a return; 0 if none.  If the return will
  * be done, '*flagp' is first set to be all of the flags that caused the
  * return. */
-#define RETURN_FAIL_ON_RESTART_OR_FLAGS(flags,flagp,extra)                  \
-    STMT_START {                                                            \
-            if ((flags) & (RESTART_PARSE|NEED_UTF8|(extra))) {              \
-                *(flagp) = (flags) & (RESTART_PARSE|NEED_UTF8|(extra));     \
-                return 0;                                                   \
-            }                                                               \
+#define RETURN_FAIL_ON_RESTART_OR_FLAGS(flags,flagp,extra)          \
+    STMT_START {                                                    \
+        if ((flags) & (RESTART_PARSE|NEED_UTF8|(extra))) {          \
+            *(flagp) = (flags) & (RESTART_PARSE|NEED_UTF8|(extra)); \
+            return 0;                                               \
+        }                                                           \
     } STMT_END
 
 #define MUST_RESTART(flags) ((flags) & (RESTART_PARSE))
 
-#define RETURN_FAIL_ON_RESTART(flags,flagp)                                 \
-                        RETURN_FAIL_ON_RESTART_OR_FLAGS( flags, flagp, 0)
-#define RETURN_FAIL_ON_RESTART_FLAGP(flagp)                                 \
-                                    if (MUST_RESTART(*(flagp))) return 0
+#define RETURN_FAIL_ON_RESTART(flags,flagp) \
+    RETURN_FAIL_ON_RESTART_OR_FLAGS( flags, flagp, 0)
+#define RETURN_FAIL_ON_RESTART_FLAGP(flagp) \
+    if (MUST_RESTART(*(flagp))) return 0
 
 /* This converts the named class defined in regcomp.h to its equivalent class
  * number defined in handy.h. */
@@ -558,9 +558,9 @@ struct RExC_state_t {
 #define classnum_to_namedclass(classnum)  ((classnum) * 2)
 
 #define _invlist_union_complement_2nd(a, b, output) \
-                        _invlist_union_maybe_complement_2nd(a, b, TRUE, output)
-#define _invlist_intersection_complement_2nd(a, b, output) \
-                 _invlist_intersection_maybe_complement_2nd(a, b, TRUE, output)
+    _invlist_union_maybe_complement_2nd(a, b, TRUE, output)
+#define _invlist_intersection_complement_2nd(a, b, output)  \
+    _invlist_intersection_maybe_complement_2nd(a, b, TRUE, output)
 
 /* We add a marker if we are deferring expansion of a property that is both
  * 1) potentiallly user-defined; and
@@ -745,21 +745,21 @@ static const scan_data_t zero_scan_data = {
 
 /* The enums for all these are ordered so things work out correctly */
 #define LOC (get_regex_charset(RExC_flags) == REGEX_LOCALE_CHARSET)
-#define DEPENDS_SEMANTICS  \
-    (get_regex_charset(RExC_flags)\
+#define DEPENDS_SEMANTICS           \
+    (get_regex_charset(RExC_flags)  \
                                == REGEX_DEPENDS_CHARSET)
 #define UNI_SEMANTICS (get_regex_charset(RExC_flags) == REGEX_UNICODE_CHARSET)
-#define AT_LEAST_UNI_SEMANTICS  \
-    (get_regex_charset(RExC_flags)\
+#define AT_LEAST_UNI_SEMANTICS      \
+    (get_regex_charset(RExC_flags)  \
                           >= REGEX_UNICODE_CHARSET)
-#define ASCII_RESTRICTED  \
-    (get_regex_charset(RExC_flags)\
+#define ASCII_RESTRICTED            \
+    (get_regex_charset(RExC_flags)  \
                        == REGEX_ASCII_RESTRICTED_CHARSET)
-#define AT_LEAST_ASCII_RESTRICTED  \
-    (get_regex_charset(RExC_flags)\
+#define AT_LEAST_ASCII_RESTRICTED   \
+    (get_regex_charset(RExC_flags)  \
               >= REGEX_ASCII_RESTRICTED_CHARSET)
-#define ASCII_FOLD_RESTRICTED  \
-    (get_regex_charset(RExC_flags)\
+#define ASCII_FOLD_RESTRICTED       \
+    (get_regex_charset(RExC_flags)  \
               == REGEX_ASCII_MORE_RESTRICTED_CHARSET)
 
 #define FOLD cBOOL(RExC_flags & RXf_PMf_FOLD)
@@ -790,8 +790,8 @@ static const scan_data_t zero_scan_data = {
 #define MARKER1 "<-- HERE"    /* marker as it appears in the description */
 #define MARKER2 " <-- HERE "  /* marker as it appears within the regex */
 
-#define REPORT_LOCATION  \
-    " in regex; marked by " MARKER1\
+#define REPORT_LOCATION             \
+    " in regex; marked by " MARKER1 \
     " in m/%" UTF8f MARKER2 "%" UTF8f "/"
 
 /* The code in this file in places uses one level of recursion with parsing
@@ -877,18 +877,18 @@ static const scan_data_t zero_scan_data = {
 #define SKIP_IF_CHAR(s, e) (!*(s) ? 0 : UTF ? UTF8_SAFE_SKIP(s, e) : 1)
 
 /* Set up to clean up after our imminent demise */
-#define PREPARE_TO_DIE                                                      \
-    STMT_START {                                                            \
-        if (RExC_rx_sv)                                                     \
-            SAVEFREESV(RExC_rx_sv);                                         \
-        if (RExC_open_parens)                                               \
-            SAVEFREEPV(RExC_open_parens);                                   \
-        if (RExC_close_parens)                                              \
-            SAVEFREEPV(RExC_close_parens);                                  \
-        if (RExC_logical_to_parno)                                          \
-            SAVEFREEPV(RExC_logical_to_parno);                              \
-        if (RExC_parno_to_logical)                                          \
-            SAVEFREEPV(RExC_parno_to_logical);                              \
+#define PREPARE_TO_DIE                          \
+    STMT_START {                                \
+        if (RExC_rx_sv)                         \
+            SAVEFREESV(RExC_rx_sv);             \
+        if (RExC_open_parens)                   \
+            SAVEFREEPV(RExC_open_parens);       \
+        if (RExC_close_parens)                  \
+            SAVEFREEPV(RExC_close_parens);      \
+        if (RExC_logical_to_parno)              \
+            SAVEFREEPV(RExC_logical_to_parno);  \
+        if (RExC_parno_to_logical)              \
+            SAVEFREEPV(RExC_parno_to_logical);  \
     } STMT_END
 
 /*
@@ -896,136 +896,136 @@ static const scan_data_t zero_scan_data = {
  * arg. Show regex, up to a maximum length. If it's too long, chop and add
  * "...".
  */
-#define _FAIL(code)  \
-    STMT_START {\
-    const char *ellipses = "";                                          \
-    IV len = RExC_precomp_end - RExC_precomp;                           \
-                                                        \
-    PREPARE_TO_DIE;                                                     \
-    if (len > RegexLengthToShowInErrorMessages) {                       \
-        /* chop 10 shorter than the max, to ensure meaning of "..." */  \
-        len = RegexLengthToShowInErrorMessages - 10;                    \
-        ellipses = "...";                                               \
-    }                                                                   \
-    code;                                                               \
-} STMT_END
+#define _FAIL(code)                                                         \
+    STMT_START {                                                            \
+        const char *ellipses = "";                                          \
+        IV len = RExC_precomp_end - RExC_precomp;                           \
+                                                                            \
+        PREPARE_TO_DIE;                                                     \
+        if (len > RegexLengthToShowInErrorMessages) {                       \
+            /* chop 10 shorter than the max, to ensure meaning of "..." */  \
+            len = RegexLengthToShowInErrorMessages - 10;                    \
+            ellipses = "...";                                               \
+        }                                                                   \
+        code;                                                               \
+    } STMT_END
 
-#define FAIL(msg)  \
-    _FAIL(\
-    Perl_croak(aTHX_ "%s in regex m/%" UTF8f "%s/",         \
+#define FAIL(msg)                                   \
+    _FAIL(                                          \
+    Perl_croak(aTHX_ "%s in regex m/%" UTF8f "%s/", \
             msg, UTF8fARG(UTF, len, RExC_precomp), ellipses))
 
-#define FAIL2(msg,arg)  \
-    _FAIL(\
-    Perl_croak(aTHX_ msg " in regex m/%" UTF8f "%s/",       \
+#define FAIL2(msg,arg)                                  \
+    _FAIL(                                              \
+    Perl_croak(aTHX_ msg " in regex m/%" UTF8f "%s/",   \
             arg, UTF8fARG(UTF, len, RExC_precomp), ellipses))
 
-#define FAIL3(msg,arg1,arg2)  \
-    _FAIL(\
-    Perl_croak(aTHX_ msg " in regex m/%" UTF8f "%s/",       \
+#define FAIL3(msg,arg1,arg2)                            \
+    _FAIL(                                              \
+    Perl_croak(aTHX_ msg " in regex m/%" UTF8f "%s/",   \
      arg1, arg2, UTF8fARG(UTF, len, RExC_precomp), ellipses))
 
 /*
  * Simple_vFAIL -- like FAIL, but marks the current location in the scan
  */
-#define Simple_vFAIL(m)  \
-    STMT_START {\
-    Perl_croak(aTHX_ "%s" REPORT_LOCATION,                              \
-            m, REPORT_LOCATION_ARGS(RExC_parse));                       \
-} STMT_END
+#define Simple_vFAIL(m)                                 \
+    STMT_START {                                        \
+        Perl_croak(aTHX_ "%s" REPORT_LOCATION,          \
+                m, REPORT_LOCATION_ARGS(RExC_parse));   \
+    } STMT_END
 
 /*
  * Calls SAVEDESTRUCTOR_X if needed, then Simple_vFAIL()
  */
-#define vFAIL(m)  \
-    STMT_START {\
-    PREPARE_TO_DIE;                                     \
-    Simple_vFAIL(m);                                    \
-} STMT_END
+#define vFAIL(m)            \
+    STMT_START {            \
+        PREPARE_TO_DIE;     \
+        Simple_vFAIL(m);    \
+    } STMT_END
 
 /*
  * Like Simple_vFAIL(), but accepts two arguments.
  */
-#define Simple_vFAIL2(m,a1)  \
-    STMT_START {\
-    S_re_croak(aTHX_ UTF, m REPORT_LOCATION, a1,                \
-                      REPORT_LOCATION_ARGS(RExC_parse));        \
-} STMT_END
+#define Simple_vFAIL2(m,a1)                                     \
+    STMT_START {                                                \
+        S_re_croak(aTHX_ UTF, m REPORT_LOCATION, a1,            \
+                          REPORT_LOCATION_ARGS(RExC_parse));    \
+    } STMT_END
 
 /*
  * Calls SAVEDESTRUCTOR_X if needed, then Simple_vFAIL2().
  */
-#define vFAIL2(m,a1)  \
-    STMT_START {\
-    PREPARE_TO_DIE;                                     \
-    Simple_vFAIL2(m, a1);                               \
-} STMT_END
+#define vFAIL2(m,a1)            \
+    STMT_START {                \
+        PREPARE_TO_DIE;         \
+        Simple_vFAIL2(m, a1);   \
+    } STMT_END
 
 
 /*
  * Like Simple_vFAIL(), but accepts three arguments.
  */
-#define Simple_vFAIL3(m, a1, a2)  \
-    STMT_START {\
-    S_re_croak(aTHX_ UTF, m REPORT_LOCATION, a1, a2,            \
-            REPORT_LOCATION_ARGS(RExC_parse));                  \
-} STMT_END
+#define Simple_vFAIL3(m, a1, a2)                            \
+    STMT_START {                                            \
+        S_re_croak(aTHX_ UTF, m REPORT_LOCATION, a1, a2,    \
+                REPORT_LOCATION_ARGS(RExC_parse));          \
+    } STMT_END
 
 /*
  * Calls SAVEDESTRUCTOR_X if needed, then Simple_vFAIL3().
  */
-#define vFAIL3(m,a1,a2)  \
-    STMT_START {\
-    PREPARE_TO_DIE;                                     \
-    Simple_vFAIL3(m, a1, a2);                           \
-} STMT_END
+#define vFAIL3(m,a1,a2)             \
+    STMT_START {                    \
+        PREPARE_TO_DIE;             \
+        Simple_vFAIL3(m, a1, a2);   \
+    } STMT_END
 
 /*
  * Like Simple_vFAIL(), but accepts four arguments.
  */
-#define Simple_vFAIL4(m, a1, a2, a3)  \
-    STMT_START {\
-    S_re_croak(aTHX_ UTF, m REPORT_LOCATION, a1, a2, a3,        \
-            REPORT_LOCATION_ARGS(RExC_parse));                  \
-} STMT_END
+#define Simple_vFAIL4(m, a1, a2, a3)                            \
+    STMT_START {                                                \
+        S_re_croak(aTHX_ UTF, m REPORT_LOCATION, a1, a2, a3,    \
+                REPORT_LOCATION_ARGS(RExC_parse));              \
+    } STMT_END
 
-#define vFAIL4(m,a1,a2,a3)  \
-    STMT_START {\
-    PREPARE_TO_DIE;                                     \
-    Simple_vFAIL4(m, a1, a2, a3);                       \
-} STMT_END
+#define vFAIL4(m,a1,a2,a3)              \
+    STMT_START {                        \
+        PREPARE_TO_DIE;                 \
+        Simple_vFAIL4(m, a1, a2, a3);   \
+    } STMT_END
 
 /* A specialized version of vFAIL2 that works with UTF8f */
-#define vFAIL2utf8f(m, a1)  \
-    STMT_START {\
-    PREPARE_TO_DIE;                                 \
-    S_re_croak(aTHX_ UTF, m REPORT_LOCATION, a1,  \
-            REPORT_LOCATION_ARGS(RExC_parse));      \
-} STMT_END
+#define vFAIL2utf8f(m, a1)                              \
+    STMT_START {                                        \
+        PREPARE_TO_DIE;                                 \
+        S_re_croak(aTHX_ UTF, m REPORT_LOCATION, a1,    \
+                REPORT_LOCATION_ARGS(RExC_parse));      \
+    } STMT_END
 
-#define vFAIL3utf8f(m, a1, a2)  \
-    STMT_START {\
-    PREPARE_TO_DIE;                                     \
-    S_re_croak(aTHX_ UTF, m REPORT_LOCATION, a1, a2,  \
-            REPORT_LOCATION_ARGS(RExC_parse));          \
-} STMT_END
+#define vFAIL3utf8f(m, a1, a2)                              \
+    STMT_START {                                            \
+        PREPARE_TO_DIE;                                     \
+        S_re_croak(aTHX_ UTF, m REPORT_LOCATION, a1, a2,    \
+                REPORT_LOCATION_ARGS(RExC_parse));          \
+    } STMT_END
 
 /* Setting this to NULL is a signal to not output warnings */
-#define TURN_OFF_WARNINGS_IN_SUBSTITUTE_PARSE                               \
-    STMT_START {                                                            \
-      RExC_save_copy_start_in_constructed  = RExC_copy_start_in_constructed;\
-      RExC_copy_start_in_constructed = NULL;                                \
+#define TURN_OFF_WARNINGS_IN_SUBSTITUTE_PARSE                                   \
+    STMT_START {                                                                \
+        RExC_save_copy_start_in_constructed  = RExC_copy_start_in_constructed;  \
+        RExC_copy_start_in_constructed = NULL;                                  \
     } STMT_END
-#define RESTORE_WARNINGS                                                    \
+#define RESTORE_WARNINGS    \
     RExC_copy_start_in_constructed = RExC_save_copy_start_in_constructed
 
 /* Since a warning can be generated multiple times as the input is reparsed, we
  * output it the first time we come to that point in the parse, but suppress it
  * otherwise.  'RExC_copy_start_in_constructed' being NULL is a flag to not
  * generate any warnings */
-#define TO_OUTPUT_WARNINGS(loc)                                         \
-  (   RExC_copy_start_in_constructed                                    \
-   && ((xI(loc)) - RExC_precomp) > (Ptrdiff_t) RExC_latest_warn_offset)
+#define TO_OUTPUT_WARNINGS(loc)         \
+    (   RExC_copy_start_in_constructed  \
+     && ((xI(loc)) - RExC_precomp) > (Ptrdiff_t) RExC_latest_warn_offset)
 
 /* After we've emitted a warning, we save the position in the input so we don't
  * output it again */
@@ -1054,44 +1054,44 @@ static const scan_data_t zero_scan_data = {
     } STMT_END
 
 /* m is not necessarily a "literal string", in this macro */
-#define warn_non_literal_string(loc, packed_warn, m)                    \
-    _WARN_HELPER(loc, packed_warn,                                      \
-                      Perl_warner(aTHX_ packed_warn,                    \
-                                       "%s" REPORT_LOCATION,            \
+#define warn_non_literal_string(loc, packed_warn, m)            \
+    _WARN_HELPER(loc, packed_warn,                              \
+                      Perl_warner(aTHX_ packed_warn,            \
+                                       "%s" REPORT_LOCATION,    \
                                   m, REPORT_LOCATION_ARGS(loc)))
-#define reg_warn_non_literal_string(loc, m)                             \
-                warn_non_literal_string(loc, packWARN(WARN_REGEXP), m)
+#define reg_warn_non_literal_string(loc, m) \
+    warn_non_literal_string(loc, packWARN(WARN_REGEXP), m)
 
-#define ckWARN2_non_literal_string(loc, packwarn, m, a1)                    \
-    STMT_START {                                                            \
-                char * format;                                              \
-                Size_t format_size = strlen(m) + strlen(REPORT_LOCATION)+ 1;\
-                Newx(format, format_size, char);                            \
-                my_strlcpy(format, m, format_size);                         \
-                my_strlcat(format, REPORT_LOCATION, format_size);           \
-                SAVEFREEPV(format);                                         \
-                _WARN_HELPER(loc, packwarn,                                 \
-                      Perl_ck_warner(aTHX_ packwarn,                        \
-                                        format,                             \
-                                        a1, REPORT_LOCATION_ARGS(loc)));    \
+#define ckWARN2_non_literal_string(loc, packwarn, m, a1)                \
+    STMT_START {                                                        \
+        char * format;                                                  \
+        Size_t format_size = strlen(m) + strlen(REPORT_LOCATION)+ 1;    \
+        Newx(format, format_size, char);                                \
+        my_strlcpy(format, m, format_size);                             \
+        my_strlcat(format, REPORT_LOCATION, format_size);               \
+        SAVEFREEPV(format);                                             \
+        _WARN_HELPER(loc, packwarn,                                     \
+              Perl_ck_warner(aTHX_ packwarn,                            \
+                                format,                                 \
+                                a1, REPORT_LOCATION_ARGS(loc)));        \
     } STMT_END
 
-#define ckWARNreg(loc,m)                                                \
-    _WARN_HELPER(loc, packWARN(WARN_REGEXP),                            \
-                      Perl_ck_warner(aTHX_ packWARN(WARN_REGEXP),       \
-                                          m REPORT_LOCATION,            \
+#define ckWARNreg(loc,m)                                            \
+    _WARN_HELPER(loc, packWARN(WARN_REGEXP),                        \
+                      Perl_ck_warner(aTHX_ packWARN(WARN_REGEXP),   \
+                                          m REPORT_LOCATION,        \
                                           REPORT_LOCATION_ARGS(loc)))
 
-#define vWARN(loc, m)                                                   \
-    _WARN_HELPER(loc, packWARN(WARN_REGEXP),                            \
-                      Perl_warner(aTHX_ packWARN(WARN_REGEXP),          \
-                                       m REPORT_LOCATION,               \
-                                       REPORT_LOCATION_ARGS(loc)))      \
+#define vWARN(loc, m)                                               \
+    _WARN_HELPER(loc, packWARN(WARN_REGEXP),                        \
+                      Perl_warner(aTHX_ packWARN(WARN_REGEXP),      \
+                                       m REPORT_LOCATION,           \
+                                       REPORT_LOCATION_ARGS(loc)))  \
 
-#define vWARN_dep(loc, m)                                               \
-    _WARN_HELPER(loc, packWARN(WARN_DEPRECATED),                        \
-                      Perl_warner(aTHX_ packWARN(WARN_DEPRECATED),      \
-                                       m REPORT_LOCATION,               \
+#define vWARN_dep(loc, m)                                           \
+    _WARN_HELPER(loc, packWARN(WARN_DEPRECATED),                    \
+                      Perl_warner(aTHX_ packWARN(WARN_DEPRECATED),  \
+                                       m REPORT_LOCATION,           \
                                        REPORT_LOCATION_ARGS(loc)))
 
 #define ckWARNdep(loc,m)                                                \
@@ -1100,86 +1100,86 @@ static const scan_data_t zero_scan_data = {
                                             m REPORT_LOCATION,          \
                                             REPORT_LOCATION_ARGS(loc)))
 
-#define ckWARNregdep(loc,m)                                                 \
-    _WARN_HELPER(loc, packWARN2(WARN_DEPRECATED, WARN_REGEXP),              \
-                      Perl_ck_warner_d(aTHX_ packWARN2(WARN_DEPRECATED,     \
-                                                      WARN_REGEXP),         \
-                                             m REPORT_LOCATION,             \
+#define ckWARNregdep(loc,m)                                             \
+    _WARN_HELPER(loc, packWARN2(WARN_DEPRECATED, WARN_REGEXP),          \
+                      Perl_ck_warner_d(aTHX_ packWARN2(WARN_DEPRECATED, \
+                                                      WARN_REGEXP),     \
+                                             m REPORT_LOCATION,         \
                                              REPORT_LOCATION_ARGS(loc)))
 
-#define ckWARN2reg_d(loc,m, a1)                                             \
-    _WARN_HELPER(loc, packWARN(WARN_REGEXP),                                \
-                      Perl_ck_warner_d(aTHX_ packWARN(WARN_REGEXP),         \
-                                            m REPORT_LOCATION,              \
+#define ckWARN2reg_d(loc,m, a1)                                     \
+    _WARN_HELPER(loc, packWARN(WARN_REGEXP),                        \
+                      Perl_ck_warner_d(aTHX_ packWARN(WARN_REGEXP), \
+                                            m REPORT_LOCATION,      \
                                             a1, REPORT_LOCATION_ARGS(loc)))
 
-#define ckWARN2reg(loc, m, a1)                                              \
-    _WARN_HELPER(loc, packWARN(WARN_REGEXP),                                \
-                      Perl_ck_warner(aTHX_ packWARN(WARN_REGEXP),           \
-                                          m REPORT_LOCATION,                \
+#define ckWARN2reg(loc, m, a1)                                      \
+    _WARN_HELPER(loc, packWARN(WARN_REGEXP),                        \
+                      Perl_ck_warner(aTHX_ packWARN(WARN_REGEXP),   \
+                                          m REPORT_LOCATION,        \
                                           a1, REPORT_LOCATION_ARGS(loc)))
 
-#define vWARN3(loc, m, a1, a2)                                              \
-    _WARN_HELPER(loc, packWARN(WARN_REGEXP),                                \
-                      Perl_warner(aTHX_ packWARN(WARN_REGEXP),              \
-                                       m REPORT_LOCATION,                   \
+#define vWARN3(loc, m, a1, a2)                                  \
+    _WARN_HELPER(loc, packWARN(WARN_REGEXP),                    \
+                      Perl_warner(aTHX_ packWARN(WARN_REGEXP),  \
+                                       m REPORT_LOCATION,       \
                                        a1, a2, REPORT_LOCATION_ARGS(loc)))
 
-#define ckWARN3reg(loc, m, a1, a2)                                          \
-    _WARN_HELPER(loc, packWARN(WARN_REGEXP),                                \
-                      Perl_ck_warner(aTHX_ packWARN(WARN_REGEXP),           \
-                                          m REPORT_LOCATION,                \
-                                          a1, a2,                           \
+#define ckWARN3reg(loc, m, a1, a2)                                  \
+    _WARN_HELPER(loc, packWARN(WARN_REGEXP),                        \
+                      Perl_ck_warner(aTHX_ packWARN(WARN_REGEXP),   \
+                                          m REPORT_LOCATION,        \
+                                          a1, a2,                   \
                                           REPORT_LOCATION_ARGS(loc)))
 
-#define vWARN4(loc, m, a1, a2, a3)                                      \
-    _WARN_HELPER(loc, packWARN(WARN_REGEXP),                            \
-                      Perl_warner(aTHX_ packWARN(WARN_REGEXP),          \
-                                       m REPORT_LOCATION,               \
-                                       a1, a2, a3,                      \
+#define vWARN4(loc, m, a1, a2, a3)                              \
+    _WARN_HELPER(loc, packWARN(WARN_REGEXP),                    \
+                      Perl_warner(aTHX_ packWARN(WARN_REGEXP),  \
+                                       m REPORT_LOCATION,       \
+                                       a1, a2, a3,              \
                                        REPORT_LOCATION_ARGS(loc)))
 
-#define ckWARN4reg(loc, m, a1, a2, a3)                                  \
-    _WARN_HELPER(loc, packWARN(WARN_REGEXP),                            \
-                      Perl_ck_warner(aTHX_ packWARN(WARN_REGEXP),       \
-                                          m REPORT_LOCATION,            \
-                                          a1, a2, a3,                   \
+#define ckWARN4reg(loc, m, a1, a2, a3)                              \
+    _WARN_HELPER(loc, packWARN(WARN_REGEXP),                        \
+                      Perl_ck_warner(aTHX_ packWARN(WARN_REGEXP),   \
+                                          m REPORT_LOCATION,        \
+                                          a1, a2, a3,               \
                                           REPORT_LOCATION_ARGS(loc)))
 
-#define vWARN5(loc, m, a1, a2, a3, a4)                                  \
-    _WARN_HELPER(loc, packWARN(WARN_REGEXP),                            \
-                      Perl_warner(aTHX_ packWARN(WARN_REGEXP),          \
-                                       m REPORT_LOCATION,               \
-                                       a1, a2, a3, a4,                  \
+#define vWARN5(loc, m, a1, a2, a3, a4)                          \
+    _WARN_HELPER(loc, packWARN(WARN_REGEXP),                    \
+                      Perl_warner(aTHX_ packWARN(WARN_REGEXP),  \
+                                       m REPORT_LOCATION,       \
+                                       a1, a2, a3, a4,          \
                                        REPORT_LOCATION_ARGS(loc)))
 
-#define ckWARNexperimental(loc, class, m)                               \
-    STMT_START {                                                        \
-        if (! RExC_warned_ ## class) { /* warn once per compilation */  \
-            RExC_warned_ ## class = 1;                                  \
-            _WARN_HELPER(loc, packWARN(class),                          \
-                      Perl_ck_warner_d(aTHX_ packWARN(class),           \
-                                            m REPORT_LOCATION,          \
-                                            REPORT_LOCATION_ARGS(loc)));\
-        }                                                               \
+#define ckWARNexperimental(loc, class, m)                                   \
+    STMT_START {                                                            \
+        if (! RExC_warned_ ## class) { /* warn once per compilation */      \
+            RExC_warned_ ## class = 1;                                      \
+            _WARN_HELPER(loc, packWARN(class),                              \
+                      Perl_ck_warner_d(aTHX_ packWARN(class),               \
+                                            m REPORT_LOCATION,              \
+                                            REPORT_LOCATION_ARGS(loc)));    \
+        }                                                                   \
     } STMT_END
 
-#define ckWARNexperimental_with_arg(loc, class, m, arg)                 \
-    STMT_START {                                                        \
-        if (! RExC_warned_ ## class) { /* warn once per compilation */  \
-            RExC_warned_ ## class = 1;                                  \
-            _WARN_HELPER(loc, packWARN(class),                          \
-                      Perl_ck_warner_d(aTHX_ packWARN(class),           \
-                                       m REPORT_LOCATION,               \
-                                       arg, REPORT_LOCATION_ARGS(loc)));\
-        }                                                               \
+#define ckWARNexperimental_with_arg(loc, class, m, arg)                     \
+    STMT_START {                                                            \
+        if (! RExC_warned_ ## class) { /* warn once per compilation */      \
+            RExC_warned_ ## class = 1;                                      \
+            _WARN_HELPER(loc, packWARN(class),                              \
+                      Perl_ck_warner_d(aTHX_ packWARN(class),               \
+                                       m REPORT_LOCATION,                   \
+                                       arg, REPORT_LOCATION_ARGS(loc)));    \
+        }                                                                   \
     } STMT_END
 
 /* Convert between a pointer to a node and its offset from the beginning of the
  * program */
 #define REGNODE_p(offset)    (RExC_emit_start + (offset))
-#define REGNODE_OFFSET(node)  \
-    (__ASSERT_((node) >= RExC_emit_start)\
+#define REGNODE_OFFSET(node)                \
+    (__ASSERT_((node) >= RExC_emit_start)   \
      (SSize_t) ((node) - RExC_emit_start))
 
 #define ProgLen(ri) ri->proglen
@@ -1189,56 +1189,56 @@ static const scan_data_t zero_scan_data = {
 #define EXPERIMENTAL_INPLACESCAN
 #endif /*PERL_ENABLE_EXPERIMENTAL_REGEX_OPTIMISATIONS*/
 
-#define DEBUG_RExC_seen()                                                   \
-        DEBUG_OPTIMISE_MORE_r({                                             \
-            Perl_re_printf( aTHX_ "RExC_seen: ");                           \
-                                                                            \
-            if (RExC_seen & REG_ZERO_LEN_SEEN)                              \
-                Perl_re_printf( aTHX_ "REG_ZERO_LEN_SEEN ");                \
-                                                                            \
-            if (RExC_seen & REG_LOOKBEHIND_SEEN)                            \
-                Perl_re_printf( aTHX_ "REG_LOOKBEHIND_SEEN ");              \
-                                                                            \
-            if (RExC_seen & REG_GPOS_SEEN)                                  \
-                Perl_re_printf( aTHX_ "REG_GPOS_SEEN ");                    \
-                                                                            \
-            if (RExC_seen & REG_RECURSE_SEEN)                               \
-                Perl_re_printf( aTHX_ "REG_RECURSE_SEEN ");                 \
-                                                                            \
-            if (RExC_seen & REG_TOP_LEVEL_BRANCHES_SEEN)                    \
-                Perl_re_printf( aTHX_ "REG_TOP_LEVEL_BRANCHES_SEEN ");      \
-                                                                            \
-            if (RExC_seen & REG_VERBARG_SEEN)                               \
-                Perl_re_printf( aTHX_ "REG_VERBARG_SEEN ");                 \
-                                                                            \
-            if (RExC_seen & REG_CUTGROUP_SEEN)                              \
-                Perl_re_printf( aTHX_ "REG_CUTGROUP_SEEN ");                \
-                                                                            \
-            if (RExC_seen & REG_RUN_ON_COMMENT_SEEN)                        \
-                Perl_re_printf( aTHX_ "REG_RUN_ON_COMMENT_SEEN ");          \
-                                                                            \
-            if (RExC_seen & REG_UNFOLDED_MULTI_SEEN)                        \
-                Perl_re_printf( aTHX_ "REG_UNFOLDED_MULTI_SEEN ");          \
-                                                                            \
-            if (RExC_seen & REG_UNBOUNDED_QUANTIFIER_SEEN)                  \
-                Perl_re_printf( aTHX_ "REG_UNBOUNDED_QUANTIFIER_SEEN ");    \
-                                                                            \
-            if (RExC_seen & REG_PESSIMIZE_SEEN)                             \
-                Perl_re_printf( aTHX_ "REG_PESSIMIZE_SEEN ");               \
-                                                                            \
-            Perl_re_printf( aTHX_ "\n");                                    \
-        });
+#define DEBUG_RExC_seen()                                               \
+    DEBUG_OPTIMISE_MORE_r({                                             \
+        Perl_re_printf( aTHX_ "RExC_seen: ");                           \
+                                                                        \
+        if (RExC_seen & REG_ZERO_LEN_SEEN)                              \
+            Perl_re_printf( aTHX_ "REG_ZERO_LEN_SEEN ");                \
+                                                                        \
+        if (RExC_seen & REG_LOOKBEHIND_SEEN)                            \
+            Perl_re_printf( aTHX_ "REG_LOOKBEHIND_SEEN ");              \
+                                                                        \
+        if (RExC_seen & REG_GPOS_SEEN)                                  \
+            Perl_re_printf( aTHX_ "REG_GPOS_SEEN ");                    \
+                                                                        \
+        if (RExC_seen & REG_RECURSE_SEEN)                               \
+            Perl_re_printf( aTHX_ "REG_RECURSE_SEEN ");                 \
+                                                                        \
+        if (RExC_seen & REG_TOP_LEVEL_BRANCHES_SEEN)                    \
+            Perl_re_printf( aTHX_ "REG_TOP_LEVEL_BRANCHES_SEEN ");      \
+                                                                        \
+        if (RExC_seen & REG_VERBARG_SEEN)                               \
+            Perl_re_printf( aTHX_ "REG_VERBARG_SEEN ");                 \
+                                                                        \
+        if (RExC_seen & REG_CUTGROUP_SEEN)                              \
+            Perl_re_printf( aTHX_ "REG_CUTGROUP_SEEN ");                \
+                                                                        \
+        if (RExC_seen & REG_RUN_ON_COMMENT_SEEN)                        \
+            Perl_re_printf( aTHX_ "REG_RUN_ON_COMMENT_SEEN ");          \
+                                                                        \
+        if (RExC_seen & REG_UNFOLDED_MULTI_SEEN)                        \
+            Perl_re_printf( aTHX_ "REG_UNFOLDED_MULTI_SEEN ");          \
+                                                                        \
+        if (RExC_seen & REG_UNBOUNDED_QUANTIFIER_SEEN)                  \
+            Perl_re_printf( aTHX_ "REG_UNBOUNDED_QUANTIFIER_SEEN ");    \
+                                                                        \
+        if (RExC_seen & REG_PESSIMIZE_SEEN)                             \
+            Perl_re_printf( aTHX_ "REG_PESSIMIZE_SEEN ");               \
+                                                                        \
+        Perl_re_printf( aTHX_ "\n");                                    \
+    });
 
-#define DEBUG_SHOW_STUDY_FLAG(flags,flag) \
-  if ((flags) & flag) Perl_re_printf( aTHX_  "%s ", #flag)
+#define DEBUG_SHOW_STUDY_FLAG(flags,flag)   \
+    if ((flags) & flag) Perl_re_printf( aTHX_  "%s ", #flag)
 
 
 #ifdef DEBUGGING
-#  define DEBUG_STUDYDATA(where, data, depth, is_inf, min, stopmin, delta) \
-                    debug_studydata(where, data, depth, is_inf, min, stopmin, delta)
+#  define DEBUG_STUDYDATA(where, data, depth, is_inf, min, stopmin, delta)  \
+       debug_studydata(where, data, depth, is_inf, min, stopmin, delta)
 
 #  define DEBUG_PEEP(str, scan, depth, flags)   \
-                    debug_peep(str, pRExC_state, scan, depth, flags)
+       debug_peep(str, pRExC_state, scan, depth, flags)
 #else
 #  define DEBUG_STUDYDATA(where, data, depth, is_inf, min, stopmin, delta) NOOP
 #  define DEBUG_PEEP(str, scan, depth, flags)         NOOP
@@ -1266,10 +1266,10 @@ static const scan_data_t zero_scan_data = {
 #define ssc_match_all_cp(ssc) ssc_add_range(ssc, 0, UV_MAX)
 
 #ifdef DEBUGGING
-#define REGNODE_GUTS(state,op,extra_size) \
+#define REGNODE_GUTS(state,op,extra_size)   \
     regnode_guts_debug(state,op,extra_size)
 #else
-#define REGNODE_GUTS(state,op,extra_size) \
+#define REGNODE_GUTS(state,op,extra_size)   \
     regnode_guts(state,extra_size)
 #endif
 
@@ -1280,11 +1280,11 @@ static const scan_data_t zero_scan_data = {
         optstart=NULL;                                                          \
     } STMT_END
 
-#define DUMPUNTIL(b,e)                                          \
-    CLEAR_OPTSTART;                                             \
+#define DUMPUNTIL(b,e)  \
+    CLEAR_OPTSTART;     \
     node = dumpuntil(r,start,(b),(e),last,sv,indent+1,depth+1);
 
-#define REGNODE_STEP_OVER(ret,t1,t2) \
+#define REGNODE_STEP_OVER(ret,t1,t2)    \
     NEXT_OFF(REGNODE_p(ret)) = ((sizeof(t1)+sizeof(t2))/sizeof(regnode))
 
 #endif /* REGCOMP_INTERNAL_H */

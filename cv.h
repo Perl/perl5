@@ -50,10 +50,10 @@ See L<perlguts/Autoloading with XSUBs>.
 #define CvFILE(sv)      ((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_file
 #ifdef USE_ITHREADS
 #  define CvFILE_set_from_cop(sv, cop)  \
-    (CvFILE(sv) = savepv(CopFILE(cop)), CvDYNFILE_on(sv))
+       (CvFILE(sv) = savepv(CopFILE(cop)), CvDYNFILE_on(sv))
 #else
 #  define CvFILE_set_from_cop(sv, cop)  \
-    (CvFILE(sv) = CopFILE(cop), CvDYNFILE_off(sv))
+       (CvFILE(sv) = CopFILE(cop), CvDYNFILE_off(sv))
 #endif
 #define CvFILEGV(sv)    (gv_fetchfile(CvFILE(sv)))
 #define CvDEPTH(sv)     (*Perl_CvDEPTH((const CV *)sv))
@@ -62,8 +62,8 @@ See L<perlguts/Autoloading with XSUBs>.
 #define CvDEPTHunsafe(sv) ((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_depth
 
 /* these CvPADLIST/CvRESERVED asserts can be reverted one day, once stabilized */
-#define CvPADLIST(sv)      \
-    (*(assert_(!CvISXSUB((CV*)(sv)))\
+#define CvPADLIST(sv)                   \
+    (*(assert_(!CvISXSUB((CV*)(sv)))    \
         &(((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_padlist_u.xcv_padlist)))
 /* CvPADLIST_set is not public API, it can be removed one day, once stabilized */
 #ifdef DEBUGGING
@@ -71,16 +71,16 @@ See L<perlguts/Autoloading with XSUBs>.
 #else
 #  define CvPADLIST_set(sv, padlist) (CvPADLIST(sv) = (padlist))
 #endif
-#define CvHSCXT(sv)        \
-    *(assert_(CvISXSUB((CV*)(sv)))\
+#define CvHSCXT(sv)                 \
+    *(assert_(CvISXSUB((CV*)(sv)))  \
         &(((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_padlist_u.xcv_hscxt))
 #ifdef DEBUGGING
 #  if PTRSIZE == 8
-#    define PoisonPADLIST(sv) \
-        (((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_padlist_u.xcv_padlist = (PADLIST *)UINT64_C(0xEFEFEFEFEFEFEFEF))
+#    define PoisonPADLIST(sv)   \
+         (((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_padlist_u.xcv_padlist = (PADLIST *)UINT64_C(0xEFEFEFEFEFEFEFEF))
 #  elif PTRSIZE == 4
-#    define PoisonPADLIST(sv) \
-        (((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_padlist_u.xcv_padlist = (PADLIST *)0xEFEFEFEF)
+#    define PoisonPADLIST(sv)   \
+         (((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_padlist_u.xcv_padlist = (PADLIST *)0xEFEFEFEF)
 #  else
 #    error unknown pointer size
 #  endif
@@ -93,21 +93,21 @@ See L<perlguts/Autoloading with XSUBs>.
 #define CvFLAGS(sv)       ((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_flags
 
 /* These two are sometimes called on non-CVs */
-#define CvPROTO(sv)                               \
-        (                                          \
-         SvPOK(sv)                                  \
-          ? SvTYPE(sv) == SVt_PVCV && CvAUTOLOAD(sv) \
-             ? SvEND(sv)+1 : SvPVX_const(sv)          \
-          : NULL                                       \
-        )
-#define CvPROTOLEN(sv)                            \
-        (                                          \
-         SvPOK(sv)                                  \
-          ? SvTYPE(sv) == SVt_PVCV && CvAUTOLOAD(sv) \
-             ? SvLEN(sv)-SvCUR(sv)-2                  \
-             : SvCUR(sv)                               \
-          : 0                                           \
-        )
+#define CvPROTO(sv)                                 \
+    (                                               \
+     SvPOK(sv)                                      \
+      ? SvTYPE(sv) == SVt_PVCV && CvAUTOLOAD(sv)    \
+         ? SvEND(sv)+1 : SvPVX_const(sv)            \
+      : NULL                                        \
+    )
+#define CvPROTOLEN(sv)                              \
+    (                                               \
+     SvPOK(sv)                                      \
+      ? SvTYPE(sv) == SVt_PVCV && CvAUTOLOAD(sv)    \
+         ? SvLEN(sv)-SvCUR(sv)-2                    \
+         : SvCUR(sv)                                \
+      : 0                                           \
+    )
 
 /* CV has the `:method` attribute. This used to be called CVf_METHOD but is
  * renamed to avoid collision with CVf_IsMETHOD */
@@ -288,22 +288,22 @@ CvNAME_HEK(CV *sv)
 /* helper for the common pattern:
    CvNAMED(sv) ? CvNAME_HEK((CV *)sv) : GvNAME_HEK(CvGV(sv))
 */
-#define CvGvNAME_HEK(sv)  \
-    (\
-        CvNAMED((CV*)sv) ? \
-            ((XPVCV*)MUTABLE_PTR(SvANY((SV*)sv)))->xcv_gv_u.xcv_hek\
-            : GvNAME_HEK(CvGV( (SV*) sv)) \
+#define CvGvNAME_HEK(sv)                                            \
+    (                                                               \
+        CvNAMED((CV*)sv) ?                                          \
+            ((XPVCV*)MUTABLE_PTR(SvANY((SV*)sv)))->xcv_gv_u.xcv_hek \
+            : GvNAME_HEK(CvGV( (SV*) sv))                           \
         )
 
 /* This lowers the reference count of the previous value, but does *not*
    increment the reference count of the new value. */
-#define CvNAME_HEK_set(cv, hek)  \
-    (\
-        CvNAME_HEK((CV *)(cv))                                           \
-            ? unshare_hek(SvANY((CV *)(cv))->xcv_gv_u.xcv_hek)    \
-            : (void)0,                                             \
+#define CvNAME_HEK_set(cv, hek)                                     \
+    (                                                               \
+        CvNAME_HEK((CV *)(cv))                                      \
+            ? unshare_hek(SvANY((CV *)(cv))->xcv_gv_u.xcv_hek)      \
+            : (void)0,                                              \
         ((XPVCV*)MUTABLE_PTR(SvANY(cv)))->xcv_gv_u.xcv_hek = (hek), \
-        CvNAMED_on(cv)                                               \
+        CvNAMED_on(cv)                                              \
     )
 
 /*

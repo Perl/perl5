@@ -511,8 +511,8 @@ C<L</is_c9strict_utf8_string_loclen>>.
 
 */
 
-#define is_utf8_invariant_string(s, len)                                    \
-                                is_utf8_invariant_string_loc(s, len, NULL)
+#define is_utf8_invariant_string(s, len)    \
+    is_utf8_invariant_string_loc(s, len, NULL)
 
 /*
 =for apidoc is_utf8_invariant_string_loc
@@ -551,11 +551,11 @@ Perl_is_utf8_invariant_string_loc(const U8* const s, STRLEN len, const U8 ** ep)
  * or'ing together the lowest bits of 'x'.  Hopefully the final term gets
  * optimized out completely on a 32-bit system, and its mask gets optimized out
  * on a 64-bit system */
-#  define PERL_IS_SUBWORD_ADDR(x)  \
-    (1 & (       PTR2nat(x)\
-        |   (  PTR2nat(x) >> 1)                 \
-        | ( ( (PTR2nat(x)                       \
-             & PERL_WORD_BOUNDARY_MASK) >> 2))))
+#  define PERL_IS_SUBWORD_ADDR(x)   \
+       (1 & (       PTR2nat(x)      \
+           |   (  PTR2nat(x) >> 1)  \
+           | ( ( (PTR2nat(x)        \
+                & PERL_WORD_BOUNDARY_MASK) >> 2))))
 
 #ifndef EBCDIC
 
@@ -596,8 +596,8 @@ Perl_is_utf8_invariant_string_loc(const U8* const s, STRLEN len, const U8 ** ep)
                     return FALSE;
                 }
 
-#  if   BYTEORDER == 0x1234 || BYTEORDER == 0x12345678    \
-     || BYTEORDER == 0x4321 || BYTEORDER == 0x87654321
+#  if   BYTEORDER == 0x1234 || BYTEORDER == 0x12345678  \
+    || BYTEORDER == 0x4321 || BYTEORDER == 0x87654321
 
                 *ep = x + variant_byte_number(* (const PERL_UINTMAX_T *) x);
                 assert(*ep >= s && *ep < send);
@@ -1525,32 +1525,32 @@ Perl_is_utf8_string_loclen(const U8 *s, STRLEN len, const U8 **ep, STRLEN *el)
 #  define DFA_TEASE_APART_FF_  DFA_RETURN_FAILURE_
 #endif
 
-#define PERL_IS_UTF8_CHAR_DFA(s0, e, dfa_tab,                               \
-                              accept_action,                                \
-                              reject_action,                                \
-                              incomplete_char_action)                       \
-    STMT_START {                                                            \
-        const U8 * s = s0;                                                  \
-        const U8 * e_ = e;                                                  \
-        UV state = 0;                                                       \
-                                                                            \
-        PERL_NON_CORE_CHECK_EMPTY(s, e_);                                   \
-                                                                            \
-        do {                                                                \
-            state = dfa_tab[256 + state + dfa_tab[*s]];                     \
-            s++;                                                            \
-                                                                            \
-            if (state == 0) {   /* Accepting state */                       \
-                accept_action;                                              \
-            }                                                               \
-                                                                            \
-            if (UNLIKELY(state == 1)) { /* Rejecting state */               \
-                reject_action;                                              \
-            }                                                               \
-        } while (s < e_);                                                   \
-                                                                            \
-        /* Here, dropped out of loop before end-of-char */                  \
-        incomplete_char_action;                                             \
+#define PERL_IS_UTF8_CHAR_DFA(s0, e, dfa_tab,                   \
+                              accept_action,                    \
+                              reject_action,                    \
+                              incomplete_char_action)           \
+    STMT_START {                                                \
+        const U8 * s = s0;                                      \
+        const U8 * e_ = e;                                      \
+        UV state = 0;                                           \
+                                                                \
+        PERL_NON_CORE_CHECK_EMPTY(s, e_);                       \
+                                                                \
+        do {                                                    \
+            state = dfa_tab[256 + state + dfa_tab[*s]];         \
+            s++;                                                \
+                                                                \
+            if (state == 0) {   /* Accepting state */           \
+                accept_action;                                  \
+            }                                                   \
+                                                                \
+            if (UNLIKELY(state == 1)) { /* Rejecting state */   \
+                reject_action;                                  \
+            }                                                   \
+        } while (s < e_);                                       \
+                                                                \
+        /* Here, dropped out of loop before end-of-char */      \
+        incomplete_char_action;                                 \
     } STMT_END
 
 
@@ -1740,8 +1740,8 @@ See also C<L</is_strict_utf8_string_loclen>>.
 =cut
 */
 
-#define is_strict_utf8_string_loc(s, len, ep)                               \
-                                is_strict_utf8_string_loclen(s, len, ep, 0)
+#define is_strict_utf8_string_loc(s, len, ep)   \
+    is_strict_utf8_string_loclen(s, len, ep, 0)
 
 /*
 
@@ -1817,8 +1817,8 @@ See also C<L</is_c9strict_utf8_string_loclen>>.
 =cut
 */
 
-#define is_c9strict_utf8_string_loc(s, len, ep)                             \
-                            is_c9strict_utf8_string_loclen(s, len, ep, 0)
+#define is_c9strict_utf8_string_loc(s, len, ep) \
+    is_c9strict_utf8_string_loclen(s, len, ep, 0)
 
 /*
 
@@ -1894,8 +1894,8 @@ See also C<L</is_utf8_string_loclen_flags>>.
 =cut
 */
 
-#define is_utf8_string_loc_flags(s, len, ep, flags)                         \
-                        is_utf8_string_loclen_flags(s, len, ep, 0, flags)
+#define is_utf8_string_loc_flags(s, len, ep, flags) \
+    is_utf8_string_loclen_flags(s, len, ep, 0, flags)
 
 
 /* The above 3 actual functions could have been moved into the more general one
@@ -2288,8 +2288,8 @@ failure can be signalled without having to wait for the next read.
 
 =cut
 */
-#define is_utf8_valid_partial_char(s, e)                                    \
-                                is_utf8_valid_partial_char_flags(s, e, 0)
+#define is_utf8_valid_partial_char(s, e)    \
+    is_utf8_valid_partial_char_flags(s, e, 0)
 
 /*
 
@@ -2379,8 +2379,8 @@ point.
 
 =cut
  */
-#define is_utf8_fixed_width_buf_flags(s, len, flags)                        \
-                is_utf8_fixed_width_buf_loclen_flags(s, len, 0, 0, flags)
+#define is_utf8_fixed_width_buf_flags(s, len, flags)    \
+    is_utf8_fixed_width_buf_loclen_flags(s, len, 0, 0, flags)
 
 /*
 
@@ -2396,8 +2396,8 @@ See also C<L</is_utf8_fixed_width_buf_loclen_flags>>.
 =cut
 */
 
-#define is_utf8_fixed_width_buf_loc_flags(s, len, loc, flags)               \
-                is_utf8_fixed_width_buf_loclen_flags(s, len, loc, 0, flags)
+#define is_utf8_fixed_width_buf_loc_flags(s, len, loc, flags)   \
+    is_utf8_fixed_width_buf_loclen_flags(s, len, loc, 0, flags)
 
 /*
 
@@ -2777,7 +2777,7 @@ Perl_cx_popblock(pTHX_ PERL_CONTEXT *cx)
 
     /* LEAVE_SCOPE() should have made this true. /(?{})/ cheats
      * and leaves a CX entry lying around for repeated use, so
-     * skip for multicall */                  \
+     * skip for multicall */    \
     assert(   (CxTYPE(cx) == CXt_SUB && CxMULTICALL(cx))
             || PL_savestack_ix == cx->blk_oldsaveix);
     PL_curcop     = cx->blk_oldcop;

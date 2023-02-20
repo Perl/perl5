@@ -98,9 +98,9 @@ struct mro_meta {
     U32     destroy_gen;     /* Generation number of DESTROY cache */
 };
 
-#define MRO_GET_PRIVATE_DATA(smeta, which)                 \
-    (((smeta)->mro_which && (which) == (smeta)->mro_which) \
-     ? (smeta)->mro_linear_current                         \
+#define MRO_GET_PRIVATE_DATA(smeta, which)                  \
+    (((smeta)->mro_which && (which) == (smeta)->mro_which)  \
+     ? (smeta)->mro_linear_current                          \
      : Perl_mro_get_private_data(aTHX_ (smeta), (which)))
 
 /* Subject to change.
@@ -152,7 +152,7 @@ struct xpvhv_aux {
 #define HvAUXf_NO_DEREF     0x2   /* @{}, %{} etc (and nomethod) not present */
 #define HvAUXf_IS_CLASS     0x4   /* the package is a 'class' */
 
-#define HvSTASH_IS_CLASS(hv) \
+#define HvSTASH_IS_CLASS(hv)    \
     (HvHasAUX(hv) && HvAUX(hv)->xhv_aux_flags & HvAUXf_IS_CLASS)
 
 /* hash structure: */
@@ -333,49 +333,49 @@ whether it is valid to call C<HvAUX()>.
 
 /* Checking that hv is a valid package stash is the
    caller's responsibility */
-#define HvMROMETA(hv)  \
-    (HvAUX(hv)->xhv_mro_meta\
-     ? HvAUX(hv)->xhv_mro_meta \
+#define HvMROMETA(hv)           \
+    (HvAUX(hv)->xhv_mro_meta    \
+     ? HvAUX(hv)->xhv_mro_meta  \
      : Perl_mro_meta_init(aTHX_ hv))
 
-#define HvNAME_HEK_NN(hv)                         \
- (                                                \
-  HvAUX(hv)->xhv_name_count                       \
-  ? *HvAUX(hv)->xhv_name_u.xhvnameu_names         \
-  : HvAUX(hv)->xhv_name_u.xhvnameu_name           \
- )
+#define HvNAME_HEK_NN(hv)                       \
+    (                                           \
+     HvAUX(hv)->xhv_name_count                  \
+     ? *HvAUX(hv)->xhv_name_u.xhvnameu_names    \
+     : HvAUX(hv)->xhv_name_u.xhvnameu_name      \
+    )
 /* This macro may go away without notice.  */
-#define HvNAME_HEK(hv) \
-        (HvHasAUX(hv) && HvAUX(hv)->xhv_name_u.xhvnameu_name ? HvNAME_HEK_NN(hv) : NULL)
-#define HvHasNAME(hv) \
-        (HvHasAUX(hv) && HvAUX(hv)->xhv_name_u.xhvnameu_name && HvNAME_HEK_NN(hv))
-#define HvNAME_get(hv) \
-        (HvHasNAME(hv) ? HEK_KEY(HvNAME_HEK_NN(hv)) : NULL)
-#define HvNAMELEN_get(hv) \
-        ((HvHasAUX(hv) && HvAUX(hv)->xhv_name_u.xhvnameu_name && HvNAME_HEK_NN(hv)) \
-                                 ? HEK_LEN(HvNAME_HEK_NN(hv)) : 0)
-#define HvNAMEUTF8(hv) \
-        ((HvHasAUX(hv) && HvAUX(hv)->xhv_name_u.xhvnameu_name && HvNAME_HEK_NN(hv)) \
-                                 ? HEK_UTF8(HvNAME_HEK_NN(hv)) : 0)
-#define HvENAME_HEK_NN(hv)                                             \
- (                                                                      \
-  HvAUX(hv)->xhv_name_count > 0   ? HvAUX(hv)->xhv_name_u.xhvnameu_names[0] : \
-  HvAUX(hv)->xhv_name_count < -1  ? HvAUX(hv)->xhv_name_u.xhvnameu_names[1] : \
-  HvAUX(hv)->xhv_name_count == -1 ? NULL                              : \
-                                    HvAUX(hv)->xhv_name_u.xhvnameu_name \
- )
-#define HvHasENAME_HEK(hv) \
-        (HvHasAUX(hv) && HvAUX(hv)->xhv_name_u.xhvnameu_name)
+#define HvNAME_HEK(hv)  \
+    (HvHasAUX(hv) && HvAUX(hv)->xhv_name_u.xhvnameu_name ? HvNAME_HEK_NN(hv) : NULL)
+#define HvHasNAME(hv)   \
+    (HvHasAUX(hv) && HvAUX(hv)->xhv_name_u.xhvnameu_name && HvNAME_HEK_NN(hv))
+#define HvNAME_get(hv)  \
+    (HvHasNAME(hv) ? HEK_KEY(HvNAME_HEK_NN(hv)) : NULL)
+#define HvNAMELEN_get(hv)                                                       \
+    ((HvHasAUX(hv) && HvAUX(hv)->xhv_name_u.xhvnameu_name && HvNAME_HEK_NN(hv)) \
+                             ? HEK_LEN(HvNAME_HEK_NN(hv)) : 0)
+#define HvNAMEUTF8(hv)                                                          \
+    ((HvHasAUX(hv) && HvAUX(hv)->xhv_name_u.xhvnameu_name && HvNAME_HEK_NN(hv)) \
+                             ? HEK_UTF8(HvNAME_HEK_NN(hv)) : 0)
+#define HvENAME_HEK_NN(hv)                                                          \
+    (                                                                               \
+     HvAUX(hv)->xhv_name_count > 0   ? HvAUX(hv)->xhv_name_u.xhvnameu_names[0] :    \
+     HvAUX(hv)->xhv_name_count < -1  ? HvAUX(hv)->xhv_name_u.xhvnameu_names[1] :    \
+     HvAUX(hv)->xhv_name_count == -1 ? NULL                              :          \
+                                       HvAUX(hv)->xhv_name_u.xhvnameu_name          \
+    )
+#define HvHasENAME_HEK(hv)  \
+    (HvHasAUX(hv) && HvAUX(hv)->xhv_name_u.xhvnameu_name)
 #define HvENAME_HEK(hv) \
-        (HvHasENAME_HEK(hv) ? HvENAME_HEK_NN(hv) : NULL)
-#define HvHasENAME(hv) \
-        (HvHasENAME_HEK(hv) && HvAUX(hv)->xhv_name_count != -1)
+    (HvHasENAME_HEK(hv) ? HvENAME_HEK_NN(hv) : NULL)
+#define HvHasENAME(hv)  \
+    (HvHasENAME_HEK(hv) && HvAUX(hv)->xhv_name_count != -1)
 #define HvENAME_get(hv) \
-        (HvHasENAME(hv) ? HEK_KEY(HvENAME_HEK_NN(hv)) : NULL)
-#define HvENAMELEN_get(hv) \
-        (HvHasENAME(hv) ? HEK_LEN(HvENAME_HEK_NN(hv)) : 0)
+    (HvHasENAME(hv) ? HEK_KEY(HvENAME_HEK_NN(hv)) : NULL)
+#define HvENAMELEN_get(hv)  \
+    (HvHasENAME(hv) ? HEK_LEN(HvENAME_HEK_NN(hv)) : 0)
 #define HvENAMEUTF8(hv) \
-        (HvHasENAME(hv) ? HEK_UTF8(HvENAME_HEK_NN(hv)) : 0)
+    (HvHasENAME(hv) ? HEK_UTF8(HvENAME_HEK_NN(hv)) : 0)
 
 /*
  * HvKEYS gets the number of keys that actually exist(), and is provided
@@ -430,28 +430,28 @@ whether it is valid to call C<HvAUX()>.
 #define HeKFLAGS(he)  HEK_FLAGS(HeKEY_hek(he))
 #define HeVAL(he)               (he)->he_valu.hent_val
 #define HeHASH(he)              HEK_HASH(HeKEY_hek(he))
-#define HePV(he,lp)              \
-    ((HeKLEN(he) == HEf_SVKEY) ?\
-     SvPV(HeKEY_sv(he),lp) :                \
+#define HePV(he,lp)                 \
+    ((HeKLEN(he) == HEf_SVKEY) ?    \
+     SvPV(HeKEY_sv(he),lp) :        \
      ((lp = HeKLEN(he)), HeKEY(he)))
-#define HeUTF8(he)               \
-    ((HeKLEN(he) == HEf_SVKEY) ?\
-     SvUTF8(HeKEY_sv(he)) :                 \
+#define HeUTF8(he)                  \
+    ((HeKLEN(he) == HEf_SVKEY) ?    \
+     SvUTF8(HeKEY_sv(he)) :         \
      (U32)HeKUTF8(he))
 
-#define HeSVKEY(he)              \
-    ((HeKEY(he) &&\
-      HeKLEN(he) == HEf_SVKEY) ?            \
+#define HeSVKEY(he)                 \
+    ((HeKEY(he) &&                  \
+      HeKLEN(he) == HEf_SVKEY) ?    \
      HeKEY_sv(he) : NULL)
 
-#define HeSVKEY_force(he)        \
-    (HeKEY(he) ?\
-     ((HeKLEN(he) == HEf_SVKEY) ?           \
-      HeKEY_sv(he) :                        \
-      newSVpvn_flags(HeKEY(he),             \
-                     HeKLEN(he),            \
-                     SVs_TEMP |             \
-          ( HeKUTF8(he) ? SVf_UTF8 : 0 ))) : \
+#define HeSVKEY_force(he)                       \
+    (HeKEY(he) ?                                \
+     ((HeKLEN(he) == HEf_SVKEY) ?               \
+      HeKEY_sv(he) :                            \
+      newSVpvn_flags(HeKEY(he),                 \
+                     HeKLEN(he),                \
+                     SVs_TEMP |                 \
+          ( HeKUTF8(he) ? SVf_UTF8 : 0 ))) :    \
      &PL_sv_undef)
 #define HeSVKEY_set(he,sv)      ((HeKLEN(he) = HEf_SVKEY), (HeKEY_sv(he) = sv))
 
@@ -491,10 +491,10 @@ whether it is valid to call C<HvAUX()>.
 #  define PERL_HV_ARRAY_ALLOC_BYTES(size) ((size) * sizeof(HE*))
 #else
 #  define MALLOC_OVERHEAD 16
-#  define PERL_HV_ARRAY_ALLOC_BYTES(size) \
-                        (((size) < 64)                                  \
-                         ? (size) * sizeof(HE*)                         \
-                         : (size) * sizeof(HE*) * 2 - MALLOC_OVERHEAD)
+#  define PERL_HV_ARRAY_ALLOC_BYTES(size)   \
+       (((size) < 64)                       \
+        ? (size) * sizeof(HE*)              \
+        : (size) * sizeof(HE*) * 2 - MALLOC_OVERHEAD)
 #endif
 
 /* Flags for hv_iternext_flags.  */
@@ -507,39 +507,39 @@ whether it is valid to call C<HvAUX()>.
 #define Perl_sharepvn(pv, len, hash) HEK_KEY(share_hek(pv, len, hash))
 #define sharepvn(pv, len, hash)      Perl_sharepvn(pv, len, hash)
 
-#define share_hek_hek(hek)                                              \
-    (++(((struct shared_he *)(((char *)hek)                             \
-                              - STRUCT_OFFSET(struct shared_he,         \
-                                              shared_he_hek)))          \
-        ->shared_he_he.he_valu.hent_refcount),                          \
+#define share_hek_hek(hek)                                      \
+    (++(((struct shared_he *)(((char *)hek)                     \
+                              - STRUCT_OFFSET(struct shared_he, \
+                                              shared_he_hek)))  \
+        ->shared_he_he.he_valu.hent_refcount),                  \
      hek)
 
-#define hv_store_ent(hv, keysv, val, hash)                              \
-    ((HE *) hv_common((hv), (keysv), NULL, 0, 0, HV_FETCH_ISSTORE,      \
+#define hv_store_ent(hv, keysv, val, hash)                          \
+    ((HE *) hv_common((hv), (keysv), NULL, 0, 0, HV_FETCH_ISSTORE,  \
                       (val), (hash)))
 
-#define hv_exists_ent(hv, keysv, hash)                                  \
+#define hv_exists_ent(hv, keysv, hash)  \
     cBOOL(hv_common((hv), (keysv), NULL, 0, 0, HV_FETCH_ISEXISTS, 0, (hash)))
-#define hv_fetch_ent(hv, keysv, lval, hash)                             \
-    ((HE *) hv_common((hv), (keysv), NULL, 0, 0,                        \
+#define hv_fetch_ent(hv, keysv, lval, hash)         \
+    ((HE *) hv_common((hv), (keysv), NULL, 0, 0,    \
                       ((lval) ? HV_FETCH_LVALUE : 0), NULL, (hash)))
 #define hv_delete_ent(hv, key, flags, hash)                             \
     (MUTABLE_SV(hv_common((hv), (key), NULL, 0, 0, (flags) | HV_DELETE, \
                           NULL, (hash))))
 
-#define hv_store_flags(hv, key, klen, val, hash, flags)                 \
-    ((SV**) hv_common((hv), NULL, (key), (klen), (flags),               \
-                      (HV_FETCH_ISSTORE|HV_FETCH_JUST_SV), (val),       \
+#define hv_store_flags(hv, key, klen, val, hash, flags)             \
+    ((SV**) hv_common((hv), NULL, (key), (klen), (flags),           \
+                      (HV_FETCH_ISSTORE|HV_FETCH_JUST_SV), (val),   \
                       (hash)))
 
-#define hv_store(hv, key, klen, val, hash)                              \
-    ((SV**) hv_common_key_len((hv), (key), (klen),                      \
-                              (HV_FETCH_ISSTORE|HV_FETCH_JUST_SV),      \
+#define hv_store(hv, key, klen, val, hash)                          \
+    ((SV**) hv_common_key_len((hv), (key), (klen),                  \
+                              (HV_FETCH_ISSTORE|HV_FETCH_JUST_SV),  \
                               (val), (hash)))
 
 
 
-#define hv_exists(hv, key, klen)                                        \
+#define hv_exists(hv, key, klen)    \
     cBOOL(hv_common_key_len((hv), (key), (klen), HV_FETCH_ISEXISTS, NULL, 0))
 
 #define hv_fetch(hv, key, klen, lval)                                   \
@@ -547,8 +547,8 @@ whether it is valid to call C<HvAUX()>.
                               ? (HV_FETCH_JUST_SV | HV_FETCH_LVALUE)    \
                               : HV_FETCH_JUST_SV, NULL, 0))
 
-#define hv_delete(hv, key, klen, flags)                                 \
-    (MUTABLE_SV(hv_common_key_len((hv), (key), (klen),                  \
+#define hv_delete(hv, key, klen, flags)                 \
+    (MUTABLE_SV(hv_common_key_len((hv), (key), (klen),  \
                                   (flags) | HV_DELETE, NULL, 0)))
 
 /* Provide 's' suffix subs for constant strings (and avoid needing to count
@@ -557,34 +557,34 @@ whether it is valid to call C<HvAUX()>.
 #define hv_existss(hv, key) \
     hv_exists((hv), ASSERT_IS_LITERAL(key), (sizeof(key)-1))
 
-#define hv_fetchs(hv, key, lval) \
+#define hv_fetchs(hv, key, lval)    \
     hv_fetch((hv), ASSERT_IS_LITERAL(key), (sizeof(key)-1), (lval))
 
-#define hv_deletes(hv, key, flags) \
+#define hv_deletes(hv, key, flags)  \
     hv_delete((hv), ASSERT_IS_LITERAL(key), (sizeof(key)-1), (flags))
 
-#define hv_name_sets(hv, name, flags) \
+#define hv_name_sets(hv, name, flags)   \
     hv_name_set((hv),ASSERT_IS_LITERAL(name),(sizeof(name)-1), flags)
 
 #define hv_stores(hv, key, val) \
     hv_store((hv), ASSERT_IS_LITERAL(key), (sizeof(key)-1), (val), 0)
 
 #ifdef PERL_CORE
-# define hv_storehek(hv, hek, val) \
-    hv_common((hv), NULL, HEK_KEY(hek), HEK_LEN(hek), HEK_UTF8(hek),    \
-              HV_FETCH_ISSTORE|HV_FETCH_JUST_SV, (val), HEK_HASH(hek))
-# define hv_fetchhek(hv, hek, lval) \
-    ((SV **)                                                            \
-     hv_common((hv), NULL, HEK_KEY(hek), HEK_LEN(hek), HEK_UTF8(hek),   \
-               (lval)                                                   \
-                ? (HV_FETCH_JUST_SV | HV_FETCH_LVALUE)                  \
-                : HV_FETCH_JUST_SV,                                     \
-               NULL, HEK_HASH(hek)))
-# define hv_deletehek(hv, hek, flags) \
-    hv_common((hv), NULL, HEK_KEY(hek), HEK_LEN(hek), HEK_UTF8(hek), \
-              (flags)|HV_DELETE, NULL, HEK_HASH(hek))
-#define hv_existshek(hv, hek)                                           \
-    cBOOL(hv_common((hv), NULL, HEK_KEY(hek), HEK_LEN(hek), HEK_UTF8(hek), \
+# define hv_storehek(hv, hek, val)                                      \
+      hv_common((hv), NULL, HEK_KEY(hek), HEK_LEN(hek), HEK_UTF8(hek),  \
+                HV_FETCH_ISSTORE|HV_FETCH_JUST_SV, (val), HEK_HASH(hek))
+# define hv_fetchhek(hv, hek, lval)                                     \
+      ((SV **)                                                          \
+       hv_common((hv), NULL, HEK_KEY(hek), HEK_LEN(hek), HEK_UTF8(hek), \
+                 (lval)                                                 \
+                  ? (HV_FETCH_JUST_SV | HV_FETCH_LVALUE)                \
+                  : HV_FETCH_JUST_SV,                                   \
+                 NULL, HEK_HASH(hek)))
+# define hv_deletehek(hv, hek, flags)                                   \
+      hv_common((hv), NULL, HEK_KEY(hek), HEK_LEN(hek), HEK_UTF8(hek),  \
+                (flags)|HV_DELETE, NULL, HEK_HASH(hek))
+#define hv_existshek(hv, hek)                                               \
+    cBOOL(hv_common((hv), NULL, HEK_KEY(hek), HEK_LEN(hek), HEK_UTF8(hek),  \
                     HV_FETCH_ISEXISTS, NULL, HEK_HASH(hek)))
 #endif
 
@@ -632,7 +632,7 @@ instead of a string/length pair, and no precomputed hash.
 =cut
 */
 
-#define refcounted_he_fetch_pvs(chain, key, flags) \
+#define refcounted_he_fetch_pvs(chain, key, flags)  \
     Perl_refcounted_he_fetch_pvn(aTHX_ chain, STR_WITH_LEN(key), 0, flags)
 
 /*
@@ -644,7 +644,7 @@ instead of a string/length pair, and no precomputed hash.
 =cut
 */
 
-#define refcounted_he_new_pvs(parent, key, value, flags) \
+#define refcounted_he_new_pvs(parent, key, value, flags)    \
     Perl_refcounted_he_new_pvn(aTHX_ parent, STR_WITH_LEN(key), 0, value, flags)
 
 /* Flag bits are HVhek_UTF8, HVhek_WASUTF8, then */
@@ -660,10 +660,10 @@ instead of a string/length pair, and no precomputed hash.
 
 #ifdef USE_ITHREADS
 /* A big expression to find the key offset */
-#define REF_HE_KEY(chain)                                               \
-        ((((chain->refcounted_he_data[0] & 0x60) == 0x40)               \
-            ? chain->refcounted_he_val.refcounted_he_u_len + 1 : 0)     \
-         + 1 + chain->refcounted_he_data)
+#define REF_HE_KEY(chain)                                       \
+    ((((chain->refcounted_he_data[0] & 0x60) == 0x40)           \
+        ? chain->refcounted_he_val.refcounted_he_u_len + 1 : 0) \
+     + 1 + chain->refcounted_he_data)
 #endif
 
 #  ifdef USE_ITHREADS

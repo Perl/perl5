@@ -10,10 +10,10 @@
 #define PERL_SEEN_HV_FUNC_H_
 #include "hv_macro.h"
 
-#if !( 0 \
-        || defined(PERL_HASH_FUNC_SIPHASH) \
-        || defined(PERL_HASH_FUNC_SIPHASH13) \
-        || defined(PERL_HASH_FUNC_ZAPHOD32) \
+#if !( 0                                        \
+        || defined(PERL_HASH_FUNC_SIPHASH)      \
+        || defined(PERL_HASH_FUNC_SIPHASH13)    \
+        || defined(PERL_HASH_FUNC_ZAPHOD32)     \
     )
 #   ifdef CAN64BITHASH
 #       define PERL_HASH_FUNC_SIPHASH13
@@ -109,25 +109,25 @@
 /* note the 4 in the below code comes from the fact the seed to initialize the SBOX is 128 bits */
 #define PVT_PERL_HASH_SEED_BYTES   ( PVT__PERL_HASH_SEED_BYTES + (int)( 4 * sizeof(U32)) )
 
-#define PVT_PERL_HASH_STATE_BYTES  \
+#define PVT_PERL_HASH_STATE_BYTES   \
     ( PVT__PERL_HASH_STATE_BYTES + ( ( 1 + ( 256 * SBOX32_MAX_LEN ) ) * sizeof(U32) ) )
 
-#define PVT_PERL_HASH_SEED_STATE(seed,state)  \
-    STMT_START {\
-    PVT__PERL_HASH_SEED_STATE(seed,state);                                                     \
-    sbox32_seed_state128(seed + PVT__PERL_HASH_SEED_BYTES, state + PVT__PERL_HASH_STATE_BYTES);    \
-} STMT_END
+#define PVT_PERL_HASH_SEED_STATE(seed,state)                                                        \
+    STMT_START {                                                                                    \
+        PVT__PERL_HASH_SEED_STATE(seed,state);                                                      \
+        sbox32_seed_state128(seed + PVT__PERL_HASH_SEED_BYTES, state + PVT__PERL_HASH_STATE_BYTES); \
+    } STMT_END
 
-#define PVT_PERL_HASH_WITH_STATE(state,str,len)                                            \
-    (LIKELY(len <= SBOX32_MAX_LEN)                                                      \
-        ? sbox32_hash_with_state((state + PVT__PERL_HASH_STATE_BYTES),(const U8*)(str),(len))    \
+#define PVT_PERL_HASH_WITH_STATE(state,str,len)                                                 \
+    (LIKELY(len <= SBOX32_MAX_LEN)                                                              \
+        ? sbox32_hash_with_state((state + PVT__PERL_HASH_STATE_BYTES),(const U8*)(str),(len))   \
         : PVT__PERL_HASH_WITH_STATE((state),(str),(len)))
 
 #endif
 
-#define PERL_HASH_WITH_SEED(seed,hash,str,len) \
+#define PERL_HASH_WITH_SEED(seed,hash,str,len)  \
     (hash) = S_perl_hash_with_seed((const U8 *) seed, (const U8 *) str,len)
-#define PERL_HASH_WITH_STATE(state,hash,str,len) \
+#define PERL_HASH_WITH_STATE(state,hash,str,len)    \
     (hash) = PVT_PERL_HASH_WITH_STATE((state),(const U8*)(str),(len))
 
 #define PERL_HASH_SEED_STATE(seed,state) PVT_PERL_HASH_SEED_STATE(seed,state)
@@ -139,7 +139,7 @@
 #define PERL_HASH_STATE_WORDS (PERL_HASH_STATE_BYTES/PVT__PERL_HASH_WORD_SIZE)
 
 #ifdef PERL_USE_SINGLE_CHAR_HASH_CACHE
-#define PERL_HASH(state,str,len) \
+#define PERL_HASH(state,str,len)                                                            \
     (hash) = ((len) < 2 ? ( (len) == 0 ? PL_hash_chars[256] : PL_hash_chars[(U8)(str)[0]] ) \
                        : PVT_PERL_HASH_WITH_STATE(PL_hash_state,(U8*)(str),(len)))
 #else
@@ -165,9 +165,9 @@
         * options). Repeat, you are *STRONGLY* encouraged not to use the value
         * provided here.
         */
-#       define PERL_HASH_SEED \
-           ((const U8 *)"A long string of pseudorandomly "  \
-                        "chosen bytes for hashing in Perl")
+#       define PERL_HASH_SEED                               \
+            ((const U8 *)"A long string of pseudorandomly " \
+                         "chosen bytes for hashing in Perl")
 #   endif
 #endif
 
