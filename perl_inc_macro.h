@@ -20,7 +20,7 @@
 #ifndef DEFINE_INC_MACROS
 
 /* protect against multiple inclusions */
-#define DEFINE_INC_MACROS 1
+#define DEFINE_INC_MACROS   1
 
 #ifdef APPLLIB_EXP
 #       define INCPUSH_APPLLIB_EXP                              \
@@ -79,7 +79,7 @@
 
 /* used by INCPUSH_PRIVLIB_EXP */
 #ifndef PRIVLIB_EXP
-#  define PRIVLIB_EXP "/usr/local/lib/perl5:/usr/local/lib/perl"
+#  define PRIVLIB_EXP     "/usr/local/lib/perl5:/usr/local/lib/perl"
 #endif
 
 #if defined(WIN32)
@@ -100,7 +100,7 @@
 
 /* submacros for INCPUSH_PERL5LIB */
 
-#define _INCPUSH_PERL5LIB_IF    if (perl5lib && *perl5lib != '\0')
+#define _INCPUSH_PERL5LIB_IF            if (perl5lib && *perl5lib != '\0')
 
 #ifndef VMS
 # define _INCPUSH_PERL5LIB_ADD  \
@@ -122,7 +122,7 @@
 #endif
 
 /* this macro is special and use submacros from above */
-#define INCPUSH_PERL5LIB if (!TAINTING_get) { _INCPUSH_PERL5LIB_ADD }
+#define INCPUSH_PERL5LIB                if (!TAINTING_get) { _INCPUSH_PERL5LIB_ADD }
 
 /* Use the ~-expanded versions of APPLLIB (undocumented),
    SITELIB and VENDORLIB for older versions

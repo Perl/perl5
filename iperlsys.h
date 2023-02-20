@@ -158,12 +158,12 @@ struct IPerlStdIOInfo
 /* These do not belong here ... NI-S, 14 Nov 2000 */
 
 #  ifdef USE_STDIO_PTR
-#    define PerlSIO_has_cntptr(f)       1
+#    define PerlSIO_has_cntptr(f)   1
 #    ifdef STDIO_PTR_LVALUE
 #      ifdef  STDIO_CNT_LVALUE
 #        define PerlSIO_canset_cnt(f)   1
 #        ifdef STDIO_PTR_LVAL_NOCHANGE_CNT
-#          define PerlSIO_fast_gets(f)  1
+#          define PerlSIO_fast_gets(f)    1
 #        endif
 #      else /* STDIO_CNT_LVALUE */
 #        define PerlSIO_canset_cnt(f)   0
@@ -174,18 +174,18 @@ struct IPerlStdIOInfo
 #      endif
 #    endif
 #  else  /* USE_STDIO_PTR */
-#    define PerlSIO_has_cntptr(f)       0
-#    define PerlSIO_canset_cnt(f)       0
+#    define PerlSIO_has_cntptr(f)   0
+#    define PerlSIO_canset_cnt(f)   0
 #  endif /* USE_STDIO_PTR */
 
 #  ifndef PerlSIO_fast_gets
-#  define PerlSIO_fast_gets(f)          0
+#  define PerlSIO_fast_gets(f)    0
 #  endif
 
 #  ifdef FILE_base
-#    define PerlSIO_has_base(f)         1
+#    define PerlSIO_has_base(f)     1
 #  else
-#    define PerlSIO_has_base(f)         0
+#    define PerlSIO_has_base(f)     0
 #  endif
 
 /* Now take FILE * via function table */
@@ -246,8 +246,8 @@ struct IPerlStdIOInfo
        (*PL_StdIO->pSetPtr)(PL_StdIO, (f), (p))
 #  define PerlSIO_setlinebuf(f) \
        (*PL_StdIO->pSetlinebuf)(PL_StdIO, (f))
-#  define PerlSIO_printf                Perl_fprintf_nocontext
-#  define PerlSIO_stdoutf               Perl_printf_nocontext
+#  define PerlSIO_printf      Perl_fprintf_nocontext
+#  define PerlSIO_stdoutf     Perl_printf_nocontext
 #  define PerlSIO_vprintf(f,fmt,a)  \
        (*PL_StdIO->pVprintf)(PL_StdIO, (f),(fmt),a)
 #  define PerlSIO_ftell(f)  \
@@ -272,42 +272,42 @@ struct IPerlStdIOInfo
 
 #else   /* ! PERL_IMPLICIT_SYS */
 
-#  define PerlSIO_stdin                 stdin
-#  define PerlSIO_stdout                        stdout
-#  define PerlSIO_stderr                        stderr
-#  define PerlSIO_fopen(x,y)            fopen(x,y)
+#  define PerlSIO_stdin       stdin
+#  define PerlSIO_stdout      stdout
+#  define PerlSIO_stderr      stderr
+#  define PerlSIO_fopen(x,y)  fopen(x,y)
 #  ifdef __VOS__
    /* Work around VOS bug posix-979, wrongly setting
       errno when at end of file. */
-#    define PerlSIO_fclose(f)           (((errno==1025)?errno=0:0),fclose(f))
+#    define PerlSIO_fclose(f)       (((errno==1025)?errno=0:0),fclose(f))
 #    define PerlSIO_feof(f) \
          (((errno==1025)?errno=0:0),feof(f))
-#    define PerlSIO_ferror(f)           (((errno==1025)?errno=0:0),ferror(f))
+#    define PerlSIO_ferror(f)       (((errno==1025)?errno=0:0),ferror(f))
 #  else
-#    define PerlSIO_fclose(f)           fclose(f)
-#    define PerlSIO_feof(f)                     feof(f)
-#    define PerlSIO_ferror(f)           ferror(f)
+#    define PerlSIO_fclose(f)       fclose(f)
+#    define PerlSIO_feof(f)         feof(f)
+#    define PerlSIO_ferror(f)       ferror(f)
 #  endif
-#  define PerlSIO_clearerr(f)           clearerr(f)
-#  define PerlSIO_fgetc(f)                      fgetc(f)
+#  define PerlSIO_clearerr(f) clearerr(f)
+#  define PerlSIO_fgetc(f)    fgetc(f)
 #  ifdef FILE_base
-#    define PerlSIO_get_base(f)         FILE_base(f)
-#    define PerlSIO_get_bufsiz(f)               FILE_bufsiz(f)
+#    define PerlSIO_get_base(f)     FILE_base(f)
+#    define PerlSIO_get_bufsiz(f)   FILE_bufsiz(f)
 #  else
-#    define PerlSIO_get_base(f)         NULL
-#    define PerlSIO_get_bufsiz(f)               0
+#    define PerlSIO_get_base(f)     NULL
+#    define PerlSIO_get_bufsiz(f)   0
 #  endif
 #  ifdef USE_STDIO_PTR
-#    define PerlSIO_get_cnt(f)          FILE_cnt(f)
-#    define PerlSIO_get_ptr(f)          FILE_ptr(f)
+#    define PerlSIO_get_cnt(f)  FILE_cnt(f)
+#    define PerlSIO_get_ptr(f)  FILE_ptr(f)
 #  else
-#    define PerlSIO_get_cnt(f)          0
-#    define PerlSIO_get_ptr(f)          NULL
+#    define PerlSIO_get_cnt(f)  0
+#    define PerlSIO_get_ptr(f)              NULL
 #  endif
-#  define PerlSIO_fputc(c,f)            fputc(c,f)
-#  define PerlSIO_fputs(s,f)            fputs(s,f)
-#  define PerlSIO_fflush(f)             Fflush(f)
-#  define PerlSIO_fgets(s, n, f)                fgets(s,n,f)
+#  define PerlSIO_fputc(c,f)              fputc(c,f)
+#  define PerlSIO_fputs(s,f)              fputs(s,f)
+#  define PerlSIO_fflush(f)               Fflush(f)
+#  define PerlSIO_fgets(s, n, f)          fgets(s,n,f)
 #  if defined(__VMS)
      /* Unusual definition of ungetc() here to accommodate fast_sv_gets()'
       * belief that it can mix getc/ungetc with reads from stdio buffer */
@@ -320,36 +320,36 @@ END_EXTERN_C
                    ((*(f))->_ptr > (*(f))->_base)) ?        \
                    ((*(f))->_cnt++, *(--(*(f))->_ptr) = (c)) : decc$ungetc(c,f)))
 #  else
-#    define PerlSIO_ungetc(c,f)          ungetc(c,f)
+#    define PerlSIO_ungetc(c,f)             ungetc(c,f)
 #  endif
-#  define PerlSIO_fileno(f)             fileno(f)
-#  define PerlSIO_fdopen(f, s)          fdopen(f,s)
-#  define PerlSIO_freopen(p, m, f)      freopen(p,m,f)
-#  define PerlSIO_fread(buf,sz,count,f) fread(buf,sz,count,f)
-#  define PerlSIO_fwrite(buf,sz,count,f)        fwrite(buf,sz,count,f)
-#  define PerlSIO_setbuf(f,b)           setbuf(f,b)
-#  define PerlSIO_setvbuf(f,b,t,s)      setvbuf(f,b,t,s)
+#  define PerlSIO_fileno(f)               fileno(f)
+#  define PerlSIO_fdopen(f, s)            fdopen(f,s)
+#  define PerlSIO_freopen(p, m, f)        freopen(p,m,f)
+#  define PerlSIO_fread(buf,sz,count,f)   fread(buf,sz,count,f)
+#  define PerlSIO_fwrite(buf,sz,count,f)  fwrite(buf,sz,count,f)
+#  define PerlSIO_setbuf(f,b)             setbuf(f,b)
+#  define PerlSIO_setvbuf(f,b,t,s)        setvbuf(f,b,t,s)
 #  if defined(USE_STDIO_PTR) && defined(STDIO_CNT_LVALUE)
-#    define PerlSIO_set_cnt(f,c)                FILE_cnt(f) = (c)
+#    define PerlSIO_set_cnt(f,c)            FILE_cnt(f) = (c)
 #  else
-#    define PerlSIO_set_cnt(f,c)                PerlIOProc_abort()
+#    define PerlSIO_set_cnt(f,c)            PerlIOProc_abort()
 #  endif
 #  if defined(USE_STDIO_PTR) && defined(STDIO_PTR_LVALUE)
-#    define PerlSIO_set_ptr(f,p)                (FILE_ptr(f) = (p))
+#    define PerlSIO_set_ptr(f,p)            (FILE_ptr(f) = (p))
 #  else
-#    define PerlSIO_set_ptr(f,p)                PerlIOProc_abort()
+#    define PerlSIO_set_ptr(f,p)            PerlIOProc_abort()
 #  endif
-#  define PerlSIO_setlinebuf(f)         setlinebuf(f)
-#  define PerlSIO_printf                        fprintf
-#  define PerlSIO_stdoutf                       printf
-#  define PerlSIO_vprintf(f,fmt,a)      vfprintf(f,fmt,a)
-#  define PerlSIO_ftell(f)              ftell(f)
-#  define PerlSIO_fseek(f,o,w)          fseek(f,o,w)
-#  define PerlSIO_fgetpos(f,p)          fgetpos(f,p)
-#  define PerlSIO_fsetpos(f,p)          fsetpos(f,p)
-#  define PerlSIO_rewind(f)             rewind(f)
-#  define PerlSIO_tmpfile()             tmpfile()
-#  define PerlSIO_fdupopen(f)           (f)
+#  define PerlSIO_setlinebuf(f)           setlinebuf(f)
+#  define PerlSIO_printf                  fprintf
+#  define PerlSIO_stdoutf                 printf
+#  define PerlSIO_vprintf(f,fmt,a)        vfprintf(f,fmt,a)
+#  define PerlSIO_ftell(f)                ftell(f)
+#  define PerlSIO_fseek(f,o,w)            fseek(f,o,w)
+#  define PerlSIO_fgetpos(f,p)            fgetpos(f,p)
+#  define PerlSIO_fsetpos(f,p)            fsetpos(f,p)
+#  define PerlSIO_rewind(f)               rewind(f)
+#  define PerlSIO_tmpfile()               tmpfile()
+#  define PerlSIO_fdupopen(f)             (f)
 
 #endif  /* PERL_IMPLICIT_SYS */
 
@@ -426,22 +426,22 @@ struct IPerlDirInfo
 
 #  else /* ! PERL_IMPLICIT_SYS */
 
-#  define PerlDir_mkdir(name, mode)     Mkdir((name), (mode))
+#  define PerlDir_mkdir(name, mode)       Mkdir((name), (mode))
 #  ifdef VMS
-#    define PerlDir_chdir(n)            Chdir((n))
+#    define PerlDir_chdir(n)                Chdir((n))
 #  else
-#    define PerlDir_chdir(name)         chdir((name))
+#    define PerlDir_chdir(name)             chdir((name))
 #  endif
-#  define PerlDir_rmdir(name)           rmdir((name))
-#  define PerlDir_close(dir)            closedir((dir))
-#  define PerlDir_open(name)            opendir((name))
-#  define PerlDir_read(dir)             readdir((dir))
-#  define PerlDir_rewind(dir)           rewinddir((dir))
-#  define PerlDir_seek(dir, loc)                seekdir((dir), (loc))
-#  define PerlDir_tell(dir)             telldir((dir))
+#  define PerlDir_rmdir(name)             rmdir((name))
+#  define PerlDir_close(dir)              closedir((dir))
+#  define PerlDir_open(name)              opendir((name))
+#  define PerlDir_read(dir)               readdir((dir))
+#  define PerlDir_rewind(dir)             rewinddir((dir))
+#  define PerlDir_seek(dir, loc)          seekdir((dir), (loc))
+#  define PerlDir_tell(dir)               telldir((dir))
 #  ifdef WIN32
-#    define PerlDir_mapA(dir)           dir
-#    define PerlDir_mapW(dir)           dir
+#    define PerlDir_mapA(dir)               dir
+#    define PerlDir_mapW(dir)               dir
 #  endif
 
 #endif  /* PERL_IMPLICIT_SYS */
@@ -555,40 +555,40 @@ struct IPerlEnvInfo
 
 #else   /* below is ! PERL_IMPLICIT_SYS */
 #  ifndef USE_ITHREADS  /* Threaded is an inline function in inline.h */
-#    define PerlEnv_putenv(str)         putenv(str)
+#    define PerlEnv_putenv(str)             putenv(str)
 #  endif
-#  define PerlEnv_getenv(str)           mortal_getenv(str)
-#  define PerlEnv_getenv_len(str,l)     getenv_len((str), (l))
+#  define PerlEnv_getenv(str)             mortal_getenv(str)
+#  define PerlEnv_getenv_len(str,l)       getenv_len((str), (l))
 #  ifdef HAS_ENVGETENV
-#    define PerlEnv_ENVgetenv(str)      ENVgetenv((str))
-#    define PerlEnv_ENVgetenv_len(str,l)        ENVgetenv_len((str), (l))
+#    define PerlEnv_ENVgetenv(str)          ENVgetenv((str))
+#    define PerlEnv_ENVgetenv_len(str,l)    ENVgetenv_len((str), (l))
 #  else
-#    define PerlEnv_ENVgetenv(str)      PerlEnv_getenv((str))
-#    define PerlEnv_ENVgetenv_len(str,l)        PerlEnv_getenv_len((str), (l))
+#    define PerlEnv_ENVgetenv(str)          PerlEnv_getenv((str))
+#    define PerlEnv_ENVgetenv_len(str,l)    PerlEnv_getenv_len((str), (l))
 #  endif
-#  define PerlEnv_uname(name)           uname((name))
+#  define PerlEnv_uname(name)             uname((name))
 
 #  ifdef WIN32
-#    define PerlEnv_os_id()                     win32_os_id()
+#    define PerlEnv_os_id()                 win32_os_id()
 #    define PerlEnv_lib_path(str, lenp) \
          win32_get_privlib(WIN32_NO_REGISTRY_M_(str) lenp)
-#    define PerlEnv_sitelib_path(str, lenp)     win32_get_sitelib(str, lenp)
-#    define PerlEnv_vendorlib_path(str, lenp)   win32_get_vendorlib(str, lenp)
-#  define PerlEnv_get_child_IO(ptr)     win32_get_child_IO(ptr)
-#  define PerlEnv_clearenv()            win32_clearenv()
-#  define PerlEnv_get_childenv()                win32_get_childenv()
-#  define PerlEnv_free_childenv(e)      win32_free_childenv((e))
-#  define PerlEnv_get_childdir()                win32_get_childdir()
-#  define PerlEnv_free_childdir(d)      win32_free_childdir((d))
+#    define PerlEnv_sitelib_path(str, lenp) win32_get_sitelib(str, lenp)
+#    define PerlEnv_vendorlib_path(str, lenp) win32_get_vendorlib(str, lenp)
+#  define PerlEnv_get_child_IO(ptr)       win32_get_child_IO(ptr)
+#  define PerlEnv_clearenv()              win32_clearenv()
+#  define PerlEnv_get_childenv()          win32_get_childenv()
+#  define PerlEnv_free_childenv(e)        win32_free_childenv((e))
+#  define PerlEnv_get_childdir()          win32_get_childdir()
+#  define PerlEnv_free_childdir(d)        win32_free_childdir((d))
 #  else
 #    define PerlEnv_clearenv(str)   \
          (ENV_LOCK, (clearenv(str)  \
              ? (ENV_UNLOCK, 1)      \
              : (ENV_UNLOCK, 0)))
-#    define PerlEnv_get_childenv()              get_childenv()
-#    define PerlEnv_free_childenv(e)    free_childenv((e))
-#    define PerlEnv_get_childdir()              get_childdir()
-#    define PerlEnv_free_childdir(d)    free_childdir((d))
+#    define PerlEnv_get_childenv()          get_childenv()
+#    define PerlEnv_free_childenv(e)        free_childenv((e))
+#    define PerlEnv_get_childdir()          get_childdir()
+#    define PerlEnv_free_childdir(d)        free_childdir((d))
 #  endif
 
 #endif  /* PERL_IMPLICIT_SYS */
@@ -739,59 +739,59 @@ struct IPerlLIOInfo
 
 #else   /* ! PERL_IMPLICIT_SYS */
 
-#  define PerlLIO_access(file, mode)    access((file), (mode))
-#  define PerlLIO_chmod(file, mode)     chmod((file), (mode))
-#  define PerlLIO_chown(file, owner, grp)       chown((file), (owner), (grp))
+#  define PerlLIO_access(file, mode)      access((file), (mode))
+#  define PerlLIO_chmod(file, mode)       chmod((file), (mode))
+#  define PerlLIO_chown(file, owner, grp) chown((file), (owner), (grp))
 #  if defined(HAS_TRUNCATE)
-#    define PerlLIO_chsize(fd, size)    ftruncate((fd), (size))
+#    define PerlLIO_chsize(fd, size)        ftruncate((fd), (size))
 #  elif defined(HAS_CHSIZE)
-#    define PerlLIO_chsize(fd, size)    chsize((fd), (size))
+#    define PerlLIO_chsize(fd, size)        chsize((fd), (size))
 #  else
-#    define PerlLIO_chsize(fd, size)    my_chsize((fd), (size))
+#    define PerlLIO_chsize(fd, size)        my_chsize((fd), (size))
 #  endif
-#  define PerlLIO_close(fd)             close((fd))
-#  define PerlLIO_dup(fd)                       dup((fd))
-#  define PerlLIO_dup2(fd1, fd2)                dup2((fd1), (fd2))
-#  define PerlLIO_flock(fd, op)         FLOCK((fd), (op))
-#  define PerlLIO_fstat(fd, buf)                Fstat((fd), (buf))
-#  define PerlLIO_ioctl(fd, u, buf)     ioctl((fd), (u), (buf))
-#  define PerlLIO_isatty(fd)            isatty((fd))
-#  define PerlLIO_link(oldname, newname)        link((oldname), (newname))
-#  define PerlLIO_symlink(oldname, newname)     symlink((oldname), (newname))
+#  define PerlLIO_close(fd)               close((fd))
+#  define PerlLIO_dup(fd)                 dup((fd))
+#  define PerlLIO_dup2(fd1, fd2)          dup2((fd1), (fd2))
+#  define PerlLIO_flock(fd, op)           FLOCK((fd), (op))
+#  define PerlLIO_fstat(fd, buf)          Fstat((fd), (buf))
+#  define PerlLIO_ioctl(fd, u, buf)       ioctl((fd), (u), (buf))
+#  define PerlLIO_isatty(fd)              isatty((fd))
+#  define PerlLIO_link(oldname, newname)  link((oldname), (newname))
+#  define PerlLIO_symlink(oldname, newname) symlink((oldname), (newname))
 #  define PerlLIO_readlink(path, buf, bufsiz)   \
        readlink((path), (buf), (bufsiz))
-#  define PerlLIO_lseek(fd, offset, mode)       lseek((fd), (offset), (mode))
-#  define PerlLIO_stat(name, buf)               Stat((name), (buf))
+#  define PerlLIO_lseek(fd, offset, mode) lseek((fd), (offset), (mode))
+#  define PerlLIO_stat(name, buf)         Stat((name), (buf))
 #  ifdef HAS_LSTAT
-#    define PerlLIO_lstat(name, buf)    lstat((name), (buf))
+#    define PerlLIO_lstat(name, buf)        lstat((name), (buf))
 #  else
-#    define PerlLIO_lstat(name, buf)    PerlLIO_stat((name), (buf))
+#    define PerlLIO_lstat(name, buf)        PerlLIO_stat((name), (buf))
 #  endif
-#  define PerlLIO_mktemp(file)          mktemp((file))
+#  define PerlLIO_mktemp(file)            mktemp((file))
 #  if defined(OEMVS)
 #    if (__CHARSET_LIB == 1)
     int asciiopen(const char* path, int oflag);
     int asciiopen3(const char* path, int oflag, int perm);
 
-#      define PerlLIO_open(file, flag)          asciiopen((file), (flag))
+#      define PerlLIO_open(file, flag)    asciiopen((file), (flag))
 #      define PerlLIO_open3(file, flag, perm)   \
            asciiopen3((file), (flag), (perm))
 #    else
-#      define PerlLIO_open(file, flag)          open((file), (flag))
-#      define PerlLIO_open3(file, flag, perm)   open((file), (flag), (perm))
+#      define PerlLIO_open(file, flag)    open((file), (flag))
+#      define PerlLIO_open3(file, flag, perm) open((file), (flag), (perm))
 #    endif
 #  else
-#    define PerlLIO_open(file, flag)            open((file), (flag))
-#    define PerlLIO_open3(file, flag, perm)     open((file), (flag), (perm))
+#    define PerlLIO_open(file, flag)        open((file), (flag))
+#    define PerlLIO_open3(file, flag, perm) open((file), (flag), (perm))
 #  endif
-#  define PerlLIO_read(fd, buf, count)  read((fd), (buf), (count))
-#  define PerlLIO_rename(old, new)      rename((old), (new))
-#  define PerlLIO_setmode(fd, mode)     setmode((fd), (mode))
-#  define PerlLIO_tmpnam(str)           tmpnam((str))
-#  define PerlLIO_umask(mode)           umask((mode))
-#  define PerlLIO_unlink(file)          unlink((file))
-#  define PerlLIO_utime(file, time)     utime((file), (time))
-#  define PerlLIO_write(fd, buf, count) write((fd), (buf), (count))
+#  define PerlLIO_read(fd, buf, count)    read((fd), (buf), (count))
+#  define PerlLIO_rename(old, new)        rename((old), (new))
+#  define PerlLIO_setmode(fd, mode)       setmode((fd), (mode))
+#  define PerlLIO_tmpnam(str)             tmpnam((str))
+#  define PerlLIO_umask(mode)             umask((mode))
+#  define PerlLIO_unlink(file)            unlink((file))
+#  define PerlLIO_utime(file, time)       utime((file), (time))
+#  define PerlLIO_write(fd, buf, count)   write((fd), (buf), (count))
 
 #endif  /* PERL_IMPLICIT_SYS */
 
@@ -881,31 +881,31 @@ struct IPerlMemInfo
 #else   /* ! PERL_IMPLICIT_SYS */
 
 /* Interpreter specific memory macros */
-#  define PerlMem_malloc(size)          malloc((size))
-#  define PerlMem_realloc(buf, size)    realloc((buf), (size))
-#  define PerlMem_free(buf)             free((buf))
-#  define PerlMem_calloc(num, size)     calloc((num), (size))
+#  define PerlMem_malloc(size)            malloc((size))
+#  define PerlMem_realloc(buf, size)      realloc((buf), (size))
+#  define PerlMem_free(buf)               free((buf))
+#  define PerlMem_calloc(num, size)       calloc((num), (size))
 #  define PerlMem_get_lock()
 #  define PerlMem_free_lock()
-#  define PerlMem_is_locked()           0
+#  define PerlMem_is_locked()     0
 
 /* Shared memory macros */
-#  define PerlMemShared_malloc(size)            malloc((size))
-#  define PerlMemShared_realloc(buf, size)      realloc((buf), (size))
-#  define PerlMemShared_free(buf)               free((buf))
-#  define PerlMemShared_calloc(num, size)       calloc((num), (size))
+#  define PerlMemShared_malloc(size)          malloc((size))
+#  define PerlMemShared_realloc(buf, size)    realloc((buf), (size))
+#  define PerlMemShared_free(buf)             free((buf))
+#  define PerlMemShared_calloc(num, size)     calloc((num), (size))
 #  define PerlMemShared_get_lock()
 #  define PerlMemShared_free_lock()
-#  define PerlMemShared_is_locked()             0
+#  define PerlMemShared_is_locked()   0
 
 /* Parse tree memory macros */
-#  define PerlMemParse_malloc(size)             malloc((size))
-#  define PerlMemParse_realloc(buf, size)       realloc((buf), (size))
-#  define PerlMemParse_free(buf)                free((buf))
-#  define PerlMemParse_calloc(num, size)        calloc((num), (size))
+#  define PerlMemParse_malloc(size)       malloc((size))
+#  define PerlMemParse_realloc(buf, size) realloc((buf), (size))
+#  define PerlMemParse_free(buf)          free((buf))
+#  define PerlMemParse_calloc(num, size)  calloc((num), (size))
 #  define PerlMemParse_get_lock()
 #  define PerlMemParse_free_lock()
-#  define PerlMemParse_is_locked()              0
+#  define PerlMemParse_is_locked()    0
 
 #endif  /* PERL_IMPLICIT_SYS */
 
@@ -1072,8 +1072,8 @@ struct IPerlProcInfo
        (*PL_Proc->pFork)(PL_Proc)
 #  define PerlProc_getpid() \
        (*PL_Proc->pGetpid)(PL_Proc)
-#  define PerlProc_setjmp(b, n) Sigsetjmp((b), (n))
-#  define PerlProc_longjmp(b, n) Siglongjmp((b), (n))
+#  define PerlProc_setjmp(b, n)           Sigsetjmp((b), (n))
+#  define PerlProc_longjmp(b, n)          Siglongjmp((b), (n))
 
 #  ifdef WIN32
 #    define PerlProc_DynaLoad(f)    \
@@ -1090,38 +1090,38 @@ struct IPerlProcInfo
 
 #else   /* ! PERL_IMPLICIT_SYS */
 
-#  define PerlProc_abort()      abort()
-#  define PerlProc_crypt(c,s)   crypt((c), (s))
-#  define PerlProc_exit(s)      exit((s))
-#  define PerlProc__exit(s)     _exit((s))
+#  define PerlProc_abort()                abort()
+#  define PerlProc_crypt(c,s)             crypt((c), (s))
+#  define PerlProc_exit(s)                exit((s))
+#  define PerlProc__exit(s)               _exit((s))
 #  define PerlProc_execl(c,w,x,y,z) \
        execl((c), (w), (x), (y), (z))
-#  define PerlProc_execv(c, a)  execv((c), (a))
-#  define PerlProc_execvp(c, a) execvp((c), (a))
-#  define PerlProc_getuid()     getuid()
-#  define PerlProc_geteuid()    geteuid()
-#  define PerlProc_getgid()     getgid()
-#  define PerlProc_getegid()    getegid()
-#  define PerlProc_getlogin()   getlogin()
-#  define PerlProc_kill(i, a)   kill((i), (a))
-#  define PerlProc_killpg(i, a) killpg((i), (a))
-#  define PerlProc_pause()      Pause()
-#  define PerlProc_popen(c, m)  my_popen((c), (m))
-#  define PerlProc_popen_list(m,n,a)    my_popen_list((m),(n),(a))
-#  define PerlProc_pclose(f)    my_pclose((f))
-#  define PerlProc_pipe(fd)     pipe((fd))
-#  define PerlProc_setuid(u)    setuid((u))
-#  define PerlProc_setgid(g)    setgid((g))
-#  define PerlProc_sleep(t)     sleep((t))
-#  define PerlProc_times(t)     times((t))
-#  define PerlProc_wait(t)      wait((t))
-#  define PerlProc_waitpid(p,s,f) waitpid((p), (s), (f))
-#  define PerlProc_setjmp(b, n) Sigsetjmp((b), (n))
-#  define PerlProc_longjmp(b, n) Siglongjmp((b), (n))
-#  define PerlProc_signal(n, h) signal((n), (h))
-#  define PerlProc_fork()       my_fork()
-#  define PerlProc_getpid()     getpid()
-#  define PerlProc_gettimeofday(t,z)    gettimeofday((t),(z))
+#  define PerlProc_execv(c, a)            execv((c), (a))
+#  define PerlProc_execvp(c, a)           execvp((c), (a))
+#  define PerlProc_getuid()               getuid()
+#  define PerlProc_geteuid()              geteuid()
+#  define PerlProc_getgid()               getgid()
+#  define PerlProc_getegid()              getegid()
+#  define PerlProc_getlogin()             getlogin()
+#  define PerlProc_kill(i, a)             kill((i), (a))
+#  define PerlProc_killpg(i, a)           killpg((i), (a))
+#  define PerlProc_pause()                Pause()
+#  define PerlProc_popen(c, m)            my_popen((c), (m))
+#  define PerlProc_popen_list(m,n,a)      my_popen_list((m),(n),(a))
+#  define PerlProc_pclose(f)              my_pclose((f))
+#  define PerlProc_pipe(fd)               pipe((fd))
+#  define PerlProc_setuid(u)              setuid((u))
+#  define PerlProc_setgid(g)              setgid((g))
+#  define PerlProc_sleep(t)               sleep((t))
+#  define PerlProc_times(t)               times((t))
+#  define PerlProc_wait(t)                wait((t))
+#  define PerlProc_waitpid(p,s,f)         waitpid((p), (s), (f))
+#  define PerlProc_setjmp(b, n)           Sigsetjmp((b), (n))
+#  define PerlProc_longjmp(b, n)          Siglongjmp((b), (n))
+#  define PerlProc_signal(n, h)           signal((n), (h))
+#  define PerlProc_fork()                 my_fork()
+#  define PerlProc_getpid()               getpid()
+#  define PerlProc_gettimeofday(t,z)      gettimeofday((t),(z))
 
 #  ifdef WIN32
 #    define PerlProc_DynaLoad(f)    \
@@ -1131,7 +1131,7 @@ struct IPerlProcInfo
 #    define PerlProc_spawnvp(m, c, a)   \
          win32_spawnvp((m), (c), (a))
 #    undef PerlProc_signal
-#    define PerlProc_signal(n, h) win32_signal((n), (h))
+#    define PerlProc_signal(n, h)   win32_signal((n), (h))
 #  endif
 #endif  /* PERL_IMPLICIT_SYS */
 
@@ -1350,66 +1350,66 @@ struct IPerlSockInfo
        (*PL_Sock->pSocketpair)(PL_Sock, a, t, p, f)
 
 #  ifdef WIN32
-#    define     PerlSock_closesocket(s) \
+#    define PerlSock_closesocket(s) \
          (*PL_Sock->pClosesocket)(PL_Sock, s)
 #  endif
 
 #else   /* ! PERL_IMPLICIT_SYS below */
 
-#  define PerlSock_htonl(x)             htonl(x)
-#  define PerlSock_htons(x)             htons(x)
-#  define PerlSock_ntohl(x)             ntohl(x)
-#  define PerlSock_ntohs(x)             ntohs(x)
-#  define PerlSock_accept(s, a, l)      accept(s, a, l)
-#  define PerlSock_bind(s, n, l)        bind(s, n, l)
-#  define PerlSock_connect(s, n, l)     connect(s, n, l)
+#  define PerlSock_htonl(x)               htonl(x)
+#  define PerlSock_htons(x)               htons(x)
+#  define PerlSock_ntohl(x)               ntohl(x)
+#  define PerlSock_ntohs(x)               ntohs(x)
+#  define PerlSock_accept(s, a, l)        accept(s, a, l)
+#  define PerlSock_bind(s, n, l)          bind(s, n, l)
+#  define PerlSock_connect(s, n, l)       connect(s, n, l)
 
 #  define PerlSock_gethostbyaddr(a, l, t) gethostbyaddr(a, l, t)
-#  define PerlSock_gethostbyname(n)     gethostbyname(n)
-#  define PerlSock_gethostent           gethostent
-#  define PerlSock_endhostent           endhostent
-#  define PerlSock_gethostname(n, l)    gethostname(n, l)
+#  define PerlSock_gethostbyname(n)       gethostbyname(n)
+#  define PerlSock_gethostent             gethostent
+#  define PerlSock_endhostent             endhostent
+#  define PerlSock_gethostname(n, l)      gethostname(n, l)
 
-#  define PerlSock_getnetbyaddr(n, t)   getnetbyaddr(n, t)
-#  define PerlSock_getnetbyname(n)      getnetbyname(n)
-#  define PerlSock_getnetent            getnetent
-#  define PerlSock_endnetent            endnetent
-#  define PerlSock_getpeername(s, n, l) getpeername(s, n, l)
+#  define PerlSock_getnetbyaddr(n, t)     getnetbyaddr(n, t)
+#  define PerlSock_getnetbyname(n)        getnetbyname(n)
+#  define PerlSock_getnetent              getnetent
+#  define PerlSock_endnetent              endnetent
+#  define PerlSock_getpeername(s, n, l)   getpeername(s, n, l)
 
-#  define PerlSock_getprotobyname(n)    getprotobyname(n)
-#  define PerlSock_getprotobynumber(n)  getprotobynumber(n)
-#  define PerlSock_getprotoent          getprotoent
-#  define PerlSock_endprotoent          endprotoent
+#  define PerlSock_getprotobyname(n)      getprotobyname(n)
+#  define PerlSock_getprotobynumber(n)    getprotobynumber(n)
+#  define PerlSock_getprotoent            getprotoent
+#  define PerlSock_endprotoent            endprotoent
 
-#  define PerlSock_getservbyname(n, p)  getservbyname(n, p)
+#  define PerlSock_getservbyname(n, p)    getservbyname(n, p)
 #  define PerlSock_getservbyport(port, p) getservbyport(port, p)
-#  define PerlSock_getservent           getservent
-#  define PerlSock_endservent           endservent
+#  define PerlSock_getservent             getservent
+#  define PerlSock_endservent             endservent
 
-#  define PerlSock_getsockname(s, n, l) getsockname(s, n, l)
+#  define PerlSock_getsockname(s, n, l)   getsockname(s, n, l)
 #  define PerlSock_getsockopt(s,l,n,v,i)  getsockopt(s, l, n, v, i)
-#  define PerlSock_inet_addr(c)         inet_addr(c)
-#  define PerlSock_inet_ntoa(i)         inet_ntoa(i)
-#  define PerlSock_listen(s, b)         listen(s, b)
-#  define PerlSock_recv(s, b, l, f)     recv(s, b, l, f)
+#  define PerlSock_inet_addr(c)           inet_addr(c)
+#  define PerlSock_inet_ntoa(i)           inet_ntoa(i)
+#  define PerlSock_listen(s, b)           listen(s, b)
+#  define PerlSock_recv(s, b, l, f)       recv(s, b, l, f)
 #  define PerlSock_recvfrom(s, b, l, f, from, fromlen)  \
        recvfrom(s, b, l, f, from, fromlen)
-#  define PerlSock_select(n, r, w, e, t) select(n, r, w, e, t)
-#  define PerlSock_send(s, b, l, f)     send(s, b, l, f)
+#  define PerlSock_select(n, r, w, e, t)  select(n, r, w, e, t)
+#  define PerlSock_send(s, b, l, f)       send(s, b, l, f)
 #  define PerlSock_sendto(s, b, l, f, t, tlen)  \
        sendto(s, b, l, f, t, tlen)
-#  define PerlSock_sethostent(f)        sethostent(f)
-#  define PerlSock_setnetent(f)         setnetent(f)
-#  define PerlSock_setprotoent(f)       setprotoent(f)
-#  define PerlSock_setservent(f)        setservent(f)
+#  define PerlSock_sethostent(f)          sethostent(f)
+#  define PerlSock_setnetent(f)           setnetent(f)
+#  define PerlSock_setprotoent(f)         setprotoent(f)
+#  define PerlSock_setservent(f)          setservent(f)
 #  define PerlSock_setsockopt(s, l, n, v, len)  \
        setsockopt(s, l, n, v, len)
-#  define PerlSock_shutdown(s, h)       shutdown(s, h)
-#  define PerlSock_socket(a, t, p)      socket(a, t, p)
+#  define PerlSock_shutdown(s, h)         shutdown(s, h)
+#  define PerlSock_socket(a, t, p)        socket(a, t, p)
 #  define PerlSock_socketpair(a, t, p, f) socketpair(a, t, p, f)
 
 #  ifdef WIN32
-#    define PerlSock_closesocket(s)     closesocket(s)
+#    define PerlSock_closesocket(s) closesocket(s)
 #  endif
 
 #endif  /* PERL_IMPLICIT_SYS */

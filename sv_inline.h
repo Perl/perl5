@@ -24,15 +24,15 @@
 /* The old value was hard coded at 1008.  (4096-16) seems to be a
    bit faster, at least on FreeBSD.  YMMV, so experiment. */
 #ifndef PERL_ARENA_SIZE
-#define PERL_ARENA_SIZE 4080
+#define PERL_ARENA_SIZE     4080
 #endif
 
 /* All other pre-existing definitions and functions that were
  * moved into this file originally came from sv.c. */
 
 #ifdef PERL_POISON
-#  define SvARENA_CHAIN(sv)     ((sv)->sv_u.svu_rv)
-#  define SvARENA_CHAIN_SET(sv,val)     (sv)->sv_u.svu_rv = MUTABLE_SV((val))
+#  define SvARENA_CHAIN(sv)                       ((sv)->sv_u.svu_rv)
+#  define SvARENA_CHAIN_SET(sv,val)               (sv)->sv_u.svu_rv = MUTABLE_SV((val))
 /* Whilst I'd love to do this, it seems that things like to
    check on unreferenced scalars # define
    POISON_SV_HEAD(sv) PoisonNew(sv, 1, struct STRUCT_SV)
@@ -41,8 +41,8 @@
        PoisonNew(&SvANY(sv), 1, void *),    \
        PoisonNew(&SvREFCNT(sv), 1, U32)
 #else
-#  define SvARENA_CHAIN(sv)     SvANY(sv)
-#  define SvARENA_CHAIN_SET(sv,val)     SvANY(sv) = (void *)(val)
+#  define SvARENA_CHAIN(sv)                       SvANY(sv)
+#  define SvARENA_CHAIN_SET(sv,val)               SvANY(sv) = (void *)(val)
 #  define POISON_SV_HEAD(sv)
 #endif
 
@@ -52,8 +52,8 @@
 #  define MEM_LOG_DEL_SV(sv, file, line, func)  \
        Perl_mem_log_del_sv(sv, file, line, func)
 #else
-#  define MEM_LOG_NEW_SV(sv, file, line, func)  NOOP
-#  define MEM_LOG_DEL_SV(sv, file, line, func)  NOOP
+#  define MEM_LOG_NEW_SV(sv, file, line, func)    NOOP
+#  define MEM_LOG_DEL_SV(sv, file, line, func)    NOOP
 #endif
 
 #define uproot_SV(p)                                \
@@ -102,7 +102,7 @@ S_new_SV(pTHX_ const char *file, int line, const char *func)
 
     return sv;
 }
-#  define new_SV(p) (p)=S_new_SV(aTHX_ __FILE__, __LINE__, FUNCTION__)
+#  define new_SV(p)                               (p)=S_new_SV(aTHX_ __FILE__, __LINE__, FUNCTION__)
 
 #else
 #  define new_SV(p)                                             \
@@ -133,7 +133,7 @@ struct body_details {
     U32 arena_size;                 /* Size of arena to allocate */
 };
 
-#define ALIGNED_TYPE_NAME(name) name##_aligned
+#define ALIGNED_TYPE_NAME(name)     name##_aligned
 #define ALIGNED_TYPE(name)  \
     typedef union {         \
         name align_me;      \
@@ -152,18 +152,18 @@ ALIGNED_TYPE(XPVFM);
 ALIGNED_TYPE(XPVIO);
 ALIGNED_TYPE(XPVOBJ);
 
-#define HADNV FALSE
-#define NONV TRUE
+#define HADNV                       FALSE
+#define NONV                        TRUE
 
 
 #ifdef PURIFY
 /* With -DPURFIY we allocate everything directly, and don't use arenas.  This
    seems a rather elegant way to simplify some of the code below. */
-#define HASARENA FALSE
+#define HASARENA                    FALSE
 #else
-#define HASARENA TRUE
+#define HASARENA                    TRUE
 #endif
-#define NOARENA FALSE
+#define NOARENA                     FALSE
 
 /* Size the arenas to exactly fit a given number of bodies.  A count of
    0 fits the max number bodies into a PERL_ARENA_SIZE.block,
@@ -295,20 +295,20 @@ static const struct body_details bodies_by_type[] = {
 
 #ifdef PURIFY
 #if !(NVSIZE <= IVSIZE)
-#  define new_XNV()    safemalloc(sizeof(XPVNV))
+#  define new_XNV()                               safemalloc(sizeof(XPVNV))
 #endif
-#define new_XPVNV()    safemalloc(sizeof(XPVNV))
-#define new_XPVMG()    safemalloc(sizeof(XPVMG))
+#define new_XPVNV()                 safemalloc(sizeof(XPVNV))
+#define new_XPVMG()                 safemalloc(sizeof(XPVMG))
 
-#define del_body_by_type(p, type)       safefree(p)
+#define del_body_by_type(p, type)   safefree(p)
 
 #else /* !PURIFY */
 
 #if !(NVSIZE <= IVSIZE)
-#  define new_XNV()    new_body_allocated(SVt_NV)
+#  define new_XNV()                               new_body_allocated(SVt_NV)
 #endif
-#define new_XPVNV()    new_body_allocated(SVt_PVNV)
-#define new_XPVMG()    new_body_allocated(SVt_PVMG)
+#define new_XPVNV()                 new_body_allocated(SVt_PVNV)
+#define new_XPVMG()                 new_body_allocated(SVt_PVMG)
 
 #define del_body_by_type(p, type)               \
     del_body(p + bodies_by_type[(type)].offset, \

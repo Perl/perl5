@@ -19,31 +19,31 @@
 
 #  if (defined(WIN32) && defined(__MINGW32__) && ! defined(PERL_IS_MINIPERL))
 #    ifdef __cplusplus
-#      define EXT       __declspec(dllexport)
+#      define EXT         __declspec(dllexport)
 #      define dEXT
-#      define EXTCONST  __declspec(dllexport) extern const
-#      define dEXTCONST const
+#      define EXTCONST    __declspec(dllexport) extern const
+#      define dEXTCONST   const
 #    else
-#      define EXT       __declspec(dllexport)
+#      define EXT         __declspec(dllexport)
 #      define dEXT
-#      define EXTCONST  __declspec(dllexport) const
-#      define dEXTCONST const
+#      define EXTCONST    __declspec(dllexport) const
+#      define dEXTCONST   const
 #    endif
 #  else
 #    ifdef __cplusplus
 #      define EXT
 #      define dEXT
-#      define EXTCONST EXTERN_C const
-#      define dEXTCONST const
+#      define EXTCONST    EXTERN_C const
+#      define dEXTCONST   const
 #    else
 #      define EXT
 #      define dEXT
-#      define EXTCONST const
-#      define dEXTCONST const
+#      define EXTCONST    const
+#      define dEXTCONST   const
 #    endif
 #  endif
 
 #undef INIT
-#define INIT(...) = __VA_ARGS__
+#define INIT(...)   = __VA_ARGS__
 
 #define DOINIT

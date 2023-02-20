@@ -7,21 +7,21 @@
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
  */
-#define ABORT() abort();
+#define ABORT()     abort();
 
 #ifndef SH_PATH
-#define SH_PATH "/bin/sh"
+#define SH_PATH     "/bin/sh"
 #endif
 
 #ifdef WIN32
 #  define PERL_SYS_INIT_BODY(c,v)   \
        MALLOC_CHECK_TAINT2(*c,*v) Perl_win32_init(c,v); PERLIO_INIT
-#  define PERL_SYS_TERM_BODY()   Perl_win32_term()
-#  define BIT_BUCKET "nul"
+#  define PERL_SYS_TERM_BODY()    Perl_win32_term()
+#  define BIT_BUCKET  "nul"
 #else
 #  define PERL_SYS_INIT_BODY(c,v)   \
        MALLOC_CHECK_TAINT2(*c,*v); PERLIO_INIT
-#  define BIT_BUCKET "\\dev\\nul" /* "wanna be like, umm, Newlined,
+#  define BIT_BUCKET  "\\dev\\nul"    /* "wanna be like, umm, Newlined,
                                      or somethin?" */
 #endif
 
@@ -37,7 +37,7 @@
        OP_CHECK_MUTEX_TERM; OP_REFCNT_TERM;             \
        PERLIO_TERM; MALLOC_TERM;
 #endif
-#define dXSUB_SYS dNOOP
+#define dXSUB_SYS           dNOOP
 
 /* USEMYBINMODE This symbol, if defined, indicates that the program
  * should use the routine my_binmode(FILE *fp, char iotype, int
@@ -51,15 +51,15 @@
  * include <sys/stat.h> and <sys/types.h> to get any typedef'ed information.
  */
 #if defined(WIN32)
-#  define Stat_t struct w32_stat
+#  define Stat_t              struct w32_stat
 #else
-#  define Stat_t struct _stati64
+#  define Stat_t              struct _stati64
 #endif
 
 /* USE_STAT_RDEV: This symbol is defined if this system
  * has a stat structure declaring st_rdev
  */
-#define USE_STAT_RDEV   /**/
+#define USE_STAT_RDEV       /**/
 
 /* ACME_MESS: This symbol, if defined, indicates that error
  * messages should be should be generated in a format that allows
@@ -86,14 +86,14 @@
  * stream (unlike fwrite() itself, which on some systems outputs several
  * distinct records if the number_of_items parameter is >1).
 */
-#define fwrite1 fwrite
+#define fwrite1             fwrite
 
-#define Fstat(fd,bufptr)   fstat((fd),(bufptr))
-#define Fflush(fp)      fflush(fp)
-#define Mkdir(path,mode)   mkdir((path),(mode))
+#define Fstat(fd,bufptr)    fstat((fd),(bufptr))
+#define Fflush(fp)          fflush(fp)
+#define Mkdir(path,mode)    mkdir((path),(mode))
 
 #ifndef WIN32
-#  define Stat(fname,bufptr) stat((fname),(bufptr))
+#  define Stat(fname,bufptr)  stat((fname),(bufptr))
 #else
 #  define HAS_IOCTL
 #  define HAS_UTIME

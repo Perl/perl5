@@ -1,13 +1,13 @@
 #ifndef REGCOMP_INTERNAL_H
 #define REGCOMP_INTERNAL_H
 #ifndef STATIC
-#define STATIC  static
+#define STATIC          static
 #endif
 #ifndef RE_OPTIMIZE_CURLYX_TO_CURLYM
-#define RE_OPTIMIZE_CURLYX_TO_CURLYM 1
+#define RE_OPTIMIZE_CURLYX_TO_CURLYM    1
 #endif
 #ifndef RE_OPTIMIZE_CURLYX_TO_CURLYN
-#define RE_OPTIMIZE_CURLYX_TO_CURLYN 1
+#define RE_OPTIMIZE_CURLYX_TO_CURLYN    1
 #endif
 
 /* this is a chain of data about sub patterns we are processing
@@ -28,7 +28,7 @@ typedef struct scan_frame {
 
 /* Certain characters are output as a sequence
  * with the first being a backslash. */
-#define isBACKSLASHED_PUNCT(c)  memCHRs("-[]\\^", c)
+#define isBACKSLASHED_PUNCT(c)      memCHRs("-[]\\^", c)
 
 
 struct RExC_state_t {
@@ -177,88 +177,88 @@ struct RExC_state_t {
 };
 
 #ifdef DEBUGGING
-#define RExC_lastparse  (pRExC_state->lastparse)
-#define RExC_lastnum    (pRExC_state->lastnum)
-#define RExC_paren_name_list    (pRExC_state->paren_name_list)
+#define RExC_lastparse              (pRExC_state->lastparse)
+#define RExC_lastnum                (pRExC_state->lastnum)
+#define RExC_paren_name_list        (pRExC_state->paren_name_list)
 #define RExC_study_chunk_recursed_count \
     (pRExC_state->study_chunk_recursed_count)
-#define RExC_mysv       (pRExC_state->mysv1)
-#define RExC_mysv1      (pRExC_state->mysv1)
-#define RExC_mysv2      (pRExC_state->mysv2)
+#define RExC_mysv                   (pRExC_state->mysv1)
+#define RExC_mysv1                  (pRExC_state->mysv1)
+#define RExC_mysv2                  (pRExC_state->mysv2)
 #endif
 
-#define RExC_flags      (pRExC_state->flags)
-#define RExC_pm_flags   (pRExC_state->pm_flags)
-#define RExC_precomp    (pRExC_state->precomp)
-#define RExC_copy_start_in_input (pRExC_state->copy_start_in_input)
-#define RExC_copy_start_in_constructed  (pRExC_state->copy_start)
-#define RExC_save_copy_start_in_constructed  (pRExC_state->save_copy_start)
-#define RExC_precomp_end (pRExC_state->precomp_end)
-#define RExC_rx_sv      (pRExC_state->rx_sv)
-#define RExC_rx         (pRExC_state->rx)
-#define RExC_rxi        (pRExC_state->rxi)
-#define RExC_start      (pRExC_state->start)
-#define RExC_end        (pRExC_state->end)
-#define RExC_parse      (pRExC_state->parse)
-#define RExC_latest_warn_offset (pRExC_state->latest_warn_offset )
-#define RExC_whilem_seen        (pRExC_state->whilem_seen)
-#define RExC_seen_d_op (pRExC_state->seen_d_op) /* Seen something that differs
+#define RExC_flags                  (pRExC_state->flags)
+#define RExC_pm_flags               (pRExC_state->pm_flags)
+#define RExC_precomp                (pRExC_state->precomp)
+#define RExC_copy_start_in_input    (pRExC_state->copy_start_in_input)
+#define RExC_copy_start_in_constructed (pRExC_state->copy_start)
+#define RExC_save_copy_start_in_constructed (pRExC_state->save_copy_start)
+#define RExC_precomp_end            (pRExC_state->precomp_end)
+#define RExC_rx_sv                  (pRExC_state->rx_sv)
+#define RExC_rx                     (pRExC_state->rx)
+#define RExC_rxi                    (pRExC_state->rxi)
+#define RExC_start                  (pRExC_state->start)
+#define RExC_end                    (pRExC_state->end)
+#define RExC_parse                  (pRExC_state->parse)
+#define RExC_latest_warn_offset     (pRExC_state->latest_warn_offset )
+#define RExC_whilem_seen            (pRExC_state->whilem_seen)
+#define RExC_seen_d_op              (pRExC_state->seen_d_op) /* Seen something that differs
                                                    under /d from /u ? */
 
-#define RExC_emit       (pRExC_state->emit)
-#define RExC_emit_start (pRExC_state->emit_start)
-#define RExC_sawback    (pRExC_state->sawback)
-#define RExC_seen       (pRExC_state->seen)
-#define RExC_size       (pRExC_state->size)
-#define RExC_maxlen        (pRExC_state->maxlen)
+#define RExC_emit                   (pRExC_state->emit)
+#define RExC_emit_start             (pRExC_state->emit_start)
+#define RExC_sawback                (pRExC_state->sawback)
+#define RExC_seen                   (pRExC_state->seen)
+#define RExC_size                   (pRExC_state->size)
+#define RExC_maxlen                 (pRExC_state->maxlen)
 #define RExC_logical_npar           (pRExC_state->logical_npar)
 #define RExC_logical_total_parens   (pRExC_state->logical_total_par)
 #define RExC_logical_to_parno       (pRExC_state->logical_to_parno)
 #define RExC_parno_to_logical       (pRExC_state->parno_to_logical)
 #define RExC_parno_to_logical_next  (pRExC_state->parno_to_logical_next)
-#define RExC_npar       (pRExC_state->npar)
-#define RExC_total_parens       (pRExC_state->total_par)
-#define RExC_parens_buf_size    (pRExC_state->parens_buf_size)
-#define RExC_nestroot   (pRExC_state->nestroot)
-#define RExC_seen_zerolen       (pRExC_state->seen_zerolen)
-#define RExC_utf8       (pRExC_state->utf8)
-#define RExC_uni_semantics      (pRExC_state->uni_semantics)
-#define RExC_orig_utf8  (pRExC_state->orig_utf8)
-#define RExC_open_parens        (pRExC_state->open_parens)
-#define RExC_close_parens       (pRExC_state->close_parens)
-#define RExC_end_op     (pRExC_state->end_op)
-#define RExC_paren_names        (pRExC_state->paren_names)
-#define RExC_recurse    (pRExC_state->recurse)
-#define RExC_recurse_count      (pRExC_state->recurse_count)
-#define RExC_sets_depth         (pRExC_state->sets_depth)
-#define RExC_study_chunk_recursed        (pRExC_state->study_chunk_recursed)
+#define RExC_npar                   (pRExC_state->npar)
+#define RExC_total_parens           (pRExC_state->total_par)
+#define RExC_parens_buf_size        (pRExC_state->parens_buf_size)
+#define RExC_nestroot               (pRExC_state->nestroot)
+#define RExC_seen_zerolen           (pRExC_state->seen_zerolen)
+#define RExC_utf8                   (pRExC_state->utf8)
+#define RExC_uni_semantics          (pRExC_state->uni_semantics)
+#define RExC_orig_utf8              (pRExC_state->orig_utf8)
+#define RExC_open_parens            (pRExC_state->open_parens)
+#define RExC_close_parens           (pRExC_state->close_parens)
+#define RExC_end_op                 (pRExC_state->end_op)
+#define RExC_paren_names            (pRExC_state->paren_names)
+#define RExC_recurse                (pRExC_state->recurse)
+#define RExC_recurse_count          (pRExC_state->recurse_count)
+#define RExC_sets_depth             (pRExC_state->sets_depth)
+#define RExC_study_chunk_recursed   (pRExC_state->study_chunk_recursed)
 #define RExC_study_chunk_recursed_bytes \
     (pRExC_state->study_chunk_recursed_bytes)
-#define RExC_in_lookaround      (pRExC_state->in_lookaround)
-#define RExC_contains_locale    (pRExC_state->contains_locale)
-#define RExC_recode_x_to_native (pRExC_state->recode_x_to_native)
+#define RExC_in_lookaround          (pRExC_state->in_lookaround)
+#define RExC_contains_locale        (pRExC_state->contains_locale)
+#define RExC_recode_x_to_native     (pRExC_state->recode_x_to_native)
 
 #ifdef EBCDIC
 #  define SET_recode_x_to_native(x) \
        STMT_START { RExC_recode_x_to_native = (x); } STMT_END
 #else
-#  define SET_recode_x_to_native(x) NOOP
+#  define SET_recode_x_to_native(x)   NOOP
 #endif
 
-#define RExC_in_multi_char_class (pRExC_state->in_multi_char_class)
-#define RExC_frame_head (pRExC_state->frame_head)
-#define RExC_frame_last (pRExC_state->frame_last)
-#define RExC_frame_count (pRExC_state->frame_count)
-#define RExC_strict (pRExC_state->strict)
-#define RExC_study_started      (pRExC_state->study_started)
-#define RExC_warn_text (pRExC_state->warn_text)
-#define RExC_in_script_run      (pRExC_state->in_script_run)
-#define RExC_use_BRANCHJ        (pRExC_state->use_BRANCHJ)
+#define RExC_in_multi_char_class    (pRExC_state->in_multi_char_class)
+#define RExC_frame_head             (pRExC_state->frame_head)
+#define RExC_frame_last             (pRExC_state->frame_last)
+#define RExC_frame_count            (pRExC_state->frame_count)
+#define RExC_strict                 (pRExC_state->strict)
+#define RExC_study_started          (pRExC_state->study_started)
+#define RExC_warn_text              (pRExC_state->warn_text)
+#define RExC_in_script_run          (pRExC_state->in_script_run)
+#define RExC_use_BRANCHJ            (pRExC_state->use_BRANCHJ)
 #define RExC_warned_WARN_EXPERIMENTAL__VLB  \
     (pRExC_state->sWARN_EXPERIMENTAL__VLB)
 #define RExC_warned_WARN_EXPERIMENTAL__REGEX_SETS   \
     (pRExC_state->sWARN_EXPERIMENTAL__REGEX_SETS)
-#define RExC_unlexed_names (pRExC_state->unlexed_names)
+#define RExC_unlexed_names          (pRExC_state->unlexed_names)
 
 
 /********************************************************************** */
@@ -328,7 +328,7 @@ struct RExC_state_t {
  * macro which is defined as cBOOL(RExC_parse_utf8), thus this macro
  * operates on the pRExC_state structure only.
  */
-#define RExC_parse_inc() RExC_parse_incf(UTF)
+#define RExC_parse_inc()            RExC_parse_incf(UTF)
 
 /* RExC_parse_inc_safe()
  *
@@ -340,7 +340,7 @@ struct RExC_state_t {
  * UTF macro which is defined as cBOOL(RExC_parse_utf8), thus this
  * macro operates on the pRExC_state structure only.
  */
-#define RExC_parse_inc_safe() RExC_parse_inc_safef(UTF)
+#define RExC_parse_inc_safe()       RExC_parse_inc_safef(UTF)
 
 /* RExC_parse_inc_utf8()
  *
@@ -410,8 +410,8 @@ struct RExC_state_t {
  * high complexity pattern we assume the benefit of avoiding a full match is
  * worth the cost of checking for the substrings even if they rarely help.
  */
-#define RExC_naughty    (pRExC_state->naughty)
-#define TOO_NAUGHTY (10)
+#define RExC_naughty                (pRExC_state->naughty)
+#define TOO_NAUGHTY                 (10)
 #define MARK_NAUGHTY(add)           \
     if (RExC_naughty < TOO_NAUGHTY) \
         RExC_naughty += (add)
@@ -437,7 +437,7 @@ struct RExC_state_t {
 #define NEED_UTF8       0x40    /* In conjunction with RESTART_PARSE, need
                                    to calcuate sizes as UTF-8 */
 
-#define REG_NODE_NUM(x) ((x) ? (int)((x)-RExC_emit_start) : -1)
+#define REG_NODE_NUM(x)                 ((x) ? (int)((x)-RExC_emit_start) : -1)
 
 /* whether trie related optimizations are enabled */
 #if PERL_ENABLE_EXTENDED_TRIE_OPTIMISATION
@@ -472,8 +472,8 @@ struct RExC_state_t {
  */
 
 
-#define PBYTE(u8str,paren) ((U8*)(u8str))[(paren) >> 3]
-#define PBITVAL(paren) (1 << ((paren) & 7))
+#define PBYTE(u8str,paren)              ((U8*)(u8str))[(paren) >> 3]
+#define PBITVAL(paren)                  (1 << ((paren) & 7))
 #define PAREN_OFFSET(depth) \
     (RExC_study_chunk_recursed + (depth) * RExC_study_chunk_recursed_bytes)
 #define PAREN_TEST(depth, paren)    \
@@ -494,7 +494,7 @@ struct RExC_state_t {
 /* /u is to be chosen if we are supposed to use Unicode rules,
  * or if the pattern is in UTF-8.  This latter condition is in
  * case the outermost rules are locale.  See GH #17278 */
-#define toUSE_UNI_CHARSET_NOT_DEPENDS (RExC_uni_semantics || UTF)
+#define toUSE_UNI_CHARSET_NOT_DEPENDS   (RExC_uni_semantics || UTF)
 
 /* Change from /d into /u rules, and restart the parse.  RExC_uni_semantics
  * is a flag that indicates we need to override /d with /u as a result of
@@ -529,12 +529,12 @@ struct RExC_state_t {
  * negative indicates there is some construct that needs to know the
  * actual number of parens to be properly handled.  And that means an
  * extra pass will be required after we've counted them all */
-#define ALL_PARENS_COUNTED (RExC_total_parens > 0)
+#define ALL_PARENS_COUNTED              (RExC_total_parens > 0)
 #define REQUIRE_PARENS_PASS                                 \
     STMT_START {  /* No-op if have completed a pass */      \
         if (! ALL_PARENS_COUNTED) RExC_total_parens = -1;   \
     } STMT_END
-#define IN_PARENS_PASS (RExC_total_parens < 0)
+#define IN_PARENS_PASS                  (RExC_total_parens < 0)
 
 
 /* This is used to return failure (zero) early from the calling
@@ -551,7 +551,7 @@ struct RExC_state_t {
         }                                                           \
     } STMT_END
 
-#define MUST_RESTART(flags) ((flags) & (RESTART_PARSE))
+#define MUST_RESTART(flags)             ((flags) & (RESTART_PARSE))
 
 #define RETURN_FAIL_ON_RESTART(flags,flagp) \
     RETURN_FAIL_ON_RESTART_OR_FLAGS( flags, flagp, 0)
@@ -560,8 +560,8 @@ struct RExC_state_t {
 
 /* This converts the named class defined in regcomp.h to
  * its equivalent class number defined in handy.h. */
-#define namedclass_to_classnum(class)  ((int) ((class) / 2))
-#define classnum_to_namedclass(classnum)  ((classnum) * 2)
+#define namedclass_to_classnum(class)   ((int) ((class) / 2))
+#define classnum_to_namedclass(classnum) ((classnum) * 2)
 
 #define _invlist_union_complement_2nd(a, b, output) \
     _invlist_union_maybe_complement_2nd(a, b, TRUE, output)
@@ -702,14 +702,14 @@ static const scan_data_t zero_scan_data = {
 
 /* study flags */
 
-#define SF_BEFORE_SEOL          0x0001
-#define SF_BEFORE_MEOL          0x0002
-#define SF_BEFORE_EOL           (SF_BEFORE_SEOL|SF_BEFORE_MEOL)
+#define SF_BEFORE_SEOL  0x0001
+#define SF_BEFORE_MEOL  0x0002
+#define SF_BEFORE_EOL   (SF_BEFORE_SEOL|SF_BEFORE_MEOL)
 
-#define SF_IS_INF               0x0040
-#define SF_HAS_PAR              0x0080
-#define SF_IN_PAR               0x0100
-#define SF_HAS_EVAL             0x0200
+#define SF_IS_INF           0x0040
+#define SF_HAS_PAR          0x0080
+#define SF_IN_PAR           0x0100
+#define SF_HAS_EVAL         0x0200
 
 
 /* SCF_DO_SUBSTR is the flag that tells the regexp analyzer to track the
@@ -722,32 +722,32 @@ static const scan_data_t zero_scan_data = {
  * Similarly, /foo.*(blah|erm|huh).*fnorble/ will have "foo" and "fnorble"
  * parsed with SCF_DO_SUBSTR on, but while processing the (...) it will be
  * turned off because of the alternation (BRANCH). */
-#define SCF_DO_SUBSTR           0x0400
+#define SCF_DO_SUBSTR       0x0400
 
-#define SCF_DO_STCLASS_AND      0x0800
-#define SCF_DO_STCLASS_OR       0x1000
-#define SCF_DO_STCLASS          (SCF_DO_STCLASS_AND|SCF_DO_STCLASS_OR)
-#define SCF_WHILEM_VISITED_POS  0x2000
+#define SCF_DO_STCLASS_AND  0x0800
+#define SCF_DO_STCLASS_OR   0x1000
+#define SCF_DO_STCLASS  (SCF_DO_STCLASS_AND|SCF_DO_STCLASS_OR)
+#define SCF_WHILEM_VISITED_POS   0x2000
 
-#define SCF_TRIE_RESTUDY        0x4000 /* Need to do restudy in study_chunk()?
+#define SCF_TRIE_RESTUDY         0x4000     /* Need to do restudy in study_chunk()?
                                           Search for "restudy" in this file to
                                           find a detailed explanation. */
-#define SCF_SEEN_ACCEPT         0x8000
-#define SCF_TRIE_DOING_RESTUDY 0x10000 /* Are we in restudy right now? Search
+#define SCF_SEEN_ACCEPT          0x8000
+#define SCF_TRIE_DOING_RESTUDY  0x10000     /* Are we in restudy right now? Search
                                           for "restudy" in this file to find
                                           a detailed explanation. */
-#define SCF_IN_DEFINE          0x20000
+#define SCF_IN_DEFINE           0x20000
 
 
 
-#define UTF cBOOL(RExC_utf8)
+#define UTF             cBOOL(RExC_utf8)
 
 /* The enums for all these are ordered so things work out correctly */
-#define LOC (get_regex_charset(RExC_flags) == REGEX_LOCALE_CHARSET)
+#define LOC             (get_regex_charset(RExC_flags) == REGEX_LOCALE_CHARSET)
 #define DEPENDS_SEMANTICS           \
     (get_regex_charset(RExC_flags)  \
                                == REGEX_DEPENDS_CHARSET)
-#define UNI_SEMANTICS (get_regex_charset(RExC_flags) == REGEX_UNICODE_CHARSET)
+#define UNI_SEMANTICS   (get_regex_charset(RExC_flags) == REGEX_UNICODE_CHARSET)
 #define AT_LEAST_UNI_SEMANTICS      \
     (get_regex_charset(RExC_flags)  \
                           >= REGEX_UNICODE_CHARSET)
@@ -761,33 +761,33 @@ static const scan_data_t zero_scan_data = {
     (get_regex_charset(RExC_flags)  \
               == REGEX_ASCII_MORE_RESTRICTED_CHARSET)
 
-#define FOLD cBOOL(RExC_flags & RXf_PMf_FOLD)
+#define FOLD            cBOOL(RExC_flags & RXf_PMf_FOLD)
 
 /* For programs that want to be strictly Unicode compatible
  * by dying if any attempt is made to match a non-Unicode
  * code point against a Unicode property. */
-#define ALWAYS_WARN_SUPER  ckDEAD(packWARN(WARN_NON_UNICODE))
+#define ALWAYS_WARN_SUPER ckDEAD(packWARN(WARN_NON_UNICODE))
 
-#define OOB_NAMEDCLASS          -1
+#define OOB_NAMEDCLASS  -1
 
 /* There is no code point that is out-of-bounds, so this is
  * problematic.  But its only current use is to initialize
  * a variable that is always set before looked at. */
-#define OOB_UNICODE             0xDEADBEEF
+#define OOB_UNICODE     0xDEADBEEF
 
-#define CHR_SVLEN(sv) (UTF ? sv_len_utf8(sv) : SvCUR(sv))
+#define CHR_SVLEN(sv)   (UTF ? sv_len_utf8(sv) : SvCUR(sv))
 
 
 /* length of regex to show in messages that don't mark a position within */
-#define RegexLengthToShowInErrorMessages 127
+#define RegexLengthToShowInErrorMessages    127
 
 /*
  * If MARKER[12] are adjusted, be sure to adjust the constants
  * at the top of t/op/regmesg.t, the tests in t/op/re_tests,
  * and those in op/pragma/warn/regcomp.
 */
-#define MARKER1 "<-- HERE"    /* marker as it appears in the description */
-#define MARKER2 " <-- HERE "  /* marker as it appears within the regex */
+#define MARKER1     "<-- HERE"      /* marker as it appears in the description */
+#define MARKER2     " <-- HERE "    /* marker as it appears within the regex */
 
 #define REPORT_LOCATION             \
     " in regex; marked by " MARKER1 \
@@ -838,14 +838,14 @@ static const scan_data_t zero_scan_data = {
  * sI, so that xC equals xI.
  */
 
-#define sI              RExC_precomp
-#define eI              RExC_precomp_end
-#define sC              RExC_start
-#define eC              RExC_end
-#define tI              RExC_copy_start_in_input
-#define tC              RExC_copy_start_in_constructed
-#define xI(xC)          (tI + (xC - tC))
-#define xI_offset(xC)   (xI(xC) - sI)
+#define sI                      RExC_precomp
+#define eI                      RExC_precomp_end
+#define sC                      RExC_start
+#define eC                      RExC_end
+#define tI                      RExC_copy_start_in_input
+#define tC                      RExC_copy_start_in_constructed
+#define xI(xC)                  (tI + (xC - tC))
+#define xI_offset(xC)           (xI(xC) - sI)
 
 #define REPORT_LOCATION_ARGS(xC)                                            \
     UTF8fARG(UTF,                                                           \
@@ -865,7 +865,7 @@ static const scan_data_t zero_scan_data = {
 
 /* Used to point after bad bytes for an error message,
  * but avoid skipping past a nul byte. */
-#define SKIP_IF_CHAR(s, e) (!*(s) ? 0 : UTF ? UTF8_SAFE_SKIP(s, e) : 1)
+#define SKIP_IF_CHAR(s, e)      (!*(s) ? 0 : UTF ? UTF8_SAFE_SKIP(s, e) : 1)
 
 /* Set up to clean up after our imminent demise */
 #define PREPARE_TO_DIE                          \
@@ -1168,13 +1168,13 @@ static const scan_data_t zero_scan_data = {
 
 /* Convert between a pointer to a node and its offset
  * from the beginning of the program */
-#define REGNODE_p(offset)    (RExC_emit_start + (offset))
+#define REGNODE_p(offset)       (RExC_emit_start + (offset))
 #define REGNODE_OFFSET(node)                \
     (__ASSERT_((node) >= RExC_emit_start)   \
      (SSize_t) ((node) - RExC_emit_start))
 
-#define ProgLen(ri) ri->proglen
-#define SetProgLen(ri,x) ri->proglen = x
+#define ProgLen(ri)             ri->proglen
+#define SetProgLen(ri,x)        ri->proglen = x
 
 #if PERL_ENABLE_EXPERIMENTAL_REGEX_OPTIMISATIONS
 #define EXPERIMENTAL_INPLACESCAN
@@ -1232,29 +1232,29 @@ static const scan_data_t zero_scan_data = {
        debug_peep(str, pRExC_state, scan, depth, flags)
 #else
 #  define DEBUG_STUDYDATA(where, data, depth, is_inf, min, stopmin, delta) NOOP
-#  define DEBUG_PEEP(str, scan, depth, flags)         NOOP
+#  define DEBUG_PEEP(str, scan, depth, flags)     NOOP
 #endif
 
-#define REGTAIL(x,y,z) regtail((x),(y),(z),depth+1)
+#define REGTAIL(x,y,z)          regtail((x),(y),(z),depth+1)
 #ifdef DEBUGGING
-#define REGTAIL_STUDY(x,y,z) regtail_study((x),(y),(z),depth+1)
+#define REGTAIL_STUDY(x,y,z)    regtail_study((x),(y),(z),depth+1)
 #else
-#define REGTAIL_STUDY(x,y,z) regtail((x),(y),(z),depth+1)
+#define REGTAIL_STUDY(x,y,z)    regtail((x),(y),(z),depth+1)
 #endif
 
-#define MADE_TRIE       1
-#define MADE_JUMP_TRIE  2
-#define MADE_EXACT_TRIE 4
+#define MADE_TRIE                   1
+#define MADE_JUMP_TRIE              2
+#define MADE_EXACT_TRIE             4
 
-#define INVLIST_INDEX                   0
-#define ONLY_LOCALE_MATCHES_INDEX       1
-#define DEFERRED_USER_DEFINED_INDEX     2
+#define INVLIST_INDEX               0
+#define ONLY_LOCALE_MATCHES_INDEX   1
+#define DEFERRED_USER_DEFINED_INDEX 2
 
 /* These two functions currently do the exact same thing */
 #define ssc_init_zero           ssc_init
 
-#define ssc_add_cp(ssc, cp)   ssc_add_range((ssc), (cp), (cp))
-#define ssc_match_all_cp(ssc) ssc_add_range(ssc, 0, UV_MAX)
+#define ssc_add_cp(ssc, cp)     ssc_add_range((ssc), (cp), (cp))
+#define ssc_match_all_cp(ssc)   ssc_add_range(ssc, 0, UV_MAX)
 
 #ifdef DEBUGGING
 #define REGNODE_GUTS(state,op,extra_size)   \

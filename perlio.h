@@ -40,11 +40,11 @@
 #include <stdio.h>
 
 #if defined(USE_64_BIT_STDIO) && defined(HAS_FTELLO) && !defined(USE_FTELL64)
-#define ftell ftello
+#define ftell       ftello
 #endif
 
 #if defined(USE_64_BIT_STDIO) && defined(HAS_FSEEKO) && !defined(USE_FSEEK64)
-#define fseek fseeko
+#define fseek       fseeko
 #endif
 
 /* BS2000 includes are sometimes a bit non standard :-( */
@@ -59,8 +59,8 @@
 typedef struct _PerlIO PerlIOl;
 typedef struct _PerlIO_funcs PerlIO_funcs;
 typedef PerlIOl *PerlIO;
-#define PerlIO PerlIO
-#define PERLIO_LAYERS 1
+#define PerlIO      PerlIO
+#define PERLIO_LAYERS   1
 
 /*
 =for apidoc_section $io
@@ -73,8 +73,8 @@ Cast the pointer C<func> to be of type S<C<PerlIO_funcs *>>.
 
 =cut
 */
-#define PERLIO_FUNCS_DECL(funcs) const PerlIO_funcs funcs
-#define PERLIO_FUNCS_CAST(funcs) (PerlIO_funcs*)(funcs)
+#define PERLIO_FUNCS_DECL(funcs)    const PerlIO_funcs funcs
+#define PERLIO_FUNCS_CAST(funcs)    (PerlIO_funcs*)(funcs)
 
 PERL_CALLCONV void PerlIO_define_layer(pTHX_ PerlIO_funcs *tab);
 PERL_CALLCONV PerlIO_funcs *PerlIO_find_layer(pTHX_ const char *name,
@@ -102,11 +102,11 @@ PERL_CALLCONV void PerlIO_clone(pTHX_ PerlInterpreter *proto,
    some non UNIX ports which still use "native" stdio features.
  */
 #  ifndef PERLIO_NOT_STDIO
-#    define PERLIO_NOT_STDIO 1
+#    define PERLIO_NOT_STDIO    1
 #  endif
 #else
 #  ifndef PERLIO_NOT_STDIO
-#    define PERLIO_NOT_STDIO 0
+#    define PERLIO_NOT_STDIO    0
 #  endif
 #endif
 
@@ -134,44 +134,44 @@ PERL_CALLCONV void PerlIO_clone(pTHX_ PerlInterpreter *proto,
 /* ----------- fill in things that have not got #define'd  ---------- */
 
 #ifndef Fpos_t
-#define Fpos_t Off_t
+#define Fpos_t  Off_t
 #endif
 
 #ifndef EOF
-#define EOF (-1)
+#define EOF     (-1)
 #endif
 
 /* This is to catch case with no stdio */
 #ifndef BUFSIZ
-#define BUFSIZ 1024
+#define BUFSIZ  1024
 #endif
 
 /* The default buffer size for the perlio buffering layer */
 #ifndef PERLIOBUF_DEFAULT_BUFSIZ
-#define PERLIOBUF_DEFAULT_BUFSIZ (BUFSIZ > 8192 ? BUFSIZ : 8192)
+#define PERLIOBUF_DEFAULT_BUFSIZ    (BUFSIZ > 8192 ? BUFSIZ : 8192)
 #endif
 
 #ifndef SEEK_SET
-#define SEEK_SET 0
+#define SEEK_SET        0
 #endif
 
 #ifndef SEEK_CUR
-#define SEEK_CUR 1
+#define SEEK_CUR        1
 #endif
 
 #ifndef SEEK_END
-#define SEEK_END 2
+#define SEEK_END        2
 #endif
 
-#define PERLIO_DUP_CLONE        1
-#define PERLIO_DUP_FD           2
+#define PERLIO_DUP_CLONE 1
+#define PERLIO_DUP_FD   2
 
 /* --------------------- Now prototypes for functions --------------- */
 
 START_EXTERN_C
 #ifndef __attribute__format__
 #  ifdef HASATTRIBUTE_FORMAT
-#    define __attribute__format__(x,y,z) __attribute__((format(x,y,z)))
+#    define __attribute__format__(x,y,z)    __attribute__((format(x,y,z)))
 #  else
 #    define __attribute__format__(x,y,z)
 #  endif

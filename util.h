@@ -28,7 +28,7 @@
        (*(f) == '/'                 \
         || ((f)[0] && (f)[1] == ':'))          /* drive name */
 #else   /* NOT DOSISH */
-#  define PERL_FILE_IS_ABSOLUTE(f)      (*(f) == '/')
+#  define PERL_FILE_IS_ABSOLUTE(f)    (*(f) == '/')
 #endif
 
 /*
@@ -48,8 +48,8 @@ This is a synonym for S<C<(! foldEQ_utf8())>>
 
 =cut
 */
-#define ibcmp(s1, s2, len)         cBOOL(! foldEQ(s1, s2, len))
-#define ibcmp_locale(s1, s2, len)  cBOOL(! foldEQ_locale(s1, s2, len))
+#define ibcmp(s1, s2, len)          cBOOL(! foldEQ(s1, s2, len))
+#define ibcmp_locale(s1, s2, len)   cBOOL(! foldEQ_locale(s1, s2, len))
 #define ibcmp_utf8(s1, pe1, l1, u1, s2, pe2, l2, u2)    \
     cBOOL(! foldEQ_utf8(s1, pe1, l1, u1, s2, pe2, l2, u2))
 
@@ -78,15 +78,15 @@ typedef struct PERL_DRAND48_T perl_drand48_t;
 
 #endif
 
-#define PL_RANDOM_STATE_TYPE perl_drand48_t
+#define PL_RANDOM_STATE_TYPE        perl_drand48_t
 
-#define Perl_drand48_init(seed) (Perl_drand48_init_r(&PL_random_state, (seed)))
-#define Perl_drand48() (Perl_drand48_r(&PL_random_state))
+#define Perl_drand48_init(seed)     (Perl_drand48_init_r(&PL_random_state, (seed)))
+#define Perl_drand48()              (Perl_drand48_r(&PL_random_state))
 
 #ifdef PERL_CORE
 /* uses a different source of randomness to avoid
  * interfering with the results of rand() */
-#define Perl_internal_drand48() (Perl_drand48_r(&PL_internal_random_state))
+#define Perl_internal_drand48()     (Perl_drand48_r(&PL_internal_random_state))
 #endif
 
 #ifdef USE_C_BACKTRACE
@@ -160,7 +160,7 @@ typedef struct {
      * these strings, and the lengths of these strings. */
 } Perl_c_backtrace;
 
-#define Perl_free_c_backtrace(bt) Safefree(bt)
+#define Perl_free_c_backtrace(bt)   Safefree(bt)
 
 #endif /* USE_C_BACKTRACE */
 
@@ -174,34 +174,34 @@ typedef struct {
    are user selectable.  These spare bits allow for additional features for
    the varargs stuff or ABI compat test flags in the future.
  */
-#define HSm_APIVERLEN 0x0000001F /* perl version string won't
+#define HSm_APIVERLEN   0x0000001F  /* perl version string won't
                                     be more than 31 chars */
-#define HS_APIVERLEN_MAX HSm_APIVERLEN
-#define HSm_XSVERLEN 0x0000FF00 /* if 0, not present, dont check,
+#define HS_APIVERLEN_MAX    HSm_APIVERLEN
+#define HSm_XSVERLEN    0x0000FF00  /* if 0, not present, dont check,
                                    die if over 255 */
-#define HS_XSVERLEN_MAX 0xFF
+#define HS_XSVERLEN_MAX       0xFF
 /* uses var file to set default filename for newXS_deffile to use for CvFILE */
-#define HSf_SETXSUBFN 0x00000020
-#define HSf_POPMARK 0x00000040 /* popmark mode or you must
+#define HSf_SETXSUBFN   0x00000020
+#define HSf_POPMARK     0x00000040  /* popmark mode or you must
                                   supply ax and items */
-#define HSf_IMP_CXT 0x00000080 /* ABI, threaded, MULTIPLICITY, pTHX_ present */
-#define HSm_INTRPSIZE 0xFFFF0000 /* ABI, interp struct size */
+#define HSf_IMP_CXT     0x00000080  /* ABI, threaded, MULTIPLICITY, pTHX_ present */
+#define HSm_INTRPSIZE   0xFFFF0000  /* ABI, interp struct size */
 /* A mask of bits in the key which must always match between a XS mod
    and interp.  Also if all ABI bits in a key are true, skip all ABI
    checks, it is very the unlikely interp size will all 1 bits */
 /* Maybe HSm_APIVERLEN one day if Perl_xs_apiversion_bootcheck
    is changed to a memcmp */
-#define HSm_KEY_MATCH (HSm_INTRPSIZE|HSf_IMP_CXT)
-#define HSf_NOCHK HSm_KEY_MATCH /* if all ABI bits are 1 in
+#define HSm_KEY_MATCH           (HSm_INTRPSIZE|HSf_IMP_CXT)
+#define HSf_NOCHK               HSm_KEY_MATCH           /* if all ABI bits are 1 in
                                    the key, dont chk */
 
 
-#define HS_GETINTERPSIZE(key) ((key) >> 16)
+#define HS_GETINTERPSIZE(key)   ((key) >> 16)
 /* if in the future "" and NULL must be separated, XSVERLEN would
    be 0 means arg not present, 1 is empty string/null byte */
 /* (((key) & 0x0000FF00) >> 8) is less efficient on Visual C */
-#define HS_GETXSVERLEN(key) ((U8) ((key) >> 8))
-#define HS_GETAPIVERLEN(key) ((key) & HSm_APIVERLEN)
+#define HS_GETXSVERLEN(key)     ((U8) ((key) >> 8))
+#define HS_GETAPIVERLEN(key)    ((key) & HSm_APIVERLEN)
 
 /* internal to util.h macro to create a packed handshake
    key, all args must be constants */
@@ -228,12 +228,12 @@ typedef struct {
 #  define HS_KEY(setxsubfn, popmark, apiver, xsver)                 \
        HS_KEYp(sizeof(PerlInterpreter), TRUE, setxsubfn, popmark,   \
        sizeof("" apiver "")-1, sizeof("" xsver "")-1)
-#  define HS_CXT aTHX
+#  define HS_CXT  aTHX
 #else
 #  define HS_KEY(setxsubfn, popmark, apiver, xsver)                                 \
        HS_KEYp(sizeof(struct PerlHandShakeInterpreter), FALSE, setxsubfn, popmark,  \
        sizeof("" apiver "")-1, sizeof("" xsver "")-1)
-#  define HS_CXT cv
+#  define HS_CXT  cv
 #endif
 
 /*
@@ -255,7 +255,7 @@ returning NULL if not found.  The terminating NUL bytes are not compared.
          (char *) memmem((big), (bigend) - (big),   \
                          (little), (lend) - (little)))
 #else
-#   define ninstr(a,b,c,d) Perl_ninstr(a,b,c,d)
+#   define ninstr(a,b,c,d)     Perl_ninstr(a,b,c,d)
 #endif
 
 #ifdef __Lynx__
@@ -266,19 +266,19 @@ int mkstemp(char*);
 #ifdef PERL_CORE
 #   if defined(VMS)
 /* only useful for calls to our mkostemp() emulation */
-#       define O_VMS_DELETEONCLOSE 0x40000000
+#       define O_VMS_DELETEONCLOSE     0x40000000
 #       ifdef HAS_MKOSTEMP
 #           error 134221 will need a new solution for VMS
 #       endif
 #   else
-#       define O_VMS_DELETEONCLOSE 0
+#       define O_VMS_DELETEONCLOSE     0
 #   endif
 #endif
 #if defined(HAS_MKOSTEMP) && defined(PERL_CORE)
 #   define Perl_my_mkostemp(templte, flags) mkostemp(templte, flags)
 #endif
 #if defined(HAS_MKSTEMP) && defined(PERL_CORE)
-#   define Perl_my_mkstemp(templte) mkstemp(templte)
+#   define Perl_my_mkstemp(templte)    mkstemp(templte)
 #endif
 
 #endif /* PERL_UTIL_H_ */

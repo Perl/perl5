@@ -42,15 +42,15 @@ struct jmpenv {
 typedef struct jmpenv JMPENV;
 
 #if defined DEBUGGING && !defined DEBUGGING_RE_ONLY
-#  define JE_OLD_STACK_HWM_zero      PL_start_env.je_old_stack_hwm = 0
+#  define JE_OLD_STACK_HWM_zero   PL_start_env.je_old_stack_hwm = 0
 #  define JE_OLD_STACK_HWM_save(je) \
        (je).je_old_stack_hwm = PL_curstackinfo->si_stack_hwm
 #  define JE_OLD_STACK_HWM_restore(je)                              \
        if (PL_curstackinfo->si_stack_hwm < (je).je_old_stack_hwm)   \
            PL_curstackinfo->si_stack_hwm = (je).je_old_stack_hwm
 #else
-#  define JE_OLD_STACK_HWM_zero        NOOP
-#  define JE_OLD_STACK_HWM_save(je)    NOOP
+#  define JE_OLD_STACK_HWM_zero   NOOP
+#  define JE_OLD_STACK_HWM_save(je) NOOP
 #  define JE_OLD_STACK_HWM_restore(je) NOOP
 #endif
 
@@ -107,7 +107,7 @@ typedef struct jmpenv JMPENV;
  * https://github.com/Perl/perl5/commit/14dd3ad8c9bf82cf09798a22cc89a9862dfd6d1a
 */
 
-#define dJMPENV         JMPENV cur_env
+#define dJMPENV             JMPENV cur_env
 
 #define JMPENV_PUSH(v)                                                              \
     STMT_START {                                                                    \
@@ -172,7 +172,7 @@ typedef struct jmpenv JMPENV;
         PerlProc_exit(1);                                                       \
     } STMT_END
 
-#define CATCH_GET               (PL_top_env->je_mustcatch)
+#define CATCH_GET           (PL_top_env->je_mustcatch)
 #define CATCH_SET(v)                                                        \
     STMT_START {                                                            \
         DEBUG_l(                                                            \
@@ -189,8 +189,8 @@ typedef struct jmpenv JMPENV;
 
 typedef struct refcounted_he COPHH;
 
-#define COPHH_KEY_UTF8 REFCOUNTED_HE_KEY_UTF8
-#define COPHH_EXISTS REFCOUNTED_HE_EXISTS
+#define COPHH_KEY_UTF8      REFCOUNTED_HE_KEY_UTF8
+#define COPHH_EXISTS        REFCOUNTED_HE_EXISTS
 
 /*
 =for apidoc  Amx|SV *|cophh_fetch_pv |const COPHH *cophh|const char *key              |U32 hash|U32 flags
@@ -301,7 +301,7 @@ Make and return a complete copy of the cop hints hash C<cophh>.
 =cut
 */
 
-#define cophh_copy(cophh) Perl_refcounted_he_inc(aTHX_ cophh)
+#define cophh_copy(cophh)   Perl_refcounted_he_inc(aTHX_ cophh)
 
 /*
 =for apidoc Amx|void|cophh_free|COPHH *cophh
@@ -311,7 +311,7 @@ Discard the cop hints hash C<cophh>, freeing all resources associated with it.
 =cut
 */
 
-#define cophh_free(cophh) Perl_refcounted_he_free(aTHX_ cophh)
+#define cophh_free(cophh)   Perl_refcounted_he_free(aTHX_ cophh)
 
 /*
 =for apidoc Amx|COPHH *|cophh_new_empty
@@ -321,7 +321,7 @@ Generate and return a fresh cop hints hash containing no entries.
 =cut
 */
 
-#define cophh_new_empty() ((COPHH *)NULL)
+#define cophh_new_empty()   ((COPHH *)NULL)
 
 /*
 =for apidoc  Amx|COPHH *|cophh_store_pv |COPHH *cophh|const char *key              |U32 hash|SV *value|U32 flags
@@ -551,21 +551,21 @@ typedef struct rcpv RCPV;
 #define RCPVx(pv_arg)   \
     ((RCPV *)((pv_arg) - STRUCT_OFFSET(struct rcpv, pv)))
 #define RCPV_REFCOUNT(pv)   (RCPVx(pv)->refcount)
-#define RCPV_LEN(pv)        (RCPVx(pv)->len-1) /* len always includes space
+#define RCPV_LEN(pv)        (RCPVx(pv)->len-1)      /* len always includes space
                                                   for a null */
 
 #ifdef USE_ITHREADS
 
-#  define CopFILE(c)            ((c)->cop_file)
-#  define CopFILE_LEN(c)        (CopFILE(c) ? RCPV_LEN(CopFILE(c)) : 0)
+#  define CopFILE(c)              ((c)->cop_file)
+#  define CopFILE_LEN(c)          (CopFILE(c) ? RCPV_LEN(CopFILE(c)) : 0)
 #  define CopFILEGV(c)  \
        (CopFILE(c)      \
         ? gv_fetchfile(CopFILE(c)) : NULL)
 
 #  define CopFILE_set_x(c,pv)   \
        ((c)->cop_file = rcpv_new((pv),0,RCPVf_USE_STRLEN))
-#  define CopFILE_setn_x(c,pv,l)    ((c)->cop_file = rcpv_new((pv),(l),0))
-#  define CopFILE_free_x(c)         ((c)->cop_file = rcpv_free((c)->cop_file))
+#  define CopFILE_setn_x(c,pv,l)  ((c)->cop_file = rcpv_new((pv),(l),0))
+#  define CopFILE_free_x(c)       ((c)->cop_file = rcpv_free((c)->cop_file))
 #  define CopFILE_copy_x(dst,src)   \
        ((dst)->cop_file = rcpv_copy((src)->cop_file))
 
@@ -615,8 +615,8 @@ typedef struct rcpv RCPV;
 #  define CopFILEAVx(c)     \
        (assert_(CopFILE(c)) \
           GvAV(gv_fetchfile(CopFILE(c))))
-#  define CopFILEAVn(c)         (cop_file_avn(c))
-#  define CopSTASH(c)           PL_stashpad[(c)->cop_stashoff]
+#  define CopFILEAVn(c)           (cop_file_avn(c))
+#  define CopSTASH(c)             PL_stashpad[(c)->cop_stashoff]
 #  define CopSTASH_set(c,hv)        \
        ((c)->cop_stashoff = (hv)    \
            ? alloccopstash(hv)      \
@@ -624,40 +624,40 @@ typedef struct rcpv RCPV;
 
 #else /* Above: yes threads; Below no threads */
 
-#  define CopFILEGV(c)          ((c)->cop_filegv)
-#  define CopFILEGV_set(c,gv)   ((c)->cop_filegv = (GV*)SvREFCNT_inc(gv))
-#  define CopFILE_set(c,pv)     CopFILEGV_set((c), gv_fetchfile(pv))
-#  define CopFILE_copy(dst,src) CopFILEGV_set((dst),CopFILEGV(src))
+#  define CopFILEGV(c)            ((c)->cop_filegv)
+#  define CopFILEGV_set(c,gv)     ((c)->cop_filegv = (GV*)SvREFCNT_inc(gv))
+#  define CopFILE_set(c,pv)       CopFILEGV_set((c), gv_fetchfile(pv))
+#  define CopFILE_copy(dst,src)   CopFILEGV_set((dst),CopFILEGV(src))
 #  define CopFILE_setn(c,pv,l)  \
        CopFILEGV_set((c), gv_fetchfile_flags((pv),(l),0))
-#  define CopFILESV(c)          (CopFILEGV(c) ? GvSV(CopFILEGV(c)) : NULL)
-#  define CopFILEAV(c)          (CopFILEGV(c) ? GvAV(CopFILEGV(c)) : NULL)
+#  define CopFILESV(c)            (CopFILEGV(c) ? GvSV(CopFILEGV(c)) : NULL)
+#  define CopFILEAV(c)            (CopFILEGV(c) ? GvAV(CopFILEGV(c)) : NULL)
 #  ifdef DEBUGGING
-#    define CopFILEAVx(c)       (assert(CopFILEGV(c)), GvAV(CopFILEGV(c)))
+#    define CopFILEAVx(c)   (assert(CopFILEGV(c)), GvAV(CopFILEGV(c)))
 #  else
-#    define CopFILEAVx(c)       (GvAV(CopFILEGV(c)))
+#    define CopFILEAVx(c)   (GvAV(CopFILEGV(c)))
 # endif
-#  define CopFILEAVn(c)         (CopFILEGV(c) ? GvAVn(CopFILEGV(c)) : NULL)
+#  define CopFILEAVn(c)           (CopFILEGV(c) ? GvAVn(CopFILEGV(c)) : NULL)
 #  define CopFILE(c)                    \
        (CopFILEGV(c) /* +2 for '_<' */  \
            ? GvNAME(CopFILEGV(c))+2 : NULL)
 #  define CopFILE_LEN(c)                \
        (CopFILEGV(c) /* -2 for '_<' */  \
            ? GvNAMELEN(CopFILEGV(c))-2 : 0)
-#  define CopSTASH(c)           ((c)->cop_stash)
-#  define CopSTASH_set(c,hv)    ((c)->cop_stash = (hv))
+#  define CopSTASH(c)             ((c)->cop_stash)
+#  define CopSTASH_set(c,hv)      ((c)->cop_stash = (hv))
 #  define CopFILE_free(c)   \
        (SvREFCNT_dec(CopFILEGV(c)),(CopFILEGV(c) = NULL))
 
 #endif /* USE_ITHREADS */
 
-#define CopSTASHPV(c)           (CopSTASH(c) ? HvNAME_get(CopSTASH(c)) : NULL)
+#define CopSTASHPV(c)       (CopSTASH(c) ? HvNAME_get(CopSTASH(c)) : NULL)
    /* cop_stash is not refcounted */
-#define CopSTASHPV_set(c,pv)    CopSTASH_set((c), gv_stashpv(pv,GV_ADD))
-#define CopSTASH_eq(c,hv)       (CopSTASH(c) == (hv))
+#define CopSTASHPV_set(c,pv) CopSTASH_set((c), gv_stashpv(pv,GV_ADD))
+#define CopSTASH_eq(c,hv)   (CopSTASH(c) == (hv))
 
-#define CopHINTHASH_get(c)      ((COPHH*)((c)->cop_hints_hash))
-#define CopHINTHASH_set(c,h)    ((c)->cop_hints_hash = (h))
+#define CopHINTHASH_get(c)  ((COPHH*)((c)->cop_hints_hash))
+#define CopHINTHASH_set(c,h) ((c)->cop_hints_hash = (h))
 
 #define CopFEATURES_setfrom(dst, src)   \
     ((dst)->cop_features = (src)->cop_features)
@@ -775,22 +775,22 @@ returned label, by setting C<*flags> to 0 or C<SVf_UTF8>.
 =cut
 */
 
-#define CopLABEL(c)  Perl_cop_fetch_label(aTHX_ (c), NULL, NULL)
-#define CopLABEL_len(c,len)  Perl_cop_fetch_label(aTHX_ (c), len, NULL)
+#define CopLABEL(c)         Perl_cop_fetch_label(aTHX_ (c), NULL, NULL)
+#define CopLABEL_len(c,len) Perl_cop_fetch_label(aTHX_ (c), len, NULL)
 #define CopLABEL_len_flags(c,len,flags) \
     Perl_cop_fetch_label(aTHX_ (c), len, flags)
-#define CopLABEL_alloc(pv)      ((pv)?savepv(pv):NULL)
+#define CopLABEL_alloc(pv)  ((pv)?savepv(pv):NULL)
 
-#define CopSTASH_ne(c,hv)       (!CopSTASH_eq(c,hv))
-#define CopLINE(c)              ((c)->cop_line)
-#define CopLINE_inc(c)          (++CopLINE(c))
-#define CopLINE_dec(c)          (--CopLINE(c))
-#define CopLINE_set(c,l)        (CopLINE(c) = (l))
+#define CopSTASH_ne(c,hv)   (!CopSTASH_eq(c,hv))
+#define CopLINE(c)          ((c)->cop_line)
+#define CopLINE_inc(c)      (++CopLINE(c))
+#define CopLINE_dec(c)      (--CopLINE(c))
+#define CopLINE_set(c,l)    (CopLINE(c) = (l))
 
 /* OutCopFILE() is CopFILE for output (caller, die, warn, etc.) */
-#define OutCopFILE(c) CopFILE(c)
+#define OutCopFILE(c)       CopFILE(c)
 
-#define CopHINTS_get(c)         ((c)->cop_hints + 0)
+#define CopHINTS_get(c)     ((c)->cop_hints + 0)
 #define CopHINTS_set(c, h)      \
     STMT_START {                \
         (c)->cop_hints = (h);   \
@@ -827,11 +827,11 @@ struct block_format {
 
 /* return a pointer to the current context */
 
-#define CX_CUR() (&cxstack[cxstack_ix])
+#define CX_CUR()            (&cxstack[cxstack_ix])
 
 /* free all savestack items back to the watermark of the specified context */
 
-#define CX_LEAVE_SCOPE(cx) LEAVE_SCOPE(cx->blk_oldsaveix)
+#define CX_LEAVE_SCOPE(cx)  LEAVE_SCOPE(cx->blk_oldsaveix)
 
 #ifdef DEBUGGING
 /* on debugging builds, poison cx afterwards so we know no code
@@ -842,7 +842,7 @@ struct block_format {
        cxstack_ix--;            \
        cx = NULL;
 #else
-#  define CX_POP(cx) cxstack_ix--;
+#  define CX_POP(cx)              cxstack_ix--;
 #endif
 
 #define CX_PUSHSUB_GET_LVALUE_MASK(func)                        \
@@ -892,9 +892,9 @@ struct block_eval {
 
 /* blk_u16 bit usage for eval contexts: */
 
-#define CxOLD_IN_EVAL(cx)       (((cx)->blk_u16) & 0x3F) /* saved PL_in_eval */
+#define CxOLD_IN_EVAL(cx)   (((cx)->blk_u16) & 0x3F) /* saved PL_in_eval */
 #define CxEVAL_TXT_REFCNTED(cx) (((cx)->blk_u16) & 0x40) /* cur_text rc++ */
-#define CxOLD_OP_TYPE(cx)       (((cx)->blk_u16) >> 7)   /* type of eval op */
+#define CxOLD_OP_TYPE(cx)   (((cx)->blk_u16) >> 7)  /* type of eval op */
 
 /* loop context */
 struct block_loop {
@@ -934,11 +934,11 @@ struct block_loop {
             ? &GvSV((c)->blk_loop.itervar_u.gv) \
             : (SV **)&(c)->blk_loop.itervar_u.gv)
 
-#define CxLABEL(c)      (CopLABEL((c)->blk_oldcop))
-#define CxLABEL_len(c,len)      (CopLABEL_len((c)->blk_oldcop, len))
+#define CxLABEL(c)          (CopLABEL((c)->blk_oldcop))
+#define CxLABEL_len(c,len)  (CopLABEL_len((c)->blk_oldcop, len))
 #define CxLABEL_len_flags(c,len,flags)  \
     ((const char *)CopLABEL_len_flags((c)->blk_oldcop, len, flags))
-#define CxHASARGS(c)    (((c)->cx_type & CXp_HASARGS) == CXp_HASARGS)
+#define CxHASARGS(c)        (((c)->cx_type & CXp_HASARGS) == CXp_HASARGS)
 
 /* CxLVAL(): the lval flags of the call site: the relevant flag bits from
  * the op_private field of the calling pp_entersub (or its caller's caller
@@ -951,7 +951,7 @@ struct block_loop {
  *  Note the contrast with CvLVALUE(), which is a property of the sub
  *  rather than the call site.
  */
-#define CxLVAL(c)       (0 + ((U8)((c)->blk_u16)))
+#define CxLVAL(c)           (0 + ((U8)((c)->blk_u16)))
 
 
 
@@ -985,20 +985,20 @@ struct block {
         struct block_givwhen    blku_givwhen;
     } blk_u;
 };
-#define blk_oldsp       cx_u.cx_blk.blku_oldsp
-#define blk_oldcop      cx_u.cx_blk.blku_oldcop
-#define blk_oldmarksp   cx_u.cx_blk.blku_oldmarksp
-#define blk_oldscopesp  cx_u.cx_blk.blku_oldscopesp
-#define blk_oldpm       cx_u.cx_blk.blku_oldpm
-#define blk_gimme       cx_u.cx_blk.blku_gimme
-#define blk_u16         cx_u.cx_blk.blku_u16
-#define blk_oldsaveix   cx_u.cx_blk.blku_oldsaveix
-#define blk_old_tmpsfloor cx_u.cx_blk.blku_old_tmpsfloor
-#define blk_sub         cx_u.cx_blk.blk_u.blku_sub
-#define blk_format      cx_u.cx_blk.blk_u.blku_format
-#define blk_eval        cx_u.cx_blk.blk_u.blku_eval
-#define blk_loop        cx_u.cx_blk.blk_u.blku_loop
-#define blk_givwhen     cx_u.cx_blk.blk_u.blku_givwhen
+#define blk_oldsp           cx_u.cx_blk.blku_oldsp
+#define blk_oldcop          cx_u.cx_blk.blku_oldcop
+#define blk_oldmarksp       cx_u.cx_blk.blku_oldmarksp
+#define blk_oldscopesp      cx_u.cx_blk.blku_oldscopesp
+#define blk_oldpm           cx_u.cx_blk.blku_oldpm
+#define blk_gimme           cx_u.cx_blk.blku_gimme
+#define blk_u16             cx_u.cx_blk.blku_u16
+#define blk_oldsaveix       cx_u.cx_blk.blku_oldsaveix
+#define blk_old_tmpsfloor   cx_u.cx_blk.blku_old_tmpsfloor
+#define blk_sub             cx_u.cx_blk.blk_u.blku_sub
+#define blk_format          cx_u.cx_blk.blk_u.blku_format
+#define blk_eval            cx_u.cx_blk.blk_u.blku_eval
+#define blk_loop            cx_u.cx_blk.blk_u.blku_loop
+#define blk_givwhen         cx_u.cx_blk.blk_u.blku_givwhen
 
 #define CX_DEBUG(cx, action)                                                            \
     DEBUG_l(                                                                            \
@@ -1035,18 +1035,18 @@ struct subst {
 
 #ifdef PERL_CORE
 
-#define sb_iters        cx_u.cx_subst.sbu_iters
-#define sb_maxiters     cx_u.cx_subst.sbu_maxiters
-#define sb_rflags       cx_u.cx_subst.sbu_rflags
-#define sb_rxtainted    cx_u.cx_subst.sbu_rxtainted
-#define sb_orig         cx_u.cx_subst.sbu_orig
-#define sb_dstr         cx_u.cx_subst.sbu_dstr
-#define sb_targ         cx_u.cx_subst.sbu_targ
-#define sb_s            cx_u.cx_subst.sbu_s
-#define sb_m            cx_u.cx_subst.sbu_m
-#define sb_strend       cx_u.cx_subst.sbu_strend
-#define sb_rxres        cx_u.cx_subst.sbu_rxres
-#define sb_rx           cx_u.cx_subst.sbu_rx
+#define sb_iters            cx_u.cx_subst.sbu_iters
+#define sb_maxiters         cx_u.cx_subst.sbu_maxiters
+#define sb_rflags           cx_u.cx_subst.sbu_rflags
+#define sb_rxtainted        cx_u.cx_subst.sbu_rxtainted
+#define sb_orig             cx_u.cx_subst.sbu_orig
+#define sb_dstr             cx_u.cx_subst.sbu_dstr
+#define sb_targ             cx_u.cx_subst.sbu_targ
+#define sb_s                cx_u.cx_subst.sbu_s
+#define sb_m                cx_u.cx_subst.sbu_m
+#define sb_strend           cx_u.cx_subst.sbu_strend
+#define sb_rxres            cx_u.cx_subst.sbu_rxres
+#define sb_rx               cx_u.cx_subst.sbu_rx
 
 #  define CX_PUSHSUBST(cx)                                              \
        CXINC, cx = CX_CUR(),                                            \
@@ -1080,7 +1080,7 @@ struct subst {
        } STMT_END
 #endif
 
-#define CxONCE(cx)              ((cx)->cx_type & CXp_ONCE)
+#define CxONCE(cx)          ((cx)->cx_type & CXp_ONCE)
 
 struct context {
     union {
@@ -1088,33 +1088,33 @@ struct context {
         struct subst    cx_subst;
     } cx_u;
 };
-#define cx_type cx_u.cx_subst.sbu_type
+#define cx_type             cx_u.cx_subst.sbu_type
 
 /* If you re-order these, there is also an array of uppercase names
    in perl.h and a static array of context names in pp_ctl.c */
-#define CXTYPEMASK      0xf
-#define CXt_NULL        0 /* currently only used for sort BLOCK */
-#define CXt_WHEN        1
-#define CXt_BLOCK       2
+#define CXTYPEMASK       0xf
+#define CXt_NULL           0    /* currently only used for sort BLOCK */
+#define CXt_WHEN           1
+#define CXt_BLOCK          2
 /* When micro-optimising :-) keep GIVEN next to the LOOPs, as
    these 5 share a jump table in pp_ctl.c The first 4 don't have
    a 'case' in at least one switch statement in pp_ctl.c
  */
-#define CXt_GIVEN       3
+#define CXt_GIVEN          3
 
 /* be careful of the ordering of these five.  Macros
  * like CxTYPE_is_LOOP, CxFOREACH compare ranges */
-#define CXt_LOOP_ARY    4 /* for (@ary)     { ...; } */
-#define CXt_LOOP_LAZYSV 5 /* for ('a'..'z') { ...; } */
-#define CXt_LOOP_LAZYIV 6 /* for (1..9)     { ...; } */
-#define CXt_LOOP_LIST   7 /* for (1,2,3)    { ...; } */
-#define CXt_LOOP_PLAIN  8 /* while (...)    { ...; }
+#define CXt_LOOP_ARY       4    /* for (@ary)     { ...; } */
+#define CXt_LOOP_LAZYSV    5    /* for ('a'..'z') { ...; } */
+#define CXt_LOOP_LAZYIV    6    /* for (1..9)     { ...; } */
+#define CXt_LOOP_LIST      7    /* for (1,2,3)    { ...; } */
+#define CXt_LOOP_PLAIN     8    /* while (...)    { ...; }
                              or plain block { ...; } */
-#define CXt_SUB         9
-#define CXt_FORMAT     10
-#define CXt_EVAL       11 /* eval'', eval{}, try{} */
-#define CXt_SUBST      12
-#define CXt_DEFER      13
+#define CXt_SUB            9
+#define CXt_FORMAT        10
+#define CXt_EVAL          11    /* eval'', eval{}, try{} */
+#define CXt_SUBST         12
+#define CXt_DEFER         13
 /* SUBST doesn't feature in all switch statements. */
 
 /* private flags for CXt_SUB and CXt_FORMAT */
@@ -1141,7 +1141,7 @@ struct context {
 #define CxPADLOOP(c)    ((c)->cx_type & CXp_FOR_PAD)
 
 /* private flags for CXt_SUBST */
-#define CXp_ONCE        0x10    /* What was sbu_once in struct subst */
+#define CXp_ONCE    0x10    /* What was sbu_once in struct subst */
 
 #define CxTYPE(c)       ((c)->cx_type & CXTYPEMASK)
 #define CxTYPE_is_LOOP(c)           \
@@ -1169,45 +1169,45 @@ struct context {
 #define CXp_TRYBLOCK    CXp_EVALBLOCK
 #define CxTRYBLOCK(c)   CxEVALBLOCK(c)
 
-#define CXINC (cxstack_ix < cxstack_max ? ++cxstack_ix : (cxstack_ix = cxinc()))
+#define CXINC           (cxstack_ix < cxstack_max ? ++cxstack_ix : (cxstack_ix = cxinc()))
 
-#define G_SCALAR        2
-#define G_LIST          3
-#define G_VOID          1
-#define G_WANT          3
+#define G_SCALAR    2
+#define G_LIST      3
+#define G_VOID      1
+#define G_WANT      3
 
 #ifndef PERL_CORE
    /* name prior to 5.31.1 */
-#  define G_ARRAY  G_LIST
+#  define G_ARRAY     G_LIST
 #endif
 
 /* extra flags for Perl_call_* routines */
-#define G_DISCARD         0x4   /* Call FREETMPS.  Don't change this
+#define G_DISCARD              0x4  /* Call FREETMPS.  Don't change this
                                    without consulting the hash
                                    actions codes defined in hv.h */
-#define G_EVAL            0x8   /* Assume eval {} around subroutine call. */
-#define G_NOARGS         0x10   /* Don't construct a @_ array. */
-#define G_KEEPERR        0x20   /* Warn for errors, don't overwrite $@ */
-#define G_NODEBUG        0x40   /* Disable debugging at toplevel. */
-#define G_METHOD         0x80   /* Calling method. */
-#define G_FAKINGEVAL    0x100   /* Faking an eval context for call_sv
+#define G_EVAL                 0x8  /* Assume eval {} around subroutine call. */
+#define G_NOARGS              0x10  /* Don't construct a @_ array. */
+#define G_KEEPERR             0x20  /* Warn for errors, don't overwrite $@ */
+#define G_NODEBUG             0x40  /* Disable debugging at toplevel. */
+#define G_METHOD              0x80  /* Calling method. */
+#define G_FAKINGEVAL         0x100  /* Faking an eval context for call_sv
                                    or fold_constants. */
-#define G_UNDEF_FILL    0x200   /* Fill the stack with &PL_sv_undef
+#define G_UNDEF_FILL         0x200  /* Fill the stack with &PL_sv_undef
                                    A special case for UNSHIFT in
                                    Perl_magic_methcall(). */
-#define G_WRITING_TO_STDERR 0x400 /* Perl_write_to_stderr() is calling
+#define G_WRITING_TO_STDERR  0x400  /* Perl_write_to_stderr() is calling
                                      Perl_magic_methcall(). */
-#define G_RE_REPARSING  0x800   /* compiling a run-time /(?{..})/ */
-#define G_METHOD_NAMED 0x1000   /* calling named method, eg without :: or ' */
-#define G_RETHROW      0x2000   /* eval_sv(): re-throw any error */
+#define G_RE_REPARSING       0x800  /* compiling a run-time /(?{..})/ */
+#define G_METHOD_NAMED      0x1000  /* calling named method, eg without :: or ' */
+#define G_RETHROW           0x2000  /* eval_sv(): re-throw any error */
 
 /* flag bits for PL_in_eval */
-#define EVAL_NULL       0       /* not in an eval */
-#define EVAL_INEVAL     1       /* some enclosing scope is an eval */
-#define EVAL_WARNONLY   2       /* used by yywarn() when calling yyerror() */
-#define EVAL_KEEPERR    4       /* set by Perl_call_sv if G_KEEPERR */
-#define EVAL_INREQUIRE  8       /* The code is being required. */
-#define EVAL_RE_REPARSING 0x10  /* eval_sv() called with G_RE_REPARSING */
+#define EVAL_NULL                0  /* not in an eval */
+#define EVAL_INEVAL              1  /* some enclosing scope is an eval */
+#define EVAL_WARNONLY            2  /* used by yywarn() when calling yyerror() */
+#define EVAL_KEEPERR             4  /* set by Perl_call_sv if G_KEEPERR */
+#define EVAL_INREQUIRE           8  /* The code is being required. */
+#define EVAL_RE_REPARSING     0x10  /* eval_sv() called with G_RE_REPARSING */
 /* if adding extra bits, make sure they can fit in CxOLD_OP_TYPE() */
 
 /* Support for switching (stack and block) contexts.  This ensures
@@ -1217,18 +1217,18 @@ struct context {
  */
 
 #define PERLSI_UNKNOWN          -1
-#define PERLSI_UNDEF            0
-#define PERLSI_MAIN             1
-#define PERLSI_MAGIC            2
-#define PERLSI_SORT             3
-#define PERLSI_SIGNAL           4
-#define PERLSI_OVERLOAD         5
-#define PERLSI_DESTROY          6
-#define PERLSI_WARNHOOK         7
-#define PERLSI_DIEHOOK          8
-#define PERLSI_REQUIRE          9
-#define PERLSI_MULTICALL       10
-#define PERLSI_REGCOMP         11
+#define PERLSI_UNDEF             0
+#define PERLSI_MAIN              1
+#define PERLSI_MAGIC             2
+#define PERLSI_SORT              3
+#define PERLSI_SIGNAL            4
+#define PERLSI_OVERLOAD          5
+#define PERLSI_DESTROY           6
+#define PERLSI_WARNHOOK          7
+#define PERLSI_DIEHOOK           8
+#define PERLSI_REQUIRE           9
+#define PERLSI_MULTICALL        10
+#define PERLSI_REGCOMP          11
 
 struct stackinfo {
     AV *                si_stack;       /* stack for current runlevel */
@@ -1259,21 +1259,21 @@ Use this typedef to declare variables that are to hold C<struct stackinfo>.
 */
 typedef struct stackinfo PERL_SI;
 
-#define cxstack         (PL_curstackinfo->si_cxstack)
-#define cxstack_ix      (PL_curstackinfo->si_cxix)
-#define cxstack_max     (PL_curstackinfo->si_cxmax)
+#define cxstack             (PL_curstackinfo->si_cxstack)
+#define cxstack_ix          (PL_curstackinfo->si_cxix)
+#define cxstack_max         (PL_curstackinfo->si_cxmax)
 
 #ifdef DEBUGGING
-#  define       SET_MARK_OFFSET \
+#  define SET_MARK_OFFSET   \
        PL_curstackinfo->si_markoff = PL_markstack_ptr - PL_markstack
 #else
-#  define       SET_MARK_OFFSET NOOP
+#  define SET_MARK_OFFSET         NOOP
 #endif
 
 #if defined DEBUGGING && !defined DEBUGGING_RE_ONLY
-#  define PUSHSTACK_INIT_HWM(si) ((si)->si_stack_hwm = 0)
+#  define PUSHSTACK_INIT_HWM(si)  ((si)->si_stack_hwm = 0)
 #else
-#  define PUSHSTACK_INIT_HWM(si) NOOP
+#  define PUSHSTACK_INIT_HWM(si)  NOOP
 #endif
 
 #define PUSHSTACKi(type)                                                \
@@ -1299,7 +1299,7 @@ typedef struct stackinfo PERL_SI;
         SET_MARK_OFFSET;                                                \
     } STMT_END
 
-#define PUSHSTACK PUSHSTACKi(PERLSI_UNKNOWN)
+#define PUSHSTACK           PUSHSTACKi(PERLSI_UNKNOWN)
 
 /* POPSTACK works with PL_stack_sp, so it may need to be bracketed by
  * PUTBACK/SPAGAIN to flush/refresh any local SP that may be active */
@@ -1340,8 +1340,8 @@ execution phase of the program; otherwise 0;
 
 =cut
 */
-#define IN_PERL_COMPILETIME     cBOOL(PL_curcop == &PL_compiling)
-#define IN_PERL_RUNTIME         cBOOL(PL_curcop != &PL_compiling)
+#define IN_PERL_COMPILETIME cBOOL(PL_curcop == &PL_compiling)
+#define IN_PERL_RUNTIME     cBOOL(PL_curcop != &PL_compiling)
 
 /*
 =for apidoc_section $multicall

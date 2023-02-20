@@ -9,7 +9,7 @@
   #ifndef U64TYPE
   /* This probably isn't going to work, but failing with a compiler error due
      to lack of uint64_t is no worse than failing right now with an #error. */
-  #define U64 uint64_t
+  #define U64             uint64_t
   #endif
 #endif
 
@@ -31,9 +31,9 @@
   #define _shifted_octet(type,ptr,idx,shift)    \
        (((type)(((const U8*)(ptr))[(idx)]))<<(shift))
     #if defined(USE_UNALIGNED_PTR_DEREF) && (BYTEORDER == 0x1234 || BYTEORDER == 0x12345678)
-        #define U8TO16_LE(ptr)   (*((const U16*)(ptr)))
-        #define U8TO32_LE(ptr)   (*((const U32*)(ptr)))
-        #define U8TO64_LE(ptr)   (*((const U64*)(ptr)))
+        #define U8TO16_LE(ptr)  (*((const U16*)(ptr)))
+        #define U8TO32_LE(ptr)  (*((const U32*)(ptr)))
+        #define U8TO64_LE(ptr)  (*((const U64*)(ptr)))
     #else
         #define U8TO16_LE(ptr)                  \
              (_shifted_octet(U16,(ptr),0, 0)|   \
@@ -60,26 +60,26 @@
 /* Find best way to ROTL32/ROTL64 */
 #if defined(_MSC_VER)
   #include <stdlib.h>  /* Microsoft put _rotl declaration in here */
-  #define ROTL32(x,r)  _rotl(x,r)
-  #define ROTR32(x,r)  _rotr(x,r)
-  #define ROTL64(x,r)  _rotl64(x,r)
-  #define ROTR64(x,r)  _rotr64(x,r)
+  #define ROTL32(x,r)     _rotl(x,r)
+  #define ROTR32(x,r)     _rotr(x,r)
+  #define ROTL64(x,r)     _rotl64(x,r)
+  #define ROTR64(x,r)     _rotr64(x,r)
 #else
   /* gcc recognises this code and generates a
      rotate instruction for CPUs with one */
-  #define ROTL32(x,r)  (((U32)(x) << (r)) | ((U32)(x) >> (32 - (r))))
-  #define ROTR32(x,r)  (((U32)(x) << (32 - (r))) | ((U32)(x) >> (r)))
-  #define ROTL64(x,r)  ( ( (U64)(x) << (r) ) | ( (U64)(x) >> ( 64 - (r) ) ) )
-  #define ROTR64(x,r)  ( ( (U64)(x) << ( 64 - (r) ) ) | ( (U64)(x) >> (r) ) )
+  #define ROTL32(x,r)     (((U32)(x) << (r)) | ((U32)(x) >> (32 - (r))))
+  #define ROTR32(x,r)     (((U32)(x) << (32 - (r))) | ((U32)(x) >> (r)))
+  #define ROTL64(x,r)     ( ( (U64)(x) << (r) ) | ( (U64)(x) >> ( 64 - (r) ) ) )
+  #define ROTR64(x,r)     ( ( (U64)(x) << ( 64 - (r) ) ) | ( (U64)(x) >> (r) ) )
 #endif
 
 
 #ifdef UV_IS_QUAD
-#define ROTL_UV(x,r) ROTL64(x,r)
-#define ROTR_UV(x,r) ROTL64(x,r)
+#define ROTL_UV(x,r)    ROTL64(x,r)
+#define ROTR_UV(x,r)    ROTL64(x,r)
 #else
-#define ROTL_UV(x,r) ROTL32(x,r)
-#define ROTR_UV(x,r) ROTR32(x,r)
+#define ROTL_UV(x,r)    ROTL32(x,r)
+#define ROTR_UV(x,r)    ROTR32(x,r)
 #endif
 #if IVSIZE == 8
 #define CAN64BITHASH

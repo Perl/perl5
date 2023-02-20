@@ -31,12 +31,12 @@
 */
 #include "op_reg_common.h"
 
-#define OPCODE U16
+#define OPCODE          U16
 
 typedef PERL_BITFIELD16 Optype;
 
 #ifdef BASEOP_DEFINITION
-#define BASEOP BASEOP_DEFINITION
+#define BASEOP          BASEOP_DEFINITION
 #else
 #define BASEOP                      \
     OP*         op_next;            \
@@ -94,18 +94,18 @@ C<G_SCALAR>.  Deprecated.  Use C<GIMME_V> instead.
 
 /* Public flags */
 
-#define OPf_WANT        3       /* Mask for "want" bits: */
-#define  OPf_WANT_VOID   1      /* Want nothing */
-#define  OPf_WANT_SCALAR 2      /* Want single value */
-#define  OPf_WANT_LIST   3      /* Want list of any length */
-#define OPf_KIDS        4       /* There is a firstborn child. */
-#define OPf_PARENS      8       /* This operator was parenthesized. */
+#define OPf_WANT          3     /* Mask for "want" bits: */
+#define OPf_WANT_VOID     1     /* Want nothing */
+#define OPf_WANT_SCALAR   2     /* Want single value */
+#define OPf_WANT_LIST     3     /* Want list of any length */
+#define OPf_KIDS          4     /* There is a firstborn child. */
+#define OPf_PARENS        8     /* This operator was parenthesized. */
                                 /* (Or block needs explicit scope entry.) */
-#define OPf_REF         16      /* Certified reference. */
+#define OPf_REF          16     /* Certified reference. */
                                 /* (Return container, not containee). */
-#define OPf_MOD         32      /* Will modify (lvalue). */
+#define OPf_MOD          32     /* Will modify (lvalue). */
 
-#define OPf_STACKED     64      /* Some arg is arriving on the stack. */
+#define OPf_STACKED      64     /* Some arg is arriving on the stack. */
                                 /*   Indicates mutator-variant of op for those
                                  *   ops which support them, e.g.  $x += 1
                                  */
@@ -180,8 +180,8 @@ C<G_SCALAR>.  Deprecated.  Use C<GIMME_V> instead.
 
 #define OPpTRANS_ALL    \
     (OPpTRANS_USE_SVOP|OPpTRANS_CAN_FORCE_UTF8|OPpTRANS_IDENTICAL|OPpTRANS_SQUASH|OPpTRANS_COMPLEMENT|OPpTRANS_GROWS|OPpTRANS_DELETE)
-#define OPpTRANS_FROM_UTF   OPpTRANS_USE_SVOP
-#define OPpTRANS_TO_UTF     OPpTRANS_CAN_FORCE_UTF8
+#define OPpTRANS_FROM_UTF OPpTRANS_USE_SVOP
+#define OPpTRANS_TO_UTF OPpTRANS_CAN_FORCE_UTF8
 
 
 /* Mask for OP_ENTERSUB flags, the absence of which
@@ -200,9 +200,9 @@ typedef union {
 } UNOP_AUX_item;
 
 #ifdef USE_ITHREADS
-#  define UNOP_AUX_item_sv(item) PAD_SVl((item)->pad_offset);
+#  define UNOP_AUX_item_sv(item)  PAD_SVl((item)->pad_offset);
 #else
-#  define UNOP_AUX_item_sv(item) ((item)->sv);
+#  define UNOP_AUX_item_sv(item)  ((item)->sv);
 #endif
 
 
@@ -340,7 +340,7 @@ struct pmop {
  * allocate off the low end until you get to PMf_BASE_SHIFT+0.  If that
  * isn't enough, move PMf_BASE_SHIFT down (if possible) and add the new bit
  * at the other end instead; this preserves binary compatibility. */
-#define PMf_BASE_SHIFT (_RXf_PMf_SHIFT_NEXT+2)
+#define PMf_BASE_SHIFT  (_RXf_PMf_SHIFT_NEXT+2)
 
 /* Set by the parser if it discovers an error,
  * so the regex shouldn't be compiled */
@@ -380,7 +380,7 @@ struct pmop {
 
 /* op_code_list is private; don't free it etc.  It may well point
  * to code within another sub, with different pad etc */
-#define PMf_CODELIST_PRIVATE    (1U<<(PMf_BASE_SHIFT+14))
+#define PMf_CODELIST_PRIVATE (1U<<(PMf_BASE_SHIFT+14))
 
 /* the PMOP is a QR (we should be able to detect that from the op type, but the
  * regex compilation API passes just the pm flags, not the op itself */
@@ -424,7 +424,7 @@ struct pmop {
 #endif
 #define PmopSTASHPV(o)  (PmopSTASH(o) ? HvNAME_get(PmopSTASH(o)) : NULL)
    /* op_pmstashstartu.op_pmstash is not refcounted */
-#define PmopSTASHPV_set(o,pv)   PmopSTASH_set((o), gv_stashpv(pv,GV_ADD))
+#define PmopSTASHPV_set(o,pv) PmopSTASH_set((o), gv_stashpv(pv,GV_ADD))
 
 struct svop {
     BASEOP
@@ -522,95 +522,95 @@ typedef enum {
 
 
 #ifdef USE_ITHREADS
-#  define       cGVOPx_gv(o)    ((GV*)PAD_SVl(cPADOPx(o)->op_padix))
+#  define cGVOPx_gv(o)            ((GV*)PAD_SVl(cPADOPx(o)->op_padix))
 #  ifndef PERL_CORE
-#    define     IS_PADGV(v)     (v && isGV(v))
-#    define     IS_PADCONST(v)  \
+#    define IS_PADGV(v)     (v && isGV(v))
+#    define IS_PADCONST(v)  \
          (v && (SvREADONLY(v) || (SvIsCOW(v) && !SvLEN(v))))
 #  endif
-#  define       cSVOPx_sv(v)    \
-       (cSVOPx(v)->op_sv        \
+#  define cSVOPx_sv(v)      \
+       (cSVOPx(v)->op_sv    \
         ? cSVOPx(v)->op_sv : PAD_SVl((v)->op_targ))
-#  define       cSVOPx_svp(v)   \
-       (cSVOPx(v)->op_sv        \
+#  define cSVOPx_svp(v)     \
+       (cSVOPx(v)->op_sv    \
         ? &cSVOPx(v)->op_sv : &PAD_SVl((v)->op_targ))
-#  define       cMETHOPx_meth(v)        \
+#  define cMETHOPx_meth(v)              \
        (cMETHOPx(v)->op_u.op_meth_sv    \
         ? cMETHOPx(v)->op_u.op_meth_sv : PAD_SVl((v)->op_targ))
-#  define       cMETHOPx_rclass(v) PAD_SVl(cMETHOPx(v)->op_rclass_targ)
+#  define cMETHOPx_rclass(v)      PAD_SVl(cMETHOPx(v)->op_rclass_targ)
 #else
-#  define       cGVOPx_gv(o)    ((GV*)cSVOPx(o)->op_sv)
+#  define cGVOPx_gv(o)            ((GV*)cSVOPx(o)->op_sv)
 #  ifndef PERL_CORE
-#    define     IS_PADGV(v)     FALSE
-#    define     IS_PADCONST(v)  FALSE
+#    define IS_PADGV(v)     FALSE
+#    define IS_PADCONST(v)  FALSE
 #  endif
-#  define       cSVOPx_sv(v)    (cSVOPx(v)->op_sv)
-#  define       cSVOPx_svp(v)   (&cSVOPx(v)->op_sv)
-#  define       cMETHOPx_meth(v)   (cMETHOPx(v)->op_u.op_meth_sv)
-#  define       cMETHOPx_rclass(v) (cMETHOPx(v)->op_rclass_sv)
+#  define cSVOPx_sv(v)            (cSVOPx(v)->op_sv)
+#  define cSVOPx_svp(v)           (&cSVOPx(v)->op_sv)
+#  define cMETHOPx_meth(v)        (cMETHOPx(v)->op_u.op_meth_sv)
+#  define cMETHOPx_rclass(v)      (cMETHOPx(v)->op_rclass_sv)
 #endif
 
-#define cMETHOP_meth            cMETHOPx_meth(PL_op)
-#define cMETHOP_rclass          cMETHOPx_rclass(PL_op)
+#define cMETHOP_meth    cMETHOPx_meth(PL_op)
+#define cMETHOP_rclass  cMETHOPx_rclass(PL_op)
 
-#define cMETHOPo_meth           cMETHOPx_meth(o)
-#define cMETHOPo_rclass         cMETHOPx_rclass(o)
+#define cMETHOPo_meth   cMETHOPx_meth(o)
+#define cMETHOPo_rclass cMETHOPx_rclass(o)
 
-#define cGVOP_gv                cGVOPx_gv(PL_op)
-#define cGVOPo_gv               cGVOPx_gv(o)
-#define kGVOP_gv                cGVOPx_gv(kid)
-#define cSVOP_sv                cSVOPx_sv(PL_op)
-#define cSVOPo_sv               cSVOPx_sv(o)
-#define kSVOP_sv                cSVOPx_sv(kid)
+#define cGVOP_gv        cGVOPx_gv(PL_op)
+#define cGVOPo_gv       cGVOPx_gv(o)
+#define kGVOP_gv        cGVOPx_gv(kid)
+#define cSVOP_sv        cSVOPx_sv(PL_op)
+#define cSVOPo_sv       cSVOPx_sv(o)
+#define kSVOP_sv        cSVOPx_sv(kid)
 
 #ifndef PERL_CORE
-#  define Nullop ((OP*)NULL)
+#  define Nullop                  ((OP*)NULL)
 #endif
 
 /* Lowest byte of PL_opargs */
-#define OA_MARK 1
-#define OA_FOLDCONST 2
-#define OA_RETSCALAR 4
-#define OA_TARGET 8
-#define OA_TARGLEX 16
-#define OA_OTHERINT 32
-#define OA_DANGEROUS 64
-#define OA_DEFGV 128
+#define OA_MARK           1
+#define OA_FOLDCONST      2
+#define OA_RETSCALAR      4
+#define OA_TARGET         8
+#define OA_TARGLEX       16
+#define OA_OTHERINT      32
+#define OA_DANGEROUS     64
+#define OA_DEFGV        128
 
 /* The next 4 bits (8..11) encode op class information */
-#define OCSHIFT 8
+#define OCSHIFT           8
 
-#define OA_CLASS_MASK (15 << OCSHIFT)
+#define OA_CLASS_MASK   (15 << OCSHIFT)
 
-#define OA_BASEOP (0 << OCSHIFT)
-#define OA_UNOP (1 << OCSHIFT)
-#define OA_BINOP (2 << OCSHIFT)
-#define OA_LOGOP (3 << OCSHIFT)
-#define OA_LISTOP (4 << OCSHIFT)
-#define OA_PMOP (5 << OCSHIFT)
-#define OA_SVOP (6 << OCSHIFT)
-#define OA_PADOP (7 << OCSHIFT)
+#define OA_BASEOP       (0 << OCSHIFT)
+#define OA_UNOP         (1 << OCSHIFT)
+#define OA_BINOP        (2 << OCSHIFT)
+#define OA_LOGOP        (3 << OCSHIFT)
+#define OA_LISTOP       (4 << OCSHIFT)
+#define OA_PMOP         (5 << OCSHIFT)
+#define OA_SVOP         (6 << OCSHIFT)
+#define OA_PADOP        (7 << OCSHIFT)
 #define OA_PVOP_OR_SVOP (8 << OCSHIFT)
-#define OA_LOOP (9 << OCSHIFT)
-#define OA_COP (10 << OCSHIFT)
+#define OA_LOOP         (9 << OCSHIFT)
+#define OA_COP          (10 << OCSHIFT)
 #define OA_BASEOP_OR_UNOP (11 << OCSHIFT)
-#define OA_FILESTATOP (12 << OCSHIFT)
-#define OA_LOOPEXOP (13 << OCSHIFT)
-#define OA_METHOP (14 << OCSHIFT)
-#define OA_UNOP_AUX (15 << OCSHIFT)
+#define OA_FILESTATOP   (12 << OCSHIFT)
+#define OA_LOOPEXOP     (13 << OCSHIFT)
+#define OA_METHOP       (14 << OCSHIFT)
+#define OA_UNOP_AUX     (15 << OCSHIFT)
 
 /* Each remaining nybble of PL_opargs (i.e.  bits 12..15,
  * 16..19 etc) encode the type for each arg */
-#define OASHIFT 12
+#define OASHIFT         12
 
-#define OA_SCALAR 1
-#define OA_LIST 2
-#define OA_AVREF 3
-#define OA_HVREF 4
-#define OA_CVREF 5
-#define OA_FILEREF 6
-#define OA_SCALARREF 7
-#define OA_OPTIONAL 8
+#define OA_SCALAR        1
+#define OA_LIST          2
+#define OA_AVREF         3
+#define OA_HVREF         4
+#define OA_CVREF         5
+#define OA_FILEREF       6
+#define OA_SCALARREF     7
+#define OA_OPTIONAL      8
 
 /* Op_REFCNT is a reference count at the head of each op tree: needed since
  * the tree is shared between threads, and between cloned closure copies in
@@ -621,40 +621,40 @@ typedef enum {
  */
 
 #ifdef USE_ITHREADS
-#  define OP_REFCNT_INIT                MUTEX_INIT(&PL_op_mutex)
+#  define OP_REFCNT_INIT      MUTEX_INIT(&PL_op_mutex)
 #  ifdef PERL_CORE
-#    define OP_REFCNT_LOCK              MUTEX_LOCK(&PL_op_mutex)
-#    define OP_REFCNT_UNLOCK            MUTEX_UNLOCK(&PL_op_mutex)
+#    define OP_REFCNT_LOCK      MUTEX_LOCK(&PL_op_mutex)
+#    define OP_REFCNT_UNLOCK    MUTEX_UNLOCK(&PL_op_mutex)
 #  else     /* Subject non-core uses to clang thread safety analysis */
-#    define OP_REFCNT_LOCK              op_refcnt_lock()
-#    define OP_REFCNT_UNLOCK            op_refcnt_unlock()
+#    define OP_REFCNT_LOCK      op_refcnt_lock()
+#    define OP_REFCNT_UNLOCK    op_refcnt_unlock()
 #  endif
-#  define OP_REFCNT_TERM                MUTEX_DESTROY(&PL_op_mutex)
+#  define OP_REFCNT_TERM      MUTEX_DESTROY(&PL_op_mutex)
 #else
-#  define OP_REFCNT_INIT                NOOP
-#  define OP_REFCNT_LOCK                NOOP
-#  define OP_REFCNT_UNLOCK              NOOP
-#  define OP_REFCNT_TERM                NOOP
+#  define OP_REFCNT_INIT      NOOP
+#  define OP_REFCNT_LOCK      NOOP
+#  define OP_REFCNT_UNLOCK    NOOP
+#  define OP_REFCNT_TERM      NOOP
 #endif
 
-#define OpREFCNT_set(o,n)               ((o)->op_targ = (n))
+#define OpREFCNT_set(o,n)   ((o)->op_targ = (n))
 #ifdef PERL_DEBUG_READONLY_OPS
-#  define OpREFCNT_inc(o)               Perl_op_refcnt_inc(aTHX_ o)
-#  define OpREFCNT_dec(o)               Perl_op_refcnt_dec(aTHX_ o)
+#  define OpREFCNT_inc(o)     Perl_op_refcnt_inc(aTHX_ o)
+#  define OpREFCNT_dec(o)     Perl_op_refcnt_dec(aTHX_ o)
 #else
-#  define OpREFCNT_inc(o)               ((o) ? (++(o)->op_targ, (o)) : NULL)
-#  define OpREFCNT_dec(o)               (--(o)->op_targ)
+#  define OpREFCNT_inc(o)     ((o) ? (++(o)->op_targ, (o)) : NULL)
+#  define OpREFCNT_dec(o)     (--(o)->op_targ)
 #endif
 
 /* flags used by Perl_load_module() */
-#define PERL_LOADMOD_DENY               0x1     /* no Module */
-#define PERL_LOADMOD_NOIMPORT           0x2     /* use Module () */
-#define PERL_LOADMOD_IMPORT_OPS         0x4     /* import arguments are passed
+#define PERL_LOADMOD_DENY       0x1     /* no Module */
+#define PERL_LOADMOD_NOIMPORT   0x2     /* use Module () */
+#define PERL_LOADMOD_IMPORT_OPS 0x4     /* import arguments are passed
                                                    as a sin- gle op tree, not
                                                    a list of SVs */
 
 #if defined(PERL_IN_PERLY_C) || defined(PERL_IN_OP_C) || defined(PERL_IN_TOKE_C)
-#define ref(o, type) doref(o, type, TRUE)
+#define ref(o, type)    doref(o, type, TRUE)
 #endif
 
 
@@ -678,7 +678,7 @@ o->op_next >> is not already set, C<o> should be at least an C<UNOP>.
 =cut
 */
 
-#define LINKLIST(o) ((o)->op_next ? (o)->op_next : op_linklist((OP*)o))
+#define LINKLIST(o)     ((o)->op_next ? (o)->op_next : op_linklist((OP*)o))
 
 /* no longer used anywhere in core */
 #ifndef PERL_CORE
@@ -687,7 +687,7 @@ o->op_next >> is not already set, C<o> should be at least an C<UNOP>.
 #endif
 
 #ifdef PERL_CORE
-#  define my(o) my_attrs((o), NULL)
+#  define my(o)   my_attrs((o), NULL)
 #endif
 
 #ifdef USE_REENTRANT_API
@@ -698,7 +698,7 @@ o->op_next >> is not already set, C<o> should be at least an C<UNOP>.
     (var = (type *) Perl_Slab_Alloc(aTHX_ c*sizeof(type)))
 #define NewOpSz(m,var,size) \
     (var = (OP *) Perl_Slab_Alloc(aTHX_ size))
-#define FreeOp(p) Perl_Slab_Free(aTHX_ p)
+#define FreeOp(p)       Perl_Slab_Free(aTHX_ p)
 
 /*
  * The per-CV op slabs consist of a header (the opslab struct) and a bunch of
@@ -744,7 +744,7 @@ struct opslab {
     OPSLOT      opslab_slots;           /* slots begin here */
 };
 
-# define OPSLOT_HEADER          STRUCT_OFFSET(OPSLOT, opslot_op)
+# define OPSLOT_HEADER   STRUCT_OFFSET(OPSLOT, opslot_op)
 # define OpSLOT(o)              \
       (assert_(o->op_slabbed)   \
        (OPSLOT *)(((char *)o)-OPSLOT_HEADER))
@@ -811,12 +811,12 @@ preprocessing token; the type of C<arg> depends on C<which>.
 =cut
 */
 
-#define BhkFLAGS(hk)            ((hk)->bhk_flags)
+#define BhkFLAGS(hk)    ((hk)->bhk_flags)
 
-#define BHKf_bhk_start      0x01
-#define BHKf_bhk_pre_end    0x02
-#define BHKf_bhk_post_end   0x04
-#define BHKf_bhk_eval       0x08
+#define BHKf_bhk_start                0x01
+#define BHKf_bhk_pre_end              0x02
+#define BHKf_bhk_post_end             0x04
+#define BHKf_bhk_eval                 0x08
 
 #define BhkENTRY(hk, which) \
     ((BhkFLAGS(hk) & BHKf_ ## which) ? ((hk)->which) : NULL)
@@ -860,20 +860,20 @@ preprocessing token; the type of C<arg> depends on C<which>.
 
 /* flags for rv2cv_op_cv */
 
-#define RV2CVOPCV_MARK_EARLY     0x00000001
+#define RV2CVOPCV_MARK_EARLY    0x00000001
 #define RV2CVOPCV_RETURN_NAME_GV 0x00000002
-#define RV2CVOPCV_RETURN_STUB    0x00000004
+#define RV2CVOPCV_RETURN_STUB   0x00000004
 #if defined(PERL_CORE) ||   \
     defined(PERL_EXT) /* behaviour of this flag is subject to change: */
-# define RV2CVOPCV_MAYBE_NAME_GV  0x00000008
+# define RV2CVOPCV_MAYBE_NAME_GV     0x00000008
 #endif
-#define RV2CVOPCV_FLAG_MASK      0x0000000f /* all of the above */
+#define RV2CVOPCV_FLAG_MASK     0x0000000f  /* all of the above */
 
-#define op_lvalue(op,t) Perl_op_lvalue_flags(aTHX_ op,t,0)
+#define op_lvalue(op,t)     Perl_op_lvalue_flags(aTHX_ op,t,0)
 
 /* flags for op_lvalue_flags */
 
-#define OP_LVALUE_NO_CROAK 1
+#define OP_LVALUE_NO_CROAK  1
 
 /*
 =for apidoc_section $custom
@@ -926,7 +926,7 @@ typedef union {
     XOP            *xop_ptr;
 } XOPRETANY;
 
-#define XopFLAGS(xop) ((xop)->xop_flags)
+#define XopFLAGS(xop)   ((xop)->xop_flags)
 
 #define XOPf_xop_name   0x01
 #define XOPf_xop_desc   0x02
@@ -942,10 +942,10 @@ typedef enum {
     XOPe_xop_peep = XOPf_xop_peep
 } xop_flags_enum;
 
-#define XOPd_xop_name   PL_op_name[OP_CUSTOM]
-#define XOPd_xop_desc   PL_op_desc[OP_CUSTOM]
-#define XOPd_xop_class  OA_BASEOP
-#define XOPd_xop_peep   ((Perl_cpeep_t)0)
+#define XOPd_xop_name           PL_op_name[OP_CUSTOM]
+#define XOPd_xop_desc           PL_op_desc[OP_CUSTOM]
+#define XOPd_xop_class          OA_BASEOP
+#define XOPd_xop_peep           ((Perl_cpeep_t)0)
 
 #define XopENTRY_set(xop, which, to)        \
     STMT_START {                            \
@@ -959,7 +959,7 @@ typedef enum {
 #define XopENTRYCUSTOM(o, which)    \
     (Perl_custom_op_get_field(aTHX_ o, XOPe_ ## which).which)
 
-#define XopDISABLE(xop, which) ((xop)->xop_flags &= ~XOPf_ ## which)
+#define XopDISABLE(xop, which)  ((xop)->xop_flags &= ~XOPf_ ## which)
 #define XopENABLE(xop, which)               \
     STMT_START {                            \
         (xop)->xop_flags |= XOPf_ ## which; \
@@ -1042,9 +1042,9 @@ C<L</op_sibling_splice>>.
      ? XopENTRYCUSTOM(o, xop_class) \
      : (PL_opargs[(o)->op_type] & OA_CLASS_MASK))
 
-#define OP_TYPE_IS(o, type) ((o) && (o)->op_type == (type))
-#define OP_TYPE_IS_NN(o, type) ((o)->op_type == (type))
-#define OP_TYPE_ISNT(o, type) ((o) && (o)->op_type != (type))
+#define OP_TYPE_IS(o, type)     ((o) && (o)->op_type == (type))
+#define OP_TYPE_IS_NN(o, type)  ((o)->op_type == (type))
+#define OP_TYPE_ISNT(o, type)   ((o) && (o)->op_type != (type))
 #define OP_TYPE_ISNT_NN(o, type) ((o)->op_type != (type))
 
 #define OP_TYPE_IS_OR_WAS_NN(o, type)   \
@@ -1071,7 +1071,7 @@ C<L</op_sibling_splice>>.
 
 #define OpHAS_SIBLING(o)        (cBOOL((o)->op_moresib))
 #define OpSIBLING(o)            (0 + (o)->op_moresib ? (o)->op_sibparent : NULL)
-#define OpMORESIB_set(o, sib) ((o)->op_moresib = 1, (o)->op_sibparent = (sib))
+#define OpMORESIB_set(o, sib)   ((o)->op_moresib = 1, (o)->op_sibparent = (sib))
 #define OpLASTSIB_set(o, parent)    \
     ((o)->op_moresib = 0, (o)->op_sibparent = (parent))
 #define OpMAYBESIB_set(o, sib, parent)  \
@@ -1079,22 +1079,22 @@ C<L</op_sibling_splice>>.
 
 #if !defined(PERL_CORE) && !defined(PERL_EXT)
 /* for backwards compatibility only */
-#  define OP_SIBLING(o)         OpSIBLING(o)
+#  define OP_SIBLING(o)           OpSIBLING(o)
 #endif
 
 #define newATTRSUB(f, o, p, a, b) Perl_newATTRSUB_x(aTHX_  f, o, p, a, b, FALSE)
 #define newSUB(f, o, p, b)      newATTRSUB((f), (o), (p), NULL, (b))
 
 #ifdef USE_ITHREADS
-#  define OP_CHECK_MUTEX_INIT           MUTEX_INIT(&PL_check_mutex)
-#  define OP_CHECK_MUTEX_LOCK           MUTEX_LOCK(&PL_check_mutex)
-#  define OP_CHECK_MUTEX_UNLOCK         MUTEX_UNLOCK(&PL_check_mutex)
-#  define OP_CHECK_MUTEX_TERM           MUTEX_DESTROY(&PL_check_mutex)
+#  define OP_CHECK_MUTEX_INIT     MUTEX_INIT(&PL_check_mutex)
+#  define OP_CHECK_MUTEX_LOCK     MUTEX_LOCK(&PL_check_mutex)
+#  define OP_CHECK_MUTEX_UNLOCK   MUTEX_UNLOCK(&PL_check_mutex)
+#  define OP_CHECK_MUTEX_TERM     MUTEX_DESTROY(&PL_check_mutex)
 #else
-#  define OP_CHECK_MUTEX_INIT           NOOP
-#  define OP_CHECK_MUTEX_LOCK           NOOP
-#  define OP_CHECK_MUTEX_UNLOCK         NOOP
-#  define OP_CHECK_MUTEX_TERM           NOOP
+#  define OP_CHECK_MUTEX_INIT     NOOP
+#  define OP_CHECK_MUTEX_LOCK     NOOP
+#  define OP_CHECK_MUTEX_UNLOCK   NOOP
+#  define OP_CHECK_MUTEX_TERM     NOOP
 #endif
 
 
@@ -1103,39 +1103,39 @@ C<L</op_sibling_splice>>.
 /* actions */
 
 /* Load another word of actions/flag bits.  Must be 0 */
-#define MDEREF_reload                       0
+#define MDEREF_reload                          0
 
-#define MDEREF_AV_pop_rv2av_aelem           1
-#define MDEREF_AV_gvsv_vivify_rv2av_aelem   2
-#define MDEREF_AV_padsv_vivify_rv2av_aelem  3
-#define MDEREF_AV_vivify_rv2av_aelem        4
-#define MDEREF_AV_padav_aelem               5
-#define MDEREF_AV_gvav_aelem                6
+#define MDEREF_AV_pop_rv2av_aelem              1
+#define MDEREF_AV_gvsv_vivify_rv2av_aelem      2
+#define MDEREF_AV_padsv_vivify_rv2av_aelem     3
+#define MDEREF_AV_vivify_rv2av_aelem           4
+#define MDEREF_AV_padav_aelem                  5
+#define MDEREF_AV_gvav_aelem                   6
 
-#define MDEREF_HV_pop_rv2hv_helem           8
-#define MDEREF_HV_gvsv_vivify_rv2hv_helem   9
-#define MDEREF_HV_padsv_vivify_rv2hv_helem 10
-#define MDEREF_HV_vivify_rv2hv_helem       11
-#define MDEREF_HV_padhv_helem              12
-#define MDEREF_HV_gvhv_helem               13
+#define MDEREF_HV_pop_rv2hv_helem              8
+#define MDEREF_HV_gvsv_vivify_rv2hv_helem      9
+#define MDEREF_HV_padsv_vivify_rv2hv_helem    10
+#define MDEREF_HV_vivify_rv2hv_helem          11
+#define MDEREF_HV_padhv_helem                 12
+#define MDEREF_HV_gvhv_helem                  13
 
-#define MDEREF_ACTION_MASK                0xf
+#define MDEREF_ACTION_MASK                   0xf
 
 /* key / index type */
 
-#define MDEREF_INDEX_none   0x00 /* run external ops to generate index */
-#define MDEREF_INDEX_const  0x10 /* index is const PV/UV */
-#define MDEREF_INDEX_padsv  0x20 /* index is lexical var */
-#define MDEREF_INDEX_gvsv   0x30 /* index is GV */
+#define MDEREF_INDEX_none                   0x00    /* run external ops to generate index */
+#define MDEREF_INDEX_const                  0x10    /* index is const PV/UV */
+#define MDEREF_INDEX_padsv                  0x20    /* index is lexical var */
+#define MDEREF_INDEX_gvsv                   0x30    /* index is GV */
 
-#define MDEREF_INDEX_MASK   0x30
+#define MDEREF_INDEX_MASK                   0x30
 
 /* bit flags */
 
-#define MDEREF_FLAG_last    0x40 /* the last [ah]elem; PL_op flags apply */
+#define MDEREF_FLAG_last                    0x40    /* the last [ah]elem; PL_op flags apply */
 
-#define MDEREF_MASK         0x7F
-#define MDEREF_SHIFT           7
+#define MDEREF_MASK                         0x7F
+#define MDEREF_SHIFT                           7
 
 #if defined(PERL_IN_DOOP_C) || defined(PERL_IN_PP_C)
 #   define FATAL_ABOVE_FF_MSG                                           \
@@ -1143,17 +1143,17 @@ C<L</op_sibling_splice>>.
         "%s operator is not allowed"
 #endif
 #if defined(PERL_IN_OP_C) || defined(PERL_IN_DOOP_C) || defined(PERL_IN_PERL_C)
-#  define TR_UNMAPPED           (UV)-1
-#  define TR_DELETE             (UV)-2
-#  define TR_R_EMPTY            (UV)-3  /* rhs (replacement) is empty */
-#  define TR_OOB                (UV)-4 /* Something that isn't one
+#  define TR_UNMAPPED     (UV)-1
+#  define TR_DELETE       (UV)-2
+#  define TR_R_EMPTY      (UV)-3          /* rhs (replacement) is empty */
+#  define TR_OOB          (UV)-4          /* Something that isn't one
                                           of the others */
-#  define TR_SPECIAL_HANDLING   TR_DELETE /* Can occupy same value */
-#  define TR_UNLISTED           TR_UNMAPPED /* A synonym whose name is
+#  define TR_SPECIAL_HANDLING TR_DELETE    /* Can occupy same value */
+#  define TR_UNLISTED     TR_UNMAPPED     /* A synonym whose name is
                                                clearer at times */
 #endif
 #if defined(PERL_IN_OP_C) || defined(PERL_IN_TOKE_C)
-#define RANGE_INDICATOR  ILLEGAL_UTF8_BYTE
+#define RANGE_INDICATOR     ILLEGAL_UTF8_BYTE
 #endif
 
 /* stuff for OP_ARGCHECK */
@@ -1164,7 +1164,7 @@ struct op_argcheck_aux {
     char slurpy;     /* presence of slurpy: may be '\0', '@' or '%' */
 };
 
-#define MI_INIT_WORKAROUND_PACK "Module::Install::DSL"
+#define MI_INIT_WORKAROUND_PACK     "Module::Install::DSL"
 
 
 /*

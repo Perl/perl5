@@ -36,21 +36,21 @@ L<perlguts/Autoloading with XSUBs>.
 */
 
 #ifndef PERL_CORE
-#  define Nullcv Null(CV*)
+#  define Nullcv                      Null(CV*)
 #endif
 
 #define CvSTASH(sv) \
     (MUTABLE_HV(((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_stash))
-#define CvSTASH_set(cv,st) Perl_cvstash_set(aTHX_ cv, st)
-#define CvSTART(sv)     ((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_start_u.xcv_start
-#define CvROOT(sv)      ((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_root_u.xcv_root
-#define CvXSUB(sv)      ((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_root_u.xcv_xsub
+#define CvSTASH_set(cv,st)  Perl_cvstash_set(aTHX_ cv, st)
+#define CvSTART(sv)         ((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_start_u.xcv_start
+#define CvROOT(sv)          ((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_root_u.xcv_root
+#define CvXSUB(sv)          ((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_root_u.xcv_xsub
 #define CvXSUBANY(sv)   \
     ((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_start_u.xcv_xsubany
-#define CvGV(sv)        Perl_CvGV(aTHX_ (CV *)(sv))
-#define CvGV_set(cv,gv) Perl_cvgv_set(aTHX_ cv, gv)
-#define CvHASGV(cv)     cBOOL(SvANY(cv)->xcv_gv_u.xcv_gv)
-#define CvFILE(sv)      ((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_file
+#define CvGV(sv)            Perl_CvGV(aTHX_ (CV *)(sv))
+#define CvGV_set(cv,gv)     Perl_cvgv_set(aTHX_ cv, gv)
+#define CvHASGV(cv)         cBOOL(SvANY(cv)->xcv_gv_u.xcv_gv)
+#define CvFILE(sv)          ((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_file
 #ifdef USE_ITHREADS
 #  define CvFILE_set_from_cop(sv, cop)  \
        (CvFILE(sv) = savepv(CopFILE(cop)), CvDYNFILE_on(sv))
@@ -58,11 +58,11 @@ L<perlguts/Autoloading with XSUBs>.
 #  define CvFILE_set_from_cop(sv, cop)  \
        (CvFILE(sv) = CopFILE(cop), CvDYNFILE_off(sv))
 #endif
-#define CvFILEGV(sv)    (gv_fetchfile(CvFILE(sv)))
-#define CvDEPTH(sv)     (*Perl_CvDEPTH((const CV *)sv))
+#define CvFILEGV(sv)        (gv_fetchfile(CvFILE(sv)))
+#define CvDEPTH(sv)         (*Perl_CvDEPTH((const CV *)sv))
 /* For use when you only have a XPVCV*, not a real CV*.  Must
    be assert protected as in Perl_CvDEPTH before use. */
-#define CvDEPTHunsafe(sv) ((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_depth
+#define CvDEPTHunsafe(sv)   ((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_depth
 
 /* these CvPADLIST/CvRESERVED asserts can be
    reverted one day, once stabilized */
@@ -72,9 +72,9 @@ L<perlguts/Autoloading with XSUBs>.
 /* CvPADLIST_set is not public API, it can
    be removed one day, once stabilized */
 #ifdef DEBUGGING
-#  define CvPADLIST_set(sv, padlist) Perl_set_padlist((CV*)sv, padlist)
+#  define CvPADLIST_set(sv, padlist)  Perl_set_padlist((CV*)sv, padlist)
 #else
-#  define CvPADLIST_set(sv, padlist) (CvPADLIST(sv) = (padlist))
+#  define CvPADLIST_set(sv, padlist)  (CvPADLIST(sv) = (padlist))
 #endif
 #define CvHSCXT(sv)                 \
     *(assert_(CvISXSUB((CV*)(sv)))  \
@@ -90,12 +90,12 @@ L<perlguts/Autoloading with XSUBs>.
 #    error unknown pointer size
 #  endif
 #else
-#  define PoisonPADLIST(sv) NOOP
+#  define PoisonPADLIST(sv)           NOOP
 #endif
 
-#define CvOUTSIDE(sv)     ((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_outside
-#define CvOUTSIDE_SEQ(sv) ((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_outside_seq
-#define CvFLAGS(sv)       ((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_flags
+#define CvOUTSIDE(sv)       ((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_outside
+#define CvOUTSIDE_SEQ(sv)   ((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_outside_seq
+#define CvFLAGS(sv)         ((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_flags
 
 /* These two are sometimes called on non-CVs */
 #define CvPROTO(sv)                                 \
@@ -116,33 +116,33 @@ L<perlguts/Autoloading with XSUBs>.
 
 /* CV has the `:method` attribute.  This used to be called CVf_METHOD
  * but is renamed to avoid collision with CVf_IsMETHOD */
-#define CVf_NOWARN_AMBIGUOUS    0x0001
+#define CVf_NOWARN_AMBIGUOUS   0x0001
 
-#define CVf_LVALUE      0x0002  /* CV return value can be used as lvalue */
-#define CVf_CONST       0x0004  /* inlinable sub */
-#define CVf_ISXSUB      0x0008  /* CV is an XSUB, not pure perl. */
+#define CVf_LVALUE            0x0002    /* CV return value can be used as lvalue */
+#define CVf_CONST             0x0004    /* inlinable sub */
+#define CVf_ISXSUB            0x0008    /* CV is an XSUB, not pure perl. */
 
-#define CVf_WEAKOUTSIDE 0x0010  /* CvOUTSIDE isn't ref counted */
-#define CVf_CLONE       0x0020  /* anon CV uses external lexicals */
-#define CVf_CLONED      0x0040  /* a clone of one of those */
-#define CVf_ANON        0x0080  /* CV is not pointed to by a GV */
-#define CVf_UNIQUE      0x0100  /* sub is only called once (eg PL_main_cv,
+#define CVf_WEAKOUTSIDE       0x0010    /* CvOUTSIDE isn't ref counted */
+#define CVf_CLONE             0x0020    /* anon CV uses external lexicals */
+#define CVf_CLONED            0x0040    /* a clone of one of those */
+#define CVf_ANON              0x0080    /* CV is not pointed to by a GV */
+#define CVf_UNIQUE            0x0100    /* sub is only called once (eg PL_main_cv,
                                    require, eval). */
-#define CVf_NODEBUG     0x0200  /* no DB::sub indirection for this CV (esp.
+#define CVf_NODEBUG           0x0200    /* no DB::sub indirection for this CV (esp.
                                    useful for special XSUBs) */
-#define CVf_CVGV_RC     0x0400  /* CvGV is reference counted */
+#define CVf_CVGV_RC           0x0400    /* CvGV is reference counted */
 #if defined(PERL_CORE) || defined(PERL_EXT)
-# define CVf_SLABBED    0x0800  /* Holds refcount on op slab */
+# define CVf_SLABBED       0x0800 /* Holds refcount on op slab */
 #endif
-#define CVf_DYNFILE     0x1000  /* The filename is malloced */
-#define CVf_AUTOLOAD    0x2000  /* SvPVX contains AUTOLOADed sub name */
-#define CVf_HASEVAL     0x4000  /* contains string eval */
-#define CVf_NAMED       0x8000  /* Has a name HEK */
-#define CVf_LEXICAL     0x10000 /* Omit package from name */
-#define CVf_ANONCONST   0x20000 /* :const - create anonconst op */
-#define CVf_SIGNATURE   0x40000 /* CV uses a signature */
-#define CVf_REFCOUNTED_ANYSV 0x80000 /* CvXSUBANY().any_sv is refcounted */
-#define CVf_IsMETHOD    0x100000 /* CV is a (real) method of a real class.  Not
+#define CVf_DYNFILE           0x1000    /* The filename is malloced */
+#define CVf_AUTOLOAD          0x2000    /* SvPVX contains AUTOLOADed sub name */
+#define CVf_HASEVAL           0x4000    /* contains string eval */
+#define CVf_NAMED             0x8000    /* Has a name HEK */
+#define CVf_LEXICAL          0x10000    /* Omit package from name */
+#define CVf_ANONCONST        0x20000    /* :const - create anonconst op */
+#define CVf_SIGNATURE        0x40000    /* CV uses a signature */
+#define CVf_REFCOUNTED_ANYSV  0x80000    /* CvXSUBANY().any_sv is refcounted */
+#define CVf_IsMETHOD        0x100000    /* CV is a (real) method of a real class.  Not
                                     to be confused with what used to be called
                                     CVf_METHOD; now CVf_NOWARN_AMBIGUOUS */
 
@@ -170,9 +170,9 @@ L<perlguts/Autoloading with XSUBs>.
 #define CvNODEBUG_on(cv)        (CvFLAGS(cv) |= CVf_NODEBUG)
 #define CvNODEBUG_off(cv)       (CvFLAGS(cv) &= ~CVf_NODEBUG)
 
-#define CvNOWARN_AMBIGUOUS(cv)          (CvFLAGS(cv) & CVf_NOWARN_AMBIGUOUS)
-#define CvNOWARN_AMBIGUOUS_on(cv)       (CvFLAGS(cv) |= CVf_NOWARN_AMBIGUOUS)
-#define CvNOWARN_AMBIGUOUS_off(cv)      (CvFLAGS(cv) &= ~CVf_NOWARN_AMBIGUOUS)
+#define CvNOWARN_AMBIGUOUS(cv)  (CvFLAGS(cv) & CVf_NOWARN_AMBIGUOUS)
+#define CvNOWARN_AMBIGUOUS_on(cv) (CvFLAGS(cv) |= CVf_NOWARN_AMBIGUOUS)
+#define CvNOWARN_AMBIGUOUS_off(cv) (CvFLAGS(cv) &= ~CVf_NOWARN_AMBIGUOUS)
 
 #define CvLVALUE(cv)            (CvFLAGS(cv) & CVf_LVALUE)
 #define CvLVALUE_on(cv)         (CvFLAGS(cv) |= CVf_LVALUE)
@@ -205,9 +205,9 @@ L<perlguts/Autoloading with XSUBs>.
 #define CvCVGV_RC_off(cv)       (CvFLAGS(cv) &= ~CVf_CVGV_RC)
 
 #ifdef PERL_CORE
-# define CvSLABBED(cv)          (CvFLAGS(cv) & CVf_SLABBED)
-# define CvSLABBED_on(cv)       (CvFLAGS(cv) |= CVf_SLABBED)
-# define CvSLABBED_off(cv)      (CvFLAGS(cv) &= ~CVf_SLABBED)
+# define CvSLABBED(cv)       (CvFLAGS(cv) & CVf_SLABBED)
+# define CvSLABBED_on(cv)    (CvFLAGS(cv) |= CVf_SLABBED)
+# define CvSLABBED_off(cv)   (CvFLAGS(cv) &= ~CVf_SLABBED)
 #endif
 
 #define CvDYNFILE(cv)           (CvFLAGS(cv) & CVf_DYNFILE)
@@ -263,9 +263,9 @@ Helper macro to turn off the C<CvREFCOUNTED_ANYSV> flag.
 =cut
 */
 
-#define CvREFCOUNTED_ANYSV(cv)          (CvFLAGS(cv) & CVf_REFCOUNTED_ANYSV)
-#define CvREFCOUNTED_ANYSV_on(cv)       (CvFLAGS(cv) |= CVf_REFCOUNTED_ANYSV)
-#define CvREFCOUNTED_ANYSV_off(cv)      (CvFLAGS(cv) &= ~CVf_REFCOUNTED_ANYSV)
+#define CvREFCOUNTED_ANYSV(cv)  (CvFLAGS(cv) & CVf_REFCOUNTED_ANYSV)
+#define CvREFCOUNTED_ANYSV_on(cv) (CvFLAGS(cv) |= CVf_REFCOUNTED_ANYSV)
+#define CvREFCOUNTED_ANYSV_off(cv) (CvFLAGS(cv) &= ~CVf_REFCOUNTED_ANYSV)
 
 #define CvIsMETHOD(cv)          (CvFLAGS(cv) & CVf_IsMETHOD)
 #define CvIsMETHOD_on(cv)       (CvFLAGS(cv) |= CVf_IsMETHOD)
@@ -273,10 +273,10 @@ Helper macro to turn off the C<CvREFCOUNTED_ANYSV> flag.
 
 /* Back-compat */
 #ifndef PERL_CORE
-#  define CVf_METHOD            CVf_NOWARN_AMBIGUOUS
-#  define CvMETHOD(cv)          CvNOWARN_AMBIGUOUS(cv)
-#  define CvMETHOD_on(cv)       CvNOWARN_AMBIGUOUS_on(cv)
-#  define CvMETHOD_off(cv)      CvNOWARN_AMBIGUOUS_off(cv)
+#  define CVf_METHOD          CVf_NOWARN_AMBIGUOUS
+#  define CvMETHOD(cv)        CvNOWARN_AMBIGUOUS(cv)
+#  define CvMETHOD_on(cv)     CvNOWARN_AMBIGUOUS_on(cv)
+#  define CvMETHOD_off(cv)    CvNOWARN_AMBIGUOUS_off(cv)
 #endif
 
 /* Flags for newXS_flags */
@@ -364,12 +364,12 @@ unbroken.  For example, the following should print 123:
 
 typedef OP *(*Perl_call_checker)(pTHX_ OP *, GV *, SV *);
 
-#define CALL_CHECKER_REQUIRE_GV MGf_REQUIRE_GV
+#define CALL_CHECKER_REQUIRE_GV     MGf_REQUIRE_GV
 
-#define CV_NAME_NOTQUAL         1
+#define CV_NAME_NOTQUAL     1
 
 #ifdef PERL_CORE
-# define CV_UNDEF_KEEP_NAME     1
+# define CV_UNDEF_KEEP_NAME  1
 #endif
 
 /*

@@ -197,11 +197,11 @@ possible to UTF-8-encode a single code point in different ways, but that is
 explicitly forbidden, and the shortest possible encoding should always be used
 (and that is what Perl does). */
 
-#define UTF_CONTINUATION_BYTE_INFO_BITS  UTF_EBCDIC_CONTINUATION_BYTE_INFO_BITS
+#define UTF_CONTINUATION_BYTE_INFO_BITS UTF_EBCDIC_CONTINUATION_BYTE_INFO_BITS
 
 /* ^? is defined to be APC on EBCDIC systems, as specified in Unicode
  * Technical Report #16.  See the definition of toCTRL() for more */
-#define QUESTION_MARK_CTRL   LATIN1_TO_NATIVE(0x9F)
+#define QUESTION_MARK_CTRL  LATIN1_TO_NATIVE(0x9F)
 
 /*
  * ex: set ts=8 sts=4 sw=4 et:

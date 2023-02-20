@@ -27,49 +27,49 @@
              }                                                      \
          } STMT_END
 
-#    define PERL_GET_CONTEXT    Perl_get_context()
-#    define PERL_SET_CONTEXT(t) Perl_set_context((void*)t)
+#    define PERL_GET_CONTEXT            Perl_get_context()
+#    define PERL_SET_CONTEXT(t)         Perl_set_context((void*)t)
 
 #    define PTHREAD_GETSPECIFIC_INT
 #    ifdef OEMVS
-#      define pthread_addr_t void *
-#      define pthread_create(t,a,s,d)        pthread_create(t,&(a),s,d)
-#      define pthread_keycreate              pthread_key_create
+#      define pthread_addr_t                  void *
+#      define pthread_create(t,a,s,d)         pthread_create(t,&(a),s,d)
+#      define pthread_keycreate               pthread_key_create
 #    endif
 #    ifdef VMS
-#      define pthread_attr_init(a) pthread_attr_create(a)
+#      define pthread_attr_init(a)            pthread_attr_create(a)
 #      define PTHREAD_ATTR_SETDETACHSTATE(a,s) pthread_setdetach_np(a,s)
-#      define PTHREAD_CREATE(t,a,s,d) pthread_create(t,a,s,d)
+#      define PTHREAD_CREATE(t,a,s,d)         pthread_create(t,a,s,d)
 #      define pthread_key_create(k,d)   \
            pthread_keycreate(k,(pthread_destructor_t)(d))
-#      define pthread_mutexattr_init(a) pthread_mutexattr_create(a)
-#      define pthread_mutexattr_settype(a,t) pthread_mutexattr_setkind_np(a,t)
+#      define pthread_mutexattr_init(a)       pthread_mutexattr_create(a)
+#      define pthread_mutexattr_settype(a,t)  pthread_mutexattr_setkind_np(a,t)
 #    endif
 #    if defined(__hpux) && defined(__ux_version) && __ux_version <= 1020
-#      define pthread_attr_init(a) pthread_attr_create(a)
+#      define pthread_attr_init(a)            pthread_attr_create(a)
        /* XXX pthread_setdetach_np() missing in DCE threads on HP-UX 10.20 */
-#      define PTHREAD_ATTR_SETDETACHSTATE(a,s)  (0)
-#      define PTHREAD_CREATE(t,a,s,d) pthread_create(t,a,s,d)
+#      define PTHREAD_ATTR_SETDETACHSTATE(a,s) (0)
+#      define PTHREAD_CREATE(t,a,s,d)         pthread_create(t,a,s,d)
 #      define pthread_key_create(k,d)   \
            pthread_keycreate(k,(pthread_destructor_t)(d))
-#      define pthread_mutexattr_init(a) pthread_mutexattr_create(a)
-#      define pthread_mutexattr_settype(a,t) pthread_mutexattr_setkind_np(a,t)
+#      define pthread_mutexattr_init(a)       pthread_mutexattr_create(a)
+#      define pthread_mutexattr_settype(a,t)  pthread_mutexattr_setkind_np(a,t)
 #    endif
 #    if defined(OEMVS)
 #      define PTHREAD_ATTR_SETDETACHSTATE(a,s)  \
            pthread_attr_setdetachstate(a,&(s))
-#      define YIELD pthread_yield(NULL)
+#      define YIELD                           pthread_yield(NULL)
 #    endif
 #  endif
 #  if !defined(__hpux) || !defined(__ux_version) || __ux_version > 1020
-#    define pthread_mutexattr_default NULL
-#    define pthread_condattr_default  NULL
+#    define pthread_mutexattr_default   NULL
+#    define pthread_condattr_default    NULL
 #  endif
 #endif
 
 #ifndef PTHREAD_CREATE
 /* You are not supposed to pass NULL as the 2nd arg of PTHREAD_CREATE(). */
-#  define PTHREAD_CREATE(t,a,s,d) pthread_create(t,&(a),s,d)
+#  define PTHREAD_CREATE(t,a,s,d)     pthread_create(t,&(a),s,d)
 #endif
 
 #ifndef PTHREAD_ATTR_SETDETACHSTATE
@@ -78,18 +78,18 @@
 
 #ifndef PTHREAD_CREATE_JOINABLE
 #  ifdef OLD_PTHREAD_CREATE_JOINABLE
-#    define PTHREAD_CREATE_JOINABLE OLD_PTHREAD_CREATE_JOINABLE
+#    define PTHREAD_CREATE_JOINABLE     OLD_PTHREAD_CREATE_JOINABLE
 #  else
-#    define PTHREAD_CREATE_JOINABLE 0 /* Panic? No, guess. */
+#    define PTHREAD_CREATE_JOINABLE     0   /* Panic? No, guess. */
 #  endif
 #endif
 
 #ifdef __VMS
   /* Default is 1024 on VAX, 8192 otherwise */
 #  ifdef __ia64
-#    define THREAD_CREATE_NEEDS_STACK (48*1024)
+#    define THREAD_CREATE_NEEDS_STACK   (48*1024)
 #  else
-#    define THREAD_CREATE_NEEDS_STACK (32*1024)
+#    define THREAD_CREATE_NEEDS_STACK   (32*1024)
 #  endif
 #endif
 
@@ -110,8 +110,8 @@
         }                                                       \
     } STMT_END
 
-#define MUTEX_LOCK(m)                   mutex_lock(*m)
-#define MUTEX_UNLOCK(m)                 mutex_unlock(*m)
+#define MUTEX_LOCK(m)       mutex_lock(*m)
+#define MUTEX_UNLOCK(m)     mutex_unlock(*m)
 #define MUTEX_DESTROY(m)    \
     STMT_START {            \
         mutex_free(*m);     \
@@ -130,40 +130,40 @@
         }                                                       \
     } STMT_END
 
-#define COND_SIGNAL(c)          condition_signal(*c)
-#define COND_BROADCAST(c)       condition_broadcast(*c)
-#define COND_WAIT(c, m)         condition_wait(*c, *m)
+#define COND_SIGNAL(c)      condition_signal(*c)
+#define COND_BROADCAST(c)   condition_broadcast(*c)
+#define COND_WAIT(c, m)     condition_wait(*c, *m)
 #define COND_DESTROY(c)     \
     STMT_START {            \
         condition_free(*c); \
         *c = 0;             \
     } STMT_END
 
-#define THREAD_RET_TYPE         any_t
+#define THREAD_RET_TYPE     any_t
 
-#define DETACH(t)               cthread_detach(t->self)
-#define JOIN(t, avp)            (*(avp) = MUTABLE_AV(cthread_join(t->self)))
+#define DETACH(t)           cthread_detach(t->self)
+#define JOIN(t, avp)        (*(avp) = MUTABLE_AV(cthread_join(t->self)))
 
-#define PERL_SET_CONTEXT(t)     cthread_set_data(cthread_self(), t)
-#define PERL_GET_CONTEXT        cthread_data(cthread_self())
+#define PERL_SET_CONTEXT(t) cthread_set_data(cthread_self(), t)
+#define PERL_GET_CONTEXT    cthread_data(cthread_self())
 
-#define INIT_THREADS            cthread_init()
-#define YIELD                   cthread_yield()
-#define ALLOC_THREAD_KEY        NOOP
-#define FREE_THREAD_KEY         NOOP
-#define SET_THREAD_SELF(thr)    (thr->self = cthread_self())
+#define INIT_THREADS        cthread_init()
+#define YIELD               cthread_yield()
+#define ALLOC_THREAD_KEY    NOOP
+#define FREE_THREAD_KEY     NOOP
+#define SET_THREAD_SELF(thr) (thr->self = cthread_self())
 
 #endif /* I_MACH_CTHREADS */
 
 #ifndef YIELD
 #  ifdef SCHED_YIELD
-#    define YIELD SCHED_YIELD
+#    define YIELD                       SCHED_YIELD
 #  elif defined(HAS_SCHED_YIELD)
-#    define YIELD sched_yield()
+#    define YIELD                       sched_yield()
 #  elif defined(HAS_PTHREAD_YIELD)
     /* pthread_yield(NULL) platforms are expected to
      * have #defined YIELD for themselves. */
-#    define YIELD pthread_yield()
+#    define YIELD                       pthread_yield()
 #  endif
 #endif
 
@@ -194,10 +194,10 @@
 #  endif
 
 #  ifdef PERL_TSA_ACTIVE
-#    define perl_pthread_mutex_lock(m) perl_tsa_mutex_lock(m)
+#    define perl_pthread_mutex_lock(m)  perl_tsa_mutex_lock(m)
 #    define perl_pthread_mutex_unlock(m) perl_tsa_mutex_unlock(m)
 #  else
-#    define perl_pthread_mutex_lock(m) pthread_mutex_lock(m)
+#    define perl_pthread_mutex_lock(m)  pthread_mutex_lock(m)
 #    define perl_pthread_mutex_unlock(m) pthread_mutex_unlock(m)
 #  endif
 
@@ -385,9 +385,9 @@
 #endif
 
 #ifdef HAS_PTHREAD_UNCHECKED_GETSPECIFIC_NP
-#  define PTHREAD_GETSPECIFIC(key) pthread_unchecked_getspecific_np(key)
+#  define PTHREAD_GETSPECIFIC(key)    pthread_unchecked_getspecific_np(key)
 #else
-#    define PTHREAD_GETSPECIFIC(key) pthread_getspecific(key)
+#    define PTHREAD_GETSPECIFIC(key)    pthread_getspecific(key)
 #endif
 
 #if defined(PERL_THREAD_LOCAL) && !defined(PERL_GET_CONTEXT) && !defined(PERL_SET_CONTEXT) && !defined(__cplusplus)
@@ -403,7 +403,7 @@
 #  define PERL_USE_THREAD_LOCAL
 extern PERL_THREAD_LOCAL void *PL_current_context;
 
-#  define PERL_GET_CONTEXT        PL_current_context
+#  define PERL_GET_CONTEXT            PL_current_context
 
 /* We must also call pthread_setspecific() always, as C++ code has
  * to read it with pthreads (the #else side just below) */
@@ -422,7 +422,7 @@ extern PERL_THREAD_LOCAL void *PL_current_context;
 /* else fall back to pthreads */
 
 #  ifndef PERL_GET_CONTEXT
-#    define PERL_GET_CONTEXT    PTHREAD_GETSPECIFIC(PL_thr_key)
+#    define PERL_GET_CONTEXT            PTHREAD_GETSPECIFIC(PL_thr_key)
 #  endif
 
 /* For C++ extensions built on a system where the C compiler provides thread
@@ -432,13 +432,13 @@ extern PERL_THREAD_LOCAL void *PL_current_context;
  * thread local storage.  PERL_SET_CONTEXT is not called that often. */
 
 #  ifndef PERL_SET_CONTEXT
-#    define PERL_SET_CONTEXT(t) Perl_set_context((void*)t)
+#    define PERL_SET_CONTEXT(t)         Perl_set_context((void*)t)
 #  endif /* PERL_SET_CONTEXT */
 #endif /* PERL_THREAD_LOCAL */
 
 #ifndef INIT_THREADS
 #  ifdef NEED_PTHREAD_INIT
-#    define INIT_THREADS pthread_init()
+#    define INIT_THREADS                pthread_init()
 #  endif
 #endif
 
@@ -470,82 +470,82 @@ extern PERL_THREAD_LOCAL void *PL_current_context;
 #endif
 
 #ifndef THREAD_RET_TYPE
-#  define THREAD_RET_TYPE       void *
+#  define THREAD_RET_TYPE             void *
 #endif /* THREAD_RET */
 
-#  define LOCK_DOLLARZERO_MUTEX         MUTEX_LOCK(&PL_dollarzero_mutex)
-#  define UNLOCK_DOLLARZERO_MUTEX       MUTEX_UNLOCK(&PL_dollarzero_mutex)
+#  define LOCK_DOLLARZERO_MUTEX       MUTEX_LOCK(&PL_dollarzero_mutex)
+#  define UNLOCK_DOLLARZERO_MUTEX     MUTEX_UNLOCK(&PL_dollarzero_mutex)
 
 #endif /* USE_ITHREADS */
 
 #ifndef MUTEX_LOCK
-#  define MUTEX_LOCK(m)           NOOP
+#  define MUTEX_LOCK(m)               NOOP
 #endif
 
 #ifndef MUTEX_UNLOCK
-#  define MUTEX_UNLOCK(m)         NOOP
+#  define MUTEX_UNLOCK(m)             NOOP
 #endif
 
 #ifndef MUTEX_INIT
-#  define MUTEX_INIT(m)           NOOP
+#  define MUTEX_INIT(m)               NOOP
 #endif
 
 #ifndef MUTEX_DESTROY
-#  define MUTEX_DESTROY(m)        NOOP
+#  define MUTEX_DESTROY(m)            NOOP
 #endif
 
 #ifndef COND_INIT
-#  define COND_INIT(c)            NOOP
+#  define COND_INIT(c)                NOOP
 #endif
 
 #ifndef COND_SIGNAL
-#  define COND_SIGNAL(c)          NOOP
+#  define COND_SIGNAL(c)              NOOP
 #endif
 
 #ifndef COND_BROADCAST
-#  define COND_BROADCAST(c)       NOOP
+#  define COND_BROADCAST(c)           NOOP
 #endif
 
 #ifndef COND_WAIT
-#  define COND_WAIT(c, m)         NOOP
+#  define COND_WAIT(c, m)             NOOP
 #endif
 
 #ifndef COND_DESTROY
-#  define COND_DESTROY(c)         NOOP
+#  define COND_DESTROY(c)             NOOP
 #endif
 
 #ifndef PERL_READ_LOCK
-#  define PERL_READ_LOCK          NOOP
-#  define PERL_READ_UNLOCK        NOOP
-#  define PERL_WRITE_LOCK         NOOP
-#  define PERL_WRITE_UNLOCK       NOOP
-#  define PERL_RW_MUTEX_INIT      NOOP
-#  define PERL_RW_MUTEX_DESTROY   NOOP
+#  define PERL_READ_LOCK              NOOP
+#  define PERL_READ_UNLOCK            NOOP
+#  define PERL_WRITE_LOCK             NOOP
+#  define PERL_WRITE_UNLOCK           NOOP
+#  define PERL_RW_MUTEX_INIT          NOOP
+#  define PERL_RW_MUTEX_DESTROY       NOOP
 #endif
 
 #ifndef LOCK_DOLLARZERO_MUTEX
-#  define LOCK_DOLLARZERO_MUTEX   NOOP
+#  define LOCK_DOLLARZERO_MUTEX       NOOP
 #endif
 
 #ifndef UNLOCK_DOLLARZERO_MUTEX
-#  define UNLOCK_DOLLARZERO_MUTEX NOOP
+#  define UNLOCK_DOLLARZERO_MUTEX     NOOP
 #endif
 
 /* THR, SET_THR, and dTHR are there for compatibility with old versions */
 #ifndef THR
-#  define THR           PERL_GET_THX
+#  define THR                         PERL_GET_THX
 #endif
 
 #ifndef SET_THR
-#  define SET_THR(t)    PERL_SET_THX(t)
+#  define SET_THR(t)                  PERL_SET_THX(t)
 #endif
 
 #ifndef dTHR
-#  define dTHR dNOOP
+#  define dTHR                        dNOOP
 #endif
 
 #ifndef INIT_THREADS
-#  define INIT_THREADS NOOP
+#  define INIT_THREADS                NOOP
 #endif
 
 /*

@@ -35,9 +35,9 @@ struct TM64 {
 
 /* Decide which tm struct to use */
 #ifdef USE_TM64
-#define TM      TM64
+#define TM  TM64
 #else
-#define TM      tm
+#define TM  tm
 #endif
 
 

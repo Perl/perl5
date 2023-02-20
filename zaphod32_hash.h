@@ -1,22 +1,22 @@
 #ifndef DEBUG_ZAPHOD32_HASH
-#define DEBUG_ZAPHOD32_HASH 0
+#define DEBUG_ZAPHOD32_HASH     0
 
 #if DEBUG_ZAPHOD32_HASH == 1
 #include <stdio.h>
 #define ZAPHOD32_WARN6(pat,v0,v1,v2,v3,v4,v5)   \
     printf(pat, v0, v1, v2, v3, v4, v5)
-#define ZAPHOD32_WARN5(pat,v0,v1,v2,v3,v4)       printf(pat, v0, v1, v2, v3, v4)
-#define ZAPHOD32_WARN4(pat,v0,v1,v2,v3)          printf(pat, v0, v1, v2, v3)
-#define ZAPHOD32_WARN3(pat,v0,v1,v2)             printf(pat, v0, v1, v2)
-#define ZAPHOD32_WARN2(pat,v0,v1)                printf(pat, v0, v1)
-#define NOTE3(pat,v0,v1,v2)             printf(pat, v0, v1, v2)
+#define ZAPHOD32_WARN5(pat,v0,v1,v2,v3,v4)  printf(pat, v0, v1, v2, v3, v4)
+#define ZAPHOD32_WARN4(pat,v0,v1,v2,v3)     printf(pat, v0, v1, v2, v3)
+#define ZAPHOD32_WARN3(pat,v0,v1,v2)        printf(pat, v0, v1, v2)
+#define ZAPHOD32_WARN2(pat,v0,v1)           printf(pat, v0, v1)
+#define NOTE3(pat,v0,v1,v2)                 printf(pat, v0, v1, v2)
 #elif DEBUG_ZAPHOD32_HASH == 2
 #define ZAPHOD32_WARN6(pat,v0,v1,v2,v3,v4,v5)
 #define ZAPHOD32_WARN5(pat,v0,v1,v2,v3,v4)
 #define ZAPHOD32_WARN4(pat,v0,v1,v2,v3)
 #define ZAPHOD32_WARN3(pat,v0,v1,v2)
 #define ZAPHOD32_WARN2(pat,v0,v1)
-#define NOTE3(pat,v0,v1,v2)             printf(pat, v0, v1, v2)
+#define NOTE3(pat,v0,v1,v2)                 printf(pat, v0, v1, v2)
 #else
 #define ZAPHOD32_WARN6(pat,v0,v1,v2,v3,v4,v5)
 #define ZAPHOD32_WARN5(pat,v0,v1,v2,v3,v4)
@@ -30,50 +30,50 @@
 #ifndef ROTL32
 #if defined(_MSC_VER)
 #include <stdlib.h>  /* Microsoft put _rotl declaration in here */
-#define ROTL32(x,r)  _rotl(x,r)
-#define ROTR32(x,r)  _rotr(x,r)
+#define ROTL32(x,r)                         _rotl(x,r)
+#define ROTR32(x,r)                         _rotr(x,r)
 #else
 /* gcc recognises this code and generates a
    rotate instruction for CPUs with one */
-#define ROTL32(x,r)  (((U32)(x) << (r)) | ((U32)(x) >> (32 - (r))))
-#define ROTR32(x,r)  (((U32)(x) << (32 - (r))) | ((U32)(x) >> (r)))
+#define ROTL32(x,r)                         (((U32)(x) << (r)) | ((U32)(x) >> (32 - (r))))
+#define ROTR32(x,r)                         (((U32)(x) << (32 - (r))) | ((U32)(x) >> (r)))
 #endif
 #endif
 
 #ifndef PERL_SEEN_HV_FUNC_H_
 #if !defined(U64)
 #include <stdint.h>
-#define U64 uint64_t
+#define U64                                 uint64_t
 #endif
 
 #if !defined(U32)
-#define U32 uint32_t
+#define U32                                 uint32_t
 #endif
 
 #if !defined(U8)
-#define U8 unsigned char
+#define U8                                  unsigned char
 #endif
 
 #if !defined(U16)
-#define U16 uint16_t
+#define U16                                 uint16_t
 #endif
 
 #ifndef STRLEN
-#define STRLEN int
+#define STRLEN                              int
 #endif
 #endif
 
 #ifndef ZAPHOD32_STATIC_INLINE
 #ifdef PERL_STATIC_INLINE
-#define ZAPHOD32_STATIC_INLINE PERL_STATIC_INLINE
+#define ZAPHOD32_STATIC_INLINE              PERL_STATIC_INLINE
 #else
-#define ZAPHOD32_STATIC_INLINE static inline
+#define ZAPHOD32_STATIC_INLINE              static inline
 #endif
 #endif
 
 #ifndef STMT_START
-#define STMT_START do
-#define STMT_END while(0)
+#define STMT_START                          do
+#define STMT_END                            while(0)
 #endif
 
 /* This is two marsaglia xor-shift permutes, with a prime-multiple

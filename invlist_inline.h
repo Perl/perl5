@@ -21,11 +21,11 @@
 /* An element is in an inversion list iff its
  * index is even numbered: 0, 2, 4, etc */
 #define ELEMENT_RANGE_MATCHES_INVLIST(i) (! ((i) & 1))
-#define PREV_RANGE_MATCHES_INVLIST(i) (! ELEMENT_RANGE_MATCHES_INVLIST(i))
+#define PREV_RANGE_MATCHES_INVLIST(i)   (! ELEMENT_RANGE_MATCHES_INVLIST(i))
 
 /* This converts to/from our UVs to what the SV code is expecting: bytes. */
-#define TO_INTERNAL_SIZE(x) ((x) * sizeof(UV))
-#define FROM_INTERNAL_SIZE(x) ((x)/ sizeof(UV))
+#define TO_INTERNAL_SIZE(x)             ((x) * sizeof(UV))
+#define FROM_INTERNAL_SIZE(x)           ((x)/ sizeof(UV))
 
 PERL_STATIC_INLINE bool
 S_is_invlist(const SV* const invlist)

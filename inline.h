@@ -518,12 +518,12 @@ Perl_is_utf8_invariant_string_loc(const U8* const s, STRLEN len, const U8 ** ep)
     send = s + len;
 
 /* This looks like 0x010101... */
-#  define PERL_COUNT_MULTIPLIER   (~ (UINTMAX_C(0)) / 0xFF)
+#  define PERL_COUNT_MULTIPLIER           (~ (UINTMAX_C(0)) / 0xFF)
 
 /* This looks like 0x808080... */
-#  define PERL_VARIANTS_WORD_MASK (PERL_COUNT_MULTIPLIER * 0x80)
-#  define PERL_WORDSIZE            sizeof(PERL_UINTMAX_T)
-#  define PERL_WORD_BOUNDARY_MASK (PERL_WORDSIZE - 1)
+#  define PERL_VARIANTS_WORD_MASK         (PERL_COUNT_MULTIPLIER * 0x80)
+#  define PERL_WORDSIZE                   sizeof(PERL_UINTMAX_T)
+#  define PERL_WORD_BOUNDARY_MASK         (PERL_WORDSIZE - 1)
 
 /* Evaluates to 0 if 'x' is at a word boundary; otherwise evaluates
  * to 1, by or'ing together the lowest bits of 'x'.  Hopefully the
@@ -616,52 +616,52 @@ Perl_is_utf8_invariant_string_loc(const U8* const s, STRLEN len, const U8 ** ep)
  * bit, and which one is right for using on 32 and 64 bit operands */
 #if (__has_builtin(__builtin_clz) || PERL_GCC_VERSION_GE(3,4,0))
 #  if U32SIZE == INTSIZE
-#    define PERL_CLZ_32 __builtin_clz
+#    define PERL_CLZ_32                     __builtin_clz
 #  endif
 #  if defined(U64TYPE) && U64SIZE == INTSIZE
-#    define PERL_CLZ_64 __builtin_clz
+#    define PERL_CLZ_64                     __builtin_clz
 #  endif
 #endif
 #if (__has_builtin(__builtin_ctz) || PERL_GCC_VERSION_GE(3,4,0))
 #  if U32SIZE == INTSIZE
-#    define PERL_CTZ_32 __builtin_ctz
+#    define PERL_CTZ_32                     __builtin_ctz
 #  endif
 #  if defined(U64TYPE) && U64SIZE == INTSIZE
-#    define PERL_CTZ_64 __builtin_ctz
+#    define PERL_CTZ_64                     __builtin_ctz
 #  endif
 #endif
 
 #if (__has_builtin(__builtin_clzl) || PERL_GCC_VERSION_GE(3,4,0))
 #  if U32SIZE == LONGSIZE && ! defined(PERL_CLZ_32)
-#    define PERL_CLZ_32 __builtin_clzl
+#    define PERL_CLZ_32                     __builtin_clzl
 #  endif
 #  if defined(U64TYPE) && U64SIZE == LONGSIZE && ! defined(PERL_CLZ_64)
-#    define PERL_CLZ_64 __builtin_clzl
+#    define PERL_CLZ_64                     __builtin_clzl
 #  endif
 #endif
 #if (__has_builtin(__builtin_ctzl) || PERL_GCC_VERSION_GE(3,4,0))
 #  if U32SIZE == LONGSIZE && ! defined(PERL_CTZ_32)
-#    define PERL_CTZ_32 __builtin_ctzl
+#    define PERL_CTZ_32                     __builtin_ctzl
 #  endif
 #  if defined(U64TYPE) && U64SIZE == LONGSIZE && ! defined(PERL_CTZ_64)
-#    define PERL_CTZ_64 __builtin_ctzl
+#    define PERL_CTZ_64                     __builtin_ctzl
 #  endif
 #endif
 
 #if (__has_builtin(__builtin_clzll) || PERL_GCC_VERSION_GE(3,4,0))
 #  if U32SIZE == LONGLONGSIZE && ! defined(PERL_CLZ_32)
-#    define PERL_CLZ_32 __builtin_clzll
+#    define PERL_CLZ_32                     __builtin_clzll
 #  endif
 #  if defined(U64TYPE) && U64SIZE == LONGLONGSIZE && ! defined(PERL_CLZ_64)
-#    define PERL_CLZ_64 __builtin_clzll
+#    define PERL_CLZ_64                     __builtin_clzll
 #  endif
 #endif
 #if (__has_builtin(__builtin_ctzll) || PERL_GCC_VERSION_GE(3,4,0))
 #  if U32SIZE == LONGLONGSIZE && ! defined(PERL_CTZ_32)
-#    define PERL_CTZ_32 __builtin_ctzll
+#    define PERL_CTZ_32                     __builtin_ctzll
 #  endif
 #  if defined(U64TYPE) && U64SIZE == LONGLONGSIZE && ! defined(PERL_CTZ_64)
-#    define PERL_CTZ_64 __builtin_ctzll
+#    define PERL_CTZ_64                     __builtin_ctzll
 #  endif
 #endif
 
@@ -740,9 +740,9 @@ Perl_lsbit_pos64(U64 word)
 
 }
 
-#  define lsbit_pos_uintmax_(word) lsbit_pos64(word)
+#  define lsbit_pos_uintmax_(word)        lsbit_pos64(word)
 #else   /* ! QUAD */
-#  define lsbit_pos_uintmax_(word) lsbit_pos32(word)
+#  define lsbit_pos_uintmax_(word)        lsbit_pos32(word)
 #endif
 
 PERL_STATIC_INLINE unsigned     /* Like above for 32 bit word */
@@ -784,7 +784,7 @@ Perl_lsbit_pos32(U32 word)
  * taking the exclusive-or of the two numbers.  To see why, first note that
  * the sum of any number, x, and its complement, x', is all ones.  So all
  * ones minus x is x'.  Then note that the xor of x and all ones is x'. */
-#define LZC_TO_MSBIT_POS_(size, lzc)  ((size##SIZE * CHARBITS - 1) ^ (lzc))
+#define LZC_TO_MSBIT_POS_(size, lzc)    ((size##SIZE * CHARBITS - 1) ^ (lzc))
 
 #ifdef U64TYPE  /* HAS_QUAD not usable outside the core */
 
@@ -843,9 +843,9 @@ Perl_msbit_pos64(U64 word)
 
 }
 
-#  define msbit_pos_uintmax_(word) msbit_pos64(word)
+#  define msbit_pos_uintmax_(word)        msbit_pos64(word)
 #else   /* ! QUAD */
-#  define msbit_pos_uintmax_(word) msbit_pos32(word)
+#  define msbit_pos_uintmax_(word)        msbit_pos32(word)
 #endif
 
 PERL_STATIC_INLINE unsigned
@@ -885,11 +885,11 @@ Perl_msbit_pos32(U32 word)
 }
 
 #if UVSIZE == U64SIZE
-#  define msbit_pos(word)  msbit_pos64(word)
-#  define lsbit_pos(word)  lsbit_pos64(word)
+#  define msbit_pos(word)                 msbit_pos64(word)
+#  define lsbit_pos(word)                 lsbit_pos64(word)
 #elif UVSIZE == U32SIZE
-#  define msbit_pos(word)  msbit_pos32(word)
-#  define lsbit_pos(word)  lsbit_pos32(word)
+#  define msbit_pos(word)                 msbit_pos32(word)
+#  define lsbit_pos(word)                 lsbit_pos32(word)
 #endif
 
 #ifdef U64TYPE  /* HAS_QUAD not usable outside the core */
@@ -1135,7 +1135,7 @@ C<L</is_utf8_fixed_width_buf_loclen_flags>>,
 =cut
 */
 
-#define is_utf8_string(s, len)  is_utf8_string_loclen(s, len, NULL, NULL)
+#define is_utf8_string(s, len)          is_utf8_string_loclen(s, len, NULL, NULL)
 
 #if defined(PERL_CORE) || defined (PERL_EXT)
 
@@ -1448,12 +1448,12 @@ Perl_is_utf8_string_loclen(const U8 *s, STRLEN len, const U8 **ep, STRLEN *el)
  * after it.
 */
 
-#define DFA_RETURN_SUCCESS_      return s - s0
-#define DFA_RETURN_FAILURE_      return 0
+#define DFA_RETURN_SUCCESS_             return s - s0
+#define DFA_RETURN_FAILURE_             return 0
 #ifdef HAS_EXTRA_LONG_UTF8
-#  define DFA_TEASE_APART_FF_  goto tease_apart_FF
+#  define DFA_TEASE_APART_FF_             goto tease_apart_FF
 #else
-#  define DFA_TEASE_APART_FF_  DFA_RETURN_FAILURE_
+#  define DFA_TEASE_APART_FF_             DFA_RETURN_FAILURE_
 #endif
 
 #define PERL_IS_UTF8_CHAR_DFA(s0, e, dfa_tab,                   \
@@ -2592,7 +2592,7 @@ S_lossless_NV_to_IV(const NV nv, IV *ivp)
     defined(PERL_IN_TOKE_C) ||      \
     defined(PERL_IN_UNIVERSAL_C)
 
-#define MAX_CHARSET_NAME_LENGTH 2
+#define MAX_CHARSET_NAME_LENGTH     2
 
 PERL_STATIC_INLINE const char *
 S_get_regex_charset_name(const U32 flags, STRLEN* const lenp)

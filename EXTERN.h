@@ -23,32 +23,32 @@
 #  if defined(WIN32) && !defined(PERL_STATIC_SYMS)
     /* miniperl should not export anything */
 #    if defined(PERL_IS_MINIPERL)
-#      define EXT extern
+#      define EXT         extern
 #      define dEXT
-#      define EXTCONST extern const
-#      define dEXTCONST const
+#      define EXTCONST    extern const
+#      define dEXTCONST   const
 #    elif defined(PERLDLL)
-#      define EXT EXTERN_C __declspec(dllexport)
+#      define EXT         EXTERN_C __declspec(dllexport)
 #      define dEXT
-#      define EXTCONST EXTERN_C __declspec(dllexport) const
-#      define dEXTCONST const
+#      define EXTCONST    EXTERN_C __declspec(dllexport) const
+#      define dEXTCONST   const
 #    else
-#      define EXT EXTERN_C __declspec(dllimport)
+#      define EXT         EXTERN_C __declspec(dllimport)
 #      define dEXT
-#      define EXTCONST EXTERN_C __declspec(dllimport) const
-#      define dEXTCONST const
+#      define EXTCONST    EXTERN_C __declspec(dllimport) const
+#      define dEXTCONST   const
 #    endif
 #  else
 #    if defined(__CYGWIN__) && defined(USEIMPORTLIB)
-#      define EXT extern __declspec(dllimport)
+#      define EXT         extern __declspec(dllimport)
 #      define dEXT
-#      define EXTCONST extern __declspec(dllimport) const
-#      define dEXTCONST const
+#      define EXTCONST    extern __declspec(dllimport) const
+#      define dEXTCONST   const
 #    else
-#      define EXT extern
+#      define EXT         extern
 #      define dEXT
-#      define EXTCONST extern const
-#      define dEXTCONST const
+#      define EXTCONST    extern const
+#      define dEXTCONST   const
 #    endif
 #  endif
 

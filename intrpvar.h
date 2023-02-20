@@ -110,9 +110,9 @@ current value of the creating thread's copy.
 PERLVAR(I, dowarn,      U8)
 
 #if defined (PERL_UTF8_CACHE_ASSERT) || defined (DEBUGGING)
-#  define PERL___I -1
+#  define PERL___I    -1
 #else
-#  define PERL___I 1
+#  define PERL___I    1
 #endif
 PERLVARI(I, utf8cache, I8, PERL___I)    /* Is the utf8 caching code enabled? */
 #undef PERL___I
@@ -718,9 +718,9 @@ PERLVARI(I, breakable_sub_gen, U32, 0)
 
 #ifdef DEBUGGING
     /* exercise wrap-around */
-    #define PERL_COP_SEQMAX (U32_MAX-50)
+    #define PERL_COP_SEQMAX     (U32_MAX-50)
 #else
-    #define PERL_COP_SEQMAX 0
+    #define PERL_COP_SEQMAX     0
 #endif
 PERLVARI(I, cop_seqmax, U32,    PERL_COP_SEQMAX) /* statement sequence
                                                     number */
@@ -949,10 +949,10 @@ PERLVARI(I, lockhook,   share_proc_t, Perl_sv_nosharing)
 
 GCC_DIAG_IGNORE(-Wdeprecated-declarations)
 #ifdef NO_MATHOMS
-#  define PERL_UNLOCK_HOOK Perl_sv_nosharing
+#  define PERL_UNLOCK_HOOK    Perl_sv_nosharing
 #else
 /* This reference ensures that the mathoms are linked with perl */
-#  define PERL_UNLOCK_HOOK Perl_sv_nounlocking
+#  define PERL_UNLOCK_HOOK    Perl_sv_nounlocking
 #endif
 PERLVARI(I, unlockhook, share_proc_t, PERL_UNLOCK_HOOK)
 
@@ -996,7 +996,7 @@ PERLVARI(I, globhook,   globhook_t, NULL)
    when 5.18.0 was released.  The offset of the end of this is
    baked into a global variable in any shared perl library which
    will allow a sanity test in future perl releases. */
-#  define PERL_LAST_5_18_0_INTERP_MEMBER        Iglobhook
+#  define PERL_LAST_5_18_0_INTERP_MEMBER Iglobhook
 #endif
 
 #ifdef MULTIPLICITY
@@ -1102,7 +1102,7 @@ PERLVAR(I, wcrtomb_ps, mbstate_t)
 /* Enough space for the reserved byte, 1 for a potential
  * leading 0, then enough for the longest representable integer
  * plus an extra, the 3 flag characters, and NUL */
-#define PERL_MEM_LOG_ARYLEN (1 + 1 + TYPE_DIGITS(UV) + 1 + 3 + 1)
+#define PERL_MEM_LOG_ARYLEN     (1 + 1 + TYPE_DIGITS(UV) + 1 + 3 + 1)
 PERLVARA(I, mem_log, PERL_MEM_LOG_ARYLEN,  char)
 #endif
 

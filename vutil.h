@@ -11,7 +11,7 @@
  */
 
 #if PERL_VERSION_LT(5,15,4)
-#  define ISA_VERSION_OBJ(v) (sv_isobject(v) && sv_derived_from(v,"version"))
+#  define ISA_VERSION_OBJ(v)  (sv_isobject(v) && sv_derived_from(v,"version"))
 #else
 #  define ISA_VERSION_OBJ(v)    \
        (sv_isobject(v) && sv_derived_from_pvn(v,"version",7,0))
@@ -19,7 +19,7 @@
 
 #if PERL_VERSION_GE(5,9,0) && !defined(PERL_CORE)
 
-#  define VUTIL_REPLACE_CORE 1
+#  define VUTIL_REPLACE_CORE  1
 
 static const char * Perl_scan_version2(pTHX_ const char *s, SV *rv, bool qv);
 static SV * Perl_new_version2(pTHX_ SV *ver);
@@ -32,14 +32,14 @@ static SV * Perl_vstringify2(pTHX_ SV *vs);
 static int Perl_vcmp2(pTHX_ SV *lsv, SV *rsv);
 static const char * Perl_prescan_version2(pTHX_ const char *s, bool strict, const char** errstr, bool *sqv, int *ssaw_decimal, int *swidth, bool *salpha);
 
-#  define SCAN_VERSION(a,b,c)   Perl_scan_version2(aTHX_ a,b,c)
-#  define NEW_VERSION(a)        Perl_new_version2(aTHX_ a)
-#  define UPG_VERSION(a,b)      Perl_upg_version2(aTHX_ a, b)
-#  define VSTRINGIFY(a)         Perl_vstringify2(aTHX_ a)
-#  define VVERIFY(a)            Perl_vverify2(aTHX_ a)
-#  define VNUMIFY(a)            Perl_vnumify2(aTHX_ a)
-#  define VNORMAL(a)            Perl_vnormal2(aTHX_ a)
-#  define VCMP(a,b)             Perl_vcmp2(aTHX_ a,b)
+#  define SCAN_VERSION(a,b,c) Perl_scan_version2(aTHX_ a,b,c)
+#  define NEW_VERSION(a)      Perl_new_version2(aTHX_ a)
+#  define UPG_VERSION(a,b)    Perl_upg_version2(aTHX_ a, b)
+#  define VSTRINGIFY(a)       Perl_vstringify2(aTHX_ a)
+#  define VVERIFY(a)          Perl_vverify2(aTHX_ a)
+#  define VNUMIFY(a)          Perl_vnumify2(aTHX_ a)
+#  define VNORMAL(a)          Perl_vnormal2(aTHX_ a)
+#  define VCMP(a,b)           Perl_vcmp2(aTHX_ a,b)
 #  define PRESCAN_VERSION(a,b,c,d,e,f,g)    \
        Perl_prescan_version2(aTHX_ a,b,c,d,e,f,g)
 #  undef is_LAX_VERSION
@@ -61,14 +61,14 @@ SV * Perl_vstringify(pTHX_ SV *vs);
 int Perl_vcmp(pTHX_ SV *lsv, SV *rsv);
 const char * Perl_prescan_version(pTHX_ const char *s, bool strict, const char** errstr, bool *sqv, int *ssaw_decimal, int *swidth, bool *salpha);
 
-#  define SCAN_VERSION(a,b,c)   Perl_scan_version(aTHX_ a,b,c)
-#  define NEW_VERSION(a)        Perl_new_version(aTHX_ a)
-#  define UPG_VERSION(a,b)      Perl_upg_version(aTHX_ a, b)
-#  define VSTRINGIFY(a)         Perl_vstringify(aTHX_ a)
-#  define VVERIFY(a)            Perl_vverify(aTHX_ a)
-#  define VNUMIFY(a)            Perl_vnumify(aTHX_ a)
-#  define VNORMAL(a)            Perl_vnormal(aTHX_ a)
-#  define VCMP(a,b)             Perl_vcmp(aTHX_ a,b)
+#  define SCAN_VERSION(a,b,c) Perl_scan_version(aTHX_ a,b,c)
+#  define NEW_VERSION(a)      Perl_new_version(aTHX_ a)
+#  define UPG_VERSION(a,b)    Perl_upg_version(aTHX_ a, b)
+#  define VSTRINGIFY(a)       Perl_vstringify(aTHX_ a)
+#  define VVERIFY(a)          Perl_vverify(aTHX_ a)
+#  define VNUMIFY(a)          Perl_vnumify(aTHX_ a)
+#  define VNORMAL(a)          Perl_vnormal(aTHX_ a)
+#  define VCMP(a,b)           Perl_vcmp(aTHX_ a,b)
 
 #  define PRESCAN_VERSION(a,b,c,d,e,f,g)    \
        Perl_prescan_version(aTHX_ a,b,c,d,e,f,g)

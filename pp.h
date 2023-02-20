@@ -9,7 +9,7 @@
  *    License or the Artistic License, as specified in the README file.
  */
 
-#define PP(s) OP * Perl_##s(pTHX)
+#define PP(s)           OP * Perl_##s(pTHX)
 
 /*
 =for apidoc_section $stack
@@ -52,8 +52,8 @@ Refetch the stack pointer.  Used after a callback.  See L<perlcall>.
 =cut */
 
 #undef SP /* Solaris 2.7 i386 has this in /usr/include/sys/reg.h */
-#define SP sp
-#define MARK mark
+#define SP              sp
+#define MARK            mark
 
 /*
 =for apidoc Amn;||TARG
@@ -64,7 +64,7 @@ a return value for the OP, but some use it for other purposes.
 
 =cut
 */
-#define TARG targ
+#define TARG            targ
 
 #define PUSHMARK(p)                                                 \
     STMT_START {                                                    \
@@ -78,8 +78,8 @@ a return value for the OP, but some use it for other purposes.
                 PL_markstack_ptr, (IV)*mark_stack_entry)));         \
     } STMT_END
 
-#define TOPMARK Perl_TOPMARK(aTHX)
-#define POPMARK Perl_POPMARK(aTHX)
+#define TOPMARK         Perl_TOPMARK(aTHX)
+#define POPMARK         Perl_POPMARK(aTHX)
 
 #define INCMARK                                                     \
     STMT_START {                                                    \
@@ -101,9 +101,9 @@ a return value for the OP, but some use it for other purposes.
 
 #define GETTARGETSTACKED    \
     targ = (PL_op->op_flags & OPf_STACKED ? POPs : PAD_SV(PL_op->op_targ))
-#define dTARGETSTACKED SV * GETTARGETSTACKED
+#define dTARGETSTACKED  SV * GETTARGETSTACKED
 
-#define GETTARGET targ = PAD_SV(PL_op->op_targ)
+#define GETTARGET       targ = PAD_SV(PL_op->op_targ)
 
 /*
 =for apidoc Amn;||dTARGET
@@ -111,16 +111,16 @@ Declare that this function uses C<TARG>, and initializes it
 
 =cut
 */
-#define dTARGET SV * GETTARGET
+#define dTARGET         SV * GETTARGET
 
 #define GETATARGET  \
     targ = (PL_op->op_flags & OPf_STACKED ? sp[-1] : PAD_SV(PL_op->op_targ))
-#define dATARGET SV * GETATARGET
+#define dATARGET        SV * GETATARGET
 
-#define dTARG SV *targ
+#define dTARG           SV *targ
 
-#define NORMAL PL_op->op_next
-#define DIE return Perl_die
+#define NORMAL          PL_op->op_next
+#define DIE             return Perl_die
 
 /*
 =for apidoc Amn;||PUTBACK
@@ -342,7 +342,7 @@ Does not use C<TARG>.  See also C<L</XPUSHu>>, C<L</mPUSHu>> and C<L</PUSHu>>.
                PL_curstackinfo->si_stack_hwm = extend_hwm_set_ix;   \
        } STMT_END
 #else
-#  define EXTEND_HWM_SET(p, n) NOOP
+#  define EXTEND_HWM_SET(p, n)    NOOP
 #endif
 
 /* _EXTEND_SAFE_N(n): private helper macro for EXTEND().  Tests whether
@@ -355,7 +355,7 @@ Does not use C<TARG>.  See also C<L</XPUSHu>>, C<L</mPUSHu>> and C<L</PUSHu>>.
     (sizeof(n) > sizeof(SSize_t) && ((SSize_t)(n) != (n)) ? -1 : (n))
 
 #ifdef STRESS_REALLOC
-# define EXTEND_SKIP(p, n) EXTEND_HWM_SET(p, n)
+# define EXTEND_SKIP(p, n)   EXTEND_HWM_SET(p, n)
 
 # define EXTEND(p,n)                                \
       STMT_START {                                  \
@@ -595,11 +595,11 @@ Does not use C<TARG>.  See also C<L</XPUSHu>>, C<L</mPUSHu>> and C<L</PUSHu>>.
             (void)Perl_tmps_grow_p(aTHX_ eMiX); \
     } STMT_END
 
-#define AMGf_noright    1
-#define AMGf_noleft     2
-#define AMGf_assign     4       /* op supports mutator variant,
+#define AMGf_noright       1
+#define AMGf_noleft        2
+#define AMGf_assign        4    /* op supports mutator variant,
                                    e.g.  $x += 1 */
-#define AMGf_unary      8
+#define AMGf_unary         8
 #define AMGf_numeric    0x10    /* for Perl_try_amagic_bin */
 
 #define AMGf_want_list  0x40
@@ -682,14 +682,14 @@ Does not use C<TARG>.  See also C<L</XPUSHu>>, C<L</mPUSHu>> and C<L</PUSHu>>.
 
 
 /* 2019: no longer used in core */
-#define opASSIGN (PL_op->op_flags & OPf_STACKED)
+#define opASSIGN        (PL_op->op_flags & OPf_STACKED)
 
 /*
 =for apidoc mnU||LVRET
 True if this op will be the return value of an lvalue subroutine
 
 =cut */
-#define LVRET ((PL_op->op_private & OPpMAYBE_LVSUB) && is_lvalue_sub())
+#define LVRET           ((PL_op->op_private & OPpMAYBE_LVSUB) && is_lvalue_sub())
 
 #define SvCANEXISTDELETE(sv)                                        \
     (!SvRMAGICAL(sv)                                                \
@@ -705,9 +705,9 @@ True if this op will be the return value of an lvalue subroutine
 /* These are just for Perl_tied_method(), which is not part of the public
    API.  Use 0x04 rather than the next available bit, to help the compiler
    if the architecture can generate more efficient instructions. */
-#  define TIED_METHOD_MORTALIZE_NOT_NEEDED      0x04
-#  define TIED_METHOD_ARGUMENTS_ON_STACK        0x08
-#  define TIED_METHOD_SAY                       0x10
+#  define TIED_METHOD_MORTALIZE_NOT_NEEDED 0x04
+#  define TIED_METHOD_ARGUMENTS_ON_STACK  0x08
+#  define TIED_METHOD_SAY                 0x10
 
 /* Used in various places that need to dereference a glob or globref */
 #  define MAYBE_DEREF_GV_flags(sv,phlags)                           \
@@ -720,11 +720,11 @@ True if this op will be the return value of an lvalue subroutine
                 ? (GV *)SvRV(sv)                                    \
                 : NULL                                              \
        )
-#  define MAYBE_DEREF_GV(sv)      MAYBE_DEREF_GV_flags(sv,SV_GMAGIC)
+#  define MAYBE_DEREF_GV(sv)  MAYBE_DEREF_GV_flags(sv,SV_GMAGIC)
 #  define MAYBE_DEREF_GV_nomg(sv) MAYBE_DEREF_GV_flags(sv,0)
 
-#  define FIND_RUNCV_padid_eq   1
-#  define FIND_RUNCV_level_eq   2
+#  define FIND_RUNCV_padid_eq     1
+#  define FIND_RUNCV_level_eq     2
 
 #endif
 

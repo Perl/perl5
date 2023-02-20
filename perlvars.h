@@ -361,7 +361,7 @@ PERLVARA(G, hash_state_w, PERL_HASH_STATE_WORDS, PVT__PERL_HASH_WORD_TYPE)  \
     /* perl.c and hv.h */
 #endif
 #if defined(PERL_USE_SINGLE_CHAR_HASH_CACHE)
-#define PERL_SINGLE_CHAR_HASH_CACHE_ELEMS ((1+256) * sizeof(U32))
+#define PERL_SINGLE_CHAR_HASH_CACHE_ELEMS   ((1+256) * sizeof(U32))
 PERLVARA(G, hash_chars, PERL_SINGLE_CHAR_HASH_CACHE_ELEMS, unsigned char)   \
     /* perl.c and hv.h */
 #endif

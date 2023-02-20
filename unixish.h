@@ -19,24 +19,24 @@
 /* HAS_IOCTL: This symbol, if defined, indicates that the ioctl()
  * routine is available to set I/O characteristics
  */
-#define HAS_IOCTL               /**/
+#define HAS_IOCTL       /**/
 
 /* HAS_UTIME: This symbol, if defined, indicates that the routine utime()
  * is available to update the access and modification times of files.
  */
-#define HAS_UTIME               /**/
+#define HAS_UTIME       /**/
 
 /* HAS_GROUP This symbol, if defined, indicates that the getgrnam()
  * and getgrgid() routines are available to get group entries.  The
  * getgrent() has a separate definition, HAS_GETGRENT.
  */
-#define HAS_GROUP               /**/
+#define HAS_GROUP       /**/
 
 /* HAS_PASSWD This symbol, if defined, indicates that the getpwnam()
  * and getpwuid() routines are available to get password entries.
  * The getpwent() has a separate definition, HAS_GETPWENT.
  */
-#define HAS_PASSWD              /**/
+#define HAS_PASSWD      /**/
 
 #define HAS_KILL
 #define HAS_WAIT
@@ -54,7 +54,7 @@
  * returned by stat().  It's usually just struct stat.  It may be necessary to
  * include <sys/stat.h> and <sys/types.h> to get any typedef'ed information.
  */
-#define Stat_t struct stat
+#define Stat_t          struct stat
 
 /* USE_STAT_RDEV: This symbol is defined if this system
  * has a stat structure declaring st_rdev
@@ -93,12 +93,12 @@
 # include <signal.h>
 
 #ifndef SIGABRT
-#    define SIGABRT SIGILL
+#    define SIGABRT     SIGILL
 #endif
 #ifndef SIGILL
-#    define SIGILL 6         /* blech */
+#    define SIGILL  6   /* blech */
 #endif
-#define ABORT() kill(PerlProc_getpid(),SIGABRT);
+#define ABORT()             kill(PerlProc_getpid(),SIGABRT);
 
 /*
  * fwrite1() should be a routine with the same calling sequence as
@@ -106,21 +106,21 @@
  * stream (unlike fwrite() itself, which on some systems outputs several
  * distinct records if the number_of_items parameter is >1).
 */
-#define fwrite1 fwrite
+#define fwrite1             fwrite
 
-#define Stat(fname,bufptr) stat((fname),(bufptr))
+#define Stat(fname,bufptr)  stat((fname),(bufptr))
 
 #ifdef __amigaos4__
 int afstat(int fd, struct stat *statb);
-#  define Fstat(fd,bufptr) afstat((fd),(bufptr))
+#  define Fstat(fd,bufptr)    afstat((fd),(bufptr))
 #endif
 
 #ifndef Fstat
-#  define Fstat(fd,bufptr)   fstat((fd),(bufptr))
+#  define Fstat(fd,bufptr)    fstat((fd),(bufptr))
 #endif
 
-#define Fflush(fp)         fflush(fp)
-#define Mkdir(path,mode)   mkdir((path),(mode))
+#define Fflush(fp)          fflush(fp)
+#define Mkdir(path,mode)    mkdir((path),(mode))
 
 #if defined(__amigaos4__)
 #  define PLATFORM_SYS_TERM_  amigaos4_dispose_fork_array()
@@ -154,9 +154,9 @@ int afstat(int fd, struct stat *statb);
        PLATFORM_SYS_TERM_;
 #endif
 
-#define BIT_BUCKET "/dev/null"
+#define BIT_BUCKET  "/dev/null"
 
-#define dXSUB_SYS dNOOP
+#define dXSUB_SYS       dNOOP
 
 #ifndef NO_ENVIRON_ARRAY
 #define USE_ENVIRON_ARRAY

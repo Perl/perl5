@@ -31,16 +31,16 @@ struct magic {
     char*       mg_ptr;
 };
 
-#define MGf_TAINTEDDIR 1        /* PERL_MAGIC_envelem only */
-#define MGf_MINMATCH   1        /* PERL_MAGIC_regex_global only */
-#define MGf_REQUIRE_GV 1        /* PERL_MAGIC_checkcall only */
-#define MGf_REFCOUNTED 2
-#define MGf_GSKIP      4        /* skip further GETs until after next SET */
-#define MGf_COPY       8        /* has an svt_copy MGVTBL entry */
-#define MGf_DUP     0x10        /* has an svt_dup MGVTBL entry */
-#define MGf_LOCAL   0x20        /* has an svt_local MGVTBL entry */
-#define MGf_BYTES   0x40        /* PERL_MAGIC_regex_global only */
-#define MGf_PERSIST    0x80     /* PERL_MAGIC_lvref only */
+#define MGf_TAINTEDDIR     1    /* PERL_MAGIC_envelem only */
+#define MGf_MINMATCH       1    /* PERL_MAGIC_regex_global only */
+#define MGf_REQUIRE_GV     1    /* PERL_MAGIC_checkcall only */
+#define MGf_REFCOUNTED     2
+#define MGf_GSKIP          4    /* skip further GETs until after next SET */
+#define MGf_COPY           8    /* has an svt_copy MGVTBL entry */
+#define MGf_DUP         0x10    /* has an svt_dup MGVTBL entry */
+#define MGf_LOCAL       0x20    /* has an svt_local MGVTBL entry */
+#define MGf_BYTES       0x40    /* PERL_MAGIC_regex_global only */
+#define MGf_PERSIST     0x80    /* PERL_MAGIC_lvref only */
 
 #define MgTAINTEDDIR(mg)        (mg->mg_flags & MGf_TAINTEDDIR)
 #define MgTAINTEDDIR_on(mg)     (mg->mg_flags |= MGf_TAINTEDDIR)
@@ -69,12 +69,12 @@ struct magic {
      SvPV_nolen_const(MUTABLE_SV((mg)->mg_ptr)) :   \
      (const char*)(mg)->mg_ptr)
 
-#define SvTIED_mg(sv,how) (SvRMAGICAL(sv) ? mg_find((sv),(how)) : NULL)
+#define SvTIED_mg(sv,how)       (SvRMAGICAL(sv) ? mg_find((sv),(how)) : NULL)
 #define SvTIED_obj(sv,mg)   \
     ((mg)->mg_obj ? (mg)->mg_obj : sv_2mortal(newRV(sv)))
 
 #if defined(PERL_CORE) || defined(PERL_EXT)
-# define MgBYTEPOS(mg,sv,pv,len) S_MgBYTEPOS(aTHX_ mg,sv,pv,len)
+# define MgBYTEPOS(mg,sv,pv,len)     S_MgBYTEPOS(aTHX_ mg,sv,pv,len)
 /* assumes get-magic and stringification have already occurred */
 # define MgBYTEPOS_set(mg,sv,pv,off)                                \
       (                                                             \
@@ -87,7 +87,7 @@ struct magic {
              (mg)->mg_flags &= ~MGf_BYTES))
 #endif
 
-#define whichsig(pv) whichsig_pv(pv)
+#define whichsig(pv)            whichsig_pv(pv)
 
 /*
  * ex: set ts=8 sts=4 sw=4 et:
