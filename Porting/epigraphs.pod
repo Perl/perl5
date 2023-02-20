@@ -17,6 +17,13 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v3.37.9 - Virginia Woolf
+
+L<Announced on 2023-02-20 by Karen Etheridge|https://www.nntp.perl.org/group/perl.perl5.porters/2023/02/msg265769.html>
+
+Each has his past shut in him like the leaves of a book known to him by
+heart and his friends can only read the title.
+
 =head2 v5.37.8 - Helmut Schmidt
 
 L<Announced on 2023-01-20 by Renee Baecker|https://www.nntp.perl.org/group/perl.perl5.porters/2023/01/msg265547.html>
