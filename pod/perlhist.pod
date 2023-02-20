@@ -744,6 +744,7 @@ the strings?).
  Max M     5.37.6       2022-Nov-20
  Richard L 5.37.7       2022-Dec-20
  Renee     5.37.8       2023-Jan-20
+ Ether     5.37.9       2023-Feb-20
 
 =head2 SELECTED RELEASE SIZES
 
