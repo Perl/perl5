@@ -438,6 +438,35 @@ would not be resolved by C<AUTOLOAD>, while it was in 5.36.  The
 C<INCDIR> method for objects in C<@INC> cannot be resolved by
 C<AUTOLOAD> as C<INC> would have been resolved first.  [github #20665]
 
+=item *
+
+C<$SIG{__DIE__}> will now be called from eval when the code dies during
+compilation regardless of how it dies. This means that code expecting to
+be able to upgrade C<$@> into an object will be called consistently. In
+earlier versions of perl C<$SIG{__DIE__}> would not be called for
+certain compilation errors, for instance undeclared variables. For other
+errors it might be called if there were more than a certain number of
+errors, but not if there were less. Now you can expect that it will be
+called in every case.
+
+=item *
+
+Compilation of code with errors used to inconsistently stop depending on
+the count and type of errors encountered. The intent was that after 10
+errors compilation would halt, but bugs in this logic meant that certain
+types of error would be counted, but would not trigger the threshold
+check to stop compilation. Other errors would. With this release after
+at most 10 errors compilation will terminate, regardless of what type of
+error they were.
+
+Note that you can change the maximum count by defining
+C<PERL_STOP_PARSING_AFTER_N_ERRORS> to be something else during the
+configuration process. For instance
+
+    ./Configure ... -Accflags='-DPERL_STOP_PARSING_AFTER_N_ERRORS=100'
+
+would allow up to 100 errors.
+
 =back
 
 =head1 Known Problems
