@@ -747,7 +747,8 @@ uppercase/lowercase/titlecase/fold into.
                                    (LO))))
 
 /* Should never be used, and be deprecated */
-#define TWO_BYTE_UTF8_TO_UNI(HI, LO) NATIVE_TO_UNI(TWO_BYTE_UTF8_TO_NATIVE(HI, LO))
+#define TWO_BYTE_UTF8_TO_UNI(HI, LO)    \
+    NATIVE_TO_UNI(TWO_BYTE_UTF8_TO_NATIVE(HI, LO))
 
 /*
 

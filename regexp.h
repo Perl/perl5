@@ -57,7 +57,8 @@ struct reg_substr_data {
 };
 
 #  ifdef PERL_ANY_COW
-#    define SV_SAVED_COPY   SV *saved_copy; /* If non-NULL, SV which is COW from original */
+#    define SV_SAVED_COPY   SV *saved_copy; /* If non-NULL, SV which is
+                                               COW from original */
 #  else
 #    define SV_SAVED_COPY
 #  endif
@@ -77,12 +78,15 @@ typedef struct regexp_paren_pair {
 } regexp_paren_pair;
 
 #  if defined(PERL_IN_REGCOMP_ANY) || defined(PERL_IN_UTF8_C)
-#    define _invlist_union(a, b, output) _invlist_union_maybe_complement_2nd(a, b, FALSE, output)
-#    define _invlist_intersection(a, b, output) _invlist_intersection_maybe_complement_2nd(a, b, FALSE, output)
+#    define _invlist_union(a, b, output)    \
+         _invlist_union_maybe_complement_2nd(a, b, FALSE, output)
+#    define _invlist_intersection(a, b, output) \
+         _invlist_intersection_maybe_complement_2nd(a, b, FALSE, output)
 
 /* Subtracting b from a leaves in a everything that was there that isn't in b,
  * that is the intersection of a with b's complement */
-#    define _invlist_subtract(a, b, output) _invlist_intersection_maybe_complement_2nd(a, b, TRUE, output)
+#    define _invlist_subtract(a, b, output) \
+         _invlist_intersection_maybe_complement_2nd(a, b, TRUE, output)
 #  endif
 
 /* record the position of a (?{...}) within a pattern */
@@ -323,7 +327,8 @@ and check for NULL.
 
 #  include "op_reg_common.h"
 
-#  define RXf_PMf_STD_PMMOD     (RXf_PMf_MULTILINE|RXf_PMf_SINGLELINE|RXf_PMf_FOLD|RXf_PMf_EXTENDED|RXf_PMf_EXTENDED_MORE|RXf_PMf_NOCAPTURE)
+#  define RXf_PMf_STD_PMMOD \
+       (RXf_PMf_MULTILINE|RXf_PMf_SINGLELINE|RXf_PMf_FOLD|RXf_PMf_EXTENDED|RXf_PMf_EXTENDED_MORE|RXf_PMf_NOCAPTURE)
 
 #  define CASE_STD_PMMOD_FLAGS_PARSE_SET(pmfl, x_count)                 \
        case IGNORE_PAT_MOD:    *(pmfl) |= RXf_PMf_FOLD;       break;    \
@@ -385,7 +390,8 @@ and check for NULL.
  * character is bit +1, etc. */
 #  define STD_PAT_MODS        "msixxn"
 
-#  define CHARSET_PAT_MODS    ASCII_RESTRICT_PAT_MODS DEPENDS_PAT_MODS LOCALE_PAT_MODS UNICODE_PAT_MODS
+#  define CHARSET_PAT_MODS  \
+       ASCII_RESTRICT_PAT_MODS DEPENDS_PAT_MODS LOCALE_PAT_MODS UNICODE_PAT_MODS
 
 /* This string is expected by XS_re_regexp_pattern() in universal.c to be ordered
  * so that the first character is the flag in bit RXf_PMf_STD_PMMOD_SHIFT of
@@ -395,7 +401,8 @@ and check for NULL.
 #  define EXT_PAT_MODS    ONCE_PAT_MODS   KEEPCOPY_PAT_MODS  NOCAPTURE_PAT_MODS
 #  define QR_PAT_MODS     STD_PAT_MODS    EXT_PAT_MODS     CHARSET_PAT_MODS
 #  define M_PAT_MODS      QR_PAT_MODS     LOOP_PAT_MODS
-#  define S_PAT_MODS      M_PAT_MODS      EXEC_PAT_MODS      NONDESTRUCT_PAT_MODS
+#  define S_PAT_MODS    \
+       M_PAT_MODS      EXEC_PAT_MODS      NONDESTRUCT_PAT_MODS
 
 /*
  * NOTE: if you modify any RXf flags you should run regen.pl or
@@ -507,15 +514,22 @@ and check for NULL.
 #    define RX_ISTAINTED(rx_sv)           (RX_EXTFLAGS(rx_sv) & RXf_TAINTED)
 #    define RXp_ISTAINTED(prog)           (RXp_EXTFLAGS(prog) & RXf_TAINTED)
 #    define RX_TAINT_on(rx_sv)            (RX_EXTFLAGS(rx_sv) |= RXf_TAINTED)
-#    define RXp_MATCH_TAINTED(prog)       (RXp_EXTFLAGS(prog) & RXf_TAINTED_SEEN)
-#    define RX_MATCH_TAINTED(rx_sv)       (RX_EXTFLAGS(rx_sv) & RXf_TAINTED_SEEN)
-#    define RXp_MATCH_TAINTED_on(prog)    (RXp_EXTFLAGS(prog) |= RXf_TAINTED_SEEN)
-#    define RX_MATCH_TAINTED_on(rx_sv)    (RX_EXTFLAGS(rx_sv) |= RXf_TAINTED_SEEN)
-#    define RXp_MATCH_TAINTED_off(prog)   (RXp_EXTFLAGS(prog) &= ~RXf_TAINTED_SEEN)
-#    define RX_MATCH_TAINTED_off(rx_sv)   (RX_EXTFLAGS(rx_sv) &= ~RXf_TAINTED_SEEN)
+#    define RXp_MATCH_TAINTED(prog) \
+         (RXp_EXTFLAGS(prog) & RXf_TAINTED_SEEN)
+#    define RX_MATCH_TAINTED(rx_sv) \
+         (RX_EXTFLAGS(rx_sv) & RXf_TAINTED_SEEN)
+#    define RXp_MATCH_TAINTED_on(prog)  \
+         (RXp_EXTFLAGS(prog) |= RXf_TAINTED_SEEN)
+#    define RX_MATCH_TAINTED_on(rx_sv)  \
+         (RX_EXTFLAGS(rx_sv) |= RXf_TAINTED_SEEN)
+#    define RXp_MATCH_TAINTED_off(prog) \
+         (RXp_EXTFLAGS(prog) &= ~RXf_TAINTED_SEEN)
+#    define RX_MATCH_TAINTED_off(rx_sv) \
+         (RX_EXTFLAGS(rx_sv) &= ~RXf_TAINTED_SEEN)
 #  endif
 
-#  define RXp_HAS_CUTGROUP(prog)          ((prog)->intflags & PREGf_CUTGROUP_SEEN)
+#  define RXp_HAS_CUTGROUP(prog)    \
+       ((prog)->intflags & PREGf_CUTGROUP_SEEN)
 
 #  define RX_MATCH_TAINTED_set(rx_sv, t)                                \
        ((t)                                                             \
@@ -573,7 +587,8 @@ and check for NULL.
 #  define RXp_PARNO_TO_LOGICAL(prog)      (prog->parno_to_logical)
 #  define RX_PARNO_TO_LOGICAL(rx_sv)      (RXp_PARNO_TO_LOGICAL(ReANY(rx_sv)))
 #  define RXp_PARNO_TO_LOGICAL_NEXT(prog) (prog->parno_to_logical_next)
-#  define RX_PARNO_TO_LOGICAL_NEXT(rx_sv) (RXp_PARNO_TO_LOGICAL_NEXT(ReANY(rx_sv)))
+#  define RX_PARNO_TO_LOGICAL_NEXT(rx_sv)   \
+       (RXp_PARNO_TO_LOGICAL_NEXT(ReANY(rx_sv)))
 #  define RXp_NPARENS(prog)               (prog->nparens)
 #  define RX_NPARENS(rx_sv)               (RXp_NPARENS(ReANY(rx_sv)))
 #  define RX_SUBLEN(rx_sv)                (ReANY(rx_sv)->sublen)
@@ -680,7 +695,8 @@ and check for NULL.
 #define FBMcf_TAIL_DOLLARM      2
 #define FBMcf_TAIL_Z            4
 #define FBMcf_TAIL_z            8
-#define FBMcf_TAIL              (FBMcf_TAIL_DOLLAR|FBMcf_TAIL_DOLLARM|FBMcf_TAIL_Z|FBMcf_TAIL_z)
+#define FBMcf_TAIL  \
+    (FBMcf_TAIL_DOLLAR|FBMcf_TAIL_DOLLARM|FBMcf_TAIL_Z|FBMcf_TAIL_z)
 
 #define FBMrf_MULTILINE 1
 

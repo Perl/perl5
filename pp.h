@@ -95,9 +95,11 @@ value for the OP, but some use it for other purposes.
 #define ORIGMARK        (PL_stack_base + origmark)
 
 #define SPAGAIN         sp = PL_stack_sp
-#define MSPAGAIN        STMT_START { sp = PL_stack_sp; mark = ORIGMARK; } STMT_END
+#define MSPAGAIN    \
+    STMT_START { sp = PL_stack_sp; mark = ORIGMARK; } STMT_END
 
-#define GETTARGETSTACKED targ = (PL_op->op_flags & OPf_STACKED ? POPs : PAD_SV(PL_op->op_targ))
+#define GETTARGETSTACKED    \
+    targ = (PL_op->op_flags & OPf_STACKED ? POPs : PAD_SV(PL_op->op_targ))
 #define dTARGETSTACKED SV * GETTARGETSTACKED
 
 #define GETTARGET targ = PAD_SV(PL_op->op_targ)
@@ -110,7 +112,8 @@ Declare that this function uses C<TARG>, and initializes it
 */
 #define dTARGET SV * GETTARGET
 
-#define GETATARGET targ = (PL_op->op_flags & OPf_STACKED ? sp[-1] : PAD_SV(PL_op->op_targ))
+#define GETATARGET  \
+    targ = (PL_op->op_flags & OPf_STACKED ? sp[-1] : PAD_SV(PL_op->op_targ))
 #define dATARGET SV * GETATARGET
 
 #define dTARG SV *targ
@@ -494,7 +497,8 @@ Does not use C<TARG>.  See also C<L</XPUSHu>>, C<L</mPUSHu>> and C<L</PUSHu>>.
 
 #define PUSHs(s)        (*++sp = (s))
 #define PUSHTARG        STMT_START { SvSETMAGIC(TARG); PUSHs(TARG); } STMT_END
-#define PUSHp(p,l)      STMT_START { sv_setpvn(TARG, (p), (l)); PUSHTARG; } STMT_END
+#define PUSHp(p,l)  \
+    STMT_START { sv_setpvn(TARG, (p), (l)); PUSHTARG; } STMT_END
 #define PUSHpvs(s)      PUSHp("" s "", sizeof(s)-1)
 #define PUSHn(n)        STMT_START { TARGn(n,1); PUSHs(TARG); } STMT_END
 #define PUSHi(i)        STMT_START { TARGi(i,1); PUSHs(TARG); } STMT_END
@@ -502,7 +506,8 @@ Does not use C<TARG>.  See also C<L</XPUSHu>>, C<L</mPUSHu>> and C<L</PUSHu>>.
 
 #define XPUSHs(s)       STMT_START { EXTEND(sp,1); *++sp = (s); } STMT_END
 #define XPUSHTARG       STMT_START { SvSETMAGIC(TARG); XPUSHs(TARG); } STMT_END
-#define XPUSHp(p,l)     STMT_START { sv_setpvn(TARG, (p), (l)); XPUSHTARG; } STMT_END
+#define XPUSHp(p,l) \
+    STMT_START { sv_setpvn(TARG, (p), (l)); XPUSHTARG; } STMT_END
 #define XPUSHpvs(s)     XPUSHp("" s "", sizeof(s)-1)
 #define XPUSHn(n)       STMT_START { TARGn(n,1); XPUSHs(TARG); } STMT_END
 #define XPUSHi(i)       STMT_START { TARGi(i,1); XPUSHs(TARG); } STMT_END
@@ -527,7 +532,8 @@ Does not use C<TARG>.  See also C<L</XPUSHu>>, C<L</mPUSHu>> and C<L</PUSHu>>.
 
 #define SETs(s)         (*sp = s)
 #define SETTARG         STMT_START { SvSETMAGIC(TARG); SETs(TARG); } STMT_END
-#define SETp(p,l)       STMT_START { sv_setpvn(TARG, (p), (l)); SETTARG; } STMT_END
+#define SETp(p,l)   \
+    STMT_START { sv_setpvn(TARG, (p), (l)); SETTARG; } STMT_END
 #define SETn(n)         STMT_START { TARGn(n,1); SETs(TARG); } STMT_END
 #define SETi(i)         STMT_START { TARGi(i,1); SETs(TARG); } STMT_END
 #define SETu(u)         STMT_START { TARGu(u,1); SETs(TARG); } STMT_END

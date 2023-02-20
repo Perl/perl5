@@ -574,7 +574,8 @@ __typeof__ and nothing else.
 */
 #ifndef PERL_UNUSED_RESULT
 #  if defined(__GNUC__) && defined(HASATTRIBUTE_WARN_UNUSED_RESULT)
-#    define PERL_UNUSED_RESULT(v) STMT_START { __typeof__(v) z = (v); (void)sizeof(z); } STMT_END
+#    define PERL_UNUSED_RESULT(v)   \
+         STMT_START { __typeof__(v) z = (v); (void)sizeof(z); } STMT_END
 #  else
 #    define PERL_UNUSED_RESULT(v) ((void)(v))
 #  endif
@@ -969,7 +970,8 @@ violations are fatal.
             taint_proper(NULL, s);      \
         }
 #   define TAINT_set(s)         (PL_tainted = cBOOL(s))
-#   define TAINT_get            (cBOOL(UNLIKELY(PL_tainted)))    /* Is something tainted? */
+#   define TAINT_get            (cBOOL(UNLIKELY(PL_tainted))) /* Is something
+                                                                 tainted? */
 #   define TAINTING_get         (cBOOL(UNLIKELY(PL_tainting)))
 #   define TAINTING_set(s)      (PL_tainting = cBOOL(s))
 #   define TAINT_WARN_get       (PL_taint_warn)
@@ -1602,7 +1604,8 @@ Use L</UV> to declare variables of the maximum usable size on this platform.
 #define PERL_MULTICONCAT_IX_PLAIN_LEN 2 /* non-utf8 constant string length */
 #define PERL_MULTICONCAT_IX_UTF8_PV   3 /* utf8 constant string */
 #define PERL_MULTICONCAT_IX_UTF8_LEN  4 /* utf8 constant string length */
-#define PERL_MULTICONCAT_IX_LENGTHS   5 /* first of nargs+1 const segment lens */
+#define PERL_MULTICONCAT_IX_LENGTHS   5 /* first of nargs+1 const
+                                           segment lens */
 #define PERL_MULTICONCAT_HEADER_SIZE 5 /* The number of fields of a
                                            multiconcat header */
 
@@ -1906,7 +1909,8 @@ was saved by C<dSAVE_ERRNO> or C<RESTORE_ERRNO>.
             set_vaxc_errno(vmserrcode); \
         } STMT_END
 #   define dSAVEDERRNO    int saved_errno; unsigned saved_vms_errno
-#   define dSAVE_ERRNO    int saved_errno = errno; unsigned saved_vms_errno = vaxc$errno
+#   define dSAVE_ERRNO  \
+        int saved_errno = errno; unsigned saved_vms_errno = vaxc$errno
 #   define SAVE_ERRNO     ( saved_errno = errno, saved_vms_errno = vaxc$errno )
 #   define RESTORE_ERRNO  SETERRNO(saved_errno, saved_vms_errno)
 
@@ -1943,14 +1947,18 @@ was saved by C<dSAVE_ERRNO> or C<RESTORE_ERRNO>.
 
 #ifdef WIN32
 #   define dSAVEDERRNO  int saved_errno; DWORD saved_win32_errno
-#   define dSAVE_ERRNO  int saved_errno = errno; DWORD saved_win32_errno = GetLastError()
-#   define SAVE_ERRNO   ( saved_errno = errno, saved_win32_errno = GetLastError() )
-#   define RESTORE_ERRNO ( errno = saved_errno, SetLastError(saved_win32_errno) )
+#   define dSAVE_ERRNO  \
+        int saved_errno = errno; DWORD saved_win32_errno = GetLastError()
+#   define SAVE_ERRNO   \
+        ( saved_errno = errno, saved_win32_errno = GetLastError() )
+#   define RESTORE_ERRNO    \
+        ( errno = saved_errno, SetLastError(saved_win32_errno) )
 #endif
 
 #ifdef OS2
 #   define dSAVEDERRNO  int saved_errno; unsigned long saved_os2_errno
-#   define dSAVE_ERRNO  int saved_errno = errno; unsigned long saved_os2_errno = Perl_rc
+#   define dSAVE_ERRNO  \
+        int saved_errno = errno; unsigned long saved_os2_errno = Perl_rc
 #   define SAVE_ERRNO   ( saved_errno = errno, saved_os2_errno = Perl_rc )
 #   define RESTORE_ERRNO ( errno = saved_errno, Perl_rc = saved_os2_errno )
 #endif
@@ -2295,14 +2303,16 @@ my_snprintf()
  * that should be true only if the snprintf()/vsnprintf() are true
  * to the standard. */
 
-#define PERL_SNPRINTF_CHECK(len, max, api) STMT_START { if ((max) > 0 && (Size_t)len > (max)) Perl_croak_nocontext("panic: %s buffer overflow", STRINGIFY(api)); } STMT_END
+#define PERL_SNPRINTF_CHECK(len, max, api)  \
+    STMT_START { if ((max) > 0 && (Size_t)len > (max)) Perl_croak_nocontext("panic: %s buffer overflow", STRINGIFY(api)); } STMT_END
 
 #if defined(USE_LOCALE_NUMERIC) || defined(USE_QUADMATH)
 #  define my_snprintf Perl_my_snprintf
 #  define PERL_MY_SNPRINTF_GUARDED
 #elif defined(HAS_SNPRINTF) && defined(HAS_C99_VARIADIC_MACROS) && !(defined(DEBUGGING) && !defined(PERL_USE_GCC_BRACE_GROUPS)) && !defined(PERL_GCC_PEDANTIC)
 #  ifdef PERL_USE_GCC_BRACE_GROUPS
-#      define my_snprintf(buffer, max, ...) ({ int len = snprintf(buffer, max, __VA_ARGS__); PERL_SNPRINTF_CHECK(len, max, snprintf); len; })
+#      define my_snprintf(buffer, max, ...) \
+           ({ int len = snprintf(buffer, max, __VA_ARGS__); PERL_SNPRINTF_CHECK(len, max, snprintf); len; })
 #      define PERL_MY_SNPRINTF_GUARDED
 #  else
 #    define my_snprintf(buffer, max, ...) snprintf(buffer, max, __VA_ARGS__)
@@ -2353,13 +2363,15 @@ my_snprintf()
  * insert the POST_GUARD() also in that case. */
 
 #ifndef PERL_MY_SNPRINTF_GUARDED
-#  define PERL_MY_SNPRINTF_POST_GUARD(len, max) PERL_SNPRINTF_CHECK(len, max, snprintf)
+#  define PERL_MY_SNPRINTF_POST_GUARD(len, max) \
+       PERL_SNPRINTF_CHECK(len, max, snprintf)
 #else
 #  define PERL_MY_SNPRINTF_POST_GUARD(len, max) PERL_UNUSED_VAR(len)
 #endif
 
 #ifndef  PERL_MY_VSNPRINTF_GUARDED
-#  define PERL_MY_VSNPRINTF_POST_GUARD(len, max) PERL_SNPRINTF_CHECK(len, max, vsnprintf)
+#  define PERL_MY_VSNPRINTF_POST_GUARD(len, max)    \
+       PERL_SNPRINTF_CHECK(len, max, vsnprintf)
 #else
 #  define PERL_MY_VSNPRINTF_POST_GUARD(len, max) PERL_UNUSED_VAR(len)
 #endif
@@ -2709,7 +2721,8 @@ extern long double Perl_my_frexpl(long double x, int *e);
 #   define Perl_isinf(x) isinfq(x)
 #   define Perl_isnan(x) isnanq(x)
 #   define Perl_isfinite(x) !(isnanq(x) || isinfq(x))
-#   define Perl_fp_class(x) ((x) == 0.0Q ? 0 : isinfq(x) ? 3 : isnanq(x) ? 4 : PERL_ABS(x) < FLT128_MIN ? 2 : 1)
+#   define Perl_fp_class(x) \
+        ((x) == 0.0Q ? 0 : isinfq(x) ? 3 : isnanq(x) ? 4 : PERL_ABS(x) < FLT128_MIN ? 2 : 1)
 #   define Perl_fp_class_inf(x)    (Perl_fp_class(x) == 3)
 #   define Perl_fp_class_nan(x)    (Perl_fp_class(x) == 4)
 #   define Perl_fp_class_norm(x)   (Perl_fp_class(x) == 1)
@@ -2795,8 +2808,10 @@ extern long double Perl_my_frexpl(long double x, int *e);
 #        define Perl_fp_class_qnan(x)   (Perl_fp_class(x)==FP_QNAN)
 #        define Perl_fp_class_pnorm(x)  (Perl_fp_class(x)==FP_PLUS_NORM)
 #        define Perl_fp_class_nnorm(x)  (Perl_fp_class(x)==FP_MINUS_NORM)
-#        define Perl_fp_class_pdenorm(x)        (Perl_fp_class(x)==FP_PLUS_DENORM)
-#        define Perl_fp_class_ndenorm(x)        (Perl_fp_class(x)==FP_MINUS_DENORM)
+#        define Perl_fp_class_pdenorm(x)    \
+             (Perl_fp_class(x)==FP_PLUS_DENORM)
+#        define Perl_fp_class_ndenorm(x)    \
+             (Perl_fp_class(x)==FP_MINUS_DENORM)
 #        define Perl_fp_class_pzero(x)  (Perl_fp_class(x)==FP_PLUS_ZERO)
 #        define Perl_fp_class_nzero(x)  (Perl_fp_class(x)==FP_MINUS_ZERO)
 #    else
@@ -2860,8 +2875,10 @@ extern long double Perl_my_frexpl(long double x, int *e);
 #        define Perl_fp_class_pinf(x)   (Perl_fp_class(x)==FP_CLASS_PINF)
 #        define Perl_fp_class_nnorm(x)  (Perl_fp_class(x)==FP_CLASS_NNORM)
 #        define Perl_fp_class_pnorm(x)  (Perl_fp_class(x)==FP_CLASS_PNORM)
-#        define Perl_fp_class_ndenorm(x)        (Perl_fp_class(x)==FP_CLASS_NDENORM)
-#        define Perl_fp_class_pdenorm(x)        (Perl_fp_class(x)==FP_CLASS_PDENORM)
+#        define Perl_fp_class_ndenorm(x)    \
+             (Perl_fp_class(x)==FP_CLASS_NDENORM)
+#        define Perl_fp_class_pdenorm(x)    \
+             (Perl_fp_class(x)==FP_CLASS_PDENORM)
 #        define Perl_fp_class_nzero(x)  (Perl_fp_class(x)==FP_CLASS_NZERO)
 #        define Perl_fp_class_pzero(x)  (Perl_fp_class(x)==FP_CLASS_PZERO)
 #    elif defined(FP_PINF) && defined(FP_QNAN)
@@ -2907,8 +2924,10 @@ extern long double Perl_my_frexpl(long double x, int *e);
 #            define Perl_fp_class_pinf(x)       (Perl_fp_class(x)==FP_POS_INF)
 #            define Perl_fp_class_nnorm(x)      (Perl_fp_class(x)==FP_NEG_NORM)
 #            define Perl_fp_class_pnorm(x)      (Perl_fp_class(x)==FP_POS_NORM)
-#            define Perl_fp_class_ndenorm(x)    (Perl_fp_class(x)==FP_NEG_DENORM)
-#            define Perl_fp_class_pdenorm(x)    (Perl_fp_class(x)==FP_POS_DENORM)
+#            define Perl_fp_class_ndenorm(x)    \
+                 (Perl_fp_class(x)==FP_NEG_DENORM)
+#            define Perl_fp_class_pdenorm(x)    \
+                 (Perl_fp_class(x)==FP_POS_DENORM)
 #            define Perl_fp_class_nzero(x)      (Perl_fp_class(x)==FP_NEG_ZERO)
 #            define Perl_fp_class_pzero(x)      (Perl_fp_class(x)==FP_POS_ZERO)
 #        else
@@ -2931,11 +2950,15 @@ extern long double Perl_my_frexpl(long double x, int *e);
 #            define Perl_fp_class_qnan(x)       (Perl_fp_class(x)==FP_NANQ)
 #            define Perl_fp_class_ninf(x)       (Perl_fp_class(x)==FP_MINUS_INF)
 #            define Perl_fp_class_pinf(x)       (Perl_fp_class(x)==FP_PLUS_INF)
-#            define Perl_fp_class_nnorm(x)      (Perl_fp_class(x)==FP_MINUS_NORM)
+#            define Perl_fp_class_nnorm(x)  \
+                 (Perl_fp_class(x)==FP_MINUS_NORM)
 #            define Perl_fp_class_pnorm(x)      (Perl_fp_class(x)==FP_PLUS_NORM)
-#            define Perl_fp_class_ndenorm(x)    (Perl_fp_class(x)==FP_MINUS_DENORM)
-#            define Perl_fp_class_pdenorm(x)    (Perl_fp_class(x)==FP_PLUS_DENORM)
-#            define Perl_fp_class_nzero(x)      (Perl_fp_class(x)==FP_MINUS_ZERO)
+#            define Perl_fp_class_ndenorm(x)    \
+                 (Perl_fp_class(x)==FP_MINUS_DENORM)
+#            define Perl_fp_class_pdenorm(x)    \
+                 (Perl_fp_class(x)==FP_PLUS_DENORM)
+#            define Perl_fp_class_nzero(x)  \
+                 (Perl_fp_class(x)==FP_MINUS_ZERO)
 #            define Perl_fp_class_pzero(x)      (Perl_fp_class(x)==FP_PLUS_ZERO)
 #        else
 #            undef Perl_fp_class /* Unknown set of defines */
@@ -3512,8 +3535,10 @@ typedef struct padname PADNAME;
    cast to void.  */
 #    define PERL_FPU_INIT (void)fpsetmask(0)
 #  elif defined(SIGFPE) && defined(SIG_IGN) && !defined(PERL_MICRO)
-#    define PERL_FPU_INIT       PL_sigfpe_saved = (Sighandler_t) signal(SIGFPE, SIG_IGN)
-#    define PERL_FPU_PRE_EXEC   { Sigsave_t xfpe; rsignal_save(SIGFPE, PL_sigfpe_saved, &xfpe);
+#    define PERL_FPU_INIT   \
+         PL_sigfpe_saved = (Sighandler_t) signal(SIGFPE, SIG_IGN)
+#    define PERL_FPU_PRE_EXEC   \
+         { Sigsave_t xfpe; rsignal_save(SIGFPE, PL_sigfpe_saved, &xfpe);
 #    define PERL_FPU_POST_EXEC    rsignal_restore(SIGFPE, &xfpe); }
 #  else
 #    define PERL_FPU_INIT
@@ -4032,8 +4057,10 @@ EXTERN_C int perl_tsa_mutex_unlock(perl_mutex* mutex)
 /* flags in PL_exit_flags for nature of exit() */
 #define PERL_EXIT_EXPECTED      0x01
 #define PERL_EXIT_DESTRUCT_END  0x02  /* Run END in perl_destruct */
-#define PERL_EXIT_WARN          0x04  /* Warn if Perl_my_exit() or Perl_my_failure_exit() called */
-#define PERL_EXIT_ABORT         0x08  /* Call abort() if Perl_my_exit() or Perl_my_failure_exit() called */
+#define PERL_EXIT_WARN          0x04 /* Warn if Perl_my_exit() or
+                                        Perl_my_failure_exit() called */
+#define PERL_EXIT_ABORT         0x08 /* Call abort() if Perl_my_exit() or
+                                        Perl_my_failure_exit() called */
 
 #ifndef PERL_CORE
 /* format to use for version numbers in file/directory names */
@@ -4248,7 +4275,8 @@ hint to the compiler that this condition is likely to be false.
    STATIC_ASSERT_STMT expands to a statement and is suitable for use inside a
    function.
 */
-#if (! defined(__IBMC__) || __IBMC__ >= 1210)                                   \
+#if (! defined(__IBMC__) ||\
+ __IBMC__ >= 1210)                                 \
     && ((   defined(static_assert) && (   defined(_ISOC11_SOURCE)               \
                                        || (__STDC_VERSION__ - 0) >= 201101L))   \
         || (defined(__cplusplus) && __cplusplus >= 201103L))
@@ -4272,7 +4300,8 @@ hint to the compiler that this condition is likely to be false.
 /* We need this wrapper even in C11 because 'case X: static_assert(...);' is an
    error (static_assert is a declaration, and only statements can have labels).
 */
-#define STATIC_ASSERT_STMT(COND)      STMT_START { STATIC_ASSERT_DECL(COND); } STMT_END
+#define STATIC_ASSERT_STMT(COND)    \
+    STMT_START { STATIC_ASSERT_DECL(COND); } STMT_END
 
 #ifndef __has_builtin
 #  define __has_builtin(x) 0 /* not a clang style compiler */
@@ -4827,7 +4856,8 @@ Gid_t getegid (void);
 #define DEBUG_MASK              0x1FFFEFFF /* mask of all the standard flags */
 
 #define DEBUG_DB_RECURSE_FLAG   0x40000000
-#define DEBUG_TOP_FLAG          0x80000000 /* -D was given --> PL_debug |= FLAG */
+#define DEBUG_TOP_FLAG          0x80000000 /* -D was given --> PL_debug
+                                              |= FLAG */
 
 /* Both flags have to be set */
 #  define DEBUG_BOTH_FLAGS_TEST_(flag1, flag2)  \
@@ -5934,7 +5964,8 @@ typedef enum {
 #define HINT_STRICT_REFS        0x00000002 /* strict pragma */
 #define HINT_LOCALE             0x00000004 /* locale pragma */
 #define HINT_BYTES              0x00000008 /* bytes pragma */
-#define HINT_LOCALE_PARTIAL     0x00000010 /* locale, but a subset of categories */
+#define HINT_LOCALE_PARTIAL     0x00000010 /* locale, but a subset
+                                              of categories */
 
 #define HINT_EXPLICIT_STRICT_REFS       0x00000020 /* strict.pm */
 #define HINT_EXPLICIT_STRICT_SUBS       0x00000040 /* strict.pm */
@@ -6904,8 +6935,10 @@ typedef struct am_table_short AMTS;
 #define PERLDBf_GOTO            0x80    /* Report goto: call DB::goto */
 #define PERLDBf_NAMEEVAL        0x100   /* Informative names for evals */
 #define PERLDBf_NAMEANON        0x200   /* Informative names for anon subs */
-#define PERLDBf_SAVESRC         0x400   /* Save source lines into @{"_<$filename"} */
-#define PERLDBf_SAVESRC_NOSUBS  0x800   /* Including evals that generate no subroutines */
+#define PERLDBf_SAVESRC         0x400 /* Save source lines into
+                                         @{"_<$filename"} */
+#define PERLDBf_SAVESRC_NOSUBS  0x800 /* Including evals that generate
+                                         no subroutines */
 #define PERLDBf_SAVESRC_INVALID 0x1000  /* Save source that did not compile */
 
 #define PERLDB_SUB              (PL_perldb & PERLDBf_SUB)
@@ -7901,7 +7934,8 @@ C<strtoul>.
 #   define Strtoul      strtoul
 #endif
 #if !defined(Strtoul) && defined(HAS_STRTOL) /* Last resort. */
-#   define Strtoul(s, e, b)     strchr((s), '-') ? ULONG_MAX : (unsigned long)strtol((s), (e), (b))
+#   define Strtoul(s, e, b) \
+        strchr((s), '-') ? ULONG_MAX : (unsigned long)strtol((s), (e), (b))
 #endif
 #ifndef Atoul
 #   define Atoul(s)     Strtoul(s, NULL, 10)
@@ -7931,7 +7965,8 @@ C<strtoul>.
 
 #ifndef PERL_MICRO
 #       ifndef PERL_ASYNC_CHECK
-#               define PERL_ASYNC_CHECK() if (UNLIKELY(PL_sig_pending)) PL_signalhook(aTHX)
+#               define PERL_ASYNC_CHECK()   \
+                    if (UNLIKELY(PL_sig_pending)) PL_signalhook(aTHX)
 #       endif
 #endif
 
@@ -7972,9 +8007,11 @@ C<strtoul>.
 #       define Semctl(id, num, cmd, semun) semctl(id, num, cmd, semun)
 #   elif defined(USE_SEMCTL_SEMID_DS)
 #           ifdef EXTRA_F_IN_SEMUN_BUF
-#               define Semctl(id, num, cmd, semun) semctl(id, num, cmd, semun.buff)
+#               define Semctl(id, num, cmd, semun)  \
+                    semctl(id, num, cmd, semun.buff)
 #           else
-#               define Semctl(id, num, cmd, semun) semctl(id, num, cmd, semun.buf)
+#               define Semctl(id, num, cmd, semun)  \
+                    semctl(id, num, cmd, semun.buf)
 #           endif
 #   endif
 #endif
@@ -8308,9 +8345,11 @@ Same as L</is_safe_syscall>.
 
 Allows one ending \0
 */
-#define IS_SAFE_SYSCALL(p, len, what, op_name) (Perl_is_safe_syscall(aTHX_ (p), (len), (what), (op_name)))
+#define IS_SAFE_SYSCALL(p, len, what, op_name)  \
+    (Perl_is_safe_syscall(aTHX_ (p), (len), (what), (op_name)))
 
-#define IS_SAFE_PATHNAME(p, len, op_name) IS_SAFE_SYSCALL((p), (len), "pathname", (op_name))
+#define IS_SAFE_PATHNAME(p, len, op_name)   \
+    IS_SAFE_SYSCALL((p), (len), "pathname", (op_name))
 
 #if defined(OEMVS) || defined(__amigaos4__)
 #define NO_ENV_ARRAY_IN_MAIN
@@ -8363,7 +8402,8 @@ Allows one ending \0
 
 /* used by pv_display in dump.c*/
 #define PERL_PV_PRETTY_DUMP  PERL_PV_PRETTY_ELLIPSES|PERL_PV_PRETTY_QUOTE
-#define PERL_PV_PRETTY_REGPROP PERL_PV_PRETTY_ELLIPSES|PERL_PV_PRETTY_LTGT|PERL_PV_ESCAPE_RE|PERL_PV_ESCAPE_NONASCII
+#define PERL_PV_PRETTY_REGPROP  \
+    PERL_PV_PRETTY_ELLIPSES|PERL_PV_PRETTY_LTGT|PERL_PV_ESCAPE_RE|PERL_PV_ESCAPE_NONASCII
 
 #if DOUBLEKIND == DOUBLE_IS_VAX_F_FLOAT ||  \
     DOUBLEKIND == DOUBLE_IS_VAX_D_FLOAT ||  \
@@ -8548,7 +8588,8 @@ Allows one ending \0
  * the C99 isinf() and isnan() are unavailable, and the NV_MIN becomes
  * from the C89 DBL_MIN or moral equivalent. */
 #if !defined(Perl_fp_class_denorm) && defined(Perl_isinf) && defined(Perl_isnan) && defined(NV_MIN)
-#  define Perl_fp_class_denorm(x) ((x) != 0.0 && !Perl_isinf(x) && !Perl_isnan(x) && PERL_ABS(x) < NV_MIN)
+#  define Perl_fp_class_denorm(x)   \
+       ((x) != 0.0 && !Perl_isinf(x) && !Perl_isnan(x) && PERL_ABS(x) < NV_MIN)
 #endif
 
 /* This is not a great fallback: subnormals tests will fail,

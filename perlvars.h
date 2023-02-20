@@ -48,7 +48,8 @@ PERLVAR(G, thr_key,     perl_key)       /* key to retrieve per-thread struct */
 /* XXX does anyone even use this? */
 PERLVARI(G, do_undump,  bool,   FALSE)  /* -u or dump seen? */
 
-#if defined(FAKE_PERSISTENT_SIGNAL_HANDLERS)||defined(FAKE_DEFAULT_SIGNAL_HANDLERS)
+#if defined(FAKE_PERSISTENT_SIGNAL_HANDLERS)||\
+defined(FAKE_DEFAULT_SIGNAL_HANDLERS)
 PERLVARI(G, sig_handlers_initted, int, 0)
 #endif
 #ifdef FAKE_PERSISTENT_SIGNAL_HANDLERS

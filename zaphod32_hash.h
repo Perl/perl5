@@ -3,7 +3,8 @@
 
 #if DEBUG_ZAPHOD32_HASH == 1
 #include <stdio.h>
-#define ZAPHOD32_WARN6(pat,v0,v1,v2,v3,v4,v5)    printf(pat, v0, v1, v2, v3, v4, v5)
+#define ZAPHOD32_WARN6(pat,v0,v1,v2,v3,v4,v5)   \
+    printf(pat, v0, v1, v2, v3, v4, v5)
 #define ZAPHOD32_WARN5(pat,v0,v1,v2,v3,v4)       printf(pat, v0, v1, v2, v3, v4)
 #define ZAPHOD32_WARN4(pat,v0,v1,v2,v3)          printf(pat, v0, v1, v2, v3)
 #define ZAPHOD32_WARN3(pat,v0,v1,v2)             printf(pat, v0, v1, v2)

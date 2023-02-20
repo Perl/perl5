@@ -54,9 +54,12 @@ struct gp {
               assert(SvTYPE(_gvname_hek) == SVt_PVGV || SvTYPE(_gvname_hek) >= SVt_PVLV);   \
               &(GvXPVGV(_gvname_hek)->xiv_u.xivu_namehek);                                  \
             }))
-#  define GvNAME_get(gv)        ({ assert(GvNAME_HEK(gv)); (char *)HEK_KEY(GvNAME_HEK(gv)); })
-#  define GvNAMELEN_get(gv)     ({ assert(GvNAME_HEK(gv)); HEK_LEN(GvNAME_HEK(gv)); })
-#  define GvNAMEUTF8(gv)        ({ assert(GvNAME_HEK(gv)); HEK_UTF8(GvNAME_HEK(gv)); })
+#  define GvNAME_get(gv)    \
+       ({ assert(GvNAME_HEK(gv)); (char *)HEK_KEY(GvNAME_HEK(gv)); })
+#  define GvNAMELEN_get(gv) \
+       ({ assert(GvNAME_HEK(gv)); HEK_LEN(GvNAME_HEK(gv)); })
+#  define GvNAMEUTF8(gv)    \
+       ({ assert(GvNAME_HEK(gv)); HEK_UTF8(GvNAME_HEK(gv)); })
 #else
 #  define GvGP(gv)      (0+(gv)->sv_u.svu_gp)
 #  define GvGP_set(gv,gp)       ((gv)->sv_u.svu_gp = (gp))
@@ -228,9 +231,11 @@ Return the CV from the GV.
                                    time, so don't try to free what's there.  */
 #define GV_ADDMULTI     0x02    /* add, pretending it has been added
                                    already; used also by gv_init_* */
-#define GV_ADDWARN      0x04    /* add, but warn if symbol wasn't already there */
+#define GV_ADDWARN      0x04 /* add, but warn if symbol wasn't
+                                already there */
                 /*      0x08       UNUSED */
-#define GV_NOINIT       0x10    /* add, but don't init symbol, if type != PVGV */
+#define GV_NOINIT       0x10 /* add, but don't init symbol,
+                                if type != PVGV */
 /* This is used by toke.c to avoid turing placeholder constants in the symbol
    table into full PVGVs with attached constant subroutines.  */
 #define GV_NOADD_NOINIT 0x20    /* Don't add the symbol if it's not there.
@@ -273,9 +278,12 @@ Return the CV from the GV.
 #define gv_fetchsv_nomg(n,f,t) gv_fetchsv(n,(f)|GV_NO_SVGMAGIC,t)
 #define gv_init(gv,stash,name,len,multi)    \
     gv_init_pvn(gv,stash,name,len,GV_ADDMULTI*cBOOL(multi))
-#define gv_fetchmeth(stash,name,len,level) gv_fetchmeth_pvn(stash, name, len, level, 0)
-#define gv_fetchmeth_autoload(stash,name,len,level) gv_fetchmeth_pvn_autoload(stash, name, len, level, 0)
-#define gv_fetchmethod_flags(stash,name,flags) gv_fetchmethod_pv_flags(stash, name, flags)
+#define gv_fetchmeth(stash,name,len,level)  \
+    gv_fetchmeth_pvn(stash, name, len, level, 0)
+#define gv_fetchmeth_autoload(stash,name,len,level) \
+    gv_fetchmeth_pvn_autoload(stash, name, len, level, 0)
+#define gv_fetchmethod_flags(stash,name,flags)  \
+    gv_fetchmethod_pv_flags(stash, name, flags)
 
 /*
 =for apidoc gv_autoload4

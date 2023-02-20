@@ -27,7 +27,8 @@
  * macros */
 #define SS_MAXPUSH 4
 
-#define SSGROW(need) if (UNLIKELY(PL_savestack_ix + (I32)(need) > PL_savestack_max)) savestack_grow_cnt(need)
+#define SSGROW(need)    \
+    if (UNLIKELY(PL_savestack_ix + (I32)(need) > PL_savestack_max)) savestack_grow_cnt(need)
 #define SSCHECK(need) SSGROW(need) /* legacy */
 #define SSPUSHINT(i) (PL_savestack[PL_savestack_ix++].any_i32 = (I32)(i))
 #define SSPUSHLONG(i) (PL_savestack[PL_savestack_ix++].any_long = (long)(i))
@@ -218,8 +219,10 @@ scope has the given name. C<name> must be a literal string.
 
 /* Note these are special, we can't just use a save_pushptrptr() on them
  * as the target might change after a fork or thread start. */
-#define SAVECOMPILEWARNINGS() save_pushptr(PL_compiling.cop_warnings, SAVEt_COMPILE_WARNINGS)
-#define SAVECURCOPWARNINGS()  save_pushptr(PL_curcop->cop_warnings, SAVEt_CURCOP_WARNINGS)
+#define SAVECOMPILEWARNINGS()   \
+    save_pushptr(PL_compiling.cop_warnings, SAVEt_COMPILE_WARNINGS)
+#define SAVECURCOPWARNINGS()    \
+    save_pushptr(PL_curcop->cop_warnings, SAVEt_CURCOP_WARNINGS)
 
 
 #define SAVEPARSER(p) save_pushptr((p), SAVEt_PARSER)
@@ -285,8 +288,10 @@ casts it to a pointer of that C<type>.
     (I32)(align - ((size_t)((caddr_t)&PL_savestack[PL_savestack_ix]) % align)) % align)
 #define SSNEWat(n,t,align)      SSNEWa((n)*sizeof(t), align)
 
-#define SSPTR(off,type)         (assert(sizeof(off) >= sizeof(SSize_t)), (type)  ((char*)PL_savestack + off))
-#define SSPTRt(off,type)        (assert(sizeof(off) >= sizeof(SSize_t)), (type*) ((char*)PL_savestack + off))
+#define SSPTR(off,type) \
+    (assert(sizeof(off) >= sizeof(SSize_t)), (type)  ((char*)PL_savestack + off))
+#define SSPTRt(off,type)    \
+    (assert(sizeof(off) >= sizeof(SSize_t)), (type*) ((char*)PL_savestack + off))
 
 #define save_freesv(op)         save_pushptr((void *)(op), SAVEt_FREESV)
 #define save_mortalizesv(op)    save_pushptr((void *)(op), SAVEt_MORTALIZESV)

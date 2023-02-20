@@ -187,7 +187,8 @@ Deprecated.  Use C<GIMME_V> instead.
  *       from data in regen/op_private */
 
 
-#define OPpTRANS_ALL    (OPpTRANS_USE_SVOP|OPpTRANS_CAN_FORCE_UTF8|OPpTRANS_IDENTICAL|OPpTRANS_SQUASH|OPpTRANS_COMPLEMENT|OPpTRANS_GROWS|OPpTRANS_DELETE)
+#define OPpTRANS_ALL    \
+    (OPpTRANS_USE_SVOP|OPpTRANS_CAN_FORCE_UTF8|OPpTRANS_IDENTICAL|OPpTRANS_SQUASH|OPpTRANS_COMPLEMENT|OPpTRANS_GROWS|OPpTRANS_DELETE)
 #define OPpTRANS_FROM_UTF   OPpTRANS_USE_SVOP
 #define OPpTRANS_TO_UTF     OPpTRANS_CAN_FORCE_UTF8
 
@@ -878,7 +879,8 @@ preprocessing token; the type of C<arg> depends on C<which>.
 #define RV2CVOPCV_MARK_EARLY     0x00000001
 #define RV2CVOPCV_RETURN_NAME_GV 0x00000002
 #define RV2CVOPCV_RETURN_STUB    0x00000004
-#if defined(PERL_CORE) || defined(PERL_EXT) /* behaviour of this flag is subject to change: */
+#if defined(PERL_CORE) ||\
+ defined(PERL_EXT) /* behaviour of this flag is subject to change: */
 # define RV2CVOPCV_MAYBE_NAME_GV  0x00000008
 #endif
 #define RV2CVOPCV_FLAG_MASK      0x0000000f /* all of the above */
@@ -1085,7 +1087,8 @@ C<sib> is non-null. For a higher-level interface, see C<L</op_sibling_splice>>.
     ( (o) && OP_TYPE_ISNT_AND_WASNT_NN(o, type) )
 
 /* should match anything that uses ck_ftst in regen/opcodes */
-#define OP_IS_STAT(op) (OP_IS_FILETEST(op) || (op) == OP_LSTAT || (op) == OP_STAT)
+#define OP_IS_STAT(op)  \
+    (OP_IS_FILETEST(op) || (op) == OP_LSTAT || (op) == OP_STAT)
 
 #define OpHAS_SIBLING(o)        (cBOOL((o)->op_moresib))
 #define OpSIBLING(o)            (0 + (o)->op_moresib ? (o)->op_sibparent : NULL)
@@ -1164,7 +1167,8 @@ C<sib> is non-null. For a higher-level interface, see C<L</op_sibling_splice>>.
 #  define TR_UNMAPPED           (UV)-1
 #  define TR_DELETE             (UV)-2
 #  define TR_R_EMPTY            (UV)-3  /* rhs (replacement) is empty */
-#  define TR_OOB                (UV)-4  /* Something that isn't one of the others */
+#  define TR_OOB                (UV)-4 /* Something that isn't one
+                                          of the others */
 #  define TR_SPECIAL_HANDLING   TR_DELETE /* Can occupy same value */
 #  define TR_UNLISTED           TR_UNMAPPED /* A synonym whose name is clearer
                                                at times */

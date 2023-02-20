@@ -149,7 +149,8 @@ typedef enum {
 #define padadd_STALEOK          0x08       /* allow stale lexical in active
                                             * sub, but only one level up */
 #define padadd_FIELD            0x10       /* set PADNAMEt_FIELD */
-#define padfind_FIELD_OK        0x20       /* pad_findlex is permitted to see fields */
+#define padfind_FIELD_OK        0x20 /* pad_findlex is permitted
+                                        to see fields */
 
 /* ASSERT_CURPAD_LEGAL and ASSERT_CURPAD_ACTIVE respectively determine
  * whether PL_comppad and PL_curpad are consistent and whether they have
@@ -390,8 +391,10 @@ Restore the old pad saved into the local variable C<opad> by C<PAD_SAVE_LOCAL()>
 #endif
 
 #ifdef USE_ITHREADS
-#  define padnamelist_dup_inc(pnl,param)  PadnamelistREFCNT_inc(padnamelist_dup(pnl,param))
-#  define padname_dup_inc(pn,param)       PadnameREFCNT_inc(padname_dup(pn,param))
+#  define padnamelist_dup_inc(pnl,param)    \
+       PadnamelistREFCNT_inc(padnamelist_dup(pnl,param))
+#  define padname_dup_inc(pn,param) \
+       PadnameREFCNT_inc(padname_dup(pn,param))
 #endif
 
 #ifdef DEBUGGING

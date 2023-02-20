@@ -13,7 +13,8 @@
 #if PERL_VERSION_LT(5,15,4)
 #  define ISA_VERSION_OBJ(v) (sv_isobject(v) && sv_derived_from(v,"version"))
 #else
-#  define ISA_VERSION_OBJ(v) (sv_isobject(v) && sv_derived_from_pvn(v,"version",7,0))
+#  define ISA_VERSION_OBJ(v)    \
+       (sv_isobject(v) && sv_derived_from_pvn(v,"version",7,0))
 #endif
 
 #if PERL_VERSION_GE(5,9,0) && !defined(PERL_CORE)
@@ -39,7 +40,8 @@ static const char * Perl_prescan_version2(pTHX_ const char *s, bool strict, cons
 #  define VNUMIFY(a)            Perl_vnumify2(aTHX_ a)
 #  define VNORMAL(a)            Perl_vnormal2(aTHX_ a)
 #  define VCMP(a,b)             Perl_vcmp2(aTHX_ a,b)
-#  define PRESCAN_VERSION(a,b,c,d,e,f,g)        Perl_prescan_version2(aTHX_ a,b,c,d,e,f,g)
+#  define PRESCAN_VERSION(a,b,c,d,e,f,g)    \
+       Perl_prescan_version2(aTHX_ a,b,c,d,e,f,g)
 #  undef is_LAX_VERSION
 #  define is_LAX_VERSION(a,b)   \
        (a != Perl_prescan_version2(aTHX_ a, FALSE, b, NULL, NULL, NULL, NULL))
@@ -68,7 +70,8 @@ const char * Perl_prescan_version(pTHX_ const char *s, bool strict, const char**
 #  define VNORMAL(a)            Perl_vnormal(aTHX_ a)
 #  define VCMP(a,b)             Perl_vcmp(aTHX_ a,b)
 
-#  define PRESCAN_VERSION(a,b,c,d,e,f,g)        Perl_prescan_version(aTHX_ a,b,c,d,e,f,g)
+#  define PRESCAN_VERSION(a,b,c,d,e,f,g)    \
+       Perl_prescan_version(aTHX_ a,b,c,d,e,f,g)
 #  ifndef is_LAX_VERSION
 #    define is_LAX_VERSION(a,b) \
          (a != Perl_prescan_version(aTHX_ a, FALSE, b, NULL, NULL, NULL, NULL))

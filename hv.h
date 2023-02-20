@@ -25,11 +25,13 @@
 #       define USE_PERL_PERTURB_KEYS        1
 #       define PL_HASH_RAND_BITS_ENABLED    PL_hash_rand_bits_enabled
 #   endif
-#   define PERL_HASH_ITER_BUCKET(iter)      (((iter)->xhv_riter) ^ ((iter)->xhv_rand))
+#   define PERL_HASH_ITER_BUCKET(iter)  \
+        (((iter)->xhv_riter) ^ ((iter)->xhv_rand))
 #endif
 
 #ifdef PERL_USE_UNSHARED_KEYS_IN_LARGE_HASHES
-#define LARGE_HASH_HEURISTIC(hv,new_max) S_large_hash_heuristic(aTHX_ (hv), (new_max))
+#define LARGE_HASH_HEURISTIC(hv,new_max)    \
+    S_large_hash_heuristic(aTHX_ (hv), (new_max))
 #else
 #define LARGE_HASH_HEURISTIC(hv,new_max) 0
 #endif
@@ -386,8 +388,10 @@ whether it is valid to call C<HvAUX()>.
 #define HvUSEDKEYS(hv)          (HvTOTALKEYS(hv) - HvPLACEHOLDERS_get(hv))
 #define HvTOTALKEYS(hv)         (((XPVHV*) SvANY(hv))->xhv_keys)
 #define HvPLACEHOLDERS(hv)      (*Perl_hv_placeholders_p(aTHX_ MUTABLE_HV(hv)))
-#define HvPLACEHOLDERS_get(hv)  (SvMAGIC(hv) ? Perl_hv_placeholders_get(aTHX_ (const HV *)hv) : 0)
-#define HvPLACEHOLDERS_set(hv,p)        Perl_hv_placeholders_set(aTHX_ MUTABLE_HV(hv), p)
+#define HvPLACEHOLDERS_get(hv)  \
+    (SvMAGIC(hv) ? Perl_hv_placeholders_get(aTHX_ (const HV *)hv) : 0)
+#define HvPLACEHOLDERS_set(hv,p)    \
+    Perl_hv_placeholders_set(aTHX_ MUTABLE_HV(hv), p)
 
 /* This (now) flags whether *new* keys in the hash will be allocated from the
  * shared string table. We have a heuristic to call HvSHAREKEYS_off() if a hash
@@ -501,7 +505,8 @@ whether it is valid to call C<HvAUX()>.
 #define HV_ITERNEXT_WANTPLACEHOLDERS    0x01    /* Don't skip placeholders.  */
 
 #define hv_iternext(hv) hv_iternext_flags(hv, 0)
-#define hv_magic(hv, gv, how) sv_magic(MUTABLE_SV(hv), MUTABLE_SV(gv), how, NULL, 0)
+#define hv_magic(hv, gv, how)   \
+    sv_magic(MUTABLE_SV(hv), MUTABLE_SV(gv), how, NULL, 0)
 #define hv_undef(hv) Perl_hv_undef_flags(aTHX_ hv, 0)
 
 #define Perl_sharepvn(pv, len, hash) HEK_KEY(share_hek(pv, len, hash))

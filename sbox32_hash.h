@@ -5,7 +5,8 @@
 
 #if DEBUG_SBOX32_HASH == 1
 #include <stdio.h>
-#define SBOX32_WARN6(pat,v0,v1,v2,v3,v4,v5)    printf(pat, v0, v1, v2, v3, v4, v5)
+#define SBOX32_WARN6(pat,v0,v1,v2,v3,v4,v5) \
+    printf(pat, v0, v1, v2, v3, v4, v5)
 #define SBOX32_WARN5(pat,v0,v1,v2,v3,v4)       printf(pat, v0, v1, v2, v3, v4)
 #define SBOX32_WARN4(pat,v0,v1,v2,v3)          printf(pat, v0, v1, v2, v3)
 #define SBOX32_WARN3(pat,v0,v1,v2)             printf(pat, v0, v1, v2)

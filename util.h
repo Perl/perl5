@@ -177,13 +177,16 @@ typedef struct {
    selectable. These spare bits allow for additional features for the varargs
    stuff or ABI compat test flags in the future.
 */
-#define HSm_APIVERLEN 0x0000001F /* perl version string won't be more than 31 chars */
+#define HSm_APIVERLEN 0x0000001F /* perl version string won't
+                                    be more than 31 chars */
 #define HS_APIVERLEN_MAX HSm_APIVERLEN
-#define HSm_XSVERLEN 0x0000FF00 /* if 0, not present, dont check, die if over 255*/
+#define HSm_XSVERLEN 0x0000FF00 /* if 0, not present, dont check,
+                                   die if over 255*/
 #define HS_XSVERLEN_MAX 0xFF
 /* uses var file to set default filename for newXS_deffile to use for CvFILE */
 #define HSf_SETXSUBFN 0x00000020
-#define HSf_POPMARK 0x00000040 /* popmark mode or you must supply ax and items */
+#define HSf_POPMARK 0x00000040 /* popmark mode or you must
+                                  supply ax and items */
 #define HSf_IMP_CXT 0x00000080 /* ABI, threaded, MULTIPLICITY, pTHX_ present */
 #define HSm_INTRPSIZE 0xFFFF0000 /* ABI, interp struct size */
 /* A mask of bits in the key which must always match between a XS mod and interp.
@@ -191,7 +194,8 @@ typedef struct {
    the unlikely interp size will all 1 bits */
 /* Maybe HSm_APIVERLEN one day if Perl_xs_apiversion_bootcheck is changed to a memcmp */
 #define HSm_KEY_MATCH (HSm_INTRPSIZE|HSf_IMP_CXT)
-#define HSf_NOCHK HSm_KEY_MATCH  /* if all ABI bits are 1 in the key, dont chk */
+#define HSf_NOCHK HSm_KEY_MATCH /* if all ABI bits are 1 in
+                                   the key, dont chk */
 
 
 #define HS_GETINTERPSIZE(key) ((key) >> 16)

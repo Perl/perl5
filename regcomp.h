@@ -94,7 +94,8 @@ typedef struct regexp_internal {
 
 #define PREGf_SKIP              0x00000001
 #define PREGf_IMPLICIT          0x00000002 /* Converted .* to ^.* */
-#define PREGf_NAUGHTY           0x00000004 /* how exponential is this pattern? */
+#define PREGf_NAUGHTY           0x00000004 /* how exponential is
+                                              this pattern? */
 #define PREGf_VERBARG_SEEN      0x00000008
 #define PREGf_CUTGROUP_SEEN     0x00000010
 #define PREGf_USE_RE_EVAL       0x00000020 /* compiled with "use re 'eval'" */
@@ -518,7 +519,8 @@ struct regnode_ssc {
  * other options only produce correct results under specific
  * constraints.
  */
-#define        REGNODE_AFTER_PLUS(p,extra)    ((p) + NODE_STEP_REGNODE + (extra))
+#define        REGNODE_AFTER_PLUS(p,extra)  \
+    ((p) + NODE_STEP_REGNODE + (extra))
 /* under DEBUGGING we check that all REGNODE_AFTER optimized macros did the
  * same thing that Perl_regnode_after() would have done. Note that when
  * not compiled under DEBUGGING the assert_() macro is empty. Thus we
@@ -530,11 +532,13 @@ struct regnode_ssc {
 
 /* find the regnode after this p by using the opcode we previously extracted
  * with OP(p) */
-#define REGNODE_AFTER_opcode(p,op)          REGNODE_AFTER_PLUS_DEBUG((p),REGNODE_ARG_LEN(op))
+#define REGNODE_AFTER_opcode(p,op)  \
+    REGNODE_AFTER_PLUS_DEBUG((p),REGNODE_ARG_LEN(op))
 
 /* find the regnode after this p by using the size of the struct associated with
  * the opcode for p. use this when you *know* that p is pointer to a given type*/
-#define REGNODE_AFTER_type(p,t)             REGNODE_AFTER_PLUS_DEBUG((p),EXTRA_SIZE(t))
+#define REGNODE_AFTER_type(p,t) \
+    REGNODE_AFTER_PLUS_DEBUG((p),EXTRA_SIZE(t))
 
 /* find the regnode after this p by using OP(p) to find the regnode type of p */
 #define REGNODE_AFTER_varies(p)            regnode_after(p,TRUE)
@@ -824,11 +828,13 @@ ARGp_SET_inline(struct regnode *node, SV *ptr) {
 
 #define ANYOF_ALPHA    ((CC_ALPHA_) * 2)
 #define ANYOF_NALPHA   ((ANYOF_ALPHA) + 1)
-#define ANYOF_ALPHANUMERIC   ((CC_ALPHANUMERIC_) * 2)    /* [[:alnum:]] isalnum(3), utf8::IsAlnum */
+#define ANYOF_ALPHANUMERIC   ((CC_ALPHANUMERIC_) * 2) /* [[:alnum:]] isalnum(3),
+                                                         utf8::IsAlnum */
 #define ANYOF_NALPHANUMERIC  ((ANYOF_ALPHANUMERIC) + 1)
 #define ANYOF_ASCII    ((CC_ASCII_) * 2)
 #define ANYOF_NASCII   ((ANYOF_ASCII) + 1)
-#define ANYOF_BLANK    ((CC_BLANK_) * 2)     /* GNU extension: space and tab: non-vertical space */
+#define ANYOF_BLANK    ((CC_BLANK_) * 2) /* GNU extension: space and tab:
+                                            non-vertical space */
 #define ANYOF_NBLANK   ((ANYOF_BLANK) + 1)
 #define ANYOF_CASED    ((CC_CASED_) * 2)    /* Pseudo class for [:lower:] or
                                                [:upper:] under /i */
@@ -849,7 +855,8 @@ ARGp_SET_inline(struct regnode *node, SV *ptr) {
 #define ANYOF_NSPACE   ((ANYOF_SPACE) + 1)
 #define ANYOF_UPPER    ((CC_UPPER_) * 2)
 #define ANYOF_NUPPER   ((ANYOF_UPPER) + 1)
-#define ANYOF_WORDCHAR ((CC_WORDCHAR_) * 2)  /* \w, PL_utf8_alnum, utf8::IsWord, ALNUM */
+#define ANYOF_WORDCHAR ((CC_WORDCHAR_) * 2) /* \w, PL_utf8_alnum, utf8::IsWord,
+                                               ALNUM */
 #define ANYOF_NWORDCHAR   ((ANYOF_WORDCHAR) + 1)
 #define ANYOF_XDIGIT   ((CC_XDIGIT_) * 2)
 #define ANYOF_NXDIGIT  ((ANYOF_XDIGIT) + 1)
@@ -942,12 +949,15 @@ ARGp_SET_inline(struct regnode *node, SV *ptr) {
     ((ANYOF_FLAGS(p) & ANYOF_MATCHES_POSIXL)    \
      && ANYOF_POSIXL_BITMAP(p) == nBIT_MASK(ANYOF_POSIXL_MAX))
 
-#define ANYOF_POSIXL_OR(source, dest) STMT_START { (dest)->classflags |= (source)->classflags; } STMT_END
+#define ANYOF_POSIXL_OR(source, dest)   \
+    STMT_START { (dest)->classflags |= (source)->classflags; } STMT_END
 #define ANYOF_CLASS_OR(source, dest) ANYOF_POSIXL_OR((source), (dest))
 
-#define ANYOF_POSIXL_AND(source, dest) STMT_START { (dest)->classflags &= (source)->classflags; } STMT_END
+#define ANYOF_POSIXL_AND(source, dest)  \
+    STMT_START { (dest)->classflags &= (source)->classflags; } STMT_END
 
-#define ANYOF_BITMAP_ZERO(ret)  Zero(((regnode_charclass*)(ret))->bitmap, ANYOF_BITMAP_SIZE, char)
+#define ANYOF_BITMAP_ZERO(ret)  \
+    Zero(((regnode_charclass*)(ret))->bitmap, ANYOF_BITMAP_SIZE, char)
 #define ANYOF_BITMAP(p)         ((regnode_charclass*)(p))->bitmap
 #define ANYOF_BITMAP_BYTE(p, c) BITMAP_BYTE(ANYOF_BITMAP(p), c)
 #define ANYOF_BITMAP_SET(p, c)  (ANYOF_BITMAP_BYTE(p, c) |=  ANYOF_BIT(c))
@@ -1187,8 +1197,10 @@ typedef struct _reg_ac_data reg_ac_data;
 
 /* these defines assume uniquecharcount is the correct variable, and state may be evaluated twice */
 #define TRIE_NODENUM(state) (((state)-1)/(trie->uniquecharcount)+1)
-#define SAFE_TRIE_NODENUM(state) ((state) ? (((state)-1)/(trie->uniquecharcount)+1) : (state))
-#define TRIE_NODEIDX(state) ((state) ? (((state)-1)*(trie->uniquecharcount)+1) : (state))
+#define SAFE_TRIE_NODENUM(state)    \
+    ((state) ? (((state)-1)/(trie->uniquecharcount)+1) : (state))
+#define TRIE_NODEIDX(state) \
+    ((state) ? (((state)-1)*(trie->uniquecharcount)+1) : (state))
 
 #ifdef DEBUGGING
 #define TRIE_CHARCOUNT(trie) ((trie)->charcount)
@@ -1368,7 +1380,8 @@ re.pm, especially to the documentation.
         }                                                                           \
     })
 
-#define isDEBUG_WILDCARD (DEBUG_v_TEST || RE_DEBUG_FLAG(RE_DEBUG_EXTRA_WILDCARD))
+#define isDEBUG_WILDCARD    \
+    (DEBUG_v_TEST || RE_DEBUG_FLAG(RE_DEBUG_EXTRA_WILDCARD))
 
 #define RE_PV_COLOR_DECL(rpv,rlen,isuni,dsv,pv,l,m,c1,c2)                                       \
     const char * const rpv =                                                                    \
@@ -1445,7 +1458,8 @@ typedef enum {
 #if !defined(PERL_IN_XSUB_RE) || defined(PLUGGABLE_RE_EXTENSION)
 #  define GET_REGCLASS_AUX_DATA(a,b,c,d,e,f)  get_regclass_aux_data(a,b,c,d,e,f)
 #else
-#  define GET_REGCLASS_AUX_DATA(a,b,c,d,e,f)  get_re_gclass_aux_data(a,b,c,d,e,f)
+#  define GET_REGCLASS_AUX_DATA(a,b,c,d,e,f)    \
+       get_re_gclass_aux_data(a,b,c,d,e,f)
 #endif
 
 #define REGNODE_TYPE(node)              (PL_regnode_info[(node)].type)

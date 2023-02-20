@@ -287,7 +287,8 @@ struct IPerlStdIOInfo
 #  ifdef __VOS__
    /* Work around VOS bug posix-979, wrongly setting errno when at end of file. */
 #    define PerlSIO_fclose(f)           (((errno==1025)?errno=0:0),fclose(f))
-#    define PerlSIO_feof(f)                     (((errno==1025)?errno=0:0),feof(f))
+#    define PerlSIO_feof(f) \
+         (((errno==1025)?errno=0:0),feof(f))
 #    define PerlSIO_ferror(f)           (((errno==1025)?errno=0:0),ferror(f))
 #  else
 #    define PerlSIO_fclose(f)           fclose(f)
@@ -576,7 +577,8 @@ struct IPerlEnvInfo
 
 #  ifdef WIN32
 #    define PerlEnv_os_id()                     win32_os_id()
-#    define PerlEnv_lib_path(str, lenp) win32_get_privlib(WIN32_NO_REGISTRY_M_(str) lenp)
+#    define PerlEnv_lib_path(str, lenp) \
+         win32_get_privlib(WIN32_NO_REGISTRY_M_(str) lenp)
 #    define PerlEnv_sitelib_path(str, lenp)     win32_get_sitelib(str, lenp)
 #    define PerlEnv_vendorlib_path(str, lenp)   win32_get_vendorlib(str, lenp)
 #  define PerlEnv_get_child_IO(ptr)     win32_get_child_IO(ptr)
@@ -763,7 +765,8 @@ struct IPerlLIOInfo
 #  define PerlLIO_isatty(fd)            isatty((fd))
 #  define PerlLIO_link(oldname, newname)        link((oldname), (newname))
 #  define PerlLIO_symlink(oldname, newname)     symlink((oldname), (newname))
-#  define PerlLIO_readlink(path, buf, bufsiz)   readlink((path), (buf), (bufsiz))
+#  define PerlLIO_readlink(path, buf, bufsiz)   \
+       readlink((path), (buf), (bufsiz))
 #  define PerlLIO_lseek(fd, offset, mode)       lseek((fd), (offset), (mode))
 #  define PerlLIO_stat(name, buf)               Stat((name), (buf))
 #  ifdef HAS_LSTAT
@@ -778,7 +781,8 @@ struct IPerlLIOInfo
     int asciiopen3(const char* path, int oflag, int perm);
 
 #      define PerlLIO_open(file, flag)          asciiopen((file), (flag))
-#      define PerlLIO_open3(file, flag, perm)   asciiopen3((file), (flag), (perm))
+#      define PerlLIO_open3(file, flag, perm)   \
+           asciiopen3((file), (flag), (perm))
 #    else
 #      define PerlLIO_open(file, flag)          open((file), (flag))
 #      define PerlLIO_open3(file, flag, perm)   open((file), (flag), (perm))

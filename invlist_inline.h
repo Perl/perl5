@@ -93,7 +93,9 @@ S_invlist_array(SV* const invlist)
 }
 
 #endif
-#if defined(PERL_IN_REGCOMP_ANY) || defined(PERL_IN_OP_C) || defined(PERL_IN_DOOP_C)
+#if defined(PERL_IN_REGCOMP_ANY) ||\
+ defined(PERL_IN_OP_C) ||\
+ defined(PERL_IN_DOOP_C)
 
 PERL_STATIC_INLINE void
 S_invlist_extend(pTHX_ SV* const invlist, const UV new_max)

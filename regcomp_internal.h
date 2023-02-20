@@ -176,7 +176,8 @@ struct RExC_state_t {
 #define RExC_lastparse  (pRExC_state->lastparse)
 #define RExC_lastnum    (pRExC_state->lastnum)
 #define RExC_paren_name_list    (pRExC_state->paren_name_list)
-#define RExC_study_chunk_recursed_count    (pRExC_state->study_chunk_recursed_count)
+#define RExC_study_chunk_recursed_count \
+    (pRExC_state->study_chunk_recursed_count)
 #define RExC_mysv       (pRExC_state->mysv1)
 #define RExC_mysv1      (pRExC_state->mysv1)
 #define RExC_mysv2      (pRExC_state->mysv2)
@@ -249,8 +250,10 @@ struct RExC_state_t {
 #define RExC_warn_text (pRExC_state->warn_text)
 #define RExC_in_script_run      (pRExC_state->in_script_run)
 #define RExC_use_BRANCHJ        (pRExC_state->use_BRANCHJ)
-#define RExC_warned_WARN_EXPERIMENTAL__VLB (pRExC_state->sWARN_EXPERIMENTAL__VLB)
-#define RExC_warned_WARN_EXPERIMENTAL__REGEX_SETS (pRExC_state->sWARN_EXPERIMENTAL__REGEX_SETS)
+#define RExC_warned_WARN_EXPERIMENTAL__VLB  \
+    (pRExC_state->sWARN_EXPERIMENTAL__VLB)
+#define RExC_warned_WARN_EXPERIMENTAL__REGEX_SETS   \
+    (pRExC_state->sWARN_EXPERIMENTAL__REGEX_SETS)
 #define RExC_unlexed_names (pRExC_state->unlexed_names)
 
 

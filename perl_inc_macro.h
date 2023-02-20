@@ -55,7 +55,8 @@
     /* vendorarch is always relative to vendorlib on Windows for
      * DLL-based path intuition to work correctly */
 #  if !defined(WIN32)
-#               define INCPUSH_PERL_VENDORARCH_EXP  S_incpush_use_sep(aTHX_ STR_WITH_LEN(PERL_VENDORARCH_EXP), INCPUSH_CAN_RELOCATE);
+#               define INCPUSH_PERL_VENDORARCH_EXP  \
+                    S_incpush_use_sep(aTHX_ STR_WITH_LEN(PERL_VENDORARCH_EXP), INCPUSH_CAN_RELOCATE);
 #  endif
 #endif
 
@@ -66,12 +67,14 @@
                     s = PerlEnv_vendorlib_path(PERL_FS_VERSION, &len);  \
                                         if (s) incpush_use_sep(s, len, INCPUSH_ADD_SUB_DIRS|INCPUSH_CAN_RELOCATE);
 #  else
-#               define INCPUSH_PERL_VENDORLIB_EXP S_incpush_use_sep(aTHX_ STR_WITH_LEN(PERL_VENDORLIB_EXP), INCPUSH_CAN_RELOCATE);
+#               define INCPUSH_PERL_VENDORLIB_EXP   \
+                    S_incpush_use_sep(aTHX_ STR_WITH_LEN(PERL_VENDORLIB_EXP), INCPUSH_CAN_RELOCATE);
 #  endif
 #endif
 
 #ifdef ARCHLIB_EXP
-#       define INCPUSH_ARCHLIB_EXP S_incpush_use_sep(aTHX_ STR_WITH_LEN(ARCHLIB_EXP), INCPUSH_CAN_RELOCATE);
+#       define INCPUSH_ARCHLIB_EXP  \
+            S_incpush_use_sep(aTHX_ STR_WITH_LEN(ARCHLIB_EXP), INCPUSH_CAN_RELOCATE);
 #endif
 
 /* used by INCPUSH_PRIVLIB_EXP */
@@ -84,7 +87,8 @@
             s = PerlEnv_lib_path(PERL_FS_VERSION, &len);    \
             if (s) incpush_use_sep(s, len, INCPUSH_ADD_SUB_DIRS|INCPUSH_CAN_RELOCATE);
 #else
-#       define INCPUSH_PRIVLIB_EXP S_incpush_use_sep(aTHX_ STR_WITH_LEN(PRIVLIB_EXP), INCPUSH_CAN_RELOCATE);
+#       define INCPUSH_PRIVLIB_EXP  \
+            S_incpush_use_sep(aTHX_ STR_WITH_LEN(PRIVLIB_EXP), INCPUSH_CAN_RELOCATE);
 #endif
 
 #ifdef PERL_OTHERLIBDIRS
@@ -99,7 +103,8 @@
 #define _INCPUSH_PERL5LIB_IF    if (perl5lib && *perl5lib != '\0')
 
 #ifndef VMS
-# define _INCPUSH_PERL5LIB_ADD _INCPUSH_PERL5LIB_IF incpush_use_sep(perl5lib, 0, INCPUSH_ADD_OLD_VERS|INCPUSH_NOT_BASEDIR);
+# define _INCPUSH_PERL5LIB_ADD  \
+      _INCPUSH_PERL5LIB_IF incpush_use_sep(perl5lib, 0, INCPUSH_ADD_OLD_VERS|INCPUSH_NOT_BASEDIR);
 #else
 /* VMS */
         /* Treat PERL5?LIB as a possible search list logical name -- the

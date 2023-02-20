@@ -193,7 +193,8 @@ typedef enum {
 #  define HVAUX_ARENA_ROOT_IX   SVt_IV
 #endif
 #ifdef PERL_IN_SV_C
-#  define SVt_FIRST SVt_NULL    /* the type of SV that new_SV() in sv.c returns */
+#  define SVt_FIRST SVt_NULL /* the type of SV that new_SV()
+                                in sv.c returns */
 #endif
 
 #define PERL_ARENA_ROOTS_SIZE   (SVt_LAST)
@@ -487,7 +488,8 @@ perform the upgrade if necessary.  See C<L</svtype>>.
 
 
 /* scalar SVs with SVp_POK */
-#define SVppv_STATIC    0x40000000 /* PV is pointer to static const; must be set with SVf_IsCOW */
+#define SVppv_STATIC    0x40000000 /* PV is pointer to static const;
+                                      must be set with SVf_IsCOW */
 /* PVAV */
 #define SVpav_REAL      0x40000000  /* free old entries */
 /* PVHV */
@@ -1006,11 +1008,13 @@ Set the size of the string buffer for the SV. See C<L</SvLEN>>.
     ((SvFLAGS(sv) & (SVf_IOK|SVf_IVisUV))   \
      == SVf_IOK)
 
-#define SvIandPOK(sv)              ((SvFLAGS(sv) & (SVf_IOK|SVf_POK)) == (SVf_IOK|SVf_POK))
+#define SvIandPOK(sv)   \
+    ((SvFLAGS(sv) & (SVf_IOK|SVf_POK)) == (SVf_IOK|SVf_POK))
 #define SvIandPOK_on(sv)    \
     (assert_not_glob(sv)    \
      (SvFLAGS(sv) |= (SVf_IOK|SVp_IOK|SVf_POK|SVp_POK)))
-#define SvIandPOK_off(sv)          (SvFLAGS(sv) &= ~(SVf_IOK|SVp_IOK|SVf_IVisUV|SVf_POK|SVp_POK))
+#define SvIandPOK_off(sv)   \
+    (SvFLAGS(sv) &= ~(SVf_IOK|SVp_IOK|SVf_IVisUV|SVf_POK|SVp_POK))
 
 #define SvBoolFlagsOK(sv)           SvIandPOK(sv)
 
@@ -1158,21 +1162,31 @@ not.
 /* "nog" means "doesn't have get magic" */
 #define SvPOK_nog(sv)           ((SvFLAGS(sv) & (SVf_POK|SVs_GMG)) == SVf_POK)
 #define SvIOK_nog(sv)           ((SvFLAGS(sv) & (SVf_IOK|SVs_GMG)) == SVf_IOK)
-#define SvUOK_nog(sv)           ((SvFLAGS(sv) & (SVf_IOK|SVf_IVisUV|SVs_GMG)) == (SVf_IOK|SVf_IVisUV))
+#define SvUOK_nog(sv)   \
+    ((SvFLAGS(sv) & (SVf_IOK|SVf_IVisUV|SVs_GMG)) == (SVf_IOK|SVf_IVisUV))
 #define SvNOK_nog(sv)           ((SvFLAGS(sv) & (SVf_NOK|SVs_GMG)) == SVf_NOK)
 #define SvNIOK_nog(sv)          (SvNIOK(sv) && !(SvFLAGS(sv) & SVs_GMG))
 
-#define SvPOK_nogthink(sv)      ((SvFLAGS(sv) & (SVf_POK|SVf_THINKFIRST|SVs_GMG)) == SVf_POK)
-#define SvIOK_nogthink(sv)      ((SvFLAGS(sv) & (SVf_IOK|SVf_THINKFIRST|SVs_GMG)) == SVf_IOK)
-#define SvUOK_nogthink(sv)      ((SvFLAGS(sv) & (SVf_IOK|SVf_IVisUV|SVf_THINKFIRST|SVs_GMG)) == (SVf_IOK|SVf_IVisUV))
-#define SvNOK_nogthink(sv)      ((SvFLAGS(sv) & (SVf_NOK|SVf_THINKFIRST|SVs_GMG)) == SVf_NOK)
-#define SvNIOK_nogthink(sv)     (SvNIOK(sv) && !(SvFLAGS(sv) & (SVf_THINKFIRST|SVs_GMG)))
+#define SvPOK_nogthink(sv)  \
+    ((SvFLAGS(sv) & (SVf_POK|SVf_THINKFIRST|SVs_GMG)) == SVf_POK)
+#define SvIOK_nogthink(sv)  \
+    ((SvFLAGS(sv) & (SVf_IOK|SVf_THINKFIRST|SVs_GMG)) == SVf_IOK)
+#define SvUOK_nogthink(sv)  \
+    ((SvFLAGS(sv) & (SVf_IOK|SVf_IVisUV|SVf_THINKFIRST|SVs_GMG)) == (SVf_IOK|SVf_IVisUV))
+#define SvNOK_nogthink(sv)  \
+    ((SvFLAGS(sv) & (SVf_NOK|SVf_THINKFIRST|SVs_GMG)) == SVf_NOK)
+#define SvNIOK_nogthink(sv) \
+    (SvNIOK(sv) && !(SvFLAGS(sv) & (SVf_THINKFIRST|SVs_GMG)))
 
-#define SvPOK_utf8_nog(sv)      ((SvFLAGS(sv) & (SVf_POK|SVf_UTF8|SVs_GMG)) == (SVf_POK|SVf_UTF8))
-#define SvPOK_utf8_nogthink(sv) ((SvFLAGS(sv) & (SVf_POK|SVf_UTF8|SVf_THINKFIRST|SVs_GMG)) == (SVf_POK|SVf_UTF8))
+#define SvPOK_utf8_nog(sv)  \
+    ((SvFLAGS(sv) & (SVf_POK|SVf_UTF8|SVs_GMG)) == (SVf_POK|SVf_UTF8))
+#define SvPOK_utf8_nogthink(sv) \
+    ((SvFLAGS(sv) & (SVf_POK|SVf_UTF8|SVf_THINKFIRST|SVs_GMG)) == (SVf_POK|SVf_UTF8))
 
-#define SvPOK_byte_nog(sv)      ((SvFLAGS(sv) & (SVf_POK|SVf_UTF8|SVs_GMG)) == SVf_POK)
-#define SvPOK_byte_nogthink(sv) ((SvFLAGS(sv) & (SVf_POK|SVf_UTF8|SVf_THINKFIRST|SVs_GMG)) == SVf_POK)
+#define SvPOK_byte_nog(sv)  \
+    ((SvFLAGS(sv) & (SVf_POK|SVf_UTF8|SVs_GMG)) == SVf_POK)
+#define SvPOK_byte_nogthink(sv) \
+    ((SvFLAGS(sv) & (SVf_POK|SVf_UTF8|SVf_THINKFIRST|SVs_GMG)) == SVf_POK)
 
 #define SvPOK_pure_nogthink(sv) \
     ((SvFLAGS(sv) & (SVf_POK|SVf_IOK|SVf_NOK|SVf_ROK|SVpgv_GP|SVf_THINKFIRST|SVs_GMG)) == SVf_POK)
@@ -1298,7 +1312,8 @@ object type. Exposed to perl code via Internals::SvREADONLY().
 # define SvREADONLY_off(sv)     (SvFLAGS(sv) &= ~SVf_READONLY)
 #endif
 
-#define SvSCREAM(sv) ((SvFLAGS(sv) & (SVp_SCREAM|SVp_POK)) == (SVp_SCREAM|SVp_POK))
+#define SvSCREAM(sv)    \
+    ((SvFLAGS(sv) & (SVp_SCREAM|SVp_POK)) == (SVp_SCREAM|SVp_POK))
 #define SvSCREAM_on(sv)         (SvFLAGS(sv) |= SVp_SCREAM)
 #define SvSCREAM_off(sv)        (SvFLAGS(sv) &= ~SVp_SCREAM)
 
@@ -1353,8 +1368,10 @@ object type. Exposed to perl code via Internals::SvREADONLY().
 #  define SvLEN(sv) (0 + ((XPV*) SvANY(sv))->xpv_len)
 #  define SvEND(sv) ((sv)->sv_u.svu_pv + ((XPV*)SvANY(sv))->xpv_cur)
 
-#  define SvMAGIC(sv)   (0 + *(assert_(SvTYPE(sv) >= SVt_PVMG) &((XPVMG*)  SvANY(sv))->xmg_u.xmg_magic))
-#  define SvSTASH(sv)   (0 + *(assert_(SvTYPE(sv) >= SVt_PVMG) &((XPVMG*)  SvANY(sv))->xmg_stash))
+#  define SvMAGIC(sv)   \
+       (0 + *(assert_(SvTYPE(sv) >= SVt_PVMG) &((XPVMG*)  SvANY(sv))->xmg_u.xmg_magic))
+#  define SvSTASH(sv)   \
+       (0 + *(assert_(SvTYPE(sv) >= SVt_PVMG) &((XPVMG*)  SvANY(sv))->xmg_stash))
 #else   /* Below is not PERL_DEBUG_COW */
 # ifdef PERL_CORE
 #  define SvLEN(sv) (0 + ((XPV*) SvANY(sv))->xpv_len)
@@ -1723,8 +1740,10 @@ attention to precisely which outputs are influenced by which inputs.
 #else
 #   define SvTAINTED(sv)          (SvMAGICAL(sv) && sv_tainted(sv))
 #endif
-#define SvTAINTED_on(sv)  STMT_START{ if(UNLIKELY(TAINTING_get)){sv_taint(sv);}   }STMT_END
-#define SvTAINTED_off(sv) STMT_START{ if(UNLIKELY(TAINTING_get)){sv_untaint(sv);} }STMT_END
+#define SvTAINTED_on(sv)    \
+    STMT_START{ if(UNLIKELY(TAINTING_get)){sv_taint(sv);}   }STMT_END
+#define SvTAINTED_off(sv)   \
+    STMT_START{ if(UNLIKELY(TAINTING_get)){sv_untaint(sv);} }STMT_END
 
 #define SvTAINT(sv)                         \
     STMT_START {                            \
@@ -2088,8 +2107,10 @@ END_EXTERN_C
 #define SvIsCOW(sv)              (SvFLAGS(sv) & SVf_IsCOW)
 #define SvIsCOW_on(sv)           (SvFLAGS(sv) |= SVf_IsCOW)
 #define SvIsCOW_off(sv)          (SvFLAGS(sv) &= ~(SVf_IsCOW|SVppv_STATIC))
-#define SvIsCOW_shared_hash(sv)  ((SvFLAGS(sv) & (SVf_IsCOW|SVppv_STATIC)) == (SVf_IsCOW) && SvLEN(sv) == 0)
-#define SvIsCOW_static(sv)       ((SvFLAGS(sv) & (SVf_IsCOW|SVppv_STATIC)) == (SVf_IsCOW|SVppv_STATIC))
+#define SvIsCOW_shared_hash(sv) \
+    ((SvFLAGS(sv) & (SVf_IsCOW|SVppv_STATIC)) == (SVf_IsCOW) && SvLEN(sv) == 0)
+#define SvIsCOW_static(sv)  \
+    ((SvFLAGS(sv) & (SVf_IsCOW|SVppv_STATIC)) == (SVf_IsCOW|SVppv_STATIC))
 
 #define SvSHARED_HEK_FROM_PV(pvx)   \
     ((struct hek*)(pvx - STRUCT_OFFSET(struct hek, hek_key)))
@@ -2214,10 +2235,13 @@ immediately written again.
 #define sv_pvbyte(sv) SvPVbyte_nolen(sv)
 
 #define sv_pvn_force_nomg(sv, lp) sv_pvn_force_flags(sv, lp, 0)
-#define sv_utf8_upgrade_flags(sv, flags) sv_utf8_upgrade_flags_grow(sv, flags, 0)
+#define sv_utf8_upgrade_flags(sv, flags)    \
+    sv_utf8_upgrade_flags_grow(sv, flags, 0)
 #define sv_utf8_upgrade_nomg(sv) sv_utf8_upgrade_flags(sv, 0)
-#define sv_utf8_downgrade(sv, fail_ok) sv_utf8_downgrade_flags(sv, fail_ok, SV_GMAGIC)
-#define sv_utf8_downgrade_nomg(sv, fail_ok) sv_utf8_downgrade_flags(sv, fail_ok, 0)
+#define sv_utf8_downgrade(sv, fail_ok)  \
+    sv_utf8_downgrade_flags(sv, fail_ok, SV_GMAGIC)
+#define sv_utf8_downgrade_nomg(sv, fail_ok) \
+    sv_utf8_downgrade_flags(sv, fail_ok, 0)
 #define sv_catpvn_nomg(dsv, sstr, slen) sv_catpvn_flags(dsv, sstr, slen, 0)
 #define sv_catpv_nomg(dsv, sstr) sv_catpv_flags(dsv, sstr, 0)
 #define sv_setsv(dsv, ssv)  \
@@ -2227,7 +2251,8 @@ immediately written again.
 #define sv_catsv_nomg(dsv, ssv) sv_catsv_flags(dsv, ssv, 0)
 #define sv_catsv_mg(dsv, ssv) sv_catsv_flags(dsv, ssv, SV_GMAGIC|SV_SMAGIC)
 #define sv_catpvn(dsv, sstr, slen) sv_catpvn_flags(dsv, sstr, slen, SV_GMAGIC)
-#define sv_catpvn_mg(dsv, sstr, slen) sv_catpvn_flags(dsv, sstr, slen, SV_GMAGIC|SV_SMAGIC);
+#define sv_catpvn_mg(dsv, sstr, slen)   \
+    sv_catpvn_flags(dsv, sstr, slen, SV_GMAGIC|SV_SMAGIC);
 #define sv_copypv(dsv, ssv) sv_copypv_flags(dsv, ssv, SV_GMAGIC)
 #define sv_copypv_nomg(dsv, ssv) sv_copypv_flags(dsv, ssv, 0)
 #define sv_2pv(sv, lp) sv_2pv_flags(sv, lp, SV_GMAGIC)
@@ -2367,7 +2392,8 @@ that already have a PV buffer allocated, but no SvTHINKFIRST.
 #define SvUNLOCK(sv) PL_unlockhook(aTHX_ sv)
 #define SvDESTROYABLE(sv) PL_destroyhook(aTHX_ sv)
 
-#define SvSETMAGIC(x) STMT_START { if (UNLIKELY(SvSMAGICAL(x))) mg_set(x); } STMT_END
+#define SvSETMAGIC(x)   \
+    STMT_START { if (UNLIKELY(SvSMAGICAL(x))) mg_set(x); } STMT_END
 
 #define SvSetSV_and(dst,src,finally)    \
     STMT_START {                        \

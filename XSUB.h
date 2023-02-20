@@ -386,7 +386,8 @@ Rethrows a previously caught exception.  See L<perlguts/"Exception Handling">.
            HS_CXT, __FILE__, "v" PERL_API_VERSION_STRING, XS_VERSION)
 #else
 /* should this be a #error? if you want both checked, you better supply XS_VERSION right? */
-#  define XS_BOTHVERSION_SETXSUBFN_POPMARK_BOOTCHECK XS_APIVERSION_SETXSUBFN_POPMARK_BOOTCHECK
+#  define XS_BOTHVERSION_SETXSUBFN_POPMARK_BOOTCHECK    \
+       XS_APIVERSION_SETXSUBFN_POPMARK_BOOTCHECK
 #endif
 
 /* For a normal bootstrap without API or XS version checking.

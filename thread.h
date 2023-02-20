@@ -41,7 +41,8 @@
 #      define pthread_attr_init(a) pthread_attr_create(a)
 #      define PTHREAD_ATTR_SETDETACHSTATE(a,s) pthread_setdetach_np(a,s)
 #      define PTHREAD_CREATE(t,a,s,d) pthread_create(t,a,s,d)
-#      define pthread_key_create(k,d) pthread_keycreate(k,(pthread_destructor_t)(d))
+#      define pthread_key_create(k,d)   \
+           pthread_keycreate(k,(pthread_destructor_t)(d))
 #      define pthread_mutexattr_init(a) pthread_mutexattr_create(a)
 #      define pthread_mutexattr_settype(a,t) pthread_mutexattr_setkind_np(a,t)
 #    endif
@@ -50,12 +51,14 @@
        /* XXX pthread_setdetach_np() missing in DCE threads on HP-UX 10.20 */
 #      define PTHREAD_ATTR_SETDETACHSTATE(a,s)  (0)
 #      define PTHREAD_CREATE(t,a,s,d) pthread_create(t,a,s,d)
-#      define pthread_key_create(k,d) pthread_keycreate(k,(pthread_destructor_t)(d))
+#      define pthread_key_create(k,d)   \
+           pthread_keycreate(k,(pthread_destructor_t)(d))
 #      define pthread_mutexattr_init(a) pthread_mutexattr_create(a)
 #      define pthread_mutexattr_settype(a,t) pthread_mutexattr_setkind_np(a,t)
 #    endif
 #    if defined(OEMVS)
-#      define PTHREAD_ATTR_SETDETACHSTATE(a,s) pthread_attr_setdetachstate(a,&(s))
+#      define PTHREAD_ATTR_SETDETACHSTATE(a,s)  \
+           pthread_attr_setdetachstate(a,&(s))
 #      define YIELD pthread_yield(NULL)
 #    endif
 #  endif
