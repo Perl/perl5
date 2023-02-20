@@ -10,33 +10,33 @@
 
 /*
  * The fields of BASEOP are:
- *	op_next		Pointer to next ppcode to execute after this one.
- *			(Top level pre-grafted op points to first op,
- *			but this is replaced when op is grafted in, when
- *			this op will point to the real next op, and the new
- *			parent takes over role of remembering starting op.)
- * 	op_sibparent    Pointer to the op's next sibling, or to the parent
- *			if there are no more siblings.
- *	op_ppaddr	Pointer to current ppcode's function.
- * 	op_targ		An index into the current pad, identifying an SV
- *			that is typically used to store the OP's result
- *			(such as a lexical variable, or a SVs_PADTMP
- *			temporary intermediate value).
- *	op_type		The type of the operation.
- *	op_opt		Whether or not the op has been optimised by the
- *			peephole optimiser.
- *	op_slabbed	allocated via opslab
- *	op_static	tell op_free() to skip PerlMemShared_free(), when
+ *      op_next         Pointer to next ppcode to execute after this one.
+ *                      (Top level pre-grafted op points to first op,
+ *                      but this is replaced when op is grafted in, when
+ *                      this op will point to the real next op, and the new
+ *                      parent takes over role of remembering starting op.)
+ *      op_sibparent    Pointer to the op's next sibling, or to the parent
+ *                      if there are no more siblings.
+ *      op_ppaddr       Pointer to current ppcode's function.
+ *      op_targ         An index into the current pad, identifying an SV
+ *                      that is typically used to store the OP's result
+ *                      (such as a lexical variable, or a SVs_PADTMP
+ *                      temporary intermediate value).
+ *      op_type         The type of the operation.
+ *      op_opt          Whether or not the op has been optimised by the
+ *                      peephole optimiser.
+ *      op_slabbed      allocated via opslab
+ *      op_static       tell op_free() to skip PerlMemShared_free(), when
  *                      !op_slabbed.
- *	op_savefree	on savestack via SAVEFREEOP
- *	op_folded	Result/remainder of a constant fold operation.
- *	op_moresib	this op is not the last sibling
- *	op_spare	One spare bit
- *	op_flags	Flags common to all operations.  See OPf_* below.
- *	op_private	Flags peculiar to a particular operation (BUT,
- *			by default, set to the number of children until
- *			the operation is privatized by a check routine,
- *			which may or may not check number of children).
+ *      op_savefree     on savestack via SAVEFREEOP
+ *      op_folded       Result/remainder of a constant fold operation.
+ *      op_moresib      this op is not the last sibling
+ *      op_spare        One spare bit
+ *      op_flags        Flags common to all operations.  See OPf_* below.
+ *      op_private      Flags peculiar to a particular operation (BUT,
+ *                      by default, set to the number of children until
+ *                      the operation is privatized by a check routine,
+ *                      which may or may not check number of children).
  */
 #include "op_reg_common.h"
 
@@ -47,21 +47,21 @@ typedef PERL_BITFIELD16 Optype;
 #ifdef BASEOP_DEFINITION
 #define BASEOP BASEOP_DEFINITION
 #else
-#define BASEOP				\
-    OP*		op_next;		\
-    OP*		op_sibparent;		\
-    OP*		(*op_ppaddr)(pTHX);	\
-    PADOFFSET	op_targ;		\
-    PERL_BITFIELD16 op_type:9;		\
-    PERL_BITFIELD16 op_opt:1;		\
-    PERL_BITFIELD16 op_slabbed:1;	\
-    PERL_BITFIELD16 op_savefree:1;	\
-    PERL_BITFIELD16 op_static:1;	\
-    PERL_BITFIELD16 op_folded:1;	\
+#define BASEOP                          \
+    OP*         op_next;                \
+    OP*         op_sibparent;           \
+    OP*         (*op_ppaddr)(pTHX);     \
+    PADOFFSET   op_targ;                \
+    PERL_BITFIELD16 op_type:9;          \
+    PERL_BITFIELD16 op_opt:1;           \
+    PERL_BITFIELD16 op_slabbed:1;       \
+    PERL_BITFIELD16 op_savefree:1;      \
+    PERL_BITFIELD16 op_static:1;        \
+    PERL_BITFIELD16 op_folded:1;        \
     PERL_BITFIELD16 op_moresib:1;       \
-    PERL_BITFIELD16 op_spare:1;		\
-    U8		op_flags;		\
-    U8		op_private;
+    PERL_BITFIELD16 op_spare:1;         \
+    U8          op_flags;               \
+    U8          op_private;
 #endif
 
 #define OpTYPE_set(o,type)                      \
@@ -81,7 +81,7 @@ typedef PERL_BITFIELD16 Optype;
 #define OP_GIMME(op,dfl) \
         (((op)->op_flags & OPf_WANT) ? ((op)->op_flags & OPf_WANT) : dfl)
 
-#define OP_GIMME_REVERSE(flags)	((flags) & G_WANT)
+#define OP_GIMME_REVERSE(flags) ((flags) & G_WANT)
 
 /*
 =for apidoc_section $callback
@@ -99,27 +99,27 @@ Deprecated.  Use C<GIMME_V> instead.
 =cut
 */
 
-#define GIMME_V		Perl_gimme_V(aTHX)
+#define GIMME_V         Perl_gimme_V(aTHX)
 
 /* Public flags */
 
-#define OPf_WANT	3	/* Mask for "want" bits: */
-#define  OPf_WANT_VOID	 1	/*   Want nothing */
-#define  OPf_WANT_SCALAR 2	/*   Want single value */
-#define  OPf_WANT_LIST	 3	/*   Want list of any length */
-#define OPf_KIDS	4	/* There is a firstborn child. */
-#define OPf_PARENS	8	/* This operator was parenthesized. */
+#define OPf_WANT        3       /* Mask for "want" bits: */
+#define  OPf_WANT_VOID   1      /*   Want nothing */
+#define  OPf_WANT_SCALAR 2      /*   Want single value */
+#define  OPf_WANT_LIST   3      /*   Want list of any length */
+#define OPf_KIDS        4       /* There is a firstborn child. */
+#define OPf_PARENS      8       /* This operator was parenthesized. */
                                 /*  (Or block needs explicit scope entry.) */
-#define OPf_REF		16	/* Certified reference. */
+#define OPf_REF         16      /* Certified reference. */
                                 /*  (Return container, not containee). */
-#define OPf_MOD		32	/* Will modify (lvalue). */
+#define OPf_MOD         32      /* Will modify (lvalue). */
 
-#define OPf_STACKED	64	/* Some arg is arriving on the stack. */
+#define OPf_STACKED     64      /* Some arg is arriving on the stack. */
                                 /*   Indicates mutator-variant of op for those
                                  *     ops which support them, e.g. $x += 1
                                  */
 
-#define OPf_SPECIAL	128	/* Do something weird for this op: */
+#define OPf_SPECIAL     128     /* Do something weird for this op: */
                                 /*  On local LVAL, don't init local value. */
                                 /*  On OP_SORT, subroutine is inlined. */
                                 /*  On OP_NOT, inversion was implicit. */
@@ -170,15 +170,15 @@ Deprecated.  Use C<GIMME_V> instead.
 #define OPf_FOLDED      (1<<16)
 
 /* old names; don't use in new code, but don't break them, either */
-#define OPf_LIST	OPf_WANT_LIST
-#define OPf_KNOW	OPf_WANT
+#define OPf_LIST        OPf_WANT_LIST
+#define OPf_KNOW        OPf_WANT
 
 #if !defined(PERL_CORE) && !defined(PERL_EXT)
 #  define GIMME \
-          (PL_op->op_flags & OPf_WANT					\
-           ? ((PL_op->op_flags & OPf_WANT) == OPf_WANT_LIST		\
-              ? G_LIST							\
-              : G_SCALAR)						\
+          (PL_op->op_flags & OPf_WANT                                   \
+           ? ((PL_op->op_flags & OPf_WANT) == OPf_WANT_LIST             \
+              ? G_LIST                                                  \
+              : G_SCALAR)                                               \
            : dowantarray())
 #endif
 
@@ -187,7 +187,7 @@ Deprecated.  Use C<GIMME_V> instead.
  *       from data in regen/op_private */
 
 
-#define OPpTRANS_ALL	(OPpTRANS_USE_SVOP|OPpTRANS_CAN_FORCE_UTF8|OPpTRANS_IDENTICAL|OPpTRANS_SQUASH|OPpTRANS_COMPLEMENT|OPpTRANS_GROWS|OPpTRANS_DELETE)
+#define OPpTRANS_ALL    (OPpTRANS_USE_SVOP|OPpTRANS_CAN_FORCE_UTF8|OPpTRANS_IDENTICAL|OPpTRANS_SQUASH|OPpTRANS_COMPLEMENT|OPpTRANS_GROWS|OPpTRANS_DELETE)
 #define OPpTRANS_FROM_UTF   OPpTRANS_USE_SVOP
 #define OPpTRANS_TO_UTF     OPpTRANS_CAN_FORCE_UTF8
 
@@ -222,37 +222,37 @@ struct op {
 
 struct unop {
     BASEOP
-    OP *	op_first;
+    OP *        op_first;
 };
 
 struct unop_aux {
     BASEOP
-    OP  	  *op_first;
+    OP            *op_first;
     UNOP_AUX_item *op_aux;
 };
 
 struct binop {
     BASEOP
-    OP *	op_first;
-    OP *	op_last;
+    OP *        op_first;
+    OP *        op_last;
 };
 
 struct logop {
     BASEOP
-    OP *	op_first;
+    OP *        op_first;
 
     /* Note that op->op_other is the *next* op in execution order of the
      * alternate branch, not the root of the subtree. I.e. imagine it being
      * called ->op_otherfirst.
      * To find the structural subtree root (what could be called
      * ->op_otherroot), use OpSIBLING of ->op_first  */
-    OP *	op_other;
+    OP *        op_other;
 };
 
 struct listop {
     BASEOP
-    OP *	op_first;
-    OP *	op_last;
+    OP *        op_first;
+    OP *        op_last;
 };
 
 struct methop {
@@ -272,8 +272,8 @@ struct methop {
 
 struct pmop {
     BASEOP
-    OP *	op_first;
-    OP *	op_last;
+    OP *        op_first;
+    OP *        op_last;
 #ifdef USE_ITHREADS
     PADOFFSET   op_pmoffset;
 #else
@@ -281,23 +281,23 @@ struct pmop {
 #endif
     U32         op_pmflags;
     union {
-        OP *	op_pmreplroot;		/* For OP_SUBST */
-        PADOFFSET op_pmtargetoff;	/* For OP_SPLIT lex ary or thr GV */
-        GV *	op_pmtargetgv;	        /* For OP_SPLIT non-threaded GV */
-    }	op_pmreplrootu;
+        OP *    op_pmreplroot;          /* For OP_SUBST */
+        PADOFFSET op_pmtargetoff;       /* For OP_SPLIT lex ary or thr GV */
+        GV *    op_pmtargetgv;          /* For OP_SPLIT non-threaded GV */
+    }   op_pmreplrootu;
     union {
-        OP *	op_pmreplstart;	/* Only used in OP_SUBST */
+        OP *    op_pmreplstart; /* Only used in OP_SUBST */
 #ifdef USE_ITHREADS
         PADOFFSET op_pmstashoff; /* Only used in OP_MATCH, with PMf_ONCE set */
 #else
-        HV *	op_pmstash;
+        HV *    op_pmstash;
 #endif
-    }		op_pmstashstartu;
-    OP *	op_code_list;	/* list of (?{}) code blocks */
+    }           op_pmstashstartu;
+    OP *        op_code_list;   /* list of (?{}) code blocks */
 };
 
 #ifdef USE_ITHREADS
-#define PM_GETRE(o)	(SvTYPE(PL_regex_pad[(o)->op_pmoffset]) == SVt_REGEXP \
+#define PM_GETRE(o)     (SvTYPE(PL_regex_pad[(o)->op_pmoffset]) == SVt_REGEXP \
                          ? (REGEXP*)(PL_regex_pad[(o)->op_pmoffset]) : NULL)
 /* The assignment is just to enforce type safety (or at least get a warning).
  */
@@ -307,9 +307,9 @@ struct pmop {
    more complex, and we'd have an AV with (SV*)NULL in it, which feels bad */
 /* BEWARE - something that calls this macro passes (r) which has a side
    effect.  */
-#define PM_SETRE(o,r)	STMT_START {					\
-                            REGEXP *const _pm_setre = (r);		\
-                            assert(_pm_setre);				\
+#define PM_SETRE(o,r)   STMT_START {                                    \
+                            REGEXP *const _pm_setre = (r);              \
+                            assert(_pm_setre);                          \
                             PL_regex_pad[(o)->op_pmoffset] = MUTABLE_SV(_pm_setre); \
                         } STMT_END
 #else
@@ -351,48 +351,48 @@ struct pmop {
 
 /* Set by the parser if it discovers an error, so the regex shouldn't be
  * compiled */
-#define PMf_HAS_ERROR	(1U<<(PMf_BASE_SHIFT+3))
+#define PMf_HAS_ERROR   (1U<<(PMf_BASE_SHIFT+3))
 
 /* 'use re "taint"' in scope: taint $1 etc. if target tainted */
-#define PMf_RETAINT	(1U<<(PMf_BASE_SHIFT+4))
+#define PMf_RETAINT     (1U<<(PMf_BASE_SHIFT+4))
 
 /* match successfully only once per reset, with related flag RXf_USED in
  * re->extflags holding state.  This is used only for ?? matches, and only on
  * OP_MATCH and OP_QR */
-#define PMf_ONCE	(1U<<(PMf_BASE_SHIFT+5))
+#define PMf_ONCE        (1U<<(PMf_BASE_SHIFT+5))
 
 /* PMf_ONCE, i.e. ?pat?, has matched successfully.  Not used under threading. */
 #define PMf_USED        (1U<<(PMf_BASE_SHIFT+6))
 
 /* subst replacement is constant */
-#define PMf_CONST	(1U<<(PMf_BASE_SHIFT+7))
+#define PMf_CONST       (1U<<(PMf_BASE_SHIFT+7))
 
 /* keep 1st runtime pattern forever */
-#define PMf_KEEP	(1U<<(PMf_BASE_SHIFT+8))
+#define PMf_KEEP        (1U<<(PMf_BASE_SHIFT+8))
 
-#define PMf_GLOBAL	(1U<<(PMf_BASE_SHIFT+9)) /* pattern had a g modifier */
+#define PMf_GLOBAL      (1U<<(PMf_BASE_SHIFT+9)) /* pattern had a g modifier */
 
 /* don't reset pos() if //g fails */
-#define PMf_CONTINUE	(1U<<(PMf_BASE_SHIFT+10))
+#define PMf_CONTINUE    (1U<<(PMf_BASE_SHIFT+10))
 
 /* evaluating replacement as expr */
-#define PMf_EVAL	(1U<<(PMf_BASE_SHIFT+11))
+#define PMf_EVAL        (1U<<(PMf_BASE_SHIFT+11))
 
 /* Return substituted string instead of modifying it. */
-#define PMf_NONDESTRUCT	(1U<<(PMf_BASE_SHIFT+12))
+#define PMf_NONDESTRUCT (1U<<(PMf_BASE_SHIFT+12))
 
 /* the pattern has a CV attached (currently only under qr/...(?{}).../) */
-#define PMf_HAS_CV	(1U<<(PMf_BASE_SHIFT+13))
+#define PMf_HAS_CV      (1U<<(PMf_BASE_SHIFT+13))
 
 /* op_code_list is private; don't free it etc. It may well point to
  * code within another sub, with different pad etc */
-#define PMf_CODELIST_PRIVATE	(1U<<(PMf_BASE_SHIFT+14))
+#define PMf_CODELIST_PRIVATE    (1U<<(PMf_BASE_SHIFT+14))
 
 /* the PMOP is a QR (we should be able to detect that from the op type,
  * but the regex compilation API passes just the pm flags, not the op
  * itself */
-#define PMf_IS_QR	(1U<<(PMf_BASE_SHIFT+15))
-#define PMf_USE_RE_EVAL	(1U<<(PMf_BASE_SHIFT+16)) /* use re'eval' in scope */
+#define PMf_IS_QR       (1U<<(PMf_BASE_SHIFT+15))
+#define PMf_USE_RE_EVAL (1U<<(PMf_BASE_SHIFT+16)) /* use re'eval' in scope */
 
 /* Means that this is a subpattern being compiled while processing a \p{}
  * wildcard.  This isn't called from op.c, but it is passed as a pm flag. */
@@ -411,100 +411,100 @@ struct pmop {
 #  define PmopSTASH(o)         ((o)->op_pmflags & PMf_ONCE                         \
                                 ? PL_stashpad[(o)->op_pmstashstartu.op_pmstashoff]   \
                                 : NULL)
-#  define PmopSTASH_set(o,hv)	\
-        (assert_((o)->op_pmflags & PMf_ONCE)				\
-         (o)->op_pmstashstartu.op_pmstashoff =				\
+#  define PmopSTASH_set(o,hv)   \
+        (assert_((o)->op_pmflags & PMf_ONCE)                            \
+         (o)->op_pmstashstartu.op_pmstashoff =                          \
             (hv) ? alloccopstash(hv) : 0)
 #else
-#  define PmopSTASH(o)							\
+#  define PmopSTASH(o)                                                  \
     (((o)->op_pmflags & PMf_ONCE) ? (o)->op_pmstashstartu.op_pmstash : NULL)
 #  if defined (DEBUGGING) && defined(PERL_USE_GCC_BRACE_GROUPS)
-#    define PmopSTASH_set(o,hv)		({				\
-        assert((o)->op_pmflags & PMf_ONCE);				\
-        ((o)->op_pmstashstartu.op_pmstash = (hv));			\
+#    define PmopSTASH_set(o,hv)         ({                              \
+        assert((o)->op_pmflags & PMf_ONCE);                             \
+        ((o)->op_pmstashstartu.op_pmstash = (hv));                      \
     })
 #  else
-#    define PmopSTASH_set(o,hv)	((o)->op_pmstashstartu.op_pmstash = (hv))
+#    define PmopSTASH_set(o,hv) ((o)->op_pmstashstartu.op_pmstash = (hv))
 #  endif
 #endif
-#define PmopSTASHPV(o)	(PmopSTASH(o) ? HvNAME_get(PmopSTASH(o)) : NULL)
+#define PmopSTASHPV(o)  (PmopSTASH(o) ? HvNAME_get(PmopSTASH(o)) : NULL)
    /* op_pmstashstartu.op_pmstash is not refcounted */
-#define PmopSTASHPV_set(o,pv)	PmopSTASH_set((o), gv_stashpv(pv,GV_ADD))
+#define PmopSTASHPV_set(o,pv)   PmopSTASH_set((o), gv_stashpv(pv,GV_ADD))
 
 struct svop {
     BASEOP
-    SV *	op_sv;
+    SV *        op_sv;
 };
 
 struct padop {
     BASEOP
-    PADOFFSET	op_padix;
+    PADOFFSET   op_padix;
 };
 
 struct pvop {
     BASEOP
-    char *	op_pv;
+    char *      op_pv;
 };
 
 struct loop {
     BASEOP
-    OP *	op_first;
-    OP *	op_last;
-    OP *	op_redoop;
-    OP *	op_nextop;
-    OP *	op_lastop;
+    OP *        op_first;
+    OP *        op_last;
+    OP *        op_redoop;
+    OP *        op_nextop;
+    OP *        op_lastop;
 };
 
-#define cUNOPx(o)	((UNOP*)(o))
-#define cUNOP_AUXx(o)	((UNOP_AUX*)(o))
-#define cBINOPx(o)	((BINOP*)(o))
-#define cLISTOPx(o)	((LISTOP*)(o))
-#define cLOGOPx(o)	((LOGOP*)(o))
-#define cPMOPx(o)	((PMOP*)(o))
-#define cSVOPx(o)	((SVOP*)(o))
-#define cPADOPx(o)	((PADOP*)(o))
-#define cPVOPx(o)	((PVOP*)(o))
-#define cCOPx(o)	((COP*)(o))
-#define cLOOPx(o)	((LOOP*)(o))
-#define cMETHOPx(o)	((METHOP*)(o))
+#define cUNOPx(o)       ((UNOP*)(o))
+#define cUNOP_AUXx(o)   ((UNOP_AUX*)(o))
+#define cBINOPx(o)      ((BINOP*)(o))
+#define cLISTOPx(o)     ((LISTOP*)(o))
+#define cLOGOPx(o)      ((LOGOP*)(o))
+#define cPMOPx(o)       ((PMOP*)(o))
+#define cSVOPx(o)       ((SVOP*)(o))
+#define cPADOPx(o)      ((PADOP*)(o))
+#define cPVOPx(o)       ((PVOP*)(o))
+#define cCOPx(o)        ((COP*)(o))
+#define cLOOPx(o)       ((LOOP*)(o))
+#define cMETHOPx(o)     ((METHOP*)(o))
 
-#define cUNOP		cUNOPx(PL_op)
-#define cUNOP_AUX	cUNOP_AUXx(PL_op)
-#define cBINOP		cBINOPx(PL_op)
-#define cLISTOP		cLISTOPx(PL_op)
-#define cLOGOP		cLOGOPx(PL_op)
-#define cPMOP		cPMOPx(PL_op)
-#define cSVOP		cSVOPx(PL_op)
-#define cPADOP		cPADOPx(PL_op)
-#define cPVOP		cPVOPx(PL_op)
-#define cCOP		cCOPx(PL_op)
-#define cLOOP		cLOOPx(PL_op)
+#define cUNOP           cUNOPx(PL_op)
+#define cUNOP_AUX       cUNOP_AUXx(PL_op)
+#define cBINOP          cBINOPx(PL_op)
+#define cLISTOP         cLISTOPx(PL_op)
+#define cLOGOP          cLOGOPx(PL_op)
+#define cPMOP           cPMOPx(PL_op)
+#define cSVOP           cSVOPx(PL_op)
+#define cPADOP          cPADOPx(PL_op)
+#define cPVOP           cPVOPx(PL_op)
+#define cCOP            cCOPx(PL_op)
+#define cLOOP           cLOOPx(PL_op)
 #define cMETHOP         cMETHOPx(PL_op)
 
-#define cUNOPo		cUNOPx(o)
-#define cUNOP_AUXo	cUNOP_AUXx(o)
-#define cBINOPo		cBINOPx(o)
-#define cLISTOPo	cLISTOPx(o)
-#define cLOGOPo		cLOGOPx(o)
-#define cPMOPo		cPMOPx(o)
-#define cSVOPo		cSVOPx(o)
-#define cPADOPo		cPADOPx(o)
-#define cPVOPo		cPVOPx(o)
-#define cCOPo		cCOPx(o)
-#define cLOOPo		cLOOPx(o)
+#define cUNOPo          cUNOPx(o)
+#define cUNOP_AUXo      cUNOP_AUXx(o)
+#define cBINOPo         cBINOPx(o)
+#define cLISTOPo        cLISTOPx(o)
+#define cLOGOPo         cLOGOPx(o)
+#define cPMOPo          cPMOPx(o)
+#define cSVOPo          cSVOPx(o)
+#define cPADOPo         cPADOPx(o)
+#define cPVOPo          cPVOPx(o)
+#define cCOPo           cCOPx(o)
+#define cLOOPo          cLOOPx(o)
 #define cMETHOPo        cMETHOPx(o)
 
-#define kUNOP		cUNOPx(kid)
-#define kUNOP_AUX	cUNOP_AUXx(kid)
-#define kBINOP		cBINOPx(kid)
-#define kLISTOP		cLISTOPx(kid)
-#define kLOGOP		cLOGOPx(kid)
-#define kPMOP		cPMOPx(kid)
-#define kSVOP		cSVOPx(kid)
-#define kPADOP		cPADOPx(kid)
-#define kPVOP		cPVOPx(kid)
-#define kCOP		cCOPx(kid)
-#define kLOOP		cLOOPx(kid)
+#define kUNOP           cUNOPx(kid)
+#define kUNOP_AUX       cUNOP_AUXx(kid)
+#define kBINOP          cBINOPx(kid)
+#define kLISTOP         cLISTOPx(kid)
+#define kLOGOP          cLOGOPx(kid)
+#define kPMOP           cPMOPx(kid)
+#define kSVOP           cSVOPx(kid)
+#define kPADOP          cPADOPx(kid)
+#define kPVOP           cPVOPx(kid)
+#define kCOP            cCOPx(kid)
+#define kLOOP           cLOOPx(kid)
 #define kMETHOP         cMETHOPx(kid)
 
 
@@ -527,29 +527,29 @@ typedef enum {
 
 
 #ifdef USE_ITHREADS
-#  define	cGVOPx_gv(o)	((GV*)PAD_SVl(cPADOPx(o)->op_padix))
+#  define       cGVOPx_gv(o)    ((GV*)PAD_SVl(cPADOPx(o)->op_padix))
 #  ifndef PERL_CORE
-#    define	IS_PADGV(v)	(v && isGV(v))
-#    define	IS_PADCONST(v) \
+#    define     IS_PADGV(v)     (v && isGV(v))
+#    define     IS_PADCONST(v) \
         (v && (SvREADONLY(v) || (SvIsCOW(v) && !SvLEN(v))))
 #  endif
-#  define	cSVOPx_sv(v)	(cSVOPx(v)->op_sv \
+#  define       cSVOPx_sv(v)    (cSVOPx(v)->op_sv \
                                  ? cSVOPx(v)->op_sv : PAD_SVl((v)->op_targ))
-#  define	cSVOPx_svp(v)	(cSVOPx(v)->op_sv \
+#  define       cSVOPx_svp(v)   (cSVOPx(v)->op_sv \
                                  ? &cSVOPx(v)->op_sv : &PAD_SVl((v)->op_targ))
 #  define       cMETHOPx_meth(v) (cMETHOPx(v)->op_u.op_meth_sv \
                                   ? cMETHOPx(v)->op_u.op_meth_sv : PAD_SVl((v)->op_targ))
-#  define	cMETHOPx_rclass(v) PAD_SVl(cMETHOPx(v)->op_rclass_targ)
+#  define       cMETHOPx_rclass(v) PAD_SVl(cMETHOPx(v)->op_rclass_targ)
 #else
-#  define	cGVOPx_gv(o)	((GV*)cSVOPx(o)->op_sv)
+#  define       cGVOPx_gv(o)    ((GV*)cSVOPx(o)->op_sv)
 #  ifndef PERL_CORE
-#    define	IS_PADGV(v)	FALSE
-#    define	IS_PADCONST(v)	FALSE
+#    define     IS_PADGV(v)     FALSE
+#    define     IS_PADCONST(v)  FALSE
 #  endif
-#  define	cSVOPx_sv(v)	(cSVOPx(v)->op_sv)
-#  define	cSVOPx_svp(v)	(&cSVOPx(v)->op_sv)
+#  define       cSVOPx_sv(v)    (cSVOPx(v)->op_sv)
+#  define       cSVOPx_svp(v)   (&cSVOPx(v)->op_sv)
 #  define       cMETHOPx_meth(v)   (cMETHOPx(v)->op_u.op_meth_sv)
-#  define	cMETHOPx_rclass(v) (cMETHOPx(v)->op_rclass_sv)
+#  define       cMETHOPx_rclass(v) (cMETHOPx(v)->op_rclass_sv)
 #endif
 
 #define cMETHOP_meth            cMETHOPx_meth(PL_op)
@@ -558,12 +558,12 @@ typedef enum {
 #define cMETHOPo_meth           cMETHOPx_meth(o)
 #define cMETHOPo_rclass         cMETHOPx_rclass(o)
 
-#define	cGVOP_gv		cGVOPx_gv(PL_op)
-#define	cGVOPo_gv		cGVOPx_gv(o)
-#define	kGVOP_gv		cGVOPx_gv(kid)
-#define cSVOP_sv		cSVOPx_sv(PL_op)
-#define cSVOPo_sv		cSVOPx_sv(o)
-#define kSVOP_sv		cSVOPx_sv(kid)
+#define cGVOP_gv                cGVOPx_gv(PL_op)
+#define cGVOPo_gv               cGVOPx_gv(o)
+#define kGVOP_gv                cGVOPx_gv(kid)
+#define cSVOP_sv                cSVOPx_sv(PL_op)
+#define cSVOPo_sv               cSVOPx_sv(o)
+#define kSVOP_sv                cSVOPx_sv(kid)
 
 #ifndef PERL_CORE
 #  define Nullop ((OP*)NULL)
@@ -625,35 +625,35 @@ typedef enum {
  */
 
 #ifdef USE_ITHREADS
-#  define OP_REFCNT_INIT		MUTEX_INIT(&PL_op_mutex)
+#  define OP_REFCNT_INIT                MUTEX_INIT(&PL_op_mutex)
 #  ifdef PERL_CORE
-#    define OP_REFCNT_LOCK		MUTEX_LOCK(&PL_op_mutex)
-#    define OP_REFCNT_UNLOCK		MUTEX_UNLOCK(&PL_op_mutex)
+#    define OP_REFCNT_LOCK              MUTEX_LOCK(&PL_op_mutex)
+#    define OP_REFCNT_UNLOCK            MUTEX_UNLOCK(&PL_op_mutex)
 #  else     /* Subject non-core uses to clang thread safety analysis */
-#    define OP_REFCNT_LOCK		op_refcnt_lock()
-#    define OP_REFCNT_UNLOCK		op_refcnt_unlock()
+#    define OP_REFCNT_LOCK              op_refcnt_lock()
+#    define OP_REFCNT_UNLOCK            op_refcnt_unlock()
 #  endif
-#  define OP_REFCNT_TERM		MUTEX_DESTROY(&PL_op_mutex)
+#  define OP_REFCNT_TERM                MUTEX_DESTROY(&PL_op_mutex)
 #else
-#  define OP_REFCNT_INIT		NOOP
-#  define OP_REFCNT_LOCK		NOOP
-#  define OP_REFCNT_UNLOCK		NOOP
-#  define OP_REFCNT_TERM		NOOP
+#  define OP_REFCNT_INIT                NOOP
+#  define OP_REFCNT_LOCK                NOOP
+#  define OP_REFCNT_UNLOCK              NOOP
+#  define OP_REFCNT_TERM                NOOP
 #endif
 
-#define OpREFCNT_set(o,n)		((o)->op_targ = (n))
+#define OpREFCNT_set(o,n)               ((o)->op_targ = (n))
 #ifdef PERL_DEBUG_READONLY_OPS
-#  define OpREFCNT_inc(o)		Perl_op_refcnt_inc(aTHX_ o)
-#  define OpREFCNT_dec(o)		Perl_op_refcnt_dec(aTHX_ o)
+#  define OpREFCNT_inc(o)               Perl_op_refcnt_inc(aTHX_ o)
+#  define OpREFCNT_dec(o)               Perl_op_refcnt_dec(aTHX_ o)
 #else
-#  define OpREFCNT_inc(o)		((o) ? (++(o)->op_targ, (o)) : NULL)
-#  define OpREFCNT_dec(o)		(--(o)->op_targ)
+#  define OpREFCNT_inc(o)               ((o) ? (++(o)->op_targ, (o)) : NULL)
+#  define OpREFCNT_dec(o)               (--(o)->op_targ)
 #endif
 
 /* flags used by Perl_load_module() */
-#define PERL_LOADMOD_DENY		0x1	/* no Module */
-#define PERL_LOADMOD_NOIMPORT		0x2	/* use Module () */
-#define PERL_LOADMOD_IMPORT_OPS		0x4	/* import arguments
+#define PERL_LOADMOD_DENY               0x1     /* no Module */
+#define PERL_LOADMOD_NOIMPORT           0x2     /* use Module () */
+#define PERL_LOADMOD_IMPORT_OPS         0x4     /* import arguments
                                                    are passed as a sin-
                                                    gle op tree, not a
                                                    list of SVs */
@@ -693,16 +693,16 @@ least an C<UNOP>.
 #endif
 
 #ifdef PERL_CORE
-#  define my(o)	my_attrs((o), NULL)
+#  define my(o) my_attrs((o), NULL)
 #endif
 
 #ifdef USE_REENTRANT_API
 #include "reentr.h"
 #endif
 
-#define NewOp(m,var,c,type)	\
+#define NewOp(m,var,c,type)     \
         (var = (type *) Perl_Slab_Alloc(aTHX_ c*sizeof(type)))
-#define NewOpSz(m,var,size)	\
+#define NewOpSz(m,var,size)     \
         (var = (OP *) Perl_Slab_Alloc(aTHX_ size))
 #define FreeOp(p) Perl_Slab_Free(aTHX_ p)
 
@@ -730,28 +730,28 @@ least an C<UNOP>.
 struct opslot {
     U16         opslot_size;        /* size of this slot (in pointers) */
     U16         opslot_offset;      /* offset from start of slab (in ptr units) */
-    OP		opslot_op;		/* the op itself */
+    OP          opslot_op;              /* the op itself */
 };
 
 struct opslab {
-    OPSLAB *	opslab_next;		/* next slab */
-    OPSLAB *	opslab_head;		/* first slab in chain */
-    OP **	opslab_freed;		/* array of sized chains of freed ops (head only)*/
-    size_t	opslab_refcnt;		/* number of ops (head slab only) */
+    OPSLAB *    opslab_next;            /* next slab */
+    OPSLAB *    opslab_head;            /* first slab in chain */
+    OP **       opslab_freed;           /* array of sized chains of freed ops (head only)*/
+    size_t      opslab_refcnt;          /* number of ops (head slab only) */
     U16         opslab_freed_size;      /* allocated size of opslab_freed */
-    U16		opslab_size;		/* size of slab in pointers,
+    U16         opslab_size;            /* size of slab in pointers,
                                            including header */
-    U16         opslab_free_space;	/* space available in this slab
+    U16         opslab_free_space;      /* space available in this slab
                                            for allocating new ops (in ptr
                                            units) */
 # ifdef PERL_DEBUG_READONLY_OPS
-    bool	opslab_readonly;
+    bool        opslab_readonly;
 # endif
-    OPSLOT	opslab_slots;		/* slots begin here */
+    OPSLOT      opslab_slots;           /* slots begin here */
 };
 
-# define OPSLOT_HEADER		STRUCT_OFFSET(OPSLOT, opslot_op)
-# define OpSLOT(o)		(assert_(o->op_slabbed) \
+# define OPSLOT_HEADER          STRUCT_OFFSET(OPSLOT, opslot_op)
+# define OpSLOT(o)              (assert_(o->op_slabbed) \
                                  (OPSLOT *)(((char *)o)-OPSLOT_HEADER))
 
 /* the slab that owns this op */
@@ -771,16 +771,16 @@ struct opslab {
   /* Variant that does not null out the pads */
 # define OpslabREFCNT_dec_padok(slab) \
         (((slab)->opslab_refcnt == 1)  \
-         ? opslab_free(slab)		\
+         ? opslab_free(slab)            \
          : (void)--(slab)->opslab_refcnt)
 #endif
 
 struct block_hooks {
-    U32	    bhk_flags;
-    void    (*bhk_start)	(pTHX_ int full);
-    void    (*bhk_pre_end)	(pTHX_ OP **seq);
-    void    (*bhk_post_end)	(pTHX_ OP **seq);
-    void    (*bhk_eval)		(pTHX_ OP *const saveop);
+    U32     bhk_flags;
+    void    (*bhk_start)        (pTHX_ int full);
+    void    (*bhk_pre_end)      (pTHX_ OP **seq);
+    void    (*bhk_post_end)     (pTHX_ OP **seq);
+    void    (*bhk_eval)         (pTHX_ OP *const saveop);
 };
 
 /*
@@ -818,12 +818,12 @@ preprocessing token; the type of C<arg> depends on C<which>.
 =cut
 */
 
-#define BhkFLAGS(hk)		((hk)->bhk_flags)
+#define BhkFLAGS(hk)            ((hk)->bhk_flags)
 
-#define BHKf_bhk_start	    0x01
+#define BHKf_bhk_start      0x01
 #define BHKf_bhk_pre_end    0x02
 #define BHKf_bhk_post_end   0x04
-#define BHKf_bhk_eval	    0x08
+#define BHKf_bhk_eval       0x08
 
 #define BhkENTRY(hk, which) \
     ((BhkFLAGS(hk) & BHKf_ ## which) ? ((hk)->which) : NULL)
@@ -916,30 +916,30 @@ Reenable a member of the XOP which has been disabled.
 */
 
 struct custom_op {
-    U32		    xop_flags;    
-    const char	   *xop_name;
-    const char	   *xop_desc;
-    U32		    xop_class;
-    void	  (*xop_peep)(pTHX_ OP *o, OP *oldop);
+    U32             xop_flags;
+    const char     *xop_name;
+    const char     *xop_desc;
+    U32             xop_class;
+    void          (*xop_peep)(pTHX_ OP *o, OP *oldop);
 };
 
 /* return value of Perl_custom_op_get_field, similar to void * then casting but
    the U32 doesn't need truncation on 64 bit platforms in the caller, also
    for easier macro writing */
 typedef union {
-    const char	   *xop_name;
-    const char	   *xop_desc;
-    U32		    xop_class;
-    void	  (*xop_peep)(pTHX_ OP *o, OP *oldop);
+    const char     *xop_name;
+    const char     *xop_desc;
+    U32             xop_class;
+    void          (*xop_peep)(pTHX_ OP *o, OP *oldop);
     XOP            *xop_ptr;
 } XOPRETANY;
 
 #define XopFLAGS(xop) ((xop)->xop_flags)
 
-#define XOPf_xop_name	0x01
-#define XOPf_xop_desc	0x02
-#define XOPf_xop_class	0x04
-#define XOPf_xop_peep	0x08
+#define XOPf_xop_name   0x01
+#define XOPf_xop_desc   0x02
+#define XOPf_xop_class  0x04
+#define XOPf_xop_peep   0x08
 
 /* used by Perl_custom_op_get_field for option checking */
 typedef enum {
@@ -950,10 +950,10 @@ typedef enum {
     XOPe_xop_peep = XOPf_xop_peep
 } xop_flags_enum;
 
-#define XOPd_xop_name	PL_op_name[OP_CUSTOM]
-#define XOPd_xop_desc	PL_op_desc[OP_CUSTOM]
-#define XOPd_xop_class	OA_BASEOP
-#define XOPd_xop_peep	((Perl_cpeep_t)0)
+#define XOPd_xop_name   PL_op_name[OP_CUSTOM]
+#define XOPd_xop_desc   PL_op_desc[OP_CUSTOM]
+#define XOPd_xop_class  OA_BASEOP
+#define XOPd_xop_peep   ((Perl_cpeep_t)0)
 
 #define XopENTRY_set(xop, which, to) \
     STMT_START { \
@@ -1076,8 +1076,8 @@ C<sib> is non-null. For a higher-level interface, see C<L</op_sibling_splice>>.
 /* should match anything that uses ck_ftst in regen/opcodes */
 #define OP_IS_STAT(op) (OP_IS_FILETEST(op) || (op) == OP_LSTAT || (op) == OP_STAT)
 
-#define OpHAS_SIBLING(o)	(cBOOL((o)->op_moresib))
-#define OpSIBLING(o)		(0 + (o)->op_moresib ? (o)->op_sibparent : NULL)
+#define OpHAS_SIBLING(o)        (cBOOL((o)->op_moresib))
+#define OpSIBLING(o)            (0 + (o)->op_moresib ? (o)->op_sibparent : NULL)
 #define OpMORESIB_set(o, sib) ((o)->op_moresib = 1, (o)->op_sibparent = (sib))
 #define OpLASTSIB_set(o, parent) \
     ((o)->op_moresib = 0, (o)->op_sibparent = (parent))
@@ -1086,22 +1086,22 @@ C<sib> is non-null. For a higher-level interface, see C<L</op_sibling_splice>>.
 
 #if !defined(PERL_CORE) && !defined(PERL_EXT)
 /* for backwards compatibility only */
-#  define OP_SIBLING(o)		OpSIBLING(o)
+#  define OP_SIBLING(o)         OpSIBLING(o)
 #endif
 
 #define newATTRSUB(f, o, p, a, b) Perl_newATTRSUB_x(aTHX_  f, o, p, a, b, FALSE)
-#define newSUB(f, o, p, b)	newATTRSUB((f), (o), (p), NULL, (b))
+#define newSUB(f, o, p, b)      newATTRSUB((f), (o), (p), NULL, (b))
 
 #ifdef USE_ITHREADS
-#  define OP_CHECK_MUTEX_INIT		MUTEX_INIT(&PL_check_mutex)
-#  define OP_CHECK_MUTEX_LOCK		MUTEX_LOCK(&PL_check_mutex)
-#  define OP_CHECK_MUTEX_UNLOCK		MUTEX_UNLOCK(&PL_check_mutex)
-#  define OP_CHECK_MUTEX_TERM		MUTEX_DESTROY(&PL_check_mutex)
+#  define OP_CHECK_MUTEX_INIT           MUTEX_INIT(&PL_check_mutex)
+#  define OP_CHECK_MUTEX_LOCK           MUTEX_LOCK(&PL_check_mutex)
+#  define OP_CHECK_MUTEX_UNLOCK         MUTEX_UNLOCK(&PL_check_mutex)
+#  define OP_CHECK_MUTEX_TERM           MUTEX_DESTROY(&PL_check_mutex)
 #else
-#  define OP_CHECK_MUTEX_INIT		NOOP
-#  define OP_CHECK_MUTEX_LOCK		NOOP
-#  define OP_CHECK_MUTEX_UNLOCK		NOOP
-#  define OP_CHECK_MUTEX_TERM		NOOP
+#  define OP_CHECK_MUTEX_INIT           NOOP
+#  define OP_CHECK_MUTEX_LOCK           NOOP
+#  define OP_CHECK_MUTEX_UNLOCK         NOOP
+#  define OP_CHECK_MUTEX_TERM           NOOP
 #endif
 
 

@@ -1816,7 +1816,7 @@ See also C<L</is_c9strict_utf8_string_loclen>>.
 =cut
 */
 
-#define is_c9strict_utf8_string_loc(s, len, ep)	                            \
+#define is_c9strict_utf8_string_loc(s, len, ep)                             \
                             is_c9strict_utf8_string_loclen(s, len, ep, 0)
 
 /*
@@ -2684,7 +2684,7 @@ S_get_regex_charset_name(const U32 flags, STRLEN* const lenp)
     /* The NOT_REACHED; hides an assert() which has a rather complex
      * definition in perl.h. */
     NOT_REACHED; /* NOTREACHED */
-    return "?";	    /* Unknown */
+    return "?";     /* Unknown */
 }
 
 #endif

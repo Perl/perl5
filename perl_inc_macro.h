@@ -23,7 +23,7 @@
 #define DEFINE_INC_MACROS 1
 
 #ifdef APPLLIB_EXP
-#	define INCPUSH_APPLLIB_EXP  S_incpush_use_sep(aTHX_ STR_WITH_LEN(APPLLIB_EXP), \
+#       define INCPUSH_APPLLIB_EXP  S_incpush_use_sep(aTHX_ STR_WITH_LEN(APPLLIB_EXP), \
                       INCPUSH_ADD_SUB_DIRS|INCPUSH_CAN_RELOCATE);
 #endif
 
@@ -31,7 +31,7 @@
     /* sitearch is always relative to sitelib on Windows for
      * DLL-based path intuition to work correctly */
 #  if !defined(WIN32)
-#	define INCPUSH_SITEARCH_EXP S_incpush_use_sep(aTHX_ STR_WITH_LEN(SITEARCH_EXP), \
+#       define INCPUSH_SITEARCH_EXP S_incpush_use_sep(aTHX_ STR_WITH_LEN(SITEARCH_EXP), \
                           INCPUSH_CAN_RELOCATE);
 #  endif
 #endif
@@ -39,10 +39,10 @@
 #ifdef SITELIB_EXP
 #  if defined(WIN32)
     /* this picks up sitearch as well */
-#	  define INCPUSH_SITELIB_EXP s = PerlEnv_sitelib_path(PERL_FS_VERSION, &len); \
+#         define INCPUSH_SITELIB_EXP s = PerlEnv_sitelib_path(PERL_FS_VERSION, &len); \
                 if (s) incpush_use_sep(s, len, INCPUSH_ADD_SUB_DIRS|INCPUSH_CAN_RELOCATE);
 #  else
-#	  define INCPUSH_SITELIB_EXP S_incpush_use_sep(aTHX_ STR_WITH_LEN(SITELIB_EXP), \
+#         define INCPUSH_SITELIB_EXP S_incpush_use_sep(aTHX_ STR_WITH_LEN(SITELIB_EXP), \
                 INCPUSH_CAN_RELOCATE);
 #  endif
 #endif
@@ -51,22 +51,22 @@
     /* vendorarch is always relative to vendorlib on Windows for
      * DLL-based path intuition to work correctly */
 #  if !defined(WIN32)
-#		define INCPUSH_PERL_VENDORARCH_EXP  S_incpush_use_sep(aTHX_ STR_WITH_LEN(PERL_VENDORARCH_EXP), INCPUSH_CAN_RELOCATE);
+#               define INCPUSH_PERL_VENDORARCH_EXP  S_incpush_use_sep(aTHX_ STR_WITH_LEN(PERL_VENDORARCH_EXP), INCPUSH_CAN_RELOCATE);
 #  endif
 #endif
 
 #ifdef PERL_VENDORLIB_EXP
 #  if defined(WIN32)
     /* this picks up vendorarch as well */
-#		define INCPUSH_PERL_VENDORLIB_EXP s = PerlEnv_vendorlib_path(PERL_FS_VERSION, &len); \
+#               define INCPUSH_PERL_VENDORLIB_EXP s = PerlEnv_vendorlib_path(PERL_FS_VERSION, &len); \
                         if (s) incpush_use_sep(s, len, INCPUSH_ADD_SUB_DIRS|INCPUSH_CAN_RELOCATE);
 #  else
-#		define INCPUSH_PERL_VENDORLIB_EXP S_incpush_use_sep(aTHX_ STR_WITH_LEN(PERL_VENDORLIB_EXP), INCPUSH_CAN_RELOCATE);
+#               define INCPUSH_PERL_VENDORLIB_EXP S_incpush_use_sep(aTHX_ STR_WITH_LEN(PERL_VENDORLIB_EXP), INCPUSH_CAN_RELOCATE);
 #  endif
 #endif
 
 #ifdef ARCHLIB_EXP
-#	define INCPUSH_ARCHLIB_EXP S_incpush_use_sep(aTHX_ STR_WITH_LEN(ARCHLIB_EXP), INCPUSH_CAN_RELOCATE);
+#       define INCPUSH_ARCHLIB_EXP S_incpush_use_sep(aTHX_ STR_WITH_LEN(ARCHLIB_EXP), INCPUSH_CAN_RELOCATE);
 #endif
 
 /* used by INCPUSH_PRIVLIB_EXP */
@@ -75,21 +75,21 @@
 #endif
 
 #if defined(WIN32)
-#	define INCPUSH_PRIVLIB_EXP s = PerlEnv_lib_path(PERL_FS_VERSION, &len); \
+#       define INCPUSH_PRIVLIB_EXP s = PerlEnv_lib_path(PERL_FS_VERSION, &len); \
     if (s) incpush_use_sep(s, len, INCPUSH_ADD_SUB_DIRS|INCPUSH_CAN_RELOCATE);
 #else
-#	define INCPUSH_PRIVLIB_EXP S_incpush_use_sep(aTHX_ STR_WITH_LEN(PRIVLIB_EXP), INCPUSH_CAN_RELOCATE);
+#       define INCPUSH_PRIVLIB_EXP S_incpush_use_sep(aTHX_ STR_WITH_LEN(PRIVLIB_EXP), INCPUSH_CAN_RELOCATE);
 #endif
 
 #ifdef PERL_OTHERLIBDIRS
-#	define INCPUSH_PERL_OTHERLIBDIRS S_incpush_use_sep(aTHX_ STR_WITH_LEN(PERL_OTHERLIBDIRS), \
+#       define INCPUSH_PERL_OTHERLIBDIRS S_incpush_use_sep(aTHX_ STR_WITH_LEN(PERL_OTHERLIBDIRS), \
                       INCPUSH_ADD_VERSIONED_SUB_DIRS|INCPUSH_NOT_BASEDIR|INCPUSH_CAN_RELOCATE);
 #endif
 
 
 /* submacros for INCPUSH_PERL5LIB */
 
-#define _INCPUSH_PERL5LIB_IF	if (perl5lib && *perl5lib != '\0')
+#define _INCPUSH_PERL5LIB_IF    if (perl5lib && *perl5lib != '\0')
 
 #ifndef VMS
 # define _INCPUSH_PERL5LIB_ADD _INCPUSH_PERL5LIB_IF incpush_use_sep(perl5lib, 0, INCPUSH_ADD_OLD_VERS|INCPUSH_NOT_BASEDIR);
@@ -115,25 +115,25 @@
     SITELIB and VENDORLIB for older versions
 */
 #ifdef APPLLIB_EXP
-#	define INCPUSH_APPLLIB_OLD_EXP S_incpush_use_sep(aTHX_ STR_WITH_LEN(APPLLIB_EXP), \
+#       define INCPUSH_APPLLIB_OLD_EXP S_incpush_use_sep(aTHX_ STR_WITH_LEN(APPLLIB_EXP), \
             INCPUSH_ADD_OLD_VERS|INCPUSH_NOT_BASEDIR|INCPUSH_CAN_RELOCATE);
 #endif
 
 #if defined(SITELIB_STEM) && defined(PERL_INC_VERSION_LIST)
     /* Search for version-specific dirs below here */
-#	define INCPUSH_SITELIB_STEM   S_incpush_use_sep(aTHX_ STR_WITH_LEN(SITELIB_STEM), \
+#       define INCPUSH_SITELIB_STEM   S_incpush_use_sep(aTHX_ STR_WITH_LEN(SITELIB_STEM), \
                       INCPUSH_ADD_OLD_VERS|INCPUSH_CAN_RELOCATE);
 #endif
 
 
 #if defined(PERL_VENDORLIB_STEM) && defined(PERL_INC_VERSION_LIST)
     /* Search for version-specific dirs below here */
-#	define INCPUSH_PERL_VENDORLIB_STEM    S_incpush_use_sep(aTHX_ STR_WITH_LEN(PERL_VENDORLIB_STEM), \
+#       define INCPUSH_PERL_VENDORLIB_STEM    S_incpush_use_sep(aTHX_ STR_WITH_LEN(PERL_VENDORLIB_STEM), \
                       INCPUSH_ADD_OLD_VERS|INCPUSH_CAN_RELOCATE);
 #endif
 
 #ifdef PERL_OTHERLIBDIRS
-#	define INCPUSH_PERL_OTHERLIBDIRS_ARCHONLY  S_incpush_use_sep(aTHX_ STR_WITH_LEN(PERL_OTHERLIBDIRS), \
+#       define INCPUSH_PERL_OTHERLIBDIRS_ARCHONLY  S_incpush_use_sep(aTHX_ STR_WITH_LEN(PERL_OTHERLIBDIRS), \
                       INCPUSH_ADD_OLD_VERS|INCPUSH_ADD_ARCHONLY_SUB_DIRS|INCPUSH_CAN_RELOCATE);
 #endif
 

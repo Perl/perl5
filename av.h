@@ -9,14 +9,14 @@
  */
 
 struct xpvav {
-    HV*		xmg_stash;	/* class package */
-    union _xmgu	xmg_u;
-    SSize_t	xav_fill;       /* Index of last element present */
-    SSize_t	xav_max;        /* max index for which array has space */
-    SV**	xav_alloc;	/* pointer to beginning of C array of SVs */
+    HV*         xmg_stash;      /* class package */
+    union _xmgu xmg_u;
+    SSize_t     xav_fill;       /* Index of last element present */
+    SSize_t     xav_max;        /* max index for which array has space */
+    SV**        xav_alloc;      /* pointer to beginning of C array of SVs */
 };
 
-/* SV*	xav_arylen; */
+/* SV*  xav_arylen; */
 
 /* SVpav_REAL is set for all AVs whose xav_array contents are refcounted
  * and initialized such that any element can be retrieved as a SV*.
@@ -75,25 +75,25 @@ If all you need is to look up an array element, then prefer C<av_fetch>.
 #  define Nullav Null(AV*)
 #endif
 
-#define AvARRAY(av)	((av)->sv_u.svu_array)
-#define AvALLOC(av)	((XPVAV*)  SvANY(av))->xav_alloc
-#define AvMAX(av)	((XPVAV*)  SvANY(av))->xav_max
-#define AvFILLp(av)	((XPVAV*)  SvANY(av))->xav_fill
-#define AvARYLEN(av)	(*Perl_av_arylen_p(aTHX_ MUTABLE_AV(av)))
+#define AvARRAY(av)     ((av)->sv_u.svu_array)
+#define AvALLOC(av)     ((XPVAV*)  SvANY(av))->xav_alloc
+#define AvMAX(av)       ((XPVAV*)  SvANY(av))->xav_max
+#define AvFILLp(av)     ((XPVAV*)  SvANY(av))->xav_fill
+#define AvARYLEN(av)    (*Perl_av_arylen_p(aTHX_ MUTABLE_AV(av)))
 
-#define AvREAL(av)	(SvFLAGS(av) & SVpav_REAL)
-#define AvREAL_on(av)	(SvFLAGS(av) |= SVpav_REAL)
-#define AvREAL_off(av)	(SvFLAGS(av) &= ~SVpav_REAL)
-#define AvREAL_only(av)	(AvREIFY_off(av), SvFLAGS(av) |= SVpav_REAL)
-#define AvREIFY(av)	(SvFLAGS(av) & SVpav_REIFY)
-#define AvREIFY_on(av)	(SvFLAGS(av) |= SVpav_REIFY)
-#define AvREIFY_off(av)	(SvFLAGS(av) &= ~SVpav_REIFY)
-#define AvREIFY_only(av)	(AvREAL_off(av), SvFLAGS(av) |= SVpav_REIFY)
+#define AvREAL(av)      (SvFLAGS(av) & SVpav_REAL)
+#define AvREAL_on(av)   (SvFLAGS(av) |= SVpav_REAL)
+#define AvREAL_off(av)  (SvFLAGS(av) &= ~SVpav_REAL)
+#define AvREAL_only(av) (AvREIFY_off(av), SvFLAGS(av) |= SVpav_REAL)
+#define AvREIFY(av)     (SvFLAGS(av) & SVpav_REIFY)
+#define AvREIFY_on(av)  (SvFLAGS(av) |= SVpav_REIFY)
+#define AvREIFY_off(av) (SvFLAGS(av) &= ~SVpav_REIFY)
+#define AvREIFY_only(av)        (AvREAL_off(av), SvFLAGS(av) |= SVpav_REIFY)
 
 
-#define AvREALISH(av)	(SvFLAGS(av) & (SVpav_REAL|SVpav_REIFY))
-                                          
-#define AvFILL(av)	((SvRMAGICAL((const SV *) (av))) \
+#define AvREALISH(av)   (SvFLAGS(av) & (SVpav_REAL|SVpav_REIFY))
+
+#define AvFILL(av)      ((SvRMAGICAL((const SV *) (av))) \
                          ? mg_size(MUTABLE_SV(av)) : AvFILLp(av))
 #define av_top_index(av) AvFILL(av)
 #define av_tindex(av)    av_top_index(av)
@@ -209,7 +209,7 @@ to fit one element without extending:
 
 */
 
-#define newAV()	MUTABLE_AV(newSV_type(SVt_PVAV))
+#define newAV() MUTABLE_AV(newSV_type(SVt_PVAV))
 #define newAV_alloc_x(size)  av_new_alloc(size,0)
 #define newAV_alloc_xz(size) av_new_alloc(size,1)
 

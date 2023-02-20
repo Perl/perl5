@@ -53,51 +53,51 @@ struct _PerlIO_funcs {
 
 /*--------------------------------------------------------------------------------------*/
 /* Kind values */
-#define PERLIO_K_RAW		0x00000001
-#define PERLIO_K_BUFFERED	0x00000002
-#define PERLIO_K_CANCRLF	0x00000004
-#define PERLIO_K_FASTGETS	0x00000008
-#define PERLIO_K_DUMMY		0x00000010
-#define PERLIO_K_UTF8		0x00008000
-#define PERLIO_K_DESTRUCT	0x00010000
-#define PERLIO_K_MULTIARG	0x00020000
+#define PERLIO_K_RAW            0x00000001
+#define PERLIO_K_BUFFERED       0x00000002
+#define PERLIO_K_CANCRLF        0x00000004
+#define PERLIO_K_FASTGETS       0x00000008
+#define PERLIO_K_DUMMY          0x00000010
+#define PERLIO_K_UTF8           0x00008000
+#define PERLIO_K_DESTRUCT       0x00010000
+#define PERLIO_K_MULTIARG       0x00020000
 
 /*--------------------------------------------------------------------------------------*/
 struct _PerlIO {
-    PerlIOl *next;		/* Lower layer */
-    PerlIO_funcs *tab;		/* Functions for this layer */
-    U32 flags;			/* Various flags for state */
-    int err;			/* Saved errno value */
+    PerlIOl *next;              /* Lower layer */
+    PerlIO_funcs *tab;          /* Functions for this layer */
+    U32 flags;                  /* Various flags for state */
+    int err;                    /* Saved errno value */
 #ifdef VMS
-    unsigned os_err;		/* Saved vaxc$errno value */
+    unsigned os_err;            /* Saved vaxc$errno value */
 #elif defined (OS2)
     unsigned long os_err;
 #elif defined (WIN32)
-    DWORD os_err;		/* Saved GetLastError() value */
+    DWORD os_err;               /* Saved GetLastError() value */
 #endif
-    PerlIOl *head;		/* our ultimate parent pointer */
+    PerlIOl *head;              /* our ultimate parent pointer */
 };
 
 /*--------------------------------------------------------------------------------------*/
 
 /* Flag values */
-#define PERLIO_F_EOF		0x00000100
-#define PERLIO_F_CANWRITE	0x00000200
-#define PERLIO_F_CANREAD	0x00000400
-#define PERLIO_F_ERROR		0x00000800
-#define PERLIO_F_TRUNCATE	0x00001000
-#define PERLIO_F_APPEND		0x00002000
-#define PERLIO_F_CRLF		0x00004000
-#define PERLIO_F_UTF8		0x00008000
-#define PERLIO_F_UNBUF		0x00010000
-#define PERLIO_F_WRBUF		0x00020000
-#define PERLIO_F_RDBUF		0x00040000
-#define PERLIO_F_LINEBUF	0x00080000
-#define PERLIO_F_TEMP		0x00100000
-#define PERLIO_F_OPEN		0x00200000
-#define PERLIO_F_FASTGETS	0x00400000
-#define PERLIO_F_TTY		0x00800000
-#define PERLIO_F_NOTREG         0x01000000   
+#define PERLIO_F_EOF            0x00000100
+#define PERLIO_F_CANWRITE       0x00000200
+#define PERLIO_F_CANREAD        0x00000400
+#define PERLIO_F_ERROR          0x00000800
+#define PERLIO_F_TRUNCATE       0x00001000
+#define PERLIO_F_APPEND         0x00002000
+#define PERLIO_F_CRLF           0x00004000
+#define PERLIO_F_UTF8           0x00008000
+#define PERLIO_F_UNBUF          0x00010000
+#define PERLIO_F_WRBUF          0x00020000
+#define PERLIO_F_RDBUF          0x00040000
+#define PERLIO_F_LINEBUF        0x00080000
+#define PERLIO_F_TEMP           0x00100000
+#define PERLIO_F_OPEN           0x00200000
+#define PERLIO_F_FASTGETS       0x00400000
+#define PERLIO_F_TTY            0x00800000
+#define PERLIO_F_NOTREG         0x01000000
 #define PERLIO_F_CLEARED        0x02000000 /* layer cleared but not freed */
 
 #define PerlIOBase(f)      (*(f))
@@ -131,13 +131,13 @@ PERL_CALLCONV SV *PerlIO_arg_fetch(PerlIO_list_t *av, IV n);
 */
 
 typedef struct {
-    struct _PerlIO base;	/* Base "class" info */
-    STDCHAR *buf;		/* Start of buffer */
-    STDCHAR *end;		/* End of valid part of buffer */
-    STDCHAR *ptr;		/* Current position in buffer */
-    Off_t posn;			/* Offset of buf into the file */
-    Size_t bufsiz;		/* Real size of buffer */
-    IV oneword;			/* Emergency buffer */
+    struct _PerlIO base;        /* Base "class" info */
+    STDCHAR *buf;               /* Start of buffer */
+    STDCHAR *end;               /* End of valid part of buffer */
+    STDCHAR *ptr;               /* Current position in buffer */
+    Off_t posn;                 /* Offset of buf into the file */
+    Size_t bufsiz;              /* Real size of buffer */
+    IV oneword;                 /* Emergency buffer */
 } PerlIOBuf;
 
 PERL_CALLCONV int PerlIO_apply_layera(pTHX_ PerlIO *f, const char *mode,
@@ -276,7 +276,7 @@ PERL_CALLCONV SSize_t   PerlIOUnix_write(pTHX_ PerlIO *f, const void *vbuf, Size
 /* Utf8 */
 PERL_CALLCONV IV        PerlIOUtf8_pushed(pTHX_ PerlIO *f, const char *mode, SV *arg, PerlIO_funcs *tab);
 
-#endif				/* PERLIOL_H_ */
+#endif                          /* PERLIOL_H_ */
 
 /*
  * ex: set ts=8 sts=4 sw=4 et:

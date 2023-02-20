@@ -19,17 +19,17 @@
 #else
 #  ifdef OLD_PTHREADS_API /* Here be dragons. */
 #    define DETACH(t) \
-    STMT_START {						\
-        int _eC_;						\
-        if ((_eC_ = pthread_detach(&(t)->self))) {		\
-            MUTEX_UNLOCK(&(t)->mutex);				\
-            Perl_croak_nocontext("panic: DETACH (%d) [%s:%d]",	\
-                                 _eC_, __FILE__, __LINE__);	\
-        }							\
+    STMT_START {                                                \
+        int _eC_;                                               \
+        if ((_eC_ = pthread_detach(&(t)->self))) {              \
+            MUTEX_UNLOCK(&(t)->mutex);                          \
+            Perl_croak_nocontext("panic: DETACH (%d) [%s:%d]",  \
+                                 _eC_, __FILE__, __LINE__);     \
+        }                                                       \
     } STMT_END
 
-#    define PERL_GET_CONTEXT	Perl_get_context()
-#    define PERL_SET_CONTEXT(t)	Perl_set_context((void*)t)
+#    define PERL_GET_CONTEXT    Perl_get_context()
+#    define PERL_SET_CONTEXT(t) Perl_set_context((void*)t)
 
 #    define PTHREAD_GETSPECIFIC_INT
 #    ifdef OEMVS
@@ -48,7 +48,7 @@
 #    if defined(__hpux) && defined(__ux_version) && __ux_version <= 1020
 #      define pthread_attr_init(a) pthread_attr_create(a)
        /* XXX pthread_setdetach_np() missing in DCE threads on HP-UX 10.20 */
-#      define PTHREAD_ATTR_SETDETACHSTATE(a,s)	(0)
+#      define PTHREAD_ATTR_SETDETACHSTATE(a,s)  (0)
 #      define PTHREAD_CREATE(t,a,s,d) pthread_create(t,a,s,d)
 #      define pthread_key_create(k,d) pthread_keycreate(k,(pthread_destructor_t)(d))
 #      define pthread_mutexattr_init(a) pthread_mutexattr_create(a)
@@ -98,58 +98,58 @@
 /* #include <mach/cthreads.h> is in perl.h #ifdef I_MACH_CTHREADS */
 
 #define MUTEX_INIT(m) \
-    STMT_START {						\
-        *m = mutex_alloc();					\
-        if (*m) {						\
-            mutex_init(*m);					\
-        } else {						\
-            Perl_croak_nocontext("panic: MUTEX_INIT [%s:%d]",	\
-                                 __FILE__, __LINE__);		\
-        }							\
+    STMT_START {                                                \
+        *m = mutex_alloc();                                     \
+        if (*m) {                                               \
+            mutex_init(*m);                                     \
+        } else {                                                \
+            Perl_croak_nocontext("panic: MUTEX_INIT [%s:%d]",   \
+                                 __FILE__, __LINE__);           \
+        }                                                       \
     } STMT_END
 
-#define MUTEX_LOCK(m)			mutex_lock(*m)
-#define MUTEX_UNLOCK(m)			mutex_unlock(*m)
+#define MUTEX_LOCK(m)                   mutex_lock(*m)
+#define MUTEX_UNLOCK(m)                 mutex_unlock(*m)
 #define MUTEX_DESTROY(m) \
-    STMT_START {						\
-        mutex_free(*m);						\
-        *m = 0;							\
+    STMT_START {                                                \
+        mutex_free(*m);                                         \
+        *m = 0;                                                 \
     } STMT_END
 
 #define COND_INIT(c) \
-    STMT_START {						\
-        *c = condition_alloc();					\
-        if (*c) {						\
-            condition_init(*c);					\
-        }							\
-        else {							\
-            Perl_croak_nocontext("panic: COND_INIT [%s:%d]",	\
-                                 __FILE__, __LINE__);		\
-        }							\
+    STMT_START {                                                \
+        *c = condition_alloc();                                 \
+        if (*c) {                                               \
+            condition_init(*c);                                 \
+        }                                                       \
+        else {                                                  \
+            Perl_croak_nocontext("panic: COND_INIT [%s:%d]",    \
+                                 __FILE__, __LINE__);           \
+        }                                                       \
     } STMT_END
 
-#define COND_SIGNAL(c)		condition_signal(*c)
-#define COND_BROADCAST(c)	condition_broadcast(*c)
-#define COND_WAIT(c, m)		condition_wait(*c, *m)
+#define COND_SIGNAL(c)          condition_signal(*c)
+#define COND_BROADCAST(c)       condition_broadcast(*c)
+#define COND_WAIT(c, m)         condition_wait(*c, *m)
 #define COND_DESTROY(c) \
-    STMT_START {						\
-        condition_free(*c);					\
-        *c = 0;							\
+    STMT_START {                                                \
+        condition_free(*c);                                     \
+        *c = 0;                                                 \
     } STMT_END
 
-#define THREAD_RET_TYPE		any_t
+#define THREAD_RET_TYPE         any_t
 
-#define DETACH(t)		cthread_detach(t->self)
-#define JOIN(t, avp)		(*(avp) = MUTABLE_AV(cthread_join(t->self)))
+#define DETACH(t)               cthread_detach(t->self)
+#define JOIN(t, avp)            (*(avp) = MUTABLE_AV(cthread_join(t->self)))
 
-#define PERL_SET_CONTEXT(t)	cthread_set_data(cthread_self(), t)
-#define PERL_GET_CONTEXT	cthread_data(cthread_self())
+#define PERL_SET_CONTEXT(t)     cthread_set_data(cthread_self(), t)
+#define PERL_GET_CONTEXT        cthread_data(cthread_self())
 
-#define INIT_THREADS		cthread_init()
-#define YIELD			cthread_yield()
-#define ALLOC_THREAD_KEY	NOOP
-#define FREE_THREAD_KEY		NOOP
-#define SET_THREAD_SELF(thr)	(thr->self = cthread_self())
+#define INIT_THREADS            cthread_init()
+#define YIELD                   cthread_yield()
+#define ALLOC_THREAD_KEY        NOOP
+#define FREE_THREAD_KEY         NOOP
+#define SET_THREAD_SELF(thr)    (thr->self = cthread_self())
 
 #endif /* I_MACH_CTHREADS */
 
@@ -183,8 +183,8 @@
     } STMT_END
 #  else
 #    define MUTEX_INIT(m) \
-    STMT_START {						\
-        int _eC_;						\
+    STMT_START {                                                \
+        int _eC_;                                               \
         if ((_eC_ = pthread_mutex_init((m), pthread_mutexattr_default))) \
             Perl_croak_nocontext("panic: MUTEX_INIT (%d) [%s:%d]", \
                                  _eC_, __FILE__, __LINE__);     \
@@ -200,35 +200,35 @@
 #  endif
 
 #  define MUTEX_LOCK(m)                                         \
-    STMT_START {						\
+    STMT_START {                                                \
         dSAVE_ERRNO;                                            \
-        int _eC_;						\
-        if ((_eC_ = perl_pthread_mutex_lock((m))))		\
+        int _eC_;                                               \
+        if ((_eC_ = perl_pthread_mutex_lock((m))))              \
             Perl_croak_nocontext("panic: MUTEX_LOCK (%d) [%s:%d]",\
-                                 _eC_, __FILE__, __LINE__);	\
+                                 _eC_, __FILE__, __LINE__);     \
         RESTORE_ERRNO;                                          \
     } STMT_END
 
 #  define MUTEX_UNLOCK(m)                                       \
-    STMT_START {						\
+    STMT_START {                                                \
         dSAVE_ERRNO; /* Shouldn't be necessary as panics if fails */\
-        int _eC_;						\
+        int _eC_;                                               \
         if ((_eC_ = perl_pthread_mutex_unlock((m)))) {          \
             Perl_croak_nocontext(                               \
                             "panic: MUTEX_UNLOCK (%d) [%s:%d]", \
-                                 _eC_, __FILE__, __LINE__);	\
+                                 _eC_, __FILE__, __LINE__);     \
         }                                                       \
         RESTORE_ERRNO;                                          \
     } STMT_END
 
 #  define MUTEX_DESTROY(m)                                                  \
-    STMT_START {						            \
-        int _eC_;						            \
+    STMT_START {                                                            \
+        int _eC_;                                                           \
         if ((_eC_ = pthread_mutex_destroy((m)))) {                          \
             dTHX;                                                           \
             if (PL_phase != PERL_PHASE_DESTRUCT) {                          \
                 Perl_croak_nocontext("panic: MUTEX_DESTROY (%d) [%s:%d]",   \
-                                    _eC_, __FILE__, __LINE__);	            \
+                                    _eC_, __FILE__, __LINE__);              \
             }                                                               \
         }                                                                   \
     } STMT_END
@@ -236,45 +236,45 @@
 
 #ifndef COND_INIT
 #  define COND_INIT(c) \
-    STMT_START {						\
-        int _eC_;						\
-        if ((_eC_ = pthread_cond_init((c), pthread_condattr_default)))	\
-            Perl_croak_nocontext("panic: COND_INIT (%d) [%s:%d]",	\
-                                 _eC_, __FILE__, __LINE__);	\
+    STMT_START {                                                \
+        int _eC_;                                               \
+        if ((_eC_ = pthread_cond_init((c), pthread_condattr_default)))  \
+            Perl_croak_nocontext("panic: COND_INIT (%d) [%s:%d]",       \
+                                 _eC_, __FILE__, __LINE__);     \
     } STMT_END
 
 #  define COND_SIGNAL(c) \
-    STMT_START {						\
-        int _eC_;						\
-        if ((_eC_ = pthread_cond_signal((c))))			\
-            Perl_croak_nocontext("panic: COND_SIGNAL (%d) [%s:%d]",	\
-                                 _eC_, __FILE__, __LINE__);	\
+    STMT_START {                                                \
+        int _eC_;                                               \
+        if ((_eC_ = pthread_cond_signal((c))))                  \
+            Perl_croak_nocontext("panic: COND_SIGNAL (%d) [%s:%d]",     \
+                                 _eC_, __FILE__, __LINE__);     \
     } STMT_END
 
 #  define COND_BROADCAST(c) \
-    STMT_START {						\
-        int _eC_;						\
-        if ((_eC_ = pthread_cond_broadcast((c))))		\
-            Perl_croak_nocontext("panic: COND_BROADCAST (%d) [%s:%d]",	\
-                                 _eC_, __FILE__, __LINE__);	\
+    STMT_START {                                                \
+        int _eC_;                                               \
+        if ((_eC_ = pthread_cond_broadcast((c))))               \
+            Perl_croak_nocontext("panic: COND_BROADCAST (%d) [%s:%d]",  \
+                                 _eC_, __FILE__, __LINE__);     \
     } STMT_END
 
 #  define COND_WAIT(c, m) \
-    STMT_START {						\
-        int _eC_;						\
-        if ((_eC_ = pthread_cond_wait((c), (m))))		\
-            Perl_croak_nocontext("panic: COND_WAIT (%d) [%s:%d]",	\
-                                 _eC_, __FILE__, __LINE__);	\
+    STMT_START {                                                \
+        int _eC_;                                               \
+        if ((_eC_ = pthread_cond_wait((c), (m))))               \
+            Perl_croak_nocontext("panic: COND_WAIT (%d) [%s:%d]",       \
+                                 _eC_, __FILE__, __LINE__);     \
     } STMT_END
 
 #  define COND_DESTROY(c) \
-    STMT_START {						            \
-        int _eC_;						            \
+    STMT_START {                                                            \
+        int _eC_;                                                           \
         if ((_eC_ = pthread_cond_destroy((c)))) {                           \
             dTHX;                                                           \
             if (PL_phase != PERL_PHASE_DESTRUCT) {                          \
                 Perl_croak_nocontext("panic: COND_DESTROY (%d) [%s:%d]",    \
-                                    _eC_, __FILE__, __LINE__);	            \
+                                    _eC_, __FILE__, __LINE__);              \
             }                                                               \
         }                                                                   \
     } STMT_END
@@ -352,23 +352,23 @@
 /* DETACH(t) must only be called while holding t->mutex */
 #ifndef DETACH
 #  define DETACH(t) \
-    STMT_START {						\
-        int _eC_;						\
-        if ((_eC_ = pthread_detach((t)->self))) {		\
-            MUTEX_UNLOCK(&(t)->mutex);				\
-            Perl_croak_nocontext("panic: DETACH (%d) [%s:%d]",	\
-                                 _eC_, __FILE__, __LINE__);	\
-        }							\
+    STMT_START {                                                \
+        int _eC_;                                               \
+        if ((_eC_ = pthread_detach((t)->self))) {               \
+            MUTEX_UNLOCK(&(t)->mutex);                          \
+            Perl_croak_nocontext("panic: DETACH (%d) [%s:%d]",  \
+                                 _eC_, __FILE__, __LINE__);     \
+        }                                                       \
     } STMT_END
 #endif /* DETACH */
 
 #ifndef JOIN
 #  define JOIN(t, avp) \
-    STMT_START {						\
-        int _eC_;						\
-        if ((_eC_ = pthread_join((t)->self, (void**)(avp))))	\
-            Perl_croak_nocontext("panic: pthread_join (%d) [%s:%d]",	\
-                                 _eC_, __FILE__, __LINE__);	\
+    STMT_START {                                                \
+        int _eC_;                                               \
+        if ((_eC_ = pthread_join((t)->self, (void**)(avp))))    \
+            Perl_croak_nocontext("panic: pthread_join (%d) [%s:%d]",    \
+                                 _eC_, __FILE__, __LINE__);     \
     } STMT_END
 #endif /* JOIN */
 
@@ -418,7 +418,7 @@ extern PERL_THREAD_LOCAL void *PL_current_context;
 /* else fall back to pthreads */
 
 #  ifndef PERL_GET_CONTEXT
-#    define PERL_GET_CONTEXT	PTHREAD_GETSPECIFIC(PL_thr_key)
+#    define PERL_GET_CONTEXT    PTHREAD_GETSPECIFIC(PL_thr_key)
 #  endif
 
 /* For C++ extensions built on a system where the C compiler provides thread
@@ -440,37 +440,37 @@ extern PERL_THREAD_LOCAL void *PL_current_context;
 
 #ifndef ALLOC_THREAD_KEY
 #  define ALLOC_THREAD_KEY \
-    STMT_START {						\
-        if (pthread_key_create(&PL_thr_key, 0)) {		\
+    STMT_START {                                                \
+        if (pthread_key_create(&PL_thr_key, 0)) {               \
             PERL_UNUSED_RESULT(write(2, STR_WITH_LEN("panic: pthread_key_create failed\n"))); \
-            exit(1);						\
-        }							\
+            exit(1);                                            \
+        }                                                       \
     } STMT_END
 #endif
 
 #ifndef FREE_THREAD_KEY
 #  define FREE_THREAD_KEY \
-    STMT_START {						\
-        pthread_key_delete(PL_thr_key);				\
+    STMT_START {                                                \
+        pthread_key_delete(PL_thr_key);                         \
     } STMT_END
 #endif
 
 #ifndef PTHREAD_ATFORK
 #  ifdef HAS_PTHREAD_ATFORK
-#    define PTHREAD_ATFORK(prepare,parent,child)		\
+#    define PTHREAD_ATFORK(prepare,parent,child)                \
         pthread_atfork(prepare,parent,child)
 #  else
-#    define PTHREAD_ATFORK(prepare,parent,child)		\
+#    define PTHREAD_ATFORK(prepare,parent,child)                \
         NOOP
 #  endif
 #endif
 
 #ifndef THREAD_RET_TYPE
-#  define THREAD_RET_TYPE	void *
+#  define THREAD_RET_TYPE       void *
 #endif /* THREAD_RET */
 
-#  define LOCK_DOLLARZERO_MUTEX		MUTEX_LOCK(&PL_dollarzero_mutex)
-#  define UNLOCK_DOLLARZERO_MUTEX	MUTEX_UNLOCK(&PL_dollarzero_mutex)
+#  define LOCK_DOLLARZERO_MUTEX         MUTEX_LOCK(&PL_dollarzero_mutex)
+#  define UNLOCK_DOLLARZERO_MUTEX       MUTEX_UNLOCK(&PL_dollarzero_mutex)
 
 #endif /* USE_ITHREADS */
 
@@ -529,11 +529,11 @@ extern PERL_THREAD_LOCAL void *PL_current_context;
 
 /* THR, SET_THR, and dTHR are there for compatibility with old versions */
 #ifndef THR
-#  define THR		PERL_GET_THX
+#  define THR           PERL_GET_THX
 #endif
 
 #ifndef SET_THR
-#  define SET_THR(t)	PERL_SET_THX(t)
+#  define SET_THR(t)    PERL_SET_THX(t)
 #endif
 
 #ifndef dTHR

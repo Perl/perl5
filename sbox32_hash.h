@@ -28,7 +28,7 @@
 #endif
 
 #ifndef PERL_SEEN_HV_FUNC_H_
-#if !defined(U32) 
+#if !defined(U32)
 #include <stdint.h>
 #define U32 uint32_t
 #endif
@@ -1396,7 +1396,7 @@
     r = w = ( w ^ ( w >> 29 ) ) ^ ( t ^ ( t >> 12 ) );  \
 } STMT_END
 
-#ifndef SBOX32_CHURN_ROUNDS 
+#ifndef SBOX32_CHURN_ROUNDS
 #define SBOX32_CHURN_ROUNDS 128
 #endif
 
@@ -1440,13 +1440,13 @@ SBOX32_STATIC_INLINE void sbox32_seed_state128 (
     if (!s1) s1 = 4;
     if (!s2) s2 = 2;
     if (!s3) s3 = 1;
-    
+
     for ( i = 0; i < SBOX32_CHURN_ROUNDS; i++ )
         SBOX32_MIX4(s0,s1,s2,s3,"SEED STATE");
 
     while ( state_cursor < sbox32_end ) {
-        U32 *row_end = state_cursor + 256; 
-        for ( ; state_cursor < row_end; state_cursor++ ) {
+        U32 *row_end = state_cursor + 256;
+        for (; state_cursor < row_end; state_cursor++ ) {
             XORSHIFT128_set(*state_cursor,s0,s1,s2,s3,t1);
         }
     }

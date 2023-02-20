@@ -10,14 +10,14 @@
 
 #include "scope_types.h"
 
-#define SAVEf_SETMAGIC		1
-#define SAVEf_KEEPOLDELEM	2
+#define SAVEf_SETMAGIC          1
+#define SAVEf_KEEPOLDELEM       2
 
-#define SAVE_TIGHT_SHIFT	6
-#define SAVE_MASK		0x3F
+#define SAVE_TIGHT_SHIFT        6
+#define SAVE_MASK               0x3F
 
-#define save_aelem(av,idx,sptr)	save_aelem_flags(av,idx,sptr,SAVEf_SETMAGIC)
-#define save_helem(hv,key,sptr)	save_helem_flags(hv,key,sptr,SAVEf_SETMAGIC)
+#define save_aelem(av,idx,sptr) save_aelem_flags(av,idx,sptr,SAVEf_SETMAGIC)
+#define save_helem(hv,key,sptr) save_helem_flags(hv,key,sptr,SAVEf_SETMAGIC)
 
 #ifndef SCOPE_SAVES_SIGNAL_MASK
 #define SCOPE_SAVES_SIGNAL_MASK 0
@@ -118,34 +118,34 @@ scope has the given name. C<name> must be a literal string.
 #define FREETMPS if (PL_tmps_ix > PL_tmps_floor) free_tmps()
 
 #ifdef DEBUGGING
-#define ENTER							\
-    STMT_START {						\
-        push_scope();						\
-        DEBUG_SCOPE("ENTER")					\
+#define ENTER                                                   \
+    STMT_START {                                                \
+        push_scope();                                           \
+        DEBUG_SCOPE("ENTER")                                    \
     } STMT_END
-#define LEAVE							\
-    STMT_START {						\
-        DEBUG_SCOPE("LEAVE")					\
-        pop_scope();						\
+#define LEAVE                                                   \
+    STMT_START {                                                \
+        DEBUG_SCOPE("LEAVE")                                    \
+        pop_scope();                                            \
     } STMT_END
-#define ENTER_with_name(name)						\
-    STMT_START {							\
-        push_scope();							\
-        if (PL_scopestack_name)						\
+#define ENTER_with_name(name)                                           \
+    STMT_START {                                                        \
+        push_scope();                                                   \
+        if (PL_scopestack_name)                                         \
             PL_scopestack_name[PL_scopestack_ix-1] = ASSERT_IS_LITERAL(name);\
-        DEBUG_SCOPE("ENTER \"" name "\"")				\
+        DEBUG_SCOPE("ENTER \"" name "\"")                               \
     } STMT_END
-#define LEAVE_with_name(name)						\
-    STMT_START {							\
-        DEBUG_SCOPE("LEAVE \"" name "\"")				\
-        if (PL_scopestack_name)	{					\
-            CLANG_DIAG_IGNORE_STMT(-Wstring-compare);			\
-            assert(((char*)PL_scopestack_name[PL_scopestack_ix-1]	\
+#define LEAVE_with_name(name)                                           \
+    STMT_START {                                                        \
+        DEBUG_SCOPE("LEAVE \"" name "\"")                               \
+        if (PL_scopestack_name) {                                       \
+            CLANG_DIAG_IGNORE_STMT(-Wstring-compare);                   \
+            assert(((char*)PL_scopestack_name[PL_scopestack_ix-1]       \
                         == (char*)ASSERT_IS_LITERAL(name))              \
                     || strEQ(PL_scopestack_name[PL_scopestack_ix-1], name));        \
-            CLANG_DIAG_RESTORE_STMT;					\
-        }								\
-        pop_scope();							\
+            CLANG_DIAG_RESTORE_STMT;                                    \
+        }                                                               \
+        pop_scope();                                                    \
     } STMT_END
 #else
 #define ENTER push_scope()
@@ -195,24 +195,24 @@ scope has the given name. C<name> must be a literal string.
           save_destructor_x((DESTRUCTORFUNC_t)(f), (void*)(p))
 
 #define SAVESTACK_POS() \
-    STMT_START {				   \
+    STMT_START {                                   \
         dSS_ADD;                                   \
         SS_ADD_INT(PL_stack_sp - PL_stack_base);   \
         SS_ADD_UV(SAVEt_STACK_POS);                \
         SS_ADD_END(2);                             \
     } STMT_END
 
-#define SAVEOP()	save_op()
+#define SAVEOP()        save_op()
 
-#define SAVEHINTS()	save_hints()
+#define SAVEHINTS()     save_hints()
 
 #define SAVECOMPPAD() save_pushptr(MUTABLE_SV(PL_comppad), SAVEt_COMPPAD)
 
 #define SAVESWITCHSTACK(f,t) \
-    STMT_START {					\
+    STMT_START {                                        \
         save_pushptrptr(MUTABLE_SV(f), MUTABLE_SV(t), SAVEt_SAVESWITCHSTACK); \
-        SWITCHSTACK((f),(t));				\
-        PL_curstackinfo->si_stack = (t);		\
+        SWITCHSTACK((f),(t));                           \
+        PL_curstackinfo->si_stack = (t);                \
     } STMT_END
 
 /* Note these are special, we can't just use a save_pushptrptr() on them
@@ -224,7 +224,7 @@ scope has the given name. C<name> must be a literal string.
 #define SAVEPARSER(p) save_pushptr((p), SAVEt_PARSER)
 
 #ifdef USE_ITHREADS
-#  define SAVECOPSTASH_FREE(c)	SAVEIV((c)->cop_stashoff)
+#  define SAVECOPSTASH_FREE(c)  SAVEIV((c)->cop_stashoff)
 #  define SAVECOPFILE_x(c)      SAVEPPTR((c)->cop_file)
 #  define SAVECOPFILE(c)                \
     STMT_START {                        \
@@ -239,12 +239,12 @@ scope has the given name. C<name> must be a literal string.
     } STMT_END
 #else
 #  /* XXX not refcounted */
-#  define SAVECOPSTASH_FREE(c)	SAVESPTR(CopSTASH(c))
-#  define SAVECOPFILE(c)	SAVESPTR(CopFILEGV(c))
-#  define SAVECOPFILE_FREE(c)	SAVEGENERICSV(CopFILEGV(c))
+#  define SAVECOPSTASH_FREE(c)  SAVESPTR(CopSTASH(c))
+#  define SAVECOPFILE(c)        SAVESPTR(CopFILEGV(c))
+#  define SAVECOPFILE_FREE(c)   SAVEGENERICSV(CopFILEGV(c))
 #endif
 
-#define SAVECOPLINE(c)		SAVEI32(CopLINE(c))
+#define SAVECOPLINE(c)          SAVEI32(CopLINE(c))
 
 /*
 =for apidoc_section $stack
@@ -279,15 +279,15 @@ casts it to a pointer of that C<type>.
 
 #define SSNEW(size)             Perl_save_alloc(aTHX_ (size), 0)
 #define SSNEWt(n,t)             SSNEW((n)*sizeof(t))
-#define SSNEWa(size,align)	Perl_save_alloc(aTHX_ (size), \
+#define SSNEWa(size,align)      Perl_save_alloc(aTHX_ (size), \
     (I32)(align - ((size_t)((caddr_t)&PL_savestack[PL_savestack_ix]) % align)) % align)
-#define SSNEWat(n,t,align)	SSNEWa((n)*sizeof(t), align)
+#define SSNEWat(n,t,align)      SSNEWa((n)*sizeof(t), align)
 
 #define SSPTR(off,type)         (assert(sizeof(off) >= sizeof(SSize_t)), (type)  ((char*)PL_savestack + off))
 #define SSPTRt(off,type)        (assert(sizeof(off) >= sizeof(SSize_t)), (type*) ((char*)PL_savestack + off))
 
-#define save_freesv(op)		save_pushptr((void *)(op), SAVEt_FREESV)
-#define save_mortalizesv(op)	save_pushptr((void *)(op), SAVEt_MORTALIZESV)
+#define save_freesv(op)         save_pushptr((void *)(op), SAVEt_FREESV)
+#define save_mortalizesv(op)    save_pushptr((void *)(op), SAVEt_MORTALIZESV)
 
 # define save_freeop(op)                    \
 STMT_START {                                 \
@@ -296,7 +296,7 @@ STMT_START {                                 \
       _o->op_savefree = 1;                     \
       save_pushptr((void *)(_o), SAVEt_FREEOP); \
     } STMT_END
-#define save_freepv(pv)		save_pushptr((void *)(pv), SAVEt_FREEPV)
+#define save_freepv(pv)         save_pushptr((void *)(pv), SAVEt_FREEPV)
 
 /*
 =for apidoc_section $callback
@@ -307,7 +307,7 @@ Implements C<SAVEOP>.
 =cut
  */
 
-#define save_op()		save_pushptr((void *)(PL_op), SAVEt_OP)
+#define save_op()               save_pushptr((void *)(PL_op), SAVEt_OP)
 
 /*
  * ex: set ts=8 sts=4 sw=4 et:

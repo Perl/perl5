@@ -626,8 +626,8 @@ typedef Off_t           (*LPLIOLseek)(struct IPerlLIO*, int, Off_t, int);
 typedef int             (*LPLIOLstat)(struct IPerlLIO*, const char*,
                             Stat_t*);
 typedef char*           (*LPLIOMktemp)(struct IPerlLIO*, char*);
-typedef int             (*LPLIOOpen)(struct IPerlLIO*, const char*, int);       
-typedef int             (*LPLIOOpen3)(struct IPerlLIO*, const char*, int, int); 
+typedef int             (*LPLIOOpen)(struct IPerlLIO*, const char*, int);
+typedef int             (*LPLIOOpen3)(struct IPerlLIO*, const char*, int, int);
 typedef int             (*LPLIORead)(struct IPerlLIO*, int, void*, unsigned int);
 typedef int             (*LPLIORename)(struct IPerlLIO*, const char*,
                             const char*);
@@ -886,7 +886,7 @@ struct IPerlMemInfo
 #  define PerlMem_realloc(buf, size)    realloc((buf), (size))
 #  define PerlMem_free(buf)             free((buf))
 #  define PerlMem_calloc(num, size)     calloc((num), (size))
-#  define PerlMem_get_lock()            
+#  define PerlMem_get_lock()
 #  define PerlMem_free_lock()
 #  define PerlMem_is_locked()           0
 
@@ -895,7 +895,7 @@ struct IPerlMemInfo
 #  define PerlMemShared_realloc(buf, size)      realloc((buf), (size))
 #  define PerlMemShared_free(buf)               free((buf))
 #  define PerlMemShared_calloc(num, size)       calloc((num), (size))
-#  define PerlMemShared_get_lock()              
+#  define PerlMemShared_get_lock()
 #  define PerlMemShared_free_lock()
 #  define PerlMemShared_is_locked()             0
 
@@ -904,7 +904,7 @@ struct IPerlMemInfo
 #  define PerlMemParse_realloc(buf, size)       realloc((buf), (size))
 #  define PerlMemParse_free(buf)                free((buf))
 #  define PerlMemParse_calloc(num, size)        calloc((num), (size))
-#  define PerlMemParse_get_lock()               
+#  define PerlMemParse_get_lock()
 #  define PerlMemParse_free_lock()
 #  define PerlMemParse_is_locked()              0
 
@@ -1118,7 +1118,7 @@ struct IPerlProcInfo
 #  define PerlProc_wait(t)      wait((t))
 #  define PerlProc_waitpid(p,s,f) waitpid((p), (s), (f))
 #  define PerlProc_setjmp(b, n) Sigsetjmp((b), (n))
-#  define PerlProc_longjmp(b, n)Siglongjmp((b), (n))
+#  define PerlProc_longjmp(b, n) Siglongjmp((b), (n))
 #  define PerlProc_signal(n, h) signal((n), (h))
 #  define PerlProc_fork()       my_fork()
 #  define PerlProc_getpid()     getpid()

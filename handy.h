@@ -101,12 +101,12 @@ blindly casts away const.
 #  define MUTABLE_PTR(p) ((void *) (p))
 #endif
 
-#define MUTABLE_AV(p)	((AV *)MUTABLE_PTR(p))
-#define MUTABLE_CV(p)	((CV *)MUTABLE_PTR(p))
-#define MUTABLE_GV(p)	((GV *)MUTABLE_PTR(p))
-#define MUTABLE_HV(p)	((HV *)MUTABLE_PTR(p))
-#define MUTABLE_IO(p)	((IO *)MUTABLE_PTR(p))
-#define MUTABLE_SV(p)	((SV *)MUTABLE_PTR(p))
+#define MUTABLE_AV(p)   ((AV *)MUTABLE_PTR(p))
+#define MUTABLE_CV(p)   ((CV *)MUTABLE_PTR(p))
+#define MUTABLE_GV(p)   ((GV *)MUTABLE_PTR(p))
+#define MUTABLE_HV(p)   ((HV *)MUTABLE_PTR(p))
+#define MUTABLE_IO(p)   ((IO *)MUTABLE_PTR(p))
+#define MUTABLE_SV(p)   ((SV *)MUTABLE_PTR(p))
 
 /*
 =for apidoc_section $SV
@@ -177,7 +177,7 @@ required, but is kept for backwards compatibility.
    for the Cray.)  This has the advantage of meshing nicely with
    standard library calls (where we pass an I32 and the library is
    expecting an int), but the disadvantage that an I32 is not 32 bits.
-   Andy Dougherty	August 1996
+   Andy Dougherty       August 1996
 
    There is no guarantee that there is *any* integral type with
    exactly 32 bits.  It is perfectly legal for a system to have
@@ -458,7 +458,7 @@ Perl_xxx(aTHX_ ...) form for any API calls where it's used.
 
 /* STR_WITH_LEN() shortcuts */
 #define newSVpvs(str) Perl_newSVpvn(aTHX_ STR_WITH_LEN(str))
-#define newSVpvs_flags(str,flags)	\
+#define newSVpvs_flags(str,flags)       \
     Perl_newSVpvn_flags(aTHX_ STR_WITH_LEN(str), flags)
 #define newSVpvs_share(str) Perl_newSVpvn_share(aTHX_ STR_WITH_LEN(str), 0)
 #define sv_catpvs_flags(sv, str, flags) \
@@ -485,7 +485,7 @@ Perl_xxx(aTHX_ ...) form for any API calls where it's used.
 
 #define lex_stuff_pvs(pv,flags) Perl_lex_stuff_pvn(aTHX_ STR_WITH_LEN(pv), flags)
 
-#define get_cvs(str, flags)					\
+#define get_cvs(str, flags)                                     \
         Perl_get_cvn_flags(aTHX_ STR_WITH_LEN(str), (flags))
 
 /* internal helpers */
@@ -1435,7 +1435,7 @@ or casts
 /* Likewise, this is effectively a static assert to be used to guarantee the
  * parameter is a pointer
  *
- * NOT suitable for void* 
+ * NOT suitable for void*
  */
 #define ASSERT_IS_PTR(x) (__ASSERT_(sizeof(*(x))) (x))
 
@@ -2138,9 +2138,9 @@ END_EXTERN_C
 
 #define isIDCONT(c)             isWORDCHAR(c)
 #define isIDCONT_A(c)           isWORDCHAR_A(c)
-#define isIDCONT_L1(c)	        isWORDCHAR_L1(c)
-#define isIDCONT_LC(c)	        isWORDCHAR_LC(c)
-#define isPSXSPC_LC(c)		isSPACE_LC(c)
+#define isIDCONT_L1(c)          isWORDCHAR_L1(c)
+#define isIDCONT_LC(c)          isWORDCHAR_LC(c)
+#define isPSXSPC_LC(c)          isSPACE_LC(c)
 
 /* For internal core Perl use only: the base macros for defining macros like
  * isALPHA_uvchr.  'c' is the code point to check.  'classnum' is the POSIX class
@@ -2185,10 +2185,10 @@ END_EXTERN_C
 #define isWORDCHAR_uvchr(c)   generic_invlist_uvchr_(CC_WORDCHAR_, c)
 #define isXDIGIT_uvchr(c)     generic_uvchr_(CC_XDIGIT_, is_XDIGIT_cp_high, c)
 
-#define toFOLD_uvchr(c,s,l)	to_uni_fold(c,s,l)
-#define toLOWER_uvchr(c,s,l)	to_uni_lower(c,s,l)
-#define toTITLE_uvchr(c,s,l)	to_uni_title(c,s,l)
-#define toUPPER_uvchr(c,s,l)	to_uni_upper(c,s,l)
+#define toFOLD_uvchr(c,s,l)     to_uni_fold(c,s,l)
+#define toLOWER_uvchr(c,s,l)    to_uni_lower(c,s,l)
+#define toTITLE_uvchr(c,s,l)    to_uni_title(c,s,l)
+#define toUPPER_uvchr(c,s,l)    to_uni_upper(c,s,l)
 
 /* For backwards compatibility, even though '_uni' should mean official Unicode
  * code points, in Perl it means native for those below 256 */
@@ -2388,10 +2388,10 @@ END_EXTERN_C
                                       (U8 *) (p), (U8 *) (e), 0, 1), 0)     \
                               : is_XDIGIT_high(p)))
 
-#define toFOLD_utf8(p,e,s,l)	toFOLD_utf8_safe(p,e,s,l)
-#define toLOWER_utf8(p,e,s,l)	toLOWER_utf8_safe(p,e,s,l)
-#define toTITLE_utf8(p,e,s,l)	toTITLE_utf8_safe(p,e,s,l)
-#define toUPPER_utf8(p,e,s,l)	toUPPER_utf8_safe(p,e,s,l)
+#define toFOLD_utf8(p,e,s,l)    toFOLD_utf8_safe(p,e,s,l)
+#define toLOWER_utf8(p,e,s,l)   toLOWER_utf8_safe(p,e,s,l)
+#define toTITLE_utf8(p,e,s,l)   toTITLE_utf8_safe(p,e,s,l)
+#define toUPPER_utf8(p,e,s,l)   toUPPER_utf8_safe(p,e,s,l)
 
 /* For internal core use only, subject to change */
 #define _toFOLD_utf8_flags(p,e,s,l,f)  _to_utf8_fold_flags (p,e,s,l,f)
@@ -2503,12 +2503,12 @@ END_EXTERN_C
 #define isALNUM_LC_uvchr(c) isWORDCHAR_LC_uvchr(c)
 #define isALNUM_utf8(p,e)   isWORDCHAR_utf8(p,e)
 #define isALNUM_utf8_safe(p,e) isWORDCHAR_utf8_safe(p,e)
-#define isALNUM_LC_utf8(p,e)isWORDCHAR_LC_utf8(p,e)
-#define isALNUM_LC_utf8_safe(p,e)isWORDCHAR_LC_utf8_safe(p,e)
+#define isALNUM_LC_utf8(p,e) isWORDCHAR_LC_utf8(p,e)
+#define isALNUM_LC_utf8_safe(p,e) isWORDCHAR_LC_utf8_safe(p,e)
 #define isALNUMC_A(c)       isALPHANUMERIC_A(c)      /* Mnemonic: "C's alnum" */
 #define isALNUMC_L1(c)      isALPHANUMERIC_L1(c)
-#define isALNUMC(c)	    isALPHANUMERIC(c)
-#define isALNUMC_LC(c)	    isALPHANUMERIC_LC(c)
+#define isALNUMC(c)         isALPHANUMERIC(c)
+#define isALNUMC_LC(c)      isALPHANUMERIC_LC(c)
 #define isALNUMC_uni(c)     isALPHANUMERIC_uni(c)
 #define isALNUMC_LC_uvchr(c) isALPHANUMERIC_LC_uvchr(c)
 #define isALNUMC_utf8(p,e)  isALPHANUMERIC_utf8(p,e)
@@ -2711,7 +2711,7 @@ PoisonWith(0xEF) for catching access to freed memory.
 
 /* Maintained for backwards-compatibility only. Use newSV() instead. */
 #ifndef PERL_CORE
-#define NEWSV(x,len)	newSV(len)
+#define NEWSV(x,len)    newSV(len)
 #endif
 
 #define MEM_SIZE_MAX ((MEM_SIZE)-1)
@@ -2845,15 +2845,15 @@ enum mem_log_type {
 #define MEM_LOG_FREE(a)          (a)
 #endif
 
-#define Newx(v,n,t)	(v = (MEM_WRAP_CHECK_(n,t) (t*)MEM_LOG_ALLOC(n,t,safemalloc((MEM_SIZE)((n)*sizeof(t))))))
-#define Newxc(v,n,t,c)	(v = (MEM_WRAP_CHECK_(n,t) (c*)MEM_LOG_ALLOC(n,t,safemalloc((MEM_SIZE)((n)*sizeof(t))))))
-#define Newxz(v,n,t)	(v = (MEM_WRAP_CHECK_(n,t) (t*)MEM_LOG_ALLOC(n,t,safecalloc((n),sizeof(t)))))
+#define Newx(v,n,t)     (v = (MEM_WRAP_CHECK_(n,t) (t*)MEM_LOG_ALLOC(n,t,safemalloc((MEM_SIZE)((n)*sizeof(t))))))
+#define Newxc(v,n,t,c)  (v = (MEM_WRAP_CHECK_(n,t) (c*)MEM_LOG_ALLOC(n,t,safemalloc((MEM_SIZE)((n)*sizeof(t))))))
+#define Newxz(v,n,t)    (v = (MEM_WRAP_CHECK_(n,t) (t*)MEM_LOG_ALLOC(n,t,safecalloc((n),sizeof(t)))))
 
 #ifndef PERL_CORE
 /* pre 5.9.x compatibility */
-#define New(x,v,n,t)	Newx(v,n,t)
-#define Newc(x,v,n,t,c)	Newxc(v,n,t,c)
-#define Newz(x,v,n,t)	Newxz(v,n,t)
+#define New(x,v,n,t)    Newx(v,n,t)
+#define Newc(x,v,n,t,c) Newxc(v,n,t,c)
+#define Newz(x,v,n,t)   Newxz(v,n,t)
 #endif
 
 #define Renew(v,n,t) \
@@ -2865,7 +2865,7 @@ enum mem_log_type {
 #define Safefree(d) \
   ((d) ? (void)(safefree(MEM_LOG_FREE((Malloc_t)(d))), Poison(&(d), 1, Malloc_t)) : (void) 0)
 #else
-#define Safefree(d)	safefree(MEM_LOG_FREE((Malloc_t)(d)))
+#define Safefree(d)     safefree(MEM_LOG_FREE((Malloc_t)(d)))
 #endif
 
 /* assert that a valid ptr has been supplied - use this instead of assert(ptr)  *
@@ -2874,24 +2874,24 @@ enum mem_log_type {
 #define perl_assert_ptr(p) assert( ((void*)(p)) != 0 )
 
 
-#define Move(s,d,n,t)	(MEM_WRAP_CHECK_(n,t) perl_assert_ptr(d), perl_assert_ptr(s), (void)memmove((char*)(d),(const char*)(s), (n) * sizeof(t)))
-#define Copy(s,d,n,t)	(MEM_WRAP_CHECK_(n,t) perl_assert_ptr(d), perl_assert_ptr(s), (void)memcpy((char*)(d),(const char*)(s), (n) * sizeof(t)))
-#define Zero(d,n,t)	(MEM_WRAP_CHECK_(n,t) perl_assert_ptr(d), (void)memzero((char*)(d), (n) * sizeof(t)))
+#define Move(s,d,n,t)   (MEM_WRAP_CHECK_(n,t) perl_assert_ptr(d), perl_assert_ptr(s), (void)memmove((char*)(d),(const char*)(s), (n) * sizeof(t)))
+#define Copy(s,d,n,t)   (MEM_WRAP_CHECK_(n,t) perl_assert_ptr(d), perl_assert_ptr(s), (void)memcpy((char*)(d),(const char*)(s), (n) * sizeof(t)))
+#define Zero(d,n,t)     (MEM_WRAP_CHECK_(n,t) perl_assert_ptr(d), (void)memzero((char*)(d), (n) * sizeof(t)))
 
 /* Like above, but returns a pointer to 'd' */
-#define MoveD(s,d,n,t)	(MEM_WRAP_CHECK_(n,t) perl_assert_ptr(d), perl_assert_ptr(s), memmove((char*)(d),(const char*)(s), (n) * sizeof(t)))
-#define CopyD(s,d,n,t)	(MEM_WRAP_CHECK_(n,t) perl_assert_ptr(d), perl_assert_ptr(s), memcpy((char*)(d),(const char*)(s), (n) * sizeof(t)))
-#define ZeroD(d,n,t)	(MEM_WRAP_CHECK_(n,t) perl_assert_ptr(d), memzero((char*)(d), (n) * sizeof(t)))
+#define MoveD(s,d,n,t)  (MEM_WRAP_CHECK_(n,t) perl_assert_ptr(d), perl_assert_ptr(s), memmove((char*)(d),(const char*)(s), (n) * sizeof(t)))
+#define CopyD(s,d,n,t)  (MEM_WRAP_CHECK_(n,t) perl_assert_ptr(d), perl_assert_ptr(s), memcpy((char*)(d),(const char*)(s), (n) * sizeof(t)))
+#define ZeroD(d,n,t)    (MEM_WRAP_CHECK_(n,t) perl_assert_ptr(d), memzero((char*)(d), (n) * sizeof(t)))
 
 #define NewCopy(s,d,n,t) STMT_START {   \
     Newx(d,n,t);                        \
     Copy(s,d,n,t);                      \
 } STMT_END
 
-#define PoisonWith(d,n,t,b)	(MEM_WRAP_CHECK_(n,t) (void)memset((char*)(d), (U8)(b), (n) * sizeof(t)))
-#define PoisonNew(d,n,t)	PoisonWith(d,n,t,0xAB)
-#define PoisonFree(d,n,t)	PoisonWith(d,n,t,0xEF)
-#define Poison(d,n,t)		PoisonFree(d,n,t)
+#define PoisonWith(d,n,t,b)     (MEM_WRAP_CHECK_(n,t) (void)memset((char*)(d), (U8)(b), (n) * sizeof(t)))
+#define PoisonNew(d,n,t)        PoisonWith(d,n,t,0xAB)
+#define PoisonFree(d,n,t)       PoisonWith(d,n,t,0xEF)
+#define Poison(d,n,t)           PoisonFree(d,n,t)
 
 #ifdef PERL_POISON
 #  define PERL_POISON_EXPR(x) x
@@ -2919,8 +2919,8 @@ Returns a pointer to one element past the final element of the input C array.
 C_ARRAY_END is one past the last: half-open/half-closed range, not
 last-inclusive range.
 */
-#define C_ARRAY_LENGTH(a)	(sizeof(a)/sizeof((a)[0]))
-#define C_ARRAY_END(a)		((a) + C_ARRAY_LENGTH(a))
+#define C_ARRAY_LENGTH(a)       (sizeof(a)/sizeof((a)[0]))
+#define C_ARRAY_END(a)          ((a) + C_ARRAY_LENGTH(a))
 
 #if defined(PERL_CORE) || defined(PERL_EXT_RE_BUILD)
 /* strlen() of a literal string constant.  Restricting this to core, in part

@@ -88,7 +88,7 @@ PERL_CALLCONV AV* PerlIO_get_layers(pTHX_ PerlIO *f);
 PERL_CALLCONV void PerlIO_clone(pTHX_ PerlInterpreter *proto,
                                 CLONE_PARAMS *param);
 
-#endif				/* PerlIO */
+#endif                          /* PerlIO */
 
 /* ----------- End of implementation choices  ---------- */
 
@@ -119,19 +119,19 @@ PERL_CALLCONV void PerlIO_clone(pTHX_ PerlInterpreter *proto,
  * Case 1: Strong denial of stdio - make all stdio calls (we can think of) errors
  */
 #include "nostdio.h"
-#else				/* if PERLIO_NOT_STDIO */
+#else                           /* if PERLIO_NOT_STDIO */
 /*
  * PERLIO_NOT_STDIO #define'd as 0
  * Case 2: Declares that both PerlIO and stdio can be used
  */
-#endif				/* if PERLIO_NOT_STDIO */
-#else				/* ifdef PERLIO_NOT_STDIO */
+#endif                          /* if PERLIO_NOT_STDIO */
+#else                           /* ifdef PERLIO_NOT_STDIO */
 /*
  * PERLIO_NOT_STDIO not defined
  * Case 3: Try and fake stdio calls as PerlIO calls
  */
 #include "fakesdio.h"
-#endif				/* ifndef PERLIO_NOT_STDIO */
+#endif                          /* ifndef PERLIO_NOT_STDIO */
 
 /* ----------- fill in things that have not got #define'd  ---------- */
 
@@ -165,8 +165,8 @@ PERL_CALLCONV void PerlIO_clone(pTHX_ PerlInterpreter *proto,
 #define SEEK_END 2
 #endif
 
-#define PERLIO_DUP_CLONE	1
-#define PERLIO_DUP_FD		2
+#define PERLIO_DUP_CLONE        1
+#define PERLIO_DUP_FD           2
 
 /* --------------------- Now prototypes for functions --------------- */
 
@@ -343,7 +343,7 @@ typedef struct PerlIO_list_s PerlIO_list_t;
 #endif
 
 END_EXTERN_C
-#endif				/* PERLIO_H_ */
+#endif                          /* PERLIO_H_ */
 
 /*
  * ex: set ts=8 sts=4 sw=4 et:

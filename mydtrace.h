@@ -5,8 +5,8 @@
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
  *
- *	Provides macros that wrap the various DTrace probes we use. We add
- *	an extra level of wrapping to encapsulate the _ENABLED tests.
+ *      Provides macros that wrap the various DTrace probes we use. We add
+ *      an extra level of wrapping to encapsulate the _ENABLED tests.
  */
 
 #if defined(USE_DTRACE) && defined(PERL_CORE)

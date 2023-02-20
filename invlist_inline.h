@@ -215,7 +215,7 @@ S_get_invlist_iter_addr(SV* invlist)
 }
 
 PERL_STATIC_INLINE void
-S_invlist_iterinit(SV* invlist)	/* Initialize iterator for invlist */
+S_invlist_iterinit(SV* invlist) /* Initialize iterator for invlist */
 {
     PERL_ARGS_ASSERT_INVLIST_ITERINIT;
 
@@ -255,7 +255,7 @@ S_invlist_iternext(SV* invlist, UV* start, UV* end)
     PERL_ARGS_ASSERT_INVLIST_ITERNEXT;
 
     if (*pos >= len) {
-        *pos = (STRLEN) UV_MAX;	/* Force iterinit() to be required next time */
+        *pos = (STRLEN) UV_MAX; /* Force iterinit() to be required next time */
         return FALSE;
     }
 

@@ -14,21 +14,21 @@
 
 #ifdef VMS
 #  define PERL_FILE_IS_ABSOLUTE(f) \
-        (*(f) == '/'							\
-         || (strchr(f,':')						\
-             || ((*(f) == '[' || *(f) == '<')				\
+        (*(f) == '/'                                                    \
+         || (strchr(f,':')                                              \
+             || ((*(f) == '[' || *(f) == '<')                           \
                  && (isWORDCHAR((f)[1]) || memCHRs("$-_]>",(f)[1])))))
 
 #elif defined(WIN32) || defined(__CYGWIN__)
 #  define PERL_FILE_IS_ABSOLUTE(f) \
-        (*(f) == '/' || *(f) == '\\'		/* UNC/rooted path */	\
-         || ((f)[0] && (f)[1] == ':'))		/* drive name */
+        (*(f) == '/' || *(f) == '\\'            /* UNC/rooted path */   \
+         || ((f)[0] && (f)[1] == ':'))          /* drive name */
 #elif defined(DOSISH)
 #  define PERL_FILE_IS_ABSOLUTE(f) \
-        (*(f) == '/'							\
-         || ((f)[0] && (f)[1] == ':'))		/* drive name */
-#else	/* NOT DOSISH */
-#  define PERL_FILE_IS_ABSOLUTE(f)	(*(f) == '/')
+        (*(f) == '/'                                                    \
+         || ((f)[0] && (f)[1] == ':'))          /* drive name */
+#else   /* NOT DOSISH */
+#  define PERL_FILE_IS_ABSOLUTE(f)      (*(f) == '/')
 #endif
 
 /*

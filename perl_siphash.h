@@ -54,7 +54,7 @@ FNC ## _with_state_64 \
   U64 v2 = U8TO64_LE(state+16);             \
   U64 v3 = U8TO64_LE(state+24);             \
                                             \
-  for ( ; in != end; in += 8 )              \
+  for (; in != end; in += 8 )              \
   {                                         \
     m = U8TO64_LE( in );                    \
     v3 ^= m;                                \

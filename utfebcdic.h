@@ -12,7 +12,7 @@
  *
  * To summarize, the way it works is:
  * To convert an EBCDIC code point to UTF-EBCDIC:
- *  1)	convert to Unicode.  No conversion is necessary for code points above
+ *  1)  convert to Unicode.  No conversion is necessary for code points above
  *      255, as Unicode and EBCDIC are identical in this range.  For smaller
  *      code points, the conversion is done by lookup in the PL_e2a table (with
  *      inverse PL_a2e) in the generated file 'ebcdic_tables.h'.  The 'a'
@@ -20,36 +20,36 @@
  *      NATIVE_TO_LATIN1() and LATIN1_TO_NATIVE(), respectively to perform this
  *      lookup.  NATIVE_TO_UNI() and UNI_TO_NATIVE() are similarly used for any
  *      input, and know to avoid the lookup for inputs above 255.
- *  2)	convert that to a utf8-like string called I8 ('I' stands for
- *	intermediate) with variant characters occupying multiple bytes.  This
- *	step is similar to the utf8-creating step from Unicode, but the details
- *	are different.  This transformation is called UTF8-Mod.  There is a
- *	chart about the bit patterns in a comment later in this file.  But
- *	essentially here are the differences:
- *			    UTF8		I8
- *	invariant byte	    starts with 0	starts with 0 or 100
- *	continuation byte   starts with 10	starts with 101
- *	start byte	    same in both: if the code point requires N bytes,
- *			    then the leading N bits are 1, followed by a 0.  If
- *			    all 8 bits in the first byte are 1, the code point
- *			    will occupy 14 bytes (compared to 13 in Perl's
- *			    extended UTF-8).  This is incompatible with what
- *			    tr16 implies should be the representation of code
- *			    points 2**30 and above, but allows Perl to be able
- *			    to represent all code points that fit in a 64-bit
- *			    word in either our extended UTF-EBCDIC or UTF-8.
- *  3)	Use the algorithm in tr16 to convert each byte from step 2 into
- *	final UTF-EBCDIC.  This is done by table lookup from a table
- *	constructed from the algorithm, reproduced in ebcdic_tables.h as
- *	PL_utf2e, with its inverse being PL_e2utf.  They are constructed so that
- *	all EBCDIC invariants remain invariant, but no others do, and the first
- *	byte of a variant will always have its upper bit set.  But note that
- *	the upper bit of some invariants is also 1.  The table also is designed
- *	so that lexically comparing two UTF-EBCDIC-variant characters yields
- *	the Unicode code point order.  (To get native code point order, one has
- *	to convert the latin1-range characters to their native code point
- *	value.)  The macros NATIVE_UTF8_TO_I8() and I8_TO_NATIVE_UTF8() do the
- *	table lookups.
+ *  2)  convert that to a utf8-like string called I8 ('I' stands for
+ *      intermediate) with variant characters occupying multiple bytes.  This
+ *      step is similar to the utf8-creating step from Unicode, but the details
+ *      are different.  This transformation is called UTF8-Mod.  There is a
+ *      chart about the bit patterns in a comment later in this file.  But
+ *      essentially here are the differences:
+ *                          UTF8                I8
+ *      invariant byte      starts with 0       starts with 0 or 100
+ *      continuation byte   starts with 10      starts with 101
+ *      start byte          same in both: if the code point requires N bytes,
+ *                          then the leading N bits are 1, followed by a 0.  If
+ *                          all 8 bits in the first byte are 1, the code point
+ *                          will occupy 14 bytes (compared to 13 in Perl's
+ *                          extended UTF-8).  This is incompatible with what
+ *                          tr16 implies should be the representation of code
+ *                          points 2**30 and above, but allows Perl to be able
+ *                          to represent all code points that fit in a 64-bit
+ *                          word in either our extended UTF-EBCDIC or UTF-8.
+ *  3)  Use the algorithm in tr16 to convert each byte from step 2 into
+ *      final UTF-EBCDIC.  This is done by table lookup from a table
+ *      constructed from the algorithm, reproduced in ebcdic_tables.h as
+ *      PL_utf2e, with its inverse being PL_e2utf.  They are constructed so that
+ *      all EBCDIC invariants remain invariant, but no others do, and the first
+ *      byte of a variant will always have its upper bit set.  But note that
+ *      the upper bit of some invariants is also 1.  The table also is designed
+ *      so that lexically comparing two UTF-EBCDIC-variant characters yields
+ *      the Unicode code point order.  (To get native code point order, one has
+ *      to convert the latin1-range characters to their native code point
+ *      value.)  The macros NATIVE_UTF8_TO_I8() and I8_TO_NATIVE_UTF8() do the
+ *      table lookups.
  *
  *  For example, the ordinal value of 'A' is 193 in EBCDIC, and also is 193 in
  *  UTF-EBCDIC.  Step 1) converts it to 65, Step 2 leaves it at 65, and Step 3
@@ -180,14 +180,14 @@ above what a 64 bit word can hold
    U+8000..U+D7FF       F1        A0..B5  A0..BF  A0..BF
    U+D800..U+DFFF       F1        B6..B7  A0..BF  A0..BF (surrogates)
    U+E000..U+FFFF       F1        B8..BF  A0..BF  A0..BF
-  U+10000..U+3FFFF	F2..F7    A0..BF  A0..BF  A0..BF
-  U+40000..U+FFFFF	F8      * A8..BF  A0..BF  A0..BF  A0..BF
- U+100000..U+10FFFF	F9        A0..A1  A0..BF  A0..BF  A0..BF
+  U+10000..U+3FFFF      F2..F7    A0..BF  A0..BF  A0..BF
+  U+40000..U+FFFFF      F8      * A8..BF  A0..BF  A0..BF  A0..BF
+ U+100000..U+10FFFF     F9        A0..A1  A0..BF  A0..BF  A0..BF
     Below are above-Unicode code points
- U+110000..U+1FFFFF	F9        A2..BF  A0..BF  A0..BF  A0..BF
- U+200000..U+3FFFFF	FA..FB    A0..BF  A0..BF  A0..BF  A0..BF
- U+400000..U+1FFFFFF	FC      * A4..BF  A0..BF  A0..BF  A0..BF  A0..BF
-U+2000000..U+3FFFFFF	FD        A0..BF  A0..BF  A0..BF  A0..BF  A0..BF
+ U+110000..U+1FFFFF     F9        A2..BF  A0..BF  A0..BF  A0..BF
+ U+200000..U+3FFFFF     FA..FB    A0..BF  A0..BF  A0..BF  A0..BF
+ U+400000..U+1FFFFFF    FC      * A4..BF  A0..BF  A0..BF  A0..BF  A0..BF
+U+2000000..U+3FFFFFF    FD        A0..BF  A0..BF  A0..BF  A0..BF  A0..BF
 U+4000000..U+3FFFFFFF   FE      * A2..BF  A0..BF  A0..BF  A0..BF  A0..BF  A0..BF
 U+40000000..            FF        A0..BF  A0..BF  A0..BF  A0..BF  A0..BF  A0..BF  * A1..BF  A0..BF
 

@@ -159,8 +159,8 @@ is a lexical C<$_> in scope.
 
 #define dAX const I32 ax = (I32)(MARK - PL_stack_base + 1)
 
-#define dAXMARK				\
-        I32 ax = POPMARK;	\
+#define dAXMARK                         \
+        I32 ax = POPMARK;       \
         SV **mark = PL_stack_base + ax++
 
 #define dITEMS I32 items = (I32)(SP - MARK)
@@ -174,10 +174,10 @@ is a lexical C<$_> in scope.
    Note these macros are not drop in replacements for dXSARGS since they set
    PL_xsubfilename. */
 #define dXSBOOTARGSXSAPIVERCHK  \
-        I32 ax = XS_BOTHVERSION_SETXSUBFN_POPMARK_BOOTCHECK;	\
+        I32 ax = XS_BOTHVERSION_SETXSUBFN_POPMARK_BOOTCHECK;    \
         SV **mark = PL_stack_base + ax - 1; dSP; dITEMS
 #define dXSBOOTARGSAPIVERCHK  \
-        I32 ax = XS_APIVERSION_SETXSUBFN_POPMARK_BOOTCHECK;	\
+        I32 ax = XS_APIVERSION_SETXSUBFN_POPMARK_BOOTCHECK;     \
         SV **mark = PL_stack_base + ax - 1; dSP; dITEMS
 /* dXSBOOTARGSNOVERCHK has no API in xsubpp to choose it so do
 #undef dXSBOOTARGSXSAPIVERCHK
@@ -203,9 +203,9 @@ is a lexical C<$_> in scope.
 #  define XSINTERFACE_CVT(ret,name) ret (*name)()
 #  define XSINTERFACE_CVT_ANON(ret) ret (*)()
 #endif
-#define dXSFUNCTION(ret)		XSINTERFACE_CVT(ret,XSFUNCTION)
+#define dXSFUNCTION(ret)                XSINTERFACE_CVT(ret,XSFUNCTION)
 #define XSINTERFACE_FUNC(ret,cv,f)     ((XSINTERFACE_CVT_ANON(ret))(f))
-#define XSINTERFACE_FUNC_SET(cv,f)	\
+#define XSINTERFACE_FUNC_SET(cv,f)      \
                 CvXSUBANY(cv).any_dxptr = (void (*) (pTHX_ void*))(f)
 
 #define dUNDERBAR dNOOP
@@ -321,12 +321,12 @@ Rethrows a previously caught exception.  See L<perlguts/"Exception Handling">.
 #define XST_mYES(i)   (ST(i) = &PL_sv_yes  )
 #define XST_mUNDEF(i) (ST(i) = &PL_sv_undef)
 
-#define XSRETURN(off)					\
-    STMT_START {					\
-        const IV tmpXSoff = (off);			\
+#define XSRETURN(off)                                   \
+    STMT_START {                                        \
+        const IV tmpXSoff = (off);                      \
         assert(tmpXSoff >= 0);\
-        PL_stack_sp = PL_stack_base + ax + (tmpXSoff - 1);	\
-        return;						\
+        PL_stack_sp = PL_stack_base + ax + (tmpXSoff - 1);      \
+        return;                                         \
     } STMT_END
 
 #define XSRETURN_IV(v)    STMT_START { XST_mIV(0,v);    XSRETURN(1); } STMT_END
@@ -339,24 +339,24 @@ Rethrows a previously caught exception.  See L<perlguts/"Exception Handling">.
 #define XSRETURN_UNDEF    STMT_START { XST_mUNDEF(0);   XSRETURN(1); } STMT_END
 #define XSRETURN_EMPTY    STMT_START {                  XSRETURN(0); } STMT_END
 
-#define newXSproto(a,b,c,d)	newXS_flags(a,b,c,d,0)
+#define newXSproto(a,b,c,d)     newXS_flags(a,b,c,d,0)
 
 #ifdef XS_VERSION
-#  define XS_VERSION_BOOTCHECK						\
-    Perl_xs_handshake(HS_KEY(FALSE, FALSE, "", XS_VERSION), HS_CXT, __FILE__,	\
+#  define XS_VERSION_BOOTCHECK                                          \
+    Perl_xs_handshake(HS_KEY(FALSE, FALSE, "", XS_VERSION), HS_CXT, __FILE__,   \
         items, ax, XS_VERSION)
 #else
 #  define XS_VERSION_BOOTCHECK
 #endif
 
-#define XS_APIVERSION_BOOTCHECK						\
-    Perl_xs_handshake(HS_KEY(FALSE, FALSE, "v" PERL_API_VERSION_STRING, ""),	\
+#define XS_APIVERSION_BOOTCHECK                                         \
+    Perl_xs_handshake(HS_KEY(FALSE, FALSE, "v" PERL_API_VERSION_STRING, ""),    \
         HS_CXT, __FILE__, items, ax, "v" PERL_API_VERSION_STRING)
 /* public API, this is a combination of XS_VERSION_BOOTCHECK and
    XS_APIVERSION_BOOTCHECK in 1, and is backportable */
 #ifdef XS_VERSION
-#  define XS_BOTHVERSION_BOOTCHECK						\
-    Perl_xs_handshake(HS_KEY(FALSE, FALSE, "v" PERL_API_VERSION_STRING, XS_VERSION),	\
+#  define XS_BOTHVERSION_BOOTCHECK                                              \
+    Perl_xs_handshake(HS_KEY(FALSE, FALSE, "v" PERL_API_VERSION_STRING, XS_VERSION),    \
         HS_CXT, __FILE__, items, ax, "v" PERL_API_VERSION_STRING, XS_VERSION)
 #else
 /* should this be a #error? if you want both checked, you better supply XS_VERSION right? */
@@ -364,23 +364,23 @@ Rethrows a previously caught exception.  See L<perlguts/"Exception Handling">.
 #endif
 
 /* private API */
-#define XS_APIVERSION_POPMARK_BOOTCHECK					\
-    Perl_xs_handshake(HS_KEY(FALSE, TRUE, "v" PERL_API_VERSION_STRING, ""),	\
+#define XS_APIVERSION_POPMARK_BOOTCHECK                                 \
+    Perl_xs_handshake(HS_KEY(FALSE, TRUE, "v" PERL_API_VERSION_STRING, ""),     \
         HS_CXT, __FILE__, "v" PERL_API_VERSION_STRING)
 #ifdef XS_VERSION
-#  define XS_BOTHVERSION_POPMARK_BOOTCHECK					\
-    Perl_xs_handshake(HS_KEY(FALSE, TRUE, "v" PERL_API_VERSION_STRING, XS_VERSION),	\
+#  define XS_BOTHVERSION_POPMARK_BOOTCHECK                                      \
+    Perl_xs_handshake(HS_KEY(FALSE, TRUE, "v" PERL_API_VERSION_STRING, XS_VERSION),     \
         HS_CXT, __FILE__, "v" PERL_API_VERSION_STRING, XS_VERSION)
 #else
 /* should this be a #error? if you want both checked, you better supply XS_VERSION right? */
 #  define XS_BOTHVERSION_POPMARK_BOOTCHECK XS_APIVERSION_POPMARK_BOOTCHECK
 #endif
 
-#define XS_APIVERSION_SETXSUBFN_POPMARK_BOOTCHECK				\
-    Perl_xs_handshake(HS_KEY(TRUE, TRUE, "v" PERL_API_VERSION_STRING, ""),	\
+#define XS_APIVERSION_SETXSUBFN_POPMARK_BOOTCHECK                               \
+    Perl_xs_handshake(HS_KEY(TRUE, TRUE, "v" PERL_API_VERSION_STRING, ""),      \
         HS_CXT, __FILE__, "v" PERL_API_VERSION_STRING)
 #ifdef XS_VERSION
-#  define XS_BOTHVERSION_SETXSUBFN_POPMARK_BOOTCHECK				  \
+#  define XS_BOTHVERSION_SETXSUBFN_POPMARK_BOOTCHECK                              \
     Perl_xs_handshake(HS_KEY(TRUE, TRUE, "v" PERL_API_VERSION_STRING, XS_VERSION),\
         HS_CXT, __FILE__, "v" PERL_API_VERSION_STRING, XS_VERSION)
 #else
@@ -408,88 +408,88 @@ Rethrows a previously caught exception.  See L<perlguts/"Exception Handling">.
    the *DB*_File modules
 */
 
-#define DBM_setFilter(db_type,code)				\
-        STMT_START {						\
-            if (db_type)					\
-                RETVAL = sv_mortalcopy(db_type) ;		\
-            ST(0) = RETVAL ;					\
-            if (db_type && (code == &PL_sv_undef)) {		\
-                SvREFCNT_dec_NN(db_type) ;			\
-                db_type = NULL ;				\
-            }							\
-            else if (code) {					\
-                if (db_type)					\
-                    sv_setsv(db_type, code) ;			\
-                else						\
-                    db_type = newSVsv(code) ;			\
-            }	    						\
+#define DBM_setFilter(db_type,code)                             \
+        STMT_START {                                            \
+            if (db_type)                                        \
+                RETVAL = sv_mortalcopy(db_type);               \
+            ST(0) = RETVAL;                                    \
+            if (db_type && (code == &PL_sv_undef)) {            \
+                SvREFCNT_dec_NN(db_type);                      \
+                db_type = NULL;                                \
+            }                                                   \
+            else if (code) {                                    \
+                if (db_type)                                    \
+                    sv_setsv(db_type, code);                   \
+                else                                            \
+                    db_type = newSVsv(code);                   \
+            }                                                   \
         } STMT_END
 
-#define DBM_ckFilter(arg,type,name)				\
-    STMT_START {						\
-        if (db->type) {						\
-            if (db->filtering) {				\
-                croak("recursion detected in %s", name) ;	\
-            }                     				\
-            ENTER ;						\
-            SAVETMPS ;						\
-            SAVEINT(db->filtering) ;				\
-            db->filtering = TRUE ;				\
-            SAVE_DEFSV ;					\
+#define DBM_ckFilter(arg,type,name)                             \
+    STMT_START {                                                \
+        if (db->type) {                                         \
+            if (db->filtering) {                                \
+                croak("recursion detected in %s", name);       \
+            }                                                   \
+            ENTER;                                             \
+            SAVETMPS;                                          \
+            SAVEINT(db->filtering);                            \
+            db->filtering = TRUE;                              \
+            SAVE_DEFSV;                                        \
             if (name[7] == 's')                                 \
                 arg = newSVsv(arg);                             \
-            DEFSV_set(arg) ;					\
-            SvTEMP_off(arg) ;					\
-            PUSHMARK(SP) ;					\
-            PUTBACK ;						\
-            (void) perl_call_sv(db->type, G_DISCARD); 		\
-            SPAGAIN ;						\
-            PUTBACK ;						\
-            FREETMPS ;						\
-            LEAVE ;						\
+            DEFSV_set(arg);                                    \
+            SvTEMP_off(arg);                                   \
+            PUSHMARK(SP);                                      \
+            PUTBACK;                                           \
+            (void) perl_call_sv(db->type, G_DISCARD);           \
+            SPAGAIN;                                           \
+            PUTBACK;                                           \
+            FREETMPS;                                          \
+            LEAVE;                                             \
             if (name[7] == 's'){                                \
                 arg = sv_2mortal(arg);                          \
             }                                                   \
         }                                                       \
     } STMT_END
 
-#if 1		/* for compatibility */
-#  define VTBL_sv		&PL_vtbl_sv
-#  define VTBL_env		&PL_vtbl_env
-#  define VTBL_envelem		&PL_vtbl_envelem
-#  define VTBL_sigelem		&PL_vtbl_sigelem
-#  define VTBL_pack		&PL_vtbl_pack
-#  define VTBL_packelem		&PL_vtbl_packelem
-#  define VTBL_dbline		&PL_vtbl_dbline
-#  define VTBL_isa		&PL_vtbl_isa
-#  define VTBL_isaelem		&PL_vtbl_isaelem
-#  define VTBL_arylen		&PL_vtbl_arylen
-#  define VTBL_glob		&PL_vtbl_glob
-#  define VTBL_mglob		&PL_vtbl_mglob
-#  define VTBL_nkeys		&PL_vtbl_nkeys
-#  define VTBL_taint		&PL_vtbl_taint
-#  define VTBL_substr		&PL_vtbl_substr
-#  define VTBL_vec		&PL_vtbl_vec
-#  define VTBL_pos		&PL_vtbl_pos
-#  define VTBL_bm		&PL_vtbl_bm
-#  define VTBL_fm		&PL_vtbl_fm
-#  define VTBL_uvar		&PL_vtbl_uvar
-#  define VTBL_defelem		&PL_vtbl_defelem
-#  define VTBL_regexp		&PL_vtbl_regexp
-#  define VTBL_regdata		&PL_vtbl_regdata
-#  define VTBL_regdatum		&PL_vtbl_regdatum
+#if 1           /* for compatibility */
+#  define VTBL_sv               &PL_vtbl_sv
+#  define VTBL_env              &PL_vtbl_env
+#  define VTBL_envelem          &PL_vtbl_envelem
+#  define VTBL_sigelem          &PL_vtbl_sigelem
+#  define VTBL_pack             &PL_vtbl_pack
+#  define VTBL_packelem         &PL_vtbl_packelem
+#  define VTBL_dbline           &PL_vtbl_dbline
+#  define VTBL_isa              &PL_vtbl_isa
+#  define VTBL_isaelem          &PL_vtbl_isaelem
+#  define VTBL_arylen           &PL_vtbl_arylen
+#  define VTBL_glob             &PL_vtbl_glob
+#  define VTBL_mglob            &PL_vtbl_mglob
+#  define VTBL_nkeys            &PL_vtbl_nkeys
+#  define VTBL_taint            &PL_vtbl_taint
+#  define VTBL_substr           &PL_vtbl_substr
+#  define VTBL_vec              &PL_vtbl_vec
+#  define VTBL_pos              &PL_vtbl_pos
+#  define VTBL_bm               &PL_vtbl_bm
+#  define VTBL_fm               &PL_vtbl_fm
+#  define VTBL_uvar             &PL_vtbl_uvar
+#  define VTBL_defelem          &PL_vtbl_defelem
+#  define VTBL_regexp           &PL_vtbl_regexp
+#  define VTBL_regdata          &PL_vtbl_regdata
+#  define VTBL_regdatum         &PL_vtbl_regdatum
 #  ifdef USE_LOCALE_COLLATE
-#    define VTBL_collxfrm	&PL_vtbl_collxfrm
+#    define VTBL_collxfrm       &PL_vtbl_collxfrm
 #  endif
-#  define VTBL_amagic		&PL_vtbl_amagic
-#  define VTBL_amagicelem	&PL_vtbl_amagicelem
+#  define VTBL_amagic           &PL_vtbl_amagic
+#  define VTBL_amagicelem       &PL_vtbl_amagicelem
 #endif
 
 #if defined(MULTIPLICITY) && !defined(PERL_NO_GET_CONTEXT) && !defined(PERL_CORE)
 #  undef aTHX
 #  undef aTHX_
-#  define aTHX		PERL_GET_THX
-#  define aTHX_		aTHX,
+#  define aTHX          PERL_GET_THX
+#  define aTHX_         aTHX,
 #endif
 
 #if defined(PERL_IMPLICIT_SYS) && !defined(PERL_CORE)
@@ -517,162 +517,162 @@ Rethrows a previously caught exception.  See L<perlguts/"Exception Handling">.
 
 #    undef  socketpair
 
-#    define mkdir		PerlDir_mkdir
-#    define chdir		PerlDir_chdir
-#    define rmdir		PerlDir_rmdir
-#    define closedir		PerlDir_close
-#    define opendir		PerlDir_open
-#    define readdir		PerlDir_read
-#    define rewinddir		PerlDir_rewind
-#    define seekdir		PerlDir_seek
-#    define telldir		PerlDir_tell
-#    define putenv		PerlEnv_putenv
-#    define getenv		PerlEnv_getenv
-#    define uname		PerlEnv_uname
-#    define stdin		PerlSIO_stdin
-#    define stdout		PerlSIO_stdout
-#    define stderr		PerlSIO_stderr
-#    define fopen		PerlSIO_fopen
-#    define fclose		PerlSIO_fclose
-#    define feof		PerlSIO_feof
-#    define ferror		PerlSIO_ferror
-#    define clearerr		PerlSIO_clearerr
-#    define getc		PerlSIO_getc
-#    define fgets		PerlSIO_fgets
-#    define fputc		PerlSIO_fputc
-#    define fputs		PerlSIO_fputs
-#    define fflush		PerlSIO_fflush
-#    define ungetc		PerlSIO_ungetc
-#    define fileno		PerlSIO_fileno
-#    define fdopen		PerlSIO_fdopen
-#    define freopen		PerlSIO_freopen
-#    define fread		PerlSIO_fread
-#    define fwrite		PerlSIO_fwrite
-#    define setbuf		PerlSIO_setbuf
-#    define setvbuf		PerlSIO_setvbuf
-#    define setlinebuf		PerlSIO_setlinebuf
-#    define stdoutf		PerlSIO_stdoutf
-#    define vfprintf		PerlSIO_vprintf
-#    define ftell		PerlSIO_ftell
-#    define fseek		PerlSIO_fseek
-#    define fgetpos		PerlSIO_fgetpos
-#    define fsetpos		PerlSIO_fsetpos
-#    define frewind		PerlSIO_rewind
-#    define tmpfile		PerlSIO_tmpfile
-#    define access		PerlLIO_access
-#    define chmod		PerlLIO_chmod
-#    define chsize		PerlLIO_chsize
-#    define close		PerlLIO_close
-#    define dup			PerlLIO_dup
-#    define dup2		PerlLIO_dup2
-#    define flock		PerlLIO_flock
-#    define fstat		PerlLIO_fstat
-#    define ioctl		PerlLIO_ioctl
-#    define isatty		PerlLIO_isatty
+#    define mkdir               PerlDir_mkdir
+#    define chdir               PerlDir_chdir
+#    define rmdir               PerlDir_rmdir
+#    define closedir            PerlDir_close
+#    define opendir             PerlDir_open
+#    define readdir             PerlDir_read
+#    define rewinddir           PerlDir_rewind
+#    define seekdir             PerlDir_seek
+#    define telldir             PerlDir_tell
+#    define putenv              PerlEnv_putenv
+#    define getenv              PerlEnv_getenv
+#    define uname               PerlEnv_uname
+#    define stdin               PerlSIO_stdin
+#    define stdout              PerlSIO_stdout
+#    define stderr              PerlSIO_stderr
+#    define fopen               PerlSIO_fopen
+#    define fclose              PerlSIO_fclose
+#    define feof                PerlSIO_feof
+#    define ferror              PerlSIO_ferror
+#    define clearerr            PerlSIO_clearerr
+#    define getc                PerlSIO_getc
+#    define fgets               PerlSIO_fgets
+#    define fputc               PerlSIO_fputc
+#    define fputs               PerlSIO_fputs
+#    define fflush              PerlSIO_fflush
+#    define ungetc              PerlSIO_ungetc
+#    define fileno              PerlSIO_fileno
+#    define fdopen              PerlSIO_fdopen
+#    define freopen             PerlSIO_freopen
+#    define fread               PerlSIO_fread
+#    define fwrite              PerlSIO_fwrite
+#    define setbuf              PerlSIO_setbuf
+#    define setvbuf             PerlSIO_setvbuf
+#    define setlinebuf          PerlSIO_setlinebuf
+#    define stdoutf             PerlSIO_stdoutf
+#    define vfprintf            PerlSIO_vprintf
+#    define ftell               PerlSIO_ftell
+#    define fseek               PerlSIO_fseek
+#    define fgetpos             PerlSIO_fgetpos
+#    define fsetpos             PerlSIO_fsetpos
+#    define frewind             PerlSIO_rewind
+#    define tmpfile             PerlSIO_tmpfile
+#    define access              PerlLIO_access
+#    define chmod               PerlLIO_chmod
+#    define chsize              PerlLIO_chsize
+#    define close               PerlLIO_close
+#    define dup                 PerlLIO_dup
+#    define dup2                PerlLIO_dup2
+#    define flock               PerlLIO_flock
+#    define fstat               PerlLIO_fstat
+#    define ioctl               PerlLIO_ioctl
+#    define isatty              PerlLIO_isatty
 #    define link                PerlLIO_link
-#    define lseek		PerlLIO_lseek
-#    define lstat		PerlLIO_lstat
-#    define mktemp		PerlLIO_mktemp
-#    define open		PerlLIO_open
-#    define read		PerlLIO_read
-#    define rename		PerlLIO_rename
-#    define setmode		PerlLIO_setmode
-#    define stat(buf,sb)	PerlLIO_stat(buf,sb)
-#    define tmpnam		PerlLIO_tmpnam
-#    define umask		PerlLIO_umask
-#    define unlink		PerlLIO_unlink
-#    define utime		PerlLIO_utime
-#    define write		PerlLIO_write
-#    define malloc		PerlMem_malloc
+#    define lseek               PerlLIO_lseek
+#    define lstat               PerlLIO_lstat
+#    define mktemp              PerlLIO_mktemp
+#    define open                PerlLIO_open
+#    define read                PerlLIO_read
+#    define rename              PerlLIO_rename
+#    define setmode             PerlLIO_setmode
+#    define stat(buf,sb)        PerlLIO_stat(buf,sb)
+#    define tmpnam              PerlLIO_tmpnam
+#    define umask               PerlLIO_umask
+#    define unlink              PerlLIO_unlink
+#    define utime               PerlLIO_utime
+#    define write               PerlLIO_write
+#    define malloc              PerlMem_malloc
 #    define calloc              PerlMem_calloc
-#    define realloc		PerlMem_realloc
-#    define free		PerlMem_free
-#    define abort		PerlProc_abort
-#    define exit		PerlProc_exit
-#    define _exit		PerlProc__exit
-#    define execl		PerlProc_execl
-#    define execv		PerlProc_execv
-#    define execvp		PerlProc_execvp
-#    define getuid		PerlProc_getuid
-#    define geteuid		PerlProc_geteuid
-#    define getgid		PerlProc_getgid
-#    define getegid		PerlProc_getegid
-#    define getlogin		PerlProc_getlogin
-#    define kill		PerlProc_kill
-#    define killpg		PerlProc_killpg
-#    define pause		PerlProc_pause
-#    define popen		PerlProc_popen
-#    define pclose		PerlProc_pclose
-#    define pipe		PerlProc_pipe
-#    define setuid		PerlProc_setuid
-#    define setgid		PerlProc_setgid
-#    define sleep		PerlProc_sleep
-#    define times		PerlProc_times
-#    define wait		PerlProc_wait
-#    define setjmp		PerlProc_setjmp
-#    define longjmp		PerlProc_longjmp
-#    define signal		PerlProc_signal
-#    define getpid		PerlProc_getpid
-#    define gettimeofday	PerlProc_gettimeofday
-#    define htonl		PerlSock_htonl
-#    define htons		PerlSock_htons
-#    define ntohl		PerlSock_ntohl
-#    define ntohs		PerlSock_ntohs
-#    define accept		PerlSock_accept
-#    define bind		PerlSock_bind
-#    define connect		PerlSock_connect
-#    define endhostent		PerlSock_endhostent
-#    define endnetent		PerlSock_endnetent
-#    define endprotoent		PerlSock_endprotoent
-#    define endservent		PerlSock_endservent
-#    define gethostbyaddr	PerlSock_gethostbyaddr
-#    define gethostbyname	PerlSock_gethostbyname
-#    define gethostent		PerlSock_gethostent
-#    define gethostname		PerlSock_gethostname
-#    define getnetbyaddr	PerlSock_getnetbyaddr
-#    define getnetbyname	PerlSock_getnetbyname
-#    define getnetent		PerlSock_getnetent
-#    define getpeername		PerlSock_getpeername
-#    define getprotobyname	PerlSock_getprotobyname
-#    define getprotobynumber	PerlSock_getprotobynumber
-#    define getprotoent		PerlSock_getprotoent
-#    define getservbyname	PerlSock_getservbyname
-#    define getservbyport	PerlSock_getservbyport
-#    define getservent		PerlSock_getservent
-#    define getsockname		PerlSock_getsockname
-#    define getsockopt		PerlSock_getsockopt
-#    define inet_addr		PerlSock_inet_addr
-#    define inet_ntoa		PerlSock_inet_ntoa
-#    define listen		PerlSock_listen
-#    define recv		PerlSock_recv
-#    define recvfrom		PerlSock_recvfrom
-#    define select		PerlSock_select
-#    define send		PerlSock_send
-#    define sendto		PerlSock_sendto
-#    define sethostent		PerlSock_sethostent
-#    define setnetent		PerlSock_setnetent
-#    define setprotoent		PerlSock_setprotoent
-#    define setservent		PerlSock_setservent
-#    define setsockopt		PerlSock_setsockopt
-#    define shutdown		PerlSock_shutdown
-#    define socket		PerlSock_socket
-#    define socketpair		PerlSock_socketpair
+#    define realloc             PerlMem_realloc
+#    define free                PerlMem_free
+#    define abort               PerlProc_abort
+#    define exit                PerlProc_exit
+#    define _exit               PerlProc__exit
+#    define execl               PerlProc_execl
+#    define execv               PerlProc_execv
+#    define execvp              PerlProc_execvp
+#    define getuid              PerlProc_getuid
+#    define geteuid             PerlProc_geteuid
+#    define getgid              PerlProc_getgid
+#    define getegid             PerlProc_getegid
+#    define getlogin            PerlProc_getlogin
+#    define kill                PerlProc_kill
+#    define killpg              PerlProc_killpg
+#    define pause               PerlProc_pause
+#    define popen               PerlProc_popen
+#    define pclose              PerlProc_pclose
+#    define pipe                PerlProc_pipe
+#    define setuid              PerlProc_setuid
+#    define setgid              PerlProc_setgid
+#    define sleep               PerlProc_sleep
+#    define times               PerlProc_times
+#    define wait                PerlProc_wait
+#    define setjmp              PerlProc_setjmp
+#    define longjmp             PerlProc_longjmp
+#    define signal              PerlProc_signal
+#    define getpid              PerlProc_getpid
+#    define gettimeofday        PerlProc_gettimeofday
+#    define htonl               PerlSock_htonl
+#    define htons               PerlSock_htons
+#    define ntohl               PerlSock_ntohl
+#    define ntohs               PerlSock_ntohs
+#    define accept              PerlSock_accept
+#    define bind                PerlSock_bind
+#    define connect             PerlSock_connect
+#    define endhostent          PerlSock_endhostent
+#    define endnetent           PerlSock_endnetent
+#    define endprotoent         PerlSock_endprotoent
+#    define endservent          PerlSock_endservent
+#    define gethostbyaddr       PerlSock_gethostbyaddr
+#    define gethostbyname       PerlSock_gethostbyname
+#    define gethostent          PerlSock_gethostent
+#    define gethostname         PerlSock_gethostname
+#    define getnetbyaddr        PerlSock_getnetbyaddr
+#    define getnetbyname        PerlSock_getnetbyname
+#    define getnetent           PerlSock_getnetent
+#    define getpeername         PerlSock_getpeername
+#    define getprotobyname      PerlSock_getprotobyname
+#    define getprotobynumber    PerlSock_getprotobynumber
+#    define getprotoent         PerlSock_getprotoent
+#    define getservbyname       PerlSock_getservbyname
+#    define getservbyport       PerlSock_getservbyport
+#    define getservent          PerlSock_getservent
+#    define getsockname         PerlSock_getsockname
+#    define getsockopt          PerlSock_getsockopt
+#    define inet_addr           PerlSock_inet_addr
+#    define inet_ntoa           PerlSock_inet_ntoa
+#    define listen              PerlSock_listen
+#    define recv                PerlSock_recv
+#    define recvfrom            PerlSock_recvfrom
+#    define select              PerlSock_select
+#    define send                PerlSock_send
+#    define sendto              PerlSock_sendto
+#    define sethostent          PerlSock_sethostent
+#    define setnetent           PerlSock_setnetent
+#    define setprotoent         PerlSock_setprotoent
+#    define setservent          PerlSock_setservent
+#    define setsockopt          PerlSock_setsockopt
+#    define shutdown            PerlSock_shutdown
+#    define socket              PerlSock_socket
+#    define socketpair          PerlSock_socketpair
 
 #    undef fd_set
 #    undef FD_SET
 #    undef FD_CLR
 #    undef FD_ISSET
 #    undef FD_ZERO
-#    define fd_set		Perl_fd_set
-#    define FD_SET(n,p)		PERL_FD_SET(n,p)
-#    define FD_CLR(n,p)		PERL_FD_CLR(n,p)
-#    define FD_ISSET(n,p)	PERL_FD_ISSET(n,p)
-#    define FD_ZERO(p)		PERL_FD_ZERO(p)
+#    define fd_set              Perl_fd_set
+#    define FD_SET(n,p)         PERL_FD_SET(n,p)
+#    define FD_CLR(n,p)         PERL_FD_CLR(n,p)
+#    define FD_ISSET(n,p)       PERL_FD_ISSET(n,p)
+#    define FD_ZERO(p)          PERL_FD_ZERO(p)
 
 #  endif  /* NO_XSLOCKS */
 #endif  /* PERL_IMPLICIT_SYS && !PERL_CORE */
 
-#endif /* PERL_XSUB_H_ */		/* include guard */
+#endif /* PERL_XSUB_H_ */               /* include guard */
 
 /*
  * ex: set ts=8 sts=4 sw=4 et:

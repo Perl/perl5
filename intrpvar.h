@@ -1,4 +1,4 @@
-/*   intrpvar.h 
+/*   intrpvar.h
  *
  *    Copyright (C) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005,
  *    2006, 2007, 2008 by Larry Wall and others
@@ -28,33 +28,33 @@
  *
  * Important ones in the first cache line (if alignment is done right) */
 
-PERLVAR(I, stack_sp,	SV **)		/* top of the stack */
-PERLVAR(I, op,		OP *)		/* currently executing op */
-PERLVAR(I, curpad,	SV **)		/* active pad (lexicals+tmps) */
+PERLVAR(I, stack_sp,    SV **)          /* top of the stack */
+PERLVAR(I, op,          OP *)           /* currently executing op */
+PERLVAR(I, curpad,      SV **)          /* active pad (lexicals+tmps) */
 
-PERLVAR(I, stack_base,	SV **)
-PERLVAR(I, stack_max,	SV **)
+PERLVAR(I, stack_base,  SV **)
+PERLVAR(I, stack_max,   SV **)
 
-PERLVAR(I, savestack,	ANY *)		/* items that need to be restored when
+PERLVAR(I, savestack,   ANY *)          /* items that need to be restored when
                                            LEAVEing scopes we've ENTERed */
 PERLVAR(I, savestack_ix, I32)
 PERLVAR(I, savestack_max, I32)
 
-PERLVAR(I, scopestack,	I32 *)		/* scopes we've ENTERed */
+PERLVAR(I, scopestack,  I32 *)          /* scopes we've ENTERed */
 PERLVAR(I, scopestack_ix, I32)
 PERLVAR(I, scopestack_max, I32)
 
-PERLVAR(I, tmps_stack,	SV **)		/* mortals we've made */
-PERLVARI(I, tmps_ix,	SSize_t,	-1)
-PERLVARI(I, tmps_floor,	SSize_t,	-1)
-PERLVAR(I, tmps_max,	SSize_t)        /* first unalloced slot in tmps stack */
+PERLVAR(I, tmps_stack,  SV **)          /* mortals we've made */
+PERLVARI(I, tmps_ix,    SSize_t,        -1)
+PERLVARI(I, tmps_floor, SSize_t,        -1)
+PERLVAR(I, tmps_max,    SSize_t)        /* first unalloced slot in tmps stack */
 
-PERLVAR(I, markstack,	I32 *)		/* stack_sp locations we're
+PERLVAR(I, markstack,   I32 *)          /* stack_sp locations we're
                                            remembering */
 PERLVAR(I, markstack_ptr, I32 *)
 PERLVAR(I, markstack_max, I32 *)
 
-PERLVARI(I, sub_generation, U32, 1)	/* incr to invalidate method cache */
+PERLVARI(I, sub_generation, U32, 1)     /* incr to invalidate method cache */
 
 #ifdef PERL_HASH_RANDOMIZE_KEYS
 #ifdef USE_PERL_PERTURB_KEYS
@@ -65,17 +65,17 @@ PERLVARI(I, hash_rand_bits_enabled, U8, 1) /* used to randomize hash stuff
 #endif
 PERLVARI(I, hash_rand_bits, UV, 0)      /* used to randomize hash stuff */
 #endif
-PERLVAR(I, strtab,	HV *)		/* shared string table */
+PERLVAR(I, strtab,      HV *)           /* shared string table */
 /* prog counter for the currently executing OP_MULTIDEREF Used to signal
  * to S_find_uninit_var() where we are */
 PERLVAR(I, multideref_pc, UNOP_AUX_item *)
 
 /* Fields used by magic variables such as $@, $/ and so on */
-PERLVAR(I, curpm,	PMOP *)		/* what to do \ interps in REs from */
+PERLVAR(I, curpm,       PMOP *)         /* what to do \ interps in REs from */
 PERLVAR(I, curpm_under,        PMOP *)                /* what to do \ interps in REs from */
 
-PERLVAR(I, tainting,	bool)		/* ? doing taint checks */
-PERLVARI(I, tainted,	bool, FALSE)	/* using variables controlled by $< */
+PERLVAR(I, tainting,    bool)           /* ? doing taint checks */
+PERLVARI(I, tainted,    bool, FALSE)    /* using variables controlled by $< */
 
 /* PL_delaymagic is currently used for two purposes: to assure simultaneous
  * updates in ($<,$>) = ..., and to assure atomic update in push/unshift
@@ -90,7 +90,7 @@ PERLVARI(I, tainted,	bool, FALSE)	/* using variables controlled by $< */
  * / POP. This removes the need to do ENTER/SAVEI16(PL_delaymagic)/LEAVE
  * in hot code like pp_push.
  */
-PERLVAR(I, delaymagic,	U16)		/* ($<,$>) = ... */
+PERLVAR(I, delaymagic,  U16)            /* ($<,$>) = ... */
 
 /*
 =for apidoc_section $warning
@@ -107,14 +107,14 @@ thread's copy.
 =cut
 */
 
-PERLVAR(I, dowarn,	U8)
+PERLVAR(I, dowarn,      U8)
 
 #if defined (PERL_UTF8_CACHE_ASSERT) || defined (DEBUGGING)
 #  define PERL___I -1
 #else
 #  define PERL___I 1
 #endif
-PERLVARI(I, utf8cache, I8, PERL___I)	/* Is the utf8 caching code enabled? */
+PERLVARI(I, utf8cache, I8, PERL___I)    /* Is the utf8 caching code enabled? */
 #undef PERL___I
 
 /*
@@ -130,9 +130,9 @@ thread's copy.
 =cut
 */
 
-PERLVAR(I, localizing,	U8)		/* are we processing a local() list? */
-PERLVAR(I, in_eval,	U8)		/* trap "fatal" errors? */
-PERLVAR(I, defgv,	GV *)           /* the *_ glob */
+PERLVAR(I, localizing,  U8)             /* are we processing a local() list? */
+PERLVAR(I, in_eval,     U8)             /* trap "fatal" errors? */
+PERLVAR(I, defgv,       GV *)           /* the *_ glob */
 
 /*
 =for apidoc_section $GV
@@ -148,8 +148,8 @@ thread's copy.
 */
 
 /* Stashes */
-PERLVAR(I, defstash,	HV *)		/* main symbol table */
-PERLVAR(I, curstash,	HV *)		/* symbol table for current package */
+PERLVAR(I, defstash,    HV *)           /* main symbol table */
+PERLVAR(I, curstash,    HV *)           /* symbol table for current package */
 
 /*
 =for apidoc_section $COP
@@ -165,17 +165,17 @@ thread's copy.
 =cut
 */
 
-PERLVAR(I, curcop,	COP *)
-PERLVAR(I, curstack,	AV *)		/* THE STACK */
-PERLVAR(I, curstackinfo, PERL_SI *)	/* current stack + context */
-PERLVAR(I, mainstack,	AV *)		/* the stack when nothing funny is
+PERLVAR(I, curcop,      COP *)
+PERLVAR(I, curstack,    AV *)           /* THE STACK */
+PERLVAR(I, curstackinfo, PERL_SI *)     /* current stack + context */
+PERLVAR(I, mainstack,   AV *)           /* the stack when nothing funny is
                                            happening */
 
 /* memory management */
-PERLVAR(I, sv_count,	IV)		/* how many SV* are currently allocated */
+PERLVAR(I, sv_count,    IV)             /* how many SV* are currently allocated */
 
-PERLVAR(I, sv_root,	SV *)		/* storage for SVs belonging to interp */
-PERLVAR(I, sv_arenaroot, SV *)		/* list of areas for garbage collection */
+PERLVAR(I, sv_root,     SV *)           /* storage for SVs belonging to interp */
+PERLVAR(I, sv_arenaroot, SV *)          /* list of areas for garbage collection */
 
 /* fake PMOP that PL_curpm points to while in (?{}) so $1 et al are visible */
 PERLVARI(I, reg_curpm, PMOP*, NULL)
@@ -184,10 +184,10 @@ PERLVARI(I, reg_curpm, PMOP*, NULL)
  * and the currently active state within that slab. This stack of states
  * is shared amongst re-entrant calls to the regex engine */
 
-PERLVARI(I, regmatch_slab, regmatch_slab *,	NULL)
+PERLVARI(I, regmatch_slab, regmatch_slab *,     NULL)
 PERLVAR(I, regmatch_state, regmatch_state *)
 
-PERLVAR(I, comppad,	PAD *)		/* storage for lexically scoped temporaries */
+PERLVAR(I, comppad,     PAD *)          /* storage for lexically scoped temporaries */
 
 /*
 =for apidoc_section $SV
@@ -213,18 +213,18 @@ C<&PL_sv_zero>. Introduced in 5.28.
 */
 
 #ifdef MULTIPLICITY
-PERLVAR(I, sv_yes,	SV)
-PERLVAR(I, sv_undef,	SV)
-PERLVAR(I, sv_no,	SV)
-PERLVAR(I, sv_zero,	SV)
+PERLVAR(I, sv_yes,      SV)
+PERLVAR(I, sv_undef,    SV)
+PERLVAR(I, sv_no,       SV)
+PERLVAR(I, sv_zero,     SV)
 #else
 /* store the immortals as an array to ensure they are contiguous in
  * memory: makes SvIMMORTAL_INTERP(sv) possible */
 PERLVARA(I, sv_immortals, 4, SV)
 #endif
 
-PERLVAR(I, padname_undef,	PADNAME)
-PERLVAR(I, padname_const,	PADNAME)
+PERLVAR(I, padname_undef,       PADNAME)
+PERLVAR(I, padname_const,       PADNAME)
 
 /*
 =for apidoc_section $SV
@@ -241,11 +241,11 @@ get zapped, leading to hard-to-diagnose errors.
 
 =cut
 */
-PERLVAR(I, Sv,		SV *)
+PERLVAR(I, Sv,          SV *)
 
-PERLVAR(I, parser,	yy_parser *)	/* current parser state */
+PERLVAR(I, parser,      yy_parser *)    /* current parser state */
 
-PERLVAR(I, stashcache,	HV *)		/* Cache to speed up S_method_common */
+PERLVAR(I, stashcache,  HV *)           /* Cache to speed up S_method_common */
 
 
 /*
@@ -269,13 +269,13 @@ instead, or to use the C<SvPV_nolen> macro.
 =cut
 */
 
-PERLVAR(I, na,		STRLEN)		/* for use in SvPV when length is
+PERLVAR(I, na,          STRLEN)         /* for use in SvPV when length is
                                            Not Applicable */
 
 /* stat stuff */
-PERLVAR(I, statcache,	Stat_t)		/* _ */
-PERLVAR(I, statgv,	GV *)
-PERLVARI(I, statname,	SV *,	NULL)
+PERLVAR(I, statcache,   Stat_t)         /* _ */
+PERLVAR(I, statgv,      GV *)
+PERLVARI(I, statname,   SV *,   NULL)
 
 /*
 =for apidoc_section $io
@@ -308,39 +308,39 @@ thread's copy.
 =cut
 */
 
-PERLVAR(I, rs,		SV *)		/* input record separator $/ */
-PERLVAR(I, last_in_gv,	GV *)		/* GV used in last <FH> */
-PERLVAR(I, ofsgv,	GV *)		/* GV of output field separator *, */
-PERLVAR(I, defoutgv,	GV *)		/* default FH for output */
-PERLVARI(I, chopset,	const char *, " \n-")	/* $: */
-PERLVAR(I, formtarget,	SV *)
-PERLVAR(I, bodytarget,	SV *)
-PERLVAR(I, toptarget,	SV *)
+PERLVAR(I, rs,          SV *)           /* input record separator $/ */
+PERLVAR(I, last_in_gv,  GV *)           /* GV used in last <FH> */
+PERLVAR(I, ofsgv,       GV *)           /* GV of output field separator *, */
+PERLVAR(I, defoutgv,    GV *)           /* default FH for output */
+PERLVARI(I, chopset,    const char *, " \n-")   /* $: */
+PERLVAR(I, formtarget,  SV *)
+PERLVAR(I, bodytarget,  SV *)
+PERLVAR(I, toptarget,   SV *)
 
 
-PERLVAR(I, restartop,	OP *)		/* propagating an error from croak? */
-PERLVAR(I, restartjmpenv, JMPENV *)	/* target frame for longjmp in die */
+PERLVAR(I, restartop,   OP *)           /* propagating an error from croak? */
+PERLVAR(I, restartjmpenv, JMPENV *)     /* target frame for longjmp in die */
 
-PERLVAR(I, top_env,	JMPENV *)	/* ptr to current sigjmp environment */
-PERLVAR(I, start_env,	JMPENV)		/* empty startup sigjmp environment */
-PERLVARI(I, errors,	SV *,	NULL)	/* outstanding queued errors */
+PERLVAR(I, top_env,     JMPENV *)       /* ptr to current sigjmp environment */
+PERLVAR(I, start_env,   JMPENV)         /* empty startup sigjmp environment */
+PERLVARI(I, errors,     SV *,   NULL)   /* outstanding queued errors */
 
 /* statics "owned" by various functions */
-PERLVAR(I, hv_fetch_ent_mh, HE*)	/* owned by hv_fetch_ent() */
+PERLVAR(I, hv_fetch_ent_mh, HE*)        /* owned by hv_fetch_ent() */
 
-PERLVAR(I, lastgotoprobe, OP*)		/* from pp_ctl.c */
+PERLVAR(I, lastgotoprobe, OP*)          /* from pp_ctl.c */
 
 /* sort stuff */
-PERLVAR(I, sortcop,	OP *)		/* user defined sort routine */
-PERLVAR(I, sortstash,	HV *)		/* which is in some package or other */
-PERLVAR(I, firstgv,	GV *)		/* $a */
-PERLVAR(I, secondgv,	GV *)		/* $b */
+PERLVAR(I, sortcop,     OP *)           /* user defined sort routine */
+PERLVAR(I, sortstash,   HV *)           /* which is in some package or other */
+PERLVAR(I, firstgv,     GV *)           /* $a */
+PERLVAR(I, secondgv,    GV *)           /* $b */
 
 /* float buffer */
-PERLVAR(I, efloatbuf,	char *)
-PERLVAR(I, efloatsize,	STRLEN)
+PERLVAR(I, efloatbuf,   char *)
+PERLVAR(I, efloatsize,  STRLEN)
 
-PERLVARI(I, dumpindent,	U16,	4)	/* number of blanks per dump
+PERLVARI(I, dumpindent, U16,    4)      /* number of blanks per dump
                                            indentation level */
 
 /*
@@ -384,9 +384,9 @@ thread's copy.
 =cut
 */
 
-PERLVAR(I, exit_flags,	U8)		/* was exit() unexpected, etc. */
+PERLVAR(I, exit_flags,  U8)             /* was exit() unexpected, etc. */
 
-PERLVAR(I, utf8locale,	bool)		/* utf8 locale detected */
+PERLVAR(I, utf8locale,  bool)           /* utf8 locale detected */
 
 #if defined(USE_LOCALE) && defined(USE_LOCALE_THREADS)
 PERLVARI(I, locale_mutex_depth, int, 0)     /* Emulate general semaphore */
@@ -398,7 +398,7 @@ PERLVAR(I, in_utf8_CTYPE_locale, bool)
 PERLVAR(I, in_utf8_turkic_locale, bool)
 #endif
 
-PERLVARA(I, colors,6,	char *)		/* values from PERL_RE_COLORS env var */
+PERLVARA(I, colors,6,   char *)         /* values from PERL_RE_COLORS env var */
 
 /*
 =for apidoc_section $optree_construction
@@ -426,7 +426,7 @@ thread's copy.
 =cut
 */
 
-PERLVARI(I, peepp,	peep_t, Perl_peep)
+PERLVARI(I, peepp,      peep_t, Perl_peep)
 
 /*
 =for apidoc_section $optree_construction
@@ -455,7 +455,7 @@ thread's copy.
 =cut
 */
 
-PERLVARI(I, rpeepp,	peep_t, Perl_rpeep)
+PERLVARI(I, rpeepp,     peep_t, Perl_rpeep)
 
 /*
 =for apidoc_section $optrees
@@ -474,75 +474,75 @@ thread's copy.
 =cut
 */
 
-PERLVARI(I, opfreehook,	Perl_ophook_t, 0) /* op_free() hook */
+PERLVARI(I, opfreehook, Perl_ophook_t, 0) /* op_free() hook */
 
-PERLVARI(I, watchaddr,	char **, 0)
-PERLVAR(I, watchok,	char *)
+PERLVARI(I, watchaddr,  char **, 0)
+PERLVAR(I, watchok,     char *)
 
-PERLVAR(I, perldb,	U32)
+PERLVAR(I, perldb,      U32)
 
-PERLVAR(I, signals,	U32)	/* Using which pre-5.8 signals */
+PERLVAR(I, signals,     U32)    /* Using which pre-5.8 signals */
 
-PERLVAR(I, reentrant_retint, int)	/* Integer return value from reentrant functions */
+PERLVAR(I, reentrant_retint, int)       /* Integer return value from reentrant functions */
 
 /* pseudo environmental stuff */
-PERLVAR(I, origargc,	int)
-PERLVAR(I, origargv,	char **)
-PERLVAR(I, envgv,	GV *)
-PERLVAR(I, incgv,	GV *)
-PERLVAR(I, hintgv,	GV *)
+PERLVAR(I, origargc,    int)
+PERLVAR(I, origargv,    char **)
+PERLVAR(I, envgv,       GV *)
+PERLVAR(I, incgv,       GV *)
+PERLVAR(I, hintgv,      GV *)
 PERLVAR(I, origfilename, char *)
 PERLVARI(I, xsubfilename, const char *, NULL)
-PERLVAR(I, diehook,	SV *)
-PERLVAR(I, warnhook,	SV *)
+PERLVAR(I, diehook,     SV *)
+PERLVAR(I, warnhook,    SV *)
 
 /* switches */
-PERLVAR(I, patchlevel,	SV *)
+PERLVAR(I, patchlevel,  SV *)
 PERLVAR(I, localpatches, const char * const *)
-PERLVARI(I, splitstr,	char *, NULL)
+PERLVARI(I, splitstr,   char *, NULL)
 
-PERLVAR(I, minus_c,	bool)
-PERLVAR(I, minus_n,	bool)
-PERLVAR(I, minus_p,	bool)
-PERLVAR(I, minus_l,	bool)
-PERLVAR(I, minus_a,	bool)
-PERLVAR(I, minus_F,	bool)
-PERLVAR(I, doswitches,	bool)
-PERLVAR(I, minus_E,	bool)
+PERLVAR(I, minus_c,     bool)
+PERLVAR(I, minus_n,     bool)
+PERLVAR(I, minus_p,     bool)
+PERLVAR(I, minus_l,     bool)
+PERLVAR(I, minus_a,     bool)
+PERLVAR(I, minus_F,     bool)
+PERLVAR(I, doswitches,  bool)
+PERLVAR(I, minus_E,     bool)
 
-PERLVAR(I, inplace,	char *)
-PERLVAR(I, e_script,	SV *)
+PERLVAR(I, inplace,     char *)
+PERLVAR(I, e_script,    SV *)
 
-PERLVAR(I, basetime,	Time_t)		/* $^T */
+PERLVAR(I, basetime,    Time_t)         /* $^T */
 
-PERLVARI(I, maxsysfd,	I32,	MAXSYSFD)
+PERLVARI(I, maxsysfd,   I32,    MAXSYSFD)
                                         /* top fd to pass to subprocesses */
-PERLVAR(I, statusvalue,	I32)		/* $? */
+PERLVAR(I, statusvalue, I32)            /* $? */
 #ifdef VMS
 PERLVAR(I, statusvalue_vms, U32)
 #else
 PERLVAR(I, statusvalue_posix, I32)
 #endif
 
-PERLVARI(I, sig_pending, int, 0)	/* Number if highest signal pending */
-PERLVAR(I, psig_pend, int *)		/* per-signal "count" of pending */
+PERLVARI(I, sig_pending, int, 0)        /* Number if highest signal pending */
+PERLVAR(I, psig_pend, int *)            /* per-signal "count" of pending */
 
 /* shortcuts to various I/O objects */
-PERLVAR(I, stdingv,	GV *)		/*  *STDIN      */
-PERLVAR(I, stderrgv,	GV *)		/*  *STDERR     */
-PERLVAR(I, argvgv,	GV *)		/*  *ARGV       */
-PERLVAR(I, argvoutgv,	GV *)		/*  *ARGVOUT    */
+PERLVAR(I, stdingv,     GV *)           /*  *STDIN      */
+PERLVAR(I, stderrgv,    GV *)           /*  *STDERR     */
+PERLVAR(I, argvgv,      GV *)           /*  *ARGV       */
+PERLVAR(I, argvoutgv,   GV *)           /*  *ARGVOUT    */
 PERLVAR(I, argvout_stack, AV *)
 
 /* shortcuts to regexp stuff */
-PERLVAR(I, replgv,	GV *)		/*  *^R         */
+PERLVAR(I, replgv,      GV *)           /*  *^R         */
 
 /* shortcuts to misc objects */
-PERLVAR(I, errgv,	GV *)		/*  *@          */
+PERLVAR(I, errgv,       GV *)           /*  *@          */
 
 /* shortcuts to debugging objects */
-PERLVAR(I, DBgv,	GV *)		/*  *DB::DB     */
-PERLVAR(I, DBline,	GV *)		/*  *DB::line   */
+PERLVAR(I, DBgv,        GV *)           /*  *DB::DB     */
+PERLVAR(I, DBline,      GV *)           /*  *DB::line   */
 
 /*
 =for apidoc_section $debugging
@@ -579,68 +579,68 @@ thread's copy.
 =cut
 */
 
-PERLVAR(I, DBsub,	GV *)		/*  *DB::sub    */
-PERLVAR(I, DBsingle,	SV *)		/*  $DB::single */
-PERLVAR(I, DBtrace,	SV *)		/*  $DB::trace  */
-PERLVAR(I, DBsignal,	SV *)		/*  $DB::signal */
-PERLVAR(I, dbargs,	AV *)		/* args to call listed by caller function */
+PERLVAR(I, DBsub,       GV *)           /*  *DB::sub    */
+PERLVAR(I, DBsingle,    SV *)           /*  $DB::single */
+PERLVAR(I, DBtrace,     SV *)           /*  $DB::trace  */
+PERLVAR(I, DBsignal,    SV *)           /*  $DB::signal */
+PERLVAR(I, dbargs,      AV *)           /* args to call listed by caller function */
 
 PERLVARA(I, DBcontrol,    DBVARMG_COUNT, IV) /* IV versions of $DB::single, trace, signal */
 
 /* symbol tables */
-PERLVAR(I, debstash,	HV *)		/* symbol table for perldb package */
-PERLVAR(I, globalstash,	HV *)		/* global keyword overrides imported here */
-PERLVAR(I, curstname,	SV *)		/* name of current package */
-PERLVAR(I, beginav,	AV *)		/* names of BEGIN subroutines */
-PERLVAR(I, endav,	AV *)		/* names of END subroutines */
-PERLVAR(I, unitcheckav,	AV *)		/* names of UNITCHECK subroutines */
-PERLVAR(I, checkav,	AV *)		/* names of CHECK subroutines */
-PERLVAR(I, initav,	AV *)		/* names of INIT subroutines */
+PERLVAR(I, debstash,    HV *)           /* symbol table for perldb package */
+PERLVAR(I, globalstash, HV *)           /* global keyword overrides imported here */
+PERLVAR(I, curstname,   SV *)           /* name of current package */
+PERLVAR(I, beginav,     AV *)           /* names of BEGIN subroutines */
+PERLVAR(I, endav,       AV *)           /* names of END subroutines */
+PERLVAR(I, unitcheckav, AV *)           /* names of UNITCHECK subroutines */
+PERLVAR(I, checkav,     AV *)           /* names of CHECK subroutines */
+PERLVAR(I, initav,      AV *)           /* names of INIT subroutines */
 
 /* subprocess state */
-PERLVAR(I, fdpid,	AV *)		/* keep fd-to-pid mappings for my_popen */
+PERLVAR(I, fdpid,       AV *)           /* keep fd-to-pid mappings for my_popen */
 
 /* internal state */
-PERLVARI(I, op_mask,	char *,	NULL)	/* masked operations for safe evals */
+PERLVARI(I, op_mask,    char *, NULL)   /* masked operations for safe evals */
 
 /* current interpreter roots */
-PERLVAR(I, main_cv,	CV *)
-PERLVAR(I, main_root,	OP *)
-PERLVAR(I, main_start,	OP *)
-PERLVAR(I, eval_root,	OP *)
-PERLVAR(I, eval_start,	OP *)
+PERLVAR(I, main_cv,     CV *)
+PERLVAR(I, main_root,   OP *)
+PERLVAR(I, main_start,  OP *)
+PERLVAR(I, eval_root,   OP *)
+PERLVAR(I, eval_start,  OP *)
 
 /* runtime control stuff */
-PERLVARI(I, curcopdb,	COP *,	NULL)
+PERLVARI(I, curcopdb,   COP *,  NULL)
 
-PERLVAR(I, filemode,	int)		/* so nextargv() can preserve mode */
-PERLVAR(I, lastfd,	int)		/* what to preserve mode on */
-PERLVAR(I, oldname,	char *)		/* what to preserve mode on */
+PERLVAR(I, filemode,    int)            /* so nextargv() can preserve mode */
+PERLVAR(I, lastfd,      int)            /* what to preserve mode on */
+PERLVAR(I, oldname,     char *)         /* what to preserve mode on */
 /* Elements in this array have ';' appended and are injected as a single line
    into the tokeniser. You can't put any (literal) newlines into any program
    you stuff in into this array, as the point where it's injected is expecting
    a single physical line. */
-PERLVAR(I, preambleav,	AV *)
-PERLVAR(I, mess_sv,	SV *)
-PERLVAR(I, ors_sv,	SV *)		/* output record separator $\ */
+PERLVAR(I, preambleav,  AV *)
+PERLVAR(I, mess_sv,     SV *)
+PERLVAR(I, ors_sv,      SV *)           /* output record separator $\ */
 
 /* funky return mechanisms */
-PERLVAR(I, forkprocess,	int)		/* so do_open |- can return proc# */
+PERLVAR(I, forkprocess, int)            /* so do_open |- can return proc# */
 
 /* statics moved here for shared library purposes */
-PERLVARI(I, gensym,	I32,	0)	/* next symbol for getsym() to define */
-PERLVARI(I, cv_has_eval, bool, FALSE)	/* PL_compcv includes an entereval or similar */
-PERLVAR(I, taint_warn,	bool)		/* taint warns instead of dying */
-PERLVARI(I, laststype,	U16,	OP_STAT)
+PERLVARI(I, gensym,     I32,    0)      /* next symbol for getsym() to define */
+PERLVARI(I, cv_has_eval, bool, FALSE)   /* PL_compcv includes an entereval or similar */
+PERLVAR(I, taint_warn,  bool)           /* taint warns instead of dying */
+PERLVARI(I, laststype,  U16,    OP_STAT)
 
-PERLVARI(I, laststatval, int,	-1)
+PERLVARI(I, laststatval, int,   -1)
 
-PERLVAR(I, modcount,	I32)		/* how much op_lvalue()ification in
+PERLVAR(I, modcount,    I32)            /* how much op_lvalue()ification in
                                            assignment? */
 
 /* interpreter atexit processing */
-PERLVARI(I, exitlistlen, I32, 0)	/* length of same */
-PERLVARI(I, exitlist,	PerlExitListEntry *, NULL)
+PERLVARI(I, exitlistlen, I32, 0)        /* length of same */
+PERLVARI(I, exitlist,   PerlExitListEntry *, NULL)
                                         /* list of exit functions */
 
 /*
@@ -660,41 +660,41 @@ thread's copy.
 =cut
 */
 
-PERLVAR(I, modglobal,	HV *)		/* per-interp module data */
+PERLVAR(I, modglobal,   HV *)           /* per-interp module data */
 
 /* these used to be in global before 5.004_68 */
-PERLVARI(I, profiledata, U32 *,	NULL)	/* table of ops, counts */
+PERLVARI(I, profiledata, U32 *, NULL)   /* table of ops, counts */
 
-PERLVAR(I, compiling,	COP)		/* compiling/done executing marker */
+PERLVAR(I, compiling,   COP)            /* compiling/done executing marker */
 
-PERLVAR(I, compcv,	CV *)		/* currently compiling subroutine */
-PERLVAR(I, comppad_name, PADNAMELIST *)	/* variable names for "my" variables */
-PERLVAR(I, comppad_name_fill,	PADOFFSET)/* last "introduced" variable offset */
-PERLVAR(I, comppad_name_floor,	PADOFFSET)/* start of vars in innermost block */
+PERLVAR(I, compcv,      CV *)           /* currently compiling subroutine */
+PERLVAR(I, comppad_name, PADNAMELIST *) /* variable names for "my" variables */
+PERLVAR(I, comppad_name_fill,   PADOFFSET)/* last "introduced" variable offset */
+PERLVAR(I, comppad_name_floor,  PADOFFSET)/* start of vars in innermost block */
 
 #ifdef HAVE_INTERP_INTERN
-PERLVAR(I, sys_intern,	struct interp_intern)
+PERLVAR(I, sys_intern,  struct interp_intern)
                                         /* platform internals */
 #endif
 
 /* more statics moved here */
-PERLVAR(I, DBcv,	CV *)		/* from perl.c */
-PERLVARI(I, generation,	int,	100)	/* scan sequence# for OP_AASSIGN
+PERLVAR(I, DBcv,        CV *)           /* from perl.c */
+PERLVARI(I, generation, int,    100)    /* scan sequence# for OP_AASSIGN
                                            compile-time common elem detection */
 
-PERLVAR(I, unicode, U32)	/* Unicode features: $ENV{PERL_UNICODE} or -C */
+PERLVAR(I, unicode, U32)        /* Unicode features: $ENV{PERL_UNICODE} or -C */
 
-PERLVARI(I, in_clean_objs,bool,    FALSE)	/* from sv.c */
-PERLVARI(I, in_clean_all, bool,    FALSE)	/* ptrs to freed SVs now legal */
-PERLVAR(I, nomemok,	bool)		/* let malloc context handle nomem */
-PERLVARI(I, savebegin,	bool,	FALSE)	/* save BEGINs for compiler	*/
+PERLVARI(I, in_clean_objs,bool,    FALSE)       /* from sv.c */
+PERLVARI(I, in_clean_all, bool,    FALSE)       /* ptrs to freed SVs now legal */
+PERLVAR(I, nomemok,     bool)           /* let malloc context handle nomem */
+PERLVARI(I, savebegin,  bool,   FALSE)  /* save BEGINs for compiler     */
 
 
-PERLVAR(I, delaymagic_uid,	Uid_t)	/* current real user id, only for delaymagic */
-PERLVAR(I, delaymagic_euid,	Uid_t)	/* current effective user id, only for delaymagic */
-PERLVAR(I, delaymagic_gid,	Gid_t)	/* current real group id, only for delaymagic */
-PERLVAR(I, delaymagic_egid,	Gid_t)	/* current effective group id, only for delaymagic */
-PERLVARI(I, an,		U32,	0)	/* malloc sequence number */
+PERLVAR(I, delaymagic_uid,      Uid_t)  /* current real user id, only for delaymagic */
+PERLVAR(I, delaymagic_euid,     Uid_t)  /* current effective user id, only for delaymagic */
+PERLVAR(I, delaymagic_gid,      Gid_t)  /* current real group id, only for delaymagic */
+PERLVAR(I, delaymagic_egid,     Gid_t)  /* current effective group id, only for delaymagic */
+PERLVARI(I, an,         U32,    0)      /* malloc sequence number */
 
 /* Perl_Ibreakable_sub_generation_ptr was too long for VMS, hence "gen"  */
 PERLVARI(I, breakable_sub_gen, U32, 0)
@@ -705,41 +705,41 @@ PERLVARI(I, breakable_sub_gen, U32, 0)
 #else
     #define PERL_COP_SEQMAX 0
 #endif
-PERLVARI(I, cop_seqmax,	U32,	PERL_COP_SEQMAX) /* statement sequence number */
+PERLVARI(I, cop_seqmax, U32,    PERL_COP_SEQMAX) /* statement sequence number */
 #undef PERL_COP_SEQMAX
 
-PERLVARI(I, evalseq,	U32,	0)	/* eval sequence number */
-PERLVAR(I, origalen,	U32)
+PERLVARI(I, evalseq,    U32,    0)      /* eval sequence number */
+PERLVAR(I, origalen,    U32)
 #ifdef PERL_USES_PL_PIDSTATUS
-PERLVAR(I, pidstatus,	HV *)		/* pid-to-status mappings for waitpid */
+PERLVAR(I, pidstatus,   HV *)           /* pid-to-status mappings for waitpid */
 #endif
-PERLVAR(I, osname,	char *)		/* operating system */
+PERLVAR(I, osname,      char *)         /* operating system */
 
-PERLVAR(I, sighandlerp,	 Sighandler_t)
+PERLVAR(I, sighandlerp,  Sighandler_t)
 /* these two are provided only to solve library linkage issues; they
  * should not be hooked by user code */
 PERLVAR(I, sighandler1p, Sighandler1_t)
 PERLVAR(I, sighandler3p, Sighandler3_t)
 
-PERLVARA(I, body_roots,	PERL_ARENA_ROOTS_SIZE, void*) /* array of body roots */
+PERLVARA(I, body_roots, PERL_ARENA_ROOTS_SIZE, void*) /* array of body roots */
 
-PERLVAR(I, debug,	volatile U32)	/* flags given to -D switch */
+PERLVAR(I, debug,       volatile U32)   /* flags given to -D switch */
 
-PERLVARI(I, padlist_generation, U32, 1)	/* id to identify padlist clones */
+PERLVARI(I, padlist_generation, U32, 1) /* id to identify padlist clones */
 
-PERLVARI(I, runops,	runops_proc_t, RUNOPS_DEFAULT)
+PERLVARI(I, runops,     runops_proc_t, RUNOPS_DEFAULT)
 
-PERLVAR(I, subname,	SV *)		/* name of current subroutine */
+PERLVAR(I, subname,     SV *)           /* name of current subroutine */
 
-PERLVAR(I, subline,	I32)		/* line this subroutine began on */
+PERLVAR(I, subline,     I32)            /* line this subroutine began on */
 PERLVAR(I, min_intro_pending, PADOFFSET)/* start of vars to introduce */
 
 PERLVAR(I, max_intro_pending, PADOFFSET)/* end of vars to introduce */
-PERLVAR(I, padix,	PADOFFSET)	/* lowest unused index - 1
+PERLVAR(I, padix,       PADOFFSET)      /* lowest unused index - 1
                                            in current "register" pad */
-PERLVAR(I, constpadix,	PADOFFSET)	/* lowest unused for constants */
+PERLVAR(I, constpadix,  PADOFFSET)      /* lowest unused for constants */
 
-PERLVAR(I, padix_floor,	PADOFFSET)	/* how low may inner block reset padix */
+PERLVAR(I, padix_floor, PADOFFSET)      /* how low may inner block reset padix */
 
 #if defined(USE_POSIX_2008_LOCALE) && defined(MULTIPLICITY)
 PERLVARI(I, cur_locale_obj, locale_t, NULL)
@@ -760,15 +760,15 @@ PERLVARI(I, cur_LC_ALL, const char *, NULL)
 
 /* The emory needed to store the collxfrm transformation of a string with
  * length 'x' is predicted by the linear equation mx+b; m=mult, b=base */
-PERLVARI(I, collxfrm_mult,Size_t, 0)	/* Expansion factor in *xfrm();
+PERLVARI(I, collxfrm_mult,Size_t, 0)    /* Expansion factor in *xfrm();
                                            0 => unknown or bad, depending on
                                            base */
-PERLVAR(I, collxfrm_base, Size_t)	/* Basic overhead in *xfrm();
+PERLVAR(I, collxfrm_base, Size_t)       /* Basic overhead in *xfrm();
                                            mult == 0, base == 0 => need to compute
                                            mult == 0, base != 0 => ill-formed;
                                          */
-PERLVAR(I, collation_name, char *)	/* Name of current collation */
-PERLVARI(I, collation_ix, U32,	0)	/* Collation generation index */
+PERLVAR(I, collation_name, char *)      /* Name of current collation */
+PERLVARI(I, collation_ix, U32,  0)      /* Collation generation index */
 PERLVARI(I, strxfrm_NUL_replacement, U8, 0)  /* Code point to replace NULs */
 PERLVARI(I, strxfrm_is_behaved, bool, TRUE)
                             /* Assume until proven otherwise that it works */
@@ -786,20 +786,20 @@ PERLVARI(I, stdize_locale_buf, const char *, NULL)
 PERLVARI(I, stdize_locale_bufsize, Size_t, 0)
 
 #ifdef PERL_SAWAMPERSAND
-PERLVAR(I, sawampersand, U8)		/* must save all match strings */
+PERLVAR(I, sawampersand, U8)            /* must save all match strings */
 #endif
 
 /* current phase the interpreter is in
    for ordering this structure to remove holes, we're assuming that this is 4
    bytes.  */
-PERLVARI(I, phase,	enum perl_phase, PERL_PHASE_CONSTRUCT)
+PERLVARI(I, phase,      enum perl_phase, PERL_PHASE_CONSTRUCT)
 
-PERLVARI(I, in_load_module, bool, FALSE)	/* to prevent recursions in PerlIO_find_layer */
+PERLVARI(I, in_load_module, bool, FALSE)        /* to prevent recursions in PerlIO_find_layer */
 
 PERLVARI(I, eval_begin_nest_depth, U32, 0)
 
-PERLVAR(I, unsafe,	bool)
-PERLVAR(I, colorset,	bool)		/* PERL_RE_COLORS env var is in use */
+PERLVAR(I, unsafe,      bool)
+PERLVAR(I, colorset,    bool)           /* PERL_RE_COLORS env var is in use */
 
 /*
 =for apidoc_section $embedding
@@ -829,9 +829,9 @@ thread's copy.
 =cut
 */
 /* mod_perl is special, and also assigns a meaning -1 */
-PERLVARI(I, perl_destruct_level, signed char,	0)
+PERLVARI(I, perl_destruct_level, signed char,   0)
 
-PERLVAR(I, pad_reset_pending, bool)	/* reset pad on next attempted alloc */
+PERLVAR(I, pad_reset_pending, bool)     /* reset pad on next attempted alloc */
 
 PERLVARI(I, srand_called, bool, false)      /* has random_state been initialized yet? */
 PERLVARI(I, srand_override, U32, 0)         /* Should we use a deterministic sequence? */
@@ -843,8 +843,8 @@ PERLVARI(I, numeric_underlying_is_standard, bool, TRUE)
 
 PERLVARI(I, numeric_standard, int, TRUE)    /* Assume C locale numerics */
 PERLVAR(I, numeric_name, char *)     /* Name of current numeric locale */
-PERLVAR(I, numeric_radix_sv, SV *)	/* The radix separator */
-PERLVAR(I, underlying_radix_sv, SV *)	/* The radix in the program's current underlying locale */
+PERLVAR(I, numeric_radix_sv, SV *)      /* The radix separator */
+PERLVAR(I, underlying_radix_sv, SV *)   /* The radix in the program's current underlying locale */
 
 #if defined(USE_LOCALE_NUMERIC) && defined(USE_POSIX_2008_LOCALE)
 
@@ -863,65 +863,65 @@ PERLVARI(I, ctype_name, const char *, NULL)   /* Name of current ctype locale */
 
 /* Array of signal handlers, indexed by signal number, through which the C
    signal handler dispatches.  */
-PERLVAR(I, psig_ptr,	SV **)
+PERLVAR(I, psig_ptr,    SV **)
 /* Array of names of signals, indexed by signal number, for (re)use as the first
    argument to a signal handler.   Only one block of memory is allocated for
    both psig_name and psig_ptr.  */
-PERLVAR(I, psig_name,	SV **)
+PERLVAR(I, psig_name,   SV **)
 
 #if defined(PERL_IMPLICIT_SYS)
-PERLVAR(I, Mem,		struct IPerlMem *)
-PERLVAR(I, MemShared,	struct IPerlMem *)
-PERLVAR(I, MemParse,	struct IPerlMem *)
-PERLVAR(I, Env,		struct IPerlEnv *)
-PERLVAR(I, StdIO,	struct IPerlStdIO *)
-PERLVAR(I, LIO,		struct IPerlLIO *)
-PERLVAR(I, Dir,		struct IPerlDir *)
-PERLVAR(I, Sock,	struct IPerlSock *)
-PERLVAR(I, Proc,	struct IPerlProc *)
+PERLVAR(I, Mem,         struct IPerlMem *)
+PERLVAR(I, MemShared,   struct IPerlMem *)
+PERLVAR(I, MemParse,    struct IPerlMem *)
+PERLVAR(I, Env,         struct IPerlEnv *)
+PERLVAR(I, StdIO,       struct IPerlStdIO *)
+PERLVAR(I, LIO,         struct IPerlLIO *)
+PERLVAR(I, Dir,         struct IPerlDir *)
+PERLVAR(I, Sock,        struct IPerlSock *)
+PERLVAR(I, Proc,        struct IPerlProc *)
 #endif
 
-PERLVAR(I, ptr_table,	PTR_TBL_t *)
-PERLVARI(I, beginav_save, AV *, NULL)	/* save BEGIN{}s when compiling */
+PERLVAR(I, ptr_table,   PTR_TBL_t *)
+PERLVARI(I, beginav_save, AV *, NULL)   /* save BEGIN{}s when compiling */
 
-PERLVAR(I, body_arenas, void *)		/* pointer to list of body-arenas */
+PERLVAR(I, body_arenas, void *)         /* pointer to list of body-arenas */
 
 
 #if defined(USE_ITHREADS)
-PERLVAR(I, regex_pad,     SV **)	/* Shortcut into the array of
+PERLVAR(I, regex_pad,     SV **)        /* Shortcut into the array of
                                            regex_padav */
-PERLVAR(I, regex_padav,   AV *)		/* All regex objects, indexed via the
+PERLVAR(I, regex_padav,   AV *)         /* All regex objects, indexed via the
                                            values in op_pmoffset of pmop.
                                            Entry 0 is an SV whose PV is a
                                            "packed" list of IVs listing
                                            the now-free slots in the array */
-PERLVAR(I, stashpad,    HV **)		/* for CopSTASH */
+PERLVAR(I, stashpad,    HV **)          /* for CopSTASH */
 PERLVARI(I, stashpadmax, PADOFFSET, 64)
 PERLVARI(I, stashpadix, PADOFFSET, 0)
 #endif
 
 #ifdef USE_REENTRANT_API
-PERLVAR(I, reentrant_buffer, REENTR *)	/* here we store the _r buffers */
+PERLVAR(I, reentrant_buffer, REENTR *)  /* here we store the _r buffers */
 #endif
 
-PERLVAR(I, custom_op_names, HV *)	/* Names of user defined ops */
-PERLVAR(I, custom_op_descs, HV *)	/* Descriptions of user defined ops */
+PERLVAR(I, custom_op_names, HV *)       /* Names of user defined ops */
+PERLVAR(I, custom_op_descs, HV *)       /* Descriptions of user defined ops */
 
 #ifdef PERLIO_LAYERS
-PERLVARI(I, perlio,	PerlIOl *, NULL)
+PERLVARI(I, perlio,     PerlIOl *, NULL)
 PERLVARI(I, known_layers, PerlIO_list_t *, NULL)
 PERLVARI(I, def_layerlist, PerlIO_list_t *, NULL)
 #endif
 
-PERLVARI(I, checkav_save, AV *, NULL)	/* save CHECK{}s when compiling */
+PERLVARI(I, checkav_save, AV *, NULL)   /* save CHECK{}s when compiling */
 PERLVARI(I, unitcheckav_save, AV *, NULL)
                                         /* save UNITCHECK{}s when compiling */
 
-PERLVARI(I, clocktick,	long,	0)	/* this many times() ticks in a second */
+PERLVARI(I, clocktick,  long,   0)      /* this many times() ticks in a second */
 
 /* Hooks to shared SVs and locks. */
-PERLVARI(I, sharehook,	share_proc_t, Perl_sv_nosharing)
-PERLVARI(I, lockhook,	share_proc_t, Perl_sv_nosharing)
+PERLVARI(I, sharehook,  share_proc_t, Perl_sv_nosharing)
+PERLVARI(I, lockhook,   share_proc_t, Perl_sv_nosharing)
 
 GCC_DIAG_IGNORE(-Wdeprecated-declarations)
 #ifdef NO_MATHOMS
@@ -930,20 +930,20 @@ GCC_DIAG_IGNORE(-Wdeprecated-declarations)
 /* This reference ensures that the mathoms are linked with perl */
 #  define PERL_UNLOCK_HOOK Perl_sv_nounlocking
 #endif
-PERLVARI(I, unlockhook,	share_proc_t, PERL_UNLOCK_HOOK)
+PERLVARI(I, unlockhook, share_proc_t, PERL_UNLOCK_HOOK)
 
 GCC_DIAG_RESTORE
 
-PERLVARI(I, threadhook,	thrhook_proc_t,	Perl_nothreadhook)
+PERLVARI(I, threadhook, thrhook_proc_t, Perl_nothreadhook)
 
 /* Can shared object be destroyed */
 PERLVARI(I, destroyhook, destroyable_proc_t, Perl_sv_destroyable)
 
 #ifndef PERL_MICRO
-PERLVARI(I, signalhook,	despatch_signals_proc_t, Perl_despatch_signals)
+PERLVARI(I, signalhook, despatch_signals_proc_t, Perl_despatch_signals)
 #endif
 
-PERLVARI(I, isarev, HV *, NULL)		/* Reverse map of @ISA dependencies */
+PERLVARI(I, isarev, HV *, NULL)         /* Reverse map of @ISA dependencies */
 
 /* Register of known Method Resolution Orders.
    What this actually points to is an implementation detail (it may change to
@@ -952,32 +952,32 @@ PERLVARI(I, isarev, HV *, NULL)		/* Reverse map of @ISA dependencies */
 PERLVAR(I, registered_mros, HV *)
 
 /* Compile-time block start/end hooks */
-PERLVAR(I, blockhooks,	AV *)
+PERLVAR(I, blockhooks,  AV *)
 
-PERLVAR(I, custom_ops,	HV *)		/* custom op registrations */
+PERLVAR(I, custom_ops,  HV *)           /* custom op registrations */
 
-PERLVAR(I, Xpv,		XPV *)		/* (unused) held temporary value */
+PERLVAR(I, Xpv,         XPV *)          /* (unused) held temporary value */
 
 /* name of the scopes we've ENTERed. Only used with -DDEBUGGING, but needs to be
    present always, as -DDEBUGGING must be binary compatible with non.  */
 PERLVARI(I, scopestack_name, const char **, NULL)
 
-PERLVAR(I, debug_pad,	struct perl_debug_pad)	/* always needed because of the re extension */
+PERLVAR(I, debug_pad,   struct perl_debug_pad)  /* always needed because of the re extension */
 
 /* Hook for File::Glob */
-PERLVARI(I, globhook,	globhook_t, NULL)
+PERLVARI(I, globhook,   globhook_t, NULL)
 
 #if defined(MULTIPLICITY)
 /* The last unconditional member of the interpreter structure when 5.18.0 was
-   released. The offset of the end of this is baked into a global variable in 
+   released. The offset of the end of this is baked into a global variable in
    any shared perl library which will allow a sanity test in future perl
    releases.  */
-#  define PERL_LAST_5_18_0_INTERP_MEMBER	Iglobhook
+#  define PERL_LAST_5_18_0_INTERP_MEMBER        Iglobhook
 #endif
 
 #ifdef MULTIPLICITY
 PERLVARI(I, my_cxt_list, void **, NULL) /* per-module array of MY_CXT pointers */
-PERLVARI(I, my_cxt_size, int,	0)	/* size of PL_my_cxt_list */
+PERLVARI(I, my_cxt_size, int,   0)      /* size of PL_my_cxt_list */
 #endif
 
 #if defined(MULTIPLICITY) || defined(PERL_DEBUG_READONLY_COW)
@@ -990,15 +990,15 @@ PERLVAR(I, memory_debug_header, struct perl_memory_debug_header)
 
 #ifdef DEBUG_LEAKING_SCALARS_FORK_DUMP
 /* File descriptor to talk to the child which dumps scalars.  */
-PERLVARI(I, dumper_fd,	int,	-1)
+PERLVARI(I, dumper_fd,  int,    -1)
 #endif
 
 
 #ifdef DEBUG_LEAKING_SCALARS
-PERLVARI(I, sv_serial,	U32,	0)	/* SV serial number, used in sv.c */
+PERLVARI(I, sv_serial,  U32,    0)      /* SV serial number, used in sv.c */
 #endif
 
-PERLVARA(I, sv_consts, SV_CONSTS_COUNT, SV*)	/* constant SVs with precomputed hash value */
+PERLVARA(I, sv_consts, SV_CONSTS_COUNT, SV*)    /* constant SVs with precomputed hash value */
 
 #ifdef PERL_TRACE_OPS
 PERLVARA(I, op_exec_cnt, OP_max+2, UV)  /* Counts of executed OPs of the given type.
@@ -1022,16 +1022,16 @@ PERLVAR(I, internal_random_state, PL_RANDOM_STATE_TYPE)
 
 PERLVARA(I, TR_SPECIAL_HANDLING_UTF8, UTF8_MAXBYTES, char)
 
-PERLVAR(I, AboveLatin1,	SV *)
+PERLVAR(I, AboveLatin1, SV *)
 PERLVAR(I, Assigned_invlist, SV *)
 PERLVAR(I, GCB_invlist, SV *)
 PERLVAR(I, HasMultiCharFold,   SV *)
 PERLVAR(I, InMultiCharFold,   SV *)
-PERLVAR(I, Latin1,	SV *)
+PERLVAR(I, Latin1,      SV *)
 PERLVAR(I, LB_invlist, SV *)
 PERLVAR(I, SB_invlist, SV *)
 PERLVAR(I, SCX_invlist, SV *)
-PERLVAR(I, UpperLatin1,	SV *)   /* Code points 128 - 255 */
+PERLVAR(I, UpperLatin1, SV *)   /* Code points 128 - 255 */
 
 PERLVARA(I, fold_locale, 256, U8)
 
@@ -1042,7 +1042,7 @@ PERLVAR(I, in_some_fold, SV *)
  * matching */
 PERLVAR(I, utf8_foldclosures, SV *)
 
-PERLVAR(I, utf8_idcont,	SV *)
+PERLVAR(I, utf8_idcont, SV *)
 PERLVAR(I, utf8_idstart, SV *)
 PERLVAR(I, utf8_perl_idcont, SV *)
 PERLVAR(I, utf8_perl_idstart, SV *)
@@ -1054,14 +1054,14 @@ PERLVARA(I,  Posix_ptrs, POSIX_CC_COUNT, SV *)
 PERLVAR(I, utf8_toupper, SV *)
 PERLVAR(I, utf8_totitle, SV *)
 PERLVAR(I, utf8_tolower, SV *)
-PERLVAR(I, utf8_tofold,	SV *)
-PERLVAR(I, utf8_tosimplefold,	SV *)
+PERLVAR(I, utf8_tofold, SV *)
+PERLVAR(I, utf8_tosimplefold,   SV *)
 PERLVAR(I, utf8_charname_begin, SV *)
 PERLVAR(I, utf8_charname_continue, SV *)
-PERLVAR(I, utf8_mark,	SV *)
-PERLVARI(I, InBitmap,	SV *, NULL)
-PERLVAR(I, CCC_non0_non230,	SV *)
-PERLVAR(I, Private_Use,	SV *)
+PERLVAR(I, utf8_mark,   SV *)
+PERLVARI(I, InBitmap,   SV *, NULL)
+PERLVAR(I, CCC_non0_non230,     SV *)
+PERLVAR(I, Private_Use, SV *)
 
 #ifdef HAS_MBRLEN
 PERLVAR(I, mbrlen_ps, mbstate_t)

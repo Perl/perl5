@@ -35,18 +35,18 @@ use the variable.
 
 /* global state */
 #if defined(USE_ITHREADS)
-PERLVAR(G, op_mutex,	perl_mutex)	/* Mutex for op refcounting */
+PERLVAR(G, op_mutex,    perl_mutex)     /* Mutex for op refcounting */
 #endif
-PERLVARI(G, curinterp,	PerlInterpreter *, NULL)
+PERLVARI(G, curinterp,  PerlInterpreter *, NULL)
                                         /* currently running interpreter
                                          * (initial parent interpreter under
                                          * useithreads) */
 #if defined(USE_ITHREADS)
-PERLVAR(G, thr_key,	perl_key)	/* key to retrieve per-thread struct */
+PERLVAR(G, thr_key,     perl_key)       /* key to retrieve per-thread struct */
 #endif
 
 /* XXX does anyone even use this? */
-PERLVARI(G, do_undump,	bool,	FALSE)	/* -u or dump seen? */
+PERLVARI(G, do_undump,  bool,   FALSE)  /* -u or dump seen? */
 
 #if defined(FAKE_PERSISTENT_SIGNAL_HANDLERS)||defined(FAKE_DEFAULT_SIGNAL_HANDLERS)
 PERLVARI(G, sig_handlers_initted, int, 0)
@@ -62,7 +62,7 @@ PERLVARA(G, sig_defaulting, SIG_SIZE, int)
 /* XXX signals are process-wide anyway, so we
  * ignore the implications of this for threading */
 #ifndef HAS_SIGACTION
-PERLVARI(G, sig_trapped, int,	0)
+PERLVARI(G, sig_trapped, int,   0)
 #endif
 
 #ifndef PERL_MICRO
@@ -80,7 +80,7 @@ PERLVARI(G, csighandler3p, Sighandler3_t, Perl_csighandler3)
 
 /* This is constant on most architectures, a global on OS/2 */
 #ifdef OS2
-PERLVARI(G, sh_path,	char *, SH_PATH) /* full path of shell */
+PERLVARI(G, sh_path,    char *, SH_PATH) /* full path of shell */
 #endif
 
 #ifdef USE_PERLIO
@@ -91,7 +91,7 @@ PERLVAR(G, perlio_mutex, perl_mutex)    /* Mutex for perlio fd refcounts */
 
 PERLVARI(G, perlio_fd_refcnt, int *, 0) /* Pointer to array of fd refcounts.  */
 PERLVARI(G, perlio_fd_refcnt_size, int, 0) /* Size of the array */
-PERLVARI(G, perlio_debug_fd, int, 0)	/* the fd to write perlio debug into, 0 means not set yet */
+PERLVARI(G, perlio_debug_fd, int, 0)    /* the fd to write perlio debug into, 0 means not set yet */
 #endif
 
 #ifdef HAS_MMAP
@@ -108,7 +108,7 @@ PERLVAR(G, locale_mutex, perl_mutex)   /* Mutex related to locale handling */
 PERLVARI(G, C_locale_obj, locale_t, NULL)
 #endif
 
-PERLVARI(G, watch_pvx,	char *, NULL)
+PERLVARI(G, watch_pvx,  char *, NULL)
 
 /*
 =for apidoc AmnU|Perl_check_t *|PL_check
@@ -161,7 +161,7 @@ destruction. (Use of C<PL_dirty> is discouraged since 5.14.)
 */
 
 #if defined(USE_ITHREADS)
-PERLVAR(G, check_mutex,	perl_mutex)	/* Mutex for PL_check */
+PERLVAR(G, check_mutex, perl_mutex)     /* Mutex for PL_check */
 #endif
 
 /* allocate a unique index to every module that calls MY_CXT_INIT */
@@ -171,12 +171,12 @@ PERLVAR(G, check_mutex,	perl_mutex)	/* Mutex for PL_check */
 PERLVAR(G, my_ctx_mutex, perl_mutex)
 PERLVARI(G, veto_switch_non_tTHX_context, int, FALSE)
 # endif
-PERLVARI(G, my_cxt_index, int,	0)
+PERLVARI(G, my_cxt_index, int,  0)
 #endif
 
 /* this is currently set without MUTEX protection, so keep it a type which
  * can be set atomically (ie not a bit field) */
-PERLVARI(G, veto_cleanup, int, FALSE)	/* exit without cleanup */
+PERLVARI(G, veto_cleanup, int, FALSE)   /* exit without cleanup */
 
 /*
 =for apidoc AmnUx|Perl_keyword_plugin_t|PL_keyword_plugin
@@ -274,13 +274,13 @@ it should make a call to the next function in the chain.
 
 This structure has the following definition:
 
-	struct Perl_custom_infix {
-	    enum Perl_custom_infix_precedence prec;
-	    void (*parse)(pTHX_ SV **opdata,
-		struct Perl_custom_infix *);
-	    OP *(*build_op)(pTHX_ SV **opdata, OP *lhs, OP *rhs,
-		struct Perl_custom_infix *);
-	};
+        struct Perl_custom_infix {
+            enum Perl_custom_infix_precedence prec;
+            void (*parse)(pTHX_ SV **opdata,
+                struct Perl_custom_infix *);
+            OP *(*build_op)(pTHX_ SV **opdata, OP *lhs, OP *rhs,
+                struct Perl_custom_infix *);
+        };
 
 The function must then return an integer giving the number of bytes consumed
 by the name of this operator. In the case of an operator whose name is
@@ -336,8 +336,8 @@ mechanism exists only as an interim measure to get to that stage.
 
 PERLVARI(G, infix_plugin, Perl_infix_plugin_t, Perl_infix_plugin_standard)
 
-PERLVARI(G, op_sequence, HV *, NULL)	/* dump.c */
-PERLVARI(G, op_seq,	UV,	0)	/* dump.c */
+PERLVARI(G, op_sequence, HV *, NULL)    /* dump.c */
+PERLVARI(G, op_seq,     UV,     0)      /* dump.c */
 
 #ifdef USE_ITHREADS
 PERLVAR(G, dollarzero_mutex, perl_mutex) /* Modifying $0 */
@@ -351,10 +351,10 @@ PERLVAR(G, dollarzero_mutex, perl_mutex) /* Modifying $0 */
 PERLVAR(G, sv_placeholder, SV)
 
 #if defined(MYMALLOC) && defined(USE_ITHREADS)
-PERLVAR(G, malloc_mutex, perl_mutex)	/* Mutex for malloc */
+PERLVAR(G, malloc_mutex, perl_mutex)    /* Mutex for malloc */
 #endif
 
-PERLVARI(G, hash_seed_set, bool, FALSE)	/* perl.c */
+PERLVARI(G, hash_seed_set, bool, FALSE) /* perl.c */
 PERLVARA(G, hash_seed_w, PERL_HASH_SEED_WORDS, PVT__PERL_HASH_WORD_TYPE) /* perl.c and hv.h */
 #if defined(PERL_HASH_STATE_BYTES)
 PERLVARA(G, hash_state_w, PERL_HASH_STATE_WORDS, PVT__PERL_HASH_WORD_TYPE) /* perl.c and hv.h */
@@ -373,7 +373,7 @@ PERLVAR(G, perllib_sep, char)
 
 /* Definitions of user-defined \p{} properties, as the subs that define them
  * are only called once */
-PERLVARI(G, user_def_props,	HV *, NULL)
+PERLVARI(G, user_def_props,     HV *, NULL)
 
 #if defined(USE_ITHREADS)
 PERLVAR(G, user_def_props_aTHX, PerlInterpreter *)  /* aTHX that user_def_props
@@ -388,15 +388,15 @@ PERLVAR(G, user_prop_mutex, perl_mutex)    /* Mutex for manipulating
  * In theory these variables aren't thread-safe, but the worst that can
  * happen is that two treads will both do an initial probe
  */
-PERLVARI(G, strategy_dup,        int, 0)	/* doio.c */
-PERLVARI(G, strategy_dup2,       int, 0)	/* doio.c */
-PERLVARI(G, strategy_open,       int, 0)	/* doio.c */
-PERLVARI(G, strategy_open3,      int, 0)	/* doio.c */
-PERLVARI(G, strategy_mkstemp,    int, 0)	/* doio.c */
-PERLVARI(G, strategy_socket,     int, 0)	/* doio.c */
-PERLVARI(G, strategy_accept,     int, 0)	/* doio.c */
-PERLVARI(G, strategy_pipe,       int, 0)	/* doio.c */
-PERLVARI(G, strategy_socketpair, int, 0)	/* doio.c */
+PERLVARI(G, strategy_dup,        int, 0)        /* doio.c */
+PERLVARI(G, strategy_dup2,       int, 0)        /* doio.c */
+PERLVARI(G, strategy_open,       int, 0)        /* doio.c */
+PERLVARI(G, strategy_open3,      int, 0)        /* doio.c */
+PERLVARI(G, strategy_mkstemp,    int, 0)        /* doio.c */
+PERLVARI(G, strategy_socket,     int, 0)        /* doio.c */
+PERLVARI(G, strategy_accept,     int, 0)        /* doio.c */
+PERLVARI(G, strategy_pipe,       int, 0)        /* doio.c */
+PERLVARI(G, strategy_socketpair, int, 0)        /* doio.c */
 
 PERLVARI(G, my_environ, char **, NULL)
 PERLVARI(G, origenviron, char **, NULL)
