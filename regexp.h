@@ -554,17 +554,14 @@ SvRX instead and check for NULL.
 
 /* For source compatibility.  We used to store these explicitly. */
 #  define RX_PRECOMP(rx_sv) \
-       (RX_WRAPPED(rx_sv)   \
-          + ReANY(rx_sv)->pre_prefix)
+       (RX_WRAPPED(rx_sv) + ReANY(rx_sv)->pre_prefix)
 #  define RX_PRECOMP_const(rx_sv)   \
-       (RX_WRAPPED_const(rx_sv)     \
-          + ReANY(rx_sv)->pre_prefix)
+       (RX_WRAPPED_const(rx_sv) + ReANY(rx_sv)->pre_prefix)
 /* FIXME? Are we hardcoding too much here and constraining plugin extension
    writers? Specifically, the value 1 assumes that the wrapped version always
    has exactly one character at the end, a ')'.  Will that always be true? */
 #  define RX_PRELEN(rx_sv)  \
-       (RX_WRAPLEN(rx_sv)   \
-         - ReANY(rx_sv)->pre_prefix - 1)
+       (RX_WRAPLEN(rx_sv) - ReANY(rx_sv)->pre_prefix - 1)
 
 #  define RX_WRAPPED(rx_sv)           SvPVX(rx_sv)
 #  define RX_WRAPPED_const(rx_sv)     SvPVX_const(rx_sv)

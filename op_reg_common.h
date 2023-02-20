@@ -113,8 +113,7 @@ get_regex_charset(const U32 flags)
     | RXf_PMf_STRICT )
 
 #define RXf_PMf_FLAGCOPYMASK    \
-    ( RXf_PMf_COMPILETIME       \
-    | RXf_PMf_SPLIT )
+    ( RXf_PMf_COMPILETIME | RXf_PMf_SPLIT )
 
 /* Temporary to get Jenkins happy again See thread starting at
  * http://nntp.perl.org/group/perl.perl5.porters/220710

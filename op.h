@@ -528,12 +528,10 @@ typedef enum {
 #    define IS_PADCONST(v)  \
          (v && (SvREADONLY(v) || (SvIsCOW(v) && !SvLEN(v))))
 #  endif
-#  define cSVOPx_sv(v)      \
-       (cSVOPx(v)->op_sv    \
-        ? cSVOPx(v)->op_sv : PAD_SVl((v)->op_targ))
-#  define cSVOPx_svp(v)     \
-       (cSVOPx(v)->op_sv    \
-        ? &cSVOPx(v)->op_sv : &PAD_SVl((v)->op_targ))
+#  define cSVOPx_sv(v)  \
+       (cSVOPx(v)->op_sv ? cSVOPx(v)->op_sv : PAD_SVl((v)->op_targ))
+#  define cSVOPx_svp(v) \
+       (cSVOPx(v)->op_sv ? &cSVOPx(v)->op_sv : &PAD_SVl((v)->op_targ))
 #  define cMETHOPx_meth(v)              \
        (cMETHOPx(v)->op_u.op_meth_sv    \
         ? cMETHOPx(v)->op_u.op_meth_sv : PAD_SVl((v)->op_targ))

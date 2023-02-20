@@ -292,9 +292,8 @@ Now a synonym for C<L</dTHXa>>.
 #  define CALLREGDUPE(prog,param)   \
        Perl_re_dup(aTHX_ (prog),(param))
 
-#  define CALLREGDUPE_PVT(prog,param)                       \
-       (prog ? RX_ENGINE(prog)->dupe(aTHX_ (prog),(param))  \
-             : (REGEXP *)NULL)
+#  define CALLREGDUPE_PVT(prog,param)   \
+       (prog ? RX_ENGINE(prog)->dupe(aTHX_ (prog),(param)) : (REGEXP *)NULL)
 #endif
 
 /* some compilers impersonate gcc */
@@ -6891,8 +6890,7 @@ typedef struct am_table_short AMTS;
    /* Returns TRUE if the plain locale pragma
     * without a parameter is in effect. */
 #  define IN_LOCALE_RUNTIME \
-       (PL_curcop           \
-                                 && CopHINTS_get(PL_curcop) & HINT_LOCALE)
+       (PL_curcop && CopHINTS_get(PL_curcop) & HINT_LOCALE)
 
    /* Returns TRUE if either form of the locale pragma is in effect */
 #  define IN_SOME_LOCALE_FORM_RUNTIME   \
@@ -8167,8 +8165,7 @@ extern void moncontrol(int);
      PERL_UNICODE_STDERR_FLAG)
 
 #define PERL_UNICODE_INOUT_FLAG \
-    (PERL_UNICODE_IN_FLAG   |   \
-     PERL_UNICODE_OUT_FLAG)
+    (PERL_UNICODE_IN_FLAG   | PERL_UNICODE_OUT_FLAG)
 
 #define PERL_UNICODE_DEFAULT_FLAGS      \
     (PERL_UNICODE_STD_FLAG          |   \

@@ -1440,8 +1440,7 @@ or casts
   /* The '| 0' part in ASSERT_NOT_PTR ensures a compiler error
    * if c is not integer (like e.g., a pointer) */
 #  define FITS_IN_8_BITS(c) \
-       (   (sizeof(c) == 1) \
-        || (((WIDEST_UTYPE) ASSERT_NOT_PTR(c)) >> 8) == 0)
+       (   (sizeof(c) == 1) || (((WIDEST_UTYPE) ASSERT_NOT_PTR(c)) >> 8) == 0)
 #else
 #  define FITS_IN_8_BITS(c)   (1)
 #endif
@@ -2771,9 +2770,8 @@ PoisonWith(0xEF) for catching access to freed memory.
        ((_MEM_WRAP_NEEDS_RUNTIME_CHECK(n,t) ? (MEM_SIZE)(n) :   \
              MEM_SIZE_MAX/sizeof(t)) > MEM_SIZE_MAX/sizeof(t))
 
-#  define MEM_WRAP_CHECK(n,t)                       \
-       (void)(UNLIKELY(_MEM_WRAP_WILL_WRAP(n,t))    \
-       && (croak_memory_wrap(),0))
+#  define MEM_WRAP_CHECK(n,t)   \
+       (void)(UNLIKELY(_MEM_WRAP_WILL_WRAP(n,t)) && (croak_memory_wrap(),0))
 
 #  define MEM_WRAP_CHECK_1(n,t,a)                   \
        (void)(UNLIKELY(_MEM_WRAP_WILL_WRAP(n,t))    \

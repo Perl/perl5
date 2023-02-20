@@ -35,9 +35,8 @@
         #define U8TO32_LE(ptr)  (*((const U32*)(ptr)))
         #define U8TO64_LE(ptr)  (*((const U64*)(ptr)))
     #else
-        #define U8TO16_LE(ptr)                  \
-             (_shifted_octet(U16,(ptr),0, 0)|   \
-              _shifted_octet(U16,(ptr),1, 8))
+        #define U8TO16_LE(ptr)  \
+             (_shifted_octet(U16,(ptr),0, 0)| _shifted_octet(U16,(ptr),1, 8))
 
         #define U8TO32_LE(ptr)                  \
              (_shifted_octet(U32,(ptr),0, 0)|   \

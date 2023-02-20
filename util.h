@@ -25,8 +25,7 @@
         || ((f)[0] && (f)[1] == ':'))          /* drive name */
 #elif defined(DOSISH)
 #  define PERL_FILE_IS_ABSOLUTE(f)  \
-       (*(f) == '/'                 \
-        || ((f)[0] && (f)[1] == ':'))          /* drive name */
+       (*(f) == '/' || ((f)[0] && (f)[1] == ':'))          /* drive name */
 #else   /* NOT DOSISH */
 #  define PERL_FILE_IS_ABSOLUTE(f)    (*(f) == '/')
 #endif

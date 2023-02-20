@@ -420,9 +420,8 @@ struct RExC_state_t {
         RExC_naughty += RExC_naughty / (exp) + (add)
 
 #define isNON_BRACE_QUANTIFIER(c)   ((c) == '*' || (c) == '+' || (c) == '?')
-#define isQUANTIFIER(s,e)           \
-    (   isNON_BRACE_QUANTIFIER(*s)  \
-     || ((*s) == '{' && regcurly(s, e, NULL)))
+#define isQUANTIFIER(s,e)   \
+    (   isNON_BRACE_QUANTIFIER(*s) || ((*s) == '{' && regcurly(s, e, NULL)))
 
 /*
  * Flags to be passed up.
@@ -744,22 +743,17 @@ static const scan_data_t zero_scan_data = {
 
 /* The enums for all these are ordered so things work out correctly */
 #define LOC             (get_regex_charset(RExC_flags) == REGEX_LOCALE_CHARSET)
-#define DEPENDS_SEMANTICS           \
-    (get_regex_charset(RExC_flags)  \
-                               == REGEX_DEPENDS_CHARSET)
+#define DEPENDS_SEMANTICS   \
+    (get_regex_charset(RExC_flags) == REGEX_DEPENDS_CHARSET)
 #define UNI_SEMANTICS   (get_regex_charset(RExC_flags) == REGEX_UNICODE_CHARSET)
-#define AT_LEAST_UNI_SEMANTICS      \
-    (get_regex_charset(RExC_flags)  \
-                          >= REGEX_UNICODE_CHARSET)
-#define ASCII_RESTRICTED            \
-    (get_regex_charset(RExC_flags)  \
-                       == REGEX_ASCII_RESTRICTED_CHARSET)
+#define AT_LEAST_UNI_SEMANTICS  \
+    (get_regex_charset(RExC_flags) >= REGEX_UNICODE_CHARSET)
+#define ASCII_RESTRICTED    \
+    (get_regex_charset(RExC_flags) == REGEX_ASCII_RESTRICTED_CHARSET)
 #define AT_LEAST_ASCII_RESTRICTED   \
-    (get_regex_charset(RExC_flags)  \
-              >= REGEX_ASCII_RESTRICTED_CHARSET)
-#define ASCII_FOLD_RESTRICTED       \
-    (get_regex_charset(RExC_flags)  \
-              == REGEX_ASCII_MORE_RESTRICTED_CHARSET)
+    (get_regex_charset(RExC_flags) >= REGEX_ASCII_RESTRICTED_CHARSET)
+#define ASCII_FOLD_RESTRICTED   \
+    (get_regex_charset(RExC_flags) == REGEX_ASCII_MORE_RESTRICTED_CHARSET)
 
 #define FOLD            cBOOL(RExC_flags & RXf_PMf_FOLD)
 

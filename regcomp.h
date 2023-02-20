@@ -407,12 +407,10 @@ struct regnode_ssc {
                 (((struct regnode_lstring *)p)->string))
 #define OPERANDl(p)         STRINGl(p)
 
-#define STR_LEN(p)                              \
-    ((OP(p) == LEXACT || OP(p) == LEXACT_REQ8)  \
-                           ? STR_LENl(p) : STR_LENs(p))
-#define STRING(p)                               \
-    ((OP(p) == LEXACT || OP(p) == LEXACT_REQ8)  \
-                           ? STRINGl(p)  : STRINGs(p))
+#define STR_LEN(p)  \
+    ((OP(p) == LEXACT || OP(p) == LEXACT_REQ8) ? STR_LENl(p) : STR_LENs(p))
+#define STRING(p)   \
+    ((OP(p) == LEXACT || OP(p) == LEXACT_REQ8) ? STRINGl(p)  : STRINGs(p))
 #define OPERAND(p)          STRING(p)
 
 /* The number of (smallest) regnode equivalents that a string of length l bytes
