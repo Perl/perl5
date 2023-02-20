@@ -27,7 +27,7 @@ skip_all_without_unicode_tables();
 
 my $has_locales = locales_enabled('LC_CTYPE');
 
-plan tests => 1230;  # Update this when adding/deleting tests.
+plan tests => 1231;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -2412,6 +2412,20 @@ SKIP:
         is($x,"a","Branch reset in list context check 10 (a)");
         is($y,"b","Branch reset in list context check 11 (b)");
         is($z,"z","Branch reset in list context check 12 (z)");
+    }
+    TODO:{
+        local $::TODO = "Will be fixed next commit";
+        # Test for GH Issue #20826. Save stack overflow introduced in
+        # 92373dea9d7bcc0a017f20cb37192c1d8400767f PR #20530.
+        # Note this test depends on an assert so it will only fail
+        # under DEBUGGING.
+        fresh_perl_is(q{
+            $_ = "x" x 1000;
+            my $pat = '(.)' x 200;
+            $pat = qr/($pat)+/;
+            m/$pat/;
+            print "ok";
+        }, 'ok', {}, 'gh20826: test regex save stack overflow');
     }
 } # End of sub run_tests
 
