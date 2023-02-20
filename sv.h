@@ -2085,7 +2085,7 @@ Returns the hash for C<sv> created by C<L</newSVpvn_share>>.
 #define SV_IMMEDIATE_UNREF      (1 <<  0) /* 0x0001 -     1 */
 #define SV_GMAGIC               (1 <<  1) /* 0x0002 -     2 */
 #define SV_COW_DROP_PV          (1 <<  2) /* 0x0004 -     4 */
-#define SV_FLAG_BIT3_UNUSED     (1 <<  3) /* 0x0008 -     8 */
+/* SV_NOT_USED                  (1 <<  3)    0x0008 -     8 */
 #define SV_NOSTEAL              (1 <<  4) /* 0x0010 -    16 */
 #define SV_CONST_RETURN         (1 <<  5) /* 0x0020 -    32 */
 #define SV_MUTABLE_RETURN       (1 <<  6) /* 0x0040 -    64 */
