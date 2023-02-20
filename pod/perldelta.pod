@@ -96,49 +96,93 @@ internal static SVs that are in no danger of being prematurely freed.
 
 =head1 Modules and Pragmata
 
-XXX All changes to installed files in F<cpan/>, F<dist/>, F<ext/> and F<lib/>
-go here.  If Module::CoreList is updated, generate an initial draft of the
-following sections using F<Porting/corelist-perldelta.pl>.  A paragraph summary
-for important changes should then be added by hand.  In an ideal world,
-dual-life modules would have a F<Changes> file that could be cribbed.
-
-The list of new and updated modules is modified automatically as part of
-preparing a Perl release, so the only reason to manually add entries here is if
-you're summarising the important changes in the module update. (Also, if the
-manually-added details don't match the automatically-generated ones, the
-release manager will have to investigate the situation carefully.)
-
-[ Within each section, list entries as an =item entry ]
-
-=head2 New Modules and Pragmata
-
-=over 4
-
-=item *
-
-XXX Remove this section if not applicable.
-
-=back
-
 =head2 Updated Modules and Pragmata
 
 =over 4
 
 =item *
 
-L<XXX> has been upgraded from version A.xx to B.yy.
-
-If there was something important to note about this change, include that here.
-
-=back
-
-=head2 Removed Modules and Pragmata
-
-=over 4
+L<autodie> has been upgraded from version 2.34 to 2.36.
 
 =item *
 
-XXX
+L<B> has been upgraded from version 1.87 to 1.88.
+
+=item *
+
+L<Compress::Raw::Bzip2> has been upgraded from version 2.201 to 2.204.
+
+=item *
+
+L<Compress::Raw::Zlib> has been upgraded from version 2.202 to 2.204.
+
+=item *
+
+L<Devel::Peek> has been upgraded from version 1.32 to 1.33.
+
+=item *
+
+L<Devel::PPPort> has been upgraded from version 3.69 to 3.70.
+
+=item *
+
+L<experimental> has been upgraded from version 0.030 to 0.031.
+
+=item *
+
+L<feature> has been upgraded from version 1.79 to 1.80.
+
+=item *
+
+L<File::Find> has been upgraded from version 1.42 to 1.43.
+
+=item *
+
+L<IO::Compress> has been upgraded from version 2.201 to 2.204.
+
+=item *
+
+L<Math::Complex> has been upgraded from version 1.6 to 1.61.
+
+=item *
+
+L<Memoize> has been upgraded from version 1.15 to 1.16.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 5.20230120 to 5.20230220.
+
+=item *
+
+L<mro> has been upgraded from version 1.26 to 1.28.
+
+=item *
+
+L<Opcode> has been upgraded from version 1.63 to 1.64.
+
+=item *
+
+L<parent> has been upgraded from version 0.239 to 0.241.
+
+=item *
+
+L<Term::Cap> has been upgraded from version 1.17 to 1.18.
+
+=item *
+
+L<Test::Simple> has been upgraded from version 1.302191 to 1.302192.
+
+=item *
+
+L<Tie::File> has been upgraded from version 1.06 to 1.07.
+
+=item *
+
+L<UNIVERSAL> has been upgraded from version 1.14 to 1.15.
+
+=item *
+
+L<warnings> has been upgraded from version 1.61 to 1.62.
 
 =back
 
