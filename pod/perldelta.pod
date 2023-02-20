@@ -409,6 +409,10 @@ C<GIMME> has been documented as deprecated in favour of
 L<C<GIMME_V>|perlapi/GIMME_V> since Perl v5.6.0, but had not
 previously issued a warning.
 
+=item *
+
+The API function L<perlapi/utf8_length> is now more efficient.
+
 =back
 
 =head1 Selected Bug Fixes
