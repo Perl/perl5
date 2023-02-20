@@ -188,7 +188,7 @@ foreach my $line (@pod_lines) {
 
     $line =~ s/\Q5.X.Y\E/$version/g;
     $line =~ s/\Q5.LAST\E/$last_version/g;
-    $line =~ s/\Q5.X\E-b/$major.$minor/g;
+    $line =~ s/\Q5.X\E\b/$major.$minor/g;
 
     $current_element->{'content'} .= "\n" . $line;
 }
