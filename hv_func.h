@@ -112,7 +112,8 @@
 #define PVT_PERL_HASH_STATE_BYTES  \
     ( PVT__PERL_HASH_STATE_BYTES + ( ( 1 + ( 256 * SBOX32_MAX_LEN ) ) * sizeof(U32) ) )
 
-#define PVT_PERL_HASH_SEED_STATE(seed,state) STMT_START {                                      \
+#define PVT_PERL_HASH_SEED_STATE(seed,state)  \
+    STMT_START {\
     PVT__PERL_HASH_SEED_STATE(seed,state);                                                     \
     sbox32_seed_state128(seed + PVT__PERL_HASH_SEED_BYTES, state + PVT__PERL_HASH_STATE_BYTES);    \
 } STMT_END

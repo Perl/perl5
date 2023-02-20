@@ -77,7 +77,8 @@
 /* This is two marsaglia xor-shift permutes, with a prime-multiple
  * sandwiched inside. The end result of doing this twice with different
  * primes is a completely avalanched v.  */
-#define ZAPHOD32_SCRAMBLE32(v,prime) STMT_START {  \
+#define ZAPHOD32_SCRAMBLE32(v,prime)  \
+    STMT_START {\
     v ^= (v>>9);                        \
     v ^= (v<<21);                       \
     v ^= (v>>16);                       \
@@ -87,7 +88,8 @@
     v ^= (v>>23);                       \
 } STMT_END
 
-#define ZAPHOD32_FINALIZE(v0,v1,v2) STMT_START {          \
+#define ZAPHOD32_FINALIZE(v0,v1,v2)  \
+    STMT_START {\
     ZAPHOD32_WARN3("v0=%08x v1=%08x v2=%08x - ZAPHOD32 FINALIZE\n", \
             (unsigned int)v0, (unsigned int)v1, (unsigned int)v2);  \
     v2 += v0;                       \
@@ -113,7 +115,8 @@
     v1 = ROTL32(v1, 17);           \
 } STMT_END
 
-#define ZAPHOD32_MIX(v0,v1,v2,text) STMT_START {                              \
+#define ZAPHOD32_MIX(v0,v1,v2,text)  \
+    STMT_START {\
     ZAPHOD32_WARN4("v0=%08x v1=%08x v2=%08x - ZAPHOD32 %s MIX\n",                   \
             (unsigned int)v0,(unsigned int)v1,(unsigned int)v2, text );  \
     v0 = ROTL32(v0,16) - v2;   \
@@ -132,7 +135,7 @@ void zaphod32_seed_state (
 ) {
     const U32 *seed= (const U32 *)seed_ch;
     U32 *state= (U32 *)state_ch;
-  
+
     /* hex expansion of PI, skipping first two digits. PI= 3.2[43f6...]
      *
      * PI value in hex from here:

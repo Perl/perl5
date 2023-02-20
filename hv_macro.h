@@ -36,22 +36,25 @@
         #define U8TO32_LE(ptr)   (*((const U32*)(ptr)))
         #define U8TO64_LE(ptr)   (*((const U64*)(ptr)))
     #else
-        #define U8TO16_LE(ptr)   (_shifted_octet(U16,(ptr),0, 0)|\
-                                  _shifted_octet(U16,(ptr),1, 8))
+        #define U8TO16_LE(ptr)    \
+    (_shifted_octet(U16,(ptr),0, 0)|\
+     _shifted_octet(U16,(ptr),1, 8))
 
-        #define U8TO32_LE(ptr)   (_shifted_octet(U32,(ptr),0, 0)|\
-                                  _shifted_octet(U32,(ptr),1, 8)|\
-                                  _shifted_octet(U32,(ptr),2,16)|\
-                                  _shifted_octet(U32,(ptr),3,24))
+        #define U8TO32_LE(ptr)    \
+    (_shifted_octet(U32,(ptr),0, 0)|\
+     _shifted_octet(U32,(ptr),1, 8)|\
+     _shifted_octet(U32,(ptr),2,16)|\
+     _shifted_octet(U32,(ptr),3,24))
 
-        #define U8TO64_LE(ptr)   (_shifted_octet(U64,(ptr),0, 0)|\
-                                  _shifted_octet(U64,(ptr),1, 8)|\
-                                  _shifted_octet(U64,(ptr),2,16)|\
-                                  _shifted_octet(U64,(ptr),3,24)|\
-                                  _shifted_octet(U64,(ptr),4,32)|\
-                                  _shifted_octet(U64,(ptr),5,40)|\
-                                  _shifted_octet(U64,(ptr),6,48)|\
-                                  _shifted_octet(U64,(ptr),7,56))
+        #define U8TO64_LE(ptr)    \
+    (_shifted_octet(U64,(ptr),0, 0)|\
+     _shifted_octet(U64,(ptr),1, 8)|\
+     _shifted_octet(U64,(ptr),2,16)|\
+     _shifted_octet(U64,(ptr),3,24)|\
+     _shifted_octet(U64,(ptr),4,32)|\
+     _shifted_octet(U64,(ptr),5,40)|\
+     _shifted_octet(U64,(ptr),6,48)|\
+     _shifted_octet(U64,(ptr),7,56))
     #endif
 #endif
 

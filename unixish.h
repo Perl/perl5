@@ -137,10 +137,11 @@ int afstat(int fd, struct stat *statb);
 
 #if defined(__amigaos4__)
 #  define PLATFORM_SYS_TERM_  amigaos4_dispose_fork_array()
-#  define PLATFORM_SYS_INIT_ STMT_START {                       \
-                                amigaos4_init_fork_array();     \
-                                amigaos4_init_environ_sema();   \
-                             } STMT_END
+#  define PLATFORM_SYS_INIT_  \
+    STMT_START {\
+       amigaos4_init_fork_array();     \
+       amigaos4_init_environ_sema();   \
+    } STMT_END
 #else
 #  define PLATFORM_SYS_TERM_  NOOP
 #  define PLATFORM_SYS_INIT_  NOOP

@@ -297,8 +297,9 @@ struct pmop {
 };
 
 #ifdef USE_ITHREADS
-#define PM_GETRE(o)     (SvTYPE(PL_regex_pad[(o)->op_pmoffset]) == SVt_REGEXP \
-                         ? (REGEXP*)(PL_regex_pad[(o)->op_pmoffset]) : NULL)
+#define PM_GETRE(o)      \
+    (SvTYPE(PL_regex_pad[(o)->op_pmoffset]) == SVt_REGEXP\
+     ? (REGEXP*)(PL_regex_pad[(o)->op_pmoffset]) : NULL)
 /* The assignment is just to enforce type safety (or at least get a warning).
  */
 /* With first class regexps not via a reference one needs to assign
@@ -307,11 +308,12 @@ struct pmop {
    more complex, and we'd have an AV with (SV*)NULL in it, which feels bad */
 /* BEWARE - something that calls this macro passes (r) which has a side
    effect.  */
-#define PM_SETRE(o,r)   STMT_START {                                    \
-                            REGEXP *const _pm_setre = (r);              \
-                            assert(_pm_setre);                          \
-                            PL_regex_pad[(o)->op_pmoffset] = MUTABLE_SV(_pm_setre); \
-                        } STMT_END
+#define PM_SETRE(o,r)    \
+    STMT_START {\
+        REGEXP *const _pm_setre = (r);              \
+        assert(_pm_setre);                          \
+        PL_regex_pad[(o)->op_pmoffset] = MUTABLE_SV(_pm_setre); \
+    } STMT_END
 #else
 #define PM_GETRE(o)     ((o)->op_pmregexp)
 #define PM_SETRE(o,r)   ((o)->op_pmregexp = (r))
@@ -408,9 +410,10 @@ struct pmop {
 
 #ifdef USE_ITHREADS
 
-#  define PmopSTASH(o)         ((o)->op_pmflags & PMf_ONCE                         \
-                                ? PL_stashpad[(o)->op_pmstashstartu.op_pmstashoff]   \
-                                : NULL)
+#  define PmopSTASH(o)          \
+    ((o)->op_pmflags & PMf_ONCE\
+     ? PL_stashpad[(o)->op_pmstashstartu.op_pmstashoff]   \
+     : NULL)
 #  define PmopSTASH_set(o,hv)   \
         (assert_((o)->op_pmflags & PMf_ONCE)                            \
          (o)->op_pmstashstartu.op_pmstashoff =                          \
@@ -419,7 +422,8 @@ struct pmop {
 #  define PmopSTASH(o)                                                  \
     (((o)->op_pmflags & PMf_ONCE) ? (o)->op_pmstashstartu.op_pmstash : NULL)
 #  if defined (DEBUGGING) && defined(PERL_USE_GCC_BRACE_GROUPS)
-#    define PmopSTASH_set(o,hv)         ({                              \
+#    define PmopSTASH_set(o,hv)          \
+    ({\
         assert((o)->op_pmflags & PMf_ONCE);                             \
         ((o)->op_pmstashstartu.op_pmstash = (hv));                      \
     })
@@ -533,12 +537,15 @@ typedef enum {
 #    define     IS_PADCONST(v) \
         (v && (SvREADONLY(v) || (SvIsCOW(v) && !SvLEN(v))))
 #  endif
-#  define       cSVOPx_sv(v)    (cSVOPx(v)->op_sv \
-                                 ? cSVOPx(v)->op_sv : PAD_SVl((v)->op_targ))
-#  define       cSVOPx_svp(v)   (cSVOPx(v)->op_sv \
-                                 ? &cSVOPx(v)->op_sv : &PAD_SVl((v)->op_targ))
-#  define       cMETHOPx_meth(v) (cMETHOPx(v)->op_u.op_meth_sv \
-                                  ? cMETHOPx(v)->op_u.op_meth_sv : PAD_SVl((v)->op_targ))
+#  define       cSVOPx_sv(v)     \
+    (cSVOPx(v)->op_sv\
+     ? cSVOPx(v)->op_sv : PAD_SVl((v)->op_targ))
+#  define       cSVOPx_svp(v)    \
+    (cSVOPx(v)->op_sv\
+     ? &cSVOPx(v)->op_sv : &PAD_SVl((v)->op_targ))
+#  define       cMETHOPx_meth(v)  \
+    (cMETHOPx(v)->op_u.op_meth_sv\
+     ? cMETHOPx(v)->op_u.op_meth_sv : PAD_SVl((v)->op_targ))
 #  define       cMETHOPx_rclass(v) PAD_SVl(cMETHOPx(v)->op_rclass_targ)
 #else
 #  define       cGVOPx_gv(o)    ((GV*)cSVOPx(o)->op_sv)
@@ -751,8 +758,9 @@ struct opslab {
 };
 
 # define OPSLOT_HEADER          STRUCT_OFFSET(OPSLOT, opslot_op)
-# define OpSLOT(o)              (assert_(o->op_slabbed) \
-                                 (OPSLOT *)(((char *)o)-OPSLOT_HEADER))
+# define OpSLOT(o)               \
+    (assert_(o->op_slabbed)\
+     (OPSLOT *)(((char *)o)-OPSLOT_HEADER))
 
 /* the slab that owns this op */
 # define OpMySLAB(o) \
@@ -1040,15 +1048,18 @@ C<sib> is non-null. For a higher-level interface, see C<L</op_sibling_splice>>.
 =cut
 */
 
-#define OP_NAME(o) ((o)->op_type == OP_CUSTOM \
-                    ? XopENTRYCUSTOM(o, xop_name) \
-                    : PL_op_name[(o)->op_type])
-#define OP_DESC(o) ((o)->op_type == OP_CUSTOM \
-                    ? XopENTRYCUSTOM(o, xop_desc) \
-                    : PL_op_desc[(o)->op_type])
-#define OP_CLASS(o) ((o)->op_type == OP_CUSTOM \
-                     ? XopENTRYCUSTOM(o, xop_class) \
-                     : (PL_opargs[(o)->op_type] & OA_CLASS_MASK))
+#define OP_NAME(o)  \
+    ((o)->op_type == OP_CUSTOM\
+     ? XopENTRYCUSTOM(o, xop_name) \
+     : PL_op_name[(o)->op_type])
+#define OP_DESC(o)  \
+    ((o)->op_type == OP_CUSTOM\
+     ? XopENTRYCUSTOM(o, xop_desc) \
+     : PL_op_desc[(o)->op_type])
+#define OP_CLASS(o)  \
+    ((o)->op_type == OP_CUSTOM\
+     ? XopENTRYCUSTOM(o, xop_class) \
+     : (PL_opargs[(o)->op_type] & OA_CLASS_MASK))
 
 #define OP_TYPE_IS(o, type) ((o) && (o)->op_type == (type))
 #define OP_TYPE_IS_NN(o, type) ((o)->op_type == (type))

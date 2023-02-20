@@ -320,7 +320,8 @@ struct IPerlStdIOInfo
 START_EXTERN_C
      int decc$ungetc(int __c, FILE *__stream);
 END_EXTERN_C
-#      define PerlSIO_ungetc(c,f) ((c) == EOF ? EOF :   \
+#      define PerlSIO_ungetc(c,f)  \
+    ((c) == EOF ? EOF :\
             ((*(f) && !((*(f))->_flag & _IONBF) &&      \
             ((*(f))->_ptr > (*(f))->_base)) ?           \
             ((*(f))->_cnt++, *(--(*(f))->_ptr) = (c)) : decc$ungetc(c,f)))
@@ -585,9 +586,10 @@ struct IPerlEnvInfo
 #  define PerlEnv_get_childdir()                win32_get_childdir()
 #  define PerlEnv_free_childdir(d)      win32_free_childdir((d))
 #  else
-#    define PerlEnv_clearenv(str)               (ENV_LOCK, (clearenv(str)   \
-                                                    ? (ENV_UNLOCK, 1)       \
-                                                    : (ENV_UNLOCK, 0)))
+#    define PerlEnv_clearenv(str)                \
+    (ENV_LOCK, (clearenv(str)\
+        ? (ENV_UNLOCK, 1)       \
+        : (ENV_UNLOCK, 0)))
 #    define PerlEnv_get_childenv()              get_childenv()
 #    define PerlEnv_free_childenv(e)    free_childenv((e))
 #    define PerlEnv_get_childdir()              get_childdir()

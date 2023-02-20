@@ -563,8 +563,9 @@ typedef struct rcpv RCPV;
 
 #  define CopFILE(c)            ((c)->cop_file)
 #  define CopFILE_LEN(c)        (CopFILE(c) ? RCPV_LEN(CopFILE(c)) : 0)
-#  define CopFILEGV(c)          (CopFILE(c) \
-                                 ? gv_fetchfile(CopFILE(c)) : NULL)
+#  define CopFILEGV(c)           \
+    (CopFILE(c)\
+     ? gv_fetchfile(CopFILE(c)) : NULL)
 
 #  define CopFILE_set_x(c,pv)       ((c)->cop_file = rcpv_new((pv),0,RCPVf_USE_STRLEN))
 #  define CopFILE_setn_x(c,pv,l)    ((c)->cop_file = rcpv_new((pv),(l),0))
@@ -608,17 +609,21 @@ typedef struct rcpv RCPV;
     } STMT_END
 
 
-#  define CopFILESV(c)          (CopFILE(c) \
-                                 ? GvSV(gv_fetchfile(CopFILE(c))) : NULL)
-#  define CopFILEAV(c)          (CopFILE(c) \
-                                 ? GvAV(gv_fetchfile(CopFILE(c))) : NULL)
-#  define CopFILEAVx(c)         (assert_(CopFILE(c)) \
-                                   GvAV(gv_fetchfile(CopFILE(c))))
+#  define CopFILESV(c)           \
+    (CopFILE(c)\
+     ? GvSV(gv_fetchfile(CopFILE(c))) : NULL)
+#  define CopFILEAV(c)           \
+    (CopFILE(c)\
+     ? GvAV(gv_fetchfile(CopFILE(c))) : NULL)
+#  define CopFILEAVx(c)          \
+    (assert_(CopFILE(c))\
+       GvAV(gv_fetchfile(CopFILE(c))))
 #  define CopFILEAVn(c)         (cop_file_avn(c))
 #  define CopSTASH(c)           PL_stashpad[(c)->cop_stashoff]
-#  define CopSTASH_set(c,hv)    ((c)->cop_stashoff = (hv)               \
-                                    ? alloccopstash(hv)                 \
-                                    : 0)
+#  define CopSTASH_set(c,hv)     \
+    ((c)->cop_stashoff = (hv)\
+        ? alloccopstash(hv)                 \
+        : 0)
 
 #else /* Above: yes threads; Below no threads */
 
@@ -635,10 +640,12 @@ typedef struct rcpv RCPV;
 #    define CopFILEAVx(c)       (GvAV(CopFILEGV(c)))
 # endif
 #  define CopFILEAVn(c)         (CopFILEGV(c) ? GvAVn(CopFILEGV(c)) : NULL)
-#  define CopFILE(c)            (CopFILEGV(c) /* +2 for '_<' */         \
-                                    ? GvNAME(CopFILEGV(c))+2 : NULL)
-#  define CopFILE_LEN(c)        (CopFILEGV(c) /* -2 for '_<' */         \
-                                    ? GvNAMELEN(CopFILEGV(c))-2 : 0)
+#  define CopFILE(c)             \
+    (CopFILEGV(c) /* +2 for '_<' */\
+        ? GvNAME(CopFILEGV(c))+2 : NULL)
+#  define CopFILE_LEN(c)         \
+    (CopFILEGV(c) /* -2 for '_<' */\
+        ? GvNAMELEN(CopFILEGV(c))-2 : 0)
 #  define CopSTASH(c)           ((c)->cop_stash)
 #  define CopSTASH_set(c,hv)    ((c)->cop_stash = (hv))
 #  define CopFILE_free(c)       (SvREFCNT_dec(CopFILEGV(c)),(CopFILEGV(c) = NULL))
@@ -787,9 +794,10 @@ by setting C<*flags> to 0 or C<SVf_UTF8>.
 #define OutCopFILE(c) CopFILE(c)
 
 #define CopHINTS_get(c)         ((c)->cop_hints + 0)
-#define CopHINTS_set(c, h)      STMT_START {                            \
-                                    (c)->cop_hints = (h);               \
-                                } STMT_END
+#define CopHINTS_set(c, h)       \
+    STMT_START {\
+        (c)->cop_hints = (h);               \
+    } STMT_END
 
 /*
  * Here we have some enormously heavy (or at least ponderous) wizardry.
@@ -1042,7 +1050,8 @@ struct subst {
 #define sb_rxres        cx_u.cx_subst.sbu_rxres
 #define sb_rx           cx_u.cx_subst.sbu_rx
 
-#  define CX_PUSHSUBST(cx) CXINC, cx = CX_CUR(),                        \
+#  define CX_PUSHSUBST(cx)  \
+    CXINC, cx = CX_CUR(),\
         cx->blk_oldsaveix = oldsave,                                    \
         cx->sb_iters            = iters,                                \
         cx->sb_maxiters         = maxiters,                             \
@@ -1137,17 +1146,22 @@ struct context {
 #define CXp_ONCE        0x10    /* What was sbu_once in struct subst */
 
 #define CxTYPE(c)       ((c)->cx_type & CXTYPEMASK)
-#define CxTYPE_is_LOOP(c) (   CxTYPE(cx) >= CXt_LOOP_ARY                \
-                           && CxTYPE(cx) <= CXt_LOOP_PLAIN)
+#define CxTYPE_is_LOOP(c)  \
+    (   CxTYPE(cx) >= CXt_LOOP_ARY\
+     && CxTYPE(cx) <= CXt_LOOP_PLAIN)
 #define CxMULTICALL(c)  ((c)->cx_type & CXp_MULTICALL)
-#define CxREALEVAL(c)   (((c)->cx_type & (CXTYPEMASK|CXp_REAL))         \
-                         == (CXt_EVAL|CXp_REAL))
-#define CxEVALBLOCK(c)  (((c)->cx_type & (CXTYPEMASK|CXp_EVALBLOCK))    \
-                         == (CXt_EVAL|CXp_EVALBLOCK))
-#define CxTRY(c)        (((c)->cx_type & (CXTYPEMASK|CXp_TRY))          \
-                         == (CXt_EVAL|CXp_TRY))
-#define CxFOREACH(c)    (   CxTYPE(cx) >= CXt_LOOP_ARY                  \
-                         && CxTYPE(cx) <= CXt_LOOP_LIST)
+#define CxREALEVAL(c)    \
+    (((c)->cx_type & (CXTYPEMASK|CXp_REAL))\
+     == (CXt_EVAL|CXp_REAL))
+#define CxEVALBLOCK(c)   \
+    (((c)->cx_type & (CXTYPEMASK|CXp_EVALBLOCK))\
+     == (CXt_EVAL|CXp_EVALBLOCK))
+#define CxTRY(c)         \
+    (((c)->cx_type & (CXTYPEMASK|CXp_TRY))\
+     == (CXt_EVAL|CXp_TRY))
+#define CxFOREACH(c)     \
+    (   CxTYPE(cx) >= CXt_LOOP_ARY\
+     && CxTYPE(cx) <= CXt_LOOP_LIST)
 
 /* private flags for CXt_DEFER */
 #define CXp_FINALLY     0x20    /* `finally` block; semantically identical

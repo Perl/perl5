@@ -62,7 +62,8 @@ See L<perlguts/Autoloading with XSUBs>.
 #define CvDEPTHunsafe(sv) ((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_depth
 
 /* these CvPADLIST/CvRESERVED asserts can be reverted one day, once stabilized */
-#define CvPADLIST(sv)     (*(assert_(!CvISXSUB((CV*)(sv))) \
+#define CvPADLIST(sv)      \
+    (*(assert_(!CvISXSUB((CV*)(sv)))\
         &(((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_padlist_u.xcv_padlist)))
 /* CvPADLIST_set is not public API, it can be removed one day, once stabilized */
 #ifdef DEBUGGING
@@ -70,7 +71,8 @@ See L<perlguts/Autoloading with XSUBs>.
 #else
 #  define CvPADLIST_set(sv, padlist) (CvPADLIST(sv) = (padlist))
 #endif
-#define CvHSCXT(sv)       *(assert_(CvISXSUB((CV*)(sv))) \
+#define CvHSCXT(sv)        \
+    *(assert_(CvISXSUB((CV*)(sv)))\
         &(((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_padlist_u.xcv_hscxt))
 #ifdef DEBUGGING
 #  if PTRSIZE == 8
@@ -286,7 +288,8 @@ CvNAME_HEK(CV *sv)
 /* helper for the common pattern:
    CvNAMED(sv) ? CvNAME_HEK((CV *)sv) : GvNAME_HEK(CvGV(sv))
 */
-#define CvGvNAME_HEK(sv) ( \
+#define CvGvNAME_HEK(sv)  \
+    (\
         CvNAMED((CV*)sv) ? \
             ((XPVCV*)MUTABLE_PTR(SvANY((SV*)sv)))->xcv_gv_u.xcv_hek\
             : GvNAME_HEK(CvGV( (SV*) sv)) \
@@ -294,7 +297,8 @@ CvNAME_HEK(CV *sv)
 
 /* This lowers the reference count of the previous value, but does *not*
    increment the reference count of the new value. */
-#define CvNAME_HEK_set(cv, hek) ( \
+#define CvNAME_HEK_set(cv, hek)  \
+    (\
         CvNAME_HEK((CV *)(cv))                                           \
             ? unshare_hek(SvANY((CV *)(cv))->xcv_gv_u.xcv_hek)    \
             : (void)0,                                             \

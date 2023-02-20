@@ -388,9 +388,10 @@ are in the character. */
 
 /* Is the byte 'c' part of a multi-byte UTF8-8 encoded sequence, and not the
  * first byte thereof? */
-#define UTF8_IS_CONTINUATION(c)     (__ASSERT_(FITS_IN_8_BITS(c))           \
+#define UTF8_IS_CONTINUATION(c)      \
+    (__ASSERT_(FITS_IN_8_BITS(c))\
             (((NATIVE_UTF8_TO_I8(c) & UTF_IS_CONTINUATION_MASK)             \
-                                                == UTF_CONTINUATION_MARK)))
+                == UTF_CONTINUATION_MARK)))
 
 /* Is the representation of the Unicode code point 'cp' the same regardless of
  * being encoded in UTF-8 or not? This is a fundamental property of
@@ -613,7 +614,8 @@ encoded as UTF-8.  C<cp> is a native (ASCII or EBCDIC) code point if less than
  * C0-C4 I8 start bytes on EBCDIC ones.  On EBCDIC E0 can't start a
  * non-overlong sequence, so we define a base macro and for those platforms,
  * extend it to also exclude E0 */
-#define UTF8_IS_START_base(c)    (__ASSERT_(FITS_IN_8_BITS(c))              \
+#define UTF8_IS_START_base(c)     \
+    (__ASSERT_(FITS_IN_8_BITS(c))\
                              (NATIVE_UTF8_TO_I8(c) >= UTF_MIN_START_BYTE))
 #ifdef EBCDIC
 #  define UTF8_IS_START(c)                                                  \
@@ -626,13 +628,15 @@ encoded as UTF-8.  C<cp> is a native (ASCII or EBCDIC) code point if less than
 
 /* Is the UTF8-encoded byte 'c' the first byte of a sequence of bytes that
  * represent a code point > 255? */
-#define UTF8_IS_ABOVE_LATIN1(c)     (__ASSERT_(FITS_IN_8_BITS(c))           \
+#define UTF8_IS_ABOVE_LATIN1(c)      \
+    (__ASSERT_(FITS_IN_8_BITS(c))\
                         (NATIVE_UTF8_TO_I8(c) >= UTF_MIN_ABOVE_LATIN1_BYTE))
 
 /* Is the UTF8-encoded byte 'c' the first byte of a two byte sequence?  Use
  * UTF8_IS_NEXT_CHAR_DOWNGRADEABLE() instead if the input isn't known to
  * be well-formed. */
-#define UTF8_IS_DOWNGRADEABLE_START(c)  (__ASSERT_(FITS_IN_8_BITS(c))       \
+#define UTF8_IS_DOWNGRADEABLE_START(c)   \
+    (__ASSERT_(FITS_IN_8_BITS(c))\
                 inRANGE_helper_(U8, NATIVE_UTF8_TO_I8(c),                   \
                         UTF_MIN_START_BYTE, UTF_MIN_ABOVE_LATIN1_BYTE - 1))
 
@@ -699,10 +703,11 @@ uppercase/lowercase/titlecase/fold into.
  * that this is asymmetric on EBCDIC platforms, in that the 'new' parameter is
  * the UTF-EBCDIC byte, whereas the 'old' parameter is a Unicode (not EBCDIC)
  * code point in process of being generated */
-#define UTF8_ACCUMULATE(old, new) (__ASSERT_(FITS_IN_8_BITS(new))              \
-                                   ((old) << UTF_ACCUMULATION_SHIFT)           \
-                                   | ((NATIVE_UTF8_TO_I8(new))                 \
-                                       & UTF_CONTINUATION_MASK))
+#define UTF8_ACCUMULATE(old, new)  \
+    (__ASSERT_(FITS_IN_8_BITS(new))\
+     ((old) << UTF_ACCUMULATION_SHIFT)           \
+     | ((NATIVE_UTF8_TO_I8(new))                 \
+         & UTF_CONTINUATION_MASK))
 
 /* This works in the face of malformed UTF-8. */
 #define UTF8_IS_NEXT_CHAR_DOWNGRADEABLE(s, e)                                 \
@@ -811,10 +816,11 @@ returns beyond C<e>.  On DEBUGGING builds, it asserts that S<C<s E<lt>= e>>.
 
 =cut
  */
-#define UTF8_SAFE_SKIP(s, e)  (__ASSERT_((e) >= (s))                \
-                              UNLIKELY(((e) - (s)) <= 0)            \
-                               ? 0                                  \
-                               : MIN(((e) - (s)), UTF8_SKIP(s)))
+#define UTF8_SAFE_SKIP(s, e)   \
+    (__ASSERT_((e) >= (s))\
+    UNLIKELY(((e) - (s)) <= 0)            \
+     ? 0                                  \
+     : MIN(((e) - (s)), UTF8_SKIP(s)))
 
 /* Most code that says 'UNI_' really means the native value for code points up
  * through 255 */
@@ -847,8 +853,9 @@ implementation of the latter. */
 
 /* Misleadingly named: is the UTF8-encoded byte 'c' part of a variant sequence
  * in UTF-8?  This is the inverse of UTF8_IS_INVARIANT. */
-#define UTF8_IS_CONTINUED(c)  (__ASSERT_(FITS_IN_8_BITS(c))                 \
-                               (! UTF8_IS_INVARIANT(c)))
+#define UTF8_IS_CONTINUED(c)   \
+    (__ASSERT_(FITS_IN_8_BITS(c))\
+     (! UTF8_IS_INVARIANT(c)))
 
 /* The macros in the next 4 sets are used to generate the two utf8 or utfebcdic
  * bytes from an ordinal that is known to fit into exactly two (not one) bytes;
@@ -875,10 +882,12 @@ implementation of the latter. */
 
 /* The next two macros are used when the source should be a single byte
  * character; checked for under DEBUGGING */
-#define UTF8_EIGHT_BIT_HI(c) (__ASSERT_(FITS_IN_8_BITS(c))                    \
-                             ( __BASE_TWO_BYTE_HI(c, NATIVE_TO_LATIN1)))
-#define UTF8_EIGHT_BIT_LO(c) (__ASSERT_(FITS_IN_8_BITS(c))                    \
-                             (__BASE_TWO_BYTE_LO(c, NATIVE_TO_LATIN1)))
+#define UTF8_EIGHT_BIT_HI(c)  \
+    (__ASSERT_(FITS_IN_8_BITS(c))\
+    ( __BASE_TWO_BYTE_HI(c, NATIVE_TO_LATIN1)))
+#define UTF8_EIGHT_BIT_LO(c)  \
+    (__ASSERT_(FITS_IN_8_BITS(c))\
+    (__BASE_TWO_BYTE_LO(c, NATIVE_TO_LATIN1)))
 
 /* These final two macros in the series are used when the source can be any
  * code point whose UTF-8 is known to occupy 2 bytes; they are less efficient
@@ -967,8 +976,9 @@ point's representation.
 =cut
  */
 
-#define UNICODE_IS_SURROGATE(uv) UNLIKELY(inRANGE(uv, UNICODE_SURROGATE_FIRST,  \
-                                                      UNICODE_SURROGATE_LAST))
+#define UNICODE_IS_SURROGATE(uv)  \
+    UNLIKELY(inRANGE(uv, UNICODE_SURROGATE_FIRST,\
+                         UNICODE_SURROGATE_LAST))
 #define UTF8_IS_SURROGATE(s, e)      is_SURROGATE_utf8_safe(s, e)
 
 /*
@@ -1214,11 +1224,12 @@ point's representation.
  * to have to deal with any malformations that might be present.  All such will
  * be safely replaced by the REPLACEMENT CHARACTER, unless other flags
  * overriding this are also present. */
-#define UTF8_ALLOW_ANY ( UTF8_ALLOW_CONTINUATION                                \
-                        |UTF8_ALLOW_NON_CONTINUATION                            \
-                        |UTF8_ALLOW_SHORT                                       \
-                        |UTF8_ALLOW_LONG                                        \
-                        |UTF8_ALLOW_OVERFLOW)
+#define UTF8_ALLOW_ANY  \
+    ( UTF8_ALLOW_CONTINUATION\
+     |UTF8_ALLOW_NON_CONTINUATION                            \
+     |UTF8_ALLOW_SHORT                                       \
+     |UTF8_ALLOW_LONG                                        \
+     |UTF8_ALLOW_OVERFLOW)
 
 /* Accept any Perl-extended UTF-8 that evaluates to any UV on the platform, but
  * not any malformed.  This is the default. */
@@ -1260,8 +1271,9 @@ point's representation.
 #define UNICODE_ALLOW_ANY       0
 
 #define UNICODE_BYTE_ORDER_MARK         0xFEFF
-#define UNICODE_IS_BYTE_ORDER_MARK(uv)  UNLIKELY((UV) (uv)                  \
-                                                == UNICODE_BYTE_ORDER_MARK)
+#define UNICODE_IS_BYTE_ORDER_MARK(uv)   \
+    UNLIKELY((UV) (uv)\
+            == UNICODE_BYTE_ORDER_MARK)
 
 #define LATIN_SMALL_LETTER_SHARP_S      LATIN_SMALL_LETTER_SHARP_S_NATIVE
 #define LATIN_SMALL_LETTER_Y_WITH_DIAERESIS                                  \
@@ -1293,9 +1305,10 @@ point's representation.
 #define UNI_DISPLAY_BACKSLASH   0x0002
 #define UNI_DISPLAY_BACKSPACE   0x0004  /* Allow \b when also
                                            UNI_DISPLAY_BACKSLASH */
-#define UNI_DISPLAY_QQ          (UNI_DISPLAY_ISPRINT                \
-                                |UNI_DISPLAY_BACKSLASH              \
-                                |UNI_DISPLAY_BACKSPACE)
+#define UNI_DISPLAY_QQ           \
+    (UNI_DISPLAY_ISPRINT\
+    |UNI_DISPLAY_BACKSLASH              \
+    |UNI_DISPLAY_BACKSPACE)
 
 /* Character classes could also allow \b, but not patterns in general */
 #define UNI_DISPLAY_REGEX       (UNI_DISPLAY_ISPRINT|UNI_DISPLAY_BACKSLASH)

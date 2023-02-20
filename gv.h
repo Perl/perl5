@@ -100,9 +100,10 @@ Return the CV from the GV.
 
 #define GvSV(gv)        (GvGP(gv)->gp_sv)
 #ifdef PERL_DONT_CREATE_GVSV
-#define GvSVn(gv)       (*(GvGP(gv)->gp_sv ? \
-                         &(GvGP(gv)->gp_sv) : \
-                         &(GvGP(gv_SVadd(gv))->gp_sv)))
+#define GvSVn(gv)        \
+    (*(GvGP(gv)->gp_sv ?\
+     &(GvGP(gv)->gp_sv) : \
+     &(GvGP(gv_SVadd(gv))->gp_sv)))
 #else
 #define GvSVn(gv)       GvSV(gv)
 #endif
@@ -125,14 +126,16 @@ Return the CV from the GV.
 #define GvFORM(gv)      (GvGP(gv)->gp_form)
 #define GvAV(gv)        (GvGP(gv)->gp_av)
 
-#define GvAVn(gv)       (GvGP(gv)->gp_av ? \
-                         GvGP(gv)->gp_av : \
-                         GvGP(gv_AVadd(gv))->gp_av)
+#define GvAVn(gv)        \
+    (GvGP(gv)->gp_av ?\
+     GvGP(gv)->gp_av : \
+     GvGP(gv_AVadd(gv))->gp_av)
 #define GvHV(gv)        ((GvGP(gv))->gp_hv)
 
-#define GvHVn(gv)       (GvGP(gv)->gp_hv ? \
-                         GvGP(gv)->gp_hv : \
-                         GvGP(gv_HVadd(gv))->gp_hv)
+#define GvHVn(gv)        \
+    (GvGP(gv)->gp_hv ?\
+     GvGP(gv)->gp_hv : \
+     GvGP(gv_HVadd(gv))->gp_hv)
 
 #define GvCV(gv)        ((CV*)GvGP(gv)->gp_cv)
 #define GvCV_set(gv,cv) (GvGP(gv)->gp_cv = (cv))

@@ -423,7 +423,8 @@ Restore the old pad saved into the local variable C<opad> by C<PAD_SAVE_LOCAL()>
         PAD_SET_CUR_NOSAVE(padlist,nth);
 
 
-#define PAD_SAVE_SETNULLPAD()   SAVECOMPPAD(); \
+#define PAD_SAVE_SETNULLPAD()    \
+    SAVECOMPPAD();\
         PL_comppad = NULL; PL_curpad = NULL;    \
         DEBUG_Xv(PerlIO_printf(Perl_debug_log, "Pad set_null\n"));
 

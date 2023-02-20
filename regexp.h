@@ -517,7 +517,8 @@ and check for NULL.
 
 #  define RXp_HAS_CUTGROUP(prog)          ((prog)->intflags & PREGf_CUTGROUP_SEEN)
 
-#  define RX_MATCH_TAINTED_set(rx_sv, t)  ((t) \
+#  define RX_MATCH_TAINTED_set(rx_sv, t)   \
+    ((t)\
                                         ? RX_MATCH_TAINTED_on(rx_sv) \
                                         : RX_MATCH_TAINTED_off(rx_sv))
 
@@ -527,7 +528,8 @@ and check for NULL.
 #  define RX_MATCH_COPIED_on(rx_sv)       (RX_EXTFLAGS(rx_sv) |= RXf_COPY_DONE)
 #  define RXp_MATCH_COPIED_off(prog)      (RXp_EXTFLAGS(prog) &= ~RXf_COPY_DONE)
 #  define RX_MATCH_COPIED_off(rx_sv)      (RX_EXTFLAGS(rx_sv) &= ~RXf_COPY_DONE)
-#  define RX_MATCH_COPIED_set(rx_sv,t)    ((t) \
+#  define RX_MATCH_COPIED_set(rx_sv,t)     \
+    ((t)\
                                          ? RX_MATCH_COPIED_on(rx_sv) \
                                          : RX_MATCH_COPIED_off(rx_sv))
 
@@ -535,15 +537,18 @@ and check for NULL.
 #  define RXp_COMPFLAGS(rx)               ((rx)->compflags)
 
 /* For source compatibility. We used to store these explicitly.  */
-#  define RX_PRECOMP(rx_sv)              (RX_WRAPPED(rx_sv) \
-                                            + ReANY(rx_sv)->pre_prefix)
-#  define RX_PRECOMP_const(rx_sv)        (RX_WRAPPED_const(rx_sv) \
-                                            + ReANY(rx_sv)->pre_prefix)
+#  define RX_PRECOMP(rx_sv)               \
+    (RX_WRAPPED(rx_sv)\
+       + ReANY(rx_sv)->pre_prefix)
+#  define RX_PRECOMP_const(rx_sv)         \
+    (RX_WRAPPED_const(rx_sv)\
+       + ReANY(rx_sv)->pre_prefix)
 /* FIXME? Are we hardcoding too much here and constraining plugin extension
    writers? Specifically, the value 1 assumes that the wrapped version always
    has exactly one character at the end, a ')'. Will that always be true?  */
-#  define RX_PRELEN(rx_sv)                (RX_WRAPLEN(rx_sv) \
-                                            - ReANY(rx_sv)->pre_prefix - 1)
+#  define RX_PRELEN(rx_sv)                 \
+    (RX_WRAPLEN(rx_sv)\
+      - ReANY(rx_sv)->pre_prefix - 1)
 
 #  define RX_WRAPPED(rx_sv)               SvPVX(rx_sv)
 #  define RX_WRAPPED_const(rx_sv)         SvPVX_const(rx_sv)
@@ -620,9 +625,10 @@ and check for NULL.
 #define RX_MATCH_UTF8_on(rx_sv)         (RXp_MATCH_UTF8_on(ReANY(rx_sv)))
 #define RXp_MATCH_UTF8_off(prog)        (RXp_EXTFLAGS(prog) &= ~RXf_MATCH_UTF8)
 #define RX_MATCH_UTF8_off(rx_sv)        (RXp_MATCH_UTF8_off(ReANY(rx_sv))
-#define RXp_MATCH_UTF8_set(prog, t)     ((t) \
-                                        ? RXp_MATCH_UTF8_on(prog) \
-                                        : RXp_MATCH_UTF8_off(prog))
+#define RXp_MATCH_UTF8_set(prog, t)      \
+    ((t)\
+    ? RXp_MATCH_UTF8_on(prog) \
+    : RXp_MATCH_UTF8_off(prog))
 #define RX_MATCH_UTF8_set(rx_sv, t)     (RXp_MATCH_UTF8_set(ReANY(rx_sv), t))
 
 /* Whether the pattern stored at RX_WRAPPED is in UTF-8  */

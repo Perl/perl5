@@ -355,17 +355,19 @@ Does not use C<TARG>.  See also C<L</XPUSHu>>, C<L</mPUSHu>> and C<L</PUSHu>>.
 #ifdef STRESS_REALLOC
 # define EXTEND_SKIP(p, n) EXTEND_HWM_SET(p, n)
 
-# define EXTEND(p,n)   STMT_START {                                     \
-                           sp = stack_grow(sp,p,_EXTEND_SAFE_N(n));     \
-                           PERL_UNUSED_VAR(sp);                         \
-                       } STMT_END
+# define EXTEND(p,n)    \
+    STMT_START {\
+        sp = stack_grow(sp,p,_EXTEND_SAFE_N(n));     \
+        PERL_UNUSED_VAR(sp);                         \
+    } STMT_END
 /* Same thing, but update mark register too. */
-# define MEXTEND(p,n)   STMT_START {                                    \
-                            const SSize_t markoff = mark - PL_stack_base; \
-                            sp = stack_grow(sp,p,_EXTEND_SAFE_N(n));    \
-                            mark = PL_stack_base + markoff;             \
-                            PERL_UNUSED_VAR(sp);                        \
-                        } STMT_END
+# define MEXTEND(p,n)    \
+    STMT_START {\
+        const SSize_t markoff = mark - PL_stack_base; \
+        sp = stack_grow(sp,p,_EXTEND_SAFE_N(n));    \
+        mark = PL_stack_base + markoff;             \
+        PERL_UNUSED_VAR(sp);                        \
+    } STMT_END
 #else
 
 /* _EXTEND_NEEDS_GROW(p,n): private helper macro for EXTEND().
@@ -395,29 +397,32 @@ Does not use C<TARG>.  See also C<L</XPUSHu>>, C<L</mPUSHu>> and C<L</PUSHu>>.
  * debugging mechanism which would otherwise whine
  */
 
-#  define EXTEND_SKIP(p, n) STMT_START {                                \
-                                EXTEND_HWM_SET(p, n);                   \
-                                assert(!_EXTEND_NEEDS_GROW(p,n));       \
-                            } STMT_END
+#  define EXTEND_SKIP(p, n)  \
+    STMT_START {\
+        EXTEND_HWM_SET(p, n);                   \
+        assert(!_EXTEND_NEEDS_GROW(p,n));       \
+    } STMT_END
 
 
-#  define EXTEND(p,n)   STMT_START {                                    \
-                         EXTEND_HWM_SET(p, n);                          \
-                         if (UNLIKELY(_EXTEND_NEEDS_GROW(p,n))) {       \
-                           sp = stack_grow(sp,p,_EXTEND_SAFE_N(n));     \
-                           PERL_UNUSED_VAR(sp);                         \
-                         }                                              \
-                        } STMT_END
+#  define EXTEND(p,n)    \
+    STMT_START {\
+     EXTEND_HWM_SET(p, n);                          \
+     if (UNLIKELY(_EXTEND_NEEDS_GROW(p,n))) {       \
+       sp = stack_grow(sp,p,_EXTEND_SAFE_N(n));     \
+       PERL_UNUSED_VAR(sp);                         \
+     }                                              \
+    } STMT_END
 /* Same thing, but update mark register too. */
-#  define MEXTEND(p,n)  STMT_START {                                    \
-                         EXTEND_HWM_SET(p, n);                          \
-                         if (UNLIKELY(_EXTEND_NEEDS_GROW(p,n))) {       \
-                           const SSize_t markoff = mark - PL_stack_base;\
-                           sp = stack_grow(sp,p,_EXTEND_SAFE_N(n));     \
-                           mark = PL_stack_base + markoff;              \
-                           PERL_UNUSED_VAR(sp);                         \
-                         }                                              \
-                        } STMT_END
+#  define MEXTEND(p,n)   \
+    STMT_START {\
+     EXTEND_HWM_SET(p, n);                          \
+     if (UNLIKELY(_EXTEND_NEEDS_GROW(p,n))) {       \
+       const SSize_t markoff = mark - PL_stack_base;\
+       sp = stack_grow(sp,p,_EXTEND_SAFE_N(n));     \
+       mark = PL_stack_base + markoff;              \
+       PERL_UNUSED_VAR(sp);                         \
+     }                                              \
+    } STMT_END
 #endif
 
 
@@ -602,12 +607,14 @@ Does not use C<TARG>.  See also C<L</XPUSHu>>, C<L</mPUSHu>> and C<L</PUSHu>>.
 
 /* do SvGETMAGIC on the stack args before checking for overload */
 
-#define tryAMAGICun_MG(method, flags) STMT_START { \
+#define tryAMAGICun_MG(method, flags)  \
+    STMT_START {\
         if ( UNLIKELY((SvFLAGS(TOPs) & (SVf_ROK|SVs_GMG))) \
                 && Perl_try_amagic_un(aTHX_ method, flags)) \
             return NORMAL; \
     } STMT_END
-#define tryAMAGICbin_MG(method, flags) STMT_START { \
+#define tryAMAGICbin_MG(method, flags)  \
+    STMT_START {\
         if ( UNLIKELY(((SvFLAGS(TOPm1s)|SvFLAGS(TOPs)) & (SVf_ROK|SVs_GMG))) \
                 && Perl_try_amagic_bin(aTHX_ method, flags)) \
             return NORMAL; \

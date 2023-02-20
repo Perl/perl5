@@ -153,7 +153,8 @@ scope has the given name. C<name> must be a literal string.
 #define ENTER_with_name(name) ENTER
 #define LEAVE_with_name(name) LEAVE
 #endif
-#define LEAVE_SCOPE(old) STMT_START { \
+#define LEAVE_SCOPE(old)  \
+    STMT_START {\
         if (PL_savestack_ix > old) leave_scope(old); \
     } STMT_END
 
@@ -279,7 +280,8 @@ casts it to a pointer of that C<type>.
 
 #define SSNEW(size)             Perl_save_alloc(aTHX_ (size), 0)
 #define SSNEWt(n,t)             SSNEW((n)*sizeof(t))
-#define SSNEWa(size,align)      Perl_save_alloc(aTHX_ (size), \
+#define SSNEWa(size,align)       \
+    Perl_save_alloc(aTHX_ (size),\
     (I32)(align - ((size_t)((caddr_t)&PL_savestack[PL_savestack_ix]) % align)) % align)
 #define SSNEWat(n,t,align)      SSNEWa((n)*sizeof(t), align)
 

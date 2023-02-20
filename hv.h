@@ -333,9 +333,10 @@ whether it is valid to call C<HvAUX()>.
 
 /* Checking that hv is a valid package stash is the
    caller's responsibility */
-#define HvMROMETA(hv) (HvAUX(hv)->xhv_mro_meta \
-                       ? HvAUX(hv)->xhv_mro_meta \
-                       : Perl_mro_meta_init(aTHX_ hv))
+#define HvMROMETA(hv)  \
+    (HvAUX(hv)->xhv_mro_meta\
+     ? HvAUX(hv)->xhv_mro_meta \
+     : Perl_mro_meta_init(aTHX_ hv))
 
 #define HvNAME_HEK_NN(hv)                         \
  (                                                \
@@ -429,25 +430,29 @@ whether it is valid to call C<HvAUX()>.
 #define HeKFLAGS(he)  HEK_FLAGS(HeKEY_hek(he))
 #define HeVAL(he)               (he)->he_valu.hent_val
 #define HeHASH(he)              HEK_HASH(HeKEY_hek(he))
-#define HePV(he,lp)             ((HeKLEN(he) == HEf_SVKEY) ?            \
-                                 SvPV(HeKEY_sv(he),lp) :                \
-                                 ((lp = HeKLEN(he)), HeKEY(he)))
-#define HeUTF8(he)              ((HeKLEN(he) == HEf_SVKEY) ?            \
-                                 SvUTF8(HeKEY_sv(he)) :                 \
-                                 (U32)HeKUTF8(he))
+#define HePV(he,lp)              \
+    ((HeKLEN(he) == HEf_SVKEY) ?\
+     SvPV(HeKEY_sv(he),lp) :                \
+     ((lp = HeKLEN(he)), HeKEY(he)))
+#define HeUTF8(he)               \
+    ((HeKLEN(he) == HEf_SVKEY) ?\
+     SvUTF8(HeKEY_sv(he)) :                 \
+     (U32)HeKUTF8(he))
 
-#define HeSVKEY(he)             ((HeKEY(he) &&                          \
-                                  HeKLEN(he) == HEf_SVKEY) ?            \
-                                 HeKEY_sv(he) : NULL)
+#define HeSVKEY(he)              \
+    ((HeKEY(he) &&\
+      HeKLEN(he) == HEf_SVKEY) ?            \
+     HeKEY_sv(he) : NULL)
 
-#define HeSVKEY_force(he)       (HeKEY(he) ?                            \
-                                 ((HeKLEN(he) == HEf_SVKEY) ?           \
-                                  HeKEY_sv(he) :                        \
-                                  newSVpvn_flags(HeKEY(he),             \
-                                                 HeKLEN(he),            \
-                                                 SVs_TEMP |             \
-                                      ( HeKUTF8(he) ? SVf_UTF8 : 0 ))) : \
-                                 &PL_sv_undef)
+#define HeSVKEY_force(he)        \
+    (HeKEY(he) ?\
+     ((HeKLEN(he) == HEf_SVKEY) ?           \
+      HeKEY_sv(he) :                        \
+      newSVpvn_flags(HeKEY(he),             \
+                     HeKLEN(he),            \
+                     SVs_TEMP |             \
+          ( HeKUTF8(he) ? SVf_UTF8 : 0 ))) : \
+     &PL_sv_undef)
 #define HeSVKEY_set(he,sv)      ((HeKLEN(he) = HEf_SVKEY), (HeKEY_sv(he) = sv))
 
 #ifndef PERL_CORE

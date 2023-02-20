@@ -606,8 +606,9 @@ __typeof__ and nothing else.
 #if defined(__clang__) || defined(__clang) || PERL_GCC_VERSION_GE(4,6,0)
 #  define GCC_DIAG_PRAGMA(x) _Pragma (#x)
 /* clang has "clang diagnostic" pragmas, but also understands gcc. */
-#  define GCC_DIAG_IGNORE(x) _Pragma("GCC diagnostic push") \
-                             GCC_DIAG_PRAGMA(GCC diagnostic ignored #x)
+#  define GCC_DIAG_IGNORE(x)  \
+    _Pragma("GCC diagnostic push")\
+    GCC_DIAG_PRAGMA(GCC diagnostic ignored #x)
 #  define GCC_DIAG_RESTORE   _Pragma("GCC diagnostic pop")
 #else
 #  define GCC_DIAG_IGNORE(w)
@@ -620,8 +621,9 @@ __typeof__ and nothing else.
 /* for clang specific pragmas */
 #if defined(__clang__) || defined(__clang)
 #  define CLANG_DIAG_PRAGMA(x) _Pragma (#x)
-#  define CLANG_DIAG_IGNORE(x) _Pragma("clang diagnostic push") \
-                               CLANG_DIAG_PRAGMA(clang diagnostic ignored #x)
+#  define CLANG_DIAG_IGNORE(x)  \
+    _Pragma("clang diagnostic push")\
+    CLANG_DIAG_PRAGMA(clang diagnostic ignored #x)
 #  define CLANG_DIAG_RESTORE   _Pragma("clang diagnostic pop")
 #else
 #  define CLANG_DIAG_IGNORE(w)
@@ -633,8 +635,9 @@ __typeof__ and nothing else.
 #define CLANG_DIAG_RESTORE_STMT CLANG_DIAG_RESTORE NOOP
 
 #if defined(_MSC_VER)
-#  define MSVC_DIAG_IGNORE(x) __pragma(warning(push)) \
-                              __pragma(warning(disable : x))
+#  define MSVC_DIAG_IGNORE(x)  \
+    __pragma(warning(push))\
+    __pragma(warning(disable : x))
 #  define MSVC_DIAG_RESTORE   __pragma(warning(pop))
 #else
 #  define MSVC_DIAG_IGNORE(x)
@@ -961,9 +964,10 @@ violations are fatal.
 #   define TAINT_IF(c)  if (UNLIKELY(c)) { TAINT; } /* Conditionally taint */
 #   define TAINT_ENV()  if (UNLIKELY(PL_tainting)) { taint_env(); }
                                 /* croak or warn if tainting */
-#   define TAINT_PROPER(s)      if (UNLIKELY(PL_tainting)) {                \
-                                    taint_proper(NULL, s);                  \
-                                }
+#   define TAINT_PROPER(s)       \
+    if (UNLIKELY(PL_tainting)) {\
+        taint_proper(NULL, s);                  \
+    }
 #   define TAINT_set(s)         (PL_tainted = cBOOL(s))
 #   define TAINT_get            (cBOOL(UNLIKELY(PL_tainted)))    /* Is something tainted? */
 #   define TAINTING_get         (cBOOL(UNLIKELY(PL_tainting)))
@@ -1550,18 +1554,21 @@ Use L</UV> to declare variables of the maximum usable size on this platform.
 #ifdef PERL_CORE
 
 /* byte-swapping functions for big-/little-endian conversion */
-# define _swab_16_(x) ((U16)( \
+# define _swab_16_(x)  \
+    ((U16)(\
          (((U16)(x) & UINT16_C(0x00ff)) << 8) | \
          (((U16)(x) & UINT16_C(0xff00)) >> 8) ))
 
-# define _swab_32_(x) ((U32)( \
+# define _swab_32_(x)  \
+    ((U32)(\
          (((U32)(x) & UINT32_C(0x000000ff)) << 24) | \
          (((U32)(x) & UINT32_C(0x0000ff00)) <<  8) | \
          (((U32)(x) & UINT32_C(0x00ff0000)) >>  8) | \
          (((U32)(x) & UINT32_C(0xff000000)) >> 24) ))
 
 # ifdef HAS_QUAD
-#  define _swab_64_(x) ((U64)( \
+#  define _swab_64_(x)  \
+    ((U64)(\
           (((U64)(x) & UINT64_C(0x00000000000000ff)) << 56) | \
           (((U64)(x) & UINT64_C(0x000000000000ff00)) << 40) | \
           (((U64)(x) & UINT64_C(0x0000000000ff0000)) << 24) | \
@@ -1703,7 +1710,8 @@ Use L</UV> to declare variables of the maximum usable size on this platform.
 #  define safecalloc  Perl_calloc
 #  define saferealloc Perl_realloc
 #  define safefree    Perl_mfree
-#  define CHECK_MALLOC_TOO_LATE_FOR_(code)      STMT_START {            \
+#  define CHECK_MALLOC_TOO_LATE_FOR_(code)       \
+    STMT_START {\
         if (!TAINTING_get && MallocCfg_ptr[MallocCfg_cfg_env_read])     \
                 code;                                                   \
     } STMT_END
@@ -1984,7 +1992,8 @@ any magic.
 #define ERRSV GvSVn(PL_errgv)
 
 /* contains inlined gv_add_by_type */
-#define CLEAR_ERRSV() STMT_START {                                      \
+#define CLEAR_ERRSV()  \
+    STMT_START {\
     SV ** const svp = &GvSV(PL_errgv);                                  \
     if (!*svp) {                                                        \
         *svp = newSVpvs("");                                            \
@@ -2002,7 +2011,8 @@ any magic.
     } STMT_END
 
 /* contains inlined gv_add_by_type */
-#define SANE_ERRSV() STMT_START {                                       \
+#define SANE_ERRSV()  \
+    STMT_START {\
     SV ** const svp = &GvSV(PL_errgv);                                  \
     if (!*svp) {                                                        \
         *svp = newSVpvs("");                                            \
@@ -3935,7 +3945,8 @@ EXTERN_C int perl_tsa_mutex_unlock(perl_mutex* mutex)
         (PL_statusvalue = 0, PL_statusvalue_vms = SS$_NORMAL)
 
  /* This macro forces a failure status */
-#   define STATUS_ALL_FAILURE   (PL_statusvalue = 1, \
+#   define STATUS_ALL_FAILURE    \
+    (PL_statusvalue = 1,\
      vaxc$errno = PL_statusvalue_vms = MY_POSIX_EXIT ? \
         (C_FAC_POSIX | (1 << 3) | STS$K_ERROR | STS$M_INHIB_MSG) : SS$_ABORT)
 
@@ -4290,9 +4301,10 @@ intrinsic function, see its documents for more details.
 #  define ASSUME(x) assert(x)
 #elif __has_builtin(__builtin_assume)
 #  if defined(__clang__) || defined(__clang)
-#    define ASSUME(x)  CLANG_DIAG_IGNORE(-Wassume)      \
-                       __builtin_assume (x)             \
-                       CLANG_DIAG_RESTORE
+#    define ASSUME(x)   \
+    CLANG_DIAG_IGNORE(-Wassume)\
+    __builtin_assume (x)             \
+    CLANG_DIAG_RESTORE
 #  else
 #    define ASSUME(x)  __builtin_assume(x)
 #  endif
@@ -4639,10 +4651,11 @@ my_swap16(const U16 x) {
 #  define htovl(x)      vtohl(x)
 #  define htovs(x)      vtohs(x)
 #elif BYTEORDER == 0x4321 || BYTEORDER == 0x87654321
-#  define vtohl(x)      ((((x)&0xFF)<<24)       \
-                        +(((x)>>24)&0xFF)       \
-                        +(((x)&0x0000FF00)<<8)  \
-                        +(((x)&0x00FF0000)>>8)  )
+#  define vtohl(x)       \
+    ((((x)&0xFF)<<24)\
+    +(((x)>>24)&0xFF)       \
+    +(((x)&0x0000FF00)<<8)  \
+    +(((x)&0x00FF0000)>>8)  )
 #  define vtohs(x)      ((((x)&0xFF)<<8) + (((x)>>8)&0xFF))
 #  define htovl(x)      vtohl(x)
 #  define htovs(x)      vtohs(x)
@@ -4697,18 +4710,22 @@ Cast an NV to UV while avoiding undefined C behavior
 #define I_V(what) (cast_iv((NV)(what)))
 #define U_V(what) (cast_uv((NV)(what)))
 #else
-#define I_32(n) ((n) < I32_MAX_P1 ? ((n) < I32_MIN ? I32_MIN : (I32) (n)) \
-                  : ((n) < U32_MAX_P1 ? (I32)(U32) (n) \
-                     : ((n) > 0 ? (I32) U32_MAX : 0 /* NaN */)))
-#define U_32(n) ((n) < 0.0 ? ((n) < I32_MIN ? (UV) I32_MIN : (U32)(I32) (n)) \
-                  : ((n) < U32_MAX_P1 ? (U32) (n) \
-                     : ((n) > 0 ? U32_MAX : 0 /* NaN */)))
-#define I_V(n) (LIKELY((n) < IV_MAX_P1) ? (UNLIKELY((n) < IV_MIN) ? IV_MIN : (IV) (n)) \
-                  : (LIKELY((n) < UV_MAX_P1) ? (IV)(UV) (n) \
-                     : ((n) > 0 ? (IV)UV_MAX : 0 /* NaN */)))
-#define U_V(n) ((n) < 0.0 ? (UNLIKELY((n) < IV_MIN) ? (UV) IV_MIN : (UV)(IV) (n)) \
-                  : (LIKELY((n) < UV_MAX_P1) ? (UV) (n) \
-                     : ((n) > 0 ? UV_MAX : 0 /* NaN */)))
+#define I_32(n)  \
+    ((n) < I32_MAX_P1 ? ((n) < I32_MIN ? I32_MIN : (I32) (n))\
+      : ((n) < U32_MAX_P1 ? (I32)(U32) (n) \
+         : ((n) > 0 ? (I32) U32_MAX : 0 /* NaN */)))
+#define U_32(n)  \
+    ((n) < 0.0 ? ((n) < I32_MIN ? (UV) I32_MIN : (U32)(I32) (n))\
+      : ((n) < U32_MAX_P1 ? (U32) (n) \
+         : ((n) > 0 ? U32_MAX : 0 /* NaN */)))
+#define I_V(n)  \
+    (LIKELY((n) < IV_MAX_P1) ? (UNLIKELY((n) < IV_MIN) ? IV_MIN : (IV) (n))\
+       : (LIKELY((n) < UV_MAX_P1) ? (IV)(UV) (n) \
+          : ((n) > 0 ? (IV)UV_MAX : 0 /* NaN */)))
+#define U_V(n)  \
+    ((n) < 0.0 ? (UNLIKELY((n) < IV_MIN) ? (UV) IV_MIN : (UV)(IV) (n))\
+       : (LIKELY((n) < UV_MAX_P1) ? (UV) (n) \
+          : ((n) > 0 ? UV_MAX : 0 /* NaN */)))
 #endif
 
 #define U_S(what) ((U16)U_32(what))
@@ -4767,12 +4784,13 @@ Gid_t getegid (void);
 #endif
 
 #ifndef Perl_error_log
-#  define Perl_error_log        (PL_stderrgv                    \
-                                 && isGV(PL_stderrgv)           \
-                                 && GvIOp(PL_stderrgv)          \
-                                 && IoOFP(GvIOp(PL_stderrgv))   \
-                                 ? IoOFP(GvIOp(PL_stderrgv))    \
-                                 : PerlIO_stderr())
+#  define Perl_error_log         \
+    (PL_stderrgv\
+     && isGV(PL_stderrgv)           \
+     && GvIOp(PL_stderrgv)          \
+     && IoOFP(GvIOp(PL_stderrgv))   \
+     ? IoOFP(GvIOp(PL_stderrgv))    \
+     : PerlIO_stderr())
 #endif
 
 
@@ -4961,9 +4979,10 @@ Gid_t getegid (void);
 
 /* For re_comp.c, re_exec.c, assume -Dr has been specified */
 #  ifdef PERL_EXT_RE_BUILD
-#    define DEBUG_r(a) STMT_START {                                     \
-                            DEBUG_PRE_STMTS a; DEBUG_POST_STMTS         \
-                       } STMT_END;
+#    define DEBUG_r(a)  \
+    STMT_START {\
+         DEBUG_PRE_STMTS a; DEBUG_POST_STMTS         \
+    } STMT_END;
 #  else
 #    define DEBUG_r(a) DEBUG__(DEBUG_r_TEST, a)
 #  endif /* PERL_EXT_RE_BUILD */
@@ -5076,7 +5095,8 @@ Gid_t getegid (void);
 /* Keep the old croak based assert for those who want it, and as a fallback if
    the platform is so heretically non-ANSI that it can't assert.  */
 
-#define Perl_assert(what)       PERL_DEB2(                              \
+#define Perl_assert(what)        \
+    PERL_DEB2(\
         ((what) ? ((void) 0) :                                          \
             (Perl_croak_nocontext("Assertion %s failed: file \"" __FILE__ \
                         "\", line %d", STRINGIFY(what), __LINE__),      \
@@ -5334,13 +5354,15 @@ EXTERN_C char **environ;  /* environment variables supplied via exec */
 #include "patchlevel.h"
 #undef PERL_PATCHLEVEL_H_IMPLICIT
 
-#define PERL_VERSION_STRING     STRINGIFY(PERL_REVISION) "." \
-                                STRINGIFY(PERL_VERSION) "." \
-                                STRINGIFY(PERL_SUBVERSION)
+#define PERL_VERSION_STRING      \
+    STRINGIFY(PERL_REVISION) "."\
+    STRINGIFY(PERL_VERSION) "." \
+    STRINGIFY(PERL_SUBVERSION)
 
-#define PERL_API_VERSION_STRING STRINGIFY(PERL_API_REVISION) "." \
-                                STRINGIFY(PERL_API_VERSION) "." \
-                                STRINGIFY(PERL_API_SUBVERSION)
+#define PERL_API_VERSION_STRING  \
+    STRINGIFY(PERL_API_REVISION) "."\
+    STRINGIFY(PERL_API_VERSION) "." \
+    STRINGIFY(PERL_API_SUBVERSION)
 
 START_EXTERN_C
 
@@ -5951,7 +5973,8 @@ typedef enum {
                                 0x80000000
                                  */
 
-#define HINT_ALL_STRICT       HINT_STRICT_REFS \
+#define HINT_ALL_STRICT        \
+    HINT_STRICT_REFS\
                             | HINT_STRICT_SUBS \
                             | HINT_STRICT_VARS
 
@@ -5997,7 +6020,8 @@ struct perl_debug_pad {
 };
 
 #define PERL_DEBUG_PAD(i)       &(PL_debug_pad.pad[i])
-#define PERL_DEBUG_PAD_ZERO(i)  (SvPVX(PERL_DEBUG_PAD(i))[0] = 0, \
+#define PERL_DEBUG_PAD_ZERO(i)   \
+    (SvPVX(PERL_DEBUG_PAD(i))[0] = 0,\
         (((XPV*) SvANY(PERL_DEBUG_PAD(i)))->xpv_cur = 0), \
         PERL_DEBUG_PAD(i))
 
@@ -6862,11 +6886,12 @@ typedef struct am_table_short AMTS;
 #   endif
 #endif /* _FASTMATH */
 
-#define PERLDB_ALL              (PERLDBf_SUB    | PERLDBf_LINE  |       \
-                                 PERLDBf_NOOPT  | PERLDBf_INTER |       \
-                                 PERLDBf_SUBLINE| PERLDBf_SINGLE|       \
-                                 PERLDBf_NAMEEVAL| PERLDBf_NAMEANON |   \
-                                 PERLDBf_SAVESRC)
+#define PERLDB_ALL               \
+    (PERLDBf_SUB    | PERLDBf_LINE  |\
+     PERLDBf_NOOPT  | PERLDBf_INTER |       \
+     PERLDBf_SUBLINE| PERLDBf_SINGLE|       \
+     PERLDBf_NAMEEVAL| PERLDBf_NAMEANON |   \
+     PERLDBf_SAVESRC)
                                         /* No _NONAME, _GOTO */
 #define PERLDBf_SUB             0x01    /* Debug sub enter/exit */
 #define PERLDBf_LINE            0x02    /* Keep line # */
@@ -6923,7 +6948,8 @@ typedef struct am_table_short AMTS;
 
    /* Returns TRUE if the plain locale pragma without a parameter is in effect.
     * */
-#  define IN_LOCALE_RUNTIME     (PL_curcop                                  \
+#  define IN_LOCALE_RUNTIME      \
+    (PL_curcop\
                               && CopHINTS_get(PL_curcop) & HINT_LOCALE)
 
    /* Returns TRUE if either form of the locale pragma is in effect */
@@ -7146,10 +7172,11 @@ the plain locale pragma without a parameter (S<C<use locale>>) is in effect.
 #  endif
 
 #  define LOCALE_INIT           MUTEX_INIT(&PL_locale_mutex)
-#  define LOCALE_TERM           STMT_START {                                \
-                                    LOCALE_TERM_POSIX_2008_;                \
-                                    MUTEX_DESTROY(&PL_locale_mutex);        \
-                                } STMT_END
+#  define LOCALE_TERM            \
+    STMT_START {\
+        LOCALE_TERM_POSIX_2008_;                \
+        MUTEX_DESTROY(&PL_locale_mutex);        \
+    } STMT_END
 #endif
 
 /* There are some locale-related functions which may need locking only because
@@ -8324,7 +8351,8 @@ Allows one ending \0
 #define PERL_PV_ESCAPE_NON_WC       0x040000
 #define PERL_PV_ESCAPE_TRUNC_MIDDLE 0x080000
 
-#define PERL_PV_PRETTY_QUOTEDPREFIX (   \
+#define PERL_PV_PRETTY_QUOTEDPREFIX  \
+    (\
         PERL_PV_PRETTY_ELLIPSES |       \
         PERL_PV_PRETTY_QUOTE    |       \
         PERL_PV_ESCAPE_NONASCII |       \
@@ -9040,17 +9068,20 @@ END_EXTERN_C
  */
 #define PERL_SRAND_OVERRIDE_NEXT() PERL_XORSHIFT32_A(PL_srand_override_next);
 
-#define PERL_SRAND_OVERRIDE_NEXT_INIT() STMT_START {    \
+#define PERL_SRAND_OVERRIDE_NEXT_INIT()  \
+    STMT_START {\
     PL_srand_override = PL_srand_override_next;         \
     PERL_SRAND_OVERRIDE_NEXT();                         \
 } STMT_END
 
-#define PERL_SRAND_OVERRIDE_GET(into) STMT_START {      \
+#define PERL_SRAND_OVERRIDE_GET(into)  \
+    STMT_START {\
     into= PL_srand_override;                            \
     PERL_SRAND_OVERRIDE_NEXT_INIT();                    \
 } STMT_END
 
-#define PERL_SRAND_OVERRIDE_NEXT_CHILD() STMT_START {   \
+#define PERL_SRAND_OVERRIDE_NEXT_CHILD()  \
+    STMT_START {\
     PERL_XORSHIFT32_B(PL_srand_override_next);          \
     PERL_SRAND_OVERRIDE_NEXT_INIT();                    \
 } STMT_END

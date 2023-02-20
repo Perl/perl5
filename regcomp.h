@@ -378,13 +378,16 @@ struct regnode_ssc {
 #undef STRING
 
 #define OP(p)           ((p)->type)
-#define FLAGS(p)        ((p)->flags)    /* Caution: Doesn't apply to all      \
-                                           regnode types.  For some, it's the \
-                                           character set of the regnode */
-#define STR_LENs(p)     (__ASSERT_(OP(p) != LEXACT && OP(p) != LEXACT_REQ8)  \
-                                    ((struct regnode_string *)p)->str_len)
-#define STRINGs(p)      (__ASSERT_(OP(p) != LEXACT && OP(p) != LEXACT_REQ8)  \
-                                    ((struct regnode_string *)p)->string)
+#define FLAGS(p)         \
+    ((p)->flags)    /* Caution: Doesn't apply to all\
+                       regnode types.  For some, it's the \
+                       character set of the regnode */
+#define STR_LENs(p)      \
+    (__ASSERT_(OP(p) != LEXACT && OP(p) != LEXACT_REQ8)\
+                ((struct regnode_string *)p)->str_len)
+#define STRINGs(p)       \
+    (__ASSERT_(OP(p) != LEXACT && OP(p) != LEXACT_REQ8)\
+                ((struct regnode_string *)p)->string)
 #define OPERANDs(p)     STRINGs(p)
 
 #define PARNO(p)        ARG(p)          /* APPLIES for OPEN and CLOSE only */
@@ -401,16 +404,20 @@ struct regnode_ssc {
  * node to be an ARG2L, using the second 32 bit field for the length, and not
  * using the flags nor next_off fields at all.  One could have an llstring node
  * and even an lllstring type. */
-#define STR_LENl(p)     (__ASSERT_(OP(p) == LEXACT || OP(p) == LEXACT_REQ8)  \
-                                    (((struct regnode_lstring *)p)->str_len))
-#define STRINGl(p)      (__ASSERT_(OP(p) == LEXACT || OP(p) == LEXACT_REQ8)  \
-                                    (((struct regnode_lstring *)p)->string))
+#define STR_LENl(p)      \
+    (__ASSERT_(OP(p) == LEXACT || OP(p) == LEXACT_REQ8)\
+                (((struct regnode_lstring *)p)->str_len))
+#define STRINGl(p)       \
+    (__ASSERT_(OP(p) == LEXACT || OP(p) == LEXACT_REQ8)\
+                (((struct regnode_lstring *)p)->string))
 #define OPERANDl(p)     STRINGl(p)
 
-#define STR_LEN(p)      ((OP(p) == LEXACT || OP(p) == LEXACT_REQ8)           \
-                                               ? STR_LENl(p) : STR_LENs(p))
-#define STRING(p)       ((OP(p) == LEXACT || OP(p) == LEXACT_REQ8)           \
-                                               ? STRINGl(p)  : STRINGs(p))
+#define STR_LEN(p)       \
+    ((OP(p) == LEXACT || OP(p) == LEXACT_REQ8)\
+                           ? STR_LENl(p) : STR_LENs(p))
+#define STRING(p)        \
+    ((OP(p) == LEXACT || OP(p) == LEXACT_REQ8)\
+                           ? STRINGl(p)  : STRINGs(p))
 #define OPERAND(p)      STRING(p)
 
 /* The number of (smallest) regnode equivalents that a string of length l bytes
@@ -801,9 +808,10 @@ ARGp_SET_inline(struct regnode *node, SV *ptr) {
 
 #define ANYOF_FLAGS_ALL         ((U8) ~(0x10|0x20))
 
-#define ANYOF_LOCALE_FLAGS (  ANYOFL_FOLD               \
-                            | ANYOF_MATCHES_POSIXL      \
-                            | ANYOFL_UTF8_LOCALE_REQD)
+#define ANYOF_LOCALE_FLAGS  \
+    (  ANYOFL_FOLD\
+     | ANYOF_MATCHES_POSIXL      \
+     | ANYOFL_UTF8_LOCALE_REQD)
 
 /* These are the flags that apply to both regular ANYOF nodes and synthetic
  * start class nodes during construction of the SSC.  During finalization of
@@ -925,7 +933,8 @@ ARGp_SET_inline(struct regnode *node, SV *ptr) {
  * we want to because the bit isn't set for SSC during its construction */
 #define ANYOF_POSIXL_SSC_TEST_ANY_SET(p)                               \
                             cBOOL(((regnode_ssc*)(p))->classflags)
-#define ANYOF_POSIXL_SSC_TEST_ALL_SET(p) /* Are all bits set? */       \
+#define ANYOF_POSIXL_SSC_TEST_ALL_SET(p)  \
+    /* Are all bits set? */\
         (((regnode_ssc*) (p))->classflags                              \
                                         == nBIT_MASK(ANYOF_POSIXL_MAX))
 
@@ -1253,55 +1262,76 @@ re.pm, especially to the documentation.
 
 #define RE_DEBUG_FLAG(x) (re_debug_flags & (x))
 /* Compile */
-#define DEBUG_COMPILE_r(x) DEBUG_r( \
+#define DEBUG_COMPILE_r(x)  \
+    DEBUG_r(\
     if (DEBUG_v_TEST || RE_DEBUG_FLAG(RE_DEBUG_COMPILE_MASK)) x  )
-#define DEBUG_PARSE_r(x) DEBUG_r( \
+#define DEBUG_PARSE_r(x)  \
+    DEBUG_r(\
     if (DEBUG_v_TEST || RE_DEBUG_FLAG(RE_DEBUG_COMPILE_PARSE)) x  )
-#define DEBUG_OPTIMISE_r(x) DEBUG_r( \
+#define DEBUG_OPTIMISE_r(x)  \
+    DEBUG_r(\
     if (DEBUG_v_TEST || RE_DEBUG_FLAG(RE_DEBUG_COMPILE_OPTIMISE)) x  )
-#define DEBUG_DUMP_r(x) DEBUG_r( \
+#define DEBUG_DUMP_r(x)  \
+    DEBUG_r(\
     if (DEBUG_v_TEST || RE_DEBUG_FLAG(RE_DEBUG_COMPILE_DUMP)) x  )
-#define DEBUG_TRIE_COMPILE_r(x) DEBUG_r( \
+#define DEBUG_TRIE_COMPILE_r(x)  \
+    DEBUG_r(\
     if (DEBUG_v_TEST || RE_DEBUG_FLAG(RE_DEBUG_COMPILE_TRIE)) x )
-#define DEBUG_FLAGS_r(x) DEBUG_r( \
+#define DEBUG_FLAGS_r(x)  \
+    DEBUG_r(\
     if (DEBUG_v_TEST || RE_DEBUG_FLAG(RE_DEBUG_COMPILE_FLAGS)) x )
-#define DEBUG_TEST_r(x) DEBUG_r( \
+#define DEBUG_TEST_r(x)  \
+    DEBUG_r(\
     if (DEBUG_v_TEST || RE_DEBUG_FLAG(RE_DEBUG_COMPILE_TEST)) x )
 /* Execute */
-#define DEBUG_EXECUTE_r(x) DEBUG_r( \
+#define DEBUG_EXECUTE_r(x)  \
+    DEBUG_r(\
     if (DEBUG_v_TEST || RE_DEBUG_FLAG(RE_DEBUG_EXECUTE_MASK)) x  )
-#define DEBUG_INTUIT_r(x) DEBUG_r( \
+#define DEBUG_INTUIT_r(x)  \
+    DEBUG_r(\
     if (DEBUG_v_TEST || RE_DEBUG_FLAG(RE_DEBUG_EXECUTE_INTUIT)) x  )
-#define DEBUG_MATCH_r(x) DEBUG_r( \
+#define DEBUG_MATCH_r(x)  \
+    DEBUG_r(\
     if (DEBUG_v_TEST || RE_DEBUG_FLAG(RE_DEBUG_EXECUTE_MATCH)) x  )
-#define DEBUG_TRIE_EXECUTE_r(x) DEBUG_r( \
+#define DEBUG_TRIE_EXECUTE_r(x)  \
+    DEBUG_r(\
     if (DEBUG_v_TEST || RE_DEBUG_FLAG(RE_DEBUG_EXECUTE_TRIE)) x )
 
 /* Extra */
-#define DEBUG_EXTRA_r(x) DEBUG_r( \
+#define DEBUG_EXTRA_r(x)  \
+    DEBUG_r(\
     if (DEBUG_v_TEST || RE_DEBUG_FLAG(RE_DEBUG_EXTRA_MASK)) x  )
-#define DEBUG_STATE_r(x) DEBUG_r( \
+#define DEBUG_STATE_r(x)  \
+    DEBUG_r(\
     if (DEBUG_v_TEST || RE_DEBUG_FLAG(RE_DEBUG_EXTRA_STATE)) x )
-#define DEBUG_STACK_r(x) DEBUG_r( \
+#define DEBUG_STACK_r(x)  \
+    DEBUG_r(\
     if (DEBUG_v_TEST || RE_DEBUG_FLAG(RE_DEBUG_EXTRA_STACK)) x )
-#define DEBUG_BUFFERS_r(x) DEBUG_r( \
+#define DEBUG_BUFFERS_r(x)  \
+    DEBUG_r(\
     if (DEBUG_v_TEST || RE_DEBUG_FLAG(RE_DEBUG_EXTRA_BUFFERS)) x )
 
-#define DEBUG_OPTIMISE_MORE_r(x) DEBUG_r( \
+#define DEBUG_OPTIMISE_MORE_r(x)  \
+    DEBUG_r(\
     if (DEBUG_v_TEST || ((RE_DEBUG_EXTRA_OPTIMISE|RE_DEBUG_COMPILE_OPTIMISE) == \
          RE_DEBUG_FLAG(RE_DEBUG_EXTRA_OPTIMISE|RE_DEBUG_COMPILE_OPTIMISE))) x )
-#define DEBUG_TRIE_COMPILE_MORE_r(x) DEBUG_TRIE_COMPILE_r( \
+#define DEBUG_TRIE_COMPILE_MORE_r(x)  \
+    DEBUG_TRIE_COMPILE_r(\
     if (DEBUG_v_TEST || RE_DEBUG_FLAG(RE_DEBUG_EXTRA_TRIE)) x )
-#define DEBUG_TRIE_EXECUTE_MORE_r(x) DEBUG_TRIE_EXECUTE_r( \
+#define DEBUG_TRIE_EXECUTE_MORE_r(x)  \
+    DEBUG_TRIE_EXECUTE_r(\
     if (DEBUG_v_TEST || RE_DEBUG_FLAG(RE_DEBUG_EXTRA_TRIE)) x )
 
-#define DEBUG_TRIE_r(x) DEBUG_r( \
+#define DEBUG_TRIE_r(x)  \
+    DEBUG_r(\
     if (DEBUG_v_TEST || RE_DEBUG_FLAG(RE_DEBUG_COMPILE_TRIE \
         | RE_DEBUG_EXECUTE_TRIE )) x )
-#define DEBUG_GPOS_r(x) DEBUG_r( \
+#define DEBUG_GPOS_r(x)  \
+    DEBUG_r(\
     if (DEBUG_v_TEST || RE_DEBUG_FLAG(RE_DEBUG_EXTRA_GPOS)) x )
 
-#define DEBUG_DUMP_PRE_OPTIMIZE_r(x) DEBUG_r( \
+#define DEBUG_DUMP_PRE_OPTIMIZE_r(x)  \
+    DEBUG_r(\
     if (DEBUG_v_TEST || RE_DEBUG_FLAG(RE_DEBUG_EXTRA_DUMP_PRE_OPTIMIZE)) x )
 
 /* initialization */

@@ -285,7 +285,8 @@ struct RExC_state_t {
  * RExC_parse to ensure that when processing UTF-8 we would not read
  * past the end of the string.
  */
-#define RExC_parse_incf(flag) STMT_START {              \
+#define RExC_parse_incf(flag)  \
+    STMT_START {\
     RExC_parse += (flag) ? UTF8SKIP(RExC_parse) : 1;    \
 } STMT_END
 
@@ -301,7 +302,8 @@ struct RExC_state_t {
  *
  * NOTE: Will NOT read past RExC_end when content is UTF-8.
  */
-#define RExC_parse_inc_safef(flag) STMT_START {                     \
+#define RExC_parse_inc_safef(flag)  \
+    STMT_START {\
     RExC_parse += (flag) ? UTF8_SAFE_SKIP(RExC_parse,RExC_end) : 1; \
 } STMT_END
 
@@ -344,7 +346,8 @@ struct RExC_state_t {
  * to ensure that when processing UTF-8 we would not read past the end
  * of the string.
  */
-#define RExC_parse_inc_utf8() STMT_START {  \
+#define RExC_parse_inc_utf8()  \
+    STMT_START {\
     RExC_parse += UTF8SKIP(RExC_parse);     \
 } STMT_END
 
@@ -363,7 +366,8 @@ struct RExC_state_t {
  * UTF macro which is defined as cBOOL(RExC_parse_utf8), thus this
  * macro operates on the pRExC_state structure only.
  */
-#define RExC_parse_inc_if_char() STMT_START {         \
+#define RExC_parse_inc_if_char()  \
+    STMT_START {\
     RExC_parse += SKIP_IF_CHAR(RExC_parse,RExC_end);  \
 } STMT_END
 
@@ -378,7 +382,8 @@ struct RExC_state_t {
  *
  * Typically used to advanced past previously analyzed content.
  */
-#define RExC_parse_inc_by(n_octets) STMT_START {  \
+#define RExC_parse_inc_by(n_octets)  \
+    STMT_START {\
     RExC_parse += (n_octets);                     \
 } STMT_END
 
@@ -387,7 +392,8 @@ struct RExC_state_t {
  * Sets the RExC_parse pointer to the pointer specified by the 'to'
  * argument. No validation whatsoever is performed on the to pointer.
  */
-#define RExC_parse_set(to_ptr) STMT_START { \
+#define RExC_parse_set(to_ptr)  \
+    STMT_START {\
     RExC_parse = (to_ptr);                  \
 } STMT_END
 
@@ -408,8 +414,9 @@ struct RExC_state_t {
         RExC_naughty += RExC_naughty / (exp) + (add)
 
 #define isNON_BRACE_QUANTIFIER(c)   ((c) == '*' || (c) == '+' || (c) == '?')
-#define isQUANTIFIER(s,e)  (   isNON_BRACE_QUANTIFIER(*s)                      \
-                            || ((*s) == '{' && regcurly(s, e, NULL)))
+#define isQUANTIFIER(s,e)   \
+    (   isNON_BRACE_QUANTIFIER(*s)\
+     || ((*s) == '{' && regcurly(s, e, NULL)))
 
 /*
  * Flags to be passed up.
@@ -470,12 +477,13 @@ struct RExC_state_t {
 #define PAREN_UNSET(depth, paren) \
     (PBYTE(PAREN_OFFSET(depth), paren) &= ~PBITVAL(paren))
 
-#define REQUIRE_UTF8(flagp) STMT_START {                                   \
-                                     if (!UTF) {                           \
-                                         *flagp = RESTART_PARSE|NEED_UTF8; \
-                                         return 0;                         \
-                                     }                                     \
-                             } STMT_END
+#define REQUIRE_UTF8(flagp)  \
+    STMT_START {\
+             if (!UTF) {                           \
+                 *flagp = RESTART_PARSE|NEED_UTF8; \
+                 return 0;                         \
+             }                                     \
+     } STMT_END
 
 /* /u is to be chosen if we are supposed to use Unicode rules, or if the
  * pattern is in UTF-8.  This latter condition is in case the outermost rules
@@ -737,17 +745,22 @@ static const scan_data_t zero_scan_data = {
 
 /* The enums for all these are ordered so things work out correctly */
 #define LOC (get_regex_charset(RExC_flags) == REGEX_LOCALE_CHARSET)
-#define DEPENDS_SEMANTICS (get_regex_charset(RExC_flags)                    \
-                                                     == REGEX_DEPENDS_CHARSET)
+#define DEPENDS_SEMANTICS  \
+    (get_regex_charset(RExC_flags)\
+                               == REGEX_DEPENDS_CHARSET)
 #define UNI_SEMANTICS (get_regex_charset(RExC_flags) == REGEX_UNICODE_CHARSET)
-#define AT_LEAST_UNI_SEMANTICS (get_regex_charset(RExC_flags)                \
-                                                     >= REGEX_UNICODE_CHARSET)
-#define ASCII_RESTRICTED (get_regex_charset(RExC_flags)                      \
-                                            == REGEX_ASCII_RESTRICTED_CHARSET)
-#define AT_LEAST_ASCII_RESTRICTED (get_regex_charset(RExC_flags)             \
-                                            >= REGEX_ASCII_RESTRICTED_CHARSET)
-#define ASCII_FOLD_RESTRICTED (get_regex_charset(RExC_flags)                 \
-                                        == REGEX_ASCII_MORE_RESTRICTED_CHARSET)
+#define AT_LEAST_UNI_SEMANTICS  \
+    (get_regex_charset(RExC_flags)\
+                          >= REGEX_UNICODE_CHARSET)
+#define ASCII_RESTRICTED  \
+    (get_regex_charset(RExC_flags)\
+                       == REGEX_ASCII_RESTRICTED_CHARSET)
+#define AT_LEAST_ASCII_RESTRICTED  \
+    (get_regex_charset(RExC_flags)\
+              >= REGEX_ASCII_RESTRICTED_CHARSET)
+#define ASCII_FOLD_RESTRICTED  \
+    (get_regex_charset(RExC_flags)\
+              == REGEX_ASCII_MORE_RESTRICTED_CHARSET)
 
 #define FOLD cBOOL(RExC_flags & RXf_PMf_FOLD)
 
@@ -777,8 +790,9 @@ static const scan_data_t zero_scan_data = {
 #define MARKER1 "<-- HERE"    /* marker as it appears in the description */
 #define MARKER2 " <-- HERE "  /* marker as it appears within the regex */
 
-#define REPORT_LOCATION " in regex; marked by " MARKER1    \
-                        " in m/%" UTF8f MARKER2 "%" UTF8f "/"
+#define REPORT_LOCATION  \
+    " in regex; marked by " MARKER1\
+    " in m/%" UTF8f MARKER2 "%" UTF8f "/"
 
 /* The code in this file in places uses one level of recursion with parsing
  * rebased to an alternate string constructed by us in memory.  This can take
@@ -882,10 +896,11 @@ static const scan_data_t zero_scan_data = {
  * arg. Show regex, up to a maximum length. If it's too long, chop and add
  * "...".
  */
-#define _FAIL(code) STMT_START {                                        \
+#define _FAIL(code)  \
+    STMT_START {\
     const char *ellipses = "";                                          \
     IV len = RExC_precomp_end - RExC_precomp;                           \
-                                                                        \
+                                                        \
     PREPARE_TO_DIE;                                                     \
     if (len > RegexLengthToShowInErrorMessages) {                       \
         /* chop 10 shorter than the max, to ensure meaning of "..." */  \
@@ -895,22 +910,26 @@ static const scan_data_t zero_scan_data = {
     code;                                                               \
 } STMT_END
 
-#define FAIL(msg) _FAIL(                            \
+#define FAIL(msg)  \
+    _FAIL(\
     Perl_croak(aTHX_ "%s in regex m/%" UTF8f "%s/",         \
             msg, UTF8fARG(UTF, len, RExC_precomp), ellipses))
 
-#define FAIL2(msg,arg) _FAIL(                       \
+#define FAIL2(msg,arg)  \
+    _FAIL(\
     Perl_croak(aTHX_ msg " in regex m/%" UTF8f "%s/",       \
             arg, UTF8fARG(UTF, len, RExC_precomp), ellipses))
 
-#define FAIL3(msg,arg1,arg2) _FAIL(                         \
+#define FAIL3(msg,arg1,arg2)  \
+    _FAIL(\
     Perl_croak(aTHX_ msg " in regex m/%" UTF8f "%s/",       \
      arg1, arg2, UTF8fARG(UTF, len, RExC_precomp), ellipses))
 
 /*
  * Simple_vFAIL -- like FAIL, but marks the current location in the scan
  */
-#define Simple_vFAIL(m) STMT_START {                                    \
+#define Simple_vFAIL(m)  \
+    STMT_START {\
     Perl_croak(aTHX_ "%s" REPORT_LOCATION,                              \
             m, REPORT_LOCATION_ARGS(RExC_parse));                       \
 } STMT_END
@@ -918,7 +937,8 @@ static const scan_data_t zero_scan_data = {
 /*
  * Calls SAVEDESTRUCTOR_X if needed, then Simple_vFAIL()
  */
-#define vFAIL(m) STMT_START {                           \
+#define vFAIL(m)  \
+    STMT_START {\
     PREPARE_TO_DIE;                                     \
     Simple_vFAIL(m);                                    \
 } STMT_END
@@ -926,7 +946,8 @@ static const scan_data_t zero_scan_data = {
 /*
  * Like Simple_vFAIL(), but accepts two arguments.
  */
-#define Simple_vFAIL2(m,a1) STMT_START {                        \
+#define Simple_vFAIL2(m,a1)  \
+    STMT_START {\
     S_re_croak(aTHX_ UTF, m REPORT_LOCATION, a1,                \
                       REPORT_LOCATION_ARGS(RExC_parse));        \
 } STMT_END
@@ -934,7 +955,8 @@ static const scan_data_t zero_scan_data = {
 /*
  * Calls SAVEDESTRUCTOR_X if needed, then Simple_vFAIL2().
  */
-#define vFAIL2(m,a1) STMT_START {                       \
+#define vFAIL2(m,a1)  \
+    STMT_START {\
     PREPARE_TO_DIE;                                     \
     Simple_vFAIL2(m, a1);                               \
 } STMT_END
@@ -943,7 +965,8 @@ static const scan_data_t zero_scan_data = {
 /*
  * Like Simple_vFAIL(), but accepts three arguments.
  */
-#define Simple_vFAIL3(m, a1, a2) STMT_START {                   \
+#define Simple_vFAIL3(m, a1, a2)  \
+    STMT_START {\
     S_re_croak(aTHX_ UTF, m REPORT_LOCATION, a1, a2,            \
             REPORT_LOCATION_ARGS(RExC_parse));                  \
 } STMT_END
@@ -951,7 +974,8 @@ static const scan_data_t zero_scan_data = {
 /*
  * Calls SAVEDESTRUCTOR_X if needed, then Simple_vFAIL3().
  */
-#define vFAIL3(m,a1,a2) STMT_START {                    \
+#define vFAIL3(m,a1,a2)  \
+    STMT_START {\
     PREPARE_TO_DIE;                                     \
     Simple_vFAIL3(m, a1, a2);                           \
 } STMT_END
@@ -959,24 +983,28 @@ static const scan_data_t zero_scan_data = {
 /*
  * Like Simple_vFAIL(), but accepts four arguments.
  */
-#define Simple_vFAIL4(m, a1, a2, a3) STMT_START {               \
+#define Simple_vFAIL4(m, a1, a2, a3)  \
+    STMT_START {\
     S_re_croak(aTHX_ UTF, m REPORT_LOCATION, a1, a2, a3,        \
             REPORT_LOCATION_ARGS(RExC_parse));                  \
 } STMT_END
 
-#define vFAIL4(m,a1,a2,a3) STMT_START {                 \
+#define vFAIL4(m,a1,a2,a3)  \
+    STMT_START {\
     PREPARE_TO_DIE;                                     \
     Simple_vFAIL4(m, a1, a2, a3);                       \
 } STMT_END
 
 /* A specialized version of vFAIL2 that works with UTF8f */
-#define vFAIL2utf8f(m, a1) STMT_START {             \
+#define vFAIL2utf8f(m, a1)  \
+    STMT_START {\
     PREPARE_TO_DIE;                                 \
     S_re_croak(aTHX_ UTF, m REPORT_LOCATION, a1,  \
             REPORT_LOCATION_ARGS(RExC_parse));      \
 } STMT_END
 
-#define vFAIL3utf8f(m, a1, a2) STMT_START {             \
+#define vFAIL3utf8f(m, a1, a2)  \
+    STMT_START {\
     PREPARE_TO_DIE;                                     \
     S_re_croak(aTHX_ UTF, m REPORT_LOCATION, a1, a2,  \
             REPORT_LOCATION_ARGS(RExC_parse));          \
@@ -1150,8 +1178,9 @@ static const scan_data_t zero_scan_data = {
 /* Convert between a pointer to a node and its offset from the beginning of the
  * program */
 #define REGNODE_p(offset)    (RExC_emit_start + (offset))
-#define REGNODE_OFFSET(node) (__ASSERT_((node) >= RExC_emit_start)      \
-                              (SSize_t) ((node) - RExC_emit_start))
+#define REGNODE_OFFSET(node)  \
+    (__ASSERT_((node) >= RExC_emit_start)\
+     (SSize_t) ((node) - RExC_emit_start))
 
 #define ProgLen(ri) ri->proglen
 #define SetProgLen(ri,x) ri->proglen = x
