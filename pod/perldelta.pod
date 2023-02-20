@@ -478,6 +478,12 @@ configuration process. For instance
 
 would allow up to 100 errors.
 
+=item *
+
+The API function L<perlapi/my_snprintf> now prints a non-dot decimal
+point if the perl code it ultimately is called from is in the scope of
+C<use locale> and the locale in effect calls for that.
+
 =back
 
 =head1 Known Problems
