@@ -62,6 +62,20 @@ now limited to I32_MAX, thus it is now possible to write /(?:word){1000000}/
 for example.  Note that doing so may cause the regex engine to run longer
 and use more memory.
 
+=head2 New API functions optimize_optree and finalize_optree
+
+There are two new API functions for operating on optree fragments, ensuring
+you can invoke the required parts of the optree-generation process that might
+otherwise not get invoked (e.g. when creating a custom LOGOP).  To get access
+to these functions, you first need to set a C<#define> to opt-in to using
+these functions.
+
+  #define PERL_USE_VOLATILE_API
+
+These functions are closely tied to the internals of how the interpreter
+works, and could be altered or removed at any time if other internal changes
+make that necessary.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
