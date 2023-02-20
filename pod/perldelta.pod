@@ -55,6 +55,13 @@ C<no warnings> statement.
     use feature 'class';
     no warnings 'experimental::class';
 
+=head2 REG_INF has been raised from 65,536 to 2,147,483,647
+
+Many regex quantifiers used to be limited to U16_MAX in the past, but are
+now limited to I32_MAX, thus it is now possible to write /(?:word){1000000}/
+for example.  Note that doing so may cause the regex engine to run longer
+and use more memory.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
