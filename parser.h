@@ -5,8 +5,8 @@
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
  *
- * This file defines the layout of the parser object used by the parser
- * and lexer (perly.c, toke.c).
+ *    This file defines the layout of the parser object used by the
+ *    parser and lexer (perly.c, toke.c).
  */
 
 #define YYEMPTY         (-2)
@@ -21,8 +21,8 @@ typedef struct {
 #endif
 } yy_stack_frame;
 
-/* Fields that need to be shared with (i.e., visible to) inner lex-
-   ing scopes. */
+/* Fields that need to be shared with (i.e.,
+   visible to) inner lex- ing scopes. */
 typedef struct yy_lexshared {
     struct yy_lexshared *ls_prev;
     SV                  *ls_linestr;    /* mirrors PL_parser->linestr */
@@ -37,9 +37,9 @@ typedef struct yy_parser {
 
     struct yy_parser *old_parser; /* previous value of PL_parser */
     YYSTYPE         yylval;     /* value of lookahead symbol, set by yylex() */
-    int             yychar;     /* The lookahead symbol.  */
+    int             yychar;     /* The lookahead symbol. */
 
-    /* Number of tokens to shift before error messages enabled.  */
+    /* Number of tokens to shift before error messages enabled. */
     int             yyerrstatus;
 
     yy_stack_frame  *stack;     /* base of stack */
@@ -81,18 +81,18 @@ typedef struct yy_parser {
     LEXSHARED   *lex_shared;
     SV          *linestr;       /* current chunk of src text */
     char        *bufptr;        /* carries the cursor (current parsing
-                                   position) from one invocation of yylex
-                                   to the next */
+                                   position) from one invocation of
+                                   yylex to the next */
     char        *oldbufptr;     /* in yylex, beginning of current token */
     char        *oldoldbufptr;  /* in yylex, beginning of previous token */
     char        *bufend;
     char        *linestart;     /* beginning of most recently read line */
     char        *last_uni;      /* position of last named-unary op */
     char        *last_lop;      /* position of last list operator */
-    /* copline is used to pass a specific line number to newSTATEOP.  It
-       is a one-time line number, as newSTATEOP invalidates it (sets it to
-       NOLINE) after using it.  The purpose of this is to report line num-
-       bers in multiline constructs using the number of the first line. */
+    /* copline is used to pass a specific line number to newSTATEOP.  It is a
+       one-time line number, as newSTATEOP invalidates it (sets it to NOLINE)
+       after using it.  The purpose of this is to report line num- bers in
+       multiline constructs using the number of the first line. */
     line_t      copline;
     U16         in_my;          /* we're compiling a "my"/"our" declaration */
     U8          lex_state;      /* next token is determined */
@@ -162,4 +162,4 @@ enum {
 
 /*
  * ex: set ts=8 sts=4 sw=4 et:
- */
+*/

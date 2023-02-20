@@ -1,11 +1,11 @@
 /*    perlio.h
  *
- *    Copyright (C) 1996, 1997, 1999, 2000, 2001, 2002, 2003,
- *    2004, 2005, 2006, 2007, by Larry Wall and others
+ *    Copyright (C) 1996, 1997, 1999, 2000, 2001, 2002, 2003, 2004, 2005,
+ *    2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016,
+ *    2017, 2018, 2019, 2020, 2021, 2022 by Larry Wall and others
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
- *
  */
 
 #ifndef PERLIO_H_
@@ -21,7 +21,6 @@
                  PerlIO_xxx() are real functions
                  defined in perlio.c which implement extra functionality
                  required for utf8 support.
-
 */
 
 #ifndef USE_PERLIO
@@ -32,12 +31,12 @@
 #  error "stdio is no longer supported as the default base layer -- use perlio."
 #endif
 
-/*--------------------  End of Configure controls ---------------------------*/
+/*--------------------  End of Configure controls --------------------------- */
 
 /*
- * Although we may not want stdio to be used including <stdio.h> here
- * avoids issues where stdio.h has strange side effects
- */
+ * Although we may not want stdio to be used including <stdio.h>
+ * here avoids issues where stdio.h has strange side effects
+*/
 #include <stdio.h>
 
 #if defined(USE_64_BIT_STDIO) && defined(HAS_FTELLO) && !defined(USE_FTELL64)
@@ -66,8 +65,8 @@ typedef PerlIOl *PerlIO;
 /*
 =for apidoc_section $io
 =for apidoc Amu||PERLIO_FUNCS_DECL|PerlIO * ftab
-Declare C<ftab> to be a PerlIO function table, that is, of type
-C<PerlIO_funcs>.
+Declare C<ftab> to be a PerlIO function table, that is, of
+type C<PerlIO_funcs>.
 
 =for apidoc Ay|PerlIO_funcs *|PERLIO_FUNCS_CAST|PerlIO * func
 Cast the pointer C<func> to be of type S<C<PerlIO_funcs *>>.
@@ -92,17 +91,16 @@ PERL_CALLCONV void PerlIO_clone(pTHX_ PerlInterpreter *proto,
 
 /* ----------- End of implementation choices  ---------- */
 
-/* We now need to determine  what happens if source trys to use stdio.
- * There are three cases based on PERLIO_NOT_STDIO which XS code
- * can set how it wants.
+/* We now need to determine what happens if source trys to
+ * use stdio.  There are three cases based on
+ * PERLIO_NOT_STDIO which XS code can set how it wants.
  */
 
 #ifdef PERL_CORE
-/* Make a choice for perl core code
-   - currently this is set to try and catch lingering raw stdio calls.
-     This is a known issue with some non UNIX ports which still use
-     "native" stdio features.
-*/
+/* Make a choice for perl core code - currently this is set to try
+   and catch lingering raw stdio calls.  This is a known issue with
+   some non UNIX ports which still use "native" stdio features.
+ */
 #  ifndef PERLIO_NOT_STDIO
 #    define PERLIO_NOT_STDIO 1
 #  endif
@@ -115,21 +113,21 @@ PERL_CALLCONV void PerlIO_clone(pTHX_ PerlInterpreter *proto,
 #ifdef PERLIO_NOT_STDIO
 #if PERLIO_NOT_STDIO
 /*
- * PERLIO_NOT_STDIO #define'd as 1
- * Case 1: Strong denial of stdio - make all stdio calls (we can think of) errors
- */
+ * PERLIO_NOT_STDIO #define'd as 1 Case 1: Strong denial of
+ * stdio - make all stdio calls (we can think of) errors
+*/
 #include "nostdio.h"
 #else                           /* if PERLIO_NOT_STDIO */
 /*
- * PERLIO_NOT_STDIO #define'd as 0
- * Case 2: Declares that both PerlIO and stdio can be used
- */
+ * PERLIO_NOT_STDIO #define'd as 0 Case 2: Declares
+ * that both PerlIO and stdio can be used
+*/
 #endif                          /* if PERLIO_NOT_STDIO */
 #else                           /* ifdef PERLIO_NOT_STDIO */
 /*
- * PERLIO_NOT_STDIO not defined
- * Case 3: Try and fake stdio calls as PerlIO calls
- */
+ * PERLIO_NOT_STDIO not defined Case 3: Try
+ * and fake stdio calls as PerlIO calls
+*/
 #include "fakesdio.h"
 #endif                          /* ifndef PERLIO_NOT_STDIO */
 
@@ -347,4 +345,4 @@ END_EXTERN_C
 
 /*
  * ex: set ts=8 sts=4 sw=4 et:
- */
+*/

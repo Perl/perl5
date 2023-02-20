@@ -1,11 +1,11 @@
 /*    mg.h
  *
- *    Copyright (C) 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1999,
- *    2000, 2002, 2005, 2006, 2007, 2008 by Larry Wall and others
+ *    Copyright (C) 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1999, 2000,
+ *    2002, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015,
+ *    2016, 2017, 2018, 2019, 2020, 2021, 2022 by Larry Wall and others
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
- *
  */
 
 struct mgvtbl {
@@ -36,8 +36,8 @@ struct magic {
 #define MGf_REQUIRE_GV 1        /* PERL_MAGIC_checkcall only */
 #define MGf_REFCOUNTED 2
 #define MGf_GSKIP      4        /* skip further GETs until after next SET */
-#define MGf_COPY       8        /* has an svt_copy  MGVTBL entry */
-#define MGf_DUP     0x10        /* has an svt_dup   MGVTBL entry */
+#define MGf_COPY       8        /* has an svt_copy MGVTBL entry */
+#define MGf_DUP     0x10        /* has an svt_dup MGVTBL entry */
 #define MGf_LOCAL   0x20        /* has an svt_local MGVTBL entry */
 #define MGf_BYTES   0x40        /* PERL_MAGIC_regex_global only */
 #define MGf_PERSIST    0x80     /* PERL_MAGIC_lvref only */
@@ -53,9 +53,9 @@ struct magic {
      NULL)
 
 /* If mg contains an SV, these extract the PV stored in that SV;
-   otherwise, these extract the mg's mg_ptr/mg_len.
-   These do NOT account for the SV's UTF8 flag, so handle with care.
-*/
+   otherwise, these extract the mg's mg_ptr/mg_len.  These do
+   NOT account for the SV's UTF8 flag, so handle with care.
+ */
 #define MgPV(mg,lp)                                 \
     ((((int)(lp = (mg)->mg_len)) == HEf_SVKEY) ?    \
      SvPV(MUTABLE_SV((mg)->mg_ptr),lp) :            \
@@ -91,4 +91,4 @@ struct magic {
 
 /*
  * ex: set ts=8 sts=4 sw=4 et:
- */
+*/

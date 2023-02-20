@@ -51,7 +51,7 @@ struct _PerlIO_funcs {
     void (*Set_ptrcnt) (pTHX_ PerlIO *f, STDCHAR * ptr, SSize_t cnt);
 };
 
-/*--------------------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*/
 /* Kind values */
 #define PERLIO_K_RAW            0x00000001
 #define PERLIO_K_BUFFERED       0x00000002
@@ -62,7 +62,7 @@ struct _PerlIO_funcs {
 #define PERLIO_K_DESTRUCT       0x00010000
 #define PERLIO_K_MULTIARG       0x00020000
 
-/*--------------------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*/
 struct _PerlIO {
     PerlIOl *next;              /* Lower layer */
     PerlIO_funcs *tab;          /* Functions for this layer */
@@ -78,7 +78,7 @@ struct _PerlIO {
     PerlIOl *head;              /* our ultimate parent pointer */
 };
 
-/*--------------------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*/
 
 /* Flag values */
 #define PERLIO_F_EOF            0x00000100
@@ -105,7 +105,7 @@ struct _PerlIO {
 #define PerlIONext(f)      (&(PerlIOBase(f)->next))
 #define PerlIOValid(f)     ((f) && *(f))
 
-/*--------------------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*/
 EXTCONST PerlIO_funcs PerlIO_unix;
 EXTCONST PerlIO_funcs PerlIO_perlio;
 EXTCONST PerlIO_funcs PerlIO_stdio;
@@ -124,11 +124,10 @@ PERL_CALLCONV SV *PerlIO_arg_fetch(PerlIO_list_t *av, IV n);
 #define PERLIO_STDTEXT ""
 #endif
 
-/*--------------------------------------------------------------------------------------*/
-/* perlio buffer layer
-   As this is reasonably generic its struct and "methods" are declared here
-   so they can be used to "inherit" from it.
-*/
+/*---------------------------------------------------------------------------*/
+/* perlio buffer layer As this is reasonably generic its struct and "methods"
+   are declared here so they can be used to "inherit" from it.
+ */
 
 typedef struct {
     struct _PerlIO base;        /* Base "class" info */
@@ -167,7 +166,7 @@ PERL_CALLCONV void PerlIO_list_free(pTHX_ PerlIO_list_t *list);
  * for compiling as C++.  Must also match with what perl.h says. */
 EXTERN_C void PerlIO_teardown(void);
 
-/*--------------------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*/
 /* Generic, or stub layer functions */
 
 PERL_CALLCONV IV        PerlIOBase_binmode(pTHX_ PerlIO *f);
@@ -280,4 +279,4 @@ PERL_CALLCONV IV        PerlIOUtf8_pushed(pTHX_ PerlIO *f, const char *mode, SV 
 
 /*
  * ex: set ts=8 sts=4 sw=4 et:
- */
+*/

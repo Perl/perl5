@@ -1,6 +1,7 @@
 /*    mydtrace.h
  *
- *    Copyright (C) 2008, 2010, 2011 by Larry Wall and others
+ *    Copyright (C) 2008, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017,
+ *    2018, 2019, 2020, 2021, 2022 by Larry Wall and others
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
@@ -51,4 +52,4 @@
 
 /*
  * ex: set ts=8 sts=4 sw=4 et:
- */
+*/

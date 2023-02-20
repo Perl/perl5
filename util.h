@@ -1,11 +1,11 @@
 /*    util.h
  *
  *    Copyright (C) 1991, 1992, 1993, 1999, 2001, 2002, 2003, 2004, 2005,
- *    2007, by Larry Wall and others
+ *    2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017,
+ *    2018, 2019, 2020, 2021, 2022 by Larry Wall and others
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
- *
  */
 
 #ifndef PERL_UTIL_H_
@@ -53,9 +53,9 @@ This is a synonym for S<C<(! foldEQ_utf8())>>
 #define ibcmp_utf8(s1, pe1, l1, u1, s2, pe2, l2, u2)    \
     cBOOL(! foldEQ_utf8(s1, pe1, l1, u1, s2, pe2, l2, u2))
 
-/* outside the core, perl.h undefs HAS_QUAD if IV isn't 64-bit
-   We can't swap this to HAS_QUAD, because the logic here affects the type of
-   perl_drand48_t below, and that is visible outside of the core.  */
+/* outside the core, perl.h undefs HAS_QUAD if IV isn't 64-bit We can't
+   swap this to HAS_QUAD, because the logic here affects the type of
+   perl_drand48_t below, and that is visible outside of the core. */
 #if defined(U64TYPE)
 /* use a faster implementation when quads are available */
 #    define PERL_DRAND48_QUAD
@@ -84,8 +84,8 @@ typedef struct PERL_DRAND48_T perl_drand48_t;
 #define Perl_drand48() (Perl_drand48_r(&PL_random_state))
 
 #ifdef PERL_CORE
-/* uses a different source of randomness to avoid interfering with the results
- * of rand() */
+/* uses a different source of randomness to avoid
+ * interfering with the results of rand() */
 #define Perl_internal_drand48() (Perl_drand48_r(&PL_internal_random_state))
 #endif
 
@@ -94,16 +94,16 @@ typedef struct PERL_DRAND48_T perl_drand48_t;
 typedef struct {
     /* The number of frames returned. */
     UV frame_count;
-    /* The total size of the Perl_c_backtrace, including this header,
-     * the frames, and the name strings. */
+    /* The total size of the Perl_c_backtrace, including this
+     * header, the frames, and the name strings. */
     UV total_bytes;
 } Perl_c_backtrace_header;
 
 typedef struct {
     void*  addr;  /* the program counter at this frame */
 
-    /* We could use Dl_info (as used by dladdr()) for many of these but
-     * that would be naughty towards non-dlfcn systems (hi there, Win32). */
+    /* We could use Dl_info (as used by dladdr()) for many of these but that
+     * would be naughty towards non-dlfcn systems (hi there, Win32). */
 
     void*  symbol_addr; /* symbol address (hint: try symbol_addr - addr) */
     void*  object_base_addr;   /* base address of the shared object */
@@ -118,23 +118,21 @@ typedef struct {
     STRLEN source_name_size;   /* length of the source code file name */
     STRLEN source_line_number; /* source code line number */
 
-    /* OS X notes: atos(1) (more recently, "xcrun atos"), but the C
-     * API atos() uses is unknown (private "Symbolicator" framework,
-     * might require Objective-C even if the API would be known).
-     * Currently we open read pipe to "xcrun atos" and parse the
-     * output - quite disgusting.  And that won't work if the
-     * Developer Tools isn't installed. */
+    /* OS X notes: atos(1) (more recently, "xcrun atos"), but the C API atos()
+     * uses is unknown (private "Symbolicator" framework, might require
+     * Objective-C even if the API would be known).  Currently we open read
+     * pipe to "xcrun atos" and parse the output - quite disgusting.  And that
+     * won't work if the Developer Tools isn't installed. */
 
-    /* FreeBSD notes: execinfo.h exists, but probably would need also
-     * the library -lexecinfo.  BFD exists if the pkg devel/binutils
-     * has been installed, but there seems to be a known problem that
-     * the "bfd.h" getting installed refers to "ansidecl.h", which
-     * doesn't get installed. */
+    /* FreeBSD notes: execinfo.h exists, but probably would need
+     * also the library -lexecinfo.  BFD exists if the pkg
+     * devel/binutils has been installed, but there seems to be a
+     * known problem that the "bfd.h" getting installed refers
+     * to "ansidecl.h", which doesn't get installed. */
 
-    /* Win32 notes: as moral equivalents of backtrace() + dladdr(),
-     * one could possibly first use GetCurrentProcess() +
-     * SymInitialize(), and then CaptureStackBackTrace() +
-     * SymFromAddr(). */
+    /* Win32 notes: as moral equivalents of backtrace() + dladdr(), one
+     * could possibly first use GetCurrentProcess() + SymInitialize(),
+     * and then CaptureStackBackTrace() + SymFromAddr(). */
 
     /* Note that using the compiler optimizer easily leads into much
      * of this information, like the symbol names (think inlining),
@@ -143,45 +141,44 @@ typedef struct {
      *
      * Note that for example with gcc you can do both -O and -g.
      *
-     * Note, however, that on some platforms (e.g. OSX + clang (cc))
-     * backtrace() + dladdr() works fine without -g. */
+     * Note, however, that on some platforms (e.g.  OSX + clang
+     * (cc)) backtrace() + dladdr() works fine without -g. */
 
-    /* For example: the mere presence of <bfd.h> is no guarantee: e.g.
-     * OS X has that, but BFD does not seem to work on the OSX executables.
+    /* For example: the mere presence of <bfd.h> is no guarantee: e.g.  OS
+     * X has that, but BFD does not seem to work on the OSX executables.
      *
-     * Another niceness would be to able to see something about
-     * the function arguments, however gdb/lldb manage to do that. */
+     * Another niceness would be to able to see something about the function
+     * arguments, however gdb/lldb manage to do that. */
 } Perl_c_backtrace_frame;
 
 typedef struct {
     Perl_c_backtrace_header header;
     Perl_c_backtrace_frame  frame_info[1];
-    /* After the header come:
-     * (1) header.frame_count frames
-     * (2) frame_count times the \0-terminated strings (object_name
-     * and so forth).  The frames contain the pointers to the starts
-     * of these strings, and the lengths of these strings. */
+    /* After the header come: (1) header.frame_count frames (2)
+     * frame_count times the \0-terminated strings (object_name and
+     * so forth).  The frames contain the pointers to the starts of
+     * these strings, and the lengths of these strings. */
 } Perl_c_backtrace;
 
 #define Perl_free_c_backtrace(bt) Safefree(bt)
 
 #endif /* USE_C_BACKTRACE */
 
-/* Use a packed 32 bit constant "key" to start the handshake. The key defines
+/* Use a packed 32 bit constant "key" to start the handshake.  The key defines
    ABI compatibility, and how to process the vararg list.
 
-   Note, some bits may be taken from INTRPSIZE (but then a simple x86 AX register
-   can't be used to read it) and 4 bits from API version len can also be taken,
-   since v00.00.00 is 9 bytes long. XS version length should not have any bits
-   taken since XS_VERSION lengths can get quite long since they are user
-   selectable. These spare bits allow for additional features for the varargs
-   stuff or ABI compat test flags in the future.
-*/
+   Note, some bits may be taken from INTRPSIZE (but then a simple x86 AX
+   register can't be used to read it) and 4 bits from API version len can also
+   be taken, since v00.00.00 is 9 bytes long.  XS version length should not
+   have any bits taken since XS_VERSION lengths can get quite long since they
+   are user selectable.  These spare bits allow for additional features for
+   the varargs stuff or ABI compat test flags in the future.
+ */
 #define HSm_APIVERLEN 0x0000001F /* perl version string won't
                                     be more than 31 chars */
 #define HS_APIVERLEN_MAX HSm_APIVERLEN
 #define HSm_XSVERLEN 0x0000FF00 /* if 0, not present, dont check,
-                                   die if over 255*/
+                                   die if over 255 */
 #define HS_XSVERLEN_MAX 0xFF
 /* uses var file to set default filename for newXS_deffile to use for CvFILE */
 #define HSf_SETXSUBFN 0x00000020
@@ -189,25 +186,27 @@ typedef struct {
                                   supply ax and items */
 #define HSf_IMP_CXT 0x00000080 /* ABI, threaded, MULTIPLICITY, pTHX_ present */
 #define HSm_INTRPSIZE 0xFFFF0000 /* ABI, interp struct size */
-/* A mask of bits in the key which must always match between a XS mod and interp.
-   Also if all ABI bits in a key are true, skip all ABI checks, it is very
-   the unlikely interp size will all 1 bits */
-/* Maybe HSm_APIVERLEN one day if Perl_xs_apiversion_bootcheck is changed to a memcmp */
+/* A mask of bits in the key which must always match between a XS mod
+   and interp.  Also if all ABI bits in a key are true, skip all ABI
+   checks, it is very the unlikely interp size will all 1 bits */
+/* Maybe HSm_APIVERLEN one day if Perl_xs_apiversion_bootcheck
+   is changed to a memcmp */
 #define HSm_KEY_MATCH (HSm_INTRPSIZE|HSf_IMP_CXT)
 #define HSf_NOCHK HSm_KEY_MATCH /* if all ABI bits are 1 in
                                    the key, dont chk */
 
 
 #define HS_GETINTERPSIZE(key) ((key) >> 16)
-/* if in the future "" and NULL must be separated, XSVERLEN would be 0
-means arg not present, 1 is empty string/null byte */
+/* if in the future "" and NULL must be separated, XSVERLEN would
+   be 0 means arg not present, 1 is empty string/null byte */
 /* (((key) & 0x0000FF00) >> 8) is less efficient on Visual C */
 #define HS_GETXSVERLEN(key) ((U8) ((key) >> 8))
 #define HS_GETAPIVERLEN(key) ((key) & HSm_APIVERLEN)
 
-/* internal to util.h macro to create a packed handshake key, all args must be constants */
-/* U32 return = (U16 interpsize, bool cxt, bool setxsubfn, bool popmark,
-   U5 (FIVE!) apiverlen, U8 xsverlen) */
+/* internal to util.h macro to create a packed handshake
+   key, all args must be constants */
+/* U32 return = (U16 interpsize, bool cxt, bool setxsubfn,
+   bool popmark, U5 (FIVE!) apiverlen, U8 xsverlen) */
 #define HS_KEYp(interpsize, cxt, setxsubfn, popmark, apiverlen, xsverlen)       \
     (((interpsize)  << 16)                                                      \
     | ((xsverlen) > HS_XSVERLEN_MAX                                             \
@@ -221,8 +220,8 @@ means arg not present, 1 is empty string/null byte */
         : (apiverlen)))
 /* overflows above will optimize away unless they will execute */
 
-/* public macro for core usage to create a packed handshake key but this is
-   not public API. This more friendly version already collected all ABI info */
+/* public macro for core usage to create a packed handshake key but this is not
+   public API.  This more friendly version already collected all ABI info */
 /* U32 return = (bool setxsubfn, bool popmark, "litteral_string_api_ver",
    "litteral_string_xs_ver") */
 #ifdef MULTIPLICITY
@@ -286,4 +285,4 @@ int mkstemp(char*);
 
 /*
  * ex: set ts=8 sts=4 sw=4 et:
- */
+*/

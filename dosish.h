@@ -1,11 +1,11 @@
 /*    dosish.h
  *
- *    Copyright (C) 1993, 1994, 1996, 1997, 1998, 1999,
- *    2000, 2001, 2002, 2007, by Larry Wall and others
+ *    Copyright (C) 1993, 1994, 1996, 1997, 1998, 1999, 2000, 2001, 2002,
+ *    2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017,
+ *    2018, 2019, 2020, 2021, 2022 by Larry Wall and others
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
- *
  */
 #define ABORT() abort();
 
@@ -25,11 +25,11 @@
                                      or somethin?" */
 #endif
 
-/* Generally add things last-in first-terminated.  IO and memory terminations
- * need to be generally last
+/* Generally add things last-in first-terminated.  IO and memory
+ * terminations need to be generally last
  *
- * BEWARE that using PerlIO in these will be using freed memory, so may appear
- * to work, but must NOT be retained in production code. */
+ * BEWARE that using PerlIO in these will be using freed memory, so may
+ * appear to work, but must NOT be retained in production code. */
 #ifndef PERL_SYS_TERM_BODY
 #  define PERL_SYS_TERM_BODY()                          \
        ENV_TERM; USER_PROP_MUTEX_TERM; LOCALE_TERM;     \
@@ -39,19 +39,16 @@
 #endif
 #define dXSUB_SYS dNOOP
 
-/* USEMYBINMODE
- *      This symbol, if defined, indicates that the program should
- *      use the routine my_binmode(FILE *fp, char iotype, int mode) to insure
- *      that a file is in "binary" mode -- that is, that no translation
- *      of bytes occurs on read or write operations.
+/* USEMYBINMODE This symbol, if defined, indicates that the program
+ * should use the routine my_binmode(FILE *fp, char iotype, int
+ * mode) to insure that a file is in "binary" mode -- that is, that
+ * no translation of bytes occurs on read or write operations.
  */
 #undef USEMYBINMODE
 
-/* Stat_t:
- *      This symbol holds the type used to declare buffers for information
- *      returned by stat().  It's usually just struct stat.  It may be necessary
- *      to include <sys/stat.h> and <sys/types.h> to get any typedef'ed
- *      information.
+/* Stat_t: This symbol holds the type used to declare buffers for information
+ * returned by stat().  It's usually just struct stat.  It may be necessary to
+ * include <sys/stat.h> and <sys/types.h> to get any typedef'ed information.
  */
 #if defined(WIN32)
 #  define Stat_t struct w32_stat
@@ -59,39 +56,36 @@
 #  define Stat_t struct _stati64
 #endif
 
-/* USE_STAT_RDEV:
- *      This symbol is defined if this system has a stat structure declaring
- *      st_rdev
+/* USE_STAT_RDEV: This symbol is defined if this system
+ * has a stat structure declaring st_rdev
  */
 #define USE_STAT_RDEV   /**/
 
-/* ACME_MESS:
- *      This symbol, if defined, indicates that error messages should be
- *      should be generated in a format that allows the use of the Acme
- *      GUI/editor's autofind feature.
+/* ACME_MESS: This symbol, if defined, indicates that error
+ * messages should be should be generated in a format that allows
+ * the use of the Acme GUI/editor's autofind feature.
  */
 #undef ACME_MESS        /**/
 
-/* ALTERNATE_SHEBANG:
- *      This symbol, if defined, contains a "magic" string which may be used
- *      as the first line of a Perl program designed to be executed directly
- *      by name, instead of the standard Unix #!.  If ALTERNATE_SHEBANG
- *      begins with a character other then #, then Perl will only treat
- *      it as a command line if it finds the string "perl" in the first
- *      word; otherwise it's treated as the first line of code in the script.
- *      (IOW, Perl won't hand off to another interpreter via an alternate
- *      shebang sequence that might be legal Perl code.)
+/* ALTERNATE_SHEBANG: This symbol, if defined, contains a "magic" string
+ * which may be used as the first line of a Perl program designed to be
+ * executed directly by name, instead of the standard Unix #!.  If
+ * ALTERNATE_SHEBANG begins with a character other then #, then Perl
+ * will only treat it as a command line if it finds the string "perl" in
+ * the first word; otherwise it's treated as the first line of code in
+ * the script.  (IOW, Perl won't hand off to another interpreter via an
+ * alternate shebang sequence that might be legal Perl code.)
  */
-/* #define ALTERNATE_SHEBANG "#!" / **/
+/* #define ALTERNATE_SHEBANG "#!" / * */
 
 #include <signal.h>
 
 /*
- * fwrite1() should be a routine with the same calling sequence as fwrite(),
- * but which outputs all of the bytes requested as a single stream (unlike
- * fwrite() itself, which on some systems outputs several distinct records
- * if the number_of_items parameter is >1).
- */
+ * fwrite1() should be a routine with the same calling sequence as
+ * fwrite(), but which outputs all of the bytes requested as a single
+ * stream (unlike fwrite() itself, which on some systems outputs several
+ * distinct records if the number_of_items parameter is >1).
+*/
 #define fwrite1 fwrite
 
 #define Fstat(fd,bufptr)   fstat((fd),(bufptr))
@@ -117,4 +111,4 @@
 
 /*
  * ex: set ts=8 sts=4 sw=4 et:
- */
+*/

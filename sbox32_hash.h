@@ -67,7 +67,8 @@
 #define ROTL32(x,r)  _rotl(x,r)
 #define ROTR32(x,r)  _rotr(x,r)
 #else
-/* gcc recognises this code and generates a rotate instruction for CPUs with one */
+/* gcc recognises this code and generates a
+   rotate instruction for CPUs with one */
 #define ROTL32(x,r)  (((U32)(x) << (r)) | ((U32)(x) >> (32 - (r))))
 #define ROTR32(x,r)  (((U32)(x) << (32 - (r))) | ((U32)(x) >> (r)))
 #endif

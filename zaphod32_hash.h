@@ -33,7 +33,8 @@
 #define ROTL32(x,r)  _rotl(x,r)
 #define ROTR32(x,r)  _rotr(x,r)
 #else
-/* gcc recognises this code and generates a rotate instruction for CPUs with one */
+/* gcc recognises this code and generates a
+   rotate instruction for CPUs with one */
 #define ROTL32(x,r)  (((U32)(x) << (r)) | ((U32)(x) >> (32 - (r))))
 #define ROTR32(x,r)  (((U32)(x) << (32 - (r))) | ((U32)(x) >> (r)))
 #endif
@@ -76,8 +77,8 @@
 #endif
 
 /* This is two marsaglia xor-shift permutes, with a prime-multiple
- * sandwiched inside. The end result of doing this twice with different
- * primes is a completely avalanched v.  */
+ * sandwiched inside.  The end result of doing this twice with
+ * different primes is a completely avalanched v. */
 #define ZAPHOD32_SCRAMBLE32(v,prime)    \
     STMT_START {                        \
         v ^= (v>>9);                    \
@@ -154,14 +155,14 @@ void zaphod32_seed_state (
     if (!state[0]) state[0] = 1;
     if (!state[1]) state[1] = 2;
     if (!state[2]) state[2] = 4;
-    /* these are pseudo-randomly selected primes between 2**31 and 2**32
-     * (I generated a big list and then randomly chose some from the list) */
+    /* these are pseudo-randomly selected primes between 2**31 and 2**32 (I
+     * generated a big list and then randomly chose some from the list) */
     ZAPHOD32_SCRAMBLE32(state[0],0x9fade23b);
     ZAPHOD32_SCRAMBLE32(state[1],0xaa6f908d);
     ZAPHOD32_SCRAMBLE32(state[2],0xcdf6b72d);
 
-    /* now that we have scrambled we do some mixing to avalanche the
-     * state bits to gether */
+    /* now that we have scrambled we do some mixing
+     * to avalanche the state bits to gether */
     ZAPHOD32_MIX(state[0],state[1],state[2],"ZAPHOD32 SEED-STATE A 1/4");
     ZAPHOD32_MIX(state[0],state[1],state[2],"ZAPHOD32 SEED-STATE A 2/4");
     ZAPHOD32_MIX(state[0],state[1],state[2],"ZAPHOD32 SEED-STATE A 3/4");
@@ -243,7 +244,7 @@ U32 zaphod32_hash_with_state(
         return v0 ^ v2;
     }
 
-/*  if (len >= 8) */ /* this block is only reached by a goto above, so this condition
+/* if (len >= 8) */ /* this block is only reached by a goto above, so this condition
                         is commented out, but if the above block is removed it would
                         be necessary to use this. */
     {

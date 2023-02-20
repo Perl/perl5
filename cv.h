@@ -1,14 +1,15 @@
 /*    cv.h
  *
- *    Copyright (C) 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1999, 2000, 2001,
- *    2002, 2003, 2004, 2005, 2006, 2007, 2008 by Larry Wall and others
+ *    Copyright (C) 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1999, 2000,
+ *    2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011,
+ *    2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022 by
+ *    Larry Wall and others
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
- *
  */
 
-/* This structure must match the beginning of XPVFM in sv.h  */
+/* This structure must match the beginning of XPVFM in sv.h */
 
 struct xpvcv {
     _XPV_HEAD;
@@ -25,11 +26,11 @@ Null CV pointer.
 
 =for apidoc Am|HV*|CvSTASH|CV* cv
 Returns the stash of the CV.  A stash is the symbol table hash, containing
-the package-scoped variables in the package where the subroutine was defined.
-For more information, see L<perlguts>.
+the package-scoped variables in the package where the subroutine was
+defined.  For more information, see L<perlguts>.
 
-This also has a special use with XS AUTOLOAD subs.
-See L<perlguts/Autoloading with XSUBs>.
+This also has a special use with XS AUTOLOAD subs.  See
+L<perlguts/Autoloading with XSUBs>.
 
 =cut
 */
@@ -59,15 +60,17 @@ See L<perlguts/Autoloading with XSUBs>.
 #endif
 #define CvFILEGV(sv)    (gv_fetchfile(CvFILE(sv)))
 #define CvDEPTH(sv)     (*Perl_CvDEPTH((const CV *)sv))
-/* For use when you only have a XPVCV*, not a real CV*.
-   Must be assert protected as in Perl_CvDEPTH before use. */
+/* For use when you only have a XPVCV*, not a real CV*.  Must
+   be assert protected as in Perl_CvDEPTH before use. */
 #define CvDEPTHunsafe(sv) ((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_depth
 
-/* these CvPADLIST/CvRESERVED asserts can be reverted one day, once stabilized */
+/* these CvPADLIST/CvRESERVED asserts can be
+   reverted one day, once stabilized */
 #define CvPADLIST(sv)                   \
     (*(assert_(!CvISXSUB((CV*)(sv)))    \
         &(((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_padlist_u.xcv_padlist)))
-/* CvPADLIST_set is not public API, it can be removed one day, once stabilized */
+/* CvPADLIST_set is not public API, it can
+   be removed one day, once stabilized */
 #ifdef DEBUGGING
 #  define CvPADLIST_set(sv, padlist) Perl_set_padlist((CV*)sv, padlist)
 #else
@@ -111,13 +114,13 @@ See L<perlguts/Autoloading with XSUBs>.
       : 0                                           \
     )
 
-/* CV has the `:method` attribute. This used to be called CVf_METHOD but is
- * renamed to avoid collision with CVf_IsMETHOD */
+/* CV has the `:method` attribute.  This used to be called CVf_METHOD
+ * but is renamed to avoid collision with CVf_IsMETHOD */
 #define CVf_NOWARN_AMBIGUOUS    0x0001
 
 #define CVf_LVALUE      0x0002  /* CV return value can be used as lvalue */
 #define CVf_CONST       0x0004  /* inlinable sub */
-#define CVf_ISXSUB      0x0008  /* CV is an XSUB, not pure perl.  */
+#define CVf_ISXSUB      0x0008  /* CV is an XSUB, not pure perl. */
 
 #define CVf_WEAKOUTSIDE 0x0010  /* CvOUTSIDE isn't ref counted */
 #define CVf_CLONE       0x0020  /* anon CV uses external lexicals */
@@ -125,23 +128,23 @@ See L<perlguts/Autoloading with XSUBs>.
 #define CVf_ANON        0x0080  /* CV is not pointed to by a GV */
 #define CVf_UNIQUE      0x0100  /* sub is only called once (eg PL_main_cv,
                                    require, eval). */
-#define CVf_NODEBUG     0x0200  /* no DB::sub indirection for this CV
-                                   (esp. useful for special XSUBs) */
+#define CVf_NODEBUG     0x0200  /* no DB::sub indirection for this CV (esp.
+                                   useful for special XSUBs) */
 #define CVf_CVGV_RC     0x0400  /* CvGV is reference counted */
 #if defined(PERL_CORE) || defined(PERL_EXT)
-# define CVf_SLABBED    0x0800  /* Holds refcount on op slab  */
+# define CVf_SLABBED    0x0800  /* Holds refcount on op slab */
 #endif
-#define CVf_DYNFILE     0x1000  /* The filename is malloced  */
-#define CVf_AUTOLOAD    0x2000  /* SvPVX contains AUTOLOADed sub name  */
-#define CVf_HASEVAL     0x4000  /* contains string eval  */
+#define CVf_DYNFILE     0x1000  /* The filename is malloced */
+#define CVf_AUTOLOAD    0x2000  /* SvPVX contains AUTOLOADed sub name */
+#define CVf_HASEVAL     0x4000  /* contains string eval */
 #define CVf_NAMED       0x8000  /* Has a name HEK */
 #define CVf_LEXICAL     0x10000 /* Omit package from name */
 #define CVf_ANONCONST   0x20000 /* :const - create anonconst op */
 #define CVf_SIGNATURE   0x40000 /* CV uses a signature */
 #define CVf_REFCOUNTED_ANYSV 0x80000 /* CvXSUBANY().any_sv is refcounted */
-#define CVf_IsMETHOD    0x100000 /* CV is a (real) method of a real class. Not
-                                   to be confused with what used to be called
-                                   CVf_METHOD; now CVf_NOWARN_AMBIGUOUS */
+#define CVf_IsMETHOD    0x100000 /* CV is a (real) method of a real class.  Not
+                                    to be confused with what used to be called
+                                    CVf_METHOD; now CVf_NOWARN_AMBIGUOUS */
 
 /* This symbol for optimised communication between toke.c and op.c: */
 #define CVf_BUILTIN_ATTRS       (CVf_NOWARN_AMBIGUOUS|CVf_LVALUE|CVf_ANONCONST)
@@ -276,8 +279,8 @@ Helper macro to turn off the C<CvREFCOUNTED_ANYSV> flag.
 #  define CvMETHOD_off(cv)      CvNOWARN_AMBIGUOUS_off(cv)
 #endif
 
-/* Flags for newXS_flags  */
-#define XS_DYNAMIC_FILENAME     0x01    /* The filename isn't static  */
+/* Flags for newXS_flags */
+#define XS_DYNAMIC_FILENAME     0x01    /* The filename isn't static */
 
 PERL_STATIC_INLINE HEK *
 CvNAME_HEK(CV *sv)
@@ -287,9 +290,9 @@ CvNAME_HEK(CV *sv)
         : 0;
 }
 
-/* helper for the common pattern:
-   CvNAMED(sv) ? CvNAME_HEK((CV *)sv) : GvNAME_HEK(CvGV(sv))
-*/
+/* helper for the common pattern: CvNAMED(sv) ?
+   CvNAME_HEK((CV *)sv) : GvNAME_HEK(CvGV(sv))
+ */
 #define CvGvNAME_HEK(sv)                                            \
     (                                                               \
         CvNAMED((CV*)sv) ?                                          \
@@ -297,8 +300,8 @@ CvNAME_HEK(CV *sv)
             : GvNAME_HEK(CvGV( (SV*) sv))                           \
         )
 
-/* This lowers the reference count of the previous value, but does *not*
-   increment the reference count of the new value. */
+/* This lowers the reference count of the previous value, but does
+   *not* increment the reference count of the new value. */
 #define CvNAME_HEK_set(cv, hek)                                     \
     (                                                               \
         CvNAME_HEK((CV *)(cv))                                      \
@@ -312,46 +315,43 @@ CvNAME_HEK(CV *sv)
 
 =for apidoc m|bool|CvWEAKOUTSIDE|CV *cv
 
-Each CV has a pointer, C<CvOUTSIDE()>, to its lexically enclosing
-CV (if any).  Because pointers to anonymous sub prototypes are
-stored in C<&> pad slots, it is a possible to get a circular reference,
-with the parent pointing to the child and vice-versa.  To avoid the
-ensuing memory leak, we do not increment the reference count of the CV
-pointed to by C<CvOUTSIDE> in the I<one specific instance> that the parent
-has a C<&> pad slot pointing back to us.  In this case, we set the
-C<CvWEAKOUTSIDE> flag in the child.  This allows us to determine under what
-circumstances we should decrement the refcount of the parent when freeing
-the child.
+Each CV has a pointer, C<CvOUTSIDE()>, to its lexically enclosing CV (if any).
+Because pointers to anonymous sub prototypes are stored in C<&> pad slots, it
+is a possible to get a circular reference, with the parent pointing to the
+child and vice-versa.  To avoid the ensuing memory leak, we do not increment
+the reference count of the CV pointed to by C<CvOUTSIDE> in the I<one specific
+instance> that the parent has a C<&> pad slot pointing back to us.  In this
+case, we set the C<CvWEAKOUTSIDE> flag in the child.  This allows us to
+determine under what circumstances we should decrement the refcount of the
+parent when freeing the child.
 
-There is a further complication with non-closure anonymous subs (i.e. those
+There is a further complication with non-closure anonymous subs (i.e.  those
 that do not refer to any lexicals outside that sub).  In this case, the
 anonymous prototype is shared rather than being cloned.  This has the
-consequence that the parent may be freed while there are still active
-children, I<e.g.>,
+consequence that the parent may be freed while there are still active children,
+I<e.g.>,
 
     BEGIN { $a = sub { eval '$x' } }
 
-In this case, the BEGIN is freed immediately after execution since there
-are no active references to it: the anon sub prototype has
-C<CvWEAKOUTSIDE> set since it's not a closure, and $a points to the same
-CV, so it doesn't contribute to BEGIN's refcount either.  When $a is
-executed, the C<eval '$x'> causes the chain of C<CvOUTSIDE>s to be followed,
-and the freed BEGIN is accessed.
+In this case, the BEGIN is freed immediately after execution since there are no
+active references to it: the anon sub prototype has C<CvWEAKOUTSIDE> set since
+it's not a closure, and $a points to the same CV, so it doesn't contribute to
+BEGIN's refcount either.  When $a is executed, the C<eval '$x'> causes the
+chain of C<CvOUTSIDE>s to be followed, and the freed BEGIN is accessed.
 
-To avoid this, whenever a CV and its associated pad is freed, any
-C<&> entries in the pad are explicitly removed from the pad, and if the
-refcount of the pointed-to anon sub is still positive, then that
-child's C<CvOUTSIDE> is set to point to its grandparent.  This will only
-occur in the single specific case of a non-closure anon prototype
-having one or more active references (such as C<$a> above).
+To avoid this, whenever a CV and its associated pad is freed, any C<&> entries
+in the pad are explicitly removed from the pad, and if the refcount of the
+pointed-to anon sub is still positive, then that child's C<CvOUTSIDE> is set to
+point to its grandparent.  This will only occur in the single specific case of
+a non-closure anon prototype having one or more active references (such as
+C<$a> above).
 
-One other thing to consider is that a CV may be merely undefined
-rather than freed, eg C<undef &foo>.  In this case, its refcount may
-not have reached zero, but we still delete its pad and its C<CvROOT> etc.
-Since various children may still have their C<CvOUTSIDE> pointing at this
-undefined CV, we keep its own C<CvOUTSIDE> for the time being, so that
-the chain of lexical scopes is unbroken.  For example, the following
-should print 123:
+One other thing to consider is that a CV may be merely undefined rather than
+freed, eg C<undef &foo>.  In this case, its refcount may not have reached zero,
+but we still delete its pad and its C<CvROOT> etc.  Since various children may
+still have their C<CvOUTSIDE> pointing at this undefined CV, we keep its own
+C<CvOUTSIDE> for the time being, so that the chain of lexical scopes is
+unbroken.  For example, the following should print 123:
 
     my $x = 123;
     sub tmp { sub { eval '$x' } }
@@ -374,4 +374,4 @@ typedef OP *(*Perl_call_checker)(pTHX_ OP *, GV *, SV *);
 
 /*
  * ex: set ts=8 sts=4 sw=4 et:
- */
+*/

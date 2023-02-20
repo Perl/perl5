@@ -1,21 +1,21 @@
 /*    nostdio.h
  *
- *    Copyright (C) 1996, 2000, 2001, 2005, by Larry Wall and others
+ *    Copyright (C) 1996, 2000, 2001, 2005, 2006, 2007, 2008, 2009, 2010,
+ *    2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021,
+ *    2022 by Larry Wall and others
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
- *
  */
 
 /*
  * Strong denial of stdio - make all stdio calls (we can think of) errors
- */
-/* This is a 1st attempt to stop other include files pulling
-   in real <stdio.h>.
-   A more ambitious set of possible symbols can be found in
-   sfio.h (inside an _cplusplus gard).
-   It is completely pointless as we have already included it ourselves.
 */
+/* This is a 1st attempt to stop other include files pulling in real
+   <stdio.h>.  A more ambitious set of possible symbols can be
+   found in sfio.h (inside an _cplusplus gard).  It is completely
+   pointless as we have already included it ourselves.
+ */
 
 #if !defined(_STDIO_H) && !defined(FILE) && !defined(_STDIO_INCLUDED) && !defined(__STDIO_LOADED)
 #define _STDIO_H
@@ -131,4 +131,4 @@ struct _FILE;
 
 /*
  * ex: set ts=8 sts=4 sw=4 et:
- */
+*/

@@ -1,5 +1,5 @@
-/* This file is part of the "version" CPAN distribution.  Please avoid
-   editing it in the perl core. */
+/* This file is part of the "version" CPAN distribution.
+   Please avoid editing it in the perl core. */
 
 /* The MUTABLE_*() macros cast pointers to the types shown, in such a way
  * (compiler permitting) that casting away const-ness will give a warning;

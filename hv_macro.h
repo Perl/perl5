@@ -7,26 +7,24 @@
 
 #ifdef CAN64BITHASH
   #ifndef U64TYPE
-  /* This probably isn't going to work, but failing with a compiler error due to
-   lack of uint64_t is no worse than failing right now with an #error.  */
+  /* This probably isn't going to work, but failing with a compiler error due
+     to lack of uint64_t is no worse than failing right now with an #error. */
   #define U64 uint64_t
   #endif
 #endif
 
 
-/*-----------------------------------------------------------------------------
+/* -----------------------------------------------------------------------------
  * Endianess and util macros
  *
- * The following 3 macros are defined in this section. The other macros defined
- * are only needed to help derive these 3.
+ * The following 3 macros are defined in this section.  The other macros
+ * defined are only needed to help derive these 3.
  *
- * U8TO16_LE(x)   Read a little endian unsigned 16-bit int
- * U8TO32_LE(x)   Read a little endian unsigned 32-bit int
- * U8TO64_LE(x)   Read a little endian unsigned 64-bit int
- * ROTL32(x,r)      Rotate x left by r bits
- * ROTL64(x,r)      Rotate x left by r bits
- * ROTR32(x,r)      Rotate x right by r bits
- * ROTR64(x,r)      Rotate x right by r bits
+ * U8TO16_LE(x) Read a little endian unsigned 16-bit int U8TO32_LE(x) Read a
+ * little endian unsigned 32-bit int U8TO64_LE(x) Read a little endian unsigned
+ * 64-bit int ROTL32(x,r) Rotate x left by r bits ROTL64(x,r) Rotate x left by
+ * r bits ROTR32(x,r) Rotate x right by r bits ROTR64(x,r) Rotate x right by r
+ * bits
  */
 
 #ifndef U8TO16_LE
@@ -67,7 +65,8 @@
   #define ROTL64(x,r)  _rotl64(x,r)
   #define ROTR64(x,r)  _rotr64(x,r)
 #else
-  /* gcc recognises this code and generates a rotate instruction for CPUs with one */
+  /* gcc recognises this code and generates a
+     rotate instruction for CPUs with one */
   #define ROTL32(x,r)  (((U32)(x) << (r)) | ((U32)(x) >> (32 - (r))))
   #define ROTR32(x,r)  (((U32)(x) << (32 - (r))) | ((U32)(x) >> (r)))
   #define ROTL64(x,r)  ( ( (U64)(x) << (r) ) | ( (U64)(x) >> ( 64 - (r) ) ) )

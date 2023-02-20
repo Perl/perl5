@@ -1,11 +1,11 @@
 /*    XSUB.h
  *
- *    Copyright (C) 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002,
- *    2003, 2004, 2005, 2006, 2007, 2008 by Larry Wall and others
+ *    Copyright (C) 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003,
+ *    2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015,
+ *    2016, 2017, 2018, 2019, 2020, 2021, 2022 by Larry Wall and others
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
- *
  */
 
 #ifndef PERL_XSUB_H_
@@ -23,32 +23,31 @@ Some variables below are flagged with 'u' because Devel::PPPort can't currently
 readily test them as they spring into existence by compiling with xsubpp.
 
 =for apidoc Amnu|char*|CLASS
-Variable which is setup by C<xsubpp> to indicate the
-class name for a C++ XS constructor.  This is always a C<char*>.  See
-C<L</THIS>>.
+Variable which is setup by C<xsubpp> to indicate the class name for a C++ XS
+constructor.  This is always a C<char*>.  See C<L</THIS>>.
 
 =for apidoc Amnu|type|RETVAL
-Variable which is setup by C<xsubpp> to hold the return value for an
-XSUB.  This is always the proper type for the XSUB.  See
+Variable which is setup by C<xsubpp> to hold the return value for an XSUB.
+This is always the proper type for the XSUB.  See
 L<perlxs/"The RETVAL Variable">.
 
 =for apidoc Amnu|type|THIS
-Variable which is setup by C<xsubpp> to designate the object in a C++
-XSUB.  This is always the proper type for the C++ object.  See C<L</CLASS>> and
+Variable which is setup by C<xsubpp> to designate the object in a C++ XSUB.
+This is always the proper type for the C++ object.  See C<L</CLASS>> and
 L<perlxs/"Using XS With C++">.
 
 =for apidoc Amn|I32|ax
-Variable which is setup by C<xsubpp> to indicate the stack base offset,
-used by the C<ST>, C<XSprePUSH> and C<XSRETURN> macros.  The C<dMARK> macro
-must be called prior to setup the C<MARK> variable.
+Variable which is setup by C<xsubpp> to indicate the stack base offset, used by
+the C<ST>, C<XSprePUSH> and C<XSRETURN> macros.  The C<dMARK> macro must be
+called prior to setup the C<MARK> variable.
 
 =for apidoc Amn|I32|items
-Variable which is setup by C<xsubpp> to indicate the number of
-items on the stack.  See L<perlxs/"Variable-length Parameter Lists">.
+Variable which is setup by C<xsubpp> to indicate the number of items on the
+stack.  See L<perlxs/"Variable-length Parameter Lists">.
 
 =for apidoc Amn|I32|ix
-Variable which is setup by C<xsubpp> to indicate which of an
-XSUB's aliases was used to invoke it.  See L<perlxs/"The ALIAS: Keyword">.
+Variable which is setup by C<xsubpp> to indicate which of an XSUB's aliases was
+used to invoke it.  See L<perlxs/"The ALIAS: Keyword">.
 
 =for apidoc Am|SV*|ST|int ix
 Used to access elements on the XSUB's stack.
@@ -59,37 +58,38 @@ C<xsubpp>.  It is the same as using the more explicit C<XS_EXTERNAL> macro; the
 latter is preferred.
 
 =for apidoc Ayu||XS_INTERNAL|name
-Macro to declare an XSUB and its C parameter list without exporting the symbols.
-This is handled by C<xsubpp> and generally preferable over exporting the XSUB
-symbols unnecessarily.
+Macro to declare an XSUB and its C parameter list without exporting the
+symbols.  This is handled by C<xsubpp> and generally preferable over exporting
+the XSUB symbols unnecessarily.
 
 =for comment
 XS_INTERNAL marked 'u' because declaring a function static within our test
 function doesn't work
 
 =for apidoc Ay||XS_EXTERNAL|name
-Macro to declare an XSUB and its C parameter list explicitly exporting the symbols.
+Macro to declare an XSUB and its C parameter list explicitly exporting the
+symbols.
 
 =for apidoc Ay||XSPROTO|name
 Macro used by C<L</XS_INTERNAL>> and C<L</XS_EXTERNAL>> to declare a function
 prototype.  You probably shouldn't be using this directly yourself.
 
 =for apidoc Amn;||dAX
-Sets up the C<ax> variable.
-This is usually handled automatically by C<xsubpp> by calling C<dXSARGS>.
+Sets up the C<ax> variable.  This is usually handled automatically by C<xsubpp>
+by calling C<dXSARGS>.
 
 =for apidoc Amn;||dAXMARK
-Sets up the C<ax> variable and stack marker variable C<mark>.
-This is usually handled automatically by C<xsubpp> by calling C<dXSARGS>.
+Sets up the C<ax> variable and stack marker variable C<mark>.  This is usually
+handled automatically by C<xsubpp> by calling C<dXSARGS>.
 
 =for apidoc Amn;||dITEMS
-Sets up the C<items> variable.
-This is usually handled automatically by C<xsubpp> by calling C<dXSARGS>.
+Sets up the C<items> variable.  This is usually handled automatically by
+C<xsubpp> by calling C<dXSARGS>.
 
 =for apidoc Amn;||dXSARGS
-Sets up stack and mark pointers for an XSUB, calling C<dSP> and C<dMARK>.
-Sets up the C<ax> and C<items> variables by calling C<dAX> and C<dITEMS>.
-This is usually handled automatically by C<xsubpp>.
+Sets up stack and mark pointers for an XSUB, calling C<dSP> and C<dMARK>.  Sets
+up the C<ax> and C<items> variables by calling C<dAX> and C<dITEMS>.  This is
+usually handled automatically by C<xsubpp>.
 
 =for apidoc Amn;||dXSI32
 Sets up the C<ix> variable for an XSUB which has aliases.  This is usually
@@ -97,12 +97,12 @@ handled automatically by C<xsubpp>.
 
 =for apidoc Amn;||dUNDERBAR
 Sets up any variable needed by the C<UNDERBAR> macro.  It used to define
-C<padoff_du>, but it is currently a noop.  However, it is strongly advised
-to still use it for ensuring past and future compatibility.
+C<padoff_du>, but it is currently a noop.  However, it is strongly advised to
+still use it for ensuring past and future compatibility.
 
 =for apidoc AmnU||UNDERBAR
-The SV* corresponding to the C<$_> variable.  Works even if there
-is a lexical C<$_> in scope.
+The SV* corresponding to the C<$_> variable.  Works even if there is a lexical
+C<$_> in scope.
 
 =cut
 */
@@ -123,15 +123,14 @@ is a lexical C<$_> in scope.
  *
  * This code needs to be compilable under both C and C++.
  *
- * Don't forget to change the __attribute__unused__ version of XS()
- * below too if you change XSPROTO() here.
+ * Don't forget to change the __attribute__unused__ version
+ * of XS() below too if you change XSPROTO() here.
  */
 
-/* XS_INTERNAL is the explicit static-linkage variant of the default
- * XS macro.
+/* XS_INTERNAL is the explicit static-linkage variant of the default XS macro.
  *
- * XS_EXTERNAL is the same as XS_INTERNAL except it does not include
- * "STATIC", ie. it exports XSUB symbols. You probably don't want that.
+ * XS_EXTERNAL is the same as XS_INTERNAL except it does not include "STATIC",
+ * ie.  it exports XSUB symbols.  You probably don't want that.
  */
 
 #define XSPROTO(name) void name(pTHX_ CV* cv __attribute__unused__)
@@ -153,8 +152,8 @@ is a lexical C<$_> in scope.
 #  define XS_INTERNAL(name) STATIC XSPROTO(name)
 #endif
 
-/* We do export xsub symbols by default for the public XS macro.
- * Try explicitly using XS_INTERNAL/XS_EXTERNAL instead, please. */
+/* We do export xsub symbols by default for the public XS macro.  Try
+ * explicitly using XS_INTERNAL/XS_EXTERNAL instead, please. */
 #define XS(name) XS_EXTERNAL(name)
 
 #define dAX const I32 ax = (I32)(MARK - PL_stack_base + 1)
@@ -168,11 +167,11 @@ is a lexical C<$_> in scope.
 #define dXSARGS \
     dSP; dAXMARK; dITEMS
 /* These 3 macros are replacements for dXSARGS macro only in bootstrap.
-   They factor out common code in every BOOT XSUB. Computation of vars mark
-   and items will optimize away in most BOOT functions. Var ax can never be
-   optimized away since BOOT must return &PL_sv_yes by default from xsubpp.
-   Note these macros are not drop in replacements for dXSARGS since they set
-   PL_xsubfilename. */
+   They factor out common code in every BOOT XSUB.  Computation of vars
+   mark and items will optimize away in most BOOT functions.  Var ax can
+   never be optimized away since BOOT must return &PL_sv_yes by default
+   from xsubpp.  Note these macros are not drop in replacements for
+   dXSARGS since they set PL_xsubfilename. */
 #define dXSBOOTARGSXSAPIVERCHK                              \
     I32 ax = XS_BOTHVERSION_SETXSUBFN_POPMARK_BOOTCHECK;    \
     SV **mark = PL_stack_base + ax - 1; dSP; dITEMS
@@ -190,7 +189,7 @@ is a lexical C<$_> in scope.
     SV * const targ = ((PL_op->op_private & OPpENTERSUB_HASTARG)    \
                  ? PAD_SV(PL_op->op_targ) : sv_newmortal())
 
-/* Should be used before final PUSHi etc. if not in PPCODE section. */
+/* Should be used before final PUSHi etc.  if not in PPCODE section. */
 #define XSprePUSH (sp = PL_stack_base + ax - 1)
 
 #define XSANY CvXSUBANY(cv)
@@ -212,39 +211,36 @@ is a lexical C<$_> in scope.
 #define dUNDERBAR dNOOP
 #define UNDERBAR  find_rundefsv()
 
-/* Simple macros to put new mortal values onto the stack.   */
-/* Typically used to return values from XS functions.       */
+/* Simple macros to put new mortal values onto the stack. */
+/* Typically used to return values from XS functions. */
 
 /*
 =for apidoc_section $stack
 
 =for apidoc Am|void|XST_mIV|int pos|IV iv
-Place an integer into the specified position C<pos> on the stack.  The
-value is stored in a new mortal SV.
+Place an integer into the specified position C<pos> on the stack.  The value is
+stored in a new mortal SV.
 
 =for apidoc Am|void|XST_mNV|int pos|NV nv
-Place a double into the specified position C<pos> on the stack.  The value
-is stored in a new mortal SV.
+Place a double into the specified position C<pos> on the stack.  The value is
+stored in a new mortal SV.
 
 =for apidoc Am|void|XST_mPV|int pos|char* str
-Place a copy of a string into the specified position C<pos> on the stack.
-The value is stored in a new mortal SV.
+Place a copy of a string into the specified position C<pos> on the stack.  The
+value is stored in a new mortal SV.
 
 =for apidoc Am|void|XST_mUV|int pos|UV uv
 Place an unsigned integer into the specified position C<pos> on the stack.  The
 value is stored in a new mortal SV.
 
 =for apidoc Am|void|XST_mNO|int pos
-Place C<&PL_sv_no> into the specified position C<pos> on the
-stack.
+Place C<&PL_sv_no> into the specified position C<pos> on the stack.
 
 =for apidoc Am|void|XST_mYES|int pos
-Place C<&PL_sv_yes> into the specified position C<pos> on the
-stack.
+Place C<&PL_sv_yes> into the specified position C<pos> on the stack.
 
 =for apidoc Am|void|XST_mUNDEF|int pos
-Place C<&PL_sv_undef> into the specified position C<pos> on the
-stack.
+Place C<&PL_sv_undef> into the specified position C<pos> on the stack.
 
 =for apidoc Am|void|XSRETURN|int nitems
 Return from XSUB, indicating number of items on the stack.  This is usually
@@ -275,28 +271,28 @@ Return C<&PL_sv_undef> from an XSUB immediately.  Uses C<XST_mUNDEF>.
 Return an empty list from an XSUB immediately.
 
 =for apidoc AmU||newXSproto|char* name|XSUBADDR_t f|char* filename|const char *proto
-Used by C<xsubpp> to hook up XSUBs as Perl subs.  Adds Perl prototypes to
-the subs.
+Used by C<xsubpp> to hook up XSUBs as Perl subs.  Adds Perl prototypes to the
+subs.
 
 =for apidoc AmnU||XS_VERSION
-The version identifier for an XS module.  This is usually
-handled automatically by C<ExtUtils::MakeMaker>.  See
-C<L</XS_VERSION_BOOTCHECK>>.
+The version identifier for an XS module.  This is usually handled automatically
+by C<ExtUtils::MakeMaker>.  See C<L</XS_VERSION_BOOTCHECK>>.
 
 =for apidoc Amn;||XS_VERSION_BOOTCHECK
-Macro to verify that a PM module's C<$VERSION> variable matches the XS
-module's C<XS_VERSION> variable.  This is usually handled automatically by
-C<xsubpp>.  See L<perlxs/"The VERSIONCHECK: Keyword">.
+Macro to verify that a PM module's C<$VERSION> variable matches the XS module's
+C<XS_VERSION> variable.  This is usually handled automatically by C<xsubpp>.
+See L<perlxs/"The VERSIONCHECK: Keyword">.
 
 =for apidoc Amn;||XS_APIVERSION_BOOTCHECK
-Macro to verify that the perl api version an XS module has been compiled against
-matches the api version of the perl interpreter it's being loaded into.
+Macro to verify that the perl api version an XS module has been compiled
+against matches the api version of the perl interpreter it's being loaded
+into.
 
 =for apidoc_section $exceptions
 
 =for apidoc Amn;||dXCPT
-Set up necessary local variables for exception handling.
-See L<perlguts/"Exception Handling">.
+Set up necessary local variables for exception handling.  See
+L<perlguts/"Exception Handling">.
 
 =for apidoc AmnU||XCPT_TRY_START
 Starts a try block.  See L<perlguts/"Exception Handling">.
@@ -353,14 +349,15 @@ Rethrows a previously caught exception.  See L<perlguts/"Exception Handling">.
 #define XS_APIVERSION_BOOTCHECK                                                 \
     Perl_xs_handshake(HS_KEY(FALSE, FALSE, "v" PERL_API_VERSION_STRING, ""),    \
         HS_CXT, __FILE__, items, ax, "v" PERL_API_VERSION_STRING)
-/* public API, this is a combination of XS_VERSION_BOOTCHECK and
-   XS_APIVERSION_BOOTCHECK in 1, and is backportable */
+/* public API, this is a combination of XS_VERSION_BOOTCHECK
+   and XS_APIVERSION_BOOTCHECK in 1, and is backportable */
 #ifdef XS_VERSION
 #  define XS_BOTHVERSION_BOOTCHECK                                                      \
        Perl_xs_handshake(HS_KEY(FALSE, FALSE, "v" PERL_API_VERSION_STRING, XS_VERSION), \
            HS_CXT, __FILE__, items, ax, "v" PERL_API_VERSION_STRING, XS_VERSION)
 #else
-/* should this be a #error? if you want both checked, you better supply XS_VERSION right? */
+/* should this be a #error? if you want both checked,
+   you better supply XS_VERSION right? */
 #  define XS_BOTHVERSION_BOOTCHECK XS_APIVERSION_BOOTCHECK
 #endif
 
@@ -373,7 +370,8 @@ Rethrows a previously caught exception.  See L<perlguts/"Exception Handling">.
        Perl_xs_handshake(HS_KEY(FALSE, TRUE, "v" PERL_API_VERSION_STRING, XS_VERSION),  \
            HS_CXT, __FILE__, "v" PERL_API_VERSION_STRING, XS_VERSION)
 #else
-/* should this be a #error? if you want both checked, you better supply XS_VERSION right? */
+/* should this be a #error? if you want both checked,
+   you better supply XS_VERSION right? */
 #  define XS_BOTHVERSION_POPMARK_BOOTCHECK XS_APIVERSION_POPMARK_BOOTCHECK
 #endif
 
@@ -385,15 +383,16 @@ Rethrows a previously caught exception.  See L<perlguts/"Exception Handling">.
        Perl_xs_handshake(HS_KEY(TRUE, TRUE, "v" PERL_API_VERSION_STRING, XS_VERSION),   \
            HS_CXT, __FILE__, "v" PERL_API_VERSION_STRING, XS_VERSION)
 #else
-/* should this be a #error? if you want both checked, you better supply XS_VERSION right? */
+/* should this be a #error? if you want both checked,
+   you better supply XS_VERSION right? */
 #  define XS_BOTHVERSION_SETXSUBFN_POPMARK_BOOTCHECK    \
        XS_APIVERSION_SETXSUBFN_POPMARK_BOOTCHECK
 #endif
 
-/* For a normal bootstrap without API or XS version checking.
-   Useful for static XS modules or debugging/testing scenarios.
-   If this macro gets heavily used in the future, it should separated into
-   a separate function independent of Perl_xs_handshake for efficiency */
+/* For a normal bootstrap without API or XS version checking.  Useful
+   for static XS modules or debugging/testing scenarios.  If this macro
+   gets heavily used in the future, it should separated into a separate
+   function independent of Perl_xs_handshake for efficiency */
 #define XS_SETXSUBFN_POPMARK    \
     Perl_xs_handshake(HS_KEY(TRUE, TRUE, "", "") | HSf_NOCHK, HS_CXT, __FILE__)
 
@@ -678,4 +677,4 @@ Rethrows a previously caught exception.  See L<perlguts/"Exception Handling">.
 
 /*
  * ex: set ts=8 sts=4 sw=4 et:
- */
+*/

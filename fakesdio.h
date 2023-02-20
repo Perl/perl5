@@ -1,16 +1,17 @@
 /*    fakesdio.h
  *
- *    Copyright (C) 2000, by Larry Wall and others
+ *    Copyright (C) 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008,
+ *    2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019,
+ *    2020, 2021, 2022 by Larry Wall and others
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
- *
  */
 
 /*
- * This is "source level" stdio compatibility mode.
- * We try and #define stdio functions in terms of PerlIO.
- */
+ * This is "source level" stdio compatibility mode.  We
+ * try and #define stdio functions in terms of PerlIO.
+*/
 #define _CANNOT "CANNOT"
 #undef FILE
 #define FILE                    PerlIO
@@ -57,8 +58,7 @@
 #undef vfprintf
 #undef printf
 
-/* printf used to live in perl.h like this - more sophisticated
-   than the rest
+/* printf used to live in perl.h like this - more sophisticated than the rest
  */
 #if defined(__GNUC__) && !defined(__STRICT_ANSI__) && !defined(PERL_GCC_PEDANTIC)
 #define printf(fmt,args...) PerlIO_stdoutf(fmt,##args)
@@ -124,4 +124,4 @@
 
 /*
  * ex: set ts=8 sts=4 sw=4 et:
- */
+*/

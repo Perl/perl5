@@ -1,10 +1,11 @@
 /* hash a key
- *--------------------------------------------------------------------------------------
- * The "hash seed" feature was added in Perl 5.8.1 to perturb the results
- * to avoid "algorithmic complexity attacks".
+ * --------------------------------------------------------------------------------------
+ * The "hash seed" feature was added in Perl 5.8.1 to perturb the results to
+ * avoid "algorithmic complexity attacks".
  *
- * If USE_HASH_SEED is defined, hash randomisation is done by default
- * (see also perl.c:perl_parse() and S_init_tls_and_interp() and util.c:get_hash_seed())
+ * If USE_HASH_SEED is defined, hash randomisation is done by default (see also
+ * perl.c:perl_parse() and S_init_tls_and_interp() and
+ * util.c:get_hash_seed())
  */
 #ifndef PERL_SEEN_HV_FUNC_H_ /* compile once */
 #define PERL_SEEN_HV_FUNC_H_
@@ -90,10 +91,10 @@
 #error "PVT__PERL_HASH_FUNC not defined"
 #endif
 
-/* Some siphash static functions are needed by XS::APItest even when
-   siphash isn't the current hash.  For SipHash builds this needs to
-   be before the S_perl_hash_with_seed() definition.
-*/
+/* Some siphash static functions are needed by XS::APItest even
+   when siphash isn't the current hash.  For SipHash builds this
+   needs to be before the S_perl_hash_with_seed() definition.
+ */
 #include "perl_siphash.h"
 
 #define PVT__PERL_HASH_SEED_roundup(x, y)   \
@@ -115,7 +116,8 @@
 #else
 
 #define PVT_PERL_HASH_FUNC         "SBOX32_WITH_" PVT__PERL_HASH_FUNC
-/* note the 4 in the below code comes from the fact the seed to initialize the SBOX is 128 bits */
+/* note the 4 in the below code comes from the fact
+   the seed to initialize the SBOX is 128 bits */
 #define PVT_PERL_HASH_SEED_BYTES    \
     ( PVT__PERL_HASH_SEED_BYTES + (int)( 4 * sizeof(U32)) )
 
@@ -160,8 +162,8 @@
 #endif
 
 /* Setup the hash seed, either we do things dynamically at start up,
- * including reading from the environment, or we randomly setup the
- * seed. The seed will be passed into the PERL_HASH_SEED_STATE() function
+ * including reading from the environment, or we randomly setup the seed.
+ * The seed will be passed into the PERL_HASH_SEED_STATE() function
  * defined for the configuration defined for this perl, which will then
  * initialize whatever state it might need later in hashing. */
 
@@ -169,13 +171,13 @@
 #   if defined(USE_HASH_SEED)
 #       define PERL_HASH_SEED PL_hash_seed
 #   else
-       /* this is a 512 bit seed, which should be more than enough for the
-        * configuration of any of our hash functions (with or without sbox).
-        * If you actually use a hard coded seed, you are strongly encouraged
-        * to replace this with something else of the correct length
-        * for the hash function you are using (24-32 bytes depending on build
-        * options). Repeat, you are *STRONGLY* encouraged not to use the value
-        * provided here.
+       /* this is a 512 bit seed, which should be more than enough for
+        * the configuration of any of our hash functions (with or
+        * without sbox).  If you actually use a hard coded seed, you
+        * are strongly encouraged to replace this with something else
+        * of the correct length for the hash function you are using
+        * (24-32 bytes depending on build options).  Repeat, you are
+        * *STRONGLY* encouraged not to use the value provided here.
         */
 #       define PERL_HASH_SEED                               \
             ((const U8 *)"A long string of pseudorandomly " \
@@ -183,7 +185,7 @@
 #   endif
 #endif
 
-/* legacy - only mod_perl should be doing this.  */
+/* legacy - only mod_perl should be doing this. */
 #ifdef PERL_HASH_INTERNAL_ACCESS
 #define PERL_HASH_INTERNAL(hash,str,len) PERL_HASH(hash,str,len)
 #endif
@@ -195,8 +197,8 @@ S_perl_hash_with_seed(const U8 * seed, const U8 *str, STRLEN len) {
     return PVT_PERL_HASH_WITH_STATE((U8*)state,str,len);
 }
 
-#endif /*compile once*/
+#endif /*compile once */
 
 /*
  * ex: set ts=8 sts=4 sw=4 et:
- */
+*/

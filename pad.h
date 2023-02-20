@@ -1,14 +1,15 @@
 /*    pad.h
  *
- *    Copyright (C) 2002, 2003, 2005, 2006, 2007, 2008,
- *    2009, 2010, 2011 by Larry Wall and others
+ *    Copyright (C) 2002, 2003, 2005, 2006, 2007, 2008, 2009, 2010, 2011,
+ *    2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022 by
+ *    Larry Wall and others
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
  *
- * This file defines the types and macros associated with the API for
- * manipulating scratchpads, which are used by perl to store lexical
- * variables, op targets and constants.
+ *    This file defines the types and macros associated with the API for
+ *    manipulating scratchpads, which are used by perl to store lexical
+ *    variables, op targets and constants.
  */
 
 /* offsets within a pad */
@@ -16,8 +17,8 @@
 typedef SSize_t PADOFFSET; /* signed so that -1 is a valid value */
 #define NOT_IN_PAD ((PADOFFSET) -1)
 
-/* B.xs expects the first members of these two structs to line up
-   (xpadl_max with xpadnl_fill).
+/* B.xs expects the first members of these two structs
+   to line up (xpadl_max with xpadnl_fill).
  */
 
 struct padlist {
@@ -45,8 +46,8 @@ struct padnamelist {
 };
 
 /* PERL_PADNAME_MINIMAL uses less memory, but on some platforms
-   PERL_PADNAME_ALIGNED may be faster, so platform-specific hints can
-   define one or the other.  */
+   PERL_PADNAME_ALIGNED may be faster, so platform-specific
+   hints can define one or the other. */
 #if defined(PERL_PADNAME_MINIMAL) && defined (PERL_PADNAME_ALIGNED)
 #  error PERL_PADNAME_MINIMAL and PERL_PADNAME_ALIGNED are exclusive
 #endif
@@ -90,12 +91,13 @@ struct padname_with_str {
 #define PADNAME_FROM_PV(s)  \
     ((PADNAME *)((s) - STRUCT_OFFSET(struct padname_with_str, xpadn_str)))
 
-/* Most padnames are not field names. Keep all the field-related info in its
- * own substructure, stored in ->xpadn_fieldinfo.
+/* Most padnames are not field names.  Keep all the field-related
+ * info in its own substructure, stored in ->xpadn_fieldinfo.
  */
 struct padname_fieldinfo {
     U32        refcount;
-    PADOFFSET  fieldix;    /* index of this field within ObjectFIELDS() array */
+    PADOFFSET  fieldix;    /* index of this field within
+                              ObjectFIELDS() array */
     HV        *fieldstash; /* original class package which added this field */
     OP        *defop;      /* optree fragment for defaulting expression */
     SV        *paramname;  /* name of the :param to look for in constructor */
@@ -104,8 +106,8 @@ struct padname_fieldinfo {
 };
 
 
-/* a value that PL_cop_seqmax is guaranteed never to be,
- * flagging that a lexical is being introduced, or has not yet left scope
+/* a value that PL_cop_seqmax is guaranteed never to be, flagging
+ * that a lexical is being introduced, or has not yet left scope
  */
 #define PERL_PADSEQ_INTRO  U32_MAX
 #define COP_SEQMAX_INC  \
@@ -152,9 +154,9 @@ typedef enum {
 #define padfind_FIELD_OK        0x20 /* pad_findlex is permitted
                                         to see fields */
 
-/* ASSERT_CURPAD_LEGAL and ASSERT_CURPAD_ACTIVE respectively determine
- * whether PL_comppad and PL_curpad are consistent and whether they have
- * active values */
+/* ASSERT_CURPAD_LEGAL and ASSERT_CURPAD_ACTIVE respectively
+ * determine whether PL_comppad and PL_curpad are consistent
+ * and whether they have active values */
 
 #  define pad_peg(label)
 
@@ -178,9 +180,9 @@ typedef enum {
 
 
 
-/* Note: the following three macros are actually defined in scope.h, but
- * they are documented here for completeness, since they directly or
- * indirectly affect pads. */
+/* Note: the following three macros are actually defined in
+ * scope.h, but they are documented here for completeness,
+ * since they directly or indirectly affect pads. */
 
 /*
 =for apidoc m|void|SAVEPADSV    |PADOFFSET po
@@ -191,7 +193,7 @@ Save a pad slot (used to restore after an iteration)
 XXX DAPM it would make more sense to make the arg a PADOFFSET
 
 =for apidoc m|void|SAVECLEARSV  |SV **svp
-Clear the pointed to pad value on scope exit.  (i.e. the runtime action of
+Clear the pointed to pad value on scope exit.  (i.e.  the runtime action of
 C<my>)
 
 =for apidoc m|void|SAVECOMPPAD
@@ -203,9 +205,9 @@ The C array of a padlist, containing the pads.  Only subscript it with
 numbers >= 1, as the 0th entry is not guaranteed to remain usable.
 
 =for apidoc Amx|SSize_t|PadlistMAX|PADLIST * padlist
-The index of the last allocated space in the padlist.  Note that the last
-pad may be in an earlier slot.  Any entries following it will be C<NULL> in
-that case.
+The index of the last allocated space in the padlist.  Note that the last pad
+may be in an earlier slot.  Any entries following it will be C<NULL> in that
+case.
 
 =for apidoc Amx|PADNAMELIST *|PadlistNAMES|PADLIST * padlist
 The names associated with pad entries.
@@ -264,8 +266,8 @@ are often referred to as 'fake'.
 Whether this is a "state" variable.
 
 =for apidoc m|bool|PadnameIsFIELD|PADNAME * pn
-Whether this is a "field" variable.  PADNAMEs where this is true will
-have additional information available via C<PadnameFIELDINFO>.
+Whether this is a "field" variable.  PADNAMEs where this is true will have
+additional information available via C<PadnameFIELDINFO>.
 
 =for apidoc m|HV *|PadnameTYPE|PADNAME * pn
 The stash associated with a typed lexical.  This returns the C<%Foo::> hash
@@ -288,18 +290,17 @@ Set the slot at offset C<po> in the current pad to C<sv>
 Get the value at offset C<po> in the current pad
 
 =for apidoc m|SV *|PAD_SVl      |PADOFFSET po
-Lightweight and lvalue version of C<PAD_SV>.
-Get or set the value at offset C<po> in the current pad.
-Unlike C<PAD_SV>, does not print diagnostics with -DX.
-For internal use only.
+Lightweight and lvalue version of C<PAD_SV>.  Get or set the value at offset
+C<po> in the current pad.  Unlike C<PAD_SV>, does not print diagnostics with
+-DX.  For internal use only.
 
 =for apidoc m|SV *|PAD_BASE_SV  |PADLIST padlist|PADOFFSET po
 Get the value from slot C<po> in the base (DEPTH=1) pad of a padlist
 
 =for apidoc m|void|PAD_SET_CUR  |PADLIST padlist|I32 n
-Set the current pad to be pad C<n> in the padlist, saving
-the previous current pad.  NB currently this macro expands to a string too
-long for some compilers, so it's best to replace it with
+Set the current pad to be pad C<n> in the padlist, saving the previous
+current pad.  NB currently this macro expands to a string too long for some
+compilers, so it's best to replace it with
 
     SAVECOMPPAD();
     PAD_SET_CUR_NOSAVE(padlist,n);
@@ -312,11 +313,12 @@ like PAD_SET_CUR, but without the save
 Save the current pad then set it to null.
 
 =for apidoc m|void|PAD_SAVE_LOCAL|PAD *opad|PAD *npad
-Save the current pad to the local variable C<opad>, then make the
-current pad equal to C<npad>
+Save the current pad to the local variable C<opad>, then make the current pad
+equal to C<npad>
 
 =for apidoc m|void|PAD_RESTORE_LOCAL|PAD *opad
-Restore the old pad saved into the local variable C<opad> by C<PAD_SAVE_LOCAL()>
+Restore the old pad saved into the local variable C<opad> by
+C<PAD_SAVE_LOCAL()>
 
 =cut
 */
@@ -453,8 +455,8 @@ Restore the old pad saved into the local variable C<opad> by C<PAD_SAVE_LOCAL()>
 Save the current pad in the given context block structure.
 
 =for apidoc m|SV *|CX_CURPAD_SV|struct context|PADOFFSET po
-Access the SV at offset C<po> in the saved current pad in the given
-context block structure (can be used as an lvalue).
+Access the SV at offset C<po> in the saved current pad in the
+given context block structure (can be used as an lvalue).
 
 =cut
 */
@@ -465,30 +467,29 @@ context block structure (can be used as an lvalue).
 
 /*
 =for apidoc m|U32|PAD_COMPNAME_FLAGS|PADOFFSET po
-Return the flags for the current compiling pad name
-at offset C<po>.  Assumes a valid slot entry.
+Return the flags for the current compiling pad name at offset
+C<po>.  Assumes a valid slot entry.
 
 =for apidoc m|char *|PAD_COMPNAME_PV|PADOFFSET po
-Return the name of the current compiling pad name
-at offset C<po>.  Assumes a valid slot entry.
+Return the name of the current compiling pad name at offset C<po>.
+Assumes a valid slot entry.
 
 =for apidoc m|HV *|PAD_COMPNAME_TYPE|PADOFFSET po
 Return the type (stash) of the current compiling pad name at offset
 C<po>.  Must be a valid name.  Returns null if not typed.
 
 =for apidoc m|HV *|PAD_COMPNAME_OURSTASH|PADOFFSET po
-Return the stash associated with an C<our> variable.
-Assumes the slot entry is a valid C<our> lexical.
+Return the stash associated with an C<our> variable.  Assumes the
+slot entry is a valid C<our> lexical.
 
 =for apidoc m|STRLEN|PAD_COMPNAME_GEN|PADOFFSET po
 The generation number of the name at offset C<po> in the current
 compiling pad (lvalue).
 
 =for apidoc m|STRLEN|PAD_COMPNAME_GEN_set|PADOFFSET po|int gen
-Sets the generation number of the name at offset C<po> in the current
-ling pad (lvalue) to C<gen>.
+Sets the generation number of the name at offset C<po> in the
+current ling pad (lvalue) to C<gen>.
 =cut
-
 */
 
 #define PAD_COMPNAME(po)        PAD_COMPNAME_SV(po)
@@ -540,8 +541,8 @@ Clone the state variables associated with running and compiling pads.
 /*
 =for apidoc Am|PADOFFSET|pad_add_name_pvs|"name"|U32 flags|HV *typestash|HV *ourstash
 
-Exactly like L</pad_add_name_pvn>, but takes a literal string
-instead of a string/length pair.
+Exactly like L</pad_add_name_pvn>, but takes a literal
+string instead of a string/length pair.
 
 =cut
 */
@@ -552,8 +553,8 @@ instead of a string/length pair.
 /*
 =for apidoc Am|PADOFFSET|pad_findmy_pvs|"name"|U32 flags
 
-Exactly like L</pad_findmy_pvn>, but takes a literal string
-instead of a string/length pair.
+Exactly like L</pad_findmy_pvn>, but takes a literal
+string instead of a string/length pair.
 
 =cut
 */
@@ -575,4 +576,4 @@ struct suspended_compcv
 
 /*
  * ex: set ts=8 sts=4 sw=4 et:
- */
+*/

@@ -10,9 +10,9 @@
 #define RE_OPTIMIZE_CURLYX_TO_CURLYN 1
 #endif
 
-/* this is a chain of data about sub patterns we are processing that
-   need to be handled separately/specially in study_chunk. Its so
-   we can simulate recursion without losing state.  */
+/* this is a chain of data about sub patterns we are processing
+   that need to be handled separately/specially in study_chunk.
+   Its so we can simulate recursion without losing state. */
 struct scan_frame;
 typedef struct scan_frame {
     regnode *last_regnode;      /* last node to process in this frame */
@@ -26,16 +26,18 @@ typedef struct scan_frame {
     struct scan_frame *next_frame;      /* next frame */
 } scan_frame;
 
-/* Certain characters are output as a sequence with the first being a
- * backslash. */
+/* Certain characters are output as a sequence
+ * with the first being a backslash. */
 #define isBACKSLASHED_PUNCT(c)  memCHRs("-[]\\^", c)
 
 
 struct RExC_state_t {
-    U32         flags;                  /* RXf_* are we folding, multilining? */
+    U32         flags;                  /* RXf_* are we folding,
+                                           multilining? */
     U32         pm_flags;               /* PMf_* stuff from the calling PMOP */
     char        *precomp;               /* uncompiled string. */
-    char        *precomp_end;           /* pointer to end of uncompiled string. */
+    char        *precomp_end;           /* pointer to end of uncompiled
+                                           string. */
     REGEXP      *rx_sv;                 /* The SV that is the regexp. */
     regexp      *rx;                    /* perl core regexp structure */
     regexp_internal     *rxi;           /* internal data for regexp object
@@ -45,8 +47,8 @@ struct RExC_state_t {
     char        *parse;                 /* Input-scan pointer. */
     char        *copy_start;            /* start of copy of input within
                                            constructed parse string */
-    char        *save_copy_start;       /* Provides one level of saving
-                                           and restoring 'copy_start' */
+    char        *save_copy_start;       /* Provides one level of saving and
+                                           restoring 'copy_start' */
     char        *copy_start_in_input;   /* Position in input string
                                            corresponding to copy_start */
     SSize_t     whilem_seen;            /* number of WHILEM in this expr */
@@ -54,10 +56,10 @@ struct RExC_state_t {
     regnode_offset emit;                /* Code-emit pointer */
     I32         naughty;                /* How bad is this pattern? */
     I32         sawback;                /* Did we see \1, ...? */
-    SSize_t     size;                   /* Number of regnode equivalents in
-                                           pattern */
+    SSize_t     size;                   /* Number of regnode equivalents
+                                           in pattern */
     Size_t      sets_depth;              /* Counts recursion depth of already-
-                                           compiled regex set patterns */
+                                            compiled regex set patterns */
     U32         seen;
 
     I32      parens_buf_size;           /* #slots malloced open/close_parens */
@@ -65,11 +67,11 @@ struct RExC_state_t {
     regnode_offset *close_parens;       /* offsets to close parens */
     HV          *paren_names;           /* Paren names */
 
-    /* position beyond 'precomp' of the warning message furthest away from
-     * 'precomp'.  During the parse, no warnings are raised for any problems
-     * earlier in the parse than this position.  This works if warnings are
-     * raised the first time a given spot is parsed, and if only one
-     * independent warning is raised for any given spot */
+    /* position beyond 'precomp' of the warning message furthest away
+     * from 'precomp'.  During the parse, no warnings are raised for any
+     * problems earlier in the parse than this position.  This works if
+     * warnings are raised the first time a given spot is parsed, and if
+     * only one independent warning is raised for any given spot */
     Size_t      latest_warn_offset;
 
     /* Branch reset /(?|...|...)/ gives us two concepts of capture buffer id.
@@ -110,11 +112,11 @@ struct RExC_state_t {
     I32         *parno_to_logical;        /* parno to logical_parno */
     I32         *parno_to_logical_next;   /* parno to next (greater value)
                                              parno with the same
-                                             logical_parno as parno.*/
+                                             logical_parno as parno. */
 
     I32         npar;                   /* Capture buffer count so far in the
-                                           parse, (OPEN) plus one. ("par" 0 is
-                                           the whole pattern)*/
+                                           parse, (OPEN) plus one.  ("par" 0
+                                           is the whole pattern) */
     I32         logical_npar;           /* Logical version of npar */
     I32         total_par;              /* During initial parse, is either 0,
                                            or -1; the latter indicating a
@@ -123,22 +125,23 @@ struct RExC_state_t {
                                            pass.  Hence, it being > 0 indicates
                                            we are in a reparse situation */
     I32         logical_total_par;      /* Logical version to total par */
-    I32         nestroot;               /* root parens we are in - used by
-                                           accept */
+    I32         nestroot;               /* root parens we are in
+                                           - used by accept */
     I32         seen_zerolen;
     regnode     *end_op;                /* END node in program */
     I32         utf8;           /* whether the pattern is utf8 or not */
-    I32         orig_utf8;      /* whether the pattern was originally in utf8 */
+    I32         orig_utf8;      /* whether the pattern was
+                                   originally in utf8 */
                                 /* XXX use this for future optimisation of case
                                  * where pattern must be upgraded to utf8. */
     I32         uni_semantics;  /* If a d charset modifier should use unicode
-                                   rules, even if the pattern is not in
-                                   utf8 */
+                                   rules, even if the pattern is not in utf8 */
 
-    I32         recurse_count;          /* Number of recurse regops we have generated */
+    I32         recurse_count;          /* Number of recurse regops
+                                           we have generated */
     regnode     **recurse;              /* Recurse regops */
-    U8          *study_chunk_recursed;  /* bitmap of which subs we have moved
-                                           through */
+    U8          *study_chunk_recursed;  /* bitmap of which subs we
+                                           have moved through */
     U32         study_chunk_recursed_bytes;  /* bytes in bitmap */
     I32         in_lookaround;
     I32         contains_locale;
@@ -147,8 +150,9 @@ struct RExC_state_t {
     I32         in_multi_char_class;
     int         code_index;             /* next code_blocks[] slot */
     struct reg_code_blocks *code_blocks;/* positions of literal (?{})
-                                            within pattern */
-    SSize_t     maxlen;                        /* mininum possible number of chars in string to match */
+                                           within pattern */
+    SSize_t     maxlen;                        /* mininum possible number of
+                                                  chars in string to match */
     scan_frame *frame_head;
     scan_frame *frame_last;
     U32         frame_count;
@@ -257,19 +261,19 @@ struct RExC_state_t {
 #define RExC_unlexed_names (pRExC_state->unlexed_names)
 
 
-/***********************************************************************/
+/********************************************************************** */
 /* UTILITY MACROS FOR ADVANCING OR SETTING THE PARSE "CURSOR" RExC_parse
  *
  * All of these macros depend on the above RExC_ accessor macros, which
  * in turns depend on a variable pRExC_state being in scope where they
- * are used. This is the standard regexp parser context variable which is
- * passed into every non-trivial parse function in this file.
+ * are used.  This is the standard regexp parser context variable which
+ * is passed into every non-trivial parse function in this file.
  *
  * Note that the UTF macro is itself a wrapper around RExC_utf8, so all
  * of the macros which do not take an argument will operate on the
  * pRExC_state structure *only*.
  *
- * Please do NOT modify RExC_parse without using these macros. In the
+ * Please do NOT modify RExC_parse without using these macros.  In the
  * future these macros will be extended for enhanced debugging and trace
  * output during the parse process.
  */
@@ -278,7 +282,7 @@ struct RExC_state_t {
  *
  * Increment RExC_parse to point at the next codepoint, while doing
  * the right thing depending on whether we are parsing UTF-8 strings
- * or not. The 'flag' argument determines if content is UTF-8 or not,
+ * or not.  The 'flag' argument determines if content is UTF-8 or not,
  * intended for cases where this is NOT governed by the UTF macro.
  *
  * Use RExC_parse_inc() if UTF-8ness is controlled by the UTF macro.
@@ -295,11 +299,11 @@ struct RExC_state_t {
 
 /* RExC_parse_inc_safef(flag)
  *
- * Safely increment RExC_parse to point at the next codepoint,
- * doing the right thing depending on whether we are parsing
- * UTF-8 strings or not and NOT reading past the end of the buffer.
- * The 'flag' argument determines if content is UTF-8 or not,
- * intended for cases where this is NOT governed by the UTF macro.
+ * Safely increment RExC_parse to point at the next codepoint, doing
+ * the right thing depending on whether we are parsing UTF-8 strings
+ * or not and NOT reading past the end of the buffer.  The 'flag'
+ * argument determines if content is UTF-8 or not, intended for cases
+ * where this is NOT governed by the UTF macro.
  *
  * Use RExC_parse_safe() if UTF-8ness is controlled by the UTF macro.
  *
@@ -312,26 +316,25 @@ struct RExC_state_t {
 
 /* RExC_parse_inc()
  *
- * Increment RExC_parse to point at the next codepoint,
- * doing the right thing depending on whether we are parsing
- * UTF-8 strings or not.
+ * Increment RExC_parse to point at the next codepoint, doing the right
+ * thing depending on whether we are parsing UTF-8 strings or not.
  *
  * WARNING: Does NOT take into account RExC_end, it is the callers
  * responsibility to make sure there are enough octets left in
  * RExC_parse to ensure that when processing UTF-8 we would not read
  * past the end of the string.
  *
- * NOTE: whether we are parsing UTF-8 or not is determined by the
- * UTF macro which is defined as cBOOL(RExC_parse_utf8), thus this
- * macro operates on the pRExC_state structure only.
+ * NOTE: whether we are parsing UTF-8 or not is determined by the UTF
+ * macro which is defined as cBOOL(RExC_parse_utf8), thus this macro
+ * operates on the pRExC_state structure only.
  */
 #define RExC_parse_inc() RExC_parse_incf(UTF)
 
 /* RExC_parse_inc_safe()
  *
  * Safely increment RExC_parse to point at the next codepoint,
- * doing the right thing depending on whether we are parsing
- * UTF-8 strings or not and NOT reading past the end of the buffer.
+ * doing the right thing depending on whether we are parsing UTF-8
+ * strings or not and NOT reading past the end of the buffer.
  *
  * NOTE: whether we are parsing UTF-8 or not is determined by the
  * UTF macro which is defined as cBOOL(RExC_parse_utf8), thus this
@@ -341,13 +344,13 @@ struct RExC_state_t {
 
 /* RExC_parse_inc_utf8()
  *
- * Increment RExC_parse to point at the next utf8 codepoint,
- * assumes content is UTF-8.
+ * Increment RExC_parse to point at the next utf8
+ * codepoint, assumes content is UTF-8.
  *
- * WARNING: Does NOT take into account RExC_end; it is the callers
- * responsibility to make sure there are enough octets left in RExC_parse
- * to ensure that when processing UTF-8 we would not read past the end
- * of the string.
+ * WARNING: Does NOT take into account RExC_end; it is the
+ * callers responsibility to make sure there are enough
+ * octets left in RExC_parse to ensure that when processing
+ * UTF-8 we would not read past the end of the string.
  */
 #define RExC_parse_inc_utf8()               \
     STMT_START {                            \
@@ -357,13 +360,13 @@ struct RExC_state_t {
 /* RExC_parse_inc_if_char()
  *
  * Increment RExC_parse to point at the next codepoint, if and only
- * if the current parse point is NOT a NULL, while doing the right thing
- * depending on whether we are parsing UTF-8 strings or not.
+ * if the current parse point is NOT a NULL, while doing the right
+ * thing depending on whether we are parsing UTF-8 strings or not.
  *
  * WARNING: Does NOT take into account RExC_end, it is the callers
- * responsibility to make sure there are enough octets left in RExC_parse
- * to ensure that when processing UTF-8 we would not read past the end
- * of the string.
+ * responsibility to make sure there are enough octets left in
+ * RExC_parse to ensure that when processing UTF-8 we would not
+ * read past the end of the string.
  *
  * NOTE: whether we are parsing UTF-8 or not is determined by the
  * UTF macro which is defined as cBOOL(RExC_parse_utf8), thus this
@@ -379,9 +382,9 @@ struct RExC_state_t {
  * Increment the parse cursor by the number of octets specified by
  * the 'n_octets' argument.
  *
- * NOTE: Does NOT check ANY constraints. It is the callers responsibility
- * that this will not move past the end of the string, or leave the
- * pointer in the middle of a UTF-8 sequence.
+ * NOTE: Does NOT check ANY constraints.  It is the callers
+ * responsibility that this will not move past the end of the string,
+ * or leave the pointer in the middle of a UTF-8 sequence.
  *
  * Typically used to advanced past previously analyzed content.
  */
@@ -392,20 +395,20 @@ struct RExC_state_t {
 
 /* RExC_parse_set(to_ptr)
  *
- * Sets the RExC_parse pointer to the pointer specified by the 'to'
- * argument. No validation whatsoever is performed on the to pointer.
+ * Sets the RExC_parse pointer to the pointer specified by the 'to' argument.
+ * No validation whatsoever is performed on the to pointer.
  */
 #define RExC_parse_set(to_ptr)  \
     STMT_START {                \
         RExC_parse = (to_ptr);  \
     } STMT_END
 
-/**********************************************************************/
+/********************************************************************* */
 
 /* Heuristic check on the complexity of the pattern: if TOO_NAUGHTY, we set
- * a flag to disable back-off on the fixed/floating substrings - if it's
- * a high complexity pattern we assume the benefit of avoiding a full match
- * is worth the cost of checking for the substrings even if they rarely help.
+ * a flag to disable back-off on the fixed/floating substrings - if it's a
+ * high complexity pattern we assume the benefit of avoiding a full match is
+ * worth the cost of checking for the substrings even if they rarely help.
  */
 #define RExC_naughty    (pRExC_state->naughty)
 #define TOO_NAUGHTY (10)
@@ -423,16 +426,16 @@ struct RExC_state_t {
 
 /*
  * Flags to be passed up.
- */
-#define HASWIDTH        0x01    /* Known to not match null strings, could match
-                                   non-null ones. */
+*/
+#define HASWIDTH        0x01    /* Known to not match null strings,
+                                   could match non-null ones. */
 #define SIMPLE          0x02    /* Exactly one character wide */
                                 /* (or LNBREAK as a special case) */
 #define POSTPONED       0x08    /* (?1),(?&name), (??{...}) or similar */
 #define TRYAGAIN        0x10    /* Weeded out a declaration. */
 #define RESTART_PARSE   0x20    /* Need to redo the parse */
-#define NEED_UTF8       0x40    /* In conjunction with RESTART_PARSE, need to
-                                   calcuate sizes as UTF-8 */
+#define NEED_UTF8       0x40    /* In conjunction with RESTART_PARSE, need
+                                   to calcuate sizes as UTF-8 */
 
 #define REG_NODE_NUM(x) ((x) ? (int)((x)-RExC_emit_start) : -1)
 
@@ -451,18 +454,18 @@ struct RExC_state_t {
  * Specifically, when TRIE_STUDY_OPT is defined, and it is defined in normal
  * builds, (see above), during compilation SCF_TRIE_RESTUDY may be enabled
  * which then causes the Perl_re_op_compile() to then call the optimizer
- * S_study_chunk() a second time to perform additional optimizations,
- * including the aho_corasick startclass optimization.
- * This additional pass will only happen once, which is managed by the
- * 'restudied' variable in Perl_re_op_compile().
+ * S_study_chunk() a second time to perform additional optimizations, including
+ * the aho_corasick startclass optimization.  This additional pass will only
+ * happen once, which is managed by the 'restudied' variable in
+ * Perl_re_op_compile().
  *
  * When this second pass is under way the flags passed into study_chunk() will
- * include SCF_TRIE_DOING_RESTUDY and this flag is and must be cascaded down
- * to any recursive calls to S_study_chunk().
+ * include SCF_TRIE_DOING_RESTUDY and this flag is and must be cascaded down to
+ * any recursive calls to S_study_chunk().
  *
  * IMPORTANT: Any logic in study_chunk() that emits warnings should check that
- * the SCF_TRIE_DOING_RESTUDY flag is NOT set in 'flags', or the warning may
- * be produced twice.
+ * the SCF_TRIE_DOING_RESTUDY flag is NOT set in 'flags', or the warning may be
+ * produced twice.
  *
  * See commit 07be1b83a6b2d24b492356181ddf70e1c7917ae3 and
  * 688e03912e3bff2d2419c457d8b0e1bab3eb7112 for more details.
@@ -488,29 +491,29 @@ struct RExC_state_t {
         }                                       \
     } STMT_END
 
-/* /u is to be chosen if we are supposed to use Unicode rules, or if the
- * pattern is in UTF-8.  This latter condition is in case the outermost rules
- * are locale.  See GH #17278 */
+/* /u is to be chosen if we are supposed to use Unicode rules,
+ * or if the pattern is in UTF-8.  This latter condition is in
+ * case the outermost rules are locale.  See GH #17278 */
 #define toUSE_UNI_CHARSET_NOT_DEPENDS (RExC_uni_semantics || UTF)
 
-/* Change from /d into /u rules, and restart the parse.  RExC_uni_semantics is
- * a flag that indicates we need to override /d with /u as a result of
+/* Change from /d into /u rules, and restart the parse.  RExC_uni_semantics
+ * is a flag that indicates we need to override /d with /u as a result of
  * something in the pattern.  It should only be used in regards to calling
  * set_regex_charset() or get_regex_charset() */
-#define REQUIRE_UNI_RULES(flagp, restart_retval)                        \
-    STMT_START {                                                        \
-        if (DEPENDS_SEMANTICS) {                                        \
-            set_regex_charset(&RExC_flags, REGEX_UNICODE_CHARSET);      \
-            RExC_uni_semantics = 1;                                     \
-            if (RExC_seen_d_op && LIKELY(! IN_PARENS_PASS)) {           \
-                /* No need to restart the parse if we haven't seen      \
-                 * anything that differs between /u and /d, and no need \
-                 * to restart immediately if we're going to reparse     \
-                 * anyway to count parens */                            \
-                *flagp |= RESTART_PARSE;                                \
-                return restart_retval;                                  \
-            }                                                           \
-        }                                                               \
+#define REQUIRE_UNI_RULES(flagp, restart_retval)                    \
+    STMT_START {                                                    \
+        if (DEPENDS_SEMANTICS) {                                    \
+            set_regex_charset(&RExC_flags, REGEX_UNICODE_CHARSET);  \
+            RExC_uni_semantics = 1;                                 \
+            if (RExC_seen_d_op && LIKELY(! IN_PARENS_PASS)) {       \
+                /* No need to restart the parse if we haven't seen  \
+                 * anything that differs between /u and /d, and no  \
+                 * need to restart immediately if we're going to    \
+                 * reparse anyway to count parens */                \
+                *flagp |= RESTART_PARSE;                            \
+                return restart_retval;                              \
+            }                                                       \
+        }                                                           \
     } STMT_END
 
 #define REQUIRE_BRANCHJ(flagp, restart_retval)  \
@@ -520,12 +523,12 @@ struct RExC_state_t {
         return restart_retval;                  \
     } STMT_END
 
-/* Until we have completed the parse, we leave RExC_total_parens at 0 or
- * less.  After that, it must always be positive, because the whole re is
- * considered to be surrounded by virtual parens.  Setting it to negative
- * indicates there is some construct that needs to know the actual number of
- * parens to be properly handled.  And that means an extra pass will be
- * required after we've counted them all */
+/* Until we have completed the parse, we leave RExC_total_parens at 0
+ * or less.  After that, it must always be positive, because the whole
+ * re is considered to be surrounded by virtual parens.  Setting it to
+ * negative indicates there is some construct that needs to know the
+ * actual number of parens to be properly handled.  And that means an
+ * extra pass will be required after we've counted them all */
 #define ALL_PARENS_COUNTED (RExC_total_parens > 0)
 #define REQUIRE_PARENS_PASS                                 \
     STMT_START {  /* No-op if have completed a pass */      \
@@ -534,12 +537,12 @@ struct RExC_state_t {
 #define IN_PARENS_PASS (RExC_total_parens < 0)
 
 
-/* This is used to return failure (zero) early from the calling function if
- * various flags in 'flags' are set.  Two flags always cause a return:
- * 'RESTART_PARSE' and 'NEED_UTF8'.   'extra' can be used to specify any
- * additional flags that should cause a return; 0 if none.  If the return will
- * be done, '*flagp' is first set to be all of the flags that caused the
- * return. */
+/* This is used to return failure (zero) early from the calling
+ * function if various flags in 'flags' are set.  Two flags always
+ * cause a return: 'RESTART_PARSE' and 'NEED_UTF8'.  'extra' can be
+ * used to specify any additional flags that should cause a return;
+ * 0 if none.  If the return will be done, '*flagp' is first set to
+ * be all of the flags that caused the return. */
 #define RETURN_FAIL_ON_RESTART_OR_FLAGS(flags,flagp,extra)          \
     STMT_START {                                                    \
         if ((flags) & (RESTART_PARSE|NEED_UTF8|(extra))) {          \
@@ -555,8 +558,8 @@ struct RExC_state_t {
 #define RETURN_FAIL_ON_RESTART_FLAGP(flagp) \
     if (MUST_RESTART(*(flagp))) return 0
 
-/* This converts the named class defined in regcomp.h to its equivalent class
- * number defined in handy.h. */
+/* This converts the named class defined in regcomp.h to
+ * its equivalent class number defined in handy.h. */
 #define namedclass_to_classnum(class)  ((int) ((class) / 2))
 #define classnum_to_namedclass(classnum)  ((classnum) * 2)
 
@@ -565,14 +568,14 @@ struct RExC_state_t {
 #define _invlist_intersection_complement_2nd(a, b, output)  \
     _invlist_intersection_maybe_complement_2nd(a, b, TRUE, output)
 
-/* We add a marker if we are deferring expansion of a property that is both
- * 1) potentiallly user-defined; and
- * 2) could also be an official Unicode property.
+/* We add a marker if we are deferring expansion of a property
+ * that is both 1) potentiallly user-defined; and 2) could also
+ * be an official Unicode property.
  *
- * Without this marker, any deferred expansion can only be for a user-defined
- * one.  This marker shouldn't conflict with any that could be in a legal name,
- * and is appended to its name to indicate this.  There is a string and
- * character form */
+ * Without this marker, any deferred expansion can only be for
+ * a user-defined one.  This marker shouldn't conflict with any
+ * that could be in a legal name, and is appended to its name
+ * to indicate this.  There is a string and character form */
 #define DEFERRED_COULD_BE_OFFICIAL_MARKERs  "~"
 #define DEFERRED_COULD_BE_OFFICIAL_MARKERc  '~'
 
@@ -581,47 +584,43 @@ struct RExC_state_t {
 
 /* About scan_data_t.
 
-  During optimisation we recurse through the regexp program performing
-  various inplace (keyhole style) optimisations. In addition study_chunk
-  and scan_commit populate this data structure with information about
-  what strings MUST appear in the pattern. We look for the longest
-  string that must appear at a fixed location, and we look for the
-  longest string that may appear at a floating location. So for instance
-  in the pattern:
+   During optimisation we recurse through the regexp program performing
+   various inplace (keyhole style) optimisations.  In addition study_chunk
+   and scan_commit populate this data structure with information about what
+   strings MUST appear in the pattern.  We look for the longest string that
+   must appear at a fixed location, and we look for the longest string that
+   may appear at a floating location.  So for instance in the pattern:
 
     /FOO[xX]A.*B[xX]BAR/
 
-  Both 'FOO' and 'A' are fixed strings. Both 'B' and 'BAR' are floating
-  strings (because they follow a .* construct). study_chunk will identify
-  both FOO and BAR as being the longest fixed and floating strings respectively.
+   Both 'FOO' and 'A' are fixed strings.  Both 'B' and 'BAR' are floating
+   strings (because they follow a .* construct).  study_chunk will identify
+   both FOO and BAR as being the longest fixed and floating strings
+   respectively.
 
-  The strings can be composites, for instance
+   The strings can be composites, for instance
 
      /(f)(o)(o)/
 
-  will result in a composite fixed substring 'foo'.
+   will result in a composite fixed substring 'foo'.
 
-  For each string some basic information is maintained:
+   For each string some basic information is maintained:
 
-  - min_offset
-    This is the position the string must appear at, or not before.
-    It also implicitly (when combined with minlenp) tells us how many
-    characters must match before the string we are searching for.
-    Likewise when combined with minlenp and the length of the string it
-    tells us how many characters must appear after the string we have
-    found.
+   - min_offset This is the position the string must appear at, or not
+   before.  It also implicitly (when combined with minlenp) tells us how
+   many characters must match before the string we are searching for.
+   Likewise when combined with minlenp and the length of the string it tells
+   us how many characters must appear after the string we have found.
 
-  - max_offset
-    Only used for floating strings. This is the rightmost point that
-    the string can appear at. If set to OPTIMIZE_INFTY it indicates that the
-    string can occur infinitely far to the right.
-    For fixed strings, it is equal to min_offset.
+   - max_offset Only used for floating strings.  This is the rightmost point
+   that the string can appear at.  If set to OPTIMIZE_INFTY it indicates
+   that the string can occur infinitely far to the right.  For fixed
+   strings, it is equal to min_offset.
 
-  - minlenp
-    A pointer to the minimum number of characters of the pattern that the
-    string was found inside. This is important as in the case of positive
-    lookahead or positive lookbehind we can have multiple patterns
-    involved. Consider
+   - minlenp A pointer to the minimum number of characters of the pattern
+   that the string was found inside.  This is important as in the case of
+   positive lookahead or positive lookbehind we can have multiple patterns
+   involved.  Consider
 
     /(?=FOO).*F/
 
@@ -636,7 +635,7 @@ struct RExC_state_t {
     are not known until the full pattern has been compiled, thus the
     pointer to the value.
 
-  - lookbehind
+   - lookbehind
 
     In the case of lookbehind the string being searched for can be
     offset past the start point of the final matching string.
@@ -650,10 +649,9 @@ struct RExC_state_t {
     have been lost precalculated in the end_shift field for the
     associated string.
 
-  The fields pos_min and pos_delta are used to store the minimum offset
-  and the delta to the maximum offset at the current point in the pattern.
-
-*/
+   The fields pos_min and pos_delta are used to store the minimum offset and
+   the delta to the maximum offset at the current point in the pattern.
+ */
 
 struct scan_data_substrs {
     SV      *str;       /* longest substring found in pattern */
@@ -666,17 +664,16 @@ struct scan_data_substrs {
 
 /* this is typedef'ed in perl.h */
 struct scan_data_t {
-    /*I32 len_min;      unused */
-    /*I32 len_delta;    unused */
+    /*I32 len_min; unused */
+    /*I32 len_delta; unused */
     SSize_t pos_min;
     SSize_t pos_delta;
     SV *last_found;
     SSize_t last_end;       /* min value, <0 unless valid. */
     SSize_t last_start_min;
     SSize_t last_start_max;
-    U8      cur_is_floating; /* whether the last_* values should be set as
-                              * the next fixed (0) or floating (1)
-                              * substring */
+    U8      cur_is_floating; /* whether the last_* values should be set as the
+                              * next fixed (0) or floating (1) substring */
 
     /* [0] is longest fixed substring so far, [1] is longest float so far */
     struct scan_data_substrs  substrs[2];
@@ -684,16 +681,15 @@ struct scan_data_t {
     I32 flags;             /* common SF_* and SCF_* flags */
     I32 whilem_c;
     SSize_t *last_closep;
-    regnode **last_close_opp; /* pointer to pointer to last CLOSE regop
-                                 seen. DO NOT DEREFERENCE the regnode
-                                 pointer - the op may have been optimized
-                                 away */
+    regnode **last_close_opp; /* pointer to pointer to last CLOSE regop seen.
+                                 DO NOT DEREFERENCE the regnode pointer - the
+                                 op may have been optimized away */
     regnode_ssc *start_class;
 };
 
 /*
  * Forward declarations for pregcomp()'s friends.
- */
+*/
 
 static const scan_data_t zero_scan_data = {
     0, 0, NULL, 0, 0, 0, 0,
@@ -734,12 +730,12 @@ static const scan_data_t zero_scan_data = {
 #define SCF_WHILEM_VISITED_POS  0x2000
 
 #define SCF_TRIE_RESTUDY        0x4000 /* Need to do restudy in study_chunk()?
-                                          Search for "restudy" in this file
-                                          to find a detailed explanation.*/
+                                          Search for "restudy" in this file to
+                                          find a detailed explanation. */
 #define SCF_SEEN_ACCEPT         0x8000
-#define SCF_TRIE_DOING_RESTUDY 0x10000 /* Are we in restudy right now?
-                                          Search for "restudy" in this file
-                                          to find a detailed explanation. */
+#define SCF_TRIE_DOING_RESTUDY 0x10000 /* Are we in restudy right now? Search
+                                          for "restudy" in this file to find
+                                          a detailed explanation. */
 #define SCF_IN_DEFINE          0x20000
 
 
@@ -767,16 +763,16 @@ static const scan_data_t zero_scan_data = {
 
 #define FOLD cBOOL(RExC_flags & RXf_PMf_FOLD)
 
-/* For programs that want to be strictly Unicode compatible by dying if any
- * attempt is made to match a non-Unicode code point against a Unicode
- * property.  */
+/* For programs that want to be strictly Unicode compatible
+ * by dying if any attempt is made to match a non-Unicode
+ * code point against a Unicode property. */
 #define ALWAYS_WARN_SUPER  ckDEAD(packWARN(WARN_NON_UNICODE))
 
 #define OOB_NAMEDCLASS          -1
 
-/* There is no code point that is out-of-bounds, so this is problematic.  But
- * its only current use is to initialize a variable that is always set before
- * looked at. */
+/* There is no code point that is out-of-bounds, so this is
+ * problematic.  But its only current use is to initialize
+ * a variable that is always set before looked at. */
 #define OOB_UNICODE             0xDEADBEEF
 
 #define CHR_SVLEN(sv) (UTF ? sv_len_utf8(sv) : SvCUR(sv))
@@ -786,10 +782,10 @@ static const scan_data_t zero_scan_data = {
 #define RegexLengthToShowInErrorMessages 127
 
 /*
- * If MARKER[12] are adjusted, be sure to adjust the constants at the top
- * of t/op/regmesg.t, the tests in t/op/re_tests, and those in
- * op/pragma/warn/regcomp.
- */
+ * If MARKER[12] are adjusted, be sure to adjust the constants
+ * at the top of t/op/regmesg.t, the tests in t/op/re_tests,
+ * and those in op/pragma/warn/regcomp.
+*/
 #define MARKER1 "<-- HERE"    /* marker as it appears in the description */
 #define MARKER2 " <-- HERE "  /* marker as it appears within the regex */
 
@@ -804,16 +800,14 @@ static const scan_data_t zero_scan_data = {
  * there should be no possibility of an error, as we are in complete control of
  * the alternate string.  But in the second case we don't completely control
  * the input portion, so there may be errors in that.  Here's an example:
- *      /[abc\x{DF}def]/ui
- * is handled specially because \x{df} folds to a sequence of more than one
- * character: 'ss'.  What is done is to create and parse an alternate string,
- * which looks like this:
- *      /(?:\x{DF}|[abc\x{DF}def])/ui
- * where it uses the input unchanged in the middle of something it constructs,
- * which is a branch for the DF outside the character class, and clustering
- * parens around the whole thing. (It knows enough to skip the DF inside the
- * class while in this substitute parse.) 'abc' and 'def' may have errors that
- * need to be reported.  The general situation looks like this:
+ * /[abc\x{DF}def]/ui is handled specially because \x{df} folds to a sequence
+ * of more than one character: 'ss'.  What is done is to create and parse an
+ * alternate string, which looks like this: /(?:\x{DF}|[abc\x{DF}def])/ui where
+ * it uses the input unchanged in the middle of something it constructs, which
+ * is a branch for the DF outside the character class, and clustering parens
+ * around the whole thing.  (It knows enough to skip the DF inside the class
+ * while in this substitute parse.) 'abc' and 'def' may have errors that need
+ * to be reported.  The general situation looks like this:
  *
  *                                       |<------- identical ------>|
  *              sI                       tI               xI       eI
@@ -822,28 +816,22 @@ static const scan_data_t zero_scan_data = {
  *                      sC               tC               xC       eC     EC
  *                                       |<------- identical ------>|
  *
- * sI..eI   is the portion of the input pattern we are concerned with here.
- * sC..EC   is the constructed substitute parse string.
- *  sC..tC  is constructed by us
- *  tC..eC  is an exact duplicate of the portion of the input pattern tI..eI.
- *          In the diagram, these are vertically aligned.
- *  eC..EC  is also constructed by us.
- * xC       is the position in the substitute parse string where we found a
- *          problem.
- * xI       is the position in the original pattern corresponding to xC.
+ * sI..eI is the portion of the input pattern we are concerned with here.
+ * sC..EC is the constructed substitute parse string.  sC..tC is constructed
+ * by us tC..eC is an exact duplicate of the portion of the input pattern
+ * tI..eI.  In the diagram, these are vertically aligned.  eC..EC is also
+ * constructed by us.  xC is the position in the substitute parse string where
+ * we found a problem.  xI is the position in the original pattern
+ * corresponding to xC.
  *
  * We want to display a message showing the real input string.  Thus we need to
  * translate from xC to xI.  We know that xC >= tC, since the portion of the
  * string sC..tC has been constructed by us, and so shouldn't have errors.  We
- * get:
- *      xI = tI + (xC - tC)
+ * get: xI = tI + (xC - tC)
  *
- * When the substitute parse is constructed, the code needs to set:
- *      RExC_start (sC)
- *      RExC_end (eC)
- *      RExC_copy_start_in_input  (tI)
- *      RExC_copy_start_in_constructed (tC)
- * and restore them when done.
+ * When the substitute parse is constructed, the code needs to set: RExC_start
+ * (sC) RExC_end (eC) RExC_copy_start_in_input (tI)
+ * RExC_copy_start_in_constructed (tC) and restore them when done.
  *
  * During normal processing of the input pattern, both
  * 'RExC_copy_start_in_input' and 'RExC_copy_start_in_constructed' are set to
@@ -875,8 +863,8 @@ static const scan_data_t zero_scan_data = {
              (xI(xC) > eI) ? 0 : eI - xI(xC), /* Length after <--HERE */    \
              (xI(xC) > eI) ? eI : xI(xC))     /* pattern after <--HERE */
 
-/* Used to point after bad bytes for an error message, but avoid skipping
- * past a nul byte. */
+/* Used to point after bad bytes for an error message,
+ * but avoid skipping past a nul byte. */
 #define SKIP_IF_CHAR(s, e) (!*(s) ? 0 : UTF ? UTF8_SAFE_SKIP(s, e) : 1)
 
 /* Set up to clean up after our imminent demise */
@@ -930,7 +918,7 @@ static const scan_data_t zero_scan_data = {
 
 /*
  * Simple_vFAIL -- like FAIL, but marks the current location in the scan
- */
+*/
 #define Simple_vFAIL(m)                                 \
     STMT_START {                                        \
         Perl_croak(aTHX_ "%s" REPORT_LOCATION,          \
@@ -939,7 +927,7 @@ static const scan_data_t zero_scan_data = {
 
 /*
  * Calls SAVEDESTRUCTOR_X if needed, then Simple_vFAIL()
- */
+*/
 #define vFAIL(m)            \
     STMT_START {            \
         PREPARE_TO_DIE;     \
@@ -948,7 +936,7 @@ static const scan_data_t zero_scan_data = {
 
 /*
  * Like Simple_vFAIL(), but accepts two arguments.
- */
+*/
 #define Simple_vFAIL2(m,a1)                                     \
     STMT_START {                                                \
         S_re_croak(aTHX_ UTF, m REPORT_LOCATION, a1,            \
@@ -957,7 +945,7 @@ static const scan_data_t zero_scan_data = {
 
 /*
  * Calls SAVEDESTRUCTOR_X if needed, then Simple_vFAIL2().
- */
+*/
 #define vFAIL2(m,a1)            \
     STMT_START {                \
         PREPARE_TO_DIE;         \
@@ -967,7 +955,7 @@ static const scan_data_t zero_scan_data = {
 
 /*
  * Like Simple_vFAIL(), but accepts three arguments.
- */
+*/
 #define Simple_vFAIL3(m, a1, a2)                            \
     STMT_START {                                            \
         S_re_croak(aTHX_ UTF, m REPORT_LOCATION, a1, a2,    \
@@ -976,7 +964,7 @@ static const scan_data_t zero_scan_data = {
 
 /*
  * Calls SAVEDESTRUCTOR_X if needed, then Simple_vFAIL3().
- */
+*/
 #define vFAIL3(m,a1,a2)             \
     STMT_START {                    \
         PREPARE_TO_DIE;             \
@@ -985,7 +973,7 @@ static const scan_data_t zero_scan_data = {
 
 /*
  * Like Simple_vFAIL(), but accepts four arguments.
- */
+*/
 #define Simple_vFAIL4(m, a1, a2, a3)                            \
     STMT_START {                                                \
         S_re_croak(aTHX_ UTF, m REPORT_LOCATION, a1, a2, a3,    \
@@ -1022,16 +1010,16 @@ static const scan_data_t zero_scan_data = {
 #define RESTORE_WARNINGS    \
     RExC_copy_start_in_constructed = RExC_save_copy_start_in_constructed
 
-/* Since a warning can be generated multiple times as the input is reparsed, we
- * output it the first time we come to that point in the parse, but suppress it
- * otherwise.  'RExC_copy_start_in_constructed' being NULL is a flag to not
- * generate any warnings */
+/* Since a warning can be generated multiple times as the input is
+ * reparsed, we output it the first time we come to that point in the
+ * parse, but suppress it otherwise.  'RExC_copy_start_in_constructed'
+ * being NULL is a flag to not generate any warnings */
 #define TO_OUTPUT_WARNINGS(loc)         \
     (   RExC_copy_start_in_constructed  \
      && ((xI(loc)) - RExC_precomp) > (Ptrdiff_t) RExC_latest_warn_offset)
 
-/* After we've emitted a warning, we save the position in the input so we don't
- * output it again */
+/* After we've emitted a warning, we save the position
+ * in the input so we don't output it again */
 #define UPDATE_WARNINGS_LOC(loc)                                        \
     STMT_START {                                                        \
         if (TO_OUTPUT_WARNINGS(loc)) {                                  \
@@ -1178,8 +1166,8 @@ static const scan_data_t zero_scan_data = {
         }                                                                   \
     } STMT_END
 
-/* Convert between a pointer to a node and its offset from the beginning of the
- * program */
+/* Convert between a pointer to a node and its offset
+ * from the beginning of the program */
 #define REGNODE_p(offset)    (RExC_emit_start + (offset))
 #define REGNODE_OFFSET(node)                \
     (__ASSERT_((node) >= RExC_emit_start)   \
@@ -1190,7 +1178,7 @@ static const scan_data_t zero_scan_data = {
 
 #if PERL_ENABLE_EXPERIMENTAL_REGEX_OPTIMISATIONS
 #define EXPERIMENTAL_INPLACESCAN
-#endif /*PERL_ENABLE_EXPERIMENTAL_REGEX_OPTIMISATIONS*/
+#endif /*PERL_ENABLE_EXPERIMENTAL_REGEX_OPTIMISATIONS */
 
 #define DEBUG_RExC_seen()                                               \
     DEBUG_OPTIMISE_MORE_r({                                             \

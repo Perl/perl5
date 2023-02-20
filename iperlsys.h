@@ -7,7 +7,7 @@
  * #defined to the system-level function (or a wrapper provided elsewhere).
  *
  * GSAR 21-JUN-98
- */
+*/
 
 #ifndef __Inc__IPerl___
 #define __Inc__IPerl___
@@ -15,33 +15,25 @@
 /*
  *      PerlXXX_YYY explained - DickH and DougL @ ActiveState.com
  *
- * XXX := functional group
- * YYY := stdlib/OS function name
+ * XXX := functional group YYY := stdlib/OS function name
  *
  * Continuing with the theme of PerlIO, all OS functionality was encapsulated
  * into one of several interfaces.
  *
- * PerlIO - stdio
- * PerlLIO - low level I/O
- * PerlMem - malloc, realloc, free
- * PerlDir - directory related
- * PerlEnv - process environment handling
- * PerlProc - process control
- * PerlSock - socket functions
+ * PerlIO - stdio PerlLIO - low level I/O PerlMem - malloc, realloc, free
+ * PerlDir - directory related PerlEnv - process environment handling PerlProc
+ * - process control PerlSock - socket functions
  *
  *
- * The features of this are:
- * 1. All OS dependant code is in the Perl Host and not the Perl Core.
- *    (At least this is the holy grail goal of this work)
- * 2. The Perl Host (see perl.h for description) can provide a new and
- *    improved interface to OS functionality if required.
- * 3. Developers can easily hook into the OS calls for instrumentation
- *    or diagnostic purposes.
+ * The features of this are: 1.  All OS dependant code is in the Perl Host and
+ * not the Perl Core.  (At least this is the holy grail goal of this work) 2.
+ * The Perl Host (see perl.h for description) can provide a new and improved
+ * interface to OS functionality if required.  3. Developers can easily hook
+ * into the OS calls for instrumentation or diagnostic purposes.
  *
- * What was changed to do this:
- * 1. All calls to OS functions were replaced with PerlXXX_YYY
- *
- */
+ * What was changed to do this: 1.  All calls to OS functions were replaced
+ * with PerlXXX_YYY
+*/
 
 /*
     Interface for perl stdio functions, or whatever we are Configure-d
@@ -63,7 +55,7 @@ typedef Sighandler1_t Sighandler_t;
 
 #if defined(PERL_IMPLICIT_SYS)
 
-/* IPerlStdIO           */
+/* IPerlStdIO */
 struct IPerlStdIO;
 struct IPerlStdIOInfo;
 typedef FILE*           (*LPStdin)(struct IPerlStdIO*);
@@ -285,7 +277,8 @@ struct IPerlStdIOInfo
 #  define PerlSIO_stderr                        stderr
 #  define PerlSIO_fopen(x,y)            fopen(x,y)
 #  ifdef __VOS__
-   /* Work around VOS bug posix-979, wrongly setting errno when at end of file. */
+   /* Work around VOS bug posix-979, wrongly setting
+      errno when at end of file. */
 #    define PerlSIO_fclose(f)           (((errno==1025)?errno=0:0),fclose(f))
 #    define PerlSIO_feof(f) \
          (((errno==1025)?errno=0:0),feof(f))
@@ -362,11 +355,11 @@ END_EXTERN_C
 
 /*
  *   Interface for directory functions
- */
+*/
 
 #if defined(PERL_IMPLICIT_SYS)
 
-/* IPerlDir             */
+/* IPerlDir */
 struct IPerlDir;
 struct IPerlDirInfo;
 typedef int             (*LPMakedir)(struct IPerlDir*, const char*, int);
@@ -459,7 +452,7 @@ struct IPerlDirInfo
 
 #if defined(PERL_IMPLICIT_SYS)
 
-/* IPerlEnv             */
+/* IPerlEnv */
 struct IPerlEnv;
 struct IPerlEnvInfo;
 typedef char*           (*LPEnvGetenv)(struct IPerlEnv*, const char*);
@@ -608,7 +601,7 @@ struct IPerlEnvInfo
 
 struct utimbuf; /* prevent gcc warning about the use below */
 
-/* IPerlLIO             */
+/* IPerlLIO */
 struct IPerlLIO;
 struct IPerlLIOInfo;
 typedef int             (*LPLIOAccess)(struct IPerlLIO*, const char*, int);
@@ -808,7 +801,7 @@ struct IPerlLIOInfo
 
 #if defined(PERL_IMPLICIT_SYS)
 
-/* IPerlMem             */
+/* IPerlMem */
 struct IPerlMem;
 struct IPerlMemInfo;
 typedef void*           (*LPMemMalloc)(struct IPerlMem*, size_t);
@@ -927,7 +920,7 @@ struct IPerlMemInfo
 #    include <setjmp.h>
 #  endif
 
-/* IPerlProc            */
+/* IPerlProc */
 struct IPerlProc;
 struct IPerlProcInfo;
 typedef void            (*LPProcAbort)(struct IPerlProc*);
@@ -1148,7 +1141,7 @@ struct IPerlProcInfo
 
 #if defined(PERL_IMPLICIT_SYS)
 
-/* PerlSock             */
+/* PerlSock */
 struct IPerlSock;
 struct IPerlSockInfo;
 typedef u_long          (*LPHtonl)(struct IPerlSock*, u_long);
@@ -1425,4 +1418,4 @@ struct IPerlSockInfo
 
 /*
  * ex: set ts=8 sts=4 sw=4 et:
- */
+*/

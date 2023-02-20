@@ -1,11 +1,11 @@
 /*    av.h
  *
- *    Copyright (C) 1991, 1992, 1993, 1995, 1996, 1997, 1998, 1999, 2000,
- *    2001, 2002, 2005, 2006, 2007, 2008, by Larry Wall and others
+ *    Copyright (C) 1991, 1992, 1993, 1995, 1996, 1997, 1998, 1999, 2000, 2001,
+ *    2002, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015,
+ *    2016, 2017, 2018, 2019, 2020, 2021, 2022 by Larry Wall and others
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
- *
  */
 
 struct xpvav {
@@ -16,35 +16,34 @@ struct xpvav {
     SV**        xav_alloc;      /* pointer to beginning of C array of SVs */
 };
 
-/* SV*  xav_arylen; */
+/* SV* xav_arylen; */
 
-/* SVpav_REAL is set for all AVs whose xav_array contents are refcounted
- * and initialized such that any element can be retrieved as a SV*.
- * Such AVs may be referred to as "real" AVs. Examples include regular
- * perl arrays, tiedarrays (since v5.16), and padlist AVs.
+/* SVpav_REAL is set for all AVs whose xav_array contents are refcounted and
+ * initialized such that any element can be retrieved as a SV*.  Such AVs may
+ * be referred to as "real" AVs.  Examples include regular perl arrays,
+ * tiedarrays (since v5.16), and padlist AVs.
  *
- * Some things do not set SVpav_REAL, to indicate that they are cheating
- * (for efficiency) by not refcounting the AV's contents or ensuring that
- * all elements are safe for arbitrary access. This type of AV may be
- * referred to as "fake" AVs. Examples include "@_" (unless tied), the
- * scratchpad list, and the backrefs list on an object or stash.
+ * Some things do not set SVpav_REAL, to indicate that they are cheating (for
+ * efficiency) by not refcounting the AV's contents or ensuring that all
+ * elements are safe for arbitrary access.  This type of AV may be referred
+ * to as "fake" AVs.  Examples include "@_" (unless tied), the scratchpad
+ * list, and the backrefs list on an object or stash.
  *
- * SVpav_REIFY is only meaningful on such "fake" AVs (i.e. where SVpav_REAL
- * is not set).  It indicates that the fake AV is capable of becoming
- * real if the array needs to be modified in some way.  Functions that
- * modify fake AVs check both flags to call av_reify() as appropriate.
+ * SVpav_REIFY is only meaningful on such "fake" AVs (i.e.  where SVpav_REAL
+ * is not set).  It indicates that the fake AV is capable of becoming real if
+ * the array needs to be modified in some way.  Functions that modify fake
+ * AVs check both flags to call av_reify() as appropriate.
  *
  * av_reify() transforms a fake AV into a real one through two actions.
  * Allocated but unpopulated elements are initialized to make them safe for
  * arbitrary retrieval and the reference counts of populated elements are
  * incremented.
  *
- * Note that the Perl stack has neither flag set. (Thus,
- * items that go on the stack are never refcounted.)
+ * Note that the Perl stack has neither flag set.  (Thus, items that go on
+ * the stack are never refcounted.)
  *
- * These internal details are subject to change any time.  AV
- * manipulations external to perl should not care about any of this.
- * GSAR 1999-09-10
+ * These internal details are subject to change any time.  AV manipulations
+ * external to perl should not care about any of this.  GSAR 1999-09-10
  */
 
 /*
@@ -58,15 +57,16 @@ Same as C<L</av_top_index>> or C<L</av_tindex>>.
 
 =for apidoc Cm|SSize_t|AvFILLp|AV* av
 
-If the array C<av> is empty, this returns -1; otherwise it returns the maximum
-value of the indices of all the array elements which are currently defined in
-C<av>.  It does not handle magic, hence the C<p> private indication in its name.
+If the array C<av> is empty, this returns -1; otherwise it returns
+the maximum value of the indices of all the array elements which are
+currently defined in C<av>.  It does not handle magic, hence the C<p>
+private indication in its name.
 
 =for apidoc Am|SV**|AvARRAY|AV* av
 Returns a pointer to the AV's internal SV* array.
 
-This is useful for doing pointer arithmetic on the array.
-If all you need is to look up an array element, then prefer C<av_fetch>.
+This is useful for doing pointer arithmetic on the array.  If all you
+need is to look up an array element, then prefer C<av_fetch>.
 
 =cut
 */
@@ -100,7 +100,7 @@ If all you need is to look up an array element, then prefer C<av_fetch>.
 #define av_tindex(av)    av_top_index(av)
 
 /* Note that it doesn't make sense to do this:
- *      SvGETMAGIC(av); IV x = av_tindex_nomg(av);
+ * SvGETMAGIC(av); IV x = av_tindex_nomg(av);
  */
 #   define av_top_index_skip_len_mg(av) \
         (__ASSERT_(SvTYPE(av) == SVt_PVAV) AvFILLp(av))
@@ -152,15 +152,15 @@ create that.  They differ in what else they do, as follows:
 'form' above and below is because otherwise have two =items with the same name,
 can't link to them.
 
-This does nothing beyond creating the whole-array data structure.
-The Perl equivalent is approximately S<C<my @array;>>
+This does nothing beyond creating the whole-array data structure.  The Perl
+equivalent is approximately S<C<my @array;>>
 
 This is useful when the minimum size of the array could be zero (perhaps there
 are likely code paths that will entirely skip using it).
 
 If the array does get used, the pointers data structure will need to be
-allocated at that time.  This will end up being done by L</av_extend>>,
-either explicitly:
+allocated at that time.  This will end up being done by L</av_extend>>, either
+explicitly:
 
     av_extend(av, len);
 
@@ -191,7 +191,7 @@ C<size> must be at least 1.
 =back
 
 The following examples all result in an array that can fit four elements
-(indexes 0 .. 3):
+(indexes 0 ..  3):
 
     AV *av = newAV();
     av_extend(av, 3);
@@ -207,7 +207,6 @@ to fit one element without extending:
     AV *av = newAV_alloc_xz(1);
 
 =cut
-
 */
 
 #define newAV() MUTABLE_AV(newSV_type(SVt_PVAV))
@@ -216,4 +215,4 @@ to fit one element without extending:
 
 /*
  * ex: set ts=8 sts=4 sw=4 et:
- */
+*/

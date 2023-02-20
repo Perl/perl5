@@ -1,13 +1,12 @@
-/* This is SipHash by Jean-Philippe Aumasson and Daniel J. Bernstein.
- * The authors claim it is relatively secure compared to the alternatives
- * and that performance wise it is a suitable hash for languages like Perl.
- * See:
+/* This is SipHash by Jean-Philippe Aumasson and Daniel J.  Bernstein.  The
+ * authors claim it is relatively secure compared to the alternatives and that
+ * performance wise it is a suitable hash for languages like Perl.  See:
  *
  * https://www.131002.net/siphash/
  *
  * This implementation seems to perform slightly slower than one-at-a-time for
- * short keys, but degrades slower for longer keys. Murmur Hash outperforms it
- * regardless of keys size.
+ * short keys, but degrades slower for longer keys.  Murmur Hash outperforms
+ * it regardless of keys size.
  *
  * It is 64 bit only.
  */
@@ -66,12 +65,12 @@ void S_perl_siphash_seed_state(const unsigned char * const seed_buf, unsigned ch
                                                                                         \
       switch( left )                                                                    \
       {                                                                                 \
-      case 7: b |= ( ( U64 )in[ 6] )  << 48; /*FALLTHROUGH*/                            \
-      case 6: b |= ( ( U64 )in[ 5] )  << 40; /*FALLTHROUGH*/                            \
-      case 5: b |= ( ( U64 )in[ 4] )  << 32; /*FALLTHROUGH*/                            \
-      case 4: b |= ( ( U64 )in[ 3] )  << 24; /*FALLTHROUGH*/                            \
-      case 3: b |= ( ( U64 )in[ 2] )  << 16; /*FALLTHROUGH*/                            \
-      case 2: b |= ( ( U64 )in[ 1] )  <<  8; /*FALLTHROUGH*/                            \
+      case 7: b |= ( ( U64 )in[ 6] )  << 48; /*FALLTHROUGH */                           \
+      case 6: b |= ( ( U64 )in[ 5] )  << 40; /*FALLTHROUGH */                           \
+      case 5: b |= ( ( U64 )in[ 4] )  << 32; /*FALLTHROUGH */                           \
+      case 4: b |= ( ( U64 )in[ 3] )  << 24; /*FALLTHROUGH */                           \
+      case 3: b |= ( ( U64 )in[ 2] )  << 16; /*FALLTHROUGH */                           \
+      case 2: b |= ( ( U64 )in[ 1] )  <<  8; /*FALLTHROUGH */                           \
       case 1: b |= ( ( U64 )in[ 0] ); break;                                            \
       case 0: break;                                                                    \
       }                                                                                 \

@@ -1,11 +1,12 @@
 /*    regcomp.h
  *
  *    Copyright (C) 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
- *    2000, 2001, 2002, 2003, 2005, 2006, 2007, by Larry Wall and others
+ *    2000, 2001, 2002, 2003, 2005, 2006, 2007, 2008, 2009, 2010, 2011,
+ *    2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022 by
+ *    Larry Wall and others
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
- *
  */
 
 #if ! defined(PERL_REGCOMP_H_) && (   defined(PERL_CORE)    \
@@ -31,18 +32,18 @@
  * Structure for regexp "program".  This is essentially a linear encoding
  * of a nondeterministic finite-state machine (aka syntax charts or
  * "railroad normal form" in parsing technology).  Each node is an opcode
- * plus a "next" pointer, possibly plus an operand.  "Next" pointers of
- * all nodes except BRANCH implement concatenation; a "next" pointer with
- * a BRANCH on both ends of it is connecting two alternatives.  (Here we
- * have one of the subtle syntax dependencies:  an individual BRANCH (as
- * opposed to a collection of them) is never concatenated with anything
- * because of operator precedence.)  The operand of some types of node is
- * a literal string; for others, it is a node leading into a sub-FSM.  In
- * particular, the operand of a BRANCH node is the first node of the branch.
- * (NB this is *not* a tree structure:  the tail of the branch connects
- * to the thing following the set of BRANCHes.)  The opcodes are defined
- * in regnodes.h which is generated from regcomp.sym by regcomp.pl.
- */
+ * plus a "next" pointer, possibly plus an operand.  "Next" pointers of all
+ * nodes except BRANCH implement concatenation; a "next" pointer with a
+ * BRANCH on both ends of it is connecting two alternatives.  (Here we have
+ * one of the subtle syntax dependencies: an individual BRANCH (as opposed
+ * to a collection of them) is never concatenated with anything because of
+ * operator precedence.) The operand of some types of node is a literal
+ * string; for others, it is a node leading into a sub-FSM.  In particular,
+ * the operand of a BRANCH node is the first node of the branch.  (NB this
+ * is *not* a tree structure: the tail of the branch connects to the thing
+ * following the set of BRANCHes.) The opcodes are defined in regnodes.h
+ * which is generated from regcomp.sym by regcomp.pl.
+*/
 
 /*
  * A node is one char of opcode followed by two chars of "next" pointer.
@@ -51,31 +52,33 @@
  * An operand, if any, simply follows the node.  (Note that much of the
  * code generation knows about this implicit relationship.)
  *
- * Using two bytes for the "next" pointer is vast overkill for most things,
- * but allows patterns to get big without disasters.
+ * Using two bytes for the "next" pointer is vast overkill for most
+ * things, but allows patterns to get big without disasters.
  *
- * [The "next" pointer is always aligned on an even
- * boundary, and reads the offset directly as a short.]
- */
+ * [The "next" pointer is always aligned on an even boundary, and reads
+ * the offset directly as a short.]
+*/
 
 /* This is the stuff that used to live in regexp.h that was truly
-   private to the engine itself. It now lives here. */
+   private to the engine itself.  It now lives here. */
 
 typedef struct regexp_internal {
-        regnode *regstclass;    /* Optional startclass as identified or constructed
-                                   by the optimiser */
-        struct reg_data *data;  /* Additional miscellaneous data used by the program.
-                                   Used to make it easier to clone and free arbitrary
-                                   data that the regops need. Often the ARG field of
-                                   a regop is an index into this structure. NOTE the
-                                   0th element of this structure is NEVER used and is
-                                   strictly reserved for internal purposes. */
+        regnode *regstclass;    /* Optional startclass as identified or
+                                   constructed by the optimiser */
+        struct reg_data *data;  /* Additional miscellaneous data used by
+                                   the program.  Used to make it easier to
+                                   clone and free arbitrary data that the
+                                   regops need.  Often the ARG field of a
+                                   regop is an index into this structure.
+                                   NOTE the 0th element of this structure
+                                   is NEVER used and is strictly reserved
+                                   for internal purposes. */
         struct reg_code_blocks *code_blocks;/* positions of literal (?{}) */
         U32 proglen;            /* size of the compiled program in regnodes */
-        U32 name_list_idx;      /* Optional data index of an array of paren names,
-                                   only valid when RXp_PAREN_NAMES(prog) is true,
-                                   0 means "no value" like any other index into the
-                                   data array.*/
+        U32 name_list_idx;      /* Optional data index of an array of paren
+                                   names, only valid when RXp_PAREN_NAMES(prog)
+                                   is true, 0 means "no value" like any other
+                                   index into the data array. */
         regnode program[1];     /* Unwarranted chumminess with compiler. */
 } regexp_internal;
 
@@ -84,11 +87,11 @@ typedef struct regexp_internal {
 #define RXi_GET_DECL(r,ri) regexp_internal *ri = RXi_GET(r)
 #define RXi_GET_DECL_NULL(r,ri) regexp_internal *ri = (r) ? RXi_GET(r) : NULL
 /*
- * Flags stored in regexp->intflags
- * These are used only internally to the regexp engine
+ * Flags stored in regexp->intflags These are used only
+ * internally to the regexp engine
  *
  * See regexp.h for flags used externally to the regexp engine
- */
+*/
 #define RXp_INTFLAGS(rx)        ((rx)->intflags)
 #define RX_INTFLAGS(prog)        RXp_INTFLAGS(ReANY(prog))
 
@@ -117,42 +120,38 @@ typedef struct regexp_internal {
 /* this is where the old regcomp.h started */
 
 
-/* Define the various regnode structures. These all should be a multiple
- * of 32 bits large, and they should by and large correspond with each other
- * in terms of naming, etc. Things can and will break in subtle ways if you
- * change things without care. If you look at regexp.h you will see it
+/* Define the various regnode structures.  These all should be a multiple of
+ * 32 bits large, and they should by and large correspond with each other in
+ * terms of naming, etc.  Things can and will break in subtle ways if you
+ * change things without care.  If you look at regexp.h you will see it
  * contains this:
  *
- * struct regnode {
- *   U8  flags;
- *   U8  type;
- *   U16 next_off;
- * };
+ * struct regnode { U8 flags; U8 type; U16 next_off; };
  *
- * This structure is the base unit of elements in the regexp program. When
+ * This structure is the base unit of elements in the regexp program.  When
  * we increment our way through the program we increment by the size of this
  * structure, and in all cases where regnode sizing is considered it is in
  * units of this structure.
  *
- * This implies that no regnode style structure should contain 64 bit
- * aligned members. Since the base regnode is 32 bits any member might
- * not be 64 bit aligned no matter how you might try to pad out the
- * struct itself (the regnode_ssc is special in this regard as it is
- * never used in a program directly). If you want to store 64 bit
- * members you need to store them specially. The struct regnode_p and the
- * ARGp() and ARGp_SET() macros and related inline functions provide an example
- * solution. Note they deal with a slightly more complicated problem than simple
- * alignment, as pointers may be 32 bits or 64 bits depending on platform,
- * but they illustrate the pattern to follow if you want to put a 64 bit value
- * into a regnode.
-
- * NOTE: Ideally we do not put pointers into the regnodes in a program. Instead
- * we put them in the "data" part of the regexp structure and store the index into
- * the data in the pointers in the regnode. This allows the pointer to be handled
- * properly during clone/free operations (eg refcount bookkeeping). See S_add_data(),
- * Perl_regdupe_internal(), Perl_regfree_internal() in regcomp.c for how the data
- * array can be used, the letters 'arsSu' all refer to different types of SV that
- * we already have support for in the data array.
+ * This implies that no regnode style structure should contain 64 bit aligned
+ * members.  Since the base regnode is 32 bits any member might not be 64 bit
+ * aligned no matter how you might try to pad out the struct itself (the
+ * regnode_ssc is special in this regard as it is never used in a program
+ * directly).  If you want to store 64 bit members you need to store them
+ * specially.  The struct regnode_p and the ARGp() and ARGp_SET() macros and
+ * related inline functions provide an example solution.  Note they deal with
+ * a slightly more complicated problem than simple alignment, as pointers may
+ * be 32 bits or 64 bits depending on platform, but they illustrate the
+ * pattern to follow if you want to put a 64 bit value into a regnode.
+ *
+ * NOTE: Ideally we do not put pointers into the regnodes in a program.
+ * Instead we put them in the "data" part of the regexp structure and store
+ * the index into the data in the pointers in the regnode.  This allows the
+ * pointer to be handled properly during clone/free operations (eg refcount
+ * bookkeeping).  See S_add_data(), Perl_regdupe_internal(),
+ * Perl_regfree_internal() in regcomp.c for how the data array can be used,
+ * the letters 'arsSu' all refer to different types of SV that we already
+ * have support for in the data array.
  */
 
 struct regnode_string {
@@ -162,7 +161,8 @@ struct regnode_string {
     char string[1];
 };
 
-struct regnode_lstring { /* Constructed this way to keep the string aligned. */
+struct regnode_lstring { /* Constructed this way to keep
+                            the string aligned. */
     U8  flags;
     U8  type;
     U16 next_off;
@@ -170,7 +170,8 @@ struct regnode_lstring { /* Constructed this way to keep the string aligned. */
     char string[1];
 };
 
-struct regnode_anyofhs { /* Constructed this way to keep the string aligned. */
+struct regnode_anyofhs { /* Constructed this way to keep
+                            the string aligned. */
     U8  str_len;
     U8  type;
     U16 next_off;
@@ -178,8 +179,7 @@ struct regnode_anyofhs { /* Constructed this way to keep the string aligned. */
     char string[1];
 };
 
-/* Argument bearing node - workhorse,
-   arg1 is often for the data field */
+/* Argument bearing node - workhorse, arg1 is often for the data field */
 struct regnode_1 {
     U8  flags;
     U8  type;
@@ -191,17 +191,17 @@ struct regnode_1 {
  * situations where pointers won't become invalid because of, say re-mallocs.
  *
  * Note that this regnode type is problematic and should not be used or copied
- * and will be removed in the future. Pointers should be stored in the data[]
- * array and an index into the data array stored in the regnode, which allows the
- * pointers to be handled properly during clone/free operations on the regexp
- * data structure. As a byproduct it also saves space, often we use a 16 bit
- * member to store indexes into the data[] array.
+ * and will be removed in the future.  Pointers should be stored in the data[]
+ * array and an index into the data array stored in the regnode, which allows
+ * the pointers to be handled properly during clone/free operations on the
+ * regexp data structure.  As a byproduct it also saves space, often we use a
+ * 16 bit member to store indexes into the data[] array.
  *
- * Also note that the weird storage here is because regnodes are 32 bit aligned,
- * which means we cannot have a 64 bit aligned member. To make things more annoying
- * the size of a pointer may vary by platform. Thus we use a character array, and
- * then use inline functions to copy the data in or out.
- * */
+ * Also note that the weird storage here is because regnodes are 32 bit
+ * aligned, which means we cannot have a 64 bit aligned member.  To make things
+ * more annoying the size of a pointer may vary by platform.  Thus we use a
+ * character array, and then use inline functions to copy the data in or out.
+ */
 struct regnode_p {
     U8  flags;
     U8  type;
@@ -231,9 +231,9 @@ struct regnode_2 {
       /* 6 info bits requires 64 bits; 5 => 32 */   \
     ((1 << (UTF_CONTINUATION_BYTE_INFO_BITS)) / CHARBITS)
 
-/* Used for matching any two-byte UTF-8 character whose start byte is known.
- * The array is a bitmap capable of representing any possible continuation
- * byte. */
+/* Used for matching any two-byte UTF-8 character whose
+ * start byte is known.  The array is a bitmap capable
+ * of representing any possible continuation byte. */
 struct regnode_bbm {
     U8  first_byte;
     U8  type;
@@ -243,16 +243,16 @@ struct regnode_bbm {
 
 #define ANYOF_BITMAP_SIZE       (NUM_ANYOF_CODE_POINTS / CHARBITS)
 
-/* Note that these form structs which are supersets of the next smaller one, by
- * appending fields.  Alignment problems can occur if one of those optional
- * fields requires stricter alignment than the base struct.  And formal
- * parameters that can really be two or more of the structs should be
+/* Note that these form structs which are supersets of the next smaller one,
+ * by appending fields.  Alignment problems can occur if one of those
+ * optional fields requires stricter alignment than the base struct.  And
+ * formal parameters that can really be two or more of the structs should be
  * declared as the smallest one it could be.  See commit message for
  * 7dcac5f6a5195002b55c935ee1d67f67e1df280b.  Regnode allocation is done
- * without regard to alignment, and changing it to would also require changing
- * the code that inserts and deletes regnodes.  The basic single-argument
- * regnode has a U32, which is what reganode() allocates as a unit.  Therefore
- * no field can require stricter alignment than U32. */
+ * without regard to alignment, and changing it to would also require
+ * changing the code that inserts and deletes regnodes.  The basic
+ * single-argument regnode has a U32, which is what reganode() allocates as
+ * a unit.  Therefore no field can require stricter alignment than U32. */
 
 /* also used by trie */
 struct regnode_charclass {
@@ -275,16 +275,16 @@ struct regnode_charclass_posixl {
 
 /* A synthetic start class (SSC); is a regnode_charclass_posixl_fold, plus an
  * extra SV*, used only during regex construction and which is not used by the
- * main machinery in regexec.c and which does not get embedded in the final compiled
- * regex program.
+ * main machinery in regexec.c and which does not get embedded in the final
+ * compiled regex program.
  *
- * Because it does not get embedded it does not have to comply with the alignment
- * and sizing constraints required for a normal regnode structure: it MAY contain
- * pointers or members of whatever size needed and the compiler will do the right
- * thing. (Every other regnode type is 32 bit aligned.)
+ * Because it does not get embedded it does not have to comply with the
+ * alignment and sizing constraints required for a normal regnode structure: it
+ * MAY contain pointers or members of whatever size needed and the compiler
+ * will do the right thing.  (Every other regnode type is 32 bit aligned.)
  *
- * Note that the 'next_off' field is unused, as the SSC stands alone, so there is
- * never a next node.
+ * Note that the 'next_off' field is unused, as the SSC stands alone, so there
+ * is never a next node.
  */
 struct regnode_ssc {
     U8  flags;                      /* ANYOF_MATCHES_POSIXL bit must go here */
@@ -294,19 +294,19 @@ struct regnode_ssc {
     char bitmap[ANYOF_BITMAP_SIZE];     /* both compile-time ... */
     U32 classflags;                     /* ... and run-time */
 
-    /* Auxiliary, only used during construction; NULL afterwards: list of code
-     * points matched */
+    /* Auxiliary, only used during construction; NULL
+     * afterwards: list of code points matched */
     SV* invlist;
 };
 
 /*  We take advantage of 'next_off' not otherwise being used in the SSC by
  *  actually using it: by setting it to 1.  This allows us to test and
- *  distinguish between an SSC and other ANYOF node types, as 'next_off' cannot
- *  otherwise be 1, because it is the offset to the next regnode expressed in
- *  units of regnodes.  Since an ANYOF node contains extra fields, it adds up
- *  to 12 regnode units on 32-bit systems, (hence the minimum this can be (if
- *  not 0) is 11 there.  Even if things get tightly packed on a 64-bit system,
- *  it still would be more than 1. */
+ *  distinguish between an SSC and other ANYOF node types, as 'next_off'
+ *  cannot otherwise be 1, because it is the offset to the next regnode
+ *  expressed in units of regnodes.  Since an ANYOF node contains extra
+ *  fields, it adds up to 12 regnode units on 32-bit systems, (hence the
+ *  minimum this can be (if not 0) is 11 there.  Even if things get
+ *  tightly packed on a 64-bit system, it still would be more than 1. */
 #define set_ANYOF_SYNTHETIC(n)  \
     STMT_START{                 \
         OP(n) = ANYOF;          \
@@ -315,18 +315,16 @@ struct regnode_ssc {
 
 #define is_ANYOF_SYNTHETIC(n) (REGNODE_TYPE(OP(n)) == ANYOF && NEXT_OFF(n) == 1)
 
-/* XXX fix this description.
-   Impose a limit of REG_INFTY on various pattern matching operations
-   to limit stack growth and to avoid "infinite" recursions.
-*/
+/* XXX fix this description.  Impose a limit of REG_INFTY
+   on various pattern matching operations to limit stack
+   growth and to avoid "infinite" recursions.
+ */
 /* The default size for REG_INFTY is I32_MAX, which is the same as UINT_MAX
-   (see perl.h). Unfortunately I32 isn't necessarily 32 bits (see handy.h).
-   On the Cray C90, or Cray T90, I32_MAX is considerably larger than it
-   might be elsewhere. To limit stack growth to reasonable sizes, supply a
-   smaller default.
-        --Andy Dougherty  11 June 1998
-        --Amended by Yves Orton 15 Jan 2023
-*/
+   (see perl.h).  Unfortunately I32 isn't necessarily 32 bits (see handy.h).
+   On the Cray C90, or Cray T90, I32_MAX is considerably larger than it might
+   be elsewhere.  To limit stack growth to reasonable sizes, supply a smaller
+   default.  --Andy Dougherty 11 June 1998 --Amended by Yves Orton 15 Jan 2023
+ */
 #if INTSIZE > 4
 #  ifndef REG_INFTY
 #    define REG_INFTY  nBIT_IMAX(32)
@@ -361,15 +359,12 @@ struct regnode_ssc {
 
 #define NEXT_OFF(p) ((p)->next_off)
 #define NODE_ALIGN(node)
-/* the following define was set to 0xde in 075abff3
- * as part of some linting logic. I have set it to 0
- * as otherwise in every place where we /might/ set flags
- * we have to set it 0 explicitly, which duplicates
- * assignments and IMO adds an unacceptable level of
- * surprise to working in the regex engine. If this
- * is changed from 0 then at the very least make sure
- * that SBOL for /^/ sets the flags to 0 explicitly.
- * -- Yves */
+/* the following define was set to 0xde in 075abff3 as part of some linting
+ * logic.  I have set it to 0 as otherwise in every place where we /might/
+ * set flags we have to set it 0 explicitly, which duplicates assignments
+ * and IMO adds an unacceptable level of surprise to working in the regex
+ * engine.  If this is changed from 0 then at the very least make sure that
+ * SBOL for /^/ sets the flags to 0 explicitly.  -- Yves */
 #define NODE_ALIGN_FILL(node) ((node)->flags = 0)
 
 #define SIZE_ALIGN NODE_ALIGN
@@ -379,10 +374,9 @@ struct regnode_ssc {
 #undef STRING
 
 #define OP(p)           ((p)->type)
-#define FLAGS(p)                                            \
-    ((p)->flags)    /* Caution: Doesn't apply to all        \
-                       regnode types.  For some, it's the   \
-                       character set of the regnode */
+#define FLAGS(p)                                                            \
+    ((p)->flags)    /* Caution: Doesn't apply to all regnode types.  For    \
+                       some, it's the character set of the regnode */
 #define STR_LENs(p)                                     \
     (__ASSERT_(OP(p) != LEXACT && OP(p) != LEXACT_REQ8) \
                 ((struct regnode_string *)p)->str_len)
@@ -398,13 +392,13 @@ struct regnode_ssc {
  * points to the next regnode, so the furthest away it can be is 2**16.  On
  * most architectures, regnodes are 2**2 bytes long, so that yields 2**18
  * bytes.  Should a longer string be desired, we could increase it to 26 bits
- * fairly easily, by changing this node to have longj type which causes the ARG
- * field to be used for the link to the next regnode (although code would have
- * to be changed to account for this), and then use a combination of the flags
- * and next_off fields for the length.  To get 34 bit length, also change the
- * node to be an ARG2L, using the second 32 bit field for the length, and not
- * using the flags nor next_off fields at all.  One could have an llstring node
- * and even an lllstring type. */
+ * fairly easily, by changing this node to have longj type which causes the
+ * ARG field to be used for the link to the next regnode (although code would
+ * have to be changed to account for this), and then use a combination of the
+ * flags and next_off fields for the length.  To get 34 bit length, also
+ * change the node to be an ARG2L, using the second 32 bit field for the
+ * length, and not using the flags nor next_off fields at all.  One could
+ * have an llstring node and even an lllstring type. */
 #define STR_LENl(p)                                     \
     (__ASSERT_(OP(p) == LEXACT || OP(p) == LEXACT_REQ8) \
                 (((struct regnode_lstring *)p)->str_len))
@@ -448,19 +442,19 @@ struct regnode_ssc {
 #define ARG2L_LOC(p)    (((struct regnode_2L *)p)->arg2)
 
 
-/* These should no longer be used directly in most cases. Please use
- * the REGNODE_AFTER() macros instead. */
+/* These should no longer be used directly in most cases.
+ * Please use the REGNODE_AFTER() macros instead. */
 #define NODE_STEP_REGNODE       1       /* sizeof(regnode)/sizeof(regnode) */
 
-/* Core macros for computing "the regnode after this one". See also
+/* Core macros for computing "the regnode after this one".  See also
  * Perl_regnode_after() in reginline.h
  *
- * At the struct level regnodes are a linked list, with each node pointing
- * at the next (via offsets), usually via the C<next_off> field in the
- * structure. Where there is a need for a node to have two children the
- * immediate physical successor of the node in the compiled program is used
- * to represent one of them. A good example is the BRANCH construct,
- * consider the pattern C</head(?:[ab]foo|[cd]bar)tail/>
+ * At the struct level regnodes are a linked list, with each node pointing at
+ * the next (via offsets), usually via the C<next_off> field in the structure.
+ * Where there is a need for a node to have two children the immediate physical
+ * successor of the node in the compiled program is used to represent one of
+ * them.  A good example is the BRANCH construct, consider the pattern
+ * C</head(?:[ab]foo|[cd]bar)tail/>
  *
  *      1: EXACT <head> (3)
  *      3: BRANCH (8)
@@ -473,86 +467,86 @@ struct regnode_ssc {
  *     14: EXACT <tail> (16)
  *     16: END (0)
  *
- * The numbers in parens at the end of each line show the "next_off" value
- * for that regnode in the program. We can see that the C<next_off> of
- * the first BRANCH node (#3) is the second BRANCH node (#8), and indicates
- * where execution should go if the regnodes *following* the BRANCH node fail
- * to accept the input string. Thus to find the "next BRANCH" we would do
- * C<Perl_regnext()> and follow the C<next_off> pointer, and to find
- * the "BRANCHes contents" we would use C<REGNODE_AFTER()>.
+ * The numbers in parens at the end of each line show the "next_off" value for
+ * that regnode in the program.  We can see that the C<next_off> of the first
+ * BRANCH node (#3) is the second BRANCH node (#8), and indicates where
+ * execution should go if the regnodes *following* the BRANCH node fail to
+ * accept the input string.  Thus to find the "next BRANCH" we would do
+ * C<Perl_regnext()> and follow the C<next_off> pointer, and to find the
+ * "BRANCHes contents" we would use C<REGNODE_AFTER()>.
  *
- * Be aware that C<REGNODE_AFTER()> is not guaranteed to give a *useful*
- * result once the regex peephole optimizer has run (it will be correct
- * however!). By the time code in regexec.c executes various regnodes
- * may have been optimized out of the the C<next_off> chain. An example
- * can be seen above, node 13 will never be reached during execution
- * flow as it has been stitched out of the C<next_off> chain. Both 6 and
- * 11 would have pointed at it during compilation, but it exists only to
- * facilitate the construction of the BRANCH structure and is effectively
- * a NOOP, and thus the optimizer adjusts the links so it is skipped
- * from execution time flow. In regexec.c it is only safe to use
- * REGNODE_AFTER() on specific node types.
+ * Be aware that C<REGNODE_AFTER()> is not guaranteed to give a *useful* result
+ * once the regex peephole optimizer has run (it will be correct however!).  By
+ * the time code in regexec.c executes various regnodes may have been
+ * optimized out of the the C<next_off> chain.  An example can be seen above,
+ * node 13 will never be reached during execution flow as it has been stitched
+ * out of the C<next_off> chain.  Both 6 and 11 would have pointed at it during
+ * compilation, but it exists only to facilitate the construction of the BRANCH
+ * structure and is effectively a NOOP, and thus the optimizer adjusts the
+ * links so it is skipped from execution time flow.  In regexec.c it is only
+ * safe to use REGNODE_AFTER() on specific node types.
  *
- * Conversely during compilation C<Perl_regnext()> may not work properly
- * as the C<next_off> may not be known until "later", (such as in the
- * case of BRANCH nodes) and thus in regcomp.c the REGNODE_AFTER() macro
- * is used very heavily instead.
+ * Conversely during compilation C<Perl_regnext()> may not work properly as the
+ * C<next_off> may not be known until "later", (such as in the case of BRANCH
+ * nodes) and thus in regcomp.c the REGNODE_AFTER() macro is used very heavily
+ * instead.
  *
- * There are several variants of the REGNODE_AFTER_xxx() macros which
- * are intended for use in different situations depending on how
- * confident the code is about what type of node it is trying to find a
- * successor for.
+ * There are several variants of the REGNODE_AFTER_xxx() macros which are
+ * intended for use in different situations depending on how confident the code
+ * is about what type of node it is trying to find a successor for.
  *
  * So for instance if you know you are dealing with a known node type of
  * constant size then you should use REGNODE_AFTER_type(n,TYPE).
  *
- * If you have a regnode pointer and you know you are dealing with a
- * regnode type of constant size and you have already extracted its
- * opcode use: REGNODE_AFTER_opcode(n,OPCODE).
+ * If you have a regnode pointer and you know you are dealing with a regnode
+ * type of constant size and you have already extracted its opcode use:
+ * REGNODE_AFTER_opcode(n,OPCODE).
  *
- * If you have a regnode and you know it is variable size then you
- * you can produce optimized code by using REGNODE_AFTER_varies(n).
+ * If you have a regnode and you know it is variable size then you you can
+ * produce optimized code by using REGNODE_AFTER_varies(n).
  *
- * If you have a regnode pointer and nothing else use: REGNODE_AFTER(n)
- * This is the safest option and wraps C<Perl_regnode_after()>. It
- * should produce the correct result regardless of its argument. The
- * other options only produce correct results under specific
- * constraints.
+ * If you have a regnode pointer and nothing else use: REGNODE_AFTER(n) This is
+ * the safest option and wraps C<Perl_regnode_after()>.  It should produce the
+ * correct result regardless of its argument.  The other options only produce
+ * correct results under specific constraints.
  */
 #define        REGNODE_AFTER_PLUS(p,extra)  \
     ((p) + NODE_STEP_REGNODE + (extra))
-/* under DEBUGGING we check that all REGNODE_AFTER optimized macros did the
- * same thing that Perl_regnode_after() would have done. Note that when
- * not compiled under DEBUGGING the assert_() macro is empty. Thus we
- * don't have to implement different versions for DEBUGGING and not DEBUGGING,
- * and explains why all the macros use REGNODE_AFTER_PLUS_DEBUG() under the
- * hood. */
+/* under DEBUGGING we check that all REGNODE_AFTER optimized macros
+ * did the same thing that Perl_regnode_after() would have done.
+ * Note that when not compiled under DEBUGGING the assert_() macro
+ * is empty.  Thus we don't have to implement different versions
+ * for DEBUGGING and not DEBUGGING, and explains why all the macros
+ * use REGNODE_AFTER_PLUS_DEBUG() under the hood. */
 #define REGNODE_AFTER_PLUS_DEBUG(p,extra)   \
     (assert_(check_regnode_after(p,extra))  REGNODE_AFTER_PLUS((p),(extra)))
 
-/* find the regnode after this p by using the opcode we previously extracted
- * with OP(p) */
+/* find the regnode after this p by using the opcode
+ * we previously extracted with OP(p) */
 #define REGNODE_AFTER_opcode(p,op)  \
     REGNODE_AFTER_PLUS_DEBUG((p),REGNODE_ARG_LEN(op))
 
-/* find the regnode after this p by using the size of the struct associated with
- * the opcode for p. use this when you *know* that p is pointer to a given type*/
+/* find the regnode after this p by using the size of the
+ * struct associated with the opcode for p.  use this
+ * when you *know* that p is pointer to a given type */
 #define REGNODE_AFTER_type(p,t) \
     REGNODE_AFTER_PLUS_DEBUG((p),EXTRA_SIZE(t))
 
-/* find the regnode after this p by using OP(p) to find the regnode type of p */
+/* find the regnode after this p by using OP(p)
+   to find the regnode type of p */
 #define REGNODE_AFTER_varies(p)            regnode_after(p,TRUE)
 
-/* find the regnode after this p by using OP(p) to find the regnode type of p */
+/* find the regnode after this p by using OP(p)
+   to find the regnode type of p */
 #define REGNODE_AFTER(p)            regnode_after(p,FALSE)
 
 
-/* REGNODE_BEFORE() is trickier to deal with in terms of validation, execution.
- * All the places that use it assume that p will be one struct regnode large.
- * So to validate it we do the math to go backwards and then validate that the
- * type of regnode we landed on is actually one regnode large. In theory if
- * things go wrong the opcode should be illegal or say the item should be larger
- * than it is, etc. */
+/* REGNODE_BEFORE() is trickier to deal with in terms of validation,
+ * execution.  All the places that use it assume that p will be one struct
+ * regnode large.  So to validate it we do the math to go backwards and
+ * then validate that the type of regnode we landed on is actually one
+ * regnode large.  In theory if things go wrong the opcode should be
+ * illegal or say the item should be larger than it is, etc. */
 #define        REGNODE_BEFORE_BASE(p)        ((p) - NODE_STEP_REGNODE)
 #define        REGNODE_BEFORE_BASE_DEBUG(p) \
     (assert_(check_regnode_after(REGNODE_BEFORE_BASE(p),0))  REGNODE_BEFORE_BASE(p))
@@ -590,8 +584,8 @@ struct regnode_ssc {
         (offset) += 2;                                      \
     } STMT_END
 
-/* define these after we define the normal macros, so we can use
- * ARGp_BYTES_LOC(n) */
+/* define these after we define the normal macros,
+ * so we can use ARGp_BYTES_LOC(n) */
 
 static inline SV *
 ARGp_VALUE_inline(struct regnode *node) {
@@ -608,20 +602,20 @@ ARGp_SET_inline(struct regnode *node, SV *ptr) {
 
 #define REG_MAGIC 0234
 
-/* An ANYOF node matches a single code point based on specified criteria.  It
- * now comes in several styles, but originally it was just a 256 element
- * bitmap, indexed by the code point (which was always just a byte).  If the
- * corresponding bit for a code point is 1, the code point matches; if 0, it
- * doesn't match (complemented if inverted).  This worked fine before Unicode
- * existed, but making a bit map long enough to accommodate a bit for every
- * possible Unicode code point is prohibitively large.  Therefore it is made
- * much much smaller, and an inversion list is created to handle code points
- * not represented by the bitmap.  (It is now possible to compile the bitmap to
- * a larger size to avoid the slower inversion list lookup for however big the
- * bitmap is set to, but this is rarely done).  If the bitmap is sufficient to
- * specify all possible matches (with nothing outside it matching), no
- * inversion list is needed nor included, and the argument to the ANYOF node is
- * set to the following: */
+/* An ANYOF node matches a single code point based on specified criteria.
+ * It now comes in several styles, but originally it was just a 256 element
+ * bitmap, indexed by the code point (which was always just a byte).  If
+ * the corresponding bit for a code point is 1, the code point matches; if
+ * 0, it doesn't match (complemented if inverted).  This worked fine before
+ * Unicode existed, but making a bit map long enough to accommodate a bit
+ * for every possible Unicode code point is prohibitively large.  Therefore
+ * it is made much much smaller, and an inversion list is created to handle
+ * code points not represented by the bitmap.  (It is now possible to
+ * compile the bitmap to a larger size to avoid the slower inversion list
+ * lookup for however big the bitmap is set to, but this is rarely done).
+ * If the bitmap is sufficient to specify all possible matches (with
+ * nothing outside it matching), no inversion list is needed nor included,
+ * and the argument to the ANYOF node is set to the following: */
 
 #define ANYOF_MATCHES_ALL_OUTSIDE_BITMAP_VALUE   U32_MAX
 #define ANYOF_MATCHES_ALL_OUTSIDE_BITMAP(node)  \
@@ -748,8 +742,8 @@ ARGp_SET_inline(struct regnode *node, SV *ptr) {
  * is expecting this to be in the low bit.  Never in an SSC */
 #define ANYOF_INVERT                            0x01
 
-/* For the SSC node only, which cannot be inverted, so is shared with that bit.
- * This is used only during regex compilation. */
+/* For the SSC node only, which cannot be inverted, so is shared with
+ * that bit.  This is used only during regex compilation. */
 #define SSC_MATCHES_EMPTY_STRING                ANYOF_INVERT
 
 /* Set if this is a regnode_charclass_posixl vs a regnode_charclass.  This
@@ -758,31 +752,29 @@ ARGp_SET_inline(struct regnode *node, SV *ptr) {
  * at compile-time.  Only set under /l; can be in SSC */
 #define ANYOF_MATCHES_POSIXL                    0x02
 
-/* The fold is calculated and stored in the bitmap where possible at compile
- * time.  However under locale, the actual folding varies depending on
- * what the locale is at the time of execution, so it has to be deferred until
- * then.  Only set under /l; never in an SSC  */
+/* The fold is calculated and stored in the bitmap where possible at
+ * compile time.  However under locale, the actual folding varies
+ * depending on what the locale is at the time of execution, so it has to
+ * be deferred until then.  Only set under /l; never in an SSC */
 #define ANYOFL_FOLD                             0x04
 
-/* Warn if the runtime locale isn't a UTF-8 one (and the generated node assumes
- * a UTF-8 locale. */
+/* Warn if the runtime locale isn't a UTF-8 one (and
+ * the generated node assumes a UTF-8 locale. */
 #define ANYOFL_UTF8_LOCALE_REQD                 0x08
 
-/* Spare: Be sure to change ANYOF_FLAGS_ALL if this gets used  0x10 */
+/* Spare: Be sure to change ANYOF_FLAGS_ALL if this gets used 0x10 */
 
-/* Spare: Be sure to change ANYOF_FLAGS_ALL if this gets used  0x20 */
+/* Spare: Be sure to change ANYOF_FLAGS_ALL if this gets used 0x20 */
 
 /* Shared bit that indicates that there are potential additional matches stored
  * outside the bitmap, as pointed to by the AV given by the node's argument.
  * The node type is used at runtime (in conjunction with this flag and other
  * information available then) to decide if the flag should be acted upon.
  * This extra information is needed because of at least one of the following
- * three reasons.
- *      Under /d and the matched string is in UTF-8, it means the ANYOFD node
- *          matches more things than in the bitmap.  Those things will be any
- *          code point too high for the bitmap, but crucially, any non-ASCII
- *          characters that match iff when using Unicode rules.  These all are
- *          < 256.
+ * three reasons.  Under /d and the matched string is in UTF-8, it means the
+ * ANYOFD node matches more things than in the bitmap.  Those things will be
+ * any code point too high for the bitmap, but crucially, any non-ASCII
+ * characters that match iff when using Unicode rules.  These all are < 256.
  *
  *      Under /l and ANYOFL_FOLD is set, this flag may indicate there are
  *          potential matches valid only if the locale is a UTF-8 one.  If so,
@@ -798,15 +790,13 @@ ARGp_SET_inline(struct regnode *node, SV *ptr) {
  *      look at. */
 #define ANYOF_HAS_EXTRA_RUNTIME_MATCHES 0x40
 
-/* Shared bit:
- *      Under /d it means the ANYOFD node matches all non-ASCII Latin1
- *          characters when the target string is not in utf8.
- *      When not under /d, it means the ANYOF node should raise a warning if
- *          matching against an above-Unicode code point.
- * (These uses are mutually exclusive because the warning requires a \p{}, and
- * \p{} implies /u which deselects /d).  An SSC node only has this bit set if
- * what is meant is the warning.  The names are to make sure that you are
- * cautioned about its shared nature */
+/* Shared bit: Under /d it means the ANYOFD node matches all non-ASCII
+ * Latin1 characters when the target string is not in utf8.  When not under
+ * /d, it means the ANYOF node should raise a warning if matching against an
+ * above-Unicode code point.  (These uses are mutually exclusive because the
+ * warning requires a \p{}, and \p{} implies /u which deselects /d).  An SSC
+ * node only has this bit set if what is meant is the warning.  The names
+ * are to make sure that you are cautioned about its shared nature */
 #define ANYOFD_NON_UTF8_MATCHES_ALL_NON_ASCII__shared 0x80
 #define ANYOF_WARN_SUPER__shared                      0x80
 
@@ -818,8 +808,8 @@ ARGp_SET_inline(struct regnode *node, SV *ptr) {
      | ANYOFL_UTF8_LOCALE_REQD)
 
 /* These are the flags that apply to both regular ANYOF nodes and synthetic
- * start class nodes during construction of the SSC.  During finalization of
- * the SSC, other of the flags may get added to it */
+ * start class nodes during construction of the SSC.  During finalization
+ * of the SSC, other of the flags may get added to it */
 #define ANYOF_COMMON_FLAGS      0
 
 /* Character classes for node->classflags of ANYOF */
@@ -828,7 +818,8 @@ ARGp_SET_inline(struct regnode *node, SV *ptr) {
 
 #define ANYOF_ALPHA    ((CC_ALPHA_) * 2)
 #define ANYOF_NALPHA   ((ANYOF_ALPHA) + 1)
-#define ANYOF_ALPHANUMERIC   ((CC_ALPHANUMERIC_) * 2) /* [[:alnum:]] isalnum(3),
+#define ANYOF_ALPHANUMERIC   ((CC_ALPHANUMERIC_) * 2) /* [[:alnum:]]
+                                                         isalnum(3),
                                                          utf8::IsAlnum */
 #define ANYOF_NALPHANUMERIC  ((ANYOF_ALPHANUMERIC) + 1)
 #define ANYOF_ASCII    ((CC_ASCII_) * 2)
@@ -836,8 +827,8 @@ ARGp_SET_inline(struct regnode *node, SV *ptr) {
 #define ANYOF_BLANK    ((CC_BLANK_) * 2) /* GNU extension: space and tab:
                                             non-vertical space */
 #define ANYOF_NBLANK   ((ANYOF_BLANK) + 1)
-#define ANYOF_CASED    ((CC_CASED_) * 2)    /* Pseudo class for [:lower:] or
-                                               [:upper:] under /i */
+#define ANYOF_CASED    ((CC_CASED_) * 2)    /* Pseudo class for [:lower:]
+                                               or [:upper:] under /i */
 #define ANYOF_NCASED   ((ANYOF_CASED) + 1)
 #define ANYOF_CNTRL    ((CC_CNTRL_) * 2)
 #define ANYOF_NCNTRL   ((ANYOF_CNTRL) + 1)
@@ -861,22 +852,21 @@ ARGp_SET_inline(struct regnode *node, SV *ptr) {
 #define ANYOF_XDIGIT   ((CC_XDIGIT_) * 2)
 #define ANYOF_NXDIGIT  ((ANYOF_XDIGIT) + 1)
 
-/* pseudo classes below this, not stored in the class bitmap, but used as flags
-   during compilation of char classes */
+/* pseudo classes below this, not stored in the class bitmap,
+   but used as flags during compilation of char classes */
 
 #define ANYOF_VERTWS    ((CC_VERTSPACE_) * 2)
 #define ANYOF_NVERTWS   ((ANYOF_VERTWS)+1)
 
-/* It is best if this is the last one, as all above it are stored as bits in a
- * bitmap, and it isn't part of that bitmap */
+/* It is best if this is the last one, as all above it are stored
+ * as bits in a bitmap, and it isn't part of that bitmap */
 #if CC_VERTSPACE_ != HIGHEST_REGCOMP_DOT_H_SYNC_
 #   error Problem with handy.h HIGHEST_REGCOMP_DOT_H_SYNC_ #define
 #endif
 
-#define ANYOF_POSIXL_MAX (ANYOF_VERTWS) /* So upper loop limit is written:
-                                         *       '< ANYOF_MAX'
-                                         * Hence doesn't include VERTWS, as that
-                                         * is a pseudo class */
+#define ANYOF_POSIXL_MAX (ANYOF_VERTWS) /* So upper loop limit is written: '<
+                                         * ANYOF_MAX' Hence doesn't include
+                                         * VERTWS, as that is a pseudo class */
 #define ANYOF_MAX      ANYOF_POSIXL_MAX
 
 #if (ANYOF_POSIXL_MAX > 32)   /* Must fit in 32-bit word */
@@ -925,7 +915,8 @@ ARGp_SET_inline(struct regnode *node, SV *ptr) {
 #define ANYOF_POSIXL_SET_TO_BITMAP(p, bits) \
     STMT_START { ANYOF_POSIXL_BITMAP(p) = (bits); } STMT_END
 
-/* Shifts a bit to get, eg. 0x4000_0000, then subtracts 1 to get 0x3FFF_FFFF */
+/* Shifts a bit to get, eg. 0x4000_0000, then
+   subtracts 1 to get 0x3FFF_FFFF */
 #define ANYOF_POSIXL_SETALL(ret)                                \
     STMT_START {                                                \
         ANYOF_POSIXL_BITMAP(ret) = nBIT_MASK(ANYOF_POSIXL_MAX); \
@@ -971,15 +962,15 @@ ARGp_SET_inline(struct regnode *node, SV *ptr) {
 
 /*
  * Utility definitions.
- */
+*/
 #ifndef CHARMASK
 #  define UCHARAT(p)    ((int)*(const U8*)(p))
 #else
 #  define UCHARAT(p)    ((int)*(p)&CHARMASK)
 #endif
 
-/* Number of regnode equivalents that 'guy' occupies beyond the size of the
- * smallest regnode. */
+/* Number of regnode equivalents that 'guy' occupies
+ * beyond the size of the smallest regnode. */
 #define EXTRA_SIZE(guy) ((sizeof(guy)-1)/sizeof(struct regnode))
 
 #define REG_ZERO_LEN_SEEN                   0x00000001
@@ -1036,21 +1027,16 @@ END_EXTERN_C
 
 
 /* .what is a character array with one character for each member of .data
- * The character describes the function of the corresponding .data item:
- *   a - AV for paren_name_list under DEBUGGING
- *   f - start-class data for regstclass optimization
- *   l - start op for literal (?{EVAL}) item
- *   L - start op for literal (?{EVAL}) item, with separate CV (qr//)
- *   r - pointer to an embedded code-containing qr, e.g. /ab$qr/
- *   s - inversion list for Unicode-style character class, and the
- *       multicharacter strings resulting from casefolding the single-character
- *       entries in the character class
- *   t - trie struct
- *   u - trie struct's widecharmap (a HV, so can't share, must dup)
- *       also used for revcharmap and words under DEBUGGING
- *   T - aho-trie struct
- *   S - sv for named capture lookup
- * 20010712 mjd@plover.com
+ * The character describes the function of the corresponding .data item: a
+ * - AV for paren_name_list under DEBUGGING f - start-class data for
+ * regstclass optimization l - start op for literal (?{EVAL}) item L -
+ * start op for literal (?{EVAL}) item, with separate CV (qr//) r - pointer
+ * to an embedded code-containing qr, e.g.  /ab$qr/ s - inversion list for
+ * Unicode-style character class, and the multicharacter strings resulting
+ * from casefolding the single-character entries in the character class t -
+ * trie struct u - trie struct's widecharmap (a HV, so can't share, must
+ * dup) also used for revcharmap and words under DEBUGGING T - aho-trie
+ * struct S - sv for named capture lookup 20010712 mjd@plover.com
  * (Remember to update re_dup() and pregfree() if you add any items.)
  */
 struct reg_data {
@@ -1059,8 +1045,8 @@ struct reg_data {
     void* data[1];
 };
 
-/* Code in S_to_utf8_substr() and S_to_byte_substr() in regexec.c accesses
-   anchored* and float* via array indexes 0 and 1.  */
+/* Code in S_to_utf8_substr() and S_to_byte_substr() in regexec.c
+   accesses anchored* and float* via array indexes 0 and 1. */
 #define anchored_substr substrs->data[0].substr
 #define anchored_utf8 substrs->data[0].utf8_substr
 #define anchored_offset substrs->data[0].min_offset
@@ -1085,13 +1071,11 @@ struct reg_data {
 
 /* trie related stuff */
 
-/* a transition record for the state machine. the
-   check field determines which state "owns" the
-   transition. the char the transition is for is
-   determined by offset from the owning states base
-   field.  the next field determines which state
-   is to be transitioned to if any.
-*/
+/* a transition record for the state machine.  the check field determines
+   which state "owns" the transition.  the char the transition is for is
+   determined by offset from the owning states base field.  the next
+   field determines which state is to be transitioned to if any.
+ */
 struct _reg_trie_trans {
   U32 next;
   U32 check;
@@ -1104,11 +1088,10 @@ struct _reg_trie_trans_list_elem {
 };
 typedef struct _reg_trie_trans_list_elem reg_trie_trans_le;
 
-/* a state for compressed nodes. base is an offset
-  into an array of reg_trie_trans array. If wordnum is
-  nonzero the state is accepting. if base is zero then
-  the state has no children (and will be accepting)
-*/
+/* a state for compressed nodes.  base is an offset into an array of
+   reg_trie_trans array.  If wordnum is nonzero the state is accepting.  if
+   base is zero then the state has no children (and will be accepting)
+ */
 struct _reg_trie_state {
   U16 wordnum;
   union {
@@ -1119,10 +1102,9 @@ struct _reg_trie_state {
 
 /* info per word; indexed by wordnum */
 typedef struct {
-    U16  prev;  /* previous word in acceptance chain; eg in
-                 * zzz|abc|ab/ after matching the chars abc, the
-                 * accepted word is #2, and the previous accepted
-                 * word is #3 */
+    U16  prev;  /* previous word in acceptance chain; eg in zzz|abc|ab/
+                 * after matching the chars abc, the accepted word is
+                 * #2, and the previous accepted word is #3 */
     U32 len;    /* how many chars long is this word? */
     U32 accept; /* accept state for this word */
 } reg_trie_wordinfo;
@@ -1132,27 +1114,33 @@ typedef struct _reg_trie_state    reg_trie_state;
 typedef struct _reg_trie_trans    reg_trie_trans;
 
 
-/* anything in here that needs to be freed later
-   should be dealt with in pregfree.
-   refcount is first in both this and _reg_ac_data to allow a space
-   optimisation in Perl_regdupe.  */
+/* anything in here that needs to be freed later should be dealt with
+   in pregfree.  refcount is first in both this and _reg_ac_data to
+   allow a space optimisation in Perl_regdupe. */
 struct _reg_trie_data {
-    U32             refcount;        /* number of times this trie is referenced */
+    U32             refcount;        /* number of times this trie
+                                        is referenced */
     U32             lasttrans;       /* last valid transition element */
     U16             *charmap;        /* byte to charid lookup array */
     reg_trie_state  *states;         /* state data */
     reg_trie_trans  *trans;          /* array of transition elements */
     char            *bitmap;         /* stclass bitmap */
-    U16             *jump;           /* optional 1 indexed array of offsets before tail
-                                        for the node following a given word. */
+    U16             *jump;           /* optional 1 indexed array of offsets
+                                        before tail for the node following
+                                        a given word. */
     reg_trie_wordinfo *wordinfo;     /* array of info per word */
-    U16             uniquecharcount; /* unique chars in trie (width of trans table) */
-    U32             startstate;      /* initial state - used for common prefix optimisation */
-    STRLEN          minlen;          /* minimum length of words in trie - build/opt only? */
-    STRLEN          maxlen;          /* maximum length of words in trie - build/opt only? */
+    U16             uniquecharcount; /* unique chars in trie (width
+                                        of trans table) */
+    U32             startstate;      /* initial state - used for common
+                                        prefix optimisation */
+    STRLEN          minlen;          /* minimum length of words in
+                                        trie - build/opt only? */
+    STRLEN          maxlen;          /* maximum length of words in
+                                        trie - build/opt only? */
     U32             prefixlen;       /* #chars in common prefix */
-    U32             statecount;      /* Build only - number of states in the states array
-                                        (including the unused zero state) */
+    U32             statecount;      /* Build only - number of states
+                                        in the states array (including
+                                        the unused zero state) */
     U32             wordcount;       /* Build only */
 #ifdef DEBUGGING
     STRLEN          charcount;       /* Build only */
@@ -1172,8 +1160,8 @@ struct _reg_trie_data {
 
 typedef struct _reg_trie_data reg_trie_data;
 
-/* refcount is first in both this and _reg_trie_data to allow a space
-   optimisation in Perl_regdupe.  */
+/* refcount is first in both this and _reg_trie_data to
+   allow a space optimisation in Perl_regdupe. */
 struct _reg_ac_data {
     U32              refcount;
     U32              trie;
@@ -1195,7 +1183,8 @@ typedef struct _reg_ac_data reg_ac_data;
 #define IS_ANYOF_TRIE(op) ((op)==TRIEC || (op)==AHOCORASICKC)
 #define IS_TRIE_AC(op) ((op)>=AHOCORASICK)
 
-/* these defines assume uniquecharcount is the correct variable, and state may be evaluated twice */
+/* these defines assume uniquecharcount is the correct
+   variable, and state may be evaluated twice */
 #define TRIE_NODENUM(state) (((state)-1)/(trie->uniquecharcount)+1)
 #define SAFE_TRIE_NODENUM(state)    \
     ((state) ? (((state)-1)/(trie->uniquecharcount)+1) : (state))
@@ -1217,9 +1206,9 @@ typedef struct _reg_ac_data reg_ac_data;
 
 /*
 
-RE_DEBUG_FLAGS is used to control what debug output is emitted
-its divided into three groups of options, some of which interact.
-The three groups are: Compile, Execute, Extra. There is room for a
+RE_DEBUG_FLAGS is used to control what debug output is emitted its
+divided into three groups of options, some of which interact.  The
+three groups are: Compile, Execute, Extra.  There is room for a
 further group, as currently only the low three bytes are used.
 
     Compile Options:
@@ -1239,9 +1228,8 @@ further group, as currently only the low three bytes are used.
 
     TRIE
 
-If you modify any of these make sure you make corresponding changes to
-re.pm, especially to the documentation.
-
+If you modify any of these make sure you make corresponding
+changes to re.pm, especially to the documentation.
 */
 
 
@@ -1347,9 +1335,9 @@ re.pm, especially to the documentation.
     if (DEBUG_v_TEST || RE_DEBUG_FLAG(RE_DEBUG_EXTRA_DUMP_PRE_OPTIMIZE)) x )
 
 /* initialization */
-/* Get the debug flags for code not in regcomp.c nor regexec.c.  This doesn't
- * initialize the variable if it isn't already there, instead it just assumes
- * the flags are 0 */
+/* Get the debug flags for code not in regcomp.c nor regexec.c.
+ * This doesn't initialize the variable if it isn't already there,
+ * instead it just assumes the flags are 0 */
 #define DECLARE_AND_GET_RE_DEBUG_FLAGS_NON_REGEX                                \
     volatile IV re_debug_flags = 0;  PERL_UNUSED_VAR(re_debug_flags);           \
     STMT_START {                                                                \
@@ -1363,21 +1351,22 @@ re.pm, especially to the documentation.
 
 #ifdef DEBUGGING
 
-/* For use in regcomp.c and regexec.c,  Get the debug flags, and initialize to
- * the defaults if not done already */
-#define DECLARE_AND_GET_RE_DEBUG_FLAGS                                              \
-    volatile IV re_debug_flags = 0;  PERL_UNUSED_VAR(re_debug_flags);               \
-    DEBUG_r({                                                                       \
-        SV * re_debug_flags_sv = NULL;                                              \
-                     /* get_sv() can return NULL during global destruction. */      \
-        re_debug_flags_sv = PL_curcop ? get_sv(RE_DEBUG_FLAGS, GV_ADD) : NULL;      \
-        if (re_debug_flags_sv) {                                                    \
-            if (!SvIOK(re_debug_flags_sv)) /* If doesn't exist set to default */    \
-                sv_setuv(re_debug_flags_sv,                                         \
-                        /* These defaults should be kept in sync with re.pm */      \
-                            RE_DEBUG_COMPILE_DUMP | RE_DEBUG_EXECUTE_MASK );        \
-            re_debug_flags=SvIV(re_debug_flags_sv);                                 \
-        }                                                                           \
+/* For use in regcomp.c and regexec.c, Get the debug flags,
+ * and initialize to the defaults if not done already */
+#define DECLARE_AND_GET_RE_DEBUG_FLAGS                                          \
+    volatile IV re_debug_flags = 0;  PERL_UNUSED_VAR(re_debug_flags);           \
+    DEBUG_r({                                                                   \
+        SV * re_debug_flags_sv = NULL;                                          \
+                     /* get_sv() can return NULL during global destruction. */  \
+        re_debug_flags_sv = PL_curcop ? get_sv(RE_DEBUG_FLAGS, GV_ADD) : NULL;  \
+        if (re_debug_flags_sv) {                                                \
+            if (!SvIOK(re_debug_flags_sv)) /* If doesn't exist set
+                                              to default */                     \
+                sv_setuv(re_debug_flags_sv,                                     \
+                        /* These defaults should be kept in sync with re.pm */  \
+                            RE_DEBUG_COMPILE_DUMP | RE_DEBUG_EXECUTE_MASK );    \
+            re_debug_flags=SvIV(re_debug_flags_sv);                             \
+        }                                                                       \
     })
 
 #define isDEBUG_WILDCARD    \
@@ -1434,14 +1423,14 @@ typedef enum {
  * gives the strict lower bound for the UTF-8 start byte of any code point
  * matchable by the node, and a loose upper bound as well.
  *
- * The low bound is stored as 0xC0 + ((the upper 6 bits) >> 2)
- * The loose upper bound is determined from the lowest 2 bits and the low bound
+ * The low bound is stored as 0xC0 + ((the upper 6 bits) >> 2) The loose
+ * upper bound is determined from the lowest 2 bits and the low bound
  * (called x) as follows:
  *
- * 11  The upper limit of the range can be as much as (EF - x) / 8
- * 10  The upper limit of the range can be as much as (EF - x) / 4
- * 01  The upper limit of the range can be as much as (EF - x) / 2
- * 00  The upper limit of the range can be as much as  EF
+ * 11 The upper limit of the range can be as much as (EF - x) / 8 10 The
+ * upper limit of the range can be as much as (EF - x) / 4 01 The upper
+ * limit of the range can be as much as (EF - x) / 2 00 The upper limit of
+ * the range can be as much as EF
  *
  * For motivation of this design, see commit message in
  * 3146c00a633e9cbed741e10146662fbcedfdb8d3 */
@@ -1479,4 +1468,4 @@ typedef enum {
 
 /*
  * ex: set ts=8 sts=4 sw=4 et:
- */
+*/

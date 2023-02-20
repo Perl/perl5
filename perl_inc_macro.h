@@ -1,21 +1,21 @@
-/* just define a list of macros to push elements in INC
-*  so we can easily use them and change order on demand
-*
-* list of available INCPUSH macros
-* - INCPUSH_APPLLIB_EXP
-* - INCPUSH_SITEARCH_EXP
-* - INCPUSH_SITELIB_EXP
-* - INCPUSH_PERL_VENDORARCH_EXP
-* - INCPUSH_PERL_VENDORLIB_EXP
-* - INCPUSH_ARCHLIB_EXP
-* - INCPUSH_PRIVLIB_EXP
-* - INCPUSH_PERL_OTHERLIBDIRS
-* - INCPUSH_PERL5LIB
-* - INCPUSH_APPLLIB_OLD_EXP
-* - INCPUSH_SITELIB_STEM
-* - INCPUSH_PERL_VENDORLIB_STEM
-* - INCPUSH_PERL_OTHERLIBDIRS_ARCHONLY
-*/
+/* just define a list of macros to push elements in INC so
+ * we can easily use them and change order on demand
+ *
+ * list of available INCPUSH macros
+ * - INCPUSH_APPLLIB_EXP
+ * - INCPUSH_SITEARCH_EXP
+ * - INCPUSH_SITELIB_EXP
+ * - INCPUSH_PERL_VENDORARCH_EXP
+ * - INCPUSH_PERL_VENDORLIB_EXP
+ * - INCPUSH_ARCHLIB_EXP
+ * - INCPUSH_PRIVLIB_EXP
+ * - INCPUSH_PERL_OTHERLIBDIRS
+ * - INCPUSH_PERL5LIB
+ * - INCPUSH_APPLLIB_OLD_EXP
+ * - INCPUSH_SITELIB_STEM
+ * - INCPUSH_PERL_VENDORLIB_STEM
+ * - INCPUSH_PERL_OTHERLIBDIRS_ARCHONLY
+ */
 
 #ifndef DEFINE_INC_MACROS
 
@@ -52,8 +52,8 @@
 #endif
 
 #ifdef PERL_VENDORARCH_EXP
-    /* vendorarch is always relative to vendorlib on Windows for
-     * DLL-based path intuition to work correctly */
+    /* vendorarch is always relative to vendorlib on Windows
+     * for DLL-based path intuition to work correctly */
 #  if !defined(WIN32)
 #               define INCPUSH_PERL_VENDORARCH_EXP  \
                     S_incpush_use_sep(aTHX_ STR_WITH_LEN(PERL_VENDORARCH_EXP), INCPUSH_CAN_RELOCATE);
@@ -108,8 +108,8 @@
 #else
 /* VMS */
         /* Treat PERL5?LIB as a possible search list logical name -- the
-         * "natural" VMS idiom for a Unix path string.  We allow each
-         * element to be a set of |-separated directories for compatibility.
+         * "natural" VMS idiom for a Unix path string.  We allow each element
+         * to be a set of |-separated directories for compatibility.
          */
 # define _INCPUSH_PERL5LIB_ADD                      \
       char buf[256];                                \
@@ -125,8 +125,8 @@
 #define INCPUSH_PERL5LIB if (!TAINTING_get) { _INCPUSH_PERL5LIB_ADD }
 
 /* Use the ~-expanded versions of APPLLIB (undocumented),
-    SITELIB and VENDORLIB for older versions
-*/
+   SITELIB and VENDORLIB for older versions
+ */
 #ifdef APPLLIB_EXP
 #       define INCPUSH_APPLLIB_OLD_EXP                          \
             S_incpush_use_sep(aTHX_ STR_WITH_LEN(APPLLIB_EXP),  \

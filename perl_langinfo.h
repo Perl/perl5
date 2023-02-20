@@ -1,5 +1,5 @@
-/* Replaces <langinfo.h>, and allows our code to work on systems that don't
- * have that. */
+/* Replaces <langinfo.h>, and allows our code to
+ * work on systems that don't have that. */
 
 #ifndef PERL_LANGINFO_H
 #define PERL_LANGINFO_H 1
@@ -10,8 +10,8 @@
 #   include <langinfo.h>
 #endif
 
-/* NOTE that this file is parsed by ext/XS-APItest/t/locale.t, so be careful
- * with changes */
+/* NOTE that this file is parsed by ext/XS-APItest/t/locale.t,
+ * so be careful with changes */
 
 /* If foo doesn't exist define it to a negative number. */
 

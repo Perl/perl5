@@ -1,19 +1,17 @@
 /*    INTERN.h
  *
- *    Copyright (C) 1991, 1992, 1993, 1995, 1996, 1998, 2000, 2001,
- *    by Larry Wall and others
+ *    Copyright (C) 1991, 1992, 1993, 1995, 1996, 1998, 2000, 2001, by
+ *    Larry Wall and others
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
- *
  */
 
 /*
- * EXT  designates a global var which is defined in perl.h
- * dEXT designates a global var which is defined in another
- *      file, so we can't count on finding it in perl.h
- *      (this practice should be avoided).
- */
+ * EXT designates a global var which is defined in perl.h dEXT designates
+ * a global var which is defined in another file, so we can't count on
+ * finding it in perl.h (this practice should be avoided).
+*/
 #undef EXT
 #undef dEXT
 #undef EXTCONST

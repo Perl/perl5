@@ -1,11 +1,12 @@
 /*    gv.h
  *
- *    Copyright (C) 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
- *    2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008 by Larry Wall and others
+ *    Copyright (C) 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
+ *    2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010,
+ *    2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021,
+ *    2022 by Larry Wall and others
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
- *
  */
 
 struct gp {
@@ -79,9 +80,9 @@ struct gp {
 
 Return the SV from the GV.
 
-Prior to Perl v5.9.3, this would add a scalar if none existed.  Nowadays, use
-C<L</GvSVn>> for that, or compile perl with S<C<-DPERL_CREATE_GVSV>>.  See
-L<perl5100delta>.
+Prior to Perl v5.9.3, this would add a scalar if none existed.
+Nowadays, use C<L</GvSVn>> for that, or compile perl with
+S<C<-DPERL_CREATE_GVSV>>.  See L<perl5100delta>.
 
 =for apidoc Am|SV*|GvSVn|GV* gv
 Like C<L</GvSV>>, but creates an empty scalar if none already exists.
@@ -161,10 +162,10 @@ Return the CV from the GV.
 #define GvENAME_HEK(gv) GvNAME_HEK(GvEGV(gv) ? GvEGV(gv) : gv)
 #define GvESTASH(gv)    GvSTASH(GvEGV(gv) ? GvEGV(gv) : gv)
 
-/* GVf_INTRO is one-shot flag which indicates that the next assignment
-   of a reference to the glob is to be localised; it distinguishes
-   'local *g = $ref' from '*g = $ref'.
-*/
+/* GVf_INTRO is one-shot flag which indicates that the next
+   assignment of a reference to the glob is to be localised;
+   it distinguishes 'local *g = $ref' from '*g = $ref'.
+ */
 #define GVf_INTRO       0x01
 #define GVf_MULTI       0x02
 #define GVf_ASSUMECV    0x04
@@ -225,49 +226,46 @@ Return the CV from the GV.
 
 /*
  * symbol creation flags, for use in gv_fetchpv() and get_*v()
- */
-#define GV_ADD          0x01    /* add, if symbol not already there
-                                   For gv_name_set, adding a HEK for the first
-                                   time, so don't try to free what's there.  */
-#define GV_ADDMULTI     0x02    /* add, pretending it has been added
-                                   already; used also by gv_init_* */
-#define GV_ADDWARN      0x04 /* add, but warn if symbol wasn't
-                                already there */
-                /*      0x08       UNUSED */
-#define GV_NOINIT       0x10 /* add, but don't init symbol,
-                                if type != PVGV */
+*/
+#define GV_ADD          0x01    /* add, if symbol not already there For
+                                   gv_name_set, adding a HEK for the first
+                                   time, so don't try to free what's there. */
+#define GV_ADDMULTI     0x02    /* add, pretending it has been added already;
+                                   used also by gv_init_* */
+#define GV_ADDWARN      0x04 /* add, but warn if symbol wasn't already there */
+                /*   0x08 UNUSED */
+#define GV_NOINIT       0x10 /* add, but don't init symbol, if type != PVGV */
 /* This is used by toke.c to avoid turing placeholder constants in the symbol
-   table into full PVGVs with attached constant subroutines.  */
+   table into full PVGVs with attached constant subroutines. */
 #define GV_NOADD_NOINIT 0x20    /* Don't add the symbol if it's not there.
                                    Don't init it if it is there but ! PVGV */
 #define GV_NOEXPAND     0x40    /* Don't expand SvOK() entries to PVGV */
 #define GV_NOTQUAL      0x80    /* A plain symbol name, not qualified with a
-                                   package (so skip checks for :: and ')  */
-#define GV_AUTOLOAD     0x100   /* gv_fetchmethod_flags() should AUTOLOAD  */
-#define GV_CROAK        0x200   /* gv_fetchmethod_flags() should croak  */
+                                   package (so skip checks for :: and ') */
+#define GV_AUTOLOAD     0x100   /* gv_fetchmethod_flags() should AUTOLOAD */
+#define GV_CROAK        0x200   /* gv_fetchmethod_flags() should croak */
 #define GV_ADDMG        0x400   /* add if magical */
-#define GV_NO_SVGMAGIC  0x800   /* Skip get-magic on an SV argument;
-                                   used only by gv_fetchsv(_nomg) */
-#define GV_CACHE_ONLY   0x1000  /* return stash only if found in cache;
-                                   used only in flags parameter to gv_stash* family */
+#define GV_NO_SVGMAGIC  0x800   /* Skip get-magic on an SV argument; used
+                                   only by gv_fetchsv(_nomg) */
+#define GV_CACHE_ONLY   0x1000  /* return stash only if found in
+                                   cache; used only in flags parameter
+                                   to gv_stash* family */
 
-/* Flags for gv_fetchmeth_pvn and gv_autoload_pvn*/
+/* Flags for gv_fetchmeth_pvn and gv_autoload_pvn */
 #define GV_SUPER        0x1000  /* SUPER::method */
 #define GV_NOUNIVERSAL  0x2000  /* Skip UNIVERSAL lookup */
 
-/* Flags for gv_autoload_*/
+/* Flags for gv_autoload_ */
 #define GV_AUTOLOAD_ISMETHOD 1  /* autoloading a method? */
 
-/*      SVf_UTF8 (more accurately the return value from SvUTF8) is also valid
-        as a flag to various gv_* functions, so ensure it lies
-        outside this range.
-*/
+/*   SVf_UTF8 (more accurately the return value from SvUTF8) is also valid as
+     a flag to various gv_* functions, so ensure it lies outside this range.
+ */
 
 #define GV_NOADD_MASK   \
     (SVf_UTF8|GV_NOADD_NOINIT|GV_NOEXPAND|GV_NOTQUAL|GV_ADDMG|GV_NO_SVGMAGIC)
-/* The bit flags that don't cause gv_fetchpv() to add a symbol if not
-   found (with the exception GV_ADDMG, which *might* cause the symbol
-   to be added) */
+/* The bit flags that don't cause gv_fetchpv() to add a symbol if not found
+   (with the exception GV_ADDMG, which *might* cause the symbol to be added) */
 
 /* gv_fetchfile_flags() */
 #define GVF_NOADD       0x01    /* don't add the glob if it doesn't exist */
@@ -320,4 +318,4 @@ Make sure there is a slot of the given type (AV, HV, IO, SV) in the GV C<gv>.
 
 /*
  * ex: set ts=8 sts=4 sw=4 et:
- */
+*/

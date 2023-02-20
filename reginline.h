@@ -3,7 +3,7 @@
 
 /*
  - regnext - dig the "next" pointer out of a node
- */
+*/
 PERL_STATIC_INLINE
 regnode *
 Perl_regnext(pTHX_ const regnode *p)
@@ -29,7 +29,7 @@ Perl_regnext(pTHX_ const regnode *p)
  - regnode_after - find the node physically following p in memory,
    taking into account the size of p as determined by OP(p), our
    sizing data, and possibly the STR_SZ() macro.
- */
+*/
 PERL_STATIC_INLINE
 regnode *
 Perl_regnode_after(pTHX_ const regnode *p, const bool varies)
@@ -43,8 +43,8 @@ Perl_regnode_after(pTHX_ const regnode *p, const bool varies)
     return (regnode *)ret;
 }
 
-/* validate that the passed in node and extra length would match that
- * returned by regnode_after() */
+/* validate that the passed in node and extra length
+ * would match that returned by regnode_after() */
 PERL_STATIC_INLINE
 bool
 Perl_check_regnode_after(pTHX_ const regnode *p, const STRLEN extra)
@@ -61,4 +61,4 @@ Perl_check_regnode_after(pTHX_ const regnode *p, const STRLEN extra)
 #endif
 /*
  * ex: set ts=8 sts=4 sw=4 et:
- */
+*/
