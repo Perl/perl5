@@ -1,0 +1,672 @@
+=encoding utf8
+
+=head1 NAME
+
+perl5379delta - what is new for perl v5.37.9
+
+=head1 DESCRIPTION
+
+This document describes differences between the 5.37.8 release and the 5.37.9
+release.
+
+If you are upgrading from an earlier release such as 5.37.7, first read
+L<perl5378delta>, which describes differences between 5.37.7 and 5.37.8.
+
+=head1 Core Enhancements
+
+=head2 New C<class> Feature
+
+A new B<experimental> syntax is now available for defining object classes,
+where per-instance data is stored in "field" variables that behave like
+lexicals.
+
+    use feature 'class';
+
+    class Point
+    {
+        field $x;
+        field $y;
+
+        method zero { $x = $y = 0; }
+    }
+
+This is described in more detail in L<perlclass>.  Notes on the internals of
+its implementation and other related details can be found in L<perlclassguts>.
+
+This remains a new and experimental feature, and is very much still under
+development. It will be the subject of much further addition, refinement and
+alteration in future releases.  As it is experimental, it yields warnings in
+the C<experimental::class> category.  These can be silenced by a
+C<no warnings> statement.
+
+    use feature 'class';
+    no warnings 'experimental::class';
+
+=head2 REG_INF has been raised from 65,536 to 2,147,483,647
+
+Many regex quantifiers used to be limited to U16_MAX in the past, but are
+now limited to I32_MAX, thus it is now possible to write /(?:word){1000000}/
+for example.  Note that doing so may cause the regex engine to run longer
+and use more memory.
+
+=head2 New API functions optimize_optree and finalize_optree
+
+There are two new API functions for operating on optree fragments, ensuring
+you can invoke the required parts of the optree-generation process that might
+otherwise not get invoked (e.g. when creating a custom LOGOP).  To get access
+to these functions, you first need to set a C<#define> to opt-in to using
+these functions.
+
+  #define PERL_USE_VOLATILE_API
+
+These functions are closely tied to the internals of how the interpreter
+works, and could be altered or removed at any time if other internal changes
+make that necessary.
+
+=head1 Incompatible Changes
+
+=head2 (**{ ... }) removed from the regex engine.
+
+This feature was released as part of 5.37.8, after some use and
+discussion it was seen as more problematic than understood at first
+and has been removed in 5.37.9. It was only ever present in a single
+development release and has never been released as part of a production perl,
+thus no deprecation cycle has been performed.
+
+=head1 Deprecations
+
+=head2 Use of C<'> as a package name separator is deprecated
+
+Using C<'> as package separator in a variable named in a double-quoted
+string has warned since 5.28.  It is now deprecated in both string
+interpolation and non-interpolated contexts, and will be removed in
+Perl 5.40.
+
+=head1 Performance Enhancements
+
+=over 4
+
+=item *
+
+Temporary ("mortal") copies are no longer created during context exit for
+internal static SVs that are in no danger of being prematurely freed.
+[L<GH #20800|https://github.com/Perl/perl5/issues/20800>|https://github.com/Perl/perl5/issues/20800]
+
+=back
+
+=head1 Modules and Pragmata
+
+=head2 Updated Modules and Pragmata
+
+=over 4
+
+=item *
+
+L<autodie> has been upgraded from version 2.34 to 2.36.
+
+=item *
+
+L<B> has been upgraded from version 1.87 to 1.88.
+
+=item *
+
+L<Compress::Raw::Bzip2> has been upgraded from version 2.201 to 2.204.
+
+=item *
+
+L<Compress::Raw::Zlib> has been upgraded from version 2.202 to 2.204.
+
+=item *
+
+L<Devel::Peek> has been upgraded from version 1.32 to 1.33.
+
+=item *
+
+L<Devel::PPPort> has been upgraded from version 3.69 to 3.70.
+
+=item *
+
+L<experimental> has been upgraded from version 0.030 to 0.031.
+
+=item *
+
+L<feature> has been upgraded from version 1.79 to 1.80.
+
+=item *
+
+L<File::Find> has been upgraded from version 1.42 to 1.43.
+
+=item *
+
+L<IO::Compress> has been upgraded from version 2.201 to 2.204.
+
+=item *
+
+L<Math::Complex> has been upgraded from version 1.6 to 1.61.
+
+=item *
+
+L<Memoize> has been upgraded from version 1.15 to 1.16.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 5.20230120 to 5.20230220.
+
+=item *
+
+L<mro> has been upgraded from version 1.26 to 1.28.
+
+=item *
+
+L<Opcode> has been upgraded from version 1.63 to 1.64.
+
+=item *
+
+L<parent> has been upgraded from version 0.239 to 0.241.
+
+=item *
+
+L<Term::Cap> has been upgraded from version 1.17 to 1.18.
+
+=item *
+
+L<Test::Simple> has been upgraded from version 1.302191 to 1.302192.
+
+=item *
+
+L<Tie::File> has been upgraded from version 1.06 to 1.07.
+
+=item *
+
+L<UNIVERSAL> has been upgraded from version 1.14 to 1.15.
+
+=item *
+
+L<warnings> has been upgraded from version 1.61 to 1.62.
+
+=back
+
+=head1 Documentation
+
+=head2 New Documentation
+
+=head3 L<perlclass>
+
+Describes the new C<class> feature.
+
+=head3 L<perlclassguts>
+
+Describes the internals of the new C<class> feature.
+
+=head2 Changes to Existing Documentation
+
+We have attempted to update the documentation to reflect the changes
+listed in this document.  If you find any we have missed, open an issue
+at L<https://github.com/Perl/perl5/issues>.
+
+Additionally, the following selected changes have been made:
+
+=head3 L<perlfunc>
+
+=over 4
+
+=item *
+
+Some wording improvements have been made for the C<ucfirst>, C<push>,
+C<unshift> and C<bless> functions, as well as additional examples added.
+
+=back
+
+=head3 L<perlvar>
+
+=over 4
+
+=item *
+
+Added a section on "Scoping Rules of Regex Variables", and other wording
+improvements made throughout.
+
+=back
+
+=head1 Diagnostics
+
+The following additions or changes have been made to diagnostic output,
+including warnings and fatal error messages.  For the complete list of
+diagnostic messages, see L<perldiag>.
+
+=head2 New Diagnostics
+
+=head3 New Errors
+
+=over 4
+
+=item *
+
+L<Attempt to bless into a class|perldiag/"Attempt to bless into a class">
+
+(F) You are attempting to call C<bless> with a package name that is a
+new-style C<class>.  This is not necessary, as instances created by the
+constructor are already in the correct class.  Instances cannot be created
+by other means, such as C<bless>.
+
+=item *
+
+L<Cannot assign :param(%s) to field %s because that name is already in use|perldiag/"Cannot assign :param(%s) to field %s because that name is already in use">
+
+(F) An attempt was made to apply a parameter name to a field, when the name
+is already being used by another field in the same class, or one of its
+parent classes. This would cause a name clash so is not allowed.
+
+=item *
+
+L<Cannot create class %s as it already has a non-empty @ISA|perldiag/"Cannot create class %s as it already has a non-empty @ISA">
+
+(F) An attempt was made to create a class out of a package that already has
+an C<@ISA> array, and the array is not empty.  This is not permitted, as it
+would lead to a class with inconsistent inheritance.
+
+=item *
+
+L<Cannot invoke a method of "%s" on an instance of "%s"|perldiag/"Cannot invoke a method of "%s" on
+an instance of "%s"">
+
+(F) You tried to directly call a C<method> subroutine of one class by passing
+in a value that is an instance of a different class.  This is not permitted,
+as the method would not have access to the correct instance fields.
+
+=item *
+
+L<Cannot invoke method on a non-instance|perldiag/"Cannot invoke method on a non-instance">
+
+(F) You tried to directly call a C<method> subroutine of a class by passing
+in a value that is not an instance of that class.  This is not permitted, as
+the method would not then have access to its instance fields.
+
+=item *
+
+L<Cannot '%s' outside of a 'class'|perldiag/"Cannot '%s' outside of a 'class'">
+
+(F) You attempted to use one of the keywords that only makes sense inside
+a C<class> definition, at a location that is not inside such a class.
+
+=item *
+
+L<Cannot reopen existing class "%s"|perldiag/"Cannot reopen existing class "%s"">
+
+(F) You tried to begin a C<class> definition for a class that already exists.
+A class may only have one definition block.
+
+=item *
+
+L<Can't bless an object reference|perldiag/"Can't bless an object reference">
+
+(F) You attempted to call C<bless> on a value that already refers to a real
+object instance.
+
+=item *
+
+L<can't convert empty path|perldiag/"can't convert empty path">
+
+(F) On Cygwin, you called a path conversion function with an empty path.
+Only non-empty paths are legal.
+
+=item *
+
+L<Class already has a superclass, cannot add another|perldiag/"Class already has a superclass, cannot add another">
+
+(F) You attempted to specify a second superclass for a C<class> by using
+the C<:isa> attribute, when one is already specified.  Unlike classes
+whose instances are created with C<bless>, classes created via the
+C<class> keyword cannot have more than one superclass.
+
+=item *
+
+L<Class attribute %s requires a value|perldiag/"Class attribute %s requires a value">
+
+(F) You specified an attribute for a class that would require a value to
+be passed in parentheses, but did not provide one.  Remember that
+whitespace is B<not> permitted between the attribute name and its value;
+you must write this as
+
+    class Example::Class :attr(VALUE) ...
+
+=item *
+
+L<Class :isa attribute requires a class but "%s" is not one|perldiag/"Class :isa attribute requires a class but "%s" is not one">
+
+(F) When creating a subclass using the C<class> C<:isa> attribute, the
+named superclass must also be a real class created using the C<class>
+keyword.
+
+=item *
+
+L<Field already has a parameter name, cannot add another|perldiag/"Field already has a parameter name, cannot add another">
+
+(F) A field may have at most one application of the C<:param> attribute to
+assign a parameter name to it; once applied a second one is not allowed.
+
+=item *
+
+L<Field attribute %s requires a value|perldiag/"Field attribute %s requires a value">
+
+(F) You specified an attribute for a field that would require a value to
+be passed in parentheses, but did not provide one.  Remember that
+whitespace is B<not> permitted between the attribute name and its value;
+you must write this as
+
+    field $var :attr(VALUE) ...
+
+=item *
+
+L<Field %s is not accessible outside a method|perldiag/"Field %s is not accessible outside a method">
+
+(F) An attempt was made to access a field variable of a class from code
+that does not appear inside the body of a C<method> subroutine.  This is not
+permitted, as only methods will have access to the fields of an instance.
+
+=item *
+
+L<Field %s of "%s" is not accessible in a method of "%s"|perldiag/"Field %s of "%s" is not accessible in a method of "%s"">
+
+(F) An attempt was made to access a field variable of a class, from a
+method of another class nested inside the one that actually defined it.
+This is not permitted, as only methods defined by a given class are
+permitted to access fields of that class.
+
+=item *
+
+L<Only scalar fields can take a :param attribute|perldiag/"Only scalar fields can take a :param attribute">
+
+(F) You tried to apply the C<:param> attribute to an array or hash field.
+Currently this is not permitted.
+
+=item *
+
+L<Required parameter '%s' is missing for %s constructor|perldiag/"Required parameter '%s' is missing for %s constructor">
+
+(F) You called the constructor for a class that has a required named
+parameter, but did not pass that parameter at all.
+
+=item *
+
+L<Unexpected characters while parsing class :isa attribute: %s|perldiag/"Unexpected characters while parsing class :isa attribute: %s">
+
+(F) You tried to specify something other than a single class name with an
+optional trailing version number as the value for a C<class> C<:isa>
+attribute.  This confused the parser.
+
+=item *
+
+L<Unrecognized class attribute %s|perldiag/"Unrecognized class attribute %s">
+
+(F) You attempted to add a named attribute to a C<class> definition, but
+perl does not recognise the name of the requested attribute.
+
+=item *
+
+L<Unrecognized field attribute %s|perldiag/"Unrecognized field attribute %s">
+
+(F) You attempted to add a named attribute to a C<field> definition, but
+perl does not recognise the name of the requested attribute.
+
+=back
+
+=head3 New Warnings
+
+=over 4
+
+=item *
+
+L<ADJUST is experimental|perldiag/"ADJUST is experimental">
+
+(S experimental::class) This warning is emitted if you use the C<ADJUST>
+keyword of C<use feature 'class'>.  This keyword is currently
+experimental and its behaviour may change in future releases of Perl.
+
+=item *
+
+L<class is experimental|perldiag/"class is experimental">
+
+(S experimental::class) This warning is emitted if you use the C<class>
+keyword of C<use feature 'class'>.  This keyword is currently
+experimental and its behaviour may change in future releases of Perl.
+
+=item *
+
+L<Method %s redefined|perldiag/"Method %s redefined">
+
+(W redefine) You redefined a method.  To suppress this warning, say
+
+    {
+       no warnings 'redefine';
+       *name = method { ... };
+    }
+
+=item *
+
+L<Odd number of elements in hash field initialization|perldiag/"Odd number of elements in hash field initialization">
+
+(W misc) You specified an odd number of elements to initialise a hash
+field of an object.  Hashes are initialised from a list of key/value
+pairs so there must be a corresponding value to every key.  The final
+missing value will be filled in with undef instead.
+
+=item *
+
+L<Old package separator "'" deprecated|perldiag/"Old package separator "'" deprecated">
+
+(W deprecated, syntax) You used the old package separator "'" in a
+variable, subroutine or package name.  Support for the old package
+separator will be removed in Perl 5.40.
+
+=item *
+
+L<field is experimental|perldiag/"field is experimental">
+
+(S experimental::class) This warning is emitted if you use the C<field>
+keyword of C<use feature 'class'>.  This keyword is currently
+experimental and its behaviour may change in future releases of Perl.
+
+=item *
+
+L<method is experimental|perldiag/"method is experimental">
+
+(S experimental::class) This warning is emitted if you use the C<method>
+keyword of C<use feature 'class'>.  This keyword is currently
+experimental and its behaviour may change in future releases of Perl.
+
+=back
+
+=head2 Changes to Existing Diagnostics
+
+=over 4
+
+=item *
+
+L<Old package separator used in string|perldiag/"Old package separator used in string">
+
+This diagnostic is now also part of the C<deprecated> category.
+
+=back
+
+=head1 Configuration and Compilation
+
+=over 4
+
+=item *
+
+C<Configure> now properly handles quoted elements outputted from gcc. [L<GH #20606|https://github.com/Perl/perl5/issues/20606>]
+
+=item *
+
+C<Configure> probed for the return type of malloc() and free() by
+testing whether declarations for those functions produced a function
+type mismatch with the implementation.  On Solaris, with a C++
+compiler, this check always failed, since Solaris instead imports
+malloc() and free() from C<std::> with C<using> for C++ builds.  Since
+the return types of malloc() and free() are well defined by the C
+standard, skip probing for them.  C<Configure> command-line arguments
+and hints can still override these type in the unlikely case that is
+needed.  [L<GH #20806|https://github.com/Perl/perl5/issues/20806>]
+
+=back
+
+=head1 Testing
+
+Tests were added and changed to reflect the other additions and changes
+in this release.
+
+=head1 Internal Changes
+
+=over 4
+
+=item *
+
+The underlying C<Perl_dowantarray> function implementing the
+long-deprecated L<C<GIMME>|perlapi/GIMME> macro has been marked as
+deprecated, so that use of the macro emits a compile-time warning.
+C<GIMME> has been documented as deprecated in favour of
+L<C<GIMME_V>|perlapi/GIMME_V> since Perl v5.6.0, but had not
+previously issued a warning.
+
+=item *
+
+The API function L<perlapi/utf8_length> is now more efficient.
+
+=back
+
+=head1 Selected Bug Fixes
+
+=over 4
+
+=item *
+
+Writing to a magic variables associated with the selected output
+handle, C<$^>, C<$~>, C<$=>, C<$-> and C<$%>, no longer crashes perl
+if the IO object has been cleared from the selected output
+handle. [L<GH #20733|https://github.com/Perl/perl5/issues/20733>]
+
+=item *
+
+Redefining a C<use constant> list constant with C<use constant> now
+properly warns.  This changes the behaviour of C<use constant> but is
+a core change, not a change to F<constant.pm>.  [L<GH #20742|https://github.com/Perl/perl5/issues/20742>]
+
+=item *
+
+Redefining a C<use constant> list constant with an empty prototype
+constant sub would result in an assertion failure.  [L<GH #20742|https://github.com/Perl/perl5/issues/20742>]
+
+=item *
+
+Fixed a regression where the C<INC> method for objects in C<@INC>
+would not be resolved by C<AUTOLOAD>, while it was in 5.36.  The
+C<INCDIR> method for objects in C<@INC> cannot be resolved by
+C<AUTOLOAD> as C<INC> would have been resolved first.  [L<GH #20665|https://github.com/Perl/perl5/issues/20665>]
+
+=item *
+
+C<$SIG{__DIE__}> will now be called from eval when the code dies during
+compilation regardless of how it dies. This means that code expecting to
+be able to upgrade C<$@> into an object will be called consistently. In
+earlier versions of perl C<$SIG{__DIE__}> would not be called for
+certain compilation errors, for instance undeclared variables. For other
+errors it might be called if there were more than a certain number of
+errors, but not if there were less. Now you can expect that it will be
+called in every case.
+
+=item *
+
+Compilation of code with errors used to inconsistently stop depending on
+the count and type of errors encountered. The intent was that after 10
+errors compilation would halt, but bugs in this logic meant that certain
+types of error would be counted, but would not trigger the threshold
+check to stop compilation. Other errors would. With this release after
+at most 10 errors compilation will terminate, regardless of what type of
+error they were.
+
+Note that you can change the maximum count by defining
+C<PERL_STOP_PARSING_AFTER_N_ERRORS> to be something else during the
+configuration process. For instance
+
+    ./Configure ... -Accflags='-DPERL_STOP_PARSING_AFTER_N_ERRORS=100'
+
+would allow up to 100 errors.
+
+=item *
+
+The API function L<perlapi/my_snprintf> now prints a non-dot decimal
+point if the perl code it ultimately is called from is in the scope of
+C<use locale> and the locale in effect calls for that.
+
+=back
+
+=head1 Acknowledgements
+
+Perl 5.37.9 represents approximately 4 weeks of development since Perl
+5.37.8 and contains approximately 24,000 lines of changes across 360 files
+from 32 authors.
+
+Excluding auto-generated files, documentation and release tools, there were
+approximately 8,400 lines of changes to 270 .pm, .t, .c and .h files.
+
+Perl continues to flourish into its fourth decade thanks to a vibrant
+community of users and developers. The following people are known to have
+contributed the improvements that became Perl 5.37.9:
+
+Alexander Nikolov, Alex Davies, Andrew Fresh, Aristotle Pagaltzis, Bartosz
+Jarzyna, Branislav Zahradník, Chad Granum, Craig A. Berry, Dagfinn Ilmari
+Mannsåker, Dan Jacobson, Elvin Aslanov, Håkon Hægland, Hugo van der
+Sanden, James E Keenan, Joe McMahon, Jonathan Stowe, Karen Etheridge, Karl
+Williamson, Kurt Fitzner, Leon Timmermans, Max Maischein, Nicholas Clark,
+Nicolas R, Paul Evans, Paul Marquess, Renee Baecker, Richard Leach, Scott
+Baker, Todd Rinaldo, Tomasz Konojacki, Tony Cook, Yves Orton.
+
+The list above is almost certainly incomplete as it is automatically
+generated from version control history. In particular, it does not include
+the names of the (very much appreciated) contributors who reported issues to
+the Perl bug tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core. We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please
+see the F<AUTHORS> file in the Perl source distribution.
+
+=head1 Reporting Bugs
+
+If you find what you think is a bug, you might check the perl bug database
+at L<https://github.com/Perl/perl5/issues>.  There may also be information at
+L<http://www.perl.org/>, the Perl Home Page.
+
+If you believe you have an unreported bug, please open an issue at
+L<https://github.com/Perl/perl5/issues>.  Be sure to trim your bug down to a
+tiny but sufficient test case.
+
+If the bug you are reporting has security implications which make it
+inappropriate to send to a public issue tracker, then see
+L<perlsec/SECURITY VULNERABILITY CONTACT INFORMATION>
+for details of how to report the issue.
+
+=head1 Give Thanks
+
+If you wish to thank the Perl 5 Porters for the work we had done in Perl 5,
+you can do so by running the C<perlthanks> program:
+
+    perlthanks
+
+This will send an email to the Perl 5 Porters list with your show of thanks.
+
+=head1 SEE ALSO
+
+The F<Changes> file for an explanation of how to view exhaustive details on
+what changed.
+
+The F<INSTALL> file for how to build Perl.
+
+The F<README> file for general stuff.
+
+The F<Artistic> and F<Copying> files for copyright information.
+
+=cut
