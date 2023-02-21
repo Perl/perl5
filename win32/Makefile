@@ -504,7 +504,7 @@ LIBBASEFILES	= $(LIBBASEFILES) msvcrt.lib vcruntime.lib
 !ENDIF
 
 # Avoid __intel_new_proc_init link error for libircmt.
-# libmmd is /MD equivelent, other variants exist.
+# libmmd is /MD equivalent, other variants exist.
 # libmmd is Intel C's math addon funcs to MS CRT, contains long doubles, C99,
 # and optimized C89 funcs
 !IF "$(__ICC)" == "define"

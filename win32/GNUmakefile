@@ -744,7 +744,7 @@ endif
 endif
 
 # Avoid __intel_new_proc_init link error for libircmt.
-# libmmd is /MD equivelent, other variants exist.
+# libmmd is /MD equivalent, other variants exist.
 # libmmd is Intel C's math addon funcs to MS CRT, contains long doubles, C99,
 # and optimized C89 funcs
 ifeq ($(__ICC),define)
