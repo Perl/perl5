@@ -9,8 +9,8 @@
 # When actions are enabled then it will - by default - run the 'Sanity Check' job.
 #
 # Testing other build configurations is controlled by the 'Secrets' configured
-# in 'Settings' -> 'Secrets' -> 'Actions' -> 'Repository Secrets':
-#   - EXTENDED_TESTING: when this secret exists and is set to a true value then
+# in 'Settings' -> 'Secrets and Variables' -> 'Actions' -> 'Variables':
+#   - DO_EXTENDED_TESTING: when this var exists and is set to a true value then
 #     all build configurations are tested;
 #   - CI_SKIP_SANITY: if set to a true value then most of the 'Sanity Check' job is skipped;
 #   - CI_FORCE_LINUX: if set to a true value: run the 'linux' job;
@@ -33,18 +33,11 @@
 #      * string containing only zeroes (i.e. '0', '0000')
 #      * string containing only spaces and zeroes (i.e. '0  0 0 0')
 #
-# When setting a value it's best to set a long and complex value
-# since GitHub will mask the secrets in the output. Which means if you
-# set (for example) EXTENDED_TESTING to 1 then all occurrences of '1'
-# are replaced with '*'. (e.g. `s/1/*/g;`). So it's recommended to set
-# something that is unlikely to occur in the job(/build/test) output
-# (for example: '111111111111111111', 'Rumpelstiltskin', ...).
-#
 # Example: if you only want to run tests on cygwin then you can set:
-#   - EXTENDED_TESTING=00000000000000000000000000000000000000
-#   - CI_SKIP_SANITY=1111111111111111111111111111111111111111
-#   - CI_FORCE_CYGWIN=111111111111111111111111111111111111111
-#   - (and all other CI_FORCE_... secrets to 0000000000000000)
+#   - DO_EXTENDED_TESTING=0
+#   - CI_SKIP_SANITY=1
+#   - CI_FORCE_CYGWIN=1
+#   - (and all other CI_FORCE_... vars to 0)
 #
 
 name: testsuite
@@ -117,13 +110,23 @@ jobs:
   # "linux-i386" tests -Uusethreads without -DDEBUGGING
   # All builds in the "linux" matrix test with -DDEBUGGING
   #
-  # "sanity_check" sets `fetch-depth: 0` so that it does a git clone with full
-  # history, and hence can run t/porting/cmp_version.t etc
-  # The git-related tests require full history, but we only need to run them
-  # once (they aren't platform specific).
-  # Hence leave the others with the default setting (1), which performs a
-  # shallow clone. In these shallow checkouts, the git related porting tests
-  # skip (or rapidly pass), but they won't fail spuriously.
+  # "sanity_check" sets `fetch-depth: 0` so that it does a git clone
+  # with full history, and hence can run t/porting/cmp_version.t etc
+  #
+  # The git-related tests require full history, but we only need to run
+  # them once (they aren't platform specific).  Hence leave the others
+  # with the default setting (1), which performs a shallow clone. In
+  # these shallow checkouts, the git related porting tests skip (or
+  # rapidly pass), but they won't fail spuriously.
+  #
+  # TODO - Now that we do not use secrets and instead use vars for the
+  # control of which tests we run (due to the way secrets are elided
+  # from the output), we can simplify the shell code below.  The
+  # following url includes discussion on what next steps we could take
+  # to simplify the complexity of this code.
+  #
+  # https://github.com/Perl/perl5/pull/20845#issuecomment-1440676127
+  #
 
   sanity_check:
     name: "Sanity: Linux -Dusethreads"
@@ -152,18 +155,18 @@ jobs:
       - name: Check what-to-do
         id: ci_config
         env:
-          CI_SKIP_SANITY: ${{ secrets.CI_SKIP_SANITY }}
-          CI_FORCE_LINUX: ${{ secrets.CI_FORCE_LINUX }}
-          CI_FORCE_LINUX_I386: ${{ secrets.CI_FORCE_LINUX_I386 }}
-          CI_FORCE_INSTALL: ${{ secrets.CI_FORCE_INSTALL }}
-          CI_FORCE_MACOS: ${{ secrets.CI_FORCE_MACOS }}
-          CI_FORCE_MSVC142: ${{ secrets.CI_FORCE_MSVC142 }}
-          CI_FORCE_MINGW64: ${{ secrets.CI_FORCE_MINGW64 }}
-          CI_FORCE_CYGWIN: ${{ secrets.CI_FORCE_CYGWIN }}
-          CI_FORCE_MINITEST: ${{ secrets.CI_FORCE_MINITEST }}
-          CI_FORCE_ASAN: ${{ secrets.CI_FORCE_ASAN }}
-          CI_FORCE_PERL_UNICODE: ${{ secrets.CI_FORCE_PERL_UNICODE }}
-          CI_FORCE_DIST_MODULES: ${{ secrets.CI_FORCE_DIST_MODULES }}
+          CI_SKIP_SANITY: ${{ vars.CI_SKIP_SANITY }}
+          CI_FORCE_LINUX: ${{ vars.CI_FORCE_LINUX }}
+          CI_FORCE_LINUX_I386: ${{ vars.CI_FORCE_LINUX_I386 }}
+          CI_FORCE_INSTALL: ${{ vars.CI_FORCE_INSTALL }}
+          CI_FORCE_MACOS: ${{ vars.CI_FORCE_MACOS }}
+          CI_FORCE_MSVC142: ${{ vars.CI_FORCE_MSVC142 }}
+          CI_FORCE_MINGW64: ${{ vars.CI_FORCE_MINGW64 }}
+          CI_FORCE_CYGWIN: ${{ vars.CI_FORCE_CYGWIN }}
+          CI_FORCE_MINITEST: ${{ vars.CI_FORCE_MINITEST }}
+          CI_FORCE_ASAN: ${{ vars.CI_FORCE_ASAN }}
+          CI_FORCE_PERL_UNICODE: ${{ vars.CI_FORCE_PERL_UNICODE }}
+          CI_FORCE_DIST_MODULES: ${{ vars.CI_FORCE_DIST_MODULES }}
         run: |
           echo '::echo::on'
           [[ -n "${CI_SKIP_SANITY}"        ]] && [[ "${CI_SKIP_SANITY%[!0 ]*}"        != "${CI_SKIP_SANITY}"        ]] && echo "ci_skip_sanity=true" >> "$GITHUB_OUTPUT"
@@ -214,16 +217,16 @@ jobs:
           TEST_JOBS=2 ./perl t/harness -nre='^porting/'
 
       # Set a variable for dependent jobs to signal if full testsuite is enabled
-      - name: "Check if EXTENDED_TESTING is set"
+      - name: "Check if DO_EXTENDED_TESTING is set"
         id: check_extended_testing
         env:
-          EXTENDED_TESTING: ${{ secrets.EXTENDED_TESTING }}
+          DO_EXTENDED_TESTING: ${{ vars.DO_EXTENDED_TESTING }}
           CURRENT_REPOSITORY: ${{ github.repository }}
         run: |
           if [[ "${CURRENT_REPOSITORY}" = 'Perl/perl5' ]]; then
             echo "Running all test jobs"
             echo "run_all_jobs=true" >> "$GITHUB_OUTPUT"
-          elif [[ -n "${EXTENDED_TESTING}" ]] && [[ "${EXTENDED_TESTING%[!0 ]*}" != "${EXTENDED_TESTING}" ]]; then
+          elif [[ -n "${DO_EXTENDED_TESTING}" ]] && [[ "${DO_EXTENDED_TESTING%[!0 ]*}" != "${DO_EXTENDED_TESTING}" ]]; then
             echo "Running all test jobs"
             echo "run_all_jobs=true" >> "$GITHUB_OUTPUT"
           else
