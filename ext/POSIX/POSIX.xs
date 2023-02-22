@@ -1560,10 +1560,6 @@ END_EXTERN_C
 #endif
 #endif
 
-#if ! defined(HAS_LOCALECONV) && ! defined(HAS_LOCALECONV_L)
-#   define localeconv() not_here("localeconv")
-#endif /* HAS_LOCALECONV */
-
 #ifdef HAS_LONG_DOUBLE
 #  if LONG_DOUBLESIZE > NVSIZE
 #    undef HAS_LONG_DOUBLE  /* XXX until we figure out how to use them */
@@ -2062,7 +2058,8 @@ HV *
 localeconv()
     CODE:
 #ifndef HAS_LOCALECONV
-	localeconv(); /* A stub to call not_here(). */
+        RETVAL = NULL;
+        not_here("localeconv");
 #else
         RETVAL = Perl_localeconv(aTHX);
 #endif  /* HAS_LOCALECONV */
