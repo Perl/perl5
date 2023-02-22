@@ -206,8 +206,12 @@ sub _trylocale ($$$$) { # For use only by other functions in this file!
 
         # We definitely don't want the locale set to something that is
         # unsupported
-        die "Couldn't restore locale '$save_locale', category $category"
-                                      unless setlocale($category, $save_locale);
+        if (! setlocale($category, $save_locale)) {
+            my $error_text = "\$!=$!";
+            $error_text .= "; \$^E=$^E" if $^E != $!;
+            die "Couldn't restore locale '$save_locale', category $category;"
+              . $error_text;
+        }
         if ($badutf8) {
             _my_fail("Verify locale name doesn't contain malformed utf8");
             return;
