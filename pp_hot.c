@@ -1734,10 +1734,8 @@ PP(pp_aelemfast)
         if (sv) {
             PUSHs(sv);
             RETURN;
-        } else if (!lval) {
-            PUSHs(&PL_sv_undef);
-            RETURN;
-        }
+        } else if (!lval)
+            RETPUSHUNDEF;
     }
 
     /* ... else do it the hard way */

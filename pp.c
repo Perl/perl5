@@ -7474,10 +7474,8 @@ PP(pp_blessed)
 
     SvGETMAGIC(arg);
 
-    if(!SvROK(arg) || !SvOBJECT((rv = SvRV(arg)))) {
-        SETs(&PL_sv_undef);
-        RETURN;
-    }
+    if(!SvROK(arg) || !SvOBJECT((rv = SvRV(arg))))
+        RETSETUNDEF;
 
     if((PL_op->op_private & OPpTRUEBOOL) ||
             ((PL_op->op_private & OPpMAYBE_TRUEBOOL) && (block_gimme() == G_VOID))) {

@@ -1654,13 +1654,11 @@ PP(pp_prtf)
                 goto just_say_no;
     }
     SP = ORIGMARK;
-    PUSHs(&PL_sv_yes);
-    RETURN;
+    RETPUSHYES;
 
   just_say_no:
     SP = ORIGMARK;
-    PUSHs(&PL_sv_undef);
-    RETURN;
+    RETPUSHUNDEF;
 }
 
 PP(pp_sysopen)
@@ -1676,12 +1674,9 @@ PP(pp_sysopen)
     const char * const tmps = SvPV_const(sv, len);
     if (do_open_raw(gv, tmps, len, mode, perm, NULL)) {
         IoLINES(GvIOp(gv)) = 0;
-        PUSHs(&PL_sv_yes);
+        RETPUSHYES;
     }
-    else {
-        PUSHs(&PL_sv_undef);
-    }
-    RETURN;
+    RETPUSHUNDEF;
 }
 
 

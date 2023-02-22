@@ -2127,8 +2127,7 @@ PP(pp_reset)
     else
         tmps = SvPVx_const(POPs, len);
     sv_resetpvn(tmps, len, CopSTASH(PL_curcop));
-    PUSHs(&PL_sv_yes);
-    RETURN;
+    RETPUSHYES;
 }
 
 /* like pp_nextstate, but used instead when the debugger is active */
@@ -3338,8 +3337,7 @@ PP(pp_exit)
     }
     PL_exit_flags |= PERL_EXIT_EXPECTED;
     my_exit(anum);
-    PUSHs(&PL_sv_undef);
-    RETURN;
+    RETPUSHUNDEF;
 }
 
 /* Eval. */
