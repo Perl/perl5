@@ -6655,6 +6655,31 @@ t/uni/fold.t				See if Unicode folding works
 t/uni/goto.t				See if Unicode goto &sub works
 t/uni/greek.t				See if Unicode in greek works
 t/uni/gv.t				See if Unicode GVs work.
+t/uni/idstart.pl			See if the rules for variable names work
+t/uni/idstart00.t			See if the rules for variable names work
+t/uni/idstart01.t			See if the rules for variable names work
+t/uni/idstart02.t			See if the rules for variable names work
+t/uni/idstart03.t			See if the rules for variable names work
+t/uni/idstart04.t			See if the rules for variable names work
+t/uni/idstart05.t			See if the rules for variable names work
+t/uni/idstart06.t			See if the rules for variable names work
+t/uni/idstart07.t			See if the rules for variable names work
+t/uni/idstart08.t			See if the rules for variable names work
+t/uni/idstart09.t			See if the rules for variable names work
+t/uni/idstart10.t			See if the rules for variable names work
+t/uni/idstart11.t			See if the rules for variable names work
+t/uni/idstart12.t			See if the rules for variable names work
+t/uni/idstart13.t			See if the rules for variable names work
+t/uni/idstart14.t			See if the rules for variable names work
+t/uni/idstart15.t			See if the rules for variable names work
+t/uni/idstart16.t			See if the rules for variable names work
+t/uni/idstart17.t			See if the rules for variable names work
+t/uni/idstart18.t			See if the rules for variable names work
+t/uni/idstart19.t			See if the rules for variable names work
+t/uni/idstart20.t			See if the rules for variable names work
+t/uni/idstart21.t			See if the rules for variable names work
+t/uni/idstart22.t			See if the rules for variable names work
+t/uni/idstart23.t			See if the rules for variable names work
 t/uni/labels.t				See if Unicode labels work
 t/uni/latin2.t				See if Unicode in latin2 works
 t/uni/lex_utf8.t			See if Unicode in lexer works

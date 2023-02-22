@@ -14,7 +14,7 @@ use utf8;
 use open qw( :utf8 :std );
 no warnings qw(misc reserved);
 
-plan (tests => 66880);
+plan (tests => 1600);
 
 # ${single:colon} should not be treated as a simple variable, but as a
 # block with a label inside.
@@ -284,22 +284,6 @@ for my $chr (
         qr/\QUnrecognized character \x{$esc};/,
         "\\x{$esc} is illegal for a length-one identifier"
        );
-}
-
-for my $i (0x100..0xffff) {
-   my $chr = chr($i);
-   my $esc = sprintf("%x", $i);
-   local $@;
-   eval "my \$$chr = q<test>; \$$chr;";
-   if ( $chr =~ /^\p{_Perl_IDStart}$/ ) {
-      is($@, '', sprintf("\\x{%04x} is XIDS, works as a length-1 variable", $i));
-   }
-   else {
-      like($@,
-           qr/\QUnrecognized character \x{$esc};/,
-           "\\x{$esc} isn't XIDS, illegal as a length-1 variable",
-          )
-   }
 }
 
 {
