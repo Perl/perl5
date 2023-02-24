@@ -106,7 +106,7 @@ typedef enum {
                                         matter */
     UTF8NESS_YES              =  2,  /* Defintely is UTF-8, wideness
                                         unspecified */
-    UTF8NESS_UNKNOWN = (STRLEN) -1,  /* Undetermined so far */
+    UTF8NESS_UNKNOWN          = -1,  /* Undetermined so far */
 } utf8ness_t;
 
 /* Use UTF-8 as the default script encoding?
