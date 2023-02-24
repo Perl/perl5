@@ -669,9 +669,11 @@ straight north being zero, straight east being pi/2).
 
 The midpoint between London and Tokyo being
 
-    use Math::Trig qw(great_circle_midpoint);
+    use Math::Trig qw(great_circle_midpoint rad2deg);
 
     my @M = great_circle_midpoint(@L, @T);
+    sub SWNE { rad2deg( $_[0] ), 90 - rad2deg( $_[1] ) }
+    my @lonlat = SWNE(@M);
 
 or about 69 N 89 E, in the frozen wastes of Siberia.
 
