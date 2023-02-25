@@ -552,7 +552,7 @@ apply_class_attribute_isa(pTHX_ HV *stash, SV *value)
         if(!aux->xhv_class_adjust_blocks)
             aux->xhv_class_adjust_blocks = newAV();
 
-        for(U32 i = 0; i <= AvFILL(superaux->xhv_class_adjust_blocks); i++)
+        for(SSize_t i = 0; i <= AvFILL(superaux->xhv_class_adjust_blocks); i++)
             av_push(aux->xhv_class_adjust_blocks, AvARRAY(superaux->xhv_class_adjust_blocks)[i]);
     }
 
@@ -696,7 +696,7 @@ Perl_class_seal_stash(pTHX_ HV *stash)
 
         PADNAMELIST *fieldnames = aux->xhv_class_fields;
 
-        for(U32 i = 0; fieldnames && i <= PadnamelistMAX(fieldnames); i++) {
+        for(SSize_t i = 0; fieldnames && i <= PadnamelistMAX(fieldnames); i++) {
             PADNAME *pn = PadnamelistARRAY(fieldnames)[i];
             char sigil = PadnamePV(pn)[0];
             PADOFFSET fieldix = PadnameFIELDINFO(pn)->fieldix;
