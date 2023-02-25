@@ -18,7 +18,7 @@ Perl_regnext(pTHX_ const regnode *p)
                                                 (int)OP(p), (int)REGNODE_MAX);
     }
 
-    offset = (REGNODE_OFF_BY_ARG(OP(p)) ? ARG(p) : NEXT_OFF(p));
+    offset = (REGNODE_OFF_BY_ARG(OP(p)) ? ARG1u(p) : NEXT_OFF(p));
     if (offset == 0)
         return(NULL);
 

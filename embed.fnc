@@ -2516,6 +2516,7 @@ Adhp	|I32	|pregexec	|NN REGEXP * const prog 		\
 				|U32 nosave
 Cp	|void	|pregfree	|NULLOK REGEXP *r
 Cp	|void	|pregfree2	|NN REGEXP *rx
+
 Adp	|const char *|prescan_version					\
 				|NN const char *s			\
 				|bool strict				\
@@ -2742,6 +2743,11 @@ Cdhp	|int	|runops_debug
 Cdhp	|int	|runops_standard
 Adp	|CV *	|rv2cv_op_cv	|NN OP *cvop				\
 				|U32 flags
+Adp	|void	|rxmo_dup_guts	|NN const RXMO *srxmo			\
+				|NN RXMO *drxmo 			\
+				|NN CLONE_PARAMS *param
+Cp	|void	|rxmo_free	|NULLOK RXMO *rxmo
+Cp	|void	|rxmo_free2	|NN RXMOG *rxmo
 : Used in pp_hot.c
 p	|void	|rxres_save	|NN void **rsp				\
 				|NN REGEXP *rx
@@ -3310,6 +3316,9 @@ Cip	|bool	|SvTRUE_common	|NN SV *sv				\
 				|const bool sv_2bool_is_fallback
 Adip	|bool	|SvTRUE_NN	|NN SV *sv
 Adip	|bool	|SvTRUE_nomg	|NULLOK SV *sv
+ARTp	|const char *|sv_type_name					\
+				|U8 type				\
+				|bool longname
 ARdp	|char * |sv_uni_display |NN SV *dsv				\
 				|NN SV *ssv				\
 				|STRLEN pvlim				\
@@ -5136,9 +5145,6 @@ ES	|regnode_offset|reg	|NN RExC_state_t *pRExC_state		\
 				|I32 paren				\
 				|NN I32 *flagp				\
 				|U32 depth
-ES	|regnode_offset|reganode|NN RExC_state_t *pRExC_state		\
-				|U8 op					\
-				|U32 arg
 ES	|regnode_offset|regatom |NN RExC_state_t *pRExC_state		\
 				|NN I32 *flagp				\
 				|U32 depth
@@ -5162,11 +5168,6 @@ ES	|void	|reginsert	|NN RExC_state_t *pRExC_state		\
 				|const U8 op				\
 				|const regnode_offset operand		\
 				|const U32 depth
-ES	|regnode_offset|reg2Lanode					\
-				|NN RExC_state_t *pRExC_state		\
-				|const U8 op				\
-				|const U32 arg1 			\
-				|const I32 arg2
 ES	|regnode_offset|reg_la_NOTHING					\
 				|NN RExC_state_t *pRExC_state		\
 				|U32 flags				\
@@ -5175,6 +5176,13 @@ ES	|regnode_offset|reg_la_OPFAIL					\
 				|NN RExC_state_t *pRExC_state		\
 				|U32 flags				\
 				|NN const char *type
+ES	|regnode_offset|reg1node|NN RExC_state_t *pRExC_state		\
+				|U8 op					\
+				|U32 arg
+ES	|regnode_offset|reg2node|NN RExC_state_t *pRExC_state		\
+				|const U8 op				\
+				|const U32 arg1 			\
+				|const I32 arg2
 ES	|regnode_offset|reg_node|NN RExC_state_t *pRExC_state		\
 				|U8 op
 ES	|regnode_offset|regnode_guts					\

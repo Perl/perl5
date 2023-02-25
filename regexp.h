@@ -67,6 +67,10 @@ struct reg_substr_data {
 typedef struct regexp_paren_pair {
     SSize_t start;
     SSize_t end;
+
+    SSize_t start_new;
+    SSize_t end_new;
+
     /* 'start_tmp' records a new opening position before the matching end
      * has been found, so that the old start and end values are still
      * valid, e.g.
@@ -102,6 +106,32 @@ struct reg_code_blocks {
     struct reg_code_block *cb; /* array of reg_code_block's */
 };
 
+typedef struct regexp_matched_offsets {
+    _XPV_HEAD;
+    REGEXP *owner_rxsv;
+    /*----------------------------------------------------------------------
+     * Data about the last/current match. These are modified during matching
+     */
+
+    U32 lastparen;           /* highest close paren matched ($+) */
+    U32 lastcloseparen;      /* last close paren matched ($^N) */
+
+    /*---------------------------------------------------------------------- */
+
+    char *subbeg;       /* saved or original string so \digit works forever. */
+    SV_SAVED_COPY       /* If non-NULL, SV which is COW from original */
+    SSize_t sublen;     /* Length of string pointed by subbeg */
+    SSize_t suboffset;  /* byte offset of subbeg from logical start of str */
+    SSize_t subcoffset; /* suboffset equiv, but in chars (for @-/@+) */
+
+    /*---------------------------------------------------------------------- */
+
+    regexp_paren_pair *offs; /* Array of offsets for (@-) and (@+) */
+
+    U32 nparens;        /* The number elements in offs.
+                           Must match nparens in owner_rxsv */
+} regexp_matched_offsets;
+
 
 /*
 = for apidoc AyT||regexp
@@ -135,6 +165,7 @@ typedef struct regexp {
                                        physical with the same logical id */
 
     U32 extflags;      /* Flags used both externally and internally */
+    SSize_t maxlen;    /* maximum possible number of chars in string to match */
     SSize_t minlen;    /* minimum possible number of chars in string to match */
     SSize_t minlenret; /* minimum possible number of chars in $& */
     STRLEN gofs;       /* chars left of pos that we search from */
@@ -149,16 +180,6 @@ typedef struct regexp {
                         * created this object. */
     U32 intflags;      /* Engine Specific Internal flags */
 
-    /*----------------------------------------------------------------------
-     * Data about the last/current match. These are modified during matching
-     */
-
-    U32 lastparen;           /* highest close paren matched ($+) */
-    regexp_paren_pair *offs; /* Array of offsets for (@-) and (@+) */
-    char **recurse_locinput; /* used to detect infinite recursion, XXX: move to internal */
-    U32 lastcloseparen;      /* last close paren matched ($^N) */
-
-
     /*---------------------------------------------------------------------- */
 
     /* offset from wrapped to the start of precomp */
@@ -167,35 +188,42 @@ typedef struct regexp {
     /* original flags used to compile the pattern, may differ from
      * extflags in various ways */
     PERL_BITFIELD32 compflags:9;
-
-    /*---------------------------------------------------------------------- */
-
-    char *subbeg;       /* saved or original string so \digit works forever. */
-    SV_SAVED_COPY       /* If non-NULL, SV which is COW from original */
-    SSize_t sublen;     /* Length of string pointed by subbeg */
-    SSize_t suboffset;  /* byte offset of subbeg from logical start of str */
-    SSize_t subcoffset; /* suboffset equiv, but in chars (for @-/@+) */
-    SSize_t maxlen;  /* minimum possible number of chars in string to match */
-
-    /*---------------------------------------------------------------------- */
-
-
     CV *qr_anoncv;      /* the anon sub wrapped round qr/(?{..})/ */
+
+    char **recurse_locinput; /* used to detect infinite recursion, XXX: move to internal */
+
+    // RXMO *rxmo;
 } regexp;
 
 
-#define RXp_PAREN_NAMES(rx)    ((rx)->paren_names)
+#define RXp_PAREN_NAMES(rx) ((rx)->paren_names)
 
-#define RXp_OFFS_START(rx,n)   ((rx)->offs[(n)].start)
+#define RXMOp_OFFS_START(rx,n) \
+    ((RXMOp_OFFSp(rx)[(n)].end_new == -1 || RXMOp_OFFSp(rx)[(n)].start_new == -1 ) \
+     ? RXMOp_OFFSp(rx)[(n)].start \
+     : RXMOp_OFFSp(rx)[(n)].start_new )
 
-#define RXp_OFFS_END(rx,n)     ((rx)->offs[(n)].end)
+#define RXMOp_OFFS_END(rx,n) \
+    ((RXMOp_OFFSp(rx)[(n)].end_new == -1 || RXMOp_OFFSp(rx)[(n)].start_new == -1 ) \
+     ? RXMOp_OFFSp(rx)[(n)].end \
+     : RXMOp_OFFSp(rx)[(n)].end_new )
 
-#define RXp_OFFS_VALID(rx,n) \
-    ( (rx)->offs[(n)].end != -1 && (rx)->offs[(n)].start != -1 )
+#define RXMOp_OFFS_VALID(rx,n) \
+    ((RXMOp_OFFSp(rx)[(n)].end_new != -1 && RXMOp_OFFSp(rx)[(n)].start_new != -1 )  \
+      ||                                                              \
+     (RXMOp_OFFSp(rx)[(n)].end != -1 && RXMOp_OFFSp(rx)[(n)].start != -1 ))
 
-#define RX_OFFS_START(rx_sv,n)  RXp_OFFS_START(ReANY(rx_sv),n)
-#define RX_OFFS_END(rx_sv,n)    RXp_OFFS_END(ReANY(rx_sv),n)
-#define RX_OFFS_VALID(rx_sv,n)  RXp_OFFS_VALID(ReANY(rx_sv),n)
+#define RXMO_OFFS_START(rxmo_sv,n)  RXMOp_OFFS_START(RxmoANY(rxmo_sv),n)
+#define RXMO_OFFS_END(rxmo_sv,n)    RXMOp_OFFS_END(RxmoANY(rxmo_sv),n)
+#define RXMO_OFFS_VALID(rxmo_sv,n)  RXMOp_OFFS_VALID(RxmoANY(rxmo_sv),n)
+
+#define RXp_OFFS_START(rx,n)        RXMO_OFFS_START(RXp_RXMO(rx),n)
+#define RXp_OFFS_END(rx,n)          RXMO_OFFS_END(RXp_RXMO(rx),n)
+#define RXp_OFFS_VALID(rx,n)        RXMO_OFFS_VALID(RXp_RXMO(rx),n)
+
+#define RX_OFFS_START(rx_sv,n)      RXp_OFFS_START(ReANY(rx_sv),n)
+#define RX_OFFS_END(rx_sv,n)        RXp_OFFS_END(ReANY(rx_sv),n)
+#define RX_OFFS_VALID(rx_sv,n)      RXp_OFFS_VALID(ReANY(rx_sv),n)
 
 /* used for high speed searches */
 typedef struct re_scream_pos_data_s
@@ -554,34 +582,75 @@ and check for NULL.
 #  define RX_COMPFLAGS(rx_sv)             RXp_COMPFLAGS(ReANY(rx_sv))
 #  define RXp_ENGINE(prog)                ((prog)->engine)
 #  define RX_ENGINE(rx_sv)                (RXp_ENGINE(ReANY(rx_sv)))
-#  define RXp_SUBBEG(prog)                (prog->subbeg)
-#  define RX_SUBBEG(rx_sv)                (RXp_SUBBEG(ReANY(rx_sv)))
-#  define RXp_SUBOFFSET(prog)             (prog->suboffset)
-#  define RX_SUBOFFSET(rx_sv)             (RXp_SUBOFFSET(ReANY(rx_sv)))
-#  define RX_SUBCOFFSET(rx_sv)            (ReANY(rx_sv)->subcoffset)
-#  define RXp_OFFSp(prog)                 (prog->offs)
-#  define RX_OFFSp(rx_sv)                 (RXp_OFFSp(ReANY(rx_sv)))
-#  define RXp_LOGICAL_NPARENS(prog)       (prog->logical_nparens)
+#  define RXp_LOGICAL_NPARENS(prog)       ((prog)->logical_nparens)
 #  define RX_LOGICAL_NPARENS(rx_sv)       (RXp_LOGICAL_NPARENS(ReANY(rx_sv)))
-#  define RXp_LOGICAL_TO_PARNO(prog)      (prog->logical_to_parno)
+#  define RXp_LOGICAL_TO_PARNO(prog)      ((prog)->logical_to_parno)
 #  define RX_LOGICAL_TO_PARNO(rx_sv)      (RXp_LOGICAL_TO_PARNO(ReANY(rx_sv)))
-#  define RXp_PARNO_TO_LOGICAL(prog)      (prog->parno_to_logical)
+#  define RXp_PARNO_TO_LOGICAL(prog)      ((prog)->parno_to_logical)
 #  define RX_PARNO_TO_LOGICAL(rx_sv)      (RXp_PARNO_TO_LOGICAL(ReANY(rx_sv)))
-#  define RXp_PARNO_TO_LOGICAL_NEXT(prog) (prog->parno_to_logical_next)
+#  define RXp_PARNO_TO_LOGICAL_NEXT(prog) ((prog)->parno_to_logical_next)
 #  define RX_PARNO_TO_LOGICAL_NEXT(rx_sv) (RXp_PARNO_TO_LOGICAL_NEXT(ReANY(rx_sv)))
-#  define RXp_NPARENS(prog)               (prog->nparens)
+#  define RXp_NPARENS(prog)               ((prog)->nparens)
 #  define RX_NPARENS(rx_sv)               (RXp_NPARENS(ReANY(rx_sv)))
-#  define RX_SUBLEN(rx_sv)                (ReANY(rx_sv)->sublen)
-#  define RXp_MINLEN(prog)                (prog->minlen)
+#  define RXp_MINLEN(prog)                ((prog)->minlen)
 #  define RX_MINLEN(rx_sv)                (RXp_MINLEN(ReANY(rx_sv)))
-#  define RXp_MINLENRET(prog)             (prog->minlenret)
+#  define RXp_MINLENRET(prog)             ((prog)->minlenret)
 #  define RX_MINLENRET(rx_sv)             (RXp_MINLENRET(ReANY(rx_sv)))
-#  define RXp_GOFS(prog)                  (prog->gofs)
+#  define RXp_GOFS(prog)                  ((prog)->gofs)
 #  define RX_GOFS(rx_sv)                  (RXp_GOFS(ReANY(rx_sv)))
-#  define RX_LASTPAREN(rx_sv)             (ReANY(rx_sv)->lastparen)
-#  define RX_LASTCLOSEPAREN(rx_sv)        (ReANY(rx_sv)->lastcloseparen)
-#  define RXp_SAVED_COPY(prog)            (prog->saved_copy)
+#  define RXp_SUBSTRS(prog)               ((prog)->substrs)
+#  define RX_SUBSTRS(rx_sv)               (RXp_SUBSTRS(ReANY(rx_sv)))
+#  define RXp_PPRIVATE(prog)              ((prog)->pprivate)
+#  define RX_PPRIVATE(rx_sv)              (RXp_PPRIVATE(ReANY(rx_sv)))
+#  define RXp_QR_ANONCV(prog)             ((prog)->qr_anoncv)
+#  define RX_QR_ANONCV(rx_sv)             (RXp_QR_ANONCV(ReANY(rx_sv)))
+#  define RXp_MOTHER_RE(prog)             ((prog)->mother_re)
+#  define RX_MOTHER_RE(rx_sv)             (RXp_MOTHER_RE(ReANY(rx_sv)))
+#  define RXp_PRE_PREFIX(prog)            ((prog)->pre_prefix)
+#  define RX_PRE_PREFIX(rx_sv)            (RXp_PRE_PREFIX(ReANY(rx_sv)))
+
+
+#  define RXMOp_SUBBEG(rxmo)                ((rxmo)->subbeg)
+#  define RXMO_SUBBEG(rxmo_sv)              (RXMOp_SUBBEG(RxmoANY(rxmo_sv)))
+#  define RXMOp_SUBOFFSET(rxmo)             ((rxmo)->suboffset)
+#  define RXMO_SUBOFFSET(rxmo_sv)           (RXMOp_SUBOFFSET(RxmoANY(rxmo_sv)))
+#  define RXMOp_SUBCOFFSET(rxmo)            ((rxmo)->subcoffset)
+#  define RXMO_SUBCOFFSET(rxmo_sv)          (RXMOp_SUBCOFFSET(RxmoANY(rxmo_sv)))
+#  define RXMOp_OFFSp(rxmo)                 ((rxmo)->offs)
+#  define RXMO_OFFSp(rxmo_sv)               (RXMOp_OFFSp(RxmoANY(rxmo_sv)))
+#  define RXMOp_SUBLEN(rxmo)                ((rxmo)->sublen)
+#  define RXMO_SUBLEN(rxmo_sv)              (RXMOp_SUBLEN(RxmoANY(rxmo_sv)))
+#  define RXMOp_LASTPAREN(rxmo)             ((rxmo)->lastparen)
+#  define RXMO_LASTPAREN(rxmo_sv)           (RXMOp_LASTPAREN(RxmoANY(rxmo_sv)))
+#  define RXMOp_LASTCLOSEPAREN(rxmo)        ((rxmo)->lastcloseparen)
+#  define RXMO_LASTCLOSEPAREN(rxmo_sv)      (RXMOp_LASTCLOSEPAREN(RxmoANY(rxmo_sv)))
+#  define RXMOp_SAVED_COPY(rxmo)            ((rxmo)->saved_copy)
+#  define RXMO_SAVED_COPY(rxmo_sv)          (RXMOp_SAVED_COPY(RxmoANY(rxmo_sv)))
+#  define RXMOp_NPARENS(rxmo)               ((rxmo)->nparens)
+#  define RXMO_NPARENS(rxmo_sv)             (RXMOp_NPARENS(RxmoANY(rxmo_sv)))
+#  define RXMOp_OWNER_RXSV(rxmo)            ((rxmo)->owner_rxsv)
+#  define RXMO_OWNER_RXSV(rxmo_sv)          (RXMOp_OWNER_RXSV(RxmoANY(rxmo_sv)))
+
+#  define RXp_RXMO(prog)                  ((prog)->rxmo)
+#  define RX_RXMO(rx_sv)                  (RXp_RXMO(ReANY(rx_sv)))
+
+#  define RXp_SUBBEG(prog)                (RXMO_SUBBEG(RXp_RXMO(prog)))
+#  define RX_SUBBEG(rx_sv)                (RXp_SUBBEG(ReANY(rx_sv)))
+#  define RXp_SUBOFFSET(prog)             (RXMO_SUBOFFSET(RXp_RXMO(prog)))
+#  define RX_SUBOFFSET(rx_sv)             (RXp_SUBOFFSET(ReANY(rx_sv)))
+#  define RXp_SUBCOFFSET(prog)            (RXMO_SUBCOFFSET(RXp_RXMO(prog)))
+#  define RX_SUBCOFFSET(rx_sv)            (RXp_SUBCOFFSET(ReANY(rx_sv)))
+#  define RXp_OFFSp(prog)                 (RXMO_OFFSp(RXp_RXMO(prog)))
+#  define RX_OFFSp(rx_sv)                 (RXp_OFFSp(ReANY(rx_sv)))
+#  define RXp_SUBLEN(prog)                (RXMO_SUBLEN(RXp_RXMO(prog)))
+#  define RX_SUBLEN(rx_sv)                (RXp_SUBLEN(ReANY(rx_sv)))
+#  define RXp_LASTPAREN(prog)             (RXMO_LASTPAREN(RXp_RXMO(prog)))
+#  define RX_LASTPAREN(rx_sv)             (RXp_LASTPAREN(ReANY(rx_sv)))
+#  define RXp_LASTCLOSEPAREN(prog)        (RXMO_LASTCLOSEPAREN(RXp_RXMO(prog)))
+#  define RX_LASTCLOSEPAREN(rx_sv)        (RXp_LASTCLOSEPAREN(ReANY(rx_sv)))
+#  define RXp_SAVED_COPY(prog)            (RXMO_SAVED_COPY(RXp_RXMO(prog)))
 #  define RX_SAVED_COPY(rx_sv)            (RXp_SAVED_COPY(ReANY(rx_sv)))
+
 /* last match was zero-length */
 #  define RXp_ZERO_LEN(prog) \
         (RXp_OFFS_START(prog,0) + (SSize_t)RXp_GOFS(prog) \
@@ -595,7 +664,7 @@ and check for NULL.
 #ifdef PERL_ANY_COW
 #  define RXp_MATCH_COPY_FREE(prog)                                 \
     STMT_START {                                                    \
-        if (RXp_SAVED_COPY(prog)) {                                 \
+        if (RXp_RXMO(prog) && RXp_SAVED_COPY(prog)) {               \
             SV_CHECK_THINKFIRST_COW_DROP(RXp_SAVED_COPY(prog));     \
         }                                                           \
         if (RXp_MATCH_COPIED(prog)) {                               \
@@ -666,7 +735,9 @@ and check for NULL.
 #  define ReREFCNT_dec(re)	SvREFCNT_dec(re)
 #  define ReREFCNT_inc(re)	((REGEXP *) SvREFCNT_inc(re))
 #endif
-#define ReANY(re)		Perl_ReANY((const REGEXP *)(re))
+
+#define ReANY(sv_rx)		Perl_ReANY((const REGEXP *)(sv_rx))
+#define RxmoANY(sv_rxmo)        ((struct regexp_matched_offsets *)SvANY((const RXMO *)(sv_rxmo)))
 
 /* FIXME for plugins. */
 
@@ -828,6 +899,9 @@ typedef struct regmatch_state {
             U32 lastparen;
             U32 lastcloseparen;
             CHECKPOINT cp;
+            CHECKPOINT lastcp;
+            U16 before_paren;
+            U16 after_paren;
 
         } branchlike;
 
@@ -837,6 +911,9 @@ typedef struct regmatch_state {
             U32 lastparen;
             U32 lastcloseparen;
             CHECKPOINT cp;
+            CHECKPOINT lastcp;
+            U16 before_paren;
+            U16 after_paren;
 
             regnode *next_branch; /* next branch node */
         } branch;
@@ -847,10 +924,15 @@ typedef struct regmatch_state {
             U32 lastparen;
             U32 lastcloseparen;
             CHECKPOINT cp;
+            CHECKPOINT lastcp;
+            U16 before_paren;
+            U16 after_paren;
 
             U32		accepted; /* how many accepting states left */
             bool	longfold;/* saw a fold with a 1->n char mapping */
             U16         *jump;  /* positive offsets from me */
+            U16         *j_before_paren;
+            U16         *j_after_paren;
             regnode	*me;	/* Which node am I - needed for jump tries*/
             U8		*firstpos;/* pos in string of first trie match */
             U32		firstchars;/* len in chars of firstpos from start */
@@ -906,6 +988,7 @@ typedef struct regmatch_state {
             regnode	*me;	/* the CURLYX node  */
             regnode	*B;	/* the B node in /A*B/  */
             CHECKPOINT	cp;	/* remember current savestack index */
+            CHECKPOINT	lastcp;	/* remember current savestack index */
             bool	minmod;
             int		parenfloor;/* how far back to strip paren data */
 
@@ -929,6 +1012,7 @@ typedef struct regmatch_state {
             /* this first element must match u.yes */
             struct regmatch_state *prev_yes_state;
             CHECKPOINT cp;
+            CHECKPOINT	lastcp;	/* remember current savestack index */
             U32 lastparen;
             U32 lastcloseparen;
             I32 alen;		/* length of first-matched A string */
@@ -942,6 +1026,7 @@ typedef struct regmatch_state {
         struct {
             U32 paren;
             CHECKPOINT cp;
+            CHECKPOINT lastcp;  /* remember current savestack index */
             U32 lastparen;
             U32 lastcloseparen;
             char *maxpos;	/* highest possible point in string to match */
@@ -952,6 +1037,10 @@ typedef struct regmatch_state {
             struct next_matchable_info Binfo;
         } curly; /* and CURLYN/PLUS/STAR */
 
+        struct {
+            CHECKPOINT cp;
+            CHECKPOINT lastcp;
+        } backref; /* REF and friends */
     } u;
 } regmatch_state;
 

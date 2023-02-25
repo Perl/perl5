@@ -275,9 +275,11 @@ struct pmop {
     OP *	op_first;
     OP *	op_last;
 #ifdef USE_ITHREADS
-    PADOFFSET   op_pmoffset;
+    PADOFFSET   op_pmre_offset;
+    PADOFFSET   op_pmrxmo_offset;
 #else
-    REGEXP *    op_pmregexp;            /* compiled expression */
+    REGEXP *    op_pmre;
+    RXMO *      op_pmrxmo;            /* compiled expression */
 #endif
     U32         op_pmflags;
     union {
@@ -297,8 +299,11 @@ struct pmop {
 };
 
 #ifdef USE_ITHREADS
-#define PM_GETRE(o)	(SvTYPE(PL_regex_pad[(o)->op_pmoffset]) == SVt_REGEXP \
-                         ? (REGEXP*)(PL_regex_pad[(o)->op_pmoffset]) : NULL)
+#define PM_GETRXMO(o)   (SvTYPE(PL_regex_pad[(o)->op_pmrxmo_offset]) == SVt_RXMO \
+                         ? (RXMO*)PL_regex_pad[(o)->op_pmrxmo_offset] : NULL)
+
+#define PM_GETRE(o)     (SvTYPE(PL_regex_pad[(o)->op_pmre_offset]) == SVt_REGEXP \
+                         ? (REGEXP*)PL_regex_pad[(o)->op_pmre_offset] : NULL)
 /* The assignment is just to enforce type safety (or at least get a warning).
  */
 /* With first class regexps not via a reference one needs to assign
@@ -307,14 +312,26 @@ struct pmop {
    more complex, and we'd have an AV with (SV*)NULL in it, which feels bad */
 /* BEWARE - something that calls this macro passes (r) which has a side
    effect.  */
-#define PM_SETRE(o,r)	STMT_START {					\
-                            REGEXP *const _pm_setre = (r);		\
-                            assert(_pm_setre);				\
-                            PL_regex_pad[(o)->op_pmoffset] = MUTABLE_SV(_pm_setre); \
-                        } STMT_END
+#define PM_SETRE(o,r)                       \
+    STMT_START {                            \
+        REGEXP *const _pm_setre = (r);      \
+        assert(_pm_setre);                  \
+        PL_regex_pad[(o)->op_pmre_offset]   \
+            = MUTABLE_SV(_pm_setre);        \
+    } STMT_END
+
+#define PM_SETRXMO(o,r)                     \
+    STMT_START {                            \
+        RXMO *const _pm_setrxmo = (r);      \
+        assert(_pm_setrxmo);                \
+        PL_regex_pad[(o)->op_pmrxmo_offset] \
+            = MUTABLE_SV(_pm_setrxmo);      \
+    } STMT_END
 #else
-#define PM_GETRE(o)     ((o)->op_pmregexp)
-#define PM_SETRE(o,r)   ((o)->op_pmregexp = (r))
+#define PM_GETRE(o)         ((o)->op_pmre)
+#define PM_GETRXMO(o)       ((o)->op_pmrxmo)
+#define PM_SETRE(o,r)       ((o)->op_pmrxmo = (r))
+#define PM_SETRXMO(o,rxmo)  ((o)->op_pmrxmo = (rxmo))
 #endif
 
 /* Currently these PMf flags occupy a single 32-bit word.  Not all bits are

@@ -330,7 +330,7 @@ sub _pessimise_walk {
             if ($$code_list) {
                 $self->_pessimise_walk($code_list);
             }
-            elsif (${$re = $op->pmregexp} && ${$cv = $re->qr_anoncv}) {
+            elsif (${$re = $op->pmrxmo} && ${$cv = $re->qr_anoncv}) {
                 $code_list = $cv->ROOT      # leavesub
                                ->first      #   qr
                                ->code_list; #     list
@@ -6302,7 +6302,7 @@ sub re_flags {
     my $flags = '';
     my $pmflags = $op->pmflags;
     if (!$pmflags) {
-	my $re = $op->pmregexp;
+	my $re = $op->pmrxmo;
 	if ($$re) {
 	    $pmflags = $re->compflags;
 	}
@@ -6348,7 +6348,7 @@ map($matchwords{join "", sort split //, $_} = $_, 'cig', 'cog', 'cos', 'cogs',
 # For qr/(?{...})/ without interpolation, the CV is under $qr->qr_anoncv
 # and the code list (list of blocks and constants, maybe vars) is under
 # $cv->ROOT->first->code_list:
-#   ./perl -Ilib -MB -e 'use O "Concise", B::svref_2object(sub {qr/(?{die})/})->ROOT->first->first->sibling->pmregexp->qr_anoncv->object_2svref'
+#   ./perl -Ilib -MB -e 'use O "Concise", B::svref_2object(sub {qr/(?{die})/})->ROOT->first->first->sibling->pmrxmo->qr_anoncv->object_2svref'
 #
 # For qr/$a(?{...})/ with interpolation, the code list is more accessible,
 # under $pmop->code_list, but the $cv is something you have to dig for in
@@ -6392,7 +6392,7 @@ sub matchop {
 					     ->targ
 				     )
 				   : undef);
-    } elsif (${$bregexp = $op->pmregexp} && ${$cv = $bregexp->qr_anoncv}) {
+    } elsif (${$bregexp = $op->pmrxmo} && ${$cv = $bregexp->qr_anoncv}) {
 	my $patop = $cv->ROOT      # leavesub
 		       ->first     #   qr
 		       ->code_list;#     list

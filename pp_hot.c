@@ -3093,7 +3093,7 @@ PP(pp_match)
     /* PMdf_USED is set after a ?? matches once */
     if (
 #ifdef USE_ITHREADS
-        SvREADONLY(PL_regex_pad[pm->op_pmoffset])
+        SvREADONLY(PL_regex_pad[pm->op_pmrxmo_offset])
 #else
         pm->op_pmflags & PMf_USED
 #endif
@@ -3176,7 +3176,7 @@ PP(pp_match)
     PL_curpm = pm;
     if (dynpm->op_pmflags & PMf_ONCE)
 #ifdef USE_ITHREADS
-        SvREADONLY_on(PL_regex_pad[dynpm->op_pmoffset]);
+        SvREADONLY_on(PL_regex_pad[dynpm->op_pmrxmo_offset]);
 #else
         dynpm->op_pmflags |= PMf_USED;
 #endif

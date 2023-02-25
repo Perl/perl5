@@ -141,6 +141,7 @@ struct body_details {
     } ALIGNED_TYPE_NAME(name)
 
 ALIGNED_TYPE(regexp);
+ALIGNED_TYPE(regexp_matched_offsets);
 ALIGNED_TYPE(XPVGV);
 ALIGNED_TYPE(XPVLV);
 ALIGNED_TYPE(XPVAV);
@@ -287,6 +288,12 @@ static const struct body_details bodies_by_type[] = {
       0,
       SVt_PVOBJ, TRUE, NONV, HASARENA,
       FIT_ARENA(0, sizeof(ALIGNED_TYPE_NAME(XPVOBJ))) },
+
+    { sizeof(ALIGNED_TYPE_NAME(regexp_matched_offsets)),
+      sizeof(regexp_matched_offsets),
+      0,
+      SVt_RXMO, TRUE, NONV, HASARENA,
+      FIT_ARENA(0, sizeof(ALIGNED_TYPE_NAME(regexp_matched_offsets))) },
 };
 
 #define new_body_allocated(sv_type)            \
@@ -456,6 +463,7 @@ Perl_newSV_type(pTHX_ const svtype type)
     case SVt_PVLV:
     case SVt_INVLIST:
     case SVt_REGEXP:
+    case SVt_RXMO:
     case SVt_PVMG:
     case SVt_PVNV:
     case SVt_PV:
@@ -508,8 +516,12 @@ Perl_newSV_type(pTHX_ const svtype type)
         sv->sv_u.svu_rv = NULL;
         break;
     default:
-        Perl_croak(aTHX_ "panic: sv_upgrade to unknown type %lu",
-                   (unsigned long)type);
+        if (type >= SVt_LAST)
+            Perl_croak(aTHX_ "panic: newSV_type() with illegal type %lu, expecting value < %lu",
+                   (unsigned long)type, (unsigned long)SVt_LAST);
+        else
+            Perl_croak(aTHX_ "panic: newSV_type() with unknown type %lu: SVt_%s",
+                   (unsigned long)type, sv_type_name(type,TRUE));
     }
 
     return sv;

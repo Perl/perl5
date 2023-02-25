@@ -469,10 +469,26 @@ is the recommended Unicode-aware way of saying
     trie->wordinfo[curword].accept = state;                     \
                                                                 \
     if ( noper_next < tail ) {                                  \
-        if (!trie->jump)                                        \
+        if (!trie->jump) {                                      \
             trie->jump = (U16 *) PerlMemShared_calloc( word_count + 1, \
                                                  sizeof(U16) ); \
+            trie->j_before_paren = (U16 *) PerlMemShared_calloc( word_count + 1, \
+                                                 sizeof(U16) ); \
+            trie->j_after_paren = (U16 *) PerlMemShared_calloc( word_count + 1, \
+                                                 sizeof(U16) ); \
+        }                                                       \
         trie->jump[curword] = (U16)(noper_next - convert);      \
+        U16 set_before_paren;                                   \
+        U16 set_after_paren;                                    \
+        if (OP(cur) == BRANCH) {                                \
+            set_before_paren = ARG1a(cur);                       \
+            set_after_paren = ARG1b(cur);                        \
+        } else {                                                \
+            set_before_paren = ARG2a(cur);                     \
+            set_after_paren = ARG2b(cur);                      \
+        }                                                       \
+        trie->j_before_paren[curword] = set_before_paren;       \
+        trie->j_after_paren[curword] = set_after_paren;         \
         if (!jumper)                                            \
             jumper = noper_next;                                \
         if (!nextbranch)                                        \
@@ -533,6 +549,7 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
     U32 next_alloc = 0;
     regnode *jumper = NULL;
     regnode *nextbranch = NULL;
+    regnode *lastbranch = NULL;
     regnode *convert = NULL;
     U32 *prev_states; /* temp array mapping each state to previous one */
     /* we just use folder as a flag in utf8 */
@@ -569,6 +586,7 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
         default: Perl_croak( aTHX_ "panic! In trie construction, unknown node type %u %s", (unsigned) flags, REGNODE_NAME(flags) );
     }
 
+    /* create the trie struct, all zeroed */
     trie = (reg_trie_data *) PerlMemShared_calloc( 1, sizeof(reg_trie_data) );
     trie->refcount = 1;
     trie->startstate = 1;
@@ -639,6 +657,7 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
         STRLEN maxchars = 0;
         bool set_bit = trie->bitmap ? 1 : 0; /*store the first char in the
                                                bitmap?*/
+        lastbranch = cur;
 
         if (OP(noper) == NOTHING) {
             /* skip past a NOTHING at the start of an alternation
@@ -797,6 +816,13 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
             trie->maxlen = maxchars;
         }
     } /* end first pass */
+    trie->before_paren = OP(first) == BRANCH
+                 ? ARG1a(first)
+                 : ARG2a(first); /* BRANCHJ */
+
+    trie->after_paren = OP(lastbranch) == BRANCH
+                 ? ARG1b(lastbranch)
+                 : ARG2b(lastbranch); /* BRANCHJ */
     DEBUG_TRIE_COMPILE_r(
         Perl_re_indentf( aTHX_
                 "TRIE(%s): W:%d C:%d Uq:%d Min:%d Max:%d\n",
@@ -1466,7 +1492,7 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
             jumper = last;
         if ( trie->maxlen ) {
             NEXT_OFF( convert ) = (U16)(tail - convert);
-            ARG_SET( convert, data_slot );
+            ARG1u_SET( convert, data_slot );
             /* Store the offset to the first unabsorbed branch in
                jump[0], which is otherwise unused by the jump logic.
                We use this when dumping a trie and during optimisation. */
@@ -1588,7 +1614,7 @@ Perl_construct_ahocorasick_from_trie(pTHX_ RExC_state_t *pRExC_state, regnode *s
    'cdgu'.
  */
  /* add a fail transition */
-    const U32 trie_offset = ARG(source);
+    const U32 trie_offset = ARG1u(source);
     reg_trie_data *trie=(reg_trie_data *)RExC_rxi->data->data[trie_offset];
     U32 *q;
     const U32 ucharcount = trie->uniquecharcount;
@@ -1623,7 +1649,7 @@ Perl_construct_ahocorasick_from_trie(pTHX_ RExC_state_t *pRExC_state, regnode *s
     }
     OP(stclass)+=2; /* convert the TRIE type to its AHO-CORASICK equivalent */
 
-    ARG_SET( stclass, data_slot );
+    ARG1u_SET( stclass, data_slot );
     aho = (reg_ac_data *) PerlMemShared_calloc( 1, sizeof(reg_ac_data) );
     RExC_rxi->data->data[ data_slot ] = (void*)aho;
     aho->trie=trie_offset;

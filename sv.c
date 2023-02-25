@@ -1192,8 +1192,12 @@ Perl_sv_upgrade(pTHX_ SV *const sv, svtype new_type)
         }
         break;
     default:
-        Perl_croak(aTHX_ "panic: sv_upgrade to unknown type %lu",
-                   (unsigned long)new_type);
+        if (new_type >= SVt_LAST)
+            Perl_croak(aTHX_ "panic: sv_upgrade() to illegal type %lu, expecting value < %lu",
+                   (unsigned long)new_type, (unsigned long)SVt_LAST);
+        else
+            Perl_croak(aTHX_ "panic: sv_upgrade to unknown type %lu: SVt_%s",
+                   (unsigned long)new_type,sv_type_name(new_type,TRUE));
     }
 
     /* if this is zero, this is a body-less SVt_NULL, SVt_IV/SVt_RV,
@@ -10079,7 +10083,7 @@ Perl_sv_resetpvn(pTHX_ const char *s, STRLEN len, HV * const stash)
 
             while (pmp < end) {
 #ifdef USE_ITHREADS
-                SvREADONLY_off(PL_regex_pad[(*pmp)->op_pmoffset]);
+                SvREADONLY_off(PL_regex_pad[(*pmp)->op_pmrxmo_offset]);
 #else
                 (*pmp)->op_pmflags &= ~PMf_USED;
 #endif
@@ -14705,6 +14709,9 @@ S_sv_dup_common(pTHX_ const SV *const ssv, CLONE_PARAMS *const param)
             case SVt_PVNV:
                 break;
             case SVt_PVMG:
+                break;
+            case SVt_RXMO:
+                rxmo_dup_guts((RXMO*) ssv, (RXMO*) dsv, param);
                 break;
             case SVt_REGEXP:
               duprex:

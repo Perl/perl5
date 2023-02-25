@@ -537,6 +537,9 @@
 # define runops_debug()                         Perl_runops_debug(aTHX)
 # define runops_standard()                      Perl_runops_standard(aTHX)
 # define rv2cv_op_cv(a,b)                       Perl_rv2cv_op_cv(aTHX_ a,b)
+# define rxmo_dup_guts(a,b,c)                   Perl_rxmo_dup_guts(aTHX_ a,b,c)
+# define rxmo_free(a)                           Perl_rxmo_free(aTHX_ a)
+# define rxmo_free2(a)                          Perl_rxmo_free2(aTHX_ a)
 # define safesyscalloc                          Perl_safesyscalloc
 # define safesysfree                            Perl_safesysfree
 # define safesysmalloc                          Perl_safesysmalloc
@@ -711,6 +714,7 @@
 # define sv_string_from_errnum(a,b)             Perl_sv_string_from_errnum(aTHX_ a,b)
 # define sv_tainted(a)                          Perl_sv_tainted(aTHX_ a)
 # define sv_true(a)                             Perl_sv_true(aTHX_ a)
+# define sv_type_name                           Perl_sv_type_name
 # define sv_uni_display(a,b,c,d)                Perl_sv_uni_display(aTHX_ a,b,c,d)
 # define sv_unmagic(a,b)                        Perl_sv_unmagic(aTHX_ a,b)
 # define sv_unmagicext(a,b,c)                   Perl_sv_unmagicext(aTHX_ a,b,c)
@@ -1843,13 +1847,13 @@
 #     define parse_lparen_question_flags(a)     S_parse_lparen_question_flags(aTHX_ a)
 #     define parse_uniprop_string(a,b,c,d,e,f,g,h,i,j) S_parse_uniprop_string(aTHX_ a,b,c,d,e,f,g,h,i,j)
 #     define reg(a,b,c,d)                       S_reg(aTHX_ a,b,c,d)
-#     define reg2Lanode(a,b,c,d)                S_reg2Lanode(aTHX_ a,b,c,d)
+#     define reg1node(a,b,c)                    S_reg1node(aTHX_ a,b,c)
+#     define reg2node(a,b,c,d)                  S_reg2node(aTHX_ a,b,c,d)
 #     define reg_la_NOTHING(a,b,c)              S_reg_la_NOTHING(aTHX_ a,b,c)
 #     define reg_la_OPFAIL(a,b,c)               S_reg_la_OPFAIL(aTHX_ a,b,c)
 #     define reg_node(a,b)                      S_reg_node(aTHX_ a,b)
 #     define reg_scan_name(a,b)                 S_reg_scan_name(aTHX_ a,b)
 #     define reg_skipcomment                    S_reg_skipcomment
-#     define reganode(a,b,c)                    S_reganode(aTHX_ a,b,c)
 #     define regatom(a,b,c)                     S_regatom(aTHX_ a,b,c)
 #     define regbranch(a,b,c,d)                 S_regbranch(aTHX_ a,b,c,d)
 #     define regclass(a,b,c,d,e,f,g,h,i)        S_regclass(aTHX_ a,b,c,d,e,f,g,h,i)

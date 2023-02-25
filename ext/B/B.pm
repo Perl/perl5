@@ -1191,7 +1191,7 @@ op is contained within.
 
 =item precomp
 
-=item pmoffset
+=item pmrxmo_offset
 
 Only when perl was compiled with ithreads.
 
@@ -1199,10 +1199,10 @@ Only when perl was compiled with ithreads.
 
 Since perl 5.17.1
 
-=item pmregexp
+=item pmrxmo
 
 Added in perl 5.22, this method returns the B::REGEXP associated with the
-op.  While PMOPs do not actually have C<pmregexp> fields under threaded
+op.  While PMOPs do not actually have C<pmrxmo> fields under threaded
 builds, this method returns the regexp under threads nonetheless, for
 convenience.
 

@@ -3849,6 +3849,20 @@ Perl_rv2cv_op_cv(pTHX_ OP *cvop, U32 flags);
         assert(cvop)
 
 PERL_CALLCONV void
+Perl_rxmo_dup_guts(pTHX_ const RXMO *srxmo, RXMO *drxmo, CLONE_PARAMS *param);
+#define PERL_ARGS_ASSERT_RXMO_DUP_GUTS          \
+        assert(srxmo); assert(drxmo); assert(param)
+
+PERL_CALLCONV void
+Perl_rxmo_free(pTHX_ RXMO *rxmo);
+#define PERL_ARGS_ASSERT_RXMO_FREE
+
+PERL_CALLCONV void
+Perl_rxmo_free2(pTHX_ RXMOG *rxmo);
+#define PERL_ARGS_ASSERT_RXMO_FREE2             \
+        assert(rxmo)
+
+PERL_CALLCONV void
 Perl_rxres_save(pTHX_ void **rsp, REGEXP *rx)
         __attribute__visibility__("hidden");
 #define PERL_ARGS_ASSERT_RXRES_SAVE             \
@@ -4899,6 +4913,11 @@ Perl_sv_tainted(pTHX_ SV * const sv)
 PERL_CALLCONV I32
 Perl_sv_true(pTHX_ SV * const sv);
 #define PERL_ARGS_ASSERT_SV_TRUE
+
+PERL_CALLCONV const char *
+Perl_sv_type_name(U8 type, bool longname)
+        __attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_SV_TYPE_NAME
 
 PERL_CALLCONV char *
 Perl_sv_uni_display(pTHX_ SV *dsv, SV *ssv, STRLEN pvlim, UV flags)
@@ -8408,8 +8427,13 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth);
         assert(pRExC_state); assert(flagp)
 
 STATIC regnode_offset
-S_reg2Lanode(pTHX_ RExC_state_t *pRExC_state, const U8 op, const U32 arg1, const I32 arg2);
-# define PERL_ARGS_ASSERT_REG2LANODE            \
+S_reg1node(pTHX_ RExC_state_t *pRExC_state, U8 op, U32 arg);
+# define PERL_ARGS_ASSERT_REG1NODE              \
+        assert(pRExC_state)
+
+STATIC regnode_offset
+S_reg2node(pTHX_ RExC_state_t *pRExC_state, const U8 op, const U32 arg1, const I32 arg2);
+# define PERL_ARGS_ASSERT_REG2NODE              \
         assert(pRExC_state)
 
 STATIC regnode_offset
@@ -8430,11 +8454,6 @@ S_reg_node(pTHX_ RExC_state_t *pRExC_state, U8 op);
 STATIC SV *
 S_reg_scan_name(pTHX_ RExC_state_t *pRExC_state, U32 flags);
 # define PERL_ARGS_ASSERT_REG_SCAN_NAME         \
-        assert(pRExC_state)
-
-STATIC regnode_offset
-S_reganode(pTHX_ RExC_state_t *pRExC_state, U8 op, U32 arg);
-# define PERL_ARGS_ASSERT_REGANODE              \
         assert(pRExC_state)
 
 STATIC regnode_offset

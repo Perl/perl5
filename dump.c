@@ -47,6 +47,7 @@ static const char* const svtypenames[SVt_LAST] = {
     "PVFM",
     "PVIO",
     "PVOBJ",
+    "RXMO",
 };
 
 
@@ -67,13 +68,29 @@ static const char* const svshorttypenames[SVt_LAST] = {
     "CV",
     "FM",
     "IO",
+<<<<<<< HEAD
     "OBJ",
+=======
+    "RXMO",
+>>>>>>> WIP - RXMO works-ish
 };
+
+static const char unknowntypename[] = "UNKNOWN";
 
 struct flag_to_name {
     U32 flag;
     const char *name;
 };
+
+const char *
+Perl_sv_type_name(U8 type, bool long_name) {
+    if (type > SVt_LAST)
+        return unknowntypename;
+    if (long_name)
+        return svtypenames[type];
+    else
+        return svshorttypenames[type];
+}
 
 static void
 S_append_flags(pTHX_ SV *sv, U32 flags, const struct flag_to_name *start,
@@ -982,7 +999,7 @@ S_pm_description(pTHX_ const PMOP *pm)
     if (pmflags & PMf_ONCE)
         sv_catpvs(desc, ",ONCE");
 #ifdef USE_ITHREADS
-    if (SvREADONLY(PL_regex_pad[pm->op_pmoffset]))
+    if (SvREADONLY(PL_regex_pad[pm->op_pmrxmo_offset]))
         sv_catpvs(desc, ":USED");
 #else
     if (pmflags & PMf_USED)
@@ -2006,8 +2023,15 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
 
     /* Dump general SV fields */
 
+<<<<<<< HEAD
     if ((type >= SVt_PVIV && type <= SVt_PVLV
          && type != SVt_REGEXP && !isGV_with_GP(sv) && !SvVALID(sv))
+=======
+    if ((type >= SVt_PVIV && type != SVt_PVAV && type != SVt_PVHV
+         && type != SVt_PVCV && type != SVt_PVFM && type != SVt_PVIO
+         && type != SVt_REGEXP && type != SVt_RXMO
+         && !isGV_with_GP(sv) && !SvVALID(sv))
+>>>>>>> WIP - RXMO works-ish
         || (type == SVt_IV && !SvROK(sv))) {
         if (SvIsUV(sv)
                                      )
@@ -2017,8 +2041,15 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
         (void)PerlIO_putc(file, '\n');
     }
 
+<<<<<<< HEAD
     if ((type >= SVt_PVNV && type <= SVt_PVLV
          && type != SVt_REGEXP && !isGV_with_GP(sv) && !SvVALID(sv))
+=======
+    if ((type >= SVt_PVNV && type != SVt_PVAV && type != SVt_PVHV
+                && type != SVt_PVCV && type != SVt_PVFM
+                && type != SVt_REGEXP && type != SVt_RXMO
+                && type != SVt_PVIO && !isGV_with_GP(sv) && !SvVALID(sv))
+>>>>>>> WIP - RXMO works-ish
                || type == SVt_NV) {
         DECLARATION_FOR_LC_NUMERIC_MANIPULATION;
         STORE_LC_NUMERIC_SET_STANDARD();
@@ -2588,29 +2619,29 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
                 SvPVX(d)[SvCUR(d)] = '\0';                  \
             }                                               \
 } STMT_END
-            SV_SET_STRINGIFY_REGEXP_FLAGS(d,r->compflags,regexp_extflags_names);
+            SV_SET_STRINGIFY_REGEXP_FLAGS(d,RXp_COMPFLAGS(r),regexp_extflags_names);
             Perl_dump_indent(aTHX_ level, file, "  COMPFLAGS = 0x%" UVxf " (%s)\n",
-                                (UV)(r->compflags), SvPVX_const(d));
+                                (UV)(RXp_COMPFLAGS(r)), SvPVX_const(d));
 
-            SV_SET_STRINGIFY_REGEXP_FLAGS(d,r->extflags,regexp_extflags_names);
+            SV_SET_STRINGIFY_REGEXP_FLAGS(d,RXp_EXTFLAGS(r),regexp_extflags_names);
             Perl_dump_indent(aTHX_ level, file, "  EXTFLAGS = 0x%" UVxf " (%s)\n",
-                                (UV)(r->extflags), SvPVX_const(d));
+                                (UV)(RXp_EXTFLAGS(r)), SvPVX_const(d));
 
             Perl_dump_indent(aTHX_ level, file, "  ENGINE = 0x%" UVxf " (%s)\n",
-                                PTR2UV(r->engine), (r->engine == &PL_core_reg_engine) ? "STANDARD" : "PLUG-IN" );
-            if (r->engine == &PL_core_reg_engine) {
-                SV_SET_STRINGIFY_REGEXP_FLAGS(d,r->intflags,regexp_core_intflags_names);
+                                PTR2UV(RXp_ENGINE(r)), (RXp_ENGINE(r) == &PL_core_reg_engine) ? "STANDARD" : "PLUG-IN" );
+            if (RXp_ENGINE(r) == &PL_core_reg_engine) {
+                SV_SET_STRINGIFY_REGEXP_FLAGS(d,RXp_INTFLAGS(r),regexp_core_intflags_names);
                 Perl_dump_indent(aTHX_ level, file, "  INTFLAGS = 0x%" UVxf " (%s)\n",
-                                (UV)(r->intflags), SvPVX_const(d));
+                                (UV)(RXp_INTFLAGS(r)), SvPVX_const(d));
             } else {
                 Perl_dump_indent(aTHX_ level, file, "  INTFLAGS = 0x%" UVxf "(Plug in)\n",
-                                (UV)(r->intflags));
+                                (UV)(RXp_INTFLAGS(r)));
             }
 #undef SV_SET_STRINGIFY_REGEXP_FLAGS
             Perl_dump_indent(aTHX_ level, file, "  NPARENS = %" UVuf "\n",
-                                (UV)(r->nparens));
+                                (UV)(RXp_NPARENS(r)));
             Perl_dump_indent(aTHX_ level, file, "  LOGICAL_NPARENS = %" UVuf "\n",
-                                (UV)(r->logical_nparens));
+                                (UV)(RXp_LOGICAL_NPARENS(r)));
 
 #define SV_SET_STRINGIFY_I32_PAREN_ARRAY(d,count,ary)     \
     STMT_START {                                    \
@@ -2625,85 +2656,86 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
     } STMT_END
 
             Perl_dump_indent(aTHX_ level, file, "  LOGICAL_TO_PARNO = 0x%" UVxf "\n",
-                                PTR2UV(r->logical_to_parno));
-            if (r->logical_to_parno) {
-                SV_SET_STRINGIFY_I32_PAREN_ARRAY(d, r->logical_nparens, r->logical_to_parno);
+                                PTR2UV(RXp_LOGICAL_TO_PARNO(r)));
+            if (RXp_LOGICAL_TO_PARNO(r)) {
+                SV_SET_STRINGIFY_I32_PAREN_ARRAY(d, RXp_LOGICAL_NPARENS(r), RXp_LOGICAL_TO_PARNO(r));
                 Perl_dump_indent(aTHX_ level, file, "    %" SVf, d);
             }
             Perl_dump_indent(aTHX_ level, file, "  PARNO_TO_LOGICAL = 0x%" UVxf "\n",
-                                PTR2UV(r->parno_to_logical));
-            if (r->parno_to_logical) {
-                SV_SET_STRINGIFY_I32_PAREN_ARRAY(d, r->nparens, r->parno_to_logical);
+                                PTR2UV(RXp_PARNO_TO_LOGICAL(r)));
+            if (RXp_PARNO_TO_LOGICAL(r)) {
+                SV_SET_STRINGIFY_I32_PAREN_ARRAY(d, RXp_NPARENS(r), RXp_PARNO_TO_LOGICAL(r));
                 Perl_dump_indent(aTHX_ level, file, "    %" SVf, d);
             }
 
             Perl_dump_indent(aTHX_ level, file, "  PARNO_TO_LOGICAL_NEXT = 0x%" UVxf "\n",
-                                PTR2UV(r->parno_to_logical_next));
-            if (r->parno_to_logical_next) {
-                SV_SET_STRINGIFY_I32_PAREN_ARRAY(d, r->nparens, r->parno_to_logical_next);
+                                PTR2UV(RXp_PARNO_TO_LOGICAL_NEXT(r)));
+            if (RXp_PARNO_TO_LOGICAL_NEXT(r)) {
+                SV_SET_STRINGIFY_I32_PAREN_ARRAY(d, RXp_NPARENS(r), RXp_PARNO_TO_LOGICAL_NEXT(r));
                 Perl_dump_indent(aTHX_ level, file, "    %" SVf, d);
             }
 #undef SV_SET_STRINGIFY_I32_ARRAY
 
             Perl_dump_indent(aTHX_ level, file, "  LASTPAREN = %" UVuf "\n",
-                                (UV)(r->lastparen));
+                                (UV)(RXp_LASTPAREN(r)));
             Perl_dump_indent(aTHX_ level, file, "  LASTCLOSEPAREN = %" UVuf "\n",
-                                (UV)(r->lastcloseparen));
+                                (UV)(RXp_LASTCLOSEPAREN(r)));
             Perl_dump_indent(aTHX_ level, file, "  MINLEN = %" IVdf "\n",
-                                (IV)(r->minlen));
+                                (IV)(RXp_MINLEN(r)));
             Perl_dump_indent(aTHX_ level, file, "  MINLENRET = %" IVdf "\n",
-                                (IV)(r->minlenret));
+                                (IV)(RXp_MINLENRET(r)));
             Perl_dump_indent(aTHX_ level, file, "  GOFS = %" UVuf "\n",
-                                (UV)(r->gofs));
+                                (UV)(RXp_GOFS(r)));
             Perl_dump_indent(aTHX_ level, file, "  PRE_PREFIX = %" UVuf "\n",
-                                (UV)(r->pre_prefix));
+                                (UV)(RXp_PRE_PREFIX(r)));
             Perl_dump_indent(aTHX_ level, file, "  SUBLEN = %" IVdf "\n",
-                                (IV)(r->sublen));
+                                (IV)(RXp_SUBLEN(r)));
             Perl_dump_indent(aTHX_ level, file, "  SUBOFFSET = %" IVdf "\n",
-                                (IV)(r->suboffset));
+                                (IV)(RXp_SUBOFFSET(r)));
             Perl_dump_indent(aTHX_ level, file, "  SUBCOFFSET = %" IVdf "\n",
-                                (IV)(r->subcoffset));
-            if (r->subbeg)
+                                (IV)(RXp_SUBCOFFSET(r)));
+            if (RXp_SUBBEG(r))
                 Perl_dump_indent(aTHX_ level, file, "  SUBBEG = 0x%" UVxf " %s\n",
-                            PTR2UV(r->subbeg),
-                            pv_display(d, r->subbeg, r->sublen, 50, pvlim));
+                            PTR2UV(RXp_SUBBEG(r)),
+                            pv_display(d, RXp_SUBBEG(r), RXp_SUBLEN(r), 50, pvlim));
             else
                 Perl_dump_indent(aTHX_ level, file, "  SUBBEG = 0x0\n");
             Perl_dump_indent(aTHX_ level, file, "  PAREN_NAMES = 0x%" UVxf "\n",
-                                PTR2UV(r->paren_names));
+                                PTR2UV(RXp_PAREN_NAMES(r)));
             Perl_dump_indent(aTHX_ level, file, "  SUBSTRS = 0x%" UVxf "\n",
-                                PTR2UV(r->substrs));
+                                PTR2UV(RXp_SUBSTRS(r)));
             Perl_dump_indent(aTHX_ level, file, "  PPRIVATE = 0x%" UVxf "\n",
-                                PTR2UV(r->pprivate));
+                                PTR2UV(RXp_PPRIVATE(r)));
             Perl_dump_indent(aTHX_ level, file, "  OFFS = 0x%" UVxf "\n",
-                                PTR2UV(r->offs));
-            if (r->offs) {
+                                PTR2UV(RXp_OFFSp(r)));
+            if (RXp_OFFSp(r)) {
                 U32 n;
                 sv_setpvs(d,"[ ");
                 /* note offs[0] is for the whole match, and
                  * the data for $1 is in offs[1]. Thus we have to
                  * show one more than we have nparens. */
-                for(n = 0; n <= r->nparens; n++) {
+                for(n = 0; n <= RXp_NPARENS(r); n++) {
                     sv_catpvf(d,"%" IVdf ":%" IVdf "%s",
-                        r->offs[n].start, r->offs[n].end,
-                        n+1 > r->nparens ? " ]\n" : ", ");
+                        RXp_OFFSp(r)[n].start, RXp_OFFSp(r)[n].end,
+                        n+1 > RXp_NPARENS(r) ? " ]\n" : ", ");
                 }
                 Perl_dump_indent(aTHX_ level, file, "    %" SVf, d);
             }
             Perl_dump_indent(aTHX_ level, file, "  QR_ANONCV = 0x%" UVxf "\n",
-                                PTR2UV(r->qr_anoncv));
+                                PTR2UV(RXp_QR_ANONCV(r)));
 #ifdef PERL_ANY_COW
             Perl_dump_indent(aTHX_ level, file, "  SAVED_COPY = 0x%" UVxf "\n",
-                                PTR2UV(r->saved_copy));
+                                PTR2UV(RXp_SAVED_COPY(r)));
 #endif
             /* this should go LAST or the output gets really confusing */
             Perl_dump_indent(aTHX_ level, file, "  MOTHER_RE = 0x%" UVxf "\n",
-                                PTR2UV(r->mother_re));
-            if (nest < maxnest && r->mother_re)
-                do_sv_dump(level+1, file, (SV *)r->mother_re, nest+1,
+                                PTR2UV(RXp_MOTHER_RE(r)));
+            if (nest < maxnest && RXp_MOTHER_RE(r))
+                do_sv_dump(level+1, file, (SV *)RXp_MOTHER_RE(r), nest+1,
                            maxnest, dumpops, pvlim);
         }
         break;
+<<<<<<< HEAD
     case SVt_PVOBJ:
         Perl_dump_indent(aTHX_ level, file, "  MAXFIELD = %" IVdf "\n",
                 (IV)ObjectMAXFIELD(sv));
@@ -2727,6 +2759,52 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
             }
         }
         break;
+=======
+    case SVt_RXMO:
+        {
+            regexp_matched_offsets *rxmo = RxmoANY(sv);
+
+            Perl_dump_indent(aTHX_ level, file, "  SUBLEN = %" IVdf "\n",
+                                (IV)(RXMOp_SUBLEN(rxmo)));
+            Perl_dump_indent(aTHX_ level, file, "  SUBOFFSET = %" IVdf "\n",
+                                (IV)(RXMOp_SUBOFFSET(rxmo)));
+            Perl_dump_indent(aTHX_ level, file, "  SUBCOFFSET = %" IVdf "\n",
+                                (IV)(RXMOp_SUBCOFFSET(rxmo)));
+            if (RXMOp_SUBBEG(rxmo))
+                Perl_dump_indent(aTHX_ level, file, "  SUBBEG = 0x%" UVxf " %s\n",
+                            PTR2UV(RXMOp_SUBBEG(rxmo)),
+                            pv_display(d, RXMOp_SUBBEG(rxmo), RXMOp_SUBLEN(rxmo), 50, pvlim));
+            else
+                Perl_dump_indent(aTHX_ level, file, "  SUBBEG = 0x0\n");
+            
+            Perl_dump_indent(aTHX_ level, file, "  NPARENS = %" UVuf "\n",
+                                (UV)(RXMOp_NPARENS(rxmo)));
+            Perl_dump_indent(aTHX_ level, file, "  OFFS = 0x%" UVxf "\n",
+                                PTR2UV(RXMOp_OFFSp(rxmo)));
+            if (RXMOp_OFFSp(rxmo)) {
+                U32 n;
+                sv_setpvs(d,"[ ");
+                /* note offs[0] is for the whole match, and
+                 * the data for $1 is in offs[1]. Thus we have to
+                 * show one more than we have nparens. */
+                for(n = 0; n <= RXMOp_NPARENS(rxmo); n++) {
+                    sv_catpvf(d,"%" IVdf ":%" IVdf "%s",
+                        RXMOp_OFFSp(rxmo)[n].start, RXMOp_OFFSp(rxmo)[n].end,
+                        n+1 > RXMOp_NPARENS(rxmo) ? " ]\n" : ", ");
+                }
+                Perl_dump_indent(aTHX_ level, file, "    %" SVf, d);
+            }
+            Perl_dump_indent(aTHX_ level, file, "  OWNER_RXSV = 0x%" UVxf "\n",
+                                PTR2UV(RXMOp_OWNER_RXSV(rxmo)));
+
+            if (nest < maxnest && RXMOp_OWNER_RXSV(rxmo)) {
+                do_sv_dump(level+1, file, (SV *)RXMOp_OWNER_RXSV(rxmo), nest+1,
+                           maxnest, dumpops, pvlim);
+            }
+        }
+        break;
+
+>>>>>>> WIP - RXMO works-ish
     }
     SvREFCNT_dec_NN(d);
 }

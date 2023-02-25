@@ -33,6 +33,7 @@ static const char* const svclassnames[] = {
     "B::PVNV",
     "B::PVMG",
     "B::REGEXP",
+    "B::RXMO",
     "B::GV",
     "B::PVLV",
     "B::AV",
@@ -546,14 +547,14 @@ static const struct OP_methods {
   { STR_WITH_LEN("line"),    line_tp, STRUCT_OFFSET(struct cop, cop_line),  },/*18*/
   { STR_WITH_LEN("hints"),   U32p,    STRUCT_OFFSET(struct cop, cop_hints), },/*19*/
 #ifdef USE_ITHREADS
-  { STR_WITH_LEN("pmoffset"),IVp,     STRUCT_OFFSET(struct pmop, op_pmoffset),},/*20*/
+  { STR_WITH_LEN("pmrxmo_offset"),IVp,     STRUCT_OFFSET(struct pmop, op_pmrxmo_offset),},/*20*/
   { STR_WITH_LEN("filegv"),  op_offset_special, 0,                     },/*21*/
   { STR_WITH_LEN("file"),    char_pp, STRUCT_OFFSET(struct cop, cop_file),  }, /*22*/
   { STR_WITH_LEN("stash"),   op_offset_special, 0,                     },/*23*/
   { STR_WITH_LEN("stashpv"), op_offset_special, 0,                     },/*24*/
   { STR_WITH_LEN("stashoff"),PADOFFSETp,STRUCT_OFFSET(struct cop,cop_stashoff),},/*25*/
 #else
-  { STR_WITH_LEN("pmoffset"),op_offset_special, 0,                     },/*20*/
+  { STR_WITH_LEN("pmrxmo_offset"),op_offset_special, 0,                     },/*20*/
   { STR_WITH_LEN("filegv"),  SVp,     STRUCT_OFFSET(struct cop, cop_filegv),},/*21*/
   { STR_WITH_LEN("file"),    op_offset_special, 0,                     },/*22*/
   { STR_WITH_LEN("stash"),   SVp,     STRUCT_OFFSET(struct cop, cop_stash), },/*23*/
@@ -589,7 +590,7 @@ static const struct OP_methods {
   { STR_WITH_LEN("parent"),  op_offset_special, 0,                     },/*52*/
   { STR_WITH_LEN("first"),   op_offset_special, 0,                     },/*53*/
   { STR_WITH_LEN("meth_sv"), op_offset_special, 0,                     },/*54*/
-  { STR_WITH_LEN("pmregexp"),op_offset_special, 0,                     },/*55*/
+  { STR_WITH_LEN("pmrxmo"),op_offset_special, 0,                     },/*55*/
 #  ifdef USE_ITHREADS
   { STR_WITH_LEN("rclass"),  op_offset_special, 0,                     },/*56*/
 #  else
@@ -834,7 +835,7 @@ next(o)
 	B::COP::cop_seq      = 17
 	B::COP::line         = 18
 	B::COP::hints        = 19
-	B::PMOP::pmoffset    = 20
+	B::PMOP::pmrxmo_offset    = 20
 	B::COP::filegv       = 21
 	B::COP::file         = 22
 	B::COP::stash        = 23
@@ -869,7 +870,7 @@ next(o)
 	B::OP::parent        = 52
 	B::METHOP::first     = 53
 	B::METHOP::meth_sv   = 54
-	B::PMOP::pmregexp    = 55
+	B::PMOP::pmrxmo    = 55
 	B::METHOP::rclass    = 56
     PREINIT:
 	SV *ret;
@@ -1079,7 +1080,7 @@ next(o)
                             o->op_type == OP_METHOD
                                 ? NULL : cMETHOPo->op_u.op_meth_sv);
 		break;
-	    case 55: /* B::PMOP::pmregexp */
+	    case 55: /* B::PMOP::pmrxmo */
 		ret = make_sv_object(aTHX_ (SV *)PM_GETRE(cPMOPo));
 		break;
 	    case 56: /* B::METHOP::rclass */

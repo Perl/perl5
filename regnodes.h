@@ -10,7 +10,7 @@
 
 /* typedefs for regex nodes - one typedef per node type */
 
-typedef struct regnode_2L                        tregnode_ACCEPT;
+typedef struct regnode_2                         tregnode_ACCEPT;
 typedef struct regnode_1                         tregnode_AHOCORASICK;
 typedef struct regnode_charclass                 tregnode_AHOCORASICKC;
 typedef struct regnode_charclass                 tregnode_ANYOF;
@@ -29,21 +29,21 @@ typedef struct regnode                           tregnode_BOUND;
 typedef struct regnode                           tregnode_BOUNDA;
 typedef struct regnode                           tregnode_BOUNDL;
 typedef struct regnode                           tregnode_BOUNDU;
-typedef struct regnode                           tregnode_BRANCH;
-typedef struct regnode_1                         tregnode_BRANCHJ;
+typedef struct regnode_1                         tregnode_BRANCH;
+typedef struct regnode_2                         tregnode_BRANCHJ;
 typedef struct regnode_1                         tregnode_CLOSE;
 typedef struct regnode                           tregnode_CLUMP;
 typedef struct regnode_1                         tregnode_COMMIT;
-typedef struct regnode_2                         tregnode_CURLY;
-typedef struct regnode_2                         tregnode_CURLYM;
-typedef struct regnode_2                         tregnode_CURLYN;
-typedef struct regnode_2                         tregnode_CURLYX;
+typedef struct regnode_3                         tregnode_CURLY;
+typedef struct regnode_3                         tregnode_CURLYM;
+typedef struct regnode_3                         tregnode_CURLYN;
+typedef struct regnode_3                         tregnode_CURLYX;
 typedef struct regnode_1                         tregnode_CUTGROUP;
 typedef struct regnode_1                         tregnode_DEFINEP;
 typedef struct regnode                           tregnode_END;
 typedef struct regnode                           tregnode_ENDLIKE;
 typedef struct regnode                           tregnode_EOS;
-typedef struct regnode_2L                        tregnode_EVAL;
+typedef struct regnode_2                         tregnode_EVAL;
 typedef struct regnode                           tregnode_EXACT;
 typedef struct regnode                           tregnode_EXACTF;
 typedef struct regnode                           tregnode_EXACTFAA;
@@ -56,7 +56,7 @@ typedef struct regnode                           tregnode_EXACTFU_REQ8;
 typedef struct regnode                           tregnode_EXACTFU_S_EDGE;
 typedef struct regnode                           tregnode_EXACTL;
 typedef struct regnode                           tregnode_EXACT_REQ8;
-typedef struct regnode_2L                        tregnode_GOSUB;
+typedef struct regnode_2                         tregnode_GOSUB;
 typedef struct regnode                           tregnode_GPOS;
 typedef struct regnode_1                         tregnode_GROUPP;
 typedef struct regnode_1                         tregnode_GROUPPN;
@@ -94,16 +94,16 @@ typedef struct regnode                           tregnode_POSIXL;
 typedef struct regnode                           tregnode_POSIXU;
 typedef struct regnode_1                         tregnode_PRUNE;
 typedef struct regnode                           tregnode_PSEUDO;
-typedef struct regnode_1                         tregnode_REF;
-typedef struct regnode_1                         tregnode_REFF;
-typedef struct regnode_1                         tregnode_REFFA;
-typedef struct regnode_1                         tregnode_REFFAN;
-typedef struct regnode_1                         tregnode_REFFL;
-typedef struct regnode_1                         tregnode_REFFLN;
-typedef struct regnode_1                         tregnode_REFFN;
-typedef struct regnode_1                         tregnode_REFFU;
-typedef struct regnode_1                         tregnode_REFFUN;
-typedef struct regnode_1                         tregnode_REFN;
+typedef struct regnode_2                         tregnode_REF;
+typedef struct regnode_2                         tregnode_REFF;
+typedef struct regnode_2                         tregnode_REFFA;
+typedef struct regnode_2                         tregnode_REFFAN;
+typedef struct regnode_2                         tregnode_REFFL;
+typedef struct regnode_2                         tregnode_REFFLN;
+typedef struct regnode_2                         tregnode_REFFN;
+typedef struct regnode_2                         tregnode_REFFU;
+typedef struct regnode_2                         tregnode_REFFUN;
+typedef struct regnode_2                         tregnode_REFN;
 typedef struct regnode_p                         tregnode_REGEX_SET;
 typedef struct regnode                           tregnode_REG_ANY;
 typedef struct regnode_1                         tregnode_RENUM;
@@ -128,7 +128,7 @@ typedef struct regnode                           tregnode_WHILEM;
 /* Regops and State definitions */
 
 #define REGNODE_MAX           	111
-#define REGMATCH_STATE_MAX    	151
+#define REGMATCH_STATE_MAX    	153
 
 /* -- For regexec.c to switch on target being utf8 (t8) or not (tb, b='byte'); */
 #define with_t_UTF8ness(op, t_utf8) (((op) << 1) + (cBOOL(t_utf8)))
@@ -1573,6 +1573,22 @@ typedef struct regnode                           tregnode_WHILEM;
 #define KEEPS_next_fail_t8_pb             606  /*      0x25e */
 #define KEEPS_next_fail_t8_p8             607  /*      0x25f */
 
+#define REF_next                    152        /* 0x98 state for REF */
+#define REF_next_tb                    304     /*      0x130 */
+#define REF_next_t8                    305     /*      0x131 */
+#define REF_next_tb_pb                    608  /*      0x260 */
+#define REF_next_tb_p8                    609  /*      0x261 */
+#define REF_next_t8_pb                    610  /*      0x262 */
+#define REF_next_t8_p8                    611  /*      0x263 */
+
+#define REF_next_fail               153        /* 0x99 state for REF */
+#define REF_next_fail_tb               306     /*      0x132 */
+#define REF_next_fail_t8               307     /*      0x133 */
+#define REF_next_fail_tb_pb               612  /*      0x264 */
+#define REF_next_fail_tb_p8               613  /*      0x265 */
+#define REF_next_fail_t8_pb               614  /*      0x266 */
+#define REF_next_fail_t8_p8               615  /*      0x267 */
+
 
 /* PL_regnode_name[] - Opcode/state names in string form, for debugging */
 
@@ -1733,6 +1749,8 @@ EXTCONST char * const PL_regnode_name[] = {
 	"CUTGROUP_next_fail",    	/* REGNODE_MAX +0x26 */
 	"KEEPS_next",            	/* REGNODE_MAX +0x27 */
 	"KEEPS_next_fail",       	/* REGNODE_MAX +0x28 */
+	"REF_next",              	/* REGNODE_MAX +0x29 */
+	"REF_next_fail",         	/* REGNODE_MAX +0x2a */
 };
 #endif /* DOINIT */
 
@@ -2026,7 +2044,7 @@ EXTCONST struct regnode_meta PL_regnode_info[] = {
     {
         /* #40 op BRANCH */
         .type = BRANCH,
-        .arg_len = 0,
+        .arg_len = EXTRA_SIZE(tregnode_BRANCH),
         .arg_len_varies = 0,
         .off_by_arg = 0
     },
@@ -2803,6 +2821,20 @@ EXTCONST struct regnode_meta PL_regnode_info[] = {
     {
         /* #151 state KEEPS_next_fail */
         .type = KEEPS,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #152 state REF_next */
+        .type = REF,
+        .arg_len = 0,
+        .arg_len_varies = 0,
+        .off_by_arg = 0
+    },
+    {
+        /* #153 state REF_next_fail */
+        .type = REF,
         .arg_len = 0,
         .arg_len_varies = 0,
         .off_by_arg = 0

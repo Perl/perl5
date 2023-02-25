@@ -680,7 +680,7 @@ implicit CV associated with C<qr//> things containing code blocks, and a
 C<compflags> method that returns the pertinent flags originating from the
 C<qr//blahblah> op.
 
-C<B::PMOP> now provides a C<pmregexp> method returning a C<B::REGEXP> object.
+C<B::PMOP> now provides a C<pmrxmo> method returning a C<B::REGEXP> object.
 Two new classes, C<B::PADNAME> and C<B::PADNAMELIST>, have been introduced.
 
 A bug where, after an ithread creation or pseudofork, special/immortal SVs in
