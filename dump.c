@@ -1776,7 +1776,12 @@ const struct flag_to_name cv_flags_names[] = {
     {CVf_SLABBED, "SLABBED,"},
     {CVf_NAMED, "NAMED,"},
     {CVf_LEXICAL, "LEXICAL,"},
-    {CVf_ISXSUB, "ISXSUB,"}
+    {CVf_ISXSUB, "ISXSUB,"},
+    {CVf_ANONCONST,        "ANONCONST,"},
+    {CVf_SIGNATURE,        "SIGNATURE,"},
+    {CVf_REFCOUNTED_ANYSV, "REFCOUNTED_ANYSV,"},
+    {CVf_IsMETHOD,         "IsMETHOD,"}
+
 };
 
 const struct flag_to_name hv_flags_names[] = {
