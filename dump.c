@@ -2685,7 +2685,7 @@ Perl_do_sv_dump(pTHX_ I32 level, PerlIO *file, SV *sv, I32 nest, I32 maxnest, bo
                  * show one more than we have nparens. */
                 for(n = 0; n <= r->nparens; n++) {
                     sv_catpvf(d,"%" IVdf ":%" IVdf "%s",
-                        r->offs[n].start, r->offs[n].end,
+                        (IV)(r->offs[n].start), (IV)(r->offs[n].end),
                         n+1 > r->nparens ? " ]\n" : ", ");
                 }
                 Perl_dump_indent(aTHX_ level, file, "    %" SVf, d);
