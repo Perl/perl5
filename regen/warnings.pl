@@ -74,7 +74,9 @@ my $TREE = {
                                 'debugging'     => [ 5.008, DEFAULT_ON],
                                 'malloc'        => [ 5.008, DEFAULT_ON],
                            }],
-        'deprecated'    => [ 5.008, DEFAULT_ON],
+        'deprecated'    => [ 5.008, DEFAULT_ON, {
+                                'deprecated::smartmatch' => [ 5.037009, DEFAULT_ON],
+                        }],
         'void'          => [ 5.008, DEFAULT_OFF],
         'recursion'     => [ 5.008, DEFAULT_OFF],
         'redefine'      => [ 5.008, DEFAULT_OFF],
@@ -204,12 +206,12 @@ sub valueWalk
         die "Value associated with key '$k' is not an ARRAY reference"
             if !ref $v || ref $v ne 'ARRAY' ;
 
-        my ($ver, $rest) = @{ $v } ;
+        my ($ver, $rest, $rest2) = @{ $v } ;
+        my $ref = ref $rest ? $rest : $rest2;
         push @{ $v_list->{$ver} }, $k;
 
-        if (ref $rest)
-          { valueWalk ($rest, $v_list) }
-
+        if (ref $ref)
+          { valueWalk ($ref, $v_list) }
     }
 }
 
@@ -265,11 +267,12 @@ sub walk
         die "Value associated with key '$k' is not an ARRAY reference"
             if !ref $v || ref $v ne 'ARRAY' ;
 
-        my ($ver, $rest) = @{ $v } ;
-        if (ref $rest)
-          { push (@{ $CATEGORIES{$k} }, walk ($rest)) }
-        elsif ($rest == DEFAULT_ON)
+        my ($ver, $rest, $rest2) = @{ $v } ;
+        my $ref = ref $rest ? $rest : $rest2;
+        if (!ref $rest and $rest == DEFAULT_ON)
           { push @DEFAULTS, $NAME_TO_VALUE{uc $k} }
+        if (ref $ref)
+          { push (@{ $CATEGORIES{$k} }, walk ($ref)) }
 
         push @list, @{ $CATEGORIES{$k} } ;
     }
@@ -334,12 +337,13 @@ sub warningsTree
             $offset = ' ' x ($max + 1) ;
         }
 
-        my ($ver, $rest) = @{ $v } ;
-        if (ref $rest)
+        my ($ver, $rest, $rest2) = @{ $v } ;
+        my $ref = ref $rest ? $rest : $rest2;
+        if (ref $ref)
         {
             my $bar = @keys ? "|" : " ";
             $rv .= " -" . "-" x ($max - length $k ) . "+\n" ;
-            $rv .= warningsTree ($rest, $prefix . $bar . $offset )
+            $rv .= warningsTree ($ref, $prefix . $bar . $offset )
         }
         else
           { $rv .= "\n" }

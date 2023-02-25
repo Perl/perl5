@@ -134,6 +134,10 @@
 /* Warnings Categories added in Perl 5.037 */
 
 #define WARN_EXPERIMENTAL__CLASS	 72
+
+/* Warnings Categories added in Perl 5.037009 */
+
+#define WARN_DEPRECATED__SMARTMATCH	 73
 #define WARNsize			 19
 #define WARN_ALLstring			 "\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125"
 #define WARN_NONEstring			 "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"
@@ -321,6 +325,7 @@ category parameters passed.
 =for apidoc Amnh||WARN_EXPERIMENTAL__FOR_LIST
 =for apidoc Amnh||WARN_SCALAR
 =for apidoc Amnh||WARN_EXPERIMENTAL__CLASS
+=for apidoc Amnh||WARN_DEPRECATED__SMARTMATCH
 
 =cut
 */
