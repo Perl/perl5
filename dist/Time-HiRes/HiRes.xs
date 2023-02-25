@@ -19,7 +19,9 @@ extern "C" {
 #include "perl.h"
 #include "XSUB.h"
 #include "reentr.h"
+#if !defined(IS_SAFE_PATHNAME) && defined(TIME_HIRES_UTIME) && defined(HAS_UTIMENSAT)
 #define NEED_ck_warner
+#endif
 #include "ppport.h"
 #if defined(__CYGWIN__) && defined(HAS_W32API_WINDOWS_H)
 #  include <w32api/windows.h>
