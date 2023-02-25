@@ -2279,10 +2279,6 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
             RExC_parno_to_logical_next[parno]= RExC_logical_to_parno[logical_parno];
             RExC_logical_to_parno[logical_parno] = parno;
         }
-        if (0)
-        for( int parno = 1; parno < RExC_total_parens ; parno++ )
-            PerlIO_printf(Perl_debug_log,"%d -> %d -> %d\n",
-                    parno, RExC_parno_to_logical[parno], RExC_parno_to_logical_next[parno]);
         RExC_rx->logical_to_parno = RExC_logical_to_parno;
         RExC_rx->parno_to_logical = RExC_parno_to_logical;
         RExC_rx->parno_to_logical_next = RExC_parno_to_logical_next;
