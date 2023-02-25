@@ -7609,9 +7609,9 @@ test_siphash24()
             if (hash32 != vectors_32[i]) {
                 failed++;
                 printf( "Error in 32 bit result on test vector of length %d for siphash24\n"
-                        "    have: 0x%08x\n"
-                        "    want: 0x%08x\n",
-                    i, hash32, vectors_32[i]);
+                        "    have: 0x%08" UVxf "\n"
+                        "    want: 0x%08" UVxf "\n",
+                    i, (UV)hash32, (UV)vectors_32[i]);
             }
         }
         RETVAL= failed;
@@ -7830,9 +7830,9 @@ test_siphash13()
             if (hash32 != vectors_32[i]) {
                 failed++;
                 printf( "Error in 32 bit result on test vector of length %d for siphash13\n"
-                        "    have: 0x%08x\n"
-                        "    want: 0x%08x\n",
-                    i, hash32, vectors_32[i]);
+                        "    have: 0x%08" UVxf"\n"
+                        "    want: 0x%08" UVxf"\n",
+                    i, (UV)hash32, (UV)vectors_32[i]);
             }
         }
         RETVAL= failed;
