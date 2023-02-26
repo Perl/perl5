@@ -3292,18 +3292,19 @@ PP(pp_goto)
                         }
                         else sv = AvARRAY(arg)[index];
 
-
+#ifdef PERL_RC_STACK
                         rpp_push_1(
                             sv
-                            ?
-#ifdef PERL_RC_STACK
-                              sv
+                            ? sv
                             : newSVavdefelem(arg, index, 1)
-#else
-                              (r ? SvREFCNT_inc_NN(sv_2mortal(sv)) : sv)
-                            : sv_2mortal(newSVavdefelem(arg, index, 1))
-#endif
                         );
+#else
+                        rpp_push_1(
+                            sv
+                            ? (r ? SvREFCNT_inc_NN(sv_2mortal(sv)) : sv)
+                            : sv_2mortal(newSVavdefelem(arg, index, 1))
+                        );
+#endif
                     }
                 }
 
