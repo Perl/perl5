@@ -869,7 +869,7 @@ S_my_querylocale_i(pTHX_ const unsigned int index)
         /* We don't currently keep records when there is querylocale(), so have
          * to get it anew each time */
         retval = (index == LC_ALL_INDEX_)
-                 ? calculate_LC_ALL(cur_obj)
+                 ? calculate_LC_ALL_string(cur_obj)
                  : querylocale_l(index, cur_obj);
 
 #  else
@@ -925,7 +925,7 @@ S_update_PL_curlocales_i(pTHX_
         }
 
         Safefree(PL_cur_LC_ALL);
-        PL_cur_LC_ALL = savepv(calculate_LC_ALL(PL_curlocales));
+        PL_cur_LC_ALL = savepv(calculate_LC_ALL_string(PL_curlocales));
         return PL_cur_LC_ALL;
     }
 
@@ -940,7 +940,7 @@ S_update_PL_curlocales_i(pTHX_
             && index == LC_ALL_INDEX_ - 1))
     {
         Safefree(PL_cur_LC_ALL);
-        PL_cur_LC_ALL = savepv(calculate_LC_ALL(PL_curlocales));
+        PL_cur_LC_ALL = savepv(calculate_LC_ALL_string(PL_curlocales));
     }
 
     return PL_curlocales[index];
@@ -1073,7 +1073,7 @@ S_setlocale_from_aggregate_LC_ALL(pTHX_ const char * locale, const line_t line)
      * as well.  We can't just use the input 'locale' as the value may omit
      * categories whose locale is 'C'.  khw thinks it's better to store a
      * complete LC_ALL.  So calculate it. */
-    const char * retval = savepv(calculate_LC_ALL(PL_curlocales));
+    const char * retval = savepv(calculate_LC_ALL_string(PL_curlocales));
     Safefree(PL_cur_LC_ALL);
     PL_cur_LC_ALL = retval;
 
@@ -1175,7 +1175,7 @@ S_emulate_setlocale_i(pTHX_
                      && index == LC_ALL_INDEX_ - 1))
         {
             Safefree(PL_cur_LC_ALL);
-            PL_cur_LC_ALL = savepv(calculate_LC_ALL(PL_curlocales));
+            PL_cur_LC_ALL = savepv(calculate_LC_ALL_string(PL_curlocales));
         }
 
 #  endif
@@ -1635,7 +1635,7 @@ S_find_locale_from_environment(pTHX_ const unsigned int index)
                  i, category_names[i], locale_names[i]));
     }
 
-    return calculate_LC_ALL(locale_names);
+    return calculate_LC_ALL_string(locale_names);
 }
 
 #endif
@@ -1645,9 +1645,9 @@ STATIC
 const char *
 
 #  ifdef USE_QUERYLOCALE
-S_calculate_LC_ALL(pTHX_ const locale_t cur_obj)
+S_calculate_LC_ALL_string(pTHX_ const locale_t cur_obj)
 #  else
-S_calculate_LC_ALL(pTHX_ const char ** individ_locales)
+S_calculate_LC_ALL_string(pTHX_ const char ** individ_locales)
 #  endif
 
 {
@@ -1698,7 +1698,7 @@ S_calculate_LC_ALL(pTHX_ const char ** individ_locales)
     char * this_start = NULL;
     Size_t entry_len = 0;
 
-    PERL_ARGS_ASSERT_CALCULATE_LC_ALL;
+    PERL_ARGS_ASSERT_CALCULATE_LC_ALL_STRING;
 
     /* First calculate the needed size for the string listing the categories
      * and their locales. */
@@ -1764,7 +1764,7 @@ S_calculate_LC_ALL(pTHX_ const char ** individ_locales)
     }
 
     DEBUG_Lv(PerlIO_printf(Perl_debug_log,
-                           "calculate_LC_ALL returning '%s'\n",
+                           "calculate_LC_ALL_string returning '%s'\n",
                            aggregate_locale));
 
     return aggregate_locale;
@@ -1790,7 +1790,7 @@ S_get_LC_ALL_display(pTHX)
         curlocales[i] = querylocale_i(i);
     }
 
-    return calculate_LC_ALL(curlocales);
+    return calculate_LC_ALL_string(curlocales);
 
 #  endif
 
