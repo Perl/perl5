@@ -7085,8 +7085,8 @@ S_use_curlocale_scratch(pTHX);
 
 #     if defined(USE_QUERYLOCALE)
 STATIC const char *
-S_calculate_LC_ALL(pTHX_ const locale_t cur_obj);
-#       define PERL_ARGS_ASSERT_CALCULATE_LC_ALL
+S_calculate_LC_ALL_string(pTHX_ const locale_t cur_obj);
+#       define PERL_ARGS_ASSERT_CALCULATE_LC_ALL_STRING
 
 #     else
 STATIC const char *
@@ -7123,8 +7123,8 @@ S_less_dicey_bool_setlocale_r(pTHX_ const int cat, const char *locale);
         ( !defined(LC_ALL) || defined(USE_POSIX_2008_LOCALE) ||            \
            defined(WIN32) )
 STATIC const char *
-S_calculate_LC_ALL(pTHX_ const char **individ_locales);
-#     define PERL_ARGS_ASSERT_CALCULATE_LC_ALL  \
+S_calculate_LC_ALL_string(pTHX_ const char **individ_locales);
+#     define PERL_ARGS_ASSERT_CALCULATE_LC_ALL_STRING \
         assert(individ_locales)
 
 #   endif

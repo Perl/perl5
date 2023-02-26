@@ -4424,7 +4424,7 @@ S	|const char *|setlocale_from_aggregate_LC_ALL			\
 				|const line_t line
 S	|locale_t|use_curlocale_scratch
 #     if defined(USE_QUERYLOCALE)
-S	|const char *|calculate_LC_ALL					\
+S	|const char *|calculate_LC_ALL_string				\
 				|const locale_t cur_obj
 #     else
 S	|const char *|update_PL_curlocales_i				\
@@ -4453,7 +4453,7 @@ S	|bool	|less_dicey_bool_setlocale_r				\
 #   if !(  defined(USE_POSIX_2008_LOCALE) && defined(USE_QUERYLOCALE) ) && \
         ( !defined(LC_ALL) || defined(USE_POSIX_2008_LOCALE) ||            \
            defined(WIN32) )
-S	|const char *|calculate_LC_ALL					\
+S	|const char *|calculate_LC_ALL_string				\
 				|NN const char **individ_locales
 #   endif
 #   if defined(WIN32)

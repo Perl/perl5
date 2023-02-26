@@ -1306,7 +1306,7 @@
 #         define setlocale_from_aggregate_LC_ALL(a,b) S_setlocale_from_aggregate_LC_ALL(aTHX_ a,b)
 #         define use_curlocale_scratch()        S_use_curlocale_scratch(aTHX)
 #         if defined(USE_QUERYLOCALE)
-#           define calculate_LC_ALL(a)          S_calculate_LC_ALL(aTHX_ a)
+#           define calculate_LC_ALL_string(a)   S_calculate_LC_ALL_string(aTHX_ a)
 #         else
 #           define update_PL_curlocales_i(a,b,c) S_update_PL_curlocales_i(aTHX_ a,b,c)
 #         endif
@@ -1323,7 +1323,7 @@
 #       if !(  defined(USE_POSIX_2008_LOCALE) && defined(USE_QUERYLOCALE) ) && \
             ( !defined(LC_ALL) || defined(USE_POSIX_2008_LOCALE) ||            \
                defined(WIN32) )
-#         define calculate_LC_ALL(a)            S_calculate_LC_ALL(aTHX_ a)
+#         define calculate_LC_ALL_string(a)     S_calculate_LC_ALL_string(aTHX_ a)
 #       endif
 #       if defined(WIN32)
 #         define Win_byte_string_to_wstring     S_Win_byte_string_to_wstring
