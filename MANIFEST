@@ -3864,6 +3864,7 @@ dist/Locale-Maketext/lib/Locale/Maketext/Cookbook.pod	Locale::Maketext
 dist/Locale-Maketext/lib/Locale/Maketext/Guts.pm	Locale::Maketext
 dist/Locale-Maketext/lib/Locale/Maketext/GutsLoader.pm	Locale::Maketext
 dist/Locale-Maketext/lib/Locale/Maketext/TPJ13.pod	Locale::Maketext documentation article
+dist/Locale-Maketext/Makefile.PL			Build Locale::Maketext
 dist/Locale-Maketext/README				Locale::Maketext
 dist/Locale-Maketext/t/01_about_verbose.t		See if Locale::Maketext works
 dist/Locale-Maketext/t/04_use_external_lex_cache.t	See if Locale::Maketext works
