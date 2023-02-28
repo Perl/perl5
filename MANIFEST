@@ -3674,8 +3674,10 @@ dist/encoding-warnings/t/4-lexical.t	tests for encoding::warnings
 dist/Env/lib/Env.pm		Map environment into ordinary variables
 dist/Env/t/array.t		See if Env works for arrays
 dist/Env/t/env.t		See if Env works
+dist/Exporter/Changes			History of changes for Exporter
 dist/Exporter/lib/Exporter.pm		Exporter base class
 dist/Exporter/lib/Exporter/Heavy.pm	Complicated routines for Exporter
+dist/Exporter/Makefile.PL		Build Exporter
 dist/Exporter/t/Exporter.t		See if Exporter works
 dist/Exporter/t/warn.t			See if Exporter respects warning handlers
 dist/ExtUtils-CBuilder/Changes		EU-CB change log
