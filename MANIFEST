@@ -3787,6 +3787,7 @@ dist/Filter-Simple/t/lib/Filter/Simple/ImportTest.pm		Helper file for Filter::Si
 dist/Filter-Simple/t/no.t					See if Filter::Simple works
 dist/FindBin/Changes				Tracks changes made in blead
 dist/FindBin/lib/FindBin.pm			Find name of currently executing program
+dist/FindBin/Makefile.PL			Build FindBin
 dist/FindBin/t/FindBin.t			See if FindBin works
 dist/I18N-Collate/lib/I18N/Collate.pm		Routines to do strxfrm-based collation
 dist/I18N-Collate/t/I18N-Collate.t		See if I18N::Collate works
