@@ -3095,7 +3095,9 @@ dist/Carp/t/swash.t		See if Carp avoids breaking swash loading
 dist/Carp/t/vivify_gv.t		See if Carp leaves utf8:: stuff alone
 dist/Carp/t/vivify_stash.t		See if Carp leaves utf8:: stash alone
 dist/Carp/t/with_warnings.t		See if Carp plays nicely with warnings
+dist/constant/Changes		Changes for constant.pm
 dist/constant/lib/constant.pm	For "use constant"
+dist/constant/Makefile.PL	Build constant.pm (from the cpan release)
 dist/constant/t/constant.t	See if compile-time constants work
 dist/constant/t/utf8.t		Test Unicode constants under utf8 pragma
 dist/Data-Dumper/Changes	Data pretty printer, changelog
