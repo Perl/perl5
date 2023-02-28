@@ -3773,7 +3773,9 @@ dist/ExtUtils-ParseXS/t/XSTightDirectives.xs			Test file for ExtUtils::ParseXS t
 dist/ExtUtils-ParseXS/t/XSUsage.pm				ExtUtils::ParseXS tests
 dist/ExtUtils-ParseXS/t/XSUsage.xs				ExtUtils::ParseXS tests
 dist/ExtUtils-ParseXS/t/XSWarn.xs				ExtUtils::ParseXS tests
+dist/Filter-Simple/Changes					History of change for Filter::Simple
 dist/Filter-Simple/lib/Filter/Simple.pm				Simple frontend to Filter::Util::Call
+dist/Filter-Simple/Makefile.PL					Build Filter::Simple
 dist/Filter-Simple/t/code_no_comments.t				See if Filter::Simple works
 dist/Filter-Simple/t/data.t					See if Filter::Simple works
 dist/Filter-Simple/t/export.t					See if Filter::Simple works
