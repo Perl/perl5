@@ -3788,10 +3788,11 @@ dist/FindBin/lib/FindBin.pm			Find name of currently executing program
 dist/FindBin/t/FindBin.t			See if FindBin works
 dist/I18N-Collate/lib/I18N/Collate.pm		Routines to do strxfrm-based collation
 dist/I18N-Collate/t/I18N-Collate.t		See if I18N::Collate works
-dist/I18N-LangTags/ChangeLog			I18N::LangTags
+dist/I18N-LangTags/ChangeLog			I18N::LangTags change history
 dist/I18N-LangTags/lib/I18N/LangTags.pm		I18N::LangTags
 dist/I18N-LangTags/lib/I18N/LangTags/Detect.pm	Detect language preferences
 dist/I18N-LangTags/lib/I18N/LangTags/List.pm	List of tags for human languages
+dist/I18N-LangTags/Makefile.PL			Build I18N::LangTags
 dist/I18N-LangTags/README			I18N::LangTags
 dist/I18N-LangTags/t/01_about_verbose.t		See whether I18N::LangTags works
 dist/I18N-LangTags/t/05_main.t			See whether I18N::LangTags works
