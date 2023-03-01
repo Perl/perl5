@@ -20,6 +20,8 @@ dist/Devel-PPPort/devel/regenerate
 dist/Devel-PPPort/devel/scanprov
 dist/Devel-PPPort/devel/update_release_date.pl
 dist/Devel-PPPort/soak
+dist/Thread-Queue/examples/callback.pl
+dist/Thread-Queue/examples/queue.pl
 installperl
 installman
 makedepend.SH
