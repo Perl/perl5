@@ -3880,11 +3880,14 @@ dist/Locale-Maketext/t/92_blacklist.t			See if Locale::Maketext works
 dist/Locale-Maketext/t/93_whitelist.t			See if Locale::Maketext works
 dist/Locale-Maketext/t/94_denylist.t			See if Locale::Maketext works
 dist/Locale-Maketext/t/95_allowlist.t			See if Locale::Maketext works
-dist/Math-Complex/lib/Math/Complex.pm	A Complex package
-dist/Math-Complex/lib/Math/Trig.pm	A simple interface to complex trigonometry
-dist/Math-Complex/t/Complex.t		See if Math::Complex works
-dist/Math-Complex/t/Trig.t		See if Math::Trig works
-dist/Math-Complex/t/underbar.t		See if Math::Complex works
+dist/Math-Complex/ChangeLog			History of changes for Math::Complex
+dist/Math-Complex/lib/Math/Complex.pm		A package for doing math with complex numbers
+dist/Math-Complex/lib/Math/Trig.pm		A simple interface to complex trigonometry
+dist/Math-Complex/Makefile.PL			Build Math::Complex
+dist/Math-Complex/t/Complex.t			See if Math::Complex works
+dist/Math-Complex/t/Trig.t			See if Math::Trig works
+dist/Math-Complex/t/underbar.t			See if Math::Complex works
+dist/Math-Complex/TODO				TODO for Math::Complex
 dist/Module-CoreList/Changes			Module::CoreList Changes
 dist/Module-CoreList/corelist			The corelist command-line utility
 dist/Module-CoreList/identify-dependencies	A usage example for Module::CoreList
