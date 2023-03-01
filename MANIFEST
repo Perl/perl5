@@ -3901,6 +3901,7 @@ dist/Module-CoreList/t/pod.t			Module::CoreList tests
 dist/Module-CoreList/t/utils.t			Module::CoreList tests
 dist/Net-Ping/Changes			Net::Ping
 dist/Net-Ping/lib/Net/Ping.pm		Hello, anybody home?
+dist/Net-Ping/Makefile.PL		Build Net::Ping
 dist/Net-Ping/t/000_load.t
 dist/Net-Ping/t/001_new.t
 dist/Net-Ping/t/010_pingecho.t
@@ -3921,6 +3922,7 @@ dist/Net-Ping/t/500_ping_icmp.t		Ping Net::Ping
 dist/Net-Ping/t/501_ping_icmpv6.t	Ping Net::Ping
 dist/Net-Ping/t/510_ping_udp.t		Ping Net::Ping
 dist/Net-Ping/t/520_icmp_ttl.t		Ping Net::Ping
+dist/Net-Ping/TODO			TODO list for Net::Ping
 dist/PathTools/Changes			Changelog for PathTools dist
 dist/PathTools/Cwd.pm				Various cwd routines (getcwd, fastcwd, chdir)
 dist/PathTools/Cwd.xs				Cwd extension external subroutines
