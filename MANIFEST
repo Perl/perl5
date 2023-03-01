@@ -4083,13 +4083,16 @@ dist/Thread-Queue/t/08_nothreads.t	Thread::Queue tests
 dist/Thread-Queue/t/09_ended.t		Thread::Queue tests
 dist/Thread-Queue/t/10_timed.t	Thread::Queue tests
 dist/Thread-Queue/t/11_limit.t	Thread::Queue tests
+dist/Thread-Semaphore/Changes			History of changes for Thread::Semaphore
+dist/Thread-Semaphore/examples/semaphore.pl	Thread::Semaphore example script
 dist/Thread-Semaphore/lib/Thread/Semaphore.pm	Thread-safe semaphores
+dist/Thread-Semaphore/Makefile.PL		Build Thread::Semaphore
 dist/Thread-Semaphore/t/01_basic.t		Thread::Semaphore tests
 dist/Thread-Semaphore/t/02_errs.t		Thread::Semaphore tests
 dist/Thread-Semaphore/t/03_nothreads.t		Thread::Semaphore tests
 dist/Thread-Semaphore/t/04_nonblocking.t	Thread::Semaphore tests
-dist/Thread-Semaphore/t/05_force.t	Thread::Semaphore tests
-dist/Thread-Semaphore/t/06_timed.t	Thread::Semaphore tests
+dist/Thread-Semaphore/t/05_force.t		Thread::Semaphore tests
+dist/Thread-Semaphore/t/06_timed.t		Thread::Semaphore tests
 dist/threads/hints/hpux.pl	Hint file for HPUX
 dist/threads/hints/linux.pl	Hint file for Linux
 dist/threads/lib/threads.pm		ithreads
