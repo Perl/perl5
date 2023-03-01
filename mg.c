@@ -775,6 +775,39 @@ Perl_emulate_cop_io(pTHX_ const COP *const c, SV *const sv)
     }
 }
 
+int
+Perl_get_extended_os_errno(void)
+{
+
+#if defined(VMS)
+
+    return (int) vaxc$errno;
+
+#elif defined(OS2)
+
+    if (! (_emx_env & 0x200)) {	/* Under DOS */
+        return (int) errno;
+    }
+
+    if (errno != errno_isOS2) {
+        const int tmp = _syserrno();
+        if (tmp)	/* 2nd call to _syserrno() makes it 0 */
+            Perl_rc = tmp;
+    }
+    return (int) Perl_rc;
+
+#elif defined(WIN32)
+
+    return (int) GetLastError();
+
+#else
+
+    return (int) errno;
+
+#endif
+
+}
+
 STATIC void
 S_fixup_errno_string(pTHX_ SV* sv)
 {
@@ -900,23 +933,33 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
             break;
         }
 
+
 #if defined(VMS) || defined(OS2) || defined(WIN32)
+
+    int extended_errno = get_extended_os_errno();
+
 #   if defined(VMS)
         {
             char msg[255];
             $DESCRIPTOR(msgdsc,msg);
-            sv_setnv(sv,(NV) vaxc$errno);
-            if (sys$getmsg(vaxc$errno,&msgdsc.dsc$w_length,&msgdsc,0,0) & 1)
+
+            sv_setnv(sv, (NV) extended_errno);
+            if (sys$getmsg(extended_errno,
+                           &msgdsc.dsc$w_length,
+                           &msgdsc,
+                           0, 0)
+                & 1)
                 sv_setpvn(sv,msgdsc.dsc$a_pointer,msgdsc.dsc$w_length);
             else
                 SvPVCLEAR(sv);
         }
+
 #elif defined(OS2)
         if (!(_emx_env & 0x200)) {	/* Under DOS */
-            sv_setnv(sv, (NV)errno);
-            if (errno) {
+            sv_setnv(sv, (NV) extended_errno);
+            if (extended_errno) {
                 utf8ness_t utf8ness;
-                const char * errstr = my_strerror(errno, &utf8ness);
+                const char * errstr = my_strerror(extended_errno, &utf8ness);
 
                 sv_setpv(sv, errstr);
 
@@ -928,21 +971,17 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
                 SvPVCLEAR(sv);
             }
         } else {
-            if (errno != errno_isOS2) {
-                const int tmp = _syserrno();
-                if (tmp)	/* 2nd call to _syserrno() makes it 0 */
-                    Perl_rc = tmp;
-            }
-            sv_setnv(sv, (NV)Perl_rc);
-            sv_setpv(sv, os2error(Perl_rc));
+            sv_setnv(sv, (NV) extended_errno);
+            sv_setpv(sv, os2error(extended_errno));
         }
         if (SvOK(sv) && strNE(SvPVX(sv), "")) {
             fixup_errno_string(sv);
         }
+
 #   elif defined(WIN32)
         {
-            const DWORD dwErr = GetLastError();
-            sv_setnv(sv, (NV)dwErr);
+            const DWORD dwErr = (DWORD) extended_errno;
+            sv_setnv(sv, (NV) dwErr);
             if (dwErr) {
                 PerlProc_GetOSError(sv, dwErr);
                 fixup_errno_string(sv);
