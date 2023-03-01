@@ -1218,6 +1218,11 @@ Perl_get_deprecated_property_msg(const Size_t warning_offset)
         __attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_GET_DEPRECATED_PROPERTY_MSG
 
+PERL_CALLCONV int
+Perl_get_extended_os_errno(void)
+        __attribute__visibility__("hidden");
+#define PERL_ARGS_ASSERT_GET_EXTENDED_OS_ERRNO
+
 PERL_CALLCONV void
 Perl_get_hash_seed(pTHX_ unsigned char * const seed_buffer)
         __attribute__visibility__("hidden");
