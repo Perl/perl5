@@ -4072,7 +4072,11 @@ dist/Test/t/success.t		See if Test works
 dist/Test/t/todo.t		See if Test works
 dist/Text-Abbrev/lib/Text/Abbrev.pm		An abbreviation table builder
 dist/Text-Abbrev/t/Abbrev.t		Test Text::Abbrev
+dist/Thread-Queue/Changes		Thread-safe queues
+dist/Thread-Queue/examples/callback.pl	Thread::Queue example script
+dist/Thread-Queue/examples/queue.pl	Thread::Queue example script
 dist/Thread-Queue/lib/Thread/Queue.pm	Thread-safe queues
+dist/Thread-Queue/Makefile.PL		Build Thread::Queue
 dist/Thread-Queue/t/01_basic.t		Thread::Queue tests
 dist/Thread-Queue/t/02_refs.t		Thread::Queue tests
 dist/Thread-Queue/t/03_peek.t		Thread::Queue tests
@@ -4082,8 +4086,8 @@ dist/Thread-Queue/t/06_insert.t		Thread::Queue tests
 dist/Thread-Queue/t/07_lock.t		Thread::Queue tests
 dist/Thread-Queue/t/08_nothreads.t	Thread::Queue tests
 dist/Thread-Queue/t/09_ended.t		Thread::Queue tests
-dist/Thread-Queue/t/10_timed.t	Thread::Queue tests
-dist/Thread-Queue/t/11_limit.t	Thread::Queue tests
+dist/Thread-Queue/t/10_timed.t		Thread::Queue tests
+dist/Thread-Queue/t/11_limit.t		Thread::Queue tests
 dist/Thread-Semaphore/Changes			History of changes for Thread::Semaphore
 dist/Thread-Semaphore/examples/semaphore.pl	Thread::Semaphore example script
 dist/Thread-Semaphore/lib/Thread/Semaphore.pm	Thread-safe semaphores
