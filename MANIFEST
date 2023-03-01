@@ -4051,7 +4051,9 @@ dist/Term-ReadLine/t/AETk.t			See if Term::ReadLine works
 dist/Term-ReadLine/t/ReadLine.t			See if Term::ReadLine works
 dist/Term-ReadLine/t/ReadLine-STDERR.t		See if Term::ReadLine works
 dist/Term-ReadLine/t/Tk.t			See if Term::ReadLine works
+dist/Test/ChangeLog		History of changes for the Test module
 dist/Test/lib/Test.pm		A simple framework for writing test scripts
+dist/Test/Makefile.PL		Build the Test module
 dist/Test/t/05_about_verbose.t	See if Test works
 dist/Test/t/fail.t		See if Test works
 dist/Test/t/mix.t		See if Test works
