@@ -68,3 +68,4 @@ Porting/updateAUTHORS.pl
 Porting/valgrindpp.pl
 Cross/generate_config_sh
 Cross/warp
+dist/Thread-Semaphore/examples/semaphore.pl
