@@ -4134,6 +4134,7 @@ dist/threads-shared/t/wait.t		Test cond_wait and cond_timedwait
 dist/threads-shared/t/waithires.t	Test sub-second cond_timedwait
 dist/Tie-File/ChangeLog			Tie::File
 dist/Tie-File/lib/Tie/File.pm		Files as tied arrays
+dist/Tie-File/Makefile.PL		Build Tie::File
 dist/Tie-File/t/01_gen.t		Generic read/write tests for Tie::File
 dist/Tie-File/t/02_fetchsize.t		File length fetch test for Tie::File
 dist/Tie-File/t/03_longfetch.t		Past-the-end-of-the-array tests for Tie::File
