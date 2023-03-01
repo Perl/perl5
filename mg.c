@@ -916,7 +916,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
             sv_setnv(sv, (NV)errno);
             if (errno) {
                 utf8ness_t utf8ness;
-                const char * errstr = my_strerror(errnum, &utf8ness);
+                const char * errstr = my_strerror(errno, &utf8ness);
 
                 sv_setpv(sv, errstr);
 
