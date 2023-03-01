@@ -3980,7 +3980,9 @@ dist/Search-Dict/Makefile.PL		Makefile.PL
 dist/Search-Dict/README.patching	Patch instructions
 dist/Search-Dict/README.release		Release instructions
 dist/Search-Dict/t/Dict.t		See if Search::Dict works
+dist/SelfLoader/Changes			History of changes for SelfLoader
 dist/SelfLoader/lib/SelfLoader.pm	Load functions only on demand
+dist/SelfLoader/Makefile.PL		Build SelfLoader
 dist/SelfLoader/t/01SelfLoader.t	See if SelfLoader works
 dist/SelfLoader/t/02SelfLoader-buggy.t	See if SelfLoader works
 dist/SelfLoader/t/03taint.t		See if SelfLoader works under taint
