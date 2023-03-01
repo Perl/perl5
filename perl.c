@@ -3259,7 +3259,14 @@ Perl_eval_sv(pTHX_ SV *sv, I32 flags)
         if (!*PL_stack_sp) {
             /* In the presence of the OPpEVAL_EVALSV flag,
              * pp_entereval() pushes a NULL pointer onto the stack to
-             * indicate compilation failure */
+             * indicate compilation failure. Otherwise, the top slot on
+             * the stack will be a non-NULL pointer to whatever scalar or
+             * list value(s) the eval returned. In void context it will
+             * be whatever our caller has at the top of stack at the time,
+             * or the &PL_sv_undef guard at PL_stack_base[0]. Note that
+             * NULLs are not pushed on the stack except in a few very
+             * specific circumstances (such as this) to flag something
+             * special. */
             PL_stack_sp--;
             goto fail;
         }
