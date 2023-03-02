@@ -230,7 +230,8 @@ use File::Glob qw(:case);
     },
 
     'Config::Perl::V' => {
-        'DISTRIBUTION' => 'HMBRAND/Config-Perl-V-0.35.tgz',
+        'DISTRIBUTION' => 'HMBRAND/Config-Perl-V-0.36.tgz',
+        'SYNCINFO'     => 'yorton on Sat Mar  4 10:43:06 2023',
         'FILES'        => q[cpan/Config-Perl-V],
         'EXCLUDED'     => [qw(
 		examples/show-v.pl
