@@ -156,6 +156,13 @@ static int debug_initialization = 0;
 #  include <wctype.h>
 #endif
 
+ /* The main errno that gets used is this one, on platforms that support it */
+#ifdef EINVAL
+#  define SET_EINVAL  SETERRNO(EINVAL, LIB_INVARG)
+#else
+#  define SET_EINVAL
+#endif
+
 /* If we have any of these library functions, we can reliably determine is a
  * locale is a UTF-8 one or not.  And if we aren't using locales at all, we act
  * as if everything is the C locale, so the answer there is always "No, it
@@ -469,11 +476,7 @@ S_get_category_index(const int category, const char * locale)
                           "Unknown locale category %d%s%s",
                           category, conditional_warn_text, locale);
 
-#  ifdef EINVAL
-
-    SETERRNO(EINVAL, LIB_INVARG);
-
-#  endif
+    SET_EINVAL;
 
     /* Return an out-of-bounds value */
     return NOMINAL_LC_ALL_INDEX + 1;
@@ -2564,7 +2567,7 @@ S_Win_byte_string_to_wstring(const UINT code_page, const char * byte_string)
 
     int req_size = MultiByteToWideChar(code_page, 0, byte_string, -1, NULL, 0);
     if (! req_size) {
-        errno = EINVAL;
+        SET_EINVAL;
         return NULL;
     }
 
@@ -2574,7 +2577,7 @@ S_Win_byte_string_to_wstring(const UINT code_page, const char * byte_string)
     if (! MultiByteToWideChar(code_page, 0, byte_string, -1, wstring, req_size))
     {
         Safefree(wstring);
-        errno = EINVAL;
+        SET_EINVAL;
         return NULL;
     }
 
@@ -2598,7 +2601,7 @@ S_Win_wstring_to_byte_string(const UINT code_page, const wchar_t * wstring)
                                                          req_size, NULL, NULL))
     {
         Safefree(byte_string);
-        errno = EINVAL;
+        SET_EINVAL;
         return NULL;
     }
 
