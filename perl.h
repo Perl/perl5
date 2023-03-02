@@ -1157,6 +1157,11 @@ violations are fatal.
 
 #include "perl_langinfo.h"    /* Needed for _NL_LOCALE_NAME */
 
+#ifdef NO_LC_ALL
+#  undef LC_ALL
+#  undef LC_ALL_MASK
+#endif
+
 /* =========================================================================
  * The defines from here to the following ===== line are unfortunately
  * duplicated in makedef.pl, and changes here MUST also be made there */

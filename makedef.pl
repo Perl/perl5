@@ -132,13 +132,21 @@ if ($define{MULTIPLICITY} && ! $define{WIN32}) {
     $define{USE_REENTRANT_API} = 1;
 }
 
+$define{LC_ALL_MASK} = 1;
+$define{LC_ALL} = 1;
+if ($define{NO_LC_ALL} ) {
+    $define{LC_ALL} = 0;
+    $define{LC_ALL_MASK} = 0;
+}
+
 if (! $define{NO_LOCALE}) {
     if ( ! $define{NO_POSIX_2008_LOCALE}
         && $define{HAS_NEWLOCALE}
         && $define{HAS_USELOCALE}
         && $define{HAS_DUPLOCALE}
-        && $define{HAS_FREELOCALE})
-    {
+        && $define{HAS_FREELOCALE}
+        && $define{LC_ALL_MASK}
+    ) {
         $define{HAS_POSIX_2008_LOCALE} = 1;
         $define{USE_LOCALE} = 1;
     }
