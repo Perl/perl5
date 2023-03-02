@@ -7029,7 +7029,7 @@ Perl_switch_to_global_locale(pTHX)
 
     locale_t old_locale = uselocale(LC_GLOBAL_LOCALE);
     if (! old_locale) {
-        locale_panic_(Perl_form(aTHX_ "Could not change to global locale"));
+        locale_panic_("Could not change to global locale");
     }
 
     /* Free the per-thread memory */
