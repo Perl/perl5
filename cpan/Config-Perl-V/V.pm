@@ -6,7 +6,7 @@ use warnings;
 use Config;
 use Exporter;
 use vars qw($VERSION @ISA @EXPORT_OK %EXPORT_TAGS);
-$VERSION     = "0.35";
+$VERSION     = "0.36";
 @ISA         = qw( Exporter );
 @EXPORT_OK   = qw( plv2hash summary myconfig signature );
 %EXPORT_TAGS = (
@@ -59,6 +59,7 @@ my %BTD = map {( $_ => 0 )} qw(
     PERL_PERTURB_KEYS_DISABLED
     PERL_PERTURB_KEYS_RANDOM
     PERL_PRESERVE_IVUV
+    PERL_RC_STACK
     PERL_RELOCATABLE_INCPUSH
     PERL_USE_DEVEL
     PERL_USE_SAFE_PUTENV
@@ -269,7 +270,10 @@ sub plv2hash {
 	$config{$k} = $v;
 	}
 
-    if (my %kv = ($pv =~ m{\b
+    my %kv;
+    if ($pv =~ m{\S,? (?:osvers|archname)=}) { # attr is not the first on the line
+	# up to and including 5.24, a line could have multiple kv pairs
+	%kv = ($pv =~ m{\b
 	    (\w+)		# key
 	    \s*=		# assign
 	    ( '\s*[^']*?\s*'	# quoted value
@@ -277,17 +281,27 @@ sub plv2hash {
 	    | \S+		# unquoted value
 	    | \s*\n		# empty
 	    )
-	    (?:,?\s+|\s*\n)?	# separator (5.8.x reports did not have a ','
-	    }gx)) {		# between every kv pair
+	    (?:,?\s+|\s*\n)?	# optional separator (5.8.x reports did
+	    }gx);		# not have a ',' between every kv pair)
+	}
+    else {
+	# as of 5.25, each kv pair is listed on its own line
+	%kv = ($pv =~ m{^
+	    \s+
+	    (\w+)		# key
+	    \s*=\s*		# assign
+	    (.*?)		# value
+	    \s*,?\s*$
+	    }gmx);
+	}
 
-	while (my ($k, $v) = each %kv) {
-	    $k =~ s{\s+$}	{};
-	    $v =~ s{\s*\n\z}	{};
-	    $v =~ s{,$}		{};
-	    $v =~ m{^'(.*)'$} and $v = $1;
-	    $v =~ s{\s+$}	{};
-	    $config{$k} = $v;
-	    }
+    while (my ($k, $v) = each %kv) {
+	$k =~ s{\s+$}		{};
+	$v =~ s{\s*\n\z}	{};
+	$v =~ s{,$}		{};
+	$v =~ m{^'(.*)'$} and $v = $1;
+	$v =~ s{\s+$}	{};
+	$config{$k} = $v;
 	}
 
     my $build = { %empty_build };

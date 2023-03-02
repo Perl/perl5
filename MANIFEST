@@ -294,6 +294,7 @@ cpan/Config-Perl-V/t/39_plv5340tqm.t		Config::Perl::V
 cpan/Config-Perl-V/t/40_plv5358dnqm.t		Config::Perl::V
 cpan/Config-Perl-V/t/41_plv5360dnqm.t		Config::Perl::V
 cpan/Config-Perl-V/t/42_plv5373tld.t		Config::Perl::V
+cpan/Config-Perl-V/t/43_plv53710rcs.t
 cpan/Config-Perl-V/V.pm				Config::Perl::V
 cpan/CPAN/lib/App/Cpan.pm		helper package for CPAN.pm
 cpan/CPAN/lib/CPAN.pm			Interface to Comprehensive Perl Archive Network
