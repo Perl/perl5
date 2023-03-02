@@ -1,11 +1,12 @@
 use ExtUtils::MakeMaker;
-# See lib/ExtUtils/MakeMaker.pm for details of how to influence
-# the contents of the Makefile that is written.
 WriteMakefile(
-    'NAME'	=> 'if',
-    'VERSION_FROM' => 'if.pm', # finds $VERSION
-    ABSTRACT_FROM  => 'if.pm',
-    ($] >= 5.007003 ? ('INSTALLDIRS'  => 'perl') : ()), # core since 5.7.3
+    NAME            => 'if',
+    VERSION_FROM    => 'if.pm', # finds $VERSION
+    ABSTRACT_FROM   => 'if.pm',
+    # core since 5.7.3
+    (($] >= 5.007003 && $] < 5.011 ) ? (
+        'INSTALLDIRS'  => 'perl') : ()
+    ),
     AUTHOR  => 'Ilya Zakharevich <ilyaz@cpan.org>',
     LICENSE => 'perl_5',
 
@@ -13,11 +14,14 @@ WriteMakefile(
         'meta-spec' => { version => 2 },
         dynamic_config => 0,
         resources => {
-            repository => {  },
+            repository => {
+                type => 'git',
+                url => 'https://github.com/perl/perl5.git',
+                web => 'https://github.com/perl/perl5',
+            },
             bugtracker => {
-                web => 'https://rt.perl.org',
+                web => 'https://github.com/Perl/perl5/issues',
             },
         },
     },
 );
-
