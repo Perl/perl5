@@ -289,7 +289,13 @@ chdir "cpan";
 my  $pkg_dir      = $files[0];
     $pkg_dir      =~ s!.*/!!;
 
-my ($old_version) = $distribution =~ /-([0-9.]+(?:-TRIAL[0-9]*)?)\.tar\.gz/;
+my $tail_pat = qr/(?:\.tar\.gz|\.tgz)\z/;
+
+my ($old_version) = $distribution =~ /-([0-9._]+(?:-TRIAL[0-9]*)?)$tail_pat/;
+
+if (!$old_version) {
+    die "WTF: failed to parse old version from '$distribution'\n";
+}
 
 sub wget {
     my ($url, $saveas) = @_;
@@ -329,7 +335,7 @@ if (defined $tarball) {
     die "Tarball $tarball does not exist\n" if !-e $tarball;
     die "Tarball $tarball is not a plain file\n" if !-f _;
     $new_file     = $tarball;
-    $new_version  = $version // ($new_file =~ /-([0-9._]+(?:-TRIAL[0-9]*)?)\.tar\.gz/) [0];
+    $new_version  = $version // ($new_file =~ /-([0-9._]+(?:-TRIAL[0-9]*)?)$tail_pat/) [0];
     die "Blead and that tarball both have version $new_version of $module\n"
         if $new_version eq $old_version;
 }
@@ -371,7 +377,7 @@ system git => 'clean', '-dfxq', $pkg_dir;
 say "Unpacking $new_file";
 Archive::Tar->extract_archive( $new_file );
 
-(my $new_dir = basename($new_file)) =~ s/\.tar\.gz//;
+(my $new_dir = basename($new_file)) =~ s/$tail_pat//;
 # ensure 'make' will update all files
 my $t= time;
 for my $file (find_type_f($new_dir)) {
