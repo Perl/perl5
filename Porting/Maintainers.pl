@@ -1476,9 +1476,16 @@ use File::Glob qw(:case);
     },
 );
 
+
 # legacy CPAN flag
-for ( values %Modules ) {
-    $_->{CPAN} = !!$_->{DISTRIBUTION};
+for my $mod_name ( keys %Modules ) {
+    my $data = $Modules{$mod_name};
+    $data->{CPAN} = !!$data->{DISTRIBUTION};
+    my (@files)= split /\s+/, $data->{FILES};
+    if (@files and $files[0]=~s!^(cpan|dist)/!!) {
+        $DistName{$files[0]} = $mod_name;
+        $DistName{"$1/$files[0]"} = $mod_name;
+    }
 }
 
 # legacy UPSTREAM flag
