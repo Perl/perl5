@@ -4008,6 +4008,7 @@ dist/I18N-LangTags/t/55_supers_strict.t		See whether I18N::LangTags works
 dist/I18N-LangTags/t/80_all_env.t		See whether I18N::LangTags works
 dist/if/Changes				if perl module change log
 dist/if/if.pm				For "use if"
+dist/if/Makefile.PL			Makefile.PL for if.pm
 dist/if/MANIFEST			MANIFEST for if.pm
 dist/if/META.json			META.json for if.pm
 dist/if/META.yml			META.json for if.pm
