@@ -9842,7 +9842,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 
                         /* Here we do have the complete property definition
                          *
-                         * Temporary workaround for [perl #133136].  For this
+                         * Temporary workaround for [GH #16520].  For this
                          * precise input that is in the .t that is failing,
                          * load utf8.pm, which is what the test wants, so that
                          * that .t passes */
