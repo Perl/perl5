@@ -71,4 +71,14 @@ no warnings 'experimental::class';
     is($obj->x, "X", 'Constructor params passed through to superclass');
 }
 
+{
+    class Test4A { }
+
+    class Test4B :isa(Test4A);
+
+    package main;
+    my $obj = Test4B->new;
+    ok($obj isa Test4A, 'Unit class syntax allows :isa');
+}
+
 done_testing;

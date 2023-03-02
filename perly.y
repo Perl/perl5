@@ -443,13 +443,16 @@ barestmt:	PLUGSTMT
 			      package_version($version);
 			  $$ = NULL;
 			}
-	|	KW_CLASS BAREWORD[version] BAREWORD[package] PERLY_SEMICOLON
+	|	KW_CLASS BAREWORD[version] BAREWORD[package] subattrlist PERLY_SEMICOLON
 			{
 			  package($package);
 			  if ($version)
 			      package_version($version);
 			  $$ = NULL;
 			  class_setup_stash(PL_curstash);
+			  if ($subattrlist) {
+			      class_apply_attributes(PL_curstash, $subattrlist);
+			  }
 			}
 	|	KW_USE_or_NO startsub
 			{ CvSPECIAL_on(PL_compcv); /* It's a BEGIN {} */ }
