@@ -1868,7 +1868,7 @@ cpan/podlators/lib/Pod/Text/Termcap.pm		Convert POD data to ASCII text with form
 cpan/podlators/Makefile.PL			podlators Makefile.PL
 cpan/podlators/scripts/pod2man.PL		Translator to turn pod into manpage
 cpan/podlators/scripts/pod2text.PL		Translator to turn pod into text
-cpan/podlators/t/data/basic.cap			podlators test			podlators test
+cpan/podlators/t/data/basic.cap			podlators test
 cpan/podlators/t/data/basic.clr			podlators test
 cpan/podlators/t/data/basic.man			podlators test
 cpan/podlators/t/data/basic.ovr			podlators test
