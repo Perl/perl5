@@ -366,6 +366,12 @@ manager will later use a regex to expand these into links.
 
 =item *
 
+In the new experimental C<class> feature, attributes are no longer a syntax
+error when using the unit class syntax.
+[GH #20888].
+
+=item *
+
 XXX
 
 =back
