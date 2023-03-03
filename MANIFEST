@@ -3861,7 +3861,9 @@ dist/Dumpvalue/t/Dumpvalue.t		See if Dumpvalue works
 dist/Dumpvalue/t/extend-coverage.t	Extend Dumpvalue's test coverage
 dist/Dumpvalue/t/lib/TieOut.pm		Helper module for Dumpvalue tests
 dist/Dumpvalue/t/rt-134441-dumpvalue.t	See if Dumpvalue works
+dist/encoding-warnings/Changes			encoding::warnings
 dist/encoding-warnings/lib/encoding/warnings.pm	warn on implicit encoding conversions
+dist/encoding-warnings/Makefile.PL		encoding::warnings
 dist/encoding-warnings/t/1-warning.t		tests for encoding::warnings
 dist/encoding-warnings/t/2-fatal.t		tests for encoding::warnings
 dist/encoding-warnings/t/3-normal.t		tests for encoding::warnings
