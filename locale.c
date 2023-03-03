@@ -1468,7 +1468,8 @@ S_stdize_locale(pTHX_ const int category,
             retval = input_locale;  /* The input can be returned unchanged */
         }
         else {
-            retval = save_to_buffer(querylocale_c(LC_ALL), buf, buf_size);
+            retval = save_to_buffer(posix_setlocale(LC_ALL, NULL),
+                                    buf, buf_size);
         }
 
         for (i = 0; i < LC_ALL_INDEX_; i++) {
