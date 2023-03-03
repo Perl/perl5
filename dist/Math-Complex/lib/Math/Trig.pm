@@ -675,7 +675,7 @@ The midpoint between London and Tokyo being
     sub SWNE { rad2deg( $_[0] ), 90 - rad2deg( $_[1] ) }
     my @lonlat = SWNE(@M);
 
-or about 69 N 89 E, in the frozen wastes of Siberia.
+or about 69 N 89 E, on the Putorana Plateau of Siberia.
 
 B<NOTE>: you B<cannot> get from A to B like this:
 
