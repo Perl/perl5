@@ -6,11 +6,9 @@ BEGIN {
 use XS::APItest;
 use Config;
 
-skip_all("locales not available") unless locales_enabled('LC_NUMERIC');
+skip_all("locales not available") unless locales_enabled();
 
 my @locales = eval { find_locales( &LC_NUMERIC ) };
-skip_all("no LC_NUMERIC locales available") unless @locales;
-
 my $comma_locale;
 for my $locale (@locales) {
     use POSIX;
@@ -24,15 +22,14 @@ for my $locale (@locales) {
     }
 }
 
-
 SKIP: {
-      if ($Config{usequadmath}) {
-            skip "no gconvert with usequadmath", 2;
+          if ($Config{usequadmath}) {
+              skip "no gconvert with usequadmath", 2;
+          }
+          is(test_Gconvert(4.179, 2), "4.2", "Gconvert doesn't recognize underlying locale outside 'use locale'");
+          use locale;
+          is(test_Gconvert(4.179, 2), "4.2", "Gconvert doesn't recognize underlying locale inside 'use locale'");
       }
-      is(test_Gconvert(4.179, 2), "4.2", "Gconvert doesn't recognize underlying locale outside 'use locale'");
-      use locale;
-      is(test_Gconvert(4.179, 2), "4.2", "Gconvert doesn't recognize underlying locale inside 'use locale'");
-}
 
 sub check_in_bounds($$$) {
     my ($value, $lower, $upper) = @_;
@@ -178,6 +175,27 @@ SKIP: {
             else {
                 fail("Returned undef for $formal_item");
             }
+        }
+    }
+}
+
+@locales = eval { find_locales( &LC_TIME ) };
+
+SKIP: {
+    skip("no LC_TIME locales available") unless @locales;
+
+    for my $locale (@locales) {
+        use POSIX 'strftime';
+        use locale;
+        setlocale(LC_TIME, $locale) or next;
+
+        # This isn't guaranteed to find failing locales, as it is impractical
+        # to test all possible dates.  But it is much better than no test at
+        # all
+        if (strftime('%c', 0, 0, , 12, 18, 11, 87) eq "") {
+            fail('strftime() built-in expansion factor works for all locales');
+            diag("Failed for locale $locale");
+            last;
         }
     }
 }
