@@ -4906,19 +4906,29 @@ and LC_TIME are not the same locale.
         }
 
         /* There are several possible reasons for a 0 return code for a
-         * non-empty format, and they are not trivial to tease apart.  What we
-         * do is to assume that the reason is not enough space in the buffer,
-         * so increase it and try again. */
+         * non-empty format, and they are not trivial to tease apart.  This
+         * issue is a known bug in the strftime() API.  What we do to cope is
+         * to assume that the reason is not enough space in the buffer, so
+         * increase it and try again. */
         bufsize *= 2;
 
         /* But don't just keep increasing the size indefinitely.  Stop when it
          * becomes obvious that the reason for failure is something besides not
-         * enough space.  This heuristic has long been in effect successfully.
-         * */
-    } while (bufsize < 100 * fmtlen);
+         * enough space.  The most likely largest expanding format is %c.  On
+         * khw's Linux box, the maximum result of this is 67 characters, in the
+         * km_KH locale.  If a new script comes along that uses 4 UTF-8 bytes
+         * per character, and with a similar expansion factor, that would be a
+         * 268:2 byte ratio, or a bit more than 128:1 = 2**7:1.  Some strftime
+         * implementations allow you to say %1000c to pad to 1000 bytes.  This
+         * shows that it is impossible to implement this without a heuristic
+         * (that can fail).  But it indicates we need to be generous in the
+         * upper limit before failing.  The previous heuristic used was too
+         * stingy.  Since the size doubles per iteration, it doesn't take many
+         * to reach the limit */
+    } while (bufsize < ((1 << 11) + 1) * fmtlen);
 
-    /* Here, strftime() returned 0, and it wasn't for lack of space.  There
-     * are two possible reasons:
+    /* Here, strftime() returned 0, and it likely wasn't for lack of space.
+     * There are two possible reasons:
      *
      * First is that the result is legitimately 0 length.  This can happen
      * when the format is precisely "%p".  That is the only documented format
