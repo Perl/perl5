@@ -1,10 +1,9 @@
 # Regenerate this file using:
-#     cd t
-#     ./perl -I../lib porting/customized.t --regen
+#     ./perl -Ilib t/porting/customized.t --regen
 AutoLoader cpan/AutoLoader/t/02AutoSplit.t bb90cda13b88599ad45de4b45799d5218afcb6d8
 ExtUtils::Constant cpan/ExtUtils-Constant/lib/ExtUtils/Constant/Base.pm 7560e1018f806db5689dee78728ccb8374aea741
 ExtUtils::Constant cpan/ExtUtils-Constant/t/Constant.t 165e9c7132b003fd192d32a737b0f51f9ba4999e
-Filter::Util::Call pod/perlfilter.pod 545265af2f45741a0e59eecdd0cfc0c9e490c1e8
+Filter::Util::Call pod/perlfilter.pod d1e217d0bc6083755b9017050b8724472c58275a
 Locale::Maketext::Simple cpan/Locale-Maketext-Simple/lib/Locale/Maketext/Simple.pm 57ed38905791a17c150210cd6f42ead22a7707b6
 Net::Ping dist/Net-Ping/t/000_load.t deff5dc2ca54dae28cb19d3631427db127279ac2
 Net::Ping dist/Net-Ping/t/001_new.t 7b24e05672e22edfe3e6b5cc0277f815efe557e5
