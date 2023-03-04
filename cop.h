@@ -529,15 +529,38 @@ string C<p>, creating the package if necessary.
 =for apidoc Am|RCPV *|RCPVx|char *pv
 Returns the RCPV structure (struct rcpv) for a refcounted
 string pv created with C<rcpv_new()>.
+No checks are performed to ensure that C<pv> was actually allocated
+with C<rcpv_new()>, it is the callers responsibility to ensure that
+this is the case.
 
 =for apidoc Am|RCPV *|RCPV_REFCOUNT|char *pv
 Returns the refcount for a pv created with C<rcpv_new()>. 
+No checks are performed to ensure that C<pv> was actually allocated
+with C<rcpv_new()>, it is the callers responsibility to ensure that
+this is the case.
+
+=for apidoc Am|RCPV *|RCPV_REFCNT_inc|char *pv
+Increments the refcount for a C<char *> pointer which was created
+with a call to C<rcpv_new()>. Same as calling rcpv_copy().
+No checks are performed to ensure that C<pv> was actually allocated
+with C<rcpv_new()>, it is the callers responsibility to ensure that
+this is the case.
+
+=for apidoc Am|RCPV *|RCPV_REFCNT_dec|char *pv
+Decrements the refcount for a C<char *> pointer which was created
+with a call to C<rcpv_new()>. Same as calling rcpv_free().
+No checks are performed to ensure that C<pv> was actually allocated
+with C<rcpv_new()>, it is the callers responsibility to ensure that
+this is the case.
 
 =for apidoc Am|RCPV *|RCPV_LEN|char *pv
 Returns the length of a pv created with C<rcpv_new()>.
 Note that this reflects the length of the string from the callers
 point of view, it does not include the mandatory null which is
 always injected at the end of the string by rcpv_new().
+No checks are performed to ensure that C<pv> was actually allocated
+with C<rcpv_new()>, it is the callers responsibility to ensure that
+this is the case.
 
 =cut
 */
@@ -558,6 +581,8 @@ typedef struct rcpv RCPV;
 #define RCPVx(pv_arg)       ((RCPV *)((pv_arg) - STRUCT_OFFSET(struct rcpv, pv)))
 #define RCPV_REFCOUNT(pv)   (RCPVx(pv)->refcount)
 #define RCPV_LEN(pv)        (RCPVx(pv)->len-1) /* len always includes space for a null */
+#define RCPV_REFCNT_inc(pv) rcpv_copy(pv)
+#define RCPV_REFCNT_dec(pv) rcpv_free(pv)
 
 #ifdef USE_ITHREADS
 

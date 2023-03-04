@@ -177,7 +177,8 @@ scope has the given name. C<name> must be a literal string.
 #define SAVECLEARSV(sv)             save_clearsv((SV**)&(sv))
 #define SAVEGENERICSV(s)            save_generic_svref((SV**)&(s))
 #define SAVEGENERICPV(s)            save_generic_pvref((char**)&(s))
-#define SAVERCPVFREE(s)             save_rcpv_free((char**)&(s))
+#define SAVERCPV(s)                 save_rcpv((char**)&(s))
+#define SAVEFREERCPV(s)             save_freercpv(s)
 #define SAVESHAREDPV(s)             save_shared_pvref((char**)&(s))
 #define SAVESETSVFLAGS(sv,mask,val) save_set_svflags(sv,mask,val)
 #define SAVEFREECOPHH(h)            save_pushptr((void *)(h), SAVEt_FREECOPHH)
@@ -231,7 +232,7 @@ scope has the given name. C<name> must be a literal string.
         SAVECOPFILE_x(c);               \
         CopFILE_debug((c),"SAVECOPFILE",0);   \
     } STMT_END
-#  define SAVECOPFILE_FREE_x(c) SAVERCPVFREE((c)->cop_file)
+#  define SAVECOPFILE_FREE_x(c) SAVERCPV((c)->cop_file)
 #  define SAVECOPFILE_FREE(c)           \
     STMT_START {                        \
         SAVECOPFILE_FREE_x(c);          \
