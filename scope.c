@@ -353,7 +353,7 @@ Saves and restores a refcounted string, similar to what
 save_generic_svref would do for a SV*. Can be used to restore
 a refcounted string to its previous state. Performs the 
 appropriate refcount counting so that nothing should leak
-or be prematurel freed.
+or be prematurely freed.
 
 =cut
  */
