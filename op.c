@@ -5147,7 +5147,37 @@ enum {
     FORBID_LOOPEX_DEFAULT = (1<<0),
 };
 
-static void walk_ops_forbid(pTHX_ OP *o, U32 flags, HV *permittedloops, const char *blockname)
+static void walk_ops_find_labels(pTHX_ OP *o, HV *gotolabels)
+{
+    switch(o->op_type) {
+        case OP_NEXTSTATE:
+        case OP_DBSTATE:
+            {
+                STRLEN label_len;
+                U32 label_flags;
+                const char *label_pv = CopLABEL_len_flags((COP *)o, &label_len, &label_flags);
+                if(!label_pv)
+                    break;
+
+                SV *labelsv = newSVpvn_flags(label_pv, label_len, label_flags);
+                SAVEFREESV(labelsv);
+
+                sv_inc(HeVAL(hv_fetch_ent(gotolabels, labelsv, TRUE, 0)));
+                break;
+            }
+    }
+
+    if(!(o->op_flags & OPf_KIDS))
+        return;
+
+    OP *kid = cUNOPo->op_first;
+    while(kid) {
+        walk_ops_find_labels(aTHX_ kid, gotolabels);
+        kid = OpSIBLING(kid);
+    }
+}
+
+static void walk_ops_forbid(pTHX_ OP *o, U32 flags, HV *permittedloops, HV *permittedgotos, const char *blockname)
 {
     bool is_loop = FALSE;
     SV *labelsv = NULL;
@@ -5162,8 +5192,20 @@ static void walk_ops_forbid(pTHX_ OP *o, U32 flags, HV *permittedloops, const ch
             goto forbid;
 
         case OP_GOTO:
-            /* TODO: This might be safe, depending on the target */
-            goto forbid;
+            {
+                /* OPf_STACKED means either dynamically computed label or `goto &sub` */
+                if(o->op_flags & OPf_STACKED)
+                    goto forbid;
+
+                SV *target = newSVpvn_utf8(cPVOPo->op_pv, strlen(cPVOPo->op_pv),
+                        cPVOPo->op_private & OPpPV_IS_UTF8);
+                SAVEFREESV(target);
+
+                if(hv_fetch_ent(permittedgotos, target, FALSE, 0))
+                    break;
+
+                goto forbid;
+            }
 
         case OP_NEXT:
         case OP_LAST:
@@ -5224,7 +5266,7 @@ forbid:
 
     OP *kid = cUNOPo->op_first;
     while(kid) {
-        walk_ops_forbid(aTHX_ kid, flags, permittedloops, blockname);
+        walk_ops_forbid(aTHX_ kid, flags, permittedloops, permittedgotos, blockname);
         kid = OpSIBLING(kid);
 
         if(is_loop) {
@@ -5280,7 +5322,12 @@ Perl_forbid_outofblock_ops(pTHX_ OP *o, const char *blockname)
     HV *looplabels = newHV();
     SAVEFREESV((SV *)looplabels);
 
-    walk_ops_forbid(aTHX_ o, FORBID_LOOPEX_DEFAULT, looplabels, blockname);
+    HV *gotolabels = newHV();
+    SAVEFREESV((SV *)gotolabels);
+
+    walk_ops_find_labels(aTHX_ o, gotolabels);
+
+    walk_ops_forbid(aTHX_ o, FORBID_LOOPEX_DEFAULT, looplabels, gotolabels, blockname);
 
     LEAVE;
 }

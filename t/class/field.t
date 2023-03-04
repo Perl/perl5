@@ -282,4 +282,19 @@ no warnings 'experimental::class';
         'Values for missing');
 }
 
+# field initialiser expressions permit `goto` in do {} blocks
+{
+    class Test13 {
+        field $forwards = do { goto HERE; HERE: 1 };
+        field $backwards = do { my $x; HERE: ; goto HERE if !$x++; 2 };
+
+        method values { return ($forwards, $backwards) }
+    }
+
+    ok(eq_array(
+        [Test13->new->values],
+        [1, 2],
+        'Values for goto inside do {} blocks in field initialisers'));
+}
+
 done_testing;
