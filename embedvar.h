@@ -320,6 +320,7 @@
 # define PL_tainted                             (vTHX->Itainted)
 # define PL_tainting                            (vTHX->Itainting)
 # define PL_threadhook                          (vTHX->Ithreadhook)
+# define PL_throwing                            (vTHX->Ithrowing)
 # define PL_tmps_floor                          (vTHX->Itmps_floor)
 # define PL_tmps_ix                             (vTHX->Itmps_ix)
 # define PL_tmps_max                            (vTHX->Itmps_max)

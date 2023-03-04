@@ -27,6 +27,13 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 Added `PL_throwing` interpreter variable
+
+A new interpreter variable named C<PL_throwing> allows code to inspect the
+reason for the current stack unwind in progress. This should be a more
+reliable method of detection than existing techniques such as
+C<SvTRUE(ERRSV)>.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
