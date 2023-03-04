@@ -4031,6 +4031,8 @@ S	|IO *	|openn_setup	|NN GV *gv				\
 				|NN char *savetype
 #endif /* defined(PERL_IN_DOIO_C) */
 #if defined(PERL_IN_DOOP_C)
+Ri	|SV *	|do_join_inner	|NN SV *lhs				\
+				|NN SV *rhs
 RS	|Size_t |do_trans_complex					\
 				|NN SV * const sv			\
 				|NN const OPtrans_map * const tbl

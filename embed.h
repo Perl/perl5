@@ -1160,6 +1160,7 @@
 #     define openn_setup(a,b,c,d,e,f)           S_openn_setup(aTHX_ a,b,c,d,e,f)
 #   endif /* defined(PERL_IN_DOIO_C) */
 #   if defined(PERL_IN_DOOP_C)
+#     define do_join_inner(a,b)                 S_do_join_inner(aTHX_ a,b)
 #     define do_trans_complex(a,b)              S_do_trans_complex(aTHX_ a,b)
 #     define do_trans_count(a,b)                S_do_trans_count(aTHX_ a,b)
 #     define do_trans_count_invmap(a,b)         S_do_trans_count_invmap(aTHX_ a,b)
