@@ -25,6 +25,7 @@
 # correct the problem.
 
 use Config;
+use ExtUtils::Manifest 'maniskip';
 BEGIN {
     @INC = '..' if -f '../TestInit.pm';
 }
@@ -85,14 +86,11 @@ SKIP: {
 
 SKIP: {
     find_git_or_skip(6);
+    my $skip = maniskip;
     my %seen; # De-dup ls-files output (can appear more than once)
     my @repo= grep {
         chomp();
-        !m{\.git_patch$} &&
-        !m{\.gitattributes$} &&
-        !m{\.gitignore$} &&
-        !m{\.mailmap$} &&
-        !m{^\.github/} &&
+        !$skip->($_) &&
         -e $_ &&
         !$seen{$_}++
     } `git ls-files`;
