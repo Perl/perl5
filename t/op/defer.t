@@ -6,7 +6,7 @@ BEGIN {
     set_up_inc('../lib');
 }
 
-plan 26;
+plan 28;
 
 use feature 'defer';
 no warnings 'experimental::defer';
@@ -249,6 +249,17 @@ no warnings 'experimental::defer';
     #   We should consider what the behaviour ought to be here
     # This test is happy for either exception to be seen, does not care which
     like($e, qr/^Oopsie \d\n/, 'defer block can throw exception during exception unwind');
+}
+
+# goto
+{
+    ok(defined eval 'sub { defer { goto HERE; HERE: 1; } }',
+        'goto forwards within defer {} is permitted') or
+        diag("Failure was $@");
+
+    ok(defined eval 'sub { defer { HERE: 1; goto HERE; } }',
+        'goto backwards within defer {} is permitted') or
+        diag("Failure was $@");
 }
 
 {
