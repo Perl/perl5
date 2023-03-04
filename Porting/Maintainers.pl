@@ -663,6 +663,17 @@ use File::Glob qw(:case);
         ],
     },
 
+    'IO::Socket::SSL' => {
+        'DISTRIBUTION' => 'SULLR/IO-Socket-SSL-2.080.tar.gz',
+        'FILES'        => q[cpan/IO-Socket-SSL],
+        'EXCLUDED'     => [
+            qr[^example/],
+            qr[^docs/],
+            q[README],
+            q[README.Win32],
+        ],
+    },
+
     'IO::Zlib' => {
         'DISTRIBUTION' => 'TOMHUGHES/IO-Zlib-1.14.tar.gz',
         'FILES'        => q[cpan/IO-Zlib],
@@ -882,6 +893,25 @@ use File::Glob qw(:case);
                 t/500_ping_icmp.t
                 t/501_ping_icmpv6.t
             }
+        ],
+    },
+
+    'Net::SSLeay' => {
+        'DISTRIBUTION' => 'CHRISN/Net-SSLeay-1.92.tar.gz',
+        'FILES'        => q[cpan/Net-SSLeay],
+        'EXCLUDED'     => [
+          qr[^README],
+          q[Credits],
+          q[QuickRef],
+          q[t/local/01_pod.t],
+          q[t/local/02_pod_coverage.t],
+          q[t/local/kwalitee.t],
+        ],
+        'CUSTOMIZED' => [
+            qw[
+                SSLeay.xs
+                Makefile.PL
+              ],
         ],
     },
 

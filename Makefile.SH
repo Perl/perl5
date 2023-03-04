@@ -209,6 +209,7 @@ extra_dep='
 cpan/Pod-Simple/pm_to_blib: dist/if/pm_to_blib
 ext/Pod-Functions/pm_to_blib: cpan/Pod-Simple/pm_to_blib cpan/Pod-Escapes/pm_to_blib pod/perlfunc.pod
 cpan/IO-Compress/pm_to_blib: dist/lib/pm_to_blib
+cpan/IO-Socket-SSL: cpan/Net-SSLeay/pm_to_blib
 '
 for f in $dynamic_ext; do
     : the dependency named here will never exist
@@ -1418,13 +1419,15 @@ _cleaner2:
 	-rmdir ext/B/lib
 	-rm -f dist/Time-HiRes/xdefine
 	rm -f so_locations $(LIBPERL_NONSHR)
-	-rmdir lib/version lib/threads lib/inc/ExtUtils lib/inc lib/encoding
-	-rmdir lib/autodie/exception lib/autodie/Scope lib/autodie lib/XS
-	-rmdir lib/Win32API lib/VMS lib/Unicode/Collate/Locale
-	-rmdir lib/Unicode/Collate/CJK lib/Unicode/Collate lib/Tie/Hash
-	-rmdir lib/Thread lib/Text lib/Test2/Util lib/Test2/Tools
-	-rmdir lib/Test2/IPC/Driver lib/Test2/IPC lib/Test2/Hub/Interceptor
-	-rmdir lib/Test2/Hub lib/Test2/Formatter lib/Test2/EventFacet/Info
+	-rmdir lib/version lib/threads lib/inc/Test/Net/SSLeay
+	-rmdir lib/inc/Test/Net lib/inc/Test lib/inc/ExtUtils lib/inc
+	-rmdir lib/encoding lib/autodie/exception lib/autodie/Scope
+	-rmdir lib/autodie lib/XS lib/Win32API lib/VMS
+	-rmdir lib/Unicode/Collate/Locale lib/Unicode/Collate/CJK
+	-rmdir lib/Unicode/Collate lib/Tie/Hash lib/Thread lib/Text
+	-rmdir lib/Test2/Util lib/Test2/Tools lib/Test2/IPC/Driver
+	-rmdir lib/Test2/IPC lib/Test2/Hub/Interceptor lib/Test2/Hub
+	-rmdir lib/Test2/Formatter lib/Test2/EventFacet/Info
 	-rmdir lib/Test2/EventFacet lib/Test2/Event/TAP lib/Test2/Event
 	-rmdir lib/Test2/API/InterceptResult lib/Test2/API lib/Test2
 	-rmdir lib/Test/use lib/Test/Tester lib/Test/Builder/Tester
@@ -1436,19 +1439,19 @@ _cleaner2:
 	-rmdir lib/TAP/Formatter lib/TAP lib/Sys/Syslog lib/Sys lib/Sub
 	-rmdir lib/Search lib/Scalar lib/Pod/Text lib/Pod/Simple
 	-rmdir lib/Pod/Perldoc lib/Pod/Html lib/PerlIO/via lib/PerlIO lib/Perl
-	-rmdir lib/Parse/CPAN lib/Parse lib/Params lib/Net/FTP lib/Module/Load
-	-rmdir lib/Module/CoreList lib/Module lib/Memoize lib/Math/BigRat
-	-rmdir lib/Math/BigInt lib/Math/BigFloat lib/Math lib/MIME
-	-rmdir lib/Locale/Maketext lib/Locale lib/List/Util lib/List
+	-rmdir lib/Parse/CPAN lib/Parse lib/Params lib/Net/SSLeay lib/Net/FTP
+	-rmdir lib/Module/Load lib/Module/CoreList lib/Module lib/Memoize
+	-rmdir lib/Math/BigRat lib/Math/BigInt lib/Math/BigFloat lib/Math
+	-rmdir lib/MIME lib/Locale/Maketext lib/Locale lib/List/Util lib/List
 	-rmdir lib/JSON/PP lib/JSON lib/IPC lib/IO/Uncompress/Adapter
-	-rmdir lib/IO/Uncompress lib/IO/Socket lib/IO/Compress/Zlib
-	-rmdir lib/IO/Compress/Zip lib/IO/Compress/Gzip lib/IO/Compress/Base
-	-rmdir lib/IO/Compress/Adapter lib/IO/Compress lib/IO
-	-rmdir lib/I18N/LangTags lib/I18N lib/Hash/Util lib/Hash lib/HTTP
-	-rmdir lib/Filter/Util lib/Filter lib/File/Spec lib/ExtUtils/Typemaps
-	-rmdir lib/ExtUtils/ParseXS lib/ExtUtils/MakeMaker/version
-	-rmdir lib/ExtUtils/MakeMaker lib/ExtUtils/Liblist
-	-rmdir lib/ExtUtils/Constant lib/ExtUtils/Command
+	-rmdir lib/IO/Uncompress lib/IO/Socket/SSL lib/IO/Socket
+	-rmdir lib/IO/Compress/Zlib lib/IO/Compress/Zip lib/IO/Compress/Gzip
+	-rmdir lib/IO/Compress/Base lib/IO/Compress/Adapter lib/IO/Compress
+	-rmdir lib/IO lib/I18N/LangTags lib/I18N lib/Hash/Util lib/Hash
+	-rmdir lib/HTTP lib/Filter/Util lib/Filter lib/File/Spec
+	-rmdir lib/ExtUtils/Typemaps lib/ExtUtils/ParseXS
+	-rmdir lib/ExtUtils/MakeMaker/version lib/ExtUtils/MakeMaker
+	-rmdir lib/ExtUtils/Liblist lib/ExtUtils/Constant lib/ExtUtils/Command
 	-rmdir lib/ExtUtils/CBuilder/Platform/Windows
 	-rmdir lib/ExtUtils/CBuilder/Platform lib/ExtUtils/CBuilder
 	-rmdir lib/Exporter lib/Encode/Unicode lib/Encode/MIME/Header

@@ -1,0 +1,104 @@
+TYPEMAP
+SSL_METHOD *	T_PTR
+const SSL_METHOD *	T_PTR
+SSL_CTX *	T_PTR
+const SSL_CTX *	T_PTR
+SSL_SESSION *	T_PTR
+SSL *		T_PTR
+RSA *		T_PTR
+DH *		T_PTR
+EC_KEY *        T_PTR
+const X509 *        T_PTR
+const X509_CRL *    T_PTR
+const X509_REQ *    T_PTR
+const X509_NAME *   T_PTR
+const EVP_CIPHER *  T_PTR
+const EVP_PKEY *    T_PTR
+const SSL *         T_PTR
+X509 *		T_PTR
+X509_CRL *	T_PTR
+X509_LOOKUP *	T_PTR
+X509_LOOKUP_METHOD * T_PTR
+X509_NAME *	T_PTR
+X509_NAME_ENTRY *   T_PTR
+X509_EXTENSION *	T_PTR
+X509_REQ *      T_PTR
+X509_PUBKEY *   T_PTR
+BIGNUM *        T_PTR
+BIO *           T_PTR
+const BIO_METHOD *    T_PTR
+BIO_METHOD *    T_PTR
+EVP_PKEY *      T_PTR
+const EVP_MD *  T_PTR
+EVP_MD *        T_PTR
+EVP_MD_CTX *    T_PTR
+const EVP_MD_CTX *      T_PTR
+CERT *          T_PTR
+LHASH *         T_PTR
+struct lhash_st_SSL_SESSION *	T_PTR
+struct cert_st * T_PTR
+X509_STORE_CTX * T_PTR
+ASN1_TIME *      T_PTR
+ASN1_OCTET_STRING *   T_PTR
+const ASN1_INTEGER *   T_PTR
+ASN1_INTEGER *   T_PTR
+ASN1_STRING *    T_PTR
+EVP_PKEY *       T_PTR
+const char *	 T_PV
+const unsigned char * T_PV
+CRYPTO_EX_new *  T_PTR
+CRYPTO_EX_dup *  T_PTR
+CRYPTO_EX_free * T_PTR
+SSL_CIPHER *     T_PTR
+const SSL_CIPHER *     T_PTR
+int *		 T_PTR
+COMP_METHOD *	 T_PTR
+X509_INFO *	T_PTR
+X509_STORE *	 T_PTR
+X509_NAME_STACK *   T_PTR
+X509_VERIFY_PARAM * T_PTR
+const X509_VERIFY_PARAM * T_PTR
+X509_POLICY_LEVEL * T_PTR
+X509_POLICY_TREE *  T_PTR
+X509_POLICY_NODE *  T_PTR
+const X509_POLICY_NODE *  T_PTR
+STACK_OF(X509) * T_PTR
+const STACK_OF(X509) * T_PTR
+STACK_OF(X509_INFO) * T_PTR
+const STACK_OF(X509_INFO) * T_PTR
+STACK_OF(X509_POLICY_NODE) *  T_PTR
+STACK_OF(POLICYQUALINFO) * T_PTR
+ASN1_OBJECT *       T_PTR
+const ASN1_OBJECT *       T_PTR
+STACK_OF(ASN1_OBJECT) * T_PTR
+ENGINE *         T_PTR
+OCSP_RESPONSE *	T_PTR
+OCSP_REQUEST *	T_PTR
+pem_password_cb *  T_PTR
+generate_key_cb *  T_PTR
+callback_ret_int * T_PTR
+callback_no_ret *  T_PTR
+cb_ssl_int_int_ret_void *  T_PTR
+cb_ssl_int_int_ret_RSA *  T_PTR
+cb_ssl_int_int_ret_DH  *  T_PTR
+perl_filehandle_t T_PERL_IO_HANDLE
+OSSL_LIB_CTX * T_PTR
+OSSL_PROVIDER * T_PTR
+const OSSL_PROVIDER * T_PTR
+
+uint64_t T_UINT64
+
+OUTPUT
+T_UINT64
+    sv_setuv($arg, (UV)$var);
+
+INPUT
+T_UINT64
+    $var = (uint64_t)SvUV($arg)
+
+T_PERL_IO_HANDLE
+	if ($arg && SvOK($arg) && SvROK($arg)) {
+		$var = ($type)PerlIO_fileno( IoIFP( sv_2io(SvRV($arg)) ) );
+	} else {
+		$var = ($type)SvIV($arg);
+	}

@@ -1,0 +1,2092 @@
+#!/usr/bin/env perl
+
+use 5.008001;
+use strict;
+use warnings;
+
+use English qw(
+    $EVAL_ERROR $EXCEPTIONS_BEING_CAUGHT $EXECUTABLE_NAME $OS_ERROR $RS
+    -no_match_vars
+);
+use File::Basename qw(dirname);
+use File::Spec::Functions qw( catfile splitpath );
+use File::Temp;
+use Getopt::Long qw(GetOptionsFromArray);
+use IPC::Run qw( start finish timeout );
+
+our $VERSION = '1.92';
+
+local $SIG{__DIE__} = sub {
+    my ($cause) = @_;
+
+    if ($EXCEPTIONS_BEING_CAUGHT) {
+        return;
+    }
+
+    print STDERR $cause, "\n";
+
+    exit 1;
+};
+
+my ( $args, $entities ) = eval { parse_options( \@ARGV ) }
+    or fatal( 'Error while parsing command line options', $EVAL_ERROR );
+
+eval {
+    check_openssl_version(
+        {
+            min_version       => '3.0.0-alpha7',
+            min_version_match => qr{^3\.(?!0\.0-alpha[1-6])},
+        }
+    );
+} or fatal( 'OpenSSL minimum version check failed', $EVAL_ERROR );
+
+my $tmp = eval {
+    File::Temp->newdir(
+        TEMPLATE => 'test-pki-XXXXXXXX',
+        TMPDIR   => 1,
+        CLEANUP  => 1,
+    );
+} or fatal( 'Could not create temporary working directory', $EVAL_ERROR );
+
+my $pki_config = eval { pki_config() }
+    or fatal( 'Could not load PKI configuration file', $EVAL_ERROR );
+
+my $pki_tree = eval { pki_tree() }
+    or fatal( 'Error while building PKI tree', $EVAL_ERROR );
+
+generate_tree(
+    $pki_tree,
+          @{ $entities }
+        ? { map { $_ => 1 } @{ $entities } }
+        : undef
+);
+
+
+sub parse_options {
+    my ($argv) = @_;
+
+    my $opts = {
+        'config'         => catfile( dirname(__FILE__), 'pki.cfg' ),
+        'openssl-binary' => 'openssl',
+        'output'         => undef,
+        'verbose'        => 0,
+    };
+
+    GetOptionsFromArray(
+        $argv,
+        $opts,
+        'config|c=s',
+        'openssl-binary|b=s',
+        'output|o=s',
+        'verbose|v',
+    );
+
+    if ( !-e $opts->{config} ) {
+        fatal("PKI configuration file $opts->{config} does not exist");
+    }
+
+    if ( !defined $opts->{output} ) {
+        fatal("an output directory must be given");
+    }
+
+    if ( !-d $opts->{output} ) {
+        fatal("output directory $opts->{output} does not exist");
+    }
+
+    return   wantarray
+           ? ( $opts, $argv )
+           : $opts;
+}
+
+sub pki_config {
+    open my $fh, '<:encoding(UTF-8)', $args->{config}
+        or fatal( $args->{config}, $OS_ERROR );
+
+    my $config = do {
+        local $RS = undef;
+        eval <$fh>
+            or do {
+                ( my $error = $EVAL_ERROR )
+                    =~ s{ at \(eval .+?\) }{ at $args->{config} }g;
+
+                fatal( 'syntax error', $error );
+            };
+    };
+
+    close $fh;
+
+    return $config;
+}
+
+sub pki_tree {
+    my $children = {};
+    my $tree     = {};
+
+    for my $entity ( keys %{$pki_config} ) {
+        my $issuer = $pki_config->{$entity}->{cert}->{issuer};
+
+        if ( !exists $children->{$entity} ) {
+            $children->{$entity} = {};
+        }
+
+        if ( defined $issuer ) {
+            if ( !exists $pki_config->{$issuer} ) {
+                fatal("entity '$entity': issuer '$issuer' is not defined");
+            }
+
+            $children->{$issuer}->{$entity} = $children->{$entity};
+        }
+        else {
+            $tree->{$entity} = $children->{$entity};
+        }
+    }
+
+    return $tree;
+}
+
+sub openssl_config {
+    my (%tmpl) = @_;
+
+    my $start = tell DATA;
+
+    my $config = do { local $RS = undef; <DATA> };
+
+    $config =~ s/\{\{ \s* (\w+) \s* \}\}/defined $tmpl{$1} ? $tmpl{$1} : ''/xeg;
+
+    seek DATA, $start, 0;
+
+    return $config;
+}
+
+sub subject_string {
+    my (@rdns) = @_;
+
+    my $string = q{};
+
+    while (@rdns) {
+        my ( $key, $value ) = ( shift @rdns, shift @rdns );
+
+        if (    !defined $key
+             || !defined $value )
+        {
+            fatal('invalid key/value pair given in subject');
+        }
+
+        # Certain characters in an RDN value must be escaped
+        $value =~ s{([,\#+<>;"=/])}{\\$1}g;
+
+        # Any leading space in an RDN value must be escaped
+        $value =~ s{^ }{\\ };
+
+        $string .= "/$key=$value";
+    }
+
+    return $string;
+}
+
+sub time_string {
+    my ($time) = @_;
+
+    if ( $time !~ m{^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$} ) {
+        fatal('invalid timestamp');
+    }
+
+    $time =~ s/[^\d]//g;
+    $time =~ s/Z$//;
+
+    return $time . 'Z';
+}
+
+sub short_time_string {
+    my ($time) = @_;
+
+    ( $time = time_string($time) ) =~ s/^\d{2}//;
+
+    return $time;
+}
+
+sub extensions_section {
+    my ($exts) = @_;
+
+    my @section;
+
+    for my $ext ( sort keys %{$exts} ) {
+        push @section,
+            sprintf '%s = %s',
+                $ext,
+                  ref $exts->{$ext} eq 'ARRAY'
+                ? join ',', @{ $exts->{$ext} }
+                : $exts->{$ext};
+    }
+
+    return join "\n", @section;
+}
+
+sub issuer_chain {
+    my ( $entity, $opts ) = @_;
+
+    my @chain = ($entity);
+
+    while ( defined $pki_config->{$entity}->{cert}->{issuer} ) {
+        push @chain, $pki_config->{$entity}->{cert}->{issuer};
+
+        $entity = $pki_config->{$entity}->{cert}->{issuer};
+    }
+
+    return \@chain;
+}
+
+sub generate_tree {
+    my ( $tree, $entities ) = @_;
+
+    for my $root ( sort keys %{$tree} ) {
+        if ( defined $entities ) {
+            if ( exists $entities->{$root} ) {
+                for my $child ( keys %{ $tree->{$root} } ) {
+                    $entities->{$child} = 1;
+                }
+
+                generate_entity( $root, $entities )
+                    or return 0;
+            }
+
+            generate_tree( $tree->{$root}, $entities )
+                or return 0;
+        }
+        else {
+            generate_entity($root)
+                or return 0;
+
+            generate_tree( $tree->{$root} )
+                or return 0;
+        }
+    }
+
+    return 1;
+}
+
+sub generate_entity {
+    my ($entity) = @_;
+
+    print "Generating PKI for entity '$entity'\n";
+
+    my $entity_cfg  = $pki_config->{$entity};
+    my $entity_root = catfile( $args->{output}, $entity );
+
+    if ( !-e "$entity_root.key.pem" ) {
+        print "\tPEM key: $entity_root.key.pem\n";
+
+        eval {
+            generate_key(
+                "$entity_root.key.pem",
+                {
+                    algorithm => $entity_cfg->{key}->{algorithm},
+                    size      => $entity_cfg->{key}->{size},
+                }
+            )
+        } or fatal( "Could not generate '$entity_root.key.pem'", $EVAL_ERROR );
+
+        print "\tEncrypted PEM key: $entity_root.key.enc.pem\n";
+
+        eval {
+            convert_key(
+                "$entity_root.key.pem",
+                "$entity_root.key.enc.pem",
+                {
+                    (
+                        exists $entity_cfg->{key}->{passphrase}
+                        ? ( passphrase => $entity_cfg->{key}->{passphrase} )
+                        : ()
+                    )
+                }
+            )
+        } or fatal( "Could not generate '$entity_root.key.enc.pem'",
+            $EVAL_ERROR );
+
+        print "\tDER key: $entity_root.key.der\n";
+
+        eval {
+            convert_key(
+                "$entity_root.key.pem",
+                "$entity_root.key.der",
+                {
+                    format => 'der',
+                }
+            );
+        } or fatal( "Could not generate '$entity_root.key.der'", $EVAL_ERROR );
+
+        print "\tEncrypted DER key: $entity_root.key.enc.der\n";
+
+        eval {
+            convert_key(
+                "$entity_root.key.pem",
+                "$entity_root.key.enc.der",
+                {
+                    format     => 'der',
+                    passphrase => 'test',
+                }
+            );
+        } or fatal( "Could not generate '$entity_root.key.enc.der'",
+            $EVAL_ERROR );
+    }
+
+    print "\tPEM CSR: $entity_root.csr.pem\n";
+
+    eval {
+        generate_csr(
+            "$entity_root.key.pem",
+            "$entity_root.csr.pem",
+            {
+                md_algorithm => $entity_cfg->{csr}->{md_algorithm},
+                subject      => $entity_cfg->{cert}->{subject},
+            }
+        );
+    } or fatal( "Could not generate '$entity_root.csr.pem'", $EVAL_ERROR );
+
+    print "\tDER CSR: $entity_root.csr.der\n";
+
+    eval {
+        convert_csr(
+            "$entity_root.csr.pem",
+            "$entity_root.csr.der",
+            {
+                format => 'der',
+            }
+        );
+    } or fatal( "Could not generate '$entity_root.csr.der'", $EVAL_ERROR );
+
+    print "\tPEM certificate: $entity_root.cert.pem\n";
+
+    my $issuer_root =   defined $entity_cfg->{cert}->{issuer}
+                      ? catfile( $args->{output}, $entity_cfg->{cert}->{issuer} )
+                      : $entity_root;
+
+    my $issuer_cfg  =   defined $entity_cfg->{cert}->{issuer}
+                      ? $pki_config->{ $entity_cfg->{cert}->{issuer} }
+                      : undef;
+
+    my @issuer_opts =   defined $entity_cfg->{cert}->{issuer}
+                      ? (
+                            issuer_cert_path => "$issuer_root.cert.pem",
+                        )
+                      : ();
+
+    eval {
+        my $valid_from = time_string( $entity_cfg->{cert}->{valid_from} )
+            or fatal( 'valid_from', $EVAL_ERROR );
+
+        my $valid_until = time_string( $entity_cfg->{cert}->{valid_until} )
+            or fatal( 'valid_until', $EVAL_ERROR );
+
+        generate_cert(
+            "$entity_root.csr.pem",
+            "$issuer_root.key.pem",
+            "$entity_root.cert.pem",
+            {
+                extensions   => $entity_cfg->{cert}->{extensions},
+                md_algorithm => $entity_cfg->{cert}->{md_algorithm},
+                purpose      => $entity_cfg->{cert}->{purpose},
+                serial       => $entity_cfg->{cert}->{serial},
+                valid_from   => $valid_from,
+                valid_until  => $valid_until,
+                @issuer_opts,
+            }
+        );
+    } or fatal( "Could not generate '$entity_root.cert.pem'", $EVAL_ERROR );
+
+    print "\tDER certificate: $entity_root.cert.der\n";
+
+    eval {
+        convert_cert(
+            "$entity_root.cert.pem",
+            "$entity_root.cert.der",
+            {
+                format => 'der',
+            }
+        );
+    } or fatal( "Could not generate '$entity_root.cert.der'", $EVAL_ERROR );
+
+    print "\tCertificate info: $entity_root.cert.dump\n";
+
+    eval {
+        dump_cert_info(
+            "$entity_root.cert.pem",
+            "$entity_root.cert.dump"
+        );
+    } or fatal( "Could not generate '$entity_root.cert.dump'", $EVAL_ERROR );
+
+    print "\tPEM certificate chain: $entity_root.certchain.pem\n";
+
+    eval {
+        generate_cert_chain(
+            [
+                map
+                    { catfile( $args->{output}, "$_.cert.pem" ) }
+                    @{ issuer_chain( $entity ) }
+            ],
+            "$entity_root.certchain.pem"
+        );
+    } or fatal( "Could not generate '$entity_root.certchain.pem'",
+        $EVAL_ERROR );
+
+    print "\tDER certificate chain: $entity_root.certchain.der\n";
+
+    eval {
+        generate_cert_chain(
+            [
+                map
+                    { catfile( $args->{output}, "$_.cert.der" ) }
+                    @{ issuer_chain( $entity ) }
+            ],
+            "$entity_root.certchain.der"
+        )
+    } or fatal( "Could not generate '$entity_root.certchain.der'",
+        $EVAL_ERROR );
+
+    if ( exists $entity_cfg->{cert}->{revoke_reason} ) {
+        print "\tPEM CRL for signing entity: $issuer_root.crl.pem\n";
+
+        eval {
+            revoke_cert(
+                "$entity_root.cert.pem",
+                "$issuer_root.key.pem",
+                "$issuer_root.cert.pem",
+                "$issuer_root.crl.pem",
+                {
+                    crl_last_update  => $issuer_cfg->{crl}->{last_update},
+                    crl_md_algorithm => $issuer_cfg->{crl}->{md_algorithm},
+                    crl_next_update  => $issuer_cfg->{crl}->{next_update},
+                    crl_number       => $issuer_cfg->{crl}->{number},
+                    reason           => $entity_cfg->{cert}->{revoke_reason},
+                    time             => $entity_cfg->{cert}->{revoke_time},
+                }
+            );
+        } or fatal( "Could not generate '$issuer_root.crl.pem'", $EVAL_ERROR );
+
+        print "\tDER CRL for signing entity: $issuer_root.crl.der\n";
+
+        eval {
+            convert_crl(
+                "$issuer_root.crl.pem",
+                "$issuer_root.crl.der",
+                {
+                    format => 'der',
+                }
+            );
+        } or fatal( "Could not generate '$issuer_root.crl.der'", $EVAL_ERROR );
+    }
+
+    my @extra_certs = map
+        { catfile( $args->{output}, "$_.cert.pem" ) }
+        @{ issuer_chain( $entity ) };
+
+    # The certificate for this entity is at the start of the chain, but we just
+    # want the certificates in the issuer chain
+    shift @extra_certs;
+
+    my @extra_certs_opts =   @extra_certs
+                           ? (
+                                 extra_certs => \@extra_certs,
+                             )
+                           : ();
+
+    print "\tPKCS#12 archive: $entity_root.p12\n";
+
+    eval {
+        generate_pkcs12(
+            "$entity_root.key.pem",
+            "$entity_root.cert.pem",
+            "$entity_root.p12",
+            {
+                name => "$entity: unencrypted, no certificate chain",
+            }
+        );
+    } or fatal( "Could not generate '$entity_root.p12'", $EVAL_ERROR );
+
+    print "\tPKCS#12 archive with certificate chain: ",
+        "$entity_root.certchain.p12\n";
+
+    eval {
+        generate_pkcs12(
+            "$entity_root.key.pem",
+            "$entity_root.cert.pem",
+            "$entity_root.certchain.p12",
+            {
+                name => "$entity: unencrypted, certificate chain",
+                @extra_certs_opts,
+            }
+        );
+    } or fatal( "Could not generate '$entity_root.certchain.p12'",
+        $EVAL_ERROR );
+
+    print "\tEncrypted PKCS#12 archive: $entity_root.enc.p12\n";
+
+    eval {
+        generate_pkcs12(
+            "$entity_root.key.pem",
+            "$entity_root.cert.pem",
+            "$entity_root.enc.p12",
+            {
+                name       => "$entity: encrypted, no certificate chain",
+                passphrase => $entity_cfg->{pkcs12}->{passphrase},
+            }
+        );
+    } or fatal( "Could not generate '$entity_root.enc.p12'", $EVAL_ERROR );
+
+    print "\tEncrypted PKCS#12 archive with certificate chain: ",
+        "$entity_root.certchain.enc.p12\n";
+
+    eval {
+        generate_pkcs12(
+            "$entity_root.key.pem",
+            "$entity_root.cert.pem",
+            "$entity_root.certchain.enc.p12",
+            {
+                name       => "$entity: encrypted, certificate chain",
+                passphrase => $entity_cfg->{pkcs12}->{passphrase},
+                @extra_certs_opts,
+            }
+        );
+    } or fatal( "Could not generate '$entity_root.certchain.enc.p12'",
+        $EVAL_ERROR );
+
+    return 1;
+}
+
+sub generate_key {
+    my ( $out_key_path, $params ) = @_;
+
+    my $algorithms = {
+        'ec' => {
+            openssl_name => 'EC',
+        },
+        'ed25519' => {
+            openssl_name => 'ED25519',
+        },
+        'ed448' => {
+            openssl_name => 'ED448',
+        },
+        'rsa' => {
+            openssl_name => 'RSA',
+            size_param   => 'rsa_keygen_bits',
+        },
+        'rsa-pss' => {
+            openssl_name => 'RSA-PSS',
+            size_param   => 'rsa_keygen_bits',
+        },
+        'x25519' => {
+            openssl_name => 'X25519',
+        },
+        'x448' => {
+            openssl_name => 'X448',
+        },
+    };
+
+    if ( !exists $params->{algorithm} ) {
+        fatal('missing key algorithm');
+    }
+
+    if ( !exists $algorithms->{ $params->{algorithm} } ) {
+        fatal("unknown key algorithm '$params->{algorithm}'");
+    }
+
+    my $algorithm = $algorithms->{ $params->{algorithm} };
+    my @genpkey_opts;
+
+    if ( exists $algorithm->{size_param} ) {
+        if ( !exists $params->{size} ) {
+            fatal("key algorithm '$params->{algorithm}' requires a key size");
+        }
+
+        @genpkey_opts = (
+            '-pkeyopt', "$algorithm->{size_param}:$params->{size}"
+        );
+    }
+
+    # "openssl genpkey" exports keys in PKCS#8 format (which isn't recognised by
+    # OpenSSL 0.9.8), and there's no way to export in traditional SSLeay format
+    # directly - write the PKCS#8-formatted key to a temporary file, and then
+    # use "openssl pkey" to convert it to SSLeay format
+    my $out_key_name = ( splitpath($out_key_path) )[2];
+    my $tmp_key_path = catfile( $tmp->dirname(), $out_key_name );
+
+    openssl_cmd(
+        [
+            'genpkey',
+            '-out',       $tmp_key_path,
+            '-algorithm', $algorithm->{openssl_name},
+            @genpkey_opts,
+        ]
+    );
+
+    return openssl_cmd(
+        [
+            'pkey',
+            '-in',  $tmp_key_path,
+            '-out', $out_key_path,
+            '-traditional',
+        ]
+    );
+}
+
+sub convert_key {
+    my ( $in_key_path, $out_key_path, $params ) = @_;
+
+    my $formats = {
+        pem => 'PEM',
+        der => 'DER',
+    };
+
+    ( my $in_format = $in_key_path ) =~ s{.*\.}{};
+
+    my $out_format = delete $params->{format} || 'pem';
+
+    if ( !exists $formats->{$in_format} ) {
+        fatal("unknown key input format '$in_format'");
+    }
+
+    if ( !exists $formats->{$out_format} ) {
+        fatal("unknown key output format '$out_format'");
+    }
+
+    my @encrypt_opts =   exists $params->{passphrase}
+                       ? (
+                             '-aes128',
+                             '-passout', 'stdin',
+                         )
+                       : ();
+
+    return openssl_cmd(
+        [
+            'pkey',
+            '-in',      $in_key_path,
+            '-inform',  $formats->{$in_format},
+            '-out',     $out_key_path,
+            '-outform', $formats->{$out_format},
+            '-traditional',
+            @encrypt_opts,
+        ],
+        $params->{passphrase}
+    );
+}
+
+sub generate_csr {
+    my ( $in_key_path, $out_csr_path, $params ) = @_;
+
+    my $formats = {
+        pem => 'PEM',
+        der => 'DER',
+    };
+
+    my $format = delete $params->{format} || 'pem';
+
+    if ( !exists $formats->{$format} ) {
+        fatal("unknown CSR output format '$format'");
+    }
+
+    if ( !exists $params->{md_algorithm} ) {
+        fatal('missing message digest algorithm');
+    }
+
+    my $digest_opt = '-' . $params->{md_algorithm};
+
+    return openssl_cmd(
+        [
+            'req',
+            '-config',  '-',
+            '-new',
+            '-key',     $in_key_path,
+            '-out',     $out_csr_path,
+            '-outform', $formats->{$format},
+            '-subj',    subject_string( @{ $params->{subject} } ),
+            '-multivalue-rdn',
+            $digest_opt,
+        ],
+        openssl_config()
+    );
+}
+
+sub convert_csr {
+    my ( $in_csr_path, $out_csr_path, $params ) = @_;
+
+    my $formats = {
+        pem => 'PEM',
+        der => 'DER',
+    };
+
+    ( my $in_format = $in_csr_path ) =~ s{.*\.}{};
+
+    my $out_format = delete $params->{format} || 'pem';
+
+    if ( !exists $formats->{$in_format} ) {
+        fatal("unknown CSR input format '$in_format'");
+    }
+
+    if ( !exists $formats->{$out_format} ) {
+        fatal("unknown CSR output format '$out_format'");
+    }
+
+    return openssl_cmd(
+        [
+            'req',
+            '-in',      $in_csr_path,
+            '-inform',  $formats->{$in_format},
+            '-out',     $out_csr_path,
+            '-outform', $formats->{$out_format},
+        ]
+    );
+}
+
+sub generate_cert {
+    my ( $in_csr_path, $issuer_key_path, $out_cert_path, $params ) = @_;
+
+    if ( !exists $params->{md_algorithm} ) {
+        fatal('missing message digest algorithm');
+    }
+
+    my @signing_opts =   exists $params->{issuer_cert_path}
+                       ? (
+                             '-cert', $params->{issuer_cert_path},
+                         )
+                       : (
+                             '-selfsign',
+                             '-cert', 'ignored',
+                         );
+
+    my $tmp_root = do {
+        my $file = ( splitpath($issuer_key_path) )[2];
+
+        $file =~ s/(?:\.key)?\.(?:pem|der)$//;
+
+        my $dir = catfile( $tmp->dirname(), $file );
+
+        if ( !-d $dir ) {
+            mkdir $dir
+                or fatal( "could not create directory $dir", $OS_ERROR );
+        }
+
+        $dir;
+    };
+
+    my $serial_file = catfile( $tmp_root, 'serial' );
+    open my $serial_fh, '>', $serial_file
+        or fatal( "could not write serial file $serial_file", $OS_ERROR );
+    printf {$serial_fh} '%02x', $params->{serial};
+    close $serial_fh;
+
+    my $db_file = catfile( $tmp_root, 'db' );
+    open my $db_fh, '>>', $db_file
+        or fatal( "could not touch database file $db_file", $OS_ERROR );
+    close $db_fh;
+
+    return openssl_cmd(
+        [
+            'ca',
+            '-verbose',
+            '-batch',
+            '-config',     '-',
+            '-name',       'ca_conf',
+            '-in',         $in_csr_path,
+            '-out',        $out_cert_path,
+            '-keyfile',    $issuer_key_path,
+            '-startdate',  $params->{valid_from},
+            '-enddate',    $params->{valid_until},
+            '-md',         $params->{md_algorithm},
+            '-extensions', 'exts_' . $params->{purpose},
+            '-notext',
+            '-utf8',
+            '-multivalue-rdn',
+            @signing_opts,
+        ],
+        openssl_config(
+            extensions => (
+                  exists $params->{extensions}
+                ? extensions_section( $params->{extensions} )
+                : q{}
+            ),
+            certs_path    => $tmp_root,
+            database_path => $db_file,
+            serial_path   => $serial_file,
+        )
+    );
+}
+
+sub convert_cert {
+    my ( $in_cert_path, $out_cert_path, $params ) = @_;
+
+    my $formats = {
+        pem => 'PEM',
+        der => 'DER',
+    };
+
+    ( my $in_format = $in_cert_path ) =~ s{.*\.}{};
+
+    my $out_format = delete $params->{format} || 'pem';
+
+    if ( !exists $formats->{$in_format} ) {
+        fatal("unknown certificate input format '$in_format'");
+    }
+
+    if ( !exists $formats->{$out_format} ) {
+        fatal("unknown certificate output format '$out_format'");
+    }
+
+    return openssl_cmd(
+        [
+            'x509',
+            '-in',      $in_cert_path,
+            '-inform',  $formats->{$in_format},
+            '-out',     $out_cert_path,
+            '-outform', $formats->{$out_format},
+        ]
+    );
+}
+
+sub dump_cert_info {
+    my ( $in_cert_path, $out_dump_path ) = @_;
+
+    my $cwd = dirname(__FILE__);
+
+    open my $out_fh, '>', $out_dump_path
+        or fatal( "could not write $out_dump_path", $OS_ERROR );
+
+    my $run = eval {
+        start(
+            [
+                $EXECUTABLE_NAME,
+                catfile( $cwd, '..', 'examples', 'x509_cert_details.pl' ),
+                '-dump',
+                '-pem',  $in_cert_path
+            ],
+            '>',
+            sub {
+                print {$out_fh} $_[0];
+            },
+            '2>',
+            sub {
+                if ( $args->{verbose} ) {
+                    printf "[x509_cert_details.pl stderr] %s\n", $_[0];
+                }
+            }
+        );
+    } or fatal( 'could not run examples/x509_cert_details.pl', $EVAL_ERROR );
+
+    $run->finish();
+
+    close $out_fh;
+
+    if ( $run->result() != 0 ) {
+        fatal( 'examples/x509_cert_details.pl exited with exit code '
+               . $run->result() );
+    }
+
+    return 1;
+}
+
+sub generate_cert_chain {
+    my ( $in_cert_paths, $out_cert_path ) = @_;
+
+    open my $out_fh, '>', $out_cert_path
+        or fatal( "could not write certificate chain file $out_cert_path",
+            $OS_ERROR );
+
+    for my $in ( @{$in_cert_paths} ) {
+        open my $in_fh, '<', $in
+            or fatal( "could not read certificate file $in", $OS_ERROR );
+
+        my $cert = do { local $RS = undef; <$in_fh> };
+
+        print {$out_fh} $cert;
+
+        close $in_fh;
+    }
+
+    close $out_fh;
+
+    return 1;
+}
+
+sub revoke_cert {
+    my ( $in_cert_path, $issuer_key_path, $issuer_cert_path, $out_crl_path,
+        $params ) = @_;
+
+    my $tmp_root = do {
+        my ( undef, undef, $file ) = splitpath($issuer_key_path);
+
+        $file =~ s/(?:\.key)?\.(?:pem|der)$//;
+
+        my $dir = catfile( $tmp->dirname(), $file );
+
+        if ( !-d $dir ) {
+            mkdir $dir
+                or fatal( "could not create directory $dir", $OS_ERROR );
+        }
+
+        $dir;
+    };
+
+    my $serial_file = catfile( $tmp_root, 'serial' );
+
+    my ( $stdout, $stderr ) = openssl_cmd(
+        [
+            'x509',
+            '-in',     $in_cert_path,
+            '-noout',
+            '-serial',
+        ]
+    );
+
+    ( my $in_cert_serial = join "\n", @{$stdout} ) =~ s/^serial=//;
+
+    if ( $in_cert_serial !~ /^[\da-f]+$/i ) {
+        fatal('could not get serial number for revoked certificate');
+    }
+
+    my $db_file = catfile( $tmp_root, 'db' );
+    open my $db_fh, '<', $db_file
+        or fatal( "could not read database file $db_file", $OS_ERROR );
+
+    my @entries;
+
+    while ( defined( my $entry = <$db_fh> ) ) {
+        chomp $entry;
+        my @fields = split /\t/, $entry;
+
+        if ( $fields[3] eq $in_cert_serial ) {
+            $fields[0] = 'R';
+            $fields[2] = short_time_string( $params->{time} );
+
+            if ( defined $params->{reason} ) {
+                $fields[2] .= ',' . $params->{reason};
+            }
+        }
+
+        push @entries, join "\t", @fields;
+    }
+
+    close $db_fh;
+
+    open $db_fh, '>', $db_file
+        or fatal( "could not write database file $db_file", $OS_ERROR );
+
+    for my $entry (@entries) {
+        print {$db_fh} $entry, "\n";
+    }
+
+    close $db_fh;
+
+    my $crl_number_file = catfile( $tmp_root, 'crl_number' );
+    open my $crl_number_fh, '>', $crl_number_file
+    or fatal( "could not write CRL number file $crl_number_file", $OS_ERROR );
+    printf {$crl_number_fh} '%02x', $params->{crl_number};
+    close $crl_number_fh;
+
+    return openssl_cmd(
+        [
+            'ca',
+            '-verbose',
+            '-batch',
+            '-gencrl',
+            '-config',         '-',
+            '-name',           'ca_conf',
+            '-keyfile',        $issuer_key_path,
+            '-cert',           $issuer_cert_path,
+            '-out',            $out_crl_path,
+            '-crl_lastupdate', time_string( $params->{crl_last_update} ),
+            '-crl_nextupdate', time_string( $params->{crl_next_update} ),
+            '-md',             $params->{crl_md_algorithm},
+        ],
+        openssl_config(
+            certs_path      => $tmp_root,
+            crl_number_path => $crl_number_file,
+            database_path   => $db_file,
+            serial_path     => $serial_file,
+        )
+    );
+}
+
+sub convert_crl {
+    my ( $in_crl_path, $out_crl_path, $params ) = @_;
+
+    my $formats = {
+        pem => 'PEM',
+        der => 'DER',
+    };
+
+    ( my $in_format = $in_crl_path ) =~ s{.*\.}{};
+
+    my $out_format = delete $params->{format} || 'pem';
+
+    if ( !exists $formats->{$in_format} ) {
+        fatal("unknown CRL input format '$in_format'");
+    }
+
+    if ( !exists $formats->{$out_format} ) {
+        fatal("unknown CRL output format '$out_format'");
+    }
+
+    return openssl_cmd(
+        [
+            'crl',
+            '-in',      $in_crl_path,
+            '-inform',  $formats->{$in_format},
+            '-out',     $out_crl_path,
+            '-outform', $formats->{$out_format},
+        ]
+    );
+}
+
+sub generate_pkcs12 {
+    my ( $in_key_path, $in_cert_path, $out_p12_path, $params ) = @_;
+
+    my $cert_chain_path;
+
+    if ( exists $params->{extra_certs} ) {
+        my ( undef, undef, $file ) = splitpath($in_key_path);
+
+        $file =~ s/(?:\.key)?\.(?:pem|der)$//;
+
+        my $dir = catfile( $tmp->dirname(), $file );
+
+        if ( !-d $dir ) {
+            mkdir $dir
+                or fatal( 'could not create directory $dir', $OS_ERROR );
+        }
+
+        $cert_chain_path = catfile( $dir, 'pkcs12_cert_chain.pem' );
+
+        generate_cert_chain(
+            $params->{extra_certs},
+            $cert_chain_path
+        );
+    }
+
+    my @name_opt =   exists $params->{name}
+                   ? (
+                         '-name', $params->{name},
+                     )
+                   : ();
+
+    my @cert_opt =   exists $params->{extra_certs}
+                   ? (
+                         '-certfile', $cert_chain_path,
+                     )
+                   : ();
+
+    my @encrypt_opts =   exists $params->{passphrase}
+                       ? (
+                             '-passout', 'stdin',
+                             '-keypbe',  'pbeWithSHA1And3-KeyTripleDES-CBC',
+                             '-certpbe', 'pbeWithSHA1And3-KeyTripleDES-CBC',
+                         )
+                       : (
+                             '-passout', 'pass:',
+                             '-keypbe',  'NONE',
+                             '-certpbe', 'NONE',
+                             '-nomaciter',
+                         );
+
+    return openssl_cmd(
+        [
+            'pkcs12',
+            '-export',
+            '-inkey',     $in_key_path,
+            '-in',        $in_cert_path,
+            '-out',       $out_p12_path,
+            '-rand',      $in_key_path,
+            '-no-CAfile',
+            '-no-CApath',
+            @name_opt,
+            @cert_opt,
+            @encrypt_opts,
+        ],
+        $params->{passphrase}
+    );
+}
+
+sub check_openssl_version {
+    my ($params) = @_;
+
+    my $min_version = delete $params->{min_version}
+        or fatal('missing minimum OpenSSL version');
+
+    my $min_version_match = delete $params->{min_version_match}
+        or fatal('missing minimum OpenSSL version regex');
+
+    my ( $stdout, $stderr );
+
+    my $run = eval {
+        start(
+            [ 'openssl', 'version' ],
+            \undef,
+            \$stdout,
+            \$stderr,
+            timeout( 3 )
+        );
+    } or fatal( "could not run `openssl version`", $EVAL_ERROR );
+
+    $run->finish();
+
+    if ( $run->result() != 0 ) {
+        fatal( "`openssl version` exited with exit code " . $run->result() );
+    }
+
+    my ($openssl_version) = $stdout =~ m{^OpenSSL (.+?) }
+        or fatal("`openssl` is not the OpenSSL command line utility");
+
+    if ( $openssl_version !~ $min_version_match ) {
+        fatal( "OpenSSL >= $min_version required, but `openssl` is version "
+               . $openssl_version );
+    }
+
+    my $net_ssleay_version = eval {
+        use Net::SSLeay;
+        Net::SSLeay::SSLeay_version( Net::SSLeay::SSLEAY_VERSION() );
+    } or fatal( 'could not load Net::SSLeay', $EVAL_ERROR );
+
+    ($net_ssleay_version) = $net_ssleay_version =~ m{^OpenSSL (.+?) }
+        or fatal('Net::SSLeay was not built against OpenSSL');
+
+    if ( $net_ssleay_version !~ $min_version_match ) {
+        fatal( "Net::SSLeay must be built against OpenSSL >= $min_version, but "
+               . "it is built against version $net_ssleay_version" );
+    }
+
+    return 1;
+}
+
+sub openssl_cmd {
+    my ( $opts, $stdin ) = @_;
+
+    my $wantarray = wantarray;
+
+    my $stdout = [];
+    my $stderr = [];
+
+    my $print = sub {
+        my ( $prefix, $data ) = @_;
+
+        for my $line ( split /\r?\n/, $data ) {
+            printf "[OpenSSL %s] %s\n", $prefix, $line;
+        }
+    };
+
+    if ( $args->{verbose} ) {
+        print "Running `openssl ", join( q{ }, @{$opts} ), "`\n";
+    }
+
+    my $cmd        = [ 'openssl', @{$opts} ];
+    my $cmd_string = join ' ', @{$cmd};
+
+    my $run = eval {
+        start(
+            $cmd,
+            \$stdin,
+            sub {
+                if ($wantarray) {
+                    chomp $_[0];
+                    push @{$stdout}, $_[0];
+                }
+                elsif ( $args->{verbose} ) {
+                    $print->( 'stdout', $_[0] );
+                }
+            },
+            sub {
+                if ($wantarray) {
+                    chomp $_[0];
+                    push @{$stderr}, $_[0];
+                }
+                elsif ( $args->{verbose} ) {
+                    $print->( 'stderr', $_[0] );
+                }
+            }
+        );
+    } or fatal( "failed to run `$cmd_string`", $EVAL_ERROR );
+
+    $run->finish();
+
+    if ( $run->result() != 0 ) {
+        fatal( "`$cmd_string` exited with exit code " . $run->result() );
+    }
+
+    return   $wantarray
+           ? ( $stdout, $stderr )
+           : 1;
+}
+
+sub fatal {
+    my ( $message, $cause ) = @_;
+
+    die Error->new( $message, $cause );
+}
+
+package Error;
+
+use overload (
+    q{""} => sub {
+        my ($self) = @_;
+
+        return   defined $self->{cause}
+               ? "$self->{message}: $self->{cause}"
+               : $self->{message};
+    },
+    fallback => 1,
+);
+
+sub new {
+    my ( $class, $message, $cause ) = @_;
+
+    return bless {
+        message => $message,
+        cause   => $cause,
+    }, $class;
+}
+
+package main;
+
+=pod
+
+=encoding utf-8
+
+=head1 NAME
+
+C<generate-test-pki> - Generate a PKI for the Net-SSLeay test suite
+
+=head1 VERSION
+
+This document describes version 1.92 of C<generate-test-pki>.
+
+=head1 USAGE
+
+    # With openssl >= 3.0.0-alpha7 in PATH, and a version of Net::SSLeay built
+    # against OpenSSL >= 3.0.0-alpha7 in PERL5LIB:
+    generate-test-pki \
+        -c pki.cfg \
+        -o pki-output-dir
+
+=head1 DESCRIPTION
+
+The Net-SSLeay test suite relies on a dummy X.509 public key infrastructure
+(PKI). Occasionally, this PKI needs to be modified - for example, to add a
+certificate with certain properties when writing a new test - but maintaining it
+by hand is time-consuming, difficult, and error-prone.
+
+C<generate-test-pki> simplifies maintenance of the PKI by generating it from
+scratch using the OpenSSL command line utility, based on the structure defined
+in a simple configuration file. The files it generates can then be used in
+Net-SSLeay test scripts.
+
+=head1 DEPENDENCIES
+
+C<generate-test-pki> requires at least version 3.0.0-alpha7 of the OpenSSL
+command line utility to be present either in I<PATH> as C<openssl> or at the
+path given by the B<-b> option (see L</OPTIONS>). Additionally, the first
+occurrance of Net::SSLeay in I<PERL5LIB> must be built against at least version
+3.0.0-alpha7 of OpenSSL.
+
+LibreSSL is not supported, since its command line utility lacks some of the
+functionality relied on by this program.
+
+=head1 OPTIONS
+
+C<generate-test-pki> accepts the following command line options:
+
+=over 4
+
+=item *
+
+B<-b I<FILE>>, B<--openssl-binary=I<FILE>>: the path to the OpenSSL binary to
+invoke when performing PKI generation operations. Defaults to C<openssl> (i.e.
+the first occurrence of C<openssl> in I<PATH>).
+
+=item *
+
+B<-c I<FILE>>, B<--config=I<FILE>>: the path to the configuration file defining
+the PKI to generate. See L</CONFIGURATION> for a description of the expected
+format.
+
+=item *
+
+B<-o I<DIR>>, B<--output=I<DIR>>: the path to the directory to which the PKI's
+files (see L</OUTPUT>) will be written. The directory must already exist.
+Existing files whose names collide with files written by this program will be
+overwritten without warning; other existing files will be left alone.
+
+=item *
+
+B<-v>, B<--verbose>: show the output of C<openssl> and
+C<examples/x509_cert_details.pl> when they are invoked.
+
+=back
+
+=head1 CONFIGURATION
+
+The configuration file is an anonymous Perl hash whose keys define the names of
+the PKI's entities and whose values define each entity's properties:
+
+    {
+        'entity-name' => {
+            'key'    => { ... },  # Private key properties
+            'csr'    => { ... },  # Certificate signing request (CSR) properties
+            'cert'   => { ... },  # Certificate properties
+            'pkcs12' => { ... },  # PKCS#12 archive properties
+            'crl'    => { ... },  # Certificate revocation list (CRL) properties
+                                  # (optional; for CA entities only)
+        },
+        ...
+    }
+
+=head2 key
+
+An anonymous hash defining properties relating to the entity's private key.
+
+Valid keys:
+
+=over 4
+
+=item *
+
+B<algorithm>: the public key algorithm to use when generating the private key.
+Must be one of C<ec>, C<ed25519>, C<ed448>, C<rsa>, C<rsa-pss>, C<x25519>, or
+C<x448>.
+
+=item *
+
+B<passphrase>: the passphrase under which to encrypt the private key. Used only
+when generating encrypted forms of the key.
+
+=item *
+
+B<size>: the size of the public key to generate, in bits. Used only when
+B<algorithm> is C<ec>, C<rsa>, or C<rsa-pss>.
+
+=back
+
+=head2 csr
+
+An anonymous hash defining properties relating to the entity's PKCS#10
+certificate signing request (CSR). The value of the B<subject> key in L</cert>
+will be used to generate a subject name for the CSR.
+
+Valid keys:
+
+=over 4
+
+=item *
+
+B<md_algorithm>: the message digest algorithm used to sign the CSR. May be any
+value supported by C<openssl dgst>; commonly-supported values include C<md5>,
+C<sha1>, and C<sha256>.
+
+=back
+
+=head2 cert
+
+An anonymous hash defining properties relating to the entity's X.509 v3
+certificate.
+
+Valid keys:
+
+=over 4
+
+=item *
+
+B<extensions>: optional; an anonymous hash defining the X.509 v3 extensions that
+should be specified in the certificate. Keys are expected to be extension field
+names as they appear in L<x509v3_config(5)>, and values are expected to be
+either strings or anonymous arrays of strings (whose elements will be
+concatenated and delimited with commas), e.g.:
+
+    {
+        basicConstraints    => 'critical,CA:false',
+        certificatePolicies => [ '1.2.3', '4.5.6' ],  # Becomes '1.2.3,4.5.6'
+    }
+
+=item *
+
+B<issuer>: a top-level key denoting the entity that should sign this
+certificate. If undefined, the entity's certificate will be self-signed.
+
+=item *
+
+B<md_algorithm>: the message digest algorithm used to sign the certificate. May
+be any value supported by C<openssl dgst>; commonly-supported values include
+C<md5>, C<sha1>, and C<sha256>.
+
+=item *
+
+B<purpose>: a string describing the purpose of the certificate. The value given
+here will define reasonable values for the I<keyUsage>, I<extendedKeyUsage>,
+I<basicConstraints>, and/or I<subjectKeyIdentifier> X.509 v3 extension fields.
+Must be one of C<ca>, C<server>, C<client>, C<email>, or C<custom> (in which
+case no default values will be defined for any of the aforementioned fields,
+allowing for complete control of the fields that appear in the certificate via
+the B<extensions> key).
+
+=item *
+
+B<revoke_reason>: optional; the reason for revoking the certificate. Must be one
+of C<affiliationChanged>, C<CACompromise>, C<certificateHold>,
+C<cessationOfOperation>, C<keyCompromise>, C<superseded>, or C<unspecified>.
+
+=item *
+
+B<revoke_time>: optional; a timestamp string in I<YYYY-MM-DD hh:mm:ss> format
+denoting the time at which the certificate was revoked, in the UTC time zone.
+Must be specified if B<revoke_reason> is specified.
+
+=item *
+
+B<serial>: a decimal integer denoting the certificate's serial number. Must be
+unique among the serial numbers of all certificates issued by the entity given
+in B<issuer>.
+
+=item *
+
+B<subject>: an anonymous array denoting the certificate's subject name; elements
+are expected to alternate between field names in either short or long format and
+values for those fields, e.g.:
+
+    [
+        C          => 'PL',
+        O          => 'Net-SSLeay',
+        OU         => 'Test Suite',
+        commonName => 'test.net-ssleay.example',
+    ]
+
+The order of the fields is preserved when generating the Distinguished Name
+string.
+
+=item *
+
+B<valid_from>: a timestamp string in I<YYYY-MM-DD hh:mm:ss> format denoting the
+time from which the certificate is valid, in the UTC time zone.
+
+=item *
+
+B<valid_to>: a timestamp string in I<YYYY-MM-DD hh:mm:ss> format denoting the
+time until which the certificate is valid, in the UTC time zone.
+
+=back
+
+=head2 pkcs12
+
+An anonymous hash defining properties relating to the entity's PKCS#12 archives.
+
+Valid keys:
+
+=over 4
+
+=item *
+
+B<passphrase>: the passphrase under which to encrypt the private key stored in
+the archive. Used only when generating archives that contain encrypted forms of
+the private key.
+
+=back
+
+=head2 crl
+
+An anonymous hash defining properties relating to the entity's certificate
+revocation list (CRL). Only used when the entity is a certificate authority and
+at least one of the certificates it issues requires revocation.
+
+Valid keys:
+
+=over 4
+
+=item *
+
+B<last_update>: a timestamp string in I<YYYY-MM-DD hh:mm:ss> format denoting the
+time at which the CRL was last updated, in the UTC time zone.
+
+=item *
+
+B<md_algorithm>: the message digest algorithm used to sign the CRL. May be any
+value supported by C<openssl dgst>; commonly-supported values include C<md5>,
+C<sha1>, and C<sha256>.
+
+=item *
+
+B<next_update>: a timestamp string in I<YYYY-MM-DD hh:mm:ss> format denoting the
+time at which the CRL is next expected to be updated, in the UTC time zone.
+
+=item *
+
+B<number>: a decimal integer denoting the CRL number.
+
+=back
+
+=head1 OUTPUT
+
+For each entity I<E> declared in the configuration file, C<generate-test-pki>
+ensures the following set of files exists:
+
+=over 4
+
+=item *
+
+B<E.key.pem>: a private key in PEM format. Will not be generated if it already
+exists; the key in the existing file will be used instead.
+
+=item *
+
+B<E.key.enc.pem>: the file above, encrypted with AES-128 using the passphrase
+given in the configuration file (see L</CONFIGURATION>).
+
+=item *
+
+B<E.key.der>: B<E.key.pem> in DER format.
+
+=item *
+
+B<E.key.enc.der>: the file above, encrypted with AES-128 using the passphrase
+given in the configuration file (see L</CONFIGURATION>).
+
+=item *
+
+B<E.csr.pem>: a certificate signing request in PEM format.
+
+=item *
+
+B<E.csr.der>: the file above in DER format.
+
+=item *
+
+B<E.cert.pem>: a certificate in PEM format, signed by the entity given in the
+configuration file (see L</CONFIGURATION>).
+
+=item *
+
+B<E.cert.der>: the file above in DER format.
+
+=item *
+
+B<E.cert.dump>: the output of
+C<examples/x509_cert_details.pl -dump -pem E.cert.pem>. C<x509_cert_details.pl>
+is a Net-SSLeay example script whose output is used by the test suite to verify
+the correct operation of various libssl certificate information functions.
+
+=item *
+
+B<E.cert.certchain.pem>: the certificate chain in PEM format, starting with
+I<E>'s certificate and ending with the root CA certificate.
+
+=item *
+
+B<E.cert.certchain.der>: the file above, with certificates in DER format.
+
+=item *
+
+B<E.p12>: a PKCS#12 archive containing a private key and a certificate.
+
+=item *
+
+B<E.enc.p12>: the file above, with the private key encrypted with AES-128 using
+the passphrase given in the configuration file (see L</CONFIGURATION>).
+
+=item *
+
+B<E.certchain.p12>: a PKCS#12 archive containing a private key and a certificate
+chain starting with I<E>'s certificate and ending with the root CA certificate.
+
+=item *
+
+B<E.certchain.enc.p12>: the file above, with the private key encrypted with
+AES-128 using the passphrase given in the configuration file (see
+L</CONFIGURATION>).
+
+=back
+
+Additionally, for entities that sign and then revoke at least one certificate,
+C<generate-test-pki> outputs the following files:
+
+=over 4
+
+=item *
+
+B<E.crl.pem>: a certificate revocation list (version 2) in PEM format.
+
+=item *
+
+B<E.crl.der>: the file above in DER format.
+
+=back
+
+=head1 DIAGNOSTICS
+
+C<generate-test-pki> outputs a diagnostic message to stderr and immediately
+exits with exit code 1 if an error occurs. Error messages listed below indicate
+invalid input or a problem with the state of the system that can usually be
+fixed. Error messages not listed below are internal and should never be
+encountered under normal operation; please report any occurrences of such errors
+as bugs (see L</BUGS>).
+
+=over
+
+=item B<Error while parsing command line options: PKI configuration file I<PATH>
+does not exist>
+
+The PKI configuration file at I<PATH>, as specified by the B<-c> command line
+option (or C<pki.cfg> in the same directory as C<generate-test-pki> if a value
+for B<-c> was not specified), does not exist. Ensure C<pki.cfg> exists, or
+speicify an alternative path with B<-c I<PATH>>.
+
+=item B<Error while parsing command line options: an output directory must be
+given>
+
+The B<-o> option is compulsory, and has no default value. Pass the path to a
+directory in which the output files described in L</OUTPUT> should be written
+with B<-o I<PATH>>.
+
+=item B<Error while parsing command line options: output directory I<PATH> does
+not exist>
+
+C<generate-test-pki> does not attempt to create the directory at the path given
+by the B<-o> option; it must already exist and be writable.
+
+=item B<Could not load PKI configuration file: I<PATH>: I<REASON>>
+
+The configuration file at I<PATH> could not be loaded because of I<REASON>,
+which is probably an OS-level error. Ensure the file at I<PATH> is readable.
+
+=item B<Could not load PKI configuration file: syntax error: I<REASON>>
+
+The configuration file could not be parsed because of I<REASON>, which is likely
+a Perl syntax error. Ensure the configuration file is valid Perl and meets the
+specification given in L</CONFIGURATION>.
+
+=item B<OpenSSL minimum version check failed: `openssl version` exited with exit
+code I<N>>
+
+C<generate-test-pki> attempted to check the version of the OpenSSL command line
+utility currently in use by invoking C<openssl version>, and expected it to exit
+with exit code 0 (indicating success) but it actually exited with exit code I<N>
+(indicating failure). Check that the first occurrence of C<openssl> in I<PATH>
+is in fact the OpenSSL command line utility, then run C<generate-test-pki> with
+the B<-v> option to see the full output from C<openssl version>, which may help
+diagnose the problem further.
+
+=item B<OpenSSL minimum version check failed: `openssl` is not the OpenSSL
+command line utility>
+
+C<generate-test-pki> attempted to check the version of the OpenSSL command line
+utility currently in use by invoking C<openssl version>, but its output was
+inconsistent with the output format known to be used by OpenSSL. Check that the
+first occurrence of C<openssl> in I<PATH> is in fact the OpenSSL command line
+utility (and not the LibreSSL command line utility), then run
+C<generate-test-pki> with the B<-v> option to see the full output from
+C<openssl version>, which may help diagnose the problem further.
+
+=item B<OpenSSL minimum version check failed: OpenSSL E<gt>= I<MINVER> required,
+but `openssl` is version I<VER>>
+
+C<generate-test-pki> relies on features of the OpenSSL command line utility that
+were added in version I<MINVER>, but the first occurrence of C<openssl> in
+I<PATH> is version I<VER>, which is insufficient. It may be necessary to compile
+a newer version of OpenSSL from the source code and prepend the directory
+containing the command line utility to I<PATH> in order to solve this problem.
+
+=item B<OpenSSL minimum version check failed: could not load Net::SSLeay:
+I<REASON>>
+
+C<generate-test-pki> attempted to check the version of OpenSSL that Net::SSLeay
+is built against, but was unable to import Net::SSLeay because of I<REASON>.
+Ensure the first occurrence of Net::SSLeay in I<PERL5LIB> can be imported by
+Perl.
+
+=item B<OpenSSL minimum version check failed: Net::SSLeay was not built against
+OpenSSL>
+
+C<generate-test-pki> relies on features of Net::SSLeay that are only available
+when it is built against OpenSSL, but the first occurrence of Net::SSLeay in
+I<PERL5LIB> is built against LibreSSL. Rebuild Net::SSLeay against OpenSSL and
+ensure the rebuilt version is the first occurrence of Net::SSLeay in
+I<PERL5LIB>.
+
+=item B<OpenSSL minimum version check failed: Net::SSLeay must be built against
+OpenSSL E<gt>= I<MINVER>, but it is built against version I<VER>>
+
+C<generate-test-pki> relies on features of Net::SSLeay that are only available
+when it is built against OpenSSL version I<MINVER>, but the first occurrence of
+Net::SSLeay in I<PERL5LIB> is built against OpenSSL I<VER>. Rebuild Net::SSLeay
+against a newer version OpenSSL - ideally the same version as the OpenSSL
+command line utility - and ensure the rebuilt version is the first occurrence of
+Net::SSLeay in I<PERL5LIB>.
+
+=item B<Could not create temporary working directory: I<REASON>>
+
+C<generate-test-pki> attempted to create a directory to store some temporary
+files that are necessary to generate the output files, but was unable to create
+the directory because of I<REASON> (which is probably an OS-level error). Ensure
+the system's temporary directory is writable.
+
+=item B<Error while building PKI tree: entity 'I<E>': issuer 'I<I>' is not
+defined>
+
+The configuration file defines an entity I<E> whose issuer (per the the value of
+its C<{cert}-E<gt>{issuer}> key) does not exist. Check that I<I> is not
+misnamed and that the value of C<{cert}-E<gt>{issuer}> for I<E> is correct.
+
+=item B<Could not generate 'I<E>.key.pem': missing key algorithm>
+
+The configuration file defines an entity I<E> with no value for
+C<{key}-E<gt>{algorithm}>. See L</key> for a list of acceptable values.
+
+=item B<Could not generate 'I<E>.key.pem': unknown key algorithm 'I<ALGORITHM>'>
+
+The configuration file defines an entity I<E> with the value I<ALGORITHM> for
+C<{key}-E<gt>{algorithm}>, but this is not a known public key algorithm. See
+L</key> for a list of acceptable values.
+
+=item B<Could not generate 'I<E>.key.pem': key algorithm 'I<ALGORITHM>' requires
+a key size>
+
+The configuration file defines an entity I<E> with the value I<ALGORITHM> for
+C<{key}-E<gt>{algorithm}>, but I<ALGORITHM> requires a key size to be defined
+in C<{key}-E<gt>{size}>. Define a valid key size for this entity's private key.
+See L</key> for more information.
+
+=item B<Could not generate 'I<E>.csr.pem': invalid key/value pair given in
+subject>
+
+The configuration file defines an entity I<E> with at least one undefined
+element in its value for C<{cert}-E<gt>{subject}>. Undefined elements cannot be
+stringified, so the subject could not be transformed into a Distinguished Name
+string. See L</cert> for more information of the expected format for
+C<{cert}-E<gt>{subject}>.
+
+=item B<Could not generate 'I<E>.csr.pem': missing message digest algorithm>
+
+The configuration file defines an entity I<E> with no value for
+C<{csr}-E<gt>{md_algorithm}>. See L</csr> for possible values.
+
+=item B<Could not generate 'I<E>.cert.pem': valid_from: invalid timestamp>
+
+The configuration file defines an entity I<E> with an invalid timestamp for its
+value of C<{cert}-E<gt>{valid_from}>. See L</cert> for more information on the
+expected timestamp format.
+
+=item B<Could not generate 'I<E>.cert.pem': valid_until: invalid timestamp>
+
+The configuration file defines an entity I<E> with an invalid timestamp for its
+value of C<{cert}-E<gt>{valid_to}>. See L</cert> for more information on the
+expected timestamp format.
+
+=item B<Could not generate 'I<E>.cert.pem': missing message digest algorithm>
+
+The configuration file defines an entity I<E> with no value for
+C<{cert}-E<gt>{md_algorithm}>. See L</cert> for possible values.
+
+=item B<Could not generate 'I<E>.cert.pem': could not create directory I<PATH>:
+I<REASON>>
+
+C<generate-test-pki> attempted to create a temporary directory at I<PATH> to
+store intermediate files that are necessary to generate I<E>'s certificate, but
+was unable to do so because of I<REASON>, which is probably an OS-level error.
+Ensure the system's temporary directory is writable.
+
+=item B<Could not generate 'I<E>.cert.pem': could not write serial file I<PATH>:
+I<REASON>>
+
+C<generate-test-pki> attempted to write an intermediate file to I<PATH> (a
+subdirectory of a temporary directory it created earlier) that is necessary to
+generate I<E>'s certificate, but was unable to do so because of I<REASON>, which
+is probably an OS-level error. Ensure the system's temporary directory is
+writable.
+
+=item B<Could not generate 'I<E>.cert.dump': could not write I<PATH>: I<REASON>>
+
+C<generate-test-pki> attempted to write information about I<E>'s certificate to
+the file at I<PATH>, but was unable to do so because of I<REASON>, which is
+probably an OS-level error. Ensure the file at I<PATH> is writable.
+
+=item B<Could not generate 'I<E>.cert.dump': could not run
+examples/x509_cert_details.pl: I<REASON>>
+
+C<generate-test-pki> attempted to invoke the Perl script
+C<examples/x509_cert_details.pl> (part of the Net-SSLeay source distribution) to
+produce an output file containing information about I<E>'s certificate, but was
+unable to invoke the script because of I<REASON>. Ensure that the script is
+located at C<../examples/x509_cert_details.pl> relative to the path to
+C<generate-test-pki>, that it can be executed given the values of I<PATH> and
+I<PERL5LIB> that are inherited by C<generate-test-pki>, and that a suitable
+version of Net::SSLeay is present in I<PERL5LIB> (see L</DEPENDENCIES> for more
+information).
+
+=item B<Could not generate 'I<E>.cert.dump': examples/x509_cert_details.pl
+exited with exit code I<N>>
+
+C<generate-test-pki> invoked the Perl script C<examples/x509_cert_details.pl>
+(part of the Net-SSLeay source distribution) to produce an output file
+containing information about I<E>'s certificate, and expected it to exit
+with exit code 0 (indicating success) but it actually exited with exit code I<N>
+(indicating failure). Run C<generate-test-pki> with the B<-v> option to see the
+full output from C<examples/x509_cert_details.pl>, which may help diagnose the
+problem further.
+
+=item B<Could not generate 'I<E>.certchain.pem': could not write certificate
+chain file I<PATH>: I<REASON>>
+
+=item B<Could not generate 'I<E>.certchain.der': could not write certificate
+chain file I<PATH>: I<REASON>>
+
+C<generate-test-pki> attempted to concatenate the certificates in I<E>'s issuer
+chain (in either format) and write them to I<PATH>, but was unable to do so
+because of I<REASON>, which is probably an OS-level error. Ensure the file at
+I<PATH> is writable.
+
+=item B<Could not generate 'I<E>.certchain.pem': could not read certificate file
+I<PATH>: I<REASON>>
+
+=item B<Could not generate 'I<E>.certchain.der': could not read certificate file
+I<PATH>: I<REASON>>
+
+C<generate-test-pki> attempted to read a certificate in I<E>'s issuer chain (in
+either format) at I<PATH>, but was unable to do so because of I<REASON>, which
+is probably an OS-level error. Ensure the file at I<PATH> is readable.
+
+=item B<Could not generate 'I<E>.crl.pem': could not create directory I<PATH>:
+I<REASON>>
+
+C<generate-test-pki> attempted to create a temporary directory at I<PATH> to
+store intermediate files that are necessary to generate I<E>'s CRL, but was
+unable to do so because of I<REASON>, which is probably an OS-level error.
+Ensure the system's temporary directory is writable.
+
+=item B<Could not generate 'I<E>.crl.pem': could not read database file I<PATH>:
+I<REASON>>
+
+When revoking a certificate, C<generate-test-pki> looks up the certificate's
+serial number in its issuing entity's database file, which is created by OpenSSL
+in a temporary directory created earlier by C<generate-test-pki>. It was unable
+to read this file on this occasion because of I<REASON>, which is probably an
+OS-level error. Ensure the system's temporary directory is readable.
+
+=item B<Could not generate 'I<E>.crl.pem': could not write database file
+I<PATH>: I<REASON>>
+
+To revoke a certificate, C<generate-test-pki> updates the certificate's entry in
+its issuing entity's database file, which is created by OpenSSL in a temporary
+directory created earlier by C<generate-test-pki>. It was unable to update the
+file on this occasion because of I<REASON>, which is probably an OS-level error.
+Ensure the system's temporary directory is writable.
+
+=item B<Could not generate 'I<E>.crl.pem': could not write CRL number file
+I<PATH>: I<REASON>>
+
+When revoking a certificate, C<generate-test-pki> stores the CRL number for the
+CRL it outputs in a file in a temporary directory it created earlier. It was
+unable to write this file on this occasion because of I<REASON>, which is
+probably an OS-level error. Ensure the system's temporary directory is writable.
+
+=item B<Could not generate 'I<E>.certchain.p12': could not create directory
+I<PATH>: I<REASON>>
+
+=item B<Could not generate 'I<E>.certchain.enc.p12': could not create directory
+I<PATH>: I<REASON>>
+
+When generating a PKCS#12 archive containing multiple certificates,
+C<generate-test-pki> concatenates the certificates and writes them to a file in
+a temporary directory it creates before passing the path to that file in a
+command line option to C<openssl>. It was unable to create the temporary
+directory on this occasion because of I<REASON>, which is probably an OS-level
+error. Ensure the system's temporary directory is writable.
+
+=item B<OpenSSL minimum version check failed: could not run `openssl version`:
+I<REASON>>
+
+=item B<Could not generate 'I<PATH>': failed to run `openssl I<COMMAND>`:
+I<REASON>>
+
+C<generate-test-pki> attempted to invoke the OpenSSL command line utility, but
+failed to spawn a new process because of I<REASON>, which is probably an
+OS-level error.
+
+=item B<Could not generate 'I<PATH>': `openssl I<COMMAND>` failed with exit code
+I<N>>
+
+C<generate-test-pki> attempted to generate an output file by invoking the
+OpenSSL command line utility, and expected it to exit with exit code 0
+(indicating success) but it actually exited with exit code I<N> (indicating
+failure). Check that the PKI defined in the configuration file is sensible, then
+run C<generate-test-pki> with the B<-v> option to see the full output from
+C<openssl>.
+
+=back
+
+=head1 LIMITATIONS
+
+Although its interface is almost identical to the OpenSSL command line utility,
+C<generate-test-pki> is incompatible with the LibreSSL command line utility,
+since it relies on features currently only found in the OpenSSL command line
+utility.
+
+Only limited error checking is performed on the configuration file; in
+particular, C<generate-test-pki> will not always complain if required keys are
+missing. It is recommended to run the program with the B<-v> option after
+editing the configuration file to ensure C<openssl> is being invoked as
+expected.
+
+Entities can have their certificates issued by one and only one entity;
+cross-signed certificates cannot currently be generated.
+
+The uniqueness of serial numbers among the certificates signed by any given
+issuer is not enforced, and duplication will likely cause odd output from
+C<generate-test-pki> and breakage when certificates are revoked. Care should be
+taken when editing serial numbers in the configuration file.
+
+While as much effort as possible has been put into generating output files
+deterministically, C<generate-test-pki> will still generate different private
+keys and PKCS#12 archives on every invocation, even when the PKI configuration
+file has not changed between invocations. C<generate-test-pki> will avoid
+overwriting the private key for an entity if one already exists, but cannot
+recreate a private key that has been deleted. PKCS#12 archives cannot be
+generated deterministically because the PKCS#12 file format uses salts and IVs
+that the OpenSSL command line utiltity randomly generates on each invocation.
+
+=head1 SEE ALSO
+
+The man pages for the OpenSSL command line utility subcommands invoked by
+C<generate-test-pki>: L<openssl-ca(1)>, L<openssl-crl(1)>,
+L<openssl-genpkey(1)>, L<openssl-pkey(1)>, L<openssl-req(1)>, and
+L<openssl-x509(1)>.
+
+=head1 BUGS
+
+If you encounter a problem with this program that you believe is a bug, please
+L<create a new issue|https://github.com/radiator-software/p5-net-ssleay/issues/new>
+in the Net-SSLeay GitHub repository. Please make sure your bug report includes
+the following information:
+
+=over
+
+=item *
+
+the list of command line options passed to C<generate-test-pki>;
+
+=item *
+
+the full configuration file given by the C<-c> command line option;
+
+=item *
+
+the full output of C<generate-test-pki>;
+
+=item *
+
+your operating system name and version;
+
+=item *
+
+the output of C<perl -V>;
+
+=item *
+
+the version of Net-SSLeay you are using;
+
+=item *
+
+the version of OpenSSL you are using.
+
+=back
+
+=head1 AUTHORS
+
+Originally written by Chris Novakovic.
+
+Maintained by Chris Novakovic, Tuure Vartiainen and Heikki Vatiainen.
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright 2020- Chris Novakovic <chris@chrisn.me.uk>.
+
+Copyright 2020- Tuure Vartiainen <vartiait@radiatorsoftware.com>.
+
+Copyright 2020- Heikki Vatiainen <hvn@radiatorsoftware.com>.
+
+This module is released under the terms of the Artistic License 2.0. For
+details, see the C<LICENSE> file distributed with Net-SSLeay's source code.
+
+=cut
+
+__DATA__
+#-----------------------------------------------------------------------
+# openssl req
+#-----------------------------------------------------------------------
+
+[ req ]
+utf8               = yes
+string_mask        = utf8only
+prompt             = no
+distinguished_name = req_dn
+
+[ req_dn ]
+# This section is intentionally left blank - distinguished_name must be
+# defined in the [ req ] section, but the distinguished name is actually
+# specified in the -subj option to `openssl req`
+
+#-----------------------------------------------------------------------
+# openssl ca
+#-----------------------------------------------------------------------
+
+[ ca_conf ]
+database       = {{ database_path }}
+serial         = {{ serial_path }}
+new_certs_dir  = {{ certs_path }}
+unique_subject = no
+email_in_dn    = yes
+default_days   = 3650
+policy         = ca_policy
+crlnumber      = {{ crl_number_path }}
+crl_extensions = crlexts
+
+[ ca_policy ]
+domainComponent        = optional
+countryName            = optional
+organizationName       = optional
+organizationalUnitName = optional
+dnQualifier            = optional
+stateOrProvinceName    = optional
+commonName             = optional
+serialNumber           = optional
+localityName           = optional
+title                  = optional
+name                   = optional
+givenName              = optional
+initials               = optional
+pseudonym              = optional
+generationQualifier    = optional
+emailAddress           = optional
+
+[ exts_ca ]
+keyUsage             = critical,keyCertSign,cRLSign
+basicConstraints     = critical,CA:true
+subjectKeyIdentifier = hash
+{{ extensions }}
+
+[ exts_server ]
+keyUsage             = critical,digitalSignature,keyEncipherment
+extendedKeyUsage     = serverAuth,clientAuth
+subjectKeyIdentifier = hash
+{{ extensions }}
+
+[ exts_client ]
+keyUsage             = critical,digitalSignature
+extendedKeyUsage     = clientAuth
+subjectKeyIdentifier = hash
+{{ extensions }}
+
+[ exts_email ]
+keyUsage             = critical,digitalSignature,keyEncipherment
+extendedKeyUsage     = emailProtection,clientAuth
+subjectKeyIdentifier = hash
+{{ extensions }}
+
+[ exts_custom ]
+{{ extensions }}
+
+[ crlexts ]
+# This section is intentionally left blank - if crl_extensions is
+# defined in the [ ca_conf ] section (even if it is empty), OpenSSL
+# writes a V2 CRL instead of a V1 CRL

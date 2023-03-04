@@ -124,6 +124,9 @@
 /Net/POP3.pm
 /Net/Ping.pm
 /Net/SMTP.pm
+/Net/SSLeay.pm
+/Net/SSLeay.pod
+/Net/SSLeay/
 /Net/Time.pm
 /Net/libnetFAQ.pod
 /O.pm
