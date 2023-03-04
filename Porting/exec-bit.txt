@@ -50,6 +50,7 @@ Porting/checkansi.pl
 Porting/checkcfguse.pl
 Porting/checkcfgvar.pl
 Porting/checkpodencoding.pl
+Porting/clean-commit
 Porting/cmpVERSION.pl
 Porting/config_h.pl
 Porting/corecpan.pl
