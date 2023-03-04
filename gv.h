@@ -220,20 +220,20 @@ Return the CV from the GV.
 /*
  * symbol creation flags, for use in gv_fetchpv() and get_*v()
  */
-#define GV_ADD		0x01	/* add, if symbol not already there
+#define GV_ADD          0x001   /* add, if symbol not already there
                                    For gv_name_set, adding a HEK for the first
                                    time, so don't try to free what's there.  */
-#define GV_ADDMULTI	0x02	/* add, pretending it has been added
+#define GV_ADDMULTI     0x002   /* add, pretending it has been added
                                    already; used also by gv_init_* */
-#define GV_ADDWARN	0x04	/* add, but warn if symbol wasn't already there */
-                /*	0x08	   UNUSED */
-#define GV_NOINIT	0x10	/* add, but don't init symbol, if type != PVGV */
+#define GV_ADDWARN      0x004   /* add, but warn if symbol wasn't already there */
+#define GV_CARET        0x008   /* allow caret vars */
+#define GV_NOINIT       0x010   /* add, but don't init symbol, if type != PVGV */
 /* This is used by toke.c to avoid turing placeholder constants in the symbol
    table into full PVGVs with attached constant subroutines.  */
-#define GV_NOADD_NOINIT	0x20	/* Don't add the symbol if it's not there.
+#define GV_NOADD_NOINIT 0x020   /* Don't add the symbol if it's not there.
                                    Don't init it if it is there but ! PVGV */
-#define GV_NOEXPAND	0x40	/* Don't expand SvOK() entries to PVGV */
-#define GV_NOTQUAL	0x80	/* A plain symbol name, not qualified with a
+#define GV_NOEXPAND     0x040   /* Don't expand SvOK() entries to PVGV */
+#define GV_NOTQUAL      0x080   /* A plain symbol name, not qualified with a
                                    package (so skip checks for :: and ')  */
 #define GV_AUTOLOAD	0x100	/* gv_fetchmethod_flags() should AUTOLOAD  */
 #define GV_CROAK	0x200	/* gv_fetchmethod_flags() should croak  */
