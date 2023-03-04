@@ -3938,6 +3938,11 @@ Perl_save_destructor_x(pTHX_ DESTRUCTORFUNC_t f, void *p);
 #define PERL_ARGS_ASSERT_SAVE_DESTRUCTOR_X
 
 PERL_CALLCONV void
+Perl_save_freercpv(pTHX_ char *rcpv);
+#define PERL_ARGS_ASSERT_SAVE_FREERCPV          \
+        assert(rcpv)
+
+PERL_CALLCONV void
 Perl_save_generic_pvref(pTHX_ char **str);
 #define PERL_ARGS_ASSERT_SAVE_GENERIC_PVREF     \
         assert(str)
@@ -4017,9 +4022,9 @@ Perl_save_pushptrptr(pTHX_ void * const ptr1, void * const ptr2, const int type)
 #define PERL_ARGS_ASSERT_SAVE_PUSHPTRPTR
 
 PERL_CALLCONV void
-Perl_save_rcpv_free(pTHX_ char **ppv);
-#define PERL_ARGS_ASSERT_SAVE_RCPV_FREE         \
-        assert(ppv)
+Perl_save_rcpv(pTHX_ char **prcpv);
+#define PERL_ARGS_ASSERT_SAVE_RCPV              \
+        assert(prcpv)
 
 PERL_CALLCONV void
 Perl_save_re_context(pTHX);

@@ -1889,6 +1889,32 @@ and back.
 =for apidoc Amh||SAVESPTR|SV * s
 =for apidoc Amh||SAVEPPTR|char * p
 
+=item C<SAVERCPV(char **ppv)>
+
+This macro arranges to restore the value of a C<char *> variable which
+was allocated with a call to C<rcpv_new()> to its previous state when
+the current pseudo block is completed. The pointer stored in C<*ppv> at
+the time of the call will be refcount incremented and stored on the save
+stack. Later when the current I<pseudo-block> is completed the value
+stored in C<*ppv> will be refcount decremented, and the previous value
+restored from the savestack which will also be refcount decremented.
+
+This is the C<RCPV> equivalent of C<SAVEGENERICSV()>.
+
+=for apidoc Amh||SAVERCPV|char *pv
+
+=item C<SAVEGENERICSV(SV **psv)>
+
+This macro arranges to restore the value of a C<SV *> variable to its
+previous state when the current pseudo block is completed. The pointer
+stored in C<*psv> at the time of the call will be refcount incremented
+and stored on the save stack. Later when the current I<pseudo-block> is
+completed the value stored in C<*ppv> will be refcount decremented, and
+the previous value restored from the savestack which will also be refcount
+decremented. This the C equivalent of C<local $sv>.
+
+=for apidoc Amh||SAVEGENERICSV|char **psv
+
 =item C<SAVEFREESV(SV *sv)>
 
 The refcount of C<sv> will be decremented at the end of
@@ -1913,16 +1939,25 @@ live scope has finished executing.
 
 =item C<SAVEFREEOP(OP *op)>
 
-The C<OP *> is op_free()ed at the end of I<pseudo-block>.
+The C<OP *> is C<op_free()>ed at the end of I<pseudo-block>.
 
 =for apidoc Amh||SAVEFREEOP|OP *op
 
 =item C<SAVEFREEPV(p)>
 
-The chunk of memory which is pointed to by C<p> is Safefree()ed at the
-end of I<pseudo-block>.
+The chunk of memory which is pointed to by C<p> is C<Safefree()>ed at the
+end of the current I<pseudo-block>.
 
-=for apidoc Amh||SAVEFREEPV|void * p
+=for apidoc Amh||SAVEFREEPV|char *pv
+
+=item C<SAVEFREERCPV(char *pv)>
+
+Ensures that a C<char *> which was created by a call to C<rcpv_new()> is
+C<rcpv_free()>ed at the end of the current I<pseudo-block>.
+
+This is the RCPV equivalent of C<SAVEFREESV()>.
+
+=for apidoc Amh||SAVEFREERCPV|char *pv
 
 =item C<SAVECLEARSV(SV *sv)>
 

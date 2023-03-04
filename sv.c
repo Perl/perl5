@@ -15219,7 +15219,7 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
              * the target of the **SV could be something from the *other* thread.
              * So how can this possibly work correctly? */
             break;
-        case SAVEt_RCPV_FREE:
+        case SAVEt_RCPV:
             pv = (char *)POPPTR(ss,ix);
             TOPPTR(nss,ix) = rcpv_copy(pv);
             ptr = POPPTR(ss,ix);
@@ -15354,6 +15354,10 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
         case SAVEt_FREEPV:
             c = (char*)POPPTR(ss,ix);
             TOPPTR(nss,ix) = pv_dup_inc(c);
+            break;
+        case SAVEt_FREERCPV:
+            c = (char *)POPPTR(ss,ix);
+            TOPPTR(nss,ix) = rcpv_copy(c);
             break;
         case SAVEt_STACK_POS:		/* Position on Perl stack */
             i = POPINT(ss,ix);
