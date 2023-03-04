@@ -177,6 +177,23 @@ EOF
     SKIP: {
         skip("no locale available where LC_NUMERIC radix isn't '.'", 30) unless $different;
         note("using the '$different' locale for LC_NUMERIC tests");
+      SKIP: {
+                unless ($have_localeconv) {
+                    skip("no localeconv()", 1);
+                }
+                else {
+            local $ENV{LC_NUMERIC} = $different;
+                    fresh_perl_is(<<'EOF', ",,", { eval $switches },
+    use POSIX;
+    no warnings "utf8";
+    print localeconv()->{decimal_point};
+    use locale;
+    print localeconv()->{decimal_point};
+EOF
+                "localeconv() looks at LC_NUMERIC with and without 'use locale'");
+                }
+            }
+      SKIP: {
         {
             local $ENV{LC_NUMERIC} = $different;
 
@@ -202,21 +219,6 @@ EOF
                 "format() looks at LC_NUMERIC with 'use locale'");
             }
 
-      SKIP: {
-                unless ($have_localeconv) {
-                    skip("no localeconv()", 1);
-                }
-                else {
-                    fresh_perl_is(<<'EOF', ",,", { eval $switches },
-    use POSIX;
-    no warnings "utf8";
-    print localeconv()->{decimal_point};
-    use locale;
-    print localeconv()->{decimal_point};
-EOF
-                "localeconv() looks at LC_NUMERIC with and without 'use locale'");
-                }
-            }
 
             {
                 my $categories = ":collate :characters :collate :ctype :monetary :time";
@@ -293,6 +295,7 @@ EOF
                 "too late to ignore the locale at write() time");
             }
         }
+      }
 
         {
             # do not let "use 5.000" affect the locale!
