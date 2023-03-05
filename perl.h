@@ -93,12 +93,12 @@ no normal arguments, and used by L</C<comma_pDEPTH>> itself.
 #  define HAS_C99 1
 #endif
 
+/* =========================================================================
+ * The defines from here to the following ===== line are unfortunately
+ * duplicated in makedef.pl, and changes here MUST also be made there */
+
 /* See L<perlguts/"The Perl API"> for detailed notes on
  * MULTIPLICITY and PERL_IMPLICIT_SYS */
-
-/* XXX NOTE that from here --> to <-- the same logic is
- * repeated in makedef.pl, so be certain to update
- * both places when editing. */
 
 #ifdef USE_ITHREADS
 #  if !defined(MULTIPLICITY)
@@ -133,7 +133,8 @@ no normal arguments, and used by L</C<comma_pDEPTH>> itself.
 #   define USE_REENTRANT_API
 #endif
 
-/* <--- here ends the logic shared by perl.h and makedef.pl */
+/* end of makedef.pl logic duplication.  But there are other groups below.
+ * ========================================================================= */
 
 /*
 =for apidoc_section $directives
@@ -1127,6 +1128,9 @@ violations are fatal.
 #  endif
 #endif
 
+/* end of makedef.pl logic duplication.  But there are other groups below.
+ * ========================================================================= */
+
 #ifdef USE_LOCALE
 #   define HAS_SKIP_LOCALE_INIT /* Solely for XS code to test for this
                                    #define */
@@ -1251,6 +1255,10 @@ typedef enum {
  * declarations */
 #  define LOCALE_CATEGORIES_COUNT_        LC_ALL_INDEX_
 
+/* =========================================================================
+ * The defines from here to the following ===== line are unfortunately
+ * duplicated in makedef.pl, and changes here MUST also be made there */
+
 #  if defined(USE_ITHREADS) && ! defined(NO_LOCALE_THREADS)
 #    define USE_LOCALE_THREADS
 #  endif
@@ -1266,7 +1274,7 @@ typedef enum {
 
    /* On threaded builds, use thread-safe locales if they are available and not
     * forbidden.  Availability is when we are using POSIX 2008 locales, or
-    * Windows for quite a few releases now. */
+    * Windows for any vintage recent enough to have _MSC_VER defined */
 #  if defined(USE_LOCALE_THREADS) && ! defined(NO_THREAD_SAFE_LOCALE)
 #    if defined(USE_POSIX_2008_LOCALE) || (defined(WIN32) && defined(_MSC_VER))
 #      define USE_THREAD_SAFE_LOCALE
@@ -1332,7 +1340,7 @@ typedef enum {
                                     && defined(USE_THREAD_SAFE_LOCALE)))
 #    define USE_PERL_SWITCH_LOCALE_CONTEXT
 #  endif
-#endif
+#endif  /* End of USE_LOCALE */
 
 /* end of makedef.pl logic duplication
  * ========================================================================= */
@@ -4954,15 +4962,15 @@ Gid_t getegid (void);
  * #define DEBUG_POST_STMTS  RESTORE_ERRNO;
  *
  * Other potential things include displaying timestamps, location information,
- * which thread, etc.  Heres an example with both errno and location info:
+ * which thread, etc.  Here's an example with both errno and location info:
  *
  * #define DEBUG_PRE_STMTS   dSAVE_ERRNO;  \
  *              PerlIO_printf(Perl_debug_log, "%s:%d: ", __FILE__, __LINE__);
  * #define DEBUG_POST  RESTORE_ERRNO;
  *
- * All DEBUG statements in the compiled scope will be have these extra
- * statements compiled in; they will be executed only for the DEBUG statements
- * whose flags are turned on.
+ * All DEBUG statements in the compiled scope will have these extra statements
+ * compiled in; they will be executed only for the DEBUG statements whose flags
+ * are turned on.
  */
 #ifndef DEBUG_PRE_STMTS
 #  define DEBUG_PRE_STMTS
@@ -7093,7 +7101,7 @@ the plain locale pragma without a parameter (S<C<use locale>>) is in effect.
      */
 #  define LOCALE_LOCK_(cond_to_panic_if_already_locked)                     \
         STMT_START {                                                        \
-            CLANG_DIAG_IGNORE(-Wthread-safety)	     	                    \
+            CLANG_DIAG_IGNORE(-Wthread-safety)                              \
             if (LIKELY(PL_locale_mutex_depth <= 0)) {                       \
                 DEBUG_Lv(PerlIO_printf(Perl_debug_log,                      \
                          "%s: %d: locking locale; depth=1\n",               \
