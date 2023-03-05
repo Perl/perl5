@@ -1260,17 +1260,19 @@ violations are fatal.
 
 #  include "perl_langinfo.h"    /* Needed for _NL_LOCALE_NAME */
 
-/* Allow use of glibc's undocumented querylocale() equivalent if asked for, and
- * appropriate */
 #  ifdef USE_POSIX_2008_LOCALE
 #    if  defined(HAS_QUERYLOCALE)                                           \
-              /* Has this internal undocumented item for nl_langinfo() */   \
+              /* Use querylocale if has it, or has the glibc internal       \
+               * undocumented equivalent. */                                \
      || (     defined(_NL_LOCALE_NAME)                                      \
               /* And asked for */                                           \
          &&   defined(USE_NL_LOCALE_NAME)                                   \
-              /* We need the below because we will be calling it within a   \
-               * macro, can't have it get messed up by another thread. */   \
-         &&   defined(HAS_THREAD_SAFE_NL_LANGINFO_L)                        \
+              /* nl_langinfo_l almost certainly will exist on systems that  \
+               * have _NL_LOCALE_NAME, so there is nothing lost by          \
+               * requiring it instead of also allowing plain nl_langinfo(). \
+               * And experience indicates that its glibc implementation is  \
+               * thread-safe, eliminating code complications */             \
+         &&   defined(HAS_NL_LANGINFO_L)                                    \
                /* On systems that accept any locale name, the real          \
                 * underlying locale is often returned by this internal      \
                 * item, so we can't use it */                               \
