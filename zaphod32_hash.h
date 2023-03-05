@@ -1,21 +1,22 @@
 #ifndef DEBUG_ZAPHOD32_HASH
-#define DEBUG_ZAPHOD32_HASH 0
+#define DEBUG_ZAPHOD32_HASH     0
 
 #if DEBUG_ZAPHOD32_HASH == 1
 #include <stdio.h>
-#define ZAPHOD32_WARN6(pat,v0,v1,v2,v3,v4,v5)    printf(pat, v0, v1, v2, v3, v4, v5)
-#define ZAPHOD32_WARN5(pat,v0,v1,v2,v3,v4)       printf(pat, v0, v1, v2, v3, v4)
-#define ZAPHOD32_WARN4(pat,v0,v1,v2,v3)          printf(pat, v0, v1, v2, v3)
-#define ZAPHOD32_WARN3(pat,v0,v1,v2)             printf(pat, v0, v1, v2)
-#define ZAPHOD32_WARN2(pat,v0,v1)                printf(pat, v0, v1)
-#define NOTE3(pat,v0,v1,v2)             printf(pat, v0, v1, v2)
+#define ZAPHOD32_WARN6(pat,v0,v1,v2,v3,v4,v5)   \
+    printf(pat, v0, v1, v2, v3, v4, v5)
+#define ZAPHOD32_WARN5(pat,v0,v1,v2,v3,v4)  printf(pat, v0, v1, v2, v3, v4)
+#define ZAPHOD32_WARN4(pat,v0,v1,v2,v3)     printf(pat, v0, v1, v2, v3)
+#define ZAPHOD32_WARN3(pat,v0,v1,v2)        printf(pat, v0, v1, v2)
+#define ZAPHOD32_WARN2(pat,v0,v1)           printf(pat, v0, v1)
+#define NOTE3(pat,v0,v1,v2)                 printf(pat, v0, v1, v2)
 #elif DEBUG_ZAPHOD32_HASH == 2
 #define ZAPHOD32_WARN6(pat,v0,v1,v2,v3,v4,v5)
 #define ZAPHOD32_WARN5(pat,v0,v1,v2,v3,v4)
 #define ZAPHOD32_WARN4(pat,v0,v1,v2,v3)
 #define ZAPHOD32_WARN3(pat,v0,v1,v2)
 #define ZAPHOD32_WARN2(pat,v0,v1)
-#define NOTE3(pat,v0,v1,v2)             printf(pat, v0, v1, v2)
+#define NOTE3(pat,v0,v1,v2)                 printf(pat, v0, v1, v2)
 #else
 #define ZAPHOD32_WARN6(pat,v0,v1,v2,v3,v4,v5)
 #define ZAPHOD32_WARN5(pat,v0,v1,v2,v3,v4)
@@ -29,100 +30,104 @@
 #ifndef ROTL32
 #if defined(_MSC_VER)
 #include <stdlib.h>  /* Microsoft put _rotl declaration in here */
-#define ROTL32(x,r)  _rotl(x,r)
-#define ROTR32(x,r)  _rotr(x,r)
+#define ROTL32(x,r)                         _rotl(x,r)
+#define ROTR32(x,r)                         _rotr(x,r)
 #else
-/* gcc recognises this code and generates a rotate instruction for CPUs with one */
-#define ROTL32(x,r)  (((U32)(x) << (r)) | ((U32)(x) >> (32 - (r))))
-#define ROTR32(x,r)  (((U32)(x) << (32 - (r))) | ((U32)(x) >> (r)))
+/* gcc recognises this code and generates a
+   rotate instruction for CPUs with one */
+#define ROTL32(x,r)                         (((U32)(x) << (r)) | ((U32)(x) >> (32 - (r))))
+#define ROTR32(x,r)                         (((U32)(x) << (32 - (r))) | ((U32)(x) >> (r)))
 #endif
 #endif
 
 #ifndef PERL_SEEN_HV_FUNC_H_
 #if !defined(U64)
 #include <stdint.h>
-#define U64 uint64_t
+#define U64                                 uint64_t
 #endif
 
 #if !defined(U32)
-#define U32 uint32_t
+#define U32                                 uint32_t
 #endif
 
 #if !defined(U8)
-#define U8 unsigned char
+#define U8                                  unsigned char
 #endif
 
 #if !defined(U16)
-#define U16 uint16_t
+#define U16                                 uint16_t
 #endif
 
 #ifndef STRLEN
-#define STRLEN int
+#define STRLEN                              int
 #endif
 #endif
 
 #ifndef ZAPHOD32_STATIC_INLINE
 #ifdef PERL_STATIC_INLINE
-#define ZAPHOD32_STATIC_INLINE PERL_STATIC_INLINE
+#define ZAPHOD32_STATIC_INLINE              PERL_STATIC_INLINE
 #else
-#define ZAPHOD32_STATIC_INLINE static inline
+#define ZAPHOD32_STATIC_INLINE              static inline
 #endif
 #endif
 
 #ifndef STMT_START
-#define STMT_START do
-#define STMT_END while(0)
+#define STMT_START                          do
+#define STMT_END                            while(0)
 #endif
 
 /* This is two marsaglia xor-shift permutes, with a prime-multiple
- * sandwiched inside. The end result of doing this twice with different
- * primes is a completely avalanched v.  */
-#define ZAPHOD32_SCRAMBLE32(v,prime) STMT_START {  \
-    v ^= (v>>9);                        \
-    v ^= (v<<21);                       \
-    v ^= (v>>16);                       \
-    v *= prime;                         \
-    v ^= (v>>17);                       \
-    v ^= (v<<15);                       \
-    v ^= (v>>23);                       \
-} STMT_END
+ * sandwiched inside.  The end result of doing this twice with
+ * different primes is a completely avalanched v. */
+#define ZAPHOD32_SCRAMBLE32(v,prime)    \
+    STMT_START {                        \
+        v ^= (v>>9);                    \
+        v ^= (v<<21);                   \
+        v ^= (v>>16);                   \
+        v *= prime;                     \
+        v ^= (v>>17);                   \
+        v ^= (v<<15);                   \
+        v ^= (v>>23);                   \
+    } STMT_END
 
-#define ZAPHOD32_FINALIZE(v0,v1,v2) STMT_START {          \
-    ZAPHOD32_WARN3("v0=%08x v1=%08x v2=%08x - ZAPHOD32 FINALIZE\n", \
-            (unsigned int)v0, (unsigned int)v1, (unsigned int)v2);  \
-    v2 += v0;                       \
-    v1 -= v2;                       \
-    v1 = ROTL32(v1,  6);           \
-    v2 ^= v1;                       \
-    v2 = ROTL32(v2, 28);           \
-    v1 ^= v2;                       \
-    v0 += v1;                       \
-    v1 = ROTL32(v1, 24);           \
-    v2 += v1;                       \
-    v2 = ROTL32(v2, 18) + v1;      \
-    v0 ^= v2;                       \
-    v0 = ROTL32(v0, 20);           \
-    v2 += v0;                       \
-    v1 ^= v2;                       \
-    v0 += v1;                       \
-    v0 = ROTL32(v0,  5);           \
-    v2 += v0;                       \
-    v2 = ROTL32(v2, 22);           \
-    v0 -= v1;                       \
-    v1 -= v2;                       \
-    v1 = ROTL32(v1, 17);           \
-} STMT_END
+#define ZAPHOD32_FINALIZE(v0,v1,v2)                                     \
+    STMT_START {                                                        \
+        ZAPHOD32_WARN3("v0=%08x v1=%08x v2=%08x - ZAPHOD32 FINALIZE\n", \
+                (unsigned int)v0, (unsigned int)v1, (unsigned int)v2);  \
+        v2 += v0;                                                       \
+        v1 -= v2;                                                       \
+        v1 = ROTL32(v1,  6);                                            \
+        v2 ^= v1;                                                       \
+        v2 = ROTL32(v2, 28);                                            \
+        v1 ^= v2;                                                       \
+        v0 += v1;                                                       \
+        v1 = ROTL32(v1, 24);                                            \
+        v2 += v1;                                                       \
+        v2 = ROTL32(v2, 18) + v1;                                       \
+        v0 ^= v2;                                                       \
+        v0 = ROTL32(v0, 20);                                            \
+        v2 += v0;                                                       \
+        v1 ^= v2;                                                       \
+        v0 += v1;                                                       \
+        v0 = ROTL32(v0,  5);                                            \
+        v2 += v0;                                                       \
+        v2 = ROTL32(v2, 22);                                            \
+        v0 -= v1;                                                       \
+        v1 -= v2;                                                       \
+        v1 = ROTL32(v1, 17);                                            \
+    } STMT_END
 
-#define ZAPHOD32_MIX(v0,v1,v2,text) STMT_START {                              \
-    ZAPHOD32_WARN4("v0=%08x v1=%08x v2=%08x - ZAPHOD32 %s MIX\n",                   \
-            (unsigned int)v0,(unsigned int)v1,(unsigned int)v2, text );  \
-    v0 = ROTL32(v0,16) - v2;   \
-    v1 = ROTR32(v1,13) ^ v2;   \
-    v2 = ROTL32(v2,17) + v1;   \
-    v0 = ROTR32(v0, 2) + v1;   \
-    v1 = ROTR32(v1,17) - v0;   \
-    v2 = ROTR32(v2, 7) ^ v0;   \
-} STMT_END
+#define ZAPHOD32_MIX(v0,v1,v2,text)                                         \
+    STMT_START {                                                            \
+        ZAPHOD32_WARN4("v0=%08x v1=%08x v2=%08x - ZAPHOD32 %s MIX\n",       \
+                (unsigned int)v0,(unsigned int)v1,(unsigned int)v2, text ); \
+        v0 = ROTL32(v0,16) - v2;                                            \
+        v1 = ROTR32(v1,13) ^ v2;                                            \
+        v2 = ROTL32(v2,17) + v1;                                            \
+        v0 = ROTR32(v0, 2) + v1;                                            \
+        v1 = ROTR32(v1,17) - v0;                                            \
+        v2 = ROTR32(v2, 7) ^ v0;                                            \
+    } STMT_END
 
 
 ZAPHOD32_STATIC_INLINE
@@ -132,7 +137,7 @@ void zaphod32_seed_state (
 ) {
     const U32 *seed= (const U32 *)seed_ch;
     U32 *state= (U32 *)state_ch;
-  
+
     /* hex expansion of PI, skipping first two digits. PI= 3.2[43f6...]
      *
      * PI value in hex from here:
@@ -150,14 +155,14 @@ void zaphod32_seed_state (
     if (!state[0]) state[0] = 1;
     if (!state[1]) state[1] = 2;
     if (!state[2]) state[2] = 4;
-    /* these are pseudo-randomly selected primes between 2**31 and 2**32
-     * (I generated a big list and then randomly chose some from the list) */
+    /* these are pseudo-randomly selected primes between 2**31 and 2**32 (I
+     * generated a big list and then randomly chose some from the list) */
     ZAPHOD32_SCRAMBLE32(state[0],0x9fade23b);
     ZAPHOD32_SCRAMBLE32(state[1],0xaa6f908d);
     ZAPHOD32_SCRAMBLE32(state[2],0xcdf6b72d);
 
-    /* now that we have scrambled we do some mixing to avalanche the
-     * state bits to gether */
+    /* now that we have scrambled we do some mixing
+     * to avalanche the state bits to gether */
     ZAPHOD32_MIX(state[0],state[1],state[2],"ZAPHOD32 SEED-STATE A 1/4");
     ZAPHOD32_MIX(state[0],state[1],state[2],"ZAPHOD32 SEED-STATE A 2/4");
     ZAPHOD32_MIX(state[0],state[1],state[2],"ZAPHOD32 SEED-STATE A 3/4");
@@ -239,7 +244,7 @@ U32 zaphod32_hash_with_state(
         return v0 ^ v2;
     }
 
-/*  if (len >= 8) */ /* this block is only reached by a goto above, so this condition
+/* if (len >= 8) */ /* this block is only reached by a goto above, so this condition
                         is commented out, but if the above block is removed it would
                         be necessary to use this. */
     {

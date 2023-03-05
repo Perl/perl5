@@ -13,31 +13,31 @@ typedef I32             Year;
 
 /* A copy of the tm struct but with a 64 bit year */
 struct TM64 {
-        int     tm_sec;
-        int     tm_min;
-        int     tm_hour;
-        int     tm_mday;
-        int     tm_mon;
-        Year    tm_year;
-        int     tm_wday;
-        int     tm_yday;
-        int     tm_isdst;
+    int         tm_sec;
+    int         tm_min;
+    int         tm_hour;
+    int         tm_mday;
+    int         tm_mon;
+    Year        tm_year;
+    int         tm_wday;
+    int         tm_yday;
+    int         tm_isdst;
 
 #ifdef HAS_TM_TM_GMTOFF
-        long    tm_gmtoff;
+    long        tm_gmtoff;
 #endif
 
 #ifdef HAS_TM_TM_ZONE
-        const char *tm_zone;
+    const char  *tm_zone;
 #endif
 };
 
 
 /* Decide which tm struct to use */
 #ifdef USE_TM64
-#define TM      TM64
+#define TM  TM64
 #else
-#define TM      tm
+#define TM  tm
 #endif
 
 

@@ -1,11 +1,11 @@
 /*    perlio.h
  *
- *    Copyright (C) 1996, 1997, 1999, 2000, 2001, 2002, 2003,
- *    2004, 2005, 2006, 2007, by Larry Wall and others
+ *    Copyright (C) 1996, 1997, 1999, 2000, 2001, 2002, 2003, 2004, 2005,
+ *    2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016,
+ *    2017, 2018, 2019, 2020, 2021, 2022 by Larry Wall and others
  *
  *    You may distribute under the terms of either the GNU General Public
  *    License or the Artistic License, as specified in the README file.
- *
  */
 
 #ifndef PERLIO_H_
@@ -21,7 +21,6 @@
                  PerlIO_xxx() are real functions
                  defined in perlio.c which implement extra functionality
                  required for utf8 support.
-
 */
 
 #ifndef USE_PERLIO
@@ -32,20 +31,20 @@
 #  error "stdio is no longer supported as the default base layer -- use perlio."
 #endif
 
-/*--------------------  End of Configure controls ---------------------------*/
+/*--------------------  End of Configure controls --------------------------- */
 
 /*
- * Although we may not want stdio to be used including <stdio.h> here
- * avoids issues where stdio.h has strange side effects
- */
+ * Although we may not want stdio to be used including <stdio.h>
+ * here avoids issues where stdio.h has strange side effects
+*/
 #include <stdio.h>
 
 #if defined(USE_64_BIT_STDIO) && defined(HAS_FTELLO) && !defined(USE_FTELL64)
-#define ftell ftello
+#define ftell       ftello
 #endif
 
 #if defined(USE_64_BIT_STDIO) && defined(HAS_FSEEKO) && !defined(USE_FSEEK64)
-#define fseek fseeko
+#define fseek       fseeko
 #endif
 
 /* BS2000 includes are sometimes a bit non standard :-( */
@@ -60,22 +59,22 @@
 typedef struct _PerlIO PerlIOl;
 typedef struct _PerlIO_funcs PerlIO_funcs;
 typedef PerlIOl *PerlIO;
-#define PerlIO PerlIO
-#define PERLIO_LAYERS 1
+#define PerlIO      PerlIO
+#define PERLIO_LAYERS   1
 
 /*
 =for apidoc_section $io
 =for apidoc Amu||PERLIO_FUNCS_DECL|PerlIO * ftab
-Declare C<ftab> to be a PerlIO function table, that is, of type
-C<PerlIO_funcs>.
+Declare C<ftab> to be a PerlIO function table, that is, of
+type C<PerlIO_funcs>.
 
 =for apidoc Ay|PerlIO_funcs *|PERLIO_FUNCS_CAST|PerlIO * func
 Cast the pointer C<func> to be of type S<C<PerlIO_funcs *>>.
 
 =cut
 */
-#define PERLIO_FUNCS_DECL(funcs) const PerlIO_funcs funcs
-#define PERLIO_FUNCS_CAST(funcs) (PerlIO_funcs*)(funcs)
+#define PERLIO_FUNCS_DECL(funcs)    const PerlIO_funcs funcs
+#define PERLIO_FUNCS_CAST(funcs)    (PerlIO_funcs*)(funcs)
 
 PERL_CALLCONV void PerlIO_define_layer(pTHX_ PerlIO_funcs *tab);
 PERL_CALLCONV PerlIO_funcs *PerlIO_find_layer(pTHX_ const char *name,
@@ -88,92 +87,91 @@ PERL_CALLCONV AV* PerlIO_get_layers(pTHX_ PerlIO *f);
 PERL_CALLCONV void PerlIO_clone(pTHX_ PerlInterpreter *proto,
                                 CLONE_PARAMS *param);
 
-#endif				/* PerlIO */
+#endif                          /* PerlIO */
 
 /* ----------- End of implementation choices  ---------- */
 
-/* We now need to determine  what happens if source trys to use stdio.
- * There are three cases based on PERLIO_NOT_STDIO which XS code
- * can set how it wants.
+/* We now need to determine what happens if source trys to
+ * use stdio.  There are three cases based on
+ * PERLIO_NOT_STDIO which XS code can set how it wants.
  */
 
 #ifdef PERL_CORE
-/* Make a choice for perl core code
-   - currently this is set to try and catch lingering raw stdio calls.
-     This is a known issue with some non UNIX ports which still use
-     "native" stdio features.
-*/
+/* Make a choice for perl core code - currently this is set to try
+   and catch lingering raw stdio calls.  This is a known issue with
+   some non UNIX ports which still use "native" stdio features.
+ */
 #  ifndef PERLIO_NOT_STDIO
-#    define PERLIO_NOT_STDIO 1
+#    define PERLIO_NOT_STDIO    1
 #  endif
 #else
 #  ifndef PERLIO_NOT_STDIO
-#    define PERLIO_NOT_STDIO 0
+#    define PERLIO_NOT_STDIO    0
 #  endif
 #endif
 
 #ifdef PERLIO_NOT_STDIO
 #if PERLIO_NOT_STDIO
 /*
- * PERLIO_NOT_STDIO #define'd as 1
- * Case 1: Strong denial of stdio - make all stdio calls (we can think of) errors
- */
+ * PERLIO_NOT_STDIO #define'd as 1 Case 1: Strong denial of
+ * stdio - make all stdio calls (we can think of) errors
+*/
 #include "nostdio.h"
-#else				/* if PERLIO_NOT_STDIO */
+#else                           /* if PERLIO_NOT_STDIO */
 /*
- * PERLIO_NOT_STDIO #define'd as 0
- * Case 2: Declares that both PerlIO and stdio can be used
- */
-#endif				/* if PERLIO_NOT_STDIO */
-#else				/* ifdef PERLIO_NOT_STDIO */
+ * PERLIO_NOT_STDIO #define'd as 0 Case 2: Declares
+ * that both PerlIO and stdio can be used
+*/
+#endif                          /* if PERLIO_NOT_STDIO */
+#else                           /* ifdef PERLIO_NOT_STDIO */
 /*
- * PERLIO_NOT_STDIO not defined
- * Case 3: Try and fake stdio calls as PerlIO calls
- */
+ * PERLIO_NOT_STDIO not defined Case 3: Try
+ * and fake stdio calls as PerlIO calls
+*/
 #include "fakesdio.h"
-#endif				/* ifndef PERLIO_NOT_STDIO */
+#endif                          /* ifndef PERLIO_NOT_STDIO */
 
 /* ----------- fill in things that have not got #define'd  ---------- */
 
 #ifndef Fpos_t
-#define Fpos_t Off_t
+#define Fpos_t  Off_t
 #endif
 
 #ifndef EOF
-#define EOF (-1)
+#define EOF     (-1)
 #endif
 
 /* This is to catch case with no stdio */
 #ifndef BUFSIZ
-#define BUFSIZ 1024
+#define BUFSIZ  1024
 #endif
 
 /* The default buffer size for the perlio buffering layer */
 #ifndef PERLIOBUF_DEFAULT_BUFSIZ
-#define PERLIOBUF_DEFAULT_BUFSIZ (BUFSIZ > 8192 ? BUFSIZ : 8192)
+#define PERLIOBUF_DEFAULT_BUFSIZ    (BUFSIZ > 8192 ? BUFSIZ : 8192)
 #endif
 
 #ifndef SEEK_SET
-#define SEEK_SET 0
+#define SEEK_SET        0
 #endif
 
 #ifndef SEEK_CUR
-#define SEEK_CUR 1
+#define SEEK_CUR        1
 #endif
 
 #ifndef SEEK_END
-#define SEEK_END 2
+#define SEEK_END        2
 #endif
 
-#define PERLIO_DUP_CLONE	1
-#define PERLIO_DUP_FD		2
+#define PERLIO_DUP_CLONE 1
+#define PERLIO_DUP_FD   2
 
 /* --------------------- Now prototypes for functions --------------- */
 
 START_EXTERN_C
 #ifndef __attribute__format__
 #  ifdef HASATTRIBUTE_FORMAT
-#    define __attribute__format__(x,y,z) __attribute__((format(x,y,z)))
+#    define __attribute__format__(x,y,z)    __attribute__((format(x,y,z)))
 #  else
 #    define __attribute__format__(x,y,z)
 #  endif
@@ -343,8 +341,8 @@ typedef struct PerlIO_list_s PerlIO_list_t;
 #endif
 
 END_EXTERN_C
-#endif				/* PERLIO_H_ */
+#endif                          /* PERLIO_H_ */
 
 /*
  * ex: set ts=8 sts=4 sw=4 et:
- */
+*/
