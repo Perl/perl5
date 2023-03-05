@@ -12633,7 +12633,8 @@ If C<is_format> is non-zero, the input is to be considered a format sub
 (a specialised sub used to implement perl's C<format> feature); else a
 normal C<sub>.
 
-C<flags> are added to the flags for C<PL_compcv>.
+C<flags> are added to the flags for C<PL_compcv>.  C<flags> may include the
+C<CVf_IsMETHOD> bit, which causes the new subroutine to be a method.
 
 This returns the value of C<PL_savestack_ix> that was in effect upon entry to
 the function;
@@ -12646,6 +12647,10 @@ Perl_start_subparse(pTHX_ I32 is_format, U32 flags)
 {
     const I32 oldsavestack_ix = PL_savestack_ix;
     CV* const outsidecv = PL_compcv;
+    bool is_method = flags & CVf_IsMETHOD;
+
+    if (is_method)
+        croak_kw_unless_class("method");
 
     SAVEI32(PL_subline);
     save_item(PL_subname);
@@ -12660,6 +12665,8 @@ Perl_start_subparse(pTHX_ I32 is_format, U32 flags)
     CvOUTSIDE_SEQ(PL_compcv) = PL_cop_seqmax;
     if (outsidecv && CvPADLIST(outsidecv))
         CvPADLIST(PL_compcv)->xpadl_outid = CvPADLIST(outsidecv)->xpadl_id;
+    if (is_method)
+        class_prepare_method_parse(PL_compcv);
 
     return oldsavestack_ix;
 }
