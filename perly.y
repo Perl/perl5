@@ -394,9 +394,6 @@ barestmt:	PLUGSTMT
 			  OP *body = $optsigsubbody;
 
 			  SvREFCNT_inc_simple_void(PL_compcv);
-			  if($sigsub_or_method_named == KW_METHOD_named) {
-			      body = class_wrap_method_body(body);
-			  }
 			  $subname->op_type == OP_CONST
 			      ? newATTRSUB($startsub, $subname, NULL, $subattrlist, body)
 			      : newMYSUB(  $startsub, $subname, NULL, $subattrlist, body)
@@ -425,7 +422,6 @@ barestmt:	PLUGSTMT
 
 			  switch($PHASER) {
 			      case KEY_ADJUST:
-			          body = class_wrap_method_body(body);
 			          cv = newATTRSUB($startsub, NULL, NULL, NULL, body);
 			          class_add_ADJUST(PL_curstash, cv);
 			          break;
@@ -1347,7 +1343,6 @@ anonymous
 			  OP *body = $sigsubbody;
 
 			  SvREFCNT_inc_simple_void(PL_compcv);
-			  body = class_wrap_method_body(body);
 			  $$ = newANONATTRSUB($startanonsub, NULL, $subattrlist, body);
 			}
     ;

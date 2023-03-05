@@ -10638,6 +10638,8 @@ Perl_newATTRSUB_x(pTHX_ I32 floor, OP *o, OP *proto, OP *attrs,
 
     if (block) {
         assert(PL_parser);
+        if (CvIsMETHOD(PL_compcv))
+            block = class_wrap_method_body(block);
         /* This makes sub {}; work as expected.  */
         if (block->op_type == OP_STUB) {
             const line_t l = PL_parser->copline;
