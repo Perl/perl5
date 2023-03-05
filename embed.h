@@ -1975,8 +1975,9 @@
 #   define my_pclose(a)                         Perl_my_pclose(aTHX_ a)
 #   define my_popen(a,b)                        Perl_my_popen(aTHX_ a,b)
 # endif /* !defined(PERL_IMPLICIT_SYS) */
-# if defined(PERL_IN_CLASS_C) || defined(PERL_IN_PAD_C) || \
-     defined(PERL_IN_PERLY_C) || defined(PERL_IN_TOKE_C)
+# if defined(PERL_IN_CLASS_C) || defined(PERL_IN_OP_C)    || \
+     defined(PERL_IN_PAD_C)   || defined(PERL_IN_PERLY_C) || \
+     defined(PERL_IN_TOKE_C)
 #   define class_add_ADJUST(a,b)                Perl_class_add_ADJUST(aTHX_ a,b)
 #   define class_add_field(a,b)                 Perl_class_add_field(aTHX_ a,b)
 #   define class_apply_attributes(a,b)          Perl_class_apply_attributes(aTHX_ a,b)
@@ -1988,8 +1989,9 @@
 #   define class_setup_stash(a)                 Perl_class_setup_stash(aTHX_ a)
 #   define class_wrap_method_body(a)            Perl_class_wrap_method_body(aTHX_ a)
 #   define croak_kw_unless_class(a)             Perl_croak_kw_unless_class(aTHX_ a)
-# endif /* defined(PERL_IN_CLASS_C) || defined(PERL_IN_PAD_C) || \
-           defined(PERL_IN_PERLY_C) || defined(PERL_IN_TOKE_C) */
+# endif /* defined(PERL_IN_CLASS_C) || defined(PERL_IN_OP_C)    || \
+           defined(PERL_IN_PAD_C)   || defined(PERL_IN_PERLY_C) || \
+           defined(PERL_IN_TOKE_C) */
 # if defined(PERL_IN_REGEX_ENGINE)
 #   define check_regnode_after(a,b)             Perl_check_regnode_after(aTHX_ a,b)
 #   define regnext(a)                           Perl_regnext(aTHX_ a)

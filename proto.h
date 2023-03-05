@@ -6198,8 +6198,9 @@ S_get_aux_mg(pTHX_ AV *av);
         assert(av)
 
 #endif /* defined(PERL_IN_AV_C) */
-#if defined(PERL_IN_CLASS_C) || defined(PERL_IN_PAD_C) || \
-    defined(PERL_IN_PERLY_C) || defined(PERL_IN_TOKE_C)
+#if defined(PERL_IN_CLASS_C) || defined(PERL_IN_OP_C)    || \
+    defined(PERL_IN_PAD_C)   || defined(PERL_IN_PERLY_C) || \
+    defined(PERL_IN_TOKE_C)
 PERL_CALLCONV void
 Perl_class_add_ADJUST(pTHX_ HV *stash, CV *cv);
 # define PERL_ARGS_ASSERT_CLASS_ADD_ADJUST      \
@@ -6253,8 +6254,9 @@ Perl_croak_kw_unless_class(pTHX_ const char *kw);
 # define PERL_ARGS_ASSERT_CROAK_KW_UNLESS_CLASS \
         assert(kw)
 
-#endif /* defined(PERL_IN_CLASS_C) || defined(PERL_IN_PAD_C) || \
-          defined(PERL_IN_PERLY_C) || defined(PERL_IN_TOKE_C) */
+#endif /* defined(PERL_IN_CLASS_C) || defined(PERL_IN_OP_C)    || \
+          defined(PERL_IN_PAD_C)   || defined(PERL_IN_PERLY_C) || \
+          defined(PERL_IN_TOKE_C) */
 #if defined(PERL_IN_DEB_C)
 STATIC void
 S_deb_stack_n(pTHX_ SV **stack_base, I32 stack_min, I32 stack_max, I32 mark_min, I32 mark_max);

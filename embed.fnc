@@ -3964,8 +3964,9 @@ i	|bool	|PerlEnv_putenv |NN char *str
 #if defined(PERL_IN_AV_C)
 S	|MAGIC *|get_aux_mg	|NN AV *av
 #endif /* defined(PERL_IN_AV_C) */
-#if defined(PERL_IN_CLASS_C) || defined(PERL_IN_PAD_C) || \
-    defined(PERL_IN_PERLY_C) || defined(PERL_IN_TOKE_C)
+#if defined(PERL_IN_CLASS_C) || defined(PERL_IN_OP_C)    || \
+    defined(PERL_IN_PAD_C)   || defined(PERL_IN_PERLY_C) || \
+    defined(PERL_IN_TOKE_C)
 ; Functions in class.c that are called by the parser (perly.c, toke.c, pad.c)
 Cp	|void	|class_add_ADJUST					\
 				|NN HV *stash				\
@@ -3993,8 +3994,9 @@ Cp	|OP *	|class_wrap_method_body 				\
 				|NULLOK OP *o
 Cp	|void	|croak_kw_unless_class					\
 				|NN const char *kw
-#endif /* defined(PERL_IN_CLASS_C) || defined(PERL_IN_PAD_C) || \
-          defined(PERL_IN_PERLY_C) || defined(PERL_IN_TOKE_C) */
+#endif /* defined(PERL_IN_CLASS_C) || defined(PERL_IN_OP_C)    || \
+          defined(PERL_IN_PAD_C)   || defined(PERL_IN_PERLY_C) || \
+          defined(PERL_IN_TOKE_C) */
 #if defined(PERL_IN_DEB_C)
 S	|void	|deb_stack_n	|NN SV **stack_base			\
 				|I32 stack_min				\
