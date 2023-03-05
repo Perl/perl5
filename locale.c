@@ -767,7 +767,8 @@ S_less_dicey_bool_setlocale_r(pTHX_ const int cat, const char * locale)
       * all instances of that have been removed */
 #    define QUERYLOCALE_ASSERT(index)                                       \
                         __ASSERT_(isSINGLE_BIT_SET(category_masks[index]))
-#    if ! defined(HAS_QUERYLOCALE) && defined(_NL_LOCALE_NAME)
+#    if ! defined(HAS_QUERYLOCALE) && (   defined(_NL_LOCALE_NAME)          \
+                                       && defined(HAS_NL_LANGINFO_L))
 #      define querylocale_l(index, locale_obj)                              \
             (QUERYLOCALE_ASSERT(index)                                      \
              mortalized_pv_copy(nl_langinfo_l(                              \
@@ -4185,36 +4186,8 @@ S_my_langinfo_i(pTHX_
  * implementation doesn't currently worry about it.  But it is a problem on
  * Windows boxes, which don't have nl_langinfo(). */
 
-#  if defined(HAS_THREAD_SAFE_NL_LANGINFO_L) && defined(USE_POSIX_2008_LOCALE)
-
-    /* Simplest is if we can use nl_langinfo_l()
-     *
-     * With it, we can change LC_CTYPE in the same call as the other category */
-#    ifdef USE_LOCALE_CTYPE
-#      define CTYPE_SAFETY_MASK LC_CTYPE_MASK
-#    else
-#      define CTYPE_SAFETY_MASK 0
-#    endif
-
-    locale_t cur = newlocale((category_masks[cat_index] | CTYPE_SAFETY_MASK),
-                             locale, (locale_t) 0);
-
-    retval = save_to_buffer(nl_langinfo_l(item, cur), retbufp, retbuf_sizep);
-
-    if (utf8ness) {
-        *utf8ness = get_locale_string_utf8ness_i(retval,
-                                                 LOCALE_UTF8NESS_UNKNOWN,
-                                                 locale, cat_index);
-    }
-
-    freelocale(cur);
-
-    return retval;
 /*--------------------------------------------------------------------------*/
-#  elif defined(HAS_NL_LANGINFO) /* nl_langinfo() is available.  */
-
-    /* The second version of my_langinfo() is if we have plain nl_langinfo() */
-
+#  if defined(HAS_NL_LANGINFO) /* nl_langinfo() is available.  */
 #    ifdef USE_LOCALE_CTYPE
 
     /* Ths function sorts out if things actually have to be switched or not,
