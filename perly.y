@@ -94,7 +94,7 @@
 %token <ival> PHASER
 
 %type <ival> grammar remember mremember
-%type <ival>  startsub startanonsub startformsub
+%type <ival>  startsub startanonsub startanonmethod startformsub
 
 %type <ival> mintro
 
@@ -773,6 +773,11 @@ startanonsub:	%empty	/* start an anonymous subroutine scope */
 			    SAVEFREESV(PL_compcv); }
 	;
 
+startanonmethod:	%empty	/* start an anonymous method scope */
+			{ $$ = start_subparse(FALSE, CVf_ANON|CVf_IsMETHOD);
+			    SAVEFREESV(PL_compcv); }
+	;
+
 startformsub:	%empty	/* start a format subroutine scope */
 			{ $$ = start_subparse(TRUE, 0);
 			    SAVEFREESV(PL_compcv); }
@@ -1333,17 +1338,10 @@ anonymous
 	|	KW_SUB_anon_sig startanonsub subattrlist sigsubbody %prec PERLY_PAREN_OPEN
 			{ SvREFCNT_inc_simple_void(PL_compcv);
 			  $$ = newANONATTRSUB($startanonsub, NULL, $subattrlist, $sigsubbody); }
-	|	KW_METHOD_anon startanonsub 
+	|	KW_METHOD_anon startanonmethod subattrlist sigsubbody %prec PERLY_PAREN_OPEN
 			{
-			  croak_kw_unless_class("method");
-			  class_prepare_method_parse(PL_compcv);
-			}
-		    subattrlist sigsubbody %prec PERLY_PAREN_OPEN
-			{
-			  OP *body = $sigsubbody;
-
 			  SvREFCNT_inc_simple_void(PL_compcv);
-			  $$ = newANONATTRSUB($startanonsub, NULL, $subattrlist, body);
+			  $$ = newANONATTRSUB($startanonmethod, NULL, $subattrlist, $sigsubbody);
 			}
     ;
 
