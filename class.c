@@ -792,7 +792,11 @@ Perl_class_seal_stash(pTHX_ HV *stash)
             ops = op_append_list(OP_LINESEQ, ops, fieldop);
         }
 
+        /* initfields CV should not get class_wrap_method_body() called on its
+         * body. pretend it isn't a method for now */
+        CvIsMETHOD_off(PL_compcv);
         CV *initfields = newATTRSUB(floor_ix, NULL, NULL, NULL, ops);
+        CvIsMETHOD_on(initfields);
 
         aux->xhv_class_initfields_cv = initfields;
     }
