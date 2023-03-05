@@ -55,6 +55,8 @@ See https://github.com/perl/Perl5/issues?q=+label%3Abackport-5.36
 
 <commit votes="steveh" id="d8a109ccd80350f5b83d0928d87032df3ec1b8dd" issue="20806" pull="" desc="Configure: don't probe for the malloc()/free() return type"/>
 
+<commit votes="craigb" id="144dfbc7545720fb0e6e8364370a991bdf8acf76" issue="" pull="" desc="Future proof archname on VMS"/>
+
 </div>
 
 <div><h3>Portability Fixes</h3>
