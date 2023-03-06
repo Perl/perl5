@@ -17,7 +17,7 @@ sub _carp {
     return warn @_, " at $file line $line\n";
 }
 
-our $VERSION = '1.302192';
+our $VERSION = '1.302193';
 
 use Test::Builder::Module;
 our @ISA    = qw(Test::Builder::Module);
@@ -394,8 +394,13 @@ different from some other value:
 
   isnt $obj, $clone, "clone() produces a different object";
 
-For those grammatical pedants out there, there's an C<isn't()>
-function which is an alias of C<isnt()>.
+Historically we supported an C<isn't()> function as an alias of
+C<isnt()>, however in Perl 5.37.9 support for the use of aprostrophe as
+a package separator was deprecated and by Perl 5.42.0 support for it
+will have been removed completely. Accordingly use of C<isn't()> is also
+deprecated, and will produce warnings when used unless 'deprecated'
+warnings are specifically disabled in the scope where it is used. You
+are strongly advised to migrate to using C<isnt()> instead.
 
 =cut
 
@@ -411,8 +416,24 @@ sub isnt ($$;$) {
     return $tb->isnt_eq(@_);
 }
 
-# make this available as isn't()
-*isn::t = \&isnt;
+# Historically it was possible to use apostrophes as a package
+# separator. make this available as isn't() for perl's that support it.
+# However in 5.37.9 the apostrophe as a package separator was
+# deprecated, so warn users of isn't() that they should use isnt()
+# instead. We assume that if they are calling isn::t() they are doing so
+# via isn't() as we have no way to be sure that they aren't spelling it
+# with a double colon. We only trigger the warning if deprecation
+# warnings are enabled, so the user can silence the warning if they
+# wish.
+sub isn::t {
+    if (warnings::enabled("deprecated")) {
+        _carp
+        "Use of apostrophe as package separator was deprecated in Perl 5.37.9,\n",
+        "and will be removed in Perl 5.42.0.  You should change code that uses\n",
+        "Test::More::isn't() to use Test::More::isnt() as a replacement";
+    }
+    goto &isnt;
+}
 
 =item B<like>
 
