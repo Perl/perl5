@@ -12,6 +12,9 @@ Revision history for the Perl extension Time::HiRes.
  - darwin: make sure the compiler can find the system perl headers
    https://github.com/Perl/perl5/issues/20362
  - darwin: make sure PERL_DARWIN is defined on darwin.
+ - don't compare stat and lstat atime if PERL_FILE_ATIME_CHANGES is set in
+   the environment.
+   https://github.com/Perl/perl5/issues/19321
 
 1.9764 [2020-08-10]
  - Fix a bunch of repeated-word typos
