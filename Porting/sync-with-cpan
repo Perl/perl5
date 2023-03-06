@@ -474,11 +474,13 @@ else {
     }
     $new_file = (split '/', $new_path) [-1];
 
-    $re_update = "Re-";
-    print "The latest version of $module is $new_version, but blead already has it.\n";
-    print "Continuing may update MANIFEST or other metadata so it may make sense to continue anyway.\n";
-    print "Are you sure you want to continue?\n";
-    pause_for_input();
+    if ($old_version eq $new_version) {
+        $re_update = "Re-";
+        print "The latest version of $module is $new_version, but blead already has it.\n";
+        print "Continuing may update MANIFEST or other metadata so it may make sense to continue anyway.\n";
+        print "Are you sure you want to continue?\n";
+        pause_for_input();
+    }
 
     my $url = "https://cpan.metacpan.org/authors/id/$new_path";
     say "Fetching $url";
