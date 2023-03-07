@@ -4603,6 +4603,7 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
     const char * const origparse = RExC_parse;
     I32 min;
     I32 max = REG_INFTY;
+    I32 npar_before = RExC_npar-1;
 
     /* Save the original in case we change the emitted regop to a FAIL. */
     const regnode_offset orig_emit = RExC_emit;
@@ -4618,6 +4619,7 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
         RETURN_FAIL_ON_RESTART_OR_FLAGS(flags, flagp, TRYAGAIN);
         FAIL2("panic: regatom returned failure, flags=%#" UVxf, (UV) flags);
     }
+    I32 npar_after = RExC_npar-1;
 
     op = *RExC_parse;
     switch (op) {
@@ -4782,6 +4784,17 @@ S_regpiece(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 
     ARG1_SET(REGNODE_p(ret), min);
     ARG2_SET(REGNODE_p(ret), max);
+
+    /* if we had a npar_after then we need to increment npar_before,
+     * we want to track the range of parens we need to reset each iteration
+     */
+    if (npar_after!=npar_before) {
+        ARG3_SET(REGNODE_p(ret), (U16)npar_before+1);
+        ARG4_SET(REGNODE_p(ret), (U16)npar_after);
+    } else {
+        ARG3_SET(REGNODE_p(ret), 0);
+        ARG4_SET(REGNODE_p(ret), 0);
+    }
 
   done_main_op:
 

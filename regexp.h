@@ -67,6 +67,7 @@ struct reg_substr_data {
 typedef struct regexp_paren_pair {
     SSize_t start;
     SSize_t end;
+
     /* 'start_tmp' records a new opening position before the matching end
      * has been found, so that the old start and end values are still
      * valid, e.g.
@@ -184,14 +185,16 @@ typedef struct regexp {
 } regexp;
 
 
-#define RXp_PAREN_NAMES(rx)    ((rx)->paren_names)
+#define RXp_PAREN_NAMES(rx) ((rx)->paren_names)
 
-#define RXp_OFFS_START(rx,n)   ((rx)->offs[(n)].start)
+#define RXp_OFFS_START(rx,n) \
+     (rx)->offs[(n)].start
 
-#define RXp_OFFS_END(rx,n)     ((rx)->offs[(n)].end)
+#define RXp_OFFS_END(rx,n) \
+     (rx)->offs[(n)].end
 
 #define RXp_OFFS_VALID(rx,n) \
-    ( (rx)->offs[(n)].end != -1 && (rx)->offs[(n)].start != -1 )
+     ((rx)->offs[(n)].end >= 0 && (rx)->offs[(n)].start >= 0 )
 
 #define RX_OFFS_START(rx_sv,n)  RXp_OFFS_START(ReANY(rx_sv),n)
 #define RX_OFFS_END(rx_sv,n)    RXp_OFFS_END(ReANY(rx_sv),n)

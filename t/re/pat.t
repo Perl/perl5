@@ -27,7 +27,7 @@ skip_all_without_unicode_tables();
 
 my $has_locales = locales_enabled('LC_CTYPE');
 
-plan tests => 1231;  # Update this when adding/deleting tests.
+plan tests => 1240;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -2425,6 +2425,36 @@ SKIP:
             m/$pat/;
             print "ok";
         }, 'ok', {}, 'gh20826: test regex save stack overflow');
+    }
+    {
+        local $::TODO = "Not Yet Implemented";
+        my ($x, $y);
+        ok( "aaa" =~ /(?:(a)?\1)+/,
+            "GH Issue #18865 'aaa' - pattern matches");
+        $x = "($-[0],$+[0])";
+        ok( "aaa" =~ /(?:((?{})a)?\1)+/,
+            "GH Issue #18865 'aaa' - deoptimized pattern matches");
+        $y = "($-[0],$+[0])";
+        is( $y, $x,
+            "GH Issue #18865 'aaa' - test optimization");
+
+        ok( "ababab" =~ /(?:(?:(ab))?\1)+/,
+            "GH Issue #18865 'ababab' - pattern matches");
+        $x = "($-[0],$+[0])";
+        ok( "ababab" =~ /(?:(?:((?{})ab))?\1)+/,
+            "GH Issue #18865 'ababab' - deoptimized pattern matches");
+        $y = "($-[0],$+[0])";
+        is( $y, $x,
+            "GH Issue #18865 'ababab' - test optimization");
+
+        ok( "XaaXbbXb" =~ /(?:X([ab])?\1)+/,
+            "GH Issue #18865 'XaaXbbXb' - pattern matches");
+        $x = "($-[0],$+[0])";
+        ok( "XaaXbbXb" =~ /(?:X((?{})[ab])?\1)+/,
+            "GH Issue #18865 'XaaXbbXb' - deoptimized pattern matches");
+        $y = "($-[0],$+[0])";
+        is( $y, $x,
+            "GH Issue #18865 'XaaXbbXb' - test optimization");
     }
 } # End of sub run_tests
 

@@ -478,7 +478,7 @@ a(?:b|c|d)+(.)	acdbcdbe	y	$1	e
 a(?:b|c|d){2}(.)	acdbcdbe	y	$1	b
 a(?:b|c|d){4,5}(.)	acdbcdbe	y	$1	b
 a(?:b|c|d){4,5}?(.)	acdbcdbe	y	$1	d
-((foo)|(bar))*	foobar	y	$1-$2-$3	bar-foo-bar
+((foo)|(bar))*	foobar	Ty	$1-$2-$3	bar--bar		# was bar-foo-bar prior to 5.37.7
 :(?:	-	c	-	Sequence (? incomplete
 a(?:b|c|d){6,7}(.)	acdbcdbe	y	$1	e
 a(?:b|c|d){6,7}?(.)	acdbcdbe	y	$1	e
@@ -501,7 +501,7 @@ a(?:b|(c|e){1,2}?|d)+?(.)	ace	y	$1$2	ce
 ((a{4})+)	aaaaaaaaa	y	$1	aaaaaaaa
 (((aa){2})+)	aaaaaaaaaa	y	$1	aaaaaaaa
 (((a{2}){2})+)	aaaaaaaaaa	y	$1	aaaaaaaa
-(?:(f)(o)(o)|(b)(a)(r))*	foobar	y	$1:$2:$3:$4:$5:$6	f:o:o:b:a:r
+(?:(f)(o)(o)|(b)(a)(r))*	foobar	Ty	$1:$2:$3:$4:$5:$6	:::b:a:r
 (?<=a)b	ab	y	$&	b
 (?<=af?)b	ab	y	$&	b
 (?<=a)b	cb	n	-	-
@@ -2126,6 +2126,7 @@ AB\s+\x{100}	AB \x{100}X	y	-	-
 ((?|(?<a>a)(?-1)|(?<b>b)(?-1)|(?<c>c)(?-1)))	aa 	y	$1	aa		# GH 20653
 ((?|(?<a>a)(?-1)|(?<b>b)(?-1)|(?<c>c)(?-1)))	bb 	y	$1	bb		# GH 20653
 ((?|(?<a>a)(?-1)|(?<b>b)(?-1)|(?<c>c)(?-1)))	cc 	y	$1	cc		# GH 20653
+
 (?|(a)|(b))	b	y	$+	b		# GH 20912
 (?|(a)(?{$::plus_got=$+})|(b)(?{$::plus_got=$+}))	b	y	$::plus_got	b		# GH 20912
 (?|(a)|(b))	b	y	$^N	b		# GH 20912
@@ -2134,6 +2135,11 @@ AB\s+\x{100}	AB \x{100}X	y	-	-
 (?|(a)(?{$::plus_got=$+})|(b)(?{$::plus_got=$+}))	a	y	$::plus_got	a		# GH 20912
 (?|(a)|(b))	a	y	$^N	a		# GH 20912
 (?|(a)(?{$::caret_n_got=$^N})|(b)(?{$::caret_n_got=$^N}))	a	y	$::caret_n_got	a		# GH 20912
+
+/(([ab]+)|([cd]+)|([ef]+))+/	ace	y	$1-$2-$3-$4=$&	e---e=ace
+/(([ab]+)|([cd]+)|([ef]+))+/	aceb	Ty	$1-$2-$3-$4=$&	b-b--=aceb
+/(([ab]+)|([cd]+)|([ef]+))+/	acebd	Ty	$1-$2-$3-$4=$&	d--d-=acebd
+/(([ab]+)|([cd]+)|([ef]+))+/	acebdf	Ty	$1-$2-$3-$4=$&	f---f=acebdf
 # Keep these lines at the end of the file
 # pat	string	y/n/etc	expr	expected-expr	skip-reason	comment
 # vim: softtabstop=0 noexpandtab

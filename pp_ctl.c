@@ -381,9 +381,9 @@ Perl_rxres_save(pTHX_ void **rsp, REGEXP *rx)
 
     if (!p || p[1] < RX_NPARENS(rx)) {
 #ifdef PERL_ANY_COW
-        i = 7 + (RX_NPARENS(rx)+1) * 2;
+        i = 7 + (RX_NPARENS(rx)+1) * 4;
 #else
-        i = 6 + (RX_NPARENS(rx)+1) * 2;
+        i = 6 + (RX_NPARENS(rx)+1) * 4;
 #endif
         if (!p)
             Newx(p, i, UV);
