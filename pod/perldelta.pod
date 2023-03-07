@@ -27,6 +27,22 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 Some C<goto>s are now permitted in C<defer> and C<finally> blocks
+
+Perl version 5.36.0 added C<defer> blocks and permitted the C<finally> keyword
+to also add similar behaviour to C<try>/C<catch> syntax.  These did not permit
+any C<goto> expression within the body, as it could have caused control flow
+to jump out of the block.  Now, some C<goto> expressions are allowed, if they
+have a constant target label, and that label is found within the block.
+
+  use feature 'defer';
+
+  defer {
+    goto LABEL;
+    print "This does not execute\n";
+    LABEL: print "This does\n";
+  }
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
