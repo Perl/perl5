@@ -1226,7 +1226,7 @@ C<sv_force_normal> does nothing.
 #define SvTHINKFIRST(sv)	(SvFLAGS(sv) & SVf_THINKFIRST)
 
 #define SVs_PADMY		0
-#define SvPADMY(sv)		!(SvFLAGS(sv) & SVs_PADTMP)
+#define SvPADMY(sv)		(!(SvFLAGS(sv) & SVs_PADTMP))
 #ifndef PERL_CORE
 # define SvPADMY_on(sv)		SvPADTMP_off(sv)
 #endif
