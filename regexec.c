@@ -273,12 +273,12 @@ S_regcppush(pTHX_ const regexp *rex, I32 parenfloor, U32 maxopenparen _pDEPTH)
 	I32 p;
         for (p = parenfloor + 1; p <= (I32)maxopenparen; p++) {
             Perl_re_exec_indentf(aTHX_
-                "    \\%" UVuf ": %" IVdf "(%" IVdf ")..%" IVdf "\n",
+                "    \\%" UVuf " std %" IVdf " .. %" IVdf " tmp %" IVdf " (regcppush)\n",
                 depth,
                 (UV)p,
                 (IV)rex->offs[p].start,
-                (IV)rex->offs[p].start_tmp,
-                (IV)rex->offs[p].end
+                (IV)rex->offs[p].end,
+                (IV)rex->offs[p].start_tmp
             );
         }
     });
@@ -315,7 +315,7 @@ S_regcppush(pTHX_ const regexp *rex, I32 parenfloor, U32 maxopenparen _pDEPTH)
 
 /* set the start and end positions of capture ix */
 #define CLOSE_ANY_CAPTURE(rex, ix, s, e)                                    \
-    (rex)->offs[(ix)].start = (s);                                      \
+    (rex)->offs[(ix)].start = (s);                                          \
     (rex)->offs[(ix)].end = (e)
 
 #define CLOSE_CAPTURE(rex, ix, s, e)                                        \
@@ -344,8 +344,9 @@ S_regcppush(pTHX_ const regexp *rex, I32 parenfloor, U32 maxopenparen _pDEPTH)
         (UV)(rex->lastparen),               \
         (UV)(lcp)                           \
     ));                                     \
-    for (n = rex->lastparen; n > lp; n--)   \
+    for (n = rex->lastparen; n > lp; n--) { \
         rex->offs[n].end = -1;              \
+    }                                       \
     rex->lastparen = n;                     \
     rex->lastcloseparen = lcp;
 
@@ -399,12 +400,12 @@ S_regcppop(pTHX_ regexp *rex, U32 *maxopenparen_p _pDEPTH)
     DEBUG_BUFFERS_r(
         for (; paren <= *maxopenparen_p; ++paren) {
             Perl_re_exec_indentf(aTHX_
-                "    \\%" UVuf ": %" IVdf "(%" IVdf ")..%" IVdf "%s\n",
+                "    \\%" UVuf " std %" IVdf " .. %" IVdf " tmp %" IVdf "%s (regcppop)\n",
                 depth,
                 (UV)paren,
                 (IV)rex->offs[paren].start,
-                (IV)rex->offs[paren].start_tmp,
                 (IV)rex->offs[paren].end,
+                (IV)rex->offs[paren].start_tmp,
                 (paren > rex->lastparen ? "(skipped)" : ""));
         }
     );
@@ -419,11 +420,12 @@ S_regcppop(pTHX_ regexp *rex, U32 *maxopenparen_p _pDEPTH)
      * this erroneously leaves $1 defined: "1" =~ /^(?:(\d)x)?\d$/
      * --jhi updated by dapm */
     for (i = rex->lastparen + 1; i <= rex->nparens; i++) {
-        if (i > *maxopenparen_p)
+        if (i > *maxopenparen_p) {
             rex->offs[i].start = -1;
+        }
         rex->offs[i].end = -1;
         DEBUG_BUFFERS_r( Perl_re_exec_indentf( aTHX_
-            "    \\%" UVuf ": %s   ..-1 undeffing\n",
+            "    \\%" UVuf ": %s   ..-1 undeffing (regcppop)\n",
             depth,
             (UV)i,
             (i > *maxopenparen_p) ? "-1" : "  "
@@ -3491,14 +3493,15 @@ S_reg_set_capture_string(pTHX_ REGEXP * const rx,
                 && !(prog->extflags & RXf_PMf_KEEPCOPY) /* //p */
                 && !(PL_sawampersand & SAWAMPERSAND_RIGHT)
             ) { /* don't copy $' part of string */
+                SSize_t offs_end;
                 U32 n = 0;
                 max = -1;
                 /* calculate the right-most part of the string covered
                  * by a capture. Due to lookahead, this may be to
                  * the right of $&, so we have to scan all captures */
                 while (n <= prog->lastparen) {
-                    if (prog->offs[n].end > max)
-                        max = prog->offs[n].end;
+                    if ((offs_end = RXp_OFFS_END(prog,n)) > max)
+                        max = offs_end;
                     n++;
                 }
                 if (max == -1)
@@ -6523,7 +6526,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
         case KEEPS: /*   \K  */
             /* update the startpoint */
-            st->u.keeper.val = rex->offs[0].start;
+            st->u.keeper.val = RXp_OFFS_START(rex,0);
             rex->offs[0].start = locinput - reginfo->strbeg;
             PUSH_STATE_GOTO(KEEPS_next, next, locinput, loceol,
                             script_run_begin);
@@ -7928,21 +7931,29 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             if (rex->logical_to_parno) {
                 n = rex->logical_to_parno[n];
                 do {
-                    if (rex->lastparen < n || rex->offs[n].start == -1 || rex->offs[n].end == -1) {
+                    if ( rex->lastparen < n ||
+                         RXp_OFFS_START(rex,n) == -1 ||
+                         RXp_OFFS_END(rex,n) == -1
+                    ) {
                         n = rex->parno_to_logical_next[n];
                     }
                     else {
                         break;
                     }
                 } while(n);
-                if (!n) sayNO;
+                
+                if (!n) /* this means there is nothing that matched */
+                    sayNO;
             }
 
           do_nref_ref_common:
+            reginfo->poscache_iter = reginfo->poscache_maxiter; /* Void cache */
+            if (rex->lastparen < n)
+                sayNO;
+
             ln = rex->offs[n].start;
             endref = rex->offs[n].end;
-            reginfo->poscache_iter = reginfo->poscache_maxiter; /* Void cache */
-            if (rex->lastparen < n || ln == -1 || endref == -1)
+            if (ln == -1 || endref == -1)
                 sayNO;			/* Do not match unless seen CLOSEn. */
             if (ln == endref)
                 break;
@@ -8727,18 +8738,20 @@ NULL
             /* see the discussion above about CURLYX/WHILEM */
             I32 n;
             int min, max;
+            // U16 first_paren, last_paren;
             regnode *A;
 
             assert(cur_curlyx); /* keep Coverity happy */
 
             min = ARG1(cur_curlyx->u.curlyx.me);
             max = ARG2(cur_curlyx->u.curlyx.me);
+            // first_paren = ARG3(cur_curlyx->u.curlyx.me);
+            // last_paren = ARG4(cur_curlyx->u.curlyx.me);
             A = REGNODE_AFTER(cur_curlyx->u.curlyx.me);
             n = ++cur_curlyx->u.curlyx.count; /* how many A's matched */
             ST.save_lastloc = cur_curlyx->u.curlyx.lastloc;
             ST.cache_offset = 0;
             ST.cache_mask = 0;
-
 
             DEBUG_EXECUTE_r( Perl_re_exec_indentf( aTHX_  "WHILEM: matched %ld out of %d..%d\n",
                   depth, (long)n, min, max)
@@ -12145,7 +12158,7 @@ Perl_reg_numbered_buff_length(pTHX_ REGEXP * const r, const SV * const sv,
                               const I32 paren)
 {
     struct regexp *const rx = ReANY(r);
-    I32 i;
+    I32 i,j;
     I32 s1, t1;
     I32 logical_nparens = rx->logical_nparens ? rx->logical_nparens : rx->nparens;
 
@@ -12184,10 +12197,10 @@ Perl_reg_numbered_buff_length(pTHX_ REGEXP * const r, const SV * const sv,
 
       case RX_BUFF_IDX_CARET_POSTMATCH: /* ${^POSTMATCH} */
       case RX_BUFF_IDX_POSTMATCH:       /* $' */
-        if ( (i = RXp_OFFS_END(rx,0)) != -1 ) {
-            i = rx->sublen - i;
+        if ( (j = RXp_OFFS_END(rx,0)) != -1 ) {
+            i = rx->sublen - j;
             if (i > 0) {
-                s1 = rx->offs[0].end;
+                s1 = j;
                 t1 = rx->sublen;
                 goto getlen;
             }

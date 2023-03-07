@@ -217,13 +217,29 @@ struct regnode_2L {
     I32 arg2;
 };
 
-/* 'Two field' -- Two 32 bit signed args */
+/* 'Two field' -- Two 32 bit signed args.
+ *  First fields must match regnode. Currently unused except to
+ *  facilitate regnode_4 behavior. Not simplifying that as this
+ *  node type could still be useful for other regops. */
 struct regnode_2 {
     U8	flags;
     U8  type;
     U16 next_off;
     I32 arg1;
     I32 arg2;
+};
+
+/* 'Four field' -- Two 32 bit signed args, Two 16 bit unsigned args
+ * Used for CURLY and CURLYX node types to track min/max and
+ * first_paren/last_paren. First fields must match regnode_2 */
+struct regnode_4 {
+    U8  flags;
+    U8  type;
+    U16 next_off;
+    I32 arg1;
+    I32 arg2;
+    U16 arg3;
+    U16 arg4;
 };
 
 #define REGNODE_BBM_BITMAP_LEN                                                  \
@@ -347,11 +363,15 @@ struct regnode_ssc {
 #define ARGp(p) ARGp_VALUE_inline(p)
 #define ARG1(p) ARG_VALUE(ARG1_LOC(p))
 #define ARG2(p) ARG_VALUE(ARG2_LOC(p))
+#define ARG3(p) ARG_VALUE(ARG3_LOC(p))
+#define ARG4(p) ARG_VALUE(ARG4_LOC(p))
 #define ARG2L(p) ARG_VALUE(ARG2L_LOC(p))
 
 #define ARG_SET(p, val) ARG__SET(ARG_LOC(p), (val))
 #define ARG1_SET(p, val) ARG__SET(ARG1_LOC(p), (val))
 #define ARG2_SET(p, val) ARG__SET(ARG2_LOC(p), (val))
+#define ARG3_SET(p, val) ARG__SET(ARG3_LOC(p), (val))
+#define ARG4_SET(p, val) ARG__SET(ARG4_LOC(p), (val))
 #define ARG2L_SET(p, val) ARG__SET(ARG2L_LOC(p), (val))
 #define ARGp_SET(p, val) ARGp_SET_inline((p),(val))
 
@@ -437,6 +457,8 @@ struct regnode_ssc {
 #define ARGp_BYTES_LOC(p)  (((struct regnode_p *)p)->arg1_sv_ptr_bytes)
 #define	ARG1_LOC(p)	(((struct regnode_2 *)p)->arg1)
 #define	ARG2_LOC(p)	(((struct regnode_2 *)p)->arg2)
+#define ARG3_LOC(p)     (((struct regnode_4 *)p)->arg3)
+#define ARG4_LOC(p)     (((struct regnode_4 *)p)->arg4)
 #define ARG2L_LOC(p)	(((struct regnode_2L *)p)->arg2)
 
 
