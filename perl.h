@@ -2698,7 +2698,7 @@ extern long double Perl_my_frexpl(long double x, int *e);
 #   define Perl_ldexp(x, y) ldexpq(x,y)
 #   define Perl_isinf(x) isinfq(x)
 #   define Perl_isnan(x) isnanq(x)
-#   define Perl_isfinite(x) !(isnanq(x) || isinfq(x))
+#   define Perl_isfinite(x) (!(isnanq(x) || isinfq(x)))
 #   define Perl_fp_class(x) ((x) == 0.0Q ? 0 : isinfq(x) ? 3 : isnanq(x) ? 4 : PERL_ABS(x) < FLT128_MIN ? 2 : 1)
 #   define Perl_fp_class_inf(x)    (Perl_fp_class(x) == 3)
 #   define Perl_fp_class_nan(x)    (Perl_fp_class(x) == 4)
@@ -3025,7 +3025,7 @@ extern long double Perl_my_frexpl(long double x, int *e);
 
 #ifndef Perl_isinf
 #   if defined(Perl_isfinite) && defined(Perl_isnan)
-#       define Perl_isinf(x) !(Perl_isfinite(x)||Perl_isnan(x))
+#       define Perl_isinf(x) (!(Perl_isfinite(x)||Perl_isnan(x)))
 #   endif
 #endif
 
@@ -3042,7 +3042,7 @@ extern long double Perl_my_frexpl(long double x, int *e);
 #    elif defined(HAS_FINITEL)
 #        define Perl_isfinitel(x) finitel(x)
 #    elif defined(HAS_ISINFL) && defined(HAS_ISNANL)
-#        define Perl_isfinitel(x) !(isinfl(x)||isnanl(x))
+#        define Perl_isfinitel(x) (!(isinfl(x)||isnanl(x)))
 #    else
 #        define Perl_isfinitel(x) ((x) * 0 == 0)  /* See Perl_isfinite. */
 #    endif
