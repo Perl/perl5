@@ -1,5 +1,17 @@
 Change log for encoding-warnings
 
+  - Converted Makefile.PL from using Module::Install to ExtUtils::MakeMaker
+
+0.14 - 2022-05-16
+
+  - Convert tests from Test.pm to Test::More
+
+0.13 - 2016-06-20
+
+  - Disable module on perl 5.26 and newer. Using it will be a no-op, but will
+    issue warnings.
+  - Skip tests on EBCDIC systems
+
 0.11 - 2007-06-05
 
   - This module's effect is now lexical for Perl 5.9.5 and later.
