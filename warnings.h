@@ -80,68 +80,72 @@
 #define WARN_IMPRECISION		 46
 #define WARN_ILLEGALPROTO		 47
 
+/* Warnings Categories added in Perl 5.011003 */
+
+#define WARN_DEPRECATED__UNICODE_PROPERTY_NAME 48
+
 /* Warnings Categories added in Perl 5.013 */
 
-#define WARN_NON_UNICODE		 48
-#define WARN_NONCHAR			 49
-#define WARN_SURROGATE			 50
+#define WARN_NON_UNICODE		 49
+#define WARN_NONCHAR			 50
+#define WARN_SURROGATE			 51
 
 /* Warnings Categories added in Perl 5.017 */
 
-#define WARN_EXPERIMENTAL		 51
-#define WARN_EXPERIMENTAL__REGEX_SETS	 52
+#define WARN_EXPERIMENTAL		 52
+#define WARN_EXPERIMENTAL__REGEX_SETS	 53
 
 /* Warnings Categories added in Perl 5.019 */
 
-#define WARN_SYSCALLS			 53
+#define WARN_SYSCALLS			 54
 
 /* Warnings Categories added in Perl 5.021 */
 
-#define WARN_EXPERIMENTAL__CONST_ATTR	 54
-#define WARN_EXPERIMENTAL__RE_STRICT	 55
-#define WARN_EXPERIMENTAL__REFALIASING	 56
-#define WARN_LOCALE			 57
-#define WARN_MISSING			 58
-#define WARN_REDUNDANT			 59
+#define WARN_EXPERIMENTAL__CONST_ATTR	 55
+#define WARN_EXPERIMENTAL__RE_STRICT	 56
+#define WARN_EXPERIMENTAL__REFALIASING	 57
+#define WARN_LOCALE			 58
+#define WARN_MISSING			 59
+#define WARN_REDUNDANT			 60
 
 /* Warnings Categories added in Perl 5.025 */
 
-#define WARN_EXPERIMENTAL__DECLARED_REFS 60
+#define WARN_EXPERIMENTAL__DECLARED_REFS 61
 
 /* Warnings Categories added in Perl 5.025011 */
 
-#define WARN_DEPRECATED__DOT_IN_INC	 61
+#define WARN_DEPRECATED__DOT_IN_INC	 62
 
 /* Warnings Categories added in Perl 5.027 */
 
-#define WARN_SHADOW			 62
+#define WARN_SHADOW			 63
 
 /* Warnings Categories added in Perl 5.029 */
 
-#define WARN_EXPERIMENTAL__PRIVATE_USE	 63
-#define WARN_EXPERIMENTAL__UNIPROP_WILDCARDS 64
-#define WARN_EXPERIMENTAL__VLB		 65
+#define WARN_EXPERIMENTAL__PRIVATE_USE	 64
+#define WARN_EXPERIMENTAL__UNIPROP_WILDCARDS 65
+#define WARN_EXPERIMENTAL__VLB		 66
 
 /* Warnings Categories added in Perl 5.033 */
 
-#define WARN_EXPERIMENTAL__TRY		 66
+#define WARN_EXPERIMENTAL__TRY		 67
 
 /* Warnings Categories added in Perl 5.035 */
 
-#define WARN_EXPERIMENTAL__ARGS_ARRAY_WITH_SIGNATURES 67
-#define WARN_EXPERIMENTAL__BUILTIN	 68
-#define WARN_EXPERIMENTAL__DEFER	 69
-#define WARN_EXPERIMENTAL__EXTRA_PAIRED_DELIMITERS 70
-#define WARN_EXPERIMENTAL__FOR_LIST	 71
-#define WARN_SCALAR			 72
+#define WARN_EXPERIMENTAL__ARGS_ARRAY_WITH_SIGNATURES 68
+#define WARN_EXPERIMENTAL__BUILTIN	 69
+#define WARN_EXPERIMENTAL__DEFER	 70
+#define WARN_EXPERIMENTAL__EXTRA_PAIRED_DELIMITERS 71
+#define WARN_EXPERIMENTAL__FOR_LIST	 72
+#define WARN_SCALAR			 73
 
 /* Warnings Categories added in Perl 5.037 */
 
-#define WARN_EXPERIMENTAL__CLASS	 73
+#define WARN_EXPERIMENTAL__CLASS	 74
 
 /* Warnings Categories added in Perl 5.037009 */
 
-#define WARN_DEPRECATED__SMARTMATCH	 74
+#define WARN_DEPRECATED__SMARTMATCH	 75
 #define WARNsize			 19
 #define WARN_ALLstring			 "\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125"
 #define WARN_NONEstring			 "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"
@@ -304,6 +308,7 @@ category parameters passed.
 =for apidoc Amnh||WARN_VOID
 =for apidoc Amnh||WARN_IMPRECISION
 =for apidoc Amnh||WARN_ILLEGALPROTO
+=for apidoc Amnh||WARN_DEPRECATED__UNICODE_PROPERTY_NAME
 =for apidoc Amnh||WARN_NON_UNICODE
 =for apidoc Amnh||WARN_NONCHAR
 =for apidoc Amnh||WARN_SURROGATE

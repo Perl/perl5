@@ -15657,7 +15657,7 @@ S_parse_uniprop_string(pTHX_
     if (table_index > MAX_UNI_KEYWORD_INDEX) {
         Size_t warning_offset = table_index / MAX_UNI_KEYWORD_INDEX;
         table_index %= MAX_UNI_KEYWORD_INDEX;
-        Perl_ck_warner_d(aTHX_ packWARN(WARN_DEPRECATED),
+        Perl_ck_warner_d(aTHX_ packWARN(WARN_DEPRECATED__UNICODE_PROPERTY_NAME),
                 "Use of '%.*s' in \\p{} or \\P{} is deprecated because: %s",
                 (int) name_len, name,
                 get_deprecated_property_msg(warning_offset));
