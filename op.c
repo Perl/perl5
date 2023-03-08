@@ -7914,7 +7914,7 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
         /* otherwise they are off */
         else {
             if(PL_prevailing_version >= SHORTVER(5, 11))
-                deprecate_fatal_in("5.40",
+                deprecate_fatal_in(WARN_DEPRECATED__VERSION_DOWNGRADE, "5.40",
                     "Downgrading a use VERSION declaration to below v5.11");
 
             if (!(PL_hints & HINT_EXPLICIT_STRICT_REFS))

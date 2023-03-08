@@ -81,6 +81,7 @@ my $TREE = {
                                 'deprecated::apostrophe_as_package_separator'   => [ 5.037009, DEFAULT_ON],
                                 'deprecated::delimiter_will_be_paired' => [ 5.035010, DEFAULT_ON],
                                 'deprecated::goto_construct'           => [ 5.011003, DEFAULT_ON],
+                                'deprecated::version_downgrade'        => [ 5.035009, DEFAULT_ON],
                         }],
         'void'          => [ 5.008, DEFAULT_OFF],
         'recursion'     => [ 5.008, DEFAULT_OFF],

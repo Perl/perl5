@@ -140,21 +140,25 @@
 #define WARN_EXPERIMENTAL__FOR_LIST	 73
 #define WARN_SCALAR			 74
 
+/* Warnings Categories added in Perl 5.035009 */
+
+#define WARN_DEPRECATED__VERSION_DOWNGRADE 75
+
 /* Warnings Categories added in Perl 5.03501 */
 
-#define WARN_DEPRECATED__DELIMITER_WILL_BE_PAIRED 75
+#define WARN_DEPRECATED__DELIMITER_WILL_BE_PAIRED 76
 
 /* Warnings Categories added in Perl 5.037 */
 
-#define WARN_EXPERIMENTAL__CLASS	 76
+#define WARN_EXPERIMENTAL__CLASS	 77
 
 /* Warnings Categories added in Perl 5.037009 */
 
-#define WARN_DEPRECATED__APOSTROPHE_AS_PACKAGE_SEPARATOR 77
+#define WARN_DEPRECATED__APOSTROPHE_AS_PACKAGE_SEPARATOR 78
 
 /* Warnings Categories added in Perl 5.03701 */
 
-#define WARN_DEPRECATED__SMARTMATCH	 78
+#define WARN_DEPRECATED__SMARTMATCH	 79
 #define WARNsize			 20
 #define WARN_ALLstring			 "\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125"
 #define WARN_NONEstring			 "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"
@@ -344,6 +348,7 @@ category parameters passed.
 =for apidoc Amnh||WARN_EXPERIMENTAL__EXTRA_PAIRED_DELIMITERS
 =for apidoc Amnh||WARN_EXPERIMENTAL__FOR_LIST
 =for apidoc Amnh||WARN_SCALAR
+=for apidoc Amnh||WARN_DEPRECATED__VERSION_DOWNGRADE
 =for apidoc Amnh||WARN_DEPRECATED__DELIMITER_WILL_BE_PAIRED
 =for apidoc Amnh||WARN_EXPERIMENTAL__CLASS
 =for apidoc Amnh||WARN_DEPRECATED__APOSTROPHE_AS_PACKAGE_SEPARATOR
