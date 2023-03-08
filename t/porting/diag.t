@@ -37,7 +37,7 @@ my @functions;
 foreach (@{(setup_embed())[0]}) {
   my $embed= $_->{embed}
     or next;
-  next unless $embed->{name}  =~ /warn|(?<!ov)err|(\b|_)die|croak/i;
+  next unless $embed->{name}  =~ /warn|(?<!ov)err|(\b|_)die|croak|deprecate/i;
   # Skip some known exceptions
   next if $embed->{name} =~ /croak_kw_unless_class/;
   # The flag p means that this function may have a 'Perl_' prefix
@@ -47,6 +47,7 @@ foreach (@{(setup_embed())[0]}) {
   push @functions, 'S_' . $embed->{name} if $embed->{flags} =~ /S/;
 };
 push @functions, 'Perl_mess';
+@functions = sort { length($b) <=> length($a) || $a cmp $b } @functions;
 push @functions, 'PERL_DIAG_(?<wrapper>\w+)';
 
 my $regcomp_fail_re = '\b(?:(?:Simple_)?v)?FAIL[2-4]?(?:utf8f)?\b';
@@ -59,6 +60,7 @@ my $text_re = '"(?<text>(?:\\\\"|[^"]|"\s*[A-Z_]+\s*")*)"';
 my $source_msg_call_re = qr/$source_msg_re(?:_nocontext)? \s*
     \( (?: \s* Perl_form \( )? (?:aTHX_)? \s*
     (?:packWARN\d*\((?<category>.*?)\),)? \s*
+    (?:(?<category>WARN_DEPRECATED__\w+)\s*,(?:\s*"5\.\d+"\s*,)?)? \s*
     $text_re /x;
 my $bad_version_re = qr{BADVERSION\([^"]*$text_re};
    $regcomp_fail_re = qr/$regcomp_fail_re\([^"]*$text_re/;
@@ -367,6 +369,9 @@ sub check_file {
         $routine = "Perl_warner" if $wrapper=~/WARN/;
         $routine = "yyerror" if $wrapper=~/DIE/;
       }
+      if ($routine=~/^deprecate/) {
+        $name .= " is deprecated";
+      }
       # diag(Dumper(\%+,{category=>$category, routine=>$routine, name=>$name}));
       # Sometimes the regexp will pick up too much for the category
       # e.g., WARN_UNINITIALIZED), PL_warn_uninit_sv ... up to the next )
@@ -414,6 +419,7 @@ sub check_file {
                  :  $routine =~ /ckWARN\d*reg_d/? 'S'
                  :  $routine =~ /ckWARN\d*reg/ ?  'W'
                  :  $routine =~ /vWARN\d/      ? '[WDS]'
+                 :  $routine =~ /^deprecate/   ? '[WDS]'
                  :                             '[PFX]';
     my $categories;
     if (defined $category) {
@@ -508,14 +514,20 @@ sub check_message {
         state %qrs;
         my $qr = $qrs{$severity} ||= qr/$severity/;
 
+        my $pod_line = $entries{$key}{line_number} // "";
+
+        if ($pod_line) {
+            $pod_line = ", at perldiag.pod line $pod_line";
+        }
+
         like($entries{$key}{severity}, $qr,
           ($severity =~ /\[/
             ? "severity is one of $severity"
-            : "severity is $severity") . "for '$name' at $codefn line $.");
+            : "severity is $severity") . "for '$name' at $codefn line $.$pod_line");
 
         is($entries{$key}{category}, $categories,
            ($categories ? "categories are [$categories]" : "no category")
-             . " for '$name' at $codefn line $.");
+             . " for '$name' at $codefn line $.$pod_line");
       }
     } elsif ($partial) {
       # noop
