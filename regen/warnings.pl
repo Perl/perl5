@@ -75,9 +75,10 @@ my $TREE = {
                                 'malloc'        => [ 5.008, DEFAULT_ON],
                            }],
         'deprecated'    => [ 5.008, DEFAULT_ON, {
-                                'deprecated::smartmatch' => [ 5.037009, DEFAULT_ON],
+                                'deprecated::smartmatch' => [ 5.037010, DEFAULT_ON],
                                 'deprecated::dot_in_inc' => [ 5.025011, DEFAULT_ON],
                                 'deprecated::unicode_property_name' => [ 5.011003, DEFAULT_ON],
+                                'deprecated::apostrophe_as_package_separator'   => [ 5.037009, DEFAULT_ON],
                         }],
         'void'          => [ 5.008, DEFAULT_OFF],
         'recursion'     => [ 5.008, DEFAULT_OFF],

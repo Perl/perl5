@@ -4684,18 +4684,19 @@ with real files).
 
 =item Old package separator "'" deprecated
 
-(W deprecated, syntax) You used the old package separator "'" in a
-variable, subroutine or package name.  Support for the old package
-separator will be removed in Perl 5.40.
+(W deprecated::apostrophe_as_package_separator, syntax) You used the old package
+separator "'" in a variable, subroutine or package name. Support for the
+old package separator will be removed in Perl 5.42.
 
 =item Old package separator used in string
 
-(W deprecated, syntax) You used the old package separator, "'", in a variable
-named inside a double-quoted string; e.g., C<"In $name's house">.  This
-is equivalent to C<"In $name::s house">.  If you meant the former, put
-a backslash before the apostrophe (C<"In $name\'s house">).
+(W deprecated::apostrophe_as_package_separator, syntax) You used the old package
+separator, "'", in a variable named inside a double-quoted string; e.g.,
+C<"In $name's house">. This is equivalent to C<"In $name::s house">. If
+you meant the former, put a backslash before the apostrophe
+(C<"In $name\'s house">).
 
-Support for the old package separator will be removed in Perl 5.40.
+Support for the old package separator will be removed in Perl 5.42.
 
 =item Only scalar fields can take a :param attribute
 
