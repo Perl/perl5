@@ -2685,6 +2685,9 @@ PP(pp_shutdown)
     RETPUSHUNDEF;
 }
 
+#ifndef PERL_GETSOCKOPT_SIZE
+#define PERL_GETSOCKOPT_SIZE 1024
+#endif
 
 /* also used for: pp_gsockopt() */
 
@@ -2692,7 +2695,7 @@ PP(pp_ssockopt)
 {
     dSP;
     const int optype = PL_op->op_type;
-    SV * const sv = (optype == OP_GSOCKOPT) ? sv_2mortal(newSV(257)) : POPs;
+    SV * const sv = (optype == OP_GSOCKOPT) ? sv_2mortal(newSV(PERL_GETSOCKOPT_SIZE+1)) : POPs;
     const unsigned int optname = (unsigned int) POPi;
     const unsigned int lvl = (unsigned int) POPi;
     GV * const gv = MUTABLE_GV(POPs);
@@ -2711,14 +2714,14 @@ PP(pp_ssockopt)
         /* Note: there used to be an explicit SvGROW(sv,257) here, but
          * this is redundant given the sv initialization ternary above */
         (void)SvPOK_only(sv);
-        SvCUR_set(sv,256);
+        SvCUR_set(sv, PERL_GETSOCKOPT_SIZE);
         *SvEND(sv) ='\0';
         len = SvCUR(sv);
         if (PerlSock_getsockopt(fd, lvl, optname, SvPVX(sv), &len) < 0)
             goto nuts2;
 #if defined(_AIX)
         /* XXX Configure test: does getsockopt set the length properly? */
-        if (len == 256)
+        if (len == PERL_GETSOCKOPT_SIZE)
             len = sizeof(int);
 #endif
         SvCUR_set(sv, len);
