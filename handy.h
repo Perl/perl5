@@ -2961,11 +2961,11 @@ last-inclusive range.
 #ifdef PERL_CORE
 #  define deprecate(category,s) Perl_ck_warner_d(aTHX_ packWARN(category),    \
                                             "Use of " s " is deprecated")
-#  define deprecate_disappears_in(when,message) \
-              Perl_ck_warner_d(aTHX_ packWARN(WARN_DEPRECATED),    \
+#  define deprecate_disappears_in(category,when,message) \
+              Perl_ck_warner_d(aTHX_ packWARN(category),    \
                                message " is deprecated, and will disappear in Perl " when)
-#  define deprecate_fatal_in(when,message) \
-              Perl_ck_warner_d(aTHX_ packWARN(WARN_DEPRECATED),    \
+#  define deprecate_fatal_in(category,when,message) \
+              Perl_ck_warner_d(aTHX_ packWARN(category),    \
                                message " is deprecated, and will become fatal in Perl " when)
 #endif
 
