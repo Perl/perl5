@@ -1141,20 +1141,26 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
             }
         }
         break;
-    case '+':
+    case '+':                   /* $+ */
         if (PL_curpm && (rx = PM_GETRE(PL_curpm))) {
             paren = RX_LASTPAREN(rx);
-            if (paren)
+            if (paren) {
+                I32 *parno_to_logical = RX_PARNO_TO_LOGICAL(rx);
+                if (parno_to_logical)
+                    paren = parno_to_logical[paren];
                 goto do_numbuf_fetch;
+            }
         }
         goto set_undef;
-    case '\016':		/* ^N */
+    case '\016':		/* $^N */
         if (PL_curpm && (rx = PM_GETRE(PL_curpm))) {
             paren = RX_LASTCLOSEPAREN(rx);
-            if (RX_PARNO_TO_LOGICAL(rx))
-                paren = RX_PARNO_TO_LOGICAL(rx)[paren];
-            if (paren)
+            if (paren) {
+                I32 *parno_to_logical = RX_PARNO_TO_LOGICAL(rx);
+                if (parno_to_logical)
+                    paren = parno_to_logical[paren];
                 goto do_numbuf_fetch;
+            }
         }
         goto set_undef;
     case '.':
