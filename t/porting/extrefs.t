@@ -77,7 +77,8 @@ sub try_compile_and_link {
 	 . ' -DPERL_NO_INLINE_FUNCTIONS';
 
 	if ($^O eq "MSWin32") {
-	    $ccflags .= " -I../../win32 -I../../win32/include";
+	    $ccflags .= " -I../../win32 -I../../win32/include "
+             . "-I../../win32/full";
 	}
 
 	my $libs = '';
