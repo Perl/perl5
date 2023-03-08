@@ -14,6 +14,15 @@ features are available.
 The deprecated features will be grouped by the version of Perl in
 which they will be removed.
 
+=head2 Perl 5.42
+
+=head3 Smartmatch
+
+Smartmatch is now seen as a failed experiment and was marked as deprecated
+in Perl 5.37.10. This includes the C<when> and C<given> keywords, as well
+as the smartmatch operator C<~~>. The feature will be removed entirely in the
+Perl 5.42.0 production release.
+
 =head2 Perl 5.40
 
 =head3 Downgrading a C<use VERSION> to below v5.11
