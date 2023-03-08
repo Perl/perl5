@@ -6220,6 +6220,7 @@ t/porting/copyright.t			Check that copyright years match
 t/porting/corelist.t			Check that Module-CoreList has perl versions for the current perl
 t/porting/customized.dat		Data file for porting/customized.t
 t/porting/customized.t			Check all CUSTOMIZED files are as they should be
+t/porting/deprecation.t			Test that deprecation warnings are handled right
 t/porting/diag.t			Test completeness of perldiag.pod
 t/porting/dual-life.t			Check that dual-life bins are in utils/
 t/porting/exec-bit.t			Check that exec-bit bins are identified
