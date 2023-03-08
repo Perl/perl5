@@ -3335,7 +3335,7 @@ PP(pp_goto)
                     ? 2
                     : 1;
             if (enterops[i])
-                deprecate("\"goto\" to jump into a construct");
+                deprecate(WARN_DEPRECATED__GOTO_CONSTRUCT, "\"goto\" to jump into a construct");
         }
 
         /* pop unwanted frames */

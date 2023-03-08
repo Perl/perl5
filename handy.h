@@ -2959,7 +2959,7 @@ last-inclusive range.
    shortcut macro defined without -DPERL_CORE. Neither codesearch.google.com nor
    CPAN::Unpack show any users outside the core.  */
 #ifdef PERL_CORE
-#  define deprecate(s) Perl_ck_warner_d(aTHX_ packWARN(WARN_DEPRECATED),    \
+#  define deprecate(category,s) Perl_ck_warner_d(aTHX_ packWARN(category),    \
                                             "Use of " s " is deprecated")
 #  define deprecate_disappears_in(when,message) \
               Perl_ck_warner_d(aTHX_ packWARN(WARN_DEPRECATED),    \
