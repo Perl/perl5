@@ -7590,7 +7590,7 @@ repeatedly, the C</g> has no effect.
 
 =item Use of "goto" to jump into a construct is deprecated
 
-(D deprecated) Using C<goto> to jump from an outer scope into an inner
+(D deprecated::goto_construct) Using C<goto> to jump from an outer scope into an inner
 scope is deprecated and should be avoided.
 
 This was deprecated in Perl 5.12.
