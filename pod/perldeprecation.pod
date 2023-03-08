@@ -23,6 +23,14 @@ in Perl 5.37.10. This includes the C<when> and C<given> keywords, as well
 as the smartmatch operator C<~~>. The feature will be removed entirely in the
 Perl 5.42.0 production release.
 
+=head3 Use of C<'> as a global name separator.
+
+Perl allows use of C<'> instead of C<::> to replace the parts of a
+package or global variable name, for example C<A::B> and C<A'B> are
+equivalent.
+
+C<'> will no longer be recognized as a name separator in Perl 5.42.
+
 =head2 Perl 5.40
 
 =head3 Downgrading a C<use VERSION> to below v5.11
@@ -45,14 +53,6 @@ enabled implicitly. If you request a version < 5.11, strict will become
 disabled I<even if you had previously written> C<use strict>. This was not
 the previous behaviour of C<use VERSION>, which at present will track
 explicitly-enabled strictness flags independently.
-
-=head3 Use of C<'> as a global name separator.
-
-Perl allows use of C<'> instead of C<::> to replace the parts of a
-package or global variable name, for example C<A::B> and C<A'B> are
-equivalent.
-
-C<'> will no longer be recognized as a name separator in Perl 5.40.
 
 =head2 Perl 5.38
 
