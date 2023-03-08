@@ -428,7 +428,7 @@ RSC		= rc
 # Options
 #
 
-INCLUDES	= -I$(COREDIR) -I.\include -I. -I..
+INCLUDES	= -I.\include -I. -I..
 #PCHFLAGS	= -Fpc:\temp\vcmoduls.pch -YX
 DEFINES		= -DWIN32 -D_CONSOLE -DNO_STRICT
 LOCDEFS		= -DPERLDLL -DPERL_CORE
@@ -563,10 +563,10 @@ o = .obj
 .SUFFIXES : .c $(o) .cpp .asm .dll .lib .exe .rc .res
 
 .c$(o):
-	$(CC) -c -I$(<D) $(CFLAGS_O) $(OBJOUT_FLAG)$@ $<
+	$(CC) -c -I$(FULLDIR) -I$(<D) $(CFLAGS_O) $(OBJOUT_FLAG)$@ $<
 
 .c.i:
-	$(CC) -c -I$(<D) $(CFLAGS_O) -P $(OBJOUT_FLAG)$@ $<
+	$(CC) -c -I$(FULLDIR) -I$(<D) $(CFLAGS_O) -P $(OBJOUT_FLAG)$@ $<
 
 .y.c:
 	$(NOOP)
@@ -588,6 +588,8 @@ PERLSTATICLIB	= ..\perl539s.lib
 PERLDLL		= ..\perl539.dll
 
 MINIPERL	= ..\miniperl.exe
+# contains config.h for the full perl build
+FULLDIR		= .\full
 MINIDIR		= .\mini
 PERLEXE		= ..\perl.exe
 WPERLEXE	= ..\wperl.exe
@@ -775,8 +777,9 @@ CORE_NOCFG_H	=		\
 		.\include\sys\socket.h	\
 		.\win32.h
 
-CORE_H		= $(CORE_NOCFG_H) .\config.h ..\git_version.h
+CONFIG_H	= $(FULLDIR)\config.h
 MINI_CONFIG_H	= $(MINIDIR)\config.h
+CORE_H		= $(CORE_NOCFG_H) $(CONFIG_H) ..\git_version.h
 
 UUDMAP_H	= ..\uudmap.h
 BITCOUNT_H	= ..\bitcount.h
@@ -871,7 +874,7 @@ regnodes : ..\regnodes.h
 
 ..\regexec$(o) : ..\regnodes.h ..\regcharclass.h
 
-reonly : regnodes .\config.h ..\git_version.h $(GLOBEXE) $(CONFIGPM) \
+reonly : regnodes $(CONFIG_H) ..\git_version.h $(GLOBEXE) $(CONFIGPM) \
 	$(UNIDATAFILES) $(PERLEXE) Extensions_reonly
 	@echo	Perl and 're' are up to date.
 
@@ -912,10 +915,10 @@ $(CONFIGPM) : $(MINIPERL) ..\config.sh config_h.PL ..\git_version.h
 	$(XCOPY) ..\*.h $(COREDIR)\*.*
 	$(XCOPY) *.h $(COREDIR)\*.*
 	$(RCOPY) include $(COREDIR)\*.*
-	-$(MINIPERL) -I..\lib config_h.PL
-	if errorlevel 1 $(MAKE) /$(MAKEFLAGS) $(CONFIGPM)
+	if not exist "$(FULLDIR)" mkdir "$(FULLDIR)"
+	$(MINIPERL) -I..\lib config_h.PL "CONFIG_H=$(CONFIG_H)" 
 
-.\config.h : $(CONFIGPM)
+$(CONFIG_H) : $(CONFIGPM)
 
 # See the comment in Makefile.SH explaining this seemingly cranky ordering
 $(MINIPERL) : ..\lib\buildcustomize.pl
@@ -1038,7 +1041,7 @@ $(MINIWIN32_OBJ) : $(CORE_NOCFG_H)
 # This is the only file that depends on perlhost.h, vmem.h, and vdir.h
 !IF "$(USE_IMP_SYS)" == "define"
 perllib$(o)	: perllib.c .\perlhost.h .\vdir.h .\vmem.h
-	$(CC) -c -I. $(CFLAGS_O) $(CXX_FLAG) $(OBJOUT_FLAG)$@ perllib.c
+	$(CC) -c -I$(FULLDIR) -I. $(CFLAGS_O) $(CXX_FLAG) $(OBJOUT_FLAG)$@ perllib.c
 !ENDIF
 
 # We can't have miniperl.exe depend on git_version.h, as miniperl creates it
@@ -1050,7 +1053,7 @@ $(DLL_OBJ)	: $(CORE_H)
 
 perldll.def : $(MINIPERL) $(CONFIGPM) ..\embed.fnc ..\makedef.pl create_perllibst_h.pl ..\git_version.h
 	$(MINIPERL) -I..\lib create_perllibst_h.pl
-	$(MINIPERL) -I..\lib -w ..\makedef.pl PLATFORM=win32 $(OPTIMIZE) $(DEFINES) $(BUILDOPT) \
+	$(MINIPERL) -I..\lib -w ..\makedef.pl PLATFORM=win32 CONFIG_H=$(CONFIG_H) $(OPTIMIZE) $(DEFINES) $(BUILDOPT) \
 	    CCTYPE=$(CCTYPE) TARG_DIR=..\ > perldll.def
 
 $(PERLDLL): perldll.def $(PERLDLL_OBJ) $(PERLDLL_RES) Extensions_static
@@ -1085,13 +1088,13 @@ perlmain.c : runperl.c
 	copy runperl.c perlmain.c
 
 perlmain$(o) : perlmain.c
-	$(CC) $(CFLAGS_O:-DPERLDLL=-UPERLDLL) $(OBJOUT_FLAG)$@ -c perlmain.c
+	$(CC) -I$(FULLDIR) $(CFLAGS_O:-DPERLDLL=-UPERLDLL) $(OBJOUT_FLAG)$@ -c perlmain.c
 
 perlmainst.c : runperl.c
 	copy runperl.c perlmainst.c
 
 perlmainst$(o) : perlmainst.c
-	$(CC) $(CFLAGS_O) $(OBJOUT_FLAG)$@ -c perlmainst.c
+	$(CC) -I$(FULLDIR) $(CFLAGS_O) $(OBJOUT_FLAG)$@ -c perlmainst.c
 
 $(PERLEXE): $(PERLDLL) $(CONFIGPM) $(PERLEXE_OBJ) $(PERLEXE_RES)
 	$(LINK32) -out:$@ $(BLINK_FLAGS) \
@@ -1184,7 +1187,7 @@ utils: $(PERLEXE) ..\utils\Makefile
 	copy ..\pod\perldelta.pod ..\pod\perl5391delta.pod
 	cd ..\win32
 	$(PERLEXE) $(PL2BAT) $(UTILS)
-	$(MINIPERL) -I..\lib ..\autodoc.pl ..
+	$(MINIPERL) -I..\lib ..\autodoc.pl -c "win32\$(CONFIG_H)" ..
 	$(MINIPERL) -I..\lib ..\pod\perlmodlib.PL -q ..
 
 ..\pod\perltoc.pod: $(PERLEXE) Extensions Extensions_nonxs
@@ -1331,7 +1334,7 @@ $(UNIDATAFILES) ..\pod\perluniprops.pod : $(MINIPERL) $(CONFIGPM) ..\lib\unicore
 	cd ..\lib\unicore && \
 	..\$(MINIPERL) -I.. mktables -P ..\..\pod -maketest -makelist -p -check $@ $(FIRSTUNIFILE)
 
-minitest : .\config.h $(MINIPERL) ..\git_version.h $(GLOBEXE) $(CONFIGPM) $(UNIDATAFILES)
+minitest : $(CONFIG_H) $(MINIPERL) ..\git_version.h $(GLOBEXE) $(CONFIGPM) $(UNIDATAFILES)
 	$(XCOPY) $(MINIPERL) ..\t\$(NULL)
 	if exist ..\t\perl.exe del /f ..\t\perl.exe
 	rename ..\t\miniperl.exe perl.exe

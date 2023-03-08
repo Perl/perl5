@@ -5,6 +5,7 @@
 bin/*.bat
 html/
 mini/
+full/
 Extensions_static
 .coreheaders
 dlutils.c

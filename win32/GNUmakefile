@@ -808,10 +808,10 @@ a ?= .lib
 .SUFFIXES : .c .i $(o) .dll $(a) .exe .rc .res
 
 %$(o): %.c
-	$(CC) -c -I$(<D) $(CFLAGS_O) $(OBJOUT_FLAG)$@ $(PDBOUT) $<
+	$(CC) -c -I$(<D) -I$(FULLDIR) $(CFLAGS_O) $(OBJOUT_FLAG)$@ $(PDBOUT) $<
 
 %.i: %.c
-	$(CC) -c -I$(<D) $(CFLAGS_O) -E $< >$@
+	$(CC) -c -I$(<D) -I$(FULLDIR) $(CFLAGS_O) -E $< >$@
 
 %.c: %.y
 	$(NOOP)
@@ -835,6 +835,8 @@ endif
 #miniperl alone
 MINIPERL	= ..\miniperl.exe
 HAVEMINIPERL	= ..\lib\buildcustomize.pl
+# contains config.h for the full perl build
+FULLDIR		= full
 MINIDIR		= mini
 PERLEXE		= ..\perl.exe
 WPERLEXE	= ..\wperl.exe
@@ -1045,8 +1047,9 @@ CORE_NOCFG_H	=		\
 		.\include\sys\socket.h	\
 		.\win32.h
 
-CORE_H		= $(CORE_NOCFG_H) .\config.h ..\git_version.h
+CONFIG_H	= $(FULLDIR)\config.h
 MINI_CONFIG_H   = $(MINIDIR)\config.h
+CORE_H		= $(CORE_NOCFG_H) $(CONFIG_H) ..\git_version.h
 
 UUDMAP_H	= ..\uudmap.h
 BITCOUNT_H	= ..\bitcount.h
@@ -1177,7 +1180,7 @@ endif
 
 ..\regexec$(o) : ..\regnodes.h ..\regcharclass.h
 
-reonly : ..\regnodes.h .\config.h ..\git_version.h $(GLOBEXE) $(HAVEMINIPERL)\
+reonly : ..\regnodes.h $(CONFIG_H) ..\git_version.h $(GLOBEXE) $(HAVEMINIPERL)\
 	$(CONFIGPM) $(UNIDATAFILES) $(PERLEXE)				\
 	Extensions_reonly
 
@@ -1217,9 +1220,10 @@ regen_config_h:
 
 $(CONFIGPM): ..\config.sh config_h.PL ..\git_version.h
 	$(MINIPERL) -I..\lib ..\configpm --chdir=..
-	-$(MINIPERL) -I..\lib config_h.PL "ARCHPREFIX=$(ARCHPREFIX)"
+	if not exist "$(FULLDIR)" mkdir "$(FULLDIR)"
+	$(MINIPERL) -I..\lib config_h.PL "CONFIG_H=$(CONFIG_H)" "ARCHPREFIX=$(ARCHPREFIX)"
 
-.\config.h : $(CONFIGPM)
+$(CONFIG_H) : $(CONFIGPM)
 
 # See the comment in Makefile.SH explaining this seemingly cranky ordering
 ..\lib\buildcustomize.pl : $(MINI_OBJ) ..\write_buildcustomize.pl
@@ -1454,9 +1458,9 @@ $(MINIWIN32_OBJ) : $(CORE_NOCFG_H)
 
 perllib$(o)	: perllib.c perllibst.h .\perlhost.h .\vdir.h .\vmem.h
 ifeq ($(USE_IMP_SYS),define)
-	$(CC) -c -I. $(CFLAGS_O) $(CXX_FLAG) $(OBJOUT_FLAG)$@ $(PDBOUT) perllib.c
+	$(CC) -c -I$(FULLDIR) -I. $(CFLAGS_O) $(CXX_FLAG) $(OBJOUT_FLAG)$@ $(PDBOUT) perllib.c
 else
-	$(CC) -c -I. $(CFLAGS_O) $(OBJOUT_FLAG)$@ $(PDBOUT) perllib.c
+	$(CC) -c -I$(FULLDIR) -I. $(CFLAGS_O) $(OBJOUT_FLAG)$@ $(PDBOUT) perllib.c
 endif
 
 # We can't have miniperl.exe depend on git_version.h, as miniperl creates it
@@ -1473,7 +1477,7 @@ perllibst.h : $(HAVEMINIPERL) $(CONFIGPM) create_perllibst_h.pl
 	$(MINIPERL) -I..\lib create_perllibst_h.pl
 
 perldll.def : $(HAVEMINIPERL) $(CONFIGPM) ..\embed.fnc ..\makedef.pl
-	$(MINIPERL) -I..\lib -w ..\makedef.pl PLATFORM=win32 $(OPTIMIZE) $(DEFINES) \
+	$(MINIPERL) -I..\lib -w ..\makedef.pl PLATFORM=win32 CONFIG_H=$(CONFIG_H) $(OPTIMIZE) $(DEFINES) \
 	$(BUILDOPT) CCTYPE=$(CCTYPE) TARG_DIR=..\ > perldll.def
 
 $(PERLEXPLIB) : $(PERLIMPLIB)
@@ -1541,10 +1545,10 @@ MakePPPort : $(HAVEMINIPERL) $(CONFIGPM)
 	rem. > $@
 
 perlmain$(o) : runperl.c $(CONFIGPM)
-	$(CC) $(subst -DPERLDLL,-UPERLDLL,$(CFLAGS_O)) $(OBJOUT_FLAG)$@ $(PDBOUT) -c runperl.c
+	$(CC) -I$(FULLDIR) $(subst -DPERLDLL,-UPERLDLL,$(CFLAGS_O)) $(OBJOUT_FLAG)$@ $(PDBOUT) -c runperl.c
 
 perlmainst$(o) : runperl.c $(CONFIGPM)
-	$(CC) $(CFLAGS_O) $(OBJOUT_FLAG)$@ $(PDBOUT) -c runperl.c
+	$(CC) -I$(FULLDIR) $(CFLAGS_O) $(OBJOUT_FLAG)$@ $(PDBOUT) -c runperl.c
 
 $(PERLEXE): $(CONFIGPM) $(PERLEXE_OBJ) $(PERLEXE_RES) $(PERLIMPLIB)
 ifeq ($(CCTYPE),GCC)
@@ -1659,7 +1663,7 @@ utils: $(HAVEMINIPERL) ..\utils\Makefile
 	copy ..\README.win32    ..\pod\perlwin32.pod
 	copy ..\pod\perldelta.pod ..\pod\perl5391delta.pod
 	$(MINIPERL) -I..\lib $(PL2BAT) $(UTILS)
-	$(MINIPERL) -I..\lib ..\autodoc.pl ..
+	$(MINIPERL) -I..\lib ..\autodoc.pl -c "win32\$(CONFIG_H)" ..
 	$(MINIPERL) -I..\lib ..\pod\perlmodlib.PL -q ..
 
 ..\pod\perltoc.pod: $(PERLEXE) $(PERLDLL) Extensions Extensions_nonxs $(NORMALIZE_DYN) utils
@@ -1874,7 +1878,8 @@ _clean :
 	-@erase perlglob$(o)
 	-@erase perlmain$(o)
 	-@erase perlmainst$(o)
-	-@erase /f config.h
+	-@erase /f $(CONFIG_H)
+	-if exist $(FULLDIR) rmdir /s /q $(FULLDIR)
 	-@erase /f ..\git_version.h
 	-@erase $(GLOBEXE)
 	-@erase $(PERLEXE)

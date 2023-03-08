@@ -38,7 +38,6 @@ use warnings;
 my $fold;
 my %ARGS;
 my %define;
-
 BEGIN {
     %ARGS = (CCTYPE => 'MSVC', TARG_DIR => '');
 
@@ -52,7 +51,7 @@ BEGIN {
 	my $flag = shift;
 	if ($flag =~ /^(?:CC_FLAGS=)?(-D\w.*)/) {
 	    process_cc_flags($1);
-	} elsif ($flag =~ /^(CCTYPE|FILETYPE|PLATFORM|TARG_DIR)=(.+)$/) {
+	} elsif ($flag =~ /^(CCTYPE|FILETYPE|PLATFORM|TARG_DIR|CONFIG_H)=(.+)$/) {
 	    $ARGS{$1} = $2;
 	} elsif ($flag eq '--sort-fold') {
 	    ++$fold;
@@ -104,7 +103,7 @@ my %exportperlmalloc =
 
 my $exportperlmalloc = PLATFORM eq 'os2';
 
-my $config_h = 'config.h';
+my $config_h = $ARGS{CONFIG_H} || "config.h";
 open(CFG, '<', $config_h) || die "Cannot open $config_h: $!\n";
 while (<CFG>) {
     $define{$1} = 1 if /^\s*\#\s*define\s+(MYMALLOC|MULTIPLICITY

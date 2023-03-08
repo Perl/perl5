@@ -69,6 +69,12 @@ my %extra_input_pods = ( 'dist/ExtUtils-ParseXS/lib/perlxs.pod' => 1 );
 use strict;
 use warnings;
 
+my $config_h = 'config.h';
+if (@ARGV >= 2 && $ARGV[0] eq "-c") {
+    shift;
+    $config_h = shift;
+}
+
 my $nroff_min_indent = 4;   # for non-heading lines
 # 80 column terminal - 2 for pager adding 2 columns;
 my $max_width = 80 - 2 - $nroff_min_indent;
@@ -706,8 +712,6 @@ sub parse_config_h {
     use re '/aa';   # Everthing is ASCII in this file
 
     # Process config.h
-    my $config_h = 'config.h';
-    $config_h = 'win32/config.h' unless -e $config_h;
     die "Can't find $config_h" unless -e $config_h;
     open my $fh, '<', $config_h or die "Can't open $config_h: $!";
     while (<$fh>) {
