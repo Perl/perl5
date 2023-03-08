@@ -5,13 +5,13 @@
 #    lib/warnings.pm
 #    warnings.h
 #
-# from information hardcoded into this script (the $TREE hash), plus the
+# from information hardcoded into this script (the $WARNING_TREE hash), plus the
 # template for warnings.pm in the DATA section.
 #
 # When changing the number of warnings, t/op/caller.t should change to
 # correspond with the value of $BYTES in lib/warnings.pm
 #
-# With an argument of 'tree', just dump the contents of $TREE and exits.
+# With an argument of 'tree', just dump the contents of $WARNING_TREE and exits.
 # Also accepts the standard regen_lib -q and -v args.
 #
 # This script is normally invoked from regen.pl.
@@ -44,7 +44,7 @@ sub DEFAULT_OFF () { 2 }
 # created. But the warnings category 'io' WILL include all the mask bits
 # necessary to turn on 'pipe', 'unopened' etc.
 
-my $TREE = {
+our $WARNING_TREE = {
 'all' => [ 5.008, {
         'io'            => [ 5.008, {
                                 'pipe'          => [ 5.008, DEFAULT_OFF],
@@ -334,7 +334,7 @@ sub warningsTree
             if !ref $v || ref $v ne 'ARRAY' ;
 
         my $offset ;
-        if ($tree ne $TREE) {
+        if ($tree ne $WARNING_TREE) {
             $rv .= $prefix . "|\n" ;
             $rv .= $prefix . "+- $k" ;
             $offset = ' ' x ($max + 4) ;
@@ -404,149 +404,151 @@ sub mkOct
 
 
 ###########################################################################
+sub main {
 
-if (@ARGV && $ARGV[0] eq "tree")
-{
-    print warningsTree($TREE, "    ") ;
-    exit ;
-}
-
-my ($warn_h, $warn_pm) = map {
-    open_new($_, '>', { by => 'regen/warnings.pl' });
-} 'warnings.h', 'lib/warnings.pm';
-
-my ($index, $warn_size);
-
-# generate warnings.h
-
-print $warn_h warnings_h_boilerplate_1();
-
-$index = orderValues($TREE);
-
-die <<EOM if $index > 255 ;
-Too many warnings categories -- max is 255
-rewrite packWARN* & unpackWARN* macros
-EOM
-
-walk ($TREE) ;
-for (my $i = $index; $i & 3; $i++) {
-    push @{$CATEGORIES{all}}, $i;
-}
-
-$index *= 2 ;
-$warn_size = int($index / 8) + ($index % 8 != 0) ;
-
-my $k ;
-my $last_ver = 0;
-my @names;
-foreach $k (sort { $a <=> $b } keys %VALUE_TO_NAME) {
-    my ($name, $version) = @{ $VALUE_TO_NAME{$k} };
-    print $warn_h "\n/* Warnings Categories added in Perl $version */\n\n"
-        if $last_ver != $version ;
-    $name =~ y/:/_/;
-    $name = "WARN_$name";
-    print $warn_h tab(6, "#define $name"), " $k\n" ;
-    push @names, $name;
-    $last_ver = $version ;
-}
-
-print $warn_h tab(6, '#define WARNsize'),	" $warn_size\n" ;
-print $warn_h tab(6, '#define WARN_ALLstring'), ' "', ('\125' x $warn_size) , "\"\n" ;
-print $warn_h tab(6, '#define WARN_NONEstring'), ' "', ('\0' x $warn_size) , "\"\n" ;
-
-print $warn_h warnings_h_boilerplate_2();
-
-print $warn_h "\n\n/*\n" ;
-print $warn_h map { "=for apidoc Amnh||$_\n" } @names;
-print $warn_h "\n=cut\n*/\n\n" ;
-print $warn_h "/* end of file warnings.h */\n";
-
-read_only_bottom_close_and_rename($warn_h);
-
-
-# generate warnings.pm
-
-while (<DATA>) {
-    last if /^VERSION$/ ;
-    print $warn_pm $_ ;
-}
-
-print $warn_pm qq(our \$VERSION = "$::VERSION";\n);
-
-while (<DATA>) {
-    last if /^KEYWORDS$/ ;
-    print $warn_pm $_ ;
-}
-
-$last_ver = 0;
-print $warn_pm "our %Offsets = (" ;
-foreach my $k (sort { $a <=> $b } keys %VALUE_TO_NAME) {
-    my ($name, $version) = @{ $VALUE_TO_NAME{$k} };
-    $name = lc $name;
-    $k *= 2 ;
-    if ( $last_ver != $version ) {
-        print $warn_pm "\n";
-        print $warn_pm tab(6, "    # Warnings Categories added in Perl $version");
-        print $warn_pm "\n";
+    if (@ARGV && $ARGV[0] eq "tree")
+    {
+        print warningsTree($WARNING_TREE, "    ") ;
+        exit ;
     }
-    print $warn_pm tab(6, "    '$name'"), "=> $k,\n" ;
-    $last_ver = $version;
-}
 
-print $warn_pm ");\n\n" ;
+    my ($warn_h, $warn_pm) = map {
+        open_new($_, '>', { by => 'regen/warnings.pl' });
+    } 'warnings.h', 'lib/warnings.pm';
 
-print $warn_pm "our %Bits = (\n" ;
-foreach my $k (sort keys  %CATEGORIES) {
+    my ($index, $warn_size);
 
-    my $v = $CATEGORIES{$k} ;
-    my @list = sort { $a <=> $b } @$v ;
+    # generate warnings.h
 
-    print $warn_pm tab(6, "    '$k'"), '=> "',
-                mkHex($warn_size, map $_ * 2 , @list),
-                '", # [', mkRange(@list), "]\n" ;
-}
+    print $warn_h warnings_h_boilerplate_1();
 
-print $warn_pm ");\n\n" ;
+    $index = orderValues($WARNING_TREE);
 
-print $warn_pm "our %DeadBits = (\n" ;
-foreach my $k (sort keys  %CATEGORIES) {
+    die <<~EOM if $index > 255 ;
+    Too many warnings categories -- max is 255
+    rewrite packWARN* & unpackWARN* macros
+    EOM
 
-    my $v = $CATEGORIES{$k} ;
-    my @list = sort { $a <=> $b } @$v ;
-
-    print $warn_pm tab(6, "    '$k'"), '=> "',
-                mkHex($warn_size, map $_ * 2 + 1 , @list),
-                '", # [', mkRange(@list), "]\n" ;
-}
-
-print $warn_pm ");\n\n" ;
-
-print $warn_pm "our %NoOp = (\n" ;
-foreach my $k ( grep /\A[a-z:_]+\z/, sort keys %NO_BIT_FOR ) {
-    print $warn_pm tab(6, "    '$k'"), "=> 1,\n";
-}
-
-print $warn_pm ");\n\n" ;
-print $warn_pm "# These are used by various things, including our own tests\n";
-print $warn_pm tab(6, 'our $NONE'), '=  "', ('\0' x $warn_size) , "\";\n" ;
-print $warn_pm tab(6, 'our $DEFAULT'), '=  "',
-                    mkHex($warn_size, map $_ * 2, @DEFAULTS),
-                    '"; # [', mkRange(sort { $a <=> $b } @DEFAULTS), "]\n" ;
-print $warn_pm tab(6, 'our $LAST_BIT'), '=  ' . "$index ;\n" ;
-print $warn_pm tab(6, 'our $BYTES'),    '=  ' . "$warn_size ;\n" ;
-while (<DATA>) {
-    if ($_ eq "=for warnings.pl tree-goes-here\n") {
-      print $warn_pm warningsTree($TREE, "    ");
-      next;
+    walk ($WARNING_TREE) ;
+    for (my $i = $index; $i & 3; $i++) {
+        push @{$CATEGORIES{all}}, $i;
     }
-    print $warn_pm $_ ;
+
+    $index *= 2 ;
+    $warn_size = int($index / 8) + ($index % 8 != 0) ;
+
+    my $k ;
+    my $last_ver = 0;
+    my @names;
+    foreach $k (sort { $a <=> $b } keys %VALUE_TO_NAME) {
+        my ($name, $version) = @{ $VALUE_TO_NAME{$k} };
+        print $warn_h "\n/* Warnings Categories added in Perl $version */\n\n"
+            if $last_ver != $version ;
+        $name =~ y/:/_/;
+        $name = "WARN_$name";
+        print $warn_h tab(6, "#define $name"), " $k\n" ;
+        push @names, $name;
+        $last_ver = $version ;
+    }
+
+    print $warn_h tab(6, '#define WARNsize'),   " $warn_size\n" ;
+    print $warn_h tab(6, '#define WARN_ALLstring'), ' "', ('\125' x $warn_size) , "\"\n" ;
+    print $warn_h tab(6, '#define WARN_NONEstring'), ' "', ('\0' x $warn_size) , "\"\n" ;
+
+    print $warn_h warnings_h_boilerplate_2();
+
+    print $warn_h "\n\n/*\n" ;
+    print $warn_h map { "=for apidoc Amnh||$_\n" } @names;
+    print $warn_h "\n=cut\n*/\n\n" ;
+    print $warn_h "/* end of file warnings.h */\n";
+
+    read_only_bottom_close_and_rename($warn_h);
+
+
+    # generate warnings.pm
+
+    while (<DATA>) {
+        last if /^VERSION$/ ;
+        print $warn_pm $_ ;
+    }
+
+    print $warn_pm qq(our \$VERSION = "$::VERSION";\n);
+
+    while (<DATA>) {
+        last if /^KEYWORDS$/ ;
+        print $warn_pm $_ ;
+    }
+
+    $last_ver = 0;
+    print $warn_pm "our %Offsets = (" ;
+    foreach my $k (sort { $a <=> $b } keys %VALUE_TO_NAME) {
+        my ($name, $version) = @{ $VALUE_TO_NAME{$k} };
+        $name = lc $name;
+        $k *= 2 ;
+        if ( $last_ver != $version ) {
+            print $warn_pm "\n";
+            print $warn_pm tab(6, "    # Warnings Categories added in Perl $version");
+            print $warn_pm "\n";
+        }
+        print $warn_pm tab(6, "    '$name'"), "=> $k,\n" ;
+        $last_ver = $version;
+    }
+
+    print $warn_pm ");\n\n" ;
+
+    print $warn_pm "our %Bits = (\n" ;
+    foreach my $k (sort keys  %CATEGORIES) {
+
+        my $v = $CATEGORIES{$k} ;
+        my @list = sort { $a <=> $b } @$v ;
+
+        print $warn_pm tab(6, "    '$k'"), '=> "',
+                    mkHex($warn_size, map $_ * 2 , @list),
+                    '", # [', mkRange(@list), "]\n" ;
+    }
+
+    print $warn_pm ");\n\n" ;
+
+    print $warn_pm "our %DeadBits = (\n" ;
+    foreach my $k (sort keys  %CATEGORIES) {
+
+        my $v = $CATEGORIES{$k} ;
+        my @list = sort { $a <=> $b } @$v ;
+
+        print $warn_pm tab(6, "    '$k'"), '=> "',
+                    mkHex($warn_size, map $_ * 2 + 1 , @list),
+                    '", # [', mkRange(@list), "]\n" ;
+    }
+
+    print $warn_pm ");\n\n" ;
+
+    print $warn_pm "our %NoOp = (\n" ;
+    foreach my $k ( grep /\A[a-z:_]+\z/, sort keys %NO_BIT_FOR ) {
+        print $warn_pm tab(6, "    '$k'"), "=> 1,\n";
+    }
+
+    print $warn_pm ");\n\n" ;
+    print $warn_pm "# These are used by various things, including our own tests\n";
+    print $warn_pm tab(6, 'our $NONE'), '=  "', ('\0' x $warn_size) , "\";\n" ;
+    print $warn_pm tab(6, 'our $DEFAULT'), '=  "',
+                        mkHex($warn_size, map $_ * 2, @DEFAULTS),
+                        '"; # [', mkRange(sort { $a <=> $b } @DEFAULTS), "]\n" ;
+    print $warn_pm tab(6, 'our $LAST_BIT'), '=  ' . "$index ;\n" ;
+    print $warn_pm tab(6, 'our $BYTES'),    '=  ' . "$warn_size ;\n" ;
+    while (<DATA>) {
+        if ($_ eq "=for warnings.pl tree-goes-here\n") {
+          print $warn_pm warningsTree($WARNING_TREE, "    ");
+          next;
+        }
+        print $warn_pm $_ ;
+    }
+
+    read_only_bottom_close_and_rename($warn_pm);
+
+    exit(0);
 }
 
-read_only_bottom_close_and_rename($warn_pm);
-
-exit(0);
-
-
+main() unless caller();
 # -----------------------------------------------------------------
 
 sub warnings_h_boilerplate_1 { return <<'EOM'; }
