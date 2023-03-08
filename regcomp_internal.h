@@ -1060,21 +1060,21 @@ static const scan_data_t zero_scan_data = {
                                        m REPORT_LOCATION,               \
                                        REPORT_LOCATION_ARGS(loc)))      \
 
-#define vWARN_dep(loc, m)                                               \
-    _WARN_HELPER(loc, packWARN(WARN_DEPRECATED),                        \
-                      Perl_warner(aTHX_ packWARN(WARN_DEPRECATED),      \
-                                       m REPORT_LOCATION,               \
+#define vWARN_dep(loc,category,m)                                           \
+    _WARN_HELPER(loc, packWARN(category),                                   \
+                      Perl_warner(aTHX_ packWARN(category),                 \
+                                       m REPORT_LOCATION,                   \
                                        REPORT_LOCATION_ARGS(loc)))
 
-#define ckWARNdep(loc,m)                                                \
-    _WARN_HELPER(loc, packWARN(WARN_DEPRECATED),                        \
-                      Perl_ck_warner_d(aTHX_ packWARN(WARN_DEPRECATED), \
-                                            m REPORT_LOCATION,          \
+#define ckWARNdep(loc,category,m)                                           \
+    _WARN_HELPER(loc, packWARN(category),                                   \
+                      Perl_ck_warner_d(aTHX_ packWARN(category),            \
+                                            m REPORT_LOCATION,              \
                                             REPORT_LOCATION_ARGS(loc)))
 
-#define ckWARNregdep(loc,m)                                                 \
-    _WARN_HELPER(loc, packWARN2(WARN_DEPRECATED, WARN_REGEXP),              \
-                      Perl_ck_warner_d(aTHX_ packWARN2(WARN_DEPRECATED,     \
+#define ckWARNregdep(loc,category,m)                                        \
+    _WARN_HELPER(loc, packWARN2(category, WARN_REGEXP),                     \
+                      Perl_ck_warner_d(aTHX_ packWARN2(category,            \
                                                       WARN_REGEXP),         \
                                              m REPORT_LOCATION,             \
                                              REPORT_LOCATION_ARGS(loc)))
