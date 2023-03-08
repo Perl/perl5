@@ -7618,12 +7618,13 @@ only C.  This usually means there's a better way to do it in Perl.
 
 =item Use of '%s' is deprecated as a string delimiter
 
-(D deprecated) You used the given character as a starting delimiter of a
-string outside the scope of S<C<use feature 'extra_paired_delimiters'>>.
-This character is the mirror image of another Unicode character; within
-the scope of that feature, the two are considered a pair for delimitting
-strings.  It is planned to make that feature the default, at which point
-this usage would become illegal; hence this warning.
+(D deprecated::delimiter_will_be_paired) You used the given character as
+a starting delimiter of a string outside the scope of
+S<C<use feature 'extra_paired_delimiters'>>. This character is the
+mirror image of another Unicode character; within the scope of that
+feature, the two are considered a pair for delimitting strings. It is
+planned to make that feature the default, at which point this usage
+would become illegal; hence this warning.
 
 For now, you may live with this warning, or turn it off, but this code
 will no longer compile in a future version of Perl.  Or you can turn on
