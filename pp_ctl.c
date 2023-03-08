@@ -4894,7 +4894,7 @@ S_require_file(pTHX_ SV *sv)
             /* the complication is to match the logic from doopen_pm() so
              * we don't treat do "sda1" as a previously successful "do".
             */
-            bool do_warn = namesv && ckWARN_d(WARN_DEPRECATED)
+            bool do_warn = namesv && ckWARN_d(WARN_DEPRECATED__DOT_IN_INC)
                 && PerlLIO_stat(name, &st) == 0 && !S_ISDIR(st.st_mode) && !S_ISBLK(st.st_mode)
                 && (io = PerlIO_openn(aTHX_ ":", PERL_SCRIPT_MODE, -1, 0, 0, NULL, 1, &sv)) != NULL;
             if (io)
@@ -4902,7 +4902,7 @@ S_require_file(pTHX_ SV *sv)
 
             RESTORE_ERRNO;
             if (do_warn) {
-                Perl_warner(aTHX_ packWARN(WARN_DEPRECATED),
+                Perl_warner(aTHX_ packWARN(WARN_DEPRECATED__DOT_IN_INC),
                 "do \"%s\" failed, '.' is no longer in @INC; "
                 "did you mean do \"./%s\"?",
                 name, name);

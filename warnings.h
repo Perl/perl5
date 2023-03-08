@@ -108,36 +108,40 @@
 
 #define WARN_EXPERIMENTAL__DECLARED_REFS 60
 
+/* Warnings Categories added in Perl 5.025011 */
+
+#define WARN_DEPRECATED__DOT_IN_INC	 61
+
 /* Warnings Categories added in Perl 5.027 */
 
-#define WARN_SHADOW			 61
+#define WARN_SHADOW			 62
 
 /* Warnings Categories added in Perl 5.029 */
 
-#define WARN_EXPERIMENTAL__PRIVATE_USE	 62
-#define WARN_EXPERIMENTAL__UNIPROP_WILDCARDS 63
-#define WARN_EXPERIMENTAL__VLB		 64
+#define WARN_EXPERIMENTAL__PRIVATE_USE	 63
+#define WARN_EXPERIMENTAL__UNIPROP_WILDCARDS 64
+#define WARN_EXPERIMENTAL__VLB		 65
 
 /* Warnings Categories added in Perl 5.033 */
 
-#define WARN_EXPERIMENTAL__TRY		 65
+#define WARN_EXPERIMENTAL__TRY		 66
 
 /* Warnings Categories added in Perl 5.035 */
 
-#define WARN_EXPERIMENTAL__ARGS_ARRAY_WITH_SIGNATURES 66
-#define WARN_EXPERIMENTAL__BUILTIN	 67
-#define WARN_EXPERIMENTAL__DEFER	 68
-#define WARN_EXPERIMENTAL__EXTRA_PAIRED_DELIMITERS 69
-#define WARN_EXPERIMENTAL__FOR_LIST	 70
-#define WARN_SCALAR			 71
+#define WARN_EXPERIMENTAL__ARGS_ARRAY_WITH_SIGNATURES 67
+#define WARN_EXPERIMENTAL__BUILTIN	 68
+#define WARN_EXPERIMENTAL__DEFER	 69
+#define WARN_EXPERIMENTAL__EXTRA_PAIRED_DELIMITERS 70
+#define WARN_EXPERIMENTAL__FOR_LIST	 71
+#define WARN_SCALAR			 72
 
 /* Warnings Categories added in Perl 5.037 */
 
-#define WARN_EXPERIMENTAL__CLASS	 72
+#define WARN_EXPERIMENTAL__CLASS	 73
 
 /* Warnings Categories added in Perl 5.037009 */
 
-#define WARN_DEPRECATED__SMARTMATCH	 73
+#define WARN_DEPRECATED__SMARTMATCH	 74
 #define WARNsize			 19
 #define WARN_ALLstring			 "\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125"
 #define WARN_NONEstring			 "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"
@@ -313,6 +317,7 @@ category parameters passed.
 =for apidoc Amnh||WARN_MISSING
 =for apidoc Amnh||WARN_REDUNDANT
 =for apidoc Amnh||WARN_EXPERIMENTAL__DECLARED_REFS
+=for apidoc Amnh||WARN_DEPRECATED__DOT_IN_INC
 =for apidoc Amnh||WARN_SHADOW
 =for apidoc Amnh||WARN_EXPERIMENTAL__PRIVATE_USE
 =for apidoc Amnh||WARN_EXPERIMENTAL__UNIPROP_WILDCARDS
