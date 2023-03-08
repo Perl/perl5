@@ -10212,7 +10212,7 @@ S_parse_ident(pTHX_ char **s, char **d, char * const e, int allow_package,
         else
             break;
     }
-    if (UNLIKELY(saw_tick && tick_warn && ckWARN2_d(WARN_SYNTAX, WARN_DEPRECATED))) {
+    if (UNLIKELY(saw_tick && tick_warn && ckWARN2_d(WARN_SYNTAX, WARN_DEPRECATED__APOSTROPHE_AS_PACKAGE_SEPARATOR))) {
         if (PL_lex_state == LEX_INTERPNORMAL && !PL_lex_brackets) {
             char *this_d;
             char *d2;
@@ -10220,7 +10220,7 @@ S_parse_ident(pTHX_ char **s, char **d, char * const e, int allow_package,
             d2 = this_d;
             SAVEFREEPV(this_d);
 
-            Perl_warner(aTHX_ packWARN2(WARN_SYNTAX, WARN_DEPRECATED),
+            Perl_warner(aTHX_ packWARN2(WARN_SYNTAX, WARN_DEPRECATED__APOSTROPHE_AS_PACKAGE_SEPARATOR),
                         "Old package separator used in string");
             if (olds[-1] == '#')
                 *d2++ = olds[-2];
@@ -10238,7 +10238,7 @@ S_parse_ident(pTHX_ char **s, char **d, char * const e, int allow_package,
                         UTF8fARG(is_utf8, d2-this_d, this_d));
         }
         else {
-            Perl_warner(aTHX_ packWARN2(WARN_SYNTAX, WARN_DEPRECATED),
+            Perl_warner(aTHX_ packWARN2(WARN_SYNTAX, WARN_DEPRECATED__APOSTROPHE_AS_PACKAGE_SEPARATOR),
                         "Old package separator \"'\" deprecated");
         }
     }
