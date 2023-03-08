@@ -1630,7 +1630,7 @@
 #     define turkic_uc(a,b,c,d)                 S_turkic_uc(aTHX_ a,b,c,d)
 #     define unexpected_non_continuation_text(a,b,c,d) S_unexpected_non_continuation_text(aTHX_ a,b,c,d)
 #     if 0
-#       define warn_on_first_deprecated_use(a,b,c,d,e) S_warn_on_first_deprecated_use(aTHX_ a,b,c,d,e)
+#       define warn_on_first_deprecated_use(a,b,c,d,e,f) S_warn_on_first_deprecated_use(aTHX_ a,b,c,d,e,f)
 #     endif /* 0 */
 #   endif /* defined(PERL_IN_UTF8_C) */
 #   if defined(PERL_IN_UTIL_C)

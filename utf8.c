@@ -3316,7 +3316,8 @@ S_is_utf8_common(pTHX_ const U8 *const p, const U8 * const e,
 PERLVAR(I, seen_deprecated_macro, HV *)
 
 STATIC void
-S_warn_on_first_deprecated_use(pTHX_ const char * const name,
+S_warn_on_first_deprecated_use(pTHX_ U32 category,
+                                     const char * const name,
                                      const char * const alternative,
                                      const bool use_locale,
                                      const char * const file,
@@ -3326,7 +3327,7 @@ S_warn_on_first_deprecated_use(pTHX_ const char * const name,
 
     PERL_ARGS_ASSERT_WARN_ON_FIRST_DEPRECATED_USE;
 
-    if (ckWARN_d(WARN_DEPRECATED)) {
+    if (ckWARN_d(category)) {
 
         key = Perl_form(aTHX_ "%s;%d;%s;%d", name, use_locale, file, line);
         if (! hv_fetch(PL_seen_deprecated_macro, key, strlen(key), 0)) {
@@ -3340,14 +3341,14 @@ S_warn_on_first_deprecated_use(pTHX_ const char * const name,
             }
 
             if (instr(file, "mathoms.c")) {
-                Perl_warner(aTHX_ WARN_DEPRECATED,
+                Perl_warner(aTHX_ category,
                             "In %s, line %d, starting in Perl v5.32, %s()"
                             " will be removed.  Avoid this message by"
                             " converting to use %s().\n",
                             file, line, name, alternative);
             }
             else {
-                Perl_warner(aTHX_ WARN_DEPRECATED,
+                Perl_warner(aTHX_ category,
                             "In %s, line %d, starting in Perl v5.32, %s() will"
                             " require an additional parameter.  Avoid this"
                             " message by converting to use %s().\n",

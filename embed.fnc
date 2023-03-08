@@ -5875,6 +5875,7 @@ RS	|char * |unexpected_non_continuation_text			\
 				|const STRLEN expect_len
 # if 0
 S	|void	|warn_on_first_deprecated_use				\
+				|U32 category				\
 				|NN const char * const name		\
 				|NN const char * const alternative	\
 				|const bool use_locale			\

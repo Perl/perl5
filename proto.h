@@ -9523,7 +9523,7 @@ S_unexpected_non_continuation_text(pTHX_ const U8 * const s, STRLEN print_len, c
 
 # if 0
 STATIC void
-S_warn_on_first_deprecated_use(pTHX_ const char * const name, const char * const alternative, const bool use_locale, const char * const file, const unsigned line);
+S_warn_on_first_deprecated_use(pTHX_ U32 category, const char * const name, const char * const alternative, const bool use_locale, const char * const file, const unsigned line);
 #   define PERL_ARGS_ASSERT_WARN_ON_FIRST_DEPRECATED_USE \
         assert(name); assert(alternative); assert(file)
 
