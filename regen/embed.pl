@@ -105,7 +105,7 @@ sub generate_proto_h {
             die_at_end "flag $1 is not legal (for function $plain_func)";
         }
         my @nonnull;
-        my $args_assert_line = ( $flags !~ /G/ );
+        my $args_assert_line = ( $flags !~ /[Gm]/ );
         my $has_depth = ( $flags =~ /W/ );
         my $has_context = ( $flags !~ /T/ );
         my $never_returns = ( $flags =~ /r/ );

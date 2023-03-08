@@ -2955,18 +2955,37 @@ last-inclusive range.
 #define pTHX__VALUE
 #endif /* USE_ITHREADS */
 
-/* Perl_deprecate was not part of the public API, and did not have a deprecate()
-   shortcut macro defined without -DPERL_CORE. Neither codesearch.google.com nor
-   CPAN::Unpack show any users outside the core.  */
+/*
+ Perl_deprecate was not part of the public API, and did not have a deprecate()
+ shortcut macro defined without -DPERL_CORE. Neither codesearch.google.com nor
+ CPAN::Unpack show any users outside the core.
+
+=for apidoc_section $warning
+=for apidoc m||deprecate|U32 category|"construct"
+Wrapper around Perl_ck_warner_d() to produce a deprecated warning in the given
+category with an appropriate message. The C<construct> argument must be a C string.
+
+=for apidoc m||deprecate_disappears_in|U32 category|"when"|"construct"
+Wrapper around Perl_ck_warner_d() to produce a deprecated warning in the given
+category with an appropriate message that the construct will disappear in a specific
+release. The C<when> and C<construct> arguments must be a C string.
+
+=for apidoc m||deprecate_fatal_in|U32 category|"when"|"construct"
+Wrapper around Perl_ck_warner_d() to produce a deprecated warning in the given
+category with an appropriate message that the construct will become fatal in a specific
+release. The C<when> and C<construct> arguments must be a C string.
+
+*/
+
 #ifdef PERL_CORE
-#  define deprecate(category,s) Perl_ck_warner_d(aTHX_ packWARN(category),    \
-                                            "Use of " s " is deprecated")
-#  define deprecate_disappears_in(category,when,message) \
+#  define deprecate(category,construct) Perl_ck_warner_d(aTHX_ packWARN(category),    \
+                                            "Use of " construct " is deprecated")
+#  define deprecate_disappears_in(category,when,construct) \
               Perl_ck_warner_d(aTHX_ packWARN(category),    \
-                               message " is deprecated, and will disappear in Perl " when)
-#  define deprecate_fatal_in(category,when,message) \
+                               construct " is deprecated, and will disappear in Perl " when)
+#  define deprecate_fatal_in(category,when,construct) \
               Perl_ck_warner_d(aTHX_ packWARN(category),    \
-                               message " is deprecated, and will become fatal in Perl " when)
+                               construct " is deprecated, and will become fatal in Perl " when)
 #endif
 
 /* Internal macros to deal with gids and uids */
