@@ -37,7 +37,14 @@ sub sort_manifest {
     my @line_tuples;
     foreach my $idx (0 .. $#lines) {
         my $line = $lines[$idx];
-        $line =~ s/\t +/\t/;
+        # clean up tab/space issues
+        $line =~ s/\t[ ]+/\t/;
+        if ($line =~ s/^(\S+)([ ]\s+)(\S+.*)/$1\t/) {
+            my $descr = $2;
+            $descr =~ s/\t+/ /g;
+            $line .= $descr;
+        }
+        $line =~ s/\s+\z//;
         $line =~ /^(\S+)(?:\t+([^\t]*))?\z/
             or do {
                 $line =~ s/\t/\\t/g;
