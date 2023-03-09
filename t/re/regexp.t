@@ -181,7 +181,8 @@ foreach (@tests) {
 
     convert_from_ascii(\$expect);
     $expect  = eval qq("$expect"); die $@ if $@;
-    $expect = $repl = '-' if $skip_amp and $input =~ /\$[&\`\']/;
+    my $has_amp = $input =~ /\$[&\`\']/;
+    $expect = $repl = '-' if $skip_amp and $has_amp;
 
     my $todo_qr = $qr_embed_thr && ($result =~ s/t//);
     my $skip = ($skip_amp ? ($result =~ s/B//i) : ($result =~ s/B//));
@@ -218,7 +219,7 @@ foreach (@tests) {
     }
     $reason = 'skipping $&' if $reason eq  '' && $skip_amp;
     $result =~ s/B//i unless $skip;
-    my $todo= $result =~ s/T// ? " # TODO" : "";
+    my $todo= ($result =~ s/T// && (!$skip_amp || !$has_amp)) ? " # TODO" : "";
     my $testname= $test_num;
     if ($comment) {
         $comment=~s/^\s*(?:#\s*)?//;
