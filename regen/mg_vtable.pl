@@ -215,10 +215,9 @@ my %mg =
 );
 
 
-# %sig
+# %vtable_conf
 #
 # This hash is mainly concerned with populating the vtable.
-# (despite the name it has nothing to do with signals!)
 #
 # These have a subtly different "namespace" from the magic types.
 #
@@ -247,9 +246,9 @@ my %mg =
 #    dup
 #    local
 #       For each specified method, add a vtable function pointer
-#       of the form "Perl_magic_$sig{foo}{get}" etc
+#       of the form "Perl_magic_$vtable_conf{foo}{get}" etc
 
-my %sig =
+my %vtable_conf =
     (
      'sv' => {get => 'get', set => 'set'},
      'env' => {set => 'set_all_env', clear => 'clear_all_env'},
@@ -455,9 +454,9 @@ EOH
 }
 
 
-# Process %sig - everything goes to mg_vtable.h
+# Process %vtable_conf - everything goes to mg_vtable.h
 
-my @names = sort keys %sig;
+my @names = sort keys %vtable_conf;
 {
     my $want = join ",\n    ", (map {"want_vtbl_$_"} @names), 'magic_vtable_max';
     my $names = join qq{",\n    "}, @names;
@@ -505,7 +504,7 @@ my @vtable_names;
 my @aliases;
 
 while (my $name = shift @names) {
-    my $data = $sig{$name};
+    my $data = $vtable_conf{$name};
     push @vtable_names, $name;
     my @funcs = map {
         $data->{$_} ? "Perl_magic_$data->{$_}" : 0;
