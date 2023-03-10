@@ -3546,10 +3546,9 @@ PP(pp_helem)
         MAGIC *mg;
         HV *stash;
 
-        /* If we can determine whether the element exists,
-         * Try to preserve the existenceness of a tied hash
+        /* Try to preserve the existence of a tied hash
          * element by using EXISTS and DELETE if possible.
-         * Fallback to FETCH and STORE otherwise. */
+         * Fall back to FETCH and STORE otherwise. */
         if (SvCANEXISTDELETE(hv))
             preeminent = hv_exists_ent(hv, keysv, 0);
     }
@@ -3632,7 +3631,7 @@ S_softref2xv_lite(pTHX_ SV *const sv, const char *const what,
  * op_aux points to an array of unions of UV / IV / SV* / PADOFFSET.
  * Each of these either contains a set of actions, or an argument, such as
  * an IV to use as an array index, or a lexical var to retrieve.
- * Several actions re stored per UV; we keep shifting new actions off the
+ * Several actions are stored per UV; we keep shifting new actions off the
  * one UV, and only reload when it becomes zero.
  */
 
@@ -3647,7 +3646,7 @@ PP(pp_multideref)
     PL_multideref_pc = items;
 
     while (1) {
-        /* there are three main classes of action; the first retrieve
+        /* there are three main classes of action; the first retrieves
          * the initial AV or HV from a variable or the stack; the second
          * does the equivalent of an unrolled (/DREFAV, rv2av, aelem),
          * the third an unrolled (/DREFHV, rv2hv, helem).
@@ -3791,10 +3790,9 @@ PP(pp_multideref)
                         MAGIC *mg;
                         HV *stash;
 
-                        /* If we can determine whether the element exist,
-                         * Try to preserve the existenceness of a tied array
+                        /* Try to preserve the existence of a tied array
                          * element by using EXISTS and DELETE if possible.
-                         * Fallback to FETCH and STORE otherwise. */
+                         * Fall back to FETCH and STORE otherwise. */
                         if (SvCANEXISTDELETE(av))
                             preeminent = av_exists(av, elem);
                     }
@@ -3984,10 +3982,9 @@ PP(pp_multideref)
                         MAGIC *mg;
                         HV *stash;
 
-                        /* If we can determine whether the element exist,
-                         * Try to preserve the existenceness of a tied hash
+                        /* Try to preserve the existence of a tied hash
                          * element by using EXISTS and DELETE if possible.
-                         * Fallback to FETCH and STORE otherwise. */
+                         * Fall back to FETCH and STORE otherwise. */
                         if (SvCANEXISTDELETE(hv))
                             preeminent = hv_exists_ent(hv, keysv, 0);
                     }
@@ -5651,10 +5648,9 @@ PP(pp_aelem)
         MAGIC *mg;
         HV *stash;
 
-        /* If we can determine whether the element exist,
-         * Try to preserve the existenceness of a tied array
+        /* Try to preserve the existence of a tied array
          * element by using EXISTS and DELETE if possible.
-         * Fallback to FETCH and STORE otherwise. */
+         * Fall back to FETCH and STORE otherwise. */
         if (SvCANEXISTDELETE(av))
             preeminent = av_exists(av, elem);
     }
