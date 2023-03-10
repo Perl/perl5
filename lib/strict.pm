@@ -1,6 +1,6 @@
 package strict;
 
-$strict::VERSION = "1.12";
+$strict::VERSION = "1.13";
 
 my ( %bitmask, %explicit_bitmask );
 
@@ -37,16 +37,28 @@ BEGIN {
     *all_explicit_bits = sub () { $inline_all_explicit_bits };
 }
 
-sub bits {
-    my $bits = 0;
+sub _compute_bits {
+    my $bits = shift;
+    my $sense = shift;
+    my $apply_bits = $sense ? sub { $_[0] | $_[1] } : sub { $_[0] & ~$_[1] };
+    my $adverb = $_[0] // "";
+    my $proc_bits;
+    if($adverb eq "softly") {
+        shift;
+        $proc_bits = sub { $_[0] & $_[2] ? $_[0] : $apply_bits->($_[0], $_[1]) };
+    } elsif($adverb eq "forcing_softness") {
+        shift;
+        $proc_bits = sub { $apply_bits->($_[0] & ~$_[2], $_[1]) };
+    } else {
+        shift if $adverb eq "firmly";
+        $proc_bits = sub { $apply_bits->($_[0] | $_[2], $_[1]) };
+    }
     my @wrong;
+    @_ or @_ = qw(refs subs vars);
     foreach my $s (@_) {
-        if (exists $bitmask{$s}) {
-            $^H |= $explicit_bitmask{$s};
-
-            $bits |= $bitmask{$s};
-        }
-        else {
+        if(exists $bitmask{$s}) {
+            $bits = $proc_bits->($bits, $bitmask{$s}, $explicit_bitmask{$s});
+        } else {
             push @wrong, $s;
         }
     }
@@ -54,24 +66,19 @@ sub bits {
         require Carp;
         Carp::croak("Unknown 'strict' tag(s) '@wrong'");
     }
-    $bits;
+    return $bits;
 }
+
+sub bits { _compute_bits(0, 1, "softly", @_) }
 
 sub import {
     shift;
-    $^H |= @_ ? &bits : all_bits | all_explicit_bits;
+    $^H = _compute_bits($^H, 1, @_);
 }
 
 sub unimport {
     shift;
-
-    if (@_) {
-        $^H &= ~&bits;
-    }
-    else {
-        $^H &= ~all_bits;
-        $^H |= all_explicit_bits;
-    }
+    $^H = _compute_bits($^H, 0, @_);
 }
 
 1;
@@ -97,11 +104,29 @@ strict - Perl pragma to restrict unsafe constructs
 The C<strict> pragma disables certain Perl expressions that could behave
 unexpectedly or are difficult to debug, turning them into errors. The
 effect of this pragma is limited to the current file or scope block.
+C<no strict> can be used to reenable the dubious types of expression.
 
-If no import list is supplied, all possible restrictions are assumed.
-(This is the safest mode to operate in, but is sometimes too strict for
-casual programming.)  Currently, there are three possible things to be
-strict about:  "subs", "vars", and "refs".
+Usually it is best to write programs of more than a couple of lines
+with all strictures enabled at the top level, achieved by a simple
+C<use strict>.  This is the safest mode to operate in.  Where a stricture
+turns out to be counterproductive, one should then disable the specific
+kind of stricture in as small a scope as possible.  For example, if one
+needs to use a symbolic reference, one can write
+
+    $referent = do { no strict "refs"; $$name };
+
+so that symbolic references are permitted for the C<$$name> expression
+but remain prohibited in surrounding code.
+
+See L<perlmodlib/Pragmatic Modules>.
+
+=head2 Subjects
+
+The main arguments to the pragma are a list specifying which kinds
+of expression the stricture is to apply to.  Currently, there are
+three possible things to be strict about:  "subs", "vars", and "refs".
+If no such arguments are given then the stricture applies to all three
+categories.
 
 =over 6
 
@@ -165,7 +190,71 @@ operator applied to it.
 
 =back
 
-See L<perlmodlib/Pragmatic Modules>.
+=head2 Adverb
+
+The C<strict> pragma can optionally take an adverb before the (optional)
+list of subjects, to say how the declaration should interact with other
+declarations that affect strictures.  This is not useful when invoking
+C<strict> directly to apply to one's own code.  It has some value when
+setting up a lexical environment for someone else to use via C<eval>,
+and also when implementing a lexical pragma that has multiple lexical
+effects (a metapragma).  The adverb may be:
+
+=over 6
+
+=item B<firmly>
+
+The requested strictures are unconditionally turned on (or off, with
+C<no>), and qualify as firmly set.  This is the default if no adverb
+is given.
+
+=item B<softly>
+
+Any of the requested strictures that were not already firmly set are
+turned on (or off, with C<no>), and continue to not qualify as firmly set.
+Any that were already firmly set have their status unchanged.
+
+=item B<forcing_softness>
+
+The requested strictures are unconditionally turned on (or off, with
+C<no>), and no longer qualify as firmly set.
+
+=back
+
+C<no strict 'forcing_softness'> can be used to cancel the effects of all
+prior C<strict> declarations, returning the lexical stricture state to
+its default.  Specifically, this is needed for subsequent soft stricture
+declarations to take effect.
+
+=head2 Stricture implied by version declarations
+
+A L<C<use VERSION>|perlfunc/use VERSION> declaration has some effect
+on lexical stricture status.  If the specified Perl version is 5.37 or
+higher, strictures are firmly enabled, as if by a simple C<use strict>.
+If the version is 5.11 or higher but less than 5.37, then strictures are
+softly enabled, as if by C<use strict 'softly'>.  If the version is less
+than 5.11, then strictures are softly disabled, as if by C<no strict
+'softly'>.
+
+The version declarations have had these effects on strictures ever since
+Perl 5.15.6, which introduced the concept of soft stricture enablement.
+On Perls older than that the effects of version declarations was a bit
+different: if the version was 5.11 or higher then strictures would be
+firmly enabled, and if the version was less than 5.11 then strictures
+would be unaffected.  This change in meaning of version declarations
+for versions less than 5.15 was a historical mistake, which is now too
+firmly entrenched to rectify.  Beware, therefore, when using a version
+declaration with such a low version number.  Version declarations for
+version 5.16 or higher have no such problem, having always had the same
+effect on strictures that they do now.
+
+The main use of the B<softly> adverb to the C<strict> pragma is to
+imitate the effect of version declarations for versions less than 5.37.
+The concept of soft stricture enablement is now considered a poor
+design, and is not recommended for use in metapragmata that don't
+specifically need to imitate historical version declarations.  It is
+also not recommended to build a similar softness facility for a new
+pragma that controls anything else.
 
 =head1 HISTORY
 

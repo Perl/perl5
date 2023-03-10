@@ -3,7 +3,7 @@
 chdir 't' if -d 't';
 @INC = ( '.', '../lib' );
 
-our $local_tests = 4 + 3*3*38 + 3*11 + 3*18;
+our $local_tests = 4 + 3*42 + 3*12 + 3*3*38 + 3*11 + 3*18;
 require "../t/lib/common.pl";
 
 eval qq(use strict 'garbage');
@@ -46,6 +46,66 @@ sub test_strict_all {
                 \ while\ "strict\ subs"\ in\ use/x :
             qr/\A\z/,
         "\"$preamble\" yields strict subs @{[$expect_s ? q(on) : q(off)]}");
+}
+
+{
+    test_strict_all "use strict", "rvs";
+    test_strict_all "no strict", "";
+    test_strict_all "use strict; no strict", "";
+    test_strict_all "no strict; use strict", "rvs";
+    test_strict_all "use strict; no strict 'firmly'", "";
+    test_strict_all "no strict; use strict 'firmly'", "rvs";
+    test_strict_all "use strict; no strict 'softly';", "rvs";
+    test_strict_all "no strict; use strict 'softly';", "";
+    test_strict_all "use strict; no strict 'forcing_softness';", "";
+    test_strict_all "no strict; use strict 'forcing_softness';", "rvs";
+    test_strict_all "use strict 'firmly'", "rvs";
+    test_strict_all "no strict 'firmly'", "";
+    test_strict_all "use strict 'firmly'; no strict", "";
+    test_strict_all "no strict 'firmly'; use strict", "rvs";
+    test_strict_all "use strict 'firmly'; no strict 'firmly'", "";
+    test_strict_all "no strict 'firmly'; use strict 'firmly'", "rvs";
+    test_strict_all "use strict 'firmly'; no strict 'softly';", "rvs";
+    test_strict_all "no strict 'firmly'; use strict 'softly';", "";
+    test_strict_all "use strict 'firmly'; no strict 'forcing_softness';", "";
+    test_strict_all "no strict 'firmly'; use strict 'forcing_softness';", "rvs";
+    test_strict_all "use strict 'softly'", "rvs";
+    test_strict_all "no strict 'softly'", "";
+    test_strict_all "use strict 'softly'; no strict", "";
+    test_strict_all "no strict 'softly'; use strict", "rvs";
+    test_strict_all "use strict 'softly'; no strict 'firmly'", "";
+    test_strict_all "no strict 'softly'; use strict 'firmly'", "rvs";
+    test_strict_all "use strict 'softly'; no strict 'softly'", "";
+    test_strict_all "no strict 'softly'; use strict 'softly'", "rvs";
+    test_strict_all "use strict 'softly'; no strict 'forcing_softness'", "";
+    test_strict_all "no strict 'softly'; use strict 'forcing_softness'", "rvs";
+    test_strict_all "use strict 'forcing_softness'", "rvs";
+    test_strict_all "no strict 'forcing_softness'", "";
+    test_strict_all "use strict 'forcing_softness'; no strict", "";
+    test_strict_all "no strict 'forcing_softness'; use strict", "rvs";
+    test_strict_all "use strict 'forcing_softness'; no strict 'firmly'", "";
+    test_strict_all "no strict 'forcing_softness'; use strict 'firmly'", "rvs";
+    test_strict_all "use strict 'forcing_softness'; no strict 'softly'", "";
+    test_strict_all "no strict 'forcing_softness'; use strict 'softly'", "rvs";
+    test_strict_all "use strict 'forcing_softness'; no strict 'forcing_softness'", "";
+    test_strict_all "no strict 'forcing_softness'; use strict 'forcing_softness'", "rvs";
+    test_strict_all "use strict; no strict 'forcing_softness'; use strict 'softly'", "rvs";
+    test_strict_all "no strict; use strict 'forcing_softness'; no strict 'softly'", "";
+}
+
+{
+    test_strict_all "use strict 'refs'; no strict 'softly'", "r";
+    test_strict_all "use strict 'vars'; no strict 'softly'", "v";
+    test_strict_all "use strict 'subs'; no strict 'softly'", "s";
+    test_strict_all "no strict 'refs'; use strict 'softly'", "vs";
+    test_strict_all "no strict 'vars'; use strict 'softly'", "rs";
+    test_strict_all "no strict 'subs'; use strict 'softly'", "rv";
+    test_strict_all "use strict softly => 'refs'", "r";
+    test_strict_all "use strict softly => 'vars'", "v";
+    test_strict_all "use strict softly => 'subs'", "s";
+    test_strict_all "no strict; use strict softly => 'refs'", "";
+    test_strict_all "no strict; use strict softly => 'vars'", "";
+    test_strict_all "no strict; use strict softly => 'subs'", "";
 }
 
 foreach my $minor (0..10) {

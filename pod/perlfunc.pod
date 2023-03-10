@@ -10036,10 +10036,18 @@ bundle.  See L<feature>.
 If the specified Perl version is 5.37 or higher, strictures are enabled
 lexically, as if L<C<use strict>|strict> had been declared.  If the
 version is 5.11 or higher but less than 5.37, then strictures are enabled
-unless they were already explicitly disabled (by C<no strict>).  If the
+unless they were already firmly disabled (by C<no strict>),
+an effect equivalent to C<use strict 'softly'>.  If the
 version is less than 5.11, then strictures are disabled unless they were
-already explicitly enabled (by C<use strict> or C<use v5.38>).  Similarly,
-if the specified Perl version is 5.35 or higher, L<warnings> are enabled.
+already firmly enabled (by C<use strict> or C<use v5.38>),
+an effect equivalent to C<no strict 'softly'>.
+When declaring a Perl version lower than 5.15, beware that the effect
+of such a declaration on the lexical stricture status was different from
+this in Perl versions before 5.15.6.
+
+If the specified Perl version is 5.35 or higher, L<warnings> are enabled.
+If the specified Perl version is lower than 5.35, there is no effect on
+the lexical warning status.
 
 Later use of C<use VERSION> will override most behavior of a previous
 C<use VERSION>.  The feature set of the later-specified version completely
