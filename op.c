@@ -7899,20 +7899,18 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
 
         U16 shortver = S_extract_shortver(aTHX_ use_version);
 
-        /* If a version >= 5.11.0 is requested, strictures are on by default! */
-        if (shortver >= SHORTVER(5, 11)) {
+        if (shortver >= SHORTVER(5, 37)) {
+            PL_hints |= HINT_STRICT_REFS | HINT_EXPLICIT_STRICT_REFS |
+                HINT_STRICT_SUBS | HINT_EXPLICIT_STRICT_SUBS |
+                HINT_STRICT_VARS | HINT_EXPLICIT_STRICT_VARS;
+        } else if (shortver >= SHORTVER(5, 11)) {
             if (!(PL_hints & HINT_EXPLICIT_STRICT_REFS))
                 PL_hints |= HINT_STRICT_REFS;
             if (!(PL_hints & HINT_EXPLICIT_STRICT_SUBS))
                 PL_hints |= HINT_STRICT_SUBS;
             if (!(PL_hints & HINT_EXPLICIT_STRICT_VARS))
                 PL_hints |= HINT_STRICT_VARS;
-
-            if (shortver >= SHORTVER(5, 35))
-                free_and_set_cop_warnings(&PL_compiling, pWARN_ALL);
-        }
-        /* otherwise they are off */
-        else {
+        } else {
             if(PL_prevailing_version >= SHORTVER(5, 11))
                 deprecate_fatal_in("5.40",
                     "Downgrading a use VERSION declaration to below v5.11");
@@ -7924,6 +7922,9 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
             if (!(PL_hints & HINT_EXPLICIT_STRICT_VARS))
                 PL_hints &= ~HINT_STRICT_VARS;
         }
+
+        if (shortver >= SHORTVER(5, 35))
+            free_and_set_cop_warnings(&PL_compiling, pWARN_ALL);
 
         PL_prevailing_version = shortver;
     }
