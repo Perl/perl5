@@ -3313,11 +3313,7 @@ win32_freopen(const char *path, const char *mode, FILE *stream)
 DllExport int
 win32_fclose(FILE *pf)
 {
-#ifdef WIN32_NO_SOCKETS
-    return fclose(pf);
-#else
     return my_fclose(pf);	/* defined in win32sck.c */
-#endif
 }
 
 DllExport int
@@ -3923,11 +3919,7 @@ extern int my_close(int);	/* in win32sck.c */
 DllExport int
 win32_close(int fd)
 {
-#ifdef WIN32_NO_SOCKETS
-    return close(fd);
-#else
     return my_close(fd);
-#endif
 }
 
 DllExport int
@@ -5209,6 +5201,9 @@ Perl_win32_init(int *argcp, char ***argvp)
      * like MessageBox() can fail under some versions of Windows XP.
      */
     InitCommonControls();
+
+    WSADATA wsadata;
+    WSAStartup(MAKEWORD(2, 2), &wsadata);
 
     g_osver.dwOSVersionInfoSize = sizeof(g_osver);
     GetVersionEx(&g_osver);

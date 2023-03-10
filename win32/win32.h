@@ -15,12 +15,6 @@
 
 /* Win32 only optimizations for faster building */
 #ifdef PERL_IS_MINIPERL
-/* this macro will remove Winsock only on miniperl, PERL_IMPLICIT_SYS and
- * makedef.pl create dependencies that will keep Winsock linked in even with
- * this macro defined, even though sockets will be umimplemented from a script
- * level in full perl
- */
-#  define WIN32_NO_SOCKETS
 /* less I/O calls during each require */
 #  define PERL_DISABLE_PMC
 
@@ -29,29 +23,6 @@
 
 /* allow minitest to work */
 #  define PERL_TEXTMODE_SCRIPTS
-#endif
-
-#ifdef WIN32_NO_SOCKETS
-#  undef HAS_SOCKET
-#  undef HAS_GETPROTOBYNAME
-#  undef HAS_GETPROTOBYNUMBER
-#  undef HAS_GETPROTOENT
-#  undef HAS_GETNETBYNAME
-#  undef HAS_GETNETBYADDR
-#  undef HAS_GETNETENT
-#  undef HAS_GETSERVBYNAME
-#  undef HAS_GETSERVBYPORT
-#  undef HAS_GETSERVENT
-#  undef HAS_GETHOSTBYNAME
-#  undef HAS_GETHOSTBYADDR
-#  undef HAS_GETHOSTENT
-#  undef HAS_SELECT
-#  undef HAS_IOCTL
-#  undef HAS_NTOHL
-#  undef HAS_HTONL
-#  undef HAS_HTONS
-#  undef HAS_NTOHS
-#  define WIN32SCK_IS_STDSCK
 #endif
 
 #if defined(PERL_IMPLICIT_SYS)
