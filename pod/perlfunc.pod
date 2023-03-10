@@ -10060,16 +10060,6 @@ declaration, including explicit warnings declarations.
 C<use VERSION> does not load the F<feature.pm>, F<strict.pm>, or
 F<warnings.pm> files.
 
-In the current implementation, any explicit use of C<use strict> or
-C<no strict> overrides C<use VERSION> for versions less than 5.37,
-even if the explicit stricture comes before the version pragma.
-However, this may be subject to change in a future release of Perl, so new
-code should not rely on this fact.  It is recommended that a
-C<use VERSION> declaration be the first significant statement within a
-file (possibly after a C<package> statement or any amount of whitespace or
-comment), so that its effects happen first, and other pragmata are applied
-after it.
-
 Specifying VERSION as a numeric argument of the form 5.024001 should
 generally be avoided as older less readable syntax compared to
 v5.24.1. Before perl 5.8.0 released in 2002 the more verbose numeric

@@ -30,14 +30,6 @@ version will print a deprecation warning. For example,
 This behaviour will be removed in Perl 5.40; such a subsequent request will
 become a compile-time error.
 
-This is because of an intended related change to the interaction between
-C<use VERSION> and C<use strict>. If you specify a version >= 5.11, strict is
-enabled implicitly. If you request a version < 5.11, strict will become
-disabled I<even if you had previously written> C<use strict>. This was not
-the previous behaviour of C<use VERSION>, which at present
-for versions < 5.37 will track
-explicitly-enabled strictness flags independently.
-
 =head3 Use of C<'> as a global name separator.
 
 Perl allows use of C<'> instead of C<::> to replace the parts of a
