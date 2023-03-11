@@ -558,6 +558,8 @@ The current members of the Perl Core Team are:
 
 =item Tony Cook <tony@develop-help.com>
 
+=item Yves Orton <demerphq@gmail.com>
+
 =back
 
 =head2 Inactive Members
