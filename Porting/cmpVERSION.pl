@@ -82,6 +82,29 @@ unless ($tag_exists eq $tag_to_compare) {
     exit 0;
 }
 
+my $commit_epoch = `git log -1 --format="%ct"`;
+chomp($commit_epoch);
+my $tag_epoch = `git for-each-ref --format="%(taggerdate:unix)" refs/tags/$tag_to_compare`;
+chomp($tag_epoch);
+if ($commit_epoch - $tag_epoch > 60 * 24 * 60 * 60) {
+    my $months = sprintf "%.2f", ($commit_epoch - $tag_epoch) / (30 * 24 * 60 * 60);
+    my $message=
+        "Tag '$tag_to_compare' is very old compared to the most recent commit.\n"
+      . "We normally release a new version every month, and this one is $months months\n"
+      . "older than the current commit.  You probably have not synchronized your tags.\n"
+      . "This is common with github clones.  You can try the following:\n"
+      . "\n"
+      . "  git remote add -f upstream git\@github.com:Perl/perl5.git\n"
+      . "\n"
+      . "to fix your checkout.\n";
+    die "$0: $message" unless $tap;
+    $message= "$message";
+    $message=~s/^/# /mg;
+    print STDERR "\n$message";
+    print "1..0 # SKIP: Tag '$tag_to_compare' is $months months old. Update your tags!\n";
+    exit 0;
+}
+
 my %upstream_files;
 if ($exclude_upstream) {
     unshift @INC, 'Porting';
