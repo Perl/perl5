@@ -127,9 +127,13 @@ Perl_runops_wrap(pTHX)
                  * upwards; but this may prematurely free them, so
                  * mortalise them instead */
                 EXTEND_MORTAL(n);
-                Copy(PL_stack_base + cut, PL_tmps_stack + PL_tmps_ix + 1, n, SV*);
-                PL_tmps_ix += n;
+                for (SSize_t i = 0; i < n; i ++) {
+                    SV* sv = PL_stack_base[cut + i];
+                    if (sv)
+                        PL_tmps_stack[++PL_tmps_ix] = sv;
+                }
             }
+
             I32 sp1 = PL_stack_sp - PL_stack_base + 1;
             PL_curstackinfo->si_stack_nonrc_base =
                                 old_base > sp1 ? sp1 : old_base;
