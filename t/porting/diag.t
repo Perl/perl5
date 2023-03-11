@@ -60,7 +60,7 @@ my $text_re = '"(?<text>(?:\\\\"|[^"]|"\s*[A-Z_]+\s*")*)"';
 my $source_msg_call_re = qr/$source_msg_re(?:_nocontext)? \s*
     \( (?: \s* Perl_form \( )? (?:aTHX_)? \s*
     (?:packWARN\d*\((?<category>.*?)\),)? \s*
-    (?:(?<category>WARN_DEPRECATED__\w+)\s*,(?:\s*"5\.\d+"\s*,)?)? \s*
+    (?:(?<category>WARN_DEPRECATED__\w+)\s*,(?:\s*(?<version_string>"[^"]+")\s*,)?)? \s*
     $text_re /x;
 my $bad_version_re = qr{BADVERSION\([^"]*$text_re};
    $regcomp_fail_re = qr/$regcomp_fail_re\([^"]*$text_re/;
@@ -298,6 +298,7 @@ sub check_file {
   my $sub = 'top of file';
   while (<$codefh>) {
     chomp;
+    my $first_line = $.;
     # Getting too much here isn't a problem; we only use this to skip
     # errors inside of XS modules, which should get documented in the
     # docs for the module.
@@ -363,7 +364,9 @@ sub check_file {
     # DIE is just return Perl_die
     my ($name, $category, $routine, $wrapper);
     if (/\b$source_msg_call_re/) {
-      ($name, $category, $routine, $wrapper) = ($+{'text'}, $+{'category'}, $+{'routine'}, $+{'wrapper'});
+      my $version_string;
+      ($name, $category, $routine, $wrapper, $version_string) =
+        ($+{'text'}, $+{'category'}, $+{'routine'}, $+{'wrapper'}, $+{'version_string'});
       if ($wrapper) {
         $category = $wrapper if $wrapper=~/WARN/;
         $routine = "Perl_warner" if $wrapper=~/WARN/;
@@ -371,6 +374,10 @@ sub check_file {
       }
       if ($routine=~/^deprecate/) {
         $name .= " is deprecated";
+        if ($version_string) {
+            like($version_string, qr/"5\.\d+"/,
+                "version string is of the correct form at $codefn line $first_line");
+        }
       }
       # diag(Dumper(\%+,{category=>$category, routine=>$routine, name=>$name}));
       # Sometimes the regexp will pick up too much for the category
