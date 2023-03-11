@@ -2961,31 +2961,47 @@ last-inclusive range.
  CPAN::Unpack show any users outside the core.
 
 =for apidoc_section $warning
-=for apidoc m||deprecate|U32 category|"construct"
-Wrapper around Perl_ck_warner_d() to produce a deprecated warning in the given
-category with an appropriate message. The C<construct> argument must be a C string.
+=for apidoc Cdm||deprecate|U32 category|"message"
+Wrapper around Perl_ck_warner_d() to produce a deprecated warning in the
+given category with an appropriate message. The C<message> argument must
+be a C string. The string " is deprecated" will automatically be added
+to the end of the C<message>.
 
-=for apidoc m||deprecate_disappears_in|U32 category|"when"|"construct"
-Wrapper around Perl_ck_warner_d() to produce a deprecated warning in the given
-category with an appropriate message that the construct will disappear in a specific
-release. The C<when> and C<construct> arguments must be a C string.
+=for apidoc Cdm||deprecate_disappears_in|U32 category|"when"|"message"
+Wrapper around Perl_ck_warner_d() to produce a deprecated warning in the
+given category with an appropriate message that the construct referred
+to by the message will disappear in a specific release.  The C<when> and
+C<message> arguments must be a C string.  The C<when> string is expected
+to be of the form "5.40", with no minor element in the version.  The actual
+message output will be the result of the following expression C<message
+" is deprecated, and will disappear in Perl " when> which is why C<message>
+and C<when> must be literal C strings.
 
-=for apidoc m||deprecate_fatal_in|U32 category|"when"|"construct"
-Wrapper around Perl_ck_warner_d() to produce a deprecated warning in the given
-category with an appropriate message that the construct will become fatal in a specific
-release. The C<when> and C<construct> arguments must be a C string.
+=for apidoc Cdm||deprecate_fatal_in|U32 category|"when"|"message"
+Wrapper around Perl_ck_warner_d() to produce a deprecated warning in the
+given category with an appropriate message that the construct referred
+to by the message will become fatal in a specific release.  The C<when>
+and C<message> arguments must be a C string.  The C<when> string is expected
+to be of the form "5.40", with no minor element in the version.  The actual
+message output will be the result of the following expression C<message " is
+deprecated, and will become fatal in Perl " when> which is why C<message>
+and C<when> must be literal C strings.
 
+=cut
 */
 
 #ifdef PERL_CORE
-#  define deprecate(category,construct) Perl_ck_warner_d(aTHX_ packWARN(category),    \
-                                            "Use of " construct " is deprecated")
-#  define deprecate_disappears_in(category,when,construct) \
-              Perl_ck_warner_d(aTHX_ packWARN(category),    \
-                               construct " is deprecated, and will disappear in Perl " when)
-#  define deprecate_fatal_in(category,when,construct) \
-              Perl_ck_warner_d(aTHX_ packWARN(category),    \
-                               construct " is deprecated, and will become fatal in Perl " when)
+#  define deprecate(category,message)                       \
+    Perl_ck_warner_d(aTHX_ packWARN(category),              \
+        message " is deprecated")
+
+#  define deprecate_disappears_in(category,when,message)    \
+    Perl_ck_warner_d(aTHX_ packWARN(category),              \
+        message " is deprecated, and will disappear in Perl " when)
+
+#  define deprecate_fatal_in(category,when,message)         \
+    Perl_ck_warner_d(aTHX_ packWARN(category),              \
+        message " is deprecated, and will become fatal in Perl " when)
 #endif
 
 /* Internal macros to deal with gids and uids */
