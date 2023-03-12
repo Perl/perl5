@@ -109,24 +109,25 @@ is($foo{'foo'}, 1);
 
 ok(  Internals::SvREADONLY %foo, 1 );
 ok(  Internals::SvREADONLY %foo );
+
 eval { undef(%foo); };
-like($@, $ro_err, q/Can't undef read-only hash/);
-TODO: {
-    local $TODO = 'Due to restricted hashes implementation';
-    eval { %foo = ('ping' => 'pong'); };
-    like($@, $ro_err, q/Can't modify read-only hash/);
-}
+like($@, $ro_err, q/Can't undef restricted hash/); # arguably this is the wrong message
+
+eval { %foo = ('ping' => 'pong'); };
+like($@, qr/Attempt to store value into unknown key 'ping' in a restricted hash/, 
+         q/Can't add to a restricted hash via list list assignment/);
 eval { $foo{'baz'} = 123; };
-like($@, qr/Attempt to access disallowed key/, q/Can't add to a read-only hash/);
+like($@, qr/Attempt to store value into unknown key 'baz' in a restricted hash/, 
+         q/Can't add to a restricted hash/);
 
 # These ops are allow for Hash::Util functionality
 $foo{2} = 'qux';
-is($foo{2}, 'qux', 'Can modify elements in a read-only hash');
+is($foo{2}, 'qux', 'Can modify elements in a restricted hash');
 my $qux = delete($foo{2});
-ok(! exists($foo{2}), 'Can delete keys from a read-only hash');
+ok(! exists($foo{2}), 'Can delete keys from a restricted hash');
 is($qux, 'qux');
 $foo{2} = 2;
-is($foo{2}, 2, 'Can add back deleted keys in a read-only hash');
+is($foo{2}, 2, 'Can add back deleted keys in a restricted hash');
 
 ok( !Internals::SvREADONLY %foo, 0 );
 ok( !Internals::SvREADONLY %foo );

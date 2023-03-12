@@ -100,32 +100,27 @@ sub thaw_fail {
   like ($@, $expected, "Error as predicted?");
 }
 
-sub test_locked_hash {
-  my $hash = shift;
-  my @keys = keys %$hash;
-  my ($key, $value) = each %$hash;
-  eval {$hash->{$key} = reverse $value};
-  like( $@, "/^Modification of a read-only value attempted/",
-        'trying to change a locked key' );
-  is ($hash->{$key}, $value, "hash should not change?");
-  eval {$hash->{use} = 'perl'};
-  like( $@, "/^Attempt to access disallowed key 'use' in a restricted hash/",
-        'trying to add another key' );
-  ok (eq_array([keys %$hash], \@keys), "Still the same keys?");
-}
-
 sub test_restricted_hash {
-  my $hash = shift;
+  my ($hash, $ro_values) = @_;
+
   my @keys = keys %$hash;
   my ($key, $value) = each %$hash;
   eval {$hash->{$key} = reverse $value};
-  is( $@, '',
-        'trying to change a restricted key' );
-  is ($hash->{$key}, reverse ($value), "hash should change");
+  if ($ro_values) {
+    like( $@, "/^Modification of a read-only value attempted/",
+              "trying to change a readonly value should die" );
+    is($hash->{$key}, $value, "readonly value should not change.");
+  } else {
+    is($@, '',
+            'trying to change a writable value should work' );
+    is($hash->{$key}, reverse ($value), "writable value should have changed");
+  }
   eval {$hash->{use} = 'perl'};
-  like( $@, "/^Attempt to access disallowed key 'use' in a restricted hash/",
+  like( $@, ("$]" ge "5.037010"
+             ? "/^Attempt to store value into unknown key 'use' in a restricted hash/"
+             : "/^Attempt to access disallowed key 'use' in a restricted hash/"),
         'trying to add another key' );
-  ok (eq_array([keys %$hash], \@keys), "Still the same keys?");
+  ok(eq_array([keys %$hash], \@keys), "Still the same keys?");
 }
 
 sub test_placeholder {
@@ -149,9 +144,9 @@ if (eval "use Hash::Util; 1") {
   print "# We have Hash::Util, so test that the restricted hashes in <DATA> are valid\n";
   for $Storable::downgrade_restricted (0, 1, undef, "cheese") {
     my $hash = thaw_hash ('Locked hash', \%R_HASH);
-    test_locked_hash ($hash);
+    test_restricted_hash ($hash, "read-only-values");
     $hash = thaw_hash ('Locked hash placeholder', \%R_HASH);
-    test_locked_hash ($hash);
+    test_restricted_hash ($hash, "read-only-values");
     test_placeholder ($hash);
 
     $hash = thaw_hash ('Locked keys', \%R_HASH);
@@ -202,7 +197,7 @@ if ($] > 5.007002) {
       cmp_ok ($l, '==', $r, sprintf "key length %d", length $_);
       cmp_ok ($l, '==', $_ eq "ch${a_circumflex}teau" ? 0 : 1);
     }
-    test_locked_hash ($hash);
+    test_restricted_hash ($hash, "read-only-values");
   } else {
     print "# We don't have Hash::Util, so test that the utf8 hash downgrades\n";
     fail ("You can't get here [perl version $]]. This is a bug in the test.

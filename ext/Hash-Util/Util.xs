@@ -7,6 +7,53 @@
 MODULE = Hash::Util		PACKAGE = Hash::Util
 
 void
+lock_hashkeys(hv)
+        HV *hv
+    PROTOTYPE: \%
+    CODE:
+        SvFLAGS((SV*)hv) |= (SVf_READONLY);
+
+void
+unlock_hashkeys(hv)
+        HV *hv
+    PROTOTYPE: \%
+    CODE:
+        if (SvFLAGS((SV*)hv) & SVf_PROTECT)
+            croak("Cannot _unlock_hashkeys() on a read-only hash");
+        SvFLAGS((SV*)hv) &= ~SVf_READONLY;
+
+void
+hashkeys_locked(hv)
+        HV *hv
+    PROTOTYPE: \%
+    ALIAS: hash_locked => hashkeys_locked
+    PPCODE:
+        PERL_UNUSED_ARG(ix);
+        if ((SvFLAGS((SV*)hv) & (SVf_READONLY|SVf_PROTECT)) == (SVf_READONLY))
+            XSRETURN_YES;
+        else
+            XSRETURN_NO;
+
+void
+hashkeys_protected(hv)
+        HV *hv
+    PROTOTYPE: \%
+    ALIAS: hash_readonly => hashkeys_protected
+    PPCODE:
+        PERL_UNUSED_ARG(ix);
+        if ((SvFLAGS((SV*)hv) & (SVf_READONLY|SVf_PROTECT)) == (SVf_READONLY|SVf_PROTECT))
+            XSRETURN_YES;
+        else
+            XSRETURN_NO;
+
+void
+protect_hashkeys(hv)
+        HV *hv
+    PROTOTYPE: \%
+    CODE:
+        SvFLAGS(hv) |= (SVf_READONLY|SVf_PROTECT);
+
+void
 _clear_placeholders(hashref)
         HV *hashref
     PROTOTYPE: \%
@@ -325,4 +372,3 @@ used_buckets(rhv)
     }
     XSRETURN_UNDEF;
 }
-
