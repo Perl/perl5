@@ -43,6 +43,25 @@ have a constant target label, and that label is found within the block.
     LABEL: print "This does\n";
   }
 
+=head2 New regexp variable ${^LAST_SUCCESSFUL_PATTERN}
+
+This allows access to the last succesful pattern that matched in the current scope.
+Many aspects of the regex engine refer to the "last successful pattern". The empty
+pattern reuses it, and all of the magic regex vars relate to it. This allows
+access to its pattern. The following code
+
+    if (m/foo/ || m/bar/) {
+        s//PQR/;
+    }
+
+can be rewritten as follows
+
+    if (m/foo/ || m/bar/) {
+        s/${^LAST_SUCCESSFUL_PATTERN}/PQR/;
+    }
+
+and it will do the exactly same thing.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security

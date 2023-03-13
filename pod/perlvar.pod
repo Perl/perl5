@@ -1372,6 +1372,27 @@ added in 5.25.7.
 
 This variable is read-only, and its value is dynamically scoped.
 
+=item ${^LAST_SUCCESSFUL_PATTERN}
+
+The last successful pattern that matched in the current scope.  The empty
+pattern defaults to matching to this. For instance:
+
+    if (m/foo/ || m/bar/) {
+        s//BLAH/;
+    }
+
+and
+
+    if (m/foo/ || m/bar/) {
+        s/${^LAST_SUCCESSFUL_PATTERN}/BLAH/;
+    }
+
+are equivalent. 
+
+You can use this to debug which pattern matched last, or to match with it again.
+
+Added in Perl 5.37.10.
+
 =item $LAST_REGEXP_CODE_RESULT
 
 =item $^R

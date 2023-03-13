@@ -2055,11 +2055,24 @@ The bottom line is that using C</o> is almost never a good idea.
 =item The empty pattern C<//>
 
 If the I<PATTERN> evaluates to the empty string, the last
-I<successfully> matched regular expression is used instead.  In this
-case, only the C<g> and C<c> flags on the empty pattern are honored;
-the other flags are taken from the original pattern.  If no match has
+I<successfully> matched regular expression is used instead. In this
+case, only the C<g> and C<c> flags on the empty pattern are honored; the
+other flags are taken from the original pattern. If no match has
 previously succeeded, this will (silently) act instead as a genuine
-empty pattern (which will always match).
+empty pattern (which will always match).  Using a user supplied string as
+a pattern has the risk that if the string is empty that it triggers the
+"last successful match" behavior, which can be very confusing. In such
+cases you are recommended to replace C<m/$pattern/> with
+C<m/(?:$pattern)/> to avoid this behavior.
+
+The last successful pattern may be accessed as a variable via
+C<${^LAST_SUCCESSFUL_PATTERN}>. Matching against it, or the empty
+pattern should have the same effect, with the exception that when there
+is no last successful pattern the empty pattern will silently match,
+whereas using the C<${^LAST_SUCCESSFUL_PATTERN}> variable will produce
+undefined warnings (if warnings are enabled). You can check
+C<defined(${^LAST_SUCCESSFUL_PATTERN})> to test if there is a "last
+successful match" in the current scope.
 
 Note that it's possible to confuse Perl into thinking C<//> (the empty
 regex) is really C<//> (the defined-or operator).  Perl is usually pretty

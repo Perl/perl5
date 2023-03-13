@@ -27,7 +27,7 @@ skip_all_without_unicode_tables();
 
 my $has_locales = locales_enabled('LC_CTYPE');
 
-plan tests => 1240;  # Update this when adding/deleting tests.
+plan tests => 1260;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -2461,6 +2461,49 @@ SKIP:
             is( $y, $x,
                 "GH Issue #18865 'XaaXbbXb' - test optimization");
         }
+    }
+    {
+        # Test that ${^LAST_SUCCESSFUL_PATTERN} works as expected.
+        # It should match like the empty pattern does, and it should be dynamic
+        # in the same was as $1 is dynamic.
+        my ($str,$pat);
+        $str = "ABCD";
+        $str =~/(D)/;
+        is("$1", "D", '$1 is "D"');
+        $pat = "${^LAST_SUCCESSFUL_PATTERN}";
+        is($pat, "(?^:(D))", 'Outer ${^LAST_SUCCESSFUL_PATTERN} is as expected');
+        {
+            if ($str=~/BX/ || $str=~/(BC)/) {
+                is("$1", "BC",'$1 is now "BC"');
+                $pat = "${^LAST_SUCCESSFUL_PATTERN}";
+                ok($str =~ s//ZZ/, "Empty pattern matched as expected");
+                is($str, "AZZD", "Empty pattern in s/// has result we expected");
+            }
+        }
+        is("$1", "D", '$1 should now be "D" again');
+        is($pat, "(?^:(BC))", 'inner ${^LAST_SUCCESSFUL_PATTERN} is as expected');
+        ok($str=~s//Q/, 'Empty pattern to "Q" was successful');
+        is($str, "AZZQ", "Empty pattern in s/// has result we expected (try2)");
+        $pat = "${^LAST_SUCCESSFUL_PATTERN}";
+        is($pat, "(?^:(D))", 'Outer ${^LAST_SUCCESSFUL_PATTERN} restored to its previous value as expected');
+
+        $str = "ABCD";
+        {
+            if ($str=~/BX/ || $str=~/(BC)/) {
+                is("$1", "BC",'$1 is now "BC"');
+                $pat = "${^LAST_SUCCESSFUL_PATTERN}";
+                ok($str=~s/${^LAST_SUCCESSFUL_PATTERN}/ZZ/, '${^LAST_SUCCESSFUL_PATTERN} matched as expected');
+                is($str, "AZZD", '${^LAST_SUCCESSFUL_PATTERN} in s/// has result we expected');
+            }
+        }
+        is("$1", "D", '$1 should now be "D" again');
+        is($pat, "(?^:(BC))", 'inner ${^LAST_SUCCESSFUL_PATTERN} is as expected');
+        is($str, "AZZD", 'Using ${^LAST_SUCCESSFUL_PATTERN} as a pattern has same result as empty pattern');
+        ok($str=~s/${^LAST_SUCCESSFUL_PATTERN}/Q/, '${^LAST_SUCCESSFUL_PATTERN} to "Q" was successful');
+        is($str, "AZZQ", '${^LAST_SUCCESSFUL_PATTERN} in s/// has result we expected');
+        ok($str=~/ZQ/, "/ZQ/ matched as expected");
+        $pat = "${^LAST_SUCCESSFUL_PATTERN}";
+        is($pat, "(?^:ZQ)", '${^LAST_SUCCESSFUL_PATTERN} changed as expected');
     }
 } # End of sub run_tests
 
