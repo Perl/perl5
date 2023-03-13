@@ -422,6 +422,61 @@ STATIC void (*update_functions[]) (pTHX_ const char *, bool force) = {
                                 NULL
 };
 
+#  ifdef USE_POSIX_2008_LOCALE
+
+/* A fourth array, parallel to the ones above to map from category to its
+ * equivalent mask */
+STATIC const int category_masks[] = {
+#    ifdef USE_LOCALE_CTYPE
+                                LC_CTYPE_MASK,
+#    endif
+#    ifdef USE_LOCALE_NUMERIC
+                                LC_NUMERIC_MASK,
+#    endif
+#    ifdef USE_LOCALE_COLLATE
+                                LC_COLLATE_MASK,
+#    endif
+#    ifdef USE_LOCALE_TIME
+                                LC_TIME_MASK,
+#    endif
+#    ifdef USE_LOCALE_MESSAGES
+                                LC_MESSAGES_MASK,
+#    endif
+#    ifdef USE_LOCALE_MONETARY
+                                LC_MONETARY_MASK,
+#    endif
+#    ifdef USE_LOCALE_ADDRESS
+                                LC_ADDRESS_MASK,
+#    endif
+#    ifdef USE_LOCALE_IDENTIFICATION
+                                LC_IDENTIFICATION_MASK,
+#    endif
+#    ifdef USE_LOCALE_MEASUREMENT
+                                LC_MEASUREMENT_MASK,
+#    endif
+#    ifdef USE_LOCALE_PAPER
+                                LC_PAPER_MASK,
+#    endif
+#    ifdef USE_LOCALE_TELEPHONE
+                                LC_TELEPHONE_MASK,
+#    endif
+#    ifdef USE_LOCALE_NAME
+                                LC_NAME_MASK,
+#    endif
+#    ifdef USE_LOCALE_SYNTAX
+                                LC_SYNTAX_MASK,
+#    endif
+#    ifdef USE_LOCALE_TOD
+                                LC_TOD_MASK,
+#    endif
+                                LC_ALL_MASK,
+
+   /* Placeholder as a precaution if code fails to check the return of
+    * get_category_index(), which returns this element to indicate an error */
+                                0
+};
+
+#  endif
 #endif
 #if  defined(DEBUGGING) || defined(USE_POSIX_2008_LOCALE)
 
@@ -970,63 +1025,6 @@ S_less_dicey_bool_setlocale_r(pTHX_ const int cat, const char * locale)
 #    define HAS_GLIBC_LC_MESSAGES_BUG
 #    include <libintl.h>
 #  endif
-
-/* A fourth array, parallel to the ones above to map from category to its
- * equivalent mask */
-STATIC const int category_masks[] = {
-#  ifdef USE_LOCALE_CTYPE
-                                LC_CTYPE_MASK,
-#  endif
-#  ifdef USE_LOCALE_NUMERIC
-                                LC_NUMERIC_MASK,
-#  endif
-#  ifdef USE_LOCALE_COLLATE
-                                LC_COLLATE_MASK,
-#  endif
-#  ifdef USE_LOCALE_TIME
-                                LC_TIME_MASK,
-#  endif
-#  ifdef USE_LOCALE_MESSAGES
-                                LC_MESSAGES_MASK,
-#  endif
-#  ifdef USE_LOCALE_MONETARY
-                                LC_MONETARY_MASK,
-#  endif
-#  ifdef USE_LOCALE_ADDRESS
-                                LC_ADDRESS_MASK,
-#  endif
-#  ifdef USE_LOCALE_IDENTIFICATION
-                                LC_IDENTIFICATION_MASK,
-#  endif
-#  ifdef USE_LOCALE_MEASUREMENT
-                                LC_MEASUREMENT_MASK,
-#  endif
-#  ifdef USE_LOCALE_PAPER
-                                LC_PAPER_MASK,
-#  endif
-#  ifdef USE_LOCALE_TELEPHONE
-                                LC_TELEPHONE_MASK,
-#  endif
-#  ifdef USE_LOCALE_NAME
-                                LC_NAME_MASK,
-#  endif
-#  ifdef USE_LOCALE_SYNTAX
-                                LC_SYNTAX_MASK,
-#  endif
-#  ifdef USE_LOCALE_TOD
-                                LC_TOD_MASK,
-#  endif
-                                /* LC_ALL can't be turned off by a Configure
-                                 * option, and in Posix 2008, should always be
-                                 * here, so compile it in unconditionally.
-                                 * This could catch some glitches at compile
-                                 * time */
-                                LC_ALL_MASK,
-
-   /* Placeholder as a precaution if code fails to check the return of
-    * get_category_index(), which returns this element to indicate an error */
-                                0
-};
 
 #  define my_querylocale_c(cat) my_querylocale_i(cat##_INDEX_)
 
