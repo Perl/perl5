@@ -906,6 +906,9 @@ S_less_dicey_bool_setlocale_r(pTHX_ const int cat, const char * locale)
                                 bool_setlocale_r(categories[i], locale)
 #  define bool_setlocale_c(cat, locale) bool_setlocale_r(cat, locale)
 #elif defined(USE_POSIX_2008_LOCALE)
+#  ifndef LC_ALL
+#    error This code assumes that LC_ALL is available on a system modern enough to have POSIX 2008
+#  endif
 
 /* Here, there is a completely different API to get thread-safe locales.  We
  * emulate the setlocale() API with our own function(s).  setlocale categories,
