@@ -1066,6 +1066,14 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
             else
                 sv_set_undef(sv);
         }
+        else if (strEQ(remaining, "AST_SUCCESSFUL_PATTERN")) {
+            if (PL_curpm && (rx = PM_GETRE(PL_curpm))) {
+                sv_setrv_inc(sv, MUTABLE_SV(rx));
+                sv_rvweaken(sv);
+            }
+            else
+                sv_set_undef(sv);
+        }
         break;
     case '\017':		/* ^O & ^OPEN */
         if (nextchar == '\0') {
