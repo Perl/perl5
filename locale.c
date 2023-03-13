@@ -905,7 +905,7 @@ S_less_dicey_bool_setlocale_r(pTHX_ const int cat, const char * locale)
 #  define bool_setlocale_i(i, locale)                                   \
                                 bool_setlocale_r(categories[i], locale)
 #  define bool_setlocale_c(cat, locale) bool_setlocale_r(cat, locale)
-#else
+#elif defined(USE_POSIX_2008_LOCALE)
 
 /* Here, there is a completely different API to get thread-safe locales.  We
  * emulate the setlocale() API with our own function(s).  setlocale categories,
@@ -1591,6 +1591,8 @@ S_emulate_setlocale_i(pTHX_
     return new_locale;
 }
 
+#else
+#  error Unexpected Configuration
 #endif   /* End of the various implementations of the setlocale and
             querylocale macros used in the remainder of this program */
 
