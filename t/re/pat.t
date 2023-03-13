@@ -27,7 +27,7 @@ skip_all_without_unicode_tables();
 
 my $has_locales = locales_enabled('LC_CTYPE');
 
-plan tests => 1260;  # Update this when adding/deleting tests.
+plan tests => 1265;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -2504,6 +2504,14 @@ SKIP:
         ok($str=~/ZQ/, "/ZQ/ matched as expected");
         $pat = "${^LAST_SUCCESSFUL_PATTERN}";
         is($pat, "(?^:ZQ)", '${^LAST_SUCCESSFUL_PATTERN} changed as expected');
+
+        $str = "foobarfoo";
+        ok($str =~ s/foo//, "matched foo");
+        my $copy= ${^LAST_SUCCESSFUL_PATTERN};
+        ok(defined($copy), '$copy is defined');
+        ok($str =~ s/bar//,"matched bar");
+        ok($str =~ s/$copy/PQR/, 'replaced $copy with PQR');
+        is($str, "PQR", 'final string should be PQR');
     }
 } # End of sub run_tests
 
