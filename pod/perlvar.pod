@@ -1000,8 +1000,8 @@ difference in something like
     $str =~ /x/g # one char copied a million times, not a million chars
 
 In Perl 5.20.0 a new copy-on-write system was enabled by default, which
-finally fixes all performance issues with these three variables, and makes
-them safe to use anywhere.
+finally fixes most of the performance issues with these three variables, and
+makes them safe to use anywhere.
 
 The C<Devel::NYTProf> and C<Devel::FindAmpersand> modules can help you
 find uses of these problematic match variables in your code.
@@ -1072,15 +1072,14 @@ Mnemonic: like C<&> in some editors.
 =item ${^MATCH}
 X<${^MATCH}>
 
-This is similar to C<$&> (C<$MATCH>) except that it does not incur the
-performance penalty associated with that variable.
+It is only guaranteed to return a defined value when the pattern was
+compiled or executed with the C</p> modifier.
+
+This is similar to C<$&> (C<$MATCH>) except that to use it you must
+use the C</p> modifier when executing the pattern, and it does not incur
+and performance penalty associated with that variable.
 
 See L</Performance issues> above.
-
-In Perl v5.18 and earlier, it is only guaranteed
-to return a defined value when the pattern was compiled or executed with
-the C</p> modifier.  In Perl v5.20, the C</p> modifier does nothing, so
-C<${^MATCH}> does the same thing as C<$MATCH>.
 
 This variable was added in Perl v5.10.0.
 
@@ -1089,7 +1088,7 @@ This variable is read-only, and its value is dynamically scoped.
 =item $PREMATCH
 
 =item $`
-X<$`> X<$PREMATCH> X<${^PREMATCH}>
+X<$`> X<$PREMATCH>
 
 The string preceding whatever was matched by the last successful
 pattern match. (See L</Scoping Rules of Regex Variables>).
@@ -1102,17 +1101,17 @@ This variable is read-only, and its value is dynamically scoped.
 Mnemonic: C<`> often precedes a quoted string.
 
 =item ${^PREMATCH}
-X<$`> X<${^PREMATCH}>
+X<${^PREMATCH}>
 
-This is similar to C<$`> ($PREMATCH) except that it does not incur the
-performance penalty associated with that variable.
+It is only guaranteed to return a defined value when the pattern was
+executed with the C</p> modifier.
+
+This is similar to C<$`> ($PREMATCH) except that to use it you must
+use the C</p> modifier when executing the pattern, and it does not incur
+and performance penalty associated with that variable.
 
 See L</Performance issues> above.
 
-In Perl v5.18 and earlier, it is only guaranteed
-to return a defined value when the pattern was compiled or executed with
-the C</p> modifier.  In Perl v5.20, the C</p> modifier does nothing, so
-C<${^PREMATCH}> does the same thing as C<$PREMATCH>.
 
 This variable was added in Perl v5.10.0.
 
@@ -1121,7 +1120,7 @@ This variable is read-only, and its value is dynamically scoped.
 =item $POSTMATCH
 
 =item $'
-X<$'> X<$POSTMATCH> X<${^POSTMATCH}> X<@->
+X<$'> X<$POSTMATCH> X<@->
 
 The string following whatever was matched by the last successful
 pattern match. (See L</Scoping Rules of Regex Variables>). Example:
@@ -1138,17 +1137,16 @@ This variable is read-only, and its value is dynamically scoped.
 Mnemonic: C<'> often follows a quoted string.
 
 =item ${^POSTMATCH}
-X<${^POSTMATCH}> X<$'> X<$POSTMATCH>
+X<${^POSTMATCH}>
 
-This is similar to C<$'> (C<$POSTMATCH>) except that it does not incur the
-performance penalty associated with that variable.
+It is only guaranteed to return a defined value when the pattern was
+compiled or executed with the C</p> modifier.
+
+This is similar to C<$'> (C<$POSTMATCH>) except that to use it you must
+use the C</p> modifier when executing the pattern, and it does not incur
+and performance penalty associated with that variable.
 
 See L</Performance issues> above.
-
-In Perl v5.18 and earlier, it is only guaranteed
-to return a defined value when the pattern was compiled or executed with
-the C</p> modifier.  In Perl v5.20, the C</p> modifier does nothing, so
-C<${^POSTMATCH}> does the same thing as C<$POSTMATCH>.
 
 This variable was added in Perl v5.10.0.
 
