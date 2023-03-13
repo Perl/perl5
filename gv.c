@@ -2211,29 +2211,29 @@ S_gv_magicalize(pTHX_ GV *gv, HV *stash, const char *name, STRLEN len,
                     require_tie_mod_s(gv, '-', "Tie::Hash::NamedCapture",0);
                 }
                 break;
-            case '\005':	/* $^ENCODING */
+            case '\005':        /* ${^ENCODING} */
                 if (memEQs(name, len, "\005NCODING"))
                     goto magicalize;
                 break;
-            case '\007':	/* $^GLOBAL_PHASE */
+            case '\007':        /* ${^GLOBAL_PHASE} */
                 if (memEQs(name, len, "\007LOBAL_PHASE"))
                     goto ro_magicalize;
                 break;
-            case '\014':	/* $^LAST_FH */
+            case '\014':	/* ${^LAST_FH} */
                 if (memEQs(name, len, "\014AST_FH"))
                     goto ro_magicalize;
                 break;
-            case '\015':        /* $^MATCH */
+            case '\015':        /* ${^MATCH} */
                 if (memEQs(name, len, "\015ATCH")) {
                     paren = RX_BUFF_IDX_CARET_FULLMATCH;
                     goto storeparen;
                 }
                 break;
-            case '\017':	/* $^OPEN */
+            case '\017':        /* ${^OPEN} */
                 if (memEQs(name, len, "\017PEN"))
                     goto magicalize;
                 break;
-            case '\020':        /* $^PREMATCH  $^POSTMATCH */
+            case '\020':        /* ${^PREMATCH}  ${^POSTMATCH} */
                 if (memEQs(name, len, "\020REMATCH")) {
                     paren = RX_BUFF_IDX_CARET_PREMATCH;
                     goto storeparen;
