@@ -141,12 +141,12 @@ Perl_debstackptrs(pTHX)     /* Currently unused in cpan and core */
  */
 
 STATIC void
-S_deb_stack_n(pTHX_ SV** stack_base, I32 stack_min, I32 stack_max,
-        I32 mark_min, I32 mark_max, I32 nonrc_base)
+S_deb_stack_n(pTHX_ SV** stack_base, SSize_t stack_min, SSize_t stack_max,
+        SSize_t mark_min, SSize_t mark_max, SSize_t nonrc_base)
 {
 #ifdef DEBUGGING
-    I32 i = stack_max - 30;
-    const I32 *markscan = PL_markstack + mark_min;
+    SSize_t i = stack_max - 30;
+    const SSize_t *markscan = PL_markstack + mark_min;
 
     PERL_ARGS_ASSERT_DEB_STACK_N;
 

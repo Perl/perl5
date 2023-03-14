@@ -118,11 +118,11 @@ value for the OP, but some use it for other purposes.
 
 #define PUSHMARK(p) \
     STMT_START {                                                      \
-        I32 * mark_stack_entry;                                       \
+        SSize_t * mark_stack_entry;                                       \
         if (UNLIKELY((mark_stack_entry = ++PL_markstack_ptr)          \
                                            == PL_markstack_max))      \
             mark_stack_entry = markstack_grow();                      \
-        *mark_stack_entry  = (I32)((p) - PL_stack_base);              \
+        *mark_stack_entry  = (SSize_t)((p) - PL_stack_base);              \
         DEBUG_s(DEBUG_v(PerlIO_printf(Perl_debug_log,                 \
                 "MARK push %p %" IVdf "\n",                           \
                 PL_markstack_ptr, (IV)*mark_stack_entry)));           \
@@ -142,7 +142,7 @@ value for the OP, but some use it for other purposes.
 #define dSP		SV **sp = PL_stack_sp
 #define djSP		dSP
 #define dMARK		SV **mark = PL_stack_base + POPMARK
-#define dORIGMARK	const I32 origmark = (I32)(mark - PL_stack_base)
+#define dORIGMARK	const SSize_t origmark = (SSize_t)(mark - PL_stack_base)
 #define ORIGMARK	(PL_stack_base + origmark)
 
 #define SPAGAIN		sp = PL_stack_sp

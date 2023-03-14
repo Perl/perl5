@@ -995,12 +995,12 @@ struct block {
     U16		blku_u16;	/* used by block_sub and block_eval (so far) */
     I32		blku_oldsaveix; /* saved PL_savestack_ix */
     /* all the fields above must be aligned with same-sized fields as sbu */
-    I32		blku_oldsp;	/* current sp floor: where nextstate pops to */
-    I32		blku_oldmarksp;	/* mark stack index */
+    SSize_t	blku_oldsp;	/* current sp floor: where nextstate pops to */
     COP *	blku_oldcop;	/* old curcop pointer */
     PMOP *	blku_oldpm;	/* values of pattern match vars */
     SSize_t     blku_old_tmpsfloor;     /* saved PL_tmps_floor */
     I32		blku_oldscopesp;	/* scope stack index */
+    I32		blku_oldmarksp;	/* mark stack index */
 
     union {
         struct block_sub	blku_sub;
