@@ -3325,6 +3325,13 @@ sv_count()
         OUTPUT:
             RETVAL
 
+IV
+xs_items(...)
+        CODE:
+            RETVAL = items;
+        OUTPUT:
+            RETVAL
+
 void
 bhk_record(bool on)
     CODE:
