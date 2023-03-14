@@ -185,8 +185,8 @@ struct regnode_anyofhs { /* Constructed this way to keep the string aligned. */
         struct {
             U16 arg1a;
             U16 arg1b;
-        };
-    };
+        } hi_lo;
+    } arg1;
     char string[1];
 };
 
@@ -204,8 +204,8 @@ struct regnode_1 {
         struct {
             U16 arg1a;
             U16 arg1b;
-        };
-    };
+        } hi_lo;
+    } arg1;
 };
 
 /* Node whose argument is 'SV *'.  This needs to be used very carefully in
@@ -244,16 +244,16 @@ struct regnode_2 {
         struct {
             U16 arg1a;
             U16 arg1b;
-        };
-    };
+        } hi_lo;
+    } arg1;
     union {
         U32 arg2u;
         I32 arg2i;
         struct {
             U16 arg2a;
             U16 arg2b;
-        };
-    };
+        } hi_lo;
+    } arg2;
 };
 
 /* "Three Node" - similar to a regnode_2 but with space for an additional
@@ -274,24 +274,24 @@ struct regnode_3 {
         struct {
             U16 arg1a;
             U16 arg1b;
-        };
-    };
+        } hi_lo;
+    } arg1;
     union {
         I32 arg2i;
         U32 arg2u;
         struct {
             U16 arg2a;
             U16 arg2b;
-        };
-    };
+        } hi_lo;
+    } arg2;
     union {
         struct {
             U16 arg3a;
             U16 arg3b;
-        };
+        } hi_lo;
         I32 arg3i;
         U32 arg3u;
-    };
+    } arg3;
 };
 
 #define REGNODE_BBM_BITMAP_LEN                                                  \
@@ -332,8 +332,8 @@ struct regnode_charclass {
         struct {
             U16 arg1a;
             U16 arg1b;
-        };
-    };
+        } hi_lo;
+    } arg1;
     char bitmap[ANYOF_BITMAP_SIZE];	/* only compile-time */
 };
 
@@ -348,8 +348,8 @@ struct regnode_charclass_posixl {
         struct {
             U16 arg1a;
             U16 arg1b;
-        };
-    };
+        } hi_lo;
+    } arg1;
     char bitmap[ANYOF_BITMAP_SIZE];		/* both compile-time ... */
     U32 classflags;	                        /* and run-time */
 };
@@ -377,8 +377,8 @@ struct regnode_ssc {
         struct {
             U16 arg1a;
             U16 arg1b;
-        };
-    };
+        } hi_lo;
+    } arg1;
     char bitmap[ANYOF_BITMAP_SIZE];	/* both compile-time ... */
     U32 classflags;	                /* ... and run-time */
 
@@ -553,18 +553,18 @@ struct regnode_ssc {
 
 #define	NODE_ALIGN(node)
 #define ARGp_BYTES_LOC(p)  (((struct regnode_p *)p)->arg1_sv_ptr_bytes)
-#define ARG1u_LOC(p)    (((struct regnode_1 *)p)->arg1u)
-#define ARG1i_LOC(p)    (((struct regnode_1 *)p)->arg1i)
-#define ARG1a_LOC(p)    (((struct regnode_1 *)p)->arg1a)
-#define ARG1b_LOC(p)    (((struct regnode_1 *)p)->arg1b)
-#define ARG2u_LOC(p)    (((struct regnode_2 *)p)->arg2u)
-#define ARG2i_LOC(p)    (((struct regnode_2 *)p)->arg2i)
-#define ARG2a_LOC(p)    (((struct regnode_2 *)p)->arg2a)
-#define ARG2b_LOC(p)    (((struct regnode_2 *)p)->arg2b)
-#define ARG3u_LOC(p)    (((struct regnode_3 *)p)->arg3u)
-#define ARG3i_LOC(p)    (((struct regnode_3 *)p)->arg3i)
-#define ARG3a_LOC(p)    (((struct regnode_3 *)p)->arg3a)
-#define ARG3b_LOC(p)    (((struct regnode_3 *)p)->arg3b)
+#define ARG1u_LOC(p)    (((struct regnode_1 *)p)->arg1.arg1u)
+#define ARG1i_LOC(p)    (((struct regnode_1 *)p)->arg1.arg1i)
+#define ARG1a_LOC(p)    (((struct regnode_1 *)p)->arg1.hi_lo.arg1a)
+#define ARG1b_LOC(p)    (((struct regnode_1 *)p)->arg1.hi_lo.arg1b)
+#define ARG2u_LOC(p)    (((struct regnode_2 *)p)->arg2.arg2u)
+#define ARG2i_LOC(p)    (((struct regnode_2 *)p)->arg2.arg2i)
+#define ARG2a_LOC(p)    (((struct regnode_2 *)p)->arg2.hi_lo.arg2a)
+#define ARG2b_LOC(p)    (((struct regnode_2 *)p)->arg2.hi_lo.arg2b)
+#define ARG3u_LOC(p)    (((struct regnode_3 *)p)->arg3.arg3u)
+#define ARG3i_LOC(p)    (((struct regnode_3 *)p)->arg3.arg3i)
+#define ARG3a_LOC(p)    (((struct regnode_3 *)p)->arg3.hi_lo.arg3a)
+#define ARG3b_LOC(p)    (((struct regnode_3 *)p)->arg3.hi_lo.arg3b)
 
 /* These should no longer be used directly in most cases. Please use
  * the REGNODE_AFTER() macros instead. */
