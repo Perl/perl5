@@ -37,12 +37,12 @@ Variable which is setup by C<xsubpp> to designate the object in a C++
 XSUB.  This is always the proper type for the C++ object.  See C<L</CLASS>> and
 L<perlxs/"Using XS With C++">.
 
-=for apidoc Amn|I32|ax
+=for apidoc Amn|SSize_t|ax
 Variable which is setup by C<xsubpp> to indicate the stack base offset,
 used by the C<ST>, C<XSprePUSH> and C<XSRETURN> macros.  The C<dMARK> macro
 must be called prior to setup the C<MARK> variable.
 
-=for apidoc Amn|I32|items
+=for apidoc Amn|SSize_t|items
 Variable which is setup by C<xsubpp> to indicate the number of
 items on the stack.  See L<perlxs/"Variable-length Parameter Lists">.
 
@@ -157,13 +157,13 @@ is a lexical C<$_> in scope.
  * Try explicitly using XS_INTERNAL/XS_EXTERNAL instead, please. */
 #define XS(name) XS_EXTERNAL(name)
 
-#define dAX const I32 ax = (I32)(MARK - PL_stack_base + 1)
+#define dAX const SSize_t ax = (SSize_t)(MARK - PL_stack_base + 1)
 
 #define dAXMARK				\
-        I32 ax = POPMARK;	\
+        SSize_t ax = POPMARK;	\
         SV **mark = PL_stack_base + ax++
 
-#define dITEMS I32 items = (I32)(SP - MARK)
+#define dITEMS SSize_t items = (SSize_t)(SP - MARK)
 
 #define dXSARGS \
         dSP; dAXMARK; dITEMS

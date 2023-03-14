@@ -26,6 +26,12 @@ $x[0x8000_0000] = "Hello";
     is($count, 0x8000_0002, "got expected (large) list size");
 }
 
+{
+    # check XS gets the right numbers in our predefined variables
+    # returned ~ -2G before fix
+    my $count = XS::APItest::xs_items(x(), z());
+    is($count, 0x8000_0002, "got expected XS list size");
+}
 
 done_testing();
 
