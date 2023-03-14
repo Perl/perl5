@@ -11927,7 +11927,7 @@ S_optimize_regclass(pTHX_
         &&   *anyof_flags == 0
         &&   start[0] < (1 << ANYOFR_BASE_BITS)
         &&   end[0] - start[0]
-                < ((1U << (sizeof(((struct regnode_1 *)NULL)->arg1u)
+                < ((1U << (sizeof(ARG1u_LOC(NULL))
                                * CHARBITS - ANYOFR_BASE_BITS))))
 
     {
