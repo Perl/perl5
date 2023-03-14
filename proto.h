@@ -2379,7 +2379,7 @@ Perl_malloc(MEM_SIZE nbytes)
         __attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_MALLOC
 
-PERL_CALLCONV I32 *
+PERL_CALLCONV SSize_t *
 Perl_markstack_grow(pTHX);
 #define PERL_ARGS_ASSERT_MARKSTACK_GROW
 
@@ -6608,7 +6608,7 @@ Perl_croak_kw_unless_class(pTHX_ const char *kw);
           defined(PERL_IN_TOKE_C) */
 #if defined(PERL_IN_DEB_C)
 STATIC void
-S_deb_stack_n(pTHX_ SV **stack_base, I32 stack_min, I32 stack_max, I32 mark_min, I32 mark_max, I32 nonrc_base);
+S_deb_stack_n(pTHX_ SV **stack_base, SSize_t stack_min, SSize_t stack_max, SSize_t mark_min, SSize_t mark_max, SSize_t nonrc_base);
 # define PERL_ARGS_ASSERT_DEB_STACK_N           \
         assert(stack_base)
 
@@ -9513,7 +9513,7 @@ Perl_CvGV(pTHX_ CV *sv);
 # define PERL_ARGS_ASSERT_CVGV                  \
         assert(sv)
 
-PERL_STATIC_INLINE I32
+PERL_STATIC_INLINE SSize_t
 Perl_POPMARK(pTHX);
 # define PERL_ARGS_ASSERT_POPMARK
 
@@ -9617,7 +9617,7 @@ Perl_SvUV_nomg(pTHX_ SV *sv);
 # define PERL_ARGS_ASSERT_SVUV_NOMG             \
         assert(sv)
 
-PERL_STATIC_INLINE I32
+PERL_STATIC_INLINE SSize_t
 Perl_TOPMARK(pTHX);
 # define PERL_ARGS_ASSERT_TOPMARK
 

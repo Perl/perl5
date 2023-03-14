@@ -5955,6 +5955,7 @@ t/bigmem/index.t			Check that index() handles large offsets
 t/bigmem/pos.t				Check that pos() handles large offsets
 t/bigmem/read.t				Check read() handles large offsets
 t/bigmem/regexp.t			Test regular expressions with large strings
+t/bigmem/stack.t			Check handling of large value stacks (including MARK values)
 t/bigmem/str.t				Test string primitives with large strings
 t/bigmem/subst.t			Test s/// with large strings
 t/bigmem/subst2.t			Test s//EXPR/e with large strings

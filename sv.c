@@ -16192,13 +16192,13 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 
         /* next PUSHMARK() sets *(PL_markstack_ptr+1) */
         i = proto_perl->Imarkstack_max - proto_perl->Imarkstack;
-        Newx(PL_markstack, i, I32);
+        Newx(PL_markstack, i, SSize_t);
         PL_markstack_max	= PL_markstack + (proto_perl->Imarkstack_max
                                                   - proto_perl->Imarkstack);
         PL_markstack_ptr	= PL_markstack + (proto_perl->Imarkstack_ptr
                                                   - proto_perl->Imarkstack);
         Copy(proto_perl->Imarkstack, PL_markstack,
-             PL_markstack_ptr - PL_markstack + 1, I32);
+             PL_markstack_ptr - PL_markstack + 1, SSize_t);
 
         /* next push_scope()/ENTER sets PL_scopestack[PL_scopestack_ix]
          * NOTE: unlike the others! */

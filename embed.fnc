@@ -1946,7 +1946,7 @@ p	|int	|magic_wipepack |NN SV *sv				\
 				|NN MAGIC *mg
 
 CTadop	|Malloc_t|malloc	|MEM_SIZE nbytes
-Cp	|I32 *	|markstack_grow
+Cp	|SSize_t *|markstack_grow
 EXp	|int	|mbtowc_	|NULLOK const wchar_t *pwc		\
 				|NULLOK const char *s			\
 				|const Size_t len
@@ -2522,7 +2522,7 @@ p	|OP *	|pmruntime	|NN OP *o				\
 				|NULLOK OP *repl			\
 				|UV flags				\
 				|I32 floor
-Xiop	|I32	|POPMARK
+Xiop	|SSize_t|POPMARK
 Cdp	|void	|pop_scope
 Cipx	|void	|pop_stackinfo
 
@@ -3505,7 +3505,7 @@ Fpv	|OP *	|tied_method	|NN SV *methname			\
 				|U32 argc				\
 				|...
 Xp	|SSize_t|tmps_grow_p	|SSize_t ix
-Xiop	|I32	|TOPMARK
+Xiop	|SSize_t|TOPMARK
 Cm	|UV	|to_uni_fold	|UV c					\
 				|NN U8 *p				\
 				|NN STRLEN *lenp
@@ -4082,11 +4082,11 @@ Cp	|void	|croak_kw_unless_class					\
           defined(PERL_IN_TOKE_C) */
 #if defined(PERL_IN_DEB_C)
 S	|void	|deb_stack_n	|NN SV **stack_base			\
-				|I32 stack_min				\
-				|I32 stack_max				\
-				|I32 mark_min				\
-				|I32 mark_max				\
-				|I32 nonrc_base
+				|SSize_t stack_min			\
+				|SSize_t stack_max			\
+				|SSize_t mark_min			\
+				|SSize_t mark_max			\
+				|SSize_t nonrc_base
 #endif
 #if defined(PERL_IN_DOIO_C)
 S	|bool	|argvout_final	|NN MAGIC *mg				\
