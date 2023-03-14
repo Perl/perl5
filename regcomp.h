@@ -331,7 +331,7 @@ struct regnode_charclass {
         U32 arg1u;
         struct {
             U16 arg1a;
-            U16 arg2a;
+            U16 arg1b;
         };
     };
     char bitmap[ANYOF_BITMAP_SIZE];	/* only compile-time */
@@ -347,7 +347,7 @@ struct regnode_charclass_posixl {
         U32 arg1u;
         struct {
             U16 arg1a;
-            U16 arg2a;
+            U16 arg1b;
         };
     };
     char bitmap[ANYOF_BITMAP_SIZE];		/* both compile-time ... */
@@ -376,7 +376,7 @@ struct regnode_ssc {
         U32 arg1u;
         struct {
             U16 arg1a;
-            U16 arg2a;
+            U16 arg1b;
         };
     };
     char bitmap[ANYOF_BITMAP_SIZE];	/* both compile-time ... */
