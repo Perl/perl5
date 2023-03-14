@@ -17,7 +17,7 @@ sub _carp {
     return warn @_, " at $file line $line\n";
 }
 
-our $VERSION = '1.302193';
+our $VERSION = '1.302194';
 
 use Test::Builder::Module;
 our @ISA    = qw(Test::Builder::Module);
@@ -426,6 +426,7 @@ sub isnt ($$;$) {
 # warnings are enabled, so the user can silence the warning if they
 # wish.
 sub isn::t {
+    local ($@, $!, $?);
     if (warnings::enabled("deprecated")) {
         _carp
         "Use of apostrophe as package separator was deprecated in Perl 5.37.9,\n",
