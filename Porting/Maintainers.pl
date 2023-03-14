@@ -1105,7 +1105,8 @@ use File::Glob qw(:case);
     },
 
     'Test::Simple' => {
-        'DISTRIBUTION' => 'EXODIST/Test-Simple-1.302193.tar.gz',
+        'DISTRIBUTION' => 'EXODIST/Test-Simple-1.302194.tar.gz',
+        'SYNCINFO'     => 'yorton on Tue Mar 14 13:43:38 2023',
         'SYNCINFO'     => 'yorton on Mon Mar  6 19:16:42 2023',
         'FILES'        => q[cpan/Test-Simple],
         'EXCLUDED'     => [
