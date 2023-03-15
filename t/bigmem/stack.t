@@ -49,8 +49,19 @@ $x[0x8000_0000] = "Hello";
     is($last, "abc", "check iteration not confused");
 }
 
+{
+    # split had an I32 base offset
+    # this paniced with "Split loop"
+    my $count = () = ( x(), do_split("ABC") );
+    is($count, 0x8000_0004, "split base index");
+    # it would be nice to test split returning >2G (or >4G) items, but
+    # I don't have the memory needed
+}
 done_testing();
 
 sub x { @x }
 
 sub z { 1 }
+sub do_split {
+    return split //, $_[0];
+}

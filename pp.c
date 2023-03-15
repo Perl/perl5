@@ -6584,7 +6584,7 @@ PP_wrapped(pp_split,
     const char *orig;
     const IV origlimit = limit;
     bool realarray = 0;
-    I32 base;
+    SSize_t base;
     const U8 gimme = GIMME_V;
     bool gimme_scalar;
     I32 oldsave = PL_savestack_ix;
