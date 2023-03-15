@@ -2179,8 +2179,25 @@ PP_wrapped(pp_caller, MAXARG, 0)
 
         if (AvMAX(PL_dbargs) < AvFILLp(ary) + off)
             av_extend(PL_dbargs, AvFILLp(ary) + off);
-        if (AvFILLp(ary) + 1 + off)
-            Copy(AvALLOC(ary), AvARRAY(PL_dbargs), AvFILLp(ary) + 1 + off, SV*);
+
+        /* Alias elements of @_ to @DB::args */
+        for (SSize_t i = AvFILLp(ary) + off; i >= 0; i--) {
+            SV* sv = AvALLOC(ary)[i];
+            /* for a shifted @_, the elements between AvALLOC and AvARRAY
+             * point to old SVs which may have been freed or even
+             * reallocated in the meantime. In the interests of
+             * reconstructing the original @_ before any shifting, use
+             * those old values, even at the risk of them being wrong.
+             * But if the ref count is 0, then don't use it because
+             * further assigning that value anywhere will panic.
+             * Of course there's nothing to stop a RC != 0 SV being
+             * subsequently freed, but hopefully people quickly copy the
+             * contents of @DB::args before doing anything else.
+             */
+            if (sv && SvREFCNT(sv) == 0)
+                sv = NULL;
+            AvARRAY(PL_dbargs)[i] = sv;
+        }
         AvFILLp(PL_dbargs) = AvFILLp(ary) + off;
     }
 
