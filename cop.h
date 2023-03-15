@@ -936,7 +936,7 @@ struct block_loop {
             IV  ix;   /* index relative to base of array */
         } ary;
         struct { /* CXt_LOOP_LIST, C<for (list)> */
-            I32 basesp; /* first element of list on stack */
+            SSize_t basesp; /* first element of list on stack */
             IV  ix;      /* index relative to basesp */
         } stack;
         struct { /* CXt_LOOP_LAZYIV, C<for (1..9)> */
