@@ -5907,7 +5907,7 @@ PP_wrapped(pp_lslice, 0, 2)
     SV ** const firstrelem = lastlelem + 1;
     const U8 mod = PL_op->op_flags & OPf_MOD;
 
-    const I32 max = lastrelem - lastlelem;
+    const SSize_t max = lastrelem - lastlelem;
     SV **lelem;
 
     if (GIMME_V != G_LIST) {
@@ -5916,7 +5916,7 @@ PP_wrapped(pp_lslice, 0, 2)
             *firstlelem = &PL_sv_undef;
         }
         else {
-            I32 ix = SvIV(*lastlelem);
+            SSize_t ix = SvIV(*lastlelem);
             if (ix < 0)
                 ix += max;
             if (ix < 0 || ix >= max)
@@ -5934,7 +5934,7 @@ PP_wrapped(pp_lslice, 0, 2)
     }
 
     for (lelem = firstlelem; lelem <= lastlelem; lelem++) {
-        I32 ix = SvIV(*lelem);
+        SSize_t ix = SvIV(*lelem);
         if (ix < 0)
             ix += max;
         if (ix < 0 || ix >= max)
