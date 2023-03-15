@@ -2165,6 +2165,25 @@ PP_wrapped(pp_caller, MAXARG, 0)
         RETURN;
     }
 
+    /* populate @DB::args ? */
+    if (CxTYPE(cx) == CXt_SUB && CxHASARGS(cx)
+        && CopSTASH_eq(PL_curcop, PL_debstash))
+    {
+        /* slot 0 of the pad contains the original @_ */
+        AV * const ary = MUTABLE_AV(AvARRAY(MUTABLE_AV(
+                            PadlistARRAY(CvPADLIST(cx->blk_sub.cv))[
+                                cx->blk_sub.olddepth+1]))[0]);
+        const SSize_t off = AvARRAY(ary) - AvALLOC(ary);
+
+        Perl_init_dbargs(aTHX);
+
+        if (AvMAX(PL_dbargs) < AvFILLp(ary) + off)
+            av_extend(PL_dbargs, AvFILLp(ary) + off);
+        if (AvFILLp(ary) + 1 + off)
+            Copy(AvALLOC(ary), AvARRAY(PL_dbargs), AvFILLp(ary) + 1 + off, SV*);
+        AvFILLp(PL_dbargs) = AvFILLp(ary) + off;
+    }
+
     CX_DEBUG(cx, "CALLER");
     assert(CopSTASH(cx->blk_oldcop));
     stash_hek = SvTYPE(CopSTASH(cx->blk_oldcop)) == SVt_PVHV
@@ -2249,23 +2268,7 @@ PP_wrapped(pp_caller, MAXARG, 0)
         PUSHs(&PL_sv_undef);
         PUSHs(&PL_sv_undef);
     }
-    if (CxTYPE(cx) == CXt_SUB && CxHASARGS(cx)
-        && CopSTASH_eq(PL_curcop, PL_debstash))
-    {
-        /* slot 0 of the pad contains the original @_ */
-        AV * const ary = MUTABLE_AV(AvARRAY(MUTABLE_AV(
-                            PadlistARRAY(CvPADLIST(cx->blk_sub.cv))[
-                                cx->blk_sub.olddepth+1]))[0]);
-        const SSize_t off = AvARRAY(ary) - AvALLOC(ary);
 
-        Perl_init_dbargs(aTHX);
-
-        if (AvMAX(PL_dbargs) < AvFILLp(ary) + off)
-            av_extend(PL_dbargs, AvFILLp(ary) + off);
-        if (AvFILLp(ary) + 1 + off)
-            Copy(AvALLOC(ary), AvARRAY(PL_dbargs), AvFILLp(ary) + 1 + off, SV*);
-        AvFILLp(PL_dbargs) = AvFILLp(ary) + off;
-    }
     mPUSHi(CopHINTS_get(cx->blk_oldcop));
     {
         SV * mask ;
