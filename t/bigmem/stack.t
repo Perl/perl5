@@ -42,6 +42,13 @@ $x[0x8000_0000] = "Hello";
     is($last2, "Hello", "list subscripting in list context (-2)");
     is($last1, "Goodbye", "list subscripting in list context (-1)");
 }
+
+{
+    # the iter context had an I32 stack offset
+    my $last = ( x(), iter() )[-1];
+    is($last, "abc", "check iteration not confused");
+}
+
 done_testing();
 
 sub x { @x }
