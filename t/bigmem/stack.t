@@ -33,6 +33,15 @@ $x[0x8000_0000] = "Hello";
     is($count, 0x8000_0002, "got expected XS list size");
 }
 
+{
+    my $last = ( x() )[-1];
+    is($last, "Hello", "list subscripting");
+
+    my ($first, $last2, $last1) = ( "first", x(), "Goodbye" )[0, -2, -1];
+    is($first, "first", "list subscripting in list context (0)");
+    is($last2, "Hello", "list subscripting in list context (-2)");
+    is($last1, "Goodbye", "list subscripting in list context (-1)");
+}
 done_testing();
 
 sub x { @x }
