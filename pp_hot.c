@@ -5493,7 +5493,7 @@ Perl_clear_defarray(pTHX_ AV* av, bool abandon)
         /* abandon */
         const SSize_t size = AvFILLp(av) + 1;
         /* The ternary gives consistency with av_extend() */
-        AV *newav = newAV_alloc_x(size < PERL_ARRAY_NEW_MIN_KEY ?
+        AV *newav = newAV_alloc_xz(size < PERL_ARRAY_NEW_MIN_KEY ?
                                          PERL_ARRAY_NEW_MIN_KEY : size);
 #ifndef PERL_RC_STACK
         AvREIFY_only(newav);

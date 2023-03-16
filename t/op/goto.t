@@ -12,7 +12,7 @@ BEGIN {
 use warnings;
 use strict;
 use Config;
-plan tests => 133;
+plan tests => 134;
 our $TODO;
 
 my $deprecated = 0;
@@ -951,4 +951,24 @@ SKIP:
     sub bar_19936 { *bar_19936 = {}; goto &XS::APItest::gimme }
     my @a = bar_19936();
     is($XS::APItest::GIMME_V, 3, "GH #19936 gimme XS call");
+}
+
+# goto &sub could leave AvARRAY() slots of @_ uninitialised.
+
+{
+    my $i = 0;
+    my $f = sub {
+        goto &{ sub {} } unless $i++;
+        $_[1] = 1; # create a hole
+        # accessing $_[0] is more for valgrind/ASAN to chew on rather than
+        # we're too concerned about its value. Or it might give "bizarre
+        # copy" errors.
+        is($_[0], undef, "goto and AvARRAY");
+    };
+
+    # first call does goto, which gives &$f a fresh AV in pad[0],
+    # which formerly allocated an AvARRAY for it, but didn't zero it
+    $f->();
+    # second call creates hole in @_ which used to to be a wild SV pointer
+    $f->();
 }
