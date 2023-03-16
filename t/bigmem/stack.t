@@ -72,6 +72,12 @@ my @tests =
             is($count, 0x8000_0001, "check loading XS with large stack");
         }
       ],
+      [ pp_list => sub
+        {
+            my $l = ( x(), list2() )[-1];
+            is($l, 2, "pp_list mark handling");
+        }
+      ],
      );
 
 # these tests are slow, let someone debug them one at a time
@@ -107,4 +113,12 @@ sub do_split {
 sub loader {
     require Cwd;
     ();
+}
+
+sub list2 {
+    scalar list(1);
+}
+
+sub list {
+    return shift() ? (1, 2) : (2, 1);
 }
