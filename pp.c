@@ -5955,7 +5955,7 @@ PP_wrapped(pp_lslice, 0, 2)
 PP(pp_anonlist)
 {
     dMARK;
-    const I32 items = PL_stack_sp - MARK;
+    const SSize_t items = PL_stack_sp - MARK;
     SV * const av = MUTABLE_SV(av_make(items, MARK+1));
     /* attach new SV to stack before freeing everything else,
      * so no leak on croak */
