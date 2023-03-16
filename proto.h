@@ -5317,10 +5317,10 @@ Perl_write_to_stderr(pTHX_ SV *msv)
         assert(msv)
 
 PERL_CALLCONV void
-Perl_xs_boot_epilog(pTHX_ const I32 ax);
+Perl_xs_boot_epilog(pTHX_ const SSize_t ax);
 #define PERL_ARGS_ASSERT_XS_BOOT_EPILOG
 
-PERL_CALLCONV I32
+PERL_CALLCONV SSize_t
 Perl_xs_handshake(const U32 key, void *v_my_perl, const char *file, ...);
 #define PERL_ARGS_ASSERT_XS_HANDSHAKE           \
         assert(v_my_perl); assert(file)
@@ -9451,7 +9451,7 @@ S_with_queued_errors(pTHX_ SV *ex);
         assert(ex)
 
 STATIC void
-S_xs_version_bootcheck(pTHX_ U32 items, U32 ax, const char *xs_p, STRLEN xs_len);
+S_xs_version_bootcheck(pTHX_ SSize_t items, SSize_t ax, const char *xs_p, STRLEN xs_len);
 # define PERL_ARGS_ASSERT_XS_VERSION_BOOTCHECK  \
         assert(xs_p)
 

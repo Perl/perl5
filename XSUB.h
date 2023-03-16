@@ -174,16 +174,16 @@ is a lexical C<$_> in scope.
    Note these macros are not drop in replacements for dXSARGS since they set
    PL_xsubfilename. */
 #define dXSBOOTARGSXSAPIVERCHK  \
-        I32 ax = XS_BOTHVERSION_SETXSUBFN_POPMARK_BOOTCHECK;	\
+        SSize_t ax = XS_BOTHVERSION_SETXSUBFN_POPMARK_BOOTCHECK;	\
         SV **mark = PL_stack_base + ax - 1; dSP; dITEMS
 #define dXSBOOTARGSAPIVERCHK  \
-        I32 ax = XS_APIVERSION_SETXSUBFN_POPMARK_BOOTCHECK;	\
+        SSize_t ax = XS_APIVERSION_SETXSUBFN_POPMARK_BOOTCHECK;	\
         SV **mark = PL_stack_base + ax - 1; dSP; dITEMS
 /* dXSBOOTARGSNOVERCHK has no API in xsubpp to choose it so do
 #undef dXSBOOTARGSXSAPIVERCHK
 #define dXSBOOTARGSXSAPIVERCHK dXSBOOTARGSNOVERCHK */
 #define dXSBOOTARGSNOVERCHK  \
-        I32 ax = XS_SETXSUBFN_POPMARK;  \
+        SSize_t ax = XS_SETXSUBFN_POPMARK;  \
         SV **mark = PL_stack_base + ax - 1; dSP; dITEMS
 
 #define dXSTARG SV * const targ = ((PL_op->op_private & OPpENTERSUB_HASTARG) \

@@ -57,11 +57,34 @@ $x[0x8000_0000] = "Hello";
     # it would be nice to test split returning >2G (or >4G) items, but
     # I don't have the memory needed
 }
+
+{
+    # I expect this to crash if buggy
+    my $count = () = (x(), loader());
+    is($count, 0x8000_0001, "check loading XS with large stack");
+}
+
 done_testing();
 
 sub x { @x }
 
 sub z { 1 }
+
+sub iter {
+    my $result = '';
+    my $count = 0;
+    for my $item (qw(a b c)) {
+        $result .= $item;
+        die "iteration bug" if ++$count > 5;
+    }
+    $result;
+}
+
 sub do_split {
     return split //, $_[0];
+}
+
+sub loader {
+    require Cwd;
+    ();
 }

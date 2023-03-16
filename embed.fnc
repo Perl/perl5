@@ -3744,9 +3744,9 @@ Adp	|void	|wrap_op_checker|Optype opcode				\
 				|NN Perl_check_t *old_checker_p
 : Used in pp_ctl.c
 p	|void	|write_to_stderr|NN SV *msv
-Xp	|void	|xs_boot_epilog |const I32 ax
+Xp	|void	|xs_boot_epilog |const SSize_t ax
 
-FTXopv	|I32	|xs_handshake	|const U32 key				\
+FTXopv	|SSize_t|xs_handshake	|const U32 key				\
 				|NN void *v_my_perl			\
 				|NN const char *file			\
 				|...
@@ -5960,8 +5960,8 @@ Ti	|U32	|ptr_hash	|PTRV u
 S	|SV *	|with_queued_errors					\
 				|NN SV *ex
 So	|void	|xs_version_bootcheck					\
-				|U32 items				\
-				|U32 ax 				\
+				|SSize_t items				\
+				|SSize_t ax				\
 				|NN const char *xs_p			\
 				|STRLEN xs_len
 # if defined(PERL_MEM_LOG) && !defined(PERL_MEM_LOG_NOIMPL)
