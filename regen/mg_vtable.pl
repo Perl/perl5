@@ -212,6 +212,12 @@ my %mg =
                    vtable => 'debugvar' },
      lvref => { char => '\\', vtable => 'lvref',
                   desc => "Lvalue reference constructor" },
+     destruct => {
+        char        => "X",
+        vtable      => 'destruct',
+        desc        => "destruct callback",
+        value_magic => 1,
+     },
 );
 
 
@@ -288,6 +294,7 @@ my %vtable_conf =
      'checkcall' => {copy => 'copycallchecker'},
      'debugvar' => { set => 'setdebugvar', get => 'getdebugvar' },
      'lvref' => {set => 'setlvref'},
+     'destruct' => {free => 'freedestruct'},
 );
 
 
@@ -428,6 +435,7 @@ EOH
                     ($desc, @cont) = $desc =~ /(.{1,$desc_wrap})(?: |\z)/g
                 }
             }
+            s/\s+\z// for $desc, @cont;
             printf $format, $type, $vtbl, $desc;
             printf $format, '', '', $_ foreach @cont;
         }

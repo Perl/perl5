@@ -1847,5 +1847,144 @@ Perl_cx_dump(pTHX_ PERL_CONTEXT *cx)
 }
 
 /*
+=for apidoc_section $callback
+=for apidoc mortal_destructor_sv
+
+This function arranges for either a Perl code reference, or a C function
+reference to be called at the B<end of the current statement>.
+
+The C<coderef> argument determines the type of function that will be
+called. If it is C<SvROK()> it is assumed to be a reference to a CV and
+will arrange for the coderef to be called. If it is not SvROK() then it
+is assumed to be a C<SvIV()> which is C<SvIOK()> whose value is a pointer
+to a C function of type C<DESTRUCTORFUNC_t> created using C<PTR2INT()>.
+Either way the C<args> parameter will be provided to the callback as a
+parameter, although the rules for doing so differ between the Perl and
+C mode. Normally this function is only used directly for the Perl case
+and the wrapper C<mortal_destructor_x()> is used for the C function case.
+
+When operating in Perl callback mode the C<args> parameter may be NULL
+in which case the code reference is called with no arguments, otherwise
+if it is an AV (SvTYPE(args) == SVt_PVAV) then the contents of the AV
+will be used as the arguments to the code reference, and if it is any
+other type then the C<args> SV will be provided as a single argument to
+the code reference.
+
+When operating in a C callback mode the C<args> parameter will be passed
+directly to the C function as a C<void *> pointer. No additional
+processing of the argument will be peformed, and it is the callers
+responsibility to free the C<args> parameter if necessary.
+
+Be aware that there is a signficant difference in timing between the
+I<end of the current statement> and the I<end of the current pseudo
+block>. If you are looking for a mechanism to trigger a function at the
+end of the B<current pseudo block> you should look at
+C<SAVEDESTRUCTORX()> instead of this function.
+
+=for apidoc mortal_svfunc_x
+
+This function arranges for a C function reference to be called at the
+B<end of the current statement> with the arguments provided. It is a
+wrapper around C<mortal_destructor_sv()> which ensures that the latter
+function is called appropriately.
+
+Be aware that there is a signficant difference in timing between the
+I<end of the current statement> and the I<end of the current pseudo
+block>. If you are looking for a mechanism to trigger a function at the
+end of the B<current pseudo block> you should look at
+C<SAVEDESTRUCTORX()> instead of this function.
+
+=for apidoc magic_freedestruct
+
+This function is called via magic to implement the
+C<mortal_destructor_sv()> and C<mortal_destructor_x()> functions. It
+should not be called directly and has no user servicable parts.
+
+=cut
+*/
+
+void
+Perl_mortal_destructor_sv(pTHX_ SV *coderef, SV *args) {
+    PERL_ARGS_ASSERT_MORTAL_DESTRUCTOR_SV;
+    assert(
+        (SvROK(coderef) && SvTYPE(SvRV(coderef)) == SVt_PVCV) /* perl coderef */
+         ||
+        (SvIOK(coderef) && !SvROK(coderef))                  /* C function ref */
+    );
+    SV *variable = newSV_type_mortal(SVt_IV);
+    (void)sv_magicext(variable, coderef, PERL_MAGIC_destruct,
+                      &PL_vtbl_destruct, (char *)args, args ? HEf_SVKEY : 0);
+}
+
+
+void
+Perl_mortal_svfunc_x(pTHX_ SVFUNC_t f, SV *sv) {
+    PERL_ARGS_ASSERT_MORTAL_SVFUNC_X;
+    SV *sviv = newSViv(PTR2IV(f));
+    mortal_destructor_sv(sviv,sv);
+}
+
+
+int
+Perl_magic_freedestruct(pTHX_ SV* sv, MAGIC* mg) {
+    PERL_ARGS_ASSERT_MAGIC_FREEDESTRUCT;
+    dSP;
+    union {
+        SV   *sv;
+        AV   *av;
+        char *pv;
+    } args_any;
+    SV *coderef;
+
+    IV nargs = 0;
+    if (PL_phase == PERL_PHASE_DESTRUCT) {
+        Perl_warn(aTHX_ "Can't call destructor for 0x%p in global destruction\n", sv);
+        return 1;
+    }
+
+    args_any.pv = mg->mg_ptr;
+    coderef = mg->mg_obj;
+
+    /* Deal with C function destructor */
+    if (SvTYPE(coderef) == SVt_IV && !SvROK(coderef)) {
+        SVFUNC_t f = INT2PTR(SVFUNC_t, SvIV(coderef));
+        (f)(aTHX_ args_any.sv);
+        return 0;
+    }
+
+    if (args_any.sv) {
+        if (SvTYPE(args_any.sv) == SVt_PVAV) {
+            nargs = av_len(args_any.av) + 1;
+        } else {
+            nargs = 1;
+        }
+    }
+    PUSHSTACKi(PERLSI_MAGIC);
+    ENTER_with_name("call_freedestruct");
+    SAVETMPS;
+    EXTEND(SP, nargs);
+    PUSHMARK(SP);
+    if (args_any.sv) {
+        if (SvTYPE(args_any.sv) == SVt_PVAV) {
+            IV n;
+            for (n = 0 ; n < nargs ; n++ ) {
+                SV **argp = av_fetch(args_any.av, n, 0);
+                if (argp && *argp)
+                    PUSHs(*argp);
+            }
+        } else {
+            PUSHs(args_any.sv);
+        }
+    }
+    PUTBACK;
+    (void)call_sv(coderef, G_VOID | G_EVAL | G_KEEPERR);
+    FREETMPS;
+    LEAVE_with_name("call_freedestruct");
+    POPSTACK;
+    return 0;
+}
+
+
+/*
  * ex: set ts=8 sts=4 sw=4 et:
  */

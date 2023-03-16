@@ -359,7 +359,9 @@
 # define mg_size(a)                             Perl_mg_size(aTHX_ a)
 # define mini_mktime                            Perl_mini_mktime
 # define moreswitches(a)                        Perl_moreswitches(aTHX_ a)
+# define mortal_destructor_sv(a,b)              Perl_mortal_destructor_sv(aTHX_ a,b)
 # define mortal_getenv                          Perl_mortal_getenv
+# define mortal_svfunc_x(a,b)                   Perl_mortal_svfunc_x(aTHX_ a,b)
 # define mro_get_linear_isa(a)                  Perl_mro_get_linear_isa(aTHX_ a)
 # define mro_method_changed_in(a)               Perl_mro_method_changed_in(aTHX_ a)
 # define msbit_pos32                            Perl_msbit_pos32
@@ -961,6 +963,7 @@
 #   define magic_copycallchecker(a,b,c,d,e)     Perl_magic_copycallchecker(aTHX_ a,b,c,d,e)
 #   define magic_existspack(a,b)                Perl_magic_existspack(aTHX_ a,b)
 #   define magic_freearylen_p(a,b)              Perl_magic_freearylen_p(aTHX_ a,b)
+#   define magic_freedestruct(a,b)              Perl_magic_freedestruct(aTHX_ a,b)
 #   define magic_freemglob(a,b)                 Perl_magic_freemglob(aTHX_ a,b)
 #   define magic_freeovrld(a,b)                 Perl_magic_freeovrld(aTHX_ a,b)
 #   define magic_freeutf8(a,b)                  Perl_magic_freeutf8(aTHX_ a,b)

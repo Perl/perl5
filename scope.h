@@ -195,6 +195,12 @@ scope has the given name. C<name> must be a literal string.
 #define SAVEDESTRUCTOR_X(f,p) \
           save_destructor_x((DESTRUCTORFUNC_t)(f), (void*)(p))
 
+#define MORTALSVFUNC_X(f,sv) \
+          mortal_svfunc_x((SVFUNC_t)(f), sv)
+
+#define MORTALDESTRUCTOR_SV(coderef,args) \
+          mortal_destructor_sv(coderef,args)
+
 #define SAVESTACK_POS() \
     STMT_START {				   \
         dSS_ADD;                                   \

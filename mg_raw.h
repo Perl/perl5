@@ -76,6 +76,8 @@
       "/* vec 'v' vec() lvalue */" },
     { 'w', "want_vtbl_utf8 | PERL_MAGIC_VALUE_MAGIC",
       "/* utf8 'w' Cached UTF-8 information */" },
+    { 'X', "want_vtbl_destruct | PERL_MAGIC_VALUE_MAGIC",
+      "/* destruct 'X' destruct callback */" },
     { 'x', "want_vtbl_substr | PERL_MAGIC_VALUE_MAGIC",
       "/* substr 'x' substr() lvalue */" },
     { 'Y', "want_vtbl_nonelem | PERL_MAGIC_VALUE_MAGIC",

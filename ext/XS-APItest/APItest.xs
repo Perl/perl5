@@ -1515,6 +1515,11 @@ test_bool_internals_func(SV *true_sv, SV *false_sv, const char *msg) {
 }
 #include "const-c.inc"
 
+void
+destruct_test(pTHX_ void *p) {
+    warn("In destruct_test: %" SVf "\n", (SV*)p);
+}
+
 MODULE = XS::APItest            PACKAGE = XS::APItest
 
 INCLUDE: const-xs.inc
@@ -4907,6 +4912,24 @@ sv_refcnt(SV *sv)
         RETVAL = SvREFCNT(sv);
     OUTPUT:
         RETVAL
+
+void
+test_mortal_destructor_sv(SV *coderef, SV *args)
+    CODE:
+        MORTALDESTRUCTOR_SV(coderef,args);
+
+void
+test_mortal_destructor_av(SV *coderef, AV *args)
+    CODE:
+        /* passing in an AV cast to SV is different from a SV ref to an AV */
+        MORTALDESTRUCTOR_SV(coderef, (SV *)args);
+
+void
+test_mortal_svfunc_x(SV *args)
+    CODE:
+        MORTALSVFUNC_X(&destruct_test,args);
+
+
 
 
 MODULE = XS::APItest            PACKAGE = XS::APItest
