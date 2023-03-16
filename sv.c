@@ -5912,7 +5912,7 @@ Perl_sv_magic(pTHX_ SV *const sv, SV *const obj, const int how,
 }
 
 static int
-S_sv_unmagicext_flags(pTHX_ SV *const sv, const int type, MGVTBL *vtbl, const U32 flags)
+S_sv_unmagicext_flags(pTHX_ SV *const sv, const int type, const MGVTBL *vtbl, const U32 flags)
 {
     MAGIC* mg;
     MAGIC** mgp;
@@ -5977,7 +5977,7 @@ Removes all magic of type C<type> with the specified C<vtbl> from an SV.
 */
 
 int
-Perl_sv_unmagicext(pTHX_ SV *const sv, const int type, MGVTBL *vtbl)
+Perl_sv_unmagicext(pTHX_ SV *const sv, const int type, const MGVTBL *vtbl)
 {
     PERL_ARGS_ASSERT_SV_UNMAGICEXT;
     return S_sv_unmagicext_flags(aTHX_ sv, type, vtbl, 1);
