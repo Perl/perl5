@@ -3341,7 +3341,7 @@ Adp	|int	|sv_unmagic	|NN SV * const sv			\
 				|const int type
 Adp	|int	|sv_unmagicext	|NN SV * const sv			\
 				|const int type 			\
-				|NULLOK MGVTBL *vtbl
+				|NULLOK const MGVTBL *vtbl
 AMbdp	|void	|sv_unref	|NN SV *sv
 Adp	|void	|sv_unref_flags |NN SV * const ref			\
 				|const U32 flags

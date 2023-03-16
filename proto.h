@@ -4887,7 +4887,7 @@ Perl_sv_unmagic(pTHX_ SV * const sv, const int type);
         assert(sv)
 
 PERL_CALLCONV int
-Perl_sv_unmagicext(pTHX_ SV * const sv, const int type, MGVTBL *vtbl);
+Perl_sv_unmagicext(pTHX_ SV * const sv, const int type, const MGVTBL *vtbl);
 #define PERL_ARGS_ASSERT_SV_UNMAGICEXT          \
         assert(sv)
 
