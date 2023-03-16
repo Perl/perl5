@@ -664,6 +664,7 @@ Perl_SvREFCNT_inc(SV *sv)
         SvREFCNT(sv)++;
     return sv;
 }
+
 PERL_STATIC_INLINE SV *
 Perl_SvREFCNT_inc_NN(SV *sv)
 {
@@ -672,12 +673,14 @@ Perl_SvREFCNT_inc_NN(SV *sv)
     SvREFCNT(sv)++;
     return sv;
 }
+
 PERL_STATIC_INLINE void
 Perl_SvREFCNT_inc_void(SV *sv)
 {
     if (LIKELY(sv != NULL))
         SvREFCNT(sv)++;
 }
+
 PERL_STATIC_INLINE void
 Perl_SvREFCNT_dec(pTHX_ SV *sv)
 {
@@ -689,6 +692,15 @@ Perl_SvREFCNT_dec(pTHX_ SV *sv)
             Perl_sv_free2(aTHX_ sv, rc);
     }
 }
+
+PERL_STATIC_INLINE SV *
+Perl_SvREFCNT_dec_ret_NULL(pTHX_ SV *sv)
+{
+    PERL_ARGS_ASSERT_SVREFCNT_DEC_RET_NULL;
+    Perl_SvREFCNT_dec(aTHX_ sv);
+    return NULL;
+}
+
 
 PERL_STATIC_INLINE void
 Perl_SvREFCNT_dec_NN(pTHX_ SV *sv)

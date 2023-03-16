@@ -76,6 +76,10 @@ Perl_Slab_Free(pTHX_ void *op);
 #define PERL_ARGS_ASSERT_SLAB_FREE              \
         assert(op)
 
+/* PERL_CALLCONV void
+SvREFCNT_dec_set_NULL(pTHX_ SV *sv); */
+#define PERL_ARGS_ASSERT_SVREFCNT_DEC_SET_NULL
+
 PERL_CALLCONV char *
 Perl__byte_dump_string(pTHX_ const U8 * const start, const STRLEN len, const bool format);
 #define PERL_ARGS_ASSERT__BYTE_DUMP_STRING      \
@@ -9641,6 +9645,10 @@ PERL_STATIC_INLINE void
 Perl_SvREFCNT_dec_NN(pTHX_ SV *sv);
 # define PERL_ARGS_ASSERT_SVREFCNT_DEC_NN       \
         assert(sv)
+
+PERL_STATIC_INLINE SV *
+Perl_SvREFCNT_dec_ret_NULL(pTHX_ SV *sv);
+# define PERL_ARGS_ASSERT_SVREFCNT_DEC_RET_NULL
 
 PERL_STATIC_INLINE SV *
 Perl_SvREFCNT_inc(SV *sv);

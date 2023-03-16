@@ -107,6 +107,7 @@
 # define SvNV(a)                                Perl_SvNV(aTHX_ a)
 # define SvNV_nomg(a)                           Perl_SvNV_nomg(aTHX_ a)
 # define SvPVXtrue(a)                           Perl_SvPVXtrue(aTHX_ a)
+# define SvREFCNT_dec_ret_NULL(a)               Perl_SvREFCNT_dec_ret_NULL(aTHX_ a)
 # define SvTRUE(a)                              Perl_SvTRUE(aTHX_ a)
 # define SvTRUE_NN(a)                           Perl_SvTRUE_NN(aTHX_ a)
 # define SvTRUE_common(a,b)                     Perl_SvTRUE_common(aTHX_ a,b)
