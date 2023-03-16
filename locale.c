@@ -306,9 +306,9 @@ STATIC const int categories[] = {
                              FAKE_LC_ALL,
 #    endif
 
-   /* Placeholder as a precaution if code fails to check the return of
-    * get_category_index(), which returns this element to indicate an error */
-                            -1
+   /* Placeholder for an unknown category.  get_category_index() maps all
+    * categories we don't know about to the index of this element */
+                            PERL_INT_MIN
 };
 
 /* The top-most real element is LC_ALL */
@@ -363,10 +363,9 @@ STATIC const char * const category_names[] = {
                                  "If you see this, it is a bug in"
                                  " perl; please report it via perlbug",
 #    endif
-
-   /* Placeholder as a precaution if code fails to check the return of
-    * get_category_index(), which returns this element to indicate an error */
-                                 NULL
+                                 "Locale category unknown to Perl; if"  \
+                                 " you see this, it is a bug in perl;"  \
+                                 " please report it via perlbug"
 };
 
 /* A few categories require additional setup when they are changed.  This table
@@ -417,9 +416,8 @@ STATIC void (*update_functions[]) (pTHX_ const char *, bool force) = {
     /* No harm done to have this even without an LC_ALL */
                                 S_new_LC_ALL,
 
-   /* Placeholder as a precaution if code fails to check the return of
-    * get_category_index(), which returns this element to indicate an error */
-                                NULL
+                                NULL    /* Placeholder for all unknown
+                                           categories */
 };
 
 #  ifdef USE_POSIX_2008_LOCALE
@@ -471,9 +469,7 @@ STATIC const int category_masks[] = {
 #    endif
                                 LC_ALL_MASK,
 
-   /* Placeholder as a precaution if code fails to check the return of
-    * get_category_index(), which returns this element to indicate an error */
-                                0
+                                0   /* Placeholder for all unknown categories */
 };
 
 #  endif
