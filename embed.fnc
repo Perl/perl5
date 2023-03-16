@@ -4329,10 +4329,10 @@ S	|void	|populate_hash_from_localeconv				\
 				|NULLOK const lconv_offset_t *integers
 # endif
 # if defined(USE_LOCALE)
-ST	|unsigned int|get_category_index				\
+RST	|unsigned int|get_category_index				\
 				|const int category			\
 				|NULLOK const char *locale
-ST	|int	|get_category_index_nowarn				\
+RST	|int	|get_category_index_nowarn				\
 				|const int category
 Ri	|const char *|mortalized_pv_copy				\
 				|NULLOK const char * const pv
