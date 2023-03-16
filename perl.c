@@ -5508,7 +5508,7 @@ read_e_script(pTHX_ int idx, SV *buf_sv, int maxlen)
 
 /* removes boilerplate code at the end of each boot_Module xsub */
 void
-Perl_xs_boot_epilog(pTHX_ const I32 ax)
+Perl_xs_boot_epilog(pTHX_ const SSize_t ax)
 {
   if (PL_unitcheckav)
         call_list(PL_scopestack_ix, PL_unitcheckav);
