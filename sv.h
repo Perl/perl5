@@ -336,12 +336,29 @@ effects and you don't need the return value.
 C<SvREFCNT_inc_simple_void_NN> can only be used with expressions without side
 effects, you don't need the return value, and you know C<sv> is not C<NULL>.
 
-=for apidoc SvREFCNT_dec
+=for apidoc      SvREFCNT_dec
+=for apidoc_item SvREFCNT_dec_set_NULL
+=for apidoc_item SvREFCNT_dec_ret_NULL
 =for apidoc_item SvREFCNT_dec_NN
 
 These decrement the reference count of the given SV.
 
 C<SvREFCNT_dec_NN> may only be used when C<sv> is known to not be C<NULL>.
+
+The function C<SvREFCNT_dec_ret_NULL()> is identical to the
+C<SvREFCNT_dec()> except it returns a NULL C<SV *>.  It is used by
+C<SvREFCNT_dec_set_NULL()> which is a macro which will, when passed a
+non-NULL argument, decrement the reference count of its argument and
+then set it to NULL. You can replace code of the following form:
+
+    if (sv) {
+       SvREFCNT_dec_NN(sv);
+       sv = NULL;
+    }
+
+with
+
+    SvREFCNT_dec_set_NULL(sv);
 
 =for apidoc Am|svtype|SvTYPE|SV* sv
 Returns the type of the SV.  See C<L</svtype>>.
@@ -375,6 +392,10 @@ perform the upgrade if necessary.  See C<L</svtype>>.
 #define SvREFCNT_inc_simple_void_NN(sv)	(void)(++SvREFCNT(MUTABLE_SV(sv)))
 
 #define SvREFCNT_dec(sv)	Perl_SvREFCNT_dec(aTHX_ MUTABLE_SV(sv))
+#define SvREFCNT_dec_set_NULL(sv)                               \
+    STMT_START {                                                \
+        sv = Perl_SvREFCNT_dec_ret_NULL(aTHX_ MUTABLE_SV(sv));  \
+    } STMT_END
 #define SvREFCNT_dec_NN(sv)	Perl_SvREFCNT_dec_NN(aTHX_ MUTABLE_SV(sv))
 
 #define SVTYPEMASK	0xff

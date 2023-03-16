@@ -3202,6 +3202,10 @@ Adp	|SV *	|sv_ref 	|NULLOK SV *dst 			\
 				|const int ob
 AMdip	|void	|SvREFCNT_dec	|NULLOK SV *sv
 AMdip	|void	|SvREFCNT_dec_NN|NN SV *sv
+Adip	|SV *	|SvREFCNT_dec_ret_NULL					\
+				|NULLOK SV *sv
+Adm	|void	|SvREFCNT_dec_set_NULL					\
+				|NULLOK SV *sv
 AMTdip	|SV *	|SvREFCNT_inc	|NULLOK SV *sv
 AMTdip	|SV *	|SvREFCNT_inc_NN|NN SV *sv
 AMTdip	|void	|SvREFCNT_inc_void					\
