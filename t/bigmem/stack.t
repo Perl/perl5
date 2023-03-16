@@ -77,6 +77,14 @@ my @tests =
             my $l = ( x(), list2() )[-1];
             is($l, 2, "pp_list mark handling");
         }
+       ],
+      [
+          chomp_av => sub {
+              # not really stack related, but is 32-bit related
+              local $x[-1] = "Hello\n";
+              chomp(@x);
+              is($x[-1], "Hello", "chomp on a large array");
+          }
       ],
      );
 
