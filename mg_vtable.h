@@ -51,6 +51,7 @@
 #define PERL_MAGIC_vstring        'V' /* SV was vstring literal */
 #define PERL_MAGIC_vec            'v' /* vec() lvalue */
 #define PERL_MAGIC_utf8           'w' /* Cached UTF-8 information */
+#define PERL_MAGIC_destruct       'X' /* destruct callback */
 #define PERL_MAGIC_substr         'x' /* substr() lvalue */
 #define PERL_MAGIC_nonelem        'Y' /* Array element that does not exist */
 #define PERL_MAGIC_defelem        'y' /* Shadow "foreach" iterator variable /
@@ -69,6 +70,7 @@ enum {		/* pass one of these to get_vtbl */
     want_vtbl_dbline,
     want_vtbl_debugvar,
     want_vtbl_defelem,
+    want_vtbl_destruct,
     want_vtbl_env,
     want_vtbl_envelem,
     want_vtbl_hints,
@@ -107,6 +109,7 @@ EXTCONST char * const PL_magic_vtable_names[magic_vtable_max] = {
     "dbline",
     "debugvar",
     "defelem",
+    "destruct",
     "env",
     "envelem",
     "hints",
@@ -168,6 +171,7 @@ EXT_MGVTBL PL_magic_vtables[magic_vtable_max] = {
   { 0, Perl_magic_setdbline, 0, 0, 0, 0, 0, 0 },
   { Perl_magic_getdebugvar, Perl_magic_setdebugvar, 0, 0, 0, 0, 0, 0 },
   { Perl_magic_getdefelem, Perl_magic_setdefelem, 0, 0, 0, 0, 0, 0 },
+  { 0, 0, 0, 0, Perl_magic_freedestruct, 0, 0, 0 },
   { 0, Perl_magic_set_all_env, 0, Perl_magic_clear_all_env, 0, 0, 0, 0 },
   { 0, Perl_magic_setenv, 0, Perl_magic_clearenv, 0, 0, 0, 0 },
   { 0, 0, 0, Perl_magic_clearhints, 0, 0, 0, 0 },
@@ -214,6 +218,7 @@ EXT_MGVTBL PL_magic_vtables[magic_vtable_max];
 #define PL_vtbl_dbline PL_magic_vtables[want_vtbl_dbline]
 #define PL_vtbl_debugvar PL_magic_vtables[want_vtbl_debugvar]
 #define PL_vtbl_defelem PL_magic_vtables[want_vtbl_defelem]
+#define PL_vtbl_destruct PL_magic_vtables[want_vtbl_destruct]
 #define PL_vtbl_env PL_magic_vtables[want_vtbl_env]
 #define PL_vtbl_envelem PL_magic_vtables[want_vtbl_envelem]
 #define PL_vtbl_fm PL_magic_vtables[want_vtbl_fm]

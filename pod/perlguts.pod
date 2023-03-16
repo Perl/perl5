@@ -1510,17 +1510,17 @@ will be lost.
                                              tables
  <  PERL_MAGIC_backref        vtbl_backref   For weak ref data
  @  PERL_MAGIC_arylen_p       (none)         To move arylen out of XPVAV
- B  PERL_MAGIC_bm             vtbl_regexp    Boyer-Moore 
+ B  PERL_MAGIC_bm             vtbl_regexp    Boyer-Moore
                                              (fast string search)
- c  PERL_MAGIC_overload_table vtbl_ovrld     Holds overload table 
+ c  PERL_MAGIC_overload_table vtbl_ovrld     Holds overload table
                                              (AMT) on stash
- D  PERL_MAGIC_regdata        vtbl_regdata   Regex match position data 
+ D  PERL_MAGIC_regdata        vtbl_regdata   Regex match position data
                                              (@+ and @- vars)
  d  PERL_MAGIC_regdatum       vtbl_regdatum  Regex match position data
                                              element
  E  PERL_MAGIC_env            vtbl_env       %ENV hash
  e  PERL_MAGIC_envelem        vtbl_envelem   %ENV hash element
- f  PERL_MAGIC_fm             vtbl_regexp    Formline 
+ f  PERL_MAGIC_fm             vtbl_regexp    Formline
                                              ('compiled' format)
  g  PERL_MAGIC_regex_global   vtbl_mglob     m//g target
  H  PERL_MAGIC_hints          vtbl_hints     %^H hash
@@ -1548,6 +1548,7 @@ will be lost.
  V  PERL_MAGIC_vstring        (none)         SV was vstring literal
  v  PERL_MAGIC_vec            vtbl_vec       vec() lvalue
  w  PERL_MAGIC_utf8           vtbl_utf8      Cached UTF-8 information
+ X  PERL_MAGIC_destruct       vtbl_destruct  destruct callback
  x  PERL_MAGIC_substr         vtbl_substr    substr() lvalue
  Y  PERL_MAGIC_nonelem        vtbl_nonelem   Array element that does not
                                              exist
@@ -1575,6 +1576,7 @@ will be lost.
 =for apidoc_item ||PERL_MAGIC_dbline
 =for apidoc_item ||PERL_MAGIC_debugvar
 =for apidoc_item ||PERL_MAGIC_defelem
+=for apidoc_item ||PERL_MAGIC_destruct
 =for apidoc_item ||PERL_MAGIC_env
 =for apidoc_item ||PERL_MAGIC_envelem
 =for apidoc_item ||PERL_MAGIC_ext
@@ -1978,7 +1980,7 @@ this:
 =item C<SAVEDESTRUCTOR(DESTRUCTORFUNC_NOCONTEXT_t f, void *p)>
 
 At the end of I<pseudo-block> the function C<f> is called with the
-only argument C<p>.
+only argument C<p> which may be NULL.
 
 =for apidoc Ayh||DESTRUCTORFUNC_NOCONTEXT_t
 =for apidoc Amh||SAVEDESTRUCTOR|DESTRUCTORFUNC_NOCONTEXT_t f|void *p
@@ -1986,10 +1988,44 @@ only argument C<p>.
 =item C<SAVEDESTRUCTOR_X(DESTRUCTORFUNC_t f, void *p)>
 
 At the end of I<pseudo-block> the function C<f> is called with the
-implicit context argument (if any), and C<p>.
+implicit context argument (if any), and C<p> which may be NULL.
+
+Note the I<end of the current pseudo-block> may occur much later than
+the the I<end of the current statement>. You may wish to look at the
+C<MORTALDESTRUCTOR_X()> macro instead.
 
 =for apidoc Ayh||DESTRUCTORFUNC_t
 =for apidoc Amh||SAVEDESTRUCTOR_X|DESTRUCTORFUNC_t f|void *p
+
+=item C<MORTALSVFUNC_X(SVFUNC_t f, SV *sv)>
+
+At the end of I<the current statement> the function C<f> is called with
+the implicit context argument (if any), and C<sv> which may be NULL.
+
+Be aware that the parameter argument to the destructor function differs
+from the related C<SAVEDESTRUCTOR_X()> in that it MUST be either NULL or
+an C<SV*>.
+
+Note the I<end of the current statement> may occur much before the
+the I<end of the current pseudo-block>.  You may wish to look at the
+C<SAVEDESTRUCTOR_X()> macro instead.
+
+=for apidoc Amh||MORTALDESTRUCTOR_X|DESTRUCTORFUNC_t f|SV *sv
+
+=item C<MORTALDESTRUCTOR_SV(SV *coderef, SV *args)>
+
+At the end of I<the current statement> the Perl function contained in
+C<coderef> is called with the arguments provided (if any) in C<args>.
+See the documentation for C<mortal_destructor_sv()> for details on
+the C<args> parameter is handled.
+
+Note the I<end of the current statement> may occur much before the
+the I<end of the current pseudo-block>.  If you wish to call a perl
+function at the end of the current pseudo block you should use the
+C<SAVEDESTRUCTOR_X()> API instead, which will require you create a
+C wrapper to call the Perl function.
+
+=for apidoc Amh||MORTALDESTRUCTOR_SV|SV *coderef|SV *args
 
 =item C<SAVESTACK_POS()>
 

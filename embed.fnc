@@ -1808,6 +1808,9 @@ p	|int	|magic_existspack					\
 p	|int	|magic_freearylen_p					\
 				|NN SV *sv				\
 				|NN MAGIC *mg
+dp	|int	|magic_freedestruct					\
+				|NN SV *sv				\
+				|NN MAGIC *mg
 p	|int	|magic_freemglob|NN SV *sv				\
 				|NN MAGIC *mg
 p	|int	|magic_freeovrld|NN SV *sv				\
@@ -1970,7 +1973,12 @@ Cop	|void * |more_bodies	|const svtype sv_type			\
 				|const size_t arena_size
 Cp	|const char *|moreswitches					\
 				|NN const char *s
+Adp	|void	|mortal_destructor_sv					\
+				|NN SV *coderef 			\
+				|NULLOK SV *args
 CRTXip	|char * |mortal_getenv	|NN const char *str
+Cdp	|void	|mortal_svfunc_x|SVFUNC_t f				\
+				|NULLOK SV *p
 Adop	|const struct mro_alg *|mro_get_from_name			\
 				|NN SV *name
 Adp	|AV *	|mro_get_linear_isa					\

@@ -2098,6 +2098,12 @@ Perl_magic_freearylen_p(pTHX_ SV *sv, MAGIC *mg)
         assert(sv); assert(mg)
 
 PERL_CALLCONV int
+Perl_magic_freedestruct(pTHX_ SV *sv, MAGIC *mg)
+        __attribute__visibility__("hidden");
+#define PERL_ARGS_ASSERT_MAGIC_FREEDESTRUCT     \
+        assert(sv); assert(mg)
+
+PERL_CALLCONV int
 Perl_magic_freemglob(pTHX_ SV *sv, MAGIC *mg)
         __attribute__visibility__("hidden");
 #define PERL_ARGS_ASSERT_MAGIC_FREEMGLOB        \
@@ -2487,6 +2493,15 @@ PERL_CALLCONV const char *
 Perl_moreswitches(pTHX_ const char *s);
 #define PERL_ARGS_ASSERT_MORESWITCHES           \
         assert(s)
+
+PERL_CALLCONV void
+Perl_mortal_destructor_sv(pTHX_ SV *coderef, SV *args);
+#define PERL_ARGS_ASSERT_MORTAL_DESTRUCTOR_SV   \
+        assert(coderef)
+
+PERL_CALLCONV void
+Perl_mortal_svfunc_x(pTHX_ SVFUNC_t f, SV *p);
+#define PERL_ARGS_ASSERT_MORTAL_SVFUNC_X
 
 PERL_CALLCONV const struct mro_alg *
 Perl_mro_get_from_name(pTHX_ SV *name);

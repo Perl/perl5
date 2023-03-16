@@ -832,6 +832,14 @@ a C<given> block.  You probably meant to use C<next> or C<last>.
 
 (F) You called C<break>, but you're not inside a C<given> block.
 
+=item Can't call destructor for 0x%p in global destruction
+
+(S) This should not happen. Internals code has set up a destructor
+using C<mortal_destructor_sv> or C<mortal_destructor_x> which is firing
+during global destruction. Please attempt to reduce the code that triggers
+this warning down to a small an example as possible and then report the
+problem to L<https://github.com/Perl/perl5/issues/new/choose>
+
 =item Can't call method "%s" on an undefined value
 
 (F) You used the syntax of a method call, but the slot filled by the
