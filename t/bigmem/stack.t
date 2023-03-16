@@ -85,6 +85,17 @@ my @tests =
               chomp(@x);
               is($x[-1], "Hello", "chomp on a large array");
           }
+         ],
+      [
+          grepwhile => sub {
+            SKIP: {
+                  skip("This test is even slower - define PERL_RUN_SLOW_TESTS to run me", 1)
+                    unless $ENV{PERL_RUN_SLOW_TESTS};
+                  # grep ..., @x used too much memory
+                  my $count = grep 1, ( (undef) x 0x7FFF_FFFF, 1, 1 );
+                  is($count, 0x8000_0001, "grepwhile item count");
+              }
+          }
       ],
      );
 
