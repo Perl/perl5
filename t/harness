@@ -337,7 +337,7 @@ if (@ARGV) {
         my $which = $ENV{PERL_TEST_HARNESS_ASAP} ? \@last : \@next;
 
         push @$which, qw(comp run cmd);
-        push @$which, qw(io re opbasic op uni mro lib porting perf);
+        push @$which, qw(io re opbasic op uni mro lib class porting perf test_pl);
         push @$which, 'japh' if $torture;
         push @$which, 'win32' if $^O eq 'MSWin32';
         push @$which, 'benchmark' if $ENV{PERL_BENCHMARK};
@@ -352,13 +352,26 @@ if (@ARGV) {
 
         my $last = { par => '{' . join (',', @last) . '}/*.t' };
         @last = _extract_tests ($last);
-        push @last,
-          _tests_from_manifest($Config{extensions}, $Config{known_extensions});
 
-        push @tests, @last;
+        my ($non_ext, @ext_from_manifest)=
+            _tests_from_manifest($Config{extensions}, $Config{known_extensions}, "all");
+        push @last, @ext_from_manifest;
+
         push @seq, _compute_tests_and_ordering(\@last)->@*;
+        push @tests, @last;
 
         $rules = { seq => \@seq };
+
+        foreach my $test (@tests) {
+            delete $non_ext->{$test};
+        }
+
+        my @in_manifest_but_not_found = sort keys %$non_ext;
+        if (@in_manifest_but_not_found) {
+            die "There are test files which are in MANIFEST but are not found by the t/harness\n",
+                 "directory scanning rules. You should update t/harness line 339 or so.\n",
+                 "Files:\n", map { "    $_\n" } @in_manifest_but_not_found;
+        }
     }
 }
 if ($^O eq 'MSWin32') {
