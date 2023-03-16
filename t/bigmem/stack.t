@@ -18,50 +18,70 @@ $Config{ptrsize} >= 8
 my @x;
 $x[0x8000_0000] = "Hello";
 
-{
-    # unlike the grep example this avoids the mark manipulation done by grep
-    # so it's more of a pure mark type test
-    # it also fails/succeeds a lot faster
-    my $count = () =  (x(), z());
-    is($count, 0x8000_0002, "got expected (large) list size");
-}
+my @tests =
+  (
+      [ mark => sub
+        {
+            # unlike the grep example this avoids the mark manipulation done by grep
+            # so it's more of a pure mark type test
+            # it also fails/succeeds a lot faster
+            my $count = () =  (x(), z());
+            is($count, 0x8000_0002, "got expected (large) list size");
+        },
+      ],
+      [ xssize => sub
+        {
+            # check XS gets the right numbers in our predefined variables
+            # returned ~ -2G before fix
+            my $count = XS::APItest::xs_items(x(), z());
+            is($count, 0x8000_0002, "got expected XS list size");
+        }
+      ],
+      [ listsub => sub
+        {
+            my $last = ( x() )[-1];
+            is($last, "Hello", "list subscripting");
 
-{
-    # check XS gets the right numbers in our predefined variables
-    # returned ~ -2G before fix
-    my $count = XS::APItest::xs_items(x(), z());
-    is($count, 0x8000_0002, "got expected XS list size");
-}
+            my ($first, $last2, $last1) = ( "first", x(), "Goodbye" )[0, -2, -1];
+            is($first, "first", "list subscripting in list context (0)");
+            is($last2, "Hello", "list subscripting in list context (-2)");
+            is($last1, "Goodbye", "list subscripting in list context (-1)");
+        }
+      ],
+      [ iterctx => sub
+        {
+            # the iter context had an I32 stack offset
+            my $last = ( x(), iter() )[-1];
+            is($last, "abc", "check iteration not confused");
+        }
+      ],
+      [ split => sub
+        {
+            # split had an I32 base offset
+            # this paniced with "Split loop"
+            my $count = () = ( x(), do_split("ABC") );
+            is($count, 0x8000_0004, "split base index");
+            # it would be nice to test split returning >2G (or >4G) items, but
+            # I don't have the memory needed
+        }
+      ],
+      [ xsload => sub
+        {
+            # I expect this to crash if buggy
+            my $count = () = (x(), loader());
+            is($count, 0x8000_0001, "check loading XS with large stack");
+        }
+      ],
+     );
 
-{
-    my $last = ( x() )[-1];
-    is($last, "Hello", "list subscripting");
-
-    my ($first, $last2, $last1) = ( "first", x(), "Goodbye" )[0, -2, -1];
-    is($first, "first", "list subscripting in list context (0)");
-    is($last2, "Hello", "list subscripting in list context (-2)");
-    is($last1, "Goodbye", "list subscripting in list context (-1)");
-}
-
-{
-    # the iter context had an I32 stack offset
-    my $last = ( x(), iter() )[-1];
-    is($last, "abc", "check iteration not confused");
-}
-
-{
-    # split had an I32 base offset
-    # this paniced with "Split loop"
-    my $count = () = ( x(), do_split("ABC") );
-    is($count, 0x8000_0004, "split base index");
-    # it would be nice to test split returning >2G (or >4G) items, but
-    # I don't have the memory needed
-}
-
-{
-    # I expect this to crash if buggy
-    my $count = () = (x(), loader());
-    is($count, 0x8000_0001, "check loading XS with large stack");
+# these tests are slow, let someone debug them one at a time
+my %enabled = map { $_ => 1 } @ARGV;
+for my $test (@tests) {
+    my ($id, $code) = @$test;
+    if (!@ARGV || $enabled{$id}) {
+        note($id);
+        $code->();
+    }
 }
 
 done_testing();
