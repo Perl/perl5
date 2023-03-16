@@ -125,6 +125,9 @@ $| = 1;
 # (Windows only uses this script for miniperl.)
 @ARGV = eval 'map glob, @ARGV' if $^O eq 'MSWin32';
 
+my $is_win32 = $^O eq "MSWin32";
+my $is_os2 = $^O eq "os2";
+
 our $show_elapsed_time = $ENV{HARNESS_TIMER} || 0;
 
 # Cheesy version of Getopt::Std.  We can't replace it with that, because we
@@ -391,7 +394,7 @@ sub _populate_hash {
 }
 
 sub _tests_from_manifest {
-    my ($extensions, $known_extensions) = @_;
+    my ($extensions, $known_extensions, $all) = @_;
     my %skip;
     my %extensions = _populate_hash($extensions);
     my %known_extensions = _populate_hash($known_extensions);
@@ -402,10 +405,13 @@ sub _tests_from_manifest {
     }
 
     my @results;
+    my %non_ext;
+    push @results, \%non_ext if $all;
     my $mani = '../MANIFEST';
     if (open(MANI, $mani)) {
 	while (<MANI>) {
-	    if (m!^((?:cpan|dist|ext)/(\S+)/+(?:[^/\s]+\.t|test\.pl)|lib/\S+?(?:\.t|test\.pl))\s!) {
+	    my ($file)= split /\t/, $_;
+	    if ($file=~m!^((?:cpan|dist|ext)/(\S+)/+(?:[^/\s]+\.t|test\.pl)|lib/\S+?(?:\.t|test\.pl))\z!) {
 		my $t = $1;
 		my $extension = $2;
 
@@ -455,6 +461,17 @@ sub _tests_from_manifest {
 		    push @results, $path;
 		    $::path_to_name{$path} = $t;
 		}
+	    }
+	    elsif ($file=~m!/(?:test\.pl|[^/\s]+\.t)\z! and $file ne "t/test.pl") {
+		my $munged = $file;
+		next if $munged=~m!^(?:t/)?os2/!	and !$is_os2;
+		next if $munged=~m!^(?:t/)?win32/!	and !$is_win32;
+		next if $munged=~m!^(?:t/)?japh/!	and !$::torture;
+		next if $munged=~m!^(?:t/)?benchmark/!	and !($::benchmark or $ENV{PERL_BENCHMARK});
+		next if $munged=~m!^(?:t/)?bigmem/!	and !$ENV{PERL_TEST_MEMORY};
+		$munged =~ s!t/!! or $munged = "../$munged";
+
+		$non_ext{$munged}++;
 	    }
 	}
 	close MANI;
