@@ -1001,8 +1001,8 @@ sub _num_to_alpha {
     $max_char = 0 if !defined($max_char) or $max_char < 0;
 
     while( 1 ){
-        $alpha = $letters[ $num % 26 ] . $alpha;
-        $num = int( $num / 26 );
+        $alpha = $letters[ $num % @letters ] . $alpha;
+        $num = int( $num / @letters );
         last if $num == 0;
         $num = $num - 1;
 
@@ -1033,6 +1033,9 @@ $::tempfile_regexp = 'tmp_[A-Z]+_[A-Z]+';
 # Avoid ++, avoid ranges, avoid split //
 my $tempfile_count = 0;
 my $max_file_chars = 3;
+# Note that the max number of is NOT 26**3, it is 26**3 + 26**2 + 26,
+# as 3 character files are distinct from 2 character files, from 1 characters
+# files, etc.
 sub tempfile {
     # if you change the format returned by tempfile() you MUST change
     # the $::tempfile_regex define above.
