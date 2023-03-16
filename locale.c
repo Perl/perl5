@@ -251,225 +251,88 @@ static const char C_thousands_sep[] = "";
  * category */
 #  define FAKE_LC_ALL  PERL_INT_MIN
 
-/* Two parallel arrays indexed by our mapping of category numbers into small
- * non-negative indexes; first the locale categories Perl uses on this system,
- * used to do the inverse mapping.  The second array is their names.  These
- * arrays are in mostly arbitrary order. */
+/* Below are parallel arrays for locale information indexed by our mapping of
+ * category numbers into small non-negative indexes.  locale_table.h contains
+ * an entry like this for each individual category used on this system:
+ *      PERL_LOCALE_TABLE_ENTRY(LC_CTYPE, S_new_ctype)
+ *
+ * Each array redefines PERL_LOCALE_TABLE_ENTRY to generate the information
+ * needed for that array, and #includes locale_table.h to get the valid
+ * categories.
+ *
+ * An entry for the conglomerate category LC_ALL is added here, immediately
+ * following the individual categories.  (The treatment for it varies, so can't
+ * be in locale_table.h.)
+ *
+ * Following this, each array ends with an entry for illegal categories.  All
+ * category numbers unknown to perl get mapped to this entry.  This is likely
+ * to be a parameter error from the calling program; but it could be that this
+ * platform has a category we don't know about, in which case it needs to be
+ * added, using the paradigm of one of the existing categories. */
 
+/* The first array is the locale categories perl uses on this system, used to
+ * map our index back to the system's category number. */
 STATIC const int categories[] = {
 
-#    ifdef USE_LOCALE_CTYPE
-                             LC_CTYPE,
-#    endif
-#  ifdef USE_LOCALE_NUMERIC
-                             LC_NUMERIC,
-#  endif
-#    ifdef USE_LOCALE_COLLATE
-                             LC_COLLATE,
-#    endif
-#    ifdef USE_LOCALE_TIME
-                             LC_TIME,
-#    endif
-#    ifdef USE_LOCALE_MESSAGES
-                             LC_MESSAGES,
-#    endif
-#    ifdef USE_LOCALE_MONETARY
-                             LC_MONETARY,
-#    endif
-#    ifdef USE_LOCALE_ADDRESS
-                             LC_ADDRESS,
-#    endif
-#    ifdef USE_LOCALE_IDENTIFICATION
-                             LC_IDENTIFICATION,
-#    endif
-#    ifdef USE_LOCALE_MEASUREMENT
-                             LC_MEASUREMENT,
-#    endif
-#    ifdef USE_LOCALE_PAPER
-                             LC_PAPER,
-#    endif
-#    ifdef USE_LOCALE_TELEPHONE
-                             LC_TELEPHONE,
-#    endif
-#    ifdef USE_LOCALE_NAME
-                             LC_NAME,
-#    endif
-#    ifdef USE_LOCALE_SYNTAX
-                             LC_SYNTAX,
-#    endif
-#    ifdef USE_LOCALE_TOD
-                             LC_TOD,
-#    endif
-#    ifdef LC_ALL
-                             LC_ALL,
-#    else
-                             FAKE_LC_ALL,
-#    endif
+#  undef PERL_LOCALE_TABLE_ENTRY
+#  define PERL_LOCALE_TABLE_ENTRY(name, call_back)  name,
+#  include "locale_table.h"
 
-   /* Placeholder for an unknown category.  get_category_index() maps all
-    * categories we don't know about to the index of this element */
-                            PERL_INT_MIN
+#  ifdef LC_ALL
+    LC_ALL,
+#  else
+    FAKE_LC_ALL,
+#  endif
+
+   (FAKE_LC_ALL + 1)    /* Entry for unknown category; this number is unlikely
+                           to clash with a real category */
 };
 
-/* The top-most real element is LC_ALL */
-
+/* The second array is the category names. */
 STATIC const char * const category_names[] = {
 
-#    ifdef USE_LOCALE_CTYPE
-                                 "LC_CTYPE",
-#    endif
-#  ifdef USE_LOCALE_NUMERIC
-                                 "LC_NUMERIC",
+#  undef PERL_LOCALE_TABLE_ENTRY
+#  define PERL_LOCALE_TABLE_ENTRY(name, call_back)  # name,
+#  include "locale_table.h"
+
+#  ifdef LC_ALL
+#    define LC_ALL_STRING  "LC_ALL"
+#  else
+#    define LC_ALL_STRING  "If you see this, it is a bug in perl;"      \
+                           " please report it via perlbug"
 #  endif
-#    ifdef USE_LOCALE_COLLATE
-                                 "LC_COLLATE",
-#    endif
-#    ifdef USE_LOCALE_TIME
-                                 "LC_TIME",
-#    endif
-#    ifdef USE_LOCALE_MESSAGES
-                                 "LC_MESSAGES",
-#    endif
-#    ifdef USE_LOCALE_MONETARY
-                                 "LC_MONETARY",
-#    endif
-#    ifdef USE_LOCALE_ADDRESS
-                                 "LC_ADDRESS",
-#    endif
-#    ifdef USE_LOCALE_IDENTIFICATION
-                                 "LC_IDENTIFICATION",
-#    endif
-#    ifdef USE_LOCALE_MEASUREMENT
-                                 "LC_MEASUREMENT",
-#    endif
-#    ifdef USE_LOCALE_PAPER
-                                 "LC_PAPER",
-#    endif
-#    ifdef USE_LOCALE_TELEPHONE
-                                 "LC_TELEPHONE",
-#    endif
-#    ifdef USE_LOCALE_NAME
-                                 "LC_NAME",
-#    endif
-#    ifdef USE_LOCALE_SYNTAX
-                                 "LC_SYNTAX",
-#    endif
-#    ifdef USE_LOCALE_TOD
-                                 "LC_TOD",
-#    endif
-#    ifdef LC_ALL
-                                 "LC_ALL",
-#    else
-                                 "If you see this, it is a bug in"
-                                 " perl; please report it via perlbug",
-#    endif
-                                 "Locale category unknown to Perl; if"  \
-                                 " you see this, it is a bug in perl;"  \
-                                 " please report it via perlbug"
+
+    LC_ALL_STRING,
+
+#  define LC_UNKNOWN_STRING  "Locale category unknown to Perl; if you see"  \
+                             " this, it is a bug in perl; please report it" \
+                             " via perlbug"
+    LC_UNKNOWN_STRING
+
 };
 
 /* A few categories require additional setup when they are changed.  This table
  * points to the functions that do that setup */
 STATIC void (*update_functions[]) (pTHX_ const char *, bool force) = {
-#  ifdef USE_LOCALE_CTYPE
-                                S_new_ctype,
-#  endif
-#  ifdef USE_LOCALE_NUMERIC
-                                S_new_numeric,
-#  endif
-#  ifdef USE_LOCALE_COLLATE
-                                S_new_collate,
-#  endif
-#  ifdef USE_LOCALE_TIME
-                                NULL,
-#  endif
-#  ifdef USE_LOCALE_MESSAGES
-                                NULL,
-#  endif
-#  ifdef USE_LOCALE_MONETARY
-                                NULL,
-#  endif
-#  ifdef USE_LOCALE_ADDRESS
-                                NULL,
-#  endif
-#  ifdef USE_LOCALE_IDENTIFICATION
-                                NULL,
-#  endif
-#  ifdef USE_LOCALE_MEASUREMENT
-                                NULL,
-#  endif
-#  ifdef USE_LOCALE_PAPER
-                                NULL,
-#  endif
-#  ifdef USE_LOCALE_TELEPHONE
-                                NULL,
-#  endif
-#  ifdef USE_LOCALE_NAME
-                                NULL,
-#  endif
-#  ifdef USE_LOCALE_SYNTAX
-                                NULL,
-#  endif
-#  ifdef USE_LOCALE_TOD
-                                NULL,
-#  endif
-    /* No harm done to have this even without an LC_ALL */
-                                S_new_LC_ALL,
 
-                                NULL    /* Placeholder for all unknown
-                                           categories */
+#  undef PERL_LOCALE_TABLE_ENTRY
+#  define PERL_LOCALE_TABLE_ENTRY(index, call_back)  call_back,
+#  include "locale_table.h"
+
+    S_new_LC_ALL,
+    NULL,   /* No update for unknown category */
 };
 
-#  ifdef USE_POSIX_2008_LOCALE
+#  if defined(USE_POSIX_2008_LOCALE)
 
-/* A fourth array, parallel to the ones above to map from category to its
- * equivalent mask */
 STATIC const int category_masks[] = {
-#    ifdef USE_LOCALE_CTYPE
-                                LC_CTYPE_MASK,
-#    endif
-#    ifdef USE_LOCALE_NUMERIC
-                                LC_NUMERIC_MASK,
-#    endif
-#    ifdef USE_LOCALE_COLLATE
-                                LC_COLLATE_MASK,
-#    endif
-#    ifdef USE_LOCALE_TIME
-                                LC_TIME_MASK,
-#    endif
-#    ifdef USE_LOCALE_MESSAGES
-                                LC_MESSAGES_MASK,
-#    endif
-#    ifdef USE_LOCALE_MONETARY
-                                LC_MONETARY_MASK,
-#    endif
-#    ifdef USE_LOCALE_ADDRESS
-                                LC_ADDRESS_MASK,
-#    endif
-#    ifdef USE_LOCALE_IDENTIFICATION
-                                LC_IDENTIFICATION_MASK,
-#    endif
-#    ifdef USE_LOCALE_MEASUREMENT
-                                LC_MEASUREMENT_MASK,
-#    endif
-#    ifdef USE_LOCALE_PAPER
-                                LC_PAPER_MASK,
-#    endif
-#    ifdef USE_LOCALE_TELEPHONE
-                                LC_TELEPHONE_MASK,
-#    endif
-#    ifdef USE_LOCALE_NAME
-                                LC_NAME_MASK,
-#    endif
-#    ifdef USE_LOCALE_SYNTAX
-                                LC_SYNTAX_MASK,
-#    endif
-#    ifdef USE_LOCALE_TOD
-                                LC_TOD_MASK,
-#    endif
-                                LC_ALL_MASK,
 
-                                0   /* Placeholder for all unknown categories */
+#    undef PERL_LOCALE_TABLE_ENTRY
+#    define PERL_LOCALE_TABLE_ENTRY(name, call_back)  name ## _MASK,
+#    include "locale_table.h"
+
+    LC_ALL_MASK,    /* Will rightly refuse to compile unless this is defined */
+    0               /* Empty mask for unknown category */
 };
 
 #  endif
