@@ -3635,10 +3635,9 @@ S_softref2xv_lite(pTHX_ SV *const sv, const char *const what,
  * one UV, and only reload when it becomes zero.
  */
 
-PP(pp_multideref)
+STATIC OP *
+S_multideref(pTHX_ UNOP_AUX_item *items, SV *sv)
 {
-    SV *sv = NULL; /* init to avoid spurious 'may be used uninitialized' */
-    UNOP_AUX_item *items = cUNOP_AUXx(PL_op)->op_aux;
     UV actions = items->uv;
 
     assert(actions);
@@ -3662,9 +3661,16 @@ PP(pp_multideref)
             goto do_AV_aelem;
 
         case MDEREF_AV_gvav_aelem:                  /* $pkg[...] */
-            sv = UNOP_AUX_item_sv(++items);
-            assert(isGV_with_GP(sv));
-            sv = (SV*)GvAVn((GV*)sv);
+            if ( !sv )
+            {
+                sv = UNOP_AUX_item_sv(++items);
+                assert(isGV_with_GP(sv));
+                sv = (SV*)GvAVn((GV*)sv);
+            }
+            else
+            {
+                ++items;
+            }
             goto do_AV_aelem;
 
         case MDEREF_AV_pop_rv2av_aelem:             /* expr->[...] */
@@ -4040,6 +4046,12 @@ PP(pp_multideref)
         actions >>= MDEREF_SHIFT;
     } /* while */
     /* NOTREACHED */
+}
+
+PP(pp_multideref)
+{
+    UNOP_AUX_item *items = cUNOP_AUXx(PL_op)->op_aux;
+    return S_multideref(aTHX_ items, NULL);
 }
 
 
@@ -5265,6 +5277,8 @@ Perl_clear_defarray(pTHX_ AV* av, bool abandon)
 }
 
 
+STATIC AV *mut_av;
+
 PP(pp_entersub)
 {
     dSP; dPOPss;
@@ -5420,6 +5434,34 @@ PP(pp_entersub)
         I32 depth;
         bool hasargs;
         U8 gimme;
+        COP *cv_start;
+
+        OP *multideref;
+        cv_start = (COP *)CvSTART(cv);
+        if ( getenv("AAA") && cv_start && cv_start->op_next->op_type != OP_LEAVESUB)
+        {
+            multideref = cv_start->cop_accessor;
+            if ( multideref )
+            {
+            UNOP_AUX_item *aux_items = cUNOP_AUXx(multideref)->op_aux;
+
+            if ( aux_items && (aux_items->uv & MDEREF_ACTION_MASK) == MDEREF_AV_gvav_aelem )
+            {
+                SV **svp = MARK;
+                if ( mut_av == NULL )
+                {
+                    mut_av = SvREFCNT_inc(newAV());
+                    SvREFCNT_inc(mut_av);
+                    av_store(mut_av, 0, &PL_sv_undef);
+                }
+                av_store_simple(mut_av, 0, SvREFCNT_inc(*(MARK+1)));
+
+                SP = MARK;
+                PUTBACK;
+                return S_multideref(aTHX_ aux_items, (SV *)mut_av);
+            }
+            }
+        }
 
         /* keep PADTMP args alive throughout the call (we need to do this
          * because @_ isn't refcounted). Note that we create the mortals

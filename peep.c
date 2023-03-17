@@ -4220,6 +4220,18 @@ void
 Perl_peep(pTHX_ OP *o)
 {
     CALL_RPEEP(o);
+
+    if ( getenv("AAA" ) )
+    {
+        if ( o->op_type == OP_NEXTSTATE )
+        {
+          if ( o->op_next->op_type == OP_MULTIDEREF
+             && o->op_next->op_next->op_type == OP_LEAVESUB )
+          {
+            ((COP *) o)->cop_accessor = o->op_next;
+          }
+        }
+    }
 }
 
 /*

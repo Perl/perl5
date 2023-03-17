@@ -462,6 +462,9 @@ struct cop {
        notice.  Use the macros to test for features.
     */
     U32		cop_features;
+
+    /* Pointer to OP that contains the accessor's multideref */
+    OP *        cop_accessor;
 };
 
 /*
