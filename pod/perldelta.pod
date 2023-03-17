@@ -365,9 +365,19 @@ L</Modules and Pragmata> section.
 
 =over 4
 
-=item XXX-some-platform
+=item Windows
 
-XXX
+=over 4
+
+=item *
+
+C<POSIX::dup2> no longer creates broken sockets. [GH #20920]
+
+=item *
+
+Closing a busy pipe could cause Perl to hang. [GH #19963]
+
+=back
 
 =back
 
