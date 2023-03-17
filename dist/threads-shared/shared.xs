@@ -40,7 +40,7 @@
  * proxy PVLV element with attached element magic.
  *
  * Pointers to the shared SV are squirrelled away in the mg->mg_ptr field
- * of magic (with mg_len == 0), and in the IV2PTR(SvIV(sv)) field of tied
+ * of magic (with mg_len == 0), and in the INT2PTR(SvIV(sv)) field of tied
  * object SVs. These pointers have to be hidden like this because they
  * cross interpreter boundaries, and we don't want sv_clear() and friends
  * following them.
