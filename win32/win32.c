@@ -38,6 +38,7 @@
 #include <io.h>
 #include <signal.h>
 #include <winioctl.h>
+#include <winternl.h>
 
 /* #include "config.h" */
 
@@ -156,9 +157,6 @@ static void translate_to_errno(void);
 START_EXTERN_C
 HANDLE	w32_perldll_handle = INVALID_HANDLE_VALUE;
 char	w32_module_name[MAX_PATH+1];
-#ifdef WIN32_DYN_IOINFO_SIZE
-Size_t	w32_ioinfo_size;/* avoid 0 extend op b4 mul, otherwise could be a U8 */
-#endif
 END_EXTERN_C
 
 static OSVERSIONINFO g_osver = {0, 0, 0, 0, 0, ""};
@@ -3313,7 +3311,7 @@ win32_freopen(const char *path, const char *mode, FILE *stream)
 DllExport int
 win32_fclose(FILE *pf)
 {
-    return my_fclose(pf);	/* defined in win32sck.c */
+    return fclose(pf);
 }
 
 DllExport int
@@ -3913,13 +3911,10 @@ win32_open(const char *path, int flag, ...)
     return open(PerlDir_mapA(path), flag, pmode);
 }
 
-/* close() that understands socket */
-extern int my_close(int);	/* in win32sck.c */
-
 DllExport int
 win32_close(int fd)
 {
-    return my_close(fd);
+    return _close(fd);
 }
 
 DllExport int
@@ -5172,6 +5167,172 @@ ansify_path(void)
     win32_free(wide_path);
 }
 
+/* This hooks a function that is imported by the specified module. The hook is
+ * local to that module. */
+static bool
+win32_hook_imported_function_in_module(
+    HMODULE module, LPCSTR fun_name, FARPROC hook_ptr
+)
+{
+    ULONG_PTR image_base = (ULONG_PTR)module;
+    PIMAGE_DOS_HEADER dos_header = (PIMAGE_DOS_HEADER)image_base;
+    PIMAGE_NT_HEADERS nt_headers
+        = (PIMAGE_NT_HEADERS)(image_base + dos_header->e_lfanew);
+    PIMAGE_OPTIONAL_HEADER opt_header = &nt_headers->OptionalHeader;
+
+    PIMAGE_DATA_DIRECTORY data_dir = opt_header->DataDirectory;
+    DWORD data_dir_len = opt_header->NumberOfRvaAndSizes;
+
+    BOOL is_idt_present = data_dir_len > IMAGE_DIRECTORY_ENTRY_IMPORT
+        && data_dir[IMAGE_DIRECTORY_ENTRY_IMPORT].VirtualAddress != 0;
+
+    if (!is_idt_present)
+        return FALSE;
+
+    BOOL found = FALSE;
+
+    /* Import Directory Table */
+    PIMAGE_IMPORT_DESCRIPTOR idt = (PIMAGE_IMPORT_DESCRIPTOR)(
+        image_base + data_dir[IMAGE_DIRECTORY_ENTRY_IMPORT].VirtualAddress
+    );
+
+    for (; idt->Name != 0; ++idt) {
+        /* Import Lookup Table */
+        PIMAGE_THUNK_DATA ilt
+            = (PIMAGE_THUNK_DATA)(image_base + idt->OriginalFirstThunk);
+        /* Import Address Table */
+        PIMAGE_THUNK_DATA iat
+            = (PIMAGE_THUNK_DATA)(image_base + idt->FirstThunk);
+
+        ULONG_PTR address_of_data;
+        for (; address_of_data = ilt->u1.AddressOfData; ++ilt, ++iat) {
+            /* Ordinal imports are quite rare, so skipping them will most likely
+             * not cause any problems. */
+            BOOL is_ordinal
+                = address_of_data >> ((sizeof(address_of_data) * 8) - 1);
+
+            if (is_ordinal)
+                continue;
+
+            LPCSTR name = (
+                (PIMAGE_IMPORT_BY_NAME)(image_base + address_of_data)
+            )->Name;
+
+            if (strEQ(name, fun_name)) {
+                DWORD old_protect = 0;
+                BOOL succ = VirtualProtect(
+                    &iat->u1.Function, sizeof(iat->u1.Function), PAGE_READWRITE,
+                    &old_protect
+                );
+                if (!succ)
+                    return FALSE;
+
+                iat->u1.Function = (ULONG_PTR)hook_ptr;
+                found = TRUE;
+
+                VirtualProtect(
+                    &iat->u1.Function, sizeof(iat->u1.Function), old_protect,
+                    &old_protect
+                );
+                break;
+            }
+        }
+    }
+
+    return found;
+}
+
+typedef NTSTATUS (NTAPI *pNtQueryInformationFile_t)(HANDLE, PIO_STATUS_BLOCK, PVOID, ULONG, ULONG);
+pNtQueryInformationFile_t pNtQueryInformationFile = NULL;
+
+typedef BOOL (WINAPI *pCloseHandle)(HANDLE h);
+static pCloseHandle CloseHandle_orig;
+
+/* CloseHandle() that supports sockets. CRT uses mutexes during file operations,
+ * so the lack of thread safety in this function isn't a problem. */
+static BOOL WINAPI
+my_CloseHandle(HANDLE h)
+{
+    /* In theory, passing a non-socket handle to closesocket() is fine. It
+     * should return a WSAENOTSOCK error, which is easy to recover from.
+     * However, we should avoid doing that because it's not that simple in
+     * practice. For instance, it can deadlock on a handle to a stuck pipe (see:
+     * https://github.com/Perl/perl5/issues/19963).
+     *
+     * There's no foolproof way to tell if a handle is a socket (mostly because
+     * of the non-IFS sockets), but in some cases we can tell if a handle
+     * is definitely *not* a socket.
+     */
+
+    /* GetFileType() always returns FILE_TYPE_PIPE for sockets. */
+    BOOL maybe_socket = (GetFileType(h) == FILE_TYPE_PIPE);
+
+    if (maybe_socket && pNtQueryInformationFile) {
+        IO_STATUS_BLOCK isb;
+        struct {
+            ULONG name_len;
+            WCHAR name[100];
+        } volume = {0};
+
+        /* There are many ways to tell a named pipe from a socket, but almost
+         * all of them can deadlock on a handle to a stuck pipe (like in the
+         * bug ticket mentioned above). According to my tests,
+         * FileVolumeNameInfomation is the only relevant function that doesn't
+         * suffer from this problem.
+         *
+         * It's undocumented and it requires Windows 10, so on older systems
+         * we always pass pipes to closesocket().
+         */
+        NTSTATUS s = pNtQueryInformationFile(
+            h, &isb, &volume, sizeof(volume), 58 /* FileVolumeNameInformation */
+        );
+        if (NT_SUCCESS(s)) {
+            maybe_socket = (_wcsnicmp(
+                volume.name, L"\\Device\\NamedPipe", C_ARRAY_LENGTH(volume.name)
+            ) != 0);
+        }
+    }
+
+    if (maybe_socket)
+        if (closesocket((SOCKET)h) == 0)
+            return TRUE;
+        else if (WSAGetLastError() != WSAENOTSOCK)
+            return FALSE;
+
+    return CloseHandle_orig(h);
+}
+
+/* Hook CloseHandle() inside CRT so its functions like _close() or
+ * _dup2() can close sockets properly. */
+static void
+win32_hook_closehandle_in_crt()
+{
+    /* Get the handle to the CRT module basing on the address of _close()
+     * function. */
+    HMODULE crt_handle;
+    BOOL succ = GetModuleHandleExA(
+        GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS
+        | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT, (LPCSTR)_close,
+        &crt_handle
+    );
+    if (!succ)
+        return;
+
+    CloseHandle_orig = (pCloseHandle)GetProcAddress(
+        GetModuleHandleA("kernel32.dll"), "CloseHandle"
+    );
+    if (!CloseHandle_orig)
+        return;
+
+    win32_hook_imported_function_in_module(
+        crt_handle, "CloseHandle", (FARPROC)my_CloseHandle
+    );
+
+    pNtQueryInformationFile = (pNtQueryInformationFile_t)GetProcAddress(
+        GetModuleHandleA("ntdll.dll"), "NtQueryInformationFile"
+    );
+}
+
 void
 Perl_win32_init(int *argcp, char ***argvp)
 {
@@ -5208,17 +5369,7 @@ Perl_win32_init(int *argcp, char ***argvp)
     g_osver.dwOSVersionInfoSize = sizeof(g_osver);
     GetVersionEx(&g_osver);
 
-#ifdef WIN32_DYN_IOINFO_SIZE
-    {
-        Size_t ioinfo_size = _msize((void*)__pioinfo[0]);;
-        if((SSize_t)ioinfo_size <= 0) { /* -1 is err */
-            fprintf(stderr, "panic: invalid size for ioinfo\n"); /* no interp */
-            exit(1);
-        }
-        ioinfo_size /= IOINFO_ARRAY_ELTS;
-        w32_ioinfo_size = ioinfo_size;
-    }
-#endif
+    win32_hook_closehandle_in_crt();
 
     ansify_path();
 

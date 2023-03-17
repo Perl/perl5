@@ -426,7 +426,6 @@ DllExport void		win32_get_child_IO(child_IO_table* ptr);
 DllExport HWND		win32_create_message_window(void);
 DllExport int		win32_async_check(pTHX);
 
-extern int		my_fclose(FILE *);
 extern char *		win32_get_privlib(WIN32_NO_REGISTRY_M_(const char *pl) STRLEN *const len);
 extern char *		win32_get_sitelib(const char *pl, STRLEN *const len);
 extern char *		win32_get_vendorlib(const char *pl, STRLEN *const len);
@@ -565,83 +564,6 @@ struct interp_intern {
 void win32_wait_for_children(pTHX);
 #  define PERL_WAIT_FOR_CHILDREN win32_wait_for_children(aTHX)
 #endif
-
-/* The following ioinfo struct manipulations had been removed but were
- * reinstated to fix RT#120091/118059. However, they do not work with
- * the rewritten CRT in VS2015 so they are removed once again for VS2015
- * onwards, which will therefore suffer from the reintroduction of the
- * close socket bug. */
-#if (!defined(_MSC_VER)) || (defined(_MSC_VER) && _MSC_VER < 1900)
-
-#ifdef PERL_CORE
-
-/* C doesn't like repeat struct definitions */
-#if defined(__MINGW32__) && (__MINGW32_MAJOR_VERSION>=3)
-#  undef _CRTIMP
-#endif
-#ifndef _CRTIMP
-#  define _CRTIMP __declspec(dllimport)
-#endif
-
-#ifndef __MINGW32__
-/* size of ioinfo struct is determined at runtime */
-#  define WIN32_DYN_IOINFO_SIZE
-#endif
-
-#ifndef WIN32_DYN_IOINFO_SIZE
-/*
- * Control structure for lowio file handles
- */
-typedef struct {
-    intptr_t osfhnd;/* underlying OS file HANDLE */
-    char osfile;    /* attributes of file (e.g., open in text mode?) */
-    char pipech;    /* one char buffer for handles opened on pipes */
-    int lockinitflag;
-    CRITICAL_SECTION lock;
-} ioinfo;
-#else
-typedef intptr_t ioinfo;
-#endif
-
-/*
- * Array of arrays of control structures for lowio files.
- */
-EXTERN_C _CRTIMP ioinfo* __pioinfo[];
-
-/*
- * Definition of IOINFO_L2E, the log base 2 of the number of elements in each
- * array of ioinfo structs.
- */
-#define IOINFO_L2E	    5
-
-/*
- * Definition of IOINFO_ARRAY_ELTS, the number of elements in ioinfo array
- */
-#define IOINFO_ARRAY_ELTS   (1 << IOINFO_L2E)
-
-/*
- * Access macros for getting at an ioinfo struct and its fields from a
- * file handle
- */
-#ifdef WIN32_DYN_IOINFO_SIZE
-#  define _pioinfo(i) ((intptr_t *) \
-     (((Size_t)__pioinfo[(i) >> IOINFO_L2E])/* * to head of array ioinfo [] */\
-      /* offset to the head of a particular ioinfo struct */ \
-      + (((i) & (IOINFO_ARRAY_ELTS - 1)) * w32_ioinfo_size)) \
-   )
-/* first slice of ioinfo is always the OS handle */
-#  define _osfhnd(i)  (*(_pioinfo(i)))
-#else
-#  define _pioinfo(i) (__pioinfo[(i) >> IOINFO_L2E] + ((i) & (IOINFO_ARRAY_ELTS - 1)))
-#  define _osfhnd(i)  (_pioinfo(i)->osfhnd)
-#endif
-
-/* since we are not doing a dup2(), this works fine */
-#define _set_osfhnd(fh, osfh) (void)(_osfhnd(fh) = (intptr_t)osfh)
-
-#endif /* PERL_CORE */
-
-#endif /* !defined(_MSC_VER) || _MSC_VER<1900 */
 
 /* IO.xs and POSIX.xs define PERLIO_NOT_STDIO to 1 */
 #if defined(PERL_EXT_IO) || defined(PERL_EXT_POSIX)
