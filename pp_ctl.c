@@ -379,11 +379,12 @@ Perl_rxres_save(pTHX_ void **rsp, REGEXP *rx)
     PERL_ARGS_ASSERT_RXRES_SAVE;
     PERL_UNUSED_CONTEXT;
 
+    /* deal with regexp_paren_pair items */
     if (!p || p[1] < RX_NPARENS(rx)) {
 #ifdef PERL_ANY_COW
-        i = 7 + (RX_NPARENS(rx)+1) * 4;
+        i = 7 + (RX_NPARENS(rx)+1) * 2;
 #else
-        i = 6 + (RX_NPARENS(rx)+1) * 4;
+        i = 6 + (RX_NPARENS(rx)+1) * 2;
 #endif
         if (!p)
             Newx(p, i, UV);
