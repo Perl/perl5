@@ -6602,6 +6602,11 @@ If you know that you have good reason to exceed the limit you can change
 it by setting C<${^MAX_NESTED_EVAL_BEGIN_BLOCKS}> to a different value from
 the default of 1000.
 
+=item Too many capture groups (limit is %d) in regex m/%s/
+
+(F) You have too many capture groups in your regex pattern. You need to rework
+your pattern to use less capture groups.
+
 =item Too many )'s
 
 (A) You've accidentally run your script through B<csh> instead of Perl.
