@@ -357,29 +357,31 @@ S_regcppush(pTHX_ const regexp *rex, I32 parenfloor, U32 maxopenparen comma_pDEP
     RXp_LASTPAREN(rex) = n;                     \
     RXp_LASTCLOSEPAREN(rex) = lcp;
 
-#define CAPTURE_CLEAR(from_ix, to_ix, str)                              \
-STMT_START {                                                            \
-    U16 my_ix;                                                          \
-    if (from_ix) {                                                      \
-        for ( my_ix = from_ix; my_ix <= to_ix; my_ix++ ) {              \
-            DEBUG_BUFFERS_r(Perl_re_exec_indentf( aTHX_                 \
-                    "CAPTURE_CLEAR %s \\%" IVdf ": "                    \
-                    "%" IVdf "(%" IVdf ") .. %" IVdf                    \
-                    " => "                                              \
-                    "%" IVdf "(%" IVdf ") .. %" IVdf                    \
-                    "\n",                                               \
-                depth, str, (IV)my_ix,                                  \
-                (IV)RXp_OFFSp(rex)[my_ix].start,                        \
-                (IV)RXp_OFFSp(rex)[my_ix].start_tmp,                    \
-                (IV)RXp_OFFSp(rex)[my_ix].end,                          \
-                (IV)-1, (IV)-1, (IV)-1));                               \
-            RXp_OFFSp(rex)[my_ix].start = -1;                           \
-            RXp_OFFSp(rex)[my_ix].start_tmp = -1;                       \
-            RXp_OFFSp(rex)[my_ix].end = -1;                             \
-        }                                                               \
-    }                                                                   \
-} STMT_END
+PERL_STATIC_INLINE void
+S_capture_clear(pTHX_ regexp *rex, U16 from_ix, U16 to_ix, const char *str comma_pDEPTH) {
+    PERL_ARGS_ASSERT_CAPTURE_CLEAR;
+    U16 my_ix;
+    DECLARE_AND_GET_RE_DEBUG_FLAGS;
+    for ( my_ix = from_ix; my_ix <= to_ix; my_ix++ ) {
+        DEBUG_BUFFERS_r(Perl_re_exec_indentf( aTHX_
+                "CAPTURE_CLEAR %s \\%" IVdf ": "
+                "%" IVdf "(%" IVdf ") .. %" IVdf
+                " => "
+                "%" IVdf "(%" IVdf ") .. %" IVdf
+                "\n",
+            depth, str, (IV)my_ix,
+            (IV)RXp_OFFSp(rex)[my_ix].start,
+            (IV)RXp_OFFSp(rex)[my_ix].start_tmp,
+            (IV)RXp_OFFSp(rex)[my_ix].end,
+            (IV)-1, (IV)-1, (IV)-1));
+        RXp_OFFSp(rex)[my_ix].start = -1;
+        RXp_OFFSp(rex)[my_ix].start_tmp = -1;
+        RXp_OFFSp(rex)[my_ix].end = -1;
+    }
+}
 
+#define CAPTURE_CLEAR(from_ix, to_ix, str) \
+    if (from_ix) capture_clear(rex,from_ix, to_ix, str)
 
 STATIC void
 S_regcppop(pTHX_ regexp *rex, U32 *maxopenparen_p comma_pDEPTH)
@@ -6855,7 +6857,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 UNWIND_PAREN(ST.lastparen, ST.lastcloseparen);
                 if (ST.after_paren) {
                     assert(ST.before_paren<=rex->nparens && ST.after_paren<=rex->nparens);
-                    CAPTURE_CLEAR(ST.before_paren+1, ST.after_paren,"TRIE_next_fail");
+                    CAPTURE_CLEAR(ST.before_paren+1, ST.after_paren, "TRIE_next_fail");
                 }
             }
             if (!--ST.accepted) {
@@ -9105,7 +9107,7 @@ NULL
             }
             REGCP_UNWIND(ST.cp);
             UNWIND_PAREN(ST.lastparen, ST.lastcloseparen);
-            CAPTURE_CLEAR(ST.before_paren+1,ST.after_paren,"BRANCH_next_fail");
+            CAPTURE_CLEAR(ST.before_paren+1, ST.after_paren, "BRANCH_next_fail");
             scan = ST.next_branch;
             /* no more branches? */
             if (!scan || (OP(scan) != BRANCH && OP(scan) != BRANCHJ)) {
