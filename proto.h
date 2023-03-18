@@ -77,7 +77,6 @@ Perl_Slab_Free(pTHX_ void *op);
 
 /* PERL_CALLCONV void
 SvREFCNT_dec_set_NULL(pTHX_ SV *sv); */
-#define PERL_ARGS_ASSERT_SVREFCNT_DEC_SET_NULL
 
 PERL_CALLCONV char *
 Perl__byte_dump_string(pTHX_ const U8 * const start, const STRLEN len, const bool format);
