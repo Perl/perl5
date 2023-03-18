@@ -404,28 +404,33 @@ S_get_displayable_string(pTHX_
 STATIC unsigned int
 S_get_category_index_nowarn(const int category)
 {
+    PERL_ARGS_ASSERT_GET_CATEGORY_INDEX_NOWARN;
+
     /* Given a category, return the equivalent internal index we generally use
-     * instead, or negative if not found.
-     *
-     * Some sort of hash could be used instead of this loop, but the number of
-     * elements is so far at most 12 */
+     * instead, or negative if not found. */
 
     unsigned int i;
 
-    PERL_ARGS_ASSERT_GET_CATEGORY_INDEX;
+#  undef PERL_LOCALE_TABLE_ENTRY
+#  define PERL_LOCALE_TABLE_ENTRY(name, call_back)                          \
+                                    case name: i =  name ## _INDEX_; break;
 
-    for (i = 0; i <= LC_ALL_INDEX_; i++) {
-        if (category == categories[i]) {
-            dTHX_DEBUGGING;
-            DEBUG_Lv(PerlIO_printf(Perl_debug_log,
-                                   "index of category %d (%s) is %d\n",
-                                   category, category_names[i], i));
-            return i;
-        }
-    }
+    switch (category) {
+
+#  include "locale_table.h"
+#  ifdef LC_ALL
+      case LC_ALL: i =  LC_ALL_INDEX_; break;
+#  endif
 
     /* Return an out-of-bounds value */
-    return LC_ALL_INDEX_ + 1;
+      default: return LC_ALL_INDEX_ + 1;
+    }
+
+    dTHX_DEBUGGING;
+    DEBUG_Lv(PerlIO_printf(Perl_debug_log,
+                           "index of category %d (%s) is %d\n",
+                           category, category_names[i], i));
+    return i;
 }
 
 STATIC unsigned int
