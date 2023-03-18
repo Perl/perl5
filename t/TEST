@@ -118,14 +118,18 @@ $| = 1;
 #BEGIN { require '../lib/strict.pm'; "strict"->import() };
 #BEGIN { require '../lib/warnings.pm'; "warnings"->import() };
 
+my $OS = $ENV{FAKE_OS} || $^O;
+
+my $is_vms   = $OS eq "VMS";
+my $is_win32 = $OS eq "MSWin32";
+my $is_os2   = $OS eq "os2";
+
 # remove empty elements due to insertion of empty symbols via "''p1'" syntax
-@ARGV = grep($_,@ARGV) if $^O eq 'VMS';
-
-my $is_win32 = $^O eq "MSWin32";
-my $is_os2   = $^O eq "os2";
-
+@ARGV = grep($_,@ARGV) if $is_vms;
 
 our $show_elapsed_time = $ENV{HARNESS_TIMER} || 0;
+
+my $dump_tests = 0;
 
 # Cheesy version of Getopt::Std.  We can't replace it with that, because we
 # can't rely on require working.
@@ -138,6 +142,7 @@ our $show_elapsed_time = $ENV{HARNESS_TIMER} || 0;
 	utf8      => \$::with_utf8,
 	utf16     => \$::with_utf16,
 	taintwarn => \$::taintwarn,
+	dumptests => \$dump_tests,
     );
 
     my @argv = ();
@@ -248,7 +253,7 @@ sub _scan_test {
 
     close $script;
 
-    my $perl = $^O eq 'MSWin32' ? '.\perl' : './perl';
+    my $perl = $is_win32 ? '.\perl' : './perl';
     my $lib  = '../lib';
     my $run_dir;
     my $return_dir;
@@ -314,7 +319,7 @@ sub _cmd {
     }
     elsif ($type eq 'perl') {
         my $perl = $options->{perl};
-        my $redir = $^O eq 'VMS' ? '2>&1' : '';
+        my $redir = $is_vms ? '2>&1' : '';
 
         if ($ENV{PERL_VALGRIND}) {
             my $perl_supp = $options->{return_dir} ? "$options->{return_dir}/perl.supp" : "perl.supp";
@@ -405,7 +410,7 @@ sub _quote_args {
     foreach (split(/\s+/,$args)) {
        # In VMS protect with doublequotes because otherwise
        # DCL will lowercase -- unless already doublequoted.
-       $_ = q(").$_.q(") if ($^O eq 'VMS') && !/^\"/ && length($_) > 0;
+       $_ = q(").$_.q(") if $is_vms && !/^\"/ && length($_) > 0;
        $argstring = $argstring . ' ' . $_;
     }
     return $argstring;
@@ -418,6 +423,8 @@ sub _populate_hash {
 
 sub _tests_from_manifest {
     my ($extensions, $known_extensions, $all) = @_;
+    s/\bCwd\b/PathTools/, s!\bList/Util\b!Scalar/List/Utils!
+	for $extensions, $known_extensions;
     my %skip;
     my %extensions = _populate_hash($extensions);
     my %known_extensions = _populate_hash($known_extensions);
@@ -490,7 +497,7 @@ sub _tests_from_manifest {
 		my $munged = $file;
 		next if $munged=~m!^(?:t/)?os2/!	and !$is_os2;
 		next if $munged=~m!^(?:t/)?win32/!	and !$is_win32;
-		next if $munged=~m!^(?:t/)?japh/!	and !$::torture;
+		next if $munged=~m!^(?:t/)?japh/!	and !($::torture or $ENV{PERL_TORTURE_TEST});
 		next if $munged=~m!^(?:t/)?benchmark/!	and !($::benchmark or $ENV{PERL_BENCHMARK});
 		next if $munged=~m!^(?:t/)?bigmem/!	and !$ENV{PERL_TEST_MEMORY};
 		$munged =~ s!t/!! or $munged = "../$munged";
@@ -505,18 +512,32 @@ sub _tests_from_manifest {
     return @results;
 }
 
+sub dump_tests {
+    my ($ary) = @_;
+    for my $test (sort @$ary) {
+        # convert it to a path from the root of the repo
+        $test=~s!^\.\./!! or $test=~s!^!t/!;
+        print "$test\n";
+    }
+    exit(0);
+}
+
 unless (@ARGV) {
     # base first, as TEST bails out if that can't run
     # then comp, to validate that require works
     # then run, to validate that -M works
     # then we know we can -MTestInit for everything else, making life simpler
-    foreach my $dir (qw(base comp run cmd io re opbasic op uni mro perf)) {
+
+    # NOTE that _find_tests() is recursive, unlike what test_harness uses.
+    foreach my $dir (qw(base comp run cmd io re opbasic op uni mro class perf test_pl)) {
 	_find_tests($dir);
     }
     unless ($::core) {
 	_find_tests('porting');
         _find_tests("lib");
     }
+    _find_tests('win32') if $is_win32;
+    _find_tests('os2')	 if $is_os2;
     # Config.pm may be broken for make minitest. And this is only a refinement
     # for skipping tests on non-default builds, so it is allowed to fail.
     # What we want to do is make a list of extensions which we did not build.
@@ -545,13 +566,14 @@ unless (@ARGV) {
     # something is that badly wrong.
     push @ARGV, _tests_from_manifest($extensions, $known_extensions);
     unless ($::core) {
-	_find_tests('japh') if $::torture;
+	_find_tests('japh') if $::torture or $ENV{PERL_TORTURE_TEST};
 	_find_tests('benchmark') if $::benchmark or $ENV{PERL_BENCHMARK};
 	_find_tests('bigmem') if $ENV{PERL_TEST_MEMORY};
     }
 }
 @ARGV= do {
     my @order= (
+	"test_pl",
 	"base",
 	"comp",
 	"run",
@@ -560,8 +582,10 @@ unless (@ARGV) {
 	"re",
 	"opbasic",
 	"op",
+	"op/hook",
 	"uni",
 	"mro",
+	"class",
 	"lib",
 	"ext",
 	"dist",
@@ -581,6 +605,8 @@ unless (@ARGV) {
 	[ $_, $idx++, $root, $order{$root}||=0 ]
     } @ARGV;
 };
+
+dump_tests(\@ARGV) if $dump_tests;
 
 if ($::deparse) {
     _testprogs('deparse', '',   @ARGV);
@@ -671,7 +697,7 @@ EOT
 	my $te = $::path_to_name{$test} . '.'
 		    x ($dotdotdot - length($::path_to_name{$test})) .' ';
 
-	if ($^O ne 'VMS') {  # defer printing on VMS due to piping bug
+	if (!$is_vms) {  # defer printing on VMS due to piping bug
 	    print $te;
 	    $te = '';
 	}
@@ -689,7 +715,7 @@ EOT
 	my %todo;
 	while (<$results>) {
 	    next if /^\s*$/; # skip blank lines
-	    if (/^1..$/ && ($^O eq 'VMS')) {
+	    if (/^1..$/ && $is_vms) {
 		# VMS pipe bug inserts blank lines.
 		my $l2 = <$results>;
 		if ($l2 =~ /^\s*$/) {
@@ -950,7 +976,7 @@ sub gather_conf_platform_info {
 	@platform = grep /name|cpu/, <$fh>;
 	chomp $_ for @platform;
     }
-    unshift @platform, $^O;
+    unshift @platform, $OS;
 
     return (
 	conf => \%conf,

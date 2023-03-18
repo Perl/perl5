@@ -37,7 +37,12 @@ my %must_be_executed_serially = map { $_ => 1 } @_must_be_executed_serially;
 #
 my @_must_be_executed_alone = qw();
 my %must_be_executed_alone = map { $_ => 1 } @_must_be_executed_alone;
-if ($^O ne "linux") {
+
+my $OS = $ENV{FAKE_OS} || $^O;
+my $is_linux = $OS eq "linux";
+my $is_win32 = $OS eq "MSWin32";
+
+if (!$is_linux) {
     $must_be_executed_alone{"../dist/threads-shared/t/waithires.t"} = 1;
 }
 ##############################################################################
@@ -59,7 +64,13 @@ $Verbose++ while @ARGV && $ARGV[0] eq '-v' && shift;
 my $htoolnm;
 my $hgrind_ct;
 
-if ($ARGV[0] && $ARGV[0] eq '-torture') {
+my $dump_tests = 0;
+if ($ARGV[0] && $ARGV[0] =~ /^-?-dumptests$/) {
+    shift;
+    $dump_tests = 1;
+}
+
+if ($ARGV[0] && $ARGV[0] =~ /^-?-torture$/) {
     shift;
     $torture = 1;
 }
@@ -73,7 +84,7 @@ my (@tests, @re, @anti_re);
 # [.VMS]TEST.COM calls harness with empty arguments, so clean-up @ARGV
 @ARGV = grep $_ && length( $_ ) => @ARGV;
 
-while ($ARGV[0] && $ARGV[0]=~/^-(n?)re/) {
+while ($ARGV[0] && $ARGV[0]=~/^-?-(n?)re/) {
     my $ary= $1 ? \@anti_re : \@re;
 
     if ( $ARGV[0] !~ /=/ ) {
@@ -160,7 +171,7 @@ sub _compute_tests_and_ordering($) {
     my %partial_serials;
     # Preprocess the list of tests
     for my $file (@tests) {
-        if ($^O eq 'MSWin32') {
+        if ($is_win32) {
             $file =~ s,\\,/,g; # canonicalize path
         };
 
@@ -338,8 +349,8 @@ if (@ARGV) {
 
         push @$which, qw(comp run cmd);
         push @$which, qw(io re opbasic op op/hook uni mro lib class porting perf test_pl);
-        push @$which, 'japh' if $torture;
-        push @$which, 'win32' if $^O eq 'MSWin32';
+        push @$which, 'japh' if $torture or $ENV{PERL_TORTURE_TEST};
+        push @$which, 'win32' if $is_win32;
         push @$which, 'benchmark' if $ENV{PERL_BENCHMARK};
         push @$which, 'bigmem' if $ENV{PERL_TEST_MEMORY};
 
@@ -374,7 +385,7 @@ if (@ARGV) {
         }
     }
 }
-if ($^O eq 'MSWin32') {
+if ($is_win32) {
     s,\\,/,g for @tests;
 }
 if (@re or @anti_re) {
@@ -407,6 +418,8 @@ for (@tests) {
         s{^\.\./t/}{};
     }
 }
+
+dump_tests(\@tests) if $dump_tests;
 
 my %options;
 
