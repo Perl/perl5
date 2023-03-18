@@ -5405,6 +5405,10 @@ ERS	|WB_enum|backup_one_WB	|NN WB_enum *previous			\
 				|NN const U8 * const strbeg		\
 				|NN U8 **curpos 			\
 				|const bool utf8_target
+EWi	|void	|capture_clear	|NN regexp *rex 			\
+				|U16 from_ix				\
+				|U16 to_ix				\
+				|NN const char *str
 ERS	|char * |find_byclass	|NN regexp *prog			\
 				|NN const regnode *c			\
 				|NN char *s				\

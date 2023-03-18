@@ -8905,6 +8905,11 @@ Perl_re_exec_indentf(pTHX_ const char *fmt, U32 depth, ...)
 
 # endif /* defined(DEBUGGING) */
 # if !defined(PERL_NO_INLINE_FUNCTIONS)
+PERL_STATIC_INLINE void
+S_capture_clear(pTHX_ regexp *rex, U16 from_ix, U16 to_ix, const char *str comma_pDEPTH);
+#   define PERL_ARGS_ASSERT_CAPTURE_CLEAR       \
+        assert(rex); assert(str)
+
 PERL_STATIC_INLINE I32
 S_foldEQ_latin1_s2_folded(pTHX_ const char *a, const char *b, I32 len);
 #   define PERL_ARGS_ASSERT_FOLDEQ_LATIN1_S2_FOLDED \
