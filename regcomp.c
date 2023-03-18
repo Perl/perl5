@@ -4000,6 +4000,9 @@ S_reg(pTHX_ RExC_state_t *pRExC_state, I32 paren, I32 *flagp, U32 depth)
           capturing_parens:
             parno = RExC_npar;
             RExC_npar++;
+            if (RExC_npar >= U16_MAX)
+                FAIL2("Too many capture groups (limit is %" UVuf ")", (UV)RExC_npar);
+
             logical_parno = RExC_logical_npar;
             RExC_logical_npar++;
             if (! ALL_PARENS_COUNTED) {
