@@ -229,7 +229,6 @@
 # define PL_pidstatus                           (vTHX->Ipidstatus)
 # define PL_Posix_ptrs                          (vTHX->IPosix_ptrs)
 # define PL_preambleav                          (vTHX->Ipreambleav)
-# define PL_prevailing_version                  (vTHX->Iprevailing_version)
 # define PL_Private_Use                         (vTHX->IPrivate_Use)
 # define PL_Proc                                (vTHX->IProc)
 # define PL_profiledata                         (vTHX->Iprofiledata)

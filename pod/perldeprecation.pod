@@ -16,27 +16,6 @@ which they will be removed.
 
 =head2 Perl 5.40
 
-=head3 Downgrading a C<use VERSION> to below v5.11
-
-Once Perl has seen a C<use VERSION> declaration that requests a version
-C<v5.11> or above, a subsequent second declaration that requests an earlier
-version will print a deprecation warning. For example,
-
-    use v5.14;
-    say "We can use v5.14's features here";
-
-    use v5.10;        # This prints a warning
-
-This behaviour will be removed in Perl 5.40; such a subsequent request will
-become a compile-time error.
-
-This is because of an intended related change to the interaction between
-C<use VERSION> and C<use strict>. If you specify a version >= 5.11, strict is
-enabled implicitly. If you request a version < 5.11, strict will become
-disabled I<even if you had previously written> C<use strict>. This was not
-the previous behaviour of C<use VERSION>, which at present will track
-explicitly-enabled strictness flags independently.
-
 =head3 Use of C<'> as a global name separator.
 
 Perl allows use of C<'> instead of C<::> to replace the parts of a
@@ -53,6 +32,25 @@ The definition and documentation of three utility functions previously
 importable from L<Pod::Html> were moved to new package L<Pod::Html::Util> in
 Perl 5.36.  While they remain importable from L<Pod::Html> in Perl 5.36, as of
 Perl 5.38 they will only be importable, on request, from L<Pod::Html::Util>.
+
+=head3 Downgrading a C<use VERSION> to below v5.11
+
+Using a C<use VERSION> that requests a version lower than C<v5.11>,
+shadowing an earlier C<use VERSION> that requests version C<v5.11>
+or higher, was deprecated in Perl 5.36.  On that Perl version it
+generates a warning, which says that it will become fatal in Perl 5.40.
+This deprecation has been scrapped, so from Perl 5.38 onwards it no
+longer generates a warning.
+
+If your code contains nested version declarations with this pattern of
+version numbers, and you need to run that code on Perl 5.36, then it
+is desirable to avoid the now-spurious deprecation warning.  One way
+to do this is to replace the inner version declaration with equivalent
+L<feature> and L<strict> pragmata, to which Perl 5.36 won't object.
+Another way is to disable the warning with C<no warnings 'deprecated'>
+just before the inner declaration, then (presuming you generally
+want deprecation warnings enabled) reenable it with C<use warnings
+'deprecated'> just after the declaration.
 
 =head2 Perl 5.34
 

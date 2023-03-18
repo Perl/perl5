@@ -154,8 +154,8 @@ like $@, qr/^Can't use string/,
     local $SIG{__WARN__} = sub { $warnings .= $_[0] };
     eval 'use 5.012; use 5.01; ${"foo"} = "bar"';
     is $@, "", 'use 5.01 overrides implicit strict from prev ver decl';
-    like $warnings, qr/^Downgrading a use VERSION declaration to below v5.11 is deprecated, and will become fatal in Perl 5.40 at /,
-        'use 5.01 after use 5.012 provokes deprecation warning';
+    is $warnings, "",
+        'use 5.01 after use 5.012 no longer provokes deprecation warning';
 }
 eval 'no strict "subs"; use 5.012; ${"foo"} = "bar"';
 ok $@, 'no strict subs allows ver decl to enable refs';
