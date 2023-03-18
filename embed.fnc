@@ -3894,16 +3894,6 @@ EXpx	|SV *	|sv_setsv_cow	|NULLOK SV *dsv 			\
 				|NN SV *ssv
 #endif /* defined(PERL_ANY_COW) */
 #if defined(PERL_CORE)
-Cdm	|void	|deprecate	|U32 category				\
-				|"construct"
-Cdm	|void	|deprecate_disappears_in				\
-				|U32 category				\
-				|"when" 				\
-				|"construct"
-Cdm	|void	|deprecate_fatal_in					\
-				|U32 category				\
-				|"when" 				\
-				|"construct"
 p	|void	|opslab_force_free					\
 				|NN OPSLAB *slab
 p	|void	|opslab_free	|NN OPSLAB *slab
