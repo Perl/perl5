@@ -838,54 +838,71 @@ typedef struct regmatch_state {
             struct regmatch_state *prev_yes_state;
         } yes;
 
+
+        /* NOTE: Regarding 'cp' and 'lastcp' in the following structs...
+         *
+         * In the majority of cases we use 'cp' for the "normal"
+         * checkpoint for paren saves, and 'lastcp' for the addtional
+         * paren saves that are done only under RE_PESSIMISTIC_PARENS.
+         *
+         * There may be a few cases where both are used always.
+         * Regardless they tend be used something like this:
+         *
+         *   ST.cp = regcppush(rex, 0, maxopenparen);
+         *   REGCP_SET(ST.lastcp);
+         *
+         * thus ST.cp holds the checkpoint from before we push parens,
+         * and ST.lastcp holds the checkpoint from afterwards.
+         */
+
         /* branchlike members */
         /* this is a fake union member that matches the first elements
          * of each member that needs to behave like a branch */
         struct {
             /* this first element must match u.yes */
             struct regmatch_state *prev_yes_state;
-            U32 lastparen;
-            U32 lastcloseparen;
-            CHECKPOINT cp;
-            CHECKPOINT lastcp;
-            U16 before_paren;
-            U16 after_paren;
+            U32         lastparen;
+            U32         lastcloseparen;
+            CHECKPOINT  cp;         /* see note above "struct branchlike" */
+            CHECKPOINT  lastcp;     /* see note above "struct branchlike" */
+            U16         before_paren;
+            U16         after_paren;
 
         } branchlike;
 
         struct {
             /* the first elements must match u.branchlike */
             struct regmatch_state *prev_yes_state;
-            U32 lastparen;
-            U32 lastcloseparen;
-            CHECKPOINT cp;
-            CHECKPOINT lastcp;
-            U16 before_paren;
-            U16 after_paren;
+            U32         lastparen;
+            U32         lastcloseparen;
+            CHECKPOINT  cp;         /* see note above "struct branchlike" */
+            CHECKPOINT  lastcp;     /* see note above "struct branchlike" */
+            U16         before_paren;
+            U16         after_paren;
 
-            regnode *next_branch; /* next branch node */
+            regnode *next_branch;   /* next branch node */
         } branch;
 
         struct {
             /* the first elements must match u.branchlike */
             struct regmatch_state *prev_yes_state;
-            U32 lastparen;
-            U32 lastcloseparen;
-            CHECKPOINT cp;
-            CHECKPOINT lastcp;
-            U16 before_paren;
-            U16 after_paren;
+            U32         lastparen;
+            U32         lastcloseparen;
+            CHECKPOINT  cp;         /* see note above "struct branchlike" */
+            CHECKPOINT  lastcp;     /* see note above "struct branchlike" */
+            U16         before_paren;
+            U16         after_paren;
 
-            U32		accepted; /* how many accepting states left */
-            bool	longfold;/* saw a fold with a 1->n char mapping */
-            U16         *jump;  /* positive offsets from me */
+            U32         accepted;   /* how many accepting states left */
+            bool        longfold;   /* saw a fold with a 1->n char mapping */
+            U16         *jump;      /* positive offsets from me */
             U16         *j_before_paren;
             U16         *j_after_paren;
-            regnode	*me;	/* Which node am I - needed for jump tries*/
-            U8		*firstpos;/* pos in string of first trie match */
-            U32		firstchars;/* len in chars of firstpos from start */
-            U16		nextword;/* next word to try */
-            U16		topword; /* longest accepted word */
+            regnode     *me;        /* Which node am I - needed for jump tries*/
+            U8          *firstpos;  /* pos in string of first trie match */
+            U32         firstchars; /* len in chars of firstpos from start */
+            U16         nextword;   /* next word to try */
+            U16         topword;    /* longest accepted word */
         } trie;
 
         /* special types - these members are used to store state for special
@@ -896,31 +913,31 @@ typedef struct regmatch_state {
             struct regmatch_state *prev_curlyx;
             struct regmatch_state *prev_eval;
             REGEXP	*prev_rex;
-            CHECKPOINT	cp;	/* remember current savestack indexes */
-            CHECKPOINT	lastcp;
-            U32         close_paren; /* which close bracket is our end (+1) */
-            regnode	*B;	/* the node following us  */
+            CHECKPOINT  cp;             /* see note above "struct branchlike" */
+            CHECKPOINT  lastcp;         /* see note above "struct branchlike" */
+            U32         close_paren;    /* which close bracket is our end (+1) */
+            regnode     *B;             /* the node following us  */
             char        *prev_recurse_locinput;
         } eval;
 
         struct {
             /* this first element must match u.yes */
             struct regmatch_state *prev_yes_state;
-            I32 wanted;
-            I32 logical;	/* saved copy of 'logical' var */
-            U8  count;          /* number of beginning positions */
-            char *start;
-            char *end;
-            regnode  *me; /* the IFMATCH/SUSPEND/UNLESSM node  */
-            char *prev_match_end;
-        } ifmatch; /* and SUSPEND/UNLESSM */
+            I32     wanted;
+            I32     logical;    /* saved copy of 'logical' var */
+            U8      count;      /* number of beginning positions */
+            char    *start;
+            char    *end;
+            regnode *me;        /* the IFMATCH/SUSPEND/UNLESSM node  */
+            char    *prev_match_end;
+        } ifmatch;              /* and SUSPEND/UNLESSM */
 
         struct {
             /* this first element must match u.yes */
             struct regmatch_state *prev_yes_state;
             struct regmatch_state *prev_mark;
-            SV* mark_name;
-            char *mark_loc;
+            SV      *mark_name;
+            char    *mark_loc;
         } mark;
 
         struct {
@@ -933,25 +950,25 @@ typedef struct regmatch_state {
             /* this first element must match u.yes */
             struct regmatch_state *prev_yes_state;
             struct regmatch_state *prev_curlyx; /* previous cur_curlyx */
-            regnode	*me;	/* the CURLYX node  */
-            regnode	*B;	/* the B node in /A*B/  */
-            CHECKPOINT	cp;	/* remember current savestack index */
-            CHECKPOINT	lastcp;	/* remember current savestack index */
+            regnode     *me;        /* the CURLYX node  */
+            regnode     *B;         /* the B node in /A*B/  */
+            CHECKPOINT  cp;         /* see note above "struct branchlike" */
+            CHECKPOINT  lastcp;     /* see note above "struct branchlike" */
             bool	minmod;
-            int		parenfloor;/* how far back to strip paren data */
+            int         parenfloor; /* how far back to strip paren data */
 
             /* these two are modified by WHILEM */
-            int		count;	/* how many instances of A we've matched */
-            char	*lastloc;/* where previous A matched (0-len detect) */
+            int         count;      /* how many instances of A we've matched */
+            char        *lastloc;   /* where previous A matched (0-len detect) */
         } curlyx;
 
         struct {
             /* this first element must match u.yes */
             struct regmatch_state *prev_yes_state;
             struct regmatch_state *save_curlyx;
-            CHECKPOINT	cp;	/* remember current savestack indexes */
-            CHECKPOINT	lastcp;
-            char	*save_lastloc;	/* previous curlyx.lastloc */
+            CHECKPOINT  cp;             /* see note above "struct branchlike" */
+            CHECKPOINT  lastcp;         /* see note above "struct branchlike" */
+            char        *save_lastloc;  /* previous curlyx.lastloc */
             I32		cache_offset;
             I32		cache_mask;
         } whilem;
@@ -959,35 +976,35 @@ typedef struct regmatch_state {
         struct {
             /* this first element must match u.yes */
             struct regmatch_state *prev_yes_state;
-            CHECKPOINT cp;
-            CHECKPOINT	lastcp;	/* remember current savestack index */
-            U32 lastparen;
-            U32 lastcloseparen;
-            I32 alen;		/* length of first-matched A string */
-            I32 count;
-            bool minmod;
-            regnode *A, *B;	/* the nodes corresponding to /A*B/  */
-            regnode *me;	/* the curlym node */
+            U32         lastparen;
+            U32         lastcloseparen;
+            CHECKPOINT  cp;         /* see note above "struct branchlike" */
+            CHECKPOINT  lastcp;     /* see note above "struct branchlike" */
+            I32         alen;       /* length of first-matched A string */
+            I32         count;
+            bool        minmod;
+            regnode     *A, *B;     /* the nodes corresponding to /A*B/  */
+            regnode     *me;        /* the curlym node */
             struct next_matchable_info Binfo;
         } curlym;
 
         struct {
-            U32 paren;
-            CHECKPOINT cp;
-            CHECKPOINT lastcp;  /* remember current savestack index */
-            U32 lastparen;
-            U32 lastcloseparen;
-            char *maxpos;	/* highest possible point in string to match */
-            char *oldloc;	/* the previous locinput */
-            int count;
-            int min, max;	/* {m,n} */
-            regnode *A, *B;	/* the nodes corresponding to /A*B/  */
+            U32         paren;
+            U32         lastparen;
+            U32         lastcloseparen;
+            CHECKPOINT  cp;         /* see note above "struct branchlike" */
+            CHECKPOINT  lastcp;     /* see note above "struct branchlike" */
+            char        *maxpos;    /* highest possible point in string to match */
+            char        *oldloc;    /* the previous locinput */
+            int         count;
+            int         min, max;   /* {m,n} */
+            regnode     *A, *B;     /* the nodes corresponding to /A*B/  */
             struct next_matchable_info Binfo;
         } curly; /* and CURLYN/PLUS/STAR */
 
         struct {
-            CHECKPOINT cp;
-            CHECKPOINT lastcp;
+            CHECKPOINT  cp;
+            CHECKPOINT  lastcp;
         } backref; /* REF and friends */
     } u;
 } regmatch_state;
