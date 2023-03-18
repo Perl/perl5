@@ -478,7 +478,7 @@ a(?:b|c|d)+(.)	acdbcdbe	y	$1	e
 a(?:b|c|d){2}(.)	acdbcdbe	y	$1	b
 a(?:b|c|d){4,5}(.)	acdbcdbe	y	$1	b
 a(?:b|c|d){4,5}?(.)	acdbcdbe	y	$1	d
-((foo)|(bar))*	foobar	y	$1-$2-$3	bar--bar		# was bar-foo-bar prior to 5.37.7
+((foo)|(bar))*	foobar	y	$1-$2-$3	bar--bar		# was bar-foo-bar prior to 5.37.10
 :(?:	-	c	-	Sequence (? incomplete
 a(?:b|c|d){6,7}(.)	acdbcdbe	y	$1	e
 a(?:b|c|d){6,7}?(.)	acdbcdbe	y	$1	e
