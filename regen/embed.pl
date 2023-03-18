@@ -252,7 +252,7 @@ sub generate_proto_h {
         else {
             $ret .= "void" if !$has_context;
         }
-        $ret .= " _pDEPTH" if $has_depth;
+        $ret .= " comma_pDEPTH" if $has_depth;
         $ret .= ")";
         my @attrs;
         if ( $flags =~ /r/ ) {
@@ -487,7 +487,7 @@ sub embed_h {
                 $ret .= $replacelist;
                 if ($flags =~ /W/) {
                     if ($replacelist) {
-                        $ret .= " _aDEPTH";
+                        $ret .= " comma_aDEPTH";
                     } else {
                         die "Can't use W without other args (currently)";
                     }

@@ -523,7 +523,7 @@
 :
 :   U  autodoc.pl will not output a usage example
 :
-:   W  Add a _pDEPTH argument to function prototypes, and an _aDEPTH
+:   W  Add a comma_pDEPTH argument to function prototypes, and a comma_aDEPTH
 :      argument to the function calls. This means that under DEBUGGING
 :      a depth argument is added to the functions, which is used for
 :      example by the regex engine for debugging and trace output.
