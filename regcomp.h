@@ -13,11 +13,61 @@
 
 #define PERL_REGCOMP_H_
 
-/* define this to 1 if you want to enable a really aggressive and inefficient
- * paren cleanup during backtracking. We should pass test with this as 0. */
 #ifndef RE_PESSIMISTIC_PARENS
+/* Define this to 1 if you want to enable a really aggressive and
+ * inefficient paren cleanup during backtracking which should ensure
+ * correctness. Doing so should fix any bugs related to backreferences,
+ * at the cost of saving and restoring paren state far more than we
+ * necessarily must.
+ *
+ * When it is set to 0 we try to optimize away unnecessary save/restore
+ * operations which could potentially introduce bugs. We should pass our
+ * test suite with this as 0, but setting it to 1 might fix cases we do
+ * not currently test for. If setting this to 1 does fix a bug, then
+ * review the code related to storing and restoring paren state.
+ *
+ * See comment for VOLATILE_REF below for more details of a
+ * related case.
+ */
 #define RE_PESSIMISTIC_PARENS 0
 #endif
+
+/* a VOLATILE_REF is a ref which is inside of a capturing group and it
+ * refers to the capturing group it is inside of or to a following capture
+ * group which might be affected by what this capture group matches, and
+ * thus the ref requires additional backtracking support. For example:
+ *
+ *  "xa=xaaa" =~ /^(xa|=?\1a){2}\z/
+ *
+ * should not match.  In older perls the matching process would go like this:
+ *
+ * Iter 1: "xa" matches in capture group.
+ * Iter 2: "xa" does not match, goes to next alternation.
+ *         "=" matches in =?
+ *         Bifurcates here (= might not match)
+ *         "xa" matches via \1 from previous iteration
+ *         "a" matches via "a" at end of second alternation
+ *         # at this point $1 is "=xaa"
+ *         \z  does not match -> backtracks.
+ * Backtracks to Iter 2 "=?" Bifurcation point where we have NOT matched "="
+ *         "=xaa" matches via \1 (as $1 has not been reset)
+ *         "a" matches via "a" at end of second alternation
+ *         "\z" does match. -> Pattern matches overall.
+ *
+ * What should happen and now does happen instead is:
+ *
+ * Backtracks to Iter 2 "=?" Bifurcation point where we have NOT matched "=",
+ *         \1 does not match as it is "xa" (as $1 was reset when backtracked)
+ *         and the current character in the string is an "="
+ *
+ * The fact that \1 in this case is marked as a VOLATILE_REF is what ensures
+ * that we reset the capture buffer properly.
+ *
+ * See 59db194299c94c6707095797c3df0e2f67ff82b2
+ * and 38508ce8fc3a1bd12a3bb65e9d4ceb9b396a18db
+ * for more details.
+ */
+#define VOLATILE_REF 1
 
 #include "regcharclass.h"
 
