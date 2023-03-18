@@ -410,8 +410,9 @@ sub _tests_from_manifest {
     my $mani = '../MANIFEST';
     if (open(MANI, $mani)) {
 	while (<MANI>) {
+	    chomp;
 	    my ($file)= split /\t/, $_;
-	    if ($file=~m!^((?:cpan|dist|ext)/(\S+)/+(?:[^/\s]+\.t|test\.pl)|lib/\S+?(?:\.t|test\.pl))\z!) {
+	    if ($file =~ m!^((?:cpan|dist|ext)/(\S+)/+(?:[^/\s]+\.t|test\.pl)|lib/\S+?(?:\.t|test\.pl))\z!) {
 		my $t = $1;
 		my $extension = $2;
 
