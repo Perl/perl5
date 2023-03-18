@@ -30,7 +30,7 @@
 
 /*
 =for apidoc_section $debugging
-=for apidoc CmnW ||_aDEPTH
+=for apidoc CmnW ||comma_aDEPTH
 Some functions when compiled under DEBUGGING take an extra final argument named
 C<depth>, indicating the C stack depth.  This argument is omitted otherwise.
 This macro expands to either S<C<, depth>> under DEBUGGING, or to nothing at
@@ -38,20 +38,32 @@ all when not under DEBUGGING, reducing the number of C<#ifdef>'s in the code.
 
 The program is responsible for maintaining the correct value for C<depth>.
 
-=for apidoc CyW ||_pDEPTH
-This is used in the prototype declarations for functions that take a L</C<_aDEPTH>>
+=for apidoc CyW ||comma_pDEPTH
+This is used in the prototype declarations for functions that take a L</C<comma_aDEPTH>>
 final parameter, much like L<C<pTHX_>|perlguts/Background and MULTIPLICITY>
 is used in functions that take a thread context initial parameter.
+
+=for apidoc CmnW ||debug_aDEPTH
+Same as L</C<comma_aDEPTH>> but with no leading argument. Intended for functions with
+no normal arguments, and used by L</C<comma_aDEPTH>> itself.
+
+=for apidoc CmnW ||debug_pDEPTH
+Same as L</C<comma_pDEPTH>> but with no leading argument. Intended for functions with
+no normal arguments, and used by L</C<comma_pDEPTH>> itself.
 
 =cut
  */
 
 #ifdef DEBUGGING
-#  define _pDEPTH ,U32 depth
-#  define _aDEPTH ,depth
+#  define debug_pDEPTH U32 depth
+#  define comma_pDEPTH ,debug_pDEPTH
+#  define debug_aDEPTH depth
+#  define comma_aDEPTH ,debug_aDEPTH
 #else
-#  define _pDEPTH
-#  define _aDEPTH
+#  define debug_aDEPTH
+#  define comma_aDEPTH
+#  define debug_pDEPTH
+#  define comma_pDEPTH
 #endif
 
 /* NOTE 1: that with gcc -std=c89 the __STDC_VERSION__ is *not* defined

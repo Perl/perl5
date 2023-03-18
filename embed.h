@@ -1953,15 +1953,15 @@
 #     define isSB(a,b,c,d,e,f)                  S_isSB(aTHX_ a,b,c,d,e,f)
 #     define isWB(a,b,c,d,e,f,g)                S_isWB(aTHX_ a,b,c,d,e,f,g)
 #     define reg_check_named_buff_matched       S_reg_check_named_buff_matched
-#     define regcp_restore(a,b,c)               S_regcp_restore(aTHX_ a,b,c _aDEPTH)
-#     define regcppop(a,b)                      S_regcppop(aTHX_ a,b _aDEPTH)
-#     define regcppush(a,b,c)                   S_regcppush(aTHX_ a,b,c _aDEPTH)
+#     define regcp_restore(a,b,c)               S_regcp_restore(aTHX_ a,b,c comma_aDEPTH)
+#     define regcppop(a,b)                      S_regcppop(aTHX_ a,b comma_aDEPTH)
+#     define regcppush(a,b,c)                   S_regcppush(aTHX_ a,b,c comma_aDEPTH)
 #     define reghop3                            S_reghop3
 #     define reghop4                            S_reghop4
 #     define reghopmaybe3                       S_reghopmaybe3
 #     define reginclass(a,b,c,d,e)              S_reginclass(aTHX_ a,b,c,d,e)
 #     define regmatch(a,b,c)                    S_regmatch(aTHX_ a,b,c)
-#     define regrepeat(a,b,c,d,e,f)             S_regrepeat(aTHX_ a,b,c,d,e,f _aDEPTH)
+#     define regrepeat(a,b,c,d,e,f)             S_regrepeat(aTHX_ a,b,c,d,e,f comma_aDEPTH)
 #     define regtry(a,b)                        S_regtry(aTHX_ a,b)
 #     define to_byte_substr(a)                  S_to_byte_substr(aTHX_ a)
 #     define to_utf8_substr(a)                  S_to_utf8_substr(aTHX_ a)
