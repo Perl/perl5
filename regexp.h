@@ -62,8 +62,9 @@ struct reg_substr_data {
 #    define SV_SAVED_COPY
 #  endif
 
-/* offsets within a string of a particular /(.)/ capture */
-
+/* offsets within a string of a particular /(.)/ capture
+ * if you change this by adding new non-temporary fields
+ * then be sure to update Perl_rxres_save() in pp_ctl.c */
 typedef struct regexp_paren_pair {
     SSize_t start;
     SSize_t end;
