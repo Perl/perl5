@@ -6033,15 +6033,6 @@ Perl_sv_setsv_cow(pTHX_ SV *dsv, SV *ssv);
 
 #endif /* defined(PERL_ANY_COW) */
 #if defined(PERL_CORE)
-/* PERL_CALLCONV void
-deprecate(pTHX_ U32 category, const char * const construct); */
-
-/* PERL_CALLCONV void
-deprecate_disappears_in(pTHX_ U32 category, const char * const when, const char * const construct); */
-
-/* PERL_CALLCONV void
-deprecate_fatal_in(pTHX_ U32 category, const char * const when, const char * const construct); */
-
 PERL_CALLCONV void
 Perl_opslab_force_free(pTHX_ OPSLAB *slab)
         __attribute__visibility__("hidden");
