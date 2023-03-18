@@ -5499,6 +5499,9 @@ ERS	|bool	|regtry 	|NN regmatch_info *reginfo		\
 				|NN char **startposp
 ES	|bool	|to_byte_substr |NN regexp *prog
 ES	|void	|to_utf8_substr |NN regexp *prog
+EWi	|void	|unwind_paren	|NN regexp *rex 			\
+				|U32 lp 				\
+				|U32 lcp
 # if defined(DEBUGGING)
 ES	|void	|debug_start_match					\
 				|NN const REGEXP *prog			\

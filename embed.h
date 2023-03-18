@@ -1966,6 +1966,7 @@
 #     define regtry(a,b)                        S_regtry(aTHX_ a,b)
 #     define to_byte_substr(a)                  S_to_byte_substr(aTHX_ a)
 #     define to_utf8_substr(a)                  S_to_utf8_substr(aTHX_ a)
+#     define unwind_paren(a,b,c)                S_unwind_paren(aTHX_ a,b,c comma_aDEPTH)
 #     if defined(DEBUGGING)
 #       define debug_start_match(a,b,c,d,e)     S_debug_start_match(aTHX_ a,b,c,d,e)
 #       define dump_exec_pos(a,b,c,d,e,f,g)     S_dump_exec_pos(aTHX_ a,b,c,d,e,f,g)

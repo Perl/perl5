@@ -341,21 +341,33 @@ S_regcppush(pTHX_ const regexp *rex, I32 parenfloor, U32 maxopenparen comma_pDEP
         (UV)RXp_LASTPAREN(rex)                                              \
     ))
 
-#define UNWIND_PAREN(lp, lcp)               \
-    DEBUG_BUFFERS_r(Perl_re_exec_indentf( aTHX_  \
-        "UNWIND_PAREN: rex=0x%" UVxf " offs=0x%" UVxf ": invalidate (%" UVuf "..%" UVuf "] set lcp: %" UVuf "\n", \
-        depth,                              \
-        PTR2UV(rex),                        \
-        PTR2UV(RXp_OFFSp(rex)),                  \
-        (UV)(lp),                           \
-        (UV)(RXp_LASTPAREN(rex)),               \
-        (UV)(lcp)                           \
-    ));                                     \
-    for (n = RXp_LASTPAREN(rex); n > lp; n--) { \
-        RXp_OFFSp(rex)[n].end = -1;              \
-    }                                       \
-    RXp_LASTPAREN(rex) = n;                     \
+/* the lp and lcp args match the relevant members of the
+ * regexp structure, but in practice they should all be U16
+ * instead as we have a hard limit of U16_MAX parens. See
+ * line 4003 or so of regcomp.c where we parse OPEN parens
+ * of various types. */
+PERL_STATIC_INLINE void
+S_unwind_paren(pTHX_ regexp *rex, U32 lp, U32 lcp comma_pDEPTH) {
+    PERL_ARGS_ASSERT_UNWIND_PAREN;
+    U32 n;
+    DECLARE_AND_GET_RE_DEBUG_FLAGS;
+    DEBUG_BUFFERS_r(Perl_re_exec_indentf( aTHX_
+        "UNWIND_PAREN: rex=0x%" UVxf " offs=0x%" UVxf
+        ": invalidate (%" UVuf " .. %" UVuf ") set lcp: %" UVuf "\n",
+        depth,
+        PTR2UV(rex),
+        PTR2UV(RXp_OFFSp(rex)),
+        (UV)(lp),
+        (UV)(RXp_LASTPAREN(rex)),
+        (UV)(lcp)
+    ));
+    for (n = RXp_LASTPAREN(rex); n > lp; n--) {
+        RXp_OFFSp(rex)[n].end = -1;
+    }
+    RXp_LASTPAREN(rex) = n;
     RXp_LASTCLOSEPAREN(rex) = lcp;
+}
+#define UNWIND_PAREN(lp,lcp) unwind_paren(rex,lp,lcp)
 
 PERL_STATIC_INLINE void
 S_capture_clear(pTHX_ regexp *rex, U16 from_ix, U16 to_ix, const char *str comma_pDEPTH) {

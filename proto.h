@@ -8915,6 +8915,11 @@ S_foldEQ_latin1_s2_folded(pTHX_ const char *a, const char *b, I32 len);
 #   define PERL_ARGS_ASSERT_FOLDEQ_LATIN1_S2_FOLDED \
         assert(a); assert(b)
 
+PERL_STATIC_INLINE void
+S_unwind_paren(pTHX_ regexp *rex, U32 lp, U32 lcp comma_pDEPTH);
+#   define PERL_ARGS_ASSERT_UNWIND_PAREN        \
+        assert(rex)
+
 # endif /* !defined(PERL_NO_INLINE_FUNCTIONS) */
 #endif /* defined(PERL_IN_REGEXEC_C) */
 #if defined(PERL_IN_REGEX_ENGINE)
