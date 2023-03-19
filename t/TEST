@@ -121,12 +121,9 @@ $| = 1;
 # remove empty elements due to insertion of empty symbols via "''p1'" syntax
 @ARGV = grep($_,@ARGV) if $^O eq 'VMS';
 
-# String eval to avoid loading File::Glob on non-miniperl.
-# (Windows only uses this script for miniperl.)
-@ARGV = eval 'map glob, @ARGV' if $^O eq 'MSWin32';
-
 my $is_win32 = $^O eq "MSWin32";
-my $is_os2 = $^O eq "os2";
+my $is_os2   = $^O eq "os2";
+
 
 our $show_elapsed_time = $ENV{HARNESS_TIMER} || 0;
 
@@ -159,6 +156,17 @@ if (-f 'TEST' && -f 'harness' && -d '../lib') {
 
 die "You need to run \"make test_prep\" first to set things up.\n"
   unless -e 'perl' or -e 'perl.exe' or -e 'perl.pm';
+
+if ($is_win32) {
+    # String eval to avoid loading File::Glob on non-miniperl.
+    # (Windows only uses this script for miniperl.)
+    my @argv;
+    if (eval '@argv = map glob, @ARGV; 1') {
+	@ARGV = @argv;
+    } else {
+	die "Failed to glob \@ARGV: $@";
+    }
+}
 
 # check leakage for embedders
 $ENV{PERL_DESTRUCT_LEVEL} = 2 unless exists $ENV{PERL_DESTRUCT_LEVEL};
