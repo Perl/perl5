@@ -130,20 +130,35 @@ our $show_elapsed_time = $ENV{HARNESS_TIMER} || 0;
 # Cheesy version of Getopt::Std.  We can't replace it with that, because we
 # can't rely on require working.
 {
+    my %opt_vars = (
+	benchmark => \$::benchmark,
+	core      => \$::core,
+	v         => \$::verbose,
+	torture	  => \$::torture,
+	utf8      => \$::with_utf8,
+	utf16     => \$::with_utf16,
+	taintwarn => \$::taintwarn,
+    );
+
     my @argv = ();
     foreach my $idx (0..$#ARGV) {
-	push( @argv, $ARGV[$idx] ), next unless $ARGV[$idx] =~ /^-(\S+)$/;
-	$::benchmark = 1 if $1 eq 'benchmark';
-	$::core    = 1 if $1 eq 'core';
-	$::verbose = 1 if $1 eq 'v';
-	$::torture = 1 if $1 eq 'torture';
-	$::with_utf8 = 1 if $1 eq 'utf8';
-	$::with_utf16 = 1 if $1 eq 'utf16';
-	$::taintwarn = 1 if $1 eq 'taintwarn';
-	if ($1 =~ /^deparse(,.+)?$/) {
+	my $opt;
+	if ($ARGV[$idx] =~ /^-?-(\S+)$/) {
+	    $opt = $1;
+	} else {
+	    push @argv, $ARGV[$idx];
+	    next;
+	}
+	if (my $ref = $opt_vars{$opt}) {
+	    $$ref = 1;
+	}
+	elsif ($opt =~ /^deparse(,.+)?$/) {
 	    $::deparse = 1;
 	    $::deparse_opts = $1;
             _process_deparse_config();
+	}
+	else {
+	    die "Unknown option '$opt'\n";
 	}
     }
     @ARGV = @argv;
