@@ -1452,7 +1452,7 @@ and
         s/${^LAST_SUCCESSFUL_PATTERN}/BLAH/;
     }
 
-are equivalent. 
+are equivalent.
 
 You can use this to debug which pattern matched last, or to match with it again.
 
