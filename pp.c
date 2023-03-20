@@ -1848,10 +1848,7 @@ PP_wrapped(pp_repeat,
         if (count > 1) {
             SSize_t max;
 
-            if (  items > SSize_t_MAX / count   /* max would overflow */
-                                                /* repeatcpy would overflow */
-               || items > I32_MAX / (I32)sizeof(SV *)
-            )
+            if ( items > SSize_t_MAX / (SSize_t)sizeof(SV *) / count )
                Perl_croak(aTHX_ "%s","Out of memory during list extend");
             max = items * count;
             MEXTEND(MARK, max);
