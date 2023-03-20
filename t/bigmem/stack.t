@@ -89,13 +89,26 @@ my @tests =
       [
           grepwhile => sub {
             SKIP: {
-                  skip("This test is even slower - define PERL_RUN_SLOW_TESTS to run me", 1)
+                  skip "This test is even slower - define PERL_RUN_SLOW_TESTS to run me", 1
                     unless $ENV{PERL_RUN_SLOW_TESTS};
                   # grep ..., @x used too much memory
                   my $count = grep 1, ( (undef) x 0x7FFF_FFFF, 1, 1 );
                   is($count, 0x8000_0001, "grepwhile item count");
               }
           }
+      ],
+      [
+          repeat => sub {
+            SKIP:
+              {
+                  $ENV{PERL_TEST_MEMORY} >= 70
+                       or skip "repeat test needs 70GB", 2;
+                  # pp_repeat would throw an unable to allocate error
+                  my ($lastm1, $middle) = ( ( x() ) x 2 )[-1, @x-1];
+                  is($lastm1, "Hello", "repeat lastm1");
+                  is($middle, "Hello", "repeat middle");
+              }
+          },
       ],
      );
 
@@ -139,5 +152,7 @@ sub list2 {
 }
 
 sub list {
+    # ensure this continues to use a pp_list op
+    # if you change it.
     return shift() ? (1, 2) : (2, 1);
 }
