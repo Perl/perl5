@@ -1098,9 +1098,9 @@ PP(pp_mapwhile)
      */
 
     const U8 gimme = GIMME_V;
-    I32 items = (PL_stack_sp - PL_stack_base) - TOPMARK; /* how many new items */
-    I32 count;
-    I32 shift;
+    SSize_t items = (PL_stack_sp - PL_stack_base) - TOPMARK; /* how many new items */
+    SSize_t count;
+    SSize_t shift;
     SV** src;
     SV** dst;
 
@@ -1177,8 +1177,8 @@ PP(pp_mapwhile)
              * We have to do to this way so that everything gets correctly
              * freed if we die during the map.
              */
-            I32 tmpsbase;
-            I32 i = items;
+            SSize_t tmpsbase;
+            SSize_t i = items;
             /* make space for the slice */
             EXTEND_MORTAL(items);
             tmpsbase = PL_tmps_floor + 1;
