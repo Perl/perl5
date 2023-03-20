@@ -941,10 +941,10 @@ PP_wrapped(pp_tie, 0, 1)
     HV* stash;
     GV *gv = NULL;
     SV *sv;
-    const I32 markoff = MARK - PL_stack_base;
+    const SSize_t markoff = MARK - PL_stack_base;
     const char *methname;
     int how = PERL_MAGIC_tied;
-    U32 items;
+    SSize_t items;
     SV *varsv = *++MARK;
 
     switch(SvTYPE(varsv)) {
@@ -997,7 +997,7 @@ PP_wrapped(pp_tie, 0, 1)
         ENTER_with_name("call_TIE");
         PUSHSTACKi(PERLSI_MAGIC);
         PUSHMARK(SP);
-        EXTEND(SP,(I32)items);
+        EXTEND(SP, items);
         while (items--)
             PUSHs(*MARK++);
         PUTBACK;
@@ -1047,7 +1047,7 @@ PP_wrapped(pp_tie, 0, 1)
         ENTER_with_name("call_TIE");
         PUSHSTACKi(PERLSI_MAGIC);
         PUSHMARK(SP);
-        EXTEND(SP,(I32)items);
+        EXTEND(SP, items);
         while (items--)
             PUSHs(*MARK++);
         PUTBACK;

@@ -110,6 +110,35 @@ my @tests =
               }
           },
       ],
+      [
+          tiescalar => sub {
+            SKIP:
+              {
+                  # this swaps unless you have actually 80GB RAM, since
+                  # most of the memory is touched
+                  $ENV{PERL_TEST_MEMORY} >= 80
+                    or skip "tiescalar second test needs 80GB", 2;
+                  my $x;
+                  ok(ref( ( x(), tie($x, "ScalarTie", 1..5))[-1]),
+                     "tied with deep stack");
+                  is($x, 6, "check arguments received");
+                  untie $x;
+                  ok(tie($x, "ScalarTie", x()), "tie scalar with long argument list");
+                  is($x, 1+scalar(@x), "check arguments received");
+                  untie $x;
+                SKIP:
+                  {
+                      skip "This test is even slower - define PERL_RUN_SLOW_TESTS to run me", 1
+                        unless $ENV{PERL_RUN_SLOW_TESTS};
+                      my $o = bless {}, "ScalarTie";
+                      # this was news to me
+                      ok(tie($x, $o, x(), 1), "tie scalar via object with long argument list");
+                      is($x, 2+scalar(@x), "check arguments received");
+                      untie $x;
+                  }
+              }
+          }
+      ],
      );
 
 # these tests are slow, let someone debug them one at a time
@@ -155,4 +184,15 @@ sub list {
     # ensure this continues to use a pp_list op
     # if you change it.
     return shift() ? (1, 2) : (2, 1);
+}
+
+package ScalarTie;
+
+sub TIESCALAR {
+    ::note("TIESCALAR $_[0]");
+    bless { count => scalar @_ }, __PACKAGE__;
+}
+
+sub FETCH {
+    $_[0]{count};
 }
