@@ -83,32 +83,33 @@ enabled with
 
     use warnings;
 
+=head2 %{^HOOK} API introduced
+
+For various reasons it can be difficult to create subroutine wrappers
+for some of perls keywords. Any keyword which has an undefined
+prototype simply cannot be wrapped with a subroutine, and some keywords
+which perl permits to be wrapped are in practice very tricky to wrap.
+For example C<require> is tricky to wrap, it is possible but doing so
+changes the stack depth, and the standard methods of exporting assume
+that they will be exporting to a package at certain stack depth up the
+stack, and the wrapper will thus change where functions are exported to
+unless implemented with a great deal of care. This can be very awkward
+to deal with.
+
+Accordingly we have introduced a new hash called C<%{^HOOK}> which is
+intended to facilitate such cases. When a keyword supports any kind of
+special hook then the hook will live in this new hash. Hooks in this
+hash will be named after the function they are called by, followed by
+two underbars and then the phase they are executed in, currently either
+before or after the keyword is executed.
+
+In this initial release we support two hooks C<require__before> and
+C<require__after>. These are provided to make it easier to perform tasks
+before and after a require statement.
+
+See L<perlvar> for more details.
 
 =head1 Modules and Pragmata
-
-XXX All changes to installed files in F<cpan/>, F<dist/>, F<ext/> and F<lib/>
-go here.  If Module::CoreList is updated, generate an initial draft of the
-following sections using F<Porting/corelist-perldelta.pl>.  A paragraph summary
-for important changes should then be added by hand.  In an ideal world,
-dual-life modules would have a F<Changes> file that could be cribbed.
-
-The list of new and updated modules is modified automatically as part of
-preparing a Perl release, so the only reason to manually add entries here is if
-you're summarising the important changes in the module update. (Also, if the
-manually-added details don't match the automatically-generated ones, the
-release manager will have to investigate the situation carefully.)
-
-[ Within each section, list entries as an =item entry ]
-
-=head2 New Modules and Pragmata
-
-=over 4
-
-=item *
-
-XXX Remove this section if Porting/corelist-perldelta.pl did not add any content here.
-
-=back
 
 =head2 Updated Modules and Pragmata
 
@@ -116,19 +117,83 @@ XXX Remove this section if Porting/corelist-perldelta.pl did not add any content
 
 =item *
 
+L<Benchmark> has been upgraded from version 1.23 to 1.24.
+
+=item *
+
+L<Class::Struct> has been upgraded from version 0.67 to 0.68.
+
+=item *
+
+L<Config::Perl::V> has been upgraded from version 0.35 to 0.36.
+
+=item *
+
+L<Data::Dumper> has been upgraded from version 2.187 to 2.188.
+
+=item *
+
+L<Digest::SHA> has been upgraded from version 6.03 to 6.04.
+
+=item *
+
+L<Env> has been upgraded from version 1.05 to 1.06.
+
+=item *
+
+L<feature> has been upgraded from version 1.80 to 1.81.
+
+=item *
+
+L<File::Spec> has been upgraded from version 3.88 to 3.89.
+
+=item *
+
+L<Net::Cmd> has been upgraded from version 3.14 to 3.15.
+
+=item *
+
+L<Math::Complex> has been upgraded from version 1.61 to 1.62.
+
+=item *
+
 L<Module::CoreList> has been upgraded from version 5.20230220 to 5.20230320.
 
 =item *
 
-L<Config::Perl::V> has been upgraded from version 0.35 to 0.36
+L<overload> has been upgraded from version 1.36 to 1.37.
 
 =item *
 
-L<Digest::SHA> has been upgraded from version 6.03 to 6.04
+L<POSIX> has been upgraded from version 2.11 to 2.12.
 
 =item *
 
-L<Test::More> has been upgraded from version 1.302192 to 1.302194
+L<Storable> has been upgraded from version 3.29 to 3.31.
+
+=item *
+
+L<Test::Simple> has been upgraded from version 1.302192 to 1.302194.
+
+=item *
+
+L<threads> has been upgraded from version 2.34 to 2.35.
+
+=item *
+
+L<threads::shared> has been upgraded from version 1.65 to 1.67.
+
+=item *
+
+L<Time::HiRes> has been upgraded from version 1.9772 to 1.9774.
+
+=item *
+
+L<warnings> has been upgraded from version 1.62 to 1.63.
+
+=item *
+
+L<XS::APItest> has been upgraded from version 1.30 to 1.32.
 
 =back
 
@@ -138,7 +203,7 @@ L<Test::More> has been upgraded from version 1.302192 to 1.302194
 
 We have attempted to update the documentation to reflect the changes
 listed in this document.  If you find any we have missed, open an issue
-at L<https://github.com/Perl/perl5/issues>.
+at L<https://github.com/Perl/perl5/issues/new/choose>.
 
 Additionally, the following selected changes have been made:
 
@@ -252,13 +317,7 @@ The following additions or changes have been made to diagnostic output,
 including warnings and fatal error messages.  For the complete list of
 diagnostic messages, see L<perldiag>.
 
-XXX New or changed warnings emitted by the core's C<C> code go here.  Also
-include any changes in L<perldiag> that reconcile it to the C<C> code.
-
 =head2 New Diagnostics
-
-XXX Newly added diagnostic messages go under here, separated into New Errors
-and New Warnings
 
 =head3 New Errors
 
@@ -345,11 +404,11 @@ F<t/class> were not being run during normal testing.
 
 =item *
 
-C<POSIX::dup2> no longer creates broken sockets. [GH #20920]
+C<POSIX::dup2> no longer creates broken sockets. [L<GH #20920|https://github.com/Perl/perl5/issues/20920>]
 
 =item *
 
-Closing a busy pipe could cause Perl to hang. [GH #19963]
+Closing a busy pipe could cause Perl to hang. [L<GH #19963|https://github.com/Perl/perl5/issues/19963>]
 
 =back
 
@@ -412,7 +471,7 @@ they contain.
 
 In the new experimental C<class> feature, attributes are no longer a syntax
 error when using the unit class syntax.
-[GH #20888].
+[L<GH #20888|https://github.com/Perl/perl5/issues/20888>].
 
 =item *
 
@@ -431,7 +490,7 @@ group have been fixed. For instance:
 
     "xa=xaaa" =~ /^(xa|=?\1a){2}\z/
 
-will now correctly not match. [GH #10073]
+will now correctly not match. [L<GH #10073|https://github.com/Perl/perl5/issues/10073>]
 
 =item *
 
