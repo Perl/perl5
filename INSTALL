@@ -2638,9 +2638,9 @@ seriously consider using a separate directory, since development
 subversions may not have all the compatibility wrinkles ironed out
 yet.
 
-=head2 Upgrading from 5.37.3 or earlier
+=head2 Upgrading from 5.37.9 or earlier
 
-B<Perl 5.37.10 may not be binary compatible with Perl 5.37.3 or
+B<Perl 5.37.10 may not be binary compatible with Perl 5.37.9 or
 earlier Perl releases.>  Perl modules having binary parts
 (meaning that a C compiler is used) will have to be recompiled to be
 used with 5.37.10.  If you find you do need to rebuild an extension with
