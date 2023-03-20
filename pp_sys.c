@@ -5872,7 +5872,7 @@ PP_wrapped(pp_syscall, 0, 1)
 {
 #ifdef HAS_SYSCALL
     dSP; dMARK; dORIGMARK; dTARGET;
-    I32 items = SP - MARK;
+    SSize_t items = SP - MARK;
     unsigned long a[20];
     I32 i = 0;
     IV retval = -1;
