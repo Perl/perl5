@@ -16772,8 +16772,19 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
     switch (obase->op_type) {
 
     case OP_UNDEF:
-        /* undef should care if its args are undef - any warnings
+        /* the optimizer rewrites '$x = undef' to 'undef $x' for lexical
+         * variables, which can occur as the source of warnings:
+         *   ($x = undef) =~ s/a/b/;
+         * The OPpUNDEF_KEEP_PV flag indicates that this used to be an
+         * assignment op.
+         * Otherwise undef should not care if its args are undef - any warnings
          * will be from tied/magic vars */
+        if (
+            (obase->op_private & (OPpTARGET_MY | OPpUNDEF_KEEP_PV)) == (OPpTARGET_MY | OPpUNDEF_KEEP_PV)
+            && (!match || PAD_SVl(obase->op_targ) == uninit_sv)
+        ) {
+            return varname(NULL, '$', obase->op_targ, NULL, 0, FUV_SUBSCRIPT_NONE);
+        }
         break;
 
     case OP_RV2AV:
@@ -16852,6 +16863,12 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
         return varname(NULL, '$', obase->op_targ,
                                     NULL, 0, FUV_SUBSCRIPT_NONE);
 
+    case OP_PADSV_STORE:
+        if (match && PAD_SVl(obase->op_targ) != uninit_sv)
+            goto do_op;
+        return varname(NULL, '$', obase->op_targ,
+                                    NULL, 0, FUV_SUBSCRIPT_NONE);
+
     case OP_GVSV:
         gv = cGVOPx_gv(obase);
         if (!gv || (match && GvSV(gv) != uninit_sv) || !GvSTASH(gv))
@@ -16870,6 +16887,20 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
         }
         return varname(NULL, '$', obase->op_targ,
                        NULL, (I8)obase->op_private, FUV_SUBSCRIPT_ARRAY);
+
+    case OP_AELEMFASTLEX_STORE:
+        if (match) {
+            SV **svp;
+            AV *av = MUTABLE_AV(PAD_SV(obase->op_targ));
+            if (!av || SvRMAGICAL(av))
+                goto do_op;
+            svp = av_fetch(av, (I8)obase->op_private, FALSE);
+            if (!svp || *svp != uninit_sv)
+                goto do_op;
+        }
+        return varname(NULL, '$', obase->op_targ,
+                       NULL, (I8)obase->op_private, FUV_SUBSCRIPT_ARRAY);
+
     case OP_AELEMFAST:
         {
             gv = cGVOPx_gv(obase);
