@@ -178,16 +178,36 @@ typedef struct regexp_internal {
  * change things without care. If you look at regexp.h you will see it
  * contains this:
  *
- * struct regnode {
- *   U8  flags;
- *   U8  type;
- *   U16 next_off;
+ * union regnode_head {
+ *   struct {
+ *     union {
+ *       U8 flags;
+ *       U8 str_len_u8;
+ *       U8 first_byte;
+ *     } u_8;
+ *     U8  type;
+ *     U16 next_off;
+ *   } data;
+ *   U32 data_u32;
  * };
  *
- * This structure is the base unit of elements in the regexp program. When
- * we increment our way through the program we increment by the size of this
- * structure, and in all cases where regnode sizing is considered it is in
- * units of this structure.
+ * struct regnode {
+ *   union regnode_head head;
+ * };
+ *
+ * Which really is a complicated and alignment friendly version of
+ *
+ *  struct {
+ *    U8  flags;
+ *    U8  type;
+ *    U16 next_off;
+ *  };
+ *
+ * This structure is the base unit of elements in the regexp program.
+ * When we increment our way through the program we increment by the
+ * size of this structure (32 bits), and in all cases where regnode
+ * sizing is considered it is in units of this structure. All regnodes
+ * have a union regnode_head as their first parameter.
  *
  * This implies that no regnode style structure should contain 64 bit
  * aligned members. Since the base regnode is 32 bits any member might
@@ -210,52 +230,40 @@ typedef struct regexp_internal {
  * we already have support for in the data array.
  */
 
+union regnode_arg {
+    I32 i32;
+    U32 u32;
+    struct {
+        U16 u16a;
+        U16 u16b;
+    } hi_lo;
+};
+
+
 struct regnode_string {
-    U8	str_len_u8;
-    U8  type;
-    U16 next_off;
+    union regnode_head head;
     char string[1];
 };
 
 struct regnode_lstring { /* Constructed this way to keep the string aligned. */
-    U8	flags;
-    U8  type;
-    U16 next_off;
+    union regnode_head head;
     U32 str_len_u32;    /* Only 18 bits allowed before would overflow 'next_off' */
     char string[1];
 };
 
 struct regnode_anyofhs { /* Constructed this way to keep the string aligned. */
-    U8	str_len;
-    U8  type;
-    U16 next_off;
-    union {
-        U32 arg1u;
-        I32 arg1i;
-        struct {
-            U16 arg1a;
-            U16 arg1b;
-        } hi_lo;
-    } arg1;
+    union regnode_head head;
+    union regnode_arg arg1;
     char string[1];
 };
 
-/* Argument bearing node - workhorse, arg1u is often for the data field
- * Can store either a signed value via ARG1i() or unsigned 32 bit value
+/* Argument bearing node - workhorse, ARG1u() is often used for the data field
+ * Can store either a signed 32 bit value via ARG1i() or unsigned 32 bit value
  * via ARG1u(), or two unsigned 16 bit values via ARG1a() or ARG1b()
  */
 struct regnode_1 {
-    U8	flags;
-    U8  type;
-    U16 next_off;
-    union {
-        U32 arg1u;
-        I32 arg1i;
-        struct {
-            U16 arg1a;
-            U16 arg1b;
-        } hi_lo;
-    } arg1;
+    union regnode_head head;
+    union regnode_arg arg1;
 };
 
 /* Node whose argument is 'SV *'.  This needs to be used very carefully in
@@ -274,9 +282,7 @@ struct regnode_1 {
  * then use inline functions to copy the data in or out.
  * */
 struct regnode_p {
-    U8	flags;
-    U8  type;
-    U16 next_off;
+    union regnode_head head;
     char arg1_sv_ptr_bytes[sizeof(SV *)];
 };
 
@@ -285,25 +291,9 @@ struct regnode_p {
  * Extra field can be accessed as (U32)ARG2u() (I32)ARG2i() or (U16)ARG2a()
  * and (U16)ARG2b() */
 struct regnode_2 {
-    U8	flags;
-    U8  type;
-    U16 next_off;
-    union {
-        U32 arg1u;
-        I32 arg1i;
-        struct {
-            U16 arg1a;
-            U16 arg1b;
-        } hi_lo;
-    } arg1;
-    union {
-        U32 arg2u;
-        I32 arg2i;
-        struct {
-            U16 arg2a;
-            U16 arg2b;
-        } hi_lo;
-    } arg2;
+    union regnode_head head;
+    union regnode_arg arg1;
+    union regnode_arg arg2;
 };
 
 /* "Three Node" - similar to a regnode_2 but with space for an additional
@@ -315,33 +305,10 @@ struct regnode_2 {
  * ARG3a() and ARG3b() which are used to store information about the number of
  * parens before and inside the quantified expression. */
 struct regnode_3 {
-    U8  flags;
-    U8  type;
-    U16 next_off;
-    union {
-        I32 arg1i;
-        U32 arg1u;
-        struct {
-            U16 arg1a;
-            U16 arg1b;
-        } hi_lo;
-    } arg1;
-    union {
-        I32 arg2i;
-        U32 arg2u;
-        struct {
-            U16 arg2a;
-            U16 arg2b;
-        } hi_lo;
-    } arg2;
-    union {
-        struct {
-            U16 arg3a;
-            U16 arg3b;
-        } hi_lo;
-        I32 arg3i;
-        U32 arg3u;
-    } arg3;
+    union regnode_head head;
+    union regnode_arg arg1;
+    union regnode_arg arg2;
+    union regnode_arg arg3;
 };
 
 #define REGNODE_BBM_BITMAP_LEN                                                  \
@@ -352,9 +319,7 @@ struct regnode_3 {
  * The array is a bitmap capable of representing any possible continuation
  * byte. */
 struct regnode_bbm {
-    U8	first_byte;
-    U8  type;
-    U16 next_off;
+    union regnode_head head;
     U8 bitmap[REGNODE_BBM_BITMAP_LEN];
 };
 
@@ -370,36 +335,18 @@ struct regnode_bbm {
  * the code that inserts and deletes regnodes.  The basic single-argument
  * regnode has a U32, which is what reganode() allocates as a unit.  Therefore
  * no field can require stricter alignment than U32. */
-
+    
 /* also used by trie */
 struct regnode_charclass {
-    U8	flags;
-    U8  type;
-    U16 next_off;
-    union {
-        I32 arg1i;
-        U32 arg1u;
-        struct {
-            U16 arg1a;
-            U16 arg1b;
-        } hi_lo;
-    } arg1;
+    union regnode_head head;
+    union regnode_arg arg1;
     char bitmap[ANYOF_BITMAP_SIZE];	/* only compile-time */
 };
 
 /* has runtime (locale) \d, \w, ..., [:posix:] classes */
 struct regnode_charclass_posixl {
-    U8	flags;                      /* ANYOF_MATCHES_POSIXL bit must go here */
-    U8  type;
-    U16 next_off;
-    union {
-        I32 arg1i;
-        U32 arg1u;
-        struct {
-            U16 arg1a;
-            U16 arg1b;
-        } hi_lo;
-    } arg1;
+    union regnode_head head;
+    union regnode_arg arg1;
     char bitmap[ANYOF_BITMAP_SIZE];		/* both compile-time ... */
     U32 classflags;	                        /* and run-time */
 };
@@ -418,17 +365,8 @@ struct regnode_charclass_posixl {
  * never a next node.
  */
 struct regnode_ssc {
-    U8	flags;                      /* ANYOF_MATCHES_POSIXL bit must go here */
-    U8  type;
-    U16 next_off;
-    union {
-        I32 arg1i;
-        U32 arg1u;
-        struct {
-            U16 arg1a;
-            U16 arg1b;
-        } hi_lo;
-    } arg1;
+    union regnode_head head;
+    union regnode_arg arg1;
     char bitmap[ANYOF_BITMAP_SIZE];	/* both compile-time ... */
     U32 classflags;	                /* ... and run-time */
 
@@ -524,11 +462,6 @@ struct regnode_ssc {
 
 #define ARGp_SET(p, val) ARGp_SET_inline((p),(val))
 
-#undef NEXT_OFF
-#undef NODE_ALIGN
-
-#define NEXT_OFF(p) ((p)->next_off)
-#define NODE_ALIGN(node)
 /* the following define was set to 0xde in 075abff3
  * as part of some linting logic. I have set it to 0
  * as otherwise in every place where we /might/ set flags
@@ -538,25 +471,32 @@ struct regnode_ssc {
  * is changed from 0 then at the very least make sure
  * that SBOL for /^/ sets the flags to 0 explicitly.
  * -- Yves */
-#define NODE_ALIGN_FILL(node) ((node)->flags = 0)
 
+#define NODE_ALIGN(node)
 #define SIZE_ALIGN NODE_ALIGN
 
 #undef OP
 #undef OPERAND
 #undef STRING
+#undef NEXT_OFF
+#undef NODE_ALIGN
 
-#define	OP(p)		((p)->type)
-#define FLAGS(p)	((p)->flags)	/* Caution: Doesn't apply to all      \
+#define NEXT_OFF(p)     ((p)->head.data.next_off)
+#define OP(p)           ((p)->head.data.type)
+#define STR_LEN_U8(p)   ((p)->head.data.u_8.str_len_u8)
+#define FIRST_BYTE(p)   ((p)->head.data.u_8.first_byte)
+#define FLAGS(p)        ((p)->head.data.u_8.flags) /* Caution: Doesn't apply to all      \
                                            regnode types.  For some, it's the \
                                            character set of the regnode */
 #define	STR_LENs(p)	(__ASSERT_(OP(p) != LEXACT && OP(p) != LEXACT_REQ8)  \
-                                    ((struct regnode_string *)p)->str_len_u8)
+                                    STR_LEN_U8((struct regnode_string *)p))
 #define	STRINGs(p)	(__ASSERT_(OP(p) != LEXACT && OP(p) != LEXACT_REQ8)  \
                                     ((struct regnode_string *)p)->string)
 #define	OPERANDs(p)	STRINGs(p)
 
 #define PARNO(p)        ARG1u(p)          /* APPLIES for OPEN and CLOSE only */
+
+#define NODE_ALIGN_FILL(node) (FLAGS(node) = 0)
 
 /* Long strings.  Currently limited to length 18 bits, which handles a 262000
  * byte string.  The limiting factor is the 16 bit 'next_off' field, which
@@ -591,7 +531,7 @@ struct regnode_ssc {
         if (OP(p) == LEXACT || OP(p) == LEXACT_REQ8)                        \
             ((struct regnode_lstring *)(p))->str_len_u32 = (v);             \
         else                                                                \
-            ((struct regnode_string *)(p))->str_len_u8 = (v);               \
+            STR_LEN_U8((struct regnode_string *)(p)) = (v);                 \
     } STMT_END
 
 #define ANYOFR_BASE_BITS    20
@@ -603,18 +543,18 @@ struct regnode_ssc {
 
 #define	NODE_ALIGN(node)
 #define ARGp_BYTES_LOC(p)  (((struct regnode_p *)p)->arg1_sv_ptr_bytes)
-#define ARG1u_LOC(p)    (((struct regnode_1 *)p)->arg1.arg1u)
-#define ARG1i_LOC(p)    (((struct regnode_1 *)p)->arg1.arg1i)
-#define ARG1a_LOC(p)    (((struct regnode_1 *)p)->arg1.hi_lo.arg1a)
-#define ARG1b_LOC(p)    (((struct regnode_1 *)p)->arg1.hi_lo.arg1b)
-#define ARG2u_LOC(p)    (((struct regnode_2 *)p)->arg2.arg2u)
-#define ARG2i_LOC(p)    (((struct regnode_2 *)p)->arg2.arg2i)
-#define ARG2a_LOC(p)    (((struct regnode_2 *)p)->arg2.hi_lo.arg2a)
-#define ARG2b_LOC(p)    (((struct regnode_2 *)p)->arg2.hi_lo.arg2b)
-#define ARG3u_LOC(p)    (((struct regnode_3 *)p)->arg3.arg3u)
-#define ARG3i_LOC(p)    (((struct regnode_3 *)p)->arg3.arg3i)
-#define ARG3a_LOC(p)    (((struct regnode_3 *)p)->arg3.hi_lo.arg3a)
-#define ARG3b_LOC(p)    (((struct regnode_3 *)p)->arg3.hi_lo.arg3b)
+#define ARG1u_LOC(p)    (((struct regnode_1 *)p)->arg1.u32)
+#define ARG1i_LOC(p)    (((struct regnode_1 *)p)->arg1.i32)
+#define ARG1a_LOC(p)    (((struct regnode_1 *)p)->arg1.hi_lo.u16a)
+#define ARG1b_LOC(p)    (((struct regnode_1 *)p)->arg1.hi_lo.u16b)
+#define ARG2u_LOC(p)    (((struct regnode_2 *)p)->arg2.u32)
+#define ARG2i_LOC(p)    (((struct regnode_2 *)p)->arg2.i32)
+#define ARG2a_LOC(p)    (((struct regnode_2 *)p)->arg2.hi_lo.u16a)
+#define ARG2b_LOC(p)    (((struct regnode_2 *)p)->arg2.hi_lo.u16b)
+#define ARG3u_LOC(p)    (((struct regnode_3 *)p)->arg3.u32)
+#define ARG3i_LOC(p)    (((struct regnode_3 *)p)->arg3.i32)
+#define ARG3a_LOC(p)    (((struct regnode_3 *)p)->arg3.hi_lo.u16a)
+#define ARG3b_LOC(p)    (((struct regnode_3 *)p)->arg3.hi_lo.u16b)
 
 /* These should no longer be used directly in most cases. Please use
  * the REGNODE_AFTER() macros instead. */
@@ -1065,7 +1005,7 @@ ARGp_SET_inline(struct regnode *node, SV *ptr) {
 #define BITMAP_BIT(c)	        (1U << ((c) & 7))
 #define BITMAP_TEST(p, c)	(BITMAP_BYTE(p, c) & BITMAP_BIT((U8)(c)))
 
-#define ANYOF_FLAGS(p)		((p)->flags)
+#define ANYOF_FLAGS(p)          (FLAGS(p))
 
 #define ANYOF_BIT(c)		BITMAP_BIT(c)
 
