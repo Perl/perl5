@@ -1183,7 +1183,13 @@ Do not proceed any further until you are sure that your tarballs are on CPAN.
 Check your authors directory metacpan.org to confirm that your uploads have
 been successful.
 
- https://metacpan.org/author/YOUR_PAUSE_ID
+ https://metacpan.org/author/YOUR_PAUSE_ID/releases
+
+You can also check
+
+ https://metacpan.org/release/YOUR_PAUSE_ID/perl-5.X.Y
+
+which may be faster.
 
 =for checklist skip RC BLEAD-POINT
 
@@ -1626,4 +1632,3 @@ L<http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2009-05/msg00608.html>,
 plus a whole bunch of other sources, including private correspondence.
 
 =cut
-
