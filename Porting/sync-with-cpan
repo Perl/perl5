@@ -206,6 +206,7 @@ my $tmpdir = tmpdir();
 my $package      = "02packages.details.txt";
 my $package_url  = "http://www.cpan.org/modules/$package";
 my $package_file = "$tmpdir/$package"; # this is a cache
+my $type_dir     = "cpan";
 
 my @problematic = (
     # no current entries as of perl-5.37.10 (Dec 2022)
@@ -226,6 +227,7 @@ GetOptions ('tarball=s'  =>  \my $tarball,
             'force'      =>  \my $force,
             'no-test|nt' =>  \my $no_test,
             'help'       =>  sub { usage 0; },
+            'type=s'     =>  \$type_dir,
         ) or  die "Failed to parse arguments";
 
 usage 1 unless @ARGV == 1;
@@ -370,19 +372,19 @@ if (!$ENV{TEST_JOBS} and !WIN32) {
 if (!$make_jobs and !WIN32) {
     print "*** NOTE *** For speedups you can pass --jobs=N as an arg to this script.\n"
 }
-print "About to clean the cpan/ directory, and ensure its contents is up to date.\n";
-print "Will also checkout -f on cpan/, MANIFEST and Porting/Maintainers.pl\n";
+print "About to clean the $type_dir/ directory, and ensure its contents is up to date.\n";
+print "Will also checkout -f on $type_dir/, MANIFEST and Porting/Maintainers.pl\n";
 print "*** WARNING *** - this may DELETE uncommitted changes. Hit ^C if you have ANY doubts!\n";
 pause_for_input("\n");
 # clean out the cpan directory, this cleans up any temporary files that might be
 # in the way, or other issues that might come up if the user bails out of the sync
 # script and then runs it again.
-my $clean_out= `git clean -dfx cpan`; # use backticks to hide the output
-system git => qw(checkout -f
-                cpan
-                MANIFEST
-                Porting/Maintainers.pl); # let the user see the output
-print "the cpan/ directory is now clean and up to date\n---\n";
+my $clean_out= `git clean -dfx $type_dir`; # use backticks to hide the output
+system git => 'checkout -f',
+              $type_dir,
+              'MANIFEST',
+              'Porting/Maintainers.pl'; # let the user see the output
+print "the $type_dir/ directory is now clean and up to date\n---\n";
 
 my  $distribution = $$info {DISTRIBUTION};
 
@@ -399,7 +401,7 @@ if (!-d $files [0] || grep { $_ eq $module } @problematic) {
 use Cwd 'cwd';
 my $orig_pwd = cwd();
 
-chdir "cpan";
+chdir "$type_dir";
 
 my  $pkg_dir      = $files[0];
     $pkg_dir      =~ s!.*/!!;
@@ -542,8 +544,8 @@ FILE: for my $file ( find_type_f( $new_dir )) {
         $file = $files[0] . '/' . $file;
     }
 
-    if ( $file =~ m{^cpan/} ) {
-        $file =~ s{^cpan/}{};
+    if ( $file =~ m{^$type_dir/} ) {
+        $file =~ s{^$type_dir/}{};
     }
     else {
         $file = '../' . $file;
@@ -679,7 +681,7 @@ if (@de_exec && @delete) {
 if (@de_exec) {
     my %permitted = map { (my $x = $_) =~ tr/\n//d; $x => 1 } grep !/^#/,
         do { local @ARGV = '../Porting/exec-bit.txt'; <> };
-    @de_exec = grep !$permitted{"cpan/$pkg_dir/$_"}, @de_exec;
+    @de_exec = grep !$permitted{"$type_dir/$pkg_dir/$_"}, @de_exec;
 }
 @$_ = sort @$_ for \@delete, \@commit, \@gone, \@de_exec;
 
@@ -722,8 +724,8 @@ chdir "..";
         or die "Failed to open $MANIFEST for reading: $!\n";
     open my $new, ">", $MANIFEST_NEW
         or die "Failed to open $MANIFEST_NEW for writing: $!\n";
-    my %keep = map +("cpan/$pkg_dir/$_" => 1), keys %new_files;
-    my %gone = map +("cpan/$pkg_dir/$_" => 1), @gone;
+    my %keep = map +("$type_dir/$pkg_dir/$_" => 1), keys %new_files;
+    my %gone = map +("$type_dir/$pkg_dir/$_" => 1), @gone;
     while (my $line = <$orig>) {
         chomp $line;
         my ($file, $descr) = split /\t+/, $line;
@@ -752,7 +754,7 @@ chdir "..";
         say $new $line if !$gone{$file};
     }
 
-    say $new "cpan/$pkg_dir/$_\t\t$pkg_dir" for @commit;
+    say $new "$type_dir/$pkg_dir/$_\t\t$pkg_dir" for @commit;
 
     close $new or die "Can't close $MANIFEST: $!\n";
 
@@ -796,8 +798,8 @@ if (@commit || @gone) {
 print "About to clean up the old version, update Maintainers.pl and start tests\n";
 pause_for_input("\n");
 
-remove_tree( "cpan/$old_dir" );
-unlink "cpan/$new_file" unless $tarball;
+remove_tree( "$type_dir/$old_dir" );
+unlink "$type_dir/$new_file" unless $tarball;
 
 
 open my $Maintainers_pl, '<', 'Porting/Maintainers.pl';
@@ -867,9 +869,9 @@ my $committed;
 if (@changes_info) {
     system git => 'commit',
            join("\n",
-               "-mcpan/$pkg_dir - ${re_update}Update to version $new_version",
+               "-m$type_dir/$pkg_dir - ${re_update}Update to version $new_version",
                "",@changes_info),
-           "cpan/$pkg_dir", "MANIFEST", "Porting/Maintainers.pl"
+           "$type_dir/$pkg_dir", "MANIFEST", "Porting/Maintainers.pl"
         or $committed = 1; # note system returns true for an error!
 }
 
@@ -888,7 +890,7 @@ has added an XS dependency - even if the full test suite passes just fine.
 Hopefully all will complete successfully, but if not, you can make any
 changes you need to get the tests to pass. Don't forget that you'll need
 a "CUSTOMIZED" entry in Porting/Maintainers.pl if you change any of the
-files under cpan/$pkg_dir.
+files under $type_dir/$pkg_dir.
 
 EOF
 
@@ -912,7 +914,7 @@ EOF
     print <<"EOF";
 Once all tests pass, you can commit it with a command like:
 
-    git commit -m${shell_quote}cpan/$pkg_dir - Update to version $new_version${shell_quote} cpan/$pkg_dir
+    git commit -m${shell_quote}$type_dir/$pkg_dir - Update to version $new_version${shell_quote} $type_dir/$pkg_dir
 
 and then push it upstream with a command like
 
