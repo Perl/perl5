@@ -280,7 +280,7 @@ PP(pp_methstart)
         U32 fieldcount = (aux++)->uv;
         U32 max_fieldix = (aux++)->uv;
 
-        assert(ObjectMAXFIELD(instance)+1 > max_fieldix);
+        assert((U32)(ObjectMAXFIELD(instance)+1) > max_fieldix);
         PERL_UNUSED_VAR(max_fieldix);
 
         for(Size_t i = 0; i < fieldcount; i++) {
