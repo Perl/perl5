@@ -209,7 +209,7 @@ my $package_file = "$tmpdir/$package"; # this is a cache
 my $type_dir     = "cpan";
 
 my @problematic = (
-    # no current entries as of perl-5.37.10 (Dec 2022)
+    # no current entries as of perl-5.37.11 (Mar 2023)
 );
 
 
