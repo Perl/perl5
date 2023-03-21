@@ -2,114 +2,122 @@
 
 =head1 NAME
 
-perldelta - what is new for perl v5.37.10
+[ this is a template for a new perldelta file.  Any text flagged as XXX needs
+to be processed before release. ]
+
+perldelta - what is new for perl v5.37.11
 
 =head1 DESCRIPTION
 
-This document describes differences between the 5.37.9 release and the 5.37.10
+This document describes differences between the 5.37.10 release and the 5.37.11
 release.
 
-If you are upgrading from an earlier release such as 5.37.8, first read
-L<perl5379delta>, which describes differences between 5.37.8 and 5.37.9.
+If you are upgrading from an earlier release such as 5.37.9, first read
+L<perl53710delta>, which describes differences between 5.37.9 and 5.37.10.
+
+=head1 Notice
+
+XXX Any important notices here
 
 =head1 Core Enhancements
 
-=head2 Some C<goto>s are now permitted in C<defer> and C<finally> blocks
+XXX New core language features go here.  Summarize user-visible core language
+enhancements.  Particularly prominent performance optimisations could go
+here, but most should go in the L</Performance Enhancements> section.
 
-Perl version 5.36.0 added C<defer> blocks and permitted the C<finally> keyword
-to also add similar behaviour to C<try>/C<catch> syntax.  These did not permit
-any C<goto> expression within the body, as it could have caused control flow
-to jump out of the block.  Now, some C<goto> expressions are allowed, if they
-have a constant target label, and that label is found within the block.
+[ List each enhancement as a =head2 entry ]
 
-  use feature 'defer';
+=head1 Security
 
-  defer {
-    goto LABEL;
-    print "This does not execute\n";
-    LABEL: print "This does\n";
-  }
+XXX Any security-related notices go here.  In particular, any security
+vulnerabilities closed should be noted here rather than in the
+L</Selected Bug Fixes> section.
 
-=head2 New regexp variable ${^LAST_SUCCESSFUL_PATTERN}
+[ List each security issue as a =head2 entry ]
 
-This allows access to the last succesful pattern that matched in the current scope.
-Many aspects of the regex engine refer to the "last successful pattern". The empty
-pattern reuses it, and all of the magic regex vars relate to it. This allows
-access to its pattern. The following code
+=head1 Incompatible Changes
 
-    if (m/foo/ || m/bar/) {
-        s//PQR/;
-    }
+XXX For a release on a stable branch, this section aspires to be:
 
-can be rewritten as follows
+    There are no changes intentionally incompatible with 5.XXX.XXX
+    If any exist, they are bugs, and we request that you submit a
+    report.  See L</Reporting Bugs> below.
 
-    if (m/foo/ || m/bar/) {
-        s/${^LAST_SUCCESSFUL_PATTERN}/PQR/;
-    }
+[ List each incompatible change as a =head2 entry ]
 
-and it will do the exactly same thing.
+=head1 Deprecations
 
-=head2 Deprecation warnings now have specific subcategories
+XXX Any deprecated features, syntax, modules etc. should be listed here.
 
-As of 5.37.10 all deprecation warnings will have their own specific
-deprecation category which can be disabled individually. You can see a
-list of all deprecated features in L<perldeprecation>, and in
-L<warnings>. The following list is from L<warnings>:
+=head2 Module removals
 
-         +- deprecated ----+
-         |                 |
-         |                 +- deprecated::apostrophe_as_package_separator
-         |                 |
-         |                 +- deprecated::delimiter_will_be_paired
-         |                 |
-         |                 +- deprecated::dot_in_inc
-         |                 |
-         |                 +- deprecated::goto_construct
-         |                 |
-         |                 +- deprecated::smartmatch
-         |                 |
-         |                 +- deprecated::unicode_property_name
-         |                 |
-         |                 +- deprecated::version_downgrade
+XXX Remove this section if not applicable.
 
-It is still possible to disable all deprecation warnings in a single
-statement with
+The following modules will be removed from the core distribution in a
+future release, and will at that time need to be installed from CPAN.
+Distributions on CPAN which require these modules will need to list them as
+prerequisites.
 
-    no warnings 'deprecated';
+The core versions of these modules will now issue C<"deprecated">-category
+warnings to alert you to this fact.  To silence these deprecation warnings,
+install the modules in question from CPAN.
 
-but as of 5.37.10 it is possible to have a finer grained control. As
-has historically been the case these warnings are automatically
-enabled with
+Note that these are (with rare exceptions) fine modules that you are encouraged
+to continue to use.  Their disinclusion from core primarily hinges on their
+necessity to bootstrapping a fully functional, CPAN-capable Perl installation,
+not usually on concerns over their design.
 
-    use warnings;
+=over
 
-=head2 %{^HOOK} API introduced
+=item XXX
 
-For various reasons it can be difficult to create subroutine wrappers
-for some of perls keywords. Any keyword which has an undefined
-prototype simply cannot be wrapped with a subroutine, and some keywords
-which perl permits to be wrapped are in practice very tricky to wrap.
-For example C<require> is tricky to wrap, it is possible but doing so
-changes the stack depth, and the standard methods of exporting assume
-that they will be exporting to a package at certain stack depth up the
-stack, and the wrapper will thus change where functions are exported to
-unless implemented with a great deal of care. This can be very awkward
-to deal with.
+XXX Note that deprecated modules should be listed here even if they are listed
+as an updated module in the L</Modules and Pragmata> section.
 
-Accordingly we have introduced a new hash called C<%{^HOOK}> which is
-intended to facilitate such cases. When a keyword supports any kind of
-special hook then the hook will live in this new hash. Hooks in this
-hash will be named after the function they are called by, followed by
-two underbars and then the phase they are executed in, currently either
-before or after the keyword is executed.
+=back
 
-In this initial release we support two hooks C<require__before> and
-C<require__after>. These are provided to make it easier to perform tasks
-before and after a require statement.
+[ List each other deprecation as a =head2 entry ]
 
-See L<perlvar> for more details.
+=head1 Performance Enhancements
+
+XXX Changes which enhance performance without changing behaviour go here.
+There may well be none in a stable release.
+
+[ List each enhancement as an =item entry ]
+
+=over 4
+
+=item *
+
+XXX
+
+=back
 
 =head1 Modules and Pragmata
+
+XXX All changes to installed files in F<cpan/>, F<dist/>, F<ext/> and F<lib/>
+go here.  If Module::CoreList is updated, generate an initial draft of the
+following sections using F<Porting/corelist-perldelta.pl>.  A paragraph summary
+for important changes should then be added by hand.  In an ideal world,
+dual-life modules would have a F<Changes> file that could be cribbed.
+
+The list of new and updated modules is modified automatically as part of
+preparing a Perl release, so the only reason to manually add entries here is if
+you're summarising the important changes in the module update. (Also, if the
+manually-added details don't match the automatically-generated ones, the
+release manager will have to investigate the situation carefully.)
+
+[ Within each section, list entries as an =item entry ]
+
+=head2 New Modules and Pragmata
+
+=over 4
+
+=item *
+
+XXX Remove this section if Porting/corelist-perldelta.pl did not add any content here.
+
+=back
 
 =head2 Updated Modules and Pragmata
 
@@ -117,197 +125,54 @@ See L<perlvar> for more details.
 
 =item *
 
-L<Benchmark> has been upgraded from version 1.23 to 1.24.
+L<XXX> has been upgraded from version A.xx to B.yy.
+
+XXX If there was something important to note about this change, include that here.
+
+=back
+
+=head2 Removed Modules and Pragmata
+
+=over 4
 
 =item *
 
-L<Class::Struct> has been upgraded from version 0.67 to 0.68.
-
-=item *
-
-L<Config::Perl::V> has been upgraded from version 0.35 to 0.36.
-
-=item *
-
-L<Data::Dumper> has been upgraded from version 2.187 to 2.188.
-
-=item *
-
-L<Digest::SHA> has been upgraded from version 6.03 to 6.04.
-
-=item *
-
-L<Env> has been upgraded from version 1.05 to 1.06.
-
-=item *
-
-L<feature> has been upgraded from version 1.80 to 1.81.
-
-=item *
-
-L<File::Spec> has been upgraded from version 3.88 to 3.89.
-
-=item *
-
-L<Net::Cmd> has been upgraded from version 3.14 to 3.15.
-
-=item *
-
-L<Math::Complex> has been upgraded from version 1.61 to 1.62.
-
-=item *
-
-L<Module::CoreList> has been upgraded from version 5.20230220 to 5.20230320.
-
-=item *
-
-L<overload> has been upgraded from version 1.36 to 1.37.
-
-=item *
-
-L<POSIX> has been upgraded from version 2.11 to 2.12.
-
-=item *
-
-L<Storable> has been upgraded from version 3.29 to 3.31.
-
-=item *
-
-L<Test::Simple> has been upgraded from version 1.302192 to 1.302194.
-
-=item *
-
-L<threads> has been upgraded from version 2.34 to 2.35.
-
-=item *
-
-L<threads::shared> has been upgraded from version 1.65 to 1.67.
-
-=item *
-
-L<Time::HiRes> has been upgraded from version 1.9772 to 1.9774.
-
-=item *
-
-L<warnings> has been upgraded from version 1.62 to 1.63.
-
-=item *
-
-L<XS::APItest> has been upgraded from version 1.30 to 1.32.
+XXX Remove this section if Porting/corelist-perldelta.pl did not add any content here.
 
 =back
 
 =head1 Documentation
 
+XXX Changes to files in F<pod/> go here.  Consider grouping entries by
+file and be sure to link to the appropriate page, e.g. L<perlfunc>.
+
+=head2 New Documentation
+
+XXX Changes which create B<new> files in F<pod/> go here.
+
+=head3 L<XXX>
+
+XXX Description of the purpose of the new file here
+
 =head2 Changes to Existing Documentation
 
 We have attempted to update the documentation to reflect the changes
 listed in this document.  If you find any we have missed, open an issue
-at L<https://github.com/Perl/perl5/issues/new/choose>.
+at L<https://github.com/Perl/perl5/issues>.
+
+XXX Changes which significantly change existing files in F<pod/> go here.
+However, any changes to F<pod/perldiag.pod> should go in the L</Diagnostics>
+section.
 
 Additionally, the following selected changes have been made:
 
-=head3 F<pod/perldebguts.pod>
+=head3 L<XXX>
 
 =over 4
 
 =item *
 
-Updates to regex internals documentation.
-
-=back
-
-=head3 F<pod/perldeprecation.pod>
-
-=over 4
-
-=item *
-
-Added information about unscheduled deprecations and their categories.
-
-=item *
-
-Added category information for existing scheduled deprecations.
-
-=item *
-
-Added smartmatch and apostrophe as a package separator deprecation data.
-
-=back
-
-=head3 F<pod/perlexperiment.pod>
-
-=over 4
-
-=item *
-
-Smartmatch has been moved from experimental status to deprecated status.
-Unfortunately the experiment did not work out.
-
-=back
-
-=head3 F<pod/perlexperiment.pod>
-
-=over 4
-
-=item *
-
-Documented new require hooks.
-
-=back
-
-=head3 F<pod/perlguts.pod>
-
-=over 4
-
-=item *
-
-Documented new magic types C<PERL_MAGIC_destruct>, C<PERL_MAGIC_hook> and
-C<PERL_MAGIC_hookelem>.
-
-=item *
-
-Documented several new or existing save stack macros: C<SAVERCPV()>,
-C<SAVEGENERICSV()>, C<SAVEFREEPV()>, C<SAVEFREERCPV()>
-
-=item *
-
-Documented new mortalization callback macros: C<MORTALSVFUNC_X()>,
-C<MORTALDESTRUCTOR_SV()>
-
-=back
-
-=head3 F<pod/perlop.pod>
-
-=over 4
-
-=item *
-
-Document the behavior of matching the empty pattern better and specify
-its relationship to the new C<${^LAST_SUCCESSFUL_PATTERN}> properly.
-
-=back
-
-=head3 F<pod/perlvar.pod>
-
-=over 4
-
-=item *
-
-Added information on the new C<%{^HOOK}> interface, and the new
-C<require__before> and C<require__after> hooks which it exposes.
-
-=item *
-
-Correct information on the regex variables C<${^PREMATCH}>, C<${^MATCH}>
-and C<${^POSTMATCH}>, all of which were incorrectly documented due to an
-oversight. Specifically they only work properly after a regex operation
-that used the /p modifier to enable them.
-
-=item *
-
-Added information on the new regex variable C<${^LAST_SUCCESSFUL_PATTERN}>,
-which represents the pattern of the last successful regex match in scope.
+XXX Description of the change here
 
 =back
 
@@ -317,7 +182,13 @@ The following additions or changes have been made to diagnostic output,
 including warnings and fatal error messages.  For the complete list of
 diagnostic messages, see L<perldiag>.
 
+XXX New or changed warnings emitted by the core's C<C> code go here.  Also
+include any changes in L<perldiag> that reconcile it to the C<C> code.
+
 =head2 New Diagnostics
+
+XXX Newly added diagnostic messages go under here, separated into New Errors
+and New Warnings
 
 =head3 New Errors
 
@@ -325,19 +196,7 @@ diagnostic messages, see L<perldiag>.
 
 =item *
 
-L<${^HOOK}{%s} may only be a CODE reference or undef|perldiag/"${^HOOK}{%s} may only be a CODE reference or undef">
-
-=item *
-
-L<Attempt to set unknown hook '%s' in %{^HOOK}|perldiag/"Attempt to set unknown hook '%s' in %{^HOOK}">
-
-=item *
-
-L<Missing or undefined argument to %s via %{^HOOK}{require__before}|perldiag/"Missing or undefined argument to %s via %{^HOOK}{require__before}">
-
-=item *
-
-L<Too many capture groups (limit is %d) in regex mE<sol>%sE<sol>|perldiag/"Too many capture groups (limit is %d) in regex m/%s/">
+XXX L<message|perldiag/"message">
 
 =back
 
@@ -347,188 +206,207 @@ L<Too many capture groups (limit is %d) in regex mE<sol>%sE<sol>|perldiag/"Too m
 
 =item *
 
-L<Can't call destructor for 0x%p in global destruction|perldiag/"Can't call destructor for 0x%p in global destruction">
+XXX L<message|perldiag/"message">
 
 =back
 
 =head2 Changes to Existing Diagnostics
 
+XXX Changes (i.e. rewording) of diagnostic messages go here
+
 =over 4
 
 =item *
 
-L<given is deprecated|perldiag/"given is deprecated"> replaces C<given is experimental>.
+XXX Describe change here
+
+=back
+
+=head1 Utility Changes
+
+XXX Changes to installed programs such as F<perldoc> and F<xsubpp> go here.
+Most of these are built within the directory F<utils>.
+
+[ List utility changes as a =head2 entry for each utility and =item
+entries for each change
+Use L<XXX> with program names to get proper documentation linking. ]
+
+=head2 L<XXX>
+
+=over 4
 
 =item *
 
-L<when is deprecated|perldiag/"when is deprecated"> replaces C<when is experimental>.
+XXX
+
+=back
+
+=head1 Configuration and Compilation
+
+XXX Changes to F<Configure>, F<installperl>, F<installman>, and analogous tools
+go here.  Any other changes to the Perl build process should be listed here.
+However, any platform-specific changes should be listed in the
+L</Platform Support> section, instead.
+
+[ List changes as an =item entry ].
+
+=over 4
 
 =item *
 
-L<Smartmatch is deprecated|perldiag/"Smartmatch is deprecated"> replaces C<Smartmatch is experimental>.
+XXX
 
 =back
 
 =head1 Testing
 
+XXX Any significant changes to the testing of a freshly built perl should be
+listed here.  Changes which create B<new> files in F<t/> go here as do any
+large changes to the testing harness (e.g. when parallel testing was added).
+Changes to existing files in F<t/> aren't worth summarizing, although the bugs
+that they represent may be covered elsewhere.
+
+XXX If there were no significant test changes, say this:
+
+Tests were added and changed to reflect the other additions and changes
+in this release.
+
+XXX If instead there were significant changes, say this:
+
 Tests were added and changed to reflect the other additions and
 changes in this release.  Furthermore, these significant changes were
 made:
+
+[ List each test improvement as an =item entry ]
 
 =over 4
 
 =item *
 
-Added t/op/hook/ for testing C<%{^HOOK}> related functionality. Specifically
-the F<t/op/hook/require.t> for testing the new require hooks.
+XXX
 
-=item *
+=back
 
-Added F<t/op/deprecation.t> to test that our deprecation policies are being
-followed properly.
+=head1 Platform Support
 
-=item *
+XXX Any changes to platform support should be listed in the sections below.
 
-Fixed bugs in F<t/harness> and F<t/TEST> that meant that tests in F<t/test_pl> and
-F<t/class> were not being run during normal testing.
+[ Within the sections, list each platform as an =item entry with specific
+changes as paragraphs below it. ]
+
+=head2 New Platforms
+
+XXX List any platforms that this version of perl compiles on, that previous
+versions did not.  These will either be enabled by new files in the F<hints/>
+directories, or new subdirectories and F<README> files at the top level of the
+source tree.
+
+=over 4
+
+=item XXX-some-platform
+
+XXX
+
+=back
+
+=head2 Discontinued Platforms
+
+XXX List any platforms that this version of perl no longer compiles on.
+
+=over 4
+
+=item XXX-some-platform
+
+XXX
 
 =back
 
 =head2 Platform-Specific Notes
 
+XXX List any changes for specific platforms.  This could include configuration
+and compilation changes or changes in portability/compatibility.  However,
+changes within modules for platforms should generally be listed in the
+L</Modules and Pragmata> section.
+
 =over 4
 
-=item Windows
+=item XXX-some-platform
 
-=over 4
-
-=item *
-
-C<POSIX::dup2> no longer creates broken sockets. [L<GH #20920|https://github.com/Perl/perl5/issues/20920>]
-
-=item *
-
-Closing a busy pipe could cause Perl to hang. [L<GH #19963|https://github.com/Perl/perl5/issues/19963>]
-
-=back
+XXX
 
 =back
 
 =head1 Internal Changes
 
+XXX Changes which affect the interface available to C<XS> code go here.  Other
+significant internal changes for future core maintainers should be noted as
+well.
+
+[ List each change as an =item entry ]
+
 =over 4
 
 =item *
 
-Added C<SAVERCPV()> and C<SAVEFREERCPV()> for better support for working
-with C<RCPV> (reference counted string/pointer value) structures which
-currently are used in opcodes to share filename and warning bit data in
-a memory efficient manner.
-
-=item *
-
-Added C<MORTALSVFUNC_SV()> and C<MORTALDESTRUCTOR_SV()> macros, which
-make it possible to create a destructor which is fired at the end of
-the current statement. This uses the C<PERL_MAGIC_destruct> magic to
-use "free" magic to trigger an action when a variable is freed. The
-action can be specified as a C function or as a Perl code reference.
-
-=item *
-
-Added the C<%{^HOOK}> api and related C<PERL_MAGIC_hook> and
-C<PERL_MAGIC_hookelem> for providing ways to hook selected perl functions
-which for one reason or another are problematic to wrap with a customized
-subroutine.
-
-=item *
-
-Added support for C<${^HOOK}{require__before}> which can be used to
-rewrite the filename that C<require> will try to load, and also to block
-C<require> from loading a specific module, even via fully qualified
-filename. The hook can also be used to perform "pre-require" and
-"post-require" actions.
-
-=item *
-
-Added support for C<${^HOOK}{require__after}> which can be used to
-track what modules have been required after the fact.
-
-=item *
-
-Regular expression opcodes (regops) now use a standardized structure
-layout that uses unions to expose data in different format. This means
-it should be much easier to extend or modify regops to use more memory.
-This has been used to make a number of regops track how many parens
-they contain.
+XXX
 
 =back
 
 =head1 Selected Bug Fixes
 
+XXX Important bug fixes in the core language are summarized here.  Bug fixes in
+files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
+
+Include references to GitHub issues and PRs as: [GH #12345] and the release
+manager will later use a regex to expand these into links.
+
+[ List each fix as an =item entry ]
+
 =over 4
 
 =item *
 
-In the new experimental C<class> feature, attributes are no longer a syntax
-error when using the unit class syntax.
-[L<GH #20888|https://github.com/Perl/perl5/issues/20888>].
-
-=item *
-
-A number of bugs related to capture groups in quantified groups in regular
-expression have been fixed, especially in alternations. For example in
-a pattern like:
-
-	"foobazfoobar" =~ /((foo)baz|foo(bar))+/
-
-the regex variable C<$2> will not be "foo" as it once was, it will be undef.
-
-=item *
-
-Bugs with regex backreference operators that are inside of a capture
-group have been fixed. For instance:
-
-    "xa=xaaa" =~ /^(xa|=?\1a){2}\z/
-
-will now correctly not match. [L<GH #10073|https://github.com/Perl/perl5/issues/10073>]
-
-=item *
-
-C<SSGROW()> and C<SSCHECK()> have been reworked to ensure that the requested
-space is actually allocated. C<SSCHECK()> is now an alias for C<SSGROW()>.
+XXX
 
 =back
 
+=head1 Known Problems
+
+XXX Descriptions of platform agnostic bugs we know we can't fix go here.  Any
+tests that had to be C<TODO>ed for the release would be noted here.  Unfixed
+platform specific bugs also go here.
+
+[ List each fix as an =item entry ]
+
+=over 4
+
+=item *
+
+XXX
+
+=back
+
+=head1 Errata From Previous Releases
+
+=over 4
+
+=item *
+
+XXX Add anything here that we forgot to add, or were mistaken about, in
+the perldelta of a previous release.
+
+=back
+
+=head1 Obituary
+
+XXX If any significant core contributor or member of the CPAN community has
+died, add a short obituary here.
+
 =head1 Acknowledgements
 
-Perl 5.37.10 represents approximately 4 weeks of development since Perl
-5.37.9 and contains approximately 23,000 lines of changes across 360 files
-from 21 authors.
+XXX Generate this with:
 
-Excluding auto-generated files, documentation and release tools, there were
-approximately 6,000 lines of changes to 220 .pm, .t, .c and .h files.
-
-Perl continues to flourish into its fourth decade thanks to a vibrant
-community of users and developers. The following people are known to have
-contributed the improvements that became Perl 5.37.10:
-
-Arne Johannessen, Craig A. Berry, Dan Jacobson, David Mitchell, Elvin
-Aslanov, Graham Knop, James E Keenan, James Raspass, Jon Gentle, Karen
-Etheridge, Karl Williamson, Leon Timmermans, Lukas Mai, Paul Evans, Philippe
-Bruhat (BooK), Richard Leach, Steve Hay, Tomasz Konojacki, Tony Cook, Yves
-Orton, Zefram.
-
-The list above is almost certainly incomplete as it is automatically
-generated from version control history. In particular, it does not include
-the names of the (very much appreciated) contributors who reported issues to
-the Perl bug tracker.
-
-Many of the changes included in this version originated in the CPAN modules
-included in Perl's core. We're grateful to the entire CPAN community for
-helping Perl to flourish.
-
-For a more complete list of all of Perl's historical contributors, please
-see the F<AUTHORS> file in the Perl source distribution.
+  perl Porting/acknowledgements.pl v5.37.10..HEAD
 
 =head1 Reporting Bugs
 
