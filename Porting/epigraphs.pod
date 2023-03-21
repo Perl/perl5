@@ -17,7 +17,18 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
-=head2 v3.37.9 - Virginia Woolf
+=head2 v5.37.10 - Lewis Carroll "The Walrus and the Carpenter"
+
+L<Announced on 2023-03-21 by Yves Orton|https://www.nntp.perl.org/group/perl.perl5.porters/2023/03/msg266078.html>
+
+    The time has come,' the Walrus said,
+          To talk of many things:
+    Of shoes - and ships - and sealing-wax -
+          Of cabbages - and kings -
+    And why the sea is boiling hot -
+          And whether pigs have wings.'
+
+=head2 v5.37.9 - Virginia Woolf
 
 L<Announced on 2023-02-20 by Karen Etheridge|https://www.nntp.perl.org/group/perl.perl5.porters/2023/02/msg265769.html>
 
