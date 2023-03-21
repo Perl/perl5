@@ -152,6 +152,13 @@ my @tests =
               }
           }
       ],
+      [
+          join => sub {
+              no warnings 'uninitialized';
+              my $joined = join "", @x, "!";
+              is($joined, "Hello!", "join");
+          },
+      ],
      );
 
 # these tests are slow, let someone debug them one at a time
