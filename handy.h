@@ -2730,6 +2730,7 @@ PoisonWith(0xEF) for catching access to freed memory.
  *    max(n) * sizeof(t) > MEM_SIZE_MAX
  */
 
+
 #  define _MEM_WRAP_NEEDS_RUNTIME_CHECK(n,t) \
     (  sizeof(MEM_SIZE) < sizeof(n) \
     || sizeof(t) > ((MEM_SIZE)1 << 8*(sizeof(MEM_SIZE) - sizeof(n))))
