@@ -639,7 +639,7 @@ ETXip	|void	|append_utf8_from_native_byte				\
 				|const U8 byte				\
 				|NN U8 **dest
 : FIXME - this is only called by pp_chown. They should be merged.
-p	|I32	|apply		|I32 type				\
+p	|SSize_t|apply		|I32 type				\
 				|NN SV **mark				\
 				|NN SV **sp
 Apx	|void	|apply_attrs_string					\

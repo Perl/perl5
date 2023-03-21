@@ -3853,7 +3853,7 @@ PP_wrapped(pp_chdir, MAXARG, 0)
 PP_wrapped(pp_chown, 0, 1)
 {
     dSP; dMARK; dTARGET;
-    const I32 value = (I32)apply(PL_op->op_type, MARK, SP);
+    const IV value = apply(PL_op->op_type, MARK, SP);
 
     SP = MARK;
     XPUSHi(value);

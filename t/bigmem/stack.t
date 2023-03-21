@@ -139,6 +139,19 @@ my @tests =
               }
           }
       ],
+      [
+          apply => sub {
+            SKIP:
+              {
+                  skip "2**31 system calls take a very long time - define PERL_RUN_SLOW_TESTS to run me", 1
+                    unless $ENV{PERL_RUN_SLOW_TESTS};
+                  my $mode = (stat $0)[2];
+                  my $tries = 0x8000_0001;
+                  my $count = chmod $mode, ( $0 ) x $tries;
+                  is($count, $tries, "chmod with 2G files");
+              }
+          }
+      ],
      );
 
 # these tests are slow, let someone debug them one at a time

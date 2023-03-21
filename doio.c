@@ -2603,11 +2603,11 @@ leave:
 
 #endif /* OS2 || WIN32 */
 
-I32
+SSize_t
 Perl_apply(pTHX_ I32 type, SV **mark, SV **sp)
 {
     I32 val;
-    I32 tot = 0;
+    SSize_t tot = 0;
     const char *const what = PL_op_name[type];
     const char *s;
     STRLEN len;
