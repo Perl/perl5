@@ -11,6 +11,22 @@
 #ifndef H_PERL
 #define H_PERL 1
 
+#if defined(__HP_cc) || defined(__HP_aCC)
+/* The HPUX compiler for Itanium is very picky and warns about
+ * things that gcc doesn't and that we would prefer it does not.
+ * So on that platform silence certain warnings unlaterally. */
+
+/* silence "relational operator ">" always evaluates to 'false'"
+ * warnings. We get a LOT of these from the memwrap checks. */
+#pragma diag_suppress 4276
+
+/* silence "may cause misaligned access" warnings from our "OO in C"
+ * type logic. we do this a lot and if it was broken we would fail tests
+ * all over the place */
+#pragma diag_suppress 4232
+
+#endif /* end HPUX warning disablement */
+
 #ifdef PERL_FOR_X2P
 /*
  * This file is being used for x2p stuff.
