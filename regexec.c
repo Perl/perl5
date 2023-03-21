@@ -197,7 +197,7 @@ static const char non_utf8_target_but_utf8_required[]
 
 /*
   Search for mandatory following text node; for lookahead, the text must
-  follow but for lookbehind (rn->flags != 0) we skip to the next step.
+  follow but for lookbehind (FLAGS(rn) != 0) we skip to the next step.
 */
 #define FIND_NEXT_IMPT(rn) STMT_START {                                   \
     while (JUMPABLE(rn)) { \
@@ -207,7 +207,7 @@ static const char non_utf8_target_but_utf8_required[]
         else if (type == PLUS) \
             rn = REGNODE_AFTER_type(rn,tregnode_PLUS); \
         else if (type == IFMATCH) \
-            rn = (rn->flags == 0) ? REGNODE_AFTER_type(rn,tregnode_IFMATCH) : rn + ARG1u(rn); \
+            rn = (FLAGS(rn) == 0) ? REGNODE_AFTER_type(rn,tregnode_IFMATCH) : rn + ARG1u(rn); \
         else rn += NEXT_OFF(rn); \
     } \
 } STMT_END
@@ -1781,15 +1781,15 @@ Perl_re_intuit_start(pTHX_
     const enum { trie_plain, trie_utf8, trie_utf8_fold, trie_latin_utf8_fold,       \
                  trie_utf8_exactfa_fold, trie_latin_utf8_exactfa_fold,              \
                  trie_utf8l, trie_flu8, trie_flu8_latin }                           \
-                    trie_type = ((scan->flags == EXACT)                             \
+                    trie_type = ((FLAGS(scan) == EXACT)                             \
                                  ? (utf8_target ? trie_utf8 : trie_plain)           \
-                                 : (scan->flags == EXACTL)                          \
+                                 : (FLAGS(scan) == EXACTL)                          \
                                     ? (utf8_target ? trie_utf8l : trie_plain)       \
-                                    : (scan->flags == EXACTFAA)                     \
+                                    : (FLAGS(scan) == EXACTFAA)                     \
                                       ? (utf8_target                                \
                                          ? trie_utf8_exactfa_fold                   \
                                          : trie_latin_utf8_exactfa_fold)            \
-                                      : (scan->flags == EXACTFLU8                   \
+                                      : (FLAGS(scan) == EXACTFLU8                   \
                                          ? (utf8_target                             \
                                            ? trie_flu8                              \
                                            : trie_flu8_latin)                       \
@@ -6704,12 +6704,12 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                 HV * widecharmap = MUTABLE_HV(rexi->data->data[ ARG1u( scan ) + 1 ]);
                 U32 state = trie->startstate;
 
-                if (scan->flags == EXACTL || scan->flags == EXACTFLU8) {
+                if (FLAGS(scan) == EXACTL || FLAGS(scan) == EXACTFLU8) {
                     CHECK_AND_WARN_PROBLEMATIC_LOCALE_;
                     if (utf8_target
                         && ! NEXTCHR_IS_EOS
                         && UTF8_IS_ABOVE_LATIN1(nextbyte)
-                        && scan->flags == EXACTL)
+                        && FLAGS(scan) == EXACTL)
                     {
                         /* We only output for EXACTL, as we let the folder
                          * output this message for EXACTFLU8 to avoid
@@ -8081,7 +8081,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             locinput += ln;
         }
         ref_yes:
-            if (scan->flags) { /* == VOLATILE_REF but only other value is 0 */
+            if (FLAGS(scan)) { /* == VOLATILE_REF but only other value is 0 */
                 ST.cp = regcppush(rex, ARG2u(scan) - 1, maxopenparen);
                 REGCP_SET(ST.lastcp);
                 PUSH_STATE_GOTO(REF_next, next, locinput, loceol,
@@ -8428,7 +8428,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                         /* if we got here, it should be an engine which
                          * supports compiling code blocks and stuff */
                         assert(rex->engine && rex->engine->op_comp);
-                        assert(!(scan->flags & ~RXf_PMf_COMPILETIME));
+                        assert(!(FLAGS(scan) & ~RXf_PMf_COMPILETIME));
                         re_sv = rex->engine->op_comp(aTHX_ &ret, 1, NULL,
                                     rex->engine, NULL, NULL,
                                     /* copy /msixn etc to inner pattern */
@@ -8632,7 +8632,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
 
         case ACCEPT:  /*  (*ACCEPT)  */
             is_accepted = true;
-            if (scan->flags)
+            if (FLAGS(scan))
                 sv_yes_mark = MUTABLE_SV(rexi->data->data[ ARG1u( scan ) ]);
             utmp = ARG2u(scan);
 
@@ -8699,7 +8699,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
             break;
 
         case LOGICAL:  /* modifier for EVAL and IFMATCH */
-            logical = scan->flags & EVAL_FLAGS_MASK; /* reserve a bit for optimistic eval */
+            logical = FLAGS(scan) & EVAL_FLAGS_MASK; /* reserve a bit for optimistic eval */
             break;
 
 /*******************************************************************
@@ -8790,7 +8790,7 @@ NULL
         case CURLYX:    /* start of /A*B/  (for complex A) */
         {
             /* No need to save/restore up to this paren */
-            I32 parenfloor = scan->flags;
+            I32 parenfloor = FLAGS(scan);
 
             assert(next); /* keep Coverity happy */
             if (OP(REGNODE_BEFORE(next)) == NOTHING) /* LONGJMP */
@@ -8905,20 +8905,20 @@ NULL
              * op (string-length x #WHILEMs) times do we allocate the
              * cache.
              *
-             * The top 4 bits of scan->flags byte say how many different
+             * The top 4 bits of FLAGS(scan) byte say how many different
              * relevant CURLLYX/WHILEM op pairs there are, while the
              * bottom 4-bits is the identifying index number of this
              * WHILEM.
              */
 
-            if (scan->flags) {
+            if (FLAGS(scan)) {
 
                 if (!reginfo->poscache_maxiter) {
                     /* start the countdown: Postpone detection until we
                      * know the match is not *that* much linear. */
                     reginfo->poscache_maxiter
                         =    (reginfo->strend - reginfo->strbeg + 1)
-                           * (scan->flags>>4);
+                           * (FLAGS(scan)>>4);
                     /* possible overflow for long strings and many CURLYX's */
                     if (reginfo->poscache_maxiter < 0)
                         reginfo->poscache_maxiter = I32_MAX;
@@ -8951,9 +8951,9 @@ NULL
                     SSize_t offset, mask;
 
                     reginfo->poscache_iter = -1; /* stop eventual underflow */
-                    offset  = (scan->flags & 0xf) - 1
+                    offset  = (FLAGS(scan) & 0xf) - 1
                                 +   (locinput - reginfo->strbeg)
-                                  * (scan->flags>>4);
+                                  * (FLAGS(scan)>>4);
                     mask    = 1 << (offset % 8);
                     offset /= 8;
                     if (reginfo->info_aux->poscache[offset] & mask) {
@@ -9089,7 +9089,7 @@ NULL
             NOT_REACHED; /* NOTREACHED */
 
         case CUTGROUP:  /*  /(*THEN)/  */
-            sv_yes_mark = st->u.mark.mark_name = scan->flags
+            sv_yes_mark = st->u.mark.mark_name = FLAGS(scan)
                 ? MUTABLE_SV(rexi->data->data[ ARG1u( scan ) ])
                 : NULL;
             PUSH_STATE_GOTO(CUTGROUP_next, next, locinput, loceol,
@@ -9156,8 +9156,8 @@ NULL
             ST.lastcloseparen = RXp_LASTCLOSEPAREN(rex);
 
             /* if paren positive, emulate an OPEN/CLOSE around A */
-            if (ST.me->flags) {
-                U32 paren = ST.me->flags;
+            if (FLAGS(ST.me)) {
+                U32 paren = FLAGS(ST.me);
                 lastopen = paren;
                 if (paren > maxopenparen)
                     maxopenparen = paren;
@@ -9202,15 +9202,15 @@ NULL
                           depth, (IV) ST.count, (IV)ST.alen)
             );
 
-            if (ST.me->flags) {
+            if (FLAGS(ST.me)) {
                 /* emulate CLOSE: mark current A as captured */
-                U32 paren = (U32)ST.me->flags;
+                U32 paren = (U32)FLAGS(ST.me);
                 CLOSE_CAPTURE(rex, paren,
                     HOPc(locinput, -ST.alen) - reginfo->strbeg,
                     locinput - reginfo->strbeg);
             }
 
-            if (EVAL_CLOSE_PAREN_IS_TRUE(cur_eval,(U32)ST.me->flags))
+            if (EVAL_CLOSE_PAREN_IS_TRUE(cur_eval,(U32)FLAGS(ST.me)))
                 goto fake_end;
 
 
@@ -9226,7 +9226,7 @@ NULL
 
 
             if (ST.minmod || ST.count < ARG1i(ST.me) /* min*/
-                || EVAL_CLOSE_PAREN_IS_TRUE(cur_eval,(U32)ST.me->flags))
+                || EVAL_CLOSE_PAREN_IS_TRUE(cur_eval,(U32)FLAGS(ST.me)))
                 sayNO;
 
           curlym_do_B: /* execute the B in /A{m,n}B/  */
@@ -9275,9 +9275,9 @@ NULL
             }
 
           curlym_close_B:
-            if (ST.me->flags) {
+            if (FLAGS(ST.me)) {
                 /* emulate CLOSE: mark current A as captured */
-                U32 paren = (U32)ST.me->flags;
+                U32 paren = (U32)FLAGS(ST.me);
                 if (ST.count || is_accepted) {
                     CLOSE_CAPTURE(rex, paren,
                         HOPc(locinput, -ST.alen) - reginfo->strbeg,
@@ -9286,7 +9286,7 @@ NULL
                 else
                     RXp_OFFSp(rex)[paren].end = -1;
 
-                if (EVAL_CLOSE_PAREN_IS_TRUE(cur_eval,(U32)ST.me->flags))
+                if (EVAL_CLOSE_PAREN_IS_TRUE(cur_eval,(U32)FLAGS(ST.me)))
                 {
                     if (ST.count || is_accepted)
                         goto fake_end;
@@ -9349,7 +9349,7 @@ NULL
             goto repeat;
 
         case CURLYN:		/*  /(A){m,n}B/ where A is width 1 char */
-            ST.paren = scan->flags;	/* Which paren to set */
+            ST.paren = FLAGS(scan);     /* Which paren to set */
             ST.lastparen      = RXp_LASTPAREN(rex);
             ST.lastcloseparen = RXp_LASTCLOSEPAREN(rex);
             if (ST.paren > maxopenparen)
@@ -9738,10 +9738,10 @@ NULL
             ST.wanted = 1;
           ifmatch_trivial_fail_test:
             ST.prev_match_end= match_end;
-            ST.count = scan->next_off + 1; /* next_off repurposed to be
+            ST.count = NEXT_OFF(scan) + 1; /* next_off repurposed to be
                                               lookbehind count, requires
                                               non-zero flags */
-            if (! scan->flags) {    /* 'flags' zero means lookahed */
+            if (! FLAGS(scan)) {    /* 'flags' zero means lookahed */
 
                 /* Lookahead starts here and ends at the normal place */
                 ST.start = locinput;
@@ -9749,7 +9749,7 @@ NULL
                 match_end = NULL;
             }
             else {
-                PERL_UINT_FAST8_T back_count = scan->flags;
+                PERL_UINT_FAST8_T back_count = FLAGS(scan);
                 char * s;
                 match_end = locinput;
 
@@ -9847,7 +9847,7 @@ NULL
             /* FALLTHROUGH */
 
         case PRUNE:   /*  (*PRUNE)   */
-            if (scan->flags)
+            if (FLAGS(scan))
                 sv_yes_mark = sv_commit = MUTABLE_SV(rexi->data->data[ ARG1u( scan ) ]);
             PUSH_STATE_GOTO(COMMIT_next, next, locinput, loceol,
                             script_run_begin);
@@ -9860,7 +9860,7 @@ NULL
             NOT_REACHED; /* NOTREACHED */
 
         case OPFAIL:   /* (*FAIL)  */
-            if (scan->flags)
+            if (FLAGS(scan))
                 sv_commit = MUTABLE_SV(rexi->data->data[ ARG1u( scan ) ]);
             if (logical) {
                 /* deal with (?(?!)X|Y) properly,
@@ -9910,7 +9910,7 @@ NULL
             NOT_REACHED; /* NOTREACHED */
 
         case SKIP:  /*  (*SKIP)  */
-            if (!scan->flags) {
+            if (!FLAGS(scan)) {
                 /* (*SKIP) : if we fail we cut here*/
                 ST.mark_name = NULL;
                 ST.mark_loc = locinput;

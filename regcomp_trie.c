@@ -1517,7 +1517,7 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
                 OP( convert ) = TRIE;
 
             /* store the type in the flags */
-            convert->flags = nodetype;
+            FLAGS(convert) = nodetype;
             DEBUG_r({
             optimize = convert
                       + NODE_STEP_REGNODE

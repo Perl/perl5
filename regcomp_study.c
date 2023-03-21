@@ -2557,7 +2557,7 @@ Perl_study_chunk(pTHX_
                 goto optimize_curly_tail;
             case CURLY:
                 if (stopparen>0 && (OP(scan)==CURLYN || OP(scan)==CURLYM)
-                    && (scan->flags == stopparen))
+                    && (FLAGS(scan) == stopparen))
                 {
                     mincount = 1;
                     maxcount = 1;
@@ -2568,7 +2568,7 @@ Perl_study_chunk(pTHX_
                 next = regnext(scan);
                 if (OP(scan) == CURLYX) {
                     I32 lp = (data ? *(data->last_closep) : 0);
-                    scan->flags = ((lp <= (I32)U8_MAX) ? (U8)lp : U8_MAX);
+                    FLAGS(scan) = ((lp <= (I32)U8_MAX) ? (U8)lp : U8_MAX);
                 }
                 scan = REGNODE_AFTER(scan);
                 next_is_eval = (OP(scan) == EVAL);
@@ -2729,7 +2729,7 @@ Perl_study_chunk(pTHX_
                         RExC_close_parens[PARNO(nxt1)] = REGNODE_OFFSET(nxt) + 2;
                     }
                     /* Now we know that nxt2 is the only contents: */
-                    oscan->flags = (U8)PARNO(nxt);
+                    FLAGS(oscan) = (U8)PARNO(nxt);
                     OP(oscan) = CURLYN;
                     OP(nxt1) = NOTHING; /* was OPEN. */
 
@@ -2778,7 +2778,7 @@ Perl_study_chunk(pTHX_
                         /* note that we have changed the type of oscan to CURLYM here */
                         regnode *nxt1 = REGNODE_AFTER_type(oscan, tregnode_CURLYM); /* OPEN*/
 
-                        oscan->flags = (U8)PARNO(nxt);
+                        FLAGS(oscan) = (U8)PARNO(nxt);
                         if (RExC_open_parens) {
                              /*open->CURLYM*/
                             RExC_open_parens[PARNO(nxt1)] = REGNODE_OFFSET(oscan);
@@ -2817,7 +2817,7 @@ Perl_study_chunk(pTHX_
                                     depth+1, mutate_ok);
                     }
                     else
-                        oscan->flags = 0;
+                        FLAGS(oscan) = 0;
                 }
                 else if ((OP(oscan) == CURLYX)
                          && (flags & SCF_WHILEM_VISITED_POS)
@@ -2833,11 +2833,11 @@ Perl_study_chunk(pTHX_
                     if (OP(REGNODE_BEFORE(nxt)) == NOTHING) /* LONGJMP */
                         nxt += ARG1u(nxt);
                     nxt = REGNODE_BEFORE(nxt);
-                    if (nxt->flags & 0xf) {
+                    if (FLAGS(nxt) & 0xf) {
                         /* we've already set whilem count on this node */
                     } else if (++data->whilem_c < 16) {
                         assert(data->whilem_c <= RExC_whilem_seen);
-                        nxt->flags = (U8)(data->whilem_c
+                        FLAGS(nxt) = (U8)(data->whilem_c
                             | (RExC_whilem_seen << 4)); /* On WHILEM */
                     }
                 }
@@ -3223,7 +3223,7 @@ Perl_study_chunk(pTHX_
         }
         else if (  REGNODE_TYPE(OP(scan)) == BRANCHJ
                  /* Lookbehind, or need to calculate parens/evals/stclass: */
-                   && (scan->flags || data || (flags & SCF_DO_STCLASS))
+                   && (FLAGS(scan) || data || (flags & SCF_DO_STCLASS))
                    && (OP(scan) == IFMATCH || OP(scan) == UNLESSM))
         {
             if ( !PERL_ENABLE_POSITIVE_ASSERTION_STUDY
@@ -3260,7 +3260,7 @@ Perl_study_chunk(pTHX_
                 cur_last_close_op= *(data_fake.last_close_opp);
 
                 data_fake.pos_delta = delta;
-                if ( flags & SCF_DO_STCLASS && !scan->flags
+                if ( flags & SCF_DO_STCLASS && !FLAGS(scan)
                      && OP(scan) == IFMATCH ) { /* Lookahead */
                     ssc_init(pRExC_state, &intrnl);
                     data_fake.start_class = &intrnl;
@@ -3277,7 +3277,7 @@ Perl_study_chunk(pTHX_
                                       recursed_depth, NULL, f, depth+1,
                                       mutate_ok);
 
-                if (scan->flags) {
+                if (FLAGS(scan)) {
                     if (   deltanext < 0
                         || deltanext > (I32) U8_MAX
                         || minnext > (I32)U8_MAX
@@ -3293,7 +3293,7 @@ Perl_study_chunk(pTHX_
                      * matches to avoid breakage for those not using this
                      * extension) */
                     if (deltanext)  {
-                        scan->next_off = deltanext;
+                        NEXT_OFF(scan) = deltanext;
                         if (
                             /* See a CLOSE op inside this lookbehind? */
                             cur_last_close_op != *(data_fake.last_close_opp)
@@ -3308,7 +3308,7 @@ Perl_study_chunk(pTHX_
                                 is_positive ? "positive" : "negative");
                         }
                     }
-                    scan->flags = (U8)minnext + deltanext;
+                    FLAGS(scan) = (U8)minnext + deltanext;
                 }
                 if (data) {
                     if (data_fake.flags & (SF_HAS_PAR|SF_IN_PAR))
@@ -3365,7 +3365,7 @@ Perl_study_chunk(pTHX_
                     StructCopy(data, &data_fake, scan_data_t);
                     if ((flags & SCF_DO_SUBSTR) && data->last_found) {
                         f |= SCF_DO_SUBSTR;
-                        if (scan->flags)
+                        if (FLAGS(scan))
                             scan_commit(pRExC_state, &data_fake, minlenp, is_inf);
                         data_fake.last_found=newSVsv(data->last_found);
                     }
@@ -3380,7 +3380,7 @@ Perl_study_chunk(pTHX_
                 data_fake.pos_delta = delta;
                 if (is_inf)
                     data_fake.flags |= SF_IS_INF;
-                if ( flags & SCF_DO_STCLASS && !scan->flags
+                if ( flags & SCF_DO_STCLASS && !FLAGS(scan)
                      && OP(scan) == IFMATCH ) { /* Lookahead */
                     ssc_init(pRExC_state, &intrnl);
                     data_fake.start_class = &intrnl;
@@ -3396,7 +3396,7 @@ Perl_study_chunk(pTHX_
                                         &deltanext, last, &data_fake,
                                         stopparen, recursed_depth, NULL,
                                         f, depth+1, mutate_ok);
-                if (scan->flags) {
+                if (FLAGS(scan)) {
                     assert(0);  /* This code has never been tested since this
                                    is normally not compiled */
                     if (   deltanext < 0
@@ -3409,9 +3409,9 @@ Perl_study_chunk(pTHX_
                     }
 
                     if (deltanext) {
-                        scan->next_off = deltanext;
+                        NEXT_OFF(scan) = deltanext;
                     }
-                    scan->flags = (U8)*minnextp + deltanext;
+                    FLAGS(scan) = (U8)*minnextp + deltanext;
                 }
 
                 *minnextp += min;
@@ -3441,7 +3441,7 @@ Perl_study_chunk(pTHX_
                                             data_fake.substrs[i].max_offset;
                                 data->substrs[i].minlenp =
                                             data_fake.substrs[i].minlenp;
-                                data->substrs[i].lookbehind += scan->flags;
+                                data->substrs[i].lookbehind += FLAGS(scan);
                             }
                         }
                     }
@@ -3469,7 +3469,7 @@ Perl_study_chunk(pTHX_
             }
         }
         else if (OP(scan) == EVAL) {
-            if (data && !(scan->flags & EVAL_OPTIMISTIC_FLAG) )
+            if (data && !(FLAGS(scan) & EVAL_OPTIMISTIC_FLAG) )
                 data->flags |= SF_HAS_EVAL;
         }
         else if ( REGNODE_TYPE(OP(scan)) == ENDLIKE ) {
@@ -3496,7 +3496,7 @@ Perl_study_chunk(pTHX_
                 flags &= ~SCF_DO_SUBSTR;
             }
         }
-        else if (OP(scan) == LOGICAL && scan->flags == 2) /* Embedded follows */
+        else if (OP(scan) == LOGICAL && FLAGS(scan) == 2) /* Embedded follows */
         {
                 if (flags & SCF_DO_SUBSTR) {
                     scan_commit(pRExC_state, data, minlenp, is_inf);

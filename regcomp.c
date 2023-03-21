@@ -1837,7 +1837,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
                /* An OR of *one* alternative - should not happen now. */
             (OP(first) == BRANCH && OP(first_next) != BRANCH) ||
             /* for now we can't handle lookbehind IFMATCH*/
-            (OP(first) == IFMATCH && !first->flags && (sawlookahead = 1)) ||
+            (OP(first) == IFMATCH && !FLAGS(first) && (sawlookahead = 1)) ||
             (OP(first) == PLUS) ||
             (OP(first) == MINMOD) ||
                /* An {n,m} with n>0 */
@@ -2220,7 +2220,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
          */
         if (REGNODE_TYPE(fop) == NOTHING && nop == END)
             RExC_rx->extflags |= RXf_NULL;
-        else if ((fop == MBOL || (fop == SBOL && !first->flags)) && nop == END)
+        else if ((fop == MBOL || (fop == SBOL && !FLAGS(first))) && nop == END)
             /* when fop is SBOL first->flags will be true only when it was
              * produced by parsing /\A/, and not when parsing /^/. This is
              * very important for the split code as there we want to
@@ -2766,7 +2766,7 @@ S_handle_named_backref(pTHX_ RExC_state_t *pRExC_state,
                            : REFFN),
                     num, RExC_nestroot);
     if (RExC_nestroot && num >= (U32)RExC_nestroot)
-        REGNODE_p(ret)->flags = VOLATILE_REF;
+        FLAGS(REGNODE_p(ret)) = VOLATILE_REF;
     *flagp |= HASWIDTH;
 
     nextchar(pRExC_state);
@@ -6045,7 +6045,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
                                        : REFF),
                                 num, RExC_nestroot);
                 if (RExC_nestroot && num >= RExC_nestroot)
-                    REGNODE_p(ret)->flags = VOLATILE_REF;
+                    FLAGS(REGNODE_p(ret)) = VOLATILE_REF;
                 if (OP(REGNODE_p(ret)) == REFF) {
                     RExC_seen_d_op = TRUE;
                 }
@@ -12024,7 +12024,7 @@ S_optimize_regclass(pTHX_
                         op = ANYOFHbbm;
                         *ret = REGNODE_GUTS(pRExC_state, op, REGNODE_ARG_LEN(op));
                         FILL_NODE(*ret, op);
-                        ((struct regnode_bbm *) REGNODE_p(*ret))->first_byte = low_utf8[0],
+                        FIRST_BYTE((struct regnode_bbm *) REGNODE_p(*ret)) = low_utf8[0],
 
                         /* The 64 bit (or 32 on EBCCDIC) map can be looked up
                          * directly based on the continuation byte, without
@@ -12050,7 +12050,7 @@ S_optimize_regclass(pTHX_
                     *ret = REGNODE_GUTS(pRExC_state, op,
                                        REGNODE_ARG_LEN(op) + STR_SZ(len));
                     FILL_NODE(*ret, op);
-                    ((struct regnode_anyofhs *) REGNODE_p(*ret))->str_len
+                    STR_LEN_U8((struct regnode_anyofhs *) REGNODE_p(*ret))
                                                                     = len;
                     Copy(low_utf8,  /* Add the common bytes */
                     ((struct regnode_anyofhs *) REGNODE_p(*ret))->string,
@@ -13044,7 +13044,7 @@ Perl_get_ANYOFHbbm_contents(pTHX_ const regnode * n) {
               &cp_list,
 
               /* The base cp is from the start byte plus a zero continuation */
-              TWO_BYTE_UTF8_TO_NATIVE(((struct regnode_bbm *) n)->first_byte,
+              TWO_BYTE_UTF8_TO_NATIVE(FIRST_BYTE((struct regnode_bbm *) n),
                                       UTF_CONTINUATION_MARK | 0));
     return cp_list;
 }

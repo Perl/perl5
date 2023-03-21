@@ -438,7 +438,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
         const reg_trie_data * const trie
             = (reg_trie_data*)progi->data->data[!IS_TRIE_AC(op) ? n : ac->trie];
 
-        Perl_sv_catpvf(aTHX_ sv, "-%s", REGNODE_NAME(o->flags));
+        Perl_sv_catpvf(aTHX_ sv, "-%s", REGNODE_NAME(FLAGS(o)));
         DEBUG_TRIE_COMPILE_r({
           if (trie->jump)
             sv_catpvs(sv, "(JUMP)");
@@ -475,7 +475,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
         if (ARG3u(o)) /* check both ARG3a and ARG3b at the same time */
             Perl_sv_catpvf(aTHX_ sv, "<%d:%d>", ARG3a(o),ARG3b(o)); /* paren before, paren after */
         if (op == CURLYM || op == CURLYN || op == CURLYX)
-            Perl_sv_catpvf(aTHX_ sv, "[%d]", o->flags); /* Parenth number */
+            Perl_sv_catpvf(aTHX_ sv, "[%d]", FLAGS(o)); /* Parenth number */
         Perl_sv_catpvf(aTHX_ sv, "{%u,", (unsigned) lo);
         if (hi == REG_INFTY)
             sv_catpvs(sv, "INFTY");
@@ -483,8 +483,8 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
             Perl_sv_catpvf(aTHX_ sv, "%u", (unsigned) hi);
         sv_catpvs(sv, "}");
     }
-    else if (k == WHILEM && o->flags)                   /* Ordinal/of */
-        Perl_sv_catpvf(aTHX_ sv, "[%d/%d]", o->flags & 0xf, o->flags>>4);
+    else if (k == WHILEM && FLAGS(o))                   /* Ordinal/of */
+        Perl_sv_catpvf(aTHX_ sv, "[%d/%d]", FLAGS(o) & 0xf, FLAGS(o)>>4);
     else if (k == REF || k == OPEN || k == CLOSE
              || k == GROUPP || op == ACCEPT)
     {
@@ -586,7 +586,7 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
     }
     else if (k == LOGICAL)
         /* 2: embedded, otherwise 1 */
-        Perl_sv_catpvf(aTHX_ sv, "[%d]", o->flags);
+        Perl_sv_catpvf(aTHX_ sv, "[%d]", FLAGS(o));
     else if (k == ANYOF || k == ANYOFH || k == ANYOFR) {
         U8 flags;
         char * bitmap;
@@ -876,21 +876,21 @@ Perl_regprop(pTHX_ const regexp *prog, SV *sv, const regnode *o, const regmatch_
         sv_catpv(sv, bounds[FLAGS(o)]);
     }
     else if (k == BRANCHJ && (op == UNLESSM || op == IFMATCH)) {
-        Perl_sv_catpvf(aTHX_ sv, "[%d", -(o->flags));
-        if (o->next_off) {
-            Perl_sv_catpvf(aTHX_ sv, "..-%d", o->flags - o->next_off);
+        Perl_sv_catpvf(aTHX_ sv, "[%d", -(FLAGS(o)));
+        if (NEXT_OFF(o)) {
+            Perl_sv_catpvf(aTHX_ sv, "..-%d", FLAGS(o) - NEXT_OFF(o));
         }
         Perl_sv_catpvf(aTHX_ sv, "]");
     }
     else if (op == SBOL)
-        Perl_sv_catpvf(aTHX_ sv, " /%s/", o->flags ? "\\A" : "^");
+        Perl_sv_catpvf(aTHX_ sv, " /%s/", FLAGS(o) ? "\\A" : "^");
     else if (op == EVAL) {
-        if (o->flags & EVAL_OPTIMISTIC_FLAG)
+        if (FLAGS(o) & EVAL_OPTIMISTIC_FLAG)
             Perl_sv_catpvf(aTHX_ sv, " optimistic");
     }
 
     /* add on the verb argument if there is one */
-    if ( ( k == VERB || op == ACCEPT || op == OPFAIL ) && o->flags) {
+    if ( ( k == VERB || op == ACCEPT || op == OPFAIL ) && FLAGS(o)) {
         if ( ARG1u(o) )
             Perl_sv_catpvf(aTHX_ sv, ":%" SVf,
                        SVfARG((MUTABLE_SV(progi->data->data[ ARG1u( o ) ]))));
