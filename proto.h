@@ -7062,8 +7062,8 @@ S_emulate_setlocale_i(pTHX_ const unsigned int index, const char *new_locale, co
 #     define PERL_ARGS_ASSERT_EMULATE_SETLOCALE_I
 
 STATIC const char *
-S_my_querylocale_i(pTHX_ const unsigned int index);
-#     define PERL_ARGS_ASSERT_MY_QUERYLOCALE_I
+S_querylocale_2008_i(pTHX_ const unsigned int index);
+#     define PERL_ARGS_ASSERT_QUERYLOCALE_2008_I
 
 STATIC const char *
 S_setlocale_from_aggregate_LC_ALL(pTHX_ const char *locale, const line_t line);
