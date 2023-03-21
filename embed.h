@@ -1300,7 +1300,7 @@
 #       endif
 #       if defined(USE_POSIX_2008_LOCALE)
 #         define emulate_setlocale_i(a,b,c,d)   S_emulate_setlocale_i(aTHX_ a,b,c,d)
-#         define my_querylocale_i(a)            S_my_querylocale_i(aTHX_ a)
+#         define querylocale_2008_i(a)          S_querylocale_2008_i(aTHX_ a)
 #         define setlocale_from_aggregate_LC_ALL(a,b) S_setlocale_from_aggregate_LC_ALL(aTHX_ a,b)
 #         define use_curlocale_scratch()        S_use_curlocale_scratch(aTHX)
 #         if defined(USE_QUERYLOCALE)

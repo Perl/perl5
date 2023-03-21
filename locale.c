@@ -855,7 +855,7 @@ S_less_dicey_bool_setlocale_r(pTHX_ const int cat, const char * locale)
                                   bool_setlocale_i(cat##_INDEX_, locale)
 #  define bool_setlocale_r(cat, locale)   cBOOL(setlocale_r(cat, locale))
 
-#  define querylocale_i(i)      mortalized_pv_copy(my_querylocale_i(i))
+#  define querylocale_i(i)      mortalized_pv_copy(querylocale_2008_i(i))
 #  define querylocale_c(cat)    querylocale_i(cat##_INDEX_)
 #  define querylocale_r(cat)    querylocale_i(get_category_index(cat,NULL))
 
@@ -883,10 +883,10 @@ S_less_dicey_bool_setlocale_r(pTHX_ const int cat, const char * locale)
 #    include <libintl.h>
 #  endif
 
-#  define my_querylocale_c(cat) my_querylocale_i(cat##_INDEX_)
+#  define my_querylocale_c(cat) querylocale_2008_i(cat##_INDEX_)
 
 STATIC const char *
-S_my_querylocale_i(pTHX_ const unsigned int index)
+S_querylocale_2008_i(pTHX_ const unsigned int index)
 {
     /* This function returns the name of the locale category given by the input
      * index into our parallel tables of them.
@@ -907,12 +907,12 @@ S_my_querylocale_i(pTHX_ const unsigned int index)
     const locale_t cur_obj = uselocale((locale_t) 0);
     const char * retval;
 
-    PERL_ARGS_ASSERT_MY_QUERYLOCALE_I;
+    PERL_ARGS_ASSERT_QUERYLOCALE_2008_I;
     assert(index <= LC_ALL_INDEX_);
 
     category = categories[index];
 
-    DEBUG_Lv(PerlIO_printf(Perl_debug_log, "my_querylocale_i(%s) on %p\n",
+    DEBUG_Lv(PerlIO_printf(Perl_debug_log, "querylocale_2008_i(%s) on %p\n",
                                            category_names[index], cur_obj));
     if (cur_obj == LC_GLOBAL_LOCALE) {
         POSIX_SETLOCALE_LOCK;
@@ -945,7 +945,7 @@ S_my_querylocale_i(pTHX_ const unsigned int index)
     }
 
     DEBUG_Lv(PerlIO_printf(Perl_debug_log,
-                           "my_querylocale_i(%s) returning '%s'\n",
+                           "querylocale_2008_i(%s) returning '%s'\n",
                            category_names[index], retval));
     assert(strNE(retval, ""));
     return retval;

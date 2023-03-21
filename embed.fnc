@@ -4415,7 +4415,7 @@ S	|const char *|emulate_setlocale_i				\
 				|NULLOK const char *new_locale		\
 				|const recalc_lc_all_t recalc_LC_ALL	\
 				|const line_t line
-S	|const char *|my_querylocale_i					\
+S	|const char *|querylocale_2008_i				\
 				|const unsigned int index
 S	|const char *|setlocale_from_aggregate_LC_ALL			\
 				|NN const char *locale			\
