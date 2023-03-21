@@ -104,7 +104,7 @@ PP(pp_initfield)
                     SV *key = *svp; svp++;
                     SV *val = svp <= SP ? *svp : &PL_sv_undef; svp++;
 
-                    hv_store_ent(hv, key, newSVsv(val), 0);
+                    (void)hv_store_ent(hv, key, newSVsv(val), 0);
                 }
             }
             val = (SV *)hv;
@@ -155,7 +155,7 @@ XS(injected_constructor)
              * But then,  %params = @_;  wouldn't do that
              */
 
-            hv_store_ent(params, name, SvREFCNT_inc(val), 0);
+            (void)hv_store_ent(params, name, SvREFCNT_inc(val), 0);
         }
     }
 
@@ -664,7 +664,7 @@ Perl_class_seal_stash(pTHX_ HV *stash)
                 continue;
 
             U32 fieldix = PadnameFIELDINFO(pn)->fieldix;
-            hv_store_ent(fieldix_to_padix, sv_2mortal(newSVuv(fieldix)), newSVuv(padix), 0);
+            (void)hv_store_ent(fieldix_to_padix, sv_2mortal(newSVuv(fieldix)), newSVuv(padix), 0);
         }
 
         OP *ops = NULL;
@@ -943,7 +943,7 @@ apply_field_attribute_param(pTHX_ PADNAME *pn, SV *value)
     if(!aux->xhv_class_param_map)
         aux->xhv_class_param_map = newHV();
 
-    hv_store_ent(aux->xhv_class_param_map, value, newSVuv(PadnameFIELDINFO(pn)->fieldix), 0);
+    (void)hv_store_ent(aux->xhv_class_param_map, value, newSVuv(PadnameFIELDINFO(pn)->fieldix), 0);
 }
 
 static struct {
