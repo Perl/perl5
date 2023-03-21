@@ -211,7 +211,7 @@ typedef struct regexp_internal {
  */
 
 struct regnode_string {
-    U8	str_len;
+    U8	str_len_u8;
     U8  type;
     U16 next_off;
     char string[1];
@@ -221,7 +221,7 @@ struct regnode_lstring { /* Constructed this way to keep the string aligned. */
     U8	flags;
     U8  type;
     U16 next_off;
-    U32 str_len;    /* Only 18 bits allowed before would overflow 'next_off' */
+    U32 str_len_u32;    /* Only 18 bits allowed before would overflow 'next_off' */
     char string[1];
 };
 
@@ -551,7 +551,7 @@ struct regnode_ssc {
                                            regnode types.  For some, it's the \
                                            character set of the regnode */
 #define	STR_LENs(p)	(__ASSERT_(OP(p) != LEXACT && OP(p) != LEXACT_REQ8)  \
-                                    ((struct regnode_string *)p)->str_len)
+                                    ((struct regnode_string *)p)->str_len_u8)
 #define	STRINGs(p)	(__ASSERT_(OP(p) != LEXACT && OP(p) != LEXACT_REQ8)  \
                                     ((struct regnode_string *)p)->string)
 #define	OPERANDs(p)	STRINGs(p)
@@ -571,7 +571,7 @@ struct regnode_ssc {
  * using the flags nor next_off fields at all.  One could have an llstring node
  * and even an lllstring type. */
 #define	STR_LENl(p)	(__ASSERT_(OP(p) == LEXACT || OP(p) == LEXACT_REQ8)  \
-                                    (((struct regnode_lstring *)p)->str_len))
+                                    (((struct regnode_lstring *)p)->str_len_u32))
 #define	STRINGl(p)	(__ASSERT_(OP(p) == LEXACT || OP(p) == LEXACT_REQ8)  \
                                     (((struct regnode_lstring *)p)->string))
 #define	OPERANDl(p)	STRINGl(p)
@@ -589,9 +589,9 @@ struct regnode_ssc {
 #define setSTR_LEN(p,v)                                                     \
     STMT_START{                                                             \
         if (OP(p) == LEXACT || OP(p) == LEXACT_REQ8)                        \
-            ((struct regnode_lstring *)(p))->str_len = (v);                 \
+            ((struct regnode_lstring *)(p))->str_len_u32 = (v);             \
         else                                                                \
-            ((struct regnode_string *)(p))->str_len = (v);                  \
+            ((struct regnode_string *)(p))->str_len_u8 = (v);               \
     } STMT_END
 
 #define ANYOFR_BASE_BITS    20
