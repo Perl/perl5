@@ -159,6 +159,16 @@ my @tests =
               is($joined, "Hello!", "join");
           },
       ],
+      [
+          class_construct => sub {
+              use experimental 'class';
+              class Foo {
+                  field $x :param;
+              };
+              my $y = Foo->new((x => 1) x 0x4000_0001);
+              ok($y, "construct class based object with 2G parameters");
+          },
+      ],
      );
 
 # these tests are slow, let someone debug them one at a time
