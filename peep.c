@@ -2690,7 +2690,7 @@ Perl_rpeep(pTHX_ OP *o)
 {
     OP* oldop = NULL;
     OP* oldoldop = NULL;
-    OP** defer_queue[MAX_DEFERRED]; /* small queue of deferred branches */
+    OP** defer_queue[MAX_DEFERRED] = { NULL }; /* small queue of deferred branches */
     int defer_base = 0;
     int defer_ix = -1;
 
