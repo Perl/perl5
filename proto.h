@@ -198,7 +198,7 @@ Perl_amagic_is_enabled(pTHX_ int method)
         __attribute__visibility__("hidden");
 #define PERL_ARGS_ASSERT_AMAGIC_IS_ENABLED
 
-PERL_CALLCONV I32
+PERL_CALLCONV SSize_t
 Perl_apply(pTHX_ I32 type, SV **mark, SV **sp)
         __attribute__visibility__("hidden");
 #define PERL_ARGS_ASSERT_APPLY                  \
