@@ -2760,7 +2760,7 @@ call_sv(sv, flags, ...)
     SV* sv
     I32 flags
     PREINIT:
-        I32 i;
+        SSize_t i;
     PPCODE:
         for (i=0; i<items-2; i++)
             ST(i) = ST(i+2); /* pop first two args */
