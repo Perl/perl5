@@ -1092,7 +1092,7 @@ Perl_eval_pv(pTHX_ const char *p, I32 croak_on_error);
 #define PERL_ARGS_ASSERT_EVAL_PV                \
         assert(p)
 
-PERL_CALLCONV I32
+PERL_CALLCONV SSize_t
 Perl_eval_sv(pTHX_ SV *sv, I32 flags);
 #define PERL_ARGS_ASSERT_EVAL_SV                \
         assert(sv)

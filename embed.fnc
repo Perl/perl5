@@ -1120,7 +1120,7 @@ EXopx	|void	|emulate_cop_io |NN const COP * const c 		\
 				|NN SV * const sv
 AOdp	|SV *	|eval_pv	|NN const char *p			\
 				|I32 croak_on_error
-AOdp	|I32	|eval_sv	|NN SV *sv				\
+AOdp	|SSize_t|eval_sv	|NN SV *sv				\
 				|I32 flags
 Adp	|void	|fbm_compile	|NN SV *sv				\
 				|U32 flags

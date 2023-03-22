@@ -169,6 +169,18 @@ my @tests =
               ok($y, "construct class based object with 2G parameters");
           },
       ],
+      [
+          eval_sv_count => sub {
+            SKIP:
+              {
+                  $ENV{PERL_TEST_MEMORY} >= 70
+                    or skip "eval_sv_count test needs 70GB", 2;
+
+                  my $count = ( @x, XS::APItest::eval_sv('@x', G_LIST) )[-1];
+                  is($count, scalar @x, "check eval_sv result/mark handling");
+              }
+          }
+      ],
      );
 
 # these tests are slow, let someone debug them one at a time

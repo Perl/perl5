@@ -3237,14 +3237,14 @@ current hints from C<PL_curcop>.
 =cut
 */
 
-I32
+SSize_t
 Perl_eval_sv(pTHX_ SV *sv, I32 flags)
 
                         /* See G_* flags in cop.h */
 {
     UNOP myop;		/* fake syntax tree node */
-    volatile I32 oldmark;
-    volatile I32 retval = 0;
+    volatile SSize_t oldmark;
+    volatile SSize_t retval = 0;
     int ret;
     OP* const oldop = PL_op;
     dJMPENV;

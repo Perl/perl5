@@ -3046,7 +3046,7 @@ eval_sv(sv, flags)
     SV* sv
     I32 flags
     PREINIT:
-        I32 i;
+        SSize_t i;
     PPCODE:
         PUTBACK;
         i = eval_sv(sv, flags);
