@@ -19,6 +19,7 @@ use 5.006;
 use ExtUtils::MakeMaker;
 use File::Spec::Functions qw(devnull);
 use Getopt::Long;
+use Time::Local qw(timelocal_posix);
 
 my ($diffs, $exclude_upstream, $tag_to_compare, $tap);
 unless (GetOptions('diffs' => \$diffs,
@@ -84,8 +85,15 @@ unless ($tag_exists eq $tag_to_compare) {
 
 my $commit_epoch = `git log -1 --format="%ct"`;
 chomp($commit_epoch);
-my $tag_epoch = `git for-each-ref --format="%(taggerdate:unix)" refs/tags/$tag_to_compare`;
-chomp($tag_epoch);
+# old git versions dont support taggerdate:unix. so use :iso8601 and then
+# use timelocal_posix() to convert to an epoch.
+my $tag_date = `git for-each-ref --format="%(taggerdate:iso8601)" refs/tags/$tag_to_compare`;
+chomp($tag_date);
+my $tag_epoch= do {
+    my ($Y,$M,$D,$h,$m,$s) = split /[- :]/, $tag_date; # 2023-03-20 22:49:09
+    timelocal_posix($s,$m,$h,$D,$M,$Y);
+};
+
 if ($commit_epoch - $tag_epoch > 60 * 24 * 60 * 60) {
     my $months = sprintf "%.2f", ($commit_epoch - $tag_epoch) / (30 * 24 * 60 * 60);
     my $message=
