@@ -669,7 +669,7 @@ code.
 
 =cut
 */
-#define NOOP /*EMPTY*/((void)0)
+#define NOOP ((void)0)
 #define dNOOP struct Perl___notused_struct
 
 #ifndef pTHX
