@@ -2989,7 +2989,13 @@ PP(pp_stat)
             Stat_t s;
             CLANG_DIAG_IGNORE_STMT(-Wtautological-compare);
             GCC_DIAG_IGNORE_STMT(-Wtype-limits);
+#if defined(__HP_cc) || defined(__HP_aCC)
+#pragma diag_suppress 2186
+#endif
             neg = PL_statcache.st_ino < 0;
+#if defined(__HP_cc) || defined(__HP_aCC)
+#pragma diag_default 2186
+#endif
             GCC_DIAG_RESTORE_STMT;
             CLANG_DIAG_RESTORE_STMT;
             if (neg) {
