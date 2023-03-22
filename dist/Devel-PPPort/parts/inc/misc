@@ -1434,8 +1434,8 @@ check_HeUTF8(utf8_key)
                 hash = newHV();
 
                 key = SvPV(utf8_key, klen);
-                if (SvUTF8(utf8_key)) klen *= -1;
-                hv_store(hash, key, klen, newSVpvs("string"), 0);
+                hv_store(hash, key, SvUTF8(utf8_key) ? -klen : klen,
+                    newSVpvs("string"), 0);
                 hv_iterinit(hash);
                 ent = hv_iternext(hash);
                 assert(ent);
