@@ -1833,31 +1833,33 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
          * properly currently.
          *
          */
-        while ((OP(first) == OPEN && ((sawopen = 1)) ) ||
-               /* An OR of *one* alternative - should not happen now. */
-            (OP(first) == BRANCH && OP(first_next) != BRANCH) ||
-            /* for now we can't handle lookbehind IFMATCH*/
-            (OP(first) == IFMATCH && !FLAGS(first) && (sawlookahead = 1)) ||
-            (OP(first) == PLUS) ||
-            (OP(first) == MINMOD) ||
-               /* An {n,m} with n>0 */
-            (REGNODE_TYPE(OP(first)) == CURLY && ARG1i(first) > 0) ||
-            (OP(first) == NOTHING && REGNODE_TYPE(OP(first_next)) != END ))
+        while (1)
         {
-                /*
-                 * the only op that could be a regnode is PLUS, all the rest
-                 * will be regnode_1 or regnode_2.
-                 *
-                 * (yves doesn't think this is true)
-                 */
-                if (OP(first) == PLUS)
-                    sawplus = 1;
-                else
-                if (OP(first) == MINMOD)
-                    sawminmod = 1;
+            if (OP(first) == OPEN)
+                sawopen = 1;
+            else
+            if (OP(first) == IFMATCH && !FLAGS(first))
+                /* for now we can't handle lookbehind IFMATCH */
+                sawlookahead = 1;
+            else
+            if (OP(first) == PLUS)
+                sawplus = 1;
+            else
+            if (OP(first) == MINMOD)
+                sawminmod = 1;
+            else
+            if (!(
+                /* An OR of *one* alternative - should not happen now. */
+                (OP(first) == BRANCH && OP(first_next) != BRANCH) ||
+                /* An {n,m} with n>0 */
+                (REGNODE_TYPE(OP(first)) == CURLY && ARG1i(first) > 0) ||
+                (OP(first) == NOTHING && REGNODE_TYPE(OP(first_next)) != END)
+            )){
+                break;
+            }
 
-                first = REGNODE_AFTER(first);
-                first_next= regnext(first);
+            first = REGNODE_AFTER(first);
+            first_next= regnext(first);
         }
 
         /* Starting-point info. */
