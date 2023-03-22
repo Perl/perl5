@@ -924,7 +924,7 @@ Perl_grok_infnan(pTHX_ const char** sp, const char* send)
                      * of UVs and NVs can be different. */
 
                     if ((nantype & IS_NUMBER_NOT_INT) ||
-                        !(nantype && IS_NUMBER_IN_UV)) {
+                        !(nantype & IS_NUMBER_IN_UV)) {
                         /* treat "NaN(invalid)" the same as "NaNgarbage" */
                         return trail;
                     }
