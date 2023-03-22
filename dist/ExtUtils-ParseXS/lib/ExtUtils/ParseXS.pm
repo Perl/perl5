@@ -11,7 +11,7 @@ use Symbol;
 
 our $VERSION;
 BEGIN {
-  $VERSION = '3.49';
+  $VERSION = '3.50';
   require ExtUtils::ParseXS::Constants; ExtUtils::ParseXS::Constants->VERSION($VERSION);
   require ExtUtils::ParseXS::CountLines; ExtUtils::ParseXS::CountLines->VERSION($VERSION);
   require ExtUtils::ParseXS::Utilities; ExtUtils::ParseXS::Utilities->VERSION($VERSION);
@@ -636,7 +636,16 @@ EOF
           $self->print_section();
           $self->death("PPCODE must be last thing") if @{ $self->{line} };
           print "\tLEAVE;\n" if $self->{ScopeThisXSUB};
+          print "#if defined(__HP_cc) || defined(__HP_aCC)\n",
+                "#pragma diag_suppress 2111\n",
+                "#endif\n"
+            if $^O eq "hpux";
           print "\tPUTBACK;\n\treturn;\n";
+          print "#if defined(__HP_cc) || defined(__HP_aCC)\n",
+                "#pragma diag_default 2111\n",
+                "#endif\n"
+            if $^O eq "hpux";
+
         }
         elsif ($self->check_keyword("CODE")) {
           my $consumed_code = $self->print_section();
@@ -798,6 +807,10 @@ EOF
 #    if (errbuf[0])
 #    Perl_croak(aTHX_ errbuf);
 EOF
+    print "#if defined(__HP_cc) || defined(__HP_aCC)\n",
+          "#pragma diag_suppress 2128\n",
+          "#endif\n"
+      if $^O eq "hpux";
 
     if ($xsreturn) {
       print Q(<<"EOF") unless $PPCODE;
@@ -809,6 +822,10 @@ EOF
 #    XSRETURN_EMPTY;
 EOF
     }
+    print "#if defined(__HP_cc) || defined(__HP_aCC)\n",
+          "#pragma diag_default 2128\n",
+          "#endif\n"
+      if $^O eq "hpux";
 
     print Q(<<"EOF");
 #]]
