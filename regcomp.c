@@ -11247,10 +11247,7 @@ S_optimize_regclass(pTHX_
                 if (*invert) {
                     goto return_OPFAIL;
                 }
-                else {
-                    goto return_SANY;
-                }
-                return op;
+                goto return_SANY;
             }
         }
 
