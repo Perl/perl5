@@ -1429,7 +1429,7 @@ perl_destruct(pTHXx)
         for (sva = PL_sv_arenaroot; sva; sva = MUTABLE_SV(SvANY(sva))) {
             svend = &sva[SvREFCNT(sva)];
             for (sv = sva + 1; sv < svend; ++sv) {
-                if (SvTYPE(sv) != (svtype)SVTYPEMASK) {
+                if (!SvIS_FREED(sv)) {
                     PerlIO_printf(Perl_debug_log, "leaked: sv=0x%p"
                         " flags=0x%" UVxf
                         " refcnt=%" UVuf pTHX__FORMAT "\n"
