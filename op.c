@@ -2469,8 +2469,7 @@ Perl_scalarvoid(pTHX_ OP *arg)
         }
         o = next_kid;
     }
-
-    return arg;
+    NOT_REACHED;
 }
 
 
