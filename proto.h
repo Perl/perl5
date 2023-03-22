@@ -419,7 +419,7 @@ Perl_bytes_to_utf8(pTHX_ const U8 *s, STRLEN *lenp);
 #define PERL_ARGS_ASSERT_BYTES_TO_UTF8          \
         assert(s); assert(lenp)
 
-PERL_CALLCONV I32
+PERL_CALLCONV SSize_t
 Perl_call_argv(pTHX_ const char *sub_name, I32 flags, char **argv);
 #define PERL_ARGS_ASSERT_CALL_ARGV              \
         assert(sub_name); assert(argv)
@@ -433,17 +433,17 @@ Perl_call_list(pTHX_ I32 oldscope, AV *paramList);
 #define PERL_ARGS_ASSERT_CALL_LIST              \
         assert(paramList)
 
-PERL_CALLCONV I32
+PERL_CALLCONV SSize_t
 Perl_call_method(pTHX_ const char *methname, I32 flags);
 #define PERL_ARGS_ASSERT_CALL_METHOD            \
         assert(methname)
 
-PERL_CALLCONV I32
+PERL_CALLCONV SSize_t
 Perl_call_pv(pTHX_ const char *sub_name, I32 flags);
 #define PERL_ARGS_ASSERT_CALL_PV                \
         assert(sub_name)
 
-PERL_CALLCONV I32
+PERL_CALLCONV SSize_t
 Perl_call_sv(pTHX_ SV *sv, volatile I32 flags);
 #define PERL_ARGS_ASSERT_CALL_SV                \
         assert(sv)

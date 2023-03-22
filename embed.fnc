@@ -752,7 +752,7 @@ CTdpx	|U8 *	|bytes_from_utf8_loc					\
 				|NULLOK const U8 **first_unconverted
 Adpx	|U8 *	|bytes_to_utf8	|NN const U8 *s 			\
 				|NN STRLEN *lenp
-AOdp	|I32	|call_argv	|NN const char *sub_name		\
+AOdp	|SSize_t|call_argv	|NN const char *sub_name		\
 				|I32 flags				\
 				|NN char **argv
 
@@ -765,13 +765,13 @@ Adp	|const PERL_CONTEXT *|caller_cx 				\
 				|NULLOK const PERL_CONTEXT **dbcxp
 Cp	|void	|call_list	|I32 oldscope				\
 				|NN AV *paramList
-AOdp	|I32	|call_method	|NN const char *methname		\
+AOdp	|SSize_t|call_method	|NN const char *methname		\
 				|I32 flags
 CTadop	|Malloc_t|calloc	|MEM_SIZE elements			\
 				|MEM_SIZE size
-AOdp	|I32	|call_pv	|NN const char *sub_name		\
+AOdp	|SSize_t|call_pv	|NN const char *sub_name		\
 				|I32 flags
-AOdp	|I32	|call_sv	|NN SV *sv				\
+AOdp	|SSize_t|call_sv	|NN SV *sv				\
 				|volatile I32 flags
 : Used in several source files
 Rp	|bool	|cando		|Mode_t mode				\

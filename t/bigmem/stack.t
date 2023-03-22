@@ -18,6 +18,8 @@ $Config{ptrsize} >= 8
 my @x;
 $x[0x8000_0000] = "Hello";
 
+my $arg_count;
+
 my @tests =
   (
       [ mark => sub
@@ -181,6 +183,20 @@ my @tests =
               }
           }
       ],
+      [
+          call_sv_args => sub {
+              undef $arg_count;
+              my $ret_count = XS::APItest::call_sv(\&arg_count, G_LIST, x());
+              is($ret_count, 0, "call_sv with 2G args - arg_count() returns nothing");
+              is($arg_count, scalar @x, "check call_sv argument handling - argument count");
+          },
+      ],
+      [
+          call_sv_mark => sub {
+              my $ret_count = ( x(), XS::APItest::call_sv(\&list, G_LIST) )[-1];
+              is($ret_count, 2, "call_sv with deep stack - returned value count");
+          },
+      ],
      );
 
 # these tests are slow, let someone debug them one at a time
@@ -226,6 +242,11 @@ sub list {
     # ensure this continues to use a pp_list op
     # if you change it.
     return shift() ? (1, 2) : (2, 1);
+}
+
+sub arg_count {
+    $arg_count = @_;
+    ();
 }
 
 package ScalarTie;
