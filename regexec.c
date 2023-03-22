@@ -617,8 +617,7 @@ S_isFOO_utf8_lc(pTHX_ const U8 classnum, const U8* character, const U8* e)
             return _invlist_contains_cp(PL_XPosix_ptrs[classnum],
                                         utf8_to_uvchr_buf(character, e, NULL));
     }
-
-    return FALSE; /* Things like CNTRL are always below 256 */
+    NOT_REACHED; /* NOTREACHED */
 }
 
 STATIC U8 *
