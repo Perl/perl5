@@ -931,6 +931,7 @@ PERLVARI(I, lockhook,	share_proc_t, Perl_sv_nosharing)
 #pragma diag_suppress 3215
 #endif
 GCC_DIAG_IGNORE(-Wdeprecated-declarations)
+MSVC_DIAG_IGNORE(4996)
 
 #ifdef NO_MATHOMS
 #  define PERL_UNLOCK_HOOK Perl_sv_nosharing
@@ -940,6 +941,7 @@ GCC_DIAG_IGNORE(-Wdeprecated-declarations)
 #endif
 PERLVARI(I, unlockhook,	share_proc_t, PERL_UNLOCK_HOOK)
 
+MSVC_DIAG_RESTORE
 GCC_DIAG_RESTORE
 #if defined(__HP_cc) || defined(__HP_aCC)
 #pragma diag_default 3215
