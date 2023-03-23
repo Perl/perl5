@@ -366,7 +366,9 @@ manager will later use a regex to expand these into links.
 
 =item *
 
-XXX
+The buffer used by getsockopt() is now 1024 bytes by default and can
+be adjusted at perl build time by defining C<PERL_GETSOCKOPT_SIZE> in
+C<ccflags>.  [github #19758]
 
 =back
 
