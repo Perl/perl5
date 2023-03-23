@@ -1299,7 +1299,7 @@
 #         define get_LC_ALL_display()           S_get_LC_ALL_display(aTHX)
 #       endif
 #       if defined(USE_POSIX_2008_LOCALE)
-#         define emulate_setlocale_i(a,b,c,d)   S_emulate_setlocale_i(aTHX_ a,b,c,d)
+#         define bool_setlocale_2008_i(a,b,c,d) S_bool_setlocale_2008_i(aTHX_ a,b,c,d)
 #         define querylocale_2008_i(a)          S_querylocale_2008_i(aTHX_ a)
 #         define setlocale_from_aggregate_LC_ALL(a,b) S_setlocale_from_aggregate_LC_ALL(aTHX_ a,b)
 #         define use_curlocale_scratch()        S_use_curlocale_scratch(aTHX)
@@ -1312,11 +1312,9 @@
              !defined(USE_THREAD_SAFE_LOCALE) &&              \
              !defined(USE_THREAD_SAFE_LOCALE_EMULATION) /* &&
              !defined(USE_POSIX_2008_LOCALE) */
+#         define less_dicey_bool_setlocale_r(a,b) S_less_dicey_bool_setlocale_r(aTHX_ a,b)
 #         define less_dicey_setlocale_r(a,b)    S_less_dicey_setlocale_r(aTHX_ a,b)
 #         define less_dicey_void_setlocale_i(a,b,c) S_less_dicey_void_setlocale_i(aTHX_ a,b,c)
-#         if 0
-#           define less_dicey_bool_setlocale_r(a,b) S_less_dicey_bool_setlocale_r(aTHX_ a,b)
-#         endif
 #       endif
 #       if !(  defined(USE_POSIX_2008_LOCALE) && defined(USE_QUERYLOCALE) ) && \
             ( !defined(LC_ALL) || defined(USE_POSIX_2008_LOCALE) ||            \
