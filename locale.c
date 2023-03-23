@@ -69,7 +69,7 @@
  * systems where the same API, after set up, is used for thread-safe locale
  * handling.  On other systems, there is a completely different API, specified
  * in POSIX 2008, to do thread-safe locales.  On these systems, our
- * emulate_setlocale_i() function is used to hide the different API from the
+ * bool_setlocale_2008_i() function is used to hide the different API from the
  * outside.  This makes it completely transparent to most XS code.
  *
  * A huge complicating factor is that the LC_NUMERIC category is normally held
@@ -707,10 +707,6 @@ S_stdize_locale(pTHX_ const int category,
  * See the introductory comments in this file for the meaning of the suffixes
  * '_c', '_r', '_i'. */
 
-#  define setlocale_r(cat, locale)        stdized_setlocale(cat, locale)
-#  define setlocale_i(i, locale)      setlocale_r(categories[i], locale)
-#  define setlocale_c(cat, locale)              setlocale_r(cat, locale)
-
 #  define void_setlocale_i(i, locale)                                       \
     STMT_START {                                                            \
         if (! posix_setlocale(categories[i], locale)) {                     \
@@ -721,7 +717,7 @@ S_stdize_locale(pTHX_ const int category,
 #  define void_setlocale_c(cat, locale)                                     \
                                   void_setlocale_i(cat##_INDEX_, locale)
 #  define void_setlocale_r(cat, locale)                                     \
-               void_setlocale_i(get_category_index(cat, locale), locale)
+                       void_setlocale_i(get_category_index(cat), locale)
 
 #  define bool_setlocale_r(cat, locale) cBOOL(posix_setlocale(cat, locale))
 #  define bool_setlocale_i(i, locale)                                       \
@@ -731,9 +727,10 @@ S_stdize_locale(pTHX_ const int category,
 /* All the querylocale...() forms return a mortalized copy.  If you need
  * something stable across calls, you need to savepv() the result yourself */
 
-#  define querylocale_r(cat)        mortalized_pv_copy(setlocale_r(cat, NULL))
-#  define querylocale_c(cat)        querylocale_r(cat)
-#  define querylocale_i(i)          querylocale_c(categories[i])
+
+#  define querylocale_r(cat)  mortalized_pv_copy(stdized_setlocale(cat, NULL))
+#  define querylocale_c(cat)  querylocale_r(cat)
+#  define querylocale_i(i)    querylocale_c(categories[i])
 
 #elif   defined(USE_LOCALE_THREADS)                 \
    && ! defined(USE_THREAD_SAFE_LOCALE)
@@ -765,11 +762,8 @@ S_less_dicey_setlocale_r(pTHX_ const int category, const char * locale)
     return retval;
 }
 
-#  define setlocale_r(cat, locale)  less_dicey_setlocale_r(cat, locale)
-#  define setlocale_c(cat, locale)             setlocale_r(cat, locale)
-#  define setlocale_i(i, locale)     setlocale_r(categories[i], locale)
-
-#  define querylocale_r(cat)  mortalized_pv_copy(setlocale_r(cat, NULL))
+#  define querylocale_r(cat)                                                \
+                    mortalized_pv_copy(less_dicey_setlocale_r(cat, NULL))
 #  define querylocale_c(cat)                   querylocale_r(cat)
 #  define querylocale_i(i)                     querylocale_r(categories[i])
 
@@ -793,9 +787,7 @@ S_less_dicey_void_setlocale_i(pTHX_ const unsigned cat_index,
 #  define void_setlocale_c(cat, locale)                                     \
                           void_setlocale_i(cat##_INDEX_, locale)
 #  define void_setlocale_r(cat, locale)                                     \
-       void_setlocale_i(get_category_index(cat, locale), locale)
-
-#  if 0     /* Not currently used */
+               void_setlocale_i(get_category_index(cat), locale)
 
 STATIC bool
 S_less_dicey_bool_setlocale_r(pTHX_ const int cat, const char * locale)
@@ -811,7 +803,6 @@ S_less_dicey_bool_setlocale_r(pTHX_ const int cat, const char * locale)
     return retval;
 }
 
-#  endif
 #  define bool_setlocale_r(cat, locale)                                 \
                                less_dicey_bool_setlocale_r(cat, locale)
 #  define bool_setlocale_i(i, locale)                                   \
@@ -825,39 +816,26 @@ S_less_dicey_bool_setlocale_r(pTHX_ const int cat, const char * locale)
 /* Here, there is a completely different API to get thread-safe locales.  We
  * emulate the setlocale() API with our own function(s).  setlocale categories,
  * like LC_NUMERIC, are not valid here for the POSIX 2008 API.  Instead, there
- * are equivalents, like LC_NUMERIC_MASK, which we use instead, converting to
- * by using get_category_index() followed by table lookup. */
-
-#  define emulate_setlocale_c(cat, locale, recalc_LC_ALL, line)             \
-           emulate_setlocale_i(cat##_INDEX_, locale, recalc_LC_ALL, line)
-
-     /* A wrapper for the macros below. */
-#  define common_emulate_setlocale(i, locale)                               \
-                 emulate_setlocale_i(i, locale, YES_RECALC_LC_ALL, __LINE__)
-
-#  define setlocale_i(i, locale)                                            \
-     save_to_buffer(common_emulate_setlocale(i, locale),                    \
-                                             &PL_stdize_locale_buf,         \
-                                             &PL_stdize_locale_bufsize)
-#  define setlocale_c(cat, locale)     setlocale_i(cat##_INDEX_, locale)
-#  define setlocale_r(cat, locale)                                          \
-                    setlocale_i(get_category_index(cat, locale), locale)
+ * are equivalents, like LC_NUMERIC_MASK, which we use instead, which we find
+ * by table lookup. */
 
 #  define void_setlocale_i(i, locale)                                       \
-                             ((void) common_emulate_setlocale(i, locale))
+                             ((void) bool_setlocale_i(i, locale))
 #  define void_setlocale_c(cat, locale)                                     \
                                   void_setlocale_i(cat##_INDEX_, locale)
-#  define void_setlocale_r(cat, locale) ((void) setlocale_r(cat, locale))
+#  define void_setlocale_r(cat, locale)                                     \
+                       void_setlocale_i(get_category_index(cat), locale)
 
 #  define bool_setlocale_i(i, locale)                                       \
-                               cBOOL(common_emulate_setlocale(i, locale))
+              bool_setlocale_2008_i(i, locale, YES_RECALC_LC_ALL, __LINE__)
 #  define bool_setlocale_c(cat, locale)                                     \
                                   bool_setlocale_i(cat##_INDEX_, locale)
-#  define bool_setlocale_r(cat, locale)   cBOOL(setlocale_r(cat, locale))
+#  define bool_setlocale_r(cat, locale)                                     \
+                       bool_setlocale_i(get_category_index(cat), locale)
 
 #  define querylocale_i(i)      mortalized_pv_copy(querylocale_2008_i(i))
 #  define querylocale_c(cat)    querylocale_i(cat##_INDEX_)
-#  define querylocale_r(cat)    querylocale_i(get_category_index(cat,NULL))
+#  define querylocale_r(cat)    querylocale_i(get_category_index(cat))
 
 #  ifdef USE_QUERYLOCALE
 #    define isSINGLE_BIT_SET(mask) isPOWER_OF_2(mask)
@@ -959,7 +937,7 @@ S_update_PL_curlocales_i(pTHX_
                          const char * new_locale,
                          recalc_lc_all_t recalc_LC_ALL)
 {
-    /* This is a helper function for emulate_setlocale_i(), mostly used to
+    /* This is a helper function for bool_setlocale_2008_i(), mostly used to
      * make that function easier to read. */
 
     PERL_ARGS_ASSERT_UPDATE_PL_CURLOCALES_I;
@@ -1031,7 +1009,7 @@ S_setlocale_from_aggregate_LC_ALL(pTHX_ const char * locale, const line_t line)
      * all the individual categories to "C", and override the furnished
      * ones below.  FALSE => No need to recalculate LC_ALL, as this is a
      * temporary state */
-    if (! emulate_setlocale_c(LC_ALL, "C", DONT_RECALC_LC_ALL, line)) {
+    if (! bool_setlocale_2008_i(LC_ALL_INDEX_, "C", DONT_RECALC_LC_ALL, line)) {
         setlocale_failure_panic_c(LC_ALL, locale_on_entry,
                                   "C", __LINE__, line);
         NOT_REACHED; /* NOTREACHED */
@@ -1092,13 +1070,13 @@ S_setlocale_from_aggregate_LC_ALL(pTHX_ const char * locale, const line_t line)
 
             /* And do the change.  Don't recalculate LC_ALL; we'll do it
              * ourselves after the loop */
-            if (! emulate_setlocale_i(i, individ_locale,
-                                      DONT_RECALC_LC_ALL, line))
+            if (! bool_setlocale_2008_i(i, individ_locale,
+                                        DONT_RECALC_LC_ALL, line))
             {
 
                 /* But if we have to back out, do fix up LC_ALL */
-                if (! emulate_setlocale_c(LC_ALL, locale_on_entry,
-                                          YES_RECALC_LC_ALL, line))
+                if (! bool_setlocale_2008_i(LC_ALL_INDEX_, locale_on_entry,
+                                            YES_RECALC_LC_ALL, line))
                 {
                     setlocale_failure_panic_i(i, individ_locale,
                                               locale, __LINE__, line);
@@ -1138,8 +1116,8 @@ S_setlocale_from_aggregate_LC_ALL(pTHX_ const char * locale, const line_t line)
     return retval;
 }
 
-STATIC const char *
-S_emulate_setlocale_i(pTHX_
+STATIC bool
+S_bool_setlocale_2008_i(pTHX_
 
         /* Our internal index of the 'category' setlocale is called with */
         const unsigned int index,
@@ -1149,24 +1127,14 @@ S_emulate_setlocale_i(pTHX_
         const line_t line     /* Called from this line number */
        )
 {
-    PERL_ARGS_ASSERT_EMULATE_SETLOCALE_I;
+    PERL_ARGS_ASSERT_BOOL_SETLOCALE_2008_I;
     assert(index <= LC_ALL_INDEX_);
-
-    /* Otherwise could have undefined behavior, as the return of this function
-     * may be copied to this buffer, which this function could change in the
-     * middle of its work */
-    assert(new_locale != PL_stdize_locale_buf);
 
     /* This function effectively performs a setlocale() on just the current
      * thread; thus it is thread-safe.  It does this by using the POSIX 2008
-     * locale functions to emulate the behavior of setlocale().  Similar to
-     * regular setlocale(), the return from this function points to memory that
-     * can be overwritten by other system calls, so needs to be copied
-     * immediately if you need to retain it.  The difference here is that
-     * system calls besides another setlocale() can overwrite it.
-     *
-     * By doing this, most locale-sensitive functions become thread-safe.  The
-     * exceptions are mostly those that return a pointer to static memory.
+     * locale functions to emulate the behavior of setlocale().  By doing this,
+     * most locale-sensitive functions become thread-safe.  The exceptions are
+     * mostly those that return a pointer to static memory.
      *
      * This function may be called in a tight loop that iterates over all
      * categories.  Because LC_ALL is not a "real" category, but merely the sum
@@ -1187,18 +1155,12 @@ S_emulate_setlocale_i(pTHX_
     const char * locale_on_entry = querylocale_i(index);
 
     DEBUG_Lv(PerlIO_printf(Perl_debug_log,
-             "emulate_setlocale_i input=%d (%s), mask=0x%x,"
+             "bool_setlocale_2008_i input=%d (%s), mask=0x%x,"
              " new locale=\"%s\", current locale=\"%s\","
              "index=%d, object=%p\n",
              categories[index], category_names[index], mask,
              ((new_locale == NULL) ? "(nil)" : new_locale),
              locale_on_entry, index, entry_obj));
-
-    /* Return the already-calculated info if just querying what the existing
-     * locale is */
-    if (new_locale == NULL) {
-        return locale_on_entry;
-    }
 
     /* Here, trying to change the locale, but it is a no-op if the new boss is
      * the same as the old boss.  Except this routine is called when converting
@@ -1213,7 +1175,7 @@ S_emulate_setlocale_i(pTHX_
         && strEQ(new_locale, locale_on_entry))
     {
         DEBUG_Lv(PerlIO_printf(Perl_debug_log,
-                 "(%" LINE_Tf "): emulate_setlocale_i"
+                 "(%" LINE_Tf "): bool_setlocale_2008_i"
                  " no-op to change to what it already was\n",
                  line));
 
@@ -1232,7 +1194,7 @@ S_emulate_setlocale_i(pTHX_
 
 #  endif
 
-        return locale_on_entry;
+        return true;
     }
 
 #  ifndef USE_QUERYLOCALE
@@ -1250,7 +1212,13 @@ S_emulate_setlocale_i(pTHX_
      * the same locale.  This is the glibc syntax. */
     if (strchr(new_locale, ';')) {
         assert(index == LC_ALL_INDEX_);
-        return setlocale_from_aggregate_LC_ALL(new_locale, line);
+
+        if (setlocale_from_aggregate_LC_ALL(new_locale, line)) {
+            return true;
+        }
+
+        SET_EINVAL;
+        return false;
     }
 
 #  ifdef HAS_GLIBC_LC_MESSAGES_BUG
@@ -1284,7 +1252,7 @@ S_emulate_setlocale_i(pTHX_
     }
 
     DEBUG_Lv(PerlIO_printf(Perl_debug_log,
-             "(%" LINE_Tf "): emulate_setlocale_i now using C"
+             "(%" LINE_Tf "): bool_setlocale_2008_i now using C"
              " object=%p\n", line, PL_C_locale_obj));
 
     locale_t new_obj;
@@ -1296,7 +1264,7 @@ S_emulate_setlocale_i(pTHX_
      * do further switching. */
     if (mask == LC_ALL_MASK && isNAME_C_OR_POSIX(new_locale)) {
         DEBUG_Lv(PerlIO_printf(Perl_debug_log, "(%" LINE_Tf "):"
-                                               " emulate_setlocale_i will stay"
+                                               " bool_setlocale_2008_i will stay"
                                                " in C object\n", line));
         new_obj = PL_C_locale_obj;
 
@@ -1324,7 +1292,7 @@ S_emulate_setlocale_i(pTHX_
             }
 
             DEBUG_Lv(PerlIO_printf(Perl_debug_log,
-                                   "(%" LINE_Tf "): emulate_setlocale_i"
+                                   "(%" LINE_Tf "): bool_setlocale_2008_i"
                                    " created %p by duping the input\n",
                                    line, basis_obj));
         }
@@ -1339,7 +1307,7 @@ S_emulate_setlocale_i(pTHX_
 
         if (! new_obj) {
             DEBUG_L(PerlIO_printf(Perl_debug_log,
-                                  " (%" LINE_Tf "): emulate_setlocale_i"
+                                  " (%" LINE_Tf "): bool_setlocale_2008_i"
                                   " creating new object from %p failed:"
                                   " errno=%d\n",
                                   line, basis_obj, GET_ERRNO));
@@ -1374,18 +1342,19 @@ S_emulate_setlocale_i(pTHX_
             }
 #    endif
 
-            return NULL;
+            SET_EINVAL;
+            return false;
         }
 
         DEBUG_Lv(PerlIO_printf(Perl_debug_log,
-                               "(%" LINE_Tf "): emulate_setlocale_i created %p"
+                               "(%" LINE_Tf "): bool_setlocale_2008_i created %p"
                                " while freeing %p\n", line, new_obj, basis_obj));
 
         /* Here, successfully created an object representing the desired
          * locale; now switch into it */
         if (! uselocale(new_obj)) {
             freelocale(new_obj);
-            locale_panic_(Perl_form(aTHX_ "(%" LINE_Tf "): emulate_setlocale_i"
+            locale_panic_(Perl_form(aTHX_ "(%" LINE_Tf "): bool_setlocale_2008_i"
                                           " switching into new locale failed",
                                           line));
         }
@@ -1393,7 +1362,7 @@ S_emulate_setlocale_i(pTHX_
 
     /* Here, we are using 'new_obj' which matches the input 'new_locale'. */
     DEBUG_Lv(PerlIO_printf(Perl_debug_log,
-             "(%" LINE_Tf "): emulate_setlocale_i now using %p\n",
+             "(%" LINE_Tf "): bool_setlocale_2008_i now using %p\n",
              line, new_obj));
 
 #ifdef MULTIPLICITY
@@ -1441,7 +1410,7 @@ S_emulate_setlocale_i(pTHX_
 
 #  endif
 
-    return new_locale;
+    return true;
 }
 
 #else
@@ -2812,16 +2781,15 @@ Perl_setlocale(const int category, const char * locale)
     }
 
     /* Here, an actual change is being requested.  Do it */
-    retval = setlocale_i(cat_index, locale);
-
-    if (! retval) {
+    if (! bool_setlocale_i(cat_index, locale)) {
         DEBUG_L(PerlIO_printf(Perl_debug_log, "%s\n",
                           setlocale_debug_string_i(cat_index, locale, "NULL")));
         return NULL;
     }
 
     assert(strNE(retval, ""));
-    retval = save_to_buffer(retval, &PL_setlocale_buf, &PL_setlocale_bufsize);
+    retval = save_to_buffer(querylocale_i(cat_index),
+                            &PL_setlocale_buf, &PL_setlocale_bufsize);
 
     /* Now that have changed locales, we have to update our records to
      * correspond.  Only certain categories have extra work to update. */
@@ -5228,9 +5196,9 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
     /* Initialize our records. */
     PL_curlocales[LC_ALL_INDEX_] = NULL;
     for (i = 0; i < LC_ALL_INDEX_; i++) {
-        (void) emulate_setlocale_i(i, posix_setlocale(categories[i], NULL),
-                                   RECALCULATE_LC_ALL_ON_FINAL_INTERATION,
-                                   __LINE__);
+        (void) bool_setlocale_2008_i(i, posix_setlocale(categories[i], NULL),
+                                     RECALCULATE_LC_ALL_ON_FINAL_INTERATION,
+                                     __LINE__);
     }
 
 #  endif
@@ -5546,9 +5514,9 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
      * them now, calculating LC_ALL only on the final go round, when all have
      * been set. */
     for (i = 0; i < LC_ALL_INDEX_; i++) {
-        (void) emulate_setlocale_i(i, curlocales[i],
-                                   RECALCULATE_LC_ALL_ON_FINAL_INTERATION,
-                                   __LINE__);
+        (void) bool_setlocale_2008_i(i, curlocales[i],
+                                     RECALCULATE_LC_ALL_ON_FINAL_INTERATION,
+                                     __LINE__);
     }
 
 #  endif
@@ -7024,7 +6992,7 @@ Perl_sync_locale(pTHX)
 #  endif
 
     for (unsigned i = 0; i < LC_ALL_INDEX_; i++) {
-        setlocale_i(i, current_globals[i]);
+        void_setlocale_i(i, current_globals[i]);
         Safefree(current_globals[i]);
     }
 

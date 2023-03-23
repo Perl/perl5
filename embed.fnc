@@ -4410,9 +4410,9 @@ S	|void	|new_numeric	|NN const char *newnum			\
 S	|const char *|get_LC_ALL_display
 #   endif
 #   if defined(USE_POSIX_2008_LOCALE)
-S	|const char *|emulate_setlocale_i				\
+S	|bool	|bool_setlocale_2008_i					\
 				|const unsigned int index		\
-				|NULLOK const char *new_locale		\
+				|NN const char *new_locale		\
 				|const recalc_lc_all_t recalc_LC_ALL	\
 				|const line_t line
 S	|const char *|querylocale_2008_i				\
@@ -4434,6 +4434,9 @@ S	|const char *|update_PL_curlocales_i				\
          !defined(USE_THREAD_SAFE_LOCALE) &&              \
          !defined(USE_THREAD_SAFE_LOCALE_EMULATION) /* &&
          !defined(USE_POSIX_2008_LOCALE) */
+S	|bool	|less_dicey_bool_setlocale_r				\
+				|const int cat				\
+				|NN const char *locale
 S	|const char *|less_dicey_setlocale_r				\
 				|const int category			\
 				|NULLOK const char *locale
@@ -4442,11 +4445,6 @@ S	|void	|less_dicey_void_setlocale_i				\
 				|const unsigned cat_index		\
 				|NN const char *locale			\
 				|const line_t line
-#     if 0
-S	|bool	|less_dicey_bool_setlocale_r				\
-				|const int cat				\
-				|NN const char *locale
-#     endif
 #   endif
 #   if !(  defined(USE_POSIX_2008_LOCALE) && defined(USE_QUERYLOCALE) ) && \
         ( !defined(LC_ALL) || defined(USE_POSIX_2008_LOCALE) ||            \
