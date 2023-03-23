@@ -2977,4 +2977,4 @@ EXTCONST U32 PL_EXACT_REQ8_bitmask = 0x1E00;
 
 #endif /* defined(PERL_CORE) || defined(PERL_EXT_RE_BUILD) */
 
-/* ex: set ro ft=C: */
+/* ex: set ro ft=c: */

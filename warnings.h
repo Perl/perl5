@@ -359,4 +359,4 @@ category parameters passed.
 
 /* end of file warnings.h */
 
-/* ex: set ro ft=C: */
+/* ex: set ro ft=c: */

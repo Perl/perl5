@@ -5378,4 +5378,4 @@
 /* Generated from:
  * 8cb1765533e123c379f0207fc2a4f75df4be3e84be3a0da71ab37bcf00e13a46 config_h.SH
  * 9c5779a38fbba64b0a5dcf7ce548120a29ea5039350102827f500c812bda10b2 uconfig.sh
- * ex: set ro ft=C: */
+ * ex: set ro ft=c: */

@@ -95,4 +95,4 @@ enum {
 
 #define NofAMmeth max_amg_code
 
-/* ex: set ro ft=C: */
+/* ex: set ro ft=c: */

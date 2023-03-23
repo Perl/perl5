@@ -10548,4 +10548,4 @@ Perl_do_exec3(pTHX_ const char *incmd, int fd, int do_report)
 #endif
 END_EXTERN_C
 
-/* ex: set ro ft=C: */
+/* ex: set ro ft=c: */

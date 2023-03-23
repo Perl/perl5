@@ -793,4 +793,4 @@
 
 #endif	/* EBCDIC 037 */
 
-/* ex: set ro ft=C: */
+/* ex: set ro ft=c: */

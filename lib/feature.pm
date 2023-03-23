@@ -4,7 +4,7 @@
 # Any changes made here will be lost!
 
 package feature;
-our $VERSION = '1.81';
+our $VERSION = '1.82';
 
 our %feature = (
     fc                      => 'feature_fc',
@@ -1247,4 +1247,4 @@ sub feature_bundle {
 
 1;
 
-# ex: set ro ft=Perl:
+# ex: set ro ft=perl:

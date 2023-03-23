@@ -7762,4 +7762,4 @@ match_uniprop( const unsigned char * const key, const U16 key_len ) {
  * c7ff8e0d207d3538c7feb4a1a152b159e5e902d20293b303569ea8323e84633e regen/mk_PL_charclass.pl
  * 2a64e8b4ca351f490530bdf8c7b4962c407b7ed6a1123eeb8d9e8e0e4236d16a regen/mk_invlists.pl
  * d6987e01ad538d1567394851cf199f99815f7701bebd6092be4bc7a6d8f147c6 regen/mph.pl
- * ex: set ro ft=C: */
+ * ex: set ro ft=c: */

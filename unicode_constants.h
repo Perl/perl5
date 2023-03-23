@@ -242,4 +242,4 @@ bytes.
 
 #endif /* PERL_UNICODE_CONSTANTS_H_ */
 
-/* ex: set ro ft=C: */
+/* ex: set ro ft=c: */

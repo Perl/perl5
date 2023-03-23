@@ -161,4 +161,4 @@ xs_init(pTHX)
     PERL_UNUSED_CONTEXT;
 }
 
-/* ex: set ro ft=C: */
+/* ex: set ro ft=c: */

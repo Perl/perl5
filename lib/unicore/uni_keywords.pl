@@ -1336,4 +1336,4 @@
 # 0a6b5ab33bb1026531f816efe81aea1a8ffcd34a27cbea37dd6a70a63d73c844 regen/charset_translations.pl
 # c7ff8e0d207d3538c7feb4a1a152b159e5e902d20293b303569ea8323e84633e regen/mk_PL_charclass.pl
 # 2a64e8b4ca351f490530bdf8c7b4962c407b7ed6a1123eeb8d9e8e0e4236d16a regen/mk_invlists.pl
-# ex: set ro ft=Perl:
+# ex: set ro ft=perl:
