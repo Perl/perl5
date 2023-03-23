@@ -803,9 +803,11 @@ S_less_dicey_bool_setlocale_r(pTHX_ const int cat, const char * locale)
  * by table lookup. */
 
 #  define void_setlocale_i(i, locale)                                       \
-                             ((void) bool_setlocale_i(i, locale))
-#  define void_setlocale_c(cat, locale)                                     \
-                                  void_setlocale_i(cat##_INDEX_, locale)
+     STMT_START {                                                           \
+        if (! bool_setlocale_i(i, locale))                                  \
+            setlocale_failure_panic_i(i, NULL, locale, __LINE__, __LINE__); \
+     } STMT_END
+#  define void_setlocale_c(cat, locale) void_setlocale_i(cat##_INDEX_, locale)
 #  define void_setlocale_r(cat, locale)                                     \
                        void_setlocale_i(get_category_index(cat), locale)
 
