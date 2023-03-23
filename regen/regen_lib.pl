@@ -37,8 +37,11 @@ sub safer_unlink {
 sub open_new {
     my ($final_name, $mode, $header, $force) = @_;
     my $name = $final_name . '-new';
-    my $lang = $final_name =~ /\.pod$/ ? 'Pod' :
-        $final_name =~ /\.(?:c|h|inc|tab|act)$/ ? 'C' : 'Perl';
+    my $lang =
+        $final_name =~ /\.pod\z/ ? 'Pod' :
+        $final_name =~ /\.(?:c|h|inc|tab|act)\z/ ? 'C' :
+        $final_name =~ /\.gitignore\z/ ? 'None' :
+        'Perl';
     if ($force && -e $final_name) {
         chmod 0777, $name if $Needs_Write;
         CORE::unlink $final_name
@@ -128,7 +131,12 @@ sub close_and_rename {
     rename $name, $final_name or die "renaming $name to $final_name: $!";
 }
 
-my %lang_opener = (Perl => '# ', Pod => '', C => '/* ');
+my %lang_opener = (
+    Perl => '# ',
+    Pod  => '',
+    C    => '/* ',
+    None => '# ',
+);
 
 sub read_only_top {
     my %args = @_;
@@ -139,7 +147,7 @@ sub read_only_top {
     my $style = $args{style} ? " $args{style} " : '   ';
 
     # Generate the "modeline" for syntax highlighting based on the language
-    my $raw = "-*- mode: $lang; buffer-read-only: t -*-\n";
+    my $raw = "-*- " . ($lang eq 'None' ? "" : "mode: $lang; ") . "buffer-read-only: t -*-\n";
 
     if ($args{file}) {
         $raw .= "\n   $args{file}\n";
@@ -203,14 +211,16 @@ sub read_only_bottom_close_and_rename {
             $comment .= "$digest $file\n";
         }
     }
-    $comment .= "ex: set ro ft=\L$lang\E:";
+    $comment .= "ex: set ro" . ($lang eq 'None' ? "" : " ft=\L$lang\E") . ":";
 
-    if (defined $lang && $lang eq 'Perl') {
-        $comment =~ s/^/# /mg;
-    } elsif (!defined $lang or $lang ne 'Pod') {
+    if ($lang eq 'Pod') {
+        # nothing
+    } elsif ($lang eq 'C') {
         $comment =~ s/^/ * /mg;
         $comment =~ s! \* !/* !;
         $comment .= " */";
+    } else {
+        $comment =~ s/^/# /mg;
     }
     print $fh "\n$comment\n";
 
