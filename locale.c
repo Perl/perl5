@@ -707,26 +707,22 @@ S_stdize_locale(pTHX_ const int category,
  * See the introductory comments in this file for the meaning of the suffixes
  * '_c', '_r', '_i'. */
 
-#  define void_setlocale_i(i, locale)                                       \
-    STMT_START {                                                            \
-        if (! posix_setlocale(categories[i], locale)) {                     \
-            setlocale_failure_panic_i(i, NULL, locale, __LINE__, 0);        \
-            NOT_REACHED; /* NOTREACHED */                                   \
-        }                                                                   \
-    } STMT_END
-#  define void_setlocale_c(cat, locale)                                     \
-                                  void_setlocale_i(cat##_INDEX_, locale)
 #  define void_setlocale_r(cat, locale)                                     \
-                       void_setlocale_i(get_category_index(cat), locale)
+     STMT_START {                                                           \
+        if (! bool_setlocale_r(cat, locale))                                \
+            setlocale_failure_panic_i(get_category_index(cat),              \
+                                      NULL, locale, __LINE__, __LINE__);    \
+     } STMT_END
+#  define void_setlocale_c(cat, locale) void_setlocale_r(cat, locale)
+#  define void_setlocale_i(i, locale)   void_setlocale_r(categories[i], locale)
 
 #  define bool_setlocale_r(cat, locale) cBOOL(posix_setlocale(cat, locale))
 #  define bool_setlocale_i(i, locale)                                       \
-                                 bool_setlocale_c(categories[i], locale)
-#  define bool_setlocale_c(cat, locale)    bool_setlocale_r(cat, locale)
+                                   bool_setlocale_c(categories[i], locale)
+#  define bool_setlocale_c(cat, locale)      bool_setlocale_r(cat, locale)
 
 /* All the querylocale...() forms return a mortalized copy.  If you need
  * something stable across calls, you need to savepv() the result yourself */
-
 
 #  define querylocale_r(cat)  mortalized_pv_copy(stdized_setlocale(cat, NULL))
 #  define querylocale_c(cat)  querylocale_r(cat)
@@ -774,7 +770,7 @@ S_less_dicey_setlocale_r(pTHX_ const int category, const char * locale)
                                       NULL, locale, __LINE__, __LINE__);    \
      } STMT_END
 #  define void_setlocale_c(cat, locale) void_setlocale_r(cat, locale)
-#  define void_setlocale_i(i, locale) void_setlocale_r(categories[i], locale)
+#  define void_setlocale_i(i, locale)   void_setlocale_r(categories[i], locale)
 
 STATIC bool
 S_less_dicey_bool_setlocale_r(pTHX_ const int cat, const char * locale)
