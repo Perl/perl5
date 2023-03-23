@@ -4440,11 +4440,6 @@ S	|bool	|less_dicey_bool_setlocale_r				\
 S	|const char *|less_dicey_setlocale_r				\
 				|const int category			\
 				|NULLOK const char *locale
-: Not currently used
-S	|void	|less_dicey_void_setlocale_i				\
-				|const unsigned cat_index		\
-				|NN const char *locale			\
-				|const line_t line
 #   endif
 #   if !(  defined(USE_POSIX_2008_LOCALE) && defined(USE_QUERYLOCALE) ) && \
         ( !defined(LC_ALL) || defined(USE_POSIX_2008_LOCALE) ||            \

@@ -1314,7 +1314,6 @@
              !defined(USE_POSIX_2008_LOCALE) */
 #         define less_dicey_bool_setlocale_r(a,b) S_less_dicey_bool_setlocale_r(aTHX_ a,b)
 #         define less_dicey_setlocale_r(a,b)    S_less_dicey_setlocale_r(aTHX_ a,b)
-#         define less_dicey_void_setlocale_i(a,b,c) S_less_dicey_void_setlocale_i(aTHX_ a,b,c)
 #       endif
 #       if !(  defined(USE_POSIX_2008_LOCALE) && defined(USE_QUERYLOCALE) ) && \
             ( !defined(LC_ALL) || defined(USE_POSIX_2008_LOCALE) ||            \
