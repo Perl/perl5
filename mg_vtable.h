@@ -256,4 +256,4 @@ EXT_MGVTBL PL_magic_vtables[magic_vtable_max];
 #define PL_vtbl_uvar PL_magic_vtables[want_vtbl_uvar]
 #define PL_vtbl_vec PL_magic_vtables[want_vtbl_vec]
 
-/* ex: set ro ft=C: */
+/* ex: set ro ft=c: */

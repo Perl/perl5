@@ -203,7 +203,7 @@ sub read_only_bottom_close_and_rename {
             $comment .= "$digest $file\n";
         }
     }
-    $comment .= "ex: set ro ft=$lang:";
+    $comment .= "ex: set ro ft=\L$lang\E:";
 
     if (defined $lang && $lang eq 'Perl') {
         $comment =~ s/^/# /mg;

@@ -238,4 +238,4 @@ int yyparse (void);
 /* Generated from:
  * 0a5fcd15cf0b7afb57ade6ceaf68037a38dd194acd9d60d3e4ad99c15233af75 perly.y
  * acf1cbfd2545faeaaa58b1cf0cf9d7f98b5be0752eb7a54528ef904a9e2e1ca7 regen_perly.pl
- * ex: set ro ft=C: */
+ * ex: set ro ft=c: */

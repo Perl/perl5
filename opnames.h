@@ -464,4 +464,4 @@ typedef enum opcode {
 #define OP_IS_INFIX_BIT(op)   \
 	((op) >= OP_BIT_AND && (op) <= OP_SBIT_OR)
 
-/* ex: set ro ft=C: */
+/* ex: set ro ft=c: */

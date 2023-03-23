@@ -55,4 +55,4 @@
 	{ PERL_MAGIC_extvalue,       "extvalue(^)" },
 	{ PERL_MAGIC_ext,            "ext(~)" },
 
-/* ex: set ro ft=C: */
+/* ex: set ro ft=c: */

@@ -97,4 +97,4 @@
     { '~', "magic_vtable_max | PERL_MAGIC_READONLY_ACCEPTABLE",
       "/* ext '~' Variable magic available for use by extensions */" },
 
-/* ex: set ro ft=C: */
+/* ex: set ro ft=c: */

@@ -2183,4 +2183,4 @@
 # endif /* !defined(WIN32) */
 #endif /* !defined(PERL_NO_SHORT_NAMES) */
 
-/* ex: set ro ft=C: */
+/* ex: set ro ft=c: */

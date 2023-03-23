@@ -795,4 +795,4 @@ SOFTWARE.
 
 #endif /* PERL_EBCDIC_TABLES_H_ */
 
-/* ex: set ro ft=C: */
+/* ex: set ro ft=c: */

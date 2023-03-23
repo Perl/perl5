@@ -219,4 +219,4 @@ STATIC const packprops_t packprops[512] = {
 };
 #endif
 
-/* ex: set ro ft=C: */
+/* ex: set ro ft=c: */

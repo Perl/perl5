@@ -368,4 +368,4 @@
 # endif /* !defined(PL_sawampersand) */
 #endif /* defined(MULTIPLICITY) */
 
-/* ex: set ro ft=C: */
+/* ex: set ro ft=c: */

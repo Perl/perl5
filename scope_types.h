@@ -148,4 +148,4 @@ static const U8 leave_scope_arg_counts[] = {
 
 #define MAX_SAVEt 58
 
-/* ex: set ro ft=C: */
+/* ex: set ro ft=c: */

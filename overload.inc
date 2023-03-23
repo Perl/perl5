@@ -177,4 +177,4 @@ static const char * const PL_AMG_names[NofAMmeth] = {
     "(qr"
 };
 
-/* ex: set ro ft=C: */
+/* ex: set ro ft=c: */

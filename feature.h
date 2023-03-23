@@ -451,4 +451,4 @@ S_magic_sethint_feature(pTHX_ SV *keysv, const char *keypv, STRLEN keylen,
 
 #endif /* PERL_FEATURE_H_ */
 
-/* ex: set ro ft=C: */
+/* ex: set ro ft=c: */

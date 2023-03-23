@@ -5,7 +5,7 @@
 
 package warnings;
 
-our $VERSION = "1.63";
+our $VERSION = "1.64";
 
 # Verify that we're called correctly so that warnings will work.
 # Can't use Carp, since Carp uses us!
@@ -1492,4 +1492,4 @@ See also L<perlmodlib/Pragmatic Modules> and L<perldiag>.
 
 =cut
 
-# ex: set ro ft=Perl:
+# ex: set ro ft=perl:

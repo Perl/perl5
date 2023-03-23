@@ -173,4 +173,4 @@ our @enums = qw#
 
 { my $i = 0; our %enums = map { $_ => $i++ } @enums }
 
-# ex: set ro ft=Perl:
+# ex: set ro ft=perl:

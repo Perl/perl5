@@ -677,4 +677,4 @@ Perl_reentrant_retry(const char *f, ...)
     return retptr;
 }
 
-/* ex: set ro ft=C: */
+/* ex: set ro ft=c: */
