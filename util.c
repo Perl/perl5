@@ -5535,9 +5535,9 @@ Perl_xs_handshake(const U32 key, void * v_my_perl, const char * file, ...)
         }
     }
     {
-        U32 xsverlen;
-        assert(HS_GETXSVERLEN(key) <= UCHAR_MAX && HS_GETXSVERLEN(key) <= HS_APIVERLEN_MAX);
-        if((xsverlen = HS_GETXSVERLEN(key)))
+        U32 xsverlen = HS_GETXSVERLEN(key);
+        assert(xsverlen <= UCHAR_MAX && xsverlen <= HS_APIVERLEN_MAX);
+        if(xsverlen)
             S_xs_version_bootcheck(aTHX_
                 items, ax, va_arg(args, char*), xsverlen);
     }
