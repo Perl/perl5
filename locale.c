@@ -767,27 +767,14 @@ S_less_dicey_setlocale_r(pTHX_ const int category, const char * locale)
 #  define querylocale_c(cat)                   querylocale_r(cat)
 #  define querylocale_i(i)                     querylocale_r(categories[i])
 
-STATIC void
-S_less_dicey_void_setlocale_i(pTHX_ const unsigned cat_index,
-                                    const char * locale,
-                                    const line_t line)
-{
-    PERL_ARGS_ASSERT_LESS_DICEY_VOID_SETLOCALE_I;
-
-    POSIX_SETLOCALE_LOCK;
-    if (! posix_setlocale(categories[cat_index], locale)) {
-        POSIX_SETLOCALE_UNLOCK;
-        setlocale_failure_panic_i(cat_index, NULL, locale, __LINE__, line);
-    }
-    POSIX_SETLOCALE_UNLOCK;
-}
-
-#  define void_setlocale_i(i, locale)                                       \
-                          less_dicey_void_setlocale_i(i, locale, __LINE__)
-#  define void_setlocale_c(cat, locale)                                     \
-                          void_setlocale_i(cat##_INDEX_, locale)
 #  define void_setlocale_r(cat, locale)                                     \
-               void_setlocale_i(get_category_index(cat), locale)
+     STMT_START {                                                           \
+        if (! bool_setlocale_r(cat, locale))                                \
+            setlocale_failure_panic_i(get_category_index(cat),              \
+                                      NULL, locale, __LINE__, __LINE__);    \
+     } STMT_END
+#  define void_setlocale_c(cat, locale) void_setlocale_r(cat, locale)
+#  define void_setlocale_i(i, locale) void_setlocale_r(categories[i], locale)
 
 STATIC bool
 S_less_dicey_bool_setlocale_r(pTHX_ const int cat, const char * locale)
