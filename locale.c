@@ -1179,18 +1179,16 @@ S_querylocale_2008_i(pTHX_ const unsigned int index)
         retval = mortalized_pv_copy(posix_setlocale(categories[index], NULL));
         POSIX_SETLOCALE_UNLOCK;
     }
+
+    /* Here we have handled the case of the the current locale being the global
+     * one.  Below is the 'else' case of that.  There are two different
+     * implementations, depending on USE_PL_CURLOCALES */
+
+#  ifdef USE_PL_CURLOCALES
+
     else {
 
-#  ifdef USE_QUERYLOCALE
-
-        /* We don't currently keep records when there is querylocale(), so have
-         * to get it anew each time */
-        retval = (index == LC_ALL_INDEX_)
-                 ? calculate_LC_ALL_string(NULL)
-                 : querylocale_l(index, cur_obj);
-#  else
-
-        /* But we do have up-to-date values when we keep our own records,
+        /* We have up-to-date values when we keep our own records,
          * except sometimes, LC_ALL */
         if (index == LC_ALL_INDEX_) {
             if (PL_curlocales[LC_ALL_INDEX_] == NULL) {
@@ -1200,10 +1198,26 @@ S_querylocale_2008_i(pTHX_ const unsigned int index)
         }
 
         retval = mortalized_pv_copy(PL_curlocales[index]);
+    }
 
-#  endif
+#  else
+
+    /* Below is the implementation of the 'else' clause which handles the case
+     * of the current locale not being the global one on platforms where
+     * USE_PL_CURLOCALES is NOT in effect.  That means the system must have
+     * some form of querylocale. */
+
+    else {
+
+        /* We don't currently keep records when there is querylocale(), so have
+         * to get it anew each time */
+        retval = (index == LC_ALL_INDEX_)
+                 ? calculate_LC_ALL_string(NULL)
+                 : querylocale_l(index, cur_obj);
 
     }
+
+#  endif
 
     DEBUG_Lv(PerlIO_printf(Perl_debug_log,
                            "querylocale_2008_i(%s) returning '%s'\n",
