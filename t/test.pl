@@ -358,7 +358,7 @@ sub is ($$@) {
 	unshift(@mess, "#      got "._qq($got)."\n",
 		       "# expected "._qq($expected)."\n");
         if (defined $got and defined $expected and
-            (length($got)>20 or length($expected)>20))
+            (length($got)>60 or length($expected)>60))
         {
             my $p = 0;
             $p++ while substr($got,$p,1) eq substr($expected,$p,1);
