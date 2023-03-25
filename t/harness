@@ -139,7 +139,6 @@ sub _extract_tests {
 }
 
 my %total_time;
-
 sub _compute_tests_and_ordering($) {
     my @tests = $_[0]->@*;
 
@@ -147,10 +146,23 @@ sub _compute_tests_and_ordering($) {
     my %all_dirs;
     my %map_file_to_dir;
 
-    if ($jobs > 1) {
+    if (!$dump_tests) {
         require App::Prove::State;
-        $state = App::Prove::State->new({ store => 'test_state' });
-        $state->apply_switch('slow', 'save');
+        if (!$state) {
+            # silence unhelpful warnings from App::Prove::State about not having
+            # a save state, unless we actually set the PERL_TEST_STATE we don't care
+            # and we don't need to know if its fresh or not.
+            local $SIG{__WARN__} = $ENV{PERL_TEST_STATE} ? $SIG{__WARN__} : sub {
+                return if $_[0] and $_[0]=~/No saved state/;
+                warn $_[0];
+            };
+            my $state_file = $ENV{PERL_TEST_STATE_FILE} // 'test_state';
+            if ($state_file) { # set PERL_TEST_STATE_FILE to 0 to skip this
+                $state = App::Prove::State->new({ store => $state_file });
+                $state->apply_switch('save');
+                $state->apply_switch('slow') if $jobs > 1;
+            }
+        }
         # For some reason get_tests returns *all* the tests previously run,
         # (in the right order), not simply the selection in @tests
         # (in the right order). Not sure if this is a bug or a feature.
