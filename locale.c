@@ -1124,7 +1124,7 @@ S_querylocale_2008_i(pTHX_ const unsigned int index)
 /*---------------------------------------------------------------------------*/
 
 #  define bool_setlocale_i(i, locale)                                       \
-              bool_setlocale_2008_i(i, locale, YES_RECALC_LC_ALL, __LINE__)
+                              bool_setlocale_2008_i(i, locale, __LINE__)
 #  define bool_setlocale_c(cat, locale)                                     \
                                   bool_setlocale_i(cat##_INDEX_, locale)
 #  define bool_setlocale_r(cat, locale)                                     \
@@ -1135,8 +1135,7 @@ S_querylocale_2008_i(pTHX_ const unsigned int index)
 STATIC void
 S_update_PL_curlocales_i(pTHX_
                          const unsigned int index,
-                         const char * new_locale,
-                         recalc_lc_all_t recalc_LC_ALL)
+                         const char * new_locale)
 {
     /* This is a helper function for bool_setlocale_2008_i(), mostly used to
      * make that function easier to read. */
@@ -1159,15 +1158,9 @@ S_update_PL_curlocales_i(pTHX_
         Safefree(PL_curlocales[index]);
         PL_curlocales[index] = savepv(new_locale);
 
-    /* And also LC_ALL if the input says to, including if this is the final
-     * iteration of a loop updating all sub-categories */
-    if (   recalc_LC_ALL == YES_RECALC_LC_ALL
-        || (   recalc_LC_ALL == RECALCULATE_LC_ALL_ON_FINAL_INTERATION
-            && index == LC_ALL_INDEX_ - 1))
-    {
+        /* Invalidate LC_ALL */
         Safefree(PL_curlocales[LC_ALL_INDEX_]);
-        PL_curlocales[LC_ALL_INDEX_]= savepv(calculate_LC_ALL_string(PL_curlocales));
-    }
+        PL_curlocales[LC_ALL_INDEX_] = NULL;
     }
 }
 
@@ -1204,7 +1197,7 @@ S_setlocale_from_aggregate_LC_ALL(pTHX_ const char * locale, const line_t line)
      * all the individual categories to "C", and override the furnished
      * ones below.  FALSE => No need to recalculate LC_ALL, as this is a
      * temporary state */
-    if (! bool_setlocale_2008_i(LC_ALL_INDEX_, "C", DONT_RECALC_LC_ALL, line)) {
+    if (! bool_setlocale_2008_i(LC_ALL_INDEX_, "C", line)) {
         setlocale_failure_panic_c(LC_ALL, locale_on_entry, "C", __LINE__, line);
         NOT_REACHED; /* NOTREACHED */
     }
@@ -1264,13 +1257,12 @@ S_setlocale_from_aggregate_LC_ALL(pTHX_ const char * locale, const line_t line)
 
             /* And do the change.  Don't recalculate LC_ALL; we'll do it
              * ourselves after the loop */
-            if (! bool_setlocale_2008_i(i, individ_locale,
-                                        DONT_RECALC_LC_ALL, line))
+            if (! bool_setlocale_2008_i(i, individ_locale, line))
             {
 
                 /* But if we have to back out, do fix up LC_ALL */
                 if (! bool_setlocale_2008_i(LC_ALL_INDEX_, locale_on_entry,
-                                            YES_RECALC_LC_ALL, line))
+                                            line))
                 {
                     setlocale_failure_panic_i(i, individ_locale,
                                               locale, __LINE__, line);
@@ -1317,7 +1309,6 @@ S_bool_setlocale_2008_i(pTHX_
         const unsigned int index,
 
         const char * new_locale, /* The locale to set the category to */
-        const recalc_lc_all_t recalc_LC_ALL,  /* Explained below */
         const line_t line     /* Called from this line number */
        )
 {
@@ -1328,21 +1319,7 @@ S_bool_setlocale_2008_i(pTHX_
      * thread; thus it is thread-safe.  It does this by using the POSIX 2008
      * locale functions to emulate the behavior of setlocale().  By doing this,
      * most locale-sensitive functions become thread-safe.  The exceptions are
-     * mostly those that return a pointer to static memory.
-     *
-     * This function may be called in a tight loop that iterates over all
-     * categories.  Because LC_ALL is not a "real" category, but merely the sum
-     * of all the other ones, such loops don't include LC_ALL.  On systems that
-     * have querylocale() or similar, the current LC_ALL value is immediately
-     * retrievable; on systems lacking that feature, we have to keep track of
-     * LC_ALL ourselves.  We could do that on each iteration, only to throw it
-     * away on the next, but the calculation is more than a trivial amount of
-     * work.  Instead, the 'recalc_LC_ALL' parameter is set to
-     * RECALCULATE_LC_ALL_ON_FINAL_INTERATION to only do the calculation once.
-     * This function calls itself recursively in such a loop.
-     *
-     * When not in such a loop, the parameter is set to the other enum values
-     * DONT_RECALC_LC_ALL or YES_RECALC_LC_ALL. */
+     * mostly those that return a pointer to static memory. */
 
     int mask = category_masks[index];
     const locale_t entry_obj = uselocale((locale_t) 0);
@@ -1372,22 +1349,6 @@ S_bool_setlocale_2008_i(pTHX_
                  "(%" LINE_Tf "): bool_setlocale_2008_i"
                  " no-op to change to what it already was\n",
                  line));
-
-#  ifdef USE_PL_CURLOCALES
-
-       /* On the final iteration of a loop that needs to recalculate LC_ALL, do
-        * so.  If no iteration changed anything, LC_ALL also doesn't change,
-        * but khw believes the complexity needed to keep track of that isn't
-        * worth it. */
-        if (UNLIKELY(   recalc_LC_ALL == RECALCULATE_LC_ALL_ON_FINAL_INTERATION
-                     && index == LC_ALL_INDEX_ - 1))
-        {
-            Safefree(PL_curlocales[LC_ALL_INDEX_]);
-            PL_curlocales[LC_ALL_INDEX_] = savepv(calculate_LC_ALL_string(PL_curlocales));
-        }
-
-#  endif
-
         return true;
     }
 
@@ -1565,11 +1526,9 @@ S_bool_setlocale_2008_i(pTHX_
         new_locale = querylocale_i(index);
     }
 
-    PERL_UNUSED_ARG(recalc_LC_ALL);
-
 #  else
 
-    update_PL_curlocales_i(index, new_locale, recalc_LC_ALL);
+    update_PL_curlocales_i(index, new_locale);
 
 #  endif
 #  ifdef HAS_GLIBC_LC_MESSAGES_BUG

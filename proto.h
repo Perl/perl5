@@ -7058,7 +7058,7 @@ S_get_LC_ALL_display(pTHX);
 #   endif
 #   if defined(USE_POSIX_2008_LOCALE)
 STATIC bool
-S_bool_setlocale_2008_i(pTHX_ const unsigned int index, const char *new_locale, const recalc_lc_all_t recalc_LC_ALL, const line_t line);
+S_bool_setlocale_2008_i(pTHX_ const unsigned int index, const char *new_locale, const line_t line);
 #     define PERL_ARGS_ASSERT_BOOL_SETLOCALE_2008_I \
         assert(new_locale)
 
@@ -7082,7 +7082,7 @@ S_calculate_LC_ALL_string(pTHX_ const locale_t cur_obj);
 
 #     else
 STATIC void
-S_update_PL_curlocales_i(pTHX_ const unsigned int index, const char *new_locale, recalc_lc_all_t recalc_LC_ALL);
+S_update_PL_curlocales_i(pTHX_ const unsigned int index, const char *new_locale);
 #       define PERL_ARGS_ASSERT_UPDATE_PL_CURLOCALES_I \
         assert(new_locale)
 

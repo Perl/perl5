@@ -4415,7 +4415,6 @@ S	|const char *|get_LC_ALL_display
 S	|bool	|bool_setlocale_2008_i					\
 				|const unsigned int index		\
 				|NN const char *new_locale		\
-				|const recalc_lc_all_t recalc_LC_ALL	\
 				|const line_t line
 S	|const char *|querylocale_2008_i				\
 				|const unsigned int index
@@ -4429,8 +4428,7 @@ S	|const char *|calculate_LC_ALL_string				\
 #     else
 S	|void	|update_PL_curlocales_i 				\
 				|const unsigned int index		\
-				|NN const char *new_locale		\
-				|recalc_lc_all_t recalc_LC_ALL
+				|NN const char *new_locale
 #     endif
 #   elif  defined(USE_LOCALE_THREADS) &&                  \
          !defined(USE_THREAD_SAFE_LOCALE) &&              \
