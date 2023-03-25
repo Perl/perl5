@@ -398,7 +398,7 @@ corrupted.
 
 =item Attempt to %s readonly key "%s" in restricted hash
 
-(F) The failing code has attempted to modify or
+(F) The failing code has attempted to localize, alias, modify or
 delete a key with a readonly value in a restricted hash.
 
 =item Attempt to %s disallowed key "%s" in restricted hash

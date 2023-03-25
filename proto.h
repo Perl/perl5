@@ -1611,6 +1611,9 @@ Perl_hv_ename_delete(pTHX_ HV *hv, const char *name, U32 len, U32 flags)
 #define PERL_ARGS_ASSERT_HV_ENAME_DELETE        \
         assert(hv); assert(name)
 
+/* PERL_CALLCONV HE *
+hv_fetch_ent_for(pTHX_ HV *hv, SV *keysv, I32 lval, U32 hash, U32 for_flags); */
+
 PERL_CALLCONV STRLEN
 Perl_hv_fill(pTHX_ HV * const hv);
 #define PERL_ARGS_ASSERT_HV_FILL                \
@@ -1709,6 +1712,9 @@ Perl_hv_scalar(pTHX_ HV *hv)
         __attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_HV_SCALAR              \
         assert(hv)
+
+/* PERL_CALLCONV HE *
+hv_store_ent_for(pTHX_ HV *hv, SV *key, SV *val, U32 hash, U32 for_flags); */
 
 /* PERL_CALLCONV SV **
 hv_stores(pTHX_ HV *hv, const char * const key, SV *val); */

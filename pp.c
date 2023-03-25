@@ -6915,13 +6915,19 @@ S_localise_aelem_lval(pTHX_ AV * const av, SV * const keysv,
 
 static void
 S_localise_helem_lval(pTHX_ HV * const hv, SV * const keysv,
-                            const bool can_preserve)
+                            const bool can_preserve, U32 for_flags)
 {
     if (can_preserve ? hv_exists_ent(hv, keysv, 0) : TRUE) {
-        HE * const he = hv_fetch_ent(hv, keysv, 1, 0);
+        HE * const he = hv_fetch_ent_for(hv, keysv, 1, 0, for_flags);
         SV ** const svp = he ? &HeVAL(he) : NULL;
         if (!svp || !*svp)
             Perl_croak(aTHX_ PL_no_helem_sv, SVfARG(keysv));
+        if (SvREADONLY(hv) && SvREADONLY(*svp)) {
+            croak("Attempt to %s readonly key %" SVf_QUOTEDPREFIX
+                  " in restricted hash",
+                  (for_flags & HV_ACTION_ISLOCALIZE) ? "localize" : "alias",
+                  keysv);
+        }
         save_helem_flags(hv, keysv, svp, 0);
     }
     else
@@ -7006,12 +7012,16 @@ PP(pp_refassign)
         av_store((AV *)left, SvIV(key), SvREFCNT_inc_simple_NN(SvRV(sv)));
         break;
     case SVt_PVHV:
-        if (UNLIKELY(PL_op->op_private & OPpLVAL_INTRO)) {
-            assert(key);
-            S_localise_helem_lval(aTHX_ (HV *)left, key,
-                                        SvCANEXISTDELETE(left));
+        {
+            HV *hv = (HV *)left;
+            if (UNLIKELY(PL_op->op_private & OPpLVAL_INTRO)) {
+                assert(key);
+                S_localise_helem_lval(aTHX_ hv, key,
+                    SvCANEXISTDELETE(left), HV_ACTION_ISALIAS);
+            }
+            (void)hv_store_ent_for(hv, key,
+                    SvREFCNT_inc_simple_NN(SvRV(sv)), 0, HV_ACTION_ISALIAS);
         }
-        (void)hv_store_ent((HV *)left, key, SvREFCNT_inc_simple_NN(SvRV(sv)), 0);
     }
     if (PL_op->op_flags & OPf_MOD)
         SETs(sv_2mortal(newSVsv(sv)));
@@ -7043,7 +7053,7 @@ PP(pp_lvref)
             if (SvTYPE(arg) == SVt_PVAV)
               S_localise_aelem_lval(aTHX_ (AV *)arg, elem, can_preserve);
             else
-              S_localise_helem_lval(aTHX_ (HV *)arg, elem, can_preserve);
+              S_localise_helem_lval(aTHX_ (HV *)arg, elem, can_preserve, 0);
         }
       }
       else if (arg) {
@@ -7090,7 +7100,7 @@ PP(pp_lvrefslice)
             if (SvTYPE(av) == SVt_PVAV)
                 S_localise_aelem_lval(aTHX_ av, elemsv, can_preserve);
             else
-                S_localise_helem_lval(aTHX_ (HV *)av, elemsv, can_preserve);
+                S_localise_helem_lval(aTHX_ (HV *)av, elemsv, can_preserve, 0);
         }
         *MARK = newSV_type_mortal(SVt_PVMG);
         sv_magic(*MARK,(SV *)av,PERL_MAGIC_lvref,(char *)elemsv,HEf_SVKEY);

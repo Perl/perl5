@@ -4011,6 +4011,10 @@ PP(pp_multideref)
                         }
                         else {
                             if (localizing) {
+                                if (SvREADONLY(hv) && SvREADONLY(*svp))
+                                    croak("Attempt to %s readonly key %"
+                                            SVf_QUOTEDPREFIX " in restricted hash",
+                                            "localize", keysv);
                                 if (HvNAME_get(hv) && isGV_or_RVCV(sv))
                                     save_gp(MUTABLE_GV(sv),
                                         !(PL_op->op_flags & OPf_SPECIAL));

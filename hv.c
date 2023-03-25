@@ -396,6 +396,13 @@ C<hv_store> in preference to C<hv_store_ent>.
 See L<perlguts/"Understanding the Magic of Tied Hashes and Arrays"> for more
 information on how to use this function on tied hashes.
 
+=for apidoc hv_store_ent_for
+
+Identical to C<hv_store_ent()> but accepting an additional parameter which allows
+the caller to signal what the store is for, typically HV_ACTION_ISLOCALIZE or
+HV_ACTION_ISALIAS. This additional data is passed into hv_common() in the
+C<action> field (B<not> the flags field). Intended for internal use only.
+
 =for apidoc hv_exists
 
 Returns a boolean indicating whether the specified hash key exists.  The
@@ -441,6 +448,13 @@ store it somewhere.
 
 See L<perlguts/"Understanding the Magic of Tied Hashes and Arrays"> for more
 information on how to use this function on tied hashes.
+
+=for apidoc hv_fetch_ent_for
+
+Identical to C<hv_fetch_ent()> but accepting an additional parameter which allows
+the caller to signal what the fetch is for, typically HV_ACTION_ISLOCALIZE or
+HV_ACTION_ISALIAS. This additional data is passed into hv_common() in the
+C<action> field (B<not> the flags field). Intended for internal use only.
 
 =cut
 */
@@ -878,6 +892,14 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
                 }
                 HeVAL(entry) = val;
             } else if (action & HV_FETCH_ISSTORE) {
+                if (SvREADONLY(hv) && SvREADONLY(HeVAL(entry))) {
+                    hv_notallowed(flags, key, klen,
+                        (action & HV_ACTION_ISLOCALIZE) ? "localize" :
+                        (action & HV_ACTION_ISALIAS) ? "alias" : "modify",
+                        "Attempt to %s readonly key %" SVf_QUOTEDPREFIX " in"
+                        " restricted hash");
+                }
+
                 SvREFCNT_dec(HeVAL(entry));
                 HeVAL(entry) = val;
             }
