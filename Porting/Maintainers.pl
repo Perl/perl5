@@ -859,16 +859,6 @@ use File::Glob qw(:case);
             qw(t/appveyor-test.bat),
 
         ],
-        'CUSTOMIZED' => [
-            qw{
-                t/000_load.t
-                t/001_new.t
-                t/010_pingecho.t
-                t/450_service.t
-                t/500_ping_icmp.t
-                t/501_ping_icmpv6.t
-            }
-        ],
     },
 
     'NEXT' => {
