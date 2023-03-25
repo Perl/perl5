@@ -1145,18 +1145,14 @@ S_update_PL_curlocales_i(pTHX_
     assert(index <= LC_ALL_INDEX_);
 
     if (index == LC_ALL_INDEX_) {
-        unsigned int i;
 
-        /* For LC_ALL, we change all individual categories to correspond */
-                         /* PL_curlocales is a parallel array, so has same
-                          * length as 'categories' */
-        for (i = 0; i < LC_ALL_INDEX_; i++) {
+        /* For LC_ALL, we change all individual categories to correspond,
+         * including the LC_ALL element */
+        for (unsigned int i = 0; i <= LC_ALL_INDEX_; i++) {
             Safefree(PL_curlocales[i]);
             PL_curlocales[i] = savepv(new_locale);
         }
 
-        Safefree(PL_curlocales[LC_ALL_INDEX_]);
-        PL_curlocales[LC_ALL_INDEX_] = savepv(calculate_LC_ALL_string(PL_curlocales));
         return PL_curlocales[LC_ALL_INDEX_];
     }
 
