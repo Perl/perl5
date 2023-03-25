@@ -1099,11 +1099,13 @@ S_querylocale_2008_i(pTHX_ const unsigned int index)
                  : querylocale_l(index, cur_obj);
 #  else
 
-        /* But we do have up-to-date values when we keep our own records
-         * (except some times in initialization, where we get the value from
-         * the system. */
-        if (PL_curlocales[index] == NULL) {
-            PL_curlocales[index] = savepv(stdized_setlocale(category, NULL));
+        /* But we do have up-to-date values when we keep our own records,
+         * except sometimes, LC_ALL */
+        if (index == LC_ALL_INDEX_) {
+            if (PL_curlocales[LC_ALL_INDEX_] == NULL) {
+                PL_curlocales[LC_ALL_INDEX_] =
+                savepv(calculate_LC_ALL_string((const char **) &PL_curlocales));
+            }
         }
 
         retval = mortalized_pv_copy(PL_curlocales[index]);
@@ -1519,26 +1521,6 @@ S_bool_setlocale_2008_i(pTHX_
                                           locale_on_entry, __LINE__, line);
                 NOT_REACHED; /* NOTREACHED */
             }
-
-#    ifdef USE_PL_CURLOCALES
-
-            if (entry_obj == LC_GLOBAL_LOCALE) {
-
-                /* Here, we are back in the global locale.  We may never have
-                 * set PL_curlocales.  If the locale change had succeeded, the
-                 * code would have then set them up, but since it didn't, do so
-                 * here.  khw isn't sure if this prevents some issues or not,
-                 * This will calculate LC_ALL's entry only on the final
-                 * iteration */
-                POSIX_SETLOCALE_LOCK;
-                for (PERL_UINT_FAST8_T i = 0; i < LC_ALL_INDEX_; i++) {
-                    update_PL_curlocales_i(i,
-                                       posix_setlocale(categories[i], NULL),
-                                       RECALCULATE_LC_ALL_ON_FINAL_INTERATION);
-                }
-                POSIX_SETLOCALE_UNLOCK;
-            }
-#    endif
 
             SET_EINVAL;
             return false;
@@ -5511,6 +5493,13 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 
 #    endif
 #  endif
+#  ifdef USE_PL_CURLOCALES
+
+    for (unsigned int i = 0; i <= LC_ALL_INDEX_; i++) {
+        PL_curlocales[i] = savepv("C");
+    }
+
+#  endif
 #  ifdef USE_POSIX_2008_LOCALE
 
     if (! PL_C_locale_obj) {
@@ -5553,17 +5542,6 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 
     Newxz(PL_ctype_name, 1, char);
     new_ctype("C", false);
-
-#  endif
-#  ifdef USE_PL_CURLOCALES
-
-    /* Initialize our records. */
-    PL_curlocales[LC_ALL_INDEX_] = NULL;
-    for (i = 0; i < LC_ALL_INDEX_; i++) {
-        (void) bool_setlocale_2008_i(i, posix_setlocale(categories[i], NULL),
-                                     RECALCULATE_LC_ALL_ON_FINAL_INTERATION,
-                                     __LINE__);
-    }
 
 #  endif
 
