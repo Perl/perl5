@@ -6134,43 +6134,15 @@ S_output_check_environment_warning(pTHX_ const char * const language,
                                   lc_all ? lc_all : "unset",
                                   lc_all ? '"' : ')');
 
-#  if defined(USE_ENVIRON_ARRAY)
-
-    {
-        char **e;
-
-        /* Look through the environment for any variables of the
-         * form qr/ ^ LC_ [A-Z]+ = /x, except LC_ALL which was
-         * already handled above.  These are assumed to be locale
-         * settings.  Output them and their values. */
-
-        ENV_READ_LOCK;
-
-        for (e = environ; *e; e++) {
-            const STRLEN prefix_len = sizeof("LC_") - 1;
-            STRLEN uppers_len;
-
-            if (     strBEGINs(*e, "LC_")
-                && ! strBEGINs(*e, "LC_ALL=")
-                && (uppers_len = strspn(*e + prefix_len,
-                                 "ABCDEFGHIJKLMNOPQRSTUVWXYZ"))
-                && ((*e)[prefix_len + uppers_len] == '='))
-            {
-                PerlIO_printf(Perl_error_log, "\t%.*s = \"%s\",\n",
-                    (int) (prefix_len + uppers_len), *e,
-                    *e + prefix_len + uppers_len + 1);
-            }
-        }
-
-        ENV_READ_UNLOCK;
+    for (unsigned int i = 0; i < LC_ALL_INDEX_; i++) {
+        const char * value = PerlEnv_getenv(category_names[i]);
+        PerlIO_printf(Perl_error_log,
+                      "\t%s = %c%s%c,\n",
+                      category_names[i],
+                      value ? '"' : '(',
+                      value ? value : "unset",
+                      value ? '"' : ')');
     }
-
-#  else
-
-    PerlIO_printf(Perl_error_log,
-                  "\t(possibly more locale environment variables)\n");
-
-#  endif
 
     PerlIO_printf(Perl_error_log, "\tLANG = %c%s%c\n",
                                   lang ? '"' : '(',
