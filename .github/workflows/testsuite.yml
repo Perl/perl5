@@ -135,7 +135,7 @@ jobs:
 
     outputs:
       run_all_jobs: ${{ steps.check_extended_testing.outputs.run_all_jobs }}
-      ci_force_linux: ${{ steps.ci_config.outputs.ci_force_linux }}
+      ci_force_linux: true # ${{ steps.ci_config.outputs.ci_force_linux }}
       ci_force_linux_i386: ${{ steps.ci_config.outputs.ci_force_linux_i386 }}
       ci_force_install: ${{ steps.ci_config.outputs.ci_force_install }}
       ci_force_macos: ${{ steps.ci_config.outputs.ci_force_macos }}
