@@ -1986,6 +1986,12 @@ S_Internals_V(pTHX_ CV *cv)
 #  ifdef DEBUGGING
                              " DEBUGGING"
 #  endif
+#  ifdef HAS_LONG_DOUBLE
+                             " HAS_LONG_DOUBLE"
+#  endif
+#  ifdef HAS_STRTOLD
+                             " HAS_STRTOLD"
+#  endif
 #  ifdef NO_MATHOMS
                              " NO_MATHOMS"
 #  endif
