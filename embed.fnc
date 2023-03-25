@@ -4427,7 +4427,7 @@ S	|locale_t|use_curlocale_scratch
 S	|const char *|calculate_LC_ALL_string				\
 				|const locale_t cur_obj
 #     else
-S	|const char *|update_PL_curlocales_i				\
+S	|void	|update_PL_curlocales_i 				\
 				|const unsigned int index		\
 				|NN const char *new_locale		\
 				|recalc_lc_all_t recalc_LC_ALL

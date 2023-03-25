@@ -7081,7 +7081,7 @@ S_calculate_LC_ALL_string(pTHX_ const locale_t cur_obj);
 #       define PERL_ARGS_ASSERT_CALCULATE_LC_ALL_STRING
 
 #     else
-STATIC const char *
+STATIC void
 S_update_PL_curlocales_i(pTHX_ const unsigned int index, const char *new_locale, recalc_lc_all_t recalc_LC_ALL);
 #       define PERL_ARGS_ASSERT_UPDATE_PL_CURLOCALES_I \
         assert(new_locale)

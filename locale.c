@@ -1132,7 +1132,7 @@ S_querylocale_2008_i(pTHX_ const unsigned int index)
 
 #  ifdef USE_PL_CURLOCALES
 
-STATIC const char *
+STATIC void
 S_update_PL_curlocales_i(pTHX_
                          const unsigned int index,
                          const char * new_locale,
@@ -1152,13 +1152,12 @@ S_update_PL_curlocales_i(pTHX_
             Safefree(PL_curlocales[i]);
             PL_curlocales[i] = savepv(new_locale);
         }
-
-        return PL_curlocales[LC_ALL_INDEX_];
     }
+    else {  /* Not LC_ALL */
 
-    /* Update the single category's record */
-    Safefree(PL_curlocales[index]);
-    PL_curlocales[index] = savepv(new_locale);
+        /* Update the single category's record */
+        Safefree(PL_curlocales[index]);
+        PL_curlocales[index] = savepv(new_locale);
 
     /* And also LC_ALL if the input says to, including if this is the final
      * iteration of a loop updating all sub-categories */
@@ -1169,8 +1168,7 @@ S_update_PL_curlocales_i(pTHX_
         Safefree(PL_curlocales[LC_ALL_INDEX_]);
         PL_curlocales[LC_ALL_INDEX_]= savepv(calculate_LC_ALL_string(PL_curlocales));
     }
-
-    return PL_curlocales[index];
+    }
 }
 
 #  endif  /* Need PL_curlocales[] */
@@ -1571,7 +1569,7 @@ S_bool_setlocale_2008_i(pTHX_
 
 #  else
 
-    new_locale = update_PL_curlocales_i(index, new_locale, recalc_LC_ALL);
+    update_PL_curlocales_i(index, new_locale, recalc_LC_ALL);
 
 #  endif
 #  ifdef HAS_GLIBC_LC_MESSAGES_BUG
