@@ -5435,14 +5435,15 @@ PP(pp_entersub)
         bool hasargs;
         U8 gimme;
         COP *cv_start;
-
         OP *multideref;
+
         cv_start = (COP *)CvSTART(cv);
-        if ( getenv("AAA") && cv_start && cv_start->op_next->op_type != OP_LEAVESUB)
+        if (
+               cv_start
+            && ( multideref = cv_start->cop_accessor )
+            && cv_start->op_next->op_type != OP_LEAVESUB
+           )
         {
-            multideref = cv_start->cop_accessor;
-            if ( multideref )
-            {
             UNOP_AUX_item *aux_items = cUNOP_AUXx(multideref)->op_aux;
 
             if ( aux_items && (aux_items->uv & MDEREF_ACTION_MASK) == MDEREF_AV_gvav_aelem )
@@ -5458,8 +5459,8 @@ PP(pp_entersub)
 
                 SP = MARK;
                 PUTBACK;
-                return S_multideref(aTHX_ aux_items, (SV *)mut_av);
-            }
+                S_multideref(aTHX_ aux_items, (SV *)mut_av);
+                return NORMAL;
             }
         }
 
