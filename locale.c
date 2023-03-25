@@ -911,12 +911,22 @@ S_stdize_locale(pTHX_ const int category,
 
 /*---------------------------------------------------------------------------*/
 
-#  define void_setlocale_r(cat, locale)                                     \
+#  define void_setlocale_r_with_caller(cat, locale, file, line)             \
      STMT_START {                                                           \
         if (! bool_setlocale_r(cat, locale))                                \
-            setlocale_failure_panic_i(get_category_index(cat),              \
-                                      NULL, locale, __LINE__, __LINE__);    \
+            setlocale_failure_panic_via_i(get_category_index(cat),          \
+                                          NULL, locale, __LINE__, 0,        \
+                                          file, line);                      \
      } STMT_END
+
+#  define void_setlocale_c_with_caller(cat, locale, file, line)             \
+                    void_setlocale_r_with_caller(cat, locale, file, line)
+
+#  define void_setlocale_i_with_caller(i, locale, file, line)               \
+          void_setlocale_r_with_caller(categories[i], locale, file, line)
+
+#  define void_setlocale_r(cat, locale)                                     \
+            void_setlocale_r_with_caller(cat, locale, __FILE__, __LINE__)
 #  define void_setlocale_c(cat, locale) void_setlocale_r(cat, locale)
 #  define void_setlocale_i(i, locale)   void_setlocale_r(categories[i], locale)
 
@@ -984,12 +994,22 @@ S_less_dicey_bool_setlocale_r(pTHX_ const int cat, const char * locale)
 
 /*---------------------------------------------------------------------------*/
 
-#  define void_setlocale_r(cat, locale)                                     \
+#  define void_setlocale_r_with_caller(cat, locale, file, line)             \
      STMT_START {                                                           \
         if (! bool_setlocale_r(cat, locale))                                \
-            setlocale_failure_panic_i(get_category_index(cat),              \
-                                      NULL, locale, __LINE__, __LINE__);    \
+            setlocale_failure_panic_via_i(get_category_index(cat),          \
+                                          NULL, locale, __LINE__, 0,        \
+                                          file, line);                      \
      } STMT_END
+
+#  define void_setlocale_c_with_caller(cat, locale, file, line)             \
+                    void_setlocale_r_with_caller(cat, locale, file, line)
+
+#  define void_setlocale_i_with_caller(i, locale, file, line)               \
+          void_setlocale_r_with_caller(categories[i], locale, file, line)
+
+#  define void_setlocale_r(cat, locale)                                     \
+            void_setlocale_r_with_caller(cat, locale, __FILE__, __LINE__)
 #  define void_setlocale_c(cat, locale) void_setlocale_r(cat, locale)
 #  define void_setlocale_i(i, locale)   void_setlocale_r(categories[i], locale)
 
@@ -1593,11 +1613,22 @@ S_bool_setlocale_2008_i(pTHX_
 
 /*---------------------------------------------------------------------------*/
 
-#  define void_setlocale_i(i, locale)                                       \
+#  define void_setlocale_i_with_caller(i, locale, file, line)               \
      STMT_START {                                                           \
         if (! bool_setlocale_i(i, locale))                                  \
-            setlocale_failure_panic_i(i, NULL, locale, __LINE__, __LINE__); \
+            setlocale_failure_panic_via_i(i, NULL, locale, __LINE__, 0,     \
+                                          file, line);                      \
      } STMT_END
+
+#  define void_setlocale_r_with_caller(cat, locale, file, line)             \
+        void_setlocale_i_with_caller(get_category_index(cat, NULL), locale, \
+                                     file, line)
+
+#  define void_setlocale_c_with_caller(cat, locale, file, line)             \
+            void_setlocale_i_with_caller(cat##_INDEX_, locale, file, line)
+
+#  define void_setlocale_i(i, locale)                                       \
+                void_setlocale_i_with_caller(i, locale, __FILE__, __LINE__)
 #  define void_setlocale_c(cat, locale)                                     \
                                   void_setlocale_i(cat##_INDEX_, locale)
 #  define void_setlocale_r(cat, locale)                                     \
@@ -2156,7 +2187,7 @@ Perl_set_numeric_standard(pTHX)
     DEBUG_L(PerlIO_printf(Perl_debug_log,
                                   "Setting LC_NUMERIC locale to standard C\n"));
 
-    void_setlocale_c(LC_NUMERIC, "C");
+    void_setlocale_c_with_caller(LC_NUMERIC, "C", __FILE__,  __LINE__);
     PL_numeric_standard = TRUE;
     sv_setpv(PL_numeric_radix_sv, C_decimal_point);
 
@@ -2183,7 +2214,8 @@ Perl_set_numeric_underlying(pTHX)
     DEBUG_L(PerlIO_printf(Perl_debug_log, "Setting LC_NUMERIC locale to %s\n",
                                           PL_numeric_name));
 
-    void_setlocale_c(LC_NUMERIC, PL_numeric_name);
+    void_setlocale_c_with_caller(LC_NUMERIC, PL_numeric_name,
+                                 __FILE__,  __LINE__);
     PL_numeric_underlying = TRUE;
     sv_setsv_nomg(PL_numeric_radix_sv, PL_underlying_radix_sv);
 
@@ -6638,7 +6670,7 @@ S_toggle_locale_i(pTHX_ const unsigned cat_index,
     }
 
     /* Finally, change the locale to the new one */
-    void_setlocale_i(cat_index, new_locale);
+    void_setlocale_i_with_caller(cat_index, new_locale, __FILE__, caller_line);
 
     DEBUG_Lv(PerlIO_printf(Perl_debug_log,
                            "(%" LINE_Tf "): %s locale switched to %s\n",
@@ -6676,7 +6708,8 @@ S_restore_toggled_locale_i(pTHX_ const unsigned int cat_index,
                            caller_line, category_names[cat_index],
                            restore_locale));
 
-    void_setlocale_i(cat_index, restore_locale);
+    void_setlocale_i_with_caller(cat_index, restore_locale,
+                                  __FILE__, caller_line);
 
 #  ifndef DEBUGGING
     PERL_UNUSED_ARG(caller_line);
