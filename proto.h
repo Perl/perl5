@@ -6962,10 +6962,10 @@ S_hv_magic_check(HV *hv, bool *needs_copy, bool *needs_store);
         assert(hv); assert(needs_copy); assert(needs_store)
 
 PERL_STATIC_NO_RET void
-S_hv_notallowed(pTHX_ int flags, const char *key, I32 klen, const char *msg)
+S_hv_notallowed(pTHX_ int flags, const char *key, I32 klen, const char *action, const char *msg)
         __attribute__noreturn__;
 # define PERL_ARGS_ASSERT_HV_NOTALLOWED         \
-        assert(key); assert(msg)
+        assert(key); assert(action); assert(msg)
 
 STATIC SV *
 S_refcounted_he_value(pTHX_ const struct refcounted_he *he);

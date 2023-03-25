@@ -4283,6 +4283,7 @@ ST	|void	|hv_magic_check |NN HV *hv				\
 Sr	|void	|hv_notallowed	|int flags				\
 				|NN const char *key			\
 				|I32 klen				\
+				|NN const char *action			\
 				|NN const char *msg
 S	|SV *	|refcounted_he_value					\
 				|NN const struct refcounted_he *he
