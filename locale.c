@@ -1184,7 +1184,7 @@ S_querylocale_2008_i(pTHX_ const unsigned int index)
         /* We don't currently keep records when there is querylocale(), so have
          * to get it anew each time */
         retval = (index == LC_ALL_INDEX_)
-                 ? calculate_LC_ALL_string(cur_obj)
+                 ? calculate_LC_ALL_string(NULL)
                  : querylocale_l(index, cur_obj);
 #  else
 
@@ -1679,18 +1679,13 @@ S_bool_setlocale_2008_i(pTHX_
 #endif
 
 #if defined(USE_LOCALE)
-#  if defined(WIN32) || defined(USE_POSIX_2008_LOCALE) || ! defined(LC_ALL)
 
 STATIC
 const char *
-
-#    ifdef USE_QUERYLOCALE
-S_calculate_LC_ALL_string(pTHX_ const locale_t cur_obj)
-#    else
 S_calculate_LC_ALL_string(pTHX_ const char ** category_locales_list)
-#    endif
-
 {
+    PERL_ARGS_ASSERT_CALCULATE_LC_ALL_STRING;
+
     /* For POSIX 2008, we have to figure out LC_ALL ourselves when needed.
      * querylocale(), on systems that have it, doesn't tend to work for LC_ALL.
      * So we have to construct the answer ourselves based on the passed in
@@ -1730,6 +1725,16 @@ S_calculate_LC_ALL_string(pTHX_ const char ** category_locales_list)
      * categories, adding new ones as they show up on obscure platforms.
      */
 
+    const char * my_category_locales_list[LOCALE_CATEGORIES_COUNT_];
+    const char ** locales_list = category_locales_list;
+    if (locales_list == NULL) {
+        locales_list = (const char **) &my_category_locales_list;
+
+        for (unsigned i = 0; i < LC_ALL_INDEX_; i++) {
+            locales_list[i] = querylocale_i(i);
+        }
+    }
+
     unsigned int i;
     Size_t names_len = 0;
     bool are_all_categories_the_same_locale = TRUE;
@@ -1738,17 +1743,11 @@ S_calculate_LC_ALL_string(pTHX_ const char ** category_locales_list)
     char * this_start = NULL;
     Size_t entry_len = 0;
 
-    PERL_ARGS_ASSERT_CALCULATE_LC_ALL_STRING;
 
     /* First calculate the needed size for the string listing the categories
      * and their locales. */
     for (i = 0; i < LC_ALL_INDEX_; i++) {
-
-#    ifdef USE_QUERYLOCALE
-        const char * entry = querylocale_l(i, cur_obj);
-#    else
-        const char * entry = category_locales_list[i];
-#    endif
+        const char * entry = locales_list[i];
 
         names_len += category_name_lengths[i]
                   + 1                           /* '=' */
@@ -1765,12 +1764,7 @@ S_calculate_LC_ALL_string(pTHX_ const char ** category_locales_list)
     /* Then fill it in */
     for (i = 0; i < LC_ALL_INDEX_; i++) {
         Size_t new_len;
-
-#    ifdef USE_QUERYLOCALE
-        const char * entry = querylocale_l(i, cur_obj);
-#    else
-        const char * entry = category_locales_list[i];
-#    endif
+        const char * entry = locales_list[i];
 
         new_len = my_strlcat(aggregate_locale, category_names[i], names_len);
         assert(new_len <= names_len);
@@ -1810,7 +1804,6 @@ S_calculate_LC_ALL_string(pTHX_ const char ** category_locales_list)
     return aggregate_locale;
 }
 
-#  endif
 #  if defined(WIN32) || (     defined(USE_POSIX_2008_LOCALE)        \
                          && ! defined(USE_QUERYLOCALE))
 

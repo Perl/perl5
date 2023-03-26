@@ -1268,6 +1268,7 @@
 #       define populate_hash_from_localeconv(a,b,c,d,e) S_populate_hash_from_localeconv(aTHX_ a,b,c,d,e)
 #     endif
 #     if defined(USE_LOCALE)
+#       define calculate_LC_ALL_string(a)       S_calculate_LC_ALL_string(aTHX_ a)
 #       define get_category_index_helper(a,b,c) S_get_category_index_helper(aTHX_ a,b,c)
 #       define mortalized_pv_copy(a)            S_mortalized_pv_copy(aTHX_ a)
 #       define new_LC_ALL(a,b)                  S_new_LC_ALL(aTHX_ a,b)
@@ -1303,22 +1304,14 @@
 #         define querylocale_2008_i(a)          S_querylocale_2008_i(aTHX_ a)
 #         define setlocale_from_aggregate_LC_ALL(a,b) S_setlocale_from_aggregate_LC_ALL(aTHX_ a,b)
 #         define use_curlocale_scratch()        S_use_curlocale_scratch(aTHX)
-#         if defined(USE_QUERYLOCALE)
-#           define calculate_LC_ALL_string(a)   S_calculate_LC_ALL_string(aTHX_ a)
-#         else
+#         if !defined(USE_QUERYLOCALE)
 #           define update_PL_curlocales_i(a,b)  S_update_PL_curlocales_i(aTHX_ a,b)
 #         endif
-#       elif  defined(USE_LOCALE_THREADS) &&                  \
-             !defined(USE_THREAD_SAFE_LOCALE) &&              \
-             !defined(USE_THREAD_SAFE_LOCALE_EMULATION) /* &&
-             !defined(USE_POSIX_2008_LOCALE) */
+#       elif  defined(USE_LOCALE_THREADS) &&     \
+             !defined(USE_THREAD_SAFE_LOCALE) && \
+             !defined(USE_THREAD_SAFE_LOCALE_EMULATION)
 #         define less_dicey_bool_setlocale_r(a,b) S_less_dicey_bool_setlocale_r(aTHX_ a,b)
 #         define less_dicey_setlocale_r(a,b)    S_less_dicey_setlocale_r(aTHX_ a,b)
-#       endif
-#       if !(  defined(USE_POSIX_2008_LOCALE) && defined(USE_QUERYLOCALE) ) && \
-            ( !defined(LC_ALL) || defined(USE_POSIX_2008_LOCALE) ||            \
-               defined(WIN32) || defined(WIN32_USE_FAKE_OLD_MINGW_LOCALES) )
-#         define calculate_LC_ALL_string(a)     S_calculate_LC_ALL_string(aTHX_ a)
 #       endif
 #       if defined(WIN32) || defined(WIN32_USE_FAKE_OLD_MINGW_LOCALES)
 #         define Win_byte_string_to_wstring     S_Win_byte_string_to_wstring

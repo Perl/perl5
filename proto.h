@@ -6958,6 +6958,10 @@ S_populate_hash_from_localeconv(pTHX_ HV *hv, const char *locale, const U32 whic
 
 # endif /* defined(HAS_LOCALECONV) */
 # if defined(USE_LOCALE)
+STATIC const char *
+S_calculate_LC_ALL_string(pTHX_ const char **category_locales_list);
+#   define PERL_ARGS_ASSERT_CALCULATE_LC_ALL_STRING
+
 STATIC unsigned int
 S_get_category_index_helper(pTHX_ const int category, bool *success, const line_t caller_line)
         __attribute__warn_unused_result__;
@@ -7075,12 +7079,7 @@ STATIC locale_t
 S_use_curlocale_scratch(pTHX);
 #     define PERL_ARGS_ASSERT_USE_CURLOCALE_SCRATCH
 
-#     if defined(USE_QUERYLOCALE)
-STATIC const char *
-S_calculate_LC_ALL_string(pTHX_ const locale_t cur_obj);
-#       define PERL_ARGS_ASSERT_CALCULATE_LC_ALL_STRING
-
-#     else
+#     if !defined(USE_QUERYLOCALE)
 STATIC void
 S_update_PL_curlocales_i(pTHX_ const unsigned int index, const char *new_locale);
 #       define PERL_ARGS_ASSERT_UPDATE_PL_CURLOCALES_I \
@@ -7104,15 +7103,6 @@ S_less_dicey_setlocale_r(pTHX_ const int category, const char *locale);
              !defined(USE_POSIX_2008_LOCALE) &&
              !defined(USE_THREAD_SAFE_LOCALE) &&
              !defined(USE_THREAD_SAFE_LOCALE_EMULATION) */
-#   if !(  defined(USE_POSIX_2008_LOCALE) && defined(USE_QUERYLOCALE) ) && \
-        ( !defined(LC_ALL) || defined(USE_POSIX_2008_LOCALE) ||            \
-           defined(WIN32) || defined(WIN32_USE_FAKE_OLD_MINGW_LOCALES) )
-STATIC const char *
-S_calculate_LC_ALL_string(pTHX_ const char **category_locales_list);
-#     define PERL_ARGS_ASSERT_CALCULATE_LC_ALL_STRING \
-        assert(category_locales_list)
-
-#   endif
 #   if defined(WIN32) || defined(WIN32_USE_FAKE_OLD_MINGW_LOCALES)
 STATIC wchar_t *
 S_Win_byte_string_to_wstring(const UINT code_page, const char *byte_string);
