@@ -308,6 +308,7 @@ if (PLATFORM ne 'vms') {
 
 if (PLATFORM ne 'win32') {
     ++$skip{$_} foreach qw(
+		    Perl_get_context
 		    Perl_get_win32_message_utf8ness
 		    Perl_Win_utf8_string_to_wstring
 		    Perl_Win_wstring_to_utf8_string
