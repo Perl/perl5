@@ -13,10 +13,11 @@ our %Config_Override;
 
 use ExtUtils::MakeMaker qw($Verbose neatvalue _sprintf562);
 
-# If we make $VERSION an our variable parse_version() breaks
-use vars qw($VERSION);
-$VERSION = '7.66';
+# If $VERSION is in scope, parse_version() breaks
+{
+our $VERSION = '7.70';
 $VERSION =~ tr/_//d;
+}
 
 require ExtUtils::MM_Any;
 our @ISA = qw(ExtUtils::MM_Any);
@@ -34,7 +35,7 @@ BEGIN {
     $Is{SunOS4}  = $^O eq 'sunos';
     $Is{Solaris} = $^O eq 'solaris';
     $Is{SunOS}   = $Is{SunOS4} || $Is{Solaris};
-    $Is{BSD}     = ($^O =~ /^(?:free|net|open)bsd$/ or
+    $Is{BSD}     = ($^O =~ /^(?:free|midnight|net|open)bsd$/ or
                    grep( $^O eq $_, qw(bsdos interix dragonfly) )
                   );
     $Is{Android} = $^O =~ /android/;
@@ -2196,7 +2197,7 @@ Add MM_Unix_VERSION.
 sub init_platform {
     my($self) = shift;
 
-    $self->{MM_Unix_VERSION} = $VERSION;
+    $self->{MM_Unix_VERSION} = our $VERSION;
     $self->{PERL_MALLOC_DEF} = '-DPERL_EXTMALLOC_DEF -Dmalloc=Perl_malloc '.
                                '-Dfree=Perl_mfree -Drealloc=Perl_realloc '.
                                '-Dcalloc=Perl_calloc';
