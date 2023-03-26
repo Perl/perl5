@@ -1146,6 +1146,9 @@ S_less_dicey_bool_setlocale_r(pTHX_ const int cat, const char * locale)
 STATIC const char *
 S_querylocale_2008_i(pTHX_ const unsigned int index)
 {
+    PERL_ARGS_ASSERT_QUERYLOCALE_2008_I;
+    assert(index <= LC_ALL_INDEX_);
+
     /* This function returns the name of the locale category given by the input
      * index into our parallel tables of them.
      *
@@ -1161,20 +1164,19 @@ S_querylocale_2008_i(pTHX_ const unsigned int index)
      * libraries do use setlocale(), but that changes the global locale, and
      * threads using per-thread locales will just ignore those changes. */
 
-    int category;
     const locale_t cur_obj = uselocale((locale_t) 0);
     const char * retval;
 
-    PERL_ARGS_ASSERT_QUERYLOCALE_2008_I;
-    assert(index <= LC_ALL_INDEX_);
-
-    category = categories[index];
-
     DEBUG_Lv(PerlIO_printf(Perl_debug_log, "querylocale_2008_i(%s) on %p\n",
                                            category_names[index], cur_obj));
-    if (cur_obj == LC_GLOBAL_LOCALE) {
+    if (UNLIKELY(cur_obj == LC_GLOBAL_LOCALE)) {
+
+        /* Even on platforms that have querylocale(), it is unclear if they
+         * work in the global locale, and we have the means to get the correct
+         * answer anyway.  khw is unsure this situation even comes up these
+         * days, hence the branch prediction */
         POSIX_SETLOCALE_LOCK;
-        retval = mortalized_pv_copy(posix_setlocale(category, NULL));
+        retval = mortalized_pv_copy(posix_setlocale(categories[index], NULL));
         POSIX_SETLOCALE_UNLOCK;
     }
     else {
