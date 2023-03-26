@@ -25,7 +25,7 @@ my %Recognized_Att_Keys;
 our %macro_fsentity; # whether a macro is a filesystem name
 our %macro_dep; # whether a macro is a dependency
 
-our $VERSION = '7.66';
+our $VERSION = '7.70';
 $VERSION =~ tr/_//d;
 
 # Emulate something resembling CVS $Revision$
@@ -525,7 +525,10 @@ sub new {
                     # simulate "use warnings FATAL => 'all'" for vintage perls
                     die @_;
                 };
-                version->new( $perl_version )->numify;
+                my $v = version->new($perl_version);
+                # we care about parse issues, not numify warnings
+                no warnings;
+                $v->numify;
             };
             $perl_version =~ tr/_//d
                 if defined $perl_version;
@@ -1331,26 +1334,6 @@ sub neatvalue {
         push @m,"$key=>".neatvalue($v->{$key});
     }
     return "{ ".join(', ',@m)." }";
-}
-
-sub _find_magic_vstring {
-    my $value = shift;
-    return $value if $UNDER_CORE;
-    my $tvalue = '';
-    require B;
-    my $sv = B::svref_2object(\$value);
-    my $magic = ref($sv) eq 'B::PVMG' ? $sv->MAGIC : undef;
-    while ( $magic ) {
-        if ( $magic->TYPE eq 'V' ) {
-            $tvalue = $magic->PTR;
-            $tvalue =~ s/^v?(.+)$/v$1/;
-            last;
-        }
-        else {
-            $magic = $magic->MOREMAGIC;
-        }
-    }
-    return $tvalue;
 }
 
 sub selfdocument {
