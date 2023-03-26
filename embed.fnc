@@ -4328,6 +4328,8 @@ S	|void	|populate_hash_from_localeconv				\
 				|NULLOK const lconv_offset_t *integers
 # endif
 # if defined(USE_LOCALE)
+S	|const char *|calculate_LC_ALL_string					\
+				|NULLOK const char **category_locales_list
 RS	|unsigned int|get_category_index_helper 			\
 				|const int category			\
 				|NULLOK bool *success			\
@@ -4422,30 +4424,19 @@ S	|const char *|setlocale_from_aggregate_LC_ALL			\
 				|NN const char *locale			\
 				|const line_t line
 S	|locale_t|use_curlocale_scratch
-#     if defined(USE_QUERYLOCALE)
-S	|const char *|calculate_LC_ALL_string				\
-				|const locale_t cur_obj
-#     else
+#     if !defined(USE_QUERYLOCALE)
 S	|void	|update_PL_curlocales_i 				\
 				|const unsigned int index		\
 				|NN const char *new_locale
 #     endif
-#   elif  defined(USE_LOCALE_THREADS) &&                  \
-         !defined(USE_THREAD_SAFE_LOCALE) &&              \
-         !defined(USE_THREAD_SAFE_LOCALE_EMULATION) /* &&
-         !defined(USE_POSIX_2008_LOCALE) */
+#   elif  defined(USE_LOCALE_THREADS) && !defined(USE_THREAD_SAFE_LOCALE) && \
+         !defined(USE_THREAD_SAFE_LOCALE_EMULATION)
 S	|bool	|less_dicey_bool_setlocale_r				\
 				|const int cat				\
 				|NN const char *locale
 S	|const char *|less_dicey_setlocale_r				\
 				|const int category			\
 				|NULLOK const char *locale
-#   endif
-#   if !(  defined(USE_POSIX_2008_LOCALE) && defined(USE_QUERYLOCALE) ) && \
-        ( !defined(LC_ALL) || defined(USE_POSIX_2008_LOCALE) ||            \
-           defined(WIN32) || defined(WIN32_USE_FAKE_OLD_MINGW_LOCALES) )
-S	|const char *|calculate_LC_ALL_string				\
-				|NN const char **category_locales_list
 #   endif
 #   if defined(WIN32) || defined(WIN32_USE_FAKE_OLD_MINGW_LOCALES)
 ST	|wchar_t *|Win_byte_string_to_wstring				\
