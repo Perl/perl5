@@ -18,9 +18,7 @@ use Test::Harness qw(execute_tests);
 local $ENV{HARNESS_PERL_SWITCHES};
 
 my $TEST_DIR       = 't/sample-tests';
-my $NoTaintSupport = 
-    (exists($Config{taint_support}) && !$Config{taint_support}) ||
-    $Config{ccflags} =~ /-DSILENT_NO_TAINT_SUPPORT/;
+my $NoTaintSupport = exists($Config{taint_support}) && !$Config{taint_support};
 
 my @test_list      = qw(descriptive die die_head_end die_last_minute duplicates
                         head_end head_fail inc_taint junk_before_plan lone_not_bug

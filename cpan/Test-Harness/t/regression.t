@@ -22,9 +22,7 @@ use TAP::Parser;
 
 my $IsVMS          = $^O eq 'VMS';
 my $IsWin32        = $^O eq 'MSWin32';
-my $NoTaintSupport = 
-    (exists($Config{taint_support}) && !$Config{taint_support}) ||
-    $Config{ccflags} =~ /-DSILENT_NO_TAINT_SUPPORT/;
+my $NoTaintSupport = exists($Config{taint_support}) && !$Config{taint_support};
 
 my $SAMPLE_TESTS = File::Spec->catdir(
     File::Spec->curdir,
