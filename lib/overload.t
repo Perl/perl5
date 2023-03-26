@@ -1,17 +1,18 @@
 #!./perl -T
 
+use Config;
 BEGIN {
     chdir 't' if -d 't';
     @INC = '../lib';
-    require Config;
-    if (($Config::Config{'extensions'} !~ m!\bList/Util\b!) ){
+    if (($Config{'extensions'} !~ m!\bList/Util\b!) ){
 	print "1..0 # Skip -- Perl configured without List::Util module\n";
 	exit 0;
     }
 }
 
-my $no_taint_support = exists($Config::Config{taint_support})
-                     && !$Config::Config{taint_support};
+my $NoTaintSupport =
+    (exists($Config{taint_support}) && !$Config{taint_support}) ||
+    $Config{ccflags} =~ /-DSILENT_NO_TAINT_SUPPORT/;
 
 my %skip_fetch_count_when_no_taint = (
     '<${$ts}> RT57012_OV' => 1,
@@ -24,7 +25,7 @@ my %skip_fetch_count_when_no_taint = (
 
 sub is_if_taint_supported {
     my ($got, $expected, $name, @mess) = @_;
-    if ($expected && $no_taint_support) {
+    if ($expected && $NoTaintSupport) {
         return skip("your perl was built without taint support");
     }
     else {
@@ -2052,7 +2053,7 @@ foreach my $op (qw(<=> == != < <= > >=)) {
 		    my $exp_fetch = ($var eq '$ts') ?
 			    $exp_fetch_s : $exp_fetch_a;
 		    SKIP: {
-			if ($skip_fetch_count_when_no_taint{$desc} && $no_taint_support) {
+			if ($skip_fetch_count_when_no_taint{$desc} && $NoTaintSupport) {
 			    skip("your perl was built without taint support");
 			}
 			else {

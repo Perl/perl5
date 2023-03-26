@@ -124,7 +124,10 @@ try({PERL5OPT => '-w -w'},
     '');
 
 SKIP: {
-    if (exists($Config{taint_support}) && !$Config{taint_support}) {
+    if (
+        (exists($Config{taint_support}) && !$Config{taint_support}) ||
+        $Config{ccflags} =~ /-DSILENT_NO_TAINT_SUPPORT/
+    ) {
         skip("built without taint support", 2);
     }
     try({PERL5OPT => '-t'},

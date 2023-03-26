@@ -8,7 +8,10 @@ BEGIN {
 
 use Config;
 
-if (exists($Config{taint_support}) && !$Config{taint_support}) {
+if (
+    (exists($Config{taint_support}) && !$Config{taint_support}) ||
+    $Config{ccflags} =~ /-DSILENT_NO_TAINT_SUPPORT/
+) {
     skip_all("perl built without taint support");
 }
 

@@ -10,7 +10,7 @@ def
 # taint.c
 use Config;
 BEGIN {
-    if ( exists($Config{taint_support}) && not $Config{taint_support}) {
+    if ( (exists($Config{taint_support}) && not $Config{taint_support}) || $Config{ccflags} =~ /-DSILENT_NO_TAINT_SUPPORT/) {
 	print "SKIPPED\n# your perl was built without taint support\n";
 	exit 0;
     }
@@ -30,7 +30,7 @@ def
 # taint.c
 use Config;
 BEGIN {
-    if ( exists($Config{taint_support}) && not $Config{taint_support}) {
+    if ( (exists($Config{taint_support}) && not $Config{taint_support}) || $Config{ccflags} =~ /-DSILENT_NO_TAINT_SUPPORT/) {
 	print "SKIPPED\n# your perl was built without taint support\n";
 	exit 0;
     }
@@ -58,7 +58,7 @@ def
 # taint.c
 use Config;
 BEGIN {
-    if ( exists($Config{taint_support}) && not $Config{taint_support}) {
+    if ( (exists($Config{taint_support}) && not $Config{taint_support}) || $Config{ccflags} =~ /-DSILENT_NO_TAINT_SUPPORT/) {
 	print "SKIPPED\n# your perl was built without taint support\n";
 	exit 0;
     }

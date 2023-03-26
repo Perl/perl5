@@ -36,7 +36,9 @@ my $is_ebcdic = ord("A") == 193;
 my $os = lc $^O;
 
 # Configure now lets you build a perl that silently ignores taint features
-my $NoTaintSupport = exists($Config{taint_support}) && !$Config{taint_support};
+my $NoTaintSupport =
+    (exists($Config{taint_support}) && !$Config{taint_support}) ||
+    $Config{ccflags} =~ /-DSILENT_NO_TAINT_SUPPORT/;
 
 no warnings 'locale';  # We test even weird locales; and do some scary things
                        # in ok locales

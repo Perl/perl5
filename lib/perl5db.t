@@ -687,8 +687,10 @@ sub _calc_trace_wrapper
 }
 
 # taint tests
-if (!exists($Config{taint_support}) || $Config{taint_support})
-{
+if (
+    (!exists($Config{taint_support}) || $Config{taint_support}) &&
+    $Config{ccflags} !~ /-DSILENT_NO_TAINT_SUPPORT/
+) {
     my $wrapper = _calc_trace_wrapper(
         {
             prog => '../lib/perl5db/t/taint',

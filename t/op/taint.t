@@ -18,7 +18,9 @@ use strict;
 use warnings;
 use Config;
 
-my $NoTaintSupport = exists($Config{taint_support}) && !$Config{taint_support};
+my $NoTaintSupport = 
+    (exists($Config{taint_support}) && !$Config{taint_support}) ||
+    $Config{ccflags} =~ /-DSILENT_NO_TAINT_SUPPORT/;
 
 if ($NoTaintSupport) {
     skip_all("your perl was built without taint support");
