@@ -7,7 +7,10 @@ use Config;
 use Test::More;
 use Scalar::Util qw(tainted);
 
-if (exists($Config{taint_support}) && not $Config{taint_support}) {
+if (
+    (exists($Config{taint_support}) && not $Config{taint_support}) ||
+    $Config{ccflags} =~ /-DSILENT_NO_TAINT_SUPPORT/
+) {
     plan skip_all => "your perl was built without taint support";
 }
 else {
