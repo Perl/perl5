@@ -4445,7 +4445,7 @@ S	|const char *|less_dicey_setlocale_r				\
         ( !defined(LC_ALL) || defined(USE_POSIX_2008_LOCALE) ||            \
            defined(WIN32) || defined(WIN32_USE_FAKE_OLD_MINGW_LOCALES) )
 S	|const char *|calculate_LC_ALL_string				\
-				|NN const char **individ_locales
+				|NN const char **category_locales_list
 #   endif
 #   if defined(WIN32) || defined(WIN32_USE_FAKE_OLD_MINGW_LOCALES)
 ST	|wchar_t *|Win_byte_string_to_wstring				\
