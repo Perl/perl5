@@ -1115,14 +1115,15 @@ S_less_dicey_bool_setlocale_r(pTHX_ const int cat, const char * locale)
  * are equivalents, like LC_NUMERIC_MASK, which we use instead, which we find
  * by table lookup. */
 
-#  define querylocale_i(i)    querylocale_2008_i(i)
-#  define querylocale_c(cat)  querylocale_i(cat##_INDEX_)
-#  define querylocale_r(cat)  querylocale_i(get_category_index(cat))
-
 #  if defined(__GLIBC__) && defined(USE_LOCALE_MESSAGES)
+            /* https://sourceware.org/bugzilla/show_bug.cgi?id=24936 */
 #    define HAS_GLIBC_LC_MESSAGES_BUG
 #    include <libintl.h>
 #  endif
+
+#  define querylocale_i(i)    querylocale_2008_i(i)
+#  define querylocale_c(cat)  querylocale_i(cat##_INDEX_)
+#  define querylocale_r(cat)  querylocale_i(get_category_index(cat))
 
 STATIC const char *
 S_querylocale_2008_i(pTHX_ const unsigned int index)
