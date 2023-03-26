@@ -1332,6 +1332,12 @@ typedef struct {
 } lconv_offset_t;
 
 
+typedef enum {
+    invalid,
+    no_array,
+    full_array
+} parse_LC_ALL_string_return;
+
 #endif
 
 #include <setjmp.h>
