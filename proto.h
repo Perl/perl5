@@ -7108,9 +7108,9 @@ S_less_dicey_setlocale_r(pTHX_ const int category, const char *locale);
         ( !defined(LC_ALL) || defined(USE_POSIX_2008_LOCALE) ||            \
            defined(WIN32) || defined(WIN32_USE_FAKE_OLD_MINGW_LOCALES) )
 STATIC const char *
-S_calculate_LC_ALL_string(pTHX_ const char **individ_locales);
+S_calculate_LC_ALL_string(pTHX_ const char **category_locales_list);
 #     define PERL_ARGS_ASSERT_CALCULATE_LC_ALL_STRING \
-        assert(individ_locales)
+        assert(category_locales_list)
 
 #   endif
 #   if defined(WIN32) || defined(WIN32_USE_FAKE_OLD_MINGW_LOCALES)
