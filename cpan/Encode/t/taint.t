@@ -12,10 +12,7 @@ my $notaint = "";
 my $notaint_str = "dan\x{5f3e}" . $notaint;
 my $notaint_bin = encode('UTF-8', $notaint_str);
 my @names = Encode->encodings(':all');
-if (
-    (exists($Config{taint_support}) && not $Config{taint_support}) ||
-    $Config{ccflags} =~ /-DSILENT_NO_TAINT_SUPPORT/
-) {
+if (exists($Config{taint_support}) && not $Config{taint_support}) {
     plan skip_all => "your perl was built without taint support";
 }
 else {
