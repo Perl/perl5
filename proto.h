@@ -7079,6 +7079,13 @@ STATIC locale_t
 S_use_curlocale_scratch(pTHX);
 #     define PERL_ARGS_ASSERT_USE_CURLOCALE_SCRATCH
 
+#     if defined(LC_ALL)
+STATIC parse_LC_ALL_string_return
+S_parse_LC_ALL_string(pTHX_ const char *string, const char **output, const line_t caller_line);
+#       define PERL_ARGS_ASSERT_PARSE_LC_ALL_STRING \
+        assert(string); assert(output)
+
+#     endif
 #     if !defined(USE_QUERYLOCALE)
 STATIC void
 S_update_PL_curlocales_i(pTHX_ const unsigned int index, const char *new_locale);

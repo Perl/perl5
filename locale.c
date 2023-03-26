@@ -768,6 +768,200 @@ Perl_locale_panic(const char * msg,
 #define setlocale_failure_panic_c(cat, cur, fail, line, higher_line)        \
    setlocale_failure_panic_i(cat##_INDEX_, cur, fail, line, higher_line)
 
+#if defined(USE_POSIX_2008_LOCALE) && defined(LC_ALL)
+
+STATIC parse_LC_ALL_string_return
+S_parse_LC_ALL_string(pTHX_ const char * string,
+                            const char ** output,
+                            const line_t caller_line)
+{
+    /* This function parses the value of the input 'string' which is expected
+     * to be the representation of an LC_ALL locale, and splits the result into
+     * the values for the individual component categories, returning those in
+     * the 'output' array.  Each array value will be a savepv() copy that is
+     * the responsibility of the caller to make sure gets freed
+     *
+     * The locale for each category is independent of the other categories.
+     * Often, they are all the same, but certainly not always.  Perl, in fact,
+     * usually keeps LC_NUMERIC in the C locale, regardless of the underlying
+     * locale.  LC_ALL has to be able to represent the case of when not all
+     * categories have the same locale.  Platforms have differing ways of
+     * representing this.  Internally, this file uses the 'name=value;'
+     * representation found on some platforms, so this function always looks
+     * for and parses that.
+     *
+     * Often, all categories will have the same locale.  In that case, the
+     * input 'string' likely is a single value, and no splitting is needed.
+     * In such cases, this function doesn't store anything into 'output', and
+     * returns 'no_array'.
+     *
+     * Otherwise, the input 'string' may not be valid.  This function looks
+     * mainly for syntactic errors, and if found, returns 'invalid'.  'output'
+     * will not be filled in in that case, but the input state of it isn't
+     * necessarily preserved.  Turning on -DL debugging will give details as to
+     * the error.
+     *
+     * Otherwise, output[] will be filled with the individual locale names for
+     * all categories on the system, 'full_array' will be returned, and the
+     * caller needs to arrange for each to be freed.
+     *
+     */
+
+    DEBUG_Lv(PerlIO_printf(Perl_debug_log,
+                           "Entering parse_LC_ALL_string; called from %"    \
+                           LINE_Tf "\nnew='%s'\n", caller_line, string));
+
+    const char separator[] = ";";
+    const Size_t separator_len = 1;
+    const bool single_component = (strchr(string, ';') == NULL);
+
+    if (single_component) {
+        return no_array;
+    }
+
+    /* Here the input is multiple components.  Parse through them.
+     *
+     * This enum notes the possible errors findable in parsing */
+    enum {
+            incomplete,
+            no_equals,
+            unknown_category,
+            contains_LC_ALL_element
+    } error;
+
+    /* Keep track of the categories we have encountered so far */
+    bool seen[LC_ALL_INDEX_] = { false };
+
+    Size_t index;           /* Our internal index for the current category */
+    const char * s = string;
+    const char * e = s + strlen(string);
+    const char * category_end = NULL;
+
+    /* Parse the input locale string */
+    while (s < e) {
+
+        /* 'separator' has been set up to delimit the components */
+        const char * next_sep = instr(s, separator);
+        if (! next_sep) {   /* At the end of the input */
+            next_sep = e;
+        }
+
+        {   /* Get the category part */
+
+            category_end = strchr(s, '=');
+
+            /* The '=' terminates the category name.  If no '=', is improper
+             * form */
+            if (! category_end) {
+                error = no_equals;
+                goto failure;
+            }
+
+            /* Find our internal index of the category name; uses a linear
+             * search.  (XXX This could be avoided by various means, but the
+             * maximum likely search is 6 items, and khw doesn't think the
+             * added complexity would save very much at all.) */
+            const unsigned int name_len = (unsigned int) (category_end - s);
+            for (index = 0; index < C_ARRAY_LENGTH(category_names); index++) {
+                if (   name_len == category_name_lengths[index]
+                    && memEQ(s, category_names[index], name_len))
+                {
+                    goto found_category;
+                }
+            }
+
+            /* Here, the category is not in our list. */
+            error = unknown_category;
+            goto failure;
+
+          found_category:   /* The system knows about this category. */
+
+            if (index == LC_ALL_INDEX_) {
+                error = contains_LC_ALL_element;
+                goto failure;
+            }
+
+            /* The locale name starts just beyond the '=' */
+            s = category_end + 1;
+
+            /* Linux (and maybe others) doesn't treat a duplicate category in
+             * the string as an error.  Instead it uses the final occurrence as
+             * the intended value.  So if this is a duplicate, free the former
+             * value before setting the new one */
+            if (seen[index]) {
+                Safefree(output[index]);
+            }
+            else {
+                seen[index] = true;
+            }
+        }
+
+        /* Here, 'index' contains our internal index number for the current
+         * category, and 's' points to the beginning of the locale name for
+         * that category. */
+        output[index] = savepvn(s, next_sep - s);
+
+        /* Next time start from the new position */
+        s = next_sep + separator_len;
+    }
+
+    /* Finished looping through all the categories */
+
+    {
+        for (unsigned int i = 0; i < LC_ALL_INDEX_; i++) {
+            if (! seen[i]) {
+                error = incomplete;
+                goto failure;
+            }
+        }
+    }
+
+        return full_array;
+
+  failure:
+
+    /* Don't leave memory dangling that we allocated before the failure */
+    for (unsigned int i = 0; i < LC_ALL_INDEX_; i++) {
+        if (seen[i]) {
+            Safefree(output[i]);
+            output[i] = NULL;
+        }
+    }
+
+    const char * msg;
+    const char * display_start = s;
+    const char * display_end = e;
+
+    switch (error) {
+        case incomplete:
+            msg = "doesn't list every locale category";
+            display_start = string;
+            break;
+        case no_equals:
+            msg = "needs an '=' to split name=value";
+            break;
+        case unknown_category:
+            msg = "is an unknown category";
+            display_end = (category_end && category_end > display_start)
+                          ? category_end
+                          : e;
+            break;
+        case contains_LC_ALL_element:
+            msg = "has LC_ALL, which is illegal here";
+            break;
+    }
+
+    msg = Perl_form(aTHX_ "'%.*s' %s\n",
+                          (int) (display_end - display_start),
+                          display_start, msg);
+
+    DEBUG_L(PerlIO_printf(Perl_debug_log, "%s", msg));
+
+    return invalid;
+}
+
+#endif
+
 /*==========================================================================
  * Here starts the code that gives a uniform interface to its callers, hiding
  * the differences between platforms.
@@ -1401,114 +1595,48 @@ S_setlocale_from_aggregate_LC_ALL(pTHX_ const char * locale, const line_t line)
 
     PERL_ARGS_ASSERT_SETLOCALE_FROM_AGGREGATE_LC_ALL;
 
-    /* If the string that gives what to set doesn't include all categories,
-     * the omitted ones get set to "C".  To get this behavior, first set
-     * all the individual categories to "C", and override the furnished
-     * ones below.  FALSE => No need to recalculate LC_ALL, as this is a
-     * temporary state */
-    if (! bool_setlocale_2008_i(LC_ALL_INDEX_, "C", line)) {
-        setlocale_failure_panic_c(LC_ALL, locale_on_entry, "C", __LINE__, line);
+    const char * locale_categories[LOCALE_CATEGORIES_COUNT_];
+    switch (parse_LC_ALL_string(locale,
+                                (const char **) &locale_categories,
+                                line))
+    {
+      case invalid:
+        return NULL;
+
+      case no_array:
+        locale_panic_(Perl_form(aTHX_ "(%" LINE_Tf
+                                      "): expecting aggregate locale, got '%s'",
+                                      line, locale));
         NOT_REACHED; /* NOTREACHED */
+
+      case full_array:
+        break;
     }
 
-    const char * s = locale;
-    const char * e = locale + strlen(locale);
-    while (s < e) {
-        const char * p = s;
+    /* Change each category to the value returned for it */
+    for (unsigned int i = 0; i < LC_ALL_INDEX_; i++) {
+        if (! bool_setlocale_2008_i(i, locale_categories[i], line)) {
 
-        /* Parse through the category */
-        while (isWORDCHAR(*p)) {
-            p++;
-        }
-
-        const char * category_end = p;
-
-        if (*p++ != '=') {
-            locale_panic_(Perl_form(aTHX_
-                          "Unexpected character in locale category name '%s"
-                          "<-- HERE",
-                          get_displayable_string(s, p - 1, 0)));
-        }
-
-        /* Parse through the locale name */
-        const char * name_start = p;
-        while (p < e && *p != ';') {
-            p++;
-        }
-        if (UNLIKELY( p < e && *p != ';')) {
-            locale_panic_(Perl_form(aTHX_
-                          "Unexpected character in locale name '%s<-- HERE",
-                          get_displayable_string(s, p, 0)));
-        }
-
-        const char * name_end = p;
-
-        /* Space past the semi-colon */
-        if (p < e) {
-            p++;
-        }
-
-        /* Find the index of the category name in our lists */
-        for (PERL_UINT_FAST8_T i = 0; i < LC_ALL_INDEX_; i++) {
-
-            /* Keep going if this index doesn't point to the category being
-             * parsed.  The strnNE() avoids a Perl_form(), but would fail if
-             * ever a category name could be a substring of another one, e.g.,
-             * if there were a "LC_TIME_DATE" */
-            if strnNE(s, category_names[i], category_end - s) {
-                continue;
+            /* If we have to back out, fix up LC_ALL */
+            if (! bool_setlocale_2008_i(LC_ALL_INDEX_, locale_on_entry, line)) {
+                setlocale_failure_panic_i(i, locale_categories[i],
+                                          locale, __LINE__, line);
+                NOT_REACHED; /* NOTREACHED */
             }
 
-            /* Here i points to the category being parsed.  Now isolate the
-             * locale it is being changed to */
-            const char * individ_locale = Perl_form(aTHX_ "%.*s",
-                                (int) (name_end - name_start), name_start);
-
-            /* And do the change.  Don't recalculate LC_ALL; we'll do it
-             * ourselves after the loop */
-            if (! bool_setlocale_2008_i(i, individ_locale, line))
-            {
-
-                /* But if we have to back out, do fix up LC_ALL */
-                if (! bool_setlocale_2008_i(LC_ALL_INDEX_, locale_on_entry,
-                                            line))
-                {
-                    setlocale_failure_panic_i(i, individ_locale,
-                                              locale, __LINE__, line);
-                    NOT_REACHED; /* NOTREACHED */
-                }
-
-                /* Reverting to the entry value succeeded, but the operation
-                 * failed to go to the requested locale. */
-                return NULL;
+            /* Reverting to the entry value succeeded, but the operation
+             * failed to go to the requested locale.  Free the rest of
+             * locale_categories[] and return failure. */
+            for (unsigned int j = i; j < LC_ALL_INDEX_; j++) {
+                Safefree(locale_categories[i]);
             }
-
-            /* Found and handled the desired category.  Quit the inner loop to
-             * try the next category */
-            break;
+            return NULL;
         }
 
-        /* Finished with this category; iterate to the next one in the input */
-        s = p;
+        Safefree(locale_categories[i]);
     }
 
-#    ifdef USE_PL_CURLOCALES
-
-    /* Here we have set all the individual categories.  Update the LC_ALL entry
-     * as well.  We can't just use the input 'locale' as the value may omit
-     * categories whose locale is 'C'.  khw thinks it's better to store a
-     * complete LC_ALL.  So calculate it. */
-    const char * retval = savepv(calculate_LC_ALL_string(PL_curlocales));
-    Safefree(PL_curlocales[LC_ALL_INDEX_]);
-    PL_curlocales[LC_ALL_INDEX_] = retval;
-
-#    else
-
-    const char * retval = querylocale_c(LC_ALL);
-
-#    endif
-
-    return retval;
+    return querylocale_c(LC_ALL);
 }
 
 STATIC bool
@@ -1845,10 +1973,10 @@ S_calculate_LC_ALL_string(pTHX_ const char ** category_locales_list)
      * categories, adding new ones as they show up on obscure platforms.
      */
 
-    const char * my_category_locales_list[LOCALE_CATEGORIES_COUNT_];
+    const char * my_category_locales_list[LC_ALL_INDEX_];
     const char ** locales_list = category_locales_list;
     if (locales_list == NULL) {
-        locales_list = (const char **) &my_category_locales_list;
+        locales_list = my_category_locales_list;
 
         for (unsigned i = 0; i < LC_ALL_INDEX_; i++) {
             locales_list[i] = querylocale_i(i);
