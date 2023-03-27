@@ -6478,6 +6478,10 @@ S_get_displayable_string(pTHX_
     bool first_time = TRUE;
     char * ret;
 
+    if (e <= s) {
+        return "";
+    }
+
     /* Worst case scenario: All are non-printable so have a blank between each.
      * If UTF-8, all are the largest possible code point; otherwise all are a
      * single byte.  '(2 + 1)'  is from each byte takes 2 characters to
