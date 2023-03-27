@@ -1985,11 +1985,13 @@ S_new_numeric(pTHX_ const char *newnum, bool force)
      * library routines anyway. */
 
     const char * scratch_buffer = NULL;
-    PL_numeric_underlying_is_standard &= strEQ(C_thousands_sep,
-                                               my_langinfo_c(THOUSEP, LC_NUMERIC,
-                                                             PL_numeric_name,
-                                                             &scratch_buffer,
-                                                             NULL, NULL));
+    if (PL_numeric_underlying_is_standard) {
+        PL_numeric_underlying_is_standard = strEQ(C_thousands_sep,
+                                             my_langinfo_c(THOUSEP, LC_NUMERIC,
+                                                           PL_numeric_name,
+                                                           &scratch_buffer,
+                                                           NULL, NULL));
+    }
     Safefree(scratch_buffer);
 
 #    else
