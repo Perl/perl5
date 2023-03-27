@@ -1001,8 +1001,6 @@ S_less_dicey_bool_setlocale_r(pTHX_ const int cat, const char * locale)
 #    include <libintl.h>
 #  endif
 
-#  define my_querylocale_c(cat) querylocale_2008_i(cat##_INDEX_)
-
 STATIC const char *
 S_querylocale_2008_i(pTHX_ const unsigned int index)
 {
@@ -1551,7 +1549,7 @@ S_bool_setlocale_2008_i(pTHX_
     /* Invalidate the glibc cache of loaded translations if the locale has
      * changed, see [perl #134264] */
     if (old_messages_locale) {
-        if (strNE(old_messages_locale, my_querylocale_c(LC_MESSAGES))) {
+        if (strNE(old_messages_locale, querylocale_c(LC_MESSAGES))) {
             textdomain(textdomain(NULL));
         }
     }
