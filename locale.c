@@ -33,6 +33,13 @@
  * switched to the C locale for outputting the message unless within the scope
  * of 'use locale'.
  *
+ * There is more than the typical amount of variation between platforms with
+ * regard to locale handling.  At the end of these introductory comments, are
+ * listed various relevent Configuration options, including some that can be
+ * used to pretend to some extent that this is being developed on a different
+ * platform than it actually is.  This allows you to make changes and catch
+ * some errors without having access to those other platforms.
+ *
  * This code now has multi-thread-safe locale handling on systems that support
  * that.  This is completely transparent to most XS code.  On earlier systems,
  * it would be possible to emulate thread-safe locales, but this likely would
@@ -46,23 +53,10 @@
  * to table lookup.  Instead we have created our own equivalent values which
  * are all small contiguous non-negative integers, and translation functions
  * between the two sets.  For category 'LC_foo', the name of our index is
- * LC_foo_INDEX_.  Various parallel tables, indexed by these, are used.
- *
- * Many of the macros and functions in this file have one of the suffixes '_c',
- * '_r', or '_i'.  khw found these useful in remembering what type of locale
- * category to use as their parameter.  '_r' takes an int category number as
- * passed to setlocale(), like LC_ALL, LC_CTYPE, etc.  The 'r' indicates that
- * the value isn't known until runtime.  '_c' also indicates such a category
- * number, but its value is known at compile time.  These are both converted
- * into unsigned indexes into various tables of category information, where the
- * real work is generally done.  The tables are generated at compile-time based
- * on platform characteristics and Configure options.  They hide from the code
- * many of the vagaries of the different locale implementations out there.  You
- * may have already guessed that '_i' indicates the parameter is such an
- * unsigned index.  Converting from '_r' to '_i' requires run-time lookup.
- * '_c' is used to get cpp to do this at compile time.  To avoid the runtime
- * expense, the code is structured to use '_r' at the API level, and once
- * converted, everything possible is done using the table indexes.
+ * LC_foo_INDEX_.  Various parallel tables, indexed by these, are used for the
+ * translation.  The tables are generated at compile-time based on platform
+ * characteristics and Configure options.  They hide from the code many of the
+ * vagaries of the different locale implementations out there.
  *
  * On unthreaded perls, most operations expand out to just the basic
  * setlocale() calls.  The same is true on threaded perls on modern Windows
@@ -85,22 +79,39 @@
  * There are 3.5 major implementations here; which one chosen depends on what
  * the platform has available, and Configuration options.
  *
- * 1) Raw my_setlocale().  Here the layer adds nothing.  This is used for
- *    unthreaded perls, and when the API for safe locale threading is identical
- *    to the unsafe API (Windows, currently).
+ * 1) Raw posix_setlocale().  This implementation is basically the libc
+ *    setlocale(), with possibly minor tweaks.  This is used for startup, and
+ *    always for unthreaded perls, and when the API for safe locale threading
+ *    is identical to the unsafe API (Windows, currently).
  *
- * 2) A minimal layer that makes my_setlocale() uninterruptible and returns a
+ *    This implementation is composed of two layers:
+ *      a)  posix_setlocale() implements the libc setlocale().  In most cases,
+ *          it is just an alias for the libc version.  But Windows doesn't
+ *          fully conform to the POSIX standard, and this is a layer on top of
+ *          libc to bring it more into conformance.
+ *      b)  stdized_setlocale() is a layer above a) that fixes some vagaries in
+ *          the return value of the libc setlocale().
+ *
+ * 2) An implementation that adds a minimal layer above implementation 1),
+ *    making that implementation uninterruptible and returning a
  *    per-thread/per-category value.
  *
- * 3a and 3b) A layer that implements POSIX 2008 thread-safe locale handling,
- *    mapping the setlocale() API to them.  This automatically makes almost all
- *    code thread-safe without need for changes.  This layer is chosen on
- *    threaded perls when the platform supports the POSIX 2008 functions, and
- *    when there is no manual override in Configure.
+ * 3a and 3b) An implementation of POSIX 2008 thread-safe locale handling,
+ *    hiding from the programmer the completely different API for this.
+ *    This automatically makes almost all code thread-safe without need for
+ *    changes.  This implementation is chosen on threaded perls when the
+ *    platform properly supports the POSIX 2008 functions, and when there is no
+ *    manual override to the contrary passed to Configure.
  *
- *    3a) is when the platform has a reliable querylocale() function or
- *        equivalent that is selected to be used.
+ *    3a) is when the platform has a documented reliable querylocale() function
+ *        or equivalent that is selected to be used.
  *    3b) is when we have to emulate that functionality.
+ *
+ *    Unfortunately, it seems that some platforms that claim to support these
+ *    are buggy, in one way or another.  There are workarounds encoded here,
+ *    where feasible, for platforms where the bugs are amenable to that
+ *    (glibc, for example).  But other platforms instead don't use this
+ *    implementation.
  *
  * z/OS (os390) is an outlier.  Locales really don't work under threads when
  * either the radix character isn't a dot, or attempts are made to change
@@ -111,6 +122,112 @@
  * its locale information before the first fork, and be stable thereafter.  But
  * perl toggles LC_NUMERIC if the locale's radix character isn't a dot, as do
  * the other toggles, which are less common.
+ *
+ * Associated with each implementation are three sets of macros that translate
+ * a consistent API into what that implementation needs.  Each set consists of
+ * three macros with the suffixes:
+ *  _c  Means the argument is a locale category number known at compile time.
+ *          An example would be LC_TIME.  This token is a compile-time constant
+ *          and can be passed to a '_c' macro.
+ *  _r  Means the argument is a locale category number whose value might not be
+ *      known until runtime
+ *  _i  Means the argument is our internal index of a locale category
+ *
+ * The three sets are:    ('_X'  means one of '_c', '_r', '_i')
+ * 1) bool_setlocale_X()
+ *      This calls the appropriate setlocale()-equivalent for the
+ *      implementation, with the category and new locale.  The input locale is
+ *      not necessarily valid, so the return is true or false depending on
+ *      whether or not the setlocale() succeeded.  This is not used for
+ *      querying the locale, so the input locale must not be NULL.
+ *
+ *      This macro is suitable for toggling the locale back and forth during an
+ *      operation.  For example, the names of days and months under LC_TIME are
+ *      strings that are also subject to LC_CTYPE.  If the locales of these two
+ *      categories differ, mojibake can result on many platforms.  The code
+ *      here will toggle LC_CTYPE into the locale of LC_TIME temporarily to
+ *      avoid this.
+ *
+ *      Several categories require extra work when their locale is changed.
+ *      LC_CTYPE, for example, requires the calculation of the table of which
+ *      characters fold to which others under /i pattern matching or fc(), as
+ *      folding is not a concept in POSIX.  This table isn't needed when the
+ *      LC_CTYPE locale gets toggled during an operation, and will be toggled
+ *      back before return to the caller.  To save work that would be
+ *      discarded, the bool_setlocale_X() implementations don't do this extra
+ *      work.  Instead, there is a separate function for just this purpose to
+ *      be done before control is transferred back to the external caller.  All
+ *      categories that have such requirements have such a function.  The
+ *      update_functions[] array contains pointers to them (or NULL for
+ *      categories which don't need a function).
+ *
+ *      Care must be taken to remember to call the separate function before
+ *      returning to an external caller, and to not use things it updates
+ *      before its call.  An alternative approach would be to have
+ *      bool_setlocale_X() always call the update, which would return
+ *      immediately if a flag wasn't set indicating it was time to actually
+ *      perform it.
+ *
+ * 2) void_setlocale_X()
+ *      This is like bool_setlocale_X(), but it is used only when it is
+ *      expected that the call must succeed, or something is seriously wrong.
+ *      A panic is issued if it fails.  The caller uses this form when it just
+ *      wants to assume things worked.
+ *
+ * 3) querylocale_X()
+ *      This returns a string that specifies the current locale for the given
+ *      category given by the input argument.  The string is safe from other
+ *      threads zapping it, and the caller need not worry about freeing it, but
+ *      it may be mortalized, so must be copied if you need to preserve it
+ *      across calls, or long term.  This returns the actual current locale,
+ *      not the nominal.  These differ, for example, when LC_NUMERIC is
+ *      supposed to be a locale whose decimal radix character is a comma.  As
+ *      mentioned above, Perl actually keeps this category set to C in such
+ *      circumstances so that XS code can just assume a dot radix character.
+ *      querylocale_X() returns the locale that libc has stored at this moment,
+ *      so most of the time will return a locale whose radix character is a
+ *      dot.
+ *
+ * The underlying C API that this implements uses category numbers, hence the
+ * code is structured to use '_r' at the API level to convert to indexes, which
+ * are then used internally with the '_i' forms.
+ *
+ * The splitting apart into setting vs querying means that the return value of
+ * the bool macros is not subject to potential clashes with other threads,
+ * eliminating any need for the calling code to worry about that and get it
+ * wrong.  Whereas, you do have to think about thread interactions when using a
+ * query.
+ *
+ * There are also a few other macros herein that use this naming convention to
+ * describe their category parameter.
+ *
+ * Relevant Configure options
+ *
+ *      -Accflags=-DNO_LOCALE
+ *          This compiles perl to always use the C locale, ignoring any
+ *          attempts to change it.  This could be useful on platforms with a
+ *          crippled locale implementation.  microperl uses it.
+ *
+ *      -Accflags=-DNO_THREAD_SAFE_LOCALE
+ *          Even if thread-safe operations are available on this platform and
+ *          would otherwise be used (because this is a perl with multiplicity),
+ *          perl is compiled to not use them.  This could be useful on
+ *          platforms where the libc is buggy.
+ *
+ *      -Accflags=-DNO_POSIX_2008_LOCALE
+ *          Even if the libc locale operations specified by the Posix 2008
+ *          Standard are available on this platform and would otherwise be used
+ *          (because this is a perl with multiplicity), perl is compiled to not
+ *          use them.  This could be useful on platforms where the libc is
+ *          buggy.  This is like NO_THREAD_SAFE_LOCALE, but has no effect on
+ *          platforms that don't have these functions.
+ *
+ *      -Accflags=-DUSE_POSIX_2008_LOCALE
+ *          Normally, setlocale() is used for locale operations on perls
+ *          compiled without multiplicity.  This option causes the locale
+ *          operations defined by the Posix 2008 Standard to always be used
+ *          instead.  This could be useful on platforms where the libc
+ *          setlocale() is buggy.
  */
 
 /* If the environment says to, we can output debugging information during
@@ -526,18 +643,29 @@ Perl_locale_panic(const char * msg,
         setlocale_failure_panic_i(cat##_INDEX_, current, failed,            \
                         caller_0_line, caller_1_line)
 
-/* posix_setlocale() presents a consistent POSIX-compliant interface to
+/*==========================================================================
+ * Here starts the code that gives a uniform interface to its callers, hiding
+ * the differences between platforms.
+ *
+ * posix_setlocale() presents a consistent POSIX-compliant interface to
  * setlocale().   Windows requres a customized base-level setlocale().  Any
- * necessary mutex locking needs to be done at a higher level */
+ * necessary mutex locking needs to be done at a higher level.  The
+ * returns may be overwritten by the next call to the macro. */
 #ifdef WIN32
 #  define posix_setlocale(cat, locale) win32_setlocale(cat, locale)
 #else
 #  define posix_setlocale(cat, locale) ((const char *) setlocale(cat, locale))
 #endif
 
-/* The next layer up is to catch vagaries and bugs in the libc setlocale return
- * value.  Again, any necessary mutex locking needs to be done at a higher
- * level */
+/* End of posix layer
+ *==========================================================================
+ *
+ * The next layer up is to catch vagaries and bugs in the libc setlocale return
+ * value.  The return is not guaranteed to be stable.
+ *
+ * Any necessary mutex locking needs to be done at a higher level.
+ *
+ */
 #ifdef stdize_locale
 #  define stdized_setlocale(cat, locale)                                       \
      stdize_locale(cat, posix_setlocale(cat, locale),                          \
@@ -688,24 +816,64 @@ S_stdize_locale(pTHX_ const int category,
     return retval;
 }
 
-#endif
+#endif  /* USE_LOCALE */
 
-/* The next many lines form a layer above the close-to-the-metal 'posix'
- * and 'stdized' macros.  They are used to present a uniform API to the rest of
- * the code in this file in spite of the disparate underlying implementations.
- * */
+/* End of stdize_locale layer
+ *
+ * ==========================================================================
+ *
+ * The next many lines form several implementations of a layer above the
+ * close-to-the-metal 'posix' and 'stdized' macros.  They are used to present a
+ * uniform API to the rest of the code in this file in spite of the disparate
+ * underlying implementations.  Which implementation gets compiled depends on
+ * the platform capabilities (and some user choice) as determined by Configure.
+ *
+ * As more fully described in the introductory comments in this file, the
+ * API of each implementation consists of three sets of macros.  Each set has
+ * three variants with suffixes '_c', '_r', and '_i'.  In the list below '_X'
+ * is to be replaced by any of these suffixes.
+ *
+ * 1) bool_setlocale_X  attempts to set the given category's locale to the
+ *                      given value, returning if it worked or not.
+ * 2) void_setlocale_X  is like the corresponding bool_setlocale, but used when
+ *                      success is the only sane outcome, so failure causes it
+ *                      to panic.
+ * 3) querylocale_X     to see what the given category's locale is
+ *
+ * Each implementation below is separated by ==== lines, and includes bool,
+ * void, and query macros.  The query macros are first, followed by any
+ * functions needed to implement them.  Then come the bool, again followed by
+ * any implementing functions  Finally are the void macros.  The sets in each
+ * implementation are separated by ---- lines.
+ *
+ * The returned strings from all the querylocale...() forms in all
+ * implementations are thread-safe, and the caller should not free them,
+ * but each may be a mortalized copy.  If you need something stable across
+ * calls, you need to savepv() the result yourself.
+ *
+ *===========================================================================*/
 
 #if    (! defined(USE_LOCALE_THREADS) && ! defined(USE_POSIX_2008_LOCALE))    \
     || (  defined(WIN32) && defined(USE_THREAD_SAFE_LOCALE))
 
-/* For non-threaded perls, the added layer just expands to the base-level
- * functions, except if we are supposed to use the POSIX 2008 interface anyway.
- * On perls where threading is invisible to us, the base-level functions are
- * used regardless of threading.  Currently this is only on later Windows
- * versions.
- *
- * See the introductory comments in this file for the meaning of the suffixes
- * '_c', '_r', '_i'. */
+/* For non-threaded perls, the implementation just expands to the base-level
+ * functions (except if we are Configured to nonetheless use the POSIX 2008
+ * interface) This implementation is also used on threaded perls where
+ * threading is invisible to us.  Currently this is only on later Windows
+ * versions. */
+
+#  define querylocale_r(cat)  mortalized_pv_copy(stdized_setlocale(cat, NULL))
+#  define querylocale_c(cat)  querylocale_r(cat)
+#  define querylocale_i(i)    querylocale_c(categories[i])
+
+/*---------------------------------------------------------------------------*/
+
+#  define bool_setlocale_r(cat, locale) cBOOL(posix_setlocale(cat, locale))
+#  define bool_setlocale_i(i, locale)                                       \
+                                   bool_setlocale_c(categories[i], locale)
+#  define bool_setlocale_c(cat, locale)      bool_setlocale_r(cat, locale)
+
+/*---------------------------------------------------------------------------*/
 
 #  define void_setlocale_r(cat, locale)                                     \
      STMT_START {                                                           \
@@ -716,17 +884,7 @@ S_stdize_locale(pTHX_ const int category,
 #  define void_setlocale_c(cat, locale) void_setlocale_r(cat, locale)
 #  define void_setlocale_i(i, locale)   void_setlocale_r(categories[i], locale)
 
-#  define bool_setlocale_r(cat, locale) cBOOL(posix_setlocale(cat, locale))
-#  define bool_setlocale_i(i, locale)                                       \
-                                   bool_setlocale_c(categories[i], locale)
-#  define bool_setlocale_c(cat, locale)      bool_setlocale_r(cat, locale)
-
-/* All the querylocale...() forms return a mortalized copy.  If you need
- * something stable across calls, you need to savepv() the result yourself */
-
-#  define querylocale_r(cat)  mortalized_pv_copy(stdized_setlocale(cat, NULL))
-#  define querylocale_c(cat)  querylocale_r(cat)
-#  define querylocale_i(i)    querylocale_c(categories[i])
+/*===========================================================================*/
 
 #elif   defined(USE_LOCALE_THREADS)                 \
    && ! defined(USE_THREAD_SAFE_LOCALE)
@@ -736,6 +894,12 @@ S_stdize_locale(pTHX_ const int category,
     * not supporting, but it arises in practice.  We can do a modicum of
     * automatic mitigation by making sure there is a per-thread return from
     * setlocale(), and that a mutex protects it from races */
+
+#  define querylocale_r(cat)                                                \
+                      mortalized_pv_copy(less_dicey_setlocale_r(cat, NULL))
+#  define querylocale_c(cat)  querylocale_r(cat)
+#  define querylocale_i(i)    querylocale_r(categories[i])
+
 STATIC const char *
 S_less_dicey_setlocale_r(pTHX_ const int category, const char * locale)
 {
@@ -758,10 +922,31 @@ S_less_dicey_setlocale_r(pTHX_ const int category, const char * locale)
     return retval;
 }
 
-#  define querylocale_r(cat)                                                \
-                    mortalized_pv_copy(less_dicey_setlocale_r(cat, NULL))
-#  define querylocale_c(cat)                   querylocale_r(cat)
-#  define querylocale_i(i)                     querylocale_r(categories[i])
+/*---------------------------------------------------------------------------*/
+
+#  define bool_setlocale_r(cat, locale)                                     \
+                               less_dicey_bool_setlocale_r(cat, locale)
+#  define bool_setlocale_i(i, locale)                                       \
+                                bool_setlocale_r(categories[i], locale)
+#  define bool_setlocale_c(cat, locale) bool_setlocale_r(cat, locale)
+
+STATIC bool
+S_less_dicey_bool_setlocale_r(pTHX_ const int cat, const char * locale)
+{
+    bool retval;
+
+    PERL_ARGS_ASSERT_LESS_DICEY_BOOL_SETLOCALE_R;
+
+    /* Unlikely, but potentially possible that another thread could zap the
+     * buffer from true to false or vice-versa, so need to lock here */
+    POSIX_SETLOCALE_LOCK;
+    retval = cBOOL(posix_setlocale(cat, locale));
+    POSIX_SETLOCALE_UNLOCK;
+
+    return retval;
+}
+
+/*---------------------------------------------------------------------------*/
 
 #  define void_setlocale_r(cat, locale)                                     \
      STMT_START {                                                           \
@@ -772,25 +957,8 @@ S_less_dicey_setlocale_r(pTHX_ const int category, const char * locale)
 #  define void_setlocale_c(cat, locale) void_setlocale_r(cat, locale)
 #  define void_setlocale_i(i, locale)   void_setlocale_r(categories[i], locale)
 
-STATIC bool
-S_less_dicey_bool_setlocale_r(pTHX_ const int cat, const char * locale)
-{
-    bool retval;
+/*===========================================================================*/
 
-    PERL_ARGS_ASSERT_LESS_DICEY_BOOL_SETLOCALE_R;
-
-    POSIX_SETLOCALE_LOCK;
-    retval = cBOOL(posix_setlocale(cat, locale));
-    POSIX_SETLOCALE_UNLOCK;
-
-    return retval;
-}
-
-#  define bool_setlocale_r(cat, locale)                                 \
-                               less_dicey_bool_setlocale_r(cat, locale)
-#  define bool_setlocale_i(i, locale)                                   \
-                                bool_setlocale_r(categories[i], locale)
-#  define bool_setlocale_c(cat, locale) bool_setlocale_r(cat, locale)
 #elif defined(USE_POSIX_2008_LOCALE)
 #  ifndef LC_ALL
 #    error This code assumes that LC_ALL is available on a system modern enough to have POSIX 2008
@@ -802,25 +970,9 @@ S_less_dicey_bool_setlocale_r(pTHX_ const int cat, const char * locale)
  * are equivalents, like LC_NUMERIC_MASK, which we use instead, which we find
  * by table lookup. */
 
-#  define void_setlocale_i(i, locale)                                       \
-     STMT_START {                                                           \
-        if (! bool_setlocale_i(i, locale))                                  \
-            setlocale_failure_panic_i(i, NULL, locale, __LINE__, __LINE__); \
-     } STMT_END
-#  define void_setlocale_c(cat, locale) void_setlocale_i(cat##_INDEX_, locale)
-#  define void_setlocale_r(cat, locale)                                     \
-                       void_setlocale_i(get_category_index(cat), locale)
-
-#  define bool_setlocale_i(i, locale)                                       \
-              bool_setlocale_2008_i(i, locale, YES_RECALC_LC_ALL, __LINE__)
-#  define bool_setlocale_c(cat, locale)                                     \
-                                  bool_setlocale_i(cat##_INDEX_, locale)
-#  define bool_setlocale_r(cat, locale)                                     \
-                       bool_setlocale_i(get_category_index(cat), locale)
-
-#  define querylocale_i(i)      mortalized_pv_copy(querylocale_2008_i(i))
-#  define querylocale_c(cat)    querylocale_i(cat##_INDEX_)
-#  define querylocale_r(cat)    querylocale_i(get_category_index(cat))
+#  define querylocale_i(i)    mortalized_pv_copy(querylocale_2008_i(i))
+#  define querylocale_c(cat)  querylocale_i(cat##_INDEX_)
+#  define querylocale_r(cat)  querylocale_i(get_category_index(cat))
 
 #  ifdef USE_QUERYLOCALE
 #    define isSINGLE_BIT_SET(mask) isPOWER_OF_2(mask)
@@ -891,7 +1043,6 @@ S_querylocale_2008_i(pTHX_ const unsigned int index)
         retval = (index == LC_ALL_INDEX_)
                  ? calculate_LC_ALL_string(cur_obj)
                  : querylocale_l(index, cur_obj);
-
 #  else
 
         /* But we do have up-to-date values when we keep our own records
@@ -913,6 +1064,15 @@ S_querylocale_2008_i(pTHX_ const unsigned int index)
     assert(strNE(retval, ""));
     return retval;
 }
+
+/*---------------------------------------------------------------------------*/
+
+#  define bool_setlocale_i(i, locale)                                       \
+              bool_setlocale_2008_i(i, locale, YES_RECALC_LC_ALL, __LINE__)
+#  define bool_setlocale_c(cat, locale)                                     \
+                                  bool_setlocale_i(cat##_INDEX_, locale)
+#  define bool_setlocale_r(cat, locale)                                     \
+                 bool_setlocale_i(get_category_index(cat, NULL), locale)
 
 #  ifdef USE_PL_CURLOCALES
 
@@ -1397,6 +1557,20 @@ S_bool_setlocale_2008_i(pTHX_
 
     return true;
 }
+
+/*---------------------------------------------------------------------------*/
+
+#  define void_setlocale_i(i, locale)                                       \
+     STMT_START {                                                           \
+        if (! bool_setlocale_i(i, locale))                                  \
+            setlocale_failure_panic_i(i, NULL, locale, __LINE__, __LINE__); \
+     } STMT_END
+#  define void_setlocale_c(cat, locale)                                     \
+                                  void_setlocale_i(cat##_INDEX_, locale)
+#  define void_setlocale_r(cat, locale)                                     \
+                  void_setlocale_i(get_category_index(cat, NULL), locale)
+
+/*===========================================================================*/
 
 #else
 #  error Unexpected Configuration
