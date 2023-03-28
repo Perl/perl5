@@ -3712,31 +3712,31 @@ Cdp	|void	|pad_setsv	|PADOFFSET po				\
 Cdp	|SV *	|pad_sv 	|PADOFFSET po
 TXp	|void	|set_padlist	|NN CV *cv				\
 				|NULLOK PADLIST *padlist
-#endif /* defined(DEBUGGING) */
+#endif
 #if defined(DEBUG_LEAKING_SCALARS_FORK_DUMP)
 : Used in sv.c
 p	|void	|dump_sv_child	|NN SV *sv
-#endif /* defined(DEBUG_LEAKING_SCALARS_FORK_DUMP) */
+#endif
 #if !defined(EBCDIC)
 CRTip	|unsigned int|variant_byte_number				\
 				|PERL_UINTMAX_T word
-#endif /* !defined(EBCDIC) */
+#endif
 #if defined(F_FREESP) && !defined(HAS_CHSIZE) && !defined(HAS_TRUNCATE)
 ARdp	|I32	|my_chsize	|int fd 				\
 				|Off_t length
-#endif /* defined(F_FREESP) && !defined(HAS_CHSIZE) && !defined(HAS_TRUNCATE) */
+#endif
 #if !defined(HAS_GETENV_LEN)
 : Used in hv.c
 p	|char * |getenv_len	|NN const char *env_elem		\
 				|NN unsigned long *len
-#endif /* !defined(HAS_GETENV_LEN) */
+#endif
 #if !defined(HAS_MKOSTEMP)
 Tdop	|int	|my_mkostemp	|NN char *templte			\
 				|int flags
-#endif /* !defined(HAS_MKOSTEMP) */
+#endif
 #if !defined(HAS_MKSTEMP)
 Tdop	|int	|my_mkstemp	|NN char *templte
-#endif /* !defined(HAS_MKSTEMP) */
+#endif
 #if defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM)
 : Defined in doio.c, used only in pp_sys.c
 p	|I32	|do_ipcctl	|I32 optype				\
@@ -3766,25 +3766,25 @@ ATdo	|const char *|Perl_langinfo					\
 ATdo	|const char *|Perl_langinfo8					\
 				|const nl_item item			\
 				|NULLOK utf8ness_t *utf8ness
-#else /* if !( defined(HAS_NL_LANGINFO) && defined(PERL_LANGINFO_H) ) */
+#else
 ATdo	|const char *|Perl_langinfo					\
 				|const int item
 ATdo	|const char *|Perl_langinfo8					\
 				|const int item 			\
 				|NULLOK utf8ness_t *utf8ness
-#endif /* !( defined(HAS_NL_LANGINFO) && defined(PERL_LANGINFO_H) ) */
+#endif
 #if defined(HAS_PIPE)
 Rp	|int	|PerlProc_pipe_cloexec					\
 				|NN int *pipefd
-#endif /* defined(HAS_PIPE) */
+#endif
 #if !defined(HAS_RENAME)
 : Used in pp_sys.c
 p	|I32	|same_dirent	|NN const char *a			\
 				|NN const char *b
-#endif /* !defined(HAS_RENAME) */
+#endif
 #if !defined(HAS_SIGNBIT)
 APTdox	|int	|Perl_signbit	|NV f
-#endif /* !defined(HAS_SIGNBIT) */
+#endif
 #if defined(HAS_SOCKET)
 Rp	|int	|PerlSock_accept_cloexec				\
 				|int listenfd				\
@@ -3794,7 +3794,7 @@ Rp	|int	|PerlSock_socket_cloexec				\
 				|int domain				\
 				|int type				\
 				|int protocol
-#endif /* defined(HAS_SOCKET) */
+#endif
 #if defined(HAS_SOCKETPAIR) || ( defined(AF_INET) && defined(HAS_SOCKET) && \
     defined(PF_INET) && defined(SOCK_DGRAM) )
 Rp	|int	|PerlSock_socketpair_cloexec				\
@@ -3802,39 +3802,38 @@ Rp	|int	|PerlSock_socketpair_cloexec				\
 				|int type				\
 				|int protocol				\
 				|NN int *pairfd
-#endif /* defined(HAS_SOCKETPAIR) || ( defined(AF_INET) && \
-          defined(HAS_SOCKET) && defined(PF_INET) && defined(SOCK_DGRAM) ) */
+#endif
 #if !defined(HAS_STRLCAT)
 ATdip	|Size_t |my_strlcat	|NULLOK char *dst			\
 				|NULLOK const char *src 		\
 				|Size_t size
-#endif /* !defined(HAS_STRLCAT) */
+#endif
 #if !defined(HAS_STRLCPY)
 ATds	|Size_t |my_strlcpy	|NULLOK char *dst			\
 				|NULLOK const char *src 		\
 				|Size_t size
-#endif /* !defined(HAS_STRLCPY) */
+#endif
 #if !defined(HAS_STRNLEN)
 ATdip	|Size_t |my_strnlen	|NN const char *str			\
 				|Size_t maxlen
-#endif /* !defined(HAS_STRNLEN) */
+#endif
 #if defined(HAVE_INTERP_INTERN)
 Cp	|void	|sys_intern_clear
 Cp	|void	|sys_intern_init
 # if defined(USE_ITHREADS)
 Cp	|void	|sys_intern_dup |NN struct interp_intern *src		\
 				|NN struct interp_intern *dst
-# endif /* defined(USE_ITHREADS) */
-#endif /* defined(HAVE_INTERP_INTERN) */
+# endif
+#endif
 #if defined(_MSC_VER)
 p	|int	|magic_regdatum_set					\
 				|NN SV *sv				\
 				|NN MAGIC *mg
-#else /* if !defined(_MSC_VER) */
+#else
 pr	|int	|magic_regdatum_set					\
 				|NN SV *sv				\
 				|NN MAGIC *mg
-#endif /* !defined(_MSC_VER) */
+#endif
 #if defined(MULTIPLICITY)
 ATdfpr	|void	|croak_nocontext|NULLOK const char *pat 		\
 				|...
@@ -3887,12 +3886,12 @@ Cp	|int	|get_mstats	|NN perl_mstats_t *buf			\
 RTp	|MEM_SIZE|malloced_size |NN void *p
 RTp	|MEM_SIZE|malloc_good_size					\
 				|size_t nbytes
-#endif /* defined(MYMALLOC) */
+#endif
 #if defined(PERL_ANY_COW)
 : Used in regexec.c
 EXpx	|SV *	|sv_setsv_cow	|NULLOK SV *dsv 			\
 				|NN SV *ssv
-#endif /* defined(PERL_ANY_COW) */
+#endif
 #if defined(PERL_CORE)
 p	|void	|opslab_force_free					\
 				|NN OPSLAB *slab
@@ -3906,7 +3905,7 @@ RTi	|bool	|should_warn_nl |NN const char *pv
 # if defined(PERL_DEBUG_READONLY_OPS)
 ep	|void	|Slab_to_ro	|NN OPSLAB *slab
 ep	|void	|Slab_to_rw	|NN OPSLAB * const slab
-# endif /* defined(PERL_DEBUG_READONLY_OPS) */
+# endif
 #endif /* defined(PERL_CORE) */
 #if defined(PERL_CORE) || defined(PERL_EXT)
 ERXdp	|bool	|isSCRIPT_RUN	|NN const U8 *s 			\
@@ -3927,29 +3926,29 @@ ERTdi	|Size_t |variant_under_utf8_count				\
 ETei	|void * |my_memrchr	|NN const char *s			\
 				|const char c				\
 				|const STRLEN len
-# endif /* !defined(HAS_MEMRCHR) */
-#endif /* defined(PERL_CORE) || defined(PERL_EXT) */
+# endif
+#endif
 #if defined(PERL_CORE) || defined(PERL_USE_VOLATILE_API)
 Adp	|void	|finalize_optree|NN OP *o
 Adp	|void	|optimize_optree|NN OP *o
-#endif /* defined(PERL_CORE) || defined(PERL_USE_VOLATILE_API) */
+#endif
 #if defined(PERL_DEBUG_READONLY_COW)
 p	|void	|sv_buf_to_ro	|NN SV *sv
-#endif /* defined(PERL_DEBUG_READONLY_COW) */
+#endif
 #if defined(PERL_DEBUG_READONLY_OPS)
 : FIXME - can be static.
 eopx	|PADOFFSET|op_refcnt_dec|NN OP *o
 : Used in OpREFCNT_inc() in sv.c
 eopx	|OP *	|op_refcnt_inc	|NULLOK OP *o
-#endif /* defined(PERL_DEBUG_READONLY_OPS) */
+#endif
 #if defined(PERL_DEFAULT_DO_EXEC3_IMPLEMENTATION)
 Mp	|bool	|do_exec	|NN const char *cmd
-#else /* if !defined(PERL_DEFAULT_DO_EXEC3_IMPLEMENTATION) */
+#else
 p	|bool	|do_exec	|NN const char *cmd
-#endif /* !defined(PERL_DEFAULT_DO_EXEC3_IMPLEMENTATION) */
+#endif
 #if defined(PERL_DONT_CREATE_GVSV)
 AMbdp	|GV *	|gv_SVadd	|NULLOK GV *gv
-#endif /* defined(PERL_DONT_CREATE_GVSV) */
+#endif
 #if defined(PERL_IMPLICIT_SYS)
 CTo	|PerlInterpreter *|perl_alloc_using				\
 				|NN struct IPerlMem *ipM		\
@@ -3974,18 +3973,18 @@ CTo	|PerlInterpreter *|perl_clone_using				\
 				|NN struct IPerlDir *ipD		\
 				|NN struct IPerlSock *ipS		\
 				|NN struct IPerlProc *ipP
-# endif /* defined(USE_ITHREADS) */
-#else /* if !defined(PERL_IMPLICIT_SYS) */
+# endif
+#else
 Adp	|I32	|my_pclose	|NULLOK PerlIO *ptr
 Adp	|PerlIO *|my_popen	|NN const char *cmd			\
 				|NN const char *mode
 # if defined(USE_ITHREADS)
 i	|bool	|PerlEnv_putenv |NN char *str
-# endif /* defined(USE_ITHREADS) */
-#endif /* !defined(PERL_IMPLICIT_SYS) */
+# endif
+#endif
 #if defined(PERL_IN_AV_C)
 S	|MAGIC *|get_aux_mg	|NN AV *av
-#endif /* defined(PERL_IN_AV_C) */
+#endif
 #if defined(PERL_IN_CLASS_C) || defined(PERL_IN_OP_C)    || \
     defined(PERL_IN_PAD_C)   || defined(PERL_IN_PERLY_C) || \
     defined(PERL_IN_TOKE_C)
@@ -4025,7 +4024,7 @@ S	|void	|deb_stack_n	|NN SV **stack_base			\
 				|I32 stack_max				\
 				|I32 mark_min				\
 				|I32 mark_max
-#endif /* defined(PERL_IN_DEB_C) */
+#endif
 #if defined(PERL_IN_DOIO_C)
 S	|bool	|argvout_final	|NN MAGIC *mg				\
 				|NN IO *io				\
@@ -4054,7 +4053,7 @@ S	|IO *	|openn_setup	|NN GV *gv				\
 				|NN PerlIO **saveofp			\
 				|NN int *savefd 			\
 				|NN char *savetype
-#endif /* defined(PERL_IN_DOIO_C) */
+#endif
 #if defined(PERL_IN_DOOP_C)
 RS	|Size_t |do_trans_complex					\
 				|NN SV * const sv			\
@@ -4068,7 +4067,7 @@ RS	|Size_t |do_trans_invmap|NN SV * const sv			\
 				|NN AV * const map
 RS	|Size_t |do_trans_simple|NN SV * const sv			\
 				|NN const OPtrans_map * const tbl
-#endif /* defined(PERL_IN_DOOP_C) */
+#endif
 #if defined(PERL_IN_DOOP_C) || defined(PERL_IN_OP_C)        || defined(PERL_IN_PP_C) \
                             || defined(PERL_IN_REGCOMP_ANY) || defined(PERL_IN_REGEXEC_C) || \
     defined(PERL_IN_TOKE_C) || defined(PERL_IN_UTF8_C)
@@ -4082,10 +4081,7 @@ ERTi	|UV	|_invlist_len	|NN SV * const invlist
 ERTXp	|SSize_t|_invlist_search|NN SV * const invlist			\
 				|const UV cp
 ERTi	|bool	|is_invlist	|NULLOK const SV * const invlist
-#endif /* defined(PERL_IN_DOOP_C)    || defined(PERL_IN_OP_C)        || \
-          defined(PERL_IN_PP_C)      || defined(PERL_IN_REGCOMP_ANY) || \
-          defined(PERL_IN_REGEXEC_C) || defined(PERL_IN_TOKE_C)      || \
-          defined(PERL_IN_UTF8_C) */
+#endif
 #if defined(PERL_IN_DOOP_C) || defined(PERL_IN_OP_C) || \
     defined(PERL_IN_REGCOMP_ANY)
 ERi	|SV *	|add_cp_to_invlist					\
@@ -4097,8 +4093,7 @@ ERTi	|UV	|invlist_highest|NN SV * const invlist
 Ei	|void	|invlist_set_len|NN SV * const invlist			\
 				|const UV len				\
 				|const bool offset
-#endif /* defined(PERL_IN_DOOP_C) || defined(PERL_IN_OP_C) || \
-          defined(PERL_IN_REGCOMP_ANY) */
+#endif
 #if defined(PERL_IN_DOOP_C)      || defined(PERL_IN_OP_C) || \
     defined(PERL_IN_REGCOMP_ANY) || defined(PERL_IN_UTF8_C)
 ERXp	|SV *	|_add_range_to_invlist					\
@@ -4163,8 +4158,7 @@ ERXp	|bool	|grok_bslash_x	|NN char **s				\
 				|const bool strict			\
 				|const bool allow_UV_MAX		\
 				|const bool utf8
-#endif /* defined(PERL_IN_DQUOTE_C) || defined(PERL_IN_REGCOMP_C) || \
-          defined(PERL_IN_TOKE_C) */
+#endif
 #if defined(PERL_IN_DQUOTE_C) || defined(PERL_IN_REGCOMP_C) || \
     defined(PERL_IN_TOKE_C)   || defined(PERL_IN_UTF8_C)
 ERXp	|const char *|form_cp_too_large_msg				\
@@ -4172,28 +4166,25 @@ ERXp	|const char *|form_cp_too_large_msg				\
 				|NULLOK const char *string		\
 				|const Size_t len			\
 				|const UV cp
-#endif /* defined(PERL_IN_DQUOTE_C) || defined(PERL_IN_REGCOMP_C) || \
-          defined(PERL_IN_TOKE_C)   || defined(PERL_IN_UTF8_C) */
+#endif
 #if defined(PERL_IN_DUMP_C)
 S	|CV *	|deb_curcv	|I32 ix
 Sd	|void	|debprof	|NN const OP *o
 S	|SV *	|pm_description |NN const PMOP *pm
 S	|UV	|sequence_num	|NULLOK const OP *o
-#endif /* defined(PERL_IN_DUMP_C) */
+#endif
 #if defined(PERL_IN_DUMP_C)  || defined(PERL_IN_HV_C) || \
     defined(PERL_IN_SCOPE_C) || defined(PERL_IN_SV_C)
 opx	|void	|hv_kill_backrefs					\
 				|NN HV *hv
-#endif /* defined(PERL_IN_DUMP_C)  || defined(PERL_IN_HV_C) || \
-          defined(PERL_IN_SCOPE_C) || defined(PERL_IN_SV_C) */
+#endif
 #if defined(PERL_IN_DUMP_C) || defined(PERL_IN_OP_C) || \
     defined(PERL_IN_REGCOMP_ANY)
 EXp	|void	|_invlist_dump	|NN PerlIO *file			\
 				|I32 level				\
 				|NN const char * const indent		\
 				|NN SV * const invlist
-#endif /* defined(PERL_IN_DUMP_C) || defined(PERL_IN_OP_C) || \
-          defined(PERL_IN_REGCOMP_ANY) */
+#endif
 #if defined(PERL_IN_GV_C)
 S	|bool	|find_default_stash					\
 				|NN HV **stash				\
@@ -4249,15 +4240,14 @@ S	|void	|require_tie_mod|NN GV *gv				\
 : Used in gv.c
 op	|void	|sv_add_backref |NN SV * const tsv			\
 				|NN SV * const sv
-#endif /* defined(PERL_IN_GV_C)  || defined(PERL_IN_OP_C) || \
-          defined(PERL_IN_PAD_C) || defined(PERL_IN_SV_C) */
+#endif
 #if defined(PERL_IN_GV_C) || defined(PERL_IN_UNIVERSAL_C)
 EGdp	|HV *	|gv_stashsvpvn_cached					\
 				|SV *namesv				\
 				|const char *name			\
 				|U32 namelen				\
 				|I32 flags
-#endif /* defined(PERL_IN_GV_C) || defined(PERL_IN_UNIVERSAL_C) */
+#endif
 #if defined(PERL_IN_HV_C)
 Sx	|void	|clear_placeholders					\
 				|NN HV *hv				\
@@ -4301,20 +4291,19 @@ S	|void	|unshare_hek_or_pvn					\
 				|U32 hash
 # if !defined(PURIFY)
 RS	|HE *	|new_he
-# endif /* !defined(PURIFY) */
+# endif
 #endif /* defined(PERL_IN_HV_C) */
 #if defined(PERL_IN_HV_C) || defined(PERL_IN_MG_C) || defined(PERL_IN_SV_C)
 : Used in hv.c and mg.c
 opx	|void	|sv_kill_backrefs					\
 				|NN SV * const sv			\
 				|NULLOK AV * const av
-#endif /* defined(PERL_IN_HV_C) || defined(PERL_IN_MG_C) || \
-          defined(PERL_IN_SV_C) */
+#endif
 #if defined(PERL_IN_HV_C) || defined(PERL_IN_SV_C)
 op	|SV *	|hfree_next_entry					\
 				|NN HV *hv				\
 				|NN STRLEN *indexp
-#endif /* defined(PERL_IN_HV_C) || defined(PERL_IN_SV_C) */
+#endif
 #if defined(PERL_IN_LOCALE_C)
 S	|utf8ness_t|get_locale_string_utf8ness_i			\
 				|NULLOK const char *string		\
@@ -4330,7 +4319,7 @@ S	|void	|populate_hash_from_localeconv				\
 				|const U32 which_mask			\
 				|NN const lconv_offset_t *strings[2]	\
 				|NULLOK const lconv_offset_t *integers
-# endif /* defined(HAS_LOCALECONV) */
+# endif
 # if defined(USE_LOCALE)
 ST	|unsigned int|get_category_index				\
 				|const int category			\
@@ -4371,7 +4360,7 @@ RS	|char * |my_setlocale_debug_string_i				\
 				|NULLOK const char *locale		\
 				|NULLOK const char *retval		\
 				|const line_t line
-#   endif /* defined(DEBUGGING) */
+#   endif
 #   if defined(HAS_NL_LANGINFO) || defined(HAS_NL_LANGINFO_L)
 S	|const char *|my_langinfo_i					\
 				|const nl_item item			\
@@ -4380,7 +4369,7 @@ S	|const char *|my_langinfo_i					\
 				|NN const char **retbufp		\
 				|NULLOK Size_t *retbuf_sizep		\
 				|NULLOK utf8ness_t *utf8ness
-#   else /* if !( defined(HAS_NL_LANGINFO) || defined(HAS_NL_LANGINFO_L) ) */
+#   else
 S	|const char *|my_langinfo_i					\
 				|const int item 			\
 				|const unsigned int cat_index		\
@@ -4388,7 +4377,7 @@ S	|const char *|my_langinfo_i					\
 				|NN const char **retbufp		\
 				|NULLOK Size_t *retbuf_sizep		\
 				|NULLOK utf8ness_t *utf8ness
-#   endif /* !( defined(HAS_NL_LANGINFO) || defined(HAS_NL_LANGINFO_L) ) */
+#   endif
 #   if defined(USE_LOCALE_COLLATE)
 S	|void	|new_collate	|NN const char *newcoll 		\
 				|bool force
@@ -4399,21 +4388,21 @@ S	|void	|print_collxfrm_input_and_return			\
 				|NULLOK const char *xbuf		\
 				|const STRLEN xlen			\
 				|const bool is_utf8
-#     endif /* defined(DEBUGGING) */
-#   endif /* defined(USE_LOCALE_COLLATE) */
+#     endif
+#   endif
 #   if defined(USE_LOCALE_CTYPE)
 ST	|bool	|is_codeset_name_UTF8					\
 				|NN const char *name
 S	|void	|new_ctype	|NN const char *newctype		\
 				|bool force
-#   endif /* defined(USE_LOCALE_CTYPE) */
+#   endif
 #   if defined(USE_LOCALE_NUMERIC)
 S	|void	|new_numeric	|NN const char *newnum			\
 				|bool force
-#   endif /* defined(USE_LOCALE_NUMERIC) */
+#   endif
 #   if defined(USE_PERL_SWITCH_LOCALE_CONTEXT) || defined(DEBUGGING)
 S	|const char *|get_LC_ALL_display
-#   endif /* defined(USE_PERL_SWITCH_LOCALE_CONTEXT) || defined(DEBUGGING) */
+#   endif
 #   if defined(USE_POSIX_2008_LOCALE)
 S	|const char *|emulate_setlocale_i				\
 				|const unsigned int index		\
@@ -4429,12 +4418,12 @@ S	|locale_t|use_curlocale_scratch
 #     if defined(USE_QUERYLOCALE)
 S	|const char *|calculate_LC_ALL					\
 				|const locale_t cur_obj
-#     else /* if !defined(USE_QUERYLOCALE) */
+#     else
 S	|const char *|update_PL_curlocales_i				\
 				|const unsigned int index		\
 				|NN const char *new_locale		\
 				|recalc_lc_all_t recalc_LC_ALL
-#     endif /* !defined(USE_QUERYLOCALE) */
+#     endif
 #   elif defined(USE_LOCALE_THREADS) && !defined(USE_THREAD_SAFE_LOCALE) && \
          !defined(USE_THREAD_SAFE_LOCALE_EMULATION) /* && \
          !defined(USE_POSIX_2008_LOCALE) */
@@ -4450,17 +4439,13 @@ S	|void	|less_dicey_void_setlocale_i				\
 S	|bool	|less_dicey_bool_setlocale_r				\
 				|const int cat				\
 				|NN const char *locale
-#     endif /* 0 */
-#   endif /* !defined(USE_POSIX_2008_LOCALE) && ( defined(USE_LOCALE_THREADS) \
-             && !defined(USE_THREAD_SAFE_LOCALE) && \
-             !defined(USE_THREAD_SAFE_LOCALE_EMULATION) ) */
+#     endif
+#   endif
 #   if !( defined(USE_POSIX_2008_LOCALE) && defined(USE_QUERYLOCALE) ) && ( \
        !defined(LC_ALL) || defined(USE_POSIX_2008_LOCALE) || defined(WIN32) )
 S	|const char *|calculate_LC_ALL					\
 				|NN const char **individ_locales
-#   endif /* !( defined(USE_POSIX_2008_LOCALE) && defined(USE_QUERYLOCALE) ) \
-             && ( !defined(LC_ALL) || defined(USE_POSIX_2008_LOCALE) || \
-             defined(WIN32) ) */
+#   endif
 #   if defined(WIN32)
 ST	|wchar_t *|Win_byte_string_to_wstring				\
 				|const UINT code_page			\
@@ -4474,25 +4459,24 @@ ST	|char * |Win_wstring_to_byte_string				\
 S	|const char *|wrap_wsetlocale					\
 				|const int category			\
 				|NULLOK const char *locale
-#   endif /* defined(WIN32) */
+#   endif
 #   if defined(WIN32) || ( defined(USE_POSIX_2008_LOCALE) && \
        !defined(USE_QUERYLOCALE) )
 S	|const char *|find_locale_from_environment			\
 				|const unsigned int index
-#   endif /* defined(WIN32) || ( defined(USE_POSIX_2008_LOCALE) && \
-             !defined(USE_QUERYLOCALE) ) */
+#   endif
 # endif /* defined(USE_LOCALE) */
 # if defined(USE_POSIX_2008_LOCALE) || defined(DEBUGGING)
 S	|const char *|get_displayable_string				\
 				|NN const char * const s		\
 				|NN const char * const e		\
 				|const bool is_utf8
-# endif /* defined(USE_POSIX_2008_LOCALE) || defined(DEBUGGING) */
+# endif
 #endif /* defined(PERL_IN_LOCALE_C) */
 #if defined(PERL_IN_MALLOC_C)
 ST	|int	|adjust_size_and_find_bucket				\
 				|NN size_t *nbytes_p
-#endif /* defined(PERL_IN_MALLOC_C) */
+#endif
 #if defined(PERL_IN_MG_C)
 
 S	|void	|fixup_errno_string					\
@@ -4513,7 +4497,7 @@ S	|void	|save_magic_flags					\
 				|U32 flags
 S	|void	|unwind_handler_stack					\
 				|NULLOK const void *p
-#endif /* defined(PERL_IN_MG_C) */
+#endif
 #if defined(PERL_IN_MG_C) || defined(PERL_IN_PP_C)
 Tp	|bool	|translate_substr_offsets				\
 				|STRLEN curlen				\
@@ -4523,7 +4507,7 @@ Tp	|bool	|translate_substr_offsets				\
 				|bool len_is_uv 			\
 				|NN STRLEN *posp			\
 				|NN STRLEN *lenp
-#endif /* defined(PERL_IN_MG_C) || defined(PERL_IN_PP_C) */
+#endif
 #if defined(PERL_IN_MRO_C)
 S	|void	|mro_clean_isarev					\
 				|NN HV * const isa			\
@@ -4541,11 +4525,11 @@ S	|void	|mro_gather_and_rename					\
 Sd	|AV *	|mro_get_linear_isa_dfs 				\
 				|NN HV *stash				\
 				|U32 level
-#endif /* defined(PERL_IN_MRO_C) */
+#endif
 #if defined(PERL_IN_NUMERIC_C)
 S	|void	|output_non_portable					\
 				|const U8 shift
-#endif /* defined(PERL_IN_NUMERIC_C) */
+#endif
 #if defined(PERL_IN_OP_C)
 S	|void	|apply_attrs	|NN HV *stash				\
 				|NN SV *target				\
@@ -4641,7 +4625,7 @@ S	|OP *	|voidnonfinal	|NULLOK OP *o
 #if defined(PERL_IN_OP_C) || defined(PERL_IN_PAD_C)
 Ti	|bool	|PadnameIN_SCOPE|NN const PADNAME * const pn		\
 				|const U32 seq
-#endif /* defined(PERL_IN_OP_C) || defined(PERL_IN_PAD_C) */
+#endif
 #if defined(PERL_IN_OP_C) || defined(PERL_IN_PEEP_C)
 p	|void	|check_hash_fields_and_hekify				\
 				|NULLOK UNOP *rop			\
@@ -4657,13 +4641,12 @@ p	|void	|warn_elem_scalar_context				\
 				|NN SV *name				\
 				|bool is_hash				\
 				|bool is_slice
-#endif /* defined(PERL_IN_OP_C) || defined(PERL_IN_PEEP_C) */
+#endif
 #if defined(PERL_IN_OP_C) || defined(PERL_IN_PERLY_C) || \
     defined(PERL_IN_TOKE_C)
 Mbp	|OP *	|ref		|NULLOK OP *o				\
 				|I32 type
-#endif /* defined(PERL_IN_OP_C) || defined(PERL_IN_PERLY_C) || \
-          defined(PERL_IN_TOKE_C) */
+#endif
 #if defined(PERL_IN_OP_C) || defined(PERL_IN_REGCOMP_ANY)
 ERTi	|STRLEN *|get_invlist_iter_addr 				\
 				|NN SV *invlist
@@ -4675,7 +4658,7 @@ ERTi	|bool	|invlist_iternext					\
 				|NN SV *invlist 			\
 				|NN UV *start				\
 				|NN UV *end
-#endif /* defined(PERL_IN_OP_C) || defined(PERL_IN_REGCOMP_ANY) */
+#endif
 #if defined(PERL_IN_OP_C) || defined(PERL_IN_SV_C)
 p	|void	|report_redefined_cv					\
 				|NN const SV *name			\
@@ -4687,7 +4670,7 @@ Rp	|SV *	|varname	|NULLOK const GV * const gv		\
 				|NULLOK const SV * const keyname	\
 				|SSize_t aindex 			\
 				|int subscript_type
-#endif /* defined(PERL_IN_OP_C) || defined(PERL_IN_SV_C) */
+#endif
 #if defined(PERL_IN_PAD_C)
 Sd	|PADOFFSET|pad_alloc_name					\
 				|NN PADNAME *name			\
@@ -4710,15 +4693,15 @@ Sd	|void	|pad_reset
 # if defined(DEBUGGING)
 Sd	|void	|cv_dump	|NN const CV *cv			\
 				|NN const char *title
-# endif /* defined(DEBUGGING) */
-#endif /* defined(PERL_IN_PAD_C) */
+# endif
+#endif
 #if defined(PERL_IN_PEEP_C)
 S	|void	|finalize_op	|NN OP *o
 S	|void	|optimize_op	|NN OP *o
 Sd	|OP *	|traverse_op_tree					\
 				|NN OP *top				\
 				|NN OP *o
-#endif /* defined(PERL_IN_PEEP_C) */
+#endif
 #if defined(PERL_IN_PERL_C)
 S	|void	|find_beginning |NN SV *linestr_sv			\
 				|NN PerlIO *rsfp
@@ -4758,10 +4741,10 @@ S	|SV *	|incpush_if_exists					\
 				|NN AV * const av			\
 				|NN SV *dir				\
 				|NN SV * const stem
-# endif /* !defined(PERL_IS_MINIPERL) */
+# endif
 # if !defined(SETUID_SCRIPTS_ARE_SECURE_NOW)
 So	|void	|validate_suid	|NN PerlIO *rsfp
-# endif /* !defined(SETUID_SCRIPTS_ARE_SECURE_NOW) */
+# endif
 #endif /* defined(PERL_IN_PERL_C) */
 #if defined(PERL_IN_PERL_C) || defined(PERL_IN_REGCOMP_ANY) || \
     defined(PERL_IN_UTF8_C)
@@ -4770,15 +4753,14 @@ EXp	|bool	|_invlistEQ	|NN SV * const a			\
 				|const bool complement_b
 ERXp	|SV *	|_new_invlist_C_array					\
 				|NN const UV * const list
-#endif /* defined(PERL_IN_PERL_C) || defined(PERL_IN_REGCOMP_ANY) || \
-          defined(PERL_IN_UTF8_C) */
+#endif
 #if defined(PERL_IN_PP_C)
 S	|size_t |do_chomp	|NN SV *retval				\
 				|NN SV *sv				\
 				|bool chomping
 S	|OP *	|do_delete_local
 RS	|SV *	|refto		|NN SV *sv
-#endif /* defined(PERL_IN_PP_C) */
+#endif
 #if defined(PERL_IN_PP_C) || defined(PERL_IN_PP_HOT_C)
 RTi	|bool	|lossless_NV_to_IV					\
 				|const NV nv				\
@@ -4788,21 +4770,20 @@ Reop	|GV *	|softref2xv	|NN SV * const sv			\
 				|NN const char * const what		\
 				|const svtype type			\
 				|NN SV ***spp
-#endif /* defined(PERL_IN_PP_C) || defined(PERL_IN_PP_HOT_C) */
+#endif
 #if defined(PERL_IN_PP_C)   || defined(PERL_IN_REGCOMP_ANY) || \
     defined(PERL_IN_TOKE_C) || defined(PERL_IN_UNIVERSAL_C)
 ETi	|const char *|get_regex_charset_name				\
 				|const U32 flags			\
 				|NN STRLEN * const lenp
-#endif /* defined(PERL_IN_PP_C)   || defined(PERL_IN_REGCOMP_ANY) || \
-          defined(PERL_IN_TOKE_C) || defined(PERL_IN_UNIVERSAL_C) */
+#endif
 #if defined(PERL_IN_PP_C) || defined(PERL_IN_UTF8_C)
 p	|UV	|_to_upper_title_latin1 				\
 				|const U8 c				\
 				|NN U8 *p				\
 				|NN STRLEN *lenp			\
 				|const char S_or_s
-#endif /* defined(PERL_IN_PP_C) || defined(PERL_IN_UTF8_C) */
+#endif
 #if defined(PERL_IN_PP_CTL_C)
 RS	|PerlIO *|check_type_and_open					\
 				|NN SV *name
@@ -4850,20 +4831,20 @@ S	|void	|save_lines	|NULLOK AV *array			\
 				|NN SV *sv
 # if !defined(PERL_DISABLE_PMC)
 RS	|PerlIO *|doopen_pm	|NN SV *name
-# endif /* !defined(PERL_DISABLE_PMC) */
+# endif
 #endif /* defined(PERL_IN_PP_CTL_C) */
 #if defined(PERL_IN_PP_CTL_C) || defined(PERL_IN_UTIL_C)
 p	|bool	|invoke_exception_hook					\
 				|NULLOK SV *ex				\
 				|bool warn
-#endif /* defined(PERL_IN_PP_CTL_C) || defined(PERL_IN_UTIL_C) */
+#endif
 #if defined(PERL_IN_PP_HOT_C)
 S	|void	|do_oddball	|NN SV **oddkey 			\
 				|NN SV **firstkey
 i	|HV *	|opmethod_stash |NN SV *meth
 IR	|bool	|should_we_output_Debug_r				\
 				|NN regexp *prog
-#endif /* defined(PERL_IN_PP_HOT_C) */
+#endif
 #if defined(PERL_IN_PP_PACK_C)
 S	|int	|div128 	|NN SV *pnum				\
 				|NN bool *done
@@ -4944,7 +4925,7 @@ i	|I32	|amagic_cmp_locale_desc 				\
 				|NN SV * const str2
 i	|I32	|cmp_locale_desc|NN SV * const str1			\
 				|NN SV * const str2
-# endif /* defined(USE_LOCALE_COLLATE) */
+# endif
 #endif /* defined(PERL_IN_PP_SORT_C) */
 #if defined(PERL_IN_PP_SYS_C)
 S	|OP *	|doform 	|NN CV *cv				\
@@ -4955,8 +4936,8 @@ S	|SV *	|space_join_names_mortal				\
 # if !defined(HAS_MKDIR) || !defined(HAS_RMDIR)
 RS	|int	|dooneliner	|NN const char *cmd			\
 				|NN const char *filename
-# endif /* !defined(HAS_MKDIR) || !defined(HAS_RMDIR) */
-#endif /* defined(PERL_IN_PP_SYS_C) */
+# endif
+#endif
 #if defined(PERL_IN_REGCOMP_ANY)
 Ep	|void	|add_above_Latin1_folds 				\
 				|NN RExC_state_t *pRExC_state		\
@@ -5043,12 +5024,12 @@ ES	|void	|dump_trie_interim_table				\
 				|NN AV *revcharmap			\
 				|U32 next_alloc 			\
 				|U32 depth
-# endif /* defined(PERL_IN_REGCOMP_TRIE_C) && defined(DEBUGGING) */
+# endif
 #endif /* defined(PERL_IN_REGCOMP_ANY) */
 #if defined(PERL_IN_REGCOMP_ANY) || defined(PERL_IN_SV_C)
 EXp	|SV *	|invlist_clone	|NN SV * const invlist			\
 				|NULLOK SV *newlist
-#endif /* defined(PERL_IN_REGCOMP_ANY) || defined(PERL_IN_SV_C) */
+#endif
 #if defined(PERL_IN_REGCOMP_C)
 ES	|AV *	|add_multi_match|NULLOK AV *multi_char_matches		\
 				|NN SV *multi_string			\
@@ -5235,8 +5216,8 @@ ES	|void	|dump_regex_sets_structures				\
 				|NN AV *stack				\
 				|const IV fence 			\
 				|NN AV *fence_stack
-#   endif /* defined(ENABLE_REGEX_SETS_DEBUGGING) */
-# endif /* defined(DEBUGGING) */
+#   endif
+# endif
 #endif /* defined(PERL_IN_REGCOMP_C) */
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGCOMP_INVLIST_C)
 Ep	|void	|populate_bitmap_from_invlist				\
@@ -5249,28 +5230,26 @@ Ep	|void	|populate_invlist_from_bitmap				\
 				|const Size_t bitmap_len		\
 				|NN SV **invlist			\
 				|const UV offset
-#endif /* defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGCOMP_INVLIST_C) */
+#endif
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C) || \
     defined(PERL_IN_TOKE_C)
 ERp	|bool	|is_grapheme	|NN const U8 *strbeg			\
 				|NN const U8 *s 			\
 				|NN const U8 *strend			\
 				|const UV cp
-#endif /* defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C) || \
-          defined(PERL_IN_TOKE_C) */
+#endif
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C) || \
     defined(PERL_IN_UTF8_C)
 ETXp	|UV	|_to_fold_latin1|const U8 c				\
 				|NN U8 *p				\
 				|NN STRLEN *lenp			\
 				|const unsigned int flags
-#endif /* defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_REGEXEC_C) || \
-          defined(PERL_IN_UTF8_C) */
+#endif
 #if defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_TOKE_C)
 ERTXp	|bool	|regcurly	|NN const char *s			\
 				|NN const char *e			\
 				|NULLOK const char *result[5]
-#endif /* defined(PERL_IN_REGCOMP_C) || defined(PERL_IN_TOKE_C) */
+#endif
 #if defined(PERL_IN_REGCOMP_DEBUG_C) && defined(DEBUGGING)
 ES	|U8	|put_charclass_bitmap_innards				\
 				|NN SV *sv				\
@@ -5302,7 +5281,7 @@ ES	|void	|regdump_extflags					\
 ES	|void	|regdump_intflags					\
 				|NULLOK const char *lead		\
 				|const U32 flags
-#endif /* defined(PERL_IN_REGCOMP_DEBUG_C) && defined(DEBUGGING) */
+#endif
 #if defined(PERL_IN_REGCOMP_INVLIST_C) && !defined(PERL_EXT_RE_BUILD)
 ES	|void	|_append_range_to_invlist				\
 				|NN SV * const invlist			\
@@ -5504,7 +5483,7 @@ ES	|void	|dump_exec_pos	|NN const char *locinput		\
 EFp	|int	|re_exec_indentf|NN const char *fmt			\
 				|U32 depth				\
 				|...
-# endif /* defined(DEBUGGING) */
+# endif
 #endif /* defined(PERL_IN_REGEXEC_C) */
 #if defined(PERL_IN_REGEX_ENGINE)
 CRip	|bool	|check_regnode_after					\
@@ -5549,7 +5528,7 @@ EFp	|int	|re_indentf	|NN const char *fmt			\
 				|...
 Efp	|int	|re_printf	|NN const char *fmt			\
 				|...
-# endif /* defined(DEBUGGING) */
+# endif
 # if defined(PERL_EXT_RE_BUILD)
 Ep	|SV *	|get_re_gclass_aux_data 				\
 				|NULLOK const regexp *prog		\
@@ -5558,7 +5537,7 @@ Ep	|SV *	|get_re_gclass_aux_data 				\
 				|NULLOK SV **listsvp			\
 				|NULLOK SV **lonly_utf8_locale		\
 				|NULLOK SV **output_invlist
-# else /* if !defined(PERL_EXT_RE_BUILD) */
+# else
 Ep	|SV *	|get_regclass_aux_data					\
 				|NULLOK const regexp *prog		\
 				|NN const struct regnode *node		\
@@ -5566,7 +5545,7 @@ Ep	|SV *	|get_regclass_aux_data					\
 				|NULLOK SV **listsvp			\
 				|NULLOK SV **lonly_utf8_locale		\
 				|NULLOK SV **output_invlist
-# endif /* !defined(PERL_EXT_RE_BUILD) */
+# endif
 #endif /* defined(PERL_IN_REGEX_ENGINE) */
 #if defined(PERL_IN_SCOPE_C)
 S	|void	|save_pushptri32ptr					\
@@ -5576,7 +5555,7 @@ S	|void	|save_pushptri32ptr					\
 				|const int type
 Sd	|SV *	|save_scalar_at |NN SV **sptr				\
 				|const U32 flags
-#endif /* defined(PERL_IN_SCOPE_C) */
+#endif
 #if defined(PERL_IN_SV_C)
 S	|void	|anonymise_cv_maybe					\
 				|NN GV *gv				\
@@ -5667,20 +5646,20 @@ S	|I32	|visit		|NN SVFUNC_t f				\
 				|const U32 mask
 # if defined(DEBUGGING)
 S	|void	|del_sv 	|NN SV *p
-# endif /* defined(DEBUGGING) */
+# endif
 # if !defined(NV_PRESERVES_UV)
 #   if defined(DEBUGGING)
 S	|int	|sv_2iuv_non_preserve					\
 				|NN SV * const sv			\
 				|I32 numtype
-#   else /* if !defined(DEBUGGING) */
+#   else
 S	|int	|sv_2iuv_non_preserve					\
 				|NN SV * const sv
-#   endif /* !defined(DEBUGGING) */
-# endif /* !defined(NV_PRESERVES_UV) */
+#   endif
+# endif
 # if defined(PERL_DEBUG_READONLY_COW)
 S	|void	|sv_buf_to_rw	|NN SV *sv
-# endif /* defined(PERL_DEBUG_READONLY_COW) */
+# endif
 # if defined(USE_ITHREADS)
 RS	|SV *	|sv_dup_common	|NN const SV * const ssv		\
 				|NN CLONE_PARAMS * const param
@@ -5694,7 +5673,7 @@ S	|SV **	|sv_dup_inc_multiple					\
 				|NN CLONE_PARAMS * const param
 S	|void	|unreferenced_to_tmp_stack				\
 				|NN AV * const unreferenced
-# endif /* defined(USE_ITHREADS) */
+# endif
 #endif /* defined(PERL_IN_SV_C) */
 #if defined(PERL_IN_TOKE_C)
 S	|int	|ao		|int toketype
@@ -5785,13 +5764,13 @@ Sf	|void	|printbuf	|NN const char * const fmt		\
 				|NN const char * const s
 S	|int	|tokereport	|I32 rv 				\
 				|NN const YYSTYPE *lvalp
-# endif /* defined(DEBUGGING) */
+# endif
 # if defined(PERL_CR_FILTER)
 S	|I32	|cr_textfilter	|int idx				\
 				|NULLOK SV *sv				\
 				|int maxlen
 S	|void	|strip_return	|NN SV *sv
-# endif /* defined(PERL_CR_FILTER) */
+# endif
 # if !defined(PERL_NO_UTF16_FILTER)
 S	|U8 *	|add_utf16_textfilter					\
 				|NN U8 * const s			\
@@ -5800,7 +5779,7 @@ S	|I32	|utf16_textfilter					\
 				|int idx				\
 				|NN SV *sv				\
 				|int maxlen
-# endif /* !defined(PERL_NO_UTF16_FILTER) */
+# endif
 #endif /* defined(PERL_IN_TOKE_C) */
 #if defined(PERL_IN_UNIVERSAL_C)
 GS	|bool	|isa_lookup	|NULLOK HV *stash			\
@@ -5814,7 +5793,7 @@ GS	|bool	|sv_derived_from_svpvn					\
 				|NULLOK const char *name		\
 				|const STRLEN len			\
 				|U32 flags
-#endif /* defined(PERL_IN_UNIVERSAL_C) */
+#endif
 #if defined(PERL_IN_UTF8_C)
 RS	|UV	|check_locale_boundary_crossing 			\
 				|NN const U8 * const p			\
@@ -5882,7 +5861,7 @@ S	|void	|warn_on_first_deprecated_use				\
 				|const bool use_locale			\
 				|NN const char * const file		\
 				|const unsigned line
-# endif /* 0 */
+# endif
 #endif /* defined(PERL_IN_UTF8_C) */
 #if defined(PERL_IN_UTIL_C)
 S	|bool	|ckwarn_common	|U32 w
@@ -5906,11 +5885,11 @@ ST	|void	|mem_log_common |enum mem_log_type mlt			\
 				|NN const char *filename		\
 				|const int linenumber			\
 				|NN const char *funcname
-# endif /* defined(PERL_MEM_LOG) && !defined(PERL_MEM_LOG_NOIMPL) */
+# endif
 # if defined(PERL_USES_PL_PIDSTATUS)
 S	|void	|pidgone	|Pid_t pid				\
 				|int status
-# endif /* defined(PERL_USES_PL_PIDSTATUS) */
+# endif
 #endif /* defined(PERL_IN_UTIL_C) */
 #if defined(PERL_MEM_LOG)
 CTp	|Malloc_t|mem_log_alloc |const UV nconst			\
@@ -5941,7 +5920,7 @@ CTp	|Malloc_t|mem_log_realloc					\
 				|NN const char *filename		\
 				|const int linenumber			\
 				|NN const char *funcname
-#endif /* defined(PERL_MEM_LOG) */
+#endif
 #if !defined(PERL_NO_INLINE_FUNCTIONS)
 Cipx	|void	|cx_popblock	|NN PERL_CONTEXT *cx
 Cipx	|void	|cx_popeval	|NN PERL_CONTEXT *cx
@@ -5990,19 +5969,19 @@ CTp	|Signal_t|csighandler	|int sig				\
 Tp	|Signal_t|sighandler	|int sig				\
 				|NULLOK Siginfo_t *info 		\
 				|NULLOK void *uap
-#else /* if !defined(PERL_USE_3ARG_SIGHANDLER) */
+#else
 CTp	|Signal_t|csighandler	|int sig
 Tp	|Signal_t|sighandler	|int sig
-#endif /* !defined(PERL_USE_3ARG_SIGHANDLER) */
+#endif
 #if defined(U64TYPE)
 CRTip	|unsigned|lsbit_pos64	|U64 word
 CRTip	|unsigned|msbit_pos64	|U64 word
 CRTip	|unsigned|single_1bit_pos64					\
 				|U64 word
-#endif /* defined(U64TYPE) */
+#endif
 #if defined(UNLINK_ALL_VERSIONS)
 Cp	|I32	|unlnk		|NN const char *f
-#endif /* defined(UNLINK_ALL_VERSIONS) */
+#endif
 #if defined(USE_C_BACKTRACE)
 Adp	|bool	|dump_c_backtrace					\
 				|NN PerlIO *fp				\
@@ -6016,7 +5995,7 @@ dp	|Perl_c_backtrace *|get_c_backtrace				\
 Adp	|SV *	|get_c_backtrace_dump					\
 				|int max_depth				\
 				|int skip
-#endif /* defined(USE_C_BACKTRACE) */
+#endif
 #if defined(USE_DTRACE)
 EXop	|void	|dtrace_probe_call					\
 				|NN CV *cv				\
@@ -6027,7 +6006,7 @@ EXop	|void	|dtrace_probe_load					\
 EXop	|void	|dtrace_probe_op|NN const OP *op
 EXop	|void	|dtrace_probe_phase					\
 				|enum perl_phase phase
-#endif /* defined(USE_DTRACE) */
+#endif
 #if defined(USE_ITHREADS)
 Adpx	|PADOFFSET|alloccopstash|NN HV *hv
 CRp	|void * |any_dup	|NULLOK void *v 			\
@@ -6095,11 +6074,11 @@ ARp	|SV *	|sv_dup_inc	|NULLOK const SV * const ssv		\
 # if defined(PERL_IN_OP_C) || defined(PERL_IN_PEEP_C)
 p	|void	|op_relocate_sv |NN SV **svp				\
 				|NN PADOFFSET *targp
-# endif /* defined(PERL_IN_OP_C) || defined(PERL_IN_PEEP_C) */
+# endif
 #else /* if !defined(USE_ITHREADS) */
 Adm	|void	|CopFILEGV_set	|NN COP *c				\
 				|NN GV *gv
-#endif /* !defined(USE_ITHREADS) */
+#endif
 #if defined(USE_LOCALE_COLLATE)
 p	|int	|magic_freecollxfrm					\
 				|NN SV *sv				\
@@ -6121,8 +6100,7 @@ Ep	|char * |mem_collxfrm_	|NN const char *input_string		\
 				|STRLEN len				\
 				|NN STRLEN *xlen			\
 				|bool utf8
-# endif /* defined(PERL_IN_LOCALE_C) || defined(PERL_IN_MATHOMS_C) || \
-           defined(PERL_IN_SV_C) */
+# endif
 #endif /* defined(USE_LOCALE_COLLATE) */
 #if defined(USE_PERLIO)
 Adhp	|void	|PerlIO_clearerr|NULLOK PerlIO *f
@@ -6170,31 +6148,31 @@ Adhp	|SSize_t|PerlIO_write	|NULLOK PerlIO *f			\
 #endif /* defined(USE_PERLIO) */
 #if defined(USE_PERL_SWITCH_LOCALE_CONTEXT)
 CTop	|void	|switch_locale_context
-#endif /* defined(USE_PERL_SWITCH_LOCALE_CONTEXT) */
+#endif
 #if defined(USE_QUADMATH)
 Tdp	|bool	|quadmath_format_needed 				\
 				|NN const char *format
 Tdp	|bool	|quadmath_format_valid					\
 				|NN const char *format
-#endif /* defined(USE_QUADMATH) */
+#endif
 #if defined(VMS) || defined(WIN32)
 Cp	|int	|do_aspawn	|NULLOK SV *really			\
 				|NN SV **mark				\
 				|NN SV **sp
 Cp	|int	|do_spawn	|NN char *cmd
 Cp	|int	|do_spawn_nowait|NN char *cmd
-#endif /* defined(VMS) || defined(WIN32) */
+#endif
 #if defined(WIN32)
 CRTdp	|void * |get_context
 p	|bool	|get_win32_message_utf8ness				\
 				|NULLOK const char *string
 Teor	|void	|win32_croak_not_implemented				\
 				|NN const char *fname
-#else /* if !defined(WIN32) */
+#else
 p	|bool	|do_exec3	|NN const char *incmd			\
 				|int fd 				\
 				|int do_report
 CRTdip	|void * |get_context
-#endif /* !defined(WIN32) */
+#endif
 
 : ex: set ts=8 sts=4 sw=4 noet:

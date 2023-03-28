@@ -662,6 +662,7 @@ sub parse_fh {
 
         push @lines, $line_info;
         if ($do_pop) {
+            $line_info->{inner_lines} = $line_info->start_line_num - $cond_line[-1]->start_line_num;
             pop @cond;
             pop @cond_line;
         }
@@ -817,6 +818,7 @@ sub lines_as_str {
     $post_process_content ||= $self->{post_process_content};
     my $filter= $self->{filter_content};
     my $last_line= "";
+    #warn $self->dd($lines);
     foreach my $line_data (@$lines) {
         my $line= $line_data->{line};
         if ($line_data->{type} ne "content" or $line_data->{sub_type} ne "text")
@@ -826,28 +828,31 @@ sub lines_as_str {
             $line =~ s/^#(\s*)/#$ind/;
         }
         if ($line_data->{type} eq "cond") {
+            my $add_commented_expr_after = 10;
             if ($line_data->{sub_type} =~ /#(?:else|endif)/) {
                 my $joined= join " && ",
                     map { "($_)" } @{ $line_data->{cond}[-1] };
                 my $cond_txt= $self->tidy_cond($joined);
                 $cond_txt= "if $cond_txt" if $line_data->{sub_type} eq "#else";
-                $line =~ s!\s*\z! /* $cond_txt */\n!;
+                $line =~ s!\s*\z! /* $cond_txt */\n!
+                    if $line_data->{inner_lines} >= $add_commented_expr_after;
             }
             elsif ($line_data->{sub_type} eq "#elif") {
                 my $last_frame= $line_data->{cond}[-1];
                 my $joined= join " && ",
                     map { "($_)" } @$last_frame[ 0 .. ($#$last_frame - 1) ];
                 my $cond_txt= $self->tidy_cond($joined);
-                $line =~ s!\s*\z! /* && $cond_txt */\n!;
+                $line =~ s!\s*\z! /* && $cond_txt */\n!
+                    if $line_data->{inner_lines} >= $add_commented_expr_after;
             }
         }
-        $line =~ s/\s+\z/\n/;
+        $line =~ s/\s*\z/\n/;
         if ($last_line eq "\n" and $line eq "\n") {
             next;
         }
         $last_line= $line;
         if ($line_data->{type} eq "cond") {
-            $line =~ m!(^\s*#\s*\w+\s+)([^/].*?\s*)?(/\*.*)?\n\z!
+            $line =~ m!(^\s*#\s*\w+[ ]*)([^/].*?\s*)?(/\*.*)?\n\z!
                 or die "Failed to split cond line: $line";
             my ($type, $cond, $comment)= ($1, $2, $3);
             $comment //= "";
@@ -882,6 +887,7 @@ sub _my_wrap {
     local $Text::Wrap::unexpand= 0;
     local $Text::Wrap::huge= "overflow";
     local $Text::Wrap::columns= 78;
+    unless (length $line) { return $head };
     $line= wrap $head, $rest, $line;
     return $line;
 }
@@ -1004,7 +1010,7 @@ sub _best_path {
 # @{$tree{''}}, lines with the condition "defined(A) && defined(B)" would be
 # in $tree{"defined(A)"}{"defined(B)"}{""}.
 #
-# The result of this sub is normally passed into _recurse_group_content_tree()
+# The result of this sub is normally passed into __recurse_group_content_tree()
 # which converts it back into a set of HeaderLine objects.
 #
 sub _build_group_content_tree {
@@ -1065,15 +1071,26 @@ sub _build_group_content_tree {
     return \%tree;
 }
 
+sub _recurse_group_content_tree {
+    my ($self, $node, @path)= @_;
+
+    my @ret;
+    local $self->{rgct_ret}= \@ret;
+    local $self->{line_by_depth}= [];
+
+    $self->__recurse_group_content_tree($node,@path);
+    return \@ret;
+}
+
 # convert a tree of conditions constructed by _build_group_content_tree()
 # and turn it into a set of HeaderLines that represents it. Performs the
 # appropriate sets required to reconstitute an if/elif/elif/else sequence
 # by calling _handle_else().
-sub _recurse_group_content_tree {
+sub __recurse_group_content_tree {
     my ($self, $node, @path)= @_;
     my $depth= 0 + @path;
     my $ind= $self->indent_chars($depth);
-    my @ret;
+    my $ret= $self->{rgct_ret};
     if ($node->{''}) {
         if (my $cb= $self->{post_process_grouped_content}) {
             $cb->($self, $node->{''}, \@path);
@@ -1081,8 +1098,8 @@ sub _recurse_group_content_tree {
         if (my $cb= $self->{post_process_content}) {
             $cb->($self, $_, \@path) for @{ $node->{''} };
         }
-        push @ret,
-            map { HeaderLine->new(%$_, cond => [@path], level => $depth) }
+        push @$ret,
+            map { HeaderLine->new(%$_, cond => [@path], level => $depth, start_line_num => 0+@$ret) }
             @{ $node->{''} };
     }
 
@@ -1115,15 +1132,16 @@ sub _recurse_group_content_tree {
             raw      => $raw,
             line     => $raw,
             level    => $depth,
-            cond     => [ @path, [$expr] ]);
-        my $ar= $self->_recurse_group_content_tree($kid, @path, [$expr]);
-        push @ret, $hl, @$ar;
+            cond     => [ @path, [$expr] ],
+            start_line_num => 0+@$ret,
+        );
+        $self->{line_by_depth}[$depth] = 0+@$ret;
+        push @$ret, $hl;
+        $self->__recurse_group_content_tree($kid, @path, [$expr]);
         if ($node->{$not}) {
             $skip{$not}++;
-            my $ar=
-                $self->_handle_else($not, $node->{$not}, $ind, $depth, @path,
+            $self->_handle_else($not, $node->{$not}, $ind, $depth, @path,
                 [$not]);
-            push @ret, @$ar;
         }
 
         # and finally the #endif
@@ -1138,7 +1156,7 @@ sub _recurse_group_content_tree {
         # BUT if this last line is itself an #endif, then we need to take the second
         # to last line instead, as the endif would have "popped" that frame off the
         # condition stack.
-        my $last_ret= $ret[-1];
+        my $last_ret= $ret->[-1];
         my $idx=
             ($last_ret->{type} eq "cond" && $last_ret->{sub_type} eq "#endif")
             ? -2
@@ -1149,16 +1167,21 @@ sub _recurse_group_content_tree {
             raw      => $raw,
             line     => $raw,
             level    => $depth,
-            cond     => [ @path, $last_ret->{cond}[$idx] ]);
-        push @ret, $end_line;
+            cond     => [ @path, $last_ret->{cond}[$idx] ],
+            start_line_num => 0+@$ret,
+            inner_lines => @$ret - $self->{line_by_depth}[$depth],
+        );
+        undef $self->{line_by_depth}[$depth];
+        push @$ret, $end_line;
     }
-    return \@ret;
+    return $ret;
 }
+
 
 # this handles the specific case of an else clause, detecting
 # when an elif can be constructed, may recursively call itself
 # to deal with if/elif/elif/else chains. Calls back into
-# _recurse_group_content_tree().
+# __recurse_group_content_tree().
 sub _handle_else {
     my ($self, $not, $kid, $ind, $depth, @path)= @_;
 
@@ -1174,7 +1197,7 @@ sub _handle_else {
         # the inverse of $k1, which we will use later.
         $not_k1= $self->tidy_cond("!($k1)");
     }
-    my @ret;
+    my $ret = $self->{rgct_ret};
     if (length($k1) and !defined($k2)) {
 
         # only one child, no payload -> elsif $k1
@@ -1197,9 +1220,13 @@ sub _handle_else {
             raw      => $raw,
             line     => $raw,
             level    => $depth,
-            cond     => [ map { [@$_] } @path ]);
-        my $ar= $self->_recurse_group_content_tree($kid, @path);
-        push @ret, $hl, @$ar;
+            cond     => [ map { [@$_] } @path ],
+            start_line_num => 0+@$ret,
+            inner_lines => @$ret - $self->{line_by_depth}[$depth],
+        );
+        $self->{line_by_depth}[$depth] = 0+@$ret;
+        push @$ret, $hl;
+        $self->__recurse_group_content_tree($kid, @path);
     }
     elsif (defined($not_k1) and $not_k1 eq $k2) {
 
@@ -1213,11 +1240,15 @@ sub _handle_else {
             raw      => $raw,
             line     => $raw,
             level    => $depth,
-            cond     => [ map { [@$_] } @path ]);
-        my $ar= $self->_recurse_group_content_tree($kid->{$k1}, @path);
+            cond     => [ map { [@$_] } @path ],
+            start_line_num => 0+@$ret,
+            inner_lines => @$ret - $self->{line_by_depth}[$depth],
+        );
+        $self->{line_by_depth}[$depth] = 0+@$ret;
+        push @$ret, $hl;
+        $self->__recurse_group_content_tree($kid->{$k1}, @path);
         $path[-1][-1]= $k2;
-        my $rest= $self->_handle_else($k2, $kid->{$k2}, $ind, $depth, @path);
-        push @ret, $hl, @$ar, @$rest;
+        $self->_handle_else($k2, $kid->{$k2}, $ind, $depth, @path);
     }
     else {
         # payload, 3+ children, or 2 which are not complementary -> else
@@ -1228,11 +1259,15 @@ sub _handle_else {
             raw      => $raw,
             line     => $raw,
             level    => $depth,
-            cond     => [ map { [@$_] } @path ]);
-        my $ar= $self->_recurse_group_content_tree($kid, @path);
-        push @ret, $hl, @$ar;
+            cond     => [ map { [@$_] } @path ],
+            start_line_num => 0+@$ret,
+            inner_lines => @$ret - $self->{line_by_depth}[$depth],
+        );
+        $self->{line_by_depth}[$depth] = 0+@$ret;
+        push @$ret, $hl;
+        $self->__recurse_group_content_tree($kid, @path);
     }
-    return \@ret;
+    return $ret;
 }
 
 # group the content in lines by the condition that apply to them
@@ -1279,6 +1314,7 @@ sub HeaderLine::is_content  { return $_[0]->type_is("content") }
 sub HeaderLine::is_cond     { return $_[0]->type_is("cond") }
 sub HeaderLine::is_define   { return $_[0]->sub_type_is("#define") }
 sub HeaderLine::line_num    { $_[0]->{start_line_num} }
+sub HeaderLine::inner_lines { $_[0]->{inner_lines} }
 sub HeaderLine::n_lines     { $_[0]->{n_lines} }
 sub HeaderLine::embed       { $_[0]->{embed} }
 *HeaderLine::start_line_num= *HeaderLine::line_num;

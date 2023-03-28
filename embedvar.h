@@ -365,7 +365,7 @@
 # define PL_xsubfilename                        (vTHX->Ixsubfilename)
 # if !defined(PL_sawampersand)
 #   define PL_sawampersand                      (vTHX->Isawampersand)
-# endif /* !defined(PL_sawampersand) */
+# endif
 #endif /* defined(MULTIPLICITY) */
 
 /* ex: set ro ft=c: */
