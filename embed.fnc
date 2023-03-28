@@ -3795,8 +3795,9 @@ Rp	|int	|PerlSock_socket_cloexec				\
 				|int type				\
 				|int protocol
 #endif
-#if defined(HAS_SOCKETPAIR) || ( defined(AF_INET) && defined(HAS_SOCKET) && \
-    defined(PF_INET) && defined(SOCK_DGRAM) )
+#if   defined(HAS_SOCKETPAIR) ||                                     \
+    ( defined(AF_INET) && defined(HAS_SOCKET) && defined(PF_INET) && \
+      defined(SOCK_DGRAM) )
 Rp	|int	|PerlSock_socketpair_cloexec				\
 				|int domain				\
 				|int type				\
@@ -4015,8 +4016,8 @@ Cp	|OP *	|class_wrap_method_body 				\
 				|NULLOK OP *o
 Cp	|void	|croak_kw_unless_class					\
 				|NN const char *kw
-#endif /* defined(PERL_IN_CLASS_C) || defined(PERL_IN_OP_C)    || \
-          defined(PERL_IN_PAD_C)   || defined(PERL_IN_PERLY_C) || \
+#endif /* defined(PERL_IN_CLASS_C) || defined(PERL_IN_OP_C)    ||
+          defined(PERL_IN_PAD_C)   || defined(PERL_IN_PERLY_C) ||
           defined(PERL_IN_TOKE_C) */
 #if defined(PERL_IN_DEB_C)
 S	|void	|deb_stack_n	|NN SV **stack_base			\
@@ -4068,9 +4069,10 @@ RS	|Size_t |do_trans_invmap|NN SV * const sv			\
 RS	|Size_t |do_trans_simple|NN SV * const sv			\
 				|NN const OPtrans_map * const tbl
 #endif
-#if defined(PERL_IN_DOOP_C) || defined(PERL_IN_OP_C)        || defined(PERL_IN_PP_C) \
-                            || defined(PERL_IN_REGCOMP_ANY) || defined(PERL_IN_REGEXEC_C) || \
-    defined(PERL_IN_TOKE_C) || defined(PERL_IN_UTF8_C)
+#if defined(PERL_IN_DOOP_C)    || defined(PERL_IN_OP_C)        || \
+    defined(PERL_IN_PP_C)      || defined(PERL_IN_REGCOMP_ANY) || \
+    defined(PERL_IN_REGEXEC_C) || defined(PERL_IN_TOKE_C)      || \
+    defined(PERL_IN_UTF8_C)
 ERTi	|bool * |get_invlist_offset_addr				\
 				|NN SV *invlist
 ERTi	|UV *	|invlist_array	|NN SV * const invlist
@@ -4127,7 +4129,7 @@ ERXp	|SV *	|_setup_canned_invlist					\
 				|const STRLEN size			\
 				|const UV element0			\
 				|NN UV **other_elements_ptr
-#endif /* defined(PERL_IN_DOOP_C)      || defined(PERL_IN_OP_C) || \
+#endif /* defined(PERL_IN_DOOP_C)      || defined(PERL_IN_OP_C) ||
           defined(PERL_IN_REGCOMP_ANY) || defined(PERL_IN_UTF8_C) */
 #if defined(PERL_IN_DQUOTE_C) || defined(PERL_IN_REGCOMP_C) || \
     defined(PERL_IN_TOKE_C)
@@ -4235,8 +4237,8 @@ S	|void	|require_tie_mod|NN GV *gv				\
 				|STRLEN len				\
 				|const U32 flags
 #endif /* defined(PERL_IN_GV_C) */
-#if defined(PERL_IN_GV_C) || defined(PERL_IN_OP_C) || defined(PERL_IN_PAD_C) \
-                          || defined(PERL_IN_SV_C)
+#if defined(PERL_IN_GV_C)  || defined(PERL_IN_OP_C) || \
+    defined(PERL_IN_PAD_C) || defined(PERL_IN_SV_C)
 : Used in gv.c
 op	|void	|sv_add_backref |NN SV * const tsv			\
 				|NN SV * const sv
@@ -4424,8 +4426,9 @@ S	|const char *|update_PL_curlocales_i				\
 				|NN const char *new_locale		\
 				|recalc_lc_all_t recalc_LC_ALL
 #     endif
-#   elif defined(USE_LOCALE_THREADS) && !defined(USE_THREAD_SAFE_LOCALE) && \
-         !defined(USE_THREAD_SAFE_LOCALE_EMULATION) /* && \
+#   elif  defined(USE_LOCALE_THREADS) &&                  \
+         !defined(USE_THREAD_SAFE_LOCALE) &&              \
+         !defined(USE_THREAD_SAFE_LOCALE_EMULATION) /* &&
          !defined(USE_POSIX_2008_LOCALE) */
 S	|const char *|less_dicey_setlocale_r				\
 				|const int category			\
@@ -4441,8 +4444,9 @@ S	|bool	|less_dicey_bool_setlocale_r				\
 				|NN const char *locale
 #     endif
 #   endif
-#   if !( defined(USE_POSIX_2008_LOCALE) && defined(USE_QUERYLOCALE) ) && ( \
-       !defined(LC_ALL) || defined(USE_POSIX_2008_LOCALE) || defined(WIN32) )
+#   if !(  defined(USE_POSIX_2008_LOCALE) && defined(USE_QUERYLOCALE) ) && \
+        ( !defined(LC_ALL) || defined(USE_POSIX_2008_LOCALE) ||            \
+           defined(WIN32) )
 S	|const char *|calculate_LC_ALL					\
 				|NN const char **individ_locales
 #   endif
@@ -4460,8 +4464,8 @@ S	|const char *|wrap_wsetlocale					\
 				|const int category			\
 				|NULLOK const char *locale
 #   endif
-#   if defined(WIN32) || ( defined(USE_POSIX_2008_LOCALE) && \
-       !defined(USE_QUERYLOCALE) )
+#   if   defined(WIN32) || \
+       ( defined(USE_POSIX_2008_LOCALE) && !defined(USE_QUERYLOCALE) )
 S	|const char *|find_locale_from_environment			\
 				|const unsigned int index
 #   endif

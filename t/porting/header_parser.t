@@ -26,7 +26,7 @@ sub show_text {
     print STDERR $as_text=~s/^/" " x 8/mger;
 }
 
-my $hp= HeaderParser->new;
+my $hp= HeaderParser->new();
 $hp->parse_text(<<~'EOF');
     #ifdef A
     #ifdef B
@@ -129,8 +129,9 @@ is($lines_as_str,<<~'DUMP_EOF', "Simple data structure as expected") or show_tex
               ]
             ],
             "flat" => "#endif",
+            "inner_lines" => 3,
             "level" => 1,
-            "line" => "# endif /* defined(B) */\n",
+            "line" => "# endif\n",
             "n_lines" => 1,
             "raw" => "#endif\n",
             "source" => "(buffer)",
@@ -177,8 +178,9 @@ is($lines_as_str,<<~'DUMP_EOF', "Simple data structure as expected") or show_tex
               ]
             ],
             "flat" => "#endif",
+            "inner_lines" => 7,
             "level" => 0,
-            "line" => "#endif /* defined(A) */\n",
+            "line" => "#endif\n",
             "n_lines" => 1,
             "raw" => "#endif\n",
             "source" => "(buffer)",
@@ -218,10 +220,10 @@ is($normal,<<~'EOF',"Normalized text as expected");
     # if defined(B)
     #   define AB
     content 1
-    # endif /* defined(B) */
+    # endif
     content 2
     # define A
-    #endif /* defined(A) */
+    #endif
     /*comment
       line */
     #define C /* this is
@@ -232,7 +234,7 @@ is($normal,<<~'EOF',"Normalized text as expected");
     my @warn;
     local $SIG{__WARN__}= sub { push @warn, $_[0]; warn $_[0] };
     my $ok= eval {
-        HeaderParser->new()->parse_text(<<~'EOF'); 1
+        HeaderParser->new(add_commented_expr_after=>0)->parse_text(<<~'EOF'); 1
         #ifdef A
         #ifdef B
         #endif
@@ -247,7 +249,7 @@ is($normal,<<~'EOF',"Normalized text as expected");
     my @warn;
     local $SIG{__WARN__}= sub { push @warn, $_[0]; warn $_[0] };
     my $ok= eval {
-        HeaderParser->new()->parse_text(<<~'EOF'); 1
+        HeaderParser->new(add_commented_expr_after=>0)->parse_text(<<~'EOF'); 1
         #ifdef A
         #ifdef B
         #elif C
@@ -262,7 +264,7 @@ is($normal,<<~'EOF',"Normalized text as expected");
     my @warn;
     local $SIG{__WARN__}= sub { push @warn, $_[0]; warn $_[0] };
     my $ok= eval {
-        HeaderParser->new()->parse_text(<<~'EOF'); 1
+        HeaderParser->new(add_commented_expr_after=>0)->parse_text(<<~'EOF'); 1
         #if 1 * * 10 > 5
         #elifdef C
         EOF
@@ -277,7 +279,7 @@ is($normal,<<~'EOF',"Normalized text as expected");
          "Expected token error") or warn $err;
 }
 {
-    my $hp= HeaderParser->new(debug=>0);
+    my $hp= HeaderParser->new(debug=>0,add_commented_expr_after=>0);
 
     $hp->parse_text(<<~'EOF');
         #ifdef A
@@ -308,7 +310,7 @@ is($normal,<<~'EOF',"Normalized text as expected");
         EOF
 }
 {
-    my $hp= HeaderParser->new(debug=>0);
+    my $hp= HeaderParser->new(debug=>0,add_commented_expr_after=>0);
     $hp->parse_text(<<~'EOF');
         #if defined(A) && defined(B)
         # if (defined(C) && defined(D))
@@ -338,7 +340,7 @@ is($normal,<<~'EOF',"Normalized text as expected");
         EOF
 }
 {
-    my $hp= HeaderParser->new(debug=>0);
+    my $hp= HeaderParser->new(debug=>0,add_commented_expr_after=>0);
     $hp->parse_text(<<~'EOF');
         #if defined(A)
         #define HAS_A
@@ -365,7 +367,7 @@ is($normal,<<~'EOF',"Normalized text as expected");
         EOF
 }
 {
-    my $hp= HeaderParser->new(debug=>0);
+    my $hp= HeaderParser->new(debug=>0,add_commented_expr_after=>0);
     $hp->parse_text(<<~'EOF');
         #if defined(A)
         #define HAS_A
@@ -399,7 +401,7 @@ is($normal,<<~'EOF',"Normalized text as expected");
         EOF
 }
 {
-    my $hp= HeaderParser->new(debug=>0);
+    my $hp= HeaderParser->new(debug=>0,add_commented_expr_after=>0);
     $hp->parse_text(<<~'EOF');
         #if defined(A)
         #define HAS_A
@@ -443,7 +445,7 @@ is($normal,<<~'EOF',"Normalized text as expected");
         EOF
 }
 {
-    my $hp= HeaderParser->new(debug=>0);
+    my $hp= HeaderParser->new(debug=>0,add_commented_expr_after=>0);
     $hp->parse_text(<<~'EOF');
         #if !defined(A)
         #define NOT_A1
@@ -469,7 +471,7 @@ is($normal,<<~'EOF',"Normalized text as expected");
         EOF
 }
 {
-    my $hp= HeaderParser->new(debug=>0);
+    my $hp= HeaderParser->new(debug=>0,add_commented_expr_after=>0);
     $hp->parse_text(<<~'EOF');
         #if !!!(defined(A) && defined(B))
         #define NOT_A_AND_B
@@ -491,7 +493,7 @@ is($normal,<<~'EOF',"Normalized text as expected");
         EOF
 }
 {
-    my $hp= HeaderParser->new(debug=>0);
+    my $hp= HeaderParser->new(debug=>0,add_commented_expr_after=>0);
     $hp->parse_text(<<~'EOF');
         #if defined(A) && !!defined(A) && !!!!defined(A)
         #define HAS_A
@@ -509,7 +511,7 @@ is($normal,<<~'EOF',"Normalized text as expected");
     local $::TODO;
     $::TODO= "Absorbtion not implemented yet";
     # currently we don't handle absorbtion: (A && (A || B || C ...)) == A
-    my $hp= HeaderParser->new(debug=>0);
+    my $hp= HeaderParser->new(debug=>0,add_commented_expr_after=>0);
     $hp->parse_text(<<~'EOF');
         #if defined(X) && (defined(X) || defined(Y))
         #define HAS_X
@@ -521,6 +523,97 @@ is($normal,<<~'EOF',"Normalized text as expected");
         #if defined(X)
         # define HAS_X
         #endif /* defined(X) */
+        EOF
+}
+{
+    my $hp= HeaderParser->new(debug=>0,add_commented_expr_after=>0);
+    $hp->parse_text(<<~'EOF');
+        #if defined(A) && (defined(B) && defined(C))
+        #define HAS_A
+        #endif
+        EOF
+    my $grouped= $hp->group_content();
+    my $as_text= $hp->lines_as_str($grouped);
+    is($as_text,<<~'EOF',"expression flattening") or show_text($as_text);
+        #if defined(A) && defined(B) && defined(C)
+        # define HAS_A
+        #endif /* defined(A) && defined(B) && defined(C) */
+        EOF
+}
+{
+    my $hp= HeaderParser->new(debug=>0,add_commented_expr_after=>3);
+    $hp->parse_text(<<~'EOF');
+        #if defined(A)
+        #define HAS_A1
+        #define HAS_A2
+        #define HAS_A3
+        #endif
+        #if defined(B)
+        #define HAS_B1
+        #else
+        #define HAS_B1e
+        #define HAS_B2e
+        #define HAS_B3e
+        #endif
+        #if defined(C)
+        #if defined(D)
+        #define HAS_D1
+        #endif
+        #elif defined(CC)
+        #define HAS_CC1
+        #define HAS_CC2
+        #define HAS_CC3
+        #endif
+        EOF
+    my $grouped= $hp->group_content();
+    my $as_text= $hp->lines_as_str($grouped);
+    is($as_text,<<~'EOF',"auto-comments") or show_text($as_text);
+        #if defined(A)
+        # define HAS_A1
+        # define HAS_A2
+        # define HAS_A3
+        #endif /* defined(A) */
+        #if defined(B)
+        # define HAS_B1
+        #else
+        # define HAS_B1e
+        # define HAS_B2e
+        # define HAS_B3e
+        #endif /* !defined(B) */
+        #if defined(C)
+        # if defined(D)
+        #   define HAS_D1
+        # endif
+        #elif defined(CC) /* && !defined(C) */
+        # define HAS_CC1
+        # define HAS_CC2
+        # define HAS_CC3
+        #endif /* !defined(C) && defined(CC) */
+        EOF
+}
+{
+    my $hp= HeaderParser->new(debug=>0,add_commented_expr_after=>0);
+    $hp->parse_text(<<~'EOF');
+        #if  defined(DEBUGGING)                                                    \
+             || (defined(USE_LOCALE) && (    defined(USE_THREADS)                  \
+                                        ||   defined(HAS_IGNORED_LOCALE_CATEGORIES)\
+                                        ||   defined(USE_POSIX_2008_LOCALE)        \
+                                        || ! defined(LC_ALL)))
+        # define X
+        #endif
+        EOF
+    my $grouped= $hp->group_content();
+    my $as_text= $hp->lines_as_str($grouped);
+    is($as_text,<<~'EOF',"Karls example") or show_text($as_text);
+        #if   defined(DEBUGGING) ||                                         \
+            ( defined(USE_LOCALE) &&                                        \
+            ( defined(HAS_IGNORED_LOCALE_CATEGORIES) || !defined(LC_ALL) || \
+              defined(USE_POSIX_2008_LOCALE) || defined(USE_THREADS) ) )
+        # define X
+        #endif /*   defined(DEBUGGING) ||
+                  ( defined(USE_LOCALE) &&
+                  ( defined(HAS_IGNORED_LOCALE_CATEGORIES) || !defined(LC_ALL) ||
+                    defined(USE_POSIX_2008_LOCALE) || defined(USE_THREADS) ) ) */
         EOF
 }
 
