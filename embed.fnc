@@ -4454,14 +4454,13 @@ S	|bool	|less_dicey_bool_setlocale_r				\
 #   endif /* !defined(USE_POSIX_2008_LOCALE) && ( defined(USE_LOCALE_THREADS) \
              && !defined(USE_THREAD_SAFE_LOCALE) && \
              !defined(USE_THREAD_SAFE_LOCALE_EMULATION) ) */
-#   if !( defined(USE_POSIX_2008_LOCALE) && defined(USE_QUERYLOCALE) )
-:	    regen/embed.pl can't currently cope with 'elif'
-#     if !defined(LC_ALL) || defined(USE_POSIX_2008_LOCALE) || defined(WIN32)
+#   if !( defined(USE_POSIX_2008_LOCALE) && defined(USE_QUERYLOCALE) ) && ( \
+       !defined(LC_ALL) || defined(USE_POSIX_2008_LOCALE) || defined(WIN32) )
 S	|const char *|calculate_LC_ALL					\
 				|NN const char **individ_locales
-#     endif /* !defined(LC_ALL) || defined(USE_POSIX_2008_LOCALE) || \
-               defined(WIN32) */
-#   endif /* !( defined(USE_POSIX_2008_LOCALE) && defined(USE_QUERYLOCALE) ) */
+#   endif /* !( defined(USE_POSIX_2008_LOCALE) && defined(USE_QUERYLOCALE) ) \
+             && ( !defined(LC_ALL) || defined(USE_POSIX_2008_LOCALE) || \
+             defined(WIN32) ) */
 #   if defined(WIN32)
 ST	|wchar_t *|Win_byte_string_to_wstring				\
 				|const UINT code_page			\
