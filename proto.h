@@ -5345,17 +5345,6 @@ Perl_yyunlex(pTHX)
         __attribute__visibility__("hidden");
 #define PERL_ARGS_ASSERT_YYUNLEX
 
-#if ( defined(AF_INET) && defined(HAS_SOCKET) && defined(PF_INET) && \
-    defined(SOCK_DGRAM) ) || defined(HAS_SOCKETPAIR)
-PERL_CALLCONV int
-Perl_PerlSock_socketpair_cloexec(pTHX_ int domain, int type, int protocol, int *pairfd)
-        __attribute__warn_unused_result__
-        __attribute__visibility__("hidden");
-# define PERL_ARGS_ASSERT_PERLSOCK_SOCKETPAIR_CLOEXEC \
-        assert(pairfd)
-
-#endif /* ( defined(AF_INET) && defined(HAS_SOCKET) && defined(PF_INET) && \
-          defined(SOCK_DGRAM) ) || defined(HAS_SOCKETPAIR) */
 #if defined(DEBUGGING)
 PERL_CALLCONV int
 Perl_get_debug_opts(pTHX_ const char **s, bool givehelp)
@@ -5529,6 +5518,17 @@ Perl_PerlSock_socket_cloexec(pTHX_ int domain, int type, int protocol)
 # define PERL_ARGS_ASSERT_PERLSOCK_SOCKET_CLOEXEC
 
 #endif /* defined(HAS_SOCKET) */
+#if defined(HAS_SOCKETPAIR) || ( defined(AF_INET) && defined(HAS_SOCKET) && \
+    defined(PF_INET) && defined(SOCK_DGRAM) )
+PERL_CALLCONV int
+Perl_PerlSock_socketpair_cloexec(pTHX_ int domain, int type, int protocol, int *pairfd)
+        __attribute__warn_unused_result__
+        __attribute__visibility__("hidden");
+# define PERL_ARGS_ASSERT_PERLSOCK_SOCKETPAIR_CLOEXEC \
+        assert(pairfd)
+
+#endif /* defined(HAS_SOCKETPAIR) || ( defined(AF_INET) && \
+          defined(HAS_SOCKET) && defined(PF_INET) && defined(SOCK_DGRAM) ) */
 #if !defined(HAS_STRLCPY)
 STATIC Size_t
 Perl_my_strlcpy(char *dst, const char *src, Size_t size);
@@ -6017,6 +6017,15 @@ Perl_gv_SVadd(pTHX_ GV *gv);
 #   define PERL_ARGS_ASSERT_GV_SVADD
 
 # endif /* defined(PERL_DONT_CREATE_GVSV) */
+# if defined(PERL_IN_OP_C) || defined(PERL_IN_PERLY_C) || \
+     defined(PERL_IN_TOKE_C)
+PERL_CALLCONV OP *
+Perl_ref(pTHX_ OP *o, I32 type)
+        __attribute__visibility__("hidden");
+#   define PERL_ARGS_ASSERT_REF
+
+# endif /* defined(PERL_IN_OP_C) || defined(PERL_IN_PERLY_C) || \
+           defined(PERL_IN_TOKE_C) */
 # if defined(USE_LOCALE_COLLATE)
 PERL_CALLCONV char *
 Perl_sv_collxfrm(pTHX_ SV * const sv, STRLEN * const nxp);
@@ -6085,32 +6094,6 @@ Perl_isSCRIPT_RUN(pTHX_ const U8 *s, const U8 *send, const bool utf8_target)
 # define PERL_ARGS_ASSERT_ISSCRIPT_RUN          \
         assert(s); assert(send)
 
-# if !defined(PERL_NO_INLINE_FUNCTIONS)
-PERL_STATIC_INLINE bool
-Perl_is_utf8_non_invariant_string(const U8 * const s, STRLEN len)
-        __attribute__warn_unused_result__;
-#   define PERL_ARGS_ASSERT_IS_UTF8_NON_INVARIANT_STRING \
-        assert(s)
-
-PERL_STATIC_INLINE STRLEN
-S_sv_or_pv_pos_u2b(pTHX_ SV *sv, const char *pv, STRLEN pos, STRLEN *lenp);
-#   define PERL_ARGS_ASSERT_SV_OR_PV_POS_U2B    \
-        assert(sv); assert(pv)
-
-PERL_STATIC_INLINE Size_t
-S_variant_under_utf8_count(const U8 * const s, const U8 * const e)
-        __attribute__warn_unused_result__;
-#   define PERL_ARGS_ASSERT_VARIANT_UNDER_UTF8_COUNT \
-        assert(s); assert(e)
-
-#   if !defined(HAS_MEMRCHR)
-PERL_STATIC_INLINE void *
-S_my_memrchr(const char *s, const char c, const STRLEN len);
-#     define PERL_ARGS_ASSERT_MY_MEMRCHR        \
-        assert(s)
-
-#   endif /* !defined(HAS_MEMRCHR) */
-# endif /* !defined(PERL_NO_INLINE_FUNCTIONS) */
 #endif /* defined(PERL_CORE) || defined(PERL_EXT) */
 #if defined(PERL_CORE) || defined(PERL_USE_VOLATILE_API)
 PERL_CALLCONV void
@@ -6327,37 +6310,6 @@ Perl__invlist_search(SV * const invlist, const UV cp)
 # define PERL_ARGS_ASSERT__INVLIST_SEARCH       \
         assert(invlist)
 
-# if !defined(PERL_NO_INLINE_FUNCTIONS)
-PERL_STATIC_INLINE bool
-S__invlist_contains_cp(SV * const invlist, const UV cp)
-        __attribute__warn_unused_result__;
-#   define PERL_ARGS_ASSERT__INVLIST_CONTAINS_CP \
-        assert(invlist)
-
-PERL_STATIC_INLINE UV
-S__invlist_len(SV * const invlist)
-        __attribute__warn_unused_result__;
-#   define PERL_ARGS_ASSERT__INVLIST_LEN        \
-        assert(invlist)
-
-PERL_STATIC_INLINE bool *
-S_get_invlist_offset_addr(SV *invlist)
-        __attribute__warn_unused_result__;
-#   define PERL_ARGS_ASSERT_GET_INVLIST_OFFSET_ADDR \
-        assert(invlist)
-
-PERL_STATIC_INLINE UV *
-S_invlist_array(SV * const invlist)
-        __attribute__warn_unused_result__;
-#   define PERL_ARGS_ASSERT_INVLIST_ARRAY       \
-        assert(invlist)
-
-PERL_STATIC_INLINE bool
-S_is_invlist(const SV * const invlist)
-        __attribute__warn_unused_result__;
-#   define PERL_ARGS_ASSERT_IS_INVLIST
-
-# endif /* !defined(PERL_NO_INLINE_FUNCTIONS) */
 #endif /* defined(PERL_IN_DOOP_C)    || defined(PERL_IN_OP_C)        || \
           defined(PERL_IN_PP_C)      || defined(PERL_IN_REGCOMP_ANY) || \
           defined(PERL_IN_REGEXEC_C) || defined(PERL_IN_TOKE_C)      || \
@@ -6365,29 +6317,6 @@ S_is_invlist(const SV * const invlist)
 #if defined(PERL_IN_DOOP_C) || defined(PERL_IN_OP_C) || \
     defined(PERL_IN_REGCOMP_ANY)
 
-# if !defined(PERL_NO_INLINE_FUNCTIONS)
-PERL_STATIC_INLINE SV *
-S_add_cp_to_invlist(pTHX_ SV *invlist, const UV cp)
-        __attribute__warn_unused_result__;
-#   define PERL_ARGS_ASSERT_ADD_CP_TO_INVLIST
-
-PERL_STATIC_INLINE void
-S_invlist_extend(pTHX_ SV * const invlist, const UV len);
-#   define PERL_ARGS_ASSERT_INVLIST_EXTEND      \
-        assert(invlist)
-
-PERL_STATIC_INLINE UV
-S_invlist_highest(SV * const invlist)
-        __attribute__warn_unused_result__;
-#   define PERL_ARGS_ASSERT_INVLIST_HIGHEST     \
-        assert(invlist)
-
-PERL_STATIC_INLINE void
-S_invlist_set_len(pTHX_ SV * const invlist, const UV len, const bool offset);
-#   define PERL_ARGS_ASSERT_INVLIST_SET_LEN     \
-        assert(invlist)
-
-# endif /* !defined(PERL_NO_INLINE_FUNCTIONS) */
 #endif /* defined(PERL_IN_DOOP_C) || defined(PERL_IN_OP_C) || \
           defined(PERL_IN_REGCOMP_ANY) */
 #if defined(PERL_IN_DOOP_C)      || defined(PERL_IN_OP_C) || \
@@ -7091,16 +7020,6 @@ S_my_langinfo_i(pTHX_ const int item, const unsigned int cat_index, const char *
         assert(locale); assert(retbufp)
 
 #   endif /* !( defined(HAS_NL_LANGINFO) || defined(HAS_NL_LANGINFO_L) ) */
-#   if ( !defined(LC_ALL) || defined(USE_POSIX_2008_LOCALE) || defined(WIN32) \
-       ) && !( defined(USE_POSIX_2008_LOCALE) && defined(USE_QUERYLOCALE) )
-STATIC const char *
-S_calculate_LC_ALL(pTHX_ const char **individ_locales);
-#     define PERL_ARGS_ASSERT_CALCULATE_LC_ALL  \
-        assert(individ_locales)
-
-#   endif /* ( !defined(LC_ALL) || defined(USE_POSIX_2008_LOCALE) || \
-             defined(WIN32) ) && !( defined(USE_POSIX_2008_LOCALE) && \
-             defined(USE_QUERYLOCALE) ) */
 #   if !defined(PERL_NO_INLINE_FUNCTIONS)
 PERL_STATIC_INLINE const char *
 S_mortalized_pv_copy(pTHX_ const char * const pv)
@@ -7196,18 +7115,19 @@ S_less_dicey_bool_setlocale_r(pTHX_ const int cat, const char *locale);
         assert(locale)
 
 #     endif /* 0 */
-#   endif /* ( defined(USE_LOCALE_THREADS) && \
-             !defined(USE_THREAD_SAFE_LOCALE) && \
-             !defined(USE_THREAD_SAFE_LOCALE_EMULATION) ) && \
-             !defined(USE_POSIX_2008_LOCALE) */
-#   if ( defined(USE_POSIX_2008_LOCALE) && !defined(USE_QUERYLOCALE) ) || \
-       defined(WIN32)
+#   endif /* !defined(USE_POSIX_2008_LOCALE) && ( defined(USE_LOCALE_THREADS) \
+             && !defined(USE_THREAD_SAFE_LOCALE) && \
+             !defined(USE_THREAD_SAFE_LOCALE_EMULATION) ) */
+#   if !( defined(USE_POSIX_2008_LOCALE) && defined(USE_QUERYLOCALE) ) && ( \
+       !defined(LC_ALL) || defined(USE_POSIX_2008_LOCALE) || defined(WIN32) )
 STATIC const char *
-S_find_locale_from_environment(pTHX_ const unsigned int index);
-#     define PERL_ARGS_ASSERT_FIND_LOCALE_FROM_ENVIRONMENT
+S_calculate_LC_ALL(pTHX_ const char **individ_locales);
+#     define PERL_ARGS_ASSERT_CALCULATE_LC_ALL  \
+        assert(individ_locales)
 
-#   endif /* ( defined(USE_POSIX_2008_LOCALE) && !defined(USE_QUERYLOCALE) ) \
-             || defined(WIN32) */
+#   endif /* !( defined(USE_POSIX_2008_LOCALE) && defined(USE_QUERYLOCALE) ) \
+             && ( !defined(LC_ALL) || defined(USE_POSIX_2008_LOCALE) || \
+             defined(WIN32) ) */
 #   if defined(WIN32)
 STATIC wchar_t *
 S_Win_byte_string_to_wstring(const UINT code_page, const char *byte_string);
@@ -7226,6 +7146,14 @@ S_wrap_wsetlocale(pTHX_ const int category, const char *locale);
 #     define PERL_ARGS_ASSERT_WRAP_WSETLOCALE
 
 #   endif /* defined(WIN32) */
+#   if defined(WIN32) || ( defined(USE_POSIX_2008_LOCALE) && \
+       !defined(USE_QUERYLOCALE) )
+STATIC const char *
+S_find_locale_from_environment(pTHX_ const unsigned int index);
+#     define PERL_ARGS_ASSERT_FIND_LOCALE_FROM_ENVIRONMENT
+
+#   endif /* defined(WIN32) || ( defined(USE_POSIX_2008_LOCALE) && \
+             !defined(USE_QUERYLOCALE) ) */
 # endif /* defined(USE_LOCALE) */
 # if defined(USE_POSIX_2008_LOCALE) || defined(DEBUGGING)
 STATIC const char *
@@ -7523,53 +7451,14 @@ Perl_warn_elem_scalar_context(pTHX_ const OP *o, SV *name, bool is_hash, bool is
 # define PERL_ARGS_ASSERT_WARN_ELEM_SCALAR_CONTEXT \
         assert(o); assert(name)
 
-# if defined(USE_ITHREADS)
-PERL_CALLCONV void
-Perl_op_relocate_sv(pTHX_ SV **svp, PADOFFSET *targp)
-        __attribute__visibility__("hidden");
-#   define PERL_ARGS_ASSERT_OP_RELOCATE_SV      \
-        assert(svp); assert(targp)
-
-# endif /* defined(USE_ITHREADS) */
 #endif /* defined(PERL_IN_OP_C) || defined(PERL_IN_PEEP_C) */
 #if defined(PERL_IN_OP_C) || defined(PERL_IN_PERLY_C) || \
     defined(PERL_IN_TOKE_C)
 
-# if !defined(NO_MATHOMS)
-PERL_CALLCONV OP *
-Perl_ref(pTHX_ OP *o, I32 type)
-        __attribute__visibility__("hidden");
-#   define PERL_ARGS_ASSERT_REF
-
-# endif /* !defined(NO_MATHOMS) */
 #endif /* defined(PERL_IN_OP_C) || defined(PERL_IN_PERLY_C) || \
           defined(PERL_IN_TOKE_C) */
 #if defined(PERL_IN_OP_C) || defined(PERL_IN_REGCOMP_ANY)
 
-# if !defined(PERL_NO_INLINE_FUNCTIONS)
-PERL_STATIC_INLINE STRLEN *
-S_get_invlist_iter_addr(SV *invlist)
-        __attribute__warn_unused_result__;
-#   define PERL_ARGS_ASSERT_GET_INVLIST_ITER_ADDR \
-        assert(invlist)
-
-PERL_STATIC_INLINE void
-S_invlist_iterfinish(SV *invlist);
-#   define PERL_ARGS_ASSERT_INVLIST_ITERFINISH  \
-        assert(invlist)
-
-PERL_STATIC_INLINE void
-S_invlist_iterinit(SV *invlist);
-#   define PERL_ARGS_ASSERT_INVLIST_ITERINIT    \
-        assert(invlist)
-
-PERL_STATIC_INLINE bool
-S_invlist_iternext(SV *invlist, UV *start, UV *end)
-        __attribute__warn_unused_result__;
-#   define PERL_ARGS_ASSERT_INVLIST_ITERNEXT    \
-        assert(invlist); assert(start); assert(end)
-
-# endif /* !defined(PERL_NO_INLINE_FUNCTIONS) */
 #endif /* defined(PERL_IN_OP_C) || defined(PERL_IN_REGCOMP_ANY) */
 #if defined(PERL_IN_OP_C) || defined(PERL_IN_SV_C)
 PERL_CALLCONV void
@@ -7768,14 +7657,6 @@ Perl_softref2xv(pTHX_ SV * const sv, const char * const what, const svtype type,
 # define PERL_ARGS_ASSERT_SOFTREF2XV            \
         assert(sv); assert(what); assert(spp)
 
-# if !defined(PERL_NO_INLINE_FUNCTIONS)
-PERL_STATIC_INLINE bool
-S_lossless_NV_to_IV(const NV nv, IV *ivp)
-        __attribute__warn_unused_result__;
-#   define PERL_ARGS_ASSERT_LOSSLESS_NV_TO_IV   \
-        assert(ivp)
-
-# endif /* !defined(PERL_NO_INLINE_FUNCTIONS) */
 #endif /* defined(PERL_IN_PP_C) || defined(PERL_IN_PP_HOT_C) */
 #if defined(PERL_IN_PP_C) || defined(PERL_IN_UTF8_C)
 PERL_CALLCONV UV
@@ -10069,6 +9950,94 @@ Perl_my_strnlen(const char *str, Size_t maxlen);
         assert(str)
 
 # endif /* !defined(HAS_STRNLEN) */
+# if defined(PERL_CORE) || defined(PERL_EXT)
+PERL_STATIC_INLINE bool
+Perl_is_utf8_non_invariant_string(const U8 * const s, STRLEN len)
+        __attribute__warn_unused_result__;
+#   define PERL_ARGS_ASSERT_IS_UTF8_NON_INVARIANT_STRING \
+        assert(s)
+
+PERL_STATIC_INLINE STRLEN
+S_sv_or_pv_pos_u2b(pTHX_ SV *sv, const char *pv, STRLEN pos, STRLEN *lenp);
+#   define PERL_ARGS_ASSERT_SV_OR_PV_POS_U2B    \
+        assert(sv); assert(pv)
+
+PERL_STATIC_INLINE Size_t
+S_variant_under_utf8_count(const U8 * const s, const U8 * const e)
+        __attribute__warn_unused_result__;
+#   define PERL_ARGS_ASSERT_VARIANT_UNDER_UTF8_COUNT \
+        assert(s); assert(e)
+
+#   if !defined(HAS_MEMRCHR)
+PERL_STATIC_INLINE void *
+S_my_memrchr(const char *s, const char c, const STRLEN len);
+#     define PERL_ARGS_ASSERT_MY_MEMRCHR        \
+        assert(s)
+
+#   endif /* !defined(HAS_MEMRCHR) */
+# endif /* defined(PERL_CORE) || defined(PERL_EXT) */
+# if defined(PERL_IN_DOOP_C)    || defined(PERL_IN_OP_C)        || \
+     defined(PERL_IN_PP_C)      || defined(PERL_IN_REGCOMP_ANY) || \
+     defined(PERL_IN_REGEXEC_C) || defined(PERL_IN_TOKE_C)      || \
+     defined(PERL_IN_UTF8_C)
+PERL_STATIC_INLINE bool
+S__invlist_contains_cp(SV * const invlist, const UV cp)
+        __attribute__warn_unused_result__;
+#   define PERL_ARGS_ASSERT__INVLIST_CONTAINS_CP \
+        assert(invlist)
+
+PERL_STATIC_INLINE UV
+S__invlist_len(SV * const invlist)
+        __attribute__warn_unused_result__;
+#   define PERL_ARGS_ASSERT__INVLIST_LEN        \
+        assert(invlist)
+
+PERL_STATIC_INLINE bool *
+S_get_invlist_offset_addr(SV *invlist)
+        __attribute__warn_unused_result__;
+#   define PERL_ARGS_ASSERT_GET_INVLIST_OFFSET_ADDR \
+        assert(invlist)
+
+PERL_STATIC_INLINE UV *
+S_invlist_array(SV * const invlist)
+        __attribute__warn_unused_result__;
+#   define PERL_ARGS_ASSERT_INVLIST_ARRAY       \
+        assert(invlist)
+
+PERL_STATIC_INLINE bool
+S_is_invlist(const SV * const invlist)
+        __attribute__warn_unused_result__;
+#   define PERL_ARGS_ASSERT_IS_INVLIST
+
+# endif /* defined(PERL_IN_DOOP_C)    || defined(PERL_IN_OP_C)        || \
+           defined(PERL_IN_PP_C)      || defined(PERL_IN_REGCOMP_ANY) || \
+           defined(PERL_IN_REGEXEC_C) || defined(PERL_IN_TOKE_C)      || \
+           defined(PERL_IN_UTF8_C) */
+# if defined(PERL_IN_DOOP_C) || defined(PERL_IN_OP_C) || \
+     defined(PERL_IN_REGCOMP_ANY)
+PERL_STATIC_INLINE SV *
+S_add_cp_to_invlist(pTHX_ SV *invlist, const UV cp)
+        __attribute__warn_unused_result__;
+#   define PERL_ARGS_ASSERT_ADD_CP_TO_INVLIST
+
+PERL_STATIC_INLINE void
+S_invlist_extend(pTHX_ SV * const invlist, const UV len);
+#   define PERL_ARGS_ASSERT_INVLIST_EXTEND      \
+        assert(invlist)
+
+PERL_STATIC_INLINE UV
+S_invlist_highest(SV * const invlist)
+        __attribute__warn_unused_result__;
+#   define PERL_ARGS_ASSERT_INVLIST_HIGHEST     \
+        assert(invlist)
+
+PERL_STATIC_INLINE void
+S_invlist_set_len(pTHX_ SV * const invlist, const UV len, const bool offset);
+#   define PERL_ARGS_ASSERT_INVLIST_SET_LEN     \
+        assert(invlist)
+
+# endif /* defined(PERL_IN_DOOP_C) || defined(PERL_IN_OP_C) || \
+           defined(PERL_IN_REGCOMP_ANY) */
 # if defined(PERL_IN_OP_C) || defined(PERL_IN_PAD_C)
 PERL_STATIC_INLINE bool
 S_PadnameIN_SCOPE(const PADNAME * const pn, const U32 seq);
@@ -10076,6 +10045,38 @@ S_PadnameIN_SCOPE(const PADNAME * const pn, const U32 seq);
         assert(pn)
 
 # endif /* defined(PERL_IN_OP_C) || defined(PERL_IN_PAD_C) */
+# if defined(PERL_IN_OP_C) || defined(PERL_IN_REGCOMP_ANY)
+PERL_STATIC_INLINE STRLEN *
+S_get_invlist_iter_addr(SV *invlist)
+        __attribute__warn_unused_result__;
+#   define PERL_ARGS_ASSERT_GET_INVLIST_ITER_ADDR \
+        assert(invlist)
+
+PERL_STATIC_INLINE void
+S_invlist_iterfinish(SV *invlist);
+#   define PERL_ARGS_ASSERT_INVLIST_ITERFINISH  \
+        assert(invlist)
+
+PERL_STATIC_INLINE void
+S_invlist_iterinit(SV *invlist);
+#   define PERL_ARGS_ASSERT_INVLIST_ITERINIT    \
+        assert(invlist)
+
+PERL_STATIC_INLINE bool
+S_invlist_iternext(SV *invlist, UV *start, UV *end)
+        __attribute__warn_unused_result__;
+#   define PERL_ARGS_ASSERT_INVLIST_ITERNEXT    \
+        assert(invlist); assert(start); assert(end)
+
+# endif /* defined(PERL_IN_OP_C) || defined(PERL_IN_REGCOMP_ANY) */
+# if defined(PERL_IN_PP_C) || defined(PERL_IN_PP_HOT_C)
+PERL_STATIC_INLINE bool
+S_lossless_NV_to_IV(const NV nv, IV *ivp)
+        __attribute__warn_unused_result__;
+#   define PERL_ARGS_ASSERT_LOSSLESS_NV_TO_IV   \
+        assert(ivp)
+
+# endif /* defined(PERL_IN_PP_C) || defined(PERL_IN_PP_HOT_C) */
 # if defined(PERL_IN_PP_C)   || defined(PERL_IN_REGCOMP_ANY) || \
      defined(PERL_IN_TOKE_C) || defined(PERL_IN_UNIVERSAL_C)
 PERL_STATIC_INLINE const char *
@@ -10341,6 +10342,14 @@ Perl_sv_dup_inc(pTHX_ const SV * const ssv, CLONE_PARAMS * const param)
 # define PERL_ARGS_ASSERT_SV_DUP_INC            \
         assert(param)
 
+# if defined(PERL_IN_OP_C) || defined(PERL_IN_PEEP_C)
+PERL_CALLCONV void
+Perl_op_relocate_sv(pTHX_ SV **svp, PADOFFSET *targp)
+        __attribute__visibility__("hidden");
+#   define PERL_ARGS_ASSERT_OP_RELOCATE_SV      \
+        assert(svp); assert(targp)
+
+# endif /* defined(PERL_IN_OP_C) || defined(PERL_IN_PEEP_C) */
 #else /* if !defined(USE_ITHREADS) */
 /* PERL_CALLCONV void
 CopFILEGV_set(pTHX_ COP *c, GV *gv); */
