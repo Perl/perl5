@@ -57,6 +57,7 @@ Class::PseudoHash
 Class::Tiny
 Class::Tiny::Antlers
 Classic::Perl
+CLDR::Number
 clearerr(3)
 clock(3)
 clock_getres(3)
@@ -89,6 +90,7 @@ Data::Util
 Date::Parse
 Date::Pcalc
 DateTime
+DateTime::Format::CLDR
 DB_File(3)
 DBI
 DBIx::Profile
@@ -191,6 +193,7 @@ List::Gather
 listen(2)
 local::lib
 locale(7)
+Locale::CLDR
 Locale::Codes
 Locale::Country
 Locale::Language
