@@ -942,6 +942,16 @@ Note that the command line above added a C<-j> parameter to make, so as
 to cause parallel compilation.  This may or may not work on your
 platform.
 
+Normally data on how long tests take is stored in F<t/test_state>,
+however you can change this to use a different filename by setting the
+C<PERL_TEST_STATE_FILE> environment variable to something different, or
+to a false value (0 or the empty string) to disable use of the state
+mechanism entirely.  There are no protections against the format of the
+state file changing over time, so if you have any issues related to this
+file it is up to you to delete the file manually and then let the
+harness recreate it, although the file format does not change frequently
+so this should not be necessary very often.
+
 =head2 Running tests by hand
 
 You can run part of the test suite by hand by using one of the

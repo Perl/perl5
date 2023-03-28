@@ -615,6 +615,8 @@ if (!$changes_file) {
     chomp(my @lines = <$ifh>);
     close $ifh;
     my $seen_new_version;
+    my $is_update = $new_version ne $old_version;
+
     for(my $idx = 0; $idx < @lines; $idx++) {
         if ($lines[$idx] =~ /$new_version/ ||
             ($pkg_dir eq "CPAN" and $lines[$idx] =~/^\d{4}-\d{2}-\d{2}/
@@ -624,7 +626,12 @@ if (!$changes_file) {
             $seen_new_version = 1;
             push @changes_info, $lines[$idx];
         } elsif ($seen_new_version) {
-            if (($lines[$idx]=~/\d\.\d/ and $lines[$idx]=~/20\d\d/) ||
+            if ($is_update && $pkg_dir eq "ExtUtils-MakeMaker") {
+                if ($lines[$idx] =~/$old_version/) {
+                    last;
+                }
+            }
+            elsif (($lines[$idx]=~/\d\.\d/ and $lines[$idx]=~/20\d\d/) ||
                 ($lines[$idx]=~/---------------------------------/) ||
                 ($pkg_dir eq "CPAN" and $lines[$idx] =~/^\d{4}-\d{2}-\d{2}/) ||
                 ($pkg_dir eq "version" and $lines[$idx] =~/^\d\.\d+/) ||
@@ -633,9 +640,9 @@ if (!$changes_file) {
                 0 # less commit churn if we have to tweak the heuristics above
             ){
                 last;
-            } else {
-                push @changes_info, $lines[$idx];
             }
+            push @changes_info, $lines[$idx];
+
         }
     }
     if (!@changes_info) {
