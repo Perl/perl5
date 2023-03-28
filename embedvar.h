@@ -330,7 +330,6 @@
 # define PL_top_env                             (vTHX->Itop_env)
 # define PL_toptarget                           (vTHX->Itoptarget)
 # define PL_TR_SPECIAL_HANDLING_UTF8            (vTHX->ITR_SPECIAL_HANDLING_UTF8)
-# define PL_underlying_numeric_obj              (vTHX->Iunderlying_numeric_obj)
 # define PL_underlying_radix_sv                 (vTHX->Iunderlying_radix_sv)
 # define PL_unicode                             (vTHX->Iunicode)
 # define PL_unitcheckav                         (vTHX->Iunitcheckav)
