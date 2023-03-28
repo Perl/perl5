@@ -171,6 +171,9 @@ sub indent_chars {
 # we use OO to store state, etc.
 sub new {
     my ($class, %args)= @_;
+    $args{add_commented_expr_after} //= 10;
+    $args{max_width} //= 78;
+    $args{min_break_width} //= 70;
     return bless \%args,;
 }
 
@@ -198,7 +201,7 @@ sub _tokenize_expr {
 
 sub _count_ops {
     my ($self, $term)= @_;
-    my $count = 0;
+    my $count= 0;
     $count++ while $term =~ m/(?: \|\| | \&\& | \? )/gx;
     return $count;
 }
@@ -219,7 +222,7 @@ sub _sort_terms {
             $_     =~ m/PERL_IN_/  ? 1 : 0,    # 2: PERL_IN_ labeled define
             $_     =~ m/^\d/       ? 1 : 0,    # 3: digit
             $_     =~ m/DEBUGGING/ ? 1 : 0,    # 4: DEBUGGING?
-            $self->_count_ops($_),             # 5: Number of ops (||, && and ternary)
+            $self->_count_ops($_),             # 5: Number of ops (||, &&)
         ]
     } @_;
     my %seen;
@@ -449,7 +452,18 @@ sub _parse_expr_assoc {
             push @$lhs, $rhs;
         }
         else {
-            $lhs= [ $op_token->{op}, $lhs, $rhs ];
+            my @lt= ($lhs);
+            my @rt= ($rhs);
+
+            # if we have '( a && b ) && ( c && d)'
+            # turn it into 'a && b && c && d'
+            if (@$lhs > 2 && $lhs->[0] eq $op_token->{op}) {
+                (undef,@lt)= @$lhs; # throw away op.
+            }
+            if (@$rhs > 2 && $rhs->[0] eq $op_token->{op}) {
+                (undef,@rt)= @$rhs; # throw away op.
+            }
+            $lhs= [ $op_token->{op}, @lt, @rt ];
         }
     }
     return $lhs;
@@ -662,7 +676,8 @@ sub parse_fh {
 
         push @lines, $line_info;
         if ($do_pop) {
-            $line_info->{inner_lines} = $line_info->start_line_num - $cond_line[-1]->start_line_num;
+            $line_info->{inner_lines}=
+                $line_info->start_line_num - $cond_line[-1]->start_line_num;
             pop @cond;
             pop @cond_line;
         }
@@ -799,14 +814,218 @@ sub _line_up_frag {
     return $ret;
 }
 
-sub line_up {
-    my ($self, $line, @fragments)= @_;
+sub _fixup_indent {
+    my ($self, $line)= @_;
+    my @lines= split /\n/, $line;
+    if ($lines[0]=~/^(#\s*\w+(?:\s*\/\*)?\s)(\s+)/) {
+        my $first_left_len = length $1;
 
+        while (1) {
+            my $ok = 1;
+            for (@lines) {
+                /^.{$first_left_len} /
+                    or do { $ok = 0; last; };
+            }
+            if ($ok) {
+                s/^(.{$first_left_len}) /$1/ for @lines;
+            } else {
+                last;
+            }
+        }
+    }
+
+    if ($lines[0]=~/^(#\s*\w+\s+)\(/) {
+        my $len = length($1);
+        for my $idx (1..$#lines) {
+            $lines[$idx]=~s/^([ ]{$len})(\s+)(\()/$1$3$2/;
+        }
+    }
+    my $ret= join "", map { "$_\n" } @lines;
+    return $ret;
+}
+
+# this is the workhorse for _break_line_at_op().
+sub __break_line_at_op {
+    my ($self, $limit, $line, $blank_prefix)= @_;
+    my @lines= ("");
+    while (length $line) {
+        my $part;
+        if ($line =~ s/^(.*?(?:\|\||&&)\s+)//) {
+            $part= $1;
+        }
+        else {
+            $part= $line;
+            $line= "";
+        }
+        if (length($lines[-1]) + length($part) < $limit) {
+            $lines[-1] .= $part;
+        }
+        else {
+            push @lines, $blank_prefix . $part;
+        }
+    }
+    return \@lines;
+}
+
+# Break a condition line into parts, while trying to keep the last
+# token on each line being an operator like || or && or ? or : We try
+# to keep each line at $limit characters, however, we also try to
+# ensure that each line has the same number of operators on it such
+# that across all the lines there are only two counts of operators (eg,
+# we either way each line to have two operators on it, or 0, or 1 or 0,
+# or 2 or 1, and so on.) If we cannot meet this requirement we reduce
+# the limit by 1 and try again, until we meet the objective, or the
+# limit ends up at 70 chars or less.
+sub _break_line_at_op {
+    my ($self, $limit, $line, $blank_prefix)= @_;
+    my $lines;
+    while (1) {
+        $lines= $self->__break_line_at_op($limit, $line, $blank_prefix);
+        my %op_counts;
+        foreach my $line_idx (0 .. $#$lines) {
+            my $line= $lines->[$line_idx];
+            my $count= 0;
+            $count++ while $line =~ /(\|\||&&|\?|:)/g;
+            $op_counts{$count}++;
+
+        }
+        if ($limit <= $self->{min_break_width} || keys(%op_counts) <= 2) {
+            last;
+        }
+        $limit--;
+    }
+
+    s/\s*\z/\n/ for @$lines;
+    return join "", @$lines;
+}
+
+sub _max { # cant use Scalar::Util so we roll our own
+    my $max= shift;
+    $max < $_ and $max= $_ for @_;
+    return $max;
+}
+
+# take a condition, split into $type and $rest
+# wrap it, and try to line up operators and defined() functions
+# that it contains. This is rather horrible code, but it does a
+# reasonable job applying the heuristics we need to lay our the
+# conditions in a reasonable way.
+sub _wrap_and_line_up_cond {
+    my ($self, $type, $rest)= @_;
+
+    my $limit= $self->{max_width};
+
+    # extract the expression part of the line, and normalize it, we do
+    # this here even though it might be duplicative as it is possible
+    # that the caller code has munged the expression in some way, and we
+    # might want to simplify the expression first. Eg:
+    # 'defined(FOO) && (defined(BAR) && defined(BAZ))' should be turned into
+    # 'defined(FOO) && defined(BAR) && defined(BAZ)' if possible.
+    my $rest_head= "";
+    my $rest_tail= "";
+    if ($rest =~ s!(if\s+)!!) {
+        $rest_head= $1;
+    }
+    if ($rest =~ s!(\s*/\*.*?\*/)\s*\z!! || $rest =~ s!(\s*\*/\s*)\z!!) {
+        $rest_tail= $1;
+    }
+    if ($rest) {
+        $rest= $self->tidy_cond($rest);
+        $rest= $rest_head . $rest . $rest_tail;
+    }
+
+    my $l= length($type);
+    my $line= $type;
+    $line .= $rest if length($rest);
+    my $blank_prefix= " " x $l;
+
+    # at this point we have a single line with the entire expression on it
+    # if it fits on one line we are done, we can return it right away.
+    if (length($line) <= $limit) {
+        $line =~ s/\s*\z/\n/;
+        return $line;
+    }
+    my $rest_copy= $rest;
+    my @fragments;
+    my $op_pat= qr/(?:\|\||&&|[?:])/;
+
+    # does the $rest contain a parenthesized group? If it does then
+    # there are a mixture of different ops being used, as if it was all
+    # the same opcode there would not be a parenthesized group.
+    # If it does then we handle it differently, and try to put the
+    # different parts of the expression on their own line.
+    if ($rest_copy =~ /$op_pat\s*\(/) {
+        my @parts;
+        while (length $rest_copy) {
+            if ($rest_copy =~ s/^(.*?$op_pat)(\s*!?\()/$2/) {
+                push @parts, $1;
+            } else {
+                #$rest_copy=~s/^\s+//;
+                push @parts, $rest_copy;
+                last;
+            }
+        }
+        $parts[0]= $type . $parts[0];
+        $parts[$_]= $blank_prefix . $parts[$_] for 1 .. $#parts;
+        foreach my $line (@parts) {
+            if (length($line) > $limit) {
+                $line= $self->_break_line_at_op($limit, $line, $blank_prefix);
+            }
+        }
+        s/\s*\z/\n/ for @parts;
+        $line= join "", @parts;
+        @fragments= ("defined", "||");
+    }
+    else {
+        # the expression consists of just one opcode type, so we can use
+        # simpler logic to break it apart with the objective of ensuring
+        # that the lines are similarly formed with trailing operators on
+        # each line but the last.
+        @fragments= ("||", "defined");
+        $line= $self->_break_line_at_op($limit, $type . $rest, $blank_prefix);
+    }
+
+    # try to line up the text on different lines. We stop after
+    # the first $fragment that modifies the text. The order
+    # of fragments we try is determined above based on the type
+    # of condition this is.
+    my $pre_line= $line;
     foreach my $fragment (@fragments) {
         $line= $self->_line_up_frag($line, $fragment);
-        last if $line ne $_[1];
+        last if $line ne $pre_line;
     }
-    return $line;
+
+    # if we have lined up by "defined" in _line_up_frag()
+    # then we may have " ||        defined(...)" type expressions
+    # convert these to "        || defined(...)" as it looks better.
+    $line =~ s/( )(\|\||&&|[()?:])([ ]{2,})(!?defined)/$3$2$1$4/g;
+    $line =~ s/(\|\||&&|[()?:])[ ]{10,}/$1 /g;
+
+    # add back the line continuations. this is all pretty inefficient,
+    # but it works nicely.
+    my @lines= split /\n/, $line;
+    my $last= pop @lines;
+    my $max_len= _max(map { length $_ } @lines);
+    $_= sprintf "%*s \\\n", -$max_len, $_ for @lines;
+    $last .= "\n";
+
+    $line= join "", @lines, $last;
+
+    # remove line continuations that are inside of a comment,
+    # we may have a variable number of lines of the expression
+    # or parts of lines of the expression in a comment, so
+    # we do this last.
+    $line =~ s!/\* (.*) \*/
+              !"/*"._strip_line_cont("$1")."*/"!xsge;
+
+    return $self->_fixup_indent($line);
+}
+
+#remove line continuations from the argument.
+sub _strip_line_cont {
+    my ($string)= @_;
+    $string =~ s/\s*\\\n/\n/g;
+    return $string;
 }
 
 # Takes an array of HeaderLines objects produced by parse_fh()
@@ -818,6 +1037,7 @@ sub lines_as_str {
     $post_process_content ||= $self->{post_process_content};
     my $filter= $self->{filter_content};
     my $last_line= "";
+
     #warn $self->dd($lines);
     foreach my $line_data (@$lines) {
         my $line= $line_data->{line};
@@ -828,7 +1048,7 @@ sub lines_as_str {
             $line =~ s/^#(\s*)/#$ind/;
         }
         if ($line_data->{type} eq "cond") {
-            my $add_commented_expr_after = 10;
+            my $add_commented_expr_after= $self->{add_commented_expr_after};
             if ($line_data->{sub_type} =~ /#(?:else|endif)/) {
                 my $joined= join " && ",
                     map { "($_)" } @{ $line_data->{cond}[-1] };
@@ -862,11 +1082,8 @@ sub lines_as_str {
                 $comment =~ s!^(/\*\s+)!!
                     and $type .= $1;
             }
-            my $l= length($type);
-            $line= _my_wrap($type, " " x $l, $cond . $comment);
-            $line =~ s/\n(?!\z)/ \\\n/g;
-            $line =~ s!\\\n\s+((?:\)\s*)*)\*/!$1*/!;
-            $line= $self->line_up($line, "||", "define");
+
+            $line= $self->_wrap_and_line_up_cond($type, $cond . $comment);
         }
         $line_data->{line}= $line;
         if ($post_process_content and $line_data->{type} eq "content") {
@@ -887,7 +1104,7 @@ sub _my_wrap {
     local $Text::Wrap::unexpand= 0;
     local $Text::Wrap::huge= "overflow";
     local $Text::Wrap::columns= 78;
-    unless (length $line) { return $head };
+    unless (length $line) { return $head }
     $line= wrap $head, $rest, $line;
     return $line;
 }
@@ -1078,7 +1295,7 @@ sub _recurse_group_content_tree {
     local $self->{rgct_ret}= \@ret;
     local $self->{line_by_depth}= [];
 
-    $self->__recurse_group_content_tree($node,@path);
+    $self->__recurse_group_content_tree($node, @path);
     return \@ret;
 }
 
@@ -1098,9 +1315,14 @@ sub __recurse_group_content_tree {
         if (my $cb= $self->{post_process_content}) {
             $cb->($self, $_, \@path) for @{ $node->{''} };
         }
-        push @$ret,
-            map { HeaderLine->new(%$_, cond => [@path], level => $depth, start_line_num => 0+@$ret) }
-            @{ $node->{''} };
+        push @$ret, map {
+            HeaderLine->new(
+                %$_,
+                cond           => [@path],
+                level          => $depth,
+                start_line_num => 0 + @$ret
+            )
+        } @{ $node->{''} };
     }
 
     my %skip;
@@ -1127,15 +1349,15 @@ sub __recurse_group_content_tree {
         }
         my $raw= "#${ind}if $expr\n";
         my $hl= HeaderLine->new(
-            type     => "cond",
-            sub_type => "#if",
-            raw      => $raw,
-            line     => $raw,
-            level    => $depth,
-            cond     => [ @path, [$expr] ],
-            start_line_num => 0+@$ret,
+            type           => "cond",
+            sub_type       => "#if",
+            raw            => $raw,
+            line           => $raw,
+            level          => $depth,
+            cond           => [ @path, [$expr] ],
+            start_line_num => 0 + @$ret,
         );
-        $self->{line_by_depth}[$depth] = 0+@$ret;
+        $self->{line_by_depth}[$depth]= 0 + @$ret;
         push @$ret, $hl;
         $self->__recurse_group_content_tree($kid, @path, [$expr]);
         if ($node->{$not}) {
@@ -1162,21 +1384,20 @@ sub __recurse_group_content_tree {
             ? -2
             : -1;
         my $end_line= HeaderLine->new(
-            type     => "cond",
-            sub_type => "#endif",
-            raw      => $raw,
-            line     => $raw,
-            level    => $depth,
-            cond     => [ @path, $last_ret->{cond}[$idx] ],
-            start_line_num => 0+@$ret,
-            inner_lines => @$ret - $self->{line_by_depth}[$depth],
+            type           => "cond",
+            sub_type       => "#endif",
+            raw            => $raw,
+            line           => $raw,
+            level          => $depth,
+            cond           => [ @path, $last_ret->{cond}[$idx] ],
+            start_line_num => 0 + @$ret,
+            inner_lines    => @$ret - $self->{line_by_depth}[$depth],
         );
         undef $self->{line_by_depth}[$depth];
         push @$ret, $end_line;
     }
     return $ret;
 }
-
 
 # this handles the specific case of an else clause, detecting
 # when an elif can be constructed, may recursively call itself
@@ -1197,7 +1418,7 @@ sub _handle_else {
         # the inverse of $k1, which we will use later.
         $not_k1= $self->tidy_cond("!($k1)");
     }
-    my $ret = $self->{rgct_ret};
+    my $ret= $self->{rgct_ret};
     if (length($k1) and !defined($k2)) {
 
         # only one child, no payload -> elsif $k1
@@ -1215,16 +1436,16 @@ sub _handle_else {
         my $raw= "#${ind}elif $sub_expr\n";
         push @{ $path[-1] }, $sub_expr;
         my $hl= HeaderLine->new(
-            type     => "cond",
-            sub_type => "#elif",
-            raw      => $raw,
-            line     => $raw,
-            level    => $depth,
-            cond     => [ map { [@$_] } @path ],
-            start_line_num => 0+@$ret,
-            inner_lines => @$ret - $self->{line_by_depth}[$depth],
+            type           => "cond",
+            sub_type       => "#elif",
+            raw            => $raw,
+            line           => $raw,
+            level          => $depth,
+            cond           => [ map { [@$_] } @path ],
+            start_line_num => 0 + @$ret,
+            inner_lines    => @$ret - $self->{line_by_depth}[$depth],
         );
-        $self->{line_by_depth}[$depth] = 0+@$ret;
+        $self->{line_by_depth}[$depth]= 0 + @$ret;
         push @$ret, $hl;
         $self->__recurse_group_content_tree($kid, @path);
     }
@@ -1235,16 +1456,16 @@ sub _handle_else {
 
         push @{ $path[-1] }, $k1;
         my $hl= HeaderLine->new(
-            type     => "cond",
-            sub_type => "#elif",
-            raw      => $raw,
-            line     => $raw,
-            level    => $depth,
-            cond     => [ map { [@$_] } @path ],
-            start_line_num => 0+@$ret,
-            inner_lines => @$ret - $self->{line_by_depth}[$depth],
+            type           => "cond",
+            sub_type       => "#elif",
+            raw            => $raw,
+            line           => $raw,
+            level          => $depth,
+            cond           => [ map { [@$_] } @path ],
+            start_line_num => 0 + @$ret,
+            inner_lines    => @$ret - $self->{line_by_depth}[$depth],
         );
-        $self->{line_by_depth}[$depth] = 0+@$ret;
+        $self->{line_by_depth}[$depth]= 0 + @$ret;
         push @$ret, $hl;
         $self->__recurse_group_content_tree($kid->{$k1}, @path);
         $path[-1][-1]= $k2;
@@ -1254,16 +1475,16 @@ sub _handle_else {
         # payload, 3+ children, or 2 which are not complementary -> else
         my $raw= "#${ind}else\n";
         my $hl= HeaderLine->new(
-            type     => "cond",
-            sub_type => "#else",
-            raw      => $raw,
-            line     => $raw,
-            level    => $depth,
-            cond     => [ map { [@$_] } @path ],
-            start_line_num => 0+@$ret,
-            inner_lines => @$ret - $self->{line_by_depth}[$depth],
+            type           => "cond",
+            sub_type       => "#else",
+            raw            => $raw,
+            line           => $raw,
+            level          => $depth,
+            cond           => [ map { [@$_] } @path ],
+            start_line_num => 0 + @$ret,
+            inner_lines    => @$ret - $self->{line_by_depth}[$depth],
         );
-        $self->{line_by_depth}[$depth] = 0+@$ret;
+        $self->{line_by_depth}[$depth]= 0 + @$ret;
         push @$ret, $hl;
         $self->__recurse_group_content_tree($kid, @path);
     }

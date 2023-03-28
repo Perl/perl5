@@ -5518,8 +5518,9 @@ Perl_PerlSock_socket_cloexec(pTHX_ int domain, int type, int protocol)
 # define PERL_ARGS_ASSERT_PERLSOCK_SOCKET_CLOEXEC
 
 #endif /* defined(HAS_SOCKET) */
-#if defined(HAS_SOCKETPAIR) || ( defined(AF_INET) && defined(HAS_SOCKET) && \
-    defined(PF_INET) && defined(SOCK_DGRAM) )
+#if   defined(HAS_SOCKETPAIR) ||                                     \
+    ( defined(AF_INET) && defined(HAS_SOCKET) && defined(PF_INET) && \
+      defined(SOCK_DGRAM) )
 PERL_CALLCONV int
 Perl_PerlSock_socketpair_cloexec(pTHX_ int domain, int type, int protocol, int *pairfd)
         __attribute__warn_unused_result__
@@ -6228,8 +6229,8 @@ Perl_croak_kw_unless_class(pTHX_ const char *kw);
 # define PERL_ARGS_ASSERT_CROAK_KW_UNLESS_CLASS \
         assert(kw)
 
-#endif /* defined(PERL_IN_CLASS_C) || defined(PERL_IN_OP_C)    || \
-          defined(PERL_IN_PAD_C)   || defined(PERL_IN_PERLY_C) || \
+#endif /* defined(PERL_IN_CLASS_C) || defined(PERL_IN_OP_C)    ||
+          defined(PERL_IN_PAD_C)   || defined(PERL_IN_PERLY_C) ||
           defined(PERL_IN_TOKE_C) */
 #if defined(PERL_IN_DEB_C)
 STATIC void
@@ -6298,9 +6299,10 @@ S_do_trans_simple(pTHX_ SV * const sv, const OPtrans_map * const tbl)
         assert(sv); assert(tbl)
 
 #endif /* defined(PERL_IN_DOOP_C) */
-#if defined(PERL_IN_DOOP_C) || defined(PERL_IN_OP_C)        || defined(PERL_IN_PP_C) \
-                            || defined(PERL_IN_REGCOMP_ANY) || defined(PERL_IN_REGEXEC_C) || \
-    defined(PERL_IN_TOKE_C) || defined(PERL_IN_UTF8_C)
+#if defined(PERL_IN_DOOP_C)    || defined(PERL_IN_OP_C)        || \
+    defined(PERL_IN_PP_C)      || defined(PERL_IN_REGCOMP_ANY) || \
+    defined(PERL_IN_REGEXEC_C) || defined(PERL_IN_TOKE_C)      || \
+    defined(PERL_IN_UTF8_C)
 
 PERL_CALLCONV SSize_t
 Perl__invlist_search(SV * const invlist, const UV cp)
@@ -6308,9 +6310,9 @@ Perl__invlist_search(SV * const invlist, const UV cp)
 # define PERL_ARGS_ASSERT__INVLIST_SEARCH       \
         assert(invlist)
 
-#endif /* defined(PERL_IN_DOOP_C)    || defined(PERL_IN_OP_C)        || \
-          defined(PERL_IN_PP_C)      || defined(PERL_IN_REGCOMP_ANY) || \
-          defined(PERL_IN_REGEXEC_C) || defined(PERL_IN_TOKE_C)      || \
+#endif /* defined(PERL_IN_DOOP_C)    || defined(PERL_IN_OP_C)        ||
+          defined(PERL_IN_PP_C)      || defined(PERL_IN_REGCOMP_ANY) ||
+          defined(PERL_IN_REGEXEC_C) || defined(PERL_IN_TOKE_C)      ||
           defined(PERL_IN_UTF8_C) */
 #if defined(PERL_IN_DOOP_C) || defined(PERL_IN_OP_C) || \
     defined(PERL_IN_REGCOMP_ANY)
@@ -6358,7 +6360,7 @@ Perl__setup_canned_invlist(pTHX_ const STRLEN size, const UV element0, UV **othe
 # define PERL_ARGS_ASSERT__SETUP_CANNED_INVLIST \
         assert(other_elements_ptr)
 
-#endif /* defined(PERL_IN_DOOP_C)      || defined(PERL_IN_OP_C) || \
+#endif /* defined(PERL_IN_DOOP_C)      || defined(PERL_IN_OP_C) ||
           defined(PERL_IN_REGCOMP_ANY) || defined(PERL_IN_UTF8_C) */
 #if defined(PERL_IN_DQUOTE_C) || defined(PERL_IN_REGCOMP_C) || \
     defined(PERL_IN_TOKE_C)
@@ -6386,7 +6388,7 @@ Perl_grok_bslash_x(pTHX_ char **s, const char * const send, UV *uv, const char *
 # define PERL_ARGS_ASSERT_GROK_BSLASH_X         \
         assert(s); assert(send); assert(uv); assert(message)
 
-#endif /* defined(PERL_IN_DQUOTE_C) || defined(PERL_IN_REGCOMP_C) || \
+#endif /* defined(PERL_IN_DQUOTE_C) || defined(PERL_IN_REGCOMP_C) ||
           defined(PERL_IN_TOKE_C) */
 #if defined(PERL_IN_DQUOTE_C) || defined(PERL_IN_REGCOMP_C) || \
     defined(PERL_IN_TOKE_C)   || defined(PERL_IN_UTF8_C)
@@ -6778,7 +6780,7 @@ Perl_ck_trycatch(pTHX_ OP *o)
 # define PERL_ARGS_ASSERT_CK_TRYCATCH           \
         assert(o)
 
-#endif /* defined(PERL_IN_GLOBALS_C) || defined(PERL_IN_OP_C) || \
+#endif /* defined(PERL_IN_GLOBALS_C) || defined(PERL_IN_OP_C) ||
           defined(PERL_IN_PEEP_C) */
 #if defined(PERL_IN_GV_C)
 STATIC bool
@@ -6833,8 +6835,8 @@ S_gv_stashpvn_internal(pTHX_ const char *name, U32 namelen, I32 flags);
 
 # endif /* !defined(PERL_NO_INLINE_FUNCTIONS) */
 #endif /* defined(PERL_IN_GV_C) */
-#if defined(PERL_IN_GV_C) || defined(PERL_IN_OP_C) || defined(PERL_IN_PAD_C) \
-                          || defined(PERL_IN_SV_C)
+#if defined(PERL_IN_GV_C)  || defined(PERL_IN_OP_C) || \
+    defined(PERL_IN_PAD_C) || defined(PERL_IN_SV_C)
 PERL_CALLCONV void
 Perl_sv_add_backref(pTHX_ SV * const tsv, SV * const sv)
         __attribute__visibility__("hidden");
@@ -7088,8 +7090,9 @@ S_update_PL_curlocales_i(pTHX_ const unsigned int index, const char *new_locale,
         assert(new_locale)
 
 #     endif
-#   elif defined(USE_LOCALE_THREADS) && !defined(USE_THREAD_SAFE_LOCALE) && \
-         !defined(USE_THREAD_SAFE_LOCALE_EMULATION) /* && \
+#   elif  defined(USE_LOCALE_THREADS) &&                  \
+         !defined(USE_THREAD_SAFE_LOCALE) &&              \
+         !defined(USE_THREAD_SAFE_LOCALE_EMULATION) /* &&
          !defined(USE_POSIX_2008_LOCALE) */
 STATIC const char *
 S_less_dicey_setlocale_r(pTHX_ const int category, const char *locale);
@@ -7107,11 +7110,13 @@ S_less_dicey_bool_setlocale_r(pTHX_ const int cat, const char *locale);
         assert(locale)
 
 #     endif
-#   endif /* !defined(USE_POSIX_2008_LOCALE) && ( defined(USE_LOCALE_THREADS) \
-             && !defined(USE_THREAD_SAFE_LOCALE) && \
-             !defined(USE_THREAD_SAFE_LOCALE_EMULATION) ) */
-#   if !( defined(USE_POSIX_2008_LOCALE) && defined(USE_QUERYLOCALE) ) && ( \
-       !defined(LC_ALL) || defined(USE_POSIX_2008_LOCALE) || defined(WIN32) )
+#   endif /*  defined(USE_LOCALE_THREADS) &&
+             !defined(USE_POSIX_2008_LOCALE) &&
+             !defined(USE_THREAD_SAFE_LOCALE) &&
+             !defined(USE_THREAD_SAFE_LOCALE_EMULATION) */
+#   if !(  defined(USE_POSIX_2008_LOCALE) && defined(USE_QUERYLOCALE) ) && \
+        ( !defined(LC_ALL) || defined(USE_POSIX_2008_LOCALE) ||            \
+           defined(WIN32) )
 STATIC const char *
 S_calculate_LC_ALL(pTHX_ const char **individ_locales);
 #     define PERL_ARGS_ASSERT_CALCULATE_LC_ALL  \
@@ -7136,8 +7141,8 @@ S_wrap_wsetlocale(pTHX_ const int category, const char *locale);
 #     define PERL_ARGS_ASSERT_WRAP_WSETLOCALE
 
 #   endif /* defined(WIN32) */
-#   if defined(WIN32) || ( defined(USE_POSIX_2008_LOCALE) && \
-       !defined(USE_QUERYLOCALE) )
+#   if   defined(WIN32) || \
+       ( defined(USE_POSIX_2008_LOCALE) && !defined(USE_QUERYLOCALE) )
 STATIC const char *
 S_find_locale_from_environment(pTHX_ const unsigned int index);
 #     define PERL_ARGS_ASSERT_FIND_LOCALE_FROM_ENVIRONMENT
@@ -7618,7 +7623,7 @@ Perl__new_invlist_C_array(pTHX_ const UV * const list)
 # define PERL_ARGS_ASSERT__NEW_INVLIST_C_ARRAY  \
         assert(list)
 
-#endif /* defined(PERL_IN_PERL_C) || defined(PERL_IN_REGCOMP_ANY) || \
+#endif /* defined(PERL_IN_PERL_C) || defined(PERL_IN_REGCOMP_ANY) ||
           defined(PERL_IN_UTF8_C) */
 #if defined(PERL_IN_PP_C)
 STATIC size_t
@@ -9995,9 +10000,9 @@ S_is_invlist(const SV * const invlist)
         __attribute__warn_unused_result__;
 #   define PERL_ARGS_ASSERT_IS_INVLIST
 
-# endif /* defined(PERL_IN_DOOP_C)    || defined(PERL_IN_OP_C)        || \
-           defined(PERL_IN_PP_C)      || defined(PERL_IN_REGCOMP_ANY) || \
-           defined(PERL_IN_REGEXEC_C) || defined(PERL_IN_TOKE_C)      || \
+# endif /* defined(PERL_IN_DOOP_C)    || defined(PERL_IN_OP_C)        ||
+           defined(PERL_IN_PP_C)      || defined(PERL_IN_REGCOMP_ANY) ||
+           defined(PERL_IN_REGEXEC_C) || defined(PERL_IN_TOKE_C)      ||
            defined(PERL_IN_UTF8_C) */
 # if defined(PERL_IN_DOOP_C) || defined(PERL_IN_OP_C) || \
      defined(PERL_IN_REGCOMP_ANY)
@@ -10022,7 +10027,7 @@ S_invlist_set_len(pTHX_ SV * const invlist, const UV len, const bool offset);
 #   define PERL_ARGS_ASSERT_INVLIST_SET_LEN     \
         assert(invlist)
 
-# endif /* defined(PERL_IN_DOOP_C) || defined(PERL_IN_OP_C) || \
+# endif /* defined(PERL_IN_DOOP_C) || defined(PERL_IN_OP_C) ||
            defined(PERL_IN_REGCOMP_ANY) */
 # if defined(PERL_IN_OP_C) || defined(PERL_IN_PAD_C)
 PERL_STATIC_INLINE bool
