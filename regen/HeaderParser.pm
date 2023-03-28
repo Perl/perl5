@@ -196,6 +196,13 @@ sub _tokenize_expr {
     return \@tokens;
 }
 
+sub _count_ops {
+    my ($self, $term)= @_;
+    my $count = 0;
+    $count++ while $term =~ m/(?: \|\| | \&\& | \? )/gx;
+    return $count;
+}
+
 # sort terms in an expression in a way that puts things
 # in a sensible order. Anything starting with PERL_IN_
 # should be on the left in alphabetical order. Digits
@@ -211,13 +218,15 @@ sub _sort_terms {
             lc($_) =~ s/[^a-zA-Z0-9]//gr,      # 1: "_" stripped and caseless
             $_     =~ m/PERL_IN_/  ? 1 : 0,    # 2: PERL_IN_ labeled define
             $_     =~ m/^\d/       ? 1 : 0,    # 3: digit
-            $_     =~ m/DEBUGGING/ ? 1 : 0     # 4: DEBUGGING?
+            $_     =~ m/DEBUGGING/ ? 1 : 0,    # 4: DEBUGGING?
+            $self->_count_ops($_),             # 5: Number of ops (||, && and ternary)
         ]
     } @_;
     my %seen;
     #start-no-tidy
     @terms= map { $seen{ $_->[0] }++ ? () : $_->[0] }
         sort {
+            $a->[5] <=> $b->[5]         ||    # least number of ops
             $b->[2] <=> $a->[2]         ||    # PERL_IN before others
             $a->[3] <=> $b->[3]         ||    # digits after others
             $a->[4] <=> $b->[4]         ||    # DEBUGGING after all else

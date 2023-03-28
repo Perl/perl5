@@ -837,12 +837,6 @@
 #   define sv_setpvf_mg(a,...)                  Perl_sv_setpvf_mg(aTHX_ a,__VA_ARGS__)
 #   define warn(...)                            Perl_warn(aTHX_ __VA_ARGS__)
 #   define warner(a,...)                        Perl_warner(aTHX_ a,__VA_ARGS__)
-#   if defined(PERL_CORE)
-#     define tied_method(a,b,c,d,e,...)         Perl_tied_method(aTHX_ a,b,c,d,e,__VA_ARGS__)
-#     if defined(PERL_IN_REGCOMP_C)
-#       define re_croak(a,...)                  S_re_croak(aTHX_ a,__VA_ARGS__)
-#     endif /* defined(PERL_IN_REGCOMP_C) */
-#   endif /* defined(PERL_CORE) */
 # endif /* !defined(MULTIPLICITY) || defined(PERL_CORE) */
 # if defined(MYMALLOC)
 #   define dump_mstats(a)                       Perl_dump_mstats(aTHX_ a)
@@ -1107,11 +1101,6 @@
 #   define opslab_free_nopad(a)                 Perl_opslab_free_nopad(aTHX_ a)
 #   define parser_free_nexttoke_ops(a,b)        Perl_parser_free_nexttoke_ops(aTHX_ a,b)
 #   define should_warn_nl                       S_should_warn_nl
-#   if ( defined(AF_INET) && defined(HAS_SOCKET) && defined(PF_INET) && \
-       defined(SOCK_DGRAM) ) || defined(HAS_SOCKETPAIR)
-#     define PerlSock_socketpair_cloexec(a,b,c,d) Perl_PerlSock_socketpair_cloexec(aTHX_ a,b,c,d)
-#   endif /* ( defined(AF_INET) && defined(HAS_SOCKET) && defined(PF_INET) && \
-             defined(SOCK_DGRAM) ) || defined(HAS_SOCKETPAIR) */
 #   if defined(DEBUGGING)
 #     define get_debug_opts(a,b)                Perl_get_debug_opts(aTHX_ a,b)
 #     define set_padlist                        Perl_set_padlist
@@ -1140,11 +1129,22 @@
 #     define PerlSock_accept_cloexec(a,b,c)     Perl_PerlSock_accept_cloexec(aTHX_ a,b,c)
 #     define PerlSock_socket_cloexec(a,b,c)     Perl_PerlSock_socket_cloexec(aTHX_ a,b,c)
 #   endif /* defined(HAS_SOCKET) */
+#   if defined(HAS_SOCKETPAIR) || ( defined(AF_INET) && defined(HAS_SOCKET) \
+       && defined(PF_INET) && defined(SOCK_DGRAM) )
+#     define PerlSock_socketpair_cloexec(a,b,c,d) Perl_PerlSock_socketpair_cloexec(aTHX_ a,b,c,d)
+#   endif /* defined(HAS_SOCKETPAIR) || ( defined(AF_INET) && \
+             defined(HAS_SOCKET) && defined(PF_INET) && defined(SOCK_DGRAM) ) */
 #   if defined(_MSC_VER)
 #     define magic_regdatum_set(a,b)            Perl_magic_regdatum_set(aTHX_ a,b)
 #   else /* if !defined(_MSC_VER) */
 #     define magic_regdatum_set(a,b)            Perl_magic_regdatum_set(aTHX_ a,b)
 #   endif /* !defined(_MSC_VER) */
+#   if !defined(MULTIPLICITY) || defined(PERL_CORE)
+#     define tied_method(a,b,c,d,e,...)         Perl_tied_method(aTHX_ a,b,c,d,e,__VA_ARGS__)
+#     if defined(PERL_IN_REGCOMP_C)
+#       define re_croak(a,...)                  S_re_croak(aTHX_ a,__VA_ARGS__)
+#     endif /* defined(PERL_IN_REGCOMP_C) */
+#   endif /* !defined(MULTIPLICITY) || defined(PERL_CORE) */
 #   if defined(PERL_DEBUG_READONLY_COW)
 #     define sv_buf_to_ro(a)                    Perl_sv_buf_to_ro(aTHX_ a)
 #   endif /* defined(PERL_DEBUG_READONLY_COW) */
@@ -1286,13 +1286,6 @@
 #       else /* if !( defined(HAS_NL_LANGINFO) || defined(HAS_NL_LANGINFO_L) ) */
 #         define my_langinfo_i(a,b,c,d,e,f)     S_my_langinfo_i(aTHX_ a,b,c,d,e,f)
 #       endif /* !( defined(HAS_NL_LANGINFO) || defined(HAS_NL_LANGINFO_L) ) */
-#       if ( !defined(LC_ALL) || defined(USE_POSIX_2008_LOCALE) || \
-           defined(WIN32) ) && !( defined(USE_POSIX_2008_LOCALE) && \
-           defined(USE_QUERYLOCALE) )
-#         define calculate_LC_ALL(a)            S_calculate_LC_ALL(aTHX_ a)
-#       endif /* ( !defined(LC_ALL) || defined(USE_POSIX_2008_LOCALE) || \
-                 defined(WIN32) ) && !( defined(USE_POSIX_2008_LOCALE) && \
-                 defined(USE_QUERYLOCALE) ) */
 #       if defined(USE_LOCALE_COLLATE)
 #         define new_collate(a,b)               S_new_collate(aTHX_ a,b)
 #         if defined(DEBUGGING)
@@ -1328,21 +1321,28 @@
 #         if 0
 #           define less_dicey_bool_setlocale_r(a,b) S_less_dicey_bool_setlocale_r(aTHX_ a,b)
 #         endif /* 0 */
-#       endif /* ( defined(USE_LOCALE_THREADS) && \
+#       endif /* !defined(USE_POSIX_2008_LOCALE) && ( \
+                 defined(USE_LOCALE_THREADS) && \
                  !defined(USE_THREAD_SAFE_LOCALE) && \
-                 !defined(USE_THREAD_SAFE_LOCALE_EMULATION) ) && \
-                 !defined(USE_POSIX_2008_LOCALE) */
-#       if ( defined(USE_POSIX_2008_LOCALE) && !defined(USE_QUERYLOCALE) ) || \
-           defined(WIN32)
-#         define find_locale_from_environment(a) S_find_locale_from_environment(aTHX_ a)
-#       endif /* ( defined(USE_POSIX_2008_LOCALE) && \
-                 !defined(USE_QUERYLOCALE) ) || defined(WIN32) */
+                 !defined(USE_THREAD_SAFE_LOCALE_EMULATION) ) */
+#       if !( defined(USE_POSIX_2008_LOCALE) && defined(USE_QUERYLOCALE) ) && \
+           ( !defined(LC_ALL) || defined(USE_POSIX_2008_LOCALE) || \
+           defined(WIN32) )
+#         define calculate_LC_ALL(a)            S_calculate_LC_ALL(aTHX_ a)
+#       endif /* !( defined(USE_POSIX_2008_LOCALE) && \
+                 defined(USE_QUERYLOCALE) ) && ( !defined(LC_ALL) || \
+                 defined(USE_POSIX_2008_LOCALE)                   || defined(WIN32) ) */
 #       if defined(WIN32)
 #         define Win_byte_string_to_wstring     S_Win_byte_string_to_wstring
 #         define Win_wstring_to_byte_string     S_Win_wstring_to_byte_string
 #         define win32_setlocale(a,b)           S_win32_setlocale(aTHX_ a,b)
 #         define wrap_wsetlocale(a,b)           S_wrap_wsetlocale(aTHX_ a,b)
 #       endif /* defined(WIN32) */
+#       if defined(WIN32) || ( defined(USE_POSIX_2008_LOCALE) && \
+           !defined(USE_QUERYLOCALE) )
+#         define find_locale_from_environment(a) S_find_locale_from_environment(aTHX_ a)
+#       endif /* defined(WIN32) || ( defined(USE_POSIX_2008_LOCALE) && \
+                 !defined(USE_QUERYLOCALE) ) */
 #     endif /* defined(USE_LOCALE) */
 #     if defined(USE_POSIX_2008_LOCALE) || defined(DEBUGGING)
 #       define get_displayable_string(a,b,c)    S_get_displayable_string(aTHX_ a,b,c)
@@ -1419,9 +1419,6 @@
 #     define op_prune_chain_head                Perl_op_prune_chain_head
 #     define op_varname(a)                      Perl_op_varname(aTHX_ a)
 #     define warn_elem_scalar_context(a,b,c,d)  Perl_warn_elem_scalar_context(aTHX_ a,b,c,d)
-#     if defined(USE_ITHREADS)
-#       define op_relocate_sv(a,b)              Perl_op_relocate_sv(aTHX_ a,b)
-#     endif /* defined(USE_ITHREADS) */
 #   endif /* defined(PERL_IN_OP_C) || defined(PERL_IN_PEEP_C) */
 #   if defined(PERL_IN_OP_C) || defined(PERL_IN_SV_C)
 #     define report_redefined_cv(a,b,c)         Perl_report_redefined_cv(aTHX_ a,b,c)
@@ -1661,6 +1658,9 @@
 #     if !defined(PERL_IMPLICIT_SYS)
 #       define PerlEnv_putenv(a)                S_PerlEnv_putenv(aTHX_ a)
 #     endif /* !defined(PERL_IMPLICIT_SYS) */
+#     if defined(PERL_IN_OP_C) || defined(PERL_IN_PEEP_C)
+#       define op_relocate_sv(a,b)              Perl_op_relocate_sv(aTHX_ a,b)
+#     endif /* defined(PERL_IN_OP_C) || defined(PERL_IN_PEEP_C) */
 #   endif /* defined(USE_ITHREADS) */
 #   if defined(USE_LOCALE_COLLATE)
 #     define magic_freecollxfrm(a,b)            Perl_magic_freecollxfrm(aTHX_ a,b)
@@ -1783,11 +1783,6 @@
 #   if defined(PERL_IN_GV_C) || defined(PERL_IN_UNIVERSAL_C)
 #     define gv_stashsvpvn_cached(a,b,c,d)      Perl_gv_stashsvpvn_cached(aTHX_ a,b,c,d)
 #   endif /* defined(PERL_IN_GV_C) || defined(PERL_IN_UNIVERSAL_C) */
-#   if ( defined(PERL_IN_LOCALE_C) || defined(PERL_IN_MATHOMS_C) || \
-       defined(PERL_IN_SV_C) ) && defined(USE_LOCALE_COLLATE)
-#     define mem_collxfrm_(a,b,c,d)             Perl_mem_collxfrm_(aTHX_ a,b,c,d)
-#   endif /* ( defined(PERL_IN_LOCALE_C) || defined(PERL_IN_MATHOMS_C) || \
-             defined(PERL_IN_SV_C) ) && defined(USE_LOCALE_COLLATE) */
 #   if defined(PERL_IN_OP_C) || defined(PERL_IN_REGCOMP_ANY)
 #     define get_invlist_iter_addr              S_get_invlist_iter_addr
 #     define invlist_iterfinish                 S_invlist_iterfinish
@@ -1971,12 +1966,10 @@
 #     if defined(DEBUGGING)
 #       define debug_start_match(a,b,c,d,e)     S_debug_start_match(aTHX_ a,b,c,d,e)
 #       define dump_exec_pos(a,b,c,d,e,f,g)     S_dump_exec_pos(aTHX_ a,b,c,d,e,f,g)
+#       if !defined(MULTIPLICITY) || defined(PERL_CORE)
+#         define re_exec_indentf(a,...)         Perl_re_exec_indentf(aTHX_ a,__VA_ARGS__)
+#       endif /* !defined(MULTIPLICITY) || defined(PERL_CORE) */
 #     endif /* defined(DEBUGGING) */
-#     if ( !defined(MULTIPLICITY) || defined(PERL_CORE) ) && \
-         defined(DEBUGGING)
-#       define re_exec_indentf(a,...)           Perl_re_exec_indentf(aTHX_ a,__VA_ARGS__)
-#     endif /* ( !defined(MULTIPLICITY) || defined(PERL_CORE) ) && \
-               defined(DEBUGGING) */
 #   endif /* defined(PERL_IN_REGEXEC_C) */
 # endif /* defined(PERL_CORE) || defined(PERL_EXT) */
 # if defined(PERL_CORE) || defined(PERL_USE_VOLATILE_API)
@@ -2008,26 +2001,30 @@
 #   define check_regnode_after(a,b)             Perl_check_regnode_after(aTHX_ a,b)
 #   define regnext(a)                           Perl_regnext(aTHX_ a)
 #   define regnode_after(a,b)                   Perl_regnode_after(aTHX_ a,b)
-#   if defined(PERL_CORE) || defined(PERL_EXT)
-#     if defined(DEBUGGING)
+#   if defined(DEBUGGING)
+#     if ( !defined(MULTIPLICITY) || defined(PERL_CORE) ) && ( \
+         defined(PERL_CORE)       || defined(PERL_EXT) )
+#       define re_indentf(a,...)                Perl_re_indentf(aTHX_ a,__VA_ARGS__)
+#       define re_printf(...)                   Perl_re_printf(aTHX_ __VA_ARGS__)
+#     endif /* ( !defined(MULTIPLICITY) || defined(PERL_CORE) ) && ( \
+               defined(PERL_CORE)       || defined(PERL_EXT) ) */
+#     if defined(PERL_CORE) || defined(PERL_EXT)
 #       define debug_peep(a,b,c,d,e)            Perl_debug_peep(aTHX_ a,b,c,d,e)
 #       define debug_show_study_flags(a,b,c)    Perl_debug_show_study_flags(aTHX_ a,b,c)
 #       define debug_studydata(a,b,c,d,e,f,g)   Perl_debug_studydata(aTHX_ a,b,c,d,e,f,g)
 #       define dumpuntil(a,b,c,d,e,f,g,h)       Perl_dumpuntil(aTHX_ a,b,c,d,e,f,g,h)
 #       define regprop(a,b,c,d,e)               Perl_regprop(aTHX_ a,b,c,d,e)
-#     endif /* defined(DEBUGGING) */
-#     if ( !defined(MULTIPLICITY) || defined(PERL_CORE) ) && \
-         defined(DEBUGGING)
-#       define re_indentf(a,...)                Perl_re_indentf(aTHX_ a,__VA_ARGS__)
-#       define re_printf(...)                   Perl_re_printf(aTHX_ __VA_ARGS__)
-#     endif /* ( !defined(MULTIPLICITY) || defined(PERL_CORE) ) && \
-               defined(DEBUGGING) */
-#     if defined(PERL_EXT_RE_BUILD)
+#     endif /* defined(PERL_CORE) || defined(PERL_EXT) */
+#   endif /* defined(DEBUGGING) */
+#   if defined(PERL_EXT_RE_BUILD)
+#     if defined(PERL_CORE) || defined(PERL_EXT)
 #       define get_re_gclass_aux_data(a,b,c,d,e,f) Perl_get_re_gclass_aux_data(aTHX_ a,b,c,d,e,f)
-#     else /* if !defined(PERL_EXT_RE_BUILD) */
-#       define get_regclass_aux_data(a,b,c,d,e,f) Perl_get_regclass_aux_data(aTHX_ a,b,c,d,e,f)
-#     endif /* !defined(PERL_EXT_RE_BUILD) */
-#   endif /* defined(PERL_CORE) || defined(PERL_EXT) */
+#     endif /* defined(PERL_CORE) || defined(PERL_EXT) */
+#   elif defined(PERL_CORE) || defined(PERL_EXT) /* && \
+         !defined(PERL_EXT_RE_BUILD) */
+#     define get_regclass_aux_data(a,b,c,d,e,f) Perl_get_regclass_aux_data(aTHX_ a,b,c,d,e,f)
+#   endif /* !defined(PERL_EXT_RE_BUILD) && ( defined(PERL_CORE) || \
+             defined(PERL_EXT) ) */
 # endif /* defined(PERL_IN_REGEX_ENGINE) */
 # if defined(PERL_IN_SV_C)
 #   define more_sv()                            Perl_more_sv(aTHX)
@@ -2147,6 +2144,13 @@
 # endif /* defined(USE_ITHREADS) */
 # if defined(USE_LOCALE_COLLATE)
 #   define sv_collxfrm_flags(a,b,c)             Perl_sv_collxfrm_flags(aTHX_ a,b,c)
+#   if ( defined(PERL_CORE)      || defined(PERL_EXT) ) && ( \
+       defined(PERL_IN_LOCALE_C) || defined(PERL_IN_MATHOMS_C) || \
+       defined(PERL_IN_SV_C) )
+#     define mem_collxfrm_(a,b,c,d)             Perl_mem_collxfrm_(aTHX_ a,b,c,d)
+#   endif /* ( defined(PERL_CORE)      || defined(PERL_EXT) ) && ( \
+             defined(PERL_IN_LOCALE_C) || defined(PERL_IN_MATHOMS_C) || \
+             defined(PERL_IN_SV_C) ) */
 # endif /* defined(USE_LOCALE_COLLATE) */
 # if defined(USE_PERLIO)
 #   define PerlIO_clearerr(a)                   Perl_PerlIO_clearerr(aTHX_ a)

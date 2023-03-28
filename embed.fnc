@@ -3702,15 +3702,6 @@ EXp	|int	|yylex
 p	|int	|yyparse	|int gramtype
 p	|void	|yyquit
 p	|void	|yyunlex
-#if ( defined(AF_INET) && defined(HAS_SOCKET) && defined(PF_INET) && \
-    defined(SOCK_DGRAM) ) || defined(HAS_SOCKETPAIR)
-Rp	|int	|PerlSock_socketpair_cloexec				\
-				|int domain				\
-				|int type				\
-				|int protocol				\
-				|NN int *pairfd
-#endif /* ( defined(AF_INET) && defined(HAS_SOCKET) && defined(PF_INET) && \
-          defined(SOCK_DGRAM) ) || defined(HAS_SOCKETPAIR) */
 #if defined(DEBUGGING)
 : Used in mg.c
 Rp	|int	|get_debug_opts |NN const char **s			\
@@ -3804,6 +3795,15 @@ Rp	|int	|PerlSock_socket_cloexec				\
 				|int type				\
 				|int protocol
 #endif /* defined(HAS_SOCKET) */
+#if defined(HAS_SOCKETPAIR) || ( defined(AF_INET) && defined(HAS_SOCKET) && \
+    defined(PF_INET) && defined(SOCK_DGRAM) )
+Rp	|int	|PerlSock_socketpair_cloexec				\
+				|int domain				\
+				|int type				\
+				|int protocol				\
+				|NN int *pairfd
+#endif /* defined(HAS_SOCKETPAIR) || ( defined(AF_INET) && \
+          defined(HAS_SOCKET) && defined(PF_INET) && defined(SOCK_DGRAM) ) */
 #if !defined(HAS_STRLCAT)
 ATdip	|Size_t |my_strlcat	|NULLOK char *dst			\
 				|NULLOK const char *src 		\
@@ -4451,10 +4451,9 @@ S	|bool	|less_dicey_bool_setlocale_r				\
 				|const int cat				\
 				|NN const char *locale
 #     endif /* 0 */
-#   endif /* ( defined(USE_LOCALE_THREADS) && \
-             !defined(USE_THREAD_SAFE_LOCALE) && \
-             !defined(USE_THREAD_SAFE_LOCALE_EMULATION) ) && \
-             !defined(USE_POSIX_2008_LOCALE) */
+#   endif /* !defined(USE_POSIX_2008_LOCALE) && ( defined(USE_LOCALE_THREADS) \
+             && !defined(USE_THREAD_SAFE_LOCALE) && \
+             !defined(USE_THREAD_SAFE_LOCALE_EMULATION) ) */
 #   if !( defined(USE_POSIX_2008_LOCALE) && defined(USE_QUERYLOCALE) )
 :	    regen/embed.pl can't currently cope with 'elif'
 #     if !defined(LC_ALL) || defined(USE_POSIX_2008_LOCALE) || defined(WIN32)
@@ -4463,12 +4462,6 @@ S	|const char *|calculate_LC_ALL					\
 #     endif /* !defined(LC_ALL) || defined(USE_POSIX_2008_LOCALE) || \
                defined(WIN32) */
 #   endif /* !( defined(USE_POSIX_2008_LOCALE) && defined(USE_QUERYLOCALE) ) */
-#   if ( defined(USE_POSIX_2008_LOCALE) && !defined(USE_QUERYLOCALE) ) || \
-       defined(WIN32)
-S	|const char *|find_locale_from_environment			\
-				|const unsigned int index
-#   endif /* ( defined(USE_POSIX_2008_LOCALE) && !defined(USE_QUERYLOCALE) ) \
-             || defined(WIN32) */
 #   if defined(WIN32)
 ST	|wchar_t *|Win_byte_string_to_wstring				\
 				|const UINT code_page			\
@@ -4483,6 +4476,12 @@ S	|const char *|wrap_wsetlocale					\
 				|const int category			\
 				|NULLOK const char *locale
 #   endif /* defined(WIN32) */
+#   if defined(WIN32) || ( defined(USE_POSIX_2008_LOCALE) && \
+       !defined(USE_QUERYLOCALE) )
+S	|const char *|find_locale_from_environment			\
+				|const unsigned int index
+#   endif /* defined(WIN32) || ( defined(USE_POSIX_2008_LOCALE) && \
+             !defined(USE_QUERYLOCALE) ) */
 # endif /* defined(USE_LOCALE) */
 # if defined(USE_POSIX_2008_LOCALE) || defined(DEBUGGING)
 S	|const char *|get_displayable_string				\
@@ -4659,10 +4658,6 @@ p	|void	|warn_elem_scalar_context				\
 				|NN SV *name				\
 				|bool is_hash				\
 				|bool is_slice
-# if defined(USE_ITHREADS)
-p	|void	|op_relocate_sv |NN SV **svp				\
-				|NN PADOFFSET *targp
-# endif /* defined(USE_ITHREADS) */
 #endif /* defined(PERL_IN_OP_C) || defined(PERL_IN_PEEP_C) */
 #if defined(PERL_IN_OP_C) || defined(PERL_IN_PERLY_C) || \
     defined(PERL_IN_TOKE_C)
@@ -6098,6 +6093,10 @@ ARp	|SV *	|sv_dup 	|NULLOK const SV * const ssv		\
 				|NN CLONE_PARAMS * const param
 ARp	|SV *	|sv_dup_inc	|NULLOK const SV * const ssv		\
 				|NN CLONE_PARAMS * const param
+# if defined(PERL_IN_OP_C) || defined(PERL_IN_PEEP_C)
+p	|void	|op_relocate_sv |NN SV **svp				\
+				|NN PADOFFSET *targp
+# endif /* defined(PERL_IN_OP_C) || defined(PERL_IN_PEEP_C) */
 #else /* if !defined(USE_ITHREADS) */
 Adm	|void	|CopFILEGV_set	|NN COP *c				\
 				|NN GV *gv
