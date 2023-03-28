@@ -2731,7 +2731,7 @@ accent of some type.  These are considered to be in the script of the
 master character, and so never cause a script run to not match.
 
 The other one is "Common".  This consists of mostly punctuation, emoji,
-and characters used in mathematics and music, the ASCII digits C<0>
+characters used in mathematics and music, the ASCII digits C<0>
 through C<9>, and full-width forms of these digits.  These characters
 can appear intermixed in text in many of the world's scripts.  These
 also don't cause a script run to not match.  But like other scripts, all
