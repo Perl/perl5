@@ -3319,9 +3319,6 @@ S_new_numeric(pTHX_ const char *newnum, bool force)
      *                  radix character string.  This is copied into
      *                  PL_numeric_radix_sv when the situation warrants.  It
      *                  exists to avoid having to recalculate it when toggling.
-     * PL_underlying_numeric_obj = (only on POSIX 2008 platforms)  An object
-     *                  with everything set up properly so as to avoid work on
-     *                  such platforms.
      */
 
     DEBUG_L( PerlIO_printf(Perl_debug_log,
@@ -3355,20 +3352,6 @@ S_new_numeric(pTHX_ const char *newnum, bool force)
     /* We are in the underlying locale until changed at the end of this
      * function */
     PL_numeric_underlying = TRUE;
-
-#    ifdef USE_POSIX_2008_LOCALE
-
-    /* We keep a special object for easy switching to.
-     *
-     * NOTE: This code may incorrectly show up as a leak under the address
-     * sanitizer. We do not free this object under normal teardown, however
-     * you can set PERL_DESTRUCT_LEVEL=2 to cause it to be freed.
-     */
-    PL_underlying_numeric_obj = newlocale(LC_NUMERIC_MASK,
-                                          PL_numeric_name,
-                                          PL_underlying_numeric_obj);
-
-#      endif
 
     char * radix = NULL;
     utf8ness_t utf8ness = UTF8NESS_IMMATERIAL;
@@ -7131,11 +7114,6 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 #    ifdef MULTIPLICITY
 
     PL_cur_locale_obj = PL_C_locale_obj;
-
-#    endif
-#    ifdef USE_LOCALE_NUMERIC
-
-    PL_underlying_numeric_obj = duplocale(PL_C_locale_obj);
 
 #    endif
 #  endif

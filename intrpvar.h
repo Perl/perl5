@@ -862,11 +862,6 @@ PERLVAR(I, numeric_name, char *)     /* Name of current numeric locale */
 PERLVAR(I, numeric_radix_sv, SV *)	/* The radix separator */
 PERLVAR(I, underlying_radix_sv, SV *)	/* The radix in the program's current underlying locale */
 
-#if defined(USE_LOCALE_NUMERIC) && defined(USE_POSIX_2008_LOCALE)
-
-PERLVARI(I, underlying_numeric_obj, locale_t, NULL)
-
-#endif
 #ifdef USE_POSIX_2008_LOCALE
 PERLVARI(I, scratch_locale_obj, locale_t, 0)
 #endif

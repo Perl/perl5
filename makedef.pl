@@ -458,7 +458,6 @@ unless ($define{USE_POSIX_2008_LOCALE})
     ++$skip{$_} foreach qw(
         PL_C_locale_obj
         PL_scratch_locale_obj
-        PL_underlying_numeric_obj
     );
 }
 unless ($define{USE_PL_CURLOCALES})
@@ -607,13 +606,6 @@ unless ($define{USE_LOCALE_THREADS} && ! $define{USE_THREAD_SAFE_LOCALE}) {
                            PL_less_dicey_locale_buf
                            PL_less_dicey_locale_bufsize
 			  );
-}
-
-
-unless ($define{USE_LOCALE_NUMERIC}) {
-    ++$skip{$_} foreach qw(
-                    PL_underlying_numeric_obj
-			 );
 }
 
 unless ($define{USE_LOCALE_CTYPE}) {

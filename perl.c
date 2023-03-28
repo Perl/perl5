@@ -1158,15 +1158,6 @@ perl_destruct(pTHXx)
         freelocale(PL_scratch_locale_obj);
         PL_scratch_locale_obj = NULL;
     }
-#  ifdef USE_LOCALE_NUMERIC
-    if (PL_underlying_numeric_obj) {
-        DEBUG_Lv(PerlIO_printf(Perl_debug_log,
-                    "%s:%d: Freeing %p\n", __FILE__, __LINE__,
-                    PL_underlying_numeric_obj));
-        freelocale(PL_underlying_numeric_obj);
-        PL_underlying_numeric_obj = (locale_t) NULL;
-    }
-#  endif
 #endif
 #ifdef USE_LOCALE_NUMERIC
     Safefree(PL_numeric_name);

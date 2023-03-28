@@ -16091,9 +16091,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_numeric_underlying = true;
     PL_numeric_underlying_is_standard = true;
 
-#  if defined(USE_POSIX_2008_LOCALE)
-    PL_underlying_numeric_obj = NULL;
-#  endif
 #endif /* !USE_LOCALE_NUMERIC */
 #if defined(USE_POSIX_2008_LOCALE)
     PL_scratch_locale_obj = NULL;
