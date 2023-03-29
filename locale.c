@@ -2127,7 +2127,7 @@ S_find_locale_from_environment(pTHX_ const unsigned int index)
 #    ifndef WIN32
         return "C";
 #    else
-        return wrap_wsetlocale(categories[index], "");
+        return wrap_wsetlocale(categories[index], ".ACP");
 #    endif
 
     }
@@ -2161,7 +2161,7 @@ S_find_locale_from_environment(pTHX_ const unsigned int index)
 #    ifndef WIN32
             locale_names[i] = "C";
 #    else
-            locale_names[i] = wrap_wsetlocale(categories[index], "");
+            locale_names[i] = wrap_wsetlocale(categories[index], ".ACP");
 #    endif
 
         }
@@ -5942,10 +5942,10 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
                  * use wrap_wsetlocale(). */
                 const char *system_default_locale =
                                     stdize_locale(LC_ALL,
-                                                  wrap_wsetlocale(LC_ALL, ""),
-                                                  &PL_stdize_locale_buf,
-                                                  &PL_stdize_locale_bufsize,
-                                                  __LINE__);
+                                               wrap_wsetlocale(LC_ALL, ".ACP"),
+                                               &PL_stdize_locale_buf,
+                                               &PL_stdize_locale_bufsize,
+                                               __LINE__);
                 DEBUG_LOCALE_INIT(LC_ALL_INDEX_, "", system_default_locale);
 
                 /* Skip if invalid or if it's already on the list of locales to
