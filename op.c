@@ -11037,19 +11037,18 @@ S_process_special_blocks(pTHX_ I32 floor, const char *const fullname,
 {
     const char *const colon = strrchr(fullname,':');
     const char *const name = colon ? colon + 1 : fullname;
-    int is_module_install_hack = 0;
 
     PERL_ARGS_ASSERT_PROCESS_SPECIAL_BLOCKS;
 
     if (*name == 'B') {
-        module_install_hack:
-        if (strEQ(name, "BEGIN") || is_module_install_hack) {
+        if (strEQ(name, "BEGIN")) {
+            /* can't goto a declaration, but a null statement is fine */
+            module_install_hack: ;
             const I32 oldscope = PL_scopestack_ix;
             SV *max_nest_sv = NULL;
             IV max_nest_iv;
             dSP;
             (void)CvGV(cv);
-            is_module_install_hack = 0;
             if (floor) LEAVE_SCOPE(floor);
             ENTER;
 
@@ -11197,7 +11196,6 @@ S_process_special_blocks(pTHX_ I32 floor, const char *const fullname,
                          */
                         Perl_warn(aTHX_ "Treating %s::INIT block as BEGIN block as workaround",
                                 MI_INIT_WORKAROUND_PACK);
-                        is_module_install_hack = 1;
                         goto module_install_hack;
                     }
 
