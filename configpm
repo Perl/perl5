@@ -576,6 +576,8 @@ $_ = <<'!END!';
 EOT
 #proper lexicographical order of the keys
 my %seen_var;
+my @v_define = ( "taint_support=''\n",
+                 "taint_disabled=''\n" );
 $heavy_txt .= join('',
     map { $_->[-1] }
     sort {$a->[0] cmp $b->[0] }
@@ -583,7 +585,7 @@ $heavy_txt .= join('',
     map {
         /^([^=]+)/ ? [ $1, $_ ]
                    : [ $_, $_ ] # shouldnt happen
-    } @v_others, @v_forced
+    } (@v_others, @v_forced, @v_define)
 ) . "!END!\n";
 
 # Only need the dynamic byteorder code in Config.pm if 'byteorder' is one of
@@ -593,6 +595,32 @@ if ($Common{byteorder}) {
 } else {
     $heavy_txt .= $byteorder_code;
 }
+
+$heavy_txt .= <<'EOT';
+s/(byteorder=)(['"]).*?\2/$1$2$Config::byteorder$2/m;
+
+EOT
+
+$heavy_txt .= <<'EOF_TAINT_INIT';
+{
+    # We have to set this up late as Win32 does not build miniperl
+    # with the same defines and CC flags as it builds perl itself.
+    my $defines = join " ", (Internals::V)[0,1];
+    if (
+        $defines =~ /\b(SILENT_NO_TAINT_SUPPORT)\b/ ||
+        $defines =~ /\b(NO_TAINT_SUPPORT)\b/
+    ){
+        my $which = $1;
+        my $taint_disabled = ($which eq "SILENT_NO_TAINT_SUPPORT")
+                             ? "silent" : "define";
+        s/^(taint_disabled=['"])(["'])/$1$taint_disabled$2/m;
+    }
+    else {
+        my $taint_support = 'define';
+        s/^(taint_support=['"])(["'])/$1$taint_support$2/m;
+    }
+}
+EOF_TAINT_INIT
 
 if (@need_relocation) {
 $heavy_txt .= 'foreach my $what (qw(' . join (' ', @need_relocation) .
@@ -612,8 +640,6 @@ EOT
 }
 
 $heavy_txt .= <<'EOT';
-s/(byteorder=)(['"]).*?\2/$1$2$Config::byteorder$2/m;
-
 my $config_sh_len = length $_;
 
 our $Config_SH_expanded = "\n$_" . << 'EOVIRTUAL';
@@ -1014,29 +1040,21 @@ ENDOFTAIL
 if ($Opts{glossary}) {
   open(GLOS, '<', $Glossary) or die "Can't open $Glossary: $!";
 }
-my %seen = ();
 my $text = 0;
 $/ = '';
 my $errors= 0;
 
+my %glossary;
+
+my $fc;
+my $item;
+
 sub process {
   if (s/\A(\w*)\s+\(([\w.]+)\):\s*\n(\t?)/=item C<$1>\n\nFrom F<$2>:\n\n/m) {
-    my $c = substr $1, 0, 1;
-    unless ($seen{$c}++) {
-      print CONFIG_POD <<EOF if $text;
-=back
-
-EOF
-      print CONFIG_POD <<EOF;
-=head2 $c
-
-=over 4
-
-EOF
-     $text = 1;
-    }
+    $item = $1;
+    $fc = substr $item, 0, 1;
   }
-  elsif (!$text || !/\A\t/) {
+  elsif (!$item || !/\A\t/) {
     warn "Expected a Configure variable header",
       ($text ? " or another paragraph of description" : () ),
       ", instead we got:\n$_";
@@ -1068,6 +1086,7 @@ EOF
   s/(?<![.<\'\"])\b([A-Z_]{2,})\b(?![\'\"])/C<$1>/g;	# UNISTD
   s/(?<![.<\'\"])\b(?!the\b)(\w+)\s+macro\b/C<$1> macro/g; # FILE_cnt macro
   s/n[\0]t/n't/g;		# undo can't, won't damage
+  $glossary{$fc}{$item} .= $_;
 }
 
 if ($Opts{glossary}) {
@@ -1075,7 +1094,6 @@ if ($Opts{glossary}) {
     <GLOS>;				# Skip the preamble
   while (<GLOS>) {
     process;
-    print CONFIG_POD;
   }
   if ($errors) {
     die "Errors encountered while processing $Glossary. ",
@@ -1086,9 +1104,43 @@ if ($Opts{glossary}) {
   }
 }
 
-print CONFIG_POD <<'ENDOFTAIL';
+$glossary{t}{taint_support} //= <<EOF_TEXT;
+=item C<taint_support>
 
-=back
+From define: C<SILENT_NO_TAINT_SUPPORT> or C<NO_TAINT_SUPPORT>
+
+If this perl is compiled with support for taint mode this variable will
+be set to 'define', if it is not it will be set to the empty string.
+Either of the above defines will result in it being empty.  This property
+was added in version 5.37.11. See also L</taint_disabled>.
+
+EOF_TEXT
+
+$glossary{t}{taint_disabled} //= <<EOF_TEXT;
+=item C<taint_disabled>
+
+From define: C<SILENT_NO_TAINT_SUPPORT> or C<NO_TAINT_SUPPORT>
+
+If this perl is compiled with support for taint mode this variable will
+be set to the empty string, if it was compiled with
+C<SILENT_NO_TAINT_SUPPORT> defined then it will be set to be "silent",
+and if it was compiled with C<NO_TAINT_SUPPORT> defined it will be
+'define'. Either of the above defines will results in it being a true
+value. This property was added in 5.37.11. See also L</taint_support>.
+
+EOF_TEXT
+
+if ($Opts{glossary}) {
+    foreach my $fc (sort keys %glossary) {
+        print CONFIG_POD "=head2 $fc\n\n=over 4\n\n";
+        foreach my $item (sort keys %{$glossary{$fc}}) {
+            print CONFIG_POD $glossary{$fc}{$item};
+        }
+        print CONFIG_POD "=back\n\n";
+    }
+}
+
+print CONFIG_POD <<'ENDOFTAIL';
 
 =head1 GIT DATA
 
