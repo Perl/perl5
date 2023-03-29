@@ -2166,8 +2166,9 @@ sub generate_output {
     (my $ntype = $type) =~ s/\s*\*/Ptr/g;
     $ntype =~ s/\(\)//g;
     (my $subtype = $ntype) =~ s/(?:Array)?(?:Ptr)?$//;
+    $type =~ tr/:/_/ unless $self->{RetainCplusplusHierarchicalTypes};
 
-    my $eval_vars = {%$argsref, subtype => $subtype, ntype => $ntype, arg => $arg};
+    my $eval_vars = {%$argsref, subtype => $subtype, ntype => $ntype, arg => $arg, type => $type };
     my $expr = $outputmap->cleaned_code;
     if ($expr =~ /DO_ARRAY_ELEM/) {
       my $subtypemap = $typemaps->get_typemap(ctype => $subtype);
