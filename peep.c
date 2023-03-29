@@ -4345,6 +4345,7 @@ Perl_peep(pTHX_ OP *o)
                 Copy(cUNOP_AUXx(o->op_next)->op_aux-1, arg_buf, size+1, UNOP_AUX_item);
 
                 ((COP *) o)->cop_md_accessor.cop_mdacc_get = arg_buf+1;
+                o->op_private |= OPpMD_ACCESSOR;
             }
           }
         }

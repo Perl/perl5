@@ -306,6 +306,7 @@ addbits($_, 2 => qw(OPpUSEINT USEINT))
 for (qw(nextstate dbstate)) {
     addbits($_,
         5 => qw(OPpHUSH_VMSISH          HUSH),
+        4 => qw(OPpMD_ACCESSOR          MDACC),
     );
 }
 

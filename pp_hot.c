@@ -5441,9 +5441,9 @@ PP(pp_entersub)
         cv_start = (COP *)CvSTART(cv);
         if (
                cv_start
+            && ( cv_start->op_private & OPpMD_ACCESSOR )
             && ( accessor = &cv_start->cop_md_accessor )
             && ( md_items = accessor->cop_mdacc_get )
-            && cv_start->op_next->op_type != OP_LEAVESUB
            )
         {
             if ( md_items && (md_items->uv & MDEREF_ACTION_MASK) == MDEREF_AV_gvav_aelem )
