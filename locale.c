@@ -1644,11 +1644,21 @@ S_bool_setlocale_2008_i(pTHX_
 
     locale_t new_obj;
 
-    /* We created a (never changing) object at start-up for LC_ALL being in the
-     * C locale.  If this call is to switch to LC_ALL=>C, simply use that
-     * object.  But in fact, we already have switched to it just above, in
-     * preparation for the general case.  Since we're already there, no need to
-     * do further switching. */
+    /* These two objects are special:
+     *  LC_GLOBAL_LOCALE    because it is undefined behavior to call
+     *                      newlocale() with it as a parameter.
+     *  PL_C_locale_obj     because newlocale() generally destroys its locale
+     *                      object parameter when it succeeds; and we don't
+     *                      want that happening to this immutable object.
+     * Copies will be made for them to use instead if we get so far as to call
+     * newlocale(). */
+    bool entry_obj_is_special = (   entry_obj == LC_GLOBAL_LOCALE
+                                 || entry_obj == PL_C_locale_obj);
+
+    /* PL_C_locale_obj is LC_ALL set to the C locale.  If this call is to
+     * switch to LC_ALL=>C, simply use that object.  But in fact, we already
+     * have switched to it just above, in preparation for the general case.
+     * Since we're already there, no need to do further switching. */
     if (mask == LC_ALL_MASK && isNAME_C_OR_POSIX(new_locale)) {
         DEBUG_Lv(PerlIO_printf(Perl_debug_log, "(%" LINE_Tf "):"
                                                " bool_setlocale_2008_i will stay"
@@ -1656,21 +1666,15 @@ S_bool_setlocale_2008_i(pTHX_
         new_obj = PL_C_locale_obj;
 
         /* And free the old object if it isn't a special one */
-        if (entry_obj != LC_GLOBAL_LOCALE && entry_obj != PL_C_locale_obj) {
+        if (! entry_obj_is_special) {
             freelocale(entry_obj);
         }
     }
     else {  /* Here is the general case, not to LC_ALL=>C */
         locale_t basis_obj = entry_obj;
 
-        /* Specially handle two objects */
-        if (basis_obj == LC_GLOBAL_LOCALE || basis_obj == PL_C_locale_obj) {
+        if (entry_obj_is_special) {
 
-            /* For these two objects, we make duplicates to hand to newlocale()
-             * below.  For LC_GLOBAL_LOCALE, this is because newlocale()
-             * doesn't necessarily accept it as input (the results are
-             * undefined).  For PL_C_locale_obj, it is so that it never gets
-             * modified, as otherwise newlocale() is free to do so */
             basis_obj = duplocale(basis_obj);
             if (! basis_obj) {
                 locale_panic_(Perl_form(aTHX_ "(%" LINE_Tf "): duplocale failed",
