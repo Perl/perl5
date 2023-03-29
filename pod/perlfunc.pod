@@ -6094,9 +6094,7 @@ one element.
 
     # @arr is now ('cat', 'dog')
 
-Returns C<undef> if the array is empty. If ARRAY is omitted, C<pop> operates on
-the L<C<@ARGV>|perlvar/@ARGV> array in the main program, but the
-L<C<@_>|perlvar/@_> array in subroutines.
+Returns C<undef> if the array is empty.
 
 B<Note:> C<pop> may also return C<undef> if the last element in the array
 is C<undef>.
@@ -6104,8 +6102,10 @@ is C<undef>.
     my @arr  = ('one', 'two', undef);
     my $item = pop(@arr); # undef
 
-C<pop> will operate on the C<@ARGV> array in C<eval STRING>,
-C<BEGIN {}>, C<INIT {}>, C<CHECK {}> blocks.
+If ARRAY is omitted, C<pop> operates on the L<C<@ARGV>|perlvar/@ARGV> array
+in the main program, but the L<C<@_>|perlvar/@_> array in subroutines. C<pop>
+will operate on the C<@ARGV> array in C<eval STRING>, C<BEGIN {}>, C<INIT {}>,
+C<CHECK {}> blocks.
 
 Starting with Perl 5.14, an experimental feature allowed
 L<C<pop>|/pop ARRAY> to take a
@@ -7678,9 +7678,7 @@ array by one and moves everything down.
 
     # @arr is now ('dog');
 
-Returns C<undef> if the array is empty. If ARRAY is omitted, C<shift>
-operates on the C<@ARGV> array in the main program, and the C<@_> array
-in subroutines.
+Returns C<undef> if the array is empty.
 
 B<Note:> C<shift> may also return C<undef> if the first element in the array
 is C<undef>.
@@ -7688,8 +7686,9 @@ is C<undef>.
     my @arr  = (undef, 'two', 'three');
     my $item = shift(@arr); # undef
 
-C<shift> will operate on the C<@ARGV> array in C<eval STRING>,
-C<BEGIN {}>, C<INIT {}>, C<CHECK {}> blocks.
+If ARRAY is omitted, C<shift> operates on the C<@ARGV> array in the main
+program, and the C<@_> array in subroutines. C<shift> will operate on the
+C<@ARGV> array in C<eval STRING>, C<BEGIN {}>, C<INIT {}>, C<CHECK {}> blocks.
 
 Starting with Perl 5.14, an experimental feature allowed
 L<C<shift>|/shift ARRAY> to take a
