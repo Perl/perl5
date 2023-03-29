@@ -1995,6 +1995,12 @@ S_Internals_V(pTHX_ CV *cv)
 #  ifdef NO_MATHOMS
                              " NO_MATHOMS"
 #  endif
+#  ifdef NO_PERL_INTERNAL_RAND_SEED
+                             " NO_PERL_INTERNAL_RAND_SEED"
+#  endif
+#  ifdef NO_PERL_RAND_SEED
+                             " NO_PERL_RAND_SEED"
+#  endif
 #  ifdef NO_TAINT_SUPPORT
                              " NO_TAINT_SUPPORT"
 #  endif
@@ -2080,13 +2086,8 @@ S_Internals_V(pTHX_ CV *cv)
 #  ifdef USE_THREAD_SAFE_LOCALE
                              " USE_THREAD_SAFE_LOCALE"
 #  endif
-#  ifdef NO_PERL_RAND_SEED
-                             " NO_PERL_RAND_SEED"
-#  endif
-#  ifdef NO_PERL_INTERNAL_RAND_SEED
-                             " NO_PERL_INTERNAL_RAND_SEED"
-#  endif
-        ;
+    ""; /* keep this on a line by itself, WITH the empty string */
+
     PERL_UNUSED_ARG(cv);
     PERL_UNUSED_VAR(items);
 

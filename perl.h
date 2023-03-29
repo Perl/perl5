@@ -5823,7 +5823,7 @@ EXTCONST char PL_bincompat_options[] =
 #  ifdef VMS_WE_ARE_CASE_SENSITIVE
                              " VMS_SYMBOL_CASE_AS_IS"
 #  endif
-  "";
+    ""; /* keep this on a line by itself, WITH the empty string */
 #else
 EXTCONST char PL_bincompat_options[];
 #endif
