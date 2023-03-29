@@ -3636,8 +3636,9 @@ S_softref2xv_lite(pTHX_ SV *const sv, const char *const what,
  */
 
 STATIC OP *
-S_multideref(pTHX_ UNOP_AUX_item *items, SV *sv)
+S_multideref(pTHX_ UNOP_AUX_item *items)
 {
+    SV *sv = NULL; /* init to avoid spurious 'may be used uninitialized' */
     UV actions = items->uv;
 
     assert(actions);
@@ -3661,16 +3662,9 @@ S_multideref(pTHX_ UNOP_AUX_item *items, SV *sv)
             goto do_AV_aelem;
 
         case MDEREF_AV_gvav_aelem:                  /* $pkg[...] */
-            if ( !sv )
-            {
-                sv = UNOP_AUX_item_sv(++items);
-                assert(isGV_with_GP(sv));
-                sv = (SV*)GvAVn((GV*)sv);
-            }
-            else
-            {
-                ++items;
-            }
+            sv = UNOP_AUX_item_sv(++items);
+            assert(isGV_with_GP(sv));
+            sv = (SV*)GvAVn((GV*)sv);
             goto do_AV_aelem;
 
         case MDEREF_AV_pop_rv2av_aelem:             /* expr->[...] */
@@ -4051,7 +4045,7 @@ S_multideref(pTHX_ UNOP_AUX_item *items, SV *sv)
 PP(pp_multideref)
 {
     UNOP_AUX_item *items = cUNOP_AUXx(PL_op)->op_aux;
-    return S_multideref(aTHX_ items, NULL);
+    return S_multideref(aTHX_ items);
 }
 
 
@@ -5452,14 +5446,20 @@ PP(pp_entersub)
                 if ( mut_av == NULL )
                 {
                     mut_av = SvREFCNT_inc(newAV());
-                    SvREFCNT_inc(mut_av);
+                    SvREFCNT_inc_simple_NN(mut_av);
                     av_store(mut_av, 0, &PL_sv_undef);
                 }
                 av_store_simple(mut_av, 0, SvREFCNT_inc(*(MARK+1)));
 
+                AV **defavp;
+                defavp = &GvAV(PL_defgv);
+                AV *prev_avp = *defavp;
+                *defavp = mut_av;
+
                 SP = MARK;
                 PUTBACK;
-                S_multideref(aTHX_ md_items, (SV *)mut_av);
+                S_multideref(aTHX_ md_items);
+                *defavp = prev_avp;
                 return NORMAL;
             }
         }
