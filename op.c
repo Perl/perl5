@@ -11053,44 +11053,45 @@ S_process_special_blocks(pTHX_ I32 floor, const char *const fullname,
             if (floor) LEAVE_SCOPE(floor);
             ENTER;
 
-            /* make sure we don't recurse too deeply into BEGIN blocks
+            /* Make sure we don't recurse too deeply into BEGIN blocks,
              * but let the user control it via the new control variable
              *
              *   ${^MAX_NESTED_EVAL_BEGIN_BLOCKS}
              *
-             * Note this *looks* code like when max_nest_iv is 1 that it
-             * would block the following code:
+             * Note that this code (when max_nest_iv is 1) *looks* like
+             * it would block the following code:
              *
              * BEGIN { $n |= 1; BEGIN { $n |= 2; BEGIN { $n |= 4 } } }
              *
-             * but it does *not*, this code will happily execute when
+             * but it does *not*; this code will happily execute when
              * the nest limit is 1. The reason is revealed in the
-             * execution order. If we could watch $n in this code we
-             * would see the follow order of modifications:
+             * execution order. If we could watch $n in this code, we
+             * would see the following order of modifications:
              *
              * $n |= 4;
              * $n |= 2;
              * $n |= 1;
              *
              * This is because nested BEGIN blocks execute in FILO
-             * order, this is because BEGIN blocks are defined to
-             * execute immediately they are closed. So the innermost
-             * block is closed first, and it executes, which would the
-             * eval_begin_nest_depth by 1, it would finish, which would
-             * drop it back to its previous value. This would happen in
-             * turn as each BEGIN was terminated.
+             * order; this is because BEGIN blocks are defined to
+             * execute immediately once they are closed. So the
+             * innermost block is closed first, and it executes, which
+             * increments the eval_begin_nest_depth by 1, and then it
+             * finishes, which drops eval_begin_nest_depth back to its
+             * previous value. This happens in turn as each BEGIN is
+             * completed.
              *
-             * The *only* place these counts matter is when BEGIN in
-             * inside of some kind of eval, either a require or a true
-             * eval. Only in that case would there be any nesting and
-             * would perl try to execute a BEGIN before another had
+             * The *only* place these counts matter is when BEGIN is
+             * inside of some kind of string eval, either a require or a
+             * true eval. Only in that case would there be any nesting
+             * and would perl try to execute a BEGIN before another had
              * completed.
              *
              * Thus this logic puts an upper limit on module nesting.
-             * Hence the reason we let the user control it, although its
-             * hard to imagine a 1000 level deep module use dependency
-             * even in a very large codebase. The real objective is to
-             * prevent code like this:
+             * Hence the reason we let the user control it, although it
+             * is hard to imagine a 1000-level-deep module use
+             * dependency even in a very large codebase. The real
+             * objective is to prevent code like this:
              *
              * perl -e'sub f { eval "BEGIN { f() }" } f()'
              *
@@ -11187,12 +11188,12 @@ S_process_special_blocks(pTHX_ I32 floor, const char *const fullname,
                     if ( pv && strEQ(pv,MI_INIT_WORKAROUND_PACK) )
                     {
                         /* old versions of Module::Install::DSL contain code
-                         * that creates an INIT in eval, which expect to run
+                         * that creates an INIT in eval, which expects to run
                          * after an exit(0) in BEGIN. This unfortunately
                          * breaks a lot of code in the CPAN river. So we magically
                          * convert INIT blocks from Module::Install::DSL to
                          * be BEGIN blocks. Which works out, since the INIT
-                         * blocks it creates are eval'ed so are late.
+                         * blocks it creates are eval'ed and so are late.
                          */
                         Perl_warn(aTHX_ "Treating %s::INIT block as BEGIN block as workaround",
                                 MI_INIT_WORKAROUND_PACK);
