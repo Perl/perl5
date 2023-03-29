@@ -973,7 +973,7 @@ S_less_dicey_bool_setlocale_r(pTHX_ const int cat, const char * locale)
  * are equivalents, like LC_NUMERIC_MASK, which we use instead, which we find
  * by table lookup. */
 
-#  define querylocale_i(i)    mortalized_pv_copy(querylocale_2008_i(i))
+#  define querylocale_i(i)    querylocale_2008_i(i)
 #  define querylocale_c(cat)  querylocale_i(cat##_INDEX_)
 #  define querylocale_r(cat)  querylocale_i(get_category_index(cat))
 
@@ -1032,7 +1032,7 @@ S_querylocale_2008_i(pTHX_ const unsigned int index)
                                            category_names[index], cur_obj));
     if (cur_obj == LC_GLOBAL_LOCALE) {
         POSIX_SETLOCALE_LOCK;
-        retval = posix_setlocale(category, NULL);
+        retval = mortalized_pv_copy(posix_setlocale(category, NULL));
         POSIX_SETLOCALE_UNLOCK;
     }
     else {
@@ -1053,7 +1053,7 @@ S_querylocale_2008_i(pTHX_ const unsigned int index)
             PL_curlocales[index] = savepv(stdized_setlocale(category, NULL));
         }
 
-        retval = PL_curlocales[index];
+        retval = mortalized_pv_copy(PL_curlocales[index]);
 
 #  endif
 
