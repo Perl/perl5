@@ -1344,6 +1344,12 @@ typedef struct {
     size_t offset;
 } lconv_offset_t;
 
+typedef enum {
+    INTERNAL_FORMAT,
+    EXTERNAL_FORMAT_FOR_SET,
+    EXTERNAL_FORMAT_FOR_QUERY
+} calc_LC_ALL_format;
+
 
 typedef enum {
     invalid,
