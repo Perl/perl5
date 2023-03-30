@@ -532,7 +532,12 @@ S_mortalized_pv_copy(pTHX_ const char * const pv)
 #define C_codeset "ANSI_X3.4-1968" /* Only in some Configurations, and usually
                                       a single instance, so is a #define */
 static const char C_decimal_point[] = ".";
+
+#if (defined(USE_LOCALE_NUMERIC) && ! defined(TS_W32_BROKEN_LOCALECONV))    \
+ || ! (   defined(USE_LOCALE_NUMERIC)                                       \
+       && (defined(HAS_SOME_LANGINFO) || defined(HAS_LOCALECONV)))
 static const char C_thousands_sep[] = "";
+#endif
 
 /* Is the C string input 'name' "C" or "POSIX"?  If so, and 'name' is the
  * return of setlocale(), then this is extremely likely to be the C or POSIX
@@ -2770,8 +2775,6 @@ S_new_numeric(pTHX_ const char *newnum, bool force)
     }
     Safefree(scratch_buffer);
 
-#    else
-    PERL_UNUSED_VAR(C_thousands_sep);
 #    endif
 
     PL_numeric_standard = PL_numeric_underlying_is_standard;
