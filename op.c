@@ -11180,12 +11180,11 @@ S_process_special_blocks(pTHX_ I32 floor, const char *const fullname,
             if (strEQ(name, "INIT")) {
 #ifdef MI_INIT_WORKAROUND_PACK
                 {
-                    HV *hv= CvSTASH(cv);
+                    HV *hv = CvSTASH(cv);
                     STRLEN len = hv ? HvNAMELEN(hv) : 0;
-                    char *pv= (len == sizeof(MI_INIT_WORKAROUND_PACK)-1)
+                    char *pv = (len == sizeof(MI_INIT_WORKAROUND_PACK)-1)
                             ? HvNAME_get(hv) : NULL;
-                    if ( pv && strEQ(pv,MI_INIT_WORKAROUND_PACK) )
-                    {
+                    if ( pv && strEQ(pv, MI_INIT_WORKAROUND_PACK) ) {
                         /* old versions of Module::Install::DSL contain code
                          * that creates an INIT in eval, which expects to run
                          * after an exit(0) in BEGIN. This unfortunately
