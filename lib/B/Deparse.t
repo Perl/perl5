@@ -2134,7 +2134,7 @@ print f();
     {
       foo();
       my sub b;
-      b ;
+      b;
       main::b();
       &main::b;
       &main::b();
@@ -2150,7 +2150,7 @@ print f();
 ();
 state sub sb2;
 sub sb2 {
-    sb2 ;
+    sb2;
 }
 ####
 # lexical subroutine with outer declaration and inner definition
@@ -2236,6 +2236,14 @@ optoptwack($a = $b);
 wackbrack($a = $b);
 optwackbrack($a = $b);
 optoptwackbrack($a = $b);
+optbar;
+optoptbar;
+optplus;
+optoptplus;
+optwack;
+optoptwack;
+optwackbrack;
+optoptwackbrack;
 >>>>
 package prototest;
 dollar($a < $b);
@@ -2247,15 +2255,91 @@ optoptdollar($a < $b);
 bar($a < $b);
 optbar($a < $b);
 optoptbar($a < $b);
-&plus($a < $b);
-&optplus($a < $b);
-&optoptplus($a < $b);
+plus($a < $b);
+optplus($a < $b);
+optoptplus($a < $b);
 &wack(\($a = $b));
 &optwack(\($a = $b));
 &optoptwack(\($a = $b));
 &wackbrack(\($a = $b));
 &optwackbrack(\($a = $b));
 &optoptwackbrack(\($a = $b));
+optbar;
+optoptbar;
+optplus;
+optoptplus;
+optwack;
+optoptwack;
+optwackbrack;
+optoptwackbrack;
+####
+# enreferencing prototypes: @
+# CONTEXT sub wackat(\@) {} sub optwackat(;\@) {} sub wackbrackat(\[@]) {} sub optwackbrackat(;\[@]) {}
+wackat(my @a0);
+wackat(@a0);
+wackat(@ARGV);
+wackat(@{['t'];});
+optwackat;
+optwackat(my @a1);
+optwackat(@a1);
+optwackat(@ARGV);
+optwackat(@{['t'];});
+wackbrackat(my @a2);
+wackbrackat(@a2);
+wackbrackat(@ARGV);
+wackbrackat(@{['t'];});
+optwackbrackat;
+optwackbrackat(my @a3);
+optwackbrackat(@a3);
+optwackbrackat(@ARGV);
+optwackbrackat(@{['t'];});
+####
+# enreferencing prototypes: %
+# CONTEXT sub wackperc(\%) {} sub optwackperc(;\%) {} sub wackbrackperc(\[%]) {} sub optwackbrackperc(;\[%]) {}
+wackperc(my %a0);
+wackperc(%a0);
+wackperc(%ARGV);
+wackperc(%{+{'t', 1};});
+optwackperc;
+optwackperc(my %a1);
+optwackperc(%a1);
+optwackperc(%ARGV);
+optwackperc(%{+{'t', 1};});
+wackbrackperc(my %a2);
+wackbrackperc(%a2);
+wackbrackperc(%ARGV);
+wackbrackperc(%{+{'t', 1};});
+optwackbrackperc;
+optwackbrackperc(my %a3);
+optwackbrackperc(%a3);
+optwackbrackperc(%ARGV);
+optwackbrackperc(%{+{'t', 1};});
+####
+# enreferencing prototypes: +
+# CONTEXT sub plus(+) {} sub optplus(;+) {}
+plus('hi');
+plus(my @a0);
+plus(my %h0);
+plus(\@a0);
+plus(\%h0);
+optplus;
+optplus('hi');
+optplus(my @a1);
+optplus(my %h1);
+optplus(\@a1);
+optplus(\%h1);
+>>>>
+plus('hi');
+plus(my @a0);
+plus(my %h0);
+plus(@a0);
+plus(%h0);
+optplus;
+optplus('hi');
+optplus(my @a1);
+optplus(my %h1);
+optplus(@a1);
+optplus(%h1);
 ####
 # ensure aelemfast works in the range -128..127 and that there's no
 # funky edge cases

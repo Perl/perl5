@@ -7,7 +7,7 @@
 # This is based on the module of the same name by Malcolm Beattie,
 # but essentially none of his code remains.
 
-package B::Deparse 1.72;
+package B::Deparse 1.73;
 use strict;
 use Carp;
 use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
@@ -1554,7 +1554,7 @@ sub maybe_parens_func {
     if ($prec <= $cx or substr($text, 0, 1) eq "(" or $self->{'parens'}) {
 	return "$func($text)";
     } else {
-	return "$func $text";
+        return $func . (length($text) ? " $text" : "");
     }
 }
 
@@ -5050,78 +5050,92 @@ sub e_method {
 sub check_proto {
     my $self = shift;
     return "&" if $self->{'noproto'};
-    my($proto, @args) = @_;
-    my($arg, $real);
+    my ($proto, @args) = @_;
     my $doneok = 0;
     my @reals;
-    # An unbackslashed @ or % gobbles up the rest of the args
-    1 while $proto =~ s/(?<!\\)([@%])[^\]]+$/$1/;
-    $proto =~ s/^\s*//;
-    while ($proto) {
-	$proto =~ s/^(\\?[\$\@&%*_]|\\\[[\$\@&%*]+\]|;|)\s*//;
+    $proto =~ s/^\s+//;
+    while (length $proto) {
+        $proto =~ s/^(\\?[\$\@&%*]|\\\[[\$\@&%*]+\]|[_+;])\s*//
+            or return "&";  # malformed prototype
 	my $chr = $1;
-	if ($chr eq "") {
-	    return "&" if @args;
-	} elsif ($chr eq ";") {
+        if ($chr eq ";") {
 	    $doneok = 1;
-	} elsif ($chr eq "@" or $chr eq "%") {
+        } elsif ($chr eq '@' or $chr eq '%') {
+            # An unbackslashed @ or % gobbles up the rest of the args
 	    push @reals, map($self->deparse($_, 6), @args);
 	    @args = ();
+            $proto = '';
+        } elsif (!@args) {
+            last if $doneok;
+            return "&"; # too few args and no ';'
 	} else {
-	    $arg = shift @args;
-	    last unless $arg;
-	    if ($chr eq "\$" || $chr eq "_") {
+            my $arg = shift @args;
+            if ($chr eq '$' || $chr eq '_') {
 		if (want_scalar $arg) {
 		    push @reals, $self->deparse($arg, 6);
 		} else {
 		    return "&";
 		}
 	    } elsif ($chr eq "&") {
-		if ($arg->name =~ /^(s?refgen|undef)$/) {
+                if ($arg->name =~ /^(?:s?refgen|undef)\z/) {
 		    push @reals, $self->deparse($arg, 6);
 		} else {
 		    return "&";
 		}
 	    } elsif ($chr eq "*") {
-		if ($arg->name =~ /^s?refgen$/
+                if ($arg->name =~ /^s?refgen\z/
 		    and $arg->first->first->name eq "rv2gv")
-		  {
-		      $real = $arg->first->first; # skip refgen, null
-		      if ($real->first->name eq "gv") {
-			  push @reals, $self->deparse($real, 6);
-		      } else {
-			  push @reals, $self->deparse($real->first, 6);
-		      }
-		  } else {
-		      return "&";
-		  }
+                {
+                    my $real = $arg->first->first; # skip refgen, null
+                    if ($real->first->name eq "gv") {
+                        push @reals, $self->deparse($real, 6);
+                    } else {
+                        push @reals, $self->deparse($real->first, 6);
+                    }
+                } else {
+                    return "&";
+                }
+            } elsif ($chr eq "+") {
+                my $real;
+                if ($arg->name =~ /^s?refgen\z/ and
+                    !null($real = $arg->first) and
+                    !null($real->first) and
+                    $real->first->name =~ /^(?:rv2|pad)[ah]v\z/)
+                {
+                    push @reals, $self->deparse($real, 6);
+                } elsif (want_scalar $arg) {
+                    push @reals, $self->deparse($arg, 6);
+                } else {
+                    return "&";
+                }
 	    } elsif (substr($chr, 0, 1) eq "\\") {
 		$chr =~ tr/\\[]//d;
-		if ($arg->name =~ /^s?refgen$/ and
+                my $real;
+                if ($arg->name =~ /^s?refgen\z/ and
 		    !null($real = $arg->first) and
 		    ($chr =~ /\$/ && is_scalar($real->first)
 		     or ($chr =~ /@/
-			 && class($real->first->sibling) ne 'NULL'
-			 && $real->first->sibling->name
-			 =~ /^(rv2|pad)av$/)
+                         && !null($real->first)
+                         && $real->first->name =~ /^(?:rv2|pad)av\z/)
 		     or ($chr =~ /%/
-			 && class($real->first->sibling) ne 'NULL'
-			 && $real->first->sibling->name
-			 =~ /^(rv2|pad)hv$/)
+                         && !null($real->first)
+                         && $real->first->name =~ /^(?:rv2|pad)hv\z/)
 		     #or ($chr =~ /&/ # This doesn't work
 		     #   && $real->first->name eq "rv2cv")
 		     or ($chr =~ /\*/
 			 && $real->first->name eq "rv2gv")))
-		  {
-		      push @reals, $self->deparse($real, 6);
-		  } else {
-		      return "&";
-		  }
-	    }
-       }
+                {
+                    push @reals, $self->deparse($real, 6);
+                } else {
+                    return "&";
+                }
+            } else {
+                # should not happen
+                return "&";
+            }
+        }
     }
-    return "&" if $proto and !$doneok; # too few args and no ';'
-    return "&" if @args;               # too many args
+    return "&" if @args; # too many args
     return ("", join ", ", @reals);
 }
 
@@ -5301,19 +5315,23 @@ sub pp_entersub {
 	# it back.
 	$kid =~ s/^CORE::GLOBAL:://;
 
-	my $dproto = defined($proto) ? $proto : "undefined";
-	my $scalar_proto = $dproto =~ /^;*(?:[\$*_+]|\\.|\\\[[^]]\])\z/;
         if (!$declared) {
 	    return "$kid(" . $args . ")";
-	} elsif ($dproto =~ /^\s*\z/) {
+        }
+
+        my $dproto = defined($proto) ? $proto : "undefined";
+        if ($dproto =~ /^\s*\z/) {
 	    return $kid;
-	} elsif ($scalar_proto and is_scalar($exprs[0])) {
+        }
+
+        my $scalar_proto = $dproto =~ /^ \s* (?: ;\s* )* (?: [\$*_+] |\\ \s* (?: [\$\@%&*] | \[ [^\]]+ \] ) ) \s* \z/x;
+        if ($scalar_proto and !@exprs || is_scalar($exprs[0])) {
 	    # is_scalar is an excessively conservative test here:
 	    # really, we should be comparing to the precedence of the
 	    # top operator of $exprs[0] (ala unop()), but that would
 	    # take some major code restructuring to do right.
 	    return $self->maybe_parens_func($kid, $args, $cx, 16);
-	} elsif (not $scalar_proto and defined($proto) || $simple) { #'
+        } elsif (not $scalar_proto and defined($proto) || $simple) {
 	    return $self->maybe_parens_func($kid, $args, $cx, 5);
 	} else {
 	    return "$kid(" . $args . ")";
