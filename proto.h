@@ -6998,7 +6998,7 @@ S_setlocale_failure_panic_via_i(pTHX_ const unsigned int cat_index, const char *
         assert(failed); assert(higher_caller_file)
 
 STATIC const char *
-S_stdize_locale(pTHX_ const int category, const char *input_locale, const char **buf, Size_t *buf_size, line_t caller_line);
+S_stdize_locale(pTHX_ const int category, const char *input_locale, line_t caller_line);
 #   define PERL_ARGS_ASSERT_STDIZE_LOCALE
 
 STATIC const char *
