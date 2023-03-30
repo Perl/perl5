@@ -1979,10 +1979,10 @@ Perl_load_module(pTHX_ U32 flags, SV *name, SV *ver, ...);
         assert(name)
 
 PERL_CALLCONV_NO_RET void
-Perl_locale_panic(const char *msg, const char *file_name, const line_t line, const int errnum)
+Perl_locale_panic(const char *msg, const line_t immediate_caller_line, const char * const higher_caller_file, const line_t higher_caller_line)
         __attribute__noreturn__;
 #define PERL_ARGS_ASSERT_LOCALE_PANIC           \
-        assert(msg); assert(file_name)
+        assert(msg); assert(higher_caller_file)
 
 PERL_CALLCONV OP *
 Perl_localize(pTHX_ OP *o, I32 lex)
@@ -6976,10 +6976,10 @@ S_save_to_buffer(const char *string, const char **buf, Size_t *buf_size);
 #   define PERL_ARGS_ASSERT_SAVE_TO_BUFFER
 
 PERL_STATIC_NO_RET void
-S_setlocale_failure_panic_i(pTHX_ const unsigned int cat_index, const char *current, const char *failed, const line_t caller_0_line, const line_t caller_1_line)
+S_setlocale_failure_panic_via_i(pTHX_ const unsigned int cat_index, const char *current, const char *failed, const line_t proxy_caller_line, const line_t immediate_caller_line, const char *higher_caller_file, const line_t higher_caller_line)
         __attribute__noreturn__;
-#   define PERL_ARGS_ASSERT_SETLOCALE_FAILURE_PANIC_I \
-        assert(failed)
+#   define PERL_ARGS_ASSERT_SETLOCALE_FAILURE_PANIC_VIA_I \
+        assert(failed); assert(higher_caller_file)
 
 STATIC const char *
 S_stdize_locale(pTHX_ const int category, const char *input_locale, const char **buf, Size_t *buf_size, line_t caller_line);
@@ -7139,7 +7139,7 @@ S_find_locale_from_environment(pTHX_ const unsigned int index);
 
 #   endif
 # endif /* defined(USE_LOCALE) */
-# if defined(USE_POSIX_2008_LOCALE) || defined(DEBUGGING)
+# if defined(USE_LOCALE) || defined(DEBUGGING)
 STATIC const char *
 S_get_displayable_string(pTHX_ const char * const s, const char * const e, const bool is_utf8);
 #   define PERL_ARGS_ASSERT_GET_DISPLAYABLE_STRING \
