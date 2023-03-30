@@ -632,6 +632,14 @@ STATIC const Size_t category_name_lengths[] = {
     STRLENs(LC_UNKNOWN_STRING)
 };
 
+/* Each entry includes space for the '=' and ';' */
+#  undef PERL_LOCALE_TABLE_ENTRY
+#  define PERL_LOCALE_TABLE_ENTRY(name, call_back)  + STRLENs(# name) + 2
+
+STATIC const Size_t lc_all_boiler_plate_length = 1  /* space for trailing NUL */
+#  include "locale_table.h"
+;
+
 /* A few categories require additional setup when they are changed.  This table
  * points to the functions that do that setup */
 STATIC void (*update_functions[]) (pTHX_ const char *, bool force) = {
@@ -2190,16 +2198,11 @@ S_calculate_LC_ALL_string(pTHX_ const char ** category_locales_list)
     char * this_start = NULL;
     Size_t entry_len = 0;
 
-
     /* First calculate the needed size for the string listing the categories
      * and their locales. */
+    names_len = lc_all_boiler_plate_length;
     for (i = 0; i < LC_ALL_INDEX_; i++) {
-        const char * entry = locales_list[i];
-
-        names_len += category_name_lengths[i]
-                  + 1                           /* '=' */
-                  + strlen(entry)
-                  + 1;                          /* ';' */
+        names_len += strlen(locales_list[i]);
     }
 
     names_len++;    /* Trailing '\0' */
