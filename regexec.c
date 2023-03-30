@@ -372,6 +372,7 @@ S_unwind_paren(pTHX_ regexp *rex, U32 lp, U32 lcp comma_pDEPTH) {
 PERL_STATIC_INLINE void
 S_capture_clear(pTHX_ regexp *rex, U16 from_ix, U16 to_ix, const char *str comma_pDEPTH) {
     PERL_ARGS_ASSERT_CAPTURE_CLEAR;
+    PERL_UNUSED_ARG(str); /* only used for debugging */
     U16 my_ix;
     DECLARE_AND_GET_RE_DEBUG_FLAGS;
     for ( my_ix = from_ix; my_ix <= to_ix; my_ix++ ) {
