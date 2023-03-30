@@ -895,9 +895,7 @@ Perl_locale_panic(const char * msg,
 #define setlocale_failure_panic_c(cat, cur, fail, line, higher_line)        \
    setlocale_failure_panic_i(cat##_INDEX_, cur, fail, line, higher_line)
 
-#if defined(USE_LOCALE)                                                     \
- && (   (defined(USE_POSIX_2008_LOCALE) && defined(LC_ALL))                 \
-     ||  defined(USE_FAKE_LC_ALL_POSITIONAL_NOTATION))
+#if defined(USE_LOCALE) && defined(LC_ALL)
 
 STATIC parse_LC_ALL_string_return
 S_parse_LC_ALL_string(pTHX_ const char * string,
@@ -1167,32 +1165,29 @@ S_parse_LC_ALL_string(pTHX_ const char * string,
  * Any necessary mutex locking needs to be done at a higher level.
  *
  */
-#ifdef stdize_locale
-#  define stdized_setlocale(cat, locale)                                       \
-     stdize_locale(cat, posix_setlocale(cat, locale),                          \
-                   &PL_stdize_locale_buf, &PL_stdize_locale_bufsize, __LINE__)
-#else
+#ifndef stdize_locale
 #  define stdized_setlocale(cat, locale)  posix_setlocale(cat, locale)
-#endif
-#ifdef USE_LOCALE
-
-/* So far, the locale strings returned by modern 2008-compliant systems have
- * been fine */
+#  define stdize_locale(cat, locale)  (locale)
+#else
+#  define stdized_setlocale(cat, locale)                                    \
+                stdize_locale(cat, posix_setlocale(cat, locale), __LINE__)
 
 STATIC const char *
 S_stdize_locale(pTHX_ const int category,
                       const char *input_locale,
-                      const char **buf,
-                      Size_t *buf_size,
                       const line_t caller_line)
 {
     /* The return value of setlocale() is opaque, but is required to be usable
      * as input to a future setlocale() to create the same state.
-     * Unfortunately not all systems are compliant.  But most often they are of
-     * a very restricted set of forms that this file has been coded to expect.
+     * Unfortunately not all systems are compliant.  This function brings those
+     * outliers into conformance.  It is based on what problems have arisen in
+     * the field.
      *
-     * There are some outliers, though, that this function tries to tame:
+     * This has similar constraints as the posix layer.  You need to lock
+     * around it until its return is safely copied or no longer needed. (The
+     * return may point to a global static buffer or may be mortalized.)
      *
+     * The current things this corrects are:
      * 1) A new-line.  This function chomps any \n characters
      * 2) foo=bar.     'bar' is what is generally meant, and the foo= part is
      *                 stripped.  This form is legal for LC_ALL.  When found in
@@ -1200,15 +1195,7 @@ S_stdize_locale(pTHX_ const int category,
      *                 recursively on each possible component category to make
      *                 sure the individual categories are ok.
      *
-     * If no changes to the input were made, it is returned; otherwise the
-     * changed version is stored into memory at *buf, with *buf_size set to its
-     * new value, and *buf is returned.
-     */
-
-    const char * first_bad;
-    const char * retval;
-
-    PERL_ARGS_ASSERT_STDIZE_LOCALE;
+     * If no changes were made, the input is returned as-is */
 
     DEBUG_Lv(PerlIO_printf(Perl_debug_log,
                           "Entering stdize_locale(%d, '%s');"
@@ -1219,102 +1206,126 @@ S_stdize_locale(pTHX_ const int category,
         return NULL;
     }
 
-    first_bad = strpbrk(input_locale, "=\n");
+    char * retval = (char *) input_locale;
+    char * first_bad = NULL;
 
-    /* Most likely, there isn't a problem with the input */
-    if (LIKELY(! first_bad)) {
-        return input_locale;
-    }
-
-#    ifdef LC_ALL
-
-    /* But if there is, and the category is LC_ALL, we have to look at each
-     * component category */
-    if (category == LC_ALL) {
-        const char * individ_locales[LC_ALL_INDEX_];
-        bool made_changes = FALSE;
-        unsigned int i;
-
-        for (i = 0; i < LC_ALL_INDEX_; i++) {
-            Size_t this_size = 0;
-            individ_locales[i] = stdize_locale(categories[i],
-                                               posix_setlocale(categories[i],
-                                                               NULL),
-                                               &individ_locales[i],
-                                               &this_size,
-                                               caller_line);
-
-            /* If the size didn't change, it means this category did not have
-             * to be adjusted, and individ_locales[i] points to the buffer
-             * returned by posix_setlocale(); we have to copy that before
-             * it's called again in the next iteration */
-            if (this_size == 0) {
-                individ_locales[i] = savepv(individ_locales[i]);
-            }
-            else {
-                made_changes = TRUE;
-            }
-        }
-
-        /* If all the individual categories were ok as-is, this was a false
-         * alarm.  We must have seen an '=' which was a legal occurrence in
-         * this combination locale */
-        if (! made_changes) {
-            retval = input_locale;  /* The input can be returned unchanged */
-        }
-        else {
-            retval = save_to_buffer(posix_setlocale(LC_ALL, NULL),
-                                    buf, buf_size);
-        }
-
-        for (i = 0; i < LC_ALL_INDEX_; i++) {
-            Safefree(individ_locales[i]);
-        }
-
-        return retval;
-    }
-
-#    else   /* else no LC_ALL */
+#    ifndef LC_ALL
 
     PERL_UNUSED_ARG(category);
     PERL_UNUSED_ARG(caller_line);
 
-#    endif
+#      define INPUT_LOCALE  retval
+#      define MARK_CHANGED
+#    else
 
-    /* Here, there was a problem in an individual category.  This means that at
-     * least one adjustment will be necessary.  Create a modifiable copy */
-    retval = save_to_buffer(input_locale, buf, buf_size);
-
-    if (*first_bad != '=') {
-
-        /* Translate the found position into terms of the copy */
-        first_bad = retval + (first_bad - input_locale);
+    char * individ_locales[LC_ALL_INDEX_] = { NULL };
+    bool made_changes = false;
+    Size_t upper;
+    if (category != LC_ALL) {
+        individ_locales[0] = retval;
+        upper = 0;
     }
-    else { /* An '=' */
+    else {
 
-        /* It is unlikely that the return is so screwed-up that it contains
-         * multiple equals signs, but handle that case by stripping all of
-         * them.  */
-        const char * final_equals = strrchr(retval, '=');
+        /* And parse the locale string, splitting into its individual
+         * components. */
+        switch (parse_LC_ALL_string(retval,
+                                    (const char **) &individ_locales,
+                                    caller_line))
+        {
+          case invalid:
+            return NULL;
 
-        /* The length passed here causes the move to include the terminating
-         * NUL */
-        Move(final_equals + 1, retval, strlen(final_equals), char);
+          case full_array: /* Loop below through all the component categories.
+                            */
+            upper = LC_ALL_INDEX_ - 1;
+            break;
 
-        /* See if there are additional problems; if not, we're good to return.
-         * */
-        first_bad = strpbrk(retval, "\n");
-
-        if (! first_bad) {
-            return retval;
+          case no_array:
+            /* All categories here are set to the same locale, and the parse
+             * didn't fill in any of 'individ_locales'.  Set the 0th element to
+             * that locale. */
+            individ_locales[0] = retval;
+            upper = 0;
+            break;
         }
     }
 
-    /* Here, the problem must be a \n.  Get rid of it and what follows.
-     * (Originally, only a trailing \n was stripped.  Unsure what to do if not
-     * trailing) */
-    *((char *) first_bad) = '\0';
-    return retval;
+    for (unsigned int i = 0; i <= upper; i++)
+
+#      define INPUT_LOCALE  individ_locales[i]
+#      define MARK_CHANGED  made_changes = true;
+#    endif    /* Has LC_ALL */
+
+    {
+        first_bad = (char *) strpbrk(INPUT_LOCALE, "=\n");
+
+        /* Most likely, there isn't a problem with the input */
+        if (UNLIKELY(first_bad)) {
+
+            /* This element will need to be adjusted.  Create a modifiable
+             * copy. */
+            MARK_CHANGED
+            retval = savepv(INPUT_LOCALE);
+            SAVEFREEPV(retval);
+
+            if (*first_bad != '=') {
+
+                /* Translate the found position into terms of the copy */
+                first_bad = retval + (first_bad - INPUT_LOCALE);
+            }
+            else { /* An '=' */
+
+                /* It is unlikely that the return is so screwed-up that it
+                 * contains multiple equals signs, but handle that case by
+                 * stripping all of them.  */
+                const char * final_equals = strrchr(retval, '=');
+
+                /* The length passed here causes the move to include the
+                 * terminating NUL */
+                Move(final_equals + 1, retval, strlen(final_equals), char);
+
+                /* See if there are additional problems; if not, we're finished
+                 * with this item */
+                first_bad = (char *) strchr(retval, '\n');
+            }
+
+            if (first_bad) {
+                /* Here, the problem must be a \n.  Get rid of it and what
+                 * follows.  (Originally, only a trailing \n was stripped.
+                 * Unsure what to do if not trailing) */
+                *((char *) first_bad) = '\0';
+            }
+        }   /* End of needs adjusting */
+    }   /* End of looking for problems */
+
+#    ifdef LC_ALL
+
+    /* If we had multiple elements, extra work is required */
+    if (upper != 0) {
+
+        /* If no changes were made to the input, 'retval' already contains it
+         * */
+        if (made_changes) {
+
+            /* But if did make changes, need to calculate the new value */
+            retval = (char *) calculate_LC_ALL_string(
+                                            (const char **) &individ_locales,
+                                            EXTERNAL_FORMAT_FOR_SET,
+                                            caller_line);
+        }
+
+        /* And free the no-longer needed memory */
+        for (unsigned int i = 0; i <= upper; i++) {
+            Safefree(individ_locales[i]);
+        }
+    }
+
+#    endif
+#    undef INPUT_LOCALE
+#    undef MARK_CHANGED
+
+    return (const char *) retval;
 }
 
 #endif  /* USE_LOCALE */
@@ -6320,8 +6331,6 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
                 const char *system_default_locale =
                                     stdize_locale(LC_ALL,
                                                wrap_wsetlocale(LC_ALL, ".ACP"),
-                                               &PL_stdize_locale_buf,
-                                               &PL_stdize_locale_bufsize,
                                                __LINE__);
                 DEBUG_LOCALE_INIT(LC_ALL_INDEX_, "", system_default_locale);
 

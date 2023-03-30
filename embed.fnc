@@ -4360,8 +4360,6 @@ Sr	|void	|setlocale_failure_panic_via_i				\
 S	|const char *|stdize_locale					\
 				|const int category			\
 				|NULLOK const char *input_locale	\
-				|NULLOK const char **buf		\
-				|NULLOK Size_t *buf_size		\
 				|line_t caller_line
 So	|const char *|toggle_locale_i					\
 				|const unsigned switch_cat_index	\
