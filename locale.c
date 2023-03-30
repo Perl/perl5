@@ -1927,23 +1927,7 @@ S_find_locale_from_environment(pTHX_ const unsigned int index)
 STATIC const char *
 S_get_LC_ALL_display(pTHX)
 {
-
-#    ifdef LC_ALL
-
-    return querylocale_c(LC_ALL);
-
-#    else
-
-    const char * curlocales[LC_ALL_INDEX_];
-
-    for (unsigned i = 0; i < LC_ALL_INDEX_; i++) {
-        curlocales[i] = querylocale_i(i);
-    }
-
-    return calculate_LC_ALL_string(curlocales);
-
-#    endif
-
+    return calculate_LC_ALL_string(NULL);
 }
 
 #  endif
