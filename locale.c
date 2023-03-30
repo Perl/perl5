@@ -466,7 +466,7 @@ STATIC const int category_masks[] = {
 
 #  endif
 #endif
-#if  defined(DEBUGGING) || defined(USE_POSIX_2008_LOCALE)
+#if defined(USE_LOCALE) || defined(DEBUGGING)
 
 STATIC const char *
 S_get_displayable_string(pTHX_
@@ -566,7 +566,8 @@ S_get_category_index_helper(pTHX_ const int category, bool * succeeded,
         return 0;   /* Arbitrary */
     }
 
-    locale_panic_(Perl_form(aTHX_ "Unknown locale category %d", category));
+    locale_panic_via_(Perl_form(aTHX_ "Unknown locale category %d", category),
+                      __FILE__, caller_line);
     NOT_REACHED; /* NOTREACHED */
 }
 
@@ -622,13 +623,13 @@ S_use_curlocale_scratch(pTHX)
 
 void
 Perl_locale_panic(const char * msg,
-                  const char * file_name,
-                  const line_t line,
-                  const int errnum)
+                  const line_t immediate_caller_line,
+                  const char * const higher_caller_file,
+                  const line_t higher_caller_line)
 {
-    dTHX;
-
     PERL_ARGS_ASSERT_LOCALE_PANIC;
+    dTHX;
+    dSAVE_ERRNO;
 
     force_locale_unlock();
 
@@ -636,15 +637,47 @@ Perl_locale_panic(const char * msg,
     dump_c_backtrace(Perl_debug_log, 20, 1);
 #endif
 
+    const char * called_by = "";
+    if (   strNE(__FILE__, higher_caller_file)
+        || immediate_caller_line != higher_caller_line)
+    {
+        called_by = Perl_form(aTHX_ "\nCalled by %s: %" LINE_Tf "\n",
+                                    higher_caller_file, higher_caller_line);
+    }
+
+    RESTORE_ERRNO;
+
+    const char * errno_text;
+
+#ifdef HAS_EXTENDED_OS_ERRNO
+
+    const int extended_errnum = get_extended_os_errno();
+    if (errno != extended_errnum) {
+        errno_text = Perl_form(aTHX_ "; errno=%d, $^E=%d",
+                                     errno, extended_errnum);
+    }
+    else
+
+#endif
+
+    {
+        errno_text = Perl_form(aTHX_ "; errno=%d", errno);
+    }
+
     /* diag_listed_as: panic: %s */
-    Perl_croak(aTHX_ "%s: %" LINE_Tf ": panic: %s; errno=%d\n",
-                     file_name, line, msg, errnum);
+    Perl_croak(aTHX_ "%s: %" LINE_Tf ": panic: %s%s%s\n",
+                     __FILE__, immediate_caller_line,
+                     msg, errno_text, called_by);
 }
 
-#define setlocale_failure_panic_c(                                          \
-                        cat, current, failed, caller_0_line, caller_1_line) \
-        setlocale_failure_panic_i(cat##_INDEX_, current, failed,            \
-                        caller_0_line, caller_1_line)
+/* Macros to report and croak on an unexpected failure to set the locale.  The
+ * via version has more stack trace information */
+#define setlocale_failure_panic_i(i, cur, fail, line, higher_line)          \
+    setlocale_failure_panic_via_i(i, cur, fail, __LINE__, line,             \
+                                  __FILE__, higher_line)
+
+#define setlocale_failure_panic_c(cat, cur, fail, line, higher_line)        \
+   setlocale_failure_panic_i(cat##_INDEX_, cur, fail, line, higher_line)
 
 /*==========================================================================
  * Here starts the code that gives a uniform interface to its callers, hiding
@@ -1156,8 +1189,7 @@ S_setlocale_from_aggregate_LC_ALL(pTHX_ const char * locale, const line_t line)
      * ones below.  FALSE => No need to recalculate LC_ALL, as this is a
      * temporary state */
     if (! bool_setlocale_2008_i(LC_ALL_INDEX_, "C", DONT_RECALC_LC_ALL, line)) {
-        setlocale_failure_panic_c(LC_ALL, locale_on_entry,
-                                  "C", __LINE__, line);
+        setlocale_failure_panic_c(LC_ALL, locale_on_entry, "C", __LINE__, line);
         NOT_REACHED; /* NOTREACHED */
     }
 
@@ -1869,29 +1901,70 @@ S_get_LC_ALL_display(pTHX)
 #  endif
 
 STATIC void
-S_setlocale_failure_panic_i(pTHX_
-                            const unsigned int cat_index,
-                            const char * current,
-                            const char * failed,
-                            const line_t caller_0_line,
-                            const line_t caller_1_line)
+S_setlocale_failure_panic_via_i(pTHX_
+                                const unsigned int cat_index,
+                                const char * current,
+                                const char * failed,
+                                const line_t proxy_caller_line,
+                                const line_t immediate_caller_line,
+                                const char * const higher_caller_file,
+                                const line_t higher_caller_line)
 {
-    dSAVE_ERRNO;
+    PERL_ARGS_ASSERT_SETLOCALE_FAILURE_PANIC_VIA_I;
+
+    /* Called to panic when a setlocale form unexpectedly failed for the
+     * category determined by 'cat_index', and the locale that was in effect
+     * (and likely still is) is 'current'.  'current' may be NULL, which causes
+     * this function to query what it is.
+     *
+     * The extra caller information is used for when a function acts as a
+     * stand-in for another function, which a typical reader would more likely
+     * think would be the caller
+     *
+     * If a line number is 0, its stack (sort-of) frame is omitted; same if
+     * it's the same line number as the next higher caller. */
+
     const int cat = categories[cat_index];
     const char * name = category_names[cat_index];
 
-    PERL_ARGS_ASSERT_SETLOCALE_FAILURE_PANIC_I;
+    dSAVE_ERRNO;
 
     if (current == NULL) {
         current = querylocale_i(cat_index);
     }
 
-    Perl_locale_panic(Perl_form(aTHX_ "(%" LINE_Tf
-                                      "): Can't change locale for %s(%d)"
-                                      " from '%s' to '%s'",
-                                      caller_1_line, name, cat,
-                                      current, failed),
-                      __FILE__, caller_0_line, GET_ERRNO);
+    const char * proxy_text = "";
+    if (proxy_caller_line != 0 && proxy_caller_line != immediate_caller_line)
+    {
+        proxy_text = Perl_form(aTHX_ "\nCalled via %s: %" LINE_Tf,
+                                      __FILE__, proxy_caller_line);
+    }
+    if (   strNE(__FILE__, higher_caller_file)
+        || (   immediate_caller_line != 0
+            && immediate_caller_line != higher_caller_line))
+    {
+        proxy_text = Perl_form(aTHX_ "%s\nCalled via %s: %" LINE_Tf,
+                                      proxy_text, __FILE__,
+                                      immediate_caller_line);
+    }
+
+    /* 'false' in the get_displayable_string() calls makes it not think the
+     * locale is UTF-8, so just dumps bytes.  Actually figuring it out can be
+     * too complicated for a panic situation. */
+    const char * msg = Perl_form(aTHX_
+                            "Can't change locale for %s (%d) from '%s' to '%s'"
+                            " %s",
+                            name, cat,
+                            get_displayable_string(current,
+                                                   current + strlen(current),
+                                                   false),
+                            get_displayable_string(failed,
+                                                   failed + strlen(failed),
+                                                   false),
+                            proxy_text);
+    RESTORE_ERRNO;
+
+    Perl_locale_panic(msg, __LINE__, higher_caller_file, higher_caller_line);
     NOT_REACHED; /* NOTREACHED */
 }
 
@@ -6548,9 +6621,10 @@ S_toggle_locale_i(pTHX_ const unsigned cat_index,
              new_locale, locale_to_restore_to));
 
     if (! locale_to_restore_to) {
-        locale_panic_(Perl_form(aTHX_
-                                "Could not find current %s locale, errno=%d",
-                                category_names[cat_index], errno));
+        locale_panic_via_(Perl_form(aTHX_
+                                    "Could not find current %s locale",
+                                    category_names[cat_index]),
+                         __FILE__, caller_line);
     }
 
     /* If the locales are the same, there's nothing to do */

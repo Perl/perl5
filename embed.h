@@ -1272,7 +1272,7 @@
 #       define mortalized_pv_copy(a)            S_mortalized_pv_copy(aTHX_ a)
 #       define new_LC_ALL(a,b)                  S_new_LC_ALL(aTHX_ a,b)
 #       define save_to_buffer                   S_save_to_buffer
-#       define setlocale_failure_panic_i(a,b,c,d,e) S_setlocale_failure_panic_i(aTHX_ a,b,c,d,e)
+#       define setlocale_failure_panic_via_i(a,b,c,d,e,f,g) S_setlocale_failure_panic_via_i(aTHX_ a,b,c,d,e,f,g)
 #       define stdize_locale(a,b,c,d,e)         S_stdize_locale(aTHX_ a,b,c,d,e)
 #       if defined(DEBUGGING)
 #         define my_setlocale_debug_string_i(a,b,c,d) S_my_setlocale_debug_string_i(aTHX_ a,b,c,d)
@@ -1331,7 +1331,7 @@
 #         define find_locale_from_environment(a) S_find_locale_from_environment(aTHX_ a)
 #       endif
 #     endif /* defined(USE_LOCALE) */
-#     if defined(USE_POSIX_2008_LOCALE) || defined(DEBUGGING)
+#     if defined(USE_LOCALE) || defined(DEBUGGING)
 #       define get_displayable_string(a,b,c)    S_get_displayable_string(aTHX_ a,b,c)
 #     endif
 #   endif /* defined(PERL_IN_LOCALE_C) */

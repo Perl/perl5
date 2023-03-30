@@ -7034,7 +7034,8 @@ the plain locale pragma without a parameter (S<C<use locale>>) is in effect.
 #  define _CHECK_AND_OUTPUT_WIDE_LOCALE_CP_MSG(c)
 #endif
 
-#define locale_panic_(m)  Perl_locale_panic((m), __FILE__, __LINE__, errno)
+#define locale_panic_via_(m, f, l)  Perl_locale_panic((m), __LINE__, f, l)
+#define locale_panic_(m)  locale_panic_via_((m), __FILE__, __LINE__)
 
 /* Locale/thread synchronization macros. */
 #if ! defined(USE_LOCALE_THREADS)

@@ -1765,10 +1765,10 @@ AFdp	|void	|load_module	|U32 flags				\
 				|NN SV *name				\
 				|NULLOK SV *ver 			\
 				|...
-CTopr	|void	|locale_panic	|NN const char *msg			\
-				|NN const char *file_name		\
-				|const line_t line			\
-				|const int errnum
+CTopr	|void	|locale_panic	|NN const char *msg				\
+				|const line_t immediate_caller_line		\
+				|NN const char * const higher_caller_file	\
+				|const line_t higher_caller_line
 : Used in perly.y
 p	|OP *	|localize	|NN OP *o				\
 				|I32 lex
@@ -4344,12 +4344,14 @@ ST	|const char *|save_to_buffer					\
 				|NULLOK const char *string		\
 				|NULLOK const char **buf		\
 				|NULLOK Size_t *buf_size
-Sr	|void	|setlocale_failure_panic_i				\
+Sr	|void	|setlocale_failure_panic_via_i				\
 				|const unsigned int cat_index		\
 				|NULLOK const char *current		\
 				|NN const char *failed			\
-				|const line_t caller_0_line		\
-				|const line_t caller_1_line
+				|const line_t proxy_caller_line 	\
+				|const line_t immediate_caller_line	\
+				|NN const char *higher_caller_file	\
+				|const line_t higher_caller_line
 S	|const char *|stdize_locale					\
 				|const int category			\
 				|NULLOK const char *input_locale	\
@@ -4467,7 +4469,7 @@ S	|const char *|find_locale_from_environment			\
 				|const unsigned int index
 #   endif
 # endif /* defined(USE_LOCALE) */
-# if defined(USE_POSIX_2008_LOCALE) || defined(DEBUGGING)
+# if defined(USE_LOCALE) || defined(DEBUGGING)
 S	|const char *|get_displayable_string				\
 				|NN const char * const s		\
 				|NN const char * const e		\
