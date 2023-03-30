@@ -4330,7 +4330,9 @@ S	|void	|populate_hash_from_localeconv				\
 # endif
 # if defined(USE_LOCALE)
 S	|const char *|calculate_LC_ALL_string					\
-				|NULLOK const char **category_locales_list
+				|NULLOK const char **category_locales_list	\
+				|const calc_LC_ALL_format format		\
+				|const line_t caller_line
 RS	|unsigned int|get_category_index_helper 			\
 				|const int category			\
 				|NULLOK bool *success			\

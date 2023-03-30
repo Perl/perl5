@@ -413,7 +413,11 @@ S_positional_name_value_xlation(const char * locale, bool direction)
 
       case full_array:
        {
-        const char * retval = calculate_LC_ALL_string(individ_locales);
+        calc_LC_ALL_format  format = (direction)
+                                     ? EXTERNAL_FORMAT_FOR_SET
+                                     : INTERNAL_FORMAT;
+        const char * retval = calculate_LC_ALL_string(individ_locales,
+                                                      format, __LINE__);
 
         for (unsigned int i = 0; i < LC_ALL_INDEX_; i++) {
             Safefree(individ_locales[i]);
@@ -1578,7 +1582,8 @@ S_querylocale_2008_i(pTHX_ const unsigned int index, const line_t caller_line)
          * should now be calculated.  (The called function updates that
          * element.) */
         if (index == LC_ALL_INDEX_ && PL_curlocales[LC_ALL_INDEX_] == NULL) {
-            calculate_LC_ALL_string((const char **) &PL_curlocales);
+            calculate_LC_ALL_string((const char **) &PL_curlocales,
+                                    INTERNAL_FORMAT, caller_line);
         }
 
         if (cur_obj == PL_C_locale_obj) {
@@ -1668,7 +1673,8 @@ S_querylocale_2008_i(pTHX_ const unsigned int index, const line_t caller_line)
          * categories each time, since the querylocale() forms on many (if not
          * all) platforms only work on individual categories */
         if (index == LC_ALL_INDEX_) {
-            retval = calculate_LC_ALL_string(NULL);
+            retval = calculate_LC_ALL_string(NULL, INTERNAL_FORMAT,
+                                             caller_line);
         }
         else {
 
@@ -2134,42 +2140,73 @@ S_setlocale_from_aggregate_LC_ALL(pTHX_ const char * locale, const line_t line)
 
 #if defined(USE_LOCALE)
 
+/* This paradigm is needed in several places in the function below.  We have to
+ * substitute the nominal locale for LC_NUMERIC when returning a value for
+ * external consumption */
+#  ifndef USE_LOCALE_NUMERIC
+#    define ENTRY(i, array, format)  array[i]
+#  else
+#    define ENTRY(i, array, format)                         \
+       (UNLIKELY(   format == EXTERNAL_FORMAT_FOR_QUERY     \
+                 && i == LC_NUMERIC_INDEX_)                 \
+        ? PL_numeric_name                                   \
+        : array[i])
+#  endif
+
 STATIC
 const char *
-S_calculate_LC_ALL_string(pTHX_ const char ** category_locales_list)
+S_calculate_LC_ALL_string(pTHX_ const char ** category_locales_list,
+                                const calc_LC_ALL_format format,
+                                const line_t caller_line)
 {
     PERL_ARGS_ASSERT_CALCULATE_LC_ALL_STRING;
 
     /* NOTE: On Configurations that have PL_curlocales[], this function has the
      * side effect of updating the LC_ALL_INDEX_ element with its result.
      *
-     * For POSIX 2008, we have to figure out LC_ALL ourselves when needed.
-     * querylocale(), on systems that have it, doesn't tend to work for LC_ALL.
-     * So we have to construct the answer ourselves based on the passed in
-     * data, which is either a locale_t object, for systems with querylocale(),
-     * or an array we keep updated to the proper values, otherwise.
+     * This function returns a string that defines the locale(s) LC_ALL is set
+     * to, in either:
+     *  1)  Our internal format if 'format' is set to INTERNAL_FORMAT.
+     *  2)  The external format returned by Perl_setlocale() if 'format' is set
+     *      to EXTERNAL_FORMAT_FOR_QUERY or EXTERNAL_FORMAT_FOR_SET.
      *
-     * For Windows, we also may need to construct an LC_ALL when setting the
-     * locale to the system default.
+     *      These two are distinguished by:
+     *       a) EXTERNAL_FORMAT_FOR_SET returns the actual locale currently in
+     *          effect.
+     *       b) EXTERNAL_FORMAT_FOR_QUERY returns the nominal locale.
+     *          Currently this can differ only from the actual locale in the
+     *          LC_NUMERIC category when it is set to a locale whose radix is
+     *          not a dot.  (The actual locale is kept as a dot to accommodate
+     *          the large corpus of XS code that expects it to be that;
+     *          switched to a non-dot temporarily during certain operations
+     *          that require the actual radix.)
+     *
+     * In both 1) and 2), LC_ALL's values are passed to this function by
+     * 'category_locales_list' which is either:
+     *  1) a pointer to an array of strings with up-to-date values of all the
+     *     individual categories; or
+     *  2) NULL, to indicate to use querylocale_i() to get each individual
+     *     value.
      *
      * This function returns a mortalized string containing the locale name(s)
      * of LC_ALL.
      *
+     * querylocale(), on systems that have it, doesn't tend to work for LC_ALL.
+     * So we have to construct the answer ourselves based on the passed in
+     * data.
+     *
      * If all individual categories are the same locale, we can just set LC_ALL
      * to that locale.  But if not, we have to create an aggregation of all the
      * categories on the system.  Platforms differ as to the syntax they use
-     * for these non-uniform locales for LC_ALL.  Some use a '/' or other
-     * delimiter of the locales with a predetermined order of categories; a
-     * Configure probe would be needed to tell us how to decipher those.  glibc
-     * and Windows use a series of name=value pairs, like
+     * for these non-uniform locales for LC_ALL.  Some, like glibc and Windows,
+     * use an unordered series of name=value pairs, like
      *      LC_NUMERIC=C;LC_TIME=en_US.UTF-8;...
-     * This function returns that syntax, which is suitable for input to the
-     * Windows setlocale().  It could also be suitable for glibc, but because
-     * the non-Windows code is common to systems that use a different syntax,
-     * we don't depend on it for glibc.  Instead we take care not to use the
-     * native setlocale() function on whatever non-Windows style is chosen.
-     * But, it would be possible for someone to call Perl_setlocale() using a
-     * native style we don't understand.  So far no one has complained.
+     * to specify LC_ALL; others, like *BSD, use a positional notation with a
+     * delimitter, typically a single '/' character:
+     *      C/en_UK.UTF-8/...
+     *
+     * When the external format is desired, this function returns whatever the
+     * system expects.  The internal format is always name=value pairs.
      *
      * For systems that have categories we don't know about, the algorithm
      * below won't know about those missing categories, leading to potential
@@ -2182,87 +2219,173 @@ S_calculate_LC_ALL_string(pTHX_ const char ** category_locales_list)
      * categories, adding new ones as they show up on obscure platforms.
      */
 
+    DEBUG_Lv(PerlIO_printf(Perl_debug_log,
+                           "Entering calculate_LC_ALL_string(%s);"
+                           " called from %" LINE_Tf "\n",
+                           ((format == EXTERNAL_FORMAT_FOR_QUERY)
+                            ? "EXTERNAL_FORMAT_FOR_QUERY"
+                            : ((format == EXTERNAL_FORMAT_FOR_SET)
+                               ? "EXTERNAL_FORMAT_FOR_SET"
+                               : "INTERNAL_FORMAT")),
+                           caller_line));
+
+    /* If there was no input category list, construct a temporary one
+     * ourselves. */
     const char * my_category_locales_list[LC_ALL_INDEX_];
     const char ** locales_list = category_locales_list;
     if (locales_list == NULL) {
         locales_list = my_category_locales_list;
 
-        for (unsigned i = 0; i < LC_ALL_INDEX_; i++) {
-            locales_list[i] = querylocale_i(i);
-        }
-    }
-
-    unsigned int i;
-    Size_t names_len = 0;
-    bool are_all_categories_the_same_locale = TRUE;
-    char * aggregate_locale;
-    char * previous_start = NULL;
-    char * this_start = NULL;
-    Size_t entry_len = 0;
-
-    /* First calculate the needed size for the string listing the categories
-     * and their locales. */
-    names_len = lc_all_boiler_plate_length;
-    for (i = 0; i < LC_ALL_INDEX_; i++) {
-        names_len += strlen(locales_list[i]);
-    }
-
-    names_len++;    /* Trailing '\0' */
-
-    /* Allocate enough space for the aggregated string */
-    Newxz(aggregate_locale, names_len, char);
-    SAVEFREEPV(aggregate_locale);
-
-    /* Then fill it in */
-    for (i = 0; i < LC_ALL_INDEX_; i++) {
-        Size_t new_len;
-        const char * entry = locales_list[i];
-
-        new_len = my_strlcat(aggregate_locale, category_names[i], names_len);
-        assert(new_len <= names_len);
-        new_len = my_strlcat(aggregate_locale, "=", names_len);
-        assert(new_len <= names_len);
-
-        this_start = aggregate_locale + strlen(aggregate_locale);
-        entry_len = strlen(entry);
-
-        new_len = my_strlcat(aggregate_locale, entry, names_len);
-        assert(new_len <= names_len);
-        new_len = my_strlcat(aggregate_locale, ";", names_len);
-        assert(new_len <= names_len);
-        PERL_UNUSED_VAR(new_len);   /* Only used in DEBUGGING */
-
-        if (   i > 0
-            && are_all_categories_the_same_locale
-            && memNE(previous_start, this_start, entry_len + 1))
-        {
-            are_all_categories_the_same_locale = FALSE;
+        if (format == EXTERNAL_FORMAT_FOR_QUERY) {
+            for (unsigned i = 0; i < LC_ALL_INDEX_; i++) {
+                locales_list[i] = query_nominal_locale_i(i);
+            }
         }
         else {
-            previous_start = this_start;
+            for (unsigned i = 0; i < LC_ALL_INDEX_; i++) {
+                locales_list[i] = querylocale_i(i);
+            }
         }
     }
 
-    /* If they are all the same, just return any one of them */
-    if (are_all_categories_the_same_locale) {
-        aggregate_locale = this_start;
-        aggregate_locale[entry_len] = '\0';
+    /* While we are calculating LC_ALL, we see if every category's locale is
+     * the same as every other's or not. */
+
+    /* We assume they are all the same until proven different */
+    bool disparate = false;
+
+    /* Calculate the needed size for the string listing the individual locales.
+     * Initialize with values known at compile time. */
+    Size_t total_len;
+    const char *separator;
+
+#  ifdef PERL_LC_ALL_USES_NAME_VALUE_PAIRS  /* Positional formatted LC_ALL */
+    PERL_UNUSED_ARG(format);
+#  else
+
+    if (format != INTERNAL_FORMAT) {
+
+        /* Here, we will be using positional notation.  it includes n-1
+         * separators */
+        total_len = (  LOCALE_CATEGORIES_COUNT_ - 1)
+                     * STRLENs(PERL_LC_ALL_SEPARATOR)
+                  + 1;   /* And a trailing NUL */
+        separator = PERL_LC_ALL_SEPARATOR;
+    }
+    else
+
+#  endif
+
+    {
+        /* name=value output is always used in internal format, and when
+         * positional isn't available on the platform. */
+        total_len = lc_all_boiler_plate_length;
+        separator = ";";
     }
 
-#  ifdef USE_PL_CURLOCALES
+    /* The total length then is just the sum of the above boiler-plate plus the
+     * total strlen()s of the locale name of each individual category. */
+    for (unsigned int i = 0;  i < LC_ALL_INDEX_; i++) {
+        const char * entry = ENTRY(i, locales_list, format);
+
+        total_len += strlen(entry);
+        if (! disparate && strNE(entry, locales_list[0])) {
+            disparate = true;
+        }
+    }
+
+    /* Done iterating through all the categories. */
+    const char * retval;
+
+    /* If all categories have the same locale, we already know the answer */
+    if (! disparate) {
+            retval = savepv(locales_list[0]);
+            SAVEFREEPV(retval);
+    }
+    else {  /* Here, not all categories have the same locale */
+        char * writable_alias;
+
+            Newx(writable_alias, total_len, char);
+            SAVEFREEPV(writable_alias);
+
+        writable_alias[0] = '\0';
+
+        /* Loop through all the categories */
+        for (unsigned j = 0; j < LC_ALL_INDEX_; j++) {
+
+            /* Add a separator, except before the first one */
+            if (j != 0) {
+                my_strlcat(writable_alias, separator, total_len);
+            }
+
+            const char * entry;
+            Size_t needed_len;
+            unsigned int i = j;
+
+#  ifndef PERL_LC_ALL_USES_NAME_VALUE_PAIRS
+
+            if (UNLIKELY(format != INTERNAL_FORMAT)) {
+
+                /* In positional notation 'j' means the position, and we have
+                 * to convert to the index 'i' */
+                i = map_LC_ALL_position_to_index[j];
+
+                entry = ENTRY(i, locales_list, format);
+                needed_len = my_strlcat(writable_alias, entry, total_len);
+            }
+            else
+
+#  endif
+            {
+                /* Below, we are to use name=value notation, either because
+                 * that's what the platform uses, or because this is the
+                 * internal format, which uses that notation regardless of the
+                 * external form */
+
+                entry = ENTRY(i, locales_list, format);
+
+                /* "name=locale;" */
+                my_strlcat(writable_alias, category_names[i], total_len);
+                my_strlcat(writable_alias, "=", total_len);
+                needed_len = my_strlcat(writable_alias, entry, total_len);
+            }
+
+            if (LIKELY(needed_len <= total_len)) {
+                continue;
+            }
+
+            /* If would have overflowed, panic */
+            locale_panic_via_(Perl_form(aTHX_
+                                        "Internal length calculation wrong.\n"
+                                        "\"%s\" was not entirely added to"
+                                        " \"%.*s\"; needed=%zu, had=%zu",
+                                        entry, (int) total_len,
+                                        writable_alias,
+                                        needed_len, total_len),
+                                __FILE__,
+                                caller_line);
+        } /* End of loop through the categories */
+
+        retval = (const char *) writable_alias;
+
+    } /* End of the categories' locales are displarate */
+
+#  if defined(USE_PL_CURLOCALES) && defined(LC_ALL)
+
+    if (format == INTERNAL_FORMAT) {
 
         /* PL_curlocales[LC_ALL_INDEX_] is updated as a side-effect of this
-         * function. */
+         * function for internal format. */
         Safefree(PL_curlocales[LC_ALL_INDEX_]);
-        PL_curlocales[LC_ALL_INDEX_] = savepv(aggregate_locale);
+        PL_curlocales[LC_ALL_INDEX_] = savepv(retval);
+    }
 
 #  endif
 
     DEBUG_Lv(PerlIO_printf(Perl_debug_log,
                            "calculate_LC_ALL_string returning '%s'\n",
-                           aggregate_locale));
-
-    return aggregate_locale;
+                           retval));
+    return retval;
 }
 
 #  if defined(WIN32) || (     defined(USE_POSIX_2008_LOCALE)        \
@@ -2379,7 +2502,7 @@ S_find_locale_from_environment(pTHX_ const unsigned int index)
                  i, category_names[i], locale_names[i]));
     }
 
-    return calculate_LC_ALL_string(locale_names);
+    return calculate_LC_ALL_string(locale_names, INTERNAL_FORMAT, __LINE__);
 }
 
 #  endif
@@ -2388,7 +2511,8 @@ S_find_locale_from_environment(pTHX_ const unsigned int index)
 STATIC const char *
 S_get_LC_ALL_display(pTHX)
 {
-    return calculate_LC_ALL_string(NULL);
+    return calculate_LC_ALL_string(NULL, INTERNAL_FORMAT,
+                                   __LINE__);
 }
 
 #  endif
