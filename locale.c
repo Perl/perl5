@@ -6186,6 +6186,15 @@ S_output_check_environment_warning(pTHX_ const char * const language,
 
 #endif
 
+/* A helper macro for the next function.  Needed because would be called in two
+ * places.  Knows about the internal workings of the function */
+#define GET_DESCRIPTION(trial, name)                                    \
+    ((isNAME_C_OR_POSIX(name))                                          \
+     ? "the standard locale"                                            \
+     : ((trial == (system_default_trial)                                \
+                  ? "the system default locale"                         \
+                  : "a fallback locale")))
+
 /*
  * Initialize locale awareness.
  */
@@ -6205,90 +6214,74 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
      * Under -DDEBUGGING, if the environment variable PERL_DEBUG_LOCALE_INIT is
      * set, debugging information is output.
      *
-     * This looks more complicated than it actually is, mainly due to the
-     * #ifdefs and error handling.
+     * This routine effectively does the following in most cases:
      *
-     * Besides some asserts, data structure initialization, and specific
-     * platform complications, this routine is effectively represented by this
-     * pseudo-code:
+     *      basic initialization;
+     *      asserts that the compiled tables are consistent;
+     *      initialize data structures;
+     *      make sure we are in the global locale;
+     *      setlocale(LC_ALL, "");
+     *      switch to per-thread locale if applicable;
      *
-     *      setlocale(LC_ALL, "");                                            x
-     *      foreach (subcategory) {                                           x
-     *          curlocales[f(subcategory)] = setlocale(subcategory, NULL);    x
-     *      }                                                                 x
-     *      if (platform_so_requires) {
-     *          foreach (subcategory) {
-     *            PL_curlocales[f(subcategory)] = curlocales[f(subcategory)]
+     * The "" causes the locale to be set to what the environment variables at
+     * the time say it should be.
+     *
+     * To handle possible failures, the setlocale is expanded to be like:
+     *
+     *      trial_locale = pre-first-trial;
+     *      while (has_another_trial()) {
+     *          trial_locale = next_trial();
+     *          if setlocale(LC_ALL, trial_locale) {
+     *              ok = true;
+     *              break;
      *          }
+     *
+     *          had_failure = true;
+     *          warn();
      *      }
-     *      foreach (subcategory) {
-     *          if (needs_special_handling[f(subcategory)] &this_subcat_handler
+     *
+     *      if (had_failure) {
+     *          warn_even_more();
+     *          if (! ok) warn_still_more();
      *      }
      *
-     * This sets all the categories to the values in the current environment,
-     * saves them temporarily in curlocales[] until they can be handled and/or
-     * on some platforms saved in a per-thread array PL_curlocales[].
+     * The first trial is either:
+     *      ""      to examine the environment variables for the locale
+     *      NULL    to use the values already set for the locale by the program
+     *              embedding this perl instantiation.
      *
-     * f(foo) is a mapping from the opaque system category numbers to small
-     * non-negative integers used most everywhere in this file as indices into
-     * arrays (such as curlocales[]) so the program doesn't have to otherwise
-     * deal with the opaqueness.
+     * Something is wrong if this trial fails, but there is a sequence of
+     * fallbacks to try should that happen.  They are given in the enum below.
+
+     * If there is no LC_ALL defined on the system, the setlocale() above is
+     * replaced by a loop setting each individual category separately.
      *
-     * If the platform doesn't have LC_ALL, the lines marked 'x' above are
-     * effectively replaced by:
-     *      foreach (subcategory) {                                           y
-     *          curlocales[f(subcategory)] = setlocale(subcategory, "");      y
-     *      }                                                                 y
+     * In a non-embeded environment, this code is executed exactly once.  It
+     * sets up the global locale environment.  At the end, if some sort of
+     * thread-safety is in effect, it will turn thread 0 into using that, with
+     * the same locale as the global initially.  thread 0 can then change its
+     * locale at will without affecting the global one.
      *
-     * The only differences being the lack of an LC_ALL call, and using ""
-     * instead of NULL in the setlocale calls.
+     * At destruction time, thread 0 will revert to the global locale as the
+     * other threads die.
      *
-     * But there are, of course, complications.
-     *
-     * it has to deal with if this is an embedded perl, whose locale doesn't
-     * come from the environment, but has been set up by the caller.  This is
-     * pretty simply handled: the "" in the setlocale calls is not a string
-     * constant, but a variable which is set to NULL in the embedded case.
-     *
-     * But the major complication is handling failure and doing fallback.  All
-     * the code marked 'x' or 'y' above is actually enclosed in an outer loop,
-     * using the array trial_locales[].  On entry, trial_locales[] is
-     * initialized to just one entry, containing the NULL or "" locale argument
-     * shown above.  If, as is almost always the case, everything works, it
-     * exits after just the one iteration, going on to the next step.
-     *
-     * But if there is a failure, the code tries its best to honor the
-     * environment as much as possible.  It self-modifies trial_locales[] to
-     * have more elements, one for each of the POSIX-specified settings from
-     * the environment, such as LANG, ending in the ultimate fallback, the C
-     * locale.  Thus if there is something bogus with a higher priority
-     * environment variable, it will try with the next highest, until something
-     * works.  If everything fails, it limps along with whatever state it got
-     * to.
-     *
-     * A further complication is that Windows has an additional fallback, the
-     * user-default ANSI code page obtained from the operating system.  This is
-     * added as yet another loop iteration, just before the final "C"
-     *
-     * A slight complication is that in embedded Perls, the locale may already
-     * be set-up, and we don't want to get it from the normal environment
-     * variables.  This is handled by having a special environment variable
-     * indicate we're in this situation.  We simply set setlocale's 2nd
-     * parameter to be a NULL instead of "".  That indicates to setlocale that
-     * it is not to change anything, but to return the current value,
-     * effectively initializing perl's db to what the locale already is.
-     *
-     * We play the same trick with NULL if a LC_ALL succeeds.  We call
-     * setlocale() on the individual categories with NULL to get their existing
-     * values for our db, instead of trying to change them.
-     * */
+     * Care must be taken in an embedded environment.  This code will be
+     * executed for each instantiation.  Since it changes the global locale, it
+     * could clash with another running instantiation that isn't using
+     * per-thread locales.  perlembed suggests having the controlling program
+     * set each instantiation's locale and set PERL_SKIP_LOCALE_INIT so this
+     * code uses that without actually changing anything.  Then the onus is on
+     * the controlling program to prevent any races.  The code below does
+     * enough locking so as to prevent system calls from overwriting data
+     * before it is safely copied here, but that isn't a general solution.
+     */
 
 #ifndef USE_LOCALE
 
     PERL_UNUSED_ARG(printwarn);
     const int ok = 1;
 
-#else  /* USE_LOCALE */
+#else  /* USE_LOCALE to near the end of the routine */
 
     int ok = 0;
 
@@ -6296,24 +6289,9 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 
     const char * const language = PerlEnv_getenv("LANGUAGE");
 
+#  else
+    const char * const language = NULL;     /* Unused placeholder */
 #  endif
-
-    /* NULL uses the existing already set up locale */
-    const char * const setlocale_init = (PerlEnv_getenv("PERL_SKIP_LOCALE_INIT"))
-                                        ? NULL
-                                        : "";
-    typedef struct trial_locales_struct_s {
-        const char* trial_locale;
-        const char* fallback_desc;
-        const char* fallback_name;
-    } trial_locales_struct;
-    /* 5 = 1 each for "", LC_ALL, LANG, (Win32) system default locale, C */
-    trial_locales_struct trial_locales[5];
-    unsigned int trial_locales_count;
-    const char * const lc_all     = PerlEnv_getenv("LC_ALL");
-    const char * const lang       = PerlEnv_getenv("LANG");
-    bool setlocale_failure = FALSE;
-    unsigned int i;
 
     /* A later getenv() could zap this, so only use here */
     const char * const bad_lang_use_once = PerlEnv_getenv("PERL_BADLANG");
@@ -6325,10 +6303,6 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
                                          /* disallow with "" or "0" */
                                          *bad_lang_use_once
                                        && strNE("0", bad_lang_use_once)))));
-
-    /* current locale for given category; should have been copied so aren't
-     * volatile */
-    const char * curlocales[LC_ALL_INDEX_ + 1];
 
 #  ifndef DEBUGGING
 #    define DEBUG_LOCALE_INIT(a,b,c)
@@ -6446,264 +6420,340 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 
 #  endif
 
-    /* We try each locale in the list until we get one that works, or exhaust
-     * the list.  Normally the loop is executed just once.  But if setting the
-     * locale fails, inside the loop we add fallback trials to the array and so
-     * will execute the loop multiple times */
-    trial_locales_struct ts = {
-        .trial_locale = setlocale_init,
-        .fallback_desc = NULL,
-        .fallback_name = NULL,
-    };
-    trial_locales[0] = ts;
-    trial_locales_count = 1;
+/*===========================================================================*/
 
-    for (i = 0; i < LC_ALL_INDEX_; i++) {
-        curlocales[i] = NULL;
-    }
+    /* Now ready to override the initialization with the values that the user
+     * wants.  This is done in the global locale as explained in the
+     * introductory comments to this function */
+    switch_to_global_locale();
 
-    for (i= 0; i < trial_locales_count; i++) {
-        const char * trial_locale = trial_locales[i].trial_locale;
-        setlocale_failure = FALSE;
+    const char * const lc_all     = PerlEnv_getenv("LC_ALL");
+    const char * const lang       = PerlEnv_getenv("LANG");
 
-#  ifdef LC_ALL
+    /* We try each locale in the enum, in order, until we get one that works,
+     * or exhaust the list.  Normally the loop is executed just once.
+     *
+     * Each enum value is +1 from the previous */
+    typedef enum {
+            dummy_trial       = -1,
+            environment_trial =  0,     /* "" or NULL; code below assumes value
+                                           0 is the first real trial */
+            LC_ALL_trial,               /* ENV{LC_ALL} */
+            LANG_trial,                 /* ENV{LANG} */
+            system_default_trial,       /* Windows .ACP */
+            C_trial,                    /* C locale */
+            beyond_final_trial,
+    } trials;
 
-        /* setlocale() return vals; not copied so must be looked at
-         * immediately. */
-        const char * sl_result[LC_ALL_INDEX_ + 1];
-        sl_result[LC_ALL_INDEX_] = stdized_setlocale(LC_ALL, trial_locale);
-        DEBUG_LOCALE_INIT(LC_ALL_INDEX_, trial_locale, sl_result[LC_ALL_INDEX_]);
-        if (! sl_result[LC_ALL_INDEX_]) {
-            setlocale_failure = TRUE;
-        }
-        else {
-            /* Since LC_ALL succeeded, it should have changed all the other
-             * categories it can to its value; so we massage things so that the
-             * setlocales below just return their category's current values.
-             * This adequately handles the case in NetBSD where LC_COLLATE may
-             * not be defined for a locale, and setting it individually will
-             * fail, whereas setting LC_ALL succeeds, leaving LC_COLLATE set to
-             * the POSIX locale. */
-            trial_locale = NULL;
-        }
-
-#  endif /* LC_ALL */
-
-        if (! setlocale_failure) {
-            unsigned int j;
-            for (j = 0; j < LC_ALL_INDEX_; j++) {
-                curlocales[j] = stdized_setlocale(categories[j], trial_locale);
-                if (! curlocales[j]) {
-                    setlocale_failure = TRUE;
-                }
-                curlocales[j] = savepv(curlocales[j]);
-                DEBUG_LOCALE_INIT(j, trial_locale, curlocales[j]);
-            }
-
-            if (LIKELY(! setlocale_failure)) {  /* All succeeded */
-                ok = 1;
-                break;  /* Exit trial_locales loop */
-            }
-        }
-
-        if (i == 0) {
-            unsigned int j;
-
-            if (locwarn) { /* Output failure info only on the first one */
+    trials trial;
+    SSize_t already_checked = 0;
+    const char * checked[C_trial];
 
 #  ifdef LC_ALL
+    const char * lc_all_string;
+#  else
+    const char * curlocales[LC_ALL_INDEX_];
+#  endif
 
-                PerlIO_printf(Perl_error_log,
-                "perl: warning: Setting locale failed.\n");
+    /* Loop through the initial setting and all the possible fallbacks,
+     * breaking out of the loop on success */
+    trial = dummy_trial;
+    while (trial != beyond_final_trial) {
 
-#  else /* !LC_ALL */
+        /* Each time through compute the next trial to use based on the one in
+         * the previous iteration and switch to the new one.  This enforces the
+         * order in which the fallbacks are applied */
+      next_trial:
+        trial = (trials) ((int) trial + 1);     /* Casts are needed for g++ */
 
-                PerlIO_printf(Perl_error_log,
-                "perl: warning: Setting locale failed for the categories:\n");
+        const char * locale = NULL;
 
-                for (j = 0; j < LC_ALL_INDEX_; j++) {
-                    if (! curlocales[j]) {
-                        PerlIO_printf(Perl_error_log, "\t%s\n", category_names[j]);
-                    }
-                }
+        /* Set up the parameters for this trial */
+        switch (trial) {
+          case dummy_trial:
+            locale_panic_("Unexpectedly got 'dummy_trial");
+            break;
 
-#  endif /* LC_ALL */
+          case environment_trial:
+            /* This is either "" to get the values from the environment, or
+             * NULL if the calling program has initialized the values already.
+             * */
+            locale = (PerlEnv_getenv("PERL_SKIP_LOCALE_INIT"))
+                     ? NULL
+                     : "";
+            break;
 
-                output_check_environment_warning(language, lc_all, lang);
+          case LC_ALL_trial:
+            if (! lc_all || strEQ(lc_all, "")) {
+                continue;   /* No-op */
             }
 
-            /* Calculate what fallback locales to try.  We have avoided this
-             * until we have to, because failure is quite unlikely.  This will
-             * usually change the upper bound of the loop we are in.
-             *
-             * Since the system's default way of setting the locale has not
-             * found one that works, We use Perl's defined ordering: LC_ALL,
-             * LANG, and the C locale.  We don't try the same locale twice, so
-             * don't add to the list if already there.  (On POSIX systems, the
-             * LC_ALL element will likely be a repeat of the 0th element "",
-             * but there's no harm done by doing it explicitly.
-             *
-             * Note that this tries the LC_ALL environment variable even on
-             * systems which have no LC_ALL locale setting.  This may or may
-             * not have been originally intentional, but there's no real need
-             * to change the behavior. */
-            if (lc_all) {
-                for (j = 0; j < trial_locales_count; j++) {
-                    if (strEQ(lc_all, trial_locales[j].trial_locale)) {
-                        goto done_lc_all;
-                    }
-                }
-                trial_locales_struct ts = {
-                    .trial_locale = lc_all,
-                    .fallback_desc = (strEQ(lc_all, "C")
-                                      ? "the standard locale"
-                                      : "a fallback locale"),
-                    .fallback_name = lc_all,
-                };
-                trial_locales[trial_locales_count++] = ts;
+            locale = lc_all;
+            break;
+
+          case LANG_trial:
+            if (! lang || strEQ(lang, "")) {
+                continue;   /* No-op */
             }
-          done_lc_all:
 
-            if (lang) {
-                for (j = 0; j < trial_locales_count; j++) {
-                    if (strEQ(lang, trial_locales[j].trial_locale)) {
-                        goto done_lang;
-                    }
-                }
-                trial_locales_struct ts = {
-                    .trial_locale = lang,
-                    .fallback_desc = (strEQ(lang, "C")
-                                      ? "the standard locale"
-                                      : "a fallback locale"),
-                    .fallback_name = lang,
-                };
-                trial_locales[trial_locales_count++] = ts;
-            }
-          done_lang:
+            locale = lang;
+            break;
 
-#  if defined(WIN32) && defined(LC_ALL)
+          case system_default_trial:
 
+#  if ! defined(WIN32) || ! defined(LC_ALL)
+
+            continue;   /* No-op */
+
+#  else
             /* For Windows, we also try the system default locale before "C".
              * (If there exists a Windows without LC_ALL we skip this because
-             * it gets too complicated.  For those, the "C" is the next
-             * fallback possibility). */
-            {
-                /* Note that this may change the locale, but we are going to do
-                 * that anyway.
-                 *
-                 * Our normal Windows setlocale() implementation ignores the
-                 * system default locale to make things work like POSIX.  This
-                 * is the only place where we want to consider it, so have to
-                 * use wrap_wsetlocale(). */
-                const char *system_default_locale =
-                                    stdize_locale(LC_ALL,
-                                               wrap_wsetlocale(LC_ALL, ".ACP"));
-                DEBUG_LOCALE_INIT(LC_ALL_INDEX_, "", system_default_locale);
+             * it gets too complicated.  For those, "C" is the next fallback
+             * possibility). */
+            locale = ".ACP";
+#  endif
+            break;
 
-                /* Skip if invalid or if it's already on the list of locales to
-                 * try */
-                if (! system_default_locale) {
-                    goto done_system_default;
+          case C_trial:
+            locale = "C";
+            break;
+
+          case beyond_final_trial:
+            continue;     /* No-op, causes loop to exit */
+        }
+
+        /* If the locale is a substantive name, don't try the same locale
+         * twice. */
+        if (locale && strNE(locale, "")) {
+            for (unsigned int i = 0; i < already_checked; i++) {
+                if (strEQ(checked[i], locale)) {
+                    goto next_trial;
                 }
-                for (j = 0; j < trial_locales_count; j++) {
-                    if (strEQ(system_default_locale, trial_locales[j].trial_locale)) {
-                        goto done_system_default;
+            }
+
+            /* And, for future iterations, indicate we've tried this locale */
+            checked[already_checked] = savepv(locale);
+            SAVEFREEPV(checked[already_checked]);
+            already_checked++;
+        }
+
+#  ifdef LC_ALL
+
+        STDIZED_SETLOCALE_LOCK;
+        lc_all_string = savepv(stdized_setlocale(LC_ALL, locale));
+        STDIZED_SETLOCALE_UNLOCK;
+
+        DEBUG_LOCALE_INIT(LC_ALL_INDEX_, locale, lc_all_string);
+
+        if (LIKELY(lc_all_string)) {     /* Succeeded */
+            ok = 1;
+            break;
+        }
+
+        if (trial == 0 && locwarn) {
+            PerlIO_printf(Perl_error_log,
+                                  "perl: warning: Setting locale failed.\n");
+            output_check_environment_warning(language, lc_all, lang);
+        }
+
+#  else /* Below is ! LC_ALL */
+
+        bool setlocale_failure = FALSE;  /* This trial hasn't failed so far */
+        bool dowarn = trial == 0 && locwarn;
+
+        for (unsigned int j = 0; j < LC_ALL_INDEX_; j++) {
+            STDIZED_SETLOCALE_LOCK;
+            curlocales[j] = savepv(stdized_setlocale(categories[j], locale));
+            STDIZED_SETLOCALE_UNLOCK;
+
+            DEBUG_LOCALE_INIT(j, locale, curlocales[j]);
+
+            if (UNLIKELY(! curlocales[j])) {
+                setlocale_failure = TRUE;
+
+                /* If are going to warn below, continue to loop so all failures
+                 * are included in the message */
+                if (! dowarn) {
+                    break;
+                }
+            }
+        }
+
+        if (LIKELY(! setlocale_failure)) {  /* All succeeded */
+            ok = 1;
+            break;  /* Exit trial_locales loop */
+        }
+
+        /* Here, this trial failed */
+
+        if (dowarn) {
+            PerlIO_printf(Perl_error_log,
+                "perl: warning: Setting locale failed for the categories:\n");
+
+            for (unsigned int j = 0; j < LC_ALL_INDEX_; j++) {
+                if (! curlocales[j]) {
+                    PerlIO_printf(Perl_error_log, "\t%s\n", category_names[j]);
+                }
+            }
+
+            output_check_environment_warning(language, lc_all, lang);
+        }   /* end of warning on first failure */
+
+#  endif /* LC_ALL */
+
+    }   /* end of looping through the trial locales */
+
+    /* If we had to do more than the first trial, it means that one failed, and
+     * we may need to output a warning, and, if none worked, do more */
+    if (UNLIKELY(trial != 0)) {
+        if (locwarn) {
+            const char * description = "a fallback locale";
+            const char * name = NULL;;
+
+            /* If we didn't find a good fallback, list all we tried */
+            if (! ok && already_checked > 0) {
+                PerlIO_printf(Perl_error_log, "perl: warning: Failed to fall"
+                                              " back to ");
+                if (already_checked > 1) {  /* more than one was tried */
+                    PerlIO_printf(Perl_error_log, "any of:\n");
+                }
+
+                while (already_checked > 0) {
+                    name = checked[--already_checked];
+                    description = GET_DESCRIPTION(trial, name);
+                    PerlIO_printf(Perl_error_log, "%s (\"%s\")\n",
+                                                  description, name);
+                }
+            }
+
+            if (ok) {
+
+                /* Here, a fallback worked.  So we have saved its name, and the
+                 * trial that succeeded is still valid */
+#  ifdef LC_ALL
+                const char * individ_locales[LC_ALL_INDEX_] = { NULL };
+
+                /* Even though we know the valid string for LC_ALL that worked,
+                 * translate it into our internal format, which is the
+                 * name=value pairs notation.  This is easier for a human to
+                 * decipher than the positional notation.  Some platforms
+                 * can return "C C C C C C" for LC_ALL.  This code also
+                 * standardizes that result into plain "C". */
+                switch (parse_LC_ALL_string(lc_all_string,
+                                            (const char **) &individ_locales,
+                                            false,   /* Return only [0] if
+                                                        suffices */
+                                            false,   /* Don't panic on error */
+                                            __LINE__))
+                {
+                  case invalid:
+
+                    /* Here, the parse failed, which shouldn't happen, but if
+                     * it does, we have an easy fallback that allows us to keep
+                     * going. */
+                    name = lc_all_string;
+                    break;
+
+                  case no_array:    /* The original is a single locale */
+                    name = lc_all_string;
+                    break;
+
+                  case only_element_0:  /* element[0] is a single locale valid
+                                           for all categories */
+                    SAVEFREEPV(individ_locales[0]);
+                    name = individ_locales[0];
+                    break;
+
+                  case full_array:
+                    name = calculate_LC_ALL_string(individ_locales,
+                                                   INTERNAL_FORMAT,
+                                                   __LINE__);
+                    for (unsigned int j = 0; j < LC_ALL_INDEX_; j++) {
+                        Safefree(individ_locales[j]);
+                    }
+                }
+#  else
+                name = calculate_LC_ALL_string(curlocales,
+                                               INTERNAL_FORMAT,
+                                               __LINE__);
+#  endif
+                description = GET_DESCRIPTION(trial, name);
+            }
+            else {
+
+                /* Nothing seems to be working, yet we want to continue
+                 * executing.  It may well be that locales are mostly
+                 * irrelevant to this particular program, and there must be
+                 * some locale underlying the program.  Figure it out as best
+                 * we can, by querying the system's current locale */
+
+#  ifdef LC_ALL
+
+                STDIZED_SETLOCALE_LOCK;
+                name = stdized_setlocale(LC_ALL, NULL);
+                STDIZED_SETLOCALE_UNLOCK;
+
+                if (UNLIKELY(! name)) {
+                    name = "locale name not determinable";
+                }
+
+#  else /* Below is ! LC_ALL */
+
+                const char * system_locales[LC_ALL_INDEX_] = { NULL };
+
+                for (unsigned int j = 0; j < LC_ALL_INDEX_; j++) {
+                    STDIZED_SETLOCALE_LOCK;
+                    system_locales[j] = savepv(stdized_setlocale(categories[j],
+                                                                 NULL));
+                    STDIZED_SETLOCALE_UNLOCK;
+
+                    if (UNLIKELY(! system_locales[j])) {
+                        system_locales[j] = "not determinable";
                     }
                 }
 
-                trial_locales_struct ts = {
-                    .trial_locale = system_default_locale,
-                    .fallback_desc = (strEQ(system_default_locale, "C")
-                                      ? "the standard locale"
-                                      : "the system default locale"),
-                    .fallback_name = system_default_locale,
-                };
-                trial_locales[trial_locales_count++] = ts;
-            }
-          done_system_default:
+                /* We use the name=value form for the string, as that is more
+                 * human readable than the positional notation */
+                name = calculate_LC_ALL_string(system_locales,
+                                               INTERNAL_FORMAT,
+                                               __LINE__);
+                description = "what the system says";
 
-#  endif
-
-            for (j = 0; j < trial_locales_count; j++) {
-                if (strEQ("C", trial_locales[j].trial_locale)) {
-                    goto done_C;
+                for (unsigned int j = 0; j < LC_ALL_INDEX_; j++) {
+                    Safefree(system_locales[j]);
                 }
+#  endif
             }
-            {
-                /* new scope to avoid C++ complaining about
-                   initialization being bypassed by goto.
-                */
-                trial_locales_struct ts = {
-                    .trial_locale = "C",
-                    .fallback_desc = "the standard locale",
-                    .fallback_name = "C",
-                };
-                trial_locales[trial_locales_count++] = ts;
-            }
-          done_C: ;
-        }   /* end of first time through the loop */
-    }   /* end of looping through the trial locales */
 
-    if (trial_locales_count > 1) {   /* If we tried to fallback */
-        const char* msg;
-        if (! setlocale_failure) {  /* fallback succeeded */
-           msg = "Falling back to";
+            PerlIO_printf(Perl_error_log,
+                          "perl: warning: Falling back to %s (\"%s\").\n",
+                          description, name);
+
+            /* Here, ok being true indicates that the first attempt failed, but
+             * a fallback succeeded; false => nothing working.  Translate to
+             * API return values. */
+            ok = (ok) ? 0 : -1;
         }
-        else {  /* fallback failed */
-            unsigned int j;
+    }
 
-            /* We dropped off the end of the loop, so have to decrement i to
-             * get back to the value the last time through */
-            i--;
+#  ifdef LC_ALL
 
-            ok = -1;
-            msg = "Failed to fall back to";
+    give_perl_locale_control(lc_all_string, __LINE__);
+    Safefree(lc_all_string);
 
-            /* To continue, we should use whatever values we've got */
+#  else
 
-            for (j = 0; j < LC_ALL_INDEX_; j++) {
-                Safefree(curlocales[j]);
-                curlocales[j] = savepv(stdized_setlocale(categories[j], NULL));
-                DEBUG_LOCALE_INIT(j, NULL, curlocales[j]);
-            }
-        }
+    give_perl_locale_control((const char **) &curlocales, __LINE__);
 
-        if (locwarn) {
-            const char * description = trial_locales[i].fallback_desc;
-            const char * name = trial_locales[i].fallback_name;
-
-            if (name && strNE(name, "")) {
-                PerlIO_printf(Perl_error_log,
-                    "perl: warning: %s %s (\"%s\").\n", msg, description, name);
-            }
-            else {
-                PerlIO_printf(Perl_error_log,
-                                   "perl: warning: %s %s.\n", msg, description);
-            }
-        }
-    } /* End of tried to fallback */
-
-#  ifdef USE_POSIX_2008_LOCALE
-
-    /* The stdized setlocales haven't affected the P2008 locales.  Initialize
-     * them now */
-    for (i = 0; i < LC_ALL_INDEX_; i++) {
-        void_setlocale_i(i, curlocales[i]);
+    for (unsigned int j = 0; j < LC_ALL_INDEX_; j++) {
+        Safefree(curlocales[j]);
     }
 
 #  endif
-
-    /* Done with finding the locales; update the auxiliary records */
-    new_LC_ALL(NULL, false);
-
-    for (i = 0; i < LC_ALL_INDEX_; i++) {
-        Safefree(curlocales[i]);
-    }
-
 #  if defined(USE_PERLIO) && defined(USE_LOCALE_CTYPE)
 
     /* Set PL_utf8locale to TRUE if using PerlIO _and_ the current LC_CTYPE
-     * locale is UTF-8.  The call to new_ctype() just above has already
+     * locale is UTF-8.  give_perl_locale_control() just above has already
      * calculated the latter value and saved it in PL_in_utf8_CTYPE_locale. If
      * both PL_utf8locale and PL_unicode (set by -C or by $ENV{PERL_UNICODE})
      * are true, perl.c:S_parse_body() will turn on the PerlIO :utf8 layer on
@@ -6721,14 +6771,23 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
     }
 
 #  endif
-#endif /* USE_LOCALE */
+#  if defined(USE_POSIX_2008_LOCALE) && defined(MULTIPLICITY)
+    DEBUG_Lv(PerlIO_printf(Perl_debug_log,
+                           "finished Perl_init_i18nl10n; actual obj=%p,"
+                           " expected obj=%p, initial=%s\n",
+                           uselocale(0), PL_cur_locale_obj,
+                           get_LC_ALL_display()));
+#  endif
 
     /* So won't continue to output stuff */
     DEBUG_INITIALIZATION_set(FALSE);
 
+#endif /* USE_LOCALE */
+
     return ok;
 }
 
+#undef GET_DESCRIPTION
 #ifdef USE_LOCALE_COLLATE
 
 STATIC void
