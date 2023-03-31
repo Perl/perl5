@@ -264,6 +264,7 @@ jobs:
           - "-Dcc='clang'"
           - "-Dcc='g++'"
           - "-Accflags=-DSILENT_NO_TAINT_SUPPORT"
+          - "-Accflags=-DNO_TAINT_SUPPORT"
 
     steps:
       - name: Install System dependencies
