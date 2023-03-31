@@ -1327,6 +1327,13 @@ sub run_multiple_progs {
         my $dummy;
         ($dummy, @prgs) = _setup_one_file(shift);
     }
+    my $taint_disabled;
+    if (! eval {require Config; 1}) {
+        warn "test.pl had problems loading Config: $@";
+        $taint_disabled = '';
+    } else {
+        $taint_disabled = $Config::Config{taint_disabled};
+    }
 
     my $tmpfile = tempfile();
 
@@ -1378,6 +1385,10 @@ sub run_multiple_progs {
     } elsif (defined $file) {
         $name = "test from $file at line $line";
     }
+
+        if ($switch=~/[Tt]/ and $taint_disabled eq "define") {
+            $reason{skip} ||= "This perl does not support taint";
+        }
 
 	if ($reason{skip}) {
 	SKIP:

@@ -522,6 +522,36 @@ sub dump_tests {
     exit(0);
 }
 
+sub filter_taint_tests {
+    my $tests = shift;
+    require Config;
+    return unless $Config::Config{taint_disabled} eq "define";
+
+    # These are test files which are known to fail with -DNO_TAINT_SUPPORT
+    # but which do not have "taint" in their name, nor have shebang lines
+    # with -t or -T in them. So we exclude them specifically instead.
+    my %known_tainter = map { $_ => 0 } (
+        '../cpan/Test-Harness/t/regression.t',
+        '../cpan/Test-Harness/t/source_handler.t',
+        '../cpan/Test-Harness/t/compat/inc-propagation.t',
+    );
+    @$tests = grep {
+        my $file = $_;
+        open my $ifh, "<", $file
+            or die "Failed to read: '$file': $!";
+        my $line = <$ifh>;
+        my $keep = $file=~/taint/ ? 0 : ($known_tainter{$file} // 1);
+        if ($line=~/^#!.*perl\s+-(\w+)/) {
+            my $switch = $1;
+            if ($switch =~ s/[Tt]//) {
+                $keep = 0;
+            }
+        }
+        $keep
+    } @$tests;
+}
+
+
 unless (@ARGV) {
     # base first, as TEST bails out if that can't run
     # then comp, to validate that require works
@@ -607,6 +637,8 @@ unless (@ARGV) {
 };
 
 dump_tests(\@ARGV) if $dump_tests;
+
+filter_taint_tests(\@ARGV);
 
 if ($::deparse) {
     _testprogs('deparse', '',   @ARGV);
