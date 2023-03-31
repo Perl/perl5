@@ -473,7 +473,8 @@ use File::Glob qw(:case);
     },
 
     'ExtUtils::MakeMaker' => {
-        'DISTRIBUTION' => 'BINGOS/ExtUtils-MakeMaker-7.66.tar.gz',
+        'DISTRIBUTION' => 'BINGOS/ExtUtils-MakeMaker-7.70.tar.gz',
+        'SYNCINFO'     => 'yorton on Sun Mar 26 16:20:23 2023',
         'FILES'        => q[cpan/ExtUtils-MakeMaker],
         'EXCLUDED'     => [
             qr{^t/lib/Test/},
@@ -857,16 +858,6 @@ use File::Glob qw(:case);
             qw(t/604_manifest.t),
             qw(t/appveyor-test.bat),
 
-        ],
-        'CUSTOMIZED' => [
-            qw{
-                t/000_load.t
-                t/001_new.t
-                t/010_pingecho.t
-                t/450_service.t
-                t/500_ping_icmp.t
-                t/501_ping_icmpv6.t
-            }
         ],
     },
 

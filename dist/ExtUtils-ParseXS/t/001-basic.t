@@ -94,6 +94,7 @@ is( $seen, 1, "Line numbers created in output file, as intended" );
     local $/ = undef;
     seek($IN, 0, 0);
     my $filecontents = <$IN>;
+    $filecontents =~ s/^#if defined\(__HP_cc\).*\n#.*\n#endif\n//gm;
     my $good_T_BOOL_re =
 qr|\QXS_EUPXS(XS_XSTest_T_BOOL)\E
 .+?

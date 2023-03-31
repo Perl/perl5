@@ -1429,7 +1429,7 @@ perl_destruct(pTHXx)
         for (sva = PL_sv_arenaroot; sva; sva = MUTABLE_SV(SvANY(sva))) {
             svend = &sva[SvREFCNT(sva)];
             for (sv = sva + 1; sv < svend; ++sv) {
-                if (SvTYPE(sv) != (svtype)SVTYPEMASK) {
+                if (!SvIS_FREED(sv)) {
                     PerlIO_printf(Perl_debug_log, "leaked: sv=0x%p"
                         " flags=0x%" UVxf
                         " refcnt=%" UVuf pTHX__FORMAT "\n"
@@ -1986,8 +1986,20 @@ S_Internals_V(pTHX_ CV *cv)
 #  ifdef DEBUGGING
                              " DEBUGGING"
 #  endif
+#  ifdef HAS_LONG_DOUBLE
+                             " HAS_LONG_DOUBLE"
+#  endif
+#  ifdef HAS_STRTOLD
+                             " HAS_STRTOLD"
+#  endif
 #  ifdef NO_MATHOMS
                              " NO_MATHOMS"
+#  endif
+#  ifdef NO_PERL_INTERNAL_RAND_SEED
+                             " NO_PERL_INTERNAL_RAND_SEED"
+#  endif
+#  ifdef NO_PERL_RAND_SEED
+                             " NO_PERL_RAND_SEED"
 #  endif
 #  ifdef NO_TAINT_SUPPORT
                              " NO_TAINT_SUPPORT"
@@ -2074,13 +2086,8 @@ S_Internals_V(pTHX_ CV *cv)
 #  ifdef USE_THREAD_SAFE_LOCALE
                              " USE_THREAD_SAFE_LOCALE"
 #  endif
-#  ifdef NO_PERL_RAND_SEED
-                             " NO_PERL_RAND_SEED"
-#  endif
-#  ifdef NO_PERL_INTERNAL_RAND_SEED
-                             " NO_PERL_INTERNAL_RAND_SEED"
-#  endif
-        ;
+    ""; /* keep this on a line by itself, WITH the empty string */
+
     PERL_UNUSED_ARG(cv);
     PERL_UNUSED_VAR(items);
 

@@ -38,7 +38,7 @@ Added the C<is_tainted()> builtin function. [L<github #19854|https://github.com/
 
 =item *
 
-Added the C<export_lexically()> builtin function as per RFC 0020. [L<github #19895|https://github.com/Perl/perl5/issues/19895>]
+Added the C<export_lexically()> builtin function as per PPC 0020. [L<github #19895|https://github.com/Perl/perl5/issues/19895>]
 
 =back
 

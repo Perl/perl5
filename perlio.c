@@ -53,7 +53,7 @@
 #  include <rms.h>
 #endif
 
-#define PerlIO_lockcnt(f) (((PerlIOl*)(f))->head->flags)
+#define PerlIO_lockcnt(f) (((PerlIOl*)(void*)(f))->head->flags)
 
 /* Call the callback or PerlIOBase, and return failure. */
 #define Perl_PerlIO_or_Base(f, callback, base, failure, args) 	\

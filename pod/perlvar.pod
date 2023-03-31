@@ -747,7 +747,7 @@ The C<$SIG{__DIE__}> hook is called even inside an C<eval()>. It was
 never intended to happen this way, but an implementation glitch made
 this possible. This used to be deprecated, as it allowed strange action
 at a distance like rewriting a pending exception in C<$@>. Plans to
-rectify this have been scrapped, as users found that rewriting a 
+rectify this have been scrapped, as users found that rewriting a
 pending exception is actually a useful feature, and not a bug.
 
 The C<$SIG{__DIE__}> doesn't support C<'IGNORE'>; it has the same
@@ -1739,7 +1739,7 @@ Suppose we wrote the following string to a file:
     $string .= "epsilon zeta eta\n\n";
     $string .= "theta\n";
 
-    my $file = 'simple_file.txt'; 
+    my $file = 'simple_file.txt';
     open my $OUT, '>', $file or die;
     print $OUT $string;
     close $OUT or die;
@@ -2368,7 +2368,7 @@ value when the interpreter started to compile the BLOCK.
 
 Each time a statement completes being compiled, the current value of
 C<$^H> is stored with that statement, and can later be retrieved via
-C<(caller($level))[8]>.
+C<(caller($level))[8]>.  See L<perlfunc/caller EXPR>.
 
 When perl begins to parse any block construct that provides a lexical scope
 (e.g., eval body, required file, subroutine body, loop body, or conditional
@@ -2412,15 +2412,14 @@ This variable was added in Perl 5.003.
 =item %^H
 X<%^H>
 
-The C<%^H> hash provides the same scoping semantic as C<$^H>.  This makes
-it useful for implementation of lexically scoped pragmas.  See
-L<perlpragma>.   All the entries are stringified when accessed at
-runtime, so only simple values can be accommodated.  This means no
-pointers to objects, for example.
+The C<%^H> hash provides the same scoping semantics as L<C<$^H>|/$^H>.  This
+makes it useful for implementing lexically scoped pragmas.  See L<perlpragma>.
+All the entries are stringified when accessed at runtime, so only simple values
+can be accommodated.  This means no references to objects, for example.
 
 Each time a statement completes being compiled, the current value of
 C<%^H> is stored with that statement, and can later be retrieved via
-C<(caller($level))[10]>.
+C<(caller($level))[10]>.  See L<perlfunc/caller EXPR>.
 
 When putting items into C<%^H>, in order to avoid conflicting with other
 users of the hash there is a convention regarding which keys to use.

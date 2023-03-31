@@ -938,8 +938,8 @@ case any call to string overloading updates the internal UTF-8 encoding flag.
 
 /* Should all strings be treated as Unicode, and not just UTF-8 encoded ones?
  * Is so within 'feature unicode_strings' or 'locale :not_characters', and not
- * within 'use bytes'.  UTF-8 locales are not tested for here, but perhaps
- * could be */
+ * within 'use bytes'.  UTF-8 locales are not tested for here, because it gets
+ * complicated by the probability of having categories in different locales. */
 #define IN_UNI_8_BIT                                                    \
             ((    (      (CopHINTS_get(PL_curcop) & HINT_UNI_8_BIT))    \
                    || (   CopHINTS_get(PL_curcop) & HINT_LOCALE_PARTIAL \

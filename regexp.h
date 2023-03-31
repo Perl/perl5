@@ -29,10 +29,23 @@ struct regnode_meta {
     U8 off_by_arg;
 };
 
+/* this ensures that on alignment sensitive platforms
+ * this struct is aligned on 32 bit boundaries */
+union regnode_head {
+    struct {
+        union {
+            U8 flags;
+            U8 str_len_u8;
+            U8 first_byte;
+        } u_8;
+        U8  type;
+        U16 next_off;
+    } data;
+    U32 data_u32;
+};
+
 struct regnode {
-    U8	flags;
-    U8  type;
-    U16 next_off;
+    union regnode_head head;
 };
 
 typedef struct regnode regnode;
