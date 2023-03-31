@@ -307,14 +307,19 @@ x(); z()
 .
 EOCODH
 
-is runperl(stderr => 1, switches => [ '-MO=-qq,Deparse', $path, '-T' ],
+SKIP: {
+    skip("Your perl was built without taint support", 1)
+        unless $Config::Config{taint_support};
+
+    is runperl(stderr => 1, switches => [ '-MO=-qq,Deparse', $path, '-T' ],
            prog => "format =\n\@\n\$;\n.\n"),
-   <<'EOCODM', '$; on format line';
-format STDOUT =
-@
-$;
-.
-EOCODM
+        <<~'EOCODM', '$; on format line';
+        format STDOUT =
+        @
+        $;
+        .
+        EOCODM
+}
 
 is runperl(stderr => 1, switches => [ '-MO=-qq,Deparse,-l', $path ],
            prog => "format =\n\@\n\$foo\n.\n"),
@@ -537,10 +542,14 @@ is runperl(stderr => 1, switches => [ '-MO=-qq,Deparse', $path ],
    "sub BEGIN {\n    \$main::{'f'} = \\!0;\n}\n",
    '&PL_sv_yes constant (used to croak)';
 
-is runperl(stderr => 1, switches => [ '-MO=-qq,Deparse', $path, '-T' ],
+SKIP: {
+    skip("Your perl was built without taint support", 1)
+        unless $Config::Config{taint_support};
+    is runperl(stderr => 1, switches => [ '-MO=-qq,Deparse', $path, '-T' ],
            prog => '$x =~ (1?/$a/:0)'),
-  '$x =~ ($_ =~ /$a/);'."\n",
-  '$foo =~ <branch-folded match> under taint mode';
+        '$x =~ ($_ =~ /$a/);'."\n",
+        '$foo =~ <branch-folded match> under taint mode';
+}
 
 unlike runperl(stderr => 1, switches => [ '-MO=-qq,Deparse', $path, '-w' ],
                prog => 'BEGIN { undef &foo }'),

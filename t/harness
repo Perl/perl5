@@ -433,6 +433,8 @@ for (@tests) {
 
 dump_tests(\@tests) if $dump_tests;
 
+filter_taint_tests(\@tests);
+
 my %options;
 
 my $type = 'perl';
