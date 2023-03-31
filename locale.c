@@ -6283,13 +6283,15 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
      * values for our db, instead of trying to change them.
      * */
 
-    int ok = 1;
-
 #ifndef USE_LOCALE
 
     PERL_UNUSED_ARG(printwarn);
+    const int ok = 1;
 
 #else  /* USE_LOCALE */
+
+    int ok = 0;
+
 #  ifdef __GLIBC__
 
     const char * const language = PerlEnv_getenv("LANGUAGE");
@@ -6499,12 +6501,10 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
             }
 
             if (LIKELY(! setlocale_failure)) {  /* All succeeded */
+                ok = 1;
                 break;  /* Exit trial_locales loop */
             }
         }
-
-        /* Here, something failed; will need to try a fallback. */
-        ok = 0;
 
         if (i == 0) {
             unsigned int j;
@@ -6644,7 +6644,7 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
         }   /* end of first time through the loop */
     }   /* end of looping through the trial locales */
 
-    if (ok < 1) {   /* If we tried to fallback */
+    if (trial_locales_count > 1) {   /* If we tried to fallback */
         const char* msg;
         if (! setlocale_failure) {  /* fallback succeeded */
            msg = "Falling back to";
