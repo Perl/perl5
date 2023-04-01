@@ -6986,6 +6986,10 @@ S_new_LC_ALL(pTHX_ const char *unused, bool force);
 #   define PERL_ARGS_ASSERT_NEW_LC_ALL
 
 STATIC void
+S_output_check_environment_warning(pTHX_ const char * const language, const char * const lc_all, const char * const lang);
+#   define PERL_ARGS_ASSERT_OUTPUT_CHECK_ENVIRONMENT_WARNING
+
+STATIC void
 S_restore_toggled_locale_i(pTHX_ const unsigned cat_index, const char *original_locale, const line_t caller_line);
 #   define PERL_ARGS_ASSERT_RESTORE_TOGGLED_LOCALE_I
 
@@ -7022,6 +7026,24 @@ STATIC const char *
 S_my_langinfo_i(pTHX_ const int item, const unsigned int cat_index, const char *locale, const char **retbufp, Size_t *retbuf_sizep, utf8ness_t *utf8ness);
 #     define PERL_ARGS_ASSERT_MY_LANGINFO_I     \
         assert(locale); assert(retbufp)
+
+#   endif
+#   if defined(LC_ALL)
+STATIC void
+S_give_perl_locale_control(pTHX_ const char *lc_all_string, const line_t caller_line);
+#     define PERL_ARGS_ASSERT_GIVE_PERL_LOCALE_CONTROL \
+        assert(lc_all_string)
+
+STATIC parse_LC_ALL_string_return
+S_parse_LC_ALL_string(pTHX_ const char *string, const char **output, bool always_use_full_array, const bool panic_on_error, const line_t caller_line);
+#     define PERL_ARGS_ASSERT_PARSE_LC_ALL_STRING \
+        assert(string); assert(output)
+
+#   else /* if !defined(LC_ALL) */
+STATIC void
+S_give_perl_locale_control(pTHX_ const char **curlocales, const line_t caller_line);
+#     define PERL_ARGS_ASSERT_GIVE_PERL_LOCALE_CONTROL \
+        assert(curlocales)
 
 #   endif
 #   if !defined(PERL_NO_INLINE_FUNCTIONS)
@@ -7084,13 +7106,6 @@ STATIC locale_t
 S_use_curlocale_scratch(pTHX);
 #     define PERL_ARGS_ASSERT_USE_CURLOCALE_SCRATCH
 
-#     if defined(LC_ALL)
-STATIC parse_LC_ALL_string_return
-S_parse_LC_ALL_string(pTHX_ const char *string, const char **output, bool always_use_full_array, const bool panic_on_error, const line_t caller_line);
-#       define PERL_ARGS_ASSERT_PARSE_LC_ALL_STRING \
-        assert(string); assert(output)
-
-#     endif
 #     if !defined(USE_QUERYLOCALE)
 STATIC void
 S_update_PL_curlocales_i(pTHX_ const unsigned int index, const char *new_locale, const line_t caller_line);
