@@ -8069,16 +8069,13 @@ Perl_switch_to_global_locale(pTHX)
     DEBUG_L(PerlIO_printf(Perl_debug_log, "Entering switch_to_global; %s\n",
                                           get_LC_ALL_display()));
 
-#  ifdef USE_THREAD_SAFE_LOCALE
-
    /* In these cases, we use the system state to determine if we are in the
     * global locale or not. */
-
-#    ifdef USE_POSIX_2008_LOCALE
+#  ifdef USE_POSIX_2008_LOCALE
 
     const bool perl_controls = (LC_GLOBAL_LOCALE != uselocale((locale_t) 0));
 
-#    elif defined(WIN32)
+#  elif defined(USE_THREAD_SAFE_LOCALE) && defined(WIN32)
 
     int config_return = _configthreadlocale(0);
     if (config_return == -1) {
@@ -8086,7 +8083,6 @@ Perl_switch_to_global_locale(pTHX)
     }
     const bool perl_controls = (config_return == _ENABLE_PER_THREAD_LOCALE);
 
-#    endif
 #  else
 
     const bool perl_controls = false;
@@ -8098,14 +8094,15 @@ Perl_switch_to_global_locale(pTHX)
         return;
     }
 
-#  ifdef USE_THREAD_SAFE_LOCALE
-#    if defined(WIN32)
+#  ifdef LC_ALL
 
-    const char * thread_locale = posix_setlocale(LC_ALL, NULL);
+    const char * thread_locale = calculate_LC_ALL_string(NULL,
+                                                       EXTERNAL_FORMAT_FOR_SET,
+                                                       __LINE__);
     CHANGE_SYSTEM_LOCALE_TO_GLOBAL;
     posix_setlocale(LC_ALL, thread_locale);
 
-#    else   /* Must be USE_POSIX_2008_LOCALE) */
+#  else   /* Must be USE_POSIX_2008_LOCALE) */
 
     const char * cur_thread_locales[LC_ALL_INDEX_];
 
@@ -8123,7 +8120,6 @@ Perl_switch_to_global_locale(pTHX)
     }
     POSIX_SETLOCALE_UNLOCK;
 
-#    endif
 #  endif
 #  ifdef USE_LOCALE_NUMERIC
 
