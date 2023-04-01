@@ -8084,6 +8084,15 @@ Perl_sync_locale(pTHX)
 
     /* Here, we are in the global locale.  Get and save the values for each
      * category. */
+
+#  ifdef LC_ALL
+
+    STDIZED_SETLOCALE_LOCK;
+    const char * lc_all_string = savepv(stdized_setlocale(LC_ALL, NULL));
+    STDIZED_SETLOCALE_UNLOCK;
+
+#  else
+
     const char * current_globals[LC_ALL_INDEX_];
     for (unsigned i = 0; i < LC_ALL_INDEX_; i++) {
         STDIZED_SETLOCALE_LOCK;
@@ -8091,23 +8100,33 @@ Perl_sync_locale(pTHX)
         STDIZED_SETLOCALE_UNLOCK;
     }
 
+#  endif
+
     /* Now we have to convert the current thread to use them */
 
 #  if defined(USE_THREAD_SAFE_LOCALE) && defined(WIN32)
 
     /* On Windows, convert to per-thread behavior.  This isn't necessary in
-     * POSIX 2008, as the conversion gets done automatically in the loop below.
-     * */
+     * POSIX 2008, as the conversion gets done automatically below in the
+     * void_X calls.  */
     if (_configthreadlocale(_ENABLE_PER_THREAD_LOCALE) == -1) {
         locale_panic_("_configthreadlocale returned an error");
     }
 
 #  endif
+#  ifdef LC_ALL
+
+    void_setlocale_c(LC_ALL, lc_all_string);
+    Safefree(lc_all_string);
+
+#  else
 
     for (unsigned i = 0; i < LC_ALL_INDEX_; i++) {
         void_setlocale_i(i, current_globals[i]);
         Safefree(current_globals[i]);
     }
+
+#  endif
 
     /* And update our remaining records.  'true' => force recalculation */
     new_LC_ALL(NULL, true);
