@@ -8034,7 +8034,14 @@ handle all cases of single- vs multi-thread, POSIX 2008-supported or not.
 =cut
 */
 
-#if defined(USE_POSIX_2008_LOCALE)
+#if defined(WIN32) && defined(USE_THREAD_SAFE_LOCALE)
+#  define CHANGE_SYSTEM_LOCALE_TO_GLOBAL                                \
+    STMT_START {                                                        \
+        if (_configthreadlocale(_DISABLE_PER_THREAD_LOCALE) == -1) {    \
+            locale_panic_("_configthreadlocale returned an error");     \
+        }                                                               \
+    } STMT_END
+#elif defined(USE_POSIX_2008_LOCALE)
 #  define CHANGE_SYSTEM_LOCALE_TO_GLOBAL                                \
     STMT_START {                                                        \
         locale_t old_locale = uselocale(LC_GLOBAL_LOCALE);              \
@@ -8049,6 +8056,8 @@ handle all cases of single- vs multi-thread, POSIX 2008-supported or not.
             freelocale(old_locale);                                     \
         }                                                               \
     } STMT_END
+#else
+#  define CHANGE_SYSTEM_LOCALE_TO_GLOBAL
 #endif
 
 void
@@ -8092,9 +8101,7 @@ Perl_switch_to_global_locale(pTHX)
 #    if defined(WIN32)
 
     const char * thread_locale = posix_setlocale(LC_ALL, NULL);
-    if (_configthreadlocale(_DISABLE_PER_THREAD_LOCALE) == -1) {
-        locale_panic_("_configthreadlocale returned an error");
-    }
+    CHANGE_SYSTEM_LOCALE_TO_GLOBAL;
     posix_setlocale(LC_ALL, thread_locale);
 
 #    else   /* Must be USE_POSIX_2008_LOCALE) */
