@@ -8068,7 +8068,6 @@ Perl_switch_to_global_locale(pTHX)
 
     DEBUG_L(PerlIO_printf(Perl_debug_log, "Entering switch_to_global; %s\n",
                                           get_LC_ALL_display()));
-    bool perl_controls = false;
 
 #  ifdef USE_THREAD_SAFE_LOCALE
 
@@ -8077,7 +8076,7 @@ Perl_switch_to_global_locale(pTHX)
 
 #    ifdef USE_POSIX_2008_LOCALE
 
-    perl_controls = (LC_GLOBAL_LOCALE != uselocale((locale_t) 0));
+    const bool perl_controls = (LC_GLOBAL_LOCALE != uselocale((locale_t) 0));
 
 #    elif defined(WIN32)
 
@@ -8085,11 +8084,13 @@ Perl_switch_to_global_locale(pTHX)
     if (config_return == -1) {
         locale_panic_("_configthreadlocale returned an error");
     }
-    perl_controls = (config_return == _ENABLE_PER_THREAD_LOCALE);
+    const bool perl_controls = (config_return == _ENABLE_PER_THREAD_LOCALE);
 
-#    else
-#      error Unexpected Configuration
 #    endif
+#  else
+
+    const bool perl_controls = false;
+
 #  endif
 
     /* No-op if already in global */
