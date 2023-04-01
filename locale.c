@@ -8106,7 +8106,7 @@ Perl_switch_to_global_locale(pTHX)
 
 #    else   /* Must be USE_POSIX_2008_LOCALE) */
 
-    const char * cur_thread_locales[LC_ALL_INDEX_ + 1];
+    const char * cur_thread_locales[LC_ALL_INDEX_];
 
     /* Save each category's current per-thread state */
     for (unsigned i = 0; i < LC_ALL_INDEX_; i++) {
