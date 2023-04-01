@@ -8075,7 +8075,7 @@ Perl_sync_locale(pTHX)
 
 #    elif defined(USE_POSIX_2008_LOCALE)
 
-    was_in_global = (LC_GLOBAL_LOCALE == uselocale((locale_t) 0));
+    was_in_global = (LC_GLOBAL_LOCALE == uselocale(LC_GLOBAL_LOCALE));
 
 #    else
 #      error Unexpected Configuration
