@@ -1273,6 +1273,7 @@
 #       define get_category_index_helper(a,b,c) S_get_category_index_helper(aTHX_ a,b,c)
 #       define mortalized_pv_copy(a)            S_mortalized_pv_copy(aTHX_ a)
 #       define new_LC_ALL(a,b)                  S_new_LC_ALL(aTHX_ a,b)
+#       define output_check_environment_warning(a,b,c) S_output_check_environment_warning(aTHX_ a,b,c)
 #       define save_to_buffer(a,b,c)            S_save_to_buffer(aTHX_ a,b,c)
 #       define setlocale_failure_panic_via_i(a,b,c,d,e,f,g) S_setlocale_failure_panic_via_i(aTHX_ a,b,c,d,e,f,g)
 #       if defined(DEBUGGING)
@@ -1282,6 +1283,12 @@
 #         define my_langinfo_i(a,b,c,d,e,f)     S_my_langinfo_i(aTHX_ a,b,c,d,e,f)
 #       else
 #         define my_langinfo_i(a,b,c,d,e,f)     S_my_langinfo_i(aTHX_ a,b,c,d,e,f)
+#       endif
+#       if defined(LC_ALL)
+#         define give_perl_locale_control(a,b)  S_give_perl_locale_control(aTHX_ a,b)
+#         define parse_LC_ALL_string(a,b,c,d,e) S_parse_LC_ALL_string(aTHX_ a,b,c,d,e)
+#       else
+#         define give_perl_locale_control(a,b)  S_give_perl_locale_control(aTHX_ a,b)
 #       endif
 #       if defined(USE_LOCALE_COLLATE)
 #         define new_collate(a,b)               S_new_collate(aTHX_ a,b)
@@ -1303,16 +1310,12 @@
 #         define bool_setlocale_2008_i(a,b,c)   S_bool_setlocale_2008_i(aTHX_ a,b,c)
 #         define querylocale_2008_i(a,b)        S_querylocale_2008_i(aTHX_ a,b)
 #         define use_curlocale_scratch()        S_use_curlocale_scratch(aTHX)
-#         if defined(LC_ALL)
-#           define parse_LC_ALL_string(a,b,c,d,e) S_parse_LC_ALL_string(aTHX_ a,b,c,d,e)
-#         endif
 #         if !defined(USE_QUERYLOCALE)
 #           define update_PL_curlocales_i(a,b,c) S_update_PL_curlocales_i(aTHX_ a,b,c)
 #         endif
-#       elif  defined(USE_LOCALE_THREADS) &&                  \
-             !defined(USE_THREAD_SAFE_LOCALE) &&              \
-             !defined(USE_THREAD_SAFE_LOCALE_EMULATION) /* &&
-             !defined(USE_POSIX_2008_LOCALE) */
+#       elif  defined(USE_LOCALE_THREADS) &&     \
+             !defined(USE_THREAD_SAFE_LOCALE) && \
+             !defined(USE_THREAD_SAFE_LOCALE_EMULATION)
 #         define less_dicey_bool_setlocale_r(a,b) S_less_dicey_bool_setlocale_r(aTHX_ a,b)
 #         define less_dicey_setlocale_r(a,b)    S_less_dicey_setlocale_r(aTHX_ a,b)
 #       endif

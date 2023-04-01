@@ -4344,6 +4344,11 @@ Ri	|const char *|mortalized_pv_copy				\
 				|NULLOK const char * const pv
 S	|void	|new_LC_ALL	|NULLOK const char *unused		\
 				|bool force
+void
+S	|void	|output_check_environment_warning			\
+				|NULLOK const char * const language	\
+				|NULLOK const char * const lc_all	\
+				|NULLOK const char * const lang
 So	|void	|restore_toggled_locale_i				\
 				|const unsigned cat_index		\
 				|NULLOK const char *original_locale	\
@@ -4388,6 +4393,21 @@ S	|const char *|my_langinfo_i					\
 				|NULLOK Size_t *retbuf_sizep		\
 				|NULLOK utf8ness_t *utf8ness
 #   endif
+#   if defined(LC_ALL)
+S	|void	|give_perl_locale_control				\
+				|NN const char *lc_all_string		\
+				|const line_t caller_line
+S	|parse_LC_ALL_string_return|parse_LC_ALL_string 		\
+				|NN const char *string			\
+				|NN const char **output 		\
+				|bool always_use_full_array		\
+				|const bool panic_on_error		\
+				|const line_t caller_line
+#   else
+S	|void	|give_perl_locale_control				\
+				|NN const char **curlocales		\
+				|const line_t caller_line
+#   endif
 #   if defined(USE_LOCALE_COLLATE)
 S	|void	|new_collate	|NN const char *newcoll 		\
 				|bool force
@@ -4422,24 +4442,14 @@ S	|const char *|querylocale_2008_i				\
 				|const unsigned int index		\
 				|const line_t line
 S	|locale_t|use_curlocale_scratch
-#     if defined(LC_ALL)
-S	|parse_LC_ALL_string_return|parse_LC_ALL_string 		\
-				|NN const char *string			\
-				|NN const char **output 		\
-				|bool always_use_full_array		\
-				|const bool panic_on_error		\
-				|const line_t caller_line
-#     endif
 #     if !defined(USE_QUERYLOCALE)
 S	|void	|update_PL_curlocales_i 				\
 				|const unsigned int index		\
 				|NN const char *new_locale		\
 				|const line_t caller_line
 #     endif
-#   elif  defined(USE_LOCALE_THREADS) &&                  \
-         !defined(USE_THREAD_SAFE_LOCALE) &&              \
-         !defined(USE_THREAD_SAFE_LOCALE_EMULATION) /* &&
-         !defined(USE_POSIX_2008_LOCALE) */
+#   elif  defined(USE_LOCALE_THREADS) && !defined(USE_THREAD_SAFE_LOCALE) && \
+         !defined(USE_THREAD_SAFE_LOCALE_EMULATION)
 S	|bool	|less_dicey_bool_setlocale_r				\
 				|const int cat				\
 				|NN const char *locale
