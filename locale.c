@@ -8034,6 +8034,23 @@ handle all cases of single- vs multi-thread, POSIX 2008-supported or not.
 =cut
 */
 
+#if defined(USE_POSIX_2008_LOCALE)
+#  define CHANGE_SYSTEM_LOCALE_TO_GLOBAL                                \
+    STMT_START {                                                        \
+        locale_t old_locale = uselocale(LC_GLOBAL_LOCALE);              \
+        if (! old_locale) {                                             \
+            locale_panic_("Could not change to global locale");         \
+        }                                                               \
+                                                                        \
+        /* Free the per-thread memory */                                \
+        if (   old_locale != LC_GLOBAL_LOCALE                           \
+            && old_locale != PL_C_locale_obj)                           \
+        {                                                               \
+            freelocale(old_locale);                                     \
+        }                                                               \
+    } STMT_END
+#endif
+
 void
 Perl_switch_to_global_locale(pTHX)
 {
@@ -8089,18 +8106,7 @@ Perl_switch_to_global_locale(pTHX)
         cur_thread_locales[i] = querylocale_i(i);
     }
 
-    /* Now switch to global */
-    DEBUG_Lv(PerlIO_printf(Perl_debug_log, "Switching to global locale\n"));
-
-    locale_t old_locale = uselocale(LC_GLOBAL_LOCALE);
-    if (! old_locale) {
-        locale_panic_("Could not change to global locale");
-    }
-
-    /* Free the per-thread memory */
-    if (old_locale != LC_GLOBAL_LOCALE && old_locale != PL_C_locale_obj) {
-        freelocale(old_locale);
-    }
+    CHANGE_SYSTEM_LOCALE_TO_GLOBAL;
 
     /* Set the global to what was our per-thread state */
     POSIX_SETLOCALE_LOCK;
