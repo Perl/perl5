@@ -2650,6 +2650,7 @@ S_find_locale_from_environment(pTHX_ const unsigned int index)
      */
 
     const char * const lc_all = PerlEnv_getenv("LC_ALL");
+    const char * locale_names[LC_ALL_INDEX_] = { NULL };
 
     /* Use any "LC_ALL" environment variable, as it overrides everything else.
      * */
@@ -2657,68 +2658,86 @@ S_find_locale_from_environment(pTHX_ const unsigned int index)
         return lc_all;
     }
 
-    /* If setting an individual category, use its corresponding value found in
-     * the environment, if any */
-    if (index != LC_ALL_INDEX_) {
-        const char * const new_value = PerlEnv_getenv(category_names[index]);
+    /* Here, no usable LC_ALL environment variable.  We have to handle each
+     * category separately.  If all categories are desired, we loop through
+     * them all.  If only an individual category is desired, to avoid
+     * duplicating logic, we use the same loop, but set up the limits so it is
+     * only executed once, for that particular category. */
+    unsigned int lower, upper, offset;
+    if (index == LC_ALL_INDEX_) {
+        lower = 0;
+        upper = LC_ALL_INDEX_ - 1;
+        offset = 0;
+    }
+    else {
+        lower = index;
+        upper = index;
 
-        if (new_value && strNE(new_value, "")) {
-            return new_value;
-        }
-
-        /* If no corresponding environment variable, see if LANG exists.  If
-         * so, use it. */
-        const char * env_lang = PerlEnv_getenv("LANG");
-        if (env_lang && strNE(env_lang, "")) {
-            return env_lang;
-        }
-
-        /* If no LANG, use "C" on POSIX 2008, the system default on Windows */
-#    ifndef WIN32
-        return "C";
-#    else
-        return wrap_wsetlocale(categories[index], ".ACP");
-#    endif
-
+        /* 'offset' is used so that the result of the single loop iteration is
+         * stored into output[0] */
+        offset = lower;
     }
 
-    /* Here is LC_ALL, and no LC_ALL environment variable.  LANG is used as a
-     * default, but overridden for individual categories that have
-     * corresponding environment variables.  If no LANG exists, the default is
-     * "C" on POSIX 2008, or the system default for the category on Windows. */
-    const char * env_lang = PerlEnv_getenv("LANG");
+    /* When no LC_ALL environment variable, LANG is used as a default, but
+     * overridden for individual categories that have corresponding environment
+     * variables.  If no LANG exists, the default is "C" on POSIX 2008, or the
+     * system default for the category on Windows. */
+    const char * env_lang = NULL;
 
-    /* Convert "" to NULL to save conditionals in the loop below */
-    if (env_lang != NULL && strEQ(env_lang, "")) {
-        env_lang = NULL;
-    }
-
-    /* Loop through all the individual categories, setting each to any
-     * corresponding environment variable; or to the default if none exists for
-     * the category */
-    const char * locale_names[LC_ALL_INDEX_];
-    for (unsigned i = 0; i < LC_ALL_INDEX_; i++) {
+    /* For each desired category, use any corresponding environment variable;
+     * or the default if none such exists. */
+    bool is_disparate = false;  /* Assume is uniform until proven otherwise */
+    for (unsigned i = lower; i <= upper; i++) {
         const char * const env_override = PerlEnv_getenv(category_names[i]);
+        unsigned int j = i - offset;
 
         if (env_override && strNE(env_override, "")) {
-            locale_names[i] = env_override;
+            locale_names[j] = env_override;
         }
-        else if (env_lang) {
-            locale_names[i] = env_lang;
-        }
-        else {
+        else { /* Here, no corresponding environment variable, see if LANG
+                  exists and is usable.  Done this way to avoid fetching LANG
+                  unless it is actually needed */
+            if (env_lang == NULL) {
+                env_lang = PerlEnv_getenv("LANG");
 
-#    ifndef WIN32
-            locale_names[i] = "C";
-#    else
-            locale_names[i] = wrap_wsetlocale(categories[index], ".ACP");
+                /* If not usable, set it to a non-NULL illegal value so won't
+                 * try to use it below */
+                if (env_lang == NULL || strEQ(env_lang, "")) {
+                    env_lang = (const char *) 1;
+                }
+            }
+
+            /* If a usable LANG exists, use it. */
+            if (env_lang != NULL && env_lang != (const char *) 1) {
+                locale_names[j] = env_lang;
+            }
+            else {
+
+#    ifdef WIN32
+                /* If no LANG, use the system default on Windows. */
+                locale_names[j] = wrap_wsetlocale(categories[i], ".ACP");
+                if (! locale_names[j])
 #    endif
+                {   /* If nothing was found or worked, use C */
+                    locale_names[j] = "C";
+                }
+            }
+        }
 
+        if (j > 0 && ! is_disparate && strNE(locale_names[0], locale_names[j]))
+        {
+            is_disparate = true;
         }
 
         DEBUG_Lv(PerlIO_printf(Perl_debug_log,
-                 "find_locale_from_environment i=%d, name=%s, locale=%s\n",
-                 i, category_names[i], locale_names[i]));
+                 "find_locale_from_environment i=%u, j=%u, name=%s,"
+                 " locale=%s, locale of 0th category=%s, disparate=%d\n",
+                 i, j, category_names[i],
+                 locale_names[j], locale_names[0], is_disparate));
+    }
+
+    if (! is_disparate) {
+        return locale_names[0];
     }
 
     return calculate_LC_ALL_string(locale_names, INTERNAL_FORMAT, __LINE__);
