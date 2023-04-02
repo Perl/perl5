@@ -78,10 +78,9 @@ Perl_Slab_Free(pTHX_ void *op);
 /* PERL_CALLCONV void
 SvREFCNT_dec_set_NULL(pTHX_ SV *sv); */
 
-PERL_CALLCONV char *
+PERL_CALLCONV const char *
 Perl__byte_dump_string(pTHX_ const U8 * const start, const STRLEN len, const bool format);
-#define PERL_ARGS_ASSERT__BYTE_DUMP_STRING      \
-        assert(start)
+#define PERL_ARGS_ASSERT__BYTE_DUMP_STRING
 
 PERL_CALLCONV void
 Perl__force_out_malformed_utf8_message(pTHX_ const U8 * const p, const U8 * const e, const U32 flags, const bool die_here);

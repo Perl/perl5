@@ -726,8 +726,8 @@ p	|OP *	|build_infix_plugin					\
 				|NN OP *lhs				\
 				|NN OP *rhs				\
 				|NN void *tokendata
-EXp	|char * |_byte_dump_string					\
-				|NN const U8 * const start		\
+EXp	|const char *|_byte_dump_string 				\
+				|NULLOK const U8 * const start		\
 				|const STRLEN len			\
 				|const bool format
 Adp	|int	|bytes_cmp_utf8 |NN const U8 *b 			\
