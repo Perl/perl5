@@ -47,7 +47,10 @@ delete local @ENV{'LANGUAGE', 'LANG', (grep /^LC_[A-Z]+$/, keys %ENV)};
 # 'debug'
 delete local $ENV{'PERL_DEBUG_LOCALE_INIT'} unless $debug;
 
-my $has_ctype = grep { $_ eq "LC_CTYPE" } platform_locale_categories();
+my @platform_categories = platform_locale_categories();
+my @changeable_from_C_categories = valid_locale_categories();
+
+my $has_ctype = grep { $_ eq "LC_CTYPE" } @platform_categories;
 
 SKIP: {
     skip("LC_CTYPE not available on the system", 1 ) unless $has_ctype;
@@ -74,9 +77,14 @@ EOF
 
 }
 
+sub is_locale_C ($) {
+    my $locale = shift;
+    return $locale eq "C" || $locale eq 'POSIX' || $locale eq "C.UTF-8";
+}
+
 my $non_C_locale;
 foreach my $locale (@locales) {
-    next if $locale eq "C" || $locale eq 'POSIX' || $locale eq "C.UTF-8";
+    next if is_locale_C($locale);
     $non_C_locale = $locale;
     last;
 }
@@ -519,14 +527,12 @@ SKIP: {
             skip("Test only valid when LC_ALL syntax is name=value pairs", 2);
         }
 
-        my @valid_categories = valid_locale_categories();
-
         my $valid_string = "";
         my $invalid_string = "";
 
         # Deliberately don't include all categories, so as to test this situation
-        for my $i (0 .. @valid_categories - 2) {
-            my $category = $valid_categories[$i];
+        for my $i (0 .. @changeable_from_C_categories - 2) {
+            my $category = $changeable_from_C_categories[$i];
             if ($category ne "LC_ALL") {
                 $invalid_string .= ";" if $invalid_string ne "";
                 $invalid_string .= "$category=foo_BAR";
@@ -628,6 +634,63 @@ SKIP: {   # GH #20054
                     EOT
                     qr/Falling back to the $fallback locale/,
                     {}, "check that illegal startup environment falls back");
+
+    SKIP: {
+        if (! $Config{d_perl_lc_all_uses_name_value_pairs}) {
+            skip("Test currently written only for name=value pairs LC_ALL syntax",
+                 1);
+        }
+
+        my @non_C_locales = grep { ! is_locale_C($_) } @lc_all_locales;
+
+        # We will look at all changeable categories on the platform, and
+        # spread their names out so that they are quickly distinguishable from
+        # each other.
+        my $index = 0;
+        my $delta = POSIX::floor(@non_C_locales / @changeable_from_C_categories);
+        $delta = 1 if $delta < 1;
+
+        my $lc_all_string = "";
+        my $lc_numeric;
+
+        # Set up an LC_ALL value with each changeable category set to a
+        # different locale (if possible), and the non-changeable ones set to
+        # "C".
+        foreach my $category (@platform_categories) {
+            next if $category eq "LC_ALL";
+            $lc_all_string .= ";" if $lc_all_string;
+
+            my $locale;
+            if (grep { $category eq $_ } @changeable_from_C_categories) {
+                $locale = $non_C_locales[$index];
+                $index += $delta;
+                $index = 0 if $index >= @non_C_locales;
+            }
+            else {
+                $locale = "C";
+            }
+
+            $lc_all_string .= "$category=" . $locale;
+            $lc_numeric = $locale if $category eq "LC_NUMERIC";
+        }
+
+        fresh_perl_is(<<~EOT,
+                        # Some platforms (or shells) can't handle setting from
+                        # a disparate LC_ALL "".  Suppress any message.
+                        local \$ENV{PERL_BADLANG} = 0;
+
+                        local \$ENV{LC_ALL} = '$lc_all_string';
+                        system(qq($^X -I../lib -I. -e 'use POSIX qw(locale_h);
+                                                    setlocale(LC_ALL, "C");
+                                                    setlocale(LC_NUMERIC, "");
+                                                    print setlocale(LC_NUMERIC);'
+                                ));
+                        EOT
+                    $lc_numeric,
+                    { eval $switches },
+                    'Fetching a single category from a disparate "" environment'
+                  . ' works');
+    }
 }
 
 done_testing();
