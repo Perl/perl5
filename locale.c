@@ -3641,11 +3641,7 @@ S_win32_setlocale(pTHX_ int category, const char* locale)
      * use the particular category's variable if set; otherwise to use the LANG
      * variable. */
 
-    if (locale == NULL) {
-        return wrap_wsetlocale(category, NULL);
-    }
-
-    if (strEQ(locale, "")) {
+    if (locale != NULL && strEQ(locale, "")) {
         /* Note this function may change the locale, but that's ok because we
          * are about to change it anyway */
         locale = find_locale_from_environment(get_category_index(category));
