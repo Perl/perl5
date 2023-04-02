@@ -2591,46 +2591,68 @@ S_calculate_LC_ALL_string(pTHX_ const char ** category_locales_list,
 STATIC const char *
 S_find_locale_from_environment(pTHX_ const unsigned int index)
 {
-    /* NB: This function may actually change the locale on Windows.
+    /* NB: This function may actually change the locale on Windows.  It
+     * currently is designed to be called only from setting the locale on
+     * Windows, and POSIX 2008
      *
-     * On Windows systems, the concept of the POSIX ordering of environment
-     * variables is missing.  To increase portability of programs across
-     * platforms, the POSIX ordering is emulated on Windows.
+     * This function returns the locale specified by the program's environment
+     * for the category specified by our internal index number 'index'.  It
+     * therefore simulates:
+     *      setlocale(cat, "")
+     * but, except for some cases in Windows, doesn't actually change the
+     * locale; merely returns it.
      *
-     * And on POSIX 2008 systems without querylocale(), it is problematic
-     * getting the results of the POSIX 2008 equivalent of
-     *      setlocale(category,  "")
-     * (which gets the locale from the environment).
+     * The return need not be freed by the caller.  This
+     * promise relies on PerlEnv_getenv() returning a mortalized copy to us.
      *
-     * To ensure that we know exactly what those values are, we do the setting
-     * ourselves, using the documented algorithm (assuming the documentation is
-     * correct) rather than use "" as the locale.  This will lead to results
-     * that differ from native behavior if the native behavior differs from the
-     * standard documented value, but khw believes it is better to know what's
-     * going on, even if different from native, than to just guess.
+     * The simulation is needed only on certain platforms; otherwise, libc is
+     * called with "" to get the actual value(s).  The simulation is needed
+     * for:
      *
-     * Another option for the POSIX 2008 case would be, in a critical section,
-     * to save the global locale's current value, and do a straight
-     * setlocale(LC_ALL, "").  That would return our desired values, destroying
-     * the global locale's, which we would then restore.  But that could cause
-     * races with any other thread that is using the global locale and isn't
-     * using the mutex.  And, the only reason someone would have done that is
-     * because they are calling a library function, like in gtk, that calls
-     * setlocale(), and which can't be changed to use the mutex.  That wouldn't
-     * be a problem if this were to be done before any threads had switched,
-     * say during perl construction time.  But this code would still be needed
-     * for the general case.
+     *  1)  On Windows systems, the concept of the POSIX ordering of
+     *      environment variables is missing.  To increase portability of
+     *      programs across platforms, the POSIX ordering is emulated on
+     *      Windows.
+     *
+     *  2)  On POSIX 2008 systems without querylocale(), it is problematic
+     *      getting the results of the POSIX 2008 equivalent of
+     *
+     *          setlocale(category, "")
+     *
+     *      To ensure that we know exactly what those values are, we do the
+     *      setting ourselves, using the documented algorithm specified by the
+     *      POSIX standard (assuming the platform follows the Standard) rather
+     *      than use "" as the locale.  This will lead to results that differ
+     *      from native behavior if the native behavior differs from the
+     *      Standard's documented value, but khw believes it is better to know
+     *      what's going on, even if different from native, than to just guess.
+     *
+     *      glibc systems differ from this standard in having a LANGUAGE
+     *      environment variable used for just LC_MESSAGES.  This function does
+     *      NOT handle that.
+     *
+     *      Another option for the POSIX 2008 case would be, in a critical
+     *      section, to save the global locale's current value, and do a
+     *      straight setlocale(LC_ALL, "").  That would return our desired
+     *      values, destroying the global locale's, which we would then
+     *      restore.  But that could cause races with any other thread that is
+     *      using the global locale and isn't using the mutex.  And, the only
+     *      reason someone would have done that is because they are calling a
+     *      library function, like in gtk, that calls setlocale(), and which
+     *      can't be changed to use the mutex.  That wouldn't be a problem if
+     *      this were to be done before any threads had switched, say during
+     *      perl construction time.  But this code would still be needed for
+     *      the general case.
      *
      * The Windows and POSIX 2008 differ in that the ultimate fallback is "C"
      * in POSIX, and is the system default locale in Windows.  To get that
      * system default value, we actually have to call setlocale() on Windows.
      */
 
-    /* We rely on PerlEnv_getenv() returning a mortalized copy */
     const char * const lc_all = PerlEnv_getenv("LC_ALL");
 
-    /* Use any "LC_ALL" environment variable, as it overrides everything
-     * else. */
+    /* Use any "LC_ALL" environment variable, as it overrides everything else.
+     * */
     if (lc_all && strNE(lc_all, "")) {
         return lc_all;
     }
@@ -3632,14 +3654,10 @@ S_win32_setlocale(pTHX_ int category, const char* locale)
      * means on Windows to get the machine default, which is set via the
      * computer's "Regional and Language Options" (or its current equivalent).
      * In POSIX, it instead means to find the locale from the user's
-     * environment.  This routine changes the Windows behavior to first look in
-     * the environment, and, if anything is found, use that instead of going to
-     * the machine default.  If there is no environment override, the machine
-     * default is used, by calling the real setlocale() with "".
-     *
-     * The POSIX behavior is to use the LC_ALL variable if set; otherwise to
-     * use the particular category's variable if set; otherwise to use the LANG
-     * variable. */
+     * environment.  This routine changes the Windows behavior to try the POSIX
+     * behavior first.  Further details are in the called function
+     * find_locale_from_environment().
+     */
 
     if (locale != NULL && strEQ(locale, "")) {
         /* Note this function may change the locale, but that's ok because we
