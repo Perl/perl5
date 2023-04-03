@@ -253,10 +253,7 @@ sub OtherSouper::method { "Isidore Ropen, Draft Manager" }
    my @ret = $o->SUPER::method('whatever');
    ::is $ret[0], $o, 'object passed to SUPER::method';
    ::is $ret[1], 'whatever', 'argument passed to SUPER::method';
-   {
-       no warnings qw(syntax deprecated);
-       @ret = $o->SUPER'method('whatever');
-   }
+   @ret = $o->SUPER'method('whatever');
    ::is $ret[0], $o, "object passed to SUPER'method";
    ::is $ret[1], 'whatever', "argument passed to SUPER'method";
    @ret = Saab->SUPER::method;

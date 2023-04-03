@@ -237,7 +237,6 @@ eval { @b = sort twoface 4,1 };
 cmp_ok(substr($@,0,4), 'eq', 'good', 'twoface eval');
 
 eval <<'CODE';
-    no warnings qw(deprecated syntax);
     my @result = sort main'Backwards 'one', 'two';
 CODE
 cmp_ok($@,'eq','',q(old skool package));
