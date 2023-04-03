@@ -1877,8 +1877,6 @@ S_bool_setlocale_2008_i(pTHX_
                            "bool_setlocale_2008_i: now using C"
                            " object=%p\n", PL_C_locale_obj));
 
-    locale_t new_obj;
-
     /* These two objects are special:
      *  LC_GLOBAL_LOCALE    because it is undefined behavior to call
      *                      newlocale() with it as a parameter.
@@ -1889,6 +1887,7 @@ S_bool_setlocale_2008_i(pTHX_
      * newlocale(). */
     bool entry_obj_is_special = (   entry_obj == LC_GLOBAL_LOCALE
                                  || entry_obj == PL_C_locale_obj);
+    locale_t new_obj;
 
     /* PL_C_locale_obj is LC_ALL set to the C locale.  If this call is to
      * switch to LC_ALL => C, simply use that object.  But in fact, we already
