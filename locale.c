@@ -1926,6 +1926,21 @@ S_bool_setlocale_2008_i(pTHX_
                                    " duping the input\n", basis_obj));
         }
 
+#  define DEBUG_NEW_OBJECT_CREATED(category, locale, new, old, caller_line) \
+      DEBUG_Lv(PerlIO_printf(Perl_debug_log,                                \
+                             "bool_setlocale_2008_i(%s, %s): created %p"    \
+                             " while freeing %p; called from %" LINE_Tf     \
+                             " via %" LINE_Tf "\n",                         \
+                             category, locale, new, old,                    \
+                             caller_line, __LINE__))
+#  define DEBUG_NEW_OBJECT_FAILED(category, locale, basis_obj)              \
+      DEBUG_L(PerlIO_printf(Perl_debug_log,                                 \
+                            "bool_setlocale_2008_i: creating new object"    \
+                            " for (%s '%s') from %p failed; called from %"  \
+                            LINE_Tf " via %" LINE_Tf "\n",                  \
+                            category, locale, basis_obj,                    \
+                            caller_line, __LINE__));
+
         /* Ready to create a new locale by modification of the existing one.
          *
          * NOTE: This code may incorrectly show up as a leak under the address
@@ -1935,22 +1950,16 @@ S_bool_setlocale_2008_i(pTHX_
         new_obj = newlocale(mask, new_locale, basis_obj);
 
         if (! new_obj) {
-            DEBUG_L(PerlIO_printf(Perl_debug_log,
-                                  "bool_setlocale_2008_i: creating new object"
-                                  " for (%s '%s') from %p failed; called from %"
-                                  LINE_Tf " via %" LINE_Tf "\n",
-                                  category_names[index], new_locale, basis_obj,
-                                  caller_line, __LINE__));
+            DEBUG_NEW_OBJECT_FAILED(category_names[index], new_locale,
+                                    basis_obj);
 
             /* Failed.  Likely this is because the proposed new locale isn't
              * valid on this system. */
             goto must_restore_state;
         }
 
-        DEBUG_Lv(PerlIO_printf(Perl_debug_log,
-                               "(%" LINE_Tf "): bool_setlocale_2008_i created %p"
-                               " while freeing %p\n",
-                               caller_line, new_obj, basis_obj));
+            DEBUG_NEW_OBJECT_CREATED(category_names[index], new_locale,
+                                     new_obj, basis_obj, caller_line);
 
         /* Here, successfully created an object representing the desired
          * locale; now switch into it */
@@ -1959,6 +1968,10 @@ S_bool_setlocale_2008_i(pTHX_
             locale_panic_(Perl_form(aTHX_ "bool_setlocale_2008_i: switching"
                                           " into new locale failed\n"));
         }
+
+#  undef DEBUG_NEW_OBJECT_CREATED
+#  undef DEBUG_NEW_OBJECT_FAILED
+
     }
 
     DEBUG_Lv(PerlIO_printf(Perl_debug_log,
