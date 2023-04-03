@@ -1944,18 +1944,8 @@ S_bool_setlocale_2008_i(pTHX_
                                   caller_line, __LINE__));
 
             /* Failed.  Likely this is because the proposed new locale isn't
-             * valid on this system.  But we earlier switched to the LC_ALL=>C
-             * locale in anticipation of it succeeding,  Now have to switch
-             * back to the state upon entry */
-            if (! uselocale(entry_obj)) {
-                setlocale_failure_panic_i(index, "switching back to",
-                                          locale_on_entry, __LINE__,
-                                          caller_line);
-                NOT_REACHED; /* NOTREACHED */
-            }
-
-            SET_EINVAL;
-            return false;
+             * valid on this system. */
+            goto must_restore_state;
         }
 
         DEBUG_Lv(PerlIO_printf(Perl_debug_log,
@@ -2023,6 +2013,17 @@ S_bool_setlocale_2008_i(pTHX_
 #  endif
 
     return true;
+
+  must_restore_state:
+
+    /* We earlier switched to the LC_ALL => C locale in anticipation of it
+     * succeeding,  Now have to switch back to the state upon entry.  */
+    if (! uselocale(entry_obj)) {
+        setlocale_failure_panic_i(index, "switching back to",
+                                  locale_on_entry, __LINE__, caller_line);
+    }
+
+    return false;
 }
 
 /*---------------------------------------------------------------------------*/
