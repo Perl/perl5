@@ -7072,7 +7072,7 @@ S_get_LC_ALL_display(pTHX);
 #   endif
 #   if defined(USE_POSIX_2008_LOCALE)
 STATIC bool
-S_bool_setlocale_2008_i(pTHX_ const unsigned int index, const char *new_locale, const line_t line);
+S_bool_setlocale_2008_i(pTHX_ const unsigned int index, const char *new_locale, const line_t caller_line);
 #     define PERL_ARGS_ASSERT_BOOL_SETLOCALE_2008_I \
         assert(new_locale)
 
