@@ -4413,7 +4413,7 @@ S	|const char *|get_LC_ALL_display
 S	|bool	|bool_setlocale_2008_i					\
 				|const unsigned int index		\
 				|NN const char *new_locale		\
-				|const line_t line
+				|const line_t caller_line
 S	|const char *|querylocale_2008_i				\
 				|const unsigned int index		\
 				|const line_t line

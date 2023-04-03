@@ -1763,8 +1763,8 @@ S_bool_setlocale_2008_i(pTHX_
         /* Our internal index of the 'category' setlocale is called with */
         const unsigned int index,
 
-        const char * new_locale, /* The locale to set the category to */
-        const line_t line     /* Called from this line number */
+        const char * new_locale,    /* The locale to set the category to */
+        const line_t caller_line    /* Called from this line number */
        )
 {
     PERL_ARGS_ASSERT_BOOL_SETLOCALE_2008_I;
@@ -1809,7 +1809,7 @@ S_bool_setlocale_2008_i(pTHX_
         DEBUG_Lv(PerlIO_printf(Perl_debug_log,
                  "(%" LINE_Tf "): bool_setlocale_2008_i"
                  " no-op to change to what it already was\n",
-                 line));
+                 caller_line));
         return true;
     }
 
@@ -1830,7 +1830,7 @@ S_bool_setlocale_2008_i(pTHX_
     if (strchr(new_locale, ';')) {
         assert(index == LC_ALL_INDEX_);
 
-        if (setlocale_from_aggregate_LC_ALL(new_locale, line)) {
+        if (setlocale_from_aggregate_LC_ALL(new_locale, caller_line)) {
             return true;
         }
 
@@ -1864,13 +1864,14 @@ S_bool_setlocale_2008_i(pTHX_
 
         /* Not being able to change to the C locale is severe; don't keep
          * going.  */
-        setlocale_failure_panic_i(index, locale_on_entry, "C", __LINE__, line);
+        setlocale_failure_panic_i(index, locale_on_entry, "C",
+                                  __LINE__, caller_line);
         NOT_REACHED; /* NOTREACHED */
     }
 
     DEBUG_Lv(PerlIO_printf(Perl_debug_log,
              "(%" LINE_Tf "): bool_setlocale_2008_i now using C"
-             " object=%p\n", line, PL_C_locale_obj));
+             " object=%p\n", caller_line, PL_C_locale_obj));
 
     locale_t new_obj;
 
@@ -1892,7 +1893,7 @@ S_bool_setlocale_2008_i(pTHX_
     if (mask == LC_ALL_MASK && isNAME_C_OR_POSIX(new_locale)) {
         DEBUG_Lv(PerlIO_printf(Perl_debug_log, "(%" LINE_Tf "):"
                                                " bool_setlocale_2008_i will stay"
-                                               " in C object\n", line));
+                                               " in C object\n", caller_line));
         new_obj = PL_C_locale_obj;
 
         /* 'entry_obj' is now dangling, of no further use to anyone (unless it
@@ -1915,14 +1916,14 @@ S_bool_setlocale_2008_i(pTHX_
             basis_obj = duplocale(basis_obj);
             if (! basis_obj) {
                 locale_panic_(Perl_form(aTHX_ "(%" LINE_Tf "): duplocale failed",
-                                              line));
+                                              caller_line));
                 NOT_REACHED; /* NOTREACHED */
             }
 
             DEBUG_Lv(PerlIO_printf(Perl_debug_log,
                                    "(%" LINE_Tf "): bool_setlocale_2008_i"
                                    " created %p by duping the input\n",
-                                   line, basis_obj));
+                                   caller_line, basis_obj));
         }
 
         /* Ready to create a new locale by modification of the existing one.
@@ -1938,7 +1939,7 @@ S_bool_setlocale_2008_i(pTHX_
                                   " (%" LINE_Tf "): bool_setlocale_2008_i"
                                   " creating new object from %p failed:"
                                   " errno=%d\n",
-                                  line, basis_obj, GET_ERRNO));
+                                  caller_line, basis_obj, GET_ERRNO));
 
             /* Failed.  Likely this is because the proposed new locale isn't
              * valid on this system.  But we earlier switched to the LC_ALL=>C
@@ -1946,7 +1947,8 @@ S_bool_setlocale_2008_i(pTHX_
              * back to the state upon entry */
             if (! uselocale(entry_obj)) {
                 setlocale_failure_panic_i(index, "switching back to",
-                                          locale_on_entry, __LINE__, line);
+                                          locale_on_entry, __LINE__,
+                                          caller_line);
                 NOT_REACHED; /* NOTREACHED */
             }
 
@@ -1956,7 +1958,8 @@ S_bool_setlocale_2008_i(pTHX_
 
         DEBUG_Lv(PerlIO_printf(Perl_debug_log,
                                "(%" LINE_Tf "): bool_setlocale_2008_i created %p"
-                               " while freeing %p\n", line, new_obj, basis_obj));
+                               " while freeing %p\n",
+                               caller_line, new_obj, basis_obj));
 
         /* Here, successfully created an object representing the desired
          * locale; now switch into it */
@@ -1964,13 +1967,13 @@ S_bool_setlocale_2008_i(pTHX_
             freelocale(new_obj);
             locale_panic_(Perl_form(aTHX_ "(%" LINE_Tf "): bool_setlocale_2008_i"
                                           " switching into new locale failed",
-                                          line));
+                                          caller_line));
         }
     }
 
     DEBUG_Lv(PerlIO_printf(Perl_debug_log,
              "(%" LINE_Tf "): bool_setlocale_2008_i now using %p\n",
-             line, new_obj));
+             caller_line, new_obj));
 
 #  ifdef MULTIPLICITY   /* Unlikely, but POSIX 2008 functions could be
                            Configured to be used on unthreaded perls, in which
@@ -1981,7 +1984,7 @@ S_bool_setlocale_2008_i(pTHX_
             PerlIO_printf(Perl_debug_log,
                           "(%" LINE_Tf "): PL_cur_locale_obj"
                           " was %p, now is %p\n",
-                          line, PL_cur_locale_obj, new_obj);
+                          caller_line, PL_cur_locale_obj, new_obj);
         }
     }
 
