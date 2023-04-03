@@ -1819,6 +1819,10 @@ S_bool_setlocale_2008_i(pTHX_
 
     if (strEQ(new_locale, "")) {
         new_locale = find_locale_from_environment(index);
+        if (! new_locale) {
+            SET_EINVAL;
+            return false;
+        }
     }
 
 #  endif
