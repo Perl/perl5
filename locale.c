@@ -1961,8 +1961,15 @@ S_bool_setlocale_2008_i(pTHX_
                 DEBUG_NEW_OBJECT_FAILED(category_names[index], new_locale,
                                         basis_obj);
 
-                /* Failed.  Likely this is because the proposed new locale isn't
-                * valid on this system. */
+                /* Since the call failed, it didn't trash 'basis_obj', which is
+                 * a dup for these objects, and hence would leak if we don't
+                 * free it.  XXX However, something is seriously wrong if we
+                 * can't switch to C or the global locale, so maybe should
+                 * panic instead */
+                if (entry_obj_is_special) {
+                    freelocale(basis_obj);
+                }
+
                 goto must_restore_state;
             }
 
