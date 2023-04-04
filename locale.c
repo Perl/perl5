@@ -1494,12 +1494,12 @@ S_less_dicey_bool_setlocale_r(pTHX_ const int cat, const char * locale)
 #    include <libintl.h>
 #  endif
 
-#  define querylocale_i(i)    querylocale_2008_i(i)
+#  define querylocale_i(i)    querylocale_2008_i(i, __LINE__)
 #  define querylocale_c(cat)  querylocale_i(cat##_INDEX_)
 #  define querylocale_r(cat)  querylocale_i(get_category_index(cat))
 
 STATIC const char *
-S_querylocale_2008_i(pTHX_ const unsigned int index)
+S_querylocale_2008_i(pTHX_ const unsigned int index, const line_t caller_line)
 {
     PERL_ARGS_ASSERT_QUERYLOCALE_2008_I;
     assert(index <= LC_ALL_INDEX_);
@@ -1549,8 +1549,10 @@ S_querylocale_2008_i(pTHX_ const unsigned int index)
     const locale_t cur_obj = uselocale((locale_t) 0);
     const char * retval;
 
-    DEBUG_Lv(PerlIO_printf(Perl_debug_log, "querylocale_2008_i(%s) on %p\n",
-                                           category_names[index], cur_obj));
+    DEBUG_Lv(PerlIO_printf(Perl_debug_log, "querylocale_2008_i(%s) on %p;"
+                                           " called from %" LINE_Tf "\n",
+                                           category_names[index], cur_obj,
+                                           caller_line));
 
     if (UNLIKELY(cur_obj == LC_GLOBAL_LOCALE)) {
 

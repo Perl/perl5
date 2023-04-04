@@ -7079,7 +7079,7 @@ S_bool_setlocale_2008_i(pTHX_ const unsigned int index, const char *new_locale, 
         assert(new_locale)
 
 STATIC const char *
-S_querylocale_2008_i(pTHX_ const unsigned int index);
+S_querylocale_2008_i(pTHX_ const unsigned int index, const line_t line);
 #     define PERL_ARGS_ASSERT_QUERYLOCALE_2008_I
 
 STATIC const char *
