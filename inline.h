@@ -2812,7 +2812,7 @@ Perl_cx_pushsub(pTHX_ PERL_CONTEXT *cx, CV *cv, OP *retop, bool hasargs)
 
     PERL_DTRACE_PROBE_ENTRY(cv);
     cx->blk_sub.old_cxsubix     = PL_curstackinfo->si_cxsubix;
-    PL_curstackinfo->si_cxsubix = cx - PL_curstackinfo->si_cxstack;
+    PL_curstackinfo->si_cxsubix = (I32)(cx - PL_curstackinfo->si_cxstack);
     cx->blk_sub.cv = cv;
     cx->blk_sub.olddepth = CvDEPTH(cv);
     cx->blk_sub.prevcomppad = PL_comppad;
@@ -2887,7 +2887,7 @@ Perl_cx_pushformat(pTHX_ PERL_CONTEXT *cx, CV *cv, OP *retop, GV *gv)
     PERL_ARGS_ASSERT_CX_PUSHFORMAT;
 
     cx->blk_format.old_cxsubix = PL_curstackinfo->si_cxsubix;
-    PL_curstackinfo->si_cxsubix= cx - PL_curstackinfo->si_cxstack;
+    PL_curstackinfo->si_cxsubix= (I32)(cx - PL_curstackinfo->si_cxstack);
     cx->blk_format.cv          = cv;
     cx->blk_format.retop       = retop;
     cx->blk_format.gv          = gv;
@@ -2948,7 +2948,7 @@ Perl_cx_pusheval(pTHX_ PERL_CONTEXT *cx, OP *retop, SV *namesv)
     Perl_push_evalortry_common(aTHX_ cx, retop, namesv);
 
     cx->blk_eval.old_cxsubix    = PL_curstackinfo->si_cxsubix;
-    PL_curstackinfo->si_cxsubix = cx - PL_curstackinfo->si_cxstack;
+    PL_curstackinfo->si_cxsubix = (I32)(cx - PL_curstackinfo->si_cxstack);
 }
 
 PERL_STATIC_INLINE void
