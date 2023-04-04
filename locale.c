@@ -6342,14 +6342,14 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 
     if (! PL_C_locale_obj) {
         PL_C_locale_obj = newlocale(LC_ALL_MASK, "C", (locale_t) 0);
-    }
-    if (! PL_C_locale_obj) {
-        locale_panic_(Perl_form(aTHX_
+        if (! PL_C_locale_obj) {
+            locale_panic_(Perl_form(aTHX_
                                 "Cannot create POSIX 2008 C locale object"));
-    }
+        }
 
-    DEBUG_Lv(PerlIO_printf(Perl_debug_log, "created C object %p\n",
-                           PL_C_locale_obj));
+        DEBUG_Lv(PerlIO_printf(Perl_debug_log, "created C object %p\n",
+                                               PL_C_locale_obj));
+    }
 
     /* Switch to using the POSIX 2008 interface now.  This would happen below
      * anyway, but deferring it can lead to leaks of memory that would also get
