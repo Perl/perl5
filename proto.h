@@ -7080,11 +7080,6 @@ STATIC const char *
 S_querylocale_2008_i(pTHX_ const unsigned int index, const line_t line);
 #     define PERL_ARGS_ASSERT_QUERYLOCALE_2008_I
 
-STATIC const char *
-S_setlocale_from_aggregate_LC_ALL(pTHX_ const char *locale, const line_t line);
-#     define PERL_ARGS_ASSERT_SETLOCALE_FROM_AGGREGATE_LC_ALL \
-        assert(locale)
-
 STATIC locale_t
 S_use_curlocale_scratch(pTHX);
 #     define PERL_ARGS_ASSERT_USE_CURLOCALE_SCRATCH

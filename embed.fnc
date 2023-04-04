@@ -4421,9 +4421,6 @@ S	|bool	|bool_setlocale_2008_i					\
 S	|const char *|querylocale_2008_i				\
 				|const unsigned int index		\
 				|const line_t line
-S	|const char *|setlocale_from_aggregate_LC_ALL			\
-				|NN const char *locale			\
-				|const line_t line
 S	|locale_t|use_curlocale_scratch
 #     if defined(LC_ALL)
 S	|parse_LC_ALL_string_return|parse_LC_ALL_string 		\
