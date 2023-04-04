@@ -208,6 +208,12 @@
  * wrong.  Whereas, you do have to think about thread interactions when using a
  * query.
  *
+ * Additionally, for the implementations where there aren't any complications,
+ * a setlocale_i() is defined that is like plain setlocale(), returning the new
+ * locale.  Thus it combines a bool_setlocale_X() with a querylocale_X().  It
+ * is used only for performance on implementations that allow it, such as
+ * non-threaded perls.
+ *
  * There are also a few other macros herein that use this naming convention to
  * describe their category parameter.
  *
@@ -1762,12 +1768,16 @@ S_stdize_locale(pTHX_ const int category,
  *                      to panic.
  * 3) querylocale_X     to see what the given category's locale is
  *
+ * 4) setlocale_i()     is defined only in those implementations where the bool
+ *                      and query forms are essentially the same, and can be
+ *                      combined to save CPU time.
+ *
  * Each implementation below is separated by ==== lines, and includes bool,
  * void, and query macros.  The query macros are first, followed by any
  * functions needed to implement them.  Then come the bool, again followed by
- * any implementing functions  Then are the void macros.  Finally are any
- * helper functions.  The sets in each implementation are separated by ----
- * lines.
+ * any implementing functions  Then are the void macros; next is setlocale_i if
+ * present on this implementation.  Finally are any helper functions.  The sets
+ * in each implementation are separated by ---- lines.
  *
  * The returned strings from all the querylocale...() forms in all
  * implementations are thread-safe, and the caller should not free them,
@@ -1817,8 +1827,41 @@ S_stdize_locale(pTHX_ const int category,
 #  define void_setlocale_c(cat, locale) void_setlocale_r(cat, locale)
 #  define void_setlocale_i(i, locale)   void_setlocale_r(categories[i], locale)
 
-/*===========================================================================*/
+/*---------------------------------------------------------------------------*/
 
+/* setlocale_i is only defined for Configurations where the libc setlocale()
+ * doesn't need any tweaking.  It allows for some shortcuts */
+#  ifndef USE_LOCALE_THREADS
+#    define setlocale_i(i, locale)   stdized_setlocale(categories[i], locale)
+
+#  elif defined(WIN32) && defined(USE_THREAD_SAFE_LOCALE)
+
+/* On Windows, we don't know at compile time if we are in thread-safe mode or
+ * not.  If we are, we can just return the result of the layer below us.  If we
+ * are in unsafe mode, we need to first copy that result to a safe place while
+ * in a critical section */
+
+#    define setlocale_i(i, locale)   S_setlocale_i(aTHX_ categories[i], locale)
+
+STATIC const char *
+S_setlocale_i(pTHX_ const int category, const char * locale)
+{
+    if (LIKELY(_configthreadlocale(0) == _ENABLE_PER_THREAD_LOCALE)) {
+        return stdized_setlocale(category, locale);
+    }
+
+    gwLOCALE_LOCK;
+    const char * retval = save_to_buffer(stdized_setlocale(category, locale),
+                                         &PL_setlocale_buf,
+                                         &PL_setlocale_bufsize);
+    gwLOCALE_UNLOCK;
+
+    return retval;
+}
+
+#  endif
+
+/*===========================================================================*/
 #elif   defined(USE_LOCALE_THREADS)                 \
    && ! defined(USE_THREAD_SAFE_LOCALE)
 
@@ -4169,8 +4212,17 @@ S_native_querylocale_i(pTHX_ const unsigned int cat_index)
     {
         /* Here, not LC_ALL, and not LC_NUMERIC: the actual and native values
          * match */
+
+#  ifdef setlocale_i    /* Can shortcut if this is defined */
+
+        return setlocale_i(cat_index, NULL);
+
+#  else
+
         return save_to_buffer(querylocale_i(cat_index),
                               &PL_setlocale_buf, &PL_setlocale_bufsize);
+#  endif
+
     }
 
     /* Below, querying LC_ALL */
@@ -4279,6 +4331,17 @@ Perl_setlocale(const int category, const char * locale)
         SET_EINVAL;
         return NULL;
     }
+
+#  ifdef setlocale_i
+
+    /* setlocale_i() gets defined only on Configurations that use setlocale()
+     * in a simple manner that adequately handles all cases.  If this category
+     * doesn't have any perl complications, just do that. */
+    if (! update_functions[cat_index]) {
+        return setlocale_i(cat_index, locale);
+    }
+
+#  endif
 
     /* Get current locale */
     const char * current_locale = native_querylocale_i(cat_index);
