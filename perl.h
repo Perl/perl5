@@ -7447,7 +7447,8 @@ cannot have changed since the precalculation.
                     (! PL_numeric_underlying && PL_numeric_standard < 2)
 
 #  define DECLARATION_FOR_LC_NUMERIC_MANIPULATION                           \
-    void (*_restore_LC_NUMERIC_function)(pTHX) = NULL
+    void (*_restore_LC_NUMERIC_function)(pTHX_ const char * const file,     \
+                                               const line_t line) = NULL
 
 #  define STORE_LC_NUMERIC_SET_TO_NEEDED_IN(in)                             \
         STMT_START {                                                        \
@@ -7457,14 +7458,14 @@ cannot have changed since the precalculation.
                      || (! _in_lc_numeric && NOT_IN_NUMERIC_STANDARD_)));   \
             if (_in_lc_numeric) {                                           \
                 if (NOT_IN_NUMERIC_UNDERLYING_) {                           \
-                    Perl_set_numeric_underlying(aTHX);                      \
+                    Perl_set_numeric_underlying(aTHX_ __FILE__, __LINE__);  \
                     _restore_LC_NUMERIC_function                            \
                                             = &Perl_set_numeric_standard;   \
                 }                                                           \
             }                                                               \
             else {                                                          \
                 if (NOT_IN_NUMERIC_STANDARD_) {                             \
-                    Perl_set_numeric_standard(aTHX);                        \
+                    Perl_set_numeric_standard(aTHX_ __FILE__, __LINE__);    \
                     _restore_LC_NUMERIC_function                            \
                                             = &Perl_set_numeric_underlying; \
                 }                                                           \
@@ -7477,7 +7478,7 @@ cannot have changed since the precalculation.
 #  define RESTORE_LC_NUMERIC()                                              \
         STMT_START {                                                        \
             if (_restore_LC_NUMERIC_function) {                             \
-                _restore_LC_NUMERIC_function(aTHX);                         \
+                _restore_LC_NUMERIC_function(aTHX_ __FILE__, __LINE__);     \
             }                                                               \
             LC_NUMERIC_UNLOCK;                                              \
         } STMT_END
@@ -7490,7 +7491,7 @@ cannot have changed since the precalculation.
                                "%s: %d: lc_numeric standard=%d\n",          \
                                 __FILE__, __LINE__, PL_numeric_standard));  \
             if (UNLIKELY(NOT_IN_NUMERIC_STANDARD_)) {                       \
-                Perl_set_numeric_standard(aTHX);                            \
+                Perl_set_numeric_standard(aTHX_ __FILE__, __LINE__);        \
             }                                                               \
             DEBUG_Lv(PerlIO_printf(Perl_debug_log,                          \
                                  "%s: %d: lc_numeric standard=%d\n",        \
@@ -7501,7 +7502,7 @@ cannot have changed since the precalculation.
 	STMT_START {                                                        \
           /*assert(PL_locale_mutex_depth > 0);*/                            \
             if (NOT_IN_NUMERIC_UNDERLYING_) {                               \
-                Perl_set_numeric_underlying(aTHX);                          \
+                Perl_set_numeric_underlying(aTHX_ __FILE__, __LINE__);      \
             }                                                               \
         } STMT_END
 
@@ -7512,7 +7513,7 @@ cannot have changed since the precalculation.
             LC_NUMERIC_LOCK(NOT_IN_NUMERIC_STANDARD_);                      \
             if (NOT_IN_NUMERIC_STANDARD_) {                                 \
                 _restore_LC_NUMERIC_function = &Perl_set_numeric_underlying;\
-                Perl_set_numeric_standard(aTHX);                            \
+                Perl_set_numeric_standard(aTHX_ __FILE__, __LINE__);        \
             }                                                               \
         } STMT_END
 
@@ -7522,7 +7523,7 @@ cannot have changed since the precalculation.
 	STMT_START {                                                        \
             LC_NUMERIC_LOCK(NOT_IN_NUMERIC_UNDERLYING_);                    \
             if (NOT_IN_NUMERIC_UNDERLYING_) {                               \
-                Perl_set_numeric_underlying(aTHX);                          \
+                Perl_set_numeric_underlying(aTHX_ __FILE__, __LINE__);      \
                 _restore_LC_NUMERIC_function = &Perl_set_numeric_standard;  \
             }                                                               \
         } STMT_END

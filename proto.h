@@ -4164,12 +4164,14 @@ Perl_set_context(void *t);
         assert(t)
 
 PERL_CALLCONV void
-Perl_set_numeric_standard(pTHX);
-#define PERL_ARGS_ASSERT_SET_NUMERIC_STANDARD
+Perl_set_numeric_standard(pTHX_ const char *file, const line_t caller_line);
+#define PERL_ARGS_ASSERT_SET_NUMERIC_STANDARD   \
+        assert(file)
 
 PERL_CALLCONV void
-Perl_set_numeric_underlying(pTHX);
-#define PERL_ARGS_ASSERT_SET_NUMERIC_UNDERLYING
+Perl_set_numeric_underlying(pTHX_ const char *file, const line_t caller_line);
+#define PERL_ARGS_ASSERT_SET_NUMERIC_UNDERLYING \
+        assert(file)
 
 PERL_CALLCONV void
 Perl_setdefout(pTHX_ GV *gv);

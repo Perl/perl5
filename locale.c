@@ -2790,15 +2790,18 @@ S_new_numeric(pTHX_ const char *newnum, bool force)
      * the radix being a non-dot.  (Core operations that need the underlying
      * locale change to it temporarily). */
     if (! PL_numeric_standard) {
-        set_numeric_standard();
+        set_numeric_standard(__FILE__, __LINE__);
     }
 }
 
 #  endif
 
 void
-Perl_set_numeric_standard(pTHX)
+Perl_set_numeric_standard(pTHX_ const char * const file, const line_t line)
 {
+    PERL_ARGS_ASSERT_SET_NUMERIC_STANDARD;
+    PERL_UNUSED_ARG(file);      /* Some Configurations ignore these */
+    PERL_UNUSED_ARG(line);
 
 #  ifdef USE_LOCALE_NUMERIC
 
@@ -2809,10 +2812,11 @@ Perl_set_numeric_standard(pTHX)
      * if toggling isn't necessary according to our records (which could be
      * wrong if some XS code has changed the locale behind our back) */
 
-    DEBUG_L(PerlIO_printf(Perl_debug_log,
-                                  "Setting LC_NUMERIC locale to standard C\n"));
+    DEBUG_L(PerlIO_printf(Perl_debug_log, "Setting LC_NUMERIC locale to"
+                                          " standard C; called from %s: %"
+                                          LINE_Tf "\n", file, line));
 
-    void_setlocale_c_with_caller(LC_NUMERIC, "C", __FILE__,  __LINE__);
+    void_setlocale_c_with_caller(LC_NUMERIC, "C", file, line);
     PL_numeric_standard = TRUE;
     sv_setpv(PL_numeric_radix_sv, C_decimal_point);
     SvUTF8_off(PL_numeric_radix_sv);
@@ -2824,8 +2828,11 @@ Perl_set_numeric_standard(pTHX)
 }
 
 void
-Perl_set_numeric_underlying(pTHX)
+Perl_set_numeric_underlying(pTHX_ const char * const file, const line_t line)
 {
+    PERL_ARGS_ASSERT_SET_NUMERIC_UNDERLYING;
+    PERL_UNUSED_ARG(file);      /* Some Configurations ignore these */
+    PERL_UNUSED_ARG(line);
 
 #  ifdef USE_LOCALE_NUMERIC
 
@@ -2837,11 +2844,12 @@ Perl_set_numeric_underlying(pTHX)
      * if toggling isn't necessary according to our records (which could be
      * wrong if some XS code has changed the locale behind our back) */
 
-    DEBUG_L(PerlIO_printf(Perl_debug_log, "Setting LC_NUMERIC locale to %s\n",
-                                          PL_numeric_name));
+    DEBUG_L(PerlIO_printf(Perl_debug_log, "Setting LC_NUMERIC locale to %s;"
+                                          " called from %s: %" LINE_Tf "\n",
+                                          PL_numeric_name, file, line));
+    /* Maybe not in init? assert(PL_locale_mutex_depth > 0);*/
 
-    void_setlocale_c_with_caller(LC_NUMERIC, PL_numeric_name,
-                                 __FILE__,  __LINE__);
+    void_setlocale_c_with_caller(LC_NUMERIC, PL_numeric_name, file, line);
     PL_numeric_underlying = TRUE;
     sv_setsv_nomg(PL_numeric_radix_sv, PL_underlying_radix_sv);
 
@@ -3651,14 +3659,14 @@ Perl_setlocale(const int category, const char * locale)
          * (if we aren't there already) so as to get the correct results.  Our
          * records for all the other categories are valid without switching */
         if (! PL_numeric_underlying) {
-            set_numeric_underlying();
+            set_numeric_underlying(__FILE__, __LINE__);
             toggled = TRUE;
         }
 
         retval = querylocale_c(LC_ALL);
 
         if (toggled) {
-            set_numeric_standard();
+            set_numeric_standard(__FILE__, __LINE__);
         }
 
         DEBUG_L(PerlIO_printf(Perl_debug_log, "%s\n",

@@ -2921,8 +2921,12 @@ p	|void	|setfd_cloexec_or_inhexec_by_sysfdness			\
 Tp	|void	|setfd_inhexec	|int fd
 p	|void	|setfd_inhexec_for_sysfd				\
 				|int fd
-Xp	|void	|set_numeric_standard
-Xp	|void	|set_numeric_underlying
+Xp	|void	|set_numeric_standard					\
+				|NN const char *file			\
+				|const line_t caller_line
+Xp	|void	|set_numeric_underlying 				\
+				|NN const char *file			\
+				|const line_t caller_line
 Cp	|HEK *	|share_hek	|NN const char *str			\
 				|SSize_t len				\
 				|U32 hash
