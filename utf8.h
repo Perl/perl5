@@ -374,7 +374,8 @@ are in the character. */
 
 /* For use in UTF8_IS_CONTINUATION().  This turns out to be 0xC0 in UTF-8,
  * E0 in UTF-EBCDIC */
-#define UTF_IS_CONTINUATION_MASK    ((U8) (0xFF << UTF_ACCUMULATION_SHIFT))
+#define UTF_IS_CONTINUATION_MASK \
+    ((U8) ((0xFF << UTF_ACCUMULATION_SHIFT) & 0xFF))
 
 /* This defines the bits that are to be in the continuation bytes of a
  * multi-byte UTF-8 encoded character that mark it is a continuation byte.
