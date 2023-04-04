@@ -1302,7 +1302,6 @@
 #       if defined(USE_POSIX_2008_LOCALE)
 #         define bool_setlocale_2008_i(a,b,c)   S_bool_setlocale_2008_i(aTHX_ a,b,c)
 #         define querylocale_2008_i(a,b)        S_querylocale_2008_i(aTHX_ a,b)
-#         define setlocale_from_aggregate_LC_ALL(a,b) S_setlocale_from_aggregate_LC_ALL(aTHX_ a,b)
 #         define use_curlocale_scratch()        S_use_curlocale_scratch(aTHX)
 #         if defined(LC_ALL)
 #           define parse_LC_ALL_string(a,b,c,d) S_parse_LC_ALL_string(aTHX_ a,b,c,d)
