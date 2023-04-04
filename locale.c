@@ -1992,6 +1992,13 @@ S_less_dicey_bool_setlocale_r(pTHX_ const int cat, const char * locale)
 #  define void_setlocale_c(cat, locale) void_setlocale_r(cat, locale)
 #  define void_setlocale_i(i, locale)   void_setlocale_r(categories[i], locale)
 
+/*---------------------------------------------------------------------------*/
+
+/* setlocale_i is only defined for Configurations where the libc setlocale()
+ * suffices for both querying and setting the locale.  It allows for some
+ * shortcuts */
+#  define setlocale_i(i, locale)  less_dicey_setlocale_r(categories[i], locale)
+
 /*===========================================================================*/
 
 #elif defined(USE_POSIX_2008_LOCALE)
