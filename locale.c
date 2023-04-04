@@ -1849,15 +1849,29 @@ S_bool_setlocale_2008_i(pTHX_
 
 #  endif
 
-    if (is_disparate_LC_ALL(new_locale)) {
-        assert(index == LC_ALL_INDEX_);
+    bool need_loop = false;
+    const char * new_locales[LC_ALL_INDEX_] = { NULL };
 
-        if (setlocale_from_aggregate_LC_ALL(new_locale, caller_line)) {
-            return true;
+    /* If we're going to have to parse the LC_ALL string, might as well do it
+     * now before we have made changes that we would have to back out of if the
+     * parse fails */
+    if (index == LC_ALL_INDEX_) {
+        switch (parse_LC_ALL_string(new_locale,
+                                    (const char **) &new_locales,
+                                    caller_line))
+        {
+          case invalid:
+            SET_EINVAL;
+            return false;
+
+          case no_array:
+            need_loop = false;
+            break;
+
+          case full_array:
+            need_loop = true;
+            break;
         }
-
-        SET_EINVAL;
-        return false;
     }
 
 #  ifdef HAS_GLIBC_LC_MESSAGES_BUG
@@ -1931,11 +1945,15 @@ S_bool_setlocale_2008_i(pTHX_
          * create the changed locale, trashing it iff successful.
          *
          * For the objects that are not to be modified by this function, we
-         * create a duplicate that gets trashed instead. */
+         * create a duplicate that gets trashed instead.
+         *
+         * Also if we will have to loop doing multiple newlocale()s, there is a
+         * chance we will succeed for the first few, and then fail, having to
+         * back out.  We need to duplicate 'entry_obj' in this case as well, so
+         * it remains valid as something to back out to. */
         locale_t basis_obj = entry_obj;
 
-        if (entry_obj_is_special) {
-
+        if (entry_obj_is_special || need_loop) {
             basis_obj = duplocale(basis_obj);
             if (! basis_obj) {
                 locale_panic_via_("duplocale failed", __FILE__, caller_line);
@@ -1968,8 +1986,11 @@ S_bool_setlocale_2008_i(pTHX_
          * sanitizer. We do not free this object under normal teardown, however
          * you can set PERL_DESTRUCT_LEVEL=2 to cause it to be freed.
          */
-            new_obj = newlocale(mask, new_locale, basis_obj);
 
+        /* If a single call to newlocale() will do */
+        if (! need_loop)
+        {
+            new_obj = newlocale(mask, new_locale, basis_obj);
             if (! new_obj) {
                 DEBUG_NEW_OBJECT_FAILED(category_names[index], new_locale,
                                         basis_obj);
@@ -1990,6 +2011,67 @@ S_bool_setlocale_2008_i(pTHX_
                                      new_obj, basis_obj, caller_line);
 
             update_PL_curlocales_i(index, new_locale, caller_line);
+        }
+        else {  /* Need multiple newlocale() calls */
+
+            /* Loop through the individual categories, setting the locale of
+             * each to the corresponding name previously populated into
+             * newlocales[].  Each iteration builds on the previous one, adding
+             * its category to what's already been calculated, and taking as a
+             * basis for what's been calculated 'basis_obj', which is updated
+             * each iteration to be the result of the previous one.  Upon
+             * success, newlocale() trashes the 'basis_obj' parameter to it.
+             * If any iteration fails, we immediately give up, restore the
+             * locale to what it was at the time this function was called
+             * (saved in 'entry_obj'), and return failure. */
+
+            /* Loop, using the previous iteration's result as the basis for the
+             * next one.  (The first time we effectively use the locale in
+             * force upon entry to this function.) */
+            for (unsigned int i = 0; i < LC_ALL_INDEX_; i++) {
+                new_obj = newlocale(category_masks[i],
+                                    new_locales[i],
+                                    basis_obj);
+                if (new_obj) {
+                    DEBUG_NEW_OBJECT_CREATED(category_names[i],
+                                             new_locales[i],
+                                             new_obj, basis_obj,
+                                             caller_line);
+                    basis_obj = new_obj;
+                    continue;
+                }
+
+                /* Failed.  Likely this is because the proposed new locale
+                 * isn't valid on this system. */
+
+                DEBUG_NEW_OBJECT_FAILED(category_names[i],
+                                        new_locales[i],
+                                        basis_obj);
+
+                /* newlocale() didn't trash this, since the function call
+                 * failed */
+                freelocale(basis_obj);
+
+                for (unsigned int j = 0; j < LC_ALL_INDEX_; j++) {
+                    Safefree(new_locales[j]);
+                }
+
+                goto must_restore_state;
+            }
+
+            /* Success for all categories. */
+            for (unsigned int i = 0; i < LC_ALL_INDEX_; i++) {
+                update_PL_curlocales_i(i, new_locales[i], caller_line);
+                Safefree(new_locales[i]);
+            }
+
+            /* We dup'd entry_obj in case we had to fall back to it.  The
+             * newlocale() above destroyed the dup when it first succeeded, but
+             * entry_obj itself is left dangling, so free it */
+            if (! entry_obj_is_special) {
+                freelocale(entry_obj);
+            }
+        }
     }
 
 #  undef DEBUG_NEW_OBJECT_CREATED
