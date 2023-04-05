@@ -505,6 +505,23 @@ S_positional_newlocale(int mask, const char * locale, locale_t base)
 #endif
 #ifdef USE_LOCALE
 
+/* Not all categories need be set to the same locale.  This macro determines if
+ * 'name' which represents LC_ALL is uniform or disparate.  There are two
+ * situations: 1) the platform uses unordered name=value pairs; 2) the platform
+ * uses ordered positional values, with a separator string between them */
+#  ifdef PERL_LC_ALL_SEPARATOR   /* positional */
+#    define is_disparate_LC_ALL(name)  cBOOL(instr(name, PERL_LC_ALL_SEPARATOR))
+#  else     /* name=value */
+
+    /* In the, hopefully never occurring, event that the platform doesn't use
+     * either mechanism for disparate LC_ALL's, assume the name=value pairs
+     * form, rather than taking the extreme step of refusing to compile.  Many
+     * programs won't have disparate locales, so will generally work */
+#    define PERL_LC_ALL_SEPARATOR  ";"
+#    define is_disparate_LC_ALL(name)  cBOOL(   strchr(name, ';')   \
+                                             && strchr(name, '='))
+#  endif
+
 PERL_STATIC_INLINE const char *
 S_mortalized_pv_copy(pTHX_ const char * const pv)
 {
@@ -1833,10 +1850,7 @@ S_bool_setlocale_2008_i(pTHX_
 
 #  endif
 
-    /* So far, it has worked that a semi-colon in the locale name means that
-     * the category is LC_ALL and it subsumes categories which don't all have
-     * the same locale.  This is the glibc syntax. */
-    if (strchr(new_locale, ';')) {
+    if (is_disparate_LC_ALL(new_locale)) {
         assert(index == LC_ALL_INDEX_);
 
         if (setlocale_from_aggregate_LC_ALL(new_locale, caller_line)) {
