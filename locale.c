@@ -6626,6 +6626,9 @@ S_toggle_locale_i(pTHX_ const unsigned cat_index,
                         const char * new_locale,
                         const line_t caller_line)
 {
+    PERL_ARGS_ASSERT_TOGGLE_LOCALE_I;
+    assert(cat_index <= LC_ALL_INDEX_);
+
     /* Changes the locale for the category specified by 'index' to 'new_locale,
      * if they aren't already the same.
      *
@@ -6633,15 +6636,9 @@ S_toggle_locale_i(pTHX_ const unsigned cat_index,
      * so can be switched back to with the companion function
      * restore_toggled_locale_i(),  (NULL if no restoral is necessary.) */
 
-    const char * locale_to_restore_to = NULL;
-
-    PERL_ARGS_ASSERT_TOGGLE_LOCALE_I;
-    assert(cat_index <= LC_ALL_INDEX_);
-
     /* Find the original locale of the category we may need to change, so that
      * it can be restored to later */
-
-    locale_to_restore_to = querylocale_i(cat_index);
+    const char * locale_to_restore_to = querylocale_i(cat_index);
 
     DEBUG_Lv(PerlIO_printf(Perl_debug_log,
              "(%" LINE_Tf "): toggle_locale_i: index=%d(%s), wanted=%s,"
