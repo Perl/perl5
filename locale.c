@@ -628,6 +628,15 @@ S_positional_newlocale(int mask, const char * locale, locale_t base)
 #ifdef HAS_IGNORED_LOCALE_CATEGORIES_
 #  undef NEWLOCALE_HANDLES_DISPARATE_LC_ALL
 #endif
+
+#ifdef USE_THREADS
+#  define savepv_if_threaded(x)    savepv(x)
+#  define Safefree_if_threaded(x)  Safefree(x)
+#else
+#  define savepv_if_threaded(x)    (x)
+#  define Safefree_if_threaded(x)
+#endif
+
 #ifdef USE_LOCALE
 
 /* Not all categories need be set to the same locale.  This macro determines if
