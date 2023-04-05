@@ -4234,14 +4234,6 @@ time C<Perl_setlocale> is called from the same thread.
 
 */
 
-#ifndef USE_LOCALE_NUMERIC
-#  define affects_LC_NUMERIC(cat) 0
-#elif defined(LC_ALL)
-#  define affects_LC_NUMERIC(cat) (cat == LC_NUMERIC || cat == LC_ALL)
-#else
-#  define affects_LC_NUMERIC(cat) (cat == LC_NUMERIC)
-#endif
-
 const char *
 Perl_setlocale(const int category, const char * locale)
 {
