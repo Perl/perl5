@@ -6458,7 +6458,10 @@ S_print_collxfrm_input_and_return(pTHX_
                   get_displayable_string(s, e, is_utf8),
                   ((xbuf == NULL)
                    ? "(null)"
-                   : _byte_dump_string((U8 *) xbuf + COLLXFRM_HDR_LEN, xlen, 0)),
+                   : ((xlen == 0)
+                      ? "(empty)"
+                      : _byte_dump_string((U8 *) xbuf + COLLXFRM_HDR_LEN,
+                                          xlen, 0))),
                   xlen);
 }
 
