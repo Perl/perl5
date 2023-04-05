@@ -26,14 +26,15 @@
 #define FEATURE_MODULE_TRUE_BIT             0x0800
 #define FEATURE_MULTIDIMENSIONAL_BIT        0x1000
 #define FEATURE_POSTDEREF_QQ_BIT            0x2000
-#define FEATURE_REFALIASING_BIT             0x4000
-#define FEATURE_SAY_BIT                     0x8000
-#define FEATURE_SIGNATURES_BIT              0x10000
-#define FEATURE_STATE_BIT                   0x20000
-#define FEATURE_SWITCH_BIT                  0x40000
-#define FEATURE_TRY_BIT                     0x80000
-#define FEATURE_UNIEVAL_BIT                 0x100000
-#define FEATURE_UNICODE_BIT                 0x200000
+#define FEATURE_QUOTE_IN_SYMBOL_BIT         0x4000
+#define FEATURE_REFALIASING_BIT             0x8000
+#define FEATURE_SAY_BIT                     0x10000
+#define FEATURE_SIGNATURES_BIT              0x20000
+#define FEATURE_STATE_BIT                   0x40000
+#define FEATURE_SWITCH_BIT                  0x80000
+#define FEATURE_TRY_BIT                     0x100000
+#define FEATURE_UNIEVAL_BIT                 0x200000
+#define FEATURE_UNICODE_BIT                 0x400000
 
 #define FEATURE_BUNDLE_DEFAULT	0
 #define FEATURE_BUNDLE_510	1
@@ -192,6 +193,13 @@
     ( \
 	CURRENT_FEATURE_BUNDLE == FEATURE_BUNDLE_CUSTOM && \
 	 FEATURE_IS_ENABLED_MASK(FEATURE_MYREF_BIT) \
+    )
+
+#define FEATURE_QUOTE_IN_SYMBOL_IS_ENABLED \
+    ( \
+	CURRENT_FEATURE_BUNDLE <= FEATURE_BUNDLE_535 \
+     || (CURRENT_FEATURE_BUNDLE == FEATURE_BUNDLE_CUSTOM && \
+	 FEATURE_IS_ENABLED_MASK(FEATURE_QUOTE_IN_SYMBOL_BIT)) \
     )
 
 #define FEATURE_UNICODE_IS_ENABLED \
@@ -382,6 +390,14 @@ S_magic_sethint_feature(pTHX_ SV *keysv, const char *keypv, STRLEN keylen,
             if (keylen == sizeof("feature_postderef_qq")-1
                  && memcmp(subf+1, "ostderef_qq", keylen - sizeof("feature_")) == 0) {
                 mask = FEATURE_POSTDEREF_QQ_BIT;
+                break;
+            }
+            return;
+
+        case 'q':
+            if (keylen == sizeof("feature_quote_in_symbol")-1
+                 && memcmp(subf+1, "uote_in_symbol", keylen - sizeof("feature_")) == 0) {
+                mask = FEATURE_QUOTE_IN_SYMBOL_BIT;
                 break;
             }
             return;

@@ -17,10 +17,10 @@ BEGIN {
    print "bundle: ", feature::feature_bundle(0) // "undef", "\n";
 }
 EXPECT
-default: bareword_filehandles indirect multidimensional
+default: bareword_filehandles indirect multidimensional quote_in_symbol
 unicode_strings is not enabled
 bundle: default
-5.12: bareword_filehandles indirect multidimensional say state switch unicode_strings
+5.12: bareword_filehandles indirect multidimensional quote_in_symbol say state switch unicode_strings
 unicode_strings is enabled
 bundle: 5.11
 ########
@@ -40,9 +40,9 @@ BEGIN {
    print "bundle: ", feature::feature_bundle(0) // "undef", "\n";
 }
 EXPECT
-no feature indirect: bareword_filehandles multidimensional
+no feature indirect: bareword_filehandles multidimensional quote_in_symbol
 indirect is not enabled
 bundle: undef
-added unicode_strings: bareword_filehandles multidimensional unicode_strings
+added unicode_strings: bareword_filehandles multidimensional quote_in_symbol unicode_strings
 unicode_strings is enabled
 bundle: undef

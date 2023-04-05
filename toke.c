@@ -10165,6 +10165,7 @@ S_parse_ident(pTHX_ char **s, char **d, char * const e, int allow_package,
 {
     int saw_tick = 0;
     const char *olds = *s;
+    char *quote_at = NULL;
     PERL_ARGS_ASSERT_PARSE_IDENT;
 
     while (*s < PL_bufend) {
@@ -10195,6 +10196,8 @@ S_parse_ident(pTHX_ char **s, char **d, char * const e, int allow_package,
                  && **s == '\''
                  && isIDFIRST_lazy_if_safe((*s)+1, PL_bufend, is_utf8))
         {
+            if (!quote_at)
+                quote_at = *s;
             *(*d)++ = ':';
             *(*d)++ = ':';
             (*s)++;
@@ -10212,6 +10215,16 @@ S_parse_ident(pTHX_ char **s, char **d, char * const e, int allow_package,
         else
             break;
     }
+    if (!FEATURE_QUOTE_IN_SYMBOL_IS_ENABLED
+        && saw_tick) {
+        /* ensure yyerror() quotes the quote */
+        char *save_buf = PL_bufptr;
+        PL_bufptr = quote_at+1;
+        yyerror("Quotes as package separators disabled");
+        PL_bufptr = save_buf;
+        return;
+    }
+
     if (UNLIKELY(tick_warn && saw_tick && PL_lex_state == LEX_INTERPNORMAL
               && !PL_lex_brackets && ckWARN_d(WARN_SYNTAX))) {
         char *this_d;

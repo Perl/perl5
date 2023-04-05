@@ -5469,6 +5469,13 @@ quantifier inside the assertion instead.  For example, the way to match
 "abc" provided that it is followed by three repetitions of "xyz" is
 C</abc(?=(?:xyz){3})/>, not C</abc(?=xyz){3}/>.
 
+=item Quotes as package separators disabled
+
+(F) The C<quote_in_symbol> feature has been disabled either explicitly
+with C<no feature> or with C<use v5.37;> or later, and the code
+attempted to use a C<'> as a package separator in a variable or
+subroutine name.
+
 =item Range iterator outside integer range
 
 (F) One (or both) of the numeric arguments to the range operator ".."

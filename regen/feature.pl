@@ -46,6 +46,7 @@ my %feature = (
     extra_paired_delimiters => 'more_delims',
     module_true             => 'module_true',
     class                   => 'class',
+    quote_in_symbol         => 'quote_in_symbol',
 );
 
 # NOTE: If a feature is ever enabled in a non-contiguous range of Perl
@@ -55,7 +56,7 @@ my %feature = (
 # 5.odd implies the next 5.even, but an explicit 5.even can override it.
 
 # features bundles
-use constant V5_9_5 => sort qw{say state switch indirect multidimensional bareword_filehandles};
+use constant V5_9_5 => sort qw{say state switch indirect multidimensional bareword_filehandles quote_in_symbol};
 use constant V5_11  => sort ( +V5_9_5, qw{unicode_strings} );
 use constant V5_15  => sort ( +V5_11, qw{unicode_eval evalbytes current_sub fc} );
 use constant V5_23  => sort ( +V5_15, qw{postderef_qq} );
@@ -65,14 +66,15 @@ use constant V5_35  => sort grep {; $_ ne 'switch'
                                  && $_ ne 'indirect'
                                  && $_ ne 'multidimensional' } +V5_27, qw{isa signatures};
 
-use constant V5_37  => sort grep {; $_ ne 'bareword_filehandles' } +V5_35, qw{module_true};
+use constant V5_37  => sort grep {; $_ ne 'bareword_filehandles'
+                                 && $_ ne 'quote_in_symbol' } +V5_35, qw{module_true};
 
 #
 # when updating features please also update the Pod entry for L</"FEATURES CHEAT SHEET">
 #
 my %feature_bundle = (
     all     => [ sort keys %feature ],
-    default => [ qw{indirect multidimensional bareword_filehandles} ],
+    default => [ qw{indirect multidimensional bareword_filehandles quote_in_symbol} ],
     # using 5.9.5 features bundle
     "5.9.5" => [ +V5_9_5 ],
     "5.10"  => [ +V5_9_5 ],
@@ -859,6 +861,15 @@ previous versions it was simply on all the time.
 
 You can use the L<bareword::filehandles> module on CPAN to disable
 bareword filehandles for older versions of perl.
+
+=head2 The 'quote_in_symbol' feature
+
+This feature allows the use of single quotes as package separators in
+package, sub and variable names.  It is enabled by default, but can be
+turned off to disallow quotes in symbol names.
+
+This feature is available under this name from Perl 5.38 onwards. In
+previous versions, it was simply on all the time.
 
 =head2 The 'try' feature
 

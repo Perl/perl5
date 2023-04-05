@@ -25,6 +25,7 @@ our %feature = (
     postderef_qq            => 'feature_postderef_qq',
     unicode_eval            => 'feature_unieval',
     declared_refs           => 'feature_myref',
+    quote_in_symbol         => 'feature_quote_in_symbol',
     unicode_strings         => 'feature_unicode',
     multidimensional        => 'feature_multidimensional',
     bareword_filehandles    => 'feature_bareword_filehandles',
@@ -32,15 +33,15 @@ our %feature = (
 );
 
 our %feature_bundle = (
-    "5.10"    => [qw(bareword_filehandles indirect multidimensional say state switch)],
-    "5.11"    => [qw(bareword_filehandles indirect multidimensional say state switch unicode_strings)],
-    "5.15"    => [qw(bareword_filehandles current_sub evalbytes fc indirect multidimensional say state switch unicode_eval unicode_strings)],
-    "5.23"    => [qw(bareword_filehandles current_sub evalbytes fc indirect multidimensional postderef_qq say state switch unicode_eval unicode_strings)],
-    "5.27"    => [qw(bareword_filehandles bitwise current_sub evalbytes fc indirect multidimensional postderef_qq say state switch unicode_eval unicode_strings)],
-    "5.35"    => [qw(bareword_filehandles bitwise current_sub evalbytes fc isa postderef_qq say signatures state unicode_eval unicode_strings)],
+    "5.10"    => [qw(bareword_filehandles indirect multidimensional quote_in_symbol say state switch)],
+    "5.11"    => [qw(bareword_filehandles indirect multidimensional quote_in_symbol say state switch unicode_strings)],
+    "5.15"    => [qw(bareword_filehandles current_sub evalbytes fc indirect multidimensional quote_in_symbol say state switch unicode_eval unicode_strings)],
+    "5.23"    => [qw(bareword_filehandles current_sub evalbytes fc indirect multidimensional postderef_qq quote_in_symbol say state switch unicode_eval unicode_strings)],
+    "5.27"    => [qw(bareword_filehandles bitwise current_sub evalbytes fc indirect multidimensional postderef_qq quote_in_symbol say state switch unicode_eval unicode_strings)],
+    "5.35"    => [qw(bareword_filehandles bitwise current_sub evalbytes fc isa postderef_qq quote_in_symbol say signatures state unicode_eval unicode_strings)],
     "5.37"    => [qw(bitwise current_sub evalbytes fc isa module_true postderef_qq say signatures state unicode_eval unicode_strings)],
-    "all"     => [qw(bareword_filehandles bitwise class current_sub declared_refs defer evalbytes extra_paired_delimiters fc indirect isa module_true multidimensional postderef_qq refaliasing say signatures state switch try unicode_eval unicode_strings)],
-    "default" => [qw(bareword_filehandles indirect multidimensional)],
+    "all"     => [qw(bareword_filehandles bitwise class current_sub declared_refs defer evalbytes extra_paired_delimiters fc indirect isa module_true multidimensional postderef_qq quote_in_symbol refaliasing say signatures state switch try unicode_eval unicode_strings)],
+    "default" => [qw(bareword_filehandles indirect multidimensional quote_in_symbol)],
 );
 
 $feature_bundle{"5.12"} = $feature_bundle{"5.11"};
@@ -437,6 +438,15 @@ previous versions it was simply on all the time.
 
 You can use the L<bareword::filehandles> module on CPAN to disable
 bareword filehandles for older versions of perl.
+
+=head2 The 'quote_in_symbol' feature
+
+This feature allows the use of single quotes as package separators in
+package, sub and variable names.  It is enabled by default, but can be
+turned off to disallow quotes in symbol names.
+
+This feature is available under this name from Perl 5.38 onwards. In
+previous versions, it was simply on all the time.
 
 =head2 The 'try' feature
 
@@ -904,68 +914,74 @@ The following feature bundles are available:
   bundle    features included
   --------- -----------------
   :default  indirect multidimensional
-            bareword_filehandles
+            bareword_filehandles quote_in_symbol
 
   :5.10     bareword_filehandles indirect
-            multidimensional say state switch
+            multidimensional quote_in_symbol say state
+            switch
 
   :5.12     bareword_filehandles indirect
-            multidimensional say state switch
-            unicode_strings
+            multidimensional quote_in_symbol say state
+            switch unicode_strings
 
   :5.14     bareword_filehandles indirect
-            multidimensional say state switch
-            unicode_strings
+            multidimensional quote_in_symbol say state
+            switch unicode_strings
 
   :5.16     bareword_filehandles current_sub evalbytes
-            fc indirect multidimensional say state
-            switch unicode_eval unicode_strings
+            fc indirect multidimensional quote_in_symbol
+            say state switch unicode_eval
+            unicode_strings
 
   :5.18     bareword_filehandles current_sub evalbytes
-            fc indirect multidimensional say state
-            switch unicode_eval unicode_strings
+            fc indirect multidimensional quote_in_symbol
+            say state switch unicode_eval
+            unicode_strings
 
   :5.20     bareword_filehandles current_sub evalbytes
-            fc indirect multidimensional say state
-            switch unicode_eval unicode_strings
+            fc indirect multidimensional quote_in_symbol
+            say state switch unicode_eval
+            unicode_strings
 
   :5.22     bareword_filehandles current_sub evalbytes
-            fc indirect multidimensional say state
-            switch unicode_eval unicode_strings
+            fc indirect multidimensional quote_in_symbol
+            say state switch unicode_eval
+            unicode_strings
 
   :5.24     bareword_filehandles current_sub evalbytes
             fc indirect multidimensional postderef_qq
-            say state switch unicode_eval
-            unicode_strings
+            quote_in_symbol say state switch
+            unicode_eval unicode_strings
 
   :5.26     bareword_filehandles current_sub evalbytes
             fc indirect multidimensional postderef_qq
-            say state switch unicode_eval
-            unicode_strings
+            quote_in_symbol say state switch
+            unicode_eval unicode_strings
 
   :5.28     bareword_filehandles bitwise current_sub
             evalbytes fc indirect multidimensional
-            postderef_qq say state switch unicode_eval
-            unicode_strings
+            postderef_qq quote_in_symbol say state
+            switch unicode_eval unicode_strings
 
   :5.30     bareword_filehandles bitwise current_sub
             evalbytes fc indirect multidimensional
-            postderef_qq say state switch unicode_eval
-            unicode_strings
+            postderef_qq quote_in_symbol say state
+            switch unicode_eval unicode_strings
 
   :5.32     bareword_filehandles bitwise current_sub
             evalbytes fc indirect multidimensional
-            postderef_qq say state switch unicode_eval
-            unicode_strings
+            postderef_qq quote_in_symbol say state
+            switch unicode_eval unicode_strings
 
   :5.34     bareword_filehandles bitwise current_sub
             evalbytes fc indirect multidimensional
-            postderef_qq say state switch unicode_eval
-            unicode_strings
+            postderef_qq quote_in_symbol say state
+            switch unicode_eval unicode_strings
 
   :5.36     bareword_filehandles bitwise current_sub
-            evalbytes fc isa postderef_qq say signatures
-            state unicode_eval unicode_strings
+            evalbytes fc isa postderef_qq
+            quote_in_symbol say signatures state
+            unicode_eval unicode_strings
 
   :5.38     bitwise current_sub evalbytes fc isa
             module_true postderef_qq say signatures

@@ -5831,6 +5831,7 @@ t/lib/feature/implicit			Tests for implicit loading of feature.pm
 t/lib/feature/indirect			Tests for enabling/disabling indirect method calls
 t/lib/feature/multidimensional		Tests for enabling/disabling $foo{$x, $y} => $foo{join($;, $x, $y)}
 t/lib/feature/nonesuch			Tests for enabling/disabling nonexistent feature
+t/lib/feature/quote_in_symbol		Tests for enabling/disabling quotes as package separators
 t/lib/feature/removed			Tests for enabling/disabling removed feature
 t/lib/feature/say			Tests for enabling/disabling say feature
 t/lib/feature/switch			Tests for enabling/disabling switch feature

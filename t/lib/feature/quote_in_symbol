@@ -1,0 +1,63 @@
+Check the behavior of the default-on quote_in_symbol feature
+
+__END__
+# NAME default
+sub foo::bar { print "$_[0]\n" }
+foo::bar("one");
+foo'bar("two");
+$x::y = "y\n";
+print $x'y;
+print "$x'y";
+package quux'bar;
+EXPECT
+Old package separator used in string at - line 6.
+	(Did you mean "$x\'y" instead?)
+one
+two
+y
+y
+########
+# NAME 5.37 bundle
+use v5.37;
+sub foo'bar {}
+EXPECT
+Quotes as package separators disabled at - line 2, near "sub foo'"
+Execution of - aborted due to compilation errors.
+########
+# NAME quote in sub def
+no feature 'quote_in_symbol';
+sub foo'bar { }
+EXPECT
+Quotes as package separators disabled at - line 2, near "sub foo'"
+Execution of - aborted due to compilation errors.
+########
+# NAME quote in sub call
+no feature 'quote_in_symbol';
+sub foo::bar { }
+foo'bar();
+EXPECT
+Quotes as package separators disabled at - line 3, near "foo'"
+Execution of - aborted due to compilation errors.
+########
+# NAME quote in package
+no feature 'quote_in_symbol';
+package quux'bar;
+EXPECT
+Quotes as package separators disabled at - line 2, near "package quux'"
+Execution of - aborted due to compilation errors.
+########
+# NAME quote in variable
+no feature 'quote_in_symbol';
+$x::y = "y\n";
+print $x'y;
+EXPECT
+Quotes as package separators disabled at - line 3, near "print $x'"
+Execution of - aborted due to compilation errors.
+########
+# NAME quote in quotes
+no feature 'quote_in_symbol';
+$x::y = "y\n";
+"$x'y";
+EXPECT
+Quotes as package separators disabled at - line 3, near "$x'"
+Execution of - aborted due to compilation errors.
