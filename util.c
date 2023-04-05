@@ -3256,7 +3256,7 @@ all.
 
 #define PERL_REPEATCPY_LINEAR 4
 void
-Perl_repeatcpy(char *to, const char *from, I32 len, IV count)
+Perl_repeatcpy(char *to, const char *from, SSize_t len, IV count)
 {
     PERL_ARGS_ASSERT_REPEATCPY;
 

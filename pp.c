@@ -1810,7 +1810,6 @@ PP(pp_repeat)
                 STRLEN max;
 
                 if (   len > (MEM_SIZE_MAX-1) / (UV)count /* max would overflow */
-                    || len > (U32)I32_MAX  /* repeatcpy would overflow */
                 )
                      Perl_croak(aTHX_ "%s",
                                         "Out of memory during string extend");

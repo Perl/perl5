@@ -2724,7 +2724,7 @@ Xp	|REGEXP *|re_op_compile |NULLOK SV ** const patternp		\
 
 ATdp	|void	|repeatcpy	|NN char *to				\
 				|NN const char *from			\
-				|I32 len				\
+				|SSize_t len				\
 				|IV count
 : Used in doio.c, pp_hot.c, pp_sys.c
 p	|void	|report_evil_fh |NULLOK const GV *gv
