@@ -3695,11 +3695,11 @@ S_populate_hash_from_localeconv(pTHX_ HV * hv,
 #    if defined(WIN32)
 
         /* There is a bug in Windows in which setting LC_CTYPE after the others
-         * doesn't actually take effect for localeconv().  See the commit
-         * message for this commit for details.  Thus we have to make sure that
-         * the locale we want is set after LC_CTYPE.  We unconditionally toggle
-         * away from and back to the current locale prior to calling
-         * localeconv().
+         * doesn't actually take effect for localeconv().  See commit
+         * 418efacd1950763f74ed3cc22f8cf9206661b892 for details.  Thus we have
+         * to make sure that the locale we want is set after LC_CTYPE.  We
+         * unconditionally toggle away from and back to the current locale
+         * prior to calling localeconv().
          *
          * This code will have no effect if we already are in C, but khw
          * hasn't seen any cases where this causes problems when we are in the
