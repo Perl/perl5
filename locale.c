@@ -3691,7 +3691,7 @@ S_populate_hash_from_localeconv(pTHX_ HV * hv,
      * accesses until we have made a copy of its returned static buffer */
     gwLOCALE_LOCK;
 
-#  ifdef TS_W32_BROKEN_LOCALECONV
+#  if defined(TS_W32_BROKEN_LOCALECONV) && defined(USE_THREAD_SAFE_LOCALE)
 
     /* This is a workaround for another bug in Windows.  localeconv() was
      * broken with thread-safe locales prior to VS 15.  It looks at the global
@@ -3799,7 +3799,7 @@ S_populate_hash_from_localeconv(pTHX_ HV * hv,
 
     /* Done with copying to the hash.  Can unwind the critical section locks */
 
-#  ifdef TS_W32_BROKEN_LOCALECONV
+#  if defined(TS_W32_BROKEN_LOCALECONV) && defined(USE_THREAD_SAFE_LOCALE)
 
     /* Restore the global locale's prior state */
     void_setlocale_c(LC_ALL, save_global);
