@@ -3577,7 +3577,7 @@ S_reg_set_capture_string(pTHX_ REGEXP * const rx,
                  * by a capture. Due to lookbehind, this may be to
                  * the left of $&, so we have to scan all captures */
                 while (min && n <= RXp_LASTPAREN(prog)) {
-                    I32 start = RXp_OFFS_START(prog,n);
+                    SSize_t start = RXp_OFFS_START(prog,n);
                     if (   start != -1
                         && start < min)
                     {
