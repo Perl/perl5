@@ -4539,7 +4539,7 @@ PP(pp_subst)
 #ifdef PERL_ANY_COW
         && !was_cow
 #endif
-        && (I32)clen <= RXp_MINLENRET(prog)
+        && (SSize_t)clen <= RXp_MINLENRET(prog)
         && (  once
            || !(r_flags & REXEC_COPY_STR)
            || (!SvGMAGICAL(dstr) && !(RXp_EXTFLAGS(prog) & RXf_EVAL_SEEN))
