@@ -6335,12 +6335,19 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 #  endif
 #  ifdef USE_POSIX_2008_LOCALE
 
-    if (! PL_C_locale_obj) {
+    /* This is a global, so be sure to keep another instance from zapping it */
+    LOCALE_LOCK;
+    if (PL_C_locale_obj) {
+        LOCALE_UNLOCK;
+    }
+    else {
         PL_C_locale_obj = newlocale(LC_ALL_MASK, "C", (locale_t) 0);
         if (! PL_C_locale_obj) {
+            LOCALE_UNLOCK;
             locale_panic_(Perl_form(aTHX_
                                 "Cannot create POSIX 2008 C locale object"));
         }
+        LOCALE_UNLOCK;
 
         DEBUG_Lv(PerlIO_printf(Perl_debug_log, "created C object %p\n",
                                                PL_C_locale_obj));
