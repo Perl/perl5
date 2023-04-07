@@ -3920,8 +3920,9 @@ only one is completely unimplemented, though on non-Windows platforms, another
 significant one is not fully implemented).  They use various techniques to
 recover the other items, including calling C<L<localeconv(3)>>, and
 C<L<strftime(3)>>, both of which are specified in C89, so should be always be
-available.  Later C<strftime()> versions have additional capabilities; What the
-C locale yields or C<""> is returned for any item not available on your system.
+available.  Later C<strftime()> versions have additional capabilities.
+If an item is not available on your system, this returns either the value
+associated with the C locale, or simply C<"">, whichever is more appropriate.
 
 It is important to note that, when called with an item that is recovered by
 using C<localeconv>, the buffer from any previous explicit call to
