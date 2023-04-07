@@ -3166,8 +3166,8 @@ Perl_mbtowc_(pTHX_ const wchar_t * pwc, const char * s, const Size_t len)
 
 #  else
 
-        MBTOWC_LOCK_;
         SETERRNO(0, 0);
+        MBTOWC_LOCK_;
         retval = mbtowc(NULL, NULL, 0);
         MBTOWC_UNLOCK_;
         return retval;
@@ -3185,8 +3185,8 @@ Perl_mbtowc_(pTHX_ const wchar_t * pwc, const char * s, const Size_t len)
 
     /* Locking prevents races, but locales can be switched out without locking,
      * so this isn't a cure all */
-    MBTOWC_LOCK_;
     SETERRNO(0, 0);
+    MBTOWC_LOCK_;
     retval = mbtowc((wchar_t *) pwc, s, len);
     MBTOWC_UNLOCK_;
 
