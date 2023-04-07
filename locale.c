@@ -4958,7 +4958,7 @@ char *
 Perl_my_strftime8(pTHX_ const char *fmt, int sec, int min, int hour, int mday,
                          int mon, int year, int wday, int yday, int isdst,
                          utf8ness_t * utf8ness)
-{   /* Documented in util.c */
+{   /* Documented above */
     char * retval = my_strftime(fmt, sec, min, hour, mday, mon, year, wday,
                                 yday, isdst);
 
