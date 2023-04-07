@@ -6426,9 +6426,8 @@ Perl_strxfrm(pTHX_ SV * src)
 {
     PERL_ARGS_ASSERT_STRXFRM;
 
-    /* For use by POSIX::strxfrm().  The PV in an SV is controlled by LC_CTYPE,
-     * not LC_COLLATE.  If the locales for the two categories differ, LC_CTYPE
-     * should win out.
+    /* For use by POSIX::strxfrm().  If they differ, toggle LC_CTYPE to
+     * LC_COLLATE to avoid potential mojibake.
      *
      * If we can't calculate a collation, 'src' is instead returned, so that
      * future comparisons will be by code point order */
