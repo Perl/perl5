@@ -6565,6 +6565,9 @@ S_my_langinfo_i(pTHX_
         *utf8ness = is_utf8;
     }
 
+    DEBUG_Lv(PerlIO_printf(Perl_debug_log,
+                           "Leaving my_langinfo item=%ld, using locale %s\n",
+                           (long) item, locale));
     return retval;
 
 #  endif    /* All the implementations of my_langinfo() */
