@@ -3123,12 +3123,18 @@ S_save_to_buffer(const char * string, const char **buf, Size_t *buf_size)
 bool
 Perl_get_win32_message_utf8ness(pTHX_ const char * string)
 {
-    /* NULL => locale irrelevant, 0 => category irrelevant
-     * so returns based on the UTF-8 legality of the input string, ignoring the
-     * locale and category completely.
-     *
-     * This is because Windows doesn't have LC_MESSAGES */
-    return get_locale_string_utf8ness_i(string, LOCALE_IS_UTF8, NULL, 0);
+    /* This is because Windows doesn't have LC_MESSAGES. */
+
+#    ifdef USE_LC_CTYPE
+
+    return get_locale_string_utf8ness_i(string, LOCALE_IS_UTF8,
+                                        NULL, LC_CTYPE_INDEX_);
+#    else
+
+    return false;
+
+#    endif
+
 }
 
 #  endif
