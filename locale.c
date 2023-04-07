@@ -4260,9 +4260,11 @@ S_my_localeconv(pTHX_ const int item)
 #  else
 
     /* This only gets compiled for the use-case of using localeconv() to
-     * emulate an nl_langinfo() missing from the platform.
-     *
-     * We need this substructure to only return this field for the THOUSEP
+     * emulate an nl_langinfo() missing from the platform. */
+
+#    ifdef USE_LOCALE_NUMERIC
+
+    /* We need this substructure to only return this field for the THOUSEP
      * item.  The other items also need substructures, but they were handled
      * above by placing the substructure's item at the end of the full one, so
      * the data structure could do double duty.  However, both this and
@@ -4272,6 +4274,8 @@ S_my_localeconv(pTHX_ const int item)
         LCONV_NUMERIC_ENTRY(thousands_sep),
         {NULL, 0}
     };
+
+#    endif
 
     /* End of all the initialization of data structures.  Now for actual code.
      *
