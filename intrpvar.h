@@ -772,7 +772,7 @@ PERLVAR(I, collxfrm_base, Size_t)	/* Basic overhead in *xfrm();
                                            mult == 0, base != 0 => ill-formed;
                                          */
 PERLVAR(I, collation_name, char *)	/* Name of current collation */
-PERLVARI(I, collation_ix, U32,	0)	/* Collation generation index */
+PERLVARI(I, collation_ix, PERL_UINTMAX_T, 0)	/* Collation generation index */
 PERLVARI(I, strxfrm_NUL_replacement, U8, 0)  /* Code point to replace NULs */
 PERLVARI(I, strxfrm_is_behaved, bool, TRUE)
                             /* Assume until proven otherwise that it works */
