@@ -277,6 +277,12 @@
  * creation, so can be a file-level static.  (Must come before #including
  * perl.h) */
 #include "config.h"
+
+/* Returns the Unix errno portion; ignoring any others.  This is a macro here
+ * instead of putting it into perl.h, because unclear to khw what should be
+ * done generally. */
+#define GET_ERRNO   saved_errno
+
 #ifdef DEBUGGING
 static int debug_initialization = 0;
 #  define DEBUG_INITIALIZATION_set(v) (debug_initialization = v)
@@ -551,11 +557,6 @@ S_mortalized_pv_copy(pTHX_ const char * const pv)
 }
 
 #endif
-
-/* Returns the Unix errno portion; ignoring any others.  This is a macro here
- * instead of putting it into perl.h, because unclear to khw what should be
- * done generally. */
-#define GET_ERRNO   saved_errno
 
 /* Default values come from the C locale */
 #define C_codeset "ANSI_X3.4-1968" /* Only in some Configurations, and usually
