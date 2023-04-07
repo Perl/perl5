@@ -2556,10 +2556,27 @@ S_bool_setlocale_2008_i(pTHX_
 #  define void_setlocale_r(cat, locale)                                     \
                   void_setlocale_i(get_category_index(cat), locale)
 
-/*---------------------------------------------------------------------------*/
-/* helper functions for POSIX 2008 */
+/*===========================================================================*/
 
-#  ifdef USE_PL_CURLOCALES
+#else
+#  error Unexpected Configuration
+#endif   /* End of the various implementations of the setlocale and
+            querylocale macros used in the remainder of this program */
+
+/* query_nominal_locale_i() is used when the caller needs the locale that an
+ * external caller would be expecting, and not what we're secretly using
+ * behind the scenes.  It deliberately doesn't handle LC_ALL; use
+ * calculate_LC_ALL_string() for that. */
+#ifdef USE_LOCALE_NUMERIC
+#  define query_nominal_locale_i(i)                                         \
+      (__ASSERT_(i != LC_ALL_INDEX_)                                        \
+       ((i == LC_NUMERIC_INDEX_) ? PL_numeric_name : querylocale_i(i)))
+#else
+#  define query_nominal_locale_i(i)                                         \
+      (__ASSERT_(i != LC_ALL_INDEX_) querylocale_i(i))
+#endif
+
+#ifdef USE_PL_CURLOCALES
 
 STATIC void
 S_update_PL_curlocales_i(pTHX_
@@ -2623,24 +2640,6 @@ S_update_PL_curlocales_i(pTHX_
 #  endif  /* Need PL_curlocales[] */
 
 /*===========================================================================*/
-
-#else
-#  error Unexpected Configuration
-#endif   /* End of the various implementations of the setlocale and
-            querylocale macros used in the remainder of this program */
-
-/* query_nominal_locale_i() is used when the caller needs the locale that an
- * external caller would be expecting, and not what we're secretly using
- * behind the scenes.  It deliberately doesn't handle LC_ALL; use
- * calculate_LC_ALL_string() for that. */
-#ifdef USE_LOCALE_NUMERIC
-#  define query_nominal_locale_i(i)                                         \
-      (__ASSERT_(i != LC_ALL_INDEX_)                                        \
-       ((i == LC_NUMERIC_INDEX_) ? PL_numeric_name : querylocale_i(i)))
-#else
-#  define query_nominal_locale_i(i)                                         \
-      (__ASSERT_(i != LC_ALL_INDEX_) querylocale_i(i))
-#endif
 
 #if defined(USE_LOCALE)
 
