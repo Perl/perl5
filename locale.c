@@ -2526,9 +2526,10 @@ S_new_collate(pTHX_ const char *newcoll, bool force)
      * cleared.  The next time the locale changes, the index is incremented,
      * and so we know during a comparison that the transformation is not
      * necessarily still valid, and so is recomputed.  Note that if the locale
-     * changes enough times, the index could wrap (a U32), and it is possible
-     * that a transformation would improperly be considered valid, leading to
-     * an unlikely bug */
+     * changes enough times, the index could wrap, and it is possible that a
+     * transformation would improperly be considered valid, leading to an
+     * unlikely bug.  The value is declared to the widest possible type on this
+     * platform. */
 
     /* Return if the locale isn't changing */
     if (strEQ(PL_collation_name, newcoll)) {
@@ -6194,7 +6195,7 @@ Perl_mem_collxfrm_(pTHX_ const char *input_string,
     }
 
     /* Store the collation id */
-    *(U32*)xbuf = PL_collation_ix;
+    *(PERL_UINTMAX_T *)xbuf = PL_collation_ix;
 
 #  if defined(USE_POSIX_2008_LOCALE) && defined HAS_STRXFRM_L
 #    ifdef USE_LOCALE_CTYPE
