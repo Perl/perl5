@@ -1565,10 +1565,10 @@ S_querylocale_2008_i(pTHX_ const unsigned int index)
 
         /* PL_curlocales[] is kept up-to-date for all categories except LC_ALL,
          * which may have been invalidated by setting it to NULL, and if so,
-         * should now be calculated. */
+         * should now be calculated.  (The called function updates that
+         * element.) */
         if (index == LC_ALL_INDEX_ && PL_curlocales[LC_ALL_INDEX_] == NULL) {
-            PL_curlocales[LC_ALL_INDEX_] =
-                savepv(calculate_LC_ALL_string((const char **) &PL_curlocales));
+            calculate_LC_ALL_string((const char **) &PL_curlocales);
         }
 
         if (cur_obj == PL_C_locale_obj) {
@@ -2130,7 +2130,10 @@ S_calculate_LC_ALL_string(pTHX_ const char ** category_locales_list)
 {
     PERL_ARGS_ASSERT_CALCULATE_LC_ALL_STRING;
 
-    /* For POSIX 2008, we have to figure out LC_ALL ourselves when needed.
+    /* NOTE: On Configurations that have PL_curlocales[], this function has the
+     * side effect of updating the LC_ALL_INDEX_ element with its result.
+     *
+     * For POSIX 2008, we have to figure out LC_ALL ourselves when needed.
      * querylocale(), on systems that have it, doesn't tend to work for LC_ALL.
      * So we have to construct the answer ourselves based on the passed in
      * data, which is either a locale_t object, for systems with querylocale(),
@@ -2240,6 +2243,15 @@ S_calculate_LC_ALL_string(pTHX_ const char ** category_locales_list)
         aggregate_locale = this_start;
         aggregate_locale[entry_len] = '\0';
     }
+
+#  ifdef USE_PL_CURLOCALES
+
+        /* PL_curlocales[LC_ALL_INDEX_] is updated as a side-effect of this
+         * function. */
+        Safefree(PL_curlocales[LC_ALL_INDEX_]);
+        PL_curlocales[LC_ALL_INDEX_] = savepv(aggregate_locale);
+
+#  endif
 
     DEBUG_Lv(PerlIO_printf(Perl_debug_log,
                            "calculate_LC_ALL_string returning '%s'\n",
