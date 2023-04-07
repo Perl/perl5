@@ -1757,6 +1757,11 @@ S_querylocale_2008_i(pTHX_ const unsigned int index, const line_t caller_line)
 #  define bool_setlocale_r(cat, locale)                                     \
                  bool_setlocale_i(get_category_index(cat, NULL), locale)
 
+/* If this doesn't exist on this platform, make it a no-op (to save #ifdefs) */
+#  ifndef update_PL_curlocales_i
+#    define update_PL_curlocales_i(index, new_locale)
+#  endif
+
 STATIC bool
 S_bool_setlocale_2008_i(pTHX_
 
@@ -1903,6 +1908,8 @@ S_bool_setlocale_2008_i(pTHX_
         if (! entry_obj_is_special) {
             freelocale(entry_obj);
         }
+
+        update_PL_curlocales_i(index, new_locale);
     }
     else {  /* Here is the general case, not to LC_ALL => C */
 
@@ -1961,6 +1968,7 @@ S_bool_setlocale_2008_i(pTHX_
             DEBUG_NEW_OBJECT_CREATED(category_names[index], new_locale,
                                      new_obj, basis_obj, caller_line);
 
+            update_PL_curlocales_i(index, new_locale);
     }
 
 #  undef DEBUG_NEW_OBJECT_CREATED
@@ -1994,13 +2002,6 @@ S_bool_setlocale_2008_i(pTHX_
 
     /* Update the current object */
     PL_cur_locale_obj = new_obj;
-
-#  endif
-#  ifdef USE_PL_CURLOCALES
-
-    /* We are done, except for updating our records (if the system doesn't keep
-     * them). */
-    update_PL_curlocales_i(index, new_locale);
 
 #  endif
 #  ifdef HAS_GLIBC_LC_MESSAGES_BUG
