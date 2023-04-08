@@ -91,6 +91,9 @@ if ($ARGV[0] && $ARGV[0] =~ /^-?-torture$/) {
 $ENV{PERL_CORE} = 1;
 
 my (@tests, @re, @anti_re);
+if ($Config{ccflags} =~ /-fsanitize/) {
+    @anti_re = qr!^lib/croak\.t|porting/test_testlist\.t!;
+}
 
 # [.VMS]TEST.COM calls harness with empty arguments, so clean-up @ARGV
 @ARGV = grep $_ && length( $_ ) => @ARGV;
