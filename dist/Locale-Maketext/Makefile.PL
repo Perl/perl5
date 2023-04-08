@@ -28,8 +28,15 @@ WriteMakefile(
 );
 
 sub MY::postamble {
-    return <<'MAKE_FRAG';
-.PHONY: tags critic
+    # .PHONY is not portable
+    my $self = shift;
+    my $phony_line = $self->can('is_make_type')
+                     && ($self->is_make_type('gmake')
+                         || $self->is_make_type('bsdmake'))
+                     ? '.PHONY: tags critic'
+                     : '';
+
+    return "$phony_line\n\n" . <<'MAKE_FRAG';
 
 tags:
 	ctags -f tags --recurse --totals \
