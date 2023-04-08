@@ -7285,7 +7285,7 @@ Perl_thread_locale_term(pTHX)
      * they affect libc's knowledge of the thread; libc has no knowledge of
      * aTHX */
 
-#ifdef USE_POSIX_2008_LOCALE
+#if defined(USE_POSIX_2008_LOCALE) && defined(USE_THREADS)
 
     /* C starts the new thread in the global C locale.  If we are thread-safe,
      * we want to not be in the global locale */
