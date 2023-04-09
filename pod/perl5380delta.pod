@@ -106,6 +106,19 @@ a previous version of perl is now reported as a compile-time error with this
 one. This only happens in cases where it would have been an error to actually
 execute the code anyway; the error simply happens at an earlier time.
 
+=head2 Optimistic Eval in Patterns
+
+The use of C<(?{ ... })> and C<(??{ ... })> in a pattern disables various
+optimisations globally in that pattern. This may or may not be desired by the
+programmer. This release adds the C<(*{ ... })> 
+equivalent. The only difference is that it does not and will never disable
+any optimisations in the regex engine. This may make it more unstable in the
+sense that it may be called more or less times in the future, however the
+number of times it executes will truly match how the regex engine functions.
+For example, certain types of optimisation are disabled when C<(?{ ... })> is
+included in a pattern, so that patterns which are O(N) in normal use become
+O(N*N) with a C<(?{ ... })> pattern in them. Switching to C<(*{ ... })> means
+the pattern will stay O(N).
 
 =head1 Security
 
@@ -760,6 +773,16 @@ readlink() now returns the C<PrintName> from a symbolic link reparse
 point instead of the C<SubstituteName>, which should make it better
 match the name the link was created with.  [github #20271]
 
+lstat() on Windows now returns the length of the link target as the
+size of the file, as it does on POSIX systems.  [github #20476]
+
+symlink() on Windows now replaces any C</> in the target with C<\>,
+since Windows does not recognise C</> in symbolic links.  The reverse
+translation is B<not> done by readlink().  [github #20506]
+
+symlink() where the target was an absolute path to a directory was
+incorrectly created as a file symbolic link.  [github #20533]
+
 =back
 
 =head1 Internal Changes
@@ -1011,6 +1034,12 @@ The change adds a new struct/type RCPV, which is a refcounted
 string using shared memory. This is implemented in such a way that code
 that previously used a char * can continue to do so, as the refcounting
 data is located a specific offset before the char * pointer itself.
+
+=item *
+
+Added HvNAMEf and HvNAMEf_QUOTEDPREFIX special formats. They take an HV *
+as an argument and use C<HvNAME()> and related macros to determine the string,
+its length, and whether it is utf8.
 
 =back
 
