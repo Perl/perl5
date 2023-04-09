@@ -97,13 +97,84 @@ section.
 
 Additionally, the following selected changes have been made:
 
-=head3 L<XXX>
+=head3 L<perlapi>
 
 =over 4
 
 =item *
 
-XXX Description of the change here
+Documented L<C<hv_ksplit>|perlapi/hv_ksplit>
+
+=item *
+
+Documented L<C<hv_name_set>|perlapi/hv_name_set>
+
+=item *
+
+L<C<hv_store>|perlapi/hv_store> and L<C<hv_stores>|perlapi/hv_stores>
+documentation have been greatly improved.
+
+=item *
+
+Documented L<C<gv_autoload_pv>|perlapi/gv_autoload_pv>
+
+=item *
+
+Documented L<C<gv_autoload_pvn>|perlapi/gv_autoload_pvn>
+
+=item *
+
+Documented L<C<gv_autoload_sv>|perlapi/gv_autoload_sv>
+
+=item *
+
+Documented L<C<gv_name_set>|perlapi/gv_name_set>
+
+=item *
+
+Documented L<C<start_subparse>|perlapi/start_subparse>
+
+=item *
+
+Documented L<C<SV_CHECK_THINKFIRST_COW_DROP>|perlapi/SV_CHECK_THINKFIRST_COW_DROP>
+
+=item *
+
+Documented L<C<SV_CHECK_THINKFIRST>|perlapi/SV_CHECK_THINKFIRST>
+
+=item *
+
+Documented L<C<SvPV_shrink_to_cur>|perlapi/SvPV_shrink_to_cur>
+
+=item *
+
+Documented L<C<save_aelem>|perlapi/save_aelem>
+
+=item *
+
+Documented L<C<save_aelem_flags>|perlapi/save_aelem_flags>
+
+=item *
+
+Documented L<C<save_helem>|perlapi/save_helem>
+
+=item *
+
+Documented L<C<save_helem_flags>|perlapi/save_helem_flags>
+
+=back
+
+=head3 L<perlintern>
+
+=over 4
+
+=item *
+
+Documented L<C<save_pushptr>|perlintern/save_pushptr>
+
+=item *
+
+Documented L<C<save_scalar_at>|perlintern/save_scalar_at>
 
 =back
 
@@ -127,7 +198,9 @@ and New Warnings
 
 =item *
 
-XXX L<message|perldiag/"message">
+A new syntax error has been added for the error that a C<catch> block does
+not have its required variable declaration. See
+L<catch block requires a (VAR)|perldiag/"catch block requires a (VAR)">
 
 =back
 
@@ -137,19 +210,26 @@ XXX L<message|perldiag/"message">
 
 =item *
 
-XXX L<message|perldiag/"message">
+L<Unknown locale category %d|perldiag/"Unknown locale category %d">
+
+This is a shortened form of an already existing diagnostic, for use when
+there is no new locale being switched to.  The previous diagnostic was
+misleading in such circumstances.
 
 =back
 
 =head2 Changes to Existing Diagnostics
 
-XXX Changes (i.e. rewording) of diagnostic messages go here
-
 =over 4
 
 =item *
 
-XXX Describe change here
+Removed C<< Complex regular subexpression recursion limit (%d) exceeded >>
+
+The regular expresion engine has not used recursion in some time. This
+warning no longer makes sense.
+
+See [L<GH #19636|https://github.com/Perl/perl5/pull/19636>].
 
 =back
 
@@ -174,41 +254,34 @@ XXX
 
 =head1 Configuration and Compilation
 
+=over 4
+
+=item *
+
+C<make -j6 minitest> could fail due to a build conflict in building
+C<$(MINIPERL_EXE)> between the main make process and a child process.
+[github #19829]
+
+=back
+
+=head1 Testing
+
+Tests were added and changed to reflect the other additions and
+changes in this release.  Furthermore, these significant changes were
+made:
+
+=over 4
+
+=item *
+
+Unicode normalization tests have been added.
+
 XXX Changes to F<Configure>, F<installperl>, F<installman>, and analogous tools
 go here.  Any other changes to the Perl build process should be listed here.
 However, any platform-specific changes should be listed in the
 L</Platform Support> section, instead.
 
 [ List changes as an =item entry ].
-
-=over 4
-
-=item *
-
-XXX
-
-=back
-
-=head1 Testing
-
-XXX Any significant changes to the testing of a freshly built perl should be
-listed here.  Changes which create B<new> files in F<t/> go here as do any
-large changes to the testing harness (e.g. when parallel testing was added).
-Changes to existing files in F<t/> aren't worth summarizing, although the bugs
-that they represent may be covered elsewhere.
-
-XXX If there were no significant test changes, say this:
-
-Tests were added and changed to reflect the other additions and changes
-in this release.
-
-XXX If instead there were significant changes, say this:
-
-Tests were added and changed to reflect the other additions and
-changes in this release.  Furthermore, these significant changes were
-made:
-
-[ List each test improvement as an =item entry ]
 
 =over 4
 
@@ -242,13 +315,13 @@ XXX
 
 =head2 Discontinued Platforms
 
-XXX List any platforms that this version of perl no longer compiles on.
-
 =over 4
 
-=item XXX-some-platform
+=item Ultrix
 
-XXX
+Support code for DEC Ultrix has been removed.  Ultrix was the native
+Unix-like operating system for various Digital Equipment Corporation
+machines.  Its final release was in 1995.
 
 =back
 
@@ -261,43 +334,111 @@ L</Modules and Pragmata> section.
 
 =over 4
 
-=item XXX-some-platform
+=item Windows
 
-XXX
+utimes() on Win32 would print a message to stderr if it failed to
+convert a supplied C<time_t> to to a C<FILETIME>. [github #19668]
 
 =back
 
 =head1 Internal Changes
 
-XXX Changes which affect the interface available to C<XS> code go here.  Other
-significant internal changes for future core maintainers should be noted as
-well.
-
-[ List each change as an =item entry ]
-
 =over 4
 
 =item *
 
-XXX
+Removed many deprecated C functions.
+
+These have been deprecated for a long time. See
+L<https://github.com/perl/perl5/commit/7008caa915ad99e650acf2aea40612b5e48b7ba2>
+for a full list.
+
+=item *
+
+C<get_op_descs>, C<get_op_names>, C<get_opargs>, C<get_no_modify> and
+C<get_ppaddr> have been marked deprecated.
+
+=item *
+
+C<hv_free_ent> has been marked as internal API.
+
+=item *
+
+C<save_pushptr>, C<save_pushptrptr>, and C<save_pushi32ptr> have been marked
+as internal API.
+
+=item *
+
+New bool related functions and macros have been added to complement the new
+bool type introduced in 5.36:
+
+The functions are:
+
+=over 4
+
+=item L<C<newSVbool(const bool bool_val)>|perlapi/newSVbool>
+
+=item L<C<newSV_true()>|perlapi/newSV_true>
+
+=item L<C<newSV_false()>|perlapi/newSV_false>
+
+=item L<C<sv_set_true(SV *sv)>|perlapi/sv_set_true>
+
+=item L<C<sv_set_false(SV *sv)>|perlapi/sv_set_false>
+
+=item L<C<sv_set_bool(SV *sv, const bool bool_val)>|perlapi/sv_set_bool>
+
+=back
+
+The macros are:
+
+=over 4
+
+=item L<C<SvIandPOK(sv)>|perlapi/SvIandPOK>
+
+=item L<C<SvIandPOK_off(sv)>|perlapi/SvIandPOK_off>
+
+=item L<C<SvIandPOK_on>|perlapi/SvIandPOK_on>
+
+=back
+
+=item *
+
+Perl is no longer manipulating the C<environ> array directly. The variable
+C<PL_use_safe_putenv> has been removed and C<PERL_USE_SAFE_PUTENV> is always
+defined. This means XS modules can now call C<setenv> and C<putenv> without
+causing segfaults. [L<perl #19399|https://github.com/Perl/perl5/issues/19399>]
+
+=item *
+
+Internal C API functions are now hidden with C<__attribute__((hidden))> on the
+platforms that support it. This means they are no longer callable from XS
+modules on those platforms.
+
+It should be noted that those functions have always been hidden on Windows. This
+change merely brings that to the other platforms.
+[L<perl #19655|https://github.com/Perl/perl5/pull/19655>]
 
 =back
 
 =head1 Selected Bug Fixes
 
-XXX Important bug fixes in the core language are summarized here.  Bug fixes in
-files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
-
-Include references to GitHub issues and PRs as: [GH #12345] and the release
-manager will later use a regex to expand these into links.
-
-[ List each fix as an =item entry ]
-
 =over 4
 
 =item *
 
-XXX
+Avoid recursion and stack overflow parsing 'pack' template
+
+[L<GH #16319|https://github.com/Perl/perl5/issues/16319>]
+
+=item *
+
+An eval() as the last statement in a regex code block could trigger an
+interpreter panic; e.g.
+
+    /(?{ ...; eval {....}; })/
+
+[L<GH #19680|https://github.com/Perl/perl5/issues/19680>]
 
 =back
 
