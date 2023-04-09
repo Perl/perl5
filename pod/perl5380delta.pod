@@ -11,9 +11,38 @@ release.
 
 =head1 Notice
 
-XXX Any important notices here
+Perl 5.28 introduced "thread-safe" locales on systems that supported
+them, namely modern Windows, and systems supporting POSIX 2008 locale
+operations.  These systems accomplish this by having per-thread locales,
+while continuing to support the older global locale operations for code
+that doesn't take the steps necessary to use the newer per-thread ones.
+
+It turns out that some POSIX 2008 platforms have or have had buggy
+implementations, which forced perl to not use them.  The
+C<${^SAFE_LOCALES}> scalar variable contains 0 or 1 to indicate whether
+or not the current platform is considered by perl to have a working
+thread-safe implementation.  Some implementations have been fixed
+already, but FreeBSD and Cygwin have been newly discovered to be
+sufficiently buggy that the thread-safe operations are no longer used by
+perl, starting in this release.  Hence, C<${^SAFE_LOCALES}> is now 0 for
+them.  Older versions of perl can be configured to avoid these buggy
+implementations by adding the F<Configure> option
+C<-DNO_POSIX_2008_LOCALE>.
+
+And 5.37.5 fixes a bug in all previous perls that led to locales not
+being fully thread-safe.  The first thread that finishes caused
+the main thread (named C<thread0>) to revert to the global locale in
+effect at startup, discarding whatever the thread's locale had been
+previously set to.  If any other thread had switched to the global
+locale by calling C<switch_to_global_locale()> in XS code, those threads
+would all share the global locale, and C<thread0> would not be
+thread-safe.
 
 =head1 Core Enhancements
+
+=head2 Unicode 15.0 is supported
+
+See L<https://www.unicode.org/versions/Unicode15.0.0/> for details.
 
 =head2 PERL_RAND_SEED
 
@@ -87,6 +116,12 @@ simple OPs replaced by a single streamlined OP, so as to be more efficient at
 runtime. L<[GH #19943]|https://github.com/Perl/perl5/pull/19943>,
 L<[GH #20063]|https://github.com/Perl/perl5/pull/20063>,
 L<[GH #20077]|https://github.com/Perl/perl5/pull/20077>.
+
+=item *
+
+Creating an anonymous sub no longer generates an C<srefgen> op, the
+reference generation is now done in the C<anoncode> or C<anonconst>
+op, saving runtime.  [github #20290]
 
 =back
 
@@ -258,6 +293,29 @@ A section on symbol naming has been added to L<perlhacktips>.
 L<perlexperiment> has been edited to properly reference the warning categories
 for the defer block modifier and extra paired delimiters for quote-like
 operators.
+
+=back
+
+=head3 L<perlhacktips/Writing safer macros>
+
+=over 4
+
+=item *
+
+A new section has been added to discuss pitfalls and solutions to using
+C macros in C and XS code.
+
+=back
+
+=head3 L<perlhacktips/Choosing good symbol names>
+
+=over 4
+
+=item *
+
+A new section has been added to discuss unexpected gotchas with names.
+(Actually this section was added in v5.37.4, but notice of it was
+inadvertently left out of that perl delta.)
 
 =back
 
@@ -461,6 +519,22 @@ Properly populate osvers on Dragonfly BSD when the hostname isn't set.
 
 Fix typos for C99 macro name PRIX64.
 
+=item *
+
+Remove ancient and broken GCC for VMS support
+
+=item *
+
+Remove vestigial reference to /VAXC qualifier
+
+=item *
+
+Remove sharedperl option on VMS
+
+=item *
+
+VMS now has mkostemp
+
 =back
 
 =head1 Testing
@@ -475,18 +549,9 @@ made:
 
 Unicode normalization tests have been added.
 
-XXX Changes to F<Configure>, F<installperl>, F<installman>, and analogous tools
-go here.  Any other changes to the Perl build process should be listed here.
-However, any platform-specific changes should be listed in the
-L</Platform Support> section, instead.
-
-[ List changes as an =item entry ].
-
-=over 4
-
 =item *
 
-XXX
+t/test.pl: Add ability to cancel an watchdog timer
 
 =back
 
