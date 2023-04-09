@@ -63,9 +63,13 @@ XXX Remove this section if Porting/corelist-perldelta.pl did not add any content
 
 =item *
 
-L<XXX> has been upgraded from version A.xx to B.yy.
+=item *
 
-XXX If there was something important to note about this change, include that here.
+Added the C<is_tainted()> builtin function. [L<github #19854|https://github.com/Perl/perl5/issues/19854>]
+
+=item *
+
+Added the C<export_lexically()> builtin function as per PPC 0020. [L<github #19895|https://github.com/Perl/perl5/issues/19895>]
 
 =back
 
@@ -262,6 +266,14 @@ C<make -j6 minitest> could fail due to a build conflict in building
 C<$(MINIPERL_EXE)> between the main make process and a child process.
 [github #19829]
 
+=item *
+
+Properly populate osvers on Dragonfly BSD when the hostname isn't set.
+
+=item *
+
+Fix typos for C99 macro name PRIX64.
+
 =back
 
 =head1 Testing
@@ -334,7 +346,25 @@ L</Modules and Pragmata> section.
 
 =over 4
 
+=item DragonflyBSD
+
+Skip tests to workaround an apparent bug in setproctitle().  [L<github #19894|https://github.com/Perl/perl5/issues/19894>]
+
+=item FreeBSD
+
+Replace the first part of archname with `uname -p` [L<github #19791|https://github.com/Perl/perl5/issues/19791>]
+
+=item Solaris
+
+Avoid some compiler and compilation issues on NetBSD/Solaris from regexec.c and regcomp.c.
+
+=item Synology
+
+Update Synology Readme for DSM 7.
+
 =item Windows
+
+Fix win32 memory alignment needed for gcc-12 from vmem.h.
 
 utimes() on Win32 would print a message to stderr if it failed to
 convert a supplied C<time_t> to to a C<FILETIME>. [github #19668]
@@ -419,6 +449,97 @@ It should be noted that those functions have always been hidden on Windows. This
 change merely brings that to the other platforms.
 [L<perl #19655|https://github.com/Perl/perl5/pull/19655>]
 
+=item *
+
+New formatting symbols were added for printing values declared as U32 or
+I32:
+
+=over
+
+=item I32df -- Like %d
+
+=item U32of -- Like %o
+
+=item U32uf -- Like %u
+
+=item U32xf -- Like %x
+
+=item U32Xf -- Like %X
+
+=back
+
+These are used in the same way already existing similar symbols, such as
+C<IVdf>, are used.  See L<perlapi/I/O Formats>.
+
+=item *
+
+new 'HvHasAUX' macro
+
+=item *
+
+regexec.c: Add some branch predictions reorder conds
+
+=item *
+
+locale: Change macro name to be C conformant
+
+=item *
+
+Rename the C<PADNAMEt_*> constants to C<PADNAMEf_*>
+
+=item *
+
+Changes all the API macros that retrieve a PV into a call to an
+inline function so as to evaluate the parameter just once.
+
+=item *
+
+regexec.c: multiple code refactor to make the code more readable
+
+=item *
+
+perl.h: Change macro name to be C conformant
+(remove leading _ from NOT_IN_NUMERIC macros)
+
+=item *
+
+regcomp.h: add new C<BITMAP_BIT> macro in addition to the existing C<BITMAP_BYTE>
+and C<BITMAP_TEST> ones.
+
+=item *
+
+Create new regnode type ANYOFH.
+populate_ANYOF_from_invlist was renamed to populate_bitmap_from_invlist
+
+=item *
+
+regex: Refactor bitmap vs non-bitmap of qr/[]/
+
+=item *
+
+regcomp.c: add new functions to convert from an inversion list to a bitmap (and vice versa)
+C<populate_bitmap_from_invlist> and C<populate_invlist_from_bitmap>.
+
+=item *
+
+Add C<newAVav()> to create an AV from an existing AV.
+Add C<newAVhv()> to create an AV using keys and values from an existing HV.
+
+=item *
+
+Fix definition of C<Perl_atof>.
+
+=item *
+
+Fix undefined behavior with overflow related OPTIMIZE_INFTY and delta
+in C<regcomp.c>.
+
+=item *
+
+Fix regnode pointer alignment issue in <regcomp.h>.
+
+=back
+
 =back
 
 =head1 Selected Bug Fixes
@@ -439,6 +560,64 @@ interpreter panic; e.g.
     /(?{ ...; eval {....}; })/
 
 [L<GH #19680|https://github.com/Perl/perl5/issues/19680>]
+
+=item *
+
+Disabling the C<bareword_filehandles> feature no longer treats C<< print
+Class->method >> as an error.  [L<github #19704|https://github.com/Perl/perl5/issues/19704>]
+
+=item *
+
+When a Perl subroutine tail-calls an XS subroutine using C<goto &xs_sub>,
+the XS subroutine can now correctly determine its calling context.
+Previously it was always reported as scalar.
+
+In addition, where the Perl subroutine is freed at the same time:
+
+    sub foo { *foo = sub {}; goto &xs_sub }
+
+this formerly could lead to crashes if the XS subroutine tried to use the
+value of C<PL_op>, since this was being set to NULL. This is now fixed.
+
+[L<github #19936|https://github.com/Perl/perl5/issues/19936>]
+
+=item *
+
+setsockopt() now uses the mechanism added in 5.36 to better
+distinguish between numeric and string values supplied as the
+C<OPTVAL> parameter.  [L<github #18761|https://github.com/Perl/perl5/issues/18761>]
+
+=item *
+
+4-argument C<select()> now rejects strings with code points above
+255. Additionally, for code points 128-255, this operator will now always
+give the corresponding octet to the OS, regardless of how Perl stores
+such code points in memory. (Previously Perl leaked its internal string
+storage to the OS.) [L<github #19882|https://github.com/Perl/perl5/issues/19882>]
+
+=item *
+
+Fix panic issue from C<val {} inside /(?{...})/> [L<github #19390|https://github.com/Perl/perl5/issues/19390>]
+
+=item *
+
+Fix multiple compiler warnings from regexp.c., locale.c [L<github #19915|https://github.com/Perl/perl5/issues/19915>]
+
+=item *
+
+Fix querying locale without LC_NUMERIC on platform [L<github #19890|https://github.com/Perl/perl5/issues/19890>]
+
+=item *
+
+Prevent undefined behaviour in C<S_maybe_multideref()>.
+
+=item *
+
+Avoid signed integer overflow in C<use integer> ops.
+
+=item *
+
+Avoid adding an offset to a NULL pointer in C<hv_delete_common>.
 
 =back
 
