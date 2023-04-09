@@ -15,6 +15,17 @@ XXX Any important notices here
 
 =head1 Core Enhancements
 
+=head2 PERL_RAND_SEED
+
+Added a new environment variable C<PERL_RAND_SEED> which can be used to
+cause a perl program which uses C<rand> without using C<srand()>
+explicitly or which uses C<srand()> with no arguments to be repeatable.
+See L<perlrun>. This feature can be disabled at compile time by passing
+
+    -Accflags=-DNO_PERL_RAND_SEED
+
+to F<Configure> during the build process.
+
 =head1 Security
 
 =head1 Incompatible Changes
@@ -27,7 +38,31 @@ XXX Any important notices here
 
 =item *
 
-XXX
+Additional optree optimizations for common OP patterns. For example, multiple
+simple OPs replaced by a single streamlined OP, so as to be more efficient at
+runtime. L<[GH #19943]|https://github.com/Perl/perl5/pull/19943>.
+=item Windows
+
+=over 4
+
+=item *
+
+In some cases, timestamps returned by L<stat()|perlfunc/stat> and
+L<lstat()|perlfunc/lstat> failed to take daylight saving time into account.
+[L<GH #20018|https://github.com/Perl/perl5/issues/20018>]
+[L<GH #20061|https://github.com/Perl/perl5/issues/20061>]
+
+=back
+
+=item FreeBSD
+
+=over 4
+
+=item *
+
+FreeBSD no longer uses thread-safe locale operations, to avoid L<a bug in FreeBSD|https://bugs.freebsd.org/bugzilla/show_bug.cgi?id=265950>
+
+=back
 
 =back
 
@@ -352,6 +387,9 @@ Skip tests to workaround an apparent bug in setproctitle().  [L<github #19894|ht
 
 =item FreeBSD
 
+FreeBSD no longer uses thread-safe locale operations, to avoid L<a bug in
+FreeBSD|https://bugs.freebsd.org/bugzilla/show_bug.cgi?id=265950>
+
 Replace the first part of archname with `uname -p` [L<github #19791|https://github.com/Perl/perl5/issues/19791>]
 
 =item Solaris
@@ -368,6 +406,11 @@ Fix win32 memory alignment needed for gcc-12 from vmem.h.
 
 utimes() on Win32 would print a message to stderr if it failed to
 convert a supplied C<time_t> to to a C<FILETIME>. [github #19668]
+
+In some cases, timestamps returned by L<stat()|perlfunc/stat> and
+L<lstat()|perlfunc/lstat> failed to take daylight saving time into account.
+[L<GH #20018|https://github.com/Perl/perl5/issues/20018>]
+[L<GH #20061|https://github.com/Perl/perl5/issues/20061>]
 
 =back
 
@@ -540,6 +583,28 @@ Fix regnode pointer alignment issue in <regcomp.h>.
 
 =back
 
+=item *
+
+The C<CVf_METHOD> CV flag and associated C<CvMETHOD> macro has been renamed to
+C<CVf_NOWARN_AMBIGUOUS> and C<CvNOWARN_AMBIGUOUS>. This closer reflects its
+actual behaviour (it suppresses a warning that would otherwise be generated
+about ambiguous names), in order to be less confusing with a possible upcoming
+feature.
+
+=item *
+
+The C<OPf_SPECIAL> flag is no longer set on the C<OP_ENTERSUB> op
+constructed to call the C<VERSION>, C<import> and C<unimport> methods
+as part of a C<use> statement and attribute application, nor when
+assigning to an C<:lvalue> subroutine.
+
+=item *
+
+A new CV flag C<CVf_REFCOUNTED_ANYSV> has been added, which indicates that the
+CV is an XSUB and stores an SV pointer in the C<CvXSUBANY.any_sv> union field.
+Perl core operations such as cloning or destroying the CV will maintain the
+reference count of the pointed-to SV, destroying it when required.
+
 =back
 
 =head1 Selected Bug Fixes
@@ -618,6 +683,11 @@ Avoid signed integer overflow in C<use integer> ops.
 =item *
 
 Avoid adding an offset to a NULL pointer in C<hv_delete_common>.
+
+=item * PerlIO::get_layers will now accept IO references too
+
+Previously it would only take glob references or names of globs. Now it will
+also accept IO references.
 
 =back
 
