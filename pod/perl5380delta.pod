@@ -103,6 +103,12 @@ that used to be produced will no longer be displayed.
 
 See L<Changes to Existing Diagnostics> for more details.
 
+=head2 L<C<utf8::upgrade()>|utf8/Utility functions>
+
+Starting in this release, if the input string is C<undef>, it remains
+C<undef>.  Previously it would be changed into a defined, zero-length
+string.
+
 =head1 Deprecations
 
 =head1 Performance Enhancements
@@ -164,6 +170,14 @@ Added the C<is_tainted()> builtin function. [L<github #19854|https://github.com/
 =item *
 
 Added the C<export_lexically()> builtin function as per PPC 0020. [L<github #19895|https://github.com/Perl/perl5/issues/19895>]
+
+=item *
+
+Support for PPC 0018, C<use feature "module_true";> has been added to
+the default feature bundle for 5.37 and later. It may also be used
+explicitly. When enabled inside of a module the module does not need
+to return true explicitly, and in fact the return will be forced to
+a simple true value regardless of what it originally was.
 
 =back
 
@@ -480,6 +494,23 @@ warning no longer makes sense.
 
 See [L<GH #19636|https://github.com/Perl/perl5/pull/19636>].
 
+=item *
+
+Various warnings that used to produce parenthesized hints underneath the
+main warning message and after its "location data" were chanaged to put
+the hint inline with the main message. For instance:
+
+ Bareword found where operator expected at -e line 1, near "foo bar"
+     (Do you need to predeclare foo?)
+
+will now look like this but as one line:
+
+ Bareword found where operator expected (Do you need to predeclare
+ foo?) at -e line 1, near "foo bar"
+
+as a result such warnings will no longer trigger C<$SIG{__WARN__}>
+twice, and the hint will be visible when fatal warnings is in effect.
+
 =back
 
 =head1 Utility Changes
@@ -534,6 +565,12 @@ Remove sharedperl option on VMS
 =item *
 
 VMS now has mkostemp
+
+=item *
+
+C<I32>/C<U32> formatting symbols added in 5.37.2, C<I32df>, C<U32xf>, etc.
+used to be defined in F<perl.h> using preprocessor conditionals.
+They are now determined in F<Configure> and defined in F<config.h>.
 
 =back
 
@@ -628,6 +665,12 @@ In some cases, timestamps returned by L<stat()|perlfunc/stat> and
 L<lstat()|perlfunc/lstat> failed to take daylight saving time into account.
 [L<GH #20018|https://github.com/Perl/perl5/issues/20018>]
 [L<GH #20061|https://github.com/Perl/perl5/issues/20061>]
+
+stat() now works on AF_UNIX socket files. [github #20204]
+
+readlink() now returns the C<PrintName> from a symbolic link reparse
+point instead of the C<SubstituteName>, which should make it better
+match the name the link was created with.  [github #20271]
 
 =back
 
@@ -858,6 +901,29 @@ Note that this value relates to the size of your C stack and if you
 choose an inappropriately large value Perl may segfault, be conservative
 about what you choose.
 
+=item *
+
+A new magic type C<PERL_MAGIC_extvalue> has been added. This is available for
+use like C<PERL_MAGIC_ext>, but is a value magic: upon localization the new
+value will not be magical.
+
+=item *
+
+The C<SSNEW()>, C<SSNEWt()>, C<SSNEWa()> and C<SSNEWat()> APIs now
+return a C<SSize_t> value.  The C<SSPTR()> and C<SSPTRt()> macros now
+expect a C<SSize_t> parameter, and enforce that on debugging builds.
+[github #20411]
+
+=item *
+
+Filenames in cops are now refcounted under threads.
+Under threads we were copying the filenames into each opcode. This is because in
+theory opcodes created in one thread can be destroyed in another.
+The change adds a new struct/type RCPV, which is a refcounted
+string using shared memory. This is implemented in such a way that code
+that previously used a char * can continue to do so, as the refcounting
+data is located a specific offset before the char * pointer itself.
+
 =back
 
 =head1 Selected Bug Fixes
@@ -941,6 +1007,23 @@ Avoid adding an offset to a NULL pointer in C<hv_delete_common>.
 
 Previously it would only take glob references or names of globs. Now it will
 also accept IO references.
+
+=back
+
+=item *
+
+Fixes to memory handling for C<PL_splitstr>:
+
+=over
+
+=item *
+
+If a thread was created the allocated string would be freed twice.
+
+=item *
+
+If two C<-F> switches were supplied the memory allocated for the first
+switch wouldn't be freed.
 
 =back
 
