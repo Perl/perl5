@@ -228,7 +228,6 @@ static const char C_thousands_sep[] = "";
                                                       retbuf_sizep,  utf8ness)
 
 #ifdef USE_LOCALE
-
 #  ifdef DEBUGGING
 #    define setlocale_debug_string_i(index, locale, result)                 \
             my_setlocale_debug_string_i(index, locale, result, __LINE__)
@@ -423,6 +422,62 @@ STATIC void (*update_functions[]) (pTHX_ const char *, bool force) = {
                                 NULL
 };
 
+#endif
+#if  defined(DEBUGGING) || defined(USE_POSIX_2008_LOCALE)
+
+STATIC const char *
+S_get_displayable_string(pTHX_
+                         const char * const s,
+                         const char * const e,
+                         const bool is_utf8)
+{
+    PERL_ARGS_ASSERT_GET_DISPLAYABLE_STRING;
+
+    const char * t = s;
+    bool prev_was_printable = TRUE;
+    bool first_time = TRUE;
+    char * ret;
+
+    /* Worst case scenario: All are non-printable so have a blank between each.
+     * If UTF-8, all are the largest possible code point; otherwise all are a
+     * single byte.  '(2 + 1)'  is from each byte takes 2 characters to
+     * display, and a blank (or NUL for the final one) after it */
+    Newxz(ret, (e - s) * (2 + 1) * ((is_utf8) ? UVSIZE : 1), char);
+    SAVEFREEPV(ret);
+
+    while (t < e) {
+        UV cp = (is_utf8)
+                ?  utf8_to_uvchr_buf((U8 *) t, e, NULL)
+                : * (U8 *) t;
+        if (isPRINT(cp)) {
+            if (! prev_was_printable) {
+                my_strlcat(ret, " ", sizeof(ret));
+            }
+
+            /* Escape these to avoid any ambiguity */
+            if (cp == ' ' || cp == '\\') {
+                my_strlcat(ret, "\\", sizeof(ret));
+            }
+            my_strlcat(ret, Perl_form(aTHX_ "%c", (U8) cp), sizeof(ret));
+            prev_was_printable = TRUE;
+        }
+        else {
+            if (! first_time) {
+                my_strlcat(ret, " ", sizeof(ret));
+            }
+            my_strlcat(ret, Perl_form(aTHX_ "%02" UVXf, cp), sizeof(ret));
+            prev_was_printable = FALSE;
+        }
+        t += (is_utf8) ? UTF8SKIP(t) : 1;
+        first_time = FALSE;
+    }
+
+    return ret;
+}
+
+#endif
+#ifdef USE_LOCALE
+
 STATIC int
 S_get_category_index_nowarn(const int category)
 {
@@ -577,6 +632,150 @@ Perl_locale_panic(const char * msg,
                    &PL_stdize_locale_buf, &PL_stdize_locale_bufsize, __LINE__)
 #else
 #  define stdized_setlocale(cat, locale)  posix_setlocale(cat, locale)
+#endif
+#ifdef USE_LOCALE
+
+/* So far, the locale strings returned by modern 2008-compliant systems have
+ * been fine */
+
+STATIC const char *
+S_stdize_locale(pTHX_ const int category,
+                      const char *input_locale,
+                      const char **buf,
+                      Size_t *buf_size,
+                      const line_t caller_line)
+{
+    /* The return value of setlocale() is opaque, but is required to be usable
+     * as input to a future setlocale() to create the same state.
+     * Unfortunately not all systems are compliant.  But most often they are of
+     * a very restricted set of forms that this file has been coded to expect.
+     *
+     * There are some outliers, though, that this function tries to tame:
+     *
+     * 1) A new-line.  This function chomps any \n characters
+     * 2) foo=bar.     'bar' is what is generally meant, and the foo= part is
+     *                 stripped.  This form is legal for LC_ALL.  When found in
+     *                 that category group, the function calls itself
+     *                 recursively on each possible component category to make
+     *                 sure the individual categories are ok.
+     *
+     * If no changes to the input were made, it is returned; otherwise the
+     * changed version is stored into memory at *buf, with *buf_size set to its
+     * new value, and *buf is returned.
+     */
+
+    const char * first_bad;
+    const char * retval;
+
+    PERL_ARGS_ASSERT_STDIZE_LOCALE;
+
+    DEBUG_Lv(PerlIO_printf(Perl_debug_log,
+                          "Entering stdize_locale(%d, '%s');"
+                          " called from %" LINE_Tf "\n",
+                          category, input_locale, caller_line));
+
+    if (input_locale == NULL) {
+        return NULL;
+    }
+
+    first_bad = strpbrk(input_locale, "=\n");
+
+    /* Most likely, there isn't a problem with the input */
+    if (LIKELY(! first_bad)) {
+        return input_locale;
+    }
+
+#    ifdef LC_ALL
+
+    /* But if there is, and the category is LC_ALL, we have to look at each
+     * component category */
+    if (category == LC_ALL) {
+        const char * individ_locales[LC_ALL_INDEX_];
+        bool made_changes = FALSE;
+        unsigned int i;
+
+        for (i = 0; i < LC_ALL_INDEX_; i++) {
+            Size_t this_size = 0;
+            individ_locales[i] = stdize_locale(categories[i],
+                                               posix_setlocale(categories[i],
+                                                               NULL),
+                                               &individ_locales[i],
+                                               &this_size,
+                                               caller_line);
+
+            /* If the size didn't change, it means this category did not have
+             * to be adjusted, and individ_locales[i] points to the buffer
+             * returned by posix_setlocale(); we have to copy that before
+             * it's called again in the next iteration */
+            if (this_size == 0) {
+                individ_locales[i] = savepv(individ_locales[i]);
+            }
+            else {
+                made_changes = TRUE;
+            }
+        }
+
+        /* If all the individual categories were ok as-is, this was a false
+         * alarm.  We must have seen an '=' which was a legal occurrence in
+         * this combination locale */
+        if (! made_changes) {
+            retval = input_locale;  /* The input can be returned unchanged */
+        }
+        else {
+            retval = save_to_buffer(posix_setlocale(LC_ALL, NULL),
+                                    buf, buf_size);
+        }
+
+        for (i = 0; i < LC_ALL_INDEX_; i++) {
+            Safefree(individ_locales[i]);
+        }
+
+        return retval;
+    }
+
+#    else   /* else no LC_ALL */
+
+    PERL_UNUSED_ARG(category);
+    PERL_UNUSED_ARG(caller_line);
+
+#    endif
+
+    /* Here, there was a problem in an individual category.  This means that at
+     * least one adjustment will be necessary.  Create a modifiable copy */
+    retval = save_to_buffer(input_locale, buf, buf_size);
+
+    if (*first_bad != '=') {
+
+        /* Translate the found position into terms of the copy */
+        first_bad = retval + (first_bad - input_locale);
+    }
+    else { /* An '=' */
+
+        /* It is unlikely that the return is so screwed-up that it contains
+         * multiple equals signs, but handle that case by stripping all of
+         * them.  */
+        const char * final_equals = strrchr(retval, '=');
+
+        /* The length passed here causes the move to include the terminating
+         * NUL */
+        Move(final_equals + 1, retval, strlen(final_equals), char);
+
+        /* See if there are additional problems; if not, we're good to return.
+         * */
+        first_bad = strpbrk(retval, "\n");
+
+        if (! first_bad) {
+            return retval;
+        }
+    }
+
+    /* Here, the problem must be a \n.  Get rid of it and what follows.
+     * (Originally, only a trailing \n was stripped.  Unsure what to do if not
+     * trailing) */
+    *((char *) first_bad) = '\0';
+    return retval;
+}
+
 #endif
 
 /* The next many lines form a layer above the close-to-the-metal 'posix'
@@ -1395,268 +1594,8 @@ S_emulate_setlocale_i(pTHX_
 #endif   /* End of the various implementations of the setlocale and
             querylocale macros used in the remainder of this program */
 
-#ifdef USE_LOCALE
-
-/* So far, the locale strings returned by modern 2008-compliant systems have
- * been fine */
-
-STATIC const char *
-S_stdize_locale(pTHX_ const int category,
-                      const char *input_locale,
-                      const char **buf,
-                      Size_t *buf_size,
-                      const line_t caller_line)
-{
-    /* The return value of setlocale() is opaque, but is required to be usable
-     * as input to a future setlocale() to create the same state.
-     * Unfortunately not all systems are compliant.  But most often they are of
-     * a very restricted set of forms that this file has been coded to expect.
-     *
-     * There are some outliers, though, that this function tries to tame:
-     *
-     * 1) A new-line.  This function chomps any \n characters
-     * 2) foo=bar.     'bar' is what is generally meant, and the foo= part is
-     *                 stripped.  This form is legal for LC_ALL.  When found in
-     *                 that category group, the function calls itself
-     *                 recursively on each possible component category to make
-     *                 sure the individual categories are ok.
-     *
-     * If no changes to the input were made, it is returned; otherwise the
-     * changed version is stored into memory at *buf, with *buf_size set to its
-     * new value, and *buf is returned.
-     */
-
-    const char * first_bad;
-    const char * retval;
-
-    PERL_ARGS_ASSERT_STDIZE_LOCALE;
-
-    DEBUG_Lv(PerlIO_printf(Perl_debug_log,
-                          "Entering stdize_locale(%d, '%s');"
-                          " called from %" LINE_Tf "\n",
-                          category, input_locale, caller_line));
-
-    if (input_locale == NULL) {
-        return NULL;
-    }
-
-    first_bad = strpbrk(input_locale, "=\n");
-
-    /* Most likely, there isn't a problem with the input */
-    if (LIKELY(! first_bad)) {
-        return input_locale;
-    }
-
-#    ifdef LC_ALL
-
-    /* But if there is, and the category is LC_ALL, we have to look at each
-     * component category */
-    if (category == LC_ALL) {
-        const char * individ_locales[LC_ALL_INDEX_];
-        bool made_changes = FALSE;
-        unsigned int i;
-
-        for (i = 0; i < LC_ALL_INDEX_; i++) {
-            Size_t this_size = 0;
-            individ_locales[i] = stdize_locale(categories[i],
-                                               posix_setlocale(categories[i],
-                                                               NULL),
-                                               &individ_locales[i],
-                                               &this_size,
-                                               caller_line);
-
-            /* If the size didn't change, it means this category did not have
-             * to be adjusted, and individ_locales[i] points to the buffer
-             * returned by posix_setlocale(); we have to copy that before
-             * it's called again in the next iteration */
-            if (this_size == 0) {
-                individ_locales[i] = savepv(individ_locales[i]);
-            }
-            else {
-                made_changes = TRUE;
-            }
-        }
-
-        /* If all the individual categories were ok as-is, this was a false
-         * alarm.  We must have seen an '=' which was a legal occurrence in
-         * this combination locale */
-        if (! made_changes) {
-            retval = input_locale;  /* The input can be returned unchanged */
-        }
-        else {
-            retval = save_to_buffer(posix_setlocale(LC_ALL, NULL),
-                                    buf, buf_size);
-        }
-
-        for (i = 0; i < LC_ALL_INDEX_; i++) {
-            Safefree(individ_locales[i]);
-        }
-
-        return retval;
-    }
-
-#    else   /* else no LC_ALL */
-
-    PERL_UNUSED_ARG(category);
-    PERL_UNUSED_ARG(caller_line);
-
-#    endif
-
-    /* Here, there was a problem in an individual category.  This means that at
-     * least one adjustment will be necessary.  Create a modifiable copy */
-    retval = save_to_buffer(input_locale, buf, buf_size);
-
-    if (*first_bad != '=') {
-
-        /* Translate the found position into terms of the copy */
-        first_bad = retval + (first_bad - input_locale);
-    }
-    else { /* An '=' */
-
-        /* It is unlikely that the return is so screwed-up that it contains
-         * multiple equals signs, but handle that case by stripping all of
-         * them.  */
-        const char * final_equals = strrchr(retval, '=');
-
-        /* The length passed here causes the move to include the terminating
-         * NUL */
-        Move(final_equals + 1, retval, strlen(final_equals), char);
-
-        /* See if there are additional problems; if not, we're good to return.
-         * */
-        first_bad = strpbrk(retval, "\n");
-
-        if (! first_bad) {
-            return retval;
-        }
-    }
-
-    /* Here, the problem must be a \n.  Get rid of it and what follows.
-     * (Originally, only a trailing \n was stripped.  Unsure what to do if not
-     * trailing) */
-    *((char *) first_bad) = '\0';
-    return retval;
-}
-
-#if defined(WIN32) || (     defined(USE_POSIX_2008_LOCALE)      \
-                       && ! defined(USE_QUERYLOCALE))
-
-STATIC const char *
-S_find_locale_from_environment(pTHX_ const unsigned int index)
-{
-    /* NB: This function may actually change the locale on Windows.
-     *
-     * On Windows systems, the concept of the POSIX ordering of environment
-     * variables is missing.  To increase portability of programs across
-     * platforms, the POSIX ordering is emulated on Windows.
-     *
-     * And on POSIX 2008 systems without querylocale(), it is problematic
-     * getting the results of the POSIX 2008 equivalent of
-     *      setlocale(category,  "")
-     * (which gets the locale from the environment).
-     *
-     * To ensure that we know exactly what those values are, we do the setting
-     * ourselves, using the documented algorithm (assuming the documentation is
-     * correct) rather than use "" as the locale.  This will lead to results
-     * that differ from native behavior if the native behavior differs from the
-     * standard documented value, but khw believes it is better to know what's
-     * going on, even if different from native, than to just guess.
-     *
-     * Another option for the POSIX 2008 case would be, in a critical section,
-     * to save the global locale's current value, and do a straight
-     * setlocale(LC_ALL, "").  That would return our desired values, destroying
-     * the global locale's, which we would then restore.  But that could cause
-     * races with any other thread that is using the global locale and isn't
-     * using the mutex.  And, the only reason someone would have done that is
-     * because they are calling a library function, like in gtk, that calls
-     * setlocale(), and which can't be changed to use the mutex.  That wouldn't
-     * be a problem if this were to be done before any threads had switched,
-     * say during perl construction time.  But this code would still be needed
-     * for the general case.
-     *
-     * The Windows and POSIX 2008 differ in that the ultimate fallback is "C"
-     * in POSIX, and is the system default locale in Windows.  To get that
-     * system default value, we actually have to call setlocale() on Windows.
-     */
-
-    /* We rely on PerlEnv_getenv() returning a mortalized copy */
-    const char * const lc_all = PerlEnv_getenv("LC_ALL");
-
-    /* Use any "LC_ALL" environment variable, as it overrides everything
-     * else. */
-    if (lc_all && strNE(lc_all, "")) {
-        return lc_all;
-    }
-
-    /* If setting an individual category, use its corresponding value found in
-     * the environment, if any */
-    if (index != LC_ALL_INDEX_) {
-        const char * const new_value = PerlEnv_getenv(category_names[index]);
-
-        if (new_value && strNE(new_value, "")) {
-            return new_value;
-        }
-
-        /* If no corresponding environment variable, see if LANG exists.  If
-         * so, use it. */
-        const char * default_name = PerlEnv_getenv("LANG");
-        if (default_name && strNE(default_name, "")) {
-            return default_name;
-        }
-
-        /* If no LANG, use "C" on POSIX 2008, the system default on Windows */
-#  ifndef WIN32
-        return "C";
-#  else
-        return wrap_wsetlocale(categories[index], "");
-#  endif
-
-    }
-
-    /* Here is LC_ALL, and no LC_ALL environment variable.  LANG is used as a
-     * default, but overridden for individual categories that have
-     * corresponding environment variables.  If no LANG exists, the default is
-     * "C" on POSIX 2008, or the system default for the category on Windows. */
-    const char * default_name = PerlEnv_getenv("LANG");
-
-    /* Convert "" to NULL to save conditionals in the loop below */
-    if (default_name != NULL && strEQ(default_name, "")) {
-        default_name = NULL;
-    }
-
-    /* Loop through all the individual categories, setting each to any
-     * corresponding environment variable; or to the default if none exists for
-     * the category */
-    const char * locale_names[LC_ALL_INDEX_];
-    for (unsigned i = 0; i < LC_ALL_INDEX_; i++) {
-        const char * const env_override = PerlEnv_getenv(category_names[i]);
-
-        if (env_override && strNE(env_override, "")) {
-            locale_names[i] = env_override;
-        }
-        else if (default_name) {
-            locale_names[i] = default_name;
-        }
-        else {
-
-#  ifndef WIN32
-            locale_names[i] = "C";
-#  else
-            locale_names[i] = wrap_wsetlocale(categories[index], "");
-#  endif
-
-        }
-
-        DEBUG_Lv(PerlIO_printf(Perl_debug_log,
-                 "find_locale_from_environment i=%d, name=%s, locale=%s\n",
-                 i, category_names[i], locale_names[i]));
-    }
-
-    return calculate_LC_ALL_string(locale_names);
-}
-
-#endif
-#if defined(WIN32) || defined(USE_POSIX_2008_LOCALE) || ! defined(LC_ALL)
+#if  defined(USE_LOCALE)                                                    \
+ && (defined(WIN32) || defined(USE_POSIX_2008_LOCALE) || ! defined(LC_ALL))
 
 STATIC
 const char *
@@ -1788,6 +1727,124 @@ S_calculate_LC_ALL_string(pTHX_ const char ** individ_locales)
 }
 
 #endif
+#if defined(WIN32) || (     defined(USE_POSIX_2008_LOCALE)      \
+                       && ! defined(USE_QUERYLOCALE))
+
+STATIC const char *
+S_find_locale_from_environment(pTHX_ const unsigned int index)
+{
+    /* NB: This function may actually change the locale on Windows.
+     *
+     * On Windows systems, the concept of the POSIX ordering of environment
+     * variables is missing.  To increase portability of programs across
+     * platforms, the POSIX ordering is emulated on Windows.
+     *
+     * And on POSIX 2008 systems without querylocale(), it is problematic
+     * getting the results of the POSIX 2008 equivalent of
+     *      setlocale(category,  "")
+     * (which gets the locale from the environment).
+     *
+     * To ensure that we know exactly what those values are, we do the setting
+     * ourselves, using the documented algorithm (assuming the documentation is
+     * correct) rather than use "" as the locale.  This will lead to results
+     * that differ from native behavior if the native behavior differs from the
+     * standard documented value, but khw believes it is better to know what's
+     * going on, even if different from native, than to just guess.
+     *
+     * Another option for the POSIX 2008 case would be, in a critical section,
+     * to save the global locale's current value, and do a straight
+     * setlocale(LC_ALL, "").  That would return our desired values, destroying
+     * the global locale's, which we would then restore.  But that could cause
+     * races with any other thread that is using the global locale and isn't
+     * using the mutex.  And, the only reason someone would have done that is
+     * because they are calling a library function, like in gtk, that calls
+     * setlocale(), and which can't be changed to use the mutex.  That wouldn't
+     * be a problem if this were to be done before any threads had switched,
+     * say during perl construction time.  But this code would still be needed
+     * for the general case.
+     *
+     * The Windows and POSIX 2008 differ in that the ultimate fallback is "C"
+     * in POSIX, and is the system default locale in Windows.  To get that
+     * system default value, we actually have to call setlocale() on Windows.
+     */
+
+    /* We rely on PerlEnv_getenv() returning a mortalized copy */
+    const char * const lc_all = PerlEnv_getenv("LC_ALL");
+
+    /* Use any "LC_ALL" environment variable, as it overrides everything
+     * else. */
+    if (lc_all && strNE(lc_all, "")) {
+        return lc_all;
+    }
+
+    /* If setting an individual category, use its corresponding value found in
+     * the environment, if any */
+    if (index != LC_ALL_INDEX_) {
+        const char * const new_value = PerlEnv_getenv(category_names[index]);
+
+        if (new_value && strNE(new_value, "")) {
+            return new_value;
+        }
+
+        /* If no corresponding environment variable, see if LANG exists.  If
+         * so, use it. */
+        const char * default_name = PerlEnv_getenv("LANG");
+        if (default_name && strNE(default_name, "")) {
+            return default_name;
+        }
+
+        /* If no LANG, use "C" on POSIX 2008, the system default on Windows */
+#  ifndef WIN32
+        return "C";
+#  else
+        return wrap_wsetlocale(categories[index], "");
+#  endif
+
+    }
+
+    /* Here is LC_ALL, and no LC_ALL environment variable.  LANG is used as a
+     * default, but overridden for individual categories that have
+     * corresponding environment variables.  If no LANG exists, the default is
+     * "C" on POSIX 2008, or the system default for the category on Windows. */
+    const char * default_name = PerlEnv_getenv("LANG");
+
+    /* Convert "" to NULL to save conditionals in the loop below */
+    if (default_name != NULL && strEQ(default_name, "")) {
+        default_name = NULL;
+    }
+
+    /* Loop through all the individual categories, setting each to any
+     * corresponding environment variable; or to the default if none exists for
+     * the category */
+    const char * locale_names[LC_ALL_INDEX_];
+    for (unsigned i = 0; i < LC_ALL_INDEX_; i++) {
+        const char * const env_override = PerlEnv_getenv(category_names[i]);
+
+        if (env_override && strNE(env_override, "")) {
+            locale_names[i] = env_override;
+        }
+        else if (default_name) {
+            locale_names[i] = default_name;
+        }
+        else {
+
+#  ifndef WIN32
+            locale_names[i] = "C";
+#  else
+            locale_names[i] = wrap_wsetlocale(categories[index], "");
+#  endif
+
+        }
+
+        DEBUG_Lv(PerlIO_printf(Perl_debug_log,
+                 "find_locale_from_environment i=%d, name=%s, locale=%s\n",
+                 i, category_names[i], locale_names[i]));
+    }
+
+    return calculate_LC_ALL_string(locale_names);
+}
+
+#endif
 #if defined(USE_LOCALE) && (   defined(DEBUGGING)                       \
                             || defined(USE_PERL_SWITCH_LOCALE_CONTEXT))
 
@@ -1814,6 +1871,7 @@ S_get_LC_ALL_display(pTHX)
 }
 
 #endif
+#ifdef USE_LOCALE
 
 STATIC void
 S_setlocale_failure_panic_i(pTHX_
@@ -6555,63 +6613,6 @@ Perl_strxfrm(pTHX_ SV * src)
 }
 
 #endif /* USE_LOCALE_COLLATE */
-#if  defined(DEBUGGING) || defined(USE_POSIX_2008_LOCALE)
-
-STATIC const char *
-S_get_displayable_string(pTHX_
-                         const char * const s,
-                         const char * const e,
-                         const bool is_utf8)
-{
-    PERL_ARGS_ASSERT_GET_DISPLAYABLE_STRING;
-
-    const char * t = s;
-    bool prev_was_printable = TRUE;
-    bool first_time = TRUE;
-    char * ret;
-
-    if (e <= s) {
-        return "";
-    }
-
-    /* Worst case scenario: All are non-printable so have a blank between each.
-     * If UTF-8, all are the largest possible code point; otherwise all are a
-     * single byte.  '(2 + 1)'  is from each byte takes 2 characters to
-     * display, and a blank (or NUL for the final one) after it */
-    Newxz(ret, (e - s) * (2 + 1) * ((is_utf8) ? UVSIZE : 1), char);
-    SAVEFREEPV(ret);
-
-    while (t < e) {
-        UV cp = (is_utf8)
-                ?  utf8_to_uvchr_buf((U8 *) t, e, NULL)
-                : * (U8 *) t;
-        if (isPRINT(cp)) {
-            if (! prev_was_printable) {
-                my_strlcat(ret, " ", sizeof(ret));
-            }
-
-            /* Escape these to avoid any ambiguity */
-            if (cp == ' ' || cp == '\\') {
-                my_strlcat(ret, "\\", sizeof(ret));
-            }
-            my_strlcat(ret, Perl_form(aTHX_ "%c", (U8) cp), sizeof(ret));
-            prev_was_printable = TRUE;
-        }
-        else {
-            if (! first_time) {
-                my_strlcat(ret, " ", sizeof(ret));
-            }
-            my_strlcat(ret, Perl_form(aTHX_ "%02" UVXf, cp), sizeof(ret));
-            prev_was_printable = FALSE;
-        }
-        t += (is_utf8) ? UTF8SKIP(t) : 1;
-        first_time = FALSE;
-    }
-
-    return ret;
-}
-
-#endif
 #ifdef USE_LOCALE
 
 STATIC const char *
