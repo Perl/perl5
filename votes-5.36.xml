@@ -37,7 +37,7 @@ See https://github.com/perl/Perl5/issues?q=+label%3Abackport-5.36
 
 <commit votes="steveh tonyc yves" id="92ef216deffb274d2e40a3516632fb089187b008" issue="20678" pull="" desc="pp_multiconcat: don't set svpv_p to an invalid pointer"/>
 
-<commit votes="tonyc yves" id="af62106ad344b13fde54d2c0d5e7e0d0bab96054" issue="20733" pull="" desc="check the IO object exists when writing to IO magic variables"/>
+<commit votes="tonyc yves steveh" id="af62106ad344b13fde54d2c0d5e7e0d0bab96054" issue="20733" pull="" desc="check the IO object exists when writing to IO magic variables"/>
 
 </div>
 
@@ -49,7 +49,7 @@ See https://github.com/perl/Perl5/issues?q=+label%3Abackport-5.36
 
 <div><h3>New Feature Fixes</h3>
 
-<commit votes="tonyc yves" id="64d117434d554b7227e13abbc3ba99ff266b8484" issue="20354" pull="" desc="only negative cache a method lookup if we look at UNIVERSAL"/>
+<commit votes="tonyc yves steveh" id="64d117434d554b7227e13abbc3ba99ff266b8484" issue="20354" pull="" desc="only negative cache a method lookup if we look at UNIVERSAL"/>
 
 </div>
 
@@ -59,9 +59,9 @@ See https://github.com/perl/Perl5/issues?q=+label%3Abackport-5.36
 
 <commit votes="steveh tonyc yves" id="d8a109ccd80350f5b83d0928d87032df3ec1b8dd" issue="20806" pull="" desc="Configure: don't probe for the malloc()/free() return type"/>
 
-<commit votes="craigb tonyc yves" id="144dfbc7545720fb0e6e8364370a991bdf8acf76" issue="" pull="" desc="Future proof archname on VMS"/>
+<commit votes="craigb tonyc yves steveh" id="144dfbc7545720fb0e6e8364370a991bdf8acf76" issue="" pull="" desc="Future proof archname on VMS"/>
 
-<commit votes="tonyc yves" id="f5a18896dd41b93e5e6e8227ada0f26cd0ebc352" issue="20395" pull="" desc="pp_sort: don't force inline the comparison functions"/>
+<commit votes="tonyc yves steveh" id="f5a18896dd41b93e5e6e8227ada0f26cd0ebc352" issue="20395" pull="" desc="pp_sort: don't force inline the comparison functions"/>
 
 </div>
 
