@@ -104,13 +104,13 @@ Remember: Rip it! Roll it! And punch it!
 
 =head2 v5.37.0 - John Cage, "Lecture on Nothing"
 
-L<Announced on 2022-05-27 by Ricardo Signes|http://nntp.perl.org/group/perl.perl5.porters/263786>
+L<Announced on 2022-05-27 by Ricardo Signes|https://www.nntp.perl.org/group/perl.perl5.porters/2022/05/msg263786.html>
 
 I have nothing to say, and I am saying it.
 
 =head2 v5.36.0 - Alexandre Dumas, "The Three Musketeers"
 
-L<Announced on 2022-05-27 by Ricardo Signes|http://nntp.perl.org/group/perl.perl5.porters/263783>
+L<Announced on 2022-05-27 by Ricardo Signes|https://www.nntp.perl.org/group/perl.perl5.porters/2022/05/msg263783.html>
 
 “What!" cried he, in an accent of greater astonishment than before "your second
 witness is Monsieur Aramis?"
@@ -121,7 +121,7 @@ the city, Athos, Porthos, and Aramis, or the Three Inseparables?”
 
 =head2 v5.36.0-RC3 - The Three Amigos
 
-L<Announced on 2022-05-22 by Ricardo Signes|http://nntp.perl.org/group/perl.perl5.porters/263750>
+L<Announced on 2022-05-22 by Ricardo Signes|https://www.nntp.perl.org/group/perl.perl5.porters/2022/05/msg263750.html>
 
   Lucky Day:  I'll come back one day
   Carmen:     Why?
@@ -129,7 +129,7 @@ L<Announced on 2022-05-22 by Ricardo Signes|http://nntp.perl.org/group/perl.perl
 
 =head2 v5.36.0-RC1 - The Three Amigos
 
-L<Announced on 2022-05-20 by Ricardo Signes|http://nntp.perl.org/group/perl.perl5.porters/263728>
+L<Announced on 2022-05-20 by Ricardo Signes|https://www.nntp.perl.org/group/perl.perl5.porters/2022/05/msg263728.html>
 
   Jefe:     I have put many beautiful piñatas in the storeroom, each of them filled
             with little surprises.
