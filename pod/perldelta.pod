@@ -266,7 +266,9 @@ malloc() and free() from C<std::> with C<using> for C++ builds.  Since
 the return types of malloc() and free() are well defined by the C
 standard, skip probing for them.  C<Configure> command-line arguments
 and hints can still override these type in the unlikely case that is
-needed.  [github #20806]
+needed.
+
+[L<GH #20806|https://github.com/Perl/perl5/issues/20806>]
 
 =back
 
@@ -385,14 +387,18 @@ interpreter panic; e.g.
 =item *
 
 An C<eval EXPR> referring to a lexical sub defined in grandparent
-scope no longer produces an assertion failues. [github #19857]
+scope no longer produces an assertion failues.
+
+[L<GH #19857|https://github.com/Perl/perl5/issues/19857>]
 
 =item *
 
 Writing to a magic variables associated with the selected output
 handle, C<$^>, C<$~>, C<$=>, C<$-> and C<$%>, no longer crashes perl
 if the IO object has been cleared from the selected output
-handle. [github #20733]
+handle.
+
+[L<GH #20733|https://github.com/Perl/perl5/issues/20733>]
 
 =back
 
