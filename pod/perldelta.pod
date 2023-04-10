@@ -43,7 +43,6 @@ since Solaris instead imports malloc() and free() from C<std::> with C<using>
 for C++ builds.  Since the return types of malloc() and free() are well defined
 by the C standard, skip probing for them.  C<Configure> command-line arguments
 and hints can still override these type in the unlikely case that is needed.
-
 [L<GH #20806|https://github.com/Perl/perl5/issues/20806>]
 
 =back
@@ -69,8 +68,7 @@ interpreter panic; e.g.
 =item *
 
 An C<eval EXPR> referring to a lexical sub defined in grandparent scope no
-longer produces an assertion failues.
-
+longer produces an assertion failures.
 [L<GH #19857|https://github.com/Perl/perl5/issues/19857>]
 
 =item *
@@ -78,16 +76,40 @@ longer produces an assertion failues.
 Writing to a magic variables associated with the selected output handle, C<$^>,
 C<$~>, C<$=>, C<$-> and C<$%>, no longer crashes perl if the IO object has been
 cleared from the selected output handle.
-
 [L<GH #20733|https://github.com/Perl/perl5/issues/20733>]
 
 =back
 
 =head1 Acknowledgements
 
-XXX Generate this with:
+Perl 5.36.1 represents approximately 10 months of development since Perl 5.36.0
+and contains approximately 5,300 lines of changes across 62 files from 23
+authors.
 
-  perl Porting/acknowledgements.pl v5.36.0..HEAD
+Excluding auto-generated files, documentation and release tools, there were
+approximately 1,500 lines of changes to 23 .pm, .t, .c and .h files.
+
+Perl continues to flourish into its fourth decade thanks to a vibrant community
+of users and developers.  The following people are known to have contributed
+the improvements that became Perl 5.36.1:
+
+Andreas König, Bram, Chris 'BinGOs' Williams, Craig A. Berry, Dagfinn Ilmari
+Mannsåker, David Mitchell, Elvin Aslanov, Graham Knop, Hugo van der Sanden,
+Karen Etheridge, Karl Williamson, Leon Timmermans, Matthew Horsfall, Max
+Maischein, Neil Bowers, Nicolas R, Renee Baecker, Ricardo Signes, Richard
+Leach, Steve Hay, Todd Rinaldo, Tony Cook, Yves Orton.
+
+The list above is almost certainly incomplete as it is automatically generated
+from version control history.  In particular, it does not include the names of
+the (very much appreciated) contributors who reported issues to the Perl bug
+tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core.  We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please see
+the F<AUTHORS> file in the Perl source distribution.
 
 =head1 Reporting Bugs
 
