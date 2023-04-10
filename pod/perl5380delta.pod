@@ -11,33 +11,6 @@ release.
 
 =head1 Notice
 
-Perl 5.28 introduced "thread-safe" locales on systems that supported
-them, namely modern Windows, and systems supporting POSIX 2008 locale
-operations.  These systems accomplish this by having per-thread locales,
-while continuing to support the older global locale operations for code
-that doesn't take the steps necessary to use the newer per-thread ones.
-
-It turns out that some POSIX 2008 platforms have or have had buggy
-implementations, which forced perl to not use them.  The
-C<${^SAFE_LOCALES}> scalar variable contains 0 or 1 to indicate whether
-or not the current platform is considered by perl to have a working
-thread-safe implementation.  Some implementations have been fixed
-already, but FreeBSD and Cygwin have been newly discovered to be
-sufficiently buggy that the thread-safe operations are no longer used by
-perl, starting in this release.  Hence, C<${^SAFE_LOCALES}> is now 0 for
-them.  Older versions of perl can be configured to avoid these buggy
-implementations by adding the F<Configure> option
-C<-DNO_POSIX_2008_LOCALE>.
-
-And 5.37.5 fixes a bug in all previous perls that led to locales not
-being fully thread-safe.  The first thread that finishes caused
-the main thread (named C<thread0>) to revert to the global locale in
-effect at startup, discarding whatever the thread's locale had been
-previously set to.  If any other thread had switched to the global
-locale by calling C<switch_to_global_locale()> in XS code, those threads
-would all share the global locale, and C<thread0> would not be
-thread-safe.
-
 =head1 Core Enhancements
 
 =head2 Unicode 15.0 is supported
@@ -223,6 +196,35 @@ Starting in this release, if the input string is C<undef>, it remains
 C<undef>.  Previously it would be changed into a defined, zero-length
 string.
 
+=head2 Changes to "thread-safe" locales
+
+Perl 5.28 introduced "thread-safe" locales on systems that supported
+them, namely modern Windows, and systems supporting POSIX 2008 locale
+operations.  These systems accomplish this by having per-thread locales,
+while continuing to support the older global locale operations for code
+that doesn't take the steps necessary to use the newer per-thread ones.
+
+It turns out that some POSIX 2008 platforms have or have had buggy
+implementations, which forced perl to not use them.  The
+C<${^SAFE_LOCALES}> scalar variable contains 0 or 1 to indicate whether
+or not the current platform is considered by perl to have a working
+thread-safe implementation.  Some implementations have been fixed
+already, but FreeBSD and Cygwin have been newly discovered to be
+sufficiently buggy that the thread-safe operations are no longer used by
+perl, starting in this release.  Hence, C<${^SAFE_LOCALES}> is now 0 for
+them.  Older versions of perl can be configured to avoid these buggy
+implementations by adding the F<Configure> option
+C<-DNO_POSIX_2008_LOCALE>.
+
+And v5.38 fixes a bug in all previous perls that led to locales not
+being fully thread-safe.  The first thread that finishes caused
+the main thread (named C<thread0>) to revert to the global locale in
+effect at startup, discarding whatever the thread's locale had been
+previously set to.  If any other thread had switched to the global
+locale by calling C<switch_to_global_locale()> in XS code, those threads
+would all share the global locale, and C<thread0> would not be
+thread-safe.
+
 =head1 Deprecations
 
 =head2 Use of C<'> as a package name separator is deprecated
@@ -301,7 +303,7 @@ Added the C<export_lexically()> builtin function as per PPC 0020. [L<github #198
 =item *
 
 Support for PPC 0018, C<use feature "module_true";> has been added to
-the default feature bundle for 5.37 and later. It may also be used
+the default feature bundle for v5.38 and later. It may also be used
 explicitly. When enabled inside of a module the module does not need
 to return true explicitly, and in fact the return will be forced to
 a simple true value regardless of what it originally was.
@@ -483,8 +485,6 @@ C macros in C and XS code.
 =item *
 
 A new section has been added to discuss unexpected gotchas with names.
-(Actually this section was added in v5.37.4, but notice of it was
-inadvertently left out of that perl delta.)
 
 =back
 
@@ -921,8 +921,8 @@ Will change to (with some output elided for clarity):
         or die $@'
     Can't locate Frobnitz.pm in @INC (you may need to install the
     Frobnitz module) (@INC entries checked:
-    .../site_perl/5.37.7/x86_64-linux .../site_perl/5.37.7
-    .../5.37.7/x86_64-linux .../5.37.7 CODE(0x562745e684b8))
+    .../site_perl/5.38.0/x86_64-linux .../site_perl/5.38.0
+    .../5.38.0/x86_64-linux .../5.38.0 CODE(0x562745e684b8))
     at (eval 1) line 1.
 
 thus showing the actual directories checked. Code that checks for
@@ -995,13 +995,8 @@ VMS now has mkostemp
 
 =item *
 
-C<I32>/C<U32> formatting symbols added in 5.37.2, C<I32df>, C<U32xf>, etc.
-used to be defined in F<perl.h> using preprocessor conditionals.
-They are now determined in F<Configure> and defined in F<config.h>.
-
-=item *
-
-C<Configure> now properly handles quoted elements outputted from gcc. [L<GH #20606|https://github.com/Perl/perl5/issues/20606>]
+C<Configure> now properly handles quoted elements outputted by gcc.
+[L<GH #20606|https://github.com/Perl/perl5/issues/20606>]
 
 =item *
 
@@ -1623,7 +1618,7 @@ died, add a short obituary here.
 
 XXX Generate this with:
 
-  perl Porting/acknowledgements.pl v5.37.11..HEAD
+  perl Porting/acknowledgements.pl v5.37.0..HEAD
 
 =head1 Reporting Bugs
 
