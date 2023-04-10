@@ -25,43 +25,17 @@ See https://github.com/perl/Perl5/issues?q=+label%3Abackport-5.36
 
 <div><h3>Crash / Assertion / Memory Corruption Fixes</h3>
 
-<commit votes="steveh yves ether" id="f757874dac95bb608303f02ed7a2eeeaf1ec116b" issue="19478" pull="" desc="GH19478: applying taint is no reason to mess with pos"/>
-
-<commit votes="steveh tonyc yves ether" id="5fd637ce8c4db075c0668d9f9c806f6712cd3c7f" issue="19680" pull="" desc="fix panic from eval {} inside /(?{...})/"/>
-
-<commit votes="steveh tonyc yves ether" id="16e43efd81368f85ada6f2d40658b305d92ba57e" issue="19390" pull="" desc="fix another panic from eval {} inside /(?{...})/"/>
-
-<commit votes="steveh tonyc yves ether" id="24a3add986669c1f4ad5040b224428bd097b944e" issue="19947" pull="" desc="regcomp.h: deal with 64 bit aligned pointer data in regex program."/>
-
-<commit votes="steveh tonyc yves ether" id="b0bc598140d48d19b21d667a581c0dfa28a3749a" issue="19857" pull="" desc="handle intermediate pads not including the name in find_lexical_cv()"/>
-
-<commit votes="steveh tonyc yves ether" id="92ef216deffb274d2e40a3516632fb089187b008" issue="20678" pull="" desc="pp_multiconcat: don't set svpv_p to an invalid pointer"/>
-
-<commit votes="tonyc yves steveh ether" id="af62106ad344b13fde54d2c0d5e7e0d0bab96054" issue="20733" pull="" desc="check the IO object exists when writing to IO magic variables"/>
-
 </div>
 
 <div><h3>Regression Fixes</h3>
-
-<commit votes="steveh tonyc yves ether" id="5d7d8ffc298134400c054265830d47abb6ee7845" issue="19985" pull="" desc="formats: fix splitting on non-spaces"/>
 
 </div>
 
 <div><h3>New Feature Fixes</h3>
 
-<commit votes="tonyc yves steveh ether" id="64d117434d554b7227e13abbc3ba99ff266b8484" issue="20354" pull="" desc="only negative cache a method lookup if we look at UNIVERSAL"/>
-
 </div>
 
 <div><h3>Build and Installation Fixes</h3>
-
-<commit votes="steveh tonyc yves ether" id="bc726283c505c016567b3156526f1aeecc777244" issue="" pull="" desc="allow building with -DPERL_MEM_LOG on Win32"/>
-
-<commit votes="steveh tonyc yves ether" id="d8a109ccd80350f5b83d0928d87032df3ec1b8dd" issue="20806" pull="" desc="Configure: don't probe for the malloc()/free() return type"/>
-
-<commit votes="craigb tonyc yves steveh ether" id="144dfbc7545720fb0e6e8364370a991bdf8acf76" issue="" pull="" desc="Future proof archname on VMS"/>
-
-<commit votes="tonyc yves steveh ether" id="f5a18896dd41b93e5e6e8227ada0f26cd0ebc352" issue="20395" pull="" desc="pp_sort: don't force inline the comparison functions"/>
 
 </div>
 
@@ -74,8 +48,6 @@ See https://github.com/perl/Perl5/issues?q=+label%3Abackport-5.36
 </div>
 
 <div><h3>Documentation Fixes</h3>
-
-<commit votes="ilmari steveh tonyc yves ether" id="3377d40549ee51d1d8f2efc65a084b6df01cc9a0" issue="" pull="" desc="perlexperiment: fix warning category for defer and extra parired delimiters"/>
 
 </div>
 
