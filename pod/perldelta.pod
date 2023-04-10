@@ -379,6 +379,13 @@ interpreter panic; e.g.
 An C<eval EXPR> referring to a lexical sub defined in grandparent
 scope no longer produces an assertion failues. [github #19857]
 
+=item *
+
+Writing to a magic variables associated with the selected output
+handle, C<$^>, C<$~>, C<$=>, C<$-> and C<$%>, no longer crashes perl
+if the IO object has been cleared from the selected output
+handle. [github #20733]
+
 =back
 
 =head1 Known Problems
