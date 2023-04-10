@@ -374,6 +374,11 @@ interpreter panic; e.g.
 
 [L<GH #19680|https://github.com/Perl/perl5/issues/19680>]
 
+=item *
+
+An C<eval EXPR> referring to a lexical sub defined in grandparent
+scope no longer produces an assertion failues. [github #19857]
+
 =back
 
 =head1 Known Problems
