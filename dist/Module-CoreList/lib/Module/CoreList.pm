@@ -4,7 +4,7 @@ use strict;
 our ( %released, %version, %families, %upstream, %bug_tracker, %deprecated, %delta );
 
 use version;
-our $VERSION = '5.20230320';
+our $VERSION = '5.20230423';
 
 sub PKG_PATTERN () { q#\A[a-zA-Z_][0-9a-zA-Z_]*(?:(::|')[0-9a-zA-Z_]+)*\z# }
 sub _looks_like_invocant ($) { local $@; !!eval { $_[0]->isa(__PACKAGE__) } }
@@ -403,6 +403,7 @@ sub changes_between {
     5.037008 => '2023-01-20',
     5.037009 => '2023-02-20',
     5.037010 => '2023-03-20',
+    5.036001 => '2023-04-23',
   );
 
 for my $version ( sort { $a <=> $b } keys %released ) {
@@ -20220,6 +20221,17 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         removed => {
         }
     },
+    5.036001 => {
+        delta_from => 5.036000,
+        changed => {
+            'B::Op_private'         => '5.036001',
+            'Config'                => '5.036001',
+            'Module::CoreList'      => '5.20230423',
+            'Module::CoreList::Utils'=> '5.20230423',
+        },
+        removed => {
+        }
+    },
 );
 
 sub is_core
@@ -21600,6 +21612,13 @@ sub is_core
         removed => {
         }
     },
+    5.036001 => {
+        delta_from => 5.036,
+        changed => {
+        },
+        removed => {
+        }
+    },
 );
 
 %deprecated = _undelta(\%deprecated);
@@ -21791,9 +21810,13 @@ sub is_core
     'Math::BigInt::Trace'   => 'cpan',
     'Math::BigRat'          => 'cpan',
     'Math::BigRat::Trace'   => 'cpan',
+    'Math::Complex'         => 'cpan',
+    'Math::Trig'            => 'cpan',
     'Memoize'               => 'cpan',
     'Memoize::AnyDBM_File'  => 'cpan',
     'Memoize::Expire'       => 'cpan',
+    'Memoize::ExpireFile'   => 'cpan',
+    'Memoize::ExpireTest'   => 'cpan',
     'Memoize::NDBM_File'    => 'cpan',
     'Memoize::SDBM_File'    => 'cpan',
     'Memoize::Storable'     => 'cpan',
@@ -22028,7 +22051,6 @@ sub is_core
     'ok'                    => 'cpan',
     'parent'                => 'cpan',
     'perlfaq'               => 'cpan',
-    'stable'                => 'cpan',
     'version'               => 'cpan',
     'version::regex'        => 'cpan',
 );
@@ -22218,9 +22240,13 @@ sub is_core
     'Math::BigInt::Trace'   => undef,
     'Math::BigRat'          => undef,
     'Math::BigRat::Trace'   => undef,
+    'Math::Complex'         => undef,
+    'Math::Trig'            => undef,
     'Memoize'               => 'https://rt.cpan.org/Dist/Display.html?Name=Memoize',
     'Memoize::AnyDBM_File'  => 'https://rt.cpan.org/Dist/Display.html?Name=Memoize',
     'Memoize::Expire'       => 'https://rt.cpan.org/Dist/Display.html?Name=Memoize',
+    'Memoize::ExpireFile'   => undef,
+    'Memoize::ExpireTest'   => undef,
     'Memoize::NDBM_File'    => 'https://rt.cpan.org/Dist/Display.html?Name=Memoize',
     'Memoize::SDBM_File'    => 'https://rt.cpan.org/Dist/Display.html?Name=Memoize',
     'Memoize::Storable'     => 'https://rt.cpan.org/Dist/Display.html?Name=Memoize',
@@ -22455,7 +22481,6 @@ sub is_core
     'ok'                    => 'http://github.com/Test-More/test-more/issues',
     'parent'                => undef,
     'perlfaq'               => 'https://github.com/perl-doc-cats/perlfaq/issues',
-    'stable'                => 'http://rt.cpan.org/Public/Dist/Display.html?Name=experimental',
     'version'               => 'https://rt.cpan.org/Public/Dist/Display.html?Name=version',
     'version::regex'        => 'https://rt.cpan.org/Public/Dist/Display.html?Name=version',
 );
