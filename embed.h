@@ -1308,7 +1308,7 @@
 #           define parse_LC_ALL_string(a,b,c)   S_parse_LC_ALL_string(aTHX_ a,b,c)
 #         endif
 #         if !defined(USE_QUERYLOCALE)
-#           define update_PL_curlocales_i(a,b)  S_update_PL_curlocales_i(aTHX_ a,b)
+#           define update_PL_curlocales_i(a,b,c) S_update_PL_curlocales_i(aTHX_ a,b,c)
 #         endif
 #       elif  defined(USE_LOCALE_THREADS) &&                  \
              !defined(USE_THREAD_SAFE_LOCALE) &&              \
