@@ -22,6 +22,7 @@ our $TODO;
 
 use sigtrap qw/die normal-signals error-signals/;
 use IPC::SysV qw/ IPC_PRIVATE S_IRUSR S_IWUSR IPC_RMID IPC_CREAT IPC_STAT IPC_CREAT IPC_NOWAIT/;
+use Errno qw(EINVAL);
 
 my $id;
 END { msgctl $id, IPC_RMID, 0 if defined $id }
@@ -96,6 +97,13 @@ else {
         is($store, 1, "should be one store");
         unlike($warn, qr/uninitialized/, "shouldn't be uninitialized warning");
     }
+}
+
+{
+    # this resulted in a panic
+    my $buf;
+    ok(!msgrcv($id, $buf, -10, 0, IPC_NOWAIT), "fail with negative length");
+    is(0+$!, &Errno::EINVAL, "check proper error");
 }
 
 done_testing();

@@ -3231,11 +3231,11 @@ Perl_do_msgrcv(pTHX_ SV **mark, SV **sp)
     mtype = (long)SvIVx(*++mark);
     flags = SvIVx(*++mark);
     SvPV_force_nomg_nolen(mstr);
-    mbuf = SvGROW(mstr, sizeof(long)+msize+1);
 
     SETERRNO(0,0);
     SSize_t ret;
     if (id >= 0 && msize >= 0 && flags >= 0) {
+        mbuf = SvGROW(mstr, sizeof(long)+msize+1);
         ret = msgrcv(id, (struct msgbuf *)mbuf, msize, mtype, flags);
     } else {
         SETERRNO(EINVAL,LIB_INVARG);
@@ -3245,10 +3245,10 @@ Perl_do_msgrcv(pTHX_ SV **mark, SV **sp)
         SvCUR_set(mstr, sizeof(long)+ret);
         SvPOK_only(mstr);
         *SvEND(mstr) = '\0';
+        SvSETMAGIC(mstr);
         /* who knows who has been playing with this message? */
         SvTAINTED_on(mstr);
     }
-    SvSETMAGIC(mstr);
 
     return ret;
 #else
