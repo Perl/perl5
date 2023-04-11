@@ -1188,12 +1188,7 @@ S_stdize_locale(pTHX_ const int category,
      * return may point to a global static buffer or may be mortalized.)
      *
      * The current things this corrects are:
-     * 1) A new-line.  This function chomps any \n characters
-     * 2) foo=bar.     'bar' is what is generally meant, and the foo= part is
-     *                 stripped.  This form is legal for LC_ALL.  When found in
-     *                 that category group, the function calls itself
-     *                 recursively on each possible component category to make
-     *                 sure the individual categories are ok.
+     * 1) A new-line.  This function chops any \n characters
      *
      * If no changes were made, the input is returned as-is */
 
@@ -1234,6 +1229,7 @@ S_stdize_locale(pTHX_ const int category,
                                     caller_line))
         {
           case invalid:
+            SET_EINVAL;
             return NULL;
 
           case full_array: /* Loop below through all the component categories.
@@ -1258,7 +1254,7 @@ S_stdize_locale(pTHX_ const int category,
 #    endif    /* Has LC_ALL */
 
     {
-        first_bad = (char *) strpbrk(INPUT_LOCALE, "=\n");
+        first_bad = (char *) strchr(INPUT_LOCALE, '\n');
 
         /* Most likely, there isn't a problem with the input */
         if (UNLIKELY(first_bad)) {
@@ -1269,33 +1265,12 @@ S_stdize_locale(pTHX_ const int category,
             retval = savepv(INPUT_LOCALE);
             SAVEFREEPV(retval);
 
-            if (*first_bad != '=') {
+            /* Translate the found position into terms of the copy */
+            first_bad = retval + (first_bad - INPUT_LOCALE);
 
-                /* Translate the found position into terms of the copy */
-                first_bad = retval + (first_bad - INPUT_LOCALE);
-            }
-            else { /* An '=' */
-
-                /* It is unlikely that the return is so screwed-up that it
-                 * contains multiple equals signs, but handle that case by
-                 * stripping all of them.  */
-                const char * final_equals = strrchr(retval, '=');
-
-                /* The length passed here causes the move to include the
-                 * terminating NUL */
-                Move(final_equals + 1, retval, strlen(final_equals), char);
-
-                /* See if there are additional problems; if not, we're finished
-                 * with this item */
-                first_bad = (char *) strchr(retval, '\n');
-            }
-
-            if (first_bad) {
-                /* Here, the problem must be a \n.  Get rid of it and what
-                 * follows.  (Originally, only a trailing \n was stripped.
-                 * Unsure what to do if not trailing) */
-                *((char *) first_bad) = '\0';
-            }
+            /* Get rid of the \n and what follows.  (Originally, only a
+             * trailing \n was stripped.  Unsure what to do if not trailing) */
+            *((char *) first_bad) = '\0';
         }   /* End of needs adjusting */
     }   /* End of looking for problems */
 
