@@ -5430,7 +5430,7 @@ Perl_do_ipcget(pTHX_ I32 optype, SV **mark, SV **sp)
 # define PERL_ARGS_ASSERT_DO_IPCGET             \
         assert(mark); assert(sp)
 
-PERL_CALLCONV I32
+PERL_CALLCONV SSize_t
 Perl_do_msgrcv(pTHX_ SV **mark, SV **sp)
         __attribute__visibility__("hidden");
 # define PERL_ARGS_ASSERT_DO_MSGRCV             \

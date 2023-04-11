@@ -3752,7 +3752,7 @@ p	|I32	|do_ipcget	|I32 optype				\
 				|NN SV **mark				\
 				|NN SV **sp
 : Defined in doio.c, used only in pp_sys.c
-p	|I32	|do_msgrcv	|NN SV **mark				\
+p	|SSize_t|do_msgrcv	|NN SV **mark				\
 				|NN SV **sp
 : Defined in doio.c, used only in pp_sys.c
 p	|I32	|do_msgsnd	|NN SV **mark				\

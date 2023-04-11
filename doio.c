@@ -3181,18 +3181,20 @@ I32
 Perl_do_msgsnd(pTHX_ SV **mark, SV **sp)
 {
 #ifdef HAS_MSG
+    PERL_ARGS_ASSERT_DO_MSGSND;
+    PERL_UNUSED_ARG(sp);
+
     STRLEN len;
     const I32 id = SvIVx(*++mark);
     SV * const mstr = *++mark;
     const I32 flags = SvIVx(*++mark);
     const char * const mbuf = SvPVbyte(mstr, len);
-    const I32 msize = len - sizeof(long);
 
-    PERL_ARGS_ASSERT_DO_MSGSND;
-    PERL_UNUSED_ARG(sp);
-
-    if (msize < 0)
+    if (len < sizeof(long))
         Perl_croak(aTHX_ "Arg too short for msgsnd");
+
+    const STRLEN msize = len - sizeof(long);
+
     SETERRNO(0,0);
     if (id >= 0 && flags >= 0) {
       return msgsnd(id, (struct msgbuf *)mbuf, msize, flags);
@@ -3209,13 +3211,13 @@ Perl_do_msgsnd(pTHX_ SV **mark, SV **sp)
 #endif
 }
 
-I32
+SSize_t
 Perl_do_msgrcv(pTHX_ SV **mark, SV **sp)
 {
 #ifdef HAS_MSG
     char *mbuf;
     long mtype;
-    I32 msize, flags, ret;
+    I32 flags;
     const I32 id = SvIVx(*++mark);
     SV * const mstr = *++mark;
 
@@ -3225,13 +3227,14 @@ Perl_do_msgrcv(pTHX_ SV **mark, SV **sp)
     /* suppress warning when reading into undef var --jhi */
     if (! SvOK(mstr))
         SvPVCLEAR(mstr);
-    msize = SvIVx(*++mark);
+    SSize_t msize = SvIVx(*++mark);
     mtype = (long)SvIVx(*++mark);
     flags = SvIVx(*++mark);
     SvPV_force_nolen(mstr);
     mbuf = SvGROW(mstr, sizeof(long)+msize+1);
 
     SETERRNO(0,0);
+    SSize_t ret;
     if (id >= 0 && msize >= 0 && flags >= 0) {
         ret = msgrcv(id, (struct msgbuf *)mbuf, msize, mtype, flags);
     } else {
