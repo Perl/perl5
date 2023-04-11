@@ -602,6 +602,14 @@ unless ($define{USE_LOCALE_COLLATE}) {
 			 );
 }
 
+unless ($define{USE_LOCALE_THREADS} && ! $define{USE_THREAD_SAFE_LOCALE}) {
+    ++$skip{$_} foreach qw(
+                           PL_less_dicey_locale_buf
+                           PL_less_dicey_locale_bufsize
+			  );
+}
+
+
 unless ($define{USE_LOCALE_NUMERIC}) {
     ++$skip{$_} foreach qw(
                     PL_underlying_numeric_obj

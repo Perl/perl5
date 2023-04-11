@@ -1432,13 +1432,9 @@ S_less_dicey_setlocale_r(pTHX_ const int category, const char * locale)
 
     POSIX_SETLOCALE_LOCK;
 
-    retval = stdized_setlocale(category, locale);
-
-    /* We reuse PL_stdize_locale_buf as it doesn't conflict, but the call may
-     * already have used it, in which case we don't have to do anything further
-     * */
-    retval = save_to_buffer(retval,
-                            &PL_stdize_locale_buf, &PL_stdize_locale_bufsize);
+    retval = save_to_buffer(stdized_setlocale(category, locale),
+                            &PL_less_dicey_locale_buf,
+                            &PL_less_dicey_locale_bufsize);
 
     POSIX_SETLOCALE_UNLOCK;
 

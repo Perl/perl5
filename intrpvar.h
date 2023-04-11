@@ -786,8 +786,11 @@ PERLVARI(I, langinfo_buf, const char *, NULL)
 PERLVARI(I, langinfo_bufsize, Size_t, 0)
 PERLVARI(I, setlocale_buf, const char *, NULL)
 PERLVARI(I, setlocale_bufsize, Size_t, 0)
-PERLVARI(I, stdize_locale_buf, const char *, NULL)
-PERLVARI(I, stdize_locale_bufsize, Size_t, 0)
+
+#if   defined(USE_LOCALE_THREADS) && ! defined(USE_THREAD_SAFE_LOCALE)
+PERLVARI(I, less_dicey_locale_buf, const char *, NULL)
+PERLVARI(I, less_dicey_locale_bufsize, Size_t, 0)
+#endif
 
 #ifdef PERL_SAWAMPERSAND
 PERLVAR(I, sawampersand, U8)		/* must save all match strings */
