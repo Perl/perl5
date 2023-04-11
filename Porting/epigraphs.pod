@@ -108,6 +108,20 @@ L<Announced on 2022-05-27 by Ricardo Signes|https://www.nntp.perl.org/group/perl
 
 I have nothing to say, and I am saying it.
 
+=head2 v5.36.1-RC2 - Karl Leimer & Walter Gieseking, "The Shortest Way to Pianistic Perfection"
+
+L<Announced on 2023-04-11 by Steve Hay|https://www.nntp.perl.org/group/perl.perl5.porters/2023/04/msg266203.html>
+
+In order to attain a natural manner of playing the piano, that is to
+say, with the least possible strain and exertion, it is of the utmost
+importance to learn to exert the muscles consciously, and, what is of
+still greater importance, to relax them consciously.  My manner of
+accomplishing this differs from that of many other pedagogues.  I
+contrive to raise a feeling of relaxation from within, as it were. This
+is generally attempted by the aid of visible movements.  All superfluous
+movements are injurious.  The aim should be the very least possible
+strain of the muscles when playing the piano.
+
 =head2 v5.36.1-RC1 - Josef Lhevinne, "Basic Principles in Pianoforte Playing"
 
 L<Announced on 2023-04-10 by Steve Hay|https://www.nntp.perl.org/group/perl.perl5.porters/2023/04/msg266184.html>
