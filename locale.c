@@ -195,7 +195,8 @@
  *      dot.  The macro query_nominal_locale_i() can be used to get the nominal
  *      locale that an external caller would expect, for all categories except
  *      LC_ALL.  For that, you can use the function
- *      S_calculate_LC_ALL_string().
+ *      S_calculate_LC_ALL_string().  Or S_native_querylocale_i() will operate
+ *      on any category.
  *
  * The underlying C API that this implements uses category numbers, hence the
  * code is structured to use '_r' at the API level to convert to indexes, which
@@ -4135,7 +4136,62 @@ S_win32_setlocale(pTHX_ int category, const char* locale)
 }
 
 #  endif
-#endif  /* USE_LOCALE */
+
+STATIC const char *
+S_native_querylocale_i(pTHX_ const unsigned int cat_index)
+{
+    /* Determine the current locale and return it in the form the platform's
+     * native locale handling understands.  This is different only from our
+     * internal form for the LC_ALL category, as platforms differ in how they
+     * represent that.
+     *
+     * This is only called from Perl_setlocale().  As such it returns in
+     * PL_setlocale_buf */
+
+#  ifdef USE_LOCALE_NUMERIC
+
+    /* We have the LC_NUMERIC name saved, because we are normally switched into
+     * the C locale (or equivalent) for it. */
+    if (cat_index == LC_NUMERIC_INDEX_) {
+
+        /* We don't have to copy this return value, as it is a per-thread
+         * variable, and won't change until a future setlocale */
+        return PL_numeric_name;
+    }
+
+#  endif
+#  ifdef LC_ALL
+
+    if (cat_index != LC_ALL_INDEX_)
+
+#  endif
+
+    {
+        /* Here, not LC_ALL, and not LC_NUMERIC: the actual and native values
+         * match */
+        return save_to_buffer(querylocale_i(cat_index),
+                              &PL_setlocale_buf, &PL_setlocale_bufsize);
+    }
+
+    /* Below, querying LC_ALL */
+
+#  ifdef LC_ALL
+#    ifdef USE_PL_CURLOCALES
+#      define LC_ALL_ARG  PL_curlocales
+#    else
+#      define LC_ALL_ARG  NULL  /* Causes calculate_LC_ALL_string() to find the
+                                   locale using a querylocale function */
+#    endif
+
+    return calculate_LC_ALL_string(LC_ALL_ARG, EXTERNAL_FORMAT_FOR_QUERY,
+                                   WANT_PL_setlocale_buf,
+                                   __LINE__);
+#    undef LC_ALL_ARG
+#  endif    /* has LC_ALL */
+
+}
+
+#endif      /* USE_LOCALE */
 
 /*
 =for apidoc Perl_setlocale
@@ -4200,7 +4256,6 @@ Perl_setlocale(const int category, const char * locale)
 
 #else
 
-    const char * retval;
     dTHX;
 
     DEBUG_L(PerlIO_printf(Perl_debug_log,
@@ -4233,88 +4288,18 @@ Perl_setlocale(const int category, const char * locale)
         return NULL;
     }
 
+    /* Get current locale */
+    const char * current_locale = native_querylocale_i(cat_index);
+
     /* A NULL locale means only query what the current one is. */
     if (locale == NULL) {
+        return current_locale;
+    }
 
-#  ifndef USE_LOCALE_NUMERIC
-
-        /* Without LC_NUMERIC, it's trivial; we just return the value */
-        return save_to_buffer(querylocale_i(cat_index),
-                              &PL_setlocale_buf, &PL_setlocale_bufsize);
-#  else
-
-        /* We have the LC_NUMERIC name saved, because we are normally switched
-         * into the C locale (or equivalent) for it. */
-        if (category == LC_NUMERIC) {
-            DEBUG_L(PerlIO_printf(Perl_debug_log,
-                    "Perl_setlocale(LC_NUMERIC, NULL) returning stashed '%s'\n",
-                    PL_numeric_name));
-
-            /* We don't have to copy this return value, as it is a per-thread
-             * variable, and won't change until a future setlocale */
-            return PL_numeric_name;
-        }
-
-#    ifndef LC_ALL
-
-        /* Without LC_ALL, just return the value */
-        return save_to_buffer(querylocale_i(cat_index),
-                              &PL_setlocale_buf, &PL_setlocale_bufsize);
-
-#    else
-
-        /* Here, LC_ALL is available on this platform.  It's the one
-         * complicating category (because it can contain a toggled LC_NUMERIC
-         * value), for all the remaining ones (we took care of LC_NUMERIC
-         * above), just return the value */
-        if (category != LC_ALL) {
-            return save_to_buffer(querylocale_i(cat_index),
-                                  &PL_setlocale_buf, &PL_setlocale_bufsize);
-        }
-
-        bool toggled = FALSE;
-
-        /* For an LC_ALL query, switch back to the underlying numeric locale
-         * (if we aren't there already) so as to get the correct results.  Our
-         * records for all the other categories are valid without switching */
-        if (! PL_numeric_underlying) {
-            set_numeric_underlying(__FILE__, __LINE__);
-            toggled = TRUE;
-        }
-
-        retval = querylocale_c(LC_ALL);
-
-        if (toggled) {
-            set_numeric_standard(__FILE__, __LINE__);
-        }
-
-        DEBUG_L(PerlIO_printf(Perl_debug_log, "%s\n",
-                           setlocale_debug_string_i(cat_index, locale, retval)));
-
-        return save_to_buffer(retval, &PL_setlocale_buf, &PL_setlocale_bufsize);
-
-#    endif      /* Has LC_ALL */
-#  endif        /* Has LC_NUMERIC */
-
-    } /* End of querying the current locale */
-
-    retval = querylocale_i(cat_index);
-
-    /* If the new locale is the same as the current one, nothing is actually
-     * being changed, so do nothing. */
-    if (      strEQ(retval, locale)
-        && (   ! affects_LC_NUMERIC(category)
-
-#  ifdef USE_LOCALE_NUMERIC
-
-            || strEQ(locale, PL_numeric_name)
-
-#  endif
-
-    )) {
+    if (strEQ(current_locale, locale)) {
         DEBUG_L(PerlIO_printf(Perl_debug_log,
-                              "Already in requested locale: no action taken\n"));
-        return save_to_buffer(retval, &PL_setlocale_buf, &PL_setlocale_bufsize);
+                             "Already in requested locale: no action taken\n"));
+        return current_locale;
     }
 
     /* Here, an actual change is being requested.  Do it */
@@ -4324,19 +4309,34 @@ Perl_setlocale(const int category, const char * locale)
         return NULL;
     }
 
-    assert(strNE(retval, ""));
-    retval = save_to_buffer(querylocale_i(cat_index),
-                            &PL_setlocale_buf, &PL_setlocale_bufsize);
+    /* At this point, the locale has been changed based on the requested value,
+     * and the querylocale_i() will return the actual new value that the system
+     * has for the category.  That may not be the same as the input, as libc
+     * may have returned a synonymous locale name instead of the input one; or,
+     * if there are locale categories that we are compiled to ignore, any
+     * attempt to change them away from "C" is overruled */
+    current_locale = querylocale_i(cat_index);
 
-    /* Now that have changed locales, we have to update our records to
-     * correspond.  Only certain categories have extra work to update. */
+    /* But certain categories need further work.  For example we may need to
+     * calculate new folding or collation rules.  And for LC_NUMERIC, we have
+     * to switch into a locale that has a dot radix. */
     if (update_functions[cat_index]) {
-        update_functions[cat_index](aTHX_ retval, false);
+        update_functions[cat_index](aTHX_ current_locale,
+                                          /* No need to force recalculation, as
+                                           * aren't coming from a situation
+                                           * where Perl hasn't been controlling
+                                           * the locale, so has accurate
+                                           * records. */
+                                          false);
     }
 
-    DEBUG_L(PerlIO_printf(Perl_debug_log, "returning '%s'\n", retval));
+    /* Make sure the result is in a stable buffer for the caller's use, and is
+     * in the expected format */
+    current_locale = native_querylocale_i(cat_index);
 
-    return retval;
+    DEBUG_L(PerlIO_printf(Perl_debug_log, "returning '%s'\n", current_locale));
+
+    return current_locale;
 
 #endif
 
