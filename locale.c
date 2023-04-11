@@ -1191,6 +1191,8 @@ S_parse_LC_ALL_string(pTHX_ const char * string,
  *                  on
  */
 
+#define STDIZED_SETLOCALE_LOCK    POSIX_SETLOCALE_LOCK
+#define STDIZED_SETLOCALE_UNLOCK  POSIX_SETLOCALE_UNLOCK
 #if ! defined(USE_LOCALE)                                                   \
  || ! (   defined(HAS_LF_IN_SETLOCALE_RETURN)                               \
        || defined(HAS_BROKEN_SETLOCALE_QUERY_LC_ALL))
@@ -1452,13 +1454,13 @@ S_less_dicey_setlocale_r(pTHX_ const int category, const char * locale)
 
     PERL_ARGS_ASSERT_LESS_DICEY_SETLOCALE_R;
 
-    POSIX_SETLOCALE_LOCK;
+    STDIZED_SETLOCALE_LOCK;
 
     retval = save_to_buffer(stdized_setlocale(category, locale),
                             &PL_less_dicey_locale_buf,
                             &PL_less_dicey_locale_bufsize);
 
-    POSIX_SETLOCALE_UNLOCK;
+    STDIZED_SETLOCALE_UNLOCK;
 
     return retval;
 }
@@ -7901,9 +7903,9 @@ Perl_sync_locale(pTHX)
      * category. */
     const char * current_globals[LC_ALL_INDEX_];
     for (unsigned i = 0; i < LC_ALL_INDEX_; i++) {
-        POSIX_SETLOCALE_LOCK;
+        STDIZED_SETLOCALE_LOCK;
         current_globals[i] = savepv(stdized_setlocale(categories[i], NULL));
-        POSIX_SETLOCALE_UNLOCK;
+        STDIZED_SETLOCALE_UNLOCK;
     }
 
     /* Now we have to convert the current thread to use them */
