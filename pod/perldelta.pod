@@ -82,7 +82,7 @@ cleared from the selected output handle.
 
 =head1 Acknowledgements
 
-Perl 5.36.1 represents approximately 10 months of development since Perl 5.36.0
+Perl 5.36.1 represents approximately 11 months of development since Perl 5.36.0
 and contains approximately 5,300 lines of changes across 62 files from 23
 authors.
 
