@@ -1191,10 +1191,12 @@ perl_destruct(pTHXx)
         PL_langinfo_buf = NULL;
     }
 
-    if (PL_stdize_locale_buf) {
-        Safefree(PL_stdize_locale_buf);
-        PL_stdize_locale_buf = NULL;
+#if defined(USE_LOCALE_THREADS) && ! defined(USE_THREAD_SAFE_LOCALE)
+    if (PL_less_dicey_locale_buf) {
+        Safefree(PL_less_dicey_locale_buf);
+        PL_less_dicey_locale_buf = NULL;
     }
+#endif
 
 #ifdef USE_LOCALE_CTYPE
     SvREFCNT_dec(PL_warn_locale);
