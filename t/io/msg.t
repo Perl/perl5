@@ -73,4 +73,29 @@ else {
     }
 }
 
+{
+    # receive to magic
+    my $x;
+    my $fetch = 0;
+    my $store = 0;
+    package MyScalar {
+        sub TIESCALAR { bless {}, shift }
+        sub FETCH { ++$fetch; $x }
+        sub STORE { ++$store; $x = $_[1]; }
+    };
+    tie my $rcvbuf, "MyScalar";
+    my $msg = pack("l! a*", 1, "Hello");
+    my $warn = "";
+    if (ok(msgsnd($id, $msg, IPC_NOWAIT), "send to magic receive")) {
+        {
+            local $SIG{__WARN__} = sub { $warn .= "@_\n" };
+            ok(msgrcv($id, $rcvbuf, 1024, 0, IPC_NOWAIT), "receive it (magic receiver)");
+        }
+        is($x, $msg, "magic properly triggered");
+        is($fetch, 0, "should be no fetch");
+        is($store, 1, "should be one store");
+        unlike($warn, qr/uninitialized/, "shouldn't be uninitialized warning");
+    }
+}
+
 done_testing();

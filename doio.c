@@ -3230,7 +3230,7 @@ Perl_do_msgrcv(pTHX_ SV **mark, SV **sp)
     SSize_t msize = SvIVx(*++mark);
     mtype = (long)SvIVx(*++mark);
     flags = SvIVx(*++mark);
-    SvPV_force_nolen(mstr);
+    SvPV_force_nomg_nolen(mstr);
     mbuf = SvGROW(mstr, sizeof(long)+msize+1);
 
     SETERRNO(0,0);
@@ -3248,6 +3248,8 @@ Perl_do_msgrcv(pTHX_ SV **mark, SV **sp)
         /* who knows who has been playing with this message? */
         SvTAINTED_on(mstr);
     }
+    SvSETMAGIC(mstr);
+
     return ret;
 #else
     PERL_UNUSED_ARG(sp);
