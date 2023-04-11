@@ -1329,6 +1329,7 @@ typedef enum {
 typedef enum {
     WANT_VOID,
     WANT_TEMP_PV,
+    WANT_PL_setlocale_buf,
 } calc_LC_ALL_return;
 
 typedef enum {
