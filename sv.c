@@ -3669,7 +3669,7 @@ Perl_sv_utf8_decode(pTHX_ SV *const sv)
             /* adjust pos to the start of a UTF8 char sequence */
             MAGIC * mg = mg_find(sv, PERL_MAGIC_regex_global);
             if (mg) {
-                I32 pos = mg->mg_len;
+                SSize_t pos = mg->mg_len;
                 if (pos > 0) {
                     for (c = start + pos; c > start; c--) {
                         if (UTF8_IS_START(*c))
