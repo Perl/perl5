@@ -4331,7 +4331,7 @@ S	|void	|populate_hash_from_localeconv				\
 RST	|unsigned int|get_category_index				\
 				|const int category			\
 				|NULLOK const char *locale
-RST	|int	|get_category_index_nowarn				\
+RST	|unsigned int|get_category_index_nowarn 			\
 				|const int category
 Ri	|const char *|mortalized_pv_copy				\
 				|NULLOK const char * const pv
