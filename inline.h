@@ -3491,6 +3491,7 @@ Perl_mortal_getenv(const char * str)
 PERL_STATIC_INLINE bool
 Perl_sv_isbool(pTHX_ const SV *sv)
 {
+    PERL_UNUSED_CONTEXT;
     return SvBoolFlagsOK(sv) && BOOL_INTERNALS_sv_isbool(sv);
 }
 
