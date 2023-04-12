@@ -3597,6 +3597,9 @@ X<goto> X<jump> X<jmp>
 
 =for Pod::Functions create spaghetti code
 
+C<goto> transfers execution to a specified point in the program. Unlike a
+function call, execution does not return to C<goto>.
+
 The C<goto LABEL> form finds the statement labeled with LABEL and
 resumes execution there.  It can't be used to get out of a block or
 subroutine given to L<C<sort>|/sort SUBNAME LIST>.  It can be used to go
