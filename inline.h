@@ -3156,6 +3156,8 @@ range bytes match only themselves.
 PERL_STATIC_INLINE I32
 Perl_foldEQ(pTHX_ const char *s1, const char *s2, I32 len)
 {
+    PERL_UNUSED_CONTEXT;
+
     const U8 *a = (const U8 *)s1;
     const U8 *b = (const U8 *)s2;
 
@@ -3178,6 +3180,8 @@ Perl_foldEQ_latin1(pTHX_ const char *s1, const char *s2, I32 len)
      * representable without UTF-8, except for LATIN_SMALL_LETTER_SHARP_S, and
      * does not check for this.  Nor does it check that the strings each have
      * at least 'len' characters. */
+
+    PERL_UNUSED_CONTEXT;
 
     const U8 *a = (const U8 *)s1;
     const U8 *b = (const U8 *)s2;
