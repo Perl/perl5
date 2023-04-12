@@ -175,7 +175,7 @@ data is located a specific offset before the char * pointer itself.
 
 =back
 
--=head1 Selected Bug Fixes
+=head1 Selected Bug Fixes
 
 =over 4
 
