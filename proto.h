@@ -4376,7 +4376,7 @@ Perl_sv_chop(pTHX_ SV * const sv, const char * const ptr);
 #define PERL_ARGS_ASSERT_SV_CHOP                \
         assert(sv)
 
-PERL_CALLCONV I32
+PERL_CALLCONV SSize_t
 Perl_sv_clean_all(pTHX)
         __attribute__visibility__("hidden");
 #define PERL_ARGS_ASSERT_SV_CLEAN_ALL
@@ -8979,7 +8979,7 @@ S_utf8_mg_pos_cache_update(pTHX_ SV * const sv, MAGIC ** const mgp, const STRLEN
 # define PERL_ARGS_ASSERT_UTF8_MG_POS_CACHE_UPDATE \
         assert(sv); assert(mgp)
 
-STATIC I32
+STATIC SSize_t
 S_visit(pTHX_ SVFUNC_t f, const U32 flags, const U32 mask);
 # define PERL_ARGS_ASSERT_VISIT                 \
         assert(f)

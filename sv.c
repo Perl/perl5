@@ -375,7 +375,7 @@ S_sv_add_arena(pTHX_ char *const ptr, const U32 size, const U32 flags)
 /* visit(): call the named function for each non-free SV in the arenas
  * whose flags field matches the flags/mask args. */
 
-STATIC I32
+STATIC SSize_t
 S_visit(pTHX_ SVFUNC_t f, const U32 flags, const U32 mask)
 {
     SV* sva;
@@ -587,10 +587,10 @@ SVs which are in complex self-referential hierarchies.
 =cut
 */
 
-I32
+SSize_t
 Perl_sv_clean_all(pTHX)
 {
-    I32 cleaned;
+    SSize_t cleaned;
     PL_in_clean_all = TRUE;
     cleaned = visit(do_clean_all, 0,0);
     return cleaned;

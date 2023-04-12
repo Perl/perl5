@@ -3003,7 +3003,7 @@ AMbdp	|void	|sv_catsv_mg	|NN SV *dsv				\
 Adp	|void	|sv_chop	|NN SV * const sv			\
 				|NULLOK const char * const ptr
 : Used only in perl.c
-dp	|I32	|sv_clean_all
+dp	|SSize_t|sv_clean_all
 : Used only in perl.c
 dp	|void	|sv_clean_objs
 Adp	|void	|sv_clear	|NN SV * const orig_sv
@@ -5642,7 +5642,7 @@ S	|void	|utf8_mg_pos_cache_update				\
 				|const STRLEN byte			\
 				|const STRLEN utf8			\
 				|const STRLEN blen
-S	|I32	|visit		|NN SVFUNC_t f				\
+S	|SSize_t|visit		|NN SVFUNC_t f				\
 				|const U32 flags			\
 				|const U32 mask
 # if defined(DEBUGGING)
