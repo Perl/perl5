@@ -1238,9 +1238,7 @@ typedef enum {
 #  endif
 #endif  /* USE_LOCALE */
 
-#  ifdef LC_ALL
-    LC_ALL_INDEX_,
-#  endif
+    LC_ALL_INDEX_   /* Always defined, even if no LC_ALL on system */
 
 } locale_category_index;
 
