@@ -41,6 +41,10 @@ See https://github.com/perl/Perl5/issues?q=+label%3Abackport-5.36
 
 <div><h3>Portability Fixes</h3>
 
+<commit votes="steveh" id="e1ca9a418fa6b7d26fbb1931c9164141035262c3" issue="" pull="" desc="Add parameter types to declarations for clang-16" />
+
+<commit votes="steveh" id="fc35cee89c1a42558f50a37a6b4d5186b77f058b" issue="" pull="" desc="Configure: Add various C99 compatibility improvements" />
+
 </div>
 
 <div><h3>Platform-Specific Test Fixes</h3>
