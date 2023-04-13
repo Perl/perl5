@@ -274,7 +274,7 @@ typedef struct
     {
         FILE  _public_file;
         char* _ptr;
-    };
+    } u;
 
     char*            _base;
     int              _cnt;
@@ -289,7 +289,7 @@ typedef struct
 #define PERLIO_FILE_flag_RD 0x0001 /* _IOREAD   */
 #define PERLIO_FILE_flag_WR 0x0002 /* _IOWRITE  */
 #define PERLIO_FILE_flag_RW 0x0004 /* _IOUPDATE */
-#define PERLIO_FILE_ptr(f)  (((__crt_stdio_stream_data*)(f))->_ptr)
+#define PERLIO_FILE_ptr(f)  (((__crt_stdio_stream_data*)(f))->u._ptr)
 #define PERLIO_FILE_base(f) (((__crt_stdio_stream_data*)(f))->_base)
 #define PERLIO_FILE_cnt(f)  (((__crt_stdio_stream_data*)(f))->_cnt)
 #define PERLIO_FILE_flag(f) ((int)(((__crt_stdio_stream_data*)(f))->_flags))
