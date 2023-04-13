@@ -747,7 +747,7 @@ modify it under the same terms as Perl itself.
 
 =head1 SEE ALSO
 
-See L<h2xs>, L<ppport.h>.
+See L<h2xs>, F<ppport.h>.
 
 =cut
 
