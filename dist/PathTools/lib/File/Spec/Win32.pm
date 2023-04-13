@@ -249,7 +249,7 @@ Unlike just splitting the directories on the separator, leading empty and
 trailing directory entries can be returned, because these are significant
 on some OSs. So,
 
-    File::Spec->splitdir( "/a/b/c" );
+    File::Spec->splitdir( "/a/b//c/" );
 
 Yields:
 
