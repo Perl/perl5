@@ -2834,7 +2834,7 @@ Perl_cx_popsub_common(pTHX_ PERL_CONTEXT *cx)
     assert(CxTYPE(cx) == CXt_SUB);
 
     PL_comppad = cx->blk_sub.prevcomppad;
-    PL_curpad = LIKELY(PL_comppad) ? AvARRAY(PL_comppad) : NULL;
+    PL_curpad = LIKELY(PL_comppad != NULL) ? AvARRAY(PL_comppad) : NULL;
     cv = cx->blk_sub.cv;
     CvDEPTH(cv) = cx->blk_sub.olddepth;
     cx->blk_sub.cv = NULL;
@@ -2916,7 +2916,7 @@ Perl_cx_popformat(pTHX_ PERL_CONTEXT *cx)
     SvREFCNT_dec_NN(dfout);
 
     PL_comppad = cx->blk_format.prevcomppad;
-    PL_curpad = LIKELY(PL_comppad) ? AvARRAY(PL_comppad) : NULL;
+    PL_curpad = LIKELY(PL_comppad != NULL) ? AvARRAY(PL_comppad) : NULL;
     cv = cx->blk_format.cv;
     cx->blk_format.cv = NULL;
     --CvDEPTH(cv);
