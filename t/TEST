@@ -207,7 +207,7 @@ sub _find_files {
 	opendir DIR, $dir or die "Trouble opening $dir: $!";
 	foreach my $f (sort { $a cmp $b } readdir DIR) {
 	    next if $skip{$f};
-
+	    $dir =~ s/(?<!\^)\.dir(;1)?$//i if $is_vms; # trim .DIR extension
 	    my $fullpath = "$dir/$f";
 	    if (-d $fullpath) {
 		_find_files($patt, $fullpath);
