@@ -178,6 +178,9 @@ MANIFEST.srt
 *~
 .#*
 
+# ignore patch backups
+*.orig
+
 # test.valgrind final outputs, excluding intermediate files (pls report)
 *.cachegrind
 *.perf-stat
