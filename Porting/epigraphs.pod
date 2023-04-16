@@ -108,6 +108,24 @@ L<Announced on 2022-05-27 by Ricardo Signes|https://www.nntp.perl.org/group/perl
 
 I have nothing to say, and I am saying it.
 
+=head2 v5.36.1-RC3 - Karl Leimer & Walter Gieseking, trans. Frederick C. Rauser, "Rhythmics, Dynamics, Pedal and Other Problems of Piano Playing"
+
+L<Announced on 2023-04-16 by Steve Hay|https://www.nntp.perl.org/group/perl.perl5.porters/2023/04/msg266232.html>
+
+Generally, no clear opinions exist as to the usefulness of mental work
+in order to acquire a good technique.  We do not seem to know exactly
+what it means or how to develop technique through "brain work."
+Technique, when playing an instrument, means controlling the fingers.
+Generally, it is used only in a limited sense regarding fluency, rapid
+execution of difficult passages and steady aim.
+In order to acquire a perfect technique through brain work, an exact
+impression of the note picture upon the mind is the first problem which
+we must solve.  Thereafter we should busy ourselves with the study in
+question, as to fingering, touch, note value, etc., to achieve
+perfection along these lines in the broadest sense.  This occurs
+quickest and completely through intensive concentration of all
+intellectual powers and is, therefore, strenuous brain work.
+
 =head2 v5.36.1-RC2 - Karl Leimer & Walter Gieseking, "The Shortest Way to Pianistic Perfection"
 
 L<Announced on 2023-04-11 by Steve Hay|https://www.nntp.perl.org/group/perl.perl5.porters/2023/04/msg266203.html>
