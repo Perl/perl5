@@ -116,28 +116,6 @@ if ($ENV{HARNESS_OPTIONS}) {
 
 $jobs ||= 1;
 
-sub _extract_tests;
-sub _extract_tests {
-    # This can probably be done more tersely with a map, but I doubt that it
-    # would be as clear
-    my @results;
-    foreach (@_) {
-        my $ref = ref $_;
-        if ($ref) {
-            if ($ref eq 'ARRAY') {
-                push @results, _extract_tests @$_;
-            } elsif ($ref eq 'HASH') {
-                push @results, _extract_tests values %$_;
-            } else {
-                die "Unknown reference type $ref";
-            }
-        } else {
-            push @results, glob $_;
-        }
-    }
-    @results;
-}
-
 my %total_time;
 sub _compute_tests_and_ordering($) {
     my @tests = $_[0]->@*;
@@ -367,14 +345,12 @@ if (@ARGV) {
         push @$which, 'bigmem' if $ENV{PERL_TEST_MEMORY};
 
         if (@next) {
-            my $next = { par => '{' . join (',', @next) . '}/*.t' };
-            @next = _extract_tests ($next);
+            @next = map { glob ("$_/*.t") } @next;
             push @tests, @next;
             push @seq, _compute_tests_and_ordering(\@next)->@*;
         }
 
-        my $last = { par => '{' . join (',', @last) . '}/*.t' };
-        @last = _extract_tests ($last);
+        @last = map { glob ("$_/*.t") } @last;
 
         my ($non_ext, @ext_from_manifest)=
             _tests_from_manifest($Config{extensions}, $Config{known_extensions}, "all");
