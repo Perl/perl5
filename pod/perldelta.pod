@@ -83,7 +83,7 @@ cleared from the selected output handle.
 =head1 Acknowledgements
 
 Perl 5.36.1 represents approximately 11 months of development since Perl 5.36.0
-and contains approximately 5,300 lines of changes across 62 files from 23
+and contains approximately 5,400 lines of changes across 62 files from 24
 authors.
 
 Excluding auto-generated files, documentation and release tools, there were
@@ -94,10 +94,10 @@ of users and developers.  The following people are known to have contributed
 the improvements that became Perl 5.36.1:
 
 Andreas König, Bram, Chris 'BinGOs' Williams, Craig A. Berry, Dagfinn Ilmari
-Mannsåker, David Mitchell, Elvin Aslanov, Graham Knop, Hugo van der Sanden,
-Karen Etheridge, Karl Williamson, Leon Timmermans, Matthew Horsfall, Max
-Maischein, Neil Bowers, Nicolas R, Renee Baecker, Ricardo Signes, Richard
-Leach, Steve Hay, Todd Rinaldo, Tony Cook, Yves Orton.
+Mannsåker, David Mitchell, Elvin Aslanov, Florian Weimer, Graham Knop, Hugo
+van der Sanden, Karen Etheridge, Karl Williamson, Leon Timmermans, Matthew
+Horsfall, Max Maischein, Neil Bowers, Nicolas R, Renee Baecker, Ricardo Signes,
+Richard Leach, Steve Hay, Todd Rinaldo, Tony Cook, Yves Orton.
 
 The list above is almost certainly incomplete as it is automatically generated
 from version control history.  In particular, it does not include the names of
