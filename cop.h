@@ -29,6 +29,8 @@
  * GSAR 97-03-27
  */
 
+MSVC_DIAG_IGNORE(4324)
+
 struct jmpenv {
     struct jmpenv *	je_prev;
     Sigjmp_buf		je_buf;		/* uninit if je_prev is NULL */
@@ -37,6 +39,8 @@ struct jmpenv {
     U16                 je_old_delaymagic; /* saved PL_delaymagic */
     SSize_t             je_old_stack_hwm;
 };
+
+MSVC_DIAG_RESTORE
 
 typedef struct jmpenv JMPENV;
 
