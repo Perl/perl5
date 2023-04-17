@@ -1,6 +1,6 @@
 package ExtUtils::CBuilder::Platform::Windows::GCC;
 
-our $VERSION = '0.280238'; # VERSION
+our $VERSION = '0.280239'; # VERSION
 
 use warnings;
 use strict;

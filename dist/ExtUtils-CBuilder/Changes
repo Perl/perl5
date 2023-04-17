@@ -1,5 +1,17 @@
 Revision history for Perl extension ExtUtils::CBuilder.
 
+0.280239 - 2023-04-15
+
+  Fix:
+  - Unbreak Perl build on legacy Darwin systems.
+    On modern macOS the compiler defaults to
+    '-Werror,-Wimplicit-function-declaration'. This breaks the build on code
+    which calls a function without a prototype (invalid in C99).
+    Turning the check off with '-Wno-error=implicit-function-declaration' breaks
+    the build of Perl itself on legacy versions of Darwin with compilers which do
+    not recognise the flags.
+    https://github.com/Perl/perl5/issues/18902
+
 0.280238
 
   Fix:
