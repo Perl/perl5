@@ -27,6 +27,12 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 Locale category LC_NAME now supported on participating platforms
+
+On platforms that have the GNU extension C<LC_NAME> category, you may
+now use it as the category parameter to L<POSIX/setlocale> to set and
+query its locale.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
