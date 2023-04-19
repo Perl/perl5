@@ -155,6 +155,14 @@ L<https://visualstudio.microsoft.com/visual-cpp-build-tools/>.
 
 This is also referred to as I<Build Tools for Visual Studio>.
 
+=item Microsoft C++ Build Tools
+
+There's also a standalone (IDE-less) version of the build tools mentioned
+above containing the MSVC compiler available for download from
+L<https://visualstudio.microsoft.com/visual-cpp-build-tools/>.
+
+This is also referred to as I<Build Tools for Visual Studio>.
+
 =item GCC
 
 Perl can be compiled with gcc from MinGW (version 3.4.5 or later) or from
