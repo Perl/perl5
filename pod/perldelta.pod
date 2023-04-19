@@ -27,9 +27,51 @@ it as the category parameter to L<POSIX/setlocale> to set and query its locale.
 
 =item *
 
-L<XXX> has been upgraded from version A.xx to B.yy.
+L<B::Deparse> has been upgraded from version 1.72 to 1.73.
 
-XXX If there was something important to note about this change, include that here.
+=item *
+
+L<Devel::PPPort> has been upgraded from version 3.70 to 3.71.
+
+=item *
+
+L<ExtUtils::MakeMaker> has been upgraded from version 7.66 to 7.70.
+
+=item *
+
+L<ExtUtils::ParseXS> has been upgraded from version 3.49 to 3.50.
+
+=item *
+
+L<feature> has been upgraded from version 1.81 to 1.82.
+
+=item *
+
+L<File::Copy> has been upgraded from version 2.40 to 2.41.
+
+=item *
+
+L<Locale::Maketext> has been upgraded from version 1.32 to 1.33.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 5.20230320 to 5.20230420.
+
+=item *
+
+L<Net::Ping> has been upgraded from version 2.75 to 2.76.
+
+=item *
+
+L<threads> has been upgraded from version 2.35 to 2.36.
+
+=item *
+
+L<threads::shared> has been upgraded from version 1.67 to 1.68.
+
+=item *
+
+L<warnings> has been upgraded from version 1.63 to 1.64.
 
 =back
 
