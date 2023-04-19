@@ -55,7 +55,7 @@ delivering complete gcc toolchain for MS Windows:
 
 Delivers gcc toolchain building 32-bit executables (which can be used both 32 and 64 bit Windows platforms)
 
-=item L<http://mingw-w64.org>
+=item L<https://mingw-w64.org>
 
 Delivers gcc toolchain targeting both 64-bit Windows and 32-bit Windows
 platforms (despite the project name "mingw-w64" they are not only 64-bit
@@ -74,10 +74,10 @@ https://docs.microsoft.com/en-us/visualstudio/productinfo/vs2013-compatibility-v
 and
 https://docs.microsoft.com/en-us/visualstudio/productinfo/vs2013-sysrequirements-vs
 
-The MinGW64 compiler is available at L<http://mingw-w64.org>.
+The MinGW64 compiler is available at L<https://mingw-w64.org>.
 The latter is actually a cross-compiler targeting Win64. There's also a trimmed
 down compiler (no java, or gfortran) suitable for building perl available at:
-L<http://strawberryperl.com/package/kmx/64_gcctoolchain/>
+L<https://strawberryperl.com/package/kmx/64_gcctoolchain/>
 
 NOTE: If you're using a 32-bit compiler to build perl on a 64-bit Windows
 operating system, then you should set the WIN64 environment variable to "undef".
@@ -135,20 +135,25 @@ These free versions of Visual C++ 2013-2022 Professional contain the same
 compilers and linkers that ship with the full versions, and also contain
 everything necessary to build Perl.
 
-These packages can be downloaded by searching in the Download Center at
-L<https://www.microsoft.com/downloads/search.aspx?displaylang=en>.  (Providing exact
-links to these packages has proven a pointless task because the links keep on
-changing so often.)
+These packages can be downloaded from L<https://visualstudio.microsoft.com/>.
 
 Install Visual C++ 2013-2022 Community, then setup your environment
 using, e.g.
 
- C:\Program Files\Microsoft Visual Studio 12.0\Common7\Tools\vsvars32.bat
+F<C:\Program Files\Microsoft Visual Studio 12.0\Common7\Tools\vsvars32.bat>
 
 (assuming the default installation location was chosen).
 
-Perl should now build using the win32/Makefile.  You will need to edit that
-file to set CCTYPE to one of MSVC120-MSVC142 first.
+Perl should now build using the F<win32/Makefile>.  You will need to edit that
+file to set C<CCTYPE> to one of MSVC120-MSVC142 first.
+
+=item Microsoft C++ Build Tools
+
+There's also a standalone (IDE-less) version of the build tools mentioned
+above containing the MSVC compiler available for download from
+L<https://visualstudio.microsoft.com/visual-cpp-build-tools/>.
+
+This is also referred to as I<Build Tools for Visual Studio>.
 
 =item GCC
 
@@ -156,7 +161,7 @@ Perl can be compiled with gcc from MinGW (version 3.4.5 or later) or from
 MinGW64 (version 4.4.3 or later).  It can be downloaded here:
 
 L<https://osdn.net/projects/mingw/>
-L<http://www.mingw-w64.org/>
+L<https://www.mingw-w64.org/>
 
 You also need gmake. Usually it comes with MinGW but its executable may have
 a different name, such as mingw32-make.exe.
@@ -169,11 +174,11 @@ or later, and with MinGW64 64-bit 6.3.0 or later.
 =item Intel C++ Compiler
 
 Experimental support for using Intel C++ Compiler has been added. Edit
-win32/Makefile and pick the correct CCTYPE for the Visual C that Intel C was
-installed into. Also uncomment __ICC to enable Intel C on Visual C support.
+F<win32/Makefile> and pick the correct C<CCTYPE> for the Visual C that Intel C
+was installed into. Also uncomment C<__ICC> to enable Intel C on Visual C support.
 To set up the build environment, from the Start Menu run
 IA-32 Visual Studio 20__ mode or Intel 64 Visual Studio 20__ mode as
-appropriate. Then run nmake as usually in that prompt box.
+appropriate. Then run C<nmake> as usually in that prompt box.
 
 Only Intel C++ Compiler v12.1 has been tested. Other versions probably will
 work. Using Intel C++ Compiler instead of Visual C has the benefit of C99
