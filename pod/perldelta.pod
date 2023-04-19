@@ -172,13 +172,23 @@ section.
 
 Additionally, the following selected changes have been made:
 
-=head3 L<XXX>
+=head3 L<perlfunc>
 
 =over 4
 
 =item *
 
-XXX Description of the change here
+The descriptions of pop() and shift() have been expanded.
+
+=back
+
+=head3 L<perlvar>
+
+=over 4
+
+=item *
+
+The descriptions of $^H and %^H have been updated.
 
 =back
 
@@ -289,7 +299,8 @@ made:
 
 =item *
 
-XXX
+The test framework now skips tests that use B<-T> or B<-t> when running under a
+perl built with the F<Configure> option C<-DNO_TAINT_SUPPORT>.
 
 =back
 
@@ -372,9 +383,9 @@ manager will later use a regex to expand these into links.
 
 =item *
 
-The buffer used by getsockopt() is now 1024 bytes by default and can
-be adjusted at perl build time by defining C<PERL_GETSOCKOPT_SIZE> in
-C<ccflags>.  [github #19758]
+The buffer used by getsockopt() is now 1024 bytes by default and can be
+adjusted at perl build time by defining C<PERL_GETSOCKOPT_SIZE> in C<ccflags>.
+[L<GH #19758|https://github.com/Perl/perl5/issues/19758>]
 
 =back
 
