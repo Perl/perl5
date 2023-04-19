@@ -5144,11 +5144,6 @@ Perl_uvoffuni_to_utf8_flags_msgs(pTHX_ U8 *d, UV input_uv, const UV flags, HV **
 #define PERL_ARGS_ASSERT_UVOFFUNI_TO_UTF8_FLAGS_MSGS \
         assert(d)
 
-PERL_CALLCONV U8 *
-Perl_uvuni_to_utf8(pTHX_ U8 *d, UV uv);
-#define PERL_ARGS_ASSERT_UVUNI_TO_UTF8          \
-        assert(d)
-
 PERL_CALLCONV bool
 Perl_validate_proto(pTHX_ SV *name, SV *proto, bool warn, bool curstash);
 #define PERL_ARGS_ASSERT_VALIDATE_PROTO         \
@@ -6014,6 +6009,12 @@ Perl_utf8n_to_uvuni(pTHX_ const U8 *s, STRLEN curlen, STRLEN *retlen, U32 flags)
         __attribute__deprecated__;
 # define PERL_ARGS_ASSERT_UTF8N_TO_UVUNI        \
         assert(s)
+
+PERL_CALLCONV U8 *
+Perl_uvuni_to_utf8(pTHX_ U8 *d, UV uv)
+        __attribute__deprecated__;
+# define PERL_ARGS_ASSERT_UVUNI_TO_UTF8         \
+        assert(d)
 
 # if defined(PERL_DONT_CREATE_GVSV)
 PERL_CALLCONV GV *

@@ -754,7 +754,6 @@
 # define utf8_to_uvchr_buf_helper(a,b,c)        Perl_utf8_to_uvchr_buf_helper(aTHX_ a,b,c)
 # define utf8n_to_uvchr_msgs                    Perl_utf8n_to_uvchr_msgs
 # define uvoffuni_to_utf8_flags_msgs(a,b,c,d)   Perl_uvoffuni_to_utf8_flags_msgs(aTHX_ a,b,c,d)
-# define uvuni_to_utf8(a,b)                     Perl_uvuni_to_utf8(aTHX_ a,b)
 # define valid_utf8_to_uvchr                    Perl_valid_utf8_to_uvchr
 # define vcmp(a,b)                              Perl_vcmp(aTHX_ a,b)
 # define vcroak(a,b)                            Perl_vcroak(aTHX_ a,b)
@@ -850,6 +849,7 @@
 #   define utf8_to_uvchr(a,b)                   Perl_utf8_to_uvchr(aTHX_ a,b)
 #   define utf8_to_uvuni(a,b)                   Perl_utf8_to_uvuni(aTHX_ a,b)
 #   define utf8n_to_uvuni(a,b,c,d)              Perl_utf8n_to_uvuni(aTHX_ a,b,c,d)
+#   define uvuni_to_utf8(a,b)                   Perl_uvuni_to_utf8(aTHX_ a,b)
 # endif
 # if defined(PERL_CORE)
 #   define PerlLIO_dup2_cloexec(a,b)            Perl_PerlLIO_dup2_cloexec(aTHX_ a,b)
