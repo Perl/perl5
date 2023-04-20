@@ -447,6 +447,22 @@ S_wsetlocale(const int category, const wchar_t * wlocale)
 #  endif
 #endif  /* WIN32_USE_FAKE_OLD_MINGW_LOCALES */
 
+/* 'for' loop headers to hide the necessary casts */
+#define all_individual_category_indexes(i)                                  \
+    locale_category_index i = (locale_category_index) 0;                    \
+    i < LC_ALL_INDEX_;                                                      \
+    i = (locale_category_index) ((int) i + 1)
+
+#define all_but_0th_individual_category_indexes(i)                          \
+    locale_category_index i = (locale_category_index) 1;                    \
+    i < LC_ALL_INDEX_;                                                      \
+    i = (locale_category_index) ((int) i + 1)
+
+#define all_category_indexes(i)                                             \
+    locale_category_index i = (locale_category_index) 0;                    \
+    i <= LC_ALL_INDEX_;                                                     \
+    i = (locale_category_index) ((int) i + 1)
+
 #ifdef USE_LOCALE
 #  if defined(USE_FAKE_LC_ALL_POSITIONAL_NOTATION) && defined(LC_ALL)
 
@@ -496,7 +512,7 @@ S_positional_name_value_xlation(const char * locale, bool direction)
                                                       WANT_TEMP_PV,
                                                       __LINE__);
 
-        for (unsigned int i = 0; i < LC_ALL_INDEX_; i++) {
+        for (all_individual_category_indexes(i)) {
             Safefree(individ_locales[i]);
         }
 
@@ -822,10 +838,12 @@ STATIC const int category_masks[] = {
 
 /* On platforms that use positional notation for expressing LC_ALL, this maps
  * the position of each category to our corresponding internal index for it.
- * This is initialized at run time if needed */
+ * This is initialized at run time if needed.  LC_ALL_INDEX_ is not legal for
+ * an individual locale, hence marks the elements here as not actually
+ * initialized. */
 STATIC
 unsigned int
-map_LC_ALL_position_to_index[LC_ALL_INDEX_] = { PERL_UINT_MAX };
+map_LC_ALL_position_to_index[LC_ALL_INDEX_] = { LC_ALL_INDEX_ };
 
 #  endif
 #endif
@@ -891,7 +909,7 @@ S_get_displayable_string(pTHX_
 
 # define get_category_index(cat) get_category_index_helper(cat, NULL, __LINE__)
 
-STATIC unsigned int
+STATIC locale_category_index
 S_get_category_index_helper(pTHX_ const int category, bool * succeeded,
                                   const line_t caller_line)
 {
@@ -900,7 +918,7 @@ S_get_category_index_helper(pTHX_ const int category, bool * succeeded,
     /* Given a category, return the equivalent internal index we generally use
      * instead, warn or panic if not found. */
 
-    unsigned int i;
+    locale_category_index i;
 
 #  undef PERL_LOCALE_TABLE_ENTRY
 #  define PERL_LOCALE_TABLE_ENTRY(name, call_back)                          \
@@ -931,7 +949,7 @@ S_get_category_index_helper(pTHX_ const int category, bool * succeeded,
 
     if (succeeded) {
         *succeeded = false;
-        return 0;   /* Arbitrary */
+        return LC_ALL_INDEX_;   /* Arbitrary */
     }
 
     locale_panic_via_(Perl_form(aTHX_ "Unknown locale category %d", category),
@@ -1188,7 +1206,7 @@ S_parse_LC_ALL_string(pTHX_ const char * string,
      * will be C for each ignored category and "" for the others.  Then the
      * caller can individually set each category, and get the right answer. */
     if (single_component && ! isNAME_C_OR_POSIX(string)) {
-        for (unsigned int i = 0; i < LC_ALL_INDEX_; i++) {
+        for (all_individual_category_indexes(i)) {
            OVERRIDE_AND_SAVEPV(string, strlen(string), output[i], i, override);
         }
 
@@ -1202,7 +1220,7 @@ S_parse_LC_ALL_string(pTHX_ const char * string,
             return no_array;
         }
 
-        for (unsigned int i = 0; i < LC_ALL_INDEX_; i++) {
+        for (all_individual_category_indexes(i)) {
             output[i] = savepv(string);
         }
 
@@ -1337,7 +1355,7 @@ S_parse_LC_ALL_string(pTHX_ const char * string,
 #  endif
 
     {   /* Here is the name=value notation */
-        for (unsigned int i = 0; i < LC_ALL_INDEX_; i++) {
+        for (all_individual_category_indexes(i)) {
             if (! seen[i]) {
                 error = incomplete;
                 goto failure;
@@ -1353,7 +1371,7 @@ S_parse_LC_ALL_string(pTHX_ const char * string,
     }
 
     /* Free the dangling ones */
-    for (unsigned int i = 1; i < LC_ALL_INDEX_; i++) {
+    for (all_but_0th_individual_category_indexes(i)) {
         Safefree(output[i]);
         output[i] = NULL;
     }
@@ -1363,7 +1381,7 @@ S_parse_LC_ALL_string(pTHX_ const char * string,
   failure:
 
     /* Don't leave memory dangling that we allocated before the failure */
-    for (unsigned int i = 0; i < LC_ALL_INDEX_; i++) {
+    for (all_individual_category_indexes(i)) {
         if (seen[i]) {
             Safefree(output[i]);
             output[i] = NULL;
@@ -1503,7 +1521,7 @@ S_posix_setlocale_with_complications(pTHX_ const int cat,
                                                  WANT_TEMP_PV,
                                                  caller_line);
 
-            for (unsigned i = 0; i < LC_ALL_INDEX_; i++) {
+            for (all_individual_category_indexes(i)) {
                 Safefree(new_locales[i]);
             }
 
@@ -1963,7 +1981,8 @@ S_less_dicey_bool_setlocale_r(pTHX_ const int cat, const char * locale)
 #  define querylocale_r(cat)  querylocale_i(get_category_index(cat))
 
 STATIC const char *
-S_querylocale_2008_i(pTHX_ const unsigned int index, const line_t caller_line)
+S_querylocale_2008_i(pTHX_ const locale_category_index index,
+                           const line_t caller_line)
 {
     PERL_ARGS_ASSERT_QUERYLOCALE_2008_I;
     assert(index <= LC_ALL_INDEX_);
@@ -2193,7 +2212,7 @@ STATIC bool
 S_bool_setlocale_2008_i(pTHX_
 
         /* Our internal index of the 'category' setlocale is called with */
-        const unsigned int index,
+        const locale_category_index  index,
         const char * new_locale,    /* The locale to set the category to */
         const line_t caller_line    /* Called from this line number */
        )
@@ -2467,7 +2486,7 @@ S_bool_setlocale_2008_i(pTHX_
             /* Loop, using the previous iteration's result as the basis for the
              * next one.  (The first time we effectively use the locale in
              * force upon entry to this function.) */
-            for (unsigned int i = 0; i < LC_ALL_INDEX_; i++) {
+            for (all_individual_category_indexes(i)) {
                 new_obj = newlocale(category_masks[i],
                                     new_locales[i],
                                     basis_obj);
@@ -2491,7 +2510,7 @@ S_bool_setlocale_2008_i(pTHX_
                  * failed */
                 freelocale(basis_obj);
 
-                for (unsigned int j = 0; j < LC_ALL_INDEX_; j++) {
+                for (all_individual_category_indexes(j)) {
                     Safefree(new_locales[j]);
                 }
 
@@ -2499,7 +2518,7 @@ S_bool_setlocale_2008_i(pTHX_
             }
 
             /* Success for all categories. */
-            for (unsigned int i = 0; i < LC_ALL_INDEX_; i++) {
+            for (all_individual_category_indexes(i)) {
                 update_PL_curlocales_i(i, new_locales[i], caller_line);
                 Safefree(new_locales[i]);
             }
@@ -2623,7 +2642,7 @@ S_bool_setlocale_2008_i(pTHX_
 
 STATIC void
 S_update_PL_curlocales_i(pTHX_
-                         const unsigned int index,
+                         const locale_category_index index,
                          const char * new_locale,
                          const line_t caller_line)
 {
@@ -2653,7 +2672,6 @@ S_update_PL_curlocales_i(pTHX_
                                                it earlier had to have succeeded
                                                */
                                    caller_line))
-
         {
           case invalid:
           case no_array:
@@ -2794,12 +2812,12 @@ S_calculate_LC_ALL_string(pTHX_ const char ** category_locales_list,
         locales_list = my_category_locales_list;
 
         if (format == EXTERNAL_FORMAT_FOR_QUERY) {
-            for (unsigned i = 0; i < LC_ALL_INDEX_; i++) {
+            for (all_individual_category_indexes(i)) {
                 locales_list[i] = query_nominal_locale_i(i);
             }
         }
         else {
-            for (unsigned i = 0; i < LC_ALL_INDEX_; i++) {
+            for (all_individual_category_indexes(i)) {
                 locales_list[i] = querylocale_i(i);
             }
         }
@@ -2871,7 +2889,7 @@ S_calculate_LC_ALL_string(pTHX_ const char ** category_locales_list,
 
     /* The total length then is just the sum of the above boiler-plate plus the
      * total strlen()s of the locale name of each individual category. */
-    for (unsigned int i = 0;  i < LC_ALL_INDEX_; i++) {
+    for (all_individual_category_indexes(i)) {
         const char * entry = ENTRY(i, locales_list, format);
 
         total_len += strlen(entry);
@@ -2918,7 +2936,7 @@ S_calculate_LC_ALL_string(pTHX_ const char ** category_locales_list,
         constructed[0] = '\0';
 
         /* Loop through all the categories */
-        for (unsigned j = 0; j < LC_ALL_INDEX_; j++) {
+        for (all_individual_category_indexes(j)) {
 
             /* Add a separator, except before the first one */
             if (j != 0) {
@@ -3007,7 +3025,7 @@ S_calculate_LC_ALL_string(pTHX_ const char ** category_locales_list,
                          && ! defined(USE_QUERYLOCALE))
 
 STATIC const char *
-S_find_locale_from_environment(pTHX_ const unsigned int index)
+S_find_locale_from_environment(pTHX_ const locale_category_index index)
 {
     /* NB: This function may actually change the locale on Windows.  It
      * currently is designed to be called only from setting the locale on
@@ -3081,11 +3099,11 @@ S_find_locale_from_environment(pTHX_ const unsigned int index)
      * them all.  If only an individual category is desired, to avoid
      * duplicating logic, we use the same loop, but set up the limits so it is
      * only executed once, for that particular category. */
-    unsigned int lower, upper, offset;
+    locale_category_index lower, upper, offset;
     if (index == LC_ALL_INDEX_) {
-        lower = 0;
-        upper = LC_ALL_INDEX_ - 1;
-        offset = 0;
+        lower = (locale_category_index) 0;
+        upper = (locale_category_index) ((int) LC_ALL_INDEX_ - 1);
+        offset = (locale_category_index) 0;
     }
     else {
         lower = index;
@@ -3181,7 +3199,7 @@ S_get_LC_ALL_display(pTHX)
 
 STATIC void
 S_setlocale_failure_panic_via_i(pTHX_
-                                const unsigned int cat_index,
+                                const locale_category_index cat_index,
                                 const char * current,
                                 const char * failed,
                                 const line_t proxy_caller_line,
@@ -3963,7 +3981,7 @@ S_new_LC_ALL(pTHX_ const char ** individ_locales, bool force)
 
 #  endif
 
-    for (unsigned int i = 0; i < LC_ALL_INDEX_; i++) {
+    for (all_individual_category_indexes(i)) {
         if (update_functions[i]) {
             const char * this_locale = individ_locales[i];
             update_functions[i](aTHX_ this_locale, force);
@@ -4197,7 +4215,7 @@ S_win32_setlocale(pTHX_ int category, const char* locale)
 #  endif
 
 STATIC const char *
-S_native_querylocale_i(pTHX_ const unsigned int cat_index)
+S_native_querylocale_i(pTHX_ const locale_category_index cat_index)
 {
     /* Determine the current locale and return it in the form the platform's
      * native locale handling understands.  This is different only from our
@@ -4323,9 +4341,9 @@ Perl_setlocale(const int category, const char * locale)
                           category, locale));
 
     bool valid_category;
-    unsigned int cat_index = get_category_index_helper(category,
-                                                       &valid_category,
-                                                       __LINE__);
+    locale_category_index cat_index = get_category_index_helper(category,
+                                                                &valid_category,
+                                                                __LINE__);
     if (! valid_category) {
         if (ckWARN(WARN_LOCALE)) {
             const char * conditional_warn_text;
@@ -4419,7 +4437,7 @@ STATIC utf8ness_t
 S_get_locale_string_utf8ness_i(pTHX_ const char * string,
                                      const locale_utf8ness_t known_utf8,
                                      const char * locale,
-                                     const unsigned cat_index)
+                                     const locale_category_index cat_index)
 {
     PERL_ARGS_ASSERT_GET_LOCALE_STRING_UTF8NESS_I;
 
@@ -4899,22 +4917,22 @@ S_my_localeconv(pTHX_ const int item)
      * If not paying attention to that either, the code below should end up not
      * using this.  Make sure that things blow up if that avoidance gets lost,
      * by setting the category to an out-of-bounds value */
-    unsigned int numeric_index;
-    unsigned int monetary_index;
+    locale_category_index numeric_index;
+    locale_category_index monetary_index;
 
 #  ifdef USE_LOCALE_NUMERIC
     numeric_index = LC_NUMERIC_INDEX_;
 #  elif defined(USE_LOCALE_CTYPE)
     numeric_index = LC_CTYPE_INDEX_;
 #  else
-    numeric_index = (unsigned) -1;
+    numeric_index = LC_ALL_INDEX_;      /* Out-of-bounds */
 #  endif
 #  ifdef USE_LOCALE_MONETARY
     monetary_index = LC_MONETARY_INDEX_;
 #  elif defined(USE_LOCALE_CTYPE)
     monetary_index = LC_CTYPE_INDEX_;
 #  else
-    monetary_index = (unsigned) -1;
+    monetary_index = LC_ALL_INDEX_;     /* Out-of-bounds */
 #  endif
 
     /* Some platforms, for correct non-mojibake results, require LC_CTYPE's
@@ -5166,8 +5184,9 @@ S_my_localeconv(pTHX_ const int item)
 
             /* Determine if the string should be marked as UTF-8. */
             if (UTF8NESS_YES == (get_locale_string_utf8ness_i(SvPVX(*value),
-                                                              locale_is_utf8,
-                                                              NULL, 0)))
+                                                  locale_is_utf8,
+                                                  NULL,
+                                                  (locale_category_index) 0)))
             {
                 SvUTF8_on(*value);
             }
@@ -5566,7 +5585,7 @@ const char *
 Perl_langinfo8(const nl_item item, utf8ness_t * utf8ness)
 {
     dTHX;
-    unsigned cat_index;
+    locale_category_index cat_index;
 
     PERL_ARGS_ASSERT_PERL_LANGINFO8;
 
@@ -5802,8 +5821,8 @@ Perl_sv_strftime_ints(pTHX_ SV * fmt, int sec, int min, int hour,
 STATIC const char *
 S_my_langinfo_i(pTHX_
                 const nl_item item,           /* The item to look up */
-                const unsigned int cat_index, /* The locale category that
-                                                 controls it */
+                const locale_category_index cat_index, /* The locale category
+                                                          that controls it */
                 /* The locale to look up 'item' in. */
                 const char * locale,
 
@@ -6822,7 +6841,7 @@ S_give_perl_locale_control(pTHX_
 
 #    else
 
-    for (unsigned int i = 0; i < LC_ALL_INDEX_; i++) {
+    for (all_individual_category_indexes(i)) {
         void_setlocale_i_with_caller(i, locales[i], __FILE__, caller_line);
     }
 
@@ -6867,7 +6886,7 @@ S_output_check_environment_warning(pTHX_ const char * const language,
                                   lc_all ? lc_all : "unset",
                                   lc_all ? '"' : ')');
 
-    for (unsigned int i = 0; i < LC_ALL_INDEX_; i++) {
+    for (all_individual_category_indexes(i)) {
         const char * value = PerlEnv_getenv(category_names[i]);
         PerlIO_printf(Perl_error_log,
                       "\t%s = %c%s%c,\n",
@@ -7023,7 +7042,7 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 #      endif
 #    endif
 
-    for (unsigned int i = 0; i < LC_ALL_INDEX_; i++) {
+    for (all_individual_category_indexes(i)) {
         assert(category_name_lengths[i] == strlen(category_names[i]));
     }
 
@@ -7058,7 +7077,7 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 
     /* If we haven't done so already, translate the LC_ALL positions of
      * categories into our internal indices. */
-    if (map_LC_ALL_position_to_index[0] == PERL_UINT_MAX) {
+    if (map_LC_ALL_position_to_index[0] == LC_ALL_INDEX_) {
 
         /* Use this array, initialized by a config.h constant */
         int lc_all_category_positions[] = PERL_LC_ALL_CATEGORY_POSITIONS_INIT;
@@ -7286,7 +7305,7 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
         bool setlocale_failure = FALSE;  /* This trial hasn't failed so far */
         bool dowarn = trial == 0 && locwarn;
 
-        for (unsigned int j = 0; j < LC_ALL_INDEX_; j++) {
+        for (all_individual_category_indexes(j)) {
             STDIZED_SETLOCALE_LOCK;
             curlocales[j] = savepv(stdized_setlocale(categories[j], locale));
             STDIZED_SETLOCALE_UNLOCK;
@@ -7315,7 +7334,7 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
             PerlIO_printf(Perl_error_log,
                 "perl: warning: Setting locale failed for the categories:\n");
 
-            for (unsigned int j = 0; j < LC_ALL_INDEX_; j++) {
+            for (all_individual_category_indexes(j)) {
                 if (! curlocales[j]) {
                     PerlIO_printf(Perl_error_log, "\t%s\n", category_names[j]);
                 }
@@ -7395,7 +7414,7 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
                                                    INTERNAL_FORMAT,
                                                    WANT_TEMP_PV,
                                                    __LINE__);
-                    for (unsigned int j = 0; j < LC_ALL_INDEX_; j++) {
+                    for (all_individual_category_indexes(j)) {
                         Safefree(individ_locales[j]);
                     }
                 }
@@ -7429,7 +7448,7 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 
                 const char * system_locales[LC_ALL_INDEX_] = { NULL };
 
-                for (unsigned int j = 0; j < LC_ALL_INDEX_; j++) {
+                for (all_individual_category_indexes(j)) {
                     STDIZED_SETLOCALE_LOCK;
                     system_locales[j] = savepv(stdized_setlocale(categories[j],
                                                                  NULL));
@@ -7448,7 +7467,7 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
                                                __LINE__);
                 description = "what the system says";
 
-                for (unsigned int j = 0; j < LC_ALL_INDEX_; j++) {
+                for (all_individual_category_indexes(j)) {
                     Safefree(system_locales[j]);
                 }
 #  endif
@@ -7474,7 +7493,7 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 
     give_perl_locale_control((const char **) &curlocales, __LINE__);
 
-    for (unsigned int j = 0; j < LC_ALL_INDEX_; j++) {
+    for (all_individual_category_indexes(j)) {
         Safefree(curlocales[j]);
     }
 
@@ -8327,7 +8346,7 @@ Perl_strxfrm(pTHX_ SV * src)
 #ifdef USE_LOCALE
 
 STATIC const char *
-S_toggle_locale_i(pTHX_ const unsigned cat_index,
+S_toggle_locale_i(pTHX_ const locale_category_index cat_index,
                         const char * new_locale,
                         const line_t caller_line)
 {
@@ -8384,7 +8403,7 @@ S_toggle_locale_i(pTHX_ const unsigned cat_index,
 }
 
 STATIC void
-S_restore_toggled_locale_i(pTHX_ const unsigned int cat_index,
+S_restore_toggled_locale_i(pTHX_ const locale_category_index cat_index,
                                  const char * restore_locale,
                                  const line_t caller_line)
 {
@@ -8846,7 +8865,7 @@ Perl_switch_to_global_locale(pTHX)
     const char * cur_thread_locales[LC_ALL_INDEX_];
 
     /* Save each category's current per-thread state */
-    for (unsigned i = 0; i < LC_ALL_INDEX_; i++) {
+    for (all_individual_category_indexes(i)) {
         cur_thread_locales[i] = querylocale_i(i);
     }
 
@@ -8854,7 +8873,7 @@ Perl_switch_to_global_locale(pTHX)
 
     /* Set the global to what was our per-thread state */
     POSIX_SETLOCALE_LOCK;
-    for (unsigned int i = 0; i < LC_ALL_INDEX_; i++) {
+    for (all_individual_category_indexes(i)) {
         posix_setlocale(categories[i], cur_thread_locales[i]);
     }
     POSIX_SETLOCALE_UNLOCK;
@@ -8959,7 +8978,7 @@ Perl_sync_locale(pTHX)
 #  else
 
     const char * current_globals[LC_ALL_INDEX_];
-    for (unsigned i = 0; i < LC_ALL_INDEX_; i++) {
+    for (all_individual_category_indexes(i)) {
         STDIZED_SETLOCALE_LOCK;
         current_globals[i] = savepv(stdized_setlocale(categories[i], NULL));
         STDIZED_SETLOCALE_UNLOCK;
@@ -8967,7 +8986,7 @@ Perl_sync_locale(pTHX)
 
     give_perl_locale_control((const char **) &current_globals, __LINE__);
 
-    for (unsigned i = 0; i < LC_ALL_INDEX_; i++) {
+    for (all_individual_category_indexes(i)) {
         Safefree(current_globals[i]);
     }
 
@@ -8983,7 +9002,7 @@ Perl_sync_locale(pTHX)
 
 STATIC char *
 S_my_setlocale_debug_string_i(pTHX_
-                              const unsigned cat_index,
+                              const locale_category_index cat_index,
                               const char* locale, /* Optional locale name */
 
                               /* return value from setlocale() when attempting
