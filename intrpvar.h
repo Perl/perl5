@@ -750,19 +750,21 @@ PERLVARI(I, cur_locale_obj, locale_t, LC_GLOBAL_LOCALE)
 #endif
 #ifdef USE_PL_CURLOCALES
 
-/* This is the most number of categories we've encountered so far on any
- * platform, doesn't include LC_ALL */
-PERLVARA(I, curlocales, LOCALE_CATEGORIES_COUNT_, const char *)
+/* Some configurations do not allow perl to query libc to find out what the
+ * locale for a given category is.  On such platforms this array contains that
+ * information, indexed by the perl-defined category index.
+ * Note that this array keeps the actual locale for each category.  LC_NUMERIC
+ * is almost always toggled into the C locale, and the locale it nominally is
+ * is stored as PL_numeric_name. */
+PERLVARA(I, curlocales, LOCALE_CATEGORIES_COUNT_ + 1, const char *)
 
 #endif
 #ifdef USE_PL_CUR_LC_ALL
-
 PERLVARI(I, cur_LC_ALL, const char *, NULL)
-
 #endif
 #ifdef USE_LOCALE_COLLATE
 
-/* The emory needed to store the collxfrm transformation of a string with
+/* The memory needed to store the collxfrm transformation of a string with
  * length 'x' is predicted by the linear equation mx+b; m=mult, b=base */
 PERLVARI(I, collxfrm_mult,Size_t, 0)	/* Expansion factor in *xfrm();
                                            0 => unknown or bad, depending on
