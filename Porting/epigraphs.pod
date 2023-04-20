@@ -17,6 +17,16 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.37.11 - Ben Aaronovitch, "Moon Over Soho"
+
+L<Announced on 2023-04-20 by Steve Hay|https://www.nntp.perl.org/group/perl.perl5.porters/2023/04/msg266242.html>
+
+My dad always said that a trumpet player likes to aim his weapon at the
+audience, but a sax man likes to cut a good profile and that they always
+have a favourite side.  It being an article of faith with my dad that
+you don't even pick up a reed instrument unless you're vain about the
+shape your face makes when you're blowing down it.
+
 =head2 v5.37.10 - Lewis Carroll "The Walrus and the Carpenter"
 
 L<Announced on 2023-03-21 by Yves Orton|https://www.nntp.perl.org/group/perl.perl5.porters/2023/03/msg266078.html>
