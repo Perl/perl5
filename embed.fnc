@@ -4328,11 +4328,10 @@ S	|void	|populate_hash_from_localeconv				\
 				|NULLOK const lconv_offset_t *integers
 # endif
 # if defined(USE_LOCALE)
-RST	|unsigned int|get_category_index				\
+RS	|unsigned int|get_category_index_helper 			\
 				|const int category			\
-				|NULLOK const char *locale
-RST	|unsigned int|get_category_index_nowarn 			\
-				|const int category
+				|NULLOK bool *success			\
+				|const line_t caller_line
 Ri	|const char *|mortalized_pv_copy				\
 				|NULLOK const char * const pv
 S	|void	|new_LC_ALL	|NULLOK const char *unused		\

@@ -1268,8 +1268,7 @@
 #       define populate_hash_from_localeconv(a,b,c,d,e) S_populate_hash_from_localeconv(aTHX_ a,b,c,d,e)
 #     endif
 #     if defined(USE_LOCALE)
-#       define get_category_index               S_get_category_index
-#       define get_category_index_nowarn        S_get_category_index_nowarn
+#       define get_category_index_helper(a,b,c) S_get_category_index_helper(aTHX_ a,b,c)
 #       define mortalized_pv_copy(a)            S_mortalized_pv_copy(aTHX_ a)
 #       define new_LC_ALL(a,b)                  S_new_LC_ALL(aTHX_ a,b)
 #       define save_to_buffer                   S_save_to_buffer
