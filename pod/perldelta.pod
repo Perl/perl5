@@ -134,9 +134,32 @@ adjusted at perl build time by defining C<PERL_GETSOCKOPT_SIZE> in C<ccflags>.
 
 =head1 Acknowledgements
 
-XXX Generate this with:
+Perl 5.37.11 represents approximately 4 weeks of development since Perl 5.37.10
+and contains approximately 5,500 lines of changes across 180 files from 16
+authors.
 
-  perl Porting/acknowledgements.pl v5.37.10..HEAD
+Excluding auto-generated files, documentation and release tools, there were
+approximately 3,000 lines of changes to 110 .pm, .t, .c and .h files.
+
+Perl continues to flourish into its fourth decade thanks to a vibrant community
+of users and developers.  The following people are known to have contributed
+the improvements that became Perl 5.37.11:
+
+Craig A. Berry, Dan Book, David Cantrell, Karl Williamson, Leon Timmermans,
+Lukas Mai, Nicolas R, Paul Evans, Philippe Bruhat (BooK), Scott Baker, Sevan
+Janiyan, Steve Hay, Tomasz Konojacki, Tony Cook, Yves Orton, Zefram.
+
+The list above is almost certainly incomplete as it is automatically generated
+from version control history.  In particular, it does not include the names of
+the (very much appreciated) contributors who reported issues to the Perl bug
+tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core.  We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please see
+the F<AUTHORS> file in the Perl source distribution.
 
 =head1 Reporting Bugs
 
