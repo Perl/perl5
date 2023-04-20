@@ -6959,14 +6959,9 @@ S_populate_hash_from_localeconv(pTHX_ HV *hv, const char *locale, const U32 whic
 # endif /* defined(HAS_LOCALECONV) */
 # if defined(USE_LOCALE)
 STATIC unsigned int
-S_get_category_index(const int category, const char *locale)
+S_get_category_index_helper(pTHX_ const int category, bool *success, const line_t caller_line)
         __attribute__warn_unused_result__;
-#   define PERL_ARGS_ASSERT_GET_CATEGORY_INDEX
-
-STATIC unsigned int
-S_get_category_index_nowarn(const int category)
-        __attribute__warn_unused_result__;
-#   define PERL_ARGS_ASSERT_GET_CATEGORY_INDEX_NOWARN
+#   define PERL_ARGS_ASSERT_GET_CATEGORY_INDEX_HELPER
 
 STATIC void
 S_new_LC_ALL(pTHX_ const char *unused, bool force);

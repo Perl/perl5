@@ -234,7 +234,7 @@ static const char C_thousands_sep[] = "";
 #    define setlocale_debug_string_c(category, locale, result)              \
                 setlocale_debug_string_i(category##_INDEX_, locale, result)
 #    define setlocale_debug_string_r(category, locale, result)              \
-             setlocale_debug_string_i(get_category_index(category, locale), \
+             setlocale_debug_string_i(get_category_index(category),         \
                                       locale, result)
 #  endif
 
@@ -401,13 +401,16 @@ S_get_displayable_string(pTHX_
 #endif
 #ifdef USE_LOCALE
 
+# define get_category_index(cat) get_category_index_helper(cat, NULL, __LINE__)
+
 STATIC unsigned int
-S_get_category_index_nowarn(const int category)
+S_get_category_index_helper(pTHX_ const int category, bool * succeeded,
+                                  const line_t caller_line)
 {
-    PERL_ARGS_ASSERT_GET_CATEGORY_INDEX_NOWARN;
+    PERL_ARGS_ASSERT_GET_CATEGORY_INDEX_HELPER;
 
     /* Given a category, return the equivalent internal index we generally use
-     * instead, or negative if not found. */
+     * instead, warn or panic if not found. */
 
     unsigned int i;
 
@@ -422,48 +425,29 @@ S_get_category_index_nowarn(const int category)
       case LC_ALL: i =  LC_ALL_INDEX_; break;
 #  endif
 
-    /* Return an out-of-bounds value */
-      default: return LC_ALL_INDEX_ + 1;
+      default: goto unknown_locale;
     }
 
-    dTHX_DEBUGGING;
     DEBUG_Lv(PerlIO_printf(Perl_debug_log,
-                           "index of category %d (%s) is %d\n",
-                           category, category_names[i], i));
+                           "index of category %d (%s) is %d;"
+                           " called from %" LINE_Tf "\n",
+                           category, category_names[i], i, caller_line));
+
+    if (succeeded) {
+        *succeeded = true;
+    }
+
     return i;
-}
 
-STATIC unsigned int
-S_get_category_index(const int category, const char * locale)
-{
-    /* Given a category, return the equivalent internal index we generally use
-     * instead.
-     *
-     * 'locale' is for use in any generated diagnostics, and may be NULL
-     */
+  unknown_locale:
 
-    const char * conditional_warn_text = "; can't set it to ";
-    const int index = get_category_index_nowarn(category);
-
-    if (index <= LC_ALL_INDEX_) {
-        return index;
+    if (succeeded) {
+        *succeeded = false;
+        return 0;   /* Arbitrary */
     }
 
-    /* Here, we don't know about this category, so can't handle it. */
-
-    if (! locale) {
-        locale = "";
-        conditional_warn_text = "";
-    }
-
-    /* diag_listed_as: Unknown locale category %d; can't set it to %s */
-    Perl_warner_nocontext(packWARN(WARN_LOCALE),
-                          "Unknown locale category %d%s%s",
-                          category, conditional_warn_text, locale);
-
-    SET_EINVAL;
-
-    return index;   /* 'index' is known to be out-of-bounds */
+    locale_panic_(Perl_form(aTHX_ "Unknown locale category %d", category));
+    NOT_REACHED; /* NOTREACHED */
 }
 
 #endif /* ifdef USE_LOCALE */
@@ -2622,7 +2606,11 @@ S_win32_setlocale(pTHX_ int category, const char* locale)
     if (strEQ(locale, "")) {
         /* Note this function may change the locale, but that's ok because we
          * are about to change it anyway */
-        locale = find_locale_from_environment(get_category_index(category, ""));
+        locale = find_locale_from_environment(get_category_index(category));
+        if (locale == NULL) {
+            SET_EINVAL;
+            return NULL;
+        }
     }
 
     const char * result = wrap_wsetlocale(category, locale);
@@ -2718,8 +2706,28 @@ Perl_setlocale(const int category, const char * locale)
                           "Entering Perl_setlocale(%d, \"%s\")\n",
                           category, locale));
 
-    unsigned int cat_index = get_category_index_nowarn(category);
-    if (cat_index > LC_ALL_INDEX_) {
+    bool valid_category;
+    unsigned int cat_index = get_category_index_helper(category,
+                                                       &valid_category,
+                                                       __LINE__);
+    if (! valid_category) {
+        if (ckWARN(WARN_LOCALE)) {
+            const char * conditional_warn_text;
+            if (locale == NULL) {
+                conditional_warn_text = "";
+                locale = "";
+            }
+            else {
+                conditional_warn_text = "; can't set it to ";
+            }
+
+            /* diag_listed_as: Unknown locale category %d; can't set it to %s */
+            Perl_warner(aTHX_
+                           packWARN(WARN_LOCALE),
+                           "Unknown locale category %d%s%s",
+                           category, conditional_warn_text, locale);
+        }
+
         SET_EINVAL;
         return NULL;
     }
