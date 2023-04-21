@@ -3879,6 +3879,8 @@ Perl_setlocale(const int category, const char * locale)
 
 }
 
+#if defined(USE_LOCALE) || defined(HAS_SOME_LANGINFO) || defined(HAS_LOCALECONV)
+
 STATIC utf8ness_t
 S_get_locale_string_utf8ness_i(pTHX_ const char * string,
                                      const locale_utf8ness_t known_utf8,
@@ -3994,8 +3996,8 @@ S_get_locale_string_utf8ness_i(pTHX_ const char * string,
 
     return UTF8NESS_YES;
 
+#    endif
 #  endif
-#endif
 
 }
 
@@ -4050,6 +4052,7 @@ S_is_locale_utf8(pTHX_ const char * locale)
 
 }
 
+#endif
 #ifdef USE_LOCALE
 
 STATIC const char *

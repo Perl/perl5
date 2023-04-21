@@ -6951,15 +6951,6 @@ Perl_hfree_next_entry(pTHX_ HV *hv, STRLEN *indexp)
 
 #endif
 #if defined(PERL_IN_LOCALE_C)
-STATIC utf8ness_t
-S_get_locale_string_utf8ness_i(pTHX_ const char *string, const locale_utf8ness_t known_utf8, const char *locale, const unsigned cat_index);
-# define PERL_ARGS_ASSERT_GET_LOCALE_STRING_UTF8NESS_I
-
-STATIC bool
-S_is_locale_utf8(pTHX_ const char *locale);
-# define PERL_ARGS_ASSERT_IS_LOCALE_UTF8        \
-        assert(locale)
-
 # if defined(HAS_LOCALECONV)
 STATIC HV *
 S_my_localeconv(pTHX_ const int item);
@@ -6971,6 +6962,19 @@ S_populate_hash_from_localeconv(pTHX_ HV *hv, const char *locale, const U32 whic
         assert(hv); assert(locale); assert(strings)
 
 # endif /* defined(HAS_LOCALECONV) */
+# if defined(HAS_LOCALECONV) || defined(HAS_SOME_LANGINFO) || \
+     defined(USE_LOCALE)
+STATIC utf8ness_t
+S_get_locale_string_utf8ness_i(pTHX_ const char *string, const locale_utf8ness_t known_utf8, const char *locale, const unsigned cat_index);
+#   define PERL_ARGS_ASSERT_GET_LOCALE_STRING_UTF8NESS_I
+
+STATIC bool
+S_is_locale_utf8(pTHX_ const char *locale);
+#   define PERL_ARGS_ASSERT_IS_LOCALE_UTF8      \
+        assert(locale)
+
+# endif /* defined(HAS_LOCALECONV) || defined(HAS_SOME_LANGINFO) ||
+           defined(USE_LOCALE) */
 # if defined(USE_LOCALE)
 STATIC const char *
 S_calculate_LC_ALL_string(pTHX_ const char **category_locales_list, const calc_LC_ALL_format format, const line_t caller_line);
