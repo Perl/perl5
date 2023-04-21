@@ -1331,6 +1331,31 @@ typedef enum {
 /* end of makedef.pl logic duplication
  * ========================================================================= */
 
+#ifdef DEBUG_SETLOCALE_INCONSISTENCIES
+#  if ! defined(DEBUGGING) || defined(USE_POSIX_2008_LOCALE) || ! defined(USE_LOCALE_CTYPE)
+#    undef DEBUG_SETLOCALE_INCONSISTENCIES
+#  endif
+#endif
+#ifdef DEBUG_SETLOCALE_INCONSISTENCIES
+#  define PERL_ASSERT_CATEGORY_EQ_CTYPE(cat)                                \
+        STMT_START {                                                        \
+            const char * ctype = setlocale(LC_CTYPE, NULL);                 \
+            const char * other = setlocale(cat, NULL);                      \
+            if (strNE(other, ctype)) {                                      \
+                dTHX;                                                       \
+                Perl_locale_panic(Perl_form(aTHX_                           \
+                                            "LC_CTYPE='%s', not same as"    \
+                                            " '%s' in category %d",         \
+                                            ctype, other, cat),             \
+                                  __LINE__, __FILE__, __LINE__);            \
+                assert(strEQ(setlocale(cat, NULL),                          \
+                             setlocale(LC_CTYPE, NULL)));                   \
+            }                                                               \
+        } STMT_END
+#else
+#  define PERL_ASSERT_CATEGORY_EQ_CTYPE(cat)  NOOP
+#endif
+
 #ifdef PERL_CORE
 
 /* These typedefs are used in locale.c only (and documented there), but defined
