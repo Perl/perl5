@@ -7096,8 +7096,10 @@ the plain locale pragma without a parameter (S<C<use locale>>) is in effect.
             else {                                                          \
                 PL_locale_mutex_depth++;                                    \
                 UNLESS_PERL_MEM_LOG(DEBUG_Lv(PerlIO_printf(Perl_debug_log,  \
-                        "%s: %d: avoided locking locale; new lock depth=%d\n",\
-                        __FILE__, __LINE__, PL_locale_mutex_depth));        \
+                        "%s: %d: avoided locking locale; new lock"          \
+                        " depth=%d, but will panic if '%s' is true\n",      \
+                        __FILE__, __LINE__, PL_locale_mutex_depth,          \
+                        STRINGIFY(cond_to_panic_if_already_locked)));       \
                 )                                                           \
                 if (cond_to_panic_if_already_locked) {                      \
                     locale_panic_("Trying to lock locale incompatibly: "    \
