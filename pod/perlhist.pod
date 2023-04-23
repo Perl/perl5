@@ -737,6 +737,7 @@ the strings?).
  Steve     5.36.1-RC1   2023-Apr-10
  Steve     5.36.1-RC2   2023-Apr-11
  Steve     5.36.1-RC3   2023-Apr-16
+ Steve     5.36.1       2023-Apr-23
 
  Ricardo   5.37.0       2022-May-27     The 5.37 development track
  Matthew H 5.37.1       2022-Jun-20
