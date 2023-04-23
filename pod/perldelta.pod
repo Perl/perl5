@@ -83,11 +83,11 @@ cleared from the selected output handle.
 =head1 Acknowledgements
 
 Perl 5.36.1 represents approximately 11 months of development since Perl 5.36.0
-and contains approximately 5,400 lines of changes across 62 files from 24
+and contains approximately 5,500 lines of changes across 62 files from 24
 authors.
 
 Excluding auto-generated files, documentation and release tools, there were
-approximately 1,500 lines of changes to 23 .pm, .t, .c and .h files.
+approximately 1,600 lines of changes to 23 .pm, .t, .c and .h files.
 
 Perl continues to flourish into its fourth decade thanks to a vibrant community
 of users and developers.  The following people are known to have contributed
