@@ -420,6 +420,38 @@ the compiler dependency, you may need to also add "-Dcc=...".
 At C level the type is called C<__float128> (note, not "long double"),
 but Perl source knows it as NV.  (This is not "long doubles".)
 
+=head3 Taint Support
+
+Traditional perl has provided a security mechanism based on marking
+input data as untrusted unless it has been validated by a regex. This
+mechanism is called tainting and is enabled with the -T or -t options on
+the command line. This support has a performance cost on all code
+executed. It is possible to disable this support by providing the
+setting C<-Accflags=-DNO_TAINT_SUPPORT> or the setting
+C<-Accflags=-DSILENT_NO_TAINT_SUPPORT> to Configure.
+
+The former option C<NO_TAINT_SUPPORT> is more secure and disables taint
+support while making the use of the C<-T> or C<-t> options which
+normally enable taint support into an untrappable exception to ensure
+that no-one uses them while expecting taint checks to run. With this
+build mode there can be no confusion if a script supports taint or not.
+
+The latter option, C<SILENT_NO_TAINT_SUPPORT> is less secure but more
+flexible in that it silently disables taint support while ignoring the
+C<-T> and C<-t> command line options entirely. In this build mode it is
+possible to run a script with the C<-T> or C<-t> option and expect taint
+support but not get it, so this mode is only recommended to people who
+really know what they are doing.
+
+Both modes improve performance although the amount depends on your
+workload. It is not unreasonable to expect a 5%-10% improvement in
+performance by using one of these options. At this time this build mode
+is supported but not recommended, and if you chose to use such a perl
+you do so at your own risk. It is possible that there may be
+interoperability issues with CPAN distributions as many distributions
+are unaware of this build mode and will expect test scripts to pass or
+to detect unvalidated data when run under the C<-T> or C<-t>.
+
 =head3 Algorithmic Complexity Attacks on Hashes
 
 Perl 5.18 reworked the measures used to secure its hash function
