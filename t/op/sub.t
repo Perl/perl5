@@ -426,6 +426,7 @@ eval '
    CORE::state sub b; sub d { sub b {} sub d }
  ';
 eval '()=%e; sub e { sub e; eval q|$x| } e;';
+watchdog 0;
 
 fresh_perl_like(
     q#<s,,$0[sub{m]]]],}>0,shift#,
