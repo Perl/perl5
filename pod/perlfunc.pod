@@ -4193,7 +4193,7 @@ This makes it easy to get a month name from a list:
     print "$abbr[$mon] $mday";
     # $mon=9, $mday=18 gives "Oct 18"
 
-C<$year> contains the number of years since 1900.  To get a 4-digit
+C<$year> contains the number of years since 1900.  To get the full
 year write:
 
     $year += 1900;
