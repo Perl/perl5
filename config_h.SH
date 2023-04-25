@@ -733,6 +733,12 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$i_sysstat	I_SYS_STAT		/**/
 
+/* I_SYS_SYSCALL:
+ *	This symbol, if defined, indicates to the C program that it should
+ *	include <sys/syscall.h>.
+ */
+#$i_syssyscall	I_SYS_SYSCALL		/**/
+
 /* I_SYS_TIMES:
  *	This symbol, if defined, indicates to the C program that it should
  *	include <sys/times.h>.

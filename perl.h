@@ -1416,6 +1416,11 @@ extern char **myenviron;
 #   endif
 #endif
 
+#if defined(I_SYS_SYSCALL) && defined(HAS_SYSCALL)
+/* Illumos has the syscall() prototype here */
+#    include <sys/syscall.h>
+#endif
+
 /* for WCOREDUMP */
 #ifdef I_SYS_WAIT
 #   include <sys/wait.h>

@@ -3799,6 +3799,10 @@ i_sysstatvfs (i_sysstatvfs.U):
 	This variable conditionally defines the I_SYSSTATVFS symbol,
 	and indicates whether a C program should include <sys/statvfs.h>.
 
+i_syssyscall (i_syssyscall.U):
+	This variable conditionally defines the I_SYS_SYSCALL symbol,
+	and indicates whether a C program should include <sys/syscall.h>.
+
 i_systime (i_time.U):
 	This variable conditionally defines I_SYS_TIME, which indicates
 	to the C program that it should include <sys/time.h>.

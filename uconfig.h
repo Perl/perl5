@@ -698,6 +698,12 @@
  */
 #define	I_SYS_STAT		/**/
 
+/* I_SYS_SYSCALL:
+ *	This symbol, if defined, indicates to the C program that it should
+ *	include <sys/syscall.h>.
+ */
+/*#define	I_SYS_SYSCALL		/ **/
+
 /* I_SYS_TIMES:
  *	This symbol, if defined, indicates to the C program that it should
  *	include <sys/times.h>.
@@ -5376,6 +5382,6 @@
 #endif
 
 /* Generated from:
- * 8cb1765533e123c379f0207fc2a4f75df4be3e84be3a0da71ab37bcf00e13a46 config_h.SH
- * 9c5779a38fbba64b0a5dcf7ce548120a29ea5039350102827f500c812bda10b2 uconfig.sh
+ * ca2749faa37cd5fc46eb63d4febeab36d1e8a84b26dce77980a56844f0b3c4fb config_h.SH
+ * dac2aceefc94292b9ec73e8a4615ae98e521658172c452c5467759219568c800 uconfig.sh
  * ex: set ro ft=c: */
