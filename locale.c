@@ -5825,6 +5825,7 @@ the program, giving results based on that locale.
      * platforms an invalid conversion specifier '%?' (for all illegal '?') is
      * treated as a literal, but others may fail when '?' is illegal */
     Safefree(buf);
+    SET_EINVAL;
     return NULL;
 
   strftime_success:
