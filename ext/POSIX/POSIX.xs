@@ -3579,26 +3579,17 @@ strftime(fmt, sec, min, hour, mday, mon, year, wday = -1, yday = -1, isdst = -1)
 	int		isdst
     CODE:
 	{
-	    char *buf;
-            SV *sv;
-            utf8ness_t is_utf8;
-
-            /* allowing user-supplied (rather than literal) formats
-             * is normally frowned upon as a potential security risk;
-             * but this is part of the API so we have to allow it */
-            GCC_DIAG_IGNORE_STMT(-Wformat-nonliteral);
-	    buf = my_strftime8_temp(SvPV_nolen(fmt), sec, min, hour, mday, mon, year, wday, yday, isdst, &is_utf8);
-            GCC_DIAG_RESTORE_STMT;
-            sv = sv_newmortal();
-	    if (buf) {
-                STRLEN len = strlen(buf);
-		sv_usepvn_flags(sv, buf, len, SV_HAS_TRAILING_NUL);
-		if (SvUTF8(fmt) || is_utf8 == UTF8NESS_YES) {
-		    SvUTF8_on(sv);
-		}
+            SV *sv = sv_strftime_ints(fmt, sec, min, hour, mday, mon, year,
+                                      wday, yday, isdst);
+	    if (sv) {
+                sv = sv_2mortal(sv);
             }
-            else {  /* We can't distinguish between errors and just an empty
-                     * return; in all cases just return an empty string */
+            else {
+                /* strftime() doesn't distinguish between errors and just an
+                 * empty return, so even though sv_strftime_ints() has figured
+                 * out the difference, return an empty string in all cases to
+                 * mimic strftime() behavior */
+                sv = sv_newmortal();
                 SvUPGRADE(sv, SVt_PV);
                 SvPV_set(sv, (char *) "");
                 SvPOK_on(sv);
@@ -3606,6 +3597,7 @@ strftime(fmt, sec, min, hour, mday, mon, year, wday = -1, yday = -1, isdst = -1)
                 SvLEN_set(sv, 0);   /* Won't attempt to free the string when sv
                                        gets destroyed */
             }
+
             ST(0) = sv;
 	}
 

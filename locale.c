@@ -5219,6 +5219,49 @@ Perl_my_strftime(pTHX_ const char *fmt, int sec, int min, int hour,
     return ret;
 }
 
+SV *
+Perl_sv_strftime_tm(pTHX_ SV * fmt, const struct tm * mytm)
+{   /* Documented above */
+    PERL_ARGS_ASSERT_SV_STRFTIME_TM;
+
+    utf8ness_t fmt_utf8ness = (SvUTF8(fmt) && LIKELY(! IN_BYTES))
+                              ? UTF8NESS_YES
+                              : UTF8NESS_UNKNOWN;
+
+    utf8ness_t result_utf8ness;
+    char * retval = strftime8(SvPV_nolen(fmt),
+                              mytm,
+                              fmt_utf8ness,
+                              &result_utf8ness,
+                              true  /* calling from sv_strftime */
+                             );
+    SV * sv = NULL;
+    if (retval) {
+        STRLEN len = strlen(retval);
+        sv = newSV(len);
+        sv_usepvn_flags(sv, retval, len, SV_HAS_TRAILING_NUL);
+
+        if (result_utf8ness == UTF8NESS_YES) {
+            SvUTF8_on(sv);
+        }
+    }
+
+    return sv;
+}
+
+SV *
+Perl_sv_strftime_ints(pTHX_ SV * fmt, int sec, int min, int hour,
+                            int mday, int mon, int year, int wday,
+                            int yday, int isdst)
+{   /* Documented above */
+    PERL_ARGS_ASSERT_SV_STRFTIME_INTS;
+
+    struct tm  mytm;
+    ints_to_tm(&mytm, sec, min, hour, mday, mon, year, wday, yday, isdst);
+    SV * ret = sv_strftime_tm(fmt, &mytm);
+    return ret;
+}
+
 #ifdef USE_LOCALE
 
 /* There are several implementations of my_langinfo, depending on the
@@ -5584,8 +5627,23 @@ S_my_langinfo_i(pTHX_
             /* The year was deliberately chosen so that January 1 is on the
              * first day of the week.  Since we're only getting one thing at a
              * time, it all works */
-            const char * temp = my_strftime8_temp(format, 30, 30, hour, mday, mon,
-                                             2011, 0, 0, 0, &is_utf8);
+            struct tm  mytm;
+            ints_to_tm(&mytm, 30, 30, hour, mday, mon, 2011, 0, 0, 0);
+            char * temp;
+            if (utf8ness) {
+                temp = strftime8(format,
+                                 &mytm,
+                                 UTF8NESS_IMMATERIAL, /* All possible formats
+                                                         specified above are
+                                                         entirely ASCII */
+                                 &is_utf8,
+                                 false      /* not calling from sv_strftime */
+                                );
+            }
+            else {
+                temp = strftime_tm(format, &mytm);
+            }
+
             retval = save_to_buffer(temp, retbufp, retbuf_sizep);
             Safefree(temp);
 
@@ -5886,20 +5944,33 @@ S_my_langinfo_i(pTHX_
 
 /*
 =for apidoc_section $time
-=for apidoc      my_strftime
+=for apidoc      sv_strftime_tm
+=for apidoc_item sv_strftime_ints
+=for apidoc_item my_strftime
 
-strftime(), but with a different API so that the return value is a pointer
-to the formatted result (which MUST be arranged to be FREED BY THE
-CALLER).  This allows this function to increase the buffer size as needed,
-so that the caller doesn't have to worry about that.
+These implement the libc strftime(), but with a different API so that the return
+value is a pointer to the formatted result (which MUST be arranged to be FREED
+BY THE CALLER).  This allows these functions to increase the buffer size as
+needed, so that the caller doesn't have to worry about that.
 
-On failure it returns NULL.
+On failure they return NULL, and set errno to C<EINVAL>.
 
-Note that yday and wday effectively are ignored by this function, as
-mini_mktime() overwrites them.
+C<sv_strftime_tm> and C<sv_strftime_ints> are preferred, as they transparently
+handle the UTF-8ness of the current locale, the input C<fmt>, and the returned
+result.  Only if the current C<LC_TIME> locale is a UTF-8 one (and S<C<use
+bytes>> is not in effect) will the result be marked as UTF-8.  These differ
+only in the form of their inputs.  C<sv_strftime_tm> takes a filled-in
+S<C<struct tm>> parameter.  C<sv_strftime_ints> takes a bunch of integer
+parameters that together completely define a given time.
 
-Also note that it is always executed in the underlying C<LC_TIME> locale of
-the program, giving results based on that locale.
+C<my_strftime> is kept for backwards compatibility.  Knowing if the result
+should be considered UTF-8 or not requires significant extra logic.
+
+Note that C<yday> and C<wday> effectively are ignored by C<sv_strftime_ints>
+and C<my_strftime>, as mini_mktime() overwrites them
+
+Also note that all three functions are always executed in the underlying
+C<LC_TIME> locale of the program, giving results based on that locale.
 
 =cut
  */
@@ -5947,6 +6018,8 @@ STATIC char *
 S_strftime_tm(pTHX_ const char *fmt, const struct tm *mytm)
 {
     PERL_ARGS_ASSERT_STRFTIME_TM;
+
+    /* Execute strftime() based on the input struct tm */
 
     /* An empty format yields an empty result */
     const int fmtlen = strlen(fmt);
@@ -6045,45 +6118,109 @@ S_strftime_tm(pTHX_ const char *fmt, const struct tm *mytm)
     restore_toggled_locale_c(LC_CTYPE, orig_CTYPE_LOCALE);
 
 #  endif
+
     return buf;
 
 #endif
 
 }
 
-char *
-Perl_my_strftime8_temp(pTHX_ const char *fmt, int sec, int min, int hour, int mday,
-                         int mon, int year, int wday, int yday, int isdst,
-                         utf8ness_t * utf8ness)
-{   /* Documented above */
-    char * retval = my_strftime(fmt, sec, min, hour, mday, mon, year, wday,
-                                yday, isdst);
+STATIC char *
+S_strftime8(pTHX_ const char * fmt,
+                  const struct tm * mytm,
+                  const utf8ness_t fmt_utf8ness,
+                  utf8ness_t * result_utf8ness,
+                  const bool came_from_sv)
+{
+    PERL_ARGS_ASSERT_STRFTIME8;
 
-    PERL_ARGS_ASSERT_MY_STRFTIME8_TEMP;
-
-    if (utf8ness) {
+    /* Wrap strftime_tm, taking into account the input and output UTF-8ness */
 
 #ifdef USE_LOCALE_TIME
-        *utf8ness = get_locale_string_utf8ness_i(retval,
-                                                 LOCALE_UTF8NESS_UNKNOWN,
-                                                 NULL, LC_TIME_INDEX_);
+#  define INDEX_TO_USE  LC_TIME_INDEX_
+
+    const char * locale = querylocale_c(LC_TIME);
+    locale_utf8ness_t locale_utf8ness = LOCALE_UTF8NESS_UNKNOWN;
+
 #else
-        *utf8ness = UTF8NESS_IMMATERIAL;
+#  define INDEX_TO_USE  LC_ALL_INDEX_   /* Effectively out of bounds */
+
+    const char * locale = "C";
+    locale_utf8ness_t locale_utf8ness = LOCALE_NOT_UTF8;
+
 #endif
 
+    switch (fmt_utf8ness) {
+      case UTF8NESS_IMMATERIAL:
+        break;
+
+      case UTF8NESS_NO: /* Known not to be UTF-8; must not be UTF-8 locale */
+        if (is_locale_utf8(locale)) {
+            SET_EINVAL;
+            return NULL;
+        }
+
+        locale_utf8ness = LOCALE_NOT_UTF8;
+        break;
+
+      case UTF8NESS_YES:    /* Known to be UTF-8; must be UTF-8 locale if can't
+                               downgrade.  But downgrading assumes the locale
+                               is latin 1.  Maybe just fail XXX */
+        if (! is_locale_utf8(locale)) {
+            locale_utf8ness = LOCALE_NOT_UTF8;
+
+            bool is_utf8 = true;
+            Size_t fmt_len = strlen(fmt);
+            fmt = (char *) bytes_from_utf8((U8 *) fmt, &fmt_len, &is_utf8);
+            if (is_utf8) {
+                SET_EINVAL;
+                return NULL;
+            }
+
+            SAVEFREEPV(fmt);
+        }
+        else {
+            locale_utf8ness = LOCALE_IS_UTF8;
+        }
+
+        break;
+
+      case UTF8NESS_UNKNOWN:
+        if (! is_locale_utf8(locale)) {
+            locale_utf8ness = LOCALE_NOT_UTF8;
+        }
+        else {
+            locale_utf8ness = LOCALE_IS_UTF8;
+            if (came_from_sv) {
+
+                /* Upgrade 'fmt' to UTF-8 for a UTF-8 locale.  Otherwise the
+                 * locale would find any UTF-8 variant characters to be
+                 * malformed */
+                Size_t fmt_len = strlen(fmt);
+                fmt = (char *) bytes_to_utf8((U8 *) fmt, &fmt_len);
+                SAVEFREEPV(fmt);
+            }
+        }
+
+        break;
     }
 
+    char * retval = strftime_tm(fmt, mytm);
+    *result_utf8ness = get_locale_string_utf8ness_i(retval,
+                                                    locale_utf8ness,
+                                                    locale,
+                                                    INDEX_TO_USE);
     DEBUG_Lv(PerlIO_printf(Perl_debug_log,
-                        "fmt=%s, retval=%s", fmt,
-                        ((is_utf8_string((U8 *) retval, 0))
-                         ? retval
-                         :_byte_dump_string((U8 *) retval, strlen(retval), 0)));
-             if (utf8ness) PerlIO_printf(Perl_debug_log, "; utf8ness=%d",
-                                                         (int) *utf8ness);
-             PerlIO_printf(Perl_debug_log, "\n");
-            );
-
+                          "fmt=%s, retval=%s; utf8ness=%d",
+                          fmt,
+                          ((is_utf8_string((U8 *) retval, 0))
+                           ? retval
+                           :_byte_dump_string((U8 *) retval, strlen(retval),0)),
+                          *result_utf8ness));
     return retval;
+
+#undef INDEX_TO_USE
+
 }
 
 #ifdef USE_LOCALE
