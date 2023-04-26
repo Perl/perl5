@@ -4810,12 +4810,13 @@ to the formatted result (which MUST be arranged to be FREED BY THE
 CALLER).  This allows this function to increase the buffer size as needed,
 so that the caller doesn't have to worry about that.
 
-Note that yday and wday effectively are ignored by this function, as
-mini_mktime() overwrites them
+On failure it returns NULL.
 
-Also note that it is always executed in the underlying locale of the program,
-giving localized results.  Mojibake can result on some platforms if LC_CTYPE
-and LC_TIME are not the same locale.
+Note that yday and wday effectively are ignored by this function, as
+mini_mktime() overwrites them.
+
+Also note that it is always executed in the underlying C<LC_TIME> locale of
+the program, giving results based on that locale.
 
 =cut
  */
