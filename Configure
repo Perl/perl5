@@ -1209,6 +1209,11 @@ version_patchlevel_string=''
 perl5=''
 perladmin=''
 perlpath=''
+i32dformat=''
+u32XUformat=''
+u32oformat=''
+u32uformat=''
+u32xformat=''
 d_nv_preserves_uv=''
 d_nv_zero_is_allbits_zero=''
 i16size=''
@@ -1235,7 +1240,6 @@ u8size=''
 u8type=''
 uvsize=''
 uvtype=''
-i32dformat=''
 ivdformat=''
 nvEUformat=''
 nvFUformat=''
@@ -1243,10 +1247,6 @@ nvGUformat=''
 nveformat=''
 nvfformat=''
 nvgformat=''
-u32XUformat=''
-u32oformat=''
-u32uformat=''
-u32xformat=''
 uvXUformat=''
 uvoformat=''
 uvuformat=''
@@ -3506,10 +3506,10 @@ EOM
 			osvers="$3"
 			;;
 		dragonfly) osname=dragonfly
-                        case "$3" in
-                            [0-9]*) osvers="$3" ;;
-                            *) osvers="$2" ;;
-                        esac
+			case "$3" in
+			    [0-9]*) osvers="$3" ;;
+			    *) osvers="$2" ;;
+			esac
 			;;
 		dynixptx*) osname=dynixptx
 			osvers=`echo "$4"|sed 's/^v//'`
@@ -3682,47 +3682,47 @@ EOM
 		fi
 	fi
 
-        case "$targetarch" in
-        '') ;;
-        *)  hostarch=$osname
-            case "$targetarch" in
-                nto*|*-nto-*)
-                    # Will load qnx.sh, which should change osname to nto
-                    osname=qnx
-                    osvers=''
-                    ;;
-                *linux-android*)
-                    # Catch arm-linux-androideabi, mipsel-linux-android,
-                    # and i686-linux-android
-                    osname=linux-android
-                    osvers=''
-                    ;;
-                *linux*)
-                    # Something like arm-linux-gnueabihf is really just
-                    # plain linux.
-                    osname=linux
-                    osvers=''
-                    ;;
-                *solaris*|*sunos*)
-                    osname=solaris
-                    # XXX perhaps we should just assume
-                    # osvers to be 2, or maybe take the value
-                    # from targetarch. Using $run before the
-                    # hints are run is somewhat icky.
-                    set X `$run $uname -a 2>/dev/null`
-                    shift
-                    case "$3" in
-                        5*) osvers=`echo $3 | $sed 's/^5/2/g'` ;;
-                        *)  osvers="$3" ;;
-                    esac
-                    ;;
-                *)
+	case "$targetarch" in
+	'') ;;
+	*)  hostarch=$osname
+	    case "$targetarch" in
+		nto*|*-nto-*)
+		    # Will load qnx.sh, which should change osname to nto
+		    osname=qnx
+		    osvers=''
+		    ;;
+		*linux-android*)
+		    # Catch arm-linux-androideabi, mipsel-linux-android,
+		    # and i686-linux-android
+		    osname=linux-android
+		    osvers=''
+		    ;;
+		*linux*)
+		    # Something like arm-linux-gnueabihf is really just
+		    # plain linux.
+		    osname=linux
+		    osvers=''
+		    ;;
+		*solaris*|*sunos*)
+		    osname=solaris
+		    # XXX perhaps we should just assume
+		    # osvers to be 2, or maybe take the value
+		    # from targetarch. Using $run before the
+		    # hints are run is somewhat icky.
+		    set X `$run $uname -a 2>/dev/null`
+		    shift
+		    case "$3" in
+			5*) osvers=`echo $3 | $sed 's/^5/2/g'` ;;
+			*)  osvers="$3" ;;
+		    esac
+		    ;;
+		*)
 		    osname=`echo $targetarch|sed 's,^[^-]*-,,'`
 		    osvers=''
-                ;;
-            esac
-            ;;
-        esac
+		;;
+	    esac
+	    ;;
+	esac
 
 	: Now look for a hint file osname_osvers, unless one has been
 	: specified already.
@@ -5326,14 +5326,14 @@ for thislib in $libswanted; do
 		case " $dflt " in
 		*"-l$thislib "*);;
 		*) dflt="$dflt -l$thislib"
-                   libsfound="$libsfound $xxx"
-                   yyy=`basename $xxx`
-                   libsfiles="$libsfiles $yyy"
-                   yyy=`echo $xxx|$sed -e "s%/$yyy\\$%%"`
-                   case " $libsdirs " in
-                   *" $yyy "*) ;;
-                   *) libsdirs="$libsdirs $yyy" ;;
-                   esac
+		   libsfound="$libsfound $xxx"
+		   yyy=`basename $xxx`
+		   libsfiles="$libsfiles $yyy"
+		   yyy=`echo $xxx|$sed -e "s%/$yyy\\$%%"`
+		   case " $libsdirs " in
+		   *" $yyy "*) ;;
+		   *) libsdirs="$libsdirs $yyy" ;;
+		   esac
 		   ;;
 		esac
 		break
@@ -7765,36 +7765,6 @@ case "$inc_version_list" in
 	;;
 esac
 $rm -f getverlist
-
-: see if malloc/malloc.h has to be included
-set malloc/malloc.h i_mallocmalloc
-eval $inhdr
-
-: see if this is a malloc.h system
-: we want a real compile instead of Inhdr because some systems have a
-: malloc.h that just gives a compile error saying to use stdlib.h instead
-echo " "
-$cat >try.c <<EOCP
-#include <stdlib.h>
-#include <malloc.h>
-#$i_mallocmalloc I_MALLOCMALLOC
-#ifdef I_MALLOCMALLOC
-# include <malloc/malloc.h>
-#endif
-
-int main () { return 0; }
-EOCP
-set try
-if eval $compile; then
-    echo "<malloc.h> found." >&4
-    val="$define"
-else
-    echo "<malloc.h> NOT found." >&4
-    val="$undef"
-fi
-$rm_try
-set i_malloc
-eval $setvar
 
 : check for length of pointer
 echo " "
@@ -11339,16 +11309,16 @@ $cat >attrib.c <<'EOCP'
 __attribute__((visibility("hidden"))) int I_will_be_hidden(void);
 EOCP
 if $cc $ccflags -c attrib.c >attrib.out 2>&1 ; then
-        if $compiler_warning attrib.out >/dev/null 2>&1; then
-                echo "Your C compiler doesn't support __attribute__((visibility))."
-                val="$undef"
-        else
-                echo "Your C compiler supports __attribute__((visibility))."
-                val="$define"
-        fi
+	if $compiler_warning attrib.out >/dev/null 2>&1; then
+		echo "Your C compiler doesn't support __attribute__((visibility))."
+		val="$undef"
+	else
+		echo "Your C compiler supports __attribute__((visibility))."
+		val="$define"
+	fi
 else
-        echo "Your C compiler doesn't seem to understand __attribute__ at all."
-        val="$undef"
+	echo "Your C compiler doesn't seem to understand __attribute__ at all."
+	val="$undef"
 fi
 ;;
 *) val="$d_attribute_visibility" ;;
@@ -16233,6 +16203,36 @@ eval $inlibc
 : see if llroundl exists
 set llroundl d_llroundl
 eval $inlibc
+
+: see if malloc/malloc.h has to be included
+set malloc/malloc.h i_mallocmalloc
+eval $inhdr
+
+: see if this is a malloc.h system
+: we want a real compile instead of Inhdr because some systems have a
+: malloc.h that just gives a compile error saying to use stdlib.h instead
+echo " "
+$cat >try.c <<EOCP
+#include <stdlib.h>
+#include <malloc.h>
+#$i_mallocmalloc I_MALLOCMALLOC
+#ifdef I_MALLOCMALLOC
+# include <malloc/malloc.h>
+#endif
+
+int main () { return 0; }
+EOCP
+set try
+if eval $compile; then
+    echo "<malloc.h> found." >&4
+    val="$define"
+else
+    echo "<malloc.h> NOT found." >&4
+    val="$undef"
+fi
+$rm_try
+set i_malloc
+eval $setvar
 
 : see if localtime_r exists
 set localtime_r d_localtime_r
@@ -21790,45 +21790,6 @@ case "$ivdformat" in
     ;;
 esac
 
-case "$i32dformat" in
-'')	case "$i32type" in
-	int)
-		i32dformat='"d"'
-		u32uformat='"u"'
-		u32oformat='"o"'
-		u32xformat='"x"'
-		u32XUformat='"X"'
-		;;
-	long)
-		i32dformat='"ld"'
-		u32uformat='"lu"'
-		u32oformat='"lo"'
-		u32xformat='"lx"'
-		u32XUformat='"lX"'
-		;;
-	int_least32_t)			: will not happen currently
-		i32dformat=PRIdLEAST32
-		u32uformat=PRIuLEAST32
-		u32oformat=PRIoLEAST32
-		u32xformat=PRIxLEAST32
-		u32XUformat=PRIXLEAST32
-		;;
-	int32_t)
-		i32dformat=PRId32
-		u32uformat=PRIu32
-		u32oformat=PRIo32
-		u32xformat=PRIx32
-		u32XUformat=PRIX32
-		;;
-	esac ;;
-esac
-
-case "$i32dformat" in
-'') echo "$0: Fatal: failed to find format strings for 32-bit integers, cannot continue." >&4
-    exit 1
-    ;;
-esac
-
 : Check format string for GID
 
 echo " "
@@ -21895,6 +21856,49 @@ EOM
 	groupstype="$ans"
 	;;
 *)  groupstype="$gidtype";;
+esac
+
+: Check format strings for internal 32bit types
+echo " "
+$echo "Checking the format strings to be used for Perl's internal 32bit-types..." >&4
+
+case "$i32dformat" in
+'')	case "$i32type" in
+	int)
+		i32dformat='"d"'
+		u32uformat='"u"'
+		u32oformat='"o"'
+		u32xformat='"x"'
+		u32XUformat='"X"'
+		;;
+	long)
+		i32dformat='"ld"'
+		u32uformat='"lu"'
+		u32oformat='"lo"'
+		u32xformat='"lx"'
+		u32XUformat='"lX"'
+		;;
+	int_least32_t)		: will not happen currently
+		i32dformat=PRIdLEAST32
+		u32uformat=PRIuLEAST32
+		u32oformat=PRIoLEAST32
+		u32xformat=PRIxLEAST32
+		u32XUformat=PRIXLEAST32
+		;;
+	int32_t)
+		i32dformat=PRId32
+		u32uformat=PRIu32
+		u32oformat=PRIo32
+		u32xformat=PRIx32
+		u32XUformat=PRIX32
+		;;
+	esac ;;
+esac
+
+case "$i32dformat" in
+'') echo "$0: Fatal: failed to find format strings for 32-bit integers, cannot continue." >&4
+    exit 1
+    ;;
 esac
 
 : check whether make sets MAKE
