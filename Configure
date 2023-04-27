@@ -5224,26 +5224,6 @@ EOM
     esac
 fi
 
-: Check if quadmath is requested
-case "$usequadmath" in
-"$define"|true|[yY]*) usequadmath="$define" ;;
-*)                    usequadmath="$undef"  ;;
-esac
-
-: Fail if both uselongdouble and usequadmath are requested
-case "$usequadmath:$uselongdouble" in
-define:define)
-	$cat <<EOM >&4
-
-*** You requested the use of the quadmath library and use
-*** of long doubles.
-***
-*** Please select one or the other.
-EOM
-	exit 1
-	;;
-esac
-
 : Looking for optional libraries
 echo " "
 echo "Checking for optional libraries..." >&4
@@ -7148,6 +7128,26 @@ esac
 if test "${api_revision}${api_version}${api_subversion}" = "550"; then
 	api_versionstring='5.005'
 fi
+
+: Check if quadmath is requested
+case "$usequadmath" in
+"$define"|true|[yY]*) usequadmath="$define" ;;
+*)                    usequadmath="$undef"  ;;
+esac
+
+: Fail if both uselongdouble and usequadmath are requested
+case "$usequadmath:$uselongdouble" in
+define:define)
+	$cat <<EOM >&4
+
+*** You requested the use of the quadmath library and use
+*** of long doubles.
+***
+*** Please select one or the other.
+EOM
+	exit 1
+	;;
+esac
 
 : determine the architecture name
 echo " "
