@@ -1773,6 +1773,16 @@ sub warning_like {
 # force it to use an alarm by setting the optional second parameter to
 # 'alarm', or to use a separate process (if available on this platform) by
 # setting that parameter to 'process'.
+
+# It is good practice to CLEAR EVERY WATCHDOG timer.  Otherwise the timer
+# applies to the entire rest of the file.  Even if that works now, new tests
+# tend to get added to the end of the file, and people may not notice that
+# they are being timed.  Those tests may all complete before the timer kills
+# them, but then more new tests get added, even further away from the timer
+# setting code, with less likelihood of noticing that.  Those tests may also
+# generally work, but flap on heavily loaded smokers, leading to debugging
+# effort that wouldn't have had to be expended if the timer had been cancelled
+# in the first place
 #
 # NOTE:  If the test file uses 'threads', then call the watchdog() function
 #        _AFTER_ the 'threads' module is loaded.
