@@ -3846,6 +3846,11 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$i_sysstatvfs	I_SYS_STATVFS		/**/
 
+/* I_SYS_SYSCALL:
+ *	This symbol, if defined, indicates that <sys/syscall.h> exists.
+ */
+#$i_syssyscall	I_SYS_SYSCALL		/**/
+
 /* I_SYSUTSNAME:
  *	This symbol, if defined, indicates that <sys/utsname.h> exists and
  *	should be included.

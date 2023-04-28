@@ -1071,6 +1071,7 @@ i_sysselct=''
 i_sysstat=''
 i_sysstatfs=''
 i_sysstatvfs=''
+i_syssyscall=''
 i_systimes=''
 i_systypes=''
 i_sysuio=''
@@ -19790,9 +19791,13 @@ eval $inlibc
 set syscall d_syscall
 eval $inlibc
 
+: see if this is a sys/syscall.h system
+set sys/syscall.h i_syssyscall
+eval $inhdr
+
 : see if prototype for syscall is available
 echo " "
-set d_syscallproto syscall $i_unistd unistd.h
+set d_syscallproto syscall $i_unistd unistd.h $i_syssyscall sys/syscall.h
 eval $hasproto
 
 : see if sysconf exists
@@ -25398,6 +25403,7 @@ i_syssockio='$i_syssockio'
 i_sysstat='$i_sysstat'
 i_sysstatfs='$i_sysstatfs'
 i_sysstatvfs='$i_sysstatvfs'
+i_syssyscall='$i_syssyscall'
 i_systime='$i_systime'
 i_systimek='$i_systimek'
 i_systimes='$i_systimes'

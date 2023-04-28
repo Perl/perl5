@@ -3811,6 +3811,11 @@
  */
 /*#define I_SYS_STATVFS		/ **/
 
+/* I_SYS_SYSCALL:
+ *	This symbol, if defined, indicates that <sys/syscall.h> exists.
+ */
+#define I_SYS_SYSCALL		/**/
+
 /* I_SYSUTSNAME:
  *	This symbol, if defined, indicates that <sys/utsname.h> exists and
  *	should be included.
@@ -5377,6 +5382,6 @@
 #endif
 
 /* Generated from:
- * bfbf19b9617a2554bbd97fde2e1648ae16f81ec932e2f529d01646f2e2a362f0 config_h.SH
- * 9c5779a38fbba64b0a5dcf7ce548120a29ea5039350102827f500c812bda10b2 uconfig.sh
+ * b1c4cc0e63b951bc7c48ade0ad04d6bc7f679723f6da5c89479870204b20bdb5 config_h.SH
+ * 3577cf63ab13f859a1a2bfb5e211ddc0befbf0b1d4c6f2f8819f7ed79a91f695 uconfig.sh
  * ex: set ro ft=c: */
