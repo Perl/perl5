@@ -5240,9 +5240,6 @@ esac
 case "$usecbacktrace" in
 "$define") libswanted="$libswanted bfd" ;;
 esac
-case "$usequadmath" in
-"$define") libswanted="$libswanted quadmath" ;;
-esac
 libsfound=''
 libsfiles=''
 libsdirs=''
@@ -16852,17 +16849,49 @@ case "$usequadmath:$i_quadmath" in
 define:define)
   nvtype="__float128"
   nvsize=16
-  case "$libs" in
-  *quadmath*) ;;
-  *) $cat <<EOM >&4
+  : libquadmath is not in the usual places, and the place
+  : changes if the compiler is upgraded.  So ask the compiler if it
+  : can find it.
+  : We do not need to save this, if it fails we abort.
+  libs="$libs -lquadmath"
+  set try
+  $cat >try.c <<EOM
+#include <quadmath.h>
+#include <stdio.h>
+int main(int argc, char *argv[]) {
+  __float128 x = 1.0;
+  if (fabsq(logq(x)) > 1e-6) {
+     fputs("quadmath is broken\n", stderr);
+     return 1;
+  }
+  puts("define");
+  return 0;
+}
+EOM
+  yyy=''
+  if eval $compile_ok; then
+      yyy=`$run ./try`
+      case "$yyy" in
+      define) ;;
+      *) cat <<EOM >&4
+
+*** You requested the use of the quadmath library, but
+*** it appears to be nonfunctional.
+*** Cannot continue, aborting.
+
+EOM
+       exit 1
+       ;;
+       esac
+  else
+      $cat <<EOM >&4
 
 *** You requested the use of the quadmath library, but you
 *** do not seem to have the quadmath library installed.
 *** Cannot continue, aborting.
 EOM
     exit 1
-    ;;
-  esac
+  fi
   ;;
 define:*) $cat <<EOM >&4
 
