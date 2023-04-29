@@ -594,7 +594,7 @@ foreach my $list (qw(Punctuation Symbol)) {
 
         if ($is_Symbol) {
 
-            # Skip if the the direction is followed by a vertical motion
+            # Skip if the direction is followed by a vertical motion
             # (which defeats the left-right directionality).
             if (        $name =~ / ^ .* $no_barb_re
                                    \b (UP|DOWN|NORTH|SOUTH) /gx

@@ -648,7 +648,7 @@ run from the root directory of a git repo of perl.
 In simple, execute the script and it will either die with a helpful
 message or it will update the files as necessary, possibly not at all
 if there is no need to do so. If the C<--validate> option is provided
-the the content will not be updated and instead the tool will act as a
+the content will not be updated and instead the tool will act as a
 test script validating that the F<AUTHORS> and F<.mailmap> files are
 up to date.
 

@@ -178,7 +178,7 @@ wide_to_utf8(const wchar_t *wsrc)
 wchar_t*
 utf8_to_wide_extra_len(const char *buf, Size_t *extra_len)
 {
-    /* Return the the conversion to UTF-16 of the UTF-8 string 'buf'
+    /* Return the conversion to UTF-16 of the UTF-8 string 'buf'
      * (terminated by a NUL), making sure to have space for at least *extra_len
      * extra (wide) characters in the result.  The result must be freed by the
      * caller when no longer needed */

@@ -3849,19 +3849,19 @@ Perl_mini_mktime(struct tm *ptm)
 
     PERL_ARGS_ASSERT_MINI_MKTIME;
 
-#define	DAYS_PER_YEAR	365
-#define	DAYS_PER_QYEAR	(4*DAYS_PER_YEAR+1)
-#define	DAYS_PER_CENT	(25*DAYS_PER_QYEAR-1)
-#define	DAYS_PER_QCENT	(4*DAYS_PER_CENT+1)
-#define	SECS_PER_HOUR	(60*60)
-#define	SECS_PER_DAY	(24*SECS_PER_HOUR)
+#define DAYS_PER_YEAR   365
+#define DAYS_PER_QYEAR  (4*DAYS_PER_YEAR+1)
+#define DAYS_PER_CENT   (25*DAYS_PER_QYEAR-1)
+#define DAYS_PER_QCENT  (4*DAYS_PER_CENT+1)
+#define SECS_PER_HOUR   (60*60)
+#define SECS_PER_DAY    (24*SECS_PER_HOUR)
 /* parentheses deliberately absent on these two, otherwise they don't work */
-#define	MONTH_TO_DAYS	153/5
-#define	DAYS_TO_MONTH	5/153
+#define MONTH_TO_DAYS   153/5
+#define DAYS_TO_MONTH   5/153
 /* offset to bias by March (month 4) 1st between month/mday & year finding */
-#define	YEAR_ADJUST	(4*MONTH_TO_DAYS+1)
+#define YEAR_ADJUST     (4*MONTH_TO_DAYS+1)
 /* as used here, the algorithm leaves Sunday as day 1 unless we adjust it */
-#define	WEEKDAY_BIAS	6	/* (1+6)%7 makes Sunday 0 again */
+#define WEEKDAY_BIAS    6       /* (1+6)%7 makes Sunday 0 again */
 
 /*
  * Year/day algorithm notes:

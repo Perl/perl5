@@ -32,7 +32,7 @@ case "$CONFIG_H" in
 already-done) echo "Not re-extracting config.h" ;;
 *)
 echo "Extracting $CONFIG_H (with variable substitutions)"
-sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-def!#undef!'
+sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un-def!#undef!' -e's!define\t!define !'
 /* This file was produced by running the config_h.SH script, which
  * gets its values from $CONFIG_SH, which is generally produced by
  * running Configure.
@@ -2286,7 +2286,7 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #ifndef USE_CROSS_COMPILE
 #$usecrosscompile	USE_CROSS_COMPILE	/**/
-#define	PERL_TARGETARCH	"$targetarch"	/**/
+#define PERL_TARGETARCH	"$targetarch"	/**/
 #endif
 
 /* PERL_USE_DEVEL:
@@ -2439,7 +2439,7 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 #$d_dbminitproto	HAS_DBMINIT_PROTO	/**/
 
 /* HAS_DIR_DD_FD:
- *	This symbol, if defined, indicates that the the DIR* dirstream
+ *	This symbol, if defined, indicates that the DIR* dirstream
  *	structure contains a member variable named dd_fd.
  */
 #$d_dir_dd_fd HAS_DIR_DD_FD		/**/
@@ -3411,9 +3411,9 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	does have the f_flags member containing the mount flags of
  *	the filesystem containing the file.
  *	This kind of struct statfs is coming from <sys/mount.h> (BSD 4.3),
- *	not from <sys/statfs.h> (SYSV).  Older BSDs do not have statfs() and
- *	struct statfs, they have ustat() and getmnt() with struct ustat and
- *	struct fs_data.
+ *	not from <sys/statfs.h> (SYSV).  Older BSDs (like Ultrix) do not
+ *	have statfs() and struct statfs, they have ustat() and getmnt()
+ *	with struct ustat and struct fs_data.
  */
 #$d_statfs_f_flags HAS_STRUCT_STATFS_F_FLAGS		/**/
 
@@ -3846,6 +3846,11 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$i_sysstatvfs	I_SYS_STATVFS		/**/
 
+/* I_SYS_SYSCALL:
+ *	This symbol, if defined, indicates that <sys/syscall.h> exists.
+ */
+#$i_syssyscall	I_SYS_SYSCALL		/**/
+
 /* I_SYSUTSNAME:
  *	This symbol, if defined, indicates that <sys/utsname.h> exists and
  *	should be included.
@@ -4026,6 +4031,32 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$need_va_copy	NEED_VA_COPY		/**/
 
+/* I32df:
+ *	This symbol defines the format string used for printing a Perl I32
+ *	as a signed decimal integer.
+ */
+/* U32uf:
+ *	This symbol defines the format string used for printing a Perl U32
+ *	as an unsigned decimal integer.
+ */
+/* U32of:
+ *	This symbol defines the format string used for printing a Perl U32
+ *	as an unsigned octal integer.
+ */
+/* U32xf:
+ *	This symbol defines the format string used for printing a Perl U32
+ *	as an unsigned hexadecimal integer in lowercase abcdef.
+ */
+/* U32Xf:
+ *	This symbol defines the format string used for printing a Perl U32
+ *	as an unsigned hexadecimal integer in uppercase ABCDEF.
+ */
+#define I32df		$i32dformat		/**/
+#define U32of		$u32oformat		/**/
+#define U32uf		$u32uformat		/**/
+#define U32xf		$u32xformat		/**/
+#define U32Xf		$u32XUformat		/**/
+
 /* IVTYPE:
  *	This symbol defines the C type used for Perl's IV.
  */
@@ -4115,35 +4146,35 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	This symbol, if defined, indicates that a variable of type NVTYPE
  *	stores 0.0 in memory as all bits zero.
  */
-#define	IVTYPE		$ivtype		/**/
-#define	UVTYPE		$uvtype		/**/
-#define	I8TYPE		$i8type		/**/
-#define	U8TYPE		$u8type		/**/
-#define	I16TYPE		$i16type	/**/
-#define	U16TYPE		$u16type	/**/
-#define	I32TYPE		$i32type	/**/
-#define	U32TYPE		$u32type	/**/
+#define IVTYPE		$ivtype		/**/
+#define UVTYPE		$uvtype		/**/
+#define I8TYPE		$i8type		/**/
+#define U8TYPE		$u8type		/**/
+#define I16TYPE		$i16type	/**/
+#define U16TYPE		$u16type	/**/
+#define I32TYPE		$i32type	/**/
+#define U32TYPE		$u32type	/**/
 #ifdef HAS_QUAD
-#define	I64TYPE		$i64type	/**/
-#define	U64TYPE		$u64type	/**/
+#define I64TYPE		$i64type	/**/
+#define U64TYPE		$u64type	/**/
 #endif
-#define	NVTYPE		$nvtype		/**/
-#define	IVSIZE		$ivsize		/**/
-#define	UVSIZE		$uvsize		/**/
-#define	I8SIZE		$i8size		/**/
-#define	U8SIZE		$u8size		/**/
-#define	I16SIZE		$i16size	/**/
-#define	U16SIZE		$u16size	/**/
-#define	I32SIZE		$i32size	/**/
-#define	U32SIZE		$u32size	/**/
+#define NVTYPE		$nvtype		/**/
+#define IVSIZE		$ivsize		/**/
+#define UVSIZE		$uvsize		/**/
+#define I8SIZE		$i8size		/**/
+#define U8SIZE		$u8size		/**/
+#define I16SIZE		$i16size	/**/
+#define U16SIZE		$u16size	/**/
+#define I32SIZE		$i32size	/**/
+#define U32SIZE		$u32size	/**/
 #ifdef HAS_QUAD
-#define	I64SIZE		$i64size	/**/
-#define	U64SIZE		$u64size	/**/
+#define I64SIZE		$i64size	/**/
+#define U64SIZE		$u64size	/**/
 #endif
-#define	NVSIZE		$nvsize		/**/
+#define NVSIZE		$nvsize		/**/
 #$d_nv_preserves_uv	NV_PRESERVES_UV
-#define	NV_PRESERVES_UV_BITS	$nv_preserves_uv_bits
-#define	NV_OVERFLOWS_INTEGERS_AT	($nv_overflows_integers_at)
+#define NV_PRESERVES_UV_BITS	$nv_preserves_uv_bits
+#define NV_OVERFLOWS_INTEGERS_AT	($nv_overflows_integers_at)
 #$d_nv_zero_is_allbits_zero	NV_ZERO_IS_ALLBITS_ZERO
 #if UVSIZE == 8
 #   ifdef BYTEORDER
@@ -4191,39 +4222,14 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  *	This symbol defines the format string used for printing a Perl NV
  *	using %g-ish floating point format.
  */
-/* I32df:
- *	This symbol defines the format string used for printing a Perl I32
- *	as a signed decimal integer.
- */
-/* U32uf:
- *	This symbol defines the format string used for printing a Perl U32
- *	as an unsigned decimal integer.
- */
-/* U32of:
- *	This symbol defines the format string used for printing a Perl U32
- *	as an unsigned octal integer.
- */
-/* U32xf:
- *	This symbol defines the format string used for printing a Perl U32
- *	as an unsigned hexadecimal integer in lowercase abcdef.
- */
-/* U32Xf:
- *	This symbol defines the format string used for printing a Perl U32
- *	as an unsigned hexadecimal integer in uppercase ABCDEF.
- */
-#define	IVdf		$ivdformat		/**/
-#define	UVuf		$uvuformat		/**/
-#define	UVof		$uvoformat		/**/
-#define	UVxf		$uvxformat		/**/
-#define	UVXf		$uvXUformat		/**/
-#define	NVef		$nveformat		/**/
-#define	NVff		$nvfformat		/**/
-#define	NVgf		$nvgformat		/**/
-#define	I32df		$i32dformat		/**/
-#define	U32uf		$u32uformat		/**/
-#define	U32of		$u32oformat		/**/
-#define	U32xf		$u32xformat		/**/
-#define	U32Xf		$u32XUformat		/**/
+#define IVdf		$ivdformat		/**/
+#define UVuf		$uvuformat		/**/
+#define UVof		$uvoformat		/**/
+#define UVxf		$uvxformat		/**/
+#define UVXf		$uvXUformat		/**/
+#define NVef		$nveformat		/**/
+#define NVff		$nvfformat		/**/
+#define NVgf		$nvgformat		/**/
 
 /* SELECT_MIN_BITS:
  *	This symbol holds the minimum number of bits operated by select.
@@ -5320,7 +5326,7 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 /* Gid_t_f:
  *	This symbol defines the format string used for printing a Gid_t.
  */
-#define	Gid_t_f		$gidformat		/**/
+#define Gid_t_f		$gidformat		/**/
 
 /* Gid_t_sign:
  *	This symbol holds the signedness of a Gid_t.
@@ -5388,7 +5394,7 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
 /* Uid_t_f:
  *	This symbol defines the format string used for printing a Uid_t.
  */
-#define	Uid_t_f		$uidformat		/**/
+#define Uid_t_f		$uidformat		/**/
 
 /* Uid_t_sign:
  *	This symbol holds the signedness of a Uid_t.

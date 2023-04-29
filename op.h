@@ -527,29 +527,29 @@ typedef enum {
 
 
 #ifdef USE_ITHREADS
-#  define	cGVOPx_gv(o)	((GV*)PAD_SVl(cPADOPx(o)->op_padix))
+#  define cGVOPx_gv(o)  ((GV*)PAD_SVl(cPADOPx(o)->op_padix))
 #  ifndef PERL_CORE
-#    define	IS_PADGV(v)	(v && isGV(v))
-#    define	IS_PADCONST(v) \
+#    define IS_PADGV(v) (v && isGV(v))
+#    define IS_PADCONST(v) \
         (v && (SvREADONLY(v) || (SvIsCOW(v) && !SvLEN(v))))
 #  endif
-#  define	cSVOPx_sv(v)	(cSVOPx(v)->op_sv \
+#  define cSVOPx_sv(v)  (cSVOPx(v)->op_sv \
                                  ? cSVOPx(v)->op_sv : PAD_SVl((v)->op_targ))
-#  define	cSVOPx_svp(v)	(cSVOPx(v)->op_sv \
+#  define cSVOPx_svp(v) (cSVOPx(v)->op_sv \
                                  ? &cSVOPx(v)->op_sv : &PAD_SVl((v)->op_targ))
 #  define       cMETHOPx_meth(v) (cMETHOPx(v)->op_u.op_meth_sv \
                                   ? cMETHOPx(v)->op_u.op_meth_sv : PAD_SVl((v)->op_targ))
-#  define	cMETHOPx_rclass(v) PAD_SVl(cMETHOPx(v)->op_rclass_targ)
+#  define cMETHOPx_rclass(v) PAD_SVl(cMETHOPx(v)->op_rclass_targ)
 #else
-#  define	cGVOPx_gv(o)	((GV*)cSVOPx(o)->op_sv)
+#  define cGVOPx_gv(o)  ((GV*)cSVOPx(o)->op_sv)
 #  ifndef PERL_CORE
-#    define	IS_PADGV(v)	FALSE
-#    define	IS_PADCONST(v)	FALSE
+#    define IS_PADGV(v) FALSE
+#    define IS_PADCONST(v)      FALSE
 #  endif
-#  define	cSVOPx_sv(v)	(cSVOPx(v)->op_sv)
-#  define	cSVOPx_svp(v)	(&cSVOPx(v)->op_sv)
+#  define cSVOPx_sv(v)  (cSVOPx(v)->op_sv)
+#  define cSVOPx_svp(v) (&cSVOPx(v)->op_sv)
 #  define       cMETHOPx_meth(v)   (cMETHOPx(v)->op_u.op_meth_sv)
-#  define	cMETHOPx_rclass(v) (cMETHOPx(v)->op_rclass_sv)
+#  define cMETHOPx_rclass(v) (cMETHOPx(v)->op_rclass_sv)
 #endif
 
 #define cMETHOP_meth            cMETHOPx_meth(PL_op)
@@ -558,9 +558,9 @@ typedef enum {
 #define cMETHOPo_meth           cMETHOPx_meth(o)
 #define cMETHOPo_rclass         cMETHOPx_rclass(o)
 
-#define	cGVOP_gv		cGVOPx_gv(PL_op)
-#define	cGVOPo_gv		cGVOPx_gv(o)
-#define	kGVOP_gv		cGVOPx_gv(kid)
+#define cGVOP_gv                cGVOPx_gv(PL_op)
+#define cGVOPo_gv               cGVOPx_gv(o)
+#define kGVOP_gv                cGVOPx_gv(kid)
 #define cSVOP_sv		cSVOPx_sv(PL_op)
 #define cSVOPo_sv		cSVOPx_sv(o)
 #define kSVOP_sv		cSVOPx_sv(kid)

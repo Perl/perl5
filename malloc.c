@@ -410,25 +410,25 @@ union	overhead {
                 u_int	ovu_rmagic;	/* range magic number */
 #endif
         } ovu;
-#define	ov_magic	ovu.ovu_magic
-#define	ov_index	ovu.ovu_index
-#define	ov_size		ovu.ovu_size
-#define	ov_rmagic	ovu.ovu_rmagic
+#define ov_magic        ovu.ovu_magic
+#define ov_index        ovu.ovu_index
+#define ov_size         ovu.ovu_size
+#define ov_rmagic       ovu.ovu_rmagic
 };
 
-#define	MAGIC		0xff		/* magic # on accounting info */
+#define MAGIC           0xff            /* magic # on accounting info */
 #define RMAGIC		0x55555555	/* magic # on range info */
 #define RMAGIC_C	0x55		/* magic # on range info */
 
 #ifdef RCHECK
-#  define	RMAGIC_SZ	sizeof (u_int) /* Overhead at end of bucket */
+#  define RMAGIC_SZ     sizeof (u_int) /* Overhead at end of bucket */
 #  ifdef TWO_POT_OPTIMIZE
 #    define MAX_SHORT_BUCKET (12 * BUCKETS_PER_POW2) /* size-1 fits in short */
 #  else
 #    define MAX_SHORT_BUCKET (13 * BUCKETS_PER_POW2)
 #  endif 
 #else
-#  define	RMAGIC_SZ	0
+#  define RMAGIC_SZ     0
 #endif
 
 #if !defined(PACK_MALLOC) && defined(BUCKETS_ROOT2)
@@ -812,7 +812,7 @@ static int	getpages_adjacent(MEM_SIZE require);
  * smallest allocatable block is 8 bytes.  The overhead information
  * precedes the data area returned to the user.
  */
-#define	NBUCKETS (BITS_IN_PTR*BUCKETS_PER_POW2 + 1)
+#define NBUCKETS (BITS_IN_PTR*BUCKETS_PER_POW2 + 1)
 static	union overhead *nextf[NBUCKETS];
 
 #if defined(PURIFY) && !defined(USE_PERL_SBRK)
@@ -1059,7 +1059,7 @@ emergency_sbrk(MEM_SIZE size)
 
 #ifdef DEBUGGING
 #undef ASSERT
-#define	ASSERT(p,diag)   if (!(p)) botch(diag,STRINGIFY(p),__FILE__,__LINE__);
+#define ASSERT(p,diag)   if (!(p)) botch(diag,STRINGIFY(p),__FILE__,__LINE__);
 
 static void
 botch(const char *diag, const char *s, const char *file, int line)
@@ -1095,7 +1095,7 @@ botch(const char *diag, const char *s, const char *file, int line)
     }
 }
 #else
-#define	ASSERT(p, diag)
+#define ASSERT(p, diag)
 #endif
 
 #ifdef MALLOC_FILL

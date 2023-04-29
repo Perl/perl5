@@ -5,15 +5,15 @@
 [ this is a template for a new perldelta file.  Any text flagged as XXX needs
 to be processed before release. ]
 
-perldelta - what is new for perl v5.37.11
+perldelta - what is new for perl v5.37.12
 
 =head1 DESCRIPTION
 
-This document describes differences between the 5.37.10 release and the 5.37.11
+This document describes differences between the 5.37.11 release and the 5.37.12
 release.
 
-If you are upgrading from an earlier release such as 5.37.9, first read
-L<perl53710delta>, which describes differences between 5.37.9 and 5.37.10.
+If you are upgrading from an earlier release such as 5.37.10, first read
+L<perl53711delta>, which describes differences between 5.37.10 and 5.37.11.
 
 =head1 Notice
 
@@ -366,9 +366,7 @@ manager will later use a regex to expand these into links.
 
 =item *
 
-The buffer used by getsockopt() is now 1024 bytes by default and can
-be adjusted at perl build time by defining C<PERL_GETSOCKOPT_SIZE> in
-C<ccflags>.  [github #19758]
+XXX
 
 =back
 
@@ -408,7 +406,7 @@ died, add a short obituary here.
 
 XXX Generate this with:
 
-  perl Porting/acknowledgements.pl v5.37.10..HEAD
+  perl Porting/acknowledgements.pl v5.37.11..HEAD
 
 =head1 Reporting Bugs
 

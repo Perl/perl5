@@ -274,7 +274,7 @@ sub generate_proto_h {
             push @attrs, "__attribute__always_inline__";
         }
         # roughly the inverse of the rules used in makedef.pl
-        if ( $flags !~ /[ACeIimSX]/ ) {
+        if ( $flags !~ /[AbCeIimSX]/ ) {
             push @attrs, '__attribute__visibility__("hidden")'
         }
         if( $flags =~ /f/ ) {

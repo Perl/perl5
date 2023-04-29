@@ -587,7 +587,7 @@ use File::Glob qw(:case);
             ''                 => 'cpan/Filter-Util-Call/',
         },
         'CUSTOMIZED'   => [
-            qw(../../pod/perlfilter.pod)
+            qw(pod/perlfilter.pod)
         ],
     },
 
@@ -1261,7 +1261,9 @@ use File::Glob qw(:case);
         # to delete an entire block out of lib/version.pm, since that code is
         # only necessary with the CPAN release.
         'CUSTOMIZED'   => [
-            'lib/version.pm'
+            'lib/version.pm',
+
+            't/07locale.t'
          ],
 
         'MAP' => {

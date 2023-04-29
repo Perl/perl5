@@ -4125,7 +4125,7 @@ PP(pp_iter)
                 if (UNLIKELY(pad_it)) {
                     /* We're "beyond the end" of the iterator here, filling the
                        extra lexicals with undef, so we mustn't do anything
-                       (further) to the the iterator itself at this point.
+                       (further) to the iterator itself at this point.
                        (Observe how the other two blocks modify the iterator's
                        value) */
                 }

@@ -10,7 +10,7 @@
 #define MPH_VALt I16
 
 /*
-generator script: regen/mk_invlists.pl
+generator script: ./regen/mk_invlists.pl
 split strategy: squeeze
 srand: 1785235451
 rows: 7498
@@ -7760,6 +7760,6 @@ match_uniprop( const unsigned char * const key, const U16 key_len ) {
  * 55d90fdc3f902e5c0b16b3378f9eaa36e970a1c09723c33de7d47d0370044012 lib/unicore/version
  * 0a6b5ab33bb1026531f816efe81aea1a8ffcd34a27cbea37dd6a70a63d73c844 regen/charset_translations.pl
  * c7ff8e0d207d3538c7feb4a1a152b159e5e902d20293b303569ea8323e84633e regen/mk_PL_charclass.pl
- * 2a64e8b4ca351f490530bdf8c7b4962c407b7ed6a1123eeb8d9e8e0e4236d16a regen/mk_invlists.pl
+ * cdbafee25193032242e77f2a6332b731d8392ce342fa616dbabc2c14c7b44eb6 regen/mk_invlists.pl
  * d6987e01ad538d1567394851cf199f99815f7701bebd6092be4bc7a6d8f147c6 regen/mph.pl
  * ex: set ro ft=c: */

@@ -1971,7 +1971,7 @@ up as /system/bin/sh, and "sh" as /bin/sh.
 
 By default, B<gcc> 4.9 does some optimizations that break perl.  The B<-fwrapv>
 option disables those optimizations (and probably others), so for B<gcc> 4.3
-and later (since the there might be similar problems lurking on older versions
+and later (since there might be similar problems lurking on older versions
 too, but B<-fwrapv> was broken before 4.3, and the optimizations probably won't
 go away), F<Configure> now adds B<-fwrapv> unless the user requests
 B<-fno-wrapv>, which disables B<-fwrapv>, or B<-fsanitize=undefined>, which

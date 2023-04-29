@@ -5679,8 +5679,7 @@ Perl_malloced_size(void *p)
 #endif /* defined(MYMALLOC) */
 #if !defined(NO_MATHOMS)
 PERL_CALLCONV bool
-Perl_do_aexec(pTHX_ SV *really, SV **mark, SV **sp)
-        __attribute__visibility__("hidden");
+Perl_do_aexec(pTHX_ SV *really, SV **mark, SV **sp);
 # define PERL_ARGS_ASSERT_DO_AEXEC              \
         assert(mark); assert(sp)
 
@@ -6020,8 +6019,7 @@ Perl_gv_SVadd(pTHX_ GV *gv);
 # if defined(PERL_IN_OP_C) || defined(PERL_IN_PERLY_C) || \
      defined(PERL_IN_TOKE_C)
 PERL_CALLCONV OP *
-Perl_ref(pTHX_ OP *o, I32 type)
-        __attribute__visibility__("hidden");
+Perl_ref(pTHX_ OP *o, I32 type);
 #   define PERL_ARGS_ASSERT_REF
 
 # endif
@@ -7446,10 +7444,6 @@ Perl_warn_elem_scalar_context(pTHX_ const OP *o, SV *name, bool is_hash, bool is
         assert(o); assert(name)
 
 #endif /* defined(PERL_IN_OP_C) || defined(PERL_IN_PEEP_C) */
-#if defined(PERL_IN_OP_C) || defined(PERL_IN_PERLY_C) || \
-    defined(PERL_IN_TOKE_C)
-
-#endif
 #if defined(PERL_IN_OP_C) || defined(PERL_IN_REGCOMP_ANY)
 
 #endif

@@ -17,6 +17,16 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.37.11 - Ben Aaronovitch, "Moon Over Soho"
+
+L<Announced on 2023-04-20 by Steve Hay|https://www.nntp.perl.org/group/perl.perl5.porters/2023/04/msg266242.html>
+
+My dad always said that a trumpet player likes to aim his weapon at the
+audience, but a sax man likes to cut a good profile and that they always
+have a favourite side.  It being an article of faith with my dad that
+you don't even pick up a reed instrument unless you're vain about the
+shape your face makes when you're blowing down it.
+
 =head2 v5.37.10 - Lewis Carroll "The Walrus and the Carpenter"
 
 L<Announced on 2023-03-21 by Yves Orton|https://www.nntp.perl.org/group/perl.perl5.porters/2023/03/msg266078.html>
@@ -107,6 +117,14 @@ Remember: Rip it! Roll it! And punch it!
 L<Announced on 2022-05-27 by Ricardo Signes|https://www.nntp.perl.org/group/perl.perl5.porters/2022/05/msg263786.html>
 
 I have nothing to say, and I am saying it.
+
+=head2 v5.36.1 - Louis Kentner, "Piano"
+
+L<Announced on 2023-04-23 by Steve Hay|https://www.nntp.perl.org/group/perl.perl5.porters/2023/04/msg266251.html>
+
+Pianists can be divided into the following three categories: those who
+practice a lot and admit it; those who practice a lot but deny it; and
+those who do not practice and, therefore, are no pianists.
 
 =head2 v5.36.1-RC3 - Karl Leimer & Walter Gieseking, trans. Frederick C. Rauser, "Rhythmics, Dynamics, Pedal and Other Problems of Piano Playing"
 

@@ -66,7 +66,7 @@ if ($Is_VMS) {
 	($old{$x}) = $ENV{$x} =~ /^(.*)$/ if exists $ENV{$x};
     }
     # VMS note:  PATH and TERM are automatically created by the C
-    # library in VMS on reference to the their keys in %ENV.
+    # library in VMS on reference to their keys in %ENV.
     # There is currently no way to determine if they did not exist
     # before this test was run.
     eval <<EndOfCleanup;
