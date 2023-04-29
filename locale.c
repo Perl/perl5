@@ -414,6 +414,7 @@ S_positional_name_value_xlation(const char * locale, bool direction)
     /* This parses either notation */
     switch (parse_LC_ALL_string(locale,
                                 (const char **) &individ_locales,
+                                false,      /* Return only [0] if suffices */
                                 false,      /* Don't panic on error */
                                 __LINE__))
     {
@@ -424,7 +425,9 @@ S_positional_name_value_xlation(const char * locale, bool direction)
 
       case no_array:
         return locale;
-
+      case only_element_0:
+        SAVEFREEPV(individ_locales[0]);
+        return individ_locales[0];
       case full_array:
        {
         calc_LC_ALL_format  format = (direction)
@@ -940,6 +943,7 @@ Perl_locale_panic(const char * msg,
 STATIC parse_LC_ALL_string_return
 S_parse_LC_ALL_string(pTHX_ const char * string,
                             const char ** output,
+                            bool always_use_full_array,
                             const bool panic_on_error,
                             const line_t caller_line)
 {
@@ -960,10 +964,17 @@ S_parse_LC_ALL_string(pTHX_ const char * string,
      * those platforms, this function also parses that form.  It examines the
      * input to see which form is being parsed.
      *
-     * Often, all categories will have the same locale.  In that case, the
-     * input 'string' likely is a single value, and no splitting is needed.
-     * In such cases, this function doesn't store anything into 'output', and
-     * returns 'no_array'.
+     * Often, all categories will have the same locale.  This is special cased
+     * if 'always_use_full_array' is false on input:
+     *      1) If the input 'string' is a single value, this function doesn't
+     *         store anything into 'output', and returns 'no_array'
+     *      2) Some platforms will return multiple occurrences of the same
+     *         value rather than coalescing them down to a single one.  HP-UX
+     *         is such a one.  This function will do that collapsing for you,
+     *         returning 'only_element_0' and saving the single value in
+     *         output[0], which the caller will need to arrange to be freed.
+     *         The rest of output[] is undefined, and does not need to be
+     *         freed.
      *
      * Otherwise, the input 'string' may not be valid.  This function looks
      * mainly for syntactic errors, and if found, returns 'invalid'.  'output'
@@ -974,8 +985,9 @@ S_parse_LC_ALL_string(pTHX_ const char * string,
      *
      * Otherwise, output[] will be filled with the individual locale names for
      * all categories on the system, 'full_array' will be returned, and the
-     * caller needs to arrange for each to be freed.
-     *
+     * caller needs to arrange for each to be freed.  This means that either at
+     * least one category differed from the others, or 'always_use_full_array' was
+     * true on input.
      */
 
     DEBUG_Lv(PerlIO_printf(Perl_debug_log,
@@ -1013,10 +1025,20 @@ S_parse_LC_ALL_string(pTHX_ const char * string,
 #  endif
 
     if (single_component) {
-        return no_array;
+        if (! always_use_full_array) {
+            return no_array;
+        }
+
+        for (unsigned int i = 0; i < LC_ALL_INDEX_; i++) {
+            output[i] = savepv(string);
+        }
+
+        return full_array;
     }
 
-    /* Here the input is multiple components.  Parse through them.
+    /* Here the input is multiple components.  Parse through them.  (It is
+     * possible that these components are all the same, so we check, and if so,
+     * return just the 0th component (unless 'always_use_full_array' is true)
      *
      * This enum notes the possible errors findable in parsing */
     enum {
@@ -1033,6 +1055,7 @@ S_parse_LC_ALL_string(pTHX_ const char * string,
     const char * s = string;
     const char * e = s + strlen(string);
     const char * category_end = NULL;
+    const char * saved_first = NULL;
 
     /* Parse the input locale string */
     while (s < e) {
@@ -1109,6 +1132,17 @@ S_parse_LC_ALL_string(pTHX_ const char * string,
          * that category. */
         output[index] = savepvn(s, next_sep - s);
 
+        if (! always_use_full_array) {
+            if (! saved_first) {
+                saved_first = output[index];
+            }
+            else {
+                if (strNE(saved_first, output[index])) {
+                    always_use_full_array = true;
+                }
+            }
+        }
+
         /* Next time start from the new position */
         s = next_sep + separator_len;
     }
@@ -1138,7 +1172,20 @@ S_parse_LC_ALL_string(pTHX_ const char * string,
         }
     }
 
+    /* In the loop above, we changed 'always_use_full_array' to true iff not all
+     * categories have the same locale.  Hence, if it is still 'false', all of
+     * them are the same. */
+    if (always_use_full_array) {
         return full_array;
+    }
+
+    /* Free the dangling ones */
+    for (unsigned int i = 1; i < LC_ALL_INDEX_; i++) {
+        Safefree(output[i]);
+        output[i] = NULL;
+    }
+
+    return only_element_0;
 
   failure:
 
@@ -1303,6 +1350,7 @@ S_stdize_locale(pTHX_ const int category,
          * components. */
         switch (parse_LC_ALL_string(retval,
                                     (const char **) &individ_locales,
+                                    false,    /* Return only [0] if suffices */
                                     false,    /* Don't panic on error */
                                     caller_line))
         {
@@ -1320,6 +1368,10 @@ S_stdize_locale(pTHX_ const int category,
              * didn't fill in any of 'individ_locales'.  Set the 0th element to
              * that locale. */
             individ_locales[0] = retval;
+            /* FALLTHROUGH */
+
+          case only_element_0: /* Element 0 is the only element we need to look
+                                  at */
             upper = 0;
             break;
         }
@@ -1866,6 +1918,7 @@ S_bool_setlocale_2008_i(pTHX_
     if (index == LC_ALL_INDEX_) {
         switch (parse_LC_ALL_string(new_locale,
                                     (const char **) &new_locales,
+                                    false,    /* Return only [0] if suffices */
                                     false,    /* Don't panic on error */
                                     caller_line))
         {
@@ -1874,6 +1927,12 @@ S_bool_setlocale_2008_i(pTHX_
             return false;
 
           case no_array:
+            need_loop = false;
+            break;
+
+          case only_element_0:
+            SAVEFREEPV(new_locales[0]);
+            new_locale = new_locales[0];
             need_loop = false;
             break;
 
@@ -4040,7 +4099,6 @@ Perl_get_win32_message_utf8ness(pTHX_ const char * string)
 
 #  endif
 #endif  /* USE_LOCALE */
-
 
 int
 Perl_mbtowc_(pTHX_ const wchar_t * pwc, const char * s, const Size_t len)
