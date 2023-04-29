@@ -1610,6 +1610,8 @@ ATdip	|bool	|is_c9strict_utf8_string_loclen 			\
 				|STRLEN len				\
 				|NULLOK const U8 **ep			\
 				|NULLOK STRLEN *el
+Ap	|bool	|is_cur_locale_utf8					\
+				|const int category
 
 APTdp	|bool	|isinfnan	|NV nv
 dp	|bool	|isinfnansv	|NN SV *sv

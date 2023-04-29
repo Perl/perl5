@@ -314,6 +314,7 @@
 # define isUTF8_CHAR                            Perl_isUTF8_CHAR
 # define isUTF8_CHAR_flags                      Perl_isUTF8_CHAR_flags
 # define is_c9strict_utf8_string_loclen         Perl_is_c9strict_utf8_string_loclen
+# define is_cur_locale_utf8(a)                  Perl_is_cur_locale_utf8(aTHX_ a)
 # define is_lvalue_sub()                        Perl_is_lvalue_sub(aTHX)
 # define is_safe_syscall(a,b,c,d)               Perl_is_safe_syscall(aTHX_ a,b,c,d)
 # define is_strict_utf8_string_loclen           Perl_is_strict_utf8_string_loclen

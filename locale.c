@@ -5601,6 +5601,89 @@ S_is_codeset_name_UTF8(const char * name)
 }
 
 #  endif
+#endif
+
+bool
+Perl_is_cur_locale_utf8(pTHX_ const int category)
+{
+    /* Returns a bool as to whether or not the locale for the input category is
+     * a UTF-8 one.  The input may be LC_ALL, as long as all categories have
+     * the same locale; otherwise the answer is undefined, and this function
+     * returns false, while setting errno to EINVAL. */
+
+#ifndef USE_LOCALE
+
+    PERL_UNUSED_ARG(category);
+    return false;
+
+#else
+
+    const locale_category_index index = get_category_index(category);
+
+    if (index < LC_ALL_INDEX_) {
+        return is_locale_utf8(query_nominal_locale_i(index));
+    }
+
+#  ifndef LC_ALL
+
+    SET_EINVAL;
+    return false;
+
+#  else
+
+    if (index > LC_ALL_INDEX_) {
+        SET_EINVAL;
+        return false;
+    }
+
+    /* Parse the current LC_ALL settings to determine if all categories have
+     * the same locale or not */
+
+    const char * individ_locales[LC_ALL_INDEX_] = { NULL };
+    const char * lc_all = calculate_LC_ALL_string(NULL,
+                                                  EXTERNAL_FORMAT_FOR_QUERY,
+                                                  WANT_TEMP_PV,
+                                                  __LINE__);
+    bool is_utf8 = false;   /* Initialized because some compilers aren't smart
+                               enough to realize it always is set by the
+                               switch() below */
+    switch (parse_LC_ALL_string(lc_all,
+                                (const char **) &individ_locales,
+                                no_override,
+                                false,      /* Return only [0] if suffices */
+                                false,      /* Don't panic on error */
+                                __LINE__))
+    {
+      case no_array:    /* LC_ALL is a single locale */
+        is_utf8 = is_locale_utf8(lc_all);
+        break;
+
+      case only_element_0:  /* element[0] is a single locale valid for all
+                               categories */
+        is_utf8 = is_locale_utf8(individ_locales[0]);
+        Safefree(individ_locales[0]);
+        break;
+
+      case full_array:
+        for_all_individual_category_indexes(j) {
+            Safefree(individ_locales[j]);
+        }
+        /* FALLTHROUGH */
+
+      case invalid:
+        SET_EINVAL;
+        is_utf8 = false;
+        break;
+    }
+
+    return is_utf8;
+
+#  endif
+#endif
+
+}
+
+#ifdef USE_LOCALE
 #  ifdef WIN32
 
 bool

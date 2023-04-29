@@ -1834,6 +1834,10 @@ is_c9strict_utf8_string(const U8 *s, STRLEN len)
 /* PERL_CALLCONV bool
 is_c9strict_utf8_string_loc(const U8 *s, STRLEN len, const U8 **ep); */
 
+PERL_CALLCONV bool
+Perl_is_cur_locale_utf8(pTHX_ const int category);
+#define PERL_ARGS_ASSERT_IS_CUR_LOCALE_UTF8
+
 /* PERL_CALLCONV bool
 is_invariant_string(const U8 * const s, STRLEN len)
         __attribute__warn_unused_result__
