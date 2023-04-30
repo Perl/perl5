@@ -3814,7 +3814,7 @@
 /* I_SYS_SYSCALL:
  *	This symbol, if defined, indicates that <sys/syscall.h> exists.
  */
-#define I_SYS_SYSCALL		/**/
+/*#define I_SYS_SYSCALL		/ **/
 
 /* I_SYSUTSNAME:
  *	This symbol, if defined, indicates that <sys/utsname.h> exists and
@@ -5383,5 +5383,5 @@
 
 /* Generated from:
  * 174bcf68d4780b29467af80be166e1fc8ce42f57426a7bd489282f4c7e351597 config_h.SH
- * 3577cf63ab13f859a1a2bfb5e211ddc0befbf0b1d4c6f2f8819f7ed79a91f695 uconfig.sh
+ * dac2aceefc94292b9ec73e8a4615ae98e521658172c452c5467759219568c800 uconfig.sh
  * ex: set ro ft=c: */
