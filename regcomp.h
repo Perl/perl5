@@ -592,7 +592,7 @@ struct regnode_ssc {
  * Be aware that C<REGNODE_AFTER()> is not guaranteed to give a *useful*
  * result once the regex peephole optimizer has run (it will be correct
  * however!). By the time code in regexec.c executes various regnodes
- * may have been optimized out of the the C<next_off> chain. An example
+ * may have been optimized out of the C<next_off> chain. An example
  * can be seen above, node 13 will never be reached during execution
  * flow as it has been stitched out of the C<next_off> chain. Both 6 and
  * 11 would have pointed at it during compilation, but it exists only to

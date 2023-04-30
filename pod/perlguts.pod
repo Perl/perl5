@@ -1995,7 +1995,7 @@ At the end of I<pseudo-block> the function C<f> is called with the
 implicit context argument (if any), and C<p> which may be NULL.
 
 Note the I<end of the current pseudo-block> may occur much later than
-the the I<end of the current statement>. You may wish to look at the
+the I<end of the current statement>. You may wish to look at the
 C<MORTALDESTRUCTOR_X()> macro instead.
 
 =for apidoc Ayh||DESTRUCTORFUNC_t

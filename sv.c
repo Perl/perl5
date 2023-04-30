@@ -6193,7 +6193,7 @@ Perl_sv_del_backref(pTHX_ SV *const tsv, SV *const sv)
             svp = (SV**)Perl_hv_backreferences_p(aTHX_ MUTABLE_HV(tsv));
     }
     else if (SvIS_FREED(tsv) && PL_phase == PERL_PHASE_DESTRUCT) {
-        /* It's possible for the the last (strong) reference to tsv to have
+        /* It's possible for the last (strong) reference to tsv to have
            become freed *before* the last thing holding a weak reference.
            If both survive longer than the backreferences array, then when
            the referent's reference count drops to 0 and it is freed, it's

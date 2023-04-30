@@ -2404,7 +2404,7 @@
 /*#define HAS_DBMINIT_PROTO	/ **/
 
 /* HAS_DIR_DD_FD:
- *	This symbol, if defined, indicates that the the DIR* dirstream
+ *	This symbol, if defined, indicates that the DIR* dirstream
  *	structure contains a member variable named dd_fd.
  */
 /*#define HAS_DIR_DD_FD		/ **/
@@ -5382,6 +5382,6 @@
 #endif
 
 /* Generated from:
- * 174bcf68d4780b29467af80be166e1fc8ce42f57426a7bd489282f4c7e351597 config_h.SH
+ * e17a83ff6ae98071d846d4a001f6ce1a669df08c357fe153c2370adc4910135e config_h.SH
  * dac2aceefc94292b9ec73e8a4615ae98e521658172c452c5467759219568c800 uconfig.sh
  * ex: set ro ft=c: */

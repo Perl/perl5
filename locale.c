@@ -3661,7 +3661,7 @@ S_populate_hash_from_localeconv(pTHX_ HV * hv,
                                        * populate */
                                       const U32 which_mask,
 
-                                      /* strings[0] points the the numeric
+                                      /* strings[0] points the numeric
                                        * string fields; [1] to the monetary */
                                       const lconv_offset_t * strings[2],
 

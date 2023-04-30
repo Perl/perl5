@@ -5930,7 +5930,7 @@ typedef struct {
     bfd* abfd;
     /* bfd_syms is the BFD symbol table. */
     asymbol** bfd_syms;
-    /* bfd_text is handle to the the ".text" section of the object file. */
+    /* bfd_text is handle to the ".text" section of the object file. */
     asection* bfd_text;
     /* Since opening the executable and scanning its symbols is quite
      * heavy operation, we remember the filename we used the last time,
