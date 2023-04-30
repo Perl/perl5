@@ -2411,7 +2411,7 @@
 /*#define HAS_DBMINIT_PROTO     / **/
 
 /* HAS_DIR_DD_FD:
- *	This symbol, if defined, indicates that the the DIR* dirstream
+ *	This symbol, if defined, indicates that the DIR* dirstream
  *	structure contains a member variable named dd_fd.
  */
 /*#define HAS_DIR_DD_FD		/ **/
