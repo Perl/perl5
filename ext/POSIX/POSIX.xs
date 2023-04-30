@@ -1380,7 +1380,7 @@ char *tzname[] = { "" , "" };
 #if defined (WIN32)
 #  undef mkfifo
 #  define mkfifo(a,b) not_here("mkfifo")
-#  define ttyname(a) (char*)not_here("ttyname")
+#  define ttyname(a) (not_here("ttyname"), (char *)NULL)
 #  define sigset_t long
 #  define pid_t long
 #  ifdef _MSC_VER
@@ -1445,10 +1445,8 @@ typedef sigset_t* POSIX__SigSet;
 typedef HV* POSIX__SigAction;
 typedef int POSIX__SigNo;
 typedef int POSIX__Fd;
-#ifdef I_TERMIOS
 typedef struct termios* POSIX__Termios;
-#else /* Define termios types to int, and call not_here for the functions.*/
-#define POSIX__Termios int
+#ifndef I_TERMIOS /* Define termios types to int, and call not_here for the functions.*/
 #define speed_t int
 #define tcflag_t int
 #define cc_t int
@@ -1459,7 +1457,7 @@ typedef struct termios* POSIX__Termios;
 #define tcsendbreak(x,y) not_here("tcsendbreak")
 #define cfsetispeed(x,y) not_here("cfsetispeed")
 #define cfsetospeed(x,y) not_here("cfsetospeed")
-#define ctermid(x) (char *) not_here("ctermid")
+#define ctermid(x) (not_here("ctermid"), (char *)NULL)
 #define tcflow(x,y) not_here("tcflow")
 #define tcgetattr(x,y) not_here("tcgetattr")
 #define tcsetattr(x,y,z) not_here("tcsetattr")
