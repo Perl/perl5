@@ -14,6 +14,5 @@
  * they should be removed from here.
  *
  * HAS_NON_INT_BITFIELDS
- * I_SYS_SYSCALL
  *
  */

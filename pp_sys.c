@@ -58,6 +58,10 @@
 # endif
 #endif
 
+#ifdef I_SYS_SYSCALL
+# include <sys/syscall.h>
+#endif
+
 /* XXX Configure test needed.
    h_errno might not be a simple 'int', especially for multi-threaded
    applications, see "extern int errno in perl.h".  Creating such
