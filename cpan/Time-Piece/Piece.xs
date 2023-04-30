@@ -1,4 +1,5 @@
 #define PERL_NO_GET_CONTEXT
+#define PERL_REENTRANT
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
