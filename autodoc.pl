@@ -1321,7 +1321,9 @@ sub docout ($$$) { # output the docs for one function group
         if (   ($item_flags =~ /p/ && $item_flags =~ /o/ && $item_flags !~ /M/)
 
                 # Can't handle threaded varargs
-            || ($item_flags =~ /f/ && $item_flags !~ /T/))
+            || (   $item_flags =~ /f/
+                && $item_flags !~ /T/
+                && $item_name !~ /strftime/))
         {
             $item->{name} = "Perl_$item_name";
             print $fh <<~"EOT";
