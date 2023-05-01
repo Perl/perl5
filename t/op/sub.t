@@ -6,7 +6,7 @@ BEGIN {
     set_up_inc('../lib');
 }
 
-plan(tests => 64);
+plan(tests => 65);
 
 sub empty_sub {}
 
@@ -443,3 +443,10 @@ fresh_perl_like(
     {},
     "#6998 freeing array used as args to sub",
 );
+
+# github #21044
+{
+    local $TODO = "sub return values not modifiable";
+ok( eval { $_->{x} = 1 for sub { undef }->(); 1 }, "check sub return values are modifiable")
+  or diag $@;
+}
