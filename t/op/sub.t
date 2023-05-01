@@ -445,8 +445,5 @@ fresh_perl_like(
 );
 
 # github #21044
-{
-    local $TODO = "sub return values not modifiable";
 ok( eval { $_->{x} = 1 for sub { undef }->(); 1 }, "check sub return values are modifiable")
   or diag $@;
-}
