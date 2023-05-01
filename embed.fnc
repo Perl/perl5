@@ -350,10 +350,11 @@
 :   'f'  Function takes a format string. If the function name =~ qr/strftime/
 :        then it is assumed to take a strftime-style format string as the 1st
 :        arg; otherwise it's assumed to take a printf style format string, not
-:        necessarily the 1st arg. All the arguments following it (including
-:        possibly '...') are assumed to be for the format.
+:        necessarily the 1st arg.  All the arguments following the second form
+:	 (including possibly '...') are assumed to be for the format.
 :
-:         embed.h: any entry in here is suppressed because of varargs
+:         embed.h: any entry in here for the second form is suppressed because
+:	           of varargs
 :         proto.h: add __attribute__format__ (or ...null_ok__)
 :
 :   'F'  Function has a '...' parameter, but don't assume it is a format. This
