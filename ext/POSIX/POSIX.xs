@@ -3589,7 +3589,7 @@ strftime(fmt, sec, min, hour, mday, mon, year, wday = -1, yday = -1, isdst = -1)
              * is normally frowned upon as a potential security risk;
              * but this is part of the API so we have to allow it */
             GCC_DIAG_IGNORE_STMT(-Wformat-nonliteral);
-	    buf = my_strftime8(SvPV_nolen(fmt), sec, min, hour, mday, mon, year, wday, yday, isdst, &is_utf8);
+	    buf = my_strftime8_temp(SvPV_nolen(fmt), sec, min, hour, mday, mon, year, wday, yday, isdst, &is_utf8);
             GCC_DIAG_RESTORE_STMT;
             sv = sv_newmortal();
 	    if (buf) {

@@ -2076,7 +2076,8 @@ Adfp	|char * |my_strftime	|NN const char *fmt			\
 				|int wday				\
 				|int yday				\
 				|int isdst
-Adfp	|char * |my_strftime8	|NN const char *fmt			\
+EXfp	|char * |my_strftime8_temp					\
+				|NN const char *fmt			\
 				|int sec				\
 				|int min				\
 				|int hour				\

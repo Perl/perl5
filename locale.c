@@ -4510,7 +4510,7 @@ S_my_langinfo_i(pTHX_
             /* The year was deliberately chosen so that January 1 is on the
              * first day of the week.  Since we're only getting one thing at a
              * time, it all works */
-            const char * temp = my_strftime8(format, 30, 30, hour, mday, mon,
+            const char * temp = my_strftime8_temp(format, 30, 30, hour, mday, mon,
                                              2011, 0, 0, 0, &is_utf8);
             retval = save_to_buffer(temp, retbufp, retbuf_sizep);
             Safefree(temp);
@@ -4804,22 +4804,16 @@ Perl_my_strftime(pTHX_ const char *fmt, int sec, int min, int hour, int mday, in
 /*
 =for apidoc_section $time
 =for apidoc      my_strftime
-=for apidoc_item my_strftime8
 
 strftime(), but with a different API so that the return value is a pointer
 to the formatted result (which MUST be arranged to be FREED BY THE
-CALLER).  This allows these functions to increase the buffer size as needed,
+CALLER).  This allows this function to increase the buffer size as needed,
 so that the caller doesn't have to worry about that.
 
-C<my_strftime8> is the same as plain C<my_strftime>, but has an extra
-parameter, a pointer to a variable declared as L</C<utf8ness_t>>.
-Upon return, its variable will be set to indicate how the resultant string
-should be treated with regards to its UTF-8ness.
-
-Note that yday and wday effectively are ignored by these functions, as
+Note that yday and wday effectively are ignored by this function, as
 mini_mktime() overwrites them
 
-Also note that they are always executed in the underlying locale of the program,
+Also note that it is always executed in the underlying locale of the program,
 giving localized results.  Mojibake can result on some platforms if LC_CTYPE
 and LC_TIME are not the same locale.
 
@@ -4955,14 +4949,14 @@ and LC_TIME are not the same locale.
 }
 
 char *
-Perl_my_strftime8(pTHX_ const char *fmt, int sec, int min, int hour, int mday,
+Perl_my_strftime8_temp(pTHX_ const char *fmt, int sec, int min, int hour, int mday,
                          int mon, int year, int wday, int yday, int isdst,
                          utf8ness_t * utf8ness)
 {   /* Documented above */
     char * retval = my_strftime(fmt, sec, min, hour, mday, mon, year, wday,
                                 yday, isdst);
 
-    PERL_ARGS_ASSERT_MY_STRFTIME8;
+    PERL_ARGS_ASSERT_MY_STRFTIME8_TEMP;
 
     if (utf8ness) {
 

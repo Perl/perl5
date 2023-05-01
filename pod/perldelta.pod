@@ -348,7 +348,8 @@ well.
 
 =item *
 
-XXX
+The function C<my_strftime8>, added in v5.37.4, has been found to be
+defective, and is now removed.  It never was in a stable release.
 
 =back
 

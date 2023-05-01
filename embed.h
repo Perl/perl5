@@ -376,7 +376,6 @@
 # define my_setenv(a,b)                         Perl_my_setenv(aTHX_ a,b)
 # define my_socketpair                          Perl_my_socketpair
 # define my_strftime(a,b,c,d,e,f,g,h,i,j)       Perl_my_strftime(aTHX_ a,b,c,d,e,f,g,h,i,j)
-# define my_strftime8(a,b,c,d,e,f,g,h,i,j,k)    Perl_my_strftime8(aTHX_ a,b,c,d,e,f,g,h,i,j,k)
 # define my_strtod                              Perl_my_strtod
 # define newANONATTRSUB(a,b,c,d)                Perl_newANONATTRSUB(aTHX_ a,b,c,d)
 # define newANONHASH(a)                         Perl_newANONHASH(aTHX_ a)
@@ -1691,6 +1690,7 @@
 #   define mg_find_mglob(a)                     Perl_mg_find_mglob(aTHX_ a)
 #   define multiconcat_stringify(a)             Perl_multiconcat_stringify(aTHX_ a)
 #   define multideref_stringify(a,b)            Perl_multideref_stringify(aTHX_ a,b)
+#   define my_strftime8_temp(a,b,c,d,e,f,g,h,i,j,k) Perl_my_strftime8_temp(aTHX_ a,b,c,d,e,f,g,h,i,j,k)
 #   define op_clear(a)                          Perl_op_clear(aTHX_ a)
 #   define qerror(a)                            Perl_qerror(aTHX_ a)
 #   define reg_named_buff(a,b,c,d)              Perl_reg_named_buff(aTHX_ a,b,c,d)
