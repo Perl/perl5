@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 use strict;
-use Test::More tests => 28;
+use Test::More tests => 30;
 use Config;
 use DynaLoader;
 use ExtUtils::CBuilder;
@@ -348,6 +348,24 @@ EOF_CONTENT
     ok($pod_version, "Found the version from perlxs.pod");
     is($pod_version, $ExtUtils::ParseXS::VERSION,
         "The version in perlxs.pod should match the version of ExtUtils::ParseXS");
+}
+
+{
+    my $pxs = ExtUtils::ParseXS->new;
+    tie *FH, 'Foo';
+    my $exception;
+    my $stderr = PrimitiveCapture::capture_stderr(sub {
+        eval {
+            $pxs->process_file(
+                filename => "XSNoMap.xs",
+                output => \*FH,
+               );
+            1;
+        } or $exception = $@;
+    });
+    is($stderr, undef, "should fail to parse");
+    like($exception, qr/Could not find a typemap for C type 'S \*'/,
+         "check we throw rather than trying to deref '2'");
 }
 
 #####################################################################

@@ -771,7 +771,7 @@ sub blurt {
 =cut
 
 sub death {
-  my $self = (@_);
+  my ($self) = (@_);
   my $message = _MsgHint(@_,"");
   if ($self->{die_on_error}) {
     die $message;
