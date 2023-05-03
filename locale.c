@@ -7210,19 +7210,13 @@ S_my_setlocale_debug_string_i(pTHX_
 #ifdef USE_PERL_SWITCH_LOCALE_CONTEXT
 
 void
-Perl_switch_locale_context()
+Perl_switch_locale_context(pTHX)
 {
     /* libc keeps per-thread locale status information in some configurations.
      * So, we can't just switch out aTHX to switch to a new thread.  libc has
      * to follow along.  This routine does that based on per-interpreter
      * variables we keep just for this purpose */
-
-    /* Can't use pTHX, because we may be called from a place where that
-     * isn't available */
-    dTHX;
-
-    if (UNLIKELY(   aTHX == NULL
-                 || PL_veto_switch_non_tTHX_context
+    if (UNLIKELY(   PL_veto_switch_non_tTHX_context
                  || PL_phase == PERL_PHASE_CONSTRUCT))
     {
         return;

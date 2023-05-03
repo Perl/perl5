@@ -3591,7 +3591,7 @@ Perl_set_context(void *t)
     }
 #  endif
 
-    PERL_SET_NON_tTHX_CONTEXT(t);
+    PERL_SET_NON_tTHX_CONTEXT((PerlInterpreter *) t);
 
 #else
     PERL_UNUSED_ARG(t);
