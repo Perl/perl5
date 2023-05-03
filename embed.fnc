@@ -6226,7 +6226,7 @@ Adhp	|SSize_t|PerlIO_write	|NULLOK PerlIO *f			\
 				|Size_t count
 #endif /* defined(USE_PERLIO) */
 #if defined(USE_PERL_SWITCH_LOCALE_CONTEXT)
-CTop	|void	|switch_locale_context
+Cop	|void	|switch_locale_context
 #endif
 #if defined(USE_QUADMATH)
 Tdp	|bool	|quadmath_format_needed 				\

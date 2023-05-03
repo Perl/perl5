@@ -10642,7 +10642,7 @@ Perl_PerlIO_write(pTHX_ PerlIO *f, const void *vbuf, Size_t count);
 #endif /* defined(USE_PERLIO) */
 #if defined(USE_PERL_SWITCH_LOCALE_CONTEXT)
 PERL_CALLCONV void
-Perl_switch_locale_context(void);
+Perl_switch_locale_context(pTHX);
 # define PERL_ARGS_ASSERT_SWITCH_LOCALE_CONTEXT
 
 #endif
