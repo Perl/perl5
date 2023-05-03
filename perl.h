@@ -6359,20 +6359,20 @@ EXTCONST U8   PL_deBruijn_bitpos_tab64[];
 #ifdef USE_PERL_SWITCH_LOCALE_CONTEXT
 #  define PERL_SET_LOCALE_CONTEXT(i)                                        \
       STMT_START {                                                          \
-          if (UNLIKELY(PL_veto_switch_non_tTHX_context))                    \
-                Perl_switch_locale_context();                               \
+          if (LIKELY(! PL_veto_switch_non_tTHX_context))                    \
+                Perl_switch_locale_context(i);                              \
       } STMT_END
+
+    /* In some Configurations there may be per-thread information that is
+     * carried in a library instead of perl's tTHX structure.  This macro is to
+     * be used to handle those when tTHX is changed.  Only locale handling is
+     * currently known to be affected. */
+#  define PERL_SET_NON_tTHX_CONTEXT(i)                                      \
+            STMT_START { if (i) PERL_SET_LOCALE_CONTEXT(i); } STMT_END
 #else
-#  define PERL_SET_LOCALE_CONTEXT(i)  NOOP
+#  define PERL_SET_LOCALE_CONTEXT(i)   NOOP
+#  define PERL_SET_NON_tTHX_CONTEXT(i) NOOP
 #endif
-
-/* In some Configurations there may be per-thread information that is carried
- * in a library instead of perl's tTHX structure.  This macro is to be used to
- * handle those when tTHX is changed.  Only locale handling is currently known
- * to be affected. */
-#define PERL_SET_NON_tTHX_CONTEXT(i)                                        \
-                        STMT_START { PERL_SET_LOCALE_CONTEXT(i); } STMT_END
-
 
 #ifndef PERL_GET_CONTEXT
 #  define PERL_GET_CONTEXT		PERL_GET_INTERP

@@ -8538,19 +8538,38 @@ S_my_setlocale_debug_string_i(pTHX_
 #ifdef USE_PERL_SWITCH_LOCALE_CONTEXT
 
 void
-Perl_switch_locale_context()
+Perl_switch_locale_context(pTHX)
 {
     /* libc keeps per-thread locale status information in some configurations.
      * So, we can't just switch out aTHX to switch to a new thread.  libc has
      * to follow along.  This routine does that based on per-interpreter
-     * variables we keep just for this purpose */
+     * variables we keep just for this purpose.
+     *
+     * There are two implementations where this is an issue.  For the other
+     * implementations, it doesn't matter because libc is using global values
+     * that all threads know about.
+     *
+     * The two implementations are where libc keeps thread-specific information
+     * on its own.  These are
+     *
+     * POSIX 2008:  The current locale is kept by libc as an object.  We save
+     *              a copy of that in the per-thread PL_cur_locale_obj, and so
+     *              this routine uses that copy to tell the thread it should be
+     *              operating with that object
+     * Windows thread-safe locales:  A given thread in Windows can be being run
+     *              with per-thread locales, or not.  When the thread context
+     *              changes, libc doesn't automatically know if the thread is
+     *              using per-thread locales, nor does it know what the new
+     *              thread's locale is.  We keep that information in the
+     *              per-thread variables:
+     *                  PL_controls_locale  indicates if this thread is using
+     *                                      per-thread locales or not
+     *                  PL_cur_LC_ALL       indicates what the the locale
+     *                                      should be if it is a per-thread
+     *                                      locale.
+     */
 
-    /* Can't use pTHX, because we may be called from a place where that
-     * isn't available */
-    dTHX;
-
-    if (UNLIKELY(   aTHX == NULL
-                 || PL_veto_switch_non_tTHX_context
+    if (UNLIKELY(   PL_veto_switch_non_tTHX_context
                  || PL_phase == PERL_PHASE_CONSTRUCT))
     {
         return;
