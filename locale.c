@@ -5970,7 +5970,7 @@ the program, giving results based on that locale.
          * indicates we have at least one byte of spare space (which will be
          * used for the terminating NUL). */
         if (inRANGE(len, 1, bufsize - 1)) {
-            goto strftime_success;
+            goto strftime_return;
         }
 
         /* There are several possible reasons for a 0 return code for a
@@ -6004,7 +6004,7 @@ the program, giving results based on that locale.
     if (strEQ(fmt, "%p")) {
         Renew(buf, 1, char);
         *buf = '\0';
-        goto strftime_success;
+        goto strftime_return;
     }
 
     /* The other reason is that the format string is malformed.  Probably it is
@@ -6013,9 +6013,9 @@ the program, giving results based on that locale.
      * treated as a literal, but others may fail when '?' is illegal */
     Safefree(buf);
     SET_EINVAL;
-    return NULL;
+    buf = NULL;
 
-  strftime_success:
+  strftime_return:
 
 #  if defined(USE_LOCALE_CTYPE) && defined(USE_LOCALE_TIME)
 
