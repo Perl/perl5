@@ -58,10 +58,6 @@ if (locales_enabled('LC_TIME')) {
     $orig_time_loc = setlocale(LC_TIME) || die "Cannot get time locale information:  $!";
     setlocale(LC_TIME, "C") || die "Cannot setlocale() to C:  $!";
 }
-if (locales_enabled('LC_CTYPE')) {
-    $orig_ctype_loc = setlocale(LC_CTYPE) || die "Cannot get ctype locale information:  $!";
-    setlocale(LC_CTYPE, "C") || die "Cannot setlocale() to C:  $!";
-}
 my $jan_16 = 15 * 86400;
 is(ctime($jan_16), strftime("%a %b %d %H:%M:%S %Y\n", CORE::localtime($jan_16)),
         "get ctime() equal to strftime()");
@@ -102,9 +98,6 @@ SKIP: {
 
 if (locales_enabled('LC_TIME')) {
     setlocale(LC_TIME, $orig_time_loc) || die "Cannot setlocale(LC_TIME) back to orig: $!";
-}
-if (locales_enabled('LC_CTYPE')) {
-    setlocale(LC_CTYPE, $orig_ctype_loc) || die "Cannot setlocale(LC_CTYPE) back to orig: $!";
 }
 
 # clock() seems to have different definitions of what it does between POSIX
