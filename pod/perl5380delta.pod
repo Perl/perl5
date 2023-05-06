@@ -159,6 +159,9 @@ Since the error flag is no longer cleared calling close() on the
 stream may fail and if the stream was not explicitly closed, the
 implicit close of the stream may produce a warning.
 
+The eof flag is also not cleared as often, which may cause disruption in code
+relying on the old behavior.
+
 [L<GH #20060|https://github.com/Perl/perl5/issues/20060>]
 
 =head2 C<INIT> blocks no longer run after an C<exit()> in C<BEGIN>
