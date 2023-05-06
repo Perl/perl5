@@ -934,16 +934,11 @@ S_my_querylocale_i(pTHX_ const unsigned int index)
         /* But we do have up-to-date values when we keep our own records
          * (except some times in initialization, where we get the value from
          * the system. */
-        const char ** which  = (index == LC_ALL_INDEX_)
-                               ? &PL_cur_LC_ALL
-                               : &PL_curlocales[index];
-        if (*which == NULL) {
-            retval = stdized_setlocale(category, NULL);
-            *which = savepv(retval);
+        if (PL_curlocales[index] == NULL) {
+            PL_curlocales[index] = savepv(stdized_setlocale(category, NULL));
         }
-        else {
-            retval = *which;
-        }
+
+        retval = PL_curlocales[index];
 
 #  endif
 
@@ -981,9 +976,9 @@ S_update_PL_curlocales_i(pTHX_
             PL_curlocales[i] = savepv(new_locale);
         }
 
-        Safefree(PL_cur_LC_ALL);
-        PL_cur_LC_ALL = savepv(calculate_LC_ALL_string(PL_curlocales));
-        return PL_cur_LC_ALL;
+        Safefree(PL_curlocales[LC_ALL_INDEX_]);
+        PL_curlocales[LC_ALL_INDEX_] = savepv(calculate_LC_ALL_string(PL_curlocales));
+        return PL_curlocales[LC_ALL_INDEX_];
     }
 
     /* Update the single category's record */
@@ -996,8 +991,8 @@ S_update_PL_curlocales_i(pTHX_
         || (   recalc_LC_ALL == RECALCULATE_LC_ALL_ON_FINAL_INTERATION
             && index == LC_ALL_INDEX_ - 1))
     {
-        Safefree(PL_cur_LC_ALL);
-        PL_cur_LC_ALL = savepv(calculate_LC_ALL_string(PL_curlocales));
+        Safefree(PL_curlocales[LC_ALL_INDEX_]);
+        PL_curlocales[LC_ALL_INDEX_]= savepv(calculate_LC_ALL_string(PL_curlocales));
     }
 
     return PL_curlocales[index];
@@ -1131,8 +1126,8 @@ S_setlocale_from_aggregate_LC_ALL(pTHX_ const char * locale, const line_t line)
      * categories whose locale is 'C'.  khw thinks it's better to store a
      * complete LC_ALL.  So calculate it. */
     const char * retval = savepv(calculate_LC_ALL_string(PL_curlocales));
-    Safefree(PL_cur_LC_ALL);
-    PL_cur_LC_ALL = retval;
+    Safefree(PL_curlocales[LC_ALL_INDEX_]);
+    PL_curlocales[LC_ALL_INDEX_] = retval;
 
 #    else
 
@@ -1231,8 +1226,8 @@ S_emulate_setlocale_i(pTHX_
         if (UNLIKELY(   recalc_LC_ALL == RECALCULATE_LC_ALL_ON_FINAL_INTERATION
                      && index == LC_ALL_INDEX_ - 1))
         {
-            Safefree(PL_cur_LC_ALL);
-            PL_cur_LC_ALL = savepv(calculate_LC_ALL_string(PL_curlocales));
+            Safefree(PL_curlocales[LC_ALL_INDEX_]);
+            PL_curlocales[LC_ALL_INDEX_] = savepv(calculate_LC_ALL_string(PL_curlocales));
         }
 
 #  endif
@@ -5330,6 +5325,7 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 #  ifdef USE_PL_CURLOCALES
 
     /* Initialize our records. */
+    PL_curlocales[LC_ALL_INDEX_] = NULL;
     for (i = 0; i < LC_ALL_INDEX_; i++) {
         (void) emulate_setlocale_i(i, posix_setlocale(categories[i], NULL),
                                    RECALCULATE_LC_ALL_ON_FINAL_INTERATION,
