@@ -1286,11 +1286,11 @@ Fix definition of C<Perl_atof>.
 =item *
 
 Fix undefined behavior with overflow related OPTIMIZE_INFTY and delta
-in C<regcomp.c>.
+in F<regcomp.c>.
 
 =item *
 
-Fix regnode pointer alignment issue in <regcomp.h>.
+Fix regnode pointer alignment issue in F<regcomp.h>.
 
 =back
 
