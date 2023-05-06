@@ -1211,9 +1211,9 @@ typedef enum {
 
 #ifdef USE_LOCALE
 
-/* And a count of all the individual locale categories, mainly for use in array
+/* And a count of all the locale categories, mainly for use in array
  * declarations */
-#  define LOCALE_CATEGORIES_COUNT_        LC_ALL_INDEX_
+#  define LOCALE_CATEGORIES_COUNT_        (LC_ALL_INDEX_ + 1)
 
 /* =========================================================================
  * The defines from here to the following ===== line are unfortunately
@@ -1270,7 +1270,6 @@ typedef enum {
     * querylocale; so must keep track of it ourselves */
 #  if (defined(USE_POSIX_2008_LOCALE) && ! defined(USE_QUERYLOCALE))
 #    define USE_PL_CURLOCALES
-#    define USE_PL_CUR_LC_ALL
 #  endif
 
 #  if defined(WIN32)
