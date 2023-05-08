@@ -1028,7 +1028,7 @@ sub op_index {
         $max;
     };
 
-    align $align_at, "[${\ op_enum $_[0] }]";
+    align $align_at, "[+${\ op_enum $_[0] }]";
 }
 
 sub generate_opcode_h {
