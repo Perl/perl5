@@ -142,21 +142,46 @@ make that necessary.
 
 =head1 Incompatible Changes
 
-=head2 readline() no longer clears the stream error flag
+=head2 readline() no longer clears the stream error and eof flags
 
 C<readline()>, also spelled C<< <> >>, would clear the handle's error
-flag after an error occurred on the stream.
+and eof flags after an error occurred on the stream.
 
-The error flag is now only cleared when an error occurs when reading
-from the child process for glob() in F<miniperl>.  This allows it to
-correctly report errors from the child process on close().
+In nearly all cases this clear is no longer done, so the error and
+eof flags now properly reflect the status of the stream after
+readline().
 
 Since the error flag is no longer cleared calling close() on the
 stream may fail and if the stream was not explicitly closed, the
 implicit close of the stream may produce a warning.
 
-The eof flag is also not cleared as often, which may cause disruption in code
-relying on the old behavior.
+This has resulted in two main type of problems in downstream CPAN
+modules, and may also occur in your code:
+
+=over
+
+=item *
+
+If your code reads to end of file, and then rebinds the handle to a
+new file descriptor, previously since the eof flag wasn't set you
+could continue to read from the stream.  You now need to clear the eof
+flag yourself with C<< $handle->clearerr() >> to continue reading.
+
+=item *
+
+If your code encounters and error on the stream while reading with
+readline() you will need to call C<< $handle->clearerr >> to continue
+reading.  The one case this occurred the underlying file descriptor was
+marked non-blocking, so the read() system call was failing with
+C<EAGAIN>, which resulted in the error flag being set on the stream.
+
+=back
+
+The only case where error and eof flags continue to cleared on
+error is when reading from the child process for glob() in
+F<miniperl>.  This allows it to correctly report errors from the child
+process on close().  This is unlikely to be an issue during normal
+perl development.
 
 [L<GH #20060|https://github.com/Perl/perl5/issues/20060>]
 
