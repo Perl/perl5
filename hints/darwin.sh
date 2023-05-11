@@ -357,6 +357,9 @@ EOM
         esac
     fi
 
+    # The OS is buggy with respect to this.
+    ccflags="$ccflags -DNO_POSIX_2008_LOCALE"
+
    lddlflags="${ldflags} -bundle -undefined dynamic_lookup"
    ;;
 esac
