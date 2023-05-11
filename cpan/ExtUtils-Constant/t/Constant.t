@@ -6,6 +6,13 @@ unless ($Config{usedl}) {
     exit 0;
 }
 
+use ExtUtils::CBuilder;
+my $b = ExtUtils::CBuilder->new( quiet => 1 );
+unless ($b->have_compiler) {
+    print "1..0 # SKIP compiler not available\n";
+    exit 0;
+}
+
 # use warnings;
 use strict;
 use ExtUtils::MakeMaker;
