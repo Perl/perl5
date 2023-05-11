@@ -1191,6 +1191,8 @@ if($Config{nvsize} == 8) {
                                    or
                                $^O eq 'hpux'
                                    or
+                               $^O eq 'aix'
+                                   or
                                ($^O eq 'MSWin32' and
                                 $Config{cc} eq 'cl' and
                                 $Config{ccversion} =~ /^(\d+)/ and
