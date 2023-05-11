@@ -1,6 +1,7 @@
 package HeaderParser;
 use strict;
 use warnings;
+use v5.10;      # Needs named capture groups
 
 # these are required below in BEGIN statements, we cant have a
 # hard dependency on them as they might not be available when
