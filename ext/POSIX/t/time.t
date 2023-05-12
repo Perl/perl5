@@ -9,7 +9,7 @@ use strict;
 
 use Config;
 use POSIX;
-use Test::More tests => 20;
+use Test::More tests => 25;
 
 # go to UTC to avoid DST issues around the world when testing.  SUS3 says that
 # null should get you UTC, but some environments want the explicit names.
@@ -51,18 +51,36 @@ is(asctime(CORE::localtime(12345678)), ctime(12345678),
 is(asctime(POSIX::localtime(12345678)), ctime(12345678),
    "asctime() and ctime() at 12345678");
 
+my $illegal_format = "%!";
+
+# An illegal format could result in an empty result, but many platforms just
+# pass it through, or strip off the '%'
+sub munge_illegal_format_result($) {
+    my $result = shift;
+    $result = "" if $result eq $illegal_format || $result eq '!';
+    return $result;
+}
+
+my $jan_16 = 15 * 86400;
+
+is(munge_illegal_format_result(strftime($illegal_format,
+                                        CORE::localtime($jan_16))),
+   "", "strftime returns appropriate result for an illegal format");
+
 # Careful!  strftime() is locale sensitive.  Let's take care of that
 my $orig_time_loc = 'C';
-my $orig_ctype_loc = 'C';
-if (locales_enabled('LC_TIME')) {
+
+my $LC_TIME_enabled = locales_enabled('LC_TIME');
+if ($LC_TIME_enabled) {
     $orig_time_loc = setlocale(LC_TIME) || die "Cannot get time locale information:  $!";
     setlocale(LC_TIME, "C") || die "Cannot setlocale() to C:  $!";
 }
-my $jan_16 = 15 * 86400;
-is(ctime($jan_16), strftime("%a %b %d %H:%M:%S %Y\n", CORE::localtime($jan_16)),
+
+my $ctime_format = "%a %b %d %H:%M:%S %Y\n";
+is(ctime($jan_16), strftime($ctime_format, CORE::localtime($jan_16)),
         "get ctime() equal to strftime()");
-is(ctime($jan_16), strftime("%a %b %d %H:%M:%S %Y\n", POSIX::localtime($jan_16)),
-        "get ctime() equal to strftime()");
+is(ctime($jan_16), strftime($ctime_format, POSIX::localtime($jan_16)),
+        "get localtime() equal to strftime()");
 
 my $ss = chr 223;
 unlike($ss, qr/\w/, 'Not internally UTF-8 encoded');
@@ -82,7 +100,8 @@ TODO: {
 
 my $utf8_locale = find_utf8_ctype_locale();
 SKIP: {
-    skip "No UTF-8 locale", 2 if ! defined $utf8_locale;
+    skip "No LC_TIME UTF-8 locale", 2 if ! $LC_TIME_enabled
+                                      || ! defined $utf8_locale;
 
     setlocale(LC_TIME, $utf8_locale)
                                || die "Cannot setlocale() to $utf8_locale: $!";
@@ -94,10 +113,47 @@ SKIP: {
     is(strftime($zh_format, POSIX::gmtime($jan_16)),
                 $zh_expected_result,
                 "Same, but uses POSIX::gmtime; previous test used CORE::");
+    setlocale(LC_TIME, "C") || die "Cannot setlocale() to C: $!";
 }
 
-if (locales_enabled('LC_TIME')) {
-    setlocale(LC_TIME, $orig_time_loc) || die "Cannot setlocale(LC_TIME) back to orig: $!";
+my $non_C_locale = $utf8_locale;
+if (! defined $non_C_locale) {
+    my @locales = find_locales(LC_CTYPE);
+    while (@locales) {
+        if ($locales[0] ne "C") {
+            $non_C_locale = $locales[0];
+            last;
+        }
+
+        shift;
+    }
+}
+
+SKIP: {
+    skip "No non-C locale", 4 if ! locales_enabled(LC_CTYPE)
+                              || ! defined $non_C_locale;
+    my $orig_ctype_locale = setlocale(LC_CTYPE)
+                            || die "Cannot get ctype locale information:  $!";
+    setlocale(LC_CTYPE, $non_C_locale)
+                    || die "Cannot setlocale(LC_CTYPE) to $non_C_locale:  $!";
+
+    is(ctime($jan_16), strftime($ctime_format, CORE::localtime($jan_16)),
+       "Repeat of ctime() equal to strftime()");
+    is(setlocale(LC_CTYPE), $non_C_locale, "strftime restores LC_CTYPE");
+
+    is(munge_illegal_format_result(strftime($illegal_format,
+                                            CORE::localtime($jan_16))),
+       "", "strftime returns appropriate result for an illegal format");
+    is(setlocale(LC_CTYPE), $non_C_locale,
+       "strftime restores LC_CTYPE even on failure");
+
+    setlocale(LC_CTYPE, $orig_ctype_locale)
+                          || die "Cannot setlocale(LC_CTYPE) back to orig: $!";
+}
+
+if ($LC_TIME_enabled) {
+    setlocale(LC_TIME, $orig_time_loc)
+                            || die "Cannot setlocale(LC_TIME) back to orig: $!";
 }
 
 # clock() seems to have different definitions of what it does between POSIX
