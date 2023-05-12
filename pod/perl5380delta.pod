@@ -1394,6 +1394,14 @@ previously issued a warning.
 
 The API function L<perlapi/utf8_length> is now more efficient.
 
+=item *
+
+The C<OP_ANONCODE> opcode now recognises the C<OPf_REF> flag as a request for
+it to wrap the newly-constructed anonymous CV in a reference, avoiding the
+need to call C<OP_REFGEN> directly afterwards.  Code that constructs or
+inspects optrees around these opcodes may need to be adjusted to understand
+the new flag.
+
 =back
 
 =head1 Selected Bug Fixes
