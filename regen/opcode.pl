@@ -37,8 +37,6 @@ sub generate_pp_proto_h;
 
 sub generate_b_op_private_pm;
 
-sub op_enum;
-
 my $restrict_to_core = "if defined(PERL_CORE) || defined(PERL_EXT)";
 
 BEGIN {
@@ -780,7 +778,7 @@ sub print_PL_op_private_tables {
             else {
                 $index = -1;
             }
-            $PL_op_private_bitdef_ix .= sprintf "\t${\ ::op_index ($op) } = %4d, /* %s */\n", $index, $op;
+            $PL_op_private_bitdef_ix .= sprintf "    %4d, /* %s */\n", $index, $op;
         }
         if (%not_seen) {
             die "panic: unprocessed ops: ". join(',', keys %not_seen);
@@ -818,7 +816,7 @@ sub print_PL_op_private_tables {
         # all bets are off
         @flags = '0xff' if $op eq 'null' or $op eq 'custom';
 
-        $PL_op_private_valid .= sprintf "\t${\ ::op_index ($op) } = /* %-10s */ (%s),\n", uc($op),
+        $PL_op_private_valid .= sprintf "    /* %-10s */ (%s),\n", uc($op),
                                     @flags ? join('|', @flags): '0';
     }
 
@@ -1003,34 +1001,6 @@ sub gen_op_is_macro {
     }
 }
 
-sub align {
-    my ($length, $str) = @_;
-
-    $str .= (' ' x ($length - length $str));
-}
-
-sub op_max_length () {
-    state $max = do {
-        my ($max) = sort { $b <=> $a } map { length op_enum $_ } @ops;
-        $max;
-    };
-}
-
-sub op_enum {
-    my ($op) = @_;
-
-    "OP_\U$op";
-}
-
-sub op_index {
-    state $align_at = do {
-        my $max = op_max_length + 2;
-        $max;
-    };
-
-    align $align_at, "[${\ op_enum $_[0] }]";
-}
-
 sub generate_opcode_h {
     my $oc = open_new( 'opcode.h', '>', {
         by        => 'regen/opcode.pl',
@@ -1110,11 +1080,11 @@ sub generate_opcode_h_opnames {
     END
 
     for (@ops) {
-        print qq(\t${\ op_index $_ } = "$_",\n);
+        print qq(\t"$_",\n);
     }
 
     print <<~'END';
-        [OP_max] = "freed",
+            "freed",
     });
 
     EXTCONST char* const PL_op_desc[] INIT({
@@ -1126,11 +1096,11 @@ sub generate_opcode_h_opnames {
         # Have to escape double quotes and escape characters.
         $safe_desc =~ s/([\\"])/\\$1/g;
 
-        print qq(\t${\ op_index $_ } = "$safe_desc",\n);
+        print qq(\t"$safe_desc",\n);
     }
 
     print <<~'END';
-        [OP_max] = "freed op",
+        "freed op",
     });
 
     END_EXTERN_C
@@ -1144,12 +1114,8 @@ sub generate_opcode_h_pl_check {
     INIT({
     END
 
-    my ($max) = sort { $b cmp $a } map { length "Perl_$check{$_}" } @ops;
-
-    my $align = $max + 2; # comma and space
-
     for (@ops) {
-        print "\t", op_index ($_), " = ", align ($align, "Perl_$check{$_},"), "/* $_ */\n";
+        print "\t", tab(3, "Perl_$check{$_},"), "\t/* $_ */\n";
     }
 
     print <<~'END';
@@ -1204,7 +1170,7 @@ sub generate_opcode_h_pl_opargs {
             $argshift += 4;
         }
         $argsum = sprintf("0x%08x", $argsum);
-        print "\t", op_index ($op), " = $argsum,", " /* $op */\n";
+        print "\t", tab(3, "$argsum,"), "/* $op */\n";
     }
 
     print <<~'END';
@@ -1229,9 +1195,9 @@ sub generate_opcode_h_pl_ppaddr {
         my $op_func = "Perl_pp_$_";
         my $name = $alias{$_};
         if ($name && $name->[0] ne $op_func) {
-            print "\t${\ op_index $_ } = $op_func,\t/* implemented by $name->[0] */\n";
+            print "\t$op_func,\t/* implemented by $name->[0] */\n";
         } else {
-            print "\t${\ op_index $_ } = $op_func,\n";
+            print "\t$op_func,\n";
         }
     }
 
@@ -1263,7 +1229,7 @@ sub generate_opnames_h_opcode_enum {
 
     my $i = 0;
     for (@ops) {
-        print "\t", tab(3,op_enum ($_)), " = ", $i++, ",\n";
+        print "\t", tab(3,"OP_\U$_"), " = ", $i++, ",\n";
     }
 
     print "\t", tab(3,"OP_max"), "\n";
