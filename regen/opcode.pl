@@ -780,7 +780,7 @@ sub print_PL_op_private_tables {
             else {
                 $index = -1;
             }
-            $PL_op_private_bitdef_ix .= sprintf "\t${\ ::op_index ($op) } = %4d,\n", $index;
+            $PL_op_private_bitdef_ix .= sprintf "\t${\ ::op_index ($op) } = %4d, /* %s */\n", $index, $op;
         }
         if (%not_seen) {
             die "panic: unprocessed ops: ". join(',', keys %not_seen);
@@ -818,7 +818,7 @@ sub print_PL_op_private_tables {
         # all bets are off
         @flags = '0xff' if $op eq 'null' or $op eq 'custom';
 
-        $PL_op_private_valid .= sprintf "\t${\ ::op_index ($op) } = (%s),\n",
+        $PL_op_private_valid .= sprintf "\t${\ ::op_index ($op) } = /* %-10s */ (%s),\n", uc($op),
                                     @flags ? join('|', @flags): '0';
     }
 
@@ -1144,8 +1144,12 @@ sub generate_opcode_h_pl_check {
     INIT({
     END
 
+    my ($max) = sort { $b cmp $a } map { length "Perl_$check{$_}" } @ops;
+
+    my $align = $max + 2; # comma and space
+
     for (@ops) {
-        print "\t", op_index ($_), " = Perl_$check{$_},\n";
+        print "\t", op_index ($_), " = ", align ($align, "Perl_$check{$_},"), "/* $_ */\n";
     }
 
     print <<~'END';
@@ -1200,7 +1204,7 @@ sub generate_opcode_h_pl_opargs {
             $argshift += 4;
         }
         $argsum = sprintf("0x%08x", $argsum);
-        print "\t", op_index ($op), " = $argsum,\n";
+        print "\t", op_index ($op), " = $argsum,", " /* $op */\n";
     }
 
     print <<~'END';
