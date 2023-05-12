@@ -7529,18 +7529,22 @@ cannot have changed since the precalculation.
             }                                                               \
         } STMT_END
 
-/* Lock/unlock to the C locale until unlock is called.  This needs to be
- * recursively callable.  [perl #128207] */
-#  define LOCK_LC_NUMERIC_STANDARD()                                        \
+/* Lock/unlock changes to LC_NUMERIC.  This needs to be recursively callable.
+ * The highest level caller is responsible for making sure that LC_NUMERIC is
+ * set to a locale with a dot radix character.  These deliberately don't check
+ * for the internal state being so, as they can be called from code that is not
+ * party to the internal conventions, namely 'version' (vutil.c).
+ * PL_numeric_standard changing doesn't affect anything about what locale is in
+ * effect, etc.  [perl #128207] */
+#  define DISABLE_LC_NUMERIC_CHANGES()                                      \
         STMT_START {                                                        \
             DEBUG_Lv(PerlIO_printf(Perl_debug_log,                          \
                     "%s: %d: lc_numeric_standard now locked to depth %d\n", \
                     __FILE__, __LINE__, PL_numeric_standard));              \
-            __ASSERT_(PL_numeric_standard)                                  \
             PL_numeric_standard++;                                          \
         } STMT_END
 
-#  define UNLOCK_LC_NUMERIC_STANDARD()                                      \
+#  define REENABLE_LC_NUMERIC_CHANGES()                                     \
         STMT_START {                                                        \
             if (PL_numeric_standard > 1) {                                  \
                 PL_numeric_standard--;                                      \
@@ -7557,6 +7561,17 @@ cannot have changed since the precalculation.
                      "lc_numeric_standard lock decremented to depth %d\n",  \
                                                      PL_numeric_standard););\
         } STMT_END
+
+/* Essentially synonyms for the above.  The LOCK asserts at the top level that
+ * we are in a locale equivalent to C.  By including the top level, this can be
+ * recursively called from chains which include DISABLE_LC_NUMERIC_CHANGES().
+ * */
+#  define LOCK_LC_NUMERIC_STANDARD()                                        \
+        STMT_START {                                                        \
+            assert(PL_numeric_standard > 0 || PL_numeric_standard);         \
+            DISABLE_LC_NUMERIC_CHANGES();                                   \
+        } STMT_END
+#  define UNLOCK_LC_NUMERIC_STANDARD()  REENABLE_LC_NUMERIC_CHANGES()
 
 #  define WITH_LC_NUMERIC_SET_TO_NEEDED_IN(in_lc_numeric, block)            \
         STMT_START {                                                        \
@@ -7582,6 +7597,8 @@ cannot have changed since the precalculation.
 #  define RESTORE_LC_NUMERIC()
 #  define LOCK_LC_NUMERIC_STANDARD()
 #  define UNLOCK_LC_NUMERIC_STANDARD()
+#  define DISABLE_LC_NUMERIC_CHANGES()
+#  define REENABLE_LC_NUMERIC_CHANGES()
 #  define WITH_LC_NUMERIC_SET_TO_NEEDED_IN(in_lc_numeric, block) \
     STMT_START { block; } STMT_END
 #  define WITH_LC_NUMERIC_SET_TO_NEEDED(block) \
