@@ -7578,7 +7578,7 @@ cannot have changed since the precalculation.
             STORE_LC_NUMERIC_SET_TO_NEEDED_IN(in_lc_numeric);               \
             block;                                                          \
             RESTORE_LC_NUMERIC();                                           \
-        } STMT_END;
+        } STMT_END
 
 #  define WITH_LC_NUMERIC_SET_TO_NEEDED(block) \
         WITH_LC_NUMERIC_SET_TO_NEEDED_IN(IN_LC(LC_NUMERIC), block)
