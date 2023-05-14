@@ -180,6 +180,23 @@ Hence this is fine in C and XS code, but not headers:
         .action = "Built"
      };
 
+You cannot use the similar syntax for compound literals, since we also
+build perl using C++ compilers:
+
+    /* this is fine */
+    struct message m = {
+        .target = "some target",
+        .action = "some action"
+    };
+    /* this is not valid in C++ */
+    m = (struct message){
+        .target = "some target",
+        .action = "some action"
+    };
+
+While structure designators are usable, the related array designators
+are not, since they aren't supported by C++ at all.
+
 =item *
 
 flexible array members
