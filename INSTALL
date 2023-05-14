@@ -694,7 +694,7 @@ for example:
 
     18126:./miniperl: /sbin/loader: Fatal Error: cannot map libperl.so
 
-There is also an potential problem with the shared perl library if you
+There is also a potential problem with the shared perl library if you
 want to have more than one "flavor" of the same version of perl (e.g.
 with and without -DDEBUGGING).  For example, suppose you build and
 install a standard Perl 5.10.0 with a shared library.  Then, suppose you
