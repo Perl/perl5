@@ -4483,6 +4483,11 @@ S	|const char *|get_displayable_string				\
 ST	|int	|adjust_size_and_find_bucket				\
 				|NN size_t *nbytes_p
 #endif
+#if defined(PERL_IN_MATHOMS_C) || defined(PERL_IN_OP_C) || \
+    defined(PERL_IN_PERLY_C)   || defined(PERL_IN_TOKE_C)
+Mbp	|OP *	|ref		|NULLOK OP *o				\
+				|I32 type
+#endif
 #if defined(PERL_IN_MG_C)
 
 S	|void	|fixup_errno_string					\
@@ -4647,11 +4652,6 @@ p	|void	|warn_elem_scalar_context				\
 				|NN SV *name				\
 				|bool is_hash				\
 				|bool is_slice
-#endif
-#if defined(PERL_IN_OP_C) || defined(PERL_IN_PERLY_C) || \
-    defined(PERL_IN_TOKE_C)
-Mbp	|OP *	|ref		|NULLOK OP *o				\
-				|I32 type
 #endif
 #if defined(PERL_IN_OP_C) || defined(PERL_IN_REGCOMP_ANY)
 ERTi	|STRLEN *|get_invlist_iter_addr 				\
