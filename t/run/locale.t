@@ -21,6 +21,12 @@ BEGIN {
     }
 }
 use Config;
+
+if ($^O eq "aix" && ($Config{osvers} =~ /^(\d+)/)[0] < 7) {
+    # https://www.ibm.com/support/pages/apar/IV22174
+    skip_all("old AIX setlocale is broken in some cases");
+}
+
 use I18N::Langinfo qw(langinfo RADIXCHAR);
 my $have_strtod = $Config{d_strtod} eq 'define';
 my $have_localeconv = defined $Config{d_locconv} && $Config{d_locconv} eq 'define';
