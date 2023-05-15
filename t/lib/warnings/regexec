@@ -212,11 +212,15 @@ setlocale(&POSIX::LC_CTYPE, $utf8_locale);
  "abc def" =~ /\b{wb}.*?/;
  "abc def" =~ /\B{wb}.*?/;
 EXPECT
-Use of \b{} or \B{} for non-UTF-8 locale is wrong.  Assuming a UTF-8 locale at - line 16.
-Use of \b{} or \B{} for non-UTF-8 locale is wrong.  Assuming a UTF-8 locale at - line 16.
-Use of \b{} or \B{} for non-UTF-8 locale is wrong.  Assuming a UTF-8 locale at - line 17.
-Use of \b{} or \B{} for non-UTF-8 locale is wrong.  Assuming a UTF-8 locale at - line 17.
-Use of \b{} or \B{} for non-UTF-8 locale is wrong.  Assuming a UTF-8 locale at - line 17.
+OPTION regex
+\AUse of \\b\{\} or \\B\{\} for non-UTF-8 locale is wrong\.  Assuming a UTF-8 locale at - line 16\.
+Use of \\b\{\} or \\B\{\} for non-UTF-8 locale is wrong\.  Assuming a UTF-8 locale at - line 16\.
+Use of \\b\{\} or \\B\{\} for non-UTF-8 locale is wrong\.  Assuming a UTF-8 locale at - line 17\.
+Use of \\b\{\} or \\B\{\} for non-UTF-8 locale is wrong\.  Assuming a UTF-8 locale at - line 17\.
+Use of \\b\{\} or \\B\{\} for non-UTF-8 locale is wrong\.  Assuming a UTF-8 locale at - line 17\.(?:
+Locale '.*' contains \(at least\) the following characters which have
+unexpected meanings: .*
+The Perl program will use the expected meanings; codeset=UTF-8)?\z
 ########
 # NAME (?[ ]) in non-UTF-8 locale
 require '../loc_tools.pl';

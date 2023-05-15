@@ -789,18 +789,24 @@ my $final_without_setlocale = $test_num;
 debug "Scanning for locales...\n";
 
 require POSIX; import POSIX ':locale_h';
-
 my $categories = [ 'LC_CTYPE', 'LC_NUMERIC', 'LC_ALL' ];
-debug "Scanning for just compatible";
-my @Locale = find_locales($categories);
-debug "Scanning for even incompatible";
-my @include_incompatible_locales = find_locales($categories,
-                                                'even incompatible locales');
-
+my @Locale;
+my @include_incompatible_locales;
+if ($^O eq "aix"
+    and version->new(($Config{osvers} =~ /^(\d+(\.\d+))/)[0]) < 7) {
+    # https://www.ibm.com/support/pages/apar/IV22097
+    skip("setlocale broken on old AIX");
+}
+else {
+    debug "Scanning for just compatible";
+    @Locale = find_locales($categories);
+    debug "Scanning for even incompatible";
+    @include_incompatible_locales = find_locales($categories,
+                                              'even incompatible locales');
+}
 # The locales included in the incompatible list that aren't in the compatible
 # one.
 my @incompatible_locales;
-
 if (@Locale < @include_incompatible_locales) {
     my %seen;
     @seen{@Locale} = ();
