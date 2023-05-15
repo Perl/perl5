@@ -671,7 +671,7 @@ INCLUDES	= -I.\include -I. -I..
 #PCHFLAGS	= -Fpc:\temp\vcmoduls.pch -YX
 DEFINES		= -DWIN32 -D_CONSOLE -DNO_STRICT
 LOCDEFS		= -DPERLDLL -DPERL_CORE
-CXX_FLAG	= -TP -EHsc
+CXX_FLAG	= -TP -EHsc -std:c++20
 EXTRACFLAGS	= -nologo -GF -W3
 
 ifeq ($(CCTYPE),MSVC120)
