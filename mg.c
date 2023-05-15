@@ -927,19 +927,18 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
         sv_setiv(sv, (IV)(PL_debug & DEBUG_MASK));
         break;
     case '\005':  /* ^E */
-         if (nextchar != '\0') {
-            if (strEQ(remaining, "NCODING"))
-                sv_set_undef(sv);
-            break;
-        }
-
+        {
+            if (nextchar != '\0') {
+                if (strEQ(remaining, "NCODING"))
+                    sv_set_undef(sv);
+                break;
+            }
 
 #if defined(VMS) || defined(OS2) || defined(WIN32)
 
-    int extended_errno = get_extended_os_errno();
+            int extended_errno = get_extended_os_errno();
 
 #   if defined(VMS)
-        {
             char msg[255];
             $DESCRIPTOR(msgdsc,msg);
 
@@ -952,34 +951,32 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
                 sv_setpvn(sv,msgdsc.dsc$a_pointer,msgdsc.dsc$w_length);
             else
                 SvPVCLEAR(sv);
-        }
 
 #elif defined(OS2)
-        if (!(_emx_env & 0x200)) {	/* Under DOS */
-            sv_setnv(sv, (NV) extended_errno);
-            if (extended_errno) {
-                utf8ness_t utf8ness;
-                const char * errstr = my_strerror(extended_errno, &utf8ness);
+            if (!(_emx_env & 0x200)) {	/* Under DOS */
+                sv_setnv(sv, (NV) extended_errno);
+                if (extended_errno) {
+                    utf8ness_t utf8ness;
+                    const char * errstr = my_strerror(extended_errno, &utf8ness);
 
-                sv_setpv(sv, errstr);
+                    sv_setpv(sv, errstr);
 
-                if (utf8ness == UTF8NESS_YES) {
-                    SvUTF8_on(sv);
+                    if (utf8ness == UTF8NESS_YES) {
+                        SvUTF8_on(sv);
+                    }
                 }
+                else {
+                    SvPVCLEAR(sv);
+                }
+            } else {
+                sv_setnv(sv, (NV) extended_errno);
+                sv_setpv(sv, os2error(extended_errno));
             }
-            else {
-                SvPVCLEAR(sv);
+            if (SvOK(sv) && strNE(SvPVX(sv), "")) {
+                fixup_errno_string(sv);
             }
-        } else {
-            sv_setnv(sv, (NV) extended_errno);
-            sv_setpv(sv, os2error(extended_errno));
-        }
-        if (SvOK(sv) && strNE(SvPVX(sv), "")) {
-            fixup_errno_string(sv);
-        }
 
 #   elif defined(WIN32)
-        {
             const DWORD dwErr = (DWORD) extended_errno;
             sv_setnv(sv, (NV) dwErr);
             if (dwErr) {
@@ -997,7 +994,6 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
             else
                 SvPVCLEAR(sv);
             SetLastError(dwErr);
-        }
 #   else
 #   error Missing code for platform
 #   endif
@@ -1006,6 +1002,7 @@ Perl_magic_get(pTHX_ SV *sv, MAGIC *mg)
         break;
 #endif  /* End of platforms with special handling for $^E; others just fall
            through to $! */
+        }
     /* FALLTHROUGH */
 
     case '!':
