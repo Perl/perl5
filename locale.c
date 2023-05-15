@@ -5323,11 +5323,12 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
      * the list.  Normally the loop is executed just once.  But if setting the
      * locale fails, inside the loop we add fallback trials to the array and so
      * will execute the loop multiple times */
-    trial_locales[0] = (trial_locales_struct) {
+    trial_locales_struct ts = {
         .trial_locale = setlocale_init,
         .fallback_desc = NULL,
         .fallback_name = NULL,
     };
+    trial_locales[0] = ts;
     trial_locales_count = 1;
 
     for (i = 0; i < NOMINAL_LC_ALL_INDEX; i++) {
@@ -5485,13 +5486,14 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
                         goto done_lc_all;
                     }
                 }
-                trial_locales[trial_locales_count++] = (trial_locales_struct) {
+                trial_locales_struct ts = {
                     .trial_locale = lc_all,
                     .fallback_desc = (strEQ(lc_all, "C")
                                       ? "the standard locale"
                                       : "a fallback locale"),
                     .fallback_name = lc_all,
                 };
+                trial_locales[trial_locales_count++] = ts;
             }
           done_lc_all:
 
@@ -5501,13 +5503,14 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
                         goto done_lang;
                     }
                 }
-                trial_locales[trial_locales_count++] = (trial_locales_struct) {
+                trial_locales_struct ts = {
                     .trial_locale = lang,
                     .fallback_desc = (strEQ(lang, "C")
                                       ? "the standard locale"
                                       : "a fallback locale"),
                     .fallback_name = lang,
                 };
+                trial_locales[trial_locales_count++] = ts;
             }
           done_lang:
 
@@ -5544,13 +5547,14 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
                     }
                 }
 
-                trial_locales[trial_locales_count++] = (trial_locales_struct) {
+                trial_locales_struct ts = {
                     .trial_locale = system_default_locale,
                     .fallback_desc = (strEQ(system_default_locale, "C")
                                       ? "the standard locale"
                                       : "the system default locale"),
                     .fallback_name = system_default_locale,
                 };
+                trial_locales[trial_locales_count++] = ts;
             }
           done_system_default:
 
@@ -5561,12 +5565,17 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
                     goto done_C;
                 }
             }
-            trial_locales[trial_locales_count++] = (trial_locales_struct) {
-                .trial_locale = "C",
-                .fallback_desc = "the standard locale",
-                .fallback_name = "C",
-            };
-
+            {
+                /* new scope to avoid C++ complaining about
+                   initialization being bypassed by goto.
+                */
+                trial_locales_struct ts = {
+                    .trial_locale = "C",
+                    .fallback_desc = "the standard locale",
+                    .fallback_name = "C",
+                };
+                trial_locales[trial_locales_count++] = ts;
+            }
           done_C: ;
         }   /* end of first time through the loop */
     }   /* end of looping through the trial locales */

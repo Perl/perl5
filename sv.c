@@ -1062,20 +1062,28 @@ Perl_sv_upgrade(pTHX_ SV *const sv, svtype new_type)
         SvANY(sv) = new_body;
         switch(new_type) {
         case SVt_PVAV:
-            *((XPVAV*) SvANY(sv)) = (XPVAV) {
-                .xmg_stash = NULL, .xmg_u = {.xmg_magic = NULL},
-                .xav_fill = -1, .xav_max = -1, .xav_alloc = 0
+            {
+                XPVAV pvav = {
+                    .xmg_stash = NULL,
+                    .xmg_u = {.xmg_magic = NULL},
+                    .xav_fill = -1, .xav_max = -1, .xav_alloc = 0
                 };
+                *((XPVAV*) SvANY(sv)) = pvav;
+            }
 
             AvREAL_only(sv);
             break;
         case SVt_PVHV:
-            *((XPVHV*) SvANY(sv)) = (XPVHV) {
-                .xmg_stash = NULL, .xmg_u = {.xmg_magic = NULL},
-                .xhv_keys = 0,
-                /* start with PERL_HASH_DEFAULT_HvMAX+1 buckets: */
-                .xhv_max = PERL_HASH_DEFAULT_HvMAX
+            {
+                XPVHV pvhv = {
+                    .xmg_stash = NULL,
+                    .xmg_u = {.xmg_magic = NULL},
+                    .xhv_keys = 0,
+                    /* start with PERL_HASH_DEFAULT_HvMAX+1 buckets: */
+                    .xhv_max = PERL_HASH_DEFAULT_HvMAX
                 };
+                *((XPVHV*) SvANY(sv)) = pvhv;
+            }
 
             assert(!SvOK(sv));
             SvOK_off(sv);
@@ -1084,12 +1092,15 @@ Perl_sv_upgrade(pTHX_ SV *const sv, svtype new_type)
 #endif
             break;
         case SVt_PVOBJ:
-            *((XPVOBJ*) SvANY(sv)) = (XPVOBJ) {
-                .xmg_stash = NULL, .xmg_u = {.xmg_magic = NULL},
-                .xobject_maxfield = -1,
-                .xobject_iter_sv_at = 0,
-                .xobject_fields = NULL,
-            };
+            {
+                XPVOBJ pvo = {
+                    .xmg_stash = NULL, .xmg_u = {.xmg_magic = NULL},
+                    .xobject_maxfield = -1,
+                    .xobject_iter_sv_at = 0,
+                    .xobject_fields = NULL,
+                };
+                *((XPVOBJ*) SvANY(sv)) = pvo;
+            }
             break;
         default:
             NOT_REACHED;
