@@ -110,7 +110,7 @@ static char*	get_regstr(const char *valuename, SV **svp);
 #endif
 
 static char*	get_emd_part(SV **prev_pathp, STRLEN *const len,
-                        char *trailing, ...);
+                        const char *trailing, ...);
 static char*	win32_get_xlib(const char *pl,
                         WIN32_NO_REGISTRY_M_(const char *xlib)
                         const char *libname, STRLEN *const len);
@@ -326,7 +326,7 @@ get_regstr(const char *valuename, SV **svp)
 
 /* *prev_pathp (if non-NULL) is expected to be POK (valid allocated SvPVX(sv)) */
 static char *
-get_emd_part(SV **prev_pathp, STRLEN *const len, char *trailing_path, ...)
+get_emd_part(SV **prev_pathp, STRLEN *const len, const char *trailing_path, ...)
 {
     char base[10];
     va_list ap;
@@ -394,7 +394,7 @@ get_emd_part(SV **prev_pathp, STRLEN *const len, char *trailing_path, ...)
 EXTERN_C char *
 win32_get_privlib(WIN32_NO_REGISTRY_M_(const char *pl) STRLEN *const len)
 {
-    char *stdlib = "lib";
+    const char *stdlib = "lib";
     SV *sv = NULL;
 #ifndef WIN32_NO_REGISTRY
     char buffer[MAX_PATH+1];
@@ -623,7 +623,7 @@ get_shell(void)
 int
 Perl_do_aspawn(pTHX_ SV *really, SV **mark, SV **sp)
 {
-    char **argv;
+    const char **argv;
     char *str;
     int status;
     int flag = P_WAIT;
@@ -636,7 +636,7 @@ Perl_do_aspawn(pTHX_ SV *really, SV **mark, SV **sp)
         return -1;
 
     get_shell();
-    Newx(argv, (sp - mark) + w32_perlshell_items + 2, char*);
+    Newx(argv, (sp - mark) + w32_perlshell_items + 2, const char*);
 
     if (SvNIOKp(*(mark+1)) && !SvPOKp(*(mark+1))) {
         ++mark;
@@ -1737,8 +1737,10 @@ S_follow_symlinks_to(pTHX_ const char *pathname, DWORD *reparse_type) {
         else {
             STRLEN work_len;
             const char *workp = SvPV(work_path, work_len);
-            const char *final_bslash = my_memrchr(workp, '\\', work_len);
-            const char *final_slash = my_memrchr(workp, '/', work_len);
+            const char *final_bslash =
+                (const char *)my_memrchr(workp, '\\', work_len);
+            const char *final_slash =
+                (const char *)my_memrchr(workp, '/', work_len);
             const char *path_sep = NULL;
             if (final_bslash && final_slash)
                 path_sep = final_bslash > final_slash ? final_bslash : final_slash;
@@ -2622,7 +2624,7 @@ win32_uname(struct utsname *name)
     {
         SYSTEM_INFO info;
         DWORD procarch;
-        char *arch;
+        const char *arch;
         GetSystemInfo(&info);
 
 #if (defined(__MINGW32__) && !defined(_ANONYMOUS_UNION) && !defined(__MINGW_EXTENSION))
@@ -3753,9 +3755,9 @@ win32_symlink(const char *oldfile, const char *newfile)
         }
         else if (oldfile[0] != '\\') {
             size_t newfile_len = strlen(newfile);
-            char *last_slash = strrchr(newfile, '/');
-            char *last_bslash = strrchr(newfile, '\\');
-            char *end_dir = last_slash && last_bslash
+            const char *last_slash = strrchr(newfile, '/');
+            const char *last_bslash = strrchr(newfile, '\\');
+            const char *end_dir = last_slash && last_bslash
                 ? ( last_slash > last_bslash ? last_slash : last_bslash)
                 : last_slash ? last_slash : last_bslash ? last_bslash : NULL;
 
@@ -4071,7 +4073,7 @@ win32_read(int fd, void *buf, unsigned int cnt)
     int ret;
     if (UNLIKELY(win32_isatty(fd) && GetConsoleCP() == 65001)) {
         MUTEX_LOCK(&win32_read_console_mutex);
-        ret = win32_read_console(fd, buf, cnt);
+        ret = win32_read_console(fd, (U8 *)buf, cnt);
         MUTEX_UNLOCK(&win32_read_console_mutex);
     }
     else
@@ -4980,7 +4982,7 @@ void
 Perl_init_os_extras(void)
 {
     dTHXa(NULL);
-    char *file = __FILE__;
+    const char *file = __FILE__;
 
     /* Initialize Win32CORE if it has been statically linked. */
 #ifndef PERL_IS_MINIPERL
