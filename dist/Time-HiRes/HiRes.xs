@@ -11,9 +11,6 @@
  * it under the same terms as Perl itself.
  */
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 #define PERL_NO_GET_CONTEXT
 #include "EXTERN.h"
 #include "perl.h"
@@ -39,9 +36,6 @@ extern "C" {
 #endif
 #if defined(TIME_HIRES_CLOCK_GETTIME_SYSCALL) || defined(TIME_HIRES_CLOCK_GETRES_SYSCALL)
 #  include <syscall.h>
-#endif
-#ifdef __cplusplus
-}
 #endif
 
 #ifndef GCC_DIAG_IGNORE
