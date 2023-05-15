@@ -832,6 +832,8 @@ win32_setservent(int stayopen)
     win32_croak_not_implemented("setservent");
 }
 
+static char tcp_proto[] = "tcp";
+
 static struct servent*
 win32_savecopyservent(struct servent*d, struct servent*s, const char *proto)
 {
@@ -844,7 +846,7 @@ win32_savecopyservent(struct servent*d, struct servent*s, const char *proto)
     if (proto && strlen(proto))
         d->s_proto = (char *)proto;
     else
-        d->s_proto = "tcp";
+        d->s_proto = tcp_proto;
    
     return d;
 }
