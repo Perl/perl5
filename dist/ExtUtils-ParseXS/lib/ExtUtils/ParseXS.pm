@@ -931,7 +931,7 @@ MAKE_FETCHMETHOD_WORK
 
   print Q(<<"EOF");
 ##ifdef __cplusplus
-#extern "C"
+#extern "C" {
 ##endif
 EOF
 
@@ -1042,6 +1042,9 @@ EOF
 ##endif
 #]]
 #
+##ifdef __cplusplus
+#}
+##endif
 EOF
 
   warn("Please specify prototyping behavior for $self->{filename} (see perlxs manual)\n")
