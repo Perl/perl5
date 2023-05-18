@@ -120,6 +120,7 @@ DEFAULT_INC_EXCLUDES_DOT = define
 
 #
 # Uncomment this if you want to build everything in C++ mode
+# This requires at least MSVC 2019.
 #
 #USE_CPLUSPLUS	= define
 
@@ -431,7 +432,10 @@ INCLUDES	= -I$(COREDIR) -I.\include -I. -I..
 #PCHFLAGS	= -Fpc:\temp\vcmoduls.pch -YX
 DEFINES		= -DWIN32 -D_CONSOLE -DNO_STRICT
 LOCDEFS		= -DPERLDLL -DPERL_CORE
-CXX_FLAG	= -TP -std:c++20 -EHsc
+CXX_FLAG	= -TP -EHsc
+!IF "$(USE_CPLUSPLUS)" == "define"
+CXX_FLAG	= $(CXX_FLAG) -std:c++20
+!ENDIF
 EXTRACFLAGS	= -nologo -GF -W3
 
 !IF "$(CCTYPE)" == "MSVC120"
