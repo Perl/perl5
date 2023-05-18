@@ -4141,7 +4141,7 @@ Perl_get_win32_message_utf8ness(pTHX_ const char * string)
 {
     /* This is because Windows doesn't have LC_MESSAGES. */
 
-#    ifdef USE_LC_CTYPE
+#    ifdef USE_LOCALE_CTYPE
 
     return get_locale_string_utf8ness_i(string, LOCALE_IS_UTF8,
                                         NULL, LC_CTYPE_INDEX_);
@@ -5618,6 +5618,7 @@ S_my_langinfo_i(pTHX_
         }
 
 #    endif
+#    ifdef USE_LOCALE_CTYPE
 
       case CODESET:
 
@@ -5627,7 +5628,7 @@ S_my_langinfo_i(pTHX_
             break;
         }
 
-#    ifdef WIN32
+#      ifdef WIN32
 
         /* This function retrieves the code page.  It is subject to change, but
          * is documented and has been stable for many releases */
@@ -5647,7 +5648,7 @@ S_my_langinfo_i(pTHX_
                                                locale, retval));
         break;
 
-#    else
+#      else
 
         /* The codeset is important, but khw did not figure out a way for it to
          * be retrieved on non-Windows boxes without nl_langinfo().  But even
@@ -5655,7 +5656,7 @@ S_my_langinfo_i(pTHX_
          * UTF-8 locale or not.  If it is UTF-8, we (correctly) use that for
          * the code set. */
 
-#      if defined(HAS_MBTOWC) || defined(HAS_MBRTOWC)
+#        if defined(HAS_MBTOWC) || defined(HAS_MBRTOWC)
 
         /* If libc mbtowc() evaluates the bytes that form the REPLACEMENT
          * CHARACTER as that Unicode code point, this has to be a UTF-8 locale.
@@ -5673,7 +5674,7 @@ S_my_langinfo_i(pTHX_
 
         /* Here, it isn't a UTF-8 locale. */
 
-#      else     /* mbtowc() is not available.  The chances of this code getting
+#        else   /* mbtowc() is not available.  The chances of this code getting
                    compiled are very small, as it is a C99 required function,
                    and we are now requiring C99; perhaps if it is a defective
                    implementation.  But if so, there are other libc functions
@@ -5688,7 +5689,7 @@ S_my_langinfo_i(pTHX_
         utf8ness_t is_utf8 = UTF8NESS_UNKNOWN;
         const char * scratch_buf = NULL;
 
-#        if defined(USE_LOCALE_MONETARY) && defined(HAS_LOCALECONV)
+#          if defined(USE_LOCALE_MONETARY) && defined(HAS_LOCALECONV)
 
         /* Can't use this method unless localeconv() is available, as that's
          * the way we find out the currency symbol.
@@ -5701,8 +5702,8 @@ S_my_langinfo_i(pTHX_
                              &is_utf8);
         Safefree(scratch_buf);
 
-#        endif
-#        ifdef USE_LOCALE_TIME
+#          endif
+#          ifdef USE_LOCALE_TIME
 
         /* If we have ruled out being UTF-8, no point in checking further. */
         if (is_utf8 != UTF8NESS_NO) {
@@ -5756,7 +5757,7 @@ S_my_langinfo_i(pTHX_
             restore_toggled_locale_c(LC_TIME, orig_TIME_locale);
         }
 
-#        endif    /* LC_TIME */
+#          endif    /* LC_TIME */
 
         /* If nothing examined above rules out it being UTF-8, and at least one
          * thing fits as UTF-8 (and not plain ASCII), assume the codeset is
@@ -5787,7 +5788,7 @@ S_my_langinfo_i(pTHX_
          *              has non-ASCII error messages.  But again, wait until it
          *              turns out to be an actual problem. */
 
-#      endif    /* ! mbtowc() */
+#        endif    /* ! mbtowc() */
 
         /* Rejoin the mbtowc available/not-available cases.
          *
@@ -5821,7 +5822,7 @@ S_my_langinfo_i(pTHX_
             retval = code_set_name;
         }
 
-#      if defined(HAS_MBTOWC) || defined(HAS_MBRTOWC)
+#        if defined(HAS_MBTOWC) || defined(HAS_MBRTOWC)
 
         /* When these functions, are available, they were tried earlier and
          * indicated that the locale did not act like a proper UTF-8 one.  So
@@ -5831,7 +5832,7 @@ S_my_langinfo_i(pTHX_
             break;
         }
 
-#      endif
+#        endif
 
         /* Otherwise the code set name is considered to be everything between
          * the dot and the '@' */
@@ -5839,7 +5840,8 @@ S_my_langinfo_i(pTHX_
 
         break;
 
-#    endif
+#      endif    /* ! WIN32 */
+#    endif      /* USE_LOCALE_CTYPE */
 
     } /* Giant switch() of nl_langinfo() items */
 
