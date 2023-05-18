@@ -97,7 +97,7 @@
 
 /* #include <mach/cthreads.h> is in perl.h #ifdef I_MACH_CTHREADS */
 
-#define MUTEX_INIT(m) \
+#  define MUTEX_INIT(m) \
     STMT_START {						\
         *m = mutex_alloc();					\
         if (*m) {						\
@@ -108,15 +108,15 @@
         }							\
     } STMT_END
 
-#define MUTEX_LOCK(m)			mutex_lock(*m)
-#define MUTEX_UNLOCK(m)			mutex_unlock(*m)
-#define MUTEX_DESTROY(m) \
+#  define MUTEX_LOCK(m)	    mutex_lock(*m)
+#  define MUTEX_UNLOCK(m)   mutex_unlock(*m)
+#  define MUTEX_DESTROY(m)                                      \
     STMT_START {						\
         mutex_free(*m);						\
         *m = 0;							\
     } STMT_END
 
-#define COND_INIT(c) \
+#  define COND_INIT(c)                                          \
     STMT_START {						\
         *c = condition_alloc();					\
         if (*c) {						\
@@ -128,28 +128,28 @@
         }							\
     } STMT_END
 
-#define COND_SIGNAL(c)		condition_signal(*c)
-#define COND_BROADCAST(c)	condition_broadcast(*c)
-#define COND_WAIT(c, m)		condition_wait(*c, *m)
-#define COND_DESTROY(c) \
+#  define COND_SIGNAL(c)        condition_signal(*c)
+#  define COND_BROADCAST(c)     condition_broadcast(*c)
+#  define COND_WAIT(c, m)       condition_wait(*c, *m)
+#  define COND_DESTROY(c)                                       \
     STMT_START {						\
         condition_free(*c);					\
         *c = 0;							\
     } STMT_END
 
-#define THREAD_RET_TYPE		any_t
+#  define THREAD_RET_TYPE		any_t
 
-#define DETACH(t)		cthread_detach(t->self)
-#define JOIN(t, avp)		(*(avp) = MUTABLE_AV(cthread_join(t->self)))
+#  define DETACH(t)		cthread_detach(t->self)
+#  define JOIN(t, avp)		(*(avp) = MUTABLE_AV(cthread_join(t->self)))
 
-#define PERL_SET_CONTEXT(t)	cthread_set_data(cthread_self(), t)
-#define PERL_GET_CONTEXT	cthread_data(cthread_self())
+#  define PERL_SET_CONTEXT(t)	cthread_set_data(cthread_self(), t)
+#  define PERL_GET_CONTEXT	cthread_data(cthread_self())
 
-#define INIT_THREADS		cthread_init()
-#define YIELD			cthread_yield()
-#define ALLOC_THREAD_KEY	NOOP
-#define FREE_THREAD_KEY		NOOP
-#define SET_THREAD_SELF(thr)	(thr->self = cthread_self())
+#  define INIT_THREADS		cthread_init()
+#  define YIELD			cthread_yield()
+#  define ALLOC_THREAD_KEY	NOOP
+#  define FREE_THREAD_KEY		NOOP
+#  define SET_THREAD_SELF(thr)	(thr->self = cthread_self())
 
 #endif /* I_MACH_CTHREADS */
 
