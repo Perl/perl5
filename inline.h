@@ -3350,7 +3350,7 @@ Perl_mortal_getenv(const char * str)
      * the recursive calls and calls from the logger, and treat them specially.
      * Let's say we want to do getenv("foo").  We first find
      * getenv(PERL_MEM_LOG) and save it to a fixed-length per-interpreter
-     * variable, so no temporary is required.  Then we do getenv{foo}, and in
+     * variable, so no temporary is required.  Then we do getenv(foo), and in
      * the process of creating a temporary to save it, this function will be
      * called recursively to do a getenv(PERL_MEM_LOG).  On the recursed call,
      * we detect that it is such a call and return our saved value instead of
