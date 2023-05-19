@@ -624,6 +624,17 @@ unless ($define{USE_LOCALE_CTYPE}) {
 			 );
 }
 
+unless (   ! $define{HAS_NL_LANGINFO}
+        &&   $define{USE_LOCALE_CTYPE}
+        && ! $define{WIN32}
+        && ! $define{HAS_MBTOWC}
+        && ! $define{HAS_MBRTOWC})
+    {
+        ++$skip{$_} foreach qw(
+                                PL_langinfo_recursed
+                              );
+    }
+
 unless ($define{'USE_C_BACKTRACE'}) {
     ++$skip{Perl_get_c_backtrace_dump};
     ++$skip{Perl_dump_c_backtrace};

@@ -5057,11 +5057,8 @@ S_my_localeconv(pTHX_ const int item)
 
         /* It saves time in the loop below to have predetermined the UTF8ness
          * of the locale.  But only do so if the platform reliably has this
-         * information; otherwise to do it, this could recurse indefinitely.
-         *
-         * When we don't do it here, it will be done on a per-element basis in
-         * the loop.  The per-element check is intelligent enough to not
-         * recurse */
+         * information; otherwise it's better to do it only it should become
+         * necessary, which happens on a per-element basis in the loop. */
 
         locale_is_utf8 = (is_locale_utf8(locale))
                          ? LOCALE_IS_UTF8
@@ -6224,6 +6221,8 @@ S_my_langinfo_i(pTHX_
         const char * scratch_buf = NULL;
 
 #          if defined(USE_LOCALE_MONETARY) && defined(HAS_LOCALECONV)
+#            define LANGINFO_RECURSED_MONETARY  0x1
+#            define LANGINFO_RECURSED_TIME      0x2
 
         /* Can't use this method unless localeconv() is available, as that's
          * the way we find out the currency symbol.
@@ -6231,22 +6230,39 @@ S_my_langinfo_i(pTHX_
          * First try looking at the currency symbol (via a recursive call) to
          * see if it disambiguates things.  Often that will be in the native
          * script, and if the symbol isn't legal UTF-8, we know that the locale
-         * isn't either. */
-        (void) my_langinfo_c(CRNCYSTR, LC_MONETARY, locale, &scratch_buf, NULL,
-                             &is_utf8);
+         * isn't either.
+         *
+         * The recursion calls my_localeconv() to find CRNCYSTR, and that can
+         * call is_locale_utf8() which will call my_langinfo(CODESET) which
+         * will get to here again, ad infinitum.  The guard prevents that.
+         */
+        if ((PL_langinfo_recursed & LANGINFO_RECURSED_MONETARY) == 0) {
+            PL_langinfo_recursed |= LANGINFO_RECURSED_MONETARY;
+            (void) my_langinfo_c(CRNCYSTR, LC_MONETARY, locale, &scratch_buf,
+                                 NULL, &is_utf8);
+            PL_langinfo_recursed &= ~LANGINFO_RECURSED_MONETARY;
+        }
+
         Safefree(scratch_buf);
 
 #          endif
 #          ifdef USE_LOCALE_TIME
 
         /* If we have ruled out being UTF-8, no point in checking further. */
-        if (is_utf8 != UTF8NESS_NO) {
-
+        if (   is_utf8 != UTF8NESS_NO
+            && (PL_langinfo_recursed & LANGINFO_RECURSED_TIME) == 0)
+        {
             /* But otherwise do check more.  This is done even if the currency
              * symbol looks to be UTF-8, just in case that's a false positive.
              *
              * Look at the LC_TIME entries, like the names of the months or
-             * weekdays.  We quit at the first one that is illegal UTF-8 */
+             * weekdays.  We quit at the first one that is illegal UTF-8
+             *
+             * The recursion guard is because the recursed my_langinfo_c() will
+             * call strftime8() to find the LC_TIME value passed to it, and
+             * that will call my_langinfo(CODESET) for non-ASCII returns,
+             * which will get here again, ad infinitum
+             */
 
             utf8ness_t this_is_utf8 = UTF8NESS_UNKNOWN;
             const int times[] = {
@@ -6265,6 +6281,7 @@ S_my_langinfo_i(pTHX_
              * loop */
             const char * orig_TIME_locale = toggle_locale_c(LC_TIME, locale);
 
+            PL_langinfo_recursed |= LANGINFO_RECURSED_TIME;
             for (PERL_UINT_FAST8_T i = 0; i < C_ARRAY_LENGTH(times); i++) {
                 scratch_buf = NULL;
                 (void) my_langinfo_c(times[i], LC_TIME, locale, &scratch_buf,
@@ -6279,6 +6296,7 @@ S_my_langinfo_i(pTHX_
                     is_utf8 = UTF8NESS_YES;
                 }
             }
+            PL_langinfo_recursed &= ~LANGINFO_RECURSED_TIME;
 
             /* Here we have gone through all the LC_TIME elements.  is_utf8 has
              * been set as follows:
