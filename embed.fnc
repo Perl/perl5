@@ -4355,6 +4355,24 @@ op	|SV *	|hfree_next_entry					\
 				|NN STRLEN *indexp
 #endif
 #if defined(PERL_IN_LOCALE_C)
+S	|utf8ness_t|get_locale_string_utf8ness_i			\
+				|NULLOK const char *string		\
+				|const locale_utf8ness_t known_utf8	\
+				|NULLOK const char *locale		\
+				|const unsigned cat_index
+S	|void	|ints_to_tm	|NN struct tm *my_tm			\
+				|int sec				\
+				|int min				\
+				|int hour				\
+				|int mday				\
+				|int mon				\
+				|int year				\
+				|int wday				\
+				|int yday				\
+				|int isdst
+S	|bool	|is_locale_utf8 |NN const char *locale
+Sf	|char * |strftime_tm	|NN const char *fmt			\
+				|NN const struct tm *mytm
 # if defined(HAS_LOCALECONV)
 S	|HV *	|my_localeconv	|const int item
 S	|void	|populate_hash_from_localeconv				\
@@ -4363,15 +4381,6 @@ S	|void	|populate_hash_from_localeconv				\
 				|const U32 which_mask			\
 				|NN const lconv_offset_t *strings[2]	\
 				|NULLOK const lconv_offset_t *integers
-# endif
-# if defined(HAS_LOCALECONV) || defined(HAS_SOME_LANGINFO) || \
-     defined(USE_LOCALE)
-S	|utf8ness_t|get_locale_string_utf8ness_i			\
-				|NULLOK const char *string		\
-				|const locale_utf8ness_t known_utf8	\
-				|NULLOK const char *locale		\
-				|const unsigned cat_index
-S	|bool	|is_locale_utf8 |NN const char *locale
 # endif
 # if defined(USE_LOCALE)
 S	|const char *|calculate_LC_ALL_string					\

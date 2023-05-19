@@ -1286,14 +1286,13 @@
 #     endif
 #   endif /* defined(PERL_IN_HV_C) */
 #   if defined(PERL_IN_LOCALE_C)
+#     define get_locale_string_utf8ness_i(a,b,c,d) S_get_locale_string_utf8ness_i(aTHX_ a,b,c,d)
+#     define ints_to_tm(a,b,c,d,e,f,g,h,i,j)    S_ints_to_tm(aTHX_ a,b,c,d,e,f,g,h,i,j)
+#     define is_locale_utf8(a)                  S_is_locale_utf8(aTHX_ a)
+#     define strftime_tm(a,b)                   S_strftime_tm(aTHX_ a,b)
 #     if defined(HAS_LOCALECONV)
 #       define my_localeconv(a)                 S_my_localeconv(aTHX_ a)
 #       define populate_hash_from_localeconv(a,b,c,d,e) S_populate_hash_from_localeconv(aTHX_ a,b,c,d,e)
-#     endif
-#     if defined(HAS_LOCALECONV) || defined(HAS_SOME_LANGINFO) || \
-         defined(USE_LOCALE)
-#       define get_locale_string_utf8ness_i(a,b,c,d) S_get_locale_string_utf8ness_i(aTHX_ a,b,c,d)
-#       define is_locale_utf8(a)                S_is_locale_utf8(aTHX_ a)
 #     endif
 #     if defined(USE_LOCALE)
 #       define calculate_LC_ALL_string(a,b,c)   S_calculate_LC_ALL_string(aTHX_ a,b,c)
