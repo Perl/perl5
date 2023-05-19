@@ -73,9 +73,11 @@ op/sub.t
 op/switch.t
 op/symbolcache.t
 op/taint.t
+op/undef.t                # keys%{($h=undef)||{}} becomes keys%{{} unless .. }
 op/vec.t
 op/warn.t
 op/write.t
+perf/opcount.t            # keys%{($h=undef)||{}} becomes keys%{{} unless .. }
 porting/globvar.t
 re/overload.t             # [perl #123385] %^H output
 re/pat_advanced.t         # [perl #123417]
