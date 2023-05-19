@@ -92,11 +92,9 @@ unlike($ss, qr/\w/, 'Still not internally UTF-8 encoded');
 
 my $zh_format = "%Y\x{5e74}%m\x{6708}%d\x{65e5}";
 my $zh_expected_result = "1970\x{5e74}01\x{6708}16\x{65e5}";
-TODO: {
-    local $TODO = 'Awaiting more fixes';
-    ok(strftime($zh_format, CORE::gmtime($jan_16)) ne $zh_expected_result,
+isnt(strftime($zh_format, CORE::gmtime($jan_16)),
+              $zh_expected_result,
            "strftime() UTF-8 format doesn't return UTF-8 in non-UTF-8 locale");
-}
 
 my $utf8_locale = find_utf8_ctype_locale();
 SKIP: {
