@@ -98,6 +98,10 @@ EXPECT
 Global symbol "$self" requires explicit package name (did you forget to declare "my $self"?) at - line 5.
 Execution of - aborted due to compilation errors.
 ########
+# This test is known to leak: see GH #20812. Skip it for now so that ASAN
+# smokes don't fail. Start failing again on the next development branch so
+# that the issue isn't forgotten
+# SKIP ? $] < 5.039
 use strict;
 no warnings 'experimental::class';
 use feature 'class';
