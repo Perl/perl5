@@ -7,7 +7,7 @@
 # This is based on the module of the same name by Malcolm Beattie,
 # but essentially none of his code remains.
 
-package B::Deparse 1.73;
+package B::Deparse 1.74;
 use strict;
 use Carp;
 use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
@@ -3878,6 +3878,9 @@ sub pp_list {
 	    if ($padname->FLAGS & PADNAMEf_TYPED) {
 		$newtype = $padname->SvSTASH->NAME;
 	    }
+	} elsif ($lopname eq 'padsv_store') {
+            # don't interpret as my (list) if it has an implicit assign
+            $local = "";
 	} elsif ($lopname =~ /^(?:gv|rv2)([ash])v$/
 			&& $loppriv & OPpOUR_INTRO
 		or $lopname eq "null" && class($lop) eq 'UNOP'
