@@ -32,6 +32,16 @@
 __DEPARSE_FAILURES__
 
 base/lex.t                # checks regexp stringification
+# class/*.t generally failing because OP_METHSTART not recognised
+class/class.t
+class/construct.t
+class/destruct.t
+class/field.t
+class/inherit.t
+class/method.t
+class/phasers.t
+class/threads.t
+#
 comp/final_line_num.t     # tests syntax error after BEGIN block
 comp/fold.t               # mutability of folded constants
 comp/parser.t             # crazy #line directives ==> shell syntax errors
