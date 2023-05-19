@@ -6961,6 +6961,26 @@ Perl_hfree_next_entry(pTHX_ HV *hv, STRLEN *indexp)
 
 #endif
 #if defined(PERL_IN_LOCALE_C)
+STATIC utf8ness_t
+S_get_locale_string_utf8ness_i(pTHX_ const char *string, const locale_utf8ness_t known_utf8, const char *locale, const unsigned cat_index);
+# define PERL_ARGS_ASSERT_GET_LOCALE_STRING_UTF8NESS_I
+
+STATIC void
+S_ints_to_tm(pTHX_ struct tm *my_tm, int sec, int min, int hour, int mday, int mon, int year, int wday, int yday, int isdst);
+# define PERL_ARGS_ASSERT_INTS_TO_TM            \
+        assert(my_tm)
+
+STATIC bool
+S_is_locale_utf8(pTHX_ const char *locale);
+# define PERL_ARGS_ASSERT_IS_LOCALE_UTF8        \
+        assert(locale)
+
+STATIC char *
+S_strftime_tm(pTHX_ const char *fmt, const struct tm *mytm)
+        __attribute__format__(__strftime__,pTHX_1,0);
+# define PERL_ARGS_ASSERT_STRFTIME_TM           \
+        assert(fmt); assert(mytm)
+
 # if defined(HAS_LOCALECONV)
 STATIC HV *
 S_my_localeconv(pTHX_ const int item);
@@ -6972,19 +6992,6 @@ S_populate_hash_from_localeconv(pTHX_ HV *hv, const char *locale, const U32 whic
         assert(hv); assert(locale); assert(strings)
 
 # endif /* defined(HAS_LOCALECONV) */
-# if defined(HAS_LOCALECONV) || defined(HAS_SOME_LANGINFO) || \
-     defined(USE_LOCALE)
-STATIC utf8ness_t
-S_get_locale_string_utf8ness_i(pTHX_ const char *string, const locale_utf8ness_t known_utf8, const char *locale, const unsigned cat_index);
-#   define PERL_ARGS_ASSERT_GET_LOCALE_STRING_UTF8NESS_I
-
-STATIC bool
-S_is_locale_utf8(pTHX_ const char *locale);
-#   define PERL_ARGS_ASSERT_IS_LOCALE_UTF8      \
-        assert(locale)
-
-# endif /* defined(HAS_LOCALECONV) || defined(HAS_SOME_LANGINFO) ||
-           defined(USE_LOCALE) */
 # if defined(USE_LOCALE)
 STATIC const char *
 S_calculate_LC_ALL_string(pTHX_ const char **category_locales_list, const calc_LC_ALL_format format, const line_t caller_line);
