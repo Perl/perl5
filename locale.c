@@ -186,7 +186,10 @@
  *      circumstances so that XS code can just assume a dot radix character.
  *      querylocale_X() returns the locale that libc has stored at this moment,
  *      so most of the time will return a locale whose radix character is a
- *      dot.
+ *      dot.  The macro query_nominal_locale_i() can be used to get the nominal
+ *      locale that an external caller would expect, for all categories except
+ *      LC_ALL.  For that, you can use the function
+ *      S_calculate_LC_ALL_string().
  *
  * The underlying C API that this implements uses category numbers, hence the
  * code is structured to use '_r' at the API level to convert to indexes, which
@@ -1576,6 +1579,19 @@ S_bool_setlocale_2008_i(pTHX_
 #  error Unexpected Configuration
 #endif   /* End of the various implementations of the setlocale and
             querylocale macros used in the remainder of this program */
+
+/* query_nominal_locale_i() is used when the caller needs the locale that an
+ * external caller would be expecting, and not what we're secretly using
+ * behind the scenes.  It deliberately doesn't handle LC_ALL; use
+ * calculate_LC_ALL_string() for that. */
+#ifdef USE_LOCALE_NUMERIC
+#  define query_nominal_locale_i(i)                                         \
+      (__ASSERT_(i != LC_ALL_INDEX_)                                        \
+       ((i == LC_NUMERIC_INDEX_) ? PL_numeric_name : querylocale_i(i)))
+#else
+#  define query_nominal_locale_i(i)                                         \
+      (__ASSERT_(i != LC_ALL_INDEX_) querylocale_i(i))
+#endif
 
 #if defined(USE_LOCALE)
 #  if defined(WIN32) || defined(USE_POSIX_2008_LOCALE) || ! defined(LC_ALL)
@@ -4267,22 +4283,9 @@ Perl_langinfo8(const nl_item item, utf8ness_t * utf8ness)
     PERL_UNUSED_VAR(cat_index);
 
 #else
-#  ifdef USE_LOCALE_NUMERIC
 
-    /* Use either the underlying numeric, or the other underlying categories */
-    if (cat_index == LC_NUMERIC_INDEX_) {
-        return my_langinfo_c(item, LC_NUMERIC, PL_numeric_name,
-                             &PL_langinfo_buf, &PL_langinfo_bufsize, utf8ness);
-    }
-    else
-
-#  endif
-
-    {
-        return my_langinfo_i(item, cat_index, querylocale_i(cat_index),
-                             &PL_langinfo_buf, &PL_langinfo_bufsize, utf8ness);
-    }
-
+    return my_langinfo_i(item, cat_index, query_nominal_locale_i(cat_index),
+                         &PL_langinfo_buf, &PL_langinfo_bufsize, utf8ness);
 #endif
 
 }
