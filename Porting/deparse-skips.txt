@@ -82,6 +82,7 @@ re/overload.t             # [perl #123385] %^H output
 re/pat_advanced.t         # [perl #123417]
 re/pat_rt_report.t        # malformed utf8 constant; also /\c@/ -> /\c\@/
 re/pat.t                  # [perl #90590]
+re/pat_re_eval.t          # the new /(*{...})/ forms don't deparse
 re/regex_sets.t
 re/reg_fold.t             # [perl #123385] %^H output
 re/rxcode.t               # checks regexp stringification
