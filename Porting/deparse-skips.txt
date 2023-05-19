@@ -154,31 +154,46 @@ uni/variables.t
 #    }
 
 ../cpan/bignum/t/bigexp.t
+../cpan/bignum/t/bigfloat.t
 ../cpan/bignum/t/bigint.t
 ../cpan/bignum/t/bignum.t
 ../cpan/bignum/t/bigrat.t
+../cpan/bignum/t/const-bigfloat.t
 ../cpan/bignum/t/const-bigint.t
 ../cpan/bignum/t/const-bignum.t
 ../cpan/bignum/t/const-bigrat.t
+../cpan/bignum/t/down-mbi-up-mbf.t
+../cpan/bignum/t/down-mbi-up-mbr.t
+../cpan/bignum/t/down-mbi-up-undef.t
+../cpan/bignum/t/down-undef-up-mbf.t
+../cpan/bignum/t/e_pi-bigfloat.t
 ../cpan/bignum/t/e_pi-bigint.t
 ../cpan/bignum/t/e_pi-bignum.t
 ../cpan/bignum/t/e_pi-bigrat.t
+../cpan/bignum/t/import-bigfloat.t
 ../cpan/bignum/t/import-bigint.t
 ../cpan/bignum/t/import-bignum.t
 ../cpan/bignum/t/import-bigrat.t
 ../cpan/bignum/t/in_effect.t
+../cpan/bignum/t/infnan-bigfloat.t
 ../cpan/bignum/t/infnan-bigint.t
-../cpan/bignum/t/infnan-bignum.t
+../cpan/bignum/t/infnan-bignum-mbf.t
+../cpan/bignum/t/infnan-bignum-mbr.t
 ../cpan/bignum/t/infnan-bigrat.t
+../cpan/bignum/t/option_a-bignum.t
 ../cpan/bignum/t/option_a.t
-../cpan/bignum/t/option_l.t
+../cpan/bignum/t/option_l-bigfloat.t
+../cpan/bignum/t/option_l-bigint.t
+../cpan/bignum/t/option_l-bignum.t
+../cpan/bignum/t/option_l-bigrat.t
+../cpan/bignum/t/option_p-bignum.t
 ../cpan/bignum/t/option_p.t
 ../cpan/bignum/t/overrides.t
 ../cpan/bignum/t/ratopt_a.t
+../cpan/bignum/t/scope-bigfloat.t
 ../cpan/bignum/t/scope-bigint.t
 ../cpan/bignum/t/scope-bignum.t
 ../cpan/bignum/t/scope-bigrat.t
-../cpan/bignum/t/scope-nested-const.t
 
 # -------------
 
