@@ -20,6 +20,33 @@
 #define    WEEKDAY_BIAS    6    /* (1+6)%7 makes Sunday 0 again */
 #define    TP_BUF_SIZE     160
 
+#ifndef ENV_LOCK
+#  define ENV_LOCK
+#  define ENV_UNLOCK
+#endif
+#ifndef GMTIME_LOCK
+#  define GMTIME_LOCK    ENV_LOCK
+#  define GMTIME_UNLOCK  ENV_UNLOCK
+#endif
+#ifndef LOCALTIME_LOCK
+#  define LOCALTIME_LOCK    ENV_LOCK
+#  define LOCALTIME_UNLOCK  ENV_UNLOCK
+#endif
+#ifndef STRFTIME_LOCK
+#  define STRFTIME_LOCK    ENV_LOCK
+#  define STRFTIME_UNLOCK  ENV_UNLOCK
+#endif
+#ifndef TZSET_LOCK
+#  define TZSET_LOCK    ENV_LOCK
+#  define TZSET_UNLOCK  ENV_UNLOCK
+#endif
+
+/* If the perl is too old for this macro, it is too old for any of the
+ * enhancements available in modern perls */
+#ifndef PERL_VERSION_GE
+#  define PERL_VERSION_GE(j,n,p)  0
+#endif
+
 #ifdef WIN32
 
 /*
@@ -145,7 +172,9 @@ my_tzset(pTHX)
 #endif
         fix_win32_tzenv();
 #endif
+    TZSET_LOCK;
     tzset();
+    TZSET_UNLOCK;
 }
 
 /*
@@ -758,10 +787,14 @@ label:
 			buf = cp;
             memset(&mytm, 0, sizeof(mytm));
 
-            if(*got_GMT == 1)
+            if(*got_GMT == 1) {
+                LOCALTIME_LOCK;
                 mytm = *localtime(&t);
-            else
+            }
+            else {
+                GMTIME_LOCK;
                 mytm = *gmtime(&t);
+            }
 
             tm->tm_sec    = mytm.tm_sec;
             tm->tm_min    = mytm.tm_min;
@@ -772,6 +805,13 @@ label:
             tm->tm_wday   = mytm.tm_wday;
             tm->tm_yday   = mytm.tm_yday;
             tm->tm_isdst  = mytm.tm_isdst;
+
+            if(*got_GMT == 1) {
+                LOCALTIME_UNLOCK;
+            }
+            else {
+                GMTIME_UNLOCK;
+            }
 			}
 			break;
 
@@ -963,12 +1003,19 @@ _strftime(fmt, epoch, islocal = 1)
         struct tm mytm;
         size_t len;
 
-        if(islocal == 1)
+        if(islocal == 1) {
+            LOCALTIME_LOCK;
             mytm = *localtime(&epoch);
-        else
+            LOCALTIME_UNLOCK;
+        }
+        else {
+            GMTIME_LOCK;
             mytm = *gmtime(&epoch);
-
+            GMTIME_UNLOCK;
+        }
+        STRFTIME_LOCK;
         len = strftime(tmpbuf, TP_BUF_SIZE, fmt, &mytm);
+        STRFTIME_UNLOCK;
         /*
         ** The following is needed to handle to the situation where
         ** tmpbuf overflows.  Basically we want to allocate a buffer
@@ -994,7 +1041,9 @@ _strftime(fmt, epoch, islocal = 1)
 
         New(0, buf, bufsize, char);
         while (buf) {
+            STRFTIME_LOCK;
             buflen = strftime(buf, bufsize, fmt, &mytm);
+            STRFTIME_UNLOCK;
             if (buflen > 0 && buflen < bufsize)
             break;
             /* heuristic to prevent out-of-memory errors */
@@ -1069,7 +1118,9 @@ _mini_mktime(int sec, int min, int hour, int mday, int mon, int year)
        time_t t;
   PPCODE:
        t = 0;
+       GMTIME_LOCK;
        mytm = *gmtime(&t);
+       GMTIME_UNLOCK;
 
        mytm.tm_sec = sec;
        mytm.tm_min = min;
@@ -1088,8 +1139,16 @@ _crt_localtime(time_t sec)
     PREINIT:
         struct tm mytm;
     PPCODE:
-        if(ix) mytm = *gmtime(&sec);
-        else mytm = *localtime(&sec);
+        if(ix) {
+            GMTIME_LOCK;
+            mytm = *gmtime(&sec);
+            GMTIME_UNLOCK;
+        }
+        else {
+            LOCALTIME_LOCK;
+            mytm = *localtime(&sec);
+            LOCALTIME_UNLOCK;
+        }
         /* Need to get: $s,$n,$h,$d,$m,$y */
 
         EXTEND(SP, 10);
@@ -1120,8 +1179,11 @@ _get_localization()
         char buf[TP_BUF_SIZE];
         size_t i;
         time_t t = 1325386800; /*1325386800 = Sun, 01 Jan 2012 03:00:00 GMT*/
-        struct tm mytm = *gmtime(&t);
+        struct tm mytm;
      CODE:
+        GMTIME_LOCK;
+        mytm = *gmtime(&t);
+        GMTIME_UNLOCK;
 
         for(i = 0; i < 7; ++i){
 
