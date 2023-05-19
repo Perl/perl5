@@ -5206,6 +5206,19 @@ Perl_langinfo8(const nl_item item, utf8ness_t * utf8ness)
 
 }
 
+char *
+Perl_my_strftime(pTHX_ const char *fmt, int sec, int min, int hour,
+                       int mday, int mon, int year, int wday, int yday,
+                       int isdst)
+{   /* Documented above */
+    PERL_ARGS_ASSERT_MY_STRFTIME;
+
+    struct tm  mytm;
+    ints_to_tm(&mytm, sec, min, hour, mday, mon, year, wday, yday, isdst);
+    char * ret = strftime_tm(fmt, &mytm);
+    return ret;
+}
+
 #ifdef USE_LOCALE
 
 /* There are several implementations of my_langinfo, depending on the
@@ -5870,17 +5883,6 @@ S_my_langinfo_i(pTHX_
 }   /* my_langinfo() */
 
 #endif      /* USE_LOCALE */
-
-char *
-Perl_my_strftime(pTHX_ const char *fmt, int sec, int min, int hour, int mday, int mon, int year, int wday, int yday, int isdst)
-{
-    PERL_ARGS_ASSERT_MY_STRFTIME;
-
-    struct tm  mytm;
-    ints_to_tm(&mytm, sec, min, hour, mday, mon, year, wday, yday, isdst);
-    char * ret = strftime_tm(fmt, &mytm);
-    return ret;
-}
 
 /*
 =for apidoc_section $time
