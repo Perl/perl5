@@ -3345,3 +3345,10 @@ my $x = !1;
 ####
 # const NV: NV-ness preserved
 my(@x) = (-2.0, -1.0, -0.0, 0.0, 1.0, 2.0);
+####
+# PADSV_STORE optimised my should be handled
+() = (my $s = 1);
+####
+# PADSV_STORE optimised state should be handled
+# CONTEXT use feature "state";
+() = (state $s = 1);
