@@ -1316,7 +1316,7 @@ Carp::confess("NULL in deparse_sub") if !defined($cv) || $cv->isa("B::NULL");
 Carp::confess("SPECIAL in deparse_sub") if $cv->isa("B::SPECIAL");
     local $self->{'curcop'} = $self->{'curcop'};
 
-    my $has_sig = $self->{hinthash}{feature_signatures};
+    my $has_sig = $self->feature_enabled('signatures');
     if ($cv->FLAGS & SVf_POK) {
 	my $myproto = $cv->PV;
 	if ($has_sig) {
@@ -2334,6 +2334,7 @@ my %feature_keywords = (
    catch    => 'try',
    finally  => 'try',
    defer    => 'defer',
+   signatures => 'signatures',
 );
 
 # keywords that are strong and also have a prototype
