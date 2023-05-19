@@ -203,10 +203,6 @@ uni/variables.t
 ../cpan/ExtUtils-MakeMaker/t/MM_VMS.t
 
 # see comment above about bignum failures
-../cpan/Math-BigInt/t/const-mbf.t
-../cpan/Math-BigInt/t/const-mbi.t
-
-# see comment above about bignum failures
 ../cpan/Math-BigRat/t/const-mbr.t
 
 
