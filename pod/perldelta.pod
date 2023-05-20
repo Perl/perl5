@@ -519,11 +519,6 @@ L<Execution of %s aborted due to compilation errors.|perldiag/"Execution of %s a
 
 =item *
 
-L<Object with arguments in @INC does not support a hook method
- |perldiag/"Object with arguments in @INC does not support a hook method">
-
-=item *
-
 L<Attempt to bless into a class|perldiag/"Attempt to bless into a class">
 
 (F) You are attempting to call C<bless> with a package name that is a
