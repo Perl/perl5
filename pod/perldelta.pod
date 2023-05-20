@@ -9,8 +9,6 @@ perldelta - what is new for perl v5.38.0
 This document describes differences between the 5.36.0 release and the 5.38.0
 release.
 
-=head1 Notice
-
 =head1 Core Enhancements
 
 =head2 Unicode 15.0 is supported
@@ -141,8 +139,6 @@ these functions.
 These functions are closely tied to the internals of how the interpreter
 works, and could be altered or removed at any time if other internal changes
 make that necessary.
-
-=head1 Security
 
 =head1 Incompatible Changes
 
