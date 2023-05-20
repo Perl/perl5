@@ -7008,7 +7008,7 @@ S_populate_hash_from_localeconv(pTHX_ HV *hv, const char *locale, const U32 whic
 # endif /* defined(HAS_LOCALECONV) */
 # if defined(USE_LOCALE)
 STATIC const char *
-S_calculate_LC_ALL_string(pTHX_ const char **category_locales_list, const calc_LC_ALL_format format, const line_t caller_line);
+S_calculate_LC_ALL_string(pTHX_ const char **category_locales_list, const calc_LC_ALL_format format, const calc_LC_ALL_return returning, const line_t caller_line);
 #   define PERL_ARGS_ASSERT_CALCULATE_LC_ALL_STRING
 
 STATIC unsigned int
