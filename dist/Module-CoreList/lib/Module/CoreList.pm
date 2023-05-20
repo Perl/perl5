@@ -405,7 +405,7 @@ sub changes_between {
     5.037010 => '2023-03-20',
     5.037011 => '2023-04-20',
     5.036001 => '2023-04-23',
-    5.037012 => '2023-05-20',
+    5.038000 => '2023-05-30',
   );
 
 for my $version ( sort { $a <=> $b } keys %released ) {
@@ -20290,13 +20290,38 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         removed => {
         }
     },
-    5.037012 => {
+    5.038000 => {
         delta_from => 5.037011,
         changed => {
-            'B::Op_private'         => '5.037012',
-            'Config'                => '5.037012',
+            'B::Op_private'         => '5.038000',
+            'Config'                => '5.038',
+            'ExtUtils::ParseXS'     => '3.51',
+            'ExtUtils::ParseXS::Constants'=> '3.51',
+            'ExtUtils::ParseXS::CountLines'=> '3.51',
+            'ExtUtils::ParseXS::Eval'=> '3.51',
+            'ExtUtils::ParseXS::Utilities'=> '3.51',
+            'ExtUtils::Typemaps'    => '3.51',
+            'ExtUtils::Typemaps::Cmd'=> '3.51',
+            'ExtUtils::Typemaps::InputMap'=> '3.51',
+            'ExtUtils::Typemaps::OutputMap'=> '3.51',
+            'ExtUtils::Typemaps::Type'=> '3.51',
+            'File::Glob'            => '1.40',
+            'IO'                    => '1.52',
+            'IO::Dir'               => '1.52',
+            'IO::File'              => '1.52',
+            'IO::Handle'            => '1.52',
+            'IO::Pipe'              => '1.52',
+            'IO::Poll'              => '1.52',
+            'IO::Seekable'          => '1.52',
+            'IO::Select'            => '1.52',
+            'IO::Socket'            => '1.52',
+            'IO::Socket::INET'      => '1.52',
+            'IO::Socket::UNIX'      => '1.52',
             'Module::CoreList'      => '5.20230520',
             'Module::CoreList::Utils'=> '5.20230520',
+            'POSIX'                 => '2.13',
+            'SDBM_File'             => '1.17',
+            'warnings'              => '1.65',
         },
         removed => {
         }
@@ -21695,7 +21720,7 @@ sub is_core
         removed => {
         }
     },
-    5.037012 => {
+    5.038000 => {
         delta_from => 5.037011,
         changed => {
         },
@@ -22523,8 +22548,8 @@ sub is_core
     'Test::use::ok'         => 'http://github.com/Test-More/test-more/issues',
     'Text::Balanced'        => undef,
     'Text::ParseWords'      => undef,
-    'Text::Tabs'            => 'https://github.com/ap/Text-Tabs/issues',
-    'Text::Wrap'            => 'https://github.com/ap/Text-Tabs/issues',
+    'Text::Tabs'            => undef,
+    'Text::Wrap'            => undef,
     'Tie::RefHash'          => 'https://rt.cpan.org/Public/Dist/Display.html?Name=Tie-RefHash',
     'Time::Local'           => 'https://github.com/houseabsolute/Time-Local/issues',
     'Time::Piece'           => undef,
