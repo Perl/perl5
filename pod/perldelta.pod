@@ -276,12 +276,6 @@ Creating an anonymous sub no longer generates an C<srefgen> op, the
 reference generation is now done in the C<anoncode> or C<anonconst>
 op, saving runtime.  [github #20290]
 
-=item *
-
-Temporary ("mortal") copies are no longer created during context exit for
-internal static SVs that are in no danger of being prematurely freed.
-[L<GH #20800|https://github.com/Perl/perl5/issues/20800>|https://github.com/Perl/perl5/issues/20800]
-
 =back
 
 =head1 Modules and Pragmata
