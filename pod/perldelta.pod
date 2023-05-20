@@ -291,8 +291,6 @@ XXX Remove this section if Porting/corelist-perldelta.pl did not add any content
 
 =item *
 
-=item *
-
 Added the C<is_tainted()> builtin function. [L<github #19854|https://github.com/Perl/perl5/issues/19854>]
 
 =item *
@@ -484,8 +482,6 @@ C macros in C and XS code.
 =item *
 
 A new section has been added to discuss unexpected gotchas with names.
-
-=back
 
 =back
 
@@ -1288,8 +1284,6 @@ in F<regcomp.c>.
 
 Fix regnode pointer alignment issue in F<regcomp.h>.
 
-=back
-
 =item *
 
 The C<CVf_METHOD> CV flag and associated C<CvMETHOD> macro has been renamed to
@@ -1469,12 +1463,12 @@ Avoid signed integer overflow in C<use integer> ops.
 
 Avoid adding an offset to a NULL pointer in C<hv_delete_common>.
 
-=item * PerlIO::get_layers will now accept IO references too
+=item *
+
+PerlIO::get_layers will now accept IO references too
 
 Previously it would only take glob references or names of globs. Now it will
 also accept IO references.
-
-=back
 
 =item *
 
