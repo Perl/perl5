@@ -1327,6 +1327,11 @@ typedef enum {
 } calc_LC_ALL_format;
 
 typedef enum {
+    WANT_VOID,
+    WANT_TEMP_PV,
+} calc_LC_ALL_return;
+
+typedef enum {
     no_override,
     override_if_ignored,
     check_that_overridden

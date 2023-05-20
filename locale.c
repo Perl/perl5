@@ -485,7 +485,9 @@ S_positional_name_value_xlation(const char * locale, bool direction)
                                      ? EXTERNAL_FORMAT_FOR_SET
                                      : INTERNAL_FORMAT;
         const char * retval = calculate_LC_ALL_string(individ_locales,
-                                                      format, __LINE__);
+                                                      format,
+                                                      WANT_TEMP_PV,
+                                                      __LINE__);
 
         for (unsigned int i = 0; i < LC_ALL_INDEX_; i++) {
             Safefree(individ_locales[i]);
@@ -1491,6 +1493,7 @@ S_posix_setlocale_with_complications(pTHX_ const int cat,
              * individual locales, and then return base(cat, NULL) */
             new_locale = calculate_LC_ALL_string(new_locales,
                                                  EXTERNAL_FORMAT_FOR_SET,
+                                                 WANT_TEMP_PV,
                                                  caller_line);
 
             for (unsigned i = 0; i < LC_ALL_INDEX_; i++) {
@@ -1612,9 +1615,10 @@ S_stdize_locale(pTHX_ const int category,
          * actually thinks it should be from its individual components */
     if (category == LC_ALL) {
         retval = (char *) calculate_LC_ALL_string(
-                                     NULL,  /* query each individ locale */
-                                     EXTERNAL_FORMAT_FOR_SET,
-                                     caller_line);
+                                          NULL,  /* query each individ locale */
+                                          EXTERNAL_FORMAT_FOR_SET,
+                                          WANT_TEMP_PV,
+                                          caller_line);
     }
 
 #  endif
@@ -1715,6 +1719,7 @@ S_stdize_locale(pTHX_ const int category,
             retval = (char *) calculate_LC_ALL_string(
                                             (const char **) &individ_locales,
                                             EXTERNAL_FORMAT_FOR_SET,
+                                            WANT_TEMP_PV,
                                             caller_line);
         }
 
@@ -1994,7 +1999,9 @@ S_querylocale_2008_i(pTHX_ const unsigned int index, const line_t caller_line)
          * element.) */
         if (index == LC_ALL_INDEX_ && PL_curlocales[LC_ALL_INDEX_] == NULL) {
             calculate_LC_ALL_string((const char **) &PL_curlocales,
-                                    INTERNAL_FORMAT, caller_line);
+                                    INTERNAL_FORMAT,
+                                    WANT_VOID,
+                                    caller_line);
         }
 
         if (cur_obj == PL_C_locale_obj) {
@@ -2085,6 +2092,7 @@ S_querylocale_2008_i(pTHX_ const unsigned int index, const line_t caller_line)
          * all) platforms only work on individual categories */
         if (index == LC_ALL_INDEX_) {
             retval = calculate_LC_ALL_string(NULL, INTERNAL_FORMAT,
+                                             WANT_TEMP_PV,
                                              caller_line);
         }
         else {
@@ -2652,6 +2660,7 @@ STATIC
 const char *
 S_calculate_LC_ALL_string(pTHX_ const char ** category_locales_list,
                                 const calc_LC_ALL_format format,
+                                const calc_LC_ALL_return returning,
                                 const line_t caller_line)
 {
     PERL_ARGS_ASSERT_CALCULATE_LC_ALL_STRING;
@@ -2659,8 +2668,8 @@ S_calculate_LC_ALL_string(pTHX_ const char ** category_locales_list,
     /* NOTE: On Configurations that have PL_curlocales[], this function has the
      * side effect of updating the LC_ALL_INDEX_ element with its result.
      *
-     * This function returns a string that defines the locale(s) LC_ALL is set
-     * to, in either:
+     * This function calculates a string that defines the locale(s) LC_ALL is
+     * set to, in either:
      *  1)  Our internal format if 'format' is set to INTERNAL_FORMAT.
      *  2)  The external format returned by Perl_setlocale() if 'format' is set
      *      to EXTERNAL_FORMAT_FOR_QUERY or EXTERNAL_FORMAT_FOR_SET.
@@ -2683,8 +2692,16 @@ S_calculate_LC_ALL_string(pTHX_ const char ** category_locales_list,
      *  2) NULL, to indicate to use querylocale_i() to get each individual
      *     value.
      *
-     * This function returns a mortalized string containing the locale name(s)
-     * of LC_ALL.
+     * The caller sets 'returning' to
+     *      WANT_TEMP_PV        the function returns the calculated string
+     *                              as a mmortalized temporary, so the caller
+     *                              doesn't have to worry about it being
+     *                              per-thread, nor needs to arrange for its
+     *                              clean-up.
+     *      WANT_VOID               NULL is returned.  This is used when the
+     *                              function is being called only for its side
+     *                              effect of updating
+     *                              PL_curlocales[LC_ALL_INDEX_]
      *
      * querylocale(), on systems that have it, doesn't tend to work for LC_ALL.
      * So we have to construct the answer ourselves based on the passed in
@@ -2723,6 +2740,8 @@ S_calculate_LC_ALL_string(pTHX_ const char ** category_locales_list,
                                ? "EXTERNAL_FORMAT_FOR_SET"
                                : "INTERNAL_FORMAT")),
                            caller_line));
+
+    bool input_list_was_NULL = (category_locales_list == NULL);
 
     /* If there was no input category list, construct a temporary one
      * ourselves. */
@@ -2818,19 +2837,40 @@ S_calculate_LC_ALL_string(pTHX_ const char ** category_locales_list,
         }
     }
 
+    bool free_if_void_return = false;
+
     /* Done iterating through all the categories. */
     const char * retval;
 
     /* If all categories have the same locale, we already know the answer */
     if (! disparate) {
-            retval = savepv(locales_list[0]);
-            SAVEFREEPV(retval);
+            retval = locales_list[0];
+
+            /* If a temporary is wanted for the return, and we had to create
+             * the input list ourselves, we created it into such a temporary,
+             * so no further work is needed; but otherwise, make a mortal copy
+             * of this passed-in list element */
+            if (returning == WANT_TEMP_PV && ! input_list_was_NULL) {
+                retval = savepv(retval);
+                SAVEFREEPV(retval);
+            }
+
+        /* In all cases here, there's nothing we create that needs to be freed,
+         * so leave 'free_if_void_return' set to the default 'false'. */
     }
     else {  /* Here, not all categories have the same locale */
         char * writable_alias;
 
             Newx(writable_alias, total_len, char);
-            SAVEFREEPV(writable_alias);
+
+            /* If returning the new memory, it must be set up to be freed
+             * later; otherwise at the end of this function */
+            if (returning == WANT_TEMP_PV) {
+                SAVEFREEPV(writable_alias);
+            }
+            else {
+                free_if_void_return = true;
+            }
 
         writable_alias[0] = '\0';
 
@@ -2907,8 +2947,17 @@ S_calculate_LC_ALL_string(pTHX_ const char ** category_locales_list,
 #  endif
 
     DEBUG_Lv(PerlIO_printf(Perl_debug_log,
-                           "calculate_LC_ALL_string returning '%s'\n",
+                           "calculate_LC_ALL_string calculated '%s'\n",
                            retval));
+
+    if (returning == WANT_VOID) {
+        if (free_if_void_return) {
+            Safefree(retval);
+        }
+
+        return NULL;
+    }
+
     return retval;
 }
 
@@ -3067,7 +3116,9 @@ S_find_locale_from_environment(pTHX_ const unsigned int index)
         return locale_names[0];
     }
 
-    return calculate_LC_ALL_string(locale_names, INTERNAL_FORMAT, __LINE__);
+    return calculate_LC_ALL_string(locale_names, INTERNAL_FORMAT,
+                                   WANT_TEMP_PV,
+                                   __LINE__);
 }
 
 #  endif
@@ -3077,6 +3128,7 @@ STATIC const char *
 S_get_LC_ALL_display(pTHX)
 {
     return calculate_LC_ALL_string(NULL, INTERNAL_FORMAT,
+                                   WANT_TEMP_PV,
                                    __LINE__);
 }
 
@@ -7253,6 +7305,7 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
                   case full_array:
                     name = calculate_LC_ALL_string(individ_locales,
                                                    INTERNAL_FORMAT,
+                                                   WANT_TEMP_PV,
                                                    __LINE__);
                     for (unsigned int j = 0; j < LC_ALL_INDEX_; j++) {
                         Safefree(individ_locales[j]);
@@ -7261,6 +7314,7 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 #  else
                 name = calculate_LC_ALL_string(curlocales,
                                                INTERNAL_FORMAT,
+                                               WANT_TEMP_PV,
                                                __LINE__);
 #  endif
                 description = GET_DESCRIPTION(trial, name);
@@ -7302,6 +7356,7 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
                  * human readable than the positional notation */
                 name = calculate_LC_ALL_string(system_locales,
                                                INTERNAL_FORMAT,
+                                               WANT_TEMP_PV,
                                                __LINE__);
                 description = "what the system says";
 
@@ -8692,8 +8747,9 @@ Perl_switch_to_global_locale(pTHX)
 #  ifdef LC_ALL
 
     const char * thread_locale = calculate_LC_ALL_string(NULL,
-                                                       EXTERNAL_FORMAT_FOR_SET,
-                                                       __LINE__);
+                                                         EXTERNAL_FORMAT_FOR_SET,
+                                                         WANT_TEMP_PV,
+                                                         __LINE__);
     CHANGE_SYSTEM_LOCALE_TO_GLOBAL;
     posix_setlocale(LC_ALL, thread_locale);
 
