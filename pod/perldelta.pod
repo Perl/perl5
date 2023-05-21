@@ -169,7 +169,7 @@ flag yourself with C<< $handle->clearerr() >> to continue reading.
 
 =item *
 
-If your code encounters and error on the stream while reading with
+If your code encounters an error on the stream while reading with
 readline() you will need to call C<< $handle->clearerr >> to continue
 reading.  The one case this occurred the underlying file descriptor was
 marked non-blocking, so the read() system call was failing with
