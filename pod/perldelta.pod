@@ -1456,7 +1456,8 @@ Fix multiple compiler warnings from regexp.c., locale.c [L<github #19915|https:/
 
 =item *
 
-Fix querying locale without LC_NUMERIC on platform [L<github #19890|https://github.com/Perl/perl5/issues/19890>]
+Fix a bug with querying locales on platforms that don't have LC_NUMERIC
+[L<github #19890|https://github.com/Perl/perl5/issues/19890>]
 
 =item *
 
