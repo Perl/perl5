@@ -1301,7 +1301,6 @@
 #       define calculate_LC_ALL_string(a,b,c)   S_calculate_LC_ALL_string(aTHX_ a,b,c)
 #       define get_category_index_helper(a,b,c) S_get_category_index_helper(aTHX_ a,b,c)
 #       define mortalized_pv_copy(a)            S_mortalized_pv_copy(aTHX_ a)
-#       define new_LC_ALL(a,b)                  S_new_LC_ALL(aTHX_ a,b)
 #       define output_check_environment_warning(a,b,c) S_output_check_environment_warning(aTHX_ a,b,c)
 #       define save_to_buffer(a,b,c)            S_save_to_buffer(aTHX_ a,b,c)
 #       define set_save_buffer_min_size(a,b,c)  S_set_save_buffer_min_size(aTHX_ a,b,c)
@@ -1316,9 +1315,11 @@
 #       endif
 #       if defined(LC_ALL)
 #         define give_perl_locale_control(a,b)  S_give_perl_locale_control(aTHX_ a,b)
+#         define new_LC_ALL(a,b)                S_new_LC_ALL(aTHX_ a,b)
 #         define parse_LC_ALL_string(a,b,c,d,e,f) S_parse_LC_ALL_string(aTHX_ a,b,c,d,e,f)
 #       else
 #         define give_perl_locale_control(a,b)  S_give_perl_locale_control(aTHX_ a,b)
+#         define new_LC_ALL(a,b)                S_new_LC_ALL(aTHX_ a,b)
 #       endif
 #       if defined(USE_LOCALE_COLLATE)
 #         define new_collate(a,b)               S_new_collate(aTHX_ a,b)
