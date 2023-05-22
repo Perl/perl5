@@ -232,6 +232,11 @@ use File::Glob qw(:case);
                 t/99pod.t
                 ),
         ],
+        'CUSTOMIZED' => [
+            # https://github.com/pmqs/Compress-Raw-Zlib/issues/23
+            'lib/Compress/Raw/Zlib.pm',
+            'Zlib.xs'
+        ],
     },
 
     'Config::Perl::V' => {
