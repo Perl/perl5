@@ -369,6 +369,11 @@ use File::Glob qw(:case);
         'DISTRIBUTION' => 'TODDR/Digest-MD5-2.58.tar.gz',
         'FILES'        => q[cpan/Digest-MD5],
         'EXCLUDED'     => [ 'rfc1321.txt', 'bin/md5sum.pl' ],
+        'CUSTOMIZED'   => [
+            # https://github.com/Dual-Life/digest-md5/pull/24
+            'MD5.pm',
+            'MD5.xs'
+        ],
     },
 
     'Digest::SHA' => {
