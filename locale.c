@@ -8685,10 +8685,10 @@ S_toggle_locale_i(pTHX_ const locale_category_index cat_index,
     const char * locale_to_restore_to = querylocale_i(cat_index);
 
     DEBUG_Lv(PerlIO_printf(Perl_debug_log,
-             "(%" LINE_Tf "): toggle_locale_i: index=%d(%s), wanted=%s,"
-             " actual=%s\n",
-             caller_line, cat_index, category_names[cat_index],
-             new_locale, locale_to_restore_to));
+                           "Entering toggle_locale_i: index=%d(%s),"        \
+                           " wanted=%s, actual=%s; called from %" LINE_Tf   \
+                           "\n", cat_index, category_names[cat_index],
+                           new_locale, locale_to_restore_to, caller_line));
 
     if (! locale_to_restore_to) {
         locale_panic_via_(Perl_form(aTHX_
@@ -8699,10 +8699,9 @@ S_toggle_locale_i(pTHX_ const locale_category_index cat_index,
 
     /* If the locales are the same, there's nothing to do */
     if (strEQ(locale_to_restore_to, new_locale)) {
-        DEBUG_Lv(PerlIO_printf(Perl_debug_log,
-                               "(%" LINE_Tf "): %s locale unchanged as %s\n",
-                               caller_line, category_names[cat_index],
-                               new_locale));
+        DEBUG_Lv(PerlIO_printf(Perl_debug_log, "%s locale unchanged as %s\n",
+                                               category_names[cat_index],
+                                               new_locale));
 
         return NULL;
     }
@@ -8711,8 +8710,8 @@ S_toggle_locale_i(pTHX_ const locale_category_index cat_index,
     void_setlocale_i_with_caller(cat_index, new_locale, __FILE__, caller_line);
 
     DEBUG_Lv(PerlIO_printf(Perl_debug_log,
-                           "(%" LINE_Tf "): %s locale switched to %s\n",
-                           caller_line, category_names[cat_index], new_locale));
+                           "%s locale switched to %s\n",
+                           category_names[cat_index], new_locale));
 
     return locale_to_restore_to;
 
@@ -8736,15 +8735,17 @@ S_restore_toggled_locale_i(pTHX_ const locale_category_index cat_index,
 
     if (restore_locale == NULL) {
         DEBUG_Lv(PerlIO_printf(Perl_debug_log,
-                               "(%" LINE_Tf "): No need to restore %s\n",
-                               caller_line, category_names[cat_index]));
+                               "restore_toggled_locale_i: No need to"       \
+                               " restore %s; called from %" LINE_Tf "\n",   \
+                               category_names[cat_index], caller_line));
         return;
     }
 
     DEBUG_Lv(PerlIO_printf(Perl_debug_log,
-                           "(%" LINE_Tf "): %s restoring locale to %s\n",
-                           caller_line, category_names[cat_index],
-                           restore_locale));
+                           "restore_toggled_locale_i: restoring locale for" \
+                           " %s to  %s; called from %" LINE_Tf "\n",        \
+                           category_names[cat_index], restore_locale,
+                           caller_line));
 
     void_setlocale_i_with_caller(cat_index, restore_locale,
                                   __FILE__, caller_line);
