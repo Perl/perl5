@@ -8,6 +8,8 @@ ExtUtils::Constant cpan/ExtUtils-Constant/lib/ExtUtils/Constant/Base.pm 7560e101
 ExtUtils::Constant cpan/ExtUtils-Constant/t/Constant.t 165e9c7132b003fd192d32a737b0f51f9ba4999e
 Filter::Util::Call pod/perlfilter.pod d1e217d0bc6083755b9017050b8724472c58275a
 Locale::Maketext::Simple cpan/Locale-Maketext-Simple/lib/Locale/Maketext/Simple.pm 57ed38905791a17c150210cd6f42ead22a7707b6
+MIME::Base64 cpan/MIME-Base64/Base64.xs ad617fe2d01932c35b92defa26d40aba601a95a8
+MIME::Base64 cpan/MIME-Base64/lib/MIME/Base64.pm 18e38d197c7c83f96b24f48bef514e93908e6a82
 Pod::Perldoc cpan/Pod-Perldoc/lib/Pod/Perldoc.pm 582be34c077c9ff44d99914724a0cc2140bcd48c
 Test::Harness cpan/Test-Harness/t/harness.t 38b13cfc479d37d91c104b97dd364a74dfde0f2f
 Time::Piece cpan/Time-Piece/Piece.pm 8cec8b66183ceddb9bf2b6af35dcdd345bc9adfa

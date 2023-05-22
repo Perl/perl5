@@ -815,6 +815,11 @@ use File::Glob qw(:case);
         'DISTRIBUTION' => 'CAPOEIRAB/MIME-Base64-3.16.tar.gz',
         'FILES'        => q[cpan/MIME-Base64],
         'EXCLUDED'     => [ qr{^xt/}, 'benchmark', 'benchmark-qp', qr{^t/00-report-prereqs} ],
+        'CUSTOMIZED'   => [
+            # https://github.com/Dual-Life/mime-base64/pull/17
+            'Base64.xs',
+            'lib/MIME/Base64.pm'
+        ],
     },
 
     'Module::CoreList' => {
