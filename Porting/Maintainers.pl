@@ -214,6 +214,11 @@ use File::Glob qw(:case);
             'bzip2-src/bzip2-cpp.patch',
             'bzip2-src/bzip2-unsigned.patch',
         ],
+        'CUSTOMIZED'   => [
+            # https://github.com/pmqs/Compress-Raw-Bzip2/issues/11
+            'Bzip2.xs',
+            'lib/Compress/Raw/Bzip.pm'
+        ],
     },
 
     'Compress::Raw::Zlib' => {
