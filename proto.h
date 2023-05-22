@@ -7017,10 +7017,6 @@ S_get_category_index_helper(pTHX_ const int category, bool *success, const line_
 #   define PERL_ARGS_ASSERT_GET_CATEGORY_INDEX_HELPER
 
 STATIC void
-S_new_LC_ALL(pTHX_ const char *unused, bool force);
-#   define PERL_ARGS_ASSERT_NEW_LC_ALL
-
-STATIC void
 S_output_check_environment_warning(pTHX_ const char * const language, const char * const lc_all, const char * const lang);
 #   define PERL_ARGS_ASSERT_OUTPUT_CHECK_ENVIRONMENT_WARNING
 
@@ -7073,6 +7069,11 @@ S_give_perl_locale_control(pTHX_ const char *lc_all_string, const line_t caller_
 #     define PERL_ARGS_ASSERT_GIVE_PERL_LOCALE_CONTROL \
         assert(lc_all_string)
 
+STATIC void
+S_new_LC_ALL(pTHX_ const char *lc_all, bool force);
+#     define PERL_ARGS_ASSERT_NEW_LC_ALL        \
+        assert(lc_all)
+
 STATIC parse_LC_ALL_string_return
 S_parse_LC_ALL_string(pTHX_ const char *string, const char **output, const parse_LC_ALL_STRING_action, bool always_use_full_array, const bool panic_on_error, const line_t caller_line);
 #     define PERL_ARGS_ASSERT_PARSE_LC_ALL_STRING \
@@ -7084,7 +7085,12 @@ S_give_perl_locale_control(pTHX_ const char **curlocales, const line_t caller_li
 #     define PERL_ARGS_ASSERT_GIVE_PERL_LOCALE_CONTROL \
         assert(curlocales)
 
-#   endif
+STATIC void
+S_new_LC_ALL(pTHX_ const char **individ_locales, bool force);
+#     define PERL_ARGS_ASSERT_NEW_LC_ALL        \
+        assert(individ_locales)
+
+#   endif /* !defined(LC_ALL) */
 #   if !defined(PERL_NO_INLINE_FUNCTIONS)
 PERL_STATIC_INLINE const char *
 S_mortalized_pv_copy(pTHX_ const char * const pv)
