@@ -1947,31 +1947,33 @@ S_bool_setlocale_2008_i(pTHX_
          * sanitizer. We do not free this object under normal teardown, however
          * you can set PERL_DESTRUCT_LEVEL=2 to cause it to be freed.
          */
-        new_obj = newlocale(mask, new_locale, basis_obj);
+            new_obj = newlocale(mask, new_locale, basis_obj);
 
-        if (! new_obj) {
-            DEBUG_NEW_OBJECT_FAILED(category_names[index], new_locale,
-                                    basis_obj);
+            if (! new_obj) {
+                DEBUG_NEW_OBJECT_FAILED(category_names[index], new_locale,
+                                        basis_obj);
 
-            /* Failed.  Likely this is because the proposed new locale isn't
-             * valid on this system. */
-            goto must_restore_state;
-        }
+                /* Failed.  Likely this is because the proposed new locale isn't
+                * valid on this system. */
+                goto must_restore_state;
+            }
 
             DEBUG_NEW_OBJECT_CREATED(category_names[index], new_locale,
                                      new_obj, basis_obj, caller_line);
 
-        /* Here, successfully created an object representing the desired
-         * locale; now switch into it */
-        if (! uselocale(new_obj)) {
-            freelocale(new_obj);
-            locale_panic_(Perl_form(aTHX_ "bool_setlocale_2008_i: switching"
-                                          " into new locale failed\n"));
-        }
+    }
 
 #  undef DEBUG_NEW_OBJECT_CREATED
 #  undef DEBUG_NEW_OBJECT_FAILED
 
+    /* Here, successfully created an object representing the desired locale;
+     * now switch into it */
+    if (! uselocale(new_obj)) {
+        freelocale(new_obj);
+        locale_panic_(Perl_form(aTHX_ "(called from %" LINE_Tf "):"
+                                      " bool_setlocale_2008_i: switching"
+                                      " into new locale failed",
+                                      caller_line));
     }
 
     DEBUG_Lv(PerlIO_printf(Perl_debug_log,
