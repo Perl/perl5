@@ -1216,6 +1216,11 @@ use File::Glob qw(:case);
         'DISTRIBUTION' => 'ESAYM/Time-Piece-1.3401.tar.gz',
         'FILES'        => q[cpan/Time-Piece],
         'EXCLUDED'     => [ qw[reverse_deps.txt] ],
+        'CUSTOMIZED'   => [
+            # https://github.com/Dual-Life/Time-Piece/pull/64
+            'Piece.pm',
+            'Piece.xs'
+         ],
     },
 
     'Unicode::Collate' => {
