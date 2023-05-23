@@ -28,7 +28,7 @@ provides native keywords supporting object-oriented programming paradigm.
 
 =head2 History
 
-Since Perl 5, support for objects resolved around the concept of I<blessing>
+Since Perl 5, support for objects revolved around the concept of I<blessing>
 references with a package name. Such reference could then be used to call
 subroutines from the package it was blessed with (or any of its parents). This
 system, while bare-bones, was flexible enough to allow creation of multiple
