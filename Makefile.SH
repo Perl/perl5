@@ -787,7 +787,7 @@ bitcount.h: generate_uudmap\$(HOST_EXE_EXT)
 
 $spitshell >>$Makefile <<'!NO!SUBS!'
 generate_uudmap$(HOST_EXE_EXT): generate_uudmap$(OBJ_EXT)
-	$(CC) -o generate_uudmap$(EXE_EXT) $(LDFLAGS) generate_uudmap$(OBJ_EXT) $(libs)
+	$(LD) -o generate_uudmap$(EXE_EXT) $(LDFLAGS) generate_uudmap$(OBJ_EXT) $(libs)
 
 !NO!SUBS!
 ;;
