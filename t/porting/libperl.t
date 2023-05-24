@@ -245,7 +245,8 @@ sub nm_parse_gnu {
 sub nm_parse_darwin {
     my $symbols = shift;
     my $line = $_;
-    if (m{^(?:.+)?libperl\.a\((\w+\.o)\):$}) {
+    if (m{^(?:.+)?libperl\.a\((\w+\.o)\):$} ||
+        m{^(\w+\.o):$}) {
         # object file name
         $symbols->{obj}{$1}++;
         $symbols->{o} = $1;
