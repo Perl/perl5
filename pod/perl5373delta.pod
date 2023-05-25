@@ -1,0 +1,275 @@
+=encoding utf8
+
+=head1 NAME
+
+perl5373delta - what is new for perl v5.37.3
+
+=head1 DESCRIPTION
+
+This document describes differences between the 5.37.2 release and the 5.37.3
+release.
+
+If you are upgrading from an earlier release such as 5.37.1, first read
+L<perl5372delta>, which describes differences between 5.37.1 and 5.37.2.
+
+
+=head1 Core Enhancements
+
+=head2 PERL_RAND_SEED
+
+Added a new environment variable C<PERL_RAND_SEED> which can be used to
+cause a perl program which uses C<rand> without using C<srand()>
+explicitly or which uses C<srand()> with no arguments to be repeatable.
+See L<perlrun>. This feature can be disabled at compile time by passing
+
+    -Accflags=-DNO_PERL_RAND_SEED
+
+to F<Configure> during the build process.
+
+
+
+=head1 Performance Enhancements
+
+=over 4
+
+=item *
+
+Additional optree optimizations for common OP patterns. For example, multiple
+simple OPs replaced by a single streamlined OP, so as to be more efficient at
+runtime. L<[GH #19943]|https://github.com/Perl/perl5/pull/19943>.
+
+=back
+
+
+=head1 Modules and Pragmata
+
+=head2 Updated Modules and Pragmata
+
+=over 4
+
+=item *
+
+L<attributes> has been upgraded from version 0.34 to 0.35.
+
+=item *
+
+L<B> has been upgraded from version 1.85 to 1.86.
+
+=item *
+
+L<B::Deparse> has been upgraded from version 1.65 to 1.68.
+
+=item *
+
+L<Digest::SHA> has been upgraded from version 6.02 to 6.03.
+
+=item *
+
+L<DynaLoader> has been upgraded from version 1.52 to 1.53.
+
+=item *
+
+L<Encode> has been upgraded from version 3.18 to 3.19.
+
+=item *
+
+L<ExtUtils::PL2Bat> has been upgraded from version 0.004 to 0.005.
+
+=item *
+
+L<File::Find> has been upgraded from version 1.40 to 1.41.
+
+=item *
+
+L<Filter::Util::Call> has been upgraded from version 1.61 to 1.64.
+
+=item *
+
+L<HTTP::Tiny> has been upgraded from version 0.080 to 0.082:
+no longer deletes the 'headers' key from post_form arguments hashref.
+
+=item *
+
+L<JSON::PP> has been upgraded from version 4.10 to 4.11.
+
+=item *
+
+L<Memoize> has been upgraded from version 1.03_01 to 1.10.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 5.20220720 to 5.20220820.
+
+=item *
+
+L<NDBM_File> has been upgraded from version 1.15 to 1.16.
+
+=item *
+
+L<Opcode> has been upgraded from version 1.59 to 1.60.
+
+=item *
+
+L<Scalar::Util> has been upgraded from version 1.62 to 1.63:
+fix off-by-one in stack handling of head() / tail() (RT143905).
+
+=item *
+
+L<Socket> has been upgraded from version 2.035 to 2.036:
+Avoid putting macros inside arguments to other macros,
+as it annoys strict C compilers
+
+=item *
+
+L<threads> has been upgraded from version 2.28 to 2.29.
+
+=item *
+
+L<XS::APItest> has been upgraded from version 1.24 to 1.25.
+
+=back
+
+
+
+
+=head1 Platform Support
+
+
+=head2 Platform-Specific Notes
+
+=over 4
+
+=item Windows
+
+=over 4
+
+=item *
+
+In some cases, timestamps returned by L<stat()|perlfunc/stat> and
+L<lstat()|perlfunc/lstat> failed to take daylight saving time into account.
+[L<GH #20018|https://github.com/Perl/perl5/issues/20018>]
+[L<GH #20061|https://github.com/Perl/perl5/issues/20061>]
+
+=back
+
+=item FreeBSD
+
+=over 4
+
+=item *
+
+FreeBSD no longer uses thread-safe locale operations, to avoid L<a bug in FreeBSD|https://bugs.freebsd.org/bugzilla/show_bug.cgi?id=265950>
+
+=back
+
+=back
+
+
+=head1 Internal Changes
+
+=over 4
+
+=item *
+
+The C<CVf_METHOD> CV flag and associated C<CvMETHOD> macro has been renamed to
+C<CVf_NOWARN_AMBIGUOUS> and C<CvNOWARN_AMBIGUOUS>. This closer reflects its
+actual behaviour (it suppresses a warning that would otherwise be generated
+about ambiguous names), in order to be less confusing with a possible upcoming
+feature.
+
+=item *
+
+The C<OPf_SPECIAL> flag is no longer set on the C<OP_ENTERSUB> op
+constructed to call the C<VERSION>, C<import> and C<unimport> methods
+as part of a C<use> statement and attribute application, nor when
+assigning to an C<:lvalue> subroutine.
+
+=item *
+
+A new CV flag C<CVf_REFCOUNTED_ANYSV> has been added, which indicates that the
+CV is an XSUB and stores an SV pointer in the C<CvXSUBANY.any_sv> union field.
+Perl core operations such as cloning or destroying the CV will maintain the
+reference count of the pointed-to SV, destroying it when required.
+
+=back
+
+=head1 Selected Bug Fixes
+
+=over 4
+
+=item * PerlIO::get_layers will now accept IO references too
+
+Previously it would only take glob references or names of globs. Now it will
+also accept IO references.
+
+=back
+
+
+=head1 Acknowledgements
+
+Perl 5.37.3 represents approximately 4 weeks of development since Perl
+5.37.2 and contains approximately 13,000 lines of changes across 240 files
+from 25 authors.
+
+Excluding auto-generated files, documentation and release tools, there were
+approximately 11,000 lines of changes to 160 .pm, .t, .c and .h files.
+
+Perl continues to flourish into its fourth decade thanks to a vibrant
+community of users and developers. The following people are known to have
+contributed the improvements that became Perl 5.37.3:
+
+Aristotle Pagaltzis, Bram, Dagfinn Ilmari Mannsåker, Dan Book, Dan Kogai,
+David Golden, David Mitchell, Elvin Aslanov, Graham Knop, Harald Jörg,
+James E Keenan, Karl Williamson, Leon Timmermans, Mark Shelor, Neil Bowers,
+Nicholas Clark, Nicolas R, Paul Evans, Reini Urban, Richard Leach, Sinan
+Unur, Tomasz Konojacki, Tony Cook, Yves Orton, 小鸡.
+
+The list above is almost certainly incomplete as it is automatically
+generated from version control history. In particular, it does not include
+the names of the (very much appreciated) contributors who reported issues to
+the Perl bug tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core. We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please
+see the F<AUTHORS> file in the Perl source distribution.
+
+
+=head1 Reporting Bugs
+
+If you find what you think is a bug, you might check the perl bug database
+at L<https://github.com/Perl/perl5/issues>.  There may also be information at
+L<http://www.perl.org/>, the Perl Home Page.
+
+If you believe you have an unreported bug, please open an issue at
+L<https://github.com/Perl/perl5/issues>.  Be sure to trim your bug down to a
+tiny but sufficient test case.
+
+If the bug you are reporting has security implications which make it
+inappropriate to send to a public issue tracker, then see
+L<perlsec/SECURITY VULNERABILITY CONTACT INFORMATION>
+for details of how to report the issue.
+
+=head1 Give Thanks
+
+If you wish to thank the Perl 5 Porters for the work we had done in Perl 5,
+you can do so by running the C<perlthanks> program:
+
+    perlthanks
+
+This will send an email to the Perl 5 Porters list with your show of thanks.
+
+=head1 SEE ALSO
+
+The F<Changes> file for an explanation of how to view exhaustive details on
+what changed.
+
+The F<INSTALL> file for how to build Perl.
+
+The F<README> file for general stuff.
+
+The F<Artistic> and F<Copying> files for copyright information.
+
+=cut

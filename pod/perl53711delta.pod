@@ -1,0 +1,199 @@
+=encoding utf8
+
+=head1 NAME
+
+perl53711delta - what is new for perl v5.37.11
+
+=head1 DESCRIPTION
+
+This document describes differences between the 5.37.10 release and the 5.37.11
+release.
+
+If you are upgrading from an earlier release such as 5.37.9, first read
+L<perl53710delta>, which describes differences between 5.37.9 and 5.37.10.
+
+=head1 Core Enhancements
+
+=head2 Locale category LC_NAME now supported on participating platforms
+
+On platforms that have the GNU extension C<LC_NAME> category, you may now use
+it as the category parameter to L<POSIX/setlocale> to set and query its locale.
+
+=head1 Modules and Pragmata
+
+=head2 Updated Modules and Pragmata
+
+=over 4
+
+=item *
+
+L<B::Deparse> has been upgraded from version 1.72 to 1.73.
+
+=item *
+
+L<Devel::PPPort> has been upgraded from version 3.70 to 3.71.
+
+=item *
+
+L<ExtUtils::MakeMaker> has been upgraded from version 7.66 to 7.70.
+
+=item *
+
+L<ExtUtils::ParseXS> has been upgraded from version 3.49 to 3.50.
+
+=item *
+
+L<feature> has been upgraded from version 1.81 to 1.82.
+
+=item *
+
+L<File::Copy> has been upgraded from version 2.40 to 2.41.
+
+=item *
+
+L<Locale::Maketext> has been upgraded from version 1.32 to 1.33.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 5.20230320 to 5.20230420.
+
+=item *
+
+L<Net::Ping> has been upgraded from version 2.75 to 2.76.
+
+=item *
+
+L<threads> has been upgraded from version 2.35 to 2.36.
+
+=item *
+
+L<threads::shared> has been upgraded from version 1.67 to 1.68.
+
+=item *
+
+L<warnings> has been upgraded from version 1.63 to 1.64.
+
+=back
+
+=head1 Documentation
+
+=head2 Changes to Existing Documentation
+
+We have attempted to update the documentation to reflect the changes listed in
+this document.  If you find any we have missed, open an issue at
+L<https://github.com/Perl/perl5/issues>.
+
+Additionally, the following selected changes have been made:
+
+=head3 L<perlfunc>
+
+=over 4
+
+=item *
+
+The descriptions of pop() and shift() have been expanded.
+
+=back
+
+=head3 L<perlvar>
+
+=over 4
+
+=item *
+
+The descriptions of $^H and %^H have been updated.
+
+=back
+
+=head1 Testing
+
+Tests were added and changed to reflect the other additions and
+changes in this release.  Furthermore, these significant changes were
+made:
+
+=over 4
+
+=item *
+
+The test framework now skips tests that use B<-T> or B<-t> when running under a
+perl built with the F<Configure> option C<-DNO_TAINT_SUPPORT>.
+
+=back
+
+=head1 Selected Bug Fixes
+
+=over 4
+
+=item *
+
+The buffer used by getsockopt() is now 1024 bytes by default and can be
+adjusted at perl build time by defining C<PERL_GETSOCKOPT_SIZE> in C<ccflags>.
+[L<GH #19758|https://github.com/Perl/perl5/issues/19758>]
+
+=back
+
+=head1 Acknowledgements
+
+Perl 5.37.11 represents approximately 4 weeks of development since Perl 5.37.10
+and contains approximately 5,500 lines of changes across 180 files from 16
+authors.
+
+Excluding auto-generated files, documentation and release tools, there were
+approximately 3,000 lines of changes to 110 .pm, .t, .c and .h files.
+
+Perl continues to flourish into its fourth decade thanks to a vibrant community
+of users and developers.  The following people are known to have contributed
+the improvements that became Perl 5.37.11:
+
+Craig A. Berry, Dan Book, David Cantrell, Karl Williamson, Leon Timmermans,
+Lukas Mai, Nicolas R, Paul Evans, Philippe Bruhat (BooK), Scott Baker, Sevan
+Janiyan, Steve Hay, Tomasz Konojacki, Tony Cook, Yves Orton, Zefram.
+
+The list above is almost certainly incomplete as it is automatically generated
+from version control history.  In particular, it does not include the names of
+the (very much appreciated) contributors who reported issues to the Perl bug
+tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core.  We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please see
+the F<AUTHORS> file in the Perl source distribution.
+
+=head1 Reporting Bugs
+
+If you find what you think is a bug, you might check the perl bug database at
+L<https://github.com/Perl/perl5/issues>.  There may also be information at
+L<http://www.perl.org/>, the Perl Home Page.
+
+If you believe you have an unreported bug, please open an issue at
+L<https://github.com/Perl/perl5/issues>.  Be sure to trim your bug down to a
+tiny but sufficient test case.
+
+If the bug you are reporting has security implications which make it
+inappropriate to send to a public issue tracker, then see
+L<perlsec/SECURITY VULNERABILITY CONTACT INFORMATION> for details of how to
+report the issue.
+
+=head1 Give Thanks
+
+If you wish to thank the Perl 5 Porters for the work we had done in Perl 5, you
+can do so by running the C<perlthanks> program:
+
+    perlthanks
+
+This will send an email to the Perl 5 Porters list with your show of thanks.
+
+=head1 SEE ALSO
+
+The F<Changes> file for an explanation of how to view exhaustive details on
+what changed.
+
+The F<INSTALL> file for how to build Perl.
+
+The F<README> file for general stuff.
+
+The F<Artistic> and F<Copying> files for copyright information.
+
+=cut

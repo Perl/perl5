@@ -1,0 +1,488 @@
+=encoding utf8
+
+=head1 NAME
+
+perl5372delta - what is new for perl v5.37.2
+
+=head1 DESCRIPTION
+
+This document describes differences between the 5.37.1 release and the 5.37.2
+release.
+
+If you are upgrading from an earlier release such as 5.37.0, first read
+L<perl5371delta>, which describes differences between 5.37.0 and 5.37.1.
+
+=head1 Performance Enhancements
+
+=over 4
+
+=item *
+
+Use C<Perl_fabs> rather than hand-coded abs expressions in C<sv.c>.
+
+=item *
+
+Replace a runtime check with compile-time static assertion in C<sv.c>.
+
+=back
+
+=head1 Modules and Pragmata
+
+=head2 New Modules and Pragmata
+
+=over 4
+
+=item *
+
+Added the C<is_tainted()> builtin function. [L<github #19854|https://github.com/Perl/perl5/issues/19854>]
+
+=item *
+
+Added the C<export_lexically()> builtin function as per PPC 0020. [L<github #19895|https://github.com/Perl/perl5/issues/19895>]
+
+=back
+
+=head2 Updated Modules and Pragmata
+
+=over 4
+
+=item *
+
+L<builtin> has been upgraded from version 0.007 to 0.008.
+
+=item *
+
+L<B> has been upgraded from version 1.84 to 1.85.
+
+=item *
+
+L<B::Concise> has been upgraded from version 1.006 to 1.007.
+
+=item *
+
+L<B::Deparse> has been upgraded from version 1.64 to 1.65.
+
+=item *
+
+L<bignum> has been upgraded from version 0.65 to 0.66.
+
+=item *
+
+L<Compress::Raw::Bzip2> has been upgraded from version 2.103 to 2.201.
+
+=item *
+
+L<Compress::Raw::Zlib> has been upgraded from version 2.105 to 2.202.
+
+=item *
+
+L<CPAN> has been upgraded from version 2.33 to 2.34.
+
+=item *
+
+L<Data::Dumper> has been upgraded from version 2.185 to 2.186.
+
+=item *
+
+L<DB_File> has been upgraded from version 1.857 to 1.858.
+
+=item *
+
+L<Encode> has been upgraded from version 3.17 to 3.18.
+
+=item *
+
+L<feature> has been upgraded from version 1.74 to 1.75.
+
+The C<bareword_filehandles> feature has been removed from the C<:5.38>
+feature bundle. [L<github #19924|https://github.com/Perl/perl5/issues/19924>]
+
+=item *
+
+L<File::Glob> has been upgraded from version 1.37 to 1.38.
+
+=item *
+
+L<File::Spec> has been upgraded from version 3.85 to 3.86.
+
+=item *
+
+L<Filter::Util::Call> has been upgraded from version 1.60 to 1.61.
+
+=item *
+
+L<Hash::Util> has been upgraded from version 0.28 to 0.29.
+
+=item *
+
+L<IO::Compress> has been upgraded from version 2.106 to 2.201.
+
+=item *
+
+L<JSON::PP> has been upgraded from version 4.07 to 4.10.
+
+=item *
+
+L<Math::BigInt> has been upgraded from version 1.999830 to 1.999837.
+
+=item *
+
+L<Math::BigInt::FastCalc> has been upgraded from version 0.5012 to 0.5013.
+
+=item *
+
+L<Math::BigRat> has been upgraded from version 0.2621 to 0.2624.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 5.20220620 to 5.20220720.
+
+=item *
+
+L<Opcode> has been upgraded from version 1.58 to 1.59.
+
+=item *
+
+L<PerlIO::via::QuotedPrint> has been upgraded from version 0.09 to 0.10.
+
+=item *
+
+L<Pod::Checker> has been upgraded from version 1.74 to 1.75.
+
+=item *
+
+L<Pod::Usage> has been upgraded from version 2.01 to 2.03.
+
+=item *
+
+L<Socket> has been upgraded from version 2.033 to 2.035.
+
+=item *
+
+L<Storable> has been upgraded from version 3.26 to 3.27.
+
+=item *
+
+L<Test::Simple> has been upgraded from version 1.302190 to 1.302191.
+
+=item *
+
+L<Text::Balanced> has been upgraded from version 2.04 to 2.06.
+
+=item *
+
+L<threads::shared> has been upgraded from version 1.64 to 1.65.
+
+=item *
+
+L<XS::APItest> has been upgraded from version 1.23 to 1.24.
+
+=back
+
+=head1 Documentation
+
+=head2 Changes to Existing Documentation
+
+We have attempted to update the documentation to reflect the changes
+listed in this document.  If you find any we have missed, open an issue
+at L<https://github.com/Perl/perl5/issues>.
+
+Additionally, the following selected changes have been made:
+
+=over 4
+
+=item *
+
+Perl API: Better documentation of experimental and deprecated elements.
+
+=item *
+
+Add comments better explaining ANYOF nodes in C<regcomp.h>
+
+=item *
+
+perlunicode: Clarify user-defined properties
+
+=item *
+
+regex: Add POSIXA1R node
+
+=item *
+
+Improve sorting of documentation for better reading.
+
+=back
+
+=head1 Configuration and Compilation
+
+=over 4
+
+=item *
+
+Properly populate osvers on Dragonfly BSD when the hostname isn't set.
+
+=item *
+
+Fix typos for C99 macro name PRIX64.
+
+=back
+
+=head1 Testing
+
+Tests were added and changed to reflect the other additions and changes
+in this release.
+
+=head1 Platform Support
+
+=head2 Platform-Specific Notes
+
+=over 4
+
+=item DragonflyBSD
+
+Skip tests to workaround an apparent bug in setproctitle().  [L<github #19894|https://github.com/Perl/perl5/issues/19894>]
+
+=item FreeBSD
+
+Replace the first part of archname with `uname -p` [L<github #19791|https://github.com/Perl/perl5/issues/19791>]
+
+=item Synology
+
+Update Synology Readme for DSM 7.
+
+=item Solaris
+
+Avoid some compiler and compilation issues on NetBSD/Solaris from regexec.c and regcomp.c.
+
+=item Windows
+
+Fix win32 memory alignment needed for gcc-12 from vmem.h.
+
+=back
+
+=head1 Internal Changes
+
+=over 4
+
+=item *
+
+New formatting symbols were added for printing values declared as U32 or
+I32:
+
+=over
+
+=item I32df -- Like %d
+
+=item U32of -- Like %o
+
+=item U32uf -- Like %u
+
+=item U32xf -- Like %x
+
+=item U32Xf -- Like %X
+
+=back
+
+These are used in the same way already existing similar symbols, such as
+C<IVdf>, are used.  See L<perlapi/I/O Formats>.
+
+=item *
+
+new 'HvHasAUX' macro
+
+=item *
+
+regexec.c: Add some branch predictions reorder conds
+
+=item *
+
+locale: Change macro name to be C conformant
+
+=item *
+
+Rename the C<PADNAMEt_*> constants to C<PADNAMEf_*>
+
+=item *
+
+Changes all the API macros that retrieve a PV into a call to an
+inline function so as to evaluate the parameter just once.
+
+=item *
+
+regexec.c: multiple code refactor to make the code more readable
+
+=item *
+
+perl.h: Change macro name to be C conformant
+(remove leading _ from NOT_IN_NUMERIC macros)
+
+=item *
+
+regcomp.h: add new C<BITMAP_BIT> macro in addition to the existing C<BITMAP_BYTE>
+and C<BITMAP_TEST> ones.
+
+=item *
+
+Create new regnode type ANYOFH.
+populate_ANYOF_from_invlist was renamed to populate_bitmap_from_invlist
+
+=item *
+
+regex: Refactor bitmap vs non-bitmap of qr/[]/
+
+=item *
+
+regcomp.c: add new functions to convert from an inversion list to a bitmap (and vice versa)
+C<populate_bitmap_from_invlist> and C<populate_invlist_from_bitmap>.
+
+=item *
+
+Add C<newAVav()> to create an AV from an existing AV.
+Add C<newAVhv()> to create an AV using keys and values from an existing HV.
+
+=item *
+
+Fix definition of C<Perl_atof>.
+
+=item *
+
+Fix undefined behavior with overflow related OPTIMIZE_INFTY and delta
+in C<regcomp.c>.
+
+=item *
+
+Fix regnode pointer alignment issue in <regcomp.h>.
+
+=back
+
+=head1 Selected Bug Fixes
+
+=over 4
+
+=item *
+
+Disabling the C<bareword_filehandles> feature no longer treats C<< print
+Class->method >> as an error.  [L<github #19704|https://github.com/Perl/perl5/issues/19704>]
+
+=item *
+
+When a Perl subroutine tail-calls an XS subroutine using C<goto &xs_sub>,
+the XS subroutine can now correctly determine its calling context.
+Previously it was always reported as scalar.
+
+In addition, where the Perl subroutine is freed at the same time:
+
+    sub foo { *foo = sub {}; goto &xs_sub }
+
+this formerly could lead to crashes if the XS subroutine tried to use the
+value of C<PL_op>, since this was being set to NULL. This is now fixed.
+
+[L<github #19936|https://github.com/Perl/perl5/issues/19936>]
+
+=item *
+
+setsockopt() now uses the mechanism added in 5.36 to better
+distinguish between numeric and string values supplied as the
+C<OPTVAL> parameter.  [L<github #18761|https://github.com/Perl/perl5/issues/18761>]
+
+=item *
+
+4-argument C<select()> now rejects strings with code points above
+255. Additionally, for code points 128-255, this operator will now always
+give the corresponding octet to the OS, regardless of how Perl stores
+such code points in memory. (Previously Perl leaked its internal string
+storage to the OS.) [L<github #19882|https://github.com/Perl/perl5/issues/19882>]
+
+=item *
+
+Fix panic issue from C<val {} inside /(?{...})/> [L<github #19390|https://github.com/Perl/perl5/issues/19390>]
+
+=item *
+
+Fix multiple compiler warnings from regexp.c., locale.c [L<github #19915|https://github.com/Perl/perl5/issues/19915>]
+
+=item *
+
+Fix querying locale without LC_NUMERIC on platform [L<github #19890|https://github.com/Perl/perl5/issues/19890>]
+
+=item *
+
+Prevent undefined behaviour in C<S_maybe_multideref()>.
+
+=item *
+
+Avoid signed integer overflow in C<use integer> ops.
+
+=item *
+
+Avoid adding an offset to a NULL pointer in C<hv_delete_common>.
+
+=back
+
+=head1 Acknowledgements
+
+Perl 5.37.2 represents approximately 4 weeks of development since Perl
+5.37.1 and contains approximately 35,000 lines of changes across 440 files
+from 24 authors.
+
+Excluding auto-generated files, documentation and release tools, there were
+approximately 30,000 lines of changes to 350 .pm, .t, .c and .h files.
+
+Perl continues to flourish into its fourth decade thanks to a vibrant
+community of users and developers. The following people are known to have
+contributed the improvements that became Perl 5.37.2:
+
+Branislav Zahradník, Craig A. Berry, Dagfinn Ilmari Mannsåker, Dan Kogai,
+David Mitchell, Felipe Gasper, Graham Knop, H.Merijn Brand, James E Keenan,
+James Raspass, Karl Williamson, Kenichi Ishigaki, Leon Timmermans, Loren
+Merritt, Marcel Telka, Matthew Horsfall, Nicolas R, Paul Evans, Ricardo
+Signes, Richard Leach, Sisyphus, TAKAI Kousuke, Tony Cook, Yves Orton.
+
+The list above is almost certainly incomplete as it is automatically
+generated from version control history. In particular, it does not include
+the names of the (very much appreciated) contributors who reported issues to
+the Perl bug tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core. We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please
+see the F<AUTHORS> file in the Perl source distribution.
+
+=head1 Reporting Bugs
+
+If you find what you think is a bug, you might check the perl bug database
+at L<https://github.com/Perl/perl5/issues>.  There may also be information at
+L<http://www.perl.org/>, the Perl Home Page.
+
+If you believe you have an unreported bug, please open an issue at
+L<https://github.com/Perl/perl5/issues>.  Be sure to trim your bug down to a
+tiny but sufficient test case.
+
+If the bug you are reporting has security implications which make it
+inappropriate to send to a public issue tracker, then see
+L<perlsec/SECURITY VULNERABILITY CONTACT INFORMATION>
+for details of how to report the issue.
+
+=head1 Give Thanks
+
+If you wish to thank the Perl 5 Porters for the work we had done in Perl 5,
+you can do so by running the C<perlthanks> program:
+
+    perlthanks
+
+This will send an email to the Perl 5 Porters list with your show of thanks.
+
+=head1 SEE ALSO
+
+The F<Changes> file for an explanation of how to view exhaustive details on
+what changed.
+
+The F<INSTALL> file for how to build Perl.
+
+The F<README> file for general stuff.
+
+The F<Artistic> and F<Copying> files for copyright information.
+
+=cut

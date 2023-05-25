@@ -1,0 +1,201 @@
+name: "Push Notification"
+on: [push, pull_request]
+# add create for tracking tags
+
+# IRC colors: https://modern.ircdocs.horse/formatting.html
+# yaml formating: https://www.yaml.info/learn/quote.html
+
+permissions: {}
+jobs:
+  notify-irc:
+    timeout-minutes: 20
+    runs-on: ubuntu-latest
+    # only on main repo
+    if: ( github.event.pull_request.head.repo.full_name == 'Perl/perl5' || github.repository == 'Perl/perl5' )
+
+    env:
+      server: ssl.irc.perl.org
+      port: 7062
+      channel_p5p: "#p5p"
+      channel_noise: "#p5p-commits"
+      color_orange: "\x037"
+      color_clear: "\x0F"
+
+    steps:
+      - name: Dump GitHub context
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: echo "$GITHUB_CONTEXT"
+
+      - name: setup branch env name
+        run: |
+          ref="${github_ref/refs\/heads\//}"
+          echo "ref=$ref" >> $GITHUB_ENV
+        env:
+          github_ref: ${{ github.event.ref }}
+
+      - name: Setup commit message SUMUP env
+        id: sumup
+        env:
+          TXT: ${{ join(github.event.commits.*.message, '\n') }}
+          C1: ${{ github.event.commits[0].message }}
+          C2: ${{ github.event.commits[1].message }}
+          C3: ${{ github.event.commits[2].message }}
+          C4: ${{ github.event.commits[3].message }}
+          C5: ${{ github.event.commits[4].message }}
+        run: |
+          # -------------------------------------
+          echo "# original commit message"
+          echo "TXT=$TXT"
+
+          # -------------------------------------
+          echo "# Last 5 commits message"
+          echo "C1=$C1"
+          echo "C2=$C2"
+          echo "C3=$C3"
+          echo "C4=$C4"
+          echo "C5=$C5"
+
+          # -------------------------------------
+          echo "# script parse.pl"
+          cat <<'EOS' > parse.pl
+          use v5.14; use strict; use warnings;
+          my $txt = join "\n", map { $ENV{"C$_"} // '' } 1..5;
+          $txt =~ s{\\n}{\n}g; $txt =~ s{\\t}{ }g; $txt =~ s{\t}{ }g;
+          my @l = split( "\n", $txt );
+          my $max = 5;
+          @l = ( @l[0..$max], "..." ) if @l > $max;
+          @l = grep { $_ !~ m{^EOS} } @l;
+          say( join( "\n", @l ) );
+          EOS
+
+          # -------------------------------------
+          echo "# testing script"
+          perl parse.pl
+
+          # -------------------------------------
+          echo "# setup SUMUP environment variable"
+          echo 'SUMUP<<EOS' >> $GITHUB_ENV
+          perl parse.pl     >> $GITHUB_ENV
+          echo 'EOS'        >> $GITHUB_ENV
+
+          # -------------------------------------
+          echo "# done"
+
+      - name: checking SUMUP variable
+        run: |
+          echo "SUMUP: $SUMUP"
+
+      - name: irc push
+        uses: rectalogic/notify-irc@v2
+        if: github.event_name == 'push' && github.ref != 'refs/heads/blead'
+        with:
+          server: ${{ env.server }}
+          port: ${{ env.port }}
+          channel: ${{ env.channel_noise }}
+          nickname: Commit
+          message:
+            "\x037${{ github.actor }}\x0F pushed to branch \x033${{ env.ref }}\x0F\n\
+            ${{ env.SUMUP }}\n\
+            ${{ github.event.compare }}"
+
+      - name: irc push to blead
+        uses: rectalogic/notify-irc@v2
+        if: github.event_name == 'push' && github.ref == 'refs/heads/blead'
+        with:
+          server: ${{ env.server }}
+          port: ${{ env.port }}
+          channel: ${{ env.channel_noise }}
+          nickname: inBlead
+          message:
+            "\x0313[blead]\x0F \x037${{ github.actor }}\x0F pushed to blead\n\
+            ${{ env.SUMUP }}\n\
+            ${{ github.event.compare }}"
+
+      - name: Shorten PR fields
+        if: github.event_name == 'pull_request'
+        id: shorten
+        env:
+          TITLE: ${{ github.event.pull_request.title }}
+          BODY:  ${{ github.event.pull_request.body }}
+        run: |
+          # -------------------------------------
+          echo "# script parse.pl"
+          cat <<'EOS' > parse.pl
+          use v5.14; use strict; use warnings;
+          my ( $key, $len ) = @ARGV;
+          $key //= ''; $len //= 50;
+          my $txt = substr( $ENV{$key} || "Unknown $key", 0, $len );
+          $txt =~ s{\\n}{\n}g; $txt =~ s{\\t}{ }g; $txt =~ s{\t}{ }g;
+          $txt =~ s{^EOS}{}mg;
+          say $txt;
+          EOS
+
+          # -------------------------------------
+          echo 'TITLE<<EOS'       >> $GITHUB_ENV
+          perl parse.pl TITLE 80  >> $GITHUB_ENV
+          echo 'EOS'              >> $GITHUB_ENV
+          # -------------------------------------
+          echo 'BODY<<EOS'        >> $GITHUB_ENV
+          perl parse.pl BODY 500  >> $GITHUB_ENV
+          echo 'EOS'               >> $GITHUB_ENV
+          # -------------------------------------
+          echo "# done"
+
+      - name: checking BODY and TITLE variable
+        if: github.event_name == 'pull_request'
+        run: |
+          echo "BODY: $BODY"
+          echo "TITLE: $TITLE"
+
+      - name: irc opened pull request
+        uses: rectalogic/notify-irc@v2
+        if: github.event_name == 'pull_request' && github.event.action == 'opened'
+        with:
+          server: ${{ env.server }}
+          port: ${{ env.port }}
+          channel: ${{ env.channel_p5p }}
+          nickname: Pull-Request
+          message: |
+            ${{ env.color_orange }}${{ github.actor }}${{ env.color_clear }} opened PR #${{ github.event.pull_request.number }}
+            ${{ env.TITLE }}
+            ${{ github.event.pull_request.html_url }}
+
+      - name: irc merged pull request
+        uses: rectalogic/notify-irc@v2
+        if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true
+        with:
+          server: ${{ env.server }}
+          port: ${{ env.port }}
+          channel: ${{ env.channel_p5p }}
+          nickname: Pull-Request
+          message: |
+            ${{ env.color_orange }}${{ github.actor }}${{ env.color_clear }} merged PR #${{ github.event.pull_request.number }}
+            ${{ env.TITLE }}
+            ${{ github.event.pull_request.html_url }}
+
+      - name: irc closed pull request
+        uses: rectalogic/notify-irc@v2
+        if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == false
+        with:
+          server: ${{ env.server }}
+          port: ${{ env.port }}
+          channel: ${{ env.channel_p5p }}
+          nickname: Pull-Request
+          message: |
+            ${{ env.color_orange }}${{ github.actor }}${{ env.color_clear }} closed PR #${{ github.event.pull_request.number }}
+            ${{ env.TITLE }}
+            ${{ github.event.pull_request.html_url }}
+
+      - name: irc synchronize pull request
+        uses: rectalogic/notify-irc@v2
+        if: github.event_name == 'pull_request' && github.event.action == 'synchronize'
+        with:
+          server: ${{ env.server }}
+          port: ${{ env.port }}
+          channel: ${{ env.channel_noise }}
+          nickname: Pull-Request
+          message: |
+            ${{ env.color_orange }}${{ github.actor }}${{ env.color_clear }} updated PR #${{ github.event.pull_request.number }}
+            ${{ env.TITLE }}
+            ${{ github.event.pull_request.html_url }}

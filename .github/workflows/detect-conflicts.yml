@@ -1,0 +1,22 @@
+on:
+  push:
+    branches:
+      - blead
+permissions: {}
+jobs:
+  conflicts:
+    permissions:
+      pull-requests: write # to add labels to pull requests
+
+    runs-on: ubuntu-latest
+    if: ( github.event.pull_request.head.repo.full_name == 'Perl/perl5' || github.repository == 'Perl/perl5' )
+    steps:
+      # improve the chance that the mergeable status is computed
+      #- uses: mschilde/auto-label-merge-conflicts@master
+      # use fork to use custom timeout need https://github.com/mschilde/auto-label-merge-conflicts/pull/43
+      - uses: atoomic/auto-label-merge-conflicts@custom
+        with:
+          CONFLICT_LABEL_NAME: "hasConflicts"
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          MAX_RETRIES: 600 # 600 * 10 sec => 100 minutes
+          WAIT_MS: 10000 # 10 sec

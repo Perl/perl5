@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Feature request
+    url: https://github.com/Perl/RFCs
+    about: We a trialling a new RFC process. Please follow the link to see how to submit an "elevator pitch" for a new feature
+  - name: Report a CPAN Module Issue
+    url: https://metacpan.org
+    about: Please report issues with CPAN modules to their preferred bugtracker as indicated on their MetaCPAN page

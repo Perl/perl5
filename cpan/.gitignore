@@ -1,0 +1,10 @@
+# ignore generated .c files, and other module build traces
+*.c
+*.bs
+blib
+pm_to_blib
+Makefile
+Makefile.PL
+ppport.h
+Win32API-File/cFile_pc_to_blib
+AutoLoader/t/auto-*
