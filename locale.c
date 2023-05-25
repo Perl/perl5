@@ -2424,6 +2424,9 @@ S_new_ctype(pTHX_ const char *newctype, bool force)
         if (   (UNLIKELY(bad_count))
             && (LIKELY(ckWARN_d(WARN_LOCALE)) || UNLIKELY(DEBUG_L_TEST)))
         {
+            /* WARNING.  If you change the wording of these; be sure to update
+             * t/loc_tools.pl correspondingly */
+
             if (PL_in_utf8_CTYPE_locale) {
                 PL_warn_locale = Perl_newSVpvf(aTHX_
                      "Locale '%s' contains (at least) the following characters"
