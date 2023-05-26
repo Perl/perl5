@@ -68,18 +68,6 @@ POD = perl.pod	\
 	perl5341delta.pod	\
 	perl5360delta.pod	\
 	perl5361delta.pod	\
-	perl5370delta.pod	\
-	perl53710delta.pod	\
-	perl53711delta.pod	\
-	perl5371delta.pod	\
-	perl5372delta.pod	\
-	perl5373delta.pod	\
-	perl5374delta.pod	\
-	perl5375delta.pod	\
-	perl5376delta.pod	\
-	perl5377delta.pod	\
-	perl5378delta.pod	\
-	perl5379delta.pod	\
 	perl5380delta.pod	\
 	perl561delta.pod	\
 	perl56delta.pod	\
@@ -249,18 +237,6 @@ MAN = perl.man	\
 	perl5341delta.man	\
 	perl5360delta.man	\
 	perl5361delta.man	\
-	perl5370delta.man	\
-	perl53710delta.man	\
-	perl53711delta.man	\
-	perl5371delta.man	\
-	perl5372delta.man	\
-	perl5373delta.man	\
-	perl5374delta.man	\
-	perl5375delta.man	\
-	perl5376delta.man	\
-	perl5377delta.man	\
-	perl5378delta.man	\
-	perl5379delta.man	\
 	perl5380delta.man	\
 	perl561delta.man	\
 	perl56delta.man	\
@@ -430,18 +406,6 @@ HTML = perl.html	\
 	perl5341delta.html	\
 	perl5360delta.html	\
 	perl5361delta.html	\
-	perl5370delta.html	\
-	perl53710delta.html	\
-	perl53711delta.html	\
-	perl5371delta.html	\
-	perl5372delta.html	\
-	perl5373delta.html	\
-	perl5374delta.html	\
-	perl5375delta.html	\
-	perl5376delta.html	\
-	perl5377delta.html	\
-	perl5378delta.html	\
-	perl5379delta.html	\
 	perl5380delta.html	\
 	perl561delta.html	\
 	perl56delta.html	\
@@ -611,18 +575,6 @@ TEX = perl.tex	\
 	perl5341delta.tex	\
 	perl5360delta.tex	\
 	perl5361delta.tex	\
-	perl5370delta.tex	\
-	perl53710delta.tex	\
-	perl53711delta.tex	\
-	perl5371delta.tex	\
-	perl5372delta.tex	\
-	perl5373delta.tex	\
-	perl5374delta.tex	\
-	perl5375delta.tex	\
-	perl5376delta.tex	\
-	perl5377delta.tex	\
-	perl5378delta.tex	\
-	perl5379delta.tex	\
 	perl5380delta.tex	\
 	perl561delta.tex	\
 	perl56delta.tex	\
