@@ -360,7 +360,7 @@ defined by the core itself.
 During compilation, the parser makes use of a suspended compcv when parsing
 the defaulting expression for a field. All the expressions for all the fields
 in the class share the same suspended compcv, which is then compiled up into
-the same internal CV called by the constructor to intialize all the fields
+the same internal CV called by the constructor to initialize all the fields
 provided by that class.
 
 =head1 RUNTIME BEHAVIOUR
