@@ -7,7 +7,7 @@
 # This is based on the module of the same name by Malcolm Beattie,
 # but essentially none of his code remains.
 
-package B::Deparse 1.73;
+package B::Deparse 1.74;
 use strict;
 use Carp;
 use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
@@ -1316,7 +1316,7 @@ Carp::confess("NULL in deparse_sub") if !defined($cv) || $cv->isa("B::NULL");
 Carp::confess("SPECIAL in deparse_sub") if $cv->isa("B::SPECIAL");
     local $self->{'curcop'} = $self->{'curcop'};
 
-    my $has_sig = $self->{hinthash}{feature_signatures};
+    my $has_sig = $self->feature_enabled('signatures');
     if ($cv->FLAGS & SVf_POK) {
 	my $myproto = $cv->PV;
 	if ($has_sig) {
@@ -2334,6 +2334,7 @@ my %feature_keywords = (
    catch    => 'try',
    finally  => 'try',
    defer    => 'defer',
+   signatures => 'signatures',
 );
 
 # keywords that are strong and also have a prototype
@@ -3878,6 +3879,9 @@ sub pp_list {
 	    if ($padname->FLAGS & PADNAMEf_TYPED) {
 		$newtype = $padname->SvSTASH->NAME;
 	    }
+	} elsif ($lopname eq 'padsv_store') {
+            # don't interpret as my (list) if it has an implicit assign
+            $local = "";
 	} elsif ($lopname =~ /^(?:gv|rv2)([ash])v$/
 			&& $loppriv & OPpOUR_INTRO
 		or $lopname eq "null" && class($lop) eq 'UNOP'
