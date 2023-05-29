@@ -258,7 +258,7 @@ sub nm_parse_darwin {
             # String literals can live in different sections
             # depending on the compiler and os release, assumedly
             # also linker flags.
-            if (/^\(__TEXT,__(?:const|(?:asan_)?cstring|literal\d+)\) (?:non-)?external _?(\w+)(\.\w+)?$/) {
+            if (/^\(__TEXT,__(?:const|(?:asan_)?cstring|literal\d+)\) (?:non-)?external _?(\w+)(\.\w+){0,2}$/) {
                 my ($symbol, $suffix) = ($1, $2);
                 # Ignore function-local constants like
                 # _Perl_av_extend_guts.oom_array_extend
@@ -266,10 +266,13 @@ sub nm_parse_darwin {
                 # Ignore the cstring unnamed strings.
                 return if $symbol =~ /^L\.str\d+$/;
                 $symbols->{data}{const}{$symbol}{$symbols->{o}}++;
-            } elsif (/^\(__TEXT,__text\) ((?:non-)?external) _(\w+)$/) {
+            } elsif (/^\(__TEXT,__text\) ((?:non-|private )?external) \[cold func\] _(\w+\.cold\.[1-9][0-9]*)$/) {
+                # for N_COLD_FUNC symbols in MachO
+                # eg. 0000000000022c60 (__TEXT,__text) non-external [cold func] _Perl_lex_next_chunk.cold.1 (toke.o)
+            } elsif (/^\(__TEXT,__text\) ((?:non-|private )?external) _(\w+)$/) {
                 my ($exp, $sym) = ($1, $2);
                 $symbols->{text}{$sym}{$symbols->{o}}{$exp =~ /^non/ ? 't' : 'T'}++;
-            } elsif (/^\(__DATA,__\w*?(const|data|bss|common)\w*\) (?:non-)?external _?(\w+)(\.\w+)?$/) {
+            } elsif (/^\(__DATA,__\w*?(const|data|bss|common)\w*\) (?:non-)?external _?(\w+)(\.\w+){0,3}$/) {
                 my ($dtype, $symbol, $suffix) = ($1, $2, $3);
                 # Ignore function-local constants like
                 # _Perl_pp_gmtime.dayname
