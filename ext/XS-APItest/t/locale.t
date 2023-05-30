@@ -50,17 +50,19 @@ SKIP: {
     # system returns may be an alias.  ALl we can do is test for
     # success/failure
     if (ok($global_locale, "Successfully switched to $comma_locale")) {
-    is(newSvNV("4.888"), 4, "dot not recognized in global comma locale for SvNV");
+        is(newSvNV("4.888"), 4,
+           "dot not recognized in global comma locale for SvNV");
 
-    no warnings 'numeric';  # Otherwise get "Argument isn't numeric in
-                            # subroutine entry"
+        no warnings 'numeric';  # Otherwise get "Argument isn't numeric in
+                                # subroutine entry"
 
-    is(check_in_bounds(newSvNV("4,888"), 4.88, 4.89), 1,
-       "comma recognized in global comma locale for SvNV");
-    isnt(sync_locale, 0, "sync_locale() returns that was in the global locale");
+        is(check_in_bounds(newSvNV("4,888"), 4.88, 4.89), 1,
+           "comma recognized in global comma locale for SvNV");
+        isnt(sync_locale, 0,
+             "sync_locale() returns that was in the global locale");
 
-    is(check_in_bounds(newSvNV("4.888"), 4.88, 4.89), 1,
-    "dot recognized in perl-controlled comma locale for SvNV");
+        is(check_in_bounds(newSvNV("4.888"), 4.88, 4.89), 1,
+        "dot recognized in perl-controlled comma locale for SvNV");
     }
     else {
         skip "Couldn't switch to $comma_locale", 4;
