@@ -3092,7 +3092,10 @@ S_find_locale_from_environment(pTHX_ const unsigned int index)
 #    ifdef WIN32
                 /* If no LANG, use the system default on Windows. */
                 locale_names[j] = wrap_wsetlocale(categories[i], ".ACP");
-                if (! locale_names[j])
+                if (locale_names[j]) {
+                    SAVEFREEPV(locale_names[j]);
+                }
+                else
 #    endif
                 {   /* If nothing was found or worked, use C */
                     locale_names[j] = "C";
@@ -4054,6 +4057,8 @@ S_wrap_wsetlocale(pTHX_ const int category, const char *locale)
 
     /* Calls _wsetlocale(), converting the parameters/return to/from
      * Perl-expected forms as if plain setlocale() were being called instead.
+     *
+     * Caller must arrange for the returned PV to be freed.
      */
 
     const wchar_t * wlocale = NULL;
@@ -4078,9 +4083,6 @@ S_wrap_wsetlocale(pTHX_ const int category, const char *locale)
     WSETLOCALE_UNLOCK;
 
     Safefree(wlocale);
-    SAVEFREEPV(result); /* is there something better we can do here?  Answer:
-                           Without restructuring, returning a unique value each
-                           call is required.  See GH #20434 */
     return result;
 }
 
@@ -4116,23 +4118,38 @@ S_win32_setlocale(pTHX_ int category, const char* locale)
         return NULL;
     }
 
-#    ifdef USE_PL_CUR_LC_ALL
+    save_to_buffer(result, &PL_setlocale_buf, &PL_setlocale_bufsize);
 
-    /* Here, we need to keep track of LC_ALL.  If we set it directly above, we
-     * already know what it is; otherwise query the new value. */
-    const char * new_lc_all = ((category == LC_ALL)
-                               ? result
-                               : wrap_wsetlocale(LC_ALL, NULL));
+#    ifndef USE_PL_CUR_LC_ALL
 
-    /* And update if it has changed. */
-    if (strNE(new_lc_all, PL_cur_LC_ALL)) {
+    Safefree(result);
+
+#  else
+
+    /* Here, we need to keep track of LC_ALL, so store the new value.  but if
+     * the input locale is NULL, we were just querying, so the original value
+     * hasn't changed */
+    if (locale == NULL) {
+        Safefree(result);
+    }
+    else {
+
+        /* If we set LC_ALL directly above, we already know its new value; but
+         * if we changed just an individual category, find the new LC_ALL */
+        if (category != LC_ALL) {
+            Safefree(result);
+            result = wrap_wsetlocale(LC_ALL, NULL);
+        }
+
         Safefree(PL_cur_LC_ALL);
-        PL_cur_LC_ALL = savepv(new_lc_all);
+        PL_cur_LC_ALL = result;
     }
 
+    DEBUG_L(PerlIO_printf(Perl_debug_log, "new PL_cur_LC_ALL=%s\n",
+                                          PL_cur_LC_ALL));
 #    endif
 
-    return result;
+    return PL_setlocale_buf;
 }
 
 #  endif
