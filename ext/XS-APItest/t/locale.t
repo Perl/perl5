@@ -49,7 +49,7 @@ SKIP: {
     # Can't do a compare of $global_locale and $comma_locale because what the
     # system returns may be an alias.  ALl we can do is test for
     # success/failure
-    ok($global_locale, "Successfully switched to $comma_locale");
+    if (ok($global_locale, "Successfully switched to $comma_locale")) {
     is(newSvNV("4.888"), 4, "dot not recognized in global comma locale for SvNV");
 
     no warnings 'numeric';  # Otherwise get "Argument isn't numeric in
@@ -61,6 +61,10 @@ SKIP: {
 
     is(check_in_bounds(newSvNV("4.888"), 4.88, 4.89), 1,
     "dot recognized in perl-controlled comma locale for SvNV");
+    }
+    else {
+        skip "Couldn't switch to $comma_locale", 4;
+    }
 }
 
 my %correct_C_responses = (
