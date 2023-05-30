@@ -3655,6 +3655,11 @@ S_win32_setlocale(pTHX_ int category, const char* locale)
     DEBUG_L(PerlIO_printf(Perl_debug_log, "%s\n",
                           setlocale_debug_string_r(category, locale, result)));
 
+    if (! result) {
+        SET_EINVAL;
+        return NULL;
+    }
+
 #    ifdef USE_PL_CUR_LC_ALL
 
     /* Here, we need to keep track of LC_ALL.  If we set it directly above, we
