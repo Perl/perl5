@@ -1510,7 +1510,7 @@ EOP
         ok("\x{017F}\x{017F}" =~ qr/^[$sharp_s]?$/i, "[] to EXACTish optimization");
     }
 
-    {   # Test that it avoids spllitting a multi-char fold across nodes.
+    {   # Test that it avoids splitting a multi-char fold across nodes.
         # These all fold to things that are like 'ss', which, if split across
         # nodes could fail to match a single character that folds to the
         # combination.  1F0 byte expands when folded;
