@@ -898,6 +898,15 @@ symbol would not be defined on C<L</EBCDIC>> platforms.
 #define STANDARD_C
 #endif
 
+/* Don't compile 'code' if PERL_MEM_LOG is defined.  This is used for
+ * constructs that don't play well when PERL_MEM_LOG is active, so that they
+ * automatically don't get compiled without having to use extra #ifdef's */
+#ifndef PERL_MEM_LOG
+#  define UNLESS_PERL_MEM_LOG(code)  code
+#else
+#  define UNLESS_PERL_MEM_LOG(code)
+#endif
+
 /* By compiling a perl with -DNO_TAINT_SUPPORT or -DSILENT_NO_TAINT_SUPPORT,
  * you get a perl without taint support, but doubtlessly with a lesser
  * degree of support. Do not do so unless you know exactly what it means
