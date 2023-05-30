@@ -3657,13 +3657,16 @@ S_win32_setlocale(pTHX_ int category, const char* locale)
 
 #    ifdef USE_PL_CUR_LC_ALL
 
-    /* If we need to keep track of LC_ALL, update it to the new value.  */
-    Safefree(PL_cur_LC_ALL);
-    if (category == LC_ALL) {
-        PL_cur_LC_ALL = savepv(result);
-    }
-    else {
-        PL_cur_LC_ALL = savepv(wrap_wsetlocale(LC_ALL, NULL));
+    /* Here, we need to keep track of LC_ALL.  If we set it directly above, we
+     * already know what it is; otherwise query the new value. */
+    const char * new_lc_all = ((category == LC_ALL)
+                               ? result
+                               : wrap_wsetlocale(LC_ALL, NULL));
+
+    /* And update if it has changed. */
+    if (strNE(new_lc_all, PL_cur_LC_ALL)) {
+        Safefree(PL_cur_LC_ALL);
+        PL_cur_LC_ALL = savepv(new_lc_all);
     }
 
 #    endif
