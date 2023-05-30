@@ -26,6 +26,7 @@ BEGIN {
 skip_all_without_unicode_tables();
 
 my $has_locales = locales_enabled('LC_CTYPE');
+my $utf8_locale = find_utf8_ctype_locale();
 
 plan tests => 1265;  # Update this when adding/deleting tests.
 
@@ -1514,7 +1515,6 @@ EOP
         # These all fold to things that are like 'ss', which, if split across
         # nodes could fail to match a single character that folds to the
         # combination.  1F0 byte expands when folded;
-        my $utf8_locale = find_utf8_ctype_locale();
         for my $char('F', $sharp_s, "\x{1F0}", "\x{FB00}") {
             my $length = 260;    # Long enough to overflow an EXACTFish regnode
             my $p = $char x $length;
@@ -2315,7 +2315,6 @@ x{0c!}\;\;îçÿ  /0f/! F  /;îçÿù\Q   xÿÿÿÿ   ù   `x{0c!};   ù\Q
 
 SKIP:
     {   # [perl #134334], Assertion failure
-        my $utf8_locale = find_utf8_ctype_locale();
         skip "no UTF-8 locale available" unless $utf8_locale;
         fresh_perl_like("use POSIX; POSIX::setlocale(&LC_CTYPE, '$utf8_locale'); 'ssss' =~ /\xDF+?sX/il;",
                         qr/^$/,
