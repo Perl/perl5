@@ -453,7 +453,9 @@ const struct IPerlMem perlMemParse =
 char*
 PerlEnvGetenv(struct IPerlEnv* piPerl, const char *varname)
 {
-    return IPERL2HOST(piPerl)->Getenv(varname);
+
+    //  The mortal version causes run/switchd.t et. al. to fail
+    return IPERL2HOST(piPerl)->Getenv(varname); //Perl_mortal_getenv(varname);
 };
 
 int

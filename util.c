@@ -4960,6 +4960,14 @@ S_mem_log_common(enum mem_log_type mlt, const UV n,
 
     PERL_ARGS_ASSERT_MEM_LOG_COMMON;
 
+#ifdef WIN32
+
+    if (PL_phase == PERL_PHASE_CONSTRUCT) {
+        return;
+    }
+
+#endif
+
     PL_mem_log[0] |= 0x2;   /* Flag that the call is from this code */
     pmlenv = PerlEnv_getenv("PERL_MEM_LOG");
     PL_mem_log[0] &= ~0x2;
