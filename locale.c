@@ -4307,8 +4307,8 @@ S_win32_setlocale(pTHX_ int category, const char* locale)
     }
 
     const char * result = wrap_wsetlocale(category, locale);
-    DEBUG_L(PerlIO_printf(Perl_debug_log, "%s\n",
-                          setlocale_debug_string_r(category, locale, result)));
+    DEBUG_Lv(PerlIO_printf(Perl_debug_log, "Return from wrap_wsetlocale: %s\n",
+                           setlocale_debug_string_r(category, locale, result)));
 
     if (! result) {
         SET_EINVAL;
