@@ -1227,7 +1227,8 @@ S_querylocale_2008_i(pTHX_ const unsigned int index)
     /* Below is the implementation of the 'else' clause which handles the case
      * of the current locale not being the global one on platforms where
      * USE_PL_CURLOCALES is NOT in effect.  That means the system must have
-     * some form of querylocale.
+     * some form of querylocale.  But these have varying characteristics, so
+     * first create some #defines to make the actual 'else' clause uniform.
      *
      * First, glibc has a function that implements querylocale(), but is called
      * something else, and takes the category number; the others take the mask.
@@ -1236,10 +1237,51 @@ S_querylocale_2008_i(pTHX_ const unsigned int index)
                                      && defined(HAS_NL_LANGINFO_L))
 #      define my_querylocale(index, cur_obj)                                \
                 nl_langinfo_l(_NL_LOCALE_NAME(categories[index]), cur_obj)
+
+       /* Experience so far shows it is thread-safe, as well as glibc's
+        * nl_langinfo_l(), so unless overridden, mark it so */
+#      ifdef NO_THREAD_SAFE_QUERYLOCALE
+#        undef HAS_THREAD_SAFE_QUERYLOCALE
+#      else
+#        define HAS_THREAD_SAFE_QUERYLOCALE
+#      endif
 #    else   /* below, ! glibc */
+
+       /* Otherwise, use the system's querylocale(). */
 #      define my_querylocale(index, cur_obj)                                \
                                querylocale(category_masks[index], cur_obj)
+
+       /* There is no standard for this function, and khw has never seen
+        * anything beyond minimal vendor documentation, lacking important
+        * details.  Experience has shown that some implementations have race
+        * condiions, and their returns may not be thread safe.  It would be
+        * unreliable to test for complete thread safety in Configure.  What we
+        * do instead is to assume that it is thread-safe, unless overriden by,
+        * say, a hints file specifying
+        * -Accflags='-DNO_THREAD_SAFE_QUERYLOCALE */
+#      ifdef NO_THREAD_SAFE_QUERYLOCALE
+#        undef HAS_THREAD_SAFE_QUERYLOCALE
+#      else
+#        define HAS_THREAD_SAFE_QUERYLOCALE
+#      endif
 #    endif
+
+     /* Here, we have set up enough information to know if this querylocale()
+      * is thread-safe, or needs to use a mutex */
+#    ifdef HAS_THREAD_SAFE_QUERYLOCALE
+#      define QUERYLOCALE_LOCK
+#      define QUERYLOCALE_UNLOCK
+#    else
+#      define QUERYLOCALE_LOCK    gwLOCALE_LOCK
+#      define QUERYLOCALE_UNLOCK  gwLOCALE_UNLOCK
+#    endif
+
+    /* Finally, everything is ready, so here is the 'else' clause to implement
+     * the case of the current locale not being the global one on systems that
+     * have some form of querylocale().  (POSIX will presumably eventually
+     * publish their next version in their pipeline, which will define a
+     * precisely specified querylocale equivalent, and there can be a new
+     * #ifdef to use it without having to guess at its characteristics) */
 
     else {
         /* We don't keep records when there is querylocale(), so as to avoid the
@@ -1252,7 +1294,10 @@ S_querylocale_2008_i(pTHX_ const unsigned int index)
             retval = calculate_LC_ALL_string(NULL);
         }
         else {
+
+            QUERYLOCALE_LOCK;
             retval = savepv(my_querylocale(index, cur_obj));
+            QUERYLOCALE_UNLOCK;
 
             /* querylocale() may conflate the C locale with something that
              * isn't exactly the same.  See for example
@@ -1273,6 +1318,8 @@ S_querylocale_2008_i(pTHX_ const unsigned int index)
         }
     }
 
+#    undef QUERYLOCALE_LOCK
+#    undef QUERYLOCALE_UNLOCK
 #  endif
 
     DEBUG_Lv(PerlIO_printf(Perl_debug_log,
