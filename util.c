@@ -5012,32 +5012,43 @@ S_mem_log_common(enum mem_log_type mlt, const UV n,
                                 MEM_LOG_TIME_FMT, MEM_LOG_TIME_ARG);
                 PERL_UNUSED_RESULT(PerlLIO_write(fd, buf, len));
             }
+#    ifdef USE_THREADS
+#      define ATHXf  "%p: "
+#      define my_aTHX_  aTHX_
+#    else
+#      define ATHXf
+#      define my_aTHX_
+#    endif
             switch (mlt) {
             case MLT_ALLOC:
                 len = my_snprintf(buf, sizeof(buf),
-                        "alloc: %s:%d:%s: %" IVdf " %" UVuf
+                        ATHXf "alloc: %s:%d:%s: %" IVdf " %" UVuf
                         " %s = %" IVdf ": %" UVxf "\n",
+                        my_aTHX_
                         filename, linenumber, funcname, n, typesize,
                         type_name, n * typesize, PTR2UV(newalloc));
                 break;
             case MLT_REALLOC:
                 len = my_snprintf(buf, sizeof(buf),
-                        "realloc: %s:%d:%s: %" IVdf " %" UVuf
+                        ATHXf "realloc: %s:%d:%s: %" IVdf " %" UVuf
                         " %s = %" IVdf ": %" UVxf " -> %" UVxf "\n",
+                        my_aTHX_
                         filename, linenumber, funcname, n, typesize,
                         type_name, n * typesize, PTR2UV(oldalloc),
                         PTR2UV(newalloc));
                 break;
             case MLT_FREE:
                 len = my_snprintf(buf, sizeof(buf),
-                        "free: %s:%d:%s: %" UVxf "\n",
+                        ATHXf "free: %s:%d:%s: %" UVxf "\n",
+                        my_aTHX_
                         filename, linenumber, funcname,
                         PTR2UV(oldalloc));
                 break;
             case MLT_NEW_SV:
             case MLT_DEL_SV:
                 len = my_snprintf(buf, sizeof(buf),
-                        "%s_SV: %s:%d:%s: %" UVxf SV_LOG_SERIAL_FMT "\n",
+                        ATHXf "%s_SV: %s:%d:%s: %" UVxf SV_LOG_SERIAL_FMT "\n",
+                        my_aTHX_
                         mlt == MLT_NEW_SV ? "new" : "del",
                         filename, linenumber, funcname,
                         PTR2UV(sv) _SV_LOG_SERIAL_ARG(sv));
