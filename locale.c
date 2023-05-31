@@ -1204,7 +1204,22 @@ S_querylocale_2008_i(pTHX_ const unsigned int index)
                 savepv(calculate_LC_ALL_string((const char **) &PL_curlocales));
         }
 
-        retval = mortalized_pv_copy(PL_curlocales[index]);
+        if (cur_obj == PL_C_locale_obj) {
+
+            /* If the current locale object is the C object, then the answer is
+             * "C" or POSIX, regardless of the category.  Handling this
+             * reasonably likely case specially shortcuts extra effort, and
+             * hides some bugs from us in OS's that alias other locales to C,
+             * but do so incompletely.  If our records say it is POSIX, use
+             * that; otherwise use C.  See
+             * https://bugs.freebsd.org/bugzilla/show_bug.cgi?id=269375 */
+            retval = mortalized_pv_copy((strEQ(PL_curlocales[index], "POSIX"))
+                                        ? "POSIX"
+                                        : "C");
+        }
+        else {
+            retval = mortalized_pv_copy(PL_curlocales[index]);
+        }
     }
 
 #  else
@@ -1238,6 +1253,22 @@ S_querylocale_2008_i(pTHX_ const unsigned int index)
         }
         else {
             retval = savepv(my_querylocale(index, cur_obj));
+
+            /* querylocale() may conflate the C locale with something that
+             * isn't exactly the same.  See for example
+             * https://bugs.freebsd.org/bugzilla/show_bug.cgi?id=269375
+             * We know that if the locale object is the C one, we
+             * are in the C locale, which may go by the name POSIX, as both, by
+             * definition, are equivalent.  But we consider any other name
+             * spurious, so override with "C".  As in the PL_CURLOCALES case
+             * above, this hides those glitches, for the most part, from the
+             * rest of our code.  (The code is ordered this way so that if the
+             * system distinugishes "C" from "POSIX", we do too.) */
+            if (cur_obj == PL_C_locale_obj && ! isNAME_C_OR_POSIX(retval)) {
+                Safefree(retval);
+                retval = savepv("C");
+            }
+
             SAVEFREEPV(retval);
         }
     }
