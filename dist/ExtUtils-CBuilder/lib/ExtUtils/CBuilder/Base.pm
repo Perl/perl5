@@ -205,7 +205,7 @@ sub have_compiler {
     print $FH "class Bogus { public: int boot_compilet() { return 1; } };\n";
   }
   else {
-    print $FH "int boot_compilet() { return 1; }\n";
+    print $FH "int boot_compilet(void) { return 1; }\n";
   }
   close $FH;
 
