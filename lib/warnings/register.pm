@@ -1,4 +1,4 @@
-package warnings::register 1.05;
+package warnings::register 1.06;
 
 require warnings;
 
