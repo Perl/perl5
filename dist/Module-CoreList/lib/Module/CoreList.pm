@@ -405,7 +405,7 @@ sub changes_between {
     5.037010 => '2023-03-20',
     5.037011 => '2023-04-20',
     5.036001 => '2023-04-23',
-    5.038000 => '2023-05-30',
+    5.038000 => '2023-06-20',
   );
 
 for my $version ( sort { $a <=> $b } keys %released ) {
@@ -20330,6 +20330,7 @@ for my $version ( sort { $a <=> $b } keys %released ) {
             'Module::CoreList::Utils'=> '5.20230520',
             'POSIX'                 => '2.13',
             'SDBM_File'             => '1.17',
+            'Storable'              => '3.32',
             'Time::HiRes'           => '1.9775',
             'Time::Piece'           => '1.3401_01',
             'warnings'              => '1.65',

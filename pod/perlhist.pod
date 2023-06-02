@@ -752,7 +752,7 @@ the strings?).
  Yves      5.37.10      2023-Mar-20
  Steve     5.37.11      2023-Apr-20
 
- Ricardo   5.38.0       2023-May-??
+ Ricardo   5.38.0       2023-Jun-20
 
 =head2 SELECTED RELEASE SIZES
 
