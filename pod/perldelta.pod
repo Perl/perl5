@@ -140,6 +140,101 @@ These functions are closely tied to the internals of how the interpreter
 works, and could be altered or removed at any time if other internal changes
 make that necessary.
 
+=head2 Some C<goto>s are now permitted in C<defer> and C<finally> blocks
+
+Perl version 5.36.0 added C<defer> blocks and permitted the C<finally> keyword
+to also add similar behaviour to C<try>/C<catch> syntax.  These did not permit
+any C<goto> expression within the body, as it could have caused control flow
+to jump out of the block.  Now, some C<goto> expressions are allowed, if they
+have a constant target label, and that label is found within the block.
+
+  use feature 'defer';
+
+  defer {
+    goto LABEL;
+    print "This does not execute\n";
+    LABEL: print "This does\n";
+  }
+
+=head2 New regexp variable ${^LAST_SUCCESSFUL_PATTERN}
+
+This allows access to the last succesful pattern that matched in the current scope.
+Many aspects of the regex engine refer to the "last successful pattern". The empty
+pattern reuses it, and all of the magic regex vars relate to it. This allows
+access to its pattern. The following code
+
+    if (m/foo/ || m/bar/) {
+        s//PQR/;
+    }
+
+can be rewritten as follows
+
+    if (m/foo/ || m/bar/) {
+        s/${^LAST_SUCCESSFUL_PATTERN}/PQR/;
+    }
+
+and it will do the exactly same thing.
+
+=head2 Deprecation warnings now have specific subcategories
+
+As of 5.37.10 all deprecation warnings will have their own specific
+deprecation category which can be disabled individually. You can see a
+list of all deprecated features in L<perldeprecation>, and in
+L<warnings>. The following list is from L<warnings>:
+
+         +- deprecated ----+
+         |                 |
+         |                 +- deprecated::apostrophe_as_package_separator
+         |                 |
+         |                 +- deprecated::delimiter_will_be_paired
+         |                 |
+         |                 +- deprecated::dot_in_inc
+         |                 |
+         |                 +- deprecated::goto_construct
+         |                 |
+         |                 +- deprecated::smartmatch
+         |                 |
+         |                 +- deprecated::unicode_property_name
+         |                 |
+         |                 +- deprecated::version_downgrade
+
+It is still possible to disable all deprecation warnings in a single
+statement with
+
+    no warnings 'deprecated';
+
+but as of 5.37.10 it is possible to have a finer grained control. As
+has historically been the case these warnings are automatically
+enabled with
+
+    use warnings;
+
+=head2 %{^HOOK} API introduced
+
+For various reasons it can be difficult to create subroutine wrappers
+for some of perls keywords. Any keyword which has an undefined
+prototype simply cannot be wrapped with a subroutine, and some keywords
+which perl permits to be wrapped are in practice very tricky to wrap.
+For example C<require> is tricky to wrap, it is possible but doing so
+changes the stack depth, and the standard methods of exporting assume
+that they will be exporting to a package at certain stack depth up the
+stack, and the wrapper will thus change where functions are exported to
+unless implemented with a great deal of care. This can be very awkward
+to deal with.
+
+Accordingly we have introduced a new hash called C<%{^HOOK}> which is
+intended to facilitate such cases. When a keyword supports any kind of
+special hook then the hook will live in this new hash. Hooks in this
+hash will be named after the function they are called by, followed by
+two underbars and then the phase they are executed in, currently either
+before or after the keyword is executed.
+
+In this initial release we support two hooks C<require__before> and
+C<require__after>. These are provided to make it easier to perform tasks
+before and after a require statement.
+
+See L<perlvar> for more details.
+
 =head1 Incompatible Changes
 
 =head2 readline() no longer clears the stream error and eof flags
@@ -354,10 +449,6 @@ We have attempted to update the documentation to reflect the changes
 listed in this document.  If you find any we have missed, open an issue
 at L<https://github.com/Perl/perl5/issues>.
 
-XXX Changes which significantly change existing files in F<pod/> go here.
-However, any changes to F<pod/perldiag.pod> should go in the L</Diagnostics>
-section.
-
 Additionally, the following selected changes have been made:
 
 =head3 L<perlapi>
@@ -427,6 +518,24 @@ Documented L<C<save_helem_flags>|perlapi/save_helem_flags>
 
 =back
 
+=head3 L<perldeprecation>
+
+=over 4
+
+=item *
+
+Added information about unscheduled deprecations and their categories.
+
+=item *
+
+Added category information for existing scheduled deprecations.
+
+=item *
+
+Added smartmatch and apostrophe as a package separator deprecation data.
+
+=back
+
 =head3 L<perlintern>
 
 =over 4
@@ -461,6 +570,17 @@ operators.
 
 =back
 
+=head3 L<perlexperiment>
+
+=over 4
+
+=item *
+
+Smartmatch has been moved from experimental status to deprecated status.
+Unfortunately the experiment did not work out.
+
+=back
+
 =head3 L<perlfunc>
 
 =over 4
@@ -472,6 +592,19 @@ C<unshift> and C<bless> functions, as well as additional examples added.
 
 =back
 
+=head3 L<perlop>
+
+=over 4
+
+=item *
+
+Document the behavior of matching the empty pattern better and specify
+its relationship to the new C<${^LAST_SUCCESSFUL_PATTERN}> properly.
+
+=back
+
+=cut
+
 =head3 L<perlvar>
 
 =over 4
@@ -480,6 +613,23 @@ C<unshift> and C<bless> functions, as well as additional examples added.
 
 Added a section on "Scoping Rules of Regex Variables", and other wording
 improvements made throughout.
+
+=item *
+
+Added information on the new C<%{^HOOK}> interface, and the new
+C<require__before> and C<require__after> hooks which it exposes.
+
+=item *
+
+Correct information on the regex variables C<${^PREMATCH}>, C<${^MATCH}>
+and C<${^POSTMATCH}>, all of which were incorrectly documented due to an
+oversight. Specifically they only work properly after a regex operation
+that used the /p modifier to enable them.
+
+=item *
+
+Added information on the new regex variable C<${^LAST_SUCCESSFUL_PATTERN}>,
+which represents the pattern of the last successful regex match in scope.
 
 =back
 
@@ -705,6 +855,21 @@ L<Unrecognized field attribute %s|perldiag/"Unrecognized field attribute %s">
 (F) You attempted to add a named attribute to a C<field> definition, but
 perl does not recognise the name of the requested attribute.
 
+=item *
+
+L<${^HOOK}{%s} may only be a CODE reference or undef|perldiag/"${^HOOK}{%s} may only be a CODE reference or undef">
+
+=item *
+
+L<Attempt to set unknown hook '%s' in %{^HOOK}|perldiag/"Attempt to set unknown hook '%s' in %{^HOOK}">
+
+=item *
+
+L<Missing or undefined argument to %s via %{^HOOK}{require__before}|perldiag/"Missing or undefined argument to %s via %{^HOOK}{require__before}">
+
+=item *
+
+L<Too many capture groups (limit is %d) in regex mE<sol>%sE<sol>|perldiag/"Too many capture groups (limit is %d) in regex m/%s/">
 
 =back
 
@@ -795,6 +960,11 @@ L<method is experimental|perldiag/"method is experimental">
 (S experimental::class) This warning is emitted if you use the C<method>
 keyword of C<use feature 'class'>.  This keyword is currently
 experimental and its behaviour may change in future releases of Perl.
+
+=item *
+
+L<Can't call destructor for 0x%p in global destruction|perldiag/"Can't call destructor for 0x%p in global destruction">
+
 
 =back
 
@@ -946,6 +1116,18 @@ and backward compatibility.
 L<Old package separator used in string|perldiag/"Old package separator used in string">
 
 This diagnostic is now also part of the C<deprecated> category.
+
+=item *
+
+L<given is deprecated|perldiag/"given is deprecated"> replaces C<given is experimental>.
+
+=item *
+
+L<when is deprecated|perldiag/"when is deprecated"> replaces C<when is experimental>.
+
+=item *
+
+L<Smartmatch is deprecated|perldiag/"Smartmatch is deprecated"> replaces C<Smartmatch is experimental>.
 
 =back
 
@@ -1128,6 +1310,12 @@ translation is B<not> done by readlink().  [github #20506]
 
 symlink() where the target was an absolute path to a directory was
 incorrectly created as a file symbolic link.  [github #20533]
+
+C<POSIX::dup2> no longer creates broken sockets. [L<GH
+#20920|https://github.com/Perl/perl5/issues/20920>]
+
+Closing a busy pipe could cause Perl to hang. [L<GH
+#19963|https://github.com/Perl/perl5/issues/19963>]
 
 =back
 
@@ -1391,6 +1579,49 @@ previously issued a warning.
 
 The API function L<perlapi/utf8_length> is now more efficient.
 
+=item *
+
+Added C<SAVERCPV()> and C<SAVEFREERCPV()> for better support for working
+with C<RCPV> (reference counted string/pointer value) structures which
+currently are used in opcodes to share filename and warning bit data in
+a memory efficient manner.
+
+=item *
+
+Added C<MORTALSVFUNC_SV()> and C<MORTALDESTRUCTOR_SV()> macros, which
+make it possible to create a destructor which is fired at the end of
+the current statement. This uses the C<PERL_MAGIC_destruct> magic to
+use "free" magic to trigger an action when a variable is freed. The
+action can be specified as a C function or as a Perl code reference.
+
+=item *
+
+Added the C<%{^HOOK}> api and related C<PERL_MAGIC_hook> and
+C<PERL_MAGIC_hookelem> for providing ways to hook selected perl functions
+which for one reason or another are problematic to wrap with a customized
+subroutine.
+
+=item *
+
+Added support for C<${^HOOK}{require__before}> which can be used to
+rewrite the filename that C<require> will try to load, and also to block
+C<require> from loading a specific module, even via fully qualified
+filename. The hook can also be used to perform "pre-require" and
+"post-require" actions.
+
+=item *
+
+Added support for C<${^HOOK}{require__after}> which can be used to
+track what modules have been required after the fact.
+
+=item *
+
+Regular expression opcodes (regops) now use a standardized structure
+layout that uses unions to expose data in different format. This means
+it should be much easier to extend or modify regops to use more memory.
+This has been used to make a number of regops track how many parens
+they contain.
+
 =back
 
 =head1 Selected Bug Fixes
@@ -1582,6 +1813,29 @@ The API function L<perlapi/my_snprintf> now prints a non-dot decimal
 point if the perl code it ultimately is called from is in the scope of
 C<use locale> and the locale in effect calls for that.
 
+=item *
+
+A number of bugs related to capture groups in quantified groups in regular
+expression have been fixed, especially in alternations. For example in
+a pattern like:
+
+	"foobazfoobar" =~ /((foo)baz|foo(bar))+/
+
+the regex variable C<$2> will not be "foo" as it once was, it will be undef.
+
+=item *
+
+Bugs with regex backreference operators that are inside of a capture
+group have been fixed. For instance:
+
+    "xa=xaaa" =~ /^(xa|=?\1a){2}\z/
+
+will now correctly not match. [L<GH #10073|https://github.com/Perl/perl5/issues/10073>]
+
+=item *
+
+C<SSGROW()> and C<SSCHECK()> have been reworked to ensure that the requested
+space is actually allocated. C<SSCHECK()> is now an alias for C<SSGROW()>.
 
 =back
 
