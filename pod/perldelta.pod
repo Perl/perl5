@@ -354,7 +354,7 @@ thread-safe.
 Using C<'> as package separator in a variable named in a double-quoted
 string has warned since 5.28.  It is now deprecated in both string
 interpolation and non-interpolated contexts, and will be removed in
-Perl 5.40.
+Perl 5.42.
 
 =head1 Performance Enhancements
 
