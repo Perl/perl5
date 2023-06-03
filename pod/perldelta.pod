@@ -45,10 +45,9 @@ See L<https://www.unicode.org/versions/Unicode15.0.0/> for details.
 
 =head2 Deprecation warnings now have specific subcategories
 
-As of 5.37.10 all deprecation warnings will have their own specific
-deprecation category which can be disabled individually. You can see a
-list of all deprecated features in L<perldeprecation>, and in
-L<warnings>. The following list is from L<warnings>:
+All deprecation warnings now have their own specific deprecation category which
+can be disabled individually. You can see a list of all deprecated features in
+L<perldeprecation>, and in L<warnings>. The following list is from L<warnings>:
 
          +- deprecated ----+
          |                 |
@@ -71,9 +70,8 @@ statement with
 
     no warnings 'deprecated';
 
-but as of 5.37.10 it is possible to have a finer grained control. As
-has historically been the case these warnings are automatically
-enabled with
+but now is possible to have a finer grained control. As has historically been
+the case these warnings are automatically enabled with
 
     use warnings;
 
