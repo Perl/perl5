@@ -253,8 +253,8 @@ Since the error flag is no longer cleared calling close() on the
 stream may fail and if the stream was not explicitly closed, the
 implicit close of the stream may produce a warning.
 
-This has resulted in two main type of problems in downstream CPAN
-modules, and may also occur in your code:
+This has resulted in two main types of problems in downstream CPAN
+modules, and these may also occur in your code:
 
 =over
 
