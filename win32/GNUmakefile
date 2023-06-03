@@ -6,7 +6,7 @@
 #	MinGW64 with gcc-4.4.3 or later
 #
 # This is set up to build a perl.exe that runs off a shared library
-# (perl537.dll).  Also makes individual DLLs for the XS extensions.
+# (perl538.dll).  Also makes individual DLLs for the XS extensions.
 #
 # The easiest way to customize the build process is to use parameters like this:
 #
@@ -220,7 +220,7 @@ DEFAULT_INC_EXCLUDES_DOT := define
 # set this to additionally provide a statically linked perl-static.exe.
 # Note that dynamic loading will not work with this perl, so you must
 # include required modules statically using the STATIC_EXT or ALL_STATIC
-# variables below. A static library perl537s.lib will also be created.
+# variables below. A static library perl538s.lib will also be created.
 # Ordinary perl.exe is not affected by this option.
 #
 #BUILD_STATIC	:= define
@@ -911,9 +911,9 @@ ifeq ($(CCTYPE),GCC)
 
 CFGSH_TMPL	= config.gc
 CFGH_TMPL	= config_H.gc
-PERLIMPLIB	= $(COREDIR)\libperl537$(a)
-PERLIMPLIBBASE	= libperl537$(a)
-PERLSTATICLIB	= ..\libperl537s$(a)
+PERLIMPLIB	= $(COREDIR)\libperl538$(a)
+PERLIMPLIBBASE	= libperl538$(a)
+PERLSTATICLIB	= ..\libperl538s$(a)
 INT64		= long long
 
 else
@@ -926,12 +926,12 @@ endif
 
 # makedef.pl must be updated if this changes, and this should normally
 # only change when there is an incompatible revision of the public API.
-PERLIMPLIB	?= $(COREDIR)\perl537$(a)
-PERLIMPLIBBASE	?= perl537$(a)
-PERLEXPLIB	?= $(COREDIR)\perl537.exp
-PERLSTATICLIB	?= ..\perl537s$(a)
-PERLDLL		= ..\perl537.dll
-PERLDLLBASE	= perl537.dll
+PERLIMPLIB	?= $(COREDIR)\perl538$(a)
+PERLIMPLIBBASE	?= perl538$(a)
+PERLEXPLIB	?= $(COREDIR)\perl538.exp
+PERLSTATICLIB	?= ..\perl538s$(a)
+PERLDLL		= ..\perl538.dll
+PERLDLLBASE	= perl538.dll
 
 # don't let "gmake -n all" try to run "miniperl.exe make_ext.pl"
 PLMAKE		= gmake
@@ -1654,7 +1654,7 @@ utils: $(HAVEMINIPERL) ..\utils\Makefile
 	copy ..\README.tw       ..\pod\perltw.pod
 	copy ..\README.vos      ..\pod\perlvos.pod
 	copy ..\README.win32    ..\pod\perlwin32.pod
-	copy ..\pod\perldelta.pod ..\pod\perl53712delta.pod
+	copy ..\pod\perldelta.pod ..\pod\perl5380delta.pod
 	$(MINIPERL) -I..\lib $(PL2BAT) $(UTILS)
 	$(MINIPERL) -I..\lib ..\autodoc.pl ..
 	$(MINIPERL) -I..\lib ..\pod\perlmodlib.PL -q ..
@@ -1753,7 +1753,7 @@ distclean: realclean
 	-if exist $(LIBDIR)\Win32API rmdir /s /q $(LIBDIR)\Win32API
 	-if exist $(LIBDIR)\XS rmdir /s /q $(LIBDIR)\XS
 	-cd $(PODDIR) && del /f *.html *.bat roffitall \
-	    perl53712delta.pod perlaix.pod perlamiga.pod perlandroid.pod \
+	    perl5380delta.pod perlaix.pod perlamiga.pod perlandroid.pod \
 	    perlapi.pod perlbs2000.pod perlcn.pod perlcygwin.pod \
 	    perlfreebsd.pod perlhaiku.pod perlhpux.pod perlhurd.pod \
 	    perlintern.pod perlirix.pod perljp.pod perlko.pod perllinux.pod \

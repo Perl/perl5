@@ -5,7 +5,7 @@
 
 package warnings;
 
-our $VERSION = "1.64";
+our $VERSION = "1.65";
 
 # Verify that we're called correctly so that warnings will work.
 # Can't use Carp, since Carp uses us!
@@ -129,7 +129,7 @@ our %Offsets = (
     # Warnings Categories added in Perl 5.037009
     'deprecated::apostrophe_as_package_separator'=> 156,
 
-    # Warnings Categories added in Perl 5.03701
+    # Warnings Categories added in Perl 5.038
     'deprecated::smartmatch'		=> 158,
 );
 
