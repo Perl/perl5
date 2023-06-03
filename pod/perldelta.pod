@@ -235,6 +235,11 @@ before and after a require statement.
 
 See L<perlvar> for more details.
 
+=head2 Locale category LC_NAME now supported on participating platforms
+
+On platforms that have the GNU extension C<LC_NAME> category, you may now use
+it as the category parameter to L<POSIX/setlocale> to set and query its locale.
+
 =head1 Incompatible Changes
 
 =head2 readline() no longer clears the stream error and eof flags
