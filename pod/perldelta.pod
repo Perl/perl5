@@ -101,7 +101,6 @@ before and after a require statement.
 
 See L<perlvar> for more details.
 
-
 =head2 PERL_RAND_SEED
 
 Added a new environment variable C<PERL_RAND_SEED> which can be used to
@@ -562,6 +561,22 @@ C<unshift> and C<bless> functions, as well as additional examples added.
 
 =back
 
+=head3 perlhacktips
+
+=over 4
+
+=item *
+
+A new section, L<perlhacktips/Writing safer macros> has been added to discuss
+pitfalls and solutions to using C macros in C and XS code.
+
+=item *
+
+A new section, L<perlhacktips/Choosing good symbol names>, has been added to
+discuss unexpected gotchas with names.
+
+=back
+
 =head3 L<perlop>
 
 =over 4
@@ -600,27 +615,6 @@ that used the /p modifier to enable them.
 
 Added information on the new regex variable C<${^LAST_SUCCESSFUL_PATTERN}>,
 which represents the pattern of the last successful regex match in scope.
-
-=back
-
-=head3 L<perlhacktips/Writing safer macros>
-
-=over 4
-
-=item *
-
-A new section has been added to discuss pitfalls and solutions to using
-C macros in C and XS code.
-
-=back
-
-=head3 L<perlhacktips/Choosing good symbol names>
-
-=over 4
-
-=item *
-
-A new section has been added to discuss unexpected gotchas with names.
 
 =back
 
