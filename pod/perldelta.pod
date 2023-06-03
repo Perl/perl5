@@ -11,9 +11,98 @@ release.
 
 =head1 Core Enhancements
 
+=head2 New C<class> Feature
+
+A new B<experimental> syntax is now available for defining object classes,
+where per-instance data is stored in "field" variables that behave like
+lexicals.
+
+    use feature 'class';
+
+    class Point
+    {
+        field $x;
+        field $y;
+
+        method zero { $x = $y = 0; }
+    }
+
+This is described in more detail in L<perlclass>.  Notes on the internals of
+its implementation and other related details can be found in L<perlclassguts>.
+
+This remains a new and experimental feature, and is very much still under
+development. It will be the subject of much further addition, refinement and
+alteration in future releases.  As it is experimental, it yields warnings in
+the C<experimental::class> category.  These can be silenced by a
+C<no warnings> statement.
+
+    use feature 'class';
+    no warnings 'experimental::class';
+
 =head2 Unicode 15.0 is supported
 
 See L<https://www.unicode.org/versions/Unicode15.0.0/> for details.
+
+=head2 Deprecation warnings now have specific subcategories
+
+As of 5.37.10 all deprecation warnings will have their own specific
+deprecation category which can be disabled individually. You can see a
+list of all deprecated features in L<perldeprecation>, and in
+L<warnings>. The following list is from L<warnings>:
+
+         +- deprecated ----+
+         |                 |
+         |                 +- deprecated::apostrophe_as_package_separator
+         |                 |
+         |                 +- deprecated::delimiter_will_be_paired
+         |                 |
+         |                 +- deprecated::dot_in_inc
+         |                 |
+         |                 +- deprecated::goto_construct
+         |                 |
+         |                 +- deprecated::smartmatch
+         |                 |
+         |                 +- deprecated::unicode_property_name
+         |                 |
+         |                 +- deprecated::version_downgrade
+
+It is still possible to disable all deprecation warnings in a single
+statement with
+
+    no warnings 'deprecated';
+
+but as of 5.37.10 it is possible to have a finer grained control. As
+has historically been the case these warnings are automatically
+enabled with
+
+    use warnings;
+
+=head2 %{^HOOK} API introduced
+
+For various reasons it can be difficult to create subroutine wrappers
+for some of perls keywords. Any keyword which has an undefined
+prototype simply cannot be wrapped with a subroutine, and some keywords
+which perl permits to be wrapped are in practice very tricky to wrap.
+For example C<require> is tricky to wrap, it is possible but doing so
+changes the stack depth, and the standard methods of exporting assume
+that they will be exporting to a package at certain stack depth up the
+stack, and the wrapper will thus change where functions are exported to
+unless implemented with a great deal of care. This can be very awkward
+to deal with.
+
+Accordingly we have introduced a new hash called C<%{^HOOK}> which is
+intended to facilitate such cases. When a keyword supports any kind of
+special hook then the hook will live in this new hash. Hooks in this
+hash will be named after the function they are called by, followed by
+two underbars and then the phase they are executed in, currently either
+before or after the keyword is executed.
+
+In this initial release we support two hooks C<require__before> and
+C<require__after>. These are provided to make it easier to perform tasks
+before and after a require statement.
+
+See L<perlvar> for more details.
+
 
 =head2 PERL_RAND_SEED
 
@@ -81,7 +170,7 @@ execute the code anyway; the error simply happens at an earlier time.
 
 The use of C<(?{ ... })> and C<(??{ ... })> in a pattern disables various
 optimisations globally in that pattern. This may or may not be desired by the
-programmer. This release adds the C<(*{ ... })> 
+programmer. This release adds the C<(*{ ... })>
 equivalent. The only difference is that it does not and will never disable
 any optimisations in the regex engine. This may make it more unstable in the
 sense that it may be called more or less times in the future, however the
@@ -90,34 +179,6 @@ For example, certain types of optimisation are disabled when C<(?{ ... })> is
 included in a pattern, so that patterns which are O(N) in normal use become
 O(N*N) with a C<(?{ ... })> pattern in them. Switching to C<(*{ ... })> means
 the pattern will stay O(N).
-
-=head2 New C<class> Feature
-
-A new B<experimental> syntax is now available for defining object classes,
-where per-instance data is stored in "field" variables that behave like
-lexicals.
-
-    use feature 'class';
-
-    class Point
-    {
-        field $x;
-        field $y;
-
-        method zero { $x = $y = 0; }
-    }
-
-This is described in more detail in L<perlclass>.  Notes on the internals of
-its implementation and other related details can be found in L<perlclassguts>.
-
-This remains a new and experimental feature, and is very much still under
-development. It will be the subject of much further addition, refinement and
-alteration in future releases.  As it is experimental, it yields warnings in
-the C<experimental::class> category.  These can be silenced by a
-C<no warnings> statement.
-
-    use feature 'class';
-    no warnings 'experimental::class';
 
 =head2 REG_INF has been raised from 65,536 to 2,147,483,647
 
@@ -158,10 +219,10 @@ have a constant target label, and that label is found within the block.
 
 =head2 New regexp variable ${^LAST_SUCCESSFUL_PATTERN}
 
-This allows access to the last succesful pattern that matched in the current scope.
-Many aspects of the regex engine refer to the "last successful pattern". The empty
-pattern reuses it, and all of the magic regex vars relate to it. This allows
-access to its pattern. The following code
+This allows access to the last succesful pattern that matched in the current
+scope.  Many aspects of the regex engine refer to the "last successful
+pattern". The empty pattern reuses it, and all of the magic regex vars relate
+to it. This allows access to its pattern. The following code
 
     if (m/foo/ || m/bar/) {
         s//PQR/;
@@ -174,66 +235,6 @@ can be rewritten as follows
     }
 
 and it will do the exactly same thing.
-
-=head2 Deprecation warnings now have specific subcategories
-
-As of 5.37.10 all deprecation warnings will have their own specific
-deprecation category which can be disabled individually. You can see a
-list of all deprecated features in L<perldeprecation>, and in
-L<warnings>. The following list is from L<warnings>:
-
-         +- deprecated ----+
-         |                 |
-         |                 +- deprecated::apostrophe_as_package_separator
-         |                 |
-         |                 +- deprecated::delimiter_will_be_paired
-         |                 |
-         |                 +- deprecated::dot_in_inc
-         |                 |
-         |                 +- deprecated::goto_construct
-         |                 |
-         |                 +- deprecated::smartmatch
-         |                 |
-         |                 +- deprecated::unicode_property_name
-         |                 |
-         |                 +- deprecated::version_downgrade
-
-It is still possible to disable all deprecation warnings in a single
-statement with
-
-    no warnings 'deprecated';
-
-but as of 5.37.10 it is possible to have a finer grained control. As
-has historically been the case these warnings are automatically
-enabled with
-
-    use warnings;
-
-=head2 %{^HOOK} API introduced
-
-For various reasons it can be difficult to create subroutine wrappers
-for some of perls keywords. Any keyword which has an undefined
-prototype simply cannot be wrapped with a subroutine, and some keywords
-which perl permits to be wrapped are in practice very tricky to wrap.
-For example C<require> is tricky to wrap, it is possible but doing so
-changes the stack depth, and the standard methods of exporting assume
-that they will be exporting to a package at certain stack depth up the
-stack, and the wrapper will thus change where functions are exported to
-unless implemented with a great deal of care. This can be very awkward
-to deal with.
-
-Accordingly we have introduced a new hash called C<%{^HOOK}> which is
-intended to facilitate such cases. When a keyword supports any kind of
-special hook then the hook will live in this new hash. Hooks in this
-hash will be named after the function they are called by, followed by
-two underbars and then the phase they are executed in, currently either
-before or after the keyword is executed.
-
-In this initial release we support two hooks C<require__before> and
-C<require__after>. These are provided to make it easier to perform tasks
-before and after a require statement.
-
-See L<perlvar> for more details.
 
 =head2 Locale category LC_NAME now supported on participating platforms
 
