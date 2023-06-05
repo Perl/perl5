@@ -504,7 +504,6 @@ Rethrows a previously caught exception.  See L<perlguts/"Exception Handling">.
 #    undef fgetpos
 #    undef ioctl
 #    undef getlogin
-#    undef setjmp
 #    undef getc
 #    undef ungetc
 #    undef fileno
@@ -609,8 +608,6 @@ Rethrows a previously caught exception.  See L<perlguts/"Exception Handling">.
 #    define sleep		PerlProc_sleep
 #    define times		PerlProc_times
 #    define wait		PerlProc_wait
-#    define setjmp		PerlProc_setjmp
-#    define longjmp		PerlProc_longjmp
 #    define signal		PerlProc_signal
 #    define getpid		PerlProc_getpid
 #    define gettimeofday	PerlProc_gettimeofday

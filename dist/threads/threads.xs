@@ -1,24 +1,12 @@
 #define PERL_NO_GET_CONTEXT
-/* Workaround for mingw 32-bit compiler by mingw-w64.sf.net - has to come before any #include.
- * It also defines USE_NO_MINGW_SETJMP_TWO_ARGS for the mingw.org 32-bit compilers ... but
- * that's ok as that compiler makes no use of that symbol anyway */
-#if defined(WIN32) && defined(__MINGW32__) && !defined(__MINGW64__)
-#  define USE_NO_MINGW_SETJMP_TWO_ARGS 1
-#endif
+/* Tell XSUB.h not to redefine common functions. Its setjmp() override has a
+ * circular definition in Perls < 5.40. */
+#define NO_XSLOCKS
+
 #include "EXTERN.h"
 #include "perl.h"
 #include "XSUB.h"
-/* Workaround for XSUB.h bug under WIN32 */
-#ifdef WIN32
-#  undef setjmp
-#  if defined(USE_NO_MINGW_SETJMP_TWO_ARGS) || (!defined(__BORLANDC__) && !defined(__MINGW64__))
-#    define setjmp(x) _setjmp(x)
-#  endif
-#  if defined(__MINGW64__)
-#    include <intrin.h>
-#    define setjmp(x) _setjmpex((x), mingw_getsp())
-#  endif
-#endif
+
 #define NEED_PL_signals
 #define NEED_sv_2pv_flags
 #include "ppport.h"
