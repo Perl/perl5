@@ -956,6 +956,9 @@ use File::Glob qw(:case);
             # utils first
             'perldoc',
 
+            # files only used for manual testing
+            qr[^corpus/],
+
             # https://rt.cpan.org/Ticket/Display.html?id=116827
             't/02_module_pod_output.t'
         ],
