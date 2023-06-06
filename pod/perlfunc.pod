@@ -3403,7 +3403,7 @@ each field.  For example:
 
    use File::stat;
    use User::pwent;
-   my $is_his = (stat($filename)->uid == pwent($whoever)->uid);
+   my $is_theirs = (stat($filename)->uid == getpwnam($whoever)->uid);
 
 Even though it looks as though they're the same method calls (uid),
 they aren't, because a C<File::stat> object is different from
