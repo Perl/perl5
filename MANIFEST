@@ -1801,9 +1801,6 @@ cpan/Pod-Escapes/lib/Pod/Escapes.pm	Pod::Escapes
 cpan/Pod-Escapes/t/01_about_verbose.t	test Pod::Escapes
 cpan/Pod-Escapes/t/10_main.t		test Pod::Escapes
 cpan/Pod-Escapes/t/15_name2charnum.t	test Pod::Escapes
-cpan/Pod-Perldoc/corpus/no-head.pod		test file for Pod-Perldoc
-cpan/Pod-Perldoc/corpus/perlfunc.pod		test file for Pod-Perldoc
-cpan/Pod-Perldoc/corpus/utf8.pod		test file for Pod-Perldoc
 cpan/Pod-Perldoc/lib/Pod/Perldoc.pm		guts of the 'perldoc' utility
 cpan/Pod-Perldoc/lib/Pod/Perldoc/BaseTo.pm	utility module for perldoc
 cpan/Pod-Perldoc/lib/Pod/Perldoc/GetOptsOO.pm	options parsing for perldoc
