@@ -8543,11 +8543,12 @@ how many places right of the decimal point to show (the default being 6).
 For example:
 
   # these examples are subject to system-specific variation
-  printf '<%f>', 1;    # prints "<1.000000>"
-  printf '<%.1f>', 1;  # prints "<1.0>"
-  printf '<%.0f>', 1;  # prints "<1>"
-  printf '<%e>', 10;   # prints "<1.000000e+01>"
-  printf '<%.1e>', 10; # prints "<1.0e+01>"
+  printf '<%f>', 1;       # prints "<1.000000>"
+  printf '<%.1f>', 1;     # prints "<1.0>"
+  printf '<%.0f>', 1;     # prints "<1>"
+  printf '<%07.2f>', 1.3; # prints "<0001.30>"
+  printf '<%e>', 10;      # prints "<1.000000e+01>"
+  printf '<%.1e>', 10;    # prints "<1.0e+01>"
 
 For "g" and "G", this specifies the maximum number of significant digits to
 show; for example:
