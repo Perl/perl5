@@ -7410,7 +7410,7 @@ Returns the currently selected filehandle.  If FILEHANDLE is supplied,
 sets the new current default filehandle for output.  This has two
 effects: first, a L<C<write>|/write FILEHANDLE>,  L<C<print>|/print
 FILEHANDLE LIST>, or L<C<say>|/say FILEHANDLE LIST> without a
-filehandle default to this FILEHANDLE.  Second, references to variables
+filehandle will default to this FILEHANDLE.  Second, references to variables
 related to output will refer to this output channel.
 
 For example, to set the top-of-form format for more than one
