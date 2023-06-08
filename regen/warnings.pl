@@ -1495,7 +1495,7 @@ this snippet of code:
         open(@_);
     }
 
-    sub new
+    sub open
     ...
     1;
 
