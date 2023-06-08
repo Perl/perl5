@@ -401,9 +401,12 @@ Perl_cv_undef_flags(pTHX_ CV *cv, U32 flags)
             SV ** const curpad = AvARRAY(comppad);
             for (ix = PadnamelistMAX(comppad_name); ix > 0; ix--) {
                 PADNAME * const name = namepad[ix];
-                if (name && PadnamePV(name) && *PadnamePV(name) == '&')
-                    {
-                        CV * const innercv = MUTABLE_CV(curpad[ix]);
+                if (name && PadnamePV(name) && *PadnamePV(name) == '&') {
+                    CV * const innercv = MUTABLE_CV(curpad[ix]);
+                    if (PadnameIsOUR(name) && CvCLONED(&cvbody)) {
+                        assert(!innercv);
+                    }
+                    else {
                         U32 inner_rc;
                         assert(innercv);
                         assert(SvTYPE(innercv) != SVt_PVFM);
@@ -433,6 +436,7 @@ Perl_cv_undef_flags(pTHX_ CV *cv, U32 flags)
                             }
                         }
                     }
+                }
             }
         }
 

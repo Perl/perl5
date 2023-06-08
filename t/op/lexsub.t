@@ -7,7 +7,7 @@ BEGIN {
     *bar::is = *is;
     *bar::like = *like;
 }
-plan 151;
+plan 152;
 
 # -------------------- our -------------------- #
 
@@ -105,6 +105,14 @@ sub bar::_cmp { $b cmp $a }
   package main;
   is join(" ", sort _cmp split //, 'oursub'), 'u u s r o b', 'sort our_sub'
 }
+
+# https://github.com/Perl/perl5/issues/21067
+# this would crash/assert
+fresh_perl_is(<<'PROG', "ok", { }, "pad cleanup for a closure referring to an our sub");
+our sub foo;
+0 if sub { eval "" if 0; \&foo if 0; };
+print "ok";
+PROG
 
 # -------------------- state -------------------- #
 
