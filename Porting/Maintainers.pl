@@ -678,6 +678,10 @@ use File::Glob qw(:case);
         'EXCLUDED'     => [
             qr{^examples/},
         ],
+        'CUSTOMIZED' => [
+            # https://rt.cpan.org/Ticket/Display.html?id=148293
+            'lib/IO/Socket/IP.pm'
+        ],
     },
 
     'IO::Zlib' => {
