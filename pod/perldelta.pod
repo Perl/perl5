@@ -356,6 +356,20 @@ string has warned since 5.28.  It is now deprecated in both string
 interpolation and non-interpolated contexts, and will be removed in
 Perl 5.42.
 
+=head2 Switch and Smart Match operator
+
+The "switch" feature and the smartmatch operator, C<~~>, were introduced in
+v5.10.  Their behavior was significantly changed in v5.10.1.  When the
+"experiment" system was added in v5.18.0, switch and smartmatch were
+retroactively declared experimental.  Over the years, proposals to fix or
+supplement the features have come and gone.
+
+In v5.38.0, we are declaring the experiment a failure.  Some future system may
+take the conceptual place of smartmatch, but it has not yet been designed or
+built.  
+
+These features will be entirely removed from perl in v5.42.0.
+
 =head1 Performance Enhancements
 
 =over 4
