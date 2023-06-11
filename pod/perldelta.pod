@@ -112,7 +112,7 @@ See L<perlrun>. This feature can be disabled at compile time by passing
 
 to F<Configure> during the build process.
 
-=head2 Defined-or and logical-or assignment default expressions to signatures
+=head2 Defined-or and logical-or assignment default expressions in signatures
 
 The default expression for a subroutine signature parameter can now be
 assigned using the C<//=> or C<||=> operators, to apply the defaults whenever
