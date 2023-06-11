@@ -82,7 +82,7 @@ our $WARNING_TREE = {
                                 'deprecated::delimiter_will_be_paired' => [ 5.035010, DEFAULT_ON],
                                 'deprecated::apostrophe_as_package_separator'
                                                                        => [ 5.037009, DEFAULT_ON],
-                                'deprecated::smartmatch'               => [ 5.038000, DEFAULT_ON],
+                                'deprecated::smartmatch'               => [ 5.037010, DEFAULT_ON],
                         }],
         'void'          => [ 5.008, DEFAULT_OFF],
         'recursion'     => [ 5.008, DEFAULT_OFF],

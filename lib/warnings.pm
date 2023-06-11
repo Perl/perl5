@@ -129,7 +129,7 @@ our %Offsets = (
     # Warnings Categories added in Perl 5.037009
     'deprecated::apostrophe_as_package_separator'=> 156,
 
-    # Warnings Categories added in Perl 5.038
+    # Warnings Categories added in Perl 5.03701
     'deprecated::smartmatch'		=> 158,
 );
 

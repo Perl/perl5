@@ -156,7 +156,7 @@
 
 #define WARN_DEPRECATED__APOSTROPHE_AS_PACKAGE_SEPARATOR 78
 
-/* Warnings Categories added in Perl 5.038 */
+/* Warnings Categories added in Perl 5.03701 */
 
 #define WARN_DEPRECATED__SMARTMATCH	 79
 #define WARNsize			 20
