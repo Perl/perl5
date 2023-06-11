@@ -1030,6 +1030,12 @@ L<Execution of %s aborted due to compilation errors.|perldiag/"Execution of %s a
 
 =item *
 
+L<Can't locate object method "INC", nor "INCDIR" nor string overload via
+package "%s" %s in @INC|perldiag/"Can't locate object method "INC", nor
+"INCDIR" nor string overload via package "%s" %s in @INC">
+
+=item *
+
 L<Attempt to bless into a class|perldiag/"Attempt to bless into a class">
 
 (F) You are attempting to call C<bless> with a package name that is a
