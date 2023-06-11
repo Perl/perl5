@@ -20313,6 +20313,7 @@ for my $version ( sort { $a <=> $b } keys %released ) {
             'ExtUtils::Typemaps::OutputMap'=> '3.51',
             'ExtUtils::Typemaps::Type'=> '3.51',
             'File::Glob'            => '1.40',
+            'HTTP::Tiny'            => '0.083',
             'IO'                    => '1.52',
             'IO::Dir'               => '1.52',
             'IO::File'              => '1.52',
