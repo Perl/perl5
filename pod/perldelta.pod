@@ -398,6 +398,390 @@ explicitly. When enabled inside of a module the module does not need
 to return true explicitly, and in fact the return will be forced to
 a simple true value regardless of what it originally was.
 
+=item *
+
+L<Attribute::Handlers> has been upgraded from version 1.02 to 1.03.
+
+=item *
+
+L<attributes> has been upgraded from version 0.34 to 0.35.
+
+=item *
+
+L<autodie> has been upgraded from version 2.34 to 2.36.
+
+=item *
+
+L<B> has been upgraded from version 1.83 to 1.88.
+
+=item *
+
+L<B::Concise> has been upgraded from version 1.006 to 1.007.
+
+=item *
+
+L<B::Deparse> has been upgraded from version 1.64 to 1.74.
+
+=item *
+
+L<Benchmark> has been upgraded from version 1.23 to 1.24.
+
+=item *
+
+L<bignum> has been upgraded from version 0.65 to 0.66.
+
+=item *
+
+L<Carp> has been upgraded from version 1.52 to 1.54.
+
+=item *
+
+L<Class::Struct> has been upgraded from version 0.66 to 0.68.
+
+=item *
+
+L<Compress::Raw::Bzip2> has been upgraded from version 2.103 to 2.204_001.
+
+=item *
+
+L<Compress::Raw::Zlib> has been upgraded from version 2.105 to 2.204_001.
+
+=item *
+
+L<Config::Perl::V> has been upgraded from version 0.33 to 0.36.
+
+=item *
+
+L<CPAN> has been upgraded from version 2.33 to 2.36.
+
+=item *
+
+L<Data::Dumper> has been upgraded from version 2.184 to 2.188.
+
+=item *
+
+L<DB_File> has been upgraded from version 1.857 to 1.858.
+
+=item *
+
+L<Devel::Peek> has been upgraded from version 1.32 to 1.33.
+
+=item *
+
+L<Devel::PPPort> has been upgraded from version 3.68 to 3.71.
+
+=item *
+
+L<Digest::MD5> has been upgraded from version 2.58 to 2.58_01.
+
+=item *
+
+L<Digest::SHA> has been upgraded from version 6.02 to 6.04.
+
+=item *
+
+L<DynaLoader> has been upgraded from version 1.52 to 1.54.
+
+=item *
+
+L<Encode> has been upgraded from version 3.17 to 3.19.
+
+=item *
+
+L<encoding::warnings> has been upgraded from version 0.13 to 0.14.
+
+=item *
+
+L<Env> has been upgraded from version 1.05 to 1.06.
+
+=item *
+
+L<Errno> has been upgraded from version 1.36 to 1.37.
+
+=item *
+
+L<experimental> has been upgraded from version 0.028 to 0.031.
+
+=item *
+
+L<ExtUtils::CBuilder> has been upgraded from version 0.280236 to 0.280238.
+
+=item *
+
+L<ExtUtils::Install> has been upgraded from version 2.20 to 2.22.
+
+=item *
+
+L<ExtUtils::MakeMaker> has been upgraded from version 7.64 to 7.70.
+
+=item *
+
+L<ExtUtils::Miniperl> has been upgraded from version 1.11 to 1.13.
+
+=item *
+
+L<ExtUtils::ParseXS> has been upgraded from version 3.45 to 3.51.
+
+=item *
+
+L<ExtUtils::PL2Bat> has been upgraded from version 0.004 to 0.005.
+
+=item *
+
+L<ExtUtils::Typemaps> has been upgraded from version 3.45 to 3.51.
+
+=item *
+
+L<feature> has been upgraded from version 1.72 to 1.82.
+
+=item *
+
+L<File::Basename> has been upgraded from version 2.85 to 2.86.
+
+=item *
+
+L<File::Copy> has been upgraded from version 2.39 to 2.41.
+
+=item *
+
+L<File::Find> has been upgraded from version 1.40 to 1.43.
+
+=item *
+
+L<File::Glob> has been upgraded from version 1.37 to 1.40.
+
+=item *
+
+L<File::Spec> has been upgraded from version 3.84 to 3.89.
+
+=item *
+
+L<File::stat> has been upgraded from version 1.12 to 1.13.
+
+=item *
+
+L<FileHandle> has been upgraded from version 2.03 to 2.05.
+
+=item *
+
+L<Filter::Util::Call> has been upgraded from version 1.60 to 1.64.
+
+=item *
+
+L<GDBM_File> has been upgraded from version 1.23 to 1.24.
+
+=item *
+
+L<Getopt::Long> has been upgraded from version 2.52 to 2.54.
+
+=item *
+
+L<Hash::Util> has been upgraded from version 0.28 to 0.30.
+
+=item *
+
+L<HTTP::Tiny> has been upgraded from version 0.080 to 0.083.
+
+=item *
+
+L<I18N::Langinfo> has been upgraded from version 0.21 to 0.22.
+
+=item *
+
+L<IO> has been upgraded from version 1.50 to 1.52.
+
+=item *
+
+IO-Compress has been upgraded from version 2.106 to 2.204.
+
+=item *
+
+L<IO::Zlib> has been upgraded from version 1.11 to 1.14.
+
+=item *
+
+L<JSON::PP> has been upgraded from version 4.07 to 4.16.
+
+=item *
+
+libnet has been upgraded from version 3.14 to 3.15.
+
+=item *
+
+L<Locale::Maketext> has been upgraded from version 1.31 to 1.33.
+
+=item *
+
+L<Math::BigInt> has been upgraded from version 1.999830 to 1.999837.
+
+=item *
+
+L<Math::BigInt::FastCalc> has been upgraded from version 0.5012 to 0.5013.
+
+=item *
+
+L<Math::BigRat> has been upgraded from version 0.2621 to 0.2624.
+
+=item *
+
+L<Math::Complex> has been upgraded from version 1.5902 to 1.62.
+
+=item *
+
+L<Memoize> has been upgraded from version 1.03_01 to 1.16.
+
+=item *
+
+L<MIME::Base64> has been upgraded from version 3.16 to 3.16_01.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 5.20220520 to 5.20230520.
+
+=item *
+
+L<mro> has been upgraded from version 1.26 to 1.28.
+
+=item *
+
+L<NDBM_File> has been upgraded from version 1.15 to 1.16.
+
+=item *
+
+L<Net::Ping> has been upgraded from version 2.74 to 2.76.
+
+=item *
+
+L<ODBM_File> has been upgraded from version 1.17 to 1.18.
+
+=item *
+
+L<Opcode> has been upgraded from version 1.57 to 1.64.
+
+=item *
+
+L<overload> has been upgraded from version 1.35 to 1.37.
+
+=item *
+
+L<parent> has been upgraded from version 0.238 to 0.241.
+
+=item *
+
+L<PerlIO::via::QuotedPrint> has been upgraded from version 0.09 to 0.10.
+
+=item *
+
+L<Pod::Checker> has been upgraded from version 1.74 to 1.75.
+
+=item *
+
+L<Pod::Html> has been upgraded from version 1.33 to 1.34.
+
+=item *
+
+L<Pod::Usage> has been upgraded from version 2.01 to 2.03.
+
+=item *
+
+L<podlators> has been upgraded from version 4.14 to 5.01.
+
+=item *
+
+L<POSIX> has been upgraded from version 2.03 to 2.13.
+
+=item *
+
+L<re> has been upgraded from version 0.43 to 0.44.
+
+=item *
+
+L<Safe> has been upgraded from version 2.43 to 2.44.
+
+=item *
+
+L<Scalar::Util> has been upgraded from version 1.62 to 1.63.
+
+=item *
+
+L<SDBM_File> has been upgraded from version 1.15 to 1.17.
+
+=item *
+
+L<Socket> has been upgraded from version 2.033 to 2.036.
+
+=item *
+
+L<Storable> has been upgraded from version 3.26 to 3.32.
+
+=item *
+
+L<Sys::Hostname> has been upgraded from version 1.24 to 1.25.
+
+=item *
+
+L<Term::Cap> has been upgraded from version 1.17 to 1.18.
+
+=item *
+
+L<Test::Simple> has been upgraded from version 1.302190 to 1.302194.
+
+=item *
+
+L<Text::Balanced> has been upgraded from version 2.04 to 2.06.
+
+=item *
+
+L<threads> has been upgraded from version 2.27 to 2.36.
+
+=item *
+
+L<threads::shared> has been upgraded from version 1.64 to 1.68.
+
+=item *
+
+L<Tie::File> has been upgraded from version 1.06 to 1.07.
+
+=item *
+
+L<Time::HiRes> has been upgraded from version 1.9770 to 1.9775.
+
+=item *
+
+L<Time::Piece> has been upgraded from version 1.3401 to 1.3401_01.
+
+=item *
+
+L<Unicode::Normalize> has been upgraded from version 1.31 to 1.32.
+
+=item *
+
+L<UNIVERSAL> has been upgraded from version 1.14 to 1.15.
+
+=item *
+
+L<User::grent> has been upgraded from version 1.03 to 1.04.
+
+=item *
+
+L<User::pwent> has been upgraded from version 1.01 to 1.02.
+
+=item *
+
+L<utf8> has been upgraded from version 1.24 to 1.25.
+
+=item *
+
+L<warnings> has been upgraded from version 1.58 to 1.65.
+
+=item *
+
+L<XS::APItest> has been upgraded from version 1.22 to 1.32.
+
+=item *
+
+L<XSLoader> has been upgraded from version 0.31 to 0.32.
+
 =back
 
 =head1 Documentation
