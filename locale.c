@@ -840,14 +840,12 @@ S_get_category_index_helper(pTHX_ const int category, bool * succeeded,
 #endif /* ifdef USE_LOCALE */
 
 void
-Perl_force_locale_unlock()
+Perl_force_locale_unlock(pTHX)
 {
     /* Remove any locale mutex, in preperation for an inglorious termination,
      * typically a  panic */
 
 #if defined(USE_LOCALE_THREADS)
-
-    dTHX;
 
     /* If recursively locked, clear all at once */
     if (PL_locale_mutex_depth > 1) {
