@@ -1233,10 +1233,7 @@ cpan/HTTP-Tiny/corpus/redirect-07.txt
 cpan/HTTP-Tiny/corpus/redirect-08.txt
 cpan/HTTP-Tiny/corpus/redirect-09.txt
 cpan/HTTP-Tiny/corpus/redirect-10.txt
-cpan/HTTP-Tiny/corpus/snake-oil.crt
 cpan/HTTP-Tiny/lib/HTTP/Tiny.pm
-cpan/HTTP-Tiny/t/00-report-prereqs.dd
-cpan/HTTP-Tiny/t/00-report-prereqs.t
 cpan/HTTP-Tiny/t/000_load.t
 cpan/HTTP-Tiny/t/001_api.t
 cpan/HTTP-Tiny/t/002_croakage.t
@@ -1264,9 +1261,6 @@ cpan/HTTP-Tiny/t/161_basic_auth.t
 cpan/HTTP-Tiny/t/162_proxy_auth.t
 cpan/HTTP-Tiny/t/170_keepalive.t
 cpan/HTTP-Tiny/t/180_verify_SSL.t
-cpan/HTTP-Tiny/t/200_live.t
-cpan/HTTP-Tiny/t/200_live_local_ip.t
-cpan/HTTP-Tiny/t/210_live_ssl.t
 cpan/HTTP-Tiny/t/BrokenCookieJar.pm
 cpan/HTTP-Tiny/t/SimpleCookieJar.pm
 cpan/HTTP-Tiny/t/Util.pm

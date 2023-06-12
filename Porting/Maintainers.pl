@@ -626,6 +626,7 @@ use File::Glob qw(:case);
         'DISTRIBUTION' => 'DAGOLDEN/HTTP-Tiny-0.082.tar.gz',
         'FILES'        => q[cpan/HTTP-Tiny],
         'EXCLUDED'     => [
+            'corpus/snake-oil.crt', # only used by 210_live_ssl.t
             't/00-report-prereqs.t',
             't/00-report-prereqs.dd',
             't/200_live.t',
