@@ -1043,3 +1043,7 @@ U+00C5 native
 U+00FF native
 U+00B5 native
 U+00B5 string
+U+066B string
+U+066B first
+U+066B tail
+U+066B first_s
