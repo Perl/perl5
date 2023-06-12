@@ -1166,7 +1166,7 @@ Cp	|I32	|foldEQ_utf8_flags					\
 Adpx	|void	|forbid_outofblock_ops					\
 				|NN OP *o				\
 				|NN const char *blockname
-Tp	|void	|force_locale_unlock
+p	|void	|force_locale_unlock
 Cp	|void	|_force_out_malformed_utf8_message			\
 				|NN const U8 * const p			\
 				|NN const U8 * const e			\

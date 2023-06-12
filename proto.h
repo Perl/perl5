@@ -1162,7 +1162,7 @@ Perl_forbid_outofblock_ops(pTHX_ OP *o, const char *blockname);
         assert(o); assert(blockname)
 
 PERL_CALLCONV void
-Perl_force_locale_unlock(void)
+Perl_force_locale_unlock(pTHX)
         __attribute__visibility__("hidden");
 #define PERL_ARGS_ASSERT_FORCE_LOCALE_UNLOCK
 
