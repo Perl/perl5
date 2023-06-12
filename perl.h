@@ -1027,9 +1027,6 @@ violations are fatal.
 #  define HAS_SETPGRP  /* Well, effectively it does . . . */
 #endif
 
-/* getpgid isn't POSIX, but at least Solaris and Linux have it, and it makes
-    our life easier :-) so we'll try it.
-*/
 #ifdef HAS_GETPGID
 #  define BSD_GETPGRP(pid)		getpgid((pid))
 #elif defined(HAS_GETPGRP) && defined(USE_BSD_GETPGRP)

@@ -3128,9 +3128,10 @@ Returns the current process group for the specified PID.  Use
 a PID of C<0> to get the current process group for the
 current process.  Will raise an exception if used on a machine that
 doesn't implement L<getpgrp(2)>.  If PID is omitted, returns the process
-group of the current process.  Note that the POSIX version of
-L<C<getpgrp>|/getpgrp PID> does not accept a PID argument, so only
-C<PID==0> is truly portable.
+group of the current process.
+
+Some very old machines may not support C<PID != 0> and will throw an
+exception if C<PID != 0>.
 
 Portability issues: L<perlport/getpgrp>.
 
