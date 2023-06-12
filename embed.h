@@ -1273,7 +1273,7 @@
 #       define get_category_index_helper(a,b,c) S_get_category_index_helper(aTHX_ a,b,c)
 #       define mortalized_pv_copy(a)            S_mortalized_pv_copy(aTHX_ a)
 #       define new_LC_ALL(a,b)                  S_new_LC_ALL(aTHX_ a,b)
-#       define save_to_buffer                   S_save_to_buffer
+#       define save_to_buffer(a,b,c)            S_save_to_buffer(aTHX_ a,b,c)
 #       define setlocale_failure_panic_via_i(a,b,c,d,e,f,g) S_setlocale_failure_panic_via_i(aTHX_ a,b,c,d,e,f,g)
 #       if defined(DEBUGGING)
 #         define my_setlocale_debug_string_i(a,b,c,d) S_my_setlocale_debug_string_i(aTHX_ a,b,c,d)

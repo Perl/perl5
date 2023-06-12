@@ -4348,7 +4348,7 @@ So	|void	|restore_toggled_locale_i				\
 				|const unsigned cat_index		\
 				|NULLOK const char *original_locale	\
 				|const line_t caller_line
-ST	|const char *|save_to_buffer					\
+S	|const char *|save_to_buffer					\
 				|NULLOK const char *string		\
 				|NULLOK const char **buf		\
 				|NULLOK Size_t *buf_size

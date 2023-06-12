@@ -4063,7 +4063,7 @@ S_is_locale_utf8(pTHX_ const char * locale)
 #ifdef USE_LOCALE
 
 STATIC const char *
-S_save_to_buffer(const char * string, const char **buf, Size_t *buf_size)
+S_save_to_buffer(pTHX_ const char * string, const char **buf, Size_t *buf_size)
 {
     /* Copy the NUL-terminated 'string' to a buffer whose address before this
      * call began at *buf, and whose available length before this call was
@@ -4113,23 +4113,18 @@ S_save_to_buffer(const char * string, const char **buf, Size_t *buf_size)
         *buf_size = string_size;
     }
 
-    {
-        dTHX_DEBUGGING;
-        DEBUG_Lv(PerlIO_printf(Perl_debug_log,
+#    ifdef DEBUGGING
+
+    DEBUG_Lv(PerlIO_printf(Perl_debug_log,
                          "Copying '%s' to %p\n",
                          ((is_utf8_string((U8 *) string, 0))
                           ? string
                           :_byte_dump_string((U8 *) string, strlen(string), 0)),
                           *buf));
-    }
-
-#    ifdef DEBUGGING
 
     /* Catch glitches.  Usually this is because LC_CTYPE needs to be the same
      * locale as whatever is being worked on */
     if (UNLIKELY(instr(string, REPLACEMENT_CHARACTER_UTF8))) {
-        dTHX_DEBUGGING;
-
         locale_panic_(Perl_form(aTHX_
                                 "Unexpected REPLACEMENT_CHARACTER in '%s'\n%s",
                                 string, get_LC_ALL_display()));
