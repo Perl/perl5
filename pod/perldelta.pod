@@ -610,6 +610,14 @@ IO-Compress has been upgraded from version 2.106 to 2.204.
 
 =item *
 
+L<IO::Socket::IP> has been upgraded from version 0.41 to 0.41_01.
+
+On DragonflyBSD, detect setsockopt() not actually clearing
+C<IPV6_V6ONLY> even when setsockopt() returns success.  [L<cpan
+#148293|https://rt.cpan.org/Ticket/Display.html?id=148293>]
+
+=item *
+
 L<IO::Zlib> has been upgraded from version 1.11 to 1.14.
 
 =item *
