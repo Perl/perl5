@@ -2666,7 +2666,9 @@ S_new_numeric(pTHX_ const char *newnum, bool force)
         PL_numeric_underlying_is_standard = TRUE;
         PL_numeric_underlying = TRUE;
         sv_setpv(PL_numeric_radix_sv, C_decimal_point);
+        SvUTF8_off(PL_numeric_radix_sv);
         sv_setpv(PL_underlying_radix_sv, C_decimal_point);
+        SvUTF8_off(PL_underlying_radix_sv);
         return;
     }
 
@@ -2698,6 +2700,9 @@ S_new_numeric(pTHX_ const char *newnum, bool force)
 
     if (utf8ness == UTF8NESS_YES) {
         SvUTF8_on(PL_underlying_radix_sv);
+    }
+    else {
+        SvUTF8_off(PL_underlying_radix_sv);
     }
 
     DEBUG_L(PerlIO_printf(Perl_debug_log,
@@ -2775,6 +2780,7 @@ Perl_set_numeric_standard(pTHX)
     void_setlocale_c_with_caller(LC_NUMERIC, "C", __FILE__,  __LINE__);
     PL_numeric_standard = TRUE;
     sv_setpv(PL_numeric_radix_sv, C_decimal_point);
+    SvUTF8_off(PL_numeric_radix_sv);
 
     PL_numeric_underlying = PL_numeric_underlying_is_standard;
 
