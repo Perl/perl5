@@ -2429,7 +2429,7 @@ S_new_ctype(pTHX_ const char *newctype, bool force)
                             );
             }
 
-#    ifdef HAS_SOME_LANGINFO
+#    if defined(HAS_SOME_LANGINFO) || defined(WIN32)
 
             const char * scratch_buffer = NULL;
             Perl_sv_catpvf(aTHX_ PL_warn_locale, "; codeset=%s",
