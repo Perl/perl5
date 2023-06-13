@@ -243,6 +243,13 @@
  *          querylocale() is called only while the locale mutex is locked, and
  *          the result is copied to a per-thread place before unlocking.
  *
+ *      -Accflags=-DHAS_BROKEN_SETLOCALE_QUERY_LC_ALL
+ *          This would be set in a hints file to tell perl that doing a libc
+ *              setlocale(LC_ALL, NULL)
+ *          can give erroneous results, and perl will compensate to get the
+ *          correct results.  This is known to be a problem in earlier AIX
+ *          versions
+ *
  *      -Accflags=-DHAS_LF_IN_SETLOCALE_RETURN
  *          This would be set in a hints file to tell perl that a libc
  *          setlocale() can return results containing \n characters that need
@@ -1175,14 +1182,18 @@ S_parse_LC_ALL_string(pTHX_ const char * string,
  * Any necessary mutex locking needs to be done at a higher level.
  *
  * On most platforms this layer is empty, expanding to just the layer
- * below.   To enable it, call Configure with:
+ * below.   To enable it, call Configure with either or both:
  * -Accflags=-DHAS_LF_IN_SETLOCALE_RETURN
  *                  to indicate that extraneous \n characters can be returned
  *                  by setlocale()
+ * -Accflags=-DHAS_BROKEN_SETLOCALE_QUERY_LC_ALL
+ *                  to indicate that setlocale(LC_ALL, NULL) cannot be relied
+ *                  on
  */
 
 #if ! defined(USE_LOCALE)                                                   \
- || ! defined(HAS_LF_IN_SETLOCALE_RETURN)
+ || ! (   defined(HAS_LF_IN_SETLOCALE_RETURN)                               \
+       || defined(HAS_BROKEN_SETLOCALE_QUERY_LC_ALL))
 #  define stdized_setlocale(cat, locale)  posix_setlocale(cat, locale)
 #  define stdize_locale(cat, locale)  (locale)
 #else
@@ -1206,6 +1217,8 @@ S_stdize_locale(pTHX_ const int category,
      *
      * The current things this corrects are:
      * 1) A new-line.  This function chops any \n characters
+     * 2) A broken 'setlocale(LC_ALL, foo)'  This constructs a proper returned
+     *                 string from the constituent categories
      *
      * If no changes were made, the input is returned as-is */
 
@@ -1219,6 +1232,21 @@ S_stdize_locale(pTHX_ const int category,
     }
 
     char * retval = (char *) input_locale;
+
+#  if defined(LC_ALL) && defined(HAS_BROKEN_SETLOCALE_QUERY_LC_ALL)
+
+        /* If setlocale(LC_ALL, NULL) is broken, compute what the system
+         * actually thinks it should be from its individual components */
+    if (category == LC_ALL) {
+        retval = (char *) calculate_LC_ALL_string(
+                                     NULL,  /* query each individ locale */
+                                     EXTERNAL_FORMAT_FOR_SET,
+                                     caller_line);
+    }
+
+#  endif
+#  ifdef HAS_NL_IN_SETLOCALE_RETURN
+
     char * first_bad = NULL;
 
 #    ifndef LC_ALL
@@ -1316,6 +1344,7 @@ S_stdize_locale(pTHX_ const int category,
 #    endif
 #    undef INPUT_LOCALE
 #    undef MARK_CHANGED
+#  endif    /* HAS_NL_IN_SETLOCALE_RETURN */
 
     return (const char *) retval;
 }
