@@ -1817,7 +1817,8 @@ Fix regnode pointer alignment issue in F<regcomp.h>.
 The C<CVf_METHOD> CV flag and associated C<CvMETHOD> macro has been renamed to
 C<CVf_NOWARN_AMBIGUOUS> and C<CvNOWARN_AMBIGUOUS>. This closer reflects its
 actual behaviour (it suppresses a warning that would otherwise be generated
-about ambiguous names), in order to be less confusing with a possible upcoming
+about ambiguous names), in order to be less confusing with C<CvIsMETHOD>,
+which indicates that a CV is a C<method> subroutine relating to the C<class>
 feature.
 
 =item *
