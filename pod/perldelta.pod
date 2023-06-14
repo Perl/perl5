@@ -1889,9 +1889,9 @@ data is located a specific offset before the char * pointer itself.
 
 =item *
 
-Added HvNAMEf and HvNAMEf_QUOTEDPREFIX special formats. They take an HV *
-as an argument and use C<HvNAME()> and related macros to determine the string,
-its length, and whether it is utf8.
+Added C<HvNAMEf> and C<HvNAMEf_QUOTEDPREFIX> special formats. They take an
+C<HV *> as an argument and use C<HvNAME()> and related macros to determine the
+string, its length, and whether it is utf8.
 
 =item *
 
