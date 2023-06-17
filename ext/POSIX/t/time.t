@@ -100,11 +100,24 @@ TODO: {
 
 my $utf8_locale = find_utf8_ctype_locale();
 SKIP: {
-    skip "No LC_TIME UTF-8 locale", 2 if ! $LC_TIME_enabled
-                                      || ! defined $utf8_locale;
+    my $has_time_utf8_locale = ($LC_TIME_enabled && defined $utf8_locale);
+    if ($has_time_utf8_locale) {
+        my $time_utf8_locale = setlocale(LC_TIME, $utf8_locale);
 
-    setlocale(LC_TIME, $utf8_locale)
-                               || die "Cannot setlocale() to $utf8_locale: $!";
+        # Some platforms don't allow LC_TIME to be changed to a UTF-8 locale,
+        # even if we have found one whose LC_CTYPE can be.  The next two tests
+        # are invalid on such platforms.  Check for that.  (Examples include
+        # OpenBSD, and Alpine Linux without the add-on locales package
+        # installed.)
+        if (   ! defined $time_utf8_locale
+            || ! is_locale_utf8($time_utf8_locale))
+        {
+            $has_time_utf8_locale = 0;
+        }
+    }
+
+    skip "No LC_TIME UTF-8 locale", 2 unless $has_time_utf8_locale;
+
     # By setting LC_TIME only, we verify that the code properly handles the
     # case where that and LC_CTYPE differ
     is(strftime($zh_format, CORE::gmtime($jan_16)),
