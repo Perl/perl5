@@ -3398,16 +3398,17 @@ S_wrap_wsetlocale(pTHX_ const int category, const char *locale)
 
     WSETLOCALE_LOCK;
     const wchar_t * wresult = _wsetlocale(category, wlocale);
-    Safefree(wlocale);
 
     if (! wresult) {
         WSETLOCALE_UNLOCK;
+        Safefree(wlocale);
         return NULL;
     }
 
     const char * result = Win_wstring_to_utf8_string(wresult);
     WSETLOCALE_UNLOCK;
 
+    Safefree(wlocale);
     SAVEFREEPV(result); /* is there something better we can do here?  Answer:
                            Without restructuring, returning a unique value each
                            call is required.  See GH #20434 */
