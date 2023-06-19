@@ -1056,7 +1056,9 @@ optsigsubbody
 	;
 
 /* Subroutine body with optional signature */
-sigsubbody:	remember optsubsignature PERLY_BRACE_OPEN stmtseq PERLY_BRACE_CLOSE
+sigsubbody:	remember optsubsignature PERLY_BRACE_OPEN 
+			{ PL_parser->sig_seen = FALSE; }
+		stmtseq PERLY_BRACE_CLOSE
 			{
 			  if (parser->copline > (line_t)$PERLY_BRACE_OPEN)
 			      parser->copline = (line_t)$PERLY_BRACE_OPEN;
