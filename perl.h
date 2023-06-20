@@ -1316,21 +1316,25 @@ violations are fatal.
 #    define USE_PL_CUR_LC_ALL
 #  endif
 
-#  if defined(WIN32) && defined(USE_THREAD_SAFE_LOCALE)
+#  if defined(WIN32)
 
-   /* We need to be able to map the current value of what the tTHX context
-    * thinks LC_ALL is so as to inform the Windows libc when switching
-    * contexts. */
-#    define USE_PL_CUR_LC_ALL
-
-   /* Microsoft documentation reads in the change log for VS 2015: "The
-    * localeconv function declared in locale.h now works correctly when
-    * per-thread locale is enabled. In previous versions of the library, this
-    * function would return the lconv data for the global locale, not the
-    * thread's locale." */
-#    if _MSC_VER < 1900
-#      define TS_W32_BROKEN_LOCALECONV
+      /* We need to be able to map the current value of what the tTHX context
+       * thinks LC_ALL is so as to inform the Windows libc when switching
+       * contexts. */
+#    if defined(USE_THREAD_SAFE_LOCALE)
+#      define USE_PL_CUR_LC_ALL
 #    endif
+
+     /* Microsoft documentation reads in the change log for VS 2015: "The
+      * localeconv function declared in locale.h now works correctly when
+      * per-thread locale is enabled. In previous versions of the library, this
+      * function would return the lconv data for the global locale, not the
+      * thread's locale." */
+#      ifndef _MSC_VER
+#        define TS_W32_BROKEN_LOCALECONV
+#      elif _MSC_VER < 1900
+#        define TS_W32_BROKEN_LOCALECONV
+#      endif
 #  endif
 
    /* POSIX 2008 and Windows with thread-safe locales keep locale information
