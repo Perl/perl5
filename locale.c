@@ -3781,26 +3781,34 @@ S_populate_hash_from_localeconv(pTHX_ HV * hv,
     /* Fill in the string fields of the HV* */
     for (unsigned int i = 0; i < 2; i++) {
 
+        /* One iteration is only for the numeric string fields.  Skip these
+         * unless we are compiled to care about those fields and the input
+         * parameters indicate we want their values */
+        if (   i == NUMERIC_STRING_OFFSET
+
 #  ifdef USE_LOCALE_NUMERIC
 
-        /* One iteration is only for the numeric string fields */
-        if (   i == NUMERIC_STRING_OFFSET
-            && (which_mask & INDEX_TO_BIT(LC_NUMERIC_INDEX_))  == 0)
-        {
+            && (which_mask & INDEX_TO_BIT(LC_NUMERIC_INDEX_)) == 0
+
+#  endif
+
+        ) {
             continue;
         }
 
-#  endif
+        /* The other iteration is only for the monetary string fields.  Again
+         * skip it unless we want those values */
+        if (   i == MONETARY_STRING_OFFSET
+
 #  ifdef USE_LOCALE_MONETARY
 
-        /* The other iteration is only for the monetary string fields */
-        if (   i == MONETARY_STRING_OFFSET
-            && (which_mask & INDEX_TO_BIT(LC_MONETARY_INDEX_)) == 0)
-        {
-            continue;
-        }
+            && (which_mask & INDEX_TO_BIT(LC_MONETARY_INDEX_)) == 0
 
 #  endif
+        ) {
+
+            continue;
+        }
 
         /* For each field for the given category ... */
         const lconv_offset_t * category_strings = strings[i];
