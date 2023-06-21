@@ -231,6 +231,14 @@
  *          operations defined by the Posix 2008 Standard to always be used
  *          instead.  This could be useful on platforms where the libc
  *          setlocale() is buggy.
+ *
+ *      -Accflags=USE_FAKE_LC_ALL_POSITIONAL_NOTATION
+ *          This is used when developing Perl on a platform that uses
+ *          'name=value;' notation to represent LC_ALL when not all categories
+ *          are the same.  When so compiled, much of the code gets compiled
+ *          and exercised that applies to platforms that instead use positional
+ *          notation.  This allows for finding many bugs in that portion of the
+ *          implementation, without having to access such a platform.
  */
 
 /* If the environment says to, we can output debugging information during
@@ -355,6 +363,93 @@ S_wsetlocale(const int category, const wchar_t * wlocale)
 #  define _wsetlocale(category, wlocale)  S_wsetlocale(category, wlocale)
 #  endif
 #endif  /* WIN32_USE_FAKE_OLD_MINGW_LOCALES */
+
+#ifdef USE_LOCALE
+#  ifndef LC_ALL    /* Doesn't make sense without LC_ALL */
+#    undef USE_FAKE_LC_ALL_POSITIONAL_NOTATION
+#  endif
+#  ifdef USE_FAKE_LC_ALL_POSITIONAL_NOTATION
+
+/* This simulates an underlying positional notation for LC_ALL when compiled on
+ * a system that uses name=value notation.  Use this to develop on Linux and
+ * make a quick check that things have some chance of working on a positional
+ * box.  Enable by adding to the Congfigure parameters:
+ *      -Accflags=USE_FAKE_LC_ALL_POSITIONAL_NOTATION
+ *
+ * NOTE it redefines setlocale() and usequerylocale()
+ * */
+
+STATIC const char *
+S_positional_name_value_xlation(const char * locale, bool direction)
+{   /* direction == 1 is from name=value to positional
+       direction == 0 is from positional to name=value */
+    assert(locale);
+
+    dTHX;
+    const char * individ_locales[LC_ALL_INDEX_] = { NULL };
+
+    /* This parses either notation */
+    switch (parse_LC_ALL_string(locale,
+                                (const char **) &individ_locales,
+                                __LINE__))
+    {
+      default:      /* Some compilers don't realize that below is the complete
+                       list of the available enum values */
+      case invalid:
+        return NULL;
+
+      case no_array:
+        return locale;
+
+      case full_array:
+       {
+        const char * retval = calculate_LC_ALL_string(individ_locales);
+
+        for (unsigned int i = 0; i < LC_ALL_INDEX_; i++) {
+            Safefree(individ_locales[i]);
+        }
+
+        return retval;
+       }
+    }
+}
+
+STATIC const char *
+S_positional_setlocale(int cat, const char * locale)
+{
+    if (cat != LC_ALL) return setlocale(cat, locale);
+
+    if (locale && strNE(locale, "")) {
+        locale = S_positional_name_value_xlation(locale, 0);
+        if (! locale) return NULL;
+    }
+
+    locale = setlocale(cat, locale);
+    if (locale == NULL) return NULL;
+    return S_positional_name_value_xlation(locale, 1);
+}
+
+#    undef setlocale
+#    define setlocale(a,b)  S_positional_setlocale(a,b)
+#    ifdef USE_POSIX_2008_LOCALE
+
+STATIC locale_t
+S_positional_newlocale(int mask, const char * locale, locale_t base)
+{
+    assert(locale);
+
+    if (mask != LC_ALL_MASK) return newlocale(mask, locale, base);
+
+    if (strNE(locale, "")) locale = S_positional_name_value_xlation(locale, 0);
+    if (locale == NULL) return NULL;
+    return newlocale(LC_ALL_MASK, locale, base);
+}
+
+#    undef newlocale
+#    define newlocale(a,b,c)  S_positional_newlocale(a,b,c)
+#    endif
+#  endif
+#endif  /* End of fake positional notation */
 
 #include "reentr.h"
 
@@ -768,7 +863,9 @@ Perl_locale_panic(const char * msg,
 #define setlocale_failure_panic_c(cat, cur, fail, line, higher_line)        \
    setlocale_failure_panic_i(cat##_INDEX_, cur, fail, line, higher_line)
 
-#if defined(USE_POSIX_2008_LOCALE) && defined(LC_ALL)
+#if defined(USE_LOCALE)                                                     \
+ && (   (defined(USE_POSIX_2008_LOCALE) && defined(LC_ALL))                 \
+     ||  defined(USE_FAKE_LC_ALL_POSITIONAL_NOTATION))
 
 STATIC parse_LC_ALL_string_return
 S_parse_LC_ALL_string(pTHX_ const char * string,
