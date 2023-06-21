@@ -2568,7 +2568,7 @@ S_new_collate(pTHX_ const char *newcoll, bool force)
 
 #ifdef WIN32
 
-wchar_t *
+STATIC wchar_t *
 S_Win_byte_string_to_wstring(const UINT code_page, const char * byte_string)
 {
     /* Caller must arrange to free the returned string */
@@ -2594,7 +2594,7 @@ S_Win_byte_string_to_wstring(const UINT code_page, const char * byte_string)
 
 #define Win_utf8_string_to_wstring(s)  Win_byte_string_to_wstring(CP_UTF8, (s))
 
-char *
+STATIC char *
 S_Win_wstring_to_byte_string(const UINT code_page, const wchar_t * wstring)
 {
     /* Caller must arrange to free the returned string */
