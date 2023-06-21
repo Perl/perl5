@@ -2565,7 +2565,6 @@ S_new_collate(pTHX_ const char *newcoll, bool force)
 }
 
 #  endif /* USE_LOCALE_COLLATE */
-#endif  /* USE_LOCALE */
 
 #ifdef WIN32
 
@@ -2703,6 +2702,7 @@ S_win32_setlocale(pTHX_ int category, const char* locale)
 }
 
 #endif
+#endif  /* USE_LOCALE */
 
 /*
 =for apidoc Perl_setlocale
