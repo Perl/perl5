@@ -180,7 +180,7 @@ the pattern will stay O(N).
 =head2 REG_INF has been raised from 65,536 to 2,147,483,647
 
 Many regex quantifiers used to be limited to U16_MAX in the past, but are
-now limited to I32_MAX, thus it is now possible to write /(?:word){1000000}/
+now limited to I32_MAX, thus it is now possible to write C</(?:word){1000000}/>
 for example.  Note that doing so may cause the regex engine to run longer
 and use more memory.
 
