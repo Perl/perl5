@@ -2263,7 +2263,7 @@ S_force_word(pTHX_ char *start, int token, int check_keyword, int allow_pack)
     if (   isIDFIRST_lazy_if_safe(s, PL_bufend, UTF)
         || (allow_pack && *s == ':' && s[1] == ':') )
     {
-        s = scan_word(s, PL_tokenbuf, sizeof PL_tokenbuf, allow_pack, &len, allow_pack);
+        s = scan_word6(s, PL_tokenbuf, sizeof PL_tokenbuf, allow_pack, &len, allow_pack);
         if (check_keyword) {
           char *s2 = PL_tokenbuf;
           STRLEN len2 = len;
@@ -4675,7 +4675,7 @@ S_intuit_method(pTHX_ char *start, SV *ioname, CV *cv)
         return *s == '(' ? METHCALL : METHCALL0;
     }
 
-    s = scan_word(s, tmpbuf, sizeof tmpbuf, TRUE, &len, FALSE);
+    s = scan_word6(s, tmpbuf, sizeof tmpbuf, TRUE, &len, FALSE);
     /* start is the beginning of the possible filehandle/object,
      * and s is the end of it
      * tmpbuf is a copy of it (but with single quotes as double colons)
@@ -5303,7 +5303,7 @@ yyl_dollar(pTHX_ char *s)
                     } while (isSPACE(*t));
                     if (isIDFIRST_lazy_if_safe(t, PL_bufend, UTF)) {
                         STRLEN len;
-                        t = scan_word(t, tmpbuf, sizeof tmpbuf, TRUE,
+                        t = scan_word6(t, tmpbuf, sizeof tmpbuf, TRUE,
                                       &len, TRUE);
                         while (isSPACE(*t))
                             t++;
@@ -5337,7 +5337,7 @@ yyl_dollar(pTHX_ char *s)
                 char tmpbuf[sizeof PL_tokenbuf];
                 int t2;
                 STRLEN len;
-                scan_word(s, tmpbuf, sizeof tmpbuf, TRUE, &len, FALSE);
+                scan_word6(s, tmpbuf, sizeof tmpbuf, TRUE, &len, FALSE);
                 if ((t2 = keyword(tmpbuf, len, 0))) {
                     /* binary operators exclude handle interpretations */
                     switch (t2) {
@@ -5408,7 +5408,7 @@ yyl_sub(pTHX_ char *s, const int key)
     {
 
         PL_expect = XATTRBLOCK;
-        d = scan_word(s, tmpbuf, sizeof PL_tokenbuf - 1, TRUE,
+        d = scan_word6(s, tmpbuf, sizeof PL_tokenbuf - 1, TRUE,
                       &len, TRUE);
         if (key == KEY_format)
             format_name = S_newSV_maybe_utf8(aTHX_ s, d - s);
@@ -5993,7 +5993,7 @@ yyl_colon(pTHX_ char *s)
             I32 tmp;
             SV *sv;
             STRLEN len;
-            char *d = scan_word(s, PL_tokenbuf, sizeof PL_tokenbuf, FALSE, &len, FALSE);
+            char *d = scan_word6(s, PL_tokenbuf, sizeof PL_tokenbuf, FALSE, &len, FALSE);
             if (isLOWER(*s) && (tmp = keyword(PL_tokenbuf, len, 0))) {
                 if (tmp < 0) tmp = -tmp;
                 switch (tmp) {
@@ -6175,7 +6175,7 @@ yyl_leftcurly(pTHX_ char *s, const U8 formbrack)
         }
         if (d < PL_bufend && isIDFIRST_lazy_if_safe(d, PL_bufend, UTF)) {
             STRLEN len;
-            d = scan_word(d, PL_tokenbuf + 1, sizeof PL_tokenbuf - 1,
+            d = scan_word6(d, PL_tokenbuf + 1, sizeof PL_tokenbuf - 1,
                           FALSE, &len, FALSE);
             while (d < PL_bufend && SPACE_OR_TAB(*d))
                 d++;
@@ -7022,7 +7022,7 @@ yyl_foreach(pTHX_ char *s)
             /* skip optional package name, as in "for my abc $x (..)" */
             if (UNLIKELY(isIDFIRST_lazy_if_safe(p, PL_bufend, UTF))) {
                 STRLEN len;
-                p = scan_word(p, PL_tokenbuf, sizeof PL_tokenbuf, TRUE, &len, TRUE);
+                p = scan_word6(p, PL_tokenbuf, sizeof PL_tokenbuf, TRUE, &len, TRUE);
                 p = skipspace(p);
                 paren_is_valid = FALSE;
             }
@@ -7053,7 +7053,7 @@ yyl_do(pTHX_ char *s, I32 orig_keyword)
         char *d;
         STRLEN len;
         *PL_tokenbuf = '&';
-        d = scan_word(s, PL_tokenbuf + 1, sizeof PL_tokenbuf - 1,
+        d = scan_word6(s, PL_tokenbuf + 1, sizeof PL_tokenbuf - 1,
                       1, &len, TRUE);
         if (len && memNEs(PL_tokenbuf+1, len, "CORE")
          && !keyword(PL_tokenbuf + 1, len, 0)) {
@@ -7089,7 +7089,7 @@ yyl_my(pTHX_ char *s, I32 my)
     s = skipspace(s);
     if (isIDFIRST_lazy_if_safe(s, PL_bufend, UTF)) {
         STRLEN len;
-        s = scan_word(s, PL_tokenbuf, sizeof PL_tokenbuf, TRUE, &len, TRUE);
+        s = scan_word6(s, PL_tokenbuf, sizeof PL_tokenbuf, TRUE, &len, TRUE);
         if (memEQs(PL_tokenbuf, len, "sub"))
             return yyl_sub(aTHX_ s, my);
         PL_in_my_stash = find_in_my_stash(PL_tokenbuf, len);
@@ -7561,7 +7561,7 @@ yyl_just_a_word(pTHX_ char *s, STRLEN len, I32 orig_keyword, struct code c)
 
     if (*s == '\'' || (*s == ':' && s[1] == ':')) {
         STRLEN morelen;
-        s = scan_word(s, PL_tokenbuf + len, sizeof PL_tokenbuf - len,
+        s = scan_word6(s, PL_tokenbuf + len, sizeof PL_tokenbuf - len,
                       TRUE, &morelen, TRUE);
         if (no_op_error) {
             no_op("Bareword",s);
@@ -8311,7 +8311,7 @@ yyl_word_or_keyword(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct
         s = skipspace(s);
         if (isIDFIRST_lazy_if_safe(s, PL_bufend, UTF)) {
             const char *t;
-            char *d = scan_word(s, PL_tokenbuf, sizeof PL_tokenbuf, FALSE, &len, FALSE);
+            char *d = scan_word6(s, PL_tokenbuf, sizeof PL_tokenbuf, FALSE, &len, FALSE);
             for (t=d; isSPACE(*t);)
                 t++;
             if ( *t && memCHRs("|&*+-=!?:.", *t) && ckWARN_d(WARN_PRECEDENCE)
@@ -8759,7 +8759,7 @@ yyl_key_core(pTHX_ char *s, STRLEN len, struct code c)
     STRLEN olen = len;
     char *d = s;
     s += 2;
-    s = scan_word(s, PL_tokenbuf, sizeof PL_tokenbuf, FALSE, &len, FALSE);
+    s = scan_word6(s, PL_tokenbuf, sizeof PL_tokenbuf, FALSE, &len, FALSE);
     if ((*s == ':' && s[1] == ':')
         || (!(key = keyword(PL_tokenbuf, len, 1)) && *s == '\''))
     {
@@ -8838,7 +8838,7 @@ yyl_keylookup(pTHX_ char *s, GV *gv)
     c.gv = gv;
 
     PL_bufptr = s;
-    s = scan_word(s, PL_tokenbuf, sizeof PL_tokenbuf, FALSE, &len, FALSE);
+    s = scan_word6(s, PL_tokenbuf, sizeof PL_tokenbuf, FALSE, &len, FALSE);
 
     /* Some keywords can be followed by any delimiter, including ':' */
     anydelim = word_takes_any_delimiter(PL_tokenbuf, len);
@@ -10247,15 +10247,17 @@ S_parse_ident(pTHX_ char **s, char **d, char * const e, int allow_package,
 
 /* Returns a NUL terminated string, with the length of the string written to
    *slp
+
+   scan_word6() may be removed once ' in names is removed.
    */
 char *
-Perl_scan_word(pTHX_ char *s, char *dest, STRLEN destlen, int allow_package, STRLEN *slp, bool warn_tick)
+Perl_scan_word6(pTHX_ char *s, char *dest, STRLEN destlen, int allow_package, STRLEN *slp, bool warn_tick)
 {
     char *d = dest;
     char * const e = d + destlen - 3;  /* two-character token, ending NUL */
     bool is_utf8 = cBOOL(UTF);
 
-    PERL_ARGS_ASSERT_SCAN_WORD;
+    PERL_ARGS_ASSERT_SCAN_WORD6;
 
     parse_ident(&s, &d, e, allow_package, is_utf8, TRUE, warn_tick);
     *d = '\0';
@@ -10263,6 +10265,12 @@ Perl_scan_word(pTHX_ char *s, char *dest, STRLEN destlen, int allow_package, STR
     return s;
 }
 
+char *
+Perl_scan_word(pTHX_ char *s, char *dest, STRLEN destlen, int allow_package, STRLEN *slp)
+{
+    PERL_ARGS_ASSERT_SCAN_WORD;
+    return scan_word6(s, dest, destlen, allow_package, slp, FALSE);
+}
 
 /* scan s and extract an identifier ($var) from it if possible
  * into dest.
@@ -13723,7 +13731,7 @@ Perl_parse_label(pTHX_ U32 flags)
         t = s = PL_bufptr;
         if (!isIDFIRST_lazy_if_safe(s, PL_bufend, UTF))
             goto no_label;
-        t = scan_word(s, PL_tokenbuf, sizeof PL_tokenbuf, FALSE, &wlen, FALSE);
+        t = scan_word6(s, PL_tokenbuf, sizeof PL_tokenbuf, FALSE, &wlen, FALSE);
         if (word_takes_any_delimiter(s, wlen))
             goto no_label;
         bufptr_pos = s - SvPVX(PL_linestr);

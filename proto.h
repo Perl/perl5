@@ -4146,8 +4146,13 @@ Perl_scan_vstring(pTHX_ const char *s, const char * const e, SV *sv);
         assert(s); assert(e); assert(sv)
 
 PERL_CALLCONV char *
-Perl_scan_word(pTHX_ char *s, char *dest, STRLEN destlen, int allow_package, STRLEN *slp, bool warn_tick);
+Perl_scan_word(pTHX_ char *s, char *dest, STRLEN destlen, int allow_package, STRLEN *slp);
 #define PERL_ARGS_ASSERT_SCAN_WORD              \
+        assert(s); assert(dest); assert(slp)
+
+PERL_CALLCONV char *
+Perl_scan_word6(pTHX_ char *s, char *dest, STRLEN destlen, int allow_package, STRLEN *slp, bool warn_tick);
+#define PERL_ARGS_ASSERT_SCAN_WORD6             \
         assert(s); assert(dest); assert(slp)
 
 PERL_CALLCONV U32
