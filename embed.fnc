@@ -2903,6 +2903,11 @@ EXpx	|char * |scan_word	|NN char *s				\
 				|NN char *dest				\
 				|STRLEN destlen 			\
 				|int allow_package			\
+				|NN STRLEN *slp
+EXpx	|char * |scan_word6	|NN char *s				\
+				|NN char *dest				\
+				|STRLEN destlen 			\
+				|int allow_package			\
 				|NN STRLEN *slp 			\
 				|bool warn_tick
 Cp	|U32	|seed
