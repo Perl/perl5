@@ -179,10 +179,10 @@ the pattern will stay O(N).
 
 =head2 REG_INF has been raised from 65,536 to 2,147,483,647
 
-Many regex quantifiers used to be limited to U16_MAX in the past, but are
-now limited to I32_MAX, thus it is now possible to write C</(?:word){1000000}/>
-for example.  Note that doing so may cause the regex engine to run longer
-and use more memory.
+Many regex quantifiers used to be limited to C<U16_MAX> in the past, but are
+now limited to C<I32_MAX>, thus it is now possible to write
+C</(?:word){1000000}/> for example.  Note that doing so may cause the regex
+engine to run longer and use more memory.
 
 =head2 New API functions optimize_optree and finalize_optree
 
@@ -1517,7 +1517,7 @@ Properly populate osvers on Dragonfly BSD when the hostname isn't set.
 
 =item *
 
-Fix typos for C99 macro name PRIX64.
+Fix typos for C99 macro name C<PRIX64>.
 
 =item *
 
@@ -1525,7 +1525,7 @@ Remove ancient and broken GCC for VMS support
 
 =item *
 
-Remove vestigial reference to /VAXC qualifier
+Remove vestigial reference to C</VAXC> qualifier
 
 =item *
 
@@ -1725,8 +1725,8 @@ change merely brings that to the other platforms.
 
 =item *
 
-New formatting symbols were added for printing values declared as U32 or
-I32:
+New formatting symbols were added for printing values declared as C<U32> or
+C<I32>:
 
 =over
 
@@ -1805,7 +1805,7 @@ Fix definition of C<Perl_atof>.
 
 =item *
 
-Fix undefined behavior with overflow related OPTIMIZE_INFTY and delta
+Fix undefined behavior with overflow related C<OPTIMIZE_INFTY> and delta
 in F<regcomp.c>.
 
 =item *
@@ -1882,7 +1882,7 @@ expect a C<SSize_t> parameter, and enforce that on debugging builds.
 Filenames in cops are now refcounted under threads.
 Under threads we were copying the filenames into each opcode. This is because in
 theory opcodes created in one thread can be destroyed in another.
-The change adds a new struct/type RCPV, which is a refcounted
+The change adds a new struct/type C<RCPV>, which is a refcounted
 string using shared memory. This is implemented in such a way that code
 that previously used a char * can continue to do so, as the refcounting
 data is located a specific offset before the char * pointer itself.
@@ -2014,7 +2014,7 @@ Fix multiple compiler warnings from regexp.c., locale.c [L<github #19915|https:/
 
 =item *
 
-Fix a bug with querying locales on platforms that don't have LC_NUMERIC
+Fix a bug with querying locales on platforms that don't have C<LC_NUMERIC>
 [L<github #19890|https://github.com/Perl/perl5/issues/19890>]
 
 =item *
