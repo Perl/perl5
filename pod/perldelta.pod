@@ -402,11 +402,11 @@ Added the C<is_tainted()> builtin function. [L<github #19854|https://github.com/
 
 =item *
 
-Added the C<export_lexically()> builtin function as per PPC 0020. [L<github #19895|https://github.com/Perl/perl5/issues/19895>]
+Added the C<export_lexically()> builtin function as per L<PPC 0020|https://github.com/Perl/PPCs/blob/main/ppcs/ppc0020-lexical-export.md>. [L<github #19895|https://github.com/Perl/perl5/issues/19895>]
 
 =item *
 
-Support for PPC 0018, C<use feature "module_true";> has been added to
+Support for L<PPC 0018|https://github.com/Perl/PPCs/blob/main/ppcs/ppc0018-module-true.md>, C<use feature "module_true";> has been added to
 the default feature bundle for v5.38 and later. It may also be used
 explicitly. When enabled inside of a module the module does not need
 to return true explicitly, and in fact the return will be forced to
