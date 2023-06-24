@@ -4,7 +4,7 @@ perlclass - Perl class syntax reference
 
 =head1 SYNOPSIS
 
-    use v5.36;
+    use v5.38;
     use feature 'class';
 
     class My::Example 1.234 {
