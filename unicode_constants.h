@@ -16,10 +16,12 @@
  *
  * The macros that have the suffix "_UTF8" may have further suffixes, as
  * follows:
- *  "_FIRST_BYTE" if the value is just the first byte of the UTF-8
- *                representation; the value will be a numeric constant.
- *  "_TAIL"       if instead it represents all but the first byte.  This, and
- *                with no additional suffix are both string constants */
+ *  "_FIRST_BYTE"   if the value is just the first byte of the UTF-8
+ *                  representation; the value will be a numeric constant.
+ *  "_FIRST_BYTEs"  same, but the first byte is represented as a literal
+ *                  string
+ *  "_TAIL"         if instead it represents all but the first byte.  This,
+ *                  and with no additional suffix are both string constants */
 
 /*
 =for apidoc_section $unicode
