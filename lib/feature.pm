@@ -4,7 +4,7 @@
 # Any changes made here will be lost!
 
 package feature;
-our $VERSION = '1.82';
+our $VERSION = '1.83';
 
 our %feature = (
     fc                      => 'feature_fc',
@@ -65,6 +65,8 @@ $feature_bundle{"5.33"} = $feature_bundle{"5.27"};
 $feature_bundle{"5.34"} = $feature_bundle{"5.27"};
 $feature_bundle{"5.36"} = $feature_bundle{"5.35"};
 $feature_bundle{"5.38"} = $feature_bundle{"5.37"};
+$feature_bundle{"5.39"} = $feature_bundle{"5.37"};
+$feature_bundle{"5.40"} = $feature_bundle{"5.37"};
 $feature_bundle{"5.9.5"} = $feature_bundle{"5.10"};
 my %noops = (
     postderef => 1,
@@ -968,6 +970,10 @@ The following feature bundles are available:
             state unicode_eval unicode_strings
 
   :5.38     bitwise current_sub evalbytes fc isa
+            module_true postderef_qq say signatures
+            state unicode_eval unicode_strings
+
+  :5.40     bitwise current_sub evalbytes fc isa
             module_true postderef_qq say signatures
             state unicode_eval unicode_strings
 
