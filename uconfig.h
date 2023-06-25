@@ -5383,5 +5383,5 @@
 
 /* Generated from:
  * e17a83ff6ae98071d846d4a001f6ce1a669df08c357fe153c2370adc4910135e config_h.SH
- * 8d785207fec43bbad5118a8125e625d1cc654455994f09a76c1625b2ae2ae2d0 uconfig.sh
+ * 6b70570dc96ee98b0fc9ac965b3e38f6be909a5748447eb22bd763cf51923aba uconfig.sh
  * ex: set ro ft=c: */
