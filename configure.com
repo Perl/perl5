@@ -1,3 +1,4 @@
+
 $! OpenVMS configuration procedure for Perl -- do not attempt to run under DOS
 $ sav_ver = 'F$VERIFY(0)'
 $ on control_y then goto clean_up
@@ -6215,6 +6216,9 @@ $ WC "d_oldpthreads='" + d_oldpthreads + "'"
 $ WC "d_oldsock='undef'"
 $ WC "d_open3='define'"
 $ WC "d_openat='undef'"
+$ WC "d_perl_lc_all_category_positions_init='undef'"
+$ WC "d_perl_lc_all_separator='undef'"
+$ WC "d_perl_lc_all_uses_name_value_pairs='undef'"
 $ WC "d_unlinkat='undef'"
 $ WC "d_renameat='undef'"
 $ WC "d_linkat='undef'"
@@ -6679,6 +6683,8 @@ $ WC "package='" + package + "'"
 $ WC "pager='" + pager + "'"
 $ WC "patchlevel='" + patchlevel + "'"
 $ WC "path_sep='|'"
+$ WC "perl_lc_all_category_positions_init='undef'"
+$ WC "perl_lc_all_separator='undef'"
 $ WC "perl_root='" + perl_root + "'" ! VMS specific $trnlnm()
 $ WC "perladmin='" + perladmin + "'"
 $ WC "perllibs='" + perllibs + "'"

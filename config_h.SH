@@ -3651,6 +3651,31 @@ sed <<!GROK!THIS! >$CONFIG_H -e 's!^#undef\(.*/\)\*!/\*#define\1 \*!' -e 's!^#un
  */
 #$default_inc_excludes_dot DEFAULT_INC_EXCLUDES_DOT	/**/
 
+/* PERL_LC_ALL_USES_NAME_VALUE_PAIRS:
+ *	This symbol, if defined, indicates to the C program that the string
+ *	returned by setlocale(LC_ALL, NULL) uses 'name=value;' pairs to
+ *	indicate what each category's locale is when they aren't all set to the
+ *	same locale.  For example, "LC_NUMERIC=C;LC_CTYPE=de_DE;..."
+ *	When not defined, the system uses positional notation.
+ */
+/* PERL_LC_ALL_SEPARATOR:
+ *	This symbol, if defined, gives the string returned by
+ *	setlocale(LC_ALL, NULL) to separate categories that are in different
+ *	locales on systems that use a positional notation as opposed to
+ *	'name=value' pairs.  An example on some platforms could be the '/' in
+ *	"C/de_DE/C/en_UK/C/C"
+ */
+/* PERL_LC_ALL_CATEGORY_POSITIONS_INIT:
+ *	This symbol, when defined, gives the C initializer for an array whose
+ *	element [0] is the first category in the string returned by
+ *	setlocale(LC_ALL, NULL) when not all categories are the same, on
+ *	systems that use a positional notation.  After element [0] is
+ *	LC_ALL_SEPARATOR, then the category given by element [1] and so on.
+ */
+#$d_perl_lc_all_uses_name_value_pairs PERL_LC_ALL_USES_NAME_VALUE_PAIRS  	/**/
+#$d_perl_lc_all_separator  PERL_LC_ALL_SEPARATOR $perl_lc_all_separator	/**/
+#$d_perl_lc_all_category_positions_init  PERL_LC_ALL_CATEGORY_POSITIONS_INIT  $perl_lc_all_category_positions_init	/**/
+
 /* USE_DYNAMIC_LOADING:
  *	This symbol, if defined, indicates that dynamic loading of
  *	some sort is available.

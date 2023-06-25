@@ -13,6 +13,7 @@
  * Symbols should only be here temporarily. Once they are actually used,
  * they should be removed from here.
  *
- * HAS_NON_INT_BITFIELDS
- *
+ * PERL_LC_ALL_USES_NAME_VALUE_PAIRS
+ * PERL_LC_ALL_SEPARATOR
+ * PERL_LC_ALL_CATEGORY_POSITIONS_INIT
  */
