@@ -296,13 +296,13 @@ precedence.
 [L<GH #1537|https://github.com/Perl/perl5/issues/1537>]
 [L<GH #20181|https://github.com/Perl/perl5/issues/20181>]
 
-=head2 Syntax errors will no longer produce "phantom error messages".
+=head2 Syntax errors no longer produce "phantom error messages"
 
 Generally perl will continue parsing the source code even after
 encountering a compile error. In many cases this is helpful, for
 instance with misspelled variable names it is helpful to show as many
 examples of the error as possible. But in the case of syntax errors
-continuing often produces bizarre error messages, and may even cause
+continuing often produces bizarre error messages and may even cause
 segmentation faults during the compile process. In this release the
 compiler will halt at the first syntax error encountered. This means
 that any code expecting to see the specific error messages we used to
