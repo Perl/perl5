@@ -1224,6 +1224,20 @@ typedef enum {
  * declarations */
 #  define LOCALE_CATEGORIES_COUNT_        (LC_ALL_INDEX_ + 1)
 
+/* As a development aid for platforms that have LC_ALL name=value notation,
+ * setting -Accflags=-DUSE_FAKE_LC_ALL_POSITIONAL_NOTATION, simulates a
+ * platform that instead uses positional notation.  By doing this, you can find
+ * many bugs without trying it out on a real such platform.  It would be
+ * possible to create the reverse definitions for people who have ready access
+ * to a posiional notation box, but harder to get a name=value box */
+#  if defined(USE_FAKE_LC_ALL_POSITIONAL_NOTATION)            \
+   && defined(PERL_LC_ALL_USES_NAME_VALUE_PAIRS)
+#    undef  PERL_LC_ALL_USES_NAME_VALUE_PAIRS
+
+#    define  PERL_LC_ALL_CATEGORY_POSITIONS_INIT /* Assumes glibc cateories */\
+                                  { 12, 11, 10, 9, 8, 7, 5, 4, 3, 2, 1, 0 }
+#    define  PERL_LC_ALL_SEPARATOR "/ = /"
+#  endif
 /* =========================================================================
  * The defines from here to the following ===== line are unfortunately
  * duplicated in makedef.pl, and changes here MUST also be made there */
