@@ -506,6 +506,13 @@ S_positional_newlocale(int mask, const char * locale, locale_t base)
    || defined(HAS_MBRTOWC) || ! defined(USE_LOCALE)
 #  define HAS_RELIABLE_UTF8NESS_DETERMINATION
 #endif
+
+/* This is a starting guess as to when this is true.  It definititely isn't
+ * true on *BSD where positional LC_ALL notation is used.  Likely this will end
+ * up being defined in hints files. */
+#ifdef PERL_LC_ALL_USES_NAME_VALUE_PAIRS
+#  define NEWLOCALE_HANDLES_DISPARATE_LC_ALL
+#endif
 #ifdef USE_LOCALE
 
 /* Not all categories need be set to the same locale.  This macro determines if
