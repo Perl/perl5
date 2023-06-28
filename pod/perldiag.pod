@@ -2619,6 +2619,13 @@ same name?
 iterate multiple values at a time. This syntax is currently experimental
 and its behaviour may change in future releases of Perl.
 
+=item Forked open '%s' not meaningful in <>
+
+(S inplace) You had C<|-> or C<-|> in C<@ARGV> and tried to use C<< <>
+>> to read from it.
+
+Previously this would fork and produce a confusing error message.
+
 =item Format not terminated
 
 (F) A format must be terminated by a line with a solitary dot.  Perl got

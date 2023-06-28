@@ -1162,6 +1162,7 @@
 #     define argvout_final(a,b,c)               S_argvout_final(aTHX_ a,b,c)
 #     define exec_failed(a,b,c)                 S_exec_failed(aTHX_ a,b,c)
 #     define ingroup(a,b)                       S_ingroup(aTHX_ a,b)
+#     define is_fork_open                       S_is_fork_open
 #     define openn_cleanup(a,b,c,d,e,f,g,h,i,j,k,l,m) S_openn_cleanup(aTHX_ a,b,c,d,e,f,g,h,i,j,k,l,m)
 #     define openn_setup(a,b,c,d,e,f)           S_openn_setup(aTHX_ a,b,c,d,e,f)
 #   endif

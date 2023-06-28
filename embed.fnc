@@ -4040,6 +4040,7 @@ S	|void	|exec_failed	|NN const char *cmd			\
 				|int do_report
 RS	|bool	|ingroup	|Gid_t testgid				\
 				|bool effective
+ST	|bool	|is_fork_open	|NN const char *name
 S	|bool	|openn_cleanup	|NN GV *gv				\
 				|NN IO *io				\
 				|NULLOK PerlIO *fp			\
