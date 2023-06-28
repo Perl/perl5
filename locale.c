@@ -1119,25 +1119,6 @@ S_less_dicey_bool_setlocale_r(pTHX_ const int cat, const char * locale)
 #  define querylocale_c(cat)  querylocale_i(cat##_INDEX_)
 #  define querylocale_r(cat)  querylocale_i(get_category_index(cat))
 
-#  ifdef USE_QUERYLOCALE
-#    define isSINGLE_BIT_SET(mask) isPOWER_OF_2(mask)
-
-     /* This code used to think querylocale() was valid on LC_ALL.  Make sure
-      * all instances of that have been removed */
-#    define QUERYLOCALE_ASSERT(index)                                       \
-                        __ASSERT_(isSINGLE_BIT_SET(category_masks[index]))
-#    if ! defined(HAS_QUERYLOCALE) && (   defined(_NL_LOCALE_NAME)          \
-                                       && defined(HAS_NL_LANGINFO_L))
-#      define querylocale_l(index, locale_obj)                              \
-            (QUERYLOCALE_ASSERT(index)                                      \
-             mortalized_pv_copy(nl_langinfo_l(                              \
-                         _NL_LOCALE_NAME(categories[index]), locale_obj)))
-#    else
-#      define querylocale_l(index, locale_obj)                              \
-        (QUERYLOCALE_ASSERT(index)                                          \
-         mortalized_pv_copy(querylocale(category_masks[index], locale_obj)))
-#    endif
-#  endif
 #  if defined(__GLIBC__) && defined(USE_LOCALE_MESSAGES)
 #    define HAS_GLIBC_LC_MESSAGES_BUG
 #    include <libintl.h>
@@ -1150,19 +1131,46 @@ S_querylocale_2008_i(pTHX_ const unsigned int index)
     assert(index <= LC_ALL_INDEX_);
 
     /* This function returns the name of the locale category given by the input
-     * index into our parallel tables of them.
+     * 'index' into our parallel tables of them.
      *
      * POSIX 2008, for some sick reason, chose not to provide a method to find
-     * the category name of a locale, discarding a basic linguistic tenet that
-     * for any object, people will create a name for it.  Some vendors have
-     * created a querylocale() function to do just that.  This function is a
-     * lot simpler to implement on systems that have this.  Otherwise, we have
-     * to keep track of what the locale has been set to, so that we can return
-     * its name so as to emulate setlocale().  It's also possible for C code in
-     * some library to change the locale without us knowing it, though as of
-     * September 2017, there are no occurrences in CPAN of uselocale().  Some
-     * libraries do use setlocale(), but that changes the global locale, and
-     * threads using per-thread locales will just ignore those changes. */
+     * the category name of a locale, disregarding a basic linguistic tenet
+     * that for any object, people will create a name for it.  (The next
+     * version of the POSIX standard is proposed to fix this.)  Some vendors
+     * have created a querylocale() function to do this in the meantime.  On
+     * systems without querylocale(), we have to keep track of what the locale
+     * has been set to, so that we can return its name so as to emulate
+     * setlocale().  There are potential problems with this:
+     *
+     *  1)  We don't know what calling newlocale() with the locale argument ""
+     *      actually does.  It gets its values from the program's environment.
+     *      find_locale_from_environment() is used to work around this.  But it
+     *      isn't fool-proof.  See the comments for that function for details.
+     *  2)  It's possible for C code in some library to change the locale
+     *      without us knowing it, and thus our records become wrong;
+     *      querylocale() would catch this.  But as of September 2017, there
+     *      are no occurrences in CPAN of uselocale().  Some libraries do use
+     *      setlocale(), but that changes the global locale, and threads using
+     *      per-thread locales will just ignore those changes.
+     *  3)  Many systems have multiple names for the same locale.  Generally,
+     *      there is an underlying base name, with aliases that evaluate to it.
+     *      On some systems, if you set the locale to an alias, and then
+     *      retrieve the name, you get the alias as expected; but on others you
+     *      get the base name, not the alias you used.  And sometimes the
+     *      charade is incomplete.  See
+     *      https://bugs.freebsd.org/bugzilla/show_bug.cgi?id=269375.
+     *
+     *      The code is structured so that the returned locale name when the
+     *      locale is changed is whatever the result of querylocale() on the
+     *      new locale is.  This effectively gives the result the system
+     *      expects.  Without querylocale, the name returned is always the
+     *      input name.  Theoretically this could cause problems, but khw knows
+     *      of none so far, but mentions it here in case you are trying to
+     *      debug something.  (This could be worked around by messing with the
+     *      global locale temporarily, using setlocale() to get the base name;
+     *      but that could cause a race.  The comments for
+     *      find_locale_from_environment() give details on the potential race.)
+     */
 
     const locale_t cur_obj = uselocale((locale_t) 0);
     const char * retval;
@@ -1205,16 +1213,34 @@ S_querylocale_2008_i(pTHX_ const unsigned int index)
     /* Below is the implementation of the 'else' clause which handles the case
      * of the current locale not being the global one on platforms where
      * USE_PL_CURLOCALES is NOT in effect.  That means the system must have
-     * some form of querylocale. */
+     * some form of querylocale.
+     *
+     * First, glibc has a function that implements querylocale(), but is called
+     * something else, and takes the category number; the others take the mask.
+     * */
+#    if defined(USE_QUERYLOCALE) && (   defined(_NL_LOCALE_NAME)            \
+                                     && defined(HAS_NL_LANGINFO_L))
+#      define my_querylocale(index, cur_obj)                                \
+                nl_langinfo_l(_NL_LOCALE_NAME(categories[index]), cur_obj)
+#    else   /* below, ! glibc */
+#      define my_querylocale(index, cur_obj)                                \
+                               querylocale(category_masks[index], cur_obj)
+#    endif
 
     else {
-
-        /* We don't currently keep records when there is querylocale(), so have
-         * to get it anew each time */
-        retval = (index == LC_ALL_INDEX_)
-                 ? calculate_LC_ALL_string(NULL)
-                 : querylocale_l(index, cur_obj);
-
+        /* We don't keep records when there is querylocale(), so as to avoid the
+         * pitfalls mentioned at the beginning of this function.
+         *
+         * That means LC_ALL has to be calculated from all its constituent
+         * categories each time, since the querylocale() forms on many (if not
+         * all) platforms only work on individual categories */
+        if (index == LC_ALL_INDEX_) {
+            retval = calculate_LC_ALL_string(NULL);
+        }
+        else {
+            retval = savepv(my_querylocale(index, cur_obj));
+            SAVEFREEPV(retval);
+        }
     }
 
 #  endif
