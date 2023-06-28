@@ -1358,6 +1358,23 @@ static const MGVTBL argvout_vtbl =
         NULL /* svt_local */
     };
 
+static bool
+S_is_fork_open(const char *name) {
+    /* return true if name matches /^\A\s*(\|-|\-|)\s*\z/ */
+    while (isSPACE(*name))
+        name++;
+    if ((name[0] != '|' || name[1] != '-')
+        && (name[0] != '-' || name[1] != '|')) {
+        return false;
+    }
+    name +=  2;
+
+    while (isSPACE(*name))
+        name++;
+
+    return *name == 0;
+}
+
 PerlIO *
 Perl_nextargv(pTHX_ GV *gv, bool nomagicopen)
 {
@@ -1400,11 +1417,22 @@ Perl_nextargv(pTHX_ GV *gv, bool nomagicopen)
         SvSETMAGIC(GvSV(gv));
         PL_oldname = SvPVx(GvSV(gv), oldlen);
         if (LIKELY(!PL_inplace)) {
-            if (nomagicopen
-                    ? do_open6(gv, "<", 1, NULL, &GvSV(gv), 1)
-                    : do_open6(gv, PL_oldname, oldlen, NULL, NULL, 0)
-               ) {
-                return IoIFP(GvIOp(gv));
+            if (nomagicopen) {
+                if (do_open6(gv, "<", 1, NULL, &GvSV(gv), 1)) {
+                    return IoIFP(GvIOp(gv));
+                }
+            }
+            else {
+                if (is_fork_open(PL_oldname)) {
+                    Perl_ck_warner_d(aTHX_ packWARN(WARN_INPLACE),
+                                     "Forked open '%s' not meaningful in <>",
+                                     PL_oldname);
+                    continue;
+                }
+
+                if ( do_open6(gv, PL_oldname, oldlen, NULL, NULL, 0) ) {
+                    return IoIFP(GvIOp(gv));
+                }
             }
         }
         else {

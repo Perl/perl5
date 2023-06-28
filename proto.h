@@ -6259,6 +6259,11 @@ S_ingroup(pTHX_ Gid_t testgid, bool effective)
 # define PERL_ARGS_ASSERT_INGROUP
 
 STATIC bool
+S_is_fork_open(const char *name);
+# define PERL_ARGS_ASSERT_IS_FORK_OPEN          \
+        assert(name)
+
+STATIC bool
 S_openn_cleanup(pTHX_ GV *gv, IO *io, PerlIO *fp, char *mode, const char *oname, PerlIO *saveifp, PerlIO *saveofp, int savefd, char savetype, int writing, bool was_fdopen, const char *type, Stat_t *statbufp);
 # define PERL_ARGS_ASSERT_OPENN_CLEANUP         \
         assert(gv); assert(io); assert(mode); assert(oname)
