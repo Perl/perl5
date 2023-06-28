@@ -5335,6 +5335,31 @@ win32_hook_closehandle_in_crt()
     );
 }
 
+/* Remove the hook installed by win32_hook_closehandle_crt(). This is needed in
+ * case the Perl DLL is unloaded, which would cause the hook become invalid.
+ * This can happen in embedded Perls, for example in mod_perl. */
+static void
+win32_unhook_closehandle_in_crt()
+{
+    if (!CloseHandle_orig)
+        return;
+
+    HMODULE crt_handle;
+    BOOL succ = GetModuleHandleExA(
+        GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS
+        | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT, (LPCSTR)_close,
+        &crt_handle
+    );
+    if (!succ)
+        return;
+
+    win32_hook_imported_function_in_module(
+        crt_handle, "CloseHandle", (FARPROC)CloseHandle_orig
+    );
+
+    CloseHandle_orig = NULL;
+}
+
 void
 Perl_win32_init(int *argcp, char ***argvp)
 {
@@ -5419,6 +5444,7 @@ Perl_win32_term(void)
     RegCloseKey(HKCU_Perl_hnd);
     /* the handles are in an undefined state until the next PERL_SYS_INIT3 */
 #endif
+    win32_unhook_closehandle_in_crt();
 }
 
 void
