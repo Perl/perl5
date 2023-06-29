@@ -2536,14 +2536,9 @@ S_new_ctype(pTHX_ const char *newctype, bool force)
     }
 }
 
-#  endif /* USE_LOCALE_CTYPE */
-
 void
-Perl__warn_problematic_locale()
+Perl_warn_problematic_locale()
 {
-
-#  ifdef USE_LOCALE_CTYPE
-
     dTHX;
 
     /* Internal-to-core function that outputs the message in PL_warn_locale,
@@ -2557,10 +2552,9 @@ Perl__warn_problematic_locale()
         SvREFCNT_dec_NN(PL_warn_locale);
         PL_warn_locale = NULL;
     }
-
-#  endif
-
 }
+
+#  endif /* USE_LOCALE_CTYPE */
 
 STATIC void
 S_new_LC_ALL(pTHX_ const char *unused, bool force)

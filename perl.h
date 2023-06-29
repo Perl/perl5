@@ -7016,7 +7016,7 @@ the plain locale pragma without a parameter (S<C<use locale>>) is in effect.
 #      define CHECK_AND_WARN_PROBLEMATIC_LOCALE_                              \
                 STMT_START {                                                  \
                     if (UNLIKELY(PL_warn_locale)) {                           \
-                        Perl__warn_problematic_locale();                      \
+                        Perl_warn_problematic_locale();                       \
                     }                                                         \
                 }  STMT_END
 #    else

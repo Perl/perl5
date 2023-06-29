@@ -160,10 +160,6 @@ Perl__utf8n_to_uvchr_msgs_helper(const U8 *s, STRLEN curlen, STRLEN *retlen, con
 #define PERL_ARGS_ASSERT__UTF8N_TO_UVCHR_MSGS_HELPER \
         assert(s)
 
-PERL_CALLCONV void
-Perl__warn_problematic_locale(void);
-#define PERL_ARGS_ASSERT__WARN_PROBLEMATIC_LOCALE
-
 PERL_CALLCONV_NO_RET void
 Perl_abort_execution(pTHX_ SV *msg_sv, const char * const name)
         __attribute__noreturn__
@@ -10379,6 +10375,12 @@ Perl_mem_collxfrm_(pTHX_ const char *input_string, STRLEN len, STRLEN *xlen, boo
 
 # endif
 #endif /* defined(USE_LOCALE_COLLATE) */
+#if defined(USE_LOCALE_CTYPE)
+PERL_CALLCONV void
+Perl_warn_problematic_locale(void);
+# define PERL_ARGS_ASSERT_WARN_PROBLEMATIC_LOCALE
+
+#endif
 #if defined(USE_PERLIO)
 PERL_CALLCONV void
 Perl_PerlIO_clearerr(pTHX_ PerlIO *f);
