@@ -1594,17 +1594,17 @@ S_emulate_setlocale_i(pTHX_
 #endif   /* End of the various implementations of the setlocale and
             querylocale macros used in the remainder of this program */
 
-#if  defined(USE_LOCALE)                                                    \
- && (defined(WIN32) || defined(USE_POSIX_2008_LOCALE) || ! defined(LC_ALL))
+#if defined(USE_LOCALE)
+#  if defined(WIN32) || defined(USE_POSIX_2008_LOCALE) || ! defined(LC_ALL)
 
 STATIC
 const char *
 
-#  ifdef USE_QUERYLOCALE
+#    ifdef USE_QUERYLOCALE
 S_calculate_LC_ALL_string(pTHX_ const locale_t cur_obj)
-#  else
+#    else
 S_calculate_LC_ALL_string(pTHX_ const char ** individ_locales)
-#  endif
+#    endif
 
 {
     /* For POSIX 2008, we have to figure out LC_ALL ourselves when needed.
@@ -1660,11 +1660,11 @@ S_calculate_LC_ALL_string(pTHX_ const char ** individ_locales)
      * and their locales. */
     for (i = 0; i < LC_ALL_INDEX_; i++) {
 
-#  ifdef USE_QUERYLOCALE
+#    ifdef USE_QUERYLOCALE
         const char * entry = querylocale_l(i, cur_obj);
-#  else
+#    else
         const char * entry = individ_locales[i];
-#  endif
+#    endif
 
         names_len += strlen(category_names[i])
                   + 1                           /* '=' */
@@ -1682,11 +1682,11 @@ S_calculate_LC_ALL_string(pTHX_ const char ** individ_locales)
     for (i = 0; i < LC_ALL_INDEX_; i++) {
         Size_t new_len;
 
-#  ifdef USE_QUERYLOCALE
+#    ifdef USE_QUERYLOCALE
         const char * entry = querylocale_l(i, cur_obj);
-#  else
+#    else
         const char * entry = individ_locales[i];
-#  endif
+#    endif
 
         new_len = my_strlcat(aggregate_locale, category_names[i], names_len);
         assert(new_len <= names_len);
@@ -1726,9 +1726,9 @@ S_calculate_LC_ALL_string(pTHX_ const char ** individ_locales)
     return aggregate_locale;
 }
 
-#endif
-#if defined(WIN32) || (     defined(USE_POSIX_2008_LOCALE)      \
-                       && ! defined(USE_QUERYLOCALE))
+#  endif
+#  if defined(WIN32) || (     defined(USE_POSIX_2008_LOCALE)        \
+                         && ! defined(USE_QUERYLOCALE))
 
 STATIC const char *
 S_find_locale_from_environment(pTHX_ const unsigned int index)
@@ -1794,11 +1794,11 @@ S_find_locale_from_environment(pTHX_ const unsigned int index)
         }
 
         /* If no LANG, use "C" on POSIX 2008, the system default on Windows */
-#  ifndef WIN32
+#    ifndef WIN32
         return "C";
-#  else
+#    else
         return wrap_wsetlocale(categories[index], "");
-#  endif
+#    endif
 
     }
 
@@ -1828,11 +1828,11 @@ S_find_locale_from_environment(pTHX_ const unsigned int index)
         }
         else {
 
-#  ifndef WIN32
+#    ifndef WIN32
             locale_names[i] = "C";
-#  else
+#    else
             locale_names[i] = wrap_wsetlocale(categories[index], "");
-#  endif
+#    endif
 
         }
 
@@ -1844,19 +1844,18 @@ S_find_locale_from_environment(pTHX_ const unsigned int index)
     return calculate_LC_ALL_string(locale_names);
 }
 
-#endif
-#if defined(USE_LOCALE) && (   defined(DEBUGGING)                       \
-                            || defined(USE_PERL_SWITCH_LOCALE_CONTEXT))
+#  endif
+#  if defined(DEBUGGING) || defined(USE_PERL_SWITCH_LOCALE_CONTEXT)
 
 STATIC const char *
 S_get_LC_ALL_display(pTHX)
 {
 
-#  ifdef LC_ALL
+#    ifdef LC_ALL
 
     return querylocale_c(LC_ALL);
 
-#  else
+#    else
 
     const char * curlocales[LC_ALL_INDEX_];
 
@@ -1866,12 +1865,11 @@ S_get_LC_ALL_display(pTHX)
 
     return calculate_LC_ALL_string(curlocales);
 
-#  endif
+#    endif
 
 }
 
-#endif
-#ifdef USE_LOCALE
+#  endif
 
 STATIC void
 S_setlocale_failure_panic_i(pTHX_
@@ -1989,7 +1987,7 @@ S_new_numeric(pTHX_ const char *newnum, bool force)
      * function */
     PL_numeric_underlying = TRUE;
 
-#  ifdef USE_POSIX_2008_LOCALE
+#    ifdef USE_POSIX_2008_LOCALE
 
     /* We keep a special object for easy switching to.
      *
@@ -2001,7 +1999,7 @@ S_new_numeric(pTHX_ const char *newnum, bool force)
                                           PL_numeric_name,
                                           PL_underlying_numeric_obj);
 
-#    endif
+#      endif
 
     const char * radix = NULL;
     utf8ness_t utf8ness = UTF8NESS_IMMATERIAL;
@@ -2514,7 +2512,7 @@ S_new_ctype(pTHX_ const char *newctype, bool force)
                                                NULL));
             Safefree(scratch_buffer);
 
-#  endif
+#    endif
 
             Perl_sv_catpvf(aTHX_ PL_warn_locale, "\n");
 
@@ -2640,7 +2638,7 @@ S_new_collate(pTHX_ const char *newcoll, bool force)
 
 #  endif /* USE_LOCALE_COLLATE */
 
-#ifdef WIN32
+#  ifdef WIN32
 
 STATIC wchar_t *
 S_Win_byte_string_to_wstring(const UINT code_page, const char * byte_string)
@@ -2666,7 +2664,8 @@ S_Win_byte_string_to_wstring(const UINT code_page, const char * byte_string)
     return wstring;
 }
 
-#define Win_utf8_string_to_wstring(s)  Win_byte_string_to_wstring(CP_UTF8, (s))
+#    define Win_utf8_string_to_wstring(s)                                   \
+                                    Win_byte_string_to_wstring(CP_UTF8, (s))
 
 STATIC char *
 S_Win_wstring_to_byte_string(const UINT code_page, const wchar_t * wstring)
@@ -2690,7 +2689,8 @@ S_Win_wstring_to_byte_string(const UINT code_page, const wchar_t * wstring)
     return byte_string;
 }
 
-#define Win_wstring_to_utf8_string(ws) Win_wstring_to_byte_string(CP_UTF8, (ws))
+#    define Win_wstring_to_utf8_string(ws)                                  \
+                                   Win_wstring_to_byte_string(CP_UTF8, (ws))
 
 STATIC const char *
 S_wrap_wsetlocale(pTHX_ const int category, const char *locale)
@@ -2759,7 +2759,7 @@ S_win32_setlocale(pTHX_ int category, const char* locale)
     DEBUG_L(PerlIO_printf(Perl_debug_log, "%s\n",
                           setlocale_debug_string_r(category, locale, result)));
 
-#  ifdef USE_PL_CUR_LC_ALL
+#    ifdef USE_PL_CUR_LC_ALL
 
     /* If we need to keep track of LC_ALL, update it to the new value.  */
     Safefree(PL_cur_LC_ALL);
@@ -2770,12 +2770,12 @@ S_win32_setlocale(pTHX_ int category, const char* locale)
         PL_cur_LC_ALL = savepv(wrap_wsetlocale(LC_ALL, NULL));
     }
 
-#  endif
+#    endif
 
     return result;
 }
 
-#endif
+#  endif
 #endif  /* USE_LOCALE */
 
 /*
