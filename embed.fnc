@@ -3667,7 +3667,6 @@ Adfp	|void	|warn		|NN const char *pat			\
 Adfp	|void	|warner 	|U32 err				\
 				|NN const char *pat			\
 				|...
-TXp	|void	|_warn_problematic_locale
 Adp	|void	|warn_sv	|NN SV *baseex
 : Used in cop.h
 RXop	|I32	|was_lvalue_sub
@@ -6112,6 +6111,9 @@ Ep	|char * |mem_collxfrm_	|NN const char *input_string		\
 				|bool utf8
 # endif
 #endif /* defined(USE_LOCALE_COLLATE) */
+#if defined(USE_LOCALE_CTYPE)
+TXop	|void	|warn_problematic_locale
+#endif
 #if defined(USE_PERLIO)
 Adhp	|void	|PerlIO_clearerr|NULLOK PerlIO *f
 Adhp	|int	|PerlIO_close	|NULLOK PerlIO *f
