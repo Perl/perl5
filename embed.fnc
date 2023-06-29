@@ -14,7 +14,7 @@
 : real (full) name, with any appropriate thread context paramaters, thus hiding
 : that detail from the typical code.
 :
-: Most macros (as opposed to function) listed here are the complete full name.
+: Most macros (as opposed to functions) listed here are the complete full name.
 :
 : All non-static functions defined by perl need to be listed in this file.
 : embed.pl uses the entries here to construct:
