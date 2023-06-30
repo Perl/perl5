@@ -415,6 +415,7 @@ S_positional_name_value_xlation(const char * locale, bool direction)
     /* This parses either notation */
     switch (parse_LC_ALL_string(locale,
                                 (const char **) &individ_locales,
+                                false,      /* Don't panic on error */
                                 __LINE__))
     {
       default:      /* Some compilers don't realize that below is the complete
@@ -940,6 +941,7 @@ Perl_locale_panic(const char * msg,
 STATIC parse_LC_ALL_string_return
 S_parse_LC_ALL_string(pTHX_ const char * string,
                             const char ** output,
+                            const bool panic_on_error,
                             const line_t caller_line)
 {
     /* This function parses the value of the input 'string' which is expected
@@ -968,7 +970,8 @@ S_parse_LC_ALL_string(pTHX_ const char * string,
      * mainly for syntactic errors, and if found, returns 'invalid'.  'output'
      * will not be filled in in that case, but the input state of it isn't
      * necessarily preserved.  Turning on -DL debugging will give details as to
-     * the error.
+     * the error.  If 'panic_on_error' is 'true', the function panics instead
+     * of returning on error, with a message giving the details.
      *
      * Otherwise, output[] will be filled with the individual locale names for
      * all categories on the system, 'full_array' will be returned, and the
@@ -1177,6 +1180,10 @@ S_parse_LC_ALL_string(pTHX_ const char * string,
 
     DEBUG_L(PerlIO_printf(Perl_debug_log, "%s", msg));
 
+    if (panic_on_error) {
+        locale_panic_via_(msg, __FILE__, caller_line);
+    }
+
     return invalid;
 }
 
@@ -1297,6 +1304,7 @@ S_stdize_locale(pTHX_ const int category,
          * components. */
         switch (parse_LC_ALL_string(retval,
                                     (const char **) &individ_locales,
+                                    false,    /* Don't panic on error */
                                     caller_line))
         {
           case invalid:
@@ -1859,6 +1867,7 @@ S_bool_setlocale_2008_i(pTHX_
     if (index == LC_ALL_INDEX_) {
         switch (parse_LC_ALL_string(new_locale,
                                     (const char **) &new_locales,
+                                    false,    /* Don't panic on error */
                                     caller_line))
         {
           case invalid:
@@ -2228,6 +2237,7 @@ S_setlocale_from_aggregate_LC_ALL(pTHX_ const char * locale, const line_t line)
     const char * locale_categories[LC_ALL_INDEX_];
     switch (parse_LC_ALL_string(locale,
                                 (const char **) &locale_categories,
+                                false,    /* Don't panic on error */
                                 line))
     {
       case invalid:

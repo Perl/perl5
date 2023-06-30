@@ -4429,6 +4429,7 @@ S	|locale_t|use_curlocale_scratch
 S	|parse_LC_ALL_string_return|parse_LC_ALL_string 		\
 				|NN const char *string			\
 				|NN const char **output 		\
+				|const bool panic_on_error		\
 				|const line_t caller_line
 #     endif
 #     if !defined(USE_QUERYLOCALE)

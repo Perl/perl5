@@ -1305,7 +1305,7 @@
 #         define setlocale_from_aggregate_LC_ALL(a,b) S_setlocale_from_aggregate_LC_ALL(aTHX_ a,b)
 #         define use_curlocale_scratch()        S_use_curlocale_scratch(aTHX)
 #         if defined(LC_ALL)
-#           define parse_LC_ALL_string(a,b,c)   S_parse_LC_ALL_string(aTHX_ a,b,c)
+#           define parse_LC_ALL_string(a,b,c,d) S_parse_LC_ALL_string(aTHX_ a,b,c,d)
 #         endif
 #         if !defined(USE_QUERYLOCALE)
 #           define update_PL_curlocales_i(a,b,c) S_update_PL_curlocales_i(aTHX_ a,b,c)
