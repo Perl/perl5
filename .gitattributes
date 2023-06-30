@@ -1,3 +1,4 @@
+* text=auto
 .git_patch export-subst
 charclass_invlists.h linguist-generated
 embedvar.h linguist-generated
