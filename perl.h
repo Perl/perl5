@@ -1905,6 +1905,12 @@ was saved by C<dSAVE_ERRNO> or C<RESTORE_ERRNO>.
 # undef SETERRNO  /* SOCKS might have defined this */
 #endif
 
+#if defined(VMS) || defined(WIN32) || defined(OS2)
+#    define HAS_EXTENDED_OS_ERRNO
+#    define get_extended_os_errno()  Perl_get_extended_os_errno()
+#  else
+#    define get_extended_os_errno()  errno
+#  endif
 #ifdef VMS
 #   define SETERRNO(errcode,vmserrcode) \
         STMT_START {			\
