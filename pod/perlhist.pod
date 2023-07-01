@@ -754,7 +754,7 @@ the strings?).
 
  Ricardo   5.38.0-RC1   2023-Jun-15     The 5.38 maintenance track
  Ricardo   5.38.0-RC2   2023-Jun-23
- Ricardo   5.38.0       2023-Jun-30
+ Ricardo   5.38.0       2023-Jul-02
 
 =head2 SELECTED RELEASE SIZES
 
