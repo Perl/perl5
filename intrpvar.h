@@ -395,8 +395,8 @@ PERLVARI(I, locale_mutex_depth, int, 0)     /* Emulate general semaphore */
 
 #ifdef USE_LOCALE_CTYPE
 PERLVAR(I, warn_locale, SV *)
-PERLVAR(I, in_utf8_CTYPE_locale, bool)
-PERLVAR(I, in_utf8_turkic_locale, bool)
+PERLVARI(I, in_utf8_CTYPE_locale, bool, false)
+PERLVARI(I, in_utf8_turkic_locale, bool, false)
 #endif
 
 PERLVARA(I, colors,6,	char *)		/* values from PERL_RE_COLORS env var */
@@ -746,7 +746,7 @@ PERLVAR(I, constpadix,	PADOFFSET)	/* lowest unused for constants */
 PERLVAR(I, padix_floor,	PADOFFSET)	/* how low may inner block reset padix */
 
 #if defined(USE_POSIX_2008_LOCALE) && defined(MULTIPLICITY)
-PERLVARI(I, cur_locale_obj, locale_t, NULL)
+PERLVARI(I, cur_locale_obj, locale_t, LC_GLOBAL_LOCALE)
 #endif
 #ifdef USE_PL_CURLOCALES
 
