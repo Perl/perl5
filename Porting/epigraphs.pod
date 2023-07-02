@@ -17,6 +17,31 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.38.0 - Miguel de Cervantes, Don Quixote
+
+L<Announced on 2023-07-02 by Ricardo Signes|http://nntp.perl.org/group/perl.perl5.porters/266602>
+
+Take my advice and live for a long, long time. Because the maddest thing
+a man can do in this life is to let himself die.
+
+=head2 v5.38.0-RC2 - They Might Be Giants, "O Do Not Forsake Me"
+
+L<Announced on 2023-06-23 by Ricardo Signes|http://nntp.perl.org/group/perl.perl5.porters/266559>
+
+    Oh, do not forsake me, my indolent friends
+    Oh, do not forsake me though you know I must spend
+    All my darkest hours talking like this
+    For I am one thousand years old
+
+=head2 v5.38.0-RC1 - Kurt Vonnegut, "Good Bless You, Mr. Rosewater"
+
+L<Announced on 2023-06-15 by Ricardo Signes|http://nntp.perl.org/group/perl.perl5.porters/266521>
+
+Welcome to Earth. It's hot in the summer and cold in the winter. It's
+round and wet and crowded. On the outside, babies, you've got a hundred
+years here. There's only one rule that I know of, babies—"God damn it,
+you've got to be kind."
+
 =head2 v5.37.11 - Ben Aaronovitch, "Moon Over Soho"
 
 L<Announced on 2023-04-20 by Steve Hay|https://www.nntp.perl.org/group/perl.perl5.porters/2023/04/msg266242.html>
