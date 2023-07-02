@@ -96,6 +96,7 @@ my %feature_bundle = (
     "5.35"  => [ +V5_35 ],
     # using 5.37 features bundle
     "5.37"  => [ +V5_37 ],
+    "5.39"  => [ +V5_37 ],
 );
 
 my @noops = qw( postderef lexical_subs );
@@ -501,7 +502,7 @@ read_only_bottom_close_and_rename($h);
 
 __END__
 package feature;
-our $VERSION = '1.82';
+our $VERSION = '1.83';
 
 FEATURES
 
