@@ -526,8 +526,6 @@ The current members of the Perl Core Team are:
 
 =item James E Keenan <jkeenan@cpan.org>
 
-=item Jason McIntosh <jmac@jmac.org>
-
 =item Karen Etheridge <ether@cpan.org>
 
 =item Karl Williamson <khw@cpan.org>
@@ -573,6 +571,8 @@ The current members of the Perl Core Team are:
 =item David Golden <xdg@xdg.me>
 
 =item Jan Dubois <jan@jandubois.com>
+
+=item Jason McIntosh <jmac@jmac.org>
 
 =item Jesse Vincent <jesse@fsck.com>
 
