@@ -7388,8 +7388,20 @@ Perl_thread_locale_init(pTHX)
                            " calling setlocale(LC_ALL, \"C\")\n",
                            get_LC_ALL_display()));
 
-    uselocale(PL_C_locale_obj);
+    if (! uselocale(PL_C_locale_obj)) {
 
+        /* Not being able to change to the C locale is severe; don't keep
+         * going.  */
+        locale_panic_(Perl_form(aTHX_
+                                "Can't uselocale(%p), 'C'", PL_C_locale_obj));
+        NOT_REACHED; /* NOTREACHED */
+    }
+
+#    ifdef MULTIPLICITY
+
+    PL_cur_locale_obj = PL_C_locale_obj;
+
+#    endif
 #  elif defined(WIN32)
 
     /* On Windows, make sure new thread has per-thread locales enabled */
