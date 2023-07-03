@@ -429,6 +429,8 @@ sub find_locales ($;$) {
     my $input_categories = shift;
     my $allow_incompatible = shift // 0;
 
+    die ("Usage: find_locales( category | [ categories ] )")
+                                                unless defined $input_categories;
     my @categories = (ref $input_categories)
                       ? $input_categories->@*
                       : $input_categories;
