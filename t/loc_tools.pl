@@ -211,8 +211,8 @@ sub _trylocale ($$$$) { # For use only by other functions in this file!
         # Incompatible locales aren't warned about unless using locales.
         use locale;
 
-        my $result = setlocale($category, $locale);
-        return unless defined $result;
+        my $cur_result = setlocale($category, $locale);
+        return unless defined $cur_result;
 
         no locale;
 
@@ -242,7 +242,7 @@ sub _trylocale ($$$$) { # For use only by other functions in this file!
         # Commas in locale names are bad in Windows, and there is a bug in
         # some versions where setlocale() turns a legal input locale name into
         # an illegal return value, which it can't later parse.
-        return if $result =~ /,/;
+        return if $cur_result =~ /,/;
 
         return unless $plays_well || $allow_incompatible;
     }
