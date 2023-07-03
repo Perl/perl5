@@ -132,6 +132,11 @@ $master_category = $category_number{'ALL'}
         if ! defined $master_category
           && is_category_valid('LC_ALL') && defined $category_number{'ALL'};
 
+my @platform_locales;       # cache of locales found on this platform
+my $gathering_platform_locales = 0; # Should we gather locales, or use the
+                                    # cache?
+my %seen;   # Used to avoid duplicates
+
 sub _trylocale ($$$$) { # For use only by other functions in this file!
 
     # Adds the locale given by the first parameter to the list given by the
@@ -203,6 +208,14 @@ sub _trylocale ($$$$) { # For use only by other functions in this file!
         return unless defined $result;
 
         no locale;
+
+        if (   $gathering_platform_locales
+            && $category eq $master_category
+            && ! $seen{$locale})
+        {
+            push @platform_locales, $locale;
+            $seen{$locale}++;
+        }
 
         # We definitely don't want the locale set to something that is
         # unsupported
@@ -434,12 +447,18 @@ sub find_locales ($;$) {
                 && $Config{cc} =~ /^(cl|gcc|g\+\+|ici)/i);
 
     my @Locale;
-    _trylocale("C", \@categories, \@Locale, $allow_incompatible);
-    _trylocale("POSIX", \@categories, \@Locale, $allow_incompatible);
 
-    if ($Config{d_has_C_UTF8} && $Config{d_has_C_UTF8} eq 'true') {
-        _trylocale("C.UTF-8", \@categories, \@Locale, $allow_incompatible);
+    if (@platform_locales) {
+        $gathering_platform_locales = 0;
+        foreach my $locale (@platform_locales) {
+            _trylocale($locale, \@categories, \@Locale, $allow_incompatible);
+        }
     }
+    else {
+        $gathering_platform_locales = 1;
+
+        _trylocale("C", \@categories, \@Locale, $allow_incompatible);
+        _trylocale("POSIX", \@categories, \@Locale, $allow_incompatible);
 
     # There's no point in looking at anything more if we know that setlocale
     # will return success on any garbage or non-garbage name.
@@ -558,6 +577,7 @@ sub find_locales ($;$) {
                 }
             }
         }
+    }
     }
 
     @Locale = sort @Locale;
