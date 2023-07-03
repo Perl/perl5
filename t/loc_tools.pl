@@ -460,124 +460,144 @@ sub find_locales ($;$) {
         _trylocale("C", \@categories, \@Locale, $allow_incompatible);
         _trylocale("POSIX", \@categories, \@Locale, $allow_incompatible);
 
-    # There's no point in looking at anything more if we know that setlocale
-    # will return success on any garbage or non-garbage name.
-    return sort @Locale if defined $Config{d_setlocale_accepts_any_locale_name};
+        # There's no point in looking at anything more if we know that
+        # setlocale will return success on any garbage or non-garbage name.
+        return sort @Locale
+                        if defined $Config{d_setlocale_accepts_any_locale_name};
 
-    foreach (1..16) {
-        _trylocale("ISO8859-$_", \@categories, \@Locale, $allow_incompatible);
-        _trylocale("iso8859$_", \@categories, \@Locale, $allow_incompatible);
-        _trylocale("iso8859-$_", \@categories, \@Locale, $allow_incompatible);
-        _trylocale("iso_8859_$_", \@categories, \@Locale, $allow_incompatible);
-        _trylocale("isolatin$_", \@categories, \@Locale, $allow_incompatible);
-        _trylocale("isolatin-$_", \@categories, \@Locale, $allow_incompatible);
-        _trylocale("iso_latin_$_", \@categories, \@Locale, $allow_incompatible);
-    }
-
-    # Sanitize the environment so that we can run the external 'locale'
-    # program without the taint mode getting grumpy.
-
-    # $ENV{PATH} is special in VMS.
-    delete local $ENV{PATH} if $^O ne 'VMS' or $Config{d_setenv};
-
-    # Other subversive stuff.
-    delete local @ENV{qw(IFS CDPATH ENV BASH_ENV)};
-
-    if (-x "/usr/bin/locale"
-        && open(LOCALES, '-|', "/usr/bin/locale -a 2>/dev/null"))
-    {
-        while (<LOCALES>) {
-            # It seems that /usr/bin/locale steadfastly outputs 8 bit data, which
-            # ain't great when we're running this testPERL_UNICODE= so that utf8
-            # locales will cause all IO hadles to default to (assume) utf8
-            next unless utf8::valid($_);
-            chomp;
-            _trylocale($_, \@categories, \@Locale, $allow_incompatible);
-        }
-        close(LOCALES);
-    } elsif ($^O eq 'VMS'
-             && defined($ENV{'SYS$I18N_LOCALE'})
-             && -d 'SYS$I18N_LOCALE')
-    {
-    # The SYS$I18N_LOCALE logical name search list was not present on
-    # VAX VMS V5.5-12, but was on AXP && VAX VMS V6.2 as well as later versions.
-        opendir(LOCALES, "SYS\$I18N_LOCALE:");
-        while ($_ = readdir(LOCALES)) {
-            chomp;
-            _trylocale($_, \@categories, \@Locale, $allow_incompatible);
-        }
-        close(LOCALES);
-    } elsif (($^O eq 'openbsd' || $^O eq 'bitrig' ) && -e '/usr/share/locale') {
-
-        # OpenBSD doesn't have a locale executable, so reading
-        # /usr/share/locale is much easier and faster than the last resort
-        # method.
-
-        opendir(LOCALES, '/usr/share/locale');
-        while ($_ = readdir(LOCALES)) {
-            chomp;
-            _trylocale($_, \@categories, \@Locale, $allow_incompatible);
-        }
-        close(LOCALES);
-    } else { # Final fallback.  Try our list of locales hard-coded here
-
-        # This is going to be slow.
-        my @Data;
-
-        # Locales whose name differs if the utf8 bit is on are stored in these
-        # two files with appropriate encodings.
-        my $data_file = ($^H & 0x08 || (${^OPEN} || "") =~ /:utf8/)
-                        ? _source_location() . "/lib/locale/utf8"
-                        : _source_location() . "/lib/locale/latin1";
-        if (-e $data_file) {
-            @Data = do $data_file;
-        }
-        else {
-            _my_diag(__FILE__ . ":" . __LINE__ . ": '$data_file' doesn't exist");
+        foreach (1..16) {
+            _trylocale("ISO8859-$_", \@categories, \@Locale,
+                       $allow_incompatible);
+            _trylocale("iso8859$_", \@categories, \@Locale,
+                       $allow_incompatible);
+            _trylocale("iso8859-$_", \@categories, \@Locale,
+                       $allow_incompatible);
+            _trylocale("iso_8859_$_", \@categories, \@Locale,
+                       $allow_incompatible);
+            _trylocale("isolatin$_", \@categories, \@Locale,
+                       $allow_incompatible);
+            _trylocale("isolatin-$_", \@categories, \@Locale,
+                       $allow_incompatible);
+            _trylocale("iso_latin_$_", \@categories, \@Locale,
+                       $allow_incompatible);
         }
 
-        # The rest of the locales are in this file.
-        state @my_data = <DATA>; close DATA if fileno DATA;
-        push @Data, @my_data;
+        # Sanitize the environment so that we can run the external 'locale'
+        # program without the taint mode getting grumpy.
 
-        foreach my $line (@Data) {
-            chomp $line;
-            my ($locale_name, $language_codes, $country_codes, $encodings) =
-                split /:/, $line;
-            _my_diag(__FILE__ . ":" . __LINE__ . ": Unexpected syntax in '$line'")
-                                                     unless defined $locale_name;
-            my @enc = _decode_encodings($encodings);
-            foreach my $loc (split(/ /, $locale_name)) {
-                _trylocale($loc, \@categories, \@Locale, $allow_incompatible);
-                foreach my $enc (@enc) {
-                    _trylocale("$loc.$enc", \@categories, \@Locale,
-                                                            $allow_incompatible);
+        # $ENV{PATH} is special in VMS.
+        delete local $ENV{PATH} if $^O ne 'VMS' or $Config{d_setenv};
+
+        # Other subversive stuff.
+        delete local @ENV{qw(IFS CDPATH ENV BASH_ENV)};
+
+        if (-x "/usr/bin/locale"
+            && open(LOCALES, '-|', "/usr/bin/locale -a 2>/dev/null"))
+        {
+            while (<LOCALES>) {
+
+                # It seems that /usr/bin/locale steadfastly outputs 8 bit
+                # data, which ain't great when we're running this
+                # testPERL_UNICODE= so that utf8 locales will cause all IO
+                # hadles to default to (assume) utf8
+                next unless utf8::valid($_);
+                chomp;
+                _trylocale($_, \@categories, \@Locale, $allow_incompatible);
+            }
+
+            close(LOCALES);
+        } elsif ($^O eq 'VMS'
+                && defined($ENV{'SYS$I18N_LOCALE'})
+                && -d 'SYS$I18N_LOCALE')
+        {
+            # The SYS$I18N_LOCALE logical name search list was not present on
+            # VAX VMS V5.5-12, but was on AXP && VAX VMS V6.2 as well as later
+            # versions.
+            opendir(LOCALES, "SYS\$I18N_LOCALE:");
+            while ($_ = readdir(LOCALES)) {
+                chomp;
+                _trylocale($_, \@categories, \@Locale, $allow_incompatible);
+            }
+            close(LOCALES);
+        } elsif (   ($^O eq 'openbsd' || $^O eq 'bitrig' )
+                 && -e '/usr/share/locale')
+        {
+
+            # OpenBSD doesn't have a locale executable, so reading
+            # /usr/share/locale is much easier and faster than the last resort
+            # method.
+
+            opendir(LOCALES, '/usr/share/locale');
+            while ($_ = readdir(LOCALES)) {
+                chomp;
+                _trylocale($_, \@categories, \@Locale, $allow_incompatible);
+            }
+            close(LOCALES);
+        } else { # Final fallback.  Try our list of locales hard-coded here
+
+            # This is going to be slow.
+            my @Data;
+
+            # Locales whose name differs if the utf8 bit is on are stored in
+            # these two files with appropriate encodings.
+            my $data_file = ($^H & 0x08 || (${^OPEN} || "") =~ /:utf8/)
+                            ? _source_location() . "/lib/locale/utf8"
+                            : _source_location() . "/lib/locale/latin1";
+            if (-e $data_file) {
+                @Data = do $data_file;
+            }
+            else {
+                _my_diag(__FILE__ . ":" . __LINE__ .
+                         ": '$data_file' doesn't exist");
+            }
+
+            # The rest of the locales are in this file.
+            state @my_data = <DATA>; close DATA if fileno DATA;
+            push @Data, @my_data;
+
+            foreach my $line (@Data) {
+                chomp $line;
+                my ($locale_name, $language_codes, $country_codes, $encodings) =
+                    split /:/, $line;
+                _my_diag(__FILE__ . ":" . __LINE__
+                         . ": Unexpected syntax in '$line'")
+                                                    unless defined $locale_name;
+                my @enc = _decode_encodings($encodings);
+                foreach my $loc (split(/ /, $locale_name)) {
+                    _trylocale($loc, \@categories, \@Locale,
+                               $allow_incompatible);
+                    foreach my $enc (@enc) {
+                        _trylocale("$loc.$enc", \@categories, \@Locale,
+                                   $allow_incompatible);
+                    }
+                    $loc = lc $loc;
+                    foreach my $enc (@enc) {
+                        _trylocale("$loc.$enc", \@categories, \@Locale,
+                                   $allow_incompatible);
+                    }
                 }
-                $loc = lc $loc;
-                foreach my $enc (@enc) {
-                    _trylocale("$loc.$enc", \@categories, \@Locale,
-                                                            $allow_incompatible);
+                foreach my $lang (split(/ /, $language_codes)) {
+                    _trylocale($lang, \@categories, \@Locale,
+                               $allow_incompatible);
+                    foreach my $country (split(/ /, $country_codes)) {
+                        my $lc = "${lang}_${country}";
+                        _trylocale($lc, \@categories, \@Locale,
+                                   $allow_incompatible);
+                        foreach my $enc (@enc) {
+                            _trylocale("$lc.$enc", \@categories, \@Locale,
+                                       $allow_incompatible);
+                        }
+                        my $lC = "${lang}_\U${country}";
+                        _trylocale($lC, \@categories, \@Locale,
+                                   $allow_incompatible);
+                        foreach my $enc (@enc) {
+                            _trylocale("$lC.$enc", \@categories, \@Locale,
+                                       $allow_incompatible);
+                        }
+                    }
                 }
             }
-            foreach my $lang (split(/ /, $language_codes)) {
-                _trylocale($lang, \@categories, \@Locale, $allow_incompatible);
-                foreach my $country (split(/ /, $country_codes)) {
-                    my $lc = "${lang}_${country}";
-                    _trylocale($lc, \@categories, \@Locale, $allow_incompatible);
-                    foreach my $enc (@enc) {
-                        _trylocale("$lc.$enc", \@categories, \@Locale,
-                                                            $allow_incompatible);
-                    }
-                    my $lC = "${lang}_\U${country}";
-                    _trylocale($lC, \@categories, \@Locale, $allow_incompatible);
-                    foreach my $enc (@enc) {
-                        _trylocale("$lC.$enc", \@categories, \@Locale,
-                                                            $allow_incompatible);
-                    }
-                }
-            }
         }
-    }
     }
 
     @Locale = sort @Locale;
