@@ -252,10 +252,6 @@ sub nm_parse_darwin {
         $symbols->{o} = $1;
         return;
     } else {
-        if ($^V < v5.39 && !defined $symbols->{o}) {
-            skip_all "nm parser requires an update on Darwin";
-        }
-
         die "$0: undefined current object: $line" unless defined $symbols->{o};
         # 64-bit systems have 16 hexdigits, 32-bit systems have 8.
         if (s/^[0-9a-f]{8}(?:[0-9a-f]{8})? //) {
