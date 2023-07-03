@@ -45,6 +45,11 @@ See https://github.com/perl/Perl5/issues?q=+label%3Abackport-5.36
 
 <div><h3>Platform-Specific Test Fixes</h3>
 
+The following two are related, only apply the second if the first is applied
+<commit votes="tonyc" id="b1db17763c817dd84f06c0147a2bc60fe1bfe639" issue="21117" pull="21120" desc="porting/libperl.t: handle nm output on Mac OS Ventura 13.4"/>
+
+<commit votes="tonyc" id="41f7ccfe264b40f480676b52fe3c0bc952e66041" issue="21117" pull="21120" desc="libperl.t: eliminate the rest of the noise on recent Darwin"/>
+
 </div>
 
 <div><h3>Documentation Fixes</h3>
