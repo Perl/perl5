@@ -1762,10 +1762,17 @@ sub warning_like {
     }
 }
 
-# Set a watchdog to timeout the entire test file.  The input seconds is
-# multiplied by $ENV{PERL_TEST_TIME_OUT_FACTOR} (default 1; minimum 1).
-# Set this in your profile for slow boxes, or use it to override the timeout
-# temporarily for debugging.
+# Set or clear a watchdog timer.  The input seconds is:
+#   zero      to clear;
+#   non-zero  to set
+# and is multiplied by $ENV{PERL_TEST_TIME_OUT_FACTOR} (default 1; minimum 1).
+# Set this variable in your profile for slow boxes, or use it to override the
+# timeout temporarily for debugging.
+#
+# This will figure out a suitable method to implement the timer, but you can
+# force it to use an alarm by setting the optional second parameter to
+# 'alarm', or to use a separate process (if available on this platform) by
+# setting that parameter to 'process'.
 #
 # NOTE:  If the test file uses 'threads', then call the watchdog() function
 #        _AFTER_ the 'threads' module is loaded.
@@ -1965,8 +1972,8 @@ sub watchdog ($;$)
 
         # Don't proceed until the watchdog has set up its signal handler.
         # (Otherwise there is a possibility that we will exit with threads
-        # running.)  The watchdog tells us the handler is set by detaching
-        # itself.  (The 'is_running()' is a fail-safe.)
+        # running.)  The watchdog tells us that the handler is set by
+        # detaching itself.  (The 'is_running()' is a fail-safe.)
         while (     $watchdog_thread->is_running()
                && ! $watchdog_thread->is_detached())
         {
