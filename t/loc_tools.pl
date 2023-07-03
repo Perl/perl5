@@ -249,6 +249,7 @@ sub _decode_encodings { # For use only by other functions in this file!
     foreach (split(/ /, shift)) {
 	if (/^(\d+)$/) {
 	    push @enc, "ISO8859-$1";
+	    push @enc, "ISO-8859-$1";
 	    push @enc, "iso8859$1";	# HP
 	    if ($1 eq '1') {
 		 push @enc, "roman8";	# HP
