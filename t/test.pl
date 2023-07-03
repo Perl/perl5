@@ -1763,11 +1763,17 @@ sub warning_like {
     }
 }
 
-# Set or clear a watchdog timer.  The input seconds is zero to clear; non-zero
-# to set.  The actual value used is this number multiplied by
-# $ENV{PERL_TEST_TIME_OUT_FACTOR} (default 1; minimum 1).  You can set this
-# variable in your profile for slow boxes, or use it to override the timeout
-# temporarily for debugging.
+# Set or clear a watchdog timer.  The input seconds is:
+#   zero      to clear;
+#   non-zero  to set
+# and is multiplied by $ENV{PERL_TEST_TIME_OUT_FACTOR} (default 1; minimum 1).
+# Set this variable in your profile for slow boxes, or use it to override the
+# timeout temporarily for debugging.
+#
+# This will figure out a suitable method to implement the timer, but you can
+# force it to use an alarm by setting the optional second parameter to
+# 'alarm', or to use a separate process (if available on this platform) by
+# setting that parameter to 'process'.
 #
 # It is good practice to CLEAR EVERY WATCHDOG timer.  Otherwise the timer
 # applies to the entire rest of the file.  Even if that works now, new tests
@@ -1778,11 +1784,6 @@ sub warning_like {
 # generally work, but flap on heavily loaded smokers, leading to debugging
 # effort that wouldn't have had to be expended if the timer had been cancelled
 # in the first place
-#
-# This will figure out a suitable method to implement the timer, but you can
-# force it to use an alarm by setting the optional second parameter to
-# 'alarm', or to use a separate process (if available on this platform) by
-# setting that parameter to 'process'.
 #
 # NOTE:  If the test file uses 'threads', then call the watchdog() function
 #        _AFTER_ the 'threads' module is loaded.
