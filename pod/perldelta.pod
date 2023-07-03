@@ -285,7 +285,8 @@ made:
 
 =item *
 
-XXX
+Update F<nm> output parsing for Darwin in F<t/porting/libperl.t> to
+handle changes in the output of nm on Darwin.  [GH #21117]
 
 =back
 
