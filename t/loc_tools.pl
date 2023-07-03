@@ -462,6 +462,10 @@ sub find_locales ($;$) {
         _trylocale("C", \@categories, \@Locale, $allow_incompatible);
         _trylocale("POSIX", \@categories, \@Locale, $allow_incompatible);
 
+        if ($Config{d_has_C_UTF8} && $Config{d_has_C_UTF8} eq 'true') {
+            _trylocale("C.UTF-8", \@categories, \@Locale, $allow_incompatible);
+        }
+
         # There's no point in looking at anything more if we know that
         # setlocale will return success on any garbage or non-garbage name.
         return sort @Locale
