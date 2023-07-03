@@ -104,7 +104,7 @@ sub _my_fail($) {
 
 sub valid_locale_categories() {
     # Returns a list of the locale categories (expressed as strings, like
-    # "LC_ALL) known to this program that are available on this platform.
+    # "LC_ALL") known to this program that are available on this platform.
 
     return grep { ! category_excluded($_) } @platform_categories;
 }
