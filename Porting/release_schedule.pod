@@ -11,15 +11,15 @@ release schedules for the next, current and previous stable versions
 of Perl.  Dates with two or more question marks will only be releases if
 deemed necessary by the Steering Council.
 
+=head2 Perl 5.38
+
+  2023-07-01  5.38.0  ✓       Ricardo Signes
+  2023-??-??  5.38.1
+
 =head2 Perl 5.36
 
   2022-05-27  5.36.0  ✓       Ricardo Signes
   2023-04-23  5.36.1  ✓       Steve Hay
-
-=head2 Perl 5.34
-
-  2021-05-20  5.34.0  ✓       Sawyer X
-  2022-03-13  5.34.1  ✓       Steve Hay
 
 =head1 DEVELOPMENT RELEASE SCHEDULE
 
@@ -35,23 +35,23 @@ When shipping a release, you should include the schedule for (at least)
 the next four releases. If a stable version of Perl is released,
 you should reset the version numbers to the next blead series.
 
-=head2 Perl 5.37
+=head2 Perl 5.39
 
-  2022-05-27  5.37.0  ✓       Ricardo Signes
-  2022-06-20  5.37.1  ✓       Matthew Horsfall
-  2022-07-20  5.37.2  ✓       Nicolas R
-  2022-08-20  5.37.3  ✓       Neil Bowers
-  2022-09-20  5.37.4  ✓       Karen Etheridge
-  2022-10-20  5.37.5  ✓       Todd Rinaldo
-  2022-11-20  5.37.6  ✓       Max Maischein
-  2022-12-20  5.37.7  ✓       Richard Leach
-  2023-01-20  5.37.8  ✓       Renée Bäcker
-  2023-02-20  5.37.9  ✓       Karen Etheridge   Contentious changes freeze
-  2023-03-20  5.37.10 ✓       Yves Orton        User-visible changes to
+  2023-07-02  5.39.0  ✓       Ricardo Signes
+                              (tag only)
+  2023-07-20  5.39.1          ?
+  2023-08-20  5.39.2          ?
+  2023-09-20  5.39.3          ?
+  2023-10-20  5.39.4          ?
+  2023-11-20  5.39.5          ?
+  2023-12-20  5.39.6          ?
+  2024-01-20  5.39.7          ?
+  2024-02-20  5.39.8          ?                 Contentious changes freeze
+  2024-03-20  5.39.9          ?                 User-visible changes to
                                                 correctly functioning
                                                 programs freeze
-  2023-04-20  5.37.11 ✓       Steve Hay         Full code freeze
-  2023-05-20  5.38.0           Ricardo Signes   New perl!
+  2024-04-20  5.39.10         ?                 Full program freeze
+  2024-05-20  5.40.0          ?                 New perl!
 
 =head1 VICTIMS
 
