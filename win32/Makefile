@@ -932,7 +932,7 @@ $(MINIDIR)\.exists : $(CFGH_TMPL)
 # as per the options chosen and compiler used.
 # Note: This config.h is only used to build miniperl.exe anyway, but
 # it's as well to have its options correct to be sure that it builds
-# and so that it's "-V" options are correct for use by makedef.pl. The
+# and so that its "-V" options are correct for use by makedef.pl. The
 # real config.h used to build perl.exe is generated from the top-level
 # config_h.SH by config_h.PL (run by miniperl.exe).
 #
