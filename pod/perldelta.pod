@@ -334,9 +334,10 @@ L</Modules and Pragmata> section.
 
 =over 4
 
-=item XXX-some-platform
+=item Windows
 
-XXX
+Eliminated several header build warnings under MSVC with C</W4> to
+reduce noise for embedders. [GH #21031]
 
 =back
 
