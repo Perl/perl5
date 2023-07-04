@@ -2673,6 +2673,10 @@ make)
 	gmake)
 	echo "I can't find make or gmake, and my life depends on it." >&4
 	echo "Go find a public domain implementation or fix your PATH setting!" >&4
+	test -f /etc/debian_version && echo "Run \"apt install build-essential\" to install make and friends" >&4
+	test -f /etc/SUSE-brand     && echo "Run \"zypper install 'pattern:devel_C_C++'\" to install make and friends" >&4
+	test -f /etc/redhat-release && echo "Run \"yum groupinstall 'Development Tools'\" to install make and friends" >&4
+	test -f /etc/fedora-release && echo "Run \"dnf group install 'Development Tools'\" to install make and friends" >&4
 	exit 1
 	;;
 	esac
