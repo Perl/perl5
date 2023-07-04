@@ -109,7 +109,7 @@ to know I<in advance> what you decide.
 
 =head2 Why is it called the patch pumpkin?
 
-Chip Salzenberg gets credit for that, with a nod to his cow orker,
+Chip Salzenberg gets credit for that, with a nod to his coworker,
 David Croy.  We had passed around various names (baton, token, hot
 potato) but none caught on.  Then, Chip asked:
 
