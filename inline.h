@@ -2812,7 +2812,7 @@ Perl_cx_pushsub(pTHX_ PERL_CONTEXT *cx, CV *cv, OP *retop, bool hasargs)
 
     PERL_DTRACE_PROBE_ENTRY(cv);
     cx->blk_sub.old_cxsubix     = PL_curstackinfo->si_cxsubix;
-    PL_curstackinfo->si_cxsubix = cx - PL_curstackinfo->si_cxstack;
+    PL_curstackinfo->si_cxsubix = (I32)(cx - PL_curstackinfo->si_cxstack);
     cx->blk_sub.cv = cv;
     cx->blk_sub.olddepth = CvDEPTH(cv);
     cx->blk_sub.prevcomppad = PL_comppad;
@@ -2834,7 +2834,7 @@ Perl_cx_popsub_common(pTHX_ PERL_CONTEXT *cx)
     assert(CxTYPE(cx) == CXt_SUB);
 
     PL_comppad = cx->blk_sub.prevcomppad;
-    PL_curpad = LIKELY(PL_comppad) ? AvARRAY(PL_comppad) : NULL;
+    PL_curpad = LIKELY(PL_comppad != NULL) ? AvARRAY(PL_comppad) : NULL;
     cv = cx->blk_sub.cv;
     CvDEPTH(cv) = cx->blk_sub.olddepth;
     cx->blk_sub.cv = NULL;
@@ -2887,7 +2887,7 @@ Perl_cx_pushformat(pTHX_ PERL_CONTEXT *cx, CV *cv, OP *retop, GV *gv)
     PERL_ARGS_ASSERT_CX_PUSHFORMAT;
 
     cx->blk_format.old_cxsubix = PL_curstackinfo->si_cxsubix;
-    PL_curstackinfo->si_cxsubix= cx - PL_curstackinfo->si_cxstack;
+    PL_curstackinfo->si_cxsubix= (I32)(cx - PL_curstackinfo->si_cxstack);
     cx->blk_format.cv          = cv;
     cx->blk_format.retop       = retop;
     cx->blk_format.gv          = gv;
@@ -2916,7 +2916,7 @@ Perl_cx_popformat(pTHX_ PERL_CONTEXT *cx)
     SvREFCNT_dec_NN(dfout);
 
     PL_comppad = cx->blk_format.prevcomppad;
-    PL_curpad = LIKELY(PL_comppad) ? AvARRAY(PL_comppad) : NULL;
+    PL_curpad = LIKELY(PL_comppad != NULL) ? AvARRAY(PL_comppad) : NULL;
     cv = cx->blk_format.cv;
     cx->blk_format.cv = NULL;
     --CvDEPTH(cv);
@@ -2948,7 +2948,7 @@ Perl_cx_pusheval(pTHX_ PERL_CONTEXT *cx, OP *retop, SV *namesv)
     Perl_push_evalortry_common(aTHX_ cx, retop, namesv);
 
     cx->blk_eval.old_cxsubix    = PL_curstackinfo->si_cxsubix;
-    PL_curstackinfo->si_cxsubix = cx - PL_curstackinfo->si_cxstack;
+    PL_curstackinfo->si_cxsubix = (I32)(cx - PL_curstackinfo->si_cxstack);
 }
 
 PERL_STATIC_INLINE void
@@ -3156,6 +3156,8 @@ range bytes match only themselves.
 PERL_STATIC_INLINE I32
 Perl_foldEQ(pTHX_ const char *s1, const char *s2, I32 len)
 {
+    PERL_UNUSED_CONTEXT;
+
     const U8 *a = (const U8 *)s1;
     const U8 *b = (const U8 *)s2;
 
@@ -3178,6 +3180,8 @@ Perl_foldEQ_latin1(pTHX_ const char *s1, const char *s2, I32 len)
      * representable without UTF-8, except for LATIN_SMALL_LETTER_SHARP_S, and
      * does not check for this.  Nor does it check that the strings each have
      * at least 'len' characters. */
+
+    PERL_UNUSED_CONTEXT;
 
     const U8 *a = (const U8 *)s1;
     const U8 *b = (const U8 *)s2;
@@ -3487,6 +3491,7 @@ Perl_mortal_getenv(const char * str)
 PERL_STATIC_INLINE bool
 Perl_sv_isbool(pTHX_ const SV *sv)
 {
+    PERL_UNUSED_CONTEXT;
     return SvBoolFlagsOK(sv) && BOOL_INTERNALS_sv_isbool(sv);
 }
 
