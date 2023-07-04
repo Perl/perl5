@@ -168,13 +168,14 @@ section.
 
 Additionally, the following selected changes have been made:
 
-=head3 L<XXX>
+=head3 L<perlhacktips>
 
 =over 4
 
 =item *
 
-XXX Description of the change here
+Document we can't use compound literals or array designators due to
+C++ compatibility.  [GH #21073]
 
 =back
 
