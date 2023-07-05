@@ -521,27 +521,18 @@ jobs:
     steps:
       - run: git config --global core.autocrlf false
       - uses: actions/checkout@v3
-      - name: Set up Perl build environment
-        run: |
-          # skip installing perl if it is already installed.
-          if (!(Test-Path "C:\strawberry\perl\bin")) {
-            choco install strawberryperl
-          }
-          echo @"
-          C:\strawberry\c\bin
-          C:\strawberry\perl\site\bin
-          C:\strawberry\perl\bin
-          "@ |
-            Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+      - name: Install mingw-64
+        uses: egor-tensin/setup-mingw@v2
       - name: Host perl -V
-        run: perl -V
+        run: |
+          perl -V
       - name: gcc --version
         run: gcc --version
       - name: Build
         shell: cmd
         run: |
           cd win32
-          gmake CCHOME=C:\strawberry\c CFG=Debug -f GNUMakefile -j2
+          gmake CCHOME=C:\ProgramData\chocolatey\lib\mingw\tools\install\mingw64 CFG=Debug -f GNUMakefile -j2
       - name: Show Config
         shell: cmd
         run: |
@@ -552,7 +543,7 @@ jobs:
         run: |
           cd win32
           set HARNESS_OPTIONS=j2
-          gmake CCHOME=C:\strawberry\c CFG=Debug -f GNUMakefile test
+          gmake CCHOME=C:\ProgramData\chocolatey\lib\mingw\tools\install\mingw64 CFG=Debug -f GNUMakefile test
 
   #                            _
   #   ___ _   _  __ ___      _(_)_ __
