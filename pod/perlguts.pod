@@ -1996,7 +1996,7 @@ implicit context argument (if any), and C<p> which may be NULL.
 
 Note the I<end of the current pseudo-block> may occur much later than
 the I<end of the current statement>. You may wish to look at the
-C<MORTALDESTRUCTOR_X()> macro instead.
+C<MORTALSVFUNC_X()> macro instead.
 
 =for apidoc Ayh||DESTRUCTORFUNC_t
 =for apidoc Amh||SAVEDESTRUCTOR_X|DESTRUCTORFUNC_t f|void *p
@@ -2014,7 +2014,7 @@ Note the I<end of the current statement> may occur much before the
 the I<end of the current pseudo-block>.  You may wish to look at the
 C<SAVEDESTRUCTOR_X()> macro instead.
 
-=for apidoc Amh||MORTALDESTRUCTOR_X|DESTRUCTORFUNC_t f|SV *sv
+=for apidoc Amh||MORTALSVFUNC_X|SVFUNC_t f|SV *sv
 
 =item C<MORTALDESTRUCTOR_SV(SV *coderef, SV *args)>
 
