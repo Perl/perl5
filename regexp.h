@@ -210,9 +210,49 @@ typedef struct regexp {
 #define RXp_OFFS_VALID(rx,n) \
      (RXp_OFFSp(rx)[(n)].end != -1 && RXp_OFFSp(rx)[(n)].start != -1 )
 
+
 #define RX_OFFS_START(rx_sv,n)  RXp_OFFS_START(ReANY(rx_sv),n)
 #define RX_OFFS_END(rx_sv,n)    RXp_OFFS_END(ReANY(rx_sv),n)
 #define RX_OFFS_VALID(rx_sv,n)  RXp_OFFS_VALID(ReANY(rx_sv),n)
+
+/*
+
+=for apidoc mh||RX_OFFSp|const REGEXP * rx_sv
+Returns the RX_OFFS structure as a pointer.  This should NOT be used
+directly, and the structure it returns may change in future versions of
+perl.  Use one of the other RX_OFFS_xxx macros instead, which should be
+stable as Perl evolves. The 'p' suffix on the macro is meant to indicate
+both that the macro is "private" to the internals, and that it returns
+a pointer.
+
+=for apidoc Amh||RX_OFFS_START|const REGEXP * rx_sv|U32 n
+Returns the start offset of the C<n>'th capture buffer, when
+C<n> is 0 it refers to the overall match as a whole. A value of
+-1 is returned if the C<n>'th capture buffer did not match.
+
+=for apidoc Amh||RXp_OFFS_START|const regexp * rx|U32 n
+Same as RX_OFFS_START() but operates on a C<struct regexp *> instead of
+an C<SV *>.
+
+=for apidoc Amh||RX_OFFS_END|const REGEXP * rx_sv|U32 n
+Returns the end offset of the C<n>'th capture buffer, when C<n> is 0 it
+refers to the overall match as a whole. A value of
+-1 is returned if the C<n>'th capture buffer did not match.
+
+=for apidoc Amh||RXp_OFFS_END|const regexp * rx|U32 n
+Same as RX_OFFS_END() but operates on a C<struct regexp *> instead of
+an C<SV *>.
+
+=for apidoc Amh||RX_OFFS_VALID|const REGEXP * rx_sv|U32 n
+Returns true if the C<n>'th offset buffer matched, false otherwise, when
+C<n> is 0 it refers to the overall match as a whole which should always
+return true.
+
+=for apidoc Amh||RXp_OFFS_VALID|const regexp * rx|U32 n
+Same as RX_OFFS_VLAID() but operates on a C<struct regexp *> instead of
+an C<SV *>.
+
+*/
 
 /* used for high speed searches */
 typedef struct re_scream_pos_data_s
