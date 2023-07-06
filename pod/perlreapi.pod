@@ -828,11 +828,12 @@ the regex engine at all, and if so where in the string to search.
 Used during the execution phase for managing search and replace patterns,
 and for providing the text for C<$&>, C<$1> etc. C<subbeg> points to a
 buffer (either the original string, or a copy in the case of
-C<RX_MATCH_COPIED(rx)>), and C<sublen> is the length of the buffer.  The
-C<RX_OFFS> start and end indices index into this buffer.
+C<RX_MATCH_COPIED(rx_sv)>), and C<sublen> is the length of the buffer.  The
+C<RX_OFFS_START(rx_sv,n)> and C<RX_OFFS_END(rx_sv,n)> macros index into this
+buffer. as does the data structure returned by C<RX_OFFSp(rx_sv)> but you
+should not use that directly.
 
-=for apidoc Amh||RX_MATCH_COPIED|const REGEXP * rx
-=for apidoc Amh||RX_OFFS|const REGEXP * rx_sv
+=for apidoc Amh||RX_MATCH_COPIED|const REGEXP * rx_sv
 
 In the presence of the C<REXEC_COPY_STR> flag, but with the addition of
 the C<REXEC_COPY_SKIP_PRE> or C<REXEC_COPY_SKIP_POST> flags, an engine
