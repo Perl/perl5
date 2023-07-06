@@ -256,8 +256,8 @@ scope has the given name. C<name> must be a literal string.
 /*
 =for apidoc_section $stack
 =for apidoc    Am|SSize_t|SSNEW  |Size_t size
-=for apidoc_item |       |SSNEWa |Size_t_size|Size_t align
-=for apidoc_item |       |SSNEWat|Size_t_size|type|Size_t align
+=for apidoc_item |       |SSNEWa |Size_t size|Size_t align
+=for apidoc_item |       |SSNEWat|Size_t size|type|Size_t align
 =for apidoc_item |       |SSNEWt |Size_t size|type
 
 These temporarily allocates data on the savestack, returning an SSize_t index into
