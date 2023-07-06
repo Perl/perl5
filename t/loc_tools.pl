@@ -173,7 +173,6 @@ sub _trylocale ($$$$) { # For use only by other functions in this file!
         return if grep { $locale eq $_ } @bad_locales;
     }
 
-    $categories = [ $categories ] unless ref $categories;
 
     my $badutf8 = 0;
     my $plays_well = 1;
@@ -190,11 +189,19 @@ sub _trylocale ($$$$) { # For use only by other functions in this file!
             } @_;
     };
 
-    my $first_time = 1;
-    foreach my $category ($master_category, $categories->@*) {
-        next if ! defined $category || (! $first_time && $category == $master_category);
-        $first_time = 0;
+    my @category_list;
+    if (defined $categories) {
+        $categories = [ $categories ] unless ref $categories;
+        push @category_list, $categories->@*;
+    }
 
+    # Make the master category first thing on the list; adding it if necessary
+    if (defined $master_category) {
+        @category_list =  grep { $_ != $master_category } @category_list;
+        unshift @category_list, $master_category;
+    }
+
+    foreach my $category (@category_list) {
         my $save_locale = setlocale($category);
         if (! $save_locale) {
             _my_fail("Verify could save previous locale");
