@@ -15382,12 +15382,6 @@ Perl_ss_dup(pTHX_ PerlInterpreter *proto_perl, CLONE_PARAMS* param)
             intval = (int)POPINT(ss,ix);
             TOPINT(nss,ix) = intval;
             break;
-        case SAVEt_LONG:			/* long reference */
-            ptr = POPPTR(ss,ix);
-            TOPPTR(nss,ix) = any_dup(ptr, proto_perl);
-            longval = (long)POPLONG(ss,ix);
-            TOPLONG(nss,ix) = longval;
-            break;
         case SAVEt_I32:				/* I32 reference */
             ptr = POPPTR(ss,ix);
             TOPPTR(nss,ix) = any_dup(ptr, proto_perl);

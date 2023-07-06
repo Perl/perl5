@@ -1900,8 +1900,6 @@ Inside such a I<pseudo-block> the following service is available:
 
 =item C<SAVEI32(I32 i)>
 
-=item C<SAVELONG(long i)>
-
 =item C<SAVEI8(I8 i)>
 
 =item C<SAVEI16(I16 i)>
@@ -1917,7 +1915,6 @@ C<i> at the end of the enclosing I<pseudo-block>.
 =for apidoc Amh||SAVEINT|int i
 =for apidoc Amh||SAVEIV|IV i
 =for apidoc Amh||SAVEI32|I32 i
-=for apidoc Amh||SAVELONG|long i
 =for apidoc Amh||SAVEI8|I8 i
 =for apidoc Amh||SAVEI16|I16 i
 =for apidoc Amh||SAVEBOOL|bool i

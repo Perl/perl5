@@ -61,28 +61,27 @@
 #define SAVEt_INT                 37
 #define SAVEt_ITEM                38
 #define SAVEt_IV                  39
-#define SAVEt_LONG                40
-#define SAVEt_PPTR                41
-#define SAVEt_SAVESWITCHSTACK     42
-#define SAVEt_SHARED_PVREF        43
-#define SAVEt_SPTR                44
-#define SAVEt_STRLEN              45
-#define SAVEt_SV                  46
-#define SAVEt_SVREF               47
-#define SAVEt_VPTR                48
-#define SAVEt_ADELETE             49
-#define SAVEt_APTR                50
-#define SAVEt_RCPV                51
+#define SAVEt_PPTR                40
+#define SAVEt_SAVESWITCHSTACK     41
+#define SAVEt_SHARED_PVREF        42
+#define SAVEt_SPTR                43
+#define SAVEt_STRLEN              44
+#define SAVEt_SV                  45
+#define SAVEt_SVREF               46
+#define SAVEt_VPTR                47
+#define SAVEt_ADELETE             48
+#define SAVEt_APTR                49
+#define SAVEt_RCPV                50
 
 /* three args */
 
-#define SAVEt_HELEM               52
-#define SAVEt_PADSV_AND_MORTALIZE 53
-#define SAVEt_SET_SVFLAGS         54
-#define SAVEt_GVSLOT              55
-#define SAVEt_AELEM               56
-#define SAVEt_DELETE              57
-#define SAVEt_HINTS_HH            58
+#define SAVEt_HELEM               51
+#define SAVEt_PADSV_AND_MORTALIZE 52
+#define SAVEt_SET_SVFLAGS         53
+#define SAVEt_GVSLOT              54
+#define SAVEt_AELEM               55
+#define SAVEt_DELETE              56
+#define SAVEt_HINTS_HH            57
 
 static const U8 leave_scope_arg_counts[] = {
     0, /* SAVEt_ALLOC               */
@@ -125,7 +124,6 @@ static const U8 leave_scope_arg_counts[] = {
     2, /* SAVEt_INT                 */
     2, /* SAVEt_ITEM                */
     2, /* SAVEt_IV                  */
-    2, /* SAVEt_LONG                */
     2, /* SAVEt_PPTR                */
     2, /* SAVEt_SAVESWITCHSTACK     */
     2, /* SAVEt_SHARED_PVREF        */
@@ -146,6 +144,6 @@ static const U8 leave_scope_arg_counts[] = {
     3  /* SAVEt_HINTS_HH            */
 };
 
-#define MAX_SAVEt 58
+#define MAX_SAVEt 57
 
 /* ex: set ro ft=c: */
