@@ -189,6 +189,7 @@ sub _trylocale ($$$$) { # For use only by other functions in this file!
             } @_;
     };
 
+    my $result;
     my @category_list;
     if (defined $categories) {
         $categories = [ $categories ] unless ref $categories;
@@ -245,9 +246,26 @@ sub _trylocale ($$$$) { # For use only by other functions in this file!
         return if $cur_result =~ /,/;
 
         return unless $plays_well || $allow_incompatible;
+
+        if (! defined $result) {    # First time
+                $result = $cur_result;
+        }
+        elsif ($result ne $cur_result) {
+
+            # Some platforms will translate POSIX into C
+            if (! (   ($result eq "C" && $cur_result eq "POSIX")
+                   || ($result eq "POSIX" && $cur_result eq "C")))
+            {
+                # But otherwise if the new result for this category doesn't
+                # match what we already have for a previous category for this
+                # same input locale, it's problematic, so discard this whole
+                # locale.
+                return;
+            }
+        }
     }
 
-    push @$list, $locale;
+    push @$list, $result;
 }
 
 sub _decode_encodings { # For use only by other functions in this file!
