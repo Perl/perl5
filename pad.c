@@ -2915,8 +2915,8 @@ block.
     suspend_compcv(&buffer);
     LEAVE;
 
-Once suspended, the C<resume_compcv> or C<resume_compcv_and_save> function can
-later be used to continue the parsing from the point this stopped.
+Once suspended, the C<resume_compcv_final> or C<resume_compcv_and_save>
+function can later be used to continue the parsing from the point this stopped.
 
 =cut
 */
