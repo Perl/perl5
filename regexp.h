@@ -252,6 +252,8 @@ return true.
 Same as RX_OFFS_VLAID() but operates on a C<struct regexp *> instead of
 an C<SV *>.
 
+=cut
+
 */
 
 /* used for high speed searches */
