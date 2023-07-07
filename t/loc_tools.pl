@@ -29,11 +29,13 @@ my @known_categories = ( qw(LC_ALL LC_COLLATE LC_CTYPE LC_MESSAGES LC_MONETARY
                             LC_TOD LC_NAME));
 my @platform_categories;
 
+my $has_excluded_category = $Config{ccflags} =~ /\bD?NO_LOCALE_/;
 sub category_excluded($) {
     my $cat_name = shift =~ s/^LC_//r;
 
     # Recognize Configure option to exclude a category
-    return $Config{ccflags} =~ /\bD?NO_LOCALE_$cat_name\b/;
+    return $has_excluded_category
+        && $Config{ccflags} =~ /\bD?NO_LOCALE_$cat_name\b/;
 }
 
 # LC_ALL can be -1 on some platforms.  And, in fact the implementors could
@@ -248,9 +250,33 @@ sub _trylocale ($$$$) { # For use only by other functions in this file!
         return unless $plays_well || $allow_incompatible;
 
         if (! defined $result) {    # First time
+
+            # If the name returned as $cur_result by the setlocale() above is the
+            # same as we requested, there are no complications: use that.
+            if ($locale eq $cur_result) {
                 $result = $cur_result;
+            }
+            else {
+
+                # But if it's different, we check if it's part of a disparate
+                # LC_ALL.  If so, use the input locale; if not it means the
+                # input was a synonym, and we use what it maps to.
+                #
+                # First, if the platform uses positional notation
+                if ($Config{PERL_LC_ALL_SEPARATOR}) {
+                    $result = (index($cur_result, $Config{PERL_LC_ALL_SEPARATOR})
+                                                                            >= 0)
+                              ? $locale
+                              : $cur_result;
+                }
+                else {  # Must be using name=value notation
+                    $result = ($cur_result =~ / = .* ; /x)
+                            ? $locale
+                            : $cur_result;
+                }
+            }
         }
-        elsif ($result ne $cur_result) {
+        elsif (! $has_excluded_category && $result ne $cur_result) {
 
             # Some platforms will translate POSIX into C
             if (! (   ($result eq "C" && $cur_result eq "POSIX")
