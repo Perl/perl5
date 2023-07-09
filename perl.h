@@ -1173,6 +1173,7 @@ violations are fatal.
 #   if !defined(NO_LOCALE_TOD) && defined(LC_TOD)
 #	define USE_LOCALE_TOD
 #   endif
+#endif
 
 /* XXX The Configure probe for categories must be updated when adding new
  * categories here */
@@ -1191,6 +1192,8 @@ violations are fatal.
  * regardless of how the platform defines the actual locale categories.
  */
 typedef enum {
+
+#ifdef USE_LOCALE
 
 /* Now create LC_foo_INDEX_ values for just those categories used on this
  * system */
