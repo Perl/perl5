@@ -4443,11 +4443,11 @@ S	|const char *|less_dicey_setlocale_r				\
 #   endif
 #   if !(  defined(USE_POSIX_2008_LOCALE) && defined(USE_QUERYLOCALE) ) && \
         ( !defined(LC_ALL) || defined(USE_POSIX_2008_LOCALE) ||            \
-           defined(WIN32) )
+           defined(WIN32) || defined(WIN32_USE_FAKE_OLD_MINGW_LOCALES) )
 S	|const char *|calculate_LC_ALL_string				\
 				|NN const char **individ_locales
 #   endif
-#   if defined(WIN32)
+#   if defined(WIN32) || defined(WIN32_USE_FAKE_OLD_MINGW_LOCALES)
 ST	|wchar_t *|Win_byte_string_to_wstring				\
 				|const UINT code_page			\
 				|NULLOK const char *byte_string
@@ -4461,7 +4461,7 @@ S	|const char *|wrap_wsetlocale					\
 				|const int category			\
 				|NULLOK const char *locale
 #   endif
-#   if   defined(WIN32) || \
+#   if   defined(WIN32) || defined(WIN32_USE_FAKE_OLD_MINGW_LOCALES) || \
        ( defined(USE_POSIX_2008_LOCALE) && !defined(USE_QUERYLOCALE) )
 S	|const char *|find_locale_from_environment			\
 				|const unsigned int index

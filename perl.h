@@ -44,6 +44,25 @@
 #   include "config.h"
 #endif
 
+/* This fakes up using Mingw for locale handling.  In order to not define WIN32
+ * in this file (and hence throughout the code that isn't expecting it), this
+ * doesn't define that, but defines the appropriate things that would otherwise
+ * be defined later in the file.  Hence those and here must be kept in sync */
+#ifdef WIN32_USE_FAKE_OLD_MINGW_LOCALES
+#  define UINT  unsigned int
+#  undef USE_THREAD_SAFE_LOCALE
+#  define NO_POSIX_2008_LOCALE
+#  undef HAS_NL_LANGINFO
+#  undef HAS_NL_LANGINFO_L
+#  undef _UCRT
+#  ifdef USE_LOCALE
+#    define TS_W32_BROKEN_LOCALECONV
+#    ifdef USE_THREADS
+#      define EMULATE_THREAD_SAFE_LOCALES
+#    endif
+#  endif
+#endif
+
 /*
 =for apidoc_section $debugging
 =for apidoc CmnW ||comma_aDEPTH
@@ -7110,8 +7129,14 @@ the plain locale pragma without a parameter (S<C<use locale>>) is in effect.
 #    endif
 #  endif
 
-#  ifndef USE_POSIX_2008_LOCALE
-#    define LOCALE_TERM_POSIX_2008_  NOOP
+#  ifdef WIN32_USE_FAKE_OLD_MINGW_LOCALES
+    /* This function is coerced by this Configure option into cleaning up
+     * memory that is static to locale.c.  So we call it at termination.  Doing
+     * it this way is kludgy but confines having to deal with this
+     * Configuration to a bare minimum number of places. */
+#      define LOCALE_TERM_POSIX_2008_  Perl_thread_locale_term(NULL)
+#  elif ! defined(USE_POSIX_2008_LOCALE)
+#      define LOCALE_TERM_POSIX_2008_  NOOP
 #  else
      /* We have a locale object holding the 'C' locale for Posix 2008 */
 #    define LOCALE_TERM_POSIX_2008_                                         \

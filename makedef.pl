@@ -113,6 +113,10 @@ while (<CFG>) {
 }
 close(CFG);
 
+if ($define{WIN32_USE_FAKE_OLD_MINGW_LOCALES}) {
+    $define{NO_POSIX_2008_LOCALE} = 1;
+}
+
 #==========================================================================
 # perl.h logic duplication begins
 

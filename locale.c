@@ -267,6 +267,95 @@ static int debug_initialization = 0;
 #define PERL_IN_LOCALE_C
 #include "perl.h"
 
+#ifdef WIN32_USE_FAKE_OLD_MINGW_LOCALES
+
+   /* Use -Accflags=-DWIN32_USE_FAKE_OLD_MINGW_LOCALES on a POSIX or *nix box
+    * to get a semblance of pretending the locale handling is that of a MingW
+    * that doesn't use UCRT (hence 'OLD' in the name).  This exercizes code
+    * paths that are not compiled on non-Windows boxes, and allows for ASAN.
+    * This is thus a way to see if locale.c on Windows is likely going to
+    * compile, without having to use a real Win32 box.  And running the test
+    * suite will verify to a large extent our logic and memory allocation
+    * handling for such boxes.  And access to ASAN and PERL_MEMLOG Of course the underlying calls are to the POSIX
+    * libc, so any differences in implementation between those and the Windows
+    * versions will not be caught by this. */
+
+#  define WIN32
+#  undef P_CS_PRECEDES
+#  undef CURRENCY_SYMBOL
+#  define CP_UTF8 -1
+#  undef _configthreadlocale
+#  define _configthreadlocale(arg) NOOP
+
+#  define MultiByteToWideChar(cp, flags, byte_string, m1, wstring, req_size) \
+                    (mbsrtowcs(wstring, &(byte_string), req_size, NULL) + 1)
+#  define WideCharToMultiByte(cp, flags, wstring, m1, byte_string,          \
+                              req_size, default_char, found_default_char)   \
+                    (wcsrtombs(byte_string, &(wstring), req_size, NULL) + 1)
+
+#  ifdef USE_LOCALE
+
+static const wchar_t * wsetlocale_buf = NULL;
+static Size_t wsetlocale_buf_size = 0;
+static PerlInterpreter * wsetlocale_buf_aTHX = NULL;
+
+STATIC
+const wchar_t *
+S_wsetlocale(const int category, const wchar_t * wlocale)
+{
+    /* Windows uses a setlocale that takes a wchar_t* locale.  Other boxes
+     * don't have this, so this Windows replacement converts the wchar_t input
+     * to plain 'char*', calls plain setlocale(), and converts the result back
+     * to 'wchar_t*' */
+
+    const char * byte_locale = NULL;
+    if (wlocale) {
+        byte_locale = Win_wstring_to_byte_string(CP_UTF8, wlocale);
+    }
+
+    const char * byte_result = setlocale(category, byte_locale);
+    Safefree(byte_locale);
+    if (byte_result == NULL) {
+        return NULL;
+    }
+
+    const wchar_t * wresult = Win_byte_string_to_wstring(CP_UTF8, byte_result);
+
+    if (! wresult) {
+        return NULL;
+    }
+
+    /* Emulate a global static memory return from wsetlocale().  This currently
+     * leaks at process end; would require changing LOCALE_TERM to fix that */
+    Size_t string_size = wcslen(wresult) + 1;
+
+    if (wsetlocale_buf_size == 0) {
+        Newx(wsetlocale_buf, string_size, wchar_t);
+        wsetlocale_buf_size = string_size;
+
+#  ifdef MULTIPLICITY
+
+        dTHX;
+        wsetlocale_buf_aTHX = aTHX;
+
+#  endif
+
+    }
+    else if (string_size > wsetlocale_buf_size) {
+        Renew(wsetlocale_buf, string_size, wchar_t);
+        wsetlocale_buf_size = string_size;
+    }
+
+    Copy(wresult, wsetlocale_buf, string_size, wchar_t);
+    Safefree(wresult);
+
+    return wsetlocale_buf;
+}
+
+#  define _wsetlocale(category, wlocale)  S_wsetlocale(category, wlocale)
+#  endif
+#endif  /* WIN32_USE_FAKE_OLD_MINGW_LOCALES */
+
 #include "reentr.h"
 
 #ifdef I_WCHAR
@@ -4760,8 +4849,16 @@ S_my_langinfo_i(pTHX_
          * is documented and has been stable for many releases */
         UINT ___lc_codepage_func(void);
 
+#        ifndef WIN32_USE_FAKE_OLD_MINGW_LOCALES
+
         retval = save_to_buffer(Perl_form(aTHX_ "%d", ___lc_codepage_func()),
                                 retbufp, retbuf_sizep);
+#        else
+
+        retval = save_to_buffer(nl_langinfo(CODESET),
+                                retbufp, retbuf_sizep);
+#        endif
+
         DEBUG_Lv(PerlIO_printf(Perl_debug_log, "locale='%s' cp=%s\n",
                                                locale, retval));
         break;
@@ -7359,6 +7456,29 @@ Perl_thread_locale_term(pTHX)
     }
 
     PL_cur_locale_obj = LC_GLOBAL_LOCALE;
+
+#endif
+#ifdef WIN32_USE_FAKE_OLD_MINGW_LOCALES
+
+    /* When faking the mingw implementation, we coerce this function into doing
+     * something completely different from its intent -- namely to free up our
+     * static buffer to avoid a leak.  This function gets called for each
+     * thread that is terminating, so will give us a chance to free the buffer
+     * from the appropriate pool.  On unthreaded systems, it gets called by the
+     * mutex termination code. */
+
+#  ifdef MULTIPLICITY
+
+    if (aTHX != wsetlocale_buf_aTHX) {
+        return;
+    }
+
+#  endif
+
+    if (wsetlocale_buf_size > 0) {
+        Safefree(wsetlocale_buf);
+        wsetlocale_buf_size = 0;
+    }
 
 #endif
 
