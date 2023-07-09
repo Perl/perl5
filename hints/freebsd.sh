@@ -327,10 +327,11 @@ d_printf_format_null='undef'
 # Experiments have shown that this doesn't fully work.  The first kernel we know it works is 1200056
 
 FREEBSD_KERNEL_VERSION=`uname -U`
-#if  [ $FREEBSD_KERNEL_VERSION -lt 1003507 ] || \
-#    [ $FREEBSD_KERNEL_VERSION -ge 1100000 ] && [ $FREEBSD_KERNEL_VERSION -lt 1100502 ] || \
-#    [ $FREEBSD_KERNEL_VERSION -ge 1200000 ] && [ $FREEBSD_KERNEL_VERSION -lt 1200004 ]
-if  [ $FREEBSD_KERNEL_VERSION -lt 1200056 ]
+if  [     $FREEBSD_KERNEL_VERSION -lt 1003507           \
+   -o \(  $FREEBSD_KERNEL_VERSION -ge 1100000           \
+       -a $FREEBSD_KERNEL_VERSION -lt 1100502 \)        \
+   -o \(  $FREEBSD_KERNEL_VERSION -ge 1200000           \
+       -a $FREEBSD_KERNEL_VERSION -lt 1200004 \) ]
 then
     d_uselocale='undef'
 fi
@@ -370,7 +371,7 @@ esac
 
 # This function on this box has weird behavior.  See
 # https://bugs.freebsd.org/bugzilla/show_bug.cgi?id=255646
-d_querylocale='undef'
+#d_querylocale='undef'
 
 # See https://bugs.freebsd.org/bugzilla/show_bug.cgi?id=265950
-d_duplocale='undef'
+#d_duplocale='undef'
