@@ -153,7 +153,7 @@ esac
 # openbsd has a problem regarding newlocale()
 # https://marc.info/?l=openbsd-bugs&m=155364568608759&w=2
 # which is being fixed.  In the meantime, forbid POSIX 2008 locales
-d_newlocale="$undef"
+#d_newlocale="$undef"
 
 # Seems that OpenBSD returns bogus values in _Thread_local variables in code in
 # shared objects, so we need to disable it. See GH #19109
