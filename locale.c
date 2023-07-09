@@ -737,6 +737,10 @@ S_get_displayable_string(pTHX_
 {
     PERL_ARGS_ASSERT_GET_DISPLAYABLE_STRING;
 
+    if (e <= s) {
+        return "";
+    }
+
     const char * t = s;
     bool prev_was_printable = TRUE;
     bool first_time = TRUE;
@@ -746,7 +750,8 @@ S_get_displayable_string(pTHX_
      * If UTF-8, all are the largest possible code point; otherwise all are a
      * single byte.  '(2 + 1)'  is from each byte takes 2 characters to
      * display, and a blank (or NUL for the final one) after it */
-    Newxz(ret, (e - s) * (2 + 1) * ((is_utf8) ? UVSIZE : 1), char);
+    const Size_t size = (e - s) * (2 + 1) * ((is_utf8) ? UVSIZE : 1);
+    Newxz(ret, size, char);
     SAVEFREEPV(ret);
 
     while (t < e) {
@@ -755,21 +760,21 @@ S_get_displayable_string(pTHX_
                 : * (U8 *) t;
         if (isPRINT(cp)) {
             if (! prev_was_printable) {
-                my_strlcat(ret, " ", sizeof(ret));
+                my_strlcat(ret, " ", size);
             }
 
             /* Escape these to avoid any ambiguity */
             if (cp == ' ' || cp == '\\') {
-                my_strlcat(ret, "\\", sizeof(ret));
+                my_strlcat(ret, "\\", size);
             }
-            my_strlcat(ret, Perl_form(aTHX_ "%c", (U8) cp), sizeof(ret));
+            my_strlcat(ret, Perl_form(aTHX_ "%c", (U8) cp), size);
             prev_was_printable = TRUE;
         }
         else {
             if (! first_time) {
-                my_strlcat(ret, " ", sizeof(ret));
+                my_strlcat(ret, " ", size);
             }
-            my_strlcat(ret, Perl_form(aTHX_ "%02" UVXf, cp), sizeof(ret));
+            my_strlcat(ret, Perl_form(aTHX_ "%02" UVXf, cp), size);
             prev_was_printable = FALSE;
         }
         t += (is_utf8) ? UTF8SKIP(t) : 1;
