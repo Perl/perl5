@@ -291,7 +291,7 @@ Equivalent to
 =item * Metaprogramming
 
 An extension of the metaprogramming API (currently proposed by
-L<RFC0022|https://github.com/Perl/RFCs/pull/25>) which adds knowledge of
+L<PPC0022|https://github.com/Perl/PPCs/pull/25>) which adds knowledge of
 classes, methods, fields, ADJUST blocks, and other such class-related details.
 
 =item * Extension Customisation
