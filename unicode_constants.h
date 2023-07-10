@@ -16,10 +16,12 @@
  *
  * The macros that have the suffix "_UTF8" may have further suffixes, as
  * follows:
- *  "_FIRST_BYTE" if the value is just the first byte of the UTF-8
- *                representation; the value will be a numeric constant.
- *  "_TAIL"       if instead it represents all but the first byte.  This, and
- *                with no additional suffix are both string constants */
+ *  "_FIRST_BYTE"   if the value is just the first byte of the UTF-8
+ *                  representation; the value will be a numeric constant.
+ *  "_FIRST_BYTEs"  same, but the first byte is represented as a literal
+ *                  string
+ *  "_TAIL"         if instead it represents all but the first byte.  This,
+ *                  and with no additional suffix are both string constants */
 
 /*
 =for apidoc_section $unicode
@@ -88,6 +90,10 @@ bytes.
 #   define LATIN_SMALL_LETTER_Y_WITH_DIAERESIS_NATIVE  0xFF    /* U+00FF */
 #   define MICRO_SIGN_NATIVE  0xB5    /* U+00B5 */
 #   define MICRO_SIGN_UTF8  "\xC2\xB5"    /* U+00B5 */
+#   define ARABIC_DECIMAL_SEPARATOR_UTF8  "\xD9\xAB"    /* U+066B */
+#   define ARABIC_DECIMAL_SEPARATOR_UTF8_FIRST_BYTE  0xD9    /* U+066B */
+#   define ARABIC_DECIMAL_SEPARATOR_UTF8_TAIL  "\xAB"    /* U+066B */
+#   define ARABIC_DECIMAL_SEPARATOR_UTF8_FIRST_BYTE_s  "\xD9"    /* U+066B */
 
 #   ifdef PERL_IN_TOKE_C
        /* Paired characters for quote-like operators, in UTF-8 */
@@ -149,6 +155,10 @@ bytes.
 #   define LATIN_SMALL_LETTER_Y_WITH_DIAERESIS_NATIVE  0xDF    /* U+00FF */
 #   define MICRO_SIGN_NATIVE  0xA0    /* U+00B5 */
 #   define MICRO_SIGN_UTF8  "\x80\x64"    /* U+00B5 */
+#   define ARABIC_DECIMAL_SEPARATOR_UTF8  "\xB8\x62\x52"    /* U+066B */
+#   define ARABIC_DECIMAL_SEPARATOR_UTF8_FIRST_BYTE  0xB8    /* U+066B */
+#   define ARABIC_DECIMAL_SEPARATOR_UTF8_TAIL  "\x62\x52"    /* U+066B */
+#   define ARABIC_DECIMAL_SEPARATOR_UTF8_FIRST_BYTE_s  "\xB8"    /* U+066B */
 
 #   ifdef PERL_IN_TOKE_C
        /* Paired characters for quote-like operators, in UTF-8 */
@@ -210,6 +220,10 @@ bytes.
 #   define LATIN_SMALL_LETTER_Y_WITH_DIAERESIS_NATIVE  0xDF    /* U+00FF */
 #   define MICRO_SIGN_NATIVE  0xA0    /* U+00B5 */
 #   define MICRO_SIGN_UTF8  "\x78\x63"    /* U+00B5 */
+#   define ARABIC_DECIMAL_SEPARATOR_UTF8  "\xB7\x5F\x52"    /* U+066B */
+#   define ARABIC_DECIMAL_SEPARATOR_UTF8_FIRST_BYTE  0xB7    /* U+066B */
+#   define ARABIC_DECIMAL_SEPARATOR_UTF8_TAIL  "\x5F\x52"    /* U+066B */
+#   define ARABIC_DECIMAL_SEPARATOR_UTF8_FIRST_BYTE_s  "\xB7"    /* U+066B */
 
 #   ifdef PERL_IN_TOKE_C
        /* Paired characters for quote-like operators, in UTF-8 */

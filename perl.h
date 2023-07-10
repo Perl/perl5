@@ -1173,6 +1173,7 @@ violations are fatal.
 #   if !defined(NO_LOCALE_TOD) && defined(LC_TOD)
 #	define USE_LOCALE_TOD
 #   endif
+#endif
 
 /* XXX The Configure probe for categories must be updated when adding new
  * categories here */
@@ -1191,6 +1192,8 @@ violations are fatal.
  * regardless of how the platform defines the actual locale categories.
  */
 typedef enum {
+
+#ifdef USE_LOCALE
 
 /* Now create LC_foo_INDEX_ values for just those categories used on this
  * system */
@@ -1243,6 +1246,11 @@ typedef enum {
 } locale_category_index;
 
 #ifdef USE_LOCALE
+
+/* And a count of all the individual locale categories, mainly for use in array
+ * declarations */
+#  define LOCALE_CATEGORIES_COUNT_        LC_ALL_INDEX_
+
 #  if defined(USE_ITHREADS) && ! defined(NO_LOCALE_THREADS)
 #    define USE_LOCALE_THREADS
 #  endif
@@ -1295,21 +1303,25 @@ typedef enum {
 #    define USE_PL_CUR_LC_ALL
 #  endif
 
-#  if defined(WIN32) && defined(USE_THREAD_SAFE_LOCALE)
+#  if defined(WIN32)
 
-   /* We need to be able to map the current value of what the tTHX context
-    * thinks LC_ALL is so as to inform the Windows libc when switching
-    * contexts. */
-#    define USE_PL_CUR_LC_ALL
-
-   /* Microsoft documentation reads in the change log for VS 2015: "The
-    * localeconv function declared in locale.h now works correctly when
-    * per-thread locale is enabled. In previous versions of the library, this
-    * function would return the lconv data for the global locale, not the
-    * thread's locale." */
-#    if _MSC_VER < 1900
-#      define TS_W32_BROKEN_LOCALECONV
+      /* We need to be able to map the current value of what the tTHX context
+       * thinks LC_ALL is so as to inform the Windows libc when switching
+       * contexts. */
+#    if defined(USE_THREAD_SAFE_LOCALE)
+#      define USE_PL_CUR_LC_ALL
 #    endif
+
+     /* Microsoft documentation reads in the change log for VS 2015: "The
+      * localeconv function declared in locale.h now works correctly when
+      * per-thread locale is enabled. In previous versions of the library, this
+      * function would return the lconv data for the global locale, not the
+      * thread's locale." */
+#      ifndef _MSC_VER
+#        define TS_W32_BROKEN_LOCALECONV
+#      elif _MSC_VER < 1900
+#        define TS_W32_BROKEN_LOCALECONV
+#      endif
 #  endif
 
    /* POSIX 2008 and Windows with thread-safe locales keep locale information
@@ -7522,18 +7534,22 @@ cannot have changed since the precalculation.
             }                                                               \
         } STMT_END
 
-/* Lock/unlock to the C locale until unlock is called.  This needs to be
- * recursively callable.  [perl #128207] */
-#  define LOCK_LC_NUMERIC_STANDARD()                                        \
+/* Lock/unlock changes to LC_NUMERIC.  This needs to be recursively callable.
+ * The highest level caller is responsible for making sure that LC_NUMERIC is
+ * set to a locale with a dot radix character.  These deliberately don't check
+ * for the internal state being so, as they can be called from code that is not
+ * party to the internal conventions, namely 'version' (vutil.c).
+ * PL_numeric_standard changing doesn't affect anything about what locale is in
+ * effect, etc.  [perl #128207] */
+#  define DISABLE_LC_NUMERIC_CHANGES()                                      \
         STMT_START {                                                        \
             DEBUG_Lv(PerlIO_printf(Perl_debug_log,                          \
                     "%s: %d: lc_numeric_standard now locked to depth %d\n", \
                     __FILE__, __LINE__, PL_numeric_standard));              \
-            __ASSERT_(PL_numeric_standard)                                  \
             PL_numeric_standard++;                                          \
         } STMT_END
 
-#  define UNLOCK_LC_NUMERIC_STANDARD()                                      \
+#  define REENABLE_LC_NUMERIC_CHANGES()                                     \
         STMT_START {                                                        \
             if (PL_numeric_standard > 1) {                                  \
                 PL_numeric_standard--;                                      \
@@ -7550,6 +7566,17 @@ cannot have changed since the precalculation.
                      "lc_numeric_standard lock decremented to depth %d\n",  \
                                                      PL_numeric_standard););\
         } STMT_END
+
+/* Essentially synonyms for the above.  The LOCK asserts at the top level that
+ * we are in a locale equivalent to C.  By including the top level, this can be
+ * recursively called from chains which include DISABLE_LC_NUMERIC_CHANGES().
+ * */
+#  define LOCK_LC_NUMERIC_STANDARD()                                        \
+        STMT_START {                                                        \
+            assert(PL_numeric_standard > 0 || PL_numeric_standard);         \
+            DISABLE_LC_NUMERIC_CHANGES();                                   \
+        } STMT_END
+#  define UNLOCK_LC_NUMERIC_STANDARD()  REENABLE_LC_NUMERIC_CHANGES()
 
 #  define WITH_LC_NUMERIC_SET_TO_NEEDED_IN(in_lc_numeric, block)            \
         STMT_START {                                                        \
@@ -7575,6 +7602,8 @@ cannot have changed since the precalculation.
 #  define RESTORE_LC_NUMERIC()
 #  define LOCK_LC_NUMERIC_STANDARD()
 #  define UNLOCK_LC_NUMERIC_STANDARD()
+#  define DISABLE_LC_NUMERIC_CHANGES()
+#  define REENABLE_LC_NUMERIC_CHANGES()
 #  define WITH_LC_NUMERIC_SET_TO_NEEDED_IN(in_lc_numeric, block) \
     STMT_START { block; } STMT_END
 #  define WITH_LC_NUMERIC_SET_TO_NEEDED(block) \

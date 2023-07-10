@@ -3682,10 +3682,43 @@ S_populate_hash_from_localeconv(pTHX_ HV * hv,
     const char * orig_NUMERIC_locale = NULL;
     if (which_mask & INDEX_TO_BIT(LC_NUMERIC_INDEX_)) {
         LC_NUMERIC_LOCK(0);
+
+#    if defined(WIN32)
+
+        /* There is a bug in Windows in which setting LC_CTYPE after the others
+         * doesn't actually take effect for localeconv().  See the commit
+         * message for this commit for details.  Thus we have to make sure that
+         * the locale we want is set after LC_CTYPE.  We unconditionally toggle
+         * away from and back to the current locale prior to calling
+         * localeconv().
+         *
+         * This code will have no effect if we already are in C, but khw
+         * hasn't seen any cases where this causes problems when we are in the
+         * C locale. */
+        orig_NUMERIC_locale = toggle_locale_i(LC_NUMERIC_INDEX_, "C");
+        toggle_locale_i(LC_NUMERIC_INDEX_, locale);
+
+#    else
+
+        /* No need for the extra toggle when not on Windows */
         orig_NUMERIC_locale = toggle_locale_i(LC_NUMERIC_INDEX_, locale);
-    }
 
 #    endif
+
+    }
+
+#  endif
+#  if defined(USE_LOCALE_MONETARY) && defined(WIN32)
+
+    /* Same Windows bug as described just above for NUMERIC.  Otherwise, no
+     * need to toggle LC_MONETARY, as it is kept in the underlying locale */
+    const char * orig_MONETARY_locale = NULL;
+    if (which_mask & INDEX_TO_BIT(LC_MONETARY_INDEX_)) {
+        orig_MONETARY_locale = toggle_locale_i(LC_MONETARY_INDEX_, "C");
+        toggle_locale_i(LC_MONETARY_INDEX_, locale);
+    }
+
+#  endif
 
     /* Finally ready to do the actual localeconv().  Lock to prevent other
      * accesses until we have made a copy of its returned static buffer */
@@ -3817,6 +3850,11 @@ S_populate_hash_from_localeconv(pTHX_ HV * hv,
     gwLOCALE_UNLOCK;    /* Finished with the critical section of a
                            globally-accessible buffer */
 
+#  if defined(USE_LOCALE_MONETARY) && defined(WIN32)
+
+    restore_toggled_locale_i(LC_MONETARY_INDEX_, orig_MONETARY_locale);
+
+#  endif
 #  ifdef USE_LOCALE_NUMERIC
 
     restore_toggled_locale_i(LC_NUMERIC_INDEX_, orig_NUMERIC_locale);
@@ -3905,8 +3943,9 @@ only one is completely unimplemented, though on non-Windows platforms, another
 significant one is not fully implemented).  They use various techniques to
 recover the other items, including calling C<L<localeconv(3)>>, and
 C<L<strftime(3)>>, both of which are specified in C89, so should be always be
-available.  Later C<strftime()> versions have additional capabilities; What the
-C locale yields or C<""> is returned for any item not available on your system.
+available.  Later C<strftime()> versions have additional capabilities.
+If an item is not available on your system, this returns either the value
+associated with the C locale, or simply C<"">, whichever is more appropriate.
 
 It is important to note that, when called with an item that is recovered by
 using C<localeconv>, the buffer from any previous explicit call to
@@ -4932,7 +4971,6 @@ the program, giving results based on that locale.
 
 #else
     Perl_croak(aTHX_ "panic: no strftime");
-    return NULL;
 #endif
 
 }
@@ -7285,7 +7323,7 @@ Perl_thread_locale_term(pTHX)
      * they affect libc's knowledge of the thread; libc has no knowledge of
      * aTHX */
 
-#ifdef USE_POSIX_2008_LOCALE
+#if defined(USE_POSIX_2008_LOCALE) && defined(USE_THREADS)
 
     /* C starts the new thread in the global C locale.  If we are thread-safe,
      * we want to not be in the global locale */
