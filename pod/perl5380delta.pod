@@ -78,7 +78,7 @@ the case these warnings are automatically enabled with
 =head2 %{^HOOK} API introduced
 
 For various reasons it can be difficult to create subroutine wrappers
-for some of perls keywords. Any keyword which has an undefined
+for some of perl's keywords. Any keyword which has an undefined
 prototype simply cannot be wrapped with a subroutine, and some keywords
 which perl permits to be wrapped are in practice very tricky to wrap.
 For example C<require> is tricky to wrap, it is possible but doing so
