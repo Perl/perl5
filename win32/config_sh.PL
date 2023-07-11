@@ -323,10 +323,6 @@ if ($opt{cc} =~ /\bcl/ and $opt{ccversion} =~ /^(\d+)/) {
 	$opt{i_stdint} = 'define';
     }
     if ($ccversion >= 19) { # VC14+
-	$opt{stdio_base} = 'PERLIO_FILE_base(fp)';
-	$opt{stdio_bufsiz} = '(PERLIO_FILE_cnt(fp) + PERLIO_FILE_ptr(fp) - PERLIO_FILE_base(fp))';
-	$opt{stdio_cnt} = 'PERLIO_FILE_cnt(fp)';
-	$opt{stdio_ptr} = 'PERLIO_FILE_ptr(fp)';
 	$opt{i_stdbool} = 'define' unless $prebuilt;
     }
 }
@@ -342,14 +338,17 @@ elsif ($opt{cc} =~ /\bicl/) {
 	$opt{i_stdint} = 'define';
     }
     if ($num_ver =~ /^(\d+)/ && $1 >= 19) { # VC14+
-	$opt{stdio_base} = 'PERLIO_FILE_base(fp)';
-	$opt{stdio_bufsiz} = '(PERLIO_FILE_cnt(fp) + PERLIO_FILE_ptr(fp) - PERLIO_FILE_base(fp))';
-	$opt{stdio_cnt} = 'PERLIO_FILE_cnt(fp)';
-	$opt{stdio_ptr} = 'PERLIO_FILE_ptr(fp)';
 	$opt{i_stdbool} = 'define';
     }
     $opt{ar} ='xilib';
 }
+
+# win32.h always defines these, and those definitions
+# depend on the current CRT
+$opt{stdio_base} = 'PERLIO_FILE_base(fp)';
+$opt{stdio_bufsiz} = '(PERLIO_FILE_cnt(fp) + PERLIO_FILE_ptr(fp) - PERLIO_FILE_base(fp))';
+$opt{stdio_cnt} = 'PERLIO_FILE_cnt(fp)';
+$opt{stdio_ptr} = 'PERLIO_FILE_ptr(fp)';
 
 if ($opt{useithreads} eq 'define' && $opt{ccflags} =~ /-DPERL_IMPLICIT_SYS\b/) {
     $opt{d_pseudofork} = 'define';
