@@ -65,7 +65,6 @@ make_patchnum.pl			Script to generate git_version.h and lib/Config_git.pl files 
 makedef.pl				Create symbol export lists for linking
 makedepend.SH				Precursor to makedepend
 makedepend_file.SH			Precursor to makedepend_file
-Makefile.micro				microperl Makefile
 Makefile.SH				A script that generates Makefile
 malloc.c				A version of malloc you might not want
 malloc_ctl.h				A version of malloc you might not want
@@ -147,7 +146,6 @@ README.jp				Perl for Japanese (in EUC-JP)
 README.ko				Perl for Korean (in EUC-KR)
 README.linux				Perl notes for Linux
 README.macosx				Perl notes for Mac OS X
-README.micro				Notes about microperl
 README.openbsd				Perl notes for OpenBSD
 README.os2				Perl notes for OS/2
 README.os390				Perl notes for OS/390
@@ -196,9 +194,6 @@ time64.c				64 bit clean time.h (code)
 time64.h				64 bit clean time.h (header)
 time64_config.h				64 bit clean time.h (configuration)
 toke.c					The tokener
-uconfig.h				Configuration header for microperl
-uconfig.sh				Configuration script for microperl
-uconfig64.sh				Configuration script for microperl for LP64
 uni_keywords.h				Map unicode property names to numbers
 unicode_constants.h			compile-time macros for Unicode code points
 universal.c				The default UNIVERSAL package methods
@@ -5679,7 +5674,6 @@ regen/regcomp.pl			Builder of regnodes.h
 regen/regen_lib.pl			Common file routines for generator scripts
 regen/scope_types.pl			Regenerate scope_types.h
 regen/tidy_embed.pl			Program to clean up embed.fnc manually
-regen/uconfig_h.pl			generate uconfig.h (requires /bin/sh)
 regen/unicode_constants.pl		generate unicode_constants.h
 regen/warnings.pl			Program to write warnings.h and lib/warnings.pm
 t/base/cond.t				See if conditionals work

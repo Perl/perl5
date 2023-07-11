@@ -38,11 +38,7 @@
 #define USE_STDIO
 #endif /* PERL_FOR_X2P */
 
-#ifdef PERL_MICRO
-#   include "uconfig.h"
-#else
-#   include "config.h"
-#endif
+#include "config.h"
 
 /*
 =for apidoc_section $debugging
@@ -361,47 +357,45 @@ Now a no-op.
  * have HASATTRIBUTE_FORMAT).
  */
 
-#ifndef PERL_MICRO
-#  if defined __GNUC__ && !defined(__INTEL_COMPILER)
-#    if PERL_GCC_VERSION_GE(3,1,0)
-#      define HASATTRIBUTE_DEPRECATED
-#    endif
-#    if PERL_GCC_VERSION_GE(3,0,0)  /* XXX Verify this version */
-#      define HASATTRIBUTE_FORMAT
-#      if defined __MINGW32__
-#        define PRINTF_FORMAT_NULL_OK
-#      endif
-#    endif
-#    if PERL_GCC_VERSION_GE(3,0,0)
-#      define HASATTRIBUTE_MALLOC
-#    endif
-#    if PERL_GCC_VERSION_GE(3,3,0)
-#      define HASATTRIBUTE_NONNULL
-#    endif
-#    if PERL_GCC_VERSION_GE(2,5,0)
-#      define HASATTRIBUTE_NORETURN
-#    endif
-#    if PERL_GCC_VERSION_GE(3,0,0)
-#      define HASATTRIBUTE_PURE
-#    endif
-#    if PERL_GCC_VERSION_GE(3,4,0)
-#      define HASATTRIBUTE_UNUSED
-#    endif
-#    if __GNUC__ == 3 && __GNUC_MINOR__ == 3 && !defined(__cplusplus)
-#      define HASATTRIBUTE_UNUSED /* gcc-3.3, but not g++-3.3. */
-#    endif
-#    if PERL_GCC_VERSION_GE(3,4,0)
-#      define HASATTRIBUTE_WARN_UNUSED_RESULT
-#    endif
-     /* always_inline is buggy in gcc <= 4.6 and causes compilation errors */
-#    if PERL_GCC_VERSION_GE(4,7,0)
-#      define HASATTRIBUTE_ALWAYS_INLINE
-#    endif
-#    if PERL_GCC_VERSION_GE(3,3,0)
-#      define HASATTRIBUTE_VISIBILITY
+#if defined __GNUC__ && !defined(__INTEL_COMPILER)
+#  if PERL_GCC_VERSION_GE(3,1,0)
+#    define HASATTRIBUTE_DEPRECATED
+#  endif
+#  if PERL_GCC_VERSION_GE(3,0,0)  /* XXX Verify this version */
+#    define HASATTRIBUTE_FORMAT
+#    if defined __MINGW32__
+#      define PRINTF_FORMAT_NULL_OK
 #    endif
 #  endif
-#endif /* #ifndef PERL_MICRO */
+#  if PERL_GCC_VERSION_GE(3,0,0)
+#    define HASATTRIBUTE_MALLOC
+#  endif
+#  if PERL_GCC_VERSION_GE(3,3,0)
+#    define HASATTRIBUTE_NONNULL
+#  endif
+#  if PERL_GCC_VERSION_GE(2,5,0)
+#    define HASATTRIBUTE_NORETURN
+#  endif
+#  if PERL_GCC_VERSION_GE(3,0,0)
+#    define HASATTRIBUTE_PURE
+#  endif
+#  if PERL_GCC_VERSION_GE(3,4,0)
+#    define HASATTRIBUTE_UNUSED
+#  endif
+#  if __GNUC__ == 3 && __GNUC_MINOR__ == 3 && !defined(__cplusplus)
+#    define HASATTRIBUTE_UNUSED /* gcc-3.3, but not g++-3.3. */
+#  endif
+#  if PERL_GCC_VERSION_GE(3,4,0)
+#    define HASATTRIBUTE_WARN_UNUSED_RESULT
+#  endif
+   /* always_inline is buggy in gcc <= 4.6 and causes compilation errors */
+#  if PERL_GCC_VERSION_GE(4,7,0)
+#    define HASATTRIBUTE_ALWAYS_INLINE
+#  endif
+#  if PERL_GCC_VERSION_GE(3,3,0)
+#    define HASATTRIBUTE_VISIBILITY
+#  endif
+#endif
 
 #ifdef HASATTRIBUTE_DEPRECATED
 #  define __attribute__deprecated__         __attribute__((deprecated))
@@ -776,7 +770,7 @@ as in
  if (x) STMT_START { ... } STMT_END else ...
 
 Note that you can't return a value out of this construct and cannot use it as
-an operand to the comma operator.  These limit its utility.  
+an operand to the comma operator.  These limit its utility.
 
 But, a value could be returned by constructing the API so that a pointer is
 passed and the macro dereferences this to set the return.  If the value can be
@@ -1081,10 +1075,6 @@ violations are fatal.
 
 #ifdef METHOD 	/* Defined by OSF/1 v3.0 by ctype.h */
 #undef METHOD
-#endif
-
-#ifdef PERL_MICRO
-#   define NO_LOCALE
 #endif
 
 #ifdef I_LOCALE
@@ -3527,7 +3517,7 @@ typedef struct padname PADNAME;
    and then they have the gall to warn that a value computed is not used. Hence
    cast to void.  */
 #    define PERL_FPU_INIT (void)fpsetmask(0)
-#  elif defined(SIGFPE) && defined(SIG_IGN) && !defined(PERL_MICRO)
+#  elif defined(SIGFPE) && defined(SIG_IGN)
 #    define PERL_FPU_INIT       PL_sigfpe_saved = (Sighandler_t) signal(SIGFPE, SIG_IGN)
 #    define PERL_FPU_PRE_EXEC   { Sigsave_t xfpe; rsignal_save(SIGFPE, PL_sigfpe_saved, &xfpe);
 #    define PERL_FPU_POST_EXEC    rsignal_restore(SIGFPE, &xfpe); }
@@ -5481,18 +5471,10 @@ EXTCONST char PL_isa_DOES[]
 
 #ifdef DOINIT
 EXTCONST char PL_uudmap[256] =
-#  ifdef PERL_MICRO
-#    include "uuudmap.h"
-#  else
-#    include "uudmap.h"
-#  endif
+#  include "uudmap.h"
 ;
 EXTCONST char PL_bitcount[256] =
-#  ifdef PERL_MICRO
-#    include "ubitcount.h"
-#else
-#    include "bitcount.h"
-#  endif
+#  include "bitcount.h"
 ;
 EXTCONST char* const PL_sig_name[] = { SIG_NAME };
 EXTCONST int         PL_sig_num[]  = { SIG_NUM };
@@ -5755,9 +5737,6 @@ EXTCONST char PL_bincompat_options[] =
 #  endif
 #  ifdef PERL_IMPLICIT_SYS
                              " PERL_IMPLICIT_SYS"
-#  endif
-#  ifdef PERL_MICRO
-                             " PERL_MICRO"
 #  endif
 #  ifdef PERL_POISON
                              " PERL_POISON"
@@ -6283,11 +6262,7 @@ EXTCONST runops_proc_t PL_runops_dbg
 
 #ifdef DOINIT
 EXTCONST U8 PL_magic_data[256] =
-#  ifdef PERL_MICRO
-#    include "umg_data.h"
-#  else
-#    include "mg_data.h"
-#  endif
+#  include "mg_data.h"
 ;
 #else
 EXTCONST U8 PL_magic_data[256];
@@ -7945,14 +7920,8 @@ C<strtoul>.
  * massively.
  */
 
-#ifndef PERL_MICRO
-#	ifndef PERL_ASYNC_CHECK
-#		define PERL_ASYNC_CHECK() if (UNLIKELY(PL_sig_pending)) PL_signalhook(aTHX)
-#	endif
-#endif
-
 #ifndef PERL_ASYNC_CHECK
-#   define PERL_ASYNC_CHECK()  NOOP
+#define PERL_ASYNC_CHECK() if (UNLIKELY(PL_sig_pending)) PL_signalhook(aTHX)
 #endif
 
 /*

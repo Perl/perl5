@@ -24,9 +24,7 @@
 #include "perl.h"
 #include "invlist_inline.h"
 
-#ifndef PERL_MICRO
 #include <signal.h>
-#endif
 
 
 /* Helper function for do_trans().

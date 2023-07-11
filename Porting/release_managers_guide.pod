@@ -450,14 +450,7 @@ release and this is something you would have to do at the very end.
 When releasing a MAINT perl version, the C<PERL_API_*> constants C<MUST NOT>
 be changed as we aim to guarantee binary compatibility in maint branches.
 
-After editing, regenerate uconfig.h (this must be run on a system with a
-/bin/sh available):
-
- $ perl regen/uconfig_h.pl
-
-This might not cause any new changes.
-
-You may also need to regen opcodes:
+After editing, you may need to regen opcodes:
 
  $ ./perl -Ilib regen/opcode.pl
 

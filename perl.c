@@ -408,11 +408,9 @@ perl_construct(pTHXx)
 
     Zero(PL_sv_consts, SV_CONSTS_COUNT, SV*);
 
-#ifndef PERL_MICRO
-#   ifdef  USE_ENVIRON_ARRAY
+#ifdef  USE_ENVIRON_ARRAY
     if (!PL_origenviron)
         PL_origenviron = environ;
-#   endif
 #endif
 
     /* Use sysconf(_SC_CLK_TCK) if available, if not
@@ -2477,12 +2475,11 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 
         validate_suid(rsfp);
 
-#ifndef PERL_MICRO
-#  if defined(SIGCHLD) || defined(SIGCLD)
+#if defined(SIGCHLD) || defined(SIGCLD)
         {
-#  ifndef SIGCHLD
-#    define SIGCHLD SIGCLD
-#  endif
+#ifndef SIGCHLD
+#  define SIGCHLD SIGCLD
+#endif
             Sighandler_t sigstate = rsignal_state(SIGCHLD);
             if (sigstate == (Sighandler_t) SIG_IGN) {
                 Perl_ck_warner(aTHX_ packWARN(WARN_SIGNAL),
@@ -2490,7 +2487,6 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
                 (void)rsignal(SIGCHLD, (Sighandler_t)SIG_DFL);
             }
         }
-#  endif
 #endif
 
         if (doextract) {
@@ -2523,10 +2519,8 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
 
     if (xsinit)
         (*xsinit)(aTHX);	/* in case linked C routines want magical variables */
-#ifndef PERL_MICRO
 #if defined(VMS) || defined(WIN32) || defined(__CYGWIN__)
     init_os_extras();
-#endif
 #endif
 
 #ifdef USE_SOCKS
@@ -4684,7 +4678,6 @@ S_init_postdump_symbols(pTHX_ int argc, char **argv, char **env)
         GvMULTI_on(PL_envgv);
         hv = GvHVn(PL_envgv);
         hv_magic(hv, NULL, PERL_MAGIC_env);
-#ifndef PERL_MICRO
 #if defined(USE_ENVIRON_ARRAY) || defined(WIN32)
         /* Note that if the supplied env parameter is actually a copy
            of the global environ then it may now point to free'd memory
@@ -4797,7 +4790,6 @@ S_init_postdump_symbols(pTHX_ int argc, char **argv, char **env)
           SvREFCNT_dec_NN(dups);
       }
 #endif /* USE_ENVIRON_ARRAY */
-#endif /* !PERL_MICRO */
     }
     TAINT_NOT;
 

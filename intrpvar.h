@@ -952,9 +952,7 @@ PERLVARI(I, threadhook,	thrhook_proc_t,	Perl_nothreadhook)
 /* Can shared object be destroyed */
 PERLVARI(I, destroyhook, destroyable_proc_t, Perl_sv_destroyable)
 
-#ifndef PERL_MICRO
 PERLVARI(I, signalhook,	despatch_signals_proc_t, Perl_despatch_signals)
-#endif
 
 PERLVARI(I, isarev, HV *, NULL)		/* Reverse map of @ISA dependencies */
 

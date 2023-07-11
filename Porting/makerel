@@ -252,7 +252,6 @@ my @writables = qw(
     win32/Makefile
     win32/config_H.gc
     win32/config_H.vc
-    uconfig.h
 );
 
 my $out = `chmod u+w @writables 2>&1`;

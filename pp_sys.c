@@ -4435,7 +4435,7 @@ PP(pp_system)
         TAINT_PROPER("system");
     }
     PERL_FLUSHALL_FOR_CHILD;
-#if (defined(HAS_FORK) || defined(__amigaos4__)) && !defined(VMS) && !defined(OS2) || defined(PERL_MICRO)
+#if (defined(HAS_FORK) || defined(__amigaos4__)) && !defined(VMS) && !defined(OS2)
     {
 #ifdef __amigaos4__
         struct UserData userdata;
@@ -4493,10 +4493,8 @@ PP(pp_system)
             if (did_pipes)
                 PerlLIO_close(pp[1]);
 #endif
-#ifndef PERL_MICRO
             rsignal_save(SIGINT,  (Sighandler_t) SIG_IGN, &ihand);
             rsignal_save(SIGQUIT, (Sighandler_t) SIG_IGN, &qhand);
-#endif
 #ifdef __amigaos4__
             result = pthread_join(proc, (void **)&status);
 #else
@@ -4504,13 +4502,11 @@ PP(pp_system)
                 result = wait4pid(childpid, &status, 0);
             } while (result == -1 && errno == EINTR);
 #endif
-#ifndef PERL_MICRO
 #ifdef HAS_SIGPROCMASK
             sigprocmask(SIG_SETMASK, &oldset, NULL);
 #endif
             (void)rsignal_restore(SIGINT, &ihand);
             (void)rsignal_restore(SIGQUIT, &qhand);
-#endif
             STATUS_NATIVE_CHILD_SET(result == -1 ? -1 : status);
             SP = ORIGMARK;
             if (did_pipes) {
@@ -4763,16 +4759,6 @@ PP(pp_tms)
         mPUSHn(((NV)timesbuf.tms_stime)/(NV)PL_clocktick);
         mPUSHn(((NV)timesbuf.tms_cutime)/(NV)PL_clocktick);
         mPUSHn(((NV)timesbuf.tms_cstime)/(NV)PL_clocktick);
-    }
-    RETURN;
-#elif defined(PERL_MICRO)
-    dSP;
-    mPUSHn(0.0);
-    EXTEND(SP, 4);
-    if (GIMME_V == G_LIST) {
-         mPUSHn(0.0);
-         mPUSHn(0.0);
-         mPUSHn(0.0);
     }
     RETURN;
 #else

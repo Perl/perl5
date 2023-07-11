@@ -1033,7 +1033,6 @@ S_openn_cleanup(pTHX_ GV *gv, IO *io, PerlIO *fp, char *mode, const char *oname,
             (void) PerlIO_close(fp);
             goto say_false;
         }
-#ifndef PERL_MICRO
         if (S_ISSOCK(statbuf.st_mode))
             IoTYPE(io) = IoTYPE_SOCKET;	/* in case a socket was passed in to us */
 #ifdef HAS_SOCKET
@@ -1050,7 +1049,6 @@ S_openn_cleanup(pTHX_ GV *gv, IO *io, PerlIO *fp, char *mode, const char *oname,
                                                 /* but some return 0 for streams too, sigh */
         }
 #endif /* HAS_SOCKET */
-#endif /* !PERL_MICRO */
     }
 
     /* Eeek - FIXME !!!
