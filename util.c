@@ -30,11 +30,9 @@
 #include "perliol.h" /* For PerlIOUnix_refcnt */
 #endif
 
-#ifndef PERL_MICRO
 #include <signal.h>
 #ifndef SIG_ERR
 # define SIG_ERR ((Sighandler_t) -1)
-#endif
 #endif
 
 #include <math.h>
@@ -2881,7 +2879,6 @@ dup2(int oldfd, int newfd)
 }
 #endif
 
-#ifndef PERL_MICRO
 #ifdef HAS_SIGACTION
 
 /*
@@ -3049,7 +3046,6 @@ Perl_rsignal_restore(pTHX_ int signo, Sigsave_t *save)
 }
 
 #endif /* !HAS_SIGACTION */
-#endif /* !PERL_MICRO */
 
     /* VMS' my_pclose() is in VMS.c */
 
@@ -4055,7 +4051,6 @@ Fill C<sv> with current working directory
 int
 Perl_getcwd_sv(pTHX_ SV *sv)
 {
-#ifndef PERL_MICRO
     SvTAINTED_on(sv);
 
     PERL_ARGS_ASSERT_GETCWD_SV;
@@ -4192,9 +4187,6 @@ Perl_getcwd_sv(pTHX_ SV *sv)
     return TRUE;
 #endif
 
-#else
-    return FALSE;
-#endif
 }
 
 #include "vutil.c"
@@ -5344,7 +5336,6 @@ Perl_my_vsnprintf(char *buffer, const Size_t len, const char *format, va_list ap
 void
 Perl_my_clearenv(pTHX)
 {
-#if ! defined(PERL_MICRO)
 #  if defined(PERL_IMPLICIT_SYS) || defined(WIN32)
     PerlEnv_clearenv();
 #  else /* ! (PERL_IMPLICIT_SYS || WIN32) */
@@ -5379,7 +5370,6 @@ Perl_my_clearenv(pTHX)
 #      endif /* HAS_CLEARENV || HAS_UNSETENV */
 #    endif /* USE_ENVIRON_ARRAY */
 #  endif /* PERL_IMPLICIT_SYS || WIN32 */
-#endif /* PERL_MICRO */
 }
 
 #ifdef MULTIPLICITY

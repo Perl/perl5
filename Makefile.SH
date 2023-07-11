@@ -1072,14 +1072,6 @@ $(PERL_EXE): $& $(perlmain_dep) $(LIBPERL) $(static_ext) ext.libs $(PERLEXPORT) 
 
 	$spitshell >>$Makefile <<'!NO!SUBS!'
 
-# Microperl.  This is just a convenience thing if one happens to
-# build also the full Perl and therefore the real big Makefile:
-# usually one should manually explicitly issue the below command.
-
-.PHONY: microperl
-microperl:
-	$(MAKE) -f Makefile.micro
-
 !NO!SUBS!
 
 fi
@@ -1276,11 +1268,9 @@ CHMOD_W = chmod +w
 
 regen:	FORCE
 	-perl regen.pl
-	-perl regen/uconfig_h.pl
 
 regen_headers regen-headers:	FORCE
 	-perl regen.pl -v
-	-perl regen/uconfig_h.pl -v
 
 regen_meta regen-meta:  META.yml META.json
 
@@ -1370,7 +1360,7 @@ _mopup:
 	-rm -f perl.export perl.dll perl.libexp perl.map perl.def
 	-rm -f *perl.xok
 	-rm -f cygwin.c libperl*.def libperl*.dll cygperl*.dll *.exe.stackdump
-	-rm -f $(PERL_EXE) $(MINIPERL_EXE) $(LIBPERL) libperl.* microperl
+	-rm -f $(PERL_EXE) $(MINIPERL_EXE) $(LIBPERL) libperl.*
 	-rm -f config.arch config.over $(DTRACE_H)
 
 _cleaner1:

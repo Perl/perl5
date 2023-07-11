@@ -254,7 +254,8 @@ L</Platform Support> section, instead.
 
 =item *
 
-XXX
+C<microperl>, long broken and of unclear present purpose, has been removed
+as promised in L<Perl 5.18|perl5180delta/Future Deprecations>.
 
 =back
 
