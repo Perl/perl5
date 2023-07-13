@@ -326,7 +326,6 @@ cpan/autodie/t/skip.t
 cpan/autodie/t/string-eval-basic.t			autodie - Basic string eval test
 cpan/autodie/t/string-eval-leak.t			autodie - String eval leak test
 cpan/autodie/t/sysopen.t				autodie - sysopen tests
-cpan/autodie/t/touch_me
 cpan/autodie/t/truncate.t				autodie - File truncation tests
 cpan/autodie/t/unlink.t					autodie - Unlink system tests.
 cpan/autodie/t/user-context.t				autodie - Context changes for usersubs

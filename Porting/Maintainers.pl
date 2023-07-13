@@ -164,6 +164,16 @@ use File::Glob qw(:case);
                 t/socket.t
                 t/system.t
                 t/no-all.t
+                ),
+            # removed by https://github.com/pjf/autodie/pull/120 below
+            qw( t/touch_me )
+        ],
+        'CUSTOMIZED' => [
+            # https://github.com/Perl/perl5/issues/21233
+            # https://github.com/pjf/autodie/pull/120
+            qw( t/chmod.t
+                t/chown.t
+                t/utime.t
                 )
         ],
     },
