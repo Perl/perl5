@@ -2742,7 +2742,11 @@ Perl_check_hash_fields_and_hekify(pTHX_ UNOP *rop, SVOP *key_op, int real)
         {
             SSize_t keylen;
             const char * const key = SvPV_const(sv, *(STRLEN*)&keylen);
-            SV *nsv = newSVpvn_share(key, SvUTF8(sv) ? -keylen : keylen, 0);
+            if (keylen > I32_MAX) {
+                Perl_croak_nocontext("Sorry, hash keys must be smaller than 2**31 bytes");
+            }
+
+            SV *nsv = newSVpvn_share(key, SvUTF8(sv) ? -(I32)keylen : (I32)keylen, 0);
             SvREFCNT_dec_NN(sv);
             *svp = nsv;
         }
