@@ -368,6 +368,18 @@ while (defined (my $file = next_file())) {
 	    $new =~ s/(["\\])/\\$1/g;       #"]);
 	    # now that's almost like a macro (we hope)
 	    EMIT($proto);
+	} elsif (/^typedef/) {
+	    # Add typedefs to '%isatype' so we can eliminate them later...
+	    until( /typedef[^\{]*(?:\{[^\}]*\}[^\{]*)*[^\{]*\W(?:\w+)?\s*;\s*$/ ) {
+		last unless defined ($next = next_line($file));
+		chomp $next;
+		# We don't really care about the contents; we just want the name
+                $next =~ s/\b\/\/.*//;
+		$next =~ s/^\s*#.*//;
+		$_ .= $next;
+                $_ =~ s/\b\/\*[^*]*\*+([^\/*][^*]*\*+)*\///;
+	    }
+	    $isatype{$1} = 1 if /typedef[^\{]*(?:\{[^\}]*\}[^\{]*)*[^\{]*\W(\w+)\s*;\s*$/;
 	}
     }
     $Is_converted{$file} = 1;
@@ -1020,6 +1032,10 @@ Doesn't handle complicated expressions built piecemeal, a la:
 
 Doesn't necessarily locate all of your C compiler's internally-defined
 symbols.
+
+Only recognizes C<typedef>s, etc. that were defined B<during this run> --
+meaning C<h2ph -r /usr/include> (recursive) will likely work better than
+trying to individually convert B<.h> files one-by-one.
 
 =cut
 
