@@ -4522,10 +4522,15 @@ S_intuit_more(pTHX_ char *s, char *e)
         return TRUE;
     }
 
-    weight = 2;		/* let's weigh the evidence */
+    if (*s == '$') {    /* First char is dollar; lean very slightly to it being
+                           a subscript */
+        weight = -1;
+    }
+    else {              /* Otherwise, lean a little more towards it being a
+                           character class. */
+        weight = 2;
+    }
 
-    if (*s == '$')
-        weight -= 3;
     Zero(seen,256,char);
     un_char = 255;
     for (; s < send; s++) {
