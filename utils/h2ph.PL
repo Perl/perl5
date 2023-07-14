@@ -877,6 +877,35 @@ DEFINE
 		    quotemeta($define{$_}), "\" } }\n\n";
 	    }
 	}
+
+	print PREAMBLE <<SIZEOF;
+%sizeof = (
+	char	=> $Config{charsize},
+	uchar	=> $Config{charsize},
+	u_char	=> $Config{charsize},
+
+	short	=> $Config{shortsize},
+	ushort	=> $Config{shortsize},
+	u_short => $Config{shortsize},
+
+	int	=> $Config{intsize},
+	uint	=> $Config{intsize},
+	u_int	=> $Config{intsize},
+
+	long	=> $Config{longsize},
+	ulong	=> $Config{longsize},
+	u_long	=> $Config{longsize},
+
+	FILE	=> $Config{ptrsize},
+	key_t	=> $Config{ptrsize},
+	caddr_t	=> $Config{ptrsize},
+
+	float	=> $Config{intsize},
+	double	=> $Config{doublesize},
+	size_t	=> $Config{sizesize},
+);
+SIZEOF
+
 	print PREAMBLE "\n1;\n";  # avoid 'did not return a true value' when empty
     close PREAMBLE               or die "Cannot close $preamble:  $!";
 }
@@ -1022,7 +1051,7 @@ The usual warnings if it can't read or write the files involved.
 
 =head1 BUGS
 
-Doesn't construct the %sizeof array for you.
+Only constructs part of the %sizeof array for you.
 
 It doesn't handle all C constructs, but it does attempt to isolate
 definitions inside evals so that you can get at the definitions
