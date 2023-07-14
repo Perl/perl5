@@ -4515,18 +4515,17 @@ S_intuit_more(pTHX_ char *s, char *e)
 
     if (!send)		/* has to be an expression */
         return TRUE;
+
+    /* If the construct consists entirely of one or two digits, call it a
+     * subscript. */
+    if (isDIGIT(*s) && send - s <= 2 && (send - s == 1 || (isDIGIT(s[1])))) {
+        return TRUE;
+    }
+
     weight = 2;		/* let's weigh the evidence */
 
     if (*s == '$')
         weight -= 3;
-    else if (isDIGIT(*s)) {
-        if (s[1] != ']') {
-            if (isDIGIT(s[1]) && s[2] == ']')
-                weight -= 10;
-        }
-        else
-            weight -= 100;
-    }
     Zero(seen,256,char);
     un_char = 255;
     for (; s < send; s++) {
