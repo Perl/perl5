@@ -509,6 +509,8 @@ sub expr {
 		s/\([\w\s]+[\*\s]*\)// && next;      # then eliminate them.
 	    }
 	};
+	# "<headers.h>"-style include paths; just quote them for now
+	s/^(<[_A-Z\/]+(?:\.h)?>)//i && do { $new .= "\"$1\""; next;};
 	# struct/union member, including arrays:
 	s/^([_A-Z]\w*(\[[^\]]+\])?((\.|->)[_A-Z]\w*(\[[^\]]+\])?)+)//i && do {
 	    my $id = $1;
