@@ -903,6 +903,8 @@ DEFINE
 	float	=> $Config{intsize},
 	double	=> $Config{doublesize},
 	size_t	=> $Config{sizesize},
+
+	%sizeof,   # Allow scripts to extend/customize %sizeof
 );
 SIZEOF
 
