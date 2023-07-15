@@ -4558,7 +4558,7 @@ S_intuit_more(pTHX_ char *s, char *e)
     /* Examine each character in the construct */
     bool first_time = true;
     for (; s < send; s++, first_time = false) {
-        unsigned char last_un_char = un_char;
+        unsigned char prev_un_char = un_char;
         un_char = (unsigned char) s[0];
         switch (s[0]) {
           case '@':
@@ -4629,7 +4629,7 @@ S_intuit_more(pTHX_ char *s, char *e)
             /* If it is something like 'a-' or '0-', it is more likely to
              * be a character class. '!' is the first ASCII graphic, so '!-'
              * would be the start of a range of graphics. */
-            if (! first_time && memCHRs("aA01! ", last_un_char))
+            if (! first_time && memCHRs("aA01! ", prev_un_char))
                 weight += 30;
 
             /* If it is something like '-Z' or '-7' (for octal) or '-9' it
@@ -4646,10 +4646,10 @@ S_intuit_more(pTHX_ char *s, char *e)
             break;
 
           default:
-            if (  (first_time || (  ! isWORDCHAR(last_un_char)
-                                  &&  last_un_char != '$'
-                                  &&  last_un_char != '@'
-                                  &&  last_un_char != '&'))
+            if (  (first_time || (  ! isWORDCHAR(prev_un_char)
+                                  &&  prev_un_char != '$'
+                                  &&  prev_un_char != '@'
+                                  &&  prev_un_char != '&'))
                 && isALPHA(s[0])
                 && isALPHA(s[1]))
             {
@@ -4667,7 +4667,7 @@ S_intuit_more(pTHX_ char *s, char *e)
 
             /* Consecutive chars like [...12...] and [...ab...] are presumed
              * more likely to be character classes */
-            if (! first_time && un_char == last_un_char + 1)
+            if (! first_time && un_char == prev_un_char + 1)
                 weight += 5;
 
             /* But repeating a character inside a character class does nothing,
