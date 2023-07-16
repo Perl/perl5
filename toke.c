@@ -4670,8 +4670,12 @@ S_intuit_more(pTHX_ char *s, char *e)
 
             /* Consecutive chars like [...12...] and [...ab...] are presumed
              * more likely to be character classes */
-            if (! first_time && un_char == prev_un_char + 1)
+            if (    ! first_time
+                && (   NATIVE_TO_LATIN1(un_char)
+                    == NATIVE_TO_LATIN1(prev_un_char) + 1))
+            {
                 weight += 5;
+            }
 
             /* But repeating a character inside a character class does nothing,
              * like [aba], so less likely that someone makes such a class, more
