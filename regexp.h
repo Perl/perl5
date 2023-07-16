@@ -130,8 +130,19 @@ struct reg_code_blocks {
   regexp's data array based on the data item's type.
 */
 
+/* NOTE: There is a copy of this struct in the documentation in perlreapi.pod
+ *       if you make ANY changes please make sure they are ALSO made there.
+ */
 typedef struct regexp {
+    /*----------------------------------------------------------------------
+     * Fields required for compatibility with SV types
+     */
     _XPV_HEAD;
+
+    /*----------------------------------------------------------------------
+     * Operational fields
+     */
+
     const struct regexp_engine* engine; /* what engine created this regexp? */
     REGEXP *mother_re; /* what re is this a lightweight copy of? */
     HV *paren_names;   /* Optional hash of paren names */
@@ -149,7 +160,6 @@ typedef struct regexp {
     I32 *parno_to_logical_next;     /* map every physical parno to the next
                                        physical with the same logical id */
 
-    U32 extflags;      /* Flags used both externally and internally */
     SSize_t maxlen;    /* maximum possible number of chars in string to match */
     SSize_t minlen;    /* minimum possible number of chars in string to match */
     SSize_t minlenret; /* minimum possible number of chars in $& */
@@ -163,6 +173,8 @@ typedef struct regexp {
 
     void *pprivate;    /* Data private to the regex engine which
                         * created this object. */
+
+    U32 extflags;      /* Flags used both externally and internally */
     U32 intflags;      /* Engine Specific Internal flags */
 
     /*----------------------------------------------------------------------
@@ -170,10 +182,9 @@ typedef struct regexp {
      */
 
     U32 lastparen;           /* highest close paren matched ($+) */
+    U32 lastcloseparen;      /* last close paren matched ($^N) */
     regexp_paren_pair *offs; /* Array of offsets for (@-) and (@+) */
     char **recurse_locinput; /* used to detect infinite recursion, XXX: move to internal */
-    U32 lastcloseparen;      /* last close paren matched ($^N) */
-
 
     /*---------------------------------------------------------------------- */
 
@@ -192,8 +203,9 @@ typedef struct regexp {
     SSize_t suboffset;  /* byte offset of subbeg from logical start of str */
     SSize_t subcoffset; /* suboffset equiv, but in chars (for @-/@+) */
 
-    /*---------------------------------------------------------------------- */
-
+    /*----------------------------------------------------------------------
+     * More Operational fields
+     */
 
     CV *qr_anoncv;      /* the anon sub wrapped round qr/(?{..})/ */
 } regexp;
