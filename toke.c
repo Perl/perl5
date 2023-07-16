@@ -4477,6 +4477,12 @@ S_intuit_more(pTHX_ char *s, char *e)
 {
     PERL_ARGS_ASSERT_INTUIT_MORE;
 
+    /* This function has been mostly untouched for a long time, due to its,
+     * 'scariness', and lack of comments.  khw has gone through and done some
+     * cleanup, while finding various instances of problematic behavior.
+     * Rather than change this base-level function immediately, khw has added
+     * commentary to those areas. */
+
     /* If recursed within brackets, there is more to the expression */
     if (PL_lex_brackets)
         return TRUE;
@@ -4510,7 +4516,12 @@ S_intuit_more(pTHX_ char *s, char *e)
         return TRUE;
 
     /* In a pattern, so maybe we have {n,m}, in which case, there isn't more to
-     * the expression. */
+     * the expression.
+     *
+     * khw: This assumes that anything matching regcurly is a character class.
+     * The syntax of regcurly has been loosened since this function was
+     * written, and regcurly never required a comma, as in {0}.  Probably it is
+     * ok as-is */
     if (s[0] == '{') {
         if (regcurly(s, e, NULL)) {
             return FALSE;
@@ -4526,7 +4537,8 @@ S_intuit_more(pTHX_ char *s, char *e)
     if (s[0] == ']' || s[0] == '^')
         return FALSE;
 
-    /* Find matching ']' */
+    /* Find matching ']'.  khw: This means any s[1] below is guaranteed to
+     * exist */
     const char * const send = (char *) memchr(s, ']', e - s);
     if (! send)		/* has to be an expression */
         return TRUE;
@@ -4537,7 +4549,15 @@ S_intuit_more(pTHX_ char *s, char *e)
         return TRUE;
     }
 
-    /* this is terrifying, and it mostly works.  See GH #16478 */
+    /* this is terrifying, and it mostly works.  See GH #16478.
+     *
+     * khw: That ticket shows that the heuristics here get things wrong.  That
+     * most of the weights are divisible by 5 indicates that not a lot of
+     * tuning was done, and that the values are fairly arbitrary.  Especially
+     * problematic are when all characters in the construct are numeric.  We
+     * have [89] always resolving to a subscript, though that could well be a
+     * character class that is related to finding non-octals.  And [100] is a
+     * character class when it could well be a subscript. */
 
     int weight;
 
@@ -4609,10 +4629,12 @@ S_intuit_more(pTHX_ char *s, char *e)
             if (s[1]) {
                 if (memCHRs("wds]", s[1]))
                     weight += 100;  /* \w \d \s => strongly charclass */
+                    /* khw: Why not \W \D \S \h \v, etc as well? */
                 else if (seen[(U8)'\''] || seen[(U8)'"'])
                     weight += 1;    /* \' => mildly charclass */
                 else if (memCHRs("abcfnrtvx", s[1]))
                     weight += 40;   /* \n, etc => charclass */
+                    /* khw: Why not \e etc as well? */
                 else if (isDIGIT(s[1])) {
                     weight += 40;   /* \123 => charclass */
                     while (s[1] && isDIGIT(s[1]))
@@ -4625,7 +4647,10 @@ S_intuit_more(pTHX_ char *s, char *e)
 
           case '-':
             /* If it is something like '-\', it is more likely to be a
-             * character class */
+             * character class.
+             *
+             * khw: The rest of the conditionals in this 'case' really should
+             * be subject to an 'else' of this condition */
             if (s[1] == '\\')
                 weight += 50;
 
@@ -4637,7 +4662,10 @@ S_intuit_more(pTHX_ char *s, char *e)
 
             /* If it is something like '-Z' or '-7' (for octal) or '-9' it
              * is more likely to be a character class. '~' is the final ASCII
-             * graphic, so '-~' would be the end of a range of graphics. */
+             * graphic, so '-~' would be the end of a range of graphics.
+             *
+             * khw: Having [-z] really doesn't imply what the comments above
+             * indicate, so this should only be tested when '! first_time' */
             if (memCHRs("zZ79~", s[1]))
                 weight += 30;
 
@@ -4666,6 +4694,8 @@ S_intuit_more(pTHX_ char *s, char *e)
                  * character class */
                 if (keyword(d, s - d, 0))
                     weight -= 150;
+
+                /* khw: Should those alphas be marked as seen? */
             }
 
             /* Consecutive chars like [...12...] and [...ab...] are presumed
@@ -4685,6 +4715,15 @@ S_intuit_more(pTHX_ char *s, char *e)
             break;
         }   /* End of switch */
 
+        /* khw: 'seen' is declared as a char.  This ++ can cause it to wrap.
+         * This gives different results with compilers for which a plain 'char'
+         * is actually unsigned, versus those where it is signed.  I believe it
+         * is undefined behavior to wrap a 'signed'.  I think it should be
+         * instead declared an unsigned int to make the chances of wrapping
+         * essentially zero.
+         *
+         * And I believe that extra backslashes are different from other
+         * repeated characters. */
         seen[un_char]++;
     }   /* End of loop through each character of the construct */
 
