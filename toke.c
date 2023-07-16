@@ -4548,7 +4548,7 @@ S_intuit_more(pTHX_ char *s, char *e)
     }
 
     /* Unsigned version of current character */
-    unsigned char un_char = 255;
+    unsigned char un_char = 0;
 
     /* Keep track of how many multiple occurrences of the same character there
      * are */
@@ -4556,7 +4556,8 @@ S_intuit_more(pTHX_ char *s, char *e)
     Zero(seen, 256, char);
 
     /* Examine each character in the construct */
-    for (; s < send; s++) {
+    bool first_time = true;
+    for (; s < send; s++, first_time = false) {
         unsigned char last_un_char = un_char;
         un_char = (unsigned char)*s;
         switch (*s) {
@@ -4602,7 +4603,6 @@ S_intuit_more(pTHX_ char *s, char *e)
             break;
 
           case '\\':
-            un_char = 254;
             if (s[1]) {
                 if (memCHRs("wds]", s[1]))
                     weight += 100;  /* \w \d \s => strongly charclass */
@@ -4629,7 +4629,7 @@ S_intuit_more(pTHX_ char *s, char *e)
             /* If it is something like 'a-' or '0-', it is more likely to
              * be a character class. '!' is the first ASCII graphic, so '!-'
              * would be the start of a range of graphics. */
-            if (memCHRs("aA01! ", last_un_char))
+            if (! first_time && memCHRs("aA01! ", last_un_char))
                 weight += 30;
 
             /* If it is something like '-Z' or '-7' (for octal) or '-9' it
@@ -4640,20 +4640,18 @@ S_intuit_more(pTHX_ char *s, char *e)
 
             /* If it is something like -1 or -$foo, it is more likely to be a
              * subscript.  */
-            if (   last_un_char == 255
-                && (isDIGIT(s[1]) || s[1] == '$'))
-            {
+            if (first_time && (isDIGIT(s[1]) || s[1] == '$')) {
                 weight -= 5;	/* cope with negative subscript */
             }
             break;
 
           default:
-            if (   ! isWORDCHAR(last_un_char)
-                &&   last_un_char != '$'
-                &&   last_un_char != '@'
-                &&   last_un_char != '&'
-                &&   isALPHA(*s)
-                &&   isALPHA(s[1]))
+            if (  (first_time || (  ! isWORDCHAR(last_un_char)
+                                  &&  last_un_char != '$'
+                                  &&  last_un_char != '@'
+                                  &&  last_un_char != '&'))
+                && isALPHA(*s)
+                && isALPHA(s[1]))
             {
                 /* Here it's \W (that isn't [$@&] ) followed immediately by two
                  * alphas in a row.  Accumulate all the consecutive alphas */
@@ -4669,7 +4667,7 @@ S_intuit_more(pTHX_ char *s, char *e)
 
             /* Consecutive chars like [...12...] and [...ab...] are presumed
              * more likely to be character classes */
-            if (un_char == last_un_char + 1)
+            if (! first_time && un_char == last_un_char + 1)
                 weight += 5;
 
             /* But repeating a character inside a character class does nothing,
