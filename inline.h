@@ -2150,7 +2150,7 @@ Perl_utf8_hop_back(const U8 *s, SSize_t off, const U8 *start)
     while (off++ && s > start) {
         do {
             s--;
-        } while (UTF8_IS_CONTINUATION(*s) && s > start);
+        } while (s > start && UTF8_IS_CONTINUATION(*s));
     }
 
     GCC_DIAG_IGNORE(-Wcast-qual)
