@@ -3573,7 +3573,7 @@ PerlIOStdio_set_ptrcnt(pTHX_ PerlIO *f, STDCHAR * ptr, SSize_t cnt)
          * problem is that one cannot know the signedness of char, and
          * more precisely the signedness of FILE._ptr.  The following
          * things have been tried, and they have all failed (across
-         * different compilers (remember that core needs to to build
+         * different compilers (remember that core needs to build
          * also with c++) and compiler options:
          *
          * - casting the RHS to (void*) -- works in *some* places

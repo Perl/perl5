@@ -248,7 +248,7 @@ static const char C_thousands_sep[] = "";
                              restore_toggled_locale_i(cat##_INDEX_, locale)
 
 /* On systems without LC_ALL, pretending it exists anyway simplifies things.
- * Choose a value for it that is very unlikely to to clash with any actual
+ * Choose a value for it that is very unlikely to clash with any actual
  * category */
 #  define FAKE_LC_ALL  PERL_INT_MIN
 
