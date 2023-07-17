@@ -2064,9 +2064,8 @@ start of the next character.
 
 C<off> must be non-negative.
 
-C<s> must be before or equal to C<end>.
-
 When moving forward it will not move beyond C<end>.
+If C<s> on input is equal to or beyond C<end>, C<end> is returned.
 
 Will not exceed this limit even if the string is not valid "UTF-8".
 
@@ -2082,19 +2081,24 @@ Perl_utf8_hop_forward(const U8 *s, SSize_t off, const U8 *end)
      * the bitops (especially ~) can create illegal UTF-8.
      * In other words: in Perl UTF-8 is not just for Unicode. */
 
-    assert(s <= end);
     assert(off >= 0);
+
+    if (UNLIKELY(s >= end)) {
+        GCC_DIAG_IGNORE(-Wcast-qual)
+        return (U8 *)end;
+        GCC_DIAG_RESTORE
+    }
 
     if (off && UNLIKELY(UTF8_IS_CONTINUATION(*s))) {
         /* Get to next non-continuation byte */
         do {
             s++;
         }
-        while (UTF8_IS_CONTINUATION(*s));
+        while (s < end && UTF8_IS_CONTINUATION(*s));
         off--;
     }
 
-    while (off--) {
+    while (off-- && s < end) {
         STRLEN skip = UTF8SKIP(s);
         if ((STRLEN)(end - s) <= skip) {
             GCC_DIAG_IGNORE(-Wcast-qual)
