@@ -2659,7 +2659,7 @@ start of the next character.
 
 C<off> must be non-negative.
 
-C<s> must be before or equal to C<end>.
+C<s> must be before or equal to C<end>.  If after, the function panics.
 
 When moving forward it will not move beyond C<end>.
 
@@ -2677,19 +2677,28 @@ Perl_utf8_hop_forward(const U8 *s, SSize_t off, const U8 *end)
      * the bitops (especially ~) can create illegal UTF-8.
      * In other words: in Perl UTF-8 is not just for Unicode. */
 
-    assert(s <= end);
     assert(off >= 0);
+
+    if (UNLIKELY(s >= end)) {
+        if (s == end) {
+            return (U8 *) end;
+        }
+
+        Perl_croak_nocontext("panic: Start of forward hop (0x%p) is %zd bytes"
+                             " beyond legal end position (0x%p)",
+                             s, 1 + s - end, end);
+    }
 
     if (off && UNLIKELY(UTF8_IS_CONTINUATION(*s))) {
         /* Get to next non-continuation byte */
         do {
             s++;
         }
-        while (UTF8_IS_CONTINUATION(*s));
+        while (s < end && UTF8_IS_CONTINUATION(*s));
         off--;
     }
 
-    while (off--) {
+    while (off-- && s < end) {
         STRLEN skip = UTF8SKIP(s);
         if ((STRLEN)(end - s) <= skip) {
             GCC_DIAG_IGNORE(-Wcast-qual)
