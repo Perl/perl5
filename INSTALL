@@ -6,7 +6,7 @@ designed to be readable as is.
 
 =head1 NAME
 
-INSTALL - Build and Installation guide for perl 5.
+INSTALL - Build and installation guide for Perl
 
 =head1 SYNOPSIS
 
@@ -20,7 +20,7 @@ production environments.  Fixes and new features are first carefully
 tested in development releases and only if they prove themselves to be
 worthy will they be migrated to the maintenance releases.
 
-The basic steps to build and install perl 5 on a Unix system with all
+The basic steps to build and install Perl on a Unix system with all
 the defaults are to run, from a freshly unpacked source tree:
 
 	sh Configure -de
@@ -32,19 +32,19 @@ Each of these is explained in further detail below.
 
 The above commands will install Perl to F</usr/local> (or some other
 platform-specific directory -- see the appropriate file in F<hints/>.)
-If that's not okay with you, you can run Configure interactively, by
-just typing "sh Configure" (without the -de args). You can also specify
-any prefix location by adding C<"-Dprefix='/some/dir'"> to Configure's args.
-To explicitly name the perl binary, use the command
-"make install PERLNAME=myperl".
+If that's not okay with you, you can run F<Configure> interactively, by
+just typing C<sh Configure> (without the C<-de> args). You can also specify any
+prefix location by adding C<"-Dprefix='/some/dir'"> to F<Configure>'s arguments.
+To name the F<perl> binary explicitly, use the command
+C<make install PERLNAME=myperl>. X<PERLNAME>
 
-Building perl from source requires an ANSI compliant C compiler.
+Building C<perl> from source requires an ANSI-compliant C compiler.
 C89 with a minimal subset of C99 features is required. Some other
 features available in C99 will be probed for and used when found.
 
 These options, and many more, are explained in further detail below.
 
-If you're building perl from a git repository, you should also consult
+If you're building C<perl> from a git repository, you should also consult
 the documentation in F<pod/perlgit.pod> for information on that special
 circumstance.
 
@@ -53,14 +53,14 @@ L<"Reporting Problems"> below.
 
 For information on what's new in this release, see the
 F<pod/perldelta.pod> file.  For more information about how to find more
-specific detail about changes, see the Changes file.
+specific detail about changes, see the F<Changes> file.
 
 =head1 DESCRIPTION
 
 This document is written in pod format as an easy way to indicate its
 structure.  The pod format is described in F<pod/perlpod.pod>, but you can
 read it as is with any pager or editor.  Headings and items are marked
-by lines beginning with '='.  The other mark-up used is
+by lines beginning with C<=>.  The other mark-up used is
 
     B<text>     embolden text, used for switches, programs or commands
     C<code>	literal code
@@ -71,7 +71,7 @@ Although most of the defaults are probably fine for most users,
 you should probably at least skim through this document before
 proceeding.
 
-In addition to this file, check if there is a README file specific to
+In addition to this file, check if there is a F<README> file specific to
 your operating system, since it may provide additional or different
 instructions for building Perl.  If there is a hint file for your
 system (in the F<hints/> directory) you might also want to read it
@@ -153,33 +153,33 @@ of perl are configured to fault C99.
 
 =back
 
-=head1 Run Configure
+=head1 Run F<Configure>
 
-Configure will figure out various things about your system.  Some
-things Configure will figure out for itself, other things it will ask
-you about.  To accept the default, just press RETURN.   The default is
+F<Configure> will figure out various things about your system.  Some
+things F<Configure> will figure out for itself, other things it will ask
+you about.  To accept the default, just press C<RETURN>.  The default is
 almost always okay.  It is normal for some things to be "NOT found",
-since Configure often searches for many different ways of performing
+since F<Configure> often searches for many different ways of performing
 the same function.
 
-At any Configure prompt, you can type  &-d  and Configure will use the
-defaults from then on.
+At any F<Configure> prompt, you can type  C<&-d> and F<Configure> will
+use the defaults from then on.
 
-After it runs, Configure will perform variable substitution on all the
-*.SH files and offer to run make depend.
+After it runs, F<Configure> will perform variable substitution on all the
+C<*.SH> files and offer to run C<make depend>.
 
-The results of a Configure run are stored in the config.sh and Policy.sh
-files.
+The results of a F<Configure> run are stored in the F<config.sh> and
+F<Policy.sh> files.
 
-=head2 Common Configure options
+=head2 Common F<Configure> options
 
-Configure supports a number of useful options.  Run
+F<Configure> supports a number of useful options.  Run:
 
 	Configure -h
 
 to get a listing.
 
-Many Configure switches are expressed as C<key=value> pairs, for example:
+Many F<Configure> switches are expressed as C<key=value> pairs, for example:
 
     -Dcc=clang
 
@@ -191,7 +191,7 @@ spaces.  In that case, the value needs to be quoted so as to delimit that
         -Doptimize="-O2 -pipe -fstack-protector -fno-strict-aliasing" \
         -Dusedevel
 
-Once Configure has run, you will be able to access configuration data via
+Once F<Configure> has run, you will be able to access configuration data via
 entries in the file F<config.sh>.
 
     config_arg0='./Configure'
@@ -202,18 +202,18 @@ entries in the file F<config.sh>.
     config_arg3='-Dusedevel'
 
 See the F<Porting/Glossary> file for a complete list of
-Configure variables you can set and their definitions.
+F<Configure> variables you can set and their definitions.
 
 =over 4
 
 =item C compiler
 
-To compile with gcc, if it's not the default compiler on your
+To compile with C<gcc>, if it's not the default compiler on your
 system, you should run
 
 	sh Configure -Dcc=gcc
 
-This is the preferred way to specify gcc (or any another alternative
+This is the preferred way to specify C<gcc> (or any another alternative
 compiler) so that the hints files can set appropriate defaults.
 
 =item Installation prefix
@@ -2336,32 +2336,34 @@ similar, you may be on a case-insensitive filesystems such as Mac's HFS+,
 and you should say "make install-all".  (This confusion is brought to you
 by the Perl distribution having a file called INSTALL.)
 
-=head2 Installing perl under different names
+=head2 Installing C<perl> under different names
+X<PERLNAME>
 
-If you want to install perl under a name other than "perl" (for example,
-when installing perl with special features enabled, such as debugging),
-indicate the alternate name on the "make install" line, such as:
+If you want to install C<perl> under a name other than F<perl> (for example,
+when installing C<perl> with special features enabled, such as debugging),
+indicate the alternate name on the C<make install> line, such as:
 
     make install PERLNAME=myperl
 
 You can separately change the base used for versioned names (like
-"perl5.8.9") by setting PERLNAME_VERBASE, like
+"perl5.8.9") by setting C<PERLNAME_VERBASE>, like
 
     make install PERLNAME=perl5 PERLNAME_VERBASE=perl
 
-This can be useful if you have to install perl as "perl5" (e.g. to avoid
-conflicts with an ancient version in /usr/bin supplied by your vendor).
-Without this the versioned binary would be called "perl55.8.8".
+This can be useful if you have to install C<perl> as F<perl5> (e.g. to avoid
+conflicts with an ancient version in F</usr/bin> supplied by your vendor).
+Without this, the versioned binary would be called F<perl55.8.8>.
 
 =head2 Installing perl under a different directory
+X<DESTDIR>
 
-You can install perl under a different destination directory by using
-the DESTDIR variable during C<make install>, with a command like
+You can install perl under a different destination directory by using the
+C<DESTDIR> environment variable during C<make install>, with a command like
 
 	make install DESTDIR=/tmp/perl5
 
-DESTDIR is automatically prepended to all the installation paths.  See
-the example in L<"DESTDIR"> above.
+C<DESTDIR> is automatically prepended to all the installation paths.
+See the example in L<"DESTDIR"> above.
 
 =head2 Installed files
 
