@@ -1345,7 +1345,18 @@ S_emulate_setlocale_i(pTHX_
              line, new_obj));
 
 #ifdef MULTIPLICITY
+
+    if (DEBUG_Lv_TEST) {
+        if (PL_cur_locale_obj != new_obj) {
+            PerlIO_printf(Perl_debug_log,
+                          "(%" LINE_Tf "): PL_cur_locale_obj"
+                          " was %p, now is %p\n",
+                          line, PL_cur_locale_obj, new_obj);
+        }
+    }
+
     PL_cur_locale_obj = new_obj;
+
 #endif
 
     /* We are done, except for updating our records (if the system doesn't keep
@@ -1419,6 +1430,11 @@ S_stdize_locale(pTHX_ const int category,
     const char * retval;
 
     PERL_ARGS_ASSERT_STDIZE_LOCALE;
+
+    DEBUG_Lv(PerlIO_printf(Perl_debug_log,
+                          "Entering stdize_locale(%d, '%s');"
+                          " called from %" LINE_Tf "\n",
+                          category, input_locale, caller_line));
 
     if (input_locale == NULL) {
         return NULL;
@@ -2913,6 +2929,16 @@ S_get_locale_string_utf8ness_i(pTHX_ const char * string,
      * use the current locale for the category specified by 'cat_index'.
      */
 
+    DEBUG_Lv(PerlIO_printf(Perl_debug_log,
+                           "Entering get_locale_string_utf8ness_i; locale=%s,"
+                           " index=%u(%s), string=%s, known_utf8=%d\n",
+                           locale, cat_index, category_names[cat_index],
+                           ((string)
+                            ?  _byte_dump_string((U8 *) string,
+                                                 strlen(string),
+                                                 0)
+                            : "nil"),
+                           known_utf8));
     if (string == NULL) {
         return UTF8NESS_NO;
     }
@@ -3034,6 +3060,9 @@ S_is_locale_utf8(pTHX_ const char * locale)
                            "found codeset=%s, is_utf8=%d\n", codeset, retval));
 
     Safefree(scratch_buffer);
+
+    DEBUG_Lv(PerlIO_printf(Perl_debug_log, "is_locale_utf8(%s) returning %d\n",
+                                                            locale, retval));
     return retval;
 
 #  endif
