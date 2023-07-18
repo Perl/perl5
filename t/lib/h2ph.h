@@ -116,6 +116,47 @@ typdef struct empty_struct {
 } // trailing C++-style comment should not force continuation
 #endif
 
+struct empty_struct {
+}; // trailing C++-style comment should not force continuation
+
+typedef struct {
+} empty_struct; // trailing C++-style comment should not force continuation
+
+struct n_struct {
+    int  n;
+    char c;
+}; // trailing C++-style comment should not force continuation
+
+typedef struct {
+    int  n;
+    char c;
+} n_typedef; // trailing C++-style comment should not force continuation
+
+union n_union {
+    int  n;
+    char c;
+}; // trailing C++-style comment should not force continuation
+
+typedef union {
+    int  n;
+    char c;
+} t_union; // trailing C++-style comment should not force continuation
+
+// Test removal of typedefs
+typedef unsigned int  __uint32_t;
+#define _UINT_32      (__uint32_t)0x12345678
+
+#define _EMPTY_S      (empty_struct)   other
+#define _EMPTY_S      (empty_struct*) &other
+#define N_STRUCT      (n_struct)       other
+#define N_STRUCT      (n_struct*)     &other
+#define TYPE_DEF      (n_typedef)      other
+#define TYPE_DEF      (n_typedef*)    &other
+#define N_UNION_      (n_union)        other
+#define N_UNION_      (n_union*)      &other
+#define T_UNION_      (t_union)        other
+#define T_UNION_      (t_union*)      &other
+
 /* comments (that look like string) inside enums... */
 
 enum {
