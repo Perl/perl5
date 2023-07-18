@@ -522,7 +522,17 @@ jobs:
       - run: git config --global core.autocrlf false
       - uses: actions/checkout@v3
       - name: Install mingw-64
-        uses: egor-tensin/setup-mingw@v2
+        run: |
+          mkdir C:\perl_ci && cd C:\perl_ci
+          curl -L https://github.com/brechtsanders/winlibs_mingw/releases/download/13.1.0-16.0.5-11.0.0-ucrt-r5/winlibs-x86_64-posix-seh-gcc-13.1.0-mingw-w64ucrt-11.0.0-r5.zip -o mingw.zip
+          $expected_hash = '418E8A0175640E617EC6F6639BCA8D3AEDDB6A108391EAF312D1351D19375958'
+          $file_hash = (Get-FileHash mingw.zip -Algorithm SHA256).Hash
+          if ($file_hash -ne $expected_hash) {
+            throw "Wrong hash. Got ${file_hash}, expected ${expected_hash}"
+          }
+          tar -xf mingw.zip && rm mingw.zip
+          copy mingw64\bin\mingw32-make.exe mingw64\bin\gmake.exe
+          echo 'C:\perl_ci\mingw64\bin' >> $env:GITHUB_PATH
       - name: Host perl -V
         run: |
           perl -V
@@ -532,7 +542,7 @@ jobs:
         shell: cmd
         run: |
           cd win32
-          gmake CCHOME=C:\ProgramData\chocolatey\lib\mingw\tools\install\mingw64 CFG=Debug -f GNUMakefile -j2
+          gmake CCHOME=C:\perl_ci\mingw64 CFG=Debug -f GNUMakefile -j2
       - name: Show Config
         shell: cmd
         run: |
@@ -543,7 +553,7 @@ jobs:
         run: |
           cd win32
           set HARNESS_OPTIONS=j2
-          gmake CCHOME=C:\ProgramData\chocolatey\lib\mingw\tools\install\mingw64 CFG=Debug -f GNUMakefile test
+          gmake CCHOME=C:\perl_ci\mingw64 CFG=Debug -f GNUMakefile test
 
   #                            _
   #   ___ _   _  __ ___      _(_)_ __
