@@ -380,6 +380,18 @@ while (defined (my $file = next_file())) {
                 $_ =~ s/\b\/\*[^*]*\*+([^\/*][^*]*\*+)*\///;
 	    }
 	    $isatype{$1} = 1 if /typedef[^\{]*(?:\{[^\}]*\}[^\{]*)*[^\{]*\W(\w+)\s*;\s*$/;
+	} elsif (/^(?:struct|union)/) {
+	    # Add typedefs to '%isatype' so we can eliminate them later...
+	    until( /(?:struct|union)\s+(?:\w+)\s*(?:\{[^\}]*\}[^\{]*)*[^\{]*\s*;\s*$/ ) {
+		last unless defined ($next = next_line($file));
+		chomp $next;
+		# We don't really care about the contents; we just want the name
+                $next =~ s/\b\/\/.*//;
+		$next =~ s/^\s*#.*//;
+		$_ .= $next;
+                $_ =~ s/\b\/\*[^*]*\*+([^\/*][^*]*\*+)*\///;
+	    }
+	    $isatype{$1} = 1 if /(?:struct|union)\s+(\w+)\s*(?:\{[^\}]*\}[^\{]*)*[^\{]*\s*;\s*$/;
 	}
     }
     $Is_converted{$file} = 1;
