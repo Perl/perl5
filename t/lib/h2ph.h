@@ -157,6 +157,12 @@ typedef unsigned int  __uint32_t;
 #define T_UNION_      (t_union)        other
 #define T_UNION_      (t_union*)      &other
 
+// Test "<header.h>" include paths
+#define __has_include(x) 0
+#if __has_include(<ptrcheck.h>)
+#include <ptrcheck.h>
+#endif
+
 /* comments (that look like string) inside enums... */
 
 enum {
