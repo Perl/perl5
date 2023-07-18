@@ -214,11 +214,6 @@ use File::Glob qw(:case);
             'bzip2-src/bzip2-cpp.patch',
             'bzip2-src/bzip2-unsigned.patch',
         ],
-        'CUSTOMIZED'   => [
-            # https://github.com/pmqs/Compress-Raw-Bzip2/issues/11
-            'Bzip2.xs',
-            'lib/Compress/Raw/Bzip.pm'
-        ],
     },
 
     'Compress::Raw::Zlib' => {
@@ -231,11 +226,6 @@ use File::Glob qw(:case);
             qw( t/000prereq.t
                 t/99pod.t
                 ),
-        ],
-        'CUSTOMIZED' => [
-            # https://github.com/pmqs/Compress-Raw-Zlib/issues/23
-            'lib/Compress/Raw/Zlib.pm',
-            'Zlib.xs'
         ],
     },
 
