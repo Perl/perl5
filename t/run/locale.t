@@ -354,6 +354,7 @@ EOF
 
         {
             open my $saved_stderr, ">&STDERR" or die "Can't dup STDERR: $!";
+            # Comment out the following line to get error output when running the test
             close STDERR;
 
             {
@@ -376,7 +377,7 @@ EOF
 EOF
                 "LANG is used if LC_ALL, LC_NUMERIC are invalid"))
             {
-                note "To see details change this .t, do not close STDERR";
+                note "To see details change '" . __FILE__ . "', to not close STDERR";
             }
             }
 
@@ -404,7 +405,7 @@ EOF
 EOF
                     'C locale is used if LC_ALL, LC_NUMERIC, LANG are invalid'))
                     {
-                        note "To see details change this .t, do not close STDERR";
+                        note "To see details change '" . __FILE__ . "', to not close STDERR";
                     }
                 }
             }
