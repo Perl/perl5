@@ -4,7 +4,7 @@ perlfaq4 - Data Manipulation
 
 =head1 VERSION
 
-version 5.20210520
+version 5.20230701
 
 =head1 DESCRIPTION
 
@@ -2201,10 +2201,9 @@ such as C<each()>.
 (contributed by brian d foy)
 
 To sort a hash, start with the keys. In this example, we give the list of
-keys to the sort function which then compares them ASCIIbetically (which
-might be affected by your locale settings). The output list has the keys
-in ASCIIbetical order. Once we have the keys, we can go through them to
-create a report which lists the keys in ASCIIbetical order.
+keys to the sort function which then compares them as strings. The output list
+has the keys in string order. Once we have the keys, we can go through them to
+create a report which lists the keys in string order:
 
     my @keys = sort { $a cmp $b } keys %hash;
 
@@ -2217,9 +2216,15 @@ comparing the keys, we can compute a value with them and use that
 value as the comparison.
 
 For instance, to make our report order case-insensitive, we use
-C<lc> to lowercase the keys before comparing them:
+C<fc> to safely lowercase the keys before comparing them:
 
-    my @keys = sort { lc $a cmp lc $b } keys %hash;
+    use v5.16;
+    my @keys = sort { fc($a) cmp fc($b) } keys %hash;
+
+Earlier versions of this answer used C<lc>, but that could give
+unexpected results with some Unicode strings. See L<perlfunc/fc>
+for the details. The Unicode::UCD module does the same thing for
+earlier perls.
 
 Note: if the computation is expensive or the hash has many elements,
 you may want to look at the Schwartzian Transform to cache the
@@ -2227,17 +2232,18 @@ computation results.
 
 If we want to sort by the hash value instead, we use the hash key
 to look it up. We still get out a list of keys, but this time they
-are ordered by their value.
+are ordered by their value:
 
     my @keys = sort { $hash{$a} <=> $hash{$b} } keys %hash;
 
 From there we can get more complex. If the hash values are the same,
-we can provide a secondary sort on the hash key.
+we can provide a secondary sort on the hash key:
 
+    use v5.16;
     my @keys = sort {
         $hash{$a} <=> $hash{$b}
             or
-        "\L$a" cmp "\L$b"
+        fc($a) cmp fc($b)
     } keys %hash;
 
 =head2 How can I always keep my hash sorted?
