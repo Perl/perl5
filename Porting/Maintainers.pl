@@ -827,8 +827,7 @@ use File::Glob qw(:case);
     },
 
     'Module::CoreList' => {
-        'DISTRIBUTION' => 'BINGOS/Module-CoreList-5.20230320.tar.gz',
-        'SYNCINFO'     => 'yorton on Tue Mar 21 11:46:02 2023',
+        'DISTRIBUTION' => 'BINGOS/Module-CoreList-5.20230520.tar.gz',
         'FILES'        => q[dist/Module-CoreList],
     },
 
