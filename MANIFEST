@@ -639,6 +639,7 @@ cpan/CPAN-Meta/t/repository.t
 cpan/CPAN-Meta/t/save-load.t
 cpan/CPAN-Meta/t/validator.t
 cpan/CPAN-Meta-Requirements/lib/CPAN/Meta/Requirements.pm
+cpan/CPAN-Meta-Requirements/lib/CPAN/Meta/Requirements/Range.pm
 cpan/CPAN-Meta-Requirements/t/accepts.t
 cpan/CPAN-Meta-Requirements/t/bad_version_hook.t
 cpan/CPAN-Meta-Requirements/t/basic.t
