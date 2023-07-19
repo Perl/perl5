@@ -10,7 +10,7 @@ use warnings ;
 use bytes ;
 our ($VERSION, $XS_VERSION, @ISA, @EXPORT, %EXPORT_TAGS, @EXPORT_OK, $AUTOLOAD, %DEFLATE_CONSTANTS, @DEFLATE_CONSTANTS);
 
-$VERSION = '2.204_001';
+$VERSION = '2.205';
 $XS_VERSION = $VERSION;
 $VERSION = eval $VERSION;
 
@@ -1282,7 +1282,7 @@ simpler.
             last OUTER
                 unless $status == Z_OK || $status == Z_BUF_ERROR ;
         }
-        while ($status == Z_OK && length $input);
+        while length $input;
     }
 
     die "inflation failed\n"
@@ -1453,7 +1453,7 @@ Below is typical code that shows how to use C<LimitOutput>.
             last OUTER
                 unless $status == Z_OK || $status == Z_BUF_ERROR ;
         }
-        while ($status == Z_OK && length $input);
+        while length $input;
     }
 
     die "inflation failed\n"

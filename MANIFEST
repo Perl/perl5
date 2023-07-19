@@ -435,8 +435,8 @@ cpan/Compress-Raw-Zlib/t/02zlib.t			Compress::Raw::Zlib
 cpan/Compress-Raw-Zlib/t/07bufsize.t			Compress::Raw::Zlib
 cpan/Compress-Raw-Zlib/t/09limitoutput.t		Compress::Raw::Zlib
 cpan/Compress-Raw-Zlib/t/18lvalue.t			Compress::Raw::Zlib
-cpan/Compress-Raw-Zlib/t/19nonpv.t
-cpan/Compress-Raw-Zlib/t/compress/CompTestUtils.pm
+cpan/Compress-Raw-Zlib/t/19nonpv.t			Test file related to Compress::Raw::Zlib
+cpan/Compress-Raw-Zlib/t/compress/CompTestUtils.pm	Module related to Compress::Raw::Zlib
 cpan/Compress-Raw-Zlib/typemap				Compress::Raw::Zlib
 cpan/Compress-Raw-Zlib/Zlib.xs				Compress::Raw::Zlib
 cpan/Compress-Raw-Zlib/zlib-src/adler32.c		Compress::Raw::Zlib

@@ -951,6 +951,17 @@ ZLIB_VERNUM()
 uLong
 Zip_zlibCompileFlags()
 
+const char*
+ZLIBNG_VER_STATUS()
+    CODE:
+#ifdef ZLIBNG_VER_STATUS
+        RETVAL = STRINGIFY(ZLIBNG_VER_STATUS);
+#else
+        RETVAL = "0";
+#endif
+    OUTPUT:
+        RETVAL
+
 MODULE = Compress::Raw::Zlib	PACKAGE = Compress::Raw::Zlib	PREFIX = Zip_
 
 #define Zip_adler32(buf, adler) CRZ_adler32(adler, buf, (uInt)len)

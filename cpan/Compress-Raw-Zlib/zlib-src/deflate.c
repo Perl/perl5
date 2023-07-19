@@ -51,6 +51,13 @@
 
 #include "deflate.h"
 
+/*
+  Perl-specific change to allow building with C++
+  The 'register' keyword not allowed from C++17
+  see https://github.com/pmqs/Compress-Raw-Zlib/issues/23
+*/
+#define register
+
 const char deflate_copyright[] =
    " deflate 1.2.13 Copyright 1995-2022 Jean-loup Gailly and Mark Adler ";
 /*
@@ -1279,9 +1286,9 @@ local uInt longest_match(
     IPos cur_match)
 {
     unsigned chain_length = s->max_chain_length;/* max hash chain length */
-    Bytef *scan = s->window + s->strstart; /* current string */
-    Bytef *match;                      /* matched string */
-    int len;                           /* length of current match */
+    register Bytef *scan = s->window + s->strstart; /* current string */
+    register Bytef *match;                      /* matched string */
+    register int len;                           /* length of current match */
     int best_len = (int)s->prev_length;         /* best match length so far */
     int nice_match = s->nice_match;             /* stop if match long enough */
     IPos limit = s->strstart > (IPos)MAX_DIST(s) ?
@@ -1296,13 +1303,13 @@ local uInt longest_match(
     /* Compare two bytes at a time. Note: this is not always beneficial.
      * Try with and without -DUNALIGNED_OK to check.
      */
-    Bytef *strend = s->window + s->strstart + MAX_MATCH - 1;
-    ush scan_start = *(ushf*)scan;
-    ush scan_end   = *(ushf*)(scan + best_len - 1);
+    register Bytef *strend = s->window + s->strstart + MAX_MATCH - 1;
+    register ush scan_start = *(ushf*)scan;
+    register ush scan_end   = *(ushf*)(scan + best_len - 1);
 #else
-    Bytef *strend = s->window + s->strstart + MAX_MATCH;
-    Byte scan_end1  = scan[best_len - 1];
-    Byte scan_end   = scan[best_len];
+    register Bytef *strend = s->window + s->strstart + MAX_MATCH;
+    register Byte scan_end1  = scan[best_len - 1];
+    register Byte scan_end   = scan[best_len];
 #endif
 
     /* The code is optimized for HASH_BITS >= 8 and MAX_MATCH-2 multiple of 16.
@@ -1429,10 +1436,10 @@ local uInt longest_match(
     deflate_state *s,
     IPos cur_match)
 {
-    Bytef *scan = s->window + s->strstart; /* current string */
-    Bytef *match;                       /* matched string */
-    int len;                           /* length of current match */
-    Bytef *strend = s->window + s->strstart + MAX_MATCH;
+    register Bytef *scan = s->window + s->strstart; /* current string */
+    register Bytef *match;                       /* matched string */
+    register int len;                           /* length of current match */
+    register Bytef *strend = s->window + s->strstart + MAX_MATCH;
 
     /* The code is optimized for HASH_BITS >= 8 and MAX_MATCH-2 multiple of 16.
      * It is easy to get rid of this optimization if necessary.
