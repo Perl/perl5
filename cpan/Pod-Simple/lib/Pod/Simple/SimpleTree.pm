@@ -1,11 +1,13 @@
+
+require 5;
 package Pod::Simple::SimpleTree;
 use strict;
-use warnings;
 use Carp ();
 use Pod::Simple ();
-our $VERSION = '3.45';
+use vars qw( $ATTR_PAD @ISA $VERSION $SORT_ATTRS);
+$VERSION = '3.43';
 BEGIN {
-  our @ISA = ('Pod::Simple');
+  @ISA = ('Pod::Simple');
   *DEBUG = \&Pod::Simple::DEBUG unless defined &DEBUG;
 }
 
@@ -59,7 +61,7 @@ __END__
 
 =head1 NAME
 
-Pod::Simple::SimpleTree -- parse Pod into a simple parse tree
+Pod::Simple::SimpleTree -- parse Pod into a simple parse tree 
 
 =head1 SYNOPSIS
 
@@ -141,7 +143,7 @@ pod-people-subscribe@perl.org to subscribe.
 
 This module is managed in an open GitHub repository,
 L<https://github.com/perl-pod/pod-simple/>. Feel free to fork and contribute, or
-to clone L<https://github.com/perl-pod/pod-simple.git> and send patches!
+to clone L<git://github.com/perl-pod/pod-simple.git> and send patches!
 
 Patches against Pod::Simple are welcome. Please send bug reports to
 <bug-pod-simple@rt.cpan.org>.

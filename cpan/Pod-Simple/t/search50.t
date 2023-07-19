@@ -1,11 +1,18 @@
+BEGIN {
+    if( $ENV{PERL_CORE} ) {
+        chdir 't';
+        use File::Spec;
+        @INC = (File::Spec->rel2abs('../lib') );
+    }
+}
 use strict;
 use warnings;
-
-use Test::More;
 
 #sub Pod::Simple::Search::DEBUG () {5};
 
 use Pod::Simple::Search;
+use Test::More;
+BEGIN { plan 'no_plan' }
 
 # print "#  Test the scanning of the whole of \@INC ...\n";
 
@@ -45,7 +52,7 @@ ok $found;
 my $nopod = not exists ($name2where->{'strict'});
 SKIP: {
   skip 'No Pod for strict.pm', 3 if $nopod;
-  like $name2where->{'strict'}, qr/strict\.(pod|pm)$/;
+  like $name2where->{'strict'}, '/strict\.(pod|pm)$/';
   ok grep( m/strict\.(pod|pm)/, keys %$where2name);
 
   ok my $strictpath = $name2where->{'strict'}, 'Should have strict path';
@@ -81,4 +88,8 @@ while (my ($testmod, $testpath) = each %{ $name2where }) {
   }
 }
 
-done_testing;
+pass;
+# print "# Byebye from ", __FILE__, "\n";
+# print "# @INC\n";
+__END__
+

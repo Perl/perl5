@@ -1,11 +1,21 @@
 # Testing the LinkSection class
+BEGIN {
+    if($ENV{PERL_CORE}) {
+        chdir 't';
+        @INC = '../lib';
+    }
+}
+
 ### Test the basic sanity of the link-section treelet class
 
 use strict;
 use warnings;
-use Test::More tests => 6;
+use Test;
+BEGIN { plan tests => 8 };
 
 #use Pod::Simple::Debug (6);
+
+ok 1;
 
 use Pod::Simple::LinkSection;
 use Pod::Simple::BlackBox; # for its pretty()
@@ -23,13 +33,13 @@ my $treelet = Pod::Simple::LinkSection->new($bare_treelet);
 
 # Make sure they're not the same
 
-is ref($bare_treelet), 'ARRAY';
-is ref($treelet), 'Pod::Simple::LinkSection';
+ok ref($bare_treelet), 'ARRAY';
+ok ref($treelet), 'Pod::Simple::LinkSection';
 
 print "# Testing stringification...\n";
 
-is $treelet->stringify, 'abc';  # explicit
-is join('', $treelet),  'abc';  # implicit
+ok $treelet->stringify, 'abc';  # explicit
+ok join('', $treelet),  'abc';  # implicit
 
 
 print "# Testing non-coreferentiality...\n";
@@ -50,7 +60,13 @@ print "# Testing non-coreferentiality...\n";
   }
   # These will fail if $treelet and $bare_treelet are coreferential,
   # since we just conspicuously nuked $bare_treelet
-
-  is $treelet->stringify, 'abc';  # explicit
-  is join('', $treelet),  'abc';  # implicit
+  
+  ok $treelet->stringify, 'abc';  # explicit
+  ok join('', $treelet),  'abc';  # implicit
 }
+
+
+print "# Byebye...\n";
+ok 1;
+print "# --- Done with ", __FILE__, " --- \n";
+

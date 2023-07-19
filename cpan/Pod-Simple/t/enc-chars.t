@@ -2,10 +2,12 @@
 # =encoding line should be ignored
 # utf8 characters should come through unscathed
 
-use strict;
-use warnings;
-
 BEGIN {
+    if($ENV{PERL_CORE}) {
+        chdir 't';
+        @INC = '../lib';
+    }
+
     use Config;
     if ($Config::Config{'extensions'} !~ /\bEncode\b/) {
       print "1..0 # Skip: Encode was not built\n";
@@ -13,7 +15,10 @@ BEGIN {
     }
 }
 
-use Test::More tests => 5;
+use strict;
+use warnings;
+use Test;
+BEGIN { plan tests => 5 };
 
 use Pod::Simple::DumpAsXML;
 use Pod::Simple::XMLOutStream;
@@ -72,5 +77,7 @@ Confirm that the parser detects multiple encodings and complains.
 });
 
 # Should have an error.
-like($output, qr/POD ERRORS/);
-like($output, qr/Cannot have multiple =encoding directives/);
+ok($output =~ /POD ERRORS/);
+ok($output =~ /Cannot have multiple =encoding directives/);
+
+exit;

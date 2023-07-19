@@ -1,10 +1,18 @@
+BEGIN {
+    if($ENV{PERL_CORE}) {
+        chdir 't';
+        @INC = '../lib';
+    }
+}
+
 use strict;
 use warnings;
-use Test::More tests => 8;
 
 #sub Pod::Simple::Search::DEBUG () {5};
 
 use Pod::Simple::Search;
+use Test;
+BEGIN { plan tests => 10 }
 
 print "# ", __FILE__,
  ": Testing limit_glob ...\n";
@@ -16,16 +24,40 @@ $x->inc(0);
 $x->shadows(1);
 
 use File::Spec;
-use Cwd ();
-use File::Basename ();
+use Cwd;
+my $cwd = cwd();
+print "# CWD: $cwd\n";
+my $dir;
+sub source_path {
+    my $file = shift;
+    if ($ENV{PERL_CORE}) {
+        my $updir = File::Spec->updir;
+        $dir = File::Spec->catdir($updir, 'lib', 'Pod', 'Simple', 't');
+        return File::Spec->catdir ($dir, $file);
+    } else {
+        return $file;
+    }
+}
 
-my $t_dir = File::Basename::dirname(Cwd::abs_path(__FILE__));
+my($here1, $here2, $here3);
 
-my $here1 = File::Spec->catdir($t_dir, 'testlib1');
-my $here2 = File::Spec->catdir($t_dir, 'testlib2');
-my $here3 = File::Spec->catdir($t_dir, 'testlib3');
+if(        -e ($here1 = source_path( 'testlib1'      ))) {
+  die "But where's $here2?"
+    unless -e ($here2 = source_path( 'testlib2'));
+  die "But where's $here3?"
+    unless -e ($here3 = source_path( 'testlib3'));
 
+} elsif(   -e ($here1 = File::Spec->catdir($cwd, 't', 'testlib1'      ))) {
+  die "But where's $here2?"
+    unless -e ($here2 = File::Spec->catdir($cwd, 't', 'testlib2'));
+  die "But where's $here3?"
+    unless -e ($here3 = File::Spec->catdir($cwd, 't', 'testlib3'));
+
+} else {
+  die "Can't find the test corpora: $dir";
+}
 print "# OK, found the test corpora\n#  as $here1\n# and $here2\n# and $here3\n#\n";
+ok 1;
 
 print $x->_state_as_string;
 #$x->verbose(12);
@@ -44,44 +76,44 @@ $p =~ s/, +/,\n/g;
 $p =~ s/^/#  /mg;
 print $p;
 
-SKIP: {
-    skip '-- case may or may not be preserved', 2
-        if $^O eq 'VMS';
-
-    {
-        my $names = join "|", sort keys %$name2where;
-        is $names,
-            "squaa::Glunk|squaa::Vliff|squaa::Wowo";
-    }
-
-    {
-        my $names = join "|", sort values %$where2name;
-        is $names,
-            "squaa::Glunk|squaa::Vliff|squaa::Vliff|squaa::Vliff|squaa::Wowo";
-    }
+{
+my $names = join "|", sort keys %$name2where;
+skip $^O eq 'VMS' ? '-- case may or may not be preserved' : 0, 
+      $names, 
+      "squaa::Glunk|squaa::Vliff|squaa::Wowo";
 }
+
+{
+my $names = join "|", sort values %$where2name;
+skip $^O eq 'VMS' ? '-- case may or may not be preserved' : 0, 
+     $names, 
+     "squaa::Glunk|squaa::Vliff|squaa::Vliff|squaa::Vliff|squaa::Wowo";
 
 my %count;
 for(values %$where2name) { ++$count{$_} };
 #print pretty(\%count), "\n\n";
 delete @count{ grep $count{$_} < 2, keys %count };
 my $shadowed = join "|", sort keys %count;
-is $shadowed, "squaa::Vliff";
+ok $shadowed, "squaa::Vliff";
 
 sub thar { print "# Seen $_[0] :\n", map "#  {$_}\n", sort grep $where2name->{$_} eq $_[0],keys %$where2name; return; }
 
-is $count{'squaa::Vliff'}, 3;
+ok $count{'squaa::Vliff'}, 3;
 thar 'squaa::Vliff';
+}
 
 
 ok ! $name2where->{'squaa'};  # because squaa.pm isn't squaa::*
 
-like( ($name2where->{'squaa::Vliff'} || 'huh???'), qr/[^\^]testlib1/ );
+ok( ($name2where->{'squaa::Vliff'} || 'huh???'), '/[^\^]testlib1/' );
 
-SKIP: {
-    skip '-- case may or may not be preserved', 1
-        if $^O eq 'VMS';
+skip $^O eq 'VMS' ? '-- case may or may not be preserved' : 0,
+    ($name2where->{'squaa::Wowo'}  || 'huh???'), 
+    '/testlib2/';
 
-    like +($name2where->{'squaa::Wowo'}  || 'huh???'),
-        qr/testlib2/;
-}
+
+print "# OK, bye from ", __FILE__, "\n";
+ok 1;
+
+__END__
+

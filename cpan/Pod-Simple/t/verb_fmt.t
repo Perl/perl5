@@ -1,9 +1,12 @@
 # Testing verbatim formatted sections
 use strict;
 use warnings;
-use Test::More tests => 60;
+use Test;
+BEGIN { plan tests => 62 };
 
 #use Pod::Simple::Debug (6);
+
+ok 1;
 
 use Pod::Simple::DumpAsXML;
 use Pod::Simple::XMLOutStream;
@@ -23,10 +26,23 @@ print "# Testing VerbatimFormatted...\n";
     # "^" to mean bold, "/" to mean underline, and "%" to mean bold italic.
     # Example:
     #   What do you want?  i like pie. [or whatever]
-    # #:^^^^^^^^^^^^^^^^^              /////////////
+    # #:^^^^^^^^^^^^^^^^^              /////////////         
 
 
-&is( Pod::Simple::XMLOutStream->_out(\&with_vf,
+&ok( Pod::Simple::XMLOutStream->_out(\&with_vf,
+q{=pod
+
+  What do you want?  i like pie. [or whatever]
+#:^^^^^^^^^^^^^^^^^              /////////////         
+  Hooboy.
+
+=cut
+
+}) => qq{<Document><VerbatimFormatted\nxml:space="preserve">  <VerbatimB>What do you want?</VerbatimB>  i like pie. <VerbatimI>[or whatever]</VerbatimI>\n  Hooboy.</VerbatimFormatted></Document>}
+);
+
+
+&ok( Pod::Simple::XMLOutStream->_out(\&with_vf,
 q{=pod
 
   What do you want?  i like pie. [or whatever]
@@ -39,20 +55,7 @@ q{=pod
 );
 
 
-&is( Pod::Simple::XMLOutStream->_out(\&with_vf,
-q{=pod
-
-  What do you want?  i like pie. [or whatever]
-#:^^^^^^^^^^^^^^^^^              /////////////
-  Hooboy.
-
-=cut
-
-}) => qq{<Document><VerbatimFormatted\nxml:space="preserve">  <VerbatimB>What do you want?</VerbatimB>  i like pie. <VerbatimI>[or whatever]</VerbatimI>\n  Hooboy.</VerbatimFormatted></Document>}
-);
-
-
-&is( Pod::Simple::XMLOutStream->_out(\&with_vf,
+&ok( Pod::Simple::XMLOutStream->_out(\&with_vf,
 q{=pod
 
   What do you want?  i like pie. [or whatever]
@@ -64,7 +67,7 @@ q{=pod
 );
 
 
-&is( Pod::Simple::XMLOutStream->_out(\&with_vf,
+&ok( Pod::Simple::XMLOutStream->_out(\&with_vf,
 q{=pod
 
   What do you want?  i like pie. [or whatever]
@@ -73,7 +76,7 @@ q{=pod
 );
 
 
-&is( Pod::Simple::XMLOutStream->_out(\&with_vf,
+&ok( Pod::Simple::XMLOutStream->_out(\&with_vf,
 q{=pod
 
   What do you want?  i like pie. [or whatever]
@@ -82,7 +85,7 @@ q{=pod
 );
 
 
-&is( Pod::Simple::XMLOutStream->_out(\&with_vf,
+&ok( Pod::Simple::XMLOutStream->_out(\&with_vf,
 q{=pod
 
   What do you want?  i like pie. [or whatever]
@@ -91,7 +94,7 @@ q{=pod
 );
 
 
-&is( Pod::Simple::XMLOutStream->_out(\&with_vf,
+&ok( Pod::Simple::XMLOutStream->_out(\&with_vf,
 q{=pod
 
   What do you want?  i like pie. [or whatever]
@@ -101,7 +104,7 @@ q{=pod
 );
 
 
-&is( Pod::Simple::XMLOutStream->_out(\&with_vf,
+&ok( Pod::Simple::XMLOutStream->_out(\&with_vf,
 # with a tab:
 q{=pod
 
@@ -113,7 +116,7 @@ q{=pod
 
 
 # Now testing the % too:
-&is( Pod::Simple::XMLOutStream->_out(\&with_vf,
+&ok( Pod::Simple::XMLOutStream->_out(\&with_vf,
 q{=pod
 
   What do you want?  i like pie. [or whatever]
@@ -122,7 +125,7 @@ q{=pod
 );
 
 
-&is( Pod::Simple::XMLOutStream->_out(\&with_vf,
+&ok( Pod::Simple::XMLOutStream->_out(\&with_vf,
 q{=pod
 
    Hooboy!
@@ -144,39 +147,39 @@ q{=pod
 print "# Now running some tests adapted from verbatims.t...\n#\n#\n";
 
 print "# Without VerbatimFormatted...\n";
-&is(  e "", "" );
-&is(  e "\n", "", );
-&is(  e "\n=pod\n\n foo bar baz", "\n=pod\n\n foo bar baz" );
-&is(  e "\n=pod\n\n foo bar baz", "\n=pod\n\n foo bar baz\n" );
+&ok(  e "", "" );
+&ok(  e "\n", "", );
+&ok(  e "\n=pod\n\n foo bar baz", "\n=pod\n\n foo bar baz" );
+&ok(  e "\n=pod\n\n foo bar baz", "\n=pod\n\n foo bar baz\n" );
 print "# With VerbatimFormatted...\n";
-&is( ev "", "" );
-&is( ev "\n", "", );
-&is( ev "\n=pod\n\n foo bar baz", "\n=pod\n\n foo bar baz" );
-&is( ev "\n=pod\n\n foo bar baz", "\n=pod\n\n foo bar baz\n" );
+&ok( ev "", "" );
+&ok( ev "\n", "", );
+&ok( ev "\n=pod\n\n foo bar baz", "\n=pod\n\n foo bar baz" );
+&ok( ev "\n=pod\n\n foo bar baz", "\n=pod\n\n foo bar baz\n" );
 
 
 print "# Now testing via XMLOutStream without VerbatimFormatted...\n";
 
-is( Pod::Simple::XMLOutStream->_out(\&without_vf, "\n=pod\n\n foo bar baz\n"),
+ok( Pod::Simple::XMLOutStream->_out(\&without_vf, "\n=pod\n\n foo bar baz\n"),
   qq{<Document><Verbatim\nxml:space="preserve"> foo bar baz</Verbatim></Document>}
 );
-is( Pod::Simple::XMLOutStream->_out(\&without_vf, "\n=pod\n\n foo bar baz\n quux\n"),
+ok( Pod::Simple::XMLOutStream->_out(\&without_vf, "\n=pod\n\n foo bar baz\n quux\n"),
   qq{<Document><Verbatim\nxml:space="preserve"> foo bar baz\n quux</Verbatim></Document>}
 );
-is( Pod::Simple::XMLOutStream->_out(\&without_vf, "\n=pod\n\n foo bar baz\nquux\n"),
+ok( Pod::Simple::XMLOutStream->_out(\&without_vf, "\n=pod\n\n foo bar baz\nquux\n"),
   qq{<Document><Verbatim\nxml:space="preserve"> foo bar baz\nquux</Verbatim></Document>}
 );
 
 print "# Contiguous verbatims...\n";
-is( Pod::Simple::XMLOutStream->_out(\&without_vf, "\n=pod\n\n foo bar baz\n\n quux\n"),
+ok( Pod::Simple::XMLOutStream->_out(\&without_vf, "\n=pod\n\n foo bar baz\n\n quux\n"),
   qq{<Document><Verbatim\nxml:space="preserve"> foo bar baz\n\n quux</Verbatim></Document>}
 );
-is( Pod::Simple::XMLOutStream->_out(\&without_vf, "\n=pod\n\n foo bar baz\n\n\n quux\n"),
+ok( Pod::Simple::XMLOutStream->_out(\&without_vf, "\n=pod\n\n foo bar baz\n\n\n quux\n"),
   qq{<Document><Verbatim\nxml:space="preserve"> foo bar baz\n\n\n quux</Verbatim></Document>}
 );
 
 print "# Testing =cut...\n";
-is( Pod::Simple::XMLOutStream->_out(\&without_vf, "\n=pod\n\n foo bar baz\n=cut\n quux\n"),
+ok( Pod::Simple::XMLOutStream->_out(\&without_vf, "\n=pod\n\n foo bar baz\n=cut\n quux\n"),
   qq{<Document><Verbatim\nxml:space="preserve"> foo bar baz</Verbatim></Document>}
 );
 
@@ -185,26 +188,26 @@ is( Pod::Simple::XMLOutStream->_out(\&without_vf, "\n=pod\n\n foo bar baz\n=cut\
 
 print "#\n# Now retesting with VerbatimFormatted...\n";
 
-is( Pod::Simple::XMLOutStream->_out(\&with_vf, "\n=pod\n\n foo bar baz\n"),
+ok( Pod::Simple::XMLOutStream->_out(\&with_vf, "\n=pod\n\n foo bar baz\n"),
   qq{<Document><VerbatimFormatted\nxml:space="preserve"> foo bar baz</VerbatimFormatted></Document>}
 );
-is( Pod::Simple::XMLOutStream->_out(\&with_vf, "\n=pod\n\n foo bar baz\n quux\n"),
+ok( Pod::Simple::XMLOutStream->_out(\&with_vf, "\n=pod\n\n foo bar baz\n quux\n"),
   qq{<Document><VerbatimFormatted\nxml:space="preserve"> foo bar baz\n quux</VerbatimFormatted></Document>}
 );
-is( Pod::Simple::XMLOutStream->_out(\&with_vf, "\n=pod\n\n foo bar baz\nquux\n"),
+ok( Pod::Simple::XMLOutStream->_out(\&with_vf, "\n=pod\n\n foo bar baz\nquux\n"),
   qq{<Document><VerbatimFormatted\nxml:space="preserve"> foo bar baz\nquux</VerbatimFormatted></Document>}
 );
 
 print "# Contiguous verbatims...\n";
-is( Pod::Simple::XMLOutStream->_out(\&with_vf, "\n=pod\n\n foo bar baz\n\n quux\n"),
+ok( Pod::Simple::XMLOutStream->_out(\&with_vf, "\n=pod\n\n foo bar baz\n\n quux\n"),
   qq{<Document><VerbatimFormatted\nxml:space="preserve"> foo bar baz\n\n quux</VerbatimFormatted></Document>}
 );
-is( Pod::Simple::XMLOutStream->_out(\&with_vf, "\n=pod\n\n foo bar baz\n\n\n quux\n"),
+ok( Pod::Simple::XMLOutStream->_out(\&with_vf, "\n=pod\n\n foo bar baz\n\n\n quux\n"),
   qq{<Document><VerbatimFormatted\nxml:space="preserve"> foo bar baz\n\n\n quux</VerbatimFormatted></Document>}
 );
 
 print "# Testing =cut...\n";
-is( Pod::Simple::XMLOutStream->_out(\&with_vf, "\n=pod\n\n foo bar baz\n=cut\n quux\n"),
+ok( Pod::Simple::XMLOutStream->_out(\&with_vf, "\n=pod\n\n foo bar baz\n=cut\n quux\n"),
   qq{<Document><VerbatimFormatted\nxml:space="preserve"> foo bar baz</VerbatimFormatted></Document>}
 );
 
@@ -223,33 +226,33 @@ print "# Various \\n-(in)significance sanity checks...\n";
 
 print "#  verbatim/cut/head/verbatim sanity zero...\n";
 
-is( Pod::Simple::XMLOutStream->_out(\&without_vf, "\n=pod\n\n foo bar baz\n\n=head1 Foo\n\n quux\nquum\n"), $it);
-is( Pod::Simple::XMLOutStream->_out(\&without_vf, "\n=pod\n\n foo bar baz\n=cut\nsome code here...\n=head1 Foo\n\n quux\nquum\n"), $it);
-is( Pod::Simple::XMLOutStream->_out(\&without_vf, "\n=pod\n\n foo bar baz\n=cut\nsome code here...\n\n=head1 Foo\n\n quux\nquum\n"), $it);
+ok( Pod::Simple::XMLOutStream->_out(\&without_vf, "\n=pod\n\n foo bar baz\n\n=head1 Foo\n\n quux\nquum\n"), $it);
+ok( Pod::Simple::XMLOutStream->_out(\&without_vf, "\n=pod\n\n foo bar baz\n=cut\nsome code here...\n=head1 Foo\n\n quux\nquum\n"), $it);
+ok( Pod::Simple::XMLOutStream->_out(\&without_vf, "\n=pod\n\n foo bar baz\n=cut\nsome code here...\n\n=head1 Foo\n\n quux\nquum\n"), $it);
 
 print "#  verbatim/cut/head/verbatim sanity one...\n";
 
-is( Pod::Simple::XMLOutStream->_out(\&without_vf, "\n=pod\n\n foo bar baz\n=cut\n\nsome code here...\n=head1 Foo\n\n quux\nquum\n"), $it);
-is( Pod::Simple::XMLOutStream->_out(\&without_vf, "\n=pod\n\n foo bar baz\n\n=cut\nsome code here...\n=head1 Foo\n\n quux\nquum\n"), $it);
-is( Pod::Simple::XMLOutStream->_out(\&without_vf, "\n=pod\n\n foo bar baz\n\n=cut\n\nsome code here...\n=head1 Foo\n\n quux\nquum\n"), $it);
+ok( Pod::Simple::XMLOutStream->_out(\&without_vf, "\n=pod\n\n foo bar baz\n=cut\n\nsome code here...\n=head1 Foo\n\n quux\nquum\n"), $it);
+ok( Pod::Simple::XMLOutStream->_out(\&without_vf, "\n=pod\n\n foo bar baz\n\n=cut\nsome code here...\n=head1 Foo\n\n quux\nquum\n"), $it);
+ok( Pod::Simple::XMLOutStream->_out(\&without_vf, "\n=pod\n\n foo bar baz\n\n=cut\n\nsome code here...\n=head1 Foo\n\n quux\nquum\n"), $it);
 
 print "#  verbatim/cut/head/verbatim sanity two...\n";
 
-is( Pod::Simple::XMLOutStream->_out(\&without_vf, "\n=pod\n\n foo bar baz\n=cut\n\nsome code here...\n\n=head1 Foo\n\n quux\nquum\n"), $it);
-is( Pod::Simple::XMLOutStream->_out(\&without_vf, "\n=pod\n\n foo bar baz\n\n=cut\nsome code here...\n\n=head1 Foo\n\n quux\nquum\n"), $it);
-is( Pod::Simple::XMLOutStream->_out(\&without_vf, "\n=pod\n\n foo bar baz\n\n=cut\n\n\nsome code here...\n\n=head1 Foo\n\n quux\nquum\n"), $it);
+ok( Pod::Simple::XMLOutStream->_out(\&without_vf, "\n=pod\n\n foo bar baz\n=cut\n\nsome code here...\n\n=head1 Foo\n\n quux\nquum\n"), $it);
+ok( Pod::Simple::XMLOutStream->_out(\&without_vf, "\n=pod\n\n foo bar baz\n\n=cut\nsome code here...\n\n=head1 Foo\n\n quux\nquum\n"), $it);
+ok( Pod::Simple::XMLOutStream->_out(\&without_vf, "\n=pod\n\n foo bar baz\n\n=cut\n\n\nsome code here...\n\n=head1 Foo\n\n quux\nquum\n"), $it);
 
 print "#  verbatim/cut/head/verbatim sanity three...\n";
 
-is( Pod::Simple::XMLOutStream->_out(\&without_vf, "\n=pod\n\n foo bar baz\n=cut\n\nsome code here...\n\n\n=head1 Foo\n\n quux\nquum\n"), $it);
-is( Pod::Simple::XMLOutStream->_out(\&without_vf, "\n=pod\n\n foo bar baz\n\n=cut\nsome code here...\n\n\n=head1 Foo\n\n quux\nquum\n"), $it);
-is( Pod::Simple::XMLOutStream->_out(\&without_vf, "\n=pod\n\n foo bar baz\n\n=cut\n\nsome code here...\n\n\n=head1 Foo\n\n quux\nquum\n"), $it);
+ok( Pod::Simple::XMLOutStream->_out(\&without_vf, "\n=pod\n\n foo bar baz\n=cut\n\nsome code here...\n\n\n=head1 Foo\n\n quux\nquum\n"), $it);
+ok( Pod::Simple::XMLOutStream->_out(\&without_vf, "\n=pod\n\n foo bar baz\n\n=cut\nsome code here...\n\n\n=head1 Foo\n\n quux\nquum\n"), $it);
+ok( Pod::Simple::XMLOutStream->_out(\&without_vf, "\n=pod\n\n foo bar baz\n\n=cut\n\nsome code here...\n\n\n=head1 Foo\n\n quux\nquum\n"), $it);
 
 print "#  verbatim/cut/head/verbatim sanity four...\n";
 
-is( Pod::Simple::XMLOutStream->_out(\&without_vf, "\n=pod\n\n foo bar baz\n\n\n\n\n=cut\n\nsome code here...\n\n\n=head1 Foo\n\n quux\nquum\n"), $it);
-is( Pod::Simple::XMLOutStream->_out(\&without_vf, "\n=pod\n\n foo bar baz\n\n\n\n\n\n=cut\nsome code here...\n\n\n=head1 Foo\n\n quux\nquum\n"), $it);
-is( Pod::Simple::XMLOutStream->_out(\&without_vf, "\n=pod\n\n foo bar baz\n\n\n\n\n\n=cut\n\nsome code here...\n\n\n=head1 Foo\n\n quux\nquum\n"), $it);
+ok( Pod::Simple::XMLOutStream->_out(\&without_vf, "\n=pod\n\n foo bar baz\n\n\n\n\n=cut\n\nsome code here...\n\n\n=head1 Foo\n\n quux\nquum\n"), $it);
+ok( Pod::Simple::XMLOutStream->_out(\&without_vf, "\n=pod\n\n foo bar baz\n\n\n\n\n\n=cut\nsome code here...\n\n\n=head1 Foo\n\n quux\nquum\n"), $it);
+ok( Pod::Simple::XMLOutStream->_out(\&without_vf, "\n=pod\n\n foo bar baz\n\n\n\n\n\n=cut\n\nsome code here...\n\n\n=head1 Foo\n\n quux\nquum\n"), $it);
 
 }
 
@@ -268,32 +271,40 @@ print "# Various \\n-(in)significance sanity checks...\n";
 
 print "#  verbatim/cut/head/verbatim sanity zero...\n";
 
-is( Pod::Simple::XMLOutStream->_out(\&with_vf, "\n=pod\n\n foo bar baz\n\n=head1 Foo\n\n quux\nquum\n"), $it);
-is( Pod::Simple::XMLOutStream->_out(\&with_vf, "\n=pod\n\n foo bar baz\n=cut\nsome code here...\n=head1 Foo\n\n quux\nquum\n"), $it);
-is( Pod::Simple::XMLOutStream->_out(\&with_vf, "\n=pod\n\n foo bar baz\n=cut\nsome code here...\n\n=head1 Foo\n\n quux\nquum\n"), $it);
+ok( Pod::Simple::XMLOutStream->_out(\&with_vf, "\n=pod\n\n foo bar baz\n\n=head1 Foo\n\n quux\nquum\n"), $it);
+ok( Pod::Simple::XMLOutStream->_out(\&with_vf, "\n=pod\n\n foo bar baz\n=cut\nsome code here...\n=head1 Foo\n\n quux\nquum\n"), $it);
+ok( Pod::Simple::XMLOutStream->_out(\&with_vf, "\n=pod\n\n foo bar baz\n=cut\nsome code here...\n\n=head1 Foo\n\n quux\nquum\n"), $it);
 
 print "#  verbatim/cut/head/verbatim sanity one...\n";
 
-is( Pod::Simple::XMLOutStream->_out(\&with_vf, "\n=pod\n\n foo bar baz\n=cut\n\nsome code here...\n=head1 Foo\n\n quux\nquum\n"), $it);
-is( Pod::Simple::XMLOutStream->_out(\&with_vf, "\n=pod\n\n foo bar baz\n\n=cut\nsome code here...\n=head1 Foo\n\n quux\nquum\n"), $it);
-is( Pod::Simple::XMLOutStream->_out(\&with_vf, "\n=pod\n\n foo bar baz\n\n=cut\n\nsome code here...\n=head1 Foo\n\n quux\nquum\n"), $it);
+ok( Pod::Simple::XMLOutStream->_out(\&with_vf, "\n=pod\n\n foo bar baz\n=cut\n\nsome code here...\n=head1 Foo\n\n quux\nquum\n"), $it);
+ok( Pod::Simple::XMLOutStream->_out(\&with_vf, "\n=pod\n\n foo bar baz\n\n=cut\nsome code here...\n=head1 Foo\n\n quux\nquum\n"), $it);
+ok( Pod::Simple::XMLOutStream->_out(\&with_vf, "\n=pod\n\n foo bar baz\n\n=cut\n\nsome code here...\n=head1 Foo\n\n quux\nquum\n"), $it);
 
 print "#  verbatim/cut/head/verbatim sanity two...\n";
 
-is( Pod::Simple::XMLOutStream->_out(\&with_vf, "\n=pod\n\n foo bar baz\n=cut\n\nsome code here...\n\n=head1 Foo\n\n quux\nquum\n"), $it);
-is( Pod::Simple::XMLOutStream->_out(\&with_vf, "\n=pod\n\n foo bar baz\n\n=cut\nsome code here...\n\n=head1 Foo\n\n quux\nquum\n"), $it);
-is( Pod::Simple::XMLOutStream->_out(\&with_vf, "\n=pod\n\n foo bar baz\n\n=cut\n\n\nsome code here...\n\n=head1 Foo\n\n quux\nquum\n"), $it);
+ok( Pod::Simple::XMLOutStream->_out(\&with_vf, "\n=pod\n\n foo bar baz\n=cut\n\nsome code here...\n\n=head1 Foo\n\n quux\nquum\n"), $it);
+ok( Pod::Simple::XMLOutStream->_out(\&with_vf, "\n=pod\n\n foo bar baz\n\n=cut\nsome code here...\n\n=head1 Foo\n\n quux\nquum\n"), $it);
+ok( Pod::Simple::XMLOutStream->_out(\&with_vf, "\n=pod\n\n foo bar baz\n\n=cut\n\n\nsome code here...\n\n=head1 Foo\n\n quux\nquum\n"), $it);
 
 print "#  verbatim/cut/head/verbatim sanity three...\n";
 
-is( Pod::Simple::XMLOutStream->_out(\&with_vf, "\n=pod\n\n foo bar baz\n=cut\n\nsome code here...\n\n\n=head1 Foo\n\n quux\nquum\n"), $it);
-is( Pod::Simple::XMLOutStream->_out(\&with_vf, "\n=pod\n\n foo bar baz\n\n=cut\nsome code here...\n\n\n=head1 Foo\n\n quux\nquum\n"), $it);
-is( Pod::Simple::XMLOutStream->_out(\&with_vf, "\n=pod\n\n foo bar baz\n\n=cut\n\nsome code here...\n\n\n=head1 Foo\n\n quux\nquum\n"), $it);
+ok( Pod::Simple::XMLOutStream->_out(\&with_vf, "\n=pod\n\n foo bar baz\n=cut\n\nsome code here...\n\n\n=head1 Foo\n\n quux\nquum\n"), $it);
+ok( Pod::Simple::XMLOutStream->_out(\&with_vf, "\n=pod\n\n foo bar baz\n\n=cut\nsome code here...\n\n\n=head1 Foo\n\n quux\nquum\n"), $it);
+ok( Pod::Simple::XMLOutStream->_out(\&with_vf, "\n=pod\n\n foo bar baz\n\n=cut\n\nsome code here...\n\n\n=head1 Foo\n\n quux\nquum\n"), $it);
 
 print "#  verbatim/cut/head/verbatim sanity four...\n";
 
-is( Pod::Simple::XMLOutStream->_out(\&with_vf, "\n=pod\n\n foo bar baz\n\n\n\n\n=cut\n\nsome code here...\n\n\n=head1 Foo\n\n quux\nquum\n"), $it);
-is( Pod::Simple::XMLOutStream->_out(\&with_vf, "\n=pod\n\n foo bar baz\n\n\n\n\n\n=cut\nsome code here...\n\n\n=head1 Foo\n\n quux\nquum\n"), $it);
-is( Pod::Simple::XMLOutStream->_out(\&with_vf, "\n=pod\n\n foo bar baz\n\n\n\n\n\n=cut\n\nsome code here...\n\n\n=head1 Foo\n\n quux\nquum\n"), $it);
+ok( Pod::Simple::XMLOutStream->_out(\&with_vf, "\n=pod\n\n foo bar baz\n\n\n\n\n=cut\n\nsome code here...\n\n\n=head1 Foo\n\n quux\nquum\n"), $it);
+ok( Pod::Simple::XMLOutStream->_out(\&with_vf, "\n=pod\n\n foo bar baz\n\n\n\n\n\n=cut\nsome code here...\n\n\n=head1 Foo\n\n quux\nquum\n"), $it);
+ok( Pod::Simple::XMLOutStream->_out(\&with_vf, "\n=pod\n\n foo bar baz\n\n\n\n\n\n=cut\n\nsome code here...\n\n\n=head1 Foo\n\n quux\nquum\n"), $it);
 
 }
+
+
+
+print "# Wrapping up... one for the road...\n";
+ok 1;
+print "# --- Done with ", __FILE__, " --- \n";
+
+

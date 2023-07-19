@@ -1,7 +1,15 @@
+BEGIN {
+    if($ENV{PERL_CORE}) {
+        chdir 't';
+        @INC = '../lib';
+    }
+}
+
 use strict;
 use warnings;
 use Pod::Simple::Search;
-use Test::More tests => 15;
+use Test;
+BEGIN { plan tests => 16 }
 
 print "# Some basic sanity tests...\n";
 
@@ -28,4 +36,7 @@ print "# Testing state dumping...\n";
 print $x->_state_as_string;
 $x->inc("I\nLike  Pie!\t!!");
 print $x->_state_as_string;
+
+print "# bye\n";
+ok 1;
 

@@ -1,3 +1,5 @@
+#!/usr/bin/perl -w
+
 # t/xhtml-bkb.t - https://rt.cpan.org/Public/Bug/Display.html?id=77686
 
 use strict;

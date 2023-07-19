@@ -1,7 +1,14 @@
+#!/usr/bin/perl
+
 # t/eol2.t - check handling of \r, \n, and \r\n as line separators (again)
 
-use strict;
+BEGIN {
+    chdir 't' if -d 't';
+}
+
 use warnings;
+use strict;
+use lib '../lib';
 use Test::More tests => 7;
 
 use_ok('Pod::Simple::XHTML') or exit;

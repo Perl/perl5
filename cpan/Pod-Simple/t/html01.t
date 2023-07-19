@@ -1,7 +1,16 @@
 # Testing HTML paragraphs
+
+BEGIN {
+    if($ENV{PERL_CORE}) {
+        chdir 't';
+        @INC = '../lib';
+    }
+}
+
 use strict;
 use warnings;
-use Test::More tests => 15;
+use Test;
+BEGIN { plan tests => 16 };
 
 #use Pod::Simple::Debug (10);
 
@@ -14,12 +23,12 @@ sub x {
   "=pod\n\n$_[0]",
 ) }
 
-is( x(
+ok( x(
 q{
 =pod
-
+ 
 This is a paragraph
-
+ 
 =cut
 }),
   qq{\n<p>This is a paragraph</p>\n},
@@ -27,69 +36,69 @@ This is a paragraph
 );
 
 
-is( x(qq{=pod\n\nThis is a paragraph}),
+ok( x(qq{=pod\n\nThis is a paragraph}),
  qq{\n<p>This is a paragraph</p>\n},
  "paragraph building"
 );
 
 
-is( x(qq{This is a paragraph}),
+ok( x(qq{This is a paragraph}),
  qq{\n<p>This is a paragraph</p>\n},
  "paragraph building"
 );
 
 
 
-like(x(
+ok(x(
 '=head1 This is a heading')
- => qr{\s*<h1><a[^<>]+>This\s+is\s+a\s+heading</a></h1>\s*$},
+ => q{/\s*<h1><a[^<>]+>This\s+is\s+a\s+heading</a></h1>\s*$/},
   "heading building"
 );
 
-like(x('=head1 This is a heading', sub { $_[0]->html_h_level(2) })
- => qr{\s*<h2><a[^<>]+>This\s+is\s+a\s+heading</a></h2>\s*$},
+ok(x('=head1 This is a heading', sub { $_[0]->html_h_level(2) })
+ => q{/\s*<h2><a[^<>]+>This\s+is\s+a\s+heading</a></h2>\s*$/},
   "heading building"
 );
 
-like(x(
+ok(x(
 '=head2 This is a heading too')
- => qr{\s*<h2><a[^<>]+>This\s+is\s+a\s+heading\s+too</a></h2>\s*$},
+ => q{/\s*<h2><a[^<>]+>This\s+is\s+a\s+heading\s+too</a></h2>\s*$/},
   "heading building"
 );
 
-like(x(
+ok(x(
 '=head3 Also, this is a heading')
- => qr{\s*<h3><a[^<>]+>Also,\s+this\s+is\s+a\s+heading</a></h3>\s*$},
+ => q{/\s*<h3><a[^<>]+>Also,\s+this\s+is\s+a\s+heading</a></h3>\s*$/},
   "heading building"
 );
 
 
-like(x(
+ok(x(
 '=head4 This, too, is a heading')
- => qr{\s*<h4><a[^<>]+>This,\s+too,\s+is\s+a\s+heading</a></h4>\s*$},
+ => q{/\s*<h4><a[^<>]+>This,\s+too,\s+is\s+a\s+heading</a></h4>\s*$/},
   "heading building"
 );
 
-like(x(
+ok(x(
 '=head5 The number of the heading shall be five')
- => qr{\s*<h5><a[^<>]+>The\s+number\s+of\s+the\s+heading\s+shall\s+be\s+five</a></h5>\s*$},
+ => q{/\s*<h5><a[^<>]+>The\s+number\s+of\s+the\s+heading\s+shall\s+be\s+five</a></h5>\s*$/},
   "heading building"
 );
 
-like(x(
+ok(x(
 '=head6 The sixth a heading is the perfect heading')
- => qr{\s*<h6><a[^<>]+>The\s+sixth\s+a\s+heading\s+is\s+the\s+perfect\s+heading</a></h6>\s*$},
+ => q{/\s*<h6><a[^<>]+>The\s+sixth\s+a\s+heading\s+is\s+the\s+perfect\s+heading</a></h6>\s*$/},
   "heading building"
 );
 
-like(x(
+ok(x(
 '=head2 Yada Yada Operator
 X<...> X<... operator> X<yada yada operator>')
- => qr{name="Yada_Yada_Operator"},
+ => q{/name="Yada_Yada_Operator"/},
   "heading anchor name"
 );
 
-is(
+ok(
     x("=over 4\n\n=item one\n\n=item two\n\nHello\n\n=back\n"),
     q{
 <dl>
@@ -119,7 +128,7 @@ int main(int argc,char *argv[]) {
 }
 </pre>
 </tt>};
-is(
+ok(
     x("=begin html\n\n$html\n\n=end html\n"),
     "$html\n\n"
 );
@@ -133,7 +142,7 @@ SUBCLASS: {
     sub do_section { 'howdy' }
 }
 
-is(
+ok(
     My::Pod::HTML->_out(
         sub{  $_[0]->bare_output(1)  },
         "=pod\n\n=over\n\n=item Foo\n\n=back\n",
@@ -148,5 +157,9 @@ is(
     $obj->strip_verbatim_indent("  ");
     $obj->output_string(\$output);
     $obj->parse_string_document("=pod\n\n  First line\n  2nd line\n");
-    like($output, qr!<pre>First line\n2nd line</pre>!s);
+    ok($output, qr!<pre>First line\n2nd line</pre>!s);
 }
+
+print "# And one for the road...\n";
+ok 1;
+

@@ -1,12 +1,20 @@
 # Testing HTMLBatch
+BEGIN {
+    if($ENV{PERL_CORE}) {
+        chdir 't';
+        @INC = '../lib';
+    }
+}
+
+# Time-stamp: "2004-05-24 02:07:47 ADT"
 use strict;
 use warnings;
-
-use Test::More tests => 15;
+my $DEBUG = 0;
 
 #sub Pod::Simple::HTMLBatch::DEBUG () {5};
 
-my $DEBUG = 0;
+use Test;
+BEGIN { plan tests => 17 }
 
 require Pod::Simple::HTMLBatch;;
 
@@ -15,14 +23,25 @@ use Cwd;
 my $cwd = cwd();
 print "# CWD: $cwd\n" if $DEBUG;
 
-use File::Spec;
-use Cwd ();
-use File::Basename ();
+my $t_dir;
+my $corpus_dir;
 
-my $t_dir = File::Basename::dirname(Cwd::abs_path(__FILE__));
-my $corpus_dir = File::Spec->catdir($t_dir, 'testlib1');
+foreach my $t_maybe (
+  File::Spec->catdir( File::Spec->updir(), 'lib','Pod','Simple','t'),
+  File::Spec->catdir( $cwd ),
+  File::Spec->catdir( $cwd, 't' ),
+  'OHSNAP'
+) {
+  die "Can't find the test corpus" if $t_maybe eq 'OHSNAP';
+  next unless -e $t_maybe;
 
+  $t_dir = $t_maybe;
+  $corpus_dir = File::Spec->catdir( $t_maybe, 'testlib1' );
+  next unless -e $corpus_dir;
+  last;
+}
 print "# OK, found the test corpus as $corpus_dir\n" if $DEBUG;
+ok 1;
 
 my $outdir;
 while(1) {
@@ -58,7 +77,7 @@ find( sub {
           open HTML, $_ or die "Cannot open $_: $!\n";
           my $html = do { local $/; <HTML> };
           close HTML;
-          like $html, qr/<div class='indexgroup'>/;
+          ok $html =~ /<div class='indexgroup'>/;
       }
       return;
 }, $outdir );
@@ -96,3 +115,6 @@ if (my @long = grep { /^[^.]{9,}/ } map { s{^[^/]/}{} } @files) {
 
 # use Pod::Simple;
 # *pretty = \&Pod::Simple::BlackBox::pretty;
+
+print "# Bye from ", __FILE__, "\n" if $DEBUG;
+ok 1;

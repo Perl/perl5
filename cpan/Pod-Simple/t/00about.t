@@ -1,43 +1,41 @@
+
+require 5;
+# Time-stamp: "2004-05-23 19:48:32 ADT"
+
 # Summary of, well, things.
+
+BEGIN {
+    if($ENV{PERL_CORE}) {
+        chdir 't';
+        @INC = '../lib';
+    }
+}
 
 use strict;
 use warnings;
-use Test::More;
+use Test;
 my @modules;
 BEGIN {
   @modules = qw(
 
 Pod::Escapes
 
-Pod::Simple
-Pod::Simple::BlackBox
-Pod::Simple::Checker
-Pod::Simple::DumpAsText
-Pod::Simple::DumpAsXML
-Pod::Simple::HTML
-Pod::Simple::HTMLBatch
-Pod::Simple::HTMLLegacy
-Pod::Simple::LinkSection
-Pod::Simple::Methody
-Pod::Simple::JustPod
-Pod::Simple::Progress
-Pod::Simple::PullParser
-Pod::Simple::PullParserEndToken
-Pod::Simple::PullParserStartToken
-Pod::Simple::PullParserTextToken
-Pod::Simple::PullParserToken
-Pod::Simple::RTF
-Pod::Simple::Search
-Pod::Simple::SimpleTree
-Pod::Simple::Text
-Pod::Simple::TextContent
-Pod::Simple::TiedOutFH
-Pod::Simple::Transcode
-Pod::Simple::XMLOutStream
+Pod::Simple	
+Pod::Simple::BlackBox	Pod::Simple::Checker	Pod::Simple::DumpAsText
+Pod::Simple::DumpAsXML	Pod::Simple::HTML	Pod::Simple::HTMLBatch
+Pod::Simple::HTMLLegacy	Pod::Simple::LinkSection	Pod::Simple::Methody
+Pod::Simple::JustPod	Pod::Simple::Progress	Pod::Simple::PullParser
+Pod::Simple::PullParserEndToken	Pod::Simple::PullParserStartToken
+Pod::Simple::PullParserTextToken	Pod::Simple::PullParserToken
+Pod::Simple::RTF	Pod::Simple::Search	Pod::Simple::SimpleTree
+Pod::Simple::Text	Pod::Simple::TextContent	Pod::Simple::TiedOutFH
+Pod::Simple::Transcode	Pod::Simple::XMLOutStream
 
   );
-  plan tests => scalar @modules;
+  plan tests => 2 + @modules;
 };
+
+ok 1;
 
 #chdir "t" if -e "t";
 foreach my $m (@modules) {
@@ -91,7 +89,7 @@ foreach my $m (@modules) {
       # It's probably an unpopulated package.
       ## $v{$this} = '...';
     }
-
+    
     $pref = length($this) ? "$this\::" : '';
     push @stack, map m/^(.+)::$/ ? "$pref$1" : (),
         do { no strict 'refs'; keys %{$this . '::'} };
@@ -121,4 +119,6 @@ print "# \%INC:\n";
 foreach my $x (sort {lc($a) cmp lc($b)} keys %INC) {
   print "#   [$x] = [", $INC{$x} || '', "]\n";
 }
+
+ok 1;
 
