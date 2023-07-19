@@ -1455,11 +1455,11 @@ _cleaner2:
 	-rmdir lib/Encode/MIME lib/Encode/KR lib/Encode/JP lib/Encode/CN
 	-rmdir lib/Encode lib/Digest lib/Devel lib/Data lib/Config/Perl
 	-rmdir lib/Compress/Raw lib/Compress lib/Carp lib/CPAN/Plugin
-	-rmdir lib/CPAN/Meta/History lib/CPAN/Meta lib/CPAN/LWP
-	-rmdir lib/CPAN/Kwalify lib/CPAN/HTTP lib/CPAN/FTP lib/CPAN/Exception
-	-rmdir lib/CPAN/API lib/CPAN lib/Attribute lib/Archive/Tar lib/Archive
-	-rmdir lib/App/Prove/State/Result lib/App/Prove/State lib/App/Prove
-	-rmdir lib/App lib/Amiga
+	-rmdir lib/CPAN/Meta/Requirements lib/CPAN/Meta/History lib/CPAN/Meta
+	-rmdir lib/CPAN/LWP lib/CPAN/Kwalify lib/CPAN/HTTP lib/CPAN/FTP
+	-rmdir lib/CPAN/Exception lib/CPAN/API lib/CPAN lib/Attribute
+	-rmdir lib/Archive/Tar lib/Archive lib/App/Prove/State/Result
+	-rmdir lib/App/Prove/State lib/App/Prove lib/App lib/Amiga
 
 _realcleaner:
 	@$(LDLIBPTH) $(MAKE) _cleaner1 CLEAN=distclean
