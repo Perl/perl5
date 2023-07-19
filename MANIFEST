@@ -1855,7 +1855,6 @@ cpan/Pod-Simple/lib/Pod/Simple/TranscodeSmart.pm	Pod::Simple::TranscodeSmart
 cpan/Pod-Simple/lib/Pod/Simple/XHTML.pm			turn Pod into XHTML
 cpan/Pod-Simple/lib/Pod/Simple/XMLOutStream.pm		turn Pod into XML
 cpan/Pod-Simple/t/00about.t				Pod::Simple test file
-cpan/Pod-Simple/t/20_skip.t				Pod::Simple test file
 cpan/Pod-Simple/t/ac_d.t				Pod::Simple test file
 cpan/Pod-Simple/t/accept01.t				Pod::Simple test file
 cpan/Pod-Simple/t/accept05.t				Pod::Simple test file
@@ -2033,6 +2032,7 @@ cpan/Pod-Simple/t/xhtml05.t				Pod::Simple test file
 cpan/Pod-Simple/t/xhtml10.t				Pod::Simple test file
 cpan/Pod-Simple/t/xhtml15.t				Pod::Simple test file
 cpan/Pod-Simple/t/xhtml20.t				Pod::Simple test file
+cpan/Pod-Simple/t/xhtml25.t				Pod::Simple test file
 cpan/Pod-Usage/lib/Pod/Usage.pm
 cpan/Pod-Usage/scripts/pod2usage.PL
 cpan/Pod-Usage/t/inc/Pod/InputObjects.pm
