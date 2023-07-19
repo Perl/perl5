@@ -651,13 +651,14 @@ use File::Glob qw(:case);
     },
 
     'IO-Compress' => {
-        'DISTRIBUTION' => 'PMQS/IO-Compress-2.204.tar.gz',
+        'DISTRIBUTION' => 'PMQS/IO-Compress-2.205.tar.gz',
         'MAIN_MODULE'  => 'IO::Compress::Base',
         'FILES'        => q[cpan/IO-Compress],
         'EXCLUDED'     => [
             qr{^examples/},
             qr{^t/Test/},
             qr{^t/999meta-},
+            't/000prereq.t',
             't/010examples-bzip2.t',
             't/010examples-zlib.t',
             't/cz-05examples.t',
