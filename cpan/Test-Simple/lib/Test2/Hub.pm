@@ -2,7 +2,7 @@ package Test2::Hub;
 use strict;
 use warnings;
 
-our $VERSION = '1.302194';
+our $VERSION = '1.302195';
 
 
 use Carp qw/carp croak confess/;
@@ -432,7 +432,7 @@ sub finalize {
         $count  = $self->{+COUNT};
         $failed = $self->{+FAILED};
 
-        if (($plan && $plan eq 'NO PLAN') || ($do_plan && !$plan)) {
+        if ((defined($plan) && $plan eq 'NO PLAN') || ($do_plan && !defined($plan))) {
             $self->send(
                 Test2::Event::Plan->new(
                     trace => $trace,
