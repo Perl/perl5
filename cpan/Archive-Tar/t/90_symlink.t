@@ -6,13 +6,9 @@ use strict;
 use File::Spec;
 use File::Path;
 use Test::More;
-use Config;
 
-### developer tests mostly
-plan skip_all => "Skipping tests on this platform"
-  if ($^O !~ /(linux|bsd|darwin|solaris|hpux|aix|
-              sunos|dynixptx|haiku|irix|next|dec_osf|svr4|sco_sv|unicos|
-              cygwin)/x and !$Config{d_symlink});
+### developer tests mostly, so enable them with an extra argument
+plan skip_all => "Skipping tests on this platform" unless @ARGV;
 plan 'no_plan';
 
 my $Class   = 'Archive::Tar';
@@ -24,7 +20,7 @@ my %Map     = (
     ],
     File::Spec->catfile( $Dir, "linktest_missing_dir.tar" ) => [
         [ 0, qr/SECURE EXTRACT MODE/ ],
-        [ 0, qr/Could not create directory/ ],
+        [ 0, qr/File exists/ ],
     ],
 );
 
@@ -46,7 +42,7 @@ use_ok( $Class );
             ok( 1,                  "   Extracting with insecure mode: $mode" );
 
             my $warning;
-            local $SIG{__WARN__} = sub { $warning .= "@_" };
+            local $SIG{__WARN__} = sub { $warning .= "@_"; warn @_; };
 
             my $rv = eval { $tar->extract } || 0;
             ok( !$@,                "       No fatal error" );

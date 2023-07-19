@@ -1,8 +1,8 @@
 ### the gnu tar specification:
-### https://www.gnu.org/software/tar/manual/tar.html
+### http://www.gnu.org/software/tar/manual/tar.html
 ###
 ### and the pax format spec, which tar derives from:
-### https://www.opengroup.org/onlinepubs/007904975/utilities/pax.html
+### http://www.opengroup.org/onlinepubs/007904975/utilities/pax.html
 
 package Archive::Tar;
 require 5.005_03;
@@ -24,7 +24,6 @@ use strict;
 use vars qw[$DEBUG $error $VERSION $WARN $FOLLOW_SYMLINK $CHOWN $CHMOD
             $DO_NOT_USE_PREFIX $HAS_PERLIO $HAS_IO_STRING $SAME_PERMISSIONS
             $INSECURE_EXTRACT_MODE $ZERO_PAD_NUMBERS @ISA @EXPORT $RESOLVE_SYMLINK
-            $EXTRACT_BLOCK_SIZE
          ];
 
 @ISA                    = qw[Exporter];
@@ -32,7 +31,7 @@ use vars qw[$DEBUG $error $VERSION $WARN $FOLLOW_SYMLINK $CHOWN $CHMOD
 $DEBUG                  = 0;
 $WARN                   = 1;
 $FOLLOW_SYMLINK         = 0;
-$VERSION                = "3.02";
+$VERSION                = "2.40";
 $CHOWN                  = 1;
 $CHMOD                  = 1;
 $SAME_PERMISSIONS       = $> == 0 ? 1 : 0;
@@ -40,7 +39,6 @@ $DO_NOT_USE_PREFIX      = 0;
 $INSECURE_EXTRACT_MODE  = 0;
 $ZERO_PAD_NUMBERS       = 0;
 $RESOLVE_SYMLINK        = $ENV{'PERL5_AT_RESOLVE_SYMLINK'} || 'speed';
-$EXTRACT_BLOCK_SIZE     = 1024 * 1024 * 1024;
 
 BEGIN {
     use Config;
@@ -425,7 +423,7 @@ sub _read_tar {
         }
 
         ### ignore labels:
-        ### https://www.gnu.org/software/tar/manual/html_chapter/Media.html#SEC159
+        ### http://www.gnu.org/software/tar/manual/html_chapter/Media.html#SEC159
         next if $entry->is_label;
 
         if( length $entry->type and ($entry->is_file || $entry->is_longlink) ) {
@@ -896,18 +894,10 @@ sub _extract_file {
 
         if( $entry->size ) {
             binmode $fh;
-            my $offset = 0;
-            my $content = $entry->get_content_by_ref();
-            while ($offset < $entry->size) {
-                my $written
-                    = syswrite $fh, $$content, $EXTRACT_BLOCK_SIZE, $offset;
-                if (defined $written) {
-                    $offset += $written;
-                } else {
-                    $self->_error( qq[Could not write data to '$full': $!] );
-                    return;
-                }
-            }
+            syswrite $fh, $entry->data or (
+                $self->_error( qq[Could not write data to '$full'] ),
+                return
+            );
         }
 
         close $fh or (
@@ -2153,39 +2143,25 @@ numbers. Added for compatibility with C<busybox> implementations.
 
 =head2 Tuning the way RESOLVE_SYMLINK will works
 
-You can tune the behaviour by setting the $Archive::Tar::RESOLVE_SYMLINK variable,
-or $ENV{PERL5_AT_RESOLVE_SYMLINK} before loading the module Archive::Tar.
+	You can tune the behaviour by setting the $Archive::Tar::RESOLVE_SYMLINK variable,
+	or $ENV{PERL5_AT_RESOLVE_SYMLINK} before loading the module Archive::Tar.
 
-Values can be one of the following:
+  Values can be one of the following:
 
-=over 4
+		none
+           Disable this mechanism and failed as it was in previous version (<1.88)
 
-=item none
+		speed (default)
+           If you prefer speed
+           this will read again the whole archive using read() so all entries
+           will be available
 
-Disable this mechanism and failed as it was in previous version (<1.88)
+    memory
+           If you prefer memory
 
-=item speed (default)
+	Limitation
 
-If you prefer speed
-this will read again the whole archive using read() so all entries
-will be available
-
-=item memory
-
-If you prefer memory
-
-=back
-
-Limitation: It won't work for terminal, pipe or sockets or every non seekable
-source.
-
-=head2 $Archive::Tar::EXTRACT_BLOCK_SIZE
-
-This variable holds an integer with the block size that should be used when
-writing files during extraction. It defaults to 1 GiB. Please note that this
-cannot be arbitrarily large since some operating systems limit the number of
-bytes that can be written in one call to C<write(2)>, so if this is too large,
-extraction may fail with an error.
+		It won't work for terminal, pipe or sockets or every non seekable source.
 
 =cut
 
@@ -2420,11 +2396,22 @@ to an uploaded file, which might be a compressed archive.
 
 =item The GNU tar specification
 
-L<https://www.gnu.org/software/tar/manual/tar.html>
+C<http://www.gnu.org/software/tar/manual/tar.html>
 
 =item The PAX format specification
 
-The specification which tar derives from; L<https://pubs.opengroup.org/onlinepubs/007904975/utilities/pax.html>
+The specification which tar derives from; C< http://www.opengroup.org/onlinepubs/007904975/utilities/pax.html>
+
+=item A comparison of GNU and POSIX tar standards; C<http://www.delorie.com/gnu/docs/tar/tar_114.html>
+
+=item GNU tar intends to switch to POSIX compatibility
+
+GNU Tar authors have expressed their intention to become completely
+POSIX-compatible; C<http://www.gnu.org/software/tar/manual/html_node/Formats.html>
+
+=item A Comparison between various tar implementations
+
+Lists known issues and incompatibilities; C<http://gd.tuwien.ac.at/utils/archivers/star/README.otherbugs>
 
 =back
 

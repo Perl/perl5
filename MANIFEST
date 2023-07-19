@@ -245,7 +245,6 @@ cpan/Archive-Tar/t/src/long/b					Archive::Tar tests
 cpan/Archive-Tar/t/src/long/bar.tar				Archive::Tar tests
 cpan/Archive-Tar/t/src/long/foo.tbz				Archive::Tar tests
 cpan/Archive-Tar/t/src/long/foo.tgz				Archive::Tar tests
-cpan/Archive-Tar/t/src/long/prefix-directory-concat.tar		Archive::Tar tests
 cpan/Archive-Tar/t/src/short/b					Archive::Tar tests
 cpan/Archive-Tar/t/src/short/bar.tar				Archive::Tar tests
 cpan/Archive-Tar/t/src/short/foo.tbz				Archive::Tar tests
