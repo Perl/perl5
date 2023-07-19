@@ -64,6 +64,40 @@ as with C<m?pattern?>.
 
 [GH #20763]
 
+=head2 Calling the import method of an unknown package produces an error
+
+Historically it has been possible to call the import() or unimport()
+method of any class, including ones which have not been defined, with
+an argument and not experience an error. For instance this code will
+not throw an error in 5.38:
+
+    Class::That::Does::Not::Exist->import("foo");
+
+however, as of 5.39.1 this will throw an exception.  Note that calling
+these methods with no arguments continues to silently succeed and do
+nothing. For instance
+
+    Class::That::Does::Not::Exist->import();
+
+will continue to not throw an error. This is because every class
+implicitly inherits from the class UNIVERSAL which now defines an import
+method. In older perls there was no such method defined, and instead the
+method calls for C<import> and C<unimport> were special cased to not
+throw errors if there was no such method defined.
+
+This change has been added because it makes it easier to detect case
+typos in C<use> statements when running on case-insensitive file
+systems. For instance, on Windows or other platforms with
+case-insensitive file systems on older perls the following code
+
+    use STRICT 'refs';
+
+would silently do nothing as the module is actually called 'strict.pm'
+not 'STRICT.pm', so it would be loaded, but its import method would
+never be called. It will also detect cases where a user passes an
+argument when using a package that does not provide its own import, for
+instance most "pure" class definitions do not define an import method.
+
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.
@@ -219,6 +253,24 @@ and New Warnings
 =item *
 
 XXX L<message|perldiag/"message">
+
+=item *
+
+L<Attempt to call undefined %s method with arguments via package
+"%s" (perhaps you forgot to load the package?)|
+perldiag/"Attempt to call undefined %s method with arguments via package
+"%s" (perhaps you forgot to load the package?)">
+
+(F) You called the C<import()> or C<unimport()> method of a class that
+has no import method defined in its inheritance graph, and passed an
+argument to the method. This is very often the sign of a mispelled
+package name in a use or require statement that has silently succeded
+due to a case insensitive file system.
+
+Another common reason this may happen is when mistakenly attempting to
+import or unimport a symbol from a class definition or package which
+does not use C<Exporter> or otherwise define its own C<import> or
+C<unimport> method.
 
 =back
 

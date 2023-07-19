@@ -1260,9 +1260,15 @@ See also L<perlfunc/require>.
 "%s" (perhaps you forgot to load the package?)
 
 (F) You called the C<import()> or C<unimport()> method of a class that
-has no import method defined in its inheritance graph. This is very
-often the sign of a mispelled package name in a use or require statement
-that has silently succeded due to a case insensitive file system.
+has no import method defined in its inheritance graph, and passed an
+argument to the method. This is very often the sign of a mispelled
+package name in a use or require statement that has silently succeded
+due to a case insensitive file system.
+
+Another common reason this may happen is when mistakenly attempting to
+import or unimport a symbol from a class definition or package which
+does not use C<Exporter> or otherwise define its own C<import> or
+C<unimport> method.
 
 =item Can't locate package %s for @%s::ISA
 
