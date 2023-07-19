@@ -23,7 +23,7 @@ use warnings;
 use Carp          qw< carp croak >;
 use Scalar::Util  qw< blessed refaddr >;
 
-our $VERSION = '1.999837';
+our $VERSION = '1.999839';
 $VERSION =~ tr/_//d;
 
 require Exporter;
@@ -350,34 +350,34 @@ sub accuracy {
     if (@_ > 0) {
         my $a = shift;
         if (defined $a) {
-            $a = $a->numify() if ref($a) && $a->can('numify');
+            $a = $a -> can('numify') ? $a -> numify() : 0 + "$a" if ref($a);
             # also croak on non-numerical
-            if (!$a || $a <= 0) {
-                croak('Argument to accuracy must be greater than zero');
-            }
-            if (int($a) != $a) {
-                croak('Argument to accuracy must be an integer');
-            }
+            croak "accuracy must be a number, not '$a'"
+              unless $a =~/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[Ee][+-]?\d+)?\z/;
+            croak "accuracy must be an integer, not '$a'"
+              if $a != int $a;
+            croak "accuracy must be greater than zero, not '$a'"
+              if $a <= 0;
         }
 
         if (ref($x)) {
             # Set instance variable.
-            $x = $x->bround($a) if $a; # not for undef, 0
-            $x->{_a} = $a;        # set/overwrite, even if not rounded
-            delete $x->{_p};      # clear P
+            $x = $x->bround($a) if defined $a;
+            $x->{_a} = $a;      # set/overwrite, even if not rounded
+            $x->{_p} = undef;   # clear P
             # Why return class variable here? Fixme!
             $a = ${"${class}::accuracy"} unless defined $a;
         } else {
             # Set class variable.
-            ${"${class}::accuracy"} = $a; # set global A
-            ${"${class}::precision"} = undef; # clear global P
+            ${"${class}::accuracy"}  = $a;      # set global A
+            ${"${class}::precision"} = undef;   # clear global P
         }
 
         return $a;              # shortcut
     }
 
     # Return instance variable.
-    return $x->{_a} if ref($x) && (defined($x->{_a}) || defined($x->{_p}));
+    return $x->{_a} if ref($x);
 
     # Return class variable.
     return ${"${class}::accuracy"};
@@ -396,30 +396,31 @@ sub precision {
     if (@_ > 0) {
         my $p = shift;
         if (defined $p) {
-            $p = $p->numify() if ref($p) && $p->can('numify');
-            if ($p != int $p) {
-                croak('Argument to precision must be an integer');
-            }
+            $p = $p -> can('numify') ? $p -> numify() : 0 + "$p" if ref($p);
+            croak "precision must be a number, not '$p'"
+              unless $p =~/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[Ee][+-]?\d+)?\z/;
+            croak "precision must be an integer, not '$p'"
+              if $p != int $p;
         }
 
         if (ref($x)) {
             # Set instance variable.
-            $x = $x->bfround($p) if $p; # not for undef, 0
-            $x->{_p} = $p;         # set/overwrite, even if not rounded
-            delete $x->{_a};       # clear A
+            $x = $x->bfround($p) if defined $p;
+            $x->{_p} = $p;      # set/overwrite, even if not rounded
+            $x->{_a} = undef;   # clear A
             # Why return class variable here? Fixme!
             $p = ${"${class}::precision"} unless defined $p;
         } else {
             # Set class variable.
-            ${"${class}::precision"} = $p; # set global P
-            ${"${class}::accuracy"} = undef; # clear global A
+            ${"${class}::precision"} = $p;      # set global P
+            ${"${class}::accuracy"}  = undef;   # clear global A
         }
 
         return $p;              # shortcut
     }
 
     # Return instance variable.
-    return $x->{_p} if ref($x) && (defined($x->{_a}) || defined($x->{_p}));
+    return $x->{_p} if ref($x);
 
     # Return class variable.
     return ${"${class}::precision"};
@@ -2700,10 +2701,11 @@ sub blog {
 
     my ($class, $x, $base, @r);
 
-    # Don't objectify the base, since an undefined base, as in $x->blog() or
-    # $x->blog(undef) signals that the base is Euler's number.
+    # Only objectify the base if it is defined, since an undefined base, as in
+    # $x->blog() or $x->blog(undef) signals that the base is Euler's number =
+    # 2.718281828...
 
-    if (!ref($_[0]) && $_[0] =~ /^[a-z]\w*(?:::[a-z]\w*)*$/i) {
+    if (!ref($_[0]) && $_[0] =~ /^[a-z]\w*(?:::\w+)*$/i) {
         # E.g., Math::BigInt->blog(256, 2)
         ($class, $x, $base, @r) =
           defined $_[2] ? objectify(2, @_) : objectify(1, @_);
@@ -2721,7 +2723,8 @@ sub blog {
     return $x -> bnan(@r) if $x -> is_nan();
 
     if (defined $base) {
-        $base = $class -> new($base) unless ref $base;
+        $base = $class -> new($base)
+          unless defined(blessed($base)) && $base -> isa($class);
         if ($base -> is_nan() || $base -> is_one()) {
             return $x -> bnan(@r);
         } elsif ($base -> is_inf() || $base -> is_zero()) {
@@ -2729,18 +2732,26 @@ sub blog {
             return $x -> bzero(@r);
         } elsif ($base -> is_negative()) {              # -inf < base < 0
             return $x -> bzero(@r) if $x -> is_one();   #     x = 1
-            return $x -> bone(@r)  if $x == $base;      #     x = base
-            return $x -> bnan(@r);                      #     otherwise
+            return $x -> bone('+', @r)  if $x == $base; #     x = base
+            # we can't handle these cases, so upgrade, if we can
+            return $upgrade -> blog($x, $base, @r) if defined $upgrade;
+            return $x -> bnan(@r);
         }
         return $x -> bone(@r) if $x == $base;   # 0 < base && 0 < x < inf
     }
 
     # We now know that the base is either undefined or >= 2 and finite.
 
-    return $x -> binf('+', @r) if $x -> is_inf();       #   x = +/-inf
-    return $x -> bnan(@r)      if $x -> is_neg();       #   -inf < x < 0
-    return $x -> bzero(@r)     if $x -> is_one();       #   x = 1
-    return $x -> binf('-', @r) if $x -> is_zero();      #   x = 0
+    if ($x -> is_inf()) {                       # x = +/-inf
+        return $x -> binf('+', @r);
+    } elsif ($x -> is_neg()) {                  # -inf < x < 0
+        return $upgrade -> blog($x, $base, @r) if defined $upgrade;
+        return $x -> bnan(@r);
+    } elsif ($x -> is_one()) {                  # x = 1
+        return $x -> bzero(@r);
+    } elsif ($x -> is_zero()) {                 # x = 0
+        return $x -> binf('-', @r);
+    }
 
     # At this point we are done handling all exception cases and trivial cases.
 
@@ -2750,15 +2761,31 @@ sub blog {
     # the default base is e (Euler's number) which is not an integer
     if (!defined $base) {
         require Math::BigFloat;
-        my $u = Math::BigFloat->blog($x)->as_int();
+
+        # disable upgrading and downgrading
+
+        my $upg = Math::BigFloat -> upgrade();
+        my $dng = Math::BigFloat -> downgrade();
+        Math::BigFloat -> upgrade(undef);
+        Math::BigFloat -> downgrade(undef);
+
+        my $u = Math::BigFloat -> blog($x) -> as_int();
+
+        # reset upgrading and downgrading
+
+        Math::BigFloat -> upgrade($upg);
+        Math::BigFloat -> downgrade($dng);
+
         # modify $x in place
+
         $x->{value} = $u->{value};
-        $x->{sign} = $u->{sign};
+        $x->{sign}  = $u->{sign};
+
         return $x -> round(@r);
     }
 
-    my ($rc) = $LIB->_log_int($x->{value}, $base->{value});
-    return $x->bnan(@r) unless defined $rc; # not possible to take log?
+    my ($rc) = $LIB -> _log_int($x->{value}, $base->{value});
+    return $x -> bnan(@r) unless defined $rc;   # not possible to take log?
     $x->{value} = $rc;
     $x = $x -> round(@r);
 }
@@ -3770,7 +3797,7 @@ sub bfround {
     # no-op for Math::BigInt objects if $n <= 0
     $x = $x->bround($x->length()-$scale, $mode) if $scale > 0;
 
-    delete $x->{_a};            # delete to save memory
+    $x->{_a} = undef;
     $x->{_p} = $scale;          # store new _p
     $x;
 }
@@ -4003,8 +4030,8 @@ sub mantissa {
         return $class->new($x->{sign}, @r);
     }
     my $m = $x->copy();
-    delete $m->{_p};
-    delete $m->{_a};
+    $m -> precision(undef);
+    $m -> accuracy(undef);
 
     # that's a bit inefficient:
     my $zeros = $LIB->_zeros($m->{value});
@@ -8545,28 +8572,6 @@ L<https://metacpan.org/release/Math-BigInt>
 =item * CPAN Testers Matrix
 
 L<http://matrix.cpantesters.org/?dist=Math-BigInt>
-
-=item * CPAN Ratings
-
-L<https://cpanratings.perl.org/dist/Math-BigInt>
-
-=item * The Bignum mailing list
-
-=over 4
-
-=item * Post to mailing list
-
-C<bignum at lists.scsys.co.uk>
-
-=item * View mailing list
-
-L<http://lists.scsys.co.uk/pipermail/bignum/>
-
-=item * Subscribe/Unsubscribe
-
-L<http://lists.scsys.co.uk/cgi-bin/mailman/listinfo/bignum>
-
-=back
 
 =back
 

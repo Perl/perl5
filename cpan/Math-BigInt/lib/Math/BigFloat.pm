@@ -20,7 +20,7 @@ use Carp          qw< carp croak >;
 use Scalar::Util  qw< blessed >;
 use Math::BigInt  qw< >;
 
-our $VERSION = '1.999837';
+our $VERSION = '1.999839';
 $VERSION =~ tr/_//d;
 
 require Exporter;
@@ -2189,16 +2189,16 @@ sub bdiv {
 
     # shortcut to not run through _find_round_parameters again
     if (defined $params[0]) {
-        delete $x->{_a};               # clear before round
+        $x->{_a} = undef;               # clear before round
         $x = $x->bround($params[0], $params[2]); # then round accordingly
     } else {
-        delete $x->{_p};                # clear before round
+        $x->{_p} = undef;               # clear before round
         $x = $x->bfround($params[1], $params[2]); # then round accordingly
     }
     if ($fallback) {
         # clear a/p after round, since user did not request it
-        delete $x->{_a};
-        delete $x->{_p};
+        $x->{_a} = undef;
+        $x->{_p} = undef;
     }
 
     if (wantarray) {
@@ -2208,8 +2208,8 @@ sub bdiv {
         }
         if ($fallback) {
             # clear a/p after round, since user did not request it
-            delete $rem->{_a};
-            delete $rem->{_p};
+            $rem->{_a} = undef;
+            $rem->{_p} = undef;
         }
         $x = $downgrade -> new($x -> bdstr(), @r)
           if defined($downgrade) && $x -> is_int();
@@ -2475,24 +2475,56 @@ sub blog {
     my ($class, $x, $base, @r);
 
     # Only objectify the base if it is defined, since an undefined base, as in
-    # $x->blog() or $x->blog(undef) signals that the base is Euler's number.
+    # $x->blog() or $x->blog(undef) signals that the base is Euler's number =
+    # 2.718281828...
 
     if (!ref($_[0]) && $_[0] =~ /^[A-Za-z]|::/) {
         # E.g., Math::BigFloat->blog(256, 2)
         ($class, $x, $base, @r) =
           defined $_[2] ? objectify(2, @_) : objectify(1, @_);
     } else {
-        # E.g., Math::BigFloat::blog(256, 2) or $x->blog(2)
+        # E.g., $x->blog(2) or the deprecated Math::BigFloat::blog(256, 2)
         ($class, $x, $base, @r) =
           defined $_[1] ? objectify(2, @_) : objectify(1, @_);
     }
 
     return $x if $x->modify('blog');
 
+    # Handle all exception cases and all trivial cases. I have used Wolfram
+    # Alpha (http://www.wolframalpha.com) as the reference for these cases.
+
     return $x -> bnan(@r) if $x -> is_nan();
 
-    return $upgrade -> blog($x, $base, @r)
-      if defined($upgrade) && $x -> is_neg();
+    if (defined $base) {
+        $base = $class -> new($base)
+          unless defined(blessed($base)) && $base -> isa($class);
+        if ($base -> is_nan() || $base -> is_one()) {
+            return $x -> bnan(@r);
+        } elsif ($base -> is_inf() || $base -> is_zero()) {
+            return $x -> bnan(@r) if $x -> is_inf() || $x -> is_zero();
+            return $x -> bzero(@r);
+        } elsif ($base -> is_negative()) {              # -inf < base < 0
+            return $x -> bzero(@r) if $x -> is_one();   #     x = 1
+            return $x -> bone('+', @r)  if $x == $base; #     x = base
+            # we can't handle these cases, so upgrade, if we can
+            return $upgrade -> blog($x, $base, @r) if defined $upgrade;
+            return $x -> bnan(@r);
+        }
+        return $x -> bone(@r) if $x == $base;       # 0 < base && 0 < x < inf
+    }
+
+    if ($x -> is_inf()) {                       # x = +/-inf
+        my $sign = defined($base) && $base < 1 ? '-' : '+';
+        return $x -> binf($sign, @r);
+    } elsif ($x -> is_neg()) {                  # -inf < x < 0
+        return $upgrade -> blog($x, $base, @r) if defined $upgrade;
+        return $x -> bnan(@r);
+    } elsif ($x -> is_one()) {                  # x = 1
+        return $x -> bzero(@r);
+    } elsif ($x -> is_zero()) {                 # x = 0
+        my $sign = defined($base) && $base < 1 ? '+' : '-';
+        return $x -> binf($sign, @r);
+    }
 
     # we need to limit the accuracy to protect against overflow
     my $fallback = 0;
@@ -2513,66 +2545,6 @@ sub blog {
         $scale = abs($params[0] || $params[1]) + 4; # take whatever is defined
     }
 
-    my $done = 0;
-    if (defined $base) {
-        $base = $class -> new($base)
-          unless defined(blessed($base)) && $base -> isa($class);
-        if ($base -> is_nan() || $base -> is_one()) {
-            $x = $x -> bnan();
-            $done = 1;
-        } elsif ($base -> is_inf() || $base -> is_zero()) {
-            if ($x -> is_inf() || $x -> is_zero()) {
-                $x = $x -> bnan();
-            } else {
-                $x = $x -> bzero(@params);
-            }
-            $done = 1;
-        } elsif ($base -> is_negative()) { # -inf < base < 0
-            if ($x -> is_one()) {          #     x = 1
-                $x = $x -> bzero(@params);
-            } elsif ($x == $base) {
-                $x = $x -> bone('+', @params); #     x = base
-            } else {
-                $x = $x -> bnan();   #     otherwise
-            }
-            $done = 1;
-        } elsif ($x == $base) {
-            $x = $x -> bone('+', @params); # 0 < base && 0 < x < inf
-            $done = 1;
-        }
-    }
-
-    # We now know that the base is either undefined or positive and finite.
-
-    unless ($done) {
-        if ($x -> is_inf()) {   #   x = +/-inf
-            my $sign = defined $base && $base < 1 ? '-' : '+';
-            $x = $x -> binf($sign);
-            $done = 1;
-        } elsif ($x -> is_neg()) { #   -inf < x < 0
-            $x = $x -> bnan();
-            $done = 1;
-        } elsif ($x -> is_one()) { #   x = 1
-            $x = $x -> bzero(@params);
-            $done = 1;
-        } elsif ($x -> is_zero()) { #   x = 0
-            my $sign = defined $base && $base < 1 ? '+' : '-';
-            $x = $x -> binf($sign);
-            $done = 1;
-        }
-    }
-
-    if ($done) {
-        if ($fallback) {
-            # clear a/p after round, since user did not request it
-            delete $x->{_a};
-            delete $x->{_p};
-        }
-        return $downgrade -> new($x -> bdstr(), @r)
-          if defined($downgrade) && $x->is_int();
-        return $x;
-    }
-
     # when user set globals, they would interfere with our calculation, so
     # disable them and later re-enable them
     no strict 'refs';
@@ -2584,14 +2556,13 @@ sub blog {
     $$pbr = undef;
     # we also need to disable any set A or P on $x (_find_round_parameters took
     # them already into account), since these would interfere, too
-    delete $x->{_a};
-    delete $x->{_p};
+    $x->{_a} = undef;
+    $x->{_p} = undef;
 
-    $done = 0;
+    my $done = 0;
 
-    # If both the invocand and the base are integers, try to calculate integer
-    # result first. This is very fast, and in case the real result was found, we
-    # can stop right here.
+    # If both $x and $base are integers, try to calculate an integer result
+    # first. This is very fast, and if the exact result was found, we are done.
 
     if (defined($base) && $base -> is_int() && $x -> is_int()) {
         my $x_lib = $LIB -> _new($x -> bdstr());
@@ -2605,36 +2576,37 @@ sub blog {
         }
     }
 
+    # If the integer result was not accurate, compute the natural logarithm
+    # log($x) (using reduction by 10 and possibly also by 2), and if a
+    # different base was requested, convert the result with log($x)/log($base).
+
     unless ($done) {
-
-        # First calculate the log to base e (using reduction by 10 and possibly
-        # also by 2), and if a different base was requested, convert the result.
-
-        $x = $x->_log_10($scale);
+        $x = $x -> _log_10($scale);
         if (defined $base) {
             # log_b(x) = ln(x) / ln(b), so compute ln(b)
-            my $base_log_e = $base->copy()->_log_10($scale);
-            $x = $x->bdiv($base_log_e, $scale);
+            my $base_log_e = $base -> copy() -> _log_10($scale);
+            $x = $x -> bdiv($base_log_e, $scale);
         }
     }
 
     # shortcut to not run through _find_round_parameters again
+
     if (defined $params[0]) {
-        $x = $x->bround($params[0], $params[2]); # then round accordingly
+        $x = $x -> bround($params[0], $params[2]); # then round accordingly
     } else {
-        $x = $x->bfround($params[1], $params[2]); # then round accordingly
+        $x = $x -> bfround($params[1], $params[2]); # then round accordingly
     }
     if ($fallback) {
         # clear a/p after round, since user did not request it
-        delete $x->{_a};
-        delete $x->{_p};
+        $x->{_a} = undef;
+        $x->{_p} = undef;
     }
     # restore globals
     $$abr = $ab;
     $$pbr = $pb;
 
     return $downgrade -> new($x -> bdstr(), @r)
-      if defined($downgrade) && $x->is_int();
+      if defined($downgrade) && $x -> is_int();
     return $x;
 }
 
@@ -2688,15 +2660,17 @@ sub bexp {
     $$pbr = undef;
     # we also need to disable any set A or P on $x (_find_round_parameters took
     # them already into account), since these would interfere, too
-    delete $x->{_a};
-    delete $x->{_p};
+    $x->{_a} = undef;
+    $x->{_p} = undef;
 
     # Disabling upgrading and downgrading is no longer necessary to avoid an
     # infinite recursion, but it avoids unnecessary upgrading and downgrading in
     # the intermediate computations.
 
-    local $Math::BigInt::upgrade = undef;
-    local $Math::BigFloat::downgrade = undef;
+    # Temporarily disable downgrading
+
+    my $dng = Math::BigFloat -> downgrade();
+    Math::BigFloat -> downgrade(undef);
 
     my $x_org = $x->copy();
 
@@ -2810,8 +2784,8 @@ sub bexp {
         }
     } else {
         # else just round the already computed result
-        delete $x->{_a};
-        delete $x->{_p};
+        $x->{_a} = undef;
+        $x->{_p} = undef;
         # shortcut to not run through _find_round_parameters again
         if (defined $params[0]) {
             $x = $x->bround($params[0], $params[2]); # then round accordingly
@@ -2819,14 +2793,20 @@ sub bexp {
             $x = $x->bfround($params[1], $params[2]); # then round accordingly
         }
     }
+
     if ($fallback) {
         # clear a/p after round, since user did not request it
-        delete $x->{_a};
-        delete $x->{_p};
+        $x->{_a} = undef;
+        $x->{_p} = undef;
     }
-    # restore globals
+
+    # Restore globals
     $$abr = $ab;
     $$pbr = $pb;
+
+    # Restore downgrading.
+
+    Math::BigFloat -> downgrade($dng);
 
     return $downgrade -> new($x -> bdstr(), @r)
       if defined($downgrade) && $x -> is_int();
@@ -2910,8 +2890,8 @@ sub bsin {
     $$pbr = undef;
     # we also need to disable any set A or P on $x (_find_round_parameters took
     # them already into account), since these would interfere, too
-    delete $x->{_a};
-    delete $x->{_p};
+    $x->{_a} = undef;
+    $x->{_p} = undef;
 
     # Disabling upgrading and downgrading is no longer necessary to avoid an
     # infinite recursion, but it avoids unnecessary upgrading and downgrading in
@@ -2926,8 +2906,8 @@ sub bsin {
     my $sign = 1;               # start with -=
     my $below = $class->new(6);
     my $factorial = $class->new(4);
-    delete $x->{_a};
-    delete $x->{_p};
+    $x->{_a} = undef;
+    $x->{_p} = undef;
 
     my $limit = $class->new("1E-". ($scale-1));
     while (1) {
@@ -2959,8 +2939,8 @@ sub bsin {
     }
     if ($fallback) {
         # clear a/p after round, since user did not request it
-        delete $x->{_a};
-        delete $x->{_p};
+        $x->{_a} = undef;
+        $x->{_p} = undef;
     }
     # restore globals
     $$abr = $ab;
@@ -3014,8 +2994,8 @@ sub bcos {
     $$pbr = undef;
     # we also need to disable any set A or P on $x (_find_round_parameters took
     # them already into account), since these would interfere, too
-    delete $x->{_a};
-    delete $x->{_p};
+    $x->{_a} = undef;
+    $x->{_p} = undef;
 
     my $over = $x * $x;         # X ^ 2
     my $x2 = $over->copy();     # X ^ 2; difference between terms
@@ -3023,8 +3003,8 @@ sub bcos {
     my $below = $class->new(2);
     my $factorial = $class->new(3);
     $x = $x->bone();
-    delete $x->{_a};
-    delete $x->{_p};
+    $x->{_a} = undef;
+    $x->{_p} = undef;
 
     my $limit = $class->new("1E-". ($scale-1));
     #my $steps = 0;
@@ -3057,8 +3037,8 @@ sub bcos {
     }
     if ($fallback) {
         # clear a/p after round, since user did not request it
-        delete $x->{_a};
-        delete $x->{_p};
+        $x->{_a} = undef;
+        $x->{_p} = undef;
     }
     # restore globals
     $$abr = $ab;
@@ -3167,8 +3147,8 @@ sub batan {
     $$pbr = undef;
     # We also need to disable any set A or P on $x (_find_round_parameters
     # took them already into account), since these would interfere, too
-    delete $x->{_a};
-    delete $x->{_p};
+    $x->{_a} = undef;
+    $x->{_p} = undef;
 
     # Disabling upgrading and downgrading is no longer necessary to avoid an
     # infinite recursion, but it avoids unnecessary upgrading and downgrading in
@@ -3183,8 +3163,8 @@ sub batan {
     my $sign = 1;               # start with -=
     my $below = $class->new(3);
     my $two = $class->new(2);
-    delete $x->{_a};
-    delete $x->{_p};
+    $x->{_a} = undef;
+    $x->{_p} = undef;
 
     my $limit = $class->new("1E-". ($scale-1));
     #my $steps = 0;
@@ -3225,8 +3205,8 @@ sub batan {
     }
     if ($fallback) {
         # Clear a/p after round, since user did not request it.
-        delete $x->{_a};
-        delete $x->{_p};
+        $x->{_a} = undef;
+        $x->{_p} = undef;
     }
 
     # restore globals
@@ -3322,8 +3302,8 @@ sub batan2 {
     $y = $y -> round(@r);
 
     if ($fallback) {
-        delete $y->{_a};
-        delete $y->{_p};
+        $y->{_a} = undef;
+        $y->{_p} = undef;
     }
 
     return $y;
@@ -3380,8 +3360,8 @@ sub bsqrt {
     $$pbr = undef;
     # we also need to disable any set A or P on $x (_find_round_parameters took
     # them already into account), since these would interfere, too
-    delete $x->{_a};
-    delete $x->{_p};
+    $x->{_a} = undef;
+    $x->{_p} = undef;
 
     # Disabling upgrading and downgrading is no longer necessary to avoid an
     # infinite recursion, but it avoids unnecessary upgrading and downgrading in
@@ -3414,8 +3394,8 @@ sub bsqrt {
         }
         if ($fallback) {
             # clear a/p after round, since user did not request it
-            delete $x->{_a};
-            delete $x->{_p};
+            $x->{_a} = undef;
+            $x->{_p} = undef;
         }
         # re-enable A and P, upgrade is taken care of by "local"
         ${"$class\::accuracy"} = $ab;
@@ -3496,8 +3476,8 @@ sub bsqrt {
     }
     if ($fallback) {
         # clear a/p after round, since user did not request it
-        delete $x->{_a};
-        delete $x->{_p};
+        $x->{_a} = undef;
+        $x->{_p} = undef;
     }
     # restore globals
     $$abr = $ab;
@@ -3567,8 +3547,8 @@ sub broot {
     $$pbr = undef;
     # we also need to disable any set A or P on $x (_find_round_parameters took
     # them already into account), since these would interfere, too
-    delete $x->{_a};
-    delete $x->{_p};
+    $x->{_a} = undef;
+    $x->{_p} = undef;
 
     # Disabling upgrading and downgrading is no longer necessary to avoid an
     # infinite recursion, but it avoids unnecessary upgrading and downgrading in
@@ -3623,8 +3603,8 @@ sub broot {
         }
         if ($done == 0) {
             my $u = $class->bone()->bdiv($y, $scale+4);
-            delete $u->{_a};
-            delete $u->{_p};
+            $u->{_a} = undef;
+            $u->{_p} = undef;
             $x = $x->bpow($u, $scale+4);            # el cheapo
         }
     }
@@ -3638,8 +3618,8 @@ sub broot {
     }
     if ($fallback) {
         # clear a/p after round, since user did not request it
-        delete $x->{_a};
-        delete $x->{_p};
+        $x->{_a} = undef;
+        $x->{_p} = undef;
     }
     # restore globals
     $$abr = $ab;
@@ -3856,16 +3836,18 @@ sub band {
 
     return $x -> bnan(@r) if $x -> is_nan() || $y -> is_nan();
 
-    my $xtmp = Math::BigInt -> new($x -> bint());   # to Math::BigInt
-    $xtmp = $xtmp -> band($y);
+    my $xint = $x -> as_int();          # to Math::BigInt
+    my $yint = $y -> as_int();          # to Math::BigInt
 
-    return $xtmp -> round(@r) if defined $downgrade;
+    $xint = $xint -> band($yint);
 
-    $xtmp = $class -> new($xtmp);                   # back to Math::BigFloat
-    $x -> {sign} = $xtmp -> {sign};
-    $x -> {_m}   = $xtmp -> {_m};
-    $x -> {_es}  = $xtmp -> {_es};
-    $x -> {_e}   = $xtmp -> {_e};
+    return $xint -> round(@r) if defined $downgrade;
+
+    my $xflt = $class -> new($xint);    # back to Math::BigFloat
+    $x -> {sign} = $xflt -> {sign};
+    $x -> {_m}   = $xflt -> {_m};
+    $x -> {_es}  = $xflt -> {_es};
+    $x -> {_e}   = $xflt -> {_e};
 
     return $x -> round(@r);
 }
@@ -3879,16 +3861,18 @@ sub bior {
 
     return $x -> bnan(@r) if $x -> is_nan() || $y -> is_nan();
 
-    my $xtmp = Math::BigInt -> new($x -> bint());   # to Math::BigInt
-    $xtmp = $xtmp -> bior($y);
+    my $xint = $x -> as_int();          # to Math::BigInt
+    my $yint = $y -> as_int();          # to Math::BigInt
 
-    return $xtmp -> round(@r) if defined $downgrade;
+    $xint = $xint -> bior($yint);
 
-    $xtmp = $class -> new($xtmp);                   # back to Math::BigFloat
-    $x -> {sign} = $xtmp -> {sign};
-    $x -> {_m}   = $xtmp -> {_m};
-    $x -> {_es}  = $xtmp -> {_es};
-    $x -> {_e}   = $xtmp -> {_e};
+    return $xint -> round(@r) if defined $downgrade;
+
+    my $xflt = $class -> new($xint);    # back to Math::BigFloat
+    $x -> {sign} = $xflt -> {sign};
+    $x -> {_m}   = $xflt -> {_m};
+    $x -> {_es}  = $xflt -> {_es};
+    $x -> {_e}   = $xflt -> {_e};
 
     return $x -> round(@r);
 }
@@ -3902,16 +3886,18 @@ sub bxor {
 
     return $x -> bnan(@r) if $x -> is_nan() || $y -> is_nan();
 
-    my $xtmp = Math::BigInt -> new($x -> bint());   # to Math::BigInt
-    $xtmp = $xtmp -> bxor($y);
+    my $xint = $x -> as_int();          # to Math::BigInt
+    my $yint = $y -> as_int();          # to Math::BigInt
 
-    return $xtmp -> round(@r) if defined $downgrade;
+    $xint = $xint -> bxor($yint);
 
-    $xtmp = $class -> new($xtmp);                   # back to Math::BigFloat
-    $x -> {sign} = $xtmp -> {sign};
-    $x -> {_m}   = $xtmp -> {_m};
-    $x -> {_es}  = $xtmp -> {_es};
-    $x -> {_e}   = $xtmp -> {_e};
+    return $xint -> round(@r) if defined $downgrade;
+
+    my $xflt = $class -> new($xint);    # back to Math::BigFloat
+    $x -> {sign} = $xflt -> {sign};
+    $x -> {_m}   = $xflt -> {_m};
+    $x -> {_es}  = $xflt -> {_es};
+    $x -> {_e}   = $xflt -> {_e};
 
     return $x -> round(@r);
 }
@@ -3923,16 +3909,16 @@ sub bnot {
 
     return $x -> bnan(@r) if $x -> is_nan();
 
-    my $xtmp = Math::BigInt -> new($x -> bint());   # to Math::BigInt
-    $xtmp = $xtmp -> bnot();
+    my $xint = $x -> as_int();          # to Math::BigInt
+    $xint = $xint -> bnot();
 
-    return $xtmp -> round(@r) if defined $downgrade;
+    return $xint -> round(@r) if defined $downgrade;
 
-    $xtmp = $class -> new($xtmp);                   # back to Math::BigFloat
-    $x -> {sign} = $xtmp -> {sign};
-    $x -> {_m}   = $xtmp -> {_m};
-    $x -> {_es}  = $xtmp -> {_es};
-    $x -> {_e}   = $xtmp -> {_e};
+    my $xflt = $class -> new($xint);    # back to Math::BigFloat
+    $x -> {sign} = $xflt -> {sign};
+    $x -> {_m}   = $xflt -> {_m};
+    $x -> {_es}  = $xflt -> {_es};
+    $x -> {_e}   = $xflt -> {_e};
 
     return $x -> round(@r);
 }
@@ -3995,7 +3981,7 @@ sub bround {
     $m = $m->bround($scale, $mode);     # round mantissa
     $x->{_m} = $m->{value};             # get our mantissa back
     $x->{_a} = $scale;                  # remember rounding
-    delete $x->{_p};                    # and clear P
+    $x->{_p} = undef;                   # and clear P
 
     # bnorm() downgrades if necessary, so no need to check whether to downgrade.
     $x->bnorm();                # del trailing zeros gen. by bround()
@@ -4040,7 +4026,7 @@ sub bfround {
     }
 
     $x->{_p} = $scale;          # remember round in any case
-    delete $x->{_a};            # and clear A
+    $x->{_a} = undef;           # and clear A
     if ($scale < 0) {
         # round right from the '.'
 
@@ -4394,17 +4380,13 @@ sub sparts {
 
     # Finite number.
 
-    my $mant = $x -> copy();
+    my $mant = $class -> new($x);
     $mant->{_es} = '+';
     $mant->{_e}  = $LIB->_zero();
     $mant = $downgrade -> new($mant) if defined $downgrade;
     return $mant unless wantarray;
 
-    my $expo = bless { sign => $x -> {_es},
-                       _m   => $LIB->_copy($x -> {_e}),
-                       _es  => '+',
-                       _e   => $LIB->_zero(),
-                     }, $class;
+    my $expo = $class -> new($x -> {_es} . $LIB->_str($x -> {_e}));
     $expo = $downgrade -> new($expo) if defined $downgrade;
     return ($mant, $expo);
 }
@@ -5460,7 +5442,7 @@ sub _log {
     my $class = ref $x;
 
     # in case of $x == 1, result is 0
-    return $x->bzero() if $x->is_one();
+    return $x -> bzero() if $x -> is_one();
 
     # XXX TODO: rewrite this in a similar manner to bexp()
 
@@ -5479,56 +5461,49 @@ sub _log {
     # ln (x)  = 2 |   --- + - * --- + - * --- + ... |  x > 1/2
     #             |_   x    2   x^2   3   x^3      _|
 
-    my ($limit, $v, $u, $below, $factor, $next, $over, $f);
+    # scale used in intermediate computations
+    my $scaleup = $scale + 4;
 
-    $v = $x->copy();
+    my ($v, $u, $numer, $denom, $factor, $f);
+
+    $v = $x -> copy();
     $v = $v -> binc();                  # v = x+1
-    $x = $x->bdec();
-    $u = $x->copy();                    # u = x-1; x = x-1
-    $x = $x->bdiv($v, $scale);          # first term: u/v
-    $below = $v->copy();
-    $over = $u->copy();
+    $x = $x -> bdec();
+    $u = $x -> copy();                  # u = x-1; x = x-1
+
+    $x = $x -> bdiv($v, $scaleup);        # first term: u/v
+
+    $numer = $u -> copy();              # numerator
+    $denom = $v -> copy();              # denominator
+
     $u = $u -> bmul($u);                # u^2
     $v = $v -> bmul($v);                # v^2
-    $below = $below->bmul($v);          # u^3, v^3
-    $over = $over->bmul($u);
-    $factor = $class->new(3);
-    $f = $class->new(2);
 
-    $limit = $class->new("1E-". ($scale-1));
+    $numer = $numer -> bmul($u);        # u^3
+    $denom = $denom -> bmul($v);        # v^3
 
-    while (3 < 5) {
-        # we calculate the next term, and add it to the last
-        # when the next term is below our limit, it won't affect the outcome
-        # anymore, so we stop
+    $factor = $class -> new(3);
+    $f = $class -> new(2);
 
-        # calculating the next term simple from over/below will result in quite
-        # a time hog if the input has many digits, since over and below will
-        # accumulate more and more digits, and the result will also have many
-        # digits, but in the end it is rounded to $scale digits anyway. So if we
-        # round $over and $below first, we save a lot of time for the division
-        # (not with log(1.2345), but try log (123**123) to see what I mean. This
-        # can introduce a rounding error if the division result would be f.i.
-        # 0.1234500000001 and we round it to 5 digits it would become 0.12346,
-        # but if we truncated $over and $below we might get 0.12345. Does this
-        # matter for the end result? So we give $over and $below 4 more digits
-        # to be on the safe side (unscientific error handling as usual... :+D
+    while (1) {
+        my $next = $numer -> copy() -> bround($scaleup)
+          -> bdiv($denom -> copy() -> bmul($factor) -> bround($scaleup), $scaleup);
 
-        $next = $over->copy()->bround($scale+4)
-          ->bdiv($below->copy()->bmul($factor)->bround($scale+4),
-                 $scale);
+        $next->{_a} = undef;
+        $next->{_p} = undef;
+        my $x_prev = $x -> copy();
+        $x = $x -> badd($next);
 
-        last if $next->bacmp($limit) <= 0;
+        last if $x -> bacmp($x_prev) == 0;
 
-        delete $next->{_a};
-        delete $next->{_p};
-        $x = $x->badd($next);
         # calculate things for the next term
-        $over *= $u;
-        $below *= $v;
-        $factor = $factor->badd($f);
+        $numer  = $numer -> bmul($u);
+        $denom  = $denom -> bmul($v);
+        $factor = $factor -> badd($f);
     }
-    $x->bmul($f);               # $x *= 2
+
+    $x = $x -> bmul($f);             # $x *= 2
+    $x = $x -> bround($scale);
 }
 
 sub _log_10 {
@@ -5557,8 +5532,12 @@ sub _log_10 {
 
     # In addition, the values for blog(2) and blog(10) are cached.
 
-    # Calculate nr of digits before dot. x = 123, dbd = 3; x = 1.23, dbd = 1;
-    # x = 0.0123, dbd = -1; x = 0.000123, dbd = -3, etc.
+    # Calculate the number of digits before the dot, i.e., 1 + floor(log10(x)):
+    #   x = 123      => dbd =  3
+    #   x = 1.23     => dbd =  1
+    #   x = 0.0123   => dbd = -1
+    #   x = 0.000123 => dbd = -3
+    #   etc.
 
     my $dbd = $LIB->_num($x->{_e});
     $dbd = -$dbd if $x->{_es} eq '-';
@@ -5568,6 +5547,11 @@ sub _log_10 {
     # infinite recursion
 
     my $calc = 1;               # do some calculation?
+
+    # No upgrading or downgrading in the intermediate computations.
+
+    local $Math::BigInt::upgrade = undef;
+    local $Math::BigFloat::downgrade = undef;
 
     # disable the shortcut for 10, since we need log(10) and this would recurse
     # infinitely deep
@@ -5629,7 +5613,6 @@ sub _log_10 {
         # at import() time, since not everybody needs this)
         $LOG_10 = $class->new($LOG_10, undef, undef) unless ref $LOG_10;
 
-        #print "x = $x, dbd = $dbd, calc = $calc\n";
         # got more than one digit before the dot, or more than one zero after
         # the dot, so do:
         #  log(123)    == log(1.23) + log(10) * 2
@@ -5640,13 +5623,6 @@ sub _log_10 {
             $l_10 = $LOG_10->copy(); # copy for mul
         } else {
             # else: slower, compute and cache result
-
-            # Disabling upgrading and downgrading is no longer necessary to
-            # avoid an infinite recursion, but it avoids unnecessary upgrading
-            # and downgrading in the intermediate computations.
-
-            local $Math::BigInt::upgrade = undef;
-            local $Math::BigFloat::downgrade = undef;
 
             # shorten the time to calculate log(10) based on the following:
             # log(1.25 * 8) = log(1.25) + log(8)
@@ -5715,14 +5691,6 @@ sub _log_10 {
             $l_2 = $LOG_2->copy(); # copy() for the mul below
         } else {
             # else: slower, compute and cache result
-
-            # Disabling upgrading and downgrading is no longer necessary to
-            # avoid an infinite recursion, but it avoids unnecessary upgrading
-            # and downgrading in the intermediate computations.
-
-            local $Math::BigInt::upgrade = undef;
-            local $Math::BigFloat::downgrade = undef;
-
             $l_2 = $two->copy();
             $l_2 = $l_2->_log($scale); # scale+4, actually
             $LOG_2 = $l_2->copy(); # cache the result for later
@@ -5792,8 +5760,8 @@ sub _pow {
     $$pbr = undef;
     # we also need to disable any set A or P on $x (_find_round_parameters took
     # them already into account), since these would interfere, too
-    delete $x->{_a};
-    delete $x->{_p};
+    $x->{_a} = undef;
+    $x->{_p} = undef;
 
     # Disabling upgrading and downgrading is no longer necessary to avoid an
     # infinite recursion, but it avoids unnecessary upgrading and downgrading in
@@ -5843,8 +5811,8 @@ sub _pow {
     }
     if ($fallback) {
         # clear a/p after round, since user did not request it
-        delete $x->{_a};
-        delete $x->{_p};
+        $x->{_a} = undef;
+        $x->{_p} = undef;
     }
     # restore globals
     $$abr = $ab;
@@ -6770,28 +6738,6 @@ L<https://metacpan.org/release/Math-BigInt>
 =item * CPAN Testers Matrix
 
 L<http://matrix.cpantesters.org/?dist=Math-BigInt>
-
-=item * CPAN Ratings
-
-L<https://cpanratings.perl.org/dist/Math-BigInt>
-
-=item * The Bignum mailing list
-
-=over 4
-
-=item * Post to mailing list
-
-C<bignum at lists.scsys.co.uk>
-
-=item * View mailing list
-
-L<http://lists.scsys.co.uk/pipermail/bignum/>
-
-=item * Subscribe/Unsubscribe
-
-L<http://lists.scsys.co.uk/cgi-bin/mailman/listinfo/bignum>
-
-=back
 
 =back
 

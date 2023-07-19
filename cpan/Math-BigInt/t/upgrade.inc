@@ -1108,6 +1108,8 @@ abc:0:NaN
 -7:-4:-8
 -7:4:0
 -4:7:4
+1:0.5:0
+
 # equal arguments are treated special, so also do some test with unequal ones
 0xFFFF:0xFFFF:0x0xFFFF
 0xFFFFFF:0xFFFFFF:0x0xFFFFFF
@@ -1140,6 +1142,8 @@ abc:0:NaN
 -6:-6:-6
 -7:4:-3
 -4:7:-1
+1:0.5:1
+
 # equal arguments are treated special, so also do some test with unequal ones
 0xFFFF:0xFFFF:0x0xFFFF
 0xFFFFFF:0xFFFFFF:0x0xFFFFFF
@@ -1189,6 +1193,8 @@ abc:0:NaN
 -4:7:-5
 4:-7:-3
 -4:-7:5
+1:0.5:1
+
 # equal arguments are treated special, so also do some test with unequal ones
 0xFFFF:0xFFFF:0
 0xFFFFFF:0xFFFFFF:0
