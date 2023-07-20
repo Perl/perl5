@@ -178,11 +178,99 @@ XXX Remove this section if Porting/corelist-perldelta.pl did not add any content
 
 =item *
 
+L<Compress::Raw::Bzip2> has been upgraded from version 2.204_001 to 2.205.
+
+=item *
+
+L<Compress::Raw::Zlib> has been upgraded from version 2.204_001 to 2.205.
+
+=item *
+
+L<CPAN::Meta::Requirements> has been upgraded from version 2.140 to 2.143.
+
+=item *
+
 L<Errno> has been upgraded from version 1.37 to 1.38.
 
 The C<osvers> and C<archname> baked into the module to ensure Errno is
 loaded by the perl that built it are now more comprehensively
 escaped. [GH #21135]
+
+=item *
+
+L<ExtUtils::CBuilder> has been upgraded from version 0.280238 to 0.280239.
+
+=item *
+
+L<ExtUtils::Manifest> has been upgraded from version 1.73 to 1.75.
+
+=item *
+
+L<feature> has been upgraded from version 1.82 to 1.83.
+
+=item *
+
+L<IO-Compress> has been upgraded from version 2.204 to 2.205.
+
+=item *
+
+L<Math::BigInt> has been upgraded from version 1.999837 to 1.999839.
+
+=item *
+
+L<Math::BigInt::FastCalc> has been upgraded from version 0.5013 to 0.5014.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 5.20230520 to 5.20230720.
+
+=item *
+
+L<Module::Metadata> has been upgraded from version 1.000037 to 1.000038.
+
+=item *
+
+L<perlfaq> has been upgraded from version 5.20210520 to 5.20230701.
+
+=item *
+
+L<POSIX> has been upgraded from version 2.13 to 2.14.
+
+=item *
+
+L<Socket> has been upgraded from version 2.036 to 2.037.
+
+=item *
+
+L<Test::Simple> has been upgraded from version 1.302194 to 1.302195.
+
+=item *
+
+L<Text::Tabs> has been upgraded from version 2021.0814 to 2023.0511.
+
+=item *
+
+L<Text::Wrap> has been upgraded from version 2021.0814 to 2023.0511.
+
+=item *
+
+L<threads> has been upgraded from version 2.36 to 2.37.
+
+=item *
+
+L<Time::HiRes> has been upgraded from version 1.9775 to 1.9776.
+
+=item *
+
+L<Time::Local> has been upgraded from version 1.30 to 1.35.
+
+=item *
+
+L<UNIVERSAL> has been upgraded from version 1.15 to 1.16.
+
+=item *
+
+L<warnings> has been upgraded from version 1.65 to 1.66.
 
 =back
 
