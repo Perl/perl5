@@ -19,6 +19,10 @@ skip_all(
     "This is a shallow clone, this test requires history.")
   if (-e "$source_dir/.git/shallow");
 
+skip_all(
+    "Cannot locate .mailmap: GH#21272.")
+  unless (-f ".mailmap");
+
 my $revision_range = ''; # could use 'v5.22.0..' as default, no reason to recheck all previous commits...
 if ( $ENV{TRAVIS} && defined $ENV{TRAVIS_COMMIT_RANGE} ) {
 	# travisci is adding a merge commit when smoking a pull request
