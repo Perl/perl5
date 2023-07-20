@@ -5018,18 +5018,6 @@ New code should favor the three-argument form of C<open> over this older
 form. Declaring the mode and the filename as two distinct arguments
 avoids any confusion between the two.
 
-=item Calling C<open> with one argument via global variables
-
-As a shortcut, a one-argument call takes the filename from the global
-scalar variable of the same name as the filehandle:
-
-    $ARTICLE = 100;
-    open(ARTICLE)
-        or die "Can't find article $ARTICLE: $!\n";
-
-Here C<$ARTICLE> must be a global (package) scalar variable - not one
-declared with L<C<my>|/my VARLIST> or L<C<state>|/state VARLIST>.
-
 =item Assigning a filehandle to a bareword
 
 An older style is to use a bareword as the filehandle, as
@@ -5041,9 +5029,23 @@ Then you can use C<FH> as the filehandle, in C<< close FH >> and C<<
 <FH> >> and so on.  Note that it's a global variable, so this form is
 not recommended when dealing with filehandles other than Perl's built-in ones
 (e.g. STDOUT and STDIN).  In fact, using a bareword for the filehandle is
-an error when the C<bareword_filehandles> feature has been disabled.  This
-feature is disabled by default when in the scope of C<use v5.36.0> or later.
+an error when the
+L<C<"bareword_filehandles"> feature|feature/"The 'bareword_filehandles' feature">
+has been disabled.  This feature is disabled automatically when in the
+scope of C<use v5.36.0> or later.
 
+=item Calling C<open> with one argument via global variables
+
+As a shortcut, a one-argument call takes the filename from the global
+scalar variable of the same name as the bareword filehandle:
+
+    $ARTICLE = 100;
+    open(ARTICLE)
+        or die "Can't find article $ARTICLE: $!\n";
+
+Here C<$ARTICLE> must be a global scalar variable in the same package
+as the filehandle - not one declared with L<C<my>|/my VARLIST> or
+L<C<state>|/state VARLIST>.
 
 =back
 
