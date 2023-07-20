@@ -17,6 +17,20 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.39.1 - Ben Aaronovitch, "Whispers Under Ground"
+
+L<Announced on 2023-07-20 by Steve Hay|https://www.nntp.perl.org/group/perl.perl5.porters/2023/07/msg266737.html>
+
+The British have always been madly over-ambitious and from one angle it
+can seem like bravery, but from another it looks suspiciously like a
+lack of foresight.  The London Underground was no exception and was
+built by a breed of entrepreneurs whose grasp was matched only by the
+size of their sideburns.  While their equally gloriously bewhiskered
+counterparts across the Atlantic were busy blowing each other to pieces
+in a Civil War, they embarked on the construction of the Metropolitan
+Line knowing only one thing for certain - there was no way they were
+going to be able to run steam trains through it.
+
 =head2 v5.38.0 - Miguel de Cervantes, Don Quixote
 
 L<Announced on 2023-07-02 by Ricardo Signes|http://nntp.perl.org/group/perl.perl5.porters/266602>
