@@ -757,6 +757,7 @@ the strings?).
  Ricardo   5.38.0       2023-Jul-02
 
  Ricardo   5.39.0       2023-Jun-30     The 5.39 development track
+ Steve     5.39.1       2023-Jul-20
 
 =head2 SELECTED RELEASE SIZES
 
