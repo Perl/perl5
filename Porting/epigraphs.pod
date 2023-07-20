@@ -31,16 +31,16 @@ in a Civil War, they embarked on the construction of the Metropolitan
 Line knowing only one thing for certain - there was no way they were
 going to be able to run steam trains through it.
 
-=head2 v5.38.0 - Miguel de Cervantes, Don Quixote
+=head2 v5.38.0 - Miguel de Cervantes, "Don Quixote"
 
-L<Announced on 2023-07-02 by Ricardo Signes|http://nntp.perl.org/group/perl.perl5.porters/266602>
+L<Announced on 2023-07-02 by Ricardo Signes|https://www.nntp.perl.org/group/perl.perl5.porters/2023/07/msg266602.html>
 
 Take my advice and live for a long, long time. Because the maddest thing
 a man can do in this life is to let himself die.
 
 =head2 v5.38.0-RC2 - They Might Be Giants, "O Do Not Forsake Me"
 
-L<Announced on 2023-06-23 by Ricardo Signes|http://nntp.perl.org/group/perl.perl5.porters/266559>
+L<Announced on 2023-06-23 by Ricardo Signes|https://www.nntp.perl.org/group/perl.perl5.porters/2023/06/msg266559.html>
 
     Oh, do not forsake me, my indolent friends
     Oh, do not forsake me though you know I must spend
@@ -49,7 +49,7 @@ L<Announced on 2023-06-23 by Ricardo Signes|http://nntp.perl.org/group/perl.perl
 
 =head2 v5.38.0-RC1 - Kurt Vonnegut, "Good Bless You, Mr. Rosewater"
 
-L<Announced on 2023-06-15 by Ricardo Signes|http://nntp.perl.org/group/perl.perl5.porters/266521>
+L<Announced on 2023-06-15 by Ricardo Signes|https://www.nntp.perl.org/group/perl.perl5.porters/2023/06/msg266521.html>
 
 Welcome to Earth. It's hot in the summer and cold in the winter. It's
 round and wet and crowded. On the outside, babies, you've got a hundred
