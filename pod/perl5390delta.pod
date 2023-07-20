@@ -45,25 +45,6 @@ XXX For a release on a stable branch, this section aspires to be:
 
 [ List each incompatible change as a =head2 entry ]
 
-=head2 reset EXPR now calls set-magic on scalars
-
-Previously C<reset EXPR> did not call set magic when clearing scalar
-variables.  This meant that changes did not propagate to the
-underlying internal state where needed, such as for C<$^W>, and did
-not result in an exception where the underlying magic would normally
-throw an exception, such as for C<$1>.
-
-This means code that had no effect before may now actually have an
-effect, including possibly throwing an exception.
-
-C<reset EXPR> already called set magic when modifying arrays and
-hashes.
-
-This has no effect on plain C<reset> used to reset one-match searches
-as with C<m?pattern?>.
-
-[GH #20763]
-
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.
@@ -144,11 +125,9 @@ XXX Remove this section if Porting/corelist-perldelta.pl did not add any content
 
 =item *
 
-L<Errno> has been upgraded from version 1.37 to 1.38.
+L<XXX> has been upgraded from version A.xx to B.yy.
 
-The C<osvers> and C<archname> baked into the module to ensure Errno is
-loaded by the perl that built it are now more comprehensively
-escaped. [GH #21135]
+XXX If there was something important to note about this change, include that here.
 
 =back
 
@@ -187,14 +166,13 @@ section.
 
 Additionally, the following selected changes have been made:
 
-=head3 L<perlhacktips>
+=head3 L<XXX>
 
 =over 4
 
 =item *
 
-Document we can't use compound literals or array designators due to
-C++ compatibility.  [GH #21073]
+XXX Description of the change here
 
 =back
 
@@ -305,8 +283,7 @@ made:
 
 =item *
 
-Update F<nm> output parsing for Darwin in F<t/porting/libperl.t> to
-handle changes in the output of nm on Darwin.  [GH #21117]
+XXX
 
 =back
 
@@ -353,10 +330,9 @@ L</Modules and Pragmata> section.
 
 =over 4
 
-=item Windows
+=item XXX-some-platform
 
-Eliminated several header build warnings under MSVC with C</W4> to
-reduce noise for embedders. [GH #21031]
+XXX
 
 =back
 
