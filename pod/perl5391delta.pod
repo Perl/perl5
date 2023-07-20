@@ -1,0 +1,315 @@
+=encoding utf8
+
+=head1 NAME
+
+perl5391delta - what is new for perl v5.39.1
+
+=head1 DESCRIPTION
+
+This document describes differences between the 5.39.0 release and the 5.39.1
+release.
+
+If you are upgrading from an earlier release such as 5.38.0, first read
+L<perl5390delta>, which describes differences between 5.38.0 and 5.39.0.
+
+=head1 Incompatible Changes
+
+=head2 reset EXPR now calls set-magic on scalars
+
+Previously C<reset EXPR> did not call set magic when clearing scalar variables.
+This meant that changes did not propagate to the underlying internal state
+where needed, such as for C<$^W>, and did not result in an exception where the
+underlying magic would normally throw an exception, such as for C<$1>.
+
+This means code that had no effect before may now actually have an effect,
+including possibly throwing an exception.
+
+C<reset EXPR> already called set magic when modifying arrays and hashes.
+
+This has no effect on plain C<reset> used to reset one-match searches as with
+C<m?pattern?>.
+
+[L<GH #20763|https://github.com/Perl/perl5/issues/20763>]
+
+=head2 Calling the import method of an unknown package produces an error
+
+Historically, it has been possible to call the import() or unimport() method of
+any class, including ones which have not been defined, with an argument and not
+experience an error.  For instance, this code will not throw an error in Perl
+5.38:
+
+    Class::That::Does::Not::Exist->import("foo");
+
+However, as of Perl 5.39.1 this will throw an exception.  Note that calling
+these methods with no arguments continues to silently succeed and do nothing.
+For instance,
+
+    Class::That::Does::Not::Exist->import();
+
+will continue to not throw an error.  This is because every class implicitly
+inherits from the class UNIVERSAL which now defines an import method.  In older
+perls there was no such method defined, and instead the method calls for
+C<import> and C<unimport> were special cased to not throw errors if there was
+no such method defined.
+
+This change has been added because it makes it easier to detect case typos in
+C<use> statements when running on case-insensitive file systems.  For instance,
+on Windows or other platforms with case-insensitive file systems on older perls
+the following code
+
+    use STRICT 'refs';
+
+would silently do nothing as the module is actually called 'strict.pm', not
+'STRICT.pm', so it would be loaded but its import method would never be called.
+It will also detect cases where a user passes an argument when using a package
+that does not provide its own import, for instance most "pure" class
+definitions do not define an import method.
+
+=head1 Modules and Pragmata
+
+=head2 Updated Modules and Pragmata
+
+=over 4
+
+=item *
+
+L<Compress::Raw::Bzip2> has been upgraded from version 2.204_001 to 2.205.
+
+=item *
+
+L<Compress::Raw::Zlib> has been upgraded from version 2.204_001 to 2.205.
+
+=item *
+
+L<CPAN::Meta::Requirements> has been upgraded from version 2.140 to 2.143.
+
+=item *
+
+L<Errno> has been upgraded from version 1.37 to 1.38.
+
+The C<osvers> and C<archname> baked into the module to ensure Errno is loaded
+by the perl that built it are now more comprehensively escaped.
+[L<GH #21135|https://github.com/Perl/perl5/issues/21135>]
+
+=item *
+
+L<ExtUtils::CBuilder> has been upgraded from version 0.280238 to 0.280239.
+
+=item *
+
+L<ExtUtils::Manifest> has been upgraded from version 1.73 to 1.75.
+
+=item *
+
+L<feature> has been upgraded from version 1.82 to 1.83.
+
+=item *
+
+IO-Compress has been upgraded from version 2.204 to 2.205.
+
+=item *
+
+L<Math::BigInt> has been upgraded from version 1.999837 to 1.999839.
+
+=item *
+
+L<Math::BigInt::FastCalc> has been upgraded from version 0.5013 to 0.5014.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 5.20230520 to 5.20230720.
+
+=item *
+
+L<Module::Metadata> has been upgraded from version 1.000037 to 1.000038.
+
+=item *
+
+L<perlfaq> has been upgraded from version 5.20210520 to 5.20230701.
+
+=item *
+
+L<POSIX> has been upgraded from version 2.13 to 2.14.
+
+=item *
+
+L<Socket> has been upgraded from version 2.036 to 2.037.
+
+=item *
+
+L<Test::Simple> has been upgraded from version 1.302194 to 1.302195.
+
+=item *
+
+L<Text::Tabs> has been upgraded from version 2021.0814 to 2023.0511.
+
+=item *
+
+L<Text::Wrap> has been upgraded from version 2021.0814 to 2023.0511.
+
+=item *
+
+L<threads> has been upgraded from version 2.36 to 2.37.
+
+=item *
+
+L<Time::HiRes> has been upgraded from version 1.9775 to 1.9776.
+
+=item *
+
+L<Time::Local> has been upgraded from version 1.30 to 1.35.
+
+=item *
+
+L<UNIVERSAL> has been upgraded from version 1.15 to 1.16.
+
+=item *
+
+L<warnings> has been upgraded from version 1.65 to 1.66.
+
+=back
+
+=head1 Documentation
+
+=head2 Changes to Existing Documentation
+
+We have attempted to update the documentation to reflect the changes listed in
+this document.  If you find any we have missed, open an issue at
+L<https://github.com/Perl/perl5/issues>.
+
+Additionally, the following selected changes have been made:
+
+=head3 L<perlhacktips>
+
+=over 4
+
+=item *
+
+Document we can't use compound literals or array designators due to C++
+compatibility.  [L<GH #21073|https://github.com/Perl/perl5/issues/21073>]
+
+=back
+
+=head1 Diagnostics
+
+The following additions or changes have been made to diagnostic output,
+including warnings and fatal error messages.  For the complete list of
+diagnostic messages, see L<perldiag>.
+
+=head2 New Diagnostics
+
+=head3 New Errors
+
+=over 4
+
+=item *
+
+L<Attempt to call undefined %s method with arguments via package "%s" (perhaps
+you forgot to load the package?)|perldiag/"Attempt to call undefined %s method
+with arguments via package "%s" (perhaps you forgot to load the package?)">
+
+(F) You called the C<import()> or C<unimport()> method of a class that has no
+import method defined in its inheritance graph, and passed an argument to the
+method.  This is very often the sign of a misspelled package name in a use or
+require statement that has silently succeeded due to a case-insensitive file
+system.
+
+Another common reason this may happen is when mistakenly attempting to import
+or unimport a symbol from a class definition or package which does not use
+C<Exporter> or otherwise define its own C<import> or C<unimport> method.
+
+=back
+
+=head1 Testing
+
+Tests were added and changed to reflect the other additions and changes in this
+release.  Furthermore, these significant changes were made:
+
+=over 4
+
+=item *
+
+Update F<nm> output parsing for Darwin in F<t/porting/libperl.t> to handle
+changes in the output of nm on Darwin.
+[L<GH #21117|https://github.com/Perl/perl5/issues/21117>]
+
+=back
+
+=head1 Platform Support
+
+=head2 Platform-Specific Notes
+
+=over 4
+
+=item Windows
+
+Eliminated several header build warnings under MSVC with C</W4> to reduce noise
+for embedders.  [L<GH #21031|https://github.com/Perl/perl5/issues/21031>]
+
+=back
+
+=head1 Acknowledgements
+
+Perl 5.39.1 represents approximately 3 weeks of development since Perl 5.38.0
+and contains approximately 24,000 lines of changes across 290 files from 18
+authors.
+
+Excluding auto-generated files, documentation and release tools, there were
+approximately 6,100 lines of changes to 200 .pm, .t, .c and .h files.
+
+Perl continues to flourish into its fourth decade thanks to a vibrant community
+of users and developers.  The following people are known to have contributed
+the improvements that became Perl 5.39.1:
+
+Bernd, Elvin Aslanov, Eugen Konkov, Graham Knop, Hauke D, H.Merijn Brand, Hugo
+van der Sanden, James E Keenan, James Raspass, Karl Williamson, Lukas Mai, Paul
+Evans, Ricardo Signes, Steve Hay, TAKAI Kousuke, Tomasz Konojacki, Tony Cook
+Yves Orton.
+
+The list above is almost certainly incomplete as it is automatically generated
+from version control history.  In particular, it does not include the names of
+the (very much appreciated) contributors who reported issues to the Perl bug
+tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core.  We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please see
+the F<AUTHORS> file in the Perl source distribution.
+
+=head1 Reporting Bugs
+
+If you find what you think is a bug, you might check the perl bug database at
+L<https://github.com/Perl/perl5/issues>.  There may also be information at
+L<http://www.perl.org/>, the Perl Home Page.
+
+If you believe you have an unreported bug, please open an issue at
+L<https://github.com/Perl/perl5/issues>.  Be sure to trim your bug down to a
+tiny but sufficient test case.
+
+If the bug you are reporting has security implications which make it
+inappropriate to send to a public issue tracker, then see L<perlsec/SECURITY
+VULNERABILITY CONTACT INFORMATION> for details of how to report the issue.
+
+=head1 Give Thanks
+
+If you wish to thank the Perl 5 Porters for the work we had done in Perl 5, you
+can do so by running the C<perlthanks> program:
+
+    perlthanks
+
+This will send an email to the Perl 5 Porters list with your show of thanks.
+
+=head1 SEE ALSO
+
+The F<Changes> file for an explanation of how to view exhaustive details on
+what changed.
+
+The F<INSTALL> file for how to build Perl.
+
+The F<README> file for general stuff.
+
+The F<Artistic> and F<Copying> files for copyright information.
+
+=cut
