@@ -22,6 +22,7 @@ my @OPTSPEC= qw(
     man
     authors_file=s
     mailmap_file=s
+    source_dir=s
 
     validate|tap
     verbose+
