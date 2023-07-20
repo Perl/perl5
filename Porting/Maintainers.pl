@@ -374,7 +374,9 @@ use File::Glob qw(:case);
         'CUSTOMIZED'   => [
             # https://github.com/Dual-Life/digest-md5/pull/24
             'MD5.pm',
-            'MD5.xs'
+            'MD5.xs',
+
+            't/files.t'
         ],
     },
 
@@ -822,7 +824,9 @@ use File::Glob qw(:case);
         'CUSTOMIZED'   => [
             # https://github.com/Dual-Life/mime-base64/pull/17
             'Base64.xs',
-            'lib/MIME/Base64.pm'
+            'lib/MIME/Base64.pm',
+
+            'lib/MIME/QuotedPrint.pm'
         ],
     },
 
