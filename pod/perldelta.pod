@@ -250,9 +250,33 @@ for embedders.  [L<GH #21031|https://github.com/Perl/perl5/issues/21031>]
 
 =head1 Acknowledgements
 
-XXX Generate this with:
+Perl 5.39.1 represents approximately 3 weeks of development since Perl 5.38.0
+and contains approximately 24,000 lines of changes across 290 files from 18
+authors.
 
-  perl Porting/acknowledgements.pl v5.39.0..HEAD
+Excluding auto-generated files, documentation and release tools, there were
+approximately 6,100 lines of changes to 200 .pm, .t, .c and .h files.
+
+Perl continues to flourish into its fourth decade thanks to a vibrant community
+of users and developers.  The following people are known to have contributed
+the improvements that became Perl 5.39.1:
+
+Bernd, Elvin Aslanov, Eugen Konkov, Graham Knop, Hauke D, H.Merijn Brand, Hugo
+van der Sanden, James E Keenan, James Raspass, Karl Williamson, Lukas Mai, Paul
+Evans, Ricardo Signes, Steve Hay, TAKAI Kousuke, Tomasz Konojacki, Tony Cook
+Yves Orton.
+
+The list above is almost certainly incomplete as it is automatically generated
+from version control history.  In particular, it does not include the names of
+the (very much appreciated) contributors who reported issues to the Perl bug
+tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core.  We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please see
+the F<AUTHORS> file in the Perl source distribution.
 
 =head1 Reporting Bugs
 
