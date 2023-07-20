@@ -210,7 +210,7 @@ L<feature> has been upgraded from version 1.82 to 1.83.
 
 =item *
 
-L<IO-Compress> has been upgraded from version 2.204 to 2.205.
+IO-Compress has been upgraded from version 2.204 to 2.205.
 
 =item *
 
