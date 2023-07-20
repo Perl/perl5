@@ -4,7 +4,7 @@
 # Any changes made here will be lost!
 
 package feature;
-our $VERSION = '1.83';
+our $VERSION = '1.84';
 
 our %feature = (
     fc                      => 'feature_fc',
@@ -434,7 +434,7 @@ for the exceptions listed below.
 The perl built-in filehandles C<STDIN>, C<STDOUT>, C<STDERR>, C<DATA>,
 C<ARGV>, C<ARGVOUT> and the special C<_> are always enabled.
 
-This feature is enabled under this name from Perl 5.34 onwards.  In
+This feature is available under this name from Perl 5.34 onwards.  In
 previous versions it was simply on all the time.
 
 You can use the L<bareword::filehandles> module on CPAN to disable
