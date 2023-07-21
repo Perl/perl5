@@ -1,10 +1,18 @@
-#!perl -w
+#!perl
+
 use strict;
+use warnings;
+
+BEGIN {
+    chdir 't' if -d 't';
+    require './test.pl';
+    set_up_inc('../lib');
+	skip_all('Can\'t run under miniperl') if is_miniperl();
+}
+
+plan(19);
+
 use IO::Handle; # ungetc()
-
-use Test::More tests => 20;
-
-require_ok q{PerlIO::scalar};
 
 my $s = 'foo';
 Internals::SvREADONLY($s, 1);

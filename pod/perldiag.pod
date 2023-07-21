@@ -4688,7 +4688,7 @@ missing value will be filled in with undef instead.
 
 =item Offset outside string
 
-(F)(W layer) You tried to do a read/write/send/recv/seek operation
+(W layer) You tried to do a read/write/send/recv/seek operation
 with an offset pointing outside the buffer.  This is difficult to
 imagine.  The sole exceptions to this are that zero padding will
 take place when going past the end of the string when either

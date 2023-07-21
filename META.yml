@@ -72,7 +72,6 @@ no_index:
     - ext/ODBM_File/t
     - ext/Opcode/t
     - ext/PerlIO-encoding/t
-    - ext/PerlIO-scalar/t
     - ext/PerlIO-via/t
     - ext/Pod-Functions/t
     - ext/Pod-Html/t

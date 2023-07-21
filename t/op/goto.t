@@ -636,8 +636,7 @@ format CHOLET =
 wellington
 .
 $foo .= "(1)";
-SKIP: {
-    skip_if_miniperl("no dynamic loading on miniperl, so can't load PerlIO::scalar", 1);
+{
     my $cholet;
     open(CHOLET, ">", \$cholet);
     write CHOLET;
