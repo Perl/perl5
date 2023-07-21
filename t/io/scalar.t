@@ -1,19 +1,18 @@
 #!./perl
 
 BEGIN {
-    require Config;
-    if (($Config::Config{'extensions'} !~ m!\bPerlIO/scalar\b!) ){
-        print "1..0 # Skip -- Perl configured without PerlIO::scalar module\n";
-        exit 0;
-    }
+    chdir 't' if -d 't';
+    require './test.pl';
+    set_up_inc('../lib');
+	skip_all('Can\'t run under miniperl') if is_miniperl();
 }
+
+use strict;
 
 use Fcntl qw(SEEK_SET SEEK_CUR SEEK_END); # Not 0, 1, 2 everywhere.
 use Errno qw(EACCES);
 
-$| = 1;
-
-use Test::More tests => 125;
+plan(128);
 
 my $fh;
 my $var = "aaa\n";
@@ -82,7 +81,7 @@ is($var, "foo");
 $var = '';
 open $fh, "+>", \$var;
 print $fh "xxx\n";
-open $dup,'+<&',$fh;
+open my $dup,'+<&',$fh;
 print $dup "yyy\n";
 seek($dup,0,SEEK_SET);
 is(<$dup>, "xxx\n");
@@ -95,7 +94,7 @@ is(<$fh>, "42", "reading from non-string scalars");
 close $fh;
 
 { package P; sub TIESCALAR {bless{}} sub FETCH { "shazam" } sub STORE {} }
-tie $p, P; open $fh, '<', \$p;
+tie my $p, 'P'; open $fh, '<', \$p;
 is(<$fh>, "shazam", "reading from magic scalars");
 
 {
@@ -136,7 +135,7 @@ is(<$fh>, "shazam", "reading from magic scalars");
         sub FETCH { $fetch++; return undef }
 	sub STORE {}
     }
-    tie my $scalar, MgUndef;
+    tie my $scalar, 'MgUndef';
 
     open my $fh, '<', \$scalar;
     close $fh;
@@ -409,12 +408,13 @@ my $byte_warning = "Strings with code points over 0xFF may not be mapped into in
     $! = 0;
     ok(!open(my $fh, "<", \$content), "non-byte open should fail");
     is(0+$!, EINVAL, "check \$! is updated");
-    is_deeply(\@warnings, [], "should be no warnings (yet)");
+	is(@warnings, 0, "should be no warnings (yet)");
     use warnings "utf8";
     $! = 0;
     ok(!open(my $fh, "<", \$content), "non byte open should fail (and warn)");
     is(0+$!, EINVAL, "check \$! is updated even when we warn");
-    is_deeply(\@warnings, [ $byte_warning ], "should have warned");
+    is(@warnings, 1, "should have warned");
+    is($warnings[0], $byte_warning, "should have warned");
 
     @warnings = ();
     $content = "12\xA1";
@@ -425,7 +425,7 @@ my $byte_warning = "Strings with code points over 0xFF may not be mapped into in
     is(read($fh, $tmp, 4), 3, "read should get the downgraded bytes");
     is($tmp, "12\xA1", "check we got the expected bytes");
     close $fh;
-    is_deeply(\@warnings, [], "should be no more warnings");
+    is(@warnings, 0, "should be no more warnings");
 }
 { # changes after open
     my $content = "abc";
@@ -447,11 +447,12 @@ my $byte_warning = "Strings with code points over 0xFF may not be mapped into in
     $! = 0;
     is(read($fh, $tmp, 1), undef, "read from scalar with >0xff chars");
     is(0+$!, EINVAL, "check errno set correctly");
-    is_deeply(\@warnings, [], "should be no warning (yet)");
+	is(@warnings, 0, "should be no warnings (yet)");
     use warnings "utf8";
     seek($fh, 1, SEEK_SET);
     is(read($fh, $tmp, 1), undef, "read from scalar with >0xff chars");
-    is_deeply(\@warnings, [ $byte_warning ], "check warning");
+    is(@warnings, 1, "check warnings");
+    is($warnings[0], $byte_warning, "check warnings");
 
     select $fh; # make sure print fails rather tha buffers
     $| = 1;
@@ -470,11 +471,12 @@ my $byte_warning = "Strings with code points over 0xFF may not be mapped into in
     ok(!(print $fh "B"), "write to an non-downgradable SV");
     is(0+$!, EINVAL, "check errno set");
 
-    is_deeply(\@warnings, [], "should be no warning");
+    is(@warnings, 0, "should be no warning");
 
     use warnings "utf8";
     ok(!(print $fh "B"), "write to an non-downgradable SV (and warn)");
-    is_deeply(\@warnings, [ $byte_warning ], "check warning");
+    is(@warnings, 1, "check warnings");
+    is($warnings[0], $byte_warning, "check warnings");
 }
 
 #  RT #119529: Reading refs should not loop

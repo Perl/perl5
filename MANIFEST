@@ -4654,10 +4654,7 @@ ext/PerlIO-encoding/t/nolooping.t	Tests for PerlIO::encoding
 ext/PerlIO-encoding/t/threads.t		Tests PerlIO::encoding and threads
 ext/PerlIO-mmap/mmap.pm			PerlIO layer for memory maps
 ext/PerlIO-mmap/mmap.xs			PerlIO layer for memory maps
-ext/PerlIO-scalar/scalar.pm		PerlIO layer for scalars
-ext/PerlIO-scalar/scalar.xs		PerlIO layer for scalars
-ext/PerlIO-scalar/t/scalar.t		See if PerlIO::scalar works
-ext/PerlIO-scalar/t/scalar_ungetc.t	Tests for PerlIO layer for scalars
+ext/PerlIO-scalar/scalar.pm		PerlIO layer for in-memory handles
 ext/PerlIO-via/hints/aix.pl		Hint for PerlIO::via for named architecture
 ext/PerlIO-via/t/thread.t		See if PerlIO::via works with threads
 ext/PerlIO-via/t/via.t			See if PerlIO::via works
@@ -5775,6 +5772,8 @@ t/io/print.t				See if print commands work
 t/io/pvbm.t				See if PVBMs break IO commands
 t/io/read.t				See if read works
 t/io/say.t				See if say works
+t/io/scalar.t				See if PerlIO::scalar works
+t/io/scalar_ungetc.t			Tests for PerlIO layer for scalars
 t/io/sem.t				See if SysV semaphores work
 t/io/semctl.t				See if SysV semaphore semctl works
 t/io/shm.t				See if SysV shared memory works
