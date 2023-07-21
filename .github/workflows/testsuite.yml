@@ -805,6 +805,7 @@ jobs:
       AUTHOR_TESTING: 1
       AUTOMATED_TESTING: 1
       RELEASE_TESTING: 1
+      NO_NETWORK_TESTING: 1
 
     strategy:
       fail-fast: false
@@ -839,6 +840,7 @@ jobs:
       AUTHOR_TESTING: 1
       AUTOMATED_TESTING: 1
       RELEASE_TESTING: 1
+      NO_NETWORK_TESTING: 1
 
     strategy:
       fail-fast: false
