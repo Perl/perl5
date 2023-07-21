@@ -308,7 +308,16 @@ STATIC const char * const category_names[] = {
                              " this, it is a bug in perl; please report it" \
                              " via perlbug"
     LC_UNKNOWN_STRING
+};
 
+STATIC const Size_t category_name_lengths[] = {
+
+#  undef PERL_LOCALE_TABLE_ENTRY
+#  define PERL_LOCALE_TABLE_ENTRY(name, call_back)  STRLENs(# name),
+#  include "locale_table.h"
+
+    STRLENs(LC_ALL_STRING),
+    STRLENs(LC_UNKNOWN_STRING)
 };
 
 /* A few categories require additional setup when they are changed.  This table
@@ -1528,7 +1537,7 @@ S_calculate_LC_ALL_string(pTHX_ const char ** individ_locales)
         const char * entry = individ_locales[i];
 #    endif
 
-        names_len += strlen(category_names[i])
+        names_len += category_name_lengths[i]
                   + 1                           /* '=' */
                   + strlen(entry)
                   + 1;                          /* ';' */
