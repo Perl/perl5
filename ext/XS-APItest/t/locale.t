@@ -9,6 +9,14 @@ use Config;
 skip_all("locales not available") unless locales_enabled();
 
 my @locales = eval { find_locales( &LC_NUMERIC ) };
+
+if (@locales) {
+    use POSIX;
+                   # Choose a number unlikely to be a legal category
+    ok(! setlocale(1114112, $locales[0]),
+                   "Fails to set an illegal category to a legal locale");
+}
+
 my $comma_locale;
 for my $locale (@locales) {
     use POSIX;
