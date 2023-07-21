@@ -363,7 +363,8 @@ sub is ($$@) {
             my $p = 0;
             $p++ while substr($got,$p,1) eq substr($expected,$p,1);
             push @mess,"#  diff at $p\n";
-            push @mess,"#    after "._qq(substr($got,$p-40<0 ? 0 : $p-40,40))."\n";
+            push @mess,"#    after "._qq(substr($got,$p < 40 ? 0  : $p - 40,
+                                                     $p < 40 ? $p : 40)) . "\n";
             push @mess,"#     have "._qq(substr($got,$p,40))."\n";
             push @mess,"#     want "._qq(substr($expected,$p,40))."\n";
         }
