@@ -461,17 +461,66 @@ XS(XS_UNIVERSAL_import_unimport)
     dXSI32;
 
     if (items > 1) {
-        char *class_pv= SvPV_nolen(ST(0));
+        SV *class_sv = ST(0);
+        char *class_pv = SvPV_nolen(class_sv);
         if (strEQ(class_pv,"UNIVERSAL"))
             Perl_croak(aTHX_ "UNIVERSAL does not export anything");
         /* _charnames is special - ignore it for now as the code that
-         * depends on it has its own "no import" logic that produces better
-         * warnings than this does. */
-        if (strNE(class_pv,"_charnames"))
-            Perl_croak(aTHX_
-                "Attempt to call undefined %s method with arguments via package "
-                "%" SVf_QUOTEDPREFIX " (Perhaps you forgot to load the package?)",
-                ix ? "unimport" : "import", SVfARG(ST(0)));
+         * depends on it has its own "no import" logic that produces
+         * better warnings than this does. We special case
+         * Test::SubExport::SETUPALT as Sub::Export is high in the CPAN
+         * river, and is owned by rjbs, who will fix it soon. For now
+         * special case it. */
+        if (strNE(class_pv,"_charnames") &&
+            strNE(class_pv,"Test::SubExport::SETUPALT"))
+        {
+            /* !ix means "import was called" */
+            IV cmp_items = 1;
+
+            if (!ix && Perl_looks_like_number(aTHX_ ST(1))) {
+                SV *want_version = ST(1);
+                cmp_items = 2;
+
+                /* it looks like the caller has done one of the following:
+                 *
+                 *  use Thing '1234';
+                 *  Thing->import('1234');
+                 *
+                 * But Thing doesn't define its own import() method.
+                 * So we convert this call into
+                 *
+                 *  Thing->VERSION('1234')
+                 *
+                 * which does the version check. VERSION will throw
+                 * an exception if the Thing package isn't defined.
+                 */
+
+                /* note it would be nice if we could do the
+                 * equivalent of 'goto &UNIVERSAL::VERSION'
+                 * here and avoid having to repush items onto the
+                 * stack.
+                 */
+                ENTER_with_name("call_VERSION_from_import");
+                SAVETMPS;
+                EXTEND(SP, 2);
+                PUSHMARK(SP);
+                PUSHs(class_sv);
+                PUSHs(want_version);
+                PUTBACK;
+                (void)call_method("VERSION", G_VOID);
+                SPAGAIN;
+                PUTBACK;
+                FREETMPS;
+                LEAVE_with_name("call_VERSION_from_import");
+            }
+
+            if ( items > cmp_items ) {
+                Perl_croak(aTHX_
+                    "Attempt to call undefined %s method with arguments via package "
+                    "%" SVf_QUOTEDPREFIX " (Perhaps you forgot to load the package?)",
+                    ix ? "unimport" : "import", SVfARG(ST(0)));
+            }
+        }
     }
     XSRETURN_EMPTY;
 }
