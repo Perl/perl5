@@ -179,7 +179,14 @@ Otherwise ends a section of code already begun by a C<L</START_EXTERN_C>>.
 /* Fallback definitions in case we don't have definitions from config.h.
    This should only matter for systems that don't use Configure and
    haven't been modified to define PERL_STATIC_INLINE yet.
+
+=for apidoc AmU|void|PERL_STATIC_INLINE|token
+Declares the function named C<token> to be static, and if the compiler has the
+capability, requests for it to be inlined.
+
+=cut
 */
+
 #if !defined(PERL_STATIC_INLINE)
 #  ifdef HAS_STATIC_INLINE
 #    define PERL_STATIC_INLINE static inline
