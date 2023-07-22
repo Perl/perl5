@@ -6,7 +6,7 @@
 
 #include "config.h"
 
-#if defined(HAS_NL_LANGINFO) && defined(I_LANGINFO)
+#if defined(I_LANGINFO)
 #   include <langinfo.h>
 #endif
 
