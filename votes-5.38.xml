@@ -15,7 +15,7 @@ Adding new warnings, errors or deprecations
 
 The same criteria apply to code in dual-life modules as to core code.)
 
-See https://github.com/perl/Perl5/issues?q=+label%3Abackport-5.36
+See https://github.com/perl/Perl5/issues?q=+label%3Abackport-5.38
 
 </div>
 
@@ -48,9 +48,6 @@ See https://github.com/perl/Perl5/issues?q=+label%3Abackport-5.36
 <div><h3>Platform-Specific Test Fixes</h3>
 
 The following two are related, only apply the second if the first is applied
-<commit votes="tonyc" id="b1db17763c817dd84f06c0147a2bc60fe1bfe639" issue="21117" pull="21120" desc="porting/libperl.t: handle nm output on Mac OS Ventura 13.4"/>
-
-<commit votes="tonyc" id="41f7ccfe264b40f480676b52fe3c0bc952e66041" issue="21117" pull="21120" desc="libperl.t: eliminate the rest of the noise on recent Darwin"/>
 
 </div>
 
@@ -68,14 +65,14 @@ The following two are related, only apply the second if the first is applied
   <xsl:template match="/">
     <html>
       <head>
-        <title>Cherry-pick votes for maint-5.36</title>
+        <title>Cherry-pick votes for maint-5.38</title>
         <style>
           .accepted .ref a { color: #090 }
           .unvoted  .ref a { color: #c00 }
         </style>
       </head>
       <body>
-        <h1>Cherry-pick votes for maint-5.36</h1>
+        <h1>Cherry-pick votes for maint-5.38</h1>
         <xsl:for-each select="/doc/data/div">
           <h2><xsl:value-of select="h2"/></h2>
           <h3><xsl:value-of select="h3"/></h3>
