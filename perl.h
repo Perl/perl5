@@ -1186,7 +1186,8 @@ violations are fatal.
  * In locale.c, there are a bunch of parallel arrays corresponding to this
  * enum.  The first element of each corresponds with the first enum value here,
  * and so on.  That means this enum must be in identical order with those
- * arrays.  (There are asserts in locale.c that should fail if this gets
+ * arrays.  This is guaranteed by using locale_table.h in all instances.
+ * (There are also asserts in locale.c that should fail if this gets
  * out-of-sync.)  So, if the platform doesn't have LC_CTYPE, but does have
  * LC_NUMERIC, the code below will cause LC_NUMERIC_INDEX_ to be defined to be
  * 0.  That way the foo_INDEX_ values are contiguous non-negative integers,
@@ -1198,48 +1199,10 @@ typedef enum {
 
 /* Now create LC_foo_INDEX_ values for just those categories used on this
  * system */
-#  ifdef USE_LOCALE_CTYPE
-    LC_CTYPE_INDEX_,
-#  endif
-#  ifdef USE_LOCALE_NUMERIC
-    LC_NUMERIC_INDEX_,
-#  endif
-#  ifdef USE_LOCALE_COLLATE
-    LC_COLLATE_INDEX_,
-#  endif
-#  ifdef USE_LOCALE_TIME
-    LC_TIME_INDEX_,
-#  endif
-#  ifdef USE_LOCALE_MESSAGES
-    LC_MESSAGES_INDEX_,
-#  endif
-#  ifdef USE_LOCALE_MONETARY
-    LC_MONETARY_INDEX_,
-#  endif
-#  ifdef USE_LOCALE_ADDRESS
-    LC_ADDRESS_INDEX_,
-#  endif
-#  ifdef USE_LOCALE_IDENTIFICATION
-    LC_IDENTIFICATION_INDEX_,
-#  endif
-#  ifdef USE_LOCALE_MEASUREMENT
-    LC_MEASUREMENT_INDEX_,
-#  endif
-#  ifdef USE_LOCALE_PAPER
-    LC_PAPER_INDEX_,
-#  endif
-#  ifdef USE_LOCALE_TELEPHONE
-    LC_TELEPHONE_INDEX_,
-#  endif
-#  ifdef USE_LOCALE_NAME
-    LC_NAME_INDEX_,
-#  endif
-#  ifdef USE_LOCALE_SYNTAX
-    LC_SYNTAX_INDEX_,
-#  endif
-#  ifdef USE_LOCALE_TOD
-    LC_TOD_INDEX_,
-#  endif
+#    undef PERL_LOCALE_TABLE_ENTRY
+#    define PERL_LOCALE_TABLE_ENTRY(name, call_back)  name ## _INDEX_,
+#    include "locale_table.h"
+
 #endif  /* USE_LOCALE */
 
     LC_ALL_INDEX_   /* Always defined, even if no LC_ALL on system */
