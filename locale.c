@@ -5853,12 +5853,9 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 #  ifdef USE_POSIX_2008_LOCALE
 
     /* The stdized setlocales haven't affected the P2008 locales.  Initialize
-     * them now, calculating LC_ALL only on the final go round, when all have
-     * been set. */
+     * them now */
     for (i = 0; i < LC_ALL_INDEX_; i++) {
-        (void) bool_setlocale_2008_i(i, curlocales[i],
-                                     RECALCULATE_LC_ALL_ON_FINAL_INTERATION,
-                                     __LINE__);
+        void_setlocale_i(i, curlocales[i]);
     }
 
 #  endif
