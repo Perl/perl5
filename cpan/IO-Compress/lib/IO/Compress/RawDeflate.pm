@@ -6,16 +6,16 @@ use strict ;
 use warnings;
 use bytes;
 
-use IO::Compress::Base 2.205 ;
-use IO::Compress::Base::Common  2.205 qw(:Status :Parse);
-use IO::Compress::Adapter::Deflate 2.205 ;
-use Compress::Raw::Zlib  2.205 qw(Z_DEFLATED Z_DEFAULT_COMPRESSION Z_DEFAULT_STRATEGY);
+use IO::Compress::Base 2.206 ;
+use IO::Compress::Base::Common  2.206 qw(:Status :Parse);
+use IO::Compress::Adapter::Deflate 2.206 ;
+use Compress::Raw::Zlib  2.206 qw(Z_DEFLATED Z_DEFAULT_COMPRESSION Z_DEFAULT_STRATEGY);
 
 require Exporter ;
 
 our ($VERSION, @ISA, @EXPORT_OK, %DEFLATE_CONSTANTS, %EXPORT_TAGS, $RawDeflateError);
 
-$VERSION = '2.205';
+$VERSION = '2.206';
 $RawDeflateError = '';
 
 @ISA = qw(IO::Compress::Base Exporter);

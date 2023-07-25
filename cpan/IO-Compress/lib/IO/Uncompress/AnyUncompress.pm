@@ -4,16 +4,16 @@ use strict;
 use warnings;
 use bytes;
 
-use IO::Compress::Base::Common 2.205 ();
+use IO::Compress::Base::Common 2.206 ();
 
-use IO::Uncompress::Base 2.205 ;
+use IO::Uncompress::Base 2.206 ;
 
 
 require Exporter ;
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, $AnyUncompressError);
 
-$VERSION = '2.205';
+$VERSION = '2.206';
 $AnyUncompressError = '';
 
 @ISA = qw(IO::Uncompress::Base Exporter);
@@ -33,26 +33,26 @@ BEGIN
    # Don't trigger any __DIE__ Hooks.
    local $SIG{__DIE__};
 
-   eval ' use IO::Uncompress::Adapter::Inflate 2.205 ;';
-   eval ' use IO::Uncompress::Adapter::Bunzip2 2.205 ;';
-   eval ' use IO::Uncompress::Adapter::LZO 2.205 ;';
-   eval ' use IO::Uncompress::Adapter::Lzf 2.205 ;';
-   eval ' use IO::Uncompress::Adapter::UnLzma 2.205 ;';
-   eval ' use IO::Uncompress::Adapter::UnXz 2.205 ;';
-   eval ' use IO::Uncompress::Adapter::UnZstd 2.205 ;';
-   eval ' use IO::Uncompress::Adapter::UnLzip 2.205 ;';
+   eval ' use IO::Uncompress::Adapter::Inflate 2.206 ;';
+   eval ' use IO::Uncompress::Adapter::Bunzip2 2.206 ;';
+   eval ' use IO::Uncompress::Adapter::LZO 2.206 ;';
+   eval ' use IO::Uncompress::Adapter::Lzf 2.206 ;';
+   eval ' use IO::Uncompress::Adapter::UnLzma 2.206 ;';
+   eval ' use IO::Uncompress::Adapter::UnXz 2.206 ;';
+   eval ' use IO::Uncompress::Adapter::UnZstd 2.206 ;';
+   eval ' use IO::Uncompress::Adapter::UnLzip 2.206 ;';
 
-   eval ' use IO::Uncompress::Bunzip2 2.205 ;';
-   eval ' use IO::Uncompress::UnLzop 2.205 ;';
-   eval ' use IO::Uncompress::Gunzip 2.205 ;';
-   eval ' use IO::Uncompress::Inflate 2.205 ;';
-   eval ' use IO::Uncompress::RawInflate 2.205 ;';
-   eval ' use IO::Uncompress::Unzip 2.205 ;';
-   eval ' use IO::Uncompress::UnLzf 2.205 ;';
-   eval ' use IO::Uncompress::UnLzma 2.205 ;';
-   eval ' use IO::Uncompress::UnXz 2.205 ;';
-   eval ' use IO::Uncompress::UnZstd 2.205 ;';
-   eval ' use IO::Uncompress::UnLzip 2.205 ;';
+   eval ' use IO::Uncompress::Bunzip2 2.206 ;';
+   eval ' use IO::Uncompress::UnLzop 2.206 ;';
+   eval ' use IO::Uncompress::Gunzip 2.206 ;';
+   eval ' use IO::Uncompress::Inflate 2.206 ;';
+   eval ' use IO::Uncompress::RawInflate 2.206 ;';
+   eval ' use IO::Uncompress::Unzip 2.206 ;';
+   eval ' use IO::Uncompress::UnLzf 2.206 ;';
+   eval ' use IO::Uncompress::UnLzma 2.206 ;';
+   eval ' use IO::Uncompress::UnXz 2.206 ;';
+   eval ' use IO::Uncompress::UnZstd 2.206 ;';
+   eval ' use IO::Uncompress::UnLzip 2.206 ;';
 
 }
 

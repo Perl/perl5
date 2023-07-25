@@ -8,16 +8,16 @@ use bytes;
 
 require Exporter ;
 
-use IO::Compress::RawDeflate 2.205 ();
-use IO::Compress::Adapter::Deflate 2.205 ;
+use IO::Compress::RawDeflate 2.206 ();
+use IO::Compress::Adapter::Deflate 2.206 ;
 
-use IO::Compress::Zlib::Constants 2.205 ;
-use IO::Compress::Base::Common  2.205 qw();
+use IO::Compress::Zlib::Constants 2.206 ;
+use IO::Compress::Base::Common  2.206 qw();
 
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, %DEFLATE_CONSTANTS, $DeflateError);
 
-$VERSION = '2.205';
+$VERSION = '2.206';
 $DeflateError = '';
 
 @ISA    = qw(IO::Compress::RawDeflate Exporter);

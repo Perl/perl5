@@ -26,9 +26,9 @@ BEGIN {
 
     eval {
            require IO::Compress::Bzip2 ;
-           IO::Compress::Bzip2->import( 2.010 );
+           IO::Compress::Bzip2->VERSION( 2.010 );
            require IO::Uncompress::Bunzip2 ;
-           IO::Uncompress::Bunzip2->import( 2.010 );
+           IO::Uncompress::Bunzip2->VERSION( 2.010 );
          } ;
 
 }

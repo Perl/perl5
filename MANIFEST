@@ -1265,7 +1265,7 @@ cpan/HTTP-Tiny/t/180_verify_SSL.t
 cpan/HTTP-Tiny/t/BrokenCookieJar.pm
 cpan/HTTP-Tiny/t/SimpleCookieJar.pm
 cpan/HTTP-Tiny/t/Util.pm
-cpan/IO-Compress/bin/streamzip
+cpan/IO-Compress/bin/streamzip				IO-Compress
 cpan/IO-Compress/bin/zipdetails				IO::Compress
 cpan/IO-Compress/lib/Compress/Zlib.pm			IO::Compress
 cpan/IO-Compress/lib/File/GlobMapper.pm			IO::Compress
@@ -1297,7 +1297,6 @@ cpan/IO-Compress/lib/IO/Uncompress/RawInflate.pm	IO::Compress
 cpan/IO-Compress/lib/IO/Uncompress/Unzip.pm		IO::Compress
 cpan/IO-Compress/Makefile.PL				IO::Compress
 cpan/IO-Compress/private/MakeUtil.pm			IO::Compress
-cpan/IO-Compress/t/000prereq.t				IO::Compress
 cpan/IO-Compress/t/001bzip2.t				IO::Compress
 cpan/IO-Compress/t/001zlib-generic-deflate.t		IO::Compress
 cpan/IO-Compress/t/001zlib-generic-gzip.t		IO::Compress
@@ -1311,7 +1310,7 @@ cpan/IO-Compress/t/002any-zip.t				IO::Compress
 cpan/IO-Compress/t/004gziphdr.t				IO::Compress
 cpan/IO-Compress/t/005defhdr.t				IO::Compress
 cpan/IO-Compress/t/006zip.t				IO::Compress
-cpan/IO-Compress/t/011-streamzip.t
+cpan/IO-Compress/t/011-streamzip.t			Test file related to IO-Compress
 cpan/IO-Compress/t/01misc.t				IO::Compress
 cpan/IO-Compress/t/020isize.t				IO::Compress
 cpan/IO-Compress/t/050interop-gzip.t			IO::Compress
@@ -1359,7 +1358,7 @@ cpan/IO-Compress/t/107multi-deflate.t			IO::Compress
 cpan/IO-Compress/t/107multi-gzip.t			IO::Compress
 cpan/IO-Compress/t/107multi-rawdeflate.t		IO::Compress
 cpan/IO-Compress/t/107multi-zip.t			IO::Compress
-cpan/IO-Compress/t/107multi-zip-only.t
+cpan/IO-Compress/t/107multi-zip-only.t			Test file related to IO-Compress
 cpan/IO-Compress/t/108anyunc-bzip2.t			IO::Compress
 cpan/IO-Compress/t/108anyunc-deflate.t			IO::Compress
 cpan/IO-Compress/t/108anyunc-gzip.t			IO::Compress
@@ -1376,8 +1375,8 @@ cpan/IO-Compress/t/110encode-gzip.t			IO::Compress
 cpan/IO-Compress/t/110encode-rawdeflate.t		IO::Compress
 cpan/IO-Compress/t/110encode-zip.t			IO::Compress
 cpan/IO-Compress/t/111const-deflate.t			IO::Compress
-cpan/IO-Compress/t/112utf8-zip.t
-cpan/IO-Compress/t/113issues.t
+cpan/IO-Compress/t/112utf8-zip.t			Test file related to IO-Compress
+cpan/IO-Compress/t/113issues.t				Test file related to IO-Compress
 cpan/IO-Compress/t/999pod.t				IO::Compress
 cpan/IO-Compress/t/compress/any.pl			Compress::Zlib
 cpan/IO-Compress/t/compress/anyunc.pl			Compress::Zlib
@@ -1398,13 +1397,13 @@ cpan/IO-Compress/t/cz-03zlib-v1.t			IO::Compress
 cpan/IO-Compress/t/cz-06gzsetp.t			IO::Compress
 cpan/IO-Compress/t/cz-08encoding.t			IO::Compress
 cpan/IO-Compress/t/cz-14gzopen.t			IO::Compress
-cpan/IO-Compress/t/files/bad-efs.zip
-cpan/IO-Compress/t/files/encrypt-aes.zip
-cpan/IO-Compress/t/files/encrypt-standard.zip
-cpan/IO-Compress/t/files/jar.zip
-cpan/IO-Compress/t/files/meta.xml
-cpan/IO-Compress/t/files/test.ods
-cpan/IO-Compress/t/files/testfile1.odt
+cpan/IO-Compress/t/files/bad-efs.zip			IO-Compress
+cpan/IO-Compress/t/files/encrypt-aes.zip		IO-Compress
+cpan/IO-Compress/t/files/encrypt-standard.zip		IO-Compress
+cpan/IO-Compress/t/files/jar.zip			IO-Compress
+cpan/IO-Compress/t/files/meta.xml			IO-Compress
+cpan/IO-Compress/t/files/test.ods			IO-Compress
+cpan/IO-Compress/t/files/testfile1.odt			IO-Compress
 cpan/IO-Compress/t/globmapper.t				IO::Compress
 cpan/IO-Socket-IP/lib/IO/Socket/IP.pm			IO::Socket::IP
 cpan/IO-Socket-IP/t/00use.t				IO::Socket::IP tests
