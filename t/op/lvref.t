@@ -5,7 +5,7 @@ BEGIN {
     set_up_inc("../lib");
 }
 
-plan 167;
+plan 170;
 
 eval '\$x = \$y';
 like $@, qr/^Experimental aliasing via reference not enabled/,
@@ -76,11 +76,13 @@ for (1,2) {
   \my($y) = \3,
   \state $a = \3,
   \state($b) = \3 if $_ == 1;
+  \state $c = \$_;
   if ($_ == 2) {
     is $x, undef, '\my $x = ... clears $x on scope exit';
     is $y, undef, '\my($x) = ... clears $x on scope exit';
     is $a, 3, '\state $x = ... does not clear $x on scope exit';
     is $b, 3, '\state($x) = ... does not clear $x on scope exit';
+    is $c, 1, '\state $x = ... can be used with refaliasing';
   }
 }
 
@@ -210,11 +212,13 @@ for (1,2) {
   \my(@y) = \3,
   \state @a = [1..3],
   \state(@b) = \3 if $_ == 1;
+  \state @c = [$_];
   if ($_ == 2) {
     is @x, 0, '\my @x = ... clears @x on scope exit';
     is @y, 0, '\my(@x) = ... clears @x on scope exit';
     is "@a", "1 2 3", '\state @x = ... does not clear @x on scope exit';
     is "@b", 3, '\state(@x) = ... does not clear @x on scope exit';
+    is $c[0], 1, '\state @x = ... can be used with refaliasing';
   }
 }
 
@@ -254,9 +258,11 @@ package HashTest {
 for (1,2) {
   \state %y = {1,2},
   \my %x = {1,2} if $_ == 1;
+  \state %c = {X => $_};
   if ($_ == 2) {
     is %x, 0, '\my %x = ... clears %x on scope exit';
     is "@{[%y]}", "1 2", '\state %x = ... does not clear %x on scope exit';
+    is $c{X}, 1, '\state %x = ... can be used with refaliasing';
   }
 }
 
