@@ -371,6 +371,11 @@ C<use 5.36;> or later didn't enable the post parse reporting of L<Name
 only once: possible typo"> warnings when enabling warnings. [GH
 #21271]
 
+=item *
+
+Fix a crash or assertion when cleaning up a closure that refers to an
+outside C<our> sub.  [GH #21067]
+
 =back
 
 =head1 Known Problems
