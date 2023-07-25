@@ -380,7 +380,7 @@ pause_for_input("\n");
 # in the way, or other issues that might come up if the user bails out of the sync
 # script and then runs it again.
 my $clean_out= `git clean -dfx $type_dir`; # use backticks to hide the output
-system git => 'checkout -f',
+system git => 'checkout', '-f',
               $type_dir,
               'MANIFEST',
               'Porting/Maintainers.pl'; # let the user see the output
