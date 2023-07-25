@@ -13263,7 +13263,8 @@ Perl_ck_refassign(pTHX_ OP *o)
       settarg:
         o->op_private |= (varop->op_private & (OPpLVAL_INTRO|OPpPAD_STATE));
         o->op_targ = varop->op_targ;
-        varop->op_targ = 0;
+        if (!(o->op_private & (OPpPAD_STATE|OPpLVAL_INTRO)))
+            varop->op_targ = 0;
         PAD_COMPNAME_GEN_set(o->op_targ, PERL_INT_MAX);
         break;
 
@@ -13336,6 +13337,9 @@ Perl_ck_refassign(pTHX_ OP *o)
     else {
         o->op_flags &=~ OPf_STACKED;
         op_sibling_splice(o, right, 1, NULL);
+    }
+    if (o->op_private & OPpPAD_STATE && o->op_private & OPpLVAL_INTRO) {
+        o = S_newONCEOP(aTHX_ o, varop);
     }
     op_free(left);
     return o;
