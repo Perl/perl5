@@ -1256,14 +1256,15 @@ a string overload and is also not a blessed CODE reference. In short the
 C<require> function does not know what to do with the object.
 See also L<perlfunc/require>.
 
-=item Attempt to call undefined %s method with arguments via package
-"%s" (perhaps you forgot to load the package?)
+=item Attempt to call undefined %s method with arguments ("%s"%s)
+via package "%s" (Perhaps you forgot to load the package?)
 
-(F) You called the C<import()> or C<unimport()> method of a class that
-has no import method defined in its inheritance graph, and passed an
-argument to the method. This is very often the sign of a mispelled
-package name in a use or require statement that has silently succeded
-due to a case insensitive file system.
+(D deprecated::missing_import_called_with_args) You called the
+C<import()> or C<unimport()> method of a class that has no import method
+defined in its inheritance graph, and passed an argument to the method.
+This is very often the sign of a mispelled package name in a use or
+require statement that has silently succeded due to a case insensitive
+file system.
 
 Another common reason this may happen is when mistakenly attempting to
 import or unimport a symbol from a class definition or package which
