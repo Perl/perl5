@@ -655,7 +655,8 @@ use File::Glob qw(:case);
     },
 
     'IO-Compress' => {
-        'DISTRIBUTION' => 'PMQS/IO-Compress-2.205.tar.gz',
+        'DISTRIBUTION' => 'PMQS/IO-Compress-2.206.tar.gz',
+        'SYNCINFO'     => 'yorton on Tue Jul 25 20:51:33 2023',
         'MAIN_MODULE'  => 'IO::Compress::Base',
         'FILES'        => q[cpan/IO-Compress],
         'EXCLUDED'     => [
