@@ -159,9 +159,13 @@
 /* Warnings Categories added in Perl 5.03701 */
 
 #define WARN_DEPRECATED__SMARTMATCH	 79
-#define WARNsize			 20
-#define WARN_ALLstring			 "\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125"
-#define WARN_NONEstring			 "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"
+
+/* Warnings Categories added in Perl 5.03901 */
+
+#define WARN_DEPRECATED__MISSING_IMPORT_CALLED_WITH_ARGS 80
+#define WARNsize			 21
+#define WARN_ALLstring			 "\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125"
+#define WARN_NONEstring			 "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"
 
 #define isLEXWARN_on \
         cBOOL(PL_curcop && PL_curcop->cop_warnings != pWARN_STD)
@@ -353,6 +357,7 @@ category parameters passed.
 =for apidoc Amnh||WARN_EXPERIMENTAL__CLASS
 =for apidoc Amnh||WARN_DEPRECATED__APOSTROPHE_AS_PACKAGE_SEPARATOR
 =for apidoc Amnh||WARN_DEPRECATED__SMARTMATCH
+=for apidoc Amnh||WARN_DEPRECATED__MISSING_IMPORT_CALLED_WITH_ARGS
 
 =cut
 */

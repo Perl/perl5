@@ -60,6 +60,21 @@ in deprecation warnings.
 
 Category: "deprecated::unicode_property_name"
 
+=head2 Perl 5.44
+
+=head3 Calling a missing C<import()> or C<unimport()> method with an argument
+
+Historically calling C<import()> or C<unimport()> on any class which did
+not define such a method would be silently ignored. Effectively Perl
+behaved as though there was an empty method defined in the C<UNIVERSAL>
+package (even when there was no such method actually defined). As of
+Perl version 5.39.2 calling such a method I<with> an argument will
+trigger a warning, and in Perl version 5.44 this warning will be
+upgraded to an error. (Calling such a method with no arguments at all
+will always be safe.)
+
+Category: "deprecated::missing_import_called_with_args"
+
 =head2 Perl 5.42
 
 =head3 Smartmatch
