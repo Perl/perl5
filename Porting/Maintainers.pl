@@ -205,7 +205,8 @@ use File::Glob qw(:case);
     },
 
     'Compress::Raw::Bzip2' => {
-        'DISTRIBUTION' => 'PMQS/Compress-Raw-Bzip2-2.205.tar.gz',
+        'DISTRIBUTION' => 'PMQS/Compress-Raw-Bzip2-2.206.tar.gz',
+        'SYNCINFO'     => 'yorton on Tue Jul 25 20:45:42 2023',
         'SYNCINFO'     => 'jkeenan on Wed Jul 19 09:49:28 2023',
         'FILES'        => q[cpan/Compress-Raw-Bzip2],
         'EXCLUDED'     => [
