@@ -2677,6 +2677,12 @@ C<getpwnam> operator returned an invalid UIC.
 forget to check the return value of your socket() call?  See
 L<perlfunc/getsockopt>.
 
+=item get_layers: unknown argument '%s'
+
+(F) You called PerlIO::get_layers() with an unknown argument. Legal
+arguments are provided in key/value pairs, with the keys being one
+of C<input>, C<output> or C<detail>, followed by a boolean.
+
 =item given is deprecated
 
 (D deprecated::smartmatch) C<given> depends on smartmatch, which is
