@@ -397,6 +397,7 @@ A specialised variant of C<croak()> for emitting the usage message for xsubs
 works out the package name and subroutine name from C<cv>, and then calls
 C<croak()>.  Hence if C<cv> is C<&ouch::awk>, it would call C<croak> as:
 
+ diag_listed_as: SKIPME
  Perl_croak(aTHX_ "Usage: %" SVf "::%" SVf "(%s)", "ouch" "awk",
                                                      "eee_yow");
 
@@ -1016,6 +1017,7 @@ XS(XS_re_regnames)
         entry = av_fetch(av, i, FALSE);
         
         if (!entry)
+            /* diag_listed_as: SKIPME */
             Perl_croak(aTHX_ "NULL array element in re::regnames()");
 
         mPUSHs(SvREFCNT_inc_simple_NN(*entry));
