@@ -3545,6 +3545,10 @@ S_reg_set_capture_string(pTHX_ REGEXP * const rx,
             SSize_t max = strend - strbeg;
             SSize_t sublen;
 
+            /* NOTE: the following if block is not used or tested
+             * in standard builds. It is only used when PERL_SAWAMPERSAND is
+             * defined */
+
             if (    (flags & REXEC_COPY_SKIP_POST)
                 && !(prog->extflags & RXf_PMf_KEEPCOPY) /* //p */
                 && !(PL_sawampersand & SAWAMPERSAND_RIGHT)
@@ -3567,6 +3571,9 @@ S_reg_set_capture_string(pTHX_ REGEXP * const rx,
                 assert(max >= 0 && max <= strend - strbeg);
             }
 
+            /* NOTE: the following if block is not used or tested
+             * in standard builds. It is only used when PERL_SAWAMPERSAND is
+             * defined */
             if (    (flags & REXEC_COPY_SKIP_PRE)
                 && !(prog->extflags & RXf_PMf_KEEPCOPY) /* //p */
                 && !(PL_sawampersand & SAWAMPERSAND_LEFT)
@@ -3585,11 +3592,11 @@ S_reg_set_capture_string(pTHX_ REGEXP * const rx,
                     }
                     n++;
                 }
-                if ((PL_sawampersand & SAWAMPERSAND_RIGHT)
-                    && min >  RXp_OFFS_END(prog,0)
-                )
-                    min = RXp_OFFS_END(prog,0);
-
+                if (PL_sawampersand & SAWAMPERSAND_RIGHT) {
+                    SSize_t end = RXp_OFFS_END(prog,0);
+                    if ( min > end )
+                        min = end;
+                }
             }
 
             assert(min >= 0 && min <= max && min <= strend - strbeg);
