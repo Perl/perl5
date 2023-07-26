@@ -997,8 +997,6 @@ sub run_tests {
     }
 
     {
-        local $::TODO = "[perl #38133]";
-
         "A" =~ /(((?:A))?)+/;
         my $first = $2;
 

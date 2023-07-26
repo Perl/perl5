@@ -82,6 +82,9 @@ typedef struct regexp_paren_pair {
     SSize_t start;
     SSize_t end;
 
+    SSize_t start_new;
+    SSize_t end_new;
+
     /* 'start_tmp' records a new opening position before the matching end
      * has been found, so that the old start and end values are still
      * valid, e.g.
@@ -214,13 +217,19 @@ typedef struct regexp {
 #define RXp_PAREN_NAMES(rx) ((rx)->paren_names)
 
 #define RXp_OFFS_START(rx,n) \
-     RXp_OFFSp(rx)[(n)].start 
+    ((RXp_OFFSp(rx)[(n)].end_new < 0 || RXp_OFFSp(rx)[(n)].start_new < 0 ) \
+     ? RXp_OFFSp(rx)[(n)].start \
+     : RXp_OFFSp(rx)[(n)].start_new )
 
 #define RXp_OFFS_END(rx,n) \
-     RXp_OFFSp(rx)[(n)].end 
+    ((RXp_OFFSp(rx)[(n)].end_new < 0 || RXp_OFFSp(rx)[(n)].start_new < 0 ) \
+     ? RXp_OFFSp(rx)[(n)].end \
+     : RXp_OFFSp(rx)[(n)].end_new )
 
 #define RXp_OFFS_VALID(rx,n) \
-     (RXp_OFFSp(rx)[(n)].end != -1 && RXp_OFFSp(rx)[(n)].start != -1 )
+    ((RXp_OFFSp(rx)[(n)].end_new >= 0 && RXp_OFFSp(rx)[(n)].start_new >= 0 )  \
+      ||                                                              \
+     (RXp_OFFSp(rx)[(n)].end >= 0 && RXp_OFFSp(rx)[(n)].start >= 0 ))
 
 
 #define RX_OFFS_START(rx_sv,n)  RXp_OFFS_START(ReANY(rx_sv),n)
