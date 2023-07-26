@@ -3585,7 +3585,7 @@ S_reg_set_capture_string(pTHX_ REGEXP * const rx,
                     }
                     n++;
                 }
-                if ((PL_sawampersand & SAWAMPERSAND_RIGHT)
+                if ((PL_sawampersand & SAWAMPERSAND_RIGHT) > 0
                     && min >  RXp_OFFS_END(prog,0)
                 )
                     min = RXp_OFFS_END(prog,0);
