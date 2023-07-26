@@ -1356,8 +1356,15 @@ X<close>
 
 Closes the file or pipe associated with the filehandle, flushes the IO
 buffers, and closes the system file descriptor.  Returns true if those
-operations succeed and if no error was reported by any PerlIO
-layer.  Closes the currently selected filehandle if the argument is
+operations succeed, and if no error was reported by any PerlIO layer,
+and there was no existing error on the filehandle.
+
+If there was an existing error on the filehandle, close will return
+false and L<C<$!>|perlvar/$!> will be set to the error from the
+failing operation, so you can safely use its value when reporting the
+error.
+
+Closes the currently selected filehandle if the argument is
 omitted.
 
 You don't have to close FILEHANDLE if you are immediately going to do
@@ -1401,6 +1408,11 @@ Example:
 
 FILEHANDLE may be an expression whose value can be used as an indirect
 filehandle, usually the real filehandle name or an autovivified handle.
+
+If an error occurs when perl implicitly closes a handle, perl will
+produce a L<warning|perldiag/"Warning: unable to close filehandle %s
+properly: %s">.  Explicitly calling close on the handle prevents that
+warning.
 
 =item closedir DIRHANDLE
 X<closedir>
