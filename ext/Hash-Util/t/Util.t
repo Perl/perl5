@@ -56,7 +56,7 @@ foreach my $func (@Exported_Funcs) {
 my %hash = (foo => 42, bar => 23, locked => 'yep');
 lock_keys(%hash);
 eval { $hash{baz} = 99; };
-like( $@, qr/^Attempt to access disallowed key 'baz' in a restricted hash/,
+like( $@, qr/^Attempt to access disallowed key "baz" in restricted hash/,
                                                        'lock_keys()');
 is( $hash{bar}, 23, '$hash{bar} == 23' );
 ok( !exists $hash{baz},'!exists $hash{baz}' );
@@ -67,20 +67,20 @@ $hash{bar} = 69;
 is( $hash{bar}, 69 ,'$hash{bar} == 69');
 
 eval { () = $hash{i_dont_exist} };
-like( $@, qr/^Attempt to access disallowed key 'i_dont_exist' in a restricted hash/,
+like( $@, qr/^Attempt to access disallowed key "i_dont_exist" in restricted hash/,
       'Disallowed 1' );
 
 lock_value(%hash, 'locked');
 eval { print "# oops" if $hash{four} };
-like( $@, qr/^Attempt to access disallowed key 'four' in a restricted hash/,
+like( $@, qr/^Attempt to access disallowed key "four" in restricted hash/,
       'Disallowed 2' );
 
 eval { $hash{"\x{2323}"} = 3 };
-like( $@, qr/^Attempt to access disallowed key '(.*)' in a restricted hash/,
+like( $@, qr/^Attempt to access disallowed key "(.*)" in restricted hash/,
                                                'wide hex key' );
 
 eval { delete $hash{locked} };
-like( $@, qr/^Attempt to delete readonly key 'locked' from a restricted hash/,
+like( $@, qr/^Attempt to delete readonly key "locked" in restricted hash/,
                                            'trying to delete a locked key' );
 eval { $hash{locked} = 42; };
 like( $@, qr/^Modification of a read-only value attempted/,
@@ -88,7 +88,7 @@ like( $@, qr/^Modification of a read-only value attempted/,
 is( $hash{locked}, 'yep', '$hash{locked} is yep' );
 
 eval { delete $hash{I_dont_exist} };
-like( $@, qr/^Attempt to delete disallowed key 'I_dont_exist' from a restricted hash/,
+like( $@, qr/^Attempt to delete disallowed key "I_dont_exist" in restricted hash/,
                              'trying to delete a key that doesnt exist' );
 
 ok( !exists $hash{I_dont_exist},'!exists $hash{I_dont_exist}' );
@@ -113,7 +113,7 @@ is( $hash{locked}, 42,  'unlock_value' );
 
     lock_keys(%hash);
     eval { %hash = ( wubble => 42 ) };  # we know this will bomb
-    like( $@, qr/^Attempt to access disallowed key 'wubble'/,'Disallowed 3' );
+    like( $@, qr/^Attempt to access disallowed key "wubble"/,'Disallowed 3' );
     unlock_keys(%hash);
 }
 
@@ -123,7 +123,7 @@ is( $hash{locked}, 42,  'unlock_value' );
     lock_value(%hash, 'RO');
 
     eval { %hash = (KEY => 1) };
-    like( $@, qr/^Attempt to delete readonly key 'RO' from a restricted hash/,
+    like( $@, qr/^Attempt to delete readonly key "RO" in restricted hash/,
         'attempt to delete readonly key from restricted hash' );
 }
 
@@ -141,7 +141,7 @@ is( $hash{locked}, 42,  'unlock_value' );
     $hash{foo} = 42;
     is( keys %hash, 1, '1 element in hash' );
     eval { $hash{wibble} = 42 };
-    like( $@, qr/^Attempt to access disallowed key 'wibble' in a restricted hash/,
+    like( $@, qr/^Attempt to access disallowed key "wibble" in restricted hash/,
                         'write threw error (locked)');
 
     unlock_keys(%hash);
@@ -159,7 +159,7 @@ is( $hash{locked}, 42,  'unlock_value' );
     is( $@, '','No error 1' );
 
     eval { $hash{wibble} = 23 };
-    like( $@, qr/^Attempt to access disallowed key 'wibble' in a restricted hash/,
+    like( $@, qr/^Attempt to access disallowed key "wibble" in restricted hash/,
           'locked "wibble"' );
 }
 
@@ -203,7 +203,7 @@ lock_keys(%ENV);
 eval { () = $ENV{I_DONT_EXIST} };
 like(
     $@,
-    qr/^Attempt to access disallowed key 'I_DONT_EXIST' in a restricted hash/,
+    qr/^Attempt to access disallowed key "I_DONT_EXIST" in restricted hash/,
     'locked %ENV'
 );
 unlock_keys(%ENV); # Test::Builder cannot print test failures otherwise
@@ -232,11 +232,11 @@ unlock_keys(%ENV); # Test::Builder cannot print test failures otherwise
 
     eval {$hash{zeroeth} = 0};
     like ($@,
-          qr/^Attempt to access disallowed key 'zeroeth' in a restricted hash/,
+          qr/^Attempt to access disallowed key "zeroeth" in restricted hash/,
           'locked key never mentioned before should fail');
     eval {$hash{first} = -1};
     like ($@,
-          qr/^Attempt to access disallowed key 'first' in a restricted hash/,
+          qr/^Attempt to access disallowed key "first" in restricted hash/,
           'previously locked place holders should also fail');
     is (scalar keys %hash, 0, "and therefore there are no keys");
     $hash{second} = 1;
@@ -257,7 +257,7 @@ unlock_keys(%ENV); # Test::Builder cannot print test failures otherwise
 
     eval {$hash{second} = -1};
     like ($@,
-          qr/^Attempt to access disallowed key 'second' in a restricted hash/,
+          qr/^Attempt to access disallowed key "second" in restricted hash/,
           'previously locked place holders should fail');
 
     is ($hash{void}, undef,

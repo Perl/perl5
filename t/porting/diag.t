@@ -46,6 +46,7 @@ foreach (@{(setup_embed())[0]}) {
   push @functions, 'Perl_' . $embed->{name} if $embed->{flags} =~ /p/;
   push @functions, 'S_' . $embed->{name} if $embed->{flags} =~ /S/;
 };
+push @functions, "hv_notallowed", "S_hv_notallowed";
 push @functions, 'Perl_mess';
 @functions = sort { length($b) <=> length($a) || $a cmp $b } @functions;
 push @functions, 'PERL_DIAG_(?<wrapper>\w+)';
@@ -408,6 +409,10 @@ sub check_file {
         $category .= ',WARN_DEPRECATED';
       }
     }
+    elsif (/hv_notallowed\(.*,\s*"([^,]+)"\s*\);/) {
+        $routine = "hv_notallowed";
+        $name = $1;
+    }
     else {
       next;
     }
@@ -427,6 +432,7 @@ sub check_file {
                  :  $routine =~ /ckWARN\d*reg/ ?  'W'
                  :  $routine =~ /vWARN\d/      ? '[WDS]'
                  :  $routine =~ /^deprecate/   ? '[WDS]'
+                 :  $routine =~ /^hv_notallowed/? 'F'
                  :                             '[PFX]';
     my $categories;
     if (defined $category) {
@@ -530,7 +536,7 @@ sub check_message {
         like($entries{$key}{severity}, $qr,
           ($severity =~ /\[/
             ? "severity is one of $severity"
-            : "severity is $severity") . "for '$name' at $codefn line $.$pod_line");
+            : "severity is $severity") . " for '$name' at $codefn line $.$pod_line");
 
         is($entries{$key}{category}, $categories,
            ($categories ? "categories are [$categories]" : "no category")

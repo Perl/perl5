@@ -509,15 +509,24 @@ whether it is valid to call C<HvAUX()>.
         ->shared_he_he.he_valu.hent_refcount),				\
      hek)
 
+#define hv_store_ent_for(hv, keysv, val, hash, for_flags)               \
+    ((HE *) hv_common((hv), (keysv), NULL, 0, 0,                        \
+        (HV_FETCH_ISSTORE | (for_flags)), (val), (hash)))
+
 #define hv_store_ent(hv, keysv, val, hash)				\
-    ((HE *) hv_common((hv), (keysv), NULL, 0, 0, HV_FETCH_ISSTORE,	\
-                      (val), (hash)))
+    hv_store_ent_for(hv, keysv, val, hash, 0)
 
 #define hv_exists_ent(hv, keysv, hash)					\
     cBOOL(hv_common((hv), (keysv), NULL, 0, 0, HV_FETCH_ISEXISTS, 0, (hash)))
-#define hv_fetch_ent(hv, keysv, lval, hash)				\
+
+#define hv_fetch_ent_for(hv, keysv, lval, hash, for_flags)              \
     ((HE *) hv_common((hv), (keysv), NULL, 0, 0,			\
-                      ((lval) ? HV_FETCH_LVALUE : 0), NULL, (hash)))
+                      (((lval) ? HV_FETCH_LVALUE : 0)|(for_flags)),     \
+                      NULL, (hash)))
+
+#define hv_fetch_ent(hv, keysv, lval, hash)                             \
+    hv_fetch_ent_for(hv, keysv, lval, hash, 0)
+
 #define hv_delete_ent(hv, key, flags, hash)				\
     (MUTABLE_SV(hv_common((hv), (key), NULL, 0, 0, (flags) | HV_DELETE,	\
                           NULL, (hash))))
@@ -681,18 +690,20 @@ instead of a string/length pair, and no precomputed hash.
 /* Hash actions
  * Passed in PERL_MAGIC_uvar calls
  */
-#define HV_DISABLE_UVAR_XKEY	0x01
+#define HV_DISABLE_UVAR_XKEY    0x001
 /* We need to ensure that these don't clash with G_DISCARD, which is 2, as it
    is documented as being passed to hv_delete().  */
-#define HV_FETCH_ISSTORE	0x04
-#define HV_FETCH_ISEXISTS	0x08
-#define HV_FETCH_LVALUE		0x10
-#define HV_FETCH_JUST_SV	0x20
-#define HV_DELETE		0x40
-#define HV_FETCH_EMPTY_HE	0x80 /* Leave HeVAL null. */
+#define HV_FETCH_ISSTORE        0x004
+#define HV_FETCH_ISEXISTS       0x008
+#define HV_FETCH_LVALUE         0x010
+#define HV_FETCH_JUST_SV        0x020
+#define HV_DELETE               0x040
+#define HV_FETCH_EMPTY_HE       0x080 /* Leave HeVAL null. */
+#define HV_ACTION_ISLOCALIZE    0x100
+#define HV_ACTION_ISALIAS       0x200
 
 /* Must not conflict with HVhek_UTF8 */
-#define HV_NAME_SETALL		0x02
+#define HV_NAME_SETALL          0x002
 
 /*
 =for apidoc newHV

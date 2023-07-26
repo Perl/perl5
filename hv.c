@@ -301,13 +301,13 @@ Perl_he_dup(pTHX_ const HE *e, bool shared, CLONE_PARAMS* param)
 
 static void
 S_hv_notallowed(pTHX_ int flags, const char *key, I32 klen,
-                const char *msg)
+                const char *action, const char *msg)
 {
+    PERL_ARGS_ASSERT_HV_NOTALLOWED;
+
    /* Straight to SVt_PVN here, as needed by sv_setpvn_fresh and
     * sv_usepvn would otherwise call it */
     SV * const sv = newSV_type_mortal(SVt_PV);
-
-    PERL_ARGS_ASSERT_HV_NOTALLOWED;
 
     if (!(flags & HVhek_FREEKEY)) {
         sv_setpvn_fresh(sv, key, klen);
@@ -320,7 +320,7 @@ S_hv_notallowed(pTHX_ int flags, const char *key, I32 klen,
     if (flags & HVhek_UTF8) {
         SvUTF8_on(sv);
     }
-    Perl_croak(aTHX_ msg, SVfARG(sv));
+    Perl_croak(aTHX_ msg, action, SVfARG(sv));
 }
 
 /* (klen == HEf_SVKEY) is special for MAGICAL hv entries, meaning key slot
@@ -396,6 +396,13 @@ C<hv_store> in preference to C<hv_store_ent>.
 See L<perlguts/"Understanding the Magic of Tied Hashes and Arrays"> for more
 information on how to use this function on tied hashes.
 
+=for apidoc hv_store_ent_for
+
+Identical to C<hv_store_ent()> but accepting an additional parameter which allows
+the caller to signal what the store is for, typically HV_ACTION_ISLOCALIZE or
+HV_ACTION_ISALIAS. This additional data is passed into hv_common() in the
+C<action> field (B<not> the flags field). Intended for internal use only.
+
 =for apidoc hv_exists
 
 Returns a boolean indicating whether the specified hash key exists.  The
@@ -441,6 +448,13 @@ store it somewhere.
 
 See L<perlguts/"Understanding the Magic of Tied Hashes and Arrays"> for more
 information on how to use this function on tied hashes.
+
+=for apidoc hv_fetch_ent_for
+
+Identical to C<hv_fetch_ent()> but accepting an additional parameter which allows
+the caller to signal what the fetch is for, typically HV_ACTION_ISLOCALIZE or
+HV_ACTION_ISALIAS. This additional data is passed into hv_common() in the
+C<action> field (B<not> the flags field). Intended for internal use only.
 
 =cut
 */
@@ -878,6 +892,14 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
                 }
                 HeVAL(entry) = val;
             } else if (action & HV_FETCH_ISSTORE) {
+                if (SvREADONLY(hv) && SvREADONLY(HeVAL(entry))) {
+                    hv_notallowed(flags, key, klen,
+                        (action & HV_ACTION_ISLOCALIZE) ? "localize" :
+                        (action & HV_ACTION_ISALIAS) ? "alias" : "modify",
+                        "Attempt to %s readonly key %" SVf_QUOTEDPREFIX " in"
+                        " restricted hash");
+                }
+
                 SvREFCNT_dec(HeVAL(entry));
                 HeVAL(entry) = val;
             }
@@ -912,9 +934,9 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 #endif
 
     if (!entry && SvREADONLY(hv) && !(action & HV_FETCH_ISEXISTS)) {
-        hv_notallowed(flags, key, klen,
-                        "Attempt to access disallowed key '%" SVf "' in"
-                        " a restricted hash");
+        hv_notallowed(flags, key, klen, "access",
+                        "Attempt to %s disallowed key %" SVf_QUOTEDPREFIX " in"
+                        " restricted hash");
     }
     if (!(action & (HV_FETCH_LVALUE|HV_FETCH_ISSTORE))) {
         /* Not doing some form of store, so return failure.  */
@@ -1402,9 +1424,9 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
             return NULL;
         }
         if (SvREADONLY(hv) && sv && SvREADONLY(sv)) {
-            hv_notallowed(k_flags, key, klen,
-                            "Attempt to delete readonly key '%" SVf "' from"
-                            " a restricted hash");
+            hv_notallowed(k_flags, key, klen, "delete",
+                            "Attempt to %s readonly key %" SVf_QUOTEDPREFIX " in"
+                            " restricted hash");
         }
 
         /*
@@ -1558,9 +1580,9 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 
   not_found:
     if (SvREADONLY(hv)) {
-        hv_notallowed(k_flags, key, klen,
-                        "Attempt to delete disallowed key '%" SVf "' from"
-                        " a restricted hash");
+        hv_notallowed(k_flags, key, klen, "delete",
+                        "Attempt to %s disallowed key %" SVf_QUOTEDPREFIX " in"
+                        " restricted hash");
     }
 
     if (k_flags & HVhek_FREEKEY)
@@ -2019,7 +2041,8 @@ Perl_hv_clear(pTHX_ HV *hv)
                         if (SvREADONLY(HeVAL(entry))) {
                             SV* const keysv = hv_iterkeysv(entry);
                             Perl_croak_nocontext(
-                                "Attempt to delete readonly key '%" SVf "' from a restricted hash",
+                                "Attempt to delete readonly key %" SVf_QUOTEDPREFIX
+                                " in restricted hash",
                                 (void*)keysv);
                         }
                         SvREFCNT_dec_NN(HeVAL(entry));

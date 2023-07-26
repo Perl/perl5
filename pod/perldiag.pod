@@ -308,7 +308,7 @@ or
 (F) You wrote C<< require <file> >> when you should have written
 C<require 'file'>.
 
-=item Attempt to access disallowed key '%s' in a restricted hash
+=item Attempt to access disallowed key "%s" in restricted hash
 
 (F) The failing code has attempted to get or set a key which is not in
 the current set of allowed keys of a restricted hash.
@@ -351,12 +351,12 @@ Freed values are not supposed to be visible to Perl code.  This
 can also happen if XS code calls C<av_clear> from a custom magic
 callback on the array.
 
-=item Attempt to delete disallowed key '%s' from a restricted hash
+=item Attempt to delete disallowed key "%s" in restricted hash
 
 (F) The failing code attempted to delete from a restricted hash a key
 which is not in its key set.
 
-=item Attempt to delete readonly key '%s' from a restricted hash
+=item Attempt to delete readonly key "%s" in restricted hash
 
 (F) The failing code attempted to delete a key whose value has been
 declared readonly from a restricted hash.
@@ -395,6 +395,16 @@ This could indicate that SvREFCNT_dec() was called too many times, or
 that SvREFCNT_inc() was called too few times, or that the SV was
 mortalized when it shouldn't have been, or that memory has been
 corrupted.
+
+=item Attempt to %s readonly key "%s" in restricted hash
+
+(F) The failing code has attempted to localize, alias, modify or
+delete a key with a readonly value in a restricted hash.
+
+=item Attempt to %s disallowed key "%s" in restricted hash
+
+(F) The failing code has attempted to access or delete a key that
+is not registered as usable in a restricted hash.
 
 =item Attempt to pack pointer to temporary value
 

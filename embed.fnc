@@ -1468,6 +1468,12 @@ AMbdp	|HE *	|hv_fetch_ent	|NULLOK HV *hv				\
 				|NN SV *keysv				\
 				|I32 lval				\
 				|U32 hash
+Edm	|HE *	|hv_fetch_ent_for					\
+				|NULLOK HV *hv				\
+				|NN SV *keysv				\
+				|I32 lval				\
+				|U32 hash				\
+				|U32 for_flags
 Cdop	|STRLEN |hv_fill	|NN HV * const hv
 Cp	|void	|hv_free_ent	|NULLOK HV *notused			\
 				|NULLOK HE *entry
@@ -1518,6 +1524,12 @@ AMbdp	|HE *	|hv_store_ent	|NULLOK HV *hv				\
 				|NULLOK SV *key 			\
 				|NULLOK SV *val 			\
 				|U32 hash
+Edm	|HE *	|hv_store_ent_for					\
+				|NULLOK HV *hv				\
+				|NULLOK SV *key 			\
+				|NULLOK SV *val 			\
+				|U32 hash				\
+				|U32 for_flags
 AMbpx	|SV **	|hv_store_flags |NULLOK HV *hv				\
 				|NULLOK const char *key 		\
 				|I32 klen				\
@@ -4280,6 +4292,7 @@ ST	|void	|hv_magic_check |NN HV *hv				\
 Sr	|void	|hv_notallowed	|int flags				\
 				|NN const char *key			\
 				|I32 klen				\
+				|NN const char *action			\
 				|NN const char *msg
 S	|SV *	|refcounted_he_value					\
 				|NN const struct refcounted_he *he

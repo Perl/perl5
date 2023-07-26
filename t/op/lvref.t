@@ -5,7 +5,7 @@ BEGIN {
     set_up_inc("../lib");
 }
 
-plan 167;
+plan 188;
 
 eval '\$x = \$y';
 like $@, qr/^Experimental aliasing via reference not enabled/,
@@ -650,4 +650,56 @@ pass("RT #123821");
     is("@a", "102 200 301", "rt #133538 \@a still aliased");
     is("$h{one} $h{two} $h{three}", "102 200 301", "rt #133538 %h still aliased");
 
+}
+{
+    use feature 'refaliasing', 'declared_refs';
+    no warnings 'experimental::declared_refs';
+    my %hash = ( locked => "k1", normal => "k2" );
+    Internals::SvREADONLY(%hash, 1);
+    Internals::SvREADONLY($hash{locked}, 1);
+    my $href = \%hash;
+    my $val = "val";
+    ok(!eval { \$hash{locked} = \$val; 1},
+        "Eval alias of readonly hash key in restricted hash died");
+    like($@,qr/Attempt to alias readonly key "locked" in restricted hash at/,
+        "Got the error we expected");
+    ok(!eval { local \$hash{locked} = \$val; 1},
+        "Eval local alias of readonly hash key in restricted hash died");
+    like($@,qr/Attempt to alias readonly key "locked" in restricted hash at/,
+        "Got the error we expected");
+    ok(!eval { local $hash{locked} = $val; 1},
+        "Eval localization of readonly hash key in restricted hash died");
+    like($@,qr/Attempt to localize readonly key "locked" in restricted hash at/,
+        "Got the error we expected");
+    ok(!eval { \$href->{locked} = \$val; 1},
+        "Eval alias of readonly hashref key in restricted hash died");
+    like($@,qr/Attempt to alias readonly key "locked" in restricted hash at/,
+        "Got the error we expected");
+    ok(!eval { local \$href->{locked} = \$val; 1},
+        "Eval local alias of readonly hashref key in restricted hash died");
+    like($@,qr/Attempt to alias readonly key "locked" in restricted hash at/,
+        "Got the error we expected");
+    ok(!eval { local $href->{locked} = $val; 1},
+        "Eval localization of readonly hashref key in restricted hash died");
+    like($@,qr/Attempt to localize readonly key "locked" in restricted hash at/,
+        "Got the error we expected");
+    ok(eval { { local \$hash{normal} = \1; } 1},
+        "Eval unlocalization of aliased readonly hash key should not die");
+    ok(eval { { local $hash{normal} = 1; Internals::SvREADONLY($hash{normal},1); } 1},
+        "Eval unlocalization of readonly hash key should not die");
+    ok(eval { { local $hash{normal} = 1; Internals::SvREADONLY($hash{normal},1); } 1},
+        "Eval unlocalization of readonly hash key should not die");
+    ok(eval { { local \$hash->{normal} = \1; } 1},
+        "Eval unlocalization of aliased readonly hashref key should not die");
+    ok(eval { { local $hash->{normal} = 1; Internals::SvREADONLY($hash{normal},1); } 1},
+        "Eval unlocalization of readonly hashref key should not die");
+    ok(!eval { { local \$hash{normal} = \1; local \$hash{normal} = \2; } 1},
+        "Eval aliased localization of localized aliased readonly hash key should die");
+    like($@,qr/Attempt to alias readonly key \"normal\" in restricted hash/,
+        "Got the error we expected");
+    ok(!eval { { local $hash{normal} = 1; Internals::SvREADONLY($hash{normal},1);
+                local $hash{normal} = 2; } 1},
+        "Eval localization of localized readonly hash key should die");
+    like($@,qr/Attempt to localize readonly key \"normal\" in restricted hash/,
+        "Got the error we expected");
 }
