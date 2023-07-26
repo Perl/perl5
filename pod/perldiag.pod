@@ -6703,6 +6703,11 @@ certain type.  Arrays must be @NAME or C<@{EXPR}>.  Hashes must be
 (F) Your machine doesn't implement the umask function and you tried to
 use it to restrict permissions for yourself (EXPR & 0700).
 
+=item UNIVERSAL does not export anything
+
+(F) You asked UNIVERSAL to export something, but UNIVERSAL is the
+base class for all classes and contains not exportable symbols.
+
 =item Unbalanced context: %d more PUSHes than POPs
 
 (S internal) The exit code detected an internal inconsistency in how
