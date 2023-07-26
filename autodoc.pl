@@ -534,7 +534,8 @@ sub autodoc ($$) { # parse a file and extract documentation info
             die "'u' flag must also have 'm' or 'y' flags' for $element_name"
                                             if $flags =~ /u/ && $flags !~ /[my]/;
             warn ("'$element_name' not \\w+ in '$proto_in_file' in $file")
-                        if $flags !~ /N/ && $element_name !~ / ^ [_[:alpha:]] \w* $ /x;
+                        if $flags !~ /N/ &&
+                           $element_name !~ / ^ (?:struct\s+)? [_[:alpha:]] \w* $ /x;
 
             if ($flags =~ /#/) {
                 die "Return type must be empty for '$element_name'"
