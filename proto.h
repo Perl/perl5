@@ -7530,6 +7530,15 @@ S_op_std_init(pTHX_ OP *o);
 #   define PERL_ARGS_ASSERT_OP_STD_INIT         \
         assert(o)
 
+PERL_STATIC_INLINE U16
+S_opslab_slot_offset(const OPSLAB *slab, const OPSLOT *slot);
+#   define PERL_ARGS_ASSERT_OPSLAB_SLOT_OFFSET  \
+        assert(slab); assert(slot)
+
+PERL_STATIC_INLINE U16
+S_size_to_psize(size_t size);
+#   define PERL_ARGS_ASSERT_SIZE_TO_PSIZE
+
 # endif /* !defined(PERL_NO_INLINE_FUNCTIONS) */
 #endif /* defined(PERL_IN_OP_C) */
 #if defined(PERL_IN_OP_C) || defined(PERL_IN_PEEP_C)
