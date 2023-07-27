@@ -5036,6 +5036,7 @@ hints/sco_2_3_1.sh			Hints for named architecture
 hints/sco_2_3_2.sh			Hints for named architecture
 hints/sco_2_3_3.sh			Hints for named architecture
 hints/sco_2_3_4.sh			Hints for named architecture
+hints/serenity.sh			Hints for named architecture
 hints/solaris_2.sh			Hints for named architecture
 hints/stellar.sh			Hints for named architecture
 hints/sunos_4_0.sh			Hints for named architecture
