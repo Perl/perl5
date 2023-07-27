@@ -245,7 +245,6 @@ package FetchStoreCounter {
     ok(recurselexicalfunc("rec"), 'true in self-recursive lexical sub');
 
     my $recursecoderef = sub {
-        use feature 'current_sub';
         use builtin 'true';
         return __SUB__->() if @_;
         return true;
