@@ -989,6 +989,10 @@ sub parse_config_h {
                 $configs{$name}{section} = $section;
                 last;
             }
+            elsif (exists $docs{'intern'}{$section}{$name}) {
+                die "'$name' is in 'config.h' meaning it is part of the API,\n"
+                  . " but it is also in 'perlintern', meaning it isn't API\n";
+            }
         }
 
         my $handled = 0;    # Haven't handled this yet
