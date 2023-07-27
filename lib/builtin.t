@@ -237,6 +237,13 @@ package FetchStoreCounter {
     }
     ok(recursefunc("rec"), 'true in self-recursive sub');
 
+    my sub recurselexicalfunc {
+        use builtin 'true';
+        return recurselexicalfunc() if @_;
+        return true;
+    }
+    ok(recursefunc("rec"), 'true in self-recursive lexical sub');
+
     my $recursecoderef = sub {
         use feature 'current_sub';
         use builtin 'true';
