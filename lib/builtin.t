@@ -1,4 +1,4 @@
-#!./perl -T
+#!./perl
 
 BEGIN {
     chdir 't' if -d 't';
@@ -364,25 +364,6 @@ TODO: {
 
     our $str2 = "\t\nHello world!\t  ";
     is(trim($str2), "Hello world!", "trim on an our \$var");
-}
-
-# is_tainted
-{
-    use builtin qw( is_tainted );
-
-    is(is_tainted($0), !!${^TAINT}, "\$0 is tainted (if tainting is supported)");
-    ok(!is_tainted($1), "\$1 isn't tainted");
-
-    # Invokes magic
-    tie my $tied, FetchStoreCounter => (\my $fetchcount, \my $storecount);
-
-    my $_dummy = is_tainted($tied);
-    is($fetchcount, 1, 'is_tainted() invokes FETCH magic');
-
-    $tied = is_tainted($0);
-    is($storecount, 1, 'is_tainted() invokes STORE magic');
-
-    is(prototype(\&builtin::is_tainted), '$', 'is_tainted prototype');
 }
 
 # Lexical export
