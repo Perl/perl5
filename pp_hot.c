@@ -4539,7 +4539,7 @@ PP(pp_subst)
 #ifdef PERL_ANY_COW
         && !was_cow
 #endif
-        && (I32)clen <= RXp_MINLENRET(prog)
+        && (SSize_t)clen <= RXp_MINLENRET(prog)
         && (  once
            || !(r_flags & REXEC_COPY_STR)
            || (!SvGMAGICAL(dstr) && !(RXp_EXTFLAGS(prog) & RXf_EVAL_SEEN))
@@ -4573,7 +4573,7 @@ PP(pp_subst)
             d = orig + RXp_OFFS_END(prog,0);
             s = orig;
             if (m - s > strend - d) {  /* faster to shorten from end */
-                I32 i;
+                SSize_t i;
                 if (clen) {
                     Copy(c, m, clen, char);
                     m += clen;
@@ -4587,7 +4587,7 @@ PP(pp_subst)
                 SvCUR_set(TARG, m - s);
             }
             else {	/* faster from front */
-                I32 i = m - s;
+                SSize_t i = m - s;
                 d -= clen;
                 if (i > 0)
                     Move(s, d - i, i, char);
@@ -4602,7 +4602,7 @@ PP(pp_subst)
             char *d, *m;
             d = s = RXp_OFFS_START(prog,0) + orig;
             do {
-                I32 i;
+                SSize_t i;
                 if (UNLIKELY(iters++ > maxiters))
                     DIE(aTHX_ "Substitution loop");
                 /* run time pattern taint, eg locale */
@@ -4624,7 +4624,7 @@ PP(pp_subst)
                                  TARG, NULL,
                      REXEC_NOT_FIRST|REXEC_IGNOREPOS|REXEC_FAIL_ON_UNDERFLOW));
             if (s != d) {
-                I32 i = strend - s;
+                SSize_t i = strend - s;
                 SvCUR_set(TARG, d - SvPVX_const(TARG) + i);
                 Move(s, d, i+1, char);		/* include the NUL */
             }

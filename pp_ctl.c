@@ -435,12 +435,12 @@ S_rxres_restore(pTHX_ void **rsp, REGEXP *rx)
 #endif
 
     RX_SUBBEG(rx) = INT2PTR(char*,*p++);
-    RX_SUBLEN(rx) = (I32)(*p++);
-    RX_SUBOFFSET(rx) = (I32)*p++;
-    RX_SUBCOFFSET(rx) = (I32)*p++;
+    RX_SUBLEN(rx) = (SSize_t)(*p++);
+    RX_SUBOFFSET(rx) = (Size_t)*p++;
+    RX_SUBCOFFSET(rx) = (SSize_t)*p++;
     for (i = 0; i <= RX_NPARENS(rx); ++i) {
-        RX_OFFSp(rx)[i].start = (I32)(*p++);
-        RX_OFFSp(rx)[i].end = (I32)(*p++);
+        RX_OFFSp(rx)[i].start = (SSize_t)(*p++);
+        RX_OFFSp(rx)[i].end = (SSize_t)(*p++);
     }
 }
 

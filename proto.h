@@ -3766,7 +3766,7 @@ Perl_reginitcolors(pTHX);
 #define PERL_ARGS_ASSERT_REGINITCOLORS
 
 PERL_CALLCONV void
-Perl_repeatcpy(char *to, const char *from, I32 len, IV count);
+Perl_repeatcpy(char *to, const char *from, SSize_t len, IV count);
 #define PERL_ARGS_ASSERT_REPEATCPY              \
         assert(to); assert(from)
 
@@ -4376,7 +4376,7 @@ Perl_sv_chop(pTHX_ SV * const sv, const char * const ptr);
 #define PERL_ARGS_ASSERT_SV_CHOP                \
         assert(sv)
 
-PERL_CALLCONV I32
+PERL_CALLCONV SSize_t
 Perl_sv_clean_all(pTHX)
         __attribute__visibility__("hidden");
 #define PERL_ARGS_ASSERT_SV_CLEAN_ALL
@@ -5430,7 +5430,7 @@ Perl_do_ipcget(pTHX_ I32 optype, SV **mark, SV **sp)
 # define PERL_ARGS_ASSERT_DO_IPCGET             \
         assert(mark); assert(sp)
 
-PERL_CALLCONV I32
+PERL_CALLCONV SSize_t
 Perl_do_msgrcv(pTHX_ SV **mark, SV **sp)
         __attribute__visibility__("hidden");
 # define PERL_ARGS_ASSERT_DO_MSGRCV             \
@@ -8979,7 +8979,7 @@ S_utf8_mg_pos_cache_update(pTHX_ SV * const sv, MAGIC ** const mgp, const STRLEN
 # define PERL_ARGS_ASSERT_UTF8_MG_POS_CACHE_UPDATE \
         assert(sv); assert(mgp)
 
-STATIC I32
+STATIC SSize_t
 S_visit(pTHX_ SVFUNC_t f, const U32 flags, const U32 mask);
 # define PERL_ARGS_ASSERT_VISIT                 \
         assert(f)

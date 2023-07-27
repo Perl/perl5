@@ -2724,7 +2724,7 @@ Xp	|REGEXP *|re_op_compile |NULLOK SV ** const patternp		\
 
 ATdp	|void	|repeatcpy	|NN char *to				\
 				|NN const char *from			\
-				|I32 len				\
+				|SSize_t len				\
 				|IV count
 : Used in doio.c, pp_hot.c, pp_sys.c
 p	|void	|report_evil_fh |NULLOK const GV *gv
@@ -3003,7 +3003,7 @@ AMbdp	|void	|sv_catsv_mg	|NN SV *dsv				\
 Adp	|void	|sv_chop	|NN SV * const sv			\
 				|NULLOK const char * const ptr
 : Used only in perl.c
-dp	|I32	|sv_clean_all
+dp	|SSize_t|sv_clean_all
 : Used only in perl.c
 dp	|void	|sv_clean_objs
 Adp	|void	|sv_clear	|NN SV * const orig_sv
@@ -3752,7 +3752,7 @@ p	|I32	|do_ipcget	|I32 optype				\
 				|NN SV **mark				\
 				|NN SV **sp
 : Defined in doio.c, used only in pp_sys.c
-p	|I32	|do_msgrcv	|NN SV **mark				\
+p	|SSize_t|do_msgrcv	|NN SV **mark				\
 				|NN SV **sp
 : Defined in doio.c, used only in pp_sys.c
 p	|I32	|do_msgsnd	|NN SV **mark				\
@@ -5642,7 +5642,7 @@ S	|void	|utf8_mg_pos_cache_update				\
 				|const STRLEN byte			\
 				|const STRLEN utf8			\
 				|const STRLEN blen
-S	|I32	|visit		|NN SVFUNC_t f				\
+S	|SSize_t|visit		|NN SVFUNC_t f				\
 				|const U32 flags			\
 				|const U32 mask
 # if defined(DEBUGGING)

@@ -1810,7 +1810,6 @@ PP(pp_repeat)
                 STRLEN max;
 
                 if (   len > (MEM_SIZE_MAX-1) / (UV)count /* max would overflow */
-                    || len > (U32)I32_MAX  /* repeatcpy would overflow */
                 )
                      Perl_croak(aTHX_ "%s",
                                         "Out of memory during string extend");
@@ -2603,7 +2602,7 @@ static void
 S_scomplement(pTHX_ SV *targ, SV *sv)
 {
         U8 *tmps;
-        I32 anum;
+        SSize_t anum;
         STRLEN len;
 
         sv_copypv_nomg(TARG, sv);
@@ -2624,7 +2623,7 @@ S_scomplement(pTHX_ SV *targ, SV *sv)
             for ( ; anum && PTR2nat(tmps) % sizeof(long); anum--, tmps++)
                 *tmps = ~*tmps;
             tmpl = (long*)tmps;
-            for ( ; anum >= (I32)sizeof(long); anum -= (I32)sizeof(long), tmpl++)
+            for ( ; anum >= (SSize_t)sizeof(long); anum -= (SSize_t)sizeof(long), tmpl++)
                 *tmpl = ~*tmpl;
             tmps = (U8*)tmpl;
         }
