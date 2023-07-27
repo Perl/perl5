@@ -4755,6 +4755,9 @@ i	|OP *	|newMETHOP_internal					\
 				|NULLOK SV * const_meth
 RS	|OP *	|no_fh_allowed	|NN OP *o
 i	|OP *	|op_integerize	|NN OP *o
+Ti	|U16	|opslab_slot_offset					\
+				|NN const OPSLAB *slab			\
+				|NN const OPSLOT *slot
 i	|OP *	|op_std_init	|NN OP *o
 S	|OP *	|pmtrans	|NN OP *o				\
 				|NN OP *expr				\
@@ -4774,6 +4777,7 @@ RST	|bool	|scalar_mod_type|NULLOK const OP *o			\
 				|I32 type
 RS	|OP *	|search_const	|NN OP *o
 S	|void	|simplify_sort	|NN OP *o
+Ti	|U16	|size_to_psize	|size_t size
 RS	|OP *	|too_few_arguments_pv					\
 				|NN OP *o				\
 				|NN const char *name			\
