@@ -45,6 +45,12 @@
 
 #include "config.h"
 
+#ifndef WIN32   /* XXX temp */
+#  define _configthreadlocale(x) (! cBOOL(x))
+#  define _DISABLE_PER_THREAD_LOCALE 0
+#  define _ENABLE_PER_THREAD_LOCALE 1
+#endif
+
 /* This fakes up using Mingw for locale handling.  In order to not define WIN32
  * in this file (and hence throughout the code that isn't expecting it), this
  * doesn't define that, but defines the appropriate things that would otherwise
