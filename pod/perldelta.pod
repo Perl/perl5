@@ -377,6 +377,51 @@ only once: possible typo"> warnings when enabling warnings. [GH
 Fix a crash or assertion when cleaning up a closure that refers to an
 outside C<our> sub.  [GH #21067]
 
+=item *
+
+Fixed a number of issues where C<I32> was used as a string offset or
+size rather than C<SSize_t> or C<STRLEN>/C<size_t> [GH #21012]:
+
+=over
+
+=item *
+
+C<~$str> when C<$str> was more than 2GB in size would do nothing or
+produce an incomplete result.
+
+=item *
+
+String repeat, C<$str x $count>, didn't handle C<$str> over 2GB in
+size, throwing an error.  Now such strings are repeated.
+
+=item *
+
+Complex substitution after the 2GB point in a string could access
+incorrect or invalid offsets in the string.
+
+=item *
+
+sv_utf8_decode() would truncate the SVs pos() value.  This wasn't
+visible via utf8::decode().
+
+=item *
+
+When compiling a constant folded hash key, the length was truncated
+when creating the shared SV.  Since hash keys over 2GB are not
+supported, throw a compilation error instead.
+
+=back
+
+=item *
+
+msgrcv() incorrectly called get magic on the bufffer SV and failed to
+call set magic on completion. [GH #21012]
+
+=item *
+
+msgrcv() used the size parameter to resize the buffer before
+validating it. [GH #21012]
+
 =back
 
 =head1 Known Problems
