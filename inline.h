@@ -3240,8 +3240,8 @@ Perl_foldEQ_locale(pTHX_ const char *s1, const char *s2, I32 len)
 The C library C<strnlen> if available, or a Perl implementation of it.
 
 C<my_strnlen()> computes the length of the string, up to C<maxlen>
-characters.  It will never attempt to address more than C<maxlen>
-characters, making it suitable for use with strings that are not
+bytes.  It will never attempt to address more than C<maxlen>
+bytes, making it suitable for use with strings that are not
 guaranteed to be NUL-terminated.
 
 =cut
@@ -3698,7 +3698,7 @@ The C library C<strlcat> if available, or a Perl implementation of it.
 This operates on C C<NUL>-terminated strings.
 
 C<my_strlcat()> appends string C<src> to the end of C<dst>.  It will append at
-most S<C<size - strlen(dst) - 1>> characters.  It will then C<NUL>-terminate,
+most S<C<size - strlen(dst) - 1>> bytes.  It will then C<NUL>-terminate,
 unless C<size> is 0 or the original C<dst> string was longer than C<size> (in
 practice this should not happen as it means that either C<size> is incorrect or
 that C<dst> is not a proper C<NUL>-terminated string).
@@ -3739,7 +3739,7 @@ Perl_my_strlcat(char *dst, const char *src, Size_t size)
 The C library C<strlcpy> if available, or a Perl implementation of it.
 This operates on C C<NUL>-terminated strings.
 
-C<my_strlcpy()> copies up to S<C<size - 1>> characters from the string C<src>
+C<my_strlcpy()> copies up to S<C<size - 1>> bytes from the string C<src>
 to C<dst>, C<NUL>-terminating the result if C<size> is not 0.
 
 The return value is the total length C<src> would be if the copy completely
