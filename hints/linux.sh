@@ -166,7 +166,7 @@ esac
 if [ -x /usr/bin/gcc ] ; then
     gcc=/usr/bin/gcc
 # clang also provides -print-search-dirs
-elif ${cc:-cc} --version 2>/dev/null | grep -q '^clang ' ; then
+elif ${cc:-cc} --version 2>/dev/null | grep -q -e '^clang version' -e ' clang version'; then
     gcc=${cc:-cc}
 else
     gcc=gcc
