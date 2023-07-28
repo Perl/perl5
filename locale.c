@@ -209,7 +209,7 @@
  *      -Accflags=-DNO_LOCALE
  *          This compiles perl to always use the C locale, ignoring any
  *          attempts to change it.  This could be useful on platforms with a
- *          crippled locale implementation.  microperl uses it.
+ *          crippled locale implementation.
  *
  *      -Accflags=-DNO_THREAD_SAFE_LOCALE
  *          Even if thread-safe operations are available on this platform and
