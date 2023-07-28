@@ -507,7 +507,8 @@ static const struct BuiltinFuncDescriptor builtins[] = {
     /* list functions */
     { "builtin::indexed", &XS_builtin_indexed, &ck_builtin_funcN, 0 },
     { "builtin::export_lexically", &XS_builtin_export_lexically, NULL, 0 },
-    { 0 }
+
+    { NULL, NULL, NULL, 0 }
 };
 
 XS(XS_builtin_import);
