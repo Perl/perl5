@@ -4,6 +4,8 @@
 # tests that are not specific to &foo-style calls should go in this
 # file, too.
 
+use strict;
+
 BEGIN {
     chdir 't' if -d 't';
     require "./test.pl";
@@ -39,6 +41,7 @@ my %args_for = (
 my %desc = (
   #pos => 'match position',
 );
+my $tests = 0;
 
 use File::Spec::Functions;
 my $keywords_file = catfile(updir,'regen','keywords.pl');
@@ -57,7 +60,10 @@ while(<$kh>) {
       ok defined &{"CORE::$word"}, "defined &{'CORE::$word'}";
 
       my $proto = prototype "CORE::$word";
-      *{"my$word"} = \&{"CORE::$word"};
+      {
+        no strict 'refs';
+        *{"my$word"} = \&{"CORE::$word"};
+      }
       is prototype \&{"my$word"}, $proto, "prototype of &CORE::$word";
 
       CORE::state $protochar = qr/([^\\]|\\(?:[^[]|\[[^]]+\]))/;
@@ -82,8 +88,8 @@ while(<$kh>) {
          # __FILE__ won’t fold with warnings on, and then we get
          # ‘(eval 21)’ vs ‘(eval 22)’.
          no warnings 'numeric';
-         $core = op_list(eval $hpcode =~ s/my/CORE::/r or die);
-         $my   = op_list(eval $hpcode or die);
+         my $core = op_list(eval $hpcode =~ s/my/CORE::/r or die);
+         my $my   = op_list(eval $hpcode or die);
          is $my, $core, "precedence of CORE::$word without parens";
       }
 
@@ -95,7 +101,7 @@ while(<$kh>) {
                            |reset|system|values|l?stat)|evalbytes/x;
 
       $tests ++;
-      $code =
+      my $code =
          "sub { () = (my$word("
              . (
                 $args_for{$word}
@@ -117,10 +123,9 @@ while(<$kh>) {
   }
 }
 
-sub B::OP::pushname { push @op_names, shift->name }
-
 sub op_list {
-    local @op_names;
+    my @op_names;
+    local *B::OP::pushname = sub { push @op_names, shift->name };
     B::walkoptree(B::svref_2object($_[0])->ROOT, 'pushname');
     return "@op_names";
 }
@@ -169,7 +174,7 @@ ok eval { *CORE::exit = \42 },
 inlinable_ok($_, '$_{k}', 'on hash')
     for qw<delete exists>;
 
-@UNIVERSAL::ISA = CORE;
+@UNIVERSAL::ISA = qw( CORE );
 is "just another "->ucfirst . "perl hacker,\n"->ucfirst,
    "Just another Perl hacker,\n", 'coresubs do not return TARG';
 ++$tests;
