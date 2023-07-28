@@ -570,7 +570,7 @@ static struct {
       .requires_value = true,
       .apply          = &apply_class_attribute_isa,
     },
-    {0}
+    { NULL, false, NULL }
 };
 
 static void
@@ -955,7 +955,7 @@ static struct {
       .requires_value = false,
       .apply          = &apply_field_attribute_param,
     },
-    {0}
+    { NULL, false, NULL }
 };
 
 static void
