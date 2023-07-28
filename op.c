@@ -14333,20 +14333,17 @@ Perl_ck_entersub_args_core(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
 
         op_free(entersubop);
         switch(cvflags >> 16) {
-        case 'F': return newSVOP(OP_CONST, 0,
-                                        newSVpv(CopFILE(PL_curcop),0));
-        case 'L': return newSVOP(
-                           OP_CONST, 0,
-                           Perl_newSVpvf(aTHX_
-                             "%" LINE_Tf, CopLINE(PL_curcop)
-                           )
-                         );
-        case 'P': return newSVOP(OP_CONST, 0,
-                                   (PL_curstash
-                                     ? newSVhek(HvNAME_HEK(PL_curstash))
-                                     : &PL_sv_undef
-                                   )
-                                );
+        case 'F': /* __FILE__ */
+            return newSVOP(OP_CONST, 0,
+                    newSVpv(CopFILE(PL_curcop),0));
+        case 'L': /* __LINE__ */
+            return newSVOP(OP_CONST, 0,
+                    Perl_newSVpvf(aTHX_ "%" LINE_Tf, CopLINE(PL_curcop)));
+        case 'P': /* __PACKAGE__ */
+            return newSVOP(OP_CONST, 0,
+                    (PL_curstash
+                        ? newSVhek(HvNAME_HEK(PL_curstash))
+                        : &PL_sv_undef));
         }
         NOT_REACHED; /* NOTREACHED */
     }
