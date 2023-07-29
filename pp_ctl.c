@@ -4251,6 +4251,7 @@ S_require_file(pTHX_ SV *sv)
         int count = call_sv(PL_hook__require__before, G_SCALAR);
         SPAGAIN;
         if (count && SvOK(*SP) && SvROK(*SP) && SvTYPE(SvRV(*SP)) == SVt_PVCV)
+            /* the RC++ preserves it across the FREETMPS below */
             post_hook__require__before_sv = SvREFCNT_inc_simple_NN(*SP);
         if (!sv_streq(name_sv,sv)) {
             /* they modified the name argument, so do some sleight of hand */
@@ -4258,12 +4259,15 @@ S_require_file(pTHX_ SV *sv)
             if (!(name && len > 0 && *name))
                 DIE(aTHX_ "Missing or undefined argument to %s via %%{^HOOK}{require__before}",
                         op_name);
-            sv = SvREFCNT_inc_simple_NN(name_sv);
+            sv = name_sv;
         }
         FREETMPS;
         LEAVE_with_name("call_PRE_REQUIRE");
         if (post_hook__require__before_sv) {
-            MORTALDESTRUCTOR_SV(post_hook__require__before_sv, newSVsv(sv));
+            SV *nsv = newSVsv(sv);
+            MORTALDESTRUCTOR_SV(post_hook__require__before_sv, nsv);
+            SvREFCNT_dec_NN(nsv);
+            SvREFCNT_dec_NN(post_hook__require__before_sv);
         }
     }
     if (
@@ -4271,7 +4275,9 @@ S_require_file(pTHX_ SV *sv)
         && SvROK(PL_hook__require__after)
         && SvTYPE(SvRV(PL_hook__require__after)) == SVt_PVCV
     ) {
-        MORTALDESTRUCTOR_SV(PL_hook__require__after, newSVsv(sv));
+        SV *nsv = newSVsv(sv);
+        MORTALDESTRUCTOR_SV(PL_hook__require__after, nsv);
+        SvREFCNT_dec_NN(nsv);
     }
 
 #ifndef VMS

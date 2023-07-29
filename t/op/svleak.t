@@ -15,7 +15,7 @@ BEGIN {
 
 use Config;
 
-plan tests => 151;
+plan tests => 153;
 
 # run some code N times. If the number of SVs at the end of loop N is
 # greater than (N-1)*delta at the end of loop 1, we've got a leak
@@ -644,4 +644,19 @@ my $refcount;
     print $sv->REFCNT == 1 ? "ok" : "not ok";
 }
 PERL
+}
+
+# the initial implementation of the require hook had some leaks
+
+sub hook::before  { $_[0] = "NoSuchFile2" if $_[0] =~/ NoSuch/;
+                        return \&hook::before2 }
+sub hook::before2 { return }
+sub hook::after   { return }
+
+{
+    local ${^HOOK}{require__before} =  \&hook::before;
+    local ${^HOOK}{require__after}  =  \&hook::after;
+
+    leak(5, 0, sub { require strict; }, "require hook");
+    leak(5, 0, sub { eval { require "NoSuchFile" } }, "require hook no file");
 }
