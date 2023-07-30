@@ -47,7 +47,6 @@ Perl_newSVobject(pTHX_ Size_t fieldcount)
 
 PP(pp_initfield)
 {
-    dSP;
     UNOP_AUX_item *aux = cUNOP_AUX->op_aux;
 
     SV *self = PAD_SVl(PADIX_SELF);
@@ -62,8 +61,10 @@ PP(pp_initfield)
 
     switch(PL_op->op_private & (OPpINITFIELD_AV|OPpINITFIELD_HV)) {
         case 0:
-            if(PL_op->op_flags & OPf_STACKED)
-                val = newSVsv(POPs);
+            if(PL_op->op_flags & OPf_STACKED) {
+                val = newSVsv(*PL_stack_sp);
+                rpp_popfree_1();
+            }
             else
                 val = newSV(0);
             break;
@@ -73,15 +74,16 @@ PP(pp_initfield)
             AV *av;
             if(PL_op->op_flags & OPf_STACKED) {
                 SV **svp = PL_stack_base + POPMARK + 1;
-                STRLEN count = SP - svp + 1;
+                STRLEN count = PL_stack_sp - svp + 1;
 
                 av = newAV_alloc_x(count);
 
                 av_extend(av, count);
-                while(svp <= SP) {
+                while(svp <= PL_stack_sp) {
                     av_push_simple(av, newSVsv(*svp));
                     svp++;
                 }
+                rpp_popfree_to(PL_stack_sp - count);
             }
             else
                 av = newAV();
@@ -94,18 +96,19 @@ PP(pp_initfield)
             HV *hv = newHV();
             if(PL_op->op_flags & OPf_STACKED) {
                 SV **svp = PL_stack_base + POPMARK + 1;
-                STRLEN svcount = SP - svp + 1;
+                STRLEN svcount = PL_stack_sp - svp + 1;
 
                 if(svcount % 2)
                     Perl_warner(aTHX_
                             packWARN(WARN_MISC), "Odd number of elements in hash field initialization");
 
-                while(svp <= SP) {
+                while(svp <= PL_stack_sp) {
                     SV *key = *svp; svp++;
-                    SV *val = svp <= SP ? *svp : &PL_sv_undef; svp++;
+                    SV *val = svp <= PL_stack_sp ? *svp : &PL_sv_undef; svp++;
 
                     (void)hv_store_ent(hv, key, newSVsv(val), 0);
                 }
+                rpp_popfree_to(PL_stack_sp - svcount);
             }
             val = (SV *)hv;
             break;
@@ -121,7 +124,7 @@ PP(pp_initfield)
         save_freesv(sv);
     }
 
-    RETURN;
+    return NORMAL;
 }
 
 XS(injected_constructor);
@@ -239,7 +242,9 @@ XS(injected_constructor)
 /* TODO: People would probably expect to find this in pp.c  ;) */
 PP(pp_methstart)
 {
-    SV *self = av_shift(GvAV(PL_defgv));
+    /* note that if AvREAL(@_), be careful not to leak self:
+     * so keep it in @_ for now, and only shift it later */
+    SV *self = *(av_fetch(GvAV(PL_defgv), 0, 1));
     SV *rv = NULL;
 
     /* pp_methstart happens before the first OP_NEXTSTATE of the method body,
@@ -296,6 +301,11 @@ PP(pp_methstart)
             save_freesv(sv);
         }
     }
+
+    /* safe to shift and free self now */
+    self = av_shift(GvAV(PL_defgv));
+    if (AvREAL(GvAV(PL_defgv)))
+        SvREFCNT_dec_NN(self);
 
     if(PL_op->op_private & OPpINITFIELDS) {
         SV *params = *av_fetch(GvAV(PL_defgv), 0, 0);
@@ -438,15 +448,10 @@ static const char *S_split_package_ver(pTHX_ SV *value, SV *pkgname, SV *pkgvers
 #define ensure_module_version(module, version)  S_ensure_module_version(aTHX_ module, version)
 static void S_ensure_module_version(pTHX_ SV *module, SV *version)
 {
-    dSP;
-
     ENTER;
 
-    PUSHMARK(SP);
-    PUSHs(module);
-    PUSHs(version);
-    PUTBACK;
-
+    PUSHMARK(PL_stack_sp);
+    rpp_xpush_2(module, version);
     call_method("VERSION", G_VOID);
 
     LEAVE;
@@ -1070,17 +1075,15 @@ Perl_ck_classname(pTHX_ OP *o)
 
 PP(pp_classname)
 {
-    dSP;
     dTARGET;
 
     SV *self = PAD_SVl(PADIX_SELF);
     assert(SvTYPE(SvRV(self)) == SVt_PVOBJ);
 
-    EXTEND(SP, 1);
-    PUSHs(TARG);
+    rpp_xpush_1(TARG);
     sv_ref(TARG, SvRV(self), true);
 
-    RETURN;
+    return NORMAL;
 }
 
 /*
