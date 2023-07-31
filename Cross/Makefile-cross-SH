@@ -58,6 +58,9 @@ true)
 	cygwin*)
 		linklibperl="-lperl"
 		;;
+	msys*)
+		linklibperl="-L. -lperl"
+		;;
 	sunos*)
 		linklibperl="-lperl"
 		;;
@@ -150,7 +153,7 @@ extra_dep=''
 for f in $dynamic_ext; do
     : the dependency named here will never exist
       base=`echo "$f" | sed 's/.*\///'`
-    this_target="lib/auto/$f/$base.$dlext"  
+    this_target="lib/auto/$f/$base.$dlext"
     dynamic_list="$dynamic_list $this_target"
 
     : Parallel makes reveal that we have some interdependencies
@@ -461,7 +464,7 @@ perlmain.c: miniperlmain.c config.sh $(FIRSTMAKEFILE)
 
 !NO!SUBS!
 case "$osname" in
-cygwin)
+cygwin | msys)
 	;; # Let cygwin/Makefile.SHs do its work.
 *)
 	$spitshell >>$Makefile <<'!NO!SUBS!'
@@ -518,9 +521,9 @@ MINIPERLEXP		= $(MINIPERL_NONSHR)
 LIBPERLEXPORT		= perl.exp
 
 !NO!SUBS!
-		
+
 		;;
-	*)	
+	*)
 		$spitshell >>$Makefile <<'!NO!SUBS!'
 MINIPERLEXP		= miniperl$(EXE_EXT)
 
@@ -912,7 +915,7 @@ printconfig:
 	realclean _realcleaner clobber _clobber \
 	distclean veryclean _verycleaner
 
-clean:		_tidy _mopup 
+clean:		_tidy _mopup
 
 realclean:	_realcleaner _mopup
 	@echo "Note that '$(MAKE) realclean' does not delete config.sh or Policy.sh"
@@ -941,6 +944,7 @@ _mopup:
 	-rm -f perl.pixie lib*.so.perl.pixie lib*.so.Addrs
 	-rm -f perl.Addrs perl.Counts t/perl.Addrs t/perl.Counts *perl.xok
 	-rm -f cygwin.c libperl*.def libperl*.dll cygperl*.dll *.exe.stackdump
+	-rm -f msys-perl*.dll
 	-rm -f perl$(EXE_EXT) miniperl$(EXE_EXT) $(LIBPERL) libperl.*
 	-rm -f config.over
 
