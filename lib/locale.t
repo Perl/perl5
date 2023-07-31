@@ -90,7 +90,7 @@ my %known_bad_locales = (
 
 # cygwin isn't returning proper radix length in this locale, but supposedly to
 # be fixed in later versions.
-if ($os eq 'cygwin' && version->new(($Config{osvers} =~ /^(\d+(?:\.\d+)+)/)[0]) le v2.4.1) {
+if (($^O eq 'cygwin' or $^O eq 'msys') && version->new(($Config{osvers} =~ /^(\d+(?:\.\d+)+)/)[0]) le v2.4.1) {
     $known_bad_locales{'cygwin'} = qr/ ^ ps_AF /ix;
 }
 

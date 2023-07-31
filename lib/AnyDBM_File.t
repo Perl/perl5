@@ -14,7 +14,8 @@ use Fcntl;
 
 $Is_Dosish = ($^O eq 'amigaos' || $^O eq 'MSWin32' ||
 	      $^O eq 'os2' ||
-	      $^O eq 'cygwin');
+	      $^O eq 'cygwin' ||
+	      $^O eq 'msys');
 
 my $filename = "Any_dbmx$$";
 unlink <"$filename*">;

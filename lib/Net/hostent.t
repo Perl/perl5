@@ -65,7 +65,7 @@ ok(defined $i, 'gethost on capture variable');
 
 SKIP: {
     skip "Windows will return the machine name instead of 'localhost'", 2
-      if $^O eq 'MSWin32' or $^O eq 'cygwin';
+      if $^O eq 'MSWin32' or $^O eq 'cygwin' or $^O eq 'msys';
 
     print "# name = " . $h->name . ", aliases = " . join (",", @{$h->aliases}) . "\n";
 

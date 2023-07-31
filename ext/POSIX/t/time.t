@@ -22,7 +22,7 @@ SKIP: {
     # actually do anything.  Cygwin works in some places, but not others.  The
     # other Win32's below are guesses.
     skip "No tzset()", 2
-       if $^O eq "VMS" || $^O eq "cygwin" ||
+       if $^O eq "VMS" || $^O eq "cygwin" || $^O eq "msys"
           $^O eq "MSWin32" || $^O eq "interix";
     tzset();
     my @tzname = tzname();
