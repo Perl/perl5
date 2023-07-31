@@ -189,6 +189,10 @@ DEFAULT_INC_EXCLUDES_DOT := define
 # If not enabled, we automatically try to use maximum optimization
 # with all compilers that are known to have a working optimizer.
 #
+# You can also set CFG = DebugSymbols for a slightly smaller/faster
+# debug build without the special debugging code in perl which is
+# enabled via -DDEBUGGING;
+#
 #CFG		:= Debug
 
 #
@@ -614,6 +618,9 @@ ifeq ($(CFG),Debug)
 OPTIMIZE	= -g -Og
 LINK_DBG	= -g
 DEFINES		+= -DDEBUGGING
+else ifeq ($(CFG),DebugSymbols)
+OPTIMIZE	= -g -Og
+LINK_DBG	= -g
 else
 # In https://github.com/Perl/perl5/issues/20081 it is found that the previous
 # optimization level -O2 causes generated code that fails in mysterious ways
