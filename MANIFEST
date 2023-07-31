@@ -5263,6 +5263,7 @@ hints/minix.sh				Hints for named architecture
 hints/mips.sh				Hints for named architecture
 hints/mirbsd.sh				Hints for named architecture
 hints/mpc.sh				Hints for named architecture
+hints/msys.sh				Hints for named architecture
 hints/ncr_tower.sh			Hints for named architecture
 hints/netbsd.sh				Hints for named architecture
 hints/newsos4.sh			Hints for named architecture
