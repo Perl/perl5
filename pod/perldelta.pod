@@ -206,7 +206,12 @@ XXX L<message|perldiag/"message">
 
 =item *
 
-XXX L<message|perldiag/"message">
+L<< Forked open '%s' not meaningful in <>|perldiag/"Forked open '%s' not meaningful in <>" >>
+
+(S inplace) You had C<|-> or C<-|> in C<@ARGV> and tried to use C<< <>
+>> to read from it.
+
+Previously this would fork and produce a confusing error message. [GH #21176]
 
 =back
 
