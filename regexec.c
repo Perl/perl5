@@ -4428,7 +4428,8 @@ S_regtry(pTHX_ regmatch_info *reginfo, char **startposp)
 */
 #define REPORT_CODE_OFF 29
 #define INDENT_CHARS(depth) ((int)(depth) % 20)
-#ifdef DEBUGGING
+
+#ifdef PERL_RE_BUILD_DEBUG
 int
 Perl_re_exec_indentf(pTHX_ const char *fmt, U32 depth, ...)
 {
