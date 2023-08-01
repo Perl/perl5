@@ -11,6 +11,7 @@ BEGIN {
 
 use warnings;
 use strict;
+use Config;
 plan tests => 133;
 our $TODO;
 
@@ -909,6 +910,7 @@ is $@,'', 'goto the first parameter of a binary expression [perl #132854]';
 SKIP:
 {
     skip "No XS::APItest in miniperl", 6 if is_miniperl();
+    skip "No XS::APItest in static perl", 6 if not $Config{usedl};
 
     require XS::APItest;
 
@@ -939,6 +941,7 @@ SKIP:
 SKIP:
 {
     skip "No XS::APItest in miniperl", 2 if is_miniperl();
+    skip "No XS::APItest in static perl", 2 if not $Config{usedl};
 
     # utf8::is_utf8() is just an example of an XS sub
     sub foo_19936 { *foo_19936 = {}; goto &utf8::is_utf8 }
