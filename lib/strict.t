@@ -3,7 +3,7 @@
 chdir 't' if -d 't';
 @INC = ( '.', '../lib' );
 
-our $local_tests = 6 + 3*3*38 + 3*11 + 3*18;
+our $local_tests = 6 + 3*3*40 + 3*11 + 3*18;
 require "../t/lib/common.pl";
 
 eval qq(use strict 'garbage');
@@ -63,12 +63,12 @@ foreach my $minor (0..10) {
     test_strict_all "use strict; use v5.$minor", "rvs";
     test_strict_all "no strict; use v5.$minor", "";
 }
-foreach my $minor (11..36) {
+foreach my $minor (11..38) {
     test_strict_all "use v5.$minor", "rvs";
     test_strict_all "use strict; use v5.$minor", "rvs";
     test_strict_all "no strict; use v5.$minor", "";
 }
-foreach my $minor (37..37) {
+foreach my $minor (39..39) {
     test_strict_all "use v5.$minor", "rvs";
     test_strict_all "use strict; use v5.$minor", "rvs";
     test_strict_all "no strict; use v5.$minor", "rvs";
@@ -78,20 +78,20 @@ foreach my $minor (37..37) {
     test_strict_all "use v5.8; use v5.10", "";
     test_strict_all "use v5.10; use v5.8", "";
     test_strict_all "use v5.10; use v5.16", "rvs";
-    test_strict_all "use v5.10; use v5.37", "rvs";
+    test_strict_all "use v5.10; use v5.39", "rvs";
     {
         local $SIG{__WARN__} = sub {};
         test_strict_all "use v5.16; use v5.10", "";
     }
     test_strict_all "use v5.16; use v5.20", "rvs";
     test_strict_all "use v5.20; use v5.16", "rvs";
-    test_strict_all "use v5.16; use v5.37", "rvs";
+    test_strict_all "use v5.16; use v5.39", "rvs";
     {
         local $SIG{__WARN__} = sub {};
-        test_strict_all "use v5.37; use v5.10", "rvs";
+        test_strict_all "use v5.39; use v5.10", "rvs";
     }
-    test_strict_all "use v5.37; use v5.16", "rvs";
-    test_strict_all "use v5.37; use v5.37", "rvs";
+    test_strict_all "use v5.39; use v5.16", "rvs";
+    test_strict_all "use v5.39; use v5.39", "rvs";
 }
 
 {
@@ -107,10 +107,10 @@ foreach my $minor (37..37) {
     test_strict_all "no strict 'refs'; use v5.16", "vs";
     test_strict_all "no strict 'vars'; use v5.16", "rs";
     test_strict_all "no strict 'subs'; use v5.16", "rv";
-    test_strict_all "use strict 'refs'; use v5.37", "rvs";
-    test_strict_all "use strict 'vars'; use v5.37", "rvs";
-    test_strict_all "use strict 'subs'; use v5.37", "rvs";
-    test_strict_all "no strict 'refs'; use v5.37", "rvs";
-    test_strict_all "no strict 'vars'; use v5.37", "rvs";
-    test_strict_all "no strict 'subs'; use v5.37", "rvs";
+    test_strict_all "use strict 'refs'; use v5.39", "rvs";
+    test_strict_all "use strict 'vars'; use v5.39", "rvs";
+    test_strict_all "use strict 'subs'; use v5.39", "rvs";
+    test_strict_all "no strict 'refs'; use v5.39", "rvs";
+    test_strict_all "no strict 'vars'; use v5.39", "rvs";
+    test_strict_all "no strict 'subs'; use v5.39", "rvs";
 }

@@ -7902,7 +7902,7 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
 
         U16 shortver = S_extract_shortver(aTHX_ use_version);
 
-        if (shortver >= SHORTVER(5, 37)) {
+        if (shortver >= SHORTVER(5, 39)) {
             PL_hints |= HINT_STRICT_REFS | HINT_EXPLICIT_STRICT_REFS |
                 HINT_STRICT_SUBS | HINT_EXPLICIT_STRICT_SUBS |
                 HINT_STRICT_VARS | HINT_EXPLICIT_STRICT_VARS;
