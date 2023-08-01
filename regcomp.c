@@ -290,6 +290,7 @@ S_edit_distance(const UV* src,
 /* END of edit_distance() stuff
  * ========================================================= */
 
+#ifdef PERL_RE_BUILD_AUX
 /* add a data member to the struct reg_data attached to this regex, it should
  * always return a non-zero return. the 's' argument is the type of the items
  * being added and the n is the number of items. The length of 's' should match
@@ -340,6 +341,7 @@ Perl_reg_add_data(RExC_state_t* const pRExC_state, const char* const s, const U3
     assert(count>0);
     return count;
 }
+#endif /* PERL_RE_BUILD_AUX */
 
 /*XXX: todo make this not included in a non debugging perl, but appears to be
  * used anyway there, in 'use re' */
@@ -7443,6 +7445,7 @@ S_regatom(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth)
 }
 
 
+#ifdef PERL_RE_BUILD_AUX
 void
 Perl_populate_anyof_bitmap_from_invlist(pTHX_ regnode *node, SV** invlist_ptr)
 {
@@ -7502,6 +7505,7 @@ Perl_populate_anyof_bitmap_from_invlist(pTHX_ regnode *node, SV** invlist_ptr)
         }
     }
 }
+#endif /* PERL_RE_BUILD_AUX */
 
 /* Parse POSIX character classes: [[:foo:]], [[=foo=]], [[.foo.]].
    Character classes ([:foo:]) can also be negated ([:^foo:]).
@@ -9095,6 +9099,7 @@ S_dump_regex_sets_structures(pTHX_ RExC_state_t *pRExC_state,
 #undef IS_OPERATOR
 #undef IS_OPERAND
 
+#ifdef PERL_RE_BUILD_AUX
 void
 Perl_add_above_Latin1_folds(pTHX_ RExC_state_t *pRExC_state, const U8 cp, SV** invlist)
 {
@@ -9182,6 +9187,8 @@ Perl_add_above_Latin1_folds(pTHX_ RExC_state_t *pRExC_state, const U8 cp, SV** i
          }
     }
 }
+#endif /* PERL_RE_BUILD_AUX */
+
 
 STATIC void
 S_output_posix_warnings(pTHX_ RExC_state_t *pRExC_state, AV* posix_warnings)
@@ -12105,6 +12112,7 @@ S_optimize_regclass(pTHX_
 
 #undef HAS_NONLOCALE_RUNTIME_PROPERTY_DEFINITION
 
+#ifdef PERL_RE_BUILD_AUX
 void
 Perl_set_ANYOF_arg(pTHX_ RExC_state_t* const pRExC_state,
                 regnode* const node,
@@ -12261,6 +12269,7 @@ Perl_set_ANYOF_arg(pTHX_ RExC_state_t* const pRExC_state,
     RExC_rxi->data->data[n] = (void*)rv;
     ARG1u_SET(node, n);
 }
+#endif /* PERL_RE_BUILD_AUX */
 
 SV *
 
@@ -12999,6 +13008,8 @@ S_regtail_study(pTHX_ RExC_state_t *pRExC_state, regnode_offset p,
 }
 #endif
 
+
+#ifdef PERL_RE_BUILD_AUX
 SV*
 Perl_get_ANYOFM_contents(pTHX_ const regnode * n) {
 
@@ -13047,7 +13058,7 @@ Perl_get_ANYOFHbbm_contents(pTHX_ const regnode * n) {
                                       UTF_CONTINUATION_MARK | 0));
     return cp_list;
 }
-
+#endif /* PERL_RE_BUILD_AUX */
 
 
 SV *
