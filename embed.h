@@ -1155,35 +1155,12 @@
 #   if defined(PERL_IN_AV_C)
 #     define get_aux_mg(a)                      S_get_aux_mg(aTHX_ a)
 #   endif
-#   if defined(PERL_IN_DEB_C)
-#     define deb_stack_n(a,b,c,d,e)             S_deb_stack_n(aTHX_ a,b,c,d,e)
-#   endif
-#   if defined(PERL_IN_DOIO_C)
-#     define argvout_final(a,b,c)               S_argvout_final(aTHX_ a,b,c)
-#     define exec_failed(a,b,c)                 S_exec_failed(aTHX_ a,b,c)
-#     define ingroup(a,b)                       S_ingroup(aTHX_ a,b)
-#     define is_fork_open                       S_is_fork_open
-#     define openn_cleanup(a,b,c,d,e,f,g,h,i,j,k,l,m) S_openn_cleanup(aTHX_ a,b,c,d,e,f,g,h,i,j,k,l,m)
-#     define openn_setup(a,b,c,d,e,f)           S_openn_setup(aTHX_ a,b,c,d,e,f)
-#   endif
-#   if defined(PERL_IN_DOOP_C)
-#     define do_trans_complex(a,b)              S_do_trans_complex(aTHX_ a,b)
-#     define do_trans_count(a,b)                S_do_trans_count(aTHX_ a,b)
-#     define do_trans_count_invmap(a,b)         S_do_trans_count_invmap(aTHX_ a,b)
-#     define do_trans_invmap(a,b)               S_do_trans_invmap(aTHX_ a,b)
-#     define do_trans_simple(a,b)               S_do_trans_simple(aTHX_ a,b)
-#   endif
-#   if defined(PERL_IN_DUMP_C)
-#     define deb_curcv(a)                       S_deb_curcv(aTHX_ a)
-#     define debprof(a)                         S_debprof(aTHX_ a)
-#     define pm_description(a)                  S_pm_description(aTHX_ a)
-#     define sequence_num(a)                    S_sequence_num(aTHX_ a)
-#   endif
-#   if defined(PERL_IN_GLOBALS_C) || defined(PERL_IN_OP_C) || \
-       defined(PERL_IN_PEEP_C)
+#   if defined(PERL_IN_CLASS_C) || defined(PERL_IN_GLOBALS_C) || \
+       defined(PERL_IN_OP_C)    || defined(PERL_IN_PEEP_C)
 #     define ck_anoncode(a)                     Perl_ck_anoncode(aTHX_ a)
 #     define ck_backtick(a)                     Perl_ck_backtick(aTHX_ a)
 #     define ck_bitop(a)                        Perl_ck_bitop(aTHX_ a)
+#     define ck_classname(a)                    Perl_ck_classname(aTHX_ a)
 #     define ck_cmp(a)                          Perl_ck_cmp(aTHX_ a)
 #     define ck_concat(a)                       Perl_ck_concat(aTHX_ a)
 #     define ck_defined(a)                      Perl_ck_defined(aTHX_ a)
@@ -1230,8 +1207,32 @@
 #     define ck_tell(a)                         Perl_ck_tell(aTHX_ a)
 #     define ck_trunc(a)                        Perl_ck_trunc(aTHX_ a)
 #     define ck_trycatch(a)                     Perl_ck_trycatch(aTHX_ a)
-#   endif /* defined(PERL_IN_GLOBALS_C) || defined(PERL_IN_OP_C) ||
-             defined(PERL_IN_PEEP_C) */
+#   endif /* defined(PERL_IN_CLASS_C) || defined(PERL_IN_GLOBALS_C) ||
+             defined(PERL_IN_OP_C)    || defined(PERL_IN_PEEP_C) */
+#   if defined(PERL_IN_DEB_C)
+#     define deb_stack_n(a,b,c,d,e)             S_deb_stack_n(aTHX_ a,b,c,d,e)
+#   endif
+#   if defined(PERL_IN_DOIO_C)
+#     define argvout_final(a,b,c)               S_argvout_final(aTHX_ a,b,c)
+#     define exec_failed(a,b,c)                 S_exec_failed(aTHX_ a,b,c)
+#     define ingroup(a,b)                       S_ingroup(aTHX_ a,b)
+#     define is_fork_open                       S_is_fork_open
+#     define openn_cleanup(a,b,c,d,e,f,g,h,i,j,k,l,m) S_openn_cleanup(aTHX_ a,b,c,d,e,f,g,h,i,j,k,l,m)
+#     define openn_setup(a,b,c,d,e,f)           S_openn_setup(aTHX_ a,b,c,d,e,f)
+#   endif
+#   if defined(PERL_IN_DOOP_C)
+#     define do_trans_complex(a,b)              S_do_trans_complex(aTHX_ a,b)
+#     define do_trans_count(a,b)                S_do_trans_count(aTHX_ a,b)
+#     define do_trans_count_invmap(a,b)         S_do_trans_count_invmap(aTHX_ a,b)
+#     define do_trans_invmap(a,b)               S_do_trans_invmap(aTHX_ a,b)
+#     define do_trans_simple(a,b)               S_do_trans_simple(aTHX_ a,b)
+#   endif
+#   if defined(PERL_IN_DUMP_C)
+#     define deb_curcv(a)                       S_deb_curcv(aTHX_ a)
+#     define debprof(a)                         S_debprof(aTHX_ a)
+#     define pm_description(a)                  S_pm_description(aTHX_ a)
+#     define sequence_num(a)                    S_sequence_num(aTHX_ a)
+#   endif
 #   if defined(PERL_IN_GV_C)
 #     define find_default_stash(a,b,c,d,e,f)    S_find_default_stash(aTHX_ a,b,c,d,e,f)
 #     define gv_fetchmeth_internal(a,b,c,d,e,f) S_gv_fetchmeth_internal(aTHX_ a,b,c,d,e,f)

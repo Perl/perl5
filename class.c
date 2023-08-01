@@ -1059,6 +1059,30 @@ Perl_class_add_ADJUST(pTHX_ HV *stash, CV *cv)
     av_push(aux->xhv_class_adjust_blocks, (SV *)cv);
 }
 
+OP *
+Perl_ck_classname(pTHX_ OP *o)
+{
+    if(!CvIsMETHOD(PL_compcv))
+        croak("Cannot use __CLASS__ outside of a method or field initializer expression");
+
+    return o;
+}
+
+PP(pp_classname)
+{
+    dSP;
+    dTARGET;
+
+    SV *self = PAD_SVl(PADIX_SELF);
+    assert(SvTYPE(SvRV(self)) == SVt_PVOBJ);
+
+    EXTEND(SP, 1);
+    PUSHs(TARG);
+    sv_ref(TARG, SvRV(self), true);
+
+    RETURN;
+}
+
 /*
  * ex: set ts=8 sts=4 sw=4 et:
  */

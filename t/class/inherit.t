@@ -18,6 +18,8 @@ no warnings 'experimental::class';
         field $adja;
         ADJUST { $adja = "base class" }
         method adja { return $adja; }
+
+        method classname { return __CLASS__; }
     }
 
     class Test1B :isa(Test1A) {
@@ -41,6 +43,8 @@ no warnings 'experimental::class';
     is($obj->inita, "base",      'Object has base class initialised field');
     can_ok($obj, "adja");
     is($obj->adja, "base class", 'Object has base class ADJUSTed field');
+
+    is($obj->classname, "Test1B", '__CLASS__ yields runtime instance class name');
 
     class Test1C :isa(    Test1A    ) { }
 

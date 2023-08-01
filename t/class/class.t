@@ -14,12 +14,16 @@ no warnings 'experimental::class';
 {
     class Test1 {
         method hello { return "hello, world"; }
+
+        method classname { return __CLASS__; }
     }
 
     my $obj = Test1->new;
     isa_ok($obj, "Test1", '$obj');
 
     is($obj->hello, "hello, world", '$obj->hello');
+
+    is($obj->classname, "Test1", '$obj->classname yields __CLASS__');
 }
 
 # Classes are still regular packages

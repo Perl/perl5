@@ -14333,6 +14333,8 @@ Perl_ck_entersub_args_core(pTHX_ OP *entersubop, GV *namegv, SV *protosv)
 
         op_free(entersubop);
         switch(cvflags >> 16) {
+        case 'C': /* __CLASS__ */
+            return newOP(OP_CLASSNAME, 0);
         case 'F': /* __FILE__ */
             return newSVOP(OP_CONST, 0,
                     newSVpv(CopFILE(PL_curcop),0));
@@ -15252,6 +15254,7 @@ Perl_core_prototype(pTHX_ SV *sv, const char *name, const int code,
     case KEY_values:  retsetpvs("\\[%@]", OP_VALUES);
     case KEY_each:    retsetpvs("\\[%@]", OP_EACH);
     case KEY_pos:     retsetpvs(";\\[$*]", OP_POS);
+    case KEY___CLASS__:
     case KEY___FILE__: case KEY___LINE__: case KEY___PACKAGE__:
         retsetpvs("", 0);
     case KEY_evalbytes:

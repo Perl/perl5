@@ -7820,6 +7820,9 @@ yyl_word_or_keyword(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct
                     ? newOP(OP_RUNCV, 0)
                     : newSVOP(OP_RUNCV, 0, &PL_sv_undef));
 
+    case KEY___CLASS__:
+        FUN0(OP_CLASSNAME);
+
     case KEY_AUTOLOAD:
     case KEY_DESTROY:
     case KEY_BEGIN:
