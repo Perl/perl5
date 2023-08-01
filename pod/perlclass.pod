@@ -120,6 +120,27 @@ constructor at all. Expressions using C<//=> will also apply if the caller did
 pass the parameter but the value was undefined, and expressions using C<||=>
 will apply if the value was false.
 
+During a field initializing expression, the instance is not yet constructed
+and so the C<$self> lexical is not available.  However, the special
+C<__CLASS__> token may be used to obtain the name of the class being
+constructed, for example in order to invoke class methods on it to help in
+constructing values for fields.
+
+    class WithCustomField {
+        use constant DEFAULT_X => 10;
+        field $x = __CLASS__->DEFAULT_X;
+    }
+
+This allows subclasses to override the method with different behaviour.
+
+    class DifferentCustomField :isa(WithCustomField) {
+        sub DEFAULT_X { rand > 0.5 ? 20 : 30 }
+    }
+
+When an instance of C<DifferentCustomField> is constructed, the C<__CLASS__>
+expression in the base will yield the correct class name, and so invoke this
+overridden method instead.
+
 =head2 method
 
     method METHOD_NAME SIGNATURE BLOCK

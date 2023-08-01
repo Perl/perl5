@@ -603,3 +603,5 @@ helemexistsor	hash element exists or	ck_helemexistsor	|	S S
 
 methstart	method start		ck_null		+
 initfield	initialise field	ck_null		+
+
+classname	class name		ck_classname		0t

@@ -567,6 +567,7 @@ EXTCONST char* const PL_op_name[] INIT({
 	"helemexistsor",
 	"methstart",
 	"initfield",
+	"classname",
         "freed",
 });
 
@@ -992,6 +993,7 @@ EXTCONST char* const PL_op_desc[] INIT({
 	"hash element exists or",
 	"method start",
 	"initialise field",
+	"class name",
     "freed op",
 });
 
@@ -1422,6 +1424,7 @@ INIT({
 	Perl_pp_helemexistsor,
 	Perl_pp_methstart,
 	Perl_pp_initfield,
+	Perl_pp_classname,
 });
 
 EXT Perl_check_t PL_check[] /* or perlvars.h */
@@ -1847,6 +1850,7 @@ INIT({
 	Perl_ck_helemexistsor,	/* helemexistsor */
 	Perl_ck_null,		/* methstart */
 	Perl_ck_null,		/* initfield */
+	Perl_ck_classname,	/* classname */
 });
 
 EXTCONST U32 PL_opargs[] INIT({
@@ -2271,6 +2275,7 @@ EXTCONST U32 PL_opargs[] INIT({
 	0x00011300,	/* helemexistsor */
 	0x00000f00,	/* methstart */
 	0x00000f00,	/* initfield */
+	0x00000008,	/* classname */
 });
 
 END_EXTERN_C
@@ -2975,6 +2980,7 @@ EXTCONST I16  PL_op_private_bitdef_ix[] = {
      254, /* helemexistsor */
      256, /* methstart */
      258, /* initfield */
+      -1, /* classname */
 
 };
 
@@ -3501,6 +3507,7 @@ EXTCONST U8 PL_op_private_valid[] = {
     /* HELEMEXISTSOR */ (OPpARG1_MASK|OPpHELEMEXISTSOR_DELETE),
     /* METHSTART  */ (OPpARG1_MASK|OPpINITFIELDS),
     /* INITFIELD  */ (OPpARG1_MASK|OPpINITFIELD_AV|OPpINITFIELD_HV),
+    /* CLASSNAME  */ (0),
 
 };
 

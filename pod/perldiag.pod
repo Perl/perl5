@@ -788,6 +788,13 @@ keep a reference count on its arguments and cannot be made to
 do so.  Such arrays are not even supposed to be accessible to
 Perl code, but are only used internally.
 
+=item Cannot use __CLASS__ outside of a method or field initializer expression
+
+(F) A C<__CLASS__> expression yields the class name of the object instance
+executing the current method, and therefore it can only be placed inside an
+actual method (or method-like expression, such as a field initializer
+expression).
+
 =item Cannot yet reorder sv_vcatpvfn() arguments from va_list
 
 (F) Some XS code tried to use C<sv_vcatpvfn()> or a related function with a

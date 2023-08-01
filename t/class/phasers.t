@@ -14,14 +14,17 @@ no warnings 'experimental::class';
 # ADJUST
 {
     my $adjusted;
+    my $class_in_adjust;
 
     class Test1 {
         ADJUST { $adjusted .= "a" }
         ADJUST { $adjusted .= "b" }
+        ADJUST { $class_in_adjust = __CLASS__; }
     }
 
     Test1->new;
     is($adjusted, "ab", 'both ADJUST blocks run in order');
+    is($class_in_adjust, "Test1", 'value of __CLASS__ in ADJUST block');
 }
 
 # $self in ADJUST

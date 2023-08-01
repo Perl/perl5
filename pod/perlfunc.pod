@@ -352,6 +352,7 @@ X<object> X<class> X<package>
 
 L<C<bless>|/bless REF,CLASSNAME>,
 L<C<class>|/class NAMESPACE>,
+L<C<__CLASS__>|/__CLASS__>,
 L<C<dbmclose>|/dbmclose HASH>,
 L<C<dbmopen>|/dbmopen HASH,DBNAME,MASK>,
 L<C<field>|/field VARNAME>,
@@ -6070,6 +6071,37 @@ X<__PACKAGE__>
 =for Pod::Functions +5.004 the current package
 
 A special token that returns the name of the package in which it occurs.
+
+=item __CLASS__
+X<__CLASS__>
+
+=for Pod::Functions the class name of the current instance.
+
+Invoked within a L<C<method>|/method NAME BLOCK>, or similar location, such as
+a field initializer expression, this token returns the name of the class of
+the invoking instance.  Essentially it is equivalent to C<ref($self)> except
+that it can additionally be used in a field initializer to gain access to
+class methods, before the instance is fully constructed.
+
+    use feature 'class';
+
+    class Example1 {
+	field $f = __CLASS__->default_f;
+
+	sub default_f { 10 }
+    }
+
+In a basic class, this value will be the same as
+L<C<__PACKAGE__>|/__PACKAGE__>.  The distinction can be seen when a subclass
+is constructed; it will give the class name of the instance being constructed,
+rather than just the package name that the actual code belongs to.
+
+    class Example2 :isa(Example1) {
+	sub default_f { 20 }
+    }
+
+    my $obj = Example2->new;
+    # The $f field now has the value 20
 
 =item pipe READHANDLE,WRITEHANDLE
 X<pipe>

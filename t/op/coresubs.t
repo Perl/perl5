@@ -73,6 +73,8 @@ while(<$kh>) {
 
       inlinable_ok($word, $args_for{$word} || join ",", map "\$$_", 1..$numargs);
 
+      next if $word eq "__CLASS__";
+
       # High-precedence tests
       my $hpcode;
       if (!$proto && defined $proto) { # nullary
@@ -138,13 +140,29 @@ sub inlinable_ok {
 
   for ([with => "($args)"], [without => " $args"]) {
     my ($preposition, $full_args) = @$_;
-    my $core_code =
-       "#line 1 This-line-makes-__FILE__-easier-to-test.
-        sub { () = (CORE::$word$full_args) }";
-    my $my_code = $core_code =~ s/CORE::$word/my$word/r;
+    my $core_code;
+    if($word eq "__CLASS__") {
+        use feature 'state';
+        state $classcount = 1;
+        # __CLASS__ is only valid inside a method of a class
+        $core_code =
+           "#line 1 This-line-makes-__FILE__-easier-to-test.
+            use feature 'class';
+            no warnings 'experimental::class';
+            class TmpClassA$classcount { method { () = (CORE::$word$full_args) } }";
+        $classcount++;
+    }
+    else {
+        $core_code =
+           "#line 1 This-line-makes-__FILE__-easier-to-test.
+            sub { () = (CORE::$word$full_args) }";
+    }
+    my $my_code = $core_code =~ s/CORE::$word/::my$word/r;
+    $my_code =~ s/TmpClassA/TmpClassB/;
     my $core = op_list(eval $core_code or die);
     my $my   = op_list(eval   $my_code or die);
     is $my, $core, "inlinability of CORE::$word $preposition parens $desc_suffix";
+
   }
 }
 

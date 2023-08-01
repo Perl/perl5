@@ -128,3 +128,12 @@ class YYY :isa(XXX) {
 }
 EXPECT
 Cannot assign :param(p) to field $y because that name is already in use at - line 8.
+########
+use strict;
+no warnings 'experimental::class';
+use feature 'class';
+class XXX {
+  my $classname = __CLASS__;
+}
+EXPECT
+Cannot use __CLASS__ outside of a method or field initializer expression at - line 5.

@@ -352,6 +352,7 @@ my %not_tested = map { $_ => 1} qw(
     __FILE__
     __LINE__
     __PACKAGE__
+    __CLASS__
     ADJUST
     AUTOLOAD
     BEGIN
