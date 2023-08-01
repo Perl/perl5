@@ -50,7 +50,7 @@ sub get_extensions {
                 $name = "PathTools" if $name eq "Cwd";
                 $name = "Scalar/List/Utils" if $name eq "List/Util";
                 my $sub_dir = $name;
-                $sub_dir =~ s!/!-!g;
+                $sub_dir =~ s!/!-!g unless $sub_dir =~ /^Encode/;
                 foreach my $dir (qw(cpan dist ext)) {
                     if (-e "$dir/$sub_dir") {
                         $extensions{"$dir/$sub_dir"} = $name;
