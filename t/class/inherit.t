@@ -85,4 +85,15 @@ no warnings 'experimental::class';
     ok($obj isa Test4A, 'Unit class syntax allows :isa');
 }
 
+{
+    class Test5A {
+        field $classname = __CLASS__;
+        method classname { return $classname }
+    }
+
+    class Test5B :isa(Test5A) { }
+
+    is(Test5B->new->classname, "Test5B", '__CLASS__ yields correct class name for subclass');
+}
+
 done_testing;
