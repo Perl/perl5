@@ -27,6 +27,18 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 New C<__CLASS__> Keyword
+
+When using the new C<class> feature, code inside a method, C<ADJUST> block or
+field initializer expression is now permitted to use the new C<__CLASS__>
+keyword.  This yields a class name, similar to C<__PACKAGE__>, but whereas that
+gives the compile-time package that the code appears in, the C<__CLASS__>
+keyword is aware of the actual run-time class that the object instance is a
+member of.  This makes it useful for method dispatch on that class, especially
+during constructors, where access to C<$self> is not permitted.
+
+For more information, see L<perlfunc/__CLASS__>.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
