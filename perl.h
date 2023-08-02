@@ -1115,7 +1115,6 @@ violations are fatal.
  * repeated in t/loc_tools.pl and makedef.pl;  The three should be kept in
  * sync. */
 #if   ! defined(NO_LOCALE)
-
 #  if ! defined(NO_POSIX_2008_LOCALE)           \
    &&   defined(HAS_NEWLOCALE)                  \
    &&   defined(HAS_USELOCALE)                  \
@@ -1273,7 +1272,7 @@ typedef enum {
               /* Use querylocale if has it, or has the glibc internal       \
                * undocumented equivalent. */                                \
      || (     defined(_NL_LOCALE_NAME)                                      \
-              /* And asked for */                                           \
+              /* And is asked for */                                        \
          &&   defined(USE_NL_LOCALE_NAME)                                   \
               /* nl_langinfo_l almost certainly will exist on systems that  \
                * have _NL_LOCALE_NAME, so there is nothing lost by          \
@@ -1283,7 +1282,7 @@ typedef enum {
          &&   defined(HAS_NL_LANGINFO_L)                                    \
                /* On systems that accept any locale name, the real          \
                 * underlying locale is often returned by this internal      \
-                * item, so we can't use it */                               \
+                * langinfo item, so we can't use it */                      \
          && ! defined(SETLOCALE_ACCEPTS_ANY_LOCALE_NAME))
 #      define USE_QUERYLOCALE
 #    endif
@@ -7229,7 +7228,6 @@ the plain locale pragma without a parameter (S<C<use locale>>) is in effect.
 #  define LOCALE_LOCK                NOOP
 #  define LOCALE_UNLOCK              NOOP
 #endif
-
 
       /* On systems that don't have per-thread locales, even though we don't
        * think we are changing the locale ourselves, behind the scenes it does
