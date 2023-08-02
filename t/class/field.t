@@ -297,4 +297,15 @@ no warnings 'experimental::class';
         'Values for goto inside do {} blocks in field initialisers'));
 }
 
+# field initialiser expressions permit a __CLASS__
+{
+    class Test14 {
+        field $classname = __CLASS__;
+
+        method classname { return $classname }
+    }
+
+    is(Test14->new->classname, "Test14", '__CLASS__ in field initialisers');
+}
+
 done_testing;
