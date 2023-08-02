@@ -1827,7 +1827,7 @@ cpan/Pod-Simple/lib/Pod/Simple/DumpAsXML.pm		turn Pod into XML
 cpan/Pod-Simple/lib/Pod/Simple/HTML.pm			convert Pod to HTML
 cpan/Pod-Simple/lib/Pod/Simple/HTMLBatch.pm		convert several Pod files to several HTML files
 cpan/Pod-Simple/lib/Pod/Simple/HTMLLegacy.pm		Pod::Simple::HTMLLegacy
-cpan/Pod-Simple/lib/Pod/Simple/JustPod.pm
+cpan/Pod-Simple/lib/Pod/Simple/JustPod.pm		Module related to Pod::Simple
 cpan/Pod-Simple/lib/Pod/Simple/LinkSection.pm		represent "section" attributes of L codes
 cpan/Pod-Simple/lib/Pod/Simple/Methody.pm		turn Pod::Simple events into method calls
 cpan/Pod-Simple/lib/Pod/Simple/Progress.pm		Pod::Simple::Progress
@@ -1849,11 +1849,10 @@ cpan/Pod-Simple/lib/Pod/Simple/TranscodeSmart.pm	Pod::Simple::TranscodeSmart
 cpan/Pod-Simple/lib/Pod/Simple/XHTML.pm			turn Pod into XHTML
 cpan/Pod-Simple/lib/Pod/Simple/XMLOutStream.pm		turn Pod into XML
 cpan/Pod-Simple/t/00about.t				Pod::Simple test file
-cpan/Pod-Simple/t/20_skip.t				Pod::Simple test file
 cpan/Pod-Simple/t/ac_d.t				Pod::Simple test file
 cpan/Pod-Simple/t/accept01.t				Pod::Simple test file
 cpan/Pod-Simple/t/accept05.t				Pod::Simple test file
-cpan/Pod-Simple/t/ascii_order.pl
+cpan/Pod-Simple/t/ascii_order.pl			Script related to Pod::Simple
 cpan/Pod-Simple/t/basic.t				Pod::Simple test file
 cpan/Pod-Simple/t/begin.t				Pod::Simple test file
 cpan/Pod-Simple/t/cbacks.t				Pod::Simple test file
@@ -1881,10 +1880,10 @@ cpan/Pod-Simple/t/corpus/encwarn01.txt			Pod::Simple test file
 cpan/Pod-Simple/t/corpus/encwarn01.xml			Pod::Simple test file
 cpan/Pod-Simple/t/corpus/encwarn02.txt			Pod::Simple test file
 cpan/Pod-Simple/t/corpus/encwarn02.xml			Pod::Simple test file
-cpan/Pod-Simple/t/corpus/encwarn03.txt
-cpan/Pod-Simple/t/corpus/encwarn03.xml
-cpan/Pod-Simple/t/corpus/encwarn04.txt
-cpan/Pod-Simple/t/corpus/encwarn04.xml
+cpan/Pod-Simple/t/corpus/encwarn03.txt			Test file related to Pod::Simple
+cpan/Pod-Simple/t/corpus/encwarn03.xml			Pod::Simple
+cpan/Pod-Simple/t/corpus/encwarn04.txt			Test file related to Pod::Simple
+cpan/Pod-Simple/t/corpus/encwarn04.xml			Pod::Simple
 cpan/Pod-Simple/t/corpus/fet_cont.txt			Pod::Simple test file
 cpan/Pod-Simple/t/corpus/fet_cont.xml			Pod::Simple test file
 cpan/Pod-Simple/t/corpus/fet_dup.txt			Pod::Simple test file
@@ -1932,11 +1931,11 @@ cpan/Pod-Simple/t/corpus2/polish_utf8_bom2.txt		Pod::Simple test file
 cpan/Pod-Simple/t/corpus2/polish_utf8_bom2.xml		Pod::Simple test file
 cpan/Pod-Simple/t/corpus2/README			Pod::Simple test file
 cpan/Pod-Simple/t/emptylists.t				Pod::Simple test file
-cpan/Pod-Simple/t/enc-chars.t
+cpan/Pod-Simple/t/enc-chars.t				Test file related to Pod::Simple
 cpan/Pod-Simple/t/encod01.t				Pod::Simple test file
 cpan/Pod-Simple/t/encod02.t				Pod::Simple test file
 cpan/Pod-Simple/t/encod03.t				Pod::Simple test file
-cpan/Pod-Simple/t/encod04.t
+cpan/Pod-Simple/t/encod04.t				Test file related to Pod::Simple
 cpan/Pod-Simple/t/end_over.t				Pod::Simple test file
 cpan/Pod-Simple/t/eol.t					Pod::Simple test file
 cpan/Pod-Simple/t/eol2.t				Pod::Simple test file
@@ -1947,7 +1946,7 @@ cpan/Pod-Simple/t/fcodes_l.t				Pod::Simple test file
 cpan/Pod-Simple/t/fcodes_s.t				Pod::Simple test file
 cpan/Pod-Simple/t/for.t					Pod::Simple test file
 cpan/Pod-Simple/t/fornot.t				Pod::Simple test file
-cpan/Pod-Simple/t/github_issue_79.t
+cpan/Pod-Simple/t/github_issue_79.t			Test file related to Pod::Simple
 cpan/Pod-Simple/t/heads.t				Pod::Simple test file
 cpan/Pod-Simple/t/html01.t				Pod::Simple test file
 cpan/Pod-Simple/t/html02.t				Pod::Simple test file
@@ -1960,9 +1959,9 @@ cpan/Pod-Simple/t/junk1.pod				Pod::Simple test file
 cpan/Pod-Simple/t/junk1o.txt				Pod::Simple test file
 cpan/Pod-Simple/t/junk2.pod				Pod::Simple test file
 cpan/Pod-Simple/t/junk2o.txt				Pod::Simple test file
-cpan/Pod-Simple/t/JustPod01.t
-cpan/Pod-Simple/t/JustPod02.t
-cpan/Pod-Simple/t/JustPod_corpus.t
+cpan/Pod-Simple/t/JustPod01.t				Test file related to Pod::Simple
+cpan/Pod-Simple/t/JustPod02.t				Test file related to Pod::Simple
+cpan/Pod-Simple/t/JustPod_corpus.t			Test file related to Pod::Simple
 cpan/Pod-Simple/t/lib/helpers.pm			Pod::Simple test file
 cpan/Pod-Simple/t/linkclas.t				Pod::Simple test file
 cpan/Pod-Simple/t/output.t				Pod::Simple test file
@@ -1976,7 +1975,7 @@ cpan/Pod-Simple/t/puller.t				Pod::Simple test file
 cpan/Pod-Simple/t/pulltitl.t				Pod::Simple test file
 cpan/Pod-Simple/t/reinit.t				Pod::Simple test file
 cpan/Pod-Simple/t/render.t				Pod::Simple test file
-cpan/Pod-Simple/t/rtf_utf8.t
+cpan/Pod-Simple/t/rtf_utf8.t				Test file related to Pod::Simple
 cpan/Pod-Simple/t/search05.t				Pod::Simple test file
 cpan/Pod-Simple/t/search10.t				Pod::Simple test file
 cpan/Pod-Simple/t/search12.t				Pod::Simple test file
@@ -2019,14 +2018,15 @@ cpan/Pod-Simple/t/testlib3/squaa/Vliff.pm		Pod::Simple test file
 cpan/Pod-Simple/t/tiedfh.t				Pod::Simple test file
 cpan/Pod-Simple/t/verb_fmt.t				Pod::Simple test file
 cpan/Pod-Simple/t/verbatim.t				Pod::Simple test file
-cpan/Pod-Simple/t/whine.t
+cpan/Pod-Simple/t/whine.t				Test file related to Pod::Simple
 cpan/Pod-Simple/t/x_nixer.t				Pod::Simple test file
-cpan/Pod-Simple/t/xhtml-bkb.t
+cpan/Pod-Simple/t/xhtml-bkb.t				Test file related to Pod::Simple
 cpan/Pod-Simple/t/xhtml01.t				Pod::Simple test file
 cpan/Pod-Simple/t/xhtml05.t				Pod::Simple test file
 cpan/Pod-Simple/t/xhtml10.t				Pod::Simple test file
 cpan/Pod-Simple/t/xhtml15.t				Pod::Simple test file
 cpan/Pod-Simple/t/xhtml20.t				Pod::Simple test file
+cpan/Pod-Simple/t/xhtml25.t				Pod-Simple
 cpan/Pod-Usage/lib/Pod/Usage.pm
 cpan/Pod-Usage/scripts/pod2usage.PL
 cpan/Pod-Usage/t/inc/Pod/InputObjects.pm
