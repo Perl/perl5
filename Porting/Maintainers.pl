@@ -965,7 +965,8 @@ use File::Glob qw(:case);
     },
 
     'Pod::Simple' => {
-        'DISTRIBUTION' => 'KHW/Pod-Simple-3.43.tar.gz',
+        'DISTRIBUTION' => 'KHW/Pod-Simple-3.45.tar.gz',
+        'SYNCINFO'     => 'jkeenan on Wed Aug  2 19:32:39 2023',
         'FILES'        => q[cpan/Pod-Simple],
         'EXCLUDED' => [
             qw{.ChangeLog.swp},
