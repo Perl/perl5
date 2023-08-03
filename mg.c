@@ -1526,6 +1526,7 @@ Perl_magic_clearsig(pTHX_ SV *sv, MAGIC *mg)
 }
 
 
+PERL_STACK_REALIGN
 #ifdef PERL_USE_3ARG_SIGHANDLER
 Signal_t
 Perl_csighandler(int sig, Siginfo_t *sip, void *uap)
