@@ -1692,6 +1692,7 @@ PerlProcGetTimeOfDay(struct IPerlProc* piPerl, struct timeval *t, void *z)
 }
 
 #ifdef USE_ITHREADS
+PERL_STACK_REALIGN
 static THREAD_RET_TYPE
 win32_start_child(LPVOID arg)
 {

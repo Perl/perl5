@@ -535,11 +535,11 @@ S_jmpenv_run(pTHX_ int action, ithread *thread,
     return jmp_rc;
 }
 
-
 /* Starts executing the thread.
  * Passed as the C level function to run in the new thread.
  */
 #ifdef WIN32
+PERL_STACK_REALIGN
 STATIC THREAD_RET_TYPE
 S_ithread_run(LPVOID arg)
 #else
