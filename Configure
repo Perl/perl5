@@ -17829,7 +17829,7 @@ if eval $compile_ok; then
         *)  d_perl_lc_all_uses_name_value_pairs="$undef"
             d_perl_lc_all_separator="$define"
               perl_lc_all_separator="$separator"
-	    d_perl_lc_all_category_positions_init="$undef"
+	    d_perl_lc_all_category_positions_init="$define"
 	      perl_lc_all_category_positions_init=`echo "$output" | sed -n 2p`
 	    ;;
     esac
