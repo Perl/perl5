@@ -210,7 +210,7 @@ Pops an unsigned long off the stack.
 #define RETURNOP(o)	return (PUTBACK, o)
 #define RETURNX(x)	return (x, PUTBACK, NORMAL)
 
-#if defined(PERL_RC_STACK) && defined(DEBUG_LEAKING_SCALARS)
+#ifdef PERL_RC_STACK
 #  define POPs		(assert(!rpp_stack_is_rc()), *sp--)
 #else
 #  define POPs		(*sp--)
@@ -543,7 +543,7 @@ Does not use C<TARG>.  See also C<L</XPUSHu>>, C<L</mPUSHu>> and C<L</PUSHu>>.
             sv_setnv_mg(targ, TARGn_nv);                                \
     } STMT_END
 
-#if defined(PERL_RC_STACK) && defined(DEBUG_LEAKING_SCALARS)
+#ifdef PERL_RC_STACK
 #  define PUSHs(s)	(assert(!rpp_stack_is_rc()), *++sp = (s))
 #else
 #  define PUSHs(s)	(*++sp = (s))

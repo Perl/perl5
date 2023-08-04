@@ -4477,8 +4477,7 @@ API.
 A reference-counted perl can be built using the PERL_RC_STACK define.
 For development and debugging purposes, it is best to enable leaking
 scalar debugging too, as that displays extra information about scalars
-that have leaked or been prematurely freed, and it also enables extra
-assertions in the macros and functions which manipulate the stack:
+that have leaked or been prematurely freed.
 
     Configure -DDEBUGGING \
       -Accflags='-DPERL_RC_STACK -DDEBUG_LEAKING_SCALARS'
@@ -4899,9 +4898,9 @@ call_sv() is called from a standard PP function (rpp_stack_is_rc() is
 true) or from a wrapped PP or XS function (rpp_stack_is_rc() is false).
 Note that you're unlikely to need to use this function, as in most places,
 such as PP or XS functions, it is always RC or non-RC respectively. In
-fact, under C<DEBUG_LEAKING_SCALARS>, PUSHs() and similar macros include
-an C<assert(!rpp_stack_is_rc())>, while rpp_push_1() and similar functions
-have C<assert(rpp_stack_is_rc())>.
+fact on debugging builds under C<PERL_RC_STACK>, PUSHs() and similar
+macros include an C<assert(!rpp_stack_is_rc())>, while rpp_push_1() and
+similar functions have C<assert(rpp_stack_is_rc())>.
 
 The macros for pushing new stackinfos have been replaced with inline
 functions which don't rely on C<dSP> being in scope, and which have less
