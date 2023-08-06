@@ -983,7 +983,7 @@ sub parse_config_h {
                 chomp $was;
                 if ($was ne "" && $was !~ m/$link_text/) {
                     die "Multiple descriptions for $name\n"
-                        . "$section contained '$was'";
+                        . "The '$section' section contained\n'$was'";
                 }
                 $docs{'api'}{$section}{$name}->{pod} = $configs{$name}{pod};
                 $configs{$name}{section} = $section;
