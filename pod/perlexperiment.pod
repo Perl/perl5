@@ -178,8 +178,8 @@ Using this feature triggers warnings in the category C<experimental::builtin>.
 
 In Perl 5.36.0, a new namespace, C<builtin>, was created for new core functions
 that will not be present in every namespace, but will be available for
-importing.  The namespace itself is considered an experiment.  Specific
-functions within it may also be experimental.
+importing.  The namespace itself was considered experimental until Perl 5.39.2.
+Some specific functions within it remain experimental.
 
 The ticket for this experiment is
 L<[perl #19764]|https://github.com/Perl/perl5/issues/19764>.
