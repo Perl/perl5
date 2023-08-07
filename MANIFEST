@@ -4173,6 +4173,7 @@ dist/Safe/t/safenamedcap.t		Tests that Tie::Hash::NamedCapture can be loaded
 dist/Safe/t/safeops.t			Tests that all ops can be trapped by Safe
 dist/Safe/t/saferegexp.t		Tests Safe with regular expressions
 dist/Safe/t/safesecurity.t		Tests misc. security fixes in Safe
+dist/Safe/t/safesig.t			Tests %SIG being cleared and restored
 dist/Safe/t/safesort.t			Tests Safe with sort
 dist/Safe/t/safeuniversal.t		Tests Safe with functions from universal.c
 dist/Safe/t/safeutf8.t			Tests Safe with utf8.pm
