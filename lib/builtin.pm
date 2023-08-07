@@ -1,4 +1,4 @@
-package builtin 0.008;
+package builtin 0.009;
 
 use strict;
 use warnings;
@@ -40,12 +40,9 @@ can be requested for convenience.
 Individual named functions can be imported by listing them as import
 parameters on the C<use> statement for this pragma.
 
-The overall C<builtin> mechanism, as well as every individual function it
-provides, are currently B<experimental>.
-
-B<Warning>:  At present, the entire C<builtin> namespace is experimental.
-Calling functions in it will trigger warnings of the C<experimental::builtin>
-category.
+B<Warning>:  At present, many of the functions in the C<builtin> namespace are
+experimental.  Calling them will trigger warnings of the
+C<experimental::builtin> category.
 
 =head2 Lexical Import
 
@@ -105,6 +102,8 @@ This gives an equivalent value to expressions like C<!!0> or C<!1>.
 =head2 is_bool
 
     $bool = is_bool($val);
+
+This function is currently B<experimental>.
 
 Returns true when given a distinguished boolean value, or false if not. A
 distinguished boolean value is the result of any boolean-returning builtin
@@ -167,6 +166,8 @@ C<ARRAY> for array references, or C<HASH> for hash references.
 
     $bool = created_as_string($val);
 
+This function is currently B<experimental>.
+
 Returns a boolean representing if the argument value was originally created as
 a string. It will return true for any scalar expression whose most recent
 assignment or modification was of a string-like nature - such as assignment
@@ -187,6 +188,8 @@ strings. For example
 =head2 created_as_number
 
     $bool = created_as_number($val);
+
+This function is currently B<experimental>.
 
 Returns a boolean representing if the argument value was originally created as
 a number. It will return true for any scalar expression whose most recent
@@ -292,6 +295,8 @@ Returns true when given a tainted variable.
 =head2 export_lexically
 
     export_lexically($name1, $ref1, $name2, $ref2, ...)
+
+This function is currently B<experimental>.
 
 Exports new lexical names into the scope currently being compiled. Names given
 by the first of each pair of values will refer to the corresponding item whose
