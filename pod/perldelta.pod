@@ -321,9 +321,11 @@ source tree.
 
 =over 4
 
-=item XXX-some-platform
+=item Windows
 
-XXX
+Workaround a bug in most 32-bit Mingw builds, where the generated
+code, including the code in the gcc support library, assumes 16-byte
+stack alignment, which 32-bit Windows does not preserve. [GH #21313]
 
 =back
 
