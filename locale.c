@@ -91,7 +91,10 @@
  *          fully conform to the POSIX standard, and this is a layer on top of
  *          libc to bring it more into conformance.
  *      b)  stdized_setlocale() is a layer above a) that fixes some vagaries in
- *          the return value of the libc setlocale().
+ *          the return value of the libc setlocale().  On most platforms this
+ *          layer is empty; it requires perl to be Configured with a parameter
+ *          indicating the platform's defect, in order to be activated.  The
+ *          current ones are listed at the definition of the macro.
  *
  * 2) An implementation that adds a minimal layer above implementation 1),
  *    making that implementation uninterruptible and returning a
@@ -240,6 +243,12 @@
  *          querylocale() is called only while the locale mutex is locked, and
  *          the result is copied to a per-thread place before unlocking.
  *
+ *      -Accflags=-DHAS_LF_IN_SETLOCALE_RETURN
+ *          This would be set in a hints file to tell perl that a libc
+ *          setlocale() can return results containing \n characters that need
+ *          to be stripped off.  khw believes there aren't any such platforms
+ *          still in existence.
+ *
  *      -Accflags=USE_FAKE_LC_ALL_POSITIONAL_NOTATION
  *          This is used when developing Perl on a platform that uses
  *          'name=value;' notation to represent LC_ALL when not all categories
@@ -375,10 +384,7 @@ S_wsetlocale(const int category, const wchar_t * wlocale)
 #endif  /* WIN32_USE_FAKE_OLD_MINGW_LOCALES */
 
 #ifdef USE_LOCALE
-#  ifndef LC_ALL    /* Doesn't make sense without LC_ALL */
-#    undef USE_FAKE_LC_ALL_POSITIONAL_NOTATION
-#  endif
-#  ifdef USE_FAKE_LC_ALL_POSITIONAL_NOTATION
+#  if defined(USE_FAKE_LC_ALL_POSITIONAL_NOTATION) && defined(LC_ALL)
 
 /* This simulates an underlying positional notation for LC_ALL when compiled on
  * a system that uses name=value notation.  Use this to develop on Linux and
@@ -895,7 +901,11 @@ Perl_locale_panic(const char * msg,
 #define setlocale_failure_panic_c(cat, cur, fail, line, higher_line)        \
    setlocale_failure_panic_i(cat##_INDEX_, cur, fail, line, higher_line)
 
-#if defined(USE_LOCALE) && defined(LC_ALL)
+#if   defined(USE_LOCALE)                                                   \
+ &&   defined(LC_ALL)                                                       \
+ && (   defined(USE_FAKE_LC_ALL_POSITIONAL_NOTATION)                        \
+     || defined(USE_POSIX_2008_LOCALE)                                      \
+     || defined(USE_STDIZE_LOCALE))
 
 STATIC parse_LC_ALL_string_return
 S_parse_LC_ALL_string(pTHX_ const char * string,
@@ -1164,13 +1174,20 @@ S_parse_LC_ALL_string(pTHX_ const char * string,
  *
  * Any necessary mutex locking needs to be done at a higher level.
  *
+ * On most platforms this layer is empty, expanding to just the layer
+ * below.   To enable it, call Configure with:
+ * -Accflags=-DHAS_LF_IN_SETLOCALE_RETURN
+ *                  to indicate that extraneous \n characters can be returned
+ *                  by setlocale()
  */
-#ifndef stdize_locale
+
+#if ! defined(USE_LOCALE)                                                   \
+ || ! defined(HAS_LF_IN_SETLOCALE_RETURN)
 #  define stdized_setlocale(cat, locale)  posix_setlocale(cat, locale)
 #  define stdize_locale(cat, locale)  (locale)
 #else
 #  define stdized_setlocale(cat, locale)                                    \
-                stdize_locale(cat, posix_setlocale(cat, locale), __LINE__)
+        S_stdize_locale(aTHX_ cat, posix_setlocale(cat, locale), __LINE__)
 
 STATIC const char *
 S_stdize_locale(pTHX_ const int category,
@@ -6302,8 +6319,7 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
                  * use wrap_wsetlocale(). */
                 const char *system_default_locale =
                                     stdize_locale(LC_ALL,
-                                               wrap_wsetlocale(LC_ALL, ".ACP"),
-                                               __LINE__);
+                                               wrap_wsetlocale(LC_ALL, ".ACP"));
                 DEBUG_LOCALE_INIT(LC_ALL_INDEX_, "", system_default_locale);
 
                 /* Skip if invalid or if it's already on the list of locales to
