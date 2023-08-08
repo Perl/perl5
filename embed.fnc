@@ -4357,10 +4357,6 @@ Sr	|void	|setlocale_failure_panic_via_i				\
 				|const line_t immediate_caller_line	\
 				|NN const char *higher_caller_file	\
 				|const line_t higher_caller_line
-S	|const char *|stdize_locale					\
-				|const int category			\
-				|NULLOK const char *input_locale	\
-				|line_t caller_line
 So	|const char *|toggle_locale_i					\
 				|const unsigned switch_cat_index	\
 				|NN const char *new_locale		\
