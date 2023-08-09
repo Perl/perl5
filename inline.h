@@ -1082,41 +1082,103 @@ C<L<perlapi/is_utf8_invariant_string_loc>>,
 PERL_STATIC_INLINE Size_t
 S_variant_under_utf8_count(const U8* const s, const U8* const e)
 {
-    const U8* x = s;
-    Size_t count = 0;
-
     PERL_ARGS_ASSERT_VARIANT_UNDER_UTF8_COUNT;
 
-#  ifndef EBCDIC
+    Size_t count = 0;
 
-    /* Test if the string is long enough to use word-at-a-time.  (Logic is the
-     * same as for is_utf8_invariant_string()) */
+#  ifdef EBCDIC
+
+    const U8* x = s;
+
+#  else
+#    if BYTEORDER == 0x1234 || BYTEORDER == 0x12345678
+#      define PERL_HAS_MONOTONIC_BYTE_ORDER
+#      define PERL_INITIAL_SHIFT_OP   <<
+#    elif BYTEORDER == 0x4321 || BYTEORDER == 0x87654321
+#      define PERL_HAS_MONOTONIC_BYTE_ORDER
+#      define PERL_INITIAL_SHIFT_OP   >>
+#    endif
+#    ifndef PERL_HAS_MONOTONIC_BYTE_ORDER
+    const U8* x = s;
+
+    /* Test if the string is long enough to use word-at-a-time.  (Logic is 
+       the same as for is_utf8_invariant_string()) */
     if ((STRLEN) (e - x) >= PERL_WORDSIZE
                           + PERL_WORDSIZE * PERL_IS_SUBWORD_ADDR(x)
                           - (PTR2nat(x) & PERL_WORD_BOUNDARY_MASK))
     {
 
-        /* Process per-byte until reach word boundary.  XXX This loop could be
-         * eliminated if we knew that this platform had fast unaligned reads */
+       /* Without monotonic byte order, process per-byte until reach word
+        * boundary.  */
         while (PTR2nat(x) & PERL_WORD_BOUNDARY_MASK) {
             count += ! UTF8_IS_INVARIANT(*x++);
         }
 
-        /* Process per-word as long as we have at least a full word left */
         do {    /* Commit 03c1e4ab1d6ee9062fb3f94b0ba31db6698724b1 contains an
                    explanation of how this works */
-            PERL_UINTMAX_T increment
-                = ((((* (PERL_UINTMAX_T *) x) & PERL_VARIANTS_WORD_MASK) >> 7)
-                      * PERL_COUNT_MULTIPLIER)
+            PERL_UINTMAX_T word_masked =  PERL_VARIANTS_WORD_MASK
+                                       & (* (const PERL_UINTMAX_T *) x);
+            count += ((word_masked >> 7) * PERL_COUNT_MULTIPLIER)
                     >> ((PERL_WORDSIZE - 1) * CHARBITS);
-            count += (Size_t) increment;
+            x += PERL_WORDSIZE;
+        } while (x + PERL_WORDSIZE <= e);
+
+#    else
+#      define PERL_STRING_EXTENDS_TO_END_OF_WORD(s, send)                   \
+                        ( __ASSERT_(send >= s)                              \
+                         (    (PTR2nat(s)    & ~PERL_WORD_BOUNDARY_MASK)    \
+                          !=  (PTR2nat(send) & ~PERL_WORD_BOUNDARY_MASK)))
+
+    const U8* x;
+
+    /* With monotonic byte order, we can use the full word shortcuts as long as
+     * the final byte of the first word is part of the string 's' */
+    if (! PERL_STRING_EXTENDS_TO_END_OF_WORD(s, e)) {
+        x = s;
+    }
+    else {
+        /* Find the address of the first byte of the full word containing 's'.
+         * (If each word contains 8 bytes, then 3 bits are used to
+         * address them individually, so to get that first byte, this would
+         * mask off the final 3 bits.) */
+        x = NUM2PTR(const U8 *, PTR2nat(s) & ~PERL_WORD_BOUNDARY_MASK);
+
+        /* Create a mask that will zero the bytes in the word before the
+         * first byte of 's'; while the bytes after that are the
+         * regular variants mask bytes.  If the first byte is aligned to a word
+         * boundary, there are no bytes in the word before it, so 'mask' is
+         * plain PERL_VARIANTS_WORD_MASK */
+        PERL_UINTMAX_T mask = PERL_VARIANTS_WORD_MASK
+                              PERL_INITIAL_SHIFT_OP
+                              (s - x) * CHARBITS;
+        /* Here:
+         *  1)  'x' points to a word boundary; and
+         *  2)  that word contains the beginning of the string 's' but also
+         *      potentially some bytes before 's'; and
+         *  3)  's' extends at least to the end of the word; and
+         *  4)  'mask' is set up appropriately for the word containing 'x', so
+         *      that ANDing it with 'x' will zero any bytes before 's' */
+
+        do {    /* Commit 03c1e4ab1d6ee9062fb3f94b0ba31db6698724b1 contains an
+                   explanation of how this works */
+            PERL_UINTMAX_T word_masked = mask & (* (const PERL_UINTMAX_T *) x);
+            count += ((word_masked >> 7) * PERL_COUNT_MULTIPLIER)
+                    >> ((PERL_WORDSIZE - 1) * CHARBITS);
+
+            /* The next iteration, if any, will look at an entire word.  This
+             * assignment is redundant for all but the first iteration, but is
+             * cheaper to do it unconditionally than have a conditional */
+            mask = PERL_VARIANTS_WORD_MASK;
+
             x += PERL_WORDSIZE;
         } while (x + PERL_WORDSIZE <= e);
     }
 
+#    endif
 #  endif
 
-    /* Process per-byte */
+    /* Here, we can't continue to use full word operations.  Process any
+     * remainder per-byte */
     while (x < e) {
         if (! UTF8_IS_INVARIANT(*x)) {
             count++;
@@ -1125,6 +1187,8 @@ S_variant_under_utf8_count(const U8* const s, const U8* const e)
         x++;
     }
 
+    dTHX_DEBUGGING;
+    DEBUG_U(PerlIO_printf(Perl_debug_log, "%s yields %ld\n", s, count));
     return count;
 }
 
