@@ -1302,13 +1302,12 @@
 #       if defined(USE_POSIX_2008_LOCALE)
 #         define bool_setlocale_2008_i(a,b,c)   S_bool_setlocale_2008_i(aTHX_ a,b,c)
 #         define querylocale_2008_i(a,b)        S_querylocale_2008_i(aTHX_ a,b)
-#         define setlocale_from_aggregate_LC_ALL(a,b) S_setlocale_from_aggregate_LC_ALL(aTHX_ a,b)
 #         define use_curlocale_scratch()        S_use_curlocale_scratch(aTHX)
 #         if defined(LC_ALL)
-#           define parse_LC_ALL_string(a,b,c)   S_parse_LC_ALL_string(aTHX_ a,b,c)
+#           define parse_LC_ALL_string(a,b,c,d,e) S_parse_LC_ALL_string(aTHX_ a,b,c,d,e)
 #         endif
 #         if !defined(USE_QUERYLOCALE)
-#           define update_PL_curlocales_i(a,b)  S_update_PL_curlocales_i(aTHX_ a,b)
+#           define update_PL_curlocales_i(a,b,c) S_update_PL_curlocales_i(aTHX_ a,b,c)
 #         endif
 #       elif  defined(USE_LOCALE_THREADS) &&                  \
              !defined(USE_THREAD_SAFE_LOCALE) &&              \

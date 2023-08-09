@@ -1354,6 +1354,7 @@ typedef enum {
 typedef enum {
     invalid,
     no_array,
+    only_element_0,
     full_array
 } parse_LC_ALL_string_return;
 

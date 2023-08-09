@@ -415,6 +415,8 @@ S_positional_name_value_xlation(const char * locale, bool direction)
     /* This parses either notation */
     switch (parse_LC_ALL_string(locale,
                                 (const char **) &individ_locales,
+                                false,      /* Return only [0] if suffices */
+                                false,      /* Don't panic on error */
                                 __LINE__))
     {
       default:      /* Some compilers don't realize that below is the complete
@@ -424,7 +426,9 @@ S_positional_name_value_xlation(const char * locale, bool direction)
 
       case no_array:
         return locale;
-
+      case only_element_0:
+        SAVEFREEPV(individ_locales[0]);
+        return individ_locales[0];
       case full_array:
        {
         calc_LC_ALL_format  format = (direction)
@@ -503,7 +507,31 @@ S_positional_newlocale(int mask, const char * locale, locale_t base)
    || defined(HAS_MBRTOWC) || ! defined(USE_LOCALE)
 #  define HAS_RELIABLE_UTF8NESS_DETERMINATION
 #endif
+
+/* This is a starting guess as to when this is true.  It definititely isn't
+ * true on *BSD where positional LC_ALL notation is used.  Likely this will end
+ * up being defined in hints files. */
+#ifdef PERL_LC_ALL_USES_NAME_VALUE_PAIRS
+#  define NEWLOCALE_HANDLES_DISPARATE_LC_ALL
+#endif
 #ifdef USE_LOCALE
+
+/* Not all categories need be set to the same locale.  This macro determines if
+ * 'name' which represents LC_ALL is uniform or disparate.  There are two
+ * situations: 1) the platform uses unordered name=value pairs; 2) the platform
+ * uses ordered positional values, with a separator string between them */
+#  ifdef PERL_LC_ALL_SEPARATOR   /* positional */
+#    define is_disparate_LC_ALL(name)  cBOOL(instr(name, PERL_LC_ALL_SEPARATOR))
+#  else     /* name=value */
+
+    /* In the, hopefully never occurring, event that the platform doesn't use
+     * either mechanism for disparate LC_ALL's, assume the name=value pairs
+     * form, rather than taking the extreme step of refusing to compile.  Many
+     * programs won't have disparate locales, so will generally work */
+#    define PERL_LC_ALL_SEPARATOR  ";"
+#    define is_disparate_LC_ALL(name)  cBOOL(   strchr(name, ';')   \
+                                             && strchr(name, '='))
+#  endif
 
 PERL_STATIC_INLINE const char *
 S_mortalized_pv_copy(pTHX_ const char * const pv)
@@ -923,6 +951,8 @@ Perl_locale_panic(const char * msg,
 STATIC parse_LC_ALL_string_return
 S_parse_LC_ALL_string(pTHX_ const char * string,
                             const char ** output,
+                            bool always_use_full_array,
+                            const bool panic_on_error,
                             const line_t caller_line)
 {
     /* This function parses the value of the input 'string' which is expected
@@ -942,21 +972,30 @@ S_parse_LC_ALL_string(pTHX_ const char * string,
      * those platforms, this function also parses that form.  It examines the
      * input to see which form is being parsed.
      *
-     * Often, all categories will have the same locale.  In that case, the
-     * input 'string' likely is a single value, and no splitting is needed.
-     * In such cases, this function doesn't store anything into 'output', and
-     * returns 'no_array'.
+     * Often, all categories will have the same locale.  This is special cased
+     * if 'always_use_full_array' is false on input:
+     *      1) If the input 'string' is a single value, this function doesn't
+     *         store anything into 'output', and returns 'no_array'
+     *      2) Some platforms will return multiple occurrences of the same
+     *         value rather than coalescing them down to a single one.  HP-UX
+     *         is such a one.  This function will do that collapsing for you,
+     *         returning 'only_element_0' and saving the single value in
+     *         output[0], which the caller will need to arrange to be freed.
+     *         The rest of output[] is undefined, and does not need to be
+     *         freed.
      *
      * Otherwise, the input 'string' may not be valid.  This function looks
      * mainly for syntactic errors, and if found, returns 'invalid'.  'output'
      * will not be filled in in that case, but the input state of it isn't
      * necessarily preserved.  Turning on -DL debugging will give details as to
-     * the error.
+     * the error.  If 'panic_on_error' is 'true', the function panics instead
+     * of returning on error, with a message giving the details.
      *
      * Otherwise, output[] will be filled with the individual locale names for
      * all categories on the system, 'full_array' will be returned, and the
-     * caller needs to arrange for each to be freed.
-     *
+     * caller needs to arrange for each to be freed.  This means that either at
+     * least one category differed from the others, or 'always_use_full_array' was
+     * true on input.
      */
 
     DEBUG_Lv(PerlIO_printf(Perl_debug_log,
@@ -994,10 +1033,20 @@ S_parse_LC_ALL_string(pTHX_ const char * string,
 #  endif
 
     if (single_component) {
-        return no_array;
+        if (! always_use_full_array) {
+            return no_array;
+        }
+
+        for (unsigned int i = 0; i < LC_ALL_INDEX_; i++) {
+            output[i] = savepv(string);
+        }
+
+        return full_array;
     }
 
-    /* Here the input is multiple components.  Parse through them.
+    /* Here the input is multiple components.  Parse through them.  (It is
+     * possible that these components are all the same, so we check, and if so,
+     * return just the 0th component (unless 'always_use_full_array' is true)
      *
      * This enum notes the possible errors findable in parsing */
     enum {
@@ -1014,6 +1063,7 @@ S_parse_LC_ALL_string(pTHX_ const char * string,
     const char * s = string;
     const char * e = s + strlen(string);
     const char * category_end = NULL;
+    const char * saved_first = NULL;
 
     /* Parse the input locale string */
     while (s < e) {
@@ -1090,6 +1140,17 @@ S_parse_LC_ALL_string(pTHX_ const char * string,
          * that category. */
         output[index] = savepvn(s, next_sep - s);
 
+        if (! always_use_full_array) {
+            if (! saved_first) {
+                saved_first = output[index];
+            }
+            else {
+                if (strNE(saved_first, output[index])) {
+                    always_use_full_array = true;
+                }
+            }
+        }
+
         /* Next time start from the new position */
         s = next_sep + separator_len;
     }
@@ -1119,7 +1180,20 @@ S_parse_LC_ALL_string(pTHX_ const char * string,
         }
     }
 
+    /* In the loop above, we changed 'always_use_full_array' to true iff not all
+     * categories have the same locale.  Hence, if it is still 'false', all of
+     * them are the same. */
+    if (always_use_full_array) {
         return full_array;
+    }
+
+    /* Free the dangling ones */
+    for (unsigned int i = 1; i < LC_ALL_INDEX_; i++) {
+        Safefree(output[i]);
+        output[i] = NULL;
+    }
+
+    return only_element_0;
 
   failure:
 
@@ -1159,6 +1233,10 @@ S_parse_LC_ALL_string(pTHX_ const char * string,
                           display_start, msg);
 
     DEBUG_L(PerlIO_printf(Perl_debug_log, "%s", msg));
+
+    if (panic_on_error) {
+        locale_panic_via_(msg, __FILE__, caller_line);
+    }
 
     return invalid;
 }
@@ -1280,6 +1358,8 @@ S_stdize_locale(pTHX_ const int category,
          * components. */
         switch (parse_LC_ALL_string(retval,
                                     (const char **) &individ_locales,
+                                    false,    /* Return only [0] if suffices */
+                                    false,    /* Don't panic on error */
                                     caller_line))
         {
           case invalid:
@@ -1296,6 +1376,10 @@ S_stdize_locale(pTHX_ const int category,
              * didn't fill in any of 'individ_locales'.  Set the 0th element to
              * that locale. */
             individ_locales[0] = retval;
+            /* FALLTHROUGH */
+
+          case only_element_0: /* Element 0 is the only element we need to look
+                                  at */
             upper = 0;
             break;
         }
@@ -1758,14 +1842,18 @@ S_querylocale_2008_i(pTHX_ const unsigned int index, const line_t caller_line)
 #  define bool_setlocale_r(cat, locale)                                     \
                  bool_setlocale_i(get_category_index(cat, NULL), locale)
 
+/* If this doesn't exist on this platform, make it a no-op (to save #ifdefs) */
+#  ifndef update_PL_curlocales_i
+#    define update_PL_curlocales_i(index, new_locale, caller_line)
+#  endif
+
 STATIC bool
 S_bool_setlocale_2008_i(pTHX_
 
         /* Our internal index of the 'category' setlocale is called with */
         const unsigned int index,
-
-        const char * new_locale, /* The locale to set the category to */
-        const line_t line     /* Called from this line number */
+        const char * new_locale,    /* The locale to set the category to */
+        const line_t caller_line    /* Called from this line number */
        )
 {
     PERL_ARGS_ASSERT_BOOL_SETLOCALE_2008_I;
@@ -1788,12 +1876,13 @@ S_bool_setlocale_2008_i(pTHX_
     const char * locale_on_entry = querylocale_i(index);
 
     DEBUG_Lv(PerlIO_printf(Perl_debug_log,
-             "bool_setlocale_2008_i input=%d (%s), mask=0x%x,"
-             " new locale=\"%s\", current locale=\"%s\","
-             "index=%d, object=%p\n",
-             categories[index], category_names[index], mask,
-             ((new_locale == NULL) ? "(nil)" : new_locale),
-             locale_on_entry, index, entry_obj));
+                           "bool_setlocale_2008_i: input=%d (%s), mask=0x%x,"
+                           " new locale=\"%s\", current locale=\"%s\","
+                           " index=%d, entry object=%p;"
+                           " called from %" LINE_Tf "\n",
+                           categories[index], category_names[index], mask,
+                           ((new_locale == NULL) ? "(nil)" : new_locale),
+                           locale_on_entry, index, entry_obj, caller_line));
 
     /* Here, trying to change the locale, but it is a no-op if the new boss is
      * the same as the old boss.  Except this routine is called when converting
@@ -1808,9 +1897,8 @@ S_bool_setlocale_2008_i(pTHX_
         && strEQ(new_locale, locale_on_entry))
     {
         DEBUG_Lv(PerlIO_printf(Perl_debug_log,
-                 "(%" LINE_Tf "): bool_setlocale_2008_i"
-                 " no-op to change to what it already was\n",
-                 line));
+                               "bool_setlocale_2008_i: no-op to change to"
+                               " what it already was\n"));
         return true;
     }
 
@@ -1821,24 +1909,53 @@ S_bool_setlocale_2008_i(pTHX_
 
     if (strEQ(new_locale, "")) {
         new_locale = find_locale_from_environment(index);
+        if (! new_locale) {
+            SET_EINVAL;
+            return false;
+        }
     }
 
 #  endif
+#  ifdef NEWLOCALE_HANDLES_DISPARATE_LC_ALL
 
-    /* So far, it has worked that a semi-colon in the locale name means that
-     * the category is LC_ALL and it subsumes categories which don't all have
-     * the same locale.  This is the glibc syntax. */
-    if (strchr(new_locale, ';')) {
-        assert(index == LC_ALL_INDEX_);
+    const bool need_loop = false;
 
-        if (setlocale_from_aggregate_LC_ALL(new_locale, line)) {
-            return true;
+#  else
+
+    bool need_loop = false;
+    const char * new_locales[LC_ALL_INDEX_] = { NULL };
+
+    /* If we're going to have to parse the LC_ALL string, might as well do it
+     * now before we have made changes that we would have to back out of if the
+     * parse fails */
+    if (index == LC_ALL_INDEX_) {
+        switch (parse_LC_ALL_string(new_locale,
+                                    (const char **) &new_locales,
+                                    false,    /* Return only [0] if suffices */
+                                    false,    /* Don't panic on error */
+                                    caller_line))
+        {
+          case invalid:
+            SET_EINVAL;
+            return false;
+
+          case no_array:
+            need_loop = false;
+            break;
+
+          case only_element_0:
+            SAVEFREEPV(new_locales[0]);
+            new_locale = new_locales[0];
+            need_loop = false;
+            break;
+
+          case full_array:
+            need_loop = true;
+            break;
         }
-
-        SET_EINVAL;
-        return false;
     }
 
+#  endif
 #  ifdef HAS_GLIBC_LC_MESSAGES_BUG
 
     /* For this bug, if the LC_MESSAGES locale changes, we have to do an
@@ -1865,15 +1982,14 @@ S_bool_setlocale_2008_i(pTHX_
 
         /* Not being able to change to the C locale is severe; don't keep
          * going.  */
-        setlocale_failure_panic_i(index, locale_on_entry, "C", __LINE__, line);
+        setlocale_failure_panic_i(index, locale_on_entry, "C",
+                                  __LINE__, caller_line);
         NOT_REACHED; /* NOTREACHED */
     }
 
     DEBUG_Lv(PerlIO_printf(Perl_debug_log,
-             "(%" LINE_Tf "): bool_setlocale_2008_i now using C"
-             " object=%p\n", line, PL_C_locale_obj));
-
-    locale_t new_obj;
+                           "bool_setlocale_2008_i: now using C"
+                           " object=%p\n", PL_C_locale_obj));
 
     /* These two objects are special:
      *  LC_GLOBAL_LOCALE    because it is undefined behavior to call
@@ -1885,15 +2001,16 @@ S_bool_setlocale_2008_i(pTHX_
      * newlocale(). */
     bool entry_obj_is_special = (   entry_obj == LC_GLOBAL_LOCALE
                                  || entry_obj == PL_C_locale_obj);
+    locale_t new_obj;
 
     /* PL_C_locale_obj is LC_ALL set to the C locale.  If this call is to
      * switch to LC_ALL => C, simply use that object.  But in fact, we already
      * have switched to it just above, in preparation for the general case.
      * Since we're already there, no need to do further switching. */
     if (mask == LC_ALL_MASK && isNAME_C_OR_POSIX(new_locale)) {
-        DEBUG_Lv(PerlIO_printf(Perl_debug_log, "(%" LINE_Tf "):"
-                                               " bool_setlocale_2008_i will stay"
-                                               " in C object\n", line));
+        DEBUG_Lv(PerlIO_printf(Perl_debug_log,
+                               "bool_setlocale_2008_i: will stay in C"
+                               " object\n"));
         new_obj = PL_C_locale_obj;
 
         /* 'entry_obj' is now dangling, of no further use to anyone (unless it
@@ -1901,6 +2018,8 @@ S_bool_setlocale_2008_i(pTHX_
         if (! entry_obj_is_special) {
             freelocale(entry_obj);
         }
+
+        update_PL_curlocales_i(index, new_locale, caller_line);
     }
     else {  /* Here is the general case, not to LC_ALL => C */
 
@@ -1908,23 +2027,40 @@ S_bool_setlocale_2008_i(pTHX_
          * create the changed locale, trashing it iff successful.
          *
          * For the objects that are not to be modified by this function, we
-         * create a duplicate that gets trashed instead. */
+         * create a duplicate that gets trashed instead.
+         *
+         * Also if we will have to loop doing multiple newlocale()s, there is a
+         * chance we will succeed for the first few, and then fail, having to
+         * back out.  We need to duplicate 'entry_obj' in this case as well, so
+         * it remains valid as something to back out to. */
         locale_t basis_obj = entry_obj;
 
-        if (entry_obj_is_special) {
-
+        if (entry_obj_is_special || need_loop) {
             basis_obj = duplocale(basis_obj);
             if (! basis_obj) {
-                locale_panic_(Perl_form(aTHX_ "(%" LINE_Tf "): duplocale failed",
-                                              line));
+                locale_panic_via_("duplocale failed", __FILE__, caller_line);
                 NOT_REACHED; /* NOTREACHED */
             }
 
             DEBUG_Lv(PerlIO_printf(Perl_debug_log,
-                                   "(%" LINE_Tf "): bool_setlocale_2008_i"
-                                   " created %p by duping the input\n",
-                                   line, basis_obj));
+                                   "bool_setlocale_2008_i created %p by"
+                                   " duping the input\n", basis_obj));
         }
+
+#  define DEBUG_NEW_OBJECT_CREATED(category, locale, new, old, caller_line) \
+      DEBUG_Lv(PerlIO_printf(Perl_debug_log,                                \
+                             "bool_setlocale_2008_i(%s, %s): created %p"    \
+                             " while freeing %p; called from %" LINE_Tf     \
+                             " via %" LINE_Tf "\n",                         \
+                             category, locale, new, old,                    \
+                             caller_line, __LINE__))
+#  define DEBUG_NEW_OBJECT_FAILED(category, locale, basis_obj)              \
+      DEBUG_L(PerlIO_printf(Perl_debug_log,                                 \
+                            "bool_setlocale_2008_i: creating new object"    \
+                            " for (%s '%s') from %p failed; called from %"  \
+                            LINE_Tf " via %" LINE_Tf "\n",                  \
+                            category, locale, basis_obj,                    \
+                            caller_line, __LINE__));
 
         /* Ready to create a new locale by modification of the existing one.
          *
@@ -1932,46 +2068,124 @@ S_bool_setlocale_2008_i(pTHX_
          * sanitizer. We do not free this object under normal teardown, however
          * you can set PERL_DESTRUCT_LEVEL=2 to cause it to be freed.
          */
-        new_obj = newlocale(mask, new_locale, basis_obj);
 
-        if (! new_obj) {
-            DEBUG_L(PerlIO_printf(Perl_debug_log,
-                                  " (%" LINE_Tf "): bool_setlocale_2008_i"
-                                  " creating new object from %p failed:"
-                                  " errno=%d\n",
-                                  line, basis_obj, GET_ERRNO));
+#  ifdef NEWLOCALE_HANDLES_DISPARATE_LC_ALL
 
-            /* Failed.  Likely this is because the proposed new locale isn't
-             * valid on this system.  But we earlier switched to the LC_ALL=>C
-             * locale in anticipation of it succeeding,  Now have to switch
-             * back to the state upon entry */
-            if (! uselocale(entry_obj)) {
-                setlocale_failure_panic_i(index, "switching back to",
-                                          locale_on_entry, __LINE__, line);
-                NOT_REACHED; /* NOTREACHED */
+        /* Some platforms have a newlocale() that can handle disparate LC_ALL
+         * input, so on these a single call to newlocale() always works */
+#  else
+
+        /* If a single call to newlocale() will do */
+        if (! need_loop)
+
+#  endif
+
+        {
+            new_obj = newlocale(mask, new_locale, basis_obj);
+            if (! new_obj) {
+                DEBUG_NEW_OBJECT_FAILED(category_names[index], new_locale,
+                                        basis_obj);
+
+                /* Since the call failed, it didn't trash 'basis_obj', which is
+                 * a dup for these objects, and hence would leak if we don't
+                 * free it.  XXX However, something is seriously wrong if we
+                 * can't switch to C or the global locale, so maybe should
+                 * panic instead */
+                if (entry_obj_is_special) {
+                    freelocale(basis_obj);
+                }
+
+                goto must_restore_state;
             }
 
-            SET_EINVAL;
-            return false;
+            DEBUG_NEW_OBJECT_CREATED(category_names[index], new_locale,
+                                     new_obj, basis_obj, caller_line);
+
+            update_PL_curlocales_i(index, new_locale, caller_line);
         }
 
-        DEBUG_Lv(PerlIO_printf(Perl_debug_log,
-                               "(%" LINE_Tf "): bool_setlocale_2008_i created %p"
-                               " while freeing %p\n", line, new_obj, basis_obj));
+#  ifndef NEWLOCALE_HANDLES_DISPARATE_LC_ALL
 
-        /* Here, successfully created an object representing the desired
-         * locale; now switch into it */
-        if (! uselocale(new_obj)) {
-            freelocale(new_obj);
-            locale_panic_(Perl_form(aTHX_ "(%" LINE_Tf "): bool_setlocale_2008_i"
-                                          " switching into new locale failed",
-                                          line));
+        else {  /* Need multiple newlocale() calls */
+
+            /* Loop through the individual categories, setting the locale of
+             * each to the corresponding name previously populated into
+             * newlocales[].  Each iteration builds on the previous one, adding
+             * its category to what's already been calculated, and taking as a
+             * basis for what's been calculated 'basis_obj', which is updated
+             * each iteration to be the result of the previous one.  Upon
+             * success, newlocale() trashes the 'basis_obj' parameter to it.
+             * If any iteration fails, we immediately give up, restore the
+             * locale to what it was at the time this function was called
+             * (saved in 'entry_obj'), and return failure. */
+
+            /* Loop, using the previous iteration's result as the basis for the
+             * next one.  (The first time we effectively use the locale in
+             * force upon entry to this function.) */
+            for (unsigned int i = 0; i < LC_ALL_INDEX_; i++) {
+                new_obj = newlocale(category_masks[i],
+                                    new_locales[i],
+                                    basis_obj);
+                if (new_obj) {
+                    DEBUG_NEW_OBJECT_CREATED(category_names[i],
+                                             new_locales[i],
+                                             new_obj, basis_obj,
+                                             caller_line);
+                    basis_obj = new_obj;
+                    continue;
+                }
+
+                /* Failed.  Likely this is because the proposed new locale
+                 * isn't valid on this system. */
+
+                DEBUG_NEW_OBJECT_FAILED(category_names[i],
+                                        new_locales[i],
+                                        basis_obj);
+
+                /* newlocale() didn't trash this, since the function call
+                 * failed */
+                freelocale(basis_obj);
+
+                for (unsigned int j = 0; j < LC_ALL_INDEX_; j++) {
+                    Safefree(new_locales[j]);
+                }
+
+                goto must_restore_state;
+            }
+
+            /* Success for all categories. */
+            for (unsigned int i = 0; i < LC_ALL_INDEX_; i++) {
+                update_PL_curlocales_i(i, new_locales[i], caller_line);
+                Safefree(new_locales[i]);
+            }
+
+            /* We dup'd entry_obj in case we had to fall back to it.  The
+             * newlocale() above destroyed the dup when it first succeeded, but
+             * entry_obj itself is left dangling, so free it */
+            if (! entry_obj_is_special) {
+                freelocale(entry_obj);
+            }
         }
+
+#  endif    /* End of newlocale can't handle disparate LC_ALL input */
+
+    }
+
+#  undef DEBUG_NEW_OBJECT_CREATED
+#  undef DEBUG_NEW_OBJECT_FAILED
+
+    /* Here, successfully created an object representing the desired locale;
+     * now switch into it */
+    if (! uselocale(new_obj)) {
+        freelocale(new_obj);
+        locale_panic_(Perl_form(aTHX_ "(called from %" LINE_Tf "):"
+                                      " bool_setlocale_2008_i: switching"
+                                      " into new locale failed",
+                                      caller_line));
     }
 
     DEBUG_Lv(PerlIO_printf(Perl_debug_log,
-             "(%" LINE_Tf "): bool_setlocale_2008_i now using %p\n",
-             line, new_obj));
+                           "bool_setlocale_2008_i: now using %p\n", new_obj));
 
 #  ifdef MULTIPLICITY   /* Unlikely, but POSIX 2008 functions could be
                            Configured to be used on unthreaded perls, in which
@@ -1980,31 +2194,14 @@ S_bool_setlocale_2008_i(pTHX_
     if (DEBUG_Lv_TEST) {
         if (PL_cur_locale_obj != new_obj) {
             PerlIO_printf(Perl_debug_log,
-                          "(%" LINE_Tf "): PL_cur_locale_obj"
+                          "bool_setlocale_2008_i: PL_cur_locale_obj"
                           " was %p, now is %p\n",
-                          line, PL_cur_locale_obj, new_obj);
+                          PL_cur_locale_obj, new_obj);
         }
     }
 
     /* Update the current object */
     PL_cur_locale_obj = new_obj;
-
-#endif
-
-    /* We are done, except for updating our records (if the system doesn't keep
-     * them) and in the case of locale "", we don't actually know what the
-     * locale that got switched to is, as it came from the environment.  So
-     * have to find it */
-
-#  ifdef USE_QUERYLOCALE
-
-    if (strEQ(new_locale, "")) {
-        new_locale = querylocale_i(index);
-    }
-
-#  else
-
-    update_PL_curlocales_i(index, new_locale);
 
 #  endif
 #  ifdef HAS_GLIBC_LC_MESSAGES_BUG
@@ -2021,6 +2218,17 @@ S_bool_setlocale_2008_i(pTHX_
 #  endif
 
     return true;
+
+  must_restore_state:
+
+    /* We earlier switched to the LC_ALL => C locale in anticipation of it
+     * succeeding,  Now have to switch back to the state upon entry.  */
+    if (! uselocale(entry_obj)) {
+        setlocale_failure_panic_i(index, "switching back to",
+                                  locale_on_entry, __LINE__, caller_line);
+    }
+
+    return false;
 }
 
 /*---------------------------------------------------------------------------*/
@@ -2054,7 +2262,8 @@ S_bool_setlocale_2008_i(pTHX_
 STATIC void
 S_update_PL_curlocales_i(pTHX_
                          const unsigned int index,
-                         const char * new_locale)
+                         const char * new_locale,
+                         const line_t caller_line)
 {
     /* Update PL_curlocales[], which is parallel to the other ones indexed by
      * our mapping of libc category number to our internal equivalents. */
@@ -2068,7 +2277,29 @@ S_update_PL_curlocales_i(pTHX_
          * including the LC_ALL element */
         for (unsigned int i = 0; i <= LC_ALL_INDEX_; i++) {
             Safefree(PL_curlocales[i]);
-            PL_curlocales[i] = savepv(new_locale);
+            PL_curlocales[i] = NULL;
+        }
+
+        switch (parse_LC_ALL_string(new_locale,
+                                    (const char **) &PL_curlocales,
+                                    true,   /* Always fill array */
+                                    true,   /* Panic if fails, as to get here
+                                               it earlier had to have succeeded
+                                               */
+                                   caller_line))
+
+        {
+          case invalid:
+          case no_array:
+          case only_element_0:
+            locale_panic_via_("Unexpected return from parse_LC_ALL_string",
+                              __FILE__, caller_line);
+
+          case full_array:
+            /* parse_LC_ALL_string() has already filled PL_curlocales properly,
+             * except for the LC_ALL element, which should be set to
+             * 'new_locale'. */
+            PL_curlocales[LC_ALL_INDEX_] = savepv(new_locale);
         }
     }
     else {  /* Not LC_ALL */
@@ -2084,76 +2315,6 @@ S_update_PL_curlocales_i(pTHX_
 }
 
 #  endif  /* Need PL_curlocales[] */
-
-STATIC const char *
-S_setlocale_from_aggregate_LC_ALL(pTHX_ const char * locale, const line_t line)
-{
-    /* This function parses the value of the LC_ALL locale, assuming glibc
-     * syntax, and sets each individual category on the system to the proper
-     * value.
-     *
-     * This is likely to only ever be called from one place, so exists to make
-     * the calling function easier to read by moving this ancillary code out of
-     * the main line.
-     *
-     * The locale for each category is independent of the other categories.
-     * Often, they are all the same, but certainly not always.  Perl, in fact,
-     * usually keeps LC_NUMERIC in the C locale, regardless of the underlying
-     * locale.  LC_ALL has to be able to represent the case of when there are
-     * varying locales.  Platforms have differing ways of representing this.
-     * Because of this, the code in this file goes to lengths to avoid the
-     * issue, generally looping over the component categories instead of
-     * referring to them in the aggregate, wherever possible.  However, there
-     * are cases where we have to parse our own constructed aggregates, which use
-     * the glibc syntax. */
-
-    const char * locale_on_entry = querylocale_c(LC_ALL);
-
-    PERL_ARGS_ASSERT_SETLOCALE_FROM_AGGREGATE_LC_ALL;
-
-    const char * locale_categories[LC_ALL_INDEX_];
-    switch (parse_LC_ALL_string(locale,
-                                (const char **) &locale_categories,
-                                line))
-    {
-      case invalid:
-        return NULL;
-
-      case no_array:
-        locale_panic_(Perl_form(aTHX_ "(%" LINE_Tf
-                                      "): expecting aggregate locale, got '%s'",
-                                      line, locale));
-        NOT_REACHED; /* NOTREACHED */
-
-      case full_array:
-        break;
-    }
-
-    /* Change each category to the value returned for it */
-    for (unsigned int i = 0; i < LC_ALL_INDEX_; i++) {
-        if (! bool_setlocale_2008_i(i, locale_categories[i], line)) {
-
-            /* If we have to back out, fix up LC_ALL */
-            if (! bool_setlocale_2008_i(LC_ALL_INDEX_, locale_on_entry, line)) {
-                setlocale_failure_panic_i(i, locale_categories[i],
-                                          locale, __LINE__, line);
-                NOT_REACHED; /* NOTREACHED */
-            }
-
-            /* Reverting to the entry value succeeded, but the operation
-             * failed to go to the requested locale.  Free the rest of
-             * locale_categories[] and return failure. */
-            for (unsigned int j = i; j < LC_ALL_INDEX_; j++) {
-                Safefree(locale_categories[i]);
-            }
-            return NULL;
-        }
-
-        Safefree(locale_categories[i]);
-    }
-
-    return querylocale_c(LC_ALL);
-}
 
 /*===========================================================================*/
 
@@ -3996,7 +4157,6 @@ Perl_get_win32_message_utf8ness(pTHX_ const char * string)
 
 #  endif
 #endif  /* USE_LOCALE */
-
 
 int
 Perl_mbtowc_(pTHX_ const wchar_t * pwc, const char * s, const Size_t len)
