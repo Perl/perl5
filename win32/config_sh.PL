@@ -1,4 +1,5 @@
 #!perl -w
+#XXX
 use strict;
 use FindExt;
 
