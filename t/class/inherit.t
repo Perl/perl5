@@ -96,4 +96,13 @@ no warnings 'experimental::class';
     is(Test5B->new->classname, "Test5B", '__CLASS__ yields correct class name for subclass');
 }
 
+{
+    # https://github.com/Perl/perl5/issues/21332
+    use lib 'lib/class';
+    ok(eval <<'EOS', "hierarchical base class loaded");
+use A::B;
+1;
+EOS
+}
+
 done_testing;
