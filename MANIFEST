@@ -5790,6 +5790,8 @@ t/lib/caller/Foo.pm			test Module for caller.t and t/op/hook/require.t
 t/lib/caller/Tricycle.pm		test Module for t/op/hook/require.t (cyclic)
 t/lib/CannotParse.pm			For test case in op/require_errors.t
 t/lib/charnames/alias			Tests of "use charnames" with aliases.
+t/lib/class/A.pm			Test class loading of hierarchical parent
+t/lib/class/A/B.pm			Test class loading of hierarchical parent
 t/lib/Cname.pm				Test charnames in regexes (op/pat.t)
 t/lib/common.pl				Helper for lib/{warnings,feature}.t
 t/lib/commonsense.t			See if configuration meets basic needs

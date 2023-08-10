@@ -508,7 +508,7 @@ apply_class_attribute_isa(pTHX_ HV *stash, SV *value)
         croak("Class already has a superclass, cannot add another");
 
     HV *superstash = gv_stashsv(superclassname, 0);
-    if(!superstash) {
+    if (!superstash || !HvSTASH_IS_CLASS(superstash)) {
         /* Try to `require` the module then attempt a second time */
         load_module(PERL_LOADMOD_NOIMPORT, newSVsv(superclassname), NULL, NULL);
         superstash = gv_stashsv(superclassname, 0);
