@@ -3227,7 +3227,7 @@ S_new_ctype(pTHX_ const char *newctype, bool force)
 
         Perl_ck_warner_d(aTHX_ packWARN(WARN_LOCALE),
                          "Locale '%s' is unsupported, and may crash the"
-                         " interpreter.\n",
+                         " interpreter",
                          newctype);
     }
 

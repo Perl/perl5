@@ -3632,7 +3632,7 @@ the first approach, not using C<ispunct()> at all (see L<Note [5] in
 perlrecharclass|perlrecharclass/[5]>), and this message is raised to notify you that you
 are getting Perl's approach, not the locale's.
 
-=item Locale '%s' is unsupported, and may crash the interpreter.
+=item Locale '%s' is unsupported, and may crash the interpreter
 
 (S locale) The named locale is not supported by Perl, and using it leads
 to undefined behavior, including potentially crashing the computer.
