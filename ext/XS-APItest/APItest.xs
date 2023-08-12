@@ -4821,6 +4821,35 @@ set_custom_pp_func(sv)
         PERL_UNUSED_ARG(sv);
         XSRETURN(1);
 
+void
+set_xs_rc_stack(cv, sv)
+    CV *cv;
+    SV *sv;
+    PPCODE:
+        /* set or undet the CVf_XS_RCSTACK flag on the CV */
+        assert(SvTYPE(cv) == SVt_PVCV);
+        if (SvTRUE(sv))
+            CvXS_RCSTACK_on(cv);
+        else
+            CvXS_RCSTACK_off(cv);
+        XSRETURN(0);
+
+void
+rc_add(sv1, sv2)
+    SV *sv1;
+    SV *sv2;
+    PPCODE:
+        /* Do the XS equivalent of pp_add(), while expecting a
+         * reference-counted stack */
+
+        /* manipulate the stack directly */
+        PERL_UNUSED_ARG(sv1);
+        PERL_UNUSED_ARG(sv2);
+        SV *r = newSViv(SvIV(PL_stack_sp[-1]) + SvIV(PL_stack_sp[0]));
+        rpp_replace_2_1(r);
+        return;
+
+
 
 MODULE = XS::APItest PACKAGE = XS::APItest::AUTOLOADtest
 

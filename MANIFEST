@@ -4898,6 +4898,7 @@ ext/XS-APItest/t/ptr_table.t			Test ptr_table_* APIs
 ext/XS-APItest/t/push.t				XS::APItest extension
 ext/XS-APItest/t/refs.t				Test typemap ref handling
 ext/XS-APItest/t/rmagical.t			XS::APItest extension
+ext/XS-APItest/t/rpp_invoke_xs.t		XS::APItest: test rpp_invoke_xs()
 ext/XS-APItest/t/rv2cv_op_cv.t			test rv2cv_op_cv() API
 ext/XS-APItest/t/savehints.t			test SAVEHINTS() API
 ext/XS-APItest/t/savestack.t			test savestack behavior, currently only in the regex engine
