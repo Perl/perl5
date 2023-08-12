@@ -782,10 +782,11 @@ Perl_rpp_invoke_xs(pTHX_ CV *cv)
     PERL_ARGS_ASSERT_RPP_INVOKE_XS;
 
 #ifdef PERL_RC_STACK
-    Perl_xs_wrap(aTHX_ CvXSUB(cv), cv);
-#else
-    CvXSUB(cv)(aTHX_ cv);
+    if (!CvXS_RCSTACK(cv))
+        Perl_xs_wrap(aTHX_ CvXSUB(cv), cv);
+    else
 #endif
+        CvXSUB(cv)(aTHX_ cv);
 }
 
 
