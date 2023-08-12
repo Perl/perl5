@@ -6111,6 +6111,7 @@ t/op/readdir.t				See if readdir() works
 t/op/readline.t				See if <> / readline / rcatline work
 t/op/recurse.t				See if deep recursion works
 t/op/ref.t				See if refs and objects work
+t/op/refstack.t				See if a ref counted stack fixes things
 t/op/repeat.t				See if x operator works
 t/op/require_37033.t			See if require always closes rsfp
 t/op/require_errors.t			See if errors from require are reported correctly
