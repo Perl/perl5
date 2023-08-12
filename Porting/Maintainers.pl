@@ -1088,7 +1088,8 @@ use File::Glob qw(:case);
     },
 
     'Test::Harness' => {
-        'DISTRIBUTION' => 'LEONT/Test-Harness-3.44.tar.gz',
+        'DISTRIBUTION' => 'LEONT/Test-Harness-3.46.tar.gz',
+        'SYNCINFO'     => 'jkeenan on Sat Aug 12 17:05:02 2023',
         'FILES'        => q[cpan/Test-Harness],
         'EXCLUDED'     => [
             qr{^examples/},
