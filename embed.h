@@ -538,6 +538,7 @@
 # define require_pv(a)                          Perl_require_pv(aTHX_ a)
 # define rninstr                                Perl_rninstr
 # define rpp_extend(a)                          Perl_rpp_extend(aTHX_ a)
+# define rpp_invoke_xs(a)                       Perl_rpp_invoke_xs(aTHX_ a)
 # define rpp_is_lone(a)                         Perl_rpp_is_lone(aTHX_ a)
 # define rpp_obliterate_stack_to(a)             Perl_rpp_obliterate_stack_to(aTHX_ a)
 # define rpp_pop_1_norc()                       Perl_rpp_pop_1_norc(aTHX)

@@ -2758,6 +2758,7 @@ APTdp	|char * |rninstr	|NN const char *big			\
 				|NN const char *lend
 p	|void	|rpeep		|NULLOK OP *o
 Adipx	|void	|rpp_extend	|SSize_t n
+Adipx	|void	|rpp_invoke_xs	|NN CV *cv
 Adipx	|bool	|rpp_is_lone	|NN SV *sv
 Cpx	|void	|rpp_obliterate_stack_to				\
 				|I32 ix

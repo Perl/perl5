@@ -2381,12 +2381,7 @@ PP(pp_dbstate)
 #endif
             SAVETMPS;
             PUSHMARK(PL_stack_sp);
-#ifdef PERL_RC_STACK
-            Perl_xs_wrap(aTHX_ CvXSUB(cv), cv);
-#else
-            CvXSUB(cv)(aTHX_ cv);
-#endif
-
+            rpp_invoke_xs(cv);
             FREETMPS;
             LEAVE;
             return NORMAL;
@@ -3361,11 +3356,7 @@ PP(pp_goto)
 
                 /* Push a mark for the start of arglist */
                 PUSHMARK(mark);
-#ifdef PERL_RC_STACK
-                Perl_xs_wrap(aTHX_ CvXSUB(cv), cv);
-#else
-                (void)(*CvXSUB(cv))(aTHX_ cv);
-#endif
+                rpp_invoke_xs(cv);
                 LEAVE;
                 goto finish;
             }

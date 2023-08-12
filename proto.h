@@ -9752,6 +9752,11 @@ PERL_STATIC_INLINE void
 Perl_rpp_extend(pTHX_ SSize_t n);
 # define PERL_ARGS_ASSERT_RPP_EXTEND
 
+PERL_STATIC_INLINE void
+Perl_rpp_invoke_xs(pTHX_ CV *cv);
+# define PERL_ARGS_ASSERT_RPP_INVOKE_XS         \
+        assert(cv)
+
 PERL_STATIC_INLINE bool
 Perl_rpp_is_lone(pTHX_ SV *sv);
 # define PERL_ARGS_ASSERT_RPP_IS_LONE           \
