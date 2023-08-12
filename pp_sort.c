@@ -1290,11 +1290,7 @@ S_sortcv_xsub(pTHX_ SV *const a, SV *const b)
     PUSHMARK(PL_stack_sp);
     rpp_xpush_2(a, b);
 
-#ifdef PERL_RC_STACK
-    Perl_xs_wrap(aTHX_ CvXSUB(cv), cv);
-#else
-    (void)(*CvXSUB(cv))(aTHX_ cv);
-#endif
+    rpp_invoke_xs(cv);
 
     /* entry zero of a stack is always PL_sv_undef, which
      * simplifies converting a '()' return into undef in scalar context */

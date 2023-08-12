@@ -766,6 +766,31 @@ Perl_rpp_is_lone(pTHX_ SV *sv)
 }
 
 
+/*
+=for apidoc rpp_invoke_xs
+
+Call the XS function associated with C<cv>. Wraps the call if necessary to
+handle XS functions which are not aware of reference-counted stacks.
+
+=cut
+*/
+
+
+PERL_STATIC_INLINE void
+Perl_rpp_invoke_xs(pTHX_ CV *cv)
+{
+    PERL_ARGS_ASSERT_RPP_INVOKE_XS;
+
+#ifdef PERL_RC_STACK
+    Perl_xs_wrap(aTHX_ CvXSUB(cv), cv);
+#else
+    CvXSUB(cv)(aTHX_ cv);
+#endif
+}
+
+
+
+
 /* ----------------------------- regexp.h ----------------------------- */
 
 /* PVLVs need to act as a superset of all scalar types - they are basically

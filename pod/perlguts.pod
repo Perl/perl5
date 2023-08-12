@@ -4628,8 +4628,8 @@ the stack as:
 
     ... X+ Y+
 
-In places like pp_entersub(), a similar wrapping (via the function
-xs_wrap()) is done when calling XS subs.
+In places like pp_entersub(), a similar wrapping (via the functions
+rpp_invoke_xs() and then xs_wrap()) is done when calling XS subs.
 
 When C<nlists> is positive, a similar action takes place, except that the
 mark stack is examined (and adjusted) in order to determine the number of
@@ -4762,6 +4762,8 @@ in summary:
  rpp_is_lone(sv)         SvTEMP(sv) && SvREFCNT(sv) == 1
  rpp_stack_is_rc()       no equivalent
 
+ rpp_invoke_xs(cv)       CvXSUB(cv)(aTHX_ cv);
+
  (no replacement)        dATARGET   // just write the macro body in full
 
 Other new C and perl functions related to reference-counted stacks are:
@@ -4867,6 +4869,9 @@ unary or binary op overloading (among other things) have been replaced
 with rpp_try_AMAGIC_1() and _2() inline functions, which now rely on the
 calling PP function to choose whether to return immediately rather than
 the return being hidden away in the macro.
+
+The rpp_invoke_xs() function calls the XS function associated with the CV,
+but may do so via a wrapper function to adjust the stack as necessary.
 
 In the spirit of hiding away less in macros, C<dATARGET> hasn't been given
 a replacement; where its effect is needed, it is now written out in full;

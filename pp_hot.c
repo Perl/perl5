@@ -5822,11 +5822,7 @@ PP(pp_entersub)
         /* CvXSUB(cv) must not be NULL because newXS() refuses NULL xsub address */
         assert(CvXSUB(cv));
 
-#ifdef PERL_RC_STACK
-        Perl_xs_wrap(aTHX_ CvXSUB(cv), cv);
-#else
-        CvXSUB(cv)(aTHX_ cv);
-#endif
+        rpp_invoke_xs(cv);
 
 #if defined DEBUGGING && !defined DEBUGGING_RE_ONLY
         /* This duplicates the check done in runops_debug(), but provides more
