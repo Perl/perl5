@@ -619,7 +619,8 @@ use File::Glob qw(:case);
     },
 
     'HTTP::Tiny' => {
-        'DISTRIBUTION' => 'DAGOLDEN/HTTP-Tiny-0.086.tar.gz',
+        'DISTRIBUTION' => 'DAGOLDEN/HTTP-Tiny-0.088.tar.gz',
+        'SYNCINFO'     => 'jkeenan on Sat Aug 12 14:49:17 2023',
         'FILES'        => q[cpan/HTTP-Tiny],
         'EXCLUDED'     => [
             'corpus/snake-oil.crt', # only used by 210_live_ssl.t
