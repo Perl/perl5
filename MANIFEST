@@ -2323,7 +2323,7 @@ cpan/Test-Harness/lib/TAP/Formatter/File.pm			A parser for Test Anything Protoco
 cpan/Test-Harness/lib/TAP/Formatter/File/Session.pm		A parser for Test Anything Protocol
 cpan/Test-Harness/lib/TAP/Formatter/Session.pm			A parser for Test Anything Protocol
 cpan/Test-Harness/lib/TAP/Harness.pm				A parser for Test Anything Protocol
-cpan/Test-Harness/lib/TAP/Harness/Beyond.pod
+cpan/Test-Harness/lib/TAP/Harness/Beyond.pod			Test::Harness
 cpan/Test-Harness/lib/TAP/Harness/Env.pm			A parser for Test Anything Protocol
 cpan/Test-Harness/lib/TAP/Object.pm				A parser for Test Anything Protocol
 cpan/Test-Harness/lib/TAP/Parser.pm				A parser for Test Anything Protocol
@@ -2350,11 +2350,11 @@ cpan/Test-Harness/lib/TAP/Parser/Scheduler/Job.pm		A parser for Test Anything Pr
 cpan/Test-Harness/lib/TAP/Parser/Scheduler/Spinner.pm		A parser for Test Anything Protocol
 cpan/Test-Harness/lib/TAP/Parser/Source.pm			A parser for Test Anything Protocol
 cpan/Test-Harness/lib/TAP/Parser/SourceHandler.pm		A parser for Test Anything Protocol
-cpan/Test-Harness/lib/TAP/Parser/SourceHandler/Executable.pm
-cpan/Test-Harness/lib/TAP/Parser/SourceHandler/File.pm
-cpan/Test-Harness/lib/TAP/Parser/SourceHandler/Handle.pm
-cpan/Test-Harness/lib/TAP/Parser/SourceHandler/Perl.pm
-cpan/Test-Harness/lib/TAP/Parser/SourceHandler/RawTAP.pm
+cpan/Test-Harness/lib/TAP/Parser/SourceHandler/Executable.pm	Module related to Test::Harness
+cpan/Test-Harness/lib/TAP/Parser/SourceHandler/File.pm		Module related to Test::Harness
+cpan/Test-Harness/lib/TAP/Parser/SourceHandler/Handle.pm	Module related to Test::Harness
+cpan/Test-Harness/lib/TAP/Parser/SourceHandler/Perl.pm		Module related to Test::Harness
+cpan/Test-Harness/lib/TAP/Parser/SourceHandler/RawTAP.pm	Module related to Test::Harness
 cpan/Test-Harness/lib/TAP/Parser/YAMLish/Reader.pm		A parser for Test Anything Protocol
 cpan/Test-Harness/lib/TAP/Parser/YAMLish/Writer.pm		A parser for Test Anything Protocol
 cpan/Test-Harness/lib/Test/Harness.pm				A test harness
@@ -2377,7 +2377,7 @@ cpan/Test-Harness/t/console.t					Test::Harness test
 cpan/Test-Harness/t/data/catme.1				Test data for Test::Harness
 cpan/Test-Harness/t/data/proverc				Test data for Test::Harness
 cpan/Test-Harness/t/data/sample.yml				Test data for Test::Harness
-cpan/Test-Harness/t/env_opts.t
+cpan/Test-Harness/t/env_opts.t					Test file related to Test::Harness
 cpan/Test-Harness/t/errors.t					Test::Harness test
 cpan/Test-Harness/t/file.t					Test::Harness test
 cpan/Test-Harness/t/glob-to-regexp.t				Test::Harness test
@@ -2402,7 +2402,7 @@ cpan/Test-Harness/t/lib/MyResultFactory.pm			Module for testing Test::Harness
 cpan/Test-Harness/t/lib/MySourceHandler.pm			Test::Harness test
 cpan/Test-Harness/t/lib/NoFork.pm				Module for testing Test::Harness
 cpan/Test-Harness/t/lib/NOP.pm					Module for testing Test::Harness
-cpan/Test-Harness/t/lib/TAP/Harness/TestSubclass.pm
+cpan/Test-Harness/t/lib/TAP/Harness/TestSubclass.pm		Module related to Test::Harness
 cpan/Test-Harness/t/lib/TAP/Parser/SubclassTest.pm		Module for testing Test::Harness
 cpan/Test-Harness/t/multiplexer.t				Test::Harness test
 cpan/Test-Harness/t/nested.t					Test::Harness test
@@ -2422,7 +2422,7 @@ cpan/Test-Harness/t/proverun.t					Test::Harness test
 cpan/Test-Harness/t/proveversion.t				Test::Harness test
 cpan/Test-Harness/t/regression.t				Test::Harness test
 cpan/Test-Harness/t/results.t					Test::Harness test
-cpan/Test-Harness/t/rulesfile.t
+cpan/Test-Harness/t/rulesfile.t					Test file related to Test::Harness
 cpan/Test-Harness/t/sample-tests/bailout			Test data for Test::Harness
 cpan/Test-Harness/t/sample-tests/bignum				Test data for Test::Harness
 cpan/Test-Harness/t/sample-tests/bignum_many			Test data for Test::Harness
@@ -2464,7 +2464,7 @@ cpan/Test-Harness/t/sample-tests/skipall			Test data for Test::Harness
 cpan/Test-Harness/t/sample-tests/skipall_nomsg			Test data for Test::Harness
 cpan/Test-Harness/t/sample-tests/skipall_v13			Test data for Test::Harness
 cpan/Test-Harness/t/sample-tests/space_after_plan		Test data for Test::Harness
-cpan/Test-Harness/t/sample-tests/space_after_plan_v13
+cpan/Test-Harness/t/sample-tests/space_after_plan_v13		Test::Harness
 cpan/Test-Harness/t/sample-tests/stdout_stderr			Test data for Test::Harness
 cpan/Test-Harness/t/sample-tests/strict				Test data for Test::Harness
 cpan/Test-Harness/t/sample-tests/switches			Test data for Test::Harness
@@ -2498,7 +2498,7 @@ cpan/Test-Harness/t/source_tests/source.sh			Test::Harness test
 cpan/Test-Harness/t/source_tests/source.t			Test::Harness test
 cpan/Test-Harness/t/source_tests/source.tap			Test::Harness test
 cpan/Test-Harness/t/source_tests/source_args.sh			Test::Harness test
-cpan/Test-Harness/t/source_tests/test.tap
+cpan/Test-Harness/t/source_tests/test.tap			Test file related to Test::Harness
 cpan/Test-Harness/t/spool.t					Test::Harness test
 cpan/Test-Harness/t/state.t					Test::Harness test
 cpan/Test-Harness/t/state_results.t				Test::Harness test
