@@ -1122,10 +1122,15 @@ PP(pp_multiconcat)
             }
 
             if (arg_count == 2 && i < n) {
-                /* for the first concat, create a mortal acting like the
-                 * padtmp from OP_CONST. In later iterations this will
-                 * be appended to */
-                nexttarg = sv_newmortal();
+                if (SvPADTMP(targ)) { /* Reuse current pad SV */
+                    SvPVCLEAR(targ);
+                    nexttarg = targ;
+                } else {
+                    /* for the first concat, create a mortal acting like the
+                     * padtmp from OP_CONST. In later iterations this will
+                     * be appended to */
+                    nexttarg = sv_newmortal();
+                }
                 nextappend = FALSE;
             }
             else {
