@@ -6357,6 +6357,11 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
                                 PL_C_locale_obj));
     }
 
+#    ifdef MULTIPLICITY
+
+    PL_cur_locale_obj = PL_C_locale_obj;
+
+#    endif
 #    ifdef USE_LOCALE_NUMERIC
 
     PL_underlying_numeric_obj = duplocale(PL_C_locale_obj);
