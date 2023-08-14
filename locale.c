@@ -6065,11 +6065,6 @@ S_give_perl_locale_control(pTHX_
 {
     PERL_UNUSED_ARG(caller_line);
 
-    /* Now initialize some data structures.  This is entirely so that
-     * later-executed code doesn't have to concern itself with things not being
-     * initialized.  Arbitrarily use the C locale (which we know has to exist
-     * on the system). */
-
     /* This is called when the program is in the global locale and are
      * switching to per-thread (if available).  And it is called at
      * initialization time to do the same.
@@ -6362,6 +6357,12 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 
 #    endif
 #  endif
+
+    /* Now initialize some data structures.  This is entirely so that
+     * later-executed code doesn't have to concern itself with things not being
+     * initialized.  Arbitrarily use the C locale (which we know has to exist
+     * on the system). */
+
 #  ifdef USE_LOCALE_NUMERIC
 
     PL_numeric_radix_sv    = newSV(1);
