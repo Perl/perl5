@@ -1605,13 +1605,14 @@ Use L</UV> to declare variables of the maximum usable size on this platform.
  * and if utf8 and non-utf8 differ, a second nargs+1 set for utf8.
  */
 
-#define PERL_MULTICONCAT_IX_NARGS     0 /* number of arguments */
-#define PERL_MULTICONCAT_IX_PLAIN_PV  1 /* non-utf8 constant string */
-#define PERL_MULTICONCAT_IX_PLAIN_LEN 2 /* non-utf8 constant string length */
-#define PERL_MULTICONCAT_IX_UTF8_PV   3 /* utf8 constant string */
-#define PERL_MULTICONCAT_IX_UTF8_LEN  4 /* utf8 constant string length */
-#define PERL_MULTICONCAT_IX_LENGTHS   5 /* first of nargs+1 const segment lens */
-#define PERL_MULTICONCAT_HEADER_SIZE 5 /* The number of fields of a
+#define PERL_MULTICONCAT_MORTAL_PAD   0 /* Local tmp stack for Phase 7 */
+#define PERL_MULTICONCAT_IX_NARGS     1 /* number of arguments */
+#define PERL_MULTICONCAT_IX_PLAIN_PV  2 /* non-utf8 constant string */
+#define PERL_MULTICONCAT_IX_PLAIN_LEN 3 /* non-utf8 constant string length */
+#define PERL_MULTICONCAT_IX_UTF8_PV   4 /* utf8 constant string */
+#define PERL_MULTICONCAT_IX_UTF8_LEN  5 /* utf8 constant string length */
+#define PERL_MULTICONCAT_IX_LENGTHS   6 /* first of nargs+1 const segment lens */
+#define PERL_MULTICONCAT_HEADER_SIZE 6 /* The number of fields of a
                                            multiconcat header */
 
 /* We no longer default to creating a new SV for GvSV.

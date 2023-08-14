@@ -1048,6 +1048,12 @@ PP(pp_multiconcat)
         UNOP_AUX_item *lens = aux + PERL_MULTICONCAT_IX_LENGTHS;
         Size_t arg_count = 0; /* how many args have been processed */
 
+        /* Local tmps stack, see GH #21360 */
+        SV **tmps_padentry = &PAD_SVl(aux[PERL_MULTICONCAT_MORTAL_PAD].pad_offset);
+        AV *tmps_av = MUTABLE_AV(*tmps_padentry);
+        SvUPGRADE(MUTABLE_SV(tmps_av), SVt_PVAV);
+        assert(!SvMAGICAL(tmps_av));
+
         if (!cpv) {
             cpv = aux[PERL_MULTICONCAT_IX_UTF8_PV].pv;
             utf8 = SVf_UTF8;
@@ -1089,6 +1095,8 @@ PP(pp_multiconcat)
             )
             {
                 SV *tmp = newSV_type_mortal(SVt_PV);
+                SvFLAGS(tmp) |= SVs_TEMP;
+                av_push_simple(tmps_av, tmp);
                 sv_copypv(tmp, left);
                 SvSETMAGIC(tmp);
                 left = tmp;
@@ -1214,6 +1222,11 @@ PP(pp_multiconcat)
         else
             targ = left;
         SETs(targ);
+
+        /* Memory consumption vs speed of reuse tradeoff between
+         * av_clear and av_undef... */
+        av_clear(tmps_av);
+
         RETURN;
     }
 }

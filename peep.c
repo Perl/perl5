@@ -857,6 +857,7 @@ S_maybe_multiconcat(pTHX_ OP *o)
 
     /* Populate the aux struct */
 
+    aux[PERL_MULTICONCAT_MORTAL_PAD].pad_offset = pad_alloc(OP_MULTICONCAT, SVs_PADTMP);
     aux[PERL_MULTICONCAT_IX_NARGS].ssize     = nargs;
     aux[PERL_MULTICONCAT_IX_PLAIN_PV].pv    = utf8 ? NULL : const_str;
     aux[PERL_MULTICONCAT_IX_PLAIN_LEN].ssize = utf8 ?    0 : total_len;
