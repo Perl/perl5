@@ -6348,8 +6348,14 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 
     /* Switch to using the POSIX 2008 interface now.  This would happen below
      * anyway, but deferring it can lead to leaks of memory that would also get
-     * malloc'd in the interim */
-    uselocale(PL_C_locale_obj);
+     * malloc'd in the interim.  We arbitrarily switch to the C locale,
+     * overridden below  */
+    if (! uselocale(PL_C_locale_obj)) {
+        locale_panic_(Perl_form(aTHX_
+                                "Can't uselocale(%p), LC_ALL supposed to"
+                                " be 'C'",
+                                PL_C_locale_obj));
+    }
 
 #    ifdef USE_LOCALE_NUMERIC
 
