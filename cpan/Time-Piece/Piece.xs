@@ -988,20 +988,41 @@ static void _populate_C_time_locale(pTHX_ HV* locales )
     return;
 }
 
+#ifdef sv_strftime_tm
+#  define TP_strftime(format, tm)                                           \
+                        sv_strftime_tm(sv_2mortal(newSVpv(format, 0)), tm)
+#else
+#  define TP_strftime(format, tm)                                           \
+                my_strftime_tm(aTHX_ sv_2mortal(newSVpv(format, 0)), tm)
+
+static SV* my_strftime_tm(pTHX_ const char * format, const struct tm * mytm)
+{
+    size_t len;
+    char buf[TP_BUF_SIZE];
+
+    STRFTIME_LOCK;
+    len = strftime(buf, TP_BUF_SIZE, "%a", mytm);
+    STRFTIME_UNLOCK;
+    return newSVpvn(buf, len);
+}
+#endif
+
 MODULE = Time::Piece     PACKAGE = Time::Piece
 
 PROTOTYPES: ENABLE
 
 void
 _strftime(fmt, epoch, islocal = 1)
-    char *      fmt
+    SV *        fmt
     time_t      epoch
     int         islocal
     CODE:
     {
+#ifndef sv_strftime_tm
         char tmpbuf[TP_BUF_SIZE];
-        struct tm mytm;
         size_t len;
+#endif
+        struct tm mytm;
 
         if(islocal == 1) {
             LOCALTIME_LOCK;
@@ -1013,8 +1034,13 @@ _strftime(fmt, epoch, islocal = 1)
             mytm = *gmtime(&epoch);
             GMTIME_UNLOCK;
         }
+#ifdef sv_strftime_tm
+        ST(0) = sv_strftime_tm(fmt, &mytm);
+#else
+        size_t fmtlen;
+        char * fmt_pv = SvPV(fmt, fmtlen);
         STRFTIME_LOCK;
-        len = strftime(tmpbuf, TP_BUF_SIZE, fmt, &mytm);
+        len = strftime(tmpbuf, TP_BUF_SIZE, fmt_pv, &mytm);
         STRFTIME_UNLOCK;
         /*
         ** The following is needed to handle to the situation where
@@ -1030,11 +1056,10 @@ _strftime(fmt, epoch, islocal = 1)
         ** If there is a better way to make it portable, go ahead by
         ** all means.
         */
-        if ((len > 0 && len < TP_BUF_SIZE) || (len == 0 && *fmt == '\0'))
+        if ((len > 0 && len < TP_BUF_SIZE) || (len == 0 && *fmt_pv == '\0'))
         ST(0) = sv_2mortal(newSVpv(tmpbuf, len));
         else {
         /* Possibly buf overflowed - try again with a bigger buf */
-        size_t fmtlen = strlen(fmt);
         size_t bufsize = fmtlen + TP_BUF_SIZE;
         char*     buf;
         size_t    buflen;
@@ -1042,7 +1067,7 @@ _strftime(fmt, epoch, islocal = 1)
         New(0, buf, bufsize, char);
         while (buf) {
             STRFTIME_LOCK;
-            buflen = strftime(buf, bufsize, fmt, &mytm);
+            buflen = strftime(buf, bufsize, fmt_pv, &mytm);
             STRFTIME_UNLOCK;
             if (buflen > 0 && buflen < bufsize)
             break;
@@ -1062,6 +1087,8 @@ _strftime(fmt, epoch, islocal = 1)
         else
             ST(0) = sv_2mortal(newSVpv(tmpbuf, len));
         }
+#endif
+
     }
 
 void
@@ -1175,8 +1202,6 @@ _get_localization()
         AV* mons = newAV();
         AV* months = newAV();
         SV** tmp;
-        size_t len;
-        char buf[TP_BUF_SIZE];
         size_t i;
         time_t t = 1325386800; /*1325386800 = Sun, 01 Jan 2012 03:00:00 GMT*/
         struct tm mytm;
@@ -1187,22 +1212,16 @@ _get_localization()
 
         for(i = 0; i < 7; ++i){
 
-            len = strftime(buf, TP_BUF_SIZE, "%a", &mytm);
-            av_push(wdays, (SV *) newSVpvn(buf, len));
-
-            len = strftime(buf, TP_BUF_SIZE, "%A", &mytm);
-            av_push(weekdays, (SV *) newSVpvn(buf, len));
+            av_push(wdays, TP_strftime("%a", &mytm));
+            av_push(weekdays, TP_strftime("%A", &mytm));
 
             ++mytm.tm_wday;
         }
 
         for(i = 0; i < 12; ++i){
 
-            len = strftime(buf, TP_BUF_SIZE, "%b", &mytm);
-            av_push(mons, (SV *) newSVpvn(buf, len));
-
-            len = strftime(buf, TP_BUF_SIZE, "%B", &mytm);
-            av_push(months, (SV *) newSVpvn(buf, len));
+            av_push(mons, TP_strftime("%b", &mytm));
+            av_push(months, TP_strftime("%B", &mytm));
 
             ++mytm.tm_mon;
         }
@@ -1213,11 +1232,9 @@ _get_localization()
         tmp = hv_store(locales, "month", 5, newRV_noinc((SV *) months), 0);
         tmp = hv_store(locales, "alt_month", 9, newRV((SV *) months), 0);
 
-        len = strftime(buf, TP_BUF_SIZE, "%p", &mytm);
-        tmp = hv_store(locales, "AM", 2, newSVpvn(buf,len), 0);
+        tmp = hv_store(locales, "AM", 2, TP_strftime("%p", &mytm), 0);
         mytm.tm_hour = 18;
-        len = strftime(buf, TP_BUF_SIZE, "%p", &mytm);
-        tmp = hv_store(locales, "PM", 2, newSVpvn(buf,len), 0);
+        tmp = hv_store(locales, "PM", 2, TP_strftime("%p", &mytm), 0);
 
         if(tmp == NULL || !SvOK( (SV *) *tmp)){
             croak("Failed to get localization.");
