@@ -10984,7 +10984,6 @@ set atoll d_atoll
 eval $inlibc
 
 : See if a file contains compiler warnings
-: See if a file contains compiler warnings
 case "$osname" in
   'aix')
 	cat >compiler_warning <<EOSS
