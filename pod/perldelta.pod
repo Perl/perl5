@@ -441,6 +441,12 @@ call set magic on completion. [GH #21012]
 msgrcv() used the size parameter to resize the buffer before
 validating it. [GH #21012]
 
+=item *
+
+Inheriting from a class that was hierarchically an ancestor of the new
+class, eg. C< class A::B :isa(A) { ... } >, would not attempt to load
+the parent class. [GH #21332]
+
 =back
 
 =head1 Known Problems
