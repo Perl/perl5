@@ -6308,6 +6308,11 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
     }
 
 #  endif
+#  ifdef USE_PL_CUR_LC_ALL
+
+    PL_cur_LC_ALL = savepv("C");
+
+#  endif
 #  if ! defined(PERL_LC_ALL_USES_NAME_VALUE_PAIRS) && defined(LC_ALL)
 
     LOCALE_LOCK;
