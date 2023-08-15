@@ -1228,7 +1228,7 @@ PP(pp_sselect)
         value = SvNV_nomg(sv);
         if (value < 0.0)
             value = 0.0;
-        timebuf.tv_sec = (long)value;
+        timebuf.tv_sec = (time_t)value;
         value -= (NV)timebuf.tv_sec;
         timebuf.tv_usec = (long)(value * 1000000.0);
     }
