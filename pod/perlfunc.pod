@@ -998,7 +998,7 @@ for Perl builtin types and pragmas, respectively. Avoid creating
 all-uppercase or all-lowercase package names to prevent
 confusion.
 
-Also avoid <Cbless>ing things into the class name C<0>; this
+Also avoid C<bless>ing things into the class name C<0>; this
 will cause code which (erroneously) checks the result of
 L<C<ref>|/ref EXPR> to see if a reference is C<bless>ed to fail,
 as "0", a falsy value, is returned.
@@ -1029,7 +1029,7 @@ Returns the context of the current pure perl subroutine call.  In scalar
 context, returns the caller's package name if there I<is> a caller (that is, if
 we're in a subroutine or L<C<eval>|/eval EXPR> or
 L<C<require>|/require VERSION>) and the undefined value otherwise.
-caller never returns XS subs and they are skipped.  The next pure perl
+C<caller> never returns XS subs and they are skipped.  The next pure perl
 sub will appear instead of the XS sub in caller's return values.  In
 list context, caller returns
 
@@ -1297,9 +1297,9 @@ X<chr> X<character> X<ASCII> X<Unicode>
 
 Returns the character represented by that NUMBER in the character set.
 For example, C<chr(65)> is C<"A"> in either ASCII or Unicode, and
-chr(0x263a) is a Unicode smiley face.
+C<chr(0x263a)> is a Unicode smiley face.
 
-Negative values give the Unicode replacement character (chr(0xfffd)),
+Negative values give the Unicode replacement character (C<chr(0xfffd)>),
 except under the L<bytes> pragma, where the low eight bits of the value
 (truncated to an integer) are used.
 
@@ -4195,7 +4195,7 @@ follows:
     my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) =
                                                 localtime(time);
 
-All list elements are numeric and come straight out of the C `struct
+All list elements are numeric and come straight out of the C 'struct
 tm'.  C<$sec>, C<$min>, and C<$hour> are the seconds, minutes, and hours
 of the specified time.
 
@@ -4239,7 +4239,7 @@ To get similar but locale-dependent date strings, try for example:
  # or for GMT formatted appropriately for your locale:
  my $now_string = strftime "%a %b %e %H:%M:%S %Y", gmtime;
 
-C$now_string> will be formatted according to the current LC_TIME locale
+C<$now_string> will be formatted according to the current LC_TIME locale
 the program or thread is running in.  See L<perllocale> for how to set
 up and change that locale.  Note that C<%a> and C<%b>, the short forms
 of the day of the week and the month of the year, may not necessarily be
