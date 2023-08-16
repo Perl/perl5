@@ -9,11 +9,11 @@ App::Prove::State::Result::Test - Individual test results.
 
 =head1 VERSION
 
-Version 3.46
+Version 3.47
 
 =cut
 
-our $VERSION = '3.46';
+our $VERSION = '3.47';
 
 =head1 DESCRIPTION
 
