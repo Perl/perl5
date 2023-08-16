@@ -42,14 +42,14 @@ you'll be notified of an uninitialized value whenever you treat
 C<undef> as a string or a number.  Well, usually.  Boolean contexts,
 such as:
 
-    if ($a) {}
+    if ($x) {}
 
 are exempt from warnings (because they care about truth rather than
 definedness).  Operators such as C<++>, C<-->, C<+=>,
 C<-=>, and C<.=>, that operate on undefined variables such as:
 
-    undef $a;
-    $a++;
+    undef $x;
+    $x++;
 
 are also always exempt from such warnings.
 
@@ -1036,7 +1036,7 @@ These examples of attempts to use an ellipsis are syntax errors:
     print ...;
     open(my $fh, ">", "/dev/passwd") or ...;
     if ($condition && ... ) { say "Howdy" };
-    ... if $a > $b;
+    ... if $x > $y;
     say "Cromulent" if ...;
     $flub = 5 + ...;
 
@@ -1087,11 +1087,11 @@ actually knows to look for pod escapes even in the middle of a
 paragraph.  This means that the following secret stuff will be
 ignored by both the compiler and the translators.
 
-    $a=3;
+    $x=3;
     =secret stuff
      warn "Neither POD nor CODE!?"
     =cut back
-    print "got $a\n";
+    print "got $x\n";
 
 You probably shouldn't rely upon the C<warn()> being podded out forever.
 Not all pod translators are well-behaved in this regard, and perhaps

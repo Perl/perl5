@@ -2721,8 +2721,8 @@ If the C</s> modifier is specified, sequences of characters, all in a
 row, that were transliterated to the same character are squashed down to
 a single instance of that character.
 
- my $a = "aaabbbca";
- $a =~ tr/ab/dd/s;     # $a now is "dcd"
+ my $x = "aaabbbca";
+ $x =~ tr/ab/dd/s;     # $x now is "dcd"
 
 If the C</d> modifier is used, the I<REPLACEMENTLIST> is always interpreted
 exactly as specified.  Otherwise, if the I<REPLACEMENTLIST> is shorter

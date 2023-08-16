@@ -696,7 +696,7 @@ the stat buffer was filled by an L<C<lstat>|/lstat FILEHANDLE> call,
 C<-T> and C<-B> will reset it with the results of C<stat _>).
 Example:
 
-    print "Can do.\n" if -r $a || -w _ || -x _;
+    print "Can do.\n" if -r $x || -w _ || -x _;
 
     stat($filename);
     print "Readable\n" if -r _;
@@ -1216,8 +1216,8 @@ Note that parentheses are necessary when you're chomping anything
 that is not a simple variable.  This is because C<chomp $cwd = `pwd`;>
 is interpreted as C<(chomp $cwd) = `pwd`;>, rather than as
 C<chomp( $cwd = `pwd` )> which you might expect.  Similarly,
-C<chomp $a, $b> is interpreted as C<chomp($a), $b> rather than
-as C<chomp($a, $b)>.
+C<chomp $x, $y> is interpreted as C<chomp($x), $y> rather than
+as C<chomp($x, $y)>.
 
 =item chop VARIABLE
 X<chop>
@@ -2439,10 +2439,10 @@ L<C<$@>|perlvar/$@>.
 Examples:
 
     # make divide-by-zero nonfatal
-    eval { $answer = $a / $b; }; warn $@ if $@;
+    eval { $answer = $x / $y; }; warn $@ if $@;
 
     # same thing, but less efficient
-    eval '$answer = $a / $b'; warn $@ if $@;
+    eval '$answer = $x / $y'; warn $@ if $@;
 
     # a compile-time error
     eval { $answer = }; # WRONG
@@ -2462,7 +2462,7 @@ You can use the C<local $SIG{__DIE__}> construct for this purpose,
 as this example shows:
 
     # a private exception trap for divide-by-zero
-    eval { local $SIG{'__DIE__'}; $answer = $a / $b; };
+    eval { local $SIG{'__DIE__'}; $answer = $x / $y; };
     warn $@ if $@;
 
 This is especially significant, given that C<__DIE__> hooks can call
@@ -8750,14 +8750,14 @@ would have been the next argument.
 
 So:
 
-    printf "<%*.*s>", $a, $b, $c;
+    printf "<%*.*s>", $x, $y, $z;
 
-uses C<$a> for the width, C<$b> for the precision, and C<$c>
+uses C<$x> for the width, C<$y> for the precision, and C<$z>
 as the value to format; while:
 
-  printf '<%*1$.*s>', $a, $b;
+  printf '<%*1$.*s>', $x, $y;
 
-would use C<$a> for the width and precision, and C<$b> as the
+would use C<$x> for the width and precision, and C<$y> as the
 value to format.
 
 Here are some more examples; be aware that when using an explicit

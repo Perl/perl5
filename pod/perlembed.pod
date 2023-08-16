@@ -339,18 +339,18 @@ the first, a C<float> from the second, and a C<char *> from the third.
      PL_exit_flags |= PERL_EXIT_DESTRUCT_END;
      perl_run(my_perl);
 
-     /** Treat $a as an integer **/
-     eval_pv("$a = 3; $a **= 2", TRUE);
-     printf("a = %d\n", SvIV(get_sv("a", 0)));
+     /** Treat $x as an integer **/
+     eval_pv("$x = 3; $x **= 2", TRUE);
+     printf("x = %d\n", SvIV(get_sv("x", 0)));
 
-     /** Treat $a as a float **/
-     eval_pv("$a = 3.14; $a **= 2", TRUE);
-     printf("a = %f\n", SvNV(get_sv("a", 0)));
+     /** Treat $x as a float **/
+     eval_pv("$x = 3.14; $x **= 2", TRUE);
+     printf("x = %f\n", SvNV(get_sv("x", 0)));
 
-     /** Treat $a as a string **/
+     /** Treat $x as a string **/
      eval_pv(
-       "$a = 'rekcaH lreP rehtonA tsuJ'; $a = reverse($a);", TRUE);
-     printf("a = %s\n", SvPV_nolen(get_sv("a", 0)));
+       "$x = 'rekcaH lreP rehtonA tsuJ'; $x = reverse($x);", TRUE);
+     printf("x = %s\n", SvPV_nolen(get_sv("x", 0)));
 
      perl_destruct(my_perl);
      perl_free(my_perl);
@@ -614,8 +614,8 @@ sounds, because Perl implements ** with C's I<pow()> function).  First
 I'll create a stub exponentiation function in I<power.pl>:
 
     sub expo {
-        my ($a, $b) = @_;
-        return $a ** $b;
+        my ($x, $y) = @_;
+        return $x ** $y;
     }
 
 Now I'll create a C program, I<power.c>, with a function

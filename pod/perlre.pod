@@ -1217,8 +1217,8 @@ using C<"$+{I<name>}">.
 
 Braces are required in referring to named capture groups, but are optional for
 absolute or relative numbered ones.  Braces are safer when creating a regex by
-concatenating smaller strings.  For example if you have C<qr/$a$b/>, and C<$a>
-contained C<"\g1">, and C<$b> contained C<"37">, you would get C</\g137/> which
+concatenating smaller strings.  For example if you have C<qr/$x$y/>, and C<$x>
+contained C<"\g1">, and C<$y> contained C<"37">, you would get C</\g137/> which
 is probably not what you intended.
 
 If you use braces, you may also optionally add any number of blank
@@ -1269,14 +1269,14 @@ Examples:
     /((.)(.)(.)(.)(.)(.)(.)(.)(.))\10/  # \10 is a backreference
     /((.)(.)(.)(.)(.)(.)(.)(.)(.))\010/ # \010 is octal
 
-    $a = '(.)\1';        # Creates problems when concatenated.
-    $b = '(.)\g{1}';     # Avoids the problems.
-    "aa" =~ /${a}/;      # True
-    "aa" =~ /${b}/;      # True
-    "aa0" =~ /${a}0/;    # False!
-    "aa0" =~ /${b}0/;    # True
-    "aa\x08" =~ /${a}0/;  # True!
-    "aa\x08" =~ /${b}0/;  # False
+    $x = '(.)\1';        # Creates problems when concatenated.
+    $y = '(.)\g{1}';     # Avoids the problems.
+    "aa" =~ /${x}/;      # True
+    "aa" =~ /${y}/;      # True
+    "aa0" =~ /${x}0/;    # False!
+    "aa0" =~ /${y}0/;    # True
+    "aa\x08" =~ /${x}0/;  # True!
+    "aa\x08" =~ /${y}0/;  # False
 
 Several special variables also refer back to portions of the previous
 match.  C<$+> returns whatever the last bracket match matched.

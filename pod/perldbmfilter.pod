@@ -103,7 +103,7 @@ fix very easily.
     $db->filter_store_value( sub { $_ .= "\0" } );
 
     $hash{"abc"} = "def";
-    my $a = $hash{"ABC"};
+    my $x = $hash{"ABC"};
     # ...
     undef $db;
     untie %hash;
