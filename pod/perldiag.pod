@@ -228,16 +228,16 @@ coerced to a scalar - the number of elements in the array.
 (F) Each subroutine signature parameter declaration must start with a valid
 sigil; for example:
 
-    sub foo ($a, $, $b = 1, @c) {}
+    sub foo ($x, $, $y = 1, @z) {}
 
 =item A slurpy parameter may not have a default value
 
 (F) Only scalar subroutine signature parameters may have a default value;
 for example:
 
-    sub foo ($a = 1)        {} # legal
-    sub foo (@a = (1))      {} # invalid
-    sub foo (%a = (a => b)) {} # invalid
+    sub foo ($x = 1)        {} # legal
+    sub foo (@x = (1))      {} # invalid
+    sub foo (%x = (a => b)) {} # invalid
 
 =item assertion botched: %s
 
@@ -2890,7 +2890,7 @@ For example:
 
     use feature 'signatures;
     sub foo ($$) {}            # illegal - was expecting a signature
-    sub foo ($a, $b)
+    sub foo ($x, $y)
             :prototype($$) {}  # legal
 
 
@@ -2938,9 +2938,9 @@ other than C<=> introducing a default, C<,> or C<)>.
 
     use feature 'signatures';
     sub foo ($=1) {}           # legal
-    sub foo ($a = 1) {}        # legal
-    sub foo ($a += 1) {}       # illegal
-    sub foo ($a == 1) {}       # illegal
+    sub foo ($x = 1) {}        # legal
+    sub foo ($x += 1) {}       # illegal
+    sub foo ($x == 1) {}       # illegal
 
 =item Illegal pattern in regex; marked by S<<-- HERE> in m/%s/
 
@@ -3064,8 +3064,8 @@ throwing an exception.
 =item Initialization of state variables in list currently forbidden
 
 (F) C<state> only permits initializing a single variable, specified
-without parentheses.  So C<state $a = 42> and C<state @a = qw(a b c)> are
-allowed, but not C<state ($a) = 42> or C<(state $a) = 42>.  To initialize
+without parentheses.  So C<state $x = 42> and C<state @x = qw(a b c)> are
+allowed, but not C<state ($x) = 42> or C<(state $x) = 42>.  To initialize
 more than one C<state> variable, initialize them one at a time.
 
 =item %%s[%s] in scalar context better written as $%s[%s]
@@ -3830,8 +3830,8 @@ doing it Perl met a malformed Unicode surrogate.
 
 =item Mandatory parameter follows optional parameter
 
-(F) In a subroutine signature, you wrote something like "$a = undef,
-$b", making an earlier parameter optional and a later one mandatory.
+(F) In a subroutine signature, you wrote something like "$x = undef,
+$y", making an earlier parameter optional and a later one mandatory.
 Parameters are filled from left to right, so it's impossible for the
 caller to omit an earlier one and pass a later one.  If you want to act
 as if the parameters are filled from right to left, declare the rightmost
@@ -4162,8 +4162,8 @@ They're written like C<$foo[1][2][3]>, as in C.
 the last parameter, and there must not be more than one of them; for
 example:
 
-    sub foo ($a, @b)    {} # legal
-    sub foo ($a, @b, %) {} # invalid
+    sub foo ($x, @y)    {} # legal
+    sub foo ($x, @y, %) {} # invalid
 
 =item '/' must follow a numeric type in unpack
 
@@ -4568,10 +4568,10 @@ particular to avoid confusion with the C<$#> variable.  For example:
 
     # bad
     sub f ($# ignore first arg
-           , $b) {}
+           , $y) {}
     # good
     sub f ($, # ignore first arg
-           $b) {}
+           $y) {}
 
 =item Not an ARRAY reference
 
@@ -4811,10 +4811,10 @@ example, if you say "*foo *foo" it will be interpreted as if you said
 
 =item Optional parameter lacks default expression
 
-(F) In a subroutine signature, you wrote something like "$a =", making a
+(F) In a subroutine signature, you wrote something like "$x =", making a
 named optional parameter without a default value.  A nameless optional
 parameter is permitted to have no default value, but a named one must
-have a specific default.  You probably want "$a = undef".
+have a specific default.  You probably want "$x = undef".
 
 =item "our" variable %s redeclared
 
@@ -5370,15 +5370,15 @@ Perl assumes that memory is now corrupted.  See L<perlfunc/ioctl>.
 flow operator (e.g. C<return>) and a low-precedence operator like
 C<or>.  Consider:
 
-    sub { return $a or $b; }
+    sub { return $x or $y; }
 
 This is parsed as:
 
-    sub { (return $a) or $b; }
+    sub { (return $x) or $y; }
 
 Which is effectively just:
 
-    sub { return $a; }
+    sub { return $x; }
 
 Either use parentheses or the high-precedence variant of the operator.
 
@@ -6190,8 +6190,8 @@ C<can> may break this.
 come before the signature. Note that this order was the opposite in
 versions 5.22..5.26. So:
 
-    sub foo :lvalue ($a, $b) { ... }  # 5.20 and 5.28 +
-    sub foo ($a, $b) :lvalue { ... }  # 5.22 .. 5.26
+    sub foo :lvalue ($x, $y) { ... }  # 5.20 and 5.28 +
+    sub foo ($x, $y) :lvalue { ... }  # 5.22 .. 5.26
 
 =item Subroutine "&%s" is not available
 
@@ -7105,12 +7105,12 @@ flags for the regex.  One of the ones you specified is invalid.  One way
 this can happen is if you didn't put in white space between the end of
 the regex and a following alphanumeric operator:
 
- if ($a =~ /foo/and $bar == 3) { ... }
+ if ($x =~ /foo/and $bar == 3) { ... }
 
 The C<"a"> is a valid modifier flag, but the C<"n"> is not, and raises
 this error.  Likely what was meant instead was:
 
- if ($a =~ /foo/ and $bar == 3) { ... }
+ if ($x =~ /foo/ and $bar == 3) { ... }
 
 =item Unknown "re" subpragma '%s' (known ones are: %s)
 
@@ -7881,26 +7881,26 @@ declared in an outer anonymous subroutine that has not yet been created.
 (Remember that named subs are created at compile time, while anonymous
 subs are created at run-time.)  For example,
 
-    sub { my $a; sub f { $a } }
+    sub { my $x; sub f { $x } }
 
-At the time that f is created, it can't capture the current value of $a,
+At the time that f is created, it can't capture the current value of $x,
 since the anonymous subroutine hasn't been created yet.  Conversely,
 the following won't give a warning since the anonymous subroutine has by
 now been created and is live:
 
-    sub { my $a; eval 'sub f { $a }' }->();
+    sub { my $x; eval 'sub f { $x }' }->();
 
 The second situation is caused by an eval accessing a variable that has
 gone out of scope, for example,
 
     sub f {
-	my $a;
-	sub { eval '$a' }
+	my $x;
+	sub { eval '$x' }
     }
     f()->();
 
-Here, when the '$a' in the eval is being compiled, f() is not currently
-being executed, so its $a is not available for capture.
+Here, when the '$x' in the eval is being compiled, f() is not currently
+being executed, so its $x is not available for capture.
 
 =item Variable "%s" is not imported%s
 

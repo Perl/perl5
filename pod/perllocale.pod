@@ -1045,7 +1045,7 @@ so on. (See L</The localeconv function> if you care about these things.)
 
  $n = 5/2;   # Assign numeric 2.5 to $n
 
- $a = " $n"; # Locale-dependent conversion to string
+ $x = " $n"; # Locale-dependent conversion to string
 
  print "half five is $n\n";       # Locale-dependent output
 
@@ -1413,8 +1413,8 @@ be confused, perhaps silently.
  use locale;
  use POSIX qw(locale_h);
  setlocale(LC_NUMERIC, "fr_FR") or die "Pardon";
- my $a = 1.2;
- print eval "$a + 1.5";
+ my $x = 1.2;
+ print eval "$x + 1.5";
  print "\n";
 
 prints C<13,5>.  This is because in that locale, the comma is the
@@ -1427,7 +1427,7 @@ generated.  If you do string C<eval>'s within the scope of
 S<C<use locale>>, you should instead change the C<eval> line to do
 something like:
 
- print eval "no locale; $a + 1.5";
+ print eval "no locale; $x + 1.5";
 
 This prints C<2.7>.
 

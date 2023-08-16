@@ -105,7 +105,7 @@ That's because Perl doesn't (ever) implicitly dereference your variables.
 If you want to get at the thing a reference is referring to, then you have
 to do this yourself using either prefix typing indicators, like
 C<${$blah}>, C<@{$blah}>, C<@{$blah[$i]}>, or else postfix pointer arrows,
-like C<$a-E<gt>[3]>, C<$h-E<gt>{fred}>, or even C<$ob-E<gt>method()-E<gt>[3]>.
+like C<< $arr->[3] >>, C<< $hash->{fred} >>, or even C<< $obj->method()->[3] >>.
 
 =head1 COMMON MISTAKES
 

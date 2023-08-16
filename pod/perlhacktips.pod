@@ -1154,9 +1154,9 @@ options are probably
 
 For example
 
-    $ perl -Dst -e '$a + 1'
+    $ perl -Dst -e '$x + 1'
     ....
-    (-e:1)	gvsv(main::a)
+    (-e:1)	gvsv(main::x)
         =>  UNDEF
     (-e:1)	const(IV(1))
         =>  UNDEF  IV(1)
@@ -1293,8 +1293,8 @@ One way to get around this macro hell is to use the dumping functions
 in F<dump.c>; these work a little like an internal
 L<Devel::Peek|Devel::Peek>, but they also cover OPs and other
 structures that you can't get at from Perl.  Let's take an example.
-We'll use the C<$a = $b + $c> we used before, but give it a bit of
-context: C<$b = "6XXXX"; $c = 2.3;>.  Where's a good place to stop and
+We'll use the C<$x = $y + $z> we used before, but give it a bit of
+context: C<$y = "6XXXX"; $z = 2.3;>.  Where's a good place to stop and
 poke around?
 
 What about C<pp_add>, the function we examined earlier to implement the
@@ -1307,7 +1307,7 @@ Notice we use C<Perl_pp_add> and not C<pp_add> - see
 L<perlguts/Internal Functions>.  With the breakpoint in place, we can
 run our program:
 
-    (gdb) run -e '$b = "6XXXX"; $c = 2.3; $a = $b + $c'
+    (gdb) run -e '$y = "6XXXX"; $z = 2.3; $x = $y + $z'
 
 Lots of junk will go past as gdb reads in the relevant source files and
 libraries, and then:
@@ -1333,7 +1333,7 @@ C<POPn> uses C<TOPs> - but doesn't remove it.  We then use C<SvNV> to
 get the NV from C<leftsv> in the same way as before - yes, C<POPn> uses
 C<SvNV>.
 
-Since we don't have an NV for C<$b>, we'll have to use C<sv_2nv> to
+Since we don't have an NV for C<$y>, we'll have to use C<sv_2nv> to
 convert it.  If we step again, we'll find ourselves there:
 
     (gdb) step
@@ -1403,8 +1403,8 @@ And in gdb do:
 And then step until you hit what you're looking for.  This works well
 in a loop if you want to only break at certain iterations:
 
-    for my $c (1..100) {
-        study if $c == 50;
+    for my $i (1..100) {
+        study if $i == 50;
     }
 
 =head2 Using gdb to look at what the parser/lexer are doing
@@ -1423,7 +1423,7 @@ And in gdb:
 If you want to see what the parser/lexer is doing inside of C<if>
 blocks and the like you need to be a little trickier:
 
-    if ($a && $b && do { BEGIN { study } 1 } && $c) { ... }
+    if ($x && $y && do { BEGIN { study } 1 } && $z) { ... }
 
 =head1 SOURCE CODE STATIC ANALYSIS
 

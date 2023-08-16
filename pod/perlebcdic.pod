@@ -288,9 +288,9 @@ be compiled to run on.
 
    my %ebcdic = ( 176 => 'cp37', 95 => 'cp1047', 106 => 'posix-bc' );
 
-   # $a is in EBCDIC code points
-   from_to($a, $ebcdic{ord '^'}, 'latin1');
-   # $a is ISO 8859-1 code points
+   # $x is in EBCDIC code points
+   from_to($x, $ebcdic{ord '^'}, 'latin1');
+   # $x is ISO 8859-1 code points
 
 and from Latin-1 code points to EBCDIC code points
 
@@ -298,9 +298,9 @@ and from Latin-1 code points to EBCDIC code points
 
    my %ebcdic = ( 176 => 'cp37', 95 => 'cp1047', 106 => 'posix-bc' );
 
-   # $a is ISO 8859-1 code points
-   from_to($a, 'latin1', $ebcdic{ord '^'});
-   # $a is in EBCDIC code points
+   # $x is ISO 8859-1 code points
+   from_to($x, 'latin1', $ebcdic{ord '^'});
+   # $x is in EBCDIC code points
 
 For doing I/O it is suggested that you use the autotranslating features
 of PerlIO, see L<perluniintro>.
