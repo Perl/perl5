@@ -1,10 +1,14 @@
+=pod
+
+=encoding UTF-8
+
 =head1 NAME
 
 perlfaq2 - Obtaining and Learning about Perl
 
 =head1 VERSION
 
-version 5.20230701
+version 5.20230812
 
 =head1 DESCRIPTION
 
@@ -172,12 +176,16 @@ There are many good L<books on Perl|http://www.perl.org/books/library.html>.
 
 =head2 Which magazines have Perl content?
 
-There's also I<$foo Magazin>, a German magazine dedicated to Perl, at
-( L<http://www.foo-magazin.de> ). The I<Perl-Zeitung> is another
-German-speaking magazine for Perl beginners (see
-L<http://perl-zeitung.at.tf> ).
+There are no current magazines that focus on Perl, although you sometimes
+will find Perl content in more general interest programming titles.
 
-Several Unix/Linux related magazines frequently include articles on Perl.
+In the distant past, there have been a few Perl magazines. The first was I<The Perl
+Journal>, published by Jon Orwant. After that, there was I<The Perl Review>,
+published by brian d foy, and  I<$foo Magazin>, published by Renée Bäcker
+(L<http://www.foo-magazin.de>).
+
+The closest you might find today is Perl Weekly, (L<https://perlweekly.com>),
+an online newsletter with a magazine-like format.
 
 =head2 Which Perl blogs should I read?
 

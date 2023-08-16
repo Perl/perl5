@@ -7,7 +7,7 @@ perlglossary - Perl Glossary
 
 =head1 VERSION
 
-version 5.20230701
+version 5.20230812
 
 =head1 DESCRIPTION
 

@@ -4,7 +4,7 @@ perlfaq4 - Data Manipulation
 
 =head1 VERSION
 
-version 5.20230701
+version 5.20230812
 
 =head1 DESCRIPTION
 
@@ -277,32 +277,63 @@ are left as an exercise to the inclined reader.
 
 =head2 Why doesn't & work the way I want it to?
 
-The behavior of binary arithmetic operators depends on whether they're
-used on numbers or strings. The operators treat a string as a series
-of bits and work with that (the string C<"3"> is the bit pattern
-C<00110011>). The operators work with the binary form of a number
-(the number C<3> is treated as the bit pattern C<00000011>).
+Perl's C<&> bitwise operator works on both numbers and strings,
+sometimes producing surprising results when you expected a number
+but received a string. You probably expected perl to automatically
+convert the operands to numbers like the mathematical operators would.
+Instead, perl treats string operands as bitvectors.
 
-So, saying C<11 & 3> performs the "and" operation on numbers (yielding
-C<3>). Saying C<"11" & "3"> performs the "and" operation on strings
-(yielding C<"1">).
+Consider the bitwise difference between the number 3 and the bitvector
+represented by "3". A number has the bit pattern for its magnitude. The
+number 3 is 0b11 (a 2 and a 1). The bitvector has the bit pattern that
+is the ordinal value for each octet, and that value is unrelated to any
+numeric value that the digit represents. The character "3" is the
+bitvector 0b0011_0011.
 
-Most problems with C<&> and C<|> arise because the programmer thinks
-they have a number but really it's a string or vice versa. To avoid this,
-stringify the arguments explicitly (using C<""> or C<qq()>) or convert them
-to numbers explicitly (using C<0+$arg>). The rest arise because
-the programmer says:
+These operations have different results even though you might think they
+look like the same "number":
 
-    if ("\020\020" & "\101\101") {
-        # ...
-    }
+	 11  &  3;   # 0b0000_1011 & 0b0000_0011
+	             #     -> 0b0000_0011   (number 3)
+	"11" & "3";  # 0b0011_0001_0011_0001 & 0b0011_0011
+	             #     -> 0b0011_0001   (ASCII char "1")
 
-but a string consisting of two null bytes (the result of C<"\020\020"
-& "\101\101">) is not a false value in Perl. You need:
+Note that if any operand has a numeric value, perl uses numeric
+semantics (although you should not count on this):
 
-    if ( ("\020\020" & "\101\101") !~ /[^\000]/) {
-        # ...
-    }
+	my($i, $j) = ( 11,   3 );   # $i & $j  # 11  &  3 -> 3
+ 	my($i, $j) = ("11",  3 );   # $i & $j  # 11  &  3 -> 3
+ 	my($i, $j) = ("11", "3");   # $i & $j  # "11"  &  "3" -> 1
+
+Remember that a perl scalar can have both string and numeric values at
+the same time. A value that starts as a string and has never encountered
+a numeric operation has no numeric value yet. Perl does this to save
+time and work so it doesn't have to decide a numeric value for a scalar
+it might never use as a number. In that case, string semantics wins. But,
+if there is a numeric value already, numeric semantics win. Force perl
+to compute the numeric value by adding 0:
+
+    my($i, $j) = ("11", "3"); $j += 0  # $i & $j  # "11"  &  3 -> 3
+
+However, this is not a documented feature, or as L<perlop> says, it "is not
+well defined". One way to fix ensure numeric semantics is to explicitly
+convert both of values to numbers:
+
+	(0+$i) & (0+$j)
+
+To fix this annoyance, Perl v5.22 separated the string and number
+behavior. The C<bitwise> feature introduced four new operators that
+would work with only string semantics: C<&.>, C<|.>, C<^.>, and C<~.>.
+The original operators, C<&>, C<|>, C<^>, and C<~>, would then apply
+only numeric semantics.
+
+Enable this feature explicitly with L<feature>:
+
+	use feature qw(bitwise);
+
+Or, as of v5.28, require the minimum version of perl with C<use>:
+
+	use v5.28;  # bitwise feature for free
 
 =head2 How do I multiply matrices?
 
@@ -432,7 +463,7 @@ To get the day of year for any date, use L<POSIX>'s C<mktime> to get
 a time in epoch seconds for the argument to C<localtime>.
 
     use POSIX qw/mktime strftime/;
-    my $week_of_year = strftime "%W",
+    my $week_of_year = strftime "%j",
         localtime( mktime( 0, 0, 0, 18, 11, 87 ) );
 
 You can also use L<Time::Piece>, which comes with Perl and provides a
@@ -1365,8 +1396,8 @@ by a comma:
 Since you're assigning to a scalar, the righthand side is in scalar
 context. The comma operator (yes, it's an operator!) in scalar
 context evaluates its lefthand side, throws away the result, and
-evaluates it's righthand side and returns the result. In effect,
-that list-lookalike assigns to C<$scalar> it's rightmost value. Many
+evaluates its righthand side and returns the result. In effect,
+that list-lookalike assigns to C<$scalar> its rightmost value. Many
 people mess this up because they choose a list-lookalike whose
 last element is also the count they expect:
 
@@ -2172,7 +2203,7 @@ This is very similar to "How do I process an entire hash?", also in
 L<perlfaq4>, but a bit simpler in the common cases.
 
 You can use the C<keys()> built-in function in scalar context to find out
-have many entries you have in a hash:
+how many entries you have in a hash:
 
     my $key_count = keys %hash; # must be scalar context!
 
