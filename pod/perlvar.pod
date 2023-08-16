@@ -21,8 +21,7 @@ punctuation character, or the two-character sequence: C<^> (caret or
 CIRCUMFLEX ACCENT) followed by any one of the characters C<[][A-Z^_?\]>.
 These names are all reserved for
 special uses by Perl; for example, the all-digits names are used
-to hold data captured by backreferences after a regular expression
-match.
+to hold data captured by backreferences after a regex match.
 
 Since Perl v5.6.0, Perl variable names may also be alphanumeric strings
 preceded by a caret.  These must all be written using the demarcated
@@ -950,9 +949,10 @@ command or referenced as a file.
 
 =back
 
-=head2 Variables related to regular expressions
+=head2 Regex Variables
+X<variables related to regular expressions>
 
-Most of the special variables related to regular expressions are side
+Most of the special variables related to regex matching are side
 effects. Perl sets these variables when it has completed a match
 successfully, so you should check the match result before using them.
 For instance:
@@ -1323,7 +1323,7 @@ The underlying behaviour of C<%+> is provided by the
 L<Tie::Hash::NamedCapture> module.
 
 B<Note:> C<%-> and C<%+> are tied views into a common internal hash
-associated with the last successful regular expression.  Therefore mixing
+associated with the last successful regex match.  Therefore mixing
 iterative access to them via C<each> may have unpredictable results.
 Likewise, if the last successful match changes, then the results may be
 surprising.
@@ -1356,7 +1356,7 @@ with C<substr $_, $-[n], $+[n] - $-[n]> if C<$-[n]> is defined, and
 C<$+> coincides with C<substr $_, $-[$#-], $+[$#-] - $-[$#-]>.
 One can use C<$#-> to find the last matched subgroup in the last
 successful match.  Contrast with C<$#+>, the number of subgroups
-in the regular expression.
+in the regex.
 
 C<$-[0]> is the offset into the string of the beginning of the
 entire match.  The I<n>th element of this array holds the offset
@@ -1394,7 +1394,7 @@ X<%->
 Similar to C<%+>, this variable allows access to the named capture
 groups in the last successful match in the currently active dynamic
 scope. (See L</Scoping Rules of Regex Variables>). To each capture group
-name found in the regular expression, it associates a reference to an
+name found in the regex, it associates a reference to an
 array containing the list of values captured by all buffers with that
 name (should there be several of them), in the order where they appear.
 
@@ -1421,13 +1421,13 @@ would print out:
     $-{B}[1] : '4'
 
 The keys of the C<%-> hash correspond to all buffer names found in
-the regular expression.
+the regex.
 
 The behaviour of C<%-> is implemented via the
 L<Tie::Hash::NamedCapture> module.
 
 B<Note:> C<%-> and C<%+> are tied views into a common internal hash
-associated with the last successful regular expression.  Therefore mixing
+associated with the last successful regex match.  Therefore mixing
 iterative access to them via C<each> may have unpredictable results.
 Likewise, if the last successful match changes, then the results may be
 surprising. See L</Scoping Rules of Regex Variables>.
@@ -1464,7 +1464,7 @@ Added in Perl 5.37.10.
 X<$^R> X<$LAST_REGEXP_CODE_RESULT>
 
 The result of evaluation of the last successful C<(?{ code })>
-regular expression assertion (see L<perlre>).
+regexp assertion (see L<perlre>).
 
 This variable may be written to, and its value is scoped normally,
 unlike most other regex variables.
