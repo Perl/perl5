@@ -8,6 +8,57 @@
  *
  */
 
+/*
+=for apidoc_section $rpp
+
+=for apidoc Amux||XSPP_wrapped|xsppw_name|I32 xsppw_nargs|I32 xsppw_nlists
+Declare and wrap a non-reference-counted PP-style function.
+On traditional perl builds where the stack isn't reference-counted, this
+just produces a function declaration like
+
+  OP * xsppw_name(pTHX)
+
+Conversely, in ref-counted builds it creates xsppw_name() as a small
+wrapper function which calls the real function via a wrapper which
+processes the args and return values to ensure that reference counts are
+properly handled for code which uses old-style dSP, PUSHs(), POPs() etc,
+which don't adjust the reference counts of the items they manipulate.
+
+xsppw_nargs indicates how many arguments the function consumes off the
+stack. It can be a constant value or an expression, such as
+
+    ((PL_op->op_flags & OPf_STACKED) ? 2 : 1)
+
+Alternatively if xsppw_nlists is 1, it indicates that the PP function
+consumes a list (or - rarely - if 2, consumes two lists, like
+pp_aassign()), as indicated by the top markstack position.
+
+This is intended as a temporary fix when converting XS code to run under
+PERL_RC_STACK builds. In the longer term, the PP function should be
+rewritten to replace PUSHs() etc with rpp_push_1() etc.
+
+=cut
+*/
+
+#ifdef PERL_RC_STACK
+#  define XSPP_wrapped(xsppw_name, xsppw_nargs, xsppw_nlists)  \
+                                                               \
+STATIC OP* S_##xsppw_name##_norc(pTHX);                        \
+OP* xsppw_name(pTHX)                                           \
+{                                                              \
+    return Perl_pp_wrap(aTHX_ S_##xsppw_name##_norc,           \
+                        (xsppw_nargs), (xsppw_nlists));        \
+}                                                              \
+STATIC OP* S_##xsppw_name##_norc(pTHX)
+
+#else
+#  define XSPP_wrapped(xsppw_name, xsppw_nargs, xsppw_nlists)  \
+        OP * xsppw_name(pTHX)
+#endif
+
+#define PP_wrapped(ppw_name, ppw_nargs, ppw_nlists)    \
+    XSPP_wrapped(Perl_##ppw_name, ppw_nargs, ppw_nlists)
+
 #define PP(s) OP * Perl_##s(pTHX)
 
 /*
@@ -159,7 +210,12 @@ Pops an unsigned long off the stack.
 #define RETURNOP(o)	return (PUTBACK, o)
 #define RETURNX(x)	return (x, PUTBACK, NORMAL)
 
-#define POPs		(*sp--)
+#ifdef PERL_RC_STACK
+#  define POPs		(assert(!rpp_stack_is_rc()), *sp--)
+#else
+#  define POPs		(*sp--)
+#endif
+
 #define POPp		POPpx
 #define POPpx		(SvPVx_nolen(POPs))
 #define POPpconstx	(SvPVx_nolen_const(POPs))
@@ -487,7 +543,12 @@ Does not use C<TARG>.  See also C<L</XPUSHu>>, C<L</mPUSHu>> and C<L</PUSHu>>.
             sv_setnv_mg(targ, TARGn_nv);                                \
     } STMT_END
 
-#define PUSHs(s)	(*++sp = (s))
+#ifdef PERL_RC_STACK
+#  define PUSHs(s)	(assert(!rpp_stack_is_rc()), *++sp = (s))
+#else
+#  define PUSHs(s)	(*++sp = (s))
+#endif
+
 #define PUSHTARG	STMT_START { SvSETMAGIC(TARG); PUSHs(TARG); } STMT_END
 #define PUSHp(p,l)	STMT_START { sv_setpvn(TARG, (p), (l)); PUSHTARG; } STMT_END
 #define PUSHpvs(s)      PUSHp("" s "", sizeof(s)-1)
@@ -495,7 +556,7 @@ Does not use C<TARG>.  See also C<L</XPUSHu>>, C<L</mPUSHu>> and C<L</PUSHu>>.
 #define PUSHi(i)	STMT_START { TARGi(i,1); PUSHs(TARG); } STMT_END
 #define PUSHu(u)	STMT_START { TARGu(u,1); PUSHs(TARG); } STMT_END
 
-#define XPUSHs(s)	STMT_START { EXTEND(sp,1); *++sp = (s); } STMT_END
+#define XPUSHs(s)	STMT_START { EXTEND(sp,1); PUSHs(s); } STMT_END
 #define XPUSHTARG	STMT_START { SvSETMAGIC(TARG); XPUSHs(TARG); } STMT_END
 #define XPUSHp(p,l)	STMT_START { sv_setpvn(TARG, (p), (l)); XPUSHTARG; } STMT_END
 #define XPUSHpvs(s)     XPUSHp("" s "", sizeof(s)-1)
@@ -574,13 +635,14 @@ Does not use C<TARG>.  See also C<L</XPUSHu>>, C<L</mPUSHu>> and C<L</PUSHu>>.
 
 #define MAXARG		(PL_op->op_private & OPpARG4_MASK)
 
+/* for backcompat - use switch_argstack() instead */
+
 #define SWITCHSTACK(f,t) \
-    STMT_START {							\
-        AvFILLp(f) = sp - PL_stack_base;				\
-        PL_stack_base = AvARRAY(t);					\
-        PL_stack_max = PL_stack_base + AvMAX(t);			\
-        sp = PL_stack_sp = PL_stack_base + AvFILLp(t);			\
-        PL_curstack = t;						\
+    STMT_START {		\
+        PL_curstack = f;        \
+        PL_stack_sp = sp;       \
+        switch_argstack(t);     \
+        sp = PL_stack_sp;       \
     } STMT_END
 
 #define EXTEND_MORTAL(n) \

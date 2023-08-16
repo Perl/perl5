@@ -691,6 +691,8 @@ Adip	|void	|av_push_simple |NN AV *av				\
 				|NN SV *val
 : Used in scope.c, and by Data::Alias
 EXp	|void	|av_reify	|NN AV *av
+ipx	|void	|av_remove_offset					\
+				|NN AV *av
 ARdp	|SV *	|av_shift	|NN AV *av
 Adp	|SV **	|av_store	|NN AV *av				\
 				|SSize_t key				\
@@ -805,6 +807,8 @@ Adfp	|void	|ck_warner_d	|U32 err				\
 
 Cp	|void	|clear_defarray |NN AV *av				\
 				|bool abandon
+Cipx	|void	|clear_defarray_simple					\
+				|NN AV *av
 p	|const COP *|closest_cop|NN const COP *cop			\
 				|NULLOK const OP *o			\
 				|NULLOK const OP *curop 		\
@@ -839,6 +843,7 @@ p	|OP *	|coresub_op	|NN SV * const coreargssv		\
 : Used in op.c and perl.c
 px	|void	|create_eval_scope					\
 				|NULLOK OP *retop			\
+				|NN SV **sp				\
 				|U32 flags
 : croak()'s first parm can be NULL.  Otherwise, mod_perl breaks.
 Adfpr	|void	|croak		|NULLOK const char *pat 		\
@@ -2228,6 +2233,10 @@ ARdp	|OP *	|newSLICEOP	|I32 flags				\
 				|NULLOK OP *listop
 CRp	|PERL_SI *|new_stackinfo|I32 stitems				\
 				|I32 cxitems
+CRp	|PERL_SI *|new_stackinfo_flags					\
+				|I32 stitems				\
+				|I32 cxitems				\
+				|UV flags
 ARdp	|OP *	|newSTATEOP	|I32 flags				\
 				|NULLOK char *label			\
 				|NULLOK OP *o
@@ -2518,6 +2527,7 @@ p	|OP *	|pmruntime	|NN OP *o				\
 				|I32 floor
 Xiop	|I32	|POPMARK
 Cdp	|void	|pop_scope
+Cipx	|void	|pop_stackinfo
 
 : Used in perl.c and toke.c
 Fop	|void	|populate_isa	|NN const char *name			\
@@ -2551,6 +2561,8 @@ Adp	|void	|ptr_table_store|NN PTR_TBL_t * const tbl		\
 				|NULLOK const void * const oldsv	\
 				|NN void * const newsv
 Cdp	|void	|push_scope
+Cipx	|void	|push_stackinfo |I32 type				\
+				|UV flags
 Adp	|char * |pv_display	|NN SV *dsv				\
 				|NN const char *pv			\
 				|STRLEN cur				\
@@ -2745,6 +2757,31 @@ APTdp	|char * |rninstr	|NN const char *big			\
 				|NN const char *little			\
 				|NN const char *lend
 p	|void	|rpeep		|NULLOK OP *o
+Adipx	|void	|rpp_extend	|SSize_t n
+Adipx	|void	|rpp_invoke_xs	|NN CV *cv
+Adipx	|bool	|rpp_is_lone	|NN SV *sv
+Cpx	|void	|rpp_obliterate_stack_to				\
+				|I32 ix
+Adipx	|void	|rpp_popfree_1
+Adipx	|void	|rpp_popfree_2
+Adipx	|void	|rpp_popfree_to |NN SV **sp
+Adipx	|SV *	|rpp_pop_1_norc
+Adipx	|void	|rpp_push_1	|NN SV *sv
+Adipx	|void	|rpp_push_2	|NN SV *sv1				\
+				|NN SV *sv2
+Adipx	|void	|rpp_push_1_norc|NN SV *sv
+Adipx	|void	|rpp_replace_1_1|NN SV *sv
+Adipx	|void	|rpp_replace_2_1|NN SV *sv
+Adipx	|bool	|rpp_stack_is_rc
+Adipx	|bool	|rpp_try_AMAGIC_1					\
+				|int method				\
+				|int flags
+Adipx	|bool	|rpp_try_AMAGIC_2					\
+				|int method				\
+				|int flags
+Adipx	|void	|rpp_xpush_1	|NN SV *sv
+Adipx	|void	|rpp_xpush_2	|NN SV *sv1				\
+				|NN SV *sv2
 Adp	|Sighandler_t|rsignal	|int i					\
 				|Sighandler_t t
 : Used in pp_sys.c
@@ -3429,6 +3466,7 @@ Adp	|void	|sv_vsetpvfn	|NN SV * const sv			\
 				|NULLOK SV ** const svargs		\
 				|const Size_t sv_count			\
 				|NULLOK bool * const maybe_tainted
+Cipx	|void	|switch_argstack|NN AV *to
 Adp	|void	|switch_to_global_locale
 Adp	|bool	|sync_locale
 CTop	|void	|sys_init	|NN int *argc				\
@@ -4032,7 +4070,8 @@ S	|void	|deb_stack_n	|NN SV **stack_base			\
 				|I32 stack_min				\
 				|I32 stack_max				\
 				|I32 mark_min				\
-				|I32 mark_max
+				|I32 mark_max				\
+				|I32 nonrc_base
 #endif
 #if defined(PERL_IN_DOIO_C)
 S	|bool	|argvout_final	|NN MAGIC *mg				\
@@ -5972,6 +6011,14 @@ Cipx	|void	|cx_pushwhen	|NN PERL_CONTEXT *cx
 Cipx	|void	|cx_topblock	|NN PERL_CONTEXT *cx
 Cipx	|U8	|gimme_V
 #endif /* !defined(PERL_NO_INLINE_FUNCTIONS) */
+#if defined(PERL_RC_STACK)
+EXopx	|OP *	|pp_wrap	|NN Perl_ppaddr_t real_pp_fn		\
+				|I32 nargs				\
+				|int nlists
+Cpx	|int	|runops_wrap
+EXopx	|void	|xs_wrap	|NN XSUBADDR_t xsub			\
+				|NN CV *cv
+#endif
 #if defined(PERL_USE_3ARG_SIGHANDLER)
 CTp	|Signal_t|csighandler	|int sig				\
 				|NULLOK Siginfo_t *info 		\

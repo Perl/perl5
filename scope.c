@@ -69,16 +69,31 @@ Perl_stack_grow(pTHX_ SV **sp, SV **p, SSize_t n)
 #define GROW(old) ((old) * 3 / 2)
 #endif
 
+/* for backcomp */
 PERL_SI *
 Perl_new_stackinfo(pTHX_ I32 stitems, I32 cxitems)
+{
+    return new_stackinfo_flags(stitems, cxitems, 0);
+}
+
+/* current flag meanings:
+ *   1 make the new arg stack AvREAL
+ */
+
+PERL_SI *
+Perl_new_stackinfo_flags(pTHX_ I32 stitems, I32 cxitems, UV flags)
 {
     PERL_SI *si;
     Newx(si, 1, PERL_SI);
     si->si_stack = newAV();
-    AvREAL_off(si->si_stack);
+    if (!(flags & 1))
+        AvREAL_off(si->si_stack);
     av_extend(si->si_stack, stitems > 0 ? stitems-1 : 0);
     AvALLOC(si->si_stack)[0] = &PL_sv_undef;
     AvFILLp(si->si_stack) = 0;
+#ifdef PERL_RC_STACK
+    si->si_stack_nonrc_base = 0;
+#endif
     si->si_prev = 0;
     si->si_next = 0;
     si->si_cxmax = cxitems - 1;
@@ -1525,6 +1540,14 @@ Perl_leave_scope(pTHX_ I32 base)
             break;
 
         case SAVEt_STACK_POS:		/* Position on Perl stack */
+#ifdef PERL_RC_STACK
+            /* DAPM Jan 2023. I don't think this save type is used any
+             * more, but if some XS code uses it, fail it for now, as
+             * it's not clear to me what perl should be doing to stack ref
+             * counts when arbitrarily resetting the stack pointer.
+             */
+            assert(0);
+#endif
             a0 = ap[0];
             PL_stack_sp = PL_stack_base + a0.any_i32;
             break;

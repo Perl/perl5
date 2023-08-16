@@ -2043,6 +2043,9 @@ S_Internals_V(pTHX_ CV *cv)
 #  ifdef PERL_PRESERVE_IVUV
                              " PERL_PRESERVE_IVUV"
 #  endif
+#  ifdef PERL_RC_STACK
+                             " PERL_RC_STACK"
+#  endif
 #  ifdef PERL_RELOCATABLE_INCPUSH
                              " PERL_RELOCATABLE_INCPUSH"
 #  endif
@@ -2975,16 +2978,23 @@ Perl_call_argv(pTHX_ const char *sub_name, I32 flags, char **argv)
                         /* See G_* flags in cop.h */
                         /* null terminated arg list */
 {
-    dSP;
-
     PERL_ARGS_ASSERT_CALL_ARGV;
 
-    PUSHMARK(SP);
+    bool is_rc =
+#ifdef PERL_RC_STACK
+                rpp_stack_is_rc();
+#else
+                0;
+#endif
+    PUSHMARK(PL_stack_sp);
     while (*argv) {
-        mXPUSHs(newSVpv(*argv,0));
+        SV *newsv = newSVpv(*argv,0);
+        rpp_extend(1);
+        *++PL_stack_sp = newsv;
+        if (!is_rc)
+            sv_2mortal(newsv);
         argv++;
     }
-    PUTBACK;
     return call_pv(sub_name, flags);
 }
 
@@ -3094,10 +3104,12 @@ Perl_call_sv(pTHX_ SV *sv, volatile I32 flags)
     PL_op = (OP*)&myop;
 
     if (!(flags & G_METHOD_NAMED)) {
-        dSP;
-        EXTEND(SP, 1);
-        PUSHs(sv);
-        PUTBACK;
+        rpp_extend(1);
+        *++PL_stack_sp = sv;
+#ifdef PERL_RC_STACK
+        if (rpp_stack_is_rc())
+            SvREFCNT_inc_simple_void_NN(sv);
+#endif
     }
     oldmark = TOPMARK;
 
@@ -3135,7 +3147,7 @@ Perl_call_sv(pTHX_ SV *sv, volatile I32 flags)
         myop.op_other = (OP*)&myop;
         (void)POPMARK;
         old_cxix = cxstack_ix;
-        create_eval_scope(NULL, flags|G_FAKINGEVAL);
+        create_eval_scope( NULL, PL_stack_base + oldmark, flags|G_FAKINGEVAL);
         INCMARK;
 
         JMPENV_PUSH(ret);
@@ -3166,6 +3178,11 @@ Perl_call_sv(pTHX_ SV *sv, volatile I32 flags)
                 PL_restartop = 0;
                 goto redo_body;
             }
+            /* Should be nothing left in stack frame apart from a possible
+             * scalar context undef. Assert it's safe to reset the stack */
+            assert(     PL_stack_sp == PL_stack_base + oldmark
+                    || (PL_stack_sp == PL_stack_base + oldmark + 1
+                        && *PL_stack_sp == &PL_sv_undef));
             PL_stack_sp = PL_stack_base + oldmark;
             if ((flags & G_WANT) == G_LIST)
                 retval = 0;
@@ -3187,7 +3204,12 @@ Perl_call_sv(pTHX_ SV *sv, volatile I32 flags)
     }
 
     if (flags & G_DISCARD) {
-        PL_stack_sp = PL_stack_base + oldmark;
+#ifdef PERL_RC_STACK
+        if (rpp_stack_is_rc())
+            rpp_popfree_to(PL_stack_base + oldmark);
+        else
+#endif
+            PL_stack_sp = PL_stack_base + oldmark;
         retval = 0;
         FREETMPS;
         LEAVE;
@@ -3236,13 +3258,13 @@ Perl_eval_sv(pTHX_ SV *sv, I32 flags)
     myop.op_ppaddr = PL_ppaddr[OP_ENTEREVAL];
     myop.op_type = OP_ENTEREVAL;
 
-    {
-        dSP;
-        oldmark = SP - PL_stack_base;
-        EXTEND(SP, 1);
-        PUSHs(sv);
-        PUTBACK;
-    }
+    oldmark = PL_stack_sp - PL_stack_base;
+    rpp_extend(1);
+    *++PL_stack_sp = sv;
+#ifdef PERL_RC_STACK
+    if (rpp_stack_is_rc())
+        SvREFCNT_inc_simple_void_NN(sv);
+#endif
 
     if (!(flags & G_NOARGS))
         myop.op_flags = OPf_STACKED;
@@ -3323,7 +3345,12 @@ Perl_eval_sv(pTHX_ SV *sv, I32 flags)
 
     JMPENV_POP;
     if (flags & G_DISCARD) {
-        PL_stack_sp = PL_stack_base + oldmark;
+#ifdef PERL_RC_STACK
+        if (rpp_stack_is_rc())
+            rpp_popfree_to(PL_stack_base + oldmark);
+        else
+#endif
+            PL_stack_sp = PL_stack_base + oldmark;
         retval = 0;
         FREETMPS;
         LEAVE;
@@ -3356,11 +3383,16 @@ Perl_eval_pv(pTHX_ const char *p, I32 croak_on_error)
         SvREFCNT_dec(sv);
     }
 
-    {
-        dSP;
-        sv = POPs;
-        PUTBACK;
+    sv = *PL_stack_sp;
+
+#ifdef PERL_RC_STACK
+    if (rpp_stack_is_rc()) {
+        SvREFCNT_inc_NN(sv_2mortal(sv));
+        rpp_popfree_1();
     }
+    else
+#endif
+        PL_stack_sp--;
 
     return sv;
 }
@@ -4451,9 +4483,15 @@ Perl_init_stacks(pTHX)
 {
     SSize_t size;
 
+#ifdef PERL_RC_STACK
+    const UV make_real = 1;
+#else
+    const UV make_real = 0;
+#endif
     /* start with 128-item stack and 8K cxstack */
-    PL_curstackinfo = new_stackinfo(REASONABLE(128),
-                                 REASONABLE(8192/sizeof(PERL_CONTEXT) - 1));
+    PL_curstackinfo = new_stackinfo_flags(REASONABLE(128),
+                                 REASONABLE(8192/sizeof(PERL_CONTEXT) - 1),
+                                 make_real);
     PL_curstackinfo->si_type = PERLSI_MAIN;
 #if defined DEBUGGING && !defined DEBUGGING_RE_ONLY
     PL_curstackinfo->si_stack_hwm = 0;
@@ -5434,8 +5472,8 @@ S_my_exit_jump(pTHX)
     POPSTACK_TO(PL_mainstack);
     if (cxstack_ix >= 0) {
         dounwind(-1);
-        cx_popblock(cxstack);
     }
+    rpp_obliterate_stack_to(0);
     LEAVE_SCOPE(0);
 
     JMPENV_JUMP(2);

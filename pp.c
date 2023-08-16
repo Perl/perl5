@@ -34,7 +34,7 @@
 
 /* variations on pp_null */
 
-PP(pp_stub)
+PP_wrapped(pp_stub, 0, 0)
 {
     dSP;
     if (GIMME_V == G_SCALAR)
@@ -46,7 +46,7 @@ PP(pp_stub)
 
 
 
-PP(pp_padcv)
+PP_wrapped(pp_padcv, 0, 0)
 {
     dSP; dTARGET;
     assert(SvTYPE(TARG) == SVt_PVCV);
@@ -187,7 +187,7 @@ S_rv2gv(pTHX_ SV *sv, const bool vivify_sv, const bool strict,
     return sv;
 }
 
-PP(pp_rv2gv)
+PP_wrapped(pp_rv2gv, 1, 0)
 {
     dSP; dTOPss;
 
@@ -248,7 +248,7 @@ Perl_softref2xv(pTHX_ SV *const sv, const char *const what,
     return gv;
 }
 
-PP(pp_rv2sv)
+PP_wrapped(pp_rv2sv, 1, 0)
 {
     dSP; dTOPss;
     GV *gv = NULL;
@@ -290,7 +290,7 @@ PP(pp_rv2sv)
     RETURN;
 }
 
-PP(pp_av2arylen)
+PP_wrapped(pp_av2arylen, 1, 0)
 {
     dSP;
     AV * const av = MUTABLE_AV(TOPs);
@@ -308,7 +308,7 @@ PP(pp_av2arylen)
     RETURN;
 }
 
-PP(pp_pos)
+PP_wrapped(pp_pos, 1, 0)
 {
     dSP; dTOPss;
 
@@ -338,7 +338,7 @@ PP(pp_pos)
     return NORMAL;
 }
 
-PP(pp_rv2cv)
+PP_wrapped(pp_rv2cv, 1, 0)
 {
     dSP;
     GV *gv;
@@ -365,7 +365,7 @@ PP(pp_rv2cv)
     return NORMAL;
 }
 
-PP(pp_prototype)
+PP_wrapped(pp_prototype, 1, 0)
 {
     dSP;
     CV *cv;
@@ -398,7 +398,7 @@ PP(pp_prototype)
     RETURN;
 }
 
-PP(pp_anoncode)
+PP_wrapped(pp_anoncode, 0, 0)
 {
     dSP;
     CV *cv = MUTABLE_CV(PAD_SV(PL_op->op_targ));
@@ -417,14 +417,14 @@ PP(pp_anoncode)
     RETURN;
 }
 
-PP(pp_srefgen)
+PP_wrapped(pp_srefgen, 1, 0)
 {
     dSP;
     *SP = refto(*SP);
     return NORMAL;
 }
 
-PP(pp_refgen)
+PP_wrapped(pp_refgen, 0, 1)
 {
     dSP; dMARK;
     if (GIMME_V != G_LIST) {
@@ -480,7 +480,7 @@ S_refto(pTHX_ SV *sv)
     return rv;
 }
 
-PP(pp_ref)
+PP_wrapped(pp_ref, 1, 0)
 {
     dSP;
     SV * const sv = TOPs;
@@ -530,7 +530,7 @@ PP(pp_ref)
 }
 
 
-PP(pp_bless)
+PP_wrapped(pp_bless, MAXARG, 0)
 {
     dSP;
     HV *stash;
@@ -571,7 +571,7 @@ PP(pp_bless)
     RETURN;
 }
 
-PP(pp_gelem)
+PP_wrapped(pp_gelem, 2, 0)
 {
     dSP;
 
@@ -647,7 +647,7 @@ PP(pp_gelem)
 
 /* Pattern matching */
 
-PP(pp_study)
+PP_wrapped(pp_study, 1, 0)
 {
     dSP; dTOPss;
     STRLEN len;
@@ -668,7 +668,7 @@ PP(pp_study)
 
 /* also used for: pp_transr() */
 
-PP(pp_trans)
+PP_wrapped(pp_trans, ((PL_op->op_flags & OPf_STACKED) ? 1 : 0), 0)
 {
     dSP;
     SV *sv;
@@ -842,7 +842,7 @@ S_do_chomp(pTHX_ SV *retval, SV *sv, bool chomping)
 
 /* also used for: pp_schomp() */
 
-PP(pp_schop)
+PP_wrapped(pp_schop, 1, 0)
 {
     dSP; dTARGET;
     const bool chomping = PL_op->op_type == OP_SCHOMP;
@@ -857,7 +857,7 @@ PP(pp_schop)
 
 /* also used for: pp_chomp() */
 
-PP(pp_chop)
+PP_wrapped(pp_chop, 0, 1)
 {
     dSP; dMARK; dTARGET; dORIGMARK;
     const bool chomping = PL_op->op_type == OP_CHOMP;
@@ -872,7 +872,9 @@ PP(pp_chop)
     RETURN;
 }
 
-PP(pp_undef)
+PP_wrapped(pp_undef,
+    ((!PL_op->op_private || (PL_op->op_private & OPpTARGET_MY)) ? 0 : 1),
+    0)
 {
     dSP;
     SV *sv;
@@ -1020,7 +1022,7 @@ S_postincdec_common(pTHX_ SV *sv, SV *targ)
 
 /* also used for: pp_i_postinc() */
 
-PP(pp_postinc)
+PP_wrapped(pp_postinc, 1, 0)
 {
     dSP; dTARGET;
     SV *sv = TOPs;
@@ -1045,7 +1047,7 @@ PP(pp_postinc)
 
 /* also used for: pp_i_postdec() */
 
-PP(pp_postdec)
+PP_wrapped(pp_postdec, 1, 0)
 {
     dSP; dTARGET;
     SV *sv = TOPs;
@@ -1070,7 +1072,7 @@ PP(pp_postdec)
 
 /* Ordinary operators. */
 
-PP(pp_pow)
+PP_wrapped(pp_pow, 2, 0)
 {
     dSP; dATARGET; SV *svl, *svr;
 #ifdef PERL_PRESERVE_IVUV
@@ -1251,7 +1253,7 @@ PP(pp_pow)
     }
 }
 
-PP(pp_multiply)
+PP_wrapped(pp_multiply, 2, 0)
 {
     dSP; dATARGET; SV *svl, *svr;
     tryAMAGICbin_MG(mult_amg, AMGf_assign|AMGf_numeric);
@@ -1444,7 +1446,7 @@ PP(pp_multiply)
     }
 }
 
-PP(pp_divide)
+PP_wrapped(pp_divide, 2, 0)
 {
     dSP; dATARGET; SV *svl, *svr;
     tryAMAGICbin_MG(div_amg, AMGf_assign|AMGf_numeric);
@@ -1561,7 +1563,7 @@ PP(pp_divide)
     }
 }
 
-PP(pp_modulo)
+PP_wrapped(pp_modulo, 2, 0)
 {
     dSP; dATARGET;
     tryAMAGICbin_MG(modulo_amg, AMGf_assign|AMGf_numeric);
@@ -1688,7 +1690,10 @@ PP(pp_modulo)
     }
 }
 
-PP(pp_repeat)
+PP_wrapped(pp_repeat,
+    /* two scalar args or one list */
+    ((PL_op->op_private & OPpREPEAT_DOLIST) ? 0 : 2),
+    ((PL_op->op_private & OPpREPEAT_DOLIST) ? 1 : 0))
 {
     dSP; dATARGET;
     IV count;
@@ -1831,7 +1836,7 @@ PP(pp_repeat)
     RETURN;
 }
 
-PP(pp_subtract)
+PP_wrapped(pp_subtract, 2, 0)
 {
     dSP; dATARGET; bool useleft; SV *svl, *svr;
     tryAMAGICbin_MG(subtr_amg, AMGf_assign|AMGf_numeric);
@@ -2061,7 +2066,7 @@ static IV S_iv_shift(IV iv, int shift, bool left)
 #define IV_LEFT_SHIFT(iv, shift) S_iv_shift(iv, shift, TRUE)
 #define IV_RIGHT_SHIFT(iv, shift) S_iv_shift(iv, shift, FALSE)
 
-PP(pp_left_shift)
+PP_wrapped(pp_left_shift, 2, 0)
 {
     dSP; dATARGET; SV *svl, *svr;
     tryAMAGICbin_MG(lshift_amg, AMGf_assign|AMGf_numeric);
@@ -2079,7 +2084,7 @@ PP(pp_left_shift)
     }
 }
 
-PP(pp_right_shift)
+PP_wrapped(pp_right_shift, 2, 0)
 {
     dSP; dATARGET; SV *svl, *svr;
     tryAMAGICbin_MG(rshift_amg, AMGf_assign|AMGf_numeric);
@@ -2097,7 +2102,7 @@ PP(pp_right_shift)
     }
 }
 
-PP(pp_lt)
+PP_wrapped(pp_lt, 2, 0)
 {
     dSP;
     SV *left, *right;
@@ -2119,7 +2124,7 @@ PP(pp_lt)
     RETURN;
 }
 
-PP(pp_gt)
+PP_wrapped(pp_gt, 2, 0)
 {
     dSP;
     SV *left, *right;
@@ -2141,7 +2146,7 @@ PP(pp_gt)
     RETURN;
 }
 
-PP(pp_le)
+PP_wrapped(pp_le, 2, 0)
 {
     dSP;
     SV *left, *right;
@@ -2163,7 +2168,7 @@ PP(pp_le)
     RETURN;
 }
 
-PP(pp_ge)
+PP_wrapped(pp_ge, 2, 0)
 {
     dSP;
     SV *left, *right;
@@ -2185,7 +2190,7 @@ PP(pp_ge)
     RETURN;
 }
 
-PP(pp_ne)
+PP_wrapped(pp_ne, 2, 0)
 {
     dSP;
     SV *left, *right;
@@ -2279,7 +2284,7 @@ Perl_do_ncmp(pTHX_ SV* const left, SV * const right)
 }
 
 
-PP(pp_ncmp)
+PP_wrapped(pp_ncmp, 2, 0)
 {
     dSP;
     SV *left, *right;
@@ -2301,7 +2306,7 @@ PP(pp_ncmp)
 
 /* also used for: pp_sge() pp_sgt() pp_slt() */
 
-PP(pp_sle)
+PP_wrapped(pp_sle, 2, 0)
 {
     dSP;
 
@@ -2343,7 +2348,7 @@ PP(pp_sle)
     }
 }
 
-PP(pp_seq)
+PP_wrapped(pp_seq, 2, 0)
 {
     dSP;
     tryAMAGICbin_MG(seq_amg, 0);
@@ -2354,7 +2359,7 @@ PP(pp_seq)
     }
 }
 
-PP(pp_sne)
+PP_wrapped(pp_sne, 2, 0)
 {
     dSP;
     tryAMAGICbin_MG(sne_amg, 0);
@@ -2365,7 +2370,7 @@ PP(pp_sne)
     }
 }
 
-PP(pp_scmp)
+PP_wrapped(pp_scmp, 2, 0)
 {
     dSP; dTARGET;
     tryAMAGICbin_MG(scmp_amg, 0);
@@ -2383,7 +2388,7 @@ PP(pp_scmp)
     }
 }
 
-PP(pp_bit_and)
+PP_wrapped(pp_bit_and, 2, 0)
 {
     dSP; dATARGET;
     tryAMAGICbin_MG(band_amg, AMGf_assign);
@@ -2411,7 +2416,7 @@ PP(pp_bit_and)
     }
 }
 
-PP(pp_nbit_and)
+PP_wrapped(pp_nbit_and, 2, 0)
 {
     dSP;
     tryAMAGICbin_MG(band_amg, AMGf_assign|AMGf_numarg);
@@ -2429,7 +2434,7 @@ PP(pp_nbit_and)
     RETURN;
 }
 
-PP(pp_sbit_and)
+PP_wrapped(pp_sbit_and, 2, 0)
 {
     dSP;
     tryAMAGICbin_MG(sband_amg, AMGf_assign);
@@ -2442,7 +2447,7 @@ PP(pp_sbit_and)
 
 /* also used for: pp_bit_xor() */
 
-PP(pp_bit_or)
+PP_wrapped(pp_bit_or, 2, 0)
 {
     dSP; dATARGET;
     const int op_type = PL_op->op_type;
@@ -2478,7 +2483,7 @@ PP(pp_bit_or)
 
 /* also used for: pp_nbit_xor() */
 
-PP(pp_nbit_or)
+PP_wrapped(pp_nbit_or, 2, 0)
 {
     dSP;
     const int op_type = PL_op->op_type;
@@ -2505,7 +2510,7 @@ PP(pp_nbit_or)
 
 /* also used for: pp_sbit_xor() */
 
-PP(pp_sbit_or)
+PP_wrapped(pp_sbit_or, 2, 0)
 {
     dSP;
     const int op_type = PL_op->op_type;
@@ -2543,7 +2548,7 @@ S_negate_string(pTHX)
     return TRUE;
 }
 
-PP(pp_negate)
+PP_wrapped(pp_negate, 1, 0)
 {
     dSP; dTARGET;
     tryAMAGICun_MG(neg_amg, AMGf_numeric);
@@ -2589,12 +2594,9 @@ PP(pp_negate)
 
 PP(pp_not)
 {
-    dSP;
-    SV *sv;
-
-    tryAMAGICun_MG(not_amg, 0);
-    sv = *PL_stack_sp;
-    *PL_stack_sp = boolSV(!SvTRUE_nomg_NN(sv));
+    if (rpp_try_AMAGIC_1(not_amg, 0))
+        return NORMAL;
+    rpp_replace_1_1(boolSV(!SvTRUE_nomg_NN(*PL_stack_sp)));
     return NORMAL;
 }
 
@@ -2632,7 +2634,7 @@ S_scomplement(pTHX_ SV *targ, SV *sv)
             *tmps = ~*tmps;
 }
 
-PP(pp_complement)
+PP_wrapped(pp_complement, 1, 0)
 {
     dSP; dTARGET;
     tryAMAGICun_MG(compl_amg, AMGf_numeric);
@@ -2656,7 +2658,7 @@ PP(pp_complement)
     }
 }
 
-PP(pp_ncomplement)
+PP_wrapped(pp_ncomplement, 1, 0)
 {
     dSP;
     tryAMAGICun_MG(compl_amg, AMGf_numeric|AMGf_numarg);
@@ -2674,7 +2676,7 @@ PP(pp_ncomplement)
     return NORMAL;
 }
 
-PP(pp_scomplement)
+PP_wrapped(pp_scomplement, 1, 0)
 {
     dSP;
     tryAMAGICun_MG(scompl_amg, AMGf_numeric);
@@ -2688,7 +2690,7 @@ PP(pp_scomplement)
 
 /* integer versions of some of the above */
 
-PP(pp_i_multiply)
+PP_wrapped(pp_i_multiply, 2, 0)
 {
     dSP; dATARGET;
     tryAMAGICbin_MG(mult_amg, AMGf_assign);
@@ -2699,7 +2701,7 @@ PP(pp_i_multiply)
     }
 }
 
-PP(pp_i_divide)
+PP_wrapped(pp_i_divide, 2, 0)
 {
     IV num;
     dSP; dATARGET;
@@ -2721,7 +2723,7 @@ PP(pp_i_divide)
     }
 }
 
-PP(pp_i_modulo)
+PP_wrapped(pp_i_modulo, 2, 0)
 {
      dSP; dATARGET;
      tryAMAGICbin_MG(modulo_amg, AMGf_assign);
@@ -2738,7 +2740,7 @@ PP(pp_i_modulo)
      }
 }
 
-PP(pp_i_add)
+PP_wrapped(pp_i_add, 2, 0)
 {
     dSP; dATARGET;
     tryAMAGICbin_MG(add_amg, AMGf_assign);
@@ -2749,7 +2751,7 @@ PP(pp_i_add)
     }
 }
 
-PP(pp_i_subtract)
+PP_wrapped(pp_i_subtract, 2, 0)
 {
     dSP; dATARGET;
     tryAMAGICbin_MG(subtr_amg, AMGf_assign);
@@ -2760,7 +2762,7 @@ PP(pp_i_subtract)
     }
 }
 
-PP(pp_i_lt)
+PP_wrapped(pp_i_lt, 2, 0)
 {
     dSP;
     tryAMAGICbin_MG(lt_amg, 0);
@@ -2771,7 +2773,7 @@ PP(pp_i_lt)
     }
 }
 
-PP(pp_i_gt)
+PP_wrapped(pp_i_gt, 2, 0)
 {
     dSP;
     tryAMAGICbin_MG(gt_amg, 0);
@@ -2782,7 +2784,7 @@ PP(pp_i_gt)
     }
 }
 
-PP(pp_i_le)
+PP_wrapped(pp_i_le, 2, 0)
 {
     dSP;
     tryAMAGICbin_MG(le_amg, 0);
@@ -2793,7 +2795,7 @@ PP(pp_i_le)
     }
 }
 
-PP(pp_i_ge)
+PP_wrapped(pp_i_ge, 2, 0)
 {
     dSP;
     tryAMAGICbin_MG(ge_amg, 0);
@@ -2804,7 +2806,7 @@ PP(pp_i_ge)
     }
 }
 
-PP(pp_i_eq)
+PP_wrapped(pp_i_eq, 2, 0)
 {
     dSP;
     tryAMAGICbin_MG(eq_amg, 0);
@@ -2815,7 +2817,7 @@ PP(pp_i_eq)
     }
 }
 
-PP(pp_i_ne)
+PP_wrapped(pp_i_ne, 2, 0)
 {
     dSP;
     tryAMAGICbin_MG(ne_amg, 0);
@@ -2826,7 +2828,7 @@ PP(pp_i_ne)
     }
 }
 
-PP(pp_i_ncmp)
+PP_wrapped(pp_i_ncmp, 2, 0)
 {
     dSP; dTARGET;
     tryAMAGICbin_MG(ncmp_amg, 0);
@@ -2845,7 +2847,7 @@ PP(pp_i_ncmp)
     }
 }
 
-PP(pp_i_negate)
+PP_wrapped(pp_i_negate, 2, 0)
 {
     dSP; dTARGET;
     tryAMAGICun_MG(neg_amg, 0);
@@ -2860,7 +2862,7 @@ PP(pp_i_negate)
 
 /* High falutin' math. */
 
-PP(pp_atan2)
+PP_wrapped(pp_atan2, 2, 0)
 {
     dSP; dTARGET;
     tryAMAGICbin_MG(atan2_amg, 0);
@@ -2874,7 +2876,7 @@ PP(pp_atan2)
 
 /* also used for: pp_cos() pp_exp() pp_log() pp_sqrt() */
 
-PP(pp_sin)
+PP_wrapped(pp_sin, 1, 0)
 {
     dSP; dTARGET;
     int amg_type = fallback_amg;
@@ -2941,7 +2943,7 @@ PP(pp_sin)
    --Jarkko Hietaniemi	27 September 1998
  */
 
-PP(pp_rand)
+PP_wrapped(pp_rand, MAXARG, 0)
 {
     if (!PL_srand_called) {
         Rand_seed_t s;
@@ -2991,7 +2993,7 @@ PP(pp_rand)
     return NORMAL;
 }
 
-PP(pp_srand)
+PP_wrapped(pp_srand, MAXARG, 0)
 {
     dSP; dTARGET;
     UV anum;
@@ -3035,7 +3037,7 @@ PP(pp_srand)
     RETURN;
 }
 
-PP(pp_int)
+PP_wrapped(pp_int, 1, 0)
 {
     dSP; dTARGET;
     tryAMAGICun_MG(int_amg, AMGf_numeric);
@@ -3079,7 +3081,7 @@ PP(pp_int)
     return NORMAL;
 }
 
-PP(pp_abs)
+PP_wrapped(pp_abs, 1, 0)
 {
     dSP; dTARGET;
     tryAMAGICun_MG(abs_amg, AMGf_numeric);
@@ -3122,7 +3124,7 @@ PP(pp_abs)
 
 /* also used for: pp_hex() */
 
-PP(pp_oct)
+PP_wrapped(pp_oct, 1, 0)
 {
     dSP; dTARGET;
     const char *tmps;
@@ -3179,7 +3181,7 @@ PP(pp_oct)
 /* String stuff. */
 
 
-PP(pp_length)
+PP_wrapped(pp_length, 1, 0)
 {
     dSP; dTARGET;
     SV * const sv = TOPs;
@@ -3313,7 +3315,10 @@ Perl_translate_substr_offsets( STRLEN curlen, IV pos1_iv,
     return TRUE;
 }
 
-PP(pp_substr)
+PP_wrapped(pp_substr,
+                (PL_op->op_private & 7)
+              + ((PL_op->op_private & OPpSUBSTR_REPL_FIRST) ? 1 : 0),
+            0)
 {
     dSP; dTARGET;
     SV *sv;
@@ -3453,7 +3458,7 @@ PP(pp_substr)
     RETPUSHUNDEF;
 }
 
-PP(pp_vec)
+PP_wrapped(pp_vec, 3, 0)
 {
     dSP;
     const IV size   = POPi;
@@ -3510,7 +3515,7 @@ PP(pp_vec)
 
 /* also used for: pp_rindex() */
 
-PP(pp_index)
+PP_wrapped(pp_index, MAXARG, 0)
 {
     dSP; dTARGET;
     SV *big;
@@ -3631,7 +3636,7 @@ PP(pp_index)
     RETURN;
 }
 
-PP(pp_sprintf)
+PP_wrapped(pp_sprintf, 0, 1)
 {
     dSP; dMARK; dORIGMARK; dTARGET;
     SvTAINTED_off(TARG);
@@ -3642,7 +3647,7 @@ PP(pp_sprintf)
     RETURN;
 }
 
-PP(pp_ord)
+PP_wrapped(pp_ord, 1, 0)
 {
     dSP; dTARGET;
 
@@ -3657,7 +3662,7 @@ PP(pp_ord)
     return NORMAL;
 }
 
-PP(pp_chr)
+PP_wrapped(pp_chr, 1, 0)
 {
     dSP; dTARGET;
     char *tmps;
@@ -3715,7 +3720,7 @@ PP(pp_chr)
     return NORMAL;
 }
 
-PP(pp_crypt)
+PP_wrapped(pp_crypt, 2, 0)
 {
 #ifdef HAS_CRYPT
     dSP; dTARGET;
@@ -3766,7 +3771,7 @@ PP(pp_crypt)
 
 /* also used for: pp_lcfirst() */
 
-PP(pp_ucfirst)
+PP_wrapped(pp_ucfirst, 1, 0)
 {
     /* Actually is both lcfirst() and ucfirst().  Only the first character
      * changes.  This means that possibly we can change in-place, ie., just
@@ -4114,7 +4119,8 @@ PP(pp_ucfirst)
     return NORMAL;
 }
 
-PP(pp_uc)
+
+PP_wrapped(pp_uc, 1, 0)
 {
     dSP;
     SV *source = TOPs;
@@ -4438,7 +4444,7 @@ PP(pp_uc)
     return NORMAL;
 }
 
-PP(pp_lc)
+PP_wrapped(pp_lc, 1, 0)
 {
     dSP;
     SV *source = TOPs;
@@ -4655,7 +4661,7 @@ PP(pp_lc)
     return NORMAL;
 }
 
-PP(pp_quotemeta)
+PP_wrapped(pp_quotemeta, 1, 0)
 {
     dSP; dTARGET;
     SV * const sv = TOPs;
@@ -4733,7 +4739,7 @@ PP(pp_quotemeta)
     return NORMAL;
 }
 
-PP(pp_fc)
+PP_wrapped(pp_fc, 1, 0)
 {
     dTARGET;
     dSP;
@@ -4943,7 +4949,7 @@ PP(pp_fc)
 
 /* Arrays. */
 
-PP(pp_aslice)
+PP_wrapped(pp_aslice, 0, 1)
 {
     dSP; dMARK; dORIGMARK;
     AV *const av = MUTABLE_AV(POPs);
@@ -5007,7 +5013,7 @@ PP(pp_aslice)
     RETURN;
 }
 
-PP(pp_kvaslice)
+PP_wrapped(pp_kvaslice, 0, 1)
 {
     dSP; dMARK;
     AV *const av = MUTABLE_AV(POPs);
@@ -5053,7 +5059,7 @@ PP(pp_kvaslice)
 }
 
 
-PP(pp_aeach)
+PP_wrapped(pp_aeach, 1, 0)
 {
     dSP;
     AV *array = MUTABLE_AV(POPs);
@@ -5079,7 +5085,7 @@ PP(pp_aeach)
 }
 
 /* also used for: pp_avalues()*/
-PP(pp_akeys)
+PP_wrapped(pp_akeys, 1, 0)
 {
     dSP;
     AV *array = MUTABLE_AV(POPs);
@@ -5126,7 +5132,7 @@ PP(pp_akeys)
 
 /* Associative arrays. */
 
-PP(pp_each)
+PP_wrapped(pp_each, 1, 0)
 {
     dSP;
     HV * hash = MUTABLE_HV(POPs);
@@ -5262,7 +5268,9 @@ S_do_delete_local(pTHX)
     RETURN;
 }
 
-PP(pp_delete)
+PP_wrapped(pp_delete,
+                ((PL_op->op_private & (OPpSLICE|OPpKVSLICE)) ? 0 : 2),
+                ((PL_op->op_private & (OPpSLICE|OPpKVSLICE)) ? 1 : 0))
 {
     dSP;
     U8 gimme;
@@ -5340,7 +5348,7 @@ PP(pp_delete)
     RETURN;
 }
 
-PP(pp_exists)
+PP_wrapped(pp_exists, ((PL_op->op_private & OPpEXISTS_SUB) ? 1 : 2), 0)
 {
     dSP;
     SV *tmpsv;
@@ -5402,7 +5410,7 @@ PP(pp_exists)
  * as required.
  */
 
-PP(pp_helemexistsor)
+PP_wrapped(pp_helemexistsor, 2, 0)
 {
     dSP;
     SV *keysv = POPs;
@@ -5446,7 +5454,7 @@ other:
     RETURN;
 }
 
-PP(pp_hslice)
+PP_wrapped(pp_hslice, 0, 1)
 {
     dSP; dMARK; dORIGMARK;
     HV * const hv = MUTABLE_HV(POPs);
@@ -5503,7 +5511,7 @@ PP(pp_hslice)
     RETURN;
 }
 
-PP(pp_kvhslice)
+PP_wrapped(pp_kvhslice, 0, 1)
 {
     dSP; dMARK;
     HV * const hv = MUTABLE_HV(POPs);
@@ -5555,7 +5563,7 @@ PP(pp_kvhslice)
 
 /* List operators. */
 
-PP(pp_list)
+PP_wrapped(pp_list, 0, 1)
 {
     I32 markidx = POPMARK;
     if (GIMME_V != G_LIST) {
@@ -5574,7 +5582,7 @@ PP(pp_list)
     return NORMAL;
 }
 
-PP(pp_lslice)
+PP_wrapped(pp_lslice, 0, 2)
 {
     dSP;
     SV ** const lastrelem = PL_stack_sp;
@@ -5627,7 +5635,7 @@ PP(pp_lslice)
     RETURN;
 }
 
-PP(pp_anonlist)
+PP_wrapped(pp_anonlist, 0, 1)
 {
     dSP; dMARK;
     const I32 items = SP - MARK;
@@ -5641,7 +5649,7 @@ PP(pp_anonlist)
 /* When an anonlist or anonhash will (1) be empty and (2) return an RV
  * pointing to the new AV/HV, the peephole optimizer can swap in this
  * simpler function and op_null the originally associated PUSHMARK. */
-PP(pp_emptyavhv)
+PP_wrapped(pp_emptyavhv, 0,0)
 {
     dSP;
     OP * const op = PL_op;
@@ -5683,7 +5691,7 @@ PP(pp_emptyavhv)
     RETURN;
 }
 
-PP(pp_anonhash)
+PP_wrapped(pp_anonhash, 0, 1)
 {
     dSP; dMARK; dORIGMARK;
     HV* const hv = newHV();
@@ -5720,7 +5728,7 @@ PP(pp_anonhash)
     RETURN;
 }
 
-PP(pp_splice)
+PP_wrapped(pp_splice, 0, 1)
 {
     dSP; dMARK; dORIGMARK;
     int num_args = (SP - MARK);
@@ -5937,7 +5945,7 @@ PP(pp_splice)
     RETURN;
 }
 
-PP(pp_push)
+PP_wrapped(pp_push, 0, 1)
 {
     dSP; dMARK; dORIGMARK; dTARGET;
     AV * const ary = MUTABLE_AV(*++MARK);
@@ -5979,7 +5987,7 @@ PP(pp_push)
 }
 
 /* also used for: pp_pop()*/
-PP(pp_shift)
+PP_wrapped(pp_shift, (PL_op->op_flags & OPf_SPECIAL ? 0 : 1), 0)
 {
     dSP;
     AV * const av = PL_op->op_flags & OPf_SPECIAL
@@ -5993,7 +6001,7 @@ PP(pp_shift)
     RETURN;
 }
 
-PP(pp_unshift)
+PP_wrapped(pp_unshift, 0, 1)
 {
     dSP; dMARK; dORIGMARK; dTARGET;
     AV *ary = MUTABLE_AV(*++MARK);
@@ -6052,7 +6060,7 @@ PP(pp_unshift)
     RETURN;
 }
 
-PP(pp_reverse)
+PP_wrapped(pp_reverse, 0, 1)
 {
     dSP; dMARK;
 
@@ -6187,7 +6195,11 @@ PP(pp_reverse)
     RETURN;
 }
 
-PP(pp_split)
+PP_wrapped(pp_split,
+              (   (PL_op->op_private & OPpSPLIT_ASSIGN)
+               && (PL_op->op_flags & OPf_STACKED))
+              ? 3 : 2,
+               0)
 {
     dSP; dTARG;
     AV *ary = (   (PL_op->op_private & OPpSPLIT_ASSIGN) /* @a = split */
@@ -6640,18 +6652,17 @@ PP(pp_split)
 
 PP(pp_once)
 {
-    dSP;
     SV *const sv = PAD_SVl(PL_op->op_targ);
 
     if (SvPADSTALE(sv)) {
         /* First time. */
         SvPADSTALE_off(sv);
-        RETURNOP(cLOGOP->op_other);
+        return cLOGOP->op_other;
     }
-    RETURNOP(cLOGOP->op_next);
+    return cLOGOP->op_next;
 }
 
-PP(pp_lock)
+PP_wrapped(pp_lock, 1, 0)
 {
     dSP;
     dTOPss;
@@ -6700,7 +6711,7 @@ S_maybe_unwind_defav(pTHX)
 }
 
 /* For sorting out arguments passed to a &CORE:: subroutine */
-PP(pp_coreargs)
+PP_wrapped(pp_coreargs, 0, 0)
 {
     dSP;
     int opnum = SvIOK(cSVOP_sv) ? (int)SvUV(cSVOP_sv) : 0;
@@ -6876,14 +6887,13 @@ PP(pp_coreargs)
 
 PP(pp_avhvswitch)
 {
-    dSP;
     return PL_ppaddr[
-                (SvTYPE(TOPs) == SVt_PVAV ? OP_AEACH : OP_EACH)
+                (SvTYPE(*PL_stack_sp) == SVt_PVAV ? OP_AEACH : OP_EACH)
                     + (PL_op->op_private & OPpAVHVSWITCH_MASK)
            ](aTHX);
 }
 
-PP(pp_runcv)
+PP_wrapped(pp_runcv, 0, 0)
 {
     dSP;
     CV *cv;
@@ -6944,7 +6954,11 @@ S_localise_gv_slot(pTHX_ GV *gv, U8 type)
 }
 
 
-PP(pp_refassign)
+PP_wrapped(pp_refassign,
+      !!(PL_op->op_private & OPpLVREF_ELEM)
+    + !!(PL_op->op_flags & OPf_STACKED)
+    +1,
+    0)
 {
     dSP;
     SV * const key = PL_op->op_private & OPpLVREF_ELEM ? POPs : NULL;
@@ -7018,7 +7032,9 @@ PP(pp_refassign)
     }
 }
 
-PP(pp_lvref)
+PP_wrapped(pp_lvref,
+    !!(PL_op->op_private & OPpLVREF_ELEM) + !!(PL_op->op_flags & OPf_STACKED),
+    0)
 {
     dSP;
     SV * const ret = newSV_type_mortal(SVt_PVMG);
@@ -7054,7 +7070,7 @@ PP(pp_lvref)
     RETURN;
 }
 
-PP(pp_lvrefslice)
+PP_wrapped(pp_lvrefslice, 0, 1)
 {
     dSP; dMARK;
     AV * const av = (AV *)POPs;
@@ -7095,7 +7111,7 @@ PP(pp_lvrefslice)
     RETURN;
 }
 
-PP(pp_lvavref)
+PP_wrapped(pp_lvavref, !!(PL_op->op_flags & OPf_STACKED), 0)
 {
     if (PL_op->op_flags & OPf_STACKED)
         Perl_pp_rv2av(aTHX);
@@ -7110,7 +7126,7 @@ PP(pp_lvavref)
     }
 }
 
-PP(pp_anonconst)
+PP_wrapped(pp_anonconst, 1, 0)
 {
     dSP;
     dTOPss;
@@ -7151,7 +7167,10 @@ PP(pp_anonconst)
  * etc
  */
 
-PP(pp_argelem)
+PP_wrapped(pp_argelem,
+        !!(      (PL_op->op_private & OPpARGELEM_MASK) == OPpARGELEM_SV
+            &&   (PL_op->op_flags & OPf_STACKED)),
+        0)
 {
     dTARG;
     SV *val;
@@ -7298,7 +7317,7 @@ PP(pp_argelem)
  * into PL_curpad.
  */
 
-PP(pp_argdefelem)
+PP_wrapped(pp_argdefelem, 0, 0)
 {
     OP * const o = PL_op;
     AV *defav = GvAV(PL_defgv); /* @_ */
@@ -7388,7 +7407,7 @@ PP(pp_argcheck)
     return NORMAL;
 }
 
-PP(pp_isa)
+PP_wrapped(pp_isa, 2, 0)
 {
     dSP;
     SV *left, *right;
@@ -7400,7 +7419,7 @@ PP(pp_isa)
     RETURN;
 }
 
-PP(pp_cmpchain_and)
+PP_wrapped(pp_cmpchain_and, 2, 0)
 {
     dSP;
     SV *result = POPs;
@@ -7413,7 +7432,7 @@ PP(pp_cmpchain_and)
     }
 }
 
-PP(pp_cmpchain_dup)
+PP_wrapped(pp_cmpchain_dup, 2, 0)
 {
     dSP;
     SV *right = TOPs;
@@ -7424,7 +7443,7 @@ PP(pp_cmpchain_dup)
     RETURN;
 }
 
-PP(pp_is_bool)
+PP_wrapped(pp_is_bool, 1, 0)
 {
     SV *arg = *PL_stack_sp;
 
@@ -7434,7 +7453,7 @@ PP(pp_is_bool)
     return NORMAL;
 }
 
-PP(pp_is_weak)
+PP_wrapped(pp_is_weak, 1, 0)
 {
     SV *arg = *PL_stack_sp;
 
@@ -7444,7 +7463,7 @@ PP(pp_is_weak)
     return NORMAL;
 }
 
-PP(pp_weaken)
+PP_wrapped(pp_weaken, 1, 0)
 {
     dSP;
     SV *arg = POPs;
@@ -7453,7 +7472,7 @@ PP(pp_weaken)
     RETURN;
 }
 
-PP(pp_unweaken)
+PP_wrapped(pp_unweaken, 1, 0)
 {
     dSP;
     SV *arg = POPs;
@@ -7462,7 +7481,7 @@ PP(pp_unweaken)
     RETURN;
 }
 
-PP(pp_blessed)
+PP_wrapped(pp_blessed, 1, 0)
 {
     dSP;
     SV *arg = TOPs;
@@ -7498,7 +7517,7 @@ fallback:
     RETURN;
 }
 
-PP(pp_refaddr)
+PP_wrapped(pp_refaddr, 1, 0)
 {
     dSP;
     dTARGET;
@@ -7515,7 +7534,7 @@ PP(pp_refaddr)
     RETURN;
 }
 
-PP(pp_reftype)
+PP_wrapped(pp_reftype, 1, 0)
 {
     dSP;
     dTARGET;
@@ -7532,7 +7551,7 @@ PP(pp_reftype)
     RETURN;
 }
 
-PP(pp_ceil)
+PP_wrapped(pp_ceil, 1, 0)
 {
     dSP;
     dTARGET;
@@ -7540,7 +7559,7 @@ PP(pp_ceil)
     RETURN;
 }
 
-PP(pp_floor)
+PP_wrapped(pp_floor, 1, 0)
 {
     dSP;
     dTARGET;
@@ -7548,7 +7567,7 @@ PP(pp_floor)
     RETURN;
 }
 
-PP(pp_is_tainted)
+PP_wrapped(pp_is_tainted, 1, 0)
 {
     SV *arg = *PL_stack_sp;
 

@@ -216,6 +216,24 @@ Perl_av_new_alloc(pTHX_ SSize_t size, bool zeroflag)
 }
 
 
+/* remove (AvARRAY(av) - AvALLOC(av)) offset from empty array */
+
+PERL_STATIC_INLINE void
+Perl_av_remove_offset(pTHX_ AV *av)
+{
+    PERL_ARGS_ASSERT_AV_REMOVE_OFFSET;
+    assert(AvFILLp(av) == -1);
+    SSize_t i = AvARRAY(av) - AvALLOC(av);
+    if (i) {
+        AvARRAY(av) = AvALLOC(av);
+        AvMAX(av)   += i;
+#ifdef PERL_RC_STACK
+        Zero(AvALLOC(av), i, SV*);
+#endif
+    }
+}
+
+
 /* ------------------------------- cv.h ------------------------------- */
 
 /*
@@ -379,6 +397,400 @@ Perl_POPMARK(pTHX)
     assert((PL_markstack_ptr > PL_markstack) || !"MARK underflow");
     return *PL_markstack_ptr--;
 }
+
+/*
+=for apidoc_section $rpp
+
+=for apidoc rpp_extend
+Ensures that there is space on the stack to push C<n> items, extending it
+if necessary.
+
+=cut
+*/
+
+PERL_STATIC_INLINE void
+Perl_rpp_extend(pTHX_ SSize_t n)
+{
+    PERL_ARGS_ASSERT_RPP_EXTEND;
+
+    EXTEND_HWM_SET(PL_stack_sp, n);
+#ifndef STRESS_REALLOC
+    if (UNLIKELY(_EXTEND_NEEDS_GROW(PL_stack_sp, n)))
+#endif
+    {
+        (void)stack_grow(PL_stack_sp, PL_stack_sp, n);
+    }
+}
+
+
+/*
+=for apidoc rpp_popfree_to
+
+Pop and free all items on the argument stack above C<sp>. On return,
+C<PL_stack_sp> will be equal to C<sp>.
+
+=cut
+*/
+
+PERL_STATIC_INLINE void
+Perl_rpp_popfree_to(pTHX_ SV **sp)
+{
+    PERL_ARGS_ASSERT_RPP_POPFREE_TO;
+
+    assert(sp <= PL_stack_sp);
+#ifdef PERL_RC_STACK
+    assert(rpp_stack_is_rc());
+    while (PL_stack_sp > sp) {
+        SV *sv = *PL_stack_sp--;
+        SvREFCNT_dec(sv);
+    }
+#else
+    PL_stack_sp = sp;
+#endif
+}
+
+
+/*
+=for apidoc rpp_popfree_1
+
+Pop and free the top item on the argument stack and update C<PL_stack_sp>.
+
+=cut
+*/
+
+PERL_STATIC_INLINE void
+Perl_rpp_popfree_1(pTHX)
+{
+    PERL_ARGS_ASSERT_RPP_POPFREE_1;
+
+#ifdef PERL_RC_STACK
+    assert(rpp_stack_is_rc());
+    SV *sv = *PL_stack_sp--;
+    SvREFCNT_dec(sv);
+#else
+    PL_stack_sp--;
+#endif
+}
+
+
+/*
+=for apidoc rpp_popfree_2
+
+Pop and free the top two items on the argument stack and update
+C<PL_stack_sp>.
+
+=cut
+*/
+
+
+PERL_STATIC_INLINE void
+Perl_rpp_popfree_2(pTHX)
+{
+    PERL_ARGS_ASSERT_RPP_POPFREE_2;
+
+#ifdef PERL_RC_STACK
+    assert(rpp_stack_is_rc());
+    for (int i = 0; i < 2; i++) {
+        SV *sv = *PL_stack_sp--;
+        SvREFCNT_dec(sv);
+    }
+#else
+    PL_stack_sp -= 2;
+#endif
+}
+
+/*
+=for apidoc rpp_pop_1_norc
+
+Pop and return the top item off the argument stack and update
+C<PL_stack_sp>. It's similar to rpp_popfree_1(), except that it actually
+returns a value, and it I<doesn't> decrement the SV's reference count.
+On non-C<PERL_RC_STACK> builds it actually increments the SV's reference
+count.
+
+This is useful in cases where the popped value is immediately embedded
+somewhere e.g. via av_store(), allowing you skip decrementing and then
+immediately incrementing the reference count again (and risk prematurely
+freeing the SV if it had a RC of 1). On non-RC builds, the reference count
+bookkeeping still works too, which is why it should be used rather than
+a simple C<*PL_stack_sp-->.
+
+=cut
+*/
+
+PERL_STATIC_INLINE SV*
+Perl_rpp_pop_1_norc(pTHX)
+{
+    PERL_ARGS_ASSERT_RPP_POP_1_NORC
+
+    SV *sv = *PL_stack_sp--;
+
+#ifndef PERL_RC_STACK
+    SvREFCNT_inc(sv);
+#else
+    assert(rpp_stack_is_rc());
+#endif
+    return sv;
+}
+
+
+
+/*
+=for apidoc      rpp_push_1
+=for apidoc_item rpp_push_2
+=for apidoc_item rpp_xpush_1
+=for apidoc_item rpp_xpush_2
+
+Push one or two SVs onto the stack, incrementing their reference counts
+and updating C<PL_stack_sp>. With the C<x> variants, it extends the stack
+first.
+
+=cut
+*/
+
+PERL_STATIC_INLINE void
+Perl_rpp_push_1(pTHX_ SV *sv)
+{
+    PERL_ARGS_ASSERT_RPP_PUSH_1;
+
+    *++PL_stack_sp = sv;
+#ifdef PERL_RC_STACK
+    assert(rpp_stack_is_rc());
+    SvREFCNT_inc_simple_void_NN(sv);
+#endif
+}
+
+PERL_STATIC_INLINE void
+Perl_rpp_push_2(pTHX_ SV *sv1, SV *sv2)
+{
+    PERL_ARGS_ASSERT_RPP_PUSH_2;
+
+    *++PL_stack_sp = sv1;
+    *++PL_stack_sp = sv2;
+#ifdef PERL_RC_STACK
+    assert(rpp_stack_is_rc());
+    SvREFCNT_inc_simple_void_NN(sv1);
+    SvREFCNT_inc_simple_void_NN(sv2);
+#endif
+}
+
+PERL_STATIC_INLINE void
+Perl_rpp_xpush_1(pTHX_ SV *sv)
+{
+    PERL_ARGS_ASSERT_RPP_XPUSH_1;
+
+    rpp_extend(1);
+    rpp_push_1(sv);
+}
+
+PERL_STATIC_INLINE void
+Perl_rpp_xpush_2(pTHX_ SV *sv1, SV *sv2)
+{
+    PERL_ARGS_ASSERT_RPP_XPUSH_2;
+
+    rpp_extend(2);
+    rpp_push_2(sv1, sv2);
+}
+
+
+/*
+=for apidoc rpp_push_1_norc
+
+Push C<sv> onto the stack without incrementing its reference count, and
+update C<PL_stack_sp>. On non-PERL_RC_STACK builds, mortalise too.
+
+This is most useful where an SV has just been created and already has a
+reference count of 1, but has not yet been anchored anywhere.
+
+=cut
+*/
+
+PERL_STATIC_INLINE void
+Perl_rpp_push_1_norc(pTHX_ SV *sv)
+{
+    PERL_ARGS_ASSERT_RPP_PUSH_1;
+
+    *++PL_stack_sp = sv;
+#ifdef PERL_RC_STACK
+    assert(rpp_stack_is_rc());
+#else
+    sv_2mortal(sv);
+#endif
+}
+
+
+/*
+=for apidoc rpp_replace_1_1
+
+Replace the current top stack item with C<sv>, while suitably adjusting
+reference counts. Equivalent to rpp_popfree_1(); rpp_push_1(sv), but
+is more efficient and handles both SVs being the same.
+
+=cut
+*/
+
+PERL_STATIC_INLINE void
+Perl_rpp_replace_1_1(pTHX_ SV *sv)
+{
+    PERL_ARGS_ASSERT_RPP_REPLACE_1_1;
+
+#ifdef PERL_RC_STACK
+    assert(rpp_stack_is_rc());
+    SV *oldsv = *PL_stack_sp;
+    *PL_stack_sp = sv;
+    SvREFCNT_inc_simple_void_NN(sv);
+    SvREFCNT_dec(oldsv);
+#else
+    *PL_stack_sp = sv;
+#endif
+}
+
+
+/*
+=for apidoc rpp_replace_2_1
+
+Replace the current top two stack items with C<sv>, while suitably
+adjusting reference counts. Equivalent to rpp_popfree_2();
+rpp_push_1(sv), but is more efficient and handles SVs being the same.
+
+=cut
+*/
+
+PERL_STATIC_INLINE void
+Perl_rpp_replace_2_1(pTHX_ SV *sv)
+{
+    PERL_ARGS_ASSERT_RPP_REPLACE_2_1;
+
+#ifdef PERL_RC_STACK
+    assert(rpp_stack_is_rc());
+    /* replace PL_stack_sp[-1] first; leave PL_stack_sp[0] in place while
+     * we free [-1], so if an exception occurs, [0] will still be freed.
+     */
+    SV *oldsv = PL_stack_sp[-1];
+    PL_stack_sp[-1] = sv;
+    SvREFCNT_inc_simple_void_NN(sv);
+    SvREFCNT_dec(oldsv);
+    oldsv = *PL_stack_sp--;
+    SvREFCNT_dec(oldsv);
+#else
+    *--PL_stack_sp = sv;
+#endif
+}
+
+
+/*
+=for apidoc      rpp_try_AMAGIC_1
+=for apidoc_item rpp_try_AMAGIC_2
+
+Check whether either of the one or two SVs at the top of the stack is
+magical or a ref, and in either case handle it specially: invoke get
+magic, call an overload method, or replace a ref with a temporary numeric
+value, as appropriate. If this function returns true, it indicates that
+the correct return value is already on the stack. Intended to be used at
+the beginning of the PP function for unary or binary ops.
+
+=cut
+*/
+
+PERL_STATIC_INLINE bool
+Perl_rpp_try_AMAGIC_1(pTHX_ int method, int flags)
+{
+    return    UNLIKELY((SvFLAGS(*PL_stack_sp) & (SVf_ROK|SVs_GMG)))
+           && Perl_try_amagic_un(aTHX_ method, flags);
+}
+
+PERL_STATIC_INLINE bool
+Perl_rpp_try_AMAGIC_2(pTHX_ int method, int flags)
+{
+    return    UNLIKELY(((SvFLAGS(PL_stack_sp[-1])|SvFLAGS(PL_stack_sp[0]))
+                     & (SVf_ROK|SVs_GMG)))
+           && Perl_try_amagic_bin(aTHX_ method, flags);
+}
+
+
+/*
+=for apidoc rpp_stack_is_rc
+
+Returns a boolean value indicating whether the stack is currently
+reference-counted. Note that if the stack is split (bottom half RC, top
+half non-RC), this function returns false, even if the top half currently
+contains zero items.
+
+=cut
+*/
+
+PERL_STATIC_INLINE bool
+Perl_rpp_stack_is_rc(pTHX)
+{
+#ifdef PERL_RC_STACK
+    return AvREAL(PL_curstack) && !PL_curstackinfo->si_stack_nonrc_base;
+#else
+    return 0;
+#endif
+
+}
+
+
+/*
+=for apidoc rpp_is_lone
+
+Indicates whether the stacked SV C<sv> (assumed to be not yet popped off
+the stack) is only kept alive due to a single reference from the argument
+stack and/or and the temps stack.
+
+This can used for example to decide whether the copying of return values in rvalue
+context can be skipped, or whether it shouldn't be assigned to in lvalue
+context.
+
+=cut
+*/
+
+
+PERL_STATIC_INLINE bool
+Perl_rpp_is_lone(pTHX_ SV *sv)
+{
+#ifdef PERL_RC_STACK
+    /* note that rpp_is_lone() can be used in wrapped pp functions,
+     * where technically the stack is no longer ref-counted; but because
+     * the args are non-RC copies of RC args further down the stack, we
+     * can't be in a *completely* non-ref stack.
+     */
+    assert(AvREAL(PL_curstack));
+#endif
+
+    return SvREFCNT(sv) <= cBOOL(SvTEMP(sv))
+#ifdef PERL_RC_STACK
+                         + 1
+#endif
+    ;
+}
+
+
+/*
+=for apidoc rpp_invoke_xs
+
+Call the XS function associated with C<cv>. Wraps the call if necessary to
+handle XS functions which are not aware of reference-counted stacks.
+
+=cut
+*/
+
+
+PERL_STATIC_INLINE void
+Perl_rpp_invoke_xs(pTHX_ CV *cv)
+{
+    PERL_ARGS_ASSERT_RPP_INVOKE_XS;
+
+#ifdef PERL_RC_STACK
+    if (!CvXS_RCSTACK(cv))
+        Perl_xs_wrap(aTHX_ CvXSUB(cv), cv);
+    else
+#endif
+        CvXSUB(cv)(aTHX_ cv);
+}
+
+
+
 
 /* ----------------------------- regexp.h ----------------------------- */
 
@@ -2749,6 +3161,9 @@ Perl_cx_pushblock(pTHX_ U8 type, U8 gimme, SV** sp, I32 saveix)
     cx->blk_gimme      = gimme;
     cx->blk_oldsaveix  = saveix;
     cx->blk_oldsp      = (I32)(sp - PL_stack_base);
+    assert(cxstack_ix <= 0
+            || CxTYPE(cx-1) == CXt_SUBST
+            || cx->blk_oldsp >= (cx-1)->blk_oldsp);
     cx->blk_oldcop     = PL_curcop;
     cx->blk_oldmarksp  = (I32)(PL_markstack_ptr - PL_markstack);
     cx->blk_oldscopesp = PL_scopestack_ix;
@@ -2798,8 +3213,7 @@ Perl_cx_topblock(pTHX_ PERL_CONTEXT *cx)
     PL_markstack_ptr = PL_markstack + cx->blk_oldmarksp;
     PL_scopestack_ix = cx->blk_oldscopesp;
     PL_curpm         = cx->blk_oldpm;
-
-    PL_stack_sp      = PL_stack_base + cx->blk_oldsp;
+    Perl_rpp_popfree_to(aTHX_ PL_stack_base + cx->blk_oldsp);
 }
 
 
@@ -2858,12 +3272,15 @@ Perl_cx_popsub_args(pTHX_ PERL_CONTEXT *cx)
 
     CX_POP_SAVEARRAY(cx);
     av = MUTABLE_AV(PAD_SVl(0));
-    if (UNLIKELY(AvREAL(av)))
+    if (!SvMAGICAL(av) && SvREFCNT(av) == 1
+#ifndef PERL_RC_STACK
+        && !AvREAL(av)
+#endif
+    )
+        clear_defarray_simple(av);
+    else
         /* abandon @_ if it got reified */
         clear_defarray(av, 0);
-    else {
-        CLEAR_ARGARRAY(av);
-    }
 }
 
 
@@ -3106,6 +3523,129 @@ Perl_cx_popgiven(pTHX_ PERL_CONTEXT *cx)
     cx->blk_givwhen.defsv_save = NULL;
     SvREFCNT_dec(sv);
 }
+
+
+/* Make @_ empty in-place in simple cases: a cheap av_clear().
+ * See Perl_clear_defarray() for non-simple cases */
+
+
+PERL_STATIC_INLINE void
+Perl_clear_defarray_simple(pTHX_ AV *av)
+{
+    PERL_ARGS_ASSERT_CLEAR_DEFARRAY_SIMPLE;
+
+    assert(SvTYPE(av) == SVt_PVAV);
+    assert(!SvREADONLY(av));
+    assert(!SvMAGICAL(av));
+    assert(SvREFCNT(av) == 1);
+
+#ifdef PERL_RC_STACK
+    assert(AvREAL(av));
+    /* this code assumes that destructors called here can't free av
+     * itself, because pad[0] and/or CX pointers will keep it alive */
+    SSize_t i = AvFILLp(av);
+    while (i >= 0) {
+        SV *sv = AvARRAY(av)[i];
+        AvARRAY(av)[i--] = NULL;
+        SvREFCNT_dec(sv);
+    }
+#else
+    assert(!AvREAL(av));
+#endif
+    AvFILLp(av) = -1;
+    Perl_av_remove_offset(aTHX_ av);
+}
+
+/* Switch to a different argument stack.
+ *
+ * Note that it doesn't update PL_curstackinfo->si_stack_nonrc_base,
+ * so this should only be used as part of a general switching between
+ * stackinfos.
+ */
+
+PERL_STATIC_INLINE void
+Perl_switch_argstack(pTHX_ AV *to)
+{
+    PERL_ARGS_ASSERT_SWITCH_ARGSTACK;
+
+    AvFILLp(PL_curstack) = PL_stack_sp - PL_stack_base;
+    PL_stack_base = AvARRAY(to);
+    PL_stack_max  = PL_stack_base + AvMAX(to);
+    PL_stack_sp   = PL_stack_base + AvFILLp(to);
+    PL_curstack   = to;
+}
+
+
+/* Push, and switch to a new stackinfo, allocating one if none are spare,
+ * to get a fresh set of stacks.
+ * Update all the interpreter variables like PL_curstackinfo,
+ * PL_stack_sp, etc.
+ * current flag meanings:
+ *   1 make the new arg stack AvREAL
+ */
+
+
+PERL_STATIC_INLINE void
+Perl_push_stackinfo(pTHX_ I32 type, UV flags)
+{
+    PERL_ARGS_ASSERT_PUSH_STACKINFO;
+
+    PERL_SI *next = PL_curstackinfo->si_next;
+    DEBUG_l({
+        int i = 0; PERL_SI *p = PL_curstackinfo;
+        while (p) { i++; p = p->si_prev; }
+        Perl_deb(aTHX_ "push STACKINFO %d in %s at %s:%d\n",
+                     i, SAFE_FUNCTION__, __FILE__, __LINE__);
+    })
+
+    if (!next) {
+        next = new_stackinfo_flags(32, 2048/sizeof(PERL_CONTEXT) - 1, flags);
+        next->si_prev = PL_curstackinfo;
+        PL_curstackinfo->si_next = next;
+    }
+    next->si_type = type;
+    next->si_cxix = -1;
+    next->si_cxsubix = -1;
+    PUSHSTACK_INIT_HWM(next);
+#ifdef PERL_RC_STACK
+    next->si_stack_nonrc_base = 0;
+#endif
+    if (flags & 1)
+        AvREAL_on(next->si_stack);
+    else
+        AvREAL_off(next->si_stack);
+    AvFILLp(next->si_stack) = 0;
+    switch_argstack(next->si_stack);
+    PL_curstackinfo = next;
+    SET_MARK_OFFSET;
+}
+
+
+/* Pop, then switch to the previous stackinfo and set of stacks.
+ * Update all the interpreter variables like PL_curstackinfo,
+ * PL_stack_sp, etc. */
+
+PERL_STATIC_INLINE void
+Perl_pop_stackinfo(pTHX)
+{
+    PERL_ARGS_ASSERT_POP_STACKINFO;
+
+    PERL_SI * const prev = PL_curstackinfo->si_prev;
+    DEBUG_l({
+        int i = -1; PERL_SI *p = PL_curstackinfo;
+        while (p) { i++; p = p->si_prev; }
+        Perl_deb(aTHX_ "pop  STACKINFO %d in %s at %s:%d\n",
+                     i, SAFE_FUNCTION__, __FILE__, __LINE__);})
+    if (!prev) {
+        Perl_croak_popstack();
+    }
+
+    switch_argstack(prev->si_stack);
+    /* don't free prev here, free them all at the END{} */
+    PL_curstackinfo = prev;
+}
+
+
 
 /*
 =for apidoc newPADxVOP

@@ -38,7 +38,148 @@
 
 /* Hot code. */
 
-PP(pp_const)
+
+#ifdef PERL_RC_STACK
+
+/* common code for pp_wrap() and xs_wrap():
+ * free any original arguments, and bump and shift down any return
+ * args
+ */
+
+STATIC void
+S_pp_xs_wrap_return(pTHX_ I32 nargs, I32 old_sp)
+{
+    I32 nret = (I32)(PL_stack_sp - PL_stack_base) - old_sp;
+    assert(nret >= 0);
+
+    /* bump any returned values */
+    if (nret) {
+        SV **svp = PL_stack_sp - nret + 1;
+        while (svp <= PL_stack_sp) {
+            SvREFCNT_inc(*svp);
+            svp++;
+        }
+    }
+
+    PL_curstackinfo->si_stack_nonrc_base = 0;
+
+    /* free the original args and shift the returned valued down */
+    if (nargs) {
+        SV **svp = PL_stack_sp - nret;
+        I32 i = nargs;
+        while (i--) {
+            SvREFCNT_dec(*svp);
+            *svp = NULL;
+            svp--;
+        }
+
+        if (nret) {
+            Move(PL_stack_sp - nret + 1,
+                 PL_stack_sp - nret - nargs + 1,
+                 nret, SV*);
+        }
+        PL_stack_sp -= nargs;
+    }
+}
+
+/* pp_wrap():
+ * wrapper function for pp() functions to turn them into functions
+ * that can operate on a reference-counted stack, by taking a non-
+ * reference-counted copy of the current stack frame, calling the real
+ * pp() function, then incrementing the reference count of any returned
+ * args.
+ *
+ * nargs or nlists indicate the number of stack arguments or the
+ * number of stack lists (delimited by MARKs) which the function expects.
+ */
+OP*
+Perl_pp_wrap(pTHX_ Perl_ppaddr_t real_pp_fn, I32 nargs, int nlists)
+{
+    PERL_ARGS_ASSERT_PP_WRAP;
+
+    if (!rpp_stack_is_rc())
+        /* stack-already non-RC; nothing needing wrapping */
+        return real_pp_fn(aTHX);
+
+    OP *next_op;
+    I32 old_sp = (I32)(PL_stack_sp - PL_stack_base);
+
+    assert(nargs  >= 0);
+    assert(nlists >= 0);
+    assert(AvREAL(PL_curstack));
+
+    PL_curstackinfo->si_stack_nonrc_base = PL_stack_sp - PL_stack_base + 1;
+
+    if (nlists) {
+        assert(nargs == 0);
+        I32 mark  = PL_markstack_ptr[-nlists+1];
+        nargs = (PL_stack_sp - PL_stack_base) - mark;
+        assert(nlists <= 2); /* if ever more, make below a loop */
+        PL_markstack_ptr[0]  += nargs;
+        if (nlists == 2)
+            PL_markstack_ptr[-1] += nargs;
+    }
+
+    if (nargs) {
+        /* duplicate all the arg pointers further up the stack */
+        rpp_extend(nargs);
+        Copy(PL_stack_sp - nargs + 1, PL_stack_sp + 1, nargs, SV*);
+        PL_stack_sp += nargs;
+    }
+
+    next_op = real_pp_fn(aTHX);
+
+    /* we should still be a split stack */
+    assert(AvREAL(PL_curstack));
+    assert(PL_curstackinfo->si_stack_nonrc_base);
+
+    S_pp_xs_wrap_return(aTHX_ nargs, old_sp);
+
+    return next_op;
+}
+
+
+/* xs_wrap():
+ * similar in concept to pp_wrap: make a non-referenced-counted copy of
+ * a (not refcount aware) XS sub's args, call the XS subs, then bump any
+ * return values and free the original args */
+
+void
+Perl_xs_wrap(pTHX_ XSUBADDR_t xsub, CV *cv)
+{
+    PERL_ARGS_ASSERT_XS_WRAP;
+
+    I32 old_sp = (I32)(PL_stack_sp - PL_stack_base);
+    I32 mark  = PL_markstack_ptr[0];
+    I32 nargs = (PL_stack_sp - PL_stack_base) - mark;
+
+    /* we should be a fully refcounted stack */
+    assert(AvREAL(PL_curstack));
+    assert(!PL_curstackinfo->si_stack_nonrc_base);
+
+    PL_curstackinfo->si_stack_nonrc_base = PL_stack_sp - PL_stack_base + 1;
+
+
+    if (nargs) {
+        /* duplicate all the arg pointers further up the stack */
+        rpp_extend(nargs);
+        Copy(PL_stack_sp - nargs + 1, PL_stack_sp + 1, nargs, SV*);
+        PL_stack_sp += nargs;
+        PL_markstack_ptr[0]  += nargs;
+    }
+
+    xsub(aTHX_ cv);
+
+    S_pp_xs_wrap_return(aTHX_ nargs, old_sp);
+}
+
+#endif
+
+
+/* ----------------------------------------------------------- */
+
+
+PP_wrapped(pp_const, 0, 0)
 {
     dSP;
     XPUSHs(cSVOP_sv);
@@ -49,13 +190,13 @@ PP(pp_nextstate)
 {
     PL_curcop = (COP*)PL_op;
     TAINT_NOT;		/* Each statement is presumed innocent */
-    PL_stack_sp = PL_stack_base + CX_CUR()->blk_oldsp;
+    rpp_popfree_to(PL_stack_base + CX_CUR()->blk_oldsp);
     FREETMPS;
     PERL_ASYNC_CHECK();
     return NORMAL;
 }
 
-PP(pp_gvsv)
+PP_wrapped(pp_gvsv, 0, 0)
 {
     dSP;
     assert(SvTYPE(cGVOP_gv) == SVt_PVGV);
@@ -83,7 +224,7 @@ PP(pp_pushmark)
     return NORMAL;
 }
 
-PP(pp_stringify)
+PP_wrapped(pp_stringify, 1, 0)
 {
     dSP; dTARGET;
     SV * const sv = TOPs;
@@ -94,7 +235,7 @@ PP(pp_stringify)
     return NORMAL;
 }
 
-PP(pp_gv)
+PP_wrapped(pp_gv, 0, 0)
 {
     dSP;
     /* cGVOP_gv might be a real GV or might be an RV to a CV */
@@ -107,7 +248,7 @@ PP(pp_gv)
 
 /* also used for: pp_andassign() */
 
-PP(pp_and)
+PP_wrapped(pp_and, 2, 0)
 {
     PERL_ASYNC_CHECK();
     {
@@ -135,7 +276,7 @@ PP(pp_and)
  *    (PL_op->op_private & OPpASSIGN_BACKWARDS) {or,and,dor}assign
 */
 
-PP(pp_padsv_store)
+PP_wrapped(pp_padsv_store,1,0)
 {
     dSP;
     OP * const op = PL_op;
@@ -171,7 +312,7 @@ PP(pp_padsv_store)
 
 /* A mashup of simplified AELEMFAST_LEX + SASSIGN OPs */
 
-PP(pp_aelemfastlex_store)
+PP_wrapped(pp_aelemfastlex_store, 1, 0)
 {
     dSP;
     OP * const op = PL_op;
@@ -219,7 +360,7 @@ PP(pp_aelemfastlex_store)
     RETURN;
 }
 
-PP(pp_sassign)
+PP_wrapped(pp_sassign, 2, 0)
 {
     dSP;
     /* sassign keeps its args in the optree traditionally backwards.
@@ -314,7 +455,7 @@ PP(pp_sassign)
 
     }
     if (
-      UNLIKELY(SvTEMP(left)) && !SvSMAGICAL(left) && SvREFCNT(left) == 1 &&
+      rpp_is_lone(left) && !SvSMAGICAL(left) &&
       (!isGV_with_GP(left) || SvFAKE(left)) && ckWARN(WARN_MISC)
     )
         Perl_warner(aTHX_
@@ -325,7 +466,7 @@ PP(pp_sassign)
     RETURN;
 }
 
-PP(pp_cond_expr)
+PP_wrapped(pp_cond_expr, 1, 0)
 {
     dSP;
     SV *sv;
@@ -341,7 +482,7 @@ PP(pp_unstack)
     PERL_ASYNC_CHECK();
     TAINT_NOT;		/* Each statement is presumed innocent */
     cx  = CX_CUR();
-    PL_stack_sp = PL_stack_base + cx->blk_oldsp;
+    rpp_popfree_to(PL_stack_base + CX_CUR()->blk_oldsp);
     FREETMPS;
     if (!(PL_op->op_flags & OPf_SPECIAL)) {
         assert(CxTYPE(cx) == CXt_BLOCK || CxTYPE_is_LOOP(cx));
@@ -421,7 +562,7 @@ S_do_concat(pTHX_ SV *left, SV *right, SV *targ, U8 targmy)
 }
 
 
-PP(pp_concat)
+PP_wrapped(pp_concat, 2, 0)
 {
   dSP; dATARGET; tryAMAGICbin_MG(concat_amg, AMGf_assign);
   {
@@ -492,7 +633,21 @@ have differing overloading behaviour.
 
 */
 
-PP(pp_multiconcat)
+
+/* how many stack arguments a multiconcat op expects */
+#ifdef PERL_RC_STACK
+STATIC I32
+S_multiconcat_argcount(pTHX)
+{
+    UNOP_AUX_item *aux = cUNOP_AUXx(PL_op)->op_aux;
+    SSize_t nargs = aux[PERL_MULTICONCAT_IX_NARGS].ssize;
+    if (PL_op->op_flags & OPf_STACKED)
+        nargs++;
+    return nargs;
+}
+#endif
+
+PP_wrapped(pp_multiconcat, S_multiconcat_argcount(aTHX), 0)
 {
     dSP;
     SV *targ;                /* The SV to be assigned or appended to */
@@ -1253,7 +1408,7 @@ S_pushav(pTHX_ AV* const av)
 
 /* ($lex1,@lex2,...)   or my ($lex1,@lex2,...)  */
 
-PP(pp_padrange)
+PP_wrapped(pp_padrange, 0, 0)
 {
     dSP;
     PADOFFSET base = PL_op->op_targ;
@@ -1298,7 +1453,7 @@ PP(pp_padrange)
 }
 
 
-PP(pp_padsv)
+PP_wrapped(pp_padsv, 0, 0)
 {
     dSP;
     EXTEND(SP, 1);
@@ -1328,7 +1483,7 @@ PP(pp_padsv)
     }
 }
 
-PP(pp_readline)
+PP_wrapped(pp_readline, ((PL_op->op_flags & OPf_STACKED) ? 2 : 1), 0)
 {
     dSP;
     /* pp_coreargs pushes a NULL to indicate no args passed to
@@ -1354,7 +1509,7 @@ PP(pp_readline)
     return do_readline();
 }
 
-PP(pp_eq)
+PP_wrapped(pp_eq, 2, 0)
 {
     dSP;
     SV *left, *right;
@@ -1379,7 +1534,7 @@ PP(pp_eq)
 
 /* also used for: pp_i_preinc() */
 
-PP(pp_preinc)
+PP_wrapped(pp_preinc, 1, 0)
 {
     SV *sv = *PL_stack_sp;
 
@@ -1400,7 +1555,7 @@ PP(pp_preinc)
 
 /* also used for: pp_i_predec() */
 
-PP(pp_predec)
+PP_wrapped(pp_predec, 1, 0)
 {
     SV *sv = *PL_stack_sp;
 
@@ -1421,7 +1576,7 @@ PP(pp_predec)
 
 /* also used for: pp_orassign() */
 
-PP(pp_or)
+PP_wrapped(pp_or, 1, 0)
 {
     dSP;
     SV *sv;
@@ -1439,7 +1594,7 @@ PP(pp_or)
 
 /* also used for: pp_dor() pp_dorassign() */
 
-PP(pp_defined)
+PP_wrapped(pp_defined, 1, 0)
 {
     dSP;
     SV* sv = TOPs;
@@ -1497,11 +1652,16 @@ PP(pp_defined)
 
 PP(pp_add)
 {
-    dSP; dATARGET; bool useleft; SV *svl, *svr;
+    bool useleft; SV *svl, *svr;
+    SV *targ = (PL_op->op_flags & OPf_STACKED)
+                    ? PL_stack_sp[-1]
+                    : PAD_SV(PL_op->op_targ);
 
-    tryAMAGICbin_MG(add_amg, AMGf_assign|AMGf_numeric);
-    svr = TOPs;
-    svl = TOPm1s;
+    if (rpp_try_AMAGIC_2(add_amg, AMGf_assign|AMGf_numeric))
+        return NORMAL;
+
+    svr = PL_stack_sp[0];
+    svl = PL_stack_sp[-1];
 
 #ifdef PERL_PRESERVE_IVUV
 
@@ -1522,10 +1682,9 @@ PP(pp_add)
              * simple integer add: if the top of both numbers
              * are 00  or 11, then it's safe */
             if (!( ((topl+1) | (topr+1)) & 2)) {
-                SP--;
                 TARGi(il + ir, 0); /* args not GMG, so can't be tainted */
-                SETs(TARG);
-                RETURN;
+                rpp_replace_2_1(targ);
+                return NORMAL;
             }
             goto generic;
         }
@@ -1538,10 +1697,9 @@ PP(pp_add)
                 /* nothing was lost by converting to IVs */
                 goto do_iv;
             }
-            SP--;
             TARGn(nl + nr, 0); /* args not GMG, so can't be tainted */
-            SETs(TARG);
-            RETURN;
+            rpp_replace_2_1(targ);
+            return NORMAL;
         }
     }
 
@@ -1606,8 +1764,9 @@ PP(pp_add)
             auv = 0;
             a_valid = auvok = 1;
             /* left operand is undef, treat as zero. + 0 is identity,
-               Could SETi or SETu right now, but space optimise by not adding
-               lots of code to speed up what is probably a rarish case.  */
+               Could TARGi or TARGu right now, but space optimise by not
+               adding lots of code to speed up what is probably a rare-ish
+               case. */
         } else {
             /* Left operand is defined, so is it IV? */
             if (SvIV_please_nomg(svl)) {
@@ -1676,20 +1835,20 @@ PP(pp_add)
                     result_good = 1;
             }
             if (result_good) {
-                SP--;
                 if (auvok)
-                    SETu( result );
+                    TARGu(result,1);
                 else {
                     /* Negate result */
                     if (result <= (UV)IV_MIN)
-                        SETi(result == (UV)IV_MIN
-                                ? IV_MIN : -(IV)result);
+                        TARGi(result == (UV)IV_MIN
+                                ? IV_MIN : -(IV)result, 1);
                     else {
                         /* result valid, but out of range for IV.  */
-                        SETn( -(NV)result );
+                        TARGn(-(NV)result, 1);
                     }
                 }
-                RETURN;
+                rpp_replace_2_1(targ);
+                return NORMAL;
             } /* Overflow, drop through to NVs.  */
         }
     }
@@ -1700,21 +1859,22 @@ PP(pp_add)
 
     {
         NV value = SvNV_nomg(svr);
-        (void)POPs;
         if (!useleft) {
             /* left operand is undef, treat as zero. + 0.0 is identity. */
-            SETn(value);
-            RETURN;
+            TARGn(value, 1);
         }
-        SETn( value + SvNV_nomg(svl) );
-        RETURN;
+        else {
+            TARGn(value + SvNV_nomg(svl), 1);
+        }
+        rpp_replace_2_1(targ);
+        return NORMAL;
     }
 }
 
 
 /* also used for: pp_aelemfast_lex() */
 
-PP(pp_aelemfast)
+PP_wrapped(pp_aelemfast, 0, 0)
 {
     dSP;
     AV * const av = PL_op->op_type == OP_AELEMFAST_LEX
@@ -1753,7 +1913,7 @@ PP(pp_aelemfast)
     RETURN;
 }
 
-PP(pp_join)
+PP_wrapped(pp_join, 0, 1)
 {
     dSP; dMARK; dTARGET;
     MARK++;
@@ -1767,7 +1927,7 @@ PP(pp_join)
 
 /* also used for: pp_say() */
 
-PP(pp_print)
+PP_wrapped(pp_print, 0, 1)
 {
     dSP; dMARK; dORIGMARK;
     PerlIO *fp;
@@ -1961,7 +2121,7 @@ S_padhv_rv2hv_common(pTHX_ HV *hv, U8 gimme, bool is_keys, bool has_targ)
 
 
 /* This is also called directly by pp_lvavref.  */
-PP(pp_padav)
+PP_wrapped(pp_padav, 0, 0)
 {
     dSP; dTARGET;
     U8 gimme;
@@ -2003,7 +2163,7 @@ PP(pp_padav)
 }
 
 
-PP(pp_padhv)
+PP_wrapped(pp_padhv, 0, 0)
 {
     dSP; dTARGET;
     U8 gimme;
@@ -2041,7 +2201,7 @@ PP(pp_padhv)
 /* also used for: pp_rv2hv() */
 /* also called directly by pp_lvavref */
 
-PP(pp_rv2av)
+PP_wrapped(pp_rv2av, 1, 0)
 {
     dSP; dTOPss;
     const U8 gimme = GIMME_V;
@@ -2311,7 +2471,7 @@ S_aassign_copy_common(pTHX_ SV **firstlelem, SV **lastlelem,
 
 
 
-PP(pp_aassign)
+PP_wrapped(pp_aassign, 0, 2)
 {
     dSP;
     SV **lastlelem = PL_stack_sp;
@@ -2499,7 +2659,7 @@ PP(pp_aassign)
                 for (svp = relem; svp <= lastrelem; svp++) {
                     SV *rsv = *svp;
 
-                    if (SvTEMP(rsv) && !SvGMAGICAL(rsv) && SvREFCNT(rsv) == 1) {
+                    if (rpp_is_lone(rsv) && !SvGMAGICAL(rsv)) {
                         /* can skip the copy */
                         SvREFCNT_inc_simple_void_NN(rsv);
                         SvTEMP_off(rsv);
@@ -2620,7 +2780,7 @@ PP(pp_aassign)
             for (svp = relem + 1; svp <= lastrelem; svp += 2) {
                 SV *rsv = *svp;
 
-                if (SvTEMP(rsv) && !SvGMAGICAL(rsv) && SvREFCNT(rsv) == 1) {
+                if (rpp_is_lone(rsv) && !SvGMAGICAL(rsv)) {
                     /* can skip the copy */
                     SvREFCNT_inc_simple_void_NN(rsv);
                     SvTEMP_off(rsv);
@@ -2783,7 +2943,7 @@ PP(pp_aassign)
                 SV *ref;
 
                 if (UNLIKELY(
-                  SvTEMP(lsv) && !SvSMAGICAL(lsv) && SvREFCNT(lsv) == 1 &&
+                    rpp_is_lone(lsv) && !SvSMAGICAL(lsv) &&
                   (!isGV_with_GP(lsv) || SvFAKE(lsv)) && ckWARN(WARN_MISC)
                 ))
                     Perl_warner(aTHX_
@@ -2961,7 +3121,7 @@ PP(pp_aassign)
     RETURN;
 }
 
-PP(pp_qr)
+PP_wrapped(pp_qr, 0, 0)
 {
     dSP;
     PMOP * const pm = cPMOP;
@@ -3043,7 +3203,7 @@ S_should_we_output_Debug_r(pTHX_ regexp *prog)
     return S_are_we_in_Debug_EXECUTE_r(aTHX);
 }
 
-PP(pp_match)
+PP_wrapped(pp_match, ((PL_op->op_flags & OPf_STACKED) ? 1 : 0), 0)
 {
     dSP; dTARG;
     PMOP *pm = cPMOP;
@@ -3526,7 +3686,7 @@ Perl_do_readline(pTHX)
     }
 }
 
-PP(pp_helem)
+PP_wrapped(pp_helem, 2, 0)
 {
     dSP;
     HE* he;
@@ -3625,6 +3785,28 @@ S_softref2xv_lite(pTHX_ SV *const sv, const char *const what,
 }
 
 
+/* how many stack arguments a multideref op expects */
+#ifdef PERL_RC_STACK
+STATIC I32
+S_multideref_argcount(pTHX)
+{
+    UNOP_AUX_item *items = cUNOP_AUXx(PL_op)->op_aux;
+    UV actions = items->uv;
+    I32 nargs;
+
+    switch (actions & MDEREF_ACTION_MASK) {
+    case MDEREF_AV_pop_rv2av_aelem:             /* expr->[...] */
+    case MDEREF_HV_pop_rv2hv_helem:             /* expr->{...} */
+        nargs = 1;
+        break;
+    default:
+        nargs = 0;
+    }
+    return nargs;
+}
+#endif
+
+
 /* Handle one or more aggregate derefs and array/hash indexings, e.g.
  * $h->{foo}  or  $a[0]{$key}[$i]  or  f()->[1]
  *
@@ -3635,7 +3817,7 @@ S_softref2xv_lite(pTHX_ SV *const sv, const char *const what,
  * one UV, and only reload when it becomes zero.
  */
 
-PP(pp_multideref)
+PP_wrapped(pp_multideref, S_multideref_argcount(aTHX), 0)
 {
     SV *sv = NULL; /* init to avoid spurious 'may be used uninitialized' */
     UNOP_AUX_item *items = cUNOP_AUXx(PL_op)->op_aux;
@@ -4043,7 +4225,7 @@ PP(pp_multideref)
 }
 
 
-PP(pp_iter)
+PP_wrapped(pp_iter, 0, 0)
 {
     PERL_CONTEXT *cx = CX_CUR();
     SV **itersvp = CxITERVAR(cx);
@@ -4380,7 +4562,7 @@ pp_match is just a simpler version of the above.
 
 */
 
-PP(pp_subst)
+PP_wrapped(pp_subst, ((PL_op->op_flags & OPf_STACKED) ? 2 : 1), 0)
 {
     dSP; dTARG;
     PMOP *pm = cPMOP;
@@ -4777,6 +4959,7 @@ PP(pp_subst)
     RETURN;
 }
 
+
 PP(pp_grepwhile)
 {
     /* Understanding the stack during a grep.
@@ -4830,17 +5013,30 @@ PP(pp_grepwhile)
      *
      */
 
-    dSP;
-    dPOPss;
+    bool match = SvTRUE_NN(*PL_stack_sp);
+    rpp_popfree_1();
 
-    if (SvTRUE_NN(sv))
-        PL_stack_base[PL_markstack_ptr[-1]++] = PL_stack_base[*PL_markstack_ptr];
+    if (match) {
+        SV **from_p = PL_stack_base + PL_markstack_ptr[0];
+        SV **to_p   = PL_stack_base + PL_markstack_ptr[-1]++;
+        SV *from    = *from_p;
+        SV *to      = *to_p;
+
+        if (from != to) {
+            *to_p = from;
+#ifdef PERL_RC_STACK
+            SvREFCNT_inc_simple_void_NN(from);
+            SvREFCNT_dec(to);
+#endif
+        }
+    }
+
     ++*PL_markstack_ptr;
     FREETMPS;
     LEAVE_with_name("grep_item");					/* exit inner scope */
 
     /* All done yet? */
-    if (UNLIKELY(PL_stack_base + *PL_markstack_ptr > SP)) {
+    if (UNLIKELY(PL_stack_base + *PL_markstack_ptr > PL_stack_sp)) {
         I32 items;
         const U8 gimme = GIMME_V;
 
@@ -4848,18 +5044,24 @@ PP(pp_grepwhile)
         (void)POPMARK;				/* pop src */
         items = --*PL_markstack_ptr - PL_markstack_ptr[-1];
         (void)POPMARK;				/* pop dst */
-        SP = PL_stack_base + POPMARK;		/* pop original mark */
-        if (gimme == G_SCALAR) {
-            if (PL_op->op_private & OPpTRUEBOOL)
-                PUSHs(items ? &PL_sv_yes : &PL_sv_zero);
-            else {
-                dTARGET;
-                PUSHi(items);
+        SV **base = PL_stack_base + POPMARK;	/* pop original mark */
+
+        if (gimme == G_LIST)
+            rpp_popfree_to(base + items);
+        else {
+            rpp_popfree_to(base);
+            if (gimme == G_SCALAR) {
+                if (PL_op->op_private & OPpTRUEBOOL)
+                    rpp_push_1(items ? &PL_sv_yes : &PL_sv_zero);
+                else {
+                    dTARGET;
+                    TARGi(items,1);
+                    rpp_push_1(TARG);
+                }
             }
         }
-        else if (gimme == G_LIST)
-            SP += items;
-        RETURN;
+
+        return NORMAL;
     }
     else {
         SV *src;
@@ -4869,15 +5071,22 @@ PP(pp_grepwhile)
 
         src = PL_stack_base[TOPMARK];
         if (SvPADTMP(src)) {
-            src = PL_stack_base[TOPMARK] = sv_mortalcopy(src);
+            SV *newsrc = sv_mortalcopy(src);
+             PL_stack_base[TOPMARK] = newsrc;
+#ifdef PERL_RC_STACK
+            SvREFCNT_inc_simple_void_NN(newsrc);
+            SvREFCNT_dec(src);
+#endif
+            src = newsrc;
             PL_tmps_floor++;
         }
         SvTEMP_off(src);
         DEFSV_set(src);
 
-        RETURNOP(cLOGOP->op_other);
+        return cLOGOP->op_other;
     }
 }
+
 
 /* leave_adjust_stacks():
  *
@@ -4942,7 +5151,6 @@ PP(pp_grepwhile)
 void
 Perl_leave_adjust_stacks(pTHX_ SV **from_sp, SV **to_sp, U8 gimme, int pass)
 {
-    dSP;
     SSize_t tmps_base; /* lowest index into tmps stack that needs freeing now */
     SSize_t nargs;
 
@@ -4951,22 +5159,37 @@ Perl_leave_adjust_stacks(pTHX_ SV **from_sp, SV **to_sp, U8 gimme, int pass)
     TAINT_NOT;
 
     if (gimme == G_LIST) {
-        nargs = SP - from_sp;
+        nargs = PL_stack_sp - from_sp;
         from_sp++;
     }
     else {
         assert(gimme == G_SCALAR);
-        if (UNLIKELY(from_sp >= SP)) {
+        if (UNLIKELY(from_sp >= PL_stack_sp)) {
             /* no return args */
-            assert(from_sp == SP);
-            EXTEND(SP, 1);
-            *++SP = &PL_sv_undef;
+            assert(from_sp == PL_stack_sp);
+            rpp_extend(1);
+            *++PL_stack_sp = &PL_sv_undef;
         }
-        from_sp = SP;
+        from_sp = PL_stack_sp;
         nargs   = 1;
     }
 
     /* common code for G_SCALAR and G_LIST */
+
+#ifdef PERL_RC_STACK
+    {
+        /* free any items from the stack which are about to get
+         * over-written */
+        SV **p = from_sp - 1;
+        assert(p >= to_sp);
+        while (p > to_sp) {
+            SV *sv = *p;
+            *p-- = NULL;
+            SvREFCNT_dec(sv);
+        }
+    }
+#endif
+
 
     tmps_base = PL_tmps_floor + 1;
 
@@ -5016,13 +5239,17 @@ Perl_leave_adjust_stacks(pTHX_ SV **from_sp, SV **to_sp, U8 gimme, int pass)
 #endif
 
             if (
-               pass == 0 ? (SvTEMP(sv) && !SvMAGICAL(sv) && SvREFCNT(sv) == 1)
+               pass == 0 ? (rpp_is_lone(sv) && !SvMAGICAL(sv))
              : pass == 1 ? ((SvTEMP(sv) || SvPADTMP(sv)) && !SvMAGICAL(sv) && SvREFCNT(sv) == 1)
              : pass == 2 ? (!SvPADTMP(sv))
              : 1)
             {
                 /* pass through: skip copy for logic or optimisation
                  * reasons; instead mortalise it, except that ... */
+
+#ifdef PERL_RC_STACK
+                from_sp[-1] = NULL;
+#endif
                 *++to_sp = sv;
 
                 if (SvTEMP(sv)) {
@@ -5100,7 +5327,6 @@ Perl_leave_adjust_stacks(pTHX_ SV **from_sp, SV **to_sp, U8 gimme, int pass)
                 PL_tmps_stack[++PL_tmps_ix] = *tmps_basep;
                 /* put it on the tmps stack early so it gets freed if we die */
                 *tmps_basep++ = newsv;
-                *++to_sp = newsv;
 
                 if (SvTYPE(sv) <= SVt_IV) {
                     /* arg must be one of undef, IV/UV, or RV: skip
@@ -5153,6 +5379,17 @@ Perl_leave_adjust_stacks(pTHX_ SV **from_sp, SV **to_sp, U8 gimme, int pass)
                     tmps_basep = PL_tmps_stack + old_base;
                     TAINT_NOT;	/* Each item is independent */
                 }
+
+
+#ifdef PERL_RC_STACK
+                from_sp[-1] = NULL;
+                SvREFCNT_dec_NN(sv);
+                assert(!to_sp[1]);
+                *++to_sp = newsv;
+                SvREFCNT_inc_simple_void_NN(newsv);
+#else
+                *++to_sp = newsv;
+#endif
 
             }
         } while (--nargs);
@@ -5220,7 +5457,7 @@ PP(pp_leavesub)
     oldsp = PL_stack_base + cx->blk_oldsp; /* last arg of previous frame */
 
     if (gimme == G_VOID)
-        PL_stack_sp = oldsp;
+        rpp_popfree_to(oldsp);
     else
         leave_adjust_stacks(oldsp, oldsp, gimme, 0);
 
@@ -5242,16 +5479,25 @@ Perl_clear_defarray(pTHX_ AV* av, bool abandon)
 {
     PERL_ARGS_ASSERT_CLEAR_DEFARRAY;
 
-    if (LIKELY(!abandon && SvREFCNT(av) == 1 && !SvMAGICAL(av))) {
-        av_clear(av);
+    if (LIKELY(!abandon && SvREFCNT(av) == 1 && !SvMAGICAL(av))
+#ifndef PERL_RC_STACK
+        && !AvREAL(av)
+#endif
+    ) {
+        clear_defarray_simple(av);
+#ifndef PERL_RC_STACK
         AvREIFY_only(av);
+#endif
     }
     else {
+        /* abandon */
         const SSize_t size = AvFILLp(av) + 1;
         /* The ternary gives consistency with av_extend() */
-        AV *newav = newAV_alloc_x(size < PERL_ARRAY_NEW_MIN_KEY ?
+        AV *newav = newAV_alloc_xz(size < PERL_ARRAY_NEW_MIN_KEY ?
                                          PERL_ARRAY_NEW_MIN_KEY : size);
+#ifndef PERL_RC_STACK
         AvREIFY_only(newav);
+#endif
         PAD_SVl(0) = MUTABLE_SV(newav);
         SvREFCNT_dec_NN(av);
     }
@@ -5260,11 +5506,11 @@ Perl_clear_defarray(pTHX_ AV* av, bool abandon)
 
 PP(pp_entersub)
 {
-    dSP; dPOPss;
     GV *gv;
     CV *cv;
     PERL_CONTEXT *cx;
     I32 old_savestack_ix;
+    SV *sv = *PL_stack_sp;
 
     if (UNLIKELY(!sv))
         goto do_die;
@@ -5312,7 +5558,6 @@ PP(pp_entersub)
               do_ref:
                 if (UNLIKELY(SvAMAGIC(sv))) {
                     sv = amagic_deref_call(sv, to_cv_amg);
-                    /* Don't SPAGAIN here.  */
                 }
             }
             else {
@@ -5406,6 +5651,8 @@ PP(pp_entersub)
             DIE(aTHX_ "No DB::sub routine defined");
     }
 
+    rpp_popfree_1(); /* finished with sv now */
+
     if (!(CvISXSUB(cv))) {
         /* This path taken at least 75% of the time   */
         dMARK;
@@ -5421,12 +5668,20 @@ PP(pp_entersub)
          */
         {
             SV **svp = MARK;
-            while (svp < SP) {
+            while (svp < PL_stack_sp) {
                 SV *sv = *++svp;
                 if (!sv)
                     continue;
-                if (SvPADTMP(sv))
-                    *svp = sv = sv_mortalcopy(sv);
+                if (SvPADTMP(sv)) {
+                    SV *newsv = sv_mortalcopy(sv);
+                    *svp = newsv;
+#ifdef PERL_RC_STACK
+                    /* should just skip the mortalisation instead */
+                    SvREFCNT_inc_simple_void_NN(newsv);
+                    SvREFCNT_dec_NN(sv);
+#endif
+                    sv = newsv;
+                }
                 SvTEMP_off(sv);
             }
         }
@@ -5452,9 +5707,15 @@ PP(pp_entersub)
             /* it's the responsibility of whoever leaves a sub to ensure
              * that a clean, empty AV is left in pad[0]. This is normally
              * done by cx_popsub() */
-            assert(!AvREAL(av) && AvFILLp(av) == -1);
 
-            items = SP - MARK;
+#ifdef PERL_RC_STACK
+            assert(AvREAL(av));
+#else
+            assert(!AvREAL(av));
+#endif
+            assert(AvFILLp(av) == -1);
+
+            items = PL_stack_sp - MARK;
             if (UNLIKELY(items - 1 > AvMAX(av))) {
                 SV **ary = AvALLOC(av);
                 Renew(ary, items, SV*);
@@ -5466,6 +5727,10 @@ PP(pp_entersub)
             if (items)
                 Copy(MARK+1,AvARRAY(av),items,SV*);
             AvFILLp(av) = items - 1;
+#ifdef PERL_RC_STACK
+            /* transfer ownership of the arguments' refcounts to av */
+            PL_stack_sp = MARK;
+#endif
         }
         if (UNLIKELY((cx->blk_u16 & OPpENTERSUB_LVAL_MASK) == OPpLVAL_INTRO &&
             !CvLVALUE(cv)))
@@ -5479,7 +5744,7 @@ PP(pp_entersub)
                 && ckWARN(WARN_RECURSION)
                 && !(PERLDB_SUB && cv == GvCV(PL_DBsub))))
             sub_crush_depth(cv);
-        RETURNOP(CvSTART(cv));
+        return CvSTART(cv);
     }
     else {
         SSize_t markix = TOPMARK;
@@ -5490,7 +5755,6 @@ PP(pp_entersub)
         PL_scopestack[PL_scopestack_ix - 1] = old_savestack_ix;
 
         SAVETMPS;
-        PUTBACK;
 
         if (UNLIKELY(((PL_op->op_private
                & CX_PUSHSUB_GET_LVALUE_MASK(Perl_is_lvalue_sub)
@@ -5510,7 +5774,7 @@ PP(pp_entersub)
                 SSize_t i = 0;
                 const bool m = cBOOL(SvRMAGICAL(av));
                 /* Mark is at the end of the stack. */
-                EXTEND(SP, items);
+                rpp_extend(items);
                 for (; i < items; ++i)
                 {
                     SV *sv;
@@ -5518,26 +5782,31 @@ PP(pp_entersub)
                         SV ** const svp = av_fetch(av, i, 0);
                         sv = svp ? *svp : NULL;
                     }
-                    else sv = AvARRAY(av)[i];
-                    if (sv) SP[i+1] = sv;
-                    else {
-                        SP[i+1] = av_nonelem(av, i);
-                    }
+                    else
+                        sv = AvARRAY(av)[i];
+
+                    rpp_push_1(sv ? sv : av_nonelem(av, i));
                 }
-                SP += items;
-                PUTBACK ;		
             }
         }
         else {
             SV **mark = PL_stack_base + markix;
-            SSize_t items = SP - mark;
+            SSize_t items = PL_stack_sp - mark;
             while (items--) {
                 mark++;
                 if (*mark && SvPADTMP(*mark)) {
-                    *mark = sv_mortalcopy(*mark);
+                    SV *oldsv = *mark;
+                    SV *newsv = sv_mortalcopy(oldsv);
+                    *mark = newsv;
+#ifdef PERL_RC_STACK
+                    /* should just skip the mortalisation instead */
+                    SvREFCNT_inc_simple_void_NN(newsv);
+                    SvREFCNT_dec_NN(oldsv);
+#endif
                 }
             }
         }
+
         /* We assume first XSUB in &DB::sub is the called one. */
         if (UNLIKELY(PL_curcopdb)) {
             SAVEVPTR(PL_curcop);
@@ -5552,7 +5821,8 @@ PP(pp_entersub)
 
         /* CvXSUB(cv) must not be NULL because newXS() refuses NULL xsub address */
         assert(CvXSUB(cv));
-        CvXSUB(cv)(aTHX_ cv);
+
+        rpp_invoke_xs(cv);
 
 #if defined DEBUGGING && !defined DEBUGGING_RE_ONLY
         /* This duplicates the check done in runops_debug(), but provides more
@@ -5573,8 +5843,21 @@ PP(pp_entersub)
         if (is_scalar) {
             SV **svp = PL_stack_base + markix + 1;
             if (svp != PL_stack_sp) {
+#ifdef PERL_RC_STACK
+                if (svp < PL_stack_sp) {
+                    /* move return value to bottom of stack frame
+                     * and free everything else */
+                    SV* retsv = *PL_stack_sp;
+                    *PL_stack_sp = *svp;
+                    *svp = retsv;
+                    rpp_popfree_to(svp);
+                }
+                else
+                    *++PL_stack_sp = &PL_sv_undef;
+#else
                 *svp = svp > PL_stack_sp ? &PL_sv_undef : *PL_stack_sp;
                 PL_stack_sp = svp;
+#endif
             }
         }
         LEAVE;
@@ -5617,7 +5900,7 @@ Perl_croak_caller(const char *pat, ...)
 }
 
 
-PP(pp_aelem)
+PP_wrapped(pp_aelem, 2, 0)
 {
     dSP;
     SV** svp;
@@ -5772,7 +6055,19 @@ S_opmethod_stash(pTHX_ SV* meth)
             ob = LvTARG(ob);
             assert(ob);
         }
-        *(PL_stack_base + TOPMARK + 1) = sv_2mortal(newRV(ob));
+        /* Replace the object at the base of the stack frame.
+         * This is "below" whatever pp_wrap has wrapped, so needs freeing.
+         */
+        SV *newsv = sv_2mortal(newRV(ob));
+        SV **svp = (PL_stack_base + TOPMARK + 1);
+#ifdef PERL_RC_STACK
+        SV *oldsv = *svp;
+#endif
+        *svp = newsv;
+#ifdef PERL_RC_STACK
+        SvREFCNT_inc_simple_void_NN(newsv);
+        SvREFCNT_dec_NN(oldsv);
+#endif
     }
     else {
         /* this isn't a reference */
@@ -5800,8 +6095,20 @@ S_opmethod_stash(pTHX_ SV* meth)
             if (stash) return stash;
             else return MUTABLE_HV(sv);
         }
-        /* it _is_ a filehandle name -- replace with a reference */
-        *(PL_stack_base + TOPMARK + 1) = sv_2mortal(newRV(MUTABLE_SV(iogv)));
+        /* it _is_ a filehandle name -- replace with a reference.
+         * Replace the object at the base of the stack frame.
+         * This is "below" whatever pp_wrap has wrapped, so needs freeing.
+         */
+        SV *newsv = sv_2mortal(newRV(MUTABLE_SV(iogv)));
+        SV **svp = (PL_stack_base + TOPMARK + 1);
+#ifdef PERL_RC_STACK
+        SV *oldsv = *svp;
+#endif
+        *svp = newsv;
+#ifdef PERL_RC_STACK
+        SvREFCNT_inc_simple_void_NN(newsv);
+        SvREFCNT_dec_NN(oldsv);
+#endif
     }
 
     /* if we got here, ob should be an object or a glob */
@@ -5819,7 +6126,7 @@ S_opmethod_stash(pTHX_ SV* meth)
     return SvSTASH(ob);
 }
 
-PP(pp_method)
+PP_wrapped(pp_method, 1, 0)
 {
     dSP;
     GV* gv;
@@ -5855,7 +6162,7 @@ PP(pp_method)
         }								\
     }									\
 
-PP(pp_method_named)
+PP_wrapped(pp_method_named, 0, 0)
 {
     dSP;
     GV* gv;
@@ -5873,7 +6180,7 @@ PP(pp_method_named)
     RETURN;
 }
 
-PP(pp_method_super)
+PP_wrapped(pp_method_super, 0, 0)
 {
     dSP;
     GV* gv;
@@ -5896,7 +6203,7 @@ PP(pp_method_super)
     RETURN;
 }
 
-PP(pp_method_redir)
+PP_wrapped(pp_method_redir, 0, 0)
 {
     dSP;
     GV* gv;
@@ -5914,7 +6221,7 @@ PP(pp_method_redir)
     RETURN;
 }
 
-PP(pp_method_redir_super)
+PP_wrapped(pp_method_redir_super, 0, 0)
 {
     dSP;
     GV* gv;

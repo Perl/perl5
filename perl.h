@@ -38,6 +38,11 @@
 #define USE_STDIO
 #endif /* PERL_FOR_X2P */
 
+/* Treat the SVs on the argument stack as having been reference counted.
+ * (Experimental).
+ */
+/* #define PERL_RC_STACK */
+
 #include "config.h"
 
 /* This fakes up using Mingw for locale handling.  In order to not define WIN32
@@ -273,7 +278,11 @@ Now a no-op.
 #  define MEMBER_TO_FPTR(name) name
 #endif /* !PERL_CORE */
 
-#define CALLRUNOPS  PL_runops
+#ifdef PERL_RC_STACK
+#  define CALLRUNOPS  Perl_runops_wrap
+#else
+#  define CALLRUNOPS  PL_runops
+#endif
 
 #define CALLREGCOMP(sv, flags) Perl_pregcomp(aTHX_ (sv),(flags))
 

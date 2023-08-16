@@ -15080,6 +15080,9 @@ Perl_si_dup(pTHX_ PERL_SI *si, CLONE_PARAMS* param)
     nsi->si_prev	= si_dup(si->si_prev, param);
     nsi->si_next	= si_dup(si->si_next, param);
     nsi->si_markoff	= si->si_markoff;
+#ifdef PERL_RC_STACK
+    nsi->si_stack_nonrc_base = si->si_stack_nonrc_base;
+#endif
 #if defined DEBUGGING && !defined DEBUGGING_RE_ONLY
     nsi->si_stack_hwm   = 0;
 #endif
@@ -16270,12 +16273,14 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
         HV* const stash = MUTABLE_HV(av_shift(param->stashes));
         GV* const cloner = gv_fetchmethod_autoload(stash, "CLONE", 0);
         if (cloner && GvCV(cloner)) {
-            dSP;
             ENTER;
             SAVETMPS;
-            PUSHMARK(SP);
-            mXPUSHs(newSVhek(HvNAME_HEK(stash)));
-            PUTBACK;
+            PUSHMARK(PL_stack_sp);
+            rpp_extend(1);
+            SV *newsv = newSVhek(HvNAME_HEK(stash));
+            *++PL_stack_sp = newsv;
+            if (!rpp_stack_is_rc())
+                sv_2mortal(newsv);
             call_sv(MUTABLE_SV(GvCV(cloner)), G_DISCARD);
             FREETMPS;
             LEAVE;

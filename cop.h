@@ -889,12 +889,14 @@ struct block_format {
     } STMT_END
 
 /* junk in @_ spells trouble when cloning CVs and in pp_caller(), so don't
- * leave any (a fast av_clear(ary), basically) */
+ * leave any (a fast av_clear(ary), basically).
+ * New code should probably be using Perl_clear_defarray_simple()
+ * and/or Perl_clear_defarray()
+ */
 #define CLEAR_ARGARRAY(ary) \
     STMT_START {							\
-        AvMAX(ary) += AvARRAY(ary) - AvALLOC(ary);			\
-        AvARRAY(ary) = AvALLOC(ary);					\
         AvFILLp(ary) = -1;						\
+        av_remove_offset(ary);                                          \
     } STMT_END
 
 
@@ -1259,6 +1261,15 @@ struct stackinfo {
     I32			si_markoff;	/* offset where markstack begins for us.
                                          * currently used only with DEBUGGING,
                                          * but not #ifdef-ed for bincompat */
+
+#ifdef PERL_RC_STACK
+                                        /* index of first entry in the argument
+                                           stack which is not ref-counted. If
+                                           set to 0 (default), all stack
+                                           elements are ref-counted */
+    I32                 si_stack_nonrc_base;
+#endif
+
 #if defined DEBUGGING && !defined DEBUGGING_RE_ONLY
 /* high water mark: for checking if the stack was correctly extended /
  * tested for extension by each pp function */
@@ -1292,54 +1303,31 @@ typedef struct stackinfo PERL_SI;
 #  define PUSHSTACK_INIT_HWM(si) NOOP
 #endif
 
+/* for backcompat; use push_stackinfo() instead */
+
 #define PUSHSTACKi(type) \
-    STMT_START {							\
-        PERL_SI *next = PL_curstackinfo->si_next;			\
-        DEBUG_l({							\
-            int i = 0; PERL_SI *p = PL_curstackinfo;			\
-            while (p) { i++; p = p->si_prev; }				\
-            Perl_deb(aTHX_ "push STACKINFO %d in %s at %s:%d\n",        \
-                         i, SAFE_FUNCTION__, __FILE__, __LINE__);})        \
-        if (!next) {							\
-            next = new_stackinfo(32, 2048/sizeof(PERL_CONTEXT) - 1);	\
-            next->si_prev = PL_curstackinfo;				\
-            PL_curstackinfo->si_next = next;				\
-        }								\
-        next->si_type = type;						\
-        next->si_cxix = -1;						\
-        next->si_cxsubix = -1;						\
-        PUSHSTACK_INIT_HWM(next);                                       \
-        AvFILLp(next->si_stack) = 0;					\
-        SWITCHSTACK(PL_curstack,next->si_stack);			\
-        PL_curstackinfo = next;						\
-        SET_MARK_OFFSET;						\
+    STMT_START {		\
+        PL_stack_sp = sp;       \
+        push_stackinfo(type, 0);\
+        sp = PL_stack_sp ;      \
     } STMT_END
 
 #define PUSHSTACK PUSHSTACKi(PERLSI_UNKNOWN)
 
-/* POPSTACK works with PL_stack_sp, so it may need to be bracketed by
+
+/* for backcompat; use pop_stackinfo() instead.
+ *
+ * POPSTACK works with PL_stack_sp, so it may need to be bracketed by
  * PUTBACK/SPAGAIN to flush/refresh any local SP that may be active */
-#define POPSTACK \
-    STMT_START {							\
-        dSP;								\
-        PERL_SI * const prev = PL_curstackinfo->si_prev;		\
-        DEBUG_l({							\
-            int i = -1; PERL_SI *p = PL_curstackinfo;			\
-            while (p) { i++; p = p->si_prev; }				\
-            Perl_deb(aTHX_ "pop  STACKINFO %d in %s at %s:%d\n",        \
-                         i, SAFE_FUNCTION__, __FILE__, __LINE__);})        \
-        if (!prev) {							\
-            Perl_croak_popstack();					\
-        }								\
-        SWITCHSTACK(PL_curstack,prev->si_stack);			\
-        /* don't free prev here, free them all at the END{} */		\
-        PL_curstackinfo = prev;						\
-    } STMT_END
+
+#define POPSTACK pop_stackinfo()
+
 
 #define POPSTACK_TO(s) \
     STMT_START {							\
         while (PL_curstack != s) {					\
             dounwind(-1);						\
+            rpp_obliterate_stack_to(0);					\
             POPSTACK;							\
         }								\
     } STMT_END

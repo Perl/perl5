@@ -690,16 +690,20 @@ THX_run_cleanup(pTHX_ void *cleanup_code_ref)
     POPSTACK;
 }
 
+/* Note that this is a pp function attached to an OP */
+
 STATIC OP *
 THX_pp_establish_cleanup(pTHX)
 {
-    dSP;
     SV *cleanup_code_ref;
-    cleanup_code_ref = newSVsv(POPs);
+    cleanup_code_ref = newSVsv(*PL_stack_sp);
+    rpp_popfree_1();
     SAVEFREESV(cleanup_code_ref);
     SAVEDESTRUCTOR_X(THX_run_cleanup, cleanup_code_ref);
-    if(GIMME_V != G_VOID) PUSHs(&PL_sv_undef);
-    RETURN;
+    if(GIMME_V != G_VOID)
+        rpp_push_1(&PL_sv_undef);
+    return NORMAL;
+    ;
 }
 
 STATIC OP *
@@ -1513,6 +1517,43 @@ test_bool_internals_func(SV *true_sv, SV *false_sv, const char *msg) {
     SvREFCNT_dec(false_sv);
     return failed;
 }
+
+
+/* A simplified/fake replacement for pp_add, which tests the pp
+ * function wrapping API, XSPP_wrapped() for a fixed number of args*/
+
+XSPP_wrapped(my_pp_add, 2, 0)
+{
+    SV *ret;
+    dSP;
+    SV *r = POPs;
+    SV *l = TOPs;
+    if (SvROK(l))
+        l = SvRV(l);
+    if (SvROK(r))
+        r = SvRV(r);
+    ret = newSViv( SvIV(l) + SvIV(r));
+    sv_2mortal(ret);
+    SETs(ret);
+    RETURN;
+}
+
+
+/* A copy of pp_anonlist, which tests the pp
+ * function wrapping API, XSPP_wrapped()  for a list*/
+
+XSPP_wrapped(my_pp_anonlist, 0, 1)
+{
+    dSP; dMARK;
+    const I32 items = SP - MARK;
+    SV * const av = MUTABLE_SV(av_make(items, MARK+1));
+    SP = MARK;
+    mXPUSHs((PL_op->op_flags & OPf_SPECIAL)
+            ? newRV_noinc(av) : av);
+    RETURN;
+}
+
+
 #include "const-c.inc"
 
 void
@@ -4105,6 +4146,10 @@ CODE:
     PerlInterpreter *interp_dup;    /* The duplicate interpreter */
     int oldscope = 1; /* We are responsible for all scopes */
 
+    /* push a ref-counted and non-RC stackinfo to see how they get cloned */
+    push_stackinfo(PERLSI_UNKNOWN, 1);
+    push_stackinfo(PERLSI_UNKNOWN, 0);
+
     interp_dup = perl_clone(interp, CLONEf_COPY_STACKS | CLONEf_CLONE_HOST );
 
     /* destroy old perl */
@@ -4125,12 +4170,22 @@ CODE:
     /* switch to new perl */
     PERL_SET_CONTEXT(interp_dup);
 
+    /* check and pop the stackinfo's pushed above */
+#ifdef PERL_RC_STACK
+    assert(!AvREAL(PL_curstack));
+#endif
+    pop_stackinfo();
+#ifdef PERL_RC_STACK
+    assert(AvREAL(PL_curstack));
+#endif
+    pop_stackinfo();
+
     /* continue after 'clone_with_stack' */
     if (interp_dup->Iop)
         interp_dup->Iop = interp_dup->Iop->op_next;
 
     /* run with new perl */
-    Perl_runops_standard(interp_dup);
+    CALLRUNOPS(interp_dup);
 
     /* We may have additional unclosed scopes if fork() was called
      * from within a BEGIN block.  See perlfork.pod for more details.
@@ -4748,6 +4803,53 @@ sv_streq_flags(SV *sv1, SV *sv2, U32 flags)
         RETVAL = sv_streq_flags(sv1, sv2, flags);
     OUTPUT:
         RETVAL
+
+void
+set_custom_pp_func(sv)
+    SV *sv;
+    PPCODE:
+        /* replace the pp func of the next op */
+        OP* o = PL_op->op_next;
+        if (o->op_type == OP_ADD)
+            o->op_ppaddr = my_pp_add;
+        else if (o->op_type == OP_ANONLIST)
+            o->op_ppaddr = my_pp_anonlist;
+        else
+            croak("set_custom_pp_func: op_next is not an OP_ADD\n");
+
+        /* the single SV arg is passed through */
+        PERL_UNUSED_ARG(sv);
+        XSRETURN(1);
+
+void
+set_xs_rc_stack(cv, sv)
+    CV *cv;
+    SV *sv;
+    PPCODE:
+        /* set or undet the CVf_XS_RCSTACK flag on the CV */
+        assert(SvTYPE(cv) == SVt_PVCV);
+        if (SvTRUE(sv))
+            CvXS_RCSTACK_on(cv);
+        else
+            CvXS_RCSTACK_off(cv);
+        XSRETURN(0);
+
+void
+rc_add(sv1, sv2)
+    SV *sv1;
+    SV *sv2;
+    PPCODE:
+        /* Do the XS equivalent of pp_add(), while expecting a
+         * reference-counted stack */
+
+        /* manipulate the stack directly */
+        PERL_UNUSED_ARG(sv1);
+        PERL_UNUSED_ARG(sv2);
+        SV *r = newSViv(SvIV(PL_stack_sp[-1]) + SvIV(PL_stack_sp[0]));
+        rpp_replace_2_1(r);
+        return;
+
+
 
 MODULE = XS::APItest PACKAGE = XS::APItest::AUTOLOADtest
 

@@ -4898,6 +4898,7 @@ ext/XS-APItest/t/ptr_table.t			Test ptr_table_* APIs
 ext/XS-APItest/t/push.t				XS::APItest extension
 ext/XS-APItest/t/refs.t				Test typemap ref handling
 ext/XS-APItest/t/rmagical.t			XS::APItest extension
+ext/XS-APItest/t/rpp_invoke_xs.t		XS::APItest: test rpp_invoke_xs()
 ext/XS-APItest/t/rv2cv_op_cv.t			test rv2cv_op_cv() API
 ext/XS-APItest/t/savehints.t			test SAVEHINTS() API
 ext/XS-APItest/t/savestack.t			test savestack behavior, currently only in the regex engine
@@ -4944,6 +4945,7 @@ ext/XS-APItest/t/whichsig.t			XS::APItest: tests for whichsig() and variants
 ext/XS-APItest/t/win32.t			Test Win32 specific APIs
 ext/XS-APItest/t/xs_special_subs.t		Test that XS BEGIN/CHECK/INIT/END work
 ext/XS-APItest/t/xs_special_subs_require.t	for require too
+ext/XS-APItest/t/xsppwrap.t			Tests for XSPP_wrapped() macro
 ext/XS-APItest/t/xsub_h.t			Tests for XSUB.h
 ext/XS-APItest/typemap
 ext/XS-APItest/XSUB-redefined-macros.xs		XS code needing redefined macros.
@@ -6110,6 +6112,7 @@ t/op/readdir.t				See if readdir() works
 t/op/readline.t				See if <> / readline / rcatline work
 t/op/recurse.t				See if deep recursion works
 t/op/ref.t				See if refs and objects work
+t/op/refstack.t				See if a ref counted stack fixes things
 t/op/repeat.t				See if x operator works
 t/op/require_37033.t			See if require always closes rsfp
 t/op/require_errors.t			See if errors from require are reported correctly
