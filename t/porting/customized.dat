@@ -8,7 +8,6 @@ Digest::MD5 cpan/Digest-MD5/t/files.t d3d8c88cb6849f73a15e8746ab62bafb67d3c981
 ExtUtils::Constant cpan/ExtUtils-Constant/lib/ExtUtils/Constant/Base.pm 7560e1018f806db5689dee78728ccb8374aea741
 ExtUtils::Constant cpan/ExtUtils-Constant/t/Constant.t 165e9c7132b003fd192d32a737b0f51f9ba4999e
 Filter::Util::Call pod/perlfilter.pod d1e217d0bc6083755b9017050b8724472c58275a
-IO::Socket::IP cpan/IO-Socket-IP/lib/IO/Socket/IP.pm a3390d0b3b617a0b810c75941bfc6e6d0be5b785
 Locale::Maketext::Simple cpan/Locale-Maketext-Simple/lib/Locale/Maketext/Simple.pm 57ed38905791a17c150210cd6f42ead22a7707b6
 MIME::Base64 cpan/MIME-Base64/Base64.xs ad617fe2d01932c35b92defa26d40aba601a95a8
 MIME::Base64 cpan/MIME-Base64/lib/MIME/Base64.pm 18e38d197c7c83f96b24f48bef514e93908e6a82

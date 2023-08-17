@@ -672,7 +672,8 @@ use File::Glob qw(:case);
     },
 
     'IO::Socket::IP' => {
-        'DISTRIBUTION' => 'PEVANS/IO-Socket-IP-0.41.tar.gz',
+        'DISTRIBUTION' => 'PEVANS/IO-Socket-IP-0.42.tar.gz',
+        'SYNCINFO'     => 'jkeenan on Wed Aug 16 21:34:20 2023',
         'FILES'        => q[cpan/IO-Socket-IP],
         'EXCLUDED'     => [
             qr{^examples/},
