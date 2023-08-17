@@ -1,10 +1,10 @@
-package builtin 0.009;
+package builtin 0.010;
 
 use strict;
 use warnings;
 
-# All code, including &import, is implemented by always-present functions in
-# the perl interpreter itself.
+# All code, including &import and &unimport, is implemented by always-present
+# functions in the perl interpreter itself.
 # See also `builtin.c` in perl source
 
 1;
@@ -75,6 +75,14 @@ don't accidentally appear as object methods from a class.
 
     # Can't locate object method "true" via package "An::Object::Class"
     #   at ...
+
+Imported symbols can also be removed again by using the C<no> keyword:
+
+    use builtin 'true';
+    my $yes = true;
+
+    no builtin 'true';
+    # true() is no longer aliased from builtin
 
 =head1 FUNCTIONS
 
