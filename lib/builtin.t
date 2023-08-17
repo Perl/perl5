@@ -273,6 +273,27 @@ package FetchStoreCounter {
     ok($recursecoderef->("rec"), 'true in self-recursive anon sub');
 }
 
+# imported builtins can be unexported
+{
+    package UnimportTest;
+
+    sub true() { return "true" };
+
+    {
+        use builtin 'true';
+        no builtin 'true';
+
+        ::is(true(), "true", 'no builtin can remove lexical import');
+    }
+
+    {
+        use builtin 'true';
+        { no builtin 'true'; }
+
+        ::is(true(), 1, 'no builtin is lexically scoped');
+    }
+}
+
 {
     use builtin qw( true false );
 
