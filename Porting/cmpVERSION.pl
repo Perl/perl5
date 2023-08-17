@@ -209,6 +209,13 @@ sub pm_file_from_xs {
     die "No idea which .pm file corresponds to '$xs', so aborting";
 }
 
+# .c files that correspond directly to a perl module
+# universal.c is not here, since it powers many different modules,
+# so we can't know which one would need its version bumped
+my %c_mod = (
+    "builtin.c" => "lib/builtin.pm",
+);
+
 # Key is the .pm file from which we check the version.
 # Value is a reference to an array of files to check for differences
 # The trivial case is a pure perl module, where the array holds one element,
@@ -228,6 +235,8 @@ foreach (`git --no-pager diff --name-only $tag_to_compare --diff-filter=ACMRTUXB
         push @{$module_diffs{$_}}, $_;
     } elsif (/\.xs\z/ && !/\bt\b/) {
         push @{$module_diffs{pm_file_from_xs($_)}}, $_;
+    } elsif (my $mod = $c_mod{$_}) {
+        push @{$module_diffs{$mod}}, $_;
     } elsif (!/\bt\b/ && /\.[ch]\z/ && m!^((?:dist|ext|cpan)/[^/]+)/!) {
        push @{ $dist_diffs{$1} }, $_;
     }
