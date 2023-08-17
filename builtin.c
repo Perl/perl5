@@ -552,6 +552,8 @@ Perl_boot_core_builtin(pTHX)
             proto = "";
         else if(builtin->checker == &ck_builtin_func1)
             proto = "$";
+        else if(builtin->checker == &ck_builtin_funcN)
+            proto = "@";
 
         CV *cv = newXS_flags(builtin->name, builtin->xsub, __FILE__, proto, 0);
         XSANY.any_i32 = builtin->ckval;

@@ -305,6 +305,8 @@ package FetchStoreCounter {
         my $count = indexed 'i', 'ii', 'iii', 'iv';
         is($count, 8, 'indexed in scalar context yields size of list it would return');
     }
+
+    is(prototype(\&builtin::indexed), '@', 'indexed prototype');
 }
 
 # Vanilla trim tests
