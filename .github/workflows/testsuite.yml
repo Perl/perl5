@@ -265,6 +265,7 @@ jobs:
           - "-Dcc='g++'"
           - "-Accflags=-DSILENT_NO_TAINT_SUPPORT"
           - "-Accflags=-DNO_TAINT_SUPPORT"
+          - "-Accflags=-DPERL_RC_STACK"
 
     steps:
       - name: Install System dependencies
@@ -852,4 +853,3 @@ jobs:
       - name: Build and test dist modules
         run:
           /usr/bin/perl Porting/test-dist-modules.pl -continue -separate
-
