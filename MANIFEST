@@ -1400,6 +1400,7 @@ cpan/IO-Compress/t/files/meta.xml			IO-Compress
 cpan/IO-Compress/t/files/test.ods			IO-Compress
 cpan/IO-Compress/t/files/testfile1.odt			IO-Compress
 cpan/IO-Compress/t/globmapper.t				IO::Compress
+cpan/IO-Socket-IP/.editorconfig				IO-Socket-IP
 cpan/IO-Socket-IP/lib/IO/Socket/IP.pm			IO::Socket::IP
 cpan/IO-Socket-IP/t/00use.t				IO::Socket::IP tests
 cpan/IO-Socket-IP/t/01local-client-v4.t			IO::Socket::IP tests
@@ -1420,7 +1421,7 @@ cpan/IO-Socket-IP/t/18fdopen.t				IO::Socket::IP tests
 cpan/IO-Socket-IP/t/19no-addrs.t			IO::Socket::IP tests
 cpan/IO-Socket-IP/t/20subclass.t			IO::Socket::IP tests
 cpan/IO-Socket-IP/t/21as-inet.t				IO::Socket::IP tests
-cpan/IO-Socket-IP/t/22timeout.t
+cpan/IO-Socket-IP/t/22timeout.t				Test file related to IO::Socket::IP
 cpan/IO-Socket-IP/t/30nonblocking-connect.t		IO::Socket::IP tests
 cpan/IO-Socket-IP/t/31nonblocking-connect-internet.t	IO::Socket::IP tests
 cpan/IO-Socket-IP/t/99pod.t				IO::Socket::IP tests
