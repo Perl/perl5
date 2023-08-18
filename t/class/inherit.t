@@ -105,4 +105,13 @@ use A::B;
 EOS
 }
 
+{
+    # https://github.com/Perl/perl5/issues/20891
+    class Test6A 1.23 {}
+    class Test6B 1.23 :isa(Test6A) {}
+
+    ok(Test6B->new isa Test6A, 'Test6B inherits Test6B');
+    is(Test6B->VERSION, 1.23, 'Test6B sets VERSION');
+}
+
 done_testing;
