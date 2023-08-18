@@ -1200,6 +1200,7 @@ PP_wrapped(pp_multiconcat, S_multiconcat_argcount(aTHX), 0)
         U32 utf8 = 0;
         SV **svp;
         const char    *cpv  = aux[PERL_MULTICONCAT_IX_PLAIN_PV].pv;
+        SV            *csv  = NULL; /* SV which will hold cpv */
         UNOP_AUX_item *lens = aux + PERL_MULTICONCAT_IX_LENGTHS;
         Size_t arg_count = 0; /* how many args have been processed */
 
@@ -1265,7 +1266,14 @@ PP_wrapped(pp_multiconcat, S_multiconcat_argcount(aTHX), 0)
             else if (len < 0)
                 continue; /* no const in this position */
             else {
-                right = newSVpvn_flags(cpv, len, (utf8 | SVs_TEMP));
+                /* try to reuse csv if possible. If the refcount has gone
+                 * up, something like overload code has taken a reference
+                 * to it, so abandon it */
+                if (csv && SvREFCNT(csv) == 1)
+                    sv_setpvn(csv, cpv, len);
+                else
+                    csv = newSVpvn_flags(cpv, len, (utf8 | SVs_TEMP));
+                right = csv;
                 cpv += len;
             }
 
