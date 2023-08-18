@@ -1269,10 +1269,22 @@ PP_wrapped(pp_multiconcat, S_multiconcat_argcount(aTHX), 0)
                 /* try to reuse csv if possible. If the refcount has gone
                  * up, something like overload code has taken a reference
                  * to it, so abandon it */
-                if (csv && SvREFCNT(csv) == 1)
-                    sv_setpvn(csv, cpv, len);
-                else
-                    csv = newSVpvn_flags(cpv, len, (utf8 | SVs_TEMP));
+                if (!csv || SvREFCNT(csv) > 1 || SvLEN(csv) != 0) {
+                    csv = newSV_type_mortal(SVt_PV);
+                    if (utf8)
+                        SvUTF8_on(csv);
+                    SvREADONLY_on(csv);
+                    SvPOK_on(csv);
+                }
+                /* use the const string buffer directly with the
+                 * SvLEN==0 trick */
+
+                /* cast away constness because we think we know it's safe
+                 * (SvREADONLY) */
+                SvPV_set(csv, (char *)cpv);
+                SvLEN_set(csv, 0);
+                SvCUR_set(csv, len);
+
                 right = csv;
                 cpv += len;
             }
