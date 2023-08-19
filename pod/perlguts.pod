@@ -4650,6 +4650,11 @@ a temporary crutch. Eventually, PP functions should be updated to use
 rpp_() functions, and any new PP functions should be written this way from
 scratch and thus not ever need wrapping.
 
+A couple examples of core PP functions being converted can be seen in the
+commits C<v5.39.1-304-g205fcd8410> and C<v5.39.1-303-g2fe263a83a>, which
+demonstrate a unary and a binary op being converted (pp_not() and
+pp_and()).
+
 The traditional PP stack API consisted of a C<dSP> declaration, plus a
 number of macros to push, pop and extend the stack. A I<very simplified>
 pp_add() function might look something like:
