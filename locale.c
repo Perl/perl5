@@ -730,7 +730,7 @@ STATIC const Size_t lc_all_boiler_plate_length = 1  /* space for trailing NUL */
 STATIC void (*update_functions[]) (pTHX_ const char *, bool force) = {
 
 #  undef PERL_LOCALE_TABLE_ENTRY
-#  define PERL_LOCALE_TABLE_ENTRY(index, call_back)  call_back,
+#  define PERL_LOCALE_TABLE_ENTRY(name, call_back)  call_back,
 #  include "locale_table.h"
 
     S_new_LC_ALL,
