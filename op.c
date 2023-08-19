@@ -2440,6 +2440,12 @@ Perl_scalarvoid(pTHX_ OP *arg)
         case OP_SCALAR:
             scalar(o);
             break;
+        case OP_EMPTYAVHV:
+            if (!(o->op_private & OPpTARGET_MY))
+                useless = (o->op_private & OPpEMPTYAVHV_IS_HV) ?
+                           "anonymous hash ({})" :
+                           "anonymous array ([])";
+            break;
         }
 
         if (useless_sv) {
@@ -11705,13 +11711,18 @@ Perl_newFORM(pTHX_ I32 floor, OP *o, OP *block)
 OP *
 Perl_newANONLIST(pTHX_ OP *o)
 {
-    return op_convert_list(OP_ANONLIST, OPf_SPECIAL, o);
+    return (o) ? op_convert_list(OP_ANONLIST, OPf_SPECIAL, o)
+               : newOP(OP_EMPTYAVHV, 0);
 }
 
 OP *
 Perl_newANONHASH(pTHX_ OP *o)
 {
-    return op_convert_list(OP_ANONHASH, OPf_SPECIAL, o);
+    OP * anon = (o) ? op_convert_list(OP_ANONHASH, OPf_SPECIAL, o)
+                    : newOP(OP_EMPTYAVHV, 0);
+    if (!o)
+        anon->op_private |= OPpEMPTYAVHV_IS_HV;
+    return anon;
 }
 
 OP *
@@ -13117,18 +13128,26 @@ S_maybe_targlex(pTHX_ OP *o)
         OP * const kkid = OpSIBLING(kid);
 
         /* Can just relocate the target. */
-        if (kkid && kkid->op_type == OP_PADSV
-            && (!(kkid->op_private & OPpLVAL_INTRO)
-               || kkid->op_private & OPpPAD_STATE))
-        {
-            kid->op_targ = kkid->op_targ;
-            kkid->op_targ = 0;
-            /* Now we do not need PADSV and SASSIGN.
-             * Detach kid and free the rest. */
-            op_sibling_splice(o, NULL, 1, NULL);
-            op_free(o);
-            kid->op_private |= OPpTARGET_MY;	/* Used for context settings */
-            return kid;
+        if (kkid && kkid->op_type == OP_PADSV) {
+            if (kid->op_type == OP_EMPTYAVHV) {
+                kid->op_flags |= kid->op_flags |
+                              (o->op_flags & (OPf_WANT|OPf_PARENS));
+                kid->op_private |= OPpTARGET_MY |
+                              (kkid->op_private & (OPpLVAL_INTRO|OPpPAD_STATE));
+                goto swipe_and_detach;
+            } else if (!(kkid->op_private & OPpLVAL_INTRO)
+                   || (kkid->op_private & OPpPAD_STATE))
+            {
+                kid->op_private |= OPpTARGET_MY;       /* Used for context settings */
+            swipe_and_detach:
+                kid->op_targ = kkid->op_targ;
+                kkid->op_targ = 0;
+                /* Now we do not need PADSV and SASSIGN.
+                 * Detach kid and free the rest. */
+                op_sibling_splice(o, NULL, 1, NULL);
+                op_free(o);
+                return kid;
+            }
         }
     }
     return o;
