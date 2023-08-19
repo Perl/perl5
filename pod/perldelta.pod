@@ -377,6 +377,13 @@ it. It is functional, but currently slow and incomplete.
 
 See L<perlguts|perlguts/"Reference-counted argument stack">.
 
+= item *
+
+Functions L<perlapi/sv_strftime_tm> and L<perlapi/sv_strftime_ints> have
+been added to the public API.  These transparently handle UTF-8 for you.
+One takes as input a libc S<C<struct tm>> and the other takes integers
+specifying the time, in the same form as L<POSIX/strftime>.
+
 =back
 
 =head1 Selected Bug Fixes
