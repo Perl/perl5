@@ -4427,11 +4427,10 @@ C<FREETMPS>.
 
 =head2 Introduction
 
-As of perl 5.40 (XXX check version) there is a build option,
-C<PERL_RC_STACK>, not enabled by default, which requires that items pushed
-onto, or popped off the argument stack have their reference counts
-adjusted. It is intended that eventually this will be the default way (and
-finally the only way) to configure perl.
+As of perl 5.40, there is a build option, C<PERL_RC_STACK>, not enabled by
+default, which requires that items pushed onto, or popped off the argument
+stack have their reference counts adjusted. It is intended that eventually
+this will be the default way (and finally the only way) to configure perl.
 
 The macros which manipulate the stack such as PUSHs() and POPs() don't
 adjust the reference count of the SV. Most of the time this is fine, since
