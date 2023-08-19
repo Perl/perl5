@@ -362,13 +362,20 @@ XXX Changes which affect the interface available to C<XS> code go here.  Other
 significant internal changes for future core maintainers should be noted as
 well.
 
-[ List each change as an =item entry ]
-
 =over 4
 
 =item *
 
-XXX
+C<PERL_RC_STACK> build option added.
+
+This new build option is highly experimental and is not enabled by
+default.  Perl can be built with it by using the F<Configure> option
+C<-Accflags='-DPERL_RC_STACK'>. 
+
+It makes the argument stack bump the reference count of SVs pushed onto
+it. It is functional, but currently slow and incomplete.
+
+See L<perlguts|perlguts/"Reference-counted argument stack">.
 
 =back
 
