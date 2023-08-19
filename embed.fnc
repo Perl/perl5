@@ -4457,6 +4457,7 @@ S	|void	|give_perl_locale_control				\
 S	|parse_LC_ALL_string_return|parse_LC_ALL_string 		\
 				|NN const char *string			\
 				|NN const char **output 		\
+				|const parse_LC_ALL_STRING_action	\
 				|bool always_use_full_array		\
 				|const bool panic_on_error		\
 				|const line_t caller_line

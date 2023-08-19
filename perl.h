@@ -1175,17 +1175,18 @@ violations are fatal.
  * LC_NUMERIC, the code below will cause LC_NUMERIC_INDEX_ to be defined to be
  * 0.  That way the foo_INDEX_ values are contiguous non-negative integers,
  * regardless of how the platform defines the actual locale categories.
- */
+ *
+ * It is possible to tell perl it is not to pay attention to certain categories
+ * that exist on a platform (which means they are always kept in the "C"
+ * locale).  For the ones perl is supposed to pay attention to, The hdr file
+ * creates a 'USE_LOCALE_foo' #define.  If any are to be ignored by perl, it
+ * #defines HAS_IGNORED_LOCALE_CATEGORIES_ */
 typedef enum {
 
 #ifdef USE_LOCALE
-
-/* Now create LC_foo_INDEX_ values for just those categories used on this
- * system */
 #    undef PERL_LOCALE_TABLE_ENTRY
 #    define PERL_LOCALE_TABLE_ENTRY(name, call_back)  LC_ ## name ## _INDEX_,
 #    include "locale_table.h"
-
 #endif  /* USE_LOCALE */
 
     LC_ALL_INDEX_   /* Always defined, even if no LC_ALL on system */
@@ -1325,6 +1326,11 @@ typedef enum {
     EXTERNAL_FORMAT_FOR_QUERY
 } calc_LC_ALL_format;
 
+typedef enum {
+    no_override,
+    override_if_ignored,
+    check_that_overridden
+} parse_LC_ALL_STRING_action;
 
 typedef enum {
     invalid,
