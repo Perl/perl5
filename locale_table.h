@@ -25,7 +25,7 @@
 #ifdef LC_CTYPE
 #  ifndef NO_LOCALE_CTYPE
 
-    PERL_LOCALE_TABLE_ENTRY(LC_CTYPE, S_new_ctype)
+    PERL_LOCALE_TABLE_ENTRY(CTYPE, S_new_ctype)
 
 #    define USE_LOCALE_CTYPE
 #  endif
@@ -33,7 +33,7 @@
 #ifdef LC_NUMERIC
 #  ifndef NO_LOCALE_NUMERIC
 
-    PERL_LOCALE_TABLE_ENTRY(LC_NUMERIC, S_new_numeric)
+    PERL_LOCALE_TABLE_ENTRY(NUMERIC, S_new_numeric)
 
 #    define USE_LOCALE_NUMERIC
 #  endif
@@ -44,7 +44,7 @@
         /* Perl outsources all its collation efforts to the libc strxfrm(), so
          * if it isn't available on the system, default "C" locale collation
          * gets used */
-    PERL_LOCALE_TABLE_ENTRY(LC_COLLATE, S_new_collate)
+    PERL_LOCALE_TABLE_ENTRY(COLLATE, S_new_collate)
 
 #    define USE_LOCALE_COLLATE
 #  endif
@@ -52,7 +52,7 @@
 #ifdef LC_TIME
 #  ifndef NO_LOCALE_TIME
 
-    PERL_LOCALE_TABLE_ENTRY(LC_TIME, NULL)
+    PERL_LOCALE_TABLE_ENTRY(TIME, NULL)
 
 #    define USE_LOCALE_TIME
 #  endif
@@ -60,7 +60,7 @@
 #ifdef LC_MESSAGES
 #  ifndef NO_LOCALE_MESSAGES
 
-    PERL_LOCALE_TABLE_ENTRY(LC_MESSAGES, NULL)
+    PERL_LOCALE_TABLE_ENTRY(MESSAGES, NULL)
 
 #    define USE_LOCALE_MESSAGES
 #  endif
@@ -68,7 +68,7 @@
 #ifdef LC_MONETARY
 #  ifndef NO_LOCALE_MONETARY
 
-    PERL_LOCALE_TABLE_ENTRY(LC_MONETARY, NULL)
+    PERL_LOCALE_TABLE_ENTRY(MONETARY, NULL)
 
 #    define USE_LOCALE_MONETARY
 #  endif
@@ -76,7 +76,7 @@
 #ifdef LC_ADDRESS
 #  ifndef NO_LOCALE_ADDRESS
 
-    PERL_LOCALE_TABLE_ENTRY(LC_ADDRESS, NULL)
+    PERL_LOCALE_TABLE_ENTRY(ADDRESS, NULL)
 
 #    define USE_LOCALE_ADDRESS
 #  endif
@@ -84,7 +84,7 @@
 #ifdef LC_IDENTIFICATION
 #  ifndef NO_LOCALE_IDENTIFICATION
 
-    PERL_LOCALE_TABLE_ENTRY(LC_IDENTIFICATION, NULL)
+    PERL_LOCALE_TABLE_ENTRY(IDENTIFICATION, NULL)
 
 #    define USE_LOCALE_IDENTIFICATION
 #  endif
@@ -92,7 +92,7 @@
 #ifdef LC_MEASUREMENT
 #  ifndef NO_LOCALE_MEASUREMENT
 
-    PERL_LOCALE_TABLE_ENTRY(LC_MEASUREMENT, NULL)
+    PERL_LOCALE_TABLE_ENTRY(MEASUREMENT, NULL)
 
 #    define USE_LOCALE_MEASUREMENT
 #  endif
@@ -100,7 +100,7 @@
 #ifdef LC_PAPER
 #  ifndef NO_LOCALE_PAPER
 
-    PERL_LOCALE_TABLE_ENTRY(LC_PAPER, NULL)
+    PERL_LOCALE_TABLE_ENTRY(PAPER, NULL)
 
 #    define USE_LOCALE_PAPER
 #  endif
@@ -108,7 +108,7 @@
 #ifdef LC_TELEPHONE
 #  ifndef NO_LOCALE_TELEPHONE
 
-    PERL_LOCALE_TABLE_ENTRY(LC_TELEPHONE, NULL)
+    PERL_LOCALE_TABLE_ENTRY(TELEPHONE, NULL)
 
 #    define USE_LOCALE_TELEPHONE
 #  endif
@@ -116,7 +116,7 @@
 #ifdef LC_NAME
 #  ifndef NO_LOCALE_NAME
 
-    PERL_LOCALE_TABLE_ENTRY(LC_NAME, NULL)
+    PERL_LOCALE_TABLE_ENTRY(NAME, NULL)
 
 #    define USE_LOCALE_NAME
 #  endif
@@ -124,7 +124,7 @@
 #ifdef LC_SYNTAX
 #  ifndef NO_LOCALE_SYNTAX
 
-    PERL_LOCALE_TABLE_ENTRY(LC_SYNTAX, NULL)
+    PERL_LOCALE_TABLE_ENTRY(SYNTAX, NULL)
 
 #    define USE_LOCALE_SYNTAX
 #  endif
@@ -132,7 +132,7 @@
 #ifdef LC_TOD
 #  ifndef NO_LOCALE_TOD
 
-    PERL_LOCALE_TABLE_ENTRY(LC_TOD, NULL)
+    PERL_LOCALE_TABLE_ENTRY(TOD, NULL)
 
 #    define USE_LOCALE_TOD
 #  endif

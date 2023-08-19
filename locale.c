@@ -651,7 +651,7 @@ static const char C_thousands_sep[] = "";
 /* Below are parallel arrays for locale information indexed by our mapping of
  * category numbers into small non-negative indexes.  locale_table.h contains
  * an entry like this for each individual category used on this system:
- *      PERL_LOCALE_TABLE_ENTRY(LC_CTYPE, S_new_ctype)
+ *      PERL_LOCALE_TABLE_ENTRY(CTYPE, S_new_ctype)
  *
  * Each array redefines PERL_LOCALE_TABLE_ENTRY to generate the information
  * needed for that array, and #includes locale_table.h to get the valid
@@ -672,7 +672,7 @@ static const char C_thousands_sep[] = "";
 STATIC const int categories[] = {
 
 #  undef PERL_LOCALE_TABLE_ENTRY
-#  define PERL_LOCALE_TABLE_ENTRY(name, call_back)  name,
+#  define PERL_LOCALE_TABLE_ENTRY(name, call_back)  LC_ ## name,
 #  include "locale_table.h"
 
 #  ifdef LC_ALL
@@ -685,11 +685,14 @@ STATIC const int categories[] = {
                            to clash with a real category */
 };
 
+# define GET_NAME_AS_STRING(token)  # token
+# define GET_LC_NAME_AS_STRING(token) GET_NAME_AS_STRING(LC_ ## token)
+
 /* The second array is the category names. */
 STATIC const char * const category_names[] = {
 
 #  undef PERL_LOCALE_TABLE_ENTRY
-#  define PERL_LOCALE_TABLE_ENTRY(name, call_back)  # name,
+#  define PERL_LOCALE_TABLE_ENTRY(name, call_back)  GET_LC_NAME_AS_STRING(name),
 #  include "locale_table.h"
 
 #  ifdef LC_ALL
@@ -710,7 +713,8 @@ STATIC const char * const category_names[] = {
 STATIC const Size_t category_name_lengths[] = {
 
 #  undef PERL_LOCALE_TABLE_ENTRY
-#  define PERL_LOCALE_TABLE_ENTRY(name, call_back)  STRLENs(# name),
+#  define PERL_LOCALE_TABLE_ENTRY(name, call_back)                          \
+                                    STRLENs(GET_LC_NAME_AS_STRING(name)),
 #  include "locale_table.h"
 
     STRLENs(LC_ALL_STRING),
@@ -719,7 +723,8 @@ STATIC const Size_t category_name_lengths[] = {
 
 /* Each entry includes space for the '=' and ';' */
 #  undef PERL_LOCALE_TABLE_ENTRY
-#  define PERL_LOCALE_TABLE_ENTRY(name, call_back)  + STRLENs(# name) + 2
+#  define PERL_LOCALE_TABLE_ENTRY(name, call_back)                          \
+                                + STRLENs(GET_LC_NAME_AS_STRING(name)) + 2
 
 STATIC const Size_t lc_all_boiler_plate_length = 1  /* space for trailing NUL */
 #  include "locale_table.h"
@@ -742,7 +747,7 @@ STATIC void (*update_functions[]) (pTHX_ const char *, bool force) = {
 STATIC const int category_masks[] = {
 
 #    undef PERL_LOCALE_TABLE_ENTRY
-#    define PERL_LOCALE_TABLE_ENTRY(name, call_back)  name ## _MASK,
+#    define PERL_LOCALE_TABLE_ENTRY(name, call_back)  LC_ ## name ## _MASK,
 #    include "locale_table.h"
 
     LC_ALL_MASK,    /* Will rightly refuse to compile unless this is defined */
@@ -836,7 +841,7 @@ S_get_category_index_helper(pTHX_ const int category, bool * succeeded,
 
 #  undef PERL_LOCALE_TABLE_ENTRY
 #  define PERL_LOCALE_TABLE_ENTRY(name, call_back)                          \
-                                    case name: i =  name ## _INDEX_; break;
+                    case LC_ ## name: i =  LC_ ## name ## _INDEX_; break;
 
     switch (category) {
 
