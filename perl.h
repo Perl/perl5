@@ -1183,7 +1183,7 @@ typedef enum {
 /* Now create LC_foo_INDEX_ values for just those categories used on this
  * system */
 #    undef PERL_LOCALE_TABLE_ENTRY
-#    define PERL_LOCALE_TABLE_ENTRY(name, call_back)  name ## _INDEX_,
+#    define PERL_LOCALE_TABLE_ENTRY(name, call_back)  LC_ ## name ## _INDEX_,
 #    include "locale_table.h"
 
 #endif  /* USE_LOCALE */
