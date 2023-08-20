@@ -17452,14 +17452,14 @@ $rm_try
     esac
     case "$d_setlocale" in
         $define)
-            rp="When you set your locale to something besides C$c_utf8_locale, does it do so, or just pretend to?" >&4
+            rp="When you set your locale to something besides C$c_utf8_locale, does it actually do so? (Answer no if it just pretends to set it)" >&4
             dflt=n
             . ./myread
             case "$ans" in
                 true|[Yy]*)
-		   d_setlocale_accepts_any_locale_name="$undef"
+		   d_setlocale_accepts_any_locale_name="$define"
 		   ;;
-		*) d_setlocale_accepts_any_locale_name="$define"
+		*) d_setlocale_accepts_any_locale_name="$undef"
 		   ;;
             esac
             ;;
