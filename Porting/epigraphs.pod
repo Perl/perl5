@@ -17,7 +17,7 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
-=head2 v5.39.1 - U2, "The Fly"
+=head2 v5.39.2 - U2, "The Fly"
 
 L<Announced on 2023-08-20 by Paul Evans|https://www.nntp.perl.org/group/perl.perl5.porters/2023/08/msg266915.html>
 
