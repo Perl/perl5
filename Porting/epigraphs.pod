@@ -17,6 +17,15 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.39.1 - U2, "The Fly"
+
+L<Announced on 2023-08-20 by Paul Evans|https://www.nntp.perl.org/group/perl.perl5.porters/2023/08/msg266915.html>
+
+    It's no secret that a conscience can sometimes be a pest
+    It's no secret ambition bites the nails of success
+    Every artist is a cannibal, every poet is a thief
+    All kill their inspiration and sing about the grief
+
 =head2 v5.39.1 - Ben Aaronovitch, "Whispers Under Ground"
 
 L<Announced on 2023-07-20 by Steve Hay|https://www.nntp.perl.org/group/perl.perl5.porters/2023/07/msg266737.html>
