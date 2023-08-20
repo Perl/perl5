@@ -35,7 +35,7 @@ Little, Dave Rolsky, Max Maischein, Abigail, Jesse Luehrs, Tony Cook,
 Dominic Hargreaves, Aaron Crane, Aristotle Pagaltzis, Matthew Horsfall,
 Peter Martini, Sawyer X, Chad 'Exodist' Granum, Renee Bäcker, Eric Herman,
 John SJ Anderson, Karen Etheridge, Zak B. Elep, Tom Hukins, Richard Leach,
-Neil Bowers and Yves Orton.
+Neil Bowers, Yves Orton and Paul Evans.
 
 =head2 PUMPKIN?
 
@@ -758,6 +758,7 @@ the strings?).
 
  Ricardo   5.39.0       2023-Jun-30     The 5.39 development track
  Steve     5.39.1       2023-Jul-20
+ Paul E    5.39.2       2023-Aug-20
 
 =head2 SELECTED RELEASE SIZES
 
