@@ -321,6 +321,10 @@ source tree.
 
 =over 4
 
+=item Serenity OS
+
+Out of the box support for Serenity OS was added.
+
 =item Windows
 
 Workaround a bug in most 32-bit Mingw builds, where the generated
