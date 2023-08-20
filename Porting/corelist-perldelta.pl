@@ -169,7 +169,7 @@ sub corelist_delta {
   my %distToModules = (
     'IO-Compress' => [
       {
-        'name'         => 'IO-Compress',
+        'name'         => 'IO::Compress',
         'modification' => $getModifyType->( $changes{'IO::Compress::Base'} ),
         'data'         => $changes{'IO::Compress::Base'}
       }
