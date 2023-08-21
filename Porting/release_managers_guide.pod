@@ -1293,6 +1293,16 @@ You can include the customary link to the release announcement even before your
 message reaches the web-visible archives by looking for the X-List-Archive
 header in your message after receiving it back via perl5-porters.
 
+The exact link in the header won't actually work, but by guessing the year and
+month and adjusting the URL to fit the form of the others you should be able
+to work it out. For example the header
+
+  X-List-Archive: <http://nntp.perl.org/group/perl.perl5.porters/266915>
+
+became the link
+
+  https://www.nntp.perl.org/group/perl.perl5.porters/2023/08/msg266915.html
+
 =head3 blog about your epigraph
 
 If you have a blog, please consider writing an entry in your blog explaining
