@@ -4451,9 +4451,8 @@ S_require_file(pTHX_ SV *sv)
         SAVETMPS;
         PUSHMARK(PL_stack_sp);
         rpp_xpush_1(name_sv); /* always use the object for method calls */
-        int count = call_sv(PL_hook__require__before, G_SCALAR);
+        call_sv(PL_hook__require__before, G_SCALAR);
         SV *rsv = *PL_stack_sp;
-        assert(count == 1); /* scalar context */
         if (SvOK(rsv) && SvROK(rsv) && SvTYPE(SvRV(rsv)) == SVt_PVCV) {
             /* the RC++ preserves it across the popping and/or FREETMPS
              * below */
