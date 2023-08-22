@@ -8,6 +8,8 @@
 
 package Maintainers;
 
+use strict;
+use warnings;
 use utf8;
 use File::Glob qw(:case);
 
@@ -15,7 +17,7 @@ use File::Glob qw(:case);
 # distribution, need not appear in core (i.e. core-cpan-diff won't
 # complain if it can't find them)
 
-@IGNORABLE = qw(
+our @IGNORABLE = qw(
     .cvsignore .dualLivedDiffConfig .gitignore .github .perlcriticrc .perltidyrc
     .travis.yml ANNOUNCE Announce Artistic AUTHORS BENCHMARK BUGS Build.PL
     CHANGELOG ChangeLog Changelog CHANGES Changes CONTRIBUTING CONTRIBUTING.md
@@ -124,7 +126,7 @@ use File::Glob qw(:case);
 #     ''     => 'lib/Foo/Bar/',
 #   }
 
-%Modules = (
+our %Modules = (
 
     'Archive::Tar' => {
         'DISTRIBUTION' => 'BINGOS/Archive-Tar-2.40.tar.gz',
@@ -1487,7 +1489,7 @@ use File::Glob qw(:case);
     },
 );
 
-
+our %DistName;
 # legacy CPAN flag
 for my $mod_name ( keys %Modules ) {
     my $data = $Modules{$mod_name};
@@ -1515,6 +1517,7 @@ for ( keys %Modules ) {
     }
 }
 
+our %Maintainers;
 # legacy MAINTAINER field
 for ( keys %Modules ) {
     # Keep any existing MAINTAINER flag so that "overrides" can be applied
