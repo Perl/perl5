@@ -1488,7 +1488,7 @@ our %Modules = (
     },
 );
 
-my %DistName;
+our %DistName;
 
 # legacy CPAN flag
 for my $mod_name ( keys %Modules ) {
@@ -1522,7 +1522,7 @@ for ( keys %Modules ) {
     # Keep any existing MAINTAINER flag so that "overrides" can be applied
     next if exists $Modules{$_}{MAINTAINER};
 
-my %Maintainers;
+our %Maintainers;
 
     if ($Modules{$_}{UPSTREAM} eq 'blead') {
         $Modules{$_}{MAINTAINER} = 'P5P';
