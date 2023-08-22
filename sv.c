@@ -5932,6 +5932,8 @@ S_sv_unmagicext_flags(pTHX_ SV *const sv, const int type, const MGVTBL *vtbl, co
 
     if (SvTYPE(sv) < SVt_PVMG || !SvMAGIC(sv))
         return 0;
+    if (SvIS_FREED(sv))
+        return 0;
     mgp = &(((XPVMG*) SvANY(sv))->xmg_u.xmg_magic);
     for (mg = *mgp; mg; mg = *mgp) {
         const MGVTBL* const virt = mg->mg_virtual;
@@ -6938,6 +6940,9 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
         {
             U32 arena_index;
             const struct body_details *sv_type_details;
+
+            if (SvIS_FREED(sv))
+                goto get_next_sv;
 
             if (type == SVt_PVHV && HvHasAUX(sv)) {
                 arena_index = HVAUX_ARENA_ROOT_IX;

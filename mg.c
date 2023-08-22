@@ -544,6 +544,9 @@ Perl_mg_free(pTHX_ SV *sv)
 
     PERL_ARGS_ASSERT_MG_FREE;
 
+    if (SvIS_FREED(sv))
+        return 0;
+
     for (mg = SvMAGIC(sv); mg; mg = moremagic) {
         moremagic = mg->mg_moremagic;
         mg_free_struct(sv, mg);
