@@ -283,7 +283,10 @@ made:
 
 =item *
 
-XXX
+F<t/op/magic.t> would fail when C<ps> was the BusyBox implementation,
+since that doesn't support the C<-p> flag and otherwise ignores a
+process id on the command-line.  This caused F<TEST> failures on
+BusyBox systems such as Alpine Linux.  [GH #17542]
 
 =back
 
