@@ -12227,7 +12227,6 @@ Perl_ck_eval(pTHX_ OP *o)
         /* Store a copy of %^H that pp_entereval can pick up. */
         HV *hh = hv_copy_hints_hv(GvHV(PL_hintgv));
         OP *hhop;
-        STOREFEATUREBITSHH(hh);
         hhop = newSVOP(OP_HINTSEVAL, 0, MUTABLE_SV(hh));
         /* append hhop to only child  */
         op_sibling_splice(o, cUNOPo->op_first, 0, hhop);
