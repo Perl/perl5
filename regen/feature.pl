@@ -392,14 +392,7 @@ print $h <<EOH;
 
 #define CLEARFEATUREBITS() (PL_compiling.cop_features = 0)
 
-#define STOREFEATUREBITSHH(hh) \\
-  (hv_stores((hh), "feature/bits", newSVuv(PL_compiling.cop_features)))
-
-#define FETCHFEATUREBITSHH(hh)                              \\
-  STMT_START {                                              \\
-      SV **fbsv = hv_fetchs((hh), "feature/bits", FALSE);   \\
-      PL_compiling.cop_features = fbsv ? SvUV(*fbsv) : 0;   \\
-  } STMT_END
+#define FETCHFEATUREBITSHH(hh) S_fetch_feature_bits_hh(aTHX_ (hh))
 
 #endif /* PERL_CORE or PERL_EXT */
 
@@ -434,7 +427,7 @@ print $h <<EOJ;
 }
 #endif /* PERL_IN_OP_C */
 
-#ifdef PERL_IN_MG_C
+#if defined(PERL_IN_MG_C) || defined(PERL_IN_PP_CTL_C)
 
 #define magic_sethint_feature(keysv, keypv, keylen, valsv, valbool) \\
     S_magic_sethint_feature(aTHX_ (keysv), (keypv), (keylen), (valsv), (valbool))
@@ -490,6 +483,49 @@ print $h <<EOJ;
     }
 }
 #endif /* PERL_IN_MG_C */
+
+/* subject to change */
+struct perl_feature_bit {
+  const char *name;
+  STRLEN namelen;
+  U32 mask;
+};
+
+#ifdef PERL_IN_PP_CTL_C
+
+static const struct perl_feature_bit
+PL_feature_bits[] = {
+EOJ
+for my $key (sort keys %feature) {
+    my $val = $feature{$key};
+    print $h <<EOJ;
+    {
+        /* feature $key */
+        "feature_$val",
+        STRLENs("feature_$val"),
+        FEATURE_\U$val\E_BIT
+    },
+EOJ
+}
+
+print $h <<EOJ;
+    { NULL, 0, 0U }
+};
+
+PERL_STATIC_INLINE void
+S_fetch_feature_bits_hh(pTHX_ HV *hh) {
+    PL_compiling.cop_features = 0;
+
+    const struct perl_feature_bit *fb = PL_feature_bits;
+    while (fb->name) {
+        SV **svp = hv_fetch(hh, fb->name, (I32)fb->namelen, 0);
+        if (svp && SvTRUE(*svp))
+               PL_compiling.cop_features |= fb->mask;
+        ++fb;
+    }
+}
+
+#endif
 
 #endif /* PERL_FEATURE_H_ */
 EOJ
