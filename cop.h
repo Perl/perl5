@@ -1219,6 +1219,7 @@ struct context {
 #define G_RE_REPARSING  0x800   /* compiling a run-time /(?{..})/ */
 #define G_METHOD_NAMED 0x1000	/* calling named method, eg without :: or ' */
 #define G_RETHROW      0x2000	/* eval_sv(): re-throw any error */
+#define G_USEHINTS     0x4000   /* eval_sv(): use current hints/features */
 
 /* flag bits for PL_in_eval */
 #define EVAL_NULL	0	/* not in an eval */
