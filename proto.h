@@ -2833,6 +2833,11 @@ Perl_newLISTOP(pTHX_ I32 type, I32 flags, OP *first, OP *last)
 #define PERL_ARGS_ASSERT_NEWLISTOP
 
 PERL_CALLCONV OP *
+Perl_newLISTOPn(pTHX_ I32 type, I32 flags, ...)
+        __attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_NEWLISTOPN
+
+PERL_CALLCONV OP *
 Perl_newLOGOP(pTHX_ I32 optype, I32 flags, OP *first, OP *other)
         __attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_NEWLOGOP               \
