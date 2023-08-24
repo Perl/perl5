@@ -7898,10 +7898,11 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
 
             /* Fake up a method call to VERSION */
             meth = newSVpvs_share("VERSION");
-            veop = op_convert_list(OP_ENTERSUB, OPf_STACKED,
-                            op_append_elem(OP_LIST,
-                                        op_prepend_elem(OP_LIST, pack, version),
-                                        newMETHOP_named(OP_METHOD_NAMED, 0, meth)));
+            veop = newLISTOPn(OP_ENTERSUB, OPf_STACKED,
+                    pack,
+                    version,
+                    newMETHOP_named(OP_METHOD_NAMED, 0, meth),
+                    NULL);
         }
     }
 
@@ -8978,7 +8979,7 @@ The C<flags> argument is currently ignored.
 OP *
 Perl_newTRYCATCHOP(pTHX_ I32 flags, OP *tryblock, OP *catchvar, OP *catchblock)
 {
-    OP *o, *catchop;
+    OP *catchop;
 
     PERL_ARGS_ASSERT_NEWTRYCATCHOP;
     assert(catchvar->op_type == OP_PADSV);
@@ -9010,10 +9011,10 @@ Perl_newTRYCATCHOP(pTHX_ I32 flags, OP *tryblock, OP *catchvar, OP *catchblock)
     op_free(catchvar);
 
     /* Build the optree structure */
-    o = newLISTOP(OP_LIST, 0, tryblock, catchop);
-    o = op_convert_list(OP_ENTERTRYCATCH, 0, o);
-
-    return o;
+    return newLISTOPn(OP_ENTERTRYCATCH, 0,
+            tryblock,
+            catchop,
+            NULL);
 }
 
 /*
@@ -11732,9 +11733,9 @@ Perl_newANONATTRSUB(pTHX_ I32 floor, OP *proto, OP *attrs, OP *block)
 
     if (is_const) {
         anoncode = newUNOP(OP_ANONCONST, OPf_REF,
-                           op_convert_list(OP_ENTERSUB,
-                                           OPf_STACKED|OPf_WANT_SCALAR,
-                                           anoncode));
+                newLISTOPn(OP_ENTERSUB, OPf_STACKED|OPf_WANT_SCALAR,
+                    anoncode,
+                    NULL));
     }
 
     return anoncode;
