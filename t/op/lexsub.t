@@ -7,7 +7,8 @@ BEGIN {
     *bar::is = *is;
     *bar::like = *like;
 }
-plan 152;
+
+plan 156;
 
 # -------------------- our -------------------- #
 
@@ -978,4 +979,60 @@ is join("-", qw(aa bb), do { my sub lleexx; 123 }, qw(cc dd)),
         ok(eval 'ceil(1.5)', "no assertion failure calling a lexical sub from nested eval");
     }
     nested();
+}
+
+SKIP:
+{
+    # github #18606
+    sub rec1 {
+        my $x = shift;
+        my sub b { $x };
+        rec1(2) if $x == 1;
+        return b();
+    }
+    is(rec1(1), 1, "check recursively defined lexical sub is lexical");
+
+    sub rec2 {
+        my ($x, $name) = @_;
+
+        my sub b;
+        if ($x) {
+            # provides definition for my sub b
+            sub b { $name }
+        }
+        rec2($x-1, "inner") if $x;
+
+        b();
+    }
+    is(rec2(0, "outer"), "outer", "check again");
+    is(rec2(1, "outer"), "outer", "check some more");
+
+    fresh_perl_like(<<'EOS', qr/result=103/, {}, "test code from #18606");
+use strict; use warnings; use feature qw/say state/;
+say "Perl version $^V";
+
+sub process($;$) {
+  my ($value, $callback) = @_;
+  say "### process($value,", ($callback//"undef"), ")";
+
+  my sub inner {
+    if ($callback) {
+      return $callback->($value+1);
+    } else {
+      return $value+1;
+    }
+  }
+
+  inner();
+}
+
+my $result =
+  process(1, sub{
+                 my $arg = shift;
+                 say "#   callback called with arg $arg";
+                 process($arg+100);
+              });
+say "result=", ($result//"undef");
+EOS
+
 }

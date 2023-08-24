@@ -2473,8 +2473,19 @@ Perl_pad_push(pTHX_ PADLIST *padlist, int depth)
                         || PadnameIsSTATE(names[ix])
                         || sigil == '&')
                 {
-                    /* outer lexical or anon code */
-                    sv = SvREFCNT_inc(oldpad[ix]);
+                    SV *tmp = oldpad[ix];
+                    if (sigil == '&' && SvTYPE(tmp) == SVt_PVCV
+                        && !PadnameOUTER(names[ix])
+                        && CvLEXICAL(tmp) && CvCLONED(tmp)
+                        && !PadnameIsOUR(names[ix])
+                        && !PadnameIsSTATE(names[ix])) {
+                        /* lexical sub that needs cloning */
+                        sv = newSV_type(SVt_PVCV);
+                    }
+                    else {
+                        /* outer non-cloning lexical or anon code */
+                        sv = SvREFCNT_inc(tmp);
+                    }
                 }
                 else {		/* our own lexical */
                     if (sigil == '@')
