@@ -852,6 +852,7 @@
 #   define form(...)                            Perl_form(aTHX_ __VA_ARGS__)
 #   define load_module(a,b,...)                 Perl_load_module(aTHX_ a,b,__VA_ARGS__)
 #   define mess(...)                            Perl_mess(aTHX_ __VA_ARGS__)
+#   define newLISTOPn(a,...)                    Perl_newLISTOPn(aTHX_ a,__VA_ARGS__)
 #   define newSVpvf(...)                        Perl_newSVpvf(aTHX_ __VA_ARGS__)
 #   define sv_catpvf(a,...)                     Perl_sv_catpvf(aTHX_ a,__VA_ARGS__)
 #   define sv_catpvf_mg(a,...)                  Perl_sv_catpvf_mg(aTHX_ a,__VA_ARGS__)
