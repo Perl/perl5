@@ -2656,8 +2656,12 @@ S_negate_string(pTHX)
         return FALSE;
     s = SvPV_nomg_const(sv, len);
     if (isIDFIRST(*s)) {
-        sv_setpvs(TARG, "-");
-        sv_catsv(TARG, sv);
+        if (LIKELY(TARG!=sv)) {
+            sv_setpvs(TARG, "-");
+            sv_catsv(TARG, sv);
+        } else {
+            sv_insert_flags(TARG, 0, 0, "-", 1, 0);
+        }
     }
     else if (*s == '+' || (*s == '-' && !looks_like_number(sv))) {
         sv_setsv_nomg(TARG, sv);
