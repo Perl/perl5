@@ -1956,8 +1956,8 @@ EXTCONST U32 PL_opargs[] INIT({
 	0x0001120e,	/* sbit_and */
 	0x0001120e,	/* sbit_xor */
 	0x0001120e,	/* sbit_or */
-	0x0000112e,	/* negate */
-	0x0000110e,	/* i_negate */
+	0x0000113e,	/* negate */
+	0x0000111e,	/* i_negate */
 	0x00001106,	/* not */
 	0x0000110e,	/* complement */
 	0x0000111e,	/* ncomplement */
@@ -2661,8 +2661,8 @@ EXTCONST I16  PL_op_private_bitdef_ix[] = {
      105, /* sbit_and */
      105, /* sbit_xor */
      105, /* sbit_or */
-       0, /* negate */
-       0, /* i_negate */
+      78, /* negate */
+      78, /* i_negate */
        0, /* not */
      105, /* complement */
      103, /* ncomplement */
@@ -2999,7 +2999,7 @@ EXTCONST I16  PL_op_private_bitdef_ix[] = {
  */
 
 EXTCONST U16  PL_op_private_bitdefs[] = {
-    0x0003, /* scalar, prototype, refgen, srefgen, readline, regcmaybe, regcreset, regcomp, substcont, chop, schop, defined, study, preinc, i_preinc, predec, i_predec, postinc, i_postinc, postdec, i_postdec, negate, i_negate, not, ucfirst, lcfirst, uc, lc, quotemeta, aeach, avalues, each, pop, shift, grepstart, mapstart, mapwhile, range, and, or, dor, andassign, orassign, dorassign, argcheck, method, method_named, method_super, method_redir, method_redir_super, entergiven, leavegiven, enterwhen, leavewhen, untie, tied, dbmclose, getsockname, getpeername, lstat, stat, readlink, readdir, telldir, rewinddir, closedir, localtime, alarm, require, dofile, entertry, ghbyname, gnbyname, gpbyname, shostent, snetent, sprotoent, sservent, gpwnam, gpwuid, ggrnam, ggrgid, lock, once, fc, anonconst, cmpchain_and, cmpchain_dup, entertrycatch, catch, is_bool, is_weak, weaken, unweaken, is_tainted */
+    0x0003, /* scalar, prototype, refgen, srefgen, readline, regcmaybe, regcreset, regcomp, substcont, chop, schop, defined, study, preinc, i_preinc, predec, i_predec, postinc, i_postinc, postdec, i_postdec, not, ucfirst, lcfirst, uc, lc, quotemeta, aeach, avalues, each, pop, shift, grepstart, mapstart, mapwhile, range, and, or, dor, andassign, orassign, dorassign, argcheck, method, method_named, method_super, method_redir, method_redir_super, entergiven, leavegiven, enterwhen, leavewhen, untie, tied, dbmclose, getsockname, getpeername, lstat, stat, readlink, readdir, telldir, rewinddir, closedir, localtime, alarm, require, dofile, entertry, ghbyname, gnbyname, gpbyname, shostent, snetent, sprotoent, sservent, gpwnam, gpwuid, ggrnam, ggrgid, lock, once, fc, anonconst, cmpchain_and, cmpchain_dup, entertrycatch, catch, is_bool, is_weak, weaken, unweaken, is_tainted */
     0x3abc, 0x4bb9, /* pushmark */
     0x00bd, /* wantarray, runcv */
     0x0558, 0x1b70, 0x4c6c, 0x4808, 0x3fe5, /* const */
@@ -3021,7 +3021,7 @@ EXTCONST U16  PL_op_private_bitdefs[] = {
     0x129c, 0x24b8, 0x0ad4, 0x4acc, 0x2848, 0x5244, 0x08e1, /* trans, transr */
     0x10dc, 0x05f8, 0x0067, /* sassign */
     0x0d98, 0x0c94, 0x0b90, 0x3bac, 0x06c8, 0x0067, /* aassign */
-    0x5010, 0x0003, /* chomp, schomp, scomplement, sin, cos, exp, log, sqrt, int, hex, oct, abs, ord, chr, chroot, rmdir, refaddr, reftype, ceil, floor */
+    0x5010, 0x0003, /* chomp, schomp, negate, i_negate, scomplement, sin, cos, exp, log, sqrt, int, hex, oct, abs, ord, chr, chroot, rmdir, refaddr, reftype, ceil, floor */
     0x3abc, 0x4bb8, 0x3534, 0x5010, 0x0003, /* undef */
     0x06d4, 0x3bac, 0x0003, /* pos */
     0x5010, 0x0067, /* pow, multiply, i_multiply, divide, i_divide, modulo, i_modulo, add, i_add, subtract, i_subtract */
@@ -3188,8 +3188,8 @@ EXTCONST U8 PL_op_private_valid[] = {
     /* SBIT_AND   */ (OPpUSEINT),
     /* SBIT_XOR   */ (OPpUSEINT),
     /* SBIT_OR    */ (OPpUSEINT),
-    /* NEGATE     */ (OPpARG1_MASK),
-    /* I_NEGATE   */ (OPpARG1_MASK),
+    /* NEGATE     */ (OPpARG1_MASK|OPpTARGET_MY),
+    /* I_NEGATE   */ (OPpARG1_MASK|OPpTARGET_MY),
     /* NOT        */ (OPpARG1_MASK),
     /* COMPLEMENT */ (OPpUSEINT),
     /* NCOMPLEMENT */ (OPpUSEINT|OPpTARGET_MY),

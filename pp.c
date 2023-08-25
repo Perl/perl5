@@ -2669,7 +2669,8 @@ S_negate_string(pTHX)
     }
     else return FALSE;
     SvSETMAGIC(TARG);
-    rpp_replace_1_1(TARG);
+    if (LIKELY(targ != sv))
+        rpp_replace_1_1(TARG);
     return TRUE;
 }
 
@@ -2721,7 +2722,8 @@ PP(pp_negate)
     }
 
   ret:
-    rpp_replace_1_1(TARG);
+    if (LIKELY(targ != sv))
+        rpp_replace_1_1(TARG);
     return NORMAL;
 }
 
@@ -3048,7 +3050,6 @@ PP(pp_i_ncmp)
     return NORMAL;
 }
 
-
 PP(pp_i_negate)
 {
     dTARGET;
@@ -3062,7 +3063,8 @@ PP(pp_i_negate)
         SV * const sv = *PL_stack_sp;
         IV const i = SvIV_nomg(sv);
         TARGi((IV)-(UV)i, 1);
-        rpp_replace_1_1(TARG);
+        if (LIKELY(targ != sv))
+            rpp_replace_1_1(TARG);
         return NORMAL;
     }
 }

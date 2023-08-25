@@ -171,8 +171,8 @@ sbit_and	string bitwise and (&.)	ck_bitop	fst2	S S|
 sbit_xor	string bitwise xor (^.)	ck_bitop	fst2	S S|
 sbit_or		string bitwise or (|.)	ck_bitop	fst2	S S|
 
-negate		negation (-)		ck_null		Ifst1	S
-i_negate	integer negation (-)	ck_null		ifst1	S
+negate		negation (-)		ck_null		IfsT1	S
+i_negate	integer negation (-)	ck_null		ifsT1	S
 not		not			ck_null		ifs1	S
 complement	1's complement (~)	ck_bitop	fst1	S
 ncomplement	numeric 1's complement (~)	ck_bitop	fsT1	S

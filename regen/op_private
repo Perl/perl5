@@ -362,7 +362,7 @@ addbits($_, 7 => qw(OPpLVAL_INTRO LVINTRO))
 #	  before other args are processed.
 #
 #	Suspicious wrt "additional mode of failure" (and only it):
-#	schop, chop, postinc/dec, bit_and etc, negate, complement.
+#	schop, chop, postinc/dec, bit_and etc, complement.
 #
 #	Also suspicious: 4-arg substr, sprintf, uc/lc (POK_only), reverse, pack.
 #
