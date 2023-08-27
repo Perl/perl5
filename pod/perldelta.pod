@@ -395,6 +395,11 @@ Declared references can now be used with C<state> variables. [GH #21351]
 Trailing elements in an C<unshift>ed and resized array will now always be
 initialized. [GH #21265]
 
+=item * Make C<use 5.036> respect the -X flag
+
+perl's -X flag disables all warnings globally, but «use 5.036» didn't
+respect that until now. [GH #21431]
+
 =back
 
 =head1 Known Problems
