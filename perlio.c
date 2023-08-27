@@ -1101,11 +1101,11 @@ PerlIOScalar_pushed(pTHX_ PerlIO * f, const char *mode, SV * arg,
 		SvREFCNT_inc(get_sv
 			     (SvPV_nolen(arg), GV_ADD | GV_ADDMULTI));
 	}
+        SvUPGRADE(s->var, SVt_PV);
     }
     else {
 	s->var = newSVpvs("");
     }
-    SvUPGRADE(s->var, SVt_PV);
 
     code = PerlIOBase_pushed(aTHX_ f, mode, NULL, tab);
     if (!SvOK(s->var) || (PerlIOBase(f)->flags) & PERLIO_F_TRUNCATE)
