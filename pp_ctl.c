@@ -5888,7 +5888,6 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other, const bool copied)
           sm_any_sub:
             DEBUG_M(Perl_deb(aTHX_ "    applying rule Any-CodeRef\n"));
             ENTER_with_name("smartmatch_coderef");
-            SAVETMPS;
             PUSHMARK(SP);
             PUSHs(d);
             PUTBACK;
@@ -5896,9 +5895,6 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other, const bool copied)
             SPAGAIN;
             if (c == 0)
                 PUSHs(&PL_sv_no);
-            else if (SvTEMP(TOPs))
-                SvREFCNT_inc_void(TOPs);
-            FREETMPS;
             LEAVE_with_name("smartmatch_coderef");
             RETURN;
         }

@@ -15,7 +15,7 @@ BEGIN {
 
 use Config;
 
-plan tests => 153;
+plan tests => 154;
 
 # run some code N times. If the number of SVs at the end of loop N is
 # greater than (N-1)*delta at the end of loop 1, we've got a leak
@@ -645,6 +645,9 @@ my $refcount;
 }
 PERL
 }
+
+my $one = 1;
+leak 2, 0, sub { 1 ~~ sub { 1 + $one } }, 'Smartmatch doesn\'t leak';
 
 # the initial implementation of the require hook had some leaks
 
