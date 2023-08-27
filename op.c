@@ -7967,7 +7967,7 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
             if (!(PL_hints & HINT_EXPLICIT_STRICT_VARS))
                 PL_hints |= HINT_STRICT_VARS;
 
-            if (shortver >= SHORTVER(5, 35)) {
+            if (shortver >= SHORTVER(5, 35) && !(PL_dowarn & G_WARN_ALL_MASK)) {
                 free_and_set_cop_warnings(&PL_compiling, pWARN_ALL);
                 PL_dowarn |= G_WARN_ONCE;
             }
