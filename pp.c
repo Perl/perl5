@@ -34,24 +34,23 @@
 
 /* variations on pp_null */
 
-PP_wrapped(pp_stub, 0, 0)
+PP(pp_stub)
 {
-    dSP;
     if (GIMME_V == G_SCALAR)
-        XPUSHs(&PL_sv_undef);
-    RETURN;
+        rpp_xpush_1(&PL_sv_undef);
+    return NORMAL;
 }
 
 /* Pushy stuff. */
 
 
 
-PP_wrapped(pp_padcv, 0, 0)
+PP(pp_padcv)
 {
-    dSP; dTARGET;
+    dTARGET;
     assert(SvTYPE(TARG) == SVt_PVCV);
-    XPUSHs(TARG);
-    RETURN;
+    rpp_xpush_1(TARG);
+    return NORMAL;
 }
 
 PP(pp_introcv)
@@ -398,13 +397,11 @@ PP_wrapped(pp_prototype, 1, 0)
     RETURN;
 }
 
-PP_wrapped(pp_anoncode, 0, 0)
+PP(pp_anoncode)
 {
-    dSP;
     CV *cv = MUTABLE_CV(PAD_SV(PL_op->op_targ));
     if (CvCLONE(cv))
         cv = MUTABLE_CV(sv_2mortal(MUTABLE_SV(cv_clone(cv))));
-    EXTEND(SP,1);
 
     SV* sv = MUTABLE_SV(cv);
 
@@ -412,9 +409,8 @@ PP_wrapped(pp_anoncode, 0, 0)
         sv = refto(sv);
     }
 
-    PUSHs(sv);
-
-    RETURN;
+    rpp_xpush_1(sv);
+    return NORMAL;
 }
 
 PP_wrapped(pp_srefgen, 1, 0)
@@ -6893,16 +6889,21 @@ PP(pp_avhvswitch)
            ](aTHX);
 }
 
-PP_wrapped(pp_runcv, 0, 0)
+PP(pp_runcv)
 {
-    dSP;
     CV *cv;
     if (PL_op->op_private & OPpOFFBYONE) {
         cv = find_runcv_where(FIND_RUNCV_level_eq, 1, NULL);
     }
     else cv = find_runcv(NULL);
-    XPUSHs(CvEVAL(cv) ? &PL_sv_undef : sv_2mortal(newRV((SV *)cv)));
-    RETURN;
+
+    rpp_extend(1);
+    if (CvEVAL(cv))
+        rpp_push_1(&PL_sv_undef);
+    else
+        rpp_push_1_norc(newRV((SV *)cv));
+
+    return NORMAL;
 }
 
 static void
@@ -7317,7 +7318,7 @@ PP_wrapped(pp_argelem,
  * into PL_curpad.
  */
 
-PP_wrapped(pp_argdefelem, 0, 0)
+PP(pp_argdefelem)
 {
     OP * const o = PL_op;
     AV *defav = GvAV(PL_defgv); /* @_ */
@@ -7339,9 +7340,8 @@ PP_wrapped(pp_argdefelem, 0, 0)
     if ((PL_op->op_private & OPpARG_IF_FALSE) && !SvTRUE(val))
         return cLOGOPo->op_other;
 
-    dSP;
-    XPUSHs(val);
-    RETURN;
+    rpp_xpush_1(val);
+    return NORMAL;
 }
 
 

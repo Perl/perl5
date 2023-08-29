@@ -42,31 +42,42 @@
 
 #define dopoptosub(plop)	dopoptosub_at(cxstack, (plop))
 
-PP_wrapped(pp_wantarray, 0, 0)
+PP(pp_wantarray)
 {
-    dSP;
     I32 cxix;
     const PERL_CONTEXT *cx;
-    EXTEND(SP, 1);
+    SV *sv;
 
     if (PL_op->op_private & OPpOFFBYONE) {
-        if (!(cx = caller_cx(1,NULL))) RETPUSHUNDEF;
+        if (!(cx = caller_cx(1,NULL))) {
+            sv = &PL_sv_undef;
+            goto ret;
+        }
     }
     else {
       cxix = dopopto_cursub();
-      if (cxix < 0)
-        RETPUSHUNDEF;
+      if (cxix < 0) {
+        sv = &PL_sv_undef;
+        goto ret;
+      }
       cx = &cxstack[cxix];
     }
 
     switch (cx->blk_gimme) {
     case G_LIST:
-        RETPUSHYES;
+        sv = &PL_sv_yes;
+        break;
     case G_SCALAR:
-        RETPUSHNO;
+        sv = &PL_sv_no;
+        break;
     default:
-        RETPUSHUNDEF;
+        sv = &PL_sv_undef;
+        break;
     }
+
+  ret:
+    rpp_xpush_1(sv);
+    return NORMAL;
 }
 
 PP(pp_regcreset)
@@ -5226,11 +5237,11 @@ PP(pp_require)
    pp_entereval. The hash can be modified by the code
    being eval'ed, so we return a copy instead. */
 
-PP_wrapped(pp_hintseval, 0, 0)
+PP(pp_hintseval)
 {
-    dSP;
-    mXPUSHs(MUTABLE_SV(hv_copy_hints_hv(MUTABLE_HV(cSVOP_sv))));
-    RETURN;
+    rpp_extend(1);
+    rpp_push_1_norc(MUTABLE_SV(hv_copy_hints_hv(MUTABLE_HV(cSVOP_sv))));
+    return NORMAL;
 }
 
 

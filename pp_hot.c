@@ -179,11 +179,10 @@ Perl_xs_wrap(pTHX_ XSUBADDR_t xsub, CV *cv)
 /* ----------------------------------------------------------- */
 
 
-PP_wrapped(pp_const, 0, 0)
+PP(pp_const)
 {
-    dSP;
-    XPUSHs(cSVOP_sv);
-    RETURN;
+    rpp_xpush_1(cSVOP_sv);
+    return NORMAL;
 }
 
 PP(pp_nextstate)
@@ -196,16 +195,14 @@ PP(pp_nextstate)
     return NORMAL;
 }
 
-PP_wrapped(pp_gvsv, 0, 0)
+PP(pp_gvsv)
 {
-    dSP;
     assert(SvTYPE(cGVOP_gv) == SVt_PVGV);
-    EXTEND(SP,1);
-    if (UNLIKELY(PL_op->op_private & OPpLVAL_INTRO))
-        PUSHs(save_scalar(cGVOP_gv));
-    else
-        PUSHs(GvSVn(cGVOP_gv));
-    RETURN;
+    rpp_xpush_1(
+            UNLIKELY(PL_op->op_private & OPpLVAL_INTRO)
+                ? save_scalar(cGVOP_gv)
+                : GvSVn(cGVOP_gv));
+    return NORMAL;
 }
 
 
@@ -235,14 +232,13 @@ PP_wrapped(pp_stringify, 1, 0)
     return NORMAL;
 }
 
-PP_wrapped(pp_gv, 0, 0)
+PP(pp_gv)
 {
-    dSP;
     /* cGVOP_gv might be a real GV or might be an RV to a CV */
     assert(SvTYPE(cGVOP_gv) == SVt_PVGV ||
            (SvTYPE(cGVOP_gv) <= SVt_PVMG && SvROK(cGVOP_gv) && SvTYPE(SvRV(cGVOP_gv)) == SVt_PVCV));
-    XPUSHs(MUTABLE_SV(cGVOP_gv));
-    RETURN;
+    rpp_xpush_1(MUTABLE_SV(cGVOP_gv));
+    return NORMAL;
 }
 
 
@@ -1484,10 +1480,8 @@ PP_wrapped(pp_padrange, 0, 0)
 }
 
 
-PP_wrapped(pp_padsv, 0, 0)
+PP(pp_padsv)
 {
-    dSP;
-    EXTEND(SP, 1);
     {
         OP * const op = PL_op;
         /* access PL_curpad once */
@@ -1495,19 +1489,19 @@ PP_wrapped(pp_padsv, 0, 0)
         {
             dTARG;
             TARG = *padentry;
-            PUSHs(TARG);
-            PUTBACK; /* no pop/push after this, TOPs ok */
+            rpp_xpush_1(TARG);
         }
         if (op->op_flags & OPf_MOD) {
             if (op->op_private & OPpLVAL_INTRO)
                 if (!(op->op_private & OPpPAD_STATE))
                     save_clearsv(padentry);
             if (op->op_private & OPpDEREF) {
-                /* TOPs is equivalent to TARG here.  Using TOPs (SP) rather
+                /* *sp is equivalent to TARG here.  Using *sp rather
                    than TARG reduces the scope of TARG, so it does not
                    span the call to save_clearsv, resulting in smaller
                    machine code. */
-                TOPs = vivify_ref(TOPs, op->op_private & OPpDEREF);
+                rpp_replace_1_1(
+                    vivify_ref(*PL_stack_sp, op->op_private & OPpDEREF));
             }
         }
         return op->op_next;
@@ -1905,9 +1899,8 @@ PP(pp_add)
 
 /* also used for: pp_aelemfast_lex() */
 
-PP_wrapped(pp_aelemfast, 0, 0)
+PP(pp_aelemfast)
 {
-    dSP;
     AV * const av = PL_op->op_type == OP_AELEMFAST_LEX
         ? MUTABLE_AV(PAD_SV(PL_op->op_targ)) : GvAVn(cGVOP_gv);
     const U32 lval = PL_op->op_flags & OPf_MOD;
@@ -1917,17 +1910,14 @@ PP_wrapped(pp_aelemfast, 0, 0)
 
     assert(SvTYPE(av) == SVt_PVAV);
 
-    EXTEND(SP, 1);
-
     /* inlined av_fetch() for simple cases ... */
     if (!SvRMAGICAL(av) && key >= 0 && key <= AvFILLp(av)) {
         sv = AvARRAY(av)[key];
-        if (sv) {
-            PUSHs(sv);
-            RETURN;
-        } else if (!lval) {
-            PUSHs(&PL_sv_undef);
-            RETURN;
+        if (sv)
+            goto ret;
+        if (!lval) {
+            sv = &PL_sv_undef;
+            goto ret;
         }
     }
 
@@ -1940,8 +1930,10 @@ PP_wrapped(pp_aelemfast, 0, 0)
 
     if (!lval && SvRMAGICAL(av) && SvGMAGICAL(sv)) /* see note in pp_helem() */
         mg_get(sv);
-    PUSHs(sv);
-    RETURN;
+
+  ret:
+    rpp_xpush_1(sv);
+    return NORMAL;
 }
 
 PP_wrapped(pp_join, 0, 1)
@@ -3152,9 +3144,8 @@ PP_wrapped(pp_aassign, 0, 2)
     RETURN;
 }
 
-PP_wrapped(pp_qr, 0, 0)
+PP(pp_qr)
 {
-    dSP;
     PMOP * const pm = cPMOP;
     REGEXP * rx = PM_GETRE(pm);
     regexp *prog = ReANY(rx);
@@ -3189,8 +3180,8 @@ PP_wrapped(pp_qr, 0, 0)
         SvTAINTED_on(rv);
         SvTAINTED_on(SvRV(rv));
     }
-    XPUSHs(rv);
-    RETURN;
+    rpp_xpush_1(rv);
+    return NORMAL;
 }
 
 STATIC bool
@@ -4256,7 +4247,7 @@ PP_wrapped(pp_multideref, S_multideref_argcount(aTHX), 0)
 }
 
 
-PP_wrapped(pp_iter, 0, 0)
+PP(pp_iter)
 {
     PERL_CONTEXT *cx = CX_CUR();
     SV **itersvp = CxITERVAR(cx);
@@ -6188,14 +6179,13 @@ PP_wrapped(pp_method, 1, 0)
         if (isGV(gv) && GvCV(gv) && (!GvCVGEN(gv) || GvCVGEN(gv)	\
              == (PL_sub_generation + HvMROMETA(stash)->cache_gen)))	\
         {								\
-            XPUSHs(MUTABLE_SV(GvCV(gv)));				\
-            RETURN;							\
+            rpp_xpush_1(MUTABLE_SV(GvCV(gv)));				\
+            return NORMAL;						\
         }								\
     }									\
 
-PP_wrapped(pp_method_named, 0, 0)
+PP(pp_method_named)
 {
-    dSP;
     GV* gv;
     SV* const meth = cMETHOP_meth;
     HV* const stash = opmethod_stash(meth);
@@ -6207,13 +6197,12 @@ PP_wrapped(pp_method_named, 0, 0)
     gv = gv_fetchmethod_sv_flags(stash, meth, GV_AUTOLOAD|GV_CROAK);
     assert(gv);
 
-    XPUSHs(isGV(gv) ? MUTABLE_SV(GvCV(gv)) : MUTABLE_SV(gv));
-    RETURN;
+    rpp_xpush_1(isGV(gv) ? MUTABLE_SV(GvCV(gv)) : MUTABLE_SV(gv));
+    return NORMAL;
 }
 
-PP_wrapped(pp_method_super, 0, 0)
+PP(pp_method_super)
 {
-    dSP;
     GV* gv;
     HV* cache;
     SV* const meth = cMETHOP_meth;
@@ -6230,13 +6219,12 @@ PP_wrapped(pp_method_super, 0, 0)
     gv = gv_fetchmethod_sv_flags(stash, meth, GV_AUTOLOAD|GV_CROAK|GV_SUPER);
     assert(gv);
 
-    XPUSHs(isGV(gv) ? MUTABLE_SV(GvCV(gv)) : MUTABLE_SV(gv));
-    RETURN;
+    rpp_xpush_1(isGV(gv) ? MUTABLE_SV(GvCV(gv)) : MUTABLE_SV(gv));
+    return NORMAL;
 }
 
-PP_wrapped(pp_method_redir, 0, 0)
+PP(pp_method_redir)
 {
-    dSP;
     GV* gv;
     SV* const meth = cMETHOP_meth;
     HV* stash = gv_stashsv(cMETHOP_rclass, 0);
@@ -6248,13 +6236,12 @@ PP_wrapped(pp_method_redir, 0, 0)
     gv = gv_fetchmethod_sv_flags(stash, meth, GV_AUTOLOAD|GV_CROAK);
     assert(gv);
 
-    XPUSHs(isGV(gv) ? MUTABLE_SV(GvCV(gv)) : MUTABLE_SV(gv));
-    RETURN;
+    rpp_xpush_1(isGV(gv) ? MUTABLE_SV(GvCV(gv)) : MUTABLE_SV(gv));
+    return NORMAL;
 }
 
-PP_wrapped(pp_method_redir_super, 0, 0)
+PP(pp_method_redir_super)
 {
-    dSP;
     GV* gv;
     HV* cache;
     SV* const meth = cMETHOP_meth;
@@ -6269,8 +6256,8 @@ PP_wrapped(pp_method_redir_super, 0, 0)
     gv = gv_fetchmethod_sv_flags(stash, meth, GV_AUTOLOAD|GV_CROAK|GV_SUPER);
     assert(gv);
 
-    XPUSHs(isGV(gv) ? MUTABLE_SV(GvCV(gv)) : MUTABLE_SV(gv));
-    RETURN;
+    rpp_xpush_1(isGV(gv) ? MUTABLE_SV(GvCV(gv)) : MUTABLE_SV(gv));
+    return NORMAL;
 }
 
 /*
