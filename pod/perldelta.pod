@@ -351,7 +351,12 @@ well.
 
 =item *
 
-XXX
+A new API function has been added that simplifies C (or XS) code that creates
+C<LISTOP> optree fragments.  C<newLISTOPn()> is a variadic function that takes
+a C<NULL>-terminated list of child op pointers, and constructs a new checked
+C<LISTOP> to contain them all.  This is simpler than creating a new plain
+C<OP_LIST>, adding each child individually, and finally calling
+C<op_convert_list()> in most code fragments.
 
 =back
 
