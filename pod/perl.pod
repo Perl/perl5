@@ -387,10 +387,25 @@ see L<perlvar> for more information.
 
 =head1 SEE ALSO
 
- https://www.perl.org/       the Perl homepage
- https://www.perl.com/       Perl articles
- https://www.cpan.org/       the Comprehensive Perl Archive
- https://www.pm.org/         the Perl Mongers
+=over
+
+=item L<https://www.perl.org/>
+
+the Perl homepage
+
+=item L<https://www.perl.com/>
+
+Perl articles
+
+=item L<https://www.cpan.org/>
+
+the Comprehensive Perl Archive
+
+=item L<https://www.pm.org/>
+
+the Perl Mongers
+
+=back
 
 =head1 DIAGNOSTICS
 
