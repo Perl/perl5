@@ -87,9 +87,9 @@ aux h2ph h2xs perlbug pl2pm pod2html pod2man splain xsubpp
 
 =head2 Reference Manual
 
-    perlsyn		Perl syntax
+    perlsyn		Perl syntax: declarations, statements, comments
     perldata		Perl data structures
-    perlop		Perl operators and precedence
+    perlop		Perl expressions: operators, precedence, string literals
     perlsub		Perl subroutines
     perlfunc		Perl built-in functions
       perlopentut	Perl open() tutorial

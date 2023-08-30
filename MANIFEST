@@ -5526,7 +5526,7 @@ pod/perlnewmod.pod			Perl modules: preparing a new module for distribution
 pod/perlnumber.pod			Perl number semantics
 pod/perlobj.pod				Perl objects
 pod/perlootut.pod			Perl OO tutorial for beginners
-pod/perlop.pod				Perl operators and precedence
+pod/perlop.pod				Perl expressions: operators, precedence, string literals
 pod/perlopentut.pod			Perl open() tutorial
 pod/perlpacktut.pod			Perl pack() and unpack() tutorial
 pod/perlperf.pod			Perl Performance and Optimization Techniques
@@ -5553,7 +5553,7 @@ pod/perlsecpolicy.pod			Perl security report handling policy
 pod/perlsource.pod			Guide to the Perl source tree
 pod/perlstyle.pod			Perl style guide
 pod/perlsub.pod				Perl subroutines
-pod/perlsyn.pod				Perl syntax
+pod/perlsyn.pod				Perl syntax: declarations, statements, comments
 pod/perlthrtut.pod			Perl threads tutorial
 pod/perltie.pod				Perl objects hidden behind simple variables
 pod/perltodo.pod
