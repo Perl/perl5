@@ -320,7 +320,7 @@ S_regdump_intflags(pTHX_ const char *lead, const U32 flags)
 
     ASSUME(REG_INTFLAGS_NAME_SIZE <= sizeof(flags)*8);
 
-    for (bit=0; bit<=REG_INTFLAGS_NAME_SIZE; bit++) {
+    for (bit=0; bit < REG_INTFLAGS_NAME_SIZE; bit++) {
         if (flags & (1<<bit)) {
             if (!set++ && lead)
                 Perl_re_printf( aTHX_  "%s", lead);
