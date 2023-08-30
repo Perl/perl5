@@ -1,7 +1,7 @@
 =head1 NAME
 X<syntax>
 
-perlsyn - Perl syntax
+perlsyn - Perl syntax: declarations, statements, comments
 
 =head1 DESCRIPTION
 
