@@ -6557,6 +6557,7 @@ S_ints_to_tm(pTHX_ struct tm * mytm,
      * variables */
 
     /* Override with the passed-in values */
+    Zero(mytm, 1, struct tm);
     mytm->tm_sec = sec;
     mytm->tm_min = min;
     mytm->tm_hour = hour;
