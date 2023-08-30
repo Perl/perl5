@@ -1402,60 +1402,58 @@ PP_wrapped(pp_multiconcat, S_multiconcat_argcount(aTHX), 0)
 STATIC OP*
 S_pushav(pTHX_ AV* const av)
 {
-    dSP;
     const SSize_t maxarg = AvFILL(av) + 1;
-    EXTEND(SP, maxarg);
+    rpp_extend(maxarg);
     if (UNLIKELY(SvRMAGICAL(av))) {
         PADOFFSET i;
         for (i=0; i < (PADOFFSET)maxarg; i++) {
             SV ** const svp = av_fetch(av, i, FALSE);
-            SP[i+1] = LIKELY(svp)
+            rpp_push_1(LIKELY(svp)
                        ? *svp
                        : UNLIKELY(PL_op->op_flags & OPf_MOD)
                           ? av_nonelem(av,i)
-                          : &PL_sv_undef;
+                          : &PL_sv_undef
+            );
         }
     }
     else {
         PADOFFSET i;
         for (i=0; i < (PADOFFSET)maxarg; i++) {
             SV *sv = AvARRAY(av)[i];
-            SP[i+1] = LIKELY(sv)
+            rpp_push_1(LIKELY(sv)
                        ? sv
                        : UNLIKELY(PL_op->op_flags & OPf_MOD)
                           ? av_nonelem(av,i)
-                          : &PL_sv_undef;
+                          : &PL_sv_undef
+            );
         }
     }
-    SP += maxarg;
-    PUTBACK;
     return NORMAL;
 }
 
 
 /* ($lex1,@lex2,...)   or my ($lex1,@lex2,...)  */
 
-PP_wrapped(pp_padrange, 0, 0)
+PP(pp_padrange)
 {
-    dSP;
     PADOFFSET base = PL_op->op_targ;
     int count = (int)(PL_op->op_private) & OPpPADRANGE_COUNTMASK;
     if (PL_op->op_flags & OPf_SPECIAL) {
         /* fake the RHS of my ($x,$y,..) = @_ */
-        PUSHMARK(SP);
+        PUSHMARK(PL_stack_sp);
         (void)S_pushav(aTHX_ GvAVn(PL_defgv));
-        SPAGAIN;
     }
 
     /* note, this is only skipped for compile-time-known void cxt */
     if ((PL_op->op_flags & OPf_WANT) != OPf_WANT_VOID) {
         int i;
 
-        EXTEND(SP, count);
-        PUSHMARK(SP);
+        rpp_extend(count);
+        PUSHMARK(PL_stack_sp);
         for (i = 0; i <count; i++)
-            *++SP = PAD_SV(base+i);
+            rpp_push_1(PAD_SV(base+i));
     }
+
     if (PL_op->op_private & OPpLVAL_INTRO) {
         SV **svp = &(PAD_SVl(base));
         const UV payload = (UV)(
@@ -1476,7 +1474,7 @@ PP_wrapped(pp_padrange, 0, 0)
         for (i = 0; i <count; i++)
             SvPADSTALE_off(*svp++); /* mark lexical as active */
     }
-    RETURN;
+    return NORMAL;
 }
 
 
@@ -2046,22 +2044,41 @@ PP_wrapped(pp_print, 0, 1)
 
 
 /* do the common parts of pp_padhv() and pp_rv2hv()
- * It assumes the caller has done EXTEND(SP, 1) or equivalent.
+ * It assumes the caller has done rpp_extend(1) or equivalent.
  * 'is_keys' indicates the OPpPADHV_ISKEYS/OPpRV2HV_ISKEYS flag is set.
  * 'has_targ' indicates that the op has a target - this should
  * be a compile-time constant so that the code can constant-folded as
- * appropriate
+ * appropriate. has_targ also implies that the caller has left an
+ * arg on the stack which needs freeing.
  * */
 
 PERL_STATIC_INLINE OP*
 S_padhv_rv2hv_common(pTHX_ HV *hv, U8 gimme, bool is_keys, bool has_targ)
 {
-    dSP;
-
     assert(PL_op->op_type == OP_PADHV || PL_op->op_type == OP_RV2HV);
 
     if (gimme == G_LIST) {
-        hv_pushkv(hv, 3);
+        /* push all (key,value) pairs onto stack */
+        if (has_targ) { /* i.e. if has arg still on stack */
+#ifdef PERL_RC_STACK
+            SSize_t sp_base = PL_stack_sp - PL_stack_base;
+            hv_pushkv(hv, 3);
+            /* Now safe to free the original arg on the stack and shuffle
+             * down one place anything pushed on top of it */
+            SSize_t nitems = PL_stack_sp - (PL_stack_base + sp_base);
+            SV *old_sv = PL_stack_sp[-nitems];
+            if (nitems)
+                Move(PL_stack_sp - nitems + 1,
+                     PL_stack_sp - nitems,    nitems, SV*);
+            PL_stack_sp--;
+            SvREFCNT_dec_NN(old_sv);
+#else
+            rpp_popfree_1();
+            hv_pushkv(hv, 3);
+#endif
+        }
+        else
+            hv_pushkv(hv, 3);
         return NORMAL;
     }
 
@@ -2069,8 +2086,11 @@ S_padhv_rv2hv_common(pTHX_ HV *hv, U8 gimme, bool is_keys, bool has_targ)
         /* 'keys %h' masquerading as '%h': reset iterator */
         (void)hv_iterinit(hv);
 
-    if (gimme == G_VOID)
+    if (gimme == G_VOID) {
+        if (has_targ)
+            rpp_popfree_1();
         return NORMAL;
+    }
 
     bool is_bool = (     PL_op->op_private & OPpTRUEBOOL
                    || (  PL_op->op_private & OPpMAYBE_TRUEBOOL
@@ -2087,10 +2107,16 @@ S_padhv_rv2hv_common(pTHX_ HV *hv, U8 gimme, bool is_keys, bool has_targ)
             i = 0;
             while (hv_iternext(hv))
                 i++;
+            /* hv finished with. Safe to free arg now */
+            if (has_targ)
+                rpp_popfree_1();
             goto push_i;
         }
         else {
             sv = magic_scalarpack(hv, is_tied_mg);
+            /* hv finished with. Safe to free arg now */
+            if (has_targ)
+                rpp_popfree_1();
             goto push_sv;
         }
     }
@@ -2109,16 +2135,22 @@ S_padhv_rv2hv_common(pTHX_ HV *hv, U8 gimme, bool is_keys, bool has_targ)
         }
 #endif
         i = HvUSEDKEYS(hv);
+
+        /* hv finished with. Safe to free arg now */
+        if (has_targ)
+            rpp_popfree_1();
+
         if (is_bool) {
             sv = i ? &PL_sv_yes : &PL_sv_zero;
           push_sv:
-            PUSHs(sv);
+            rpp_push_1(sv);
         }
         else {
           push_i:
             if (has_targ) {
                 dTARGET;
-                PUSHi(i);
+                TARGi(i,1);
+                rpp_push_1(targ);
             }
             else
             if (is_keys) {
@@ -2131,41 +2163,40 @@ S_padhv_rv2hv_common(pTHX_ HV *hv, U8 gimme, bool is_keys, bool has_targ)
                 k = PL_op->op_sibparent;
                 assert(k->op_type == OP_KEYS);
                 TARG = PAD_SV(k->op_targ);
-                PUSHi(i);
+                TARGi(i,1);
+                rpp_push_1(targ);
             }
             else
-                mPUSHi(i);
+                rpp_push_1_norc(newSViv(i));
         }
     }
 
-    PUTBACK;
     return NORMAL;
 }
 
 
 /* This is also called directly by pp_lvavref.  */
-PP_wrapped(pp_padav, 0, 0)
+PP(pp_padav)
 {
-    dSP; dTARGET;
+    dTARGET;
     U8 gimme;
+
     assert(SvTYPE(TARG) == SVt_PVAV);
     if (UNLIKELY( PL_op->op_private & OPpLVAL_INTRO ))
         if (LIKELY( !(PL_op->op_private & OPpPAD_STATE) ))
             SAVECLEARSV(PAD_SVl(PL_op->op_targ));
-    EXTEND(SP, 1);
 
-    if (PL_op->op_flags & OPf_REF) {
-        PUSHs(TARG);
-        RETURN;
-    }
-    else if (PL_op->op_private & OPpMAYBE_LVSUB) {
+
+    if (PL_op->op_flags & OPf_REF)
+        goto ret;
+
+    if (PL_op->op_private & OPpMAYBE_LVSUB) {
         const I32 flags = is_lvalue_sub();
         if (flags && !(flags & OPpENTERSUB_INARGS)) {
             if (GIMME_V == G_SCALAR)
                 /* diag_listed_as: Can't return %s to lvalue scalar context */
                 Perl_croak(aTHX_ "Can't return array to lvalue scalar context");
-            PUSHs(TARG);
-            RETURN;
+            goto ret;
        }
     }
 
@@ -2173,22 +2204,31 @@ PP_wrapped(pp_padav, 0, 0)
     if (gimme == G_LIST)
         return S_pushav(aTHX_ (AV*)TARG);
 
-    if (gimme == G_SCALAR) {
+    if (gimme == G_VOID)
+        return NORMAL;
+
+    {
         const SSize_t maxarg = AvFILL(MUTABLE_AV(TARG)) + 1;
         if (!maxarg)
-            PUSHs(&PL_sv_zero);
+            targ = &PL_sv_zero;
         else if (PL_op->op_private & OPpTRUEBOOL)
-            PUSHs(&PL_sv_yes);
-        else
-            mPUSHi(maxarg);
+            targ = &PL_sv_yes;
+        else {
+            rpp_extend(1);
+            rpp_push_1_norc(newSViv(maxarg));
+            return NORMAL;
+        }
     }
-    RETURN;
+
+  ret:
+    rpp_xpush_1(targ);
+    return NORMAL;
 }
 
 
-PP_wrapped(pp_padhv, 0, 0)
+PP(pp_padhv)
 {
-    dSP; dTARGET;
+    dTARGET;
     U8 gimme;
 
     assert(SvTYPE(TARG) == SVt_PVHV);
@@ -2196,11 +2236,11 @@ PP_wrapped(pp_padhv, 0, 0)
         if (LIKELY( !(PL_op->op_private & OPpPAD_STATE) ))
             SAVECLEARSV(PAD_SVl(PL_op->op_targ));
 
-    EXTEND(SP, 1);
+    rpp_extend(1);
 
     if (PL_op->op_flags & OPf_REF) {
-        PUSHs(TARG);
-        RETURN;
+        rpp_push_1(TARG);
+        return NORMAL;
     }
     else if (PL_op->op_private & OPpMAYBE_LVSUB) {
         const I32 flags = is_lvalue_sub();
@@ -2208,8 +2248,8 @@ PP_wrapped(pp_padhv, 0, 0)
             if (GIMME_V == G_SCALAR)
                 /* diag_listed_as: Can't return %s to lvalue scalar context */
                 Perl_croak(aTHX_ "Can't return hash to lvalue scalar context");
-            PUSHs(TARG);
-            RETURN;
+            rpp_push_1(TARG);
+            return NORMAL;
         }
     }
 
@@ -2224,9 +2264,9 @@ PP_wrapped(pp_padhv, 0, 0)
 /* also used for: pp_rv2hv() */
 /* also called directly by pp_lvavref */
 
-PP_wrapped(pp_rv2av, 1, 0)
+PP(pp_rv2av)
 {
-    dSP; dTOPss;
+    SV *sv = *PL_stack_sp;
     const U8 gimme = GIMME_V;
     static const char an_array[] = "an ARRAY";
     static const char a_hash[] = "a HASH";
@@ -2252,9 +2292,9 @@ PP_wrapped(pp_rv2av, 1, 0)
         
             if (!isGV_with_GP(sv)) {
                 gv = Perl_softref2xv(aTHX_ sv, is_pp_rv2av ? an_array : a_hash,
-                                     type, &sp);
+                                     type);
                 if (!gv)
-                    RETURN;
+                    return NORMAL;
             }
             else {
                 gv = MUTABLE_GV(sv);
@@ -2264,16 +2304,16 @@ PP_wrapped(pp_rv2av, 1, 0)
                 sv = is_pp_rv2av ? MUTABLE_SV(save_ary(gv)) : MUTABLE_SV(save_hash(gv));
     }
     if (PL_op->op_flags & OPf_REF) {
-                SETs(sv);
-                RETURN;
+        rpp_replace_1_1(sv);
+        return NORMAL;
     }
     else if (UNLIKELY(PL_op->op_private & OPpMAYBE_LVSUB)) {
               const I32 flags = is_lvalue_sub();
               if (flags && !(flags & OPpENTERSUB_INARGS)) {
                 if (gimme != G_LIST)
                     goto croak_cant_return;
-                SETs(sv);
-                RETURN;
+                rpp_replace_1_1(sv);
+                return NORMAL;
               }
     }
 
@@ -2281,34 +2321,49 @@ PP_wrapped(pp_rv2av, 1, 0)
         AV *const av = MUTABLE_AV(sv);
 
         if (gimme == G_LIST) {
-            SP--;
-            PUTBACK;
+#ifdef PERL_RC_STACK
+            SSize_t sp_base = PL_stack_sp - PL_stack_base;
+            (void)S_pushav(aTHX_ av);
+            /* Now safe to free the original arg on the stack and shuffle
+             * down one place anything pushed on top of it */
+            SSize_t nitems = PL_stack_sp - (PL_stack_base + sp_base);
+            SV *old_sv = PL_stack_sp[-nitems];
+            if (nitems)
+                Move(PL_stack_sp - nitems + 1,
+                     PL_stack_sp - nitems,    nitems, SV*);
+            PL_stack_sp--;
+            SvREFCNT_dec_NN(old_sv);
+            return NORMAL;
+#else
+            rpp_popfree_1();
             return S_pushav(aTHX_ av);
+#endif
         }
 
         if (gimme == G_SCALAR) {
             const SSize_t maxarg = AvFILL(av) + 1;
             if (PL_op->op_private & OPpTRUEBOOL)
-                SETs(maxarg ? &PL_sv_yes : &PL_sv_zero);
+                rpp_replace_1_1(maxarg ? &PL_sv_yes : &PL_sv_zero);
             else {
                 dTARGET;
-                SETi(maxarg);
+                TARGi(maxarg, 1);
+                rpp_replace_1_1(targ);
             }
         }
     }
     else {
-        SP--; PUTBACK;
+        /* this static function is responsible for popping sv off stack */
         return S_padhv_rv2hv_common(aTHX_ (HV*)sv, gimme,
                         cBOOL(PL_op->op_private & OPpRV2HV_ISKEYS),
                         1 /* has_targ*/);
     }
-    RETURN;
+    return NORMAL;
 
  croak_cant_return:
     Perl_croak(aTHX_ "Can't return %s to lvalue scalar context",
                is_pp_rv2av ? "array" : "hash");
-    RETURN;
 }
+
 
 STATIC void
 S_do_oddball(pTHX_ SV **oddkey, SV **firstkey)

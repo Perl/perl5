@@ -202,10 +202,18 @@ PP_wrapped(pp_rv2gv, 1, 0)
     RETURN;
 }
 
-/* Helper function for pp_rv2sv and pp_rv2av  */
+/* Helper function for pp_rv2sv and pp_rv2av/hv.
+ *
+ * Return a GV based on the value of sv, using symbolic references etc.
+ * On success: leaves argument on stack and returns gv.
+ * On failure: pops one item off stack;
+ *             then unless (list context and not rv2sv), also pushes undef;
+ *             then returns NULL.
+ */
+
 GV *
 Perl_softref2xv(pTHX_ SV *const sv, const char *const what,
-                const svtype type, SV ***spp)
+                const svtype type)
 {
     GV *gv;
 
@@ -226,10 +234,10 @@ Perl_softref2xv(pTHX_ SV *const sv, const char *const what,
         if (ckWARN(WARN_UNINITIALIZED))
             report_uninit(sv);
         if (type != SVt_PV && GIMME_V == G_LIST) {
-            (*spp)--;
+            rpp_popfree_1();
             return NULL;
         }
-        **spp = &PL_sv_undef;
+        rpp_replace_1_1(&PL_sv_undef);
         return NULL;
     }
     if ((PL_op->op_flags & OPf_SPECIAL) &&
@@ -237,7 +245,7 @@ Perl_softref2xv(pTHX_ SV *const sv, const char *const what,
         {
             if (!(gv = gv_fetchsv_nomg(sv, GV_ADDMG, type)))
                 {
-                    **spp = &PL_sv_undef;
+                    rpp_replace_1_1(&PL_sv_undef);
                     return NULL;
                 }
         }
@@ -247,9 +255,9 @@ Perl_softref2xv(pTHX_ SV *const sv, const char *const what,
     return gv;
 }
 
-PP_wrapped(pp_rv2sv, 1, 0)
+PP(pp_rv2sv)
 {
-    dSP; dTOPss;
+    SV *sv = *PL_stack_sp;
     GV *gv = NULL;
 
     SvGETMAGIC(sv);
@@ -266,16 +274,16 @@ PP_wrapped(pp_rv2sv, 1, 0)
         gv = MUTABLE_GV(sv);
 
         if (!isGV_with_GP(gv)) {
-            gv = Perl_softref2xv(aTHX_ sv, "a SCALAR", SVt_PV, &sp);
+            gv = Perl_softref2xv(aTHX_ sv, "a SCALAR", SVt_PV);
             if (!gv)
-                RETURN;
+                return NORMAL;
         }
         sv = GvSVn(gv);
     }
     if (PL_op->op_flags & OPf_MOD) {
         if (PL_op->op_private & OPpLVAL_INTRO) {
             if (cUNOP->op_first->op_type == OP_NULL)
-                sv = save_scalar(MUTABLE_GV(TOPs));
+                sv = save_scalar(MUTABLE_GV(*PL_stack_sp));
             else if (gv)
                 sv = save_scalar(gv);
             else
@@ -284,9 +292,8 @@ PP_wrapped(pp_rv2sv, 1, 0)
         else if (PL_op->op_private & OPpDEREF)
             sv = vivify_ref(sv, PL_op->op_private & OPpDEREF);
     }
-    SPAGAIN; /* in case chasing soft refs reallocated the stack */
-    SETs(sv);
-    RETURN;
+    rpp_replace_1_1(sv);
+    return NORMAL;
 }
 
 PP_wrapped(pp_av2arylen, 1, 0)
@@ -7112,18 +7119,20 @@ PP_wrapped(pp_lvrefslice, 0, 1)
     RETURN;
 }
 
-PP_wrapped(pp_lvavref, !!(PL_op->op_flags & OPf_STACKED), 0)
+PP(pp_lvavref)
 {
     if (PL_op->op_flags & OPf_STACKED)
         Perl_pp_rv2av(aTHX);
     else
         Perl_pp_padav(aTHX);
     {
-        dSP;
-        dTOPss;
-        SETs(0); /* special alias marker that aassign recognises */
-        XPUSHs(sv);
-        RETURN;
+        /* shift the return value up one and insert below it a special
+         * alias marker that aassign recognises */
+        rpp_extend(1);
+        PL_stack_sp[1] = PL_stack_sp[0];
+        PL_stack_sp[0] = NULL;
+        PL_stack_sp++;
+        return NORMAL;
     }
 }
 

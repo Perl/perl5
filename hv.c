@@ -1151,8 +1151,6 @@ Perl_hv_pushkv(pTHX_ HV *hv, U32 flags)
                                    || mg_find(MUTABLE_SV(hv), PERL_MAGIC_env)
 #endif
                                   );
-    dSP;
-
     PERL_ARGS_ASSERT_HV_PUSHKV;
     assert(flags); /* must be pushing at least one of keys and values */
 
@@ -1161,11 +1159,11 @@ Perl_hv_pushkv(pTHX_ HV *hv, U32 flags)
     if (tied) {
         SSize_t ext = (flags == 3) ? 2 : 1;
         while ((entry = hv_iternext(hv))) {
-            EXTEND(SP, ext);
+            rpp_extend(ext);
             if (flags & 1)
-                PUSHs(hv_iterkeysv(entry));
+                rpp_push_1(hv_iterkeysv(entry));
             if (flags & 2)
-                PUSHs(hv_iterval(hv, entry));
+                rpp_push_1(hv_iterval(hv, entry));
         }
     }
     else {
@@ -1180,21 +1178,19 @@ Perl_hv_pushkv(pTHX_ HV *hv, U32 flags)
         ext = nkeys * ((flags == 3) ? 2 : 1);
 
         EXTEND_MORTAL(nkeys);
-        EXTEND(SP, ext);
+        rpp_extend(ext);
 
         while ((entry = hv_iternext(hv))) {
             if (flags & 1) {
                 SV *keysv = newSVhek(HeKEY_hek(entry));
                 SvTEMP_on(keysv);
                 PL_tmps_stack[++PL_tmps_ix] = keysv;
-                PUSHs(keysv);
+                rpp_push_1(keysv);
             }
             if (flags & 2)
-                PUSHs(HeVAL(entry));
+                rpp_push_1(HeVAL(entry));
         }
     }
-
-    PUTBACK;
 }
 
 

@@ -1181,10 +1181,9 @@ Perl_do_vop(pTHX_ I32 optype, SV *sv, SV *left, SV *right)
  * values, or key-value pairs, depending on PL_op.
  */
 
-PP_wrapped(do_kv, 1, 0)
+PP(do_kv)
 {
-    dSP;
-    HV * const keys = MUTABLE_HV(POPs);
+    HV * const keys = MUTABLE_HV(*PL_stack_sp);
     const U8 gimme = GIMME_V;
 
     const I32 dokeys   =     (PL_op->op_type == OP_KEYS)
@@ -1206,8 +1205,10 @@ PP_wrapped(do_kv, 1, 0)
 
     (void)hv_iterinit(keys);	/* always reset iterator regardless */
 
-    if (gimme == G_VOID)
-        RETURN;
+    if (gimme == G_VOID) {
+        rpp_popfree_1();
+        return NORMAL;
+    }
 
     if (gimme == G_SCALAR) {
         if (PL_op->op_flags & OPf_MOD || LVRET) {	/* lvalue */
@@ -1215,7 +1216,7 @@ PP_wrapped(do_kv, 1, 0)
             sv_magic(ret, NULL, PERL_MAGIC_nkeys, NULL, 0);
             LvTYPE(ret) = 'k';
             LvTARG(ret) = SvREFCNT_inc_simple(keys);
-            PUSHs(ret);
+            rpp_replace_1_1(ret);
         }
         else {
             IV i;
@@ -1233,10 +1234,13 @@ PP_wrapped(do_kv, 1, 0)
                 i = 0;
                 while (hv_iternext(keys)) i++;
             }
-            PUSHi( i );
+            TARGi(i,1);
+            rpp_replace_1_1(targ);
         }
-        RETURN;
+        return NORMAL;
     }
+
+    /* list context only here */
 
     if (UNLIKELY(PL_op->op_private & OPpMAYBE_LVSUB)) {
         const I32 flags = is_lvalue_sub();
@@ -1245,8 +1249,23 @@ PP_wrapped(do_kv, 1, 0)
             Perl_croak(aTHX_ "Can't modify keys in list assignment");
     }
 
-    PUTBACK;
+    /* push all keys and/or values onto stack */
+#ifdef PERL_RC_STACK
+    SSize_t sp_base = PL_stack_sp - PL_stack_base;
     hv_pushkv(keys, (dokeys | (dovalues << 1)));
+    /* Now safe to free the original arg on the stack and shuffle
+     * down one place anything pushed on top of it */
+    SSize_t nitems = PL_stack_sp - (PL_stack_base + sp_base);
+    SV *old_sv = PL_stack_sp[-nitems];
+    if (nitems)
+        Move(PL_stack_sp - nitems + 1,
+             PL_stack_sp - nitems,    nitems, SV*);
+    PL_stack_sp--;
+    SvREFCNT_dec_NN(old_sv);
+#else
+    rpp_popfree_1();
+    hv_pushkv(keys, (dokeys | (dovalues << 1)));
+#endif
     return NORMAL;
 }
 
