@@ -221,14 +221,12 @@ PP(pp_pushmark)
     return NORMAL;
 }
 
-PP_wrapped(pp_stringify, 1, 0)
+PP(pp_stringify)
 {
-    dSP; dTARGET;
-    SV * const sv = TOPs;
-    SETs(TARG);
-    sv_copypv(TARG, sv);
+    dTARGET;
+    sv_copypv(TARG, *PL_stack_sp);
     SvSETMAGIC(TARG);
-    /* no PUTBACK, SETs doesn't inc/dec SP */
+    rpp_replace_1_1(TARG);
     return NORMAL;
 }
 
@@ -308,11 +306,10 @@ PP_wrapped(pp_padsv_store,1,0)
 
 /* A mashup of simplified AELEMFAST_LEX + SASSIGN OPs */
 
-PP_wrapped(pp_aelemfastlex_store, 1, 0)
+PP(pp_aelemfastlex_store)
 {
-    dSP;
     OP * const op = PL_op;
-    SV* const val = TOPs; /* RHS value to assign */
+    SV* const val = *PL_stack_sp; /* RHS value to assign */
     AV * const av = MUTABLE_AV(PAD_SV(op->op_targ));
     const I8 key   = (I8)PL_op->op_private;
     SV * targ = NULL;
@@ -352,8 +349,8 @@ PP_wrapped(pp_aelemfastlex_store, 1, 0)
 
     SvSetMagicSV(targ, val);
 
-    SETs(targ);
-    RETURN;
+    rpp_replace_1_1(targ);
+    return NORMAL;
 }
 
 PP_wrapped(pp_sassign, 2, 0)
@@ -462,14 +459,12 @@ PP_wrapped(pp_sassign, 2, 0)
     RETURN;
 }
 
-PP_wrapped(pp_cond_expr, 1, 0)
+PP(pp_cond_expr)
 {
-    dSP;
-    SV *sv;
-
     PERL_ASYNC_CHECK();
-    sv = POPs;
-    RETURNOP(SvTRUE_NN(sv) ? cLOGOP->op_other : cLOGOP->op_next);
+    bool ok = SvTRUE_NN(*PL_stack_sp);
+    rpp_popfree_1();
+    return (ok ? cLOGOP->op_other : cLOGOP->op_next);
 }
 
 PP(pp_unstack)
@@ -1557,7 +1552,7 @@ PP_wrapped(pp_eq, 2, 0)
 
 /* also used for: pp_i_preinc() */
 
-PP_wrapped(pp_preinc, 1, 0)
+PP(pp_preinc)
 {
     SV *sv = *PL_stack_sp;
 
@@ -1578,7 +1573,7 @@ PP_wrapped(pp_preinc, 1, 0)
 
 /* also used for: pp_i_predec() */
 
-PP_wrapped(pp_predec, 1, 0)
+PP(pp_predec)
 {
     SV *sv = *PL_stack_sp;
 
@@ -1599,28 +1594,26 @@ PP_wrapped(pp_predec, 1, 0)
 
 /* also used for: pp_orassign() */
 
-PP_wrapped(pp_or, 1, 0)
+PP(pp_or)
 {
-    dSP;
     SV *sv;
     PERL_ASYNC_CHECK();
-    sv = TOPs;
+    sv = *PL_stack_sp;
     if (SvTRUE_NN(sv))
-        RETURN;
+        return NORMAL;
     else {
         if (PL_op->op_type == OP_OR)
-            --SP;
-        RETURNOP(cLOGOP->op_other);
+            rpp_popfree_1();
+        return cLOGOP->op_other;
     }
 }
 
 
 /* also used for: pp_dor() pp_dorassign() */
 
-PP_wrapped(pp_defined, 1, 0)
+PP(pp_defined)
 {
-    dSP;
-    SV* sv = TOPs;
+    SV* sv = *PL_stack_sp;
     bool defined = FALSE;
     const int op_type = PL_op->op_type;
     const bool is_dor = (op_type == OP_DOR || op_type == OP_DORASSIGN);
@@ -1629,14 +1622,16 @@ PP_wrapped(pp_defined, 1, 0)
         PERL_ASYNC_CHECK();
         if (UNLIKELY(!sv || !SvANY(sv))) {
             if (op_type == OP_DOR)
-                --SP;
-            RETURNOP(cLOGOP->op_other);
+                rpp_popfree_1();
+            return cLOGOP->op_other;
         }
     }
     else {
         /* OP_DEFINED */
-        if (UNLIKELY(!sv || !SvANY(sv)))
-            RETSETNO;
+        if (UNLIKELY(!sv || !SvANY(sv))) {
+            rpp_replace_1_1(&PL_sv_no);
+            return NORMAL;
+        }
     }
 
     /* Historically what followed was a switch on SvTYPE(sv), handling SVt_PVAV,
@@ -1660,15 +1655,14 @@ PP_wrapped(pp_defined, 1, 0)
 
     if (is_dor) {
         if(defined) 
-            RETURN; 
+            return NORMAL;
         if(op_type == OP_DOR)
-            --SP;
-        RETURNOP(cLOGOP->op_other);
+            rpp_popfree_1();
+        return cLOGOP->op_other;
     }
     /* assuming OP_DEFINED */
-    if(defined) 
-        RETSETYES;
-    RETSETNO;
+    rpp_replace_1_1(defined ? &PL_sv_yes : &PL_sv_no);
+    return NORMAL;
 }
 
 
@@ -6203,18 +6197,17 @@ S_opmethod_stash(pTHX_ SV* meth)
     return SvSTASH(ob);
 }
 
-PP_wrapped(pp_method, 1, 0)
+PP(pp_method)
 {
-    dSP;
     GV* gv;
     HV* stash;
-    SV* const meth = TOPs;
+    SV* const meth = *PL_stack_sp;
 
     if (SvROK(meth)) {
         SV* const rmeth = SvRV(meth);
         if (SvTYPE(rmeth) == SVt_PVCV) {
-            SETs(rmeth);
-            RETURN;
+            rpp_replace_1_1(rmeth);
+            return NORMAL;
         }
     }
 
@@ -6223,8 +6216,8 @@ PP_wrapped(pp_method, 1, 0)
     gv = gv_fetchmethod_sv_flags(stash, meth, GV_AUTOLOAD|GV_CROAK);
     assert(gv);
 
-    SETs(isGV(gv) ? MUTABLE_SV(GvCV(gv)) : MUTABLE_SV(gv));
-    RETURN;
+    rpp_replace_1_1(isGV(gv) ? MUTABLE_SV(GvCV(gv)) : MUTABLE_SV(gv));
+    return NORMAL;
 }
 
 #define METHOD_CHECK_CACHE(stash,cache,meth) 				\
