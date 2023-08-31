@@ -575,14 +575,12 @@ PP_wrapped(pp_bless, MAXARG, 0)
     RETURN;
 }
 
-PP_wrapped(pp_gelem, 2, 0)
+PP(pp_gelem)
 {
-    dSP;
-
-    SV *sv = POPs;
+    SV *sv = PL_stack_sp[0];
     STRLEN len;
     const char * const elem = SvPV_const(sv, len);
-    GV * const gv = MUTABLE_GV(TOPs);
+    GV * const gv = MUTABLE_GV(PL_stack_sp[-1]);
     SV * tmpRef = NULL;
 
     sv = NULL;
@@ -645,8 +643,8 @@ PP_wrapped(pp_gelem, 2, 0)
         sv_2mortal(sv);
     else
         sv = &PL_sv_undef;
-    SETs(sv);
-    RETURN;
+    rpp_replace_2_1(sv);
+    return NORMAL;
 }
 
 /* Pattern matching */
@@ -1077,16 +1075,20 @@ PP(pp_postdec)
 
 /* Ordinary operators. */
 
-PP_wrapped(pp_pow, 2, 0)
+PP(pp_pow)
 {
-    dSP; dATARGET; SV *svl, *svr;
+    SV *targ = (PL_op->op_flags & OPf_STACKED)
+                    ? PL_stack_sp[-1]
+                    : PAD_SV(PL_op->op_targ);
+
+    if (rpp_try_AMAGIC_2(pow_amg, AMGf_assign|AMGf_numeric))
+        return NORMAL;
+
+    SV *svr = PL_stack_sp[0];
+    SV *svl = PL_stack_sp[-1];
+
 #ifdef PERL_PRESERVE_IVUV
     bool is_int = 0;
-#endif
-    tryAMAGICbin_MG(pow_amg, AMGf_assign|AMGf_numeric);
-    svr = TOPs;
-    svl = TOPm1s;
-#ifdef PERL_PRESERVE_IVUV
     /* For integer to integer power, we do the calculation by hand wherever
        we're sure it is safe; otherwise we call pow() and try to convert to
        integer afterwards. */
@@ -1143,10 +1145,9 @@ PP_wrapped(pp_pow, 2, 0)
                             result *= base;
                         }
                     }
-                    SP--;
-                    SETn( result );
+                    TARGn(result, 1);
                     SvIV_please_nomg(svr);
-                    RETURN;
+                    goto ret;
                 } else {
                     unsigned int highbit = 8 * sizeof(UV);
                     unsigned int diff = 8 * sizeof(UV);
@@ -1172,20 +1173,19 @@ PP_wrapped(pp_pow, 2, 0)
                                 result *= base;
                             }
                         }
-                        SP--;
                         if (baseuok || !odd_power)
                             /* answer is positive */
-                            SETu( result );
+                            TARGu(result, 1);
                         else if (result <= (UV)IV_MAX)
                             /* answer negative, fits in IV */
-                            SETi( -(IV)result );
+                            TARGi(-(IV)result, 1);
                         else if (result == (UV)IV_MIN)
                             /* 2's complement assumption: special case IV_MIN */
-                            SETi( IV_MIN );
+                            TARGi(IV_MIN, 1);
                         else
                             /* answer negative, doesn't fit */
-                            SETn( -(NV)result );
-                        RETURN;
+                            TARGn(-(NV)result, 1);
+                        goto ret;
                     }
                 }
     }
@@ -1194,7 +1194,6 @@ PP_wrapped(pp_pow, 2, 0)
     {
         NV right = SvNV_nomg(svr);
         NV left  = SvNV_nomg(svl);
-        (void)POPs;
 
 #if defined(USE_LONG_DOUBLE) && defined(HAS_AIX_POWL_NEG_BASE_BUG)
     /*
@@ -1223,14 +1222,14 @@ PP_wrapped(pp_pow, 2, 0)
         if (left < 0.0) {
             NV mod2 = Perl_fmod( right, 2.0 );
             if (mod2 == 1.0 || mod2 == -1.0) {	/* odd integer */
-                SETn( -Perl_pow( -left, right) );
+                TARGn(-Perl_pow(-left, right), 1);
             } else if (mod2 == 0.0) {		/* even integer */
-                SETn( Perl_pow( -left, right) );
+                TARGn(Perl_pow(-left, right), 1);
             } else {				/* fractional power */
-                SETn( NV_NAN );
+                TARGn(NV_NAN, 1);
             }
         } else {
-            SETn( Perl_pow( left, right) );
+            TARGn(Perl_pow(left, right), 1);
         }
 #elif IVSIZE == 4 && defined(LONGDOUBLE_DOUBLEDOUBLE) && defined(USE_LONG_DOUBLE)
     /*
@@ -1242,28 +1241,38 @@ PP_wrapped(pp_pow, 2, 0)
     */
 
         if (is_int) {
-            SETn( roundl( Perl_pow( left, right) ) );
+            TARGn(roundl(Perl_pow(left, right)), 1);
         }
-        else SETn( Perl_pow( left, right) );
+        else
+            TARGn(Perl_pow(left, right), 1 );
 
 #else
-        SETn( Perl_pow( left, right) );
+        TARGn(Perl_pow(left, right), 1);
 #endif  /* HAS_AIX_POWL_NEG_BASE_BUG */
 
 #ifdef PERL_PRESERVE_IVUV
         if (is_int)
             SvIV_please_nomg(svr);
 #endif
-        RETURN;
     }
+
+  ret:
+    rpp_replace_2_1(targ);
+    return NORMAL;
 }
 
-PP_wrapped(pp_multiply, 2, 0)
+
+PP(pp_multiply)
 {
-    dSP; dATARGET; SV *svl, *svr;
-    tryAMAGICbin_MG(mult_amg, AMGf_assign|AMGf_numeric);
-    svr = TOPs;
-    svl = TOPm1s;
+    SV *targ = (PL_op->op_flags & OPf_STACKED)
+                    ? PL_stack_sp[-1]
+                    : PAD_SV(PL_op->op_targ);
+
+    if (rpp_try_AMAGIC_2(mult_amg, AMGf_assign|AMGf_numeric))
+        return NORMAL;
+
+    SV *svr = PL_stack_sp[0];
+    SV *svl = PL_stack_sp[-1];
 
 #ifdef PERL_PRESERVE_IVUV
 
@@ -1289,10 +1298,8 @@ PP_wrapped(pp_multiply, 2, 0)
                       ((topl+1) | (topr+1))
                     & ( (((UV)1) << (UVSIZE * 4 + 1)) - 2) /* 11..110 */
             )) {
-                SP--;
                 TARGi(il * ir, 0); /* args not GMG, so can't be tainted */
-                SETs(TARG);
-                RETURN;
+                goto ret;
             }
             goto generic;
         }
@@ -1306,7 +1313,6 @@ PP_wrapped(pp_multiply, 2, 0)
                 /* nothing was lost by converting to IVs */
                 goto do_iv;
             }
-            SP--;
             result = nl * nr;
 #  if defined(__sgi) && defined(USE_LONG_DOUBLE) && LONG_DOUBLEKIND == LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_BE_BE && NVSIZE == 16
             if (Perl_isinf(result)) {
@@ -1314,8 +1320,7 @@ PP_wrapped(pp_multiply, 2, 0)
             }
 #  endif
             TARGn(result, 0); /* args not GMG, so can't be tainted */
-            SETs(TARG);
-            RETURN;
+            goto ret;
         }
     }
 
@@ -1377,19 +1382,17 @@ PP_wrapped(pp_multiply, 2, 0)
                 const UV product = alow * blow;
                 if (auvok == buvok) {
                     /* -ve * -ve or +ve * +ve gives a +ve result.  */
-                    SP--;
-                    SETu( product );
-                    RETURN;
+                    TARGu(product, 1);
+                    goto ret;
                 } else if (product <= (UV)IV_MIN) {
                     /* 2s complement assumption that (UV)-IV_MIN is correct.  */
                     /* -ve result, which could overflow an IV  */
-                    SP--;
                     /* can't negate IV_MIN, but there are aren't two
                      * integers such that !ahigh && !bhigh, where the
                      * product equals 0x800....000 */
                     assert(product != (UV)IV_MIN);
-                    SETi( -(IV)product );
-                    RETURN;
+                    TARGi(-(IV)product, 1);
+                    goto ret;
                 } /* else drop to NVs below. */
             } else {
                 /* One operand is large, 1 small */
@@ -1418,16 +1421,15 @@ PP_wrapped(pp_multiply, 2, 0)
                         /* didn't overflow */
                         if (auvok == buvok) {
                             /* -ve * -ve or +ve * +ve gives a +ve result.  */
-                            SP--;
-                            SETu( product_low );
-                            RETURN;
+                            TARGu(product_low, 1);
+                            goto ret;
                         } else if (product_low <= (UV)IV_MIN) {
                             /* 2s complement assumption again  */
                             /* -ve result, which could overflow an IV  */
-                            SP--;
-                            SETi(product_low == (UV)IV_MIN
-                                    ? IV_MIN : -(IV)product_low);
-                            RETURN;
+                            TARGi(product_low == (UV)IV_MIN
+                                    ? IV_MIN : -(IV)product_low,
+                                  1);
+                            goto ret;
                         } /* else drop to NVs below. */
                     }
                 } /* product_middle too large */
@@ -1440,23 +1442,33 @@ PP_wrapped(pp_multiply, 2, 0)
       NV left  = SvNV_nomg(svl);
       NV result = left * right;
 
-      (void)POPs;
 #if defined(__sgi) && defined(USE_LONG_DOUBLE) && LONG_DOUBLEKIND == LONG_DOUBLE_IS_DOUBLEDOUBLE_128_BIT_BE_BE && NVSIZE == 16
       if (Perl_isinf(result)) {
           Zero((U8*)&result + 8, 8, U8);
       }
 #endif
-      SETn(result);
-      RETURN;
+      TARGn(result, 1);
+      goto ret;
     }
+
+  ret:
+    rpp_replace_2_1(targ);
+    return NORMAL;
 }
 
-PP_wrapped(pp_divide, 2, 0)
+
+PP(pp_divide)
 {
-    dSP; dATARGET; SV *svl, *svr;
-    tryAMAGICbin_MG(div_amg, AMGf_assign|AMGf_numeric);
-    svr = TOPs;
-    svl = TOPm1s;
+    SV *targ = (PL_op->op_flags & OPf_STACKED)
+                    ? PL_stack_sp[-1]
+                    : PAD_SV(PL_op->op_targ);
+
+    if (rpp_try_AMAGIC_2(div_amg, AMGf_assign|AMGf_numeric))
+        return NORMAL;
+
+    SV *svr = PL_stack_sp[0];
+    SV *svl = PL_stack_sp[-1];
+
     /* Only try to do UV divide first
        if ((SLOPPYDIVIDE is true) or
            (PERL_PRESERVE_IVUV is true and one or both SV is a UV too large
@@ -1535,20 +1547,21 @@ PP_wrapped(pp_divide, 2, 0)
                  * modulo into a single div instruction */
                 const UV result = left / right;
                 if (left % right == 0) {
-                    SP--; /* result is valid */
+                    /* result is valid */
                     if (left_non_neg == right_non_neg) {
                         /* signs identical, result is positive.  */
-                        SETu( result );
-                        RETURN;
+                        TARGu(result, 1);
+                        goto ret;
                     }
                     /* 2s complement assumption */
                     if (result <= (UV)IV_MIN)
-                        SETi(result == (UV)IV_MIN ? IV_MIN : -(IV)result);
+                        TARGi(result == (UV)IV_MIN ? IV_MIN : -(IV)result,
+                              1);
                     else {
                         /* It's exact but too negative for IV. */
-                        SETn( -(NV)result );
+                        TARGn(-(NV)result, 1);
                     }
-                    RETURN;
+                    goto ret;
                 } /* tried integer divide but it was not an integer result */
             } /* else (PERL_ABS(result) < 1.0) or (both UVs in range for NV) */
     } /* one operand wasn't SvIOK */
@@ -1556,22 +1569,30 @@ PP_wrapped(pp_divide, 2, 0)
     {
         NV right = SvNV_nomg(svr);
         NV left  = SvNV_nomg(svl);
-        (void)POPs;(void)POPs;
 #if defined(NAN_COMPARE_BROKEN) && defined(Perl_isnan)
         if (! Perl_isnan(right) && right == 0.0)
 #else
         if (right == 0.0)
 #endif
             DIE(aTHX_ "Illegal division by zero");
-        PUSHn( left / right );
-        RETURN;
+        TARGn(left / right, 1);
     }
+
+  ret:
+    rpp_replace_2_1(targ);
+    return NORMAL;
 }
 
-PP_wrapped(pp_modulo, 2, 0)
+
+PP(pp_modulo)
 {
-    dSP; dATARGET;
-    tryAMAGICbin_MG(modulo_amg, AMGf_assign|AMGf_numeric);
+    SV *targ = (PL_op->op_flags & OPf_STACKED)
+                    ? PL_stack_sp[-1]
+                    : PAD_SV(PL_op->op_targ);
+
+    if (rpp_try_AMAGIC_2(modulo_amg, AMGf_assign|AMGf_numeric))
+        return NORMAL;
+
     {
         UV left  = 0;
         UV right = 0;
@@ -1581,8 +1602,8 @@ PP_wrapped(pp_modulo, 2, 0)
         bool dright_valid = FALSE;
         NV dright = 0.0;
         NV dleft  = 0.0;
-        SV * const svr = TOPs;
-        SV * const svl = TOPm1s;
+        SV * const svr = PL_stack_sp[0];
+        SV * const svl = PL_stack_sp[-1];
         if (SvIV_please_nomg(svr)) {
             right_neg = !SvUOK(svr);
             if (!right_neg) {
@@ -1656,7 +1677,7 @@ PP_wrapped(pp_modulo, 2, 0)
                 }
             }
         }
-        sp -= 2;
+
         if (use_double) {
             NV dans;
 
@@ -1690,10 +1711,13 @@ PP_wrapped(pp_modulo, 2, 0)
             else
                 sv_setuv(TARG, ans);
         }
-        PUSHTARG;
-        RETURN;
+
+        SvSETMAGIC(TARG);
+        rpp_replace_2_1(targ);
+        return NORMAL;
     }
 }
+
 
 PP_wrapped(pp_repeat,
     /* two scalar args or one list */
@@ -1841,12 +1865,20 @@ PP_wrapped(pp_repeat,
     RETURN;
 }
 
-PP_wrapped(pp_subtract, 2, 0)
+
+PP(pp_subtract)
 {
-    dSP; dATARGET; bool useleft; SV *svl, *svr;
-    tryAMAGICbin_MG(subtr_amg, AMGf_assign|AMGf_numeric);
-    svr = TOPs;
-    svl = TOPm1s;
+    bool useleft;
+    SV *targ = (PL_op->op_flags & OPf_STACKED)
+                    ? PL_stack_sp[-1]
+                    : PAD_SV(PL_op->op_targ);
+
+    if (rpp_try_AMAGIC_2(subtr_amg, AMGf_assign|AMGf_numeric))
+        return NORMAL;
+
+    SV *svr = PL_stack_sp[0];
+    SV *svl = PL_stack_sp[-1];
+
 
 #ifdef PERL_PRESERVE_IVUV
 
@@ -1867,10 +1899,8 @@ PP_wrapped(pp_subtract, 2, 0)
              * simple integer subtract: if the top of both numbers
              * are 00  or 11, then it's safe */
             if (!( ((topl+1) | (topr+1)) & 2)) {
-                SP--;
                 TARGi(il - ir, 0); /* args not GMG, so can't be tainted */
-                SETs(TARG);
-                RETURN;
+                goto ret;
             }
             goto generic;
         }
@@ -1883,10 +1913,8 @@ PP_wrapped(pp_subtract, 2, 0)
                 /* nothing was lost by converting to IVs */
                 goto do_iv;
             }
-            SP--;
             TARGn(nl - nr, 0); /* args not GMG, so can't be tainted */
-            SETs(TARG);
-            RETURN;
+            goto ret;
         }
     }
 
@@ -1973,20 +2001,20 @@ PP_wrapped(pp_subtract, 2, 0)
                 }
             }
             if (result_good) {
-                SP--;
                 if (auvok)
-                    SETu( result );
+                    TARGu(result, 1);
                 else {
                     /* Negate result */
                     if (result <= (UV)IV_MIN)
-                        SETi(result == (UV)IV_MIN
-                                ? IV_MIN : -(IV)result);
+                        TARGi(result == (UV)IV_MIN
+                                ? IV_MIN : -(IV)result,
+                              1);
                     else {
                         /* result valid, but out of range for IV.  */
-                        SETn( -(NV)result );
+                        TARGn(-(NV)result, 1);
                     }
                 }
-                RETURN;
+                goto ret;
             } /* Overflow, drop through to NVs.  */
         }
     }
@@ -1995,17 +2023,22 @@ PP_wrapped(pp_subtract, 2, 0)
 #endif
     {
         NV value = SvNV_nomg(svr);
-        (void)POPs;
 
         if (!useleft) {
             /* left operand is undef, treat as zero - value */
-            SETn(-value);
-            RETURN;
+            TARGn(-value, 1);
+            goto ret;
         }
-        SETn( SvNV_nomg(svl) - value );
-        RETURN;
+        TARGn(SvNV_nomg(svl) - value, 1);
+        goto ret;
     }
+
+  ret:
+    rpp_replace_2_1(targ);
+    return NORMAL;
+
 }
+
 
 #define IV_BITS (IVSIZE * 8)
 
@@ -2071,151 +2104,167 @@ static IV S_iv_shift(IV iv, int shift, bool left)
 #define IV_LEFT_SHIFT(iv, shift) S_iv_shift(iv, shift, TRUE)
 #define IV_RIGHT_SHIFT(iv, shift) S_iv_shift(iv, shift, FALSE)
 
-PP_wrapped(pp_left_shift, 2, 0)
+PP(pp_left_shift)
 {
-    dSP; dATARGET; SV *svl, *svr;
-    tryAMAGICbin_MG(lshift_amg, AMGf_assign|AMGf_numeric);
-    svr = POPs;
-    svl = TOPs;
+    SV *targ = (PL_op->op_flags & OPf_STACKED)
+                    ? PL_stack_sp[-1]
+                    : PAD_SV(PL_op->op_targ);
+
+    if (rpp_try_AMAGIC_2(lshift_amg, AMGf_assign|AMGf_numeric))
+        return NORMAL;
+
+    SV *svr = PL_stack_sp[0];
+    SV *svl = PL_stack_sp[-1];
+
     {
       const int shift = S_shift_amount(aTHX_ svr);
       if (PL_op->op_private & OPpUSEINT) {
-          SETi(IV_LEFT_SHIFT(SvIV_nomg(svl), shift));
+          TARGi(IV_LEFT_SHIFT(SvIV_nomg(svl), shift), 1);
       }
       else {
-          SETu(UV_LEFT_SHIFT(SvUV_nomg(svl), shift));
+          TARGu(UV_LEFT_SHIFT(SvUV_nomg(svl), shift), 1);
       }
-      RETURN;
+      rpp_replace_2_1(targ);
+      return NORMAL;
     }
 }
 
-PP_wrapped(pp_right_shift, 2, 0)
+
+PP(pp_right_shift)
 {
-    dSP; dATARGET; SV *svl, *svr;
-    tryAMAGICbin_MG(rshift_amg, AMGf_assign|AMGf_numeric);
-    svr = POPs;
-    svl = TOPs;
+    SV *targ = (PL_op->op_flags & OPf_STACKED)
+                    ? PL_stack_sp[-1]
+                    : PAD_SV(PL_op->op_targ);
+
+    if (rpp_try_AMAGIC_2(rshift_amg, AMGf_assign|AMGf_numeric))
+        return NORMAL;
+
+    SV *svr = PL_stack_sp[0];
+    SV *svl = PL_stack_sp[-1];
+
     {
       const int shift = S_shift_amount(aTHX_ svr);
       if (PL_op->op_private & OPpUSEINT) {
-          SETi(IV_RIGHT_SHIFT(SvIV_nomg(svl), shift));
+          TARGi(IV_RIGHT_SHIFT(SvIV_nomg(svl), shift), 1);
       }
       else {
-          SETu(UV_RIGHT_SHIFT(SvUV_nomg(svl), shift));
+          TARGu(UV_RIGHT_SHIFT(SvUV_nomg(svl), shift), 1);
       }
-      RETURN;
+      rpp_replace_2_1(targ);
+      return NORMAL;
     }
 }
 
-PP_wrapped(pp_lt, 2, 0)
+
+PP(pp_lt)
 {
-    dSP;
-    SV *left, *right;
-    U32 flags_and, flags_or;
+    if (rpp_try_AMAGIC_2(lt_amg, AMGf_numeric))
+        return NORMAL;
 
-    tryAMAGICbin_MG(lt_amg, AMGf_numeric);
-    right = POPs;
-    left  = TOPs;
-    flags_and = SvFLAGS(left) & SvFLAGS(right);
-    flags_or  = SvFLAGS(left) | SvFLAGS(right);
+    SV *right = PL_stack_sp[0];
+    SV *left  = PL_stack_sp[-1];
 
-    SETs(boolSV(
+    U32 flags_and = SvFLAGS(left) & SvFLAGS(right);
+    U32 flags_or  = SvFLAGS(left) | SvFLAGS(right);
+
+    rpp_replace_2_1(boolSV(
         ( (flags_and & SVf_IOK) && ((flags_or & SVf_IVisUV) ==0 ) )
         ?    (SvIVX(left) < SvIVX(right))
         : (flags_and & SVf_NOK)
         ?    (SvNVX(left) < SvNVX(right))
         : (do_ncmp(left, right) == -1)
     ));
-    RETURN;
+    return NORMAL;
 }
 
-PP_wrapped(pp_gt, 2, 0)
+
+PP(pp_gt)
 {
-    dSP;
-    SV *left, *right;
-    U32 flags_and, flags_or;
+    if (rpp_try_AMAGIC_2(gt_amg, AMGf_numeric))
+        return NORMAL;
 
-    tryAMAGICbin_MG(gt_amg, AMGf_numeric);
-    right = POPs;
-    left  = TOPs;
-    flags_and = SvFLAGS(left) & SvFLAGS(right);
-    flags_or  = SvFLAGS(left) | SvFLAGS(right);
+    SV *right = PL_stack_sp[0];
+    SV *left  = PL_stack_sp[-1];
 
-    SETs(boolSV(
+    U32 flags_and = SvFLAGS(left) & SvFLAGS(right);
+    U32 flags_or  = SvFLAGS(left) | SvFLAGS(right);
+
+    rpp_replace_2_1(boolSV(
         ( (flags_and & SVf_IOK) && ((flags_or & SVf_IVisUV) ==0 ) )
         ?    (SvIVX(left) > SvIVX(right))
         : (flags_and & SVf_NOK)
         ?    (SvNVX(left) > SvNVX(right))
         : (do_ncmp(left, right) == 1)
     ));
-    RETURN;
+    return NORMAL;
 }
 
-PP_wrapped(pp_le, 2, 0)
+
+PP(pp_le)
 {
-    dSP;
-    SV *left, *right;
-    U32 flags_and, flags_or;
+    if (rpp_try_AMAGIC_2(le_amg, AMGf_numeric))
+        return NORMAL;
 
-    tryAMAGICbin_MG(le_amg, AMGf_numeric);
-    right = POPs;
-    left  = TOPs;
-    flags_and = SvFLAGS(left) & SvFLAGS(right);
-    flags_or  = SvFLAGS(left) | SvFLAGS(right);
+    SV *right = PL_stack_sp[0];
+    SV *left  = PL_stack_sp[-1];
 
-    SETs(boolSV(
+    U32 flags_and = SvFLAGS(left) & SvFLAGS(right);
+    U32 flags_or  = SvFLAGS(left) | SvFLAGS(right);
+
+    rpp_replace_2_1(boolSV(
         ( (flags_and & SVf_IOK) && ((flags_or & SVf_IVisUV) ==0 ) )
         ?    (SvIVX(left) <= SvIVX(right))
         : (flags_and & SVf_NOK)
         ?    (SvNVX(left) <= SvNVX(right))
         : (do_ncmp(left, right) <= 0)
     ));
-    RETURN;
+    return NORMAL;
 }
 
-PP_wrapped(pp_ge, 2, 0)
+
+PP(pp_ge)
 {
-    dSP;
-    SV *left, *right;
-    U32 flags_and, flags_or;
+    if (rpp_try_AMAGIC_2(ge_amg, AMGf_numeric))
+        return NORMAL;
 
-    tryAMAGICbin_MG(ge_amg, AMGf_numeric);
-    right = POPs;
-    left  = TOPs;
-    flags_and = SvFLAGS(left) & SvFLAGS(right);
-    flags_or  = SvFLAGS(left) | SvFLAGS(right);
+    SV *right = PL_stack_sp[0];
+    SV *left  = PL_stack_sp[-1];
 
-    SETs(boolSV(
+    U32 flags_and = SvFLAGS(left) & SvFLAGS(right);
+    U32 flags_or  = SvFLAGS(left) | SvFLAGS(right);
+
+    rpp_replace_2_1(boolSV(
         ( (flags_and & SVf_IOK) && ((flags_or & SVf_IVisUV) ==0 ) )
         ?    (SvIVX(left) >= SvIVX(right))
         : (flags_and & SVf_NOK)
         ?    (SvNVX(left) >= SvNVX(right))
         : ( (do_ncmp(left, right) & 2) == 0)
     ));
-    RETURN;
+    return NORMAL;
 }
 
-PP_wrapped(pp_ne, 2, 0)
+
+PP(pp_ne)
 {
-    dSP;
-    SV *left, *right;
-    U32 flags_and, flags_or;
+    if (rpp_try_AMAGIC_2(ne_amg, AMGf_numeric))
+        return NORMAL;
 
-    tryAMAGICbin_MG(ne_amg, AMGf_numeric);
-    right = POPs;
-    left  = TOPs;
-    flags_and = SvFLAGS(left) & SvFLAGS(right);
-    flags_or  = SvFLAGS(left) | SvFLAGS(right);
+    SV *right = PL_stack_sp[0];
+    SV *left  = PL_stack_sp[-1];
 
-    SETs(boolSV(
+    U32 flags_and = SvFLAGS(left) & SvFLAGS(right);
+    U32 flags_or  = SvFLAGS(left) | SvFLAGS(right);
+
+    rpp_replace_2_1(boolSV(
         ( (flags_and & SVf_IOK) && ((flags_or & SVf_IVisUV) ==0 ) )
         ?    (SvIVX(left) != SvIVX(right))
         : (flags_and & SVf_NOK)
         ?    (SvNVX(left) != SvNVX(right))
         : (do_ncmp(left, right) != 0)
     ));
-    RETURN;
+    return NORMAL;
 }
+
 
 /* compare left and right SVs. Returns:
  * -1: <
@@ -2289,32 +2338,32 @@ Perl_do_ncmp(pTHX_ SV* const left, SV * const right)
 }
 
 
-PP_wrapped(pp_ncmp, 2, 0)
+PP(pp_ncmp)
 {
-    dSP;
-    SV *left, *right;
-    I32 value;
-    tryAMAGICbin_MG(ncmp_amg, AMGf_numeric);
-    right = POPs;
-    left  = TOPs;
-    value = do_ncmp(left, right);
+    if (rpp_try_AMAGIC_2(ncmp_amg, AMGf_numeric))
+        return NORMAL;
+
+    SV *right = PL_stack_sp[0];
+    SV *left  = PL_stack_sp[-1];
+
+    SV *targ;
+    I32 value = do_ncmp(left, right);
     if (value == 2) {
-        SETs(&PL_sv_undef);
+        targ = &PL_sv_undef;
     }
     else {
-        dTARGET;
-        SETi(value);
+        GETTARGET;
+        TARGi(value, 1);
     }
-    RETURN;
+    rpp_replace_2_1(targ);
+    return NORMAL;
 }
 
 
 /* also used for: pp_sge() pp_sgt() pp_slt() */
 
-PP_wrapped(pp_sle, 2, 0)
+PP(pp_sle)
 {
-    dSP;
-
     int amg_type = sle_amg;
     int multiplier = 1;
     int rhs = 1;
@@ -2338,20 +2387,23 @@ PP_wrapped(pp_sle, 2, 0)
         break;
     }
 
-    tryAMAGICbin_MG(amg_type, 0);
-    {
-      dPOPTOPssrl;
-      const int cmp =
+    if (rpp_try_AMAGIC_2(amg_type, 0))
+        return NORMAL;
+
+    SV *right = PL_stack_sp[0];
+    SV *left  = PL_stack_sp[-1];
+
+    const int cmp =
 #ifdef USE_LOCALE_COLLATE
                       (IN_LC_RUNTIME(LC_COLLATE))
                       ? sv_cmp_locale_flags(left, right, 0)
                       :
 #endif
                         sv_cmp_flags(left, right, 0);
-      SETs(boolSV(cmp * multiplier < rhs));
-      RETURN;
-    }
+    rpp_replace_2_1(boolSV(cmp * multiplier < rhs));
+    return NORMAL;
 }
+
 
 PP_wrapped(pp_seq, 2, 0)
 {
@@ -2364,102 +2416,145 @@ PP_wrapped(pp_seq, 2, 0)
     }
 }
 
-PP_wrapped(pp_sne, 2, 0)
+
+PP(pp_sne)
 {
-    dSP;
-    tryAMAGICbin_MG(sne_amg, 0);
-    {
-      dPOPTOPssrl;
-      SETs(boolSV(!sv_eq_flags(left, right, 0)));
-      RETURN;
-    }
+    if (rpp_try_AMAGIC_2(sne_amg, 0))
+        return NORMAL;
+
+    SV *right = PL_stack_sp[0];
+    SV *left  = PL_stack_sp[-1];
+
+    rpp_replace_2_1(boolSV(!sv_eq_flags(left, right, 0)));
+    return NORMAL;
 }
 
-PP_wrapped(pp_scmp, 2, 0)
+
+PP(pp_scmp)
 {
-    dSP; dTARGET;
-    tryAMAGICbin_MG(scmp_amg, 0);
-    {
-      dPOPTOPssrl;
-      const int cmp =
+    dTARGET;
+
+    if (rpp_try_AMAGIC_2(scmp_amg, 0))
+        return NORMAL;
+
+    SV *right = PL_stack_sp[0];
+    SV *left  = PL_stack_sp[-1];
+
+    const int cmp =
 #ifdef USE_LOCALE_COLLATE
                       (IN_LC_RUNTIME(LC_COLLATE))
                       ? sv_cmp_locale_flags(left, right, 0)
                       :
 #endif
                         sv_cmp_flags(left, right, 0);
-      SETi( cmp );
-      RETURN;
-    }
+    TARGi(cmp, 1);
+    rpp_replace_2_1(targ);
+    return NORMAL;
 }
 
-PP_wrapped(pp_bit_and, 2, 0)
+
+PP(pp_bit_and)
 {
-    dSP; dATARGET;
-    tryAMAGICbin_MG(band_amg, AMGf_assign);
+    SV *targ = (PL_op->op_flags & OPf_STACKED)
+                    ? PL_stack_sp[-1]
+                    : PAD_SV(PL_op->op_targ);
+
+    if (rpp_try_AMAGIC_2(band_amg, AMGf_assign))
+        return NORMAL;
+
+    SV *right = PL_stack_sp[0];
+    SV *left  = PL_stack_sp[-1];
+
     {
-      dPOPTOPssrl;
       if (SvNIOKp(left) || SvNIOKp(right)) {
         const bool left_ro_nonnum  = !SvNIOKp(left) && SvREADONLY(left);
         const bool right_ro_nonnum = !SvNIOKp(right) && SvREADONLY(right);
         if (PL_op->op_private & OPpUSEINT) {
           const IV i = SvIV_nomg(left) & SvIV_nomg(right);
-          SETi(i);
+          TARGi(i, 1);
         }
         else {
           const UV u = SvUV_nomg(left) & SvUV_nomg(right);
-          SETu(u);
+          TARGu(u, 1);
         }
         if (left_ro_nonnum && left != TARG) SvNIOK_off(left);
         if (right_ro_nonnum) SvNIOK_off(right);
       }
       else {
         do_vop(PL_op->op_type, TARG, left, right);
-        SETTARG;
+        SvSETMAGIC(targ);
+
       }
-      RETURN;
     }
+    rpp_replace_2_1(targ);
+    return NORMAL;
 }
 
-PP_wrapped(pp_nbit_and, 2, 0)
+
+PP(pp_nbit_and)
 {
-    dSP;
-    tryAMAGICbin_MG(band_amg, AMGf_assign|AMGf_numarg);
+    if (rpp_try_AMAGIC_2(band_amg, AMGf_assign|AMGf_numarg))
+        return NORMAL;
+
+    SV *targ = (PL_op->op_flags & OPf_STACKED)
+                    ? PL_stack_sp[-1]
+                    : PAD_SV(PL_op->op_targ);
+
+    SV *right = PL_stack_sp[0];
+    SV *left  = PL_stack_sp[-1];
+
     {
-        dATARGET; dPOPTOPssrl;
         if (PL_op->op_private & OPpUSEINT) {
           const IV i = SvIV_nomg(left) & SvIV_nomg(right);
-          SETi(i);
+          TARGi(i, 1);
         }
         else {
           const UV u = SvUV_nomg(left) & SvUV_nomg(right);
-          SETu(u);
+          TARGu(u, 1);
         }
     }
-    RETURN;
+    rpp_replace_2_1(targ);
+    return NORMAL;
 }
 
-PP_wrapped(pp_sbit_and, 2, 0)
+
+PP(pp_sbit_and)
 {
-    dSP;
-    tryAMAGICbin_MG(sband_amg, AMGf_assign);
-    {
-        dATARGET; dPOPTOPssrl;
-        do_vop(OP_BIT_AND, TARG, left, right);
-        RETSETTARG;
-    }
+    if (rpp_try_AMAGIC_2(sband_amg, AMGf_assign))
+        return NORMAL;
+
+    SV *targ = (PL_op->op_flags & OPf_STACKED)
+                    ? PL_stack_sp[-1]
+                    : PAD_SV(PL_op->op_targ);
+
+    SV *right = PL_stack_sp[0];
+    SV *left  = PL_stack_sp[-1];
+
+    do_vop(OP_BIT_AND, targ, left, right);
+    SvSETMAGIC(targ);
+    rpp_replace_2_1(targ);
+    return NORMAL;
 }
+
 
 /* also used for: pp_bit_xor() */
 
-PP_wrapped(pp_bit_or, 2, 0)
+PP(pp_bit_or)
 {
-    dSP; dATARGET;
+    SV *targ = (PL_op->op_flags & OPf_STACKED)
+                    ? PL_stack_sp[-1]
+                    : PAD_SV(PL_op->op_targ);
+
     const int op_type = PL_op->op_type;
 
-    tryAMAGICbin_MG((op_type == OP_BIT_OR ? bor_amg : bxor_amg), AMGf_assign);
+    if (rpp_try_AMAGIC_2((op_type == OP_BIT_OR ? bor_amg : bxor_amg),
+                            AMGf_assign))
+        return NORMAL;
+
+    SV *right = PL_stack_sp[0];
+    SV *left  = PL_stack_sp[-1];
+
     {
-      dPOPTOPssrl;
       if (SvNIOKp(left) || SvNIOKp(right)) {
         const bool left_ro_nonnum  = !SvNIOKp(left) && SvREADONLY(left);
         const bool right_ro_nonnum = !SvNIOKp(right) && SvREADONLY(right);
@@ -2467,68 +2562,88 @@ PP_wrapped(pp_bit_or, 2, 0)
           const IV l = (USE_LEFT(left) ? SvIV_nomg(left) : 0);
           const IV r = SvIV_nomg(right);
           const IV result = op_type == OP_BIT_OR ? (l | r) : (l ^ r);
-          SETi(result);
+          TARGi(result, 1);
         }
         else {
           const UV l = (USE_LEFT(left) ? SvUV_nomg(left) : 0);
           const UV r = SvUV_nomg(right);
           const UV result = op_type == OP_BIT_OR ? (l | r) : (l ^ r);
-          SETu(result);
+          TARGu(result, 1);
         }
         if (left_ro_nonnum && left != TARG) SvNIOK_off(left);
         if (right_ro_nonnum) SvNIOK_off(right);
       }
       else {
         do_vop(op_type, TARG, left, right);
-        SETTARG;
+        SvSETMAGIC(targ);
       }
-      RETURN;
+      rpp_replace_2_1(targ);
+      return NORMAL;
     }
 }
 
+
 /* also used for: pp_nbit_xor() */
 
-PP_wrapped(pp_nbit_or, 2, 0)
+PP(pp_nbit_or)
 {
-    dSP;
     const int op_type = PL_op->op_type;
 
-    tryAMAGICbin_MG((op_type == OP_NBIT_OR ? bor_amg : bxor_amg),
-                    AMGf_assign|AMGf_numarg);
+    if (rpp_try_AMAGIC_2((op_type == OP_NBIT_OR ? bor_amg : bxor_amg),
+                            AMGf_assign|AMGf_numarg))
+        return NORMAL;
+
+    SV *targ = (PL_op->op_flags & OPf_STACKED)
+                    ? PL_stack_sp[-1]
+                    : PAD_SV(PL_op->op_targ);
+
+    SV *right = PL_stack_sp[0];
+    SV *left  = PL_stack_sp[-1];
+
     {
-        dATARGET; dPOPTOPssrl;
         if (PL_op->op_private & OPpUSEINT) {
           const IV l = (USE_LEFT(left) ? SvIV_nomg(left) : 0);
           const IV r = SvIV_nomg(right);
           const IV result = op_type == OP_NBIT_OR ? (l | r) : (l ^ r);
-          SETi(result);
+          TARGi(result, 1);
         }
         else {
           const UV l = (USE_LEFT(left) ? SvUV_nomg(left) : 0);
           const UV r = SvUV_nomg(right);
           const UV result = op_type == OP_NBIT_OR ? (l | r) : (l ^ r);
-          SETu(result);
+          TARGu(result, 1);
         }
     }
-    RETURN;
+    rpp_replace_2_1(targ);
+    return NORMAL;
 }
+
 
 /* also used for: pp_sbit_xor() */
 
-PP_wrapped(pp_sbit_or, 2, 0)
+PP(pp_sbit_or)
 {
-    dSP;
     const int op_type = PL_op->op_type;
 
-    tryAMAGICbin_MG((op_type == OP_SBIT_OR ? sbor_amg : sbxor_amg),
-                    AMGf_assign);
-    {
-        dATARGET; dPOPTOPssrl;
-        do_vop(op_type == OP_SBIT_OR ? OP_BIT_OR : OP_BIT_XOR, TARG, left,
-               right);
-        RETSETTARG;
-    }
+    if (rpp_try_AMAGIC_2((op_type == OP_SBIT_OR ? sbor_amg : sbxor_amg),
+                            AMGf_assign))
+        return NORMAL;
+
+    SV *targ = (PL_op->op_flags & OPf_STACKED)
+                    ? PL_stack_sp[-1]
+                    : PAD_SV(PL_op->op_targ);
+
+    SV *right = PL_stack_sp[0];
+    SV *left  = PL_stack_sp[-1];
+
+    do_vop(op_type == OP_SBIT_OR ? OP_BIT_OR : OP_BIT_XOR, targ,
+            left, right);
+
+    SvSETMAGIC(TARG);
+    rpp_replace_2_1(targ);
+    return NORMAL;
 }
+
 
 PERL_STATIC_INLINE bool
 S_negate_string(pTHX)
@@ -2712,123 +2827,172 @@ PP(pp_scomplement)
     return NORMAL;
 }
 
+
 /* integer versions of some of the above */
 
-PP_wrapped(pp_i_multiply, 2, 0)
+PP(pp_i_multiply)
 {
-    dSP; dATARGET;
-    tryAMAGICbin_MG(mult_amg, AMGf_assign);
-    {
-      dPOPTOPiirl_nomg;
-      SETi( (IV)((UV)left * (UV)right) );
-      RETURN;
-    }
+    SV *targ = (PL_op->op_flags & OPf_STACKED)
+                    ? PL_stack_sp[-1]
+                    : PAD_SV(PL_op->op_targ);
+
+    if (rpp_try_AMAGIC_2(mult_amg, AMGf_assign))
+        return NORMAL;
+
+    IV right = SvIV_nomg(PL_stack_sp[0]);
+    IV left  = SvIV_nomg(PL_stack_sp[-1]);
+
+    TARGi((IV)((UV)left * (UV)right), 1);
+    rpp_replace_2_1(targ);
+    return NORMAL;
 }
 
-PP_wrapped(pp_i_divide, 2, 0)
+
+PP(pp_i_divide)
 {
-    IV num;
-    dSP; dATARGET;
-    tryAMAGICbin_MG(div_amg, AMGf_assign);
+    SV *targ = (PL_op->op_flags & OPf_STACKED)
+                    ? PL_stack_sp[-1]
+                    : PAD_SV(PL_op->op_targ);
+
+    if (rpp_try_AMAGIC_2(div_amg, AMGf_assign))
+        return NORMAL;
+
+    SV *right = PL_stack_sp[0];
+    SV *left  = PL_stack_sp[-1];
+
     {
-      dPOPTOPssrl;
       IV value = SvIV_nomg(right);
       if (value == 0)
           DIE(aTHX_ "Illegal division by zero");
-      num = SvIV_nomg(left);
+      IV num = SvIV_nomg(left);
 
       /* avoid FPE_INTOVF on some platforms when num is IV_MIN */
       if (value == -1)
           value = (IV)-(UV)num;
       else
           value = num / value;
-      SETi(value);
-      RETURN;
+      TARGi(value, 1);
+      rpp_replace_2_1(targ);
+      return NORMAL;
     }
 }
 
-PP_wrapped(pp_i_modulo, 2, 0)
+
+PP(pp_i_modulo)
 {
-     dSP; dATARGET;
-     tryAMAGICbin_MG(modulo_amg, AMGf_assign);
+    SV *targ = (PL_op->op_flags & OPf_STACKED)
+                    ? PL_stack_sp[-1]
+                    : PAD_SV(PL_op->op_targ);
+
+    if (rpp_try_AMAGIC_2(modulo_amg, AMGf_assign))
+        return NORMAL;
+
+    IV right = SvIV_nomg(PL_stack_sp[0]);
+    IV left  = SvIV_nomg(PL_stack_sp[-1]);
+
      {
-          dPOPTOPiirl_nomg;
           if (!right)
                DIE(aTHX_ "Illegal modulus zero");
           /* avoid FPE_INTOVF on some platforms when left is IV_MIN */
           if (right == -1)
-              SETi( 0 );
+              TARGi(0, 1);
           else
-              SETi( left % right );
-          RETURN;
+              TARGi(left % right, 1);
      }
+    rpp_replace_2_1(targ);
+    return NORMAL;
 }
 
-PP_wrapped(pp_i_add, 2, 0)
+
+PP(pp_i_add)
 {
-    dSP; dATARGET;
-    tryAMAGICbin_MG(add_amg, AMGf_assign);
-    {
-      dPOPTOPiirl_ul_nomg;
-      SETi( (IV)((UV)left + (UV)right) );
-      RETURN;
-    }
+    SV *targ = (PL_op->op_flags & OPf_STACKED)
+                    ? PL_stack_sp[-1]
+                    : PAD_SV(PL_op->op_targ);
+
+    if (rpp_try_AMAGIC_2(add_amg, AMGf_assign))
+        return NORMAL;
+
+    IV right   = SvIV_nomg(PL_stack_sp[0]);
+    SV *leftsv = PL_stack_sp[-1];
+    IV left    = USE_LEFT(leftsv) ? SvIV_nomg(leftsv) : 0;
+
+    TARGi((IV)((UV)left + (UV)right), 1);
+    rpp_replace_2_1(targ);
+    return NORMAL;
 }
 
-PP_wrapped(pp_i_subtract, 2, 0)
+
+PP(pp_i_subtract)
 {
-    dSP; dATARGET;
-    tryAMAGICbin_MG(subtr_amg, AMGf_assign);
-    {
-      dPOPTOPiirl_ul_nomg;
-      SETi( (IV)((UV)left - (UV)right) );
-      RETURN;
-    }
+    SV *targ = (PL_op->op_flags & OPf_STACKED)
+                    ? PL_stack_sp[-1]
+                    : PAD_SV(PL_op->op_targ);
+
+    if (rpp_try_AMAGIC_2(subtr_amg, AMGf_assign))
+        return NORMAL;
+
+    IV right   = SvIV_nomg(PL_stack_sp[0]);
+    SV *leftsv = PL_stack_sp[-1];
+    IV left    = USE_LEFT(leftsv) ? SvIV_nomg(leftsv) : 0;
+
+    TARGi((IV)((UV)left - (UV)right), 1);
+    rpp_replace_2_1(targ);
+    return NORMAL;
 }
 
-PP_wrapped(pp_i_lt, 2, 0)
+
+PP(pp_i_lt)
 {
-    dSP;
-    tryAMAGICbin_MG(lt_amg, 0);
-    {
-      dPOPTOPiirl_nomg;
-      SETs(boolSV(left < right));
-      RETURN;
-    }
+    if (rpp_try_AMAGIC_2(lt_amg, 0))
+        return NORMAL;
+
+    IV right   = SvIV_nomg(PL_stack_sp[0]);
+    IV left    = SvIV_nomg(PL_stack_sp[-1]);
+
+    rpp_replace_2_1(boolSV(left < right));
+    return NORMAL;
 }
 
-PP_wrapped(pp_i_gt, 2, 0)
+
+PP(pp_i_gt)
 {
-    dSP;
-    tryAMAGICbin_MG(gt_amg, 0);
-    {
-      dPOPTOPiirl_nomg;
-      SETs(boolSV(left > right));
-      RETURN;
-    }
+    if (rpp_try_AMAGIC_2(gt_amg, 0))
+        return NORMAL;
+
+    IV right   = SvIV_nomg(PL_stack_sp[0]);
+    IV left    = SvIV_nomg(PL_stack_sp[-1]);
+
+    rpp_replace_2_1(boolSV(left > right));
+    return NORMAL;
 }
 
-PP_wrapped(pp_i_le, 2, 0)
+
+PP(pp_i_le)
 {
-    dSP;
-    tryAMAGICbin_MG(le_amg, 0);
-    {
-      dPOPTOPiirl_nomg;
-      SETs(boolSV(left <= right));
-      RETURN;
-    }
+    if (rpp_try_AMAGIC_2(le_amg, 0))
+        return NORMAL;
+
+    IV right   = SvIV_nomg(PL_stack_sp[0]);
+    IV left    = SvIV_nomg(PL_stack_sp[-1]);
+
+    rpp_replace_2_1(boolSV(left <= right));
+    return NORMAL;
 }
 
-PP_wrapped(pp_i_ge, 2, 0)
+
+PP(pp_i_ge)
 {
-    dSP;
-    tryAMAGICbin_MG(ge_amg, 0);
-    {
-      dPOPTOPiirl_nomg;
-      SETs(boolSV(left >= right));
-      RETURN;
-    }
+    if (rpp_try_AMAGIC_2(ge_amg, 0))
+        return NORMAL;
+
+    IV right   = SvIV_nomg(PL_stack_sp[0]);
+    IV left    = SvIV_nomg(PL_stack_sp[-1]);
+
+    rpp_replace_2_1(boolSV(left >= right));
+    return NORMAL;
 }
+
 
 PP_wrapped(pp_i_eq, 2, 0)
 {
@@ -2841,23 +3005,31 @@ PP_wrapped(pp_i_eq, 2, 0)
     }
 }
 
-PP_wrapped(pp_i_ne, 2, 0)
+
+PP(pp_i_ne)
 {
-    dSP;
-    tryAMAGICbin_MG(ne_amg, 0);
-    {
-      dPOPTOPiirl_nomg;
-      SETs(boolSV(left != right));
-      RETURN;
-    }
+    if (rpp_try_AMAGIC_2(ne_amg, 0))
+        return NORMAL;
+
+    IV right   = SvIV_nomg(PL_stack_sp[0]);
+    IV left    = SvIV_nomg(PL_stack_sp[-1]);
+
+    rpp_replace_2_1(boolSV(left != right));
+    return NORMAL;
 }
 
-PP_wrapped(pp_i_ncmp, 2, 0)
+
+PP(pp_i_ncmp)
 {
-    dSP; dTARGET;
-    tryAMAGICbin_MG(ncmp_amg, 0);
+    dTARGET;
+    if (rpp_try_AMAGIC_2(ncmp_amg, 0))
+        return NORMAL;
+
+    IV right   = SvIV_nomg(PL_stack_sp[0]);
+    IV left    = SvIV_nomg(PL_stack_sp[-1]);
+
+
     {
-      dPOPTOPiirl_nomg;
       I32 value;
 
       if (left > right)
@@ -2866,10 +3038,12 @@ PP_wrapped(pp_i_ncmp, 2, 0)
         value = -1;
       else
         value = 0;
-      SETi(value);
-      RETURN;
+      TARGi(value, 1);
     }
+    rpp_replace_2_1(targ);
+    return NORMAL;
 }
+
 
 PP(pp_i_negate)
 {
@@ -2889,17 +3063,21 @@ PP(pp_i_negate)
     }
 }
 
+
 /* High falutin' math. */
 
-PP_wrapped(pp_atan2, 2, 0)
+PP(pp_atan2)
 {
-    dSP; dTARGET;
-    tryAMAGICbin_MG(atan2_amg, 0);
-    {
-      dPOPTOPnnrl_nomg;
-      SETn(Perl_atan2(left, right));
-      RETURN;
-    }
+    dTARGET;
+    if (rpp_try_AMAGIC_2(atan2_amg, 0))
+        return NORMAL;
+
+    NV right = SvNV_nomg(PL_stack_sp[0]);
+    NV left  = SvNV_nomg(PL_stack_sp[-1]);
+
+    TARGn(Perl_atan2(left, right), 1);
+    rpp_replace_2_1(targ);
+    return NORMAL;
 }
 
 
@@ -3762,11 +3940,13 @@ PP(pp_chr)
     return NORMAL;
 }
 
-PP_wrapped(pp_crypt, 2, 0)
+
+PP(pp_crypt)
 {
 #ifdef HAS_CRYPT
-    dSP; dTARGET;
-    dPOPTOPssrl;
+    dTARGET;
+    SV *right = PL_stack_sp[0];
+    SV *left  = PL_stack_sp[-1];
     STRLEN len;
     const char *tmps = SvPV_const(left, len);
 
@@ -3799,13 +3979,15 @@ PP_wrapped(pp_crypt, 2, 0)
     sv_setpv(TARG, PerlProc_crypt(tmps, SvPV_nolen_const(right)));
 
     SvUTF8_off(TARG);
-    SETTARG;
-    RETURN;
+    SvSETMAGIC(TARG);
+    rpp_replace_2_1(targ);
+    return NORMAL;
 #else
     DIE(aTHX_
       "The crypt() function is unimplemented due to excessive paranoia.");
 #endif
 }
+
 
 /* Generally UTF-8 and UTF-EBCDIC are indistinguishable at this level.  So
  * most comments below say UTF-8, when in fact they mean UTF-EBCDIC as well */
@@ -5454,11 +5636,10 @@ PP_wrapped(pp_exists, ((PL_op->op_private & OPpEXISTS_SUB) ? 1 : 2), 0)
  * as required.
  */
 
-PP_wrapped(pp_helemexistsor, 2, 0)
+PP(pp_helemexistsor)
 {
-    dSP;
-    SV *keysv = POPs;
-    HV *hv = MUTABLE_HV(POPs);
+    SV *keysv = PL_stack_sp[0];
+    HV *hv = MUTABLE_HV(PL_stack_sp[-1]);
     bool is_delete = PL_op->op_private & OPpHELEMEXISTSOR_DELETE;
 
     assert(SvTYPE(hv) == SVt_PVHV);
@@ -5490,13 +5671,14 @@ PP_wrapped(pp_helemexistsor, 2, 0)
 
     if(!val) {
 other:
-        PUTBACK;
+        rpp_popfree_2();
         return cLOGOP->op_other;
     }
 
-    PUSHs(val);
-    RETURN;
+    rpp_replace_2_1(val);
+    return NORMAL;
 }
+
 
 PP_wrapped(pp_hslice, 0, 1)
 {
@@ -7467,29 +7649,30 @@ PP_wrapped(pp_isa, 2, 0)
     RETURN;
 }
 
-PP_wrapped(pp_cmpchain_and, 2, 0)
+
+PP(pp_cmpchain_and)
 {
-    dSP;
-    SV *result = POPs;
-    PUTBACK;
+    SV *result = PL_stack_sp[0];
     if (SvTRUE_NN(result)) {
+        rpp_popfree_1();
         return cLOGOP->op_other;
     } else {
-        TOPs = result;
+        rpp_replace_2_1(result);
         return NORMAL;
     }
 }
 
-PP_wrapped(pp_cmpchain_dup, 2, 0)
+
+PP(pp_cmpchain_dup)
 {
-    dSP;
-    SV *right = TOPs;
-    SV *left = TOPm1s;
-    TOPm1s = right;
-    TOPs = left;
-    XPUSHs(right);
-    RETURN;
+    SV *right = PL_stack_sp[0];
+    SV *left  = PL_stack_sp[-1];
+    PL_stack_sp[-1] = right;
+    PL_stack_sp[0]  = left;
+    rpp_xpush_1(right);
+    return NORMAL;
 }
+
 
 PP(pp_is_bool)
 {

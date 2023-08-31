@@ -2078,14 +2078,17 @@ Perl_die_unwind(pTHX_ SV *msv)
     NOT_REACHED; /* NOTREACHED */
 }
 
-PP_wrapped(pp_xor, 2, 0)
+
+PP(pp_xor)
 {
-    dSP; dPOPTOPssrl;
-    if (SvTRUE_NN(left) != SvTRUE_NN(right))
-        RETSETYES;
-    else
-        RETSETNO;
+    SV *left  = PL_stack_sp[0];
+    SV *right = PL_stack_sp[-1];
+    rpp_replace_2_1(SvTRUE_NN(left) != SvTRUE_NN(right)
+                    ? &PL_sv_yes
+                    : &PL_sv_no);
+    return NORMAL;
 }
+
 
 /*
 

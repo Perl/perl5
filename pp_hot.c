@@ -242,21 +242,16 @@ PP(pp_gv)
 
 /* also used for: pp_andassign() */
 
-PP_wrapped(pp_and, 2, 0)
+PP(pp_and)
 {
     PERL_ASYNC_CHECK();
     {
-        /* SP is not used to remove a variable that is saved across the
-          sv_2bool_flags call in SvTRUE_NN, if a RISC/CISC or low/high machine
-          register or load/store vs direct mem ops macro is introduced, this
-          should be a define block between direct PL_stack_sp and dSP operations,
-          presently, using PL_stack_sp is bias towards CISC cpus */
         SV * const sv = *PL_stack_sp;
         if (!SvTRUE_NN(sv))
             return NORMAL;
         else {
             if (PL_op->op_type == OP_AND)
-                --PL_stack_sp;
+                rpp_popfree_1();
             return cLOGOP->op_other;
         }
     }
@@ -353,13 +348,13 @@ PP(pp_aelemfastlex_store)
     return NORMAL;
 }
 
-PP_wrapped(pp_sassign, 2, 0)
+PP(pp_sassign)
 {
-    dSP;
     /* sassign keeps its args in the optree traditionally backwards.
        So we pop them differently.
     */
-    SV *left = POPs; SV *right = TOPs;
+    SV *left  = PL_stack_sp[0];
+    SV *right = PL_stack_sp[-1];
 
     if (PL_op->op_private & OPpASSIGN_BACKWARDS) { /* {or,and,dor}assign */
         SV * const temp = left;
@@ -368,6 +363,7 @@ PP_wrapped(pp_sassign, 2, 0)
     assert(TAINTING_get || !TAINT_get);
     if (UNLIKELY(TAINT_get) && !SvTAINTED(right))
         TAINT_NOT;
+
     if (UNLIKELY(PL_op->op_private & OPpASSIGN_CV_TO_GV)) {
         /* *foo =\&bar */
         SV * const cv = SvRV(right);
@@ -394,8 +390,8 @@ PP_wrapped(pp_sassign, 2, 0)
                 SvPCS_IMPORTED_on(gv);
                 SvRV_set(gv, value);
                 SvREFCNT_inc_simple_void(value);
-                SETs(left);
-                RETURN;
+                rpp_replace_2_1(left);
+                return NORMAL;
             }
         }
 
@@ -455,8 +451,8 @@ PP_wrapped(pp_sassign, 2, 0)
             packWARN(WARN_MISC), "Useless assignment to a temporary"
         );
     SvSetMagicSV(left, right);
-    SETs(left);
-    RETURN;
+    rpp_replace_2_1(left);
+    return NORMAL;
 }
 
 PP(pp_cond_expr)
@@ -553,15 +549,20 @@ S_do_concat(pTHX_ SV *left, SV *right, SV *targ, U8 targmy)
 }
 
 
-PP_wrapped(pp_concat, 2, 0)
+PP(pp_concat)
 {
-  dSP; dATARGET; tryAMAGICbin_MG(concat_amg, AMGf_assign);
-  {
-    dPOPTOPssrl;
+    SV *targ = (PL_op->op_flags & OPf_STACKED)
+                    ? PL_stack_sp[-1]
+                    : PAD_SV(PL_op->op_targ);
+
+    if (rpp_try_AMAGIC_2(concat_amg, AMGf_assign))
+       return NORMAL;
+
+    SV *right = PL_stack_sp[0];
+    SV *left  = PL_stack_sp[-1];
     S_do_concat(aTHX_ left, right, targ, PL_op->op_private & OPpTARGET_MY);
-    SETs(TARG);
-    RETURN;
-  }
+    rpp_replace_2_1(targ);
+    return NORMAL;
 }
 
 
@@ -3757,21 +3758,23 @@ Perl_do_readline(pTHX)
     }
 }
 
-PP_wrapped(pp_helem, 2, 0)
+PP(pp_helem)
 {
-    dSP;
     HE* he;
     SV **svp;
-    SV * const keysv = POPs;
-    HV * const hv = MUTABLE_HV(POPs);
+    SV * const keysv = PL_stack_sp[0];
+    HV * const hv = MUTABLE_HV(PL_stack_sp[-1]);
     const U32 lval = PL_op->op_flags & OPf_MOD || LVRET;
     const U32 defer = PL_op->op_private & OPpLVAL_DEFER;
     SV *sv;
     const bool localizing = PL_op->op_private & OPpLVAL_INTRO;
     bool preeminent = TRUE;
+    SV *retsv;
 
-    if (SvTYPE(hv) != SVt_PVHV)
-        RETPUSHUNDEF;
+    if (SvTYPE(hv) != SVt_PVHV) {
+        retsv = &PL_sv_undef;
+        goto ret;
+    }
 
     if (localizing) {
         MAGIC *mg;
@@ -3799,9 +3802,10 @@ PP_wrapped(pp_helem, 2, 0)
             SvREFCNT_dec_NN(key2);	/* sv_magic() increments refcount */
             LvTARG(lv) = SvREFCNT_inc_simple_NN(hv);
             LvTARGLEN(lv) = 1;
-            PUSHs(lv);
-            RETURN;
+            retsv = lv;
+            goto ret;
         }
+
         if (localizing) {
             if (HvNAME_get(hv) && isGV_or_RVCV(*svp))
                 save_gp(MUTABLE_GV(*svp), !(PL_op->op_flags & OPf_SPECIAL));
@@ -3812,8 +3816,8 @@ PP_wrapped(pp_helem, 2, 0)
                 SAVEHDELETE(hv, keysv);
         }
         else if (PL_op->op_private & OPpDEREF) {
-            PUSHs(vivify_ref(*svp, PL_op->op_private & OPpDEREF));
-            RETURN;
+            retsv = vivify_ref(*svp, PL_op->op_private & OPpDEREF);
+            goto ret;;
         }
     }
     sv = (svp && *svp ? *svp : &PL_sv_undef);
@@ -3831,8 +3835,11 @@ PP_wrapped(pp_helem, 2, 0)
      * being called too many times). */
     if (!lval && SvRMAGICAL(hv) && SvGMAGICAL(sv))
         mg_get(sv);
-    PUSHs(sv);
-    RETURN;
+    retsv = sv;
+
+  ret:
+    rpp_replace_2_1(retsv);
+    return NORMAL;
 }
 
 
@@ -5971,25 +5978,27 @@ Perl_croak_caller(const char *pat, ...)
 }
 
 
-PP_wrapped(pp_aelem, 2, 0)
+PP(pp_aelem)
 {
-    dSP;
     SV** svp;
-    SV* const elemsv = POPs;
+    SV* const elemsv =  PL_stack_sp[0];
     IV elem = SvIV(elemsv);
-    AV *const av = MUTABLE_AV(POPs);
+    AV *const av = MUTABLE_AV(PL_stack_sp[-1]);
     const U32 lval = PL_op->op_flags & OPf_MOD || LVRET;
     const U32 defer = PL_op->op_private & OPpLVAL_DEFER;
     const bool localizing = PL_op->op_private & OPpLVAL_INTRO;
     bool preeminent = TRUE;
     SV *sv;
+    SV *retsv;
 
     if (UNLIKELY(SvROK(elemsv) && !SvGAMAGIC(elemsv) && ckWARN(WARN_MISC)))
         Perl_warner(aTHX_ packWARN(WARN_MISC),
                     "Use of reference \"%" SVf "\" as array index",
                     SVfARG(elemsv));
-    if (UNLIKELY(SvTYPE(av) != SVt_PVAV))
-        RETPUSHUNDEF;
+    if (UNLIKELY(SvTYPE(av) != SVt_PVAV)) {
+        retsv = &PL_sv_undef;
+        goto ret;
+    }
 
     if (UNLIKELY(localizing)) {
         MAGIC *mg;
@@ -6026,13 +6035,13 @@ PP_wrapped(pp_aelem, 2, 0)
                 elem = len + elem;
             if (elem >= 0 && elem <= len)
                 /* Falls within the array.  */
-                PUSHs(av_nonelem(av,elem));
+                retsv = av_nonelem(av, elem);
             else
                 /* Falls outside the array.  If it is negative,
                    magic_setdefelem will use the index for error reporting.
                  */
-                mPUSHs(newSVavdefelem(av, elem, 1));
-            RETURN;
+                retsv = sv_2mortal(newSVavdefelem(av, elem, 1));
+            goto ret;
         }
         if (UNLIKELY(localizing)) {
             if (preeminent)
@@ -6041,15 +6050,18 @@ PP_wrapped(pp_aelem, 2, 0)
                 SAVEADELETE(av, elem);
         }
         else if (PL_op->op_private & OPpDEREF) {
-            PUSHs(vivify_ref(*svp, PL_op->op_private & OPpDEREF));
-            RETURN;
+            retsv = vivify_ref(*svp, PL_op->op_private & OPpDEREF);
+            goto ret;
         }
     }
     sv = (svp ? *svp : &PL_sv_undef);
     if (!lval && SvRMAGICAL(av) && SvGMAGICAL(sv)) /* see note in pp_helem() */
         mg_get(sv);
-    PUSHs(sv);
-    RETURN;
+    retsv = sv;
+
+  ret:
+    rpp_replace_2_1(retsv);
+    return NORMAL;
 }
 
 SV*
