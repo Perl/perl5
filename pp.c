@@ -7491,55 +7491,50 @@ PP_wrapped(pp_cmpchain_dup, 2, 0)
     RETURN;
 }
 
-PP_wrapped(pp_is_bool, 1, 0)
+PP(pp_is_bool)
 {
     SV *arg = *PL_stack_sp;
 
     SvGETMAGIC(arg);
 
-    *PL_stack_sp = boolSV(SvIsBOOL(arg));
+    rpp_replace_1_1(boolSV(SvIsBOOL(arg)));
     return NORMAL;
 }
 
-PP_wrapped(pp_is_weak, 1, 0)
+PP(pp_is_weak)
 {
     SV *arg = *PL_stack_sp;
 
     SvGETMAGIC(arg);
 
-    *PL_stack_sp = boolSV(SvWEAKREF(arg));
+    rpp_replace_1_1(boolSV(SvWEAKREF(arg)));
     return NORMAL;
 }
 
-PP_wrapped(pp_weaken, 1, 0)
+PP(pp_weaken)
 {
-    dSP;
-    SV *arg = POPs;
-
-    sv_rvweaken(arg);
-    RETURN;
+    sv_rvweaken(*PL_stack_sp);
+    rpp_popfree_1();
+    return NORMAL;
 }
 
-PP_wrapped(pp_unweaken, 1, 0)
+PP(pp_unweaken)
 {
-    dSP;
-    SV *arg = POPs;
-
-    sv_rvunweaken(arg);
-    RETURN;
+    sv_rvunweaken(*PL_stack_sp);
+    rpp_popfree_1();
+    return NORMAL;
 }
 
-PP_wrapped(pp_blessed, 1, 0)
+PP(pp_blessed)
 {
-    dSP;
-    SV *arg = TOPs;
-    SV *rv;
+    SV *arg = *PL_stack_sp;
+    SV *rv, *ret;
 
     SvGETMAGIC(arg);
 
     if(!SvROK(arg) || !SvOBJECT((rv = SvRV(arg)))) {
-        SETs(&PL_sv_undef);
-        RETURN;
+        ret = &PL_sv_undef;
+        goto ret;
     }
 
     if((PL_op->op_private & OPpTRUEBOOL) ||
@@ -7555,21 +7550,23 @@ PP_wrapped(pp_blessed, 1, 0)
         if(UNLIKELY(len == HEf_SVKEY || (len == 1 && HEK_KEY(hek)[0] == '0')))
             goto fallback;
 
-        SETs(&PL_sv_yes);
+        ret = &PL_sv_yes;
+        goto ret;
     }
     else {
 fallback:
-        SETs(sv_ref(NULL, rv, TRUE));
+        ret = (sv_ref(NULL, rv, TRUE));
     }
 
-    RETURN;
+  ret:
+    rpp_replace_1_1(ret);
+    return NORMAL;
 }
 
-PP_wrapped(pp_refaddr, 1, 0)
+PP(pp_refaddr)
 {
-    dSP;
     dTARGET;
-    SV *arg = POPs;
+    SV *arg = *PL_stack_sp;
 
     SvGETMAGIC(arg);
 
@@ -7578,15 +7575,14 @@ PP_wrapped(pp_refaddr, 1, 0)
     else
         sv_setsv(TARG, &PL_sv_undef);
 
-    PUSHs(TARG);
-    RETURN;
+    rpp_replace_1_1(TARG);
+    return NORMAL;
 }
 
-PP_wrapped(pp_reftype, 1, 0)
+PP(pp_reftype)
 {
-    dSP;
     dTARGET;
-    SV *arg = POPs;
+    SV *arg = *PL_stack_sp;
 
     SvGETMAGIC(arg);
 
@@ -7595,33 +7591,33 @@ PP_wrapped(pp_reftype, 1, 0)
     else
         sv_setsv(TARG, &PL_sv_undef);
 
-    PUSHs(TARG);
-    RETURN;
+    rpp_replace_1_1(TARG);
+    return NORMAL;
 }
 
-PP_wrapped(pp_ceil, 1, 0)
+PP(pp_ceil)
 {
-    dSP;
     dTARGET;
-    PUSHn(Perl_ceil(POPn));
-    RETURN;
+    TARGn(Perl_ceil(SvNVx(*PL_stack_sp)), 1);
+    rpp_replace_1_1(TARG);
+    return NORMAL;
 }
 
-PP_wrapped(pp_floor, 1, 0)
+PP(pp_floor)
 {
-    dSP;
     dTARGET;
-    PUSHn(Perl_floor(POPn));
-    RETURN;
+    TARGn(Perl_floor(SvNVx(*PL_stack_sp)), 1);
+    rpp_replace_1_1(TARG);
+    return NORMAL;
 }
 
-PP_wrapped(pp_is_tainted, 1, 0)
+PP(pp_is_tainted)
 {
     SV *arg = *PL_stack_sp;
 
     SvGETMAGIC(arg);
 
-    *PL_stack_sp = boolSV(SvTAINTED(arg));
+    rpp_replace_1_1(boolSV(SvTAINTED(arg)));
     return NORMAL;
 }
 
