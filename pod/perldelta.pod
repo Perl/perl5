@@ -358,6 +358,19 @@ C<LISTOP> to contain them all.  This is simpler than creating a new plain
 C<OP_LIST>, adding each child individually, and finally calling
 C<op_convert_list()> in most code fragments.
 
+=item *
+
+The C<eval_sv()> API now accepts the C<G_USEHINTS> flag, which uses
+the hints such as strict and features from C<PL_curcop> instead of the
+default, which is to use default hints, e.g. no C<use vX.XX;>, no
+strict, default features.
+
+Beware if you use this flag in XS code: your evaluated code will need
+to support whatever strictness or features are in effect at the point
+your XS function is called.
+
+[GH #21415]
+
 =back
 
 =head1 Selected Bug Fixes
