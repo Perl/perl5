@@ -2652,8 +2652,11 @@ S_negate_string(pTHX)
     STRLEN len;
     const char *s;
     SV * const sv = *PL_stack_sp;
-    if (!SvPOKp(sv) || SvNIOK(sv) || (!SvPOK(sv) && SvNIOKp(sv)))
+
+    assert(SvPOKp(sv));
+    if (SvNIOK(sv) || (!SvPOK(sv) && SvNIOKp(sv)))
         return FALSE;
+
     s = SvPV_nomg_const(sv, len);
     if (isIDFIRST(*s)) {
         if (LIKELY(TARG!=sv)) {
@@ -2681,11 +2684,12 @@ PP(pp_negate)
     if (rpp_try_AMAGIC_1(neg_amg, AMGf_numeric))
         return NORMAL;
 
-    if (S_negate_string(aTHX))
+    SV * const sv = *PL_stack_sp;
+
+    if (SvPOKp(sv) && S_negate_string(aTHX))
         return NORMAL;
 
     {
-        SV * const sv = *PL_stack_sp;
 
         if (SvIOK(sv)) {
             /* It's publicly an integer */
@@ -3056,11 +3060,11 @@ PP(pp_i_negate)
     if (rpp_try_AMAGIC_1(neg_amg, 0))
         return NORMAL;
 
-    if (S_negate_string(aTHX))
-        return NORMAL;
+    SV * const sv = *PL_stack_sp;
 
+    if (SvPOKp(sv) && S_negate_string(aTHX))
+        return NORMAL;
     {
-        SV * const sv = *PL_stack_sp;
         IV const i = SvIV_nomg(sv);
         TARGi((IV)-(UV)i, 1);
         if (LIKELY(targ != sv))
