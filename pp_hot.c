@@ -1528,26 +1528,26 @@ PP_wrapped(pp_readline, ((PL_op->op_flags & OPf_STACKED) ? 2 : 1), 0)
     return do_readline();
 }
 
-PP_wrapped(pp_eq, 2, 0)
+
+PP(pp_eq)
 {
-    dSP;
-    SV *left, *right;
-    U32 flags_and, flags_or;
+    if (rpp_try_AMAGIC_2(eq_amg, AMGf_numeric))
+        return NORMAL;
 
-    tryAMAGICbin_MG(eq_amg, AMGf_numeric);
-    right = POPs;
-    left  = TOPs;
-    flags_and = SvFLAGS(left) & SvFLAGS(right);
-    flags_or  = SvFLAGS(left) | SvFLAGS(right);
+    SV *right = PL_stack_sp[0];
+    SV *left  = PL_stack_sp[-1];
 
-    SETs(boolSV(
+    U32 flags_and = SvFLAGS(left) & SvFLAGS(right);
+    U32 flags_or  = SvFLAGS(left) | SvFLAGS(right);
+
+    rpp_replace_2_1(boolSV(
         ( (flags_and & SVf_IOK) && ((flags_or & SVf_IVisUV) ==0 ) )
         ?    (SvIVX(left) == SvIVX(right))
         : (flags_and & SVf_NOK)
         ?    (SvNVX(left) == SvNVX(right))
         : ( do_ncmp(left, right) == 0)
     ));
-    RETURN;
+    return NORMAL;
 }
 
 
@@ -3275,9 +3275,10 @@ S_should_we_output_Debug_r(pTHX_ regexp *prog)
     return S_are_we_in_Debug_EXECUTE_r(aTHX);
 }
 
-PP_wrapped(pp_match, ((PL_op->op_flags & OPf_STACKED) ? 1 : 0), 0)
+
+PP(pp_match)
 {
-    dSP; dTARG;
+    SV *targ;
     PMOP *pm = cPMOP;
     PMOP *dynpm = pm;
     const char *s;
@@ -3294,19 +3295,27 @@ PP_wrapped(pp_match, ((PL_op->op_flags & OPf_STACKED) ? 1 : 0), 0)
     const I32 oldsave = PL_savestack_ix;
     I32 had_zerolen = 0;
     MAGIC *mg = NULL;
+    SSize_t sp_base;
 
-    if (PL_op->op_flags & OPf_STACKED)
-        TARG = POPs;
+    if (PL_op->op_flags & OPf_STACKED) {
+        targ = PL_stack_sp[0];
+        /* We have to keep targ alive on the stack. At the end we have to
+         * free it and shuffle down all the return values by one.
+         * Remember the position.
+         */
+        sp_base = PL_stack_sp - PL_stack_base;
+        assert(sp_base > 0);
+    }
     else {
-        if (ARGTARG)
-            GETTARGET;
+        sp_base = 0;
+        if (PL_op->op_targ)
+            targ = PAD_SV(PL_op->op_targ);
         else {
-            TARG = DEFSV;
+            targ = DEFSV;
         }
-        EXTEND(SP,1);
+        rpp_extend(1);
     }
 
-    PUTBACK;				/* EVAL blocks need stack_sp. */
     /* Skip get-magic if this is a qr// clone, because regcomp has
        already done it. */
     truebase = prog->mother_re
@@ -3431,7 +3440,10 @@ PP_wrapped(pp_match, ((PL_op->op_flags & OPf_STACKED) ? 1 : 0), 0)
 
     if ((!RXp_NPARENS(prog) && !global) || gimme != G_LIST) {
         LEAVE_SCOPE(oldsave);
-        RETPUSHYES;
+        if (sp_base)
+            rpp_popfree_1(); /* free arg */
+        rpp_push_1(&PL_sv_yes);
+        return NORMAL;
     }
 
     /* push captures on stack */
@@ -3463,8 +3475,7 @@ PP_wrapped(pp_match, ((PL_op->op_flags & OPf_STACKED) ? 1 : 0), 0)
          * with a given logical paren. */
         I32 *p2l_next = RXp_PARNO_TO_LOGICAL_NEXT(prog);
 
-        SPAGAIN;			/* EVAL blocks could move the stack. */
-        EXTEND(SP, logical_nparens + logical_paren);    /* devious code ... */
+        rpp_extend(logical_nparens + logical_paren);    /* devious code ... */
         EXTEND_MORTAL(logical_nparens + logical_paren); /* ... see above */
 
         /* loop over the logical parens in the pattern. This may not
@@ -3501,7 +3512,7 @@ PP_wrapped(pp_match, ((PL_op->op_flags & OPf_STACKED) ? 1 : 0), 0)
                             "start=%zd, end=%zd, s=%p, strend=%p, len=%zd",
                             phys_paren, offs_start, offs_end, s, strend, len);
                     }
-                    PUSHs(newSVpvn_flags(s, len,
+                    rpp_push_1(newSVpvn_flags(s, len,
                         (DO_UTF8(TARG))
                         ? SVf_UTF8|SVs_TEMP
                         : SVs_TEMP)
@@ -3514,7 +3525,7 @@ PP_wrapped(pp_match, ((PL_op->op_flags & OPf_STACKED) ? 1 : 0), 0)
                        of physical parens associated with this logical paren.
                        Either way we are done, and we can push undef and break
                        out of the loop. */
-                    PUSHs(sv_newmortal());
+                    rpp_push_1(sv_newmortal());
                     break;
                 }
             }
@@ -3522,12 +3533,11 @@ PP_wrapped(pp_match, ((PL_op->op_flags & OPf_STACKED) ? 1 : 0), 0)
         if (global) {
             curpos = (UV)RXp_OFFS_END(prog,0);
             had_zerolen = RXp_ZERO_LEN(prog);
-            PUTBACK;			/* EVAL blocks may use stack */
             r_flags |= REXEC_IGNOREPOS | REXEC_NOT_FIRST;
             goto play_it_again;
         }
         LEAVE_SCOPE(oldsave);
-        RETURN;
+        goto ret_list;
     }
     NOT_REACHED; /* NOTREACHED */
 
@@ -3539,10 +3549,35 @@ PP_wrapped(pp_match, ((PL_op->op_flags & OPf_STACKED) ? 1 : 0), 0)
             mg->mg_len = -1;
     }
     LEAVE_SCOPE(oldsave);
-    if (gimme == G_LIST)
-        RETURN;
-    RETPUSHNO;
+    if (gimme != G_LIST) {
+        if (sp_base)
+            rpp_popfree_1(); /* free arg */
+        rpp_push_1(&PL_sv_no);
+        return NORMAL;
+    }
+
+  ret_list:
+    /* return when in list context (i.e. don't push YES/NO, but do return
+     * a (possibly empty) list of matches */
+    if (sp_base) {
+        /* need to free the original argument and shift any results down
+         * by one */
+        SSize_t nitems = PL_stack_sp - (PL_stack_base + sp_base);
+#ifdef PERL_RC_STACK
+        SV *old_sv = PL_stack_sp[-nitems];
+#endif
+        if (nitems)
+            Move(PL_stack_sp - nitems + 1,
+                 PL_stack_sp - nitems,    nitems, SV*);
+        PL_stack_sp--;
+#ifdef PERL_RC_STACK
+        SvREFCNT_dec_NN(old_sv);
+#endif
+    }
+
+    return NORMAL;
 }
+
 
 OP *
 Perl_do_readline(pTHX)

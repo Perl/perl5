@@ -2405,15 +2405,16 @@ PP(pp_sle)
 }
 
 
-PP_wrapped(pp_seq, 2, 0)
+PP(pp_seq)
 {
-    dSP;
-    tryAMAGICbin_MG(seq_amg, 0);
-    {
-      dPOPTOPssrl;
-      SETs(boolSV(sv_eq_flags(left, right, 0)));
-      RETURN;
-    }
+    if (rpp_try_AMAGIC_2(seq_amg, 0))
+        return NORMAL;
+
+    SV *right = PL_stack_sp[0];
+    SV *left  = PL_stack_sp[-1];
+
+    rpp_replace_2_1(boolSV(sv_eq_flags(left, right, 0)));;
+    return NORMAL;
 }
 
 
@@ -3004,15 +3005,16 @@ PP(pp_i_ge)
 }
 
 
-PP_wrapped(pp_i_eq, 2, 0)
+PP(pp_i_eq)
 {
-    dSP;
-    tryAMAGICbin_MG(eq_amg, 0);
-    {
-      dPOPTOPiirl_nomg;
-      SETs(boolSV(left == right));
-      RETURN;
-    }
+    if (rpp_try_AMAGIC_2(eq_amg, 0))
+        return NORMAL;
+
+    IV right   = SvIV_nomg(PL_stack_sp[0]);
+    IV left    = SvIV_nomg(PL_stack_sp[-1]);
+
+    rpp_replace_2_1(boolSV(left == right));
+    return NORMAL;
 }
 
 
