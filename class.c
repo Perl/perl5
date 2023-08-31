@@ -78,7 +78,6 @@ PP(pp_initfield)
 
                 av = newAV_alloc_x(count);
 
-                av_extend(av, count);
                 while(svp <= PL_stack_sp) {
                     av_push_simple(av, newSVsv(*svp));
                     svp++;
