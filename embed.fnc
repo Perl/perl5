@@ -2178,7 +2178,7 @@ ARdp	|OP *	|newLISTOP	|I32 type				\
 				|I32 flags				\
 				|NULLOK OP *first			\
 				|NULLOK OP *last
-AFRdpv 	|OP *	|newLISTOPn	|I32 type				\
+AFRdp	|OP *	|newLISTOPn	|I32 type				\
 				|I32 flags				\
 				|...
 ARdp	|OP *	|newLOGOP	|I32 optype				\
