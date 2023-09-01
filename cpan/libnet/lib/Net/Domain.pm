@@ -107,6 +107,12 @@ sub _hostname {
   $host =~ s/(\A\.+|\.+\Z)//go;
   $host =~ s/\.\.+/\./go;
 
+  # deal with hostname returning fqdn
+  if ($host =~ /^([^\.]+)\.(.*)$/) {
+     $host = $1;
+     $domain = $2;
+  }
+
   $host;
 }
 
