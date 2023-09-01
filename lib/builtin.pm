@@ -1,4 +1,4 @@
-package builtin 0.009;
+package builtin 0.010;
 
 use strict;
 use warnings;
@@ -21,6 +21,7 @@ builtin - Perl pragma to import built-in utility functions
         weaken unweaken is_weak
         blessed refaddr reftype
         created_as_string created_as_number
+        stringify
         ceil floor
         indexed
         trim
@@ -213,6 +214,26 @@ their creation history, these two functions are intended to be used by data
 serialisation modules such as JSON encoders or similar situations, where
 language interoperability concerns require making a distinction between values
 that are fundamentally stringlike versus numberlike in nature.
+
+=head2 stringify
+
+    $str = stringify($val);
+
+Returns a new plain perl string that represents the given argument.
+
+When given a value that is already a string, a copy of this value is returned
+unchanged. False booleans are treated like the empty string.
+
+Numbers are turned into a decimal representation. True booleans are treated
+like the number 1.
+
+References to objects in classes that have L<overload> and define the C<"">
+overload entry will use the delegated method to provide a value here.
+
+Non-object references, or references to objects in classes without a C<"">
+overload will return a string that names the underlying container type of
+the reference, its memory address, and possibly its class name if it is an
+object.
 
 =head2 ceil
 
