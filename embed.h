@@ -71,10 +71,9 @@
 #   define perl_init_i18nl10n(a)                init_i18nl10n(a)
 #   define perl_require_pv(a)                   require_pv(a)
 
-/* varargs functions can't be handled with CPP macros. :-(
-   This provides a set of compatibility functions that don't take
-   an extra argument but grab the context pointer using the macro
-   dTHX.
+/* Before C99, macros could not wrap varargs functions. This
+   provides a set of compatibility functions that don't take an
+   extra argument but grab the context pointer using the macro dTHX.
  */
 
 #   if defined(MULTIPLICITY) && !defined(PERL_NO_SHORT_NAMES)
