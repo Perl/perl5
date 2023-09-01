@@ -173,6 +173,27 @@ package FetchStoreCounter {
     is(prototype(\&builtin::created_as_number), '$', 'created_as_number prototype');
 }
 
+# stringify
+{
+    use builtin qw( stringify );
+
+    is(stringify("abc"), "abc", 'stringify a plain string');
+    is(stringify(123),   "123", 'stringify a number');
+
+    my $aref = [];
+    is(stringify($aref), "$aref", 'stringify an array ref');
+
+    use builtin qw( created_as_string );
+    ok(!ref stringify($aref),               'stringified arrayref is not a ref');
+    ok(created_as_string(stringify($aref)), 'stringified arrayref is created as string');
+
+    package WithOverloadedStringify {
+        use overload '""' => sub { return "STRING" };
+    }
+
+    is(stringify(bless [], "WithOverloadedStringify"), "STRING", 'stringify invokes "" overload');
+}
+
 # ceil, floor
 {
     use builtin qw( ceil floor );

@@ -157,6 +157,10 @@ XS(XS_builtin_func1_scalar)
             Perl_pp_is_tainted(aTHX);
             break;
 
+        case OP_STRINGIFY:
+            Perl_pp_stringify(aTHX);
+            break;
+
         default:
             Perl_die(aTHX_ "panic: unhandled opcode %" IVdf
                            " for xs_builtin_func1_scalar()", (IV) ix);
@@ -422,7 +426,15 @@ static OP *ck_builtin_func1(pTHX_ OP *entersubop, GV *namegv, SV *ckobj)
 
     op_free(entersubop);
 
-    return newUNOP(opcode, wantflags, argop);
+    if(opcode == OP_STRINGIFY)
+        /* Even though pp_stringify only looks at TOPs and conceptually works
+         * on a single argument, it happens to be a LISTOP. I've no idea why
+         */
+        return newLISTOPn(opcode, wantflags,
+            argop,
+            NULL);
+    else
+        return newUNOP(opcode, wantflags, argop);
 }
 
 XS(XS_builtin_indexed)
@@ -494,6 +506,7 @@ static const struct BuiltinFuncDescriptor builtins[] = {
     { "builtin::floor",      &XS_builtin_func1_scalar, &ck_builtin_func1, OP_FLOOR,      false },
     { "builtin::is_tainted", &XS_builtin_func1_scalar, &ck_builtin_func1, OP_IS_TAINTED, false },
     { "builtin::trim",       &XS_builtin_trim,         &ck_builtin_func1, 0,             false },
+    { "builtin::stringify",  &XS_builtin_func1_scalar, &ck_builtin_func1, OP_STRINGIFY,  true },
 
     { "builtin::created_as_string", &XS_builtin_created_as_string, &ck_builtin_func1, 0, true },
     { "builtin::created_as_number", &XS_builtin_created_as_number, &ck_builtin_func1, 0, true },
