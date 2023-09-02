@@ -997,6 +997,23 @@ S_maybe_multiconcat(pTHX_ OP *o)
     o->op_type         = OP_MULTICONCAT;
     o->op_ppaddr       = PL_ppaddr[OP_MULTICONCAT];
     cUNOP_AUXo->op_aux = aux;
+
+
+    /* add some PADTMPs, as needed, for the 'fallback to OP_CONCAT
+     * behaviour if magic / overloaded etc present' code path */
+
+    /* general PADTMP for the target of each concat */
+    aux[PERL_MULTICONCAT_IX_PADTMP0].pad_offset =
+                            pad_alloc(OP_MULTICONCAT, SVs_PADTMP);
+
+    /* PADTMP for recreating OP_CONST return values */
+    aux[PERL_MULTICONCAT_IX_PADTMP1].pad_offset =
+        (is_sprintf || nconst) ? pad_alloc(OP_MULTICONCAT, SVs_PADTMP) : 0;
+
+    /* PADTMP for stringifying the result */
+    aux[PERL_MULTICONCAT_IX_PADTMP2].pad_offset =
+    (o->op_private &OPpMULTICONCAT_STRINGIFY)
+            ? pad_alloc(OP_MULTICONCAT, SVs_PADTMP) : 0;
 }
 
 

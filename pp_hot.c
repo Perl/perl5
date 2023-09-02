@@ -1200,6 +1200,7 @@ PP_wrapped(pp_multiconcat, S_multiconcat_argcount(aTHX), 0)
         U32 utf8 = 0;
         SV **svp;
         const char    *cpv  = aux[PERL_MULTICONCAT_IX_PLAIN_PV].pv;
+        SV            *csv  = NULL; /* SV which will hold cpv */
         UNOP_AUX_item *lens = aux + PERL_MULTICONCAT_IX_LENGTHS;
         Size_t arg_count = 0; /* how many args have been processed */
 
@@ -1243,7 +1244,8 @@ PP_wrapped(pp_multiconcat, S_multiconcat_argcount(aTHX), 0)
                    )
             )
             {
-                SV *tmp = newSV_type_mortal(SVt_PV);
+                assert(aux[PERL_MULTICONCAT_IX_PADTMP2].pad_offset);
+                SV *tmp = PAD_SV(aux[PERL_MULTICONCAT_IX_PADTMP2].pad_offset);
                 sv_copypv(tmp, left);
                 SvSETMAGIC(tmp);
                 left = tmp;
@@ -1265,7 +1267,36 @@ PP_wrapped(pp_multiconcat, S_multiconcat_argcount(aTHX), 0)
             else if (len < 0)
                 continue; /* no const in this position */
             else {
-                right = newSVpvn_flags(cpv, len, (utf8 | SVs_TEMP));
+                /* Use one of our PADTMPs to fake up the SV which would
+                 * have been returned by an OP_CONST.  Try to reuse it if
+                 * possible. If the refcount has gone up, something like
+                 * overload code has taken a reference to it, so abandon
+                 * it */
+                if (!csv || SvREFCNT(csv) > 1 || SvLEN(csv) != 0) {
+                    if (csv)
+                        csv = newSV_type_mortal(SVt_PV);
+                    else {
+                        assert(aux[PERL_MULTICONCAT_IX_PADTMP1].pad_offset);
+                        csv = PAD_SV(
+                                aux[PERL_MULTICONCAT_IX_PADTMP1].pad_offset);
+                        SvUPGRADE(csv, SVt_PV);
+                    }
+
+                    if (utf8)
+                        SvUTF8_on(csv);
+                    SvREADONLY_on(csv);
+                    SvPOK_on(csv);
+                }
+                /* use the const string buffer directly with the
+                 * SvLEN==0 trick */
+
+                /* cast away constness because we think we know it's safe
+                 * (SvREADONLY) */
+                SvPV_set(csv, (char *)cpv);
+                SvLEN_set(csv, 0);
+                SvCUR_set(csv, len);
+
+                right = csv;
                 cpv += len;
             }
 
@@ -1277,10 +1308,10 @@ PP_wrapped(pp_multiconcat, S_multiconcat_argcount(aTHX), 0)
             }
 
             if (arg_count == 2 && i < n) {
-                /* for the first concat, create a mortal acting like the
-                 * padtmp from OP_CONST. In later iterations this will
+                /* for the first concat, use one of the PADTMPs to emulate
+                 * the PADTMP from OP_CONST. In later iterations this will
                  * be appended to */
-                nexttarg = sv_newmortal();
+                nexttarg = PAD_SV(aux[PERL_MULTICONCAT_IX_PADTMP0].pad_offset);
                 nextappend = FALSE;
             }
             else {
