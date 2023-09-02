@@ -387,7 +387,12 @@ manager will later use a regex to expand these into links.
 
 =item *
 
-XXX
+Declared references can now be used with C<state> variables. [GH #21351]
+
+=item *
+
+Trailing elements in an C<unshift>ed and resized array will now always be
+initialized. [GH #21265]
 
 =back
 
