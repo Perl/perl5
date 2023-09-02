@@ -646,8 +646,12 @@ my $refcount;
 PERL
 }
 
-my $one = 1;
-leak 2, 0, sub { 1 ~~ sub { 1 + $one } }, 'Smartmatch doesn\'t leak';
+{
+    # smartmatch is deprecated and will be removed in 5.042
+    no warnings 'deprecated';
+    my $one = 1;
+    leak 2, 0, sub { 1 ~~ sub { 1 + $one } }, 'Smartmatch doesn\'t leak';
+}
 
 # the initial implementation of the require hook had some leaks
 
