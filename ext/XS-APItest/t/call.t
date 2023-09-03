@@ -344,15 +344,17 @@ for my $fn_type (qw(eval_pv eval_sv call_sv)) {
     use feature "fc";
     use strict;
     # the XS eval_sv() returns the count of results
-    is(eval_sv('fc("A") eq fc("a"); 1', G_LIST), 0,
+    is(eval_sv('my $z = fc("A") eq fc("a"); 1', G_LIST), 0,
        "don't inherit hints by default (so the eval fails)");
-    is(eval_sv('fc("A") eq fc("a"); 1', G_LIST | G_USEHINTS), 1,
+    is(eval_sv('my $z = fc("A") eq fc("a"); 1', G_LIST | G_USEHINTS), 1,
        "inherit hints when requested (so the eval succeeds)")
       or diag($@);
-    is(eval_sv('$x = 1', G_LIST), 1,
+    # prevent Variable "$z" is not imported
+    no warnings 'misc';
+    is(eval_sv('$z = 1', G_LIST), 1,
        "don't inherit hints (strict) by default, so the eval succeeds");
-    is(eval_sv('$x = 1', G_LIST | G_USEHINTS), 0,
-       "inherit hints (strict) when requested, so the evail fails");
+    is(eval_sv('$z = 1', G_LIST | G_USEHINTS), 0,
+       "inherit hints (strict) when requested, so the eval fails");
 }
 
 # DAPM 9-Aug-04. A taint test in eval_sv() could die after setting up
