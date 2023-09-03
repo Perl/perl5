@@ -62,29 +62,8 @@ sub format_linker_cmd {
   push @cmds, [ grep {defined && length} (
     @ld                       ,
     '-o', $spec{output}       ,
-    "-Wl,--base-file,$spec{base_file}"   ,
     "-Wl,--enable-auto-image-base" ,
-    @{$spec{lddlflags}}       ,
-    @{$spec{libpath}}         ,
-    @{$spec{startup}}         ,
-    @{$spec{objects}}         ,
-    @{$spec{other_ldflags}}   ,
-    $spec{libperl}            ,
-    @{$spec{perllibs}}        ,
-    $spec{explib}             ,
-    $spec{map_file} ? ('-Map', $spec{map_file}) : ''
-  ) ];
-
-  push @cmds, [
-    $DLLTOOL, '--def'        , $spec{def_file},
-              '--output-exp' , $spec{explib},
-              '--base-file'  , $spec{base_file}
-  ];
-
-  push @cmds, [ grep {defined && length} (
-    @ld                       ,
-    '-o', $spec{output}       ,
-    "-Wl,--enable-auto-image-base" ,
+	'-Wl,--export-all-symbols',
     @{$spec{lddlflags}}       ,
     @{$spec{libpath}}         ,
     @{$spec{startup}}         ,
