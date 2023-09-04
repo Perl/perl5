@@ -1929,15 +1929,16 @@ PP(pp_aelemfast)
     return NORMAL;
 }
 
-PP_wrapped(pp_join, 0, 1)
+PP(pp_join)
 {
-    dSP; dMARK; dTARGET;
+    dMARK; dTARGET;
     MARK++;
-    do_join(TARG, *MARK, MARK, SP);
-    SP = MARK;
-    SETs(TARG);
-    RETURN;
+    do_join(TARG, *MARK, MARK, PL_stack_sp);
+    rpp_popfree_to(MARK - 1);
+    rpp_push_1(TARG);
+    return NORMAL;
 }
+
 
 /* Oversized hot code. */
 
