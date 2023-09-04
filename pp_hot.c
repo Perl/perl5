@@ -265,13 +265,12 @@ PP(pp_and)
  *    (PL_op->op_private & OPpASSIGN_BACKWARDS) {or,and,dor}assign
 */
 
-PP_wrapped(pp_padsv_store,1,0)
+PP(pp_padsv_store)
 {
-    dSP;
     OP * const op = PL_op;
     SV** const padentry = &PAD_SVl(op->op_targ);
     SV* targ = *padentry; /* lvalue to assign into */
-    SV* const val = TOPs; /* RHS value to assign */
+    SV* const val = *PL_stack_sp; /* RHS value to assign */
 
     /* !OPf_STACKED is not handled by this OP */
     assert(op->op_flags & OPf_STACKED);
@@ -295,9 +294,10 @@ PP_wrapped(pp_padsv_store,1,0)
         );
     SvSetMagicSV(targ, val);
 
-    SETs(targ);
-    RETURN;
+    rpp_replace_1_1(targ);
+    return NORMAL;
 }
+
 
 /* A mashup of simplified AELEMFAST_LEX + SASSIGN OPs */
 
