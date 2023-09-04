@@ -5036,10 +5036,10 @@ Perl_thread_locale_term(pTHX);
 #define PERL_ARGS_ASSERT_THREAD_LOCALE_TERM
 
 PERL_CALLCONV OP *
-Perl_tied_method(pTHX_ SV *methname, SV **sp, SV * const sv, const MAGIC * const mg, const U32 flags, U32 argc, ...)
+Perl_tied_method(pTHX_ SV *methname, SV **mark, SV * const sv, const MAGIC * const mg, const U32 flags, U32 argc, ...)
         __attribute__visibility__("hidden");
 #define PERL_ARGS_ASSERT_TIED_METHOD            \
-        assert(methname); assert(sp); assert(sv); assert(mg)
+        assert(methname); assert(mark); assert(sv); assert(mg)
 
 PERL_CALLCONV SSize_t
 Perl_tmps_grow_p(pTHX_ SSize_t ix);

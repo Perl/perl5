@@ -3498,7 +3498,7 @@ Apx	|void	|thread_locale_init
 Apx	|void	|thread_locale_term
 
 Fpv	|OP *	|tied_method	|NN SV *methname			\
-				|NN SV **sp				\
+				|NN SV **mark				\
 				|NN SV * const sv			\
 				|NN const MAGIC * const mg		\
 				|const U32 flags			\
