@@ -1943,9 +1943,9 @@ PP_wrapped(pp_join, 0, 1)
 
 /* also used for: pp_say() */
 
-PP_wrapped(pp_print, 0, 1)
+PP(pp_print)
 {
-    dSP; dMARK; dORIGMARK;
+    dMARK; dORIGMARK;
     PerlIO *fp;
     MAGIC *mg;
     GV * const gv
@@ -1960,17 +1960,21 @@ PP_wrapped(pp_print, 0, 1)
             /* If using default handle then we need to make space to
              * pass object as 1st arg, so move other args up ...
              */
-            MEXTEND(SP, 1);
+            rpp_extend(1);
+            MARK = ORIGMARK; /* stack may have been realloced */
             ++MARK;
-            Move(MARK, MARK + 1, (SP - MARK) + 1, SV*);
-            ++SP;
+            Move(MARK, MARK + 1, (PL_stack_sp - MARK) + 1, SV*);
+            *MARK = NULL;
+            ++PL_stack_sp;
         }
         return Perl_tied_method(aTHX_ SV_CONST(PRINT), mark - 1, MUTABLE_SV(io),
                                 mg,
                                 (G_SCALAR | TIED_METHOD_ARGUMENTS_ON_STACK
                                  | (PL_op->op_type == OP_SAY
-                                    ? TIED_METHOD_SAY : 0)), sp - mark);
+                                    ? TIED_METHOD_SAY : 0)),
+                                PL_stack_sp - mark);
     }
+
     if (!io) {
         if ( gv && GvEGVx(gv) && (io = GvIO(GvEGV(gv)))
             && (mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar)))
@@ -1991,11 +1995,11 @@ PP_wrapped(pp_print, 0, 1)
         SV * const ofs = GvSV(PL_ofsgv); /* $, */
         MARK++;
         if (ofs && (SvGMAGICAL(ofs) || SvOK(ofs))) {
-            while (MARK <= SP) {
+            while (MARK <= PL_stack_sp) {
                 if (!do_print(*MARK, fp))
                     break;
                 MARK++;
-                if (MARK <= SP) {
+                if (MARK <= PL_stack_sp) {
                     /* don't use 'ofs' here - it may be invalidated by magic callbacks */
                     if (!do_print(GvSV(PL_ofsgv), fp)) {
                         MARK--;
@@ -2005,13 +2009,13 @@ PP_wrapped(pp_print, 0, 1)
             }
         }
         else {
-            while (MARK <= SP) {
+            while (MARK <= PL_stack_sp) {
                 if (!do_print(*MARK, fp))
                     break;
                 MARK++;
             }
         }
-        if (MARK <= SP)
+        if (MARK <= PL_stack_sp)
             goto just_say_no;
         else {
             if (PL_op->op_type == OP_SAY) {
@@ -2027,14 +2031,14 @@ PP_wrapped(pp_print, 0, 1)
                     goto just_say_no;
         }
     }
-    SP = ORIGMARK;
-    XPUSHs(&PL_sv_yes);
-    RETURN;
+    rpp_popfree_to(ORIGMARK);
+    rpp_xpush_1(&PL_sv_yes);
+    return NORMAL;
 
   just_say_no:
-    SP = ORIGMARK;
-    XPUSHs(&PL_sv_undef);
-    RETURN;
+    rpp_popfree_to(ORIGMARK);
+    rpp_xpush_1(&PL_sv_undef);
+    return NORMAL;
 }
 
 

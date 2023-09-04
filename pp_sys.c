@@ -511,15 +511,42 @@ PP_wrapped(pp_die, 0, 1)
     return NULL; /* avoid missing return from non-void function warning */
 }
 
-/* I/O. */
+
+/* tied_method(): call a tied method (typically for a filehandle).
+ * A variable number of args may be supplied to the method, obtained
+ * either via the stack or as varargs to this function.
+ *
+ * With TIED_METHOD_ARGUMENTS_ON_STACK, tied_method() expects the stack to
+ * look like this on entry:
+ *     -  X  A0 A1 A2 ...
+ *     |
+ *  mark 
+ * 
+ * where X is an SV to be thrown away (it's typically the original
+ * filehandle), then the method is called (on a new stack) with args:
+ *   (tied_obj(sv), A0, A1, ...)
+ * where there are (argc) arguments, not including the object.
+ *
+ * Without TIED_METHOD_ARGUMENTS_ON_STACK, the (argc) number of args are
+ * taken as extra arguments to the function following argc.
+ *
+ * The current value of PL_stack_sp is ignored (it's not assumed that
+ * the caller did a PUTBACK or whatever).
+ *
+ * On return, any original values on the stack above mark are discarded,
+ * and any return values from the method call are pushed above mark.
+ *
+ */
 
 OP *
-Perl_tied_method(pTHX_ SV *methname, SV **sp, SV *const sv,
+Perl_tied_method(pTHX_ SV *methname, SV **mark, SV *const sv,
                  const MAGIC *const mg, const U32 flags, U32 argc, ...)
 {
-    SV **orig_sp = sp;
     I32 ret_args;
     SSize_t extend_size;
+#ifdef PERL_RC_STACK
+    bool was_rc = rpp_stack_is_rc();
+#endif
 
     PERL_ARGS_ASSERT_TIED_METHOD;
 
@@ -528,8 +555,27 @@ Perl_tied_method(pTHX_ SV *methname, SV **sp, SV *const sv,
     STATIC_ASSERT_STMT((TIED_METHOD_ARGUMENTS_ON_STACK & G_WANT) == 0);
     STATIC_ASSERT_STMT((TIED_METHOD_SAY & G_WANT) == 0);
 
-    PUTBACK; /* sp is at *foot* of args, so this pops args from old stack */
-    PUSHSTACKi(PERLSI_MAGIC);
+    if (flags & TIED_METHOD_ARGUMENTS_ON_STACK) {
+        /* Notionally pop all the args from the old stack. In fact they're
+         * still there, and very shortly they'll be copied across to the
+         * new stack, with (for PERL_RC_STACK) the ownership of one ref
+         * count being taken over as appropriate. Leave the unused SV (the
+         * 'X' in the comments above) at the base of the stack frame so it
+         * will be freed on croak. Otherwise it will be freed at the end.
+         */
+        PL_stack_sp = mark + 1;
+    }
+    else if (rpp_stack_is_rc())
+        rpp_popfree_to(mark);
+    else
+        PL_stack_sp = mark;
+
+    /* Push a new stack for the method call. Make it ref-counted, and if
+     * our caller wasn't, then we'll need to adjust when copying the args
+     * and results between the two stacks.
+     */
+    push_stackinfo(PERLSI_MAGIC, 1);
+
     /* extend for object + args. If argc might wrap/truncate when cast
      * to SSize_t and incremented, set to -1, which will trigger a panic in
      * EXTEND().
@@ -543,12 +589,24 @@ Perl_tied_method(pTHX_ SV *methname, SV **sp, SV *const sv,
     extend_size =
         (argc > (sizeof(argc) >= sizeof(SSize_t) ? SSize_t_MAX - 1 : argc))
             ? -1 : (SSize_t)argc + 1;
-    EXTEND(SP, extend_size);
-    PUSHMARK(sp);
-    PUSHs(SvTIED_obj(sv, mg));
+    rpp_extend(extend_size);
+
+    PUSHMARK(PL_stack_sp);
+    rpp_push_1(SvTIED_obj(sv, mg));
     if (flags & TIED_METHOD_ARGUMENTS_ON_STACK) {
-        Copy(orig_sp + 2, sp + 1, argc, SV*); /* copy args to new stack */
-        sp += argc;
+        /* copy args to new stack */
+        Copy(mark + 2, PL_stack_sp + 1, argc, SV*);
+#ifdef PERL_RC_STACK
+        if (was_rc)
+            PL_stack_sp += argc;
+        else {
+            U32 i = argc;
+            while (i--)
+                SvREFCNT_inc(*++PL_stack_sp);
+        }
+#else
+        PL_stack_sp += argc;
+#endif
     }
     else if (argc) {
         const U32 mortalize_not_needed
@@ -558,14 +616,13 @@ Perl_tied_method(pTHX_ SV *methname, SV **sp, SV *const sv,
         do {
             SV *const arg = va_arg(args, SV *);
             if(mortalize_not_needed)
-                PUSHs(arg);
+                rpp_push_1(arg);
             else
-                mPUSHs(arg);
+                rpp_push_1_norc(arg);
         } while (--argc);
         va_end(args);
     }
 
-    PUTBACK;
     ENTER_with_name("call_tied_method");
     if (flags & TIED_METHOD_SAY) {
         /* local $\ = "\n" */
@@ -573,19 +630,38 @@ Perl_tied_method(pTHX_ SV *methname, SV **sp, SV *const sv,
         PL_ors_sv = newSVpvs("\n");
     }
     ret_args = call_sv(methname, (flags & G_WANT)|G_METHOD_NAMED);
-    SPAGAIN;
-    orig_sp = sp;
-    POPSTACK;
-    SPAGAIN;
+    SV **orig_sp = PL_stack_sp;
+    pop_stackinfo();
+    /* pop and free the spare SV (the 'X' in the comments above */
+    if (flags & TIED_METHOD_ARGUMENTS_ON_STACK) {
+#ifdef PERL_RC_STACK
+        if (was_rc)
+            rpp_popfree_1();
+        else
+#endif
+            PL_stack_sp--;
+    }
+
     if (ret_args) { /* copy results back to original stack */
-        EXTEND(sp, ret_args);
-        Copy(orig_sp - ret_args + 1, sp + 1, ret_args, SV*);
-        sp += ret_args;
-        PUTBACK;
+        rpp_extend(ret_args);
+        Copy(orig_sp - ret_args + 1, PL_stack_sp + 1, ret_args, SV*);
+#ifdef PERL_RC_STACK
+        if (was_rc)
+            PL_stack_sp += ret_args;
+        else
+        {
+            I32 i = ret_args;
+            while (i--)
+                sv_2mortal(*++PL_stack_sp);
+        }
+#else
+        PL_stack_sp += ret_args;
+#endif
     }
     LEAVE_with_name("call_tied_method");
     return NORMAL;
 }
+
 
 #define tied_method0(a,b,c,d)		\
     Perl_tied_method(aTHX_ a,b,c,d,G_SCALAR,0)
