@@ -4846,8 +4846,7 @@ RTi	|bool	|lossless_NV_to_IV					\
 : Used in pp_hot.c
 Reop	|GV *	|softref2xv	|NN SV * const sv			\
 				|NN const char * const what		\
-				|const svtype type			\
-				|NN SV ***spp
+				|const svtype type
 #endif
 #if defined(PERL_IN_PP_C)   || defined(PERL_IN_REGCOMP_ANY) || \
     defined(PERL_IN_TOKE_C) || defined(PERL_IN_UNIVERSAL_C)
