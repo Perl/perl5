@@ -133,7 +133,7 @@ subtract	subtraction (-)		ck_null		IfsT2	S S
 i_subtract	integer subtraction (-)	ck_null		ifsT2	S S
 concat		concatenation (.) or string	ck_concat	fsT2	S S
 multiconcat	concatenation (.) or string	ck_null	sT+
-stringify	string			ck_stringify	fsT@	S
+stringify	string			ck_stringify	fsT1	S
 
 left_shift	left bitshift (<<)	ck_bitop	fsT2	S S
 right_shift	right bitshift (>>)	ck_bitop	fsT2	S S

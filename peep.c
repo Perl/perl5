@@ -420,7 +420,7 @@ S_maybe_multiconcat(pTHX_ OP *o)
      * a multiconcat? */
     assert((PL_opargs[OP_SASSIGN]   & OA_CLASS_MASK) == OA_BINOP);
     assert((PL_opargs[OP_CONCAT]    & OA_CLASS_MASK) == OA_BINOP);
-    assert((PL_opargs[OP_STRINGIFY] & OA_CLASS_MASK) == OA_LISTOP);
+    assert((PL_opargs[OP_STRINGIFY] & OA_CLASS_MASK) == OA_UNOP);
     assert((PL_opargs[OP_SPRINTF]   & OA_CLASS_MASK) == OA_LISTOP);
     STATIC_ASSERT_STMT(   STRUCT_OFFSET(BINOP,    op_last)
                        == STRUCT_OFFSET(UNOP_AUX, op_aux));
