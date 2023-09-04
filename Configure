@@ -17475,7 +17475,7 @@ $echo "Checking the syntax of LC_ALL when categories are set to different locale
 case $d_setlocale in
     $define)
 $rm -f try try.*
-$cat >try.c <<EOF
+$cat >try.c <<'EOF'
 #include <limits.h>
 #include <locale.h>
 #include <stdlib.h>
@@ -17832,7 +17832,8 @@ if eval $compile_ok; then
 	      perl_lc_all_category_positions_init=`echo "$output" | sed -n 2p`
 	    ;;
     esac
-
+else
+    $echo "Failed to compile lc_all probe" >&4
 fi
 $rm -f try try.*
 ;;
