@@ -5867,26 +5867,17 @@ PP(pp_kvhslice)
     return NORMAL;
 }
 
+
 /* List operators. */
 
-PP_wrapped(pp_list, 0, 1)
+
+PP(pp_list)
 {
-    I32 markidx = POPMARK;
-    if (GIMME_V != G_LIST) {
-        /* don't initialize mark here, EXTEND() may move the stack */
-        SV **mark;
-        dSP;
-        EXTEND(SP, 1);          /* in case no arguments, as in @empty */
-        mark = PL_stack_base + markidx;
-        if (++MARK <= SP)
-            *MARK = *SP;		/* unwanted list, return last item */
-        else
-            *MARK = &PL_sv_undef;
-        SP = MARK;
-        PUTBACK;
-    }
+    dMARK;
+    rpp_context(mark, GIMME_V, 0);
     return NORMAL;
 }
+
 
 PP_wrapped(pp_lslice, 0, 2)
 {
