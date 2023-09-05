@@ -972,7 +972,7 @@ unpack_sockaddr_un(sun_sv)
         {
 #   if defined(HAS_SOCKADDR_SA_LEN)
             /* On *BSD sun_path not always ends with a '\0' */
-            int maxlen = addr.sun_len - 2; /* should use STRUCT_OFFSET(struct sockaddr_un, sun_path) instead of 2 */
+            int maxlen = addr.sun_len;
             if (maxlen > (int)sizeof(addr.sun_path))
                 maxlen = (int)sizeof(addr.sun_path);
 #   else
