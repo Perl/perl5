@@ -857,8 +857,8 @@ Perl_class_wrap_method_body(pTHX_ OP *o)
         if(fieldix > max_fieldix)
             max_fieldix = fieldix;
 
-        av_push(fieldmap, newSVuv(padix));
-        av_push(fieldmap, newSVuv(fieldix));
+        av_push_simple(fieldmap, newSVuv(padix));
+        av_push_simple(fieldmap, newSVuv(fieldix));
     }
 
     UNOP_AUX_item *aux = NULL;
