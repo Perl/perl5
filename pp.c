@@ -306,7 +306,33 @@ PP(pp_av2arylen)
             *svp = newSV_type(SVt_PVMG);
             sv_magic(*svp, MUTABLE_SV(av), PERL_MAGIC_arylen, NULL, 0);
         }
-        rpp_replace_1_1(*svp);
+        SV *sv_al = *svp; /* the temporary SV with arylen magic */
+#ifdef PERL_RC_STACK
+        if (SvREFCNT(av) == 1) {
+            /* At this point there are two SVs pointing at each other,
+             * av and sv_al. av -> sv_al is strong (MGf_REFCOUNTED),
+             * while sv_al -> av is weak, to avoid a leaking loop.
+             *
+             * The only thing keeping av alive right now is the ref from
+             * the stack. We want to swap av and sv_al on the stack, but
+             * that would trigger freeing av. So keep the ref counts and
+             * just swap the strong/weak pointer settings.
+             *
+             * XXX perhaps this should be done even for SvREFCNT(av)>1 ?
+             */
+            MAGIC *mg_av = mg_find((const SV *)av, PERL_MAGIC_arylen_p);
+            MAGIC *mg_al = mg_find(sv_al,          PERL_MAGIC_arylen);
+            assert(mg_av);
+            assert(mg_al);
+            assert(  mg_av->mg_flags & MGf_REFCOUNTED);
+            assert(!(mg_al->mg_flags & MGf_REFCOUNTED));
+            mg_av->mg_flags &= ~MGf_REFCOUNTED;
+            mg_al->mg_flags |=  MGf_REFCOUNTED;
+            *PL_stack_sp = sv_al;
+        }
+        else
+#endif
+        rpp_replace_1_1(sv_al);
     } else {
         SV *sv = newSViv(AvFILL(MUTABLE_AV(av)));
         rpp_popfree_1();
@@ -5873,16 +5899,23 @@ PP_wrapped(pp_lslice, 0, 2)
     RETURN;
 }
 
-PP_wrapped(pp_anonlist, 0, 1)
+
+PP(pp_anonlist)
 {
-    dSP; dMARK;
-    const I32 items = SP - MARK;
+    dMARK;
+    const I32 items = PL_stack_sp - MARK;
     SV * const av = MUTABLE_SV(av_make(items, MARK+1));
-    SP = MARK;
-    mXPUSHs((PL_op->op_flags & OPf_SPECIAL)
-            ? newRV_noinc(av) : av);
-    RETURN;
+    /* attach new SV to stack before freeing everything else,
+     * so no leak on croak */
+    rpp_extend(1);
+    SV *sv = (PL_op->op_flags & OPf_SPECIAL) ? newRV_noinc(av) : (SV*)av;
+    rpp_push_1_norc(sv); /* this handles ref count and/or mortalising */
+    PL_stack_sp[0] = PL_stack_sp[-items];
+    PL_stack_sp[-items] = sv;
+    rpp_popfree_to(PL_stack_sp - items);
+    return NORMAL;
 }
+
 
 /* When an anonlist or anonhash will (1) be empty and (2) return an RV
  * pointing to the new AV/HV, the peephole optimizer can swap in this
