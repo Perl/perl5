@@ -949,7 +949,7 @@ unpack_sockaddr_un(sun_sv)
         /* In this case, sun_len must be checked */
         int expectedlen = sizeof(addr.sun_len) + sizeof(addr.sun_family) + addr.sun_len;
         if (sockaddrlen != expectedlen)
-            croak("Invalid arg sun_len field for %s, length is %" UVuf ", but sun_len is %" UVuf,
+            croak("Bad arg length for %s, length is %" UVuf ", should be %" UVuf,
                     "Socket::unpack_sockaddr_un", (UV)sockaddrlen, (UV)expectedlen);
 #     endif
 #   else
