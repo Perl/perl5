@@ -254,7 +254,8 @@ L</Platform Support> section, instead.
 
 =item *
 
-XXX
+Fix here-doc used for code to probe C<LC_ALL> syntax for disparate
+locales introduced in 5.39.2.  [GH #21451]
 
 =back
 
