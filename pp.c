@@ -6313,20 +6313,25 @@ PP_wrapped(pp_shift, (PL_op->op_flags & OPf_SPECIAL ? 0 : 1), 0)
     RETURN;
 }
 
-PP_wrapped(pp_unshift, 0, 1)
+
+PP(pp_unshift)
 {
-    dSP; dMARK; dORIGMARK; dTARGET;
+    dMARK; dORIGMARK; dTARGET;
     AV *ary = MUTABLE_AV(*++MARK);
     const MAGIC * const mg = SvTIED_mg((const SV *)ary, PERL_MAGIC_tied);
 
     if (mg) {
-        *MARK-- = SvTIED_obj(MUTABLE_SV(ary), mg);
-        PUSHMARK(MARK);
-        PUTBACK;
         ENTER_with_name("call_UNSHIFT");
+        SV *obj = SvTIED_obj(MUTABLE_SV(ary), mg);
+#ifdef PERL_RC_STACK
+        /* keep ary alive as it's replaced on the stack with obj */
+        SAVEFREESV(MUTABLE_SV(ary));
+        SvREFCNT_inc_simple_void(obj);
+#endif
+        *MARK-- = obj;
+        PUSHMARK(MARK);
         call_sv(SV_CONST(UNSHIFT),G_SCALAR|G_DISCARD|G_METHOD_NAMED);
         LEAVE_with_name("call_UNSHIFT");
-        /* SPAGAIN; not needed: SP is assigned to immediately below */
     }
     else {
         /* PL_delaymagic is restored by JMPENV_POP on dieing, so we
@@ -6334,14 +6339,15 @@ PP_wrapped(pp_unshift, 0, 1)
         U16 old_delaymagic = PL_delaymagic;
         SSize_t i = 0;
 
-        av_unshift(ary, SP - MARK);
+        /* unshift N undefs into the array */
+        av_unshift(ary, PL_stack_sp - MARK);
         PL_delaymagic = DM_DELAY;
 
         if (!SvMAGICAL(ary)) {
             /* The av_unshift above means that many of the checks inside
              * av_store are unnecessary. If ary does not have magic attached
              * then a simple direct assignment is possible here. */
-            while (MARK < SP) {
+            while (MARK < PL_stack_sp) {
                 SV * const sv = newSVsv(*++MARK);
                 assert( !SvTIED_mg((const SV *)ary, PERL_MAGIC_tied) );
                 assert( i >= 0 );
@@ -6355,7 +6361,7 @@ PP_wrapped(pp_unshift, 0, 1)
                 i++;
             }
         } else {
-            while (MARK < SP) {
+            while (MARK < PL_stack_sp) {
                 SV * const sv = newSVsv(*++MARK);
                 (void)av_store(ary, i++, sv);
             }
@@ -6365,12 +6371,14 @@ PP_wrapped(pp_unshift, 0, 1)
             mg_set(MUTABLE_SV(ary));
         PL_delaymagic = old_delaymagic;
     }
-    SP = ORIGMARK;
+    rpp_popfree_to(ORIGMARK);
     if (OP_GIMME(PL_op, 0) != G_VOID) {
-        PUSHi( AvFILL(ary) + 1 );
+        TARGi(AvFILL(ary) + 1, 1);
+        rpp_push_1(targ);
     }
-    RETURN;
+    return NORMAL;
 }
+
 
 PP_wrapped(pp_reverse, 0, 1)
 {
