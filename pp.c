@@ -455,26 +455,45 @@ PP(pp_srefgen)
     return NORMAL;
 }
 
-PP_wrapped(pp_refgen, 0, 1)
+
+/* \( ... list ... )   */
+
+PP(pp_refgen)
 {
-    dSP; dMARK;
-    if (GIMME_V != G_LIST) {
-        if (++MARK <= SP)
-            *MARK = *SP;
-        else
-        {
-            MEXTEND(SP, 1);
-            *MARK = &PL_sv_undef;
+    const U8 gimme = GIMME_V;
+    dMARK;
+
+    if (gimme == G_VOID)
+        rpp_popfree_to(mark);
+    else if (gimme == G_SCALAR) {
+        if (++mark < PL_stack_sp) {
+            /* 2+ args on stack: free all except top one */
+            SV *topsv = *PL_stack_sp;
+            *PL_stack_sp = *mark;
+            *mark = topsv;
+            rpp_popfree_to(mark);
         }
-        *MARK = refto(*MARK);
-        SP = MARK;
-        RETURN;
+        else if (mark > PL_stack_sp)
+            /* 0 args on stack */
+            rpp_xpush_1(&PL_sv_undef);
+        rpp_replace_1_1(refto(*PL_stack_sp));
     }
-    EXTEND_MORTAL(SP - MARK);
-    while (++MARK <= SP)
-        *MARK = refto(*MARK);
-    RETURN;
+    else {
+        /* G_LIST */
+        EXTEND_MORTAL(PL_stack_sp - MARK); /* refto() creates mortals */
+        while (++MARK <= PL_stack_sp) {
+            SV *sv = *MARK;
+            SV *rv = refto(sv);
+#ifdef PERL_RC_STACK
+            SvREFCNT_dec(sv);
+            SvREFCNT_inc(rv);
+#endif
+            *MARK = rv;
+        }
+    }
+    return NORMAL;
 }
+
 
 STATIC SV*
 S_refto(pTHX_ SV *sv)
