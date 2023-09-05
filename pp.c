@@ -6258,29 +6258,35 @@ PP_wrapped(pp_splice, 0, 1)
     RETURN;
 }
 
-PP_wrapped(pp_push, 0, 1)
+
+PP(pp_push)
 {
-    dSP; dMARK; dORIGMARK; dTARGET;
+    dMARK; dORIGMARK; dTARGET;
     AV * const ary = MUTABLE_AV(*++MARK);
     const MAGIC * const mg = SvTIED_mg((const SV *)ary, PERL_MAGIC_tied);
 
     if (mg) {
-        *MARK-- = SvTIED_obj(MUTABLE_SV(ary), mg);
-        PUSHMARK(MARK);
-        PUTBACK;
         ENTER_with_name("call_PUSH");
+        SV *obj = SvTIED_obj(MUTABLE_SV(ary), mg);
+#ifdef PERL_RC_STACK
+        /* keep ary alive as it's replaced on the stack with obj */
+        SAVEFREESV(MUTABLE_SV(ary));
+        SvREFCNT_inc_simple_void(obj);
+#endif
+        *MARK-- = obj;
+        PUSHMARK(MARK);
         call_sv(SV_CONST(PUSH),G_SCALAR|G_DISCARD|G_METHOD_NAMED);
         LEAVE_with_name("call_PUSH");
-        /* SPAGAIN; not needed: SP is assigned to immediately below */
     }
     else {
         /* PL_delaymagic is restored by JMPENV_POP on dieing, so we
          * only need to save locally, not on the save stack */
         U16 old_delaymagic = PL_delaymagic;
 
-        if (SvREADONLY(ary) && MARK < SP) Perl_croak_no_modify();
+        if (SvREADONLY(ary) && MARK < PL_stack_sp)
+            Perl_croak_no_modify();
         PL_delaymagic = DM_DELAY;
-        for (++MARK; MARK <= SP; MARK++) {
+        for (++MARK; MARK <= PL_stack_sp; MARK++) {
             SV *sv;
             if (*MARK) SvGETMAGIC(*MARK);
             sv = newSV_type(SVt_NULL);
@@ -6292,12 +6298,14 @@ PP_wrapped(pp_push, 0, 1)
             mg_set(MUTABLE_SV(ary));
         PL_delaymagic = old_delaymagic;
     }
-    SP = ORIGMARK;
+    rpp_popfree_to(ORIGMARK);
     if (OP_GIMME(PL_op, 0) != G_VOID) {
-        PUSHi( AvFILL(ary) + 1 );
+        TARGi(AvFILL(ary) + 1, 1);
+        rpp_push_1(targ);
     }
-    RETURN;
+    return NORMAL;
 }
+
 
 /* also used for: pp_pop()*/
 PP_wrapped(pp_shift, (PL_op->op_flags & OPf_SPECIAL ? 0 : 1), 0)
