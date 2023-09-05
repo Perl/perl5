@@ -634,8 +634,8 @@ Perl_class_seal_stash(pTHX_ HV *stash)
     assert(HvSTASH_IS_CLASS(stash));
     struct xpvhv_aux *aux = HvAUX(stash);
 
-    /* generate initfields CV */
-    {
+    if (PL_parser->error_count == 0) {
+        /* generate initfields CV */
         I32 floor_ix = PL_savestack_ix;
         SAVEI32(PL_subline);
         save_item(PL_subname);
@@ -793,6 +793,18 @@ Perl_class_seal_stash(pTHX_ HV *stash)
         CvIsMETHOD_on(initfields);
 
         aux->xhv_class_initfields_cv = initfields;
+    }
+    else {
+        /* we had errors, clean up and don't populate initfields */
+        PADNAMELIST *fieldnames = aux->xhv_class_fields;
+        if (fieldnames) {
+            for(SSize_t i = PadnamelistMAX(fieldnames); i >= 0 ; i--) {
+                PADNAME *pn = PadnamelistARRAY(fieldnames)[i];
+                OP *valop = PadnameFIELDINFO(pn)->defop;
+                if (valop)
+                    op_free(valop);
+            }
+        }
     }
 }
 
@@ -1010,10 +1022,13 @@ Perl_class_set_field_defop(pTHX_ PADNAME *pn, OPCODE defmode, OP *defop)
 
     assert(HvSTASH_IS_CLASS(PL_curstash));
 
-    forbid_outofblock_ops(defop, "field initialiser expression");
-
     if(PadnameFIELDINFO(pn)->defop)
         op_free(PadnameFIELDINFO(pn)->defop);
+
+    /* set here to ensure clean up if forbid_outofblock_ops() throws */
+    PadnameFIELDINFO(pn)->defop = defop;
+
+    forbid_outofblock_ops(defop, "field initialiser expression");
 
     char sigil = PadnamePV(pn)[0];
     switch(sigil) {
