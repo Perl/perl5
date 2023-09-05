@@ -336,7 +336,8 @@ use File::Glob qw(:case);
     },
 
     'DB_File' => {
-        'DISTRIBUTION' => 'PMQS/DB_File-1.858.tar.gz',
+        'DISTRIBUTION' => 'PMQS/DB_File-1.859.tar.gz',
+        'SYNCINFO'     => 'jkeenan on Tue Sep  5 20:46:44 2023',
         'FILES'        => q[cpan/DB_File],
         'EXCLUDED'     => [
             qr{^patches/},

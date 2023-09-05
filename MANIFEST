@@ -697,11 +697,11 @@ cpan/DB_File/config.in			Part of Berkeley DB configuration
 cpan/DB_File/DB_File.pm			Berkeley DB extension Perl module
 cpan/DB_File/DB_File.xs			Berkeley DB extension external subroutines
 cpan/DB_File/dbinfo			Berkeley DB database version checker
-cpan/DB_File/hints/bitrig.pl
+cpan/DB_File/hints/bitrig.pl		Script related to DB_File
 cpan/DB_File/hints/dynixptx.pl		Hint for DB_File for named architecture
-cpan/DB_File/hints/minix.pl
-cpan/DB_File/hints/netbsd.pl
-cpan/DB_File/hints/openbsd.pl
+cpan/DB_File/hints/minix.pl		Script related to DB_File
+cpan/DB_File/hints/netbsd.pl		Script related to DB_File
+cpan/DB_File/hints/openbsd.pl		Script related to DB_File
 cpan/DB_File/hints/sco.pl		Hint for DB_File for named architecture
 cpan/DB_File/Makefile.PL		Berkeley DB extension makefile writer
 cpan/DB_File/t/db-btree.t		See if DB_File works
