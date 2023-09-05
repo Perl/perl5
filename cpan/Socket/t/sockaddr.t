@@ -12,7 +12,7 @@ use Socket qw(
     sockaddr_family
     sockaddr_un
 );
-use Test::More tests => 50;
+use Test::More tests => 52;
 
 # inet_aton, inet_ntoa
 {
@@ -167,6 +167,13 @@ SKIP: {
     ok( eval { pack_sockaddr_un( "x" x 0x10000 ); 1 },
         'pack_sockaddr_un(very long path) succeeds' ) or diag( "Died: $@" );
     is( $warnings, 1, 'pack_sockaddr_in(very long path) warns' );
+}
+
+# make sure packing and unpacking UNIX socket works
+SKIP: {
+    skip "AF_UNIX unsupported", 2 unless (eval { Socket::AF_UNIX; 1 });
+    ok(eval { Socket::pack_sockaddr_un('/path/to/socket.sock'); 1 }, 'can pack UNIX socket');
+    is(eval { Socket::unpack_sockaddr_un(pack_sockaddr_un('/path/to/socket.sock')) }, '/path/to/socket.sock', 'can unpack UNIX socket');
 }
 
 # warnings

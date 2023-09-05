@@ -914,7 +914,8 @@ pack_sockaddr_un(pathname)
             addr_len = sizeof(sun_ad);
         }
 #  ifdef HAS_SOCKADDR_SA_LEN
-        sun_ad.sun_len = addr_len;
+        sun_ad.sun_len = len;
+        addr_len = sizeof(sun_ad.sun_len) + sizeof(sun_ad.sun_family) + len; 
 #  endif
         ST(0) = sv_2mortal(newSVpvn((char *)&sun_ad, addr_len));
 #else
@@ -946,7 +947,7 @@ unpack_sockaddr_un(sun_sv)
         }
 #     ifdef HAS_SOCKADDR_SA_LEN
         /* In this case, sun_len must be checked */
-        if (sockaddrlen != addr.sun_len)
+        if (sockaddrlen != sizeof(addr.sun_len) + sizeof(addr.sun_family) + addr.sun_len)
             croak("Invalid arg sun_len field for %s, length is %" UVuf ", but sun_len is %" UVuf,
                     "Socket::unpack_sockaddr_un", (UV)sockaddrlen, (UV)addr.sun_len);
 #     endif
