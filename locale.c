@@ -4427,9 +4427,34 @@ S_is_locale_utf8(pTHX_ const char * locale)
 #endif
 #ifdef USE_LOCALE
 
+STATIC void
+S_set_save_buffer_min_size(pTHX_ Size_t min_len,
+                                 char **buf,
+                                 Size_t * buf_cursize)
+{
+    /* Make sure the buffer pointed to by *buf is at least as large 'min_len';
+     * *buf_cursize is the size of 'buf' upon entry; it will be updated to the
+     * new size on exit.  'buf_cursize' being NULL is to be used when this is a
+     * single use buffer, which will shortly be freed by the caller. */
+
+    if (buf_cursize == NULL) {
+        Newx(*buf, min_len, char);
+    }
+    else if (*buf_cursize == 0) {
+        Newx(*buf, min_len, char);
+        *buf_cursize = min_len;
+    }
+    else if (min_len > *buf_cursize) {
+        Renew(*buf, min_len, char);
+        *buf_cursize = min_len;
+    }
+}
+
 STATIC const char *
 S_save_to_buffer(pTHX_ const char * string, char **buf, Size_t *buf_size)
 {
+    PERL_ARGS_ASSERT_SAVE_TO_BUFFER;
+
     /* Copy the NUL-terminated 'string' to a buffer whose address before this
      * call began at *buf, and whose available length before this call was
      * *buf_size.
@@ -4451,10 +4476,6 @@ S_save_to_buffer(pTHX_ const char * string, char **buf, Size_t *buf_size)
      * empty, and memory is malloc'd.
      */
 
-    Size_t string_size;
-
-    PERL_ARGS_ASSERT_SAVE_TO_BUFFER;
-
     if (! string) {
         return NULL;
     }
@@ -4464,19 +4485,8 @@ S_save_to_buffer(pTHX_ const char * string, char **buf, Size_t *buf_size)
         return string;
     }
 
-    string_size = strlen(string) + 1;
-
-    if (buf_size == NULL) {
-        Newx(*buf, string_size, char);
-    }
-    else if (*buf_size == 0) {
-        Newx(*buf, string_size, char);
-        *buf_size = string_size;
-    }
-    else if (string_size > *buf_size) {
-        Renew(*buf, string_size, char);
-        *buf_size = string_size;
-    }
+    Size_t string_size = strlen(string) + 1;
+    set_save_buffer_min_size(string_size, buf, buf_size);
 
 #    ifdef DEBUGGING
 

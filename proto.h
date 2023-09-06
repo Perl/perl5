@@ -7032,6 +7032,10 @@ STATIC const char *
 S_save_to_buffer(pTHX_ const char *string, char **buf, Size_t *buf_size);
 #   define PERL_ARGS_ASSERT_SAVE_TO_BUFFER
 
+STATIC void
+S_set_save_buffer_min_size(pTHX_ const Size_t min_len, char **buf, Size_t *buf_size);
+#   define PERL_ARGS_ASSERT_SET_SAVE_BUFFER_MIN_SIZE
+
 PERL_STATIC_NO_RET void
 S_setlocale_failure_panic_via_i(pTHX_ const unsigned int cat_index, const char *current, const char *failed, const line_t proxy_caller_line, const line_t immediate_caller_line, const char *higher_caller_file, const line_t higher_caller_line)
         __attribute__noreturn__;

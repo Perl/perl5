@@ -1304,6 +1304,7 @@
 #       define new_LC_ALL(a,b)                  S_new_LC_ALL(aTHX_ a,b)
 #       define output_check_environment_warning(a,b,c) S_output_check_environment_warning(aTHX_ a,b,c)
 #       define save_to_buffer(a,b,c)            S_save_to_buffer(aTHX_ a,b,c)
+#       define set_save_buffer_min_size(a,b,c)  S_set_save_buffer_min_size(aTHX_ a,b,c)
 #       define setlocale_failure_panic_via_i(a,b,c,d,e,f,g) S_setlocale_failure_panic_via_i(aTHX_ a,b,c,d,e,f,g)
 #       if defined(DEBUGGING)
 #         define my_setlocale_debug_string_i(a,b,c,d) S_my_setlocale_debug_string_i(aTHX_ a,b,c,d)
