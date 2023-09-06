@@ -2859,27 +2859,27 @@ S_calculate_LC_ALL_string(pTHX_ const char ** category_locales_list,
          * so leave 'free_if_void_return' set to the default 'false'. */
     }
     else {  /* Here, not all categories have the same locale */
-        char * writable_alias;
 
-            Newx(writable_alias, total_len, char);
+            char * constructed;
+            Newx(constructed, total_len, char);
 
             /* If returning the new memory, it must be set up to be freed
              * later; otherwise at the end of this function */
             if (returning == WANT_TEMP_PV) {
-                SAVEFREEPV(writable_alias);
+                SAVEFREEPV(constructed);
             }
             else {
                 free_if_void_return = true;
             }
 
-        writable_alias[0] = '\0';
+        constructed[0] = '\0';
 
         /* Loop through all the categories */
         for (unsigned j = 0; j < LC_ALL_INDEX_; j++) {
 
             /* Add a separator, except before the first one */
             if (j != 0) {
-                my_strlcat(writable_alias, separator, total_len);
+                my_strlcat(constructed, separator, total_len);
             }
 
             const char * entry;
@@ -2895,7 +2895,7 @@ S_calculate_LC_ALL_string(pTHX_ const char ** category_locales_list,
                 i = map_LC_ALL_position_to_index[j];
 
                 entry = ENTRY(i, locales_list, format);
-                needed_len = my_strlcat(writable_alias, entry, total_len);
+                needed_len = my_strlcat(constructed, entry, total_len);
             }
             else
 
@@ -2909,9 +2909,9 @@ S_calculate_LC_ALL_string(pTHX_ const char ** category_locales_list,
                 entry = ENTRY(i, locales_list, format);
 
                 /* "name=locale;" */
-                my_strlcat(writable_alias, category_names[i], total_len);
-                my_strlcat(writable_alias, "=", total_len);
-                needed_len = my_strlcat(writable_alias, entry, total_len);
+                my_strlcat(constructed, category_names[i], total_len);
+                my_strlcat(constructed, "=", total_len);
+                needed_len = my_strlcat(constructed, entry, total_len);
             }
 
             if (LIKELY(needed_len <= total_len)) {
@@ -2924,14 +2924,13 @@ S_calculate_LC_ALL_string(pTHX_ const char ** category_locales_list,
                                         "\"%s\" was not entirely added to"
                                         " \"%.*s\"; needed=%zu, had=%zu",
                                         entry, (int) total_len,
-                                        writable_alias,
+                                        constructed,
                                         needed_len, total_len),
                                 __FILE__,
                                 caller_line);
         } /* End of loop through the categories */
 
-        retval = (const char *) writable_alias;
-
+        retval = constructed;
     } /* End of the categories' locales are displarate */
 
 #  if defined(USE_PL_CURLOCALES) && defined(LC_ALL)
