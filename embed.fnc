@@ -4421,7 +4421,7 @@ So	|void	|restore_toggled_locale_i				\
 				|const line_t caller_line
 S	|const char *|save_to_buffer					\
 				|NULLOK const char *string		\
-				|NULLOK const char **buf		\
+				|NULLOK char **buf			\
 				|NULLOK Size_t *buf_size
 Sr	|void	|setlocale_failure_panic_via_i				\
 				|const unsigned int cat_index		\
@@ -4447,7 +4447,7 @@ S	|const char *|my_langinfo_i					\
 				|const nl_item item			\
 				|const unsigned int cat_index		\
 				|NN const char *locale			\
-				|NN const char **retbufp		\
+				|NN char **retbufp			\
 				|NULLOK Size_t *retbuf_sizep		\
 				|NULLOK utf8ness_t *utf8ness
 #   else
@@ -4455,7 +4455,7 @@ S	|const char *|my_langinfo_i					\
 				|const int item 			\
 				|const unsigned int cat_index		\
 				|NN const char *locale			\
-				|NN const char **retbufp		\
+				|NN char **retbufp			\
 				|NULLOK Size_t *retbuf_sizep		\
 				|NULLOK utf8ness_t *utf8ness
 #   endif
