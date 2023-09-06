@@ -7029,7 +7029,7 @@ S_restore_toggled_locale_i(pTHX_ const unsigned cat_index, const char *original_
 #   define PERL_ARGS_ASSERT_RESTORE_TOGGLED_LOCALE_I
 
 STATIC const char *
-S_save_to_buffer(pTHX_ const char *string, const char **buf, Size_t *buf_size);
+S_save_to_buffer(pTHX_ const char *string, char **buf, Size_t *buf_size);
 #   define PERL_ARGS_ASSERT_SAVE_TO_BUFFER
 
 PERL_STATIC_NO_RET void
@@ -7052,13 +7052,13 @@ S_my_setlocale_debug_string_i(pTHX_ const unsigned cat_index, const char *locale
 #   endif
 #   if defined(HAS_NL_LANGINFO) || defined(HAS_NL_LANGINFO_L)
 STATIC const char *
-S_my_langinfo_i(pTHX_ const nl_item item, const unsigned int cat_index, const char *locale, const char **retbufp, Size_t *retbuf_sizep, utf8ness_t *utf8ness);
+S_my_langinfo_i(pTHX_ const nl_item item, const unsigned int cat_index, const char *locale, char **retbufp, Size_t *retbuf_sizep, utf8ness_t *utf8ness);
 #     define PERL_ARGS_ASSERT_MY_LANGINFO_I     \
         assert(locale); assert(retbufp)
 
 #   else
 STATIC const char *
-S_my_langinfo_i(pTHX_ const int item, const unsigned int cat_index, const char *locale, const char **retbufp, Size_t *retbuf_sizep, utf8ness_t *utf8ness);
+S_my_langinfo_i(pTHX_ const int item, const unsigned int cat_index, const char *locale, char **retbufp, Size_t *retbuf_sizep, utf8ness_t *utf8ness);
 #     define PERL_ARGS_ASSERT_MY_LANGINFO_I     \
         assert(locale); assert(retbufp)
 

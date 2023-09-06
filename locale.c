@@ -3255,7 +3255,7 @@ S_new_numeric(pTHX_ const char *newnum, bool force)
 
 #      endif
 
-    const char * radix = NULL;
+    char * radix = NULL;
     utf8ness_t utf8ness = UTF8NESS_IMMATERIAL;
 
     /* Find and save this locale's radix character. */
@@ -3299,7 +3299,7 @@ S_new_numeric(pTHX_ const char *newnum, bool force)
      * get this value, which doesn't appear to be used in any of the Microsoft
      * library routines anyway. */
 
-    const char * scratch_buffer = NULL;
+    char * scratch_buffer = NULL;
     if (PL_numeric_underlying_is_standard) {
         PL_numeric_underlying_is_standard = strEQ(C_thousands_sep,
                                              my_langinfo_c(THOUSEP, LC_NUMERIC,
@@ -3771,7 +3771,7 @@ S_new_ctype(pTHX_ const char *newctype, bool force)
 
 #    if defined(HAS_SOME_LANGINFO) || defined(WIN32)
 
-            const char * scratch_buffer = NULL;
+            char * scratch_buffer = NULL;
             Perl_sv_catpvf(aTHX_ PL_warn_locale, "; codeset=%s",
                                  my_langinfo_c(CODESET, LC_CTYPE,
                                                newctype,
@@ -4397,7 +4397,7 @@ S_is_locale_utf8(pTHX_ const char * locale)
 
 #  else
 
-    const char * scratch_buffer = NULL;
+    char * scratch_buffer = NULL;
     const char * codeset;
     bool retval;
 
@@ -4428,7 +4428,7 @@ S_is_locale_utf8(pTHX_ const char * locale)
 #ifdef USE_LOCALE
 
 STATIC const char *
-S_save_to_buffer(pTHX_ const char * string, const char **buf, Size_t *buf_size)
+S_save_to_buffer(pTHX_ const char * string, char **buf, Size_t *buf_size)
 {
     /* Copy the NUL-terminated 'string' to a buffer whose address before this
      * call began at *buf, and whose available length before this call was
@@ -5642,7 +5642,7 @@ S_my_langinfo_i(pTHX_
                  * is stored, updated on exit. retbuf_sizep may be NULL for an
                  * empty-on-entry, single use buffer whose size we don't need
                  * to keep track of */
-                const char ** retbufp,
+                char ** retbufp,
                 Size_t * retbuf_sizep,
 
                 /* If not NULL, the location to store the UTF8-ness of 'item's

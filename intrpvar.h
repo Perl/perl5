@@ -784,13 +784,13 @@ PERLVARI(I, collation_standard, bool, TRUE)
 PERLVAR(I, in_utf8_COLLATE_locale, bool)
 #endif /* USE_LOCALE_COLLATE */
 
-PERLVARI(I, langinfo_buf, const char *, NULL)
+PERLVARI(I, langinfo_buf, char *, NULL)
 PERLVARI(I, langinfo_bufsize, Size_t, 0)
-PERLVARI(I, setlocale_buf, const char *, NULL)
+PERLVARI(I, setlocale_buf, char *, NULL)
 PERLVARI(I, setlocale_bufsize, Size_t, 0)
 
 #if   defined(USE_LOCALE_THREADS) && ! defined(USE_THREAD_SAFE_LOCALE)
-PERLVARI(I, less_dicey_locale_buf, const char *, NULL)
+PERLVARI(I, less_dicey_locale_buf, char *, NULL)
 PERLVARI(I, less_dicey_locale_bufsize, Size_t, 0)
 #endif
 
