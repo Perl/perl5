@@ -4431,6 +4431,10 @@ Sr	|void	|setlocale_failure_panic_via_i				\
 				|const line_t immediate_caller_line	\
 				|NN const char *higher_caller_file	\
 				|const line_t higher_caller_line
+S	|void	|set_save_buffer_min_size				\
+				|const Size_t min_len			\
+				|NULLOK char **buf			\
+				|NULLOK Size_t *buf_size
 So	|const char *|toggle_locale_i					\
 				|const unsigned switch_cat_index	\
 				|NN const char *new_locale		\
