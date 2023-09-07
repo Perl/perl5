@@ -6014,27 +6014,42 @@ PP_wrapped(pp_emptyavhv, 0,0)
     RETURN;
 }
 
-PP_wrapped(pp_anonhash, 0, 1)
+
+/*  return { list };
+ *  without OPf_SPECIAL, return hash rather than hash ref */
+
+PP(pp_anonhash)
 {
-    dSP; dMARK; dORIGMARK;
+    dMARK; dORIGMARK;
     HV* const hv = newHV();
-    SV* const retval = sv_2mortal( PL_op->op_flags & OPf_SPECIAL
+    SV* const retval = (PL_op->op_flags & OPf_SPECIAL)
                                     ? newRV_noinc(MUTABLE_SV(hv))
-                                    : MUTABLE_SV(hv) );
+                                    : MUTABLE_SV(hv);
     /* This isn't quite true for an odd sized list (it's one too few) but it's
        not worth the runtime +1 just to optimise for the warning case. */
-    SSize_t pairs = (SP - MARK) >> 1;
+    SSize_t pairs = (PL_stack_sp - MARK) >> 1;
+
+    /* temporarily save the hv/hvref at the top of the stack to
+     * avoid possible premature free */
+    rpp_extend(1);
+    rpp_push_1_norc(retval);
+    mark = ORIGMARK; /* in case stack was reallocated */
+
+    if (pairs == 0)
+        return NORMAL;
+
     if (pairs > PERL_HASH_DEFAULT_HvMAX) {
         hv_ksplit(hv, pairs);
     }
 
-    while (MARK < SP) {
-        SV * const key =
-            (MARK++, SvGMAGICAL(*MARK) ? sv_mortalcopy(*MARK) : *MARK);
+    while (++MARK < PL_stack_sp) {
+        SV *key = *MARK;
+        if (SvGMAGICAL(key))
+            key = sv_mortalcopy(key);
+
         SV *val;
-        if (MARK < SP)
+        if (++MARK < PL_stack_sp)
         {
-            MARK++;
             SvGETMAGIC(*MARK);
             val = newSV_type(SVt_NULL);
             sv_setsv_nomg(val, *MARK);
@@ -6046,10 +6061,16 @@ PP_wrapped(pp_anonhash, 0, 1)
         }
         (void)hv_store_ent(hv,key,val,0);
     }
-    SP = ORIGMARK;
-    XPUSHs(retval);
-    RETURN;
+
+    /* swap the HV (which is at the top of stack) with the first key
+     * (which is at the bottom of the stack frame), then free everything
+     * above it */
+    *PL_stack_sp = ORIGMARK[1];
+    ORIGMARK[1] = retval;
+    rpp_popfree_to(ORIGMARK+1);
+    return NORMAL;
 }
+
 
 PP_wrapped(pp_splice, 0, 1)
 {
