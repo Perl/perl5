@@ -8276,7 +8276,7 @@ Perl_sv_cmp_flags(pTHX_ SV *const sv1, SV *const sv2,
                     * at the beginning of a character.  But neither or both are
                     * (or else earlier bytes would have been different).  And
                     * if we are in the middle of a character, the two
-                    * characters are comprised of the same number of bytes
+                    * characters have the same number of bytes
                     * (because in this case the start bytes are the same, and
                     * the start bytes encode the character's length). */
                  if (UTF8_IS_INVARIANT(*pv1))
