@@ -7015,7 +7015,7 @@ regex; marked by <-- HERE in m/%s/
 
 (F) A Unicode string property is one which expands to a sequence of
 multiple characters.  An example is C<\p{name=KATAKANA LETTER AINU P}>,
-which is comprised of the sequence C<\N{KATAKANA LETTER SMALL H}>
+which consists of the sequence C<\N{KATAKANA LETTER SMALL H}>
 followed by C<\N{COMBINING KATAKANA-HIRAGANA SEMI-VOICED SOUND MARK}>.
 Extended character classes, C<(?[...])> currently cannot handle these.
 
