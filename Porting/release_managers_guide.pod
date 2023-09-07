@@ -159,7 +159,7 @@ release.  You will need to have a GitHub account (if you don't have one)
 and contact the Steering Council with your username to get membership in the
 L<< Perl-Releasers|https://github.com/orgs/Perl/teams/perl-releasers >> team.
 
-=head3 web-based file share
+=head3 Web-based file share
 
 You will need to be able to share tarballs with #p5p members for
 pre-release testing, and you may wish to upload to PAUSE via URL.
@@ -197,7 +197,7 @@ The work of building a release candidate for an even numbered release
 release candidate.  Some of the following steps should be done regularly,
 but all I<must> be done in the run up to a release.
 
-=head3 dual-life CPAN module synchronisation
+=head3 Dual-life CPAN module synchronisation
 
 To see which core distro versions differ from the current CPAN versions:
 
@@ -371,7 +371,7 @@ This comes down to:
             no - note it in perldelta as a significant bugfix
             (also, try to inform the module's author)
 
-=head3 monitor smoke tests for failures
+=head3 Monitor smoke tests for failures
 
 Similarly, monitor the smoking of core tests, and try to fix.  See
 L<https://tux.nl/perl5/smoke/index.html>, L<https://perl5.test-smoke.org/>
@@ -387,7 +387,7 @@ automatically.
 
 =for checklist skip BLEAD-POINT
 
-=head3 monitor CPAN testers for failures
+=head3 Monitor CPAN testers for failures
 
 For any release except a BLEAD-POINT: Examine the relevant analysis report(s)
 at L<http://analysis.cpantesters.org/beforemaintrelease> to see how the
@@ -399,7 +399,7 @@ colon-delimited versions to use for comparison.  For example:
 
 L<http://analysis.cpantesters.org/beforemaintrelease?pair=5.20.2:5.22.0%20RC1>
 
-=head3 check pod errors
+=head3 Check POD errors
 
 F<t/porting/podcheck.t> is a porting test that will fail if it finds new
 problems in pods.  However, it can be taught to ignore problems, and
@@ -428,7 +428,7 @@ If you decide any should be fixed, after that gets done, run
 to make sure those fixes were successful, and follow the directions in
 the output about regenerating the data base.
 
-=head3 update perldelta
+=head3 Update perldelta
 
 Get perldelta in a mostly finished state.
 
@@ -437,8 +437,8 @@ every section it lists is, if necessary, populated and complete. Copy
 edit the whole document.
 
 You won't be able to automatically fill in the "Updated Modules" section until
-after Module::CoreList is updated (as described below in
-L<"update Module::CoreList">).
+after L<Module::CoreList> is updated (as described below in
+L</"Update Module::CoreList">).
 
 =head3 Bump the version number
 
@@ -466,7 +466,7 @@ Use git status and git diff to select changes you want to keep.
 Be particularly careful with F<INSTALL>, which contains a mixture of
 C<5.10.0>-type strings, some of which need bumping on every release, and
 some of which need to be left unchanged.
-See below in L<"update INSTALL"> for more details.
+See below in L</"Update INSTALL"> for more details.
 
 For the first RC release leading up to a BLEAD-FINAL release, update the
 description of which releases are now "officially" supported in
@@ -515,10 +515,10 @@ see if they look similar.  See commit f7cf42bb69 for an example of a
 previous version bump.
 
 When the version number is bumped, you should also update Module::CoreList
-(as described below in L<"update Module::CoreList">) to reflect the new
+(as described below in L</"Update Module::CoreList">) to reflect the new
 version number.
 
-=head3 update INSTALL
+=head3 Update INSTALL
 
 Review and update INSTALL to account for the change in version number.
 INSTALL for a BLEAD-POINT release should already contain the expected version.
@@ -540,7 +540,7 @@ release (so for 5.15.3 this would be 5.15.2).  If the last release manager
 followed instructions, this should have already been done after the last
 blead release, so you may find nothing to do here.
 
-=head3 update AUTHORS
+=head3 Update AUTHORS
 
 The AUTHORS file can be updated by running F<Porting/updateAUTHORS.pl>.
 This shouldn't really be necessary anymore, and in theory nothing should
@@ -590,15 +590,15 @@ compiling with C<-Dcc=$other_compiler>.
 You can also consider pushing the repo to GitHub where GitHub Actions is enabled
 which would smoke different flavors of Perl for you.
 
-=head3 update perlport
+=head3 Update perlport
 
 L<perlport> has a section currently named I<Supported Platforms> that
 indicates which platforms are known to build in the current release.
 If necessary update the list and the indicated version number.
 
-=head3 check a readonly build
+=head3 Check a readonly build
 
-Even before other prep work, follow the steps in L</build the tarball> and test
+Even before other prep work, follow the steps in L</"Build the tarball"> and test
 it locally.  Because a perl source tarballs sets many files read-only, it could
 test differently than tests run from the repository.  After you're sure
 permissions aren't a problem, delete the generated directory and tarballs.
@@ -609,13 +609,13 @@ permissions aren't a problem, delete the generated directory and tarballs.
 This section describes the actions required to make a release
 that are performed near to, or on the actual release day.
 
-=head3 re-check earlier actions
+=head3 Re-check earlier actions
 
 Review all the actions in the previous section,
-L<"Building a release - advance actions"> to ensure they are all done and
+L</"Building a release - advance actions"> to ensure they are all done and
 up-to-date.
 
-=head3 create a release branch
+=head3 Create a release branch
 
 For BLEAD-POINT releases, making a release from a release branch avoids the
 need to freeze blead during the release. This is less important for
@@ -624,7 +624,7 @@ those cases. Create the branch by running
 
  git checkout -b release-5.X.Y
 
-=head3 build a clean perl
+=head3 Build a clean perl
 
 Make sure you have a gitwise-clean perl directory (no modified files,
 unpushed commits etc):
@@ -650,7 +650,7 @@ release of the current branch, but not for any releases from other branches.)
 Any modules that fail will need a version bump, plus a nudge to the upstream
 maintainer for 'cpan' upstream modules.
 
-=head3 update Module::CoreList
+=head3 Update Module::CoreList
 
 =head4 Bump Module::CoreList* $VERSIONs
 
@@ -742,7 +742,7 @@ action from the last commit.)
 Add a perldelta entry for the new Module::CoreList version. You only
 need to do this if you want to add notes about the changes included
 with this version of Module::CoreList. Otherwise, its version bump
-will be automatically filled in below in L</finalize perldelta>.
+will be automatically filled in below in L</"Finalize perldelta">.
 
 =for checklist skip RC
 
@@ -771,7 +771,7 @@ cherry-pick it back).
 Build and test to get the changes into the currently built lib directory and to
 ensure all tests are passing.
 
-=head3 finalize perldelta
+=head3 Finalize perldelta
 
 Finalize the perldelta.  In particular, fill in the Acknowledgements
 section, which can be generated with something like:
@@ -815,7 +815,7 @@ If you make changes, be sure to commit them.
 
 =for checklist skip BLEAD-POINT MAINT RC
 
-=head3 remove stale perldeltas
+=head3 Remove stale perldeltas
 
 For the first RC release that is ONLY for a BLEAD-FINAL, the perldeltas
 from the BLEAD-POINT releases since the previous BLEAD-FINAL should have
@@ -831,7 +831,7 @@ For example, for RC0 of 5.16.0:
 
 =for checklist skip BLEAD-FINAL BLEAD-POINT
 
-=head3 add recent perldeltas
+=head3 Add recent perldeltas
 
 For the first RC for a MAINT release, copy in any recent perldeltas from
 blead that have been added since the last release on this branch. This
@@ -842,7 +842,7 @@ perldeltas from recent 5.10.x, 5.12.x etc maint releases, but not from
 
  $ git add <file1> <file2> ...
 
-=head3 update and commit perldelta files
+=head3 Update and commit perldelta files
 
 If you have added or removed any perldelta files via the previous two
 steps, then edit F<pod/perl.pod> to add/remove them from its table of
@@ -860,14 +860,14 @@ Then build a clean perl and do a full test
 
 Once all tests pass, commit your changes.
 
-=head3 final check of perldelta placeholders
+=head3 Final check of perldelta placeholders
 
 Check for any 'XXX' leftover section in the perldelta.
 Either fill them or remove these sections appropriately.
 
  $ git grep XX pod/perldelta.pod
 
-=head3 build a clean perl
+=head3 Build a clean perl
 
 If you skipped the previous step (adding/removing perldeltas),
 again, make sure you have a gitwise-clean perl directory (no modified files,
@@ -882,7 +882,7 @@ then configure and build perl so that you have a Makefile and porting tools:
 
 =for checklist skip BLEAD-FINAL BLEAD-POINT
 
-=head3 synchronise from blead's perlhist.pod
+=head3 Synchronise from blead's perlhist.pod
 
 For the first RC for a MAINT release, copy in the latest
 F<pod/perlhist.pod> from blead; this will include details of newer
@@ -897,7 +897,7 @@ branch:
  $ git checkout -p origin/blead pod/perlhist.pod
  $ git commit -m 'Sync perlhist from blead' pod/perlhist.pod
 
-=head3 update perlhist.pod
+=head3 Update perlhist.pod
 
 Add an entry to F<pod/perlhist.pod> with the release date, e.g.:
 
@@ -917,7 +917,7 @@ Be sure to commit your changes:
 
 =for checklist skip BLEAD-POINT
 
-=head3 update patchlevel.h
+=head3 Update patchlevel.h
 
 I<You MUST SKIP this step for a BLEAD-POINT release>
 
@@ -935,7 +935,7 @@ Be sure to commit your change:
 
  $ git commit -m 'Bump version to RCnnn' patchlevel.h
 
-=head3 run makemeta to update META files
+=head3 Run makemeta to update META files
 
  $ ./perl -Ilib Porting/makemeta
 
@@ -944,7 +944,7 @@ Be sure to commit any changes (if applicable):
  $ git status   # any changes?
  $ git commit -m 'Update META files' META.*
 
-=head3 build, test and check a fresh perl
+=head3 Build, test and check a fresh perl
 
 Build perl, then make sure it passes its own test suite, and installs:
 
@@ -971,7 +971,7 @@ and C<< deadbeef >> commit of that tag.
 
 Then delete the temporary installation.
 
-=head3 create the release tag
+=head3 Create the release tag
 
 Create the I<annotated> tag identifying this release (e.g.):
 
@@ -993,7 +993,7 @@ The output must look similar to the following:
  Tagger: Jesse Vincent <jesse@bestpractical.com>
  Date:   Fri Oct 2 16:29:56 2009 -0400
 
-=head3 build the tarball
+=head3 Build the tarball
 
 Before you run the following, you might want to install 7-Zip (the
 C<p7zip-full> package under Debian or the C<p7zip> port on MacPorts) or
@@ -1040,7 +1040,7 @@ Finally, clean up the temporary directory, e.g.
 
  $ rm -rf ../perl-x.y.z-RC1
 
-=head3 test the tarball
+=head3 Test the tarball
 
 Once you have a tarball it's time to test the tarball (not the repository).
 
@@ -1167,7 +1167,7 @@ the "Locally applied patches" section.
 
 =for checklist skip BLEAD-POINT
 
-=head3 monitor smokes
+=head3 Monitor smokes
 
 XXX This is probably irrelevant if working on a release branch, though
 MAINT or RC might want to push a smoke branch and wait.
@@ -1185,7 +1185,7 @@ releases, but for I<BLEAD-POINT> releases sometimes the best you can do is
 to plead with people on IRC to test stuff on their platforms, fire away,
 and then hope for the best.
 
-=head3 upload to PAUSE
+=head3 Upload to PAUSE
 
 Once smoking is okay, upload it to PAUSE. This is the point of no return.
 If anything goes wrong after this point, you will need to re-prepare
@@ -1228,7 +1228,7 @@ which may be faster.
 
 =for checklist skip RC BLEAD-POINT
 
-=head3 wait for indexing
+=head3 Wait for indexing
 
 I<You MUST SKIP this step for RC and BLEAD-POINT>
 
@@ -1239,7 +1239,7 @@ This is considered normal.
 
 =for checklist skip BLEAD-POINT
 
-=head3 disarm patchlevel.h
+=head3 Disarm patchlevel.h
 
 I<You MUST SKIP this step for BLEAD-POINT release>
 
@@ -1256,7 +1256,7 @@ Be sure to commit your change:
 
  $ git commit -m 'Disarm RCnnn bump' patchlevel.h
 
-=head3 announce to p5p
+=head3 Announce to p5p
 
 Mail perl5-porters@perl.org to announce your new release, with a quote you prepared earlier.
 Get the SHA256 digests from the PAUSE email responses.
@@ -1268,7 +1268,7 @@ Send a carbon copy to C<noc@metacpan.org>
 If your email does not appear on the list, but does not obviously bounce
 either, check that the email you are sending from is subscribed to the list.
 
-=head3 merge release branch back to blead
+=head3 Merge release branch back to blead
 
 Merge the (local) release branch back into master now, and delete it.
 
@@ -1284,7 +1284,7 @@ branch to avoid the merge commit (as you might normally do when merging a
 small branch into blead) since doing so will invalidate the tag that you
 created earlier.
 
-=head3 publish the release tag
+=head3 Publish the release tag
 
 Now that you've shipped the new perl release to PAUSE and pushed your changes
 to the Perl master repository, it's time to publish the tag you created
@@ -1292,19 +1292,19 @@ earlier too (e.g.):
 
  $ git push origin tag v5.X.Y
 
-=head3 update epigraphs.pod
+=head3 Update epigraphs.pod
 
 Add your quote to F<Porting/epigraphs.pod> and commit it.
 You can include the customary link to the release announcement even before your
 message reaches the web-visible archives by looking for the X-List-Archive
 header in your message after receiving it back via perl5-porters.
 
-=head3 blog about your epigraph
+=head3 Blog about your epigraph
 
 If you have a blog, please consider writing an entry in your blog explaining
 why you chose that particular quote for your epigraph.
 
-=head3 update the link to the latest perl on perlweb
+=head3 Update the link to the latest perl on perlweb
 
 Submit a pull request to L<https://github.com/perlorg/perlweb>.  For a dev
 release, update the link in F<docs/dev/perl5/index.html>.  For a stable
@@ -1329,7 +1329,7 @@ to CPAN.
 
 =for checklist skip RC
 
-=head3 new perldelta
+=head3 New perldelta
 
 I<You MUST SKIP this step for RC>
 
@@ -1375,7 +1375,7 @@ previous version bump.
 
 =for checklist skip MAINT RC
 
-=head3 bump version
+=head3 Bump version
 
 I<You MUST SKIP this step for RC and MAINT>
 
@@ -1392,13 +1392,13 @@ marker); e.g.
 
 Run F<regen/feature.pl> to propagate the changes to F<lib/feature.pm>.
 
-Then follow the section L<"Bump the version number"> to bump the version
+Then follow the section L</"Bump the version number"> to bump the version
 in the remaining files and test and commit.
 
 If this was a BLEAD-POINT release, then just follow the section
-L<"Bump the version number">.
+L</"Bump the version number">.
 
-After bumping the version, follow the section L<"update INSTALL"> to
+After bumping the version, follow the section L</"Update INSTALL"> to
 ensure all version number references are correct.
 
 (Note: The version is NOT bumped immediately after a MAINT release in order
@@ -1413,7 +1413,7 @@ reports to arise. (The opposite problem -- trying to figure out why there
 introduced later -- shouldn't arise for MAINT releases since they should,
 in theory, only contain bug fixes but never regressions.))
 
-=head3 clean build and test
+=head3 Clean build and test
 
 Run a clean build and test to make sure nothing obvious is broken. This is
 very important, as commands run after this point must be run using the perl
@@ -1450,7 +1450,7 @@ update its exceptions database.
 
 =back
 
-=head3 push commits
+=head3 Push commits
 
 Finally, push any commits done above.
 
@@ -1458,7 +1458,7 @@ Finally, push any commits done above.
 
 =for checklist skip BLEAD-POINT MAINT RC
 
-=head3 create maint branch
+=head3 Create maint branch
 
 I<You MUST SKIP this step for RC, BLEAD-POINT, MAINT>
 
@@ -1474,7 +1474,7 @@ Assuming you're using git 1.7.x or newer:
 
 =for checklist skip BLEAD-POINT MAINT RC
 
-=head3 make the maint branch available in the APC
+=head3 Make the maint branch available in the APC
 
 Clone the new branch into /srv/gitcommon/branches on camel so the APC will
 receive its changes.
@@ -1489,7 +1489,7 @@ XXX Who are the sysadmins?  Contact info?
 
 =for checklist skip BLEAD-POINT RC
 
-=head3 copy perldelta.pod to blead
+=head3 Copy perldelta.pod to blead
 
 I<You MUST SKIP this step for RC, BLEAD-POINT>
 
@@ -1517,7 +1517,7 @@ Finally, commit and push:
 
 =for checklist skip BLEAD-POINT
 
-=head3 copy perlhist.pod entries to blead
+=head3 Copy perlhist.pod entries to blead
 
 Make sure any recent F<pod/perlhist.pod> entries are copied to
 F<perlhist.pod> on blead.  e.g.
@@ -1535,7 +1535,7 @@ Thanks for releasing perl!
 
 =for checklist skip BLEAD-FINAL MAINT RC
 
-=head3 update Module::CoreList
+=head3 Update Module::CoreList
 
 I<After a BLEAD-POINT release only>
 
@@ -1603,7 +1603,7 @@ Commit and push your changes.
 
 =back
 
-=head3 check tarball availability
+=head3 Check tarball availability
 
 Check various website entries to make sure the that tarball has appeared
 and is properly indexed:
@@ -1640,7 +1640,7 @@ It should be visible at a URL like C<https://metacpan.org/release/DAPM/perl-5.10
 
 =back
 
-=head3 update release manager's guide
+=head3 Update release manager's guide
 
 Go over your notes from the release (you did take some, right?) and update
 F<Porting/release_managers_guide.pod> with any fixes or information that
