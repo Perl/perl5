@@ -5213,10 +5213,11 @@ PP_wrapped(pp_fc, 1, 0)
 
 /* Arrays. */
 
-PP_wrapped(pp_aslice, 0, 1)
+
+PP(pp_aslice)
 {
-    dSP; dMARK; dORIGMARK;
-    AV *const av = MUTABLE_AV(POPs);
+    dMARK; dORIGMARK;
+    AV *const av = MUTABLE_AV(*PL_stack_sp);
     const I32 lval = (PL_op->op_flags & OPf_MOD || LVRET);
 
     if (SvTYPE(av) == SVt_PVAV) {
@@ -5233,7 +5234,7 @@ PP_wrapped(pp_aslice, 0, 1)
         if (lval && localizing) {
             SV **svp;
             SSize_t max = -1;
-            for (svp = MARK + 1; svp <= SP; svp++) {
+            for (svp = MARK + 1; svp < PL_stack_sp; svp++) {
                 const SSize_t elem = SvIV(*svp);
                 if (elem > max)
                     max = elem;
@@ -5242,7 +5243,7 @@ PP_wrapped(pp_aslice, 0, 1)
                 av_extend(av, max);
         }
 
-        while (++MARK <= SP) {
+        while (++MARK < PL_stack_sp) {
             SV **svp;
             SSize_t elem = SvIV(*MARK);
             bool preeminent = TRUE;
@@ -5266,23 +5267,25 @@ PP_wrapped(pp_aslice, 0, 1)
                         SAVEADELETE(av, elem);
                 }
             }
-            *MARK = svp ? *svp : &PL_sv_undef;
+
+            rpp_replace_at(MARK, svp ? *svp : &PL_sv_undef);
         }
     }
-    if (GIMME_V != G_LIST) {
-        MARK = ORIGMARK;
-        *++MARK = SP > ORIGMARK ? *SP : &PL_sv_undef;
-        SP = MARK;
-    }
-    RETURN;
+
+    rpp_context(ORIGMARK, GIMME_V, 1);
+    return NORMAL;
 }
 
-PP_wrapped(pp_kvaslice, 0, 1)
+
+/*  %ary[1,3,5] */
+
+PP(pp_kvaslice)
 {
-    dSP; dMARK;
-    AV *const av = MUTABLE_AV(POPs);
+    dMARK; dORIGMARK;
+    /* leave av on stack for now to avoid leak on croak */
+    AV *const av = MUTABLE_AV(*PL_stack_sp);
     I32 lval = (PL_op->op_flags & OPf_MOD);
-    SSize_t items = SP - MARK;
+    SSize_t items = PL_stack_sp - MARK - 1;
 
     if (PL_op->op_private & OPpMAYBE_LVSUB) {
        const I32 flags = is_lvalue_sub();
@@ -5294,15 +5297,24 @@ PP_wrapped(pp_kvaslice, 0, 1)
        }
     }
 
-    MEXTEND(SP,items);
-    while (items > 1) {
-        *(MARK+items*2-1) = *(MARK+items);
-        items--;
-    }
-    items = SP-MARK;
-    SP += items;
+    rpp_extend(items);
+    MARK = ORIGMARK;
 
-    while (++MARK <= SP) {
+    /* move av from old top-of-stack to new top-of-stack */
+    PL_stack_sp[items] = PL_stack_sp[0];
+    PL_stack_sp[0] = NULL;
+
+    /* spread the index SVs out to every second location */
+    SSize_t i = items;
+    while (i > 1) {
+        *(MARK+i*2-1) = *(MARK+i);
+        *(MARK+i*2)   = NULL;
+        *(MARK+i)     = NULL;
+        i--;
+    }
+    PL_stack_sp += items;
+
+    while (++MARK < PL_stack_sp) {
         SV **svp;
 
         svp = av_fetch(av, SvIV(*MARK), lval);
@@ -5310,17 +5322,26 @@ PP_wrapped(pp_kvaslice, 0, 1)
             if (!svp || !*svp || *svp == &PL_sv_undef) {
                 DIE(aTHX_ PL_no_aelem, SvIV(*MARK));
             }
-            *MARK = sv_mortalcopy(*MARK);
+            /* replace key SV with a copy */
+            SV *oldsv = *MARK;
+            SV *newsv = newSVsv(oldsv);
+#ifdef PERL_RC_STACK
+            *MARK = newsv;
+            SvREFCNT_dec(oldsv);
+#else
+            *MARK = sv_2mortal(newsv);
+#endif
         }
-        *++MARK = svp ? *svp : &PL_sv_undef;
+
+        MARK++;
+        rpp_replace_at(MARK, svp ? *svp : &PL_sv_undef);
     }
-    if (GIMME_V != G_LIST) {
-        MARK = SP - items*2;
-        *++MARK = items > 0 ? *SP : &PL_sv_undef;
-        SP = MARK;
-    }
-    RETURN;
+
+    /* pop AV, then apply void/scalar/list context to stack above mark */
+    rpp_context(ORIGMARK, GIMME_V, 1);
+    return NORMAL;
 }
+
 
 
 PP_wrapped(pp_aeach, 1, 0)
@@ -5718,10 +5739,12 @@ other:
 }
 
 
-PP_wrapped(pp_hslice, 0, 1)
+/* @hash{'foo', 'bar'} */
+
+PP(pp_hslice)
 {
-    dSP; dMARK; dORIGMARK;
-    HV * const hv = MUTABLE_HV(POPs);
+    dMARK; dORIGMARK;
+    HV * const hv = MUTABLE_HV(*PL_stack_sp);
     const I32 lval = (PL_op->op_flags & OPf_MOD || LVRET);
     const bool localizing = PL_op->op_private & OPpLVAL_INTRO;
     bool can_preserve = FALSE;
@@ -5734,7 +5757,7 @@ PP_wrapped(pp_hslice, 0, 1)
             can_preserve = TRUE;
     }
 
-    while (++MARK <= SP) {
+    while (++MARK < PL_stack_sp) {
         SV * const keysv = *MARK;
         SV **svp;
         HE *he;
@@ -5765,22 +5788,24 @@ PP_wrapped(pp_hslice, 0, 1)
                     SAVEHDELETE(hv, keysv);
             }
         }
-        *MARK = svp && *svp ? *svp : &PL_sv_undef;
+
+        rpp_replace_at(MARK, svp && *svp ? *svp : &PL_sv_undef);
     }
-    if (GIMME_V != G_LIST) {
-        MARK = ORIGMARK;
-        *++MARK = SP > ORIGMARK ? *SP : &PL_sv_undef;
-        SP = MARK;
-    }
-    RETURN;
+
+    rpp_context(ORIGMARK, GIMME_V, 1);
+    return NORMAL;
 }
 
-PP_wrapped(pp_kvhslice, 0, 1)
+
+/* %hash{'foo', 'bar'} */
+
+PP(pp_kvhslice)
 {
-    dSP; dMARK;
-    HV * const hv = MUTABLE_HV(POPs);
+    dMARK; dORIGMARK;
+    /* leave hv on stack for now to avoid leak on croak */
+    HV * const hv = MUTABLE_HV(*PL_stack_sp);
     I32 lval = (PL_op->op_flags & OPf_MOD);
-    SSize_t items = SP - MARK;
+    SSize_t items = PL_stack_sp - MARK - 1;
 
     if (PL_op->op_private & OPpMAYBE_LVSUB) {
        const I32 flags = is_lvalue_sub();
@@ -5793,15 +5818,24 @@ PP_wrapped(pp_kvhslice, 0, 1)
        }
     }
 
-    MEXTEND(SP,items);
-    while (items > 1) {
-        *(MARK+items*2-1) = *(MARK+items);
-        items--;
-    }
-    items = SP-MARK;
-    SP += items;
+    rpp_extend(items);
+    MARK = ORIGMARK;
 
-    while (++MARK <= SP) {
+    /* move hv from old top-of-stack to new top-of-stack */
+    PL_stack_sp[items] = PL_stack_sp[0];
+    PL_stack_sp[0] = NULL;
+
+    /* spread the key SVs out to every second location */
+    SSize_t i = items;
+    while (i > 1) {
+        *(MARK+i*2-1) = *(MARK+i);
+        *(MARK+i*2)   = NULL;
+        *(MARK+i)     = NULL;
+        i--;
+    }
+    PL_stack_sp += items;
+
+    while (++MARK < PL_stack_sp) {
         SV * const keysv = *MARK;
         SV **svp;
         HE *he;
@@ -5813,16 +5847,24 @@ PP_wrapped(pp_kvhslice, 0, 1)
             if (!svp || !*svp || *svp == &PL_sv_undef) {
                 DIE(aTHX_ PL_no_helem_sv, SVfARG(keysv));
             }
-            *MARK = sv_mortalcopy(*MARK);
+            /* replace key SV with a copy */
+            SV *oldsv = *MARK;
+            SV *newsv = newSVsv(oldsv);
+#ifdef PERL_RC_STACK
+            *MARK = newsv;
+            SvREFCNT_dec(oldsv);
+#else
+            *MARK = sv_2mortal(newsv);
+#endif
         }
-        *++MARK = svp && *svp ? *svp : &PL_sv_undef;
+
+        MARK++;
+        rpp_replace_at(MARK, (svp  && *svp) ? *svp : &PL_sv_undef);
     }
-    if (GIMME_V != G_LIST) {
-        MARK = SP - items*2;
-        *++MARK = items > 0 ? *SP : &PL_sv_undef;
-        SP = MARK;
-    }
-    RETURN;
+
+    /* pop HV, then apply void/scalar/list context to stack above mark */
+    rpp_context(ORIGMARK, GIMME_V, 1);
+    return NORMAL;
 }
 
 /* List operators. */
