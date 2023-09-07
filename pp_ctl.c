@@ -42,31 +42,42 @@
 
 #define dopoptosub(plop)	dopoptosub_at(cxstack, (plop))
 
-PP_wrapped(pp_wantarray, 0, 0)
+PP(pp_wantarray)
 {
-    dSP;
     I32 cxix;
     const PERL_CONTEXT *cx;
-    EXTEND(SP, 1);
+    SV *sv;
 
     if (PL_op->op_private & OPpOFFBYONE) {
-        if (!(cx = caller_cx(1,NULL))) RETPUSHUNDEF;
+        if (!(cx = caller_cx(1,NULL))) {
+            sv = &PL_sv_undef;
+            goto ret;
+        }
     }
     else {
       cxix = dopopto_cursub();
-      if (cxix < 0)
-        RETPUSHUNDEF;
+      if (cxix < 0) {
+        sv = &PL_sv_undef;
+        goto ret;
+      }
       cx = &cxstack[cxix];
     }
 
     switch (cx->blk_gimme) {
     case G_LIST:
-        RETPUSHYES;
+        sv = &PL_sv_yes;
+        break;
     case G_SCALAR:
-        RETPUSHNO;
+        sv = &PL_sv_no;
+        break;
     default:
-        RETPUSHUNDEF;
+        sv = &PL_sv_undef;
+        break;
     }
+
+  ret:
+    rpp_xpush_1(sv);
+    return NORMAL;
 }
 
 PP(pp_regcreset)
@@ -2067,14 +2078,17 @@ Perl_die_unwind(pTHX_ SV *msv)
     NOT_REACHED; /* NOTREACHED */
 }
 
-PP_wrapped(pp_xor, 2, 0)
+
+PP(pp_xor)
 {
-    dSP; dPOPTOPssrl;
-    if (SvTRUE_NN(left) != SvTRUE_NN(right))
-        RETSETYES;
-    else
-        RETSETNO;
+    SV *left  = PL_stack_sp[0];
+    SV *right = PL_stack_sp[-1];
+    rpp_replace_2_1(SvTRUE_NN(left) != SvTRUE_NN(right)
+                    ? &PL_sv_yes
+                    : &PL_sv_no);
+    return NORMAL;
 }
+
 
 /*
 
@@ -4451,9 +4465,8 @@ S_require_file(pTHX_ SV *sv)
         SAVETMPS;
         PUSHMARK(PL_stack_sp);
         rpp_xpush_1(name_sv); /* always use the object for method calls */
-        int count = call_sv(PL_hook__require__before, G_SCALAR);
+        call_sv(PL_hook__require__before, G_SCALAR);
         SV *rsv = *PL_stack_sp;
-        assert(count == 1); /* scalar context */
         if (SvOK(rsv) && SvROK(rsv) && SvTYPE(SvRV(rsv)) == SVt_PVCV) {
             /* the RC++ preserves it across the popping and/or FREETMPS
              * below */
@@ -5227,11 +5240,11 @@ PP(pp_require)
    pp_entereval. The hash can be modified by the code
    being eval'ed, so we return a copy instead. */
 
-PP_wrapped(pp_hintseval, 0, 0)
+PP(pp_hintseval)
 {
-    dSP;
-    mXPUSHs(MUTABLE_SV(hv_copy_hints_hv(MUTABLE_HV(cSVOP_sv))));
-    RETURN;
+    rpp_extend(1);
+    rpp_push_1_norc(MUTABLE_SV(hv_copy_hints_hv(MUTABLE_HV(cSVOP_sv))));
+    return NORMAL;
 }
 
 
@@ -5889,7 +5902,6 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other, const bool copied)
           sm_any_sub:
             DEBUG_M(Perl_deb(aTHX_ "    applying rule Any-CodeRef\n"));
             ENTER_with_name("smartmatch_coderef");
-            SAVETMPS;
             PUSHMARK(SP);
             PUSHs(d);
             PUTBACK;
@@ -5897,9 +5909,6 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other, const bool copied)
             SPAGAIN;
             if (c == 0)
                 PUSHs(&PL_sv_no);
-            else if (SvTEMP(TOPs))
-                SvREFCNT_inc_void(TOPs);
-            FREETMPS;
             LEAVE_with_name("smartmatch_coderef");
             RETURN;
         }

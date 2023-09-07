@@ -71,10 +71,9 @@
 #   define perl_init_i18nl10n(a)                init_i18nl10n(a)
 #   define perl_require_pv(a)                   require_pv(a)
 
-/* varargs functions can't be handled with CPP macros. :-(
-   This provides a set of compatibility functions that don't take
-   an extra argument but grab the context pointer using the macro
-   dTHX.
+/* Before C99, macros could not wrap varargs functions. This
+   provides a set of compatibility functions that don't take an
+   extra argument but grab the context pointer using the macro dTHX.
  */
 
 #   if defined(MULTIPLICITY) && !defined(PERL_NO_SHORT_NAMES)
@@ -403,6 +402,7 @@
 # define newHVREF(a)                            Perl_newHVREF(aTHX_ a)
 # define newHVhv(a)                             Perl_newHVhv(aTHX_ a)
 # define newLISTOP(a,b,c,d)                     Perl_newLISTOP(aTHX_ a,b,c,d)
+# define newLISTOPn(a,...)                      Perl_newLISTOPn(aTHX_ a,__VA_ARGS__)
 # define newLOGOP(a,b,c,d)                      Perl_newLOGOP(aTHX_ a,b,c,d)
 # define newLOOPEX(a,b)                         Perl_newLOOPEX(aTHX_ a,b)
 # define newLOOPOP(a,b,c,d)                     Perl_newLOOPOP(aTHX_ a,b,c,d)
@@ -1315,7 +1315,7 @@
 #       endif
 #       if defined(LC_ALL)
 #         define give_perl_locale_control(a,b)  S_give_perl_locale_control(aTHX_ a,b)
-#         define parse_LC_ALL_string(a,b,c,d,e) S_parse_LC_ALL_string(aTHX_ a,b,c,d,e)
+#         define parse_LC_ALL_string(a,b,c,d,e,f) S_parse_LC_ALL_string(aTHX_ a,b,c,d,e,f)
 #       else
 #         define give_perl_locale_control(a,b)  S_give_perl_locale_control(aTHX_ a,b)
 #       endif

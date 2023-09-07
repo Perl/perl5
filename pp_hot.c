@@ -179,11 +179,10 @@ Perl_xs_wrap(pTHX_ XSUBADDR_t xsub, CV *cv)
 /* ----------------------------------------------------------- */
 
 
-PP_wrapped(pp_const, 0, 0)
+PP(pp_const)
 {
-    dSP;
-    XPUSHs(cSVOP_sv);
-    RETURN;
+    rpp_xpush_1(cSVOP_sv);
+    return NORMAL;
 }
 
 PP(pp_nextstate)
@@ -196,16 +195,14 @@ PP(pp_nextstate)
     return NORMAL;
 }
 
-PP_wrapped(pp_gvsv, 0, 0)
+PP(pp_gvsv)
 {
-    dSP;
     assert(SvTYPE(cGVOP_gv) == SVt_PVGV);
-    EXTEND(SP,1);
-    if (UNLIKELY(PL_op->op_private & OPpLVAL_INTRO))
-        PUSHs(save_scalar(cGVOP_gv));
-    else
-        PUSHs(GvSVn(cGVOP_gv));
-    RETURN;
+    rpp_xpush_1(
+            UNLIKELY(PL_op->op_private & OPpLVAL_INTRO)
+                ? save_scalar(cGVOP_gv)
+                : GvSVn(cGVOP_gv));
+    return NORMAL;
 }
 
 
@@ -224,45 +221,37 @@ PP(pp_pushmark)
     return NORMAL;
 }
 
-PP_wrapped(pp_stringify, 1, 0)
+PP(pp_stringify)
 {
-    dSP; dTARGET;
-    SV * const sv = TOPs;
-    SETs(TARG);
-    sv_copypv(TARG, sv);
+    dTARGET;
+    sv_copypv(TARG, *PL_stack_sp);
     SvSETMAGIC(TARG);
-    /* no PUTBACK, SETs doesn't inc/dec SP */
+    rpp_replace_1_1(TARG);
     return NORMAL;
 }
 
-PP_wrapped(pp_gv, 0, 0)
+PP(pp_gv)
 {
-    dSP;
     /* cGVOP_gv might be a real GV or might be an RV to a CV */
     assert(SvTYPE(cGVOP_gv) == SVt_PVGV ||
            (SvTYPE(cGVOP_gv) <= SVt_PVMG && SvROK(cGVOP_gv) && SvTYPE(SvRV(cGVOP_gv)) == SVt_PVCV));
-    XPUSHs(MUTABLE_SV(cGVOP_gv));
-    RETURN;
+    rpp_xpush_1(MUTABLE_SV(cGVOP_gv));
+    return NORMAL;
 }
 
 
 /* also used for: pp_andassign() */
 
-PP_wrapped(pp_and, 2, 0)
+PP(pp_and)
 {
     PERL_ASYNC_CHECK();
     {
-        /* SP is not used to remove a variable that is saved across the
-          sv_2bool_flags call in SvTRUE_NN, if a RISC/CISC or low/high machine
-          register or load/store vs direct mem ops macro is introduced, this
-          should be a define block between direct PL_stack_sp and dSP operations,
-          presently, using PL_stack_sp is bias towards CISC cpus */
         SV * const sv = *PL_stack_sp;
         if (!SvTRUE_NN(sv))
             return NORMAL;
         else {
             if (PL_op->op_type == OP_AND)
-                --PL_stack_sp;
+                rpp_popfree_1();
             return cLOGOP->op_other;
         }
     }
@@ -312,11 +301,10 @@ PP_wrapped(pp_padsv_store,1,0)
 
 /* A mashup of simplified AELEMFAST_LEX + SASSIGN OPs */
 
-PP_wrapped(pp_aelemfastlex_store, 1, 0)
+PP(pp_aelemfastlex_store)
 {
-    dSP;
     OP * const op = PL_op;
-    SV* const val = TOPs; /* RHS value to assign */
+    SV* const val = *PL_stack_sp; /* RHS value to assign */
     AV * const av = MUTABLE_AV(PAD_SV(op->op_targ));
     const I8 key   = (I8)PL_op->op_private;
     SV * targ = NULL;
@@ -356,17 +344,17 @@ PP_wrapped(pp_aelemfastlex_store, 1, 0)
 
     SvSetMagicSV(targ, val);
 
-    SETs(targ);
-    RETURN;
+    rpp_replace_1_1(targ);
+    return NORMAL;
 }
 
-PP_wrapped(pp_sassign, 2, 0)
+PP(pp_sassign)
 {
-    dSP;
     /* sassign keeps its args in the optree traditionally backwards.
        So we pop them differently.
     */
-    SV *left = POPs; SV *right = TOPs;
+    SV *left  = PL_stack_sp[0];
+    SV *right = PL_stack_sp[-1];
 
     if (PL_op->op_private & OPpASSIGN_BACKWARDS) { /* {or,and,dor}assign */
         SV * const temp = left;
@@ -375,6 +363,7 @@ PP_wrapped(pp_sassign, 2, 0)
     assert(TAINTING_get || !TAINT_get);
     if (UNLIKELY(TAINT_get) && !SvTAINTED(right))
         TAINT_NOT;
+
     if (UNLIKELY(PL_op->op_private & OPpASSIGN_CV_TO_GV)) {
         /* *foo =\&bar */
         SV * const cv = SvRV(right);
@@ -401,8 +390,8 @@ PP_wrapped(pp_sassign, 2, 0)
                 SvPCS_IMPORTED_on(gv);
                 SvRV_set(gv, value);
                 SvREFCNT_inc_simple_void(value);
-                SETs(left);
-                RETURN;
+                rpp_replace_2_1(left);
+                return NORMAL;
             }
         }
 
@@ -462,18 +451,16 @@ PP_wrapped(pp_sassign, 2, 0)
             packWARN(WARN_MISC), "Useless assignment to a temporary"
         );
     SvSetMagicSV(left, right);
-    SETs(left);
-    RETURN;
+    rpp_replace_2_1(left);
+    return NORMAL;
 }
 
-PP_wrapped(pp_cond_expr, 1, 0)
+PP(pp_cond_expr)
 {
-    dSP;
-    SV *sv;
-
     PERL_ASYNC_CHECK();
-    sv = POPs;
-    RETURNOP(SvTRUE_NN(sv) ? cLOGOP->op_other : cLOGOP->op_next);
+    bool ok = SvTRUE_NN(*PL_stack_sp);
+    rpp_popfree_1();
+    return (ok ? cLOGOP->op_other : cLOGOP->op_next);
 }
 
 PP(pp_unstack)
@@ -562,15 +549,20 @@ S_do_concat(pTHX_ SV *left, SV *right, SV *targ, U8 targmy)
 }
 
 
-PP_wrapped(pp_concat, 2, 0)
+PP(pp_concat)
 {
-  dSP; dATARGET; tryAMAGICbin_MG(concat_amg, AMGf_assign);
-  {
-    dPOPTOPssrl;
+    SV *targ = (PL_op->op_flags & OPf_STACKED)
+                    ? PL_stack_sp[-1]
+                    : PAD_SV(PL_op->op_targ);
+
+    if (rpp_try_AMAGIC_2(concat_amg, AMGf_assign))
+       return NORMAL;
+
+    SV *right = PL_stack_sp[0];
+    SV *left  = PL_stack_sp[-1];
     S_do_concat(aTHX_ left, right, targ, PL_op->op_private & OPpTARGET_MY);
-    SETs(TARG);
-    RETURN;
-  }
+    rpp_replace_2_1(targ);
+    return NORMAL;
 }
 
 
@@ -1200,6 +1192,7 @@ PP_wrapped(pp_multiconcat, S_multiconcat_argcount(aTHX), 0)
         U32 utf8 = 0;
         SV **svp;
         const char    *cpv  = aux[PERL_MULTICONCAT_IX_PLAIN_PV].pv;
+        SV            *csv  = NULL; /* SV which will hold cpv */
         UNOP_AUX_item *lens = aux + PERL_MULTICONCAT_IX_LENGTHS;
         Size_t arg_count = 0; /* how many args have been processed */
 
@@ -1243,7 +1236,8 @@ PP_wrapped(pp_multiconcat, S_multiconcat_argcount(aTHX), 0)
                    )
             )
             {
-                SV *tmp = newSV_type_mortal(SVt_PV);
+                assert(aux[PERL_MULTICONCAT_IX_PADTMP2].pad_offset);
+                SV *tmp = PAD_SV(aux[PERL_MULTICONCAT_IX_PADTMP2].pad_offset);
                 sv_copypv(tmp, left);
                 SvSETMAGIC(tmp);
                 left = tmp;
@@ -1265,7 +1259,36 @@ PP_wrapped(pp_multiconcat, S_multiconcat_argcount(aTHX), 0)
             else if (len < 0)
                 continue; /* no const in this position */
             else {
-                right = newSVpvn_flags(cpv, len, (utf8 | SVs_TEMP));
+                /* Use one of our PADTMPs to fake up the SV which would
+                 * have been returned by an OP_CONST.  Try to reuse it if
+                 * possible. If the refcount has gone up, something like
+                 * overload code has taken a reference to it, so abandon
+                 * it */
+                if (!csv || SvREFCNT(csv) > 1 || SvLEN(csv) != 0) {
+                    if (csv)
+                        csv = newSV_type_mortal(SVt_PV);
+                    else {
+                        assert(aux[PERL_MULTICONCAT_IX_PADTMP1].pad_offset);
+                        csv = PAD_SV(
+                                aux[PERL_MULTICONCAT_IX_PADTMP1].pad_offset);
+                        SvUPGRADE(csv, SVt_PV);
+                    }
+
+                    if (utf8)
+                        SvUTF8_on(csv);
+                    SvREADONLY_on(csv);
+                    SvPOK_on(csv);
+                }
+                /* use the const string buffer directly with the
+                 * SvLEN==0 trick */
+
+                /* cast away constness because we think we know it's safe
+                 * (SvREADONLY) */
+                SvPV_set(csv, (char *)cpv);
+                SvLEN_set(csv, 0);
+                SvCUR_set(csv, len);
+
+                right = csv;
                 cpv += len;
             }
 
@@ -1277,10 +1300,10 @@ PP_wrapped(pp_multiconcat, S_multiconcat_argcount(aTHX), 0)
             }
 
             if (arg_count == 2 && i < n) {
-                /* for the first concat, create a mortal acting like the
-                 * padtmp from OP_CONST. In later iterations this will
+                /* for the first concat, use one of the PADTMPs to emulate
+                 * the PADTMP from OP_CONST. In later iterations this will
                  * be appended to */
-                nexttarg = sv_newmortal();
+                nexttarg = PAD_SV(aux[PERL_MULTICONCAT_IX_PADTMP0].pad_offset);
                 nextappend = FALSE;
             }
             else {
@@ -1375,60 +1398,58 @@ PP_wrapped(pp_multiconcat, S_multiconcat_argcount(aTHX), 0)
 STATIC OP*
 S_pushav(pTHX_ AV* const av)
 {
-    dSP;
     const SSize_t maxarg = AvFILL(av) + 1;
-    EXTEND(SP, maxarg);
+    rpp_extend(maxarg);
     if (UNLIKELY(SvRMAGICAL(av))) {
         PADOFFSET i;
         for (i=0; i < (PADOFFSET)maxarg; i++) {
             SV ** const svp = av_fetch(av, i, FALSE);
-            SP[i+1] = LIKELY(svp)
+            rpp_push_1(LIKELY(svp)
                        ? *svp
                        : UNLIKELY(PL_op->op_flags & OPf_MOD)
                           ? av_nonelem(av,i)
-                          : &PL_sv_undef;
+                          : &PL_sv_undef
+            );
         }
     }
     else {
         PADOFFSET i;
         for (i=0; i < (PADOFFSET)maxarg; i++) {
             SV *sv = AvARRAY(av)[i];
-            SP[i+1] = LIKELY(sv)
+            rpp_push_1(LIKELY(sv)
                        ? sv
                        : UNLIKELY(PL_op->op_flags & OPf_MOD)
                           ? av_nonelem(av,i)
-                          : &PL_sv_undef;
+                          : &PL_sv_undef
+            );
         }
     }
-    SP += maxarg;
-    PUTBACK;
     return NORMAL;
 }
 
 
 /* ($lex1,@lex2,...)   or my ($lex1,@lex2,...)  */
 
-PP_wrapped(pp_padrange, 0, 0)
+PP(pp_padrange)
 {
-    dSP;
     PADOFFSET base = PL_op->op_targ;
     int count = (int)(PL_op->op_private) & OPpPADRANGE_COUNTMASK;
     if (PL_op->op_flags & OPf_SPECIAL) {
         /* fake the RHS of my ($x,$y,..) = @_ */
-        PUSHMARK(SP);
+        PUSHMARK(PL_stack_sp);
         (void)S_pushav(aTHX_ GvAVn(PL_defgv));
-        SPAGAIN;
     }
 
     /* note, this is only skipped for compile-time-known void cxt */
     if ((PL_op->op_flags & OPf_WANT) != OPf_WANT_VOID) {
         int i;
 
-        EXTEND(SP, count);
-        PUSHMARK(SP);
+        rpp_extend(count);
+        PUSHMARK(PL_stack_sp);
         for (i = 0; i <count; i++)
-            *++SP = PAD_SV(base+i);
+            rpp_push_1(PAD_SV(base+i));
     }
+
     if (PL_op->op_private & OPpLVAL_INTRO) {
         SV **svp = &(PAD_SVl(base));
         const UV payload = (UV)(
@@ -1449,14 +1470,12 @@ PP_wrapped(pp_padrange, 0, 0)
         for (i = 0; i <count; i++)
             SvPADSTALE_off(*svp++); /* mark lexical as active */
     }
-    RETURN;
+    return NORMAL;
 }
 
 
-PP_wrapped(pp_padsv, 0, 0)
+PP(pp_padsv)
 {
-    dSP;
-    EXTEND(SP, 1);
     {
         OP * const op = PL_op;
         /* access PL_curpad once */
@@ -1464,19 +1483,19 @@ PP_wrapped(pp_padsv, 0, 0)
         {
             dTARG;
             TARG = *padentry;
-            PUSHs(TARG);
-            PUTBACK; /* no pop/push after this, TOPs ok */
+            rpp_xpush_1(TARG);
         }
         if (op->op_flags & OPf_MOD) {
             if (op->op_private & OPpLVAL_INTRO)
                 if (!(op->op_private & OPpPAD_STATE))
                     save_clearsv(padentry);
             if (op->op_private & OPpDEREF) {
-                /* TOPs is equivalent to TARG here.  Using TOPs (SP) rather
+                /* *sp is equivalent to TARG here.  Using *sp rather
                    than TARG reduces the scope of TARG, so it does not
                    span the call to save_clearsv, resulting in smaller
                    machine code. */
-                TOPs = vivify_ref(TOPs, op->op_private & OPpDEREF);
+                rpp_replace_1_1(
+                    vivify_ref(*PL_stack_sp, op->op_private & OPpDEREF));
             }
         }
         return op->op_next;
@@ -1534,7 +1553,7 @@ PP_wrapped(pp_eq, 2, 0)
 
 /* also used for: pp_i_preinc() */
 
-PP_wrapped(pp_preinc, 1, 0)
+PP(pp_preinc)
 {
     SV *sv = *PL_stack_sp;
 
@@ -1555,7 +1574,7 @@ PP_wrapped(pp_preinc, 1, 0)
 
 /* also used for: pp_i_predec() */
 
-PP_wrapped(pp_predec, 1, 0)
+PP(pp_predec)
 {
     SV *sv = *PL_stack_sp;
 
@@ -1576,28 +1595,26 @@ PP_wrapped(pp_predec, 1, 0)
 
 /* also used for: pp_orassign() */
 
-PP_wrapped(pp_or, 1, 0)
+PP(pp_or)
 {
-    dSP;
     SV *sv;
     PERL_ASYNC_CHECK();
-    sv = TOPs;
+    sv = *PL_stack_sp;
     if (SvTRUE_NN(sv))
-        RETURN;
+        return NORMAL;
     else {
         if (PL_op->op_type == OP_OR)
-            --SP;
-        RETURNOP(cLOGOP->op_other);
+            rpp_popfree_1();
+        return cLOGOP->op_other;
     }
 }
 
 
 /* also used for: pp_dor() pp_dorassign() */
 
-PP_wrapped(pp_defined, 1, 0)
+PP(pp_defined)
 {
-    dSP;
-    SV* sv = TOPs;
+    SV* sv = *PL_stack_sp;
     bool defined = FALSE;
     const int op_type = PL_op->op_type;
     const bool is_dor = (op_type == OP_DOR || op_type == OP_DORASSIGN);
@@ -1606,14 +1623,16 @@ PP_wrapped(pp_defined, 1, 0)
         PERL_ASYNC_CHECK();
         if (UNLIKELY(!sv || !SvANY(sv))) {
             if (op_type == OP_DOR)
-                --SP;
-            RETURNOP(cLOGOP->op_other);
+                rpp_popfree_1();
+            return cLOGOP->op_other;
         }
     }
     else {
         /* OP_DEFINED */
-        if (UNLIKELY(!sv || !SvANY(sv)))
-            RETSETNO;
+        if (UNLIKELY(!sv || !SvANY(sv))) {
+            rpp_replace_1_1(&PL_sv_no);
+            return NORMAL;
+        }
     }
 
     /* Historically what followed was a switch on SvTYPE(sv), handling SVt_PVAV,
@@ -1637,15 +1656,14 @@ PP_wrapped(pp_defined, 1, 0)
 
     if (is_dor) {
         if(defined) 
-            RETURN; 
+            return NORMAL;
         if(op_type == OP_DOR)
-            --SP;
-        RETURNOP(cLOGOP->op_other);
+            rpp_popfree_1();
+        return cLOGOP->op_other;
     }
     /* assuming OP_DEFINED */
-    if(defined) 
-        RETSETYES;
-    RETSETNO;
+    rpp_replace_1_1(defined ? &PL_sv_yes : &PL_sv_no);
+    return NORMAL;
 }
 
 
@@ -1874,9 +1892,8 @@ PP(pp_add)
 
 /* also used for: pp_aelemfast_lex() */
 
-PP_wrapped(pp_aelemfast, 0, 0)
+PP(pp_aelemfast)
 {
-    dSP;
     AV * const av = PL_op->op_type == OP_AELEMFAST_LEX
         ? MUTABLE_AV(PAD_SV(PL_op->op_targ)) : GvAVn(cGVOP_gv);
     const U32 lval = PL_op->op_flags & OPf_MOD;
@@ -1886,17 +1903,14 @@ PP_wrapped(pp_aelemfast, 0, 0)
 
     assert(SvTYPE(av) == SVt_PVAV);
 
-    EXTEND(SP, 1);
-
     /* inlined av_fetch() for simple cases ... */
     if (!SvRMAGICAL(av) && key >= 0 && key <= AvFILLp(av)) {
         sv = AvARRAY(av)[key];
-        if (sv) {
-            PUSHs(sv);
-            RETURN;
-        } else if (!lval) {
-            PUSHs(&PL_sv_undef);
-            RETURN;
+        if (sv)
+            goto ret;
+        if (!lval) {
+            sv = &PL_sv_undef;
+            goto ret;
         }
     }
 
@@ -1909,8 +1923,10 @@ PP_wrapped(pp_aelemfast, 0, 0)
 
     if (!lval && SvRMAGICAL(av) && SvGMAGICAL(sv)) /* see note in pp_helem() */
         mg_get(sv);
-    PUSHs(sv);
-    RETURN;
+
+  ret:
+    rpp_xpush_1(sv);
+    return NORMAL;
 }
 
 PP_wrapped(pp_join, 0, 1)
@@ -2023,22 +2039,41 @@ PP_wrapped(pp_print, 0, 1)
 
 
 /* do the common parts of pp_padhv() and pp_rv2hv()
- * It assumes the caller has done EXTEND(SP, 1) or equivalent.
+ * It assumes the caller has done rpp_extend(1) or equivalent.
  * 'is_keys' indicates the OPpPADHV_ISKEYS/OPpRV2HV_ISKEYS flag is set.
  * 'has_targ' indicates that the op has a target - this should
  * be a compile-time constant so that the code can constant-folded as
- * appropriate
+ * appropriate. has_targ also implies that the caller has left an
+ * arg on the stack which needs freeing.
  * */
 
 PERL_STATIC_INLINE OP*
 S_padhv_rv2hv_common(pTHX_ HV *hv, U8 gimme, bool is_keys, bool has_targ)
 {
-    dSP;
-
     assert(PL_op->op_type == OP_PADHV || PL_op->op_type == OP_RV2HV);
 
     if (gimme == G_LIST) {
-        hv_pushkv(hv, 3);
+        /* push all (key,value) pairs onto stack */
+        if (has_targ) { /* i.e. if has arg still on stack */
+#ifdef PERL_RC_STACK
+            SSize_t sp_base = PL_stack_sp - PL_stack_base;
+            hv_pushkv(hv, 3);
+            /* Now safe to free the original arg on the stack and shuffle
+             * down one place anything pushed on top of it */
+            SSize_t nitems = PL_stack_sp - (PL_stack_base + sp_base);
+            SV *old_sv = PL_stack_sp[-nitems];
+            if (nitems)
+                Move(PL_stack_sp - nitems + 1,
+                     PL_stack_sp - nitems,    nitems, SV*);
+            PL_stack_sp--;
+            SvREFCNT_dec_NN(old_sv);
+#else
+            rpp_popfree_1();
+            hv_pushkv(hv, 3);
+#endif
+        }
+        else
+            hv_pushkv(hv, 3);
         return NORMAL;
     }
 
@@ -2046,8 +2081,11 @@ S_padhv_rv2hv_common(pTHX_ HV *hv, U8 gimme, bool is_keys, bool has_targ)
         /* 'keys %h' masquerading as '%h': reset iterator */
         (void)hv_iterinit(hv);
 
-    if (gimme == G_VOID)
+    if (gimme == G_VOID) {
+        if (has_targ)
+            rpp_popfree_1();
         return NORMAL;
+    }
 
     bool is_bool = (     PL_op->op_private & OPpTRUEBOOL
                    || (  PL_op->op_private & OPpMAYBE_TRUEBOOL
@@ -2064,10 +2102,16 @@ S_padhv_rv2hv_common(pTHX_ HV *hv, U8 gimme, bool is_keys, bool has_targ)
             i = 0;
             while (hv_iternext(hv))
                 i++;
+            /* hv finished with. Safe to free arg now */
+            if (has_targ)
+                rpp_popfree_1();
             goto push_i;
         }
         else {
             sv = magic_scalarpack(hv, is_tied_mg);
+            /* hv finished with. Safe to free arg now */
+            if (has_targ)
+                rpp_popfree_1();
             goto push_sv;
         }
     }
@@ -2086,16 +2130,22 @@ S_padhv_rv2hv_common(pTHX_ HV *hv, U8 gimme, bool is_keys, bool has_targ)
         }
 #endif
         i = HvUSEDKEYS(hv);
+
+        /* hv finished with. Safe to free arg now */
+        if (has_targ)
+            rpp_popfree_1();
+
         if (is_bool) {
             sv = i ? &PL_sv_yes : &PL_sv_zero;
           push_sv:
-            PUSHs(sv);
+            rpp_push_1(sv);
         }
         else {
           push_i:
             if (has_targ) {
                 dTARGET;
-                PUSHi(i);
+                TARGi(i,1);
+                rpp_push_1(targ);
             }
             else
             if (is_keys) {
@@ -2108,41 +2158,40 @@ S_padhv_rv2hv_common(pTHX_ HV *hv, U8 gimme, bool is_keys, bool has_targ)
                 k = PL_op->op_sibparent;
                 assert(k->op_type == OP_KEYS);
                 TARG = PAD_SV(k->op_targ);
-                PUSHi(i);
+                TARGi(i,1);
+                rpp_push_1(targ);
             }
             else
-                mPUSHi(i);
+                rpp_push_1_norc(newSViv(i));
         }
     }
 
-    PUTBACK;
     return NORMAL;
 }
 
 
 /* This is also called directly by pp_lvavref.  */
-PP_wrapped(pp_padav, 0, 0)
+PP(pp_padav)
 {
-    dSP; dTARGET;
+    dTARGET;
     U8 gimme;
+
     assert(SvTYPE(TARG) == SVt_PVAV);
     if (UNLIKELY( PL_op->op_private & OPpLVAL_INTRO ))
         if (LIKELY( !(PL_op->op_private & OPpPAD_STATE) ))
             SAVECLEARSV(PAD_SVl(PL_op->op_targ));
-    EXTEND(SP, 1);
 
-    if (PL_op->op_flags & OPf_REF) {
-        PUSHs(TARG);
-        RETURN;
-    }
-    else if (PL_op->op_private & OPpMAYBE_LVSUB) {
+
+    if (PL_op->op_flags & OPf_REF)
+        goto ret;
+
+    if (PL_op->op_private & OPpMAYBE_LVSUB) {
         const I32 flags = is_lvalue_sub();
         if (flags && !(flags & OPpENTERSUB_INARGS)) {
             if (GIMME_V == G_SCALAR)
                 /* diag_listed_as: Can't return %s to lvalue scalar context */
                 Perl_croak(aTHX_ "Can't return array to lvalue scalar context");
-            PUSHs(TARG);
-            RETURN;
+            goto ret;
        }
     }
 
@@ -2150,22 +2199,31 @@ PP_wrapped(pp_padav, 0, 0)
     if (gimme == G_LIST)
         return S_pushav(aTHX_ (AV*)TARG);
 
-    if (gimme == G_SCALAR) {
+    if (gimme == G_VOID)
+        return NORMAL;
+
+    {
         const SSize_t maxarg = AvFILL(MUTABLE_AV(TARG)) + 1;
         if (!maxarg)
-            PUSHs(&PL_sv_zero);
+            targ = &PL_sv_zero;
         else if (PL_op->op_private & OPpTRUEBOOL)
-            PUSHs(&PL_sv_yes);
-        else
-            mPUSHi(maxarg);
+            targ = &PL_sv_yes;
+        else {
+            rpp_extend(1);
+            rpp_push_1_norc(newSViv(maxarg));
+            return NORMAL;
+        }
     }
-    RETURN;
+
+  ret:
+    rpp_xpush_1(targ);
+    return NORMAL;
 }
 
 
-PP_wrapped(pp_padhv, 0, 0)
+PP(pp_padhv)
 {
-    dSP; dTARGET;
+    dTARGET;
     U8 gimme;
 
     assert(SvTYPE(TARG) == SVt_PVHV);
@@ -2173,11 +2231,11 @@ PP_wrapped(pp_padhv, 0, 0)
         if (LIKELY( !(PL_op->op_private & OPpPAD_STATE) ))
             SAVECLEARSV(PAD_SVl(PL_op->op_targ));
 
-    EXTEND(SP, 1);
+    rpp_extend(1);
 
     if (PL_op->op_flags & OPf_REF) {
-        PUSHs(TARG);
-        RETURN;
+        rpp_push_1(TARG);
+        return NORMAL;
     }
     else if (PL_op->op_private & OPpMAYBE_LVSUB) {
         const I32 flags = is_lvalue_sub();
@@ -2185,8 +2243,8 @@ PP_wrapped(pp_padhv, 0, 0)
             if (GIMME_V == G_SCALAR)
                 /* diag_listed_as: Can't return %s to lvalue scalar context */
                 Perl_croak(aTHX_ "Can't return hash to lvalue scalar context");
-            PUSHs(TARG);
-            RETURN;
+            rpp_push_1(TARG);
+            return NORMAL;
         }
     }
 
@@ -2201,9 +2259,9 @@ PP_wrapped(pp_padhv, 0, 0)
 /* also used for: pp_rv2hv() */
 /* also called directly by pp_lvavref */
 
-PP_wrapped(pp_rv2av, 1, 0)
+PP(pp_rv2av)
 {
-    dSP; dTOPss;
+    SV *sv = *PL_stack_sp;
     const U8 gimme = GIMME_V;
     static const char an_array[] = "an ARRAY";
     static const char a_hash[] = "a HASH";
@@ -2229,9 +2287,9 @@ PP_wrapped(pp_rv2av, 1, 0)
         
             if (!isGV_with_GP(sv)) {
                 gv = Perl_softref2xv(aTHX_ sv, is_pp_rv2av ? an_array : a_hash,
-                                     type, &sp);
+                                     type);
                 if (!gv)
-                    RETURN;
+                    return NORMAL;
             }
             else {
                 gv = MUTABLE_GV(sv);
@@ -2241,16 +2299,16 @@ PP_wrapped(pp_rv2av, 1, 0)
                 sv = is_pp_rv2av ? MUTABLE_SV(save_ary(gv)) : MUTABLE_SV(save_hash(gv));
     }
     if (PL_op->op_flags & OPf_REF) {
-                SETs(sv);
-                RETURN;
+        rpp_replace_1_1(sv);
+        return NORMAL;
     }
     else if (UNLIKELY(PL_op->op_private & OPpMAYBE_LVSUB)) {
               const I32 flags = is_lvalue_sub();
               if (flags && !(flags & OPpENTERSUB_INARGS)) {
                 if (gimme != G_LIST)
                     goto croak_cant_return;
-                SETs(sv);
-                RETURN;
+                rpp_replace_1_1(sv);
+                return NORMAL;
               }
     }
 
@@ -2258,34 +2316,49 @@ PP_wrapped(pp_rv2av, 1, 0)
         AV *const av = MUTABLE_AV(sv);
 
         if (gimme == G_LIST) {
-            SP--;
-            PUTBACK;
+#ifdef PERL_RC_STACK
+            SSize_t sp_base = PL_stack_sp - PL_stack_base;
+            (void)S_pushav(aTHX_ av);
+            /* Now safe to free the original arg on the stack and shuffle
+             * down one place anything pushed on top of it */
+            SSize_t nitems = PL_stack_sp - (PL_stack_base + sp_base);
+            SV *old_sv = PL_stack_sp[-nitems];
+            if (nitems)
+                Move(PL_stack_sp - nitems + 1,
+                     PL_stack_sp - nitems,    nitems, SV*);
+            PL_stack_sp--;
+            SvREFCNT_dec_NN(old_sv);
+            return NORMAL;
+#else
+            rpp_popfree_1();
             return S_pushav(aTHX_ av);
+#endif
         }
 
         if (gimme == G_SCALAR) {
             const SSize_t maxarg = AvFILL(av) + 1;
             if (PL_op->op_private & OPpTRUEBOOL)
-                SETs(maxarg ? &PL_sv_yes : &PL_sv_zero);
+                rpp_replace_1_1(maxarg ? &PL_sv_yes : &PL_sv_zero);
             else {
                 dTARGET;
-                SETi(maxarg);
+                TARGi(maxarg, 1);
+                rpp_replace_1_1(targ);
             }
         }
     }
     else {
-        SP--; PUTBACK;
+        /* this static function is responsible for popping sv off stack */
         return S_padhv_rv2hv_common(aTHX_ (HV*)sv, gimme,
                         cBOOL(PL_op->op_private & OPpRV2HV_ISKEYS),
                         1 /* has_targ*/);
     }
-    RETURN;
+    return NORMAL;
 
  croak_cant_return:
     Perl_croak(aTHX_ "Can't return %s to lvalue scalar context",
                is_pp_rv2av ? "array" : "hash");
-    RETURN;
 }
+
 
 STATIC void
 S_do_oddball(pTHX_ SV **oddkey, SV **firstkey)
@@ -3121,9 +3194,8 @@ PP_wrapped(pp_aassign, 0, 2)
     RETURN;
 }
 
-PP_wrapped(pp_qr, 0, 0)
+PP(pp_qr)
 {
-    dSP;
     PMOP * const pm = cPMOP;
     REGEXP * rx = PM_GETRE(pm);
     regexp *prog = ReANY(rx);
@@ -3158,8 +3230,8 @@ PP_wrapped(pp_qr, 0, 0)
         SvTAINTED_on(rv);
         SvTAINTED_on(SvRV(rv));
     }
-    XPUSHs(rv);
-    RETURN;
+    rpp_xpush_1(rv);
+    return NORMAL;
 }
 
 STATIC bool
@@ -3686,21 +3758,23 @@ Perl_do_readline(pTHX)
     }
 }
 
-PP_wrapped(pp_helem, 2, 0)
+PP(pp_helem)
 {
-    dSP;
     HE* he;
     SV **svp;
-    SV * const keysv = POPs;
-    HV * const hv = MUTABLE_HV(POPs);
+    SV * const keysv = PL_stack_sp[0];
+    HV * const hv = MUTABLE_HV(PL_stack_sp[-1]);
     const U32 lval = PL_op->op_flags & OPf_MOD || LVRET;
     const U32 defer = PL_op->op_private & OPpLVAL_DEFER;
     SV *sv;
     const bool localizing = PL_op->op_private & OPpLVAL_INTRO;
     bool preeminent = TRUE;
+    SV *retsv;
 
-    if (SvTYPE(hv) != SVt_PVHV)
-        RETPUSHUNDEF;
+    if (SvTYPE(hv) != SVt_PVHV) {
+        retsv = &PL_sv_undef;
+        goto ret;
+    }
 
     if (localizing) {
         MAGIC *mg;
@@ -3728,9 +3802,10 @@ PP_wrapped(pp_helem, 2, 0)
             SvREFCNT_dec_NN(key2);	/* sv_magic() increments refcount */
             LvTARG(lv) = SvREFCNT_inc_simple_NN(hv);
             LvTARGLEN(lv) = 1;
-            PUSHs(lv);
-            RETURN;
+            retsv = lv;
+            goto ret;
         }
+
         if (localizing) {
             if (HvNAME_get(hv) && isGV_or_RVCV(*svp))
                 save_gp(MUTABLE_GV(*svp), !(PL_op->op_flags & OPf_SPECIAL));
@@ -3741,8 +3816,8 @@ PP_wrapped(pp_helem, 2, 0)
                 SAVEHDELETE(hv, keysv);
         }
         else if (PL_op->op_private & OPpDEREF) {
-            PUSHs(vivify_ref(*svp, PL_op->op_private & OPpDEREF));
-            RETURN;
+            retsv = vivify_ref(*svp, PL_op->op_private & OPpDEREF);
+            goto ret;;
         }
     }
     sv = (svp && *svp ? *svp : &PL_sv_undef);
@@ -3760,8 +3835,11 @@ PP_wrapped(pp_helem, 2, 0)
      * being called too many times). */
     if (!lval && SvRMAGICAL(hv) && SvGMAGICAL(sv))
         mg_get(sv);
-    PUSHs(sv);
-    RETURN;
+    retsv = sv;
+
+  ret:
+    rpp_replace_2_1(retsv);
+    return NORMAL;
 }
 
 
@@ -4225,7 +4303,7 @@ PP_wrapped(pp_multideref, S_multideref_argcount(aTHX), 0)
 }
 
 
-PP_wrapped(pp_iter, 0, 0)
+PP(pp_iter)
 {
     PERL_CONTEXT *cx = CX_CUR();
     SV **itersvp = CxITERVAR(cx);
@@ -5900,25 +5978,27 @@ Perl_croak_caller(const char *pat, ...)
 }
 
 
-PP_wrapped(pp_aelem, 2, 0)
+PP(pp_aelem)
 {
-    dSP;
     SV** svp;
-    SV* const elemsv = POPs;
+    SV* const elemsv =  PL_stack_sp[0];
     IV elem = SvIV(elemsv);
-    AV *const av = MUTABLE_AV(POPs);
+    AV *const av = MUTABLE_AV(PL_stack_sp[-1]);
     const U32 lval = PL_op->op_flags & OPf_MOD || LVRET;
     const U32 defer = PL_op->op_private & OPpLVAL_DEFER;
     const bool localizing = PL_op->op_private & OPpLVAL_INTRO;
     bool preeminent = TRUE;
     SV *sv;
+    SV *retsv;
 
     if (UNLIKELY(SvROK(elemsv) && !SvGAMAGIC(elemsv) && ckWARN(WARN_MISC)))
         Perl_warner(aTHX_ packWARN(WARN_MISC),
                     "Use of reference \"%" SVf "\" as array index",
                     SVfARG(elemsv));
-    if (UNLIKELY(SvTYPE(av) != SVt_PVAV))
-        RETPUSHUNDEF;
+    if (UNLIKELY(SvTYPE(av) != SVt_PVAV)) {
+        retsv = &PL_sv_undef;
+        goto ret;
+    }
 
     if (UNLIKELY(localizing)) {
         MAGIC *mg;
@@ -5955,13 +6035,13 @@ PP_wrapped(pp_aelem, 2, 0)
                 elem = len + elem;
             if (elem >= 0 && elem <= len)
                 /* Falls within the array.  */
-                PUSHs(av_nonelem(av,elem));
+                retsv = av_nonelem(av, elem);
             else
                 /* Falls outside the array.  If it is negative,
                    magic_setdefelem will use the index for error reporting.
                  */
-                mPUSHs(newSVavdefelem(av, elem, 1));
-            RETURN;
+                retsv = sv_2mortal(newSVavdefelem(av, elem, 1));
+            goto ret;
         }
         if (UNLIKELY(localizing)) {
             if (preeminent)
@@ -5970,15 +6050,18 @@ PP_wrapped(pp_aelem, 2, 0)
                 SAVEADELETE(av, elem);
         }
         else if (PL_op->op_private & OPpDEREF) {
-            PUSHs(vivify_ref(*svp, PL_op->op_private & OPpDEREF));
-            RETURN;
+            retsv = vivify_ref(*svp, PL_op->op_private & OPpDEREF);
+            goto ret;
         }
     }
     sv = (svp ? *svp : &PL_sv_undef);
     if (!lval && SvRMAGICAL(av) && SvGMAGICAL(sv)) /* see note in pp_helem() */
         mg_get(sv);
-    PUSHs(sv);
-    RETURN;
+    retsv = sv;
+
+  ret:
+    rpp_replace_2_1(retsv);
+    return NORMAL;
 }
 
 SV*
@@ -6126,18 +6209,17 @@ S_opmethod_stash(pTHX_ SV* meth)
     return SvSTASH(ob);
 }
 
-PP_wrapped(pp_method, 1, 0)
+PP(pp_method)
 {
-    dSP;
     GV* gv;
     HV* stash;
-    SV* const meth = TOPs;
+    SV* const meth = *PL_stack_sp;
 
     if (SvROK(meth)) {
         SV* const rmeth = SvRV(meth);
         if (SvTYPE(rmeth) == SVt_PVCV) {
-            SETs(rmeth);
-            RETURN;
+            rpp_replace_1_1(rmeth);
+            return NORMAL;
         }
     }
 
@@ -6146,8 +6228,8 @@ PP_wrapped(pp_method, 1, 0)
     gv = gv_fetchmethod_sv_flags(stash, meth, GV_AUTOLOAD|GV_CROAK);
     assert(gv);
 
-    SETs(isGV(gv) ? MUTABLE_SV(GvCV(gv)) : MUTABLE_SV(gv));
-    RETURN;
+    rpp_replace_1_1(isGV(gv) ? MUTABLE_SV(GvCV(gv)) : MUTABLE_SV(gv));
+    return NORMAL;
 }
 
 #define METHOD_CHECK_CACHE(stash,cache,meth) 				\
@@ -6157,14 +6239,13 @@ PP_wrapped(pp_method, 1, 0)
         if (isGV(gv) && GvCV(gv) && (!GvCVGEN(gv) || GvCVGEN(gv)	\
              == (PL_sub_generation + HvMROMETA(stash)->cache_gen)))	\
         {								\
-            XPUSHs(MUTABLE_SV(GvCV(gv)));				\
-            RETURN;							\
+            rpp_xpush_1(MUTABLE_SV(GvCV(gv)));				\
+            return NORMAL;						\
         }								\
     }									\
 
-PP_wrapped(pp_method_named, 0, 0)
+PP(pp_method_named)
 {
-    dSP;
     GV* gv;
     SV* const meth = cMETHOP_meth;
     HV* const stash = opmethod_stash(meth);
@@ -6176,13 +6257,12 @@ PP_wrapped(pp_method_named, 0, 0)
     gv = gv_fetchmethod_sv_flags(stash, meth, GV_AUTOLOAD|GV_CROAK);
     assert(gv);
 
-    XPUSHs(isGV(gv) ? MUTABLE_SV(GvCV(gv)) : MUTABLE_SV(gv));
-    RETURN;
+    rpp_xpush_1(isGV(gv) ? MUTABLE_SV(GvCV(gv)) : MUTABLE_SV(gv));
+    return NORMAL;
 }
 
-PP_wrapped(pp_method_super, 0, 0)
+PP(pp_method_super)
 {
-    dSP;
     GV* gv;
     HV* cache;
     SV* const meth = cMETHOP_meth;
@@ -6199,13 +6279,12 @@ PP_wrapped(pp_method_super, 0, 0)
     gv = gv_fetchmethod_sv_flags(stash, meth, GV_AUTOLOAD|GV_CROAK|GV_SUPER);
     assert(gv);
 
-    XPUSHs(isGV(gv) ? MUTABLE_SV(GvCV(gv)) : MUTABLE_SV(gv));
-    RETURN;
+    rpp_xpush_1(isGV(gv) ? MUTABLE_SV(GvCV(gv)) : MUTABLE_SV(gv));
+    return NORMAL;
 }
 
-PP_wrapped(pp_method_redir, 0, 0)
+PP(pp_method_redir)
 {
-    dSP;
     GV* gv;
     SV* const meth = cMETHOP_meth;
     HV* stash = gv_stashsv(cMETHOP_rclass, 0);
@@ -6217,13 +6296,12 @@ PP_wrapped(pp_method_redir, 0, 0)
     gv = gv_fetchmethod_sv_flags(stash, meth, GV_AUTOLOAD|GV_CROAK);
     assert(gv);
 
-    XPUSHs(isGV(gv) ? MUTABLE_SV(GvCV(gv)) : MUTABLE_SV(gv));
-    RETURN;
+    rpp_xpush_1(isGV(gv) ? MUTABLE_SV(GvCV(gv)) : MUTABLE_SV(gv));
+    return NORMAL;
 }
 
-PP_wrapped(pp_method_redir_super, 0, 0)
+PP(pp_method_redir_super)
 {
-    dSP;
     GV* gv;
     HV* cache;
     SV* const meth = cMETHOP_meth;
@@ -6238,8 +6316,8 @@ PP_wrapped(pp_method_redir_super, 0, 0)
     gv = gv_fetchmethod_sv_flags(stash, meth, GV_AUTOLOAD|GV_CROAK|GV_SUPER);
     assert(gv);
 
-    XPUSHs(isGV(gv) ? MUTABLE_SV(GvCV(gv)) : MUTABLE_SV(gv));
-    RETURN;
+    rpp_xpush_1(isGV(gv) ? MUTABLE_SV(GvCV(gv)) : MUTABLE_SV(gv));
+    return NORMAL;
 }
 
 /*

@@ -2018,7 +2018,7 @@ EXTCONST U32 PL_opargs[] INIT({
 	0x00224200,	/* lslice */
 	0x00002405,	/* anonlist */
 	0x00002405,	/* anonhash */
-	0x0000241c,	/* emptyavhv */
+	0x0000001c,	/* emptyavhv */
 	0x02993401,	/* splice */
 	0x0002341d,	/* push */
 	0x0000bb04,	/* pop */

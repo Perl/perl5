@@ -1,0 +1,381 @@
+=encoding utf8
+
+=head1 NAME
+
+perl5392delta - what is new for perl v5.39.2
+
+=head1 DESCRIPTION
+
+This document describes differences between the 5.39.1 release and the 5.39.2
+release.
+
+If you are upgrading from an earlier release such as 5.39.0, first read
+L<perl5391delta>, which describes differences between 5.39.0 and 5.39.1.
+
+=head1 Core Enhancements
+
+=head2 New C<__CLASS__> Keyword
+
+When using the new C<class> feature, code inside a method, C<ADJUST> block or
+field initializer expression is now permitted to use the new C<__CLASS__>
+keyword.  This yields a class name, similar to C<__PACKAGE__>, but whereas that
+gives the compile-time package that the code appears in, the C<__CLASS__>
+keyword is aware of the actual run-time class that the object instance is a
+member of.  This makes it useful for method dispatch on that class, especially
+during constructors, where access to C<$self> is not permitted.
+
+For more information, see L<perlfunc/__CLASS__>.
+
+=head1 Modules and Pragmata
+
+=head2 Updated Modules and Pragmata
+
+=over 4
+
+=item *
+
+L<Compress::Raw::Bzip2> has been upgraded from version 2.205 to 2.206.
+
+=item *
+
+L<Compress::Raw::Zlib> has been upgraded from version 2.205 to 2.206.
+
+=item *
+
+L<Devel::Peek> has been upgraded from version 1.33 to 1.34.
+
+=item *
+
+L<ExtUtils::Miniperl> has been upgraded from version 1.13 to 1.14.
+
+=item *
+
+L<feature> has been upgraded from version 1.83 to 1.84.
+
+=item *
+
+L<File::Spec> has been upgraded from version 3.89 to 3.90.
+
+=item *
+
+L<HTTP::Tiny> has been upgraded from version 0.086 to 0.088.
+
+=item *
+
+L<IO::Compress> has been upgraded from version 2.205 to 2.206.
+
+=item *
+
+L<IO::Socket::IP> has been upgraded from version 0.41_01 to 0.42.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 5.20230720 to 5.20230820.
+
+=item *
+
+L<NDBM_File> has been upgraded from version 1.16 to 1.17.
+
+=item *
+
+L<Opcode> has been upgraded from version 1.64 to 1.65.
+
+=item *
+
+L<perlfaq> has been upgraded from version 5.20230701 to 5.20230812.
+
+=item *
+
+L<PerlIO::scalar> has been upgraded from version 0.31 to 0.32.
+
+=item *
+
+L<PerlIO::via> has been upgraded from version 0.18 to 0.19.
+
+=item *
+
+L<Pod::Html> has been upgraded from version 1.34 to 1.35.
+
+=item *
+
+L<Pod::Simple> has been upgraded from version 3.43 to 3.45.
+
+=item *
+
+L<POSIX> has been upgraded from version 2.14 to 2.15.
+
+=item *
+
+L<Safe> has been upgraded from version 2.44 to 2.45.
+
+=item *
+
+L<strict> has been upgraded from version 1.12 to 1.13.
+
+=item *
+
+L<Test::Harness> has been upgraded from version 3.44 to 3.47.
+
+=item *
+
+L<threads> has been upgraded from version 2.37 to 2.38.
+
+=item *
+
+L<warnings> has been upgraded from version 1.66 to 1.67.
+
+=item *
+
+L<XS::APItest> has been upgraded from version 1.32 to 1.33.
+
+=back
+
+=head1 Diagnostics
+
+The following additions or changes have been made to diagnostic output,
+including warnings and fatal error messages.  For the complete list of
+diagnostic messages, see L<perldiag>.
+
+=head2 New Diagnostics
+
+=head3 New Errors
+
+=over 4
+
+=item *
+
+L<Cannot use __CLASS__ outside of a method or field initializer expression|perldiag/"Cannot use __CLASS__ outside of a method or field initializer expression">
+
+(F) A C<__CLASS__> expression yields the class name of the object instance
+executing the current method, and therefore it can only be placed inside an
+actual method (or method-like expression, such as a field initializer
+expression).
+
+=item *
+
+L<get_layers: unknown argument '%s'|perldiag/"get_layers: unknown argument '%s'">
+
+(F) You called PerlIO::get_layers() with an unknown argument. Legal
+arguments are provided in key/value pairs, with the keys being one
+of C<input>, C<output> or C<detail>, followed by a boolean.
+
+=item
+
+L<UNIVERSAL does not export anything|perldiag/"UNIVERSAL does not export anything">
+
+(F) You asked UNIVERSAL to export something, but UNIVERSAL is the
+base class for all classes and contains not exportable symbols.
+
+=back
+
+=head3 New Warnings
+
+=over 4
+
+=item *
+
+L<< Forked open '%s' not meaningful in <>|perldiag/"Forked open '%s' not meaningful in <>" >>
+
+(S inplace) You had C<|-> or C<-|> in C<@ARGV> and tried to use C<< <>
+>> to read from it.
+
+Previously this would fork and produce a confusing error message. [L<GH #21176|https://github.com/Perl/perl5/issues/21176>]
+
+=back
+
+=head1 Configuration and Compilation
+
+=over 4
+
+=item *
+
+C<microperl>, long broken and of unclear present purpose, has been removed
+as promised in L<Perl 5.18|perl5180delta/Future Deprecations>.
+
+=back
+
+=head1 Testing
+
+Tests were added and changed to reflect the other additions and changes
+in this release.
+
+=head1 Platform Support
+
+=head2 Platform-Specific Notes
+
+=over 4
+
+=item Serenity OS
+
+Out of the box support for Serenity OS was added.
+
+=item Windows
+
+Workaround a bug in most 32-bit Mingw builds, where the generated
+code, including the code in the gcc support library, assumes 16-byte
+stack alignment, which 32-bit Windows does not preserve. [L<GH #21313|https://github.com/Perl/perl5/issues/21313>]
+
+=back
+
+=head1 Internal Changes
+
+=over 4
+
+=item *
+
+C<PERL_RC_STACK> build option added.
+
+This new build option is highly experimental and is not enabled by
+default.  Perl can be built with it by using the F<Configure> option
+C<-Accflags='-DPERL_RC_STACK'>. 
+
+It makes the argument stack bump the reference count of SVs pushed onto
+it. It is functional, but currently slow and incomplete.
+
+See L<perlguts|perlguts/"Reference-counted argument stack">.
+
+=item *
+
+Functions L<perlapi/sv_strftime_tm> and L<perlapi/sv_strftime_ints> have
+been added to the public API.  These transparently handle UTF-8 for you.
+One takes as input a libc S<C<struct tm>> and the other takes integers
+specifying the time, in the same form as L<POSIX/strftime>.
+
+=back
+
+=head1 Selected Bug Fixes
+
+=over 4
+
+=item *
+
+C<use 5.36;> or later didn't enable the post parse reporting of L<Name
+"%s::%s" used only once: possible typo|perldiag/"Name "%s::%s" used
+only once: possible typo"> warnings when enabling warnings.
+[L<GH #21271|https://github.com/Perl/perl5/issues/21271>]
+
+=item *
+
+Fix a crash or assertion when cleaning up a closure that refers to an
+outside C<our> sub.  [L<GH #21067|https://github.com/Perl/perl5/issues/21067>]
+
+=item *
+
+Fixed a number of issues where C<I32> was used as a string offset or
+size rather than C<SSize_t> or C<STRLEN>/C<size_t> [L<GH #21012|https://github.com/Perl/perl5/issues/21012>]
+
+=over
+
+=item *
+
+C<~$str> when C<$str> was more than 2GB in size would do nothing or
+produce an incomplete result.
+
+=item *
+
+String repeat, C<$str x $count>, didn't handle C<$str> over 2GB in
+size, throwing an error.  Now such strings are repeated.
+
+=item *
+
+Complex substitution after the 2GB point in a string could access
+incorrect or invalid offsets in the string.
+
+=item *
+
+sv_utf8_decode() would truncate the SVs pos() value.  This wasn't
+visible via utf8::decode().
+
+=item *
+
+When compiling a constant folded hash key, the length was truncated
+when creating the shared SV.  Since hash keys over 2GB are not
+supported, throw a compilation error instead.
+
+=back
+
+=item *
+
+msgrcv() incorrectly called get magic on the buffer SV and failed to
+call set magic on completion. [L<GH #21012|https://github.com/Perl/perl5/issues/21012>]
+
+=item *
+
+msgrcv() used the size parameter to resize the buffer before
+validating it. [L<GH #21012|https://github.com/Perl/perl5/issues/21012>]
+
+=item *
+
+Inheriting from a class that was hierarchically an ancestor of the new
+class, eg. C< class A::B :isa(A) { ... } >, would not attempt to load
+the parent class. [L<GH #21332|https://github.com/Perl/perl5/issues/21332>]
+
+=back
+
+=head1 Acknowledgements
+
+Perl 5.39.2 represents approximately 4 weeks of development since Perl
+5.39.1 and contains approximately 38,000 lines of changes across 510 files
+from 24 authors.
+
+Excluding auto-generated files, documentation and release tools, there were
+approximately 27,000 lines of changes to 370 .pm, .t, .c and .h files.
+
+Perl continues to flourish into its fourth decade thanks to a vibrant
+community of users and developers. The following people are known to have
+contributed the improvements that became Perl 5.39.2:
+
+Beckett Normington, Dagfinn Ilmari Mannsåker, David Golden, David Mitchell,
+Elvin Aslanov, Erik Huelsmann, Greg Kennedy, H.Merijn Brand, James E Keenan,
+James Raspass, Karen Etheridge, Karl Williamson, Leon Timmermans, Lukas Mai,
+Nicolas Mendoza, Nicolas R, OpossumPetya, Paul Evans, Raul E Rangel, Ricardo
+Signes, Richard Leach, Steve Hay, Tony Cook, Yves Orton.
+
+The list above is almost certainly incomplete as it is automatically
+generated from version control history. In particular, it does not include
+the names of the (very much appreciated) contributors who reported issues to
+the Perl bug tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core. We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please
+see the F<AUTHORS> file in the Perl source distribution.
+
+=head1 Reporting Bugs
+
+If you find what you think is a bug, you might check the perl bug database
+at L<https://github.com/Perl/perl5/issues>.  There may also be information at
+L<http://www.perl.org/>, the Perl Home Page.
+
+If you believe you have an unreported bug, please open an issue at
+L<https://github.com/Perl/perl5/issues>.  Be sure to trim your bug down to a
+tiny but sufficient test case.
+
+If the bug you are reporting has security implications which make it
+inappropriate to send to a public issue tracker, then see
+L<perlsec/SECURITY VULNERABILITY CONTACT INFORMATION>
+for details of how to report the issue.
+
+=head1 Give Thanks
+
+If you wish to thank the Perl 5 Porters for the work we had done in Perl 5,
+you can do so by running the C<perlthanks> program:
+
+    perlthanks
+
+This will send an email to the Perl 5 Porters list with your show of thanks.
+
+=head1 SEE ALSO
+
+The F<Changes> file for an explanation of how to view exhaustive details on
+what changed.
+
+The F<INSTALL> file for how to build Perl.
+
+The F<README> file for general stuff.
+
+The F<Artistic> and F<Copying> files for copyright information.
+
+=cut

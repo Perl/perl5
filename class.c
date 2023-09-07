@@ -78,7 +78,6 @@ PP(pp_initfield)
 
                 av = newAV_alloc_x(count);
 
-                av_extend(av, count);
                 while(svp <= PL_stack_sp) {
                     av_push_simple(av, newSVsv(*svp));
                     svp++;
@@ -627,16 +626,6 @@ Perl_class_apply_attributes(pTHX_ HV *stash, OP *attrlist)
     op_free(attrlist);
 }
 
-static OP *
-S_newCROAKOP(pTHX_ SV *message)
-{
-    OP *o = newLISTOP(OP_LIST, 0,
-            newOP(OP_PUSHMARK, 0),
-            newSVOP(OP_CONST, 0, message));
-    return op_convert_list(OP_DIE, 0, o);
-}
-#define newCROAKOP(message)  S_newCROAKOP(aTHX_ message)
-
 void
 Perl_class_seal_stash(pTHX_ HV *stash)
 {
@@ -683,20 +672,17 @@ Perl_class_seal_stash(pTHX_ HV *stash)
             struct xpvhv_aux *superaux = HvAUX(superstash);
 
             /* Build an OP_ENTERSUB */
-            OP *o = NULL;
-            o = op_append_list(OP_LIST, o,
-                newPADxVOP(OP_PADSV, 0, PADIX_SELF));
-            o = op_append_list(OP_LIST, o,
-                newPADxVOP(OP_PADHV, OPf_REF, PADIX_PARAMS));
-            /* TODO: This won't work at all well under `use threads` because
-             * it embeds the CV * to the superclass initfields CV right into
-             * the optree. Maybe we'll have to pop it in the pad or something
-             */
-            o = op_append_list(OP_LIST, o,
-                newSVOP(OP_CONST, 0, (SV *)superaux->xhv_class_initfields_cv));
+            OP *o = newLISTOPn(OP_ENTERSUB, OPf_WANT_VOID|OPf_STACKED,
+                newPADxVOP(OP_PADSV, 0, PADIX_SELF),
+                newPADxVOP(OP_PADHV, OPf_REF, PADIX_PARAMS),
+                /* TODO: This won't work at all well under `use threads` because
+                 * it embeds the CV * to the superclass initfields CV right into
+                 * the optree. Maybe we'll have to pop it in the pad or something
+                 */
+                newSVOP(OP_CONST, 0, (SV *)superaux->xhv_class_initfields_cv),
+                NULL);
 
-            ops = op_append_list(OP_LINESEQ, ops,
-                op_convert_list(OP_ENTERSUB, OPf_WANT_VOID|OPf_STACKED, o));
+            ops = op_append_list(OP_LINESEQ, ops, o);
         }
 
         PADNAMELIST *fieldnames = aux->xhv_class_fields;
@@ -736,11 +722,14 @@ Perl_class_seal_stash(pTHX_ HV *stash)
             switch(sigil) {
                 case '$':
                     if(paramname) {
-                        if(!valop)
-                            valop = newCROAKOP(
+                        if(!valop) {
+                            SV *message =
                                 newSVpvf("Required parameter '%" SVf "' is missing for %" HvNAMEf_QUOTEDPREFIX " constructor",
-                                    SVfARG(paramname), HvNAMEfARG(stash))
-                            );
+                                    SVfARG(paramname), HvNAMEfARG(stash));
+                            valop = newLISTOPn(OP_DIE, 0,
+                                    newSVOP(OP_CONST, 0, message),
+                                    NULL);
+                        }
 
                         OP *helemop =
                             newBINOP(OP_HELEM, 0,
@@ -868,8 +857,8 @@ Perl_class_wrap_method_body(pTHX_ OP *o)
         if(fieldix > max_fieldix)
             max_fieldix = fieldix;
 
-        av_push(fieldmap, newSVuv(padix));
-        av_push(fieldmap, newSVuv(fieldix));
+        av_push_simple(fieldmap, newSVuv(padix));
+        av_push_simple(fieldmap, newSVuv(fieldix));
     }
 
     UNOP_AUX_item *aux = NULL;

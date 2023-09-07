@@ -5,15 +5,15 @@
 [ this is a template for a new perldelta file.  Any text flagged as XXX needs
 to be processed before release. ]
 
-perldelta - what is new for perl v5.39.2
+perldelta - what is new for perl v5.39.3
 
 =head1 DESCRIPTION
 
-This document describes differences between the 5.39.1 release and the 5.39.2
+This document describes differences between the 5.39.2 release and the 5.39.3
 release.
 
-If you are upgrading from an earlier release such as 5.39.0, first read
-L<perl5391delta>, which describes differences between 5.39.0 and 5.39.1.
+If you are upgrading from an earlier release such as 5.39.1, first read
+L<perl5392delta>, which describes differences between 5.39.1 and 5.39.2.
 
 =head1 Notice
 
@@ -26,18 +26,6 @@ enhancements.  Particularly prominent performance optimisations could go
 here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
-
-=head2 New C<__CLASS__> Keyword
-
-When using the new C<class> feature, code inside a method, C<ADJUST> block or
-field initializer expression is now permitted to use the new C<__CLASS__>
-keyword.  This yields a class name, similar to C<__PACKAGE__>, but whereas that
-gives the compile-time package that the code appears in, the C<__CLASS__>
-keyword is aware of the actual run-time class that the object instance is a
-member of.  This makes it useful for method dispatch on that class, especially
-during constructors, where access to C<$self> is not permitted.
-
-For more information, see L<perlfunc/__CLASS__>.
 
 =head1 Security
 
@@ -218,12 +206,7 @@ XXX L<message|perldiag/"message">
 
 =item *
 
-L<< Forked open '%s' not meaningful in <>|perldiag/"Forked open '%s' not meaningful in <>" >>
-
-(S inplace) You had C<|-> or C<-|> in C<@ARGV> and tried to use C<< <>
->> to read from it.
-
-Previously this would fork and produce a confusing error message. [GH #21176]
+XXX L<message|perldiag/"message">
 
 =back
 
@@ -271,8 +254,8 @@ L</Platform Support> section, instead.
 
 =item *
 
-C<microperl>, long broken and of unclear present purpose, has been removed
-as promised in L<Perl 5.18|perl5180delta/Future Deprecations>.
+Fix here-doc used for code to probe C<LC_ALL> syntax for disparate
+locales introduced in 5.39.2.  [GH #21451]
 
 =back
 
@@ -301,7 +284,10 @@ made:
 
 =item *
 
-XXX
+F<t/op/magic.t> would fail when C<ps> was the BusyBox implementation,
+since that doesn't support the C<-p> flag and otherwise ignores a
+process id on the command-line.  This caused F<TEST> failures on
+BusyBox systems such as Alpine Linux.  [GH #17542]
 
 =back
 
@@ -321,15 +307,9 @@ source tree.
 
 =over 4
 
-=item Serenity OS
+=item XXX-some-platform
 
-Out of the box support for Serenity OS was added.
-
-=item Windows
-
-Workaround a bug in most 32-bit Mingw builds, where the generated
-code, including the code in the gcc support library, assumes 16-byte
-stack alignment, which 32-bit Windows does not preserve. [GH #21313]
+XXX
 
 =back
 
@@ -366,20 +346,31 @@ XXX Changes which affect the interface available to C<XS> code go here.  Other
 significant internal changes for future core maintainers should be noted as
 well.
 
+[ List each change as an =item entry ]
+
 =over 4
 
 =item *
 
-C<PERL_RC_STACK> build option added.
+A new API function has been added that simplifies C (or XS) code that creates
+C<LISTOP> optree fragments.  C<newLISTOPn()> is a variadic function that takes
+a C<NULL>-terminated list of child op pointers, and constructs a new checked
+C<LISTOP> to contain them all.  This is simpler than creating a new plain
+C<OP_LIST>, adding each child individually, and finally calling
+C<op_convert_list()> in most code fragments.
 
-This new build option is highly experimental and is not enabled by
-default.  Perl can be built with it by using the F<Configure> option
-C<-Accflags='-DPERL_RC_STACK'>. 
+=item *
 
-It makes the argument stack bump the reference count of SVs pushed onto
-it. It is functional, but currently slow and incomplete.
+The C<eval_sv()> API now accepts the C<G_USEHINTS> flag, which uses
+the hints such as strict and features from C<PL_curcop> instead of the
+default, which is to use default hints, e.g. no C<use vX.XX;>, no
+strict, default features.
 
-See L<perlguts|perlguts/"Reference-counted argument stack">.
+Beware if you use this flag in XS code: your evaluated code will need
+to support whatever strictness or features are in effect at the point
+your XS function is called.
+
+[GH #21415]
 
 =back
 
@@ -397,66 +388,12 @@ manager will later use a regex to expand these into links.
 
 =item *
 
-C<use 5.36;> or later didn't enable the post parse reporting of L<Name
-"%s::%s" used only once: possible typo|perldiag/"Name "%s::%s" used
-only once: possible typo"> warnings when enabling warnings. [GH
-#21271]
+Declared references can now be used with C<state> variables. [GH #21351]
 
 =item *
 
-Fix a crash or assertion when cleaning up a closure that refers to an
-outside C<our> sub.  [GH #21067]
-
-=item *
-
-Fixed a number of issues where C<I32> was used as a string offset or
-size rather than C<SSize_t> or C<STRLEN>/C<size_t> [GH #21012]:
-
-=over
-
-=item *
-
-C<~$str> when C<$str> was more than 2GB in size would do nothing or
-produce an incomplete result.
-
-=item *
-
-String repeat, C<$str x $count>, didn't handle C<$str> over 2GB in
-size, throwing an error.  Now such strings are repeated.
-
-=item *
-
-Complex substitution after the 2GB point in a string could access
-incorrect or invalid offsets in the string.
-
-=item *
-
-sv_utf8_decode() would truncate the SVs pos() value.  This wasn't
-visible via utf8::decode().
-
-=item *
-
-When compiling a constant folded hash key, the length was truncated
-when creating the shared SV.  Since hash keys over 2GB are not
-supported, throw a compilation error instead.
-
-=back
-
-=item *
-
-msgrcv() incorrectly called get magic on the bufffer SV and failed to
-call set magic on completion. [GH #21012]
-
-=item *
-
-msgrcv() used the size parameter to resize the buffer before
-validating it. [GH #21012]
-
-=item *
-
-Inheriting from a class that was hierarchically an ancestor of the new
-class, eg. C< class A::B :isa(A) { ... } >, would not attempt to load
-the parent class. [GH #21332]
+Trailing elements in an C<unshift>ed and resized array will now always be
+initialized. [GH #21265]
 
 =back
 
@@ -496,7 +433,7 @@ died, add a short obituary here.
 
 XXX Generate this with:
 
-  perl Porting/acknowledgements.pl v5.39.1..HEAD
+  perl Porting/acknowledgements.pl v5.39.2..HEAD
 
 =head1 Reporting Bugs
 

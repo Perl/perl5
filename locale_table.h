@@ -22,45 +22,174 @@
  * changed into, or NULL if no such set up is needed
  */
 
-#ifdef USE_LOCALE_CTYPE
-    PERL_LOCALE_TABLE_ENTRY(LC_CTYPE, S_new_ctype)
+#ifdef LC_CTYPE
+
+    PERL_LOCALE_TABLE_ENTRY(CTYPE, S_new_ctype)
+
+#  ifdef NO_LOCALE_CTYPE
+#    define HAS_IGNORED_LOCALE_CATEGORIES_
+#    define LC_CTYPE_AVAIL_  false
+#  else
+#    define LC_CTYPE_AVAIL_  true
+#    define USE_LOCALE_CTYPE
+#  endif
 #endif
-#ifdef USE_LOCALE_NUMERIC
-    PERL_LOCALE_TABLE_ENTRY(LC_NUMERIC, S_new_numeric)
+#ifdef LC_NUMERIC
+
+    PERL_LOCALE_TABLE_ENTRY(NUMERIC, S_new_numeric)
+
+#  ifdef NO_LOCALE_NUMERIC
+#    define HAS_IGNORED_LOCALE_CATEGORIES_
+#    define LC_NUMERIC_AVAIL_  false
+#  else
+#    define LC_NUMERIC_AVAIL_  true
+#    define USE_LOCALE_NUMERIC
+#  endif
 #endif
-#ifdef USE_LOCALE_COLLATE
-    PERL_LOCALE_TABLE_ENTRY(LC_COLLATE, S_new_collate)
+#ifdef LC_COLLATE
+
+    PERL_LOCALE_TABLE_ENTRY(COLLATE, S_new_collate)
+
+        /* Perl outsources all its collation efforts to the libc strxfrm(), so
+         * if it isn't available on the system, default "C" locale collation
+         * gets used */
+#  if defined(NO_LOCALE_COLLATE) || ! defined(HAS_STRXFRM)
+#    define HAS_IGNORED_LOCALE_CATEGORIES_
+#    define LC_COLLATE_AVAIL_  false
+#  else
+#    define LC_COLLATE_AVAIL_  true
+#    define USE_LOCALE_COLLATE
+#  endif
 #endif
-#ifdef USE_LOCALE_TIME
-    PERL_LOCALE_TABLE_ENTRY(LC_TIME, NULL)
+#ifdef LC_TIME
+
+    PERL_LOCALE_TABLE_ENTRY(TIME, NULL)
+
+#  ifdef NO_LOCALE_TIME
+#    define HAS_IGNORED_LOCALE_CATEGORIES_
+#    define LC_TIME_AVAIL_  false
+#  else
+#    define LC_TIME_AVAIL_  true
+#    define USE_LOCALE_TIME
+#  endif
 #endif
-#ifdef USE_LOCALE_MESSAGES
-    PERL_LOCALE_TABLE_ENTRY(LC_MESSAGES, NULL)
+#ifdef LC_MESSAGES
+
+    PERL_LOCALE_TABLE_ENTRY(MESSAGES, NULL)
+
+#  ifdef NO_LOCALE_MESSAGES
+#    define HAS_IGNORED_LOCALE_CATEGORIES_
+#    define LC_MESSAGES_AVAIL_  false
+#  else
+#    define LC_MESSAGES_AVAIL_  true
+#    define USE_LOCALE_MESSAGES
+#  endif
 #endif
-#ifdef USE_LOCALE_MONETARY
-    PERL_LOCALE_TABLE_ENTRY(LC_MONETARY, NULL)
+#ifdef LC_MONETARY
+
+    PERL_LOCALE_TABLE_ENTRY(MONETARY, NULL)
+
+#  ifdef NO_LOCALE_MONETARY
+#    define HAS_IGNORED_LOCALE_CATEGORIES_
+#    define LC_MONETARY_AVAIL_  false
+#  else
+#    define LC_MONETARY_AVAIL_  true
+#    define USE_LOCALE_MONETARY
+#  endif
 #endif
-#ifdef USE_LOCALE_ADDRESS
-    PERL_LOCALE_TABLE_ENTRY(LC_ADDRESS, NULL)
+#ifdef LC_ADDRESS
+
+    PERL_LOCALE_TABLE_ENTRY(ADDRESS, NULL)
+
+#  ifdef NO_LOCALE_ADDRESS
+#    define HAS_IGNORED_LOCALE_CATEGORIES_
+#    define LC_ADDRESS_AVAIL_  false
+#  else
+#    define LC_ADDRESS_AVAIL_  true
+#    define USE_LOCALE_ADDRESS
+#  endif
 #endif
-#ifdef USE_LOCALE_IDENTIFICATION
-    PERL_LOCALE_TABLE_ENTRY(LC_IDENTIFICATION, NULL)
+#ifdef LC_IDENTIFICATION
+
+    PERL_LOCALE_TABLE_ENTRY(IDENTIFICATION, NULL)
+
+#  ifdef NO_LOCALE_IDENTIFICATION
+#    define HAS_IGNORED_LOCALE_CATEGORIES_
+#    define LC_IDENTIFICATION_AVAIL_  false
+#  else
+#    define LC_IDENTIFICATION_AVAIL_  true
+#    define USE_LOCALE_IDENTIFICATION
+#  endif
 #endif
-#ifdef USE_LOCALE_MEASUREMENT
-    PERL_LOCALE_TABLE_ENTRY(LC_MEASUREMENT, NULL)
+#ifdef LC_MEASUREMENT
+
+    PERL_LOCALE_TABLE_ENTRY(MEASUREMENT, NULL)
+
+#  ifdef NO_LOCALE_MEASUREMENT
+#    define HAS_IGNORED_LOCALE_CATEGORIES_
+#    define LC_MEASUREMENT_AVAIL_  false
+#  else
+#    define LC_MEASUREMENT_AVAIL_  true
+#    define USE_LOCALE_MEASUREMENT
+#  endif
 #endif
-#ifdef USE_LOCALE_PAPER
-    PERL_LOCALE_TABLE_ENTRY(LC_PAPER, NULL)
+#ifdef LC_PAPER
+
+    PERL_LOCALE_TABLE_ENTRY(PAPER, NULL)
+
+#  ifdef NO_LOCALE_PAPER
+#    define HAS_IGNORED_LOCALE_CATEGORIES_
+#    define LC_PAPER_AVAIL_  false
+#  else
+#    define LC_PAPER_AVAIL_  true
+#    define USE_LOCALE_PAPER
+#  endif
 #endif
-#ifdef USE_LOCALE_TELEPHONE
-    PERL_LOCALE_TABLE_ENTRY(LC_TELEPHONE, NULL)
+#ifdef LC_TELEPHONE
+
+    PERL_LOCALE_TABLE_ENTRY(TELEPHONE, NULL)
+
+#  ifdef NO_LOCALE_TELEPHONE
+#    define HAS_IGNORED_LOCALE_CATEGORIES_
+#    define LC_TELEPHONE_AVAIL_  false
+#  else
+#    define LC_TELEPHONE_AVAIL_  true
+#    define USE_LOCALE_TELEPHONE
+#  endif
 #endif
-#ifdef USE_LOCALE_NAME
-    PERL_LOCALE_TABLE_ENTRY(LC_NAME, NULL)
+#ifdef LC_NAME
+
+    PERL_LOCALE_TABLE_ENTRY(NAME, NULL)
+
+#  ifdef NO_LOCALE_NAME
+#    define HAS_IGNORED_LOCALE_CATEGORIES_
+#    define LC_NAME_AVAIL_  false
+#  else
+#    define LC_NAME_AVAIL_  true
+#    define USE_LOCALE_NAME
+#  endif
 #endif
-#ifdef USE_LOCALE_SYNTAX
-    PERL_LOCALE_TABLE_ENTRY(LC_SYNTAX, NULL)
+#ifdef LC_SYNTAX
+
+    PERL_LOCALE_TABLE_ENTRY(SYNTAX, NULL)
+
+#  ifdef NO_LOCALE_SYNTAX
+#    define HAS_IGNORED_LOCALE_CATEGORIES_
+#    define LC_SYNTAX_AVAIL_  false
+#  else
+#    define LC_SYNTAX_AVAIL_  true
+#    define USE_LOCALE_SYNTAX
+#  endif
 #endif
-#ifdef USE_LOCALE_TOD
-    PERL_LOCALE_TABLE_ENTRY(LC_TOD, NULL)
+#ifdef LC_TOD
+
+    PERL_LOCALE_TABLE_ENTRY(TOD, NULL)
+
+#  ifdef NO_LOCALE_TOD
+#    define HAS_IGNORED_LOCALE_CATEGORIES_
+#    define LC_TOD_AVAIL_  false
+#  else
+#    define LC_TOD_AVAIL_  true
+#    define USE_LOCALE_TOD
+#  endif
 #endif

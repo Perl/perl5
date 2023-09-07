@@ -1228,7 +1228,7 @@ PP_wrapped(pp_sselect, 4, 0)
         value = SvNV_nomg(sv);
         if (value < 0.0)
             value = 0.0;
-        timebuf.tv_sec = (long)value;
+        timebuf.tv_sec = (time_t)value;
         value -= (NV)timebuf.tv_sec;
         timebuf.tv_usec = (long)(value * 1000000.0);
     }
@@ -4636,12 +4636,13 @@ PP_wrapped(pp_exec, 0, 1)
     RETURN;
 }
 
-PP_wrapped(pp_getppid, 0, 0)
+PP(pp_getppid)
 {
 #ifdef HAS_GETPPID
-    dSP; dTARGET;
-    XPUSHi( getppid() );
-    RETURN;
+    dTARGET;
+    TARGi(getppid(), 1);
+    rpp_xpush_1(targ);
+    return NORMAL;
 #else
     DIE(aTHX_ PL_no_func, "getppid");
 #endif
@@ -4743,15 +4744,16 @@ PP_wrapped(pp_setpriority, 3, 0)
 
 /* Time calls. */
 
-PP_wrapped(pp_time, 0, 0)
+PP(pp_time)
 {
-    dSP; dTARGET;
+    dTARGET;
 #ifdef BIG_TIME
-    XPUSHn( (NV)time(NULL) );
+    TARGn((NV)time(NULL),1);
 #else
-    XPUSHu( (UV)time(NULL) );
+    TARGu((UV)time(NULL),1);
 #endif
-    RETURN;
+    rpp_xpush_1(TARG);
+    return NORMAL;
 }
 
 PP_wrapped(pp_tms, 0, 0)
@@ -5398,9 +5400,8 @@ PP_wrapped(pp_shostent, 1, 0)
 /* also used for: pp_egrent() pp_enetent() pp_eprotoent() pp_epwent()
  *                pp_eservent() pp_sgrent() pp_spwent() */
 
-PP_wrapped(pp_ehostent, 0, 0)
+PP(pp_ehostent)
 {
-    dSP;
     switch(PL_op->op_type) {
     case OP_EHOSTENT:
 #ifdef HAS_ENDHOSTENT
@@ -5459,8 +5460,8 @@ PP_wrapped(pp_ehostent, 0, 0)
 #endif
         break;
     }
-    EXTEND(SP,1);
-    RETPUSHYES;
+    rpp_xpush_1(&PL_sv_yes);
+    return NORMAL;
 }
 
 
@@ -5771,17 +5772,19 @@ PP_wrapped(pp_ggrent,
 #endif
 }
 
-PP_wrapped(pp_getlogin, 0, 0)
+PP(pp_getlogin)
 {
 #ifdef HAS_GETLOGIN
-    dSP; dTARGET;
+    dTARGET;
     char *tmps;
-    EXTEND(SP, 1);
-    if (!(tmps = PerlProc_getlogin()))
-        RETPUSHUNDEF;
+    rpp_extend(1);
+    if (!(tmps = PerlProc_getlogin())) {
+        rpp_push_1(&PL_sv_undef);
+        return NORMAL;
+    }
     sv_setpv_mg(TARG, tmps);
-    PUSHs(TARG);
-    RETURN;
+    rpp_push_1(TARG);
+    return NORMAL;
 #else
     DIE(aTHX_ PL_no_func, "getlogin");
 #endif

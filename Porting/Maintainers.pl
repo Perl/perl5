@@ -8,6 +8,8 @@
 
 package Maintainers;
 
+use strict;
+use warnings;
 use utf8;
 use File::Glob qw(:case);
 
@@ -15,7 +17,7 @@ use File::Glob qw(:case);
 # distribution, need not appear in core (i.e. core-cpan-diff won't
 # complain if it can't find them)
 
-@IGNORABLE = qw(
+our @IGNORABLE = qw(
     .cvsignore .dualLivedDiffConfig .gitignore .github .perlcriticrc .perltidyrc
     .travis.yml ANNOUNCE Announce Artistic AUTHORS BENCHMARK BUGS Build.PL
     CHANGELOG ChangeLog Changelog CHANGES Changes CONTRIBUTING CONTRIBUTING.md
@@ -124,7 +126,7 @@ use File::Glob qw(:case);
 #     ''     => 'lib/Foo/Bar/',
 #   }
 
-%Modules = (
+our %Modules = (
 
     'Archive::Tar' => {
         'DISTRIBUTION' => 'BINGOS/Archive-Tar-2.40.tar.gz',
@@ -336,7 +338,8 @@ use File::Glob qw(:case);
     },
 
     'DB_File' => {
-        'DISTRIBUTION' => 'PMQS/DB_File-1.858.tar.gz',
+        'DISTRIBUTION' => 'PMQS/DB_File-1.859.tar.gz',
+        'SYNCINFO'     => 'jkeenan on Tue Sep  5 20:46:44 2023',
         'FILES'        => q[cpan/DB_File],
         'EXCLUDED'     => [
             qr{^patches/},
@@ -518,7 +521,7 @@ use File::Glob qw(:case);
     },
 
     'ExtUtils::ParseXS' => {
-        'DISTRIBUTION' => 'XSAWYERX/ExtUtils-ParseXS-3.44.tar.gz',
+        'DISTRIBUTION' => 'LEONT/ExtUtils-ParseXS-3.51.tar.gz',
         'FILES'        => q[dist/ExtUtils-ParseXS],
     },
 
@@ -832,7 +835,7 @@ use File::Glob qw(:case);
     },
 
     'Module::CoreList' => {
-        'DISTRIBUTION' => 'BINGOS/Module-CoreList-5.20230520.tar.gz',
+        'DISTRIBUTION' => 'BINGOS/Module-CoreList-5.20230820.tar.gz',
         'FILES'        => q[dist/Module-CoreList],
     },
 
@@ -1486,7 +1489,7 @@ use File::Glob qw(:case);
     },
 );
 
-
+our %DistName;
 # legacy CPAN flag
 for my $mod_name ( keys %Modules ) {
     my $data = $Modules{$mod_name};
@@ -1514,6 +1517,7 @@ for ( keys %Modules ) {
     }
 }
 
+our %Maintainers;
 # legacy MAINTAINER field
 for ( keys %Modules ) {
     # Keep any existing MAINTAINER flag so that "overrides" can be applied

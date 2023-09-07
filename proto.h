@@ -2833,6 +2833,11 @@ Perl_newLISTOP(pTHX_ I32 type, I32 flags, OP *first, OP *last)
 #define PERL_ARGS_ASSERT_NEWLISTOP
 
 PERL_CALLCONV OP *
+Perl_newLISTOPn(pTHX_ I32 type, I32 flags, ...)
+        __attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_NEWLISTOPN
+
+PERL_CALLCONV OP *
 Perl_newLOGOP(pTHX_ I32 optype, I32 flags, OP *first, OP *other)
         __attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_NEWLOGOP               \
@@ -7065,7 +7070,7 @@ S_give_perl_locale_control(pTHX_ const char *lc_all_string, const line_t caller_
         assert(lc_all_string)
 
 STATIC parse_LC_ALL_string_return
-S_parse_LC_ALL_string(pTHX_ const char *string, const char **output, bool always_use_full_array, const bool panic_on_error, const line_t caller_line);
+S_parse_LC_ALL_string(pTHX_ const char *string, const char **output, const parse_LC_ALL_STRING_action, bool always_use_full_array, const bool panic_on_error, const line_t caller_line);
 #     define PERL_ARGS_ASSERT_PARSE_LC_ALL_STRING \
         assert(string); assert(output)
 
@@ -7678,10 +7683,10 @@ S_refto(pTHX_ SV *sv)
 #if defined(PERL_IN_PP_C) || defined(PERL_IN_PP_HOT_C)
 
 PERL_CALLCONV GV *
-Perl_softref2xv(pTHX_ SV * const sv, const char * const what, const svtype type, SV ***spp)
+Perl_softref2xv(pTHX_ SV * const sv, const char * const what, const svtype type)
         __attribute__warn_unused_result__;
 # define PERL_ARGS_ASSERT_SOFTREF2XV            \
-        assert(sv); assert(what); assert(spp)
+        assert(sv); assert(what)
 
 #endif
 #if defined(PERL_IN_PP_C) || defined(PERL_IN_UTF8_C)
@@ -10642,7 +10647,7 @@ Perl_PerlIO_write(pTHX_ PerlIO *f, const void *vbuf, Size_t count);
 #endif /* defined(USE_PERLIO) */
 #if defined(USE_PERL_SWITCH_LOCALE_CONTEXT)
 PERL_CALLCONV void
-Perl_switch_locale_context(void);
+Perl_switch_locale_context(pTHX);
 # define PERL_ARGS_ASSERT_SWITCH_LOCALE_CONTEXT
 
 #endif

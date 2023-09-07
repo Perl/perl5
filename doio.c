@@ -2872,9 +2872,9 @@ nothing in the core.
            else {
                 Zero(&utbuf, sizeof utbuf, char);
 #ifdef HAS_FUTIMES
-                utbuf[0].tv_sec = (long)SvIV(accessed);  /* time accessed */
+                utbuf[0].tv_sec = (time_t)SvIV(accessed);  /* time accessed */
                 utbuf[0].tv_usec = 0;
-                utbuf[1].tv_sec = (long)SvIV(modified);  /* time modified */
+                utbuf[1].tv_sec = (time_t)SvIV(modified);  /* time modified */
                 utbuf[1].tv_usec = 0;
 #elif defined(BIG_TIME)
                 utbuf.actime = (Time_t)SvNV(accessed);  /* time accessed */

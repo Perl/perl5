@@ -382,8 +382,7 @@ the raw reports.
 Similarly, monitor the smoking of perl for compiler warnings, and try to
 fix.
 
-Additionally both L<Travis CI|https://travis-ci.org/Perl/perl5> and
-L<GitHub Actions|https://github.com/Perl/perl5/actions> smokers run
+Additionally L<GitHub Actions|https://github.com/Perl/perl5/actions> smokers run
 automatically.
 
 =for checklist skip BLEAD-POINT
@@ -581,7 +580,7 @@ C<-Dusethreads>
 If you have multiple compilers on your machine, you might also consider
 compiling with C<-Dcc=$other_compiler>.
 
-You can also consider pushing the repo to GitHub where Travis CI is enabled
+You can also consider pushing the repo to GitHub where GitHub Actions is enabled
 which would smoke different flavors of Perl for you.
 
 =head3 Update perlport

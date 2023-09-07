@@ -2440,6 +2440,12 @@ Perl_scalarvoid(pTHX_ OP *arg)
         case OP_SCALAR:
             scalar(o);
             break;
+        case OP_EMPTYAVHV:
+            if (!(o->op_private & OPpTARGET_MY))
+                useless = (o->op_private & OPpEMPTYAVHV_IS_HV) ?
+                           "anonymous hash ({})" :
+                           "anonymous array ([])";
+            break;
         }
 
         if (useless_sv) {
@@ -5598,6 +5604,10 @@ appropriate.  What you want to do in that case is create an op of type
 C<OP_LIST>, append more children to it, and then call L</op_convert_list>.
 See L</op_convert_list> for more information.
 
+If a compiletime-known fixed list of child ops is required, the
+L</newLISTOPn> function can be used as a convenient shortcut, avoiding the
+need to create a temporary plain C<OP_LIST> in a new variable.
+
 =cut
 */
 
@@ -5639,6 +5649,45 @@ Perl_newLISTOP(pTHX_ I32 type, I32 flags, OP *first, OP *last)
         OpLASTSIB_set(listop->op_last, (OP*)listop);
 
     return CHECKOP(type, listop);
+}
+
+/*
+=for apidoc newLISTOPn
+
+Constructs, checks, and returns an op of any list type.  C<type> is
+the opcode.  C<flags> gives the eight bits of C<op_flags>, except that
+C<OPf_KIDS> will be set automatically if required.  The variable number of
+arguments after C<flags> must all be OP pointers, terminated by a final
+C<NULL> pointer.  These will all be consumed as direct children of the list
+op and become part of the constructed op tree.
+
+Do not forget to end the arguments list with a C<NULL> pointer.
+
+This function is useful as a shortcut to performing the sequence of
+C<newLISTOP()>, C<op_append_elem()> on each element and final
+C<op_convert_list()> in the case where a compiletime-known fixed sequence of
+child ops is required.  If a variable number of elements are required, or for
+splicing in an entire sub-list of child ops, see instead L</newLISTOP> and
+L</op_convert_list>.
+
+=cut
+*/
+
+OP *
+Perl_newLISTOPn(pTHX_ I32 type, I32 flags, ...)
+{
+    va_list args;
+    va_start(args, flags);
+
+    OP *o = newLISTOP(OP_LIST, 0, NULL, NULL);
+
+    OP *kid;
+    while((kid = va_arg(args, OP *)))
+        o = op_append_elem(OP_LIST, o, kid);
+
+    va_end(args);
+
+    return op_convert_list(type, flags, o);
 }
 
 /*
@@ -7855,10 +7904,11 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
 
             /* Fake up a method call to VERSION */
             meth = newSVpvs_share("VERSION");
-            veop = op_convert_list(OP_ENTERSUB, OPf_STACKED,
-                            op_append_elem(OP_LIST,
-                                        op_prepend_elem(OP_LIST, pack, version),
-                                        newMETHOP_named(OP_METHOD_NAMED, 0, meth)));
+            veop = newLISTOPn(OP_ENTERSUB, OPf_STACKED,
+                    pack,
+                    version,
+                    newMETHOP_named(OP_METHOD_NAMED, 0, meth),
+                    NULL);
         }
     }
 
@@ -8935,7 +8985,7 @@ The C<flags> argument is currently ignored.
 OP *
 Perl_newTRYCATCHOP(pTHX_ I32 flags, OP *tryblock, OP *catchvar, OP *catchblock)
 {
-    OP *o, *catchop;
+    OP *catchop;
 
     PERL_ARGS_ASSERT_NEWTRYCATCHOP;
     assert(catchvar->op_type == OP_PADSV);
@@ -8967,10 +9017,10 @@ Perl_newTRYCATCHOP(pTHX_ I32 flags, OP *tryblock, OP *catchvar, OP *catchblock)
     op_free(catchvar);
 
     /* Build the optree structure */
-    o = newLISTOP(OP_LIST, 0, tryblock, catchop);
-    o = op_convert_list(OP_ENTERTRYCATCH, 0, o);
-
-    return o;
+    return newLISTOPn(OP_ENTERTRYCATCH, 0,
+            tryblock,
+            catchop,
+            NULL);
 }
 
 /*
@@ -11661,13 +11711,18 @@ Perl_newFORM(pTHX_ I32 floor, OP *o, OP *block)
 OP *
 Perl_newANONLIST(pTHX_ OP *o)
 {
-    return op_convert_list(OP_ANONLIST, OPf_SPECIAL, o);
+    return (o) ? op_convert_list(OP_ANONLIST, OPf_SPECIAL, o)
+               : newOP(OP_EMPTYAVHV, 0);
 }
 
 OP *
 Perl_newANONHASH(pTHX_ OP *o)
 {
-    return op_convert_list(OP_ANONHASH, OPf_SPECIAL, o);
+    OP * anon = (o) ? op_convert_list(OP_ANONHASH, OPf_SPECIAL, o)
+                    : newOP(OP_EMPTYAVHV, 0);
+    if (!o)
+        anon->op_private |= OPpEMPTYAVHV_IS_HV;
+    return anon;
 }
 
 OP *
@@ -11689,9 +11744,9 @@ Perl_newANONATTRSUB(pTHX_ I32 floor, OP *proto, OP *attrs, OP *block)
 
     if (is_const) {
         anoncode = newUNOP(OP_ANONCONST, OPf_REF,
-                           op_convert_list(OP_ENTERSUB,
-                                           OPf_STACKED|OPf_WANT_SCALAR,
-                                           anoncode));
+                newLISTOPn(OP_ENTERSUB, OPf_STACKED|OPf_WANT_SCALAR,
+                    anoncode,
+                    NULL));
     }
 
     return anoncode;
@@ -12227,7 +12282,6 @@ Perl_ck_eval(pTHX_ OP *o)
         /* Store a copy of %^H that pp_entereval can pick up. */
         HV *hh = hv_copy_hints_hv(GvHV(PL_hintgv));
         OP *hhop;
-        STOREFEATUREBITSHH(hh);
         hhop = newSVOP(OP_HINTSEVAL, 0, MUTABLE_SV(hh));
         /* append hhop to only child  */
         op_sibling_splice(o, cUNOPo->op_first, 0, hhop);
@@ -13073,18 +13127,26 @@ S_maybe_targlex(pTHX_ OP *o)
         OP * const kkid = OpSIBLING(kid);
 
         /* Can just relocate the target. */
-        if (kkid && kkid->op_type == OP_PADSV
-            && (!(kkid->op_private & OPpLVAL_INTRO)
-               || kkid->op_private & OPpPAD_STATE))
-        {
-            kid->op_targ = kkid->op_targ;
-            kkid->op_targ = 0;
-            /* Now we do not need PADSV and SASSIGN.
-             * Detach kid and free the rest. */
-            op_sibling_splice(o, NULL, 1, NULL);
-            op_free(o);
-            kid->op_private |= OPpTARGET_MY;	/* Used for context settings */
-            return kid;
+        if (kkid && kkid->op_type == OP_PADSV) {
+            if (kid->op_type == OP_EMPTYAVHV) {
+                kid->op_flags |= kid->op_flags |
+                              (o->op_flags & (OPf_WANT|OPf_PARENS));
+                kid->op_private |= OPpTARGET_MY |
+                              (kkid->op_private & (OPpLVAL_INTRO|OPpPAD_STATE));
+                goto swipe_and_detach;
+            } else if (!(kkid->op_private & OPpLVAL_INTRO)
+                   || (kkid->op_private & OPpPAD_STATE))
+            {
+                kid->op_private |= OPpTARGET_MY;       /* Used for context settings */
+            swipe_and_detach:
+                kid->op_targ = kkid->op_targ;
+                kkid->op_targ = 0;
+                /* Now we do not need PADSV and SASSIGN.
+                 * Detach kid and free the rest. */
+                op_sibling_splice(o, NULL, 1, NULL);
+                op_free(o);
+                return kid;
+            }
         }
     }
     return o;
@@ -13263,7 +13325,8 @@ Perl_ck_refassign(pTHX_ OP *o)
       settarg:
         o->op_private |= (varop->op_private & (OPpLVAL_INTRO|OPpPAD_STATE));
         o->op_targ = varop->op_targ;
-        varop->op_targ = 0;
+        if (!(o->op_private & (OPpPAD_STATE|OPpLVAL_INTRO)))
+            varop->op_targ = 0;
         PAD_COMPNAME_GEN_set(o->op_targ, PERL_INT_MAX);
         break;
 
@@ -13336,6 +13399,9 @@ Perl_ck_refassign(pTHX_ OP *o)
     else {
         o->op_flags &=~ OPf_STACKED;
         op_sibling_splice(o, right, 1, NULL);
+    }
+    if (o->op_private & OPpPAD_STATE && o->op_private & OPpLVAL_INTRO) {
+        o = S_newONCEOP(aTHX_ o, varop);
     }
     op_free(left);
     return o;

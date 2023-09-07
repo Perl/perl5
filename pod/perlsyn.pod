@@ -1,7 +1,7 @@
 =head1 NAME
 X<syntax>
 
-perlsyn - Perl syntax
+perlsyn - Perl syntax: declarations, statements, comments
 
 =head1 DESCRIPTION
 
@@ -1446,7 +1446,7 @@ because Perl 5 would parse the expression
 as though the argument to C<given> were an element of the hash
 C<%foo>, interpreting the braces as hash-element syntax.
 
-However, their are many, many other differences.  For example,
+However, there are many, many other differences.  For example,
 this works in Perl 5:
 
     use v5.12;

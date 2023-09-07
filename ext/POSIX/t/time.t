@@ -136,7 +136,7 @@ if (! defined $non_C_locale) {
             last;
         }
 
-        shift;
+        shift @locales;
     }
 }
 

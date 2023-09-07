@@ -552,6 +552,16 @@ Perl_boot_core_builtin(pTHX)
         CV *cv = newXS_flags(builtin->name, builtin->xsub, __FILE__, proto, 0);
         XSANY.any_i32 = builtin->ckval;
 
+        if (   builtin->xsub == &XS_builtin_func1_void
+            || builtin->xsub == &XS_builtin_func1_scalar)
+        {
+            /* these XS functions just call out to the relevant pp()
+             * functions, so they must operate with a reference-counted
+             * stack if the pp() do too.
+             */
+                CvXS_RCSTACK_on(cv);
+        }
+
         if(builtin->checker) {
             cv_set_call_checker_flags(cv, builtin->checker, newSVuv(PTR2UV(builtin)), 0);
         }

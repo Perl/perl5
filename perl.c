@@ -3229,7 +3229,12 @@ as C<call_sv>, with the obvious exception of C<G_EVAL>.  See L<perlcall>.
 The C<G_RETHROW> flag can be used if you only need eval_sv() to
 execute code specified by a string, but not catch any errors.
 
+By default the code is compiled and executed with the default hints,
+such as strict and features.  Set C<G_USEHINTS> in flags to use the
+current hints from C<PL_curcop>.
+
 =for apidoc Amnh||G_RETHROW
+=for apidoc Amnh||G_USEHINTS
 =cut
 */
 
@@ -3276,6 +3281,9 @@ Perl_eval_sv(pTHX_ SV *sv, I32 flags)
     myop.op_private = (OPpEVAL_EVALSV); /* tell pp_entereval we're the caller */
     if (flags & G_RE_REPARSING)
         myop.op_private |= (OPpEVAL_COPHH | OPpEVAL_RE_REPARSING);
+
+    if (flags & G_USEHINTS)
+        myop.op_private |= OPpEVAL_COPHH;
 
     /* fail now; otherwise we could fail after the JMPENV_PUSH but
      * before a cx_pusheval(), which corrupts the stack after a croak */

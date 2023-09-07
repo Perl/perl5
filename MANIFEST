@@ -697,11 +697,11 @@ cpan/DB_File/config.in			Part of Berkeley DB configuration
 cpan/DB_File/DB_File.pm			Berkeley DB extension Perl module
 cpan/DB_File/DB_File.xs			Berkeley DB extension external subroutines
 cpan/DB_File/dbinfo			Berkeley DB database version checker
-cpan/DB_File/hints/bitrig.pl
+cpan/DB_File/hints/bitrig.pl		Script related to DB_File
 cpan/DB_File/hints/dynixptx.pl		Hint for DB_File for named architecture
-cpan/DB_File/hints/minix.pl
-cpan/DB_File/hints/netbsd.pl
-cpan/DB_File/hints/openbsd.pl
+cpan/DB_File/hints/minix.pl		Script related to DB_File
+cpan/DB_File/hints/netbsd.pl		Script related to DB_File
+cpan/DB_File/hints/openbsd.pl		Script related to DB_File
 cpan/DB_File/hints/sco.pl		Hint for DB_File for named architecture
 cpan/DB_File/Makefile.PL		Berkeley DB extension makefile writer
 cpan/DB_File/t/db-btree.t		See if DB_File works
@@ -5460,6 +5460,7 @@ pod/perl5361delta.pod			Perl changes in version 5.36.1
 pod/perl5380delta.pod			Perl changes in version 5.38.0
 pod/perl5390delta.pod			Perl changes in version 5.39.0
 pod/perl5391delta.pod			Perl changes in version 5.39.1
+pod/perl5392delta.pod			Perl changes in version 5.39.2
 pod/perl561delta.pod			Perl changes in version 5.6.1
 pod/perl56delta.pod			Perl changes in version 5.6
 pod/perl581delta.pod			Perl changes in version 5.8.1
@@ -5525,7 +5526,7 @@ pod/perlnewmod.pod			Perl modules: preparing a new module for distribution
 pod/perlnumber.pod			Perl number semantics
 pod/perlobj.pod				Perl objects
 pod/perlootut.pod			Perl OO tutorial for beginners
-pod/perlop.pod				Perl operators and precedence
+pod/perlop.pod				Perl expressions: operators, precedence, string literals
 pod/perlopentut.pod			Perl open() tutorial
 pod/perlpacktut.pod			Perl pack() and unpack() tutorial
 pod/perlperf.pod			Perl Performance and Optimization Techniques
@@ -5552,7 +5553,7 @@ pod/perlsecpolicy.pod			Perl security report handling policy
 pod/perlsource.pod			Guide to the Perl source tree
 pod/perlstyle.pod			Perl style guide
 pod/perlsub.pod				Perl subroutines
-pod/perlsyn.pod				Perl syntax
+pod/perlsyn.pod				Perl syntax: declarations, statements, comments
 pod/perlthrtut.pod			Perl threads tutorial
 pod/perltie.pod				Perl objects hidden behind simple variables
 pod/perltodo.pod
