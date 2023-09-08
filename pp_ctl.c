@@ -2208,7 +2208,7 @@ PP_wrapped(pp_caller, MAXARG, 0)
              * subsequently freed, but hopefully people quickly copy the
              * contents of @DB::args before doing anything else.
              */
-            if (sv && SvREFCNT(sv) == 0)
+            if (sv && (SvREFCNT(sv) == 0 || SvIS_FREED(sv)))
                 sv = NULL;
             AvARRAY(PL_dbargs)[i] = sv;
         }
