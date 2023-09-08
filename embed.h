@@ -537,6 +537,7 @@
 # define repeatcpy                              Perl_repeatcpy
 # define require_pv(a)                          Perl_require_pv(aTHX_ a)
 # define rninstr                                Perl_rninstr
+# define rpp_context(a,b,c)                     Perl_rpp_context(aTHX_ a,b,c)
 # define rpp_extend(a)                          Perl_rpp_extend(aTHX_ a)
 # define rpp_invoke_xs(a)                       Perl_rpp_invoke_xs(aTHX_ a)
 # define rpp_is_lone(a)                         Perl_rpp_is_lone(aTHX_ a)

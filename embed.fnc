@@ -2754,6 +2754,9 @@ APTdp	|char * |rninstr	|NN const char *big			\
 				|NN const char *little			\
 				|NN const char *lend
 p	|void	|rpeep		|NULLOK OP *o
+Adipx	|void	|rpp_context	|NN SV **mark				\
+				|U8 gimme				\
+				|SSize_t extra
 Adipx	|void	|rpp_extend	|SSize_t n
 Adipx	|void	|rpp_invoke_xs	|NN CV *cv
 Adipx	|bool	|rpp_is_lone	|NN SV *sv
