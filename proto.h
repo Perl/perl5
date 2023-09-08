@@ -9803,6 +9803,11 @@ Perl_push_stackinfo(pTHX_ I32 type, UV flags);
 # define PERL_ARGS_ASSERT_PUSH_STACKINFO
 
 PERL_STATIC_INLINE void
+Perl_rpp_context(pTHX_ SV **mark, U8 gimme, SSize_t extra);
+# define PERL_ARGS_ASSERT_RPP_CONTEXT           \
+        assert(mark)
+
+PERL_STATIC_INLINE void
 Perl_rpp_extend(pTHX_ SSize_t n);
 # define PERL_ARGS_ASSERT_RPP_EXTEND
 
