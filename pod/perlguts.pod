@@ -4759,6 +4759,7 @@ in summary:
 
  rpp_replace_1_1(sv)     (void)POPs; PUSHs(sv);
  rpp_replace_2_1(sv)     (void)POPs; (void)POPs; PUSHs(sv);
+ rpp_replace_at(sp, sv)  *sp = sv;
 
  rpp_try_AMAGIC_1()      tryAMAGICun_MG()
  rpp_try_AMAGIC_2()      tryAMAGICbin_MG()
@@ -4798,6 +4799,9 @@ becomes
 The rpp_replace_M_N() functions are shortcuts for popping and freeing C<M>
 items then pushing and bumping up the RCs of C<N> items. Note that they
 handle edge cases such as an old and new SV being the same.
+
+rpp_replace_at(sp, sv) is similar to rpp_replace_1_1(), except that
+it replaces an SV at an address in the stack rather than at the top.
 
 rpp_popfree_to(svp) is designed to replace code like
 

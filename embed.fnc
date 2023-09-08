@@ -2769,6 +2769,8 @@ Adipx	|void	|rpp_push_2	|NN SV *sv1				\
 Adipx	|void	|rpp_push_1_norc|NN SV *sv
 Adipx	|void	|rpp_replace_1_1|NN SV *sv
 Adipx	|void	|rpp_replace_2_1|NN SV *sv
+Adipx	|void	|rpp_replace_at |NN SV **sp				\
+				|NN SV *sv
 Adipx	|bool	|rpp_stack_is_rc
 Adipx	|bool	|rpp_try_AMAGIC_1					\
 				|int method				\
