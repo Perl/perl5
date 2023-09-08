@@ -679,6 +679,35 @@ Perl_rpp_replace_2_1(pTHX_ SV *sv)
 
 
 /*
+=for apidoc rpp_replace_at
+
+Replace the SV at address sp within the stack with C<sv>, while suitably
+adjusting reference counts. Equivalent to C<*sp = sv>, except with proper
+reference count handling.
+
+=cut
+*/
+
+PERL_STATIC_INLINE void
+Perl_rpp_replace_at(pTHX_ SV **sp, SV *sv)
+{
+    PERL_ARGS_ASSERT_RPP_REPLACE_AT;
+
+#ifdef PERL_RC_STACK
+    assert(rpp_stack_is_rc());
+    SV *oldsv = *sp;
+    *sp = sv;
+    SvREFCNT_inc_simple_void_NN(sv);
+    SvREFCNT_dec(oldsv);
+#else
+    *sp = sv;
+#endif
+}
+
+
+
+
+/*
 =for apidoc      rpp_try_AMAGIC_1
 =for apidoc_item rpp_try_AMAGIC_2
 

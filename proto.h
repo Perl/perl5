@@ -9844,6 +9844,11 @@ Perl_rpp_replace_2_1(pTHX_ SV *sv);
 # define PERL_ARGS_ASSERT_RPP_REPLACE_2_1       \
         assert(sv)
 
+PERL_STATIC_INLINE void
+Perl_rpp_replace_at(pTHX_ SV **sp, SV *sv);
+# define PERL_ARGS_ASSERT_RPP_REPLACE_AT        \
+        assert(sp); assert(sv)
+
 PERL_STATIC_INLINE bool
 Perl_rpp_stack_is_rc(pTHX);
 # define PERL_ARGS_ASSERT_RPP_STACK_IS_RC
