@@ -3903,28 +3903,6 @@ S_softref2xv_lite(pTHX_ SV *const sv, const char *const what,
 }
 
 
-/* how many stack arguments a multideref op expects */
-#ifdef PERL_RC_STACK
-STATIC I32
-S_multideref_argcount(pTHX)
-{
-    UNOP_AUX_item *items = cUNOP_AUXx(PL_op)->op_aux;
-    UV actions = items->uv;
-    I32 nargs;
-
-    switch (actions & MDEREF_ACTION_MASK) {
-    case MDEREF_AV_pop_rv2av_aelem:             /* expr->[...] */
-    case MDEREF_HV_pop_rv2hv_helem:             /* expr->{...} */
-        nargs = 1;
-        break;
-    default:
-        nargs = 0;
-    }
-    return nargs;
-}
-#endif
-
-
 /* Handle one or more aggregate derefs and array/hash indexings, e.g.
  * $h->{foo}  or  $a[0]{$key}[$i]  or  f()->[1]
  *
@@ -3935,7 +3913,7 @@ S_multideref_argcount(pTHX)
  * one UV, and only reload when it becomes zero.
  */
 
-PP_wrapped(pp_multideref, S_multideref_argcount(aTHX), 0)
+PP(pp_multideref)
 {
     SV *sv = NULL; /* init to avoid spurious 'may be used uninitialized' */
     UNOP_AUX_item *items = cUNOP_AUXx(PL_op)->op_aux;
@@ -3944,6 +3922,7 @@ PP_wrapped(pp_multideref, S_multideref_argcount(aTHX), 0)
     assert(actions);
     /* this tells find_uninit_var() where we're up to */
     PL_multideref_pc = items;
+    bool replace = FALSE;
 
     while (1) {
         /* there are three main classes of action; the first retrieves
@@ -3969,9 +3948,8 @@ PP_wrapped(pp_multideref, S_multideref_argcount(aTHX), 0)
 
         case MDEREF_AV_pop_rv2av_aelem:             /* expr->[...] */
             {
-                dSP;
-                sv = POPs;
-                PUTBACK;
+                sv = *PL_stack_sp;
+                replace = TRUE;
                 goto do_AV_rv2av_aelem;
             }
 
@@ -4141,9 +4119,11 @@ PP_wrapped(pp_multideref, S_multideref_argcount(aTHX), 0)
             }
           finish:
             {
-                dSP;
-                XPUSHs(sv);
-                RETURN;
+                if (replace)
+                    rpp_replace_1_1(sv);
+                else
+                    rpp_xpush_1(sv);
+                return NORMAL;
             }
             /* NOTREACHED */
 
@@ -4162,9 +4142,8 @@ PP_wrapped(pp_multideref, S_multideref_argcount(aTHX), 0)
 
         case MDEREF_HV_pop_rv2hv_helem:             /* expr->{...} */
             {
-                dSP;
-                sv = POPs;
-                PUTBACK;
+                sv = *PL_stack_sp;
+                replace = TRUE;
                 goto do_HV_rv2hv_helem;
             }
 
