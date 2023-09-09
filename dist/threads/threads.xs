@@ -1589,11 +1589,15 @@ ithread_object(...)
         }
         classname = (char *)SvPV_nolen(ST(0));
 
+        if (items < 2) {
+            XSRETURN_UNDEF;
+        }
+
         /* Turn $tid from PVLV to SV if needed (bug #73330) */
         arg = ST(1);
         SvGETMAGIC(arg);
 
-        if ((items < 2) || ! SvOK(arg)) {
+        if (! SvOK(arg)) {
             XSRETURN_UNDEF;
         }
 
