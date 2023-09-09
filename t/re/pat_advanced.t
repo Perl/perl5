@@ -2699,6 +2699,14 @@ EOF_DEBUG_OUT
                       "Related to Github Issue #19350, forward \\g{x} pattern segv under use re Debug => 'PARSE'");
     }
 
+    {   # perl-security#140, read/write past buffer end
+        fresh_perl_like('qr/\p{utf8::perl x}/',
+                        qr/Illegal user-defined property name "utf8::perl x" in regex/,
+                        {}, "perl-security#140");
+        fresh_perl_is('qr/\p{utf8::_perl_surrogate}/', "",
+                        {}, "perl-security#140");
+    }
+
     {   # GH 20009
         my $x = "awesome quotes";
         utf8::upgrade($x);
