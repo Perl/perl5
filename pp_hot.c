@@ -625,23 +625,8 @@ have differing overloading behaviour.
 
 */
 
-
-/* how many stack arguments a multiconcat op expects */
-#ifdef PERL_RC_STACK
-STATIC I32
-S_multiconcat_argcount(pTHX)
+PP(pp_multiconcat)
 {
-    UNOP_AUX_item *aux = cUNOP_AUXx(PL_op)->op_aux;
-    SSize_t nargs = aux[PERL_MULTICONCAT_IX_NARGS].ssize;
-    if (PL_op->op_flags & OPf_STACKED)
-        nargs++;
-    return nargs;
-}
-#endif
-
-PP_wrapped(pp_multiconcat, S_multiconcat_argcount(aTHX), 0)
-{
-    dSP;
     SV *targ;                /* The SV to be assigned or appended to */
     char *targ_pv;           /* where within SvPVX(targ) we're writing to */
     STRLEN targ_len;         /* SvCUR(targ) */
@@ -650,7 +635,7 @@ PP_wrapped(pp_multiconcat, S_multiconcat_argcount(aTHX), 0)
     UNOP_AUX_item *const_lens; /* the segment length array part of aux */
     const char *const_pv;    /* the current segment of the const string buf */
     SSize_t nargs;           /* how many args were expected */
-    SSize_t stack_adj;       /* how much to adjust SP on return */
+    SSize_t stack_adj;       /* how much to adjust PL_stack_sp on return */
     STRLEN grow;             /* final size of destination string (targ) */
     UV targ_count;           /* how many times targ has appeared on the RHS */
     bool is_append;          /* OPpMULTICONCAT_APPEND flag is set */
@@ -675,15 +660,18 @@ PP_wrapped(pp_multiconcat, S_multiconcat_argcount(aTHX), 0)
 
     /* get targ from the stack or pad */
 
+    toparg = PL_stack_sp;
     if (PL_op->op_flags & OPf_STACKED) {
+        stack_adj++;
         if (is_append) {
             /* for 'expr .= ...', expr is the bottom item on the stack */
-            targ = SP[-nargs];
-            stack_adj++;
+            targ = PL_stack_sp[-nargs];
         }
-        else
+        else {
             /* for 'expr = ...', expr is the top item on the stack */
-            targ = POPs;
+            targ = *PL_stack_sp;
+            toparg--;
+        }
     }
     else {
         SV **svp = &(PAD_SVl(PL_op->op_targ));
@@ -694,11 +682,9 @@ PP_wrapped(pp_multiconcat, S_multiconcat_argcount(aTHX), 0)
         }
         if (!nargs)
             /* $lex .= "const" doesn't cause anything to be pushed */
-            EXTEND(SP,1);
+            rpp_extend(1);
     }
 
-    toparg = SP;
-    SP -= (nargs - 1);
     grow          = 1;    /* allow for '\0' at minimum */
     targ_count    = 0;
     targ_chain    = NULL;
@@ -725,14 +711,14 @@ PP_wrapped(pp_multiconcat, S_multiconcat_argcount(aTHX), 0)
      * pp_cpncat() on each arg in turn' is done.
      */
 
-    for (; SP <= toparg; SP++, svpv_end++) {
+    for (SV **svp = toparg - (nargs - 1); svp <= toparg; svp++, svpv_end++) {
         U32 utf8;
         STRLEN len;
         SV *sv;
 
         assert(svpv_end - svpv_buf < PERL_MULTICONCAT_MAXARG);
 
-        sv = *SP;
+        sv = *svp;
 
         /* this if/else chain is arranged so that common/simple cases
          * take few conditionals */
@@ -1159,10 +1145,11 @@ PP_wrapped(pp_multiconcat, S_multiconcat_argcount(aTHX), 0)
      * return result
      */
 
-    SP -= stack_adj;
+    rpp_popfree_to(PL_stack_sp - stack_adj);
     SvTAINT(targ);
-    SETTARG;
-    RETURN;
+    SvSETMAGIC(targ);
+    rpp_push_1(targ);
+    return NORMAL;
 
     /* --------------------------------------------------------------
      * Phase 7:
@@ -1316,7 +1303,8 @@ PP_wrapped(pp_multiconcat, S_multiconcat_argcount(aTHX), 0)
              *     tryAMAGICbin_MG(concat_amg, AMGf_assign);
              * and
              *     Perl_try_amagic_bin()
-             * call, but using left and right rather than SP[-1], SP[0],
+             * call, but using left and right rather than
+             * PL_stack_sp[-1], PL_stack_sp[0],
              * and not relying on OPf_STACKED implying .=
              */
 
@@ -1370,8 +1358,6 @@ PP_wrapped(pp_multiconcat, S_multiconcat_argcount(aTHX), 0)
             left = nexttarg;
         }
 
-        SP = toparg - stack_adj + 1;
-
         /* Return the result of all RHS concats, unless this op includes
          * an assign ($lex = x.y.z or expr = x.y.z), in which case copy
          * to target (which will be $lex or expr).
@@ -1386,8 +1372,10 @@ PP_wrapped(pp_multiconcat, S_multiconcat_argcount(aTHX), 0)
         }
         else
             targ = left;
-        SETs(targ);
-        RETURN;
+
+        rpp_popfree_to(PL_stack_sp - stack_adj);
+        rpp_push_1(targ);
+        return NORMAL;
     }
 }
 
