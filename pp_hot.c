@@ -2385,8 +2385,8 @@ S_do_oddball(pTHX_ SV **oddkey, SV **firstkey)
  * For example in ($a,$b) = ($b,$a), assigning the value of the first RHS
  * element ($b) to the first LH element ($a), modifies $a; when the
  * second assignment is done, the second RH element now has the wrong
- * value. So we initially replace the RHS with ($b, mortalcopy($a)).
- * Note that we don't need to make a mortal copy of $b.
+ * value. So we initially replace the RHS with ($b, copy($a)).
+ * Note that we don't need to make a copy of $b.
  *
  * The algorithm below works by, for every RHS element, mark the
  * corresponding LHS target element with SVf_BREAK. Then if the RHS
@@ -2511,8 +2511,14 @@ S_aassign_copy_common(pTHX_ SV **firstlelem, SV **lastlelem,
                count bump.  (Although I suspect that the SV won't be
                stealable here anyway - DAPM).
                */
+#ifdef PERL_RC_STACK
+            *relem = newSVsv_flags(svr,
+                        SV_GMAGIC|SV_DO_COW_SVSETSV|SV_NOSTEAL);
+            SvREFCNT_dec_NN(svr);
+#else
             *relem = sv_mortalcopy_flags(svr,
                                 SV_GMAGIC|SV_DO_COW_SVSETSV|SV_NOSTEAL);
+#endif
             /* ... but restore afterwards in case it's needed again,
              * e.g. ($a,$b,$c) = (1,$a,$a)
              */
@@ -2537,9 +2543,8 @@ S_aassign_copy_common(pTHX_ SV **firstlelem, SV **lastlelem,
 
 
 
-PP_wrapped(pp_aassign, 0, 2)
+PP(pp_aassign)
 {
-    dSP;
     SV **lastlelem = PL_stack_sp;
     SV **lastrelem = PL_stack_base + POPMARK;
     SV **firstrelem = PL_stack_base + POPMARK + 1;
@@ -2713,8 +2718,10 @@ PP_wrapped(pp_aassign, 0, 2)
                    /* diag_listed_as: Assigned value is not %s reference */
                         DIE(aTHX_
                            "Assigned value is not a SCALAR reference");
-                    if (lval)
-                        *svp = rsv = sv_mortalcopy(rsv);
+                    if (lval) {
+                        rsv = sv_mortalcopy(rsv);
+                        rpp_replace_at(svp, rsv);
+                    }
                     /* XXX else check for weak refs?  */
                     rsv = SvREFCNT_inc_NN(SvRV(rsv));
                     assert(tmps_base <= PL_tmps_max);
@@ -2736,7 +2743,8 @@ PP_wrapped(pp_aassign, 0, 2)
                          * SV_NOSTEAL */
                         nsv = newSVsv_flags(rsv,
                                 (SV_DO_COW_SVSETSV|SV_NOSTEAL|SV_GMAGIC));
-                        rsv = *svp = nsv;
+                        rpp_replace_at(svp, nsv);
+                        rsv = nsv;
                     }
 
                     assert(tmps_base <= PL_tmps_max);
@@ -2857,7 +2865,8 @@ PP_wrapped(pp_aassign, 0, 2)
                      * SV_NOSTEAL */
                     nsv = newSVsv_flags(rsv,
                             (SV_DO_COW_SVSETSV|SV_NOSTEAL|SV_GMAGIC));
-                    rsv = *svp = nsv;
+                    rpp_replace_at(svp, nsv);
+                    rsv = nsv;
                 }
 
                 assert(tmps_base <= PL_tmps_max);
@@ -2875,8 +2884,9 @@ PP_wrapped(pp_aassign, 0, 2)
                 */
                 EXTEND_MORTAL(nelems);
                 for (svp = relem; svp <= lastrelem; svp += 2)
-                    *svp = sv_mortalcopy_flags(*svp,
-                                SV_GMAGIC|SV_DO_COW_SVSETSV|SV_NOSTEAL);
+                    rpp_replace_at(svp,
+                        sv_mortalcopy_flags(*svp,
+                                SV_GMAGIC|SV_DO_COW_SVSETSV|SV_NOSTEAL));
             }
             else if (PL_op->op_private & OPpASSIGN_COMMON_AGG) {
                 /* for possible commonality, e.g.
@@ -2896,8 +2906,9 @@ PP_wrapped(pp_aassign, 0, 2)
                     SV *rsv = *svp;
                     if (UNLIKELY(SvGMAGICAL(rsv))) {
                         SSize_t n;
-                        *svp = sv_mortalcopy_flags(*svp,
-                                SV_GMAGIC|SV_DO_COW_SVSETSV|SV_NOSTEAL);
+                        rpp_replace_at(svp,
+                            sv_mortalcopy_flags(*svp,
+                                SV_GMAGIC|SV_DO_COW_SVSETSV|SV_NOSTEAL));
                         /* allow other branch to continue pushing
                          * onto tmps stack without checking each time */
                         n = (lastrelem - relem) >> 1;
@@ -2935,7 +2946,7 @@ PP_wrapped(pp_aassign, 0, 2)
                          * stack location if we encountered dups earlier,
                          * The values will be updated later
                          */
-                        *topelem = key;
+                        rpp_replace_at(topelem, key);
                         topelem += 2;
                     }
                     /* A tied store won't take ownership of val, so keep
@@ -2948,6 +2959,7 @@ PP_wrapped(pp_aassign, 0, 2)
                     /* hv_store_ent() may have added set magic to val */;
                     SvSETMAGIC(val);
                 }
+
                 if (topelem < svp) {
                     /* at this point we have removed the duplicate key/value
                      * pairs from the stack, but the remaining values may be
@@ -2959,7 +2971,8 @@ PP_wrapped(pp_aassign, 0, 2)
                     while (relem < lastrelem) {
                         HE *he;
                         he = hv_fetch_ent(hash, *relem++, 0, 0);
-                        *relem++ = (he ? HeVAL(he) : &PL_sv_undef);
+                        rpp_replace_at(relem++,
+                            (he ? HeVAL(he) : &PL_sv_undef));
                     }
                 }
             }
@@ -3035,7 +3048,7 @@ PP_wrapped(pp_aassign, 0, 2)
                 }
 
                 sv_setsv(lsv, *relem);
-                *relem = lsv;
+                rpp_replace_at(relem, lsv);
                 SvSETMAGIC(lsv);
             }
             if (++relem > lastrelem)
@@ -3077,7 +3090,7 @@ PP_wrapped(pp_aassign, 0, 2)
                 sv_set_undef(lsv);
                 SvSETMAGIC(lsv);
             }
-            *relem++ = lsv;
+            rpp_replace_at(relem++, lsv);
             break;
         } /* switch */
     } /* while */
@@ -3169,23 +3182,24 @@ PP_wrapped(pp_aassign, 0, 2)
     }
     PL_delaymagic = old_delaymagic;
 
-    if (gimme == G_VOID)
-        SP = firstrelem - 1;
-    else if (gimme == G_SCALAR) {
-        SP = firstrelem;
-        EXTEND(SP,1);
+    rpp_popfree_to((gimme == G_LIST ? relem : firstrelem) - 1);
+
+    if (gimme == G_SCALAR) {
+        rpp_extend(1);
+        SV *sv;
         if (PL_op->op_private & OPpASSIGN_TRUEBOOL)
-            SETs((firstlelem - firstrelem) ? &PL_sv_yes : &PL_sv_zero);
+             sv = (firstlelem - firstrelem) ? &PL_sv_yes : &PL_sv_zero;
         else {
             dTARGET;
-            SETi(firstlelem - firstrelem);
+            TARGi(firstlelem - firstrelem, 1);
+            sv = targ;
         }
+        rpp_push_1(sv);
     }
-    else
-        SP = relem - 1;
 
-    RETURN;
+    return NORMAL;
 }
+
 
 PP(pp_qr)
 {
