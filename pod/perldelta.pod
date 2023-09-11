@@ -334,9 +334,10 @@ L</Modules and Pragmata> section.
 
 =over 4
 
-=item XXX-some-platform
+=item MacOS/Darwin
 
-XXX
+Don't set C<MACOSX_DEPLOYMENT_TARGET> when building on OS X 10.5.  [GH
+#21367]
 
 =back
 
