@@ -444,6 +444,18 @@ TODO: {
     is($HASH{key}, "val", 'Lexically exported hash is accessible');
 }
 
+# version bundles
+{
+    use builtin ':5.39';
+    ok(true, 'true() is available from :5.39 bundle');
+
+    # parse errors
+    foreach my $bundle (qw( :x :5.x :5.36x :5.36.1000 :5.1000 :5.36.1.2 )) {
+        ok(!defined eval "use builtin '$bundle';", $bundle.' is invalid bundle');
+        like($@, qr/^Invalid version bundle \Q$bundle\E at /);
+    }
+}
+
 # vim: tabstop=4 shiftwidth=4 expandtab autoindent softtabstop=4
 
 done_testing();

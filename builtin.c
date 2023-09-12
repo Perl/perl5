@@ -16,8 +16,12 @@
 
 #include "XSUB.h"
 
+/* copied from op.c */
+#define SHORTVER(maj,min) (((maj) << 8) | (min))
+
 struct BuiltinFuncDescriptor {
     const char *name;
+    U16 since_ver;
     XSUBADDR_t xsub;
     OP *(*checker)(pTHX_ OP *, GV *, SV *);
     IV ckval;
@@ -488,34 +492,92 @@ static OP *ck_builtin_funcN(pTHX_ OP *entersubop, GV *namegv, SV *ckobj)
 
 static const char builtin_not_recognised[] = "'%" SVf "' is not recognised as a builtin function";
 
+#define NO_BUNDLE SHORTVER(255,255)
+
 static const struct BuiltinFuncDescriptor builtins[] = {
     /* constants */
-    { "true",   &XS_builtin_true,   &ck_builtin_const, BUILTIN_CONST_TRUE,  false },
-    { "false",  &XS_builtin_false,  &ck_builtin_const, BUILTIN_CONST_FALSE, false },
+    { "true",  SHORTVER(5,39), &XS_builtin_true,   &ck_builtin_const, BUILTIN_CONST_TRUE,  false },
+    { "false", SHORTVER(5,39), &XS_builtin_false,  &ck_builtin_const, BUILTIN_CONST_FALSE, false },
 
     /* unary functions */
-    { "is_bool",    &XS_builtin_func1_scalar, &ck_builtin_func1, OP_IS_BOOL,    true  },
-    { "weaken",     &XS_builtin_func1_void,   &ck_builtin_func1, OP_WEAKEN,     false },
-    { "unweaken",   &XS_builtin_func1_void,   &ck_builtin_func1, OP_UNWEAKEN,   false },
-    { "is_weak",    &XS_builtin_func1_scalar, &ck_builtin_func1, OP_IS_WEAK,    false },
-    { "blessed",    &XS_builtin_func1_scalar, &ck_builtin_func1, OP_BLESSED,    false },
-    { "refaddr",    &XS_builtin_func1_scalar, &ck_builtin_func1, OP_REFADDR,    false },
-    { "reftype",    &XS_builtin_func1_scalar, &ck_builtin_func1, OP_REFTYPE,    false },
-    { "ceil",       &XS_builtin_func1_scalar, &ck_builtin_func1, OP_CEIL,       false },
-    { "floor",      &XS_builtin_func1_scalar, &ck_builtin_func1, OP_FLOOR,      false },
-    { "is_tainted", &XS_builtin_func1_scalar, &ck_builtin_func1, OP_IS_TAINTED, false },
-    { "trim",       &XS_builtin_trim,         &ck_builtin_func1, 0,             false },
-    { "stringify",  &XS_builtin_func1_scalar, &ck_builtin_func1, OP_STRINGIFY,  true },
+    { "is_bool",         NO_BUNDLE, &XS_builtin_func1_scalar, &ck_builtin_func1, OP_IS_BOOL,    true  },
+    { "weaken",     SHORTVER(5,39), &XS_builtin_func1_void,   &ck_builtin_func1, OP_WEAKEN,     false },
+    { "unweaken",   SHORTVER(5,39), &XS_builtin_func1_void,   &ck_builtin_func1, OP_UNWEAKEN,   false },
+    { "is_weak",    SHORTVER(5,39), &XS_builtin_func1_scalar, &ck_builtin_func1, OP_IS_WEAK,    false },
+    { "blessed",    SHORTVER(5,39), &XS_builtin_func1_scalar, &ck_builtin_func1, OP_BLESSED,    false },
+    { "refaddr",    SHORTVER(5,39), &XS_builtin_func1_scalar, &ck_builtin_func1, OP_REFADDR,    false },
+    { "reftype",    SHORTVER(5,39), &XS_builtin_func1_scalar, &ck_builtin_func1, OP_REFTYPE,    false },
+    { "ceil",       SHORTVER(5,39), &XS_builtin_func1_scalar, &ck_builtin_func1, OP_CEIL,       false },
+    { "floor",      SHORTVER(5,39), &XS_builtin_func1_scalar, &ck_builtin_func1, OP_FLOOR,      false },
+    { "is_tainted", SHORTVER(5,39), &XS_builtin_func1_scalar, &ck_builtin_func1, OP_IS_TAINTED, false },
+    { "trim",       SHORTVER(5,39), &XS_builtin_trim,         &ck_builtin_func1, 0,             false },
+    { "stringify",       NO_BUNDLE, &XS_builtin_func1_scalar, &ck_builtin_func1, OP_STRINGIFY,  true },
 
-    { "created_as_string", &XS_builtin_created_as_string, &ck_builtin_func1, 0, true },
-    { "created_as_number", &XS_builtin_created_as_number, &ck_builtin_func1, 0, true },
+    { "created_as_string", NO_BUNDLE, &XS_builtin_created_as_string, &ck_builtin_func1, 0, true },
+    { "created_as_number", NO_BUNDLE, &XS_builtin_created_as_number, &ck_builtin_func1, 0, true },
 
     /* list functions */
-    { "indexed",          &XS_builtin_indexed,          &ck_builtin_funcN, 0, false },
-    { "export_lexically", &XS_builtin_export_lexically, NULL,              0, true },
+    { "indexed",          SHORTVER(5,39), &XS_builtin_indexed,          &ck_builtin_funcN, 0, false },
+    { "export_lexically",      NO_BUNDLE, &XS_builtin_export_lexically, NULL,              0, true },
 
-    { NULL, NULL, NULL, 0, false }
+    { NULL, 0, NULL, NULL, 0, false }
 };
+
+static bool S_parse_version(const char *vstr, int *vmajor, int *vminor)
+{
+    /* Parse a string like "5.35" to yield 5 and 35. Ignores an optional
+     * trailing third component e.g. "5.35.7". Returns false on parse errors.
+     */
+
+    size_t len;
+
+    if(sscanf(vstr, "%d.%d%zn", vmajor, vminor, &len) < 2)
+        return FALSE;
+
+    if(*vminor > 255)
+        return FALSE;
+
+    vstr += len;
+
+    if(vstr[0] == '.') {
+        vstr++;
+
+        int _dummy;
+        if(sscanf(vstr, "%d%zn", &_dummy, &len) < 1)
+            return FALSE;
+        if(_dummy > 255)
+            return FALSE;
+
+        vstr += len;
+    }
+
+    if(vstr[0])
+        return FALSE;
+
+    return TRUE;
+}
+
+#define import_sym(sym)  S_import_sym(aTHX_ sym)
+static void S_import_sym(pTHX_ SV *sym)
+{
+    SV *ampname = sv_2mortal(Perl_newSVpvf(aTHX_ "&%" SVf, SVfARG(sym)));
+    SV *fqname = sv_2mortal(Perl_newSVpvf(aTHX_ "builtin::%" SVf, SVfARG(sym)));
+
+    CV *cv = get_cv(SvPV_nolen(fqname), SvUTF8(fqname) ? SVf_UTF8 : 0);
+    if(!cv)
+        Perl_croak(aTHX_ builtin_not_recognised, sym);
+
+    export_lexical(ampname, (SV *)cv);
+}
+
+#define import_builtin_bundle(ver)  S_import_builtin_bundle(aTHX_ ver)
+static void S_import_builtin_bundle(pTHX_ U16 ver)
+{
+    for(int i = 0; builtins[i].name; i++) {
+        if(builtins[i].since_ver <= ver)
+            import_sym(newSVpvn_flags(builtins[i].name, strlen(builtins[i].name), SVs_TEMP));
+    }
+}
 
 XS(XS_builtin_import);
 XS(XS_builtin_import)
@@ -534,14 +596,25 @@ XS(XS_builtin_import)
         if(strEQ(sympv, "import") || strEQ(sympv, "unimport"))
             Perl_croak(aTHX_ builtin_not_recognised, sym);
 
-        SV *ampname = sv_2mortal(Perl_newSVpvf(aTHX_ "&%" SVf, SVfARG(sym)));
-        SV *fqname = sv_2mortal(Perl_newSVpvf(aTHX_ "builtin::%" SVf, SVfARG(sym)));
+        if(sympv[0] == ':') {
+            int vmajor, vminor;
+            if(!S_parse_version(sympv + 1, &vmajor, &vminor))
+                Perl_croak(aTHX_ "Invalid version bundle %s", sympv);
 
-        CV *cv = get_cv(SvPV_nolen(fqname), SvUTF8(fqname) ? SVf_UTF8 : 0);
-        if(!cv)
-            Perl_croak(aTHX_ builtin_not_recognised, sym);
+            U16 want_ver = SHORTVER(vmajor, vminor);
 
-        export_lexical(ampname, (SV *)cv);
+            if(want_ver < SHORTVER(5,39) ||
+                    /* round up devel version to next major release; e.g. 5.39 => 5.40 */
+                    want_ver > SHORTVER(PERL_REVISION, PERL_VERSION + (PERL_VERSION % 2)))
+                Perl_croak(aTHX_ "Builtin version bundle \"%s\" is not supported by Perl " PERL_VERSION_STRING,
+                        sympv);
+
+            import_builtin_bundle(want_ver);
+
+            continue;
+        }
+
+        import_sym(sym);
     }
 
     finish_export_lexical();
