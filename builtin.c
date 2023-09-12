@@ -24,13 +24,12 @@ struct BuiltinFuncDescriptor {
     bool is_experimental;
 };
 
-#define warn_experimental_builtin(name, prefix) S_warn_experimental_builtin(aTHX_ name, prefix)
-static void S_warn_experimental_builtin(pTHX_ const char *name, bool prefix)
+#define warn_experimental_builtin(name) S_warn_experimental_builtin(aTHX_ name)
+static void S_warn_experimental_builtin(pTHX_ const char *name)
 {
     /* diag_listed_as: Built-in function '%s' is experimental */
     Perl_ck_warner_d(aTHX_ packWARN(WARN_EXPERIMENTAL__BUILTIN),
-                     "Built-in function '%s%s' is experimental",
-                     prefix ? "builtin::" : "", name);
+                     "Built-in function 'builtin::%s' is experimental", name);
 }
 
 /* These three utilities might want to live elsewhere to be reused from other
@@ -125,7 +124,7 @@ XS(XS_builtin_func1_scalar)
 
     switch(ix) {
         case OP_IS_BOOL:
-            warn_experimental_builtin(PL_op_name[ix], true);
+            warn_experimental_builtin(PL_op_name[ix]);
             Perl_pp_is_bool(aTHX);
             break;
 
@@ -266,7 +265,7 @@ XS(XS_builtin_export_lexically)
 {
     dXSARGS;
 
-    warn_experimental_builtin("export_lexically", true);
+    warn_experimental_builtin("export_lexically");
 
     if(!PL_compcv)
         Perl_croak(aTHX_
@@ -395,7 +394,7 @@ static OP *ck_builtin_func1(pTHX_ OP *entersubop, GV *namegv, SV *ckobj)
     const struct BuiltinFuncDescriptor *builtin = NUM2PTR(const struct BuiltinFuncDescriptor *, SvUV(ckobj));
 
     if(builtin->is_experimental)
-        warn_experimental_builtin(builtin->name, false);
+        warn_experimental_builtin(builtin->name);
 
     SV *prototype = newSVpvs("$");
     SAVEFREESV(prototype);
@@ -476,7 +475,7 @@ static OP *ck_builtin_funcN(pTHX_ OP *entersubop, GV *namegv, SV *ckobj)
     const struct BuiltinFuncDescriptor *builtin = NUM2PTR(const struct BuiltinFuncDescriptor *, SvUV(ckobj));
 
     if(builtin->is_experimental)
-        warn_experimental_builtin(builtin->name, false);
+        warn_experimental_builtin(builtin->name);
 
     SV *prototype = newSVpvs("@");
     SAVEFREESV(prototype);
@@ -491,29 +490,29 @@ static const char builtin_not_recognised[] = "'%" SVf "' is not recognised as a 
 
 static const struct BuiltinFuncDescriptor builtins[] = {
     /* constants */
-    { "builtin::true",   &XS_builtin_true,   &ck_builtin_const, BUILTIN_CONST_TRUE,  false },
-    { "builtin::false",  &XS_builtin_false,  &ck_builtin_const, BUILTIN_CONST_FALSE, false },
+    { "true",   &XS_builtin_true,   &ck_builtin_const, BUILTIN_CONST_TRUE,  false },
+    { "false",  &XS_builtin_false,  &ck_builtin_const, BUILTIN_CONST_FALSE, false },
 
     /* unary functions */
-    { "builtin::is_bool",    &XS_builtin_func1_scalar, &ck_builtin_func1, OP_IS_BOOL,    true  },
-    { "builtin::weaken",     &XS_builtin_func1_void,   &ck_builtin_func1, OP_WEAKEN,     false },
-    { "builtin::unweaken",   &XS_builtin_func1_void,   &ck_builtin_func1, OP_UNWEAKEN,   false },
-    { "builtin::is_weak",    &XS_builtin_func1_scalar, &ck_builtin_func1, OP_IS_WEAK,    false },
-    { "builtin::blessed",    &XS_builtin_func1_scalar, &ck_builtin_func1, OP_BLESSED,    false },
-    { "builtin::refaddr",    &XS_builtin_func1_scalar, &ck_builtin_func1, OP_REFADDR,    false },
-    { "builtin::reftype",    &XS_builtin_func1_scalar, &ck_builtin_func1, OP_REFTYPE,    false },
-    { "builtin::ceil",       &XS_builtin_func1_scalar, &ck_builtin_func1, OP_CEIL,       false },
-    { "builtin::floor",      &XS_builtin_func1_scalar, &ck_builtin_func1, OP_FLOOR,      false },
-    { "builtin::is_tainted", &XS_builtin_func1_scalar, &ck_builtin_func1, OP_IS_TAINTED, false },
-    { "builtin::trim",       &XS_builtin_trim,         &ck_builtin_func1, 0,             false },
-    { "builtin::stringify",  &XS_builtin_func1_scalar, &ck_builtin_func1, OP_STRINGIFY,  true },
+    { "is_bool",    &XS_builtin_func1_scalar, &ck_builtin_func1, OP_IS_BOOL,    true  },
+    { "weaken",     &XS_builtin_func1_void,   &ck_builtin_func1, OP_WEAKEN,     false },
+    { "unweaken",   &XS_builtin_func1_void,   &ck_builtin_func1, OP_UNWEAKEN,   false },
+    { "is_weak",    &XS_builtin_func1_scalar, &ck_builtin_func1, OP_IS_WEAK,    false },
+    { "blessed",    &XS_builtin_func1_scalar, &ck_builtin_func1, OP_BLESSED,    false },
+    { "refaddr",    &XS_builtin_func1_scalar, &ck_builtin_func1, OP_REFADDR,    false },
+    { "reftype",    &XS_builtin_func1_scalar, &ck_builtin_func1, OP_REFTYPE,    false },
+    { "ceil",       &XS_builtin_func1_scalar, &ck_builtin_func1, OP_CEIL,       false },
+    { "floor",      &XS_builtin_func1_scalar, &ck_builtin_func1, OP_FLOOR,      false },
+    { "is_tainted", &XS_builtin_func1_scalar, &ck_builtin_func1, OP_IS_TAINTED, false },
+    { "trim",       &XS_builtin_trim,         &ck_builtin_func1, 0,             false },
+    { "stringify",  &XS_builtin_func1_scalar, &ck_builtin_func1, OP_STRINGIFY,  true },
 
-    { "builtin::created_as_string", &XS_builtin_created_as_string, &ck_builtin_func1, 0, true },
-    { "builtin::created_as_number", &XS_builtin_created_as_number, &ck_builtin_func1, 0, true },
+    { "created_as_string", &XS_builtin_created_as_string, &ck_builtin_func1, 0, true },
+    { "created_as_number", &XS_builtin_created_as_number, &ck_builtin_func1, 0, true },
 
     /* list functions */
-    { "builtin::indexed",          &XS_builtin_indexed,          &ck_builtin_funcN, 0, false },
-    { "builtin::export_lexically", &XS_builtin_export_lexically, NULL,              0, true },
+    { "indexed",          &XS_builtin_indexed,          &ck_builtin_funcN, 0, false },
+    { "export_lexically", &XS_builtin_export_lexically, NULL,              0, true },
 
     { NULL, NULL, NULL, 0, false }
 };
@@ -607,7 +606,9 @@ Perl_boot_core_builtin(pTHX)
         else if(builtin->checker == &ck_builtin_funcN)
             proto = "@";
 
-        CV *cv = newXS_flags(builtin->name, builtin->xsub, __FILE__, proto, 0);
+        SV *name = newSVpvs_flags("builtin::", SVs_TEMP);
+        sv_catpv(name, builtin->name);
+        CV *cv = newXS_flags(SvPV_nolen(name), builtin->xsub, __FILE__, proto, 0);
         XSANY.any_i32 = builtin->ckval;
 
         if (   builtin->xsub == &XS_builtin_func1_void
