@@ -56,10 +56,6 @@ typedef FILE * OutputStream;
 # define NORETURN_FUNCTION_END /* NOT REACHED */ return 0
 #endif
 
-#ifndef OpSIBLING
-#  define OpSIBLING(o) (o)->op_sibling
-#endif
-
 static int not_here(const char *s) __attribute__noreturn__;
 static int
 not_here(const char *s)
