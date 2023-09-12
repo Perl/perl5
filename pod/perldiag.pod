@@ -664,6 +664,12 @@ is currently being compiled. Since this method is used to remove
 previously-introduced lexical subroutines from the scope currently being
 compiled, this is not going to have any effect.
 
+=item Builtin version bundle "%s" is not supported by Perl
+
+(F) You attempted to C<use builtin :ver> for a version number that is either
+older than 5.39 (when the ability was added), or newer than the current perl
+version.
+
 =item Callback called exit
 
 (F) A subroutine invoked from an external package via call_sv()
@@ -3366,6 +3372,14 @@ See L<perlfunc/pack>.
 
 (W) The given character is not a valid pack or unpack type but used to be
 silently ignored.
+
+=item Invalid version bundle %s
+
+(F) A version number that is used to specify an import bundle during a
+C<use builtin ...> statement must be formatted as C<:MAJOR.MINOR> with an
+optional third component, which is ignored.  Each component must be a number
+of 1 to 3 digits. No other characters are permitted.  The value that was
+specified does not conform to these rules.
 
 =item Invalid version format (%s)
 

@@ -1,4 +1,4 @@
-package builtin 0.010;
+package builtin 0.011;
 
 use strict;
 use warnings;
@@ -28,6 +28,8 @@ builtin - Perl pragma to import built-in utility functions
         is_tainted
         export_lexically
     );
+
+    use builtin ':5.40';  # most of the above
 
 =head1 DESCRIPTION
 
@@ -84,6 +86,23 @@ Imported symbols can also be removed again by using the C<no> keyword:
 
     no builtin 'true';
     # true() is no longer aliased from builtin
+
+=head2 Version Bundles
+
+The entire set of builtin functions that were considered non-experimental by a
+version of perl can be imported all at once, by requesting a version bundle.
+This is done by giving the perl release version (without its subversion
+suffix) after a colon character:
+
+    use builtin ':5.40';
+
+The following bundles currently exist:
+
+    Version    Includes
+    -------    --------
+
+    :5.40      true false weaken unweaken is_weak blessed refaddr reftype
+               ceil floor is_tainted trim indexed
 
 =head1 FUNCTIONS
 
