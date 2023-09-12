@@ -2754,6 +2754,9 @@ APTdp	|char * |rninstr	|NN const char *big			\
 				|NN const char *little			\
 				|NN const char *lend
 p	|void	|rpeep		|NULLOK OP *o
+Adipx	|void	|rpp_context	|NN SV **mark				\
+				|U8 gimme				\
+				|SSize_t extra
 Adipx	|void	|rpp_extend	|SSize_t n
 Adipx	|void	|rpp_invoke_xs	|NN CV *cv
 Adipx	|bool	|rpp_is_lone	|NN SV *sv
@@ -2769,6 +2772,8 @@ Adipx	|void	|rpp_push_2	|NN SV *sv1				\
 Adipx	|void	|rpp_push_1_norc|NN SV *sv
 Adipx	|void	|rpp_replace_1_1|NN SV *sv
 Adipx	|void	|rpp_replace_2_1|NN SV *sv
+Adipx	|void	|rpp_replace_at |NN SV **sp				\
+				|NN SV *sv
 Adipx	|bool	|rpp_stack_is_rc
 Adipx	|bool	|rpp_try_AMAGIC_1					\
 				|int method				\
@@ -3493,7 +3498,7 @@ Apx	|void	|thread_locale_init
 Apx	|void	|thread_locale_term
 
 Fpv	|OP *	|tied_method	|NN SV *methname			\
-				|NN SV **sp				\
+				|NN SV **mark				\
 				|NN SV * const sv			\
 				|NN const MAGIC * const mg		\
 				|const U32 flags			\

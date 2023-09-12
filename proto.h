@@ -5036,10 +5036,10 @@ Perl_thread_locale_term(pTHX);
 #define PERL_ARGS_ASSERT_THREAD_LOCALE_TERM
 
 PERL_CALLCONV OP *
-Perl_tied_method(pTHX_ SV *methname, SV **sp, SV * const sv, const MAGIC * const mg, const U32 flags, U32 argc, ...)
+Perl_tied_method(pTHX_ SV *methname, SV **mark, SV * const sv, const MAGIC * const mg, const U32 flags, U32 argc, ...)
         __attribute__visibility__("hidden");
 #define PERL_ARGS_ASSERT_TIED_METHOD            \
-        assert(methname); assert(sp); assert(sv); assert(mg)
+        assert(methname); assert(mark); assert(sv); assert(mg)
 
 PERL_CALLCONV SSize_t
 Perl_tmps_grow_p(pTHX_ SSize_t ix);
@@ -9803,6 +9803,11 @@ Perl_push_stackinfo(pTHX_ I32 type, UV flags);
 # define PERL_ARGS_ASSERT_PUSH_STACKINFO
 
 PERL_STATIC_INLINE void
+Perl_rpp_context(pTHX_ SV **mark, U8 gimme, SSize_t extra);
+# define PERL_ARGS_ASSERT_RPP_CONTEXT           \
+        assert(mark)
+
+PERL_STATIC_INLINE void
 Perl_rpp_extend(pTHX_ SSize_t n);
 # define PERL_ARGS_ASSERT_RPP_EXTEND
 
@@ -9857,6 +9862,11 @@ PERL_STATIC_INLINE void
 Perl_rpp_replace_2_1(pTHX_ SV *sv);
 # define PERL_ARGS_ASSERT_RPP_REPLACE_2_1       \
         assert(sv)
+
+PERL_STATIC_INLINE void
+Perl_rpp_replace_at(pTHX_ SV **sp, SV *sv);
+# define PERL_ARGS_ASSERT_RPP_REPLACE_AT        \
+        assert(sp); assert(sv)
 
 PERL_STATIC_INLINE bool
 Perl_rpp_stack_is_rc(pTHX);

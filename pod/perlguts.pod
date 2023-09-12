@@ -4759,6 +4759,12 @@ in summary:
 
  rpp_replace_1_1(sv)     (void)POPs; PUSHs(sv);
  rpp_replace_2_1(sv)     (void)POPs; (void)POPs; PUSHs(sv);
+ rpp_replace_at(sp, sv)  *sp = sv;
+
+ rpp_context(mark, gimme,
+             extra)      SP -= extra;
+                         // impose void/scalar/list context on return args
+                         SP = (gimme == G_VOID) ? mark : ....
 
  rpp_try_AMAGIC_1()      tryAMAGICun_MG()
  rpp_try_AMAGIC_2()      tryAMAGICbin_MG()
@@ -4767,6 +4773,7 @@ in summary:
  rpp_stack_is_rc()       no equivalent
 
  rpp_invoke_xs(cv)       CvXSUB(cv)(aTHX_ cv);
+
 
  (no replacement)        dATARGET   // just write the macro body in full
 
@@ -4798,6 +4805,9 @@ becomes
 The rpp_replace_M_N() functions are shortcuts for popping and freeing C<M>
 items then pushing and bumping up the RCs of C<N> items. Note that they
 handle edge cases such as an old and new SV being the same.
+
+rpp_replace_at(sp, sv) is similar to rpp_replace_1_1(), except that
+it replaces an SV at an address in the stack rather than at the top.
 
 rpp_popfree_to(svp) is designed to replace code like
 
@@ -4867,6 +4877,15 @@ can be more efficiently written as
 
 By using this function, the code works correctly on both RC and non-RC
 builds.
+
+A common operation on list ops is to impose void, scalar or list context
+on the return arguments, possibly discarding all, or all except one, of
+them. rpp_context(mark, gimme, extra) does this. As a first step (for
+convenience and efficiency) it notionally pops C<extra> args off the
+stack. Then for list context, leaves things as is. For void context, the
+stack pointer is reset to mark, and everything above is popped. For
+scalar, the top argument (or &PL_sv_undef) is moved from the top to
+mark+1 and everything above is discarded.
 
 The macros which appear at the start of many PP functions to check for
 unary or binary op overloading (among other things) have been replaced

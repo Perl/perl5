@@ -679,6 +679,76 @@ Perl_rpp_replace_2_1(pTHX_ SV *sv)
 
 
 /*
+=for apidoc rpp_replace_at
+
+Replace the SV at address sp within the stack with C<sv>, while suitably
+adjusting reference counts. Equivalent to C<*sp = sv>, except with proper
+reference count handling.
+
+=cut
+*/
+
+PERL_STATIC_INLINE void
+Perl_rpp_replace_at(pTHX_ SV **sp, SV *sv)
+{
+    PERL_ARGS_ASSERT_RPP_REPLACE_AT;
+
+#ifdef PERL_RC_STACK
+    assert(rpp_stack_is_rc());
+    SV *oldsv = *sp;
+    *sp = sv;
+    SvREFCNT_inc_simple_void_NN(sv);
+    SvREFCNT_dec(oldsv);
+#else
+    *sp = sv;
+#endif
+}
+
+
+/*
+=for apidoc rpp_context
+
+Impose void, scalar or list context on the stack.
+First, pop C<extra> items off the stack, then when C<gimme> is:
+C<G_LIST>:   return as-is.
+C<G_VOID>:   pop everything back to C<mark>
+C<G_SCALAR>: move the top stack item (or C<&PL_sv_undef> if none) to
+C<mark+1> and free everything above it.
+
+=cut
+*/
+
+PERL_STATIC_INLINE void
+Perl_rpp_context(pTHX_ SV **mark, U8 gimme, SSize_t extra)
+{
+    PERL_ARGS_ASSERT_RPP_CONTEXT;
+    assert(extra >= 0);
+    assert(mark <= PL_stack_sp - extra);
+
+    if (gimme == G_LIST)
+        mark = PL_stack_sp - extra;
+    else if (gimme == G_SCALAR) {
+        SV **svp = PL_stack_sp - extra;
+        mark++;
+        if (mark > svp) {
+            /* empty list (plus extra) */
+            rpp_popfree_to(svp);
+            rpp_extend(1);
+            *++PL_stack_sp = &PL_sv_undef;
+            return;
+        }
+        /* swap top and bottom list items */
+        SV *top = *svp;
+        *svp = *mark;
+        *mark = top;
+     }
+    rpp_popfree_to(mark);
+}
+
+
+
+
+/*
 =for apidoc      rpp_try_AMAGIC_1
 =for apidoc_item rpp_try_AMAGIC_2
 

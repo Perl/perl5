@@ -306,7 +306,33 @@ PP(pp_av2arylen)
             *svp = newSV_type(SVt_PVMG);
             sv_magic(*svp, MUTABLE_SV(av), PERL_MAGIC_arylen, NULL, 0);
         }
-        rpp_replace_1_1(*svp);
+        SV *sv_al = *svp; /* the temporary SV with arylen magic */
+#ifdef PERL_RC_STACK
+        if (SvREFCNT(av) == 1) {
+            /* At this point there are two SVs pointing at each other,
+             * av and sv_al. av -> sv_al is strong (MGf_REFCOUNTED),
+             * while sv_al -> av is weak, to avoid a leaking loop.
+             *
+             * The only thing keeping av alive right now is the ref from
+             * the stack. We want to swap av and sv_al on the stack, but
+             * that would trigger freeing av. So keep the ref counts and
+             * just swap the strong/weak pointer settings.
+             *
+             * XXX perhaps this should be done even for SvREFCNT(av)>1 ?
+             */
+            MAGIC *mg_av = mg_find((const SV *)av, PERL_MAGIC_arylen_p);
+            MAGIC *mg_al = mg_find(sv_al,          PERL_MAGIC_arylen);
+            assert(mg_av);
+            assert(mg_al);
+            assert(  mg_av->mg_flags & MGf_REFCOUNTED);
+            assert(!(mg_al->mg_flags & MGf_REFCOUNTED));
+            mg_av->mg_flags &= ~MGf_REFCOUNTED;
+            mg_al->mg_flags |=  MGf_REFCOUNTED;
+            *PL_stack_sp = sv_al;
+        }
+        else
+#endif
+        rpp_replace_1_1(sv_al);
     } else {
         SV *sv = newSViv(AvFILL(MUTABLE_AV(av)));
         rpp_popfree_1();
@@ -429,26 +455,45 @@ PP(pp_srefgen)
     return NORMAL;
 }
 
-PP_wrapped(pp_refgen, 0, 1)
+
+/* \( ... list ... )   */
+
+PP(pp_refgen)
 {
-    dSP; dMARK;
-    if (GIMME_V != G_LIST) {
-        if (++MARK <= SP)
-            *MARK = *SP;
-        else
-        {
-            MEXTEND(SP, 1);
-            *MARK = &PL_sv_undef;
+    const U8 gimme = GIMME_V;
+    dMARK;
+
+    if (gimme == G_VOID)
+        rpp_popfree_to(mark);
+    else if (gimme == G_SCALAR) {
+        if (++mark < PL_stack_sp) {
+            /* 2+ args on stack: free all except top one */
+            SV *topsv = *PL_stack_sp;
+            *PL_stack_sp = *mark;
+            *mark = topsv;
+            rpp_popfree_to(mark);
         }
-        *MARK = refto(*MARK);
-        SP = MARK;
-        RETURN;
+        else if (mark > PL_stack_sp)
+            /* 0 args on stack */
+            rpp_xpush_1(&PL_sv_undef);
+        rpp_replace_1_1(refto(*PL_stack_sp));
     }
-    EXTEND_MORTAL(SP - MARK);
-    while (++MARK <= SP)
-        *MARK = refto(*MARK);
-    RETURN;
+    else {
+        /* G_LIST */
+        EXTEND_MORTAL(PL_stack_sp - MARK); /* refto() creates mortals */
+        while (++MARK <= PL_stack_sp) {
+            SV *sv = *MARK;
+            SV *rv = refto(sv);
+#ifdef PERL_RC_STACK
+            SvREFCNT_dec(sv);
+            SvREFCNT_inc(rv);
+#endif
+            *MARK = rv;
+        }
+    }
+    return NORMAL;
 }
+
 
 STATIC SV*
 S_refto(pTHX_ SV *sv)
@@ -2405,15 +2450,16 @@ PP(pp_sle)
 }
 
 
-PP_wrapped(pp_seq, 2, 0)
+PP(pp_seq)
 {
-    dSP;
-    tryAMAGICbin_MG(seq_amg, 0);
-    {
-      dPOPTOPssrl;
-      SETs(boolSV(sv_eq_flags(left, right, 0)));
-      RETURN;
-    }
+    if (rpp_try_AMAGIC_2(seq_amg, 0))
+        return NORMAL;
+
+    SV *right = PL_stack_sp[0];
+    SV *left  = PL_stack_sp[-1];
+
+    rpp_replace_2_1(boolSV(sv_eq_flags(left, right, 0)));;
+    return NORMAL;
 }
 
 
@@ -3004,15 +3050,16 @@ PP(pp_i_ge)
 }
 
 
-PP_wrapped(pp_i_eq, 2, 0)
+PP(pp_i_eq)
 {
-    dSP;
-    tryAMAGICbin_MG(eq_amg, 0);
-    {
-      dPOPTOPiirl_nomg;
-      SETs(boolSV(left == right));
-      RETURN;
-    }
+    if (rpp_try_AMAGIC_2(eq_amg, 0))
+        return NORMAL;
+
+    IV right   = SvIV_nomg(PL_stack_sp[0]);
+    IV left    = SvIV_nomg(PL_stack_sp[-1]);
+
+    rpp_replace_2_1(boolSV(left == right));
+    return NORMAL;
 }
 
 
@@ -5185,10 +5232,11 @@ PP_wrapped(pp_fc, 1, 0)
 
 /* Arrays. */
 
-PP_wrapped(pp_aslice, 0, 1)
+
+PP(pp_aslice)
 {
-    dSP; dMARK; dORIGMARK;
-    AV *const av = MUTABLE_AV(POPs);
+    dMARK; dORIGMARK;
+    AV *const av = MUTABLE_AV(*PL_stack_sp);
     const I32 lval = (PL_op->op_flags & OPf_MOD || LVRET);
 
     if (SvTYPE(av) == SVt_PVAV) {
@@ -5205,7 +5253,7 @@ PP_wrapped(pp_aslice, 0, 1)
         if (lval && localizing) {
             SV **svp;
             SSize_t max = -1;
-            for (svp = MARK + 1; svp <= SP; svp++) {
+            for (svp = MARK + 1; svp < PL_stack_sp; svp++) {
                 const SSize_t elem = SvIV(*svp);
                 if (elem > max)
                     max = elem;
@@ -5214,7 +5262,7 @@ PP_wrapped(pp_aslice, 0, 1)
                 av_extend(av, max);
         }
 
-        while (++MARK <= SP) {
+        while (++MARK < PL_stack_sp) {
             SV **svp;
             SSize_t elem = SvIV(*MARK);
             bool preeminent = TRUE;
@@ -5238,23 +5286,25 @@ PP_wrapped(pp_aslice, 0, 1)
                         SAVEADELETE(av, elem);
                 }
             }
-            *MARK = svp ? *svp : &PL_sv_undef;
+
+            rpp_replace_at(MARK, svp ? *svp : &PL_sv_undef);
         }
     }
-    if (GIMME_V != G_LIST) {
-        MARK = ORIGMARK;
-        *++MARK = SP > ORIGMARK ? *SP : &PL_sv_undef;
-        SP = MARK;
-    }
-    RETURN;
+
+    rpp_context(ORIGMARK, GIMME_V, 1);
+    return NORMAL;
 }
 
-PP_wrapped(pp_kvaslice, 0, 1)
+
+/*  %ary[1,3,5] */
+
+PP(pp_kvaslice)
 {
-    dSP; dMARK;
-    AV *const av = MUTABLE_AV(POPs);
+    dMARK; dORIGMARK;
+    /* leave av on stack for now to avoid leak on croak */
+    AV *const av = MUTABLE_AV(*PL_stack_sp);
     I32 lval = (PL_op->op_flags & OPf_MOD);
-    SSize_t items = SP - MARK;
+    SSize_t items = PL_stack_sp - MARK - 1;
 
     if (PL_op->op_private & OPpMAYBE_LVSUB) {
        const I32 flags = is_lvalue_sub();
@@ -5266,15 +5316,24 @@ PP_wrapped(pp_kvaslice, 0, 1)
        }
     }
 
-    MEXTEND(SP,items);
-    while (items > 1) {
-        *(MARK+items*2-1) = *(MARK+items);
-        items--;
-    }
-    items = SP-MARK;
-    SP += items;
+    rpp_extend(items);
+    MARK = ORIGMARK;
 
-    while (++MARK <= SP) {
+    /* move av from old top-of-stack to new top-of-stack */
+    PL_stack_sp[items] = PL_stack_sp[0];
+    PL_stack_sp[0] = NULL;
+
+    /* spread the index SVs out to every second location */
+    SSize_t i = items;
+    while (i > 1) {
+        *(MARK+i*2-1) = *(MARK+i);
+        *(MARK+i*2)   = NULL;
+        *(MARK+i)     = NULL;
+        i--;
+    }
+    PL_stack_sp += items;
+
+    while (++MARK < PL_stack_sp) {
         SV **svp;
 
         svp = av_fetch(av, SvIV(*MARK), lval);
@@ -5282,17 +5341,26 @@ PP_wrapped(pp_kvaslice, 0, 1)
             if (!svp || !*svp || *svp == &PL_sv_undef) {
                 DIE(aTHX_ PL_no_aelem, SvIV(*MARK));
             }
-            *MARK = sv_mortalcopy(*MARK);
+            /* replace key SV with a copy */
+            SV *oldsv = *MARK;
+            SV *newsv = newSVsv(oldsv);
+#ifdef PERL_RC_STACK
+            *MARK = newsv;
+            SvREFCNT_dec(oldsv);
+#else
+            *MARK = sv_2mortal(newsv);
+#endif
         }
-        *++MARK = svp ? *svp : &PL_sv_undef;
+
+        MARK++;
+        rpp_replace_at(MARK, svp ? *svp : &PL_sv_undef);
     }
-    if (GIMME_V != G_LIST) {
-        MARK = SP - items*2;
-        *++MARK = items > 0 ? *SP : &PL_sv_undef;
-        SP = MARK;
-    }
-    RETURN;
+
+    /* pop AV, then apply void/scalar/list context to stack above mark */
+    rpp_context(ORIGMARK, GIMME_V, 1);
+    return NORMAL;
 }
+
 
 
 PP_wrapped(pp_aeach, 1, 0)
@@ -5690,10 +5758,12 @@ other:
 }
 
 
-PP_wrapped(pp_hslice, 0, 1)
+/* @hash{'foo', 'bar'} */
+
+PP(pp_hslice)
 {
-    dSP; dMARK; dORIGMARK;
-    HV * const hv = MUTABLE_HV(POPs);
+    dMARK; dORIGMARK;
+    HV * const hv = MUTABLE_HV(*PL_stack_sp);
     const I32 lval = (PL_op->op_flags & OPf_MOD || LVRET);
     const bool localizing = PL_op->op_private & OPpLVAL_INTRO;
     bool can_preserve = FALSE;
@@ -5706,7 +5776,7 @@ PP_wrapped(pp_hslice, 0, 1)
             can_preserve = TRUE;
     }
 
-    while (++MARK <= SP) {
+    while (++MARK < PL_stack_sp) {
         SV * const keysv = *MARK;
         SV **svp;
         HE *he;
@@ -5737,22 +5807,24 @@ PP_wrapped(pp_hslice, 0, 1)
                     SAVEHDELETE(hv, keysv);
             }
         }
-        *MARK = svp && *svp ? *svp : &PL_sv_undef;
+
+        rpp_replace_at(MARK, svp && *svp ? *svp : &PL_sv_undef);
     }
-    if (GIMME_V != G_LIST) {
-        MARK = ORIGMARK;
-        *++MARK = SP > ORIGMARK ? *SP : &PL_sv_undef;
-        SP = MARK;
-    }
-    RETURN;
+
+    rpp_context(ORIGMARK, GIMME_V, 1);
+    return NORMAL;
 }
 
-PP_wrapped(pp_kvhslice, 0, 1)
+
+/* %hash{'foo', 'bar'} */
+
+PP(pp_kvhslice)
 {
-    dSP; dMARK;
-    HV * const hv = MUTABLE_HV(POPs);
+    dMARK; dORIGMARK;
+    /* leave hv on stack for now to avoid leak on croak */
+    HV * const hv = MUTABLE_HV(*PL_stack_sp);
     I32 lval = (PL_op->op_flags & OPf_MOD);
-    SSize_t items = SP - MARK;
+    SSize_t items = PL_stack_sp - MARK - 1;
 
     if (PL_op->op_private & OPpMAYBE_LVSUB) {
        const I32 flags = is_lvalue_sub();
@@ -5765,15 +5837,24 @@ PP_wrapped(pp_kvhslice, 0, 1)
        }
     }
 
-    MEXTEND(SP,items);
-    while (items > 1) {
-        *(MARK+items*2-1) = *(MARK+items);
-        items--;
-    }
-    items = SP-MARK;
-    SP += items;
+    rpp_extend(items);
+    MARK = ORIGMARK;
 
-    while (++MARK <= SP) {
+    /* move hv from old top-of-stack to new top-of-stack */
+    PL_stack_sp[items] = PL_stack_sp[0];
+    PL_stack_sp[0] = NULL;
+
+    /* spread the key SVs out to every second location */
+    SSize_t i = items;
+    while (i > 1) {
+        *(MARK+i*2-1) = *(MARK+i);
+        *(MARK+i*2)   = NULL;
+        *(MARK+i)     = NULL;
+        i--;
+    }
+    PL_stack_sp += items;
+
+    while (++MARK < PL_stack_sp) {
         SV * const keysv = *MARK;
         SV **svp;
         HE *he;
@@ -5785,38 +5866,37 @@ PP_wrapped(pp_kvhslice, 0, 1)
             if (!svp || !*svp || *svp == &PL_sv_undef) {
                 DIE(aTHX_ PL_no_helem_sv, SVfARG(keysv));
             }
-            *MARK = sv_mortalcopy(*MARK);
+            /* replace key SV with a copy */
+            SV *oldsv = *MARK;
+            SV *newsv = newSVsv(oldsv);
+#ifdef PERL_RC_STACK
+            *MARK = newsv;
+            SvREFCNT_dec(oldsv);
+#else
+            *MARK = sv_2mortal(newsv);
+#endif
         }
-        *++MARK = svp && *svp ? *svp : &PL_sv_undef;
+
+        MARK++;
+        rpp_replace_at(MARK, (svp  && *svp) ? *svp : &PL_sv_undef);
     }
-    if (GIMME_V != G_LIST) {
-        MARK = SP - items*2;
-        *++MARK = items > 0 ? *SP : &PL_sv_undef;
-        SP = MARK;
-    }
-    RETURN;
+
+    /* pop HV, then apply void/scalar/list context to stack above mark */
+    rpp_context(ORIGMARK, GIMME_V, 1);
+    return NORMAL;
 }
+
 
 /* List operators. */
 
-PP_wrapped(pp_list, 0, 1)
+
+PP(pp_list)
 {
-    I32 markidx = POPMARK;
-    if (GIMME_V != G_LIST) {
-        /* don't initialize mark here, EXTEND() may move the stack */
-        SV **mark;
-        dSP;
-        EXTEND(SP, 1);          /* in case no arguments, as in @empty */
-        mark = PL_stack_base + markidx;
-        if (++MARK <= SP)
-            *MARK = *SP;		/* unwanted list, return last item */
-        else
-            *MARK = &PL_sv_undef;
-        SP = MARK;
-        PUTBACK;
-    }
+    dMARK;
+    rpp_context(mark, GIMME_V, 0);
     return NORMAL;
 }
+
 
 PP_wrapped(pp_lslice, 0, 2)
 {
@@ -5871,16 +5951,23 @@ PP_wrapped(pp_lslice, 0, 2)
     RETURN;
 }
 
-PP_wrapped(pp_anonlist, 0, 1)
+
+PP(pp_anonlist)
 {
-    dSP; dMARK;
-    const I32 items = SP - MARK;
+    dMARK;
+    const I32 items = PL_stack_sp - MARK;
     SV * const av = MUTABLE_SV(av_make(items, MARK+1));
-    SP = MARK;
-    mXPUSHs((PL_op->op_flags & OPf_SPECIAL)
-            ? newRV_noinc(av) : av);
-    RETURN;
+    /* attach new SV to stack before freeing everything else,
+     * so no leak on croak */
+    rpp_extend(1);
+    SV *sv = (PL_op->op_flags & OPf_SPECIAL) ? newRV_noinc(av) : (SV*)av;
+    rpp_push_1_norc(sv); /* this handles ref count and/or mortalising */
+    PL_stack_sp[0] = PL_stack_sp[-items];
+    PL_stack_sp[-items] = sv;
+    rpp_popfree_to(PL_stack_sp - items);
+    return NORMAL;
 }
+
 
 /* When an anonlist or anonhash will (1) be empty and (2) return an RV
  * pointing to the new AV/HV, the peephole optimizer can swap in this
@@ -5927,27 +6014,42 @@ PP_wrapped(pp_emptyavhv, 0,0)
     RETURN;
 }
 
-PP_wrapped(pp_anonhash, 0, 1)
+
+/*  return { list };
+ *  without OPf_SPECIAL, return hash rather than hash ref */
+
+PP(pp_anonhash)
 {
-    dSP; dMARK; dORIGMARK;
+    dMARK; dORIGMARK;
     HV* const hv = newHV();
-    SV* const retval = sv_2mortal( PL_op->op_flags & OPf_SPECIAL
+    SV* const retval = (PL_op->op_flags & OPf_SPECIAL)
                                     ? newRV_noinc(MUTABLE_SV(hv))
-                                    : MUTABLE_SV(hv) );
+                                    : MUTABLE_SV(hv);
     /* This isn't quite true for an odd sized list (it's one too few) but it's
        not worth the runtime +1 just to optimise for the warning case. */
-    SSize_t pairs = (SP - MARK) >> 1;
+    SSize_t pairs = (PL_stack_sp - MARK) >> 1;
+
+    /* temporarily save the hv/hvref at the top of the stack to
+     * avoid possible premature free */
+    rpp_extend(1);
+    rpp_push_1_norc(retval);
+    mark = ORIGMARK; /* in case stack was reallocated */
+
+    if (pairs == 0)
+        return NORMAL;
+
     if (pairs > PERL_HASH_DEFAULT_HvMAX) {
         hv_ksplit(hv, pairs);
     }
 
-    while (MARK < SP) {
-        SV * const key =
-            (MARK++, SvGMAGICAL(*MARK) ? sv_mortalcopy(*MARK) : *MARK);
+    while (++MARK < PL_stack_sp) {
+        SV *key = *MARK;
+        if (SvGMAGICAL(key))
+            key = sv_mortalcopy(key);
+
         SV *val;
-        if (MARK < SP)
+        if (++MARK < PL_stack_sp)
         {
-            MARK++;
             SvGETMAGIC(*MARK);
             val = newSV_type(SVt_NULL);
             sv_setsv_nomg(val, *MARK);
@@ -5959,10 +6061,16 @@ PP_wrapped(pp_anonhash, 0, 1)
         }
         (void)hv_store_ent(hv,key,val,0);
     }
-    SP = ORIGMARK;
-    XPUSHs(retval);
-    RETURN;
+
+    /* swap the HV (which is at the top of stack) with the first key
+     * (which is at the bottom of the stack frame), then free everything
+     * above it */
+    *PL_stack_sp = ORIGMARK[1];
+    ORIGMARK[1] = retval;
+    rpp_popfree_to(ORIGMARK+1);
+    return NORMAL;
 }
+
 
 PP_wrapped(pp_splice, 0, 1)
 {
@@ -6181,29 +6289,35 @@ PP_wrapped(pp_splice, 0, 1)
     RETURN;
 }
 
-PP_wrapped(pp_push, 0, 1)
+
+PP(pp_push)
 {
-    dSP; dMARK; dORIGMARK; dTARGET;
+    dMARK; dORIGMARK; dTARGET;
     AV * const ary = MUTABLE_AV(*++MARK);
     const MAGIC * const mg = SvTIED_mg((const SV *)ary, PERL_MAGIC_tied);
 
     if (mg) {
-        *MARK-- = SvTIED_obj(MUTABLE_SV(ary), mg);
-        PUSHMARK(MARK);
-        PUTBACK;
         ENTER_with_name("call_PUSH");
+        SV *obj = SvTIED_obj(MUTABLE_SV(ary), mg);
+#ifdef PERL_RC_STACK
+        /* keep ary alive as it's replaced on the stack with obj */
+        SAVEFREESV(MUTABLE_SV(ary));
+        SvREFCNT_inc_simple_void(obj);
+#endif
+        *MARK-- = obj;
+        PUSHMARK(MARK);
         call_sv(SV_CONST(PUSH),G_SCALAR|G_DISCARD|G_METHOD_NAMED);
         LEAVE_with_name("call_PUSH");
-        /* SPAGAIN; not needed: SP is assigned to immediately below */
     }
     else {
         /* PL_delaymagic is restored by JMPENV_POP on dieing, so we
          * only need to save locally, not on the save stack */
         U16 old_delaymagic = PL_delaymagic;
 
-        if (SvREADONLY(ary) && MARK < SP) Perl_croak_no_modify();
+        if (SvREADONLY(ary) && MARK < PL_stack_sp)
+            Perl_croak_no_modify();
         PL_delaymagic = DM_DELAY;
-        for (++MARK; MARK <= SP; MARK++) {
+        for (++MARK; MARK <= PL_stack_sp; MARK++) {
             SV *sv;
             if (*MARK) SvGETMAGIC(*MARK);
             sv = newSV_type(SVt_NULL);
@@ -6215,12 +6329,14 @@ PP_wrapped(pp_push, 0, 1)
             mg_set(MUTABLE_SV(ary));
         PL_delaymagic = old_delaymagic;
     }
-    SP = ORIGMARK;
+    rpp_popfree_to(ORIGMARK);
     if (OP_GIMME(PL_op, 0) != G_VOID) {
-        PUSHi( AvFILL(ary) + 1 );
+        TARGi(AvFILL(ary) + 1, 1);
+        rpp_push_1(targ);
     }
-    RETURN;
+    return NORMAL;
 }
+
 
 /* also used for: pp_pop()*/
 PP_wrapped(pp_shift, (PL_op->op_flags & OPf_SPECIAL ? 0 : 1), 0)
@@ -6237,20 +6353,25 @@ PP_wrapped(pp_shift, (PL_op->op_flags & OPf_SPECIAL ? 0 : 1), 0)
     RETURN;
 }
 
-PP_wrapped(pp_unshift, 0, 1)
+
+PP(pp_unshift)
 {
-    dSP; dMARK; dORIGMARK; dTARGET;
+    dMARK; dORIGMARK; dTARGET;
     AV *ary = MUTABLE_AV(*++MARK);
     const MAGIC * const mg = SvTIED_mg((const SV *)ary, PERL_MAGIC_tied);
 
     if (mg) {
-        *MARK-- = SvTIED_obj(MUTABLE_SV(ary), mg);
-        PUSHMARK(MARK);
-        PUTBACK;
         ENTER_with_name("call_UNSHIFT");
+        SV *obj = SvTIED_obj(MUTABLE_SV(ary), mg);
+#ifdef PERL_RC_STACK
+        /* keep ary alive as it's replaced on the stack with obj */
+        SAVEFREESV(MUTABLE_SV(ary));
+        SvREFCNT_inc_simple_void(obj);
+#endif
+        *MARK-- = obj;
+        PUSHMARK(MARK);
         call_sv(SV_CONST(UNSHIFT),G_SCALAR|G_DISCARD|G_METHOD_NAMED);
         LEAVE_with_name("call_UNSHIFT");
-        /* SPAGAIN; not needed: SP is assigned to immediately below */
     }
     else {
         /* PL_delaymagic is restored by JMPENV_POP on dieing, so we
@@ -6258,14 +6379,15 @@ PP_wrapped(pp_unshift, 0, 1)
         U16 old_delaymagic = PL_delaymagic;
         SSize_t i = 0;
 
-        av_unshift(ary, SP - MARK);
+        /* unshift N undefs into the array */
+        av_unshift(ary, PL_stack_sp - MARK);
         PL_delaymagic = DM_DELAY;
 
         if (!SvMAGICAL(ary)) {
             /* The av_unshift above means that many of the checks inside
              * av_store are unnecessary. If ary does not have magic attached
              * then a simple direct assignment is possible here. */
-            while (MARK < SP) {
+            while (MARK < PL_stack_sp) {
                 SV * const sv = newSVsv(*++MARK);
                 assert( !SvTIED_mg((const SV *)ary, PERL_MAGIC_tied) );
                 assert( i >= 0 );
@@ -6279,7 +6401,7 @@ PP_wrapped(pp_unshift, 0, 1)
                 i++;
             }
         } else {
-            while (MARK < SP) {
+            while (MARK < PL_stack_sp) {
                 SV * const sv = newSVsv(*++MARK);
                 (void)av_store(ary, i++, sv);
             }
@@ -6289,12 +6411,14 @@ PP_wrapped(pp_unshift, 0, 1)
             mg_set(MUTABLE_SV(ary));
         PL_delaymagic = old_delaymagic;
     }
-    SP = ORIGMARK;
+    rpp_popfree_to(ORIGMARK);
     if (OP_GIMME(PL_op, 0) != G_VOID) {
-        PUSHi( AvFILL(ary) + 1 );
+        TARGi(AvFILL(ary) + 1, 1);
+        rpp_push_1(targ);
     }
-    RETURN;
+    return NORMAL;
 }
+
 
 PP_wrapped(pp_reverse, 0, 1)
 {
