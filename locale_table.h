@@ -23,40 +23,50 @@
  */
 
 #ifdef LC_CTYPE
-
-    PERL_LOCALE_TABLE_ENTRY(CTYPE, S_new_ctype)
-
 #  ifdef NO_LOCALE_CTYPE
+
+    PERL_LOCALE_TABLE_ENTRY(CTYPE, NULL)
+
 #    define HAS_IGNORED_LOCALE_CATEGORIES_
 #    define LC_CTYPE_AVAIL_  false
 #  else
+
+    PERL_LOCALE_TABLE_ENTRY(CTYPE, S_new_ctype)
+
 #    define LC_CTYPE_AVAIL_  true
 #    define USE_LOCALE_CTYPE
 #  endif
 #endif
 #ifdef LC_NUMERIC
-
-    PERL_LOCALE_TABLE_ENTRY(NUMERIC, S_new_numeric)
-
 #  ifdef NO_LOCALE_NUMERIC
+
+    PERL_LOCALE_TABLE_ENTRY(NUMERIC, NULL)
+
 #    define HAS_IGNORED_LOCALE_CATEGORIES_
 #    define LC_NUMERIC_AVAIL_  false
 #  else
+
+    PERL_LOCALE_TABLE_ENTRY(NUMERIC, S_new_numeric)
+
 #    define LC_NUMERIC_AVAIL_  true
 #    define USE_LOCALE_NUMERIC
 #  endif
 #endif
 #ifdef LC_COLLATE
 
-    PERL_LOCALE_TABLE_ENTRY(COLLATE, S_new_collate)
-
         /* Perl outsources all its collation efforts to the libc strxfrm(), so
          * if it isn't available on the system, default "C" locale collation
          * gets used */
 #  if defined(NO_LOCALE_COLLATE) || ! defined(HAS_STRXFRM)
+
+    PERL_LOCALE_TABLE_ENTRY(COLLATE, NULL)
+
 #    define HAS_IGNORED_LOCALE_CATEGORIES_
 #    define LC_COLLATE_AVAIL_  false
 #  else
+
+    PERL_LOCALE_TABLE_ENTRY(COLLATE, S_new_collate)
+
 #    define LC_COLLATE_AVAIL_  true
 #    define USE_LOCALE_COLLATE
 #  endif
