@@ -1412,33 +1412,39 @@ _cleaner2:
 	-rmdir lib/autodie/exception lib/autodie/Scope lib/autodie lib/XS
 	-rmdir lib/Win32API lib/VMS lib/Unicode/Collate/Locale
 	-rmdir lib/Unicode/Collate/CJK lib/Unicode/Collate lib/Tie/Hash
-	-rmdir lib/Thread lib/Text lib/Test2/Util lib/Test2/Tools
-	-rmdir lib/Test2/IPC/Driver lib/Test2/IPC lib/Test2/Hub/Interceptor
-	-rmdir lib/Test2/Hub lib/Test2/Formatter lib/Test2/EventFacet/Info
-	-rmdir lib/Test2/EventFacet lib/Test2/Event/TAP lib/Test2/Event
-	-rmdir lib/Test2/API/InterceptResult lib/Test2/API lib/Test2
-	-rmdir lib/Test/use lib/Test/Tester lib/Test/Builder/Tester
-	-rmdir lib/Test/Builder/IO lib/Test/Builder lib/Test lib/Term/Table
-	-rmdir lib/Term lib/TAP/Parser/YAMLish lib/TAP/Parser/SourceHandler
-	-rmdir lib/TAP/Parser/Scheduler lib/TAP/Parser/Result
-	-rmdir lib/TAP/Parser/Iterator lib/TAP/Parser lib/TAP/Harness
-	-rmdir lib/TAP/Formatter/File lib/TAP/Formatter/Console
-	-rmdir lib/TAP/Formatter lib/TAP lib/Sys/Syslog lib/Sys lib/Sub
-	-rmdir lib/Search lib/Scalar lib/Pod/Text lib/Pod/Simple
-	-rmdir lib/Pod/Perldoc lib/Pod/Html lib/PerlIO/via lib/PerlIO lib/Perl
-	-rmdir lib/Parse/CPAN lib/Parse lib/Params lib/Net/FTP lib/Module/Load
-	-rmdir lib/Module/CoreList lib/Module lib/Memoize lib/Math/BigRat
-	-rmdir lib/Math/BigInt lib/Math/BigFloat lib/Math lib/MIME
-	-rmdir lib/Locale/Maketext lib/Locale lib/List/Util lib/List
-	-rmdir lib/JSON/PP lib/JSON lib/IPC lib/IO/Uncompress/Adapter
-	-rmdir lib/IO/Uncompress lib/IO/Socket lib/IO/Compress/Zlib
-	-rmdir lib/IO/Compress/Zip lib/IO/Compress/Gzip lib/IO/Compress/Base
-	-rmdir lib/IO/Compress/Adapter lib/IO/Compress lib/IO
-	-rmdir lib/I18N/LangTags lib/I18N lib/Hash/Util lib/Hash lib/HTTP
-	-rmdir lib/Filter/Util lib/Filter lib/File/Spec lib/ExtUtils/Typemaps
-	-rmdir lib/ExtUtils/ParseXS lib/ExtUtils/MakeMaker/version
-	-rmdir lib/ExtUtils/MakeMaker lib/ExtUtils/Liblist
-	-rmdir lib/ExtUtils/Constant lib/ExtUtils/Command
+	-rmdir lib/Thread lib/Text lib/Test2/Workflow/Task lib/Test2/Workflow
+	-rmdir lib/Test2/Util/Table lib/Test2/Util lib/Test2/Tools
+	-rmdir lib/Test2/Require lib/Test2/Plugin
+	-rmdir lib/Test2/Manual/Tooling/Plugin lib/Test2/Manual/Tooling
+	-rmdir lib/Test2/Manual/Testing lib/Test2/Manual/Anatomy
+	-rmdir lib/Test2/Manual lib/Test2/IPC/Driver lib/Test2/IPC
+	-rmdir lib/Test2/Hub/Interceptor lib/Test2/Hub lib/Test2/Formatter
+	-rmdir lib/Test2/EventFacet/Info lib/Test2/EventFacet
+	-rmdir lib/Test2/Event/TAP lib/Test2/Event lib/Test2/Compare
+	-rmdir lib/Test2/Bundle lib/Test2/AsyncSubtest/Event
+	-rmdir lib/Test2/AsyncSubtest lib/Test2/API/InterceptResult
+	-rmdir lib/Test2/API lib/Test2 lib/Test/use lib/Test/Tester
+	-rmdir lib/Test/Builder/Tester lib/Test/Builder/IO lib/Test/Builder
+	-rmdir lib/Test lib/Term/Table lib/Term lib/TAP/Parser/YAMLish
+	-rmdir lib/TAP/Parser/SourceHandler lib/TAP/Parser/Scheduler
+	-rmdir lib/TAP/Parser/Result lib/TAP/Parser/Iterator lib/TAP/Parser
+	-rmdir lib/TAP/Harness lib/TAP/Formatter/File
+	-rmdir lib/TAP/Formatter/Console lib/TAP/Formatter lib/TAP
+	-rmdir lib/Sys/Syslog lib/Sys lib/Sub lib/Search lib/Scalar
+	-rmdir lib/Pod/Text lib/Pod/Simple lib/Pod/Perldoc lib/Pod/Html
+	-rmdir lib/PerlIO/via lib/PerlIO lib/Perl lib/Parse/CPAN lib/Parse
+	-rmdir lib/Params lib/Net/FTP lib/Module/Load lib/Module/CoreList
+	-rmdir lib/Module lib/Memoize lib/Math/BigRat lib/Math/BigInt
+	-rmdir lib/Math/BigFloat lib/Math lib/MIME lib/Locale/Maketext
+	-rmdir lib/Locale lib/List/Util lib/List lib/JSON/PP lib/JSON lib/IPC
+	-rmdir lib/IO/Uncompress/Adapter lib/IO/Uncompress lib/IO/Socket
+	-rmdir lib/IO/Compress/Zlib lib/IO/Compress/Zip lib/IO/Compress/Gzip
+	-rmdir lib/IO/Compress/Base lib/IO/Compress/Adapter lib/IO/Compress
+	-rmdir lib/IO lib/I18N/LangTags lib/I18N lib/Hash/Util lib/Hash
+	-rmdir lib/HTTP lib/Filter/Util lib/Filter lib/File/Spec
+	-rmdir lib/ExtUtils/Typemaps lib/ExtUtils/ParseXS
+	-rmdir lib/ExtUtils/MakeMaker/version lib/ExtUtils/MakeMaker
+	-rmdir lib/ExtUtils/Liblist lib/ExtUtils/Constant lib/ExtUtils/Command
 	-rmdir lib/ExtUtils/CBuilder/Platform/Windows
 	-rmdir lib/ExtUtils/CBuilder/Platform lib/ExtUtils/CBuilder
 	-rmdir lib/Exporter lib/Encode/Unicode lib/Encode/MIME/Header
