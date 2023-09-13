@@ -1418,8 +1418,8 @@ _cleaner2:
 	-rmdir lib/Test2/EventFacet lib/Test2/Event/TAP lib/Test2/Event
 	-rmdir lib/Test2/API/InterceptResult lib/Test2/API lib/Test2
 	-rmdir lib/Test/use lib/Test/Tester lib/Test/Builder/Tester
-	-rmdir lib/Test/Builder/IO lib/Test/Builder lib/Test lib/Term
-	-rmdir lib/TAP/Parser/YAMLish lib/TAP/Parser/SourceHandler
+	-rmdir lib/Test/Builder/IO lib/Test/Builder lib/Test lib/Term/Table
+	-rmdir lib/Term lib/TAP/Parser/YAMLish lib/TAP/Parser/SourceHandler
 	-rmdir lib/TAP/Parser/Scheduler lib/TAP/Parser/Result
 	-rmdir lib/TAP/Parser/Iterator lib/TAP/Parser lib/TAP/Harness
 	-rmdir lib/TAP/Formatter/File lib/TAP/Formatter/Console
