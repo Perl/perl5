@@ -2309,6 +2309,21 @@ cpan/Term-ANSIColor/t/module/true-color.t
 cpan/Term-ANSIColor/t/taint/basic.t
 cpan/Term-Cap/Cap.pm			Perl module supporting termcap usage
 cpan/Term-Cap/test.pl			See if Term::Cap works
+cpan/Term-Table/lib/Term/Table.pm		Term-Table
+cpan/Term-Table/lib/Term/Table/Cell.pm		Term-Table
+cpan/Term-Table/lib/Term/Table/CellStack.pm	Term-Table
+cpan/Term-Table/lib/Term/Table/HashBase.pm	Term-Table
+cpan/Term-Table/lib/Term/Table/LineBreak.pm	Term-Table
+cpan/Term-Table/lib/Term/Table/Spacer.pm	Term-Table
+cpan/Term-Table/lib/Term/Table/Util.pm		Term-Table
+cpan/Term-Table/t/bad_blank_line.t		Term-Table
+cpan/Term-Table/t/HashBase.t			Term-Table
+cpan/Term-Table/t/honor_env_in_non_tty.t	Term-Table
+cpan/Term-Table/t/issue-9.t			Term-Table
+cpan/Term-Table/t/Table.t			Term-Table
+cpan/Term-Table/t/Table/Cell.t			Term-Table
+cpan/Term-Table/t/Table/CellStack.t		Term-Table
+cpan/Term-Table/t/Table/LineBreak.t		Term-Table
 cpan/Test-Harness/bin/prove					The prove harness utility
 cpan/Test-Harness/lib/App/Prove.pm				Gubbins for the prove utility
 cpan/Test-Harness/lib/App/Prove/State.pm			Gubbins for the prove utility

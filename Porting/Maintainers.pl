@@ -1083,6 +1083,15 @@ our %Modules = (
         'EXCLUDED'     => [qr{^t/release-.*\.t}],
     },
 
+    'Term::Table' => {
+        'DISTRIBUTION' => 'EXODIST/Term-Table-0.017.tar.gz',
+        'SYNCINFO'     => 'LeoNerd on Wed Sep 13 18:33:07 2023',
+        'FILES'        => q[cpan/Term-Table],
+        'EXCLUDED'     => [
+            qw( appveyor.yml ),
+        ],
+    },
+
     'Test' => {
         'DISTRIBUTION' => 'JESSE/Test-1.26.tar.gz',
         'FILES'        => q[dist/Test],
