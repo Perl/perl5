@@ -6025,15 +6025,14 @@ PP(pp_anonhash)
     SV* const retval = (PL_op->op_flags & OPf_SPECIAL)
                                     ? newRV_noinc(MUTABLE_SV(hv))
                                     : MUTABLE_SV(hv);
-    /* This isn't quite true for an odd sized list (it's one too few) but it's
-       not worth the runtime +1 just to optimise for the warning case. */
-    SSize_t pairs = (PL_stack_sp - MARK) >> 1;
+    /* + 1 because a lone scalar {FOO} counts as a {FOO => undef} pair */
+    const SSize_t pairs = (PL_stack_sp - MARK + 1) >> 1;
 
     /* temporarily save the hv/hvref at the top of the stack to
      * avoid possible premature free */
     rpp_extend(1);
     rpp_push_1_norc(retval);
-    mark = ORIGMARK; /* in case stack was reallocated */
+    MARK = ORIGMARK; /* in case stack was reallocated */
 
     if (pairs == 0)
         return NORMAL;
