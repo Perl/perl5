@@ -1234,9 +1234,11 @@ typedef enum {
 
    /* On threaded builds, use thread-safe locales if they are available and not
     * forbidden.  Availability is when we are using POSIX 2008 locales, or
-    * Windows for any vintage recent enough to have _MSC_VER defined */
+    * Windows for any vintage recent enough to have _MSC_VER defined, or are
+    * using UCRT (principally MINGW in this latter case) */
 #  if defined(USE_LOCALE_THREADS) && ! defined(NO_THREAD_SAFE_LOCALE)
-#    if defined(USE_POSIX_2008_LOCALE) || (defined(WIN32) && defined(_MSC_VER))
+#    if  defined(USE_POSIX_2008_LOCALE)                                     \
+     || (defined(WIN32) && (defined(_MSC_VER) || (defined(_UCRT))))
 #      define USE_THREAD_SAFE_LOCALE
 #    endif
 #  endif
