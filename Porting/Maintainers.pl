@@ -1129,6 +1129,17 @@ our %Modules = (
         ],
     },
 
+    'Test2::Suite' => {
+        'DISTRIBUTION' => 'EXODIST/Test2-Suite-0.000156.tar.gz',
+        'SYNCINFO'     => 'LeoNerd on Wed Sep 14 10:44:29 2023',
+        'FILES'        => q[cpan/Test2-Suite],
+        'EXCLUDED'     => [
+            qw( appveyor.yml
+                perltidyrc
+                t/00-report.t ),
+        ],
+    },
+
     'Text::Abbrev' => {
         'DISTRIBUTION' => 'FLORA/Text-Abbrev-1.02.tar.gz',
         'FILES'        => q[dist/Text-Abbrev],
