@@ -401,6 +401,11 @@ initialized. [GH #21265]
 perl's -X flag disables all warnings globally, but «use 5.036» didn't
 respect that until now. [GH #21431]
 
+=item *
+
+Fixed an OP leak when an an error was produced for initializer for a class
+field. [GH #20812]
+
 =back
 
 =head1 Known Problems
