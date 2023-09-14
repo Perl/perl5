@@ -1694,7 +1694,6 @@ Perl_pad_tidy(pTHX_ padtidy_type type)
                     "Pad clone on cv=0x%" UVxf "\n", PTR2UV(cv)));
                 CvCLONE_on(cv);
             }
-            CvHASEVAL_on(cv);
         }
     }
 
@@ -1986,8 +1985,7 @@ S_cv_clone_pad(pTHX_ CV *proto, CV *cv, CV *outside, HV *cloned,
     PL_compcv = cv;
     if (newcv) SAVEFREESV(cv); /* in case of fatal warnings */
 
-    if (CvHASEVAL(cv))
-        CvOUTSIDE(cv)	= MUTABLE_CV(SvREFCNT_inc_simple(outside));
+    CvOUTSIDE(cv)	= MUTABLE_CV(SvREFCNT_inc_simple(outside));
 
     SAVESPTR(PL_comppad_name);
     PL_comppad_name = protopad_name;
