@@ -202,7 +202,7 @@ sub have_compiler {
   binmode $FH;
 
   if ( $is_cplusplus ) {
-    print $FH "class Bogus { public: int boot_compilet() { return 1; } };\n";
+    print $FH q<namespace Bogus { extern "C" int boot_compilet() { return 1; } };> . "\n";
   }
   else {
     print $FH "int boot_compilet(void) { return 1; }\n";
