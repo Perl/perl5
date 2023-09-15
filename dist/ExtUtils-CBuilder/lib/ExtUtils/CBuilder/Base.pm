@@ -205,7 +205,13 @@ sub have_compiler {
     print $FH q<namespace Bogus { extern "C" int boot_compilet() { return 1; } };> . "\n";
   }
   else {
-    print $FH "int boot_compilet(void) { return 1; }\n";
+    # Use extern "C" if "cc" was set to a C++ compiler.
+    print $FH <<EOF;
+#ifdef __cplusplus
+extern "C"
+#endif
+int boot_compilet(void) { return 1; }
+EOF
   }
   close $FH;
 
