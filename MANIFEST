@@ -5172,6 +5172,7 @@ lib/perl5db/t/filename-line-breakpoint			Tests for the Perl debugger
 lib/perl5db/t/gh-17660					Tests for the Perl debugger
 lib/perl5db/t/gh-17661					Tests for the Perl debugger
 lib/perl5db/t/gh-17661b					Tests for the Perl debugger
+lib/perl5db/t/gh-21350					Tests for the Perl debugger
 lib/perl5db/t/load-modules				Tests for the Perl debugger
 lib/perl5db/t/lsub-n					Test script used by perl5db.t
 lib/perl5db/t/lvalue-bug				Tests for the Perl debugger
