@@ -699,16 +699,18 @@ Perl_do_join(pTHX_ SV *sv, SV *delim, SV **mark, SV **sp)
     }
 
     if (delimlen) {
+        bool delim_copied = false;
         const U32 delimflag = DO_UTF8(delim) ? SV_CATUTF8 : SV_CATBYTES;
         for (; items > 0; items--,mark++) {
             STRLEN len;
             const char *s;
-            if(*mark == delim) {
+            if(*mark == delim && !delim_copied) {
                 /* Take a copy in case delim SV is a tied SV with a
                  * self-modifying FETCH [GH #21458]
                  */
                 delims = savepvn(delims, delimlen);
                 SAVEFREEPV(delims);
+                delim_copied = true;
             }
             sv_catpvn_flags(sv,delims,delimlen,delimflag);
             s = SvPV_const(*mark,len);
