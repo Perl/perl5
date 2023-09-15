@@ -4112,10 +4112,10 @@ S_doeval_compile(pTHX_ U8 gimme, CV* outside, U32 seq, HV *hh)
 
             if (!in_require)
                 invoke_exception_hook(ERRSV,FALSE);
-            if (PL_eval_root) {
-                op_free(PL_eval_root);
-                PL_eval_root = NULL;
-            }
+
+            op_free(PL_eval_root);
+            PL_eval_root = NULL;
+
             rpp_popfree_to(PL_stack_base + POPMARK); /* pop original mark */
             cx = CX_CUR();
             assert(CxTYPE(cx) == CXt_EVAL);

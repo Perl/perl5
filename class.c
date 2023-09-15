@@ -800,9 +800,7 @@ Perl_class_seal_stash(pTHX_ HV *stash)
         if (fieldnames) {
             for(SSize_t i = PadnamelistMAX(fieldnames); i >= 0 ; i--) {
                 PADNAME *pn = PadnamelistARRAY(fieldnames)[i];
-                OP *valop = PadnameFIELDINFO(pn)->defop;
-                if (valop)
-                    op_free(valop);
+                op_free(PadnameFIELDINFO(pn)->defop);
             }
         }
     }
@@ -1022,8 +1020,7 @@ Perl_class_set_field_defop(pTHX_ PADNAME *pn, OPCODE defmode, OP *defop)
 
     assert(HvSTASH_IS_CLASS(PL_curstash));
 
-    if(PadnameFIELDINFO(pn)->defop)
-        op_free(PadnameFIELDINFO(pn)->defop);
+    op_free(PadnameFIELDINFO(pn)->defop);
 
     /* set here to ensure clean up if forbid_outofblock_ops() throws */
     PadnameFIELDINFO(pn)->defop = defop;
