@@ -3296,6 +3296,177 @@ EOS
                           "[github #19198] check we stopped correctly");
 }
 
+{
+    # gh-21350: verify that nonsense linespecs are rejected #1
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                'l ...',
+                'q',
+            ],
+            prog => '../lib/perl5db/t/gh-21350',
+        }
+    );
+
+    $wrapper->contents_like(
+        qr/Invalid line specification '...'/,
+        q/gh-21350: multiple periods rejected/,
+    );
+}
+
+{
+    # gh-21350: verify that nonsense linespecs are rejected #2
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                'l $',
+                'q',
+            ],
+            prog => '../lib/perl5db/t/gh-21350',
+        }
+    );
+
+    $wrapper->contents_like(
+        qr/Invalid line specification '\$'/,
+        q/gh-21350: $ rejected/,
+    );
+}
+
+{
+    # gh-21350: verify that nonsense linespecs are rejected #3
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                'l 2.71828',
+                'q',
+            ],
+            prog => '../lib/perl5db/t/gh-21350',
+        }
+    );
+
+    $wrapper->contents_like(
+        qr/Invalid line specification '2\.71828'/,
+        q/gh-21350: floating-point rejected/,
+    );
+}
+
+{
+    # gh-21350: verify that nonsense linespecs are rejected #4
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                'l 1.1.1.1',
+                'q',
+            ],
+            prog => '../lib/perl5db/t/gh-21350',
+        }
+    );
+
+    $wrapper->contents_like(
+        qr/Invalid line specification '1\.1\.1\.1'/,
+        q/gh-21350: IPv4 address rejected/,
+    );
+}
+
+{
+    # gh-21350: verify that nonsense linespecs are rejected #5
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                'l -.',
+                'q',
+            ],
+            prog => '../lib/perl5db/t/gh-21350',
+        }
+    );
+
+    $wrapper->contents_like(
+        qr/Invalid line specification '-\.'/,
+        q/gh-21350: invalid partial range rejected/,
+    );
+}
+
+{
+    # gh-21350: verify that nonsense linespecs are rejected #6
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                'l -$.',
+                'q',
+            ],
+            prog => '../lib/perl5db/t/gh-21350',
+        }
+    );
+
+    $wrapper->contents_like(
+        qr/Invalid line specification '\-\$\.'/,
+        q/gh-21350: formerly acceptable nonsense rejected/,
+    );
+}
+
+{
+    # gh-21350: verify that nonsense linespecs are rejected #7
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                'l -12',
+                'q',
+            ],
+            prog => '../lib/perl5db/t/gh-21350',
+        }
+    );
+
+    $wrapper->contents_like(
+        qr/Invalid line specification '-12'/,
+        q/gh-21350: negative line number rejected/,
+    );
+}
+
+{
+    # gh-21350: verify that nonsense linespecs are rejected #8
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                'l 17$',
+                'q',
+            ],
+            prog => '../lib/perl5db/t/gh-21350',
+        }
+    );
+
+    $wrapper->contents_like(
+        qr/Invalid line specification '17\$'/,
+        q/gh-21350: line number with trailing $ rejected/,
+    );
+}
+
+{
+    # gh-21350: verify that nonsense linespecs are rejected #9
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                'l $2250$',
+                'q',
+            ],
+            prog => '../lib/perl5db/t/gh-21350',
+        }
+    );
+
+    $wrapper->contents_like(
+        qr/Invalid line specification '\$2250\$'/,
+        q/gh-21350: match variable with trailing $ rejected/,
+    );
+}
+
 done_testing();
 
 END {
