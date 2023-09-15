@@ -6173,7 +6173,6 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other, const bool copied)
         SV *tmpsv;
         DEBUG_M(Perl_deb(aTHX_ "    applying rule Object-Any\n"));
         DEBUG_M(Perl_deb(aTHX_ "        attempting overload\n"));
-        rpp_xpush_2(d, e);
         tmpsv = amagic_call(d, e, smart_amg, AMGf_noright);
         if (tmpsv) {
             rpp_replace_2_1(tmpsv);
