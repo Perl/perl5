@@ -662,7 +662,7 @@ Perl_do_join(pTHX_ SV *sv, SV *delim, SV **mark, SV **sp)
     I32 items = sp - mark;
     STRLEN len;
     STRLEN delimlen;
-    const char * delims = SvPV_const(delim, delimlen);
+    const char * delimpv = SvPV_const(delim, delimlen);
 
     PERL_ARGS_ASSERT_DO_JOIN;
 
@@ -708,11 +708,11 @@ Perl_do_join(pTHX_ SV *sv, SV *delim, SV **mark, SV **sp)
                 /* Take a copy in case delim SV is a tied SV with a
                  * self-modifying FETCH [GH #21458]
                  */
-                delims = savepvn(delims, delimlen);
-                SAVEFREEPV(delims);
+                delimpv = savepvn(delimpv, delimlen);
+                SAVEFREEPV(delimpv);
                 delim_copied = true;
             }
-            sv_catpvn_flags(sv,delims,delimlen,delimflag);
+            sv_catpvn_flags(sv,delimpv,delimlen,delimflag);
             s = SvPV_const(*mark,len);
             sv_catpvn_flags(sv,s,len,
                             DO_UTF8(*mark) ? SV_CATUTF8 : SV_CATBYTES);
