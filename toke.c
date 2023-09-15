@@ -6162,8 +6162,7 @@ yyl_colon(pTHX_ char *s)
             if (*d == '(') {
                 d = scan_str(d,TRUE,TRUE,FALSE,NULL);
                 if (!d) {
-                    if (attrs)
-                        op_free(attrs);
+                    op_free(attrs);
                     ASSUME(sv && SvREFCNT(sv) == 1);
                     SvREFCNT_dec(sv);
                     Perl_croak(aTHX_ "Unterminated attribute parameter in attribute list");
@@ -6211,8 +6210,7 @@ yyl_colon(pTHX_ char *s)
                       ? Perl_form(aTHX_ "Invalid separator character "
                                   "%c%c%c in attribute list", q, *s, q)
                       : "Unterminated attribute list" ) );
-            if (attrs)
-                op_free(attrs);
+            op_free(attrs);
             OPERATOR(PERLY_COLON);
         }
 
@@ -6220,8 +6218,7 @@ yyl_colon(pTHX_ char *s)
         if (PL_parser->sig_seen) {
             /* see comment about about sig_seen and parser error
              * handling */
-            if (attrs)
-                op_free(attrs);
+            op_free(attrs);
             Perl_croak(aTHX_ "Subroutine attributes must come "
                              "before the signature");
         }

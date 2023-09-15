@@ -1903,10 +1903,9 @@ perl_parse(pTHXx_ XSINIT_t xsinit, int argc, char **argv, char **env)
         return 0;
     }
 
-    if (PL_main_root) {
-        op_free(PL_main_root);
-        PL_main_root = NULL;
-    }
+    op_free(PL_main_root);
+    PL_main_root = NULL;
+
     PL_main_start = NULL;
     SvREFCNT_dec(PL_main_cv);
     PL_main_cv = NULL;

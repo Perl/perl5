@@ -3998,10 +3998,8 @@ S_move_proto_attr(pTHX_ OP **proto, OP **attrs, const GV * name,
                         Perl_warner(aTHX_ packWARN(WARN_MISC),
                             "Attribute prototype(%" UTF8f ") discards earlier prototype attribute in same sub",
                             UTF8fARG(SvUTF8(cSVOPo_sv), new_len, newp));
-                        op_free(new_proto);
                     }
-                    else if (new_proto)
-                        op_free(new_proto);
+                    op_free(new_proto);
                     new_proto = o;
                     /* excise new_proto from the list */
                     op_sibling_splice(*attrs, lasto, 1, NULL);
@@ -4051,8 +4049,7 @@ S_move_proto_attr(pTHX_ OP **proto, OP **attrs, const GV * name,
                 UTF8fARG(SvUTF8(cSVOPx_sv(new_proto)), new_len, newp),
                 SVfARG(svname));
         }
-        if (*proto)
-            op_free(*proto);
+        op_free(*proto);
         *proto = new_proto;
     }
 }
@@ -12316,8 +12313,7 @@ Perl_ck_trycatch(pTHX_ OP *o)
 
     /* cut whole sibling chain free from o */
     op_sibling_splice(o, NULL, -1, NULL);
-    if(to_free)
-        op_free(to_free);
+    op_free(to_free);
     op_free(o);
 
     enter = alloc_LOGOP(OP_ENTERTRYCATCH, NULL, NULL);
