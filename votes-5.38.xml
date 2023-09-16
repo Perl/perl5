@@ -29,6 +29,8 @@ See https://github.com/perl/Perl5/issues?q=+label%3Abackport-5.38
 
 <div><h3>Regression Fixes</h3>
 
+<commit votes="jkeenan" id="bf38d1cf744fcc49b715b9d633761aa67436c002" issue="21366" pull="" desc="locale.c: Initialize PL_curlocales at startup"/>
+
 </div>
 
 <div><h3>New Feature Fixes</h3>
