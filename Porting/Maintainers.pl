@@ -1296,7 +1296,8 @@ our %Modules = (
     },
 
     'version' => {
-        'DISTRIBUTION' => 'LEONT/version-0.9929.tar.gz',
+        'DISTRIBUTION' => 'LEONT/version-0.9930.tar.gz',
+        'SYNCINFO'     => 'LeoNerd on Mon Sep 18 21:49:09 2023',
         'FILES'        => q[cpan/version vutil.c vutil.h vxs.inc],
         'EXCLUDED' => [
             qr{^vutil/lib/},
