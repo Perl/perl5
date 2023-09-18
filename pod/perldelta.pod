@@ -89,7 +89,8 @@ There may well be none in a stable release.
 
 =item *
 
-XXX
+The negation OPs have been modified to support the generic TARGMY optimization.
+[GH #21442]
 
 =back
 
