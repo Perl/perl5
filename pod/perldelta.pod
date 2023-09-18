@@ -129,6 +129,10 @@ L<XXX> has been upgraded from version A.xx to B.yy.
 
 XXX If there was something important to note about this change, include that here.
 
+=item *
+
+L<Getopt::Std> has been upgraded from version 1.13 to 1.14.  Documentation and test improvements only; no change in functionality.
+
 =back
 
 =head2 Removed Modules and Pragmata
