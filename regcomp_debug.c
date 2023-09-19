@@ -318,7 +318,7 @@ S_regdump_intflags(pTHX_ const char *lead, const U32 flags)
     int bit;
     int set=0;
 
-    ASSUME(REG_INTFLAGS_NAME_SIZE <= sizeof(flags)*8);
+    STATIC_ASSERT_STMT(REG_INTFLAGS_NAME_SIZE <= sizeof(flags) * CHARBITS);
 
     for (bit=0; bit < REG_INTFLAGS_NAME_SIZE; bit++) {
         if (flags & (1<<bit)) {
@@ -342,7 +342,7 @@ S_regdump_extflags(pTHX_ const char *lead, const U32 flags)
     int set=0;
     regex_charset cs;
 
-    ASSUME(REG_EXTFLAGS_NAME_SIZE <= sizeof(flags)*8);
+    STATIC_ASSERT_STMT(REG_EXTFLAGS_NAME_SIZE <= sizeof(flags) * CHARBITS);
 
     for (bit=0; bit<REG_EXTFLAGS_NAME_SIZE; bit++) {
         if (flags & (1U<<bit)) {
