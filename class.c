@@ -703,7 +703,6 @@ Perl_class_seal_stash(pTHX_ HV *stash)
                 /* have to clear the OPf_KIDS flag or op_free() will get upset */
                 valop->op_flags &= ~OPf_KIDS;
                 op_free(valop);
-                assert(valop->op_type == OP_FREED);
 
                 OP *fieldcop = o;
                 assert(fieldcop->op_type == OP_NEXTSTATE || fieldcop->op_type == OP_DBSTATE);
