@@ -408,8 +408,18 @@ respect that until now. [GH #21431]
 
 =item *
 
-Fixed an OP leak when an an error was produced for initializer for a class
+Fixed an OP leak when an error was produced for initializer for a class
 field. [GH #20812]
+
+=item *
+
+Fixed a slowdown in repeated substitution replacements using special
+variables, such as C<s/....x$1/g>. It actually makes all string
+concatenations involving such "magic" variables less slow, but the
+slowdown was more noticeable on repeated substitutions due to extra memory
+usage that was only freed after the last iteration. The slowdown started
+in perl 5.28.0 - which generally sped up string concatenation but slowed
+down when using special variables. [GH #21360]
 
 =back
 
