@@ -419,6 +419,10 @@ field. [GH #20812]
 
 =item *
 
+Fixed a leak of the return value when smartmatching against a code reference.
+
+=item *
+
 Fixed a slowdown in repeated substitution replacements using special
 variables, such as C<s/....x$1/g>. It actually makes all string
 concatenations involving such "magic" variables less slow, but the
