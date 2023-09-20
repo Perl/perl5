@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use Module::CoreList;
 
-our $VERSION = '5.20230920';
+our $VERSION = '5.20231020';
 our %utilities;
 
 sub utilities {
