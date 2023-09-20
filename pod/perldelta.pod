@@ -117,6 +117,21 @@ release manager will have to investigate the situation carefully.)
 
 XXX Remove this section if Porting/corelist-perldelta.pl did not add any content here.
 
+=item *
+
+L<Test2::Suite> 0.000156 has been added to the Perl core.
+
+This distribution contains a comprehensive set of test tools for writing unit
+tests.  It is the successor to L<Test::More> and similar modules.  Its
+inclusion in the Perl core means that CPAN module tests can be written using
+this suite of tools without extra dependencies.
+
+=item *
+
+L<Term::Table> 0.017 has been added to the Perl core.
+
+This module is a dependency of L<Test2::Suite>.
+
 =back
 
 =head2 Updated Modules and Pragmata
