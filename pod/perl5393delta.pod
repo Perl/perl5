@@ -1,0 +1,274 @@
+=encoding utf8
+
+=head1 NAME
+
+perl5393delta - what is new for perl v5.39.3
+
+=head1 DESCRIPTION
+
+This document describes differences between the 5.39.2 release and the 5.39.3
+release.
+
+If you are upgrading from an earlier release such as 5.39.1, first read
+L<perl5392delta>, which describes differences between 5.39.1 and 5.39.2.
+
+=head1 Performance Enhancements
+
+=over 4
+
+=item *
+
+The negation OPs have been modified to support the generic TARGMY optimization.
+[L<GH #21442|https://github.com/Perl/perl5/issues/21442>]
+
+=back
+
+=head1 Modules and Pragmata
+
+=head2 Updated Modules and Pragmata
+
+=over 4
+
+=item *
+
+L<B> has been upgraded from version 1.88 to 1.89.
+
+=item *
+
+L<builtin> has been upgraded to version 0.010.  It now has an C<unimport>
+method, allowing you to remove lexically-imported functions by the
+C<no builtin ...> syntax.
+
+=item *
+
+L<Data::Dumper> has been upgraded from version 2.188 to 2.189.
+
+=item *
+
+L<DB_File> has been upgraded from version 1.858 to 1.859.
+
+=item *
+
+L<Devel::PPPort> has been upgraded from version 3.71 to 3.72.
+
+=item *
+
+L<ExtUtils::CBuilder> has been upgraded from version 0.280239 to 0.280240.
+
+=item *
+
+L<fields> has been upgraded from version 2.24 to 2.25.
+
+=item *
+
+L<File::Compare> has been upgraded from version 1.1007 to 1.1008.
+
+=item *
+
+L<FindBin> has been upgraded from version 1.53 to 1.54.
+
+=item *
+
+L<Getopt::Std> has been upgraded from version 1.13 to 1.14.  Documentation and test improvements only; no change in functionality.
+
+=item *
+
+L<IO> has been upgraded from version 1.52 to 1.53.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 5.20230820 to 5.20230920.
+
+=item *
+
+L<threads> has been upgraded from version 2.38 to 2.39.
+
+=item *
+
+L<threads::shared> has been upgraded from version 1.68 to 1.69.
+
+=back
+
+=head1 Documentation
+
+=head2 Changes to Existing Documentation
+
+We have attempted to update the documentation to reflect the changes
+listed in this document.  If you find any we have missed, open an issue
+at L<https://github.com/Perl/perl5/issues>.
+
+=head1 Configuration and Compilation
+
+=over 4
+
+=item *
+
+Fix here-doc used for code to probe C<LC_ALL> syntax for disparate
+locales introduced in 5.39.2.  [L<GH #21451|https://github.com/Perl/perl5/issues/21451>]
+
+=back
+
+=head1 Testing
+
+Tests were added and changed to reflect the other additions and
+changes in this release.  Furthermore, these significant changes were
+made:
+
+=over 4
+
+=item *
+
+F<t/op/magic.t> would fail when C<ps> was the BusyBox implementation,
+since that doesn't support the C<-p> flag and otherwise ignores a
+process id on the command-line.  This caused F<TEST> failures on
+BusyBox systems such as Alpine Linux.  [L<GH #17542|https://github.com/Perl/perl5/issues/17542>]
+
+=back
+
+=head1 Platform Support
+
+=head2 Platform-Specific Notes
+
+=over 4
+
+=item MacOS/Darwin
+
+Don't set C<MACOSX_DEPLOYMENT_TARGET> when building on OS X 10.5.  [L<GH
+#21367|https://github.com/Perl/perl5/issues/21367>]
+
+=back
+
+=head1 Internal Changes
+
+=over 4
+
+=item *
+
+A new API function has been added that simplifies C (or XS) code that creates
+C<LISTOP> optree fragments.  C<newLISTOPn()> is a variadic function that takes
+a C<NULL>-terminated list of child op pointers, and constructs a new checked
+C<LISTOP> to contain them all.  This is simpler than creating a new plain
+C<OP_LIST>, adding each child individually, and finally calling
+C<op_convert_list()> in most code fragments.
+
+=item *
+
+The C<eval_sv()> API now accepts the C<G_USEHINTS> flag, which uses
+the hints such as strict and features from C<PL_curcop> instead of the
+default, which is to use default hints, e.g. no C<use vX.XX;>, no
+strict, default features.
+
+Beware if you use this flag in XS code: your evaluated code will need
+to support whatever strictness or features are in effect at the point
+your XS function is called.
+
+[L<GH #21415|https://github.com/Perl/perl5/issues/21415>]
+
+=back
+
+=head1 Selected Bug Fixes
+
+=over 4
+
+=item *
+
+Declared references can now be used with C<state> variables. [L<GH #21351|https://github.com/Perl/perl5/issues/21351>]
+
+=item *
+
+Trailing elements in an C<unshift>ed and resized array will now always be
+initialized. [L<GH #21265|https://github.com/Perl/perl5/issues/21265>]
+
+=item * Make C<use 5.036> respect the -X flag
+
+perl's -X flag disables all warnings globally, but «use 5.036» didn't
+respect that until now. [L<GH #21431|https://github.com/Perl/perl5/issues/21431>]
+
+=item *
+
+Fixed an OP leak when an error was produced for initializer for a class
+field. [L<GH #20812|https://github.com/Perl/perl5/issues/20812>]
+
+=item *
+
+Fixed a leak of the return value when smartmatching against a code reference.
+
+=item *
+
+Fixed a slowdown in repeated substitution replacements using special
+variables, such as C<s/....x$1/g>. It actually makes all string
+concatenations involving such "magic" variables less slow, but the
+slowdown was more noticeable on repeated substitutions due to extra memory
+usage that was only freed after the last iteration. The slowdown started
+in perl 5.28.0 - which generally sped up string concatenation but slowed
+down when using special variables. [L<GH #21360|https://github.com/Perl/perl5/issues/21360>]
+
+=back
+
+=head1 Acknowledgements
+
+Perl 5.39.3 represents approximately 4 weeks of development since Perl
+5.39.2 and contains approximately 9,100 lines of changes across 170 files
+from 21 authors.
+
+Excluding auto-generated files, documentation and release tools, there were
+approximately 6,100 lines of changes to 91 .pm, .t, .c and .h files.
+
+Perl continues to flourish into its fourth decade thanks to a vibrant
+community of users and developers. The following people are known to have
+contributed the improvements that became Perl 5.39.3:
+
+Alexander Kanavin, Bruno Meneguele, Dagfinn Ilmari Mannsåker, Dan Church,
+David Mitchell, Elvin Aslanov, Graham Knop, Jakub Wilk, James E Keenan, Karl
+Williamson, Leon Timmermans, Lukas Mai, Matthew Horsfall, Nicolas R, Paul
+Evans, Paul Marquess, Richard Leach, Sevan Janiyan, Tomasz Konojacki, Tony
+Cook, Zakariyya Mughal.
+
+The list above is almost certainly incomplete as it is automatically
+generated from version control history. In particular, it does not include
+the names of the (very much appreciated) contributors who reported issues to
+the Perl bug tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core. We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please
+see the F<AUTHORS> file in the Perl source distribution.
+
+=head1 Reporting Bugs
+
+If you find what you think is a bug, you might check the perl bug database
+at L<https://github.com/Perl/perl5/issues>.  There may also be information at
+L<http://www.perl.org/>, the Perl Home Page.
+
+If you believe you have an unreported bug, please open an issue at
+L<https://github.com/Perl/perl5/issues>.  Be sure to trim your bug down to a
+tiny but sufficient test case.
+
+If the bug you are reporting has security implications which make it
+inappropriate to send to a public issue tracker, then see
+L<perlsec/SECURITY VULNERABILITY CONTACT INFORMATION>
+for details of how to report the issue.
+
+=head1 Give Thanks
+
+If you wish to thank the Perl 5 Porters for the work we had done in Perl 5,
+you can do so by running the C<perlthanks> program:
+
+    perlthanks
+
+This will send an email to the Perl 5 Porters list with your show of thanks.
+
+=head1 SEE ALSO
+
+The F<Changes> file for an explanation of how to view exhaustive details on
+what changed.
+
+The F<INSTALL> file for how to build Perl.
+
+The F<README> file for general stuff.
+
+The F<Artistic> and F<Copying> files for copyright information.
+
+=cut
