@@ -17,6 +17,35 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.39.3 - Porter Robinson and Madeon, "Shelter"
+
+L<Announced on 2023-09-20 by Matthew Horsfall|https://www.nntp.perl.org/group/perl.perl5.porters/2023/09/msg267064.html>
+
+  I could never find the right way to tell you
+  Have you noticed I've been gone?
+  'Cause I left behind the home that you made me
+  But I will carry it along
+
+  And it's a long way forward, so trust in me
+  I'll give them shelter, like you've done for me
+  And I know, I'm not alone, you'll be watching over us
+  Until you're gone
+
+  When I'm older, I'll be silent beside you
+  I know words won't be enough
+  And they won't need to know the names or our faces
+  But they will carry on for us
+
+  And it's a long way forward, so trust in me
+  I'll give them shelter, like you've done for me
+  And I know, I'm not alone, you'll be watching over us
+  Until you're gone
+
+  Oh it's a long way forward, trust in me
+  I'll give them shelter, like you've done for me
+  And I know, I'm not alone, you'll be watching over us
+  Until
+
 =head2 v5.39.2 - U2, "The Fly"
 
 L<Announced on 2023-08-20 by Paul Evans|https://www.nntp.perl.org/group/perl.perl5.porters/2023/08/msg266915.html>
