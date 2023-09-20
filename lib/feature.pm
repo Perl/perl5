@@ -4,7 +4,7 @@
 # Any changes made here will be lost!
 
 package feature;
-our $VERSION = '1.84';
+our $VERSION = '1.85';
 
 our %feature = (
     fc                      => 'feature_fc',
@@ -985,6 +985,19 @@ no effect.  Feature bundles are guaranteed to be the same for all sub-versions.
 
   use feature ":5.14.0";    # same as ":5.14"
   use feature ":5.14.1";    # same as ":5.14"
+
+You can also do:
+
+  use feature ":all";
+
+or
+
+  no feature ":all";
+
+but the first may enable features in a later version of Perl that
+change the meaning of your code, and the second may disable mechanisms
+that are part of Perl's current behavior that have been turned into
+features, just as C<indirect> and C<bareword_filehandles> were.
 
 =head1 IMPLICIT LOADING
 
