@@ -759,6 +759,7 @@ the strings?).
  Ricardo   5.39.0       2023-Jun-30     The 5.39 development track
  Steve     5.39.1       2023-Jul-20
  Paul E    5.39.2       2023-Aug-20
+ Matthew H 5.39.3       2023-Sep-20
 
 =head2 SELECTED RELEASE SIZES
 
