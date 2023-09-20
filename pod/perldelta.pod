@@ -134,6 +134,12 @@ XXX If there was something important to note about this change, include that her
 
 L<Getopt::Std> has been upgraded from version 1.13 to 1.14.  Documentation and test improvements only; no change in functionality.
 
+=item *
+
+L<builtin> has been upgraded to version 0.010.  It now has an C<unimport>
+method, allowing you to remove lexically-imported functions by the
+C<no builtin ...> syntax.
+
 =back
 
 =head2 Removed Modules and Pragmata
