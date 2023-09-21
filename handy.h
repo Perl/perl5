@@ -574,13 +574,13 @@ becomes
 # define PERL_VERSION_LT(j,n,p) /* < '*' effectively means < 0 */           \
     (PERL_DECIMAL_VERSION_ < PERL_JNP_TO_DECIMAL_( (j),                     \
                                                    (n),                     \
-                                                 (((p) == '*') ? 0 : p)))
+                                                 (((p) == '*') ? 0 : (p))))
 # define PERL_VERSION_GE(j,n,p)  (! PERL_VERSION_LT(j,n,p))
 
-# define PERL_VERSION_LE(j,n,p)  /* <= '*' effectively means < n+1 */       \
-    (PERL_DECIMAL_VERSION_ < PERL_JNP_TO_DECIMAL_(                  (j),    \
-                                          (((p) == '*') ? ((n)+1) : (n)),   \
-                                          (((p) == '*') ? 0 : p)))
+# define PERL_VERSION_LE(j,n,p)  /* <= '*' effectively means <= 999 */      \
+    (PERL_DECIMAL_VERSION_ <= PERL_JNP_TO_DECIMAL_( (j),                    \
+                                                    (n),                    \
+                                                  (((p) == '*') ? 999 : (p))))
 # define PERL_VERSION_GT(j,n,p) (! PERL_VERSION_LE(j,n,p))
 
 /*
