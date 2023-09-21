@@ -6,7 +6,7 @@ BEGIN {
     set_up_inc('../lib');
 }
 
-plan tests => 41;
+plan tests => 43;
 
 @x = (1, 2, 3);
 is( join(':',@x), '1:2:3', 'join an array with character');
@@ -178,4 +178,38 @@ isnt $_[1], $_[0],
         'a474b4104c', 'tied separator also in the join arguments' );
     }
     is( $SM::fetched, 3, 'FETCH called 1 + 2 times' );
+}
+{
+    # see GH #21484
+    local $TODO = "changes to delim have an effect";
+    my $expect = "a\x{100}x\x{100}b\n";
+    utf8::encode($expect);
+    fresh_perl_is(<<'CODE', $expect, {}, "modifications delim from magic should be ignored");
+my $n = 1;
+my $sep = "\x{100}" x $n;
+package MyOver {
+    use overload '""' => sub { $sep = "\xFF" x $n; "x" };
+}
+
+my $x = bless {}, "MyOver";
+binmode STDOUT, ":utf8";
+print join($sep, "a", $x, "b"), "\n";
+CODE
+}
+{
+    # see GH #21484
+    my $expect = "x\x{100}a\n";
+    local $TODO = "modifications to delim PVX caused UB";
+    utf8::encode($expect); # fresh_perl() does bytes
+    fresh_perl_is(<<'CODE', $expect, {}, "modifications to delim PVX shouldn't crash");
+my $n = 1;
+my $sep = "\x{100}" x $n;
+package MyOver {
+  use overload '""' => sub { $sep = "\xFF" x ($n+20); "x" };
+}
+
+my $x = bless {}, "MyOver";
+binmode STDOUT, ":utf8";
+print join($sep, $x, "a"), "\n";
+CODE
 }
