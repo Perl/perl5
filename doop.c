@@ -665,6 +665,8 @@ Magic and tainting are handled.
 void
 Perl_do_join(pTHX_ SV *sv, SV *delim, SV **mark, SV **sp)
 {
+    PERL_ARGS_ASSERT_DO_JOIN;
+
     SV ** const oldmark = mark;
     SSize_t items = sp - mark;
     STRLEN len;
@@ -672,8 +674,6 @@ Perl_do_join(pTHX_ SV *sv, SV *delim, SV **mark, SV **sp)
     const char * delimpv = SvPV_const(delim, delimlen);
     char delim_buf[JOIN_DELIM_BUFSIZE];
     bool delim_do_utf8 = DO_UTF8(delim);
-
-    PERL_ARGS_ASSERT_DO_JOIN;
 
     if (items >= 2) {
         /* Make a copy of the delim, since G or A magic may modify the delim SV.
