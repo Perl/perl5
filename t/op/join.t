@@ -6,7 +6,7 @@ BEGIN {
     set_up_inc('../lib');
 }
 
-plan tests => 29;
+plan tests => 41;
 
 @x = (1, 2, 3);
 is( join(':',@x), '1:2:3', 'join an array with character');
@@ -128,3 +128,54 @@ package o { use overload q|""| => sub { ${$_[0]}++ } }
 for(1,2) { push @_, \join "x", 1 }
 isnt $_[1], $_[0],
     'join(const, const) still returns a new scalar each time';
+
+# tests from GH #21458
+# simple tied variable
+{
+    package S;
+    our $fetched;
+    sub TIESCALAR { my $x = '-';   $fetched = 0; bless \$x }
+    sub FETCH     { my $y = shift; $fetched++;   $$y }
+
+    package main;
+    my $t;
+
+    tie $t, 'S';
+    is( join( $t, a .. c ), 'a-b-c', 'tied separator' );
+    is( $S::fetched,    1,       'FETCH called once' );
+
+    tie $t, 'S';
+    is( join( $t, 'a' ), 'a', 'tied separator on single item join' );
+    is( $S::fetched,     0,   'FETCH not called' );
+
+    tie $t, 'S';
+    is( join( $t, 'a', $t, 'b', $t, 'c' ),
+        'a---b---c', 'tied separator also in the join arguments' );
+    is( $S::fetched, 3, 'FETCH called 1 + 2 times' );
+}
+# self-modifying tied variable
+{
+
+    package SM;
+    our $fetched;
+    sub TIESCALAR { my $x = "1";   $fetched = 0; bless \$x }
+    sub FETCH     { my $y = shift; $fetched++;   $$y += 3 }
+
+    package main;
+    my $t;
+
+    tie $t, "SM";
+    is( join( $t, a .. c ), 'a4b4c', 'tied separator' );
+    is( $SM::fetched,   1,       'FETCH called once' );
+
+    tie $t, "SM";
+    is( join( $t, 'a' ), 'a', 'tied separator on single item join' );
+    is( $SM::fetched,    0,   'FETCH not called' );
+
+    tie $t, "SM";
+    { local $TODO = "separator keeps being FETCHed";
+    is( join( $t, "a", $t, "b", $t, "c" ),
+        'a474b4104c', 'tied separator also in the join arguments' );
+    }
+    is( $SM::fetched, 3, 'FETCH called 1 + 2 times' );
+}
