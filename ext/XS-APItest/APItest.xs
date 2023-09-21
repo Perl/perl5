@@ -10,6 +10,44 @@
 #include "perl.h"
 #include "XSUB.h"
 
+/* PERL_VERSION_xx sanity checks */
+#if !PERL_VERSION_EQ(PERL_VERSION_MAJOR, PERL_VERSION_MINOR, PERL_VERSION_PATCH)
+#  error PERL_VERSION_EQ(major, minor, patch) is false; expected true
+#endif
+#if !PERL_VERSION_EQ(PERL_VERSION_MAJOR, PERL_VERSION_MINOR, '*')
+#  error PERL_VERSION_EQ(major, minor, '*') is false; expected true
+#endif
+#if PERL_VERSION_NE(PERL_VERSION_MAJOR, PERL_VERSION_MINOR, PERL_VERSION_PATCH)
+#  error PERL_VERSION_NE(major, minor, patch) is true; expected false
+#endif
+#if PERL_VERSION_NE(PERL_VERSION_MAJOR, PERL_VERSION_MINOR, '*')
+#  error PERL_VERSION_NE(major, minor, '*') is true; expected false
+#endif
+#if PERL_VERSION_LT(PERL_VERSION_MAJOR, PERL_VERSION_MINOR, PERL_VERSION_PATCH)
+#  error PERL_VERSION_LT(major, minor, patch) is true; expected false
+#endif
+#if PERL_VERSION_LT(PERL_VERSION_MAJOR, PERL_VERSION_MINOR, '*')
+#  error PERL_VERSION_LT(major, minor, '*') is true; expected false
+#endif
+#if !PERL_VERSION_LE(PERL_VERSION_MAJOR, PERL_VERSION_MINOR, PERL_VERSION_PATCH)
+#  error PERL_VERSION_LE(major, minor, patch) is false; expected true
+#endif
+#if !PERL_VERSION_LE(PERL_VERSION_MAJOR, PERL_VERSION_MINOR, '*')
+#  error PERL_VERSION_LE(major, minor, '*') is false; expected true
+#endif
+#if PERL_VERSION_GT(PERL_VERSION_MAJOR, PERL_VERSION_MINOR, PERL_VERSION_PATCH)
+#  error PERL_VERSION_GT(major, minor, patch) is true; expected false
+#endif
+#if PERL_VERSION_GT(PERL_VERSION_MAJOR, PERL_VERSION_MINOR, '*')
+#  error PERL_VERSION_GT(major, minor, '*') is true; expected false
+#endif
+#if !PERL_VERSION_GE(PERL_VERSION_MAJOR, PERL_VERSION_MINOR, PERL_VERSION_PATCH)
+#  error PERL_VERSION_GE(major, minor, patch) is false; expected true
+#endif
+#if !PERL_VERSION_GE(PERL_VERSION_MAJOR, PERL_VERSION_MINOR, '*')
+#  error PERL_VERSION_GE(major, minor, '*') is false; expected true
+#endif
+
 typedef FILE NativeFile;
 
 #include "fakesdio.h"   /* Causes us to use PerlIO below */
