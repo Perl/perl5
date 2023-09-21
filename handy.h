@@ -507,8 +507,8 @@ Perl_xxx(aTHX_ ...) form for any API calls where it's used.
 #endif
 
 #define PERL_JNP_TO_DECIMAL_(maJor,miNor,Patch)                             \
-            /* '10*' leaves room for things like alpha, beta, releases */   \
-                    (10 * ((maJor) * 1000000) + ((miNor) * 1000) + (Patch))
+    /* '10*' leaves room for things like alpha, beta, releases */           \
+    (10 * (((maJor) * 1000000) + ((miNor) * 1000) + (Patch)))
 #define PERL_DECIMAL_VERSION_                                               \
         PERL_JNP_TO_DECIMAL_(PERL_VERSION_MAJOR, PERL_VERSION_MINOR,        \
                                                         PERL_VERSION_PATCH)
