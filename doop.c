@@ -633,6 +633,13 @@ Perl_do_trans(pTHX_ SV *sv)
     }
 }
 
+#ifdef DEBUGGING
+/* make it small to exercise the logic */
+#  define JOIN_DELIM_BUFSIZE 2
+#else
+#  define JOIN_DELIM_BUFSIZE 40
+#endif
+
 /*
 =for apidoc_section $string
 =for apidoc do_join
@@ -662,9 +669,26 @@ Perl_do_join(pTHX_ SV *sv, SV *delim, SV **mark, SV **sp)
     I32 items = sp - mark;
     STRLEN len;
     STRLEN delimlen;
-    const char * const delims = SvPV_const(delim, delimlen);
+    const char * delimpv = SvPV_const(delim, delimlen);
+    char delim_buf[JOIN_DELIM_BUFSIZE];
+    bool delim_do_utf8 = DO_UTF8(delim);
 
     PERL_ARGS_ASSERT_DO_JOIN;
+
+    if (items >= 2) {
+        /* Make a copy of the delim, since G or A magic may modify the delim SV.
+           Use a local buffer if possible to avoid the cost of allocation and
+           clean up.
+        */
+        if (delimlen <= JOIN_DELIM_BUFSIZE) {
+            Copy(delimpv, delim_buf, delimlen, char);
+            delimpv = delim_buf;
+        }
+        else {
+            delimpv = savepvn(delimpv, delimlen);
+            SAVEFREEPV(delimpv);
+        }
+    }
 
     mark++;
     len = (items > 0 ? (delimlen * (items - 1) ) : 0);
@@ -699,11 +723,11 @@ Perl_do_join(pTHX_ SV *sv, SV *delim, SV **mark, SV **sp)
     }
 
     if (delimlen) {
-        const U32 delimflag = DO_UTF8(delim) ? SV_CATUTF8 : SV_CATBYTES;
+        const U32 delimflag = delim_do_utf8 ? SV_CATUTF8 : SV_CATBYTES;
         for (; items > 0; items--,mark++) {
             STRLEN len;
             const char *s;
-            sv_catpvn_flags(sv,delims,delimlen,delimflag);
+            sv_catpvn_flags(sv, delimpv, delimlen, delimflag);
             s = SvPV_const(*mark,len);
             sv_catpvn_flags(sv,s,len,
                             DO_UTF8(*mark) ? SV_CATUTF8 : SV_CATBYTES);
