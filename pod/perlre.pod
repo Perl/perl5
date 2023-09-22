@@ -1344,8 +1344,7 @@ and C<$'>, B<except> that they are only guaranteed to be defined after a
 successful match that was executed with the C</p> (preserve) modifier.
 The use of these variables incurs no global performance penalty, unlike
 their punctuation character equivalents, however at the trade-off that you
-have to tell perl when you want to use them.  As of Perl 5.20, these three
-variables are equivalent to C<$`>, C<$&> and C<$'>, and C</p> is ignored.
+have to tell perl when you want to use them.
 X</p> X<p modifier>
 
 =head2 Quoting metacharacters

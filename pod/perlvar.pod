@@ -1142,7 +1142,7 @@ compiled or executed with the C</p> modifier.
 
 This is similar to C<$&> (C<$MATCH>) except that to use it you must
 use the C</p> modifier when executing the pattern, and it does not incur
-and performance penalty associated with that variable.
+the performance penalty associated with that variable.
 
 See L</Performance issues> above.
 
@@ -1173,7 +1173,7 @@ executed with the C</p> modifier.
 
 This is similar to C<$`> ($PREMATCH) except that to use it you must
 use the C</p> modifier when executing the pattern, and it does not incur
-and performance penalty associated with that variable.
+the performance penalty associated with that variable.
 
 See L</Performance issues> above.
 
@@ -1209,7 +1209,7 @@ compiled or executed with the C</p> modifier.
 
 This is similar to C<$'> (C<$POSTMATCH>) except that to use it you must
 use the C</p> modifier when executing the pattern, and it does not incur
-and performance penalty associated with that variable.
+the performance penalty associated with that variable.
 
 See L</Performance issues> above.
 
