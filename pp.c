@@ -7312,16 +7312,26 @@ S_localise_gv_slot(pTHX_ GV *gv, U8 type)
 }
 
 
-PP_wrapped(pp_refassign,
-      !!(PL_op->op_private & OPpLVREF_ELEM)
-    + !!(PL_op->op_flags & OPf_STACKED)
-    +1,
-    0)
+PP(pp_refassign)
 {
-    dSP;
-    SV * const key = PL_op->op_private & OPpLVREF_ELEM ? POPs : NULL;
-    SV * const left = PL_op->op_flags & OPf_STACKED ? POPs : NULL;
-    dTOPss;
+    SV     *key   = NULL;
+    SV     *left  = NULL;
+    SSize_t extra = 0;
+
+    /* \$a[key] = ...;    or \$h{key} = ...; */
+    if (PL_op->op_private & OPpLVREF_ELEM) {
+        key = PL_stack_sp[0];
+        extra++;
+    }
+
+    /* \X = ...; rather than \my X = ...; so X on stack */
+    if (PL_op->op_flags & OPf_STACKED) {
+        left = PL_stack_sp[-extra];
+        extra++;
+    }
+
+    SV *sv = PL_stack_sp[-extra];
+
     const char *bad = NULL;
     const U8 type = PL_op->op_private & OPpLVREF_TYPE;
     if (!SvROK(sv)) DIE(aTHX_ "Assigned value is not a reference");
@@ -7345,9 +7355,7 @@ PP_wrapped(pp_refassign,
     if (bad)
         /* diag_listed_as: Assigned value is not %s reference */
         DIE(aTHX_ "Assigned value is not a%s reference", bad);
-    {
-    MAGIC *mg;
-    HV *stash;
+
     switch (left ? SvTYPE(left) : 0) {
     case 0:
     {
@@ -7369,6 +7377,8 @@ PP_wrapped(pp_refassign,
     case SVt_PVAV:
         assert(key);
         if (UNLIKELY(PL_op->op_private & OPpLVAL_INTRO)) {
+            MAGIC *mg;
+            HV *stash;
             S_localise_aelem_lval(aTHX_ (AV *)left, key,
                                         SvCANEXISTDELETE(left));
         }
@@ -7377,18 +7387,33 @@ PP_wrapped(pp_refassign,
     case SVt_PVHV:
         if (UNLIKELY(PL_op->op_private & OPpLVAL_INTRO)) {
             assert(key);
+            MAGIC *mg;
+            HV *stash;
             S_localise_helem_lval(aTHX_ (HV *)left, key,
                                         SvCANEXISTDELETE(left));
         }
         (void)hv_store_ent((HV *)left, key, SvREFCNT_inc_simple_NN(SvRV(sv)), 0);
     }
-    if (PL_op->op_flags & OPf_MOD)
-        SETs(sv_2mortal(newSVsv(sv)));
-    /* XXX else can weak references go stale before they are read, e.g.,
-       in leavesub?  */
-    RETURN;
+
+    if (UNLIKELY(PL_op->op_flags & OPf_MOD)) {
+        /* e.g. f(\$x = \1); */
+        rpp_popfree_to(PL_stack_sp - extra);
+        SV *nsv = newSVsv(sv);
+#ifdef PERL_RC_STACK
+        rpp_replace_1_1(nsv);
+        SvREFCNT_dec_NN(nsv);
+#else
+        rpp_replace_1_1(sv_2mortal(nsv));
+#endif
+        /* XXX else can weak references go stale before they are read, e.g.,
+           in leavesub?  */
     }
+    else
+        rpp_popfree_to(PL_stack_sp - (extra + 1));
+
+    return NORMAL;
 }
+
 
 PP_wrapped(pp_lvref,
     !!(PL_op->op_private & OPpLVREF_ELEM) + !!(PL_op->op_flags & OPf_STACKED),
