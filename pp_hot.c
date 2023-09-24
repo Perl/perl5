@@ -2871,9 +2871,7 @@ PP(pp_aassign)
         case SVt_PVHV: {				/* normal hash */
 
             SV **svp;
-            bool dirty_tmps;
             SSize_t i;
-            SSize_t tmps_base;
             SSize_t nelems = lastrelem - relem + 1;
             HV *hash = MUTABLE_HV(lsv);
 
@@ -2891,7 +2889,8 @@ PP(pp_aassign)
              * copied (except for the SvTEMP optimisation), since they
              * need to be stored in the hash; while keys are only
              * processed where they might get prematurely freed or
-             * whatever. */
+             * whatever. The same comments about simplifying under
+             * PERL_RC_STACK apply here too */
 
             /* tmps stack slots:
              * * reserve a slot for the hash keepalive;
@@ -2900,16 +2899,19 @@ PP(pp_aassign)
              *   later;
              * then protect hash and temporarily void the remaining
              * value slots with &PL_sv_undef */
+#ifndef PERL_RC_STACK
             EXTEND_MORTAL(nelems + 1);
-
+#endif
              /* convert to number of key/value pairs */
              nelems >>= 1;
 
+#ifndef PERL_RC_STACK
             PL_tmps_stack[++PL_tmps_ix] = SvREFCNT_inc_simple_NN(hash);
-            tmps_base = PL_tmps_ix + 1;
+            SSize_t tmps_base = PL_tmps_ix + 1;
             for (i = 0; i < nelems; i++)
                 PL_tmps_stack[tmps_base + i] = &PL_sv_undef;
             PL_tmps_ix += nelems;
+#endif
 
             /* Make a copy of each RHS hash value and save on the tmps_stack
              * (or pass through where we can optimise away the copy) */
@@ -2919,7 +2921,9 @@ PP(pp_aassign)
 
                 if (rpp_is_lone(rsv) && !SvGMAGICAL(rsv)) {
                     /* can skip the copy */
+#ifndef PERL_RC_STACK
                     SvREFCNT_inc_simple_void_NN(rsv);
+#endif
                     SvTEMP_off(rsv);
                 }
                 else {
@@ -2929,13 +2933,21 @@ PP(pp_aassign)
                     nsv = newSVsv_flags(rsv,
                             (SV_DO_COW_SVSETSV|SV_NOSTEAL|SV_GMAGIC));
                     rpp_replace_at(svp, nsv);
+#ifdef PERL_RC_STACK
+                    SvREFCNT_dec_NN(nsv);
+#endif
                     rsv = nsv;
                 }
 
+#ifndef PERL_RC_STACK
                 assert(tmps_base <= PL_tmps_max);
                 PL_tmps_stack[tmps_base++] = rsv;
+#endif
             }
+
+#ifndef PERL_RC_STACK
             tmps_base -= nelems;
+#endif
 
 
             /* possibly protect keys */
@@ -2945,11 +2957,20 @@ PP(pp_aassign)
                 *     @a = ((%h = ($$r, 1)), $r = "x");
                 *     $_++ for %h = (1,2,3,4);
                 */
+#ifdef PERL_RC_STACK
+                for (svp = relem; svp <= lastrelem; svp += 2) {
+                    rpp_replace_at(svp,
+                        newSVsv_flags(*svp,
+                                SV_GMAGIC|SV_DO_COW_SVSETSV|SV_NOSTEAL));
+                    SvREFCNT_dec_NN(*svp);
+                }
+#else
                 EXTEND_MORTAL(nelems);
                 for (svp = relem; svp <= lastrelem; svp += 2)
                     rpp_replace_at(svp,
                         sv_mortalcopy_flags(*svp,
                                 SV_GMAGIC|SV_DO_COW_SVSETSV|SV_NOSTEAL));
+#endif
             }
             else if (PL_op->op_private & OPpASSIGN_COMMON_AGG) {
                 /* for possible commonality, e.g.
@@ -2963,7 +2984,23 @@ PP(pp_aassign)
                  * cases, not just under OPpASSIGN_COMMON_AGG, but in
                  * practice, !OPpASSIGN_COMMON_AGG implies only
                  * constants or padtmps on the RHS.
+                 *
+                 * For PERL_RC_STACK, no danger of premature frees, so
+                 * just handle the magic.
                  */
+#ifdef PERL_RC_STACK
+                for (svp = relem; svp <= lastrelem; svp += 2) {
+                    SV *rsv = *svp;
+                    if (UNLIKELY(SvGMAGICAL(rsv))) {
+                        /* XXX does this actually need to be copied, or
+                         * could we just call the get magic??? */
+                        rpp_replace_at(svp,
+                            newSVsv_flags(*svp,
+                                SV_GMAGIC|SV_DO_COW_SVSETSV|SV_NOSTEAL));
+                        SvREFCNT_dec_NN(*svp);
+                    }
+                }
+#else
                 EXTEND_MORTAL(nelems);
                 for (svp = relem; svp <= lastrelem; svp += 2) {
                     SV *rsv = *svp;
@@ -2981,6 +3018,7 @@ PP(pp_aassign)
                         PL_tmps_stack[++PL_tmps_ix] =
                                     SvREFCNT_inc_simple_NN(rsv);
                 }
+#endif
             }
 
             if (SvRMAGICAL(hash) || HvUSEDKEYS(hash))
@@ -2993,8 +3031,9 @@ PP(pp_aassign)
 
             /* now assign the keys and values to the hash */
 
-            dirty_tmps = FALSE;
-
+#ifndef PERL_RC_STACK
+            bool dirty_tmps = FALSE;
+#endif
             if (UNLIKELY(gimme == G_LIST)) {
                 /* @a = (%h = (...)) etc */
                 SV **svp;
@@ -3016,9 +3055,13 @@ PP(pp_aassign)
                      * the 1 refcnt on the tmps stack; otherwise disarm
                      * the tmps stack entry */
                     if (hv_store_ent(hash, key, val, 0))
+#ifdef PERL_RC_STACK
+                        SvREFCNT_inc_simple_NN(val);
+#else
                         PL_tmps_stack[tmps_base + i] = &PL_sv_undef;
                     else
                         dirty_tmps = TRUE;
+#endif
                     /* hv_store_ent() may have added set magic to val */;
                     SvSETMAGIC(val);
                 }
@@ -3045,14 +3088,19 @@ PP(pp_aassign)
                     SV *key = *svp++;
                     SV *val = *svp;
                     if (hv_store_ent(hash, key, val, 0))
+#ifdef PERL_RC_STACK
+                        SvREFCNT_inc_simple_NN(val);
+#else
                         PL_tmps_stack[tmps_base + i] = &PL_sv_undef;
                     else
                         dirty_tmps = TRUE;
+#endif
                     /* hv_store_ent() may have added set magic to val */;
                     SvSETMAGIC(val);
                 }
             }
 
+#ifndef PERL_RC_STACK
             if (dirty_tmps) {
                 /* there are still some 'live' recounts on the tmps stack
                  * - usually caused by storing into a tied hash. So let
@@ -3075,7 +3123,7 @@ PP(pp_aassign)
             }
 
             SvREFCNT_dec_NN(hash);
-
+#endif
             relem = lastrelem + 1;
             goto no_relems;
         }
