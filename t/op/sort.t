@@ -7,7 +7,7 @@ BEGIN {
     set_up_inc('../lib');
 }
 use warnings;
-plan(tests => 204);
+plan(tests => 205);
 use Tie::Array; # we need to test sorting tied arrays
 
 # these shouldn't hang
@@ -884,18 +884,14 @@ cmp_ok($answer,'eq','good','sort subr called from other package');
     }
 }
 
-
-
-# I commented out this TODO test because messing with FREEd scalars on the
-# stack can have all sorts of strange side-effects, not made safe by eval
-# - DAPM.
-#
-#{
-#    local $TODO = "sort should make sure elements are not freed in the sort block";
-#    eval { @nomodify_x=(1..8);
-#	   our @copy = sort { undef @nomodify_x; 1 } (@nomodify_x, 3); };
-#    is($@, "");
-#}
+SKIP:
+{
+    skip "freed args not under PERL_RC_STACK", 1
+        unless (Internals::stack_refcounted() & 1);
+    eval { @nomodify_x=(1..8);
+	   our @copy = sort { undef @nomodify_x; 1 } (@nomodify_x, 3); };
+    is($@, "");
+}
 
 
 # Sorting shouldn't increase the refcount of a sub

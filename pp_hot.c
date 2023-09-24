@@ -2493,6 +2493,11 @@ S_aassign_copy_common(pTHX_ SV **firstlelem, SV **lastlelem,
 
             TAINT_NOT;	/* Each item is independent */
 
+#ifndef PERL_RC_STACK
+            /* The TODO test was eventually commented out. It's now been
+             * revived, but only on PERL_RC_STACK builds. Continue
+             * this hacky workaround otherwise - DAPM Sept 2023 */
+
             /* Dear TODO test in t/op/sort.t, I love you.
                (It's relying on a panic, not a "semi-panic" from newSVsv()
                and then an assertion failure below.)  */
@@ -2500,6 +2505,8 @@ S_aassign_copy_common(pTHX_ SV **firstlelem, SV **lastlelem,
                 Perl_croak(aTHX_ "panic: attempt to copy freed scalar %p",
                            (void*)svr);
             }
+#endif
+
             /* avoid break flag while copying; otherwise COW etc
              * disabled... */
             SvFLAGS(svr) &= ~SVf_BREAK;
