@@ -3130,8 +3130,6 @@ PP(pp_aassign)
 
         default:
             if (!SvIMMORTAL(lsv)) {
-                SV *ref;
-
                 if (UNLIKELY(
                     rpp_is_lone(lsv) && !SvSMAGICAL(lsv) &&
                   (!isGV_with_GP(lsv) || SvFAKE(lsv)) && ckWARN(WARN_MISC)
@@ -3141,8 +3139,10 @@ PP(pp_aassign)
                       "Useless assignment to a temporary"
                     );
 
+#ifndef PERL_RC_STACK
                 /* avoid freeing $$lsv if it might be needed for further
                  * elements, e.g. ($ref, $foo) = (1, $$ref) */
+                SV *ref;
                 if (   SvROK(lsv)
                     && ( ((ref = SvRV(lsv)), SvREFCNT(ref)) == 1)
                     && lelem <= lastlelem
@@ -3157,6 +3157,7 @@ PP(pp_aassign)
                          (void)tmps_grow_p(ix + (lastlelem - lelem));
                     PL_tmps_stack[ix] = ref;
                 }
+#endif
 
                 sv_setsv(lsv, *relem);
                 rpp_replace_at(relem, lsv);
