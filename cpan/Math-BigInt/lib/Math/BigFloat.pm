@@ -20,7 +20,7 @@ use Carp          qw< carp croak >;
 use Scalar::Util  qw< blessed >;
 use Math::BigInt  qw< >;
 
-our $VERSION = '1.999839';
+our $VERSION = '1.999841';
 $VERSION =~ tr/_//d;
 
 require Exporter;
@@ -52,11 +52,11 @@ use overload
   '**'    =>      sub { $_[2] ? ref($_[0]) -> new($_[1]) -> bpow($_[0])
                               : $_[0] -> copy() -> bpow($_[1]); },
 
-  '<<'    =>      sub { $_[2] ? ref($_[0]) -> new($_[1]) -> blsft($_[0])
-                              : $_[0] -> copy() -> blsft($_[1]); },
+  '<<'    =>      sub { $_[2] ? ref($_[0]) -> new($_[1]) -> bblsft($_[0])
+                              : $_[0] -> copy() -> bblsft($_[1]); },
 
-  '>>'    =>      sub { $_[2] ? ref($_[0]) -> new($_[1]) -> brsft($_[0])
-                              : $_[0] -> copy() -> brsft($_[1]); },
+  '>>'    =>      sub { $_[2] ? ref($_[0]) -> new($_[1]) -> bbrsft($_[0])
+                              : $_[0] -> copy() -> bbrsft($_[1]); },
 
   # overload key: assign
 
@@ -72,9 +72,9 @@ use overload
 
   '**='   =>      sub { $_[0] -> bpow($_[1]); },
 
-  '<<='   =>      sub { $_[0] -> blsft($_[1]); },
+  '<<='   =>      sub { $_[0] -> bblsft($_[1]); },
 
-  '>>='   =>      sub { $_[0] -> brsft($_[1]); },
+  '>>='   =>      sub { $_[0] -> bbrsft($_[1]); },
 
 #  'x='    =>      sub { },
 
@@ -396,7 +396,7 @@ sub new {
 
     # Math::BigFloat or subclass
 
-    if (defined(blessed($wanted)) && $wanted -> isa($class)) {
+    if (defined(blessed($wanted)) && $wanted -> isa(__PACKAGE__)) {
 
         # Don't copy the accuracy and precision, because a new object should get
         # them from the global configuration.
@@ -2497,7 +2497,7 @@ sub blog {
 
     if (defined $base) {
         $base = $class -> new($base)
-          unless defined(blessed($base)) && $base -> isa($class);
+          unless defined(blessed($base)) && $base -> isa(__PACKAGE__);
         if ($base -> is_nan() || $base -> is_one()) {
             return $x -> bnan(@r);
         } elsif ($base -> is_inf() || $base -> is_zero()) {
@@ -3765,7 +3765,7 @@ sub bmfac {
 }
 
 sub blsft {
-    # shift left by $y (multiply by $b ** $y)
+    # shift left by $y in base $b, i.e., multiply by $b ** $y
 
     # set up parameters
     my ($class, $x, $y, $b, @r)
@@ -3778,7 +3778,8 @@ sub blsft {
     return $x -> bnan(@r) if $x -> is_nan() || $y -> is_nan();
 
     $b = 2 if !defined $b;
-    $b = $class -> new($b) unless ref($b) && $b -> isa($class);
+    $b = $class -> new($b)
+      unless defined(blessed($b)) && $b -> isa(__PACKAGE__);
     return $x -> bnan(@r) if $b -> is_nan();
 
     # There needs to be more checking for special cases here. Fixme!
@@ -3794,7 +3795,7 @@ sub blsft {
 }
 
 sub brsft {
-    # shift right by $y (divide $b ** $y)
+    # shift right by $y in base $b, i.e., divide by $b ** $y
 
     # set up parameters
     my ($class, $x, $y, $b, @r)
@@ -3809,7 +3810,8 @@ sub brsft {
     # There needs to be more checking for special cases here. Fixme!
 
     $b = 2 if !defined $b;
-    $b = $class -> new($b) unless ref($b) && $b -> isa($class);
+    $b = $class -> new($b)
+      unless defined(blessed($b)) && $b -> isa(__PACKAGE__);
     return $x -> bnan(@r) if $b -> is_nan();
 
     # shift by a negative amount?
@@ -3826,6 +3828,72 @@ sub brsft {
 ###############################################################################
 # Bitwise methods
 ###############################################################################
+
+# Bitwise left shift.
+
+sub bblsft {
+    my ($class, $x, $y, @r) = ref($_[0]) && ref($_[0]) eq ref($_[1])
+                            ? (ref($_[0]), @_)
+                            : objectify(2, @_);
+
+    my $xint = Math::BigInt -> bblsft($x, $y, @r);
+
+    # disable downgrading
+
+    my $dng = $class -> downgrade();
+    $class -> downgrade(undef);
+
+    # convert to Math::BigFloat without downgrading
+
+    my $xflt = $class -> new($xint);
+
+    # reset downgrading
+
+    $class -> downgrade($dng);
+
+    $x -> {sign} = $xflt -> {sign};
+    $x -> {_m}   = $xflt -> {_m};
+    $x -> {_es}  = $xflt -> {_es};
+    $x -> {_e}   = $xflt -> {_e};
+
+    # now we might downgrade
+
+    return $downgrade -> new($x) if defined($downgrade);
+    $x -> round(@r);
+}
+
+# Bitwise left shift.
+
+sub bbrsft {
+    my ($class, $x, $y, @r) = ref($_[0]) && ref($_[0]) eq ref($_[1])
+                            ? (ref($_[0]), @_)
+                            : objectify(2, @_);
+
+    my $xint = Math::BigInt -> bbrsft($x, $y, @r);
+
+    # disable downgrading
+
+    my $dng = $class -> downgrade();
+    $class -> downgrade(undef);
+
+    # convert to Math::BigFloat without downgrading
+
+    my $xflt = $class -> new($xint);
+
+    # reset downgrading
+
+    $class -> downgrade($dng);
+
+    $x -> {sign} = $xflt -> {sign};
+    $x -> {_m}   = $xflt -> {_m};
+    $x -> {_es}  = $xflt -> {_es};
+    $x -> {_e}   = $xflt -> {_e};
+
+    # now we might downgrade
+
+    return $downgrade -> new($x) if defined($downgrade);
+    $x -> round(@r);
+}
 
 sub band {
     my ($class, $x, $y, @r) = ref($_[0]) && ref($_[0]) eq ref($_[1])
@@ -4215,12 +4283,14 @@ sub bgcd {
     my ($class, @args) = objectify(0, @_);
 
     my $x = shift @args;
-    $x = ref($x) && $x -> isa($class) ? $x -> copy() : $class -> new($x);
+    $x = defined(blessed($x)) && $x -> isa(__PACKAGE__) ? $x -> copy()
+                                                        : $class -> new($x);
     return $class->bnan() unless $x -> is_int();
 
     while (@args) {
         my $y = shift @args;
-        $y = $class->new($y) unless ref($y) && $y -> isa($class);
+        $y = $class->new($y)
+          unless defined(blessed($y)) && $y -> isa(__PACKAGE__);
         return $class->bnan() unless $y -> is_int();
 
         # greatest common divisor
@@ -4254,12 +4324,14 @@ sub blcm {
     my ($class, @args) = objectify(0, @_);
 
     my $x = shift @args;
-    $x = ref($x) && $x -> isa($class) ? $x -> copy() : $class -> new($x);
+    $x = defined(blessed($x)) && $x -> isa(__PACKAGE__) ? $x -> copy()
+                                                        : $class -> new($x);
     return $class->bnan() if $x->{sign} !~ /^[+-]$/;    # x NaN?
 
     while (@args) {
         my $y = shift @args;
-        $y = $class -> new($y) unless ref($y) && $y -> isa($class);
+        $y = $class -> new($y)
+          unless defined(blessed($y)) && $y -> isa(__PACKAGE__);
         return $x->bnan() unless $y -> is_int();
         my $gcd = $x -> bgcd($y);
         $x = $x -> bdiv($gcd) -> bmul($y);
@@ -4687,7 +4759,7 @@ sub bdstr {
     # Upgrade?
 
     return $upgrade -> bdstr($x, @r)
-      if defined($upgrade) && !$x -> isa($class);
+      if defined($upgrade) && !$x -> isa(__PACKAGE__);
 
     # Finite number
 
@@ -4738,7 +4810,7 @@ sub bsstr {
     # Upgrade?
 
     return $upgrade -> bsstr($x, @r)
-      if defined($upgrade) && !$x -> isa($class);
+      if defined($upgrade) && !$x -> isa(__PACKAGE__);
 
     # Finite number
 
@@ -4763,7 +4835,7 @@ sub bnstr {
     # Upgrade?
 
     return $upgrade -> bnstr($x, @r)
-      if defined($upgrade) && !$x -> isa($class);
+      if defined($upgrade) && !$x -> isa(__PACKAGE__);
 
     # Finite number
 
@@ -4814,7 +4886,7 @@ sub bestr {
     # Upgrade?
 
     return $upgrade -> bestr($x, @r)
-      if defined($upgrade) && !$x -> isa($class);
+      if defined($upgrade) && !$x -> isa(__PACKAGE__);
 
     # Finite number
 
@@ -4869,7 +4941,7 @@ sub bfstr {
     # Upgrade?
 
     return $upgrade -> bfstr($x, @r)
-      if defined($upgrade) && !$x -> isa($class);
+      if defined($upgrade) && !$x -> isa(__PACKAGE__);
 
     # Finite number
 
@@ -4903,7 +4975,7 @@ sub to_hex {
     # Upgrade?
 
     return $upgrade -> to_hex($x, @r)
-      if defined($upgrade) && !$x -> isa($class);
+      if defined($upgrade) && !$x -> isa(__PACKAGE__);
 
     # Finite number
 
@@ -4935,7 +5007,7 @@ sub to_oct {
     # Upgrade?
 
     return $upgrade -> to_hex($x, @r)
-      if defined($upgrade) && !$x -> isa($class);
+      if defined($upgrade) && !$x -> isa(__PACKAGE__);
 
     # Finite number
 
@@ -4967,7 +5039,7 @@ sub to_bin {
     # Upgrade?
 
     return $upgrade -> to_hex($x, @r)
-      if defined($upgrade) && !$x -> isa($class);
+      if defined($upgrade) && !$x -> isa(__PACKAGE__);
 
     # Finite number
 
@@ -5961,6 +6033,8 @@ Math::BigFloat - arbitrary size floating point math package
 
   # Bitwise methods
 
+  $x->bblsft($y);         # bitwise left shift
+  $x->bbrsft($y);         # bitwise right shift
   $x->band($y);           # bitwise and
   $x->bior($y);           # bitwise inclusive or
   $x->bxor($y);           # bitwise exclusive or

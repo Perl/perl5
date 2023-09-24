@@ -466,17 +466,17 @@ $y = $CLASS->new("18.2");
 
 # 2 * (2 ** int(18.2));
 $x <<= $y;
-is($x->copy()->bfround(-9), "602248.763144685",
+is($x, 524288,
    qq|\$x = $CLASS->new("2"); \$y = $CLASS->new("18.2");| .
-   q| $x <<= $y; $x->copy()->bfround(-9);|);
+   q| $x <<= $y|);
 
-# 2 * (2 ** 18.2) / (2 ** 18.2) => 2
+# 2 * (2 ** int(18.2)) / (2 ** int(18.2)) => 2
 is($x >>= $y, 2,
    qq|\$x = $CLASS->new("2"); \$y = $CLASS->new("18.2");| .
-   q| $x <<= $y; $x->copy()->bfround(-9); $x >>= $y|);
+   q| $x <<= $y; $x >>= $y|);
 is($x, 2,
    qq|\$x = $CLASS->new("2"); \$y = $CLASS->new("18.2");| .
-   q| $x <<= $y; $x->copy()->bfround(-9); $x >>= $y; $x|);
+   q| $x <<= $y; $x >>= $y; $x|);
 
 __DATA__
 
