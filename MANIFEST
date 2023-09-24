@@ -1639,8 +1639,8 @@ cpan/Math-BigInt/t/with_sub.t				Test use Math::BigFloat with => package
 cpan/Math-BigInt-FastCalc/FastCalc.xs			Math::BigInt::FastCalc extension
 cpan/Math-BigInt-FastCalc/lib/Math/BigInt/FastCalc.pm	Math::BigInt::FastCalc extension
 cpan/Math-BigInt-FastCalc/t/bigintfc.t			Math::BigInt::FastCalc extension
-cpan/Math-BigInt-FastCalc/t/biglog.t
-cpan/Math-BigInt-FastCalc/t/bigroot.t
+cpan/Math-BigInt-FastCalc/t/biglog.t			Test file related to Math::BigInt::FastCalc
+cpan/Math-BigInt-FastCalc/t/bigroot.t			Test file related to Math::BigInt::FastCalc
 cpan/Math-BigInt-FastCalc/t/bootstrap.t			Math::BigInt::FastCalc extension
 cpan/Math-BigInt-FastCalc/t/leak.t			test for memory leaks in Math::BigInt::FastCalc
 cpan/Math-BigInt-FastCalc/t/mbi_rand.t			Math::BigInt::FastCalc extension
