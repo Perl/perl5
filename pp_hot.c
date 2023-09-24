@@ -2637,7 +2637,6 @@ PP(pp_aassign)
         case SVt_PVAV: {
             SV **svp;
             SSize_t i;
-            SSize_t tmps_base;
             SSize_t nelems = lastrelem - relem + 1;
             AV *ary = MUTABLE_AV(lsv);
 
@@ -2690,17 +2689,34 @@ PP(pp_aassign)
              * @a = ($a[0]) case, but the current implementation uses the
              * same algorithm regardless, so ignores that flag. (It *is*
              * used in the hash branch below, however).
-            */
+             *
+             *
+             * The net effect of this next block of code (apart from
+             * optimisations and aliasing) is to make a copy of each
+             * *relem and store the new SV both in the array and back on
+             * the *relem slot of the stack, overwriting the original.
+             * This new list of SVs will later be either returned
+             * (G_LIST), or popped.
+             *
+             * Note that under PERL_RC_STACK builds most of this
+             * complexity can be thrown away: things can be kept alive on
+             * the argument stack without involving the temps stack. In
+             * particular, the args are kept on the argument stack and
+             * processed from there, rather than their pointers being
+             * copied to the temps stack and then processed from there.
+             */
 
+#ifndef PERL_RC_STACK
             /* Reserve slots for ary, plus the elems we're about to copy,
              * then protect ary and temporarily void the remaining slots
              * with &PL_sv_undef */
             EXTEND_MORTAL(nelems + 1);
             PL_tmps_stack[++PL_tmps_ix] = SvREFCNT_inc_simple_NN(ary);
-            tmps_base = PL_tmps_ix + 1;
+            SSize_t tmps_base = PL_tmps_ix + 1;
             for (i = 0; i < nelems; i++)
                 PL_tmps_stack[tmps_base + i] = &PL_sv_undef;
             PL_tmps_ix += nelems;
+#endif
 
             /* Make a copy of each RHS elem and save on the tmps_stack
              * (or pass through where we can optimise away the copy) */
@@ -2719,13 +2735,18 @@ PP(pp_aassign)
                         DIE(aTHX_
                            "Assigned value is not a SCALAR reference");
                     if (lval) {
+                        /* XXX the 'mortal' part here is probably
+                         * unnecessary under PERL_RC_STACK.
+                         */
                         rsv = sv_mortalcopy(rsv);
                         rpp_replace_at(svp, rsv);
                     }
                     /* XXX else check for weak refs?  */
+#ifndef PERL_RC_STACK
                     rsv = SvREFCNT_inc_NN(SvRV(rsv));
                     assert(tmps_base <= PL_tmps_max);
                     PL_tmps_stack[tmps_base++] = rsv;
+#endif
                 }
             }
             else {
@@ -2734,7 +2755,9 @@ PP(pp_aassign)
 
                     if (rpp_is_lone(rsv) && !SvGMAGICAL(rsv)) {
                         /* can skip the copy */
+#ifndef PERL_RC_STACK
                         SvREFCNT_inc_simple_void_NN(rsv);
+#endif
                         SvTEMP_off(rsv);
                     }
                     else {
@@ -2744,45 +2767,83 @@ PP(pp_aassign)
                         nsv = newSVsv_flags(rsv,
                                 (SV_DO_COW_SVSETSV|SV_NOSTEAL|SV_GMAGIC));
                         rpp_replace_at(svp, nsv);
+#ifdef PERL_RC_STACK
+                        SvREFCNT_dec_NN(nsv);
+#endif
+
                         rsv = nsv;
                     }
 
+#ifndef PERL_RC_STACK
                     assert(tmps_base <= PL_tmps_max);
                     PL_tmps_stack[tmps_base++] = rsv;
+#endif
                 }
             }
 
             if (SvRMAGICAL(ary) || AvFILLp(ary) >= 0) /* may be non-empty */
                 av_clear(ary);
 
-            /* store in the array, the SVs that are in the tmps stack */
+            /* Store in the array, the argument copies that are in the
+             * tmps stack (or for PERL_RC_STACK, on the args stack) */
 
+#ifndef PERL_RC_STACK
             tmps_base -= nelems;
-
-            if (SvMAGICAL(ary) || SvREADONLY(ary) || !AvREAL(ary)) {
+#endif
+            if (alias || SvMAGICAL(ary) || SvREADONLY(ary) || !AvREAL(ary)) {
                 /* for arrays we can't cheat with, use the official API */
                 av_extend(ary, nelems - 1);
                 for (i = 0; i < nelems; i++) {
-                    SV **svp = &(PL_tmps_stack[tmps_base + i]);
+                    SV **svp =
+#ifdef PERL_RC_STACK
+                        &relem[i];
+#else
+                        &(PL_tmps_stack[tmps_base + i]);
+#endif
+
                     SV *rsv = *svp;
+#ifdef PERL_RC_STACK
+                    if (alias) {
+                        assert(SvROK(rsv));
+                        rsv = SvRV(rsv);
+                    }
+#endif
+
                     /* A tied store won't take ownership of rsv, so keep
                      * the 1 refcnt on the tmps stack; otherwise disarm
                      * the tmps stack entry */
                     if (av_store(ary, i, rsv))
+#ifdef PERL_RC_STACK
+                        SvREFCNT_inc_simple_NN(rsv);
+#else
                         *svp = &PL_sv_undef;
+#endif
                     /* av_store() may have added set magic to rsv */;
                     SvSETMAGIC(rsv);
                 }
+#ifndef PERL_RC_STACK
                 /* disarm ary refcount: see comments below about leak */
                 PL_tmps_stack[tmps_base - 1] = &PL_sv_undef;
+#endif
             }
             else {
-                /* directly access/set the guts of the AV */
+                /* Simple array: directly access/set the guts of the AV */
                 SSize_t fill = nelems - 1;
                 if (fill > AvMAX(ary))
                     av_extend_guts(ary, fill, &AvMAX(ary), &AvALLOC(ary),
                                     &AvARRAY(ary));
                 AvFILLp(ary) = fill;
+#ifdef PERL_RC_STACK
+                Copy(relem, AvARRAY(ary), nelems, SV*);
+                /* ownership of one ref count of each elem passed to
+                 * array. Remove ref from stack by zeroing, or if need
+                 * to keep the list on the stack too, bump the count */
+                if (gimme == G_LIST)
+                    for (i = 0; i < nelems; i++)
+                        SvREFCNT_inc_void_NN(relem[i]);
+                else
+                    Zero(relem, nelems, SV*);
+#else
                 Copy(&(PL_tmps_stack[tmps_base]), AvARRAY(ary), nelems, SV*);
                 /* Quietly remove all the SVs from the tmps stack slots,
                  * since ary has now taken ownership of the refcnt.
@@ -2794,13 +2855,15 @@ PP(pp_aassign)
                          PL_tmps_ix - (tmps_base + nelems) + 1,
                          SV*);
                 PL_tmps_ix -= (nelems + 1);
+#endif
             }
 
             if (UNLIKELY(PL_delaymagic & DM_ARRAY_ISA))
                 /* its assumed @ISA set magic can't die and leak ary */
                 SvSETMAGIC(MUTABLE_SV(ary));
+#ifndef PERL_RC_STACK
             SvREFCNT_dec_NN(ary);
-
+#endif
             relem = lastrelem + 1;
             goto no_relems;
         }
