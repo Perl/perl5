@@ -2461,7 +2461,14 @@ S_aassign_copy_common(pTHX_ SV **firstlelem, SV **lastlelem,
                 lcount = -1;
                 lelem--; /* no need to unmark this element */
             }
-            else if (!(do_rc1 && SvREFCNT(svl) == 1) && !SvIMMORTAL(svl)) {
+            else if (!(do_rc1 &&
+#ifdef PERL_RC_STACK
+                            SvREFCNT(svl) <= 2
+#else
+                            SvREFCNT(svl) == 1
+#endif
+                      ) && !SvIMMORTAL(svl))
+            {
                 SvFLAGS(svl) |= SVf_BREAK;
                 marked = TRUE;
             }
@@ -2589,7 +2596,13 @@ PP(pp_aassign)
                 /* skip the scan if all scalars have a ref count of 1 */
                 for (lelem = firstlelem; lelem <= lastlelem; lelem++) {
                     SV *sv = *lelem;
-                    if (!sv || SvREFCNT(sv) == 1)
+                    if (!sv ||
+#ifdef PERL_RC_STACK
+                        SvREFCNT(sv) <= 2
+#else
+                        SvREFCNT(sv) == 1
+#endif
+                    )
                         continue;
                     if (SvTYPE(sv) != SVt_PVAV && SvTYPE(sv) != SVt_PVAV)
                         goto do_scan;
