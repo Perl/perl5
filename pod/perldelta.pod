@@ -381,7 +381,13 @@ manager will later use a regex to expand these into links.
 
 =item *
 
-XXX
+Lexical names from the enclosing scope in a lexical sub or closure
+weren't visible to code executed by calling C<eval EXPR;> from the
+C<DB> package.  This was introduced in 5.18 in an attempt to prevent
+subs from retaining a reference to their outer scope, but this broke
+the special behaviour of C<eval EXPR;> in package DB.
+
+This incidentally fixed a TODO test for C<B::Deparse>.  [GH #19370]
 
 =back
 
