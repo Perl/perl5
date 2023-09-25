@@ -920,31 +920,34 @@ PP_wrapped(pp_chop, 0, 1)
     RETURN;
 }
 
-PP_wrapped(pp_undef,
-    ((!PL_op->op_private || (PL_op->op_private & OPpTARGET_MY)) ? 0 : 1),
-    0)
+
+PP(pp_undef)
 {
-    dSP;
     SV *sv;
 
     if (!PL_op->op_private) {
-        EXTEND(SP, 1);
-        RETPUSHUNDEF;
+        rpp_extend(1);
+        *++PL_stack_sp = &PL_sv_undef;
+        return NORMAL;
     }
 
     if (PL_op->op_private & OPpTARGET_MY) {
         SV** const padentry = &PAD_SVl(PL_op->op_targ);
         sv = *padentry;
-        EXTEND(SP,1);sp++;PUTBACK;
-        if ((PL_op->op_private & (OPpLVAL_INTRO|OPpPAD_STATE)) == OPpLVAL_INTRO) {
+        rpp_xpush_1(sv);
+        if ((PL_op->op_private & (OPpLVAL_INTRO|OPpPAD_STATE))
+                               == OPpLVAL_INTRO)
+        {
             save_clearsv(padentry);
         }
     } else {
-        sv = TOPs;
+        sv = *PL_stack_sp;
 
-        if (!sv)
-        {
-            SETs(&PL_sv_undef);
+        if (!sv) {
+            /* sv is NULL when pp_undef is invoked like this:
+             *    *myundef = \&CORE::undef;  &myundef();
+             */
+            *PL_stack_sp = &PL_sv_undef;
             return NORMAL;
         }
     }
@@ -1035,10 +1038,9 @@ PP_wrapped(pp_undef,
     }
 
 
-    if (PL_op->op_private & OPpTARGET_MY)
-        SETs(sv);
-    else
-        SETs(&PL_sv_undef);
+    if (!(PL_op->op_private & OPpTARGET_MY))
+        rpp_replace_1_1(&PL_sv_undef);
+
     return NORMAL;
 }
 
