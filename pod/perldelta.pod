@@ -389,6 +389,13 @@ the special behaviour of C<eval EXPR;> in package DB.
 
 This incidentally fixed a TODO test for C<B::Deparse>.  [GH #19370]
 
+=item *
+
+Support an argument stack over 2**32 entries on 64-bit platforms.
+This requires 32GB of memory just for the argument stack pointers
+itself, so you will require a significantly more memory to take
+advantage of this.  [GH #20917]
+
 =back
 
 =head1 Known Problems
