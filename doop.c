@@ -659,7 +659,7 @@ void
 Perl_do_join(pTHX_ SV *sv, SV *delim, SV **mark, SV **sp)
 {
     SV ** const oldmark = mark;
-    I32 items = sp - mark;
+    SSize_t items = sp - mark;
     STRLEN len;
     STRLEN delimlen;
     const char * const delims = SvPV_const(delim, delimlen);

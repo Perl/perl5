@@ -5122,7 +5122,7 @@ PP(pp_grepwhile)
 
     /* All done yet? */
     if (UNLIKELY(PL_stack_base + *PL_markstack_ptr > PL_stack_sp)) {
-        I32 items;
+        SSize_t items;
         const U8 gimme = GIMME_V;
 
         LEAVE_with_name("grep");					/* exit outer scope */

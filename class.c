@@ -146,7 +146,7 @@ XS(injected_constructor)
         params = newHV();
         SAVEFREESV((SV *)params);
 
-        for(I32 i = 1; i < items; i += 2) {
+        for(SSize_t i = 1; i < items; i += 2) {
             SV *name = ST(i);
             SV *val  = (i+1 < items) ? ST(i+1) : &PL_sv_undef;
 

@@ -163,13 +163,13 @@ Perl_pop_scope(pTHX)
     LEAVE_SCOPE(oldsave);
 }
 
-I32 *
+SSize_t *
 Perl_markstack_grow(pTHX)
 {
     const I32 oldmax = PL_markstack_max - PL_markstack;
     const I32 newmax = GROW(oldmax);
 
-    Renew(PL_markstack, newmax, I32);
+    Renew(PL_markstack, newmax, SSize_t);
     PL_markstack_max = PL_markstack + newmax;
     PL_markstack_ptr = PL_markstack + oldmax;
     DEBUG_s(DEBUG_v(PerlIO_printf(Perl_debug_log,

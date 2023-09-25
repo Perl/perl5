@@ -2760,7 +2760,7 @@ call_sv(sv, flags, ...)
     SV* sv
     I32 flags
     PREINIT:
-        I32 i;
+        SSize_t i;
     PPCODE:
         for (i=0; i<items-2; i++)
             ST(i) = ST(i+2); /* pop first two args */
@@ -3046,7 +3046,7 @@ eval_sv(sv, flags)
     SV* sv
     I32 flags
     PREINIT:
-        I32 i;
+        SSize_t i;
     PPCODE:
         PUTBACK;
         i = eval_sv(sv, flags);
@@ -3322,6 +3322,13 @@ I32
 sv_count()
         CODE:
             RETVAL = PL_sv_count;
+        OUTPUT:
+            RETVAL
+
+IV
+xs_items(...)
+        CODE:
+            RETVAL = items;
         OUTPUT:
             RETVAL
 

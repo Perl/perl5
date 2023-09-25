@@ -758,9 +758,9 @@ S_do_chomp(pTHX_ SV *retval, SV *sv, bool chomping)
     if (chomping && (RsSNARF(PL_rs) || RsRECORD(PL_rs)))
         return 0;
     if (SvTYPE(sv) == SVt_PVAV) {
-        I32 i;
+        SSize_t i;
         AV *const av = MUTABLE_AV(sv);
-        const I32 max = AvFILL(av);
+        const SSize_t max = AvFILL(av);
 
         for (i = 0; i <= max; i++) {
             sv = MUTABLE_SV(av_fetch(av, i, FALSE));
@@ -1848,10 +1848,7 @@ PP_wrapped(pp_repeat,
         if (count > 1) {
             SSize_t max;
 
-            if (  items > SSize_t_MAX / count   /* max would overflow */
-                                                /* repeatcpy would overflow */
-               || items > I32_MAX / (I32)sizeof(SV *)
-            )
+            if ( items > SSize_t_MAX / (SSize_t)sizeof(SV *) / count )
                Perl_croak(aTHX_ "%s","Out of memory during list extend");
             max = items * count;
             MEXTEND(MARK, max);
@@ -5907,7 +5904,7 @@ PP_wrapped(pp_lslice, 0, 2)
     SV ** const firstrelem = lastlelem + 1;
     const U8 mod = PL_op->op_flags & OPf_MOD;
 
-    const I32 max = lastrelem - lastlelem;
+    const SSize_t max = lastrelem - lastlelem;
     SV **lelem;
 
     if (GIMME_V != G_LIST) {
@@ -5916,7 +5913,7 @@ PP_wrapped(pp_lslice, 0, 2)
             *firstlelem = &PL_sv_undef;
         }
         else {
-            I32 ix = SvIV(*lastlelem);
+            SSize_t ix = SvIV(*lastlelem);
             if (ix < 0)
                 ix += max;
             if (ix < 0 || ix >= max)
@@ -5934,7 +5931,7 @@ PP_wrapped(pp_lslice, 0, 2)
     }
 
     for (lelem = firstlelem; lelem <= lastlelem; lelem++) {
-        I32 ix = SvIV(*lelem);
+        SSize_t ix = SvIV(*lelem);
         if (ix < 0)
             ix += max;
         if (ix < 0 || ix >= max)
@@ -5955,7 +5952,7 @@ PP_wrapped(pp_lslice, 0, 2)
 PP(pp_anonlist)
 {
     dMARK;
-    const I32 items = PL_stack_sp - MARK;
+    const SSize_t items = PL_stack_sp - MARK;
     SV * const av = MUTABLE_SV(av_make(items, MARK+1));
     /* attach new SV to stack before freeing everything else,
      * so no leak on croak */
@@ -6584,7 +6581,7 @@ PP_wrapped(pp_split,
     const char *orig;
     const IV origlimit = limit;
     bool realarray = 0;
-    I32 base;
+    SSize_t base;
     const U8 gimme = GIMME_V;
     bool gimme_scalar;
     I32 oldsave = PL_savestack_ix;

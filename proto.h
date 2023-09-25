@@ -198,7 +198,7 @@ Perl_amagic_is_enabled(pTHX_ int method)
         __attribute__visibility__("hidden");
 #define PERL_ARGS_ASSERT_AMAGIC_IS_ENABLED
 
-PERL_CALLCONV I32
+PERL_CALLCONV SSize_t
 Perl_apply(pTHX_ I32 type, SV **mark, SV **sp)
         __attribute__visibility__("hidden");
 #define PERL_ARGS_ASSERT_APPLY                  \
@@ -419,7 +419,7 @@ Perl_bytes_to_utf8(pTHX_ const U8 *s, STRLEN *lenp);
 #define PERL_ARGS_ASSERT_BYTES_TO_UTF8          \
         assert(s); assert(lenp)
 
-PERL_CALLCONV I32
+PERL_CALLCONV SSize_t
 Perl_call_argv(pTHX_ const char *sub_name, I32 flags, char **argv);
 #define PERL_ARGS_ASSERT_CALL_ARGV              \
         assert(sub_name); assert(argv)
@@ -433,17 +433,17 @@ Perl_call_list(pTHX_ I32 oldscope, AV *paramList);
 #define PERL_ARGS_ASSERT_CALL_LIST              \
         assert(paramList)
 
-PERL_CALLCONV I32
+PERL_CALLCONV SSize_t
 Perl_call_method(pTHX_ const char *methname, I32 flags);
 #define PERL_ARGS_ASSERT_CALL_METHOD            \
         assert(methname)
 
-PERL_CALLCONV I32
+PERL_CALLCONV SSize_t
 Perl_call_pv(pTHX_ const char *sub_name, I32 flags);
 #define PERL_ARGS_ASSERT_CALL_PV                \
         assert(sub_name)
 
-PERL_CALLCONV I32
+PERL_CALLCONV SSize_t
 Perl_call_sv(pTHX_ SV *sv, volatile I32 flags);
 #define PERL_ARGS_ASSERT_CALL_SV                \
         assert(sv)
@@ -1092,7 +1092,7 @@ Perl_eval_pv(pTHX_ const char *p, I32 croak_on_error);
 #define PERL_ARGS_ASSERT_EVAL_PV                \
         assert(p)
 
-PERL_CALLCONV I32
+PERL_CALLCONV SSize_t
 Perl_eval_sv(pTHX_ SV *sv, I32 flags);
 #define PERL_ARGS_ASSERT_EVAL_SV                \
         assert(sv)
@@ -2379,7 +2379,7 @@ Perl_malloc(MEM_SIZE nbytes)
         __attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_MALLOC
 
-PERL_CALLCONV I32 *
+PERL_CALLCONV SSize_t *
 Perl_markstack_grow(pTHX);
 #define PERL_ARGS_ASSERT_MARKSTACK_GROW
 
@@ -5317,10 +5317,10 @@ Perl_write_to_stderr(pTHX_ SV *msv)
         assert(msv)
 
 PERL_CALLCONV void
-Perl_xs_boot_epilog(pTHX_ const I32 ax);
+Perl_xs_boot_epilog(pTHX_ const SSize_t ax);
 #define PERL_ARGS_ASSERT_XS_BOOT_EPILOG
 
-PERL_CALLCONV I32
+PERL_CALLCONV SSize_t
 Perl_xs_handshake(const U32 key, void *v_my_perl, const char *file, ...);
 #define PERL_ARGS_ASSERT_XS_HANDSHAKE           \
         assert(v_my_perl); assert(file)
@@ -6608,7 +6608,7 @@ Perl_croak_kw_unless_class(pTHX_ const char *kw);
           defined(PERL_IN_TOKE_C) */
 #if defined(PERL_IN_DEB_C)
 STATIC void
-S_deb_stack_n(pTHX_ SV **stack_base, I32 stack_min, I32 stack_max, I32 mark_min, I32 mark_max, I32 nonrc_base);
+S_deb_stack_n(pTHX_ SV **stack_base, SSize_t stack_min, SSize_t stack_max, SSize_t mark_min, SSize_t mark_max, SSize_t nonrc_base);
 # define PERL_ARGS_ASSERT_DEB_STACK_N           \
         assert(stack_base)
 
@@ -9451,7 +9451,7 @@ S_with_queued_errors(pTHX_ SV *ex);
         assert(ex)
 
 STATIC void
-S_xs_version_bootcheck(pTHX_ U32 items, U32 ax, const char *xs_p, STRLEN xs_len);
+S_xs_version_bootcheck(pTHX_ SSize_t items, SSize_t ax, const char *xs_p, STRLEN xs_len);
 # define PERL_ARGS_ASSERT_XS_VERSION_BOOTCHECK  \
         assert(xs_p)
 
@@ -9513,7 +9513,7 @@ Perl_CvGV(pTHX_ CV *sv);
 # define PERL_ARGS_ASSERT_CVGV                  \
         assert(sv)
 
-PERL_STATIC_INLINE I32
+PERL_STATIC_INLINE SSize_t
 Perl_POPMARK(pTHX);
 # define PERL_ARGS_ASSERT_POPMARK
 
@@ -9617,7 +9617,7 @@ Perl_SvUV_nomg(pTHX_ SV *sv);
 # define PERL_ARGS_ASSERT_SVUV_NOMG             \
         assert(sv)
 
-PERL_STATIC_INLINE I32
+PERL_STATIC_INLINE SSize_t
 Perl_TOPMARK(pTHX);
 # define PERL_ARGS_ASSERT_TOPMARK
 

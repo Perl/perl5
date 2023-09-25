@@ -2971,7 +2971,7 @@ Approximate Perl equivalent: C<&{"$sub_name"}(@$argv)>.
 =cut
 */
 
-I32
+SSize_t
 Perl_call_argv(pTHX_ const char *sub_name, I32 flags, char **argv)
 
                         /* See G_* flags in cop.h */
@@ -3005,7 +3005,7 @@ Performs a callback to the specified Perl sub.  See L<perlcall>.
 =cut
 */
 
-I32
+SSize_t
 Perl_call_pv(pTHX_ const char *sub_name, I32 flags)
                         /* name of the subroutine */
                         /* See G_* flags in cop.h */
@@ -3024,7 +3024,7 @@ be on the stack.  See L<perlcall>.
 =cut
 */
 
-I32
+SSize_t
 Perl_call_method(pTHX_ const char *methname, I32 flags)
                         /* name of the subroutine */
                         /* See G_* flags in cop.h */
@@ -3068,14 +3068,14 @@ See L<perlcall>.
 =cut
 */
 
-I32
+SSize_t
 Perl_call_sv(pTHX_ SV *sv, volatile I32 flags)
                         /* See G_* flags in cop.h */
 {
     LOGOP myop;		/* fake syntax tree node */
     METHOP method_op;
-    I32 oldmark;
-    volatile I32 retval = 0;
+    SSize_t oldmark;
+    volatile SSize_t retval = 0;
     bool oldcatch = CATCH_GET;
     int ret;
     OP* const oldop = PL_op;
@@ -3237,14 +3237,14 @@ current hints from C<PL_curcop>.
 =cut
 */
 
-I32
+SSize_t
 Perl_eval_sv(pTHX_ SV *sv, I32 flags)
 
                         /* See G_* flags in cop.h */
 {
     UNOP myop;		/* fake syntax tree node */
-    volatile I32 oldmark;
-    volatile I32 retval = 0;
+    volatile SSize_t oldmark;
+    volatile SSize_t retval = 0;
     int ret;
     OP* const oldop = PL_op;
     dJMPENV;
@@ -4515,7 +4515,7 @@ Perl_init_stacks(pTHX)
     PL_tmps_ix = -1;
     PL_tmps_max = REASONABLE(128);
 
-    Newxz(PL_markstack,REASONABLE(32),I32);
+    Newxz(PL_markstack, REASONABLE(32), SSize_t);
     PL_markstack_ptr = PL_markstack;
     PL_markstack_max = PL_markstack + REASONABLE(32);
 
@@ -5508,7 +5508,7 @@ read_e_script(pTHX_ int idx, SV *buf_sv, int maxlen)
 
 /* removes boilerplate code at the end of each boot_Module xsub */
 void
-Perl_xs_boot_epilog(pTHX_ const I32 ax)
+Perl_xs_boot_epilog(pTHX_ const SSize_t ax)
 {
   if (PL_unitcheckav)
         call_list(PL_scopestack_ix, PL_unitcheckav);
