@@ -558,7 +558,7 @@ static bool S_parse_version(const char *vstr, const char *vend, UV *vmajor, UV *
         vstr = end;
     }
 
-    if(vstr[0])
+    if(vstr != vend)
         return FALSE;
 
     return TRUE;
@@ -607,7 +607,7 @@ XS(XS_builtin_import)
         if(sympv[0] == ':') {
             UV vmajor, vminor;
             if(!S_parse_version(sympv + 1, sympv + symlen, &vmajor, &vminor))
-                Perl_croak(aTHX_ "Invalid version bundle %s", sympv);
+                Perl_croak(aTHX_ "Invalid version bundle %" SVf_QUOTEDPREFIX, sym);
 
             U16 want_ver = SHORTVER(vmajor, vminor);
 
