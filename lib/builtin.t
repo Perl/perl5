@@ -452,9 +452,10 @@ TODO: {
     # parse errors
     foreach my $bundle (qw( :x :5.x :5.36x :5.36.1000 :5.1000 :5.36.1.2 ),
                         ":  +5.+39", ":  +5.+40. -10", ": 5.40", ":5 .40", ":5.+40",
-                        ":5.40 .0", ":5.40.-10") {
-        ok(!defined eval "use builtin '$bundle';", $bundle.' is invalid bundle');
-        like($@, qr/^Invalid version bundle \Q$bundle\E at /);
+                        ":5.40 .0", ":5.40.-10", ":5.40\0") {
+        (my $pretty_bundle = $bundle) =~ s/([^[:print:]])/ sprintf("\\%o", ord $1) /ge;
+        ok(!defined eval "use builtin '$bundle';", $pretty_bundle.' is invalid bundle');
+        like($@, qr/^Invalid version bundle "\Q$pretty_bundle\E" at /);
     }
 }
 

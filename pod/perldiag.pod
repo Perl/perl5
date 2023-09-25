@@ -3373,7 +3373,7 @@ See L<perlfunc/pack>.
 (W) The given character is not a valid pack or unpack type but used to be
 silently ignored.
 
-=item Invalid version bundle %s
+=item Invalid version bundle "%s"
 
 (F) A version number that is used to specify an import bundle during a
 C<use builtin ...> statement must be formatted as C<:MAJOR.MINOR> with an
