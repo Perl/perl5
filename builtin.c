@@ -523,32 +523,39 @@ static const struct BuiltinFuncDescriptor builtins[] = {
     { NULL, 0, NULL, NULL, 0, false }
 };
 
-static bool S_parse_version(const char *vstr, int *vmajor, int *vminor)
+static bool S_parse_version(const char *vstr, const char *vend, UV *vmajor, UV *vminor)
 {
     /* Parse a string like "5.35" to yield 5 and 35. Ignores an optional
      * trailing third component e.g. "5.35.7". Returns false on parse errors.
      */
 
-    size_t len;
+    const char *end = vend;
+    if (!grok_atoUV(vstr, vmajor, &end))
+        return FALSE;
 
-    if(sscanf(vstr, "%d.%d%zn", vmajor, vminor, &len) < 2)
+    vstr = end;
+    if (*vstr++ != '.')
+        return FALSE;
+
+    end = vend;
+    if (!grok_atoUV(vstr, vminor, &end))
         return FALSE;
 
     if(*vminor > 255)
         return FALSE;
 
-    vstr += len;
+    vstr = end;
 
     if(vstr[0] == '.') {
         vstr++;
 
-        int _dummy;
-        if(sscanf(vstr, "%d%zn", &_dummy, &len) < 1)
+        UV _dummy;
+        if(!grok_atoUV(vstr, &_dummy, &end))
             return FALSE;
         if(_dummy > 255)
             return FALSE;
 
-        vstr += len;
+        vstr = end;
     }
 
     if(vstr[0])
@@ -592,13 +599,14 @@ XS(XS_builtin_import)
 
     for(int i = 1; i < items; i++) {
         SV *sym = ST(i);
-        const char *sympv = SvPV_nolen(sym);
+        STRLEN symlen;
+        const char *sympv = SvPV(sym, symlen);
         if(strEQ(sympv, "import") || strEQ(sympv, "unimport"))
             Perl_croak(aTHX_ builtin_not_recognised, sym);
 
         if(sympv[0] == ':') {
-            int vmajor, vminor;
-            if(!S_parse_version(sympv + 1, &vmajor, &vminor))
+            UV vmajor, vminor;
+            if(!S_parse_version(sympv + 1, sympv + symlen, &vmajor, &vminor))
                 Perl_croak(aTHX_ "Invalid version bundle %s", sympv);
 
             U16 want_ver = SHORTVER(vmajor, vminor);
