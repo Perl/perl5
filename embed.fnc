@@ -2764,7 +2764,11 @@ Cpx	|void	|rpp_obliterate_stack_to				\
 				|I32 ix
 Adipx	|void	|rpp_popfree_1
 Adipx	|void	|rpp_popfree_2
+Adipx	|void	|rpp_popfree_1_NN
+Adipx	|void	|rpp_popfree_2_NN
 Adipx	|void	|rpp_popfree_to |NN SV **sp
+Adipx	|void	|rpp_popfree_to_NN					\
+				|NN SV **sp
 Adipx	|SV *	|rpp_pop_1_norc
 Adipx	|void	|rpp_push_1	|NN SV *sv
 Adipx	|void	|rpp_push_2	|NN SV *sv1				\
@@ -2774,8 +2778,18 @@ Adipx	|void	|rpp_replace_1_1|NN SV *sv
 Adipx	|void	|rpp_replace_2_1|NN SV *sv
 Adipx	|void	|rpp_replace_at |NN SV **sp				\
 				|NN SV *sv
+Adipx	|void	|rpp_replace_at_NN					\
+				|NN SV **sp				\
+				|NN SV *sv
 Adipx	|void	|rpp_replace_at_norc					\
 				|NN SV **sp				\
+				|NN SV *sv
+Adipx	|void	|rpp_replace_at_norc_NN 				\
+				|NN SV **sp				\
+				|NN SV *sv
+Adipx	|void	|rpp_replace_1_1_NN					\
+				|NN SV *sv
+Adipx	|void	|rpp_replace_2_1_NN					\
 				|NN SV *sv
 Adipx	|bool	|rpp_stack_is_rc
 Adipx	|bool	|rpp_try_AMAGIC_1					\
