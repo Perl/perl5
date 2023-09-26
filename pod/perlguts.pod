@@ -4778,6 +4778,18 @@ in summary:
 
  (no replacement)        dATARGET   // just write the macro body in full
 
+There are also some C<_NN> variants which assume that any items being
+removed from the stack are non-NULL, and so are slightly more efficient:
+
+ rpp_popfree_1_NN()
+ rpp_popfree_2_NN()
+ rpp_popfree_to_NN(svp)
+
+ rpp_replace_1_1_NN(sv)
+ rpp_replace_2_1_NN(sv)
+ rpp_replace_at_NN(sp, sv)
+ rpp_replace_at_norc_NN(sp, sv)
+
 Other new C and perl functions related to reference-counted stacks are:
 
  push_stackinfo(type,rc) PUSHSTACKi(type)

@@ -451,6 +451,34 @@ Perl_rpp_popfree_to(pTHX_ SV **sp)
 
 
 /*
+=for apidoc rpp_popfree_to_NN
+
+A variant of rpp_popfree_to() which assumes that all the pointers being
+popped off the stack are non-NULL.
+
+=cut
+*/
+
+PERL_STATIC_INLINE void
+Perl_rpp_popfree_to_NN(pTHX_ SV **sp)
+{
+    PERL_ARGS_ASSERT_RPP_POPFREE_TO_NN;
+
+    assert(sp <= PL_stack_sp);
+#ifdef PERL_RC_STACK
+    assert(rpp_stack_is_rc());
+    while (PL_stack_sp > sp) {
+        SV *sv = *PL_stack_sp--;
+        assert(sv);
+        SvREFCNT_dec_NN(sv);
+    }
+#else
+    PL_stack_sp = sp;
+#endif
+}
+
+
+/*
 =for apidoc rpp_popfree_1
 
 Pop and free the top item on the argument stack and update C<PL_stack_sp>.
@@ -467,6 +495,31 @@ Perl_rpp_popfree_1(pTHX)
     assert(rpp_stack_is_rc());
     SV *sv = *PL_stack_sp--;
     SvREFCNT_dec(sv);
+#else
+    PL_stack_sp--;
+#endif
+}
+
+
+/*
+=for apidoc rpp_popfree_1_NN
+
+A variant of rpp_popfree_1() which assumes that the pointer being popped
+off the stack is non-NULL.
+
+=cut
+*/
+
+PERL_STATIC_INLINE void
+Perl_rpp_popfree_1_NN(pTHX)
+{
+    PERL_ARGS_ASSERT_RPP_POPFREE_1_NN;
+
+#ifdef PERL_RC_STACK
+    assert(rpp_stack_is_rc());
+    SV *sv = *PL_stack_sp--;
+    assert(sv);
+    SvREFCNT_dec_NN(sv);
 #else
     PL_stack_sp--;
 #endif
@@ -498,6 +551,35 @@ Perl_rpp_popfree_2(pTHX)
     PL_stack_sp -= 2;
 #endif
 }
+
+
+/*
+=for apidoc rpp_popfree_2_NN
+
+A variant of rpp_popfree_2() which assumes that the two pointers being
+popped off the stack are non-NULL.
+
+=cut
+*/
+
+
+PERL_STATIC_INLINE void
+Perl_rpp_popfree_2_NN(pTHX)
+{
+    PERL_ARGS_ASSERT_RPP_POPFREE_2_NN;
+
+#ifdef PERL_RC_STACK
+    assert(rpp_stack_is_rc());
+    for (int i = 0; i < 2; i++) {
+        SV *sv = *PL_stack_sp--;
+        assert(sv);
+        SvREFCNT_dec_NN(sv);
+    }
+#else
+    PL_stack_sp -= 2;
+#endif
+}
+
 
 /*
 =for apidoc rpp_pop_1_norc
@@ -647,6 +729,34 @@ Perl_rpp_replace_1_1(pTHX_ SV *sv)
 
 
 /*
+=for apidoc rpp_replace_1_1_NN
+
+A variant of rpp_replace_1_1() which assumes that the SV pointer on the
+stack is non-NULL.
+
+=cut
+*/
+
+PERL_STATIC_INLINE void
+Perl_rpp_replace_1_1_NN(pTHX_ SV *sv)
+{
+    PERL_ARGS_ASSERT_RPP_REPLACE_1_1_NN;
+
+#ifdef PERL_RC_STACK
+    assert(rpp_stack_is_rc());
+    SV *oldsv = *PL_stack_sp;
+    *PL_stack_sp = sv;
+    assert(sv);
+    assert(oldsv);
+    SvREFCNT_inc_simple_void_NN(sv);
+    SvREFCNT_dec_NN(oldsv);
+#else
+    *PL_stack_sp = sv;
+#endif
+}
+
+
+/*
 =for apidoc rpp_replace_2_1
 
 Replace the current top two stack items with C<sv>, while suitably
@@ -672,6 +782,40 @@ Perl_rpp_replace_2_1(pTHX_ SV *sv)
     SvREFCNT_dec(oldsv);
     oldsv = *PL_stack_sp--;
     SvREFCNT_dec(oldsv);
+#else
+    *--PL_stack_sp = sv;
+#endif
+}
+
+
+/*
+=for apidoc rpp_replace_2_1_NN
+
+A variant of rpp_replace_2_1() which assumes that the two SV pointers on
+the stack are non-NULL.
+
+=cut
+*/
+
+PERL_STATIC_INLINE void
+Perl_rpp_replace_2_1_NN(pTHX_ SV *sv)
+{
+    PERL_ARGS_ASSERT_RPP_REPLACE_2_1_NN;
+
+#ifdef PERL_RC_STACK
+    assert(rpp_stack_is_rc());
+    /* replace PL_stack_sp[-1] first; leave PL_stack_sp[0] in place while
+     * we free [-1], so if an exception occurs, [0] will still be freed.
+     */
+    SV *oldsv = PL_stack_sp[-1];
+    PL_stack_sp[-1] = sv;
+    assert(sv);
+    SvREFCNT_inc_simple_void_NN(sv);
+    assert(oldsv);
+    SvREFCNT_dec_NN(oldsv);
+    oldsv = *PL_stack_sp--;
+    assert(oldsv);
+    SvREFCNT_dec_NN(oldsv);
 #else
     *--PL_stack_sp = sv;
 #endif
@@ -706,6 +850,34 @@ Perl_rpp_replace_at(pTHX_ SV **sp, SV *sv)
 
 
 /*
+=for apidoc rpp_replace_at_NN
+
+A variant of rpp_replace_at() which assumes that the SV pointer on the
+stack is non-NULL.
+
+=cut
+*/
+
+PERL_STATIC_INLINE void
+Perl_rpp_replace_at_NN(pTHX_ SV **sp, SV *sv)
+{
+    PERL_ARGS_ASSERT_RPP_REPLACE_AT_NN;
+
+#ifdef PERL_RC_STACK
+    assert(rpp_stack_is_rc());
+    SV *oldsv = *sp;
+    *sp = sv;
+    assert(sv);
+    SvREFCNT_inc_simple_void_NN(sv);
+    assert(oldsv);
+    SvREFCNT_dec_NN(oldsv);
+#else
+    *sp = sv;
+#endif
+}
+
+
+/*
 =for apidoc rpp_replace_at_norc
 
 Replace the SV at address sp within the stack with C<sv>, while suitably
@@ -731,6 +903,33 @@ Perl_rpp_replace_at_norc(pTHX_ SV **sp, SV *sv)
     SV *oldsv = *sp;
     *sp = sv;
     SvREFCNT_dec(oldsv);
+#else
+    *sp = sv;
+    sv_2mortal(sv);
+#endif
+}
+
+
+/*
+=for apidoc rpp_replace_at_norc_NN
+
+A variant of rpp_replace_at_norc() which assumes that the SV pointer on the
+stack is non-NULL.
+
+=cut
+*/
+
+PERL_STATIC_INLINE void
+Perl_rpp_replace_at_norc_NN(pTHX_ SV **sp, SV *sv)
+{
+    PERL_ARGS_ASSERT_RPP_REPLACE_AT_NORC_NN;
+
+#ifdef PERL_RC_STACK
+    assert(rpp_stack_is_rc());
+    SV *oldsv = *sp;
+    *sp = sv;
+    assert(oldsv);
+    SvREFCNT_dec_NN(oldsv);
 #else
     *sp = sv;
     sv_2mortal(sv);
