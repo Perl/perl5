@@ -5196,9 +5196,9 @@ X<ord> X<encoding>
 
 =item ord
 
-=for Pod::Functions find a character's numeric representation
+=for Pod::Functions find a character's code point
 
-Returns the numeric value of the first character of EXPR.
+Returns the code point of the first character of EXPR.
 If EXPR is an empty string, returns 0.  If EXPR is omitted, uses
 L<C<$_>|perlvar/$_>.
 (Note I<character>, not byte.)
