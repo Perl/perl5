@@ -179,10 +179,12 @@ isnt $_[1], $_[0],
 }
 {
     # see GH #21484
-    my $expect = "a\x{100}x\x{100}b\n";
+    my $expect = "a\x{100}\x{100}x\x{100}\x{100}b\n";
     utf8::encode($expect);
     fresh_perl_is(<<'CODE', $expect, {}, "modifications delim from magic should be ignored");
-my $n = 1;
+# The x $n here is to ensure the PV of $sep isn't a COW of some other SV
+# so the PV of $sep is unlikely to change when the overload assigns to $sep.
+my $n = 2;
 my $sep = "\x{100}" x $n;
 package MyOver {
     use overload '""' => sub { $sep = "\xFF" x $n; "x" };
@@ -195,10 +197,14 @@ CODE
 }
 {
     # see GH #21484
-    my $expect = "x\x{100}a\n";
+    my $expect = "x\x{100}\x{100}a\n";
     utf8::encode($expect); # fresh_perl() does bytes
     fresh_perl_is(<<'CODE', $expect, {}, "modifications to delim PVX shouldn't crash");
-my $n = 1;
+# the x $n here is to ensure $sep has it's own PV rather than sharing it
+# in a COW sense,  This means that when the expanded version ($n+20) is assigned
+# the origin PV has been released and valgrind or ASAN can pick up the use
+# of the freed buffer.
+my $n = 2;
 my $sep = "\x{100}" x $n;
 package MyOver {
   use overload '""' => sub { $sep = "\xFF" x ($n+20); "x" };
