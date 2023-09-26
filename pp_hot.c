@@ -2292,7 +2292,7 @@ PP(pp_rv2av)
                 sv = is_pp_rv2av ? MUTABLE_SV(save_ary(gv)) : MUTABLE_SV(save_hash(gv));
     }
     if (PL_op->op_flags & OPf_REF) {
-        rpp_replace_1_1(sv);
+        rpp_replace_1_1_NN(sv);
         return NORMAL;
     }
     else if (UNLIKELY(PL_op->op_private & OPpMAYBE_LVSUB)) {
@@ -2300,7 +2300,7 @@ PP(pp_rv2av)
               if (flags && !(flags & OPpENTERSUB_INARGS)) {
                 if (gimme != G_LIST)
                     goto croak_cant_return;
-                rpp_replace_1_1(sv);
+                rpp_replace_1_1_NN(sv);
                 return NORMAL;
               }
     }
@@ -2323,7 +2323,7 @@ PP(pp_rv2av)
             SvREFCNT_dec_NN(old_sv);
             return NORMAL;
 #else
-            rpp_popfree_1();
+            rpp_popfree_1_NN();
             return S_pushav(aTHX_ av);
 #endif
         }
@@ -2331,11 +2331,11 @@ PP(pp_rv2av)
         if (gimme == G_SCALAR) {
             const SSize_t maxarg = AvFILL(av) + 1;
             if (PL_op->op_private & OPpTRUEBOOL)
-                rpp_replace_1_1(maxarg ? &PL_sv_yes : &PL_sv_zero);
+                rpp_replace_1_1_NN(maxarg ? &PL_sv_yes : &PL_sv_zero);
             else {
                 dTARGET;
                 TARGi(maxarg, 1);
-                rpp_replace_1_1(targ);
+                rpp_replace_1_1_NN(targ);
             }
         }
     }
@@ -2649,6 +2649,9 @@ PP(pp_aassign)
         assert(relem <= lastrelem);
         if (UNLIKELY(!lsv)) {
             alias = TRUE;
+            /* remove NULL so that the faster rpp_popfree_to_NN() can be
+             * used on return */
+            lelem[-1] = &PL_sv_undef;
             lsv = *lelem++;
             ASSUME(SvTYPE(lsv) == SVt_PVAV);
         }
@@ -2759,7 +2762,7 @@ PP(pp_aassign)
                          * unnecessary under PERL_RC_STACK.
                          */
                         rsv = sv_mortalcopy(rsv);
-                        rpp_replace_at(svp, rsv);
+                        rpp_replace_at_NN(svp, rsv);
                     }
                     /* XXX else check for weak refs?  */
 #ifndef PERL_RC_STACK
@@ -2787,12 +2790,12 @@ PP(pp_aassign)
                         nsv = newSVsv_flags(rsv,
                                 (SV_DO_COW_SVSETSV|SV_NOSTEAL|SV_GMAGIC));
 #ifdef PERL_RC_STACK
-                        rpp_replace_at_norc(svp, nsv);
+                        rpp_replace_at_norc_NN(svp, nsv);
 #else
                         /* using rpp_replace_at_norc() would mortalise,
                          * but we're manually adding nsv to the tmps stack
                          * below already */
-                        rpp_replace_at(svp, nsv);
+                        rpp_replace_at_NN(svp, nsv);
 #endif
 
                         rsv = nsv;
@@ -2860,13 +2863,14 @@ PP(pp_aassign)
 #ifdef PERL_RC_STACK
                 Copy(relem, AvARRAY(ary), nelems, SV*);
                 /* ownership of one ref count of each elem passed to
-                 * array. Remove ref from stack by zeroing, or if need
+                 * array. Quietly remove old SVs from stack, or if need
                  * to keep the list on the stack too, bump the count */
                 if (gimme == G_LIST)
                     for (i = 0; i < nelems; i++)
                         SvREFCNT_inc_void_NN(relem[i]);
                 else
-                    Zero(relem, nelems, SV*);
+                    for (i = 0; i < nelems; i++)
+                        relem[i] = &PL_sv_undef;
 #else
                 Copy(&(PL_tmps_stack[tmps_base]), AvARRAY(ary), nelems, SV*);
                 /* Quietly remove all the SVs from the tmps stack slots,
@@ -2957,12 +2961,12 @@ PP(pp_aassign)
                     nsv = newSVsv_flags(rsv,
                             (SV_DO_COW_SVSETSV|SV_NOSTEAL|SV_GMAGIC));
 #ifdef PERL_RC_STACK
-                    rpp_replace_at_norc(svp, nsv);
+                    rpp_replace_at_norc_NN(svp, nsv);
 #else
                     /* using rpp_replace_at_norc() would mortalise,
                      * but we're manually adding nsv to the tmps stack
                      * below already */
-                    rpp_replace_at(svp, nsv);
+                    rpp_replace_at_NN(svp, nsv);
 #endif
                     rsv = nsv;
                 }
@@ -2989,7 +2993,7 @@ PP(pp_aassign)
                 EXTEND_MORTAL(nelems);
 #endif
                 for (svp = relem; svp <= lastrelem; svp += 2) {
-                    rpp_replace_at_norc(svp,
+                    rpp_replace_at_norc_NN(svp,
                         newSVsv_flags(*svp,
                                 SV_GMAGIC|SV_DO_COW_SVSETSV|SV_NOSTEAL));
                 }
@@ -3016,7 +3020,7 @@ PP(pp_aassign)
                     if (UNLIKELY(SvGMAGICAL(rsv)))
                         /* XXX does this actually need to be copied, or
                          * could we just call the get magic??? */
-                        rpp_replace_at_norc(svp,
+                        rpp_replace_at_norc_NN(svp,
                             newSVsv_flags(rsv,
                                 SV_GMAGIC|SV_DO_COW_SVSETSV|SV_NOSTEAL));
                 }
@@ -3026,7 +3030,7 @@ PP(pp_aassign)
                     SV *rsv = *svp;
                     if (UNLIKELY(SvGMAGICAL(rsv))) {
                         SSize_t n;
-                        rpp_replace_at_norc(svp,
+                        rpp_replace_at_norc_NN(svp,
                             newSVsv_flags(rsv,
                                 SV_GMAGIC|SV_DO_COW_SVSETSV|SV_NOSTEAL));
                         /* allow other branch to continue pushing
@@ -3068,7 +3072,7 @@ PP(pp_aassign)
                          * stack location if we encountered dups earlier,
                          * The values will be updated later
                          */
-                        rpp_replace_at(topelem, key);
+                        rpp_replace_at_NN(topelem, key);
                         topelem += 2;
                     }
                     /* A tied store won't take ownership of val, so keep
@@ -3097,7 +3101,7 @@ PP(pp_aassign)
                     while (relem < lastrelem) {
                         HE *he;
                         he = hv_fetch_ent(hash, *relem++, 0, 0);
-                        rpp_replace_at(relem++,
+                        rpp_replace_at_NN(relem++,
                             (he ? HeVAL(he) : &PL_sv_undef));
                     }
                 }
@@ -3180,7 +3184,7 @@ PP(pp_aassign)
 #endif
 
                 sv_setsv(lsv, *relem);
-                rpp_replace_at(relem, lsv);
+                rpp_replace_at_NN(relem, lsv);
                 SvSETMAGIC(lsv);
             }
             if (++relem > lastrelem)
@@ -3222,7 +3226,7 @@ PP(pp_aassign)
                 sv_set_undef(lsv);
                 SvSETMAGIC(lsv);
             }
-            rpp_replace_at(relem++, lsv);
+            rpp_replace_at_NN(relem++, lsv);
             break;
         } /* switch */
     } /* while */
@@ -3314,7 +3318,7 @@ PP(pp_aassign)
     }
     PL_delaymagic = old_delaymagic;
 
-    rpp_popfree_to((gimme == G_LIST ? relem : firstrelem) - 1);
+    rpp_popfree_to_NN((gimme == G_LIST ? relem : firstrelem) - 1);
 
     if (gimme == G_SCALAR) {
         rpp_extend(1);
