@@ -538,7 +538,7 @@ read_only_bottom_close_and_rename($h);
 
 __END__
 package feature;
-our $VERSION = '1.85';
+our $VERSION = '1.86';
 
 FEATURES
 
@@ -909,6 +909,8 @@ This feature enables the C<try> and C<catch> syntax, which allows exception
 handling, where exceptions thrown from the body of the block introduced with
 C<try> are caught by executing the body of the C<catch> block.
 
+This feature is available starting in Perl 5.34.
+
 For more information, see L<perlsyn/"Try Catch Exception Handling">.
 
 =head2 The 'defer' feature
@@ -922,6 +924,8 @@ warn when you use the feature, unless you have explicitly disabled the warning:
 This feature enables the C<defer> block syntax, which allows a block of code
 to be deferred until when the flow of control leaves the block which contained
 it. For more details, see L<perlsyn/defer>.
+
+This feature is available starting in Perl 5.36.
 
 =head2 The 'extra_paired_delimiters' feature
 
