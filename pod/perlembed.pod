@@ -1095,6 +1095,7 @@ Consult L<perlxs>, L<perlguts>, and L<perlapi> for more details.
 
 =head2 Using embedded Perl with POSIX locales
 
+XXX construct all before starting any
 (See L<perllocale> for information about these.)
 When a Perl interpreter normally starts up, it tells the system it wants
 to use the system's default locale.  This is often, but not necessarily,
