@@ -6327,7 +6327,7 @@ S_my_langinfo_i(pTHX_
          * will find out whether a locale is UTF-8 or not */
 
         utf8ness_t is_utf8 = UTF8NESS_UNKNOWN;
-        const char * scratch_buf = NULL;
+        char * scratch_buf = NULL;
 
 #          if defined(USE_LOCALE_MONETARY) && defined(HAS_LOCALECONV)
 #            define LANGINFO_RECURSED_MONETARY  0x1
