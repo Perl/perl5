@@ -4416,10 +4416,19 @@ Ri	|const char *|mortalized_pv_copy				\
 				|NULLOK const char * const pv
 S	|const char *|native_querylocale_i				\
 				|const locale_category_index cat_index
+S	|void	|new_LC_ALL	|NN const char *lc_all			\
+				|bool force
 S	|void	|output_check_environment_warning			\
 				|NULLOK const char * const language	\
 				|NULLOK const char * const lc_all	\
 				|NULLOK const char * const lang
+S	|parse_LC_ALL_string_return|parse_LC_ALL_string 		\
+				|NN const char *string			\
+				|NN const char **output 		\
+				|const parse_LC_ALL_STRING_action	\
+				|bool always_use_full_array		\
+				|const bool panic_on_error		\
+				|const line_t caller_line
 So	|void	|restore_toggled_locale_i				\
 				|const locale_category_index cat_index	\
 				|NULLOK const char *original_locale	\
@@ -4472,21 +4481,10 @@ S	|const char *|my_langinfo_i					\
 S	|void	|give_perl_locale_control				\
 				|NN const char *lc_all_string		\
 				|const line_t caller_line
-S	|void	|new_LC_ALL	|NN const char *lc_all			\
-				|bool force
-S	|parse_LC_ALL_string_return|parse_LC_ALL_string 		\
-				|NN const char *string			\
-				|NN const char **output 		\
-				|const parse_LC_ALL_STRING_action	\
-				|bool always_use_full_array		\
-				|const bool panic_on_error		\
-				|const line_t caller_line
 #   else
 S	|void	|give_perl_locale_control				\
 				|NN const char **curlocales		\
 				|const line_t caller_line
-S	|void	|new_LC_ALL	|NN const char **individ_locales	\
-				|bool force
 #   endif
 #   if defined(USE_LOCALE_COLLATE)
 S	|void	|new_collate	|NN const char *newcoll 		\

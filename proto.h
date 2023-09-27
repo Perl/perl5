@@ -7021,8 +7021,18 @@ S_native_querylocale_i(pTHX_ const locale_category_index cat_index);
 #   define PERL_ARGS_ASSERT_NATIVE_QUERYLOCALE_I
 
 STATIC void
+S_new_LC_ALL(pTHX_ const char *lc_all, bool force);
+#   define PERL_ARGS_ASSERT_NEW_LC_ALL          \
+        assert(lc_all)
+
+STATIC void
 S_output_check_environment_warning(pTHX_ const char * const language, const char * const lc_all, const char * const lang);
 #   define PERL_ARGS_ASSERT_OUTPUT_CHECK_ENVIRONMENT_WARNING
+
+STATIC parse_LC_ALL_string_return
+S_parse_LC_ALL_string(pTHX_ const char *string, const char **output, const parse_LC_ALL_STRING_action, bool always_use_full_array, const bool panic_on_error, const line_t caller_line);
+#   define PERL_ARGS_ASSERT_PARSE_LC_ALL_STRING \
+        assert(string); assert(output)
 
 STATIC void
 S_restore_toggled_locale_i(pTHX_ const locale_category_index cat_index, const char *original_locale, const line_t caller_line);
@@ -7073,28 +7083,13 @@ S_give_perl_locale_control(pTHX_ const char *lc_all_string, const line_t caller_
 #     define PERL_ARGS_ASSERT_GIVE_PERL_LOCALE_CONTROL \
         assert(lc_all_string)
 
-STATIC void
-S_new_LC_ALL(pTHX_ const char *lc_all, bool force);
-#     define PERL_ARGS_ASSERT_NEW_LC_ALL        \
-        assert(lc_all)
-
-STATIC parse_LC_ALL_string_return
-S_parse_LC_ALL_string(pTHX_ const char *string, const char **output, const parse_LC_ALL_STRING_action, bool always_use_full_array, const bool panic_on_error, const line_t caller_line);
-#     define PERL_ARGS_ASSERT_PARSE_LC_ALL_STRING \
-        assert(string); assert(output)
-
-#   else /* if !defined(LC_ALL) */
+#   else
 STATIC void
 S_give_perl_locale_control(pTHX_ const char **curlocales, const line_t caller_line);
 #     define PERL_ARGS_ASSERT_GIVE_PERL_LOCALE_CONTROL \
         assert(curlocales)
 
-STATIC void
-S_new_LC_ALL(pTHX_ const char **individ_locales, bool force);
-#     define PERL_ARGS_ASSERT_NEW_LC_ALL        \
-        assert(individ_locales)
-
-#   endif /* !defined(LC_ALL) */
+#   endif
 #   if !defined(PERL_NO_INLINE_FUNCTIONS)
 PERL_STATIC_INLINE const char *
 S_mortalized_pv_copy(pTHX_ const char * const pv)
