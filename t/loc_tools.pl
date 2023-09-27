@@ -104,6 +104,10 @@ sub _my_fail($) {
     }
 }
 
+sub platform_locale_categories() {
+    return @platform_categories;
+}
+
 sub valid_locale_categories() {
     # Returns a list of the locale categories (expressed as strings, like
     # "LC_ALL") known to this program that are available on this platform.
