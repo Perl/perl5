@@ -51,7 +51,8 @@ SKIP: {
 	while (<DATA>) {
 	    chomp;
 	    $loc = setlocale( LC_NUMERIC, $_);
-	    last if $loc && radix() eq ',';
+            next unless $loc;   # Not on this system
+	    last if radix() eq ',';
 	}
 	skip 'Cannot test locale handling without a comma locale', 6
 	    unless $loc and radix() eq ',';
