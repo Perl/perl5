@@ -823,7 +823,7 @@ STATIC const bool category_available[] = {
 #  ifdef LC_ALL
     true,
 #  else
-    false
+    false,
 #  endif
 
     false   /* LC_UNKNOWN_AVAIL_ */
@@ -1074,7 +1074,7 @@ Perl_locale_panic(const char * msg,
 #define setlocale_failure_panic_c(cat, cur, fail, line, higher_line)        \
    setlocale_failure_panic_i(cat##_INDEX_, cur, fail, line, higher_line)
 
-#if defined(LC_ALL) && defined(USE_LOCALE)
+#if defined(USE_LOCALE)
 
 /* Expands to the code to
  *      result = savepvn(s, len)
@@ -3958,17 +3958,7 @@ Perl_warn_problematic_locale()
 #  endif /* USE_LOCALE_CTYPE */
 
 STATIC void
-
-#  ifdef LC_ALL
-
 S_new_LC_ALL(pTHX_ const char *lc_all, bool force)
-
-#  else
-
-S_new_LC_ALL(pTHX_ const char ** individ_locales, bool force)
-
-#  endif
-
 {
     PERL_ARGS_ASSERT_NEW_LC_ALL;
 
@@ -3976,8 +3966,6 @@ S_new_LC_ALL(pTHX_ const char ** individ_locales, bool force)
      * called just after a change, so uses the actual underlying locale just
      * set, and not the nominal one (should they differ, as they may in
      * LC_NUMERIC). */
-
-#  ifdef LC_ALL
 
     const char * individ_locales[LC_ALL_INDEX_] = { NULL };
 
@@ -3990,16 +3978,14 @@ S_new_LC_ALL(pTHX_ const char ** individ_locales, bool force)
                                            earlier had to have succeeded */
                                 __LINE__))
     {
-        case invalid:
-        case no_array:
-        case only_element_0:
+      case invalid:
+      case no_array:
+      case only_element_0:
         locale_panic_("Unexpected return from parse_LC_ALL_string");
 
-        case full_array:
+      case full_array:
         break;
     }
-
-#  endif
 
     for_all_individual_category_indexes(i) {
         if (update_functions[i]) {
@@ -4007,12 +3993,7 @@ S_new_LC_ALL(pTHX_ const char ** individ_locales, bool force)
             update_functions[i](aTHX_ this_locale, force);
         }
 
-#  ifdef LC_ALL
-
         Safefree(individ_locales[i]);
-
-#  endif
-
     }
 }
 
@@ -6876,9 +6857,13 @@ S_give_perl_locale_control(pTHX_
 
 #    else
 
-    new_LC_ALL(locales, true);
-
+    new_LC_ALL(calculate_LC_ALL_string(locales,
+                                       INTERNAL_FORMAT,
+                                       WANT_TEMP_PV,
+                                       caller_line),
+               true);
 #    endif
+
 }
 
 STATIC void
