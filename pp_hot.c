@@ -2633,6 +2633,7 @@ PP(pp_aassign)
 #endif
 
     gimme = GIMME_V;
+    bool is_list = (gimme == G_LIST);
     relem = firstrelem;
     lelem = firstlelem;
 
@@ -2745,7 +2746,7 @@ PP(pp_aassign)
              * (or pass through where we can optimise away the copy) */
 
             if (UNLIKELY(alias)) {
-                U32 lval = (gimme == G_LIST)
+                U32 lval = (is_list)
                                 ? (PL_op->op_flags & OPf_MOD || LVRET) : 0;
                 for (svp = relem; svp <= lastrelem; svp++) {
                     SV *rsv = *svp;
@@ -2865,7 +2866,7 @@ PP(pp_aassign)
                 /* ownership of one ref count of each elem passed to
                  * array. Quietly remove old SVs from stack, or if need
                  * to keep the list on the stack too, bump the count */
-                if (gimme == G_LIST)
+                if (is_list)
                     for (i = 0; i < nelems; i++)
                         SvREFCNT_inc_void_NN(relem[i]);
                 else
@@ -2984,7 +2985,7 @@ PP(pp_aassign)
 
             /* possibly protect keys */
 
-            if (UNLIKELY(gimme == G_LIST)) {
+            if (UNLIKELY(is_list)) {
                 /* handle e.g.
                 *     @a = ((%h = ($$r, 1)), $r = "x");
                 *     $_++ for %h = (1,2,3,4);
@@ -3058,7 +3059,7 @@ PP(pp_aassign)
 #ifndef PERL_RC_STACK
             bool dirty_tmps = FALSE;
 #endif
-            if (UNLIKELY(gimme == G_LIST)) {
+            if (UNLIKELY(is_list)) {
                 /* @a = (%h = (...)) etc */
                 SV **svp;
                 SV **topelem = relem;
@@ -3318,7 +3319,7 @@ PP(pp_aassign)
     }
     PL_delaymagic = old_delaymagic;
 
-    rpp_popfree_to_NN((gimme == G_LIST ? relem : firstrelem) - 1);
+    rpp_popfree_to_NN((is_list ? relem : firstrelem) - 1);
 
     if (gimme == G_SCALAR) {
         rpp_extend(1);
