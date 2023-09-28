@@ -2755,11 +2755,11 @@ S_calculate_LC_ALL_string(pTHX_ const char ** category_locales_list,
      *
      * The caller sets 'returning' to
      *      WANT_TEMP_PV        the function returns the calculated string
-     *                              as a mmortalized temporary, so the caller
+     *                              as a mortalized temporary, so the caller
      *                              doesn't have to worry about it being
      *                              per-thread, nor needs to arrange for its
      *                              clean-up.
-     *      WANT_VOID               NULL is returned.  This is used when the
+     *      WANT_VOID           NULL is returned.  This is used when the
      *                              function is being called only for its side
      *                              effect of updating
      *                              PL_curlocales[LC_ALL_INDEX_]
@@ -2899,8 +2899,6 @@ S_calculate_LC_ALL_string(pTHX_ const char ** category_locales_list,
     }
 
     bool free_if_void_return = false;
-
-    /* Done iterating through all the categories. */
     const char * retval;
 
     /* If all categories have the same locale, we already know the answer */
@@ -2916,12 +2914,14 @@ S_calculate_LC_ALL_string(pTHX_ const char ** category_locales_list,
                 SAVEFREEPV(retval);
             }
 
-        /* In all cases here, there's nothing we create that needs to be freed,
-         * so leave 'free_if_void_return' set to the default 'false'. */
+            /* In all cases here, there's nothing we create that needs to be
+             * freed, so leave 'free_if_void_return' set to the default
+             * 'false'. */
     }
     else {  /* Here, not all categories have the same locale */
 
-            char * constructed;
+        char * constructed;
+
             Newx(constructed, total_len, char);
 
             /* If returning the new memory, it must be set up to be freed
