@@ -23,7 +23,7 @@ use warnings;
 use Carp          qw< carp croak >;
 use Scalar::Util  qw< blessed refaddr >;
 
-our $VERSION = '1.999841';
+our $VERSION = '1.999842';
 $VERSION =~ tr/_//d;
 
 require Exporter;
@@ -325,7 +325,9 @@ sub div_scale {
     if (@_) {                           # setter
         my $ds = shift;
         croak("The value for 'div_scale' must be defined") unless defined $ds;
-        croak("The value for 'div_scale' must be positive") unless $ds > 0;
+        # It is not documented what div_scale <= 0 means, but Astro::Units sets
+        # div_scale to 0 and fails its tests if this is not supported.
+        #croak("The value for 'div_scale' must be positive") unless $ds > 0;
         $ds = $ds -> numify() if defined(blessed($ds));
         no strict 'refs';
         ${"${class}::div_scale"} = $ds;
@@ -1601,7 +1603,7 @@ sub babs {
     return $x if $x->modify('babs');
 
     return $upgrade -> babs($x, @r)
-      if defined($upgrade) && !$x->isa(__PACKAGE__);
+      if defined($upgrade) && !$x->isa(__PACKAGE__) && !$x -> isa($upgrade);
 
     $x->{sign} =~ s/^-/+/;
 
@@ -1615,7 +1617,7 @@ sub bsgn {
     return $x if $x->modify('bsgn');
 
     return $upgrade -> bsgn($x, @r)
-      if defined($upgrade) && !$x->isa(__PACKAGE__);
+      if defined($upgrade) && !$x->isa(__PACKAGE__) && !$x -> isa($upgrade);
 
     return $x -> bone("+", @r) if $x -> is_pos();
     return $x -> bone("-", @r) if $x -> is_neg();
