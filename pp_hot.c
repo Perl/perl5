@@ -3185,7 +3185,8 @@ PP(pp_aassign)
 #endif
 
                 sv_setsv(lsv, *relem);
-                rpp_replace_at_NN(relem, lsv);
+                if (UNLIKELY(is_list))
+                    rpp_replace_at_NN(relem, lsv);
                 SvSETMAGIC(lsv);
             }
             if (++relem > lastrelem)
@@ -3227,7 +3228,8 @@ PP(pp_aassign)
                 sv_set_undef(lsv);
                 SvSETMAGIC(lsv);
             }
-            rpp_replace_at_NN(relem++, lsv);
+            if (UNLIKELY(is_list))
+                rpp_replace_at_NN(relem++, lsv);
             break;
         } /* switch */
     } /* while */
