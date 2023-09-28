@@ -474,6 +474,23 @@ XS(XS_builtin_indexed)
     XSRETURN(retcount);
 }
 
+XS(XS_builtin_load_module);
+XS(XS_builtin_load_module)
+{
+    dXSARGS;
+    if (items != 1)
+        croak_xs_usage(cv, "arg");
+    SV *module_name = newSVsv(ST(0));
+    if (!SvPOK(module_name)) {
+        SvREFCNT_dec(module_name);
+        croak_xs_usage(cv, "defined string");
+    }
+    load_module(PERL_LOADMOD_NOIMPORT, module_name, NULL, NULL);
+    /* The loaded module's name is left intentionally on the stack for the
+     * caller's benefit, and becomes load_module's return value. */
+    XSRETURN(1);
+}
+
 static OP *ck_builtin_funcN(pTHX_ OP *entersubop, GV *namegv, SV *ckobj)
 {
     const struct BuiltinFuncDescriptor *builtin = NUM2PTR(const struct BuiltinFuncDescriptor *, SvUV(ckobj));
@@ -515,6 +532,8 @@ static const struct BuiltinFuncDescriptor builtins[] = {
 
     { "created_as_string", NO_BUNDLE, &XS_builtin_created_as_string, &ck_builtin_func1, 0, true },
     { "created_as_number", NO_BUNDLE, &XS_builtin_created_as_number, &ck_builtin_func1, 0, true },
+
+    { "load_module", NO_BUNDLE, &XS_builtin_load_module, &ck_builtin_func1, 0, true },
 
     /* list functions */
     { "indexed",          SHORTVER(5,39), &XS_builtin_indexed,          &ck_builtin_funcN, 0, false },

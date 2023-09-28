@@ -144,6 +144,10 @@ L<perl5db.pl> has been upgraded from version 1.77 to 1.78.
 
 Made parsing of the C<l> command arguments saner. [GH #21350]
 
+=item *
+
+Added the C<load_module()> builtin function as per L<PPC 0006|https://github.com/Perl/PPCs/blob/main/ppcs/ppc0006-load-module.md>.
+
 =back
 
 =head2 Removed Modules and Pragmata
