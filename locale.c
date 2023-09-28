@@ -2759,6 +2759,12 @@ S_calculate_LC_ALL_string(pTHX_ const char ** category_locales_list,
      *                              doesn't have to worry about it being
      *                              per-thread, nor needs to arrange for its
      *                              clean-up.
+     *      WANT_PL_setlocale_buf  the function stores the calculated string
+     *                              into the per-thread buffer PL_setlocale_buf
+     *                              and returns a pointer to that.  The buffer
+     *                              is cleaned up automatically in process
+     *                              destruction.  This return method avoids
+     *                              extra copies in some circumstances.
      *      WANT_VOID           NULL is returned.  This is used when the
      *                              function is being called only for its side
      *                              effect of updating
@@ -2903,6 +2909,14 @@ S_calculate_LC_ALL_string(pTHX_ const char ** category_locales_list,
 
     /* If all categories have the same locale, we already know the answer */
     if (! disparate) {
+        if (returning == WANT_PL_setlocale_buf) {
+            save_to_buffer(locales_list[0],
+                           &PL_setlocale_buf,
+                           &PL_setlocale_bufsize);
+            retval = PL_setlocale_buf;
+        }
+        else {
+
             retval = locales_list[0];
 
             /* If a temporary is wanted for the return, and we had to create
@@ -2917,10 +2931,21 @@ S_calculate_LC_ALL_string(pTHX_ const char ** category_locales_list,
             /* In all cases here, there's nothing we create that needs to be
              * freed, so leave 'free_if_void_return' set to the default
              * 'false'. */
+        }
     }
     else {  /* Here, not all categories have the same locale */
 
         char * constructed;
+
+        /* If returning to PL_setlocale_buf, set up to write directly to it,
+         * being sure it is resized to be large enough */
+        if (returning == WANT_PL_setlocale_buf) {
+            set_save_buffer_min_size(total_len,
+                                     &PL_setlocale_buf,
+                                     &PL_setlocale_bufsize);
+            constructed = PL_setlocale_buf;
+        }
+        else {  /* Otherwise we need new memory to hold the calculated value. */
 
             Newx(constructed, total_len, char);
 
@@ -2932,6 +2957,7 @@ S_calculate_LC_ALL_string(pTHX_ const char ** category_locales_list,
             else {
                 free_if_void_return = true;
             }
+        }
 
         constructed[0] = '\0';
 
