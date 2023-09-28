@@ -444,6 +444,170 @@ TODO: {
     is($HASH{key}, "val", 'Lexically exported hash is accessible');
 }
 
+# load_module
+{
+    use builtin qw( load_module );
+    use feature qw( try );
+    no warnings 'experimental::try';
+    my ($ok, $e);
+
+    # Can't really test this sans string eval, as it's a compilation error:
+    eval 'load_module();';
+    $e = $@;
+    ok($e, 'load_module(); fails');
+    like($e, qr/^Not enough arguments for builtin::load_module at/, 'load_module(); fails with correct error');
+    eval 'load_module;';
+    $e = $@;
+    ok($e, 'load_module; fails');
+    like($e, qr/^Not enough arguments for builtin::load_module at/, 'load_module; fails with correct error');
+
+    # Failure to load module croaks
+    try {
+        load_module(undef);
+    } catch ($e) {
+        ok($e, 'load_module(undef) fails');
+        like($e, qr/^Usage: builtin::load_module\(defined string\)/, 'load_module(undef) fails with correct error');
+    };
+    try {
+        load_module(\"Foo");
+    } catch ($e) {
+        ok($e, 'load_module(\"Foo") fails');
+        like($e, qr/^Usage: builtin::load_module\(defined string\)/, 'load_module(\"Foo") fails with correct error');
+    };
+    try {
+        load_module(["Foo"]);
+    } catch ($e) {
+        ok($e, 'load_module(["Foo"]) fails');
+        like($e, qr/^Usage: builtin::load_module\(defined string\)/, 'load_module(["Foo"]) fails with correct error');
+    };
+    try {
+        load_module('5.36');
+    }
+    catch ($e) {
+        ok($e, 'load_module("5.36") fails');
+        like($e, qr/^Can't locate 5[.]36[.]pm in \@INC/, 'load_module("5.36") fails with correct error');
+    };
+    try {
+        load_module('v5.36');
+    }
+    catch ($e) {
+        ok($e, 'load_module("v5.36") fails');
+        like($e, qr/^Can't locate v5[.]36[.]pm in \@INC/, 'load_module("v5.36") fails with correct error');
+    };
+    try {
+        load_module("Dies");
+        fail('load_module("Dies") succeeded!');
+    }
+    catch ($e) {
+        ok($e, 'load_module("Dies") fails');
+        like($e, qr/^Can't locate Dies[.]pm in \@INC/, 'load_module("Dies") fails with correct error');
+    }
+    my $module_name = 'Dies';
+    try {
+        load_module($module_name);
+        fail('load_module($module_name) $module_name=Dies succeeded!');
+    }
+    catch ($e) {
+        ok($e, 'load_module($module_name) $module_name=Dies fails');
+        like($e, qr/^Can't locate Dies[.]pm in \@INC/, 'load_module($module_name) $module_name=Dies fails with correct error');
+    }
+    $module_name =~ m!(\w+)!;
+    try {
+        load_module($1);
+        fail('load_module($1) from $module_name=Dies succeeded!');
+    }
+    catch ($e) {
+        ok($e, 'load_module($1) from $module_name=Dies fails');
+        like($e, qr/^Can't locate Dies[.]pm in \@INC/, 'load_module($1) from $module_name=Dies fails with correct error');
+    }
+    "Dies" =~ m!(\w+)!;
+    try {
+        load_module($1);
+        fail('load_module($1) from "Dies" succeeded!');
+    }
+    catch ($e) {
+        ok($e, 'load_module($1) from "Dies" fails');
+        like($e, qr/^Can't locate Dies[.]pm in \@INC/, 'load_module($1) from "Dies" fails with correct error');
+    }
+
+    # Loading module goes well
+    my $ret;
+    try {
+        $ret = load_module("strict");
+        pass('load_module("strict") worked');
+        is($ret, "strict", 'load_module("strict") returned "strict"');
+    }
+    catch ($e) {
+        fail('load_module("strict") errored: ' . $e);
+    }
+    $module_name = 'strict';
+    try {
+        $ret = load_module($module_name);
+        pass('load_module($module_name) $module_name=strict worked');
+        is($ret, "strict", 'load_module($module_name) returned "strict"');
+    }
+    catch ($e) {
+        fail('load_module($module_name) $module_name=strict errored: ' . $e);
+    }
+    $module_name =~ m!(\w+)!;
+    try {
+        $ret = load_module($1);
+        pass('load_module($1) from $module_name=strict worked');
+        is($ret, "strict", 'load_module($1) from $module_name=strict returned "strict"');
+    }
+    catch ($e) {
+        fail('load_module($1) from $module_name=strict errored: ' . $e);
+    }
+    "strict" =~ m!(\w+)!;
+    try {
+        $ret = load_module($1);
+        pass('load_module($1) from "strict" worked');
+        is($ret, "strict", 'load_module($1) from "strict" returned "strict"');
+    }
+    catch ($e) {
+        fail('load_module($1) from "strict" errored: ' . $e);
+    }
+
+    # Slightly more complex, based on tie
+    {
+        package BuiltinTestTie {
+            sub TIESCALAR {
+                bless $_[1], $_[0];
+            }
+            sub FETCH {
+                ${$_[0]}
+            }
+        }
+        my $x;
+        tie my $y, BuiltinTestTie => \$x;
+        $x = "strict";
+        try {
+            $ret = load_module($y);
+            pass('load_module($y) from $y tied to $x=strict worked');
+            is($ret, "strict", 'load_module($y) from $y tied to $x=strict worked and returned "strict"');
+        }
+        catch ($e) {
+            fail('load_module($y) from $y tied to $x=strict failed: ' . $e);
+        };
+    }
+
+    # Can be used to import a symbol to the current namespace, too:
+    {
+        my $aref = [];
+        my $aref_stringified = "$aref";
+        my $got = eval '
+            BEGIN {
+                load_module("builtin")->import("stringify");
+            }
+            stringify($aref);
+        ';
+        if (my $error = $@) {
+            fail('load_module("builtin")->import("stringify") failed: ' . $error);
+        }
+        is($got, $aref_stringified, 'load_module("builtin")->import("stringify") works, stringifying $aref');
+    }
+}
+
 # version bundles
 {
     use builtin ':5.39';
