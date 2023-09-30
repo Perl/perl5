@@ -1934,13 +1934,16 @@ STMT_START {                                                                    
         s++;                                                   \
     }
 
+#define LAST_REGTRY_SKIPPED_FORWARD(reginfo) (reginfo->cutpoint)
+
 /* We keep track of where the next character should start after an occurrence
  * of the one we're looking for.  Knowing that, we can see right away if the
  * next occurrence is adjacent to the previous.  When 'doevery' is FALSE, we
  * don't accept the 2nd and succeeding adjacent occurrences */
 #define FBC_CHECK_AND_TRY                                           \
         if (   (   doevery                                          \
-                || s != previous_occurrence_end)                    \
+                || s != previous_occurrence_end                     \
+                || LAST_REGTRY_SKIPPED_FORWARD(reginfo) )           \
             && (   reginfo->intuit                                  \
                 || (s <= reginfo->strend && regtry(reginfo, &s))))  \
         {                                                           \
@@ -4356,6 +4359,12 @@ Perl_regexec_flags(pTHX_ REGEXP * const rx, char *stringarg, char *strend,
 
 /*
  - regtry - try match at specific point
+
+ NOTE: *startpos may be modifed by regtry() to signal to the caller
+       that the next match should start at a specific position in the
+       string. The macro LAST_REGTRY_SKIPPED_FORWARD(reginfo) can be
+       used to detect when this has happened.
+
  */
 STATIC bool			/* 0 failure, 1 success */
 S_regtry(pTHX_ regmatch_info *reginfo, char **startposp)
