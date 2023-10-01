@@ -2106,9 +2106,8 @@ Examples:
  # poor man's grep
  $arg = shift;
  while (<>) {
-    print if /$arg/o; # compile only once (no longer needed!)
+    print if /$arg/;
  }
-
  if (($F1, $F2, $Etc) = ($foo =~ /^(\S+)\s+(\S+)\s*(.*)/))
 
 This last example splits C<$foo> into the first two words and the
