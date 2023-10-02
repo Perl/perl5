@@ -117,7 +117,7 @@ static char*	win32_get_xlib(const char *pl,
 
 static BOOL	has_shell_metachars(const char *ptr);
 static long	tokenize(const char *str, char **dest, char ***destv);
-static void	get_shell(void);
+static int	get_shell(void);
 static char*	find_next_space(const char *s);
 static int	do_spawn2(pTHX_ const char *cmd, int exectype);
 static int	do_spawn2_handles(pTHX_ const char *cmd, int exectype,
@@ -600,7 +600,13 @@ tokenize(const char *str, char **dest, char ***destv)
     return items;
 }
 
-static void
+static const char
+cmd_opts[] = "/x/d/c";
+
+static const char
+shell_cmd[] = "cmd.exe";
+
+static int
 get_shell(void)
 {
     dTHX;
@@ -612,12 +618,53 @@ get_shell(void)
          *     interactive use (which is what most programs look in COMSPEC
          *     for).
          */
-        const char* defaultshell = "cmd.exe /x/d/c";
-        const char *usershell = PerlEnv_getenv("PERL5SHELL");
-        w32_perlshell_items = tokenize(usershell ? usershell : defaultshell,
-                                       &w32_perlshell_tokens,
-                                       &w32_perlshell_vec);
+        const char *shell = PerlEnv_getenv("PERL5SHELL");
+        if (shell) {
+            w32_perlshell_items = tokenize(shell,
+                                           &w32_perlshell_tokens,
+                                           &w32_perlshell_vec);
+        }
+        else {
+            /* tokenize does some Unix-ish like things like
+               \\ escaping that don't work well here
+            */
+            char shellbuf[MAX_PATH];
+            UINT len = GetSystemDirectoryA(shellbuf, sizeof(shellbuf));
+            if (len == 0) {
+                translate_to_errno();
+                return -1;
+            }
+            else if (len >= MAX_PATH) {
+                /* buffer too small */
+                errno = E2BIG;
+                return -1;
+            }
+            if (shellbuf[len-1] != '\\') {
+                my_strlcat(shellbuf, "\\", sizeof(shellbuf));
+                ++len;
+            }
+            if (len + sizeof(shell_cmd) > sizeof(shellbuf)) {
+                errno = E2BIG;
+                return -1;
+            }
+            my_strlcat(shellbuf, shell_cmd, sizeof(shellbuf));
+            len += sizeof(shell_cmd)-1;
+
+            Newx(w32_perlshell_vec, 3, char *);
+            Newx(w32_perlshell_tokens, len + 1 + sizeof(cmd_opts), char);
+
+            my_strlcpy(w32_perlshell_tokens, shellbuf, len+1);
+            my_strlcpy(w32_perlshell_tokens + len +1, cmd_opts,
+                       sizeof(cmd_opts));
+
+            w32_perlshell_vec[0] = w32_perlshell_tokens;
+            w32_perlshell_vec[1] = w32_perlshell_tokens + len + 1;
+            w32_perlshell_vec[2] = NULL;
+
+            w32_perlshell_items = 2;
+        }
     }
+    return 0;
 }
 
 int
@@ -635,7 +682,9 @@ Perl_do_aspawn(pTHX_ SV *really, SV **mark, SV **sp)
     if (sp <= mark)
         return -1;
 
-    get_shell();
+    if (get_shell() < 0)
+        return -1;
+
     Newx(argv, (sp - mark) + w32_perlshell_items + 2, const char*);
 
     if (SvNIOKp(*(mark+1)) && !SvPOKp(*(mark+1))) {
@@ -765,7 +814,8 @@ do_spawn2_handles(pTHX_ const char *cmd, int exectype, const int *handles)
     if (needToTry) {
         char **argv;
         int i = -1;
-        get_shell();
+        if (get_shell() < 0)
+            return -1;
         Newx(argv, w32_perlshell_items + 2, char*);
         while (++i < w32_perlshell_items)
             argv[i] = w32_perlshell_vec[i];
@@ -3482,7 +3532,8 @@ win32_pipe(int *pfd, unsigned int size, int mode)
 DllExport PerlIO*
 win32_popenlist(const char *mode, IV narg, SV **args)
 {
-    get_shell();
+    if (get_shell() < 0)
+        return NULL;
 
     return do_popen(mode, NULL, narg, args);
 }
