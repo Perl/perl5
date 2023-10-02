@@ -30,14 +30,14 @@ T_OPAQUEPTROBJ
 	}
 
 T_SIGNO
-	if ((sig = SvIV($arg)) < 0) {
+	if (($var = SvIV($arg)) < 0) {
 	   croak(\"%s: Negative signals are not allowed %d\",
 		${$ALIAS?\q[GvNAME(CvGV(cv))]:\qq[\"$pname\"]},
-                                   sig);
+                                   $var);
 	}
 
 T_FD
-	if ((fd = (int)SvIV($arg)) < 0) {
+	if (($var = (int)SvIV($arg)) < 0) {
 	     SETERRNO(EBADF, RMS_IFI);
 	     XSRETURN_IV(-1);
 	}
