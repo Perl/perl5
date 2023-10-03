@@ -1,19 +1,13 @@
-package Net::protoent;
-use strict;
+package Net::protoent 1.03;
+use v5.38;
+no feature 'signatures'; # we use prototypes
 
-use 5.006_001;
-our $VERSION = '1.02';
-our(@EXPORT, @EXPORT_OK, %EXPORT_TAGS);
 our ( $p_name, @p_aliases, $p_proto );
-BEGIN { 
-    use Exporter   ();
-    @EXPORT      = qw(getprotobyname getprotobynumber getprotoent getproto);
-    @EXPORT_OK   = qw( $p_name @p_aliases $p_proto );
-    %EXPORT_TAGS = ( FIELDS => [ @EXPORT_OK, @EXPORT ] );
-}
 
-# Class::Struct forbids use of @ISA
-sub import { goto &Exporter::import }
+use Exporter 'import';
+our @EXPORT      = qw(getprotobyname getprotobynumber getprotoent getproto);
+our @EXPORT_OK   = qw( $p_name @p_aliases $p_proto );
+our %EXPORT_TAGS = ( FIELDS => [ @EXPORT_OK, @EXPORT ] );
 
 use Class::Struct qw(struct);
 struct 'Net::protoent' => [
@@ -39,8 +33,6 @@ sub getproto ($;$) {
     no strict 'refs';
     return &{'getprotoby' . ($_[0]=~/^\d+$/ ? 'number' : 'name')}(@_);
 }
-
-1;
 
 __END__
 
