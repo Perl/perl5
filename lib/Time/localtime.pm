@@ -1,28 +1,23 @@
-package Time::localtime;
-use strict;
-use 5.006_001;
+package Time::localtime 1.04;
+use v5.38;
+no feature 'signatures'; # we use prototypes
 
-use Time::tm;
+use parent 'Time::tm';
 
-our (@ISA, @EXPORT, @EXPORT_OK, %EXPORT_TAGS, $VERSION);
 our (  
       $tm_sec, $tm_min, $tm_hour, $tm_mday,
       $tm_mon, $tm_year, $tm_wday, $tm_yday,
       $tm_isdst
 );
- 
-BEGIN {
-    use Exporter   ();
-    @ISA         = qw(Exporter Time::tm);
-    @EXPORT      = qw(localtime ctime);
-    @EXPORT_OK   = qw(  
+
+use Exporter   'import';
+our @EXPORT      = qw(localtime ctime);
+our @EXPORT_OK   = qw(
 			$tm_sec $tm_min $tm_hour $tm_mday 
 			$tm_mon $tm_year $tm_wday $tm_yday 
 			$tm_isdst
 		    );
-    %EXPORT_TAGS = ( FIELDS => [ @EXPORT_OK, @EXPORT ] );
-    $VERSION     = 1.03;
-}
+our %EXPORT_TAGS = ( FIELDS => [ @EXPORT_OK, @EXPORT ] );
 
 sub populate (@) {
     return unless @_;
@@ -37,8 +32,6 @@ sub populate (@) {
 
 sub localtime (;$) { populate CORE::localtime(@_ ? shift : time)}
 sub ctime (;$)     { scalar   CORE::localtime(@_ ? shift : time) } 
-
-1;
 
 __END__
 

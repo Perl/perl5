@@ -1,28 +1,21 @@
-package Net::hostent;
-use strict;
+package Net::hostent 1.04;
+use v5.38;
+no feature 'signatures'; # we use prototypes
 
-use 5.006_001;
-our $VERSION = '1.03';
-our (@EXPORT, @EXPORT_OK, %EXPORT_TAGS);
 our (
       $h_name, @h_aliases,
       $h_addrtype, $h_length,
       @h_addr_list, $h_addr
 );
- 
-BEGIN { 
-    use Exporter   ();
-    @EXPORT      = qw(gethostbyname gethostbyaddr gethost);
-    @EXPORT_OK   = qw(
+
+use Exporter 'import';
+our @EXPORT      = qw(gethostbyname gethostbyaddr gethost);
+our @EXPORT_OK   = qw(
 			$h_name	    	@h_aliases
 			$h_addrtype 	$h_length
 			@h_addr_list 	$h_addr
 		   );
-    %EXPORT_TAGS = ( FIELDS => [ @EXPORT_OK, @EXPORT ] );
-}
-
-# Class::Struct forbids use of @ISA
-sub import { goto &Exporter::import }
+our %EXPORT_TAGS = ( FIELDS => [ @EXPORT_OK, @EXPORT ] );
 
 use Class::Struct qw(struct);
 struct 'Net::hostent' => [
@@ -67,7 +60,6 @@ sub gethost($) {
     }
 }
 
-1;
 __END__
 
 =head1 NAME

@@ -1,19 +1,13 @@
-package Net::servent;
-use strict;
+package Net::servent 1.04;
+use v5.38;
+no feature 'signatures'; # we use prototypes
 
-use 5.006_001;
-our $VERSION = '1.03';
-our(@EXPORT, @EXPORT_OK, %EXPORT_TAGS);
 our ( $s_name, @s_aliases, $s_port, $s_proto );
-BEGIN {
-    use Exporter   ();
-    @EXPORT      = qw(getservbyname getservbyport getservent getserv);
-    @EXPORT_OK   = qw( $s_name @s_aliases $s_port $s_proto );
-    %EXPORT_TAGS = ( FIELDS => [ @EXPORT_OK, @EXPORT ] );
-}
 
-# Class::Struct forbids use of @ISA
-sub import { goto &Exporter::import }
+use Exporter 'import';
+our @EXPORT      = qw(getservbyname getservbyport getservent getserv);
+our @EXPORT_OK   = qw( $s_name @s_aliases $s_port $s_proto );
+our %EXPORT_TAGS = ( FIELDS => [ @EXPORT_OK, @EXPORT ] );
 
 use Class::Struct qw(struct);
 struct 'Net::servent' => [
@@ -41,8 +35,6 @@ sub getserv ($;$) {
     no strict 'refs';
     return &{'getservby' . ($_[0]=~/^\d+$/ ? 'port' : 'name')}(@_);
 }
-
-1;
 
 __END__
 
