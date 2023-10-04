@@ -1,6 +1,5 @@
 package User::grent 1.05;
 use v5.38;
-no feature 'signatures'; # we use prototypes
 
 our ($gr_name, $gr_gid, $gr_passwd, @gr_members);
 
@@ -17,7 +16,7 @@ struct 'User::grent' => [
     members => '@',
 ];
 
-sub populate (@) {
+sub populate {
     return unless @_;
     my $gob = new();
     ($gr_name, $gr_passwd, $gr_gid) = @$gob[0,1,2] = @_[0,1,2];
@@ -25,10 +24,10 @@ sub populate (@) {
     return $gob;
 } 
 
-sub getgrent ( ) { populate(CORE::getgrent()) } 
-sub getgrnam ($) { populate(CORE::getgrnam(shift)) } 
-sub getgrgid ($) { populate(CORE::getgrgid(shift)) } 
-sub getgr    ($) { ($_[0] =~ /^\d+/) ? &getgrgid : &getgrnam } 
+sub getgrent :prototype( ) { populate(CORE::getgrent()) }
+sub getgrnam :prototype($) { populate(CORE::getgrnam(shift)) }
+sub getgrgid :prototype($) { populate(CORE::getgrgid(shift)) }
+sub getgr    :prototype($) { ($_[0] =~ /^\d+/) ? &getgrgid : &getgrnam }
 
 __END__
 

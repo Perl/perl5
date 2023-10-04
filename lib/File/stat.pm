@@ -1,6 +1,5 @@
 package File::stat 1.14;
 use v5.38;
-no feature 'signatures'; # we use prototypes
 
 use warnings::register;
 use Carp;
@@ -185,7 +184,7 @@ struct 'File::stat' => [
      }
 ];
 
-sub populate (@) {
+sub populate {
     return unless @_;
     my $stob = new();
     @$stob = (
@@ -195,9 +194,9 @@ sub populate (@) {
     return $stob;
 } 
 
-sub lstat ($)  { populate(CORE::lstat(shift)) }
+sub lstat :prototype($) { populate(CORE::lstat(shift)) }
 
-sub stat ($) {
+sub stat :prototype($) {
     my $arg = shift;
     my $st = populate(CORE::stat $arg);
     return $st if defined $st;

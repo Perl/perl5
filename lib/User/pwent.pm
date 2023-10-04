@@ -1,6 +1,5 @@
 package User::pwent 1.03;
 use v5.38;
-no feature 'signatures'; # we use prototypes
 
 use Config;
 use Carp;
@@ -122,7 +121,7 @@ sub pw_has {
     return $cando;
 }
 
-sub _populate (@) {
+sub _populate {
     return unless @_;
     my $pwob = new();
 
@@ -163,10 +162,10 @@ sub _populate (@) {
     return $pwob;
 }
 
-sub getpwent ( ) { _populate(CORE::getpwent()) }
-sub getpwnam ($) { _populate(CORE::getpwnam(shift)) }
-sub getpwuid ($) { _populate(CORE::getpwuid(shift)) }
-sub getpw    ($) { ($_[0] =~ /^\d+\z/s) ? &getpwuid : &getpwnam }
+sub getpwent :prototype( ) { _populate(CORE::getpwent()) }
+sub getpwnam :prototype($) { _populate(CORE::getpwnam(shift)) }
+sub getpwuid :prototype($) { _populate(CORE::getpwuid(shift)) }
+sub getpw    :prototype($) { ($_[0] =~ /^\d+\z/s) ? &getpwuid : &getpwnam }
 
 _feature_init();
 
