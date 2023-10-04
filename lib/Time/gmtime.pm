@@ -1,6 +1,5 @@
 package Time::gmtime 1.05;
 use v5.38;
-no feature 'signatures'; # we use prototypes
 
 use parent 'Time::tm';
 
@@ -18,7 +17,7 @@ our @EXPORT_OK   = qw(
 		    );
 our %EXPORT_TAGS = ( FIELDS => [ @EXPORT_OK, @EXPORT ] );
 
-sub populate (@) {
+sub populate {
     return unless @_;
     my $tmob = Time::tm->new();
     @$tmob = (
@@ -29,8 +28,8 @@ sub populate (@) {
     return $tmob;
 } 
 
-sub gmtime (;$)    { populate CORE::gmtime(@_ ? shift : time)}
-sub gmctime (;$)   { scalar   CORE::gmtime(@_ ? shift : time)} 
+sub gmtime  :prototype(;$) { populate CORE::gmtime(@_ ? shift : time) }
+sub gmctime :prototype(;$) { scalar   CORE::gmtime(@_ ? shift : time) }
 
 __END__
 

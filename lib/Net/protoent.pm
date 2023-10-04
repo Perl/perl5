@@ -1,6 +1,5 @@
 package Net::protoent 1.03;
 use v5.38;
-no feature 'signatures'; # we use prototypes
 
 our ( $p_name, @p_aliases, $p_proto );
 
@@ -16,7 +15,7 @@ struct 'Net::protoent' => [
    proto	=> '$',
 ];
 
-sub populate (@) {
+sub populate {
     return unless @_;
     my $pob = new();
     $p_name 	 =    $pob->[0]     	     = $_[0];
@@ -25,11 +24,11 @@ sub populate (@) {
     return $pob;
 } 
 
-sub getprotoent      ( )  { populate(CORE::getprotoent()) } 
-sub getprotobyname   ($)  { populate(CORE::getprotobyname(shift)) } 
-sub getprotobynumber ($)  { populate(CORE::getprotobynumber(shift)) } 
+sub getprotoent      :prototype( ) { populate(CORE::getprotoent()) }
+sub getprotobyname   :prototype($) { populate(CORE::getprotobyname(shift)) }
+sub getprotobynumber :prototype($) { populate(CORE::getprotobynumber(shift)) }
 
-sub getproto ($;$) {
+sub getproto :prototype($;$) {
     no strict 'refs';
     return &{'getprotoby' . ($_[0]=~/^\d+$/ ? 'number' : 'name')}(@_);
 }

@@ -1,6 +1,5 @@
 package Net::netent 1.02;
 use v5.38;
-no feature 'signatures'; # we use prototypes
 
 our (
     $n_name, @n_aliases,
@@ -23,7 +22,7 @@ struct 'Net::netent' => [
    net		=> '$',
 ];
 
-sub populate (@) {
+sub populate {
     return unless @_;
     my $nob = new();
     $n_name 	 =    $nob->[0]     	     = $_[0];
@@ -33,9 +32,9 @@ sub populate (@) {
     return $nob;
 } 
 
-sub getnetbyname ($)  { populate(CORE::getnetbyname(shift)) } 
+sub getnetbyname :prototype($) { populate(CORE::getnetbyname(shift)) }
 
-sub getnetbyaddr ($;$) { 
+sub getnetbyaddr :prototype($;$) {
     my ($net, $addrtype);
     $net = shift;
     require Socket if @_;
@@ -43,7 +42,7 @@ sub getnetbyaddr ($;$) {
     populate(CORE::getnetbyaddr($net, $addrtype)) 
 } 
 
-sub getnet($) {
+sub getnet :prototype($) {
     if ($_[0] =~ /^\d+(?:\.\d+(?:\.\d+(?:\.\d+)?)?)?$/) {
 	require Socket;
 	&getnetbyaddr(Socket::inet_aton(shift));
