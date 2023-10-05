@@ -377,7 +377,7 @@ S_PadnameIN_SCOPE(const PADNAME * const pn, const U32 seq)
 
 /* ------------------------------- pp.h ------------------------------- */
 
-PERL_STATIC_INLINE SSize_t
+PERL_STATIC_INLINE Stack_off_t
 Perl_TOPMARK(pTHX)
 {
     DEBUG_s(DEBUG_v(PerlIO_printf(Perl_debug_log,
@@ -387,7 +387,7 @@ Perl_TOPMARK(pTHX)
     return *PL_markstack_ptr;
 }
 
-PERL_STATIC_INLINE SSize_t
+PERL_STATIC_INLINE Stack_off_t
 Perl_POPMARK(pTHX)
 {
     DEBUG_s(DEBUG_v(PerlIO_printf(Perl_debug_log,
@@ -3230,7 +3230,7 @@ Perl_cx_pushblock(pTHX_ U8 type, U8 gimme, SV** sp, I32 saveix)
     cx->cx_type        = type;
     cx->blk_gimme      = gimme;
     cx->blk_oldsaveix  = saveix;
-    cx->blk_oldsp      = sp - PL_stack_base;
+    cx->blk_oldsp      = (Stack_off_t)(sp - PL_stack_base);
     assert(cxstack_ix <= 0
             || CxTYPE(cx-1) == CXt_SUBST
             || cx->blk_oldsp >= (cx-1)->blk_oldsp);

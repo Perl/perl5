@@ -4506,7 +4506,7 @@ Perl_init_stacks(pTHX)
     PL_tmps_ix = -1;
     PL_tmps_max = REASONABLE(128);
 
-    Newxz(PL_markstack, REASONABLE(32), SSize_t);
+    Newxz(PL_markstack, REASONABLE(32), Stack_off_t);
     PL_markstack_ptr = PL_markstack;
     PL_markstack_max = PL_markstack + REASONABLE(32);
 

@@ -1946,7 +1946,7 @@ p	|int	|magic_wipepack |NN SV *sv				\
 				|NN MAGIC *mg
 
 CTadop	|Malloc_t|malloc	|MEM_SIZE nbytes
-Cp	|SSize_t *|markstack_grow
+Cp	|Stack_off_t *|markstack_grow
 EXp	|int	|mbtowc_	|NULLOK const wchar_t *pwc		\
 				|NULLOK const char *s			\
 				|const Size_t len
@@ -2522,7 +2522,7 @@ p	|OP *	|pmruntime	|NN OP *o				\
 				|NULLOK OP *repl			\
 				|UV flags				\
 				|I32 floor
-Xiop	|SSize_t|POPMARK
+Xiop	|Stack_off_t|POPMARK
 Cdp	|void	|pop_scope
 Cipx	|void	|pop_stackinfo
 
@@ -3505,7 +3505,7 @@ Fpv	|OP *	|tied_method	|NN SV *methname			\
 				|U32 argc				\
 				|...
 Xp	|SSize_t|tmps_grow_p	|SSize_t ix
-Xiop	|SSize_t|TOPMARK
+Xiop	|Stack_off_t|TOPMARK
 Cm	|UV	|to_uni_fold	|UV c					\
 				|NN U8 *p				\
 				|NN STRLEN *lenp

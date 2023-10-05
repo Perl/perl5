@@ -146,7 +146,7 @@ S_deb_stack_n(pTHX_ SV** stack_base, SSize_t stack_min, SSize_t stack_max,
 {
 #ifdef DEBUGGING
     SSize_t i = stack_max - 30;
-    const SSize_t *markscan = PL_markstack + mark_min;
+    const Stack_off_t *markscan = PL_markstack + mark_min;
 
     PERL_ARGS_ASSERT_DEB_STACK_N;
 
