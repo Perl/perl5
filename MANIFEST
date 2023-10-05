@@ -2988,7 +2988,6 @@ cpan/Test2-Suite/t/acceptance/OO.t					Test2-Suite
 cpan/Test2-Suite/t/acceptance/skip.t					Test2-Suite
 cpan/Test2-Suite/t/acceptance/spec.t					Test2-Suite
 cpan/Test2-Suite/t/acceptance/Tools.t					Test2-Suite
-cpan/Test2-Suite/t/acceptance/Workflow-Acceptance.t			Test2-Suite
 cpan/Test2-Suite/t/acceptance/Workflow-Acceptance2.t			Test2-Suite
 cpan/Test2-Suite/t/acceptance/Workflow-Acceptance3.t			Test2-Suite
 cpan/Test2-Suite/t/acceptance/Workflow-Acceptance4.t			Test2-Suite
