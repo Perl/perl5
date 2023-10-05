@@ -2379,7 +2379,7 @@ Perl_malloc(MEM_SIZE nbytes)
         __attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT_MALLOC
 
-PERL_CALLCONV SSize_t *
+PERL_CALLCONV Stack_off_t *
 Perl_markstack_grow(pTHX);
 #define PERL_ARGS_ASSERT_MARKSTACK_GROW
 
@@ -9513,7 +9513,7 @@ Perl_CvGV(pTHX_ CV *sv);
 # define PERL_ARGS_ASSERT_CVGV                  \
         assert(sv)
 
-PERL_STATIC_INLINE SSize_t
+PERL_STATIC_INLINE Stack_off_t
 Perl_POPMARK(pTHX);
 # define PERL_ARGS_ASSERT_POPMARK
 
@@ -9617,7 +9617,7 @@ Perl_SvUV_nomg(pTHX_ SV *sv);
 # define PERL_ARGS_ASSERT_SVUV_NOMG             \
         assert(sv)
 
-PERL_STATIC_INLINE SSize_t
+PERL_STATIC_INLINE Stack_off_t
 Perl_TOPMARK(pTHX);
 # define PERL_ARGS_ASSERT_TOPMARK
 

@@ -118,11 +118,11 @@ value for the OP, but some use it for other purposes.
 
 #define PUSHMARK(p) \
     STMT_START {                                                      \
-        SSize_t * mark_stack_entry;                                       \
+        Stack_off_t * mark_stack_entry;                               \
         if (UNLIKELY((mark_stack_entry = ++PL_markstack_ptr)          \
                                            == PL_markstack_max))      \
             mark_stack_entry = markstack_grow();                      \
-        *mark_stack_entry  = (SSize_t)((p) - PL_stack_base);              \
+        *mark_stack_entry  = (Stack_off_t)((p) - PL_stack_base);      \
         DEBUG_s(DEBUG_v(PerlIO_printf(Perl_debug_log,                 \
                 "MARK push %p %" IVdf "\n",                           \
                 PL_markstack_ptr, (IV)*mark_stack_entry)));           \

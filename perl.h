@@ -4280,6 +4280,13 @@ hint to the compiler that this condition is likely to be false.
 #  define __has_builtin(x) 0 /* not a clang style compiler */
 #endif
 
+#ifdef PERL_STACK_OFFSET_SSIZET
+  typedef SSize_t Stack_off_t;
+#else
+  typedef I32 Stack_off_t;
+#endif
+#define PERL_STACK_OFFSET_DEFINED
+
 /*
 =for apidoc Am||ASSUME|bool expr
 C<ASSUME> is like C<assert()>, but it has a benefit in a release build. It is a

@@ -49,10 +49,10 @@ PERLVARI(I, tmps_ix,	SSize_t,	-1)
 PERLVARI(I, tmps_floor,	SSize_t,	-1)
 PERLVAR(I, tmps_max,	SSize_t)        /* first unalloced slot in tmps stack */
 
-PERLVAR(I, markstack,	SSize_t *)	/* stack_sp locations we're
+PERLVAR(I, markstack,	Stack_off_t *)	/* stack_sp locations we're
                                            remembering */
-PERLVAR(I, markstack_ptr, SSize_t *)
-PERLVAR(I, markstack_max, SSize_t *)
+PERLVAR(I, markstack_ptr, Stack_off_t *)
+PERLVAR(I, markstack_max, Stack_off_t *)
 
 PERLVARI(I, sub_generation, U32, 1)	/* incr to invalidate method cache */
 
