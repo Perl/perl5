@@ -396,6 +396,14 @@ This requires 32GB of memory just for the argument stack pointers
 itself, so you will require a significantly more memory to take
 advantage of this.  [GH #20917]
 
+=item *
+
+Fixed various problems with join() where modifications to the
+separator could be handled inconsistently, or could access released
+memory.  Changes to the separator from magic or overloading for values
+in the C<LIST> no longer have an effect on the resulting joined
+string.  [GH #21458]
+
 =back
 
 =head1 Known Problems
