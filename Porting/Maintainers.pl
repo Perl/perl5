@@ -1140,6 +1140,9 @@ our %Modules = (
             qw( appveyor.yml
                 perltidyrc
                 t/00-report.t ),
+
+            # https://github.com/Test-More/Test2-Suite/issues/208
+            't/acceptance/Workflow-Acceptance.t',
         ],
     },
 
