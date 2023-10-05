@@ -14,6 +14,8 @@ $ENV{PERL_TEST_MEMORY} >= 60
     or skip_all("Need ~60GB for this test");
 $Config{ptrsize} >= 8
     or skip_all("Need 64-bit pointers for this test");
+XS::APItest::wide_marks()
+    or skip_all("Not configured for SSize_t marks");
 
 my @x;
 $x[0x8000_0000] = "Hello";

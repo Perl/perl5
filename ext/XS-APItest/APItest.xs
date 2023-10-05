@@ -3333,6 +3333,15 @@ xs_items(...)
             RETVAL
 
 void
+wide_marks(...)
+        PPCODE:
+#ifdef PERL_STACK_OFFSET_SSIZET
+          XSRETURN_YES;
+#else
+          XSRETURN_NO;
+#endif
+
+void
 bhk_record(bool on)
     CODE:
         dMY_CXT;
