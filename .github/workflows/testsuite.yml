@@ -341,7 +341,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          git config --global --add safe.directory /__w/perl5/perl5
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
           git init
           git remote add origin "https://$GITHUB_ACTOR:$GITHUB_TOKEN@github.com/$GITHUB_REPOSITORY"
           git config --local gc.auto 0
