@@ -1,8 +1,7 @@
 use Test2::Bundle::Extended -target => 'Test2::Require::EnvVar';
 
 {
-    local %ENV = %ENV;
-    $ENV{FOO} = 0;
+    local $ENV{FOO} = 0;
     is($CLASS->skip('FOO'), 'This test only runs if the $FOO environment variable is set', "will skip");
 
     $ENV{FOO} = 1;

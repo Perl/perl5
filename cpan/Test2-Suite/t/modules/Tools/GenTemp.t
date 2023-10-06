@@ -24,12 +24,12 @@ ok($tmp, "Got a temp dir ($tmp)");
 
 ok(-d File::Spec->canonpath($_), "Created dir $_") for (
     $tmp,
-    "$tmp/subdir",
-    "$tmp/subdir/nested",
+    File::Spec->catdir($tmp, 'subdir'),
+    File::Spec->catdir($tmp, 'subdir', 'nested'),
 );
 
 for my $file (qw{foo bar subdir/baz subdir/nested/bat}) {
-    my $cp = File::Spec->canonpath("$tmp/$file");
+    my $cp = File::Spec->catfile($tmp, $file);
     ok(-f $cp, "Created file $file");
     open(my $fh, '<', $cp) or die "Could not open file '$cp': $!";
     my $content = $file;

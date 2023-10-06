@@ -33,9 +33,8 @@ sub intercept_2(&) {
 }
 
 {
-    local %ENV = %ENV;
-    $ENV{HARNESS_IS_VERBOSE} = 1;
-    $ENV{T2_RAND_SEED} = 1234;
+    local $ENV{HARNESS_IS_VERBOSE} = 1;
+    local $ENV{T2_RAND_SEED} = 1234;
 
     my ($events, $warning);
     my $reseed_qr = qr/SRand loaded multiple times, re-seeding rand/;
