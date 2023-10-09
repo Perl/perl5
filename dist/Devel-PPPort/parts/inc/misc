@@ -37,6 +37,9 @@ WIDEST_UTYPE
 XSRETURN
 NOT_REACHED
 ASSUME
+Stack_off_t
+Stack_off_t_MAX
+PERL_STACK_OFFSET_DEFINED
 
 =implementation
 
@@ -262,6 +265,12 @@ typedef NVTYPE NV;
 #  else
 #    define PTR2ul(p)     INT2PTR(unsigned long,p)
 #  endif
+#endif
+
+#ifndef PERL_STACK_OFFSET_DEFINED
+  typedef I32 Stack_off_t;
+#  define Stack_off_t_MAX I32_MAX
+#  define PERL_STACK_OFFSET_DEFINED
 #endif
 
 __UNDEFINED__  PTR2nat(p)      (PTRV)(p)
@@ -2580,7 +2589,21 @@ av_count(av)
         OUTPUT:
                 RETVAL
 
-=tests plan => 26827
+STRLEN
+mark_size_ok()
+        CODE:
+                RETVAL = sizeof(*PL_markstack_ptr) == sizeof(Stack_off_t);
+        OUTPUT:
+                RETVAL
+
+UV
+mark_max()
+        CODE:
+                RETVAL = Stack_off_t_MAX;
+        OUTPUT:
+                RETVAL
+
+=tests plan => 26829
 
 use vars qw($my_sv @my_av %my_hv);
 
@@ -3027,3 +3050,6 @@ for $name (keys %case_changing) {
 is(&Devel::PPPort::av_top_index([1,2,3]), 2);
 is(&Devel::PPPort::av_tindex([1,2,3,4]), 3);
 is(&Devel::PPPort::av_count([1,2,3,4]), 4);
+
+ok(&Devel::PPPort::mark_size_ok(), "check mark type size");
+ok(&Devel::PPPort::mark_max(), "got a mark max");
