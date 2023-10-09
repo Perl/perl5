@@ -4282,8 +4282,10 @@ hint to the compiler that this condition is likely to be false.
 
 #ifdef PERL_STACK_OFFSET_SSIZET
   typedef SSize_t Stack_off_t;
+#  define Stack_off_t_MAX SSize_t_MAX
 #else
   typedef I32 Stack_off_t;
+#  define Stack_off_t_MAX I32_MAX
 #endif
 #define PERL_STACK_OFFSET_DEFINED
 
