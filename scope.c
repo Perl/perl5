@@ -47,10 +47,10 @@ Perl_stack_grow(pTHX_ SV **sp, SV **p, SSize_t n)
         128;
 #endif
     /* If the total might wrap, panic instead. This is really testing
-     * that (current + n + extra < SSize_t_MAX), but done in a way that
+     * that (current + n + extra < Stack_off_t_MAX), but done in a way that
      * can't wrap */
-    if (UNLIKELY(   current         > SSize_t_MAX - extra
-                 || current + extra > SSize_t_MAX - n
+    if (UNLIKELY(   current         > Stack_off_t_MAX - extra
+                 || current + extra > Stack_off_t_MAX - n
     ))
         /* diag_listed_as: Out of memory during %s extend */
         Perl_croak(aTHX_ "Out of memory during stack extend");
