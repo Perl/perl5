@@ -3384,7 +3384,7 @@ PP(pp_match)
 #endif
     {
         r_flags |= (REXEC_COPY_STR|REXEC_COPY_SKIP_PRE);
-        /* in @a =~ /(.)/g, we iterate multiple times, but copy the buffer
+        /* In @a = /(.)/g, we iterate multiple times, but copy the buffer
          * only on the first iteration. Therefore we need to copy $' as well
          * as $&, to make the rest of the string available for captures in
          * subsequent iterations */
@@ -3444,19 +3444,19 @@ PP(pp_match)
     {
         const I32 logical_nparens = RXp_LOGICAL_NPARENS(prog);
         /* This following statement is *devious* code. If we are in a global
-           match and the pattern has no parens in it we should return $&
+           match and the pattern has no parens in it, we should return $&
            (offset pair 0). So we set logical_paren to 1 when we should return
            $&, otherwise we set it to 0.
 
            This allows us to simply add logical_nparens to logical_paren to
            compute the number of elements we are going to return.
 
-           In the loop intit we "not" it with: logical_paren = !logical_paren
+           In the loop init we "not" it with: logical_paren = !logical_paren
            which results in it being 0 inside the loop when we want to return
            $&, and results in it being 1 when we want to return the parens.
            Thus we either loop over 1..logical_nparens, or just over 0.
 
-           This is an elegant way to do this code wise, but is super devious
+           This is an elegant way to do this code-wise, but is super devious
            and potentially confusing. When I first saw this logic I thought
            "WTF?". But it makes sense after you poke it a while.
 
@@ -3464,14 +3464,14 @@ PP(pp_match)
            I am leaving it. - Yves */
         I32 logical_paren = (global && !logical_nparens) ? 1 : 0;
         I32 *l2p = RXp_LOGICAL_TO_PARNO(prog);
-        /* this is used to step through the physical parens associated
-         * with a given logical paren. */
+        /* This is used to step through the physical parens associated
+           with a given logical paren. */
         I32 *p2l_next = RXp_PARNO_TO_LOGICAL_NEXT(prog);
 
         rpp_extend(logical_nparens + logical_paren);    /* devious code ... */
         EXTEND_MORTAL(logical_nparens + logical_paren); /* ... see above */
 
-        /* loop over the logical parens in the pattern. This may not
+        /* Loop over the logical parens in the pattern. This may not
            correspond to the actual paren checked, as branch reset may
            mean that there is more than one paren "behind" the logical
            parens. Eg, in /(?|(a)|(b))/ there are two parens, but one
@@ -3480,10 +3480,10 @@ PP(pp_match)
              logical_paren <= logical_nparens;
              logical_paren++)
         {
-            /* now convert the logical_paren to the physical parens which
-               are "behind" it. If branch reset was not used then
+            /* Now convert the logical_paren to the physical parens which
+               are "behind" it. If branch reset was not used, then
                physical_paren and logical_paren are the same as each other
-               and we will only perform one iteration of the loop */
+               and we will only perform one iteration of the loop. */
             I32 phys_paren = l2p ? l2p[logical_paren] : logical_paren;
             SSize_t offs_start, offs_end;
             /* We check the loop invariants below and break out of the loop
@@ -3492,7 +3492,7 @@ PP(pp_match)
             while (1) {
                 /* Check end offset first, as the start might be >=0 even
                    though the end is -1, so testing the end first helps
-                   use avoid the start check.  Really we should be able to
+                   us avoid the start check.  Really we should be able to
                    get away with ONLY testing the end, but testing both
                    doesn't hurt much and preserves sanity. */
                 if (((offs_end   = RXp_OFFS_END(prog, phys_paren))   != -1) &&
