@@ -4,7 +4,7 @@ use warnings;
 
 our ($AUTOLOAD, %SIGRT);
 
-our $VERSION = '2.15';
+our $VERSION = '2.16';
 
 require XSLoader;
 

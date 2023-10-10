@@ -3526,6 +3526,8 @@ asctime(sec, min, hour, mday, mon, year, wday = 0, yday = 0, isdst = -1)
 		    SvOK_off(TARG);
 		else if (result == 0)
 		    sv_setpvs(TARG, "0 but true");
+		else if (sizeof (IV) < sizeof (time_t) && (result < IV_MIN || IV_MAX < result))
+                    sv_setnv(TARG, result);
 		else
 		    sv_setiv(TARG, (IV)result);
 	    } else {
