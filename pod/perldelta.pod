@@ -391,10 +391,15 @@ This incidentally fixed a TODO test for C<B::Deparse>.  [GH #19370]
 
 =item *
 
-Support an argument stack over 2**32 entries on 64-bit platforms.
-This requires 32GB of memory just for the argument stack pointers
-itself, so you will require a significantly more memory to take
-advantage of this.  [GH #20917]
+Optionally support an argument stack over 2**32 entries on 64-bit
+platforms.  This requires 32GB of memory just for the argument stack
+pointers itself, so you will require a significantly more memory to
+take advantage of this.
+
+To enable this add C<-Accflags=-DPERL_STACK_OFFSET_SSIZET> or
+equivalent to the C<Configure> command-line.
+
+[GH #20917][GH #21523]
 
 =item *
 
