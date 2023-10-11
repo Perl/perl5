@@ -261,13 +261,13 @@
  *          to keep its own records, hence is more efficient and guaranteed to
  *          be accurate.
  *
- *      -Accflags=-DNO_LOCALE_CTYE
+ *      -Accflags=-DNO_LOCALE_CTYPE
  *      -Accflags=-DNO_LOCALE_NUMERIC
  *          etc.
  *
  *          If the named category(ies) does(do) not exist on this platform,
  *          these have no effect.  Otherwise they cause perl to be compiled to
- *          always keep the named category(ies) in the C locale XXX
+ *          always keep the named category(ies) in the C locale.
  *
  *      -Accflags=-DHAS_BROKEN_SETLOCALE_QUERY_LC_ALL
  *          This would be set in a hints file to tell perl that doing a libc
@@ -372,13 +372,13 @@ static int debug_initialization = 0;
    /* Use -Accflags=-DWIN32_USE_FAKE_OLD_MINGW_LOCALES on a POSIX or *nix box
     * to get a semblance of pretending the locale handling is that of a MingW
     * that doesn't use UCRT (hence 'OLD' in the name).  This exercizes code
-    * paths that are not compiled on non-Windows boxes, and allows for ASAN.
-    * This is thus a way to see if locale.c on Windows is likely going to
-    * compile, without having to use a real Win32 box.  And running the test
-    * suite will verify to a large extent our logic and memory allocation
-    * handling for such boxes.  And access to ASAN and PERL_MEMLOG Of course the underlying calls are to the POSIX
-    * libc, so any differences in implementation between those and the Windows
-    * versions will not be caught by this. */
+    * paths that are not compiled on non-Windows boxes, and allows for ASAN
+    * and PERL_MEMLOG.  This is thus a way to see if locale.c on Windows is
+    * likely going to compile, without having to use a real Win32 box.  And
+    * running the test suite will verify to a large extent our logic and memory
+    * allocation handling for such boxes.  Of course the underlying calls are
+    * to the POSIX libc, so any differences in implementation between those and
+    * the Windows versions will not be caught by this. */
 
 #  define WIN32
 #  undef P_CS_PRECEDES
