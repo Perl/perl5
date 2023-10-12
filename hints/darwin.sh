@@ -364,6 +364,10 @@ esac
 # Darwin's querylocale() has races
 ccflags="$ccflags -DNO_THREAD_SAFE_QUERYLOCALE"
 
+# But it doesn't much matter because the whole implementation has bugs [GH
+# #21556]
+ccflags="$ccflags -DNO_POSIX_2008_LOCALE"
+
 ldlibpthname='DYLD_LIBRARY_PATH';
 
 # useshrplib=true results in much slower startup times.
