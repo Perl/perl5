@@ -1102,6 +1102,48 @@ L<Commit 125e1a3|https://github.com/Perl/perl5/commit/125e1a36a939>
 
 =back
 
+=head2 When did a one-liner start to emit warnings?
+
+=over 4
+
+=item * Problem
+
+In L<GH issue 21555|https://github.com/Perl/perl5/issues/21555>, it was
+reported that the following one-liner was not emitting warnings in perl-5.16
+but was in perl-5.26 and later releases.
+
+    perl -we '"ab" =~ /.{-1,4}/;'
+
+The reporter's concern was the negative repeat in this (generated) regular
+expression.  The warning being emitted was:
+
+    Unescaped left brace in regex is passed through in regex;
+      marked by <-- HERE in m/.{ <-- HERE -1,4}/ at -e line 1.
+
+At what commit was that warning first emitted?
+
+=item * Solution
+
+We used F<perlbrew> to narrow down the range needing testing to the 5.25
+development cycle.  We then bisected with the C<--one-liner> switch and the
+following invocation:
+
+    export ERR=/tmp/err; rm $ERR
+
+    perl Porting/bisect.pl \
+      --start=v5.24.0 \
+      --end=v5.26.0 \
+      --one-liner 'system(qq|./perl -we "q{ab} =~ /.{-1,4}/" 2>$ENV{ERR}|);
+                  die "See $ENV{ERR} for warnings thrown" if -s $ENV{ERR};'
+
+Bisection pointed to a commit where a modification had been made to a warning.
+
+=item * Reference
+
+L<Commit 8e84dec|https://github.com/Perl/perl5/commit/8e84dec289>
+
+=back
+
 =head2 When did perl stop segfaulting on certain code?
 
 =over 4
