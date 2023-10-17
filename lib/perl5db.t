@@ -3467,6 +3467,30 @@ EOS
     );
 }
 
+{
+    # https://github.com/Perl/perl5/issues/21564
+    # not a debugger bug, but with the way the fix for #19198 was broken
+    # this needs to be tested with a debugger of some sort (even a no-op
+    # debugger) so test it here.
+    my $wrapper = DebugWrap->new(
+        {
+            cmds =>
+            [
+                'c', # just run it, we check the output of the code
+                'q'
+            ],
+            prog => \<<'EOS',
+use v5.12;
+no strict;
+use B qw(svref_2object SVf_IOK);
+my $sv = svref_2object(\(${"_<$0"}[3])); # the "use B;" line
+say +($sv->FLAGS & SVf_IOK) ? "OK" : "FAIL";
+EOS
+        }
+    );
+    $wrapper->output_like(qr/\bOK\b/, "check the line is IOK");
+}
+
 done_testing();
 
 END {

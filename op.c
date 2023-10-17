@@ -1361,7 +1361,6 @@ S_cop_free(pTHX_ COP* cop)
         if (av) {
             SV * const * const svp = av_fetch(av, CopLINE(cop), FALSE);
             if (svp && *svp != &PL_sv_undef && SvIVX(*svp) == PTR2IV(cop) ) {
-                (void)SvIOK_off(*svp);
                 SvIV_set(*svp, 0);
             }
         }
