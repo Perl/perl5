@@ -140,9 +140,9 @@ This module is a dependency of L<Test2::Suite>.
 
 =item *
 
-L<XXX> has been upgraded from version A.xx to B.yy.
+L<perl5db.pl> has been upgraded from version 1.77 to 1.78.
 
-XXX If there was something important to note about this change, include that here.
+Made parsing of the C<l> command arguments saner. [GH #21350]
 
 =back
 
