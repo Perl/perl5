@@ -1226,6 +1226,50 @@ But it was observed that there was no warning in perl-5.36.
 
 L<GH issue 20685|https://github.com/Perl/perl5/issues/20685>
 
+=item * Problem
+
+An issue was identified during use of the Perl debugger, but soon a change in
+C-level code became suspected.  Identifying the breaking commit entailed
+writing a Perl program which used a dummy C<Devel::*> module.
+
+=item * Solution
+
+=over 4
+
+=item *
+
+Create this file:
+
+    $ cat /tmp/21564.pl
+    #!/usr/bin/perl
+
+    use strict; no strict 'refs';
+    use warnings;
+    use B qw(svref_2object SVf_IOK);
+
+    use v5.10;
+
+    my $b = svref_2object(\(${"_</tmp/21564b.pl"}[4]));
+    unless ($b->FLAGS & SVf_IOK) {
+      die "Fail!";
+    }
+    say "Ok";
+
+=item *
+
+Bisect with an invocation which calls a `perl` debugger program.
+
+    $ PERL5DB='sub DB::DB {}' perl Porting/bisect.pl \
+      --start=v5.35.5 \
+      --end=v5.35.6 \
+      -- ./perl -Ilib -d /tmp/21564b.pl
+
+=back
+
+=item * Reference
+
+L<GH issue 21564|https://github.com/Perl/perl5/issues/21564>
+
 =back
 
 =cut
