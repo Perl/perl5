@@ -409,6 +409,12 @@ memory.  Changes to the separator from magic or overloading for values
 in the C<LIST> no longer have an effect on the resulting joined
 string.  [GH #21458]
 
+=item *
+
+Don't clear the integer flag C<IOK> from lines in the C<<
+@{"_<$sourcefile"} >> array when a C<dbstate> op is removed for that
+line.  This was broken when fixing [GH #19198].  [GH #21564]
+
 =back
 
 =head1 Known Problems
