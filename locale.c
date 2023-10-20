@@ -5179,12 +5179,8 @@ S_my_localeconv(pTHX_ const int item)
 #  endif
 
         /* Examine each string */
-        while (1) {
-            const char * name = strings[i]->name;
-
-            if (! name) {   /* Reached the end */
-                break;
-            }
+        for (const lconv_offset_t *strp = strings[i]; strp->name; strp++) {
+            const char * name = strp->name;
 
             /* 'value' will contain the string that may need to be marked as
              * UTF-8 */
@@ -5201,14 +5197,12 @@ S_my_localeconv(pTHX_ const int item)
             {
                 SvUTF8_on(*value);
             }
-
-            strings[i]++;   /* Iterate */
         }
     }   /* End of fixing up UTF8ness */
 
 
     /* Examine each integer */
-    if (integers) while (1) {
+    for (; integers; integers++) {
         const char * name = integers->name;
 
         if (! name) {   /* Reached the end */
@@ -5224,8 +5218,6 @@ S_my_localeconv(pTHX_ const int item)
         if (SvIV(*value) == CHAR_MAX) {
             sv_setiv(*value, -1);
         }
-
-        integers++;   /* Iterate */
     }
 
     return hv;
