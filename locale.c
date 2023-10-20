@@ -5194,7 +5194,7 @@ S_my_localeconv(pTHX_ const int item)
             }
 
             /* Determine if the string should be marked as UTF-8. */
-            if (UTF8NESS_YES == (get_locale_string_utf8ness_i(SvPVX(*value),
+            if (UTF8NESS_YES == (get_locale_string_utf8ness_i(SvPV_nolen(*value),
                                                   locale_is_utf8,
                                                   NULL,
                                                   (locale_category_index) 0)))
