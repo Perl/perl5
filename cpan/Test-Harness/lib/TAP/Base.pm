@@ -12,11 +12,11 @@ and L<TAP::Harness>
 
 =head1 VERSION
 
-Version 3.47
+Version 3.48
 
 =cut
 
-our $VERSION = '3.47';
+our $VERSION = '3.48';
 
 use constant GOT_TIME_HIRES => do {
     eval 'use Time::HiRes qw(time);';
