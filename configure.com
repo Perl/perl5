@@ -2200,7 +2200,6 @@ $     echo4 "...and architecture name already has -ld."
 $   ENDIF
 $ ENDIF
 $!
-$ bool_dflt = "n"
 $ vms_prefix = "perl_root"
 $ vms_prefixup = F$EDIT(vms_prefix,"UPCASE")
 $!
