@@ -444,7 +444,7 @@ Perl_call_pv(pTHX_ const char *sub_name, I32 flags);
         assert(sub_name)
 
 PERL_CALLCONV SSize_t
-Perl_call_sv(pTHX_ SV *sv, volatile I32 flags);
+Perl_call_sv(pTHX_ SV *sv, I32 flags);
 #define PERL_ARGS_ASSERT_CALL_SV                \
         assert(sv)
 

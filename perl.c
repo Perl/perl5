@@ -3060,7 +3060,7 @@ See L<perlcall>.
 */
 
 SSize_t
-Perl_call_sv(pTHX_ SV *sv, volatile I32 flags)
+Perl_call_sv(pTHX_ SV *sv, I32 arg_flags)
                         /* See G_* flags in cop.h */
 {
     LOGOP myop;		/* fake syntax tree node */
@@ -3070,6 +3070,10 @@ Perl_call_sv(pTHX_ SV *sv, volatile I32 flags)
     bool oldcatch = CATCH_GET;
     int ret;
     OP* const oldop = PL_op;
+    /* Since we don't modify flags after setjmp() we don't really need to make
+       flags volatile, but gcc complains that it could be clobbered anyway.
+     */
+    volatile I32 flags = arg_flags;
     dJMPENV;
 
     PERL_ARGS_ASSERT_CALL_SV;
