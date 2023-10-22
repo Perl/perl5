@@ -772,7 +772,7 @@ CTadop	|Malloc_t|calloc	|MEM_SIZE elements			\
 AOdp	|SSize_t|call_pv	|NN const char *sub_name		\
 				|I32 flags
 AOdp	|SSize_t|call_sv	|NN SV *sv				\
-				|volatile I32 flags
+				|I32 flags
 : Used in several source files
 Rp	|bool	|cando		|Mode_t mode				\
 				|bool effective 			\
