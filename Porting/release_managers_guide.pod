@@ -432,6 +432,12 @@ the output about regenerating the data base.
 
 Get perldelta in a mostly finished state.
 
+It is usual to send a call out to the Perl5-Porters mailing list a few days
+ahead of the release to ask for recent committers to add their own notes
+relating to their recent work.  Getting other people to write it ahead of
+time can save you from having to work out the details during the actual
+release process.
+
 Read F<Porting/how_to_write_a_perldelta.pod>, and try to make sure that
 every section it lists is, if necessary, populated and complete. Copy
 edit the whole document.
