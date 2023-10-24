@@ -252,6 +252,15 @@
  *          querylocale() is called only while the locale mutex is locked, and
  *          the result is copied to a per-thread place before unlocking.
  *
+ *      -Accflags=-DUSE_NL_LOCALE_NAME
+ *          glibc has an undocumented equivalent function to querylocale().  It
+ *          currently isn't used by default because it is undocumented.  But
+ *          testing hasn't found any problems with it.  Using this Configure
+ *          option enables it on systems that have it (with no effect on
+ *          systems lacking it).  Enabling this removes the need for perl
+ *          to keep its own records, hence is more efficient and guaranteed to
+ *          be accurate.
+ *
  *      -Accflags=-DNO_LOCALE_CTYE
  *      -Accflags=-DNO_LOCALE_NUMERIC
  *          etc.
