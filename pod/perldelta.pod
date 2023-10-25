@@ -20,6 +20,12 @@ L<perl5393delta>, which describes differences between 5.39.2 and 5.39.3.
 
 =item *
 
+L<Term::Table> 0.017 has been added to the Perl core.
+
+This module is a dependency of L<Test2::Suite>.
+
+=item *
+
 L<Test2::Suite> 0.000156 has been added to the Perl core.
 
 This distribution contains a comprehensive set of test tools for writing unit
@@ -27,17 +33,21 @@ tests.  It is the successor to L<Test::More> and similar modules.  Its
 inclusion in the Perl core means that CPAN module tests can be written using
 this suite of tools without extra dependencies.
 
-=item *
-
-L<Term::Table> 0.017 has been added to the Perl core.
-
-This module is a dependency of L<Test2::Suite>.
-
 =back
 
 =head2 Updated Modules and Pragmata
 
 =over 4
+
+=item *
+
+L<builtin> has been upgraded from version 0.010 to 0.011.
+
+L<builtin> now accepts a version bundle as an input argument, requesting it to
+import all of the functions that are considered a stable part of the module at
+the given Perl version. For example:
+
+    use builtin ':5.40';
 
 =item *
 
@@ -48,11 +58,30 @@ not wish to use it.
 
 =item *
 
-L<builtin> now accepts a version bundle as an input argument, requesting it to
-import all of the functions that are considered a stable part of the module at
-the given Perl version. For example:
+L<File::Find> has been upgraded from version 1.43 to 1.44.
 
-    use builtin ':5.40';
+=item *
+
+L<File::stat> has been upgraded from version 1.13 to 1.14.
+
+=item *
+
+L<Math::BigInt> has been upgraded from version 1.999839 to 1.999842.
+
+=item *
+
+L<Math::BigInt::FastCalc> has been upgraded from version 0.5014 to 0.5015.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 5.20230920 to 5.20231025.
+
+=item *
+
+L<perl5db.pl> has been upgraded from version 1.77 to 1.78.
+
+Made parsing of the C<l> command arguments saner.
+[L<GH #21350|https://github.com/Perl/perl5/issues/21350>]
 
 =item *
 
@@ -69,14 +98,39 @@ been updated to be integer types; previously they were C<NV> floating-point.
 
 =item *
 
-L<perl5db.pl> has been upgraded from version 1.77 to 1.78.
-
-Made parsing of the C<l> command arguments saner.
-[L<GH #21350|https://github.com/Perl/perl5/issues/21350>]
+L<Test::Harness> has been upgraded from version 3.47 to 3.48.
 
 =item *
 
-L<Module::CoreList> has been upgraded from version 5.20230920 to 5.20231025.
+L<Time::gmtime> has been upgraded from version 1.04 to 1.05.
+
+=item *
+
+L<Time::localtime> has been upgraded from version 1.03 to 1.04.
+
+=item *
+
+L<Time::tm> has been upgraded from version 1.00 to 1.01.
+
+=item *
+
+L<User::grent> has been upgraded from version 1.04 to 1.05.
+
+=item *
+
+L<User::pwent> has been upgraded from version 1.02 to 1.03.
+
+=item *
+
+L<version> has been upgraded from version 0.9929 to 0.9930.
+
+=item *
+
+L<XS::APItest> has been upgraded from version 1.33 to 1.34.
+
+=item *
+
+L<XS::Typemap> has been upgraded from version 0.19 to 0.20.
 
 =back
 
@@ -274,9 +328,33 @@ to the C<+> quantifier where it was followed by a C<(*SKIP)> pattern.
 
 =head1 Acknowledgements
 
-XXX Generate this with:
+Perl 5.39.4 represents approximately 5 weeks of development since Perl
+5.39.3 and contains approximately 46,000 lines of changes across 460 files
+from 20 authors.
 
-  perl Porting/acknowledgements.pl v5.39.3..HEAD
+Excluding auto-generated files, documentation and release tools, there were
+approximately 44,000 lines of changes to 390 .pm, .t, .c and .h files.
+
+Perl continues to flourish into its fourth decade thanks to a vibrant
+community of users and developers. The following people are known to have
+contributed the improvements that became Perl 5.39.4:
+
+Abe Timmerman, Amory Meltzer, Craig A. Berry, Dagfinn Ilmari Mannsåker, Dan
+Jacobson, Elvin Aslanov, Gianni Ceccarelli, Graham Knop, Jake Hamby, James E
+Keenan, Joe McMahon, Karl Williamson, Leon Timmermans, Lukas Mai, Matthew
+Horsfall, Paul Evans, Peter John Acklam, Tony Cook, William Lyu, Yves Orton.
+
+The list above is almost certainly incomplete as it is automatically
+generated from version control history. In particular, it does not include
+the names of the (very much appreciated) contributors who reported issues to
+the Perl bug tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core. We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please
+see the F<AUTHORS> file in the Perl source distribution.
 
 =head1 Reporting Bugs
 
