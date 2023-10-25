@@ -125,9 +125,10 @@ XXX Remove this section if Porting/corelist-perldelta.pl did not add any content
 
 =item *
 
-L<XXX> has been upgraded from version A.xx to B.yy.
+L<IO> has been upgraded from version 1.53 to 1.54.
 
-XXX If there was something important to note about this change, include that here.
+Fixed C<IO::Handle/blocking> on Windows, which has been non-functional
+since IO 1.32.  [GH #17455]
 
 =item *
 
