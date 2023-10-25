@@ -48,7 +48,7 @@ program more secure than the corresponding C program.
 Support for taint checks adds an overhead to all Perl programs,
 whether or not you're using the taint features.
 Perl 5.18 introduced C preprocessor symbols that can
-be used to disable the taint features.
+be used to disable the taint features when building perl.
 
 When taint is enabled,
 you may not use data derived from outside your program to affect
