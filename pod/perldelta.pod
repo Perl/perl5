@@ -76,7 +76,7 @@ Made parsing of the C<l> command arguments saner.
 
 =item *
 
-L<Module::CoreList> has been upgraded from version 5.20230920 to 5.20231020.
+L<Module::CoreList> has been upgraded from version 5.20230920 to 5.20231025.
 
 =back
 
