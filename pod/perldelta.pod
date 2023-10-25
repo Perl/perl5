@@ -132,6 +132,8 @@ since IO 1.32.  [GH #17455]
 
 =item *
 
+L<builtin> has been upgraded from version 0.011 to 0.012.
+
 Added the C<load_module()> builtin function as per L<PPC 0006|https://github.com/Perl/PPCs/blob/main/ppcs/ppc0006-load-module.md>.
 
 =back
