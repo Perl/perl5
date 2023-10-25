@@ -1,0 +1,394 @@
+=encoding utf8
+
+=head1 NAME
+
+perl5394delta - what is new for perl v5.39.4
+
+=head1 DESCRIPTION
+
+This document describes differences between the 5.39.3 release and the 5.39.4
+release.
+
+If you are upgrading from an earlier release such as 5.39.2, first read
+L<perl5393delta>, which describes differences between 5.39.2 and 5.39.3.
+
+=head1 Modules and Pragmata
+
+=head2 New Modules and Pragmata
+
+=over 4
+
+=item *
+
+L<Term::Table> 0.017 has been added to the Perl core.
+
+This module is a dependency of L<Test2::Suite>.
+
+=item *
+
+L<Test2::Suite> 0.000156 has been added to the Perl core.
+
+This distribution contains a comprehensive set of test tools for writing unit
+tests.  It is the successor to L<Test::More> and similar modules.  Its
+inclusion in the Perl core means that CPAN module tests can be written using
+this suite of tools without extra dependencies.
+
+=back
+
+=head2 Updated Modules and Pragmata
+
+=over 4
+
+=item *
+
+L<builtin> has been upgraded from version 0.010 to 0.011.
+
+L<builtin> now accepts a version bundle as an input argument, requesting it to
+import all of the functions that are considered a stable part of the module at
+the given Perl version. For example:
+
+    use builtin ':5.40';
+
+=item *
+
+L<feature> has been upgraded from version 1.84 to 1.85.
+
+It now documents the C<:all> feature bundle, and suggests a reason why you may
+not wish to use it.
+
+=item *
+
+L<File::Find> has been upgraded from version 1.43 to 1.44.
+
+=item *
+
+L<File::stat> has been upgraded from version 1.13 to 1.14.
+
+=item *
+
+L<Math::BigInt> has been upgraded from version 1.999839 to 1.999842.
+
+=item *
+
+L<Math::BigInt::FastCalc> has been upgraded from version 0.5014 to 0.5015.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 5.20230920 to 5.20231025.
+
+=item *
+
+L<perl5db.pl> has been upgraded from version 1.77 to 1.78.
+
+Made parsing of the C<l> command arguments saner.
+[L<GH #21350|https://github.com/Perl/perl5/issues/21350>]
+
+=item *
+
+L<POSIX> has been upgraded from version 2.15 to 2.16.
+
+The C<mktime> function now works correctly on 32-bit platforms even if the
+platform's C<time_t> type is larger than 32 bits. [L<GH #21551|https://github.com/Perl/perl5/issues/21551>]
+
+The C<T_SIGNO> and C<T_FD> typemap entries have been fixed so they work with
+any variable name, rather than just the hardcoded C<sig> and C<fd>.
+
+The mappings for C<Mode_t>, C<pid_t>, C<Uid_t>, C<Gid_t> and C<Time_t> have
+been updated to be integer types; previously they were C<NV> floating-point.
+
+=item *
+
+L<Test::Harness> has been upgraded from version 3.47 to 3.48.
+
+=item *
+
+L<Time::gmtime> has been upgraded from version 1.04 to 1.05.
+
+=item *
+
+L<Time::localtime> has been upgraded from version 1.03 to 1.04.
+
+=item *
+
+L<Time::tm> has been upgraded from version 1.00 to 1.01.
+
+=item *
+
+L<User::grent> has been upgraded from version 1.04 to 1.05.
+
+=item *
+
+L<User::pwent> has been upgraded from version 1.02 to 1.03.
+
+=item *
+
+L<version> has been upgraded from version 0.9929 to 0.9930.
+
+=item *
+
+L<XS::APItest> has been upgraded from version 1.33 to 1.34.
+
+=item *
+
+L<XS::Typemap> has been upgraded from version 0.19 to 0.20.
+
+=back
+
+=head1 Documentation
+
+=head2 Changes to Existing Documentation
+
+We have attempted to update the documentation to reflect the changes
+listed in this document.  If you find any we have missed, open an issue
+at L<https://github.com/Perl/perl5/issues>.
+
+Additionally, the following selected changes have been made:
+
+=head3 L<perlre>
+
+=over 4
+
+=item *
+
+Removed statement suggesting C</p> is a no-op.
+
+=back
+
+=head3 L<perlapi>
+
+=over 4
+
+=item *
+
+Several internal functions now have documentation - the various C<newSUB>
+functions, C<newANONLIST()>, C<newANONHASH()>, C<newSVREF()> and similar.
+
+=back
+
+=head1 Diagnostics
+
+The following additions or changes have been made to diagnostic output,
+including warnings and fatal error messages.  For the complete list of
+diagnostic messages, see L<perldiag>.
+
+=head2 New Diagnostics
+
+=head3 New Errors
+
+=over 4
+
+=item *
+
+L<Builtin version bundle "%s" is not supported by Perl|perldiag/Builtin version bundle "%s" is not supported by Perl>
+
+(F) You attempted to C<use builtin :ver> for a version number that is either
+older than 5.39 (when the ability was added), or newer than the current perl
+version.
+
+=item *
+
+L<Invalid version bundle "%s"|perldiag/Invalid version bundle "%s">
+
+(F) A version number that is used to specify an import bundle during a
+C<use builtin ...> statement must be formatted as C<:MAJOR.MINOR> with an
+optional third component, which is ignored.  Each component must be a number
+of 1 to 3 digits. No other characters are permitted.  The value that was
+specified does not conform to these rules.
+
+=back
+
+=head1 Testing
+
+Tests were added and changed to reflect the other additions and changes
+in this release.
+
+=head1 Platform Support
+
+=head2 Platform-Specific Notes
+
+=over 4
+
+=item VMS
+
+Fixed the configure "installation prefix" prompt to accept a string rather than
+yes/no.
+
+Fixed compilation by defining proper value for
+C<perl_lc_all_category_positions_init>.
+
+Increased buffer size when reading F<config_H.SH> to fix compilation under
+clang.
+
+=back
+
+=head1 Internal Changes
+
+=over 4
+
+=item *
+
+C<PERL_VERSION_LE> has been fixed to properly check for "less than or equal"
+rather than "less than".
+
+=back
+
+=head1 Selected Bug Fixes
+
+=over 4
+
+=item *
+
+Lexical names from the enclosing scope in a lexical sub or closure
+weren't visible to code executed by calling C<eval EXPR;> from the
+C<DB> package.  This was introduced in 5.18 in an attempt to prevent
+subs from retaining a reference to their outer scope, but this broke
+the special behaviour of C<eval EXPR;> in package DB.
+
+This incidentally fixed a TODO test for C<B::Deparse>.
+[L<GH #19370|https://github.com/Perl/perl5/pull/19370>]
+
+=item *
+
+Optionally support an argument stack over 2**32 entries on 64-bit
+platforms.  This requires 32GB of memory just for the argument stack
+pointers itself, so you will require a significantly more memory to
+take advantage of this.
+
+To enable this add C<-Accflags=-DPERL_STACK_OFFSET_SSIZET> or
+equivalent to the C<Configure> command-line.
+
+[L<GH #20917|https://github.com/Perl/perl5/issues/20917>]
+[L<GH #21523|https://github.com/Perl/perl5/issues/21523>]
+
+=item *
+
+Fixed various problems with join() where modifications to the
+separator could be handled inconsistently, or could access released
+memory.  Changes to the separator from magic or overloading for values
+in the C<LIST> no longer have an effect on the resulting joined
+string.
+[L<GH #21458|https://github.com/Perl/perl5/issues/21458>]
+
+=item *
+
+Don't clear the integer flag C<IOK> from lines in the C<<
+@{"_<$sourcefile"} >> array when a C<dbstate> op is removed for that
+line.  This was broken when fixing
+[L<GH #19198|https://github.com/Perl/perl5/issues/19198>].
+[L<GH #21564|https://github.com/Perl/perl5/issues/21564>]
+
+=item *
+
+Many bug fixes have been made for using locales under threads and in
+embedded perls.  And workarounds for libc bugs have been added.  As a
+result thread-safe locale handling is now the default under OpenBSD, and
+MingW when compiled with UCRT.
+
+However, testing has shown that Darwin's implementation of thread-safe
+locale handling has bugs.  So now Perl doesn't attempt to use the
+thread-safe operations when compiled on Darwin.
+
+As before, you can check to see if your program is running with
+thread-safe locales by checking if the value of C<${^SAFE_LOCALES}> is
+1.
+
+=item *
+
+Various bugs have been fixed when perl is configured with
+C<-Accflags=-DNO_LOCALE_NUMERIC> or any other locale category (or
+categories).
+
+=item *
+
+Not all locale categories need be set to the same locale.  Perl now
+works around bugs in the libc implementations of locale handling on some
+platforms that previously could result in mojibake.
+
+=item *
+
+C<LC_ALL> is represented in one of two ways when not all locale
+categories are set to the same locale.  On some platforms, such as Linux
+and Windows, the representation is of the form of a series of
+C<'category=locale-name'> pairs.  On other platforms, such as *BSD, the
+representation is positional like S<C<I<name1> / I<name2> / ... >>.
+I<name1> is always for a particular category as defined by the platform,
+as are the other names.  The sequence that separates the names
+(the S<C< / >> above) also varies by platform.  Previously, perl had
+problems with platforms that used the positional notation.  This is now
+fixed.
+
+=item *
+
+A bug has been fixed in the regexp engine with an optimisation that applies
+to the C<+> quantifier where it was followed by a C<(*SKIP)> pattern.
+
+[L<GH #21534|https://github.com/Perl/perl5/issues/21534>]
+
+=back
+
+=head1 Acknowledgements
+
+Perl 5.39.4 represents approximately 5 weeks of development since Perl
+5.39.3 and contains approximately 46,000 lines of changes across 460 files
+from 20 authors.
+
+Excluding auto-generated files, documentation and release tools, there were
+approximately 44,000 lines of changes to 390 .pm, .t, .c and .h files.
+
+Perl continues to flourish into its fourth decade thanks to a vibrant
+community of users and developers. The following people are known to have
+contributed the improvements that became Perl 5.39.4:
+
+Abe Timmerman, Amory Meltzer, Craig A. Berry, Dagfinn Ilmari Mannsåker, Dan
+Jacobson, Elvin Aslanov, Gianni Ceccarelli, Graham Knop, Jake Hamby, James E
+Keenan, Joe McMahon, Karl Williamson, Leon Timmermans, Lukas Mai, Matthew
+Horsfall, Paul Evans, Peter John Acklam, Tony Cook, William Lyu, Yves Orton.
+
+The list above is almost certainly incomplete as it is automatically
+generated from version control history. In particular, it does not include
+the names of the (very much appreciated) contributors who reported issues to
+the Perl bug tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core. We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please
+see the F<AUTHORS> file in the Perl source distribution.
+
+=head1 Reporting Bugs
+
+If you find what you think is a bug, you might check the perl bug database
+at L<https://github.com/Perl/perl5/issues>.  There may also be information at
+L<http://www.perl.org/>, the Perl Home Page.
+
+If you believe you have an unreported bug, please open an issue at
+L<https://github.com/Perl/perl5/issues>.  Be sure to trim your bug down to a
+tiny but sufficient test case.
+
+If the bug you are reporting has security implications which make it
+inappropriate to send to a public issue tracker, then see
+L<perlsec/SECURITY VULNERABILITY CONTACT INFORMATION>
+for details of how to report the issue.
+
+=head1 Give Thanks
+
+If you wish to thank the Perl 5 Porters for the work we had done in Perl 5,
+you can do so by running the C<perlthanks> program:
+
+    perlthanks
+
+This will send an email to the Perl 5 Porters list with your show of thanks.
+
+=head1 SEE ALSO
+
+The F<Changes> file for an explanation of how to view exhaustive details on
+what changed.
+
+The F<INSTALL> file for how to build Perl.
+
+The F<README> file for general stuff.
+
+The F<Artistic> and F<Copying> files for copyright information.
+
+=cut
