@@ -86,12 +86,12 @@ io_blocking(pTHX_ InputStream f, int block)
     if (RETVAL >= 0) {
 	int mode = RETVAL;
 	int newmode = mode;
-#ifdef O_NONBLOCK
+#  ifdef O_NONBLOCK
 	/* POSIX style */
 
-# ifndef O_NDELAY
-#  define O_NDELAY O_NONBLOCK
-# endif
+#    ifndef O_NDELAY
+#      define O_NDELAY O_NONBLOCK
+#    endif
 	/* Note: UNICOS and UNICOS/mk a F_GETFL returns an O_NDELAY
 	 * after a successful F_SETFL of an O_NONBLOCK. */
 	RETVAL = RETVAL & (O_NONBLOCK | O_NDELAY) ? 0 : 1;
@@ -102,7 +102,7 @@ io_blocking(pTHX_ InputStream f, int block)
 	} else if (block > 0) {
 	    newmode &= ~(O_NDELAY|O_NONBLOCK);
 	}
-#else
+#  else
 	/* Not POSIX - better have O_NDELAY or we can't cope.
 	 * for BSD-ish machines this is an acceptable alternative
 	 * for SysV we can't tell "would block" from EOF but that is
@@ -115,7 +115,7 @@ io_blocking(pTHX_ InputStream f, int block)
 	} else if (block > 0) {
 	    newmode &= ~O_NDELAY;
 	}
-#endif
+#  endif
 	if (newmode != mode) {
             const int ret = fcntl(fd, F_SETFL, newmode);
 	    if (ret < 0)
@@ -123,8 +123,7 @@ io_blocking(pTHX_ InputStream f, int block)
 	}
     }
     return RETVAL;
-#else
-#   ifdef WIN32
+#elif defined(WIN32)
     if (block >= 0) {
 	unsigned long flags = !block;
 	/* ioctl claims to take char* but really needs a u_long sized buffer */
@@ -139,9 +138,8 @@ io_blocking(pTHX_ InputStream f, int block)
     }
     /* TODO: Perhaps set $! to ENOTSUP? */
     return -1;
-#   else
+#else
     return -1;
-#   endif
 #endif
 }
 
