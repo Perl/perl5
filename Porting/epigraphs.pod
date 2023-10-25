@@ -17,6 +17,12 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.39.4 - None
+
+L<Announced on 2023-10-25 by Graham Knop|https://www.nntp.perl.org/group/perl.perl5.porters/2023/10/msg267222.html>
+
+This release does not have an epigraph.
+
 =head2 v5.39.3 - Porter Robinson and Madeon, "Shelter"
 
 L<Announced on 2023-09-20 by Matthew Horsfall|https://www.nntp.perl.org/group/perl.perl5.porters/2023/09/msg267064.html>
