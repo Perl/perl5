@@ -532,7 +532,7 @@ BEGIN {
 use vars qw($VERSION $header);
 
 # bump to X.XX in blead, only use X.XX_XX in maint
-$VERSION = '1.78';
+$VERSION = '1.79';
 
 $header = "perl5db.pl version $VERSION";
 
@@ -871,7 +871,7 @@ BEGIN {
     if ($ENV{PERL5DB_THREADED}) {
         require threads;
         require threads::shared;
-        import threads::shared qw(share);
+        threads::shared->import('share');
         $DBGR;
         share(\$DBGR);
         lock($DBGR);
