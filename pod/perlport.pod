@@ -1512,7 +1512,10 @@ C<-R>, C<-W>, C<-X>, C<-O> are indistinguishable from C<-r>, C<-w>,
 C<-x>, C<-o>.
 
 (Win32, VMS, S<RISC OS>)
-C<-g>, C<-k>, C<-l>, C<-u>, C<-A> are not particularly meaningful.
+C<-g>, C<-k>, C<-u>, C<-A> are not particularly meaningful.
+
+(VMS, S<RISC OS>)
+C<-l> is not particularly meaningful.
 
 (Win32)
 C<-l> returns true for both symlinks and directory junctions.
