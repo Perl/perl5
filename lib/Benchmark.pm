@@ -5,7 +5,7 @@ use strict;
 
 =head1 NAME
 
-Benchmark - benchmark running times of Perl code
+Benchmark - Benchmark running times of Perl code
 
 =head1 SYNOPSIS
 
@@ -46,30 +46,30 @@ Benchmark - benchmark running times of Perl code
     );
     cmpthese( $results ) ;
 
-    $t = timeit($count, '...other code...')
-    print "$count loops of other code took:",timestr($t),"\n";
+    my $t1 = timeit($count, '...other code...')
+    print "$count loops of other code took:", timestr($t1),"\n";
 
-    $t = countit($time, '...other code...')
-    $count = $t->iters ;
-    print "$count loops of other code took:",timestr($t),"\n";
+    my $t2 = countit($time, '...other code...')
+    $count = $t2->iters ;
+    print "$count loops of other code took:", timestr($t2),"\n";
 
-    # enable hires wallclock timing if possible
+    # Enable hires wallclock timing if possible
     use Benchmark ':hireswallclock';
 
 =head1 DESCRIPTION
 
-The Benchmark module encapsulates a number of routines to help you
-figure out how long it takes to execute some code.
+The C<Benchmark> module encapsulates a number of routines to
+help you figure out how long it takes to execute some code.
 
-timethis - run a chunk of code several times
+C<timethis> - Run a chunk of code several times
 
-timethese - run several chunks of code several times
+C<timethese> - Run several chunks of code several times
 
-cmpthese - print results of timethese as a comparison chart
+C<cmpthese> - Print results of C<timethese> as a comparison chart
 
-timeit - run a chunk of code and see how long it goes
+C<timeit> - Run a chunk of code and see how long it goes
 
-countit - see how many times a chunk of code runs in a given time
+C<countit> - See how many times a chunk of code runs in a given time
 
 
 =head2 Methods
@@ -482,7 +482,7 @@ our(@ISA, @EXPORT, @EXPORT_OK, %EXPORT_TAGS, $VERSION);
 	      clearcache clearallcache disablecache enablecache);
 %EXPORT_TAGS=( all => [ @EXPORT, @EXPORT_OK ] ) ;
 
-$VERSION = 1.24;
+$VERSION = 1.26;
 
 # --- ':hireswallclock' special handling
 
