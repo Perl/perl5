@@ -398,6 +398,10 @@ directory if their names are lowercased and truncated to eight
 characters before the C<.>, if any, and to three characters after the
 C<.>, if any).  (And do not use C<.>s in directory names.)
 
+On Windows extra C<.>s at the end of a file or directory name are
+ignored in most circumstances, and a directory name containing only
+three or more C<.>s are treated as the current directory by some APIs.
+
 =head2 System Interaction
 
 Not all platforms provide a command line.  These are usually platforms
