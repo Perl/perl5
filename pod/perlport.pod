@@ -1521,7 +1521,7 @@ C<-d> is true if passed a device spec without an explicit directory.
 
 (Win32)
 C<-x> (or C<-X>) determine if a file ends in one of the executable
-suffixes.  C<-S> is meaningless.
+suffixes.
 
 (S<RISC OS>)
 C<-x> (or C<-X>) determine if a file has an executable file type.
