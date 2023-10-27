@@ -8066,6 +8066,15 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
             finish_export_lexical();
         }
 
+        /* source::encoding 'ASCII' is also off by default for versions earlier
+         * than it became available */
+        if (shortver >= SHORTVER(5, 39)) {
+            PL_hints |= HINT_ASCII_ENCODING;
+        }
+        else {
+            PL_hints &= ~HINT_ASCII_ENCODING;
+        }
+
         PL_prevailing_version = shortver;
     }
 

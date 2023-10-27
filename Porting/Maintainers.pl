@@ -1492,6 +1492,7 @@ our %Modules = (
                 lib/perlbug.t
                 lib/sigtrap.{pm,t}
                 lib/sort.{pm,t}
+                lib/source/encoding.pm
                 lib/strict.{pm,t}
                 lib/subs.{pm,t}
                 lib/unicore/
