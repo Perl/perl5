@@ -1,4 +1,5 @@
 use strict;
+#12345678911234567892123456789312345678941234567895123456789612345678971234567881
 use warnings;
 
 # This file tests interactions with locale and threads
@@ -375,6 +376,9 @@ sub analyze_locale_name($) {
                           && $ret{script} =~ $official_ascii_name)
                          ? 0
                          : 1;
+    print STDERR __FILE__, ": ", __LINE__, ": '", $ret{script}, "'\n" if $debug > 1;
+    print STDERR __FILE__, ": ", __LINE__, ": '", $official_ascii_name, "'\n" if $debug > 1;
+    print STDERR __FILE__, ": ", __LINE__, ": ", $ret{priority}, "\n" if $debug > 1;
     }
 
     # Script names have been set up so that anything after an underscore is a
@@ -383,6 +387,8 @@ sub analyze_locale_name($) {
     # locales so that the characters are as varied as possible.
     my $script_root = ($ret{script} =~ s/_.*//r) . "_$ret{is_utf8}";
     $ret{script_instance} = $script_instances{$script_root}++;
+
+    print STDERR __FILE__, ": ", __LINE__, ": ", $ret{locale_name}, ": $langinfo_codeset: ", Dumper \%ret if $debug > 1;
 
     return \%ret;
 }
@@ -415,6 +421,7 @@ sub sort_locales ()
 }
 
 # Find out extra info about each locale
+print STDERR __FILE__, ": ", __LINE__, ": ", Dumper \@locales if $debug;
 my @cleaned_up_locales;
 for my $locale (@locales) {
     my $locale_struct = analyze_locale_name($locale);
@@ -428,6 +435,7 @@ for my $locale (@locales) {
 }
 
 @locales = @cleaned_up_locales;
+print STDERR __FILE__, ": ", __LINE__, ": ", Dumper \@locales if $debug;
 
 # Without a proper codeset, we can't really know how to test.  This should
 # only happen on platforms that lack the ability to determine the codeset.
@@ -435,6 +443,7 @@ for my $locale (@locales) {
 
 # Sort into priority order.
 @locales = sort sort_locales @locales;
+print STDERR __FILE__, ": ", __LINE__, ": ", Dumper \@locales if $debug;
 
 # First test
 SKIP: { # perl #127708
@@ -478,6 +487,7 @@ my %locale_name_to_object;
 for my $locale (@locales) {
     $locale_name_to_object{$locale->{locale_name}} = $locale;
 }
+print STDERR __FILE__, ": ", __LINE__, ": ", Dumper \%locale_name_to_object if $debug > 1;
 
 sub sort_by_hashed_locale {
     local $a = $locale_name_to_object{$a};
@@ -745,6 +755,7 @@ sub add_trials($$;$)
         # categories.
         if (defined $op_counts{$op} && $op_counts{$op} >= $thread_count)
         {
+            print STDERR __FILE__, ": ", __LINE__, ": Now have enough tests for $op=$op_counts{$op}\n" if $debug;
             last;
         }
     }
@@ -869,6 +880,7 @@ SKIP: {
         next unless "$description";
         $msg_catalog{$number} = quotemeta "$description";
     }
+    print STDERR __FILE__, ": ", __LINE__, ": ", Dumper \%msg_catalog if $debug > 1;
 
     # Then just the errnos.
     my @msg_catalog = sort { $a <=> $b } keys %msg_catalog;
@@ -888,6 +900,7 @@ SKIP: {
     foreach my $category (@valid_categories) {
         no warnings 'uninitialized';
 
+        print STDERR __FILE__, ": ", __LINE__, ": $category\n" if $debug > 1;
         next if $category eq 'LC_ALL';  # Tested below as a combination of the
                                         # individual categories
         if ($category eq 'LC_COLLATE') {
@@ -1067,16 +1080,24 @@ SKIP: {
         }
     } # End of creating test cases.
 
+    if ($debug) {
+        print STDERR __FILE__, ": ", __LINE__, ": ", Dumper \%distincts;
+        #print STDERR __FILE__, ": ", __LINE__, ":\n"; Dump %distincts, 1000000;
+        #print STDERR "End of Dump\n";
+    }
 
     # Now analyze the test cases
     my %all_tests;
     foreach my $category (keys %distincts) {
+        print STDERR __FILE__, ": ", __LINE__, ": $category: ", scalar keys $distincts{$category}->%*, " operations\n" if $debug > 1;
         my %results;
         my %distinct_results_count;
 
         # Find just the distinct test operations; sort for repeatibility
         my %distinct_ops;
         for my $op_result (sort keys $distincts{$category}->%*) {
+            print STDERR __FILE__, ": ", __LINE__, ": ", Dumper $op_result if $debug > 1;
+            print STDERR __FILE__, ": ", __LINE__, ": ", Dumper $distincts{$category}{$op_result} if $debug > 1;
             my ($op, $result) = unpack_op_result($op_result);
 
             $distinct_ops{$op}++;
@@ -1085,8 +1106,21 @@ SKIP: {
                         scalar $distincts{$category}{$op_result}{locales}->@*;
         }
 
+        print STDERR __FILE__, ": ", __LINE__, ": count", Dumper \%distinct_ops if $debug > 1;
+        if ($debug > 1) {
+            print STDERR __FILE__, ": ", __LINE__, ":\n", Dumper \%results;
+            Dump %results, 1000000;
+            print STDERR "End of Dump\n";
+        }
+        print STDERR __FILE__, ": ", __LINE__, ": ", Dumper \%distinct_results_count if $debug > 1;
+
         # And get a sorted list of all the test operations
         my @ops = sort keys %distinct_ops;
+        if ($debug > 1) {
+            print STDERR __FILE__, ": ", __LINE__, ":\n";
+            Dump @ops, 1000000;
+            print STDERR "End of Dump\n";
+        }
 
         sub gen_combinations {
 
@@ -1103,9 +1137,11 @@ SKIP: {
                                         # outcomes of this operation.
             my $distincts_ref = shift;  # Reference to %distincts of this
                                         # category
+            print STDERR __FILE__, ": ", __LINE__, ": ", Dumper $op_ref, $results_ref, $distincts_ref if $debug > 1;
 
             # Get the first operation on the list
             my $op = shift $op_ref->@*;
+            print STDERR __FILE__, ": ", __LINE__, ": ", Dumper $op if $debug > 1;
 
             # The return starts out as a list of hashes of all possible
             # outcomes for executing 'op'.  Each hash has two keys:
@@ -1116,11 +1152,24 @@ SKIP: {
             my @return;
             foreach my $result ($results_ref->{$op}->@*) {
                 my $op_result = pack_op_result($op, $result);
+                if ($debug > 1) {
+                    print STDERR __FILE__, ": ", __LINE__, ": $op--$result\n",
+                                Dumper $distincts_ref->{$op_result}{locales};
+                    Dump $op_result, 1000000;
+                    print STDERR "End of Dump\n";
+                }
                 push @return, {
                             op_results => [ $op_result ],
                             locales    => $distincts_ref->{$op_result}{locales},
                           };
             }
+
+            if ($debug > 1) {
+                print STDERR __FILE__, ": ", __LINE__, ":\n";
+                Dump @return, 1000000;
+                print STDERR "End of Dump\n";
+            }
+            print STDERR __FILE__, ": ", __LINE__, ": ", Dumper $op_ref if $debug > 1;
 
             # If this is the final element of the list, we are done.
             return (\@return) unless $op_ref->@*;
@@ -1130,19 +1179,23 @@ SKIP: {
             my $recurse_return = &gen_combinations($op_ref,
                                                    $results_ref,
                                                    $distincts_ref);
+            print STDERR __FILE__, ": ", __LINE__, ": ", Dumper $recurse_return if $debug > 1;
             # Now we have to generate the combinations of the current item
             # with the ones returned by the recursion.  Each element of the
             # current item is combined with each element of the recursed.
             my @combined;
             foreach my $this (@return) {
+                print STDERR __FILE__, ": ", __LINE__, ": ", Dumper $this if $debug > 1;
                 my @this_locales = $this->{locales}->@*;
                 foreach my $recursed ($recurse_return->@*) {
+                    print STDERR __FILE__, ": ", __LINE__, ": ", Dumper $recursed if $debug > 1;
                     my @recursed_locales = $recursed->{locales}->@*;
 
                     # @this_locales is a list of locales this op => result is
                     # valid for.  @recursed_locales is similarly a list of the
                     # valid ones for the recursed return.  Their intersection
                     # is a list of the locales valid for this combination.
+                    print STDERR __FILE__, ": ", __LINE__, ": ", Dumper \@this_locales, \@recursed_locales if $debug > 1;
                     my %seen;
                     $seen{$_}++ foreach @this_locales, @recursed_locales;
                     my @intersection = grep $seen{$_} == 2, keys %seen;
@@ -1152,21 +1205,27 @@ SKIP: {
                     # @set1{@list1} = ();
                     # @set2{@list2} = ();
                     # my @intersection = grep exists $set1{$_}, keys %set2;
+                    #print STDERR __FILE__, ": ", __LINE__, ": Empty intersection: ", Dumper \@this_locales, \@recursed_locales unless @intersection;# if $debug > 1;
 
                     # If the intersection is empty, this combination can't
                     # actually happen on this platform.
                     next unless @intersection;
+                    print STDERR __FILE__, ": ", __LINE__, ": intersection: ", Dumper \@intersection if $debug > 1;
 
+                    print STDERR __FILE__, ": ", __LINE__, ": ", Dumper $recursed->{op_results} if $debug > 1;
+                    print STDERR __FILE__, ": ", __LINE__, ": ", ref $recursed->{op_results}, "\n" if $debug > 1;
                     # Append the recursed list to the current list to form the
                     # combined list.
                     my @combined_result = $this->{op_results}->@*;
                     push @combined_result, $recursed->{op_results}->@*;
+                    print STDERR __FILE__, ": ", __LINE__, ": ", Dumper \@combined_result if $debug > 1;
                     # And create the hash for the combined result, including
                     # the locales it is valid for
                     push @combined, {
                                       op_results => \@combined_result,
                                       locales    => \@intersection,
                                     };
+                    print STDERR __FILE__, ": ", __LINE__, ": ", Dumper \@combined if $debug > 1;
                 }
             }
 
@@ -1189,8 +1248,22 @@ SKIP: {
         # thread.  The total array of hashes gives the complete list of
         # distinct tests possible on this system.  So later, a thread will
         # pluck the next available one from the array..
+        if ($debug > 1) {
+            print STDERR __FILE__, ": ", __LINE__, ": ", Dumper \@ops, \%results, $distincts{$category};
+            Dump \@ops, 1000000;
+            print STDERR "End of Dump\n";
+            Dump \%results, 1000000;
+            print STDERR "End of Dump\n";
+            Dump $distincts{$category}, 1000000;
+            print STDERR "End of Dump\n";
+        }
         my $combinations_ref = gen_combinations(\@ops, \%results,
                                                 $distincts{$category});
+        if ($debug > 1) {
+            print STDERR __FILE__, ": ", __LINE__, ": ", Dumper $combinations_ref;
+            Dump $combinations_ref, 1000000;
+            print STDERR "End of Dump\n";
+        }
 
         # Fix up the entries ...
         foreach my $test ($combinations_ref->@*) {
@@ -1199,6 +1272,7 @@ SKIP: {
             # to look at just the first element of each list.
             $test->{locales}->@* =
                                 sort sort_by_hashed_locale $test->{locales}->@*;
+            print STDERR __FILE__, ": ", __LINE__, ": ", Dumper $test->{locales} if $debug > 1;
 
             # And for each test, calculate and store how many locales have the
             # same result (saves recomputation later in a sort).  This adds
@@ -1211,8 +1285,16 @@ SKIP: {
                 # list of all locales that yield the same result
                 push @in_common_locale_counts,
                         scalar $distincts{$category}{$this_test}{locales}->@*;
+                print STDERR __FILE__, ": ", __LINE__, ": ", Dumper $distincts{$category}{$this_test} if $debug > 1;
             }
+            print STDERR __FILE__, ": ", __LINE__, ": ", Dumper \@in_common_locale_counts if $debug > 1;
             push $test->{in_common_locale_counts}->@*, @in_common_locale_counts;
+        }
+
+        if ($debug > 1) {
+            print STDERR __FILE__, ": ", __LINE__, ": ";
+            Dump $combinations_ref, 1000000;
+            print STDERR "End of Dump\n";
         }
 
         # Make a copy
@@ -1221,9 +1303,11 @@ SKIP: {
         # This sorts the test cases so that the ones with the least overlap
         # with other cases are first.
         sub sort_test_order {
+            print STDERR __FILE__, ": ", __LINE__, ": ", Dumper $a, $b if $debug > 1;
             my $a_tests_count = scalar $a->{in_common_locale_counts}->@*;
             my $b_tests_count = scalar $b->{in_common_locale_counts}->@*;
             my $tests_count = min($a_tests_count, $b_tests_count);
+            print STDERR __FILE__, ": ", __LINE__, ": tests count: ", $tests_count, "\n" if $debug > 1;
 
             # Choose the one that is most distinctive (least overlap); that is
             # the one that has the most tests whose results are not shared by
@@ -1234,6 +1318,7 @@ SKIP: {
                 $a_nondistincts += ($a->{in_common_locale_counts}[$i] != 1);
                 $b_nondistincts += ($b->{in_common_locale_counts}[$i] != 1);
             }
+            print STDERR __FILE__, ": ", __LINE__, ": $a_nondistincts, $b_nondistincts\n" if $debug > 1;
 
             my $cmp = $a_nondistincts <=> $b_nondistincts;
             return $cmp if $cmp;
@@ -1246,6 +1331,7 @@ SKIP: {
                 $a_count += $a->{in_common_locale_counts}[$i];
                 $b_count += $b->{in_common_locale_counts}[$i];
             }
+            print STDERR __FILE__, ": ", __LINE__, ": $a_count, $b_count\n" if $debug > 1;
 
             $cmp = $a_count <=> $b_count;
             return $cmp if $cmp;
@@ -1258,6 +1344,7 @@ SKIP: {
 
         # Actually perform the sort.
         @cat_tests = sort sort_test_order @cat_tests;
+        print STDERR __FILE__, ": ", __LINE__, ": ", Dumper \@cat_tests if $debug > 1;
 
         # This category will now have all the distinct tests possible for it
         # on this platform, with the first test being the one with the least
@@ -1265,18 +1352,24 @@ SKIP: {
         push $all_tests{$category}->@*, @cat_tests;
     }     # End of loop through the categories creating and sorting the test
           # cases
+    print STDERR __FILE__, ": ", __LINE__, ": ", Dumper \%all_tests if $debug > 1;
 
     my %thread_already_used_locales;
 
     # Now generate the tests for each thread.
     my @tests_by_thread;
     for my $i (0 .. $thread_count - 1) {
+        print STDERR __FILE__, ": ", __LINE__, ": using all_tests, thread=$i\n" if $debug > 1;
         foreach my $category (sort keys %all_tests) {
+            print STDERR __FILE__, ": ", __LINE__, ": thread $i, $category\n" if $debug;
+            print STDERR __FILE__, ": ", __LINE__, ": $category count is ", scalar $all_tests{$category}->@* if $all_tests{$category} && $debug;
+            print STDERR ", first name=$all_tests{$category}[0]->{locales}[0]\n" if $all_tests{$category} && $debug > 1; #[0]->{locale_name}\n";
             my $skipped = 0;    # Used below to not loop infinitely
 
             # Get the next test case
           NEXT_CANDIDATE:
             my $candidate = shift $all_tests{$category}->@*;
+            print STDERR __FILE__, ": ", __LINE__, ": current= ", Dumper $candidate if $debug > 1;
 
             my $locale_name = $candidate->{locales}[0];
 
@@ -1291,6 +1384,7 @@ SKIP: {
                     next if defined $thread_already_used_locales{$synonym =~
                                                                     s/\W.*//r};
                     $locale_name = $synonym;
+                    print STDERR __FILE__, ": ", __LINE__, ": ", "Found synonym $locale_name\n" if $debug > 1;
                     goto found_synonym;
                 }
 
@@ -1306,6 +1400,7 @@ SKIP: {
                 # Here no synonym was found, this test has already been used,
                 # but there are no unused ones, so have to re-use it.
 
+                print STDERR __FILE__, ": ", __LINE__, ": $locale_name: ", Dumper $candidate if $debug > 1;
               found_synonym:
             }
 
@@ -1341,12 +1436,19 @@ SKIP: {
             # test cases are cycled through.
             push $all_tests{$category}->@*, $candidate;
         } # End of looping through the categories for this thread
+        print STDERR __FILE__, ": ", __LINE__, ": end of this thread\n" if $debug > 1;
+
+        print STDERR __FILE__, ": ", __LINE__, ": ", Dumper \%all_tests if $debug > 1;
     } # End of generating all threads
+
+    print STDERR __FILE__, ': ', __LINE__, ': ', Dumper \@tests_by_thread if $debug > 1;
 
     # Now reformat the tests to a form convenient for the actual test file
     # script to use; minimizing the amount of ancillary work it needs to do.
     my @cooked_tests;
     for my $i (0 .. $#tests_by_thread) {
+        print STDERR __FILE__, ': ', __LINE__, ': ', $i, ': ',
+                                        Dumper \$tests_by_thread[$i] if $debug;
 
         my $this_tests = $tests_by_thread[$i];
         my @this_cooked_tests;
@@ -1422,6 +1524,12 @@ SKIP: {
     }
 
     my $all_tests_ref = \@cooked_tests;
+    if ($debug) {
+        print STDERR __FILE__, ": ", __LINE__, ": ", Dumper $all_tests_ref;
+        #Dump $all_tests_ref->@*, 1000000;
+        #print STDERR __FILE__, ": ", __LINE__, ": End of dump\n";
+    }
+
     my $all_tests_file = tempfile();
 
     # Store the tests into a file, retrievable by the subprocess
@@ -1521,6 +1629,8 @@ EOT
                 utf8::upgrade($copy);
                 print STDERR " (result wasn't in UTF-8; converted for easier",
                              " comparison)";
+                use Devel::Peek;
+                #print STDERR __FILE__, ": ", __LINE__, ": "; Dump $result;
             }
         }
         print STDERR ":\n";
@@ -1538,6 +1648,8 @@ EOT
 
         my $iteration = $initial_iteration;
         $count += $initial_iteration;
+        #print STDERR __FILE__, ": ", __LINE__, ": ", Dumper $tests_ref;
+        #print STDERR __FILE__, ": ", __LINE__, ": ", Dumper \%corrects;
 
         # Repeatedly ...
         while ($iteration < $count) {
@@ -1551,7 +1663,16 @@ EOT
                 # We know what we are expecting
                 my $expected = $test->{expected};
 
+                #print STDERR __FILE__, ": ", __LINE__, ": ", $tid, ": ", $iteration, ": ", Dumper $test;
                 my $category_name = $test->{category_name};
+
+                if ($debug > 3) {
+                    print STDERR "\nthread ", $tid,
+                                 " for locale $test->{locale_name}",
+                                 " codeset $test->{codeset}",
+                                 " $category_name",
+                                 " About to do '$test->{op}'\n";
+                }
 
                 # And do the test.
                 my $got = eval $test->{op};
@@ -1560,6 +1681,7 @@ EOT
                     output_test_failure_prefix($iteration,
                                                $category_name,
                                                $test);
+                    print STDERR "eval failed: $@\n";
                     output_test_result("expected", $expected,
                                         1 # utf8ness matches, since only one
                                       );
@@ -1652,6 +1774,8 @@ EOT
         else {
             usleep($sleep_time * 1_000_000) if $sleep_time > 0;
         }
+
+        #print STDERR "thread ", threads->tid, " taking off\n";
     }
 
     # Create all the subthreads: 1..n
