@@ -6332,7 +6332,6 @@ S_my_langinfo_i(pTHX_
 
 #          if defined(USE_LOCALE_MONETARY) && defined(HAS_LOCALECONV)
 #            define LANGINFO_RECURSED_MONETARY  0x1
-#            define LANGINFO_RECURSED_TIME      0x2
 
         /* Can't use this method unless localeconv() is available, as that's
          * the way we find out the currency symbol.
@@ -6357,6 +6356,12 @@ S_my_langinfo_i(pTHX_
 
 #          endif
 #          ifdef USE_LOCALE_TIME
+#            define LANGINFO_RECURSED_TIME      0x2
+#            ifdef LANGINFO_RECURSED_MONETARY
+#               if LANGINFO_RECURSED_MONETARY == LANGINFO_RECURSED_TIME
+#                 error LANGINFO_RECURSED_MONETARY must differ from LANGINFO_RECURSED_TIME
+#               endif
+#             endif
 
         /* If we have ruled out being UTF-8, no point in checking further. */
         if (   is_utf8 != UTF8NESS_NO
