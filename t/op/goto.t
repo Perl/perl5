@@ -16,7 +16,13 @@ plan tests => 134;
 our $TODO;
 
 my $deprecated = 0;
-local $SIG{__WARN__} = sub { if ($_[0] =~ m/jump into a construct/) { $deprecated++; } else { warn $_[0] } };
+
+local $SIG{__WARN__} = sub {
+    if ($_[0] =~ m/jump into a construct.*?, and will become fatal in Perl 5\.42/) {
+        $deprecated++;
+    }
+    else { warn $_[0] }
+};
 
 our $foo;
 while ($?) {
