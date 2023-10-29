@@ -3520,30 +3520,30 @@ dist/base/t/lib/HasSigDie.pm		Module for testing base.pm
 dist/base/t/sigdie.t			See if base works with SIGDIE
 dist/base/t/version.t			See if base works with versions
 dist/base/t/warnings.t			See if base works with warnings
-dist/Carp/Changes			Changelog for Carp's CPAN releases
-dist/Carp/lib/Carp.pm			Error message extension
-dist/Carp/lib/Carp/Heavy.pm		Error message retired workhorse
-dist/Carp/Makefile.PL			makefile writer for Carp
-dist/Carp/README			README for Carp's CPAN releases
-dist/Carp/t/133800-stash_deletion_new.t	Deeper look into stash deletion
-dist/Carp/t/arg_regexp.t		See if Carp formats regexp args OK in stack traces
-dist/Carp/t/arg_string.t		See if Carp formats string args OK in stack traces
-dist/Carp/t/baduni.t			See if Carp handles non-char Unicode
-dist/Carp/t/baduni_warnings.t		See if Carp handles non-char Unicode when loaded via warnings.pm
-dist/Carp/t/broken_can.t		Test Carp with bad can implementations
-dist/Carp/t/broken_univ_can.t		Test Carp with bad UNIVERSAL::can
-dist/Carp/t/Carp.t			See if Carp works
-dist/Carp/t/Carp_overload.t		See if Carp handles overloads
-dist/Carp/t/Carp_overloadless.t		See if Carp handles overloads that dont use overload.pm
-dist/Carp/t/errno.t			See if Carp preserves $! and $^E
-dist/Carp/t/heavy.t			See if Carp::Heavy works
-dist/Carp/t/heavy_mismatch.t		See if Carp::Heavy catches version mismatch
-dist/Carp/t/stack_after_err.t		Test stack traces after syntax errors
-dist/Carp/t/stash_deletion.t		See if Carp handles stash deletion
-dist/Carp/t/swash.t			See if Carp avoids breaking swash loading
-dist/Carp/t/vivify_gv.t			See if Carp leaves utf8:: stuff alone
-dist/Carp/t/vivify_stash.t		See if Carp leaves utf8:: stash alone
-dist/Carp/t/with_warnings.t		See if Carp plays nicely with warnings
+dist/Carp/Changes				Changelog for Carp's CPAN releases
+dist/Carp/lib/Carp.pm				Error message extension
+dist/Carp/lib/Carp/Heavy.pm			Error message retired workhorse
+dist/Carp/Makefile.PL				makefile writer for Carp
+dist/Carp/README				README for Carp's CPAN releases
+dist/Carp/t/arg_regexp.t			See if Carp formats regexp args OK in stack traces
+dist/Carp/t/arg_string.t			See if Carp formats string args OK in stack traces
+dist/Carp/t/baduni.t				See if Carp handles non-char Unicode
+dist/Carp/t/baduni_warnings.t			See if Carp handles non-char Unicode when loaded via warnings.pm
+dist/Carp/t/broken_can.t			Test Carp with bad can implementations
+dist/Carp/t/broken_univ_can.t			Test Carp with bad UNIVERSAL::can
+dist/Carp/t/Carp.t				See if Carp works
+dist/Carp/t/Carp_overload.t			See if Carp handles overloads
+dist/Carp/t/Carp_overloadless.t			See if Carp handles overloads that dont use overload.pm
+dist/Carp/t/errno.t				See if Carp preserves $! and $^E
+dist/Carp/t/gh-16827-stash_deletion_new.t	Deeper look into stash deletion
+dist/Carp/t/heavy.t				See if Carp::Heavy works
+dist/Carp/t/heavy_mismatch.t			See if Carp::Heavy catches version mismatch
+dist/Carp/t/stack_after_err.t			Test stack traces after syntax errors
+dist/Carp/t/stash_deletion.t			See if Carp handles stash deletion
+dist/Carp/t/swash.t				See if Carp avoids breaking swash loading
+dist/Carp/t/vivify_gv.t				See if Carp leaves utf8:: stuff alone
+dist/Carp/t/vivify_stash.t			See if Carp leaves utf8:: stash alone
+dist/Carp/t/with_warnings.t			See if Carp plays nicely with warnings
 dist/constant/Changes			Changes for constant.pm
 dist/constant/lib/constant.pm		For "use constant"
 dist/constant/Makefile.PL		Build constant.pm (from the cpan release)
