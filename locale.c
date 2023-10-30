@@ -4501,12 +4501,7 @@ S_get_locale_string_utf8ness_i(pTHX_ const char * string,
      * If we already know the UTF-8ness of the locale, then we immediately know
      * what the string is */
     if (UNLIKELY(known_utf8 != LOCALE_UTF8NESS_UNKNOWN)) {
-        if (known_utf8 == LOCALE_IS_UTF8) {
-            return UTF8NESS_YES;
-        }
-        else {
-            return UTF8NESS_NO;
-        }
+        return (known_utf8 == LOCALE_IS_UTF8) ? UTF8NESS_YES : UTF8NESS_NO;
     }
 
 #    ifdef HAS_RELIABLE_UTF8NESS_DETERMINATION
@@ -4530,11 +4525,7 @@ S_get_locale_string_utf8ness_i(pTHX_ const char * string,
         locale = querylocale_i(cat_index);
     }
 
-    if (is_locale_utf8(locale)) {
-        return UTF8NESS_YES;
-    }
-
-    return UTF8NESS_NO;
+    return (is_locale_utf8(locale)) ? UTF8NESS_YES : UTF8NESS_NO;
 
 #    else
 
