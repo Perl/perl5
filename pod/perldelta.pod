@@ -19,6 +19,13 @@ L<perl5394delta>, which describes differences between 5.39.3 and 5.39.4.
 
 XXX Any important notices here
 
+glibc has an undocumented feature to return the current locale when
+using the POSIX 2008 locale API.  This feature is now experimentally
+enabled by default so as to see if there are problems with it.  This
+enabling expires in v5.39.10.  In the meantime, if you run into
+problems, open a bug ticket and Configure with
+C<-Accflags=-DNO_NL_LOCALE_NAME> to turn it off.
+
 =head1 Core Enhancements
 
 XXX New core language features go here.  Summarize user-visible core language
