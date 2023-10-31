@@ -2055,15 +2055,16 @@ The bottom line is that using C</o> is almost never a good idea.
 =item The empty pattern C<//>
 
 If the I<PATTERN> evaluates to the empty string, the last
-I<successfully> matched regular expression is used instead. In this
-case, only the C<g> and C<c> flags on the empty pattern are honored; the
-other flags are taken from the original pattern. If no match has
-previously succeeded, this will (silently) act instead as a genuine
-empty pattern (which will always match).  Using a user supplied string as
-a pattern has the risk that if the string is empty that it triggers the
-"last successful match" behavior, which can be very confusing. In such
-cases you are recommended to replace C<m/$pattern/> with
-C<m/(?:$pattern)/> to avoid this behavior.
+I<successfully> matched regular expression in the current dynamic
+scope is used instead (see also L<perlvar/Scoping Rules of Regex Variables>).
+In this case, only the C<g> and C<c> flags on the empty pattern are
+honored; the other flags are taken from the original pattern. If no
+match has previously succeeded, this will (silently) act instead as a
+genuine empty pattern (which will always match). Using a user supplied
+string as a pattern has the risk that if the string is empty that it
+triggers the "last successful match" behavior, which can be very
+confusing. In such cases you are recommended to replace C<m/$pattern/>
+with C<m/(?:$pattern)/> to avoid this behavior.
 
 The last successful pattern may be accessed as a variable via
 C<${^LAST_SUCCESSFUL_PATTERN}>. Matching against it, or the empty

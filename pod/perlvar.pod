@@ -967,6 +967,7 @@ documented as behaving otherwise.  See the following section for more
 details.
 
 =head3 Scoping Rules of Regex Variables
+X<Scoping Rules of Regex Variables>
 
 Regular expression variables allow the programmer to access the state of
 the most recent I<successful> regex match in the current dynamic scope.
