@@ -1087,7 +1087,8 @@ our %Modules = (
     },
 
     'Term::Table' => {
-        'DISTRIBUTION' => 'EXODIST/Term-Table-0.017.tar.gz',
+        'DISTRIBUTION' => 'EXODIST/Term-Table-0.018.tar.gz',
+        'SYNCINFO'     => 'jkeenan on Wed Nov  1 19:16:24 2023',
         'SYNCINFO'     => 'LeoNerd on Wed Sep 13 18:33:07 2023',
         'FILES'        => q[cpan/Term-Table],
         'EXCLUDED'     => [
