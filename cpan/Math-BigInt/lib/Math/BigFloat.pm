@@ -20,7 +20,7 @@ use Carp          qw< carp croak >;
 use Scalar::Util  qw< blessed >;
 use Math::BigInt  qw< >;
 
-our $VERSION = '1.999842';
+our $VERSION = '2.000000';
 $VERSION =~ tr/_//d;
 
 require Exporter;
@@ -227,7 +227,9 @@ $_trap_inf = 0;
 # constant for easier life
 my $nan = 'NaN';
 
-my $IMPORT = 0; # was import() called yet? used to make require work
+# Has import() been called yet? This variable is needed to make "require" work.
+
+my $IMPORT = 0;
 
 # some digits of accuracy for blog(undef, 10); which we use in blog() for speed
 my $LOG_10 =
@@ -317,6 +319,10 @@ sub AUTOLOAD {
     sub _method_alias { exists $methods{$_[0]||''}; }
     sub _method_hand_up { exists $hand_ups{$_[0]||''}; }
 }
+
+# Compare the following function with @ISA above. This inheritance mess needs a
+# clean up. When doing so, also consider the BEGIN block and the AUTOLOAD code.
+# Fixme!
 
 sub isa {
     my ($self, $class) = @_;
@@ -545,6 +551,10 @@ sub from_dec {
     my $selfref = ref $self;
     my $class   = $selfref || $self;
 
+    # Make "require" work.
+
+    $class -> import() if $IMPORT == 0;
+
     # Don't modify constant (read-only) objects.
 
     return $self if $selfref && $self->modify('from_dec');
@@ -574,6 +584,10 @@ sub from_hex {
     my $self    = shift;
     my $selfref = ref $self;
     my $class   = $selfref || $self;
+
+    # Make "require" work.
+
+    $class -> import() if $IMPORT == 0;
 
     # Don't modify constant (read-only) objects.
 
@@ -605,6 +619,10 @@ sub from_oct {
     my $selfref = ref $self;
     my $class   = $selfref || $self;
 
+    # Make "require" work.
+
+    $class -> import() if $IMPORT == 0;
+
     # Don't modify constant (read-only) objects.
 
     return $self if $selfref && $self->modify('from_oct');
@@ -635,6 +653,10 @@ sub from_bin {
     my $selfref = ref $self;
     my $class   = $selfref || $self;
 
+    # Make "require" work.
+
+    $class -> import() if $IMPORT == 0;
+
     # Don't modify constant (read-only) objects.
 
     return $self if $selfref && $self->modify('from_bin');
@@ -664,6 +686,10 @@ sub from_ieee754 {
     my $self    = shift;
     my $selfref = ref $self;
     my $class   = $selfref || $self;
+
+    # Make "require" work.
+
+    $class -> import() if $IMPORT == 0;
 
     # Don't modify constant (read-only) objects.
 
@@ -839,7 +865,9 @@ sub bzero {
     my $selfref = ref $self;
     my $class   = $selfref || $self;
 
-    $self->import() if $IMPORT == 0;            # make require work
+    # Make "require" work.
+
+    $class -> import() if $IMPORT == 0;
 
     # Don't modify constant (read-only) objects.
 
@@ -897,7 +925,9 @@ sub bone {
     my $selfref = ref $self;
     my $class   = $selfref || $self;
 
-    $self->import() if $IMPORT == 0;            # make require work
+    # Make "require" work.
+
+    $class -> import() if $IMPORT == 0;
 
     # Don't modify constant (read-only) objects.
 
@@ -970,7 +1000,9 @@ sub binf {
         }
     }
 
-    $self->import() if $IMPORT == 0;            # make require work
+    # Make "require" work.
+
+    $class -> import() if $IMPORT == 0;
 
     # Don't modify constant (read-only) objects.
 
@@ -1043,7 +1075,9 @@ sub bnan {
         }
     }
 
-    $self->import() if $IMPORT == 0;            # make require work
+    # Make "require" work.
+
+    $class -> import() if $IMPORT == 0;
 
     # Don't modify constant (read-only) objects.
 
@@ -1118,6 +1152,10 @@ sub bpi {
     my $selfref = ref $self;
     my $class   = $selfref || $self;
     my @r       = @_;                   # rounding paramters
+
+    # Make "require" work.
+
+    $class -> import() if $IMPORT == 0;
 
     if ($selfref) {                     # bpi() called as an instance method
         return $self if $self -> modify('bpi');
@@ -1329,12 +1367,47 @@ sub as_float {
     Math::BigFloat -> upgrade(undef);
     Math::BigFloat -> downgrade(undef);
 
-    my $y = Math::BigFloat -> new($x);
+    my $y = Math::BigFloat -> copy($x);
 
     # reset upgrading and downgrading
 
     Math::BigFloat -> upgrade($upg);
     Math::BigFloat -> downgrade($dng);
+
+    return $y;
+}
+
+sub as_rat {
+    # return copy as a Math::BigRat representation of this Math::BigFloat
+    my ($class, $x, @r) = ref($_[0]) ? (ref($_[0]), @_) : objectify(1, @_);
+    carp "Rounding is not supported for ", (caller(0))[3], "()" if @r;
+
+    return $x -> copy() if $x -> isa("Math::BigRat");
+
+    # disable upgrading and downgrading
+
+    require Math::BigRat;
+    my $upg = Math::BigRat -> upgrade();
+    my $dng = Math::BigRat -> downgrade();
+    Math::BigRat -> upgrade(undef);
+    Math::BigRat -> downgrade(undef);
+
+    my $y;
+    if ($x -> is_inf()) {
+        $y = Math::BigRat -> binf($x -> sign());
+    } elsif ($x -> is_nan()) {
+        $y = Math::BigRat -> bnan();
+    } else {
+        my @flt_parts = ($x->{sign}, $x->{_m}, $x->{_es}, $x->{_e});
+        my @rat_parts = $class -> _flt_lib_parts_to_rat_lib_parts(@flt_parts);
+        $y = Math::BigRat -> new($rat_parts[0] . $LIB -> _str($rat_parts[1])
+                                         . '/' . $LIB -> _str($rat_parts[2]));
+    }
+
+    # reset upgrading and downgrading
+
+    Math::BigRat -> upgrade($upg);
+    Math::BigRat -> downgrade($dng);
 
     return $y;
 }
@@ -2465,6 +2538,23 @@ sub bpow {
     return $downgrade -> new($x)
       if defined($downgrade) && ($x->is_int() || $x->is_inf() || $x->is_nan());
     return $x;
+}
+
+sub binv {
+    my ($class, $x, @r) = ref($_[0]) ? (ref($_[0]), @_) : objectify(1, @_);
+
+    return $x if $x->modify('binv');
+
+    my $inv = $class -> bdiv($class -> bone(), $x, @r);
+
+    return $downgrade -> new($inv, @r) if defined($downgrade)
+      && ($inv -> is_int() || $inv -> is_inf() || $inv -> is_nan());
+
+    for my $key (qw/ sign _m _es _e /) {
+        $x -> {$key} = $inv -> {$key};
+    }
+
+    $x;
 }
 
 sub blog {
@@ -3832,64 +3922,80 @@ sub brsft {
 # Bitwise left shift.
 
 sub bblsft {
-    my ($class, $x, $y, @r) = ref($_[0]) && ref($_[0]) eq ref($_[1])
-                            ? (ref($_[0]), @_)
-                            : objectify(2, @_);
+    # We don't call objectify(), because the bitwise methods should not
+    # upgrade/downgrade, even when upgrading/downgrading is enabled.
+
+    my ($class, $x, $y, @r) = ref($_[0]) ? (ref($_[0]), @_) : @_;
 
     my $xint = Math::BigInt -> bblsft($x, $y, @r);
 
-    # disable downgrading
+    # Temporarily disable downgrading.
 
     my $dng = $class -> downgrade();
     $class -> downgrade(undef);
 
-    # convert to Math::BigFloat without downgrading
+    # convert to our class without downgrading.
 
     my $xflt = $class -> new($xint);
 
-    # reset downgrading
+    # Reset downgrading.
 
     $class -> downgrade($dng);
 
-    $x -> {sign} = $xflt -> {sign};
-    $x -> {_m}   = $xflt -> {_m};
-    $x -> {_es}  = $xflt -> {_es};
-    $x -> {_e}   = $xflt -> {_e};
+    # If we are called as a class method, the first operand might not be an
+    # object of this class, so check.
 
-    # now we might downgrade
+    if (defined(blessed($x)) && $x -> isa(__PACKAGE__)) {
+        $x -> {sign} = $xflt -> {sign};
+        $x -> {_m}   = $xflt -> {_m};
+        $x -> {_es}  = $xflt -> {_es};
+        $x -> {_e}   = $xflt -> {_e};
+    } else {
+        $x = $xflt;
+    }
+
+    # Now we might downgrade.
 
     return $downgrade -> new($x) if defined($downgrade);
     $x -> round(@r);
 }
 
-# Bitwise left shift.
+# Bitwise right shift.
 
 sub bbrsft {
-    my ($class, $x, $y, @r) = ref($_[0]) && ref($_[0]) eq ref($_[1])
-                            ? (ref($_[0]), @_)
-                            : objectify(2, @_);
+    # We don't call objectify(), because the bitwise methods should not
+    # upgrade/downgrade, even when upgrading/downgrading is enabled.
+
+    my ($class, $x, $y, @r) = ref($_[0]) ? (ref($_[0]), @_) : @_;
 
     my $xint = Math::BigInt -> bbrsft($x, $y, @r);
 
-    # disable downgrading
+    # Temporarily disable downgrading.
 
     my $dng = $class -> downgrade();
     $class -> downgrade(undef);
 
-    # convert to Math::BigFloat without downgrading
+    # Convert to our class without downgrading.
 
     my $xflt = $class -> new($xint);
 
-    # reset downgrading
+    # Reset downgrading.
 
     $class -> downgrade($dng);
 
-    $x -> {sign} = $xflt -> {sign};
-    $x -> {_m}   = $xflt -> {_m};
-    $x -> {_es}  = $xflt -> {_es};
-    $x -> {_e}   = $xflt -> {_e};
+    # If we are called as a class method, the first operand might not be an
+    # object of this class, so check.
 
-    # now we might downgrade
+    if (defined(blessed($x)) && $x -> isa(__PACKAGE__)) {
+        $x -> {sign} = $xflt -> {sign};
+        $x -> {_m}   = $xflt -> {_m};
+        $x -> {_es}  = $xflt -> {_es};
+        $x -> {_e}   = $xflt -> {_e};
+    } else {
+        $x = $xflt;
+    }
+
+    # Now we might downgrade.
 
     return $downgrade -> new($x) if defined($downgrade);
     $x -> round(@r);
@@ -5006,7 +5112,7 @@ sub to_oct {
 
     # Upgrade?
 
-    return $upgrade -> to_hex($x, @r)
+    return $upgrade -> to_oct($x, @r)
       if defined($upgrade) && !$x -> isa(__PACKAGE__);
 
     # Finite number
@@ -5038,7 +5144,7 @@ sub to_bin {
 
     # Upgrade?
 
-    return $upgrade -> to_hex($x, @r)
+    return $upgrade -> to_bin($x, @r)
       if defined($upgrade) && !$x -> isa(__PACKAGE__);
 
     # Finite number
@@ -6332,6 +6438,12 @@ Multiply $x by $y, and then add $z to the result.
 
 This method was added in v1.87 of Math::BigInt (June 2007).
 
+=item binv()
+
+    $x->binv();
+
+Invert the value of $x, i.e., compute 1/$x.
+
 =item bdiv()
 
     $q = $x->bdiv($y);
@@ -6660,16 +6772,6 @@ See the respective low-level library documentation for further details.
 
 See L<Math::BigInt> for more details about using a different low-level library.
 
-=head2 Using Math::BigInt::Lite
-
-For backwards compatibility reasons it is still possible to
-request a different storage class for use with Math::BigFloat:
-
-    use Math::BigFloat with => 'Math::BigInt::Lite';
-
-However, this request is ignored, as the current code now uses the low-level
-math library for directly storing the number parts.
-
 =head1 EXPORTS
 
 C<Math::BigFloat> exports nothing by default, but can export the C<bpi()>
@@ -6678,21 +6780,6 @@ method:
     use Math::BigFloat qw/bpi/;
 
     print bpi(10), "\n";
-
-=head1 CAVEATS
-
-Do not try to be clever to insert some operations in between switching
-libraries:
-
-    require Math::BigFloat;
-    my $matter = Math::BigFloat->bone() + 4;    # load BigInt and Calc
-    Math::BigFloat->import( lib => 'Pari' );    # load Pari, too
-    my $anti_matter = Math::BigFloat->bone()+4; # now use Pari
-
-This will create objects with numbers stored in two different backend libraries,
-and B<VERY BAD THINGS> will happen when you use these together:
-
-    my $flash_and_bang = $matter + $anti_matter;    # Don't do this!
 
 =over
 
@@ -6822,10 +6909,12 @@ the same terms as Perl itself.
 
 =head1 SEE ALSO
 
-L<Math::BigInt> and L<Math::BigInt> as well as the backends
-L<Math::BigInt::FastCalc>, L<Math::BigInt::GMP>, and L<Math::BigInt::Pari>.
+L<Math::BigInt> and L<Math::BigRat> as well as the backend libraries
+L<Math::BigInt::FastCalc>, L<Math::BigInt::GMP>, and L<Math::BigInt::Pari>,
+L<Math::BigInt::GMPz>, and L<Math::BigInt::BitVect>.
 
-The pragmas L<bignum>, L<bigint> and L<bigrat>.
+The pragmas L<bigint>, L<bigfloat>, and L<bigrat> might also be of interest. In
+addition there is the L<bignum> pragma which does upgrading and downgrading.
 
 =head1 AUTHORS
 
