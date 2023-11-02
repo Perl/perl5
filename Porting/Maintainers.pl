@@ -1135,7 +1135,8 @@ our %Modules = (
     },
 
     'Test2::Suite' => {
-        'DISTRIBUTION' => 'EXODIST/Test2-Suite-0.000156.tar.gz',
+        'DISTRIBUTION' => 'EXODIST/Test2-Suite-0.000159.tar.gz',
+        'SYNCINFO'     => 'jkeenan on Wed Nov  1 20:18:33 2023',
         'SYNCINFO'     => 'LeoNerd on Wed Sep 14 10:44:29 2023',
         'FILES'        => q[cpan/Test2-Suite],
         'EXCLUDED'     => [

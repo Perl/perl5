@@ -2,7 +2,7 @@ package Test2::Workflow;
 use strict;
 use warnings;
 
-our $VERSION = '0.000156';
+our $VERSION = '0.000159';
 
 our @EXPORT_OK = qw/parse_args current_build build root_build init_root build_stack/;
 use base 'Exporter';

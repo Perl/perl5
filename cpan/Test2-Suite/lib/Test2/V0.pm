@@ -4,7 +4,7 @@ use warnings;
 
 use Test2::Util::Importer;
 
-our $VERSION = '0.000156';
+our $VERSION = '0.000159';
 
 use Carp qw/croak/;
 
@@ -261,6 +261,10 @@ with the C<-srand> import option:
 
     use Test2::V0 -srand => 1234;
 
+You can also disable this behavior:
+
+    use Test2::V0 -no_srand => 1;
+
 =head2 UTF8
 
 See L<Test2::Plugin::UTF8>.
@@ -407,6 +411,8 @@ See L<Test2::Tools::Compare>.
 =item $check = number($num)
 
 =item $check = string($str)
+
+=item $check = bool($bool)
 
 =item $check = check_isa($class_name)
 

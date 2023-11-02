@@ -2,7 +2,7 @@ package Test2::Tools::Basic;
 use strict;
 use warnings;
 
-our $VERSION = '0.000156';
+our $VERSION = '0.000159';
 
 use Carp qw/croak/;
 use Test2::API qw/context/;
@@ -41,6 +41,7 @@ sub diag {
     my $ctx = context();
     $ctx->diag( join '', grep { defined $_ } @_ );
     $ctx->release;
+    return 0;
 }
 
 sub note {
@@ -247,6 +248,8 @@ Fire off a failing test (a single Ok event). The name and diagnostics are option
 
 Write diagnostics messages. All items in C<@messages> will be joined into a
 single string with no separator. When using TAP, diagnostics are sent to STDERR.
+
+Returns false, so as to preserve failure.
 
 =item note(@messages)
 
