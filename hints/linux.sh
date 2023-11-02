@@ -125,6 +125,15 @@ case "`${cc:-cc} -V 2>&1`" in
     d_attribute_pure='undef'
     d_attribute_unused='undef'
     d_attribute_warn_unused_result='undef'
+    case "$cc" in
+    *c99)   # Without -Xa c99 errors on some Linux system headers
+            # in particular zero sized arrays at the end of structs
+	    case "$ccflags" in
+		*-Xa*)	;;
+		*) ccflags="$ccflags -Xa" ;;
+	    esac
+	    ;;
+    esac
     ;;
 esac
 
