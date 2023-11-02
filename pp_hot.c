@@ -2636,6 +2636,14 @@ PP(pp_aassign)
     bool is_list = (gimme == G_LIST);
     relem = firstrelem;
     lelem = firstlelem;
+#ifdef PERL_RC_STACK
+    /* Where we can reset stack to at the end, without needing to free
+     * each element. This is normally all the lelem's, but it can vary for
+     * things like odd number of hash elements, which pushes a
+     * &PL_sv_undef into the 'lvalue' part of the stack.
+     */
+    SV ** first_discard = firstlelem;
+#endif
 
     if (relem > lastrelem)
         goto no_relems;
@@ -2650,9 +2658,6 @@ PP(pp_aassign)
         assert(relem <= lastrelem);
         if (UNLIKELY(!lsv)) {
             alias = TRUE;
-            /* remove NULL so that the faster rpp_popfree_to_NN() can be
-             * used on return */
-            lelem[-1] = &PL_sv_undef;
             lsv = *lelem++;
             ASSUME(SvTYPE(lsv) == SVt_PVAV);
         }
@@ -2890,9 +2895,12 @@ PP(pp_aassign)
             if (UNLIKELY(PL_delaymagic & DM_ARRAY_ISA))
                 /* its assumed @ISA set magic can't die and leak ary */
                 SvSETMAGIC(MUTABLE_SV(ary));
-#ifndef PERL_RC_STACK
-            SvREFCNT_dec_NN(ary);
+
+#ifdef PERL_RC_STACK
+            assert(lelem[-1] == (SV*)ary);
+            lelem[-1] = NULL;
 #endif
+            SvREFCNT_dec_NN(ary);
             relem = lastrelem + 1;
             goto no_relems;
         }
@@ -2907,6 +2915,21 @@ PP(pp_aassign)
             if (UNLIKELY(nelems & 1)) {
                 do_oddball(lastrelem, relem);
                 /* we have firstlelem to reuse, it's not needed any more */
+#ifdef PERL_RC_STACK
+                if (lelem - 1 == lastrelem + 1) {
+                    /* the lelem slot we want to use is the 
+                     * one keeping hash alive. Mortalise the hash
+                     * so it doesn't leak */
+                    assert(lastrelem[1] == (SV*)hash);
+                    sv_2mortal((SV*)hash);
+                }
+                else {
+                    /* safe to repurpose old lelem slot */
+                    assert(!lastrelem[1] || SvIMMORTAL(lastrelem[1]));
+                }
+                first_discard++;
+                assert(first_discard = lastrelem + 2);
+#endif
                 *++lastrelem = &PL_sv_undef;
                 nelems++;
             }
@@ -3125,7 +3148,17 @@ PP(pp_aassign)
                 }
             }
 
-#ifndef PERL_RC_STACK
+#ifdef PERL_RC_STACK
+            /* Disarm the ref-counted pointer on the stack. This will
+             * usually point to the hash, except for the case of an odd
+             * number of elems where the hash was mortalised and its slot
+             * on the stack was made part of the relems with the slot's
+             * value overwritten with &PL_sv_undef. */
+            if (lelem[-1] == (SV*)hash) {
+                lelem[-1] = NULL;
+                SvREFCNT_dec_NN(hash);
+            }
+#else
             if (dirty_tmps) {
                 /* there are still some 'live' recounts on the tmps stack
                  * - usually caused by storing into a tied hash. So let
@@ -3185,9 +3218,13 @@ PP(pp_aassign)
 #endif
 
                 sv_setsv(lsv, *relem);
+                SvSETMAGIC(lsv);
                 if (UNLIKELY(is_list))
                     rpp_replace_at_NN(relem, lsv);
-                SvSETMAGIC(lsv);
+#ifdef PERL_RC_STACK
+                lelem[-1] = NULL;
+                SvREFCNT_dec_NN(lsv);
+#endif
             }
             if (++relem > lastrelem)
                 goto no_relems;
@@ -3228,10 +3265,29 @@ PP(pp_aassign)
                 sv_set_undef(lsv);
                 SvSETMAGIC(lsv);
             }
-            if (UNLIKELY(is_list))
-                rpp_replace_at_NN(relem++, lsv);
+            if (UNLIKELY(is_list)) {
+                /* this usually grows the list of relems to be returned
+                 * into the stack space holding lelems (unless
+                 * there was previously a hash with dup elements) */
+#ifdef PERL_RC_STACK
+                assert(relem <= first_discard);
+                assert(relem < lelem);
+                if (relem == first_discard)
+                    first_discard++;
+#endif
+                rpp_replace_at(relem++, lsv);
+#ifdef PERL_RC_STACK
+                if (relem == lelem)
+                    /* skip the NULLing of the slot */
+                    continue;
+#endif
+            }
             break;
         } /* switch */
+#ifdef PERL_RC_STACK
+        lelem[-1] = NULL;
+        SvREFCNT_dec_NN(lsv);
+#endif
     } /* while */
 
     TAINT_NOT; /* result of list assign isn't tainted */
@@ -3321,7 +3377,30 @@ PP(pp_aassign)
     }
     PL_delaymagic = old_delaymagic;
 
+#ifdef PERL_RC_STACK
+    /* On ref-counted builds, the code above should have stored
+     * NULL in each lelem field and already freed each lelem. Thus
+     * the popfree_to() can start at a lower point.
+     * Under some circumstances, &PL_sv_undef might be stored rather than
+     * NULL, but this also doesn't need its refcount decrementing.
+     * Assert that this is true.
+     * Note that duplicate hash keys in list context can cause
+     * lastrelem and relem to be lower than at the start;
+     * while an odd number of hash elements can cause lastrelem to
+     * have a value one higher than at the start */
+#  ifdef DEBUGGING
+    for (SV **svp = first_discard; svp <= PL_stack_sp; svp++)
+        assert(!*svp || SvIMMORTAL(*svp));
+#  endif
+    PL_stack_sp = first_discard - 1;
+
+    /* now pop all the R elements too */
     rpp_popfree_to_NN((is_list ? relem : firstrelem) - 1);
+
+#else
+    /* pop all L and R elements apart from any being returned */
+    rpp_popfree_to_NN((is_list ? relem : firstrelem) - 1);
+#endif
 
     if (gimme == G_SCALAR) {
         rpp_extend(1);
