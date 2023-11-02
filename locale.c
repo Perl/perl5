@@ -6736,8 +6736,7 @@ S_strftime8(pTHX_ const char * fmt,
         break;
 
       case UTF8NESS_YES:    /* Known to be UTF-8; must be UTF-8 locale if can't
-                               downgrade.  But downgrading assumes the locale
-                               is latin 1.  Maybe just fail XXX */
+                               downgrade. */
         if (! is_locale_utf8(locale)) {
             locale_utf8ness = LOCALE_NOT_UTF8;
 
