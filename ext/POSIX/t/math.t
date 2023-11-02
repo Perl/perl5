@@ -293,7 +293,8 @@ SKIP: {
     like(NAN, qr/^NaN/, "NAN is Perl's NaN");
     cmp_ok(NAN, '!=', NAN, "NAN != NAN");
     ok(!(NAN == NAN), "NAN == NAN");
-    ok(!signbit(NAN), "signbit(NAN)");
+    ok(!signbit(copysign(NAN, 1.0)), "signbit(copysign(NAN, 1.0)))");
+    ok(signbit(copysign(NAN, -1.0)), "signbit(copysign(NAN, -1.0)))");
 }
 
 done_testing();
