@@ -1146,13 +1146,6 @@ our %Modules = (
             # https://github.com/Test-More/Test2-Suite/issues/208
             't/acceptance/Workflow-Acceptance.t',
         ],
-        'CUSTOMIZED'   => [
-            qw( t/modules/Plugin/SRand.t
-                t/modules/Require/AuthorTesting.t
-                t/modules/Require/EnvVar.t
-                t/modules/Tools/GenTemp.t
-              )
-        ],
     },
 
     'Text::Abbrev' => {
