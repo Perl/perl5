@@ -1571,28 +1571,38 @@ cpan/Math-BigInt/lib/Math/BigFloat.pm			An arbitrary precision floating-point ar
 cpan/Math-BigInt/lib/Math/BigInt.pm			An arbitrary precision integer arithmetic package
 cpan/Math-BigInt/lib/Math/BigInt/Calc.pm		Pure Perl module to support Math::BigInt
 cpan/Math-BigInt/lib/Math/BigInt/Lib.pm			Module related to Math::BigInt
+cpan/Math-BigInt/lib/Math/BigRat.pm			Math-BigInt
 cpan/Math-BigInt/t/alias.inc				Support for BigInt tests
 cpan/Math-BigInt/t/bare_mbf.t				Test MBF under Math::BigInt::BareCalc
 cpan/Math-BigInt/t/bare_mbi.t				Test MBI under Math::BigInt::BareCalc
 cpan/Math-BigInt/t/bare_mif.t				Rounding tests under BareCalc
 cpan/Math-BigInt/t/bfround_numify.t			Test file related to Math::BigInt
+cpan/Math-BigInt/t/big_ap.t				Math-BigInt
 cpan/Math-BigInt/t/big_pi_e.t				test bpi() and bexp()
 cpan/Math-BigInt/t/bigfltpm.inc				Shared tests for bigfltpm.t and sub_mbf.t
 cpan/Math-BigInt/t/bigfltpm.t				See if BigFloat.pm works
+cpan/Math-BigInt/t/bigfltrt.t				Math-BigInt
 cpan/Math-BigInt/t/bigintc.t				See if BigInt/Calc.pm works
 cpan/Math-BigInt/t/bigintc-import.t			Test file related to Math::BigInt
 cpan/Math-BigInt/t/bigintpm.inc				Shared tests for bigintpm.t and sub_mbi.t
 cpan/Math-BigInt/t/bigintpm.t				See if BigInt.pm works
 cpan/Math-BigInt/t/bigints.t				See if BigInt.pm works
 cpan/Math-BigInt/t/biglog.t				Test the log function
+cpan/Math-BigInt/t/bigrat.t				Math-BigInt
+cpan/Math-BigInt/t/bigratpm.inc				Math-BigInt
+cpan/Math-BigInt/t/bigratpm.t				Math-BigInt
+cpan/Math-BigInt/t/bigratup.t				Math-BigInt
 cpan/Math-BigInt/t/bigroot.t				Test the broot function
+cpan/Math-BigInt/t/bitwise-mbr.t			Math-BigInt
 cpan/Math-BigInt/t/calling-class-methods.t		Test Math::BigInt
 cpan/Math-BigInt/t/calling-constant.t			Test file related to Math::BigInt
 cpan/Math-BigInt/t/calling-instance-methods.t		Test Math::BigInt
 cpan/Math-BigInt/t/calling-lib1.t			Test file related to Math::BigInt
 cpan/Math-BigInt/t/calling-lib2.t			Test file related to Math::BigInt
 cpan/Math-BigInt/t/config.t				Test Math::BigInt->config()
-cpan/Math-BigInt/t/downgrade.t				Test if use Math::BigInt(); under downgrade works
+cpan/Math-BigInt/t/downgrade-mbi-mbf.t			Math-BigInt
+cpan/Math-BigInt/t/downgrade-mbi-mbr.t			Math-BigInt
+cpan/Math-BigInt/t/hang-mbr.t				Math-BigInt
 cpan/Math-BigInt/t/inf_nan.t				Special tests for inf and *NaN* handling
 cpan/Math-BigInt/t/isa.t				Test for Math::BigInt inheritance
 cpan/Math-BigInt/t/Math/BigFloat/BareSubclass.pm	Math-BigInt
@@ -1602,6 +1612,7 @@ cpan/Math-BigInt/t/Math/BigInt/Lib/Minimal.pm		Module related to Math::BigInt
 cpan/Math-BigInt/t/Math/BigInt/Lib/TestUtil.pm		Test Math::BigInt
 cpan/Math-BigInt/t/Math/BigInt/Scalar.pm		Pure Perl module to support Math::BigInt
 cpan/Math-BigInt/t/Math/BigInt/Subclass.pm		Empty subclass of BigInt for test
+cpan/Math-BigInt/t/Math/BigRat/Test.pm			Math-BigInt
 cpan/Math-BigInt/t/mbf_ali.t				Tests for BigFloat
 cpan/Math-BigInt/t/mbi_ali.t				Tests for BigInt
 cpan/Math-BigInt/t/mbi_rand.t				Test Math::BigInt randomly
@@ -1609,15 +1620,9 @@ cpan/Math-BigInt/t/mbimbf.inc				Actual BigInt/BigFloat accuracy, precision and 
 cpan/Math-BigInt/t/mbimbf.t				BigInt/BigFloat accuracy, precision and fallback, round_mode
 cpan/Math-BigInt/t/nan_cmp.t				overloaded comparison involving *NaN*
 cpan/Math-BigInt/t/new_overloaded.t			test overloaded numbers in BigFloat's new()
-cpan/Math-BigInt/t/req_mbf0.t				test: require Math::BigFloat; ->bzero();
-cpan/Math-BigInt/t/req_mbf1.t				test: require Math::BigFloat; ->bone();
-cpan/Math-BigInt/t/req_mbfa.t				test: require Math::BigFloat; ->bnan();
-cpan/Math-BigInt/t/req_mbfi.t				test: require Math::BigFloat; ->binf();
-cpan/Math-BigInt/t/req_mbfn.t				test: require Math::BigFloat; ->new();
-cpan/Math-BigInt/t/req_mbfw.t				require Math::BigFloat; import ( with => );
-cpan/Math-BigInt/t/require.t				Test if require Math::BigInt works
 cpan/Math-BigInt/t/round.t				Test rounding with non-integer A and P
 cpan/Math-BigInt/t/rt-16221.t				Tests for objectify() w/foreign objs
+cpan/Math-BigInt/t/rt121139.t				Math-BigInt
 cpan/Math-BigInt/t/sub_ali.t				Tests for aliases in BigInt subclasses
 cpan/Math-BigInt/t/sub_mbf.t				Empty subclass test of BigFloat
 cpan/Math-BigInt/t/sub_mbi.t				Empty subclass test of BigInt
@@ -1628,12 +1633,6 @@ cpan/Math-BigInt/t/upgrade.t				Test if use Math::BigInt(); under upgrade works
 cpan/Math-BigInt/t/upgrade2.t				Test that two upgrade levels work
 cpan/Math-BigInt/t/upgradef.t				Test if use Math::BigFloat(); under upgrade works
 cpan/Math-BigInt/t/use.t				Test if use Math::BigInt(); works
-cpan/Math-BigInt/t/use_lib1.t				Test combinations of Math::BigInt and BigFloat
-cpan/Math-BigInt/t/use_lib2.t				Test combinations of Math::BigInt and BigFloat
-cpan/Math-BigInt/t/use_lib3.t				Test combinations of Math::BigInt and BigFloat
-cpan/Math-BigInt/t/use_lib4.t				Test combinations of Math::BigInt and BigFloat
-cpan/Math-BigInt/t/use_lib5.t				Test file related to Math::BigInt
-cpan/Math-BigInt/t/use_lib6.t				Test file related to Math::BigInt
 cpan/Math-BigInt/t/use_mbfw.t				use BigFloat w/ with and lib at the same time
 cpan/Math-BigInt/t/with_sub.t				Test use Math::BigFloat with => package
 cpan/Math-BigInt-FastCalc/FastCalc.xs			Math::BigInt::FastCalc extension
@@ -1644,28 +1643,6 @@ cpan/Math-BigInt-FastCalc/t/bigroot.t			Test file related to Math::BigInt::FastC
 cpan/Math-BigInt-FastCalc/t/bootstrap.t			Math::BigInt::FastCalc extension
 cpan/Math-BigInt-FastCalc/t/leak.t			test for memory leaks in Math::BigInt::FastCalc
 cpan/Math-BigInt-FastCalc/t/mbi_rand.t			Math::BigInt::FastCalc extension
-cpan/Math-BigRat/lib/Math/BigRat.pm	Math::BigRat
-cpan/Math-BigRat/t/badd-mbr.t
-cpan/Math-BigRat/t/big_ap.t		Math::BigRat test
-cpan/Math-BigRat/t/bigfltpm.inc		Math::BigRat test
-cpan/Math-BigRat/t/bigfltrt.t		Math::BigRat test
-cpan/Math-BigRat/t/bigrat.t		Math::BigRat test
-cpan/Math-BigRat/t/bigratpm.inc		Math::BigRat test
-cpan/Math-BigRat/t/bigratpm.t		Math::BigRat test
-cpan/Math-BigRat/t/bigratup.t		test under $Math::BigInt::upgrade
-cpan/Math-BigRat/t/binv-mbr.t
-cpan/Math-BigRat/t/bitwise.t		Math::BigRat test
-cpan/Math-BigRat/t/bnok-mbr.t
-cpan/Math-BigRat/t/const-mbr.t
-cpan/Math-BigRat/t/downgrade.t
-cpan/Math-BigRat/t/dparts-mbr.t
-cpan/Math-BigRat/t/fparts-mbr.t
-cpan/Math-BigRat/t/hang.t		Math::BigRat test for bug #34584 - hang in exp()
-cpan/Math-BigRat/t/Math/BigRat/Test.pm	Math::BigRat test helper
-cpan/Math-BigRat/t/new-mbr.t
-cpan/Math-BigRat/t/requirer.t		see if require works properly
-cpan/Math-BigRat/t/rt121139.t
-cpan/Math-BigRat/t/trap.t		see if trap_nan and trap_inf work
 cpan/Memoize/Memoize.pm			Memoize
 cpan/Memoize/Memoize/AnyDBM_File.pm	Memoize glue layer for AnyDBM_File
 cpan/Memoize/Memoize/Expire.pm		Memoize expiry manager example

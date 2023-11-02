@@ -757,7 +757,8 @@ our %Modules = (
     },
 
     'Math::BigInt' => {
-        'DISTRIBUTION' => 'PJACKLAM/Math-BigInt-1.999842.tar.gz',
+        'DISTRIBUTION' => 'PJACKLAM/Math-BigInt-2.000000.tar.gz',
+        'SYNCINFO'     => 'jkeenan on Thu Nov  2 17:12:13 2023',
         'SYNCINFO'     => 'jkeenan on Thu Sep 28 07:49:05 2023',
         'SYNCINFO'     => 'jkeenan on Sun Sep 24 08:09:46 2023',
         'FILES'        => q[cpan/Math-BigInt],
@@ -790,20 +791,6 @@ our %Modules = (
                 t/bigintpm.t
                 t/mbimbf.inc
                 t/mbimbf.t
-                ),
-        ],
-    },
-
-    'Math::BigRat' => {
-        'DISTRIBUTION' => 'PJACKLAM/Math-BigRat-0.2624.tar.gz',
-        'FILES'        => q[cpan/Math-BigRat],
-        'EXCLUDED'     => [
-            qr{^xt/},
-            qr{^math-bigrat-pod.diff},
-            qr{^t/author-},
-            qr{^t/release-},
-            qw( t/00sig.t
-                t/01load.t
                 ),
         ],
     },
