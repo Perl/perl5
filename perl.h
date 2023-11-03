@@ -1240,6 +1240,8 @@ typedef enum {
 #    if  defined(USE_POSIX_2008_LOCALE)                                     \
      || (defined(WIN32) && (defined(_MSC_VER) || (defined(_UCRT))))
 #      define USE_THREAD_SAFE_LOCALE
+#    else
+#      define EMULATE_THREAD_SAFE_LOCALES
 #    endif
 #  endif
 
