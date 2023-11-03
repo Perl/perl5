@@ -133,9 +133,11 @@
  *    expects.  The perl core has made those changes, so pure perl programs
  *    become thread-safe.  Well-behaved XS code also keeps things thread-safe,
  *    either by not using locale-dependent system calls, or by changing to use
- *    the wrapper macros.  This layer is not chosen if the platform has native
- *    thread-safe locale handling.  Also, currently perl must have been
- *    Configured with "-Accflags=-DEMULATE_THREAD_SAFE_LOCALES".
+ *    the wrapper macros.  This layer is chosen on threaded perls where the
+ *    platform doesn't have working native thread-safe locale handling, and
+ *    there is no manual override in Configure.  To turn if off add these to
+ *    the Configuration options:
+        -Accflags='-DNO_THREAD_SAFE_LOCALE'" -Accflags='-DNO_POSIX_2008_LOCALE'"
  *
  *    This implementation is based on the observation that the underlying
  *    locale matters only to relatively few libc calls, and only during their
@@ -451,6 +453,10 @@ static int debug_initialization = 0;
 /* Some compilers don't allow a declaration to immediately follow a label.
  * This is a self-commenting no-op that works around this restriction */
 #define  NOOP_TO_SEPARATE_LABEL_FROM_DECLARATION  NOOP
+
+#if PERL_VERSION_GT(5,39,10)
+#  error Revert the commit following the one that added this line, then revert this one
+#endif
 
 #ifdef WIN32_USE_FAKE_OLD_MINGW_LOCALES
 

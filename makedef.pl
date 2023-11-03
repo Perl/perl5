@@ -181,6 +181,9 @@ if ($define{USE_LOCALE_THREADS} && ! $define{NO_THREAD_SAFE_LOCALE}) {
     {
         $define{USE_THREAD_SAFE_LOCALE} = 1;
     }
+    else {
+        $define{EMULATE_THREAD_SAFE_LOCALES} = 1;
+    }
 }
 
 if (    $define{USE_POSIX_2008_LOCALE}
@@ -192,7 +195,8 @@ if (    $define{USE_POSIX_2008_LOCALE}
     $define{USE_QUERYLOCALE} = 1;
 }
 
-if ($define{USE_POSIX_2008_LOCALE} && ! $define{USE_QUERYLOCALE})
+if (  ($define{USE_POSIX_2008_LOCALE} && ! $define{USE_QUERYLOCALE})
+    || $define{EMULATE_THREAD_SAFE_LOCALES})
 {
     $define{USE_PL_CURLOCALES} = 1;
 }
