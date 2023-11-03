@@ -810,6 +810,11 @@
 # if !defined(EBCDIC)
 #   define variant_byte_number                  Perl_variant_byte_number
 # endif
+# if defined(EMULATE_THREAD_SAFE_LOCALES)
+#   define category_lock_i(a,b,c)               Perl_category_lock_i(aTHX_ a,b,c)
+#   define category_unlock_i(a,b,c)             Perl_category_unlock_i(aTHX_ a,b,c)
+#   define posix_LC_foo_(a,b)                   Perl_posix_LC_foo_(aTHX_ a,b)
+# endif
 # if defined(F_FREESP) && !defined(HAS_CHSIZE) && !defined(HAS_TRUNCATE)
 #   define my_chsize(a,b)                       Perl_my_chsize(aTHX_ a,b)
 # endif
@@ -1313,6 +1318,10 @@
 #       if defined(DEBUGGING)
 #         define my_setlocale_debug_string_i(a,b,c,d) S_my_setlocale_debug_string_i(aTHX_ a,b,c,d)
 #       endif
+#       if   defined(EMULATE_THREAD_SAFE_LOCALES) || \
+           ( defined(USE_POSIX_2008_LOCALE) && !defined(USE_QUERYLOCALE) )
+#         define update_PL_curlocales_i(a,b,c)  S_update_PL_curlocales_i(aTHX_ a,b,c)
+#       endif
 #       if defined(HAS_NL_LANGINFO) || defined(HAS_NL_LANGINFO_L)
 #         define my_langinfo_i(a,b,c,d,e,f)     S_my_langinfo_i(aTHX_ a,b,c,d,e,f)
 #       else
@@ -1343,12 +1352,8 @@
 #         define bool_setlocale_2008_i(a,b,c)   S_bool_setlocale_2008_i(aTHX_ a,b,c)
 #         define querylocale_2008_i(a,b)        S_querylocale_2008_i(aTHX_ a,b)
 #         define use_curlocale_scratch()        S_use_curlocale_scratch(aTHX)
-#         if !defined(USE_QUERYLOCALE)
-#           define update_PL_curlocales_i(a,b,c) S_update_PL_curlocales_i(aTHX_ a,b,c)
-#         endif
-#       elif  defined(USE_LOCALE_THREADS) &&     \
-             !defined(USE_THREAD_SAFE_LOCALE) && \
-             !defined(USE_THREAD_SAFE_LOCALE_EMULATION)
+#       elif !defined(EMULATE_THREAD_SAFE_LOCALES) && \
+              defined(USE_LOCALE_THREADS) && !defined(USE_THREAD_SAFE_LOCALE)
 #         define less_dicey_bool_setlocale_r(a,b) S_less_dicey_bool_setlocale_r(aTHX_ a,b)
 #         define less_dicey_setlocale_r(a,b)    S_less_dicey_setlocale_r(aTHX_ a,b)
 #       endif

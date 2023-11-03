@@ -16045,6 +16045,10 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 
     PL_subname		= sv_dup_inc(proto_perl->Isubname, param);
 
+/* The new locale starts in the global C locale. */
+#if defined(USE_LOCALE) && (defined(WIN32) || ! defined(USE_THREAD_SAFE_LOCALE))
+    PL_perl_controls_locale = false;
+#endif
 #ifdef USE_PL_CURLOCALES
     for (i = 0; i < (int) C_ARRAY_LENGTH(PL_curlocales); i++) {
         PL_curlocales[i] = SAVEPV("C");
@@ -16052,6 +16056,12 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 #endif
 #ifdef USE_PL_CUR_LC_ALL
     PL_cur_LC_ALL = SAVEPV("C");
+#endif
+#  ifdef EMULATE_THREAD_SAFE_LOCALES
+    for (i = 0; i < (int) C_ARRAY_LENGTH(PL_restore_locale); i++) {
+        PL_restore_locale[i] = NULL;
+        PL_restore_locale_depth[i] = 0;
+    }
 #endif
 #ifdef USE_LOCALE_CTYPE
     Copy(PL_fold, PL_fold_locale, 256, U8);

@@ -1126,6 +1126,12 @@ perl_destruct(pTHXx)
         PL_curlocales[i] = NULL;
     }
 #endif
+#if defined(EMULATE_THREAD_SAFE_LOCALES)
+    for (i = 0; i < (int) C_ARRAY_LENGTH(PL_restore_locale); i++) {
+        Safefree(PL_restore_locale[i]);
+        PL_restore_locale[i] = NULL;
+    }
+#endif
 #if defined(USE_POSIX_2008_LOCALE) && defined(USE_THREADS)
     {
         /* This also makes sure we aren't using a locale object that gets freed
@@ -1182,7 +1188,8 @@ perl_destruct(pTHXx)
         PL_langinfo_buf = NULL;
     }
 
-#if defined(USE_LOCALE_THREADS) && ! defined(USE_THREAD_SAFE_LOCALE)
+#if defined(USE_LOCALE_THREADS) && ! defined(USE_THREAD_SAFE_LOCALE)        \
+                                && ! defined(EMULATE_THREAD_SAFE_LOCALES)
     if (PL_less_dicey_locale_buf) {
         Safefree(PL_less_dicey_locale_buf);
         PL_less_dicey_locale_buf = NULL;
