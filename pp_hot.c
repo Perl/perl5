@@ -2651,14 +2651,14 @@ PP(pp_aassign)
     /* first lelem loop while there are still relems */
     while (LIKELY(lelem <= lastlelem)) {
         bool alias = FALSE;
-        SV *lsv = *lelem++;
+        SV *lsv = *lelem;
 
         TAINT_NOT; /* Each item stands on its own, taintwise. */
 
         assert(relem <= lastrelem);
         if (UNLIKELY(!lsv)) {
             alias = TRUE;
-            lsv = *lelem++;
+            lsv = *++lelem;
             ASSUME(SvTYPE(lsv) == SVt_PVAV);
         }
 
@@ -2897,9 +2897,10 @@ PP(pp_aassign)
                 SvSETMAGIC(MUTABLE_SV(ary));
 
 #ifdef PERL_RC_STACK
-            assert(lelem[-1] == (SV*)ary);
-            lelem[-1] = NULL;
+            assert(*lelem == (SV*)ary);
+            *lelem = NULL;
 #endif
+            lelem++;
             SvREFCNT_dec_NN(ary);
             relem = lastrelem + 1;
             goto no_relems;
@@ -2916,7 +2917,7 @@ PP(pp_aassign)
                 do_oddball(lastrelem, relem);
                 /* we have firstlelem to reuse, it's not needed any more */
 #ifdef PERL_RC_STACK
-                if (lelem - 1 == lastrelem + 1) {
+                if (lelem == lastrelem + 1) {
                     /* the lelem slot we want to use is the 
                      * one keeping hash alive. Mortalise the hash
                      * so it doesn't leak */
@@ -3154,8 +3155,8 @@ PP(pp_aassign)
              * number of elems where the hash was mortalised and its slot
              * on the stack was made part of the relems with the slot's
              * value overwritten with &PL_sv_undef. */
-            if (lelem[-1] == (SV*)hash) {
-                lelem[-1] = NULL;
+            if (*lelem == (SV*)hash) {
+                *lelem = NULL;
                 SvREFCNT_dec_NN(hash);
             }
 #else
@@ -3182,6 +3183,7 @@ PP(pp_aassign)
 
             SvREFCNT_dec_NN(hash);
 #endif
+            lelem++;
             relem = lastrelem + 1;
             goto no_relems;
         }
@@ -3203,7 +3205,7 @@ PP(pp_aassign)
                 SV *ref;
                 if (   SvROK(lsv)
                     && ( ((ref = SvRV(lsv)), SvREFCNT(ref)) == 1)
-                    && lelem <= lastlelem
+                    && lelem < lastlelem
                 ) {
                     SSize_t ix;
                     SvREFCNT_inc_simple_void_NN(ref);
@@ -3212,7 +3214,7 @@ PP(pp_aassign)
                     if (UNLIKELY(ix >= PL_tmps_max))
                         /* speculatively grow enough to cover other
                          * possible refs */
-                         (void)tmps_grow_p(ix + (lastlelem - lelem));
+                         (void)tmps_grow_p(ix + (lastlelem - lelem + 1));
                     PL_tmps_stack[ix] = ref;
                 }
 #endif
@@ -3222,10 +3224,11 @@ PP(pp_aassign)
                 if (UNLIKELY(is_list))
                     rpp_replace_at_NN(relem, lsv);
 #ifdef PERL_RC_STACK
-                lelem[-1] = NULL;
+                *lelem = NULL;
                 SvREFCNT_dec_NN(lsv);
 #endif
             }
+            lelem++;
             if (++relem > lastrelem)
                 goto no_relems;
             break;
@@ -3237,12 +3240,12 @@ PP(pp_aassign)
 
     /* simplified lelem loop for when there are no relems left */
     while (LIKELY(lelem <= lastlelem)) {
-        SV *lsv = *lelem++;
+        SV *lsv = *lelem;
 
         TAINT_NOT; /* Each item stands on its own, taintwise. */
 
         if (UNLIKELY(!lsv)) {
-            lsv = *lelem++;
+            lsv = *++lelem;
             ASSUME(SvTYPE(lsv) == SVt_PVAV);
         }
 
@@ -3271,23 +3274,26 @@ PP(pp_aassign)
                  * there was previously a hash with dup elements) */
 #ifdef PERL_RC_STACK
                 assert(relem <= first_discard);
-                assert(relem < lelem);
+                assert(relem <= lelem);
                 if (relem == first_discard)
                     first_discard++;
 #endif
                 rpp_replace_at(relem++, lsv);
 #ifdef PERL_RC_STACK
-                if (relem == lelem)
+                if (relem == lelem + 1) {
+                    lelem++;
                     /* skip the NULLing of the slot */
                     continue;
+                }
 #endif
             }
             break;
         } /* switch */
 #ifdef PERL_RC_STACK
-        lelem[-1] = NULL;
+        *lelem = NULL;
         SvREFCNT_dec_NN(lsv);
 #endif
+        lelem++;
     } /* while */
 
     TAINT_NOT; /* result of list assign isn't tainted */
