@@ -3161,16 +3161,8 @@ PP_wrapped(pp_pack, 0, 1)
     if (SvUTF8(cat)) {
         STRLEN result_len;
         const char * result = SvPV_nomg(cat, result_len);
-        const U8 * error_pos;
 
-        if (! is_utf8_string_loc((U8 *) result, result_len, &error_pos)) {
-            _force_out_malformed_utf8_message(error_pos,
-                                              (U8 *) result + result_len,
-                                              0, /* no flags */
-                                              MALFORMED_UTF8_DIE
-                                            );
-            NOT_REACHED; /* NOTREACHED */
-        }
+        ensure_not_malformed_utf8((U8 *) result, result_len);
     }
 
     SvSETMAGIC(cat);

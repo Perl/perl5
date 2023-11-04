@@ -1115,6 +1115,9 @@ EXop	|char  *|dup_warnings	|NULLOK char *warnings
 : Used by B
 EXopx	|void	|emulate_cop_io |NN const COP * const c 		\
 				|NN SV * const sv
+Cp	|void	|ensure_not_malformed_utf8				\
+				|NN const U8 * const start_pos		\
+				|NN const STRLEN length
 AOdp	|SV *	|eval_pv	|NN const char *p			\
 				|I32 croak_on_error
 AOdp	|SSize_t|eval_sv	|NN SV *sv				\
@@ -1175,11 +1178,25 @@ Adpx	|void	|forbid_outofblock_ops					\
 				|NN OP *o				\
 				|NN const char *blockname
 p	|void	|force_locale_unlock
+Cp	|void	|force_out_malformed_utf8_die				\
+				|NN const U8 * const start_pos		\
+				|NN const U8 * const end_pos
+Cp	|void	|force_out_malformed_utf8_die_flags			\
+				|NN const U8 * const start_pos		\
+				|NN const U8 * const end_pos		\
+				|const U32 flags
 Cp	|void	|_force_out_malformed_utf8_message			\
 				|NN const U8 * const p			\
 				|NN const U8 * const e			\
 				|const U32 flags			\
 				|const bool die_here
+Cp	|void	|force_out_malformed_utf8_warn				\
+				|NN const U8 * const start_pos		\
+				|NN const U8 * const end_pos
+Cp	|void	|force_out_malformed_utf8_warn_flags			\
+				|NN const U8 * const start_pos		\
+				|NN const U8 * const end_pos		\
+				|const U32 flags
 Adfpv	|char * |form		|NN const char *pat			\
 				|...
 : Only used in perl.c

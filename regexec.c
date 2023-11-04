@@ -10919,9 +10919,7 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
         const U32 utf8n_flags = UTF8_ALLOW_DEFAULT;
         c = utf8n_to_uvchr(p, p_end - p, &c_len, utf8n_flags | UTF8_CHECK_ONLY);
         if (c_len == (STRLEN)-1) {
-            _force_out_malformed_utf8_message(p, p_end,
-                                              utf8n_flags,
-                                              MALFORMED_UTF8_DIE);
+            force_out_malformed_utf8_die_flags(p, p_end, utf8n_flags);
             NOT_REACHED; /* NOTREACHED */
         }
         if (     c > 255

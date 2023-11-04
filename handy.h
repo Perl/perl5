@@ -2277,15 +2277,15 @@ END_EXTERN_C
 
 #define generic_utf8_safe_(classnum, p, e, above_latin1)                    \
     ((! _utf8_safe_assert(p, e))                                            \
-      ? (_force_out_malformed_utf8_message((U8 *) (p), (U8 *) (e), 0, MALFORMED_UTF8_DIE), 0)\
+      ? (force_out_malformed_utf8_die((U8 *) (p), (U8 *) (e)), 0)           \
       : (UTF8_IS_INVARIANT(*(p)))                                           \
           ? generic_isCC_(*(p), classnum)                                   \
           : (UTF8_IS_DOWNGRADEABLE_START(*(p))                              \
              ? ((LIKELY((e) - (p) > 1 && UTF8_IS_CONTINUATION(*((p)+1))))   \
                 ? generic_isCC_(EIGHT_BIT_UTF8_TO_NATIVE(*(p), *((p)+1 )),  \
                                 classnum)                                   \
-                : (_force_out_malformed_utf8_message(                       \
-                                        (U8 *) (p), (U8 *) (e), 0, MALFORMED_UTF8_DIE), 0))  \
+                : (force_out_malformed_utf8_die(                            \
+                                        (U8 *) (p), (U8 *) (e)), 0))        \
              : above_latin1))
 /* Like the above, but calls 'above_latin1(p)' to get the utf8 value.
  * 'above_latin1' can be a macro */
@@ -2294,8 +2294,8 @@ END_EXTERN_C
 #define generic_non_invlist_utf8_safe_(classnum, above_latin1, p, e)        \
           generic_utf8_safe_(classnum, p, e,                                \
                              (UNLIKELY((e) - (p) < UTF8SKIP(p))             \
-                              ? (_force_out_malformed_utf8_message(         \
-                                      (U8 *) (p), (U8 *) (e), 0, MALFORMED_UTF8_DIE), 0) \
+                              ? (force_out_malformed_utf8_die(              \
+                                      (U8 *) (p), (U8 *) (e)), 0)           \
                               : above_latin1(p)))
 /* Like the above, but passes classnum to _isFOO_utf8(), instead of having an
  * 'above_latin1' parameter */
@@ -2384,8 +2384,8 @@ END_EXTERN_C
 #define isXDIGIT_utf8_safe(p, e)                                            \
                    generic_utf8_safe_no_upper_latin1_(CC_XDIGIT_, p, e,     \
                              (UNLIKELY((e) - (p) < UTF8SKIP(p))             \
-                              ? (_force_out_malformed_utf8_message(         \
-                                      (U8 *) (p), (U8 *) (e), 0, MALFORMED_UTF8_DIE), 0) \
+                              ? (force_out_malformed_utf8_die(              \
+                                      (U8 *) (p), (U8 *) (e)), 0)           \
                               : is_XDIGIT_high(p)))
 
 #define toFOLD_utf8(p,e,s,l)	toFOLD_utf8_safe(p,e,s,l)
@@ -2433,8 +2433,8 @@ END_EXTERN_C
           : (UTF8_IS_DOWNGRADEABLE_START(*(p))                              \
              ? ((LIKELY((e) - (p) > 1 && UTF8_IS_CONTINUATION(*((p)+1))))   \
                 ? macro(EIGHT_BIT_UTF8_TO_NATIVE(*(p), *((p)+1)))           \
-                : (_force_out_malformed_utf8_message(                       \
-                                        (U8 *) (p), (U8 *) (e), 0, MALFORMED_UTF8_DIE), 0)) \
+                : (force_out_malformed_utf8_die(                            \
+                                        (U8 *) (p), (U8 *) (e)), 0))        \
               : above_latin1))
 
 #define generic_LC_invlist_utf8_safe_(macro, classnum, p, e)                  \
@@ -2447,8 +2447,8 @@ END_EXTERN_C
 #define generic_LC_non_invlist_utf8_safe_(classnum, above_latin1, p, e)       \
           generic_LC_utf8_safe_(classnum, p, e,                             \
                              (UNLIKELY((e) - (p) < UTF8SKIP(p))             \
-                              ? (_force_out_malformed_utf8_message(         \
-                                      (U8 *) (p), (U8 *) (e), 0, MALFORMED_UTF8_DIE), 0) \
+                              ? (force_out_malformed_utf8_die(              \
+                                      (U8 *) (p), (U8 *) (e)), 0) \
                               : above_latin1(p)))
 
 #define isALPHANUMERIC_LC_utf8_safe(p, e)                                   \

@@ -94,6 +94,98 @@ Perl__force_out_malformed_utf8_message(pTHX_
     }
 }
 
+void
+Perl_ensure_not_malformed_utf8(
+    pTHX_
+    const U8 * const start_pos,
+    const STRLEN length
+) {
+    if (! length) return;
+
+    PERL_ARGS_ASSERT_ENSURE_NOT_MALFORMED_UTF8;
+
+    const U8* first_malformed_char_location;
+    const bool has_malformed_char = ! is_utf8_string_loc(
+        start_pos,
+        length,
+        &first_malformed_char_location
+    );
+
+    if (UNLIKELY(has_malformed_char)) {
+        force_out_malformed_utf8_die(
+            first_malformed_char_location,
+            start_pos + length
+        );
+        NOT_REACHED;
+    }
+}
+
+PERL_CALLCONV void
+Perl_force_out_malformed_utf8_die(
+    pTHX_
+    const U8 * const start_pos,
+    const U8 * const end_pos
+) {
+    PERL_ARGS_ASSERT_FORCE_OUT_MALFORMED_UTF8_DIE;
+
+    _force_out_malformed_utf8_message(
+        start_pos,
+        end_pos,
+        0,
+        MALFORMED_UTF8_DIE
+    );
+}
+
+PERL_CALLCONV void
+Perl_force_out_malformed_utf8_die_flags(
+    pTHX_
+    const U8 * const start_pos,
+    const U8 * const end_pos,
+    const U32 flags
+) {
+    PERL_ARGS_ASSERT_FORCE_OUT_MALFORMED_UTF8_DIE_FLAGS;
+
+    _force_out_malformed_utf8_message(
+        start_pos,
+        end_pos,
+        flags,
+        MALFORMED_UTF8_DIE
+    );
+}
+
+PERL_CALLCONV void
+Perl_force_out_malformed_utf8_warn(
+    pTHX_
+    const U8 * const start_pos,
+    const U8 * const end_pos
+) {
+    PERL_ARGS_ASSERT_FORCE_OUT_MALFORMED_UTF8_WARN;
+
+    _force_out_malformed_utf8_message(
+        start_pos,
+        end_pos,
+        0,
+        MALFORMED_UTF8_WARN
+    );
+}
+
+PERL_CALLCONV void
+Perl_force_out_malformed_utf8_warn_flags(
+    pTHX_
+    const U8 * const start_pos,
+    const U8 * const end_pos,
+    const U32 flags
+) {
+    PERL_ARGS_ASSERT_FORCE_OUT_MALFORMED_UTF8_WARN_FLAGS;
+
+    _force_out_malformed_utf8_message(
+        start_pos,
+        end_pos,
+        flags,
+        MALFORMED_UTF8_WARN
+    );
+}
+
 STATIC HV *
 S_new_msg_hv(pTHX_ const char * const message, /* The message text */
                    U32 categories,  /* Packed warning categories */
@@ -3308,7 +3400,7 @@ S_is_utf8_common(pTHX_ const U8 *const p, const U8 * const e,
     PERL_ARGS_ASSERT_IS_UTF8_COMMON;
 
     if (cp == 0 && (p >= e || *p != '\0')) {
-        _force_out_malformed_utf8_message(p, e, 0, MALFORMED_UTF8_DIE);
+        force_out_malformed_utf8_die(p, e);
         NOT_REACHED; /* NOTREACHED */
     }
 
@@ -3853,7 +3945,7 @@ S_turkic_uc(pTHX_ const U8 * const p, const U8 * const e,
         STRLEN len_result;                                                   \
         result = utf8n_to_uvchr(p, e - p, &len_result, UTF8_CHECK_ONLY);     \
         if (len_result == (STRLEN) -1) {                                     \
-            _force_out_malformed_utf8_message(p, e, 0, MALFORMED_UTF8_DIE ); \
+            force_out_malformed_utf8_die(p, e);                              \
         }
 
 #define CASE_CHANGE_BODY_END(locale_flags, change_macro)                     \
