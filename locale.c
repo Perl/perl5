@@ -6301,6 +6301,7 @@ S_my_langinfo_i(pTHX_
 
         utf8ness_t strings_utf8ness = UTF8NESS_UNKNOWN;
         char * scratch_buf = NULL;
+        Size_t scratch_buf_size = 0;
 
 #          if defined(USE_LOCALE_MONETARY) && defined(HAS_LOCALECONV)
 #            define LANGINFO_RECURSED_MONETARY  0x1
@@ -6319,12 +6320,11 @@ S_my_langinfo_i(pTHX_
          */
         if ((PL_langinfo_recursed & LANGINFO_RECURSED_MONETARY) == 0) {
             PL_langinfo_recursed |= LANGINFO_RECURSED_MONETARY;
-            (void) my_langinfo_c(CRNCYSTR, LC_MONETARY, locale, &scratch_buf,
-                                 NULL, &strings_utf8ness);
+            (void) my_langinfo_c(CRNCYSTR, LC_MONETARY, locale,
+                                 &scratch_buf, &scratch_buf_size,
+                                 &strings_utf8ness);
             PL_langinfo_recursed &= ~LANGINFO_RECURSED_MONETARY;
         }
-
-        Safefree(scratch_buf);
 
 #          endif
 #          ifdef USE_LOCALE_TIME
@@ -6370,10 +6370,9 @@ S_my_langinfo_i(pTHX_
 
             PL_langinfo_recursed |= LANGINFO_RECURSED_TIME;
             for (PERL_UINT_FAST8_T i = 0; i < C_ARRAY_LENGTH(times); i++) {
-                scratch_buf = NULL;
-                (void) my_langinfo_c(times[i], LC_TIME, locale, &scratch_buf,
-                                     NULL, &this_is_utf8);
-                Safefree(scratch_buf);
+                (void) my_langinfo_c(times[i], LC_TIME, locale,
+                                     &scratch_buf, &scratch_buf_size,
+                                     &this_is_utf8);
                 if (this_is_utf8 == UTF8NESS_NO) {
                     strings_utf8ness = UTF8NESS_NO;
                     break;
@@ -6397,6 +6396,9 @@ S_my_langinfo_i(pTHX_
         }
 
 #          endif    /* LC_TIME */
+
+        Safefree(scratch_buf);
+        scratch_buf = NULL;
 
         /* If nothing examined above rules out it being UTF-8, and at least one
          * thing fits as UTF-8 (and not plain ASCII), assume the codeset is
