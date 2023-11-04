@@ -972,7 +972,7 @@ Perl_lex_start(pTHX_ SV *line, PerlIO *rsfp, U32 flags)
             _force_out_malformed_utf8_message(first_bad_char_loc,
                                               (U8 *) s + SvCUR(line),
                                               0,
-                                              1 /* 1 means die */ );
+                                              MALFORMED_UTF8_DIE);
             NOT_REACHED; /* NOTREACHED */
         }
         else if (ONLY_ASCII && UNLIKELY(! is_ascii_string_loc(
@@ -1589,7 +1589,7 @@ Perl_lex_next_chunk(pTHX_ U32 flags)
             _force_out_malformed_utf8_message(first_bad_char_loc,
                                               (U8 *) PL_parser->bufend,
                                               0,
-                                              1 /* 1 means die */ );
+                                              MALFORMED_UTF8_DIE);
             NOT_REACHED; /* NOTREACHED */
         }
     }
@@ -1679,7 +1679,7 @@ Perl_lex_peek_unichar(pTHX_ U32 flags)
             _force_out_malformed_utf8_message((U8 *) s,
                                               (U8 *) bufend,
                                               0,
-                                              1 /* 1 means die */ );
+                                              MALFORMED_UTF8_DIE);
             NOT_REACHED; /* NOTREACHED */
         }
         return unichar;
@@ -3058,7 +3058,7 @@ Perl_get_and_check_backslash_N_name(pTHX_ const char* s,
             _force_out_malformed_utf8_message(first_bad_char_loc,
                                               (U8 *) PL_parser->bufend,
                                               0,
-                                              0 /* 0 means don't die */ );
+                                              MALFORMED_UTF8_WARN);
             /* diag_listed_as: Malformed UTF-8 returned by \N{%s}
                                immediately after '%s' */
             *error_msg = Perl_form(aTHX_
@@ -9656,7 +9656,7 @@ Perl_yylex(pTHX)
             _force_out_malformed_utf8_message(first_bad_char_loc,
                                               (U8 *) PL_bufend,
                                               0,
-                                              1 /* 1 means die */ );
+                                              MALFORMED_UTF8_DIE);
             NOT_REACHED; /* NOTREACHED */
         }
         else if (ONLY_ASCII && UNLIKELY(! is_ascii_string_loc(

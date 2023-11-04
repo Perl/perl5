@@ -1304,6 +1304,9 @@ point's representation.
  * retained solely for backwards compatibility */
 #define IS_UTF8_CHAR(p, n)      (isUTF8_CHAR(p, (p) + (n)) == n)
 
+#define MALFORMED_UTF8_DIE  TRUE
+#define MALFORMED_UTF8_WARN FALSE
+
 #endif /* PERL_UTF8_H_ */
 
 /*

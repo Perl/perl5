@@ -3289,7 +3289,7 @@ S_is_utf8_common(pTHX_ const U8 *const p, const U8 * const e,
     PERL_ARGS_ASSERT_IS_UTF8_COMMON;
 
     if (cp == 0 && (p >= e || *p != '\0')) {
-        _force_out_malformed_utf8_message(p, e, 0, 1);
+        _force_out_malformed_utf8_message(p, e, 0, MALFORMED_UTF8_DIE);
         NOT_REACHED; /* NOTREACHED */
     }
 
@@ -3834,7 +3834,7 @@ S_turkic_uc(pTHX_ const U8 * const p, const U8 * const e,
         STRLEN len_result;                                                   \
         result = utf8n_to_uvchr(p, e - p, &len_result, UTF8_CHECK_ONLY);     \
         if (len_result == (STRLEN) -1) {                                     \
-            _force_out_malformed_utf8_message(p, e, 0, 1 /* Die */ );        \
+            _force_out_malformed_utf8_message(p, e, 0, MALFORMED_UTF8_DIE ); \
         }
 
 #define CASE_CHANGE_BODY_END(locale_flags, change_macro)                     \
