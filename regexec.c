@@ -8041,7 +8041,7 @@ S_regmatch(pTHX_ regmatch_info *reginfo, char *startpos, regnode *prog)
                         break;
                     }
                 } while(n);
-                
+
                 if (!n) /* this means there is nothing that matched */
                     sayNO;
             }
@@ -10921,7 +10921,7 @@ S_reginclass(pTHX_ regexp * const prog, const regnode * const n, const U8* const
         if (c_len == (STRLEN)-1) {
             _force_out_malformed_utf8_message(p, p_end,
                                               utf8n_flags,
-                                              1 /* 1 means die */ );
+                                              MALFORMED_UTF8_DIE);
             NOT_REACHED; /* NOTREACHED */
         }
         if (     c > 255

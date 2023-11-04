@@ -373,7 +373,7 @@ S_do_trans_count_invmap(pTHX_ SV * const sv, AV * const invmap)
         else {
             from = utf8_to_uvchr_buf(s, send, &s_len);
             if (from == 0 && *s != '\0') {
-                _force_out_malformed_utf8_message(s, send, 0, /*die*/TRUE);
+                _force_out_malformed_utf8_message(s, send, 0, MALFORMED_UTF8_DIE);
             }
         }
 
@@ -492,7 +492,7 @@ S_do_trans_invmap(pTHX_ SV * const sv, AV * const invmap)
         else {
             from = utf8_to_uvchr_buf(s, send, &s_len);
             if (from == 0 && *s != '\0') {
-                _force_out_malformed_utf8_message(s, send, 0, /*die*/TRUE);
+                _force_out_malformed_utf8_message(s, send, 0, MALFORMED_UTF8_DIE);
             }
         }
 
