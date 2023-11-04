@@ -6328,30 +6328,15 @@ S_my_langinfo_i(pTHX_
 
 #          endif
 #          ifdef USE_LOCALE_TIME
-#            define LANGINFO_RECURSED_TIME      0x2
-#            ifdef LANGINFO_RECURSED_MONETARY
-#               if LANGINFO_RECURSED_MONETARY == LANGINFO_RECURSED_TIME
-#                 error LANGINFO_RECURSED_MONETARY must differ from LANGINFO_RECURSED_TIME
-#               endif
-#             endif
 
         /* If we have ruled out being UTF-8, no point in checking further. */
-        if (   strings_utf8ness != UTF8NESS_NO
-            && (PL_langinfo_recursed & LANGINFO_RECURSED_TIME) == 0)
-        {
+        if (strings_utf8ness != UTF8NESS_NO) {
             /* But otherwise do check more.  This is done even if the currency
              * symbol looks to be UTF-8, just in case that's a false positive.
              *
              * Look at the LC_TIME entries, like the names of the months or
-             * weekdays.  We quit at the first one that is illegal UTF-8
-             *
-             * The recursion guard is because the recursed my_langinfo_c() will
-             * call strftime8() to find the LC_TIME value passed to it, and
-             * that will call my_langinfo(CODESET) for non-ASCII returns,
-             * which will get here again, ad infinitum
-             */
+             * weekdays.  We quit at the first one that is illegal UTF-8 */
 
-            utf8ness_t this_is_utf8 = UTF8NESS_UNKNOWN;
             const int times[] = {
                 DAY_1, DAY_2, DAY_3, DAY_4, DAY_5, DAY_6, DAY_7,
                 MON_1, MON_2, MON_3, MON_4, MON_5, MON_6, MON_7, MON_8,
@@ -6368,21 +6353,36 @@ S_my_langinfo_i(pTHX_
              * loop */
             const char * orig_TIME_locale = toggle_locale_c(LC_TIME, locale);
 
-            PL_langinfo_recursed |= LANGINFO_RECURSED_TIME;
             for (PERL_UINT_FAST8_T i = 0; i < C_ARRAY_LENGTH(times); i++) {
                 (void) my_langinfo_c(times[i], LC_TIME, locale,
-                                     &scratch_buf, &scratch_buf_size,
-                                     &this_is_utf8);
-                if (this_is_utf8 == UTF8NESS_NO) {
+                                     &scratch_buf, &scratch_buf_size, NULL);
+                /* To prevent infinite recursive calls, we don't ask for the
+                 * UTF-8ness of the string (in 'times[i]') above.  Instead we
+                 * examine the returned string here */
+                Size_t len = strlen(scratch_buf);
+                const U8 * first_variant;
+
+                /* If the string is identical whether or not it is encoded as
+                 * UTF-8, it isn't helpful in determining UTF8ness. */
+                if (is_utf8_invariant_string_loc((U8 *) scratch_buf, len,
+                                                 &first_variant))
+                {
+                    continue;
+                }
+
+                /* Here, has non-ASCII.  If not legal UTF-8, isn't a UTF-8
+                 * locale */
+                if (! is_utf8_string(first_variant,
+                                     len - (first_variant - (U8 *) scratch_buf)))
+                {
                     strings_utf8ness = UTF8NESS_NO;
                     break;
                 }
 
-                if (this_is_utf8 == UTF8NESS_YES) {
-                    strings_utf8ness = UTF8NESS_YES;
-                }
+                /* Here, is a legal non-ASCII UTF-8 string; tentatively set the
+                 * return to YES; possibly overridden by later iterations */
+                strings_utf8ness = UTF8NESS_YES;
             }
-            PL_langinfo_recursed &= ~LANGINFO_RECURSED_TIME;
 
             /* Here we have gone through all the LC_TIME elements.
              * strings_utf8ness has been set as follows:
