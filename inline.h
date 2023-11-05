@@ -706,6 +706,39 @@ Perl_rpp_replace_at(pTHX_ SV **sp, SV *sv)
 
 
 /*
+=for apidoc rpp_replace_at_norc
+
+Replace the SV at address sp within the stack with C<sv>, while suitably
+adjusting the reference count of the old SV. Equivalent to C<*sp = sv>,
+except with proper reference count handling.
+
+C<sv>'s reference count doesn't get incremented. On non-C<PERL_RC_STACK>
+builds, it gets mortalised too.
+
+This is most useful where an SV has just been created and already has a
+reference count of 1, but has not yet been anchored anywhere.
+
+=cut
+*/
+
+PERL_STATIC_INLINE void
+Perl_rpp_replace_at_norc(pTHX_ SV **sp, SV *sv)
+{
+    PERL_ARGS_ASSERT_RPP_REPLACE_AT_NORC;
+
+#ifdef PERL_RC_STACK
+    assert(rpp_stack_is_rc());
+    SV *oldsv = *sp;
+    *sp = sv;
+    SvREFCNT_dec(oldsv);
+#else
+    *sp = sv;
+    sv_2mortal(sv);
+#endif
+}
+
+
+/*
 =for apidoc rpp_context
 
 Impose void, scalar or list context on the stack.
