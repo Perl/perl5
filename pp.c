@@ -5970,9 +5970,8 @@ PP(pp_anonlist)
 /* When an anonlist or anonhash will (1) be empty and (2) return an RV
  * pointing to the new AV/HV, the peephole optimizer can swap in this
  * simpler function and op_null the originally associated PUSHMARK. */
-PP_wrapped(pp_emptyavhv, 0,0)
+PP(pp_emptyavhv)
 {
-    dSP;
     OP * const op = PL_op;
     SV * rv;
     SV * const sv = MUTABLE_SV( newSV_type(
@@ -5997,19 +5996,18 @@ PP_wrapped(pp_emptyavhv, 0,0)
             save_clearsv(padentry);
         }
         if (GIMME_V == G_VOID) {
-            RETURN; /* skip extending and pushing */
+            return NORMAL; /* skip extending and pushing */
         }
+        rpp_xpush_1(rv);
     } else {
         /* Inlined newRV_noinc */
-        SV * refsv = newSV_type_mortal(SVt_IV);
+        SV * refsv = newSV_type(SVt_IV);
         SvRV_set(refsv, sv);
         SvROK_on(refsv);
-
-        rv = refsv;
+        rpp_extend(1);
+        rpp_push_1_norc(refsv);
     }
-
-    XPUSHs(rv);
-    RETURN;
+    return NORMAL; /* skip extending and pushing */
 }
 
 
