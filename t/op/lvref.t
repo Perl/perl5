@@ -5,7 +5,7 @@ BEGIN {
     set_up_inc("../lib");
 }
 
-plan 198;
+plan 201;
 
 eval '\$x = \$y';
 like $@, qr/^Experimental aliasing via reference not enabled/,
@@ -85,6 +85,23 @@ for (1,2) {
     is $c, 1, '\state $x = ... can be used with refaliasing';
   }
 }
+
+# Scalars in lvalue context
+
+{
+    my $s = 3;
+    my $t = 5;
+
+    sub foo1 {
+        ok ref($_[0]),   "foo1(alias) passes ref";
+        is ${$_[0]}, 5,  "foo1(alias) passes ref to t";
+        ${$_[0]} = 7;
+    }
+    foo1(\$s = \$t);
+    is $s, 7,  "foo1(alias) passes ref to t"
+}
+
+
 
 # Array Elements
 
