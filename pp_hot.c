@@ -2556,6 +2556,101 @@ S_aassign_copy_common(pTHX_ SV **firstlelem, SV **lastlelem,
 }
 
 
+/* Helper function for pp_aassign(): after performing something like
+ *
+ *   ($<,$>) = ($>,$<);  # swap real and effective uids
+ *
+ * the assignment to the magic variables just sets various flags in
+ * PL_delaymagic; now we tell the OS to update the uids/gids atomically.
+ */
+
+STATIC void
+S_aassign_uid(pTHX)
+{
+    /* Will be used to set PL_tainting below */
+    Uid_t tmp_uid  = PerlProc_getuid();
+    Uid_t tmp_euid = PerlProc_geteuid();
+    Gid_t tmp_gid  = PerlProc_getgid();
+    Gid_t tmp_egid = PerlProc_getegid();
+
+    /* XXX $> et al currently silently ignore failures */
+    if (PL_delaymagic & DM_UID) {
+#ifdef HAS_SETRESUID
+        PERL_UNUSED_RESULT(
+           setresuid((PL_delaymagic & DM_RUID) ? PL_delaymagic_uid  : (Uid_t)-1,
+                     (PL_delaymagic & DM_EUID) ? PL_delaymagic_euid : (Uid_t)-1,
+                     (Uid_t)-1));
+#elif defined(HAS_SETREUID)
+        PERL_UNUSED_RESULT(
+            setreuid((PL_delaymagic & DM_RUID) ? PL_delaymagic_uid  : (Uid_t)-1,
+                     (PL_delaymagic & DM_EUID) ? PL_delaymagic_euid : (Uid_t)-1));
+#else
+#  ifdef HAS_SETRUID
+        if ((PL_delaymagic & DM_UID) == DM_RUID) {
+            PERL_UNUSED_RESULT(setruid(PL_delaymagic_uid));
+            PL_delaymagic &= ~DM_RUID;
+        }
+#  endif /* HAS_SETRUID */
+#  ifdef HAS_SETEUID
+        if ((PL_delaymagic & DM_UID) == DM_EUID) {
+            PERL_UNUSED_RESULT(seteuid(PL_delaymagic_euid));
+            PL_delaymagic &= ~DM_EUID;
+        }
+#  endif /* HAS_SETEUID */
+        if (PL_delaymagic & DM_UID) {
+            if (PL_delaymagic_uid != PL_delaymagic_euid)
+                DIE(aTHX_ "No setreuid available");
+            PERL_UNUSED_RESULT(PerlProc_setuid(PL_delaymagic_uid));
+        }
+#endif /* HAS_SETRESUID */
+
+        tmp_uid  = PerlProc_getuid();
+        tmp_euid = PerlProc_geteuid();
+    }
+
+    /* XXX $> et al currently silently ignore failures */
+    if (PL_delaymagic & DM_GID) {
+#ifdef HAS_SETRESGID
+        PERL_UNUSED_RESULT(
+            setresgid((PL_delaymagic & DM_RGID) ? PL_delaymagic_gid  : (Gid_t)-1,
+                      (PL_delaymagic & DM_EGID) ? PL_delaymagic_egid : (Gid_t)-1,
+                      (Gid_t)-1));
+#elif defined(HAS_SETREGID)
+        PERL_UNUSED_RESULT(
+            setregid((PL_delaymagic & DM_RGID) ? PL_delaymagic_gid  : (Gid_t)-1,
+                     (PL_delaymagic & DM_EGID) ? PL_delaymagic_egid : (Gid_t)-1));
+#else
+#  ifdef HAS_SETRGID
+        if ((PL_delaymagic & DM_GID) == DM_RGID) {
+            PERL_UNUSED_RESULT(setrgid(PL_delaymagic_gid));
+            PL_delaymagic &= ~DM_RGID;
+        }
+#  endif /* HAS_SETRGID */
+#  ifdef HAS_SETEGID
+        if ((PL_delaymagic & DM_GID) == DM_EGID) {
+            PERL_UNUSED_RESULT(setegid(PL_delaymagic_egid));
+            PL_delaymagic &= ~DM_EGID;
+        }
+#  endif /* HAS_SETEGID */
+        if (PL_delaymagic & DM_GID) {
+            if (PL_delaymagic_gid != PL_delaymagic_egid)
+                DIE(aTHX_ "No setregid available");
+            PERL_UNUSED_RESULT(PerlProc_setgid(PL_delaymagic_gid));
+        }
+#endif /* HAS_SETRESGID */
+
+        tmp_gid  = PerlProc_getgid();
+        tmp_egid = PerlProc_getegid();
+    }
+    TAINTING_set( TAINTING_get | (tmp_uid && (tmp_euid != tmp_uid || tmp_egid != tmp_gid)) );
+#ifdef NO_TAINT_SUPPORT
+    PERL_UNUSED_VAR(tmp_uid);
+    PERL_UNUSED_VAR(tmp_euid);
+    PERL_UNUSED_VAR(tmp_gid);
+    PERL_UNUSED_VAR(tmp_egid);
+#endif
+}
+
 
 PP(pp_aassign)
 {
@@ -3316,89 +3411,9 @@ PP(pp_aassign)
 
     TAINT_NOT; /* result of list assign isn't tainted */
 
-    if (UNLIKELY(PL_delaymagic & ~DM_DELAY)) {
-        /* Will be used to set PL_tainting below */
-        Uid_t tmp_uid  = PerlProc_getuid();
-        Uid_t tmp_euid = PerlProc_geteuid();
-        Gid_t tmp_gid  = PerlProc_getgid();
-        Gid_t tmp_egid = PerlProc_getegid();
-
-        /* XXX $> et al currently silently ignore failures */
-        if (PL_delaymagic & DM_UID) {
-#ifdef HAS_SETRESUID
-            PERL_UNUSED_RESULT(
-               setresuid((PL_delaymagic & DM_RUID) ? PL_delaymagic_uid  : (Uid_t)-1,
-                         (PL_delaymagic & DM_EUID) ? PL_delaymagic_euid : (Uid_t)-1,
-                         (Uid_t)-1));
-#elif defined(HAS_SETREUID)
-            PERL_UNUSED_RESULT(
-                setreuid((PL_delaymagic & DM_RUID) ? PL_delaymagic_uid  : (Uid_t)-1,
-                         (PL_delaymagic & DM_EUID) ? PL_delaymagic_euid : (Uid_t)-1));
-#else
-#    ifdef HAS_SETRUID
-            if ((PL_delaymagic & DM_UID) == DM_RUID) {
-                PERL_UNUSED_RESULT(setruid(PL_delaymagic_uid));
-                PL_delaymagic &= ~DM_RUID;
-            }
-#    endif /* HAS_SETRUID */
-#    ifdef HAS_SETEUID
-            if ((PL_delaymagic & DM_UID) == DM_EUID) {
-                PERL_UNUSED_RESULT(seteuid(PL_delaymagic_euid));
-                PL_delaymagic &= ~DM_EUID;
-            }
-#    endif /* HAS_SETEUID */
-            if (PL_delaymagic & DM_UID) {
-                if (PL_delaymagic_uid != PL_delaymagic_euid)
-                    DIE(aTHX_ "No setreuid available");
-                PERL_UNUSED_RESULT(PerlProc_setuid(PL_delaymagic_uid));
-            }
-#endif /* HAS_SETRESUID */
-
-            tmp_uid  = PerlProc_getuid();
-            tmp_euid = PerlProc_geteuid();
-        }
-        /* XXX $> et al currently silently ignore failures */
-        if (PL_delaymagic & DM_GID) {
-#ifdef HAS_SETRESGID
-            PERL_UNUSED_RESULT(
-                setresgid((PL_delaymagic & DM_RGID) ? PL_delaymagic_gid  : (Gid_t)-1,
-                          (PL_delaymagic & DM_EGID) ? PL_delaymagic_egid : (Gid_t)-1,
-                          (Gid_t)-1));
-#elif defined(HAS_SETREGID)
-            PERL_UNUSED_RESULT(
-                setregid((PL_delaymagic & DM_RGID) ? PL_delaymagic_gid  : (Gid_t)-1,
-                         (PL_delaymagic & DM_EGID) ? PL_delaymagic_egid : (Gid_t)-1));
-#else
-#    ifdef HAS_SETRGID
-            if ((PL_delaymagic & DM_GID) == DM_RGID) {
-                PERL_UNUSED_RESULT(setrgid(PL_delaymagic_gid));
-                PL_delaymagic &= ~DM_RGID;
-            }
-#    endif /* HAS_SETRGID */
-#    ifdef HAS_SETEGID
-            if ((PL_delaymagic & DM_GID) == DM_EGID) {
-                PERL_UNUSED_RESULT(setegid(PL_delaymagic_egid));
-                PL_delaymagic &= ~DM_EGID;
-            }
-#    endif /* HAS_SETEGID */
-            if (PL_delaymagic & DM_GID) {
-                if (PL_delaymagic_gid != PL_delaymagic_egid)
-                    DIE(aTHX_ "No setregid available");
-                PERL_UNUSED_RESULT(PerlProc_setgid(PL_delaymagic_gid));
-            }
-#endif /* HAS_SETRESGID */
-
-            tmp_gid  = PerlProc_getgid();
-            tmp_egid = PerlProc_getegid();
-        }
-        TAINTING_set( TAINTING_get | (tmp_uid && (tmp_euid != tmp_uid || tmp_egid != tmp_gid)) );
-#ifdef NO_TAINT_SUPPORT
-        PERL_UNUSED_VAR(tmp_uid);
-        PERL_UNUSED_VAR(tmp_euid);
-        PERL_UNUSED_VAR(tmp_gid);
-        PERL_UNUSED_VAR(tmp_egid);
-#endif
-    }
+    if (UNLIKELY(PL_delaymagic & ~DM_DELAY))
+        /* update system UIDs and/or GIDs */
+        S_aassign_uid(aTHX);
     PL_delaymagic = old_delaymagic;
 
 #ifdef PERL_RC_STACK
