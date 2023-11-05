@@ -7401,13 +7401,7 @@ PP(pp_refassign)
     if (UNLIKELY(PL_op->op_flags & OPf_MOD)) {
         /* e.g. f(\$x = \1); */
         rpp_popfree_to(PL_stack_sp - extra);
-        SV *nsv = newSVsv(sv);
-#ifdef PERL_RC_STACK
-        rpp_replace_1_1(nsv);
-        SvREFCNT_dec_NN(nsv);
-#else
-        rpp_replace_1_1(sv_2mortal(nsv));
-#endif
+        rpp_replace_at_norc(PL_stack_sp, newSVsv(sv));
         /* XXX else can weak references go stale before they are read, e.g.,
            in leavesub?  */
     }

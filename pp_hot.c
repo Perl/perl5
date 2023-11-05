@@ -2786,9 +2786,13 @@ PP(pp_aassign)
                          * SV_NOSTEAL */
                         nsv = newSVsv_flags(rsv,
                                 (SV_DO_COW_SVSETSV|SV_NOSTEAL|SV_GMAGIC));
-                        rpp_replace_at(svp, nsv);
 #ifdef PERL_RC_STACK
-                        SvREFCNT_dec_NN(nsv);
+                        rpp_replace_at_norc(svp, nsv);
+#else
+                        /* using rpp_replace_at_norc() would mortalise,
+                         * but we're manually adding nsv to the tmps stack
+                         * below already */
+                        rpp_replace_at(svp, nsv);
 #endif
 
                         rsv = nsv;
@@ -2952,9 +2956,13 @@ PP(pp_aassign)
                      * SV_NOSTEAL */
                     nsv = newSVsv_flags(rsv,
                             (SV_DO_COW_SVSETSV|SV_NOSTEAL|SV_GMAGIC));
-                    rpp_replace_at(svp, nsv);
 #ifdef PERL_RC_STACK
-                    SvREFCNT_dec_NN(nsv);
+                    rpp_replace_at_norc(svp, nsv);
+#else
+                    /* using rpp_replace_at_norc() would mortalise,
+                     * but we're manually adding nsv to the tmps stack
+                     * below already */
+                    rpp_replace_at(svp, nsv);
 #endif
                     rsv = nsv;
                 }
@@ -2977,20 +2985,14 @@ PP(pp_aassign)
                 *     @a = ((%h = ($$r, 1)), $r = "x");
                 *     $_++ for %h = (1,2,3,4);
                 */
-#ifdef PERL_RC_STACK
+#ifndef PERL_RC_STACK
+                EXTEND_MORTAL(nelems);
+#endif
                 for (svp = relem; svp <= lastrelem; svp += 2) {
-                    rpp_replace_at(svp,
+                    rpp_replace_at_norc(svp,
                         newSVsv_flags(*svp,
                                 SV_GMAGIC|SV_DO_COW_SVSETSV|SV_NOSTEAL));
-                    SvREFCNT_dec_NN(*svp);
                 }
-#else
-                EXTEND_MORTAL(nelems);
-                for (svp = relem; svp <= lastrelem; svp += 2)
-                    rpp_replace_at(svp,
-                        sv_mortalcopy_flags(*svp,
-                                SV_GMAGIC|SV_DO_COW_SVSETSV|SV_NOSTEAL));
-#endif
             }
             else if (PL_op->op_private & OPpASSIGN_COMMON_AGG) {
                 /* for possible commonality, e.g.
@@ -3011,14 +3013,12 @@ PP(pp_aassign)
 #ifdef PERL_RC_STACK
                 for (svp = relem; svp <= lastrelem; svp += 2) {
                     SV *rsv = *svp;
-                    if (UNLIKELY(SvGMAGICAL(rsv))) {
+                    if (UNLIKELY(SvGMAGICAL(rsv)))
                         /* XXX does this actually need to be copied, or
                          * could we just call the get magic??? */
-                        rpp_replace_at(svp,
-                            newSVsv_flags(*svp,
+                        rpp_replace_at_norc(svp,
+                            newSVsv_flags(rsv,
                                 SV_GMAGIC|SV_DO_COW_SVSETSV|SV_NOSTEAL));
-                        SvREFCNT_dec_NN(*svp);
-                    }
                 }
 #else
                 EXTEND_MORTAL(nelems);
@@ -3026,8 +3026,8 @@ PP(pp_aassign)
                     SV *rsv = *svp;
                     if (UNLIKELY(SvGMAGICAL(rsv))) {
                         SSize_t n;
-                        rpp_replace_at(svp,
-                            sv_mortalcopy_flags(*svp,
+                        rpp_replace_at_norc(svp,
+                            newSVsv_flags(rsv,
                                 SV_GMAGIC|SV_DO_COW_SVSETSV|SV_NOSTEAL));
                         /* allow other branch to continue pushing
                          * onto tmps stack without checking each time */
