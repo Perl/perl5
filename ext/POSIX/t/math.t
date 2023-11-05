@@ -293,6 +293,8 @@ SKIP: {
     like(NAN, qr/^NaN/, "NAN is Perl's NaN");
     cmp_ok(NAN, '!=', NAN, "NAN != NAN");
     ok(!(NAN == NAN), "NAN == NAN");
+    # we have a fallback copysign(), but it doesn't work for NaN
+    skip('no copysign', 2) unless $Config{d_copysign};
     ok(!signbit(copysign(NAN, 1.0)), "signbit(copysign(NAN, 1.0)))");
     ok(signbit(copysign(NAN, -1.0)), "signbit(copysign(NAN, -1.0)))");
 }
