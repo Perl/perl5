@@ -552,6 +552,7 @@
 # define rpp_replace_1_1(a)                     Perl_rpp_replace_1_1(aTHX_ a)
 # define rpp_replace_2_1(a)                     Perl_rpp_replace_2_1(aTHX_ a)
 # define rpp_replace_at(a,b)                    Perl_rpp_replace_at(aTHX_ a,b)
+# define rpp_replace_at_norc(a,b)               Perl_rpp_replace_at_norc(aTHX_ a,b)
 # define rpp_stack_is_rc()                      Perl_rpp_stack_is_rc(aTHX)
 # define rpp_try_AMAGIC_1(a,b)                  Perl_rpp_try_AMAGIC_1(aTHX_ a,b)
 # define rpp_try_AMAGIC_2(a,b)                  Perl_rpp_try_AMAGIC_2(aTHX_ a,b)
