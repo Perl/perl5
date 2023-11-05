@@ -4504,6 +4504,10 @@ S_get_locale_string_utf8ness_i(pTHX_ const char * string,
         return (known_utf8 == LOCALE_IS_UTF8) ? UTF8NESS_YES : UTF8NESS_NO;
     }
 
+    if (locale == NULL) {
+        locale = querylocale_i(cat_index);
+    }
+
 #    ifdef HAS_RELIABLE_UTF8NESS_DETERMINATION
 
     /* Here, we have available the libc functions that can be used to
@@ -4520,11 +4524,6 @@ S_get_locale_string_utf8ness_i(pTHX_ const char * string,
      * messages really could be UTF-8, and given that the odds are rather small
      * of something not being UTF-8 but being syntactically valid UTF-8, khw
      * has decided to call such strings as UTF-8. */
-
-    if (locale == NULL) {
-        locale = querylocale_i(cat_index);
-    }
-
     return (is_locale_utf8(locale)) ? UTF8NESS_YES : UTF8NESS_NO;
 
 #    else
