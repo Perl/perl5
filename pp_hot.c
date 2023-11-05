@@ -3138,17 +3138,33 @@ PP(pp_aassign)
                 for (i = 0, svp = relem; svp <= lastrelem; i++, svp++) {
                     SV *key = *svp++;
                     SV *val = *svp;
-                    if (hv_store_ent(hash, key, val, 0))
 #ifdef PERL_RC_STACK
-                        SvREFCNT_inc_simple_NN(val);
+                    {
+                        HE *stored = hv_store_ent(hash, key, val, 0);
+                        /* hv_store_ent() may have added set magic to val */;
+                        SvSETMAGIC(val);
+                        /* remove key and val from stack */
+                        *svp = NULL;
+                        if (!stored)
+                            SvREFCNT_dec_NN(val);
+                        svp[-1] = NULL;
+                        SvREFCNT_dec_NN(key);
+                    }
 #else
+                    if (hv_store_ent(hash, key, val, 0))
                         PL_tmps_stack[tmps_base + i] = &PL_sv_undef;
                     else
                         dirty_tmps = TRUE;
-#endif
                     /* hv_store_ent() may have added set magic to val */;
                     SvSETMAGIC(val);
+#endif
                 }
+#ifdef PERL_RC_STACK
+                /* now that all the key and val slots on the stack have
+                 * been discarded, we can skip freeing them on return */
+                assert(first_discard == lastrelem + 1);
+                first_discard = relem;
+#endif
             }
 
 #ifdef PERL_RC_STACK
