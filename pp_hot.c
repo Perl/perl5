@@ -2871,12 +2871,14 @@ PP(pp_aassign)
                 /* ownership of one ref count of each elem passed to
                  * array. Quietly remove old SVs from stack, or if need
                  * to keep the list on the stack too, bump the count */
-                if (is_list)
+                if (UNLIKELY(is_list))
                     for (i = 0; i < nelems; i++)
                         SvREFCNT_inc_void_NN(relem[i]);
-                else
-                    for (i = 0; i < nelems; i++)
-                        relem[i] = &PL_sv_undef;
+                else {
+                    assert(first_discard == relem + nelems);
+                    Zero(relem, nelems, SV*);
+                    first_discard = relem;
+                }
 #else
                 Copy(&(PL_tmps_stack[tmps_base]), AvARRAY(ary), nelems, SV*);
                 /* Quietly remove all the SVs from the tmps stack slots,
