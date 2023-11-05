@@ -667,6 +667,14 @@ not usually on concerns over their design.
 
 =item *
 
+arybase has been removed. It used to provide the implementation of the C<$[>
+variable (also known as the C<array_base> feature), letting array and string
+indices start at a non-zero value. As the feature has been removed (see
+L</Assigning non-zero to C<$[> is fatal>), this internal module is gone as
+well.
+
+=item *
+
 B::Debug is no longer distributed with the core distribution.  It
 continues to be available on CPAN as
 C<< L<B::Debug|https://metacpan.org/pod/B::Debug> >>.
