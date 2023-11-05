@@ -6337,12 +6337,47 @@ S_my_langinfo_i(pTHX_
          * could look for other C99 functions that are implemented correctly to
          * use instead.
          *
-         * What we do is to look at various strings associated with the locale:
+         * But MB_CUR_MAX is a C99 construct that helps a lot, is simple for a
+         * vendor to implement, and our experience with it is that it works
+         * well on a variety of platforms.  We have found that it returns a
+         * too-large number on some platforms for the C locale, but for no
+         * others.  That locale was already ruled out above.  (If MB_CUR_MAX
+         * returned too small a number, that would break a lot of things, and
+         * likely would be quickly corrected by the vendor.)  khw has some
+         * confidence that it doesn't return >1 when 1 is meant, as that would
+         * trigger a Perl warning, and we've had no reports of invalid
+         * occurrences of such. */
+#          ifdef MB_CUR_MAX
+
+        /* If there are fewer bytes available in this locale than are required
+         * to represent the largest legal UTF-8 code point, this definitely
+         * isn't a UTF-8 locale, even if the locale name says it is. */
+        LC_CTYPE_LOCK;
+        const int mb_cur_max = MB_CUR_MAX;
+        LC_CTYPE_UNLOCK;
+        if (mb_cur_max < (int) UNISKIP(PERL_UNICODE_MAX)) {
+            if (lean_towards_being_utf8) {
+                retval = "";    /* The name is wrong; override */
+            }
+
+            break;
+        }
+
+        /* But if the locale could be UTF-8, and also the name corroborates
+         * this, assume it is so */
+        if (lean_towards_being_utf8) {
+            break;
+        }
+
+#          endif    /* has MB_CUR_MAX */
+
+        /* Here, MB_CUR_MAX is not available, or was inconclusive.  What we do
+         * is to look at various strings associated with the locale:
          *  1)  If any are illegal UTF-8, the locale can't be UTF-8.
          *  2)  If all are legal UTF-8, and some non-ASCII characters are
          *      present, it is likely to be UTF-8, because of the strictness of
          *      UTF-8 syntax. So assume it is UTF-8
-         *  3)  If all are ASCII and the locale name indicates
+         *  3)  If all are ASCII and the locale name and/or MB_CUR_MAX indicate
          *      UTF-8, assume the locale is UTF-8.
          *  4)  Otherwise, assume the locale isn't UTF-8
          */
@@ -6478,8 +6513,9 @@ S_my_langinfo_i(pTHX_
         /* Here have gone through all the possibilities, and all tested strings
          * are legal UTF-8.
          *
-         * If any are non-ASCII, or the locale name indicates it
-         * is a UTF-8 locale, assume the locale is UTF-8. */
+         * Above we set UTF8NESS_YES if any string wasn't ASCII.  But even if
+         * they are all ascii, and the locale name indicates it is a UTF-8
+         * locale, assume the locale is UTF-8. */
         if (lean_towards_being_utf8) {
             strings_utf8ness = UTF8NESS_YES;
         }
@@ -6511,9 +6547,9 @@ S_my_langinfo_i(pTHX_
          *              turns out to be an actual problem.
          */
 
-        /* Otherwise, assume the locale isn't UTF-8.  This can be wrong if the
-         * locale is English without UTF-8 in its name, and with a dollar
-         * currency symbol. */
+        /* Otherwise, assume the locale isn't UTF-8.  This can be wrong if we
+         * don't have MB_CUR_MAX, and the locale is English without UTF-8 in
+         * its name, and with a dollar currency symbol. */
         break; /* 'retval' is already loaded with whatever code set we found. */
 
 #        endif  /* NEED_FURTHER_UTF8NESS_CHECKING */
