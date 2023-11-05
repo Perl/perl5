@@ -6283,19 +6283,97 @@ S_my_langinfo_i(pTHX_
             break;
         }
 
-        /* Here, it isn't a UTF-8 locale. */
+        /* Here, it isn't a UTF-8 locale.  After the #else clause is code to
+         * find the codeset (if any) from the locale name */
 
-#        else   /* mbtowc() is not available.  The chances of this code getting
-                   compiled are very small, as it is a C99 required function,
-                   and we are now requiring C99; perhaps if it is a defective
-                   implementation.  But if so, there are other libc functions
-                   that could be used instead. */
+#        else
 
-        /* Sling together several possibilities, depending on platform
-         * capabilities and what we found.
+        /* Here, neither mbtowc() nor mbrtowc() is available.  The chances of
+         * this are very small, as they are C99 required functions, and we are
+         * now requiring C99; perhaps this is a defective implementation and
+         * therefore Configure has been set to indicate neither exists.
          *
-         * For non-English locales or non-dollar currency locales, we likely
-         * will find out whether a locale is UTF-8 or not */
+         * Just below we try to calculate the code set from the locale name.
+         * In all cases but this one, it has already been determined that it is
+         * not a UTF-8 locale.  But for this case, we defer that, calculate the
+         * code set name, if any, and later use that result as a hint.  First
+         * #define a symbol to later tell us that we need to handle this case.
+         * */
+#          define NEED_FURTHER_UTF8NESS_CHECKING
+#        endif
+
+        /* Here, the code set has not been found.  The only other option khw
+         * could think of is to see if the codeset is part of the locale name.
+         * This is very less than ideal; often there is no code set in the
+         * name; and at other times they even lie.
+         *
+         * But there is an XPG standard syntax, which many locales follow:
+         *
+         *    language[_territory[.codeset]][@modifier]
+         *
+         * So we take the part between the dot and any '@' */
+        retval = strchr(locale, '.');
+        if (! retval) {
+            retval = "";  /* Alas, no dot */
+        }
+        else {
+
+            /* Don't include the dot */
+            retval++;
+
+            /* And stop before any '@' */
+            const char * modifier = strchr(retval, '@');
+            if (modifier) {
+                char * code_set_name;
+                const Size_t name_len = modifier - retval;
+                Newx(code_set_name, name_len + 1, char);    /* +1 for NUL */
+                my_strlcpy(code_set_name, retval, name_len + 1);
+                SAVEFREEPV(code_set_name);
+                retval = code_set_name;
+            }
+
+            /* The code set name is considered to be everything between the dot
+             * and the '@' */
+            retval = save_to_buffer(retval, retbufp, retbuf_sizep);
+        }
+
+#        ifndef NEED_FURTHER_UTF8NESS_CHECKING
+
+        break;  /* All done */
+
+#        else
+
+        /* Here, 'retval' contains whatever code set name is in the locale
+         * name.  In this #else, it being a UTF-8 code set hasn't been
+         * determined, because this platform is lacking the libc functions
+         * which would readily return that information.  So, we try to infer
+         * the UTF-8ness by other means, using the code set name just found as
+         * a hint to help resolve ambiguities.  So if that name indicates it is
+         * UTF-8, we expect it to be so */
+        bool lean_towards_being_utf8 = is_codeset_name_UTF8(retval);
+
+        /* The code set is often UTF-8, even when the locale name doesn't so
+         * indicate.  If we discover this is so, we will override whatever the
+         * locale name said.  Conversely (but rarely), "UTF-8" in the locale
+         * name might be wrong.  We return "" as the code set name if we find
+         * that to be the case.
+         *
+         * For this portion of the file to compile, neither mbtowc() nor
+         * mbrtowc() are available to us, even though they are required by C99.
+         * So, something must be wrong with them.  The code here should be good
+         * enough to work around this issue, but should the need arise, you
+         * could look for other C99 functions that are implemented correctly to
+         * use instead.
+         *
+         * What we do is to look at various strings associated with the locale:
+         *  1)  If any are illegal UTF-8, the locale can't be UTF-8.
+         *  2)  If all are legal UTF-8, and some non-ASCII characters are
+         *      present, it is likely to be UTF-8, because of the strictness of
+         *      UTF-8 syntax. So assume it is UTF-8
+         *  3)  If all are ASCII and the locale name indicates
+         *      UTF-8, assume the locale is UTF-8.
+         *  4)  Otherwise, assume the locale isn't UTF-8
+         */
 
         utf8ness_t strings_utf8ness = UTF8NESS_UNKNOWN;
         char * scratch_buf = NULL;
@@ -6421,16 +6499,27 @@ S_my_langinfo_i(pTHX_
         Safefree(scratch_buf);
         scratch_buf = NULL;
 
-        /* If nothing examined above rules out it being UTF-8, and at least one
-         * thing fits as UTF-8 (and not plain ASCII), assume the codeset is
-         * UTF-8. */
+        if (strings_utf8ness == UTF8NESS_NO) {
+            /* 'retval' is already loaded with whatever code set we found. */
+            break;
+        }
+
+        /* Here have gone through all the possibilities, and all tested strings
+         * are legal UTF-8.
+         *
+         * If any are non-ASCII, or the locale name indicates it
+         * is a UTF-8 locale, assume the locale is UTF-8. */
+        if (lean_towards_being_utf8) {
+            strings_utf8ness = UTF8NESS_YES;
+        }
+
         if (strings_utf8ness == UTF8NESS_YES) {
             retval = "UTF-8";
             break;
         }
 
-        /* Here, nothing examined indicates that the codeset is UTF-8.  But
-         * what is it?  The other locale categories are not likely to be of
+        /* Here, nothing examined indicates that the codeset is or isn't UTF-8.
+         * But what is it?  The other locale categories are not likely to be of
          * further help:
          *
          * LC_NUMERIC   Only a few locales in the world have a non-ASCII radix
@@ -6448,60 +6537,15 @@ S_my_langinfo_i(pTHX_
          *              them is ASCII, which is of no help to us.  A Configure
          *              probe could possibly be written to see if this platform
          *              has non-ASCII error messages.  But again, wait until it
-         *              turns out to be an actual problem. */
+         *              turns out to be an actual problem.
+         */
 
-#        endif    /* ! mbtowc() */
+        /* Otherwise, assume the locale isn't UTF-8.  This can be wrong if the
+         * locale is English without UTF-8 in its name, and with a dollar
+         * currency symbol. */
+        break; /* 'retval' is already loaded with whatever code set we found. */
 
-        /* Rejoin the mbtowc available/not-available cases.
-         *
-         * We got here only because we haven't been able to find the codeset.
-         * The only other option khw could think of is to see if the codeset is
-         * part of the locale name.  This is very less than ideal; often there
-         * is no code set in the name; and at other times they even lie.
-         *
-         * But there is an XPG standard syntax, which many locales follow:
-         *
-         * language[_territory[.codeset]][@modifier]
-         *
-         * So we take the part between the dot and any '@' */
-        retval = (const char *) strchr(locale, '.');
-        if (! retval) {
-            retval = "";  /* Alas, no dot */
-            break;
-        }
-
-        /* Don't include the dot */
-        retval++;
-
-        /* And stop before any '@' */
-        const char * modifier = strchr(retval, '@');
-        if (modifier) {
-            char * code_set_name;
-            const Size_t name_len = modifier - retval;
-            Newx(code_set_name, name_len + 1, char);         /* +1 for NUL */
-            my_strlcpy(code_set_name, retval, name_len + 1);
-            SAVEFREEPV(code_set_name);
-            retval = code_set_name;
-        }
-
-#        if defined(HAS_MBTOWC) || defined(HAS_MBRTOWC)
-
-        /* When these functions, are available, they were tried earlier and
-         * indicated that the locale did not act like a proper UTF-8 one.  So
-         * if it claims to be UTF-8, it is a lie */
-        if (is_codeset_name_UTF8(retval)) {
-            retval = "";
-            break;
-        }
-
-#        endif
-
-        /* Otherwise the code set name is considered to be everything between
-         * the dot and the '@' */
-        retval = save_to_buffer(retval, retbufp, retbuf_sizep);
-
-        break;
-
+#        endif  /* NEED_FURTHER_UTF8NESS_CHECKING */
 #      endif    /* ! WIN32 */
 #    endif      /* USE_LOCALE_CTYPE */
 
