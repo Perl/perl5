@@ -6395,28 +6395,27 @@ S_my_langinfo_i(pTHX_
 #          endif
 #          ifdef USE_LOCALE_TIME
 
-            /* We can also try various strings associated with LC_TIME, like
-             * the names of months or days of the week */
+        /* We can also try various strings associated with LC_TIME, like the
+         * names of months or days of the week */
 
-                DAY_1, DAY_2, DAY_3, DAY_4, DAY_5, DAY_6, DAY_7,
-                MON_1, MON_2, MON_3, MON_4, MON_5, MON_6, MON_7, MON_8,
-                                            MON_9, MON_10, MON_11, MON_12,
-                ALT_DIGITS, AM_STR, PM_STR,
-                ABDAY_1, ABDAY_2, ABDAY_3, ABDAY_4, ABDAY_5, ABDAY_6,
-                                                             ABDAY_7,
-                ABMON_1, ABMON_2, ABMON_3, ABMON_4, ABMON_5, ABMON_6,
-                ABMON_7, ABMON_8, ABMON_9, ABMON_10, ABMON_11, ABMON_12
+            DAY_1, DAY_2, DAY_3, DAY_4, DAY_5, DAY_6, DAY_7,
+            MON_1, MON_2, MON_3, MON_4, MON_5, MON_6, MON_7, MON_8,
+                                        MON_9, MON_10, MON_11, MON_12,
+            ALT_DIGITS, AM_STR, PM_STR,
+            ABDAY_1, ABDAY_2, ABDAY_3, ABDAY_4, ABDAY_5, ABDAY_6, ABDAY_7,
+            ABMON_1, ABMON_2, ABMON_3, ABMON_4, ABMON_5, ABMON_6,
+            ABMON_7, ABMON_8, ABMON_9, ABMON_10, ABMON_11, ABMON_12
 
 #          endif
-
         };
 
 #          ifdef USE_LOCALE_TIME
 
-            /* The code in the recursive call can handle switching the locales,
-             * but by doing it here, we avoid switching each iteration of the
-             * loop */
-            const char * orig_TIME_locale = toggle_locale_c(LC_TIME, locale);
+        /* The code in the recursive call below can handle switching the
+         * locales, but by doing it now here, that code will check and discover
+         * that there is no need to switch then restore, avoiding those each
+         * loop iteration */
+        const char * orig_TIME_locale = toggle_locale_c(LC_TIME, locale);
 
 #          endif
 
@@ -6456,43 +6455,43 @@ S_my_langinfo_i(pTHX_
         const locale_category_index  follow_on_cat_index = LC_ALL_INDEX_;
 #          endif
 
-            /* Everything set up; look through all the strings */
-            for (PERL_UINT_FAST8_T i = 0; i < C_ARRAY_LENGTH(trials); i++) {
-                (void) my_langinfo_i(trials[i], cat_index, locale,
-                                     &scratch_buf, &scratch_buf_size, NULL);
-                cat_index = follow_on_cat_index;
+        /* Everything set up; look through all the strings */
+        for (PERL_UINT_FAST8_T i = 0; i < C_ARRAY_LENGTH(trials); i++) {
+            (void) my_langinfo_i(trials[i], cat_index, locale,
+                                 &scratch_buf, &scratch_buf_size, NULL);
+            cat_index = follow_on_cat_index;
 
-                /* To prevent infinite recursive calls, we don't ask for the
-                 * UTF-8ness of the string (in 'trials[i]') above.  Instead we
-                 * examine the returned string here */
-                const Size_t len = strlen(scratch_buf);
-                const U8 * first_variant;
+            /* To prevent infinite recursive calls, we don't ask for the
+             * UTF-8ness of the string (in 'trials[i]') above.  Instead we
+             * examine the returned string here */
+            const Size_t len = strlen(scratch_buf);
+            const U8 * first_variant;
 
-                /* If the string is identical whether or not it is encoded as
-                 * UTF-8, it isn't helpful in determining UTF8ness. */
-                if (is_utf8_invariant_string_loc((U8 *) scratch_buf, len,
-                                                 &first_variant))
-                {
-                    continue;
-                }
-
-                /* Here, has non-ASCII.  If not legal UTF-8, isn't a UTF-8
-                 * locale */
-                if (! is_utf8_string(first_variant,
-                                     len - (first_variant - (U8 *) scratch_buf)))
-                {
-                    strings_utf8ness = UTF8NESS_NO;
-                    break;
-                }
-
-                /* Here, is a legal non-ASCII UTF-8 string; tentatively set the
-                 * return to YES; possibly overridden by later iterations */
-                strings_utf8ness = UTF8NESS_YES;
+            /* If the string is identical whether or not it is encoded as
+             * UTF-8, it isn't helpful in determining UTF8ness. */
+            if (is_utf8_invariant_string_loc((U8 *) scratch_buf, len,
+                                             &first_variant))
+            {
+                continue;
             }
+
+            /* Here, has non-ASCII.  If not legal UTF-8, isn't a UTF-8
+             * locale */
+            if (! is_utf8_string(first_variant,
+                                 len - (first_variant - (U8 *) scratch_buf)))
+            {
+                strings_utf8ness = UTF8NESS_NO;
+                break;
+            }
+
+            /* Here, is a legal non-ASCII UTF-8 string; tentatively set the
+             * return to YES; possibly overridden by later iterations */
+            strings_utf8ness = UTF8NESS_YES;
+        }
 
 #          ifdef USE_LOCALE_TIME
 
-            restore_toggled_locale_c(LC_TIME, orig_TIME_locale);
+        restore_toggled_locale_c(LC_TIME, orig_TIME_locale);
 
 #          endif
 
