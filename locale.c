@@ -6314,6 +6314,8 @@ S_my_langinfo_i(pTHX_
         break;  /* All done */
 
 #        else
+#          define NAME_INDICATES_UTF8       0x1
+#          define MB_CUR_MAX_SUGGESTS_UTF8  0x2
 
         /* Here, 'retval' contains whatever code set name is in the locale
          * name.  In this #else, it being a UTF-8 code set hasn't been
@@ -6322,7 +6324,10 @@ S_my_langinfo_i(pTHX_
          * the UTF-8ness by other means, using the code set name just found as
          * a hint to help resolve ambiguities.  So if that name indicates it is
          * UTF-8, we expect it to be so */
-        bool lean_towards_being_utf8 = is_codeset_name_UTF8(retval);
+        unsigned int lean_towards_being_utf8 = 0;
+        if (is_codeset_name_UTF8(retval)) {
+            lean_towards_being_utf8 |= NAME_INDICATES_UTF8;
+        }
 
         /* The code set is often UTF-8, even when the locale name doesn't so
          * indicate.  If we discover this is so, we will override whatever the
@@ -6356,7 +6361,7 @@ S_my_langinfo_i(pTHX_
         const int mb_cur_max = MB_CUR_MAX;
         LC_CTYPE_UNLOCK;
         if (mb_cur_max < (int) UNISKIP(PERL_UNICODE_MAX)) {
-            if (lean_towards_being_utf8) {
+            if (lean_towards_being_utf8 & NAME_INDICATES_UTF8) {
                 retval = "";    /* The name is wrong; override */
             }
 
@@ -6365,9 +6370,26 @@ S_my_langinfo_i(pTHX_
 
         /* But if the locale could be UTF-8, and also the name corroborates
          * this, assume it is so */
-        if (lean_towards_being_utf8) {
+        if (lean_towards_being_utf8 & NAME_INDICATES_UTF8) {
             break;
         }
+
+        /* Here, the name doesn't indicate UTF-8, but MB_CUR_MAX indicates it
+         * could be.  khw knows of only two other locales in the world, EUC-TW
+         * and GB 18030, that legitimately require this many bytes (4).  In
+         * both, the single byte characters are the same as ASCII.  No
+         * multi-byte character in EUC-TW is legal UTF-8 (since the first byte
+         * of each is a continuation).  GB 18030 has no three byte sequences,
+         * and none of the four byte ones is legal UTF-8 (as the second byte
+         * for these is a non-continuation).  But every legal UTF-8 two byte
+         * sequence is also legal in GB 18030, though none have the same
+         * meaning, and no Han code point expressed in UTF-8 is two byte.  So
+         * the further tests below which look for native expressions of
+         * currency and time will not return two byte sequences, hence they
+         * will reliably rule out this locale as being UTF-8.  So, if we get
+         * this far, the result is almost certainly UTF-8.  But to be really
+         * sure, also check that there is no illegal UTF-8. */
+        lean_towards_being_utf8 |= MB_CUR_MAX_SUGGESTS_UTF8;
 
 #          endif    /* has MB_CUR_MAX */
 
@@ -6380,7 +6402,10 @@ S_my_langinfo_i(pTHX_
          *  3)  If all are ASCII and the locale name and/or MB_CUR_MAX indicate
          *      UTF-8, assume the locale is UTF-8.
          *  4)  Otherwise, assume the locale isn't UTF-8
-         */
+         *
+         * To save cycles, if the locale name indicates it is a UTF-8 locale,
+         * we stop looking at the first instance with legal non-ASCII UTF-8.
+         * It is very unlikely this combination is coincidental. */
 
         utf8ness_t strings_utf8ness = UTF8NESS_UNKNOWN;
         char * scratch_buf = NULL;
@@ -6494,6 +6519,11 @@ S_my_langinfo_i(pTHX_
             /* Here, is a legal non-ASCII UTF-8 string; tentatively set the
              * return to YES; possibly overridden by later iterations */
             strings_utf8ness = UTF8NESS_YES;
+
+            /* But if this corroborates our expectation, quit now */
+            if (lean_towards_being_utf8 & NAME_INDICATES_UTF8) {
+                break;
+            }
         }
 
 #          ifdef USE_LOCALE_TIME
@@ -6510,8 +6540,7 @@ S_my_langinfo_i(pTHX_
             break;
         }
 
-        /* Here have gone through all the possibilities, and all tested strings
-         * are legal UTF-8.
+        /* Here all tested strings are legal UTF-8.
          *
          * Above we set UTF8NESS_YES if any string wasn't ASCII.  But even if
          * they are all ascii, and the locale name indicates it is a UTF-8
@@ -6545,6 +6574,9 @@ S_my_langinfo_i(pTHX_
          *              probe could possibly be written to see if this platform
          *              has non-ASCII error messages.  But again, wait until it
          *              turns out to be an actual problem.
+         *
+         *              Things like YESSTR, NOSTR, might not be in ASCII, but
+         *              need nl_langinfo() to access, which we don't have.
          */
 
         /* Otherwise, assume the locale isn't UTF-8.  This can be wrong if we
