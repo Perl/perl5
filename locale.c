@@ -583,15 +583,6 @@ S_positional_newlocale(int mask, const char * locale, locale_t base)
 #  define SET_EINVAL
 #endif
 
-/* If we have any of these library functions, we can reliably determine is a
- * locale is a UTF-8 one or not.  And if we aren't using locales at all, we act
- * as if everything is the C locale, so the answer there is always "No, it
- * isn't UTF-8"; this too is reliably accurate */
-#if   defined(HAS_SOME_LANGINFO) || defined(HAS_MBTOWC)                 \
-   || defined(HAS_MBRTOWC) || ! defined(USE_LOCALE)
-#  define HAS_RELIABLE_UTF8NESS_DETERMINATION
-#endif
-
 /* This is a starting guess as to when this is true.  It definititely isn't
  * true on *BSD where positional LC_ALL notation is used.  Likely this will end
  * up being defined in hints files. */
@@ -4508,12 +4499,8 @@ S_get_locale_string_utf8ness_i(pTHX_ const char * string,
         locale = querylocale_i(cat_index);
     }
 
-#    ifdef HAS_RELIABLE_UTF8NESS_DETERMINATION
-
-    /* Here, we have available the libc functions that can be used to
-     * accurately determine the UTF8ness of the underlying locale.  If it is a
-     * UTF-8 locale, the string is UTF-8;  otherwise it was coincidental that
-     * the string is legal UTF-8
+    /* If the locale is UTF-8, the string is UTF-8;  otherwise it was
+     * coincidental that the string is legal UTF-8
      *
      * However, if the perl is compiled to not pay attention to the category
      * being passed in, you might think that that locale is essentially always
@@ -4526,20 +4513,6 @@ S_get_locale_string_utf8ness_i(pTHX_ const char * string,
      * has decided to call such strings as UTF-8. */
     return (is_locale_utf8(locale)) ? UTF8NESS_YES : UTF8NESS_NO;
 
-#    else
-
-    /* Here, we have a valid UTF-8 string containing non-ASCII characters, and
-     * don't have access to functions to check if the locale is UTF-8 or not.
-     * Assume that it is.  khw tried adding a check that the string is entirely
-     * in a single Unicode script, but discovered the strftime() timezone is
-     * user-settable through the environment, which may be in a different
-     * script than the locale-expected value. */
-    PERL_UNUSED_ARG(locale);
-    PERL_UNUSED_ARG(cat_index);
-
-    return UTF8NESS_YES;
-
-#    endif
 #  endif
 
 }
