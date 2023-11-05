@@ -5131,6 +5131,21 @@ S_my_localeconv(pTHX_ const int item)
      * corrections determined at hash population time, at an extra maintenance
      * cost which khw doesn't think is worth it
      */
+
+#  ifndef HAS_SOME_LANGINFO
+
+    /* We are done when called with an individual item.  There are no integer
+     * items to adjust, and it's best for the caller to determine if this
+     * string item is UTF-8 or not.  This is because the locale's UTF-8ness is
+     * calculated below, and in some Configurations, that can lead to a
+     * recursive call to here, which could recurse infinitely. */
+
+    if (item != 0) {
+        return hv;
+    }
+
+#  endif
+
     for (unsigned int i = 0; i < 2; i++) {  /* Try both types of strings */
         if (! strings[i]) {     /* Skip if no strings of this type */
             continue;
@@ -5140,24 +5155,9 @@ S_my_localeconv(pTHX_ const int item)
                  ? numeric_locale
                  : monetary_locale;
 
-        locale_utf8ness_t locale_is_utf8 = LOCALE_UTF8NESS_UNKNOWN;
-
-#  ifdef HAS_RELIABLE_UTF8NESS_DETERMINATION
-
-        /* It saves time in the loop below to have predetermined the UTF8ness
-         * of the locale.  But only do so if the platform reliably has this
-         * information; otherwise it's better to do it only it should become
-         * necessary, which happens on a per-element basis in the loop. */
-
-        locale_is_utf8 = (is_locale_utf8(locale))
-                         ? LOCALE_IS_UTF8
-                         : LOCALE_NOT_UTF8;
-
-        if (locale_is_utf8 == LOCALE_NOT_UTF8) {
+        if (! is_locale_utf8(locale)) {
             continue;   /* No string can be UTF-8 if the locale isn't */
         }
-
-#  endif
 
         /* Examine each string */
         for (const lconv_offset_t *strp = strings[i]; strp->name; strp++) {
@@ -5172,7 +5172,7 @@ S_my_localeconv(pTHX_ const int item)
 
             /* Determine if the string should be marked as UTF-8. */
             if (UTF8NESS_YES == (get_locale_string_utf8ness_i(SvPVX(*value),
-                                                  locale_is_utf8,
+                                                  LOCALE_IS_UTF8,
                                                   NULL,
                                                   (locale_category_index) 0)))
             {
@@ -6042,12 +6042,10 @@ S_my_langinfo_i(pTHX_
         retval = save_to_buffer(SvPV_nolen(string), retbufp, retbuf_sizep);
 
         if (utf8ness) {
-            is_utf8 = (SvUTF8(string))
-                      ? UTF8NESS_YES
-                      : (is_utf8_invariant_string( (U8 *) retval,
-                                                  strlen(retval)))
-                        ? UTF8NESS_IMMATERIAL
-                        : UTF8NESS_NO;
+            is_utf8 = get_locale_string_utf8ness_i(retval,
+                                                   LOCALE_UTF8NESS_UNKNOWN,
+                                                   locale,
+                                                   cat_index);
         }
 
         break;
