@@ -102,8 +102,6 @@ DEFAULT_INC_EXCLUDES_DOT = define
 #
 # uncomment exactly one of the following
 #
-# Visual C++ 2013 (aka Visual C++ 12.0) (full version or Express Edition)
-#CCTYPE		= MSVC120
 # Visual C++ 2015 (aka Visual C++ 14.0) (full version or Express Edition)
 #CCTYPE		= MSVC140
 # Visual C++ 2017 (aka Visual C++ 14.1) (full version or Community Edition)
@@ -193,7 +191,7 @@ DEFAULT_INC_EXCLUDES_DOT = define
 # Versions of Visual C++ up to VC++ 14.0 define $(VCINSTALLDIR), but from
 # VC++ 14.1 we need the subfolder given by $(VCToolsInstallDir).
 #
-!IF "$(CCTYPE)" == "MSVC120" || "$(CCTYPE)" == "MSVC140"
+!IF "$(CCTYPE)" == "MSVC140"
 CCHOME		= $(VCINSTALLDIR)
 !ELSE
 CCHOME		= $(VCTOOLSINSTALLDIR)
@@ -371,7 +369,7 @@ MINIDELAYLOAD	= -DELAYLOAD:advapi32.dll
 # Set the install location of the compiler headers/libraries.
 # These are saved into $Config{incpath} and $Config{libpth}.
 CCINCDIR	= $(CCHOME)\include
-!IF "$(CCTYPE)" == "MSVC120" || "$(CCTYPE)" == "MSVC140"
+!IF "$(CCTYPE)" == "MSVC140"
 !  IF "$(WIN64)" == "define"
 CCLIBDIR	= $(CCHOME)\lib\amd64
 !  ELSE
@@ -438,11 +436,7 @@ CXX_FLAG	= $(CXX_FLAG) -std:c++20
 !ENDIF
 EXTRACFLAGS	= -nologo -GF -W3
 
-!IF "$(CCTYPE)" == "MSVC120"
-LIBC		= msvcrt.lib
-!ELSE
 LIBC		= ucrt.lib
-!ENDIF
 
 !IF  "$(CFG)" == "Debug"
 OPTIMIZE	= -Od -Zi
@@ -454,11 +448,7 @@ OPTIMIZE	= -Od -Zi
 LINK_DBG	= -debug
 EXTRACFLAGS	= $(EXTRACFLAGS) -MD
 !ELSEIF  "$(CFG)" == "DebugFull"
-!  IF "$(CCTYPE)" == "MSVC120"
-LIBC		= msvcrtd.lib
-!  ELSE
 LIBC		= ucrtd.lib
-!  ENDIF
 OPTIMIZE	= -Od -Zi
 LINK_DBG	= -debug
 DEFINES		= $(DEFINES) -D_DEBUG -DDEBUGGING
@@ -486,12 +476,9 @@ OPTIMIZE	= $(OPTIMIZE) -fp:precise
 
 # For now, silence warnings about "unsafe" CRT functions
 # and POSIX CRT function names being deprecated.
-DEFINES		= $(DEFINES) -D_CRT_SECURE_NO_DEPRECATE -D_CRT_NONSTDC_NO_DEPRECATE
-
-# Likewise for deprecated Winsock APIs in VC++ 14.0 onwards for now.
-!IF "$(CCTYPE)" != "MSVC120"
-DEFINES		= $(DEFINES) -D_WINSOCK_DEPRECATED_NO_WARNINGS
-!ENDIF
+# Likewise for deprecated Winsock APIs
+DEFINES		= $(DEFINES) -D_CRT_SECURE_NO_DEPRECATE \
+                  -D_CRT_NONSTDC_NO_DEPRECATE -D_WINSOCK_DEPRECATED_NO_WARNINGS
 
 LIBBASEFILES	= \
 		oldnames.lib kernel32.lib user32.lib gdi32.lib winspool.lib \
@@ -499,12 +486,10 @@ LIBBASEFILES	= \
 		netapi32.lib uuid.lib ws2_32.lib mpr.lib winmm.lib \
 		version.lib odbc32.lib odbccp32.lib comctl32.lib
 
-!IF "$(CCTYPE)" != "MSVC120"
-!  IF  "$(CFG)" == "DebugFull"
+!IF  "$(CFG)" == "DebugFull"
 LIBBASEFILES	= $(LIBBASEFILES) msvcrtd.lib vcruntimed.lib
-!  ELSE
+!ELSE
 LIBBASEFILES	= $(LIBBASEFILES) msvcrt.lib vcruntime.lib
-!  ENDIF
 !ENDIF
 
 # Avoid __intel_new_proc_init link error for libircmt.
@@ -963,7 +948,6 @@ $(MINIDIR)\.exists : $(CFGH_TMPL)
 	echo #undef USE_64_BIT_INT&& \
 	echo #undef USE_LONG_DOUBLE&& \
 	echo #undef USE_CPLUSPLUS)>> $(MINI_CONFIG_H)
-!IF "$(CCTYPE)" != "MSVC120"
 	@(echo #undef FILE_ptr&& \
 	echo #undef FILE_cnt&& \
 	echo #undef FILE_base&& \
@@ -973,7 +957,6 @@ $(MINIDIR)\.exists : $(CFGH_TMPL)
 	echo #define FILE_base^(fp^) PERLIO_FILE_base^(fp^)&& \
 	echo #define FILE_bufsiz^(fp^) ^(PERLIO_FILE_cnt^(fp^) + PERLIO_FILE_ptr^(fp^) - PERLIO_FILE_base^(fp^)^)&& \
 	echo #define I_STDBOOL)>> $(MINI_CONFIG_H)
-!ENDIF
 !IF "$(WIN64)"=="define"
 	@(echo #define PTRSIZE ^8&& \
 	echo #define SSize_t $(INT64)&& \
