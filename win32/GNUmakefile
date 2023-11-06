@@ -160,8 +160,6 @@ DEFAULT_INC_EXCLUDES_DOT := define
 #
 # uncomment exactly one of the following
 #
-# Visual C++ 2013 (aka Visual C++ 12.0) (full version or Express Edition)
-#CCTYPE		:= MSVC120
 # Visual C++ 2015 (aka Visual C++ 14.0) (full version or Express Edition)
 #CCTYPE		:= MSVC140
 # Visual C++ 2017 (aka Visual C++ 14.1) (full version or Community Edition)
@@ -386,8 +384,6 @@ endif
 ifeq ($(CCHOME),)
 ifeq ($(CCTYPE),GCC)
 CCHOME		:= C:\MinGW
-else ifeq ($(CCTYPE),MSVC120)
-CCHOME		:= $(VCINSTALLDIR)
 else ifeq ($(CCTYPE),MSVC140)
 CCHOME		:= $(VCINSTALLDIR)
 else
@@ -503,13 +499,7 @@ CCLIBDIR := $(CCHOME)\lib;$(CCHOME)\$(GCCTARGET)\lib;$(CCHOME)\lib\gcc\$(GCCTARG
 ARCHPREFIX :=
 else
 CCINCDIR := $(CCHOME)\include
-ifeq ($(CCTYPE),MSVC120)
-ifeq ($(WIN64),define)
-CCLIBDIR := $(CCHOME)\lib\amd64
-else
-CCLIBDIR := $(CCHOME)\lib
-endif
-else ifeq ($(CCTYPE),MSVC140)
+ifeq ($(CCTYPE),MSVC140)
 ifeq ($(WIN64),define)
 CCLIBDIR := $(CCHOME)\lib\amd64
 else
@@ -685,11 +675,7 @@ CXX_FLAG	+= -std:c++20
 endif
 EXTRACFLAGS	= -nologo -GF -W3
 
-ifeq ($(CCTYPE),MSVC120)
-LIBC		= msvcrt.lib
-else
 LIBC		= ucrt.lib
-endif
 
 ifeq ($(CFG),Debug)
 OPTIMIZE	= -Od -Zi
@@ -701,11 +687,7 @@ OPTIMIZE	= -Od -Zi
 LINK_DBG	= -debug
 EXTRACFLAGS	+= -MD
 else ifeq ($(CFG),DebugFull)
-ifeq ($(CCTYPE),MSVC120)
-LIBC		= msvcrtd.lib
-else
 LIBC		= ucrtd.lib
-endif
 OPTIMIZE	= -Od -Zi
 LINK_DBG	= -debug
 DEFINES		+= -D_DEBUG -DDEBUGGING
@@ -734,24 +716,19 @@ endif
 
 # For now, silence warnings about "unsafe" CRT functions
 # and POSIX CRT function names being deprecated.
-DEFINES		+= -D_CRT_SECURE_NO_DEPRECATE -D_CRT_NONSTDC_NO_DEPRECATE
-
-# Likewise for deprecated Winsock APIs in VC++ 14.0 onwards for now.
-ifneq ($(CCTYPE),MSVC120)
-DEFINES		+= -D_WINSOCK_DEPRECATED_NO_WARNINGS
-endif
+# Likewise for deprecated Winsock APIs
+DEFINES         += -D_CRT_SECURE_NO_DEPRECATE -D_CRT_NONSTDC_NO_DEPRECATE \
+                   -D_WINSOCK_DEPRECATED_NO_WARNINGS
 
 LIBBASEFILES	= oldnames.lib kernel32.lib user32.lib gdi32.lib winspool.lib \
 	comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib \
 	netapi32.lib uuid.lib ws2_32.lib mpr.lib winmm.lib version.lib \
 	odbc32.lib odbccp32.lib comctl32.lib
 
-ifneq ($(CCTYPE),MSVC120)
 ifeq ($(CFG),DebugFull)
 LIBBASEFILES	+= msvcrtd.lib vcruntimed.lib
 else
 LIBBASEFILES	+= msvcrt.lib vcruntime.lib
-endif
 endif
 
 # Avoid __intel_new_proc_init link error for libircmt.
@@ -1302,7 +1279,6 @@ $(MINIDIR)\.exists : $(CFGH_TMPL)
 	echo #undef I_QUADMATH&& \
 	echo #undef USE_QUADMATH&& \
 	echo #undef USE_CPLUSPLUS)>> $(MINI_CONFIG_H)
-ifneq ($(CCTYPE),MSVC120)
 	@(echo #undef FILE_ptr&& \
 	echo #undef FILE_cnt&& \
 	echo #undef FILE_base&& \
@@ -1312,7 +1288,6 @@ ifneq ($(CCTYPE),MSVC120)
 	echo #define FILE_base^(fp^) PERLIO_FILE_base^(fp^)&& \
 	echo #define FILE_bufsiz^(fp^) ^(PERLIO_FILE_cnt^(fp^) + PERLIO_FILE_ptr^(fp^) - PERLIO_FILE_base^(fp^)^)&& \
 	echo #define I_STDBOOL)>> $(MINI_CONFIG_H)
-endif
 ifeq ($(WIN64),define)
 ifeq ($(CCTYPE),GCC)
 	@(echo #define LONG_DOUBLESIZE ^16)>> $(MINI_CONFIG_H)
