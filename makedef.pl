@@ -167,8 +167,8 @@ if (   $define{HAS_POSIX_2008_LOCALE}
 
 if ($define{USE_LOCALE_THREADS} && ! $define{NO_THREAD_SAFE_LOCALE}) {
     if (    $define{USE_POSIX_2008_LOCALE}
-        || ($define{WIN32} && (   $cctype !~ /\D/
-                               && $cctype >= 80)))
+        || ($define{WIN32} && ($cctype eq "GCC" || (   $cctype !~ /\D/
+                                                    && $cctype >= 80))))
     {
         $define{USE_THREAD_SAFE_LOCALE} = 1;
     }
