@@ -793,13 +793,6 @@ PERLVARI(I, setlocale_bufsize, Size_t, 0)
 PERLVARI(I, less_dicey_locale_buf, char *, NULL)
 PERLVARI(I, less_dicey_locale_bufsize, Size_t, 0)
 #endif
-#if ! defined(HAS_NL_LANGINFO)          \
- &&   defined(USE_LOCALE_CTYPE)         \
- && ! defined(WIN32)                    \
- && ! defined(HAS_MBTOWC)               \
- && ! defined(HAS_MBRTOWC)
-PERLVARI(I, langinfo_recursed, unsigned int, 0)
-#endif
 
 #ifdef PERL_SAWAMPERSAND
 PERLVAR(I, sawampersand, U8)		/* must save all match strings */

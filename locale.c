@@ -6301,41 +6301,25 @@ S_my_langinfo_i(pTHX_
         char * scratch_buf = NULL;
         Size_t scratch_buf_size = 0;
 
-#          if defined(USE_LOCALE_MONETARY) && defined(HAS_LOCALECONV)
-#            define LANGINFO_RECURSED_MONETARY  0x1
+        /* List of strings to look at */
+        const int trials[] = {
 
-        /* Can't use this method unless localeconv() is available, as that's
-         * the way we find out the currency symbol.
-         *
-         * First try looking at the currency symbol (via a recursive call) to
-         * see if it disambiguates things.  Often that will be in the native
-         * script, and if the symbol isn't legal UTF-8, we know that the locale
-         * isn't either.
-         *
-         * The recursion calls my_localeconv() to find CRNCYSTR, and that can
-         * call is_locale_utf8() which will call my_langinfo(CODESET) which
-         * will get to here again, ad infinitum.  The guard prevents that.
-         */
-        if ((PL_langinfo_recursed & LANGINFO_RECURSED_MONETARY) == 0) {
-            PL_langinfo_recursed |= LANGINFO_RECURSED_MONETARY;
-            (void) my_langinfo_c(CRNCYSTR, LC_MONETARY, locale,
-                                 &scratch_buf, &scratch_buf_size,
-                                 &strings_utf8ness);
-            PL_langinfo_recursed &= ~LANGINFO_RECURSED_MONETARY;
-        }
+#          if defined(USE_LOCALE_MONETARY) && defined(HAS_LOCALECONV)
+
+            /* The first string tried is the locale currency name.  Often that
+             * will be in the native script.
+             *
+             * But this is usable only if localeconv() is available, as that's
+             * the way we find out the currency symbol. */
+
+            CRNCYSTR,
 
 #          endif
 #          ifdef USE_LOCALE_TIME
 
-        /* If we have ruled out being UTF-8, no point in checking further. */
-        if (strings_utf8ness != UTF8NESS_NO) {
-            /* But otherwise do check more.  This is done even if the currency
-             * symbol looks to be UTF-8, just in case that's a false positive.
-             *
-             * Look at the LC_TIME entries, like the names of the months or
-             * weekdays.  We quit at the first one that is illegal UTF-8 */
+            /* We can also try various strings associated with LC_TIME, like
+             * the names of months or days of the week */
 
-            const int times[] = {
                 DAY_1, DAY_2, DAY_3, DAY_4, DAY_5, DAY_6, DAY_7,
                 MON_1, MON_2, MON_3, MON_4, MON_5, MON_6, MON_7, MON_8,
                                             MON_9, MON_10, MON_11, MON_12,
@@ -6344,20 +6328,66 @@ S_my_langinfo_i(pTHX_
                                                              ABDAY_7,
                 ABMON_1, ABMON_2, ABMON_3, ABMON_4, ABMON_5, ABMON_6,
                 ABMON_7, ABMON_8, ABMON_9, ABMON_10, ABMON_11, ABMON_12
-            };
+
+#          endif
+
+        };
+
+#          ifdef USE_LOCALE_TIME
 
             /* The code in the recursive call can handle switching the locales,
              * but by doing it here, we avoid switching each iteration of the
              * loop */
             const char * orig_TIME_locale = toggle_locale_c(LC_TIME, locale);
 
-            for (PERL_UINT_FAST8_T i = 0; i < C_ARRAY_LENGTH(times); i++) {
-                (void) my_langinfo_c(times[i], LC_TIME, locale,
+#          endif
+
+        /* The trials array may consist of strings from two different locale
+         * categories.  The call to my_langinfo_i() below needs to pass the
+         * proper category for each string.  There is a max of 1 trial for
+         * LC_MONETARY; the rest are LC_TIME.  So the array is arranged so the
+         * LC_MONETARY item (if any) is first, and all subsequent iterations
+         * will use LC_TIME.  These #ifdefs set up the values for all possible
+         * combinations. */
+#          if defined(USE_LOCALE_MONETARY) && defined(HAS_LOCALECONV)
+
+        locale_category_index  cat_index = LC_MONETARY_INDEX_;
+
+#            ifdef USE_LOCALE_TIME
+
+        const locale_category_index  follow_on_cat_index = LC_TIME_INDEX_;
+        assert(trials[1] == DAY_1); /* Make sure only a single non-time entry */
+
+#            else
+
+        /* Effectively out-of-bounds, as there is only the monetary entry */
+        const locale_category_index  follow_on_cat_index = LC_ALL_INDEX_;
+
+#            endif
+#          elif defined(USE_LOCALE_TIME)
+
+        locale_category_index  cat_index = LC_TIME_INDEX_;
+        const locale_category_index  follow_on_cat_index = LC_TIME_INDEX_;
+
+#          else
+
+        /* Effectively out-of-bounds, as here there are no trial entries at
+         * all.  This allows this code to compile, but there are no strings to
+         * test, and so the answer will always be non-UTF-8. */
+        locale_category_index  cat_index = LC_ALL_INDEX_;
+        const locale_category_index  follow_on_cat_index = LC_ALL_INDEX_;
+#          endif
+
+            /* Everything set up; look through all the strings */
+            for (PERL_UINT_FAST8_T i = 0; i < C_ARRAY_LENGTH(trials); i++) {
+                (void) my_langinfo_i(trials[i], cat_index, locale,
                                      &scratch_buf, &scratch_buf_size, NULL);
+                cat_index = follow_on_cat_index;
+
                 /* To prevent infinite recursive calls, we don't ask for the
-                 * UTF-8ness of the string (in 'times[i]') above.  Instead we
+                 * UTF-8ness of the string (in 'trials[i]') above.  Instead we
                  * examine the returned string here */
-                Size_t len = strlen(scratch_buf);
+                const Size_t len = strlen(scratch_buf);
                 const U8 * first_variant;
 
                 /* If the string is identical whether or not it is encoded as
@@ -6382,18 +6412,11 @@ S_my_langinfo_i(pTHX_
                 strings_utf8ness = UTF8NESS_YES;
             }
 
-            /* Here we have gone through all the LC_TIME elements.
-             * strings_utf8ness has been set as follows:
-             *      UTF8NESS_NO           If at least one isn't legal UTF-8
-             *      UTF8NESS_IMMMATERIAL  If all are ASCII
-             *      UTF8NESS_YES          If all are legal UTF-8 (including
-             *                            ASCII), and at least one isn't
-             *                            ASCII. */
+#          ifdef USE_LOCALE_TIME
 
             restore_toggled_locale_c(LC_TIME, orig_TIME_locale);
-        }
 
-#          endif    /* LC_TIME */
+#          endif
 
         Safefree(scratch_buf);
         scratch_buf = NULL;
