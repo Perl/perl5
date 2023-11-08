@@ -136,6 +136,13 @@ L<builtin> has been upgraded from version 0.011 to 0.012.
 
 Added the C<load_module()> builtin function as per L<PPC 0006|https://github.com/Perl/PPCs/blob/main/ppcs/ppc0006-load-module.md>.
 
+=item *
+
+L<POSIX> has been upgraded from version 2.16 to 2.17.
+
+Adjusted the signbit() on NaN test to handle the unusual bit pattern
+returned for NaN by Oracle Developer Studio's compiler.  [GH #21533]
+
 =back
 
 =head2 Removed Modules and Pragmata
@@ -337,9 +344,16 @@ L</Modules and Pragmata> section.
 
 =over 4
 
-=item XXX-some-platform
+=item Oracle Developer Studio (Solaris, Oracle Linux)
 
-XXX
+Due to an apparent code generation bug, the default optimization level
+for the Oracle Developer Studio (formerly Sun Workshop) compiler is
+now C<-xO1>. [GH #21535]
+
+=item Windows
+
+Enable C<copysign>, C<signbit>, C<acosh>, C<asinh>, C<atanh>, C<exp2>,
+C<tgamma> in the bundled configuration used for MSVC.  [GH #21610]
 
 =back
 
