@@ -6299,7 +6299,7 @@ S_my_langinfo_i(pTHX_
          * For non-English locales or non-dollar currency locales, we likely
          * will find out whether a locale is UTF-8 or not */
 
-        utf8ness_t is_utf8 = UTF8NESS_UNKNOWN;
+        utf8ness_t strings_utf8ness = UTF8NESS_UNKNOWN;
         char * scratch_buf = NULL;
 
 #          if defined(USE_LOCALE_MONETARY) && defined(HAS_LOCALECONV)
@@ -6320,7 +6320,7 @@ S_my_langinfo_i(pTHX_
         if ((PL_langinfo_recursed & LANGINFO_RECURSED_MONETARY) == 0) {
             PL_langinfo_recursed |= LANGINFO_RECURSED_MONETARY;
             (void) my_langinfo_c(CRNCYSTR, LC_MONETARY, locale, &scratch_buf,
-                                 NULL, &is_utf8);
+                                 NULL, &strings_utf8ness);
             PL_langinfo_recursed &= ~LANGINFO_RECURSED_MONETARY;
         }
 
@@ -6336,7 +6336,7 @@ S_my_langinfo_i(pTHX_
 #             endif
 
         /* If we have ruled out being UTF-8, no point in checking further. */
-        if (   is_utf8 != UTF8NESS_NO
+        if (   strings_utf8ness != UTF8NESS_NO
             && (PL_langinfo_recursed & LANGINFO_RECURSED_TIME) == 0)
         {
             /* But otherwise do check more.  This is done even if the currency
@@ -6375,18 +6375,18 @@ S_my_langinfo_i(pTHX_
                                      NULL, &this_is_utf8);
                 Safefree(scratch_buf);
                 if (this_is_utf8 == UTF8NESS_NO) {
-                    is_utf8 = UTF8NESS_NO;
+                    strings_utf8ness = UTF8NESS_NO;
                     break;
                 }
 
                 if (this_is_utf8 == UTF8NESS_YES) {
-                    is_utf8 = UTF8NESS_YES;
+                    strings_utf8ness = UTF8NESS_YES;
                 }
             }
             PL_langinfo_recursed &= ~LANGINFO_RECURSED_TIME;
 
-            /* Here we have gone through all the LC_TIME elements.  is_utf8 has
-             * been set as follows:
+            /* Here we have gone through all the LC_TIME elements.
+             * strings_utf8ness has been set as follows:
              *      UTF8NESS_NO           If at least one isn't legal UTF-8
              *      UTF8NESS_IMMMATERIAL  If all are ASCII
              *      UTF8NESS_YES          If all are legal UTF-8 (including
@@ -6401,7 +6401,7 @@ S_my_langinfo_i(pTHX_
         /* If nothing examined above rules out it being UTF-8, and at least one
          * thing fits as UTF-8 (and not plain ASCII), assume the codeset is
          * UTF-8. */
-        if (is_utf8 == UTF8NESS_YES) {
+        if (strings_utf8ness == UTF8NESS_YES) {
             retval = "UTF-8";
             break;
         }
