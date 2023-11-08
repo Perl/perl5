@@ -1243,8 +1243,6 @@ typedef enum {
 #    endif
 #  endif
 
-#  include "perl_langinfo.h"    /* Needed for _NL_LOCALE_NAME */
-
 #  ifdef USE_POSIX_2008_LOCALE
 #    if  defined(HAS_QUERYLOCALE)                                           \
               /* Use querylocale if has it, or has the glibc internal       \
