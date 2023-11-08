@@ -16117,13 +16117,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_less_dicey_locale_buf = NULL;
     PL_less_dicey_locale_bufsize = 0;
 #endif
-#if ! defined(HAS_NL_LANGINFO)          \
- &&   defined(USE_LOCALE_CTYPE)         \
- && ! defined(WIN32)                    \
- && ! defined(HAS_MBTOWC)               \
- && ! defined(HAS_MBRTOWC)
-    PL_langinfo_recursed = 0;
-#endif
 
     /* Unicode inversion lists */
 
