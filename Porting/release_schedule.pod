@@ -76,6 +76,7 @@ consent of the Steering Council.)
   Matt Trout <mst@shadowcat.co.uk>
   Matthew Horsfall <wolfsage@gmail.com>
   Max Maischein <corion@cpan.org>
+  Paul Evans <leonerd@leonerd.org.uk>
   Peter Martini <petercmartini@gmail.com>
   Philippe Bruhat <book@cpan.org>
   Ricardo Signes <rjbs@cpan.org>
