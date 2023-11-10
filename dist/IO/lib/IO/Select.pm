@@ -382,14 +382,14 @@ listening for more connections on a listen socket
     use IO::Select;
     use IO::Socket;
 
-    $lsn = IO::Socket::INET->new(Listen => 1, LocalPort => 8080);
-    $sel = IO::Select->new( $lsn );
+    my $lsn = IO::Socket::INET->new(Listen => 1, LocalPort => 8080);
+    my $sel = IO::Select->new( $lsn );
 
-    while(@ready = $sel->can_read) {
-        foreach $fh (@ready) {
+    while(my @ready = $sel->can_read) {
+        foreach my $fh (@ready) {
             if($fh == $lsn) {
                 # Create a new socket
-                $new = $lsn->accept;
+                my $new = $lsn->accept;
                 $sel->add($new);
             }
             else {
