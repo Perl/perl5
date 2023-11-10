@@ -265,20 +265,20 @@ __END__
 
 =head1 NAME
 
-IO::Select - OO interface to the select system call
+IO::Select - OO interface to the C<select> system call
 
 =head1 SYNOPSIS
 
     use IO::Select;
 
-    $s = IO::Select->new();
+    my $s = IO::Select->new();
 
     $s->add(\*STDIN);
     $s->add($some_handle);
 
-    @ready = $s->can_read($timeout);
+    my @ready1 = $s->can_read($timeout);
 
-    @ready = IO::Select->new(@handles)->can_read(0);
+    my @ready2 = IO::Select->new(@handles)->can_read(0);
 
 =head1 DESCRIPTION
 
