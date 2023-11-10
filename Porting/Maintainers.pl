@@ -403,7 +403,8 @@ our %Modules = (
     },
 
     'Encode' => {
-        'DISTRIBUTION' => 'DANKOGAI/Encode-3.19.tar.gz',
+        'DISTRIBUTION' => 'DANKOGAI/Encode-3.20.tar.gz',
+        'SYNCINFO'     => 'jkeenan on Fri Nov 10 15:12:07 2023',
         'FILES'        => q[cpan/Encode],
         'EXCLUDED'     => [
             qw( t/whatwg-aliases.json

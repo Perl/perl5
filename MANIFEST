@@ -823,8 +823,8 @@ cpan/Encode/t/big5-eten.utf				test data
 cpan/Encode/t/big5-hkscs.enc				test data
 cpan/Encode/t/big5-hkscs.utf				test data
 cpan/Encode/t/CJKT.t					test script
-cpan/Encode/t/cow.t
-cpan/Encode/t/decode.t
+cpan/Encode/t/cow.t					Test file related to Encode
+cpan/Encode/t/decode.t					Test file related to Encode
 cpan/Encode/t/enc_data.t				test script for utf8 DATA
 cpan/Encode/t/enc_eucjp.t				test script
 cpan/Encode/t/enc_module.enc				test data for t/enc_module.t
@@ -841,7 +841,7 @@ cpan/Encode/t/gb2312.utf				test data
 cpan/Encode/t/grow.t					test script
 cpan/Encode/t/gsm0338.t					test script
 cpan/Encode/t/guess.t					test script
-cpan/Encode/t/isa.t
+cpan/Encode/t/isa.t					Test file related to Encode
 cpan/Encode/t/jis7-fallback.t				test script
 cpan/Encode/t/jisx0201.enc				test data
 cpan/Encode/t/jisx0201.utf				test data
@@ -865,18 +865,18 @@ cpan/Encode/t/rt65541.t					test script
 cpan/Encode/t/rt76824.t					test script
 cpan/Encode/t/rt85489.t					test script
 cpan/Encode/t/rt86327.t					test script
-cpan/Encode/t/taint.t
-cpan/Encode/t/truncated_utf8.t
-cpan/Encode/t/undef.t
+cpan/Encode/t/taint.t					Test file related to Encode
+cpan/Encode/t/truncated_utf8.t				Test file related to Encode
+cpan/Encode/t/undef.t					Test file related to Encode
 cpan/Encode/t/unibench.pl				benchmark script
 cpan/Encode/t/Unicode.t					test script
-cpan/Encode/t/Unicode_trailing_nul.t
-cpan/Encode/t/use-Encode-Alias.t
-cpan/Encode/t/utf32warnings.t
+cpan/Encode/t/Unicode_trailing_nul.t			Test file related to Encode
+cpan/Encode/t/use-Encode-Alias.t			Test file related to Encode
+cpan/Encode/t/utf32warnings.t				Test file related to Encode
 cpan/Encode/t/utf8ref.t					test script
 cpan/Encode/t/utf8strict.t				test script
-cpan/Encode/t/utf8warnings.t
-cpan/Encode/t/xml.t
+cpan/Encode/t/utf8warnings.t				Test file related to Encode
+cpan/Encode/t/xml.t					Test file related to Encode
 cpan/Encode/TW/Makefile.PL				Encode extension
 cpan/Encode/TW/TW.pm					Encode extension
 cpan/Encode/ucm/8859-1.ucm				Unicode Character Map
