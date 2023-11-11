@@ -1441,8 +1441,8 @@ _cleaner2:
 	-rmdir lib/IO/Compress/Zlib lib/IO/Compress/Zip lib/IO/Compress/Gzip
 	-rmdir lib/IO/Compress/Base lib/IO/Compress/Adapter lib/IO/Compress
 	-rmdir lib/IO lib/I18N/LangTags lib/I18N lib/Hash/Util lib/Hash
-	-rmdir lib/HTTP lib/Filter/Util lib/Filter lib/File/Spec
-	-rmdir lib/ExtUtils/Typemaps lib/ExtUtils/ParseXS
+	-rmdir lib/HTTP lib/Getopt/Long lib/Filter/Util lib/Filter
+	-rmdir lib/File/Spec lib/ExtUtils/Typemaps lib/ExtUtils/ParseXS
 	-rmdir lib/ExtUtils/MakeMaker/version lib/ExtUtils/MakeMaker
 	-rmdir lib/ExtUtils/Liblist lib/ExtUtils/Constant lib/ExtUtils/Command
 	-rmdir lib/ExtUtils/CBuilder/Platform/Windows

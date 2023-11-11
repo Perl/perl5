@@ -1150,12 +1150,15 @@ cpan/Filter-Util-Call/t/call.t			See if Filter::Util::Call works
 cpan/Filter-Util-Call/t/rt_101033.pm
 cpan/Filter-Util-Call/t/rt_101033.t
 cpan/Filter-Util-Call/t/rt_54452-rebless.t
-cpan/Getopt-Long/lib/Getopt/Long.pm	Fetch command options (GetOptions)
-cpan/Getopt-Long/t/gol-basic.t		See if Getopt::Long works
-cpan/Getopt-Long/t/gol-linkage.t	See if Getopt::Long works
-cpan/Getopt-Long/t/gol-oo.t		See if Getopt::Long works
-cpan/Getopt-Long/t/gol-xargv.t		See if Getopt::Long works
-cpan/Getopt-Long/t/gol-xstring.t	See if Getopt::Long works
+cpan/Getopt-Long/lib/Getopt/Long.pm		Fetch command options (GetOptions)
+cpan/Getopt-Long/lib/Getopt/Long/Parser.pm	Getopt-Long
+cpan/Getopt-Long/t/gol-basic.t			See if Getopt::Long works
+cpan/Getopt-Long/t/gol-linkage.t		See if Getopt::Long works
+cpan/Getopt-Long/t/gol-load1.t			Getopt-Long
+cpan/Getopt-Long/t/gol-load2.t			Getopt-Long
+cpan/Getopt-Long/t/gol-oo.t			See if Getopt::Long works
+cpan/Getopt-Long/t/gol-xargv.t			See if Getopt::Long works
+cpan/Getopt-Long/t/gol-xstring.t		See if Getopt::Long works
 cpan/HTTP-Tiny/corpus/auth-01.txt	Test file related to HTTP::Tiny
 cpan/HTTP-Tiny/corpus/auth-02.txt	Test file related to HTTP::Tiny
 cpan/HTTP-Tiny/corpus/auth-03.txt	Test file related to HTTP::Tiny

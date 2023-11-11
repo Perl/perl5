@@ -1700,6 +1700,7 @@ distclean: realclean
 	-if exist $(LIBDIR)\ExtUtils\Typemaps rmdir /s /q $(LIBDIR)\ExtUtils\Typemaps
 	-if exist $(LIBDIR)\File\Spec rmdir /s /q $(LIBDIR)\File\Spec
 	-if exist $(LIBDIR)\Filter rmdir /s /q $(LIBDIR)\Filter
+	-if exist $(LIBDIR)\Getopt\Long rmdir /s /q $(LIBDIR)\Getopt\Long
 	-if exist $(LIBDIR)\Hash rmdir /s /q $(LIBDIR)\Hash
 	-if exist $(LIBDIR)\HTTP rmdir /s /q $(LIBDIR)\HTTP
 	-if exist $(LIBDIR)\I18N rmdir /s /q $(LIBDIR)\I18N
