@@ -392,16 +392,23 @@ static int debug_initialization = 0;
 #  define _configthreadlocale(arg) NOOP
 
 #  define MultiByteToWideChar(cp, flags, byte_string, m1, wstring, req_size) \
-                    (mbsrtowcs(wstring, &(byte_string), req_size, NULL) + 1)
+                    (PERL_UNUSED_ARG(cp),                                    \
+                     mbsrtowcs(wstring, &(byte_string), req_size, NULL) + 1)
 #  define WideCharToMultiByte(cp, flags, wstring, m1, byte_string,          \
                               req_size, default_char, found_default_char)   \
-                    (wcsrtombs(byte_string, &(wstring), req_size, NULL) + 1)
+                    (PERL_UNUSED_ARG(cp),                                   \
+                     wcsrtombs(byte_string, &(wstring), req_size, NULL) + 1)
 
 #  ifdef USE_LOCALE
 
 static const wchar_t * wsetlocale_buf = NULL;
 static Size_t wsetlocale_buf_size = 0;
+
+#    ifdef MULTIPLICITY
+
 static PerlInterpreter * wsetlocale_buf_aTHX = NULL;
+
+#    endif
 
 STATIC
 const wchar_t *
@@ -4672,6 +4679,7 @@ Perl_get_win32_message_utf8ness(pTHX_ const char * string)
                                         NULL, LC_CTYPE_INDEX_);
 #    else
 
+    PERL_UNUSED_ARG(string);
     return false;
 
 #    endif
