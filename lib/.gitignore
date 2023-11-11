@@ -98,6 +98,7 @@
 /FindBin.pm
 /GDBM_File.pm
 /Getopt/Long.pm
+/Getopt/Long/
 /HTTP/
 /Hash/
 /I18N/
