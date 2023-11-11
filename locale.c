@@ -5438,31 +5438,22 @@ S_populate_hash_from_localeconv(pTHX_ HV * hv,
 
         /* For each field for the given category ... */
         const lconv_offset_t * category_strings = strings[i];
-        while (1) {
-            const char * name = category_strings->name;
-            if (! name) {   /* Quit at the end */
-                break;
-            }
+        while (category_strings->name) {
 
-            /* we have set things up so that we know where in the returned
+            /* We have set things up so that we know where in the returned
              * structure, when viewed as a string, the corresponding value is.
              * */
             const char *value = *((const char **)(  lcbuf_as_string
                                                   + category_strings->offset));
-
-            /* Set to get next string on next iteration */
-            category_strings++;
-
-            /* Skip if this platform doesn't have this field. */
-            if (! value) {
-                continue;
+            if (value) {    /* Copy to the hash */
+                (void) hv_store(hv,
+                                category_strings->name,
+                                strlen(category_strings->name),
+                                newSVpv(value, strlen(value)),
+                                0);
             }
 
-            /* Copy to the hash */
-            (void) hv_store(hv,
-                            name, strlen(name),
-                            newSVpv(value, strlen(value)),
-                            0);
+            category_strings++;
         }
 
         /* Add any int fields to the HV* */
