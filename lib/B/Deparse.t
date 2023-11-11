@@ -62,7 +62,7 @@ while (<DATA>) {
     # parse options if necessary
     my $deparse = $meta{options}
 	? $deparse{$meta{options}} ||=
-	    new B::Deparse split /,/, $meta{options}
+	    B::Deparse->new(split /,/, $meta{options})
 	: $deparse;
 
     my $code = "$meta{context};\n" . <<'EOC' . "sub {$input\n}";
@@ -289,7 +289,7 @@ SKIP: {
 	    # Clear out all hints
 	    %^H = ();
 	    $^H = 0;
-	    new B::Deparse -> ambient_pragmas(strict => 'all');
+	    B::Deparse->new->ambient_pragmas(strict => 'all');
 	}
 	use 5.011;  # should enable strict
 	ok !eval '$do_noT_create_a_variable_with_this_name = 1',
