@@ -45,21 +45,27 @@ while (<$fh>) {
 
 close $fh or die "Problem running makedef.pl";
 
-my %unexported;
-
+# AIX can list a symbol as both a local and a global symbol
+# so collect all of the symbols *then* process them
+my %defined;
 foreach my $file (map {$_ . $Config{_o}} qw(globals regcomp)) {
     open $fh, '-|', $Config{nm}, "-P", $file
 	or die "Can't run nm $file";
 
     while (<$fh>) {
 	next unless /^_?(PL_\S+)${defined}/;
-	if (delete $exported{$1}) {
-	    note("Seen definition of $1");
-	    next;
-	}
-	++$unexported{$1};
+        $defined{$1} = 1;
     }
     close $fh or die "Problem running nm $file";
+}
+
+my %unexported;
+for my $name (sort keys %defined) {
+    if (delete $exported{$name}) {
+        note("Seen definition of $name");
+        next;
+    }
+    ++$unexported{$name};
 }
 
 unless ($Config{d_double_has_inf}) {
