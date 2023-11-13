@@ -355,6 +355,10 @@ now C<-xO1>. [GH #21535]
 Enable C<copysign>, C<signbit>, C<acosh>, C<asinh>, C<atanh>, C<exp2>,
 C<tgamma> in the bundled configuration used for MSVC.  [GH #21610]
 
+The build process no longer supports Visual Studio 2013.  This was
+failing to build at a very basic level and there has been no reports
+of such failures.  [GH #21624]
+
 =back
 
 =head1 Internal Changes
