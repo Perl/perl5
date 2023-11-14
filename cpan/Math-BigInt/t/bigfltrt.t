@@ -5,15 +5,13 @@ use warnings;
 
 use lib 't';
 
-use Test::More tests => 1;
+use Test::More tests => 899;
 
-use Math::BigRat::Test lib => 'Calc';   # test via this Subclass
+use Math::BigRat::Subclass lib => 'Calc';   # test via this Subclass
 
 our ($CLASS, $LIB);
-$CLASS = "Math::BigRat::Test";
+$CLASS = "Math::BigRat::Subclass";
 $LIB   = "Math::BigInt::Calc";
 
-pass();
-
 # fails still too many tests
-#require './t/bigfltpm.inc';            # all tests here for sharing
+require './t/bigratpm.inc';            # all tests here for sharing

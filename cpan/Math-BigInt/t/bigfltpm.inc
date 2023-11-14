@@ -98,14 +98,14 @@ while (<DATA>) {
             if (defined $args[2]) {
                 $try .= qq| \$z = $CLASS->new("$args[2]");|;
             }
-            $try .= qq| $CLASS\::bgcd(\$x, \$y|;
+            $try .= qq| $CLASS->bgcd(\$x, \$y|;
             $try .= qq|, \$z| if defined $args[2];
             $try .= qq|);|;
         } elsif ($f eq "blcm") {
             if (defined $args[2]) {
                 $try .= qq| \$z = $CLASS->new("$args[2]");|;
             }
-            $try .= qq| $CLASS\::blcm(\$x, \$y|;
+            $try .= qq| $CLASS->blcm(\$x, \$y|;
             $try .= qq|, \$z| if defined $args[2];
             $try .= qq|);|;
         } elsif ($f eq "bcmp") {

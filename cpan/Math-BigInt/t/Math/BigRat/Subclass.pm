@@ -1,17 +1,17 @@
 # -*- mode: perl; -*-
 
-# test subclassing Math::BigInt
+# test subclassing Math::BigRat
 
-package Math::BigInt::Subclass;
+package Math::BigRat::Subclass;
 
 use strict;
 use warnings;
 
-use Math::BigInt;
+use Math::BigRat;
 
-our @ISA = qw(Math::BigInt);
+our @ISA = qw(Math::BigRat);
 
-our $VERSION = "0.08";
+our $VERSION = '0.04';
 
 use overload;                   # inherit overload
 
@@ -27,38 +27,15 @@ BEGIN {
     *objectify = \&Math::BigInt::objectify;
 }
 
-# We override new().
+# We override new()
 
 sub new {
-    my $proto = shift;
-    my $class = ref($proto) || $proto;
+    my $proto  = shift;
+    my $class  = ref($proto) || $proto;
 
     my $self = $class -> SUPER::new(@_);
     $self->{'_custom'} = 1;     # attribute specific to this subclass
     bless $self, $class;
-}
-
-# We override import(). This is just for a sample for demonstration.
-
-sub import {
-    my $self  = shift;
-    my $class = ref($self) || $self;
-
-    my @a;                      # unrecognized arguments
-    while (@_) {
-        my $param = shift;
-
-        # The parameter "this" takes an option.
-
-        if ($param eq 'something') {
-            $self -> {$param} = shift;
-            next;
-        }
-
-        push @a, $_;
-    }
-
-    $self -> SUPER::import(@a);         # need it for subclasses
 }
 
 # Any other methods to override can go here:

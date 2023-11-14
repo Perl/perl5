@@ -7,7 +7,7 @@ use warnings;
 use Carp qw< carp croak >;
 use Math::BigInt::Lib;
 
-our $VERSION = '2.000000';
+our $VERSION = '2.001000';
 $VERSION =~ tr/_//d;
 
 our @ISA = ('Math::BigInt::Lib');

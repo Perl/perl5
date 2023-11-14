@@ -1578,6 +1578,7 @@ cpan/Math-BigInt/lib/Math/BigRat.pm			Math-BigInt
 cpan/Math-BigInt/t/alias.inc				Support for BigInt tests
 cpan/Math-BigInt/t/bare_mbf.t				Test MBF under Math::BigInt::BareCalc
 cpan/Math-BigInt/t/bare_mbi.t				Test MBI under Math::BigInt::BareCalc
+cpan/Math-BigInt/t/bare_mbr.t				Math-BigInt
 cpan/Math-BigInt/t/bare_mif.t				Rounding tests under BareCalc
 cpan/Math-BigInt/t/bfround_numify.t			Test file related to Math::BigInt
 cpan/Math-BigInt/t/big_ap.t				Math-BigInt
@@ -1615,12 +1616,13 @@ cpan/Math-BigInt/t/Math/BigInt/Lib/Minimal.pm		Module related to Math::BigInt
 cpan/Math-BigInt/t/Math/BigInt/Lib/TestUtil.pm		Test Math::BigInt
 cpan/Math-BigInt/t/Math/BigInt/Scalar.pm		Pure Perl module to support Math::BigInt
 cpan/Math-BigInt/t/Math/BigInt/Subclass.pm		Empty subclass of BigInt for test
-cpan/Math-BigInt/t/Math/BigRat/Test.pm			Math-BigInt
+cpan/Math-BigInt/t/Math/BigRat/Subclass.pm		Math-BigInt
 cpan/Math-BigInt/t/mbf_ali.t				Tests for BigFloat
 cpan/Math-BigInt/t/mbi_ali.t				Tests for BigInt
 cpan/Math-BigInt/t/mbi_rand.t				Test Math::BigInt randomly
 cpan/Math-BigInt/t/mbimbf.inc				Actual BigInt/BigFloat accuracy, precision and fallback, round_mode tests
 cpan/Math-BigInt/t/mbimbf.t				BigInt/BigFloat accuracy, precision and fallback, round_mode
+cpan/Math-BigInt/t/mbr_ali.t				Math-BigInt
 cpan/Math-BigInt/t/nan_cmp.t				overloaded comparison involving *NaN*
 cpan/Math-BigInt/t/new_overloaded.t			test overloaded numbers in BigFloat's new()
 cpan/Math-BigInt/t/round.t				Test rounding with non-integer A and P
@@ -1629,6 +1631,7 @@ cpan/Math-BigInt/t/rt121139.t				Math-BigInt
 cpan/Math-BigInt/t/sub_ali.t				Tests for aliases in BigInt subclasses
 cpan/Math-BigInt/t/sub_mbf.t				Empty subclass test of BigFloat
 cpan/Math-BigInt/t/sub_mbi.t				Empty subclass test of BigInt
+cpan/Math-BigInt/t/sub_mbr.t				Math-BigInt
 cpan/Math-BigInt/t/sub_mif.t				Test A & P with subclasses using mbimbf.inc
 cpan/Math-BigInt/t/trap.t				Test whether trap_nan and trap_inf work
 cpan/Math-BigInt/t/upgrade.inc				Actual tests for upgrade.t

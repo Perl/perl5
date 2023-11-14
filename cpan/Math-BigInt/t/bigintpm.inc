@@ -137,14 +137,14 @@ while (<DATA>) {
             if (defined $args[2]) {
                 $try .= qq| \$z = $CLASS->new("$args[2]");|;
             }
-            $try .= " $CLASS\::bgcd(\$x, \$y";
+            $try .= " $CLASS->bgcd(\$x, \$y";
             $try .= ", \$z" if defined $args[2];
             $try .= ");";
         } elsif ($f eq "blcm") {
             if (defined $args[2]) {
                 $try .= qq| \$z = $CLASS->new("$args[2]");|;
             }
-            $try .= " $CLASS\::blcm(\$x, \$y";
+            $try .= " $CLASS->blcm(\$x, \$y";
             $try .= ", \$z" if defined $args[2];
             $try .= ");";
         } elsif ($f eq "blsft") {

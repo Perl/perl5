@@ -3,18 +3,18 @@
 use strict;
 use warnings;
 
-use Test::More tests => 4278            # tests in require'd file
-                        +  9;           # tests in this file
+use Test::More tests => 899             # tests in require'd file
+                        + 9;            # tests in this file
 
 use lib 't';
 
-use Math::BigInt::Subclass;
+use Math::BigRat::Subclass;
 
 our ($CLASS, $LIB);
-$CLASS = "Math::BigInt::Subclass";
+$CLASS = "Math::BigRat::Subclass";
 $LIB   = $CLASS -> config('lib');       # backend library
 
-require './t/bigintpm.inc';             # perform same tests as bigintpm
+require './t/bigratpm.inc';
 
 ###############################################################################
 # Now do custom tests for Subclass itself
@@ -22,10 +22,10 @@ require './t/bigintpm.inc';             # perform same tests as bigintpm
 my $ms = $CLASS -> new(23);
 is($ms->{_custom}, 1, '$ms has custom attribute \$ms->{_custom}');
 
-# Check that a subclass is still considered a Math::BigInt
-isa_ok($ms, 'Math::BigInt');
+# Check that a subclass is still considered a Math::BigRat
+isa_ok($ms, 'Math::BigRat');
 
-my $bi = Math::BigInt -> new(23);         # same as other
+my $bi = Math::BigRat -> new(23);         # same as other
 $ms += $bi;
 is($ms, 46, '$ms is 46');
 is($ms->{_custom}, 1, '$ms has custom attribute $ms->{_custom}');

@@ -21,7 +21,7 @@ use Scalar::Util    qw< blessed >;
 
 use Math::BigFloat ();
 
-our $VERSION = '2.000000';
+our $VERSION = '2.001000';
 $VERSION =~ tr/_//d;
 
 our @ISA = qw(Math::BigFloat);
@@ -199,7 +199,8 @@ use overload
   ;
 
 BEGIN {
-    *objectify = \&Math::BigInt::objectify;  # inherit this from BigInt
+    *objectify = \&Math::BigInt::objectify;
+
     *AUTOLOAD  = \&Math::BigFloat::AUTOLOAD; # can't inherit AUTOLOAD
     *as_number = \&as_int;
     *is_pos = \&is_positive;
@@ -2537,9 +2538,10 @@ sub from_oct {
 
 sub import {
     my $class = shift;
+    $IMPORT++;                  # remember we did import()
     my @a;                      # unrecognized arguments
-    my $lib_param = '';
-    my $lib_value = '';
+
+    my @import = ();
 
     while (@_) {
         my $param = shift;
@@ -2601,12 +2603,18 @@ sub import {
             next;
         }
 
+        # Fall-back accuracy.
+
+        if ($param eq 'div_scale') {
+            $class -> div_scale(shift);
+            next;
+        }
+
         # Backend library.
 
         if ($param =~ /^(lib|try|only)\z/) {
-            # alternative library
-            $lib_param = $param;        # "lib", "try", or "only"
-            $lib_value = shift;
+            push @import, $param;
+            push @import, shift() if @_;
             next;
         }
 
@@ -2624,19 +2632,13 @@ sub import {
         push @a, $param;
     }
 
-    require Math::BigInt;
-
-    my @import = ('objectify');
-    push @import, $lib_param, $lib_value if $lib_param ne '';
     Math::BigInt -> import(@import);
 
-    # find out which one was actually loaded
+    # find out which library was actually loaded
     $LIB = Math::BigInt -> config("lib");
 
-    # any non :constant stuff is handled by Exporter (loaded by parent class)
-    # even if @_ is empty, to give it a chance
-    $class->SUPER::import(@a);           # for subclasses
-    $class->export_to_level(1, $class, @a); # need this, too
+    $class -> SUPER::import(@a);                        # for subclasses
+    $class -> export_to_level(1, $class, @a) if @a;     # need this, too
 }
 
 1;
