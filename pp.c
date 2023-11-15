@@ -702,11 +702,102 @@ PP(pp_gelem)
 }
 
 /* Pattern matching */
+struct rusage previous_rusage;
 
 PP(pp_study)
 {
     SV *sv = *PL_stack_sp;
     STRLEN len;
+#ifdef PERL_IMPLICIT_CONTEXT
+#  ifdef WIN32
+#    include "Sysinfoapi.h"
+    MEMORYSTATUSEX statex;
+    statex.dwLength = sizeof (statex);
+    GlobalMemoryStatusEx (&statex);
+
+    DEBUG_U(PerlIO_printf(Perl_debug_log, "%s:%d:%p: %llu\n", __FILE__, __LINE__, aTHX_ statex.ullAvailVirtual));
+#  else
+    /*DEBUG_U(PerlIO_printf(Perl_debug_log, "%s:%d:%p: %p\n", __FILE__, __LINE__, aTHX_ sbrk((intptr_t) 0)));*/
+    struct rusage current_rusage;
+    errno = 0;
+    if (getrusage(RUSAGE_SELF, &current_rusage) != 0) {
+        DEBUG_U(PerlIO_printf(Perl_debug_log, "%s:%d: getrusage failed: %ld\n",
+                                , __FILE__, __LINE__, get_extended_os_errno()));
+    }
+    else {
+        DEBUG_U(PerlIO_printf(Perl_debug_log, "%s:%d: "
+                                  "max resident set size=%ld"
+                                "; integral shared text memory size=%ld"
+                                "; integral unshared data size=%ld"
+                                "; integral unshared stack size=%ld"
+                                "; page reclaims=%ld"
+                                "; page faults=%ld"
+                                "; swaps=%ld"
+                                "; block input operations=%ld"
+                                "; block output operations=%ld"
+                                "; messages sent=%ld"
+                                "; messages received=%ld"
+                                "; signals received=%ld"
+                                "; voluntary context switches=%ld"
+                                "; involuntary context switches=%ld\n",
+                                , __FILE__, __LINE__,
+                                ru_maxrss,
+                                ru_ixrss,
+                                ru_idrss,
+                                ru_isrss,
+                                ru_minflt,
+                                ru_majflt,
+                                ru_nswap,
+                                ru_inblock,
+                                ru_oublock,
+                                ru_msgsnd,
+                                ru_msgrcv,
+                                ru_nsignals,
+                                ru_nvcsw,
+                                ru_nivcsw));
+    }
+    
+#  endif
+#endif
+    struct rusage current_rusage;
+    errno = 0;
+    if (getrusage(RUSAGE_SELF, &current_rusage) != 0) {
+        PerlIO_printf(Perl_debug_log, "%s:%d: getrusage failed: %d\n",
+                                __FILE__, __LINE__, get_extended_os_errno());
+    }
+    else {
+        PerlIO_printf(Perl_debug_log, "%s:%d: "
+                                         "max resident set size=%ld\n"
+                                "        integral shared text memory size=%ld\n"
+                                "        integral unshared data size=%ld\n"
+                                "        integral unshared stack size=%ld\n"
+                                "        page reclaims=%ld\n"
+                                "        page faults=%ld\n"
+                                "        swaps=%ld\n"
+                                "        block input operations=%ld\n"
+                                "        block output operations=%ld\n"
+                                "        messages sent=%ld\n"
+                                "        messages received=%ld\n"
+                                "        signals received=%ld\n"
+                                "        voluntary context switches=%ld\n"
+                                "        involuntary context switches=%ld\n",
+                                __FILE__, __LINE__,
+                                current_rusage.ru_maxrss,
+                                current_rusage.ru_first,
+                                current_rusage.ru_idrss,
+                                current_rusage.ru_isrss,
+                                current_rusage.ru_minflt,
+                                current_rusage.ru_majflt,
+                                current_rusage.ru_nswap,
+                                current_rusage.ru_inblock,
+                                current_rusage.ru_oublock,
+                                current_rusage.ru_msgsnd,
+                                current_rusage.ru_msgrcv,
+                                current_rusage.ru_nsignals,
+                                current_rusage.ru_nvcsw,
+                                current_rusage.ru_nivcsw);
+    }
+    
 
     (void)SvPV(sv, len);
     if (len == 0 || len > I32_MAX || !SvPOK(sv) || SvUTF8(sv) || SvVALID(sv)) {
