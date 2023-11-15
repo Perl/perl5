@@ -1621,6 +1621,7 @@ PP(pp_divide)
 #endif
             DIE(aTHX_ "Illegal division by zero");
         TARGn(left / right, 1);
+        goto ret;               /* redundant, but silence -Wunused-label */
     }
 
   ret:
