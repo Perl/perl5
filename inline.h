@@ -1040,9 +1040,9 @@ Indicates whether the stacked SV C<sv> (assumed to be not yet popped off
 the stack) is only kept alive due to a single reference from the argument
 stack and/or and the temps stack.
 
-This can used for example to decide whether the copying of return values in rvalue
-context can be skipped, or whether it shouldn't be assigned to in lvalue
-context.
+This can used for example to decide whether the copying of return values
+in rvalue context can be skipped, or whether it shouldn't be assigned to
+in lvalue context.
 
 =cut
 */
@@ -1063,6 +1063,7 @@ Perl_rpp_is_lone(pTHX_ SV *sv)
     return SvREFCNT(sv) <= cBOOL(SvTEMP(sv))
 #ifdef PERL_RC_STACK
                          + 1
+            && !SvIMMORTAL(sv) /* PL_sv_undef etc are never stealable */
 #endif
     ;
 }
