@@ -498,9 +498,17 @@ sub {
          'error when setting alias to -1 elem of empty array';
 }->($plink[0], $plink[-2], $plink[-5], $plunk[-1]);
 
-$_ = \$#{[]};
-$$_ = \1;
-"$$_";
+unless (Internals::stack_refcounted() & 1) {
+    # Skip this test on RC stack builds. The test assumes that the temp
+    # array has been freed - and so it is just checking that the code
+    # doesn't crash. But on RC builds the array (correctly) lives on while
+    # the arylen magic var lives. The assignment ends up using the address
+    # of \1 as a random number to set the array length to, which can use
+    # lots of memory!
+    $_ = \$#{[]};
+    $$_ = \1;
+    "$$_";
+}
 pass "no assertion failure after assigning ref to arylen when ary is gone";
 
 
