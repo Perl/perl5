@@ -5005,8 +5005,8 @@ S_my_localeconv(pTHX_ const int item)
      * is supposed to use to get the key names to fill the hash with.  One
      * element is always for the NUMERIC strings (or NULL if none to use), and
      * the other element similarly for the MONETARY ones. */
-#  define NUMERIC_STRING_OFFSET   0
-#  define MONETARY_STRING_OFFSET  1
+#  define NUMERIC_OFFSET   0
+#  define MONETARY_OFFSET  1
     const lconv_offset_t * strings[2] = { NULL, NULL };
 
     /* This is a mask, with one bit to tell S_populate_hash_from_localeconv to
@@ -5078,14 +5078,14 @@ S_my_localeconv(pTHX_ const int item)
           case RADIXCHAR:
             locale = numeric_locale = PL_numeric_name;
             index_bits = INDEX_TO_BIT(LC_NUMERIC_INDEX_);
-            strings[NUMERIC_STRING_OFFSET] = DECIMAL_POINT_ADDRESS;
+            strings[NUMERIC_OFFSET] = DECIMAL_POINT_ADDRESS;
             integers = NULL;
             break;
 
           case THOUSEP:
             index_bits = INDEX_TO_BIT(LC_NUMERIC_INDEX_);
             locale = numeric_locale = PL_numeric_name;
-            strings[NUMERIC_STRING_OFFSET] = thousands_sep_string;
+            strings[NUMERIC_OFFSET] = thousands_sep_string;
             integers = NULL;
             break;
 
@@ -5099,7 +5099,7 @@ S_my_localeconv(pTHX_ const int item)
             /* This item needs the values for both the currency symbol, and
              * another one used to construct the nl_langino()-compatible
              * return. */
-            strings[MONETARY_STRING_OFFSET] = CURRENCY_SYMBOL_ADDRESS;
+            strings[MONETARY_OFFSET] = CURRENCY_SYMBOL_ADDRESS;
             integers = P_CS_PRECEDES_ADDRESS;
             break;
 
@@ -5141,8 +5141,8 @@ S_my_localeconv(pTHX_ const int item)
 
         /* We always pass both sets of strings. 'index_bits' tells
          * S_populate_hash_from_localeconv which to actually look at */
-        strings[NUMERIC_STRING_OFFSET] = lconv_numeric_strings;
-        strings[MONETARY_STRING_OFFSET] = lconv_monetary_strings;
+        strings[NUMERIC_OFFSET] = lconv_numeric_strings;
+        strings[MONETARY_OFFSET] = lconv_monetary_strings;
 
         /* And pass the integer values to populate; again 'index_bits' will
          * say to use them or not */
@@ -5218,7 +5218,7 @@ S_my_localeconv(pTHX_ const int item)
             continue;
         }
 
-        locale = (i == NUMERIC_STRING_OFFSET)
+        locale = (i == NUMERIC_OFFSET)
                  ? numeric_locale
                  : monetary_locale;
 
@@ -5410,7 +5410,7 @@ S_populate_hash_from_localeconv(pTHX_ HV * hv,
         /* One iteration is only for the numeric string fields.  Skip these
          * unless we are compiled to care about those fields and the input
          * parameters indicate we want their values */
-        if (   i == NUMERIC_STRING_OFFSET
+        if (   i == NUMERIC_OFFSET
 
 #  ifdef USE_LOCALE_NUMERIC
 
@@ -5424,7 +5424,7 @@ S_populate_hash_from_localeconv(pTHX_ HV * hv,
 
         /* The other iteration is only for the monetary string fields.  Again
          * skip it unless we want those values */
-        if (   i == MONETARY_STRING_OFFSET
+        if (   i == MONETARY_OFFSET
 
 #  ifdef USE_LOCALE_MONETARY
 
@@ -5457,7 +5457,7 @@ S_populate_hash_from_localeconv(pTHX_ HV * hv,
         }
 
         /* Add any int fields to the HV* */
-        if (i == MONETARY_STRING_OFFSET && integers) {
+        if (i == MONETARY_OFFSET && integers) {
             while (integers->name) {
                 const char value = *((const char *)(  lcbuf_as_string
                                                     + integers->offset));
