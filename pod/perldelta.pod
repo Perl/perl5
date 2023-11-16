@@ -297,7 +297,10 @@ made:
 
 =item *
 
-XXX
+F<porting/globvar.t> now uses the more portable C<nm -P ...> to fetch
+the names defined in an object file.  The parsing of the names found
+in the object is now separated from processing them to handle the
+duplication between local and global definitions on AIX.  [GH #21637]
 
 =back
 
