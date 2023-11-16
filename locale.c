@@ -6054,8 +6054,6 @@ S_my_langinfo_i(pTHX_
     /* These items are available from localeconv(). */
 
 #      define P_CS_PRECEDES    "p_cs_precedes"
-#      define CURRENCY_SYMBOL  "currency_symbol"
-
    /* case RADIXCHAR:   // May drop down to here in some configurations */
       case THOUSEP:
       case CRNCYSTR:
