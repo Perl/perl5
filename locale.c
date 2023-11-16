@@ -5213,6 +5213,19 @@ S_my_localeconv(pTHX_ const int item)
                                   strings,
                                   integers
                                  );
+#    ifndef HAS_SOME_LANGINFO  /* Could be using this function to emulate
+                                nl_langinfo() */
+
+    /* We are done when called with an individual item.  There are no integer
+     * items to adjust, and it's best for the caller to determine if this
+     * string item is UTF-8 or not.  This is because the locale's UTF-8ness is
+     * calculated below, and in some Configurations, that can lead to a
+     * recursive call to here, which could recurse infinitely. */
+    if (item != 0) {
+        return hv;
+    }
+
+#    endif
 
     /* The above call may have done all the hash fields, but not always, as
      * already explained.  If we need a second call it is always for the
@@ -5243,20 +5256,6 @@ S_my_localeconv(pTHX_ const int item)
      * corrections determined at hash population time, at an extra maintenance
      * cost which khw doesn't think is worth it
      */
-
-#    ifndef HAS_SOME_LANGINFO
-
-    /* We are done when called with an individual item.  There are no integer
-     * items to adjust, and it's best for the caller to determine if this
-     * string item is UTF-8 or not.  This is because the locale's UTF-8ness is
-     * calculated below, and in some Configurations, that can lead to a
-     * recursive call to here, which could recurse infinitely. */
-
-    if (item != 0) {
-        return hv;
-    }
-
-#    endif
 
     for (unsigned int i = 0; i < 2; i++) {  /* Try both types of strings */
         if (! strings[i]) {     /* Skip if no strings of this type */
