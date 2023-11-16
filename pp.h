@@ -681,6 +681,8 @@ Does not use C<TARG>.  See also C<L</XPUSHu>>, C<L</mPUSHu>> and C<L</PUSHu>>.
 /* No longer used in core. Use AMG_CALLunary instead */
 #define AMG_CALLun(sv,meth) AMG_CALLunary(sv, CAT2(meth,_amg))
 
+/* No longer used in core. Was expanded directly into its only two users,
+ * pp_readline and pp_glob */
 #define tryAMAGICunTARGETlist(meth, jump)			\
     STMT_START {						\
         dSP;							\
