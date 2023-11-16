@@ -4860,7 +4860,7 @@ Perl_localeconv(pTHX)
 
 }
 
-#if  defined(HAS_LOCALECONV)
+#if defined(HAS_LOCALECONV)
 
 HV *
 S_my_localeconv(pTHX_ const int item)
@@ -5066,44 +5066,47 @@ S_my_localeconv(pTHX_ const int item)
      *
      * For each, set up the appropriate parameters for the call below to
      * S_populate_hash_from_localeconv() */
-    if (item != 0) switch (item) {
-      default:
-        locale_panic_(Perl_form(aTHX_
-                    "Unexpected item passed to my_localeconv: %d", item));
-        break;
+    if (item != 0) {
+        switch (item) {
+          default:
+            locale_panic_(Perl_form(aTHX_
+                          "Unexpected item passed to my_localeconv: %d", item));
+            break;
 
 #    ifdef USE_LOCALE_NUMERIC
 
-      case RADIXCHAR:
-        locale = numeric_locale = PL_numeric_name;
-        index_bits = INDEX_TO_BIT(LC_NUMERIC_INDEX_);
-        strings[NUMERIC_STRING_OFFSET] = DECIMAL_POINT_ADDRESS;
-        integers = NULL;
-        break;
+          case RADIXCHAR:
+            locale = numeric_locale = PL_numeric_name;
+            index_bits = INDEX_TO_BIT(LC_NUMERIC_INDEX_);
+            strings[NUMERIC_STRING_OFFSET] = DECIMAL_POINT_ADDRESS;
+            integers = NULL;
+            break;
 
-      case THOUSEP:
-        index_bits = INDEX_TO_BIT(LC_NUMERIC_INDEX_);
-        locale = numeric_locale = PL_numeric_name;
-        strings[NUMERIC_STRING_OFFSET] = thousands_sep_string;
-        integers = NULL;
-        break;
+          case THOUSEP:
+            index_bits = INDEX_TO_BIT(LC_NUMERIC_INDEX_);
+            locale = numeric_locale = PL_numeric_name;
+            strings[NUMERIC_STRING_OFFSET] = thousands_sep_string;
+            integers = NULL;
+            break;
 
 #    endif
 #    ifdef USE_LOCALE_MONETARY
 
-      case CRNCYSTR:
-        index_bits = INDEX_TO_BIT(LC_MONETARY_INDEX_);
-        locale = monetary_locale = querylocale_c(LC_MONETARY);
+          case CRNCYSTR:
+            index_bits = INDEX_TO_BIT(LC_MONETARY_INDEX_);
+            locale = monetary_locale = querylocale_c(LC_MONETARY);
 
-        /* This item needs the values for both the currency symbol, and another
-         * one used to construct the nl_langino()-compatible return */
-        strings[MONETARY_STRING_OFFSET] = CURRENCY_SYMBOL_ADDRESS;
-        integers = P_CS_PRECEDES_ADDRESS;
-        break;
+            /* This item needs the values for both the currency symbol, and
+             * another one used to construct the nl_langino()-compatible
+             * return. */
+            strings[MONETARY_STRING_OFFSET] = CURRENCY_SYMBOL_ADDRESS;
+            integers = P_CS_PRECEDES_ADDRESS;
+            break;
 
 #    endif
 
-    } /* End of switch() */
+        } /* End of switch() */
+    }
 
     else    /* End of for just one item to emulate nl_langinfo() */
 
