@@ -351,7 +351,49 @@ PP_wrapped(pp_glob, 1 + !(PL_op->op_flags & OPf_SPECIAL), 0)
      * is called once and only once */
     if (SvGMAGICAL(TOPs)) TOPs = sv_2mortal(newSVsv(TOPs));
 
-    tryAMAGICunTARGETlist(iter_amg, (PL_op->op_flags & OPf_SPECIAL));
+    /* unrolled
+      tryAMAGICunTARGETlist(iter_amg, (PL_op->op_flags & OPf_SPECIAL)); */
+    SV *tmpsv;
+    SV *arg= *sp;
+    U8 gimme = GIMME_V;
+    if (UNLIKELY(SvAMAGIC(arg) &&
+        (tmpsv = amagic_call(arg, &PL_sv_undef, iter_amg,
+                             AMGf_want_list | AMGf_noright
+                            |AMGf_unary))))
+    {
+        SPAGAIN;
+        if (gimme == G_VOID) {
+            NOOP;
+        }
+        else if (gimme == G_LIST) {
+            SSize_t i;
+            SSize_t len;
+            assert(SvTYPE(tmpsv) == SVt_PVAV);
+            len = av_count((AV *)tmpsv);
+            (void)POPs; /* get rid of the arg */
+            EXTEND(sp, len);
+            for (i = 0; i < len; ++i)
+                PUSHs(av_shift((AV *)tmpsv));
+        }
+        else { /* AMGf_want_scalar */
+            dATARGET; /* just use the arg's location */
+            sv_setsv(TARG, tmpsv);
+            if (PL_op->op_flags & OPf_STACKED)
+                sp--;
+            SETTARG;
+        }
+        PUTBACK;
+        if (PL_op->op_flags & OPf_SPECIAL) {
+            OP *jump_o = NORMAL->op_next;
+            while (jump_o->op_type == OP_NULL)
+                jump_o = jump_o->op_next;
+            assert(jump_o->op_type == OP_ENTERSUB);
+            (void)POPMARK;
+            return jump_o->op_next;
+        }
+        return NORMAL;
+    }
+
 
     if (PL_op->op_flags & OPf_SPECIAL) {
         /* call Perl-level glob function instead. Stack args are:
