@@ -5089,31 +5089,30 @@ S_my_localeconv(pTHX_ const int item)
 #    ifdef USE_LOCALE_NUMERIC
 
           case RADIXCHAR:
-            locale = numeric_locale = PL_numeric_name;
-            index_bits = OFFSET_TO_BIT(NUMERIC_OFFSET);
             strings[NUMERIC_OFFSET] = DECIMAL_POINT_ADDRESS;
-            integers = NULL;
-            break;
+            goto numeric_common;
 
           case THOUSEP:
+            strings[NUMERIC_OFFSET] = thousands_sep_string;
+
+          numeric_common:
+            integers = NULL;
             index_bits = OFFSET_TO_BIT(NUMERIC_OFFSET);
             locale = numeric_locale = PL_numeric_name;
-            strings[NUMERIC_OFFSET] = thousands_sep_string;
-            integers = NULL;
             break;
 
 #    endif
 #    ifdef USE_LOCALE_MONETARY
 
           case CRNCYSTR:
-            index_bits = OFFSET_TO_BIT(MONETARY_OFFSET);
-            locale = monetary_locale = querylocale_c(LC_MONETARY);
-
             /* This item needs the values for both the currency symbol, and
              * another one used to construct the nl_langino()-compatible
              * return. */
             strings[MONETARY_OFFSET] = CURRENCY_SYMBOL_ADDRESS;
             integers = P_CS_PRECEDES_ADDRESS;
+
+            index_bits = OFFSET_TO_BIT(MONETARY_OFFSET);
+            locale = monetary_locale = querylocale_c(LC_MONETARY);
             break;
 
 #    endif
