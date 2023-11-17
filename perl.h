@@ -1279,11 +1279,11 @@ typedef enum {
 #      define USE_PL_CUR_LC_ALL
 #    endif
 
-     /* Assume MingW has the broken localeconv() that Microsoft
+     /* Assume MingW without UCRT has the broken localeconv() that Microsoft
       * fixed in VS 2015 */
-#      ifndef _MSC_VER
-#        define TS_W32_BROKEN_LOCALECONV
-#      endif
+#    if ! defined(_MSC_VER) && ! defined(_UCRT)
+#      define TS_W32_BROKEN_LOCALECONV
+#    endif
 #  endif
 
    /* POSIX 2008 and Windows with thread-safe locales keep locale information
