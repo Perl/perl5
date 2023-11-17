@@ -1284,14 +1284,9 @@ typedef enum {
 #      define USE_PL_CUR_LC_ALL
 #    endif
 
-     /* Microsoft documentation reads in the change log for VS 2015: "The
-      * localeconv function declared in locale.h now works correctly when
-      * per-thread locale is enabled. In previous versions of the library, this
-      * function would return the lconv data for the global locale, not the
-      * thread's locale." */
+     /* Assume MingW has the broken localeconv() that Microsoft
+      * fixed in VS 2015 */
 #      ifndef _MSC_VER
-#        define TS_W32_BROKEN_LOCALECONV
-#      elif _MSC_VER < 1900
 #        define TS_W32_BROKEN_LOCALECONV
 #      endif
 #  endif
