@@ -270,7 +270,7 @@ instead, or to use the C<SvPV_nolen> macro.
 =cut
 */
 
-PERLVAR(I, na,		STRLEN)		/* for use in SvPV when length is
+PERLVARI(I, na,		STRLEN, 0)	/* for use in SvPV when length is
                                            Not Applicable */
 
 /* stat stuff */

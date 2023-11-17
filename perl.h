@@ -45,12 +45,6 @@
 
 #include "config.h"
 
-#ifndef WIN32   /* XXX temp */
-#  define _configthreadlocale(x) (! cBOOL(x))
-#  define _DISABLE_PER_THREAD_LOCALE 0
-#  define _ENABLE_PER_THREAD_LOCALE 1
-#endif
-
 /* This fakes up using Mingw for locale handling.  In order to not define WIN32
  * in this file (and hence throughout the code that isn't expecting it), this
  * doesn't define that, but defines the appropriate things that would otherwise
@@ -61,8 +55,9 @@
 #  define NO_POSIX_2008_LOCALE
 #  undef HAS_NL_LANGINFO
 #  undef HAS_NL_LANGINFO_L
+//#  define NO_LOCALE_MESSAGES
 #  undef _UCRT
-#  ifdef USE_LOCALE
+#  ifndef NO_LOCALE
 #    define TS_W32_BROKEN_LOCALECONV
 #    ifdef USE_THREADS
 #      define EMULATE_THREAD_SAFE_LOCALES
@@ -7397,6 +7392,17 @@ typedef struct am_table_short AMTS;
 #  define LOCALE_TERM
 #else
 #  ifdef WIN32_USE_FAKE_OLD_MINGW_LOCALES
+
+#  define _DISABLE_PER_THREAD_LOCALE 1
+#  define _ENABLE_PER_THREAD_LOCALE 2
+#  define configthreadlocale_(arg, na)                                      \
+     ({ assert(inRANGE(arg, 0, _ENABLE_PER_THREAD_LOCALE));                 \
+        const int old = na;                                                 \
+        if (arg != 0) na = arg;                                             \
+        old;                                                                \
+     })
+#  define _configthreadlocale(arg)  configthreadlocale_(arg, my_perl->Ina)
+
     /* This function is coerced by this Configure option into cleaning up
      * memory that is static to locale.c.  So we call it at termination.  Doing
      * it this way is kludgy but confines having to deal with this
