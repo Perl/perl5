@@ -35,7 +35,7 @@ use feature 'state';
 use feature 'signatures';
 no warnings qw( experimental::builtin );
 
-sub DEBUG () { 0 }  # Set to 0 for production; 1 for development
+sub DEBUG () { 1 }  # Set to 0 for production; 1 for development
 $| = 1 if DEBUG;
 my $debugging_build = $Config{"ccflags"} =~ /-DDEBUGGING/;
 
@@ -815,10 +815,12 @@ usage: $0 [-c|-p|-q|-v|-w] [-C dir] [-L filelist] [ -P pod_dir ]
 END
     }
 }
+$verbosity = $VERBOSE;
 
 # Stores the most-recently changed file.  If none have changed, can skip the
 # build
 my $most_recent = (stat $0)[9];   # Do this before the chdir!
+my $save_most_recent = $most_recent;
 
 # Change directories now, because need to read 'version' early.
 if ($use_directory) {
@@ -19985,12 +19987,19 @@ if ( $verbosity >= $VERBOSE ) {
          "Checking ".scalar( @mktables_list_output_files )." output files.\n";
 }
 
+local $to_trace = 1 if main::DEBUG;
 # We set $most_recent to be the most recently changed input file, including
 # this program itself (done much earlier in this file)
 foreach my $in (@input_files) {
     next unless -e $in;        # Keep going even if missing a file
     my $mod_time = (stat $in)[9];
-    $most_recent = $mod_time if $mod_time > $most_recent;
+    if ($mod_time > $most_recent) {
+        print "$in (", scalar localtime($mod_time), 
+              "is more recent than",
+              scalar localtime($most_recent),
+              "\n" if $verbosity >= $VERBOSE;
+        $most_recent = $mod_time;
+    }
 
     # See that the input files have distinct names, to warn someone if they
     # are adding a new one
@@ -20009,8 +20018,20 @@ foreach my $in (@input_files) {
 my $rebuild = $write_unchanged_files    # Rebuild: if unconditional rebuild
               || ! scalar @mktables_list_output_files  # or if no outputs known
               || $old_start_time < $most_recent        # or out-of-date
-              || $old_options ne $command_line_arguments; # or with different
+              #|| $old_options ne $command_line_arguments; # or with different
+              ;
                                                           # options
+if ($rebuild) {
+    trace   "write_unchanged_files=", $write_unchanged_files,
+            "\ndelta (positive means rebuild) =",
+            $most_recent - $old_start_time,
+            "\n", scalar localtime($old_start_time), "old start time",
+            "\n", scalar localtime($most_recent), "most recent=",
+            "\n", scalar localtime($save_most_recent), "mktables mod time=",
+            "\n how many files=", scalar @mktables_list_output_files
+    ;
+}
+local $to_trace = 0 if main::DEBUG;
 
 # Now we check to see if any output files are older than youngest, if
 # they are, we need to continue on, otherwise we can presumably bail.
@@ -20021,10 +20042,9 @@ if (! $rebuild) {
             $rebuild = 1;
             last;
          }
-        #local $to_trace = 1 if main::DEBUG;
-        trace $most_recent, (stat $out)[9] if main::DEBUG && $to_trace;
+        local $to_trace = 1 if main::DEBUG;
         if ( (stat $out)[9] <= $most_recent ) {
-            #trace "$out:  most recent mod time: ", (stat $out)[9], ", youngest: $most_recent\n" if main::DEBUG && $to_trace;
+            trace "$out:  most recent mod time: ", (stat $out)[9], ", youngest: $most_recent\n" if main::DEBUG && $to_trace;
             print "'$out' is too old.\n" if $verbosity >= $VERBOSE;
             $rebuild = 1;
             last;
