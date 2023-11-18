@@ -56,6 +56,15 @@ XXX For a release on a stable branch, this section aspires to be:
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.
 
+=over 4
+
+=item *
+
+Using C<goto> to jump from an outer scope into an inner scope is deprecated
+and will be removed completely in Perl 5.42.  [GH #21601]
+
+=back
+
 =head2 Module removals
 
 XXX Remove this section if not applicable.
