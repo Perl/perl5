@@ -815,7 +815,7 @@ formatting, e.g.
 
 You should add pod links for GitHub issue references thusly:
 
- $ perl -p -i -e'BEGIN{undef $/}; s{(GH\s+#)(\d+)}{L<$1$2|https://github.com/Perl/perl5/issues/$2>}mg' pod/perldelta.pod
+ $ perl -p -i -e'BEGIN{undef $/}; s{((?:GH|github)\s*#)(\d+)}{L<$1$2|https://github.com/Perl/perl5/issues/$2>}img' pod/perldelta.pod
 
 If you make changes, be sure to commit them.
 
