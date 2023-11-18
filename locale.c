@@ -5269,11 +5269,6 @@ S_my_localeconv(pTHX_ const int item)
 
     for (unsigned int i = 0; i < 2; i++) {  /* Try both types of strings */
 
-        const char * locale = locales[i];
-        if (! is_locale_utf8(locale)) {
-            continue;   /* No string can be UTF-8 if the locale isn't */
-        }
-
         /* Examine each string */
         for (const lconv_offset_t *strp = strings[i]; strp->name; strp++) {
             const char * name = strp->name;
@@ -5287,8 +5282,8 @@ S_my_localeconv(pTHX_ const int item)
 
             /* Determine if the string should be marked as UTF-8. */
             if (UTF8NESS_YES == (get_locale_string_utf8ness_i(SvPVX(*value),
-                                                  LOCALE_IS_UTF8,
-                                                  NULL,
+                                                  LOCALE_UTF8NESS_UNKNOWN,
+                                                  locales[i],
                                                   LC_ALL_INDEX_ /* OOB */)))
             {
                 SvUTF8_on(*value);
