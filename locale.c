@@ -5289,7 +5289,7 @@ S_my_localeconv(pTHX_ const int item)
             if (UTF8NESS_YES == (get_locale_string_utf8ness_i(SvPVX(*value),
                                                   LOCALE_IS_UTF8,
                                                   NULL,
-                                                  (locale_category_index) 0)))
+                                                  LC_ALL_INDEX_ /* OOB */)))
             {
                 SvUTF8_on(*value);
             }
