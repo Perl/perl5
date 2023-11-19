@@ -309,6 +309,33 @@ the names defined in an object file.  The parsing of the names found
 in the object is now separated from processing them to handle the
 duplication between local and global definitions on AIX.  [GH #21637]
 
+=item *
+
+A test was added to F<lib/locale_threads.t> that extensively stress
+tests locale handling.  It turns out that the libc implementations on
+various platforms have bugs in this regard, including Linux, Windows,
+*BSD derivatives including Darwin, and others.  Experimental versions of
+this test have been used in the past few years to find bugs in the Perl
+implementation and in those platforms, as well as to develop workarounds
+in the Perl implementation, where feasible, for the platform bugs.
+Multiple bug report tickets have been filed against platforms, and some
+have been fixed.  The test checks that platforms that purport to support
+thread-safe locale handling actually do so (and that perl works properly
+on those that do;  The read-only variable C<${^SAFE_LOCALES}> is set to
+1 if perl thinks the platform can handle this, whatever the platform's
+documentation says).
+
+Also tested for is if the various locale categories can indeed be set
+independently to disparate locales.  (An example of where you might want
+to do this is if you are a Western Canadian living and working in
+Holland.  You likely will want to have the C<LC_MONETARY> locale be
+set to where you are living, but have the other parts of your locale
+retain your native English values.  Later, as you get a bit more
+comfortable with Dutch, and in order to communicate better with your
+colleagues, you might want to change C<LC_TIME> and C<LC_NUMERIC> to
+Dutch, while leaving C<LC_CTYPE> and C<LC_COLLATE> set to English
+indefinitely.)
+
 =back
 
 =head1 Platform Support
