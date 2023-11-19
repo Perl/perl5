@@ -209,7 +209,6 @@ our %Modules = (
     'Compress::Raw::Bzip2' => {
         'DISTRIBUTION' => 'PMQS/Compress-Raw-Bzip2-2.206.tar.gz',
         'SYNCINFO'     => 'yorton on Tue Jul 25 20:45:42 2023',
-        'SYNCINFO'     => 'jkeenan on Wed Jul 19 09:49:28 2023',
         'FILES'        => q[cpan/Compress-Raw-Bzip2],
         'EXCLUDED'     => [
             qr{^t/Test/},
@@ -223,7 +222,6 @@ our %Modules = (
     'Compress::Raw::Zlib' => {
         'DISTRIBUTION' => 'PMQS/Compress-Raw-Zlib-2.206.tar.gz',
         'SYNCINFO'     => 'yorton on Tue Jul 25 20:37:04 2023',
-        'SYNCINFO'     => 'jkeenan on Wed Jul 19 09:58:08 2023',
         'FILES'    => q[cpan/Compress-Raw-Zlib],
         'EXCLUDED' => [
             qr{^examples/},
@@ -761,9 +759,6 @@ our %Modules = (
     'Math::BigInt' => {
         'DISTRIBUTION' => 'PJACKLAM/Math-BigInt-2.001000.tar.gz',
         'SYNCINFO'     => 'jkeenan on Tue Nov 14 17:22:07 2023',
-        'SYNCINFO'     => 'jkeenan on Thu Nov  2 17:12:13 2023',
-        'SYNCINFO'     => 'jkeenan on Thu Sep 28 07:49:05 2023',
-        'SYNCINFO'     => 'jkeenan on Sun Sep 24 08:09:46 2023',
         'FILES'        => q[cpan/Math-BigInt],
         'EXCLUDED'     => [
             qr{^xt/},
@@ -1079,7 +1074,6 @@ our %Modules = (
     'Term::Table' => {
         'DISTRIBUTION' => 'EXODIST/Term-Table-0.018.tar.gz',
         'SYNCINFO'     => 'jkeenan on Wed Nov  1 19:16:24 2023',
-        'SYNCINFO'     => 'LeoNerd on Wed Sep 13 18:33:07 2023',
         'FILES'        => q[cpan/Term-Table],
         'EXCLUDED'     => [
             qw( appveyor.yml ),
@@ -1094,8 +1088,6 @@ our %Modules = (
     'Test::Harness' => {
         'DISTRIBUTION' => 'LEONT/Test-Harness-3.48.tar.gz',
         'SYNCINFO'     => 'gknop on Sat Oct 21 15:01:02 2023',
-        'SYNCINFO'     => 'jkeenan on Wed Aug 16 18:28:09 2023',
-        'SYNCINFO'     => 'jkeenan on Sat Aug 12 17:05:02 2023',
         'FILES'        => q[cpan/Test-Harness],
         'EXCLUDED'     => [
             qr{^examples/},
@@ -1127,7 +1119,6 @@ our %Modules = (
     'Test2::Suite' => {
         'DISTRIBUTION' => 'EXODIST/Test2-Suite-0.000159.tar.gz',
         'SYNCINFO'     => 'jkeenan on Wed Nov  1 20:18:33 2023',
-        'SYNCINFO'     => 'LeoNerd on Wed Sep 14 10:44:29 2023',
         'FILES'        => q[cpan/Test2-Suite],
         'EXCLUDED'     => [
             qw( appveyor.yml
