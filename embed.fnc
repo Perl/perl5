@@ -4415,12 +4415,12 @@ Sf	|char * |strftime_tm	|NN const char *fmt			\
 				|NN const struct tm *mytm
 # if defined(HAS_LOCALECONV)
 S	|HV *	|my_localeconv	|const int item
-S	|void	|populate_hash_from_localeconv				\
-				|NN HV *hv				\
-				|NN const char *locale			\
-				|const U32 which_mask			\
-				|NN const lconv_offset_t *strings[2]	\
-				|NULLOK const lconv_offset_t *integers
+S	|void	|populate_hash_from_localeconv					\
+				|NN HV *hv					\
+				|NN const char *locale				\
+				|const U32 which_mask				\
+				|NN const lconv_offset_t *strings[2]		\
+				|NULLOK const lconv_offset_t *integers[2]
 # endif
 # if defined(USE_LOCALE)
 S	|const char *|calculate_LC_ALL_string					\
