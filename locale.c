@@ -5025,30 +5025,9 @@ S_my_localeconv(pTHX_ const int item)
     return hv;
 
 #  else
-    /* From here to the end of this function, at least one of NUMERIC or
-     * MONETARY can be non-C
-     *
-     * If we aren't paying attention to a given category, use LC_CTYPE instead;
-     * If not paying attention to that either, the code below should end up not
-     * using this.  Make sure that things blow up if that avoidance gets lost,
-     * by setting the category to an out-of-bounds value */
-    locale_category_index numeric_index;
-    locale_category_index monetary_index;
 
-#    ifdef USE_LOCALE_NUMERIC
-    numeric_index = LC_NUMERIC_INDEX_;
-#    elif defined(USE_LOCALE_CTYPE)
-    numeric_index = LC_CTYPE_INDEX_;
-#    else
-    numeric_index = LC_ALL_INDEX_;      /* Out-of-bounds */
-#    endif
-#    ifdef USE_LOCALE_MONETARY
-    monetary_index = LC_MONETARY_INDEX_;
-#    elif defined(USE_LOCALE_CTYPE)
-    monetary_index = LC_CTYPE_INDEX_;
-#    else
-    monetary_index = LC_ALL_INDEX_;     /* Out-of-bounds */
-#    endif
+    /* From here to the end of this function, at least one of NUMERIC or
+     * MONETARY can be non-C */
 
     /* This is a mask, with one bit to tell the populate functions to populate
      * the NUMERIC items; another bit for the MONETARY ones.  This way they can
@@ -5064,14 +5043,19 @@ S_my_localeconv(pTHX_ const int item)
      * a second call.  Assume this is the case unless overridden below */
     bool requires_2nd_localeconv = false;
 
-    /* The two categories can have disparate locales.  Initialize them to C and
-     * override later whichever one(s) we pay attention to */
-    const char * numeric_locale = "C";
-    const char * monetary_locale = "C";
+    /* The actual hash populating is done by one of the two populate functions.
+     * Which one is appropriate for either the MONETARY_OFFSET or the
+     * NUMERIC_OFFSET is calculated and then stored in this table */
+    void (*populate[2]) (pTHX_
+                         HV * ,
+                         const char *,
+                         const U32,
+                         const lconv_offset_t **,
+                         const lconv_offset_t **);
 
-    /* This will be either 'numeric_locale' or 'monetary_locale' depending on
-     * what we are working on at the moment */
-    const char * locale;
+    /* This gives the locale to use for the corresponding OFFSET, like the
+     * 'populate' array above */
+    const char * locales[2];
 
 #  ifdef HAS_SOME_LANGINFO
 
@@ -5110,6 +5094,8 @@ S_my_localeconv(pTHX_ const int item)
      * locale is "C", or set up the appropriate parameters for the call below
      * to the populate function */
     if (item != 0) {
+        const char *locale;
+
         switch (item) {
           default:
             locale_panic_(Perl_form(aTHX_
@@ -5137,7 +5123,7 @@ S_my_localeconv(pTHX_ const int item)
 
           numeric_common:
             index_bits = OFFSET_TO_BIT(NUMERIC_OFFSET);
-            locale = numeric_locale = PL_numeric_name;
+            locale = PL_numeric_name;
             break;
 
 #      endif
@@ -5163,56 +5149,79 @@ S_my_localeconv(pTHX_ const int item)
 #      endif
 
         } /* End of switch() */
+
+        /* There's only one item, so only one of each of these will get used,
+         * but cheap to initialize both */
+        populate[MONETARY_OFFSET] =
+        populate[NUMERIC_OFFSET]  = S_populate_hash_from_localeconv;
+        locales[MONETARY_OFFSET] = locales[NUMERIC_OFFSET]  = locale;
     }
-
-    else    /* End of for just one item to emulate nl_langinfo() */
+    else   /* End of for just one item to emulate nl_langinfo() */
 
 #    endif
 
-    {   /* Here, the call is for all of localeconv().  It has a bunch of
-         * items.  As in the individual item case, set up the parameters for
-         * S_populate_hash_from_localeconv(); */
-
-#    ifdef USE_LOCALE_NUMERIC
-        numeric_locale = PL_numeric_name;
-#    elif defined(USE_LOCALE_CTYPE)
-        numeric_locale = querylocale_i(numeric_index);
-#    endif
-#    if defined(USE_LOCALE_MONETARY) || defined(USE_LOCALE_CTYPE)
-        monetary_locale = querylocale_i(monetary_index);
-#    endif
-
-        /* The first call to S_populate_hash_from_localeconv() will be for the
-         * MONETARY values */
+    {
+        /* Here, the call is for all of localeconv().  It has a bunch of
+         * items.  The first function call always gets the MONETARY values */
         index_bits = OFFSET_TO_BIT(MONETARY_OFFSET);
-        locale = monetary_locale;
+
+#    ifdef USE_LOCALE_MONETARY
+
+        locales[MONETARY_OFFSET] = querylocale_c(LC_MONETARY);
+        populate[MONETARY_OFFSET] =
+                                (isNAME_C_OR_POSIX(locales[MONETARY_OFFSET]))
+                                ?  S_populate_hash_from_C_localeconv
+                                :  S_populate_hash_from_localeconv;
+
+#    else
+
+        locales[MONETARY_OFFSET] = "C";
+        populate[MONETARY_OFFSET] = S_populate_hash_from_C_localeconv;
+
+#    endif
+#    ifdef USE_LOCALE_NUMERIC
 
         /* And if the locales for the two categories are the same, we can also
          * do the NUMERIC values in the same call */
-        if (strEQ(numeric_locale, monetary_locale)) {
+        if (strEQ(PL_numeric_name, locales[MONETARY_OFFSET])) {
             index_bits |= OFFSET_TO_BIT(NUMERIC_OFFSET);
+            locales[NUMERIC_OFFSET] = locales[MONETARY_OFFSET];
+            populate[NUMERIC_OFFSET] = populate[MONETARY_OFFSET];
         }
         else {
             requires_2nd_localeconv = true;
+            locales[NUMERIC_OFFSET] = PL_numeric_name;
+            populate[NUMERIC_OFFSET] = (isNAME_C_OR_POSIX(PL_numeric_name))
+                                       ?  S_populate_hash_from_C_localeconv
+                                       :  S_populate_hash_from_localeconv;
         }
 
+#    else
 
+        /* When LC_NUMERIC is confined to "C", the two locales are the same
+           iff LC_MONETARY in this case is also "C".  We set up the function
+           for that case above, so fastest to test just its address */
+        locales[NUMERIC_OFFSET] = "C";
+        if (populate[MONETARY_OFFSET] == S_populate_hash_from_C_localeconv) {
+            index_bits |= OFFSET_TO_BIT(NUMERIC_OFFSET);
+            populate[NUMERIC_OFFSET] = populate[MONETARY_OFFSET];
+        }
+        else {
+            requires_2nd_localeconv = true;
+            populate[NUMERIC_OFFSET] = S_populate_hash_from_C_localeconv;
+        }
+
+#    endif
 
     }   /* End of call is for localeconv() */
 
-    /* The code above has determined the parameters to
-       S_populate_hash_from_localeconv() for both cases of an individual item
-       and for the entire structure.  Below is code common to both */
+    /* Call the proper populate function (which may call localeconv()) and copy
+     * its results into the hash.  All the parameters have been initialized
+     * above */
+    (*populate[MONETARY_OFFSET])(aTHX_
+                                 hv, locales[MONETARY_OFFSET],
+                                 index_bits, strings, integers);
 
-
-    /* Call localeconv() and copy its results into the hash.  All the
-     * parameters have been initialized above */
-    populate_hash_from_localeconv(hv,
-                                  locale,
-                                  index_bits,
-                                  strings,
-                                  integers
-                                 );
 #    ifndef HAS_SOME_LANGINFO  /* Could be using this function to emulate
                                 nl_langinfo() */
 
@@ -5231,10 +5240,11 @@ S_my_localeconv(pTHX_ const int item)
      * already explained.  If we need a second call it is always for the
      * NUMERIC fields */
     if (requires_2nd_localeconv) {
-        populate_hash_from_localeconv(hv,
-                                      numeric_locale,
-                                      OFFSET_TO_BIT(NUMERIC_OFFSET),
-                                      strings, integers);
+        (*populate[NUMERIC_OFFSET])(aTHX_
+                                    hv,
+                                    locales[NUMERIC_OFFSET],
+                                    OFFSET_TO_BIT(NUMERIC_OFFSET),
+                                    strings, integers);
     }
 
     /* Here, the hash has been completely populated.
@@ -5258,14 +5268,8 @@ S_my_localeconv(pTHX_ const int item)
      */
 
     for (unsigned int i = 0; i < 2; i++) {  /* Try both types of strings */
-        if (! strings[i]) {     /* Skip if no strings of this type */
-            continue;
-        }
 
-        locale = (i == NUMERIC_OFFSET)
-                 ? numeric_locale
-                 : monetary_locale;
-
+        const char * locale = locales[i];
         if (! is_locale_utf8(locale)) {
             continue;   /* No string can be UTF-8 if the locale isn't */
         }
@@ -5456,11 +5460,7 @@ S_populate_hash_from_localeconv(pTHX_ HV * hv,
          * 418efacd1950763f74ed3cc22f8cf9206661b892 for details.  Thus we have
          * to make sure that the locale we want is set after LC_CTYPE.  We
          * unconditionally toggle away from and back to the current locale
-         * prior to calling localeconv().
-         *
-         * This code will have no effect if we already are in C, but khw
-         * hasn't seen any cases where this causes problems when we are in the
-         * C locale. */
+         * prior to calling localeconv(). */
         orig_NUMERIC_locale = toggle_locale_c(LC_NUMERIC, "C");
         toggle_locale_c(LC_NUMERIC, locale);
 
