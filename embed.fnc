@@ -65,9 +65,6 @@
 : backport the fixed version to modules.  The only disadvantage khw can think
 : of is the namespace pollution one.
 :
-: Since we don't require a C compiler to support variadic macros (C99), the
-: macros can't be generated in such situations.
-:
 : WARNING: Any macro created in a header file is visible to XS code, unless
 : care is taken to wrap it within C preprocessor guards like the following
 :
