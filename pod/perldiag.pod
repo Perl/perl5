@@ -5392,7 +5392,7 @@ Perl guesses a reasonable buffer size, but puts a sentinel byte at the
 end of the buffer just in case.  This sentinel byte got clobbered, and
 Perl assumes that memory is now corrupted.  See L<perlfunc/ioctl>.
 
-=item Possible precedence issue with control flow operator
+=item Possible precedence issue with control flow operator (%s)
 
 (W syntax) There is a possible problem with the mixing of a control
 flow operator (e.g. C<return>) and a low-precedence operator like
