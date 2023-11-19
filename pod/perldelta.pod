@@ -196,13 +196,14 @@ section.
 
 Additionally, the following selected changes have been made:
 
-=head3 L<XXX>
+=head3 L<perlop>
 
 =over 4
 
 =item *
 
-XXX Description of the change here
+The section on the empty pattern C<//> has been amended to mention that the current dynamic scope is
+used to find the last successful match.
 
 =back
 
@@ -465,6 +466,9 @@ XXX
 
 XXX Add anything here that we forgot to add, or were mistaken about, in
 the perldelta of a previous release.
+
+L<perl5300delta> has been updated to include the removal of the C<arybase> module that happened at
+the same time as the removal of C<$[>.
 
 =back
 
