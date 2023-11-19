@@ -1857,7 +1857,7 @@ package foo;
 CORE::do({});
 CORE::do({});
 ####
-# [perl #77096] functions that do not follow the llafr
+# [perl #77096] functions that do not follow the looks-like-a-function rule
 () = (return 1) + time;
 () = (return ($1 + $2) * $3) + time;
 () = (return ($a xor $b)) + time;
@@ -1871,6 +1871,26 @@ CORE::do({});
 () = (last 1) + 3;
 () = (next 1) + 3;
 () = (redo 1) + 3;
+() = (-R $_) + 3;
+() = (-W $_) + 3;
+() = (-X $_) + 3;
+() = (-r $_) + 3;
+() = (-w $_) + 3;
+() = (-x $_) + 3;
+>>>>
+() = (return 1);
+() = (return ($1 + $2) * $3);
+() = (return ($a xor $b));
+() = (do 'file') + time;
+() = (do ($1 + $2) * $3) + time;
+() = (do ($1 xor $2)) + time;
+() = (goto 1);
+() = (require 'foo') + 3;
+() = (require foo) + 3;
+() = (CORE::dump 1);
+() = (last 1);
+() = (next 1);
+() = (redo 1);
 () = (-R $_) + 3;
 () = (-W $_) + 3;
 () = (-X $_) + 3;
@@ -1900,6 +1920,13 @@ $_ = ($a xor not +($1 || 2) ** 2);
 () = warn;
 () = warn() + 1;
 () = setpgrp() + 1;
+>>>>
+() = (eof) + 1;
+() = (return);
+() = (return, 1);
+() = warn;
+() = warn() + 1;
+() = setpgrp() + 1;
 ####
 # loopexes have assignment prec
 () = (CORE::dump a) | 'b';
@@ -1907,6 +1934,12 @@ $_ = ($a xor not +($1 || 2) ** 2);
 () = (last a) | 'b';
 () = (next a) | 'b';
 () = (redo a) | 'b';
+>>>>
+() = (CORE::dump a);
+() = (goto a);
+() = (last a);
+() = (next a);
+() = (redo a);
 ####
 # [perl #63558] open local(*FH)
 open local *FH;

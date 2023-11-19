@@ -4302,8 +4302,8 @@ Perl_invert(pTHX_ OP *o)
 /* Warn about possible precedence issues if op is a control flow operator that
    does not terminate normally (return, exit, next, etc).
 */
-static void
-S_check_terminates(pTHX_ OP *op)
+static bool
+S_is_control_transfer(pTHX_ OP *op)
 {
     assert(op != NULL);
 
@@ -4312,15 +4312,10 @@ S_check_terminates(pTHX_ OP *op)
        $b)".
     */
     switch (op->op_type) {
+    case OP_DUMP:
     case OP_NEXT:
     case OP_LAST:
     case OP_REDO:
-        /* XXX: Perhaps we should emit a stronger warning for these.
-           Even with the high-precedence operator they don't seem to do
-           anything sensible.
-
-           But until we do, fall through here.
-         */
     case OP_EXIT:
     case OP_RETURN:
     case OP_DIE:
@@ -4337,12 +4332,12 @@ S_check_terminates(pTHX_ OP *op)
          */
         if (!op->op_folded && !(op->op_flags & OPf_PARENS))
             Perl_ck_warner(aTHX_ packWARN(WARN_SYNTAX),
-                           "Possible precedence issue with control flow operator");
-        /* XXX: Should we optimze this to "return $a;" (i.e. remove
-           the "or $b" part)?
-        */
-        break;
+                           "Possible precedence issue with control flow operator (%s)", OP_DESC(op));
+
+        return true;
     }
+
+    return false;
 }
 
 OP *
@@ -4354,7 +4349,7 @@ Perl_cmpchain_start(pTHX_ I32 type, OP *left, OP *right)
     if (!left)
         left = newOP(OP_NULL, 0);
     else
-        S_check_terminates(aTHX_ left);
+        (void)S_is_control_transfer(aTHX_ left);
     if (!right)
         right = newOP(OP_NULL, 0);
     scalar(left);
@@ -5962,8 +5957,11 @@ Perl_newBINOP(pTHX_ I32 type, I32 flags, OP *first, OP *last)
 
     if (!first)
         first = newOP(OP_NULL, 0);
-    else
-        S_check_terminates(aTHX_ first);
+    else if (S_is_control_transfer(aTHX_ first)) {
+        op_free(last);
+        first->op_folded = 1;
+        return first;
+    }
 
     NewOp(1101, binop, 1, BINOP);
 
@@ -8759,12 +8757,16 @@ S_new_logop(pTHX_ I32 type, I32 flags, OP** firstp, OP** otherp)
     if (type == OP_XOR)		/* Not short circuit, but here by precedence. */
         return newBINOP(type, flags, scalar(first), scalar(other));
 
-    S_check_terminates(aTHX_ first);
-
     assert((PL_opargs[type] & OA_CLASS_MASK) == OA_LOGOP
         || type == OP_CUSTOM);
 
     scalarboolean(first);
+
+    if (S_is_control_transfer(aTHX_ first)) {
+        op_free(other);
+        first->op_folded = 1;
+        return first;
+    }
 
     /* search for a constant op that could let us fold the test */
     if ((cstop = search_const(first))) {
@@ -8931,8 +8933,14 @@ Perl_newCONDOP(pTHX_ I32 flags, OP *first, OP *trueop, OP *falseop)
     if (!trueop)
         return newLOGOP(OP_OR, 0, first, falseop);
 
-    S_check_terminates(aTHX_ first);
     scalarboolean(first);
+    if (S_is_control_transfer(aTHX_ first)) {
+        op_free(trueop);
+        op_free(falseop);
+        first->op_folded = 1;
+        return first;
+    }
+
     if ((cstop = search_const(first))) {
         /* Left or right arm of the conditional?  */
         const bool left = SvTRUE(cSVOPx(cstop)->op_sv);
