@@ -5076,13 +5076,16 @@ S_my_localeconv(pTHX_ const int item)
 
     /* End of all the initialization of data structures.  Now for actual code.
      *
-     * Without nl_langinfo(), the call to my_localeconv() could be for just one
-     * of the following 3 items to emulate nl_langinfo().  This is compiled
-     * only when using perl_langinfo.h, which we control, and it has been
-     * constructed so that no item is numbered 0.
+     * Without nl_langinfo(), the call to my_localeconv() could be for all of
+     * the localeconv() items or for just one of the following 3 items to
+     * emulate nl_langinfo().
      *
-     * For each, set up the appropriate parameters for the call below to
-     * S_populate_hash_from_localeconv() */
+     * This is compiled only when using perl_langinfo.h, which we control, and
+     * it has been constructed so that no item is numbered 0.
+     *
+     * For each individual item, either return the known value if the current
+     * locale is "C", or set up the appropriate parameters for the call below
+     * to the populate function */
     if (item != 0) {
         switch (item) {
           default:
@@ -5093,10 +5096,20 @@ S_my_localeconv(pTHX_ const int item)
 #    ifdef USE_LOCALE_NUMERIC
 
           case RADIXCHAR:
+            if (isNAME_C_OR_POSIX(PL_numeric_name)) {
+                (void) hv_stores(hv, DECIMAL_POINT_LITERAL, newSVpvs("."));
+                return hv;
+            }
+
             strings[NUMERIC_OFFSET] = DECIMAL_POINT_ADDRESS;
             goto numeric_common;
 
           case THOUSEP:
+            if (isNAME_C_OR_POSIX(PL_numeric_name)) {
+                (void) hv_stores(hv, THOUSANDS_SEP_LITERAL, newSVpvs(""));
+                return hv;
+            }
+
             strings[NUMERIC_OFFSET] = thousands_sep_string;
 
           numeric_common:
@@ -5108,15 +5121,21 @@ S_my_localeconv(pTHX_ const int item)
 #    endif
 #    ifdef USE_LOCALE_MONETARY
 
-          case CRNCYSTR:
-            /* This item needs the values for both the currency symbol, and
-             * another one used to construct the nl_langino()-compatible
-             * return. */
+          case CRNCYSTR:    /* This item needs the values for both the currency
+                               symbol, and another one used to construct the
+                               nl_langino()-compatible return. */
+
+            locale = querylocale_c(LC_MONETARY);
+            if (isNAME_C_OR_POSIX(locale)) {
+                (void) hv_stores(hv, CURRENCY_SYMBOL_LITERAL, newSVpvs(""));
+                (void) hv_stores(hv, P_CS_PRECEDES_LITERAL, newSViv(-1));
+                return hv;
+            }
+
             strings[MONETARY_OFFSET] = CURRENCY_SYMBOL_ADDRESS;
             integers = P_CS_PRECEDES_ADDRESS;
 
             index_bits = OFFSET_TO_BIT(MONETARY_OFFSET);
-            locale = monetary_locale = querylocale_c(LC_MONETARY);
             break;
 
 #    endif
