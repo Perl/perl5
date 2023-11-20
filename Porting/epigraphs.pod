@@ -819,8 +819,8 @@ L<Announced on 2019-07-20 by Steve Hay|https://www.nntp.perl.org/group/perl.perl
 
 L<Announced on 2019-06-20 by Karen Etheridge|https://www.nntp.perl.org/group/perl.perl5.porters/2019/06/msg255243.html>
 
-On Tuesday, January 20, 2004, I sent Joel Bleifuss, my editor at _In These
-Times_, this fax:
+On Tuesday, January 20, 2004, I sent Joel Bleifuss, my editor at I<In These
+Times>, this fax:
 
     ON ORANGE ALERT HERE.
     ECONOMIC TERRORIST ATTACK
