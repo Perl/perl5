@@ -1,0 +1,259 @@
+=encoding utf8
+
+=head1 NAME
+
+perl5395delta - what is new for perl v5.39.5
+
+=head1 DESCRIPTION
+
+This document describes differences between the 5.39.4 release and the 5.39.5
+release.
+
+If you are upgrading from an earlier release such as 5.39.3, first read
+L<perl5394delta>, which describes differences between 5.39.3 and 5.39.4.
+
+=head1 Notice
+
+glibc has an undocumented feature to return the current locale when
+using the POSIX 2008 locale API.  This feature is now experimentally
+enabled by default so as to see if there are problems with it.  This
+enabling expires in v5.39.10.  In the meantime, if you run into
+problems, open a bug ticket and Configure with
+C<-Accflags=-DNO_NL_LOCALE_NAME> to turn it off.
+
+=head1 Deprecations
+
+=over 4
+
+=item *
+
+Using C<goto> to jump from an outer scope into an inner scope is deprecated
+and will be removed completely in Perl 5.42.  [L<GH #21601|https://github.com/Perl/perl5/issues/21601>]
+
+=back
+
+=head1 Modules and Pragmata
+
+=head2 Updated Modules and Pragmata
+
+=over 4
+
+=item *
+
+L<Benchmark> has been upgraded from version 1.24 to 1.25.
+
+=item *
+
+L<builtin> has been upgraded from version 0.011 to 0.012.
+
+Added the C<load_module()> builtin function as per L<PPC 0006|https://github.com/Perl/PPCs/blob/main/ppcs/ppc0006-load-module.md>.
+
+=item *
+
+L<Encode> has been upgraded from version 3.19 to 3.20.
+
+=item *
+
+L<Getopt::Long> has been upgraded from version 2.54 to 2.57.
+
+=item *
+
+L<IO> has been upgraded from version 1.53 to 1.54.
+
+Fixed C<IO::Handle/blocking> on Windows, which has been non-functional
+since IO 1.32.  [L<GH #17455|https://github.com/Perl/perl5/issues/17455>]
+
+=item *
+
+L<locale> has been upgraded from version 1.10 to 1.11.
+
+=item *
+
+L<Math::BigInt> has been upgraded from version 1.999842 to 2.001000.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 5.20231025 to 5.20231120.
+
+=item *
+
+L<POSIX> has been upgraded from version 2.16 to 2.17.
+
+Adjusted the signbit() on NaN test to handle the unusual bit pattern
+returned for NaN by Oracle Developer Studio's compiler.  [L<GH #21533|https://github.com/Perl/perl5/issues/21533>]
+
+=item *
+
+L<Term::Table> has been upgraded from version 0.017 to 0.018.
+
+=item *
+
+L<Test2::Suite> has been upgraded from version 0.000156 to 0.000159.
+
+=back
+
+=head1 Documentation
+
+=head2 Changes to Existing Documentation
+
+We have attempted to update the documentation to reflect the changes
+listed in this document.  If you find any we have missed, open an issue
+at L<https://github.com/Perl/perl5/issues>.
+
+Additionally, the following selected changes have been made:
+
+=head3 L<perlop>
+
+=over 4
+
+=item *
+
+The section on the empty pattern C<//> has been amended to mention that the current dynamic scope is
+used to find the last successful match.
+
+=back
+
+=head1 Testing
+
+Tests were added and changed to reflect the other additions and
+changes in this release.  Furthermore, these significant changes were
+made:
+
+=over 4
+
+=item *
+
+F<porting/globvar.t> now uses the more portable C<nm -P ...> to fetch
+the names defined in an object file.  The parsing of the names found
+in the object is now separated from processing them to handle the
+duplication between local and global definitions on AIX.  [L<GH #21637|https://github.com/Perl/perl5/issues/21637>]
+
+=item *
+
+A test was added to F<lib/locale_threads.t> that extensively stress
+tests locale handling.  It turns out that the libc implementations on
+various platforms have bugs in this regard, including Linux, Windows,
+*BSD derivatives including Darwin, and others.  Experimental versions of
+this test have been used in the past few years to find bugs in the Perl
+implementation and in those platforms, as well as to develop workarounds
+in the Perl implementation, where feasible, for the platform bugs.
+Multiple bug report tickets have been filed against platforms, and some
+have been fixed.  The test checks that platforms that purport to support
+thread-safe locale handling actually do so (and that perl works properly
+on those that do;  The read-only variable C<${^SAFE_LOCALES}> is set to
+1 if perl thinks the platform can handle this, whatever the platform's
+documentation says).
+
+Also tested for is if the various locale categories can indeed be set
+independently to disparate locales.  (An example of where you might want
+to do this is if you are a Western Canadian living and working in
+Holland.  You likely will want to have the C<LC_MONETARY> locale be
+set to where you are living, but have the other parts of your locale
+retain your native English values.  Later, as you get a bit more
+comfortable with Dutch, and in order to communicate better with your
+colleagues, you might want to change C<LC_TIME> and C<LC_NUMERIC> to
+Dutch, while leaving C<LC_CTYPE> and C<LC_COLLATE> set to English
+indefinitely.)
+
+=back
+
+=head1 Platform Support
+
+=head2 Platform-Specific Notes
+
+=over 4
+
+=item Oracle Developer Studio (Solaris, Oracle Linux)
+
+Due to an apparent code generation bug, the default optimization level
+for the Oracle Developer Studio (formerly Sun Workshop) compiler is
+now C<-xO1>. [L<GH #21535|https://github.com/Perl/perl5/issues/21535>]
+
+=item Windows
+
+Enable C<copysign>, C<signbit>, C<acosh>, C<asinh>, C<atanh>, C<exp2>,
+C<tgamma> in the bundled configuration used for MSVC.  [L<GH #21610|https://github.com/Perl/perl5/issues/21610>]
+
+The build process no longer supports Visual Studio 2013.  This was
+failing to build at a very basic level and there has been no reports
+of such failures.  [L<GH #21624|https://github.com/Perl/perl5/issues/21624>]
+
+=back
+
+=head1 Errata From Previous Releases
+
+=over 4
+
+=item *
+
+L<perl5300delta> has been updated to include the removal of the C<arybase> module that happened at
+the same time as the removal of C<$[>.
+
+=back
+
+=head1 Acknowledgements
+
+Perl 5.39.5 represents approximately 4 weeks of development since Perl
+5.39.4 and contains approximately 12,000 lines of changes across 330 files
+from 17 authors.
+
+Excluding auto-generated files, documentation and release tools, there were
+approximately 8,200 lines of changes to 270 .pm, .t, .c and .h files.
+
+Perl continues to flourish into its fourth decade thanks to a vibrant
+community of users and developers. The following people are known to have
+contributed the improvements that became Perl 5.39.5:
+
+Chad Granum, Dan Kogai, E. Choroba, Elvin Aslanov, Graham Knop, Hugo van der
+Sanden, James E Keenan, Johan Vromans, Karen Etheridge, Karl Williamson,
+Leon Timmermans, Lukas Mai, Marco Fontani, Paul Evans, Peter John Acklam,
+Tony Cook, Yves Orton.
+
+The list above is almost certainly incomplete as it is automatically
+generated from version control history. In particular, it does not include
+the names of the (very much appreciated) contributors who reported issues to
+the Perl bug tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core. We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please
+see the F<AUTHORS> file in the Perl source distribution.
+
+=head1 Reporting Bugs
+
+If you find what you think is a bug, you might check the perl bug database
+at L<https://github.com/Perl/perl5/issues>.  There may also be information at
+L<http://www.perl.org/>, the Perl Home Page.
+
+If you believe you have an unreported bug, please open an issue at
+L<https://github.com/Perl/perl5/issues>.  Be sure to trim your bug down to a
+tiny but sufficient test case.
+
+If the bug you are reporting has security implications which make it
+inappropriate to send to a public issue tracker, then see
+L<perlsec/SECURITY VULNERABILITY CONTACT INFORMATION>
+for details of how to report the issue.
+
+=head1 Give Thanks
+
+If you wish to thank the Perl 5 Porters for the work we had done in Perl 5,
+you can do so by running the C<perlthanks> program:
+
+    perlthanks
+
+This will send an email to the Perl 5 Porters list with your show of thanks.
+
+=head1 SEE ALSO
+
+The F<Changes> file for an explanation of how to view exhaustive details on
+what changed.
+
+The F<INSTALL> file for how to build Perl.
+
+The F<README> file for general stuff.
+
+The F<Artistic> and F<Copying> files for copyright information.
+
+=cut

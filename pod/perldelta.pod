@@ -2,37 +2,122 @@
 
 =head1 NAME
 
-perldelta - what is new for perl v5.39.5
+[ this is a template for a new perldelta file.  Any text flagged as XXX needs
+to be processed before release. ]
+
+perldelta - what is new for perl v5.39.6
 
 =head1 DESCRIPTION
 
-This document describes differences between the 5.39.4 release and the 5.39.5
+This document describes differences between the 5.39.5 release and the 5.39.6
 release.
 
-If you are upgrading from an earlier release such as 5.39.3, first read
-L<perl5394delta>, which describes differences between 5.39.3 and 5.39.4.
+If you are upgrading from an earlier release such as 5.39.4, first read
+L<perl5395delta>, which describes differences between 5.39.4 and 5.39.5.
 
 =head1 Notice
 
-glibc has an undocumented feature to return the current locale when
-using the POSIX 2008 locale API.  This feature is now experimentally
-enabled by default so as to see if there are problems with it.  This
-enabling expires in v5.39.10.  In the meantime, if you run into
-problems, open a bug ticket and Configure with
-C<-Accflags=-DNO_NL_LOCALE_NAME> to turn it off.
+XXX Any important notices here
+
+=head1 Core Enhancements
+
+XXX New core language features go here.  Summarize user-visible core language
+enhancements.  Particularly prominent performance optimisations could go
+here, but most should go in the L</Performance Enhancements> section.
+
+[ List each enhancement as a =head2 entry ]
+
+=head1 Security
+
+XXX Any security-related notices go here.  In particular, any security
+vulnerabilities closed should be noted here rather than in the
+L</Selected Bug Fixes> section.
+
+[ List each security issue as a =head2 entry ]
+
+=head1 Incompatible Changes
+
+XXX For a release on a stable branch, this section aspires to be:
+
+    There are no changes intentionally incompatible with 5.XXX.XXX
+    If any exist, they are bugs, and we request that you submit a
+    report.  See L</Reporting Bugs> below.
+
+[ List each incompatible change as a =head2 entry ]
 
 =head1 Deprecations
+
+XXX Any deprecated features, syntax, modules etc. should be listed here.
+
+=head2 Module removals
+
+XXX Remove this section if not applicable.
+
+The following modules will be removed from the core distribution in a
+future release, and will at that time need to be installed from CPAN.
+Distributions on CPAN which require these modules will need to list them as
+prerequisites.
+
+The core versions of these modules will now issue C<"deprecated">-category
+warnings to alert you to this fact.  To silence these deprecation warnings,
+install the modules in question from CPAN.
+
+Note that these are (with rare exceptions) fine modules that you are encouraged
+to continue to use.  Their disinclusion from core primarily hinges on their
+necessity to bootstrapping a fully functional, CPAN-capable Perl installation,
+not usually on concerns over their design.
+
+=over
+
+=item XXX
+
+XXX Note that deprecated modules should be listed here even if they are listed
+as an updated module in the L</Modules and Pragmata> section.
+
+=back
+
+[ List each other deprecation as a =head2 entry ]
+
+=head1 Performance Enhancements
+
+XXX Changes which enhance performance without changing behaviour go here.
+There may well be none in a stable release.
+
+[ List each enhancement as an =item entry ]
 
 =over 4
 
 =item *
 
-Using C<goto> to jump from an outer scope into an inner scope is deprecated
-and will be removed completely in Perl 5.42.  [L<GH #21601|https://github.com/Perl/perl5/issues/21601>]
+XXX
 
 =back
 
 =head1 Modules and Pragmata
+
+XXX All changes to installed files in F<cpan/>, F<dist/>, F<ext/> and F<lib/>
+go here.  If Module::CoreList is updated, generate an initial draft of the
+following sections using F<Porting/corelist-perldelta.pl>.  A paragraph summary
+for important changes should then be added by hand.  In an ideal world,
+dual-life modules would have a F<Changes> file that could be cribbed.
+
+The list of new and updated modules is modified automatically as part of
+preparing a Perl release, so the only reason to manually add entries here is if
+you're summarising the important changes in the module update. (Also, if the
+manually-added details don't match the automatically-generated ones, the
+release manager will have to investigate the situation carefully.)
+
+[ Within each section, list entries as an =item entry ]
+
+=head2 New Modules and Pragmata
+
+=over 4
+
+=item *
+
+XXX Remove this section if Porting/corelist-perldelta.pl did not add any content here.
+
+=back
 
 =head2 Updated Modules and Pragmata
 
@@ -40,59 +125,34 @@ and will be removed completely in Perl 5.42.  [L<GH #21601|https://github.com/Pe
 
 =item *
 
-L<Benchmark> has been upgraded from version 1.24 to 1.25.
+L<XXX> has been upgraded from version A.xx to B.yy.
+
+XXX If there was something important to note about this change, include that here.
+
+=back
+
+=head2 Removed Modules and Pragmata
+
+=over 4
 
 =item *
 
-L<builtin> has been upgraded from version 0.011 to 0.012.
-
-Added the C<load_module()> builtin function as per L<PPC 0006|https://github.com/Perl/PPCs/blob/main/ppcs/ppc0006-load-module.md>.
-
-=item *
-
-L<Encode> has been upgraded from version 3.19 to 3.20.
-
-=item *
-
-L<Getopt::Long> has been upgraded from version 2.54 to 2.57.
-
-=item *
-
-L<IO> has been upgraded from version 1.53 to 1.54.
-
-Fixed C<IO::Handle/blocking> on Windows, which has been non-functional
-since IO 1.32.  [L<GH #17455|https://github.com/Perl/perl5/issues/17455>]
-
-=item *
-
-L<locale> has been upgraded from version 1.10 to 1.11.
-
-=item *
-
-L<Math::BigInt> has been upgraded from version 1.999842 to 2.001000.
-
-=item *
-
-L<Module::CoreList> has been upgraded from version 5.20231025 to 5.20231120.
-
-=item *
-
-L<POSIX> has been upgraded from version 2.16 to 2.17.
-
-Adjusted the signbit() on NaN test to handle the unusual bit pattern
-returned for NaN by Oracle Developer Studio's compiler.  [L<GH #21533|https://github.com/Perl/perl5/issues/21533>]
-
-=item *
-
-L<Term::Table> has been upgraded from version 0.017 to 0.018.
-
-=item *
-
-L<Test2::Suite> has been upgraded from version 0.000156 to 0.000159.
+XXX Remove this section if Porting/corelist-perldelta.pl did not add any content here.
 
 =back
 
 =head1 Documentation
+
+XXX Changes to files in F<pod/> go here.  Consider grouping entries by
+file and be sure to link to the appropriate page, e.g. L<perlfunc>.
+
+=head2 New Documentation
+
+XXX Changes which create B<new> files in F<pod/> go here.
+
+=head3 L<XXX>
+
+XXX Description of the purpose of the new file here
 
 =head2 Changes to Existing Documentation
 
@@ -100,83 +160,229 @@ We have attempted to update the documentation to reflect the changes
 listed in this document.  If you find any we have missed, open an issue
 at L<https://github.com/Perl/perl5/issues>.
 
+XXX Changes which significantly change existing files in F<pod/> go here.
+However, any changes to F<pod/perldiag.pod> should go in the L</Diagnostics>
+section.
+
 Additionally, the following selected changes have been made:
 
-=head3 L<perlop>
+=head3 L<XXX>
 
 =over 4
 
 =item *
 
-The section on the empty pattern C<//> has been amended to mention that the current dynamic scope is
-used to find the last successful match.
+XXX Description of the change here
+
+=back
+
+=head1 Diagnostics
+
+The following additions or changes have been made to diagnostic output,
+including warnings and fatal error messages.  For the complete list of
+diagnostic messages, see L<perldiag>.
+
+XXX New or changed warnings emitted by the core's C<C> code go here.  Also
+include any changes in L<perldiag> that reconcile it to the C<C> code.
+
+=head2 New Diagnostics
+
+XXX Newly added diagnostic messages go under here, separated into New Errors
+and New Warnings
+
+=head3 New Errors
+
+=over 4
+
+=item *
+
+XXX L<message|perldiag/"message">
+
+=back
+
+=head3 New Warnings
+
+=over 4
+
+=item *
+
+XXX L<message|perldiag/"message">
+
+=back
+
+=head2 Changes to Existing Diagnostics
+
+XXX Changes (i.e. rewording) of diagnostic messages go here
+
+=over 4
+
+=item *
+
+XXX Describe change here
+
+=back
+
+=head1 Utility Changes
+
+XXX Changes to installed programs such as F<perldoc> and F<xsubpp> go here.
+Most of these are built within the directory F<utils>.
+
+[ List utility changes as a =head2 entry for each utility and =item
+entries for each change
+Use L<XXX> with program names to get proper documentation linking. ]
+
+=head2 L<XXX>
+
+=over 4
+
+=item *
+
+XXX
+
+=back
+
+=head1 Configuration and Compilation
+
+XXX Changes to F<Configure>, F<installperl>, F<installman>, and analogous tools
+go here.  Any other changes to the Perl build process should be listed here.
+However, any platform-specific changes should be listed in the
+L</Platform Support> section, instead.
+
+[ List changes as an =item entry ].
+
+=over 4
+
+=item *
+
+XXX
 
 =back
 
 =head1 Testing
 
+XXX Any significant changes to the testing of a freshly built perl should be
+listed here.  Changes which create B<new> files in F<t/> go here as do any
+large changes to the testing harness (e.g. when parallel testing was added).
+Changes to existing files in F<t/> aren't worth summarizing, although the bugs
+that they represent may be covered elsewhere.
+
+XXX If there were no significant test changes, say this:
+
+Tests were added and changed to reflect the other additions and changes
+in this release.
+
+XXX If instead there were significant changes, say this:
+
 Tests were added and changed to reflect the other additions and
 changes in this release.  Furthermore, these significant changes were
 made:
+
+[ List each test improvement as an =item entry ]
 
 =over 4
 
 =item *
 
-F<porting/globvar.t> now uses the more portable C<nm -P ...> to fetch
-the names defined in an object file.  The parsing of the names found
-in the object is now separated from processing them to handle the
-duplication between local and global definitions on AIX.  [L<GH #21637|https://github.com/Perl/perl5/issues/21637>]
-
-=item *
-
-A test was added to F<lib/locale_threads.t> that extensively stress
-tests locale handling.  It turns out that the libc implementations on
-various platforms have bugs in this regard, including Linux, Windows,
-*BSD derivatives including Darwin, and others.  Experimental versions of
-this test have been used in the past few years to find bugs in the Perl
-implementation and in those platforms, as well as to develop workarounds
-in the Perl implementation, where feasible, for the platform bugs.
-Multiple bug report tickets have been filed against platforms, and some
-have been fixed.  The test checks that platforms that purport to support
-thread-safe locale handling actually do so (and that perl works properly
-on those that do;  The read-only variable C<${^SAFE_LOCALES}> is set to
-1 if perl thinks the platform can handle this, whatever the platform's
-documentation says).
-
-Also tested for is if the various locale categories can indeed be set
-independently to disparate locales.  (An example of where you might want
-to do this is if you are a Western Canadian living and working in
-Holland.  You likely will want to have the C<LC_MONETARY> locale be
-set to where you are living, but have the other parts of your locale
-retain your native English values.  Later, as you get a bit more
-comfortable with Dutch, and in order to communicate better with your
-colleagues, you might want to change C<LC_TIME> and C<LC_NUMERIC> to
-Dutch, while leaving C<LC_CTYPE> and C<LC_COLLATE> set to English
-indefinitely.)
+XXX
 
 =back
 
 =head1 Platform Support
 
-=head2 Platform-Specific Notes
+XXX Any changes to platform support should be listed in the sections below.
+
+[ Within the sections, list each platform as an =item entry with specific
+changes as paragraphs below it. ]
+
+=head2 New Platforms
+
+XXX List any platforms that this version of perl compiles on, that previous
+versions did not.  These will either be enabled by new files in the F<hints/>
+directories, or new subdirectories and F<README> files at the top level of the
+source tree.
 
 =over 4
 
-=item Oracle Developer Studio (Solaris, Oracle Linux)
+=item XXX-some-platform
 
-Due to an apparent code generation bug, the default optimization level
-for the Oracle Developer Studio (formerly Sun Workshop) compiler is
-now C<-xO1>. [L<GH #21535|https://github.com/Perl/perl5/issues/21535>]
+XXX
 
-=item Windows
+=back
 
-Enable C<copysign>, C<signbit>, C<acosh>, C<asinh>, C<atanh>, C<exp2>,
-C<tgamma> in the bundled configuration used for MSVC.  [L<GH #21610|https://github.com/Perl/perl5/issues/21610>]
+=head2 Discontinued Platforms
 
-The build process no longer supports Visual Studio 2013.  This was
-failing to build at a very basic level and there has been no reports
-of such failures.  [L<GH #21624|https://github.com/Perl/perl5/issues/21624>]
+XXX List any platforms that this version of perl no longer compiles on.
+
+=over 4
+
+=item XXX-some-platform
+
+XXX
+
+=back
+
+=head2 Platform-Specific Notes
+
+XXX List any changes for specific platforms.  This could include configuration
+and compilation changes or changes in portability/compatibility.  However,
+changes within modules for platforms should generally be listed in the
+L</Modules and Pragmata> section.
+
+=over 4
+
+=item XXX-some-platform
+
+XXX
+
+=back
+
+=head1 Internal Changes
+
+XXX Changes which affect the interface available to C<XS> code go here.  Other
+significant internal changes for future core maintainers should be noted as
+well.
+
+[ List each change as an =item entry ]
+
+=over 4
+
+=item *
+
+XXX
+
+=back
+
+=head1 Selected Bug Fixes
+
+XXX Important bug fixes in the core language are summarized here.  Bug fixes in
+files in F<ext/> and F<lib/> are best summarized in L</Modules and Pragmata>.
+
+Include references to GitHub issues and PRs as: [GH #12345] and the release
+manager will later use a regex to expand these into links.
+
+[ List each fix as an =item entry ]
+
+=over 4
+
+=item *
+
+XXX
+
+=back
+
+=head1 Known Problems
+
+XXX Descriptions of platform agnostic bugs we know we can't fix go here.  Any
+tests that had to be C<TODO>ed for the release would be noted here.  Unfixed
+platform specific bugs also go here.
+
+[ List each fix as an =item entry ]
+
+=over 4
+
+=item *
+
+XXX
 
 =back
 
@@ -186,40 +392,21 @@ of such failures.  [L<GH #21624|https://github.com/Perl/perl5/issues/21624>]
 
 =item *
 
-L<perl5300delta> has been updated to include the removal of the C<arybase> module that happened at
-the same time as the removal of C<$[>.
+XXX Add anything here that we forgot to add, or were mistaken about, in
+the perldelta of a previous release.
 
 =back
 
+=head1 Obituary
+
+XXX If any significant core contributor or member of the CPAN community has
+died, add a short obituary here.
+
 =head1 Acknowledgements
 
-Perl 5.39.5 represents approximately 4 weeks of development since Perl
-5.39.4 and contains approximately 12,000 lines of changes across 330 files
-from 17 authors.
+XXX Generate this with:
 
-Excluding auto-generated files, documentation and release tools, there were
-approximately 8,200 lines of changes to 270 .pm, .t, .c and .h files.
-
-Perl continues to flourish into its fourth decade thanks to a vibrant
-community of users and developers. The following people are known to have
-contributed the improvements that became Perl 5.39.5:
-
-Chad Granum, Dan Kogai, E. Choroba, Elvin Aslanov, Graham Knop, Hugo van der
-Sanden, James E Keenan, Johan Vromans, Karen Etheridge, Karl Williamson,
-Leon Timmermans, Lukas Mai, Marco Fontani, Paul Evans, Peter John Acklam,
-Tony Cook, Yves Orton.
-
-The list above is almost certainly incomplete as it is automatically
-generated from version control history. In particular, it does not include
-the names of the (very much appreciated) contributors who reported issues to
-the Perl bug tracker.
-
-Many of the changes included in this version originated in the CPAN modules
-included in Perl's core. We're grateful to the entire CPAN community for
-helping Perl to flourish.
-
-For a more complete list of all of Perl's historical contributors, please
-see the F<AUTHORS> file in the Perl source distribution.
+  perl Porting/acknowledgements.pl v5.39.5..HEAD
 
 =head1 Reporting Bugs
 
