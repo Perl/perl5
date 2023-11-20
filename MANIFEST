@@ -6710,6 +6710,7 @@ win32/config_H.gc			Win32 config header (MinGW build)
 win32/config_h.PL			Perl code to convert Win32 config.sh to config.h
 win32/config_H.vc			Win32 config header (Visual C++ build)
 win32/config_sh.PL			Perl code to update Win32 config.sh from Makefile
+win32/configure/rt.c			identify default runtime
 win32/create_perllibst_h.pl		creates perllibst.h file for inclusion from perllib.c
 win32/distclean.bat			Remove _ALL_ files not listed here in MANIFEST
 win32/fcrypt.c				crypt() implementation

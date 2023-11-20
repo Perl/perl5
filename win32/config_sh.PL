@@ -155,6 +155,9 @@ if (exists $opt{cc}) {
     }
     elsif ($opt{cc} =~ /\bgcc\b/) {
         chomp($opt{gccversion} = `$opt{cc} -dumpversion`);
+        chomp($opt{libc} = `$opt{cc} -o rt.exe configure/rt.c 1>nul 2>&1 && rt`);
+        if(-e 'rt.exe') { unlink 'rt.exe' } # rt.exe no longer needed
+        else { die "Failed to identify default runtime" }
     }
 }
 
