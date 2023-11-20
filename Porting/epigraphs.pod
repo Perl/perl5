@@ -17,6 +17,12 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.39.5 - Epictetus
+
+L<Announced on 2023-11-20 by Karen Etheridge|https://www.nntp.perl.org/group/perl.perl5.porters/2023/11/msg267331.html>
+
+It is impossible for a man to learn what he thinks he already knows.
+
 =head2 v5.39.4 - None
 
 L<Announced on 2023-10-25 by Graham Knop|https://www.nntp.perl.org/group/perl.perl5.porters/2023/10/msg267222.html>
