@@ -761,6 +761,7 @@ the strings?).
  Paul E    5.39.2       2023-Aug-20
  Matthew H 5.39.3       2023-Sep-20
  Graham K  5.39.4       2023-Oct-25
+ Ether     5.39.5       2023-Nov-20
 
 =head2 SELECTED RELEASE SIZES
 
