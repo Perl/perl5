@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use Module::CoreList;
 
-our $VERSION = '5.20220313';
+our $VERSION = '5.20231125';
 our %utilities;
 
 sub utilities {
@@ -1778,6 +1778,188 @@ my %delta = (
     },
     5.034001 => {
         delta_from => 5.034000,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.035010 => {
+        delta_from => 5.035009,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.035011 => {
+        delta_from => 5.035010,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.036000 => {
+        delta_from => 5.035011,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.037000 => {
+        delta_from => 5.036000,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.037001 => {
+        delta_from => 5.037,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.037002 => {
+        delta_from => 5.037001,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.037003 => {
+        delta_from => 5.037002,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.037004 => {
+        delta_from => 5.037003,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.037005 => {
+        delta_from => 5.037004,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.037006 => {
+        delta_from => 5.037005,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.037007 => {
+        delta_from => 5.037006,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.037008 => {
+        delta_from => 5.037007,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.037009 => {
+        delta_from => 5.037008,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.037010 => {
+        delta_from => 5.037009,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.037011 => {
+        delta_from => 5.03701,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.036001 => {
+        delta_from => 5.036000,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.038000 => {
+        delta_from => 5.037011,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.039001 => {
+        delta_from => 5.038,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.039002 => {
+        delta_from => 5.039001,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.039003 => {
+        delta_from => 5.039002,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.039004 => {
+        delta_from => 5.039003,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.039005 => {
+        delta_from => 5.039004,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.039006 => {
+        delta_from => 5.039005,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.034002 => {
+        delta_from => 5.034001,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.036002 => {
+        delta_from => 5.036001,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.038001 => {
+        delta_from => 5.038000,
         changed => {
         },
         removed => {
