@@ -2688,7 +2688,8 @@ optimise.
 
 =for apidoc_section $utility
 =for apidoc Amu|void|StructCopy|type *src|type *dest|type
-This is an architecture-independent macro to copy one structure to another.
+This is an architecture-independent macro that does a shallow copy of one
+structure to another.
 
 =for apidoc Am|void|PoisonWith|void* dest|int nitems|type|U8 byte
 
