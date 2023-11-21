@@ -5269,6 +5269,11 @@ S_my_localeconv(pTHX_ const int item)
 
     for (unsigned int i = 0; i < 2; i++) {  /* Try both types of strings */
 
+        /* The return from this function is already adjusted */
+        if (populate[i] == S_populate_hash_from_C_localeconv) {
+            continue;
+        }
+
         /* Examine each string */
         for (const lconv_offset_t *strp = strings[i]; strp->name; strp++) {
             const char * name = strp->name;
@@ -5276,7 +5281,7 @@ S_my_localeconv(pTHX_ const int item)
             /* 'value' will contain the string that may need to be marked as
              * UTF-8 */
             SV ** value = hv_fetch(hv, name, strlen(name), true);
-            if (! value || ! SvPOK(*value)) {
+            if (value == NULL) {
                 continue;
             }
 
