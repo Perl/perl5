@@ -4,7 +4,7 @@ use strict;
 our ( %released, %version, %families, %upstream, %bug_tracker, %deprecated, %delta );
 
 use version;
-our $VERSION = '5.20231220';
+our $VERSION = '5.20231125';
 
 sub PKG_PATTERN () { q#\A[a-zA-Z_][0-9a-zA-Z_]*(?:(::|')[0-9a-zA-Z_]+)*\z# }
 sub _looks_like_invocant ($) { local $@; !!eval { $_[0]->isa(__PACKAGE__) } }
@@ -412,6 +412,9 @@ sub changes_between {
     5.039004 => '2023-10-25',
     5.039005 => '2023-11-20',
     5.039006 => '2023-12-20',
+    5.034002 => '2023-11-25',
+    5.036002 => '2023-11-25',
+    5.038001 => '2023-11-25',
   );
 
 for my $version ( sort { $a <=> $b } keys %released ) {
@@ -21067,8 +21070,35 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         changed => {
             'B::Op_private'         => '5.039006',
             'Config'                => '5.039006',
-            'Module::CoreList'      => '5.20231220',
-            'Module::CoreList::Utils'=> '5.20231220',
+            'Module::CoreList'      => '5.20231125',
+            'Module::CoreList::Utils'=> '5.20231125',
+        },
+        removed => {
+        }
+    },
+    5.034002 => {
+        delta_from => 5.034001,
+        changed => {
+            'B::Op_private'         => '5.034002',
+            'Config'                => '5.034002',
+        },
+        removed => {
+        }
+    },
+    5.036002 => {
+        delta_from => 5.036001,
+        changed => {
+            'B::Op_private'         => '5.036002',
+            'Config'                => '5.036002',
+        },
+        removed => {
+        }
+    },
+    5.038001 => {
+        delta_from => 5.038000,
+        changed => {
+            'B::Op_private'         => '5.038001',
+            'Config'                => '5.038001',
         },
         removed => {
         }
@@ -22511,6 +22541,27 @@ sub is_core
     },
     5.039006 => {
         delta_from => 5.039005,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.034002 => {
+        delta_from => 5.034001,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.036002 => {
+        delta_from => 5.036001,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.038001 => {
+        delta_from => 5.038,
         changed => {
         },
         removed => {
