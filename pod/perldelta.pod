@@ -29,11 +29,41 @@ here, but most should go in the L</Performance Enhancements> section.
 
 =head1 Security
 
+This release fixes the following security issues. 
+
 XXX Any security-related notices go here.  In particular, any security
 vulnerabilities closed should be noted here rather than in the
 L</Selected Bug Fixes> section.
 
 [ List each security issue as a =head2 entry ]
+
+=head2 CVE-2023-47038 - Write past buffer end via illegal user-defined Unicode property
+
+This vulnerability was reported directly to the Perl security team by
+Nathan Mills C<the.true.nathan.mills@gmail.com>.
+
+A crafted regular expression when compiled by perl 5.30.0 through
+5.38.0 can cause a one-byte attacker controlled buffer overflow in a
+heap allocated buffer.
+
+=head2 CVE-2023-47039 - Perl for Windows binary hijacking vulnerability
+
+This vulnerability was reported to the Intel Product Security Incident
+Response Team (PSIRT) by GitHub user ycdxsb
+L<https://github.com/ycdxsb/WindowsPrivilegeEscalation>. PSIRT then
+reported it to the Perl security team.
+
+Perl for Windows relies on the system path environment variable to
+find the shell (C<cmd.exe>). When running an executable which uses
+Windows Perl interpreter, Perl attempts to find and execute C<cmd.exe>
+within the operating system. However, due to path search order issues,
+Perl initially looks for cmd.exe in the current working directory.
+
+An attacker with limited privileges can exploit this behavior by
+placing C<cmd.exe> in locations with weak permissions, such as
+C<C:\ProgramData>. By doing so, when an administrator attempts to use
+this executable from these compromised locations, arbitrary code can
+be executed.
 
 =head1 Incompatible Changes
 
