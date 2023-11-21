@@ -12,8 +12,6 @@ BEGIN {
     set_up_inc('../lib');
 
     skip_all_without_config('useithreads');
-    skip_all("Fails on threaded builds on OpenBSD")
-        if ($^O =~ m/^(openbsd)$/);
 
     require './loc_tools.pl';
 
