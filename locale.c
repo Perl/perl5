@@ -7288,7 +7288,7 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
     } trials;
 
     trials trial;
-    SSize_t already_checked = 0;
+    unsigned int already_checked = 0;
     const char * checked[C_trial];
 
 #  ifdef LC_ALL
@@ -7374,6 +7374,7 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
             }
 
             /* And, for future iterations, indicate we've tried this locale */
+            assert(already_checked < C_ARRAY_LENGTH(checked));
             checked[already_checked] = savepv(locale);
             SAVEFREEPV(checked[already_checked]);
             already_checked++;
