@@ -9183,9 +9183,8 @@ Perl_switch_locale_context(pTHX)
      *              per-thread variables:
      *                  PL_controls_locale  indicates if this thread is using
      *                                      per-thread locales or not
-     *                  PL_cur_LC_ALL       indicates what the the locale
-     *                                      should be if it is a per-thread
-     *                                      locale.
+     *                  PL_cur_LC_ALL       indicates what the locale should be
+     *                                      if it is a per-thread locale.
      */
 
     if (UNLIKELY(   PL_veto_switch_non_tTHX_context
