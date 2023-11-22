@@ -3146,7 +3146,7 @@ Adp	|void	|sv_insert_flags|NN SV * const bigstr			\
 Adp	|IO *	|sv_2io 	|NN SV * const sv
 Adp	|int	|sv_isa 	|NULLOK SV *sv				\
 				|NN const char * const name
-ARdpx	|bool	|sv_isa_sv	|NN SV *sv				\
+ARdp	|bool	|sv_isa_sv	|NN SV *sv				\
 				|NN SV *namesv
 Adp	|int	|sv_isobject	|NULLOK SV *sv
 Adip	|IV	|SvIV		|NN SV *sv
