@@ -482,7 +482,8 @@ addbits($_, 7 => qw(OPpOFFBYONE  +1)) for qw(caller wantarray runcv);
 # label is in UTF8 */
 addbits($_, 7 => qw(OPpPV_IS_UTF8 UTF)) for qw(last redo next goto dump);
 
-
+# suppress looking up a class name as an IO handle in a method call
+addbits($_, 1  => qw(OPpMETH_NO_BAREWORD_IO NO_BAREWORD_IO)) for ops_with_flag('.');
 
 # ====================================================================
 #

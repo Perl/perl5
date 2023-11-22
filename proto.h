@@ -7499,6 +7499,11 @@ S_voidnonfinal(pTHX_ OP *o);
 # define PERL_ARGS_ASSERT_VOIDNONFINAL
 
 # if !defined(PERL_NO_INLINE_FUNCTIONS)
+PERL_STATIC_INLINE bool
+S_is_standard_filehandle_name(const char *fhname);
+#   define PERL_ARGS_ASSERT_IS_STANDARD_FILEHANDLE_NAME \
+        assert(fhname)
+
 PERL_STATIC_INLINE OP *
 S_newMETHOP_internal(pTHX_ I32 type, I32 flags, OP *dynamic_meth, SV * const_meth);
 #   define PERL_ARGS_ASSERT_NEWMETHOP_INTERNAL

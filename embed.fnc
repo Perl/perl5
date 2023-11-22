@@ -4714,6 +4714,8 @@ S	|void	|inplace_aassign|NN OP *o
 RST	|bool	|is_handle_constructor					\
 				|NN const OP *o 			\
 				|I32 numargs
+Ti	|bool	|is_standard_filehandle_name				\
+				|NN const char *fhname
 S	|OP *	|listkids	|NULLOK OP *o
 S	|bool	|looks_like_bool|NN const OP *o
 S	|OP *	|modkids	|NULLOK OP *o				\
