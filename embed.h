@@ -1435,6 +1435,7 @@
 #     define gen_constant_list(a)               S_gen_constant_list(aTHX_ a)
 #     define inplace_aassign(a)                 S_inplace_aassign(aTHX_ a)
 #     define is_handle_constructor              S_is_handle_constructor
+#     define is_standard_filehandle_name        S_is_standard_filehandle_name
 #     define listkids(a)                        S_listkids(aTHX_ a)
 #     define looks_like_bool(a)                 S_looks_like_bool(aTHX_ a)
 #     define modkids(a,b)                       S_modkids(aTHX_ a,b)

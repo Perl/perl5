@@ -35,6 +35,7 @@
 #define PERL_IN_PP_HOT_C
 #include "perl.h"
 #include "regcomp.h"
+#include "feature.h"
 
 /* Hot code. */
 
@@ -6755,7 +6756,8 @@ S_opmethod_stash(pTHX_ SV* meth)
         stash = gv_stashpvn(packname, packlen, packname_utf8 | GV_CACHE_ONLY);
         if (stash) return stash;
 
-        if (!(iogv = gv_fetchpvn_flags(
+        if ((PL_op->op_private & OPpMETH_NO_BAREWORD_IO) ||
+            !(iogv = gv_fetchpvn_flags(
                 packname, packlen, packname_utf8, SVt_PVIO
              )) ||
             !(ob=MUTABLE_SV(GvIO(iogv))))
