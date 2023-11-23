@@ -246,8 +246,12 @@ Perl_tmps_grow_p(pTHX_ SSize_t ix)
 {
     SSize_t extend_to = ix;
 #ifndef STRESS_REALLOC
-    if (ix - PL_tmps_max < 128)
-        extend_to += (PL_tmps_max < 512) ? 128 : 512;
+    SSize_t grow_size = PL_tmps_max < 512 ? 128 : PL_tmps_max / 2;
+    if (extend_to > SSize_t_MAX - grow_size - 1)
+        /* trigger memwrap message or fail allocation */
+        extend_to = SSize_t_MAX-1;
+    else
+        extend_to += grow_size;
 #endif
     Renew(PL_tmps_stack, extend_to + 1, SV*);
     PL_tmps_max = extend_to + 1;
