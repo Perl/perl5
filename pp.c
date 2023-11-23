@@ -186,9 +186,10 @@ S_rv2gv(pTHX_ SV *sv, const bool vivify_sv, const bool strict,
     return sv;
 }
 
-PP_wrapped(pp_rv2gv, 1, 0)
+
+PP(pp_rv2gv)
 {
-    dSP; dTOPss;
+    SV *sv = *PL_stack_sp;
 
     sv = S_rv2gv(aTHX_
           sv, PL_op->op_private & OPpDEREF,
@@ -198,9 +199,10 @@ PP_wrapped(pp_rv2gv, 1, 0)
          );
     if (PL_op->op_private & OPpLVAL_INTRO)
         save_gp(MUTABLE_GV(sv), !(PL_op->op_flags & OPf_SPECIAL));
-    SETs(sv);
-    RETURN;
+    rpp_replace_1_1(sv);
+    return NORMAL;
 }
+
 
 /* Helper function for pp_rv2sv and pp_rv2av/hv.
  *

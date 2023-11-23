@@ -339,29 +339,62 @@ PP_wrapped(pp_backtick, 1, 0)
     RETURN;
 }
 
-PP_wrapped(pp_glob, 1 + !(PL_op->op_flags & OPf_SPECIAL), 0)
+
+/* Implement glob('*.h'), and also <X> in the cases where the X is seen by
+ * the parser as glob-ish rather than file-handle-ish.
+ *
+ * The first arg is the wildcard.
+ *
+ * The second arg is a gv which (for some reason) is just an empty
+ * placeholder to temporarily assign to PL_last_in_gv. It's a GV unique to
+ * this op with only a plain PVIO attached, which is in stash IO::File.
+ * Presumably this is used because we tail-call do_readline(), which
+ * expects PL_last_in_gv to be set.
+ *
+ * With OPf_SPECIAL, the second arg isn't present, but a stack MARK is,
+ * and the glob is done by following on in op_next to a perl-level
+ * function call.
+ *
+ * Normally, the actual glob work is done within a tail-call to
+ * do_readline().
+ *
+ * The parser decides whether '<something>' in the perl src code causes an
+ * OP_GLOB or an OPREADLINE op to be planted.
+ */
+
+PP(pp_glob)
 {
     OP *result;
-    dSP;
-    GV * const gv = (PL_op->op_flags & OPf_SPECIAL) ? NULL : (GV *)POPs;
+    GV *gv;
+    if (UNLIKELY(PL_op->op_flags & OPf_SPECIAL)) {
+        /* no GV on stack */
+        gv = NULL;
+    }
+    else {
+        gv = (GV*)*PL_stack_sp;
+        /* Normally things can't just be popped off the stack without risk
+         * of premature freeing, but in this case the GV is always
+         * referenced by a preceding OP_GV. */
+        assert(!rpp_is_lone((SV*)gv));
+        rpp_popfree_1();
+    }
 
-    PUTBACK;
 
     /* make a copy of the pattern if it is gmagical, to ensure that magic
      * is called once and only once */
-    if (SvGMAGICAL(TOPs)) TOPs = sv_2mortal(newSVsv(TOPs));
+    SV *arg = *PL_stack_sp;
+    if (SvGMAGICAL(arg))
+        rpp_replace_at_norc(PL_stack_sp, ((arg = newSVsv(arg)) ));
 
     /* unrolled
       tryAMAGICunTARGETlist(iter_amg, (PL_op->op_flags & OPf_SPECIAL)); */
     SV *tmpsv;
-    SV *arg= *sp;
     U8 gimme = GIMME_V;
     if (UNLIKELY(SvAMAGIC(arg) &&
         (tmpsv = amagic_call(arg, &PL_sv_undef, iter_amg,
                              AMGf_want_list | AMGf_noright
                             |AMGf_unary))))
     {
-        SPAGAIN;
         if (gimme == G_VOID) {
             NOOP;
         }
@@ -370,40 +403,85 @@ PP_wrapped(pp_glob, 1 + !(PL_op->op_flags & OPf_SPECIAL), 0)
             SSize_t len;
             assert(SvTYPE(tmpsv) == SVt_PVAV);
             len = av_count((AV *)tmpsv);
-            (void)POPs; /* get rid of the arg */
-            EXTEND(sp, len);
+            assert(*PL_stack_sp == arg);
+            rpp_popfree_1(); /* pop the original wildcard arg */
+            rpp_extend(len);
             for (i = 0; i < len; ++i)
-                PUSHs(av_shift((AV *)tmpsv));
+                /* amagic_call() naughtily doesn't increment the ref counts
+                 * of the items it pushes onto the temporary array. So we
+                 * don't need to decrement them when shifting off. */
+                rpp_push_1(av_shift((AV *)tmpsv));
         }
         else { /* AMGf_want_scalar */
-            dATARGET; /* just use the arg's location */
-            sv_setsv(TARG, tmpsv);
-            if (PL_op->op_flags & OPf_STACKED)
-                sp--;
-            SETTARG;
+            SV *targ = PAD_SV(PL_op->op_targ);
+            sv_setsv(targ, tmpsv);
+            SvSETMAGIC(targ);
+            /* replace the original wildcard arg with result */
+            assert(*PL_stack_sp == arg);
+            rpp_replace_1_1(targ);
         }
-        PUTBACK;
+
         if (PL_op->op_flags & OPf_SPECIAL) {
-            OP *jump_o = NORMAL->op_next;
+            /* skip the following gv(CORE::GLOBAL::glob), entersub ops */
+            OP *jump_o = PL_op->op_next->op_next;
             while (jump_o->op_type == OP_NULL)
                 jump_o = jump_o->op_next;
             assert(jump_o->op_type == OP_ENTERSUB);
             (void)POPMARK;
             return jump_o->op_next;
         }
+
         return NORMAL;
     }
+    /* end of unrolled tryAMAGICunTARGETlist */
 
 
     if (PL_op->op_flags & OPf_SPECIAL) {
-        /* call Perl-level glob function instead. Stack args are:
-         * MARK, wildcard
+        /* call Perl-level glob function instead. E.g.
+         *    use File::DosGlob 'glob'; @files = glob('*.h');
+         * Stack args are: [MARK] wildcard
          * and following OPs should be: gv(CORE::GLOBAL::glob), entersub
          * */
         return NORMAL;
     }
+
     if (PL_globhook) {
+#ifdef PERL_RC_STACK
+        /* Likely calling csh_glob_iter() in File::Glob, which doesn't
+         * understand PERL_RC_STACK yet. If it was an XS function we could
+         * use rpp_invoke_xs(); but as it's just a "raw" static function,
+         * wrap it ourselves. There's always one arg, and it will return
+         * one value in void/scalar context (possibly PL_sv_undef), or 0+
+         * values in list cxt. */
+
+        assert(AvREAL(PL_curstack));
+        assert(!PL_curstackinfo->si_stack_nonrc_base);
+
+        rpp_extend(1);
+        PL_stack_sp[1] = PL_stack_sp[0];
+        PL_stack_sp++;
+        PL_curstackinfo->si_stack_nonrc_base = PL_stack_sp - PL_stack_base;
+
         PL_globhook(aTHX);
+
+        I32 nret = (I32)(PL_stack_sp - PL_stack_base)
+                            - PL_curstackinfo->si_stack_nonrc_base + 1;
+        assert(nret >= 0);
+
+        /* bump any returned values */
+        for (I32 i = 0; i< nret; i++)
+            SvREFCNT_inc(PL_stack_sp[-i]);
+        PL_curstackinfo->si_stack_nonrc_base = 0;
+
+        /* free the original arg and shift the returned values down */
+        SV *arg = PL_stack_sp[-nret];
+        if (nret)
+            Move(PL_stack_sp - nret + 1, PL_stack_sp - nret, nret, SV*);
+        PL_stack_sp--;
+        SvREFCNT_dec_NN(arg);
+#else
+        PL_globhook(aTHX);
+#endif
         return NORMAL;
     }
 
@@ -440,11 +518,17 @@ PP_wrapped(pp_glob, 1 + !(PL_op->op_flags & OPf_SPECIAL), 0)
     return result;
 }
 
-PP_wrapped(pp_rcatline, 1, 0)
+
+/* $x .= <FOO>
+ * Where $x is on the stack and FOO is the GV attached to the op.
+ */
+
+PP(pp_rcatline)
 {
     PL_last_in_gv = cGVOP_gv;
     return do_readline();
 }
+
 
 PP_wrapped(pp_warn, 0, 1)
 {
