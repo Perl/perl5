@@ -1606,23 +1606,27 @@ sub apply_patch {
     die_255("Can't $what$files: $?, $!");
 }
 
+sub patch_from_commit {
+    my ($revert, $commit, @files) = @_;
+    my $flags = $revert ? '-R ' : '';
+    my $patch = `git show --src-prefix=a/ --dst-prefix=b/ $flags$commit @files`;
+    if (!defined $patch) {
+        my $thing = $revert ? 'revert commit' : 'commit';
+        die_255("Can't get $thing $commit for @files: $?") if @files;
+        die_255("Can't get $thing $commit: $?");
+    }
+    return $patch;
+}
+
 sub apply_commit {
     my ($commit, @files) = @_;
-    my $patch = `git show $commit @files`;
-    if (!defined $patch) {
-        die_255("Can't get commit $commit for @files: $?") if @files;
-        die_255("Can't get commit $commit: $?");
-    }
+    my $patch = patch_from_commit(undef, $commit, @files);
     apply_patch($patch, "patch $commit", @files ? " for @files" : '');
 }
 
 sub revert_commit {
     my ($commit, @files) = @_;
-    my $patch = `git show -R $commit @files`;
-    if (!defined $patch) {
-        die_255("Can't get revert commit $commit for @files: $?") if @files;
-        die_255("Can't get revert commit $commit: $?");
-    }
+    my $patch = patch_from_commit('revert', $commit, @files);
     apply_patch($patch, "revert $commit", @files ? " for @files" : '');
 }
 
@@ -3995,7 +3999,7 @@ EOPATCH
         }
         if (my $token = extract_from_file('doio.c',
                                           qr!^#if (defined\(__sun(?:__)?\)) && defined\(__svr4__\) /\* XXX Need metaconfig test \*/$!)) {
-            my $patch = `git show -R 9b599b2a63d2324d doio.c`;
+            my $patch = patch_from_commit('revert', '9b599b2a63d2324d', 'doio.c');
             $patch =~ s/defined\(__sun__\)/$token/g;
             apply_patch($patch);
         }
