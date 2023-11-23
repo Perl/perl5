@@ -845,18 +845,16 @@ SKIP: {
     # and then a setlocale of the resulting one.  Discard locales which have
     # any unacceptable name
     if (${^O} eq "MSWin32" && $Config{'libc'} !~ /ucrt/) {
-        for my $i (0 .. $#locales) {
-            my $locale_name = $locales[$i]->{locale_name};
+        @locales = grep {
+            my $locale_name = $_->{locale_name};
             my $underlying_name = setlocale(&LC_CTYPE, $locale_name);
 
             # Defeat any attempt to skip the setlocale if the same as current,
             # by switching to a locale very unlikey to be the current one.
             setlocale($LC_ALL, "Albanian");
 
-            next if setlocale(&LC_CTYPE, $underlying_name);
-
-            splice @locales, $i, 1;
-        }
+            defined($underlying_name) && setlocale(&LC_CTYPE, $underlying_name)
+        } @locales;
     }
 
     # Create a hash of the errnos:
