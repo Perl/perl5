@@ -48,7 +48,6 @@ my $min_small = min($basetimes{$small_size}->@*);
 my $min_large = min($basetimes{$large_size}->@*);
 my $ratio = $large_size / $small_size;
 
-our $TODO = "tmps stack grows in O(n**2) time";
 my $worst = $min_small * $ratio * 2;
 note "worst allowed $worst";
 cmp_ok($min_large, '<', $worst,
