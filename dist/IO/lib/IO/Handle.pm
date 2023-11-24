@@ -270,7 +270,7 @@ use IO ();	# Load the XS module
 require Exporter;
 our @ISA = qw(Exporter);
 
-our $VERSION = "1.54";
+our $VERSION = "1.55";
 
 our @EXPORT_OK = qw(
     autoflush

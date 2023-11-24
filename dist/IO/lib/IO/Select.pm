@@ -10,7 +10,7 @@ use     strict;
 use warnings::register;
 require Exporter;
 
-our $VERSION = "1.54";
+our $VERSION = "1.55";
 
 our @ISA = qw(Exporter); # This is only so we can do version checking
 
