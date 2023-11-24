@@ -5957,7 +5957,21 @@ Perl_newBINOP(pTHX_ I32 type, I32 flags, OP *first, OP *last)
 
     if (!first)
         first = newOP(OP_NULL, 0);
-    else if (S_is_control_transfer(aTHX_ first)) {
+    else if (type != OP_SASSIGN && S_is_control_transfer(aTHX_ first)) {
+        /* Skip OP_SASSIGN.
+         * '$x = return 42' is represented by (SASSIGN (RETURN 42) (GVSV *x));
+         * in other words, OP_SASSIGN has its operands "backwards". Skip the
+         * control transfer check because '$x = return $y' is not a precedence
+         * issue (the '$x =' part has no runtime effect no matter how you
+         * parenthesize it).
+         * Also, don't try to optimize the OP_SASSIGN case because the logical
+         * assignment ops like //= are represented by an OP_{AND,OR,DOR}ASSIGN
+         * containing an OP_SASSIGN with a single child (first == last):
+         * '$x //= return 42' is (DORASSIGN (GVSV *x) (SASSIGN (RETURN 42))).
+         * Naively eliminating the OP_ASSIGN leaves the incomplete (DORASSIGN
+         * (GVSV *x) (RETURN 42)), which e.g. B::Deparse doesn't handle.
+         */
+        assert(first != last);
         op_free(last);
         first->op_folded = 1;
         return first;

@@ -1871,6 +1871,7 @@ Possible precedence issue with control flow operator (die) at - line 34.
 ########
 # op.c
 #  (same as above, except these should not warn)
+use warnings;
 use constant FEATURE => 1;
 use constant MISSING_FEATURE => 0;
 
@@ -1924,6 +1925,12 @@ sub dont_warn_43 { last ($a xor $b) while(1); }
 sub dont_warn_44 { redo ($a or $b) while(1);  }
 sub dont_warn_45 { redo ($a and $b) while(1); }
 sub dont_warn_46 { redo ($a xor $b) while(1); }
+
+# These are not operator precedence issues (even though assignment internally
+# stores its RHS as the first operand)
+sub dont_warn_47 { $a = return $b; }
+sub dont_warn_48 { $a //= return $b; }
+sub dont_warn_49 { $a &&= exit $b; }
 EXPECT
 ########
 use feature "signatures";

@@ -3384,3 +3384,10 @@ my(@x) = (-2.0, -1.0, -0.0, 0.0, 1.0, 2.0);
 # PADSV_STORE optimised state should be handled
 # CONTEXT use feature "state";
 () = (state $s = 1);
+####
+# control transfer in RHS of assignment
+my $x;
+$x = (return 'ok');
+$x //= (return 'ok');
+$x = exit 42;
+$x //= exit 42;
