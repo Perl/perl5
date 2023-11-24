@@ -1822,6 +1822,7 @@ test-prep-gcc :
 	if exist $(CCDLLDIR)\libstdc++-6.dll $(XCOPY) $(CCDLLDIR)\libstdc++-6.dll ..\t\$(NULL)
 	if exist $(CCDLLDIR)\libwinpthread-1.dll $(XCOPY) $(CCDLLDIR)\libwinpthread-1.dll ..\t\$(NULL)
 	if exist $(CCDLLDIR)\libquadmath-0.dll $(XCOPY) $(CCDLLDIR)\libquadmath-0.dll ..\t\$(NULL)
+	if exist $(CCDLLDIR)\libmcfgthread-1.dll $(XCOPY) $(CCDLLDIR)\libmcfgthread-1.dll ..\t\$(NULL)
 
 endif
 
