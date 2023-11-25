@@ -6260,7 +6260,9 @@ S_my_langinfo_i(pTHX_
         (void) Perl_mbtowc_(aTHX_ NULL, NULL, 0);/* Reset shift state */
         int mbtowc_ret = Perl_mbtowc_(aTHX_ &wc,
                                       STR_WITH_LEN(REPLACEMENT_CHARACTER_UTF8));
-        if (mbtowc_ret >= 0 && wc == UNICODE_REPLACEMENT) {
+        if (   mbtowc_ret == STRLENs(REPLACEMENT_CHARACTER_UTF8)
+            && wc == UNICODE_REPLACEMENT)
+        {
             DEBUG_Lv(PerlIO_printf(Perl_debug_log,
                                    "mbtowc returned REPLACEMENT\n"));
             retval = "UTF-8";
