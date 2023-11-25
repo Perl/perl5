@@ -3543,7 +3543,7 @@
  *	This symbol, if defined, indicates that the trunc routine is
  *	available to round doubles towards zero.
  */
-/*#define HAS_TRUNC		/ **/
+#define HAS_TRUNC		/**/
 
 /* HAS_TRUNCL:
  *	This symbol, if defined, indicates that the truncl routine is
