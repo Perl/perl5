@@ -556,9 +556,7 @@ PPCODE:
     myop.op_flags = (ix ? OPf_WANT_SCALAR : OPf_WANT_LIST ) | OPf_STACKED;
     myop.op_ppaddr = PL_ppaddr[OP_READLINE];
     myop.op_type = OP_READLINE;
-    /* I don't know if we need this, but it's correct as far as the control flow
-       goes. However, if we *do* need it, do we need to set anything else up? */
-    myop.op_next = PL_op->op_next;
+    myop.op_next = NULL; /* return from the runops loop below after 1 op */
     /* Sigh, because pp_readline calls pp_rv2gv, and *it* has this wonderful
        state check for PL_op->op_type == OP_READLINE */
     PL_op = (OP *) &myop;
@@ -569,9 +567,12 @@ PPCODE:
     PUSHs(sv_newmortal());
     XPUSHs(io);
     PUTBACK;
+    /* call a new runops loop for just the one op rather than just calling
+     * pp_readline directly, as the former will handle the call coming
+     * from a ref-counted stack */
     /* And effectively we get away with tail calling pp_readline, as it stacks
        exactly the return value(s) we need to return. */
-    PL_ppaddr[OP_READLINE](aTHX);
+    CALLRUNOPS(aTHX);
     PL_op = was;
     /* And we don't want to reach the line
        PL_stack_sp = sp;
