@@ -20,7 +20,7 @@ use Carp          qw< carp croak >;
 use Scalar::Util  qw< blessed >;
 use Math::BigInt  qw< >;
 
-our $VERSION = '2.001000';
+our $VERSION = '2.001001';
 $VERSION =~ tr/_//d;
 
 require Exporter;
@@ -1332,13 +1332,15 @@ sub as_int {
 
     return $x -> copy() if $x -> isa("Math::BigInt");
 
-    # disable upgrading and downgrading
+    # Disable upgrading and downgrading.
 
     require Math::BigInt;
     my $upg = Math::BigInt -> upgrade();
     my $dng = Math::BigInt -> downgrade();
     Math::BigInt -> upgrade(undef);
     Math::BigInt -> downgrade(undef);
+
+    # Copy the value.
 
     my $y;
     if ($x -> is_inf()) {
@@ -1355,7 +1357,11 @@ sub as_int {
         $y = Math::BigInt->new($x->{sign} . $LIB->_str($y));
     }
 
-    # restore upgrading and downgrading
+    # Copy the remaining instance variables.
+
+    ($y->{_a}, $y->{_p}) = ($x->{_a}, $x->{_p});
+
+    # Restore upgrading and downgrading.
 
     Math::BigInt -> upgrade($upg);
     Math::BigInt -> downgrade($dng);
@@ -1369,17 +1375,22 @@ sub as_float {
 
     return $x -> copy() if $x -> isa("Math::BigFloat");
 
-    # disable upgrading and downgrading
+    # Disable upgrading and downgrading.
 
-    require Math::BigFloat;
     my $upg = Math::BigFloat -> upgrade();
     my $dng = Math::BigFloat -> downgrade();
     Math::BigFloat -> upgrade(undef);
     Math::BigFloat -> downgrade(undef);
 
-    my $y = Math::BigFloat -> copy($x);
+    # Copy the value.
 
-    # restore upgrading and downgrading
+    my $y = Math::BigFloat -> new($x);
+
+    # Copy the remaining instance variables.
+
+    ($y->{_a}, $y->{_p}) = ($x->{_a}, $x->{_p});
+
+    # Restore upgrading and downgrading.
 
     Math::BigFloat -> upgrade($upg);
     Math::BigFloat -> downgrade($dng);
@@ -1394,13 +1405,15 @@ sub as_rat {
 
     return $x -> copy() if $x -> isa("Math::BigRat");
 
-    # disable upgrading and downgrading
+    # Disable upgrading and downgrading.
 
     require Math::BigRat;
     my $upg = Math::BigRat -> upgrade();
     my $dng = Math::BigRat -> downgrade();
     Math::BigRat -> upgrade(undef);
     Math::BigRat -> downgrade(undef);
+
+    # Copy the value.
 
     my $y;
     if ($x -> is_inf()) {
@@ -1414,7 +1427,11 @@ sub as_rat {
                                          . '/' . $LIB -> _str($rat_parts[2]));
     }
 
-    # restore upgrading and downgrading
+    # Copy the remaining instance variables.
+
+    ($y->{_a}, $y->{_p}) = ($x->{_a}, $x->{_p});
+
+    # Restore upgrading and downgrading.
 
     Math::BigRat -> upgrade($upg);
     Math::BigRat -> downgrade($dng);

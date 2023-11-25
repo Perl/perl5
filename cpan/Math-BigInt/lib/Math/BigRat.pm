@@ -21,7 +21,7 @@ use Scalar::Util    qw< blessed >;
 
 use Math::BigFloat ();
 
-our $VERSION = '2.001000';
+our $VERSION = '2.001001';
 $VERSION =~ tr/_//d;
 
 our @ISA = qw(Math::BigFloat);
@@ -2313,13 +2313,15 @@ sub as_int {
 
     return $x -> copy() if $x -> isa("Math::BigInt");
 
-    # disable upgrading and downgrading
+    # Disable upgrading and downgrading.
 
     require Math::BigInt;
     my $upg = Math::BigInt -> upgrade();
     my $dng = Math::BigInt -> downgrade();
     Math::BigInt -> upgrade(undef);
     Math::BigInt -> downgrade(undef);
+
+    # Copy the value.
 
     my $y;
     if ($x -> is_inf()) {
@@ -2332,10 +2334,43 @@ sub as_int {
         $y = $y -> bneg() if $x -> is_neg();
     }
 
-    # reset upgrading and downgrading
+    # Copy the remaining instance variables.
+
+    ($y->{_a}, $y->{_p}) = ($x->{_a}, $x->{_p});
+
+    # Restore upgrading and downgrading.
 
     Math::BigInt -> upgrade($upg);
     Math::BigInt -> downgrade($dng);
+
+    return $y;
+}
+
+sub as_rat {
+    my ($class, $x, @r) = ref($_[0]) ? (ref($_[0]), @_) : objectify(1, @_);
+    carp "Rounding is not supported for ", (caller(0))[3], "()" if @r;
+
+    return $x -> copy() if $x -> isa("Math::BigRat");
+
+    # Disable upgrading and downgrading.
+
+    my $upg = Math::BigRat -> upgrade();
+    my $dng = Math::BigRat -> downgrade();
+    Math::BigRat -> upgrade(undef);
+    Math::BigRat -> downgrade(undef);
+
+    # Copy the value.
+
+    my $y = Math::BigRat -> new($x);
+
+    # Copy the remaining instance variables.
+
+    ($y->{_a}, $y->{_p}) = ($x->{_a}, $x->{_p});
+
+    # Restore upgrading and downgrading
+
+    Math::BigRat -> upgrade($upg);
+    Math::BigRat -> downgrade($dng);
 
     return $y;
 }
@@ -2345,13 +2380,15 @@ sub as_float {
 
     return $x -> copy() if $x -> isa("Math::BigFloat");
 
-    # disable upgrading and downgrading
+    # Disable upgrading and downgrading.
 
     require Math::BigFloat;
     my $upg = Math::BigFloat -> upgrade();
     my $dng = Math::BigFloat -> downgrade();
     Math::BigFloat -> upgrade(undef);
     Math::BigFloat -> downgrade(undef);
+
+    # Copy the value.
 
     my $y;
     if ($x -> is_inf()) {
@@ -2367,7 +2404,11 @@ sub as_float {
         }
     }
 
-    # reset upgrading and downgrading
+    # Copy the remaining instance variables.
+
+    ($y->{_a}, $y->{_p}) = ($x->{_a}, $x->{_p});
+
+    # Restore upgrading and downgrading.
 
     Math::BigFloat -> upgrade($upg);
     Math::BigFloat -> downgrade($dng);

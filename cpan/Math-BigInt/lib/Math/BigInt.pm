@@ -23,7 +23,7 @@ use warnings;
 use Carp          qw< carp croak >;
 use Scalar::Util  qw< blessed refaddr >;
 
-our $VERSION = '2.001000';
+our $VERSION = '2.001001';
 $VERSION =~ tr/_//d;
 
 require Exporter;
@@ -1333,21 +1333,24 @@ sub as_int {
     my ($class, $x, @r) = ref($_[0]) ? (ref($_[0]), @_) : objectify(1, @_);
     carp "Rounding is not supported for ", (caller(0))[3], "()" if @r;
 
-    # If called as an instance method, and the instance class is something we
-    # upgrade to, $x might not be a Math::BigInt, so don't just call copy().
-
     return $x -> copy() if $x -> isa("Math::BigInt");
 
-    # disable upgrading and downgrading
+    # Disable upgrading and downgrading.
 
     my $upg = Math::BigInt -> upgrade();
     my $dng = Math::BigInt -> downgrade();
     Math::BigInt -> upgrade(undef);
     Math::BigInt -> downgrade(undef);
 
+    # Copy the value.
+
     my $y = Math::BigInt -> new($x);
 
-    # reset upgrading and downgrading
+    # Copy the remaining instance variables.
+
+    ($y->{_a}, $y->{_p}) = ($x->{_a}, $x->{_p});
+
+    # Restore upgrading and downgrading
 
     Math::BigInt -> upgrade($upg);
     Math::BigInt -> downgrade($dng);
@@ -1359,7 +1362,7 @@ sub as_float {
     my ($class, $x, @r) = ref($_[0]) ? (ref($_[0]), @_) : objectify(1, @_);
     carp "Rounding is not supported for ", (caller(0))[3], "()" if @r;
 
-    # disable upgrading and downgrading
+    # Disable upgrading and downgrading.
 
     require Math::BigFloat;
     my $upg = Math::BigFloat -> upgrade();
@@ -1367,9 +1370,15 @@ sub as_float {
     Math::BigFloat -> upgrade(undef);
     Math::BigFloat -> downgrade(undef);
 
+    # Copy the value.
+
     my $y = Math::BigFloat -> new($x);
 
-    # reset upgrading and downgrading
+    # Copy the remaining instance variables.
+
+    ($y->{_a}, $y->{_p}) = ($x->{_a}, $x->{_p});
+
+    # Restore upgrading and downgrading..
 
     Math::BigFloat -> upgrade($upg);
     Math::BigFloat -> downgrade($dng);
@@ -1381,7 +1390,7 @@ sub as_rat {
     my ($class, $x, @r) = ref($_[0]) ? (ref($_[0]), @_) : objectify(1, @_);
     carp "Rounding is not supported for ", (caller(0))[3], "()" if @r;
 
-    # disable upgrading and downgrading
+    # Disable upgrading and downgrading.
 
     require Math::BigRat;
     my $upg = Math::BigRat -> upgrade();
@@ -1391,7 +1400,11 @@ sub as_rat {
 
     my $y = Math::BigRat -> new($x);
 
-    # reset upgrading and downgrading
+    # Copy the remaining instance variables.
+
+    ($y->{_a}, $y->{_p}) = ($x->{_a}, $x->{_p});
+
+    # Restore upgrading and downgrading.
 
     Math::BigRat -> upgrade($upg);
     Math::BigRat -> downgrade($dng);
@@ -3244,9 +3257,7 @@ sub bsqrt {
 
     return $x -> bnan(@r) if $x -> is_neg();
 
-    require Math::BigFloat;
-    my $tmp = Math::BigFloat -> bsqrt($x, @r) -> as_int();
-    $x->{value} = $tmp->{value};
+    $x->{value} = $LIB -> _sqrt($x->{value});
     return $x -> round(@r);
 }
 
@@ -5145,8 +5156,6 @@ sub objectify {
     $count ||= @a;
     unshift @a, $class;
 
-    no strict 'refs';
-
     # What we upgrade to, if anything. Note that we need the whole upgrade
     # chain, since there might be multiple levels of upgrading. E.g., class A
     # upgrades to class B, which upgrades to class C. Delay getting the chain
@@ -5158,11 +5167,8 @@ sub objectify {
     # Disable downgrading, because Math::BigFloat -> foo('1.0', '2.0') needs
     # floats.
 
-    my $down;
-    if (defined ${"$a[0]::downgrade"}) {
-        $down = ${"$a[0]::downgrade"};
-        ${"$a[0]::downgrade"} = undef;
-    }
+    my $dng = $class -> downgrade();
+    $class -> downgrade(undef);
 
   ARG: for my $i (1 .. $count) {
 
@@ -5171,13 +5177,13 @@ sub objectify {
         # Perl scalars are fed to the appropriate constructor.
 
         unless ($ref) {
-            $a[$i] = $a[0] -> new($a[$i]);
+            $a[$i] = $class -> new($a[$i]);
             next;
         }
 
         # If it is an object of the right class, all is fine.
 
-        next if $ref -> isa($a[0]);
+        next if $ref -> isa($class);
 
         # Upgrading is OK, so skip further tests if the argument is upgraded,
         # but first get the whole upgrade chain if we haven't got it yet.
@@ -5204,7 +5210,7 @@ sub objectify {
 
         my $recheck = 0;
 
-        if ($a[0] -> isa('Math::BigInt')) {
+        if ($class -> isa('Math::BigInt')) {
             if ($a[$i] -> can('as_int')) {
                 $a[$i] = $a[$i] -> as_int();
                 $recheck = 1;
@@ -5214,10 +5220,17 @@ sub objectify {
             }
         }
 
-        elsif ($a[0] -> isa('Math::BigFloat')) {
+        elsif ($class -> isa('Math::BigRat')) {
+            if ($a[$i] -> can('as_rat')) {
+                $a[$i] = $a[$i] -> as_rat();
+                $recheck = 1;
+            }
+        }
+
+        elsif ($class -> isa('Math::BigFloat')) {
             if ($a[$i] -> can('as_float')) {
                 $a[$i] = $a[$i] -> as_float();
-                $recheck = $1;
+                $recheck = 1;
             }
         }
 
@@ -5229,23 +5242,23 @@ sub objectify {
             # Perl scalars are fed to the appropriate constructor.
 
             unless ($ref) {
-                $a[$i] = $a[0] -> new($a[$i]);
+                $a[$i] = $class -> new($a[$i]);
                 next;
             }
 
             # If it is an object of the right class, all is fine.
 
-            next if $ref -> isa($a[0]);
+            next if $ref -> isa($class);
         }
 
         # Last resort.
 
-        $a[$i] = $a[0] -> new($a[$i]);
+        $a[$i] = $class -> new($a[$i]);
     }
 
-    # Reset the downgrading.
+    # Restore the downgrading.
 
-    ${"$a[0]::downgrade"} = $down;
+    $class -> downgrade($dng);
 
     return @a;
 }
