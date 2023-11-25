@@ -4531,6 +4531,8 @@ S_get_locale_string_utf8ness_i(pTHX_ const char * string,
 STATIC bool
 S_is_locale_utf8(pTHX_ const char * locale)
 {
+    PERL_ARGS_ASSERT_IS_LOCALE_UTF8;
+
     /* Returns TRUE if the locale 'locale' is UTF-8; FALSE otherwise.  It uses
      * my_langinfo(), which employs various methods to get this information
      * if nl_langinfo() isn't available, using heuristics as a last resort, in
@@ -4552,19 +4554,16 @@ S_is_locale_utf8(pTHX_ const char * locale)
 
 #  else
 
-    char * scratch_buffer = NULL;
-    const char * codeset;
-    bool retval;
-
-    PERL_ARGS_ASSERT_IS_LOCALE_UTF8;
-
+    /* If the input happens to be the same locale as we are currently setup
+     * for, the answer has already been cached. */
     if (strEQ(locale, PL_ctype_name)) {
         return PL_in_utf8_CTYPE_locale;
     }
 
-    codeset = my_langinfo_c(CODESET, LC_CTYPE, locale,
-                            &scratch_buffer, NULL, NULL);
-    retval = is_codeset_name_UTF8(codeset);
+    char * scratch_buffer = NULL;
+    const char * codeset = my_langinfo_c(CODESET, LC_CTYPE, locale,
+                                         &scratch_buffer, NULL, NULL);
+    bool retval = is_codeset_name_UTF8(codeset);
 
     DEBUG_Lv(PerlIO_printf(Perl_debug_log,
                            "found codeset=%s, is_utf8=%d\n", codeset, retval));
@@ -4575,7 +4574,7 @@ S_is_locale_utf8(pTHX_ const char * locale)
                                                             locale, retval));
     return retval;
 
-#  endif
+#  endif      /* End of the #else clause, for the non-trivial case */
 
 }
 
