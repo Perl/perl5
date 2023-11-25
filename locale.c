@@ -5859,7 +5859,16 @@ S_my_langinfo_i(pTHX_
 #  else   /* Below, emulate nl_langinfo as best we can */
 
     /* The other completion is where we have to emulate nl_langinfo().  There
-     * are various possibilities depending on the Configuration */
+     * are various possibilities depending on the Configuration.   The major
+     * platform lacking nl_langinfo is Windows.  It does have GetLocaleInfoEx()
+     * that could be used to get most of the items, but it (and other similar
+     * Windows API functions) use what MS calls "locale names", whereas the C
+     * functions use what MS calls "locale strings".  The locale string
+     * "English_United_States.1252" is equivalent to the locale name "en_US".
+     * There are tables inside Windows that translate between the two forms,
+     * but they are not exposed.  Also calling setlocale(), then calling
+     * GetThreadLocale() doesn't work, as the former doesn't change the
+     * latter's return.  Therefore we are stuck using the mechanisms below. */
 
 #    ifdef USE_LOCALE_CTYPE
 
@@ -5962,9 +5971,7 @@ S_my_langinfo_i(pTHX_
 #    endif
 #    ifdef HAS_LOCALECONV
 
-    /* These items are available from localeconv().  (To avoid using
-     * TS_W32_BROKEN_LOCALECONV, one could use GetNumberFormat and
-     * GetCurrencyFormat; patches welcome) */
+    /* These items are available from localeconv(). */
 
 #      define P_CS_PRECEDES    "p_cs_precedes"
 #      define CURRENCY_SYMBOL  "currency_symbol"
@@ -6497,6 +6504,7 @@ S_my_langinfo_i(pTHX_
          * test, and so the answer will always be non-UTF-8. */
         locale_category_index  cat_index = LC_ALL_INDEX_;
         const locale_category_index  follow_on_cat_index = LC_ALL_INDEX_;
+
 #          endif
 
         /* Everything set up; look through all the strings */
