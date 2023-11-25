@@ -553,7 +553,11 @@ PPCODE:
     if (!ix && GIMME_V != G_LIST)
         Perl_croak(aTHX_ "Can't call $io->getlines in a scalar context, use $io->getline");
     Zero(&myop, 1, UNOP);
+#if defined(PERL_VERSION_GE) && PERL_VERSION_GE(5,39,5)
+    myop.op_flags = (ix ? (OPf_WANT_SCALAR | OPf_STACKED) : OPf_WANT_LIST);
+#else
     myop.op_flags = (ix ? OPf_WANT_SCALAR : OPf_WANT_LIST ) | OPf_STACKED;
+#endif
     myop.op_ppaddr = PL_ppaddr[OP_READLINE];
     myop.op_type = OP_READLINE;
     myop.op_next = NULL; /* return from the runops loop below after 1 op */
@@ -561,10 +565,12 @@ PPCODE:
        state check for PL_op->op_type == OP_READLINE */
     PL_op = (OP *) &myop;
     io = ST(0);
-    /* Our target (which we need to provide, as we don't have a pad entry.
-       I think that this is only needed for G_SCALAR - maybe we can get away
-       with NULL for list context? */
-    PUSHs(sv_newmortal());
+    /* For scalar functions (getline/gets), provide a target on the stack,
+     * as we don't have a pad entry. */
+#if defined(PERL_VERSION_GE) && PERL_VERSION_GE(5,39,5)
+    if (ix)
+#endif
+        PUSHs(sv_newmortal());
     XPUSHs(io);
     PUTBACK;
     /* call a new runops loop for just the one op rather than just calling
