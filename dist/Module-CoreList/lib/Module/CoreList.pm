@@ -21081,6 +21081,8 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         changed => {
             'B::Op_private'         => '5.034002',
             'Config'                => '5.034002',
+            'Module::CoreList'      => '5.20231125',
+            'Module::CoreList::Utils'=> '5.20231125',
         },
         removed => {
         }
@@ -21090,6 +21092,8 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         changed => {
             'B::Op_private'         => '5.036002',
             'Config'                => '5.036002',
+            'Module::CoreList'      => '5.20231125',
+            'Module::CoreList::Utils'=> '5.20231125',
         },
         removed => {
         }
@@ -21099,6 +21103,8 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         changed => {
             'B::Op_private'         => '5.038001',
             'Config'                => '5.038001',
+            'Module::CoreList'      => '5.20231125',
+            'Module::CoreList::Utils'=> '5.20231125',
         },
         removed => {
         }
