@@ -3434,15 +3434,15 @@ S_new_numeric(pTHX_ const char *newnum, bool force)
      * get this value, which doesn't appear to be used in any of the Microsoft
      * library routines anyway. */
 
-    char * scratch_buffer = NULL;
     if (PL_numeric_underlying_is_standard) {
+        char * scratch_buffer = NULL;
         PL_numeric_underlying_is_standard = strEQ(C_thousands_sep,
                                              my_langinfo_c(THOUSEP, LC_NUMERIC,
                                                            PL_numeric_name,
                                                            &scratch_buffer,
                                                            NULL, NULL));
+        Safefree(scratch_buffer);
     }
-    Safefree(scratch_buffer);
 
 #    endif
 
