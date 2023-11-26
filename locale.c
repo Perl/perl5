@@ -6282,89 +6282,57 @@ S_emulate_langinfo(pTHX_ const int item,
 
       case RADIXCHAR:
 
-#  if    defined(USE_LOCALE_NUMERIC) && defined(HAS_SNPRINTF)           \
-   && (! defined(HAS_LOCALECONV) || defined(TS_W32_BROKEN_LOCALECONV))
+#  if defined(USE_LOCALE_NUMERIC) && defined(HAS_STRTOD)
 
-        {   /* snprintf() can be used to find the radix character by outputting
-             * a known simple floating point number to a buffer, and parsing
-             * it, inferring the radix as the bytes separating the integer and
-             * fractional parts.  But localeconv() is more direct, not
-             * requiring inference, so use it instead of the code just below,
-             * if (likely) it is available and works ok */
+       {
+        /* khw knows of only three possible radix characters used in the world.
+         * By far the two most common are comma and dot.  We can use strtod()
+         * to quickly check for those without without much fuss.  If it is
+         * something other than those two, the code drops down and lets
+         * localeconv() find it.
+         *
+         * We don't have to toggle LC_CTYPE here because all locales Perl
+         * supports are compatible with ASCII, which the two possibilities are.
+         * */
+        const char * orig_switched_locale = toggle_locale_c(LC_NUMERIC, locale);
 
-            char * floatbuf = NULL;
-            const Size_t initial_size = 10;
-
-            Newx(floatbuf, initial_size, char);
-
-            start_DEALING_WITH_MISMATCHED_CTYPE(locale);
-            const char * orig_NUMERIC_locale = toggle_locale_c(LC_NUMERIC,
-                                                               locale);
-            /* 1.5 is exactly representable on binary computers */
-            Size_t needed_size = snprintf(floatbuf, initial_size, "%.1f", 1.5);
-
-            /* If our guess wasn't big enough, increase and try again, based on
-             * the real number that snprintf() is supposed to return */
-            if (UNLIKELY(needed_size >= initial_size)) {
-                needed_size++;  /* insurance */
-                Renew(floatbuf, needed_size, char);
-                Size_t new_needed = snprintf(floatbuf, needed_size, "%.1f",
-                                             1.5);
-                assert(new_needed <= needed_size);
-                needed_size = new_needed;
-            }
-
-            restore_toggled_locale_c(LC_NUMERIC, orig_NUMERIC_locale);
-            end_DEALING_WITH_MISMATCHED_CTYPE(locale);
-
-            char * s = floatbuf;
-            char * e = floatbuf + needed_size;
-
-            /* Find the '1' */
-            while (s < e && *s != '1') {
-                s++;
-            }
-
-            if (LIKELY(s < e)) {
-                s++;
-            }
-
-            /* Find the '5' */
-            char * item_start = s;
-            while (s < e && *s != '5') {
-                s++;
-            }
-
-            /* Everything in between is the radix string */
-            if (LIKELY(s < e)) {
-                sv_setpvn(sv, item_start, s - item_start);
-                SvUTF8_off(sv);
-                retval_type = RETVAL_IN_sv;
-                Safefree(floatbuf);
-
-                if (utf8ness) {
-                    is_utf8 = get_locale_string_utf8ness_i(SvPVX(sv),
-                                                        LOCALE_UTF8NESS_UNKNOWN,
-                                                        locale,
-                                                        LC_NUMERIC_INDEX_);
-                }
-
-                break;
-            }
-
-            Safefree(floatbuf);
+        /* Comma tried first in case strtod() always accepts dot regardless of
+         * the locale */
+        if (strtod("1,5", NULL) > 1.4) {
+            retval = ",";
+        }
+        else if (strtod("1.5", NULL) > 1.4) {
+            retval = ".";
+        }
+        else {
+            retval = NULL;
         }
 
-#  endif  /* Trying snprintf() */
+        restore_toggled_locale_c(LC_NUMERIC, orig_switched_locale);
 
-        /* Here snprintf() was not compiled, or failed */
+        if (retval) {
+            break;
+        }
+       }
+
+#  endif  /* Trying strtod() */
+
+        /* If gets to here, the strtod() method wasn't compiled, or it failed;
+         * drop down.
+         *
+         * (snprintf() used to be used instead of strtod(), but it was removed
+         * as being somewhat more clumsy, and maybe non-conforming on some
+         * platforms.  But before resorting to localeconv(), the code that was
+         * removed by the strtod commit could be inserted here.  This seems
+         * unlikely to be wanted unless some really broken localeconv() shows
+         * up) */
 
 #  if ! defined(USE_LOCALE_NUMERIC) || ! defined(HAS_LOCALECONV)
 
         retval = C_decimal_point;
         break;
 
-#  else         /* snprintf() failed; drop down to use localeconv() */
+#  else
 
         cat_index = LC_NUMERIC_INDEX_;
 
