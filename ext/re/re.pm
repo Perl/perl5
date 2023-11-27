@@ -4,7 +4,7 @@ package re;
 use strict;
 use warnings;
 
-our $VERSION     = "0.44";
+our $VERSION     = "0.45";
 our @ISA         = qw(Exporter);
 our @EXPORT_OK   = qw{
 	is_regexp regexp_pattern
@@ -706,9 +706,8 @@ compile-time and run-time effects.
 
 =head2 Exportable Functions
 
-As of perl 5.9.5 're' debug contains a number of utility functions that
-may be optionally exported into the caller's namespace. They are listed
-below.
+As of perl 5.9.5, the C<re> module contains a number of utility functions that
+may be optionally exported into the caller's namespace. They are listed below.
 
 =over 4
 
