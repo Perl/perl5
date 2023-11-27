@@ -2697,7 +2697,7 @@ S_more_refcounted_fds(pTHX_ const int new_fd)
 
     if (!new_array) {
         MUTEX_UNLOCK(&PL_perlio_mutex);
-        croak_no_mem();
+        croak_no_mem_ext(STR_WITH_LEN("perlio:more_refcounted_fds"));
     }
 
     PL_perlio_fd_refcnt_size = new_max;

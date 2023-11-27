@@ -4892,11 +4892,27 @@ where the failed request happened.
 is most likely to be caused by a typo in the Perl program. e.g.,
 C<$arr[time]> instead of C<$arr[$time]>.
 
+=item Out of memory during vec in lvalue context
+
+(F) An attempt was made to extend a string beyond the largest possible memory
+allocation by assigning to C<vec()> called with a large second argument.
+
 =item Out of memory for yacc stack
 
 (F) The yacc parser wanted to grow its stack so it could continue
 parsing, but realloc() wouldn't give it more memory, virtual or
 otherwise.
+
+=item Out of memory in perl:%s
+
+(X) A low-level memory allocation routine failed, indicating there was
+insufficient remaining (virtual) memory to satisfy the request.  Perl has no
+option but to exit immediately.
+
+At least in Unix you may be able to get past this by increasing your process
+datasize limits: in csh/tcsh use C<limit> and C<limit datasize n> (where C<n>
+is the number of kilobytes) to check the current limits and change them, and in
+ksh/bash/zsh use C<ulimit -a> and C<ulimit -d n>, respectively.
 
 =item '.' outside of string in pack
 

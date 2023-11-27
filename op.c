@@ -284,7 +284,7 @@ S_link_freed_op(pTHX_ OPSLAB *slab, OP *o) {
         slab->opslab_freed = (OP**)PerlMemShared_calloc((slab->opslab_freed_size), sizeof(OP*));
 
         if (!slab->opslab_freed)
-            croak_no_mem();
+            croak_no_mem_ext(STR_WITH_LEN("op:link_freed_op"));
     }
     else if (index >= slab->opslab_freed_size) {
         /* It's probably not worth doing exponential expansion here, the number of op sizes
@@ -295,7 +295,7 @@ S_link_freed_op(pTHX_ OPSLAB *slab, OP *o) {
         OP **p = (OP **)PerlMemShared_realloc(slab->opslab_freed, newsize * sizeof(OP*));
 
         if (!p)
-            croak_no_mem();
+            croak_no_mem_ext(STR_WITH_LEN("op:link_freed_op"));
 
         Zero(p+slab->opslab_freed_size, newsize - slab->opslab_freed_size, OP *);
 
@@ -15818,7 +15818,7 @@ Perl_rcpv_new(pTHX_ const char *pv, STRLEN len, U32 flags) {
 
     rcpv = (RCPV *)PerlMemShared_malloc(sizeof(struct rcpv) + len);
     if (!rcpv)
-        croak_no_mem();
+        croak_no_mem_ext(STR_WITH_LEN("op:rcpv_new"));
 
     rcpv->len = len;    /* store length including null,
                            RCPV_LEN() subtracts 1 to account for this */

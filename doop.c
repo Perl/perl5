@@ -908,7 +908,7 @@ Perl_do_vecset(pTHX_ SV *sv)
         assert(!(errflags & ~(LVf_NEG_OFF|LVf_OUT_OF_RANGE)));
         if (errflags & LVf_NEG_OFF)
             Perl_croak_nocontext("Negative offset to vec in lvalue context");
-        Perl_croak_nocontext("Out of memory!");
+        Perl_croak_nocontext("Out of memory during vec in lvalue context");
     }
 
     if (!targ)
@@ -938,7 +938,7 @@ Perl_do_vecset(pTHX_ SV *sv)
     else if (size > 8) {
         int n = size/8;
         if (offset > Size_t_MAX / n - 1) /* would overflow */
-            Perl_croak_nocontext("Out of memory!");
+            Perl_croak_nocontext("Out of memory during vec in lvalue context");
         offset *= n;
     }
 
