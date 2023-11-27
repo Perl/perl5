@@ -336,7 +336,7 @@ unless (exists $symbols{text}) {
 ok($symbols{obj}{'util.o'}, "has object util.o");
 ok($symbols{text}{'Perl_croak'}{'util.o'}, "has text Perl_croak in util.o");
 ok(exists $symbols{data}{const}, "has data const symbols");
-ok($symbols{data}{const}{PL_no_mem}{'globals.o'}, "has PL_no_mem");
+ok($symbols{data}{const}{PL_no_modify}{'globals.o'}, "has PL_no_modify");
 
 my $nocommon = $Config{ccflags} =~ /-fno-common/ ? 1 : 0;
 
