@@ -10,6 +10,7 @@ BEGIN {
 
 use strict;
 use warnings;
+use Config;
 
 # test this many times to try to avoid noise from othe processes
 my $trial_count = 3;
@@ -50,7 +51,11 @@ my $ratio = $large_size / $small_size;
 
 my $worst = $min_small * $ratio * 2;
 note "worst allowed $worst";
-cmp_ok($min_large, '<', $worst,
-       "check growing the tmps stack takes O(n) time");
-
+SKIP:
+{
+    skip "santize greatly extends large realloc times", 1
+      if "$Config{cc} $Config{ccflags}" =~ /-fsanitize/;
+    cmp_ok($min_large, '<', $worst,
+           "check growing the tmps stack takes O(n) time");
+}
 done_testing();
