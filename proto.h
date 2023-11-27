@@ -625,6 +625,13 @@ Perl_croak_no_mem(void)
 #define PERL_ARGS_ASSERT_CROAK_NO_MEM
 
 PERL_CALLCONV_NO_RET void
+Perl_croak_no_mem_ext(const char *context, STRLEN len)
+        __attribute__noreturn__
+        __attribute__visibility__("hidden");
+#define PERL_ARGS_ASSERT_CROAK_NO_MEM_EXT       \
+        assert(context)
+
+PERL_CALLCONV_NO_RET void
 Perl_croak_no_modify(void)
         __attribute__noreturn__;
 #define PERL_ARGS_ASSERT_CROAK_NO_MODIFY

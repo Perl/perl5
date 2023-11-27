@@ -205,7 +205,7 @@ Perl_safesysmalloc(MEM_SIZE size)
             if (PL_nomemok)
                 ptr =  NULL;
             else
-                croak_no_mem();
+                croak_no_mem_ext(STR_WITH_LEN("util:safesysmalloc"));
         }
     }
     return ptr;
@@ -340,7 +340,7 @@ Perl_safesysrealloc(Malloc_t where,MEM_SIZE size)
                 if (PL_nomemok)
                     ptr = NULL;
                 else
-                    croak_no_mem();
+                    croak_no_mem_ext(STR_WITH_LEN("util:safesysrealloc"));
             }
         }
     }
@@ -512,7 +512,7 @@ Perl_safesyscalloc(MEM_SIZE count, MEM_SIZE size)
 #endif
         if (PL_nomemok)
             return NULL;
-        croak_no_mem();
+        croak_no_mem_ext(STR_WITH_LEN("util:safesyscalloc"));
     }
 }
 
@@ -1342,7 +1342,7 @@ Perl_savesharedpv(pTHX_ const char *pv)
     pvlen = strlen(pv)+1;
     newaddr = (char*)PerlMemShared_malloc(pvlen);
     if (!newaddr) {
-        croak_no_mem();
+        croak_no_mem_ext(STR_WITH_LEN("util:savesharedpv"));
     }
     return (char*)memcpy(newaddr, pv, pvlen);
 }
@@ -1365,7 +1365,7 @@ Perl_savesharedpvn(pTHX_ const char *const pv, const STRLEN len)
     /* PERL_ARGS_ASSERT_SAVESHAREDPVN; */
 
     if (!newaddr) {
-        croak_no_mem();
+        croak_no_mem_ext(STR_WITH_LEN("util:savesharedpvn"));
     }
     newaddr[len] = '\0';
     return (char*)memcpy(newaddr, pv, len);
@@ -1970,18 +1970,33 @@ Perl_croak_no_modify(void)
    This is typically called when malloc returns NULL.
 */
 void
-Perl_croak_no_mem(void)
+Perl_croak_no_mem_ext(const char *context, STRLEN len)
 {
     dTHX;
+
+    PERL_ARGS_ASSERT_CROAK_NO_MEM_EXT;
 
     int fd = PerlIO_fileno(Perl_error_log);
     if (fd < 0)
         SETERRNO(EBADF,RMS_IFI);
     else {
         /* Can't use PerlIO to write as it allocates memory */
-        PERL_UNUSED_RESULT(PerlLIO_write(fd, PL_no_mem, sizeof(PL_no_mem)-1));
+        static const char oomp[] = "Out of memory in perl:";
+        if (
+            PerlLIO_write(fd, oomp, sizeof oomp - 1) >= 0
+            && PerlLIO_write(fd, context, len) >= 0
+            && PerlLIO_write(fd, "\n", 1) >= 0
+        ) {
+            /* nop */
+        }
     }
     my_exit(1);
+}
+
+void
+Perl_croak_no_mem(void)
+{
+    croak_no_mem_ext(STR_WITH_LEN("???"));
 }
 
 /* does not return, used only in POPSTACK */

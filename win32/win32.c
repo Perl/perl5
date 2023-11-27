@@ -131,7 +131,7 @@ static void	remove_dead_process(long child);
 static int	terminate_process(DWORD pid, HANDLE process_handle, int sig);
 static int	my_killpg(int pid, int sig);
 static int	my_kill(int pid, int sig);
-static void	out_of_memory(void);
+static void	out_of_memory(const char *context, STRLEN len);
 static char*	wstr_to_str(const wchar_t* wstr);
 static long	filetime_to_clock(PFILETIME ft);
 static BOOL	filetime_from_time(PFILETIME ft, time_t t);
@@ -2227,11 +2227,11 @@ win32_longpath(char *path)
 }
 
 static void
-out_of_memory(void)
+out_of_memory(const char *context, STRLEN len)
 {
 
     if (PL_curinterp)
-        croak_no_mem();
+        croak_no_mem_ext(context, len);
     exit(1);
 }
 
@@ -2255,7 +2255,7 @@ wstr_to_str(const wchar_t* wstr)
                                    NULL, 0, NULL, NULL);
     char* str = (char*)malloc(len);
     if (!str)
-        out_of_memory();
+        out_of_memory(STR_WITH_LEN("win32:wstr_to_str"));
     WideCharToMultiByte(CP_ACP, WC_NO_BEST_FIT_CHARS, wstr, wlen,
                         str, len, NULL, &used_default);
     return str;
@@ -2288,7 +2288,7 @@ win32_ansipath(const WCHAR *widename)
                                   NULL, 0, NULL, NULL);
     name = (char*)win32_malloc(len);
     if (!name)
-        out_of_memory();
+        out_of_memory(STR_WITH_LEN("win32:win32_ansipath"));
 
     WideCharToMultiByte(CP_ACP, WC_NO_BEST_FIT_CHARS, widename, widelen,
                         name, len, NULL, &use_default);
@@ -2297,14 +2297,14 @@ win32_ansipath(const WCHAR *widename)
         if (shortlen) {
             WCHAR *shortname = (WCHAR*)win32_malloc(shortlen*sizeof(WCHAR));
             if (!shortname)
-                out_of_memory();
+                out_of_memory(STR_WITH_LEN("win32:win32_ansipath"));
             shortlen = GetShortPathNameW(widename, shortname, shortlen)+1;
 
             len = WideCharToMultiByte(CP_ACP, WC_NO_BEST_FIT_CHARS, shortname, shortlen,
                                       NULL, 0, NULL, NULL);
             name = (char*)win32_realloc(name, len);
             if (!name)
-                out_of_memory();
+                out_of_memory(STR_WITH_LEN("win32:win32_ansipath"));
             WideCharToMultiByte(CP_ACP, WC_NO_BEST_FIT_CHARS, shortname, shortlen,
                                 name, len, NULL, NULL);
             win32_free(shortname);
@@ -2337,7 +2337,7 @@ win32_getenvironmentstrings(void)
                                           lpWStr, wenvstrings_len, NULL, 0, NULL, NULL);
     lpTmp = lpStr = (char *)win32_calloc(aenvstrings_len, sizeof(char));
     if(!lpTmp)
-        out_of_memory();
+        out_of_memory(STR_WITH_LEN("win32:win32_getenvironmentstrings"));
 
     /* Convert the string from UTF-16 encoding to ACP encoding */
     WideCharToMultiByte(CP_ACP, WC_NO_BEST_FIT_CHARS, lpWStr, wenvstrings_len, lpStr, 

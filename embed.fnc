@@ -855,6 +855,9 @@ Tfprv	|void	|croak_caller	|NULLOK const char *pat 		\
 				|...
 CTrs	|void	|croak_memory_wrap
 Tpr	|void	|croak_no_mem
+Tpr	|void	|croak_no_mem_ext					\
+				|NN const char *context 		\
+				|STRLEN len
 ATdpr	|void	|croak_no_modify
 TXpr	|void	|croak_popstack
 Adpr	|void	|croak_sv	|NN SV *baseex
