@@ -796,7 +796,8 @@ S_ithread_create(
           int fd = PerlIO_fileno(Perl_error_log);
           if (fd >= 0) {
             /* If there's no error_log, we cannot scream about it missing. */
-            PERL_UNUSED_RESULT(PerlLIO_write(fd, PL_no_mem, strlen(PL_no_mem)));
+            static const char oomp[] = "Out of memory in perl:threads:ithread_create\n";
+            PERL_UNUSED_RESULT(PerlLIO_write(fd, oomp, sizeof oomp - 1));
           }
         }
         my_exit(1);
