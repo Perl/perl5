@@ -6841,7 +6841,7 @@ value is a pointer to the formatted result (which MUST be arranged to be FREED
 BY THE CALLER).  This allows these functions to increase the buffer size as
 needed, so that the caller doesn't have to worry about that.
 
-On failure they return NULL, and set errno to C<EINVAL>.
+On failure, they return NULL, and set C<errno> to C<EINVAL>.
 
 C<sv_strftime_tm> and C<sv_strftime_ints> are preferred, as they transparently
 handle the UTF-8ness of the current locale, the input C<fmt>, and the returned
@@ -6943,9 +6943,32 @@ S_strftime_tm(pTHX_ const char *fmt, const struct tm *mytm)
          * lower chance of doing something bad than the ones for printf etc. */
         GCC_DIAG_IGNORE_STMT(-Wformat-nonliteral);
 
+#ifdef WIN32    /* Windows will tell you if the input is invalid */
+
+        /* Needed because the LOCK might (or might not) save/restore errno */
+        bool strftime_failed = false;
+
+        STRFTIME_LOCK;
+        dSAVE_ERRNO;
+        errno = 0;
+
+        int len = strftime(buf, bufsize, fmt, mytm);
+        if (errno == EINVAL) {
+            strftime_failed = true;
+        }
+
+        RESTORE_ERRNO;
+        STRFTIME_UNLOCK;
+
+        if (strftime_failed) {
+            goto strftime_failed;
+        }
+
+#else
         STRFTIME_LOCK;
         int len = strftime(buf, bufsize, fmt, mytm);
         STRFTIME_UNLOCK;
+#endif
 
         GCC_DIAG_RESTORE_STMT;
 
@@ -6996,8 +7019,12 @@ S_strftime_tm(pTHX_ const char *fmt, const struct tm *mytm)
      * that the string is syntactically invalid for the locale.  On some
      * platforms an invalid conversion specifier '%?' (for all illegal '?') is
      * treated as a literal, but others may fail when '?' is illegal */
-    Safefree(buf);
+
+  strftime_failed:
+
     SET_EINVAL;
+
+    Safefree(buf);
     buf = NULL;
 
   strftime_return:
