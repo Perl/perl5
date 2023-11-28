@@ -717,6 +717,7 @@ the strings?).
  Steve     5.34.1-RC2   2022-Mar-06
  Steve     5.34.1       2022-Mar-13
  Paul E    5.34.2       2023-Nov-25
+ Paul E    5.34.3       2023-Nov-29
 
  Ricardo   5.35.0       2021-May-20     The 5.35 development track
  Max       5.35.1       2021-Jun-20
@@ -740,6 +741,7 @@ the strings?).
  Steve     5.36.1-RC3   2023-Apr-16
  Steve     5.36.1       2023-Apr-23
  Paul E    5.36.2       2023-Nov-25
+ Paul E    5.36.3       2023-Nov-29
 
  Ricardo   5.37.0       2022-May-27     The 5.37 development track
  Matthew H 5.37.1       2022-Jun-20
@@ -758,6 +760,7 @@ the strings?).
  Ricardo   5.38.0-RC2   2023-Jun-23
  Ricardo   5.38.0       2023-Jul-02
  Paul E    5.38.1       2023-Nov-25
+ Paul E    5.38.2       2023-Nov-29
 
  Ricardo   5.39.0       2023-Jun-30     The 5.39 development track
  Steve     5.39.1       2023-Jul-20
