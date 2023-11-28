@@ -26,11 +26,11 @@ Category: "deprecated::delimiter_will_be_paired"
 
 =head3 Dot In Inc
 
-The current working direct C<"."> used to be automatically included in
+The current working directory C<"."> used to be automatically included in
 C<@INC>, but in Perl 5.26 this was removed for security reasons. Ever
 since then we have produced a warning when a user uses C<do EXPR> and
 C<EXPR> does not include a path, and the file was not found in any
-directory in @INC but I<was> located C<".">. The file will not be loaded
+directory in C<@INC> but I<was> located C<".">. The file will not be loaded
 but a deprecated warning will be generated.
 
 Category: "deprecated::dot_in_inc"
