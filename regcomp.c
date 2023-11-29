@@ -1308,6 +1308,24 @@ S_is_ssc_worth_it(const RExC_state_t * pRExC_state, const regnode_ssc * ssc)
     return TRUE;
 }
 
+static void
+release_RExC_state(pTHX_ void *vstate) {
+    RExC_state_t *pRExC_state = (RExC_state_t *)vstate;
+
+    /* Any or all of these might be NULL.
+
+       There's no point in setting them to NULL after the free, since
+       pRExC_state is about to be released.
+     */
+    SvREFCNT_dec(RExC_rx_sv);
+    Safefree(RExC_open_parens);
+    Safefree(RExC_close_parens);
+    Safefree(RExC_logical_to_parno);
+    Safefree(RExC_parno_to_logical);
+
+    Safefree(pRExC_state);
+}
+
 /*
  * Perl_re_op_compile - the perl internal RE engine's function to compile a
  * regular expression into internal code.
@@ -1389,8 +1407,6 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     bool recompile = 0;
     bool runtime_code = 0;
     scan_data_t data;
-    RExC_state_t RExC_state;
-    RExC_state_t * const pRExC_state = &RExC_state;
 
 #ifdef TRIE_STUDY_OPT
     /* search for "restudy" in this file for a detailed explanation */
@@ -1401,24 +1417,27 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 
     PERL_ARGS_ASSERT_RE_OP_COMPILE;
 
+    DEBUG_r(if (!PL_colorset) reginitcolors());
+
+    RExC_state_t *pRExC_state = NULL;
     /* Ensure that all members of the pRExC_state is initialized to 0
      * at the start of regex compilation. Historically we have had issues
      * with people remembering to zero specific members or zeroing them
      * too late, etc. Doing it in one place is saner and avoid oversight
      * or error. */
-    Zero(pRExC_state,1,RExC_state_t);
+    Newxz(pRExC_state, 1, RExC_state_t);
+
+    SAVEDESTRUCTOR_X(release_RExC_state, pRExC_state);
+
     DEBUG_r({
         /* and then initialize RExC_mysv1 and RExC_mysv2 early so if
          * something calls regprop we don't have issues. These variables
-         * not being set up properly motivated the use of Zero() to initalize
+         * not being set up properly motivated the use of Newxz() to initalize
          * the pRExC_state structure, as there were codepaths under -Uusedl
          * that left these unitialized, and non-null as well. */
         RExC_mysv1 = sv_newmortal();
         RExC_mysv2 = sv_newmortal();
     });
-
-    DEBUG_r(if (!PL_colorset) reginitcolors());
-
 
     if (is_bare_re)
         *is_bare_re = FALSE;
@@ -1793,6 +1812,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 
         /* Clean up what we did in this parse */
         SvREFCNT_dec_NN(RExC_rx_sv);
+        RExC_rx_sv = NULL;
 
         goto redo_parse;
     }
@@ -1868,12 +1888,12 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     /* search for "restudy" in this file for a detailed explanation */
     if (!restudied) {
         StructCopy(&zero_scan_data, &data, scan_data_t);
-        copyRExC_state = RExC_state;
+        copyRExC_state = *pRExC_state;
     } else {
         U32 seen=RExC_seen;
         DEBUG_OPTIMISE_r(Perl_re_printf( aTHX_ "Restudying\n"));
 
-        RExC_state = copyRExC_state;
+        *pRExC_state = copyRExC_state;
         if (seen & REG_TOP_LEVEL_BRANCHES_SEEN)
             RExC_seen |= REG_TOP_LEVEL_BRANCHES_SEEN;
         else
@@ -2392,22 +2412,10 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
         regdump(RExC_rx);
     });
 
-    if (RExC_open_parens) {
-        Safefree(RExC_open_parens);
-        RExC_open_parens = NULL;
-    }
-    if (RExC_close_parens) {
-        Safefree(RExC_close_parens);
-        RExC_close_parens = NULL;
-    }
-    if (RExC_logical_to_parno) {
-        Safefree(RExC_logical_to_parno);
-        RExC_logical_to_parno = NULL;
-    }
-    if (RExC_parno_to_logical) {
-        Safefree(RExC_parno_to_logical);
-        RExC_parno_to_logical = NULL;
-    }
+    /* we're returning ownership of the SV to the caller, ensure the cleanup
+     * doesn't release it
+     */
+    RExC_rx_sv = NULL;
 
 #ifdef USE_ITHREADS
     /* under ithreads the ?pat? PMf_USED flag on the pmop is simulated
@@ -9297,7 +9305,6 @@ S_output_posix_warnings(pTHX_ RExC_state_t *pRExC_state, AV* posix_warnings)
                                             array is mortal, but is a
                                             fail-safe */
             (void) sv_2mortal(msg);
-            PREPARE_TO_DIE;
         }
         Perl_warner(aTHX_ packWARN(WARN_REGEXP), "%s", SvPVX(msg));
         SvREFCNT_dec_NN(msg);
