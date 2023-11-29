@@ -28,7 +28,7 @@ skip_all_without_unicode_tables();
 my $has_locales = locales_enabled('LC_CTYPE');
 my $utf8_locale = find_utf8_ctype_locale();
 
-plan tests => 1293;  # Update this when adding/deleting tests.
+plan tests => 1295;  # Update this when adding/deleting tests.
 
 run_tests() unless caller;
 
@@ -2627,6 +2627,22 @@ SKIP:
 
     }
 
+    {
+        # github #21661
+        fresh_perl_is(<<'PROG', <<'EXPECT', {}, "double-free on fatal warn with existing error");
+use warnings FATAL => qw(all);
+/() {}/X;
+PROG
+Unknown regexp modifier "/X" at - line 2, at end of line
+Unescaped left brace in regex is passed through in regex; marked by <-- HERE in m/() { <-- HERE }/ at - line 2.
+Execution of - aborted due to compilation errors.
+EXPECT
+        fresh_perl_is(<<'PROG', "", {}, "leak if __WARN__ handler dies");
+use warnings;
+local $SIG{__WARN__} = sub { die; };
+eval "qr/()x{/;" for 1..10;
+PROG
+    }
 } # End of sub run_tests
 
 1;
