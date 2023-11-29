@@ -2793,6 +2793,7 @@ cpan/Test-Simple/t/Test2/behavior/Subtest_plan.t				Test file related to Test::S
 cpan/Test-Simple/t/Test2/behavior/Subtest_todo.t				Test file related to Test::Simple
 cpan/Test-Simple/t/Test2/behavior/Taint.t					Test file related to Test::Simple
 cpan/Test-Simple/t/Test2/behavior/trace_signature.t				Test file related to Test::Simple
+cpan/Test-Simple/t/Test2/behavior/trace_stamps.t				Test-Simple
 cpan/Test-Simple/t/Test2/behavior/uuid.t					Test file related to Test::Simple
 cpan/Test-Simple/t/Test2/legacy/TAP.t						Test file related to Test::Simple
 cpan/Test-Simple/t/Test2/modules/API.t						Test file related to Test::Simple

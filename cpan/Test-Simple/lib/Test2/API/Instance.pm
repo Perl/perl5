@@ -2,7 +2,7 @@ package Test2::API::Instance;
 use strict;
 use warnings;
 
-our $VERSION = '1.302195';
+our $VERSION = '1.302197';
 
 our @CARP_NOT = qw/Test2::API Test2::API::Instance Test2::IPC::Driver Test2::Formatter/;
 use Carp qw/confess carp/;
@@ -36,9 +36,15 @@ use Test2::Util::HashBase qw{
     context_init_callbacks
     context_release_callbacks
     pre_subtest_callbacks
+
+    trace_stamps
 };
 
 sub DEFAULT_IPC_TIMEOUT() { 30 }
+
+sub test2_enable_trace_stamps { $_[0]->{+TRACE_STAMPS} = 1 }
+sub test2_disable_trace_stamps { $_[0]->{+TRACE_STAMPS} = 0 }
+sub test2_trace_stamps_enabled { $_[0]->{+TRACE_STAMPS} }
 
 sub pid { $_[0]->{+_PID} }
 sub tid { $_[0]->{+_TID} }
@@ -118,6 +124,8 @@ sub reset {
 
     delete $self->{+_PID};
     delete $self->{+_TID};
+
+    $self->{+TRACE_STAMPS} = $ENV{T2_TRACE_STAMPS} // 0;
 
     $self->{+ADD_UUID_VIA} = undef;
 

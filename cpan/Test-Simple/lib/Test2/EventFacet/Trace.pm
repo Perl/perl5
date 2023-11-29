@@ -2,14 +2,15 @@ package Test2::EventFacet::Trace;
 use strict;
 use warnings;
 
-our $VERSION = '1.302195';
+our $VERSION = '1.302197';
 
 BEGIN { require Test2::EventFacet; our @ISA = qw(Test2::EventFacet) }
 
 use Test2::Util qw/get_tid pkg_to_file gen_uid/;
+use Time::HiRes qw/time/;
 use Carp qw/confess/;
 
-use Test2::Util::HashBase qw{^frame ^pid ^tid ^cid -hid -nested details -buffered -uuid -huuid <full_caller};
+use Test2::Util::HashBase qw{^frame ^pid ^tid ^cid -hid -nested details -buffered -uuid -huuid <full_caller <stamp};
 
 {
     no warnings 'once';

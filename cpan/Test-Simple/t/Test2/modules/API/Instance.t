@@ -7,8 +7,9 @@ use Test2::Util qw/CAN_THREAD CAN_REALLY_FORK USE_THREADS get_tid/;
 
 ok(1, "Just to get things initialized.");
 
-# We need to control this env var for this test
+# We need to control these env vars for this test
 $ENV{T2_NO_IPC} = 0;
+$ENV{T2_TRACE_STAMPS} = 0;
 # This test relies on TAP being the default formatter for non-canon instances
 $ENV{T2_FORMATTER} = 'TAP';
 
@@ -42,6 +43,8 @@ is_deeply(
         context_init_callbacks    => [],
         context_release_callbacks => [],
         pre_subtest_callbacks     => [],
+
+        trace_stamps => 0,
 
         stack => [],
     },
@@ -79,6 +82,8 @@ is_deeply(
         context_init_callbacks    => [],
         context_release_callbacks => [],
         pre_subtest_callbacks     => [],
+
+        trace_stamps => 0,
 
         stack => [],
     },

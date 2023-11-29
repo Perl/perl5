@@ -2,7 +2,7 @@ package Test2::Event::V2;
 use strict;
 use warnings;
 
-our $VERSION = '1.302195';
+our $VERSION = '1.302197';
 
 use Scalar::Util qw/reftype/;
 use Carp qw/croak/;

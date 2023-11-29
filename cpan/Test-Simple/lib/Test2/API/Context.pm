@@ -2,7 +2,7 @@ package Test2::API::Context;
 use strict;
 use warnings;
 
-our $VERSION = '1.302195';
+our $VERSION = '1.302197';
 
 
 use Carp qw/confess croak/;
@@ -612,7 +612,7 @@ context was created.
 B<Note:> If a context is acquired more than once an internal refcount is kept.
 C<release()> decrements the ref count, none of the other actions of
 C<release()> will occur unless the refcount hits 0. This means only the last
-call to C<release()> will reset C<$?>, C<$!>, C<$@>,and run the cleanup tasks.
+call to C<release()> will reset C<$?>, C<$!>, C<$@>, and run the cleanup tasks.
 
 =item $ctx->throw($message)
 

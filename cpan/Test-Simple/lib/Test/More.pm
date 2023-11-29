@@ -17,7 +17,7 @@ sub _carp {
     return warn @_, " at $file line $line\n";
 }
 
-our $VERSION = '1.302195';
+our $VERSION = '1.302197';
 
 use Test::Builder::Module;
 our @ISA    = qw(Test::Builder::Module);
@@ -1206,13 +1206,28 @@ sub _format_stack {
     return $out;
 }
 
+my %_types = (
+  (map +($_ => $_), qw(
+    Regexp
+    ARRAY
+    HASH
+    SCALAR
+    REF
+    GLOB
+    CODE
+  )),
+  'LVALUE'  => 'SCALAR',
+  'REF'     => 'SCALAR',
+  'VSTRING' => 'SCALAR',
+);
+
 sub _type {
     my $thing = shift;
 
     return '' if !ref $thing;
 
-    for my $type (qw(Regexp ARRAY HASH REF SCALAR GLOB CODE VSTRING)) {
-        return $type if UNIVERSAL::isa( $thing, $type );
+    for my $type (keys %_types) {
+        return $_types{$type} if UNIVERSAL::isa( $thing, $type );
     }
 
     return '';
