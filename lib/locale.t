@@ -2475,7 +2475,7 @@ foreach $test_num ($first_locales_test_number..$final_locales_test_number) {
     my $has_non_global_failure = $Problem{$test_num}
                             || ! defined $Okay{$test_num}
                             || ! @{$Okay{$test_num}};
-    print "not " if %setlocale_failed || $has_non_global_failure;
+    print "not " if $has_non_global_failure;
     print "ok $test_num";
     $test_names{$test_num} = "" unless defined $test_names{$test_num};
 
@@ -2485,7 +2485,7 @@ foreach $test_num ($first_locales_test_number..$final_locales_test_number) {
     if ($todo) {
         print " # TODO\n";
     }
-    elsif (%setlocale_failed || ! $has_non_global_failure) {
+    elsif (! $has_non_global_failure) {
         print "\n";
     }
     elsif ($has_non_global_failure) {
@@ -2696,6 +2696,15 @@ setlocale(&POSIX::LC_ALL, "C");
 # Give final advice.
 
 my $didwarn = 0;
+
+if (%setlocale_failed) {
+    print "#\nsetlocale() failed for these locales:\n";
+    for my $locale (keys %setlocale_failed) {
+        print "#\t$locale\n";
+    }
+    print "#\n";
+    $didwarn = 1;
+}
 
 foreach ($first_locales_test_number..$final_locales_test_number) {
     if ($Problem{$_}) {
