@@ -824,7 +824,7 @@ our %Modules = (
     },
 
     'Module::CoreList' => {
-        'DISTRIBUTION' => 'BINGOS/Module-CoreList-5.20231120.tar.gz',
+        'DISTRIBUTION' => 'BINGOS/Module-CoreList-5.20231129.tar.gz',
         'FILES'        => q[dist/Module-CoreList],
     },
 
