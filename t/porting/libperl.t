@@ -45,6 +45,11 @@ use strict;
 
 use Config;
 
+# maint (and tarballs of maint releases) may not have updates here to
+# deal with changes to nm's output in some toolchains
+$^V =~ /^v\d+\.\d*[13579]\./
+  or skip_all "on maint";
+
 if ($Config{cc} =~ /g\+\+/) {
     # XXX Could use c++filt, maybe.
     skip_all "on g++";
