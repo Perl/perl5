@@ -163,6 +163,11 @@
         setup   => 'my $x; my @a = 1..4; sub f { @a }',
         code    => '$x = f()',
     },
+    'call::sub::accessor' => {
+        desc    => 'sub called to access hashref key',
+        setup   => 'my $x; my $b = {x => 1}; sub f { $_[0]->{x} }',
+        code    => '$x = f($b)',
+    },
 
     'call::goto::empty' => {
         desc    => 'goto &funtion with no args or body',
