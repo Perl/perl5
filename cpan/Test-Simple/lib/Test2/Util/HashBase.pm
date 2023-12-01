@@ -2,7 +2,7 @@ package Test2::Util::HashBase;
 use strict;
 use warnings;
 
-our $VERSION = '1.302197';
+our $VERSION = '1.302198';
 
 #################################################################
 #                                                               #

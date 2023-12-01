@@ -2,7 +2,7 @@ package Test2::API::InterceptResult;
 use strict;
 use warnings;
 
-our $VERSION = '1.302197';
+our $VERSION = '1.302198';
 
 use Scalar::Util qw/blessed/;
 use Test2::Util  qw/pkg_to_file/;

@@ -2,7 +2,7 @@ package Test2::API::Instance;
 use strict;
 use warnings;
 
-our $VERSION = '1.302197';
+our $VERSION = '1.302198';
 
 our @CARP_NOT = qw/Test2::API Test2::API::Instance Test2::IPC::Driver Test2::Formatter/;
 use Carp qw/confess carp/;
@@ -125,7 +125,7 @@ sub reset {
     delete $self->{+_PID};
     delete $self->{+_TID};
 
-    $self->{+TRACE_STAMPS} = $ENV{T2_TRACE_STAMPS} // 0;
+    $self->{+TRACE_STAMPS} = $ENV{T2_TRACE_STAMPS} || 0;
 
     $self->{+ADD_UUID_VIA} = undef;
 
