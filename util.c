@@ -2135,6 +2135,27 @@ any of the categories are by default enabled.
 =for apidoc vwarner
 This is like C<L</warner>>, but C<args> are an encapsulated argument list.
 
+=for apidoc fatal_warner
+
+Like L</warner> except that it acts as if fatal warnings are enabled
+for the warning.
+
+If called when there are pending compilation errors this function may
+return.
+
+This is currently used to generate "used only once" fatal warnings
+since the COP where the name being reported is no longer the current
+COP when the warning is generated and may be useful for similar cases.
+
+C<err> must be one of the C<L</packWARN>>, C<packWARN2>, C<packWARN3>,
+C<packWARN4> macros populated with the appropriate number of warning
+categories.
+
+=for apidoc vfatal_warner
+
+This is like C<L</fatal_warner>> but C<args> are an encapsulated
+argument list.
+
 =cut
 */
 
@@ -2195,18 +2216,39 @@ Perl_vwarner(pTHX_ U32  err, const char* pat, va_list* args)
         (PL_warnhook == PERL_WARNHOOK_FATAL || ckDEAD(err)) &&
         !(PL_in_eval & EVAL_KEEPERR)
     ) {
-        SV * const msv = vmess(pat, args);
-
-        if (PL_parser && PL_parser->error_count) {
-            qerror(msv);
-        }
-        else {
-            invoke_exception_hook(msv, FALSE);
-            die_unwind(msv);
-        }
+        vfatal_warner(err, pat, args);
     }
     else {
         Perl_vwarn(aTHX_ pat, args);
+    }
+}
+
+void
+Perl_fatal_warner(pTHX_ U32 err, const char *pat, ...)
+{
+    PERL_ARGS_ASSERT_FATAL_WARNER;
+
+    va_list args;
+    va_start(args, pat);
+    vfatal_warner(err, pat, &args);
+    va_end(args);
+}
+
+void
+Perl_vfatal_warner(pTHX_ U32 err, const char *pat, va_list *args)
+{
+    PERL_ARGS_ASSERT_VFATAL_WARNER;
+
+    PERL_UNUSED_ARG(err);
+
+    SV * const msv = vmess(pat, args);
+
+    if (PL_parser && PL_parser->error_count) {
+        qerror(msv);
+    }
+    else {
+        invoke_exception_hook(msv, FALSE);
+        die_unwind(msv);
     }
 }
 

@@ -1098,6 +1098,12 @@ Perl_eval_sv(pTHX_ SV *sv, I32 flags);
         assert(sv)
 
 PERL_CALLCONV void
+Perl_fatal_warner(pTHX_ U32 err, const char *pat, ...)
+        __attribute__format__(__printf__,pTHX_2,pTHX_3);
+#define PERL_ARGS_ASSERT_FATAL_WARNER           \
+        assert(pat)
+
+PERL_CALLCONV void
 Perl_fbm_compile(pTHX_ SV *sv, U32 flags);
 #define PERL_ARGS_ASSERT_FBM_COMPILE            \
         assert(sv)
@@ -5178,6 +5184,11 @@ Perl_vcroak(pTHX_ const char *pat, va_list *args)
 PERL_CALLCONV void
 Perl_vdeb(pTHX_ const char *pat, va_list *args);
 #define PERL_ARGS_ASSERT_VDEB                   \
+        assert(pat)
+
+PERL_CALLCONV void
+Perl_vfatal_warner(pTHX_ U32 err, const char *pat, va_list *args);
+#define PERL_ARGS_ASSERT_VFATAL_WARNER          \
         assert(pat)
 
 PERL_CALLCONV char *

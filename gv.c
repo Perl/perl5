@@ -2685,10 +2685,14 @@ Perl_gv_fetchpvn_flags(pTHX_ const char *nambeg, STRLEN full_len, I32 flags,
     gv_init_pvn(gv, stash, name, len, (add & GV_ADDMULTI)|is_utf8);
 
     if (   full_len != 0
-        && isIDFIRST_lazy_if_safe(name, name + full_len, is_utf8)
-        && !ckWARN(WARN_ONCE) )
-    {
-        GvMULTI_on(gv) ;
+           && isIDFIRST_lazy_if_safe(name, name + full_len, is_utf8)) {
+        if (ckWARN(WARN_ONCE)) {
+            if (ckDEAD(WARN_ONCE))
+                GvONCE_FATAL_on(gv);
+        }
+        else {
+            GvMULTI_on(gv) ;
+        }
     }
 
     /* set up magic where warranted */
@@ -2819,11 +2823,20 @@ Perl_gv_check(pTHX_ HV *stash)
                 CopFILEGV(PL_curcop)
                     = gv_fetchfile_flags(file, HEK_LEN(GvFILE_HEK(gv)), 0);
 #endif
-                Perl_warner(aTHX_ packWARN(WARN_ONCE),
-                        "Name \"%" HEKf "::%" HEKf
-                        "\" used only once: possible typo",
-                            HEKfARG(HvNAME_HEK(stash)),
-                            HEKfARG(GvNAME_HEK(gv)));
+                if (GvONCE_FATAL(gv)) {
+                    fatal_warner(packWARN(WARN_ONCE),
+                                 "Name \"%" HEKf "::%" HEKf
+                                 "\" used only once: possible typo",
+                                 HEKfARG(HvNAME_HEK(stash)),
+                                 HEKfARG(GvNAME_HEK(gv)));
+                }
+                else {
+                    warner(packWARN(WARN_ONCE),
+                           "Name \"%" HEKf "::%" HEKf
+                           "\" used only once: possible typo",
+                           HEKfARG(HvNAME_HEK(stash)),
+                           HEKfARG(GvNAME_HEK(gv)));
+                }
             }
         }
     }
