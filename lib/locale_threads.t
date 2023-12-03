@@ -1734,14 +1734,19 @@ EOT
     sub setlocales {
         # Set each category to the appropriate locale for this test set
         my ($categories, $locales) = @_;
+
         for my $i (0 .. $categories->@* - 1) {
-            if (! setlocale($categories->[$i], $locales->[$i])) {
-                my $category_name =
+            my $category_name =
                             $map_category_number_to_name->{$categories->[$i]};
+            if (! setlocale($categories->[$i], $locales->[$i])) {
                 print STDERR "\nthread ", threads->tid(),
                              " setlocale($category_name ($categories->[$i]),",
                              " $locales->[$i]) failed\n";
                 return 0;
+            }
+            elsif ($debug > 2) {
+                print STDERR "\nthread ", threads->tid(),
+                             " Changed $category_name to $locales->[$i]\n";
             }
         }
 
