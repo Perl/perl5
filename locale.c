@@ -6060,6 +6060,7 @@ S_my_langinfo_i(pTHX_
      * override if necessary */
     utf8ness_t is_utf8 = UTF8NESS_IMMATERIAL;
     const char * retval = NULL;
+    bool retval_saved = false;
 
     switch (item) {
       default:
@@ -6140,6 +6141,7 @@ S_my_langinfo_i(pTHX_
             if (LIKELY(s < e)) {
                 *s = '\0';
                 retval = save_to_buffer(item_start, retbufp, retbuf_sizep);
+                retval_saved = true;
                 Safefree(floatbuf);
 
                 if (utf8ness) {
@@ -6223,6 +6225,7 @@ S_my_langinfo_i(pTHX_
 
         /* Here, 'string' contains the value we want to return */
         retval = save_to_buffer(SvPV_nolen(string), retbufp, retbuf_sizep);
+        retval_saved = true;
 
         if (utf8ness) {
             is_utf8 = get_locale_string_utf8ness_i(retval,
@@ -6267,6 +6270,7 @@ S_my_langinfo_i(pTHX_
         orig_CTYPE_locale = toggle_locale_c(LC_CTYPE, locale);
         retval = save_to_buffer(GET_CODE_PAGE_AS_STRING, retbufp, retbuf_sizep);
         restore_toggled_locale_c(LC_CTYPE, orig_CTYPE_locale);
+        retval_saved = true;
 
         DEBUG_Lv(PerlIO_printf(Perl_debug_log, "locale='%s' cp=%s\n",
                                                locale, retval));
@@ -6322,6 +6326,7 @@ S_my_langinfo_i(pTHX_
             /* The code set name is considered to be everything between the dot
              * and the '@' */
             retval = save_to_buffer(retval, retbufp, retbuf_sizep);
+            retval_saved = true;
         }
 
 #        ifndef HAS_DEFINITIVE_UTF8NESS_DETERMINATION
@@ -6477,6 +6482,7 @@ S_my_langinfo_i(pTHX_
             restore_toggled_locale_c(LC_TIME, orig_TIME_locale);
 
             retval = save_to_buffer(temp, retbufp, retbuf_sizep);
+            retval_saved = true;
             Safefree(temp);
 
             /* If the item is 'ALT_DIGITS', '*retbuf' contains the alternate
@@ -6537,6 +6543,10 @@ S_my_langinfo_i(pTHX_
     DEBUG_Lv(PerlIO_printf(Perl_debug_log,
                            "Leaving my_langinfo item=%ld, using locale %s\n",
                            (long) item, locale));
+    if (! retval_saved) {
+        retval = save_to_buffer(retval, retbufp, retbuf_sizep);
+    }
+
     return retval;
 
 #  endif    /* All the implementations of my_langinfo() */
