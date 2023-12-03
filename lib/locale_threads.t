@@ -500,8 +500,8 @@ my $iterations = 100;
 my $alarm_clock = (1 * 10 * 60);    # A long time, just to prevent hanging
 
 # Chunk the iterations, so that every so often the test comes up for air.
-my $iterations_per_test_group = min(30, int($iterations / 5));
-$iterations_per_test_group = 1 if $iterations_per_test_group == 0;
+my $iterations_per_test_set = min(30, int($iterations / 5));
+$iterations_per_test_set = 1 if $iterations_per_test_set == 0;
 
 # Sometimes the test calls setlocale() for each individual locale category.
 # But every this many threads, it will be called just once, using LC_ALL to
@@ -1455,7 +1455,7 @@ SKIP: {
     BEGIN { \$| = 1; }
     my \$debug = $debug;
     my \$thread_count = $thread_count;
-    my \$iterations_per_test_group = $iterations_per_test_group;
+    my \$iterations_per_test_set = $iterations_per_test_set;
     my \$iterations = $iterations;
     my \$die_on_negative_sleep = $die_on_negative_sleep;
     my \$per_thread_startup = $per_thread_startup;
@@ -1610,7 +1610,7 @@ EOT
 
     $program .= <<'EOT';
     sub setlocales {
-        # Set each category to the appropriate locale for this test group
+        # Set each category to the appropriate locale for this test set
         my ($categories, $locales) = @_;
         for my $i (0 .. $categories->@* - 1) {
             if (! setlocale($categories->[$i], $locales->[$i])) {
@@ -1662,7 +1662,7 @@ EOT
 
         # Start out with the set of tests whose number is the same as the
         # thread number
-        my $which_test_group = $thread;
+        my $test_set = $thread;
 
         wait_until_time();
 
@@ -1670,21 +1670,21 @@ EOT
         my $this_iteration_start = 1;
         do {
              # Set up each category with its locale;
-            my $this_ref = $all_tests_ref->[$which_test_group];
+            my $this_ref = $all_tests_ref->[$test_set];
             return 0 unless setlocales($this_ref->{categories},
-                                        $this_ref->{locales});
+                                       $this_ref->{locales});
             # Then run one batch of iterations
             my $result = iterate($thread,
                                  $this_iteration_start,
-                                 $iterations_per_test_group,
+                                 $iterations_per_test_set,
                                  $this_ref->{tests});
             return 0 if $result == 0;   # Quit if failed
 
             # Next iteration will shift to use a different set of locales for
             # each category
-            $which_test_group++;
-            $which_test_group = 0 if $which_test_group >= $thread_count;
-            $this_iteration_start += $iterations_per_test_group;
+            $test_set++;
+            $test_set = 0 if $test_set >= $thread_count;
+            $this_iteration_start += $iterations_per_test_set;
         } while ($this_iteration_start <= $iterations);
 
         return 1;   # Success
@@ -1698,20 +1698,20 @@ EOT
     my %thread0_corrects = ();
     my $this_iteration_start = 1;
     my $result = 1;    # So far, everything is ok
-    my $which_test_group = -1;  # Start with 0th test group
+    my $test_set = -1;  # Start with 0th test set
 
     wait_until_time();
     alarm($alarm_clock);    # Guard against hangs
 
     do {
-        $which_test_group++;
-        # Next time, we'll use the next test group
-        $which_test_group = 0 if $which_test_group >= $thread_count;
+        # Next time, we'll use the next test set
+        $test_set++;
+        $test_set = 0 if $test_set >= $thread_count;
 
-        my $this_ref = $all_tests_ref->[$which_test_group];
+        my $this_ref = $all_tests_ref->[$test_set];
 
-        # set the locales for this test group.  Do this even if we are
-        # going to bail, so that it will be set correctly for the final
+        # set the locales for this test set.  Do this even if we
+        # are going to bail, so that it will be set correctly for the final
         # batch after the loop.
         $result &= setlocales($this_ref->{categories}, $this_ref->{locales});
 
@@ -1753,10 +1753,10 @@ EOT
         # Do a chunk of iterations on this thread 0.
         $result &= iterate(0,
                            $this_iteration_start,
-                           $iterations_per_test_group,
+                           $iterations_per_test_set,
                            $this_ref->{tests},
                            \%thread0_corrects);
-        $this_iteration_start += $iterations_per_test_group;
+        $this_iteration_start += $iterations_per_test_set;
 
         # And repeat as long as there are other tests
     } while (threads->list(threads::all));
