@@ -715,6 +715,7 @@ S_ithread_run(void * arg)
 
     PerlIO_flush((PerlIO *)NULL);
 
+     DEBUG_U(PerlIO_printf(Perl_debug_log, "thread locking mutex\n"));
     MUTEX_LOCK(&MY_POOL.create_destruct_mutex);
     MUTEX_LOCK(&thread->mutex);
     /* Mark as finished */
