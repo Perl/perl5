@@ -1272,7 +1272,10 @@ typedef enum {
 #      define USE_THREAD_SAFE_LOCALE
 #    else
 #      ifndef EMULATE_THREAD_SAFE_LOCALES
-#        define EMULATE_THREAD_SAFE_LOCALES
+#        ifndef WIN32 /* MingW without UCRT is excluded from thread-safe
+                         emulation.  See commit msg that added this line */
+#          define EMULATE_THREAD_SAFE_LOCALES
+#        endif
 #      endif
 #      undef USE_POSIX_2008_LOCALE
 #    endif
