@@ -5005,7 +5005,7 @@ S_my_localeconv(pTHX_ const int item)
 
       case CRNCYSTR:
         index_bits = INDEX_TO_BIT(LC_MONETARY_INDEX_);
-        locale = monetary_locale = querylocale_i(LC_MONETARY_INDEX_);
+        locale = monetary_locale = querylocale_c(LC_MONETARY);
 
         /* This item needs the values for both the currency symbol, and another
          * one used to construct the nl_langino()-compatible return */
@@ -5240,13 +5240,13 @@ S_populate_hash_from_localeconv(pTHX_ HV * hv,
          * This code will have no effect if we already are in C, but khw
          * hasn't seen any cases where this causes problems when we are in the
          * C locale. */
-        orig_NUMERIC_locale = toggle_locale_i(LC_NUMERIC_INDEX_, "C");
-        toggle_locale_i(LC_NUMERIC_INDEX_, locale);
+        orig_NUMERIC_locale = toggle_locale_c(LC_NUMERIC, "C");
+        toggle_locale_c(LC_NUMERIC, locale);
 
 #    else
 
         /* No need for the extra toggle when not on Windows */
-        orig_NUMERIC_locale = toggle_locale_i(LC_NUMERIC_INDEX_, locale);
+        orig_NUMERIC_locale = toggle_locale_c(LC_NUMERIC, locale);
 
 #    endif
 
@@ -5259,8 +5259,8 @@ S_populate_hash_from_localeconv(pTHX_ HV * hv,
      * need to toggle LC_MONETARY, as it is kept in the underlying locale */
     const char * orig_MONETARY_locale = NULL;
     if (which_mask & INDEX_TO_BIT(LC_MONETARY_INDEX_)) {
-        orig_MONETARY_locale = toggle_locale_i(LC_MONETARY_INDEX_, "C");
-        toggle_locale_i(LC_MONETARY_INDEX_, locale);
+        orig_MONETARY_locale = toggle_locale_c(LC_MONETARY, "C");
+        toggle_locale_c(LC_MONETARY, locale);
     }
 
 #  endif
@@ -5410,12 +5410,12 @@ S_populate_hash_from_localeconv(pTHX_ HV * hv,
 
 #  if defined(USE_LOCALE_MONETARY) && defined(WIN32)
 
-    restore_toggled_locale_i(LC_MONETARY_INDEX_, orig_MONETARY_locale);
+    restore_toggled_locale_c(LC_MONETARY, orig_MONETARY_locale);
 
 #  endif
 #  ifdef USE_LOCALE_NUMERIC
 
-    restore_toggled_locale_i(LC_NUMERIC_INDEX_, orig_NUMERIC_locale);
+    restore_toggled_locale_c(LC_NUMERIC, orig_NUMERIC_locale);
     if (which_mask & INDEX_TO_BIT(LC_NUMERIC_INDEX_)) {
         LC_NUMERIC_UNLOCK;
     }
