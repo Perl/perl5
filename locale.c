@@ -5600,7 +5600,6 @@ S_populate_hash_from_localeconv(pTHX_ HV * hv,
      * NUMERIC strings */
     const char * orig_NUMERIC_locale = NULL;
     if (CALL_IS_FOR(NUMERIC)) {
-        LC_NUMERIC_LOCK(0);
 
 #      if defined(WIN32)
 
@@ -5760,9 +5759,6 @@ S_populate_hash_from_localeconv(pTHX_ HV * hv,
 #    ifdef USE_LOCALE_NUMERIC
 
     restore_toggled_locale_c(LC_NUMERIC, orig_NUMERIC_locale);
-    if (CALL_IS_FOR(NUMERIC)) {
-        LC_NUMERIC_UNLOCK;
-    }
 
 #    endif
 
