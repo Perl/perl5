@@ -282,6 +282,23 @@
  *          to be stripped off.  khw believes there aren't any such platforms
  *          still in existence.
  *
+ *      -Accflags=-DLIBC_HANDLES_MISMATCHED_CTYPE
+ *          Consider the name of a month in some language, Chinese for example.
+ *          If LC_TIME has been set to a Chinese locale, strftime() can be used
+ *          to generate the Chinese month name for any given date, by using the
+ *          %B format.  But also suppose that LC_CTYPE is set to, say, "C".
+ *          The return from strftime() on many platforms will be mojibake given
+ *          that no Chinese month name is composed of just ASCII characters.
+ *          Perl handles this for you by automatically toggling LC_CTYPE to
+ *          whatever LC_TIME is during the execution of strftime(), and
+ *          afterwards restoring it to its prior value.  But the strftime()
+ *          (and similar functions) in some libc implementations already do
+ *          this toggle, meaning perl's action is redundant.  You can tell perl
+ *          that a libc does this by setting this Configure option, and it will
+ *          skip its syncing LC_CTYPE and whatever the other locale is.
+ *          Currently, perl ignores this Configuration option and  syncs anyway
+ *          for LC_COLLATE-related operations, due to perl's internal needs.
+ *
  *      -Accflags=USE_FAKE_LC_ALL_POSITIONAL_NOTATION
  *          This is used when developing Perl on a platform that uses
  *          'name=value;' notation to represent LC_ALL when not all categories
@@ -366,6 +383,13 @@ static int debug_initialization = 0;
 #include "EXTERN.h"
 #define PERL_IN_LOCALE_C
 #include "perl.h"
+
+/* Some platforms require LC_CTYPE to be congruent with the category we are
+ * looking for.  XXX This still presumes that we have to match COLLATE and
+ * CTYPE even on platforms that apparently handle this. */
+#if defined(USE_LOCALE_CTYPE) && ! defined(LIBC_HANDLES_MISMATCHED_CTYPE)
+#  define WE_MUST_DEAL_WITH_MISMATCHED_CTYPE
+#endif
 
 #if PERL_VERSION_GT(5,39,9)
 #  error Revert the commit that added this line
@@ -5438,10 +5462,8 @@ S_populate_hash_from_localeconv(pTHX_ HV * hv,
      * global static buffer.  Some locks might be no-ops on this platform, but
      * not others.  We need to lock if any one isn't a no-op. */
 
-#    ifdef USE_LOCALE_CTYPE
+#    ifdef WE_MUST_DEAL_WITH_MISMATCHED_CTYPE
 
-    /* Some platforms require LC_CTYPE to be congruent with the category we are
-     * looking for */
     const char * orig_CTYPE_locale = toggle_locale_c(LC_CTYPE, locale);
 
 #    endif
@@ -5616,7 +5638,7 @@ S_populate_hash_from_localeconv(pTHX_ HV * hv,
     }
 
 #    endif
-#    ifdef USE_LOCALE_CTYPE
+#    ifdef WE_MUST_DEAL_WITH_MISMATCHED_CTYPE
 
     restore_toggled_locale_c(LC_CTYPE, orig_CTYPE_locale);
 
@@ -6014,7 +6036,7 @@ S_my_langinfo_i(pTHX_
 
 /*--------------------------------------------------------------------------*/
 #  if defined(HAS_NL_LANGINFO) /* nl_langinfo() is available.  */
-#    ifdef USE_LOCALE_CTYPE
+#    ifdef WE_MUST_DEAL_WITH_MISMATCHED_CTYPE
 
     /* This function sorts out if things actually have to be switched or not,
      * for both save and restore. */
@@ -6036,7 +6058,7 @@ S_my_langinfo_i(pTHX_
 
     restore_toggled_locale_i(cat_index, orig_switched_locale);
 
-#    ifdef USE_LOCALE_CTYPE
+#    ifdef WE_MUST_DEAL_WITH_MISMATCHED_CTYPE
 
     restore_toggled_locale_c(LC_CTYPE, orig_CTYPE_locale);
 
@@ -6058,7 +6080,7 @@ S_my_langinfo_i(pTHX_
      * GetThreadLocale() doesn't work, as the former doesn't change the
      * latter's return.  Therefore we are stuck using the mechanisms below. */
 
-#    ifdef USE_LOCALE_CTYPE
+#    ifdef WE_MUST_DEAL_WITH_MISMATCHED_CTYPE
 
     const char * orig_CTYPE_locale = toggle_locale_c(LC_CTYPE, locale);
 
@@ -6774,7 +6796,7 @@ S_my_langinfo_i(pTHX_
 
     restore_toggled_locale_i(cat_index, orig_switched_locale);
 
-#    ifdef USE_LOCALE_CTYPE
+#    ifdef WE_MUST_DEAL_WITH_MISMATCHED_CTYPE
     restore_toggled_locale_c(LC_CTYPE, orig_CTYPE_locale);
 #    endif
 
@@ -6883,7 +6905,7 @@ S_strftime_tm(pTHX_ const char *fmt, const struct tm *mytm)
 #ifndef HAS_STRFTIME
     Perl_croak(aTHX_ "panic: no strftime");
 #else
-#  if defined(USE_LOCALE_CTYPE) && defined(USE_LOCALE_TIME)
+#  if defined(WE_MUST_DEAL_WITH_MISMATCHED_CTYPE) && defined(USE_LOCALE_TIME)
 
     const char * orig_CTYPE_LOCALE = toggle_locale_c(LC_CTYPE,
                                                      querylocale_c(LC_TIME));
@@ -6964,7 +6986,7 @@ S_strftime_tm(pTHX_ const char *fmt, const struct tm *mytm)
 
   strftime_return:
 
-#  if defined(USE_LOCALE_CTYPE) && defined(USE_LOCALE_TIME)
+#  if defined(WE_MUST_DEAL_WITH_MISMATCHED_CTYPE) && defined(USE_LOCALE_TIME)
 
     restore_toggled_locale_c(LC_CTYPE, orig_CTYPE_LOCALE);
 
