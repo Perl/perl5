@@ -1119,6 +1119,9 @@ AOdp	|SV *	|eval_pv	|NN const char *p			\
 				|I32 croak_on_error
 AOdp	|SSize_t|eval_sv	|NN SV *sv				\
 				|I32 flags
+Adfpv	|void	|fatal_warner	|U32 err				\
+				|NN const char *pat			\
+				|...
 Adp	|void	|fbm_compile	|NN SV *sv				\
 				|U32 flags
 ARdp	|char * |fbm_instr	|NN unsigned char *big			\
@@ -3703,6 +3706,9 @@ Adp	|int	|vcmp		|NN SV *lhv				\
 Adpr	|void	|vcroak 	|NULLOK const char *pat 		\
 				|NULLOK va_list *args
 Adp	|void	|vdeb		|NN const char *pat			\
+				|NULLOK va_list *args
+Adp	|void	|vfatal_warner	|U32 err				\
+				|NN const char *pat			\
 				|NULLOK va_list *args
 Adp	|char * |vform		|NN const char *pat			\
 				|NULLOK va_list *args
