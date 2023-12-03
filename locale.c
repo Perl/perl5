@@ -4028,8 +4028,12 @@ S_new_numeric(pTHX_ const char *newnum, bool force)
     }
 
     /* We are in the underlying locale until changed at the end of this
-     * function */
+     * function.  We don't know about if this is standard or not, so make
+     * things false so that the calculation of the new radix actually happens.
+     * */
     PL_numeric_underlying = TRUE;
+    PL_numeric_standard = false;
+    PL_numeric_underlying_is_standard = true;   /* Illegal combination */
 
     /* Passing a non-NULL causes the function call just below to
        automatically set the UTF-8 flag on PL_underlying_radix_sv */
