@@ -6224,13 +6224,10 @@ S_my_langinfo_i(pTHX_
         }
 
 #      ifdef WIN32
+#        ifndef WIN32_USE_FAKE_OLD_MINGW_LOCALES
 
         /* This function retrieves the code page.  It is subject to change, but
          * is documented and has been stable for many releases */
-        UINT ___lc_codepage_func(void);
-
-#        ifndef WIN32_USE_FAKE_OLD_MINGW_LOCALES
-
         retval = save_to_buffer(Perl_form(aTHX_ "%d", ___lc_codepage_func()),
                                 retbufp, retbuf_sizep);
 #        else
