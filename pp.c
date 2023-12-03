@@ -708,6 +708,10 @@ PP(pp_study)
     SV *sv = *PL_stack_sp;
     STRLEN len;
 
+#ifdef MULTIPLICITY
+    DEBUG_U(PerlIO_printf( Perl_debug_log, "aTHX=%p ", aTHX));
+#endif
+
     (void)SvPV(sv, len);
     if (len == 0 || len > I32_MAX || !SvPOK(sv) || SvUTF8(sv) || SvVALID(sv)) {
         /* Historically, study was skipped in these cases. */
