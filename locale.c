@@ -6369,9 +6369,7 @@ S_my_langinfo_i(pTHX_
         /* If there are fewer bytes available in this locale than are required
          * to represent the largest legal UTF-8 code point, this definitely
          * isn't a UTF-8 locale, even if the locale name says it is. */
-        LC_CTYPE_LOCK;
         const int mb_cur_max = MB_CUR_MAX;
-        LC_CTYPE_UNLOCK;
         if (mb_cur_max < (int) UNISKIP(PERL_UNICODE_MAX)) {
             if (lean_towards_being_utf8 & NAME_INDICATES_UTF8) {
                 retval = "";    /* The name is wrong; override */
