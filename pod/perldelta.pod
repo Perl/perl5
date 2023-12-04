@@ -396,7 +396,11 @@ manager will later use a regex to expand these into links.
 
 =item *
 
-XXX
+The tmps (mortal) stack now grows exponentially.  Previously it grew
+linearly, so if it was growing incrementally, such as through many
+calls to sv_2mortal(), on a system where realloc() is O(size), the
+performance would be O(n*n).  With exponential grows this changes to
+amortized O(n).  [GH #21654]
 
 =back
 
