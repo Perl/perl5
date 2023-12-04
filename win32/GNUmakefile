@@ -1904,3 +1904,6 @@ nok: utils $(PERLEXE) $(PERLDLL) Extensions_nonxs Extensions
 
 nokfile: utils $(PERLEXE) $(PERLDLL) Extensions_nonxs Extensions
 	$(PERLEXE) ..\utils\perlbug -nok -s "(UNINSTALLED)" -F perl.nok
+
+# prevent implicit rule
+%.c : %.y
