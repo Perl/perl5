@@ -336,6 +336,9 @@ then
 fi
 
 # See https://bugs.freebsd.org/bugzilla/show_bug.cgi?id=265950
+# localeconv() is supposed to be thread-safe when used with this, so when
+# freebsd fixes this, may want to find a way to tell that to the code in
+# locale.c that assumes that function isn't thread-safe.
 ccflags="${ccflags} -DNO_POSIX_2008_LOCALE"
 
 # https://github.com/Perl/perl5/issues/15984

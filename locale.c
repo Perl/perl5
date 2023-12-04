@@ -5003,6 +5003,21 @@ be dealt with immediately.
 =cut
 */
 
+/* All Wndows versions we support, except possibly MingW, have general
+ * thread-safety, and even localeconv() is thread safe, returning into a
+ * per-thread buffer.  MingW when built with a modern MS C runtime (UCRT as of
+ * this writing), also has those things.
+ *
+ * FreeBSD's localeconv() when used with uselocale() is supposed to be
+ * thread-safe (as is their localeconv_l()), but we currently don't use
+ * thread-safe locales there because of bugs. There may be other thread-safe
+ * localeconv() implementations, especially on *BSD derivatives, but khw knows
+ * of none, and hasn't really investigated, in part because of the past
+ * unreliability of vendor thread-safety claims */
+#if defined(WIN32) && (defined(_MSC_VER) || (defined(_UCRT)))
+#  define LOCALECONV_IS_THREAD_SAFE
+#endif
+
 HV *
 Perl_localeconv(pTHX)
 {
@@ -5579,11 +5594,11 @@ S_populate_hash_from_localeconv(pTHX_ HV * hv,
 
     /* Run localeconv() and copy some or all of its results to the input 'hv'
      * hash.  Most localeconv() implementations return the values in a global
-     * static buffer, so the operation must be performed in a critical section,
-     * ending only after the copy is completed.  There are so many locks
-     * because localeconv() deals with two categories, and returns in a single
-     * global static buffer.  Some locks might be no-ops on this platform, but
-     * not others.  We need to lock if any one isn't a no-op. */
+     * static buffer, so for them, the operation must be performed in a
+     * critical section, ending only after the copy is completed.  There are so
+     * many locks because localeconv() deals with two categories, and returns
+     * in a single global static buffer.  Some locks might be no-ops on this
+     * platform, but not others.  We need to lock if any one isn't a no-op. */
 
     /* If the call could be for either or both of the two categories, we need
      * to test which one; but if the Configuration is such that we will never
@@ -5614,11 +5629,10 @@ S_populate_hash_from_localeconv(pTHX_ HV * hv,
      *
      * The setup and teardown are highly variable due to the variance in the
      * possible Configurations.  What is done here to make it slightly more
-     * understandable is the setup section creates the details of the teardown
-     * section, and macroizes them.  So that the finished teardown product is
-     * just a linear series of macros.  You can thus easily see the logic
-     * there.  Stripped of the details, the setup section is just the reverse
-     * order of the teardown one. */
+     * understandable is each setup section creates the details of its
+     * corresponding teardown section, and macroizes them.  So that the
+     * finished teardown product is just a linear series of macros.  You can
+     * thus easily see the logic there. */
 
     /* Setup any LC_CTYPE handling */
     start_DEALING_WITH_MISMATCHED_CTYPE(locale);
@@ -5711,10 +5725,20 @@ S_populate_hash_from_localeconv(pTHX_ HV * hv,
 
 #    endif  /* End of LC_MONETARY setup */
 
-    /* Here, have toggled to the correct locale.  Lock to prevent other
-     * accesses until we have made a copy of the localeconv()returned static
-     * buffer */
+    /* Here, have toggled to the correct locale.
+     *
+     * We don't need to worry about locking at all if localeconv() is
+     * thread-safe, regardless of if using threads or not. */
+#    ifdef LOCALECONV_IS_THREAD_SAFE
+#      define LOCALECONV_UNLOCK
+#    else
+
+     /* Otherwise, the gwLOCALE_LOCK macro expands to whatever locking is
+      * needed (none if there is only a single perl instance) */
     gwLOCALE_LOCK;
+
+#      define LOCALECONV_UNLOCK  gwLOCALE_UNLOCK
+#    endif
 
 #    if defined(TS_W32_BROKEN_LOCALECONV) && defined(USE_THREAD_SAFE_LOCALE)
 
@@ -5827,8 +5851,7 @@ S_populate_hash_from_localeconv(pTHX_ HV * hv,
 #    endif  /* TS_W32_BROKEN_LOCALECONV */
 
     /* Back out of what we set up */
-    gwLOCALE_UNLOCK;    /* Finished with the critical section of a
-                           globally-accessible buffer */
+    LOCALECONV_UNLOCK;
     MONETARY_TEARDOWN;
     NUMERIC_TEARDOWN;
     CTYPE_TEARDOWN;
