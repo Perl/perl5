@@ -9825,12 +9825,25 @@ Perl_rpp_popfree_1(pTHX);
 # define PERL_ARGS_ASSERT_RPP_POPFREE_1
 
 PERL_STATIC_INLINE void
+Perl_rpp_popfree_1_NN(pTHX);
+# define PERL_ARGS_ASSERT_RPP_POPFREE_1_NN
+
+PERL_STATIC_INLINE void
 Perl_rpp_popfree_2(pTHX);
 # define PERL_ARGS_ASSERT_RPP_POPFREE_2
 
 PERL_STATIC_INLINE void
+Perl_rpp_popfree_2_NN(pTHX);
+# define PERL_ARGS_ASSERT_RPP_POPFREE_2_NN
+
+PERL_STATIC_INLINE void
 Perl_rpp_popfree_to(pTHX_ SV **sp);
 # define PERL_ARGS_ASSERT_RPP_POPFREE_TO        \
+        assert(sp)
+
+PERL_STATIC_INLINE void
+Perl_rpp_popfree_to_NN(pTHX_ SV **sp);
+# define PERL_ARGS_ASSERT_RPP_POPFREE_TO_NN     \
         assert(sp)
 
 PERL_STATIC_INLINE void
@@ -9854,13 +9867,38 @@ Perl_rpp_replace_1_1(pTHX_ SV *sv);
         assert(sv)
 
 PERL_STATIC_INLINE void
+Perl_rpp_replace_1_1_NN(pTHX_ SV *sv);
+# define PERL_ARGS_ASSERT_RPP_REPLACE_1_1_NN    \
+        assert(sv)
+
+PERL_STATIC_INLINE void
 Perl_rpp_replace_2_1(pTHX_ SV *sv);
 # define PERL_ARGS_ASSERT_RPP_REPLACE_2_1       \
         assert(sv)
 
 PERL_STATIC_INLINE void
+Perl_rpp_replace_2_1_NN(pTHX_ SV *sv);
+# define PERL_ARGS_ASSERT_RPP_REPLACE_2_1_NN    \
+        assert(sv)
+
+PERL_STATIC_INLINE void
 Perl_rpp_replace_at(pTHX_ SV **sp, SV *sv);
 # define PERL_ARGS_ASSERT_RPP_REPLACE_AT        \
+        assert(sp); assert(sv)
+
+PERL_STATIC_INLINE void
+Perl_rpp_replace_at_NN(pTHX_ SV **sp, SV *sv);
+# define PERL_ARGS_ASSERT_RPP_REPLACE_AT_NN     \
+        assert(sp); assert(sv)
+
+PERL_STATIC_INLINE void
+Perl_rpp_replace_at_norc(pTHX_ SV **sp, SV *sv);
+# define PERL_ARGS_ASSERT_RPP_REPLACE_AT_NORC   \
+        assert(sp); assert(sv)
+
+PERL_STATIC_INLINE void
+Perl_rpp_replace_at_norc_NN(pTHX_ SV **sp, SV *sv);
+# define PERL_ARGS_ASSERT_RPP_REPLACE_AT_NORC_NN \
         assert(sp); assert(sv)
 
 PERL_STATIC_INLINE bool

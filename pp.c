@@ -920,31 +920,34 @@ PP_wrapped(pp_chop, 0, 1)
     RETURN;
 }
 
-PP_wrapped(pp_undef,
-    ((!PL_op->op_private || (PL_op->op_private & OPpTARGET_MY)) ? 0 : 1),
-    0)
+
+PP(pp_undef)
 {
-    dSP;
     SV *sv;
 
     if (!PL_op->op_private) {
-        EXTEND(SP, 1);
-        RETPUSHUNDEF;
+        rpp_extend(1);
+        *++PL_stack_sp = &PL_sv_undef;
+        return NORMAL;
     }
 
     if (PL_op->op_private & OPpTARGET_MY) {
         SV** const padentry = &PAD_SVl(PL_op->op_targ);
         sv = *padentry;
-        EXTEND(SP,1);sp++;PUTBACK;
-        if ((PL_op->op_private & (OPpLVAL_INTRO|OPpPAD_STATE)) == OPpLVAL_INTRO) {
+        rpp_xpush_1(sv);
+        if ((PL_op->op_private & (OPpLVAL_INTRO|OPpPAD_STATE))
+                               == OPpLVAL_INTRO)
+        {
             save_clearsv(padentry);
         }
     } else {
-        sv = TOPs;
+        sv = *PL_stack_sp;
 
-        if (!sv)
-        {
-            SETs(&PL_sv_undef);
+        if (!sv) {
+            /* sv is NULL when pp_undef is invoked like this:
+             *    *myundef = \&CORE::undef;  &myundef();
+             */
+            *PL_stack_sp = &PL_sv_undef;
             return NORMAL;
         }
     }
@@ -1035,10 +1038,9 @@ PP_wrapped(pp_undef,
     }
 
 
-    if (PL_op->op_private & OPpTARGET_MY)
-        SETs(sv);
-    else
-        SETs(&PL_sv_undef);
+    if (!(PL_op->op_private & OPpTARGET_MY))
+        rpp_replace_1_1(&PL_sv_undef);
+
     return NORMAL;
 }
 
@@ -5970,9 +5972,8 @@ PP(pp_anonlist)
 /* When an anonlist or anonhash will (1) be empty and (2) return an RV
  * pointing to the new AV/HV, the peephole optimizer can swap in this
  * simpler function and op_null the originally associated PUSHMARK. */
-PP_wrapped(pp_emptyavhv, 0,0)
+PP(pp_emptyavhv)
 {
-    dSP;
     OP * const op = PL_op;
     SV * rv;
     SV * const sv = MUTABLE_SV( newSV_type(
@@ -5997,19 +5998,18 @@ PP_wrapped(pp_emptyavhv, 0,0)
             save_clearsv(padentry);
         }
         if (GIMME_V == G_VOID) {
-            RETURN; /* skip extending and pushing */
+            return NORMAL; /* skip extending and pushing */
         }
+        rpp_xpush_1(rv);
     } else {
         /* Inlined newRV_noinc */
-        SV * refsv = newSV_type_mortal(SVt_IV);
+        SV * refsv = newSV_type(SVt_IV);
         SvRV_set(refsv, sv);
         SvROK_on(refsv);
-
-        rv = refsv;
+        rpp_extend(1);
+        rpp_push_1_norc(refsv);
     }
-
-    XPUSHs(rv);
-    RETURN;
+    return NORMAL; /* skip extending and pushing */
 }
 
 
@@ -7315,16 +7315,26 @@ S_localise_gv_slot(pTHX_ GV *gv, U8 type)
 }
 
 
-PP_wrapped(pp_refassign,
-      !!(PL_op->op_private & OPpLVREF_ELEM)
-    + !!(PL_op->op_flags & OPf_STACKED)
-    +1,
-    0)
+PP(pp_refassign)
 {
-    dSP;
-    SV * const key = PL_op->op_private & OPpLVREF_ELEM ? POPs : NULL;
-    SV * const left = PL_op->op_flags & OPf_STACKED ? POPs : NULL;
-    dTOPss;
+    SV     *key   = NULL;
+    SV     *left  = NULL;
+    SSize_t extra = 0;
+
+    /* \$a[key] = ...;    or \$h{key} = ...; */
+    if (PL_op->op_private & OPpLVREF_ELEM) {
+        key = PL_stack_sp[0];
+        extra++;
+    }
+
+    /* \X = ...; rather than \my X = ...; so X on stack */
+    if (PL_op->op_flags & OPf_STACKED) {
+        left = PL_stack_sp[-extra];
+        extra++;
+    }
+
+    SV *sv = PL_stack_sp[-extra];
+
     const char *bad = NULL;
     const U8 type = PL_op->op_private & OPpLVREF_TYPE;
     if (!SvROK(sv)) DIE(aTHX_ "Assigned value is not a reference");
@@ -7348,9 +7358,7 @@ PP_wrapped(pp_refassign,
     if (bad)
         /* diag_listed_as: Assigned value is not %s reference */
         DIE(aTHX_ "Assigned value is not a%s reference", bad);
-    {
-    MAGIC *mg;
-    HV *stash;
+
     switch (left ? SvTYPE(left) : 0) {
     case 0:
     {
@@ -7372,6 +7380,8 @@ PP_wrapped(pp_refassign,
     case SVt_PVAV:
         assert(key);
         if (UNLIKELY(PL_op->op_private & OPpLVAL_INTRO)) {
+            MAGIC *mg;
+            HV *stash;
             S_localise_aelem_lval(aTHX_ (AV *)left, key,
                                         SvCANEXISTDELETE(left));
         }
@@ -7380,18 +7390,27 @@ PP_wrapped(pp_refassign,
     case SVt_PVHV:
         if (UNLIKELY(PL_op->op_private & OPpLVAL_INTRO)) {
             assert(key);
+            MAGIC *mg;
+            HV *stash;
             S_localise_helem_lval(aTHX_ (HV *)left, key,
                                         SvCANEXISTDELETE(left));
         }
         (void)hv_store_ent((HV *)left, key, SvREFCNT_inc_simple_NN(SvRV(sv)), 0);
     }
-    if (PL_op->op_flags & OPf_MOD)
-        SETs(sv_2mortal(newSVsv(sv)));
-    /* XXX else can weak references go stale before they are read, e.g.,
-       in leavesub?  */
-    RETURN;
+
+    if (UNLIKELY(PL_op->op_flags & OPf_MOD)) {
+        /* e.g. f(\$x = \1); */
+        rpp_popfree_to(PL_stack_sp - extra);
+        rpp_replace_at_norc(PL_stack_sp, newSVsv(sv));
+        /* XXX else can weak references go stale before they are read, e.g.,
+           in leavesub?  */
     }
+    else
+        rpp_popfree_to(PL_stack_sp - (extra + 1));
+
+    return NORMAL;
 }
+
 
 PP_wrapped(pp_lvref,
     !!(PL_op->op_private & OPpLVREF_ELEM) + !!(PL_op->op_flags & OPf_STACKED),

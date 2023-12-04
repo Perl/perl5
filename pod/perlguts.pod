@@ -4760,6 +4760,7 @@ in summary:
  rpp_replace_1_1(sv)     (void)POPs; PUSHs(sv);
  rpp_replace_2_1(sv)     (void)POPs; (void)POPs; PUSHs(sv);
  rpp_replace_at(sp, sv)  *sp = sv;
+ rpp_replace_at_norc(sp, sv) *sp = sv_2mortal(sv);
 
  rpp_context(mark, gimme,
              extra)      SP -= extra;
@@ -4776,6 +4777,18 @@ in summary:
 
 
  (no replacement)        dATARGET   // just write the macro body in full
+
+There are also some C<_NN> variants which assume that any items being
+removed from the stack are non-NULL, and so are slightly more efficient:
+
+ rpp_popfree_1_NN()
+ rpp_popfree_2_NN()
+ rpp_popfree_to_NN(svp)
+
+ rpp_replace_1_1_NN(sv)
+ rpp_replace_2_1_NN(sv)
+ rpp_replace_at_NN(sp, sv)
+ rpp_replace_at_norc_NN(sp, sv)
 
 Other new C and perl functions related to reference-counted stacks are:
 
@@ -4808,6 +4821,11 @@ handle edge cases such as an old and new SV being the same.
 
 rpp_replace_at(sp, sv) is similar to rpp_replace_1_1(), except that
 it replaces an SV at an address in the stack rather than at the top.
+
+rpp_replace_at_norc(sp, sv) is similar to rpp_replace_at(), except that
+it assumes that C<sv> already has a bumped reference count. So, a bit
+like rpp_push_1_norc() (see below), it doesn't bother increasing C<sv>'s
+reference count, or on non-RC builds it mortalises it instead.
 
 rpp_popfree_to(svp) is designed to replace code like
 

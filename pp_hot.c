@@ -2292,7 +2292,7 @@ PP(pp_rv2av)
                 sv = is_pp_rv2av ? MUTABLE_SV(save_ary(gv)) : MUTABLE_SV(save_hash(gv));
     }
     if (PL_op->op_flags & OPf_REF) {
-        rpp_replace_1_1(sv);
+        rpp_replace_1_1_NN(sv);
         return NORMAL;
     }
     else if (UNLIKELY(PL_op->op_private & OPpMAYBE_LVSUB)) {
@@ -2300,7 +2300,7 @@ PP(pp_rv2av)
               if (flags && !(flags & OPpENTERSUB_INARGS)) {
                 if (gimme != G_LIST)
                     goto croak_cant_return;
-                rpp_replace_1_1(sv);
+                rpp_replace_1_1_NN(sv);
                 return NORMAL;
               }
     }
@@ -2323,7 +2323,7 @@ PP(pp_rv2av)
             SvREFCNT_dec_NN(old_sv);
             return NORMAL;
 #else
-            rpp_popfree_1();
+            rpp_popfree_1_NN();
             return S_pushav(aTHX_ av);
 #endif
         }
@@ -2331,11 +2331,11 @@ PP(pp_rv2av)
         if (gimme == G_SCALAR) {
             const SSize_t maxarg = AvFILL(av) + 1;
             if (PL_op->op_private & OPpTRUEBOOL)
-                rpp_replace_1_1(maxarg ? &PL_sv_yes : &PL_sv_zero);
+                rpp_replace_1_1_NN(maxarg ? &PL_sv_yes : &PL_sv_zero);
             else {
                 dTARGET;
                 TARGi(maxarg, 1);
-                rpp_replace_1_1(targ);
+                rpp_replace_1_1_NN(targ);
             }
         }
     }
@@ -2385,8 +2385,8 @@ S_do_oddball(pTHX_ SV **oddkey, SV **firstkey)
  * For example in ($a,$b) = ($b,$a), assigning the value of the first RHS
  * element ($b) to the first LH element ($a), modifies $a; when the
  * second assignment is done, the second RH element now has the wrong
- * value. So we initially replace the RHS with ($b, mortalcopy($a)).
- * Note that we don't need to make a mortal copy of $b.
+ * value. So we initially replace the RHS with ($b, copy($a)).
+ * Note that we don't need to make a copy of $b.
  *
  * The algorithm below works by, for every RHS element, mark the
  * corresponding LHS target element with SVf_BREAK. Then if the RHS
@@ -2461,7 +2461,14 @@ S_aassign_copy_common(pTHX_ SV **firstlelem, SV **lastlelem,
                 lcount = -1;
                 lelem--; /* no need to unmark this element */
             }
-            else if (!(do_rc1 && SvREFCNT(svl) == 1) && !SvIMMORTAL(svl)) {
+            else if (!(do_rc1 &&
+#ifdef PERL_RC_STACK
+                            SvREFCNT(svl) <= 2
+#else
+                            SvREFCNT(svl) == 1
+#endif
+                      ) && !SvIMMORTAL(svl))
+            {
                 SvFLAGS(svl) |= SVf_BREAK;
                 marked = TRUE;
             }
@@ -2493,6 +2500,11 @@ S_aassign_copy_common(pTHX_ SV **firstlelem, SV **lastlelem,
 
             TAINT_NOT;	/* Each item is independent */
 
+#ifndef PERL_RC_STACK
+            /* The TODO test was eventually commented out. It's now been
+             * revived, but only on PERL_RC_STACK builds. Continue
+             * this hacky workaround otherwise - DAPM Sept 2023 */
+
             /* Dear TODO test in t/op/sort.t, I love you.
                (It's relying on a panic, not a "semi-panic" from newSVsv()
                and then an assertion failure below.)  */
@@ -2500,6 +2512,8 @@ S_aassign_copy_common(pTHX_ SV **firstlelem, SV **lastlelem,
                 Perl_croak(aTHX_ "panic: attempt to copy freed scalar %p",
                            (void*)svr);
             }
+#endif
+
             /* avoid break flag while copying; otherwise COW etc
              * disabled... */
             SvFLAGS(svr) &= ~SVf_BREAK;
@@ -2511,8 +2525,14 @@ S_aassign_copy_common(pTHX_ SV **firstlelem, SV **lastlelem,
                count bump.  (Although I suspect that the SV won't be
                stealable here anyway - DAPM).
                */
+#ifdef PERL_RC_STACK
+            *relem = newSVsv_flags(svr,
+                        SV_GMAGIC|SV_DO_COW_SVSETSV|SV_NOSTEAL);
+            SvREFCNT_dec_NN(svr);
+#else
             *relem = sv_mortalcopy_flags(svr,
                                 SV_GMAGIC|SV_DO_COW_SVSETSV|SV_NOSTEAL);
+#endif
             /* ... but restore afterwards in case it's needed again,
              * e.g. ($a,$b,$c) = (1,$a,$a)
              */
@@ -2536,10 +2556,104 @@ S_aassign_copy_common(pTHX_ SV **firstlelem, SV **lastlelem,
 }
 
 
+/* Helper function for pp_aassign(): after performing something like
+ *
+ *   ($<,$>) = ($>,$<);  # swap real and effective uids
+ *
+ * the assignment to the magic variables just sets various flags in
+ * PL_delaymagic; now we tell the OS to update the uids/gids atomically.
+ */
 
-PP_wrapped(pp_aassign, 0, 2)
+STATIC void
+S_aassign_uid(pTHX)
 {
-    dSP;
+    /* Will be used to set PL_tainting below */
+    Uid_t tmp_uid  = PerlProc_getuid();
+    Uid_t tmp_euid = PerlProc_geteuid();
+    Gid_t tmp_gid  = PerlProc_getgid();
+    Gid_t tmp_egid = PerlProc_getegid();
+
+    /* XXX $> et al currently silently ignore failures */
+    if (PL_delaymagic & DM_UID) {
+#ifdef HAS_SETRESUID
+        PERL_UNUSED_RESULT(
+           setresuid((PL_delaymagic & DM_RUID) ? PL_delaymagic_uid  : (Uid_t)-1,
+                     (PL_delaymagic & DM_EUID) ? PL_delaymagic_euid : (Uid_t)-1,
+                     (Uid_t)-1));
+#elif defined(HAS_SETREUID)
+        PERL_UNUSED_RESULT(
+            setreuid((PL_delaymagic & DM_RUID) ? PL_delaymagic_uid  : (Uid_t)-1,
+                     (PL_delaymagic & DM_EUID) ? PL_delaymagic_euid : (Uid_t)-1));
+#else
+#  ifdef HAS_SETRUID
+        if ((PL_delaymagic & DM_UID) == DM_RUID) {
+            PERL_UNUSED_RESULT(setruid(PL_delaymagic_uid));
+            PL_delaymagic &= ~DM_RUID;
+        }
+#  endif /* HAS_SETRUID */
+#  ifdef HAS_SETEUID
+        if ((PL_delaymagic & DM_UID) == DM_EUID) {
+            PERL_UNUSED_RESULT(seteuid(PL_delaymagic_euid));
+            PL_delaymagic &= ~DM_EUID;
+        }
+#  endif /* HAS_SETEUID */
+        if (PL_delaymagic & DM_UID) {
+            if (PL_delaymagic_uid != PL_delaymagic_euid)
+                DIE(aTHX_ "No setreuid available");
+            PERL_UNUSED_RESULT(PerlProc_setuid(PL_delaymagic_uid));
+        }
+#endif /* HAS_SETRESUID */
+
+        tmp_uid  = PerlProc_getuid();
+        tmp_euid = PerlProc_geteuid();
+    }
+
+    /* XXX $> et al currently silently ignore failures */
+    if (PL_delaymagic & DM_GID) {
+#ifdef HAS_SETRESGID
+        PERL_UNUSED_RESULT(
+            setresgid((PL_delaymagic & DM_RGID) ? PL_delaymagic_gid  : (Gid_t)-1,
+                      (PL_delaymagic & DM_EGID) ? PL_delaymagic_egid : (Gid_t)-1,
+                      (Gid_t)-1));
+#elif defined(HAS_SETREGID)
+        PERL_UNUSED_RESULT(
+            setregid((PL_delaymagic & DM_RGID) ? PL_delaymagic_gid  : (Gid_t)-1,
+                     (PL_delaymagic & DM_EGID) ? PL_delaymagic_egid : (Gid_t)-1));
+#else
+#  ifdef HAS_SETRGID
+        if ((PL_delaymagic & DM_GID) == DM_RGID) {
+            PERL_UNUSED_RESULT(setrgid(PL_delaymagic_gid));
+            PL_delaymagic &= ~DM_RGID;
+        }
+#  endif /* HAS_SETRGID */
+#  ifdef HAS_SETEGID
+        if ((PL_delaymagic & DM_GID) == DM_EGID) {
+            PERL_UNUSED_RESULT(setegid(PL_delaymagic_egid));
+            PL_delaymagic &= ~DM_EGID;
+        }
+#  endif /* HAS_SETEGID */
+        if (PL_delaymagic & DM_GID) {
+            if (PL_delaymagic_gid != PL_delaymagic_egid)
+                DIE(aTHX_ "No setregid available");
+            PERL_UNUSED_RESULT(PerlProc_setgid(PL_delaymagic_gid));
+        }
+#endif /* HAS_SETRESGID */
+
+        tmp_gid  = PerlProc_getgid();
+        tmp_egid = PerlProc_getegid();
+    }
+    TAINTING_set( TAINTING_get | (tmp_uid && (tmp_euid != tmp_uid || tmp_egid != tmp_gid)) );
+#ifdef NO_TAINT_SUPPORT
+    PERL_UNUSED_VAR(tmp_uid);
+    PERL_UNUSED_VAR(tmp_euid);
+    PERL_UNUSED_VAR(tmp_gid);
+    PERL_UNUSED_VAR(tmp_egid);
+#endif
+}
+
+
+PP(pp_aassign)
+{
     SV **lastlelem = PL_stack_sp;
     SV **lastrelem = PL_stack_base + POPMARK;
     SV **firstrelem = PL_stack_base + POPMARK + 1;
@@ -2577,7 +2691,13 @@ PP_wrapped(pp_aassign, 0, 2)
                 /* skip the scan if all scalars have a ref count of 1 */
                 for (lelem = firstlelem; lelem <= lastlelem; lelem++) {
                     SV *sv = *lelem;
-                    if (!sv || SvREFCNT(sv) == 1)
+                    if (!sv ||
+#ifdef PERL_RC_STACK
+                        SvREFCNT(sv) <= 2
+#else
+                        SvREFCNT(sv) == 1
+#endif
+                    )
                         continue;
                     if (SvTYPE(sv) != SVt_PVAV && SvTYPE(sv) != SVt_PVAV)
                         goto do_scan;
@@ -2608,8 +2728,17 @@ PP_wrapped(pp_aassign, 0, 2)
 #endif
 
     gimme = GIMME_V;
+    bool is_list = (gimme == G_LIST);
     relem = firstrelem;
     lelem = firstlelem;
+#ifdef PERL_RC_STACK
+    /* Where we can reset stack to at the end, without needing to free
+     * each element. This is normally all the lelem's, but it can vary for
+     * things like odd number of hash elements, which pushes a
+     * &PL_sv_undef into the 'lvalue' part of the stack.
+     */
+    SV ** first_discard = firstlelem;
+#endif
 
     if (relem > lastrelem)
         goto no_relems;
@@ -2617,14 +2746,14 @@ PP_wrapped(pp_aassign, 0, 2)
     /* first lelem loop while there are still relems */
     while (LIKELY(lelem <= lastlelem)) {
         bool alias = FALSE;
-        SV *lsv = *lelem++;
+        SV *lsv = *lelem;
 
         TAINT_NOT; /* Each item stands on its own, taintwise. */
 
         assert(relem <= lastrelem);
         if (UNLIKELY(!lsv)) {
             alias = TRUE;
-            lsv = *lelem++;
+            lsv = *++lelem;
             ASSUME(SvTYPE(lsv) == SVt_PVAV);
         }
 
@@ -2632,7 +2761,6 @@ PP_wrapped(pp_aassign, 0, 2)
         case SVt_PVAV: {
             SV **svp;
             SSize_t i;
-            SSize_t tmps_base;
             SSize_t nelems = lastrelem - relem + 1;
             AV *ary = MUTABLE_AV(lsv);
 
@@ -2685,23 +2813,40 @@ PP_wrapped(pp_aassign, 0, 2)
              * @a = ($a[0]) case, but the current implementation uses the
              * same algorithm regardless, so ignores that flag. (It *is*
              * used in the hash branch below, however).
-            */
+             *
+             *
+             * The net effect of this next block of code (apart from
+             * optimisations and aliasing) is to make a copy of each
+             * *relem and store the new SV both in the array and back on
+             * the *relem slot of the stack, overwriting the original.
+             * This new list of SVs will later be either returned
+             * (G_LIST), or popped.
+             *
+             * Note that under PERL_RC_STACK builds most of this
+             * complexity can be thrown away: things can be kept alive on
+             * the argument stack without involving the temps stack. In
+             * particular, the args are kept on the argument stack and
+             * processed from there, rather than their pointers being
+             * copied to the temps stack and then processed from there.
+             */
 
+#ifndef PERL_RC_STACK
             /* Reserve slots for ary, plus the elems we're about to copy,
              * then protect ary and temporarily void the remaining slots
              * with &PL_sv_undef */
             EXTEND_MORTAL(nelems + 1);
             PL_tmps_stack[++PL_tmps_ix] = SvREFCNT_inc_simple_NN(ary);
-            tmps_base = PL_tmps_ix + 1;
+            SSize_t tmps_base = PL_tmps_ix + 1;
             for (i = 0; i < nelems; i++)
                 PL_tmps_stack[tmps_base + i] = &PL_sv_undef;
             PL_tmps_ix += nelems;
+#endif
 
             /* Make a copy of each RHS elem and save on the tmps_stack
              * (or pass through where we can optimise away the copy) */
 
             if (UNLIKELY(alias)) {
-                U32 lval = (gimme == G_LIST)
+                U32 lval = (is_list)
                                 ? (PL_op->op_flags & OPf_MOD || LVRET) : 0;
                 for (svp = relem; svp <= lastrelem; svp++) {
                     SV *rsv = *svp;
@@ -2713,12 +2858,19 @@ PP_wrapped(pp_aassign, 0, 2)
                    /* diag_listed_as: Assigned value is not %s reference */
                         DIE(aTHX_
                            "Assigned value is not a SCALAR reference");
-                    if (lval)
-                        *svp = rsv = sv_mortalcopy(rsv);
+                    if (lval) {
+                        /* XXX the 'mortal' part here is probably
+                         * unnecessary under PERL_RC_STACK.
+                         */
+                        rsv = sv_mortalcopy(rsv);
+                        rpp_replace_at_NN(svp, rsv);
+                    }
                     /* XXX else check for weak refs?  */
+#ifndef PERL_RC_STACK
                     rsv = SvREFCNT_inc_NN(SvRV(rsv));
                     assert(tmps_base <= PL_tmps_max);
                     PL_tmps_stack[tmps_base++] = rsv;
+#endif
                 }
             }
             else {
@@ -2727,7 +2879,9 @@ PP_wrapped(pp_aassign, 0, 2)
 
                     if (rpp_is_lone(rsv) && !SvGMAGICAL(rsv)) {
                         /* can skip the copy */
+#ifndef PERL_RC_STACK
                         SvREFCNT_inc_simple_void_NN(rsv);
+#endif
                         SvTEMP_off(rsv);
                     }
                     else {
@@ -2736,45 +2890,91 @@ PP_wrapped(pp_aassign, 0, 2)
                          * SV_NOSTEAL */
                         nsv = newSVsv_flags(rsv,
                                 (SV_DO_COW_SVSETSV|SV_NOSTEAL|SV_GMAGIC));
-                        rsv = *svp = nsv;
+#ifdef PERL_RC_STACK
+                        rpp_replace_at_norc_NN(svp, nsv);
+#else
+                        /* using rpp_replace_at_norc() would mortalise,
+                         * but we're manually adding nsv to the tmps stack
+                         * below already */
+                        rpp_replace_at_NN(svp, nsv);
+#endif
+
+                        rsv = nsv;
                     }
 
+#ifndef PERL_RC_STACK
                     assert(tmps_base <= PL_tmps_max);
                     PL_tmps_stack[tmps_base++] = rsv;
+#endif
                 }
             }
 
             if (SvRMAGICAL(ary) || AvFILLp(ary) >= 0) /* may be non-empty */
                 av_clear(ary);
 
-            /* store in the array, the SVs that are in the tmps stack */
+            /* Store in the array, the argument copies that are in the
+             * tmps stack (or for PERL_RC_STACK, on the args stack) */
 
+#ifndef PERL_RC_STACK
             tmps_base -= nelems;
-
-            if (SvMAGICAL(ary) || SvREADONLY(ary) || !AvREAL(ary)) {
+#endif
+            if (alias || SvMAGICAL(ary) || SvREADONLY(ary) || !AvREAL(ary)) {
                 /* for arrays we can't cheat with, use the official API */
                 av_extend(ary, nelems - 1);
                 for (i = 0; i < nelems; i++) {
-                    SV **svp = &(PL_tmps_stack[tmps_base + i]);
+                    SV **svp =
+#ifdef PERL_RC_STACK
+                        &relem[i];
+#else
+                        &(PL_tmps_stack[tmps_base + i]);
+#endif
+
                     SV *rsv = *svp;
+#ifdef PERL_RC_STACK
+                    if (alias) {
+                        assert(SvROK(rsv));
+                        rsv = SvRV(rsv);
+                    }
+#endif
+
                     /* A tied store won't take ownership of rsv, so keep
                      * the 1 refcnt on the tmps stack; otherwise disarm
                      * the tmps stack entry */
                     if (av_store(ary, i, rsv))
+#ifdef PERL_RC_STACK
+                        SvREFCNT_inc_simple_NN(rsv);
+#else
                         *svp = &PL_sv_undef;
+#endif
                     /* av_store() may have added set magic to rsv */;
                     SvSETMAGIC(rsv);
                 }
+#ifndef PERL_RC_STACK
                 /* disarm ary refcount: see comments below about leak */
                 PL_tmps_stack[tmps_base - 1] = &PL_sv_undef;
+#endif
             }
             else {
-                /* directly access/set the guts of the AV */
+                /* Simple array: directly access/set the guts of the AV */
                 SSize_t fill = nelems - 1;
                 if (fill > AvMAX(ary))
                     av_extend_guts(ary, fill, &AvMAX(ary), &AvALLOC(ary),
                                     &AvARRAY(ary));
                 AvFILLp(ary) = fill;
+#ifdef PERL_RC_STACK
+                Copy(relem, AvARRAY(ary), nelems, SV*);
+                /* ownership of one ref count of each elem passed to
+                 * array. Quietly remove old SVs from stack, or if need
+                 * to keep the list on the stack too, bump the count */
+                if (UNLIKELY(is_list))
+                    for (i = 0; i < nelems; i++)
+                        SvREFCNT_inc_void_NN(relem[i]);
+                else {
+                    assert(first_discard == relem + nelems);
+                    Zero(relem, nelems, SV*);
+                    first_discard = relem;
+                }
+#else
                 Copy(&(PL_tmps_stack[tmps_base]), AvARRAY(ary), nelems, SV*);
                 /* Quietly remove all the SVs from the tmps stack slots,
                  * since ary has now taken ownership of the refcnt.
@@ -2786,13 +2986,19 @@ PP_wrapped(pp_aassign, 0, 2)
                          PL_tmps_ix - (tmps_base + nelems) + 1,
                          SV*);
                 PL_tmps_ix -= (nelems + 1);
+#endif
             }
 
             if (UNLIKELY(PL_delaymagic & DM_ARRAY_ISA))
                 /* its assumed @ISA set magic can't die and leak ary */
                 SvSETMAGIC(MUTABLE_SV(ary));
-            SvREFCNT_dec_NN(ary);
 
+#ifdef PERL_RC_STACK
+            assert(*lelem == (SV*)ary);
+            *lelem = NULL;
+#endif
+            lelem++;
+            SvREFCNT_dec_NN(ary);
             relem = lastrelem + 1;
             goto no_relems;
         }
@@ -2800,15 +3006,28 @@ PP_wrapped(pp_aassign, 0, 2)
         case SVt_PVHV: {				/* normal hash */
 
             SV **svp;
-            bool dirty_tmps;
             SSize_t i;
-            SSize_t tmps_base;
             SSize_t nelems = lastrelem - relem + 1;
             HV *hash = MUTABLE_HV(lsv);
 
             if (UNLIKELY(nelems & 1)) {
                 do_oddball(lastrelem, relem);
                 /* we have firstlelem to reuse, it's not needed any more */
+#ifdef PERL_RC_STACK
+                if (lelem == lastrelem + 1) {
+                    /* the lelem slot we want to use is the 
+                     * one keeping hash alive. Mortalise the hash
+                     * so it doesn't leak */
+                    assert(lastrelem[1] == (SV*)hash);
+                    sv_2mortal((SV*)hash);
+                }
+                else {
+                    /* safe to repurpose old lelem slot */
+                    assert(!lastrelem[1] || SvIMMORTAL(lastrelem[1]));
+                }
+                first_discard++;
+                assert(first_discard = lastrelem + 2);
+#endif
                 *++lastrelem = &PL_sv_undef;
                 nelems++;
             }
@@ -2820,7 +3039,8 @@ PP_wrapped(pp_aassign, 0, 2)
              * copied (except for the SvTEMP optimisation), since they
              * need to be stored in the hash; while keys are only
              * processed where they might get prematurely freed or
-             * whatever. */
+             * whatever. The same comments about simplifying under
+             * PERL_RC_STACK apply here too */
 
             /* tmps stack slots:
              * * reserve a slot for the hash keepalive;
@@ -2829,16 +3049,19 @@ PP_wrapped(pp_aassign, 0, 2)
              *   later;
              * then protect hash and temporarily void the remaining
              * value slots with &PL_sv_undef */
+#ifndef PERL_RC_STACK
             EXTEND_MORTAL(nelems + 1);
-
+#endif
              /* convert to number of key/value pairs */
              nelems >>= 1;
 
+#ifndef PERL_RC_STACK
             PL_tmps_stack[++PL_tmps_ix] = SvREFCNT_inc_simple_NN(hash);
-            tmps_base = PL_tmps_ix + 1;
+            SSize_t tmps_base = PL_tmps_ix + 1;
             for (i = 0; i < nelems; i++)
                 PL_tmps_stack[tmps_base + i] = &PL_sv_undef;
             PL_tmps_ix += nelems;
+#endif
 
             /* Make a copy of each RHS hash value and save on the tmps_stack
              * (or pass through where we can optimise away the copy) */
@@ -2848,7 +3071,9 @@ PP_wrapped(pp_aassign, 0, 2)
 
                 if (rpp_is_lone(rsv) && !SvGMAGICAL(rsv)) {
                     /* can skip the copy */
+#ifndef PERL_RC_STACK
                     SvREFCNT_inc_simple_void_NN(rsv);
+#endif
                     SvTEMP_off(rsv);
                 }
                 else {
@@ -2857,26 +3082,43 @@ PP_wrapped(pp_aassign, 0, 2)
                      * SV_NOSTEAL */
                     nsv = newSVsv_flags(rsv,
                             (SV_DO_COW_SVSETSV|SV_NOSTEAL|SV_GMAGIC));
-                    rsv = *svp = nsv;
+#ifdef PERL_RC_STACK
+                    rpp_replace_at_norc_NN(svp, nsv);
+#else
+                    /* using rpp_replace_at_norc() would mortalise,
+                     * but we're manually adding nsv to the tmps stack
+                     * below already */
+                    rpp_replace_at_NN(svp, nsv);
+#endif
+                    rsv = nsv;
                 }
 
+#ifndef PERL_RC_STACK
                 assert(tmps_base <= PL_tmps_max);
                 PL_tmps_stack[tmps_base++] = rsv;
+#endif
             }
+
+#ifndef PERL_RC_STACK
             tmps_base -= nelems;
+#endif
 
 
             /* possibly protect keys */
 
-            if (UNLIKELY(gimme == G_LIST)) {
+            if (UNLIKELY(is_list)) {
                 /* handle e.g.
                 *     @a = ((%h = ($$r, 1)), $r = "x");
                 *     $_++ for %h = (1,2,3,4);
                 */
+#ifndef PERL_RC_STACK
                 EXTEND_MORTAL(nelems);
-                for (svp = relem; svp <= lastrelem; svp += 2)
-                    *svp = sv_mortalcopy_flags(*svp,
-                                SV_GMAGIC|SV_DO_COW_SVSETSV|SV_NOSTEAL);
+#endif
+                for (svp = relem; svp <= lastrelem; svp += 2) {
+                    rpp_replace_at_norc_NN(svp,
+                        newSVsv_flags(*svp,
+                                SV_GMAGIC|SV_DO_COW_SVSETSV|SV_NOSTEAL));
+                }
             }
             else if (PL_op->op_private & OPpASSIGN_COMMON_AGG) {
                 /* for possible commonality, e.g.
@@ -2890,14 +3132,29 @@ PP_wrapped(pp_aassign, 0, 2)
                  * cases, not just under OPpASSIGN_COMMON_AGG, but in
                  * practice, !OPpASSIGN_COMMON_AGG implies only
                  * constants or padtmps on the RHS.
+                 *
+                 * For PERL_RC_STACK, no danger of premature frees, so
+                 * just handle the magic.
                  */
+#ifdef PERL_RC_STACK
+                for (svp = relem; svp <= lastrelem; svp += 2) {
+                    SV *rsv = *svp;
+                    if (UNLIKELY(SvGMAGICAL(rsv)))
+                        /* XXX does this actually need to be copied, or
+                         * could we just call the get magic??? */
+                        rpp_replace_at_norc_NN(svp,
+                            newSVsv_flags(rsv,
+                                SV_GMAGIC|SV_DO_COW_SVSETSV|SV_NOSTEAL));
+                }
+#else
                 EXTEND_MORTAL(nelems);
                 for (svp = relem; svp <= lastrelem; svp += 2) {
                     SV *rsv = *svp;
                     if (UNLIKELY(SvGMAGICAL(rsv))) {
                         SSize_t n;
-                        *svp = sv_mortalcopy_flags(*svp,
-                                SV_GMAGIC|SV_DO_COW_SVSETSV|SV_NOSTEAL);
+                        rpp_replace_at_norc_NN(svp,
+                            newSVsv_flags(rsv,
+                                SV_GMAGIC|SV_DO_COW_SVSETSV|SV_NOSTEAL));
                         /* allow other branch to continue pushing
                          * onto tmps stack without checking each time */
                         n = (lastrelem - relem) >> 1;
@@ -2907,6 +3164,7 @@ PP_wrapped(pp_aassign, 0, 2)
                         PL_tmps_stack[++PL_tmps_ix] =
                                     SvREFCNT_inc_simple_NN(rsv);
                 }
+#endif
             }
 
             if (SvRMAGICAL(hash) || HvUSEDKEYS(hash))
@@ -2919,9 +3177,10 @@ PP_wrapped(pp_aassign, 0, 2)
 
             /* now assign the keys and values to the hash */
 
-            dirty_tmps = FALSE;
-
-            if (UNLIKELY(gimme == G_LIST)) {
+#ifndef PERL_RC_STACK
+            bool dirty_tmps = FALSE;
+#endif
+            if (UNLIKELY(is_list)) {
                 /* @a = (%h = (...)) etc */
                 SV **svp;
                 SV **topelem = relem;
@@ -2935,19 +3194,24 @@ PP_wrapped(pp_aassign, 0, 2)
                          * stack location if we encountered dups earlier,
                          * The values will be updated later
                          */
-                        *topelem = key;
+                        rpp_replace_at_NN(topelem, key);
                         topelem += 2;
                     }
                     /* A tied store won't take ownership of val, so keep
                      * the 1 refcnt on the tmps stack; otherwise disarm
                      * the tmps stack entry */
                     if (hv_store_ent(hash, key, val, 0))
+#ifdef PERL_RC_STACK
+                        SvREFCNT_inc_simple_NN(val);
+#else
                         PL_tmps_stack[tmps_base + i] = &PL_sv_undef;
                     else
                         dirty_tmps = TRUE;
+#endif
                     /* hv_store_ent() may have added set magic to val */;
                     SvSETMAGIC(val);
                 }
+
                 if (topelem < svp) {
                     /* at this point we have removed the duplicate key/value
                      * pairs from the stack, but the remaining values may be
@@ -2959,7 +3223,8 @@ PP_wrapped(pp_aassign, 0, 2)
                     while (relem < lastrelem) {
                         HE *he;
                         he = hv_fetch_ent(hash, *relem++, 0, 0);
-                        *relem++ = (he ? HeVAL(he) : &PL_sv_undef);
+                        rpp_replace_at_NN(relem++,
+                            (he ? HeVAL(he) : &PL_sv_undef));
                     }
                 }
             }
@@ -2968,15 +3233,46 @@ PP_wrapped(pp_aassign, 0, 2)
                 for (i = 0, svp = relem; svp <= lastrelem; i++, svp++) {
                     SV *key = *svp++;
                     SV *val = *svp;
+#ifdef PERL_RC_STACK
+                    {
+                        HE *stored = hv_store_ent(hash, key, val, 0);
+                        /* hv_store_ent() may have added set magic to val */;
+                        SvSETMAGIC(val);
+                        /* remove key and val from stack */
+                        *svp = NULL;
+                        if (!stored)
+                            SvREFCNT_dec_NN(val);
+                        svp[-1] = NULL;
+                        SvREFCNT_dec_NN(key);
+                    }
+#else
                     if (hv_store_ent(hash, key, val, 0))
                         PL_tmps_stack[tmps_base + i] = &PL_sv_undef;
                     else
                         dirty_tmps = TRUE;
                     /* hv_store_ent() may have added set magic to val */;
                     SvSETMAGIC(val);
+#endif
                 }
+#ifdef PERL_RC_STACK
+                /* now that all the key and val slots on the stack have
+                 * been discarded, we can skip freeing them on return */
+                assert(first_discard == lastrelem + 1);
+                first_discard = relem;
+#endif
             }
 
+#ifdef PERL_RC_STACK
+            /* Disarm the ref-counted pointer on the stack. This will
+             * usually point to the hash, except for the case of an odd
+             * number of elems where the hash was mortalised and its slot
+             * on the stack was made part of the relems with the slot's
+             * value overwritten with &PL_sv_undef. */
+            if (*lelem == (SV*)hash) {
+                *lelem = NULL;
+                SvREFCNT_dec_NN(hash);
+            }
+#else
             if (dirty_tmps) {
                 /* there are still some 'live' recounts on the tmps stack
                  * - usually caused by storing into a tied hash. So let
@@ -2999,15 +3295,14 @@ PP_wrapped(pp_aassign, 0, 2)
             }
 
             SvREFCNT_dec_NN(hash);
-
+#endif
+            lelem++;
             relem = lastrelem + 1;
             goto no_relems;
         }
 
         default:
             if (!SvIMMORTAL(lsv)) {
-                SV *ref;
-
                 if (UNLIKELY(
                     rpp_is_lone(lsv) && !SvSMAGICAL(lsv) &&
                   (!isGV_with_GP(lsv) || SvFAKE(lsv)) && ckWARN(WARN_MISC)
@@ -3017,11 +3312,13 @@ PP_wrapped(pp_aassign, 0, 2)
                       "Useless assignment to a temporary"
                     );
 
+#ifndef PERL_RC_STACK
                 /* avoid freeing $$lsv if it might be needed for further
                  * elements, e.g. ($ref, $foo) = (1, $$ref) */
+                SV *ref;
                 if (   SvROK(lsv)
                     && ( ((ref = SvRV(lsv)), SvREFCNT(ref)) == 1)
-                    && lelem <= lastlelem
+                    && lelem < lastlelem
                 ) {
                     SSize_t ix;
                     SvREFCNT_inc_simple_void_NN(ref);
@@ -3030,14 +3327,21 @@ PP_wrapped(pp_aassign, 0, 2)
                     if (UNLIKELY(ix >= PL_tmps_max))
                         /* speculatively grow enough to cover other
                          * possible refs */
-                         (void)tmps_grow_p(ix + (lastlelem - lelem));
+                         (void)tmps_grow_p(ix + (lastlelem - lelem + 1));
                     PL_tmps_stack[ix] = ref;
                 }
+#endif
 
                 sv_setsv(lsv, *relem);
-                *relem = lsv;
                 SvSETMAGIC(lsv);
+                if (UNLIKELY(is_list))
+                    rpp_replace_at_NN(relem, lsv);
+#ifdef PERL_RC_STACK
+                *lelem = NULL;
+                SvREFCNT_dec_NN(lsv);
+#endif
             }
+            lelem++;
             if (++relem > lastrelem)
                 goto no_relems;
             break;
@@ -3049,12 +3353,12 @@ PP_wrapped(pp_aassign, 0, 2)
 
     /* simplified lelem loop for when there are no relems left */
     while (LIKELY(lelem <= lastlelem)) {
-        SV *lsv = *lelem++;
+        SV *lsv = *lelem;
 
         TAINT_NOT; /* Each item stands on its own, taintwise. */
 
         if (UNLIKELY(!lsv)) {
-            lsv = *lelem++;
+            lsv = *++lelem;
             ASSUME(SvTYPE(lsv) == SVt_PVAV);
         }
 
@@ -3077,115 +3381,82 @@ PP_wrapped(pp_aassign, 0, 2)
                 sv_set_undef(lsv);
                 SvSETMAGIC(lsv);
             }
-            *relem++ = lsv;
+            if (UNLIKELY(is_list)) {
+                /* this usually grows the list of relems to be returned
+                 * into the stack space holding lelems (unless
+                 * there was previously a hash with dup elements) */
+#ifdef PERL_RC_STACK
+                assert(relem <= first_discard);
+                assert(relem <= lelem);
+                if (relem == first_discard)
+                    first_discard++;
+#endif
+                rpp_replace_at(relem++, lsv);
+#ifdef PERL_RC_STACK
+                if (relem == lelem + 1) {
+                    lelem++;
+                    /* skip the NULLing of the slot */
+                    continue;
+                }
+#endif
+            }
             break;
         } /* switch */
+#ifdef PERL_RC_STACK
+        *lelem = NULL;
+        SvREFCNT_dec_NN(lsv);
+#endif
+        lelem++;
     } /* while */
 
     TAINT_NOT; /* result of list assign isn't tainted */
 
-    if (UNLIKELY(PL_delaymagic & ~DM_DELAY)) {
-        /* Will be used to set PL_tainting below */
-        Uid_t tmp_uid  = PerlProc_getuid();
-        Uid_t tmp_euid = PerlProc_geteuid();
-        Gid_t tmp_gid  = PerlProc_getgid();
-        Gid_t tmp_egid = PerlProc_getegid();
-
-        /* XXX $> et al currently silently ignore failures */
-        if (PL_delaymagic & DM_UID) {
-#ifdef HAS_SETRESUID
-            PERL_UNUSED_RESULT(
-               setresuid((PL_delaymagic & DM_RUID) ? PL_delaymagic_uid  : (Uid_t)-1,
-                         (PL_delaymagic & DM_EUID) ? PL_delaymagic_euid : (Uid_t)-1,
-                         (Uid_t)-1));
-#elif defined(HAS_SETREUID)
-            PERL_UNUSED_RESULT(
-                setreuid((PL_delaymagic & DM_RUID) ? PL_delaymagic_uid  : (Uid_t)-1,
-                         (PL_delaymagic & DM_EUID) ? PL_delaymagic_euid : (Uid_t)-1));
-#else
-#    ifdef HAS_SETRUID
-            if ((PL_delaymagic & DM_UID) == DM_RUID) {
-                PERL_UNUSED_RESULT(setruid(PL_delaymagic_uid));
-                PL_delaymagic &= ~DM_RUID;
-            }
-#    endif /* HAS_SETRUID */
-#    ifdef HAS_SETEUID
-            if ((PL_delaymagic & DM_UID) == DM_EUID) {
-                PERL_UNUSED_RESULT(seteuid(PL_delaymagic_euid));
-                PL_delaymagic &= ~DM_EUID;
-            }
-#    endif /* HAS_SETEUID */
-            if (PL_delaymagic & DM_UID) {
-                if (PL_delaymagic_uid != PL_delaymagic_euid)
-                    DIE(aTHX_ "No setreuid available");
-                PERL_UNUSED_RESULT(PerlProc_setuid(PL_delaymagic_uid));
-            }
-#endif /* HAS_SETRESUID */
-
-            tmp_uid  = PerlProc_getuid();
-            tmp_euid = PerlProc_geteuid();
-        }
-        /* XXX $> et al currently silently ignore failures */
-        if (PL_delaymagic & DM_GID) {
-#ifdef HAS_SETRESGID
-            PERL_UNUSED_RESULT(
-                setresgid((PL_delaymagic & DM_RGID) ? PL_delaymagic_gid  : (Gid_t)-1,
-                          (PL_delaymagic & DM_EGID) ? PL_delaymagic_egid : (Gid_t)-1,
-                          (Gid_t)-1));
-#elif defined(HAS_SETREGID)
-            PERL_UNUSED_RESULT(
-                setregid((PL_delaymagic & DM_RGID) ? PL_delaymagic_gid  : (Gid_t)-1,
-                         (PL_delaymagic & DM_EGID) ? PL_delaymagic_egid : (Gid_t)-1));
-#else
-#    ifdef HAS_SETRGID
-            if ((PL_delaymagic & DM_GID) == DM_RGID) {
-                PERL_UNUSED_RESULT(setrgid(PL_delaymagic_gid));
-                PL_delaymagic &= ~DM_RGID;
-            }
-#    endif /* HAS_SETRGID */
-#    ifdef HAS_SETEGID
-            if ((PL_delaymagic & DM_GID) == DM_EGID) {
-                PERL_UNUSED_RESULT(setegid(PL_delaymagic_egid));
-                PL_delaymagic &= ~DM_EGID;
-            }
-#    endif /* HAS_SETEGID */
-            if (PL_delaymagic & DM_GID) {
-                if (PL_delaymagic_gid != PL_delaymagic_egid)
-                    DIE(aTHX_ "No setregid available");
-                PERL_UNUSED_RESULT(PerlProc_setgid(PL_delaymagic_gid));
-            }
-#endif /* HAS_SETRESGID */
-
-            tmp_gid  = PerlProc_getgid();
-            tmp_egid = PerlProc_getegid();
-        }
-        TAINTING_set( TAINTING_get | (tmp_uid && (tmp_euid != tmp_uid || tmp_egid != tmp_gid)) );
-#ifdef NO_TAINT_SUPPORT
-        PERL_UNUSED_VAR(tmp_uid);
-        PERL_UNUSED_VAR(tmp_euid);
-        PERL_UNUSED_VAR(tmp_gid);
-        PERL_UNUSED_VAR(tmp_egid);
-#endif
-    }
+    if (UNLIKELY(PL_delaymagic & ~DM_DELAY))
+        /* update system UIDs and/or GIDs */
+        S_aassign_uid(aTHX);
     PL_delaymagic = old_delaymagic;
 
-    if (gimme == G_VOID)
-        SP = firstrelem - 1;
-    else if (gimme == G_SCALAR) {
-        SP = firstrelem;
-        EXTEND(SP,1);
+#ifdef PERL_RC_STACK
+    /* On ref-counted builds, the code above should have stored
+     * NULL in each lelem field and already freed each lelem. Thus
+     * the popfree_to() can start at a lower point.
+     * Under some circumstances, &PL_sv_undef might be stored rather than
+     * NULL, but this also doesn't need its refcount decrementing.
+     * Assert that this is true.
+     * Note that duplicate hash keys in list context can cause
+     * lastrelem and relem to be lower than at the start;
+     * while an odd number of hash elements can cause lastrelem to
+     * have a value one higher than at the start */
+#  ifdef DEBUGGING
+    for (SV **svp = first_discard; svp <= PL_stack_sp; svp++)
+        assert(!*svp || SvIMMORTAL(*svp));
+#  endif
+    PL_stack_sp = first_discard - 1;
+
+    /* now pop all the R elements too */
+    rpp_popfree_to_NN((is_list ? relem : firstrelem) - 1);
+
+#else
+    /* pop all L and R elements apart from any being returned */
+    rpp_popfree_to_NN((is_list ? relem : firstrelem) - 1);
+#endif
+
+    if (gimme == G_SCALAR) {
+        rpp_extend(1);
+        SV *sv;
         if (PL_op->op_private & OPpASSIGN_TRUEBOOL)
-            SETs((firstlelem - firstrelem) ? &PL_sv_yes : &PL_sv_zero);
+             sv = (firstlelem - firstrelem) ? &PL_sv_yes : &PL_sv_zero;
         else {
             dTARGET;
-            SETi(firstlelem - firstrelem);
+            TARGi(firstlelem - firstrelem, 1);
+            sv = targ;
         }
+        rpp_push_1(sv);
     }
-    else
-        SP = relem - 1;
 
-    RETURN;
+    return NORMAL;
 }
+
 
 PP(pp_qr)
 {

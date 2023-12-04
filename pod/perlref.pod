@@ -865,6 +865,16 @@ for obfuscated code:
     my $type = ref $thingy;
     ($type ? $type eq 'ARRAY' ? \@foo : \$bar : $baz) = $thingy;
 
+A reference assignment in list context returns a list of references to
+each left-hand value. So for example
+
+    @b = ((\$l1, \$l2, \(@a)) = (\$r1, \$r2, $\r3, \$4));
+
+is equivalent to
+
+    (\$l1, \$l2, \(@a)) = (\$r1, \$r2, $\r3, \$4);
+    @b = (\$l1, \$l2, \$a[0], \$a[1]);
+
 The C<foreach> loop can also take a reference constructor for its loop
 variable, though the syntax is limited to one of the following, with an
 optional C<my>, C<state>, or C<our> after the backslash:
