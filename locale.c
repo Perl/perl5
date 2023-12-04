@@ -6048,6 +6048,14 @@ S_populate_hash_from_localeconv(pTHX_ HV * hv,
 #  ifndef LOCALECONV_NEEDS_CRITICAL_SECTION
 
                 if (calculate_utf8ness_here) {
+                    DEBUG_U(PerlIO_printf( Perl_debug_log,
+                            "name=%s, value=%s=%s, locale=%s\n",
+                            category_strings->name,
+                            value,
+                            get_displayable_string(value,
+                                                   value + strlen(value),
+                                                   false),
+                            locale));
                     utf8ness =
                       (   UTF8NESS_YES
                        == get_locale_string_utf8ness_i(value,
