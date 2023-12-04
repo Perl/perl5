@@ -6299,6 +6299,12 @@ S_my_langinfo_i(pTHX_
             break;
         }
 
+        /* If this happens to match our cached value */
+        if (PL_in_utf8_CTYPE_locale && strEQ(locale, PL_ctype_name)) {
+            retval = "UTF-8";
+            break;
+        }
+
 #      ifdef WIN32
 #        ifndef WIN32_USE_FAKE_OLD_MINGW_LOCALES
 
