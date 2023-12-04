@@ -1188,7 +1188,6 @@ endif
 
 ..\config.sh : $(CFGSH_TMPL) config_sh.PL FindExt.pm $(HAVEMINIPERL)
 	$(MINIPERL) -I..\lib config_sh.PL -o ..\config.sh $(CFG_VARS) $(CFGSH_TMPL)
-	$(MINIPERL) -I..\lib set_depend_modtime.pl $@ $^
 
 # This target is for when changes to the main config.sh happen.
 # Edit config.gc, then make perl using GCC in a minimal configuration (i.e.
