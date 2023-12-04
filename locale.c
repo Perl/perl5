@@ -5486,8 +5486,6 @@ S_populate_hash_from_localeconv(pTHX_ HV * hv,
                                       const lconv_offset_t * integers[2])
 {
     PERL_ARGS_ASSERT_POPULATE_HASH_FROM_LOCALECONV;
-    PERL_UNUSED_ARG(which_mask);    /* Some configurations don't use this;
-                                       complicated to figure out which */
 
     /* Run localeconv() and copy some or all of its results to the input 'hv'
      * hash.  Most localeconv() implementations return the values in a global
