@@ -5018,6 +5018,18 @@ be dealt with immediately.
 #  define LOCALECONV_IS_THREAD_SAFE
 #endif
 
+/* When multiple threads can be going at once, we need a critical section
+ * around doing the localeconv() and saving its return, unless localeconv() is
+ * thread-safe, and we are using it in a thread-safe manner, which we are only
+ * doing if safe threads are available and we don't have a broken localeconv()
+ * */
+#if  defined(USE_THREADS)                               \
+ && (   ! defined(LOCALECONV_IS_THREAD_SAFE)            \
+     || ! defined(USE_THREAD_SAFE_LOCALE)               \
+     ||   defined(TS_W32_BROKEN_LOCALECONV))
+#  define LOCALECONV_NEEDS_CRITICAL_SECTION
+#endif
+
 HV *
 Perl_localeconv(pTHX)
 {
@@ -5409,20 +5421,15 @@ S_my_localeconv(pTHX_ const int item)
                                     strings, integers);
     }
 
-    /* Here, the hash has been completely populated.
-     *
-     * Now go through all the items and:
-     *     For string items, see if they should be marked as UTF-8 or not.
-     *     This would have been more convenient and faster to do while
-     *     populating the hash in the first place, but that operation has to be
-     *     done within a critical section, keeping other threads from
-     *     executing, so only the minimal amount of work necessary is done at
-     *     that time.
-     * XXX On unthreaded perls, this code could be #ifdef'd out, and the
-     * corrections determined at hash population time, at an extra maintenance
-     * cost which khw doesn't think is worth it
-     */
+    /* Here, the hash has been completely populated. */
 
+#  ifdef LOCALECONV_NEEDS_CRITICAL_SECTION
+
+    /* When the hash was populated during a critical section, the determination
+     * of whether or not a string element should be marked as UTF-8 was
+     * deferred, so as to minimize the amount of time in the critical section.
+     * But now we have the hash specific to this thread, and can do the
+     * adjusting without worrying about delaying other threads. */
     for (unsigned int i = 0; i < 2; i++) {  /* Try both types of strings */
 
         /* The return from this function is already adjusted */
@@ -5451,6 +5458,8 @@ S_my_localeconv(pTHX_ const int item)
             }
         }
     }
+
+#  endif
 
     return hv;
 
@@ -5786,18 +5795,55 @@ S_populate_hash_from_localeconv(pTHX_ HV * hv,
 
         /* Point to the string field list for the given category ... */
         const lconv_offset_t * category_strings = strings[i];
+
+        /* The string fields returned by localeconv() are stored as SVs in the
+         * hash.  Their utf8ness needs to be calculated at some point, and the
+         * SV flagged accordingly.  It is easier to do that now as we go
+         * through them, but strongly countering this is the need to minimize
+         * the length of time spent in a critical section with other threads
+         * locked out.  Therefore, when this is being executed in a critical
+         * section, the strings are stored as-is, and the utf8ness calculation
+         * is done by our caller, outside the critical section, in an extra
+         * pass through the hash.  But when this code is not being executed in
+         * a critical section, that extra pass would be extra work, so the
+         * calculation is done here.  We have #defined a symbol that indicates
+         * whether or not this is being done in a critical section.  But there
+         * is a complication.  When this is being called with just a single
+         * string to populate the hash with, there may be extra adjustments
+         * needed, and the ultimate caller is expecting to do all adjustments,
+         * so the adjustment is deferred in this case even if there is no
+         * critical section.  (This case is indicated by element [1] being a
+         * NULL marker, hence having only one real element.) */
+#  ifndef LOCALECONV_NEEDS_CRITICAL_SECTION
+        const bool calculate_utf8ness_here = category_strings[1].name;
+#  endif
+        bool utf8ness = false;
+
+        /* For each string field */
         while (category_strings->name) {
 
             /* We have set things up so that we know where in the returned
              * structure, when viewed as a string, the corresponding value is.
              * */
-            const char *value = *((const char **)(  lcbuf_as_string
-                                                  + category_strings->offset));
+            char *value = *((char **)(  lcbuf_as_string
+                                      + category_strings->offset));
             if (value) {    /* Copy to the hash */
+
+#  ifndef LOCALECONV_NEEDS_CRITICAL_SECTION
+
+                if (calculate_utf8ness_here) {
+                    utf8ness =
+                      (   UTF8NESS_YES
+                       == get_locale_string_utf8ness_i(value,
+                                                      LOCALE_UTF8NESS_UNKNOWN,
+                                                      locale,
+                                                      LC_ALL_INDEX_ /* OOB */));
+                }
+#  endif
                 (void) hv_store(hv,
                                 category_strings->name,
                                 strlen(category_strings->name),
-                                newSVpv(value, strlen(value)),
+                                newSVpvn_utf8(value, strlen(value), utf8ness),
                                 0);
             }
 
