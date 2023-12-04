@@ -5412,18 +5412,12 @@ S_my_localeconv(pTHX_ const int item)
     /* Here, the hash has been completely populated.
      *
      * Now go through all the items and:
-     *  a) For string items, see if they should be marked as UTF-8 or not.
+     *     For string items, see if they should be marked as UTF-8 or not.
      *     This would have been more convenient and faster to do while
      *     populating the hash in the first place, but that operation has to be
      *     done within a critical section, keeping other threads from
      *     executing, so only the minimal amount of work necessary is done at
      *     that time.
-     *  b) For integer items, convert the C CHAR_MAX value into -1.  Again,
-     *     this could have been done in the critical section, but was deferred
-     *     to here to keep to the bare minimum amount the time spent owning the
-     *     processor. CHAR_MAX is a C concept for an 8-bit character type.
-     *     Perl has no such type; the closest fit is a -1.
-     *
      * XXX On unthreaded perls, this code could be #ifdef'd out, and the
      * corrections determined at hash population time, at an extra maintenance
      * cost which khw doesn't think is worth it
@@ -5455,29 +5449,6 @@ S_my_localeconv(pTHX_ const int item)
             {
                 SvUTF8_on(*value);
             }
-        }
-
-        if (integers[i] == NULL) {
-            continue;
-        }
-
-        /* And each integer */
-        for (const lconv_offset_t *intp = integers[i]; intp->name; intp++) {
-            const char * name = intp->name;
-
-        if (! name) {   /* Reached the end */
-            break;
-        }
-
-        SV ** value = hv_fetch(hv, name, strlen(name), true);
-        if (! value) {
-            continue;
-        }
-
-        /* Change CHAR_MAX to -1 */
-        if (SvIV(*value) == CHAR_MAX) {
-            sv_setiv(*value, -1);
-        }
         }
     }
 
@@ -5837,8 +5808,12 @@ S_populate_hash_from_localeconv(pTHX_ HV * hv,
         if (integers[i]) {
             const lconv_offset_t * current = integers[i];
             while (current->name) {
-                const char value = *((const char *)(  lcbuf_as_string
-                                                    + current->offset));
+                int value = *((const char *)(  lcbuf_as_string
+                                             + current->offset));
+                if (value == CHAR_MAX) { /* Change CHAR_MAX to -1 */
+                    value = -1;
+                }
+
                 (void) hv_store(hv,
                                 current->name, strlen(current->name),
                                 newSViv(value),
