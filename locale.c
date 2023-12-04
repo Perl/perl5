@@ -5003,6 +5003,50 @@ Perl_localeconv(pTHX)
     return my_localeconv(0);
 }
 
+#ifndef HAS_LOCALECONV
+#if 0
+
+/* If localeconv() is unavailable, the functions below simulate its presence as
+ * if the locale were the C one.
+ *
+ * If this structure definition is also unavailable, those functions won't
+ * compile, but this version could be used instead in a pinch.  Should this
+ * ever happen, just removing the '#if 0' would work.  But a Configure probe
+ * would have to be written to detect the presence of the structure if more
+ * than an immediate workaround were needed */
+
+    typedef struct {
+          char *decimal_point;
+          char *thousands_sep;
+          char *grouping;
+
+          char *int_curr_symbol;
+          char *currency_symbol;
+          char *mon_decimal_point;
+          char *mon_thousands_sep;
+          char *mon_grouping;
+          char *positive_sign;
+          char *negative_sign;
+          char  int_frac_digits;
+          char  frac_digits;
+          char  p_cs_precedes;
+          char  p_sep_by_space;
+          char  n_cs_precedes;
+          char  n_sep_by_space;
+          char  p_sign_posn;
+          char  n_sign_posn;
+
+          char  int_p_cs_precedes;
+          char  int_p_sep_by_space;
+          char  int_n_cs_precedes;
+          char  int_n_sep_by_space;
+          char  int_p_sign_posn;
+          char  int_n_sign_posn;
+    } lconv;
+
+#  endif
+#endif
+
 HV *
 S_my_localeconv(pTHX_ const int item)
 {
