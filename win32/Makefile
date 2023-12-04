@@ -881,7 +881,6 @@ perlglob$(o)  : perlglob.c
 
 ..\config.sh : $(CFGSH_TMPL) config_sh.PL FindExt.pm $(MINIPERL)
 	$(MINIPERL) -I..\lib config_sh.PL -o ..\config.sh $(CFG_VARS) $(CFGSH_TMPL)
-	$(MINIPERL) -I..\lib set_depend_modtime.pl $@ $**
 
 # This target is for when changes to the main config.sh happen.
 # Edit config.vc, then make perl in a minimal configuration (i.e. with MULTI,
