@@ -230,9 +230,8 @@ cpan/Archive-Tar/t/03_file.t					Archive::Tar tests
 cpan/Archive-Tar/t/04_resolved_issues.t				Archive::Tar tests
 cpan/Archive-Tar/t/05_iter.t					Archive::Tar tests
 cpan/Archive-Tar/t/06_error.t					Archive::Tar tests
-cpan/Archive-Tar/t/08_ptargrep.t
-cpan/Archive-Tar/t/09_roundtrip.t
-cpan/Archive-Tar/t/90_symlink.t					Archive::Tar tests
+cpan/Archive-Tar/t/08_ptargrep.t				Test file related to Archive::Tar
+cpan/Archive-Tar/t/09_roundtrip.t				Test file related to Archive::Tar
 cpan/Archive-Tar/t/99_pod.t					Archive::Tar tests
 cpan/Archive-Tar/t/src/header/signed.tar			Archive::Tar tests
 cpan/Archive-Tar/t/src/linktest/linktest_missing_dir.tar	Archive::Tar tests
@@ -241,6 +240,7 @@ cpan/Archive-Tar/t/src/long/b					Archive::Tar tests
 cpan/Archive-Tar/t/src/long/bar.tar				Archive::Tar tests
 cpan/Archive-Tar/t/src/long/foo.tbz				Archive::Tar tests
 cpan/Archive-Tar/t/src/long/foo.tgz				Archive::Tar tests
+cpan/Archive-Tar/t/src/long/prefix-directory-concat.tar		Archive-Tar
 cpan/Archive-Tar/t/src/short/b					Archive::Tar tests
 cpan/Archive-Tar/t/src/short/bar.tar				Archive::Tar tests
 cpan/Archive-Tar/t/src/short/foo.tbz				Archive::Tar tests
