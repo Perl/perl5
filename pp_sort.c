@@ -1142,18 +1142,14 @@ PP(pp_sort)
             AvFILLp(av) = max_minus_one;
             AvREIFY_off(av);
             AvREAL_on(av);
-#ifdef PERL_RC_STACK
-            /* the AV now contributes 1 refcnt to each element */
-            for (i = 0; i <= max_minus_one; i++)
-                SvREFCNT_inc_void_NN(base[i]);
-#endif
         }
         /* sort is only ever optimised with OPpSORT_INPLACE when the
          * (@a = sort @a) is in void context. (As an aside: the context
          * flag aught to be copied to the sort op: then we could assert
          * here that it's void).
          * Thus we can simply discard the stack elements now: their
-         * reference counts have already claimed by av.
+         * reference counts have already claimed by av - hence not using
+         * rpp_popfree_to() here.
          */
         PL_stack_sp = ORIGMARK;
 #ifdef PERL_RC_STACK
