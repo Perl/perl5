@@ -59,7 +59,7 @@ use strict;
 
 use Exporter 'import';
 require XSLoader;
-our $VERSION = '1.15';
+our $VERSION = '1.16';
 
 XSLoader::load();
 
@@ -185,6 +185,7 @@ our @EXPORT_OK = (qw(
         O_NOSIGPIPE
 	O_NOTRANS
         O_SYMLINK
+        O_TMPFILE
         O_TTY_INIT
 ), map {@{$_}} values %EXPORT_TAGS);
 
