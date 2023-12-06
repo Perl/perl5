@@ -7085,6 +7085,12 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
             }
             if (--(SvREFCNT(sv)))
                 continue;
+            if (SvIMMORTAL(sv)) {
+                /* make sure SvREFCNT(sv)==0 happens very seldom */
+                SvREFCNT(sv) = SvREFCNT_IMMORTAL;
+                SvTEMP_off(sv);
+                continue;
+            }
 #ifdef DEBUGGING
             if (SvTEMP(sv)) {
                 Perl_ck_warner_d(aTHX_ packWARN(WARN_DEBUGGING),
@@ -7093,11 +7099,6 @@ Perl_sv_clear(pTHX_ SV *const orig_sv)
                 continue;
             }
 #endif
-            if (SvIMMORTAL(sv)) {
-                /* make sure SvREFCNT(sv)==0 happens very seldom */
-                SvREFCNT(sv) = SvREFCNT_IMMORTAL;
-                continue;
-            }
             break;
         } /* while 1 */
 
@@ -7280,6 +7281,12 @@ Perl_sv_free2(pTHX_ SV *const sv, const U32 rc)
         /* normal case */
         SvREFCNT(sv) = 0;
 
+        if (SvIMMORTAL(sv)) {
+            /* make sure SvREFCNT(sv)==0 happens very seldom */
+            SvREFCNT(sv) = SvREFCNT_IMMORTAL;
+            SvTEMP_off(sv);
+            return;
+        }
 #ifdef DEBUGGING
         if (SvTEMP(sv)) {
             Perl_ck_warner_d(aTHX_ packWARN(WARN_DEBUGGING),
@@ -7288,11 +7295,6 @@ Perl_sv_free2(pTHX_ SV *const sv, const U32 rc)
             return;
         }
 #endif
-        if (SvIMMORTAL(sv)) {
-            /* make sure SvREFCNT(sv)==0 happens very seldom */
-            SvREFCNT(sv) = SvREFCNT_IMMORTAL;
-            return;
-        }
         sv_clear(sv);
         if (! SvREFCNT(sv)) /* may have have been resurrected */
             del_SV(sv);
