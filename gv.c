@@ -4195,6 +4195,13 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
                 res = newSV_type_mortal(SVt_PVAV);
                 av_extend((AV *)res, nret);
                 while (nret--)
+                    /* Naughtily, we don't increment the ref counts
+                     * of the items we push onto the temporary array.
+                     * So we rely on the caller knowing not to decrement them,
+                     * and to empty the array before there's any chance of
+                     * it being freed. (Probably should either turn off
+                     * AvREAL or actually increment.)
+                     */
                     av_store((AV *)res, nret, POPs);
                 break;
             }

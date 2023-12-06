@@ -1490,29 +1490,123 @@ PP(pp_padsv)
     }
 }
 
-PP_wrapped(pp_readline, ((PL_op->op_flags & OPf_STACKED) ? 2 : 1), 0)
+
+/* Implement readline(), and also <X> and <<X>> in the cases where X is
+ * seen by the parser as file-handle-ish rather than glob-ish.
+ *
+ * It expects at least one arg: the typeglob or scalar filehandle to read
+ * from. An empty <> isn't handled specially by this op; instead the parser
+ * will have planted a preceding gv(*ARGV) op.
+ *
+ * Scalar assignment is optimised away by making the assignment target be
+ * passed as a second argument, with OPf_STACKED set. For example,
+ *
+ *    $x[$i] = readline($fh);
+ *
+ * is implemented as if written as
+ *
+ *    readline($x[$i], $fh);
+ *
+ * (that is, if the perl-level readline function took two args, which it
+ * doesn't). The 'while (<>) {...}' construct is handled specially by the
+ * parser, but not specially by this op. The parser treats the condition
+ * as
+ *
+ *    defined($_ = <>)
+ *
+ * which is then optimised into the equivalent of
+ *
+ *   defined(readline($_, *ARGV))
+ *
+ * When called as a real function, e.g. (\&CORE::readline)->(*STDIN),
+ * pp_coreargs() will have pushed a NULL if no argument was supplied.
+ *
+ * The parser decides whether '<something>' in the perl src code causes an
+ * OP_GLOB or an OPREADLINE op to be planted.
+ */
+
+PP(pp_readline)
 {
-    dSP;
+    SV *arg = *PL_stack_sp;
+
     /* pp_coreargs pushes a NULL to indicate no args passed to
      * CORE::readline() */
-    if (TOPs) {
-        SvGETMAGIC(TOPs);
-        tryAMAGICunTARGETlist(iter_amg, 0);
-        PL_last_in_gv = MUTABLE_GV(*PL_stack_sp--);
+    if (arg) {
+        SvGETMAGIC(arg);
+
+        /* unrolled tryAMAGICunTARGETlist(iter_amg, 0) */
+        SV *tmpsv;
+        U8 gimme = GIMME_V;
+        if (UNLIKELY(SvAMAGIC(arg) &&
+            (tmpsv = amagic_call(arg, &PL_sv_undef, iter_amg,
+                                 AMGf_want_list | AMGf_noright
+                                |AMGf_unary))))
+        {
+            if (gimme == G_VOID) {
+                NOOP;
+            }
+            else if (gimme == G_LIST) {
+                SSize_t i;
+                SSize_t len;
+                assert(SvTYPE(tmpsv) == SVt_PVAV);
+                len = av_count((AV *)tmpsv);
+                assert(*PL_stack_sp == arg);
+                rpp_popfree_1(); /* pop the original filehhandle arg */
+                /* no assignment target to pop */
+                assert(!(PL_op->op_flags & OPf_STACKED));
+                rpp_extend(len);
+                for (i = 0; i < len; ++i)
+                    /* amagic_call() naughtily doesn't increment the ref counts
+                     * of the items it pushes onto the temporary array. So we
+                     * don't need to decrement them when shifting off. */
+                    rpp_push_1(av_shift((AV *)tmpsv));
+            }
+            else { /* AMGf_want_scalar */
+                /* OPf_STACKED: assignment optimised away and target
+                 * on stack */
+                SV *targ = (PL_op->op_flags & OPf_STACKED)
+                                ? PL_stack_sp[-1]
+                                : PAD_SV(PL_op->op_targ);
+                sv_setsv(targ, tmpsv);
+                SvSETMAGIC(targ);
+                if (PL_op->op_flags & OPf_STACKED) {
+                    rpp_popfree_1();
+                    assert(*PL_stack_sp == targ);
+                }
+                else
+                    rpp_replace_1_1(targ);
+            }
+            return NORMAL;
+        }
+        /* end of unrolled tryAMAGICunTARGETlist */
+
+        PL_last_in_gv = MUTABLE_GV(*PL_stack_sp);
+#ifdef PERL_RC_STACK
+        /* PL_last_in_gv appears to be non-refcounted, so won't keep
+         * GV alive */
+        if (SvREFCNT(PL_last_in_gv) < 2)
+            sv_2mortal((SV*)PL_last_in_gv);
+#endif
     }
-    else PL_last_in_gv = PL_argvgv, PL_stack_sp--;
+    else
+        PL_last_in_gv = PL_argvgv;
+
+    rpp_popfree_1();
+
+    /* is it *FOO, $fh, or 'FOO' ? */
     if (!isGV_with_GP(PL_last_in_gv)) {
         if (SvROK(PL_last_in_gv) && isGV_with_GP(SvRV(PL_last_in_gv)))
             PL_last_in_gv = MUTABLE_GV(SvRV(PL_last_in_gv));
         else {
-            dSP;
-            XPUSHs(MUTABLE_SV(PL_last_in_gv));
-            PUTBACK;
+            rpp_xpush_1(MUTABLE_SV(PL_last_in_gv));
             Perl_pp_rv2gv(aTHX);
-            PL_last_in_gv = MUTABLE_GV(*PL_stack_sp--);
-            assert((SV*)PL_last_in_gv == &PL_sv_undef || isGV_with_GP(PL_last_in_gv));
+            PL_last_in_gv = MUTABLE_GV(*PL_stack_sp);
+            rpp_popfree_1();
+            assert(   (SV*)PL_last_in_gv == &PL_sv_undef
+                   || isGV_with_GP(PL_last_in_gv));
         }
     }
+
     return do_readline();
 }
 
@@ -3843,34 +3937,122 @@ PP(pp_match)
 }
 
 
+/* Perl_do_readline(): implement <$fh>, readline($fh) and glob('*.h')
+ *
+ * This function is tail-called by pp_readline(), pp_rcatline() and
+ * pp_glob(), and it may check PL_op's op_type and op_flags as
+ * appropriate.
+ *
+ * For file reading:
+ *    It reads the line(s) from PL_last_in_gv.
+ *    It returns a list of lines, or in scalar context, reads one line into
+ *       targ (or if OPf_STACKED, into the top SV on the stack), and
+ *       returns that. (If OP_RCATLINE, concats rather than sets).
+ *
+ *    So it normally expects zero args, or one arg when  the OPf_STACKED
+ *    optimisation is present.
+ *
+ * For file globbing:
+ *    Note that we don't normally reach here: we only get here if perl is
+ *    built with PERL_EXTERNAL_GLOB, which is normally only when
+ *    building miniperl.
+ *
+ *    Expects one arg, which is the pattern string (e.g. '*.h').
+ *    The caller sets PL_last_in_gv to a plain GV that just has a new
+ *    IO::File PVIO attached.
+ *
+ * Handles tied IO magic, but not overloading - that's the caller's
+ * responsibility.
+ *
+ * Handles the *ARGV filehandle specially, to do all the <> wizardry.
+ *
+ * In summary: on entry, the stack has zero or one items pushed, and
+ * looks like:
+ *
+ *  -       when OP_READLINE without OPf_STACKED
+ *  target  when OP_READLINE with    OPf_STACKED, or when OP_RCATLINE
+ *  '*.h'   when OP_GLOB
+ */
+
 OP *
 Perl_do_readline(pTHX)
 {
-    dSP; dTARGETSTACKED;
+
+    const I32 type = PL_op->op_type;
+
+    /* only readline/rcatline can have the STACKED optimisation,
+     * and rcatline *always* has it */
+    if (PL_op->op_flags & OPf_STACKED) {
+        assert(type != OP_GLOB);
+        assert(GIMME_V == G_SCALAR);
+    }
+    if (type == OP_RCATLINE)
+        assert(PL_op->op_flags & OPf_STACKED);
+
+    const U8 gimme = GIMME_V;
+    SV *targ  = (gimme == G_SCALAR)
+                    ? (PL_op->op_flags & OPf_STACKED)
+                        ? *PL_stack_sp
+                        : PAD_SV(PL_op->op_targ)
+                    : NULL;
     SV *sv;
     STRLEN tmplen = 0;
     STRLEN offset;
     PerlIO *fp;
     IO * const io = GvIO(PL_last_in_gv);
-    const I32 type = PL_op->op_type;
-    const U8 gimme = GIMME_V;
+
+    /* process tied file handle if present */
 
     if (io) {
         const MAGIC *const mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar);
         if (mg) {
-            Perl_tied_method(aTHX_ SV_CONST(READLINE), SP, MUTABLE_SV(io), mg, gimme, 0);
+            /* not possible for the faked-up IO passed by an OP_GLOB to be
+             * tied */
+            assert(type != OP_GLOB);
+            /* OPf_STACKED only applies when in scalar context */
+            assert(!(gimme != G_SCALAR && (PL_op->op_flags & OPf_STACKED)));
+
+            /* tied_method() frees everything currently above the passed
+             * mark, and returns any values at mark[1] onwards */
+            Perl_tied_method(aTHX_ SV_CONST(READLINE),
+                /* mark => */ PL_stack_sp,
+                              MUTABLE_SV(io), mg, gimme, 0);
+
             if (gimme == G_SCALAR) {
-                SPAGAIN;
-                SvSetSV_nosteal(TARG, TOPs);
-                SETTARG;
+                SvSetSV_nosteal(targ, *PL_stack_sp);
+                SvSETMAGIC(targ);
+                if (PL_op->op_flags & OPf_STACKED) {
+                    /* free the tied method call's return value */
+                    rpp_popfree_1();
+                    assert(*PL_stack_sp == targ);
+                }
+                else
+                    rpp_replace_1_1(targ);
             }
+            else
+                /* no targ to pop off the stack - any returned values
+                 * are in the right place in the stack */
+                assert(!(PL_op->op_flags & OPf_STACKED));
+
             return NORMAL;
         }
     }
+
     fp = NULL;
+
+    /* handle possible *ARGV, and check for read on write-only FH */
+
     if (io) {
         fp = IoIFP(io);
-        if (!fp) {
+        if (fp) {
+            /* not possible for the faked-up IO passed by an OP_GLOB to
+             * have a file handle */
+            assert(type != OP_GLOB);
+
+            if (IoTYPE(io) == IoTYPE_WRONLY)
+                report_wrongway_fh(PL_last_in_gv, '>');
+        }
+        else {
             if (IoFLAGS(io) & IOf_ARGV) {
                 if (IoFLAGS(io) & IOf_START) {
                     IoLINES(io) = 0;
@@ -3889,15 +4071,15 @@ Perl_do_readline(pTHX)
                     (void)do_close(PL_last_in_gv, FALSE); /* now it does*/
                 }
             }
-            else if (type == OP_GLOB)
-                fp = Perl_start_glob(aTHX_ POPs, io);
-        }
-        else if (type == OP_GLOB)
-            SP--;
-        else if (IoTYPE(io) == IoTYPE_WRONLY) {
-            report_wrongway_fh(PL_last_in_gv, '>');
+            else if (type == OP_GLOB) {
+                fp = Perl_start_glob(aTHX_ *PL_stack_sp, io);
+                rpp_popfree_1();
+            }
         }
     }
+
+    /* handle bad file handle */
+
     if (!fp) {
         if ((!io || !(IoFLAGS(io) & IOf_START))
             && ckWARN(WARN_CLOSED)
@@ -3905,20 +4087,26 @@ Perl_do_readline(pTHX)
         {
             report_evil_fh(PL_last_in_gv);
         }
+
         if (gimme == G_SCALAR) {
-            /* undef TARG, and push that undefined value */
-            if (type != OP_RCATLINE) {
-                sv_set_undef(TARG);
-            }
-            PUSHTARG;
+            /* undef targ, and return that undefined value */
+            if (type != OP_RCATLINE)
+                sv_set_undef(targ);
+            if (!(PL_op->op_flags & OPf_STACKED))
+                rpp_push_1(targ);
         }
-        RETURN;
+        return NORMAL;
     }
+
   have_fp:
+
+    /* prepare targ to have a string assigned to it */
+
     if (gimme == G_SCALAR) {
-        sv = TARG;
+        sv = targ;
         if (type == OP_RCATLINE && SvGMAGICAL(sv))
             mg_get(sv);
+
         if (SvROK(sv)) {
             if (type == OP_RCATLINE)
                 SvPV_force_nomg_nolen(sv);
@@ -3928,6 +4116,7 @@ Perl_do_readline(pTHX)
         else if (isGV_with_GP(sv)) {
             SvPV_force_nomg_nolen(sv);
         }
+
         SvUPGRADE(sv, SVt_PV);
         tmplen = SvLEN(sv);	/* remember if already alloced */
         if (!tmplen && !SvREADONLY(sv) && !SvIsCOW(sv)) {
@@ -3936,6 +4125,7 @@ Perl_do_readline(pTHX)
              */
             Sv_Grow(sv, 80);
         }
+
         offset = 0;
         if (type == OP_RCATLINE && SvOK(sv)) {
             if (!SvPOK(sv)) {
@@ -3945,6 +4135,7 @@ Perl_do_readline(pTHX)
         }
     }
     else {
+        /* XXX on RC builds, push on stack rather than mortalize ? */
         sv = sv_2mortal(newSV(80));
         offset = 0;
     }
@@ -3961,8 +4152,9 @@ Perl_do_readline(pTHX)
     (gimme != G_SCALAR || SvCUR(sv)					\
      || (IoFLAGS(io) & IOf_NOLINE) || !RsSNARF(rs))
 
+    /* create one or more lines, or (if OP_GLOB), pathnames */
+
     for (;;) {
-        PUTBACK;
         if (!sv_gets(sv, fp, offset)
             && (type == OP_GLOB
                 || SNARF_EOF(gimme, PL_rs, io, sv)
@@ -3988,27 +4180,44 @@ Perl_do_readline(pTHX)
                                    (STATUS_CURRENT & 0x80) ? ", core dumped" : "");
                 }
             }
+
             if (gimme == G_SCALAR) {
                 if (type != OP_RCATLINE) {
-                    SV_CHECK_THINKFIRST_COW_DROP(TARG);
-                    SvOK_off(TARG);
+                    SV_CHECK_THINKFIRST_COW_DROP(targ);
+                    SvOK_off(targ);
                 }
-                SPAGAIN;
-                PUSHTARG;
+                /* targ not already there? */
+                if (!(PL_op->op_flags & OPf_STACKED))
+                    rpp_push_1(targ);
             }
+            else if (PL_op->op_flags & OPf_STACKED)
+                rpp_popfree_1();
+
             MAYBE_TAINT_LINE(io, sv);
-            RETURN;
+            return NORMAL;
         }
+
         MAYBE_TAINT_LINE(io, sv);
         IoLINES(io)++;
         IoFLAGS(io) |= IOf_NOLINE;
         SvSETMAGIC(sv);
-        SPAGAIN;
-        XPUSHs(sv);
+        rpp_extend(1);
+        if (PL_op->op_flags & OPf_STACKED) {
+            /* push sv while keeping targ above it, so targ doesn't get
+             * freed */
+            assert(*PL_stack_sp == targ);
+            PL_stack_sp[1] = targ;
+            *PL_stack_sp++ = NULL;
+            rpp_replace_at(PL_stack_sp - 1, sv);
+        }
+        else 
+            rpp_push_1(sv);
+
         if (type == OP_GLOB) {
             const char *t1;
             Stat_t statbuf;
 
+            /* chomp(sv) */
             if (SvCUR(sv) > 0 && SvCUR(PL_rs) > 0) {
                 char * const tmps = SvEND(sv) - 1;
                 if (*tmps == *SvPVX_const(PL_rs)) {
@@ -4016,18 +4225,26 @@ Perl_do_readline(pTHX)
                     SvCUR_set(sv, SvCUR(sv) - 1);
                 }
             }
-            for (t1 = SvPVX_const(sv); *t1; t1++)
+
+            /* find longest substring of sv up to first metachar */
+            for (t1 = SvPVX_const(sv); *t1; t1++) {
 #ifdef __VMS
                 if (memCHRs("*%?", *t1))
 #else
                 if (memCHRs("$&*(){}[]'\";\\|?<>~`", *t1))
 #endif
                         break;
+            }
+
             if (*t1 && PerlLIO_lstat(SvPVX_const(sv), &statbuf) < 0) {
-                (void)POPs;		/* Unmatched wildcard?  Chuck it... */
+                /* Unmatched wildcard?  Chuck it... */
+                /* no need to worry about targ still on top of stack */
+                assert(!(PL_op->op_flags & OPf_STACKED));
+                rpp_popfree_1();
                 continue;
             }
         } else if (SvUTF8(sv)) { /* OP_READLINE, OP_RCATLINE */
+             /* check line if valid Unicode */
              if (ckWARN(WARN_UTF8)) {
                 const U8 * const s = (const U8*)SvPVX_const(sv) + offset;
                 const STRLEN len = SvCUR(sv) - offset;
@@ -4040,22 +4257,31 @@ Perl_do_readline(pTHX)
                                 f < (U8*)SvEND(sv) ? *f : 0);
              }
         }
+
         if (gimme == G_LIST) {
             if (SvLEN(sv) - SvCUR(sv) > 20) {
                 SvPV_shrink_to_cur(sv);
             }
+            /* XXX on RC builds, push on stack rather than mortalize ? */
             sv = sv_2mortal(newSV(80));
             continue;
         }
-        else if (gimme == G_SCALAR && !tmplen && SvLEN(sv) - SvCUR(sv) > 80) {
+
+        if (gimme == G_SCALAR && !tmplen && SvLEN(sv) - SvCUR(sv) > 80) {
             /* try to reclaim a bit of scalar space (only on 1st alloc) */
             const STRLEN new_len
                 = SvCUR(sv) < 60 ? 80 : SvCUR(sv)+40; /* allow some slop */
             SvPV_renew(sv, new_len);
         }
-        RETURN;
-    }
+
+
+        if (PL_op->op_flags & OPf_STACKED)
+            rpp_popfree_1(); /* finally remove targ */
+        /* return sv, which was recently pushed onto the stack */
+        return NORMAL;
+    } /* for (;;) */
 }
+
 
 PP(pp_helem)
 {

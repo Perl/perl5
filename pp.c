@@ -186,9 +186,10 @@ S_rv2gv(pTHX_ SV *sv, const bool vivify_sv, const bool strict,
     return sv;
 }
 
-PP_wrapped(pp_rv2gv, 1, 0)
+
+PP(pp_rv2gv)
 {
-    dSP; dTOPss;
+    SV *sv = *PL_stack_sp;
 
     sv = S_rv2gv(aTHX_
           sv, PL_op->op_private & OPpDEREF,
@@ -198,9 +199,10 @@ PP_wrapped(pp_rv2gv, 1, 0)
          );
     if (PL_op->op_private & OPpLVAL_INTRO)
         save_gp(MUTABLE_GV(sv), !(PL_op->op_flags & OPf_SPECIAL));
-    SETs(sv);
-    RETURN;
+    rpp_replace_1_1(sv);
+    return NORMAL;
 }
+
 
 /* Helper function for pp_rv2sv and pp_rv2av/hv.
  *
@@ -3789,9 +3791,11 @@ PP_wrapped(pp_vec, 3, 0)
 
 /* also used for: pp_rindex() */
 
-PP_wrapped(pp_index, MAXARG, 0)
+PP(pp_index)
 {
-    dSP; dTARGET;
+    SV *targ = (PL_op->op_flags & OPf_STACKED)
+                    ? PL_stack_sp[-1]
+                    : PAD_SV(PL_op->op_targ);
     SV *big;
     SV *little;
     SV *temp = NULL;
@@ -3804,12 +3808,24 @@ PP_wrapped(pp_index, MAXARG, 0)
     bool big_utf8;
     bool little_utf8;
     const bool is_index = PL_op->op_type == OP_INDEX;
-    const bool threeargs = MAXARG >= 3 && (TOPs || ((void)POPs,0));
 
-    if (threeargs)
-        offset = POPi;
-    little = POPs;
-    big = POPs;
+    assert(MAXARG == 2 || MAXARG == 3);
+
+    bool threeargs = (MAXARG == 3);
+    if (MAXARG == 3 && !PL_stack_sp[0]) {
+        /* pp_coreargs pushes a NULL in order to flag that &CORE::index()
+         * was called with two args */
+        PL_stack_sp--;
+        threeargs = FALSE;
+    }
+
+    if (threeargs) {
+        offset = SvIV(*PL_stack_sp);
+        rpp_popfree_1();
+    }
+
+    little = PL_stack_sp[0];
+    big    = PL_stack_sp[-1];
     big_p = SvPV_const(big, biglen);
     little_p = SvPV_const(little, llen);
 
@@ -3896,19 +3912,19 @@ PP_wrapped(pp_index, MAXARG, 0)
     if (PL_op->op_private & OPpTRUEBOOL) {
         SV *result = ((retval != -1) ^ cBOOL(PL_op->op_private & OPpINDEX_BOOLNEG))
             ? &PL_sv_yes : &PL_sv_no;
-        if (PL_op->op_private & OPpTARGET_MY) {
+        if (PL_op->op_private & OPpTARGET_MY)
             /* $lex = (index() == -1) */
-            sv_setsv_mg(TARG, result);
-            PUSHs(TARG);
-        }
-        else {
-            PUSHs(result);
-        }
+            sv_setsv_mg(targ, result);
+        else
+            targ = result;
     }
     else
-        PUSHi(retval);
-    RETURN;
+        TARGi(retval, 1);
+
+    rpp_replace_2_1(targ);
+    return NORMAL;
 }
+
 
 PP_wrapped(pp_sprintf, 0, 1)
 {

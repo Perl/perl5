@@ -681,51 +681,6 @@ Does not use C<TARG>.  See also C<L</XPUSHu>>, C<L</mPUSHu>> and C<L</PUSHu>>.
 /* No longer used in core. Use AMG_CALLunary instead */
 #define AMG_CALLun(sv,meth) AMG_CALLunary(sv, CAT2(meth,_amg))
 
-#define tryAMAGICunTARGETlist(meth, jump)			\
-    STMT_START {						\
-        dSP;							\
-        SV *tmpsv;						\
-        SV *arg= *sp;						\
-        U8 gimme = GIMME_V;                                    \
-        if (UNLIKELY(SvAMAGIC(arg) &&				\
-            (tmpsv = amagic_call(arg, &PL_sv_undef, meth,	\
-                                 AMGf_want_list | AMGf_noright	\
-                                |AMGf_unary))))                 \
-        {                                       		\
-            SPAGAIN;						\
-            if (gimme == G_VOID) {                              \
-                NOOP;                                           \
-            }                                                   \
-            else if (gimme == G_LIST) {				\
-                SSize_t i;                                      \
-                SSize_t len;                                    \
-                assert(SvTYPE(tmpsv) == SVt_PVAV);              \
-                len = av_count((AV *)tmpsv);                    \
-                (void)POPs; /* get rid of the arg */            \
-                EXTEND(sp, len);                                \
-                for (i = 0; i < len; ++i)                       \
-                    PUSHs(av_shift((AV *)tmpsv));               \
-            }                                                   \
-            else { /* AMGf_want_scalar */                       \
-                dATARGET; /* just use the arg's location */     \
-                sv_setsv(TARG, tmpsv);                          \
-                if (PL_op->op_flags & OPf_STACKED)              \
-                    sp--;                                       \
-                SETTARG;                                        \
-            }                                                   \
-            PUTBACK;						\
-            if (jump) {						\
-                OP *jump_o = NORMAL->op_next;                   \
-                while (jump_o->op_type == OP_NULL)		\
-                    jump_o = jump_o->op_next;			\
-                assert(jump_o->op_type == OP_ENTERSUB);		\
-                (void)POPMARK;                                        \
-                return jump_o->op_next;				\
-            }							\
-            return NORMAL;					\
-        }							\
-    } STMT_END
-
 /* This is no longer used anywhere in the core. You might wish to consider
    calling amagic_deref_call() directly, as it has a cleaner interface.  */
 #define tryAMAGICunDEREF(meth)						\
