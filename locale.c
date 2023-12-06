@@ -5594,6 +5594,19 @@ S_populate_hash_from_localeconv(pTHX_ HV * hv,
      * global static buffer.  Some locks might be no-ops on this platform, but
      * not others.  We need to lock if any one isn't a no-op. */
 
+    /* If the call could be for either or both of the two categories, we need
+     * to test which one; but if the Configuration is such that we will never
+     * be called with one of them, the code for that one will be #ifdef'd out
+     * below, leaving code for just the other category.  That code will always
+     * want to be executed, no conditional required.  Create a macro that
+     * replaces the condition with an always-true value so the compiler will
+     * omit the conditional */
+#    if defined(USE_LOCALE_NUMERIC) && defined(USE_LOCALE_MONETARY)
+#      define CALL_IS_FOR(x)  (which_mask & OFFSET_TO_BIT(x ## _OFFSET))
+#    else
+#      define CALL_IS_FOR(x) 1
+#    endif
+
     start_DEALING_WITH_MISMATCHED_CTYPE(locale);
 
 #    ifdef USE_LOCALE_NUMERIC
@@ -5601,7 +5614,7 @@ S_populate_hash_from_localeconv(pTHX_ HV * hv,
     /* We need to toggle to the underlying NUMERIC locale if we are getting
      * NUMERIC strings */
     const char * orig_NUMERIC_locale = NULL;
-    if (which_mask & OFFSET_TO_BIT(NUMERIC_OFFSET)) {
+    if (CALL_IS_FOR(NUMERIC)) {
         LC_NUMERIC_LOCK(0);
 
 #      if defined(WIN32)
@@ -5630,7 +5643,7 @@ S_populate_hash_from_localeconv(pTHX_ HV * hv,
     /* Same Windows bug as described just above for NUMERIC.  Otherwise, no
      * need to toggle LC_MONETARY, as it is kept in the underlying locale */
     const char * orig_MONETARY_locale = NULL;
-    if (which_mask & OFFSET_TO_BIT(MONETARY_OFFSET)) {
+    if (CALL_IS_FOR(MONETARY)) {
         orig_MONETARY_locale = toggle_locale_c(LC_MONETARY, "C");
         toggle_locale_c(LC_MONETARY, locale);
     }
@@ -5762,13 +5775,15 @@ S_populate_hash_from_localeconv(pTHX_ HV * hv,
 #    ifdef USE_LOCALE_NUMERIC
 
     restore_toggled_locale_c(LC_NUMERIC, orig_NUMERIC_locale);
-    if (which_mask & OFFSET_TO_BIT(NUMERIC_OFFSET)) {
+    if (CALL_IS_FOR(NUMERIC)) {
         LC_NUMERIC_UNLOCK;
     }
 
 #    endif
 
     end_DEALING_WITH_MISMATCHED_CTYPE(locale);
+
+#    undef CALL_IS_FOR
 
 }
 
