@@ -5175,11 +5175,12 @@ S_gen_constant_list(pTHX_ OP *o)
     o->op_flags &= ~OPf_REF;	/* treat \(1..2) like an ordinary list */
     o->op_flags |= OPf_PARENS;	/* and flatten \(1..2,3) */
     o->op_opt = 0;		/* needs to be revisited in rpeep() */
-    av = (AV *)SvREFCNT_inc_NN(*PL_stack_sp--);
+    av = (AV *)*PL_stack_sp;
 
     /* replace subtree with an OP_CONST */
     curop = cUNOPo->op_first;
     op_sibling_splice(o, NULL, -1, newSVOP(OP_CONST, 0, (SV *)av));
+    rpp_pop_1_norc();
     op_free(curop);
 
     if (AvFILLp(av) != -1)
