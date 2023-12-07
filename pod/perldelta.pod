@@ -159,6 +159,12 @@ L<XXX> has been upgraded from version A.xx to B.yy.
 
 XXX If there was something important to note about this change, include that here.
 
+=item *
+
+L<Fcntl> has been upgraded from version 1.15 to 1.16.
+
+This version adds support for the C<O_TMPFILE> flag on Linux.
+
 =back
 
 =head2 Removed Modules and Pragmata
