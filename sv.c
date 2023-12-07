@@ -596,6 +596,58 @@ Perl_sv_clean_all(pTHX)
     return cleaned;
 }
 
+
+#ifdef DEBUGGING
+
+/* Called by sv_mark_arenas() for each live SV: set SVf_BREAK */
+
+static void
+S_do_sv_mark_arenas(pTHX_ SV *const sv)
+{
+        sv->sv_flags |= SVf_BREAK;
+}
+
+/* sv_mark_arenas(): for leak debugging: mark all live SVs with SVf_BREAK.
+ * Then later, use sv_sweep_arenas() to list any SVs not so marked.
+ */
+
+void
+Perl_sv_mark_arenas(pTHX)
+{
+    visit(S_do_sv_mark_arenas, 0, 0);
+}
+
+/* Called by sv_sweep_arenas() for each live SV, to list any SVs without
+ * SVf_BREAK set */
+
+static void
+S_do_sv_sweep_arenas(pTHX_ SV *const sv)
+{
+        if (sv->sv_flags & SVf_BREAK) {
+            sv->sv_flags &= ~SVf_BREAK;
+            return;
+        }
+        PerlIO_printf(Perl_debug_log, "Unmarked SV: 0x%p: %s\n",
+                        sv, SvPEEK(sv));
+}
+
+
+/* sv_sweep_arenas(): for debugging: list all live SVs that don't have
+ * SVf_BREAK set, then turn off all SVf_BREAK flags.  Typically used some
+ * time after sv_mark_arenas(), to find SVs which have been created since
+ * the marking but not yet freed (they may have leaked, or been stored in
+ * an array, or whatever).
+ */
+
+void
+Perl_sv_sweep_arenas(pTHX)
+{
+    visit(S_do_sv_sweep_arenas, 0, 0);
+}
+
+#endif
+
+
 /*
   ARENASETS: a meta-arena implementation which separates arena-info
   into struct arena_set, which contains an array of struct

@@ -9051,7 +9051,17 @@ S_del_sv(pTHX_ SV *p);
 #   define PERL_ARGS_ASSERT_DEL_SV              \
         assert(p)
 
-# endif
+PERL_CALLCONV void
+Perl_sv_mark_arenas(pTHX)
+        __attribute__visibility__("hidden");
+#   define PERL_ARGS_ASSERT_SV_MARK_ARENAS
+
+PERL_CALLCONV void
+Perl_sv_sweep_arenas(pTHX)
+        __attribute__visibility__("hidden");
+#   define PERL_ARGS_ASSERT_SV_SWEEP_ARENAS
+
+# endif /* defined(DEBUGGING) */
 # if !defined(NV_PRESERVES_UV)
 #   if defined(DEBUGGING)
 STATIC int

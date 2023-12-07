@@ -2068,6 +2068,8 @@
 #     define visit(a,b,c)                       S_visit(aTHX_ a,b,c)
 #     if defined(DEBUGGING)
 #       define del_sv(a)                        S_del_sv(aTHX_ a)
+#       define sv_mark_arenas()                 Perl_sv_mark_arenas(aTHX)
+#       define sv_sweep_arenas()                Perl_sv_sweep_arenas(aTHX)
 #     endif
 #     if !defined(NV_PRESERVES_UV)
 #       if defined(DEBUGGING)
