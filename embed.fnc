@@ -5765,6 +5765,8 @@ S	|SSize_t|visit		|NN SVFUNC_t f				\
 				|const U32 mask
 # if defined(DEBUGGING)
 S	|void	|del_sv 	|NN SV *p
+p	|void	|sv_mark_arenas
+p	|void	|sv_sweep_arenas
 # endif
 # if !defined(NV_PRESERVES_UV)
 #   if defined(DEBUGGING)

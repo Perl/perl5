@@ -1927,6 +1927,55 @@ C<-DPERL_MEM_LOG> instead.
 =for apidoc_section $debugging
 =for apidoc Amnh||PL_sv_serial
 
+=head2 Leaked SV spotting: sv_mark_arenas() and sv_sweep_arenas()
+
+These functions exist only on C<DEBUGGING> builds. The first marks all
+live SVs which can be found in the SV arenas with the C<SVf_BREAK> flag.
+The second lists any such SVs which don't have the flag set, and resets
+the flag on the rest. They are intended to identify SVs which are being
+created, but not freed, between two points in code. They can be used
+either by temporarily adding calls to them in the relevant places in the
+code, or by calling them directly from a debugger.
+
+For example, suppose the following code was found to be leaking:
+
+    while (1) { eval '\(1..3)' }
+
+A F<gdb> session on a threaded perl might look something like this:
+
+    $ gdb ./perl
+    (gdb) break Perl_pp_entereval
+    (gdb) run -e'while (1) { eval q{\(1..3)} }'
+    ...
+    Breakpoint 1, Perl_pp_entereval ....
+    (gdb) call Perl_sv_mark_arenas(my_perl)
+    (gdb) continue
+    ...
+    Breakpoint 1, Perl_pp_entereval ....`
+    (gdb) call Perl_sv_sweep_arenas(my_perl)
+    Unmarked SV: 0xaf23a8: AV()
+    Unmarked SV: 0xaf2408: IV(1)
+    Unmarked SV: 0xaf2468: IV(2)
+    Unmarked SV: 0xaf24c8: IV(3)
+    Unmarked SV: 0xace6c8: PV("AV()"\0)
+    Unmarked SV: 0xace848: PV("IV(1)"\0)
+    (gdb) 
+
+Here, at the start of the first call to pp_entereval(), all existing SVs
+are marked. Then at the start of the second call, we list all the SVs
+which have been since been created but not yet freed. It is quickly clear
+that an array and its three elements are likely not being freed, perhaps
+as a result of a bug during constant folding. The final two SVs are just
+temporaries created during the debugging output and can be ignored.
+
+This trick relies on the C<SVf_BREAK> flag not otherwise being used. This
+flag is typically used only during global destruction, but also sometimes
+for a mark and sweep operation when looking for common elements on the two
+sides of a list assignment. The presence of the flag can also alter the
+behaviour of some specific actions in the core, such as choosing whether to
+copy or to COW a string SV. So turning it on can occasionally alter the
+behaviour of code slightly.
+
 =head2 PERL_MEM_LOG
 
 If compiled with C<-DPERL_MEM_LOG> (C<-Accflags=-DPERL_MEM_LOG>), both
