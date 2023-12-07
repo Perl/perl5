@@ -254,7 +254,9 @@ XXX Changes (i.e. rewording) of diagnostic messages go here
 
 =item *
 
-XXX Describe change here
+L<Name "%s::%s" used only once: possible typo|perldiag/"Name "%s::%s" used only once: possible typo">
+
+This warning now honors being marked as fatal.  [GH #13814]
 
 =back
 
