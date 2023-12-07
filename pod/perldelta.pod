@@ -313,7 +313,10 @@ made:
 
 =item *
 
-XXX
+The test F<t/porting/libperl.t> will no longer run in maint releases.
+This test is sensitive to changes in the output of F<nm> on various
+platforms, and tarballs aren't updated as we update this test in
+blead.  [GH #21677]
 
 =back
 
