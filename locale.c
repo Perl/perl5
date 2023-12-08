@@ -4533,16 +4533,7 @@ S_is_locale_utf8(pTHX_ const char * locale)
 {
     PERL_ARGS_ASSERT_IS_LOCALE_UTF8;
 
-    /* Returns TRUE if the locale 'locale' is UTF-8; FALSE otherwise.  It uses
-     * my_langinfo(), which employs various methods to get this information
-     * if nl_langinfo() isn't available, using heuristics as a last resort, in
-     * which case, the result will very likely be correct for locales for
-     * languages that have commonly used non-ASCII characters, but for notably
-     * English, it comes down to if the locale's name ends in something like
-     * "UTF-8".  It errs on the side of not being a UTF-8 locale.
-     *
-     * Systems conforming to C99 should have the needed libc calls to give us a
-     * completely reliable result. */
+    /* Returns TRUE if the locale 'locale' is UTF-8; FALSE otherwise. */
 
 #  if ! defined(USE_LOCALE)                                                   \
    || ! defined(USE_LOCALE_CTYPE)                                             \
@@ -4560,6 +4551,63 @@ S_is_locale_utf8(pTHX_ const char * locale)
         return PL_in_utf8_CTYPE_locale;
     }
 
+#    if ! defined(HAS_SOME_LANGINFO) && ! defined(WIN32)
+
+    /* On non-Windows without nl_langinfo(), we have to do some digging to get
+     * the answer.  First, toggle to the desired locale so can query its state
+     * */
+    const char * orig_CTYPE_locale = toggle_locale_c(LC_CTYPE, locale);
+
+#      define TEARDOWN_FOR_IS_LOCALE_UTF8                                   \
+                      restore_toggled_locale_c(LC_CTYPE, orig_CTYPE_locale)
+
+#      if defined(HAS_MBTOWC) || defined(HAS_MBRTOWC)
+
+         /* With these functions, we can definitively determine a locale's
+          * UTF-8ness */
+#        define HAS_DEFINITIVE_UTF8NESS_DETERMINATION
+
+    /* If libc mbtowc() evaluates the bytes that form the REPLACEMENT CHARACTER
+     * as that Unicode code point, this has to be a UTF-8 locale; otherwise it
+     * can't be  */
+    wchar_t wc = 0;
+    (void) Perl_mbtowc_(aTHX_ NULL, NULL, 0);/* Reset shift state */
+    int mbtowc_ret = Perl_mbtowc_(aTHX_ &wc,
+                                  STR_WITH_LEN(REPLACEMENT_CHARACTER_UTF8));
+    TEARDOWN_FOR_IS_LOCALE_UTF8;
+    return (   mbtowc_ret == STRLENs(REPLACEMENT_CHARACTER_UTF8)
+            && wc == UNICODE_REPLACEMENT);
+
+#      else
+
+        /* Without those functions, we use our emulation of nl_langinfo(),
+         * which works quite well, but isn't fully definitive */
+#        define USE_LANGINFO_FOR_UTF8NESS
+#        undef HAS_DEFINITIVE_UTF8NESS_DETERMINATION
+#      endif
+#    else
+
+     /* On Windows or on platforms with nl_langinfo(), there is a direct way to
+      * get the locale's codeset, which will be some form of 'UTF-8' for a
+      * UTF-8 locale.  my_langinfo_i() handles this, and we will call that
+      * below */
+#      define HAS_DEFINITIVE_UTF8NESS_DETERMINATION
+#      define USE_LANGINFO_FOR_UTF8NESS
+#      define TEARDOWN_FOR_IS_LOCALE_UTF8
+#    endif  /* USE_LANGINFO_FOR_UTF8NESS */
+
+     /* If the above compiled into code, it found the locale's UTF-8ness,
+      * nothing more to do; if it didn't get compiled,
+      * USE_LANGINFO_FOR_UTF8NESS is defined.  There are two possible reasons:
+      *   1)  it is the preferred method because it knows directly for sure
+      *       what the codeset is because the platform has libc functions that
+      *       return this; or
+      *   2)  the functions the above code section would compile to use don't
+      *       exist or are unreliable on this platform; we are less sure of the
+      *       my_langinfo() result, though it is very unlikely to be wrong
+      *       about if it is UTF-8 or not */
+#    ifdef USE_LANGINFO_FOR_UTF8NESS
+
     char * scratch_buffer = NULL;
     const char * codeset = my_langinfo_c(CODESET, LC_CTYPE, locale,
                                          &scratch_buffer, NULL, NULL);
@@ -4572,8 +4620,10 @@ S_is_locale_utf8(pTHX_ const char * locale)
 
     DEBUG_Lv(PerlIO_printf(Perl_debug_log, "is_locale_utf8(%s) returning %d\n",
                                                             locale, retval));
+    TEARDOWN_FOR_IS_LOCALE_UTF8;
     return retval;
 
+#    endif
 #  endif      /* End of the #else clause, for the non-trivial case */
 
 }
@@ -6250,41 +6300,13 @@ S_my_langinfo_i(pTHX_
          * UTF-8 locale or not.  If it is UTF-8, we (correctly) use that for
          * the code set. */
 
-#        if defined(HAS_MBTOWC) || defined(HAS_MBRTOWC)
+#        ifdef HAS_DEFINITIVE_UTF8NESS_DETERMINATION
 
-        /* If libc mbtowc() evaluates the bytes that form the REPLACEMENT
-         * CHARACTER as that Unicode code point, this has to be a UTF-8 locale.
-         * */
-        wchar_t wc = 0;
-        (void) Perl_mbtowc_(aTHX_ NULL, NULL, 0);/* Reset shift state */
-        int mbtowc_ret = Perl_mbtowc_(aTHX_ &wc,
-                                      STR_WITH_LEN(REPLACEMENT_CHARACTER_UTF8));
-        if (   mbtowc_ret == STRLENs(REPLACEMENT_CHARACTER_UTF8)
-            && wc == UNICODE_REPLACEMENT)
-        {
-            DEBUG_Lv(PerlIO_printf(Perl_debug_log,
-                                   "mbtowc returned REPLACEMENT\n"));
+        if (is_locale_utf8(locale)) {
             retval = "UTF-8";
             break;
         }
 
-        /* Here, it isn't a UTF-8 locale.  After the #else clause is code to
-         * find the codeset (if any) from the locale name */
-
-#        else
-
-        /* Here, neither mbtowc() nor mbrtowc() is available.  The chances of
-         * this are very small, as they are C99 required functions, and we are
-         * now requiring C99; perhaps this is a defective implementation and
-         * therefore Configure has been set to indicate neither exists.
-         *
-         * Just below we try to calculate the code set from the locale name.
-         * In all cases but this one, it has already been determined that it is
-         * not a UTF-8 locale.  But for this case, we defer that, calculate the
-         * code set name, if any, and later use that result as a hint.  First
-         * #define a symbol to later tell us that we need to handle this case.
-         * */
-#          define NEED_FURTHER_UTF8NESS_CHECKING
 #        endif
 
         /* Here, the code set has not been found.  The only other option khw
@@ -6322,18 +6344,19 @@ S_my_langinfo_i(pTHX_
             retval = save_to_buffer(retval, retbufp, retbuf_sizep);
         }
 
-#        ifndef NEED_FURTHER_UTF8NESS_CHECKING
+#        ifdef HAS_DEFINITIVE_UTF8NESS_DETERMINATION
 
         break;  /* All done */
 
-#        else
+#        else   /* Below, no definitive locale utf8ness calculation on this
+                   platform */
 #          define NAME_INDICATES_UTF8       0x1
 #          define MB_CUR_MAX_SUGGESTS_UTF8  0x2
 
         /* Here, 'retval' contains whatever code set name is in the locale
          * name.  In this #else, it being a UTF-8 code set hasn't been
          * determined, because this platform is lacking the libc functions
-         * which would readily return that information.  So, we try to infer
+         * which would definitely return that information.  So, we try to infer
          * the UTF-8ness by other means, using the code set name just found as
          * a hint to help resolve ambiguities.  So if that name indicates it is
          * UTF-8, we expect it to be so */
