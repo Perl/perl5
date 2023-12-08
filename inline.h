@@ -2646,10 +2646,6 @@ Perl_is_utf8_string_loclen_flags(const U8 *s, STRLEN len, const U8 **ep, STRLEN 
     assert(0 == (flags & ~(UTF8_DISALLOW_ILLEGAL_INTERCHANGE
                           |UTF8_DISALLOW_PERL_EXTENDED)));
 
-    if (len == 0) {
-        len = strlen((const char *) s);
-    }
-
     if (flags == 0) {
         return is_utf8_string_loclen(s, len, ep, el);
     }
@@ -2664,6 +2660,10 @@ Perl_is_utf8_string_loclen_flags(const U8 *s, STRLEN len, const U8 **ep, STRLEN 
                                     == UTF8_DISALLOW_ILLEGAL_C9_INTERCHANGE)
     {
         return is_c9strict_utf8_string_loclen(s, len, ep, el);
+    }
+
+    if (len == 0) {
+        len = strlen((const char *) s);
     }
 
     if (is_utf8_invariant_string_loc(s, len, &first_variant)) {
