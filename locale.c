@@ -4668,6 +4668,15 @@ Perl_get_win32_message_utf8ness(pTHX_ const char * string)
 
 #    ifdef USE_LOCALE_CTYPE
 
+    /* We don't know the locale utf8ness here, and not even the locale itself.
+     * Since Windows uses a different mechanism to specify message language
+     * output than the locale system, it is going to be problematic deciding
+     * if we are to store it as UTF-8 or not.  By specifying LOCALE_IS_UTF8, we
+     * are telling the called function to return true iff the string has
+     * non-ASCII characters in it that are all syntactically UTF-8.  We are
+     * thus relying on the fact that a string that is syntactically valid UTF-8
+     * is likely to be UTF-8.  Should this ever cause problems, this function
+     * could be replaced by something more Windows-specific */
     return get_locale_string_utf8ness_i(string, LOCALE_IS_UTF8,
                                         NULL, LC_CTYPE_INDEX_);
 #    else
