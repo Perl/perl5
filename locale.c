@@ -4561,6 +4561,18 @@ S_is_locale_utf8(pTHX_ const char * locale)
 #      define TEARDOWN_FOR_IS_LOCALE_UTF8                                   \
                       restore_toggled_locale_c(LC_CTYPE, orig_CTYPE_locale)
 
+#      ifdef MB_CUR_MAX
+
+    /* If there are fewer bytes available in this locale than are required
+     * to represent the largest legal UTF-8 code point, this isn't a UTF-8
+     * locale. */
+    const int mb_cur_max = MB_CUR_MAX;
+    if (mb_cur_max < (int) UNISKIP(PERL_UNICODE_MAX)) {
+        TEARDOWN_FOR_IS_LOCALE_UTF8;
+        return false;
+    }
+
+#      endif
 #      if defined(HAS_MBTOWC) || defined(HAS_MBRTOWC)
 
          /* With these functions, we can definitively determine a locale's
