@@ -2813,7 +2813,7 @@ PP(pp_return)
                     && !(SvFLAGS(sv) & (SVs_TEMP|SVs_PADTMP))
                 )
 #ifdef PERL_RC_STACK
-                    rpp_replace_1_1(newSVsv(sv));
+                    rpp_replace_at_norc(PL_stack_sp, newSVsv(sv));
 #else
                     *PL_stack_sp = sv_mortalcopy(sv);
 #endif
