@@ -4580,8 +4580,14 @@ S_is_locale_utf8(pTHX_ const char * locale)
 
 #      else
 
-        /* Without those functions, we use our emulation of nl_langinfo(),
-         * which works quite well, but isn't fully definitive */
+        /* If the above two C99 functions aren't working, you could try some
+         * different methods.  It seems likely that the obvious choices,
+         * wctomb() and wcrtomb(), wouldn't be working either.  But you could
+         * choose one of the dozen-ish Unicode titlecase triples and verify
+         * that towupper/towlower work as expected.
+         *
+         * But, our emulation of nl_langinfo() works quite well, so avoid the
+         * extra code until forced to by some weird non-conforming platform. */
 #        define USE_LANGINFO_FOR_UTF8NESS
 #        undef HAS_DEFINITIVE_UTF8NESS_DETERMINATION
 #      endif
@@ -6371,12 +6377,12 @@ S_my_langinfo_i(pTHX_
          * name might be wrong.  We return "" as the code set name if we find
          * that to be the case.
          *
-         * For this portion of the file to compile, neither mbtowc() nor
-         * mbrtowc() are available to us, even though they are required by C99.
-         * So, something must be wrong with them.  The code here should be good
-         * enough to work around this issue, but should the need arise, you
-         * could look for other C99 functions that are implemented correctly to
-         * use instead.
+         * For this portion of the file to compile, some C99 functions aren't
+         * available to us, even though we now require C99.  So, something must
+         * be wrong with them.  The code here should be good enough to work
+         * around this issue, but should the need arise, comments in
+         * S_is_locale_utf8() list some alternative C99 functions that could
+         * be tried.
          *
          * But MB_CUR_MAX is a C99 construct that helps a lot, is simple for a
          * vendor to implement, and our experience with it is that it works
