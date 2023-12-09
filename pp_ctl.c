@@ -5508,11 +5508,8 @@ PP(pp_leaveeval)
         /* make sure that we use a standard return when feature 'module_load'
          * is enabled. Returns from require are problematic (consider what happens
          * when it is called twice) */
-        if (gimme == G_SCALAR) {
-            /* this following is an optimization of POPs()/PUSHs().
-             * and does the same thing with less bookkeeping */
-            *PL_stack_sp = &PL_sv_yes;
-        }
+        if (gimme == G_SCALAR)
+            rpp_replace_1_1(&PL_sv_yes);
         assert(gimme == G_VOID || gimme == G_SCALAR);
         failed = 0;
     }
