@@ -1623,6 +1623,13 @@ Perl_msbit_pos32(U32 word)
 
 }
 
+/* Note that if you are working through all the 1 bits in a word, and don't
+ * care which order you process them in, it is better to use lsbit_pos.  This
+ * is because some platforms have a fast way to find the msb but not the lsb,
+ * and others vice versa.  The code above falls back to use the single
+ * available fast method when the desired one is missing, and it is cheaper to
+ * fall back from lsb to msb than the other way around */
+
 #if UVSIZE == U64SIZE
 #  define msbit_pos(word)  msbit_pos64(word)
 #  define lsbit_pos(word)  lsbit_pos64(word)
