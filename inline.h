@@ -1401,7 +1401,7 @@ Perl_is_utf8_invariant_string_loc(const U8* const s, STRLEN len, const U8 ** ep)
 #  endif
 #endif
 
-#if defined(_MSC_VER)
+#if defined(WIN32)
 #  include <intrin.h>
 #  pragma intrinsic(_BitScanForward)
 #  pragma intrinsic(_BitScanReverse)
@@ -1443,7 +1443,7 @@ Perl_lsbit_pos64(U64 word)
 
     return (unsigned) PERL_CTZ_64(word);
 
-#  elif U64SIZE == 8 && defined(_WIN64) && defined(_MSC_VER)
+#  elif U64SIZE == 8 && defined(_WIN64)
 #    define PERL_HAS_FAST_GET_LSB_POS64
 
     {
@@ -1497,7 +1497,7 @@ Perl_lsbit_pos32(U32 word)
 
     return (unsigned) PERL_CTZ_32(word);
 
-#elif U32SIZE == 4 && defined(_MSC_VER)
+#elif U32SIZE == 4 && defined(WIN32)
 #  define PERL_HAS_FAST_GET_LSB_POS32
 
     {
@@ -1551,7 +1551,7 @@ Perl_msbit_pos64(U64 word)
 
     return (unsigned) LZC_TO_MSBIT_POS_(U64, PERL_CLZ_64(word));
 
-#  elif U64SIZE == 8 && defined(_WIN64) && defined(_MSC_VER)
+#  elif U64SIZE == 8 && defined(_WIN64)
 #    define PERL_HAS_FAST_GET_MSB_POS64
 
     {
@@ -1607,8 +1607,7 @@ Perl_msbit_pos32(U32 word)
 #  define PERL_HAS_FAST_GET_MSB_POS32
 
     return (unsigned) LZC_TO_MSBIT_POS_(U32, PERL_CLZ_32(word));
-
-#elif U32SIZE == 4 && defined(_MSC_VER)
+#elif U32SIZE == 4 && defined(WIN32)
 #  define PERL_HAS_FAST_GET_MSB_POS32
 
     {
