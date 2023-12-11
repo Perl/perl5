@@ -4790,6 +4790,19 @@ removed from the stack are non-NULL, and so are slightly more efficient:
  rpp_replace_at_NN(sp, sv)
  rpp_replace_at_norc_NN(sp, sv)
 
+There are also a few C<_IMM> variants, which expect the single pushed or
+replacement value to be an immortal, such as C<&PL_sv_undef> - this skips
+incrementing the ref count of the immortal SV. It doesn't matter if the
+ref count of the SV prematurely reaches zero, as sv_free2() will just
+resurrect it. Not every variant is provided; if a suitable one
+doesn't exist, just using a standard C<_1> version is fine, albeit
+slightly slower.
+
+ rpp_push_IMM(&PL_sv_undef)
+ rpp_xpush_IMM(&PL_sv_zero)
+ rpp_replace_1_IMM_NN(&PL_sv_yes)
+ rpp_replace_2_IMM_NN(&PL_sv_no)
+
 Other new C and perl functions related to reference-counted stacks are:
 
  push_stackinfo(type,rc) PUSHSTACKi(type)

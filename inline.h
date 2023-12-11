@@ -515,10 +515,10 @@ Perl_rpp_popfree_1_NN(pTHX)
 {
     PERL_ARGS_ASSERT_RPP_POPFREE_1_NN;
 
+    assert(*PL_stack_sp);
 #ifdef PERL_RC_STACK
     assert(rpp_stack_is_rc());
     SV *sv = *PL_stack_sp--;
-    assert(sv);
     SvREFCNT_dec_NN(sv);
 #else
     PL_stack_sp--;
@@ -568,11 +568,12 @@ Perl_rpp_popfree_2_NN(pTHX)
 {
     PERL_ARGS_ASSERT_RPP_POPFREE_2_NN;
 
+    assert(PL_stack_sp[0]);
+    assert(PL_stack_sp[-1]);
 #ifdef PERL_RC_STACK
     assert(rpp_stack_is_rc());
     for (int i = 0; i < 2; i++) {
         SV *sv = *PL_stack_sp--;
-        assert(sv);
         SvREFCNT_dec_NN(sv);
     }
 #else
@@ -619,13 +620,17 @@ Perl_rpp_pop_1_norc(pTHX)
 
 /*
 =for apidoc      rpp_push_1
+=for apidoc_item rpp_push_IMM
 =for apidoc_item rpp_push_2
 =for apidoc_item rpp_xpush_1
+=for apidoc_item rpp_xpush_IMM
 =for apidoc_item rpp_xpush_2
 
 Push one or two SVs onto the stack, incrementing their reference counts
 and updating C<PL_stack_sp>. With the C<x> variants, it extends the stack
-first.
+first. The C<IMM> variants assume that the single argument is an immortal
+such as <&PL_sv_undef> and, for efficiency, will skip incrementing its
+reference count.
 
 =cut
 */
@@ -639,6 +644,18 @@ Perl_rpp_push_1(pTHX_ SV *sv)
 #ifdef PERL_RC_STACK
     assert(rpp_stack_is_rc());
     SvREFCNT_inc_simple_void_NN(sv);
+#endif
+}
+
+PERL_STATIC_INLINE void
+Perl_rpp_push_IMM(pTHX_ SV *sv)
+{
+    PERL_ARGS_ASSERT_RPP_PUSH_IMM;
+
+    assert(SvIMMORTAL(sv));
+    *++PL_stack_sp = sv;
+#ifdef PERL_RC_STACK
+    assert(rpp_stack_is_rc());
 #endif
 }
 
@@ -663,6 +680,15 @@ Perl_rpp_xpush_1(pTHX_ SV *sv)
 
     rpp_extend(1);
     rpp_push_1(sv);
+}
+
+PERL_STATIC_INLINE void
+Perl_rpp_xpush_IMM(pTHX_ SV *sv)
+{
+    PERL_ARGS_ASSERT_RPP_XPUSH_IMM;
+
+    rpp_extend(1);
+    rpp_push_IMM(sv);
 }
 
 PERL_STATIC_INLINE void
@@ -702,11 +728,20 @@ Perl_rpp_push_1_norc(pTHX_ SV *sv)
 
 
 /*
-=for apidoc rpp_replace_1_1
+=for apidoc      rpp_replace_1_1
+=for apidoc_item rpp_replace_1_1_NN
+=for apidoc_item rpp_replace_1_IMM_NN
 
 Replace the current top stack item with C<sv>, while suitably adjusting
 reference counts. Equivalent to rpp_popfree_1(); rpp_push_1(sv), but
 is more efficient and handles both SVs being the same.
+
+The C<_NN> variant assumes that the pointer on the stack to the SV being
+freed is non-NULL.
+
+The C<IMM_NN> variant is like the C<_NN> variant, but in addition, assumes
+that the single argument is an immortal such as <&PL_sv_undef> and, for
+efficiency, will skip incrementing its reference count.
 
 =cut
 */
@@ -716,6 +751,7 @@ Perl_rpp_replace_1_1(pTHX_ SV *sv)
 {
     PERL_ARGS_ASSERT_RPP_REPLACE_1_1;
 
+    assert(sv);
 #ifdef PERL_RC_STACK
     assert(rpp_stack_is_rc());
     SV *oldsv = *PL_stack_sp;
@@ -728,26 +764,17 @@ Perl_rpp_replace_1_1(pTHX_ SV *sv)
 }
 
 
-/*
-=for apidoc rpp_replace_1_1_NN
-
-A variant of rpp_replace_1_1() which assumes that the SV pointer on the
-stack is non-NULL.
-
-=cut
-*/
-
 PERL_STATIC_INLINE void
 Perl_rpp_replace_1_1_NN(pTHX_ SV *sv)
 {
     PERL_ARGS_ASSERT_RPP_REPLACE_1_1_NN;
 
+    assert(sv);
+    assert(*PL_stack_sp);
 #ifdef PERL_RC_STACK
     assert(rpp_stack_is_rc());
     SV *oldsv = *PL_stack_sp;
     *PL_stack_sp = sv;
-    assert(sv);
-    assert(oldsv);
     SvREFCNT_inc_simple_void_NN(sv);
     SvREFCNT_dec_NN(oldsv);
 #else
@@ -756,13 +783,40 @@ Perl_rpp_replace_1_1_NN(pTHX_ SV *sv)
 }
 
 
+PERL_STATIC_INLINE void
+Perl_rpp_replace_1_IMM_NN(pTHX_ SV *sv)
+{
+    PERL_ARGS_ASSERT_RPP_REPLACE_1_IMM_NN;
+
+    assert(sv);
+    assert(SvIMMORTAL(sv));
+    assert(*PL_stack_sp);
+#ifdef PERL_RC_STACK
+    assert(rpp_stack_is_rc());
+    SV *oldsv = *PL_stack_sp;
+    *PL_stack_sp = sv;
+    SvREFCNT_dec_NN(oldsv);
+#else
+    *PL_stack_sp = sv;
+#endif
+}
+
+
 /*
-=for apidoc rpp_replace_2_1
+=for apidoc      rpp_replace_2_1
+=for apidoc_item rpp_replace_2_1_NN
+=for apidoc_item rpp_replace_2_IMM_NN
 
-Replace the current top two stack items with C<sv>, while suitably
-adjusting reference counts. Equivalent to rpp_popfree_2();
-rpp_push_1(sv), but is more efficient and handles SVs being the same.
+Replace the current top to stacks item with C<sv>, while suitably
+adjusting reference counts. Equivalent to rpp_popfree_2(); rpp_push_1(sv),
+but is more efficient and handles SVs being the same.
 
+The C<_NN> variant assumes that the pointers on the stack to the SVs being
+freed are non-NULL.
+
+The C<IMM_NN> variant is like the C<_NN> variant, but in addition, assumes
+that the single argument is an immortal such as <&PL_sv_undef> and, for
+efficiency, will skip incrementing its reference count.
 =cut
 */
 
@@ -788,20 +842,14 @@ Perl_rpp_replace_2_1(pTHX_ SV *sv)
 }
 
 
-/*
-=for apidoc rpp_replace_2_1_NN
-
-A variant of rpp_replace_2_1() which assumes that the two SV pointers on
-the stack are non-NULL.
-
-=cut
-*/
-
 PERL_STATIC_INLINE void
 Perl_rpp_replace_2_1_NN(pTHX_ SV *sv)
 {
     PERL_ARGS_ASSERT_RPP_REPLACE_2_1_NN;
 
+    assert(sv);
+    assert(PL_stack_sp[0]);
+    assert(PL_stack_sp[-1]);
 #ifdef PERL_RC_STACK
     assert(rpp_stack_is_rc());
     /* replace PL_stack_sp[-1] first; leave PL_stack_sp[0] in place while
@@ -809,12 +857,34 @@ Perl_rpp_replace_2_1_NN(pTHX_ SV *sv)
      */
     SV *oldsv = PL_stack_sp[-1];
     PL_stack_sp[-1] = sv;
-    assert(sv);
     SvREFCNT_inc_simple_void_NN(sv);
-    assert(oldsv);
     SvREFCNT_dec_NN(oldsv);
     oldsv = *PL_stack_sp--;
-    assert(oldsv);
+    SvREFCNT_dec_NN(oldsv);
+#else
+    *--PL_stack_sp = sv;
+#endif
+}
+
+
+PERL_STATIC_INLINE void
+Perl_rpp_replace_2_IMM_NN(pTHX_ SV *sv)
+{
+    PERL_ARGS_ASSERT_RPP_REPLACE_2_IMM_NN;
+
+    assert(sv);
+    assert(SvIMMORTAL(sv));
+    assert(PL_stack_sp[0]);
+    assert(PL_stack_sp[-1]);
+#ifdef PERL_RC_STACK
+    assert(rpp_stack_is_rc());
+    /* replace PL_stack_sp[-1] first; leave PL_stack_sp[0] in place while
+     * we free [-1], so if an exception occurs, [0] will still be freed.
+     */
+    SV *oldsv = PL_stack_sp[-1];
+    PL_stack_sp[-1] = sv;
+    SvREFCNT_dec_NN(oldsv);
+    oldsv = *PL_stack_sp--;
     SvREFCNT_dec_NN(oldsv);
 #else
     *--PL_stack_sp = sv;
@@ -863,13 +933,13 @@ Perl_rpp_replace_at_NN(pTHX_ SV **sp, SV *sv)
 {
     PERL_ARGS_ASSERT_RPP_REPLACE_AT_NN;
 
+    assert(sv);
+    assert(*sp);
 #ifdef PERL_RC_STACK
     assert(rpp_stack_is_rc());
     SV *oldsv = *sp;
     *sp = sv;
-    assert(sv);
     SvREFCNT_inc_simple_void_NN(sv);
-    assert(oldsv);
     SvREFCNT_dec_NN(oldsv);
 #else
     *sp = sv;
@@ -924,11 +994,11 @@ Perl_rpp_replace_at_norc_NN(pTHX_ SV **sp, SV *sv)
 {
     PERL_ARGS_ASSERT_RPP_REPLACE_AT_NORC_NN;
 
+    assert(*sp);
 #ifdef PERL_RC_STACK
     assert(rpp_stack_is_rc());
     SV *oldsv = *sp;
     *sp = sv;
-    assert(oldsv);
     SvREFCNT_dec_NN(oldsv);
 #else
     *sp = sv;
