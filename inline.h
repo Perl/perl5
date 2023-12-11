@@ -1506,6 +1506,14 @@ Perl_lsbit_pos32(U32 word)
         return (unsigned)index;
     }
 
+#elif defined(PERL_HAS_FAST_GET_LSB_POS64)
+#  define PERL_HAS_FAST_GET_LSB_POS32
+
+    /* Unlikely, but possible for the platform to have a wider fast operation
+     * but not a narrower one.  But easy enough to handle the case by widening
+     * the parameter size. */
+    return lsbit_pos64(word);
+
 #else
 
     return single_1bit_pos32(word & (~word + 1));
@@ -1609,6 +1617,11 @@ Perl_msbit_pos32(U32 word)
         return (unsigned)index;
     }
 
+#elif defined(PERL_HAS_FAST_GET_MSB_POS64)
+#  define PERL_HAS_FAST_GET_MSB_POS32
+
+    return msbit_pos64(word);   /* Let compiler widen parameter */
+
 #else
 
     word |= (word >>  1);
@@ -1697,18 +1710,6 @@ Perl_single_1bit_pos32(U32 word)
 #elif defined(PERL_HAS_FAST_GET_LSB_POS32)
 
     return lsbit_pos32(word);
-
-/* Unlikely, but possible for the platform to have a wider fast operation but
- * not a narrower one.  But easy enough to handle the case by widening the
- * parameter size.  (Going the other way, emulating 64 bit by two 32 bit ops
- * would be slower than the deBruijn method.) */
-#elif defined(PERL_HAS_FAST_GET_MSB_POS64)
-
-    return msbit_pos64(word);
-
-#elif defined(PERL_HAS_FAST_GET_LSB_POS64)
-
-    return lsbit_pos64(word);
 
 #else
 
