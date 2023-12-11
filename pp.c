@@ -3926,16 +3926,18 @@ PP(pp_index)
 }
 
 
-PP_wrapped(pp_sprintf, 0, 1)
+PP(pp_sprintf)
 {
-    dSP; dMARK; dORIGMARK; dTARGET;
+    dMARK; dORIGMARK; dTARGET;
     SvTAINTED_off(TARG);
-    do_sprintf(TARG, SP-MARK, MARK+1);
+    do_sprintf(TARG, PL_stack_sp - MARK, MARK + 1);
     TAINT_IF(SvTAINTED(TARG));
-    SP = ORIGMARK;
-    PUSHTARG;
-    RETURN;
+    rpp_popfree_to_NN(ORIGMARK);
+    SvSETMAGIC(TARG);
+    rpp_push_1(TARG);
+    return NORMAL;
 }
+
 
 PP(pp_ord)
 {

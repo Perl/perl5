@@ -1818,31 +1818,36 @@ PP(pp_leavewrite)
 }
 
 
-PP_wrapped(pp_prtf, 0, 1)
+PP(pp_prtf)
 {
-    dSP; dMARK; dORIGMARK;
+    dMARK; dORIGMARK;
     PerlIO *fp;
 
+    /* OPf_STACKED if first argument is a file handle */
     GV * const gv
         = (PL_op->op_flags & OPf_STACKED) ? MUTABLE_GV(*++MARK) : PL_defoutgv;
     IO *const io = GvIO(gv);
 
     /* Treat empty list as "" */
-    if (MARK == SP) XPUSHs(&PL_sv_no);
+    if (MARK == PL_stack_sp)
+        rpp_xpush_IMM(&PL_sv_no);
 
+    SV * retval = &PL_sv_undef;
     if (io) {
         const MAGIC * const mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar);
         if (mg) {
             if (MARK == ORIGMARK) {
-                MEXTEND(SP, 1);
-                ++MARK;
-                Move(MARK, MARK + 1, (SP - MARK) + 1, SV*);
-                ++SP;
+                /* insert NULL hole at base of argument list if no FH */
+                rpp_extend(1);
+                MARK = ORIGMARK + 1;
+                Move(MARK, MARK + 1, (PL_stack_sp - MARK) + 1, SV*);
+                *MARK = NULL;
+                ++PL_stack_sp;
             }
             return Perl_tied_method(aTHX_ SV_CONST(PRINTF), mark - 1, MUTABLE_SV(io),
                                     mg,
                                     G_SCALAR | TIED_METHOD_ARGUMENTS_ON_STACK,
-                                    sp - mark);
+                                    PL_stack_sp - mark);
         }
     }
 
@@ -1861,7 +1866,7 @@ PP_wrapped(pp_prtf, 0, 1)
     }
     else {
         SV *sv = sv_newmortal();
-        do_sprintf(sv, SP - MARK, MARK + 1);
+        do_sprintf(sv, PL_stack_sp - MARK, MARK + 1);
         if (!do_print(sv, fp))
             goto just_say_no;
 
@@ -1869,15 +1874,14 @@ PP_wrapped(pp_prtf, 0, 1)
             if (PerlIO_flush(fp) == EOF)
                 goto just_say_no;
     }
-    SP = ORIGMARK;
-    PUSHs(&PL_sv_yes);
-    RETURN;
+    retval = &PL_sv_yes;;
 
   just_say_no:
-    SP = ORIGMARK;
-    PUSHs(&PL_sv_undef);
-    RETURN;
+    rpp_popfree_to_NN(ORIGMARK);
+    rpp_push_IMM(retval);
+    return NORMAL;
 }
+
 
 PP_wrapped(pp_sysopen, MAXARG, 0)
 {
