@@ -4551,6 +4551,10 @@ S_is_locale_utf8(pTHX_ const char * locale)
         return PL_in_utf8_CTYPE_locale;
     }
 
+    if (isNAME_C_OR_POSIX(locale)) {
+        return false;
+    }
+
 #    if ! defined(HAS_SOME_LANGINFO) && ! defined(WIN32)
 
     /* On non-Windows without nl_langinfo(), we have to do some digging to get
