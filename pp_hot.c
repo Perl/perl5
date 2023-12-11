@@ -189,7 +189,7 @@ PP(pp_nextstate)
 {
     PL_curcop = (COP*)PL_op;
     TAINT_NOT;		/* Each statement is presumed innocent */
-    rpp_popfree_to(PL_stack_base + CX_CUR()->blk_oldsp);
+    rpp_popfree_to_NN(PL_stack_base + CX_CUR()->blk_oldsp);
     FREETMPS;
     PERL_ASYNC_CHECK();
     return NORMAL;
@@ -226,7 +226,7 @@ PP(pp_stringify)
     dTARGET;
     sv_copypv(TARG, *PL_stack_sp);
     SvSETMAGIC(TARG);
-    rpp_replace_1_1(TARG);
+    rpp_replace_1_1_NN(TARG);
     return NORMAL;
 }
 
@@ -251,7 +251,7 @@ PP(pp_and)
             return NORMAL;
         else {
             if (PL_op->op_type == OP_AND)
-                rpp_popfree_1();
+                rpp_popfree_1_NN();
             return cLOGOP->op_other;
         }
     }
@@ -294,7 +294,7 @@ PP(pp_padsv_store)
         );
     SvSetMagicSV(targ, val);
 
-    rpp_replace_1_1(targ);
+    rpp_replace_1_1_NN(targ);
     return NORMAL;
 }
 
@@ -344,7 +344,7 @@ PP(pp_aelemfastlex_store)
 
     SvSetMagicSV(targ, val);
 
-    rpp_replace_1_1(targ);
+    rpp_replace_1_1_NN(targ);
     return NORMAL;
 }
 
@@ -390,7 +390,7 @@ PP(pp_sassign)
                 SvPCS_IMPORTED_on(gv);
                 SvRV_set(gv, value);
                 SvREFCNT_inc_simple_void(value);
-                rpp_replace_2_1(left);
+                rpp_replace_2_1_NN(left);
                 return NORMAL;
             }
         }
@@ -451,7 +451,7 @@ PP(pp_sassign)
             packWARN(WARN_MISC), "Useless assignment to a temporary"
         );
     SvSetMagicSV(left, right);
-    rpp_replace_2_1(left);
+    rpp_replace_2_1_NN(left);
     return NORMAL;
 }
 
@@ -459,7 +459,7 @@ PP(pp_cond_expr)
 {
     PERL_ASYNC_CHECK();
     bool ok = SvTRUE_NN(*PL_stack_sp);
-    rpp_popfree_1();
+    rpp_popfree_1_NN();
     return (ok ? cLOGOP->op_other : cLOGOP->op_next);
 }
 
@@ -469,7 +469,7 @@ PP(pp_unstack)
     PERL_ASYNC_CHECK();
     TAINT_NOT;		/* Each statement is presumed innocent */
     cx  = CX_CUR();
-    rpp_popfree_to(PL_stack_base + CX_CUR()->blk_oldsp);
+    rpp_popfree_to_NN(PL_stack_base + CX_CUR()->blk_oldsp);
     FREETMPS;
     if (!(PL_op->op_flags & OPf_SPECIAL)) {
         assert(CxTYPE(cx) == CXt_BLOCK || CxTYPE_is_LOOP(cx));
@@ -561,7 +561,7 @@ PP(pp_concat)
     SV *right = PL_stack_sp[0];
     SV *left  = PL_stack_sp[-1];
     S_do_concat(aTHX_ left, right, targ, PL_op->op_private & OPpTARGET_MY);
-    rpp_replace_2_1(targ);
+    rpp_replace_2_1_NN(targ);
     return NORMAL;
 }
 
@@ -1145,7 +1145,7 @@ PP(pp_multiconcat)
      * return result
      */
 
-    rpp_popfree_to(PL_stack_sp - stack_adj);
+    rpp_popfree_to_NN(PL_stack_sp - stack_adj);
     SvTAINT(targ);
     SvSETMAGIC(targ);
     rpp_push_1(targ);
@@ -1373,7 +1373,7 @@ PP(pp_multiconcat)
         else
             targ = left;
 
-        rpp_popfree_to(PL_stack_sp - stack_adj);
+        rpp_popfree_to_NN(PL_stack_sp - stack_adj);
         rpp_push_1(targ);
         return NORMAL;
     }
@@ -1482,7 +1482,7 @@ PP(pp_padsv)
                    than TARG reduces the scope of TARG, so it does not
                    span the call to save_clearsv, resulting in smaller
                    machine code. */
-                rpp_replace_1_1(
+                rpp_replace_1_1_NN(
                     vivify_ref(*PL_stack_sp, op->op_private & OPpDEREF));
             }
         }
@@ -1551,7 +1551,7 @@ PP(pp_readline)
                 assert(SvTYPE(tmpsv) == SVt_PVAV);
                 len = av_count((AV *)tmpsv);
                 assert(*PL_stack_sp == arg);
-                rpp_popfree_1(); /* pop the original filehhandle arg */
+                rpp_popfree_1_NN(); /* pop the original filehhandle arg */
                 /* no assignment target to pop */
                 assert(!(PL_op->op_flags & OPf_STACKED));
                 rpp_extend(len);
@@ -1570,11 +1570,11 @@ PP(pp_readline)
                 sv_setsv(targ, tmpsv);
                 SvSETMAGIC(targ);
                 if (PL_op->op_flags & OPf_STACKED) {
-                    rpp_popfree_1();
+                    rpp_popfree_1_NN();
                     assert(*PL_stack_sp == targ);
                 }
                 else
-                    rpp_replace_1_1(targ);
+                    rpp_replace_1_1_NN(targ);
             }
             return NORMAL;
         }
@@ -1587,11 +1587,13 @@ PP(pp_readline)
         if (SvREFCNT(PL_last_in_gv) < 2)
             sv_2mortal((SV*)PL_last_in_gv);
 #endif
+        rpp_popfree_1_NN();
     }
-    else
+    else {
         PL_last_in_gv = PL_argvgv;
+        PL_stack_sp--;
+    }
 
-    rpp_popfree_1();
 
     /* is it *FOO, $fh, or 'FOO' ? */
     if (!isGV_with_GP(PL_last_in_gv)) {
@@ -1601,7 +1603,7 @@ PP(pp_readline)
             rpp_xpush_1(MUTABLE_SV(PL_last_in_gv));
             Perl_pp_rv2gv(aTHX);
             PL_last_in_gv = MUTABLE_GV(*PL_stack_sp);
-            rpp_popfree_1();
+            rpp_popfree_1_NN();
             assert(   (SV*)PL_last_in_gv == &PL_sv_undef
                    || isGV_with_GP(PL_last_in_gv));
         }
@@ -1622,7 +1624,7 @@ PP(pp_eq)
     U32 flags_and = SvFLAGS(left) & SvFLAGS(right);
     U32 flags_or  = SvFLAGS(left) | SvFLAGS(right);
 
-    rpp_replace_2_1(boolSV(
+    rpp_replace_2_IMM_NN(boolSV(
         ( (flags_and & SVf_IOK) && ((flags_or & SVf_IVisUV) ==0 ) )
         ?    (SvIVX(left) == SvIVX(right))
         : (flags_and & SVf_NOK)
@@ -1686,7 +1688,7 @@ PP(pp_or)
         return NORMAL;
     else {
         if (PL_op->op_type == OP_OR)
-            rpp_popfree_1();
+            rpp_popfree_1_NN();
         return cLOGOP->op_other;
     }
 }
@@ -1740,11 +1742,11 @@ PP(pp_defined)
         if(defined) 
             return NORMAL;
         if(op_type == OP_DOR)
-            rpp_popfree_1();
+            rpp_popfree_1_NN();
         return cLOGOP->op_other;
     }
     /* assuming OP_DEFINED */
-    rpp_replace_1_1(defined ? &PL_sv_yes : &PL_sv_no);
+    rpp_replace_1_IMM_NN(defined ? &PL_sv_yes : &PL_sv_no);
     return NORMAL;
 }
 
@@ -1783,8 +1785,7 @@ PP(pp_add)
              * are 00  or 11, then it's safe */
             if (!( ((topl+1) | (topr+1)) & 2)) {
                 TARGi(il + ir, 0); /* args not GMG, so can't be tainted */
-                rpp_replace_2_1(targ);
-                return NORMAL;
+                goto ret;
             }
             goto generic;
         }
@@ -1798,8 +1799,7 @@ PP(pp_add)
                 goto do_iv;
             }
             TARGn(nl + nr, 0); /* args not GMG, so can't be tainted */
-            rpp_replace_2_1(targ);
-            return NORMAL;
+            goto ret;
         }
     }
 
@@ -1947,8 +1947,7 @@ PP(pp_add)
                         TARGn(-(NV)result, 1);
                     }
                 }
-                rpp_replace_2_1(targ);
-                return NORMAL;
+                goto ret;
             } /* Overflow, drop through to NVs.  */
         }
     }
@@ -1966,9 +1965,11 @@ PP(pp_add)
         else {
             TARGn(value + SvNV_nomg(svl), 1);
         }
-        rpp_replace_2_1(targ);
-        return NORMAL;
     }
+
+  ret:
+    rpp_replace_2_1_NN(targ);
+    return NORMAL;
 }
 
 
@@ -2016,7 +2017,7 @@ PP(pp_join)
     dMARK; dTARGET;
     MARK++;
     do_join(TARG, *MARK, MARK, PL_stack_sp);
-    rpp_popfree_to(MARK - 1);
+    rpp_popfree_to_NN(MARK - 1);
     rpp_push_1(TARG);
     return NORMAL;
 }
@@ -2034,6 +2035,7 @@ PP(pp_print)
     GV * const gv
         = (PL_op->op_flags & OPf_STACKED) ? MUTABLE_GV(*++MARK) : PL_defoutgv;
     IO *io = GvIO(gv);
+    SV *retval = &PL_sv_undef;
 
     if (io
         && (mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar)))
@@ -2114,13 +2116,11 @@ PP(pp_print)
                     goto just_say_no;
         }
     }
-    rpp_popfree_to(ORIGMARK);
-    rpp_xpush_1(&PL_sv_yes);
-    return NORMAL;
+    retval = &PL_sv_yes;
 
   just_say_no:
-    rpp_popfree_to(ORIGMARK);
-    rpp_xpush_1(&PL_sv_undef);
+    rpp_popfree_to_NN(ORIGMARK);
+    rpp_xpush_IMM(retval);
     return NORMAL;
 }
 
@@ -2155,7 +2155,7 @@ S_padhv_rv2hv_common(pTHX_ HV *hv, U8 gimme, bool is_keys, bool has_targ)
             PL_stack_sp--;
             SvREFCNT_dec_NN(old_sv);
 #else
-            rpp_popfree_1();
+            rpp_popfree_1_NN();
             hv_pushkv(hv, 3);
 #endif
         }
@@ -2170,7 +2170,7 @@ S_padhv_rv2hv_common(pTHX_ HV *hv, U8 gimme, bool is_keys, bool has_targ)
 
     if (gimme == G_VOID) {
         if (has_targ)
-            rpp_popfree_1();
+            rpp_popfree_1_NN();
         return NORMAL;
     }
 
@@ -2191,15 +2191,15 @@ S_padhv_rv2hv_common(pTHX_ HV *hv, U8 gimme, bool is_keys, bool has_targ)
                 i++;
             /* hv finished with. Safe to free arg now */
             if (has_targ)
-                rpp_popfree_1();
+                rpp_popfree_1_NN();
             goto push_i;
         }
         else {
             sv = magic_scalarpack(hv, is_tied_mg);
             /* hv finished with. Safe to free arg now */
             if (has_targ)
-                rpp_popfree_1();
-            goto push_sv;
+                rpp_popfree_1_NN();
+            rpp_push_1(sv);
         }
     }
     else {
@@ -2220,12 +2220,10 @@ S_padhv_rv2hv_common(pTHX_ HV *hv, U8 gimme, bool is_keys, bool has_targ)
 
         /* hv finished with. Safe to free arg now */
         if (has_targ)
-            rpp_popfree_1();
+            rpp_popfree_1_NN();
 
         if (is_bool) {
-            sv = i ? &PL_sv_yes : &PL_sv_zero;
-          push_sv:
-            rpp_push_1(sv);
+            rpp_push_IMM(i ? &PL_sv_yes : &PL_sv_zero);
         }
         else {
           push_i:
@@ -2291,15 +2289,17 @@ PP(pp_padav)
 
     {
         const SSize_t maxarg = AvFILL(MUTABLE_AV(TARG)) + 1;
+        rpp_extend(1);
         if (!maxarg)
             targ = &PL_sv_zero;
         else if (PL_op->op_private & OPpTRUEBOOL)
             targ = &PL_sv_yes;
         else {
-            rpp_extend(1);
             rpp_push_1_norc(newSViv(maxarg));
             return NORMAL;
         }
+        rpp_push_IMM(targ);
+        return NORMAL;
     }
 
   ret:
@@ -2425,7 +2425,7 @@ PP(pp_rv2av)
         if (gimme == G_SCALAR) {
             const SSize_t maxarg = AvFILL(av) + 1;
             if (PL_op->op_private & OPpTRUEBOOL)
-                rpp_replace_1_1_NN(maxarg ? &PL_sv_yes : &PL_sv_zero);
+                rpp_replace_1_IMM_NN(maxarg ? &PL_sv_yes : &PL_sv_zero);
             else {
                 dTARGET;
                 TARGi(maxarg, 1);
@@ -3539,13 +3539,13 @@ PP(pp_aassign)
         rpp_extend(1);
         SV *sv;
         if (PL_op->op_private & OPpASSIGN_TRUEBOOL)
-             sv = (firstlelem - firstrelem) ? &PL_sv_yes : &PL_sv_zero;
+            rpp_push_IMM((firstlelem - firstrelem) ? &PL_sv_yes : &PL_sv_zero);
         else {
             dTARGET;
             TARGi(firstlelem - firstrelem, 1);
             sv = targ;
+            rpp_push_1(sv);
         }
-        rpp_push_1(sv);
     }
 
     return NORMAL;
@@ -3800,7 +3800,7 @@ PP(pp_match)
         LEAVE_SCOPE(oldsave);
         if (sp_base)
             rpp_popfree_1(); /* free arg */
-        rpp_push_1(&PL_sv_yes);
+        rpp_push_IMM(&PL_sv_yes);
         return NORMAL;
     }
 
@@ -3910,7 +3910,7 @@ PP(pp_match)
     if (gimme != G_LIST) {
         if (sp_base)
             rpp_popfree_1(); /* free arg */
-        rpp_push_1(&PL_sv_no);
+        rpp_push_IMM(&PL_sv_no);
         return NORMAL;
     }
 
@@ -4073,7 +4073,7 @@ Perl_do_readline(pTHX)
             }
             else if (type == OP_GLOB) {
                 fp = Perl_start_glob(aTHX_ *PL_stack_sp, io);
-                rpp_popfree_1();
+                rpp_popfree_1_NN();
             }
         }
     }
@@ -4191,7 +4191,7 @@ Perl_do_readline(pTHX)
                     rpp_push_1(targ);
             }
             else if (PL_op->op_flags & OPf_STACKED)
-                rpp_popfree_1();
+                rpp_popfree_1_NN();
 
             MAYBE_TAINT_LINE(io, sv);
             return NORMAL;
@@ -4276,7 +4276,7 @@ Perl_do_readline(pTHX)
 
 
         if (PL_op->op_flags & OPf_STACKED)
-            rpp_popfree_1(); /* finally remove targ */
+            rpp_popfree_1_NN(); /* finally remove targ */
         /* return sv, which was recently pushed onto the stack */
         return NORMAL;
     } /* for (;;) */
@@ -4363,7 +4363,7 @@ PP(pp_helem)
     retsv = sv;
 
   ret:
-    rpp_replace_2_1(retsv);
+    rpp_replace_2_1_NN(retsv);
     return NORMAL;
 }
 
@@ -4605,7 +4605,7 @@ PP(pp_multideref)
           finish:
             {
                 if (replace)
-                    rpp_replace_1_1(sv);
+                    rpp_replace_1_1_NN(sv);
                 else
                     rpp_xpush_1(sv);
                 return NORMAL;
@@ -5049,7 +5049,7 @@ PP(pp_iter)
          * obvious way. */
         /* pp_enteriter should have pre-extended the stack */
         EXTEND_SKIP(PL_stack_sp, 1);
-        *++PL_stack_sp = &PL_sv_yes;
+        rpp_push_IMM(&PL_sv_yes);
         return PL_op->op_next;
     }
 
@@ -5064,7 +5064,7 @@ PP(pp_iter)
      * (or for when an XS module has replaced the op_ppaddr)
      * but it's cheaper to just push it rather than testing first
      */
-    *++PL_stack_sp = &PL_sv_no;
+    rpp_push_IMM(&PL_sv_no);
     if (PL_op->op_next->op_ppaddr == Perl_pp_and) {
         return PL_op->op_next->op_next;
     }
@@ -5596,7 +5596,7 @@ PP(pp_grepwhile)
      */
 
     bool match = SvTRUE_NN(*PL_stack_sp);
-    rpp_popfree_1();
+    rpp_popfree_1_NN();
 
     if (match) {
         SV **from_p = PL_stack_base + PL_markstack_ptr[0];
@@ -5629,12 +5629,12 @@ PP(pp_grepwhile)
         SV **base = PL_stack_base + POPMARK;	/* pop original mark */
 
         if (gimme == G_LIST)
-            rpp_popfree_to(base + items);
+            rpp_popfree_to_NN(base + items);
         else {
-            rpp_popfree_to(base);
+            rpp_popfree_to_NN(base);
             if (gimme == G_SCALAR) {
                 if (PL_op->op_private & OPpTRUEBOOL)
-                    rpp_push_1(items ? &PL_sv_yes : &PL_sv_zero);
+                    rpp_push_IMM(items ? &PL_sv_yes : &PL_sv_zero);
                 else {
                     dTARGET;
                     TARGi(items,1);
@@ -5749,8 +5749,7 @@ Perl_leave_adjust_stacks(pTHX_ SV **from_sp, SV **to_sp, U8 gimme, int pass)
         if (UNLIKELY(from_sp >= PL_stack_sp)) {
             /* no return args */
             assert(from_sp == PL_stack_sp);
-            rpp_extend(1);
-            *++PL_stack_sp = &PL_sv_undef;
+            rpp_xpush_IMM(&PL_sv_undef);
         }
         from_sp = PL_stack_sp;
         nargs   = 1;
@@ -6039,7 +6038,7 @@ PP(pp_leavesub)
     oldsp = PL_stack_base + cx->blk_oldsp; /* last arg of previous frame */
 
     if (gimme == G_VOID)
-        rpp_popfree_to(oldsp);
+        rpp_popfree_to_NN(oldsp);
     else
         leave_adjust_stacks(oldsp, oldsp, gimme, 0);
 
@@ -6233,7 +6232,7 @@ PP(pp_entersub)
             DIE(aTHX_ "No DB::sub routine defined");
     }
 
-    rpp_popfree_1(); /* finished with sv now */
+    rpp_popfree_1_NN(); /* finished with sv now */
 
     if (!(CvISXSUB(cv))) {
         /* This path taken at least 75% of the time   */
@@ -6432,10 +6431,10 @@ PP(pp_entersub)
                     SV* retsv = *PL_stack_sp;
                     *PL_stack_sp = *svp;
                     *svp = retsv;
-                    rpp_popfree_to(svp);
+                    rpp_popfree_to_NN(svp);
                 }
                 else
-                    *++PL_stack_sp = &PL_sv_undef;
+                    rpp_push_IMM(&PL_sv_undef);
 #else
                 *svp = svp > PL_stack_sp ? &PL_sv_undef : *PL_stack_sp;
                 PL_stack_sp = svp;
@@ -6564,7 +6563,7 @@ PP(pp_aelem)
     retsv = sv;
 
   ret:
-    rpp_replace_2_1(retsv);
+    rpp_replace_2_1_NN(retsv);
     return NORMAL;
 }
 
@@ -6722,7 +6721,7 @@ PP(pp_method)
     if (SvROK(meth)) {
         SV* const rmeth = SvRV(meth);
         if (SvTYPE(rmeth) == SVt_PVCV) {
-            rpp_replace_1_1(rmeth);
+            rpp_replace_1_1_NN(rmeth);
             return NORMAL;
         }
     }
@@ -6732,7 +6731,7 @@ PP(pp_method)
     gv = gv_fetchmethod_sv_flags(stash, meth, GV_AUTOLOAD|GV_CROAK);
     assert(gv);
 
-    rpp_replace_1_1(isGV(gv) ? MUTABLE_SV(GvCV(gv)) : MUTABLE_SV(gv));
+    rpp_replace_1_1_NN(isGV(gv) ? MUTABLE_SV(GvCV(gv)) : MUTABLE_SV(gv));
     return NORMAL;
 }
 
