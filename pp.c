@@ -583,10 +583,10 @@ PP(pp_ref)
 }
 
 
-PP_wrapped(pp_bless, MAXARG, 0)
+PP(pp_bless)
 {
-    dSP;
     HV *stash;
+    SV **sp = PL_stack_sp;
 
     if (MAXARG == 1)
     {
@@ -596,11 +596,13 @@ PP_wrapped(pp_bless, MAXARG, 0)
             Perl_croak(aTHX_ "Attempt to bless into a freed package");
     }
     else {
-        SV * const ssv = POPs;
+        SV * const ssv = *sp--;
         STRLEN len;
         const char *ptr;
 
-        if (!ssv) goto curstash;
+        if (!ssv)
+            goto curstash;
+
         SvGETMAGIC(ssv);
         if (SvROK(ssv)) {
           if (!SvAMAGIC(ssv)) {
@@ -620,9 +622,12 @@ PP_wrapped(pp_bless, MAXARG, 0)
         stash = gv_stashpvn(ptr, len, GV_ADD|SvUTF8(ssv));
     }
 
-    (void)sv_bless(TOPs, stash);
-    RETURN;
+    (void)sv_bless(*sp, stash);
+    if (PL_stack_sp > sp)
+        rpp_popfree_1();
+    return NORMAL;
 }
+
 
 PP(pp_gelem)
 {
