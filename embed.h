@@ -1307,7 +1307,7 @@
 #     define strftime_tm(a,b)                   S_strftime_tm(aTHX_ a,b)
 #     if defined(HAS_LOCALECONV)
 #       define my_localeconv(a)                 S_my_localeconv(aTHX_ a)
-#       define populate_hash_from_localeconv(a,b,c,d,e) S_populate_hash_from_localeconv(aTHX_ a,b,c,d,e)
+#       define populate_hash_from_C_localeconv(a,b,c,d,e) S_populate_hash_from_C_localeconv(aTHX_ a,b,c,d,e)
 #     endif
 #     if defined(USE_LOCALE)
 #       define calculate_LC_ALL_string(a,b,c,d) S_calculate_LC_ALL_string(aTHX_ a,b,c,d)
@@ -1342,6 +1342,9 @@
 #       if defined(USE_LOCALE_CTYPE)
 #         define is_codeset_name_UTF8           S_is_codeset_name_UTF8
 #         define new_ctype(a,b)                 S_new_ctype(aTHX_ a,b)
+#       endif
+#       if defined(USE_LOCALE_MONETARY) || defined(USE_LOCALE_NUMERIC)
+#         define populate_hash_from_localeconv(a,b,c,d,e) S_populate_hash_from_localeconv(aTHX_ a,b,c,d,e)
 #       endif
 #       if defined(USE_LOCALE_NUMERIC)
 #         define new_numeric(a,b)               S_new_numeric(aTHX_ a,b)
