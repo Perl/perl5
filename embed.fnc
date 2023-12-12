@@ -4415,12 +4415,12 @@ Sf	|char * |strftime_tm	|NN const char *fmt			\
 				|NN const struct tm *mytm
 # if defined(HAS_LOCALECONV)
 S	|HV *	|my_localeconv	|const int item
-S	|void	|populate_hash_from_localeconv					\
-				|NN HV *hv					\
-				|NN const char *locale				\
-				|const U32 which_mask				\
-				|NN const lconv_offset_t *strings[2]		\
-				|NULLOK const lconv_offset_t *integers[2]
+S	|void	|populate_hash_from_C_localeconv			\
+				|NN HV *hv				\
+				|NN const char *locale			\
+				|const U32 which_mask			\
+				|NN const lconv_offset_t *strings[2]	\
+				|NN const lconv_offset_t *integers[2]
 # endif
 # if defined(USE_LOCALE)
 S	|const char *|calculate_LC_ALL_string					\
@@ -4523,6 +4523,14 @@ ST	|bool	|is_codeset_name_UTF8					\
 				|NN const char *name
 S	|void	|new_ctype	|NN const char *newctype		\
 				|bool force
+#   endif
+#   if defined(USE_LOCALE_MONETARY) || defined(USE_LOCALE_NUMERIC)
+S	|void	|populate_hash_from_localeconv				\
+				|NN HV *hv				\
+				|NN const char *locale			\
+				|const U32 which_mask			\
+				|NN const lconv_offset_t *strings[2]	\
+				|NN const lconv_offset_t *integers[2]
 #   endif
 #   if defined(USE_LOCALE_NUMERIC)
 S	|void	|new_numeric	|NN const char *newnum			\

@@ -4990,8 +4990,8 @@ S_my_localeconv(pTHX_ const int item)
 #  define P_CS_PRECEDES_ADDRESS                                       \
       &lconv_integers[(C_ARRAY_LENGTH(lconv_integers) - 2)]
 
-    /* The actual populating of the hash is done by a sub function that gets
-     * passed an array of length two containing the data structure it is
+    /* The actual populating of the hash is done by two sub functions that get
+     * passed an array of length two containing the data structure they are
      * supposed to use to get the key names to fill the hash with.  One element
      * is always for the NUMERIC strings (or NULL if none to use), and the
      * other element similarly for the MONETARY ones. */
@@ -5006,7 +5006,29 @@ S_my_localeconv(pTHX_ const int item)
                                            lconv_integers
                                          };
 
-    /* If we aren't paying attention to a given category, use LC_CTYPE instead;
+#  if ! defined(USE_LOCALE_NUMERIC) && ! defined(USE_LOCALE_MONETARY)
+
+    /* If both NUMERIC and MONETARY must be the "C" locale, simply populate the
+     * hash using the function that works on just that locale. */
+    populate_hash_from_C_localeconv(hv,
+                                    "C",
+                                    (  OFFSET_TO_BIT(NUMERIC_OFFSET)
+                                     | OFFSET_TO_BIT(MONETARY_OFFSET)),
+                                     strings, integers);
+
+    /* We shouldn't get to here for the case of an individual item, as
+     * preprocessor directives elsewhere in this file should have filled in the
+     * correct values at a higher level */
+    assert(item == 0);
+    PERL_UNUSED_ARG(item);
+
+    return hv;
+
+#  else
+    /* From here to the end of this function, at least one of NUMERIC or
+     * MONETARY can be non-C
+     *
+     * If we aren't paying attention to a given category, use LC_CTYPE instead;
      * If not paying attention to that either, the code below should end up not
      * using this.  Make sure that things blow up if that avoidance gets lost,
      * by setting the category to an out-of-bounds value */
@@ -5297,7 +5319,92 @@ S_my_localeconv(pTHX_ const int item)
     }
 
     return hv;
+
+#  endif    /* End of must have one or both USE_MONETARY, USE_NUMERIC */
+
 }
+
+STATIC void
+S_populate_hash_from_C_localeconv(pTHX_ HV * hv,
+                                        const char * locale,  /* Unused */
+
+                                        /* bit mask of which categories to
+                                         * populate */
+                                        const U32 which_mask,
+
+                                        /* The string type values to return;
+                                         * one element for numeric; the other
+                                         * for monetary */
+                                        const lconv_offset_t * strings[2],
+
+                                        /* And the integer fields */
+                                        const lconv_offset_t * integers[2])
+{
+    PERL_ARGS_ASSERT_POPULATE_HASH_FROM_C_LOCALECONV;
+    PERL_UNUSED_ARG(locale);
+    assert(isNAME_C_OR_POSIX(locale));
+
+    /* Fill hv with the values that localeconv() is supposed to return for
+     * the C locale */
+
+    U32 working_mask = which_mask;
+    while (working_mask) {
+
+        /* Get the bit position of the next lowest set bit.  That is the
+         * index into the 'strings' array of the category we use in this loop
+         * iteration.  Turn the bit off so we don't work on this category
+         * again in this function call. */
+        const PERL_UINT_FAST8_T i = lsbit_pos(working_mask);
+        working_mask &= ~ (1 << i);
+
+        /* This category's string fields */
+        const lconv_offset_t * category_strings = strings[i];
+
+#  ifndef HAS_SOME_LANGINFO /* This doesn't work properly if called on a single
+                               item, which could only happen when there isn't
+                               nl_langinfo on the platform */
+        assert(category_strings[1].name != NULL);
+#  endif
+
+        /* All string fields are empty except for one NUMERIC one.  That one
+         * has been initialized to be the final one in the NUMERIC strings, so
+         * stop the loop early in that case.  Otherwise, we would store an
+         * empty string to the hash, and immediately overwrite it with the
+         * correct value */
+        const unsigned int stop_early = (i == NUMERIC_OFFSET) ? 1 : 0;
+
+        /* A NULL element terminates the list */
+        while ((category_strings + stop_early)->name) {
+            (void) hv_store(hv,
+                            category_strings->name,
+                            strlen(category_strings->name),
+                            newSVpvs(""),
+                            0);
+
+            category_strings++;
+        }
+
+        /* And fill in the NUMERIC exception */
+        if (i == NUMERIC_OFFSET) {
+            (void) hv_stores(hv, "decimal_point", newSVpvs("."));
+            category_strings++;
+        }
+
+        /* Add any int fields.  In the C locale, all are -1 */
+        if (integers[i]) {
+            const lconv_offset_t * current = integers[i];
+            while (current->name) {
+                (void) hv_store(hv,
+                                current->name, strlen(current->name),
+                                newSViv(-1),
+                                0);
+                current++;
+            }
+        }
+    }
+}
+
+#  if defined(USE_LOCALE_NUMERIC) || defined(USE_LOCALE_MONETARY)
 
 STATIC void
 S_populate_hash_from_localeconv(pTHX_ HV * hv,
@@ -5321,9 +5428,6 @@ S_populate_hash_from_localeconv(pTHX_ HV * hv,
     PERL_ARGS_ASSERT_POPULATE_HASH_FROM_LOCALECONV;
     PERL_UNUSED_ARG(which_mask);    /* Some configurations don't use this;
                                        complicated to figure out which */
-#  ifndef USE_LOCALE
-    PERL_UNUSED_ARG(locale);
-#  endif
 
     /* Run localeconv() and copy some or all of its results to the input 'hv'
      * hash.  Most localeconv() implementations return the values in a global
@@ -5523,6 +5627,7 @@ S_populate_hash_from_localeconv(pTHX_ HV * hv,
 
 }
 
+#  endif    /* defined(USE_LOCALE_NUMERIC) || defined(USE_LOCALE_MONETARY) */
 #endif /* defined(HAS_LOCALECONV) */
 #ifndef HAS_SOME_LANGINFO
 
