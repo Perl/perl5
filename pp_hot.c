@@ -5379,6 +5379,7 @@ PP(pp_subst)
                     Copy(c, d, clen, char);
             }
             retval = &PL_sv_yes;
+            goto ret;
         }
         else {
             char *d, *m;
@@ -5411,12 +5412,7 @@ PP(pp_subst)
                 Move(s, d, i+1, char);		/* include the NUL */
             }
             assert(iters);
-            if (PL_op->op_private & OPpTRUEBOOL)
-                retval = &PL_sv_yes;
-            else {
-                retval = sv_newmortal();
-                sv_setiv(retval, iters);
-            }
+            goto ret_iters;
         }
     }
     else {
@@ -5505,6 +5501,7 @@ PP(pp_subst)
                untouched.  */
             TARG = dstr;
             retval = dstr;
+            goto ret;
         } else {
 #ifdef PERL_ANY_COW
             /* The match may make the string COW. If so, brilliant, because
@@ -5524,16 +5521,19 @@ PP(pp_subst)
             SvLEN_set(TARG, SvLEN(dstr));
             SvFLAGS(TARG) |= SvUTF8(dstr);
             SvPV_set(dstr, NULL);
-
-            if (PL_op->op_private & OPpTRUEBOOL)
-                retval = &PL_sv_yes;
-            else {
-                retval = sv_newmortal();
-                sv_setiv(retval, iters);
-            }
+            goto ret_iters;
         }
     }
 
+  ret_iters:
+    if (PL_op->op_private & OPpTRUEBOOL)
+        retval = &PL_sv_yes;
+    else {
+        retval = sv_newmortal();
+        sv_setiv(retval, iters);
+    }
+
+  ret:
     if (dstr)
         rpp_popfree_1_NN(); /* pop replacement string */
     if (PL_op->op_flags & OPf_STACKED)
