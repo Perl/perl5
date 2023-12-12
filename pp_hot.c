@@ -5144,9 +5144,9 @@ pp_match is just a simpler version of the above.
 
 */
 
-PP_wrapped(pp_subst, ((PL_op->op_flags & OPf_STACKED) ? 2 : 1), 0)
+PP(pp_subst)
 {
-    dSP; dTARG;
+    dTARG;
     PMOP *pm = cPMOP;
     PMOP *rpm = pm;
     char *s;
@@ -5170,20 +5170,35 @@ PP_wrapped(pp_subst, ((PL_op->op_flags & OPf_STACKED) ? 2 : 1), 0)
     bool was_cow;
 #endif
     SV *nsv = NULL;
-    /* known replacement string? */
-    SV *dstr = (pm->op_pmflags & PMf_CONST) ? POPs : NULL;
+    SSize_t sp_offset = 0; /* number of items left on stack */
+    SV *dstr;
+    SV *retval;
 
     PERL_ASYNC_CHECK();
 
-    if (PL_op->op_flags & OPf_STACKED)
-        TARG = POPs;
+    if (pm->op_pmflags & PMf_CONST) {
+        /* known replacement string */
+        dstr = *PL_stack_sp;
+        sp_offset++;
+    }
+    else
+        dstr = NULL;
+
+    if (PL_op->op_flags & OPf_STACKED) {
+        /*  expr =~ s///;  */
+        TARG = PL_stack_sp[-sp_offset];
+        sp_offset++;
+    }
     else {
         if (ARGTARG)
+            /*  $lex =~ s///;  */
             GETTARGET;
         else {
+            /* s///;  */
             TARG = DEFSV;
         }
-        EXTEND(SP,1);
+        if (!sp_offset)
+            rpp_extend(1);
     }
 
     SvGETMAGIC(TARG); /* must come before cow check */
@@ -5202,7 +5217,6 @@ PP_wrapped(pp_subst, ((PL_op->op_flags & OPf_STACKED) ? 2 : 1), 0)
                      && !(SvTYPE(TARG) == SVt_PVGV && SvFAKE(TARG)))))
             Perl_croak_no_modify();
     }
-    PUTBACK;
 
     orig = SvPV_nomg(TARG, len);
     /* note we don't (yet) force the var into being a string; if we fail
@@ -5268,10 +5282,15 @@ PP_wrapped(pp_subst, ((PL_op->op_flags & OPf_STACKED) ? 2 : 1), 0)
 
     if (!CALLREGEXEC(rx, orig, strend, orig, 0, TARG, NULL, r_flags))
     {
-        SPAGAIN;
-        PUSHs(rpm->op_pmflags & PMf_NONDESTRUCT ? TARG : &PL_sv_no);
+        SV *ret = rpm->op_pmflags & PMf_NONDESTRUCT ? TARG : &PL_sv_no;
+        if (dstr)
+            rpp_popfree_1_NN(); /* pop replacement string */
+        if (PL_op->op_flags & OPf_STACKED)
+            rpp_replace_1_1_NN(ret); /* pop LHS of =~ */
+        else
+            rpp_push_1(ret);
         LEAVE_SCOPE(oldsave);
-        RETURN;
+        return NORMAL;
     }
     PL_curpm = pm;
 
@@ -5298,7 +5317,6 @@ PP_wrapped(pp_subst, ((PL_op->op_flags & OPf_STACKED) ? 2 : 1), 0)
         doutf8 = FALSE;
     }
     
-    /* can do inplace substitution? */
     if (c
 #ifdef PERL_ANY_COW
         && !was_cow
@@ -5312,6 +5330,7 @@ PP_wrapped(pp_subst, ((PL_op->op_flags & OPf_STACKED) ? 2 : 1), 0)
         && (!doutf8 || SvUTF8(TARG))
         && !(rpm->op_pmflags & PMf_NONDESTRUCT))
     {
+        /* known replacement string and can do in-place substitution */
 
 #ifdef PERL_ANY_COW
         /* string might have got converted to COW since we set was_cow */
@@ -5359,8 +5378,7 @@ PP_wrapped(pp_subst, ((PL_op->op_flags & OPf_STACKED) ? 2 : 1), 0)
                 if (clen)
                     Copy(c, d, clen, char);
             }
-            SPAGAIN;
-            PUSHs(&PL_sv_yes);
+            retval = &PL_sv_yes;
         }
         else {
             char *d, *m;
@@ -5392,15 +5410,17 @@ PP_wrapped(pp_subst, ((PL_op->op_flags & OPf_STACKED) ? 2 : 1), 0)
                 SvCUR_set(TARG, d - SvPVX_const(TARG) + i);
                 Move(s, d, i+1, char);		/* include the NUL */
             }
-            SPAGAIN;
             assert(iters);
             if (PL_op->op_private & OPpTRUEBOOL)
-                PUSHs(&PL_sv_yes);
-            else
-                mPUSHi(iters);
+                retval = &PL_sv_yes;
+            else {
+                retval = sv_newmortal();
+                sv_setiv(retval, iters);
+            }
         }
     }
     else {
+        /* not known replacement string or can't do in-place substitution) */
         bool first;
         char *m;
         SV *repl;
@@ -5429,8 +5449,8 @@ PP_wrapped(pp_subst, ((PL_op->op_flags & OPf_STACKED) ? 2 : 1), 0)
         dstr = newSVpvn_flags(orig, s-orig,
                     SVs_TEMP | (DO_UTF8(TARG) ? SVf_UTF8 : 0));
         if (!c) {
+        /* not known replacement string - call out to ops and OP_SUBSTCONT */
             PERL_CONTEXT *cx;
-            SPAGAIN;
             m = orig;
             /* note that a whole bunch of local vars are saved here for
              * use by pp_substcont: here's a list of them in case you're
@@ -5438,8 +5458,12 @@ PP_wrapped(pp_subst, ((PL_op->op_flags & OPf_STACKED) ? 2 : 1), 0)
              * iters maxiters r_flags oldsave rxtainted orig dstr targ
              * s m strend rx once */
             CX_PUSHSUBST(cx);
-            RETURNOP(cPMOP->op_pmreplrootu.op_pmreplroot);
+            return cPMOP->op_pmreplrootu.op_pmreplroot;
         }
+
+        /* We get here if it's a known replacement string, but can't
+         * substitute in-place */
+
         first = TRUE;
         do {
             if (UNLIKELY(iters++ > maxiters))
@@ -5480,8 +5504,7 @@ PP_wrapped(pp_subst, ((PL_op->op_flags & OPf_STACKED) ? 2 : 1), 0)
             /* From here on down we're using the copy, and leaving the original
                untouched.  */
             TARG = dstr;
-            SPAGAIN;
-            PUSHs(dstr);
+            retval = dstr;
         } else {
 #ifdef PERL_ANY_COW
             /* The match may make the string COW. If so, brilliant, because
@@ -5502,13 +5525,21 @@ PP_wrapped(pp_subst, ((PL_op->op_flags & OPf_STACKED) ? 2 : 1), 0)
             SvFLAGS(TARG) |= SvUTF8(dstr);
             SvPV_set(dstr, NULL);
 
-            SPAGAIN;
             if (PL_op->op_private & OPpTRUEBOOL)
-                PUSHs(&PL_sv_yes);
-            else
-                mPUSHi(iters);
+                retval = &PL_sv_yes;
+            else {
+                retval = sv_newmortal();
+                sv_setiv(retval, iters);
+            }
         }
     }
+
+    if (dstr)
+        rpp_popfree_1_NN(); /* pop replacement string */
+    if (PL_op->op_flags & OPf_STACKED)
+        rpp_replace_1_1_NN(retval); /* pop LHS of =~ */
+    else
+        rpp_push_1(retval);
 
     if (!(rpm->op_pmflags & PMf_NONDESTRUCT)) {
         (void)SvPOK_only_UTF8(TARG);
@@ -5525,9 +5556,9 @@ PP_wrapped(pp_subst, ((PL_op->op_flags & OPf_STACKED) ? 2 : 1), 0)
         if (!(rxtainted & SUBST_TAINT_BOOLRET)
             && (rxtainted & (SUBST_TAINT_STR|SUBST_TAINT_PAT))
         )
-            SvTAINTED_on(TOPs);  /* taint return value */
+            SvTAINTED_on(retval);  /* taint return value */
         else
-            SvTAINTED_off(TOPs);  /* may have got tainted earlier */
+            SvTAINTED_off(retval);  /* may have got tainted earlier */
 
         /* needed for mg_set below */
         TAINT_set(
@@ -5538,7 +5569,7 @@ PP_wrapped(pp_subst, ((PL_op->op_flags & OPf_STACKED) ? 2 : 1), 0)
     SvSETMAGIC(TARG); /* PL_tainted must be correctly set for this mg_set */
     TAINT_NOT;
     LEAVE_SCOPE(oldsave);
-    RETURN;
+    return NORMAL;
 }
 
 

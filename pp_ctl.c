@@ -196,21 +196,23 @@ PP(pp_regcomp)
 }
 
 
-/* how many stack arguments a substcont op expects */
-#ifdef PERL_RC_STACK
-STATIC I32
-S_substcont_argcount(pTHX)
-{
-    PERL_CONTEXT *cx = CX_CUR();
-   /* the scalar result of the expression in s//expression/ is on the
-    * stack only on iterations 2+ */
-    return cx->sb_iters ? 1 : 0;
-}
-#endif
+/* s/.../expr/e is executed in order as if written as
+ *
+ * pp_subst();
+ * while (pp_substcont()) {
+ *     expr;
+ * }
+ *
+ * Only on the second and later calls to pp_substcont() is there a scalar
+ * on the stack holding the value of expr.
+ *
+ * Note that pp_subst() leaves its original 0-2 args on the stack to
+ * avoid them being prematurely freed. It is pp_substcont()'s
+ * responsibility to pop them after the last iteration.
+ */
 
-PP_wrapped(pp_substcont, S_substcont_argcount(aTHX), 0)
+PP(pp_substcont)
 {
-    dSP;
     PERL_CONTEXT *cx = CX_CUR();
     PMOP * const pm = cPMOPx(cLOGOP->op_other);
     SV * const dstr = cx->sb_dstr;
@@ -232,14 +234,16 @@ PP_wrapped(pp_substcont, S_substcont_argcount(aTHX), 0)
     rxres_restore(&cx->sb_rxres, rx);
 
     if (cx->sb_iters++) {
+        /* second+ time round. Result is on stack */
         const SSize_t saviters = cx->sb_iters;
         if (cx->sb_iters > cx->sb_maxiters)
             DIE(aTHX_ "Substitution loop");
 
-        SvGETMAGIC(TOPs); /* possibly clear taint on $1 etc: #67962 */
+        SvGETMAGIC(*PL_stack_sp); /* possibly clear taint on $1 etc: #67962 */
 
         /* See "how taint works": pp_subst() in pp_hot.c */
-        sv_catsv_nomg(dstr, POPs);
+        sv_catsv_nomg(dstr, *PL_stack_sp);
+        rpp_popfree_1_NN();
         if (UNLIKELY(TAINT_get))
             cx->sb_rxtainted |= SUBST_TAINT_REPL;
         if (CxONCE(cx) || s < orig ||
@@ -247,7 +251,9 @@ PP_wrapped(pp_substcont, S_substcont_argcount(aTHX), 0)
                              (s == m), cx->sb_targ, NULL,
                     (REXEC_IGNOREPOS|REXEC_NOT_FIRST|REXEC_FAIL_ON_UNDERFLOW)))
         {
+            /* no more iterations. Push return value etc */
             SV *targ = cx->sb_targ;
+            SV *retval;
 
             assert(cx->sb_strend >= s);
             if(cx->sb_strend > s) {
@@ -260,7 +266,7 @@ PP_wrapped(pp_substcont, S_substcont_argcount(aTHX), 0)
                 cx->sb_rxtainted |= SUBST_TAINT_PAT;
 
             if (pm->op_pmflags & PMf_NONDESTRUCT) {
-                PUSHs(dstr);
+                retval = dstr;
                 /* From here on down we're using the copy, and leaving the
                    original untouched.  */
                 targ = dstr;
@@ -277,10 +283,20 @@ PP_wrapped(pp_substcont, S_substcont_argcount(aTHX), 0)
                 SvPV_set(dstr, NULL);
 
                 PL_tainted = 0;
-                mPUSHi(saviters - 1);
+                retval = sv_newmortal();
+                sv_setiv(retval, saviters - 1);
 
                 (void)SvPOK_only_UTF8(targ);
             }
+
+            /* pop the original args (if any) to pp_subst(),
+             * then push the result */
+            if (pm->op_pmflags & PMf_CONST)
+                rpp_popfree_1_NN(); /* pop replacement string */
+            if (pm->op_flags & OPf_STACKED)
+                rpp_replace_1_1_NN(retval); /* pop LHS of =~ */
+            else
+                rpp_push_1(retval);
 
             /* update the taint state of various variables in
              * preparation for final exit.
@@ -295,7 +311,7 @@ PP_wrapped(pp_substcont, S_substcont_argcount(aTHX), 0)
                 if (!(cx->sb_rxtainted & SUBST_TAINT_BOOLRET)
                     && (cx->sb_rxtainted & (SUBST_TAINT_STR|SUBST_TAINT_PAT))
                 )
-                    SvTAINTED_on(TOPs);  /* taint return value */
+                    SvTAINTED_on(retval);  /* taint return value */
                 /* needed for mg_set below */
                 TAINT_set(
                     cBOOL(cx->sb_rxtainted &
@@ -330,11 +346,15 @@ PP_wrapped(pp_substcont, S_substcont_argcount(aTHX), 0)
             CX_POP(cx);
 
             PERL_ASYNC_CHECK();
-            RETURNOP(pm->op_next);
+            return pm->op_next;
             NOT_REACHED; /* NOTREACHED */
         }
         cx->sb_iters = saviters;
     }
+
+    /* First iteration. The substitution expression hasn;'t been executed
+     * this time */
+
     if (RX_MATCH_COPIED(rx) && RX_SUBBEG(rx) != orig) {
         m = s;
         s = orig;
@@ -390,7 +410,7 @@ PP_wrapped(pp_substcont, S_substcont_argcount(aTHX), 0)
     }
     rxres_save(&cx->sb_rxres, rx);
     PL_curpm = pm;
-    RETURNOP(pm->op_pmstashstartu.op_pmreplstart);
+    return pm->op_pmstashstartu.op_pmreplstart;
 }
 
 
