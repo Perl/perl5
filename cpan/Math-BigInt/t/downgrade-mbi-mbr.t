@@ -13,7 +13,6 @@ use Math::BigRat downgrade => 'Math::BigInt';
 is(Math::BigRat->downgrade(), 'Math::BigInt', 'Math::BigRat->downgrade()');
 is(Math::BigInt->upgrade(),   'Math::BigRat', 'Math::BigInt->upgrade()');
 
-
 ################################################################################
 # Verify that constructors downgrade when they should.
 

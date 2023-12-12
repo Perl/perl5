@@ -23,7 +23,7 @@ use warnings;
 use Carp          qw< carp croak >;
 use Scalar::Util  qw< blessed refaddr >;
 
-our $VERSION = '2.001001';
+our $VERSION = '2.002001';
 $VERSION =~ tr/_//d;
 
 require Exporter;
@@ -3133,42 +3133,58 @@ sub ackermann {
 }
 
 sub bsin {
-    # Calculate sin(x) to N digits. Unless upgrading is in effect, returns the
-    # result truncated to an integer.
     my ($class, $x, @r) = ref($_[0]) ? (ref($_[0]), @_) : objectify(1, @_);
 
-    return $x if $x->modify('bsin');
+    return $x if $x -> modify('bsin');
 
-    return $x->bnan(@r) if $x->{sign} !~ /^[+-]\z/; # -inf +inf or NaN => NaN
-    return $x->bzero(@r) if $x->is_zero();
+    # Trivial cases.
 
-    return $upgrade -> bsin($x, @r) if defined $upgrade;
+    return $x -> bzero(@r) if $x -> is_zero();
+    return $x -> bnan(@r)  if $x -> is_inf() || $x -> is_nan();
 
-    require Math::BigFloat;
-    # calculate the result and truncate it to integer
-    my $t = Math::BigFloat->new($x)->bsin(@r)->as_int();
+    if ($upgrade) {
+        my $xtmp = $upgrade -> bsin($x, @r);
+        if ($xtmp -> is_int()) {
+            $xtmp = $xtmp -> as_int();
+            %$x = %$xtmp;
+        } else {
+            %$x = %$xtmp;
+            bless $x, $upgrade;
+        }
+        return $x;
+    }
 
-    $x = $x->bone(@r)  if $t->is_one();
-    $x = $x->bzero(@r) if $t->is_zero();
-    $x->round(@r);
+    # When x is an integer, sin(x) truncated to an integer is always zero.
+
+    $x -> bzero(@r);
 }
 
 sub bcos {
-    # Calculate cos(x) to N digits. Unless upgrading is in effect, returns the
-    # result truncated to an integer.
     my ($class, $x, @r) = ref($_[0]) ? (ref($_[0]), @_) : objectify(1, @_);
 
-    return $x if $x->modify('bcos');
+    return $x if $x -> modify('bcos');
 
-    return $x->bnan(@r) if $x->{sign} !~ /^[+-]\z/; # -inf +inf or NaN => NaN
-    return $x->bone(@r) if $x->is_zero();
+    # Trivial cases.
 
-    return $upgrade -> bcos($x, @r) if defined $upgrade;
+    return $x -> bone(@r) if $x -> is_zero();
+    return $x -> bnan(@r) if $x -> is_inf() || $x -> is_nan();
 
-    require Math::BigFloat;
-    my $tmp = Math::BigFloat -> bcos($x, @r) -> as_int();
-    $x->{value} = $tmp->{value};
-    return $x -> round(@r);
+    if ($upgrade) {
+        my $xtmp = $upgrade -> bcos($x, @r);
+        if ($xtmp -> is_int()) {
+            $xtmp = $xtmp -> as_int();
+            %$x = %$xtmp;
+        } else {
+            %$x = %$xtmp;
+            bless $x, $upgrade;
+        }
+        return $x;
+    }
+
+    # When x is a non-zero integer, cos(x) truncated to an integer is always
+    # zero.
+
+    $x -> bzero(@r);
 }
 
 sub batan {
