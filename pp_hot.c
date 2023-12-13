@@ -176,6 +176,47 @@ Perl_xs_wrap(pTHX_ XSUBADDR_t xsub, CV *cv)
 #endif
 
 
+
+/* Private helper function for Perl_rpp_replace_2_1_COMMON().
+ * Free the two passed SVs, whose original ref counts are rc1 and rc2.
+ * Assumes the stack initially looked like
+ *    .... sv1 sv2
+ * and is now:
+ *    .... X
+ * but where sv2 is still on the slot above the current PL_stack_sp.
+ */
+
+void
+Perl_rpp_free_2_(pTHX_ SV *const sv1,  SV *const sv2,
+                       const U32 rc1,  const U32 rc2)
+{
+
+    PERL_ARGS_ASSERT_RPP_FREE_2_;
+
+#ifdef PERL_RC_STACK
+    if (rc1 > 1)
+        SvREFCNT(sv1) = rc1 - 1;
+    else {
+        /* temporarily reclaim sv2 on stack in case we die while freeing sv1 */
+        assert(PL_stack_sp[1] == sv2);
+        PL_stack_sp++;
+        Perl_sv_free2(aTHX_ sv1, rc1);
+        PL_stack_sp--;
+    }
+    if (rc2 > 1)
+        SvREFCNT(sv2) = rc2 - 1;
+    else
+        Perl_sv_free2(aTHX_ sv2, rc2);
+#else
+    PERL_UNUSED_VAR(sv1);
+    PERL_UNUSED_VAR(sv2);
+    PERL_UNUSED_VAR(rc1);
+    PERL_UNUSED_VAR(rc2);
+#endif
+}
+
+
+
 /* ----------------------------------------------------------- */
 
 
