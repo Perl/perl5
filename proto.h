@@ -3839,6 +3839,11 @@ Perl_rpeep(pTHX_ OP *o)
 #define PERL_ARGS_ASSERT_RPEEP
 
 PERL_CALLCONV void
+Perl_rpp_free_2_(pTHX_ SV * const sv1, SV * const sv2, const U32 rc1, const U32 rc2);
+#define PERL_ARGS_ASSERT_RPP_FREE_2_            \
+        assert(sv1); assert(sv2)
+
+PERL_CALLCONV void
 Perl_rpp_obliterate_stack_to(pTHX_ I32 ix);
 #define PERL_ARGS_ASSERT_RPP_OBLITERATE_STACK_TO
 
@@ -9900,6 +9905,11 @@ Perl_rpp_replace_1_IMM_NN(pTHX_ SV *sv);
 PERL_STATIC_INLINE void
 Perl_rpp_replace_2_1(pTHX_ SV *sv);
 # define PERL_ARGS_ASSERT_RPP_REPLACE_2_1       \
+        assert(sv)
+
+PERL_STATIC_INLINE void
+Perl_rpp_replace_2_1_COMMON(pTHX_ SV *sv);
+# define PERL_ARGS_ASSERT_RPP_REPLACE_2_1_COMMON \
         assert(sv)
 
 PERL_STATIC_INLINE void

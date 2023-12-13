@@ -557,6 +557,7 @@
 # define rpp_replace_1_1_NN(a)                  Perl_rpp_replace_1_1_NN(aTHX_ a)
 # define rpp_replace_1_IMM_NN(a)                Perl_rpp_replace_1_IMM_NN(aTHX_ a)
 # define rpp_replace_2_1(a)                     Perl_rpp_replace_2_1(aTHX_ a)
+# define rpp_replace_2_1_COMMON(a)              Perl_rpp_replace_2_1_COMMON(aTHX_ a)
 # define rpp_replace_2_1_NN(a)                  Perl_rpp_replace_2_1_NN(aTHX_ a)
 # define rpp_replace_2_IMM_NN(a)                Perl_rpp_replace_2_IMM_NN(aTHX_ a)
 # define rpp_replace_at(a,b)                    Perl_rpp_replace_at(aTHX_ a,b)

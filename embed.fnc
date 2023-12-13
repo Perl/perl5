@@ -2766,6 +2766,10 @@ Adipx	|void	|rpp_context	|NN SV **mark				\
 				|U8 gimme				\
 				|SSize_t extra
 Adipx	|void	|rpp_extend	|SSize_t n
+Xopx	|void	|rpp_free_2_	|NN SV * const sv1			\
+				|NN SV * const sv2			\
+				|const U32 rc1				\
+				|const U32 rc2
 Adipx	|void	|rpp_invoke_xs	|NN CV *cv
 Adipx	|bool	|rpp_is_lone	|NN SV *sv
 Cpx	|void	|rpp_obliterate_stack_to				\
@@ -2795,6 +2799,8 @@ Adipx	|void	|rpp_replace_at_norc					\
 				|NN SV *sv
 Adipx	|void	|rpp_replace_at_norc_NN 				\
 				|NN SV **sp				\
+				|NN SV *sv
+Cipx	|void	|rpp_replace_2_1_COMMON 				\
 				|NN SV *sv
 Adipx	|void	|rpp_replace_1_IMM_NN					\
 				|NN SV *sv

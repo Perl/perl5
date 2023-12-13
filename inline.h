@@ -842,28 +842,58 @@ Perl_rpp_replace_2_1(pTHX_ SV *sv)
 }
 
 
+/* Private helper function for _NN and _IMM_NN variants.
+ * Assumes sv has already had its ref count incremented,
+ * ready for being put on the stack.
+ * Intended to be small and fast, since it's inlined into many hot parts of
+ * code.
+ */
+
+PERL_STATIC_INLINE void
+Perl_rpp_replace_2_1_COMMON(pTHX_ SV *sv)
+{
+
+    assert(sv);
+#ifdef PERL_RC_STACK
+    SV *sv2 = *PL_stack_sp--;
+    assert(sv2);
+    SV *sv1 = *PL_stack_sp;
+    assert(sv1);
+
+    *PL_stack_sp = sv;
+    assert(rpp_stack_is_rc());
+    U32 rc1 = SvREFCNT(sv1);
+    U32 rc2 = SvREFCNT(sv2);
+    /* This expression is intended to be true if either of rc1 or rc2 has
+     * the value 0 or 1, but using only a single branch test, rather
+     * than the two branches that a compiler would plant for a boolean
+     * expression. We are working on the assumption that, most of the
+     * time, neither of the args to a binary function will need to be
+     * freed - they're likely to lex vars, or PADTMPs or whatever.
+     * So give the CPU a single branch that is rarely taken. */
+    if (UNLIKELY( !(rc1>>1) + !(rc2>>1) ))
+        /* at least one of the old SVs needs freeing. Do it the long way */
+        Perl_rpp_free_2_(aTHX_ sv1, sv2, rc1, rc2);
+    else {
+        SvREFCNT(sv1) = rc1 - 1;
+        SvREFCNT(sv2) = rc2 - 1;
+    }
+#else
+    *--PL_stack_sp = sv;
+#endif
+}
+
+
 PERL_STATIC_INLINE void
 Perl_rpp_replace_2_1_NN(pTHX_ SV *sv)
 {
     PERL_ARGS_ASSERT_RPP_REPLACE_2_1_NN;
 
     assert(sv);
-    assert(PL_stack_sp[0]);
-    assert(PL_stack_sp[-1]);
 #ifdef PERL_RC_STACK
-    assert(rpp_stack_is_rc());
-    /* replace PL_stack_sp[-1] first; leave PL_stack_sp[0] in place while
-     * we free [-1], so if an exception occurs, [0] will still be freed.
-     */
-    SV *oldsv = PL_stack_sp[-1];
-    PL_stack_sp[-1] = sv;
     SvREFCNT_inc_simple_void_NN(sv);
-    SvREFCNT_dec_NN(oldsv);
-    oldsv = *PL_stack_sp--;
-    SvREFCNT_dec_NN(oldsv);
-#else
-    *--PL_stack_sp = sv;
 #endif
+    rpp_replace_2_1_COMMON(sv);
 }
 
 
@@ -874,21 +904,7 @@ Perl_rpp_replace_2_IMM_NN(pTHX_ SV *sv)
 
     assert(sv);
     assert(SvIMMORTAL(sv));
-    assert(PL_stack_sp[0]);
-    assert(PL_stack_sp[-1]);
-#ifdef PERL_RC_STACK
-    assert(rpp_stack_is_rc());
-    /* replace PL_stack_sp[-1] first; leave PL_stack_sp[0] in place while
-     * we free [-1], so if an exception occurs, [0] will still be freed.
-     */
-    SV *oldsv = PL_stack_sp[-1];
-    PL_stack_sp[-1] = sv;
-    SvREFCNT_dec_NN(oldsv);
-    oldsv = *PL_stack_sp--;
-    SvREFCNT_dec_NN(oldsv);
-#else
-    *--PL_stack_sp = sv;
-#endif
+    rpp_replace_2_1_COMMON(sv);
 }
 
 
