@@ -4567,6 +4567,8 @@ S_is_locale_utf8(pTHX_ const char * locale)
 
     return FALSE;
 
+     /* Definitively, can't be UTF-8 */
+#    define HAS_DEFINITIVE_UTF8NESS_DETERMINATION
 #  else
 
     /* If the input happens to be the same locale as we are currently setup
@@ -5993,6 +5995,16 @@ Perl_sv_strftime_ints(pTHX_ SV * fmt, int sec, int min, int hour,
 }
 
 #ifdef USE_LOCALE
+#  ifndef HAS_DEFINITIVE_UTF8NESS_DETERMINATION
+
+/* Forward declaration of function that we don't put into embed.fnc so as to
+ * make its removal easier, as there may not be any extant platforms that need
+ * it; and the function is located after S_my_langinfo_i() because it's easier
+ * to understand when placed in the context of that code */
+STATIC const char * S_override_codeset_if_utf8_found(pTHX_
+                                                     const char *codeset,
+                                                     const char *locale);
+#  endif
 
 /* There are several implementations of my_langinfo, depending on the
  * Configuration.  They all share the same beginning of the function */
@@ -6513,282 +6525,26 @@ S_my_langinfo_i(pTHX_
             retval = save_to_buffer(retval, retbufp, retbuf_sizep);
         }
 
-#        ifdef HAS_DEFINITIVE_UTF8NESS_DETERMINATION
+#        ifndef HAS_DEFINITIVE_UTF8NESS_DETERMINATION
+
+        /* Here, 'retval' contains any codeset name derived from the locale
+         * name.  That derived name may be empty or not necessarily indicative
+         * of the real codeset.  But we can often determine if it should be
+         * UTF-8, regardless of what the name is.  On most platforms, that
+         * determination is definitive, and was already done.  But for this
+         * code to be compiled, this platform is not one of them.  However,
+         * there are typically tools available to make a very good guess, and
+         * knowing the derived codeset name improves the quality of that guess.
+         * The following function overrides the derived codeset name when it
+         * guesses that it actually should be UTF-8.  It could be inlined here,
+         * but was moved out of this switch() so as to make the switch()
+         * control flow easier to follow */
+        retval = S_override_codeset_if_utf8_found(aTHX_ retval, locale);
+
+#        endif
 
         break;  /* All done */
 
-#        else   /* Below, no definitive locale utf8ness calculation on this
-                   platform */
-#          define NAME_INDICATES_UTF8       0x1
-#          define MB_CUR_MAX_SUGGESTS_UTF8  0x2
-
-        /* Here, 'retval' contains whatever code set name is in the locale
-         * name.  In this #else, it being a UTF-8 code set hasn't been
-         * determined, because this platform is lacking the libc functions
-         * which would definitely return that information.  So, we try to infer
-         * the UTF-8ness by other means, using the code set name just found as
-         * a hint to help resolve ambiguities.  So if that name indicates it is
-         * UTF-8, we expect it to be so */
-        unsigned int lean_towards_being_utf8 = 0;
-        if (is_codeset_name_UTF8(retval)) {
-            lean_towards_being_utf8 |= NAME_INDICATES_UTF8;
-        }
-
-        /* The code set is often UTF-8, even when the locale name doesn't so
-         * indicate.  If we discover this is so, we will override whatever the
-         * locale name said.  Conversely (but rarely), "UTF-8" in the locale
-         * name might be wrong.  We return "" as the code set name if we find
-         * that to be the case.
-         *
-         * For this portion of the file to compile, some C99 functions aren't
-         * available to us, even though we now require C99.  So, something must
-         * be wrong with them.  The code here should be good enough to work
-         * around this issue, but should the need arise, comments in
-         * S_is_locale_utf8() list some alternative C99 functions that could
-         * be tried.
-         *
-         * But MB_CUR_MAX is a C99 construct that helps a lot, is simple for a
-         * vendor to implement, and our experience with it is that it works
-         * well on a variety of platforms.  We have found that it returns a
-         * too-large number on some platforms for the C locale, but for no
-         * others.  That locale was already ruled out above.  (If MB_CUR_MAX
-         * returned too small a number, that would break a lot of things, and
-         * likely would be quickly corrected by the vendor.)  khw has some
-         * confidence that it doesn't return >1 when 1 is meant, as that would
-         * trigger a Perl warning, and we've had no reports of invalid
-         * occurrences of such. */
-#          ifdef MB_CUR_MAX
-
-        /* If there are fewer bytes available in this locale than are required
-         * to represent the largest legal UTF-8 code point, this definitely
-         * isn't a UTF-8 locale, even if the locale name says it is. */
-        const int mb_cur_max = MB_CUR_MAX;
-        if (mb_cur_max < (int) UNISKIP(PERL_UNICODE_MAX)) {
-            if (lean_towards_being_utf8 & NAME_INDICATES_UTF8) {
-                retval = "";    /* The name is wrong; override */
-            }
-
-            break;
-        }
-
-        /* But if the locale could be UTF-8, and also the name corroborates
-         * this, assume it is so */
-        if (lean_towards_being_utf8 & NAME_INDICATES_UTF8) {
-            break;
-        }
-
-        /* Here, the name doesn't indicate UTF-8, but MB_CUR_MAX indicates it
-         * could be.  khw knows of only two other locales in the world, EUC-TW
-         * and GB 18030, that legitimately require this many bytes (4).  In
-         * both, the single byte characters are the same as ASCII.  No
-         * multi-byte character in EUC-TW is legal UTF-8 (since the first byte
-         * of each is a continuation).  GB 18030 has no three byte sequences,
-         * and none of the four byte ones is legal UTF-8 (as the second byte
-         * for these is a non-continuation).  But every legal UTF-8 two byte
-         * sequence is also legal in GB 18030, though none have the same
-         * meaning, and no Han code point expressed in UTF-8 is two byte.  So
-         * the further tests below which look for native expressions of
-         * currency and time will not return two byte sequences, hence they
-         * will reliably rule out this locale as being UTF-8.  So, if we get
-         * this far, the result is almost certainly UTF-8.  But to be really
-         * sure, also check that there is no illegal UTF-8. */
-        lean_towards_being_utf8 |= MB_CUR_MAX_SUGGESTS_UTF8;
-
-#          endif    /* has MB_CUR_MAX */
-
-        /* Here, MB_CUR_MAX is not available, or was inconclusive.  What we do
-         * is to look at various strings associated with the locale:
-         *  1)  If any are illegal UTF-8, the locale can't be UTF-8.
-         *  2)  If all are legal UTF-8, and some non-ASCII characters are
-         *      present, it is likely to be UTF-8, because of the strictness of
-         *      UTF-8 syntax. So assume it is UTF-8
-         *  3)  If all are ASCII and the locale name and/or MB_CUR_MAX indicate
-         *      UTF-8, assume the locale is UTF-8.
-         *  4)  Otherwise, assume the locale isn't UTF-8
-         *
-         * To save cycles, if the locale name indicates it is a UTF-8 locale,
-         * we stop looking at the first instance with legal non-ASCII UTF-8.
-         * It is very unlikely this combination is coincidental. */
-
-        utf8ness_t strings_utf8ness = UTF8NESS_UNKNOWN;
-        char * scratch_buf = NULL;
-        Size_t scratch_buf_size = 0;
-
-        /* List of strings to look at */
-        const int trials[] = {
-
-#          if defined(USE_LOCALE_MONETARY) && defined(HAS_LOCALECONV)
-
-            /* The first string tried is the locale currency name.  Often that
-             * will be in the native script.
-             *
-             * But this is usable only if localeconv() is available, as that's
-             * the way we find out the currency symbol. */
-
-            CRNCYSTR,
-
-#          endif
-#          ifdef USE_LOCALE_TIME
-
-        /* We can also try various strings associated with LC_TIME, like the
-         * names of months or days of the week */
-
-            DAY_1, DAY_2, DAY_3, DAY_4, DAY_5, DAY_6, DAY_7,
-            MON_1, MON_2, MON_3, MON_4, MON_5, MON_6, MON_7, MON_8,
-                                        MON_9, MON_10, MON_11, MON_12,
-            ALT_DIGITS, AM_STR, PM_STR,
-            ABDAY_1, ABDAY_2, ABDAY_3, ABDAY_4, ABDAY_5, ABDAY_6, ABDAY_7,
-            ABMON_1, ABMON_2, ABMON_3, ABMON_4, ABMON_5, ABMON_6,
-            ABMON_7, ABMON_8, ABMON_9, ABMON_10, ABMON_11, ABMON_12
-
-#          endif
-        };
-
-#          ifdef USE_LOCALE_TIME
-
-        /* The code in the recursive call below can handle switching the
-         * locales, but by doing it now here, that code will check and discover
-         * that there is no need to switch then restore, avoiding those each
-         * loop iteration */
-        const char * orig_TIME_locale = toggle_locale_c(LC_TIME, locale);
-
-#          endif
-
-        /* The trials array may consist of strings from two different locale
-         * categories.  The call to my_langinfo_i() below needs to pass the
-         * proper category for each string.  There is a max of 1 trial for
-         * LC_MONETARY; the rest are LC_TIME.  So the array is arranged so the
-         * LC_MONETARY item (if any) is first, and all subsequent iterations
-         * will use LC_TIME.  These #ifdefs set up the values for all possible
-         * combinations. */
-#          if defined(USE_LOCALE_MONETARY) && defined(HAS_LOCALECONV)
-
-        locale_category_index  cat_index = LC_MONETARY_INDEX_;
-
-#            ifdef USE_LOCALE_TIME
-
-        const locale_category_index  follow_on_cat_index = LC_TIME_INDEX_;
-        assert(trials[1] == DAY_1); /* Make sure only a single non-time entry */
-
-#            else
-
-        /* Effectively out-of-bounds, as there is only the monetary entry */
-        const locale_category_index  follow_on_cat_index = LC_ALL_INDEX_;
-
-#            endif
-#          elif defined(USE_LOCALE_TIME)
-
-        locale_category_index  cat_index = LC_TIME_INDEX_;
-        const locale_category_index  follow_on_cat_index = LC_TIME_INDEX_;
-
-#          else
-
-        /* Effectively out-of-bounds, as here there are no trial entries at
-         * all.  This allows this code to compile, but there are no strings to
-         * test, and so the answer will always be non-UTF-8. */
-        locale_category_index  cat_index = LC_ALL_INDEX_;
-        const locale_category_index  follow_on_cat_index = LC_ALL_INDEX_;
-
-#          endif
-
-        /* Everything set up; look through all the strings */
-        for (PERL_UINT_FAST8_T i = 0; i < C_ARRAY_LENGTH(trials); i++) {
-            (void) my_langinfo_i(trials[i], cat_index, locale,
-                                 &scratch_buf, &scratch_buf_size, NULL);
-            cat_index = follow_on_cat_index;
-
-            /* To prevent infinite recursive calls, we don't ask for the
-             * UTF-8ness of the string (in 'trials[i]') above.  Instead we
-             * examine the returned string here */
-            const Size_t len = strlen(scratch_buf);
-            const U8 * first_variant;
-
-            /* If the string is identical whether or not it is encoded as
-             * UTF-8, it isn't helpful in determining UTF8ness. */
-            if (is_utf8_invariant_string_loc((U8 *) scratch_buf, len,
-                                             &first_variant))
-            {
-                continue;
-            }
-
-            /* Here, has non-ASCII.  If not legal UTF-8, isn't a UTF-8
-             * locale */
-            if (! is_utf8_string(first_variant,
-                                 len - (first_variant - (U8 *) scratch_buf)))
-            {
-                strings_utf8ness = UTF8NESS_NO;
-                break;
-            }
-
-            /* Here, is a legal non-ASCII UTF-8 string; tentatively set the
-             * return to YES; possibly overridden by later iterations */
-            strings_utf8ness = UTF8NESS_YES;
-
-            /* But if this corroborates our expectation, quit now */
-            if (lean_towards_being_utf8 & NAME_INDICATES_UTF8) {
-                break;
-            }
-        }
-
-#          ifdef USE_LOCALE_TIME
-
-        restore_toggled_locale_c(LC_TIME, orig_TIME_locale);
-
-#          endif
-
-        Safefree(scratch_buf);
-        scratch_buf = NULL;
-
-        if (strings_utf8ness == UTF8NESS_NO) {
-            /* 'retval' is already loaded with whatever code set we found. */
-            break;
-        }
-
-        /* Here all tested strings are legal UTF-8.
-         *
-         * Above we set UTF8NESS_YES if any string wasn't ASCII.  But even if
-         * they are all ascii, and the locale name indicates it is a UTF-8
-         * locale, assume the locale is UTF-8. */
-        if (lean_towards_being_utf8) {
-            strings_utf8ness = UTF8NESS_YES;
-        }
-
-        if (strings_utf8ness == UTF8NESS_YES) {
-            retval = "UTF-8";
-            break;
-        }
-
-        /* Here, nothing examined indicates that the codeset is or isn't UTF-8.
-         * But what is it?  The other locale categories are not likely to be of
-         * further help:
-         *
-         * LC_NUMERIC   Only a few locales in the world have a non-ASCII radix
-         *              or group separator.
-         * LC_CTYPE     This code wouldn't be compiled if mbtowc() existed and
-         *              was reliable.  This is unlikely in C99.  There are
-         *              other functions that could be used instead, but are
-         *              they going to exist, and be able to distinguish between
-         *              UTF-8 and 8859-1?  Deal with this only if it becomes
-         *              necessary.
-         * LC_MESSAGES  The strings returned from strerror() would seem likely
-         *              candidates, but experience has shown that many systems
-         *              don't actually have translations installed for them.
-         *              They are instead always in English, so everything in
-         *              them is ASCII, which is of no help to us.  A Configure
-         *              probe could possibly be written to see if this platform
-         *              has non-ASCII error messages.  But again, wait until it
-         *              turns out to be an actual problem.
-         *
-         *              Things like YESSTR, NOSTR, might not be in ASCII, but
-         *              need nl_langinfo() to access, which we don't have.
-         */
-
-        /* Otherwise, assume the locale isn't UTF-8.  This can be wrong if we
-         * don't have MB_CUR_MAX, and the locale is English without UTF-8 in
-         * its name, and with a dollar currency symbol. */
-        break; /* 'retval' is already loaded with whatever code set we found. */
-
-#        endif  /* NEED_FURTHER_UTF8NESS_CHECKING */
 #      endif    /* ! WIN32 */
 #    endif      /* USE_LOCALE_CTYPE */
 
@@ -6812,6 +6568,267 @@ S_my_langinfo_i(pTHX_
 
 }   /* my_langinfo() */
 
+#  ifndef HAS_DEFINITIVE_UTF8NESS_DETERMINATION
+
+STATIC const char *
+S_override_codeset_if_utf8_found(pTHX_ const char * codeset,
+                                       const char * locale)
+{
+#    define NAME_INDICATES_UTF8       0x1
+#    define MB_CUR_MAX_SUGGESTS_UTF8  0x2
+
+    /* Override 'codeset' with UTF-8 if this routine guesses that it should be.
+     * Conversely (but rarely), "UTF-8" in the locale name might be wrong.  We
+     * return "" as the code set name if we find that to be the case.  */
+
+    unsigned int lean_towards_being_utf8 = 0;
+    if (is_codeset_name_UTF8(codeset)) {
+        lean_towards_being_utf8 |= NAME_INDICATES_UTF8;
+    }
+
+    /* For this portion of the file to compile, some C99 functions aren't
+     * available to us, even though we now require C99.  So, something must be
+     * wrong with them.  The code here should be good enough to work around
+     * this issue, but should the need arise, comments in S_is_locale_utf8()
+     * list some alternative C99 functions that could be tried.
+     *
+     * But MB_CUR_MAX is a C99 construct that helps a lot, is simple for a
+     * vendor to implement, and our experience with it is that it works well on
+     * a variety of platforms.  We have found that it returns a too-large
+     * number on some platforms for the C locale, but for no others.  That
+     * locale was already ruled out in the code that called this function.  (If
+     * MB_CUR_MAX returned too small a number, that would break a lot of
+     * things, and likely would be quickly corrected by the vendor.)  khw has
+     * some confidence that it doesn't return >1 when 1 is meant, as that would
+     * trigger a Perl warning, and we've had no reports of invalid occurrences
+     * of such. */
+#    ifdef MB_CUR_MAX
+
+    /* If there are fewer bytes available in this locale than are required to
+     * represent the largest legal UTF-8 code point, this definitely isn't a
+     * UTF-8 locale, even if the locale name says it is. */
+    const int mb_cur_max = MB_CUR_MAX;
+    if (mb_cur_max < (int) UNISKIP(PERL_UNICODE_MAX)) {
+        if (lean_towards_being_utf8 & NAME_INDICATES_UTF8) {
+            return "";    /* The name is wrong; override */
+        }
+
+        return codeset;
+    }
+
+    /* But if the locale could be UTF-8, and also the name corroborates this,
+     * assume it is so */
+    if (lean_towards_being_utf8 & NAME_INDICATES_UTF8) {
+        return codeset;
+    }
+
+    /* Here, the name doesn't indicate UTF-8, but MB_CUR_MAX indicates it could
+     * be.  khw knows of only two other locales in the world, EUC-TW and GB
+     * 18030, that legitimately require this many bytes (4).  In both, the
+     * single byte characters are the same as ASCII.  No multi-byte character
+     * in EUC-TW is legal UTF-8 (since the first byte of each is a
+     * continuation).  GB 18030 has no three byte sequences, and none of the
+     * four byte ones is legal UTF-8 (as the second byte for these is a
+     * non-continuation).  But every legal UTF-8 two byte sequence is also
+     * legal in GB 18030, though none have the same meaning, and no Han code
+     * point expressed in UTF-8 is two byte.  So the further tests below which
+     * look for native expressions of currency and time will not return two
+     * byte sequences, hence they will reliably rule out this locale as being
+     * UTF-8.  So, if we get this far, the result is almost certainly UTF-8.
+     * But to be really sure, also check that there is no illegal UTF-8. */
+    lean_towards_being_utf8 |= MB_CUR_MAX_SUGGESTS_UTF8;
+
+#    endif    /* has MB_CUR_MAX */
+
+    /* Here, MB_CUR_MAX is not available, or was inconclusive.  What we do is
+     * to look at various strings associated with the locale:
+     *  1)  If any are illegal UTF-8, the locale can't be UTF-8.
+     *  2)  If all are legal UTF-8, and some non-ASCII characters are present,
+     *      it is likely to be UTF-8, because of the strictness of UTF-8
+     *      syntax. So assume it is UTF-8
+     *  3)  If all are ASCII and the locale name and/or MB_CUR_MAX indicate
+     *      UTF-8, assume the locale is UTF-8.
+     *  4)  Otherwise, assume the locale isn't UTF-8
+     *
+     * To save cycles, if the locale name indicates it is a UTF-8 locale, we
+     * stop looking at the first instance with legal non-ASCII UTF-8.  It is
+     * very unlikely this combination is coincidental. */
+
+    utf8ness_t strings_utf8ness = UTF8NESS_UNKNOWN;
+    char * scratch_buf = NULL;
+    Size_t scratch_buf_size = 0;
+
+    /* List of strings to look at */
+    const int trials[] = {
+
+#    if defined(USE_LOCALE_MONETARY) && defined(HAS_LOCALECONV)
+
+        /* The first string tried is the locale currency name.  Often that will
+         * be in the native script.
+         *
+         * But this is usable only if localeconv() is available, as that's the
+         * way we find out the currency symbol. */
+
+        CRNCYSTR,
+
+#    endif
+#    ifdef USE_LOCALE_TIME
+
+    /* We can also try various strings associated with LC_TIME, like the names
+     * of months or days of the week */
+
+        DAY_1, DAY_2, DAY_3, DAY_4, DAY_5, DAY_6, DAY_7,
+        MON_1, MON_2, MON_3, MON_4, MON_5, MON_6, MON_7, MON_8,
+                                    MON_9, MON_10, MON_11, MON_12,
+        ALT_DIGITS, AM_STR, PM_STR,
+        ABDAY_1, ABDAY_2, ABDAY_3, ABDAY_4, ABDAY_5, ABDAY_6, ABDAY_7,
+        ABMON_1, ABMON_2, ABMON_3, ABMON_4, ABMON_5, ABMON_6,
+        ABMON_7, ABMON_8, ABMON_9, ABMON_10, ABMON_11, ABMON_12
+
+#    endif
+
+    };
+
+#    ifdef USE_LOCALE_TIME
+
+    /* The code in the recursive call below can handle switching the locales,
+     * but by doing it now here, that code will check and discover that there
+     * is no need to switch then restore, avoiding those each loop iteration */
+    const char * orig_TIME_locale = toggle_locale_c(LC_TIME, locale);
+
+#    endif
+
+    /* The trials array may consist of strings from two different locale
+     * categories.  The call to my_langinfo_i() below needs to pass the proper
+     * category for each string.  There is a max of 1 trial for LC_MONETARY;
+     * the rest are LC_TIME.  So the array is arranged so the LC_MONETARY item
+     * (if any) is first, and all subsequent iterations will use LC_TIME.
+     * These #ifdefs set up the values for all possible combinations. */
+#    if defined(USE_LOCALE_MONETARY) && defined(HAS_LOCALECONV)
+
+    locale_category_index  cat_index = LC_MONETARY_INDEX_;
+
+#      ifdef USE_LOCALE_TIME
+
+    const locale_category_index  follow_on_cat_index = LC_TIME_INDEX_;
+    assert(trials[1] == DAY_1); /* Make sure only a single non-time entry */
+
+#      else
+
+    /* Effectively out-of-bounds, as there is only the monetary entry */
+    const locale_category_index  follow_on_cat_index = LC_ALL_INDEX_;
+
+#      endif
+#    elif defined(USE_LOCALE_TIME)
+
+    locale_category_index  cat_index = LC_TIME_INDEX_;
+    const locale_category_index  follow_on_cat_index = LC_TIME_INDEX_;
+
+#    else
+
+    /* Effectively out-of-bounds, as here there are no trial entries at all.
+     * This allows this code to compile, but there are no strings to test, and
+     * so the answer will always be non-UTF-8. */
+    locale_category_index  cat_index = LC_ALL_INDEX_;
+    const locale_category_index  follow_on_cat_index = LC_ALL_INDEX_;
+
+#    endif
+
+    /* Everything set up; look through all the strings */
+    for (PERL_UINT_FAST8_T i = 0; i < C_ARRAY_LENGTH(trials); i++) {
+        (void) my_langinfo_i(trials[i], cat_index, locale,
+                             &scratch_buf, &scratch_buf_size, NULL);
+        cat_index = follow_on_cat_index;
+
+        /* To prevent infinite recursive calls, we don't ask for the UTF-8ness
+         * of the string (in 'trials[i]') above.  Instead we examine the
+         * returned string here */
+        const Size_t len = strlen(scratch_buf);
+        const U8 * first_variant;
+
+        /* If the string is identical whether or not it is encoded as UTF-8, it
+         * isn't helpful in determining UTF8ness. */
+        if (is_utf8_invariant_string_loc((U8 *) scratch_buf, len,
+                                         &first_variant))
+        {
+            continue;
+        }
+
+        /* Here, has non-ASCII.  If not legal UTF-8, isn't a UTF-8 locale */
+        if (! is_utf8_string(first_variant,
+                             len - (first_variant - (U8 *) scratch_buf)))
+        {
+            strings_utf8ness = UTF8NESS_NO;
+            break;
+        }
+
+        /* Here, is a legal non-ASCII UTF-8 string; tentatively set the return
+         * to YES; possibly overridden by later iterations */
+        strings_utf8ness = UTF8NESS_YES;
+
+        /* But if this corroborates our expectation, quit now */
+        if (lean_towards_being_utf8 & NAME_INDICATES_UTF8) {
+            break;
+        }
+    }
+
+#    ifdef USE_LOCALE_TIME
+
+    restore_toggled_locale_c(LC_TIME, orig_TIME_locale);
+
+#    endif
+
+    Safefree(scratch_buf);
+    scratch_buf = NULL;
+
+    if (strings_utf8ness == UTF8NESS_NO) {
+        return codeset;     /* No override */
+    }
+
+    /* Here all tested strings are legal UTF-8.
+     *
+     * Above we set UTF8NESS_YES if any string wasn't ASCII.  But even if they
+     * are all ascii, and the locale name indicates it is a UTF-8 locale,
+     * assume the locale is UTF-8. */
+    if (lean_towards_being_utf8) {
+        strings_utf8ness = UTF8NESS_YES;
+    }
+
+    if (strings_utf8ness == UTF8NESS_YES) {
+        return "UTF-8";
+    }
+
+    /* Here, nothing examined indicates that the codeset is or isn't UTF-8.
+     * But what is it?  The other locale categories are not likely to be of
+     * further help:
+     *
+     * LC_NUMERIC   Only a few locales in the world have a non-ASCII radix or
+     *              group separator.
+     * LC_CTYPE     This code wouldn't be compiled if mbtowc() existed and was
+     *              reliable.  This is unlikely in C99.  There are other
+     *              functions that could be used instead, but are they going to
+     *              exist, and be able to distinguish between UTF-8 and 8859-1?
+     *              Deal with this only if it becomes necessary.
+     * LC_MESSAGES  The strings returned from strerror() would seem likely
+     *              candidates, but experience has shown that many systems
+     *              don't actually have translations installed for them.  They
+     *              are instead always in English, so everything in them is
+     *              ASCII, which is of no help to us.  A Configure probe could
+     *              possibly be written to see if this platform has non-ASCII
+     *              error messages.  But again, wait until it turns out to be
+     *              an actual problem.
+     *
+     *              Things like YESSTR, NOSTR, might not be in ASCII, but need
+     *              nl_langinfo() to access, which we don't have.
+     */
+
+    /* Otherwise, assume the locale isn't UTF-8.  This can be wrong if we don't
+     * have MB_CUR_MAX, and the locale is English without UTF-8 in its name,
+     * and with a dollar currency symbol. */
+    return codeset;     /* No override */
+}
+
+#  endif /* ! HAS_DEFINITIVE_UTF8NESS_DETERMINATION */
 #endif      /* USE_LOCALE */
 
 /*
