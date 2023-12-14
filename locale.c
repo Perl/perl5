@@ -6091,17 +6091,6 @@ S_my_langinfo_i(pTHX_
      * but they are not exposed.  Also calling setlocale(), then calling
      * GetThreadLocale() doesn't work, as the former doesn't change the
      * latter's return.  Therefore we are stuck using the mechanisms below. */
-
-#    ifdef WE_MUST_DEAL_WITH_MISMATCHED_CTYPE
-
-    const char * orig_CTYPE_locale = toggle_locale_c(LC_CTYPE, locale);
-
-#    endif
-
-    const char * orig_switched_locale = toggle_locale_i(cat_index, locale);
-
-    /* Here, we are in the locale we want information about */
-
     /* Almost all the items will have ASCII return values.  Set that here, and
      * override if necessary */
     utf8ness_t is_utf8 = UTF8NESS_IMMATERIAL;
@@ -6130,6 +6119,12 @@ S_my_langinfo_i(pTHX_
 
             Newx(floatbuf, initial_size, char);
 
+#      if defined(WE_MUST_DEAL_WITH_MISMATCHED_CTYPE)
+            const char * orig_CTYPE_locale = toggle_locale_c(LC_CTYPE, locale);
+#      endif
+
+            const char * orig_NUMERIC_locale = toggle_locale_c(LC_NUMERIC,
+                                                               locale);
             /* 1.5 is exactly representable on binary computers */
             Size_t needed_size = snprintf(floatbuf, initial_size, "%.1f", 1.5);
 
@@ -6142,6 +6137,12 @@ S_my_langinfo_i(pTHX_
                 assert(new_needed <= needed_size);
                 needed_size = new_needed;
             }
+
+            restore_toggled_locale_c(LC_NUMERIC, orig_NUMERIC_locale);
+
+#      if defined(WE_MUST_DEAL_WITH_MISMATCHED_CTYPE)
+            restore_toggled_locale_c(LC_CTYPE, orig_CTYPE_locale);
+#      endif
 
             char * s = floatbuf;
             char * e = floatbuf + needed_size;
@@ -6373,6 +6374,9 @@ S_my_langinfo_i(pTHX_
              * first day of the week.  Since we're only getting one thing at a
              * time, it all works */
             struct tm  mytm;
+
+            const char * orig_TIME_locale = toggle_locale_c(LC_TIME, locale);
+
             ints_to_tm(&mytm, 30, 30, hour, mday, mon, 2011, 0, 0, 0);
             char * temp;
             if (utf8ness) {
@@ -6388,6 +6392,8 @@ S_my_langinfo_i(pTHX_
             else {
                 temp = strftime_tm(format, &mytm);
             }
+
+            restore_toggled_locale_c(LC_TIME, orig_TIME_locale);
 
             retval = save_to_buffer(temp, retbufp, retbuf_sizep);
             Safefree(temp);
@@ -6457,6 +6463,9 @@ S_my_langinfo_i(pTHX_
         }
 
 #      ifdef WIN32
+
+        const char * orig_CTYPE_locale = toggle_locale_c(LC_CTYPE, locale);
+
 #        ifndef WIN32_USE_FAKE_OLD_MINGW_LOCALES
 
         /* This function retrieves the code page.  It is subject to change, but
@@ -6468,6 +6477,8 @@ S_my_langinfo_i(pTHX_
         retval = save_to_buffer(nl_langinfo(CODESET),
                                 retbufp, retbuf_sizep);
 #        endif
+
+        restore_toggled_locale_c(LC_CTYPE, orig_CTYPE_locale);
 
         DEBUG_Lv(PerlIO_printf(Perl_debug_log, "locale='%s' cp=%s\n",
                                                locale, retval));
@@ -6549,12 +6560,6 @@ S_my_langinfo_i(pTHX_
 #    endif      /* USE_LOCALE_CTYPE */
 
     } /* Giant switch() of nl_langinfo() items */
-
-    restore_toggled_locale_i(cat_index, orig_switched_locale);
-
-#    ifdef WE_MUST_DEAL_WITH_MISMATCHED_CTYPE
-    restore_toggled_locale_c(LC_CTYPE, orig_CTYPE_locale);
-#    endif
 
     if (utf8ness) {
         *utf8ness = is_utf8;
