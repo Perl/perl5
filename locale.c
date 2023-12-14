@@ -4488,6 +4488,100 @@ Perl_setlocale(const int category, const char * locale)
 
 }
 
+#ifdef USE_LOCALE
+
+STATIC const char *
+S_toggle_locale_i(pTHX_ const locale_category_index cat_index,
+                        const char * new_locale,
+                        const line_t caller_line)
+{
+    PERL_ARGS_ASSERT_TOGGLE_LOCALE_I;
+    assert(cat_index <= LC_ALL_INDEX_);
+
+    /* Changes the locale for the category specified by 'index' to 'new_locale,
+     * if they aren't already the same.
+     *
+     * Returns a copy of the name of the original locale for 'cat_index'
+     * so can be switched back to with the companion function
+     * restore_toggled_locale_i(),  (NULL if no restoral is necessary.) */
+
+    /* Find the original locale of the category we may need to change, so that
+     * it can be restored to later */
+    const char * locale_to_restore_to = querylocale_i(cat_index);
+
+    DEBUG_Lv(PerlIO_printf(Perl_debug_log,
+                           "Entering toggle_locale_i: index=%d(%s),"        \
+                           " wanted=%s, actual=%s; called from %" LINE_Tf   \
+                           "\n", cat_index, category_names[cat_index],
+                           new_locale, locale_to_restore_to, caller_line));
+
+    if (! locale_to_restore_to) {
+        locale_panic_via_(Perl_form(aTHX_
+                                    "Could not find current %s locale",
+                                    category_names[cat_index]),
+                         __FILE__, caller_line);
+    }
+
+    /* If the locales are the same, there's nothing to do */
+    if (strEQ(locale_to_restore_to, new_locale)) {
+        DEBUG_Lv(PerlIO_printf(Perl_debug_log, "%s locale unchanged as %s\n",
+                                               category_names[cat_index],
+                                               new_locale));
+
+        return NULL;
+    }
+
+    /* Finally, change the locale to the new one */
+    void_setlocale_i_with_caller(cat_index, new_locale, __FILE__, caller_line);
+
+    DEBUG_Lv(PerlIO_printf(Perl_debug_log,
+                           "%s locale switched to %s\n",
+                           category_names[cat_index], new_locale));
+
+    return locale_to_restore_to;
+
+#  ifndef DEBUGGING
+    PERL_UNUSED_ARG(caller_line);
+#  endif
+
+}
+
+STATIC void
+S_restore_toggled_locale_i(pTHX_ const locale_category_index cat_index,
+                                 const char * restore_locale,
+                                 const line_t caller_line)
+{
+    /* Restores the locale for LC_category corresponding to cat_index to
+     * 'restore_locale' (which is a copy that will be freed by this function),
+     * or do nothing if the latter parameter is NULL */
+
+    PERL_ARGS_ASSERT_RESTORE_TOGGLED_LOCALE_I;
+    assert(cat_index <= LC_ALL_INDEX_);
+
+    if (restore_locale == NULL) {
+        DEBUG_Lv(PerlIO_printf(Perl_debug_log,
+                               "restore_toggled_locale_i: No need to"       \
+                               " restore %s; called from %" LINE_Tf "\n",   \
+                               category_names[cat_index], caller_line));
+        return;
+    }
+
+    DEBUG_Lv(PerlIO_printf(Perl_debug_log,
+                           "restore_toggled_locale_i: restoring locale for" \
+                           " %s to  %s; called from %" LINE_Tf "\n",        \
+                           category_names[cat_index], restore_locale,
+                           caller_line));
+
+    void_setlocale_i_with_caller(cat_index, restore_locale,
+                                  __FILE__, caller_line);
+
+#  ifndef DEBUGGING
+    PERL_UNUSED_ARG(caller_line);
+#  endif
+
+}
+
+#endif
 #if defined(USE_LOCALE) || defined(HAS_SOME_LANGINFO) || defined(HAS_LOCALECONV)
 
 STATIC utf8ness_t
@@ -8754,99 +8848,8 @@ Perl_strxfrm(pTHX_ SV * src)
 }
 
 #endif /* USE_LOCALE_COLLATE */
+
 #ifdef USE_LOCALE
-
-STATIC const char *
-S_toggle_locale_i(pTHX_ const locale_category_index cat_index,
-                        const char * new_locale,
-                        const line_t caller_line)
-{
-    PERL_ARGS_ASSERT_TOGGLE_LOCALE_I;
-    assert(cat_index <= LC_ALL_INDEX_);
-
-    /* Changes the locale for the category specified by 'index' to 'new_locale,
-     * if they aren't already the same.
-     *
-     * Returns a copy of the name of the original locale for 'cat_index'
-     * so can be switched back to with the companion function
-     * restore_toggled_locale_i(),  (NULL if no restoral is necessary.) */
-
-    /* Find the original locale of the category we may need to change, so that
-     * it can be restored to later */
-    const char * locale_to_restore_to = querylocale_i(cat_index);
-
-    DEBUG_Lv(PerlIO_printf(Perl_debug_log,
-                           "Entering toggle_locale_i: index=%d(%s),"        \
-                           " wanted=%s, actual=%s; called from %" LINE_Tf   \
-                           "\n", cat_index, category_names[cat_index],
-                           new_locale, locale_to_restore_to, caller_line));
-
-    if (! locale_to_restore_to) {
-        locale_panic_via_(Perl_form(aTHX_
-                                    "Could not find current %s locale",
-                                    category_names[cat_index]),
-                         __FILE__, caller_line);
-    }
-
-    /* If the locales are the same, there's nothing to do */
-    if (strEQ(locale_to_restore_to, new_locale)) {
-        DEBUG_Lv(PerlIO_printf(Perl_debug_log, "%s locale unchanged as %s\n",
-                                               category_names[cat_index],
-                                               new_locale));
-
-        return NULL;
-    }
-
-    /* Finally, change the locale to the new one */
-    void_setlocale_i_with_caller(cat_index, new_locale, __FILE__, caller_line);
-
-    DEBUG_Lv(PerlIO_printf(Perl_debug_log,
-                           "%s locale switched to %s\n",
-                           category_names[cat_index], new_locale));
-
-    return locale_to_restore_to;
-
-#  ifndef DEBUGGING
-    PERL_UNUSED_ARG(caller_line);
-#  endif
-
-}
-
-STATIC void
-S_restore_toggled_locale_i(pTHX_ const locale_category_index cat_index,
-                                 const char * restore_locale,
-                                 const line_t caller_line)
-{
-    /* Restores the locale for LC_category corresponding to cat_index to
-     * 'restore_locale' (which is a copy that will be freed by this function),
-     * or do nothing if the latter parameter is NULL */
-
-    PERL_ARGS_ASSERT_RESTORE_TOGGLED_LOCALE_I;
-    assert(cat_index <= LC_ALL_INDEX_);
-
-    if (restore_locale == NULL) {
-        DEBUG_Lv(PerlIO_printf(Perl_debug_log,
-                               "restore_toggled_locale_i: No need to"       \
-                               " restore %s; called from %" LINE_Tf "\n",   \
-                               category_names[cat_index], caller_line));
-        return;
-    }
-
-    DEBUG_Lv(PerlIO_printf(Perl_debug_log,
-                           "restore_toggled_locale_i: restoring locale for" \
-                           " %s to  %s; called from %" LINE_Tf "\n",        \
-                           category_names[cat_index], restore_locale,
-                           caller_line));
-
-    void_setlocale_i_with_caller(cat_index, restore_locale,
-                                  __FILE__, caller_line);
-
-#  ifndef DEBUGGING
-    PERL_UNUSED_ARG(caller_line);
-#  endif
-
-}
-
 #  ifdef USE_LOCALE_CTYPE
 
 STATIC bool
