@@ -94,8 +94,8 @@
  *          setlocale() knows about, there is a layer to cope with that.
  *      b)  stdized_setlocale() is a layer above a) that fixes some vagaries in
  *          the return value of the libc setlocale().  On most platforms this
- *          layer is empty; it requires perl to be Configured with a parameter
- *          indicating the platform's defect, in order to be activated.  The
+ *          layer is empty; in order to be activated, it requires perl to be
+ *          Configured with a parameter indicating the platform's defect.  The
  *          current ones are listed at the definition of the macro.
  *
  * 2) An implementation that adds a minimal layer above implementation 1),
