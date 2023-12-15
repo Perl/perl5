@@ -6602,6 +6602,20 @@ t/re/uniprops07.t			Test unicode \p{} regex constructs
 t/re/uniprops08.t			Test unicode \p{} regex constructs
 t/re/uniprops09.t			Test unicode \p{} regex constructs
 t/re/uniprops10.t			Test unicode \p{} regex constructs
+t/re/uniprops11.t			Test unicode \p{} regex constructs
+t/re/uniprops12.t			Test unicode \p{} regex constructs
+t/re/uniprops13.t			Test unicode \p{} regex constructs
+t/re/uniprops14.t			Test unicode \p{} regex constructs
+t/re/uniprops15.t			Test unicode \p{} regex constructs
+t/re/uniprops16.t			Test unicode \p{} regex constructs
+t/re/uniprops17.t			Test unicode \p{} regex constructs
+t/re/uniprops18.t			Test unicode \p{} regex constructs
+t/re/uniprops19.t			Test unicode \p{} regex constructs
+t/re/uniprops20.t			Test unicode \p{} regex constructs
+t/re/uniprops21.t			Test unicode \p{} regex constructs
+t/re/uniprops22.t			Test unicode \p{} regex constructs
+t/re/uniprops23.t			Test unicode \p{} regex constructs
+t/re/uniprops24.t			Test unicode \p{} regex constructs
 t/re/user_prop_race_thr.t		Test races in user-defined \p{} under threads
 t/README				Instructions for regression tests
 t/run/cloexec.t				Test close-on-exec.

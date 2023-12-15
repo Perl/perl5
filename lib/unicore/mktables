@@ -19089,7 +19089,7 @@ EOF_CODE
     # Cause there to be 'if' statements to only execute a portion of this
     # long-running test each time, so that we can have a bunch of .t's running
     # in parallel
-    my $chunks = 10     # Number of test files
+    my $chunks = 24     # Number of test files
                - 1      # For GCB & SB
                - 1      # For WB
                - 4;     # LB split into this many files
