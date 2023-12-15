@@ -149,6 +149,19 @@ sub try {
   my $o = tie my @lines, 'Tie::File', $file or die $!;
   # allocate more time for the test if we are running parallel tests
   my $alarm_time = ($ENV{TEST_JOBS} || $ENV{HARNESS_OPTIONS}) ? 20 : 10;
+
+  # Accept either spelling
+  my $timeout_factor = $ENV{PERL_TEST_TIME_OUT_FACTOR}
+                    || $ENV{PERL_TEST_TIMEOUT_FACTOR}
+                    || 10;
+  $timeout_factor = 1 if $timeout_factor < 1;
+  $timeout_factor = $1 if $timeout_factor =~ /^(\d+)$/;
+
+  # Valgrind slows perl way down so give it more time before dying.
+  $timeout_factor = 10 if $timeout_factor < 10 && $ENV{PERL_VALGRIND};
+
+  $alarm_time *= $timeout_factor;
+
   local $SIG{ALRM} = sub { die "Alarm clock" };
   my $a_retval = eval { alarm($alarm_time) unless $^P; $o->_upcopy($src, $dst, $len) };
   my $err = $@;
