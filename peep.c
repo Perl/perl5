@@ -3985,6 +3985,11 @@ Perl_rpeep(pTHX_ OP *o)
             if (!(o->op_private & (OPpASSIGN_BACKWARDS|OPpASSIGN_CV_TO_GV))
                 && (lval->op_type == OP_NULL) && (lval->op_private == 2) &&
                 (cBINOPx(lval)->op_first->op_type == OP_AELEMFAST_LEX)
+                 /* For efficiency, pp_aelemfastlex_store() doesn't push its
+                  * result onto the stack. For the relatively rare case of
+                  * the array assignment not in void context, we just do it
+                  * the old slow way. */
+                 && OP_GIMME(o,0) == G_VOID
             ) {
                 OP * lex = cBINOPx(lval)->op_first;
                 /* SASSIGN's bitfield flags, such as op_moresib and
