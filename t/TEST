@@ -439,8 +439,14 @@ sub _tests_from_manifest {
     push @results, \%non_ext if $all;
     my $mani = '../MANIFEST';
     if (open(MANI, $mani)) {
+	my $output_skip = 0;
 	while (<MANI>) {
 	    chomp;
+	    if (m!^cpan!) {
+		print STDERR "Skipping cpan testing\n" unless $output_skip;
+		$output_skip = 1;
+		next;
+	    }
 	    my ($file)= split /\t/, $_;
 	    if ($file =~ m!^((?:cpan|dist|ext)/(\S+)/+(?:[^/\s]+\.t|test\.pl)|lib/\S+?(?:\.t|test\.pl))\z!) {
 		my $t = $1;
