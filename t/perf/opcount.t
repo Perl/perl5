@@ -708,7 +708,7 @@ test_opcount(0, "builtin::true/false are replaced with constants",
                 });
 
 test_opcount(0, "builtin::is_bool is replaced with direct opcode",
-                sub { my $x; my $y; $y = builtin::is_bool($x); },
+                sub { my $x; my $y; $y = builtin::is_bool($x); 1; },
                 {
                     entersub => 0,
                     is_bool  => 1,
@@ -788,12 +788,12 @@ test_opcount(0, "builtin::is_tainted is replaced with direct opcode",
                     is_tainted => 1,
                 });
 
-# sassign + padsv combinations are replaced by padsv_store
+# void sassign + padsv combinations are replaced by padsv_store
 test_opcount(0, "sassign + padsv replaced by padsv_store",
-                sub { my $y; my $z = $y = 3; },
+                sub { my $y; my $z = $y = 3; 1; },
                 {
-                    padsv        => 1,
-                    padsv_store  => 2,
+                    padsv        => 2,
+                    padsv_store  => 1,
                 });
 
 # OPpTARGET_MY optimizations on undef
@@ -956,7 +956,7 @@ test_opcount(0, "Empty anonlist and direct lexical assignment",
                     sassign   => 0,
                 });
 test_opcount(0, "Empty anonlist ref and direct lexical assignment",
-                sub { my $x = \[] },
+                sub { my $x = \[]; 1; },
                 {
                     anonlist    => 0,
                     emptyavhv   => 1,
@@ -1001,7 +1001,7 @@ test_opcount(0, "Empty anonhash and direct lexical assignment",
                     sassign   => 0,
                 });
 test_opcount(0, "Empty anonhash ref and direct lexical assignment",
-                sub { my $x = \{} },
+                sub { my $x = \{}; 1 },
                 {
                     anonhash    => 0,
                     emptyavhv   => 1,
