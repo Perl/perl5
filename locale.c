@@ -5598,16 +5598,43 @@ S_populate_hash_from_localeconv(pTHX_ HV * hv,
 #      define CALL_IS_FOR(x) 1
 #    endif
 
-    start_DEALING_WITH_MISMATCHED_CTYPE(locale);
+    /* This function is unfortunately full of #ifdefs.  It consists of three
+     * sections:
+     *  1)  Setup:
+     *        a)  On platforms where it matters, toggle LC_CTYPE to the same
+     *            locale that LC_NUMERIC and LC_MONETARY will be toggled to
+     *        b)  On calls that process LC_NUMERIC, toggle to the desired locale
+     *        c)  On calls that process LC_MONETARY, toggle to the desired
+     *            locale
+     *        d)  Do any necessary mutex locking not (automatically) done by
+     *            the toggling
+     *        e)  Work around some Windows-only issues and bugs
+     *  2)  Do the localeconv(), copying the results.
+     *  3)  Teardown, which is the inverse of setup.
+     *
+     * The setup and teardown are highly variable due to the variance in the
+     * possible Configurations.  What is done here to make it slightly more
+     * understandable is the setup section creates the details of the teardown
+     * section, and macroizes them.  So that the finished teardown product is
+     * just a linear series of macros.  You can thus easily see the logic
+     * there.  Stripped of the details, the setup section is just the reverse
+     * order of the teardown one. */
 
-#    ifdef USE_LOCALE_NUMERIC
+    /* Setup any LC_CTYPE handling */
+    start_DEALING_WITH_MISMATCHED_CTYPE(locale);
+#    define CTYPE_TEARDOWN  end_DEALING_WITH_MISMATCHED_CTYPE(locale)
+
+    /* Setup any LC_NUMERIC handling */
+#    ifndef USE_LOCALE_NUMERIC
+#      define NUMERIC_TEARDOWN
+#    else
 
     /* We need to toggle the NUMERIC locale to the desired one if we are
      * getting NUMERIC strings */
     const char * orig_NUMERIC_locale = NULL;
     if (CALL_IS_FOR(NUMERIC)) {
 
-#      if defined(WIN32)
+#      ifdef WIN32
 
         /* There is a bug in Windows in which setting LC_CTYPE after the others
          * doesn't actually take effect for localeconv().  See commit
@@ -5616,19 +5643,38 @@ S_populate_hash_from_localeconv(pTHX_ HV * hv,
          * unconditionally toggle away from and back to the current locale
          * prior to calling localeconv(). */
         orig_NUMERIC_locale = toggle_locale_c(LC_NUMERIC, "C");
-        toggle_locale_c(LC_NUMERIC, locale);
+        (void) toggle_locale_c(LC_NUMERIC, locale);
+
+#        define NUMERIC_TEARDOWN                                            \
+          STMT_START {                                                      \
+            if (CALL_IS_FOR(NUMERIC)) {                                     \
+                restore_toggled_locale_c(LC_NUMERIC, "C");                  \
+                restore_toggled_locale_c(LC_NUMERIC, orig_NUMERIC_locale);  \
+            }                                                               \
+          } STMT_END
 
 #      else
 
         /* No need for the extra toggle when not on Windows */
         orig_NUMERIC_locale = toggle_locale_c(LC_NUMERIC, locale);
 
+#        define NUMERIC_TEARDOWN                                            \
+         STMT_START {                                                       \
+            if (CALL_IS_FOR(NUMERIC)) {                                     \
+                restore_toggled_locale_c(LC_NUMERIC, orig_NUMERIC_locale);  \
+            }                                                               \
+         } STMT_END
 #      endif
 
     }
 
-#    endif
-#    ifdef USE_LOCALE_MONETARY
+#    endif  /* End of LC_NUMERIC setup */
+
+   /* Setup any LC_MONETARY handling, using the same logic as for
+    * USE_LOCALE_NUMERIC just above */
+#    ifndef USE_LOCALE_MONETARY
+#      define MONETARY_TEARDOWN
+#    else
 
     /* Same logic as LC_NUMERIC, and same Windows bug */
     const char * orig_MONETARY_locale = NULL;
@@ -5637,21 +5683,37 @@ S_populate_hash_from_localeconv(pTHX_ HV * hv,
 #      ifdef WIN32
 
         orig_MONETARY_locale = toggle_locale_c(LC_MONETARY, "C");
-        toggle_locale_c(LC_MONETARY, locale);
+        (void) toggle_locale_c(LC_MONETARY, locale);
+
+#        define MONETARY_TEARDOWN                                           \
+         STMT_START {                                                       \
+            if (CALL_IS_FOR(MONETARY)) {                                    \
+                restore_toggled_locale_c(LC_MONETARY, "C");                 \
+                restore_toggled_locale_c(LC_MONETARY, orig_MONETARY_locale);\
+            }                                                               \
+         } STMT_END
 
 #      else
 
         /* No need for the extra toggle when not on Windows */
         orig_MONETARY_locale = toggle_locale_c(LC_MONETARY, locale);
 
+#        define MONETARY_TEARDOWN                                           \
+         STMT_START {                                                       \
+            if (CALL_IS_FOR(MONETARY)) {                                    \
+                restore_toggled_locale_c(LC_MONETARY, orig_MONETARY_locale);\
+            }                                                               \
+         } STMT_END
+
 #      endif
 
     }
 
-#    endif
+#    endif  /* End of LC_MONETARY setup */
 
-    /* Finally ready to do the actual localeconv().  Lock to prevent other
-     * accesses until we have made a copy of its returned static buffer */
+    /* Here, have toggled to the correct locale.  Lock to prevent other
+     * accesses until we have made a copy of the localeconv()returned static
+     * buffer */
     gwLOCALE_LOCK;
 
 #    if defined(TS_W32_BROKEN_LOCALECONV) && defined(USE_THREAD_SAFE_LOCALE)
@@ -5695,7 +5757,7 @@ S_populate_hash_from_localeconv(pTHX_ HV * hv,
 
 #    endif  /* TS_W32_BROKEN_LOCALECONV */
 
-    /* Finally, do the actual localeconv */
+    /* Finally, do the actual call to localeconv() */
     const char *lcbuf_as_string = (const char *) localeconv();
 
     /* Copy its results for each desired category as determined by
@@ -5764,23 +5826,12 @@ S_populate_hash_from_localeconv(pTHX_ HV * hv,
 
 #    endif  /* TS_W32_BROKEN_LOCALECONV */
 
+    /* Back out of what we set up */
     gwLOCALE_UNLOCK;    /* Finished with the critical section of a
                            globally-accessible buffer */
-#    if defined(USE_LOCALE_MONETARY)
-
-    restore_toggled_locale_c(LC_MONETARY, orig_MONETARY_locale);
-
-#    endif
-#    ifdef USE_LOCALE_NUMERIC
-
-    restore_toggled_locale_c(LC_NUMERIC, orig_NUMERIC_locale);
-
-#    endif
-
-    end_DEALING_WITH_MISMATCHED_CTYPE(locale);
-
-#    undef CALL_IS_FOR
-
+    MONETARY_TEARDOWN;
+    NUMERIC_TEARDOWN;
+    CTYPE_TEARDOWN;
 }
 
 #  endif    /* defined(USE_LOCALE_NUMERIC) || defined(USE_LOCALE_MONETARY) */
