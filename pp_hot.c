@@ -403,6 +403,8 @@ PP(pp_sassign)
     if (PL_op->op_private & OPpASSIGN_BACKWARDS) { /* {or,and,dor}assign */
         SV * const temp = left;
         left = right; right = temp;
+        PL_stack_sp[0]  = left;
+        PL_stack_sp[-1] = right;
     }
     assert(TAINTING_get || !TAINT_get);
     if (UNLIKELY(TAINT_get) && !SvTAINTED(right))
@@ -442,7 +444,9 @@ PP(pp_sassign)
         /* Need to fix things up.  */
         if (!is_gv) {
             /* Need to fix GV.  */
-            left = MUTABLE_SV(gv_fetchsv_nomg(left,GV_ADD, SVt_PVGV));
+            SV *sv = MUTABLE_SV(gv_fetchsv_nomg(left,GV_ADD, SVt_PVGV));
+            rpp_replace_1_1_NN(sv);
+            left = sv;
         }
 
         if (!got_coderef) {
@@ -495,7 +499,18 @@ PP(pp_sassign)
             packWARN(WARN_MISC), "Useless assignment to a temporary"
         );
     SvSetMagicSV(left, right);
-    rpp_replace_2_1_NN(left);
+    if (LIKELY(GIMME_V == G_VOID))
+        rpp_popfree_2_NN(); /* pop left and right */
+    else {
+        /* pop right, leave left on the stack */
+        assert(PL_stack_sp[-1] == right);
+        assert(PL_stack_sp[0]  == left);
+        *--PL_stack_sp = left;
+#ifdef PERL_RC_STACK
+        SvREFCNT_dec_NN(right);
+#endif
+    }
+
     return NORMAL;
 }
 
