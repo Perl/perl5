@@ -155,6 +155,9 @@ esac
 # which is being fixed.  In the meantime, forbid POSIX 2008 locales
 #d_newlocale="$undef"
 
+# libc on this platform always keeps these categories in the C locale
+ccflags="$ccflags -DNO_LOCALE_NUMERIC -DNO_LOCALE_COLLATE -DNO_LOCALE_MONETARY -DNO_LOCALE_TIME -DNO_LOCALE_MESSAGES"
+
 # Seems that OpenBSD returns bogus values in _Thread_local variables in code in
 # shared objects, so we need to disable it. See GH #19109
 d_thread_local=undef
