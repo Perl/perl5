@@ -5596,8 +5596,8 @@ S_populate_hash_from_localeconv(pTHX_ HV * hv,
 
 #    ifdef USE_LOCALE_NUMERIC
 
-    /* We need to toggle to the underlying NUMERIC locale if we are getting
-     * NUMERIC strings */
+    /* We need to toggle the NUMERIC locale to the desired one if we are
+     * getting NUMERIC strings */
     const char * orig_NUMERIC_locale = NULL;
     if (CALL_IS_FOR(NUMERIC)) {
 
@@ -5622,14 +5622,24 @@ S_populate_hash_from_localeconv(pTHX_ HV * hv,
     }
 
 #    endif
-#    if defined(USE_LOCALE_MONETARY) && defined(WIN32)
+#    ifdef USE_LOCALE_MONETARY
 
-    /* Same Windows bug as described just above for NUMERIC.  Otherwise, no
-     * need to toggle LC_MONETARY, as it is kept in the underlying locale */
+    /* Same logic as LC_NUMERIC, and same Windows bug */
     const char * orig_MONETARY_locale = NULL;
     if (CALL_IS_FOR(MONETARY)) {
+
+#      ifdef WIN32
+
         orig_MONETARY_locale = toggle_locale_c(LC_MONETARY, "C");
         toggle_locale_c(LC_MONETARY, locale);
+
+#      else
+
+        /* No need for the extra toggle when not on Windows */
+        orig_MONETARY_locale = toggle_locale_c(LC_MONETARY, locale);
+
+#      endif
+
     }
 
 #    endif
@@ -5750,8 +5760,7 @@ S_populate_hash_from_localeconv(pTHX_ HV * hv,
 
     gwLOCALE_UNLOCK;    /* Finished with the critical section of a
                            globally-accessible buffer */
-
-#    if defined(USE_LOCALE_MONETARY) && defined(WIN32)
+#    if defined(USE_LOCALE_MONETARY)
 
     restore_toggled_locale_c(LC_MONETARY, orig_MONETARY_locale);
 
