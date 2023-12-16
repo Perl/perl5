@@ -177,7 +177,8 @@ Perl_xs_wrap(pTHX_ XSUBADDR_t xsub, CV *cv)
 
 
 
-/* Private helper function for Perl_rpp_replace_2_1_COMMON().
+/* Private helper function for Perl_rpp_replace_2_1_COMMON()
+ * and rpp_popfree_2_NN().
  * Free the two passed SVs, whose original ref counts are rc1 and rc2.
  * Assumes the stack initially looked like
  *    .... sv1 sv2
