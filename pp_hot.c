@@ -2179,7 +2179,8 @@ PP(pp_print)
 
   just_say_no:
     rpp_popfree_to_NN(ORIGMARK);
-    rpp_xpush_IMM(retval);
+    if ((PL_op->op_flags & OPf_WANT) != OPf_WANT_VOID)
+        rpp_xpush_IMM(retval);
     return NORMAL;
 }
 
