@@ -2410,6 +2410,7 @@ Perl_scalarvoid(pTHX_ OP *arg)
         case OP_LINESEQ:
         case OP_LEAVEGIVEN:
         case OP_LEAVEWHEN:
+        case OP_ONCE:
         kids:
             next_kid = cLISTOPo->op_first;
             break;
@@ -8328,7 +8329,6 @@ S_newONCEOP(pTHX_ OP *initop, OP *padop)
 
     OpTYPE_set(condop, OP_ONCE);
     other->op_targ = target;
-    nullop->op_flags |= OPf_WANT_SCALAR;
 
     /* Store the initializedness of state vars in a separate
        pad entry.  */
