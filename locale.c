@@ -5938,61 +5938,6 @@ Perl_langinfo8(const nl_item item, utf8ness_t * utf8ness)
 
 }
 
-char *
-Perl_my_strftime(pTHX_ const char *fmt, int sec, int min, int hour,
-                       int mday, int mon, int year, int wday, int yday,
-                       int isdst)
-{   /* Documented above */
-    PERL_ARGS_ASSERT_MY_STRFTIME;
-
-    struct tm  mytm;
-    ints_to_tm(&mytm, sec, min, hour, mday, mon, year, wday, yday, isdst);
-    char * ret = strftime_tm(fmt, &mytm);
-    return ret;
-}
-
-SV *
-Perl_sv_strftime_tm(pTHX_ SV * fmt, const struct tm * mytm)
-{   /* Documented above */
-    PERL_ARGS_ASSERT_SV_STRFTIME_TM;
-
-    utf8ness_t fmt_utf8ness = (SvUTF8(fmt) && LIKELY(! IN_BYTES))
-                              ? UTF8NESS_YES
-                              : UTF8NESS_UNKNOWN;
-
-    utf8ness_t result_utf8ness;
-    char * retval = strftime8(SvPV_nolen(fmt),
-                              mytm,
-                              fmt_utf8ness,
-                              &result_utf8ness,
-                              true  /* calling from sv_strftime */
-                             );
-    SV * sv = NULL;
-    if (retval) {
-        sv = newSV_type(SVt_PV);
-        sv_usepvn_flags(sv, retval, strlen(retval), SV_HAS_TRAILING_NUL);
-
-        if (result_utf8ness == UTF8NESS_YES) {
-            SvUTF8_on(sv);
-        }
-    }
-
-    return sv;
-}
-
-SV *
-Perl_sv_strftime_ints(pTHX_ SV * fmt, int sec, int min, int hour,
-                            int mday, int mon, int year, int wday,
-                            int yday, int isdst)
-{   /* Documented above */
-    PERL_ARGS_ASSERT_SV_STRFTIME_INTS;
-
-    struct tm  mytm;
-    ints_to_tm(&mytm, sec, min, hour, mday, mon, year, wday, yday, isdst);
-    SV * ret = sv_strftime_tm(fmt, &mytm);
-    return ret;
-}
-
 #ifdef USE_LOCALE
 #  ifndef HAS_DEFINITIVE_UTF8NESS_DETERMINATION
 
@@ -6862,6 +6807,62 @@ C<LC_TIME> locale of the program, giving results based on that locale.
 
 =cut
  */
+
+char *
+Perl_my_strftime(pTHX_ const char *fmt, int sec, int min, int hour,
+                       int mday, int mon, int year, int wday, int yday,
+                       int isdst)
+{   /* Documented above */
+    PERL_ARGS_ASSERT_MY_STRFTIME;
+
+    struct tm  mytm;
+    ints_to_tm(&mytm, sec, min, hour, mday, mon, year, wday, yday, isdst);
+    char * ret = strftime_tm(fmt, &mytm);
+    return ret;
+}
+
+SV *
+Perl_sv_strftime_tm(pTHX_ SV * fmt, const struct tm * mytm)
+{   /* Documented above */
+    PERL_ARGS_ASSERT_SV_STRFTIME_TM;
+
+    utf8ness_t fmt_utf8ness = (SvUTF8(fmt) && LIKELY(! IN_BYTES))
+                              ? UTF8NESS_YES
+                              : UTF8NESS_UNKNOWN;
+
+    utf8ness_t result_utf8ness;
+    char * retval = strftime8(SvPV_nolen(fmt),
+                              mytm,
+                              fmt_utf8ness,
+                              &result_utf8ness,
+                              true  /* calling from sv_strftime */
+                             );
+    SV * sv = NULL;
+    if (retval) {
+        STRLEN len = strlen(retval);
+        sv = newSV_type(SVt_PV);
+        sv_usepvn_flags(sv, retval, strlen(retval), SV_HAS_TRAILING_NUL);
+
+        if (result_utf8ness == UTF8NESS_YES) {
+            SvUTF8_on(sv);
+        }
+    }
+
+    return sv;
+}
+
+SV *
+Perl_sv_strftime_ints(pTHX_ SV * fmt, int sec, int min, int hour,
+                            int mday, int mon, int year, int wday,
+                            int yday, int isdst)
+{   /* Documented above */
+    PERL_ARGS_ASSERT_SV_STRFTIME_INTS;
+
+    struct tm  mytm;
+    ints_to_tm(&mytm, sec, min, hour, mday, mon, year, wday, yday, isdst);
+    SV * ret = sv_strftime_tm(fmt, &mytm);
+    return ret;
+}
 
 STATIC void
 S_ints_to_tm(pTHX_ struct tm * mytm,
