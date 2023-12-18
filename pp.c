@@ -6350,7 +6350,9 @@ PP(pp_push)
         PL_delaymagic = old_delaymagic;
     }
     rpp_popfree_to_NN(ORIGMARK);
-    if (OP_GIMME(PL_op, 0) != G_VOID) {
+    if (   (PL_op->op_flags & OPf_WANT) != G_VOID
+        || (PL_op->op_private & OPpTARGET_MY))
+    {
         TARGi(AvFILL(ary) + 1, 1);
         rpp_push_1(targ);
     }
@@ -6432,7 +6434,9 @@ PP(pp_unshift)
         PL_delaymagic = old_delaymagic;
     }
     rpp_popfree_to_NN(ORIGMARK);
-    if (OP_GIMME(PL_op, 0) != G_VOID) {
+    if (   (PL_op->op_flags & OPf_WANT) != G_VOID
+        || (PL_op->op_private & OPpTARGET_MY))
+    {
         TARGi(AvFILL(ary) + 1, 1);
         rpp_push_1(targ);
     }

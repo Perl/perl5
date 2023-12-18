@@ -2124,14 +2124,6 @@ Perl_scalarvoid(pTHX_ OP *arg)
             goto get_next_op;
         }
 
-        if ((o->op_private & OPpTARGET_MY)
-            && (PL_opargs[o->op_type] & OA_TARGLEX))/* OPp share the meaning */
-        {
-            /* newASSIGNOP has already applied scalar context, which we
-               leave, as if this op is inside SASSIGN.  */
-            goto get_next_op;
-        }
-
         o->op_flags = (o->op_flags & ~OPf_WANT) | OPf_WANT_VOID;
 
         switch (o->op_type) {
@@ -2218,6 +2210,14 @@ Perl_scalarvoid(pTHX_ OP *arg)
         case OP_PROTOTYPE:
         case OP_RUNCV:
         func_ops:
+            if (   (PL_opargs[o->op_type] & OA_TARGLEX)
+                && (o->op_private & OPpTARGET_MY)
+            )
+                /* '$lex = $a + $b' etc is optimised to '$a + $b' but
+                 * where the add op's TARG is actually $lex. So it's not
+                 * useless to be in void context in this special case */
+                break;
+
             useless = OP_DESC(o);
             break;
 
@@ -13261,7 +13261,7 @@ S_maybe_targlex(pTHX_ OP *o)
         if (kkid && kkid->op_type == OP_PADSV) {
             if (kid->op_type == OP_EMPTYAVHV) {
                 kid->op_flags |= kid->op_flags |
-                              (o->op_flags & (OPf_WANT|OPf_PARENS));
+                    (o->op_flags & (OPf_WANT|OPf_PARENS));
                 kid->op_private |= OPpTARGET_MY |
                               (kkid->op_private & (OPpLVAL_INTRO|OPpPAD_STATE));
                 goto swipe_and_detach;
@@ -13269,7 +13269,10 @@ S_maybe_targlex(pTHX_ OP *o)
                    || (kkid->op_private & OPpPAD_STATE))
             {
                 kid->op_private |= OPpTARGET_MY;       /* Used for context settings */
-            swipe_and_detach:
+                /* give the lexical op the context of the parent sassign */
+                kid->op_flags =   (kid->op_flags & ~OPf_WANT)
+                                | (o->op_flags   &  OPf_WANT);
+              swipe_and_detach:
                 kid->op_targ = kkid->op_targ;
                 kkid->op_targ = 0;
                 /* Now we do not need PADSV and SASSIGN.
