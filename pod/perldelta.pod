@@ -73,7 +73,25 @@ XXX For a release on a stable branch, this section aspires to be:
     If any exist, they are bugs, and we request that you submit a
     report.  See L</Reporting Bugs> below.
 
-[ List each incompatible change as a =head2 entry ]
+=head2 C<return> no longer allows an indirect object
+
+The C<return> operator syntax now rejects indirect objects, in most
+cases this would compile and even run, but wasn't documented and could
+produce confusing results, for example:
+
+  # note that sum hasn't been defined
+  sub sum_positive {
+    return sum grep $_ > 0, @_;
+  }
+  say for sum_positive(-1, 2, 3)
+
+produced:
+
+  *main::sum
+  2
+  3
+
+[github #21716]
 
 =head1 Deprecations
 
@@ -232,7 +250,11 @@ and New Warnings
 
 =item *
 
-XXX L<message|perldiag/"message">
+L<Missing comma after first argument to return|perldiag/"Missing comma after first argument to return">
+
+(F) While certain operators allow you to specify a filehandle or an
+"indirect object" before the argument list, C<return> isn't one of
+them.
 
 =back
 
