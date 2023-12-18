@@ -13654,6 +13654,13 @@ Perl_ck_return(pTHX_ OP *o)
 
     PERL_ARGS_ASSERT_CK_RETURN;
 
+    if (o->op_flags & OPf_STACKED) {
+        kid = cUNOPx(OpSIBLING(cLISTOPo->op_first))->op_first;
+        if (kid->op_type != OP_SCOPE && kid->op_type != OP_LEAVE)
+            yyerror("Missing comma after first argument to return");
+        o->op_flags &= ~OPf_STACKED;
+    }
+
     kid = OpSIBLING(cLISTOPo->op_first);
     if (PL_compcv && CvLVALUE(PL_compcv)) {
         for (; kid; kid = OpSIBLING(kid))
