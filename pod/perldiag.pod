@@ -4003,6 +4003,12 @@ follow the C<\N>.
 (F) While certain functions allow you to specify a filehandle or an
 "indirect object" before the argument list, this ain't one of them.
 
+=item Missing comma after first argument to return
+
+(F) While certain operators allow you to specify a filehandle or an
+"indirect object" before the argument list, C<return> isn't one of
+them.
+
 =item Missing command in piped open
 
 (W pipe) You used the C<open(FH, "| command")> or

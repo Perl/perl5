@@ -300,3 +300,11 @@ LOOP: {
 }
 EXPECT
 Can't "last" out of a "finally" block at - line 4.
+########
+# NAME return HANDLE LIST isn't valid [github #21716]
+sub xx {
+  return sum map { $_+1} 1 .. 5;
+}
+EXPECT
+Missing comma after first argument to return at - line 2, near "5;"
+Execution of - aborted due to compilation errors.
