@@ -722,6 +722,8 @@ static const char C_thousands_sep[] = "";
                               && (( *(name) == 'C' && (*(name + 1)) == '\0') \
                                    || strEQ((name), "POSIX")))
 
+/* If this interface to nl_langinfo() isn't defined by embed.fnc, it means it
+ * isn't available on this platform, so instead emulate it */
 #ifndef my_langinfo_i
 #  define my_langinfo_i(i, c, l, b, s, u)                                   \
                     (PERL_UNUSED_VAR(c), emulate_langinfo(i, l, b, s, u))
@@ -6149,8 +6151,8 @@ S_emulate_langinfo(pTHX_ const int item,
         /* The locale's currency symbol may be empty.  But if not, the return
          * from nl_langinfo() prefixes it with a character that indicates where
          * in the monetary value the symbol is to be placed
-         *  a) before, like $9.99);
-         *  b) middle, rare, but would like be 9$99; or
+         *  a) before, like $9.99
+         *  b) middle, rare, but would like be 9$99
          *  c) after,  like 9.99USD
          *
          * The POSIX Standard permits an implementation to choose whether or
@@ -6381,6 +6383,10 @@ S_emulate_langinfo(pTHX_ const int item,
                                                 CODE_PAGE_FUNCTION),
                                 retbufp, retbuf_sizep);
         retval_saved = true;
+
+        /* We just assume the codeset is ASCII; no need to check for it being
+         * UTF-8 */
+
         restore_toggled_locale_c(LC_CTYPE, orig_CTYPE_locale);
 
         DEBUG_Lv(PerlIO_printf(Perl_debug_log, "locale='%s' cp=%s\n",
@@ -7226,7 +7232,7 @@ S_ints_to_tm(pTHX_ struct tm * mytm,
                    int wday, int yday, int isdst)
 {
     /* Create a struct tm structure from the input time-related integer
-     * variables */
+     * variables for the current underlying LC_TIME locale */
 
     /* Override with the passed-in values */
     Zero(mytm, 1, struct tm);
@@ -7265,7 +7271,14 @@ S_strftime_tm(pTHX_ const char *fmt, const struct tm *mytm)
 {
     PERL_ARGS_ASSERT_STRFTIME_TM;
 
-    /* Execute strftime() based on the input struct tm */
+    /* Execute strftime() based on the input struct tm, and the current LC_TIME
+     * locale.
+     *
+     * The reason the locale isn't passed in and we toggle to it, is because
+     * 'mytm' should have been populated using the same locale, so better to
+     * not toggle back and forth multiple times, as long as the populating and
+     * this call are close together, to minimize the amount of time spent
+     * toggled */
 
     /* An empty format yields an empty result */
     const int fmtlen = strlen(fmt);
