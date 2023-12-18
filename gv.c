@@ -4018,6 +4018,15 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
     }
   }
 
+  /* If there's an optimised-away assignment such as $lex = $a + $b, where
+   * the  operator sets the targ lexical directly and skips the sassign,
+   * treat the op as scalar even if its marked as void */
+  if (   PL_op
+      && (PL_opargs[PL_op->op_type] & OA_TARGLEX)
+      && (PL_op->op_private & OPpTARGET_MY)
+  )
+      force_scalar = 1;
+
   switch (method) {
     /* in these cases, we're calling '+' or '-' as a fallback for a ++ or --
      * operation. we need this to return a value, so that it can be assigned
