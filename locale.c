@@ -6852,7 +6852,7 @@ only in the form of their inputs.  C<sv_strftime_tm> takes a filled-in
 S<C<struct tm>> parameter.  C<sv_strftime_ints> takes a bunch of integer
 parameters that together completely define a given time.
 
-C<my_strftime> is kept for backwards compatibility.  Knowing if the result
+C<my_strftime> is kept for backwards compatibility.  Knowing if its result
 should be considered UTF-8 or not requires significant extra logic.
 
 Note that C<yday> and C<wday> effectively are ignored by C<sv_strftime_ints>
