@@ -346,6 +346,11 @@ Perl_av_unshift(pTHX_ AV *av, SSize_t num);
 #define PERL_ARGS_ASSERT_AV_UNSHIFT             \
         assert(av)
 
+PERL_CALLCONV void
+Perl_av_unshift_sv(pTHX_ AV *av, SV *sv);
+#define PERL_ARGS_ASSERT_AV_UNSHIFT_SV          \
+        assert(av); assert(sv)
+
 PERL_CALLCONV OP *
 Perl_bind_match(pTHX_ I32 type, OP *left, OP *right)
         __attribute__warn_unused_result__
