@@ -5650,11 +5650,6 @@ S_populate_hash_from_localeconv(pTHX_ HV * hv,
 
 #  endif    /* defined(USE_LOCALE_NUMERIC) || defined(USE_LOCALE_MONETARY) */
 #endif /* defined(HAS_LOCALECONV) */
-#ifndef HAS_SOME_LANGINFO
-
-typedef int nl_item;    /* Substitute 'int' for emulated nl_langinfo() */
-
-#endif
 
 /*
 

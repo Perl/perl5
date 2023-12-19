@@ -8,6 +8,10 @@
 
 #if defined(I_LANGINFO)
 #   include <langinfo.h>
+#else
+
+typedef int nl_item;    /* Substitute 'int' for emulated nl_langinfo() */
+
 #endif
 
 /* NOTE that this file is parsed by ext/XS-APItest/t/locale.t, so be careful
