@@ -442,8 +442,8 @@ sub _tests_from_manifest {
 	my $output_skip = 0;
 	while (<MANI>) {
 	    chomp;
-	    if (m!^cpan!) {
-		print STDERR "Skipping cpan testing\n" unless $output_skip;
+	    if (m!^(cpan|dist(*nla:/[Tt]hread))!) {
+		print STDERR "Skipping cpan and most dist testing\n" unless $output_skip;
 		$output_skip = 1;
 		next;
 	    }
