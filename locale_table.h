@@ -23,7 +23,7 @@
  */
 
 #ifdef LC_CTYPE
-#  ifdef NO_LOCALE_CTYPE
+#  if defined(NO_LOCALE) || defined(NO_LOCALE_CTYPE)
 
     PERL_LOCALE_TABLE_ENTRY(CTYPE, NULL)
 
@@ -38,7 +38,7 @@
 #  endif
 #endif
 #ifdef LC_NUMERIC
-#  ifdef NO_LOCALE_NUMERIC
+#  if defined(NO_LOCALE) || defined(NO_LOCALE_NUMERIC)
 
     PERL_LOCALE_TABLE_ENTRY(NUMERIC, NULL)
 
@@ -75,7 +75,7 @@
 
     PERL_LOCALE_TABLE_ENTRY(TIME, NULL)
 
-#  ifdef NO_LOCALE_TIME
+#  if defined(NO_LOCALE) || defined(NO_LOCALE_TIME)
 #    define HAS_IGNORED_LOCALE_CATEGORIES_
 #    define LC_TIME_AVAIL_  false
 #  else
@@ -87,7 +87,7 @@
 
     PERL_LOCALE_TABLE_ENTRY(MESSAGES, NULL)
 
-#  ifdef NO_LOCALE_MESSAGES
+#  if defined(NO_LOCALE) || defined(NO_LOCALE_MESSAGES)
 #    define HAS_IGNORED_LOCALE_CATEGORIES_
 #    define LC_MESSAGES_AVAIL_  false
 #  else
@@ -99,7 +99,7 @@
 
     PERL_LOCALE_TABLE_ENTRY(MONETARY, NULL)
 
-#  ifdef NO_LOCALE_MONETARY
+#  if defined(NO_LOCALE) || defined(NO_LOCALE_MONETARY)
 #    define HAS_IGNORED_LOCALE_CATEGORIES_
 #    define LC_MONETARY_AVAIL_  false
 #  else
@@ -111,7 +111,7 @@
 
     PERL_LOCALE_TABLE_ENTRY(ADDRESS, NULL)
 
-#  ifdef NO_LOCALE_ADDRESS
+#  if defined(NO_LOCALE) || defined(NO_LOCALE_ADDRESS)
 #    define HAS_IGNORED_LOCALE_CATEGORIES_
 #    define LC_ADDRESS_AVAIL_  false
 #  else
@@ -123,7 +123,7 @@
 
     PERL_LOCALE_TABLE_ENTRY(IDENTIFICATION, NULL)
 
-#  ifdef NO_LOCALE_IDENTIFICATION
+#  if defined(NO_LOCALE) || defined(NO_LOCALE_IDENTIFICATION)
 #    define HAS_IGNORED_LOCALE_CATEGORIES_
 #    define LC_IDENTIFICATION_AVAIL_  false
 #  else
@@ -135,7 +135,7 @@
 
     PERL_LOCALE_TABLE_ENTRY(MEASUREMENT, NULL)
 
-#  ifdef NO_LOCALE_MEASUREMENT
+#  if defined(NO_LOCALE) || defined(NO_LOCALE_MEASUREMENT)
 #    define HAS_IGNORED_LOCALE_CATEGORIES_
 #    define LC_MEASUREMENT_AVAIL_  false
 #  else
@@ -147,7 +147,7 @@
 
     PERL_LOCALE_TABLE_ENTRY(PAPER, NULL)
 
-#  ifdef NO_LOCALE_PAPER
+#  if defined(NO_LOCALE) || defined(NO_LOCALE_PAPER)
 #    define HAS_IGNORED_LOCALE_CATEGORIES_
 #    define LC_PAPER_AVAIL_  false
 #  else
@@ -159,7 +159,7 @@
 
     PERL_LOCALE_TABLE_ENTRY(TELEPHONE, NULL)
 
-#  ifdef NO_LOCALE_TELEPHONE
+#  if defined(NO_LOCALE) || defined(NO_LOCALE_TELEPHONE)
 #    define HAS_IGNORED_LOCALE_CATEGORIES_
 #    define LC_TELEPHONE_AVAIL_  false
 #  else
@@ -171,7 +171,7 @@
 
     PERL_LOCALE_TABLE_ENTRY(NAME, NULL)
 
-#  ifdef NO_LOCALE_NAME
+#  if defined(NO_LOCALE) || defined(NO_LOCALE_NAME)
 #    define HAS_IGNORED_LOCALE_CATEGORIES_
 #    define LC_NAME_AVAIL_  false
 #  else
@@ -183,7 +183,7 @@
 
     PERL_LOCALE_TABLE_ENTRY(SYNTAX, NULL)
 
-#  ifdef NO_LOCALE_SYNTAX
+#  if defined(NO_LOCALE) || defined(NO_LOCALE_SYNTAX)
 #    define HAS_IGNORED_LOCALE_CATEGORIES_
 #    define LC_SYNTAX_AVAIL_  false
 #  else
@@ -195,7 +195,7 @@
 
     PERL_LOCALE_TABLE_ENTRY(TOD, NULL)
 
-#  ifdef NO_LOCALE_TOD
+#  if defined(NO_LOCALE) || defined(NO_LOCALE_TOD)
 #    define HAS_IGNORED_LOCALE_CATEGORIES_
 #    define LC_TOD_AVAIL_  false
 #  else
