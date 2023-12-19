@@ -57,6 +57,14 @@ Perl_PerlLIO_open_cloexec(pTHX_ const char *file, int flag)
 /* PERL_CALLCONV const XOP *
 Perl_custom_op_xop(pTHX_ const OP *o); */
 
+PERL_CALLCONV const char *
+Perl_langinfo(const nl_item item);
+#define PERL_ARGS_ASSERT_PERL_LANGINFO
+
+PERL_CALLCONV const char *
+Perl_langinfo8(const nl_item item, utf8ness_t *utf8ness);
+#define PERL_ARGS_ASSERT_PERL_LANGINFO8
+
 PERL_CALLCONV HV *
 Perl_localeconv(pTHX);
 #define PERL_ARGS_ASSERT_PERL_LOCALECONV
@@ -5494,25 +5502,6 @@ Perl_do_shmio(pTHX_ I32 optype, SV **mark, SV **sp)
         assert(mark); assert(sp)
 
 #endif /* defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM) */
-#if defined(HAS_NL_LANGINFO) && defined(PERL_LANGINFO_H)
-PERL_CALLCONV const char *
-Perl_langinfo(const nl_item item);
-# define PERL_ARGS_ASSERT_PERL_LANGINFO
-
-PERL_CALLCONV const char *
-Perl_langinfo8(const nl_item item, utf8ness_t *utf8ness);
-# define PERL_ARGS_ASSERT_PERL_LANGINFO8
-
-#else
-PERL_CALLCONV const char *
-Perl_langinfo(const int item);
-# define PERL_ARGS_ASSERT_PERL_LANGINFO
-
-PERL_CALLCONV const char *
-Perl_langinfo8(const int item, utf8ness_t *utf8ness);
-# define PERL_ARGS_ASSERT_PERL_LANGINFO8
-
-#endif
 #if defined(HAS_PIPE)
 PERL_CALLCONV int
 Perl_PerlProc_pipe_cloexec(pTHX_ int *pipefd)
@@ -7035,6 +7024,11 @@ S_get_category_index_helper(pTHX_ const int category, bool *success, const line_
 #   define PERL_ARGS_ASSERT_GET_CATEGORY_INDEX_HELPER
 
 STATIC const char *
+S_my_langinfo_i(pTHX_ const nl_item item, const locale_category_index cat_index, const char *locale, char **retbufp, Size_t *retbuf_sizep, utf8ness_t *utf8ness);
+#   define PERL_ARGS_ASSERT_MY_LANGINFO_I       \
+        assert(locale); assert(retbufp)
+
+STATIC const char *
 S_native_querylocale_i(pTHX_ const locale_category_index cat_index);
 #   define PERL_ARGS_ASSERT_NATIVE_QUERYLOCALE_I
 
@@ -7080,19 +7074,6 @@ STATIC char *
 S_my_setlocale_debug_string_i(pTHX_ const locale_category_index cat_index, const char *locale, const char *retval, const line_t line)
         __attribute__warn_unused_result__;
 #     define PERL_ARGS_ASSERT_MY_SETLOCALE_DEBUG_STRING_I
-
-#   endif
-#   if defined(HAS_NL_LANGINFO)
-STATIC const char *
-S_my_langinfo_i(pTHX_ const nl_item item, const locale_category_index cat_index, const char *locale, char **retbufp, Size_t *retbuf_sizep, utf8ness_t *utf8ness);
-#     define PERL_ARGS_ASSERT_MY_LANGINFO_I     \
-        assert(locale); assert(retbufp)
-
-#   else
-STATIC const char *
-S_my_langinfo_i(pTHX_ const int item, const locale_category_index cat_index, const char *locale, char **retbufp, Size_t *retbuf_sizep, utf8ness_t *utf8ness);
-#     define PERL_ARGS_ASSERT_MY_LANGINFO_I     \
-        assert(locale); assert(retbufp)
 
 #   endif
 #   if defined(LC_ALL)

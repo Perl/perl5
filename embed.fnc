@@ -2488,6 +2488,11 @@ ATdo	|void	|perl_free	|NN PerlInterpreter *my_perl
 
 Cop	|const char *|PerlIO_context_layers				\
 				|NULLOK const char *mode
+ATdo	|const char *|Perl_langinfo					\
+				|const nl_item item
+ATdo	|const char *|Perl_langinfo8					\
+				|const nl_item item			\
+				|NULLOK utf8ness_t *utf8ness
 p	|int	|PerlLIO_dup2_cloexec					\
 				|int oldfd				\
 				|int newfd
@@ -3844,19 +3849,6 @@ p	|I32	|do_shmio	|I32 optype				\
 				|NN SV **mark				\
 				|NN SV **sp
 #endif /* defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM) */
-#if defined(HAS_NL_LANGINFO) && defined(PERL_LANGINFO_H)
-ATdo	|const char *|Perl_langinfo					\
-				|const nl_item item
-ATdo	|const char *|Perl_langinfo8					\
-				|const nl_item item			\
-				|NULLOK utf8ness_t *utf8ness
-#else
-ATdo	|const char *|Perl_langinfo					\
-				|const int item
-ATdo	|const char *|Perl_langinfo8					\
-				|const int item 			\
-				|NULLOK utf8ness_t *utf8ness
-#endif
 #if defined(HAS_PIPE)
 Rp	|int	|PerlProc_pipe_cloexec					\
 				|NN int *pipefd
@@ -4437,6 +4429,13 @@ RS	|locale_category_index|get_category_index_helper		\
 				|const line_t caller_line
 Ri	|const char *|mortalized_pv_copy				\
 				|NULLOK const char * const pv
+S	|const char *|my_langinfo_i					\
+				|const nl_item item			\
+				|const locale_category_index cat_index	\
+				|NN const char *locale			\
+				|NN char **retbufp			\
+				|NULLOK Size_t *retbuf_sizep		\
+				|NULLOK utf8ness_t *utf8ness
 S	|const char *|native_querylocale_i				\
 				|const locale_category_index cat_index
 S	|void	|new_LC_ALL	|NN const char *lc_all			\
@@ -4482,23 +4481,6 @@ RS	|char * |my_setlocale_debug_string_i				\
 				|NULLOK const char *locale		\
 				|NULLOK const char *retval		\
 				|const line_t line
-#   endif
-#   if defined(HAS_NL_LANGINFO)
-S	|const char *|my_langinfo_i					\
-				|const nl_item item			\
-				|const locale_category_index cat_index	\
-				|NN const char *locale			\
-				|NN char **retbufp			\
-				|NULLOK Size_t *retbuf_sizep		\
-				|NULLOK utf8ness_t *utf8ness
-#   else
-S	|const char *|my_langinfo_i					\
-				|const int item 			\
-				|const locale_category_index cat_index	\
-				|NN const char *locale			\
-				|NN char **retbufp			\
-				|NULLOK Size_t *retbuf_sizep		\
-				|NULLOK utf8ness_t *utf8ness
 #   endif
 #   if defined(LC_ALL)
 S	|void	|give_perl_locale_control				\
