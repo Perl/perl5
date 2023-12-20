@@ -6042,8 +6042,7 @@ S_my_langinfo_i(pTHX_
  * slower than just doing the toggle ourselves.  lib/locale_threads.t was
  * slowed down by 25% on Ubuntu 22.04 */
 
-/*--------------------------------------------------------------------------*/
-#  if defined(HAS_NL_LANGINFO) /* nl_langinfo() is available.  */
+#  if defined(HAS_NL_LANGINFO) /* nl_langinfo() is available. */
 #    ifdef WE_MUST_DEAL_WITH_MISMATCHED_CTYPE
 
     /* This function sorts out if things actually have to be switched or not,
