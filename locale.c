@@ -690,6 +690,10 @@ S_mortalized_pv_copy(pTHX_ const char * const pv)
                                       a single instance, so is a #define */
 static const char C_decimal_point[] = ".";
 
+#if defined(HAS_NL_LANGINFO_L) || defined(HAS_NL_LANGINFO)
+#  define HAS_SOME_LANGINFO
+#endif
+
 #if (defined(USE_LOCALE_NUMERIC) && ! defined(TS_W32_BROKEN_LOCALECONV))    \
  || ! (   defined(USE_LOCALE_NUMERIC)                                       \
        && (defined(HAS_SOME_LANGINFO) || defined(HAS_LOCALECONV)))
@@ -710,10 +714,6 @@ static const char C_thousands_sep[] = "";
                              (   (name) != NULL                              \
                               && (( *(name) == 'C' && (*(name + 1)) == '\0') \
                                    || strEQ((name), "POSIX")))
-
-#if defined(HAS_NL_LANGINFO_L) || defined(HAS_NL_LANGINFO)
-#  define HAS_SOME_LANGINFO
-#endif
 
 #define my_langinfo_c(item, category, locale, retbufp, retbuf_sizep, utf8ness) \
             my_langinfo_i(item, category##_INDEX_, locale, retbufp,            \
