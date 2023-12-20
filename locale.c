@@ -6041,7 +6041,13 @@ S_my_langinfo_i(pTHX_
  * isn't, or vice versa).  There is explicit code to bring the categories into
  * sync.  This doesn't seem to be a problem with nl_langinfo(), so that
  * implementation doesn't currently worry about it.  But it is a problem on
- * Windows boxes, which don't have nl_langinfo(). */
+ * Windows boxes, which don't have nl_langinfo().
+ *
+ * One might be tempted to avoid any toggling by instead using nl_langinfo_l()
+ * on platforms that have it.  This would entail creating a locale object with
+ * newlocale() and freeing it afterwards.  But doing so runs significantly
+ * slower than just doing the toggle ourselves.  lib/locale_threads.t was
+ * slowed down by 25% on Ubuntu 22.04 */
 
 /*--------------------------------------------------------------------------*/
 #  if defined(HAS_NL_LANGINFO) /* nl_langinfo() is available.  */
