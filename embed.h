@@ -1359,8 +1359,12 @@
 #         endif
 #       endif
 #       if defined(USE_LOCALE_CTYPE)
-#         define is_codeset_name_UTF8           S_is_codeset_name_UTF8
 #         define new_ctype(a,b)                 S_new_ctype(aTHX_ a,b)
+#         if    defined(HAS_NL_LANGINFO) || defined(WIN32) || \
+                defined(WIN32_USE_FAKE_OLD_MINGW_LOCALES) ||  \
+             ( !defined(HAS_MBRTOWC) && !defined(HAS_MBTOWC) )
+#           define is_codeset_name_UTF8         S_is_codeset_name_UTF8
+#         endif
 #       endif
 #       if defined(USE_LOCALE_NUMERIC)
 #         define new_numeric(a,b)               S_new_numeric(aTHX_ a,b)

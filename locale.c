@@ -706,7 +706,7 @@ S_mortalized_pv_copy(pTHX_ const char * const pv)
                                       a single instance, so is a #define */
 static const char C_decimal_point[] = ".";
 
-#if defined(HAS_NL_LANGINFO_L) || defined(HAS_NL_LANGINFO)
+#if defined(HAS_NL_LANGINFO)
 #  define HAS_SOME_LANGINFO
 #endif
 
@@ -4953,7 +4953,7 @@ S_is_locale_utf8(pTHX_ const char * locale)
 #endif
 
 #ifdef USE_LOCALE
-#  ifdef USE_LOCALE_CTYPE
+#  if defined(USE_LOCALE_CTYPE) && defined(USE_LANGINFO_FOR_UTF8NESS)
 
 STATIC bool
 S_is_codeset_name_UTF8(const char * name)
