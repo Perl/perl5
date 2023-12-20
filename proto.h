@@ -7169,16 +7169,20 @@ S_print_collxfrm_input_and_return(pTHX_ const char *s, const char *e, const char
 #     endif
 #   endif /* defined(USE_LOCALE_COLLATE) */
 #   if defined(USE_LOCALE_CTYPE)
-STATIC bool
-S_is_codeset_name_UTF8(const char *name);
-#     define PERL_ARGS_ASSERT_IS_CODESET_NAME_UTF8 \
-        assert(name)
-
 STATIC void
 S_new_ctype(pTHX_ const char *newctype, bool force);
 #     define PERL_ARGS_ASSERT_NEW_CTYPE         \
         assert(newctype)
 
+#     if    defined(HAS_NL_LANGINFO) || defined(WIN32) || \
+            defined(WIN32_USE_FAKE_OLD_MINGW_LOCALES) ||  \
+         ( !defined(HAS_MBRTOWC) && !defined(HAS_MBTOWC) )
+STATIC bool
+S_is_codeset_name_UTF8(const char *name);
+#       define PERL_ARGS_ASSERT_IS_CODESET_NAME_UTF8 \
+        assert(name)
+
+#     endif
 #   endif /* defined(USE_LOCALE_CTYPE) */
 #   if defined(USE_LOCALE_NUMERIC)
 STATIC void

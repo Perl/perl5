@@ -4556,10 +4556,14 @@ S	|void	|print_collxfrm_input_and_return			\
 #     endif
 #   endif
 #   if defined(USE_LOCALE_CTYPE)
-ST	|bool	|is_codeset_name_UTF8					\
-				|NN const char *name
 S	|void	|new_ctype	|NN const char *newctype		\
 				|bool force
+#     if    defined(HAS_NL_LANGINFO) || defined(WIN32) || \
+            defined(WIN32_USE_FAKE_OLD_MINGW_LOCALES) ||  \
+         ( !defined(HAS_MBRTOWC) && !defined(HAS_MBTOWC) )
+ST	|bool	|is_codeset_name_UTF8					\
+				|NN const char *name
+#     endif
 #   endif
 #   if defined(USE_LOCALE_NUMERIC)
 S	|void	|new_numeric	|NN const char *newnum			\
