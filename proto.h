@@ -7029,11 +7029,6 @@ S_get_category_index_helper(pTHX_ const int category, bool *success, const line_
 #   define PERL_ARGS_ASSERT_GET_CATEGORY_INDEX_HELPER
 
 STATIC const char *
-S_my_langinfo_i(pTHX_ const nl_item item, locale_category_index cat_index, const char *locale, char **retbufp, Size_t *retbuf_sizep, utf8ness_t *utf8ness);
-#   define PERL_ARGS_ASSERT_MY_LANGINFO_I       \
-        assert(locale); assert(retbufp)
-
-STATIC const char *
 S_native_querylocale_i(pTHX_ const locale_category_index cat_index);
 #   define PERL_ARGS_ASSERT_NATIVE_QUERYLOCALE_I
 
@@ -7079,6 +7074,19 @@ STATIC char *
 S_my_setlocale_debug_string_i(pTHX_ const locale_category_index cat_index, const char *locale, const char *retval, const line_t line)
         __attribute__warn_unused_result__;
 #     define PERL_ARGS_ASSERT_MY_SETLOCALE_DEBUG_STRING_I
+
+#   endif
+#   if defined(HAS_NL_LANGINFO)
+STATIC const char *
+S_my_langinfo_i(pTHX_ const nl_item item, locale_category_index cat_index, const char *locale, char **retbufp, Size_t *retbuf_sizep, utf8ness_t *utf8ness);
+#     define PERL_ARGS_ASSERT_MY_LANGINFO_I     \
+        assert(locale); assert(retbufp)
+
+#   else
+STATIC const char *
+S_emulate_langinfo(pTHX_ const int item, const char *locale, char **retbufp, Size_t *retbuf_sizep, utf8ness_t *utf8ness);
+#     define PERL_ARGS_ASSERT_EMULATE_LANGINFO  \
+        assert(locale); assert(retbufp)
 
 #   endif
 #   if defined(LC_ALL)

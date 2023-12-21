@@ -715,6 +715,10 @@ static const char C_thousands_sep[] = "";
                               && (( *(name) == 'C' && (*(name + 1)) == '\0') \
                                    || strEQ((name), "POSIX")))
 
+#ifndef my_langinfo_i
+#  define my_langinfo_i(i, c, l, b, s, u)                                   \
+                    (PERL_UNUSED_VAR(c), emulate_langinfo(i, l, b, s, u))
+#endif
 #define my_langinfo_c(item, category, locale, retbufp, retbuf_sizep, utf8ness) \
             my_langinfo_i(item, category##_INDEX_, locale, retbufp,            \
                                                       retbuf_sizep,  utf8ness)
@@ -6059,19 +6063,8 @@ Perl_langinfo8(const nl_item item, utf8ness_t * utf8ness)
 }
 
 #ifdef USE_LOCALE
-#  ifndef HAS_DEFINITIVE_UTF8NESS_DETERMINATION
+#  if defined(HAS_NL_LANGINFO)
 
-/* Forward declaration of function that we don't put into embed.fnc so as to
- * make its removal easier, as there may not be any extant platforms that need
- * it; and the function is located after S_my_langinfo_i() because it's easier
- * to understand when placed in the context of that code */
-STATIC const char * S_override_codeset_if_utf8_found(pTHX_
-                                                     const char *codeset,
-                                                     const char *locale);
-#  endif
-
-/* There are several implementations of my_langinfo, depending on the
- * Configuration.  They all share the same beginning of the function */
 STATIC const char *
 S_my_langinfo_i(pTHX_
                 const nl_item item,           /* The item to look up */
@@ -6099,17 +6092,13 @@ S_my_langinfo_i(pTHX_
     DEBUG_Lv(PerlIO_printf(Perl_debug_log,
                            "Entering my_langinfo item=%ld, using locale %s\n",
                            (long) item, locale));
-/*--------------------------------------------------------------------------*/
-/* Above is the common beginning to all the implementations of my_langinfo().
- * Below are the various completions.
- *
- * One might be tempted to avoid any toggling by instead using nl_langinfo_l()
- * on platforms that have it.  This would entail creating a locale object with
- * newlocale() and freeing it afterwards.  But doing so runs significantly
- * slower than just doing the toggle ourselves.  lib/locale_threads.t was
- * slowed down by 25% on Ubuntu 22.04 */
 
-#  if defined(HAS_NL_LANGINFO) /* nl_langinfo() is available. */
+    /* One might be tempted to avoid any toggling by instead using
+     * nl_langinfo_l() on platforms that have it.  This would entail creating a
+     * locale object with newlocale() and freeing it afterwards.  But doing so
+     * runs significantly slower than just doing the toggle ourselves.
+     * lib/locale_threads.t was slowed down by 25% on Ubuntu 22.04 */
+
 #    ifdef WE_MUST_DEAL_WITH_MISMATCHED_CTYPE
 
     /* This function sorts out if things actually have to be switched or not,
@@ -6139,24 +6128,56 @@ S_my_langinfo_i(pTHX_
     }
 
     return retval;
-/*--------------------------------------------------------------------------*/
-#  else   /* Below, emulate nl_langinfo as best we can */
+}
 
-    /* The other completion is where we have to emulate nl_langinfo().  There
-     * are various possibilities depending on the Configuration.   The major
-     * platform lacking nl_langinfo is Windows.  It does have GetLocaleInfoEx()
-     * that could be used to get most of the items, but it (and other similar
-     * Windows API functions) use what MS calls "locale names", whereas the C
-     * functions use what MS calls "locale strings".  The locale string
-     * "English_United_States.1252" is equivalent to the locale name "en_US".
-     * There are tables inside Windows that translate between the two forms,
-     * but they are not exposed.  Also calling setlocale(), then calling
-     * GetThreadLocale() doesn't work, as the former doesn't change the
+#  endif
+#  ifndef HAS_DEFINITIVE_UTF8NESS_DETERMINATION
+
+/* Forward declaration of function that we don't put into embed.fnc so as to
+ * make its removal easier, as there may not be any extant platforms that need
+ * it; and the function is located after emulate_langinfo() because it's easier
+ * to understand when placed in the context of that code */
+STATIC const char * S_override_codeset_if_utf8_found(pTHX_
+                                                     const char *codeset,
+                                                     const char *locale);
+#  endif
+#  if ! defined(HAS_NL_LANGINFO)                                          \
+
+STATIC const char *
+S_emulate_langinfo(pTHX_ const nl_item item,
+                         const char * locale,
+                         char ** retbufp,
+                         Size_t * retbuf_sizep,
+                         utf8ness_t * utf8ness)
+{
+    PERL_ARGS_ASSERT_EMULATE_LANGINFO;
+
+    /* This emulates nl_langinfo() on platforms where it doesn't exist.
+     *
+     * The major platform lacking nl_langinfo() is Windows.  It does have
+     * GetLocaleInfoEx() that could be used to get most of the items, but it
+     * (and other similar Windows API functions) use what MS calls "locale
+     * names", whereas the C functions use what MS calls "locale strings".  The
+     * locale string "English_United_States.1252" is equivalent to the locale
+     * name "en_US".  There are tables inside Windows that translate between
+     * the two forms, but they are not exposed.  Also calling setlocale(), then
+     * calling GetThreadLocale() doesn't work, as the former doesn't change the
      * latter's return.  Therefore we are stuck using the mechanisms below. */
+
     /* Almost all the items will have ASCII return values.  Set that here, and
      * override if necessary */
     utf8ness_t is_utf8 = UTF8NESS_IMMATERIAL;
     const char * retval = NULL;
+
+    DEBUG_Lv(PerlIO_printf(Perl_debug_log,
+                        "Entering emulate_langinfo item=%ld, using locale %s\n",
+                        (long) item, locale));
+
+#    ifdef HAS_LOCALECONV
+
+    locale_category_index  cat_index;
+
+#    endif
 
     switch (item) {
       default:
@@ -6641,16 +6662,12 @@ S_my_langinfo_i(pTHX_
     }
 
     DEBUG_Lv(PerlIO_printf(Perl_debug_log,
-                           "Leaving my_langinfo item=%ld, using locale %s\n",
-                           (long) item, locale));
+                         "Leaving emulate_langinfo item=%ld, using locale %s\n",
+                         (long) item, locale));
     return retval;
+}
 
-#  endif    /* All the implementations of my_langinfo() */
-
-/*--------------------------------------------------------------------------*/
-
-}   /* my_langinfo() */
-
+#  endif    /* emulate_langinfo() */
 #  ifndef HAS_DEFINITIVE_UTF8NESS_DETERMINATION
 
 STATIC const char *
