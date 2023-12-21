@@ -6360,7 +6360,8 @@ PP(pp_push)
         || (PL_op->op_private & OPpTARGET_MY))
     {
         TARGi(AvFILL(ary) + 1, 1);
-        rpp_push_1(targ);
+        if ((PL_op->op_flags & OPf_WANT) != G_VOID)
+            rpp_push_1(targ);
     }
     return NORMAL;
 }
@@ -6444,7 +6445,8 @@ PP(pp_unshift)
         || (PL_op->op_private & OPpTARGET_MY))
     {
         TARGi(AvFILL(ary) + 1, 1);
-        rpp_push_1(targ);
+        if ((PL_op->op_flags & OPf_WANT) != G_VOID)
+            rpp_push_1(targ);
     }
     return NORMAL;
 }
