@@ -182,6 +182,13 @@ XXX If there was something important to note about this change, include that her
 
 =item *
 
+L<threads> has been upgraded from version 2.39 to 2.40.
+
+An internal error has been made slightly more verbose
+(C<Out of memory in perl:threads:ithread_create>).
+
+=item *
+
 L<Fcntl> has been upgraded from version 1.15 to 1.16.
 
 This version adds support for the C<O_TMPFILE> flag on Linux.
@@ -259,6 +266,15 @@ L<Missing comma after first argument to return|perldiag/"Missing comma after fir
 "indirect object" before the argument list, C<return> isn't one of
 them.
 
+=item *
+
+L<Out of memory during vec in lvalue context|perldiag/"Out of memory during vec in lvalue context">
+
+(F) An attempt was made to extend a string beyond the largest possible memory
+allocation by assigning to C<vec()> called with a large second argument.
+
+(This case used to throw a generic C<Out of memory!> error.)
+
 =back
 
 =head3 New Warnings
@@ -282,6 +298,16 @@ XXX Changes (i.e. rewording) of diagnostic messages go here
 L<Name "%s::%s" used only once: possible typo|perldiag/"Name "%s::%s" used only once: possible typo">
 
 This warning now honors being marked as fatal.  [GH #13814]
+
+=item *
+
+L<Out of memory in perl:%s|perldiag/"Out of memory in perl:%s">
+
+There used to be several places in the perl core that would print a generic
+C<Out of memory!> message and abort when memory allocation failed, giving no
+indication which program it was that ran out of memory.  These have been
+modified to include the word C<perl> and the general area of the allocation
+failure, e.g. C<Out of memory in perl:util:safesysrealloc>.  [GH #21672]
 
 =item *
 
