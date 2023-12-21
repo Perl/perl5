@@ -6075,8 +6075,10 @@ STATIC const char * S_override_codeset_if_utf8_found(pTHX_
 STATIC const char *
 S_my_langinfo_i(pTHX_
                 const nl_item item,           /* The item to look up */
-                const locale_category_index cat_index, /* The locale category
-                                                          that controls it */
+
+                /* The locale category that controls it */
+                locale_category_index cat_index,
+
                 /* The locale to look up 'item' in. */
                 const char * locale,
 
@@ -6165,7 +6167,11 @@ S_my_langinfo_i(pTHX_
 #    ifdef HAS_LOCALECONV
 
       case CRNCYSTR:
+        cat_index = LC_MONETARY_INDEX_;
+        goto use_localeconv;
+
       case THOUSEP:
+        cat_index = LC_NUMERIC_INDEX_;
         goto use_localeconv;
 
 #    endif
@@ -6240,7 +6246,8 @@ S_my_langinfo_i(pTHX_
                 if (utf8ness) {
                     is_utf8 = get_locale_string_utf8ness_i(retval,
                                                         LOCALE_UTF8NESS_UNKNOWN,
-                                                        locale, cat_index);
+                                                        locale,
+                                                        LC_NUMERIC_INDEX_);
                 }
 
                 break;
@@ -6257,6 +6264,10 @@ S_my_langinfo_i(pTHX_
 
         retval = C_decimal_point;
         break;
+
+#    else         /* snprintf() failed; drop down to use localeconv() */
+
+        cat_index = LC_NUMERIC_INDEX_;
 
 #    endif
 #    ifdef HAS_LOCALECONV

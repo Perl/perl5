@@ -4443,7 +4443,7 @@ Ri	|const char *|mortalized_pv_copy				\
 				|NULLOK const char * const pv
 S	|const char *|my_langinfo_i					\
 				|const nl_item item			\
-				|const locale_category_index cat_index	\
+				|locale_category_index cat_index	\
 				|NN const char *locale			\
 				|NN char **retbufp			\
 				|NULLOK Size_t *retbuf_sizep		\
