@@ -280,6 +280,20 @@ L<Name "%s::%s" used only once: possible typo|perldiag/"Name "%s::%s" used only 
 
 This warning now honors being marked as fatal.  [GH #13814]
 
+=item *
+
+L<Possible precedence issue with control flow operator (%s)|perldiag/"Possible precedence issue with control flow operator (%s)">
+
+This warning now mentions the name of the control flow operator that triggered
+the diagnostic (e.g. C<return>, C<exit>, C<die>, etc).
+
+It also covers more cases: Previously, the warning was only triggered if a
+low-precedence logical operator (like C<and>, C<or>, C<xor>) was involved.  Now
+it is also shown for misleading code like this:
+
+    exit $x ? 0 : 1;  # actually parses as: exit($x) ? 0 : 1;
+    exit $x == 0;     # actually parses as: exit($x) == 0;
+
 =back
 
 =head1 Utility Changes
