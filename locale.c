@@ -6597,7 +6597,7 @@ S_override_codeset_if_utf8_found(pTHX_ const char * codeset,
      * this issue, but should the need arise, comments in S_is_locale_utf8()
      * list some alternative C99 functions that could be tried.
      *
-     * But MB_CUR_MAX is a C99 construct that helps a lot, is simple for a
+     * But MB_CUR_MAX is a C89 construct that helps a lot, is simple for a
      * vendor to implement, and our experience with it is that it works well on
      * a variety of platforms.  We have found that it returns a too-large
      * number on some platforms for the C locale, but for no others.  That
