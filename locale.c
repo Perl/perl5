@@ -397,6 +397,10 @@ static int debug_initialization = 0;
 #  define end_DEALING_WITH_MISMATCHED_CTYPE(locale)
 #endif
 
+/* Some compilers don't allow a declaration to immediately follow a label.
+ * This is a self-commenting no-op that works around this restriction */
+#define  NOOP_TO_SEPARATE_LABEL_FROM_DECLARATION  NOOP
+
 #ifdef WIN32_USE_FAKE_OLD_MINGW_LOCALES
 
    /* Use -Accflags=-DWIN32_USE_FAKE_OLD_MINGW_LOCALES on a POSIX or *nix box
