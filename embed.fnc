@@ -4415,6 +4415,13 @@ S	|void	|ints_to_tm	|NN struct tm *my_tm			\
 				|int yday				\
 				|int isdst
 S	|bool	|is_locale_utf8 |NN const char *locale
+S	|HV *	|my_localeconv	|const int item
+S	|void	|populate_hash_from_C_localeconv			\
+				|NN HV *hv				\
+				|NN const char *locale			\
+				|const U32 which_mask			\
+				|NN const lconv_offset_t *strings[2]	\
+				|NN const lconv_offset_t *integers[2]
 S	|const char *|save_to_buffer					\
 				|NULLOK const char *string		\
 				|NULLOK char **buf			\
@@ -4437,15 +4444,6 @@ S	|const char *|emulate_langinfo					\
 				|NN const char *locale			\
 				|NN SV *sv				\
 				|NULLOK utf8ness_t *utf8ness
-# endif
-# if defined(HAS_LOCALECONV)
-S	|HV *	|my_localeconv	|const int item
-S	|void	|populate_hash_from_C_localeconv			\
-				|NN HV *hv				\
-				|NN const char *locale			\
-				|const U32 which_mask			\
-				|NN const lconv_offset_t *strings[2]	\
-				|NN const lconv_offset_t *integers[2]
 # endif
 # if defined(USE_LOCALE)
 S	|const char *|calculate_LC_ALL_string					\

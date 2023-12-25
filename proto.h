@@ -7001,6 +7001,15 @@ S_is_locale_utf8(pTHX_ const char *locale);
 # define PERL_ARGS_ASSERT_IS_LOCALE_UTF8        \
         assert(locale)
 
+STATIC HV *
+S_my_localeconv(pTHX_ const int item);
+# define PERL_ARGS_ASSERT_MY_LOCALECONV
+
+STATIC void
+S_populate_hash_from_C_localeconv(pTHX_ HV *hv, const char *locale, const U32 which_mask, const lconv_offset_t *strings[2], const lconv_offset_t *integers[2]);
+# define PERL_ARGS_ASSERT_POPULATE_HASH_FROM_C_LOCALECONV \
+        assert(hv); assert(locale); assert(strings); assert(integers)
+
 STATIC const char *
 S_save_to_buffer(pTHX_ const char *string, char **buf, Size_t *buf_size);
 # define PERL_ARGS_ASSERT_SAVE_TO_BUFFER
@@ -7028,17 +7037,6 @@ S_emulate_langinfo(pTHX_ const int item, const char *locale, SV *sv, utf8ness_t 
         assert(locale); assert(sv)
 
 # endif
-# if defined(HAS_LOCALECONV)
-STATIC HV *
-S_my_localeconv(pTHX_ const int item);
-#   define PERL_ARGS_ASSERT_MY_LOCALECONV
-
-STATIC void
-S_populate_hash_from_C_localeconv(pTHX_ HV *hv, const char *locale, const U32 which_mask, const lconv_offset_t *strings[2], const lconv_offset_t *integers[2]);
-#   define PERL_ARGS_ASSERT_POPULATE_HASH_FROM_C_LOCALECONV \
-        assert(hv); assert(locale); assert(strings); assert(integers)
-
-# endif /* defined(HAS_LOCALECONV) */
 # if defined(USE_LOCALE)
 STATIC const char *
 S_calculate_LC_ALL_string(pTHX_ const char **category_locales_list, const calc_LC_ALL_format format, const calc_LC_ALL_return returning, const line_t caller_line);

@@ -4999,20 +4999,8 @@ fields), but directly callable from XS code.
 HV *
 Perl_localeconv(pTHX)
 {
-
-#if  ! defined(HAS_LOCALECONV)
-
-    return newHV();
-
-#else
-
     return my_localeconv(0);
-
-#endif
-
 }
-
-#if defined(HAS_LOCALECONV)
 
 HV *
 S_my_localeconv(pTHX_ const int item)
@@ -5158,7 +5146,8 @@ S_my_localeconv(pTHX_ const int item)
                                            lconv_integers
                                          };
 
-#  if ! defined(USE_LOCALE_NUMERIC) && ! defined(USE_LOCALE_MONETARY)
+#if  ! defined(HAS_LOCALECONV)                                          \
+ || (! defined(USE_LOCALE_NUMERIC) && ! defined(USE_LOCALE_MONETARY))
 
     /* If both NUMERIC and MONETARY must be the "C" locale, simply populate the
      * hash using the function that works on just that locale. */
@@ -5557,7 +5546,8 @@ S_populate_hash_from_C_localeconv(pTHX_ HV * hv,
     }
 }
 
-#  if defined(USE_LOCALE_NUMERIC) || defined(USE_LOCALE_MONETARY)
+#if defined(HAS_LOCALECONV) && (   defined(USE_LOCALE_NUMERIC)      \
+                                || defined(USE_LOCALE_MONETARY))
 
 STATIC void
 S_populate_hash_from_localeconv(pTHX_ HV * hv,
@@ -5782,7 +5772,6 @@ S_populate_hash_from_localeconv(pTHX_ HV * hv,
 }
 
 #  endif    /* defined(USE_LOCALE_NUMERIC) || defined(USE_LOCALE_MONETARY) */
-#endif /* defined(HAS_LOCALECONV) */
 
 /*
 
