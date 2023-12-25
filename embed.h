@@ -1309,6 +1309,8 @@
 #     define get_locale_string_utf8ness_i(a,b,c,d) S_get_locale_string_utf8ness_i(aTHX_ a,b,c,d)
 #     define ints_to_tm(a,b,c,d,e,f,g,h,i,j)    S_ints_to_tm(aTHX_ a,b,c,d,e,f,g,h,i,j)
 #     define is_locale_utf8(a)                  S_is_locale_utf8(aTHX_ a)
+#     define my_localeconv(a)                   S_my_localeconv(aTHX_ a)
+#     define populate_hash_from_C_localeconv(a,b,c,d,e) S_populate_hash_from_C_localeconv(aTHX_ a,b,c,d,e)
 #     define save_to_buffer(a,b,c)              S_save_to_buffer(aTHX_ a,b,c)
 #     define set_save_buffer_min_size(a,b,c)    S_set_save_buffer_min_size(aTHX_ a,b,c)
 #     define strftime8(a,b,c,d,e)               S_strftime8(aTHX_ a,b,c,d,e)
@@ -1316,10 +1318,6 @@
 #     if defined(HAS_IGNORED_LOCALE_CATEGORIES_) || \
          !defined(HAS_NL_LANGINFO) || !defined(LC_MESSAGES)
 #       define emulate_langinfo(a,b,c,d)        S_emulate_langinfo(aTHX_ a,b,c,d)
-#     endif
-#     if defined(HAS_LOCALECONV)
-#       define my_localeconv(a)                 S_my_localeconv(aTHX_ a)
-#       define populate_hash_from_C_localeconv(a,b,c,d,e) S_populate_hash_from_C_localeconv(aTHX_ a,b,c,d,e)
 #     endif
 #     if defined(USE_LOCALE)
 #       define calculate_LC_ALL_string(a,b,c,d) S_calculate_LC_ALL_string(aTHX_ a,b,c,d)
