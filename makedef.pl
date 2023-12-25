@@ -174,11 +174,13 @@ if ($define{USE_LOCALE_THREADS} && ! $define{NO_THREAD_SAFE_LOCALE}) {
     }
 }
 
-if ($define{USE_POSIX_2008_LOCALE} && $define{HAS_QUERYLOCALE})
+if (    $define{USE_POSIX_2008_LOCALE}
+    && (   $define{HAS_QUERYLOCALE}
+        || (     $Config{cppsymbols} =~ /__GLIBC__/
+            &&   $define{HAS_NL_LANGINFO_L}
+            && ! $define{SETLOCALE_ACCEPTS_ANY_LOCALE_NAME})))
 {
     $define{USE_QUERYLOCALE} = 1;
-
-    # Don't need glibc only code from perl.h
 }
 
 if ($define{USE_POSIX_2008_LOCALE} && ! $define{USE_QUERYLOCALE})

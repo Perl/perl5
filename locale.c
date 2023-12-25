@@ -391,6 +391,10 @@ static int debug_initialization = 0;
 #  define WE_MUST_DEAL_WITH_MISMATCHED_CTYPE
 #endif
 
+#if PERL_VERSION_GT(5,39,9)
+#  error Revert the commit that added this line
+#endif
+
 #ifdef WIN32_USE_FAKE_OLD_MINGW_LOCALES
 
    /* Use -Accflags=-DWIN32_USE_FAKE_OLD_MINGW_LOCALES on a POSIX or *nix box
