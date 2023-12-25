@@ -14,7 +14,7 @@ BEGIN {
 use utf8;
 require Config;
 
-plan tests => 315;
+plan tests => 317;
 
 # Test this first before we extend the stack with other operations.
 # This caused an asan failure due to a bad write past the end of the stack.
@@ -1201,6 +1201,14 @@ for ("", nullrocow) {
     my $c = "cb";
     eval '$c =~ tr{aabc}{d\x{d0000}}';
     is($c, "\x{d0000}\x{d0000}", "Shouldn't generate valgrind errors");
+}
+
+{   # GH #21748
+    my $c;
+    my $x = "\xcb";
+    $c = $x =~ tr[\N{U+00CB}\N{U+00EB}\N{U+2010}][\N{U+0401}\N{U+0451}\-];
+    is $x, "\x{401}", 'Latin1 \N{} followed by above Latin1 work properly';
+    is $c, 1, "Count for the above test";
 }
 
 1;

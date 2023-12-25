@@ -4054,8 +4054,12 @@ S_scan_const(pTHX_ char *start)
                         }
 
                         /* Add the (Unicode) code point to the output. */
-                        if (! d_is_utf8 || OFFUNI_IS_INVARIANT(uv)) {
+                        if (OFFUNI_IS_INVARIANT(uv)) {
                             *d++ = (char) LATIN1_TO_NATIVE(uv);
+                        }
+                        else if (! d_is_utf8) {
+                            *d++ = (char) LATIN1_TO_NATIVE(uv);
+                            utf8_variant_count++;
                         }
                         else {
                             d = (char*) uvoffuni_to_utf8_flags((U8*)d, uv,
