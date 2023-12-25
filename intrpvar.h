@@ -748,18 +748,12 @@ PERLVAR(I, padix_floor,	PADOFFSET)	/* how low may inner block reset padix */
 #if defined(USE_POSIX_2008_LOCALE) && defined(MULTIPLICITY)
 PERLVARI(I, cur_locale_obj, locale_t, NULL)
 #endif
-#ifdef USE_PL_CURLOCALES
 
 /* This is the most number of categories we've encountered so far on any
  * platform, doesn't include LC_ALL */
 PERLVARA(I, curlocales, 12, const char *)
-
-#endif
-#ifdef USE_PL_CUR_LC_ALL
-
 PERLVARI(I, cur_LC_ALL, const char *, NULL)
 
-#endif
 #ifdef USE_LOCALE_COLLATE
 
 /* The emory needed to store the collxfrm transformation of a string with

@@ -1287,14 +1287,13 @@ violations are fatal.
 #  endif
 
 #  include "perl_langinfo.h"    /* Needed for _NL_LOCALE_NAME */
-
 #  ifdef USE_POSIX_2008_LOCALE
+
 #    if  defined(HAS_QUERYLOCALE)                                           \
               /* Use querylocale if has it, or has the glibc internal       \
-               * undocumented equivalent. */                                \
+               * undocumented equivalent (if not forbidden). */             \
      || (     defined(_NL_LOCALE_NAME)                                      \
-              /* And asked for */                                           \
-         &&   defined(USE_NL_LOCALE_NAME)                                   \
+         && ! defined(NO_USE_NL_LOCALE_NAME)                                \
               /* nl_langinfo_l almost certainly will exist on systems that  \
                * have _NL_LOCALE_NAME, so there is nothing lost by          \
                * requiring it instead of also allowing plain nl_langinfo(). \
