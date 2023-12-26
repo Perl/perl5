@@ -6179,6 +6179,8 @@ S_emulate_langinfo(pTHX_ const nl_item item,
 
 #    endif
 
+    GCC_DIAG_IGNORE_STMT(-Wimplicit-fallthrough);
+
     switch (item) {
 
 #    ifdef HAS_LOCALECONV
@@ -6489,8 +6491,6 @@ S_emulate_langinfo(pTHX_ const nl_item item,
 
 #    endif
 
-            GCC_DIAG_IGNORE_STMT(-Wimplicit-fallthrough);
-
         /* Nested switch for LC_TIME items, plus the default: case is for
          * unknown items */
         switch (item) {
@@ -6573,8 +6573,6 @@ S_emulate_langinfo(pTHX_ const nl_item item,
 #    endif
 
             } /* End of inner switch() */
-
-            GCC_DIAG_RESTORE_STMT;
 
             if (! format) {
                 retval = "";
@@ -6660,6 +6658,8 @@ S_emulate_langinfo(pTHX_ const nl_item item,
             break;
        }    /* End of braced group for outer switch 'default:' case */
     } /* Giant switch() of nl_langinfo() items */
+
+    GCC_DIAG_RESTORE_STMT;
 
     if (utf8ness) {
         *utf8ness = is_utf8;
