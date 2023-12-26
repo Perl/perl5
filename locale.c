@@ -6193,6 +6193,12 @@ S_emulate_langinfo(pTHX_ const nl_item item,
         cat_index = LC_MONETARY_INDEX_;
         goto use_localeconv;
 
+#  else
+
+      case CRNCYSTR:
+        retval = "-";
+        break;
+
 #  endif
 #  if defined(USE_LOCALE_NUMERIC) && defined(HAS_LOCALECONV)
 
@@ -6200,11 +6206,17 @@ S_emulate_langinfo(pTHX_ const nl_item item,
         cat_index = LC_NUMERIC_INDEX_;
         goto use_localeconv;
 
+#  else
+
+      case THOUSEP:
+        retval = C_thousands_sep;
+        break;
+
 #  endif
 
       case RADIXCHAR:
 
-#  if      defined(HAS_SNPRINTF)                                          \
+#  if    defined(USE_LOCALE_NUMERIC) && defined(HAS_SNPRINTF)           \
    && (! defined(HAS_LOCALECONV) || defined(TS_W32_BROKEN_LOCALECONV))
 
         {   /* snprintf() can be used to find the radix character by outputting
@@ -6369,7 +6381,13 @@ S_emulate_langinfo(pTHX_ const nl_item item,
        }
 
 #  endif  /* Using localeconv() for something or other */
-#  ifdef USE_LOCALE_CTYPE
+#  ifndef USE_LOCALE_CTYPE
+
+      case CODESET:
+        retval = C_codeset;
+        break;
+
+#  else
 
       case CODESET:
 
