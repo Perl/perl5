@@ -8,10 +8,11 @@ package Math::BigInt;
 #
 
 # The following hash values are used:
-#   value: unsigned int with actual value (as a Math::BigInt::Calc or similar)
-#   sign : +, -, NaN, +inf, -inf
-#   _a   : accuracy
-#   _p   : precision
+#
+#          sign : "+", "-", "+inf", "-inf", or "NaN"
+#         value : unsigned int with actual value ($LIB thingy)
+#      accuracy : accuracy (scalar)
+#     precision : precision (scalar)
 
 # Remember not to take shortcuts ala $xs = $x->{value}; $LIB->foo($xs); since
 # underlying lib might change the reference!
@@ -23,7 +24,7 @@ use warnings;
 use Carp          qw< carp croak >;
 use Scalar::Util  qw< blessed refaddr >;
 
-our $VERSION = '2.002001';
+our $VERSION = '2.003001';
 $VERSION =~ tr/_//d;
 
 require Exporter;
@@ -255,7 +256,7 @@ sub FETCH {
 }
 
 sub STORE {
-    $rnd_mode = $_[0]->round_mode($_[1]);
+    $rnd_mode = (ref $_[0]) -> round_mode($_[1]);
 }
 
 BEGIN {
@@ -276,20 +277,33 @@ sub round_mode {
     my $self = shift;
     my $class = ref($self) || $self || __PACKAGE__;
 
-    if (@_) {                           # setter
+    # setter/mutator
+
+    if (@_) {
         my $m = shift;
         croak("The value for 'round_mode' must be defined")
           unless defined $m;
         croak("Unknown round mode '$m'")
           unless $m =~ /^(even|odd|\+inf|\-inf|zero|trunc|common)$/;
-        no strict 'refs';
-        ${"${class}::round_mode"} = $m;
+
+        if (ref($self) && exists $self -> {round_mode}) {
+            $self->{round_mode} = $m;
+        } else {
+            no strict 'refs';
+            ${"${class}::round_mode"}  = $m;
+        }
     }
 
-    else {                              # getter
-        no strict 'refs';
-        my $m = ${"${class}::round_mode"};
-        defined($m) ? $m : $round_mode;
+    # getter/accessor
+
+    else {
+        if (ref($self) && exists $self -> {round_mode}) {
+            return $self->{round_mode};
+        } else {
+            no strict 'refs';
+            my $m = ${"${class}::round_mode"};
+            return defined($m) ? $m : $round_mode;
+        }
     }
 }
 
@@ -297,34 +311,56 @@ sub upgrade {
     my $self = shift;
     my $class = ref($self) || $self || __PACKAGE__;
 
-    no strict 'refs';
-
     # setter/mutator
 
     if (@_) {
-        return ${"${class}::upgrade"} = $_[0];
+        my $u = shift;
+        if (ref($self) && exists $self -> {upgrade}) {
+            $self -> {upgrade} = $u;
+        } else {
+            no strict 'refs';
+            ${"${class}::upgrade"} = $u;
+        }
     }
 
     # getter/accessor
 
-    ${"${class}::upgrade"};
+    else {
+        if (ref($self) && exists $self -> {upgrade}) {
+            return $self -> {upgrade};
+        } else {
+            no strict 'refs';
+            return ${"${class}::upgrade"};
+        }
+    }
 }
 
 sub downgrade {
     my $self = shift;
     my $class = ref($self) || $self || __PACKAGE__;
 
-    no strict 'refs';
-
     # setter/mutator
 
     if (@_) {
-        return ${"${class}::downgrade"} = $_[0];
+        my $d = shift;
+        if (ref($self) && exists $self -> {downgrade}) {
+            $self -> {downgrade} = $d;
+        } else {
+            no strict 'refs';
+            ${"${class}::downgrade"} = $d;
+        }
     }
 
     # getter/accessor
 
-    ${"${class}::downgrade"};
+    else {
+        if (ref($self) && exists $self -> {downgrade}) {
+            return $self -> {downgrade};
+        } else {
+            no strict 'refs';
+            return ${"${class}::downgrade"};
+        }
+    }
 }
 
 sub div_scale {
@@ -334,28 +370,37 @@ sub div_scale {
     # setter/mutator
 
     if (@_) {
-        my $ds = shift;
-        croak("The value for 'div_scale' must be defined") unless defined $ds;
-        $ds = $ds -> can('numify') ? $ds -> numify() : 0 + "$ds" if ref($ds);
+        my $f = shift;
+        croak("The value for 'div_scale' must be defined") unless defined $f;
+        $f = $f -> can('numify') ? $f -> numify() : 0 + "$f" if ref($f);
         # also croak on non-numerical
-        croak "div_scale must be a number, not '$ds'"
-          unless $ds =~/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[Ee][+-]?\d+)?\z/;
-        croak "div_scale must be an integer, not '$ds'"
-          if $ds != int $ds;
+        croak "div_scale must be a number, not '$f'"
+          unless $f =~/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[Ee][+-]?\d+)?\z/;
+        croak "div_scale must be an integer, not '$f'"
+          if $f != int $f;
         # It is not documented what div_scale <= 0 means, but Astro::Units sets
         # div_scale to 0 and fails its tests if this is not supported. So we
         # silently support div_scale = 0.
-        croak "div_scale must be positive, not '$ds'" if $ds < 0;
-        no strict 'refs';
-        ${"${class}::div_scale"} = $ds;
+        croak "div_scale must be positive, not '$f'" if $f < 0;
+
+        if (ref($self) && exists $self -> {div_scale}) {
+            $self -> {div_scale} = $f;
+        } else {
+            no strict 'refs';
+            ${"${class}::div_scale"} = $f;
+        }
     }
 
     # getter/accessor
 
     else {
-        no strict 'refs';
-        my $ds = ${"${class}::div_scale"};
-        defined($ds) ? $ds : $div_scale;
+        if (ref($self) && exists $self -> {div_scale}) {
+            return $self -> {div_scale};
+        } else {
+            no strict 'refs';
+            my $f = ${"${class}::div_scale"};
+            return defined($f) ? $f : $div_scale;
+        }
     }
 }
 
@@ -363,151 +408,224 @@ sub accuracy {
     my $x = shift;
     my $class = ref($x) || $x || __PACKAGE__;
 
-    no strict 'refs';
-
     # setter/mutator
 
     if (@_) {
         my $a = shift;
+
         if (defined $a) {
             $a = $a -> can('numify') ? $a -> numify() : 0 + "$a" if ref($a);
-            # also croak on non-numerical
             croak "accuracy must be a number, not '$a'"
-              unless $a =~/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[Ee][+-]?\d+)?\z/;
+              if $a !~ /^\s*[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[Ee][+-]?\d+)?\s*\z/;
             croak "accuracy must be an integer, not '$a'"
               if $a != int $a;
-            croak "accuracy must be greater than zero, not '$a'"
-              if $a <= 0;
         }
 
         if (ref($x)) {
-            # Set instance variable.
-            $x = $x->bround($a) if defined $a;
-            $x->{_a} = $a;      # set/overwrite, even if not rounded
-            $x->{_p} = undef;   # clear P
-            # Why return class variable here? Fixme!
-            $a = ${"${class}::accuracy"} unless defined $a;
+            $x = $x -> bround($a) if defined $a;
+            $x -> {precision} = undef;          # clear instance P
+            $x -> {accuracy}  = $a;             # set instance A
         } else {
-            # Set class variable.
-            ${"${class}::accuracy"}  = $a;      # set global A
-            ${"${class}::precision"} = undef;   # clear global P
+            no strict 'refs';
+            ${"${class}::precision"} = undef;   # clear class P
+            ${"${class}::accuracy"}  = $a;      # set class A
         }
-
-        return $a;              # shortcut
     }
 
     # getter/accessor
 
-    # Return instance variable.
-    return $x->{_a} if ref($x);
-
-    # Return class variable.
-    return ${"${class}::accuracy"};
+    else {
+        if (ref($x)) {
+            return $x -> {accuracy};
+        } else {
+            no strict 'refs';
+            return ${"${class}::accuracy"};
+        }
+    }
 }
 
 sub precision {
     my $x = shift;
     my $class = ref($x) || $x || __PACKAGE__;
 
-    no strict 'refs';
-
     # setter/mutator
 
     if (@_) {
         my $p = shift;
+
         if (defined $p) {
             $p = $p -> can('numify') ? $p -> numify() : 0 + "$p" if ref($p);
             croak "precision must be a number, not '$p'"
-              unless $p =~/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[Ee][+-]?\d+)?\z/;
+              if $p !~ /^\s*[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[Ee][+-]?\d+)?\s*\z/;
             croak "precision must be an integer, not '$p'"
               if $p != int $p;
         }
 
         if (ref($x)) {
-            # Set instance variable.
-            $x = $x->bfround($p) if defined $p;
-            $x->{_p} = $p;      # set/overwrite, even if not rounded
-            $x->{_a} = undef;   # clear A
-            # Why return class variable here? Fixme!
-            $p = ${"${class}::precision"} unless defined $p;
+            $x = $x -> bfround($p) if defined $p;
+            $x -> {accuracy}  = undef;          # clear instance A
+            $x -> {precision} = $p;             # set instance P
         } else {
-            # Set class variable.
-            ${"${class}::precision"} = $p;      # set global P
-            ${"${class}::accuracy"}  = undef;   # clear global A
+            no strict 'refs';
+            ${"${class}::accuracy"}  = undef;   # clear class A
+            ${"${class}::precision"} = $p;      # set class P
         }
-
-        return $p;              # shortcut
     }
 
     # getter/accessor
 
-    # Return instance variable.
-    return $x->{_p} if ref($x);
+    else {
+        if (ref($x)) {
+            return $x -> {precision};
+        } else {
+            no strict 'refs';
+            return ${"${class}::precision"};
+        }
+    }
+}
 
-    # Return class variable.
-    return ${"${class}::precision"};
+sub trap_inf {
+    my $self = shift;
+    my $class = ref($self) || $self || __PACKAGE__;
+
+    # setter/mutator
+
+    if (@_) {
+        my $b = shift() ? 1 : 0;
+        if (ref($self) && exists $self -> {trap_inf}) {
+            $self -> {trap_inf} = $b;
+        } else {
+            no strict 'refs';
+            ${"${class}::_trap_inf"} = $b;
+        }
+    }
+
+    # getter/accessor
+
+    else {
+        if (ref($self) && exists $self -> {trap_inf}) {
+            return $self -> {trap_inf};
+        } else {
+            no strict 'refs';
+            return ${"${class}::_trap_inf"};
+        }
+    }
+}
+
+sub trap_nan {
+    my $self = shift;
+    my $class = ref($self) || $self || __PACKAGE__;
+
+    # setter/mutator
+
+    if (@_) {
+        my $b = shift() ? 1 : 0;
+        if (ref($self) && exists $self -> {trap_nan}) {
+            $self -> {trap_nan} = $b;
+        } else {
+            no strict 'refs';
+            ${"${class}::_trap_nan"} = $b;
+        }
+    }
+
+    # getter/accessor
+
+    else {
+        if (ref($self) && exists $self -> {trap_nan}) {
+            return $self -> {trap_nan};
+        } else {
+            no strict 'refs';
+            return ${"${class}::_trap_nan"};
+        }
+    }
 }
 
 sub config {
     # return (or set) configuration data.
     my $class = shift || __PACKAGE__;
 
-    no strict 'refs';
+    # setter/mutator
+    #
+    # $class -> config(var => value, ...)
+    # $class -> config({ var => value, ... })
+
     if (@_ > 1 || (@_ == 1 && (ref($_[0]) eq 'HASH'))) {
         # try to set given options as arguments from hash
 
-        my $args = $_[0];
-        if (ref($args) ne 'HASH') {
-            $args = { @_ };
+        # If the argument is a hash ref, make a copy of it, since keys will be
+        # deleted below and we don't want to modify the input hash.
+
+        my $args = ref($_[0]) eq 'HASH' ? { %{ $_[0] } }: { @_ };
+
+        # We use this special handling of accuracy and precision because
+        # accuracy() always sets precision to undef and precision() always sets
+        # accuracy to undef. With out this special treatment, the following
+        # would result in both accuracy and precision being undef.
+        #
+        #   $x -> config(accuracy => 3, precision => undef)
+
+        croak "config(): both accuracy and precision are defined"
+          if defined($args -> {accuracy}) && defined ($args -> {precision});
+
+        if (defined $args -> {accuracy}) {
+            $class -> accuracy($args -> {accuracy});
+        } elsif (defined $args -> {precision}) {
+            $class -> precision($args -> {precision});
+        } else {
+            $class -> accuracy(undef);  # also sets precision to undef
         }
-        # these values can be "set"
-        my $set_args = {};
+
+        delete $args->{accuracy};
+        delete $args->{precision};
+
+        # Set any remaining keys.
+
         foreach my $key (qw/
-                               accuracy precision
                                round_mode div_scale
                                upgrade downgrade
                                trap_inf trap_nan
                            /)
         {
-            $set_args->{$key} = $args->{$key} if exists $args->{$key};
+            # use a method call to check argument
+            $class->$key($args->{$key}) if exists $args->{$key};
             delete $args->{$key};
         }
-        if (keys %$args > 0) {
+
+        # If there are any keys left, they are invalid.
+
+        if (keys %$args) {
             croak("Illegal key(s) '", join("', '", keys %$args),
                         "' passed to $class\->config()");
         }
-        foreach my $key (keys %$set_args) {
-            if ($key =~ /^trap_(inf|nan)\z/) {
-                ${"${class}::_trap_$1"} = ($set_args->{"trap_$1"} ? 1 : 0);
-                next;
-            }
-            # use a call instead of just setting the $variable to check argument
-            $class->$key($set_args->{$key});
-        }
     }
 
-    # now return actual configuration
+    # Now build the full configuration.
 
     my $cfg = {
                lib         => $LIB,
-               lib_version => ${"${LIB}::VERSION"},
+               lib_version => $LIB -> VERSION(),
                class       => $class,
-               trap_nan    => ${"${class}::_trap_nan"},
-               trap_inf    => ${"${class}::_trap_inf"},
-               version     => ${"${class}::VERSION"},
+               version     => $class -> VERSION(),
               };
+
     foreach my $key (qw/
                            accuracy precision
                            round_mode div_scale
                            upgrade downgrade
+                           trap_inf trap_nan
                        /)
     {
-        $cfg->{$key} = ${"${class}::$key"};
+        $cfg->{$key} = $class -> $key();
     }
+
+    # getter/accessor
+    #
+    # $class -> config("var")
+
     if (@_ == 1 && (ref($_[0]) ne 'HASH')) {
-        # calls of the style config('lib') return just this value
         return $cfg->{$_[0]};
     }
+
     $cfg;
 }
 
@@ -516,9 +634,8 @@ sub _scale_a {
     # used by bround() and bfround(), may return undef for scale (means no op)
     my ($x, $scale, $mode) = @_;
 
-    $scale = $x->{_a} unless defined $scale;
+    $scale = $x->{accuracy} unless defined $scale;
 
-    no strict 'refs';
     my $class = ref($x);
 
     $scale = $class -> accuracy() unless defined $scale;
@@ -538,9 +655,8 @@ sub _scale_p {
     # used by bround() and bfround(), may return undef for scale (means no op)
     my ($x, $scale, $mode) = @_;
 
-    $scale = $x->{_p} unless defined $scale;
+    $scale = $x->{precision} unless defined $scale;
 
-    no strict 'refs';
     my $class = ref($x);
 
     $scale = $class -> precision() unless defined $scale;
@@ -1055,11 +1171,11 @@ sub bzero {
             carp "can't specify both accuracy and precision";
             return $self -> bnan();
         }
-        $self->{_a} = $_[0];
-        $self->{_p} = $_[1];
+        $self->{accuracy} = $_[0];
+        $self->{precision} = $_[1];
     } elsif (!$selfref) {
-        $self->{_a} = $class -> accuracy();
-        $self->{_p} = $class -> precision();
+        $self->{accuracy} = $class -> accuracy();
+        $self->{precision} = $class -> precision();
     }
 
     return $self;
@@ -1116,11 +1232,11 @@ sub bone {
             carp "can't specify both accuracy and precision";
             return $self -> bnan();
         }
-        $self->{_a} = $_[0];
-        $self->{_p} = $_[1];
+        $self->{accuracy} = $_[0];
+        $self->{precision} = $_[1];
     } elsif (!$selfref) {
-        $self->{_a} = $class -> accuracy();
-        $self->{_p} = $class -> precision();
+        $self->{accuracy} = $class -> accuracy();
+        $self->{precision} = $class -> precision();
     }
 
     return $self;
@@ -1185,11 +1301,11 @@ sub binf {
             carp "can't specify both accuracy and precision";
             return $self -> bnan();
         }
-        $self->{_a} = $_[0];
-        $self->{_p} = $_[1];
+        $self->{accuracy} = $_[0];
+        $self->{precision} = $_[1];
     } elsif (!$selfref) {
-        $self->{_a} = $class -> accuracy();
-        $self->{_p} = $class -> precision();
+        $self->{accuracy} = $class -> accuracy();
+        $self->{precision} = $class -> precision();
     }
 
     return $self;
@@ -1244,11 +1360,11 @@ sub bnan {
             carp "can't specify both accuracy and precision";
             return $self -> bnan();
         }
-        $self->{_a} = $_[0];
-        $self->{_p} = $_[1];
+        $self->{accuracy} = $_[0];
+        $self->{precision} = $_[1];
     } elsif (!$selfref) {
-        $self->{_a} = $class -> accuracy();
-        $self->{_p} = $class -> precision();
+        $self->{accuracy} = $class -> accuracy();
+        $self->{precision} = $class -> precision();
     }
 
     return $self;
@@ -1323,8 +1439,8 @@ sub copy {
 
     $copy->{sign}  = $x->{sign};
     $copy->{value} = $LIB->_copy($x->{value});
-    $copy->{_a}    = $x->{_a} if exists $x->{_a};
-    $copy->{_p}    = $x->{_p} if exists $x->{_p};
+    $copy->{accuracy}    = $x->{accuracy} if exists $x->{accuracy};
+    $copy->{precision}    = $x->{precision} if exists $x->{precision};
 
     return $copy;
 }
@@ -1348,7 +1464,7 @@ sub as_int {
 
     # Copy the remaining instance variables.
 
-    ($y->{_a}, $y->{_p}) = ($x->{_a}, $x->{_p});
+    ($y->{accuracy}, $y->{precision}) = ($x->{accuracy}, $x->{precision});
 
     # Restore upgrading and downgrading
 
@@ -1376,7 +1492,7 @@ sub as_float {
 
     # Copy the remaining instance variables.
 
-    ($y->{_a}, $y->{_p}) = ($x->{_a}, $x->{_p});
+    ($y->{accuracy}, $y->{precision}) = ($x->{accuracy}, $x->{precision});
 
     # Restore upgrading and downgrading..
 
@@ -1402,7 +1518,7 @@ sub as_rat {
 
     # Copy the remaining instance variables.
 
-    ($y->{_a}, $y->{_p}) = ($x->{_a}, $x->{_p});
+    ($y->{accuracy}, $y->{precision}) = ($x->{accuracy}, $x->{precision});
 
     # Restore upgrading and downgrading.
 
@@ -2279,8 +2395,8 @@ sub bdiv {
             }
             $rem -> {sign} = $ysign;
         }
-        $rem -> {_a} = $x -> {_a};
-        $rem -> {_p} = $x -> {_p};
+        $rem -> {accuracy} = $x -> {accuracy};
+        $rem -> {precision} = $x -> {precision};
         $rem = $rem -> round(@r);
         return ($x, $rem);
     }
@@ -2423,8 +2539,8 @@ sub btdiv {
     if (wantarray) {
         $rem -> {sign} = $xsign;
         $rem -> {sign} = '+' if $LIB -> _is_zero($rem -> {value});
-        $rem -> {_a} = $x -> {_a};
-        $rem -> {_p} = $x -> {_p};
+        $rem -> {accuracy} = $x -> {accuracy};
+        $rem -> {precision} = $x -> {precision};
         $rem = $rem -> round(@r);
         return ($x, $rem);
     }
@@ -2924,6 +3040,82 @@ sub bexp {
     require Math::BigFloat;
     my $tmp = Math::BigFloat -> bexp($x, @r) -> as_int();
     $x->{value} = $tmp->{value};
+    return $x -> round(@r);
+}
+
+sub bilog2 {
+    my ($class, $x, @r) = ref($_[0]) ? (ref($_[0]), @_) : objectify(1, @_);
+
+    return $x if $x -> modify('bilog2');
+
+    return $upgrade -> new($x, @r) unless $x -> isa(__PACKAGE__);
+
+    return $x -> bnan(@r)        if $x -> is_nan();
+    return $x -> binf("+", @r)   if $x -> is_inf("+");
+    return $x -> binf("-", @r)   if $x -> is_zero();
+    if ($x -> is_neg()) {
+        return $upgrade -> bilog2($x, @r) if $upgrade;
+        return $x -> bnan(@r);
+    }
+
+    $x -> {value} = $LIB -> _ilog2($x -> {value});
+    return $x -> round(@r);
+}
+
+sub bilog10 {
+    my ($class, $x, @r) = ref($_[0]) ? (ref($_[0]), @_) : objectify(1, @_);
+
+    return $x if $x -> modify('bilog10');
+
+    return $upgrade -> new($x, @r) unless $x -> isa(__PACKAGE__);
+
+    return $x -> bnan(@r)        if $x -> is_nan();
+    return $x -> binf("+", @r)   if $x -> is_inf("+");
+    return $x -> binf("-", @r)   if $x -> is_zero();
+    if ($x -> is_neg()) {
+        return $upgrade -> bilog2($x, @r) if $upgrade;
+        return $x -> bnan(@r);
+    }
+
+    $x -> {value} = $LIB -> _ilog10($x -> {value});
+    return $x -> round(@r);
+}
+
+sub bclog2 {
+    my ($class, $x, @r) = ref($_[0]) ? (ref($_[0]), @_) : objectify(1, @_);
+
+    return $x if $x -> modify('bclog2');
+
+    return $upgrade -> new($x, @r) unless $x -> isa(__PACKAGE__);
+
+    return $x -> bnan(@r)        if $x -> is_nan();
+    return $x -> binf("+", @r)   if $x -> is_inf("+");
+    return $x -> binf("-", @r)   if $x -> is_zero();
+    if ($x -> is_neg()) {
+        return $upgrade -> bilog2($x, @r) if $upgrade;
+        return $x -> bnan(@r);
+    }
+
+    $x -> {value} = $LIB -> _clog2($x -> {value});
+    return $x -> round(@r);
+}
+
+sub bclog10 {
+    my ($class, $x, @r) = ref($_[0]) ? (ref($_[0]), @_) : objectify(1, @_);
+
+    return $x if $x -> modify('bclog10');
+
+    return $upgrade -> new($x, @r) unless $x -> isa(__PACKAGE__);
+
+    return $x -> bnan(@r)        if $x -> is_nan();
+    return $x -> binf("+", @r)   if $x -> is_inf("+");
+    return $x -> binf("-", @r)   if $x -> is_zero();
+    if ($x -> is_neg()) {
+        return $upgrade -> bilog2($x, @r) if $upgrade;
+        return $x -> bnan(@r);
+    }
+
+    $x -> {value} = $LIB -> _clog10($x -> {value});
     return $x -> round(@r);
 }
 
@@ -4007,11 +4199,19 @@ sub round {
 
     my ($class, $self, @args) = ref($_[0]) ? (ref($_[0]), @_) : objectify(1, @_);
 
-    # $x->round(undef, undef) signals no rounding
+    # These signal no rounding:
+    #
+    #   $x->round(undef)
+    #   $x->round(undef, undef, ...)
+    #
+    # The "@args <= 3" is necessary because the final set of parameters that
+    # will be used for rounding depend on the "extra arguments", if any.
 
-    if (@args >= 2 && @args <= 3 && !defined($args[0]) && !defined($args[1])) {
-        $self->{_a} = undef;
-        $self->{_p} = undef;
+    if (@args == 1 && !defined($args[0]) ||
+        @args >= 2 && @args <= 3 && !defined($args[0]) && !defined($args[1]))
+    {
+        $self->{accuracy} = undef;
+        $self->{precision} = undef;
         return $self;
     }
 
@@ -4036,8 +4236,8 @@ sub round {
     if (!defined $a) {
         foreach ($self, @args) {
             # take the defined one, or if both defined, the one that is smaller
-            $a = $_->{_a}
-              if (defined $_->{_a}) && (!defined $a || $_->{_a} < $a);
+            $a = $_->{accuracy}
+              if (defined $_->{accuracy}) && (!defined $a || $_->{accuracy} < $a);
         }
     }
     if (!defined $p) {
@@ -4045,12 +4245,10 @@ sub round {
         foreach ($self, @args) {
             # take the defined one, or if both defined, the one that is bigger
             # -2 > -3, and 3 > 2
-            $p = $_->{_p}
-              if (defined $_->{_p}) && (!defined $p || $_->{_p} > $p);
+            $p = $_->{precision}
+              if (defined $_->{precision}) && (!defined $p || $_->{precision} > $p);
         }
     }
-
-    no strict 'refs';
 
     # if still none defined, use globals
     unless (defined $a || defined $p) {
@@ -4075,10 +4273,10 @@ sub round {
     # now round, by calling either bround or bfround:
     if (defined $a) {
         $self = $self->bround(int($a), $r)
-          if !defined $self->{_a} || $self->{_a} >= $a;
+          if !defined $self->{accuracy} || $self->{accuracy} >= $a;
     } else {                  # both can't be undefined due to early out
         $self = $self->bfround(int($p), $r)
-          if !defined $self->{_p} || $self->{_p} <= $p;
+          if !defined $self->{precision} || $self->{precision} <= $p;
     }
 
     # bround() or bfround() already called bnorm() if nec.
@@ -4098,7 +4296,7 @@ sub bround {
     return $x if !defined $scale || $x->modify('bround'); # no-op
 
     if ($x->is_zero() || $scale == 0) {
-        $x->{_a} = $scale if !defined $x->{_a} || $x->{_a} > $scale; # 3 > 2
+        $x->{accuracy} = $scale if !defined $x->{accuracy} || $x->{accuracy} > $scale; # 3 > 2
         return $x;
     }
     return $x if $x->{sign} !~ /^[+-]$/; # inf, NaN
@@ -4112,7 +4310,7 @@ sub bround {
 
     # scale < 0, but > -len (not >=!)
     if (($scale < 0 && $scale < -$len-1) || ($scale >= $len)) {
-        $x->{_a} = $scale if !defined $x->{_a} || $x->{_a} > $scale; # 3 > 2
+        $x->{accuracy} = $scale if !defined $x->{accuracy} || $x->{accuracy} > $scale; # 3 > 2
         return $x;
     }
 
@@ -4180,10 +4378,10 @@ sub bround {
     }
     $x->{value} = $LIB->_new($xs) if $put_back == 1; # put back, if needed
 
-    $x->{_a} = $scale if $scale >= 0;
+    $x->{accuracy} = $scale if $scale >= 0;
     if ($scale < 0) {
-        $x->{_a} = $len+$scale;
-        $x->{_a} = 0 if $scale < -$len;
+        $x->{accuracy} = $len+$scale;
+        $x->{accuracy} = 0 if $scale < -$len;
     }
     $x;
 }
@@ -4201,8 +4399,8 @@ sub bfround {
     # no-op for Math::BigInt objects if $n <= 0
     $x = $x->bround($x->length()-$scale, $mode) if $scale > 0;
 
-    $x->{_a} = undef;
-    $x->{_p} = $scale;          # store new _p
+    $x->{accuracy} = undef;
+    $x->{precision} = $scale;          # store new precision
     $x;
 }
 
@@ -5516,7 +5714,6 @@ sub _find_round_parameters {
     # @args all 'other' arguments (0 for unary, 1 for binary ops)
 
     my $class = ref($self);       # find out class of argument(s)
-    no strict 'refs';
 
     # convert to normal scalar for speed and correctness in inner parts
     $a = $a->can('numify') ? $a->numify() : "$a" if defined $a && ref($a);
@@ -5526,8 +5723,8 @@ sub _find_round_parameters {
     if (!defined $a) {
         foreach ($self, @args) {
             # take the defined one, or if both defined, the one that is smaller
-            $a = $_->{_a}
-              if (defined $_->{_a}) && (!defined $a || $_->{_a} < $a);
+            $a = $_->{accuracy}
+              if (defined $_->{accuracy}) && (!defined $a || $_->{accuracy} < $a);
         }
     }
     if (!defined $p) {
@@ -5535,8 +5732,8 @@ sub _find_round_parameters {
         foreach ($self, @args) {
             # take the defined one, or if both defined, the one that is bigger
             # -2 > -3, and 3 > 2
-            $p = $_->{_p}
-              if (defined $_->{_p}) && (!defined $p || $_->{_p} > $p);
+            $p = $_->{precision}
+              if (defined $_->{precision}) && (!defined $p || $_->{precision} > $p);
         }
     }
 
@@ -6302,6 +6499,9 @@ Math::BigInt - arbitrary size integer math package
   Math::BigInt->round_mode($m); # set global round mode, must be one of
                                 # 'even', 'odd', '+inf', '-inf', 'zero',
                                 # 'trunc', or 'common'
+  Math::BigInt->div_scale($n);  # set fallback accuracy
+  Math::BigInt->trap_inf($b);   # trap infinities or not
+  Math::BigInt->trap_nan($b);   # trap NaNs or not
   Math::BigInt->config();       # return hash with configuration
 
   # Constructor methods (when the class methods below are used as instance
@@ -6384,6 +6584,10 @@ Math::BigInt - arbitrary size integer math package
   $x->blog();             # logarithm of $x to base e (Euler's number)
   $x->blog($base);        # logarithm of $x to base $base (e.g., base 2)
   $x->bexp();             # calculate e ** $x where e is Euler's number
+  $x->bilog2();           # log2($x) rounded down to nearest int
+  $x->bilog10();          # log10($x) rounded down to nearest int
+  $x->bclog2();           # log2($x) rounded up to nearest int
+  $x->bclog10();          # log19($x) rounded up to nearest int
   $x->bnok($y);           # x over y (binomial coefficient n over k)
   $x->buparrow($n, $y);   # Knuth's up-arrow notation
   $x->backermann($y);     # the Ackermann function
@@ -6676,6 +6880,15 @@ attempt to return an infinite number of digits.
 =item round_mode()
 
 Set/get the rounding mode.
+
+=item trap_inf()
+
+Set/get the value determining whether infinities should cause a fatal error or
+not.
+
+=item trap_nan()
+
+Set/get the value determining whether NaNs should cause a fatal error or not.
 
 =item upgrade()
 
@@ -7321,6 +7534,42 @@ Calculates the expression C<e ** $x> where C<e> is Euler's number.
 This method was added in v1.82 of Math::BigInt (April 2007).
 
 See also L</blog()>.
+
+=item bilog2()
+
+Base 2 logarithm rounded down towards the nearest integer.
+
+    $x->bilog2();               # int(log2(x)) = int(log(x)/log(2))
+
+In list context a second argument is returned. This is 1 if the result is
+exact, i.e., the input is an exact power of 2, and 0 otherwise.
+
+=item bilog10()
+
+Base 10 logarithm rounded down towards the nearest integer.
+
+    $x->bilog10();              # int(log10(x)) = int(log(x)/log(10))
+
+In list context a second argument is returned. This is 1 if the result is
+exact, i.e., the input is an exact power of 10, and 0 otherwise.
+
+=item bclog2()
+
+Base 2 logarithm rounded up towards the nearest integer.
+
+    $x->bclog2();               # ceil(log2(x)) = ceil(log(x)/log(2))
+
+In list context a second argument is returned. This is 1 if the result is
+exact, i.e., the input is an exact power of 2, and 0 otherwise.
+
+=item bclog10()
+
+Base 10 logarithm rounded up towards the nearest integer.
+
+    $x->bclog10();              # ceil(log10(x)) = ceil(log(x)/log(10))
+
+In list context a second argument is returned. This is 1 if the result is
+exact, i.e., the input is an exact power of 10, and 0 otherwise.
 
 =item bnok()
 
