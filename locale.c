@@ -6154,17 +6154,15 @@ S_my_langinfo_i(pTHX_
             Safefree(floatbuf);
         }
 
-#      ifdef HAS_LOCALECONV /* snprintf() failed; drop down to use
-                               localeconv() */
+#    endif  /* Trying snprintf() */
 
-        /* FALLTHROUGH */
+        /* Here snprintf() was not compiled, or failed */
 
-#      else                      /* snprintf() failed and no localeconv() */
+#    ifndef HAS_LOCALECONV    /* Requires localeconv() if no snprintf() */
 
         retval = C_decimal_point;
         break;
 
-#      endif
 #    endif
 #    ifdef HAS_LOCALECONV
 
