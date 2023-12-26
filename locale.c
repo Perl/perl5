@@ -6067,6 +6067,14 @@ S_my_langinfo_i(pTHX_
         retval = "";
         break;
 
+#    ifdef HAS_LOCALECONV
+
+      case CRNCYSTR:
+      case THOUSEP:
+        goto use_localeconv;
+
+#    endif
+
       case RADIXCHAR:
 
 #    if      defined(HAS_SNPRINTF)                                          \
@@ -6162,9 +6170,10 @@ S_my_langinfo_i(pTHX_
 
     /* These items are available from localeconv(). */
 
-   /* case RADIXCHAR:   // May drop down to here in some configurations */
-      case THOUSEP:
-      case CRNCYSTR:
+   /* case RADIXCHAR:   // May drop down to here in some configurations
+      case THOUSEP:     // Jumps to here
+      case CRNCYSTR:    // Jumps to here */
+      use_localeconv:
        {
 
         /* The hash gets populated with just the field(s) related to 'item'. */
