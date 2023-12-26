@@ -6180,10 +6180,6 @@ S_emulate_langinfo(pTHX_ const nl_item item,
 #    endif
 
     switch (item) {
-      default:
-        assert(item < 0);   /* Make sure using perl_langinfo.h */
-        retval = "";
-        break;
 
 #    ifdef HAS_LOCALECONV
 
@@ -6473,37 +6469,37 @@ S_emulate_langinfo(pTHX_ const nl_item item,
 
 #      endif    /* ! WIN32 */
 #    endif      /* USE_LOCALE_CTYPE */
+
+      default:  /* Anything else that is legal is LC_TIME-related */
+       {
+
+            const char * format = NULL;
+            retval = NULL;
+
 #    ifdef HAS_STRFTIME
 
-      /* These formats are only available in later strftime's */
-      case ERA_D_FMT: case ERA_T_FMT: case ERA_D_T_FMT: case T_FMT_AMPM:
-
-      /* The rest can be gotten from most versions of strftime(). */
-      case ABDAY_1: case ABDAY_2: case ABDAY_3:
-      case ABDAY_4: case ABDAY_5: case ABDAY_6: case ABDAY_7:
-      case ALT_DIGITS:
-      case AM_STR: case PM_STR:
-      case ABMON_1: case ABMON_2: case ABMON_3: case ABMON_4:
-      case ABMON_5: case ABMON_6: case ABMON_7: case ABMON_8:
-      case ABMON_9: case ABMON_10: case ABMON_11: case ABMON_12:
-      case DAY_1: case DAY_2: case DAY_3: case DAY_4:
-      case DAY_5: case DAY_6: case DAY_7:
-      case MON_1: case MON_2: case MON_3: case MON_4:
-      case MON_5: case MON_6: case MON_7: case MON_8:
-      case MON_9: case MON_10: case MON_11: case MON_12:
-        {
-            const char * format;
             bool return_format = FALSE;
+
+            /* Without strftime(), default compiled-in values are returned.
+            * Otherwise, we generally compute a date as explained below.
+            * Initialize default values for that computation */
             int mon = 0;
             int mday = 1;
             int hour = 6;
 
+#    endif
+
             GCC_DIAG_IGNORE_STMT(-Wimplicit-fallthrough);
 
-            switch (item) {
-              default:
-                locale_panic_(Perl_form(aTHX_ "switch case: %d problem", item));
-                NOT_REACHED; /* NOTREACHED */
+        /* Nested switch for LC_TIME items, plus the default: case is for
+         * unknown items */
+        switch (item) {
+          default:  /* Anything not covered here is something we don't know
+                       about. */
+            assert(item < 0);   /* Make sure using perl_langinfo.h */
+            break;
+
+#    ifdef HAS_STRFTIME
 
               case PM_STR: hour = 18;
               case AM_STR:
@@ -6574,9 +6570,18 @@ S_emulate_langinfo(pTHX_ const nl_item item,
               case ALT_DIGITS:
                 format = "%Ow"; /* Find the alternate digit for 0 */
                 break;
-            }
+#    endif
+
+            } /* End of inner switch() */
 
             GCC_DIAG_RESTORE_STMT;
+
+            if (! format) {
+                retval = "";
+                break;
+            }
+
+#    ifdef HAS_STRFTIME
 
             /* The year was deliberately chosen so that January 1 is on the
              * first day of the week.  Since we're only getting one thing at a
@@ -6650,11 +6655,10 @@ S_emulate_langinfo(pTHX_ const nl_item item,
                 is_utf8 = UTF8NESS_IMMATERIAL;
             }
 
-            break;
-        }
-
 #    endif
 
+            break;
+       }    /* End of braced group for outer switch 'default:' case */
     } /* Giant switch() of nl_langinfo() items */
 
     if (utf8ness) {
