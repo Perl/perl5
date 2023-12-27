@@ -5889,7 +5889,7 @@ const char *
 Perl_langinfo8(const nl_item item, utf8ness_t * utf8ness)
 {
     dTHX;
-    locale_category_index cat_index;
+    locale_category_index cat_index = LC_ALL_INDEX_;
 
     PERL_ARGS_ASSERT_PERL_LANGINFO8;
 
@@ -6050,14 +6050,30 @@ Perl_langinfo8(const nl_item item, utf8ness_t * utf8ness)
 
 #ifndef USE_LOCALE
 
-    Perl_croak_nocontext("panic: Unexpected nl_langinfo() item %d", item);
-    NOT_REACHED; /* NOTREACHED */
-    PERL_UNUSED_VAR(cat_index);
+    return emulate_langinfo(item, "C",
+                            &PL_langinfo_buf, &PL_langinfo_bufsize,
+                            utf8ness);
 
 #else
+#  ifdef HAS_IGNORED_LOCALE_CATEGORIES_
 
-    return my_langinfo_i(item, cat_index, query_nominal_locale_i(cat_index),
-                         &PL_langinfo_buf, &PL_langinfo_bufsize, utf8ness);
+    /* If the above didn't find the category's index, it has to be because the
+     * item is unknown to us (and the callee will handle that), or the category
+     * is confined to the "C" locale on this platform, which the callee also
+     * handles. */
+    if (cat_index == LC_ALL_INDEX_) {
+        return emulate_langinfo(item, "C",
+                                &PL_langinfo_buf, &PL_langinfo_bufsize,
+                                utf8ness);
+    }
+
+#  endif
+
+    return my_langinfo_i(item,
+                         cat_index,
+                         query_nominal_locale_i(cat_index),
+                         &PL_langinfo_buf, &PL_langinfo_bufsize,
+                         utf8ness);
 #endif
 
 }
@@ -6523,6 +6539,8 @@ S_emulate_langinfo(pTHX_ const nl_item item,
           default:  /* Anything not covered here is something we don't know
                        about. */
             assert(item < 0);   /* Make sure using perl_langinfo.h */
+           Perl_croak_nocontext("panic: Unexpected nl_langinfo() item %d", item);
+            NOT_REACHED; /* NOTREACHED */
             break;
 
             /* The case: statments in this switch are all for LC_TIME related
