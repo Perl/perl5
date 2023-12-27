@@ -3344,12 +3344,6 @@ S_setlocale_failure_panic_via_i(pTHX_
     NOT_REACHED; /* NOTREACHED */
 }
 
-/* Any of these will allow us to find the RADIX */
-#  if defined(USE_LOCALE_NUMERIC) && (   defined(HAS_SOME_LANGINFO)         \
-                                      || defined(HAS_LOCALECONV)            \
-                                      || defined(HAS_SNPRINTF))
-#    define CAN_CALCULATE_RADIX
-#  endif
 #  ifdef USE_LOCALE_NUMERIC
 
 STATIC void
@@ -5910,14 +5904,12 @@ Perl_langinfo8(const nl_item item, utf8ness_t * utf8ness)
 
       case CODESET:
 
-#ifdef USE_LOCALE_CTYPE
-
+#  ifdef USE_LOCALE_CTYPE
         cat_index = LC_CTYPE_INDEX_;
+#  endif
         break;
 
-#else
-        return C_codeset;
-#endif
+
 #if defined(USE_LOCALE_MESSAGES) && defined(HAS_SOME_LANGINFO)
 
       case YESEXPR: case YESSTR: case NOEXPR: case NOSTR:
@@ -5932,35 +5924,19 @@ Perl_langinfo8(const nl_item item, utf8ness_t * utf8ness)
 
       case CRNCYSTR:
 
-#if  defined(USE_LOCALE_MONETARY)                                   \
- && (defined(HAS_SOME_LANGINFO) || defined(HAS_LOCALECONV))
-
+#  ifdef USE_LOCALE_MONETARY
         cat_index = LC_MONETARY_INDEX_;
+#  endif
         break;
-#else
-        return "-";
-#endif
 
-      case RADIXCHAR:
 
-#ifdef CAN_CALCULATE_RADIX
+      case RADIXCHAR: case THOUSEP:
 
+#  ifdef USE_LOCALE_NUMERIC
         cat_index = LC_NUMERIC_INDEX_;
+#  endif
         break;
-#else
-        return C_decimal_point;
-#endif
 
-      case THOUSEP:
-
-#if  defined(USE_LOCALE_NUMERIC)                                    \
- && (defined(HAS_SOME_LANGINFO) || defined(HAS_LOCALECONV))
-
-        cat_index = LC_NUMERIC_INDEX_;
-        break;
-#else
-        return C_thousands_sep;
-#endif
 
 /* The other possible items are all in LC_TIME. */
 #ifdef USE_LOCALE_TIME
@@ -6171,7 +6147,12 @@ S_emulate_langinfo(pTHX_ const nl_item item,
     PERL_UNUSED_ARG(locale);
 #  endif
 
-    /* This emulates nl_langinfo() on platforms where it doesn't exist.
+    /* This emulates nl_langinfo() on platforms:
+     *   1) where it doesn't exist; or
+     *   2) where it does exist, but there are categories that it shouldn't be
+     *      called on because they don't exist on the platform or we are
+     *      supposed to always stay in the C locale for them.  This function
+     *      has hard-coded in the results for those for the C locale.
      *
      * The major platform lacking nl_langinfo() is Windows.  It does have
      * GetLocaleInfoEx() that could be used to get most of the items, but it
