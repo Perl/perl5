@@ -718,6 +718,19 @@ static const char C_thousands_sep[] = "";
 #define my_langinfo_c(item, category, locale, retbufp, retbuf_sizep, utf8ness) \
             my_langinfo_i(item, category##_INDEX_, locale, retbufp,            \
                                                       retbuf_sizep,  utf8ness)
+#ifndef USE_LOCALE  /* A no-op unless locales are enabled */
+#  define toggle_locale_i(index, locale)    NULL
+#  define restore_toggled_locale_i(index, locale)  PERL_UNUSED_VAR(locale)
+#else
+#  define toggle_locale_i(index, locale)                                    \
+                 S_toggle_locale_i(aTHX_ index, locale, __LINE__)
+#  define restore_toggled_locale_i(index, locale)                           \
+                 S_restore_toggled_locale_i(aTHX_ index, locale, __LINE__)
+#endif
+
+#  define toggle_locale_c(cat, locale)  toggle_locale_i(cat##_INDEX_, locale)
+#  define restore_toggled_locale_c(cat, locale)                             \
+                             restore_toggled_locale_i(cat##_INDEX_, locale)
 #ifdef USE_LOCALE
 #  ifdef DEBUGGING
 #    define setlocale_debug_string_i(index, locale, result)                 \
@@ -728,14 +741,6 @@ static const char C_thousands_sep[] = "";
              setlocale_debug_string_i(get_category_index(category),         \
                                       locale, result)
 #  endif
-
-#  define toggle_locale_i(index, locale)                                    \
-                 S_toggle_locale_i(aTHX_ index, locale, __LINE__)
-#  define toggle_locale_c(cat, locale)  toggle_locale_i(cat##_INDEX_, locale)
-#  define restore_toggled_locale_i(index, locale)                           \
-                 S_restore_toggled_locale_i(aTHX_ index, locale, __LINE__)
-#  define restore_toggled_locale_c(cat, locale)                             \
-                             restore_toggled_locale_i(cat##_INDEX_, locale)
 
 /* On systems without LC_ALL, pretending it exists anyway simplifies things.
  * Choose a value for it that is very unlikely to clash with any actual
