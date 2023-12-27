@@ -6629,19 +6629,46 @@ S_override_codeset_if_utf8_found(pTHX_ const char * codeset,
 
     /* Here, the name doesn't indicate UTF-8, but MB_CUR_MAX indicates it could
      * be.  khw knows of only two other locales in the world, EUC-TW and GB
-     * 18030, that legitimately require this many bytes (4).  In both, the
-     * single byte characters are the same as ASCII.  No multi-byte character
-     * in EUC-TW is legal UTF-8 (since the first byte of each is a
-     * continuation).  GB 18030 has no three byte sequences, and none of the
-     * four byte ones is legal UTF-8 (as the second byte for these is a
-     * non-continuation).  But every legal UTF-8 two byte sequence is also
-     * legal in GB 18030, though none have the same meaning, and no Han code
-     * point expressed in UTF-8 is two byte.  So the further tests below which
-     * look for native expressions of currency and time will not return two
-     * byte sequences, hence they will reliably rule out this locale as being
-     * UTF-8.  So, if we get this far, the result is almost certainly UTF-8.
-     * But to be really sure, also check that there is no illegal UTF-8. */
-    lean_towards_being_utf8 |= MB_CUR_MAX_SUGGESTS_UTF8;
+     * 18030, that legitimately require this many bytes (4).  So, if the name
+     * is one of those, MB_CUR_MAX has corroborated that. */
+    bool name_implies_non_utf8 = false;
+    if (foldEQ(codeset, "GB", 2)) {
+        const char * s = codeset + 2;
+        if (*s == '-' || *s == '_') {
+            s++;
+        }
+
+        if strEQ(s, "18030") {
+            name_implies_non_utf8 = true;
+        }
+    }
+    else if (foldEQ(codeset, "EUC", 3)) {
+        const char * s = codeset + 3;
+        if (*s == '-' || *s == '_') {
+            s++;
+        }
+
+        if (foldEQ(s, "TW", 2)) {
+            name_implies_non_utf8 = true;
+        }
+    }
+
+    /* Otherwise, the locale is likely UTF-8 */
+    if (! name_implies_non_utf8) {
+        lean_towards_being_utf8 |= MB_CUR_MAX_SUGGESTS_UTF8;
+    }
+
+    /* (In both those two other multibyte locales, the single byte characters
+     * are the same as ASCII.  No multi-byte character in EUC-TW is legal UTF-8
+     * (since the first byte of each is a continuation).  GB 18030 has no three
+     * byte sequences, and none of the four byte ones is legal UTF-8 (as the
+     * second byte for these is a non-continuation).  But every legal UTF-8 two
+     * byte sequence is also legal in GB 18030, though none have the same
+     * meaning, and no Han code point expressed in UTF-8 is two byte.  So the
+     * further tests below which look for native expressions of currency and
+     * time will not return two byte sequences, hence they will reliably rule
+     * out such a locale as being UTF-8, even if the code set name checked
+     * above isn't correct.) */
 
 #    endif    /* has MB_CUR_MAX */
 
