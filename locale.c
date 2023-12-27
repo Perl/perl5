@@ -6591,6 +6591,8 @@ S_override_codeset_if_utf8_found(pTHX_ const char * codeset,
         lean_towards_being_utf8 |= NAME_INDICATES_UTF8;
     }
 
+    const char * orig_CTYPE_locale = toggle_locale_c(LC_CTYPE, locale);
+
     /* For this portion of the file to compile, some C99 functions aren't
      * available to us, even though we now require C99.  So, something must be
      * wrong with them.  The code here should be good enough to work around
@@ -6618,12 +6620,14 @@ S_override_codeset_if_utf8_found(pTHX_ const char * codeset,
             return "";    /* The name is wrong; override */
         }
 
+        restore_toggled_locale_c(LC_CTYPE, orig_CTYPE_locale);
         return codeset;
     }
 
     /* But if the locale could be UTF-8, and also the name corroborates this,
      * assume it is so */
     if (lean_towards_being_utf8 & NAME_INDICATES_UTF8) {
+        restore_toggled_locale_c(LC_CTYPE, orig_CTYPE_locale);
         return codeset;
     }
 
@@ -6782,6 +6786,8 @@ S_override_codeset_if_utf8_found(pTHX_ const char * codeset,
     restore_toggled_locale_c(LC_TIME, orig_TIME_locale);
 
 #    endif
+
+    restore_toggled_locale_c(LC_CTYPE, orig_CTYPE_locale);
 
     Safefree(scratch_buf);
     scratch_buf = NULL;
