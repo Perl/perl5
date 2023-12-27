@@ -2675,9 +2675,11 @@ S_bool_setlocale_2008_i(pTHX_
 #  define query_nominal_locale_i(i)                                         \
       (__ASSERT_(i != LC_ALL_INDEX_)                                        \
        ((i == LC_NUMERIC_INDEX_) ? PL_numeric_name : querylocale_i(i)))
-#else
+#elif defined(USE_LOCALE)
 #  define query_nominal_locale_i(i)                                         \
       (__ASSERT_(i != LC_ALL_INDEX_) querylocale_i(i))
+#else
+#  define query_nominal_locale_i(i)  "C"
 #endif
 
 #ifdef USE_PL_CURLOCALES
