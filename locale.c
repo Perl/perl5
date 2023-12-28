@@ -5964,7 +5964,6 @@ Perl_langinfo8(const nl_item item, utf8ness_t * utf8ness)
       case ERA_D_FMT:     return "%x";
       case ERA_T_FMT:     return "%X";
       case ERA_D_T_FMT:   return "%c";
-      case ALT_DIGITS:    return "0";
 
 #  endif
 #  ifndef USE_LOCALE_TIME
@@ -6645,6 +6644,11 @@ S_emulate_langinfo(pTHX_ const nl_item item,
             format = "%Ec";
             return_format = TRUE;
             break;
+#  endif
+#  if defined(WIN32) || ! defined(USE_LOCALE_TIME) || ! defined(HAS_STRFTIME)
+
+          case ALT_DIGITS: retval = "0"; break;
+#  else
           case ALT_DIGITS:
             format = "%Ow"; /* Find the alternate digit for 0 */
             break;
