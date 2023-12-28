@@ -230,13 +230,76 @@ section.
 
 Additionally, the following selected changes have been made:
 
-=head3 L<XXX>
+=head3 L<perlguts>
 
 =over 4
 
 =item *
 
-XXX Description of the change here
+Documented new functions supporting the C<PERL_RC_STACK> build option:
+C<rpp_replace_at_norc()>, C<rpp_popfree_1_NN()>, C<rpp_popfree_2_NN()>,
+C<rpp_popfree_to_NN(svp)>, C<rpp_replace_1_1_NN(sv)>,
+C<rpp_replace_2_1_NN(sv)>, C<rpp_replace_at_NN(sp, sv)>,
+C<rpp_replace_at_norc_NN(sp, sv)>
+
+=back
+
+=head3 L<perlhacktips>
+
+=over 4
+
+=item *
+
+Document new functions C<sv_mark_arenas()> and C<sv_sweep_arenas()>
+(which only exist on C<DEBUGGING> builds)
+
+=back
+
+=head3 L<perllol>
+
+=over 4
+
+=item *
+
+Removed indirect object syntax in C<Dumpvalue> example
+
+=back
+
+=head3 L<perlport>
+
+=over 4
+
+=item *
+
+The C<-S> file test has been meaningful on Win32 since 5.37.6
+
+=item *
+
+The C<-l> file test is now meaningful on Win32
+
+=item *
+
+Some strange behaviour with C<.> at the end of names under Windows has been documented
+
+=back
+
+=head3 L<perlref>
+
+=over 4
+
+=item *
+
+Documented ref assignment in list context (as part of the C<refaliasing> feature)
+
+=back
+
+=head3 L<perlvar>
+
+=over 4
+
+=item *
+
+Added documentation for an alternative to C<${^CAPTURE}>
 
 =back
 
