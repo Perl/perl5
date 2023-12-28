@@ -5947,9 +5947,6 @@ Perl_langinfo8(const nl_item item, utf8ness_t * utf8ness)
      * nl_langinfo(), we use strftime() as an alternative, and it is missing
      * functionality to get every single one, so hard-code those */
 
-      case ERA: return "";  /* Unimplemented; for use with strftime() %E
-                               modifier */
-
       /* These formats are defined by C89, so we assume that strftime supports
        * them, and so are returned unconditionally; they may not be what the
        * locale actually says, but should give good enough results for someone
@@ -5973,7 +5970,6 @@ Perl_langinfo8(const nl_item item, utf8ness_t * utf8ness)
 #  ifndef USE_LOCALE_TIME
 
       case T_FMT_AMPM:    return "%r";
-
 #  endif
 #endif
 
@@ -6519,6 +6515,9 @@ S_emulate_langinfo(pTHX_ const nl_item item,
              * available for this locale on this platform, but should be good
              * enough, so that a native speaker would find them understandable.
              * */
+
+            /* Unimplemented by perl; for use with strftime() %E modifier */
+          case ERA: retval = ""; break;
 
 #  if ! defined(USE_LOCALE_TIME) || ! defined(HAS_STRFTIME)
 
