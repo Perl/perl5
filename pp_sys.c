@@ -278,11 +278,11 @@ S_emulate_eaccess(pTHX_ const char* path, Mode_t mode)
 #   define PERL_EFF_ACCESS(p,f) (S_emulate_eaccess(aTHX_ (p), (f)))
 #endif
 
-PP_wrapped(pp_backtick, 1, 0)
+PP(pp_backtick)
 {
-    dSP; dTARGET;
+    dTARGET;
     PerlIO *fp;
-    const char * const tmps = POPpconstx;
+    const char * const tmps = SvPV_nolen(*PL_stack_sp);
     const U8 gimme = GIMME_V;
     const char *mode = "r";
 
@@ -292,6 +292,7 @@ PP_wrapped(pp_backtick, 1, 0)
     else if (PL_op->op_private & OPpOPEN_IN_CRLF)
         mode = "rt";
     fp = PerlProc_popen(tmps, mode);
+    rpp_popfree_1();
     if (fp) {
         const char * const type = Perl_PerlIO_context_layers(aTHX_ NULL);
         if (type && *type)
@@ -310,7 +311,7 @@ PP_wrapped(pp_backtick, 1, 0)
             while (sv_gets(TARG, fp, SvCUR(TARG)) != NULL)
                 NOOP;
             LEAVE_with_name("backtick");
-            XPUSHs(TARG);
+            rpp_push_1(TARG);
             SvTAINTED_on(TARG);
         }
         else {
@@ -320,7 +321,8 @@ PP_wrapped(pp_backtick, 1, 0)
                     SvREFCNT_dec(sv);
                     break;
                 }
-                mXPUSHs(sv);
+                rpp_extend(1);
+                rpp_push_1_norc(sv);
                 if (SvLEN(sv) - SvCUR(sv) > 20) {
                     SvPV_shrink_to_cur(sv);
                 }
@@ -333,10 +335,10 @@ PP_wrapped(pp_backtick, 1, 0)
     else {
         STATUS_NATIVE_CHILD_SET(-1);
         if (gimme == G_SCALAR)
-            RETPUSHUNDEF;
+            rpp_push_1(&PL_sv_undef);
     }
 
-    RETURN;
+    return NORMAL;
 }
 
 
