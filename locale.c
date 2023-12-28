@@ -6595,7 +6595,16 @@ S_emulate_langinfo(pTHX_ const nl_item item,
             format = "%B";
             break;
 #  endif
-#  ifdef HAS_STRFTIME
+#  ifndef HAS_STRFTIME
+
+          /* If no strftime() on this system, no format will be recognized, so
+           * return empty */
+          case D_FMT:  case T_FMT:  case D_T_FMT:
+          case ERA_D_FMT: case ERA_T_FMT: case ERA_D_T_FMT:
+          case T_FMT_AMPM:
+            retval = "";
+            break;
+#  else
           /* These strftime formats are defined by C89, so we assume that
            * strftime supports them, and so are returned unconditionally; they
            * may not be what the locale actually says, but should give good
