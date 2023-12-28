@@ -16,6 +16,11 @@ push @constants, @times;
 
 my %want = (    RADIXCHAR => qr/ ^ \. $ /x,
                 THOUSEP	  => qr/ ^$ /x,
+
+                # Can be empty; otherwise first character must be one of
+                # these.  In the C locale, there is nothing after the first
+                # character.
+                CRNCYSTR  => qr/ ^ [+-.]? $ /x,
            );
 
 # Abbreviated and full are swapped in many locales in early netbsd.  Skip
