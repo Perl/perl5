@@ -5940,24 +5940,6 @@ Perl_langinfo8(const nl_item item, utf8ness_t * utf8ness)
 #  endif
         break;
 
-
-#if ! defined(USE_LOCALE_TIME) || ! defined(HAS_SOME_LANGINFO)
-
-    /* If not using LC_TIME, hard code the rest.  Or, if there is no
-     * nl_langinfo(), we use strftime() as an alternative, and it is missing
-     * functionality to get every single one, so hard-code those */
-
-      /* These formats are defined by C89, so we assume that strftime supports
-       * them, and so are returned unconditionally; they may not be what the
-       * locale actually says, but should give good enough results for someone
-       * using them as formats (as opposed to trying to parse them to figure
-       * out what the locale says). */
-      case D_FMT:         return "%x";
-      case T_FMT:         return "%X";
-      case D_T_FMT:       return "%c";
-
-#endif
-
     } /* End of switch on item */
 
 #ifndef USE_LOCALE
@@ -6614,6 +6596,19 @@ S_emulate_langinfo(pTHX_ const nl_item item,
             break;
 #  endif
 #  ifdef HAS_STRFTIME
+          /* These strftime formats are defined by C89, so we assume that
+           * strftime supports them, and so are returned unconditionally; they
+           * may not be what the locale actually says, but should give good
+           * enough results for someone using them as formats (as opposed to
+           * trying to parse them to figure out what the locale says).  The
+           * other format items are actually tested to verify they work on the
+           * platform */
+          case D_FMT:   retval = "%x"; break;
+          case T_FMT:   retval = "%X"; break;
+          case D_T_FMT: retval = "%c"; break;
+
+          /* This format isn't in C89; test that it actually works on the
+           * platform */
           case T_FMT_AMPM:
             format = "%r";
             return_format = TRUE;
