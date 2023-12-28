@@ -5975,18 +5975,6 @@ Perl_langinfo8(const nl_item item, utf8ness_t * utf8ness)
       case T_FMT_AMPM:    return "%r";
       case AM_STR:        return "AM";
       case PM_STR:        return "PM";
-      case MON_1:         return "January";
-      case MON_2:         return "February";
-      case MON_3:         return "March";
-      case MON_4:         return "April";
-      case MON_5:         return "May";
-      case MON_6:         return "June";
-      case MON_7:         return "July";
-      case MON_8:         return "August";
-      case MON_9:         return "September";
-      case MON_10:        return "October";
-      case MON_11:        return "November";
-      case MON_12:        return "December";
 
 #  endif
 #endif
@@ -6610,7 +6598,21 @@ S_emulate_langinfo(pTHX_ const nl_item item,
             format = "%b";
             break;
 #  endif
-#  ifdef HAS_STRFTIME
+#  if ! defined(USE_LOCALE_TIME) || ! defined(HAS_STRFTIME)
+
+          case MON_1:  retval = "January";  break;
+          case MON_2:  retval = "February"; break;
+          case MON_3:  retval = "March";    break;
+          case MON_4:  retval = "April";    break;
+          case MON_5:  retval = "May";      break;
+          case MON_6:  retval = "June";     break;
+          case MON_7:  retval = "July";     break;
+          case MON_8:  retval = "August";   break;
+          case MON_9:  retval = "September";break;
+          case MON_10: retval = "October";  break;
+          case MON_11: retval = "November"; break;
+          case MON_12: retval = "December"; break;
+#  else
           case MON_12: mon++;
           case MON_11: mon++;
           case MON_10: mon++;
@@ -6625,6 +6627,8 @@ S_emulate_langinfo(pTHX_ const nl_item item,
           case MON_1:
             format = "%B";
             break;
+#  endif
+#  ifdef HAS_STRFTIME
           case T_FMT_AMPM:
             format = "%r";
             return_format = TRUE;
