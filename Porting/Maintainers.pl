@@ -761,9 +761,6 @@ our %Modules = (
     'Math::BigInt' => {
         'DISTRIBUTION' => 'PJACKLAM/Math-BigInt-2.003001.tar.gz',
         'SYNCINFO'     => 'book on Tue Dec 26 22:44:58 2023',
-        'SYNCINFO'     => 'jkeenan on Mon Dec 11 21:10:38 2023',
-        'SYNCINFO'     => 'jkeenan on Fri Nov 24 20:23:52 2023',
-        'SYNCINFO'     => 'jkeenan on Tue Nov 14 17:22:07 2023',
         'FILES'        => q[cpan/Math-BigInt],
         'EXCLUDED'     => [
             qr{^xt/},
@@ -1110,7 +1107,6 @@ our %Modules = (
     'Test::Simple' => {
         'DISTRIBUTION' => 'EXODIST/Test-Simple-1.302198.tar.gz',
         'SYNCINFO'     => 'jkeenan on Fri Dec  1 07:01:54 2023',
-        'SYNCINFO'     => 'jkeenan on Wed Nov 29 11:41:51 2023',
         'FILES'        => q[cpan/Test-Simple],
         'EXCLUDED'     => [
             qr{^examples/},
