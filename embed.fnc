@@ -4443,6 +4443,11 @@ S	|const char *|calculate_LC_ALL_string					\
 				|const calc_LC_ALL_format format		\
 				|const calc_LC_ALL_return returning		\
 				|const line_t caller_line
+S	|const char *|external_call_langinfo				\
+				|const nl_item item			\
+				|NULLOK utf8ness_t *utf8ness		\
+				|NN char **retbufp			\
+				|NULLOK Size_t *retbuf_sizep
 RS	|locale_category_index|get_category_index_helper		\
 				|const int category			\
 				|NULLOK bool *success			\

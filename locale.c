@@ -5873,35 +5873,57 @@ it.)
 
 */
 
+/* external_call_langinfo() is an interface to callers from outside this file to
+ * my_langinfo_i(), calculating a necessary value for it.  If those functions
+ * aren't defined, the fallback function is emulate_langinfo(), which doesn't
+ * use that value (as everything in this situation takes place in the "C"
+ * locale), and so we define this macro to transparently hide the absence of
+ * the missing functions */
+#ifndef external_call_langinfo
+#  define external_call_langinfo(item, utf8p, bufp, bufsizep)               \
+                        emulate_langinfo(item, "C", bufp, bufsizep, utf8p)
+#endif
+
 const char *
 Perl_langinfo(const nl_item item)
 {
-    return Perl_langinfo8(item, NULL);
+    dTHX;
+
+    return external_call_langinfo(item,
+                                  NULL,   /* Don't want UTF-8ness */
+                                  &PL_langinfo_buf, &PL_langinfo_bufsize);
 }
 
 const char *
 Perl_langinfo8(const nl_item item, utf8ness_t * utf8ness)
 {
-    dTHX;
-    locale_category_index cat_index = LC_ALL_INDEX_;
-
     PERL_ARGS_ASSERT_PERL_LANGINFO8;
+    dTHX;
 
     if (utf8ness) {     /* Assume for now */
         *utf8ness = UTF8NESS_IMMATERIAL;
     }
 
-    /* Find the locale category that controls the input 'item'.  If we are not
-     * paying attention to that category, instead return a default value.  Also
-     * return the default value if there is no way for us to figure out the
-     * correct value.  If we have some form of nl_langinfo(), we can always
-     * figure it out, but lacking that, there may be alternative methods that
-     * can be used to recover most of the possible items.  Some of those
-     * methods need libc functions, which may or may not be available.  If
-     * unavailable, we can't compute the correct value, so must here return the
-     * default. */
-    switch (item) {
+    return external_call_langinfo(item, utf8ness,
+                                  &PL_langinfo_buf, &PL_langinfo_bufsize);
+}
 
+#ifdef USE_LOCALE
+
+const char *
+S_external_call_langinfo(pTHX_ const nl_item item, utf8ness_t * utf8ness,
+                               char ** retbufp, Size_t * retbuf_sizep)
+{
+    PERL_ARGS_ASSERT_EXTERNAL_CALL_LANGINFO;
+
+    /* Find the locale category that controls the input 'item', and call
+     * my_langinfo_i() including that value.
+     *
+     * If we are not paying attention to that category, instead call
+     * emulate_langinfo(), which knows how to handle this situation. */
+    locale_category_index  cat_index = LC_ALL_INDEX_;  /* Out-of-bounds */
+
+    switch (item) {
       case CODESET:
 
 #  ifdef USE_LOCALE_CTYPE
@@ -5942,13 +5964,6 @@ Perl_langinfo8(const nl_item item, utf8ness_t * utf8ness)
 
     } /* End of switch on item */
 
-#ifndef USE_LOCALE
-
-    return emulate_langinfo(item, "C",
-                            &PL_langinfo_buf, &PL_langinfo_bufsize,
-                            utf8ness);
-
-#else
 #  if defined(HAS_IGNORED_LOCALE_CATEGORIES_) || ! defined(LC_MESSAGES)
 
     /* If the above didn't find the category's index, it has to be because the
@@ -5959,21 +5974,23 @@ Perl_langinfo8(const nl_item item, utf8ness_t * utf8ness)
      * Windows).) */
     if (cat_index == LC_ALL_INDEX_) {
         return emulate_langinfo(item, "C",
-                                &PL_langinfo_buf, &PL_langinfo_bufsize,
+                                retbufp, retbuf_sizep,
                                 utf8ness);
     }
 
 #  endif
 
+    /* And get the value for this 'item', whose category has now been
+     * calculated.  We need to find the current corresponding locale, and pass
+     * that as well. */
     return my_langinfo_i(item,
                          cat_index,
                          query_nominal_locale_i(cat_index),
-                         &PL_langinfo_buf, &PL_langinfo_bufsize,
+                         retbufp, retbuf_sizep,
                          utf8ness);
-#endif
-
 }
 
+#endif
 #if defined(USE_LOCALE) && defined(HAS_NL_LANGINFO)
 
 STATIC const char *
