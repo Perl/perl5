@@ -7031,6 +7031,11 @@ STATIC const char *
 S_calculate_LC_ALL_string(pTHX_ const char **category_locales_list, const calc_LC_ALL_format format, const calc_LC_ALL_return returning, const line_t caller_line);
 #   define PERL_ARGS_ASSERT_CALCULATE_LC_ALL_STRING
 
+STATIC const char *
+S_external_call_langinfo(pTHX_ const nl_item item, utf8ness_t *utf8ness, char **retbufp, Size_t *retbuf_sizep);
+#   define PERL_ARGS_ASSERT_EXTERNAL_CALL_LANGINFO \
+        assert(retbufp)
+
 STATIC locale_category_index
 S_get_category_index_helper(pTHX_ const int category, bool *success, const line_t caller_line)
         __attribute__warn_unused_result__;
