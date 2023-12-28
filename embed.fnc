@@ -2129,6 +2129,7 @@ ARdm	|AV *	|newAV_alloc_x	|SSize_t size
 ARdm	|AV *	|newAV_alloc_xz |SSize_t size
 ARdp	|AV *	|newAVav	|NULLOK AV *oav
 ARdp	|AV *	|newAVhv	|NULLOK HV *ohv
+ARdm	|AV *	|newAV_mortal
 ARdp	|OP *	|newAVREF	|NN OP *o
 ARdp	|OP *	|newBINOP	|I32 type				\
 				|I32 flags				\

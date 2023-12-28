@@ -2743,6 +2743,10 @@ newAV_alloc_x(pTHX_ SSize_t size)
 newAV_alloc_xz(pTHX_ SSize_t size)
         __attribute__warn_unused_result__; */
 
+/* PERL_CALLCONV AV *
+newAV_mortal(pTHX)
+        __attribute__warn_unused_result__; */
+
 PERL_CALLCONV AV *
 Perl_newAVav(pTHX_ AV *oav)
         __attribute__warn_unused_result__;
