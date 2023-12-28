@@ -6452,17 +6452,17 @@ Perl_sv_kill_backrefs(pTHX_ SV *const sv, AV *const av)
 }
 
 /*
-=for apidoc sv_insert
+=for apidoc      sv_insert
+=for apidoc_item sv_insert_flags
 
-Inserts and/or replaces a string at the specified offset/length within the SV.
-Similar to the Perl C<substr()> function, with C<littlelen> bytes starting at
-C<little> replacing C<len> bytes of the string in C<bigstr> starting at
-C<offset>.  Handles get magic.
+These insert and/or replace a string at the specified offset/length within the
+SV.  Similar to the Perl C<substr()> function, with C<littlelen> bytes starting
+at C<little> replacing C<len> bytes of the string in C<bigstr> starting at
+C<offset>.  They handle get magic.
 
-=for apidoc sv_insert_flags
-
-Same as C<sv_insert>, but the extra C<flags> are passed to the
-C<SvPV_force_flags> that applies to C<bigstr>.
+C<sv_insert_flags> is identical to plain C<sv_insert>, but the extra C<flags>
+are passed to the C<SvPV_force_flags> operation that is internally applied to
+C<bigstr>.
 
 =cut
 */
