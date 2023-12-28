@@ -5973,8 +5973,6 @@ Perl_langinfo8(const nl_item item, utf8ness_t * utf8ness)
 #  ifndef USE_LOCALE_TIME
 
       case T_FMT_AMPM:    return "%r";
-      case AM_STR:        return "AM";
-      case PM_STR:        return "PM";
 
 #  endif
 #endif
@@ -6522,8 +6520,11 @@ S_emulate_langinfo(pTHX_ const nl_item item,
              * enough, so that a native speaker would find them understandable.
              * */
 
-#  ifdef HAS_STRFTIME
+#  if ! defined(USE_LOCALE_TIME) || ! defined(HAS_STRFTIME)
 
+          case AM_STR: retval = "AM"; break;
+          case PM_STR: retval = "PM"; break;
+#  else
           case PM_STR: hour = 18;
           case AM_STR:
             format = "%p";
