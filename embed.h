@@ -1329,8 +1329,8 @@
 #       if defined(DEBUGGING)
 #         define my_setlocale_debug_string_i(a,b,c,d) S_my_setlocale_debug_string_i(aTHX_ a,b,c,d)
 #       endif
-#       if  defined(HAS_IGNORED_LOCALE_CATEGORIES_) || \
-           !defined(HAS_NL_LANGINFO)
+#       if defined(HAS_IGNORED_LOCALE_CATEGORIES_) || \
+           !defined(HAS_NL_LANGINFO) || !defined(LC_MESSAGES)
 #         define emulate_langinfo(a,b,c,d,e)    S_emulate_langinfo(aTHX_ a,b,c,d,e)
 #       endif
 #       if defined(HAS_NL_LANGINFO)
