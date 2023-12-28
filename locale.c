@@ -5951,21 +5951,12 @@ Perl_langinfo8(const nl_item item, utf8ness_t * utf8ness)
        * them, and so are returned unconditionally; they may not be what the
        * locale actually says, but should give good enough results for someone
        * using them as formats (as opposed to trying to parse them to figure
-       * out what the locale says).  The other format items are actually tested
-       * to verify they work on the platform */
+       * out what the locale says).  The other format is actually tested
+       * to verify it works on the platform */
       case D_FMT:         return "%x";
       case T_FMT:         return "%X";
       case D_T_FMT:       return "%c";
 
-#  if defined(WIN32) || ! defined(USE_LOCALE_TIME)
-
-      /* strftime() on Windows doesn't have the POSIX (beyond C89) extensions
-       * that would allow it to recover these */
-      case ERA_D_FMT:     return "%x";
-      case ERA_T_FMT:     return "%X";
-      case ERA_D_T_FMT:   return "%c";
-
-#  endif
 #  ifndef USE_LOCALE_TIME
 
       case T_FMT_AMPM:    return "%r";
@@ -6632,18 +6623,32 @@ S_emulate_langinfo(pTHX_ const nl_item item,
             format = "%r";
             return_format = TRUE;
             break;
+
+#    if defined(WIN32) || ! defined(USE_LOCALE_TIME)
+
+          /* strftime() on Windows doesn't have the POSIX (beyond C89)
+           * extensions that would allow it to recover these, so use the plain
+           * non-ERA formats.  Also, when LC_TIME is constrained to the C
+           * locale, the %E modifier is useless, so don't return it. */
+          case ERA_D_FMT:   retval = "%x"; break;
+          case ERA_T_FMT:   retval = "%X"; break;
+          case ERA_D_T_FMT: retval = "%c"; break;
+#    else
           case ERA_D_FMT:
             format = "%Ex";
-            return_format = TRUE;
+            return_format = TRUE;   /* Test that this works on the platform */
             break;
+
           case ERA_T_FMT:
             format = "%EX";
             return_format = TRUE;
             break;
+
           case ERA_D_T_FMT:
             format = "%Ec";
             return_format = TRUE;
             break;
+#    endif
 #  endif
 #  if defined(WIN32) || ! defined(USE_LOCALE_TIME) || ! defined(HAS_STRFTIME)
 
