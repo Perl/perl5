@@ -6149,6 +6149,21 @@ S_emulate_langinfo(pTHX_ const nl_item item,
 #  else
 
       case CRNCYSTR:
+
+        /* The locale's currency symbol may be empty.  But if not, the return
+         * from nl_langinfo() prefixes it with a character that indicates where
+         * in the monetary value the symbol is to be placed
+         *  a) before, like $9.99);
+         *  b) middle, rare, but would like be 9$99; or
+         *  c) after,  like 9.99USD
+         *
+         * The POSIX Standard permits an implementation to choose whether or
+         * not to omit the prefix character if the symbol is empty (the
+         * placement position is meaningless if there is nothing to place).
+         * glibc has chosen to always prefix an empty symbol by a minus (which
+         * is the prefix for 'before' positioning).  FreeBSD has chosen to
+         * return an empty string for an empty symbol.  Perl has always
+         * emulated the glibc way (probably with little thought). */
         retval = "-";
         break;
 
