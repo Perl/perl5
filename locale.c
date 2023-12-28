@@ -5910,17 +5910,13 @@ Perl_langinfo8(const nl_item item, utf8ness_t * utf8ness)
         break;
 
 
-#if defined(USE_LOCALE_MESSAGES) && defined(HAS_SOME_LANGINFO)
-
       case YESEXPR: case YESSTR: case NOEXPR: case NOSTR:
+
+#  ifdef USE_LOCALE_MESSAGES
         cat_index = LC_MESSAGES_INDEX_;
+#  endif
         break;
-#else
-      case YESEXPR:   return "^[+1yY]";
-      case YESSTR:    return "yes";
-      case NOEXPR:    return "^[-0nN]";
-      case NOSTR:     return "no";
-#endif
+
 
       case CRNCYSTR:
 
@@ -6031,12 +6027,14 @@ Perl_langinfo8(const nl_item item, utf8ness_t * utf8ness)
                             utf8ness);
 
 #else
-#  ifdef HAS_IGNORED_LOCALE_CATEGORIES_
+#  if defined(HAS_IGNORED_LOCALE_CATEGORIES_) || ! defined(LC_MESSAGES)
 
     /* If the above didn't find the category's index, it has to be because the
      * item is unknown to us (and the callee will handle that), or the category
      * is confined to the "C" locale on this platform, which the callee also
-     * handles. */
+     * handles.  (LC_MESSAGES is not required by the C Standard (the others
+     * above are), so we have to emulate it on platforms lacking it (such as
+     * Windows).) */
     if (cat_index == LC_ALL_INDEX_) {
         return emulate_langinfo(item, "C",
                                 &PL_langinfo_buf, &PL_langinfo_bufsize,
@@ -6133,7 +6131,9 @@ STATIC const char * S_override_codeset_if_utf8_found(pTHX_
                                                      const char *codeset,
                                                      const char *locale);
 #endif
-#if ! defined(HAS_NL_LANGINFO) || defined(HAS_IGNORED_LOCALE_CATEGORIES_)
+#if ! defined(HAS_NL_LANGINFO)                      \
+ ||   defined(HAS_IGNORED_LOCALE_CATEGORIES_)       \
+ || ! defined(LC_MESSAGES)
 
 STATIC const char *
 S_emulate_langinfo(pTHX_ const nl_item item,
@@ -6183,6 +6183,13 @@ S_emulate_langinfo(pTHX_ const nl_item item,
     GCC_DIAG_IGNORE_STMT(-Wimplicit-fallthrough);
 
     switch (item) {
+
+      /* The following items have no way khw could figure out how to get except
+       * via nl_langinfo() */
+      case YESEXPR:   retval = "^[+1yY]"; break;
+      case YESSTR:    retval = "yes";     break;
+      case NOEXPR:    retval = "^[-0nN]"; break;
+      case NOSTR:     retval = "no";      break;
 
 #  if defined(USE_LOCALE_MONETARY) && defined(HAS_LOCALECONV)
 
