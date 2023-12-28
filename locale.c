@@ -6235,15 +6235,13 @@ S_my_langinfo_i(pTHX_
 
             /* The modification is to prefix the localeconv() return with a
              * single byte, calculated as follows: */
-            char prefix = (LIKELY(SvIV(precedes) != -1))
-                          ? ((precedes != 0) ?  '-' : '+')
-
-                            /* khw couldn't find any documentation that
-                             * CHAR_MAX (which we modify to -1) is the signal,
-                             * but cygwin uses it thusly, and it makes sense
-                             * given that CHAR_MAX indicates the value isn't
-                             * used, so it neither precedes nor succeeds */
-                          : '.';
+            const char * prefix = (LIKELY(SvIV(precedes) != -1))
+                                   ? ((precedes != 0) ?  "-" : "+")
+                                   : ".";
+            /* (khw couldn't find any documentation that the dot is signalled
+             * by CHAR_MAX (which we modify to -1), but cygwin uses it thusly,
+             * and it makes sense given that CHAR_MAX indicates the value isn't
+             * used, so it neither precedes nor succeeds) */
 
             /* Now get CRNCYSTR */
             (void) hv_iterinit(result_hv);
@@ -6251,7 +6249,7 @@ S_my_langinfo_i(pTHX_
             string = hv_iterval(result_hv, entry);
 
             /* And perform the modification */
-            Perl_sv_setpvf(aTHX_ string, "%c%s", prefix, SvPV_nolen(string));
+            sv_insert(string, 0, 0, prefix, 1);
         }
 
         /* Here, 'string' contains the value we want to return */
