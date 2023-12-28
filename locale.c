@@ -7095,7 +7095,7 @@ S_emulate_langinfo(pTHX_ const int item,
 #    endif
 #    if defined(WIN32) || ! defined(USE_LOCALE_TIME) || ! defined(HAS_STRFTIME)
 
-          case ALT_DIGITS: retval = "0"; break;
+          case ALT_DIGITS: retval = ""; break;
 #    else
           case ALT_DIGITS:
             format = "%Ow"; /* Find the alternate digit for 0 */
