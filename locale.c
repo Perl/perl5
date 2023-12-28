@@ -5951,16 +5951,11 @@ Perl_langinfo8(const nl_item item, utf8ness_t * utf8ness)
        * them, and so are returned unconditionally; they may not be what the
        * locale actually says, but should give good enough results for someone
        * using them as formats (as opposed to trying to parse them to figure
-       * out what the locale says).  The other format is actually tested
-       * to verify it works on the platform */
+       * out what the locale says). */
       case D_FMT:         return "%x";
       case T_FMT:         return "%X";
       case D_T_FMT:       return "%c";
 
-#  ifndef USE_LOCALE_TIME
-
-      case T_FMT_AMPM:    return "%r";
-#  endif
 #endif
 
     } /* End of switch on item */
