@@ -6021,6 +6021,16 @@ S_my_langinfo_i(pTHX_
                            "Entering my_langinfo item=%ld, using locale %s\n",
                            (long) item, locale));
 
+#    ifdef HAS_IGNORED_LOCALE_CATEGORIES
+
+    if (! category_available[cat_index]) {
+        return emulate_langinfo(item, locale,
+                                retbufp, retbuf_sizep,
+                                utf8ness);
+    }
+
+#    endif
+
     /* One might be tempted to avoid any toggling by instead using
      * nl_langinfo_l() on platforms that have it.  This would entail creating a
      * locale object with newlocale() and freeing it afterwards.  But doing so
