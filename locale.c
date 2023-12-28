@@ -5987,13 +5987,6 @@ Perl_langinfo8(const nl_item item, utf8ness_t * utf8ness)
       case ABMON_10:      return "Oct";
       case ABMON_11:      return "Nov";
       case ABMON_12:      return "Dec";
-      case DAY_1:         return "Sunday";
-      case DAY_2:         return "Monday";
-      case DAY_3:         return "Tuesday";
-      case DAY_4:         return "Wednesday";
-      case DAY_5:         return "Thursday";
-      case DAY_6:         return "Friday";
-      case DAY_7:         return "Saturday";
       case MON_1:         return "January";
       case MON_2:         return "February";
       case MON_3:         return "March";
@@ -6580,7 +6573,16 @@ S_emulate_langinfo(pTHX_ const nl_item item,
             format = "%a";
             break;
 #  endif
-#  ifdef HAS_STRFTIME
+#  if ! defined(USE_LOCALE_TIME) || ! defined(HAS_STRFTIME)
+
+          case DAY_1: retval = "Sunday";    break;
+          case DAY_2: retval = "Monday";    break;
+          case DAY_3: retval = "Tuesday";   break;
+          case DAY_4: retval = "Wednesday"; break;
+          case DAY_5: retval = "Thursday";  break;
+          case DAY_6: retval = "Friday";    break;
+          case DAY_7: retval = "Saturday";  break;
+#  else
           case DAY_7: mday++;
           case DAY_6: mday++;
           case DAY_5: mday++;
@@ -6590,6 +6592,8 @@ S_emulate_langinfo(pTHX_ const nl_item item,
           case DAY_1:
             format = "%A";
             break;
+#  endif
+#  ifdef HAS_STRFTIME
           case ABMON_12: mon++;
           case ABMON_11: mon++;
           case ABMON_10: mon++;
