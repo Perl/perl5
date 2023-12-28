@@ -6923,7 +6923,7 @@ S_strftime_tm(pTHX_ const char *fmt, const struct tm *mytm)
 #else
 #  if defined(WE_MUST_DEAL_WITH_MISMATCHED_CTYPE) && defined(USE_LOCALE_TIME)
 
-    const char * orig_CTYPE_LOCALE = toggle_locale_c(LC_CTYPE,
+    const char * orig_CTYPE_locale = toggle_locale_c(LC_CTYPE,
                                                      querylocale_c(LC_TIME));
 #  endif
 
@@ -7031,7 +7031,7 @@ S_strftime_tm(pTHX_ const char *fmt, const struct tm *mytm)
 
 #  if defined(WE_MUST_DEAL_WITH_MISMATCHED_CTYPE) && defined(USE_LOCALE_TIME)
 
-    restore_toggled_locale_c(LC_CTYPE, orig_CTYPE_LOCALE);
+    restore_toggled_locale_c(LC_CTYPE, orig_CTYPE_locale);
 
 #  endif
 
