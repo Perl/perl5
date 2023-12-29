@@ -14,8 +14,8 @@ my @constants = qw(ABDAY_1 DAY_1 ABMON_1 RADIXCHAR AM_STR THOUSEP D_T_FMT
                    D_FMT T_FMT);
 push @constants, @times;
 
-my %want = (    RADIXCHAR => ".",
-                THOUSEP	  => "",
+my %want = (    RADIXCHAR => qr/ ^ \. $ /x,
+                THOUSEP	  => qr/ ^$ /x,
            );
 
 # Abbreviated and full are swapped in many locales in early netbsd.  Skip
@@ -23,10 +23,10 @@ my %want = (    RADIXCHAR => ".",
 if (   $Config{osname} !~ / netbsd /ix
     || $Config{osvers} !~ / ^ [1-6] \. /x)
 {
-    $want{ABDAY_1} = "Sun";
-    $want{DAY_1}   = "Sunday";
-    $want{ABMON_1} = "Jan";
-    $want{MON_1}   = "January";
+    $want{ABDAY_1} = qr/ ^ Sun $ /x;
+    $want{DAY_1}   = qr/ ^ Sunday $ /x;
+    $want{ABMON_1} = qr/ ^ Jan $ /x;
+    $want{MON_1}   = qr/ ^ January $ /x;
 }
 
 sub disp_str ($) {
@@ -169,7 +169,7 @@ for my $i (1..@want) {
     SKIP: {
         skip "$try not defined", 1, if $@;
         no strict 'refs';
-        is (langinfo(&$try), $want{$try}, "$try => '$want{$try}'");
+        like (langinfo(&$try), $want{$try}, "$try => '$want{$try}'");
     }
 }
 
