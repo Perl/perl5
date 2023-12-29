@@ -1308,7 +1308,7 @@ C<@captured> array.
 Be aware that when interpolating a subscript of the C<@{^CAPTURE}>
 array you must use demarcated curly brace notation:
 
-    print "@{^CAPTURE[0]}";
+    print "${^CAPTURE[0]}";
 
 See L<perldata/"Demarcated variable names using braces"> for more on
 this notation.
