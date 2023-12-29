@@ -6229,6 +6229,116 @@ S_my_langinfo_i(pTHX_
        }
 
 #    endif  /* Some form of localeconv */
+#    ifdef USE_LOCALE_CTYPE
+
+      case CODESET:
+
+        /* The trivial case */
+        if (isNAME_C_OR_POSIX(locale)) {
+            retval = C_codeset;
+            break;
+        }
+
+        /* If this happens to match our cached value */
+        if (PL_in_utf8_CTYPE_locale && strEQ(locale, PL_ctype_name)) {
+            retval = "UTF-8";
+            break;
+        }
+
+#      ifdef WIN32
+#        ifdef WIN32_USE_FAKE_OLD_MINGW_LOCALES
+#          define GET_CODE_PAGE_AS_STRING  nl_langinfo(CODESET)
+#        else
+            /* The Windows function retrieves the code page.  It is subject to
+             * change, but is documented and has been stable for many releases
+             * */
+#          define GET_CODE_PAGE_AS_STRING                                   \
+                                Perl_form(aTHX_ "%d", ___lc_codepage_func())
+#        endif
+
+        const char * orig_CTYPE_locale;
+        orig_CTYPE_locale = toggle_locale_c(LC_CTYPE, locale);
+        retval = save_to_buffer(GET_CODE_PAGE_AS_STRING, retbufp, retbuf_sizep);
+        restore_toggled_locale_c(LC_CTYPE, orig_CTYPE_locale);
+
+        DEBUG_Lv(PerlIO_printf(Perl_debug_log, "locale='%s' cp=%s\n",
+                                               locale, retval));
+        break;
+
+#      else
+
+        /* The codeset is important, but khw did not figure out a way for it to
+         * be retrieved on non-Windows boxes without nl_langinfo().  But even
+         * if we can't get it directly, we can usually determine if it is a
+         * UTF-8 locale or not.  If it is UTF-8, we (correctly) use that for
+         * the code set. */
+
+#        ifdef HAS_DEFINITIVE_UTF8NESS_DETERMINATION
+
+        if (is_locale_utf8(locale)) {
+            retval = "UTF-8";
+            break;
+        }
+
+#        endif
+
+        /* Here, the code set has not been found.  The only other option khw
+         * could think of is to see if the codeset is part of the locale name.
+         * This is very less than ideal; often there is no code set in the
+         * name; and at other times they even lie.
+         *
+         * But there is an XPG standard syntax, which many locales follow:
+         *
+         *    language[_territory[.codeset]][@modifier]
+         *
+         * So we take the part between the dot and any '@' */
+        retval = strchr(locale, '.');
+        if (! retval) {
+            retval = "";  /* Alas, no dot */
+        }
+        else {
+
+            /* Don't include the dot */
+            retval++;
+
+            /* And stop before any '@' */
+            const char * modifier = strchr(retval, '@');
+            if (modifier) {
+                char * code_set_name;
+                const Size_t name_len = modifier - retval;
+                Newx(code_set_name, name_len + 1, char);    /* +1 for NUL */
+                my_strlcpy(code_set_name, retval, name_len + 1);
+                SAVEFREEPV(code_set_name);
+                retval = code_set_name;
+            }
+
+            /* The code set name is considered to be everything between the dot
+             * and the '@' */
+            retval = save_to_buffer(retval, retbufp, retbuf_sizep);
+        }
+
+#        ifndef HAS_DEFINITIVE_UTF8NESS_DETERMINATION
+
+        /* Here, 'retval' contains any codeset name derived from the locale
+         * name.  That derived name may be empty or not necessarily indicative
+         * of the real codeset.  But we can often determine if it should be
+         * UTF-8, regardless of what the name is.  On most platforms, that
+         * determination is definitive, and was already done.  But for this
+         * code to be compiled, this platform is not one of them.  However,
+         * there are typically tools available to make a very good guess, and
+         * knowing the derived codeset name improves the quality of that guess.
+         * The following function overrides the derived codeset name when it
+         * guesses that it actually should be UTF-8.  It could be inlined here,
+         * but was moved out of this switch() so as to make the switch()
+         * control flow easier to follow */
+        retval = S_override_codeset_if_utf8_found(aTHX_ retval, locale);
+
+#        endif
+
+        break;
+
+#      endif    /* ! WIN32 */
+#    endif      /* USE_LOCALE_CTYPE */
 #    ifdef HAS_STRFTIME
 
       /* These formats are only available in later strftime's */
@@ -6410,116 +6520,6 @@ S_my_langinfo_i(pTHX_
         }
 
 #    endif
-#    ifdef USE_LOCALE_CTYPE
-
-      case CODESET:
-
-        /* The trivial case */
-        if (isNAME_C_OR_POSIX(locale)) {
-            retval = C_codeset;
-            break;
-        }
-
-        /* If this happens to match our cached value */
-        if (PL_in_utf8_CTYPE_locale && strEQ(locale, PL_ctype_name)) {
-            retval = "UTF-8";
-            break;
-        }
-
-#      ifdef WIN32
-#        ifdef WIN32_USE_FAKE_OLD_MINGW_LOCALES
-#          define GET_CODE_PAGE_AS_STRING  nl_langinfo(CODESET)
-#        else
-            /* The Windows function retrieves the code page.  It is subject to
-             * change, but is documented and has been stable for many releases
-             * */
-#          define GET_CODE_PAGE_AS_STRING                                   \
-                                Perl_form(aTHX_ "%d", ___lc_codepage_func())
-#        endif
-
-        const char * orig_CTYPE_locale;
-        orig_CTYPE_locale = toggle_locale_c(LC_CTYPE, locale);
-        retval = save_to_buffer(GET_CODE_PAGE_AS_STRING, retbufp, retbuf_sizep);
-        restore_toggled_locale_c(LC_CTYPE, orig_CTYPE_locale);
-
-        DEBUG_Lv(PerlIO_printf(Perl_debug_log, "locale='%s' cp=%s\n",
-                                               locale, retval));
-        break;
-
-#      else
-
-        /* The codeset is important, but khw did not figure out a way for it to
-         * be retrieved on non-Windows boxes without nl_langinfo().  But even
-         * if we can't get it directly, we can usually determine if it is a
-         * UTF-8 locale or not.  If it is UTF-8, we (correctly) use that for
-         * the code set. */
-
-#        ifdef HAS_DEFINITIVE_UTF8NESS_DETERMINATION
-
-        if (is_locale_utf8(locale)) {
-            retval = "UTF-8";
-            break;
-        }
-
-#        endif
-
-        /* Here, the code set has not been found.  The only other option khw
-         * could think of is to see if the codeset is part of the locale name.
-         * This is very less than ideal; often there is no code set in the
-         * name; and at other times they even lie.
-         *
-         * But there is an XPG standard syntax, which many locales follow:
-         *
-         *    language[_territory[.codeset]][@modifier]
-         *
-         * So we take the part between the dot and any '@' */
-        retval = strchr(locale, '.');
-        if (! retval) {
-            retval = "";  /* Alas, no dot */
-        }
-        else {
-
-            /* Don't include the dot */
-            retval++;
-
-            /* And stop before any '@' */
-            const char * modifier = strchr(retval, '@');
-            if (modifier) {
-                char * code_set_name;
-                const Size_t name_len = modifier - retval;
-                Newx(code_set_name, name_len + 1, char);    /* +1 for NUL */
-                my_strlcpy(code_set_name, retval, name_len + 1);
-                SAVEFREEPV(code_set_name);
-                retval = code_set_name;
-            }
-
-            /* The code set name is considered to be everything between the dot
-             * and the '@' */
-            retval = save_to_buffer(retval, retbufp, retbuf_sizep);
-        }
-
-#        ifndef HAS_DEFINITIVE_UTF8NESS_DETERMINATION
-
-        /* Here, 'retval' contains any codeset name derived from the locale
-         * name.  That derived name may be empty or not necessarily indicative
-         * of the real codeset.  But we can often determine if it should be
-         * UTF-8, regardless of what the name is.  On most platforms, that
-         * determination is definitive, and was already done.  But for this
-         * code to be compiled, this platform is not one of them.  However,
-         * there are typically tools available to make a very good guess, and
-         * knowing the derived codeset name improves the quality of that guess.
-         * The following function overrides the derived codeset name when it
-         * guesses that it actually should be UTF-8.  It could be inlined here,
-         * but was moved out of this switch() so as to make the switch()
-         * control flow easier to follow */
-        retval = S_override_codeset_if_utf8_found(aTHX_ retval, locale);
-
-#        endif
-
-        break;  /* All done */
-
-#      endif    /* ! WIN32 */
-#    endif      /* USE_LOCALE_CTYPE */
 
     } /* Giant switch() of nl_langinfo() items */
 
