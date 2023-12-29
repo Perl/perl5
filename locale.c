@@ -6027,8 +6027,6 @@ S_my_langinfo_i(pTHX_
                  * value, as documented */
                 utf8ness_t * utf8ness)
 {
-    const char * retval = NULL;
-
     PERL_ARGS_ASSERT_MY_LANGINFO_I;
     assert(cat_index < LC_ALL_INDEX_);
 
@@ -6059,7 +6057,7 @@ S_my_langinfo_i(pTHX_
     const char * orig_switched_locale = toggle_locale_i(cat_index, locale);
 
     gwLOCALE_LOCK;
-    retval = save_to_buffer(nl_langinfo(item), retbufp, retbuf_sizep);
+    const char * retval = save_to_buffer(nl_langinfo(item), retbufp, retbuf_sizep);
     gwLOCALE_UNLOCK;
 
     if (utf8ness) {
@@ -6094,6 +6092,7 @@ S_my_langinfo_i(pTHX_
     /* Almost all the items will have ASCII return values.  Set that here, and
      * override if necessary */
     utf8ness_t is_utf8 = UTF8NESS_IMMATERIAL;
+    const char * retval = NULL;
 
     switch (item) {
       default:
