@@ -5208,7 +5208,10 @@ C<ptr> should point to memory that was allocated
 by L</C<Newx>>.  It must be
 the start of a C<Newx>-ed block of memory, and not a pointer to the
 middle of it (beware of L<C<OOK>|perlguts/Offsets> and copy-on-write),
-and not be from a non-C<Newx> memory allocator like C<malloc>.  The
+and not be from a non-C<Newx> memory allocator like C<malloc>.
+It should not be contained by C<sv>.
+
+The
 string length, C<len>, must be supplied.  By default this function
 will L</C<Renew>> (i.e. realloc, move) the memory pointed to by C<ptr>,
 so that the pointer should not be freed or used by the programmer after giving
@@ -11093,6 +11096,8 @@ These work like C<L</sv_catpvf>> but copy the text into the SV instead of
 appending it.
 
 The differences between these are:
+
+XXX pv can't point to sv
 
 C<sv_setpvf_mg> and C<sv_setpvf_mg_nocontext> perform 'set' magic; C<sv_setpvf>
 and C<sv_setpvf_nocontext> skip all magic.
