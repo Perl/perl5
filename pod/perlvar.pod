@@ -1123,15 +1123,15 @@ This variable was added in 5.25.7
 If you need access to this functionality in older Perls you can use this
 function immediately after your regexp.
 
-	sub get_captures {
-		no strict 'refs';
+    sub get_captures {
+        no strict 'refs';
 
-		my $last_idx = scalar(@-) - 1;
-		my @arr      = 1 .. $last_idx;
-		my @ret      = map { $$_; } @arr;
+        my $last_idx = scalar(@-) - 1;
+        my @arr      = 1 .. $last_idx;
+        my @ret      = map { $$_; } @arr;
 
-		return @ret;
-	}
+        return @ret;
+    }
 
 =item $MATCH
 
