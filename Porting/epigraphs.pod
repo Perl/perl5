@@ -17,6 +17,14 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.39.6 - Jasper Fforde
+
+L<Announced on 2023-12-30 by Philippe Bruhat (BooK)|https://www.nntp.perl.org/group/perl.perl5.porters/2023/12/msg267566.html>
+
+"Do I have to talk to insane people?"
+
+"You're a librarian now. I'm afraid it's mandatory."
+
 =head2 v5.39.5 - Epictetus
 
 L<Announced on 2023-11-20 by Karen Etheridge|https://www.nntp.perl.org/group/perl.perl5.porters/2023/11/msg267331.html>
