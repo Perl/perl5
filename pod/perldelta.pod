@@ -285,9 +285,6 @@ blead.  [L<GH #21677|https://github.com/Perl/perl5/issues/21677>]
 
 =head1 Selected Bug Fixes
 
-Include references to GitHub issues and PRs as: [L<GH #12345|https://github.com/Perl/perl5/issues/12345>] and the release
-manager will later use a regex to expand these into links.
-
 =over 4
 
 =item *
