@@ -607,7 +607,7 @@ our %Modules = (
     },
 
     'FindBin' => {
-        'DISTRIBUTION' => 'TODDR/FindBin-1.53.tar.gz',
+        'DISTRIBUTION' => 'TODDR/FindBin-1.54.tar.gz',
         'FILES'        => q[dist/FindBin],
     },
 
