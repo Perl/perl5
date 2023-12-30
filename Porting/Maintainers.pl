@@ -375,7 +375,8 @@ our %Modules = (
     },
 
     'Digest::MD5' => {
-        'DISTRIBUTION' => 'TODDR/Digest-MD5-2.58.tar.gz',
+        'DISTRIBUTION' => 'TODDR/Digest-MD5-2.59.tar.gz',
+        'SYNCINFO'     => 'root on Sat Dec 30 21:42:47 2023',
         'FILES'        => q[cpan/Digest-MD5],
         'EXCLUDED'     => [ 'rfc1321.txt', 'bin/md5sum.pl' ],
         'CUSTOMIZED'   => [
