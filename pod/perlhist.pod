@@ -35,7 +35,7 @@ Little, Dave Rolsky, Max Maischein, Abigail, Jesse Luehrs, Tony Cook,
 Dominic Hargreaves, Aaron Crane, Aristotle Pagaltzis, Matthew Horsfall,
 Peter Martini, Sawyer X, Chad 'Exodist' Granum, Renee Bäcker, Eric Herman,
 John SJ Anderson, Karen Etheridge, Zak B. Elep, Tom Hukins, Richard Leach,
-Neil Bowers, Yves Orton, Paul Evans, and Graham Knop.
+Neil Bowers, Yves Orton, Paul Evans, Graham Knop, and Philippe Bruhat (BooK).
 
 =head2 PUMPKIN?
 
@@ -768,6 +768,7 @@ the strings?).
  Matthew H 5.39.3       2023-Sep-20
  Graham K  5.39.4       2023-Oct-25
  Ether     5.39.5       2023-Nov-20
+ Philippe  5.39.6       2023-Dec-30
 
 =head2 SELECTED RELEASE SIZES
 
