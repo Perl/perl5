@@ -389,6 +389,13 @@ static int debug_initialization = 0;
  * CTYPE even on platforms that apparently handle this. */
 #if defined(USE_LOCALE_CTYPE) && ! defined(LIBC_HANDLES_MISMATCHED_CTYPE)
 #  define WE_MUST_DEAL_WITH_MISMATCHED_CTYPE
+#  define start_DEALING_WITH_MISMATCHED_CTYPE(locale)                          \
+        const char * orig_CTYPE_locale = toggle_locale_c(LC_CTYPE, locale)
+#  define end_DEALING_WITH_MISMATCHED_CTYPE(locale)                            \
+        restore_toggled_locale_c(LC_CTYPE, orig_CTYPE_locale);
+#else
+#  define start_DEALING_WITH_MISMATCHED_CTYPE(locale)
+#  define end_DEALING_WITH_MISMATCHED_CTYPE(locale)
 #endif
 
 #if PERL_VERSION_GT(5,39,9)
@@ -5587,11 +5594,8 @@ S_populate_hash_from_localeconv(pTHX_ HV * hv,
      * global static buffer.  Some locks might be no-ops on this platform, but
      * not others.  We need to lock if any one isn't a no-op. */
 
-#    ifdef WE_MUST_DEAL_WITH_MISMATCHED_CTYPE
+    start_DEALING_WITH_MISMATCHED_CTYPE(locale);
 
-    const char * orig_CTYPE_locale = toggle_locale_c(LC_CTYPE, locale);
-
-#    endif
 #    ifdef USE_LOCALE_NUMERIC
 
     /* We need to toggle to the underlying NUMERIC locale if we are getting
@@ -5763,11 +5767,8 @@ S_populate_hash_from_localeconv(pTHX_ HV * hv,
     }
 
 #    endif
-#    ifdef WE_MUST_DEAL_WITH_MISMATCHED_CTYPE
 
-    restore_toggled_locale_c(LC_CTYPE, orig_CTYPE_locale);
-
-#    endif
+    end_DEALING_WITH_MISMATCHED_CTYPE(locale);
 
 }
 
@@ -6037,13 +6038,7 @@ S_my_langinfo_i(pTHX_
      * runs significantly slower than just doing the toggle ourselves.
      * lib/locale_threads.t was slowed down by 25% on Ubuntu 22.04 */
 
-#  ifdef WE_MUST_DEAL_WITH_MISMATCHED_CTYPE
-
-    /* This function sorts out if things actually have to be switched or not,
-     * for both save and restore. */
-    const char * orig_CTYPE_locale = toggle_locale_c(LC_CTYPE, locale);
-
-#  endif
+    start_DEALING_WITH_MISMATCHED_CTYPE(locale);
 
     const char * orig_switched_locale = toggle_locale_i(cat_index, locale);
 
@@ -6053,12 +6048,7 @@ S_my_langinfo_i(pTHX_
     gwLOCALE_UNLOCK;
 
     restore_toggled_locale_i(cat_index, orig_switched_locale);
-
-#  ifdef WE_MUST_DEAL_WITH_MISMATCHED_CTYPE
-
-    restore_toggled_locale_c(LC_CTYPE, orig_CTYPE_locale);
-
-#  endif
+    end_DEALING_WITH_MISMATCHED_CTYPE(locale)
 
     if (utf8ness) {
         *utf8ness = get_locale_string_utf8ness_i(retval,
@@ -6199,10 +6189,7 @@ S_emulate_langinfo(pTHX_ const nl_item item,
 
             Newx(floatbuf, initial_size, char);
 
-#    if defined(WE_MUST_DEAL_WITH_MISMATCHED_CTYPE)
-            const char * orig_CTYPE_locale = toggle_locale_c(LC_CTYPE, locale);
-#    endif
-
+            start_DEALING_WITH_MISMATCHED_CTYPE(locale);
             const char * orig_NUMERIC_locale = toggle_locale_c(LC_NUMERIC,
                                                                locale);
             /* 1.5 is exactly representable on binary computers */
@@ -6220,10 +6207,7 @@ S_emulate_langinfo(pTHX_ const nl_item item,
             }
 
             restore_toggled_locale_c(LC_NUMERIC, orig_NUMERIC_locale);
-
-#    if defined(WE_MUST_DEAL_WITH_MISMATCHED_CTYPE)
-            restore_toggled_locale_c(LC_CTYPE, orig_CTYPE_locale);
-#    endif
+            end_DEALING_WITH_MISMATCHED_CTYPE(locale);
 
             char * s = floatbuf;
             char * e = floatbuf + needed_size;
