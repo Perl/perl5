@@ -1,0 +1,365 @@
+=encoding utf8
+
+=head1 NAME
+
+perl5396delta - what is new for perl v5.39.6
+
+=head1 DESCRIPTION
+
+This document describes differences between the 5.39.5 release and the 5.39.6
+release.
+
+If you are upgrading from an earlier release such as 5.39.4, first read
+L<perl5395delta>, which describes differences between 5.39.4 and 5.39.5.
+
+=head1 Security
+
+This release fixes the following security issues.
+
+=head2 CVE-2023-47038 - Write past buffer end via illegal user-defined Unicode property
+
+This vulnerability was reported directly to the Perl security team by
+Nathan Mills C<the.true.nathan.mills@gmail.com>.
+
+A crafted regular expression when compiled by perl 5.30.0 through
+5.38.0 can cause a one-byte attacker controlled buffer overflow in a
+heap allocated buffer.
+
+=head2 CVE-2023-47039 - Perl for Windows binary hijacking vulnerability
+
+This vulnerability was reported to the Intel Product Security Incident
+Response Team (PSIRT) by GitHub user ycdxsb
+L<https://github.com/ycdxsb/WindowsPrivilegeEscalation>. PSIRT then
+reported it to the Perl security team.
+
+Perl for Windows relies on the system path environment variable to
+find the shell (C<cmd.exe>). When running an executable which uses
+Windows Perl interpreter, Perl attempts to find and execute C<cmd.exe>
+within the operating system. However, due to path search order issues,
+Perl initially looks for cmd.exe in the current working directory.
+
+An attacker with limited privileges can exploit this behavior by
+placing C<cmd.exe> in locations with weak permissions, such as
+C<C:\ProgramData>. By doing so, when an administrator attempts to use
+this executable from these compromised locations, arbitrary code can
+be executed.
+
+=head1 Incompatible Changes
+
+=head2 C<return> no longer allows an indirect object
+
+The C<return> operator syntax now rejects indirect objects.  In most
+cases this would compile and even run, but wasn't documented and could
+produce confusing results, for example:
+
+  # note that sum hasn't been defined
+  sub sum_positive {
+    return sum grep $_ > 0, @_;
+    # unexpectedly parsed as:
+    #   return *sum, grep $_ > 0, @_;
+    # ... with the bareword acting like an extra (typeglob) argument
+  }
+  say for sum_positive(-1, 2, 3)
+
+produced:
+
+  *main::sum
+  2
+  3
+
+[L<GH #21716|https://github.com/Perl/perl5/issues/21716>]
+
+=head1 Modules and Pragmata
+
+=head2 Updated Modules and Pragmata
+
+=over 4
+
+=item *
+
+L<Archive::Tar> has been upgraded from version 2.40 to 3.02_001.
+
+=item *
+
+L<Fcntl> has been upgraded from version 1.15 to 1.16.
+
+This version adds support for the C<O_TMPFILE> flag on Linux.
+
+=item *
+
+L<feature> has been upgraded from version 1.85 to 1.86.
+
+=item *
+
+L<IO> has been upgraded from version 1.54 to 1.55.
+
+=item *
+
+L<Math::BigInt> has been upgraded from version 2.001000 to 2.003001.
+
+=item *
+
+L<Module::CoreList> has been upgraded from version 5.20231120 to 5.20231230.
+
+=item *
+
+L<re> has been upgraded from version 0.44 to 0.45.
+
+=item *
+
+L<Test::Simple> has been upgraded from version 1.302195 to 1.302198.
+
+=item *
+
+L<threads> has been upgraded from version 2.39 to 2.40.
+
+An internal error has been made slightly more verbose
+(C<Out of memory in perl:threads:ithread_create>).
+
+=back
+
+=head1 Documentation
+
+=head2 Changes to Existing Documentation
+
+We have attempted to update the documentation to reflect the changes
+listed in this document.  If you find any we have missed, open an issue
+at L<https://github.com/Perl/perl5/issues>.
+
+Additionally, the following selected changes have been made:
+
+=head3 L<perlguts>
+
+=over 4
+
+=item *
+
+Documented new functions supporting the C<PERL_RC_STACK> build option:
+C<rpp_replace_at_norc()>, C<rpp_popfree_1_NN()>, C<rpp_popfree_2_NN()>,
+C<rpp_popfree_to_NN(svp)>, C<rpp_replace_1_1_NN(sv)>,
+C<rpp_replace_2_1_NN(sv)>, C<rpp_replace_at_NN(sp, sv)>,
+C<rpp_replace_at_norc_NN(sp, sv)>
+
+=back
+
+=head3 L<perlhacktips>
+
+=over 4
+
+=item *
+
+Document new functions C<sv_mark_arenas()> and C<sv_sweep_arenas()>
+(which only exist on C<DEBUGGING> builds)
+
+=back
+
+=head3 L<perllol>
+
+=over 4
+
+=item *
+
+Removed indirect object syntax in C<Dumpvalue> example
+
+=back
+
+=head3 L<perlport>
+
+=over 4
+
+=item *
+
+The C<-S> file test has been meaningful on Win32 since 5.37.6
+
+=item *
+
+The C<-l> file test is now meaningful on Win32
+
+=item *
+
+Some strange behaviour with C<.> at the end of names under Windows has been documented
+
+=back
+
+=head3 L<perlref>
+
+=over 4
+
+=item *
+
+Documented ref assignment in list context (as part of the C<refaliasing> feature)
+
+=back
+
+=head3 L<perlvar>
+
+=over 4
+
+=item *
+
+Added documentation for an alternative to C<${^CAPTURE}>
+
+=back
+
+=head1 Diagnostics
+
+The following additions or changes have been made to diagnostic output,
+including warnings and fatal error messages.  For the complete list of
+diagnostic messages, see L<perldiag>.
+
+=head3 New Errors
+
+=over 4
+
+=item *
+
+L<Missing comma after first argument to return|perldiag/"Missing comma after first argument to return">
+
+(F) While certain operators allow you to specify a filehandle or an
+"indirect object" before the argument list, C<return> isn't one of
+them.
+
+=item *
+
+L<Out of memory during vec in lvalue context|perldiag/"Out of memory during vec in lvalue context">
+
+(F) An attempt was made to extend a string beyond the largest possible memory
+allocation by assigning to C<vec()> called with a large second argument.
+
+(This case used to throw a generic C<Out of memory!> error.)
+
+=back
+
+=head2 Changes to Existing Diagnostics
+
+=over 4
+
+=item *
+
+L<Name "%s::%s" used only once: possible typo|perldiag/"Name "%s::%s" used only once: possible typo">
+
+This warning now honors being marked as fatal.  [L<GH #13814|https://github.com/Perl/perl5/issues/13814>]
+
+=item *
+
+L<Out of memory in perl:%s|perldiag/"Out of memory in perl:%s">
+
+There used to be several places in the perl core that would print a generic
+C<Out of memory!> message and abort when memory allocation failed, giving no
+indication which program it was that ran out of memory.  These have been
+modified to include the word C<perl> and the general area of the allocation
+failure, e.g. C<Out of memory in perl:util:safesysrealloc>.  [L<GH #21672|https://github.com/Perl/perl5/issues/21672>]
+
+=item *
+
+L<Possible precedence issue with control flow operator (%s)|perldiag/"Possible precedence issue with control flow operator (%s)">
+
+This warning now mentions the name of the control flow operator that triggered
+the diagnostic (e.g. C<return>, C<exit>, C<die>, etc).
+
+It also covers more cases: Previously, the warning was only triggered if a
+low-precedence logical operator (like C<and>, C<or>, C<xor>) was involved.  Now
+it is also shown for misleading code like this:
+
+    exit $x ? 0 : 1;  # actually parses as: exit($x) ? 0 : 1;
+    exit $x == 0;     # actually parses as: exit($x) == 0;
+
+=back
+
+=head1 Testing
+
+Tests were added and changed to reflect the other additions and
+changes in this release.  Furthermore, these significant changes were
+made:
+
+=over 4
+
+=item *
+
+The test F<t/porting/libperl.t> will no longer run in maint releases.
+This test is sensitive to changes in the output of F<nm> on various
+platforms, and tarballs aren't updated as we update this test in
+blead.  [L<GH #21677|https://github.com/Perl/perl5/issues/21677>]
+
+=back
+
+=head1 Selected Bug Fixes
+
+=over 4
+
+=item *
+
+The tmps (mortal) stack now grows exponentially.  Previously it grew
+linearly, so if it was growing incrementally, such as through many
+calls to sv_2mortal(), on a system where realloc() is O(size), the
+performance would be O(n*n).  With exponential grows this changes to
+amortized O(n).  [L<GH #21654|https://github.com/Perl/perl5/issues/21654>]
+
+=back
+
+=head1 Acknowledgements
+
+Perl 5.39.6 represents approximately 6 weeks of development since Perl
+5.39.5 and contains approximately 9,400 lines of changes across 220 files
+from 20 authors.
+
+Excluding auto-generated files, documentation and release tools, there were
+approximately 6,700 lines of changes to 150 .pm, .t, .c and .h files.
+
+Perl continues to flourish into its fourth decade thanks to a vibrant
+community of users and developers. The following people are known to have
+contributed the improvements that became Perl 5.39.6:
+
+Chad Granum, Chris 'BinGOs' Williams, Dagfinn Ilmari Mannsåker, David
+Mitchell, E. Choroba, Elvin Aslanov, iabyn, James E Keenan, Karen Etheridge,
+Karl Williamson, Lukas Mai, Paul Evans, Peter John Acklam, Philippe Bruhat
+(BooK), Scott Baker, Sisyphus, Steve Hay, TAKAI Kousuke, Tony Cook, x-yuri.
+
+The list above is almost certainly incomplete as it is automatically
+generated from version control history. In particular, it does not include
+the names of the (very much appreciated) contributors who reported issues to
+the Perl bug tracker.
+
+Many of the changes included in this version originated in the CPAN modules
+included in Perl's core. We're grateful to the entire CPAN community for
+helping Perl to flourish.
+
+For a more complete list of all of Perl's historical contributors, please
+see the F<AUTHORS> file in the Perl source distribution.
+
+=head1 Reporting Bugs
+
+If you find what you think is a bug, you might check the perl bug database
+at L<https://github.com/Perl/perl5/issues>.  There may also be information at
+L<http://www.perl.org/>, the Perl Home Page.
+
+If you believe you have an unreported bug, please open an issue at
+L<https://github.com/Perl/perl5/issues>.  Be sure to trim your bug down to a
+tiny but sufficient test case.
+
+If the bug you are reporting has security implications which make it
+inappropriate to send to a public issue tracker, then see
+L<perlsec/SECURITY VULNERABILITY CONTACT INFORMATION>
+for details of how to report the issue.
+
+=head1 Give Thanks
+
+If you wish to thank the Perl 5 Porters for the work we had done in Perl 5,
+you can do so by running the C<perlthanks> program:
+
+    perlthanks
+
+This will send an email to the Perl 5 Porters list with your show of thanks.
+
+=head1 SEE ALSO
+
+The F<Changes> file for an explanation of how to view exhaustive details on
+what changed.
+
+The F<INSTALL> file for how to build Perl.
+
+The F<README> file for general stuff.
+
+The F<Artistic> and F<Copying> files for copyright information.
+
+=cut
