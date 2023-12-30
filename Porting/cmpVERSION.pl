@@ -91,7 +91,7 @@ my $tag_date = `git for-each-ref --format="%(taggerdate:iso8601)" refs/tags/$tag
 chomp($tag_date);
 my $tag_epoch= do {
     my ($Y,$M,$D,$h,$m,$s) = split /[- :]/, $tag_date; # 2023-03-20 22:49:09
-    timelocal_posix($s,$m,$h,$D,$M,$Y);
+    timelocal_posix($s,$m,$h,$D,$M-1,$Y-1900);
 };
 
 if ($commit_epoch - $tag_epoch > 60 * 24 * 60 * 60) {
