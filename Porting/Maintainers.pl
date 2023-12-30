@@ -192,7 +192,8 @@ our %Modules = (
     },
 
     'bignum' => {
-        'DISTRIBUTION' => 'PJACKLAM/bignum-0.66.tar.gz',
+        'DISTRIBUTION' => 'PJACKLAM/bignum-0.67.tar.gz',
+        'SYNCINFO'     => 'jkeenan on Sat Dec 30 15:32:11 2023',
         'FILES'        => q[cpan/bignum],
         'EXCLUDED'     => [
             qr{^xt/},

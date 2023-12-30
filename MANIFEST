@@ -334,67 +334,67 @@ cpan/AutoLoader/lib/AutoLoader.pm	Autoloader base class
 cpan/AutoLoader/lib/AutoSplit.pm	Split up autoload functions
 cpan/AutoLoader/t/01AutoLoader.t	See if AutoLoader works
 cpan/AutoLoader/t/02AutoSplit.t		See if AutoSplit works
-cpan/bignum/gentest/backend.sh
-cpan/bignum/gentest/scope-nested-const.sh
-cpan/bignum/gentest/scope-nested-hex-oct.sh
-cpan/bignum/lib/bigfloat.pm
+cpan/bignum/gentest/backend.sh			bignum
+cpan/bignum/gentest/scope-nested-const.sh	bignum
+cpan/bignum/gentest/scope-nested-hex-oct.sh	bignum
+cpan/bignum/lib/bigfloat.pm			Module related to bignum
 cpan/bignum/lib/bigint.pm			bigint
 cpan/bignum/lib/bignum.pm			bignum
 cpan/bignum/lib/bigrat.pm			bigrat
 cpan/bignum/lib/Math/BigFloat/Trace.pm		bignum tracing
 cpan/bignum/lib/Math/BigInt/Trace.pm		bignum tracing
-cpan/bignum/lib/Math/BigRat/Trace.pm
-cpan/bignum/t/backend-gmp-bigfloat.t
-cpan/bignum/t/backend-gmp-bigint.t
-cpan/bignum/t/backend-gmp-bignum.t
-cpan/bignum/t/backend-gmp-bigrat.t
-cpan/bignum/t/backend-pari-bigfloat.t
-cpan/bignum/t/backend-pari-bigint.t
-cpan/bignum/t/backend-pari-bignum.t
-cpan/bignum/t/backend-pari-bigrat.t
+cpan/bignum/lib/Math/BigRat/Trace.pm		Module related to bignum
+cpan/bignum/t/backend-gmp-bigfloat.t		Test file related to bignum
+cpan/bignum/t/backend-gmp-bigint.t		Test file related to bignum
+cpan/bignum/t/backend-gmp-bignum.t		Test file related to bignum
+cpan/bignum/t/backend-gmp-bigrat.t		Test file related to bignum
+cpan/bignum/t/backend-pari-bigfloat.t		Test file related to bignum
+cpan/bignum/t/backend-pari-bigint.t		Test file related to bignum
+cpan/bignum/t/backend-pari-bignum.t		Test file related to bignum
+cpan/bignum/t/backend-pari-bigrat.t		Test file related to bignum
 cpan/bignum/t/bigexp.t				See if bignum works
-cpan/bignum/t/bigfloat.t
+cpan/bignum/t/bigfloat.t			Test file related to bignum
 cpan/bignum/t/bigint.t				See if bigint works
 cpan/bignum/t/bignum.t				See if bignum works
 cpan/bignum/t/bigrat.t				See if bigrat works
-cpan/bignum/t/const-bigfloat.t
-cpan/bignum/t/const-bigint.t
-cpan/bignum/t/const-bignum.t
-cpan/bignum/t/const-bigrat.t
-cpan/bignum/t/down-mbi-up-mbf.t
-cpan/bignum/t/down-mbi-up-mbr.t
-cpan/bignum/t/down-mbi-up-undef.t
-cpan/bignum/t/down-undef-up-mbf.t
-cpan/bignum/t/e_pi-bigfloat.t
-cpan/bignum/t/e_pi-bigint.t
-cpan/bignum/t/e_pi-bignum.t
-cpan/bignum/t/e_pi-bigrat.t
-cpan/bignum/t/import-bigfloat.t
-cpan/bignum/t/import-bigint.t
-cpan/bignum/t/import-bignum.t
-cpan/bignum/t/import-bigrat.t
+cpan/bignum/t/const-bigfloat.t			Test file related to bignum
+cpan/bignum/t/const-bigint.t			Test file related to bignum
+cpan/bignum/t/const-bignum.t			Test file related to bignum
+cpan/bignum/t/const-bigrat.t			Test file related to bignum
+cpan/bignum/t/down-mbi-up-mbf.t			Test file related to bignum
+cpan/bignum/t/down-mbi-up-mbr.t			Test file related to bignum
+cpan/bignum/t/down-mbi-up-undef.t		Test file related to bignum
+cpan/bignum/t/down-undef-up-mbf.t		Test file related to bignum
+cpan/bignum/t/e_pi-bigfloat.t			Test file related to bignum
+cpan/bignum/t/e_pi-bigint.t			Test file related to bignum
+cpan/bignum/t/e_pi-bignum.t			Test file related to bignum
+cpan/bignum/t/e_pi-bigrat.t			Test file related to bignum
+cpan/bignum/t/import-bigfloat.t			Test file related to bignum
+cpan/bignum/t/import-bigint.t			Test file related to bignum
+cpan/bignum/t/import-bignum.t			Test file related to bignum
+cpan/bignum/t/import-bigrat.t			Test file related to bignum
 cpan/bignum/t/in_effect.t			See if in_effect() works
-cpan/bignum/t/infnan-bigfloat.t
-cpan/bignum/t/infnan-bigint.t
-cpan/bignum/t/infnan-bignum-mbf.t
-cpan/bignum/t/infnan-bignum-mbr.t
-cpan/bignum/t/infnan-bigrat.t
+cpan/bignum/t/infnan-bigfloat.t			Test file related to bignum
+cpan/bignum/t/infnan-bigint.t			Test file related to bignum
+cpan/bignum/t/infnan-bignum-mbf.t		Test file related to bignum
+cpan/bignum/t/infnan-bignum-mbr.t		Test file related to bignum
+cpan/bignum/t/infnan-bigrat.t			Test file related to bignum
 cpan/bignum/t/option_a.t			See if bignum a => X works
-cpan/bignum/t/option_a-bignum.t
-cpan/bignum/t/option_l-bigfloat.t
-cpan/bignum/t/option_l-bigint.t
-cpan/bignum/t/option_l-bignum.t
-cpan/bignum/t/option_l-bigrat.t
+cpan/bignum/t/option_a-bignum.t			Test file related to bignum
+cpan/bignum/t/option_l-bigfloat.t		Test file related to bignum
+cpan/bignum/t/option_l-bigint.t			Test file related to bignum
+cpan/bignum/t/option_l-bignum.t			Test file related to bignum
+cpan/bignum/t/option_l-bigrat.t			Test file related to bignum
 cpan/bignum/t/option_p.t			See if bignum p => X works
-cpan/bignum/t/option_p-bignum.t
+cpan/bignum/t/option_p-bignum.t			Test file related to bignum
 cpan/bignum/t/overrides.t			See if global overrides behave
 cpan/bignum/t/ratopt_a.t			See if bigrat a => X works
-cpan/bignum/t/scope-bigfloat.t
-cpan/bignum/t/scope-bigint.t
-cpan/bignum/t/scope-bignum.t
-cpan/bignum/t/scope-bigrat.t
-cpan/bignum/t/scope-nested-const.t
-cpan/bignum/t/scope-nested-hex-oct.t
+cpan/bignum/t/scope-bigfloat.t			Test file related to bignum
+cpan/bignum/t/scope-bigint.t			Test file related to bignum
+cpan/bignum/t/scope-bignum.t			Test file related to bignum
+cpan/bignum/t/scope-bigrat.t			Test file related to bignum
+cpan/bignum/t/scope-nested-const.t		Test file related to bignum
+cpan/bignum/t/scope-nested-hex-oct.t		Test file related to bignum
 cpan/Compress-Raw-Bzip2/Bzip2.xs			Compress::Raw::Bzip2
 cpan/Compress-Raw-Bzip2/bzip2-src/blocksort.c		Compress::Raw::Bzip2
 cpan/Compress-Raw-Bzip2/bzip2-src/bzip2.patch		Compress::Raw::Bzip2
