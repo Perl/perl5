@@ -146,7 +146,8 @@ our %Modules = (
     },
 
     'autodie' => {
-        'DISTRIBUTION' => 'TODDR/autodie-2.36.tar.gz',
+        'DISTRIBUTION' => 'TODDR/autodie-2.37.tar.gz',
+        'SYNCINFO'     => 'jkeenan on Sat Dec 30 15:24:00 2023',
         'FILES'        => q[cpan/autodie],
         'EXCLUDED'     => [
             qr{benchmarks},
