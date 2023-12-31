@@ -2693,7 +2693,7 @@ S_aassign_uid(pTHX)
 #  endif /* HAS_SETEUID */
         if (PL_delaymagic & DM_UID) {
             if (PL_delaymagic_uid != PL_delaymagic_euid)
-                DIE(aTHX_ "No setreuid available");
+                Perl_die(aTHX_ "No setreuid available");
             PERL_UNUSED_RESULT(PerlProc_setuid(PL_delaymagic_uid));
         }
 #endif /* HAS_SETRESUID */
@@ -2728,7 +2728,7 @@ S_aassign_uid(pTHX)
 #  endif /* HAS_SETEGID */
         if (PL_delaymagic & DM_GID) {
             if (PL_delaymagic_gid != PL_delaymagic_egid)
-                DIE(aTHX_ "No setregid available");
+                Perl_die(aTHX_ "No setregid available");
             PERL_UNUSED_RESULT(PerlProc_setgid(PL_delaymagic_gid));
         }
 #endif /* HAS_SETRESGID */
