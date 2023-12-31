@@ -495,6 +495,18 @@ EOF
                 "1.5", { stderr => 'devnull' }, "POSIX::strtod() uses underlying locale");
             }
           }
+
+          { # GH #21746
+                local $ENV{LANG} = $comma;
+                fresh_perl_is(<<"EOF",
+                    use POSIX;
+                    POSIX::setlocale(POSIX::LC_ALL(),'');
+                    eval q{ use constant X => \$] };
+                    print \$@;
+EOF
+                "", {},
+                "Properly toggles to radix dot locale");
+          }
         }
     }
 
