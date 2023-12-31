@@ -4602,6 +4602,10 @@ PERL_CALLCONV int
 Perl_sv_isobject(pTHX_ SV *sv);
 #define PERL_ARGS_ASSERT_SV_ISOBJECT
 
+PERL_CALLCONV SV *
+Perl_sv_langinfo(pTHX_ const nl_item item);
+#define PERL_ARGS_ASSERT_SV_LANGINFO
+
 PERL_CALLCONV STRLEN
 Perl_sv_len(pTHX_ SV * const sv);
 #define PERL_ARGS_ASSERT_SV_LEN

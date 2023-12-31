@@ -3194,6 +3194,7 @@ CMbp	|IV	|sv_2iv 	|NN SV *sv
 Adp	|IV	|sv_2iv_flags	|NN SV * const sv			\
 				|const I32 flags
 Adip	|IV	|SvIV_nomg	|NN SV *sv
+Adp	|SV *	|sv_langinfo	|const nl_item item
 Adp	|STRLEN |sv_len 	|NULLOK SV * const sv
 Adp	|STRLEN |sv_len_utf8	|NULLOK SV * const sv
 Adp	|STRLEN |sv_len_utf8_nomg					\

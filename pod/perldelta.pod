@@ -348,7 +348,14 @@ well.
 
 =item *
 
-XXX
+A new function is now available to C<XS> code, L<perlapi/sv_langinfo>.
+This provides the same information as the existing
+L<perlapi/Perl_langinfo8>, but returns an SV instead of a S<C<char *>>,
+so that programmers don't have to concern themselves with the UTF-8ness
+of the result.  This new function is now the preferred interface for
+C<XS> code to the L<nl_langinfo(3)> C<libc> function.  From Perl space,
+this information continues to be provided by the L<I18N::Langinfo>
+module.
 
 =back
 
