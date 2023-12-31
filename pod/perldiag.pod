@@ -8034,8 +8034,8 @@ for details. You may silence this warning with the following:
 
 =item "%s" variable %s masks earlier declaration in same %s
 
-(W shadow) A "my", "our" or "state" variable has been redeclared in the
-current scope or statement, effectively eliminating all access to the
+(W shadow) A "my", "our", "state" or "field" variable has been redeclared in
+the current scope or statement, effectively eliminating all access to the
 previous instance.  This is almost always a typographical error.  Note
 that the earlier variable will still exist until the end of the scope
 or until all closure references to it are destroyed.
