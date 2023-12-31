@@ -5859,16 +5859,6 @@ The details for those items which may deviate from what this emulation returns
 and what a native C<nl_langinfo()> would return are specified in
 L<I18N::Langinfo>.
 
-When using C<Perl_langinfo8> (or plain C<Perl_langinfo>) on systems that don't
-have a native C<nl_langinfo()>, you must
-
- #include "perl_langinfo.h"
-
-before the C<perl.h> C<#include>.  You can replace your F<langinfo.h>
-C<#include> with this one.  (Doing it this way keeps out the symbols that plain
-F<langinfo.h> would try to import into the namespace for code that doesn't need
-it.)
-
 =cut
 
 */
