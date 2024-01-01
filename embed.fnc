@@ -4413,6 +4413,14 @@ S	|void	|ints_to_tm	|NN struct tm *my_tm			\
 				|int yday				\
 				|int isdst
 S	|bool	|is_locale_utf8 |NN const char *locale
+S	|const char *|save_to_buffer					\
+				|NULLOK const char *string		\
+				|NULLOK char **buf			\
+				|NULLOK Size_t *buf_size
+S	|void	|set_save_buffer_min_size				\
+				|const Size_t min_len			\
+				|NULLOK char **buf			\
+				|NULLOK Size_t *buf_size
 S	|char * |strftime8	|NN const char *fmt			\
 				|NN const struct tm *mytm		\
 				|const utf8ness_t fmt_utf8ness		\
@@ -4460,10 +4468,6 @@ So	|void	|restore_toggled_locale_i				\
 				|const locale_category_index cat_index	\
 				|NULLOK const char *original_locale	\
 				|const line_t caller_line
-S	|const char *|save_to_buffer					\
-				|NULLOK const char *string		\
-				|NULLOK char **buf			\
-				|NULLOK Size_t *buf_size
 Sr	|void	|setlocale_failure_panic_via_i				\
 				|const locale_category_index cat_index	\
 				|NULLOK const char *current		\
@@ -4472,10 +4476,6 @@ Sr	|void	|setlocale_failure_panic_via_i				\
 				|const line_t immediate_caller_line	\
 				|NN const char *higher_caller_file	\
 				|const line_t higher_caller_line
-S	|void	|set_save_buffer_min_size				\
-				|const Size_t min_len			\
-				|NULLOK char **buf			\
-				|NULLOK Size_t *buf_size
 So	|const char *|toggle_locale_i					\
 				|const locale_category_index cat_index	\
 				|NN const char *new_locale		\
