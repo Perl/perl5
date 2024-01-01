@@ -6996,6 +6996,14 @@ S_is_locale_utf8(pTHX_ const char *locale);
 # define PERL_ARGS_ASSERT_IS_LOCALE_UTF8        \
         assert(locale)
 
+STATIC const char *
+S_save_to_buffer(pTHX_ const char *string, char **buf, Size_t *buf_size);
+# define PERL_ARGS_ASSERT_SAVE_TO_BUFFER
+
+STATIC void
+S_set_save_buffer_min_size(pTHX_ const Size_t min_len, char **buf, Size_t *buf_size);
+# define PERL_ARGS_ASSERT_SET_SAVE_BUFFER_MIN_SIZE
+
 STATIC char *
 S_strftime8(pTHX_ const char *fmt, const struct tm *mytm, const utf8ness_t fmt_utf8ness, utf8ness_t *result_utf8ness, const bool came_from_sv);
 # define PERL_ARGS_ASSERT_STRFTIME8             \
@@ -7049,14 +7057,6 @@ S_parse_LC_ALL_string(pTHX_ const char *string, const char **output, const parse
 STATIC void
 S_restore_toggled_locale_i(pTHX_ const locale_category_index cat_index, const char *original_locale, const line_t caller_line);
 #   define PERL_ARGS_ASSERT_RESTORE_TOGGLED_LOCALE_I
-
-STATIC const char *
-S_save_to_buffer(pTHX_ const char *string, char **buf, Size_t *buf_size);
-#   define PERL_ARGS_ASSERT_SAVE_TO_BUFFER
-
-STATIC void
-S_set_save_buffer_min_size(pTHX_ const Size_t min_len, char **buf, Size_t *buf_size);
-#   define PERL_ARGS_ASSERT_SET_SAVE_BUFFER_MIN_SIZE
 
 PERL_STATIC_NO_RET void
 S_setlocale_failure_panic_via_i(pTHX_ const locale_category_index cat_index, const char *current, const char *failed, const line_t proxy_caller_line, const line_t immediate_caller_line, const char *higher_caller_file, const line_t higher_caller_line)

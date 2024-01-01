@@ -4805,7 +4805,6 @@ S_is_locale_utf8(pTHX_ const char * locale)
 }
 
 #endif
-#ifdef USE_LOCALE
 
 STATIC void
 S_set_save_buffer_min_size(pTHX_ Size_t min_len,
@@ -4894,6 +4893,7 @@ S_save_to_buffer(pTHX_ const char * string, char **buf, Size_t *buf_size)
     return *buf;
 }
 
+#ifdef USE_LOCALE
 #  ifdef WIN32
 
 bool
