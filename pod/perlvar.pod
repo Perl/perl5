@@ -1358,7 +1358,7 @@ match and any capture buffers it contains.
 
 The number of elements it contains will be one more than the number of
 the highest capture buffers (also called a subgroup) that actually
-matched something. (As opposed to C<@+> which may have fewer elements.)
+matched something. (As opposed to C<@+> which may have more elements.)
 
 C<$-[0]> is the offset of the start of the last successful match.
 C<$-[I<n>]> is the offset of the start of the substring matched by
