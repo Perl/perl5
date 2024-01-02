@@ -4,7 +4,7 @@ use strict;
 our ( %released, %version, %families, %upstream, %bug_tracker, %deprecated, %delta );
 
 use version;
-our $VERSION = '5.20231230';
+our $VERSION = '5.20240120';
 
 sub PKG_PATTERN () { q#\A[a-zA-Z_][0-9a-zA-Z_]*(?:(::|')[0-9a-zA-Z_]+)*\z# }
 sub _looks_like_invocant ($) { local $@; !!eval { $_[0]->isa(__PACKAGE__) } }
@@ -21142,7 +21142,9 @@ for my $version ( sort { $a <=> $b } keys %released ) {
             'Archive::Tar::File'    => '3.02_001',
             'B::Op_private'         => '5.039006',
             'Config'                => '5.039006',
+            'Fatal'                 => '2.37',
             'Fcntl'                 => '1.16',
+            'File::Glob'            => '1.41',
             'IO'                    => '1.55',
             'IO::Dir'               => '1.55',
             'IO::File'              => '1.55',
@@ -21155,12 +21157,16 @@ for my $version ( sort { $a <=> $b } keys %released ) {
             'IO::Socket::INET'      => '1.55',
             'IO::Socket::UNIX'      => '1.55',
             'Math::BigFloat'        => '2.003001',
+            'Math::BigFloat::Trace' => '0.67',
             'Math::BigInt'          => '2.003001',
             'Math::BigInt::Calc'    => '2.003001',
+            'Math::BigInt::FastCalc'=> '0.5016',
             'Math::BigInt::Lib'     => '2.003001',
+            'Math::BigInt::Trace'   => '0.67',
             'Math::BigRat'          => '2.003001',
-            'Module::CoreList'      => '5.20231230',
-            'Module::CoreList::Utils'=> '5.20231230',
+            'Math::BigRat::Trace'   => '0.67',
+            'Module::CoreList'      => '5.20240120',
+            'Module::CoreList::Utils'=> '5.20240120',
             'Test2'                 => '1.302198',
             'Test2::API'            => '1.302198',
             'Test2::API::Breakage'  => '1.302198',
@@ -21230,6 +21236,19 @@ for my $version ( sort { $a <=> $b } keys %released ) {
             'Test::Tester::CaptureRunner'=> '1.302198',
             'Test::Tester::Delegate'=> '1.302198',
             'Test::use::ok'         => '1.302198',
+            'autodie'               => '2.37',
+            'autodie::Scope::Guard' => '2.37',
+            'autodie::Scope::GuardStack'=> '2.37',
+            'autodie::Util'         => '2.37',
+            'autodie::exception'    => '2.37',
+            'autodie::exception::system'=> '2.37',
+            'autodie::hints'        => '2.37',
+            'autodie::skip'         => '2.37',
+            'bigfloat'              => '0.67',
+            'bigint'                => '0.67',
+            'bignum'                => '0.67',
+            'bigrat'                => '0.67',
+            'diagnostics'           => '1.40',
             'feature'               => '1.86',
             'ok'                    => '1.302198',
             're'                    => '0.45',
