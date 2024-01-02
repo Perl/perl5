@@ -6446,12 +6446,25 @@ S_emulate_langinfo(pTHX_ const nl_item item,
         /* Nested switch for LC_TIME items, plus the default: case is for
          * unknown items */
         switch (item) {
-          default:  /* Anything not covered here is something we don't know
-                       about. */
+
+          default:
+
+            /* On systems with langinfo.h, 'item' is an enum.  If we don't
+             * handle one of those, the code needs to change to be able to do
+             * so.  But otherwise, the parameter can be any int, and so could
+             * be a garbage value and all we can do is to return that it is
+             * invalid. */;
+#  if defined(I_LANGINFO)
+
+            Perl_croak_nocontext("panic: Unexpected nl_langinfo() item %d",
+                                 item);
+
+#  else
             assert(item < 0);   /* Make sure using perl_langinfo.h */
-           Perl_croak_nocontext("panic: Unexpected nl_langinfo() item %d", item);
-            NOT_REACHED; /* NOTREACHED */
+            SET_EINVAL;
+            retval = "";
             break;
+#  endif
 
             /* The case: statments in this switch are all for LC_TIME related
              * values.  There are four types of values returned.  One type is
