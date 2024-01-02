@@ -6834,7 +6834,6 @@ Perl_sv_strftime_tm(pTHX_ SV * fmt, const struct tm * mytm)
                              );
     SV * sv = NULL;
     if (retval) {
-        STRLEN len = strlen(retval);
         sv = newSV_type(SVt_PV);
         sv_usepvn_flags(sv, retval, strlen(retval), SV_HAS_TRAILING_NUL);
 
