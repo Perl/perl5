@@ -5934,14 +5934,13 @@ Perl_langinfo8(const nl_item item, utf8ness_t * utf8ness)
         break;
 
 
-/* The other possible items are all in LC_TIME. */
-#ifdef USE_LOCALE_TIME
-
-      default:
+      default:  /* The other possible items are all in LC_TIME. */
+#  ifdef USE_LOCALE_TIME
         cat_index = LC_TIME_INDEX_;
+#  endif
         break;
 
-#endif
+
 #if ! defined(USE_LOCALE_TIME) || ! defined(HAS_SOME_LANGINFO)
 
     /* If not using LC_TIME, hard code the rest.  Or, if there is no
@@ -5974,13 +5973,6 @@ Perl_langinfo8(const nl_item item, utf8ness_t * utf8ness)
 #  ifndef USE_LOCALE_TIME
 
       case T_FMT_AMPM:    return "%r";
-      case ABDAY_1:       return "Sun";
-      case ABDAY_2:       return "Mon";
-      case ABDAY_3:       return "Tue";
-      case ABDAY_4:       return "Wed";
-      case ABDAY_5:       return "Thu";
-      case ABDAY_6:       return "Fri";
-      case ABDAY_7:       return "Sat";
       case AM_STR:        return "AM";
       case PM_STR:        return "PM";
       case ABMON_1:       return "Jan";
@@ -6567,6 +6559,17 @@ S_emulate_langinfo(pTHX_ const nl_item item,
           case AM_STR:
             format = "%p";
             break;
+#  endif
+#  if ! defined(USE_LOCALE_TIME) || ! defined(HAS_STRFTIME)
+
+          case ABDAY_1: retval = "Sun"; break;
+          case ABDAY_2: retval = "Mon"; break;
+          case ABDAY_3: retval = "Tue"; break;
+          case ABDAY_4: retval = "Wed"; break;
+          case ABDAY_5: retval = "Thu"; break;
+          case ABDAY_6: retval = "Fri"; break;
+          case ABDAY_7: retval = "Sat"; break;
+#  else
           case ABDAY_7: mday++;
           case ABDAY_6: mday++;
           case ABDAY_5: mday++;
@@ -6576,6 +6579,8 @@ S_emulate_langinfo(pTHX_ const nl_item item,
           case ABDAY_1:
             format = "%a";
             break;
+#  endif
+#  ifdef HAS_STRFTIME
           case DAY_7: mday++;
           case DAY_6: mday++;
           case DAY_5: mday++;
@@ -6636,6 +6641,14 @@ S_emulate_langinfo(pTHX_ const nl_item item,
 
         } /* End of inner switch() */
 
+        /* The inner switch() above has set 'retval' iff that is the final
+         * answer */
+        if (retval) {
+            break;
+        }
+
+        /* And it hasn't set 'format' iff it can't figure out a good value on
+         * this platform. */
         if (! format) {
             retval = "";
             break;
