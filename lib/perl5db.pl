@@ -1533,7 +1533,7 @@ We then determine what the console should be on various systems:
 
 =cut
 
-    if ( $^O eq 'cygwin' ) {
+    if ( $^O eq 'cygwin' or $^O eq 'msys' ) {
 
         # /dev/tty is binary. use stdin for textmode
         undef $console;

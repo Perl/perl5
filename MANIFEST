@@ -4124,6 +4124,7 @@ dist/ExtUtils-CBuilder/lib/ExtUtils/CBuilder/Platform/android.pm	CBuilder method
 dist/ExtUtils-CBuilder/lib/ExtUtils/CBuilder/Platform/cygwin.pm		CBuilder methods for cygwin
 dist/ExtUtils-CBuilder/lib/ExtUtils/CBuilder/Platform/darwin.pm		CBuilder methods for darwin
 dist/ExtUtils-CBuilder/lib/ExtUtils/CBuilder/Platform/dec_osf.pm	CBuilder methods for OSF
+dist/ExtUtils-CBuilder/lib/ExtUtils/CBuilder/Platform/msys.pm		CBuilder methods for Msys
 dist/ExtUtils-CBuilder/lib/ExtUtils/CBuilder/Platform/os2.pm		CBuilder methods for OS/2
 dist/ExtUtils-CBuilder/lib/ExtUtils/CBuilder/Platform/Unix.pm		CBuilder methods for Unix
 dist/ExtUtils-CBuilder/lib/ExtUtils/CBuilder/Platform/VMS.pm		CBuilder methods for VMS
