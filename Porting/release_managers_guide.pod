@@ -1662,7 +1662,7 @@ be considered.
 =head1 SOURCE
 
 Based on
-L<http://www.xray.mpe.mpg.de/mailing-lists/perl5-porters/2009-05/msg00608.html>,
+L<https://www.nntp.perl.org/group/perl.perl5.porters/2009/05/msg146638.html>,
 plus a whole bunch of other sources, including private correspondence.
 
 =cut
