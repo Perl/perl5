@@ -6036,13 +6036,6 @@ S_my_langinfo_i(pTHX_
 /* Above is the common beginning to all the implementations of my_langinfo().
  * Below are the various completions.
  *
- * Some platforms don't deal well with non-ASCII strings in locale X when
- * LC_CTYPE is not in X.  (Actually it is probably when X is UTF-8 and LC_CTYPE
- * isn't, or vice versa).  There is explicit code to bring the categories into
- * sync.  This doesn't seem to be a problem with nl_langinfo(), so that
- * implementation doesn't currently worry about it.  But it is a problem on
- * Windows boxes, which don't have nl_langinfo().
- *
  * One might be tempted to avoid any toggling by instead using nl_langinfo_l()
  * on platforms that have it.  This would entail creating a locale object with
  * newlocale() and freeing it afterwards.  But doing so runs significantly
