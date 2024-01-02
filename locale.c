@@ -7023,7 +7023,9 @@ S_strftime_tm(pTHX_ const char *fmt, const struct tm *mytm)
      * platforms an invalid conversion specifier '%?' (for all illegal '?') is
      * treated as a literal, but others may fail when '?' is illegal */
 
+#  ifdef WIN32
   strftime_failed:
+#  endif
 
     SET_EINVAL;
 
