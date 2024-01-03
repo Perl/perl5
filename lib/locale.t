@@ -58,7 +58,7 @@ BEGIN {
 }
 
 use feature 'fc';
-use I18N::Langinfo qw(langinfo CODESET CRNCYSTR RADIXCHAR);
+use I18N::Langinfo qw(langinfo CODESET CRNCYSTR RADIXCHAR THOUSEP);
 
 # =1 adds debugging output; =2 increases the verbosity somewhat
 our $debug = $ENV{PERL_DEBUG_FULL_TEST} // 0;
@@ -1059,6 +1059,7 @@ foreach my $Locale (@Locale) {
         debug "code set = " . langinfo(CODESET);
         debug "is utf8 locale? = $is_utf8_locale\n";
         debug "radix = " . disp_str(langinfo(RADIXCHAR)) . "\n";
+        debug "numeric group separator = '" .  disp_str(langinfo(THOUSEP)) . "'\n";
         debug "currency = " . disp_str(langinfo(CRNCYSTR));
     }
 
