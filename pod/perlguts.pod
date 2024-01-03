@@ -1763,6 +1763,7 @@ to do this.
         stash = gv_stashpv("MyTie", GV_ADD);
         sv_bless(tie, stash);
         hv_magic(hash, (GV*)tie, PERL_MAGIC_tied);
+        SvREFCNT_dec(tie); /* hv_magic() increases tie ref count */
         RETVAL = newRV_noinc(hash);
     OUTPUT:
         RETVAL
