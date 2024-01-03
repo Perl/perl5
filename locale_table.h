@@ -57,7 +57,7 @@
         /* Perl outsources all its collation efforts to the libc strxfrm(), so
          * if it isn't available on the system, default "C" locale collation
          * gets used */
-#  if defined(NO_LOCALE_COLLATE) || ! defined(HAS_STRXFRM)
+#  if defined(NO_LOCALE) || defined(NO_LOCALE_COLLATE) || ! defined(HAS_STRXFRM)
 
     PERL_LOCALE_TABLE_ENTRY(COLLATE, NULL)
 
