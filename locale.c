@@ -706,14 +706,12 @@ S_mortalized_pv_copy(pTHX_ const char * const pv)
                                       a single instance, so is a #define */
 static const char C_decimal_point[] = ".";
 
-#if defined(HAS_NL_LANGINFO)
-#  define HAS_SOME_LANGINFO
+#if ! defined(TS_W32_BROKEN_LOCALECONV) || ! defined(USE_LOCALE_NUMERIC)
+static const char C_thousands_sep[] = "";
 #endif
 
-#if (defined(USE_LOCALE_NUMERIC) && ! defined(TS_W32_BROKEN_LOCALECONV))    \
- || ! (   defined(USE_LOCALE_NUMERIC)                                       \
-       && (defined(HAS_SOME_LANGINFO) || defined(HAS_LOCALECONV)))
-static const char C_thousands_sep[] = "";
+#if defined(HAS_NL_LANGINFO)
+#  define HAS_SOME_LANGINFO
 #endif
 
 /* Is the C string input 'name' "C" or "POSIX"?  If so, and 'name' is the
