@@ -4770,7 +4770,7 @@ S_save_to_buffer(pTHX_ const char * string, char **buf, Size_t *buf_size)
     Size_t string_size = strlen(string) + 1;
     set_save_buffer_min_size(string_size, buf, buf_size);
 
-#    ifdef DEBUGGING
+#  ifdef DEBUGGING
 
     DEBUG_Lv(PerlIO_printf(Perl_debug_log,
                          "Copying '%s' to %p\n",
@@ -4778,6 +4778,8 @@ S_save_to_buffer(pTHX_ const char * string, char **buf, Size_t *buf_size)
                           ? string
                           :_byte_dump_string((U8 *) string, strlen(string), 0)),
                           *buf));
+
+#    ifdef USE_LOCALE_CTYPE
 
     /* Catch glitches.  Usually this is because LC_CTYPE needs to be the same
      * locale as whatever is being worked on */
@@ -4787,6 +4789,7 @@ S_save_to_buffer(pTHX_ const char * string, char **buf, Size_t *buf_size)
                                 string, get_LC_ALL_display()));
     }
 
+#    endif
 #  endif
 
     Copy(string, *buf, string_size, char);
