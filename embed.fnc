@@ -2766,6 +2766,10 @@ Adipx	|void	|rpp_context	|NN SV **mark				\
 				|U8 gimme				\
 				|SSize_t extra
 Adipx	|void	|rpp_extend	|SSize_t n
+Xopx	|void	|rpp_free_2_	|NN SV * const sv1			\
+				|NN SV * const sv2			\
+				|const U32 rc1				\
+				|const U32 rc2
 Adipx	|void	|rpp_invoke_xs	|NN CV *cv
 Adipx	|bool	|rpp_is_lone	|NN SV *sv
 Cpx	|void	|rpp_obliterate_stack_to				\
@@ -2781,6 +2785,7 @@ Adipx	|SV *	|rpp_pop_1_norc
 Adipx	|void	|rpp_push_1	|NN SV *sv
 Adipx	|void	|rpp_push_2	|NN SV *sv1				\
 				|NN SV *sv2
+Adipx	|void	|rpp_push_IMM	|NN SV *sv
 Adipx	|void	|rpp_push_1_norc|NN SV *sv
 Adipx	|void	|rpp_replace_1_1|NN SV *sv
 Adipx	|void	|rpp_replace_2_1|NN SV *sv
@@ -2794,6 +2799,12 @@ Adipx	|void	|rpp_replace_at_norc					\
 				|NN SV *sv
 Adipx	|void	|rpp_replace_at_norc_NN 				\
 				|NN SV **sp				\
+				|NN SV *sv
+Cipx	|void	|rpp_replace_2_1_COMMON 				\
+				|NN SV *sv
+Adipx	|void	|rpp_replace_1_IMM_NN					\
+				|NN SV *sv
+Adipx	|void	|rpp_replace_2_IMM_NN					\
 				|NN SV *sv
 Adipx	|void	|rpp_replace_1_1_NN					\
 				|NN SV *sv
@@ -2809,6 +2820,7 @@ Adipx	|bool	|rpp_try_AMAGIC_2					\
 Adipx	|void	|rpp_xpush_1	|NN SV *sv
 Adipx	|void	|rpp_xpush_2	|NN SV *sv1				\
 				|NN SV *sv2
+Adipx	|void	|rpp_xpush_IMM	|NN SV *sv
 Adp	|Sighandler_t|rsignal	|int i					\
 				|Sighandler_t t
 : Used in pp_sys.c

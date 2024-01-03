@@ -3839,6 +3839,11 @@ Perl_rpeep(pTHX_ OP *o)
 #define PERL_ARGS_ASSERT_RPEEP
 
 PERL_CALLCONV void
+Perl_rpp_free_2_(pTHX_ SV * const sv1, SV * const sv2, const U32 rc1, const U32 rc2);
+#define PERL_ARGS_ASSERT_RPP_FREE_2_            \
+        assert(sv1); assert(sv2)
+
+PERL_CALLCONV void
 Perl_rpp_obliterate_stack_to(pTHX_ I32 ix);
 #define PERL_ARGS_ASSERT_RPP_OBLITERATE_STACK_TO
 
@@ -9878,6 +9883,11 @@ Perl_rpp_push_2(pTHX_ SV *sv1, SV *sv2);
         assert(sv1); assert(sv2)
 
 PERL_STATIC_INLINE void
+Perl_rpp_push_IMM(pTHX_ SV *sv);
+# define PERL_ARGS_ASSERT_RPP_PUSH_IMM          \
+        assert(sv)
+
+PERL_STATIC_INLINE void
 Perl_rpp_replace_1_1(pTHX_ SV *sv);
 # define PERL_ARGS_ASSERT_RPP_REPLACE_1_1       \
         assert(sv)
@@ -9888,13 +9898,28 @@ Perl_rpp_replace_1_1_NN(pTHX_ SV *sv);
         assert(sv)
 
 PERL_STATIC_INLINE void
+Perl_rpp_replace_1_IMM_NN(pTHX_ SV *sv);
+# define PERL_ARGS_ASSERT_RPP_REPLACE_1_IMM_NN  \
+        assert(sv)
+
+PERL_STATIC_INLINE void
 Perl_rpp_replace_2_1(pTHX_ SV *sv);
 # define PERL_ARGS_ASSERT_RPP_REPLACE_2_1       \
         assert(sv)
 
 PERL_STATIC_INLINE void
+Perl_rpp_replace_2_1_COMMON(pTHX_ SV *sv);
+# define PERL_ARGS_ASSERT_RPP_REPLACE_2_1_COMMON \
+        assert(sv)
+
+PERL_STATIC_INLINE void
 Perl_rpp_replace_2_1_NN(pTHX_ SV *sv);
 # define PERL_ARGS_ASSERT_RPP_REPLACE_2_1_NN    \
+        assert(sv)
+
+PERL_STATIC_INLINE void
+Perl_rpp_replace_2_IMM_NN(pTHX_ SV *sv);
+# define PERL_ARGS_ASSERT_RPP_REPLACE_2_IMM_NN  \
         assert(sv)
 
 PERL_STATIC_INLINE void
@@ -9938,6 +9963,11 @@ PERL_STATIC_INLINE void
 Perl_rpp_xpush_2(pTHX_ SV *sv1, SV *sv2);
 # define PERL_ARGS_ASSERT_RPP_XPUSH_2           \
         assert(sv1); assert(sv2)
+
+PERL_STATIC_INLINE void
+Perl_rpp_xpush_IMM(pTHX_ SV *sv);
+# define PERL_ARGS_ASSERT_RPP_XPUSH_IMM         \
+        assert(sv)
 
 PERL_STATIC_INLINE char *
 Perl_savepv(pTHX_ const char *pv)

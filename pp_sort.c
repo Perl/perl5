@@ -709,8 +709,8 @@ PP(pp_sort)
         descending = 1;
 
     if (gimme != G_LIST) {
-        rpp_popfree_to(mark);
-        rpp_xpush_1(&PL_sv_undef);
+        rpp_popfree_to_NN(mark);
+        rpp_xpush_IMM(&PL_sv_undef);
         return NORMAL;
     }
 
@@ -976,7 +976,7 @@ PP(pp_sort)
             /* the code used to think this could be > 0 */
             assert(cx->blk_oldsp == 0);
 
-            rpp_popfree_to(PL_stack_base);
+            rpp_popfree_to_NN(PL_stack_base);
 
             CX_LEAVE_SCOPE(cx);
             if (!(flags & OPf_SPECIAL)) {
@@ -1142,18 +1142,14 @@ PP(pp_sort)
             AvFILLp(av) = max_minus_one;
             AvREIFY_off(av);
             AvREAL_on(av);
-#ifdef PERL_RC_STACK
-            /* the AV now contributes 1 refcnt to each element */
-            for (i = 0; i <= max_minus_one; i++)
-                SvREFCNT_inc_void_NN(base[i]);
-#endif
         }
         /* sort is only ever optimised with OPpSORT_INPLACE when the
          * (@a = sort @a) is in void context. (As an aside: the context
          * flag aught to be copied to the sort op: then we could assert
          * here that it's void).
          * Thus we can simply discard the stack elements now: their
-         * reference counts have already claimed by av.
+         * reference counts have already claimed by av - hence not using
+         * rpp_popfree_to() here.
          */
         PL_stack_sp = ORIGMARK;
 #ifdef PERL_RC_STACK
@@ -1196,7 +1192,7 @@ S_sortcv(pTHX_ SV *const a, SV *const b)
      * simplifies converting a '()' return into undef in scalar context */
     assert(PL_stack_sp > PL_stack_base || *PL_stack_base == &PL_sv_undef);
     result = SvIV(*PL_stack_sp);
-    rpp_popfree_to(PL_stack_base);
+    rpp_popfree_to_NN(PL_stack_base);
 
     LEAVE_SCOPE(oldsaveix);
     PL_curpm = pm;
@@ -1261,7 +1257,7 @@ S_sortcv_stacked(pTHX_ SV *const a, SV *const b)
      * simplifies converting a '()' return into undef in scalar context */
     assert(PL_stack_sp > PL_stack_base || *PL_stack_base == &PL_sv_undef);
     result = SvIV(*PL_stack_sp);
-    rpp_popfree_to(PL_stack_base);
+    rpp_popfree_to_NN(PL_stack_base);
 
     LEAVE_SCOPE(oldsaveix);
     PL_curpm = pm;
@@ -1296,7 +1292,7 @@ S_sortcv_xsub(pTHX_ SV *const a, SV *const b)
      * simplifies converting a '()' return into undef in scalar context */
     assert(PL_stack_sp > PL_stack_base || *PL_stack_base == &PL_sv_undef);
     result = SvIV(*PL_stack_sp);
-    rpp_popfree_to(PL_stack_base);
+    rpp_popfree_to_NN(PL_stack_base);
 
     LEAVE_SCOPE(oldsaveix);
     PL_curpm = pm;
