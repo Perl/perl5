@@ -8468,9 +8468,6 @@ In addition, Perl permits the following widely-supported conversions:
    %a    hexadecimal floating point
    %A    like %a, but using upper-case letters
 
-Finally, for backward (and we do mean "backward") compatibility, Perl
-permits these unnecessary but widely-supported conversions:
-
    %i    a synonym for %d
    %D    a synonym for %ld
    %U    a synonym for %lu
