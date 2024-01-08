@@ -1329,10 +1329,12 @@
 #       if defined(DEBUGGING)
 #         define my_setlocale_debug_string_i(a,b,c,d) S_my_setlocale_debug_string_i(aTHX_ a,b,c,d)
 #       endif
+#       if  defined(HAS_IGNORED_LOCALE_CATEGORIES_) || \
+           !defined(HAS_NL_LANGINFO)
+#         define emulate_langinfo(a,b,c,d,e)    S_emulate_langinfo(aTHX_ a,b,c,d,e)
+#       endif
 #       if defined(HAS_NL_LANGINFO)
 #         define my_langinfo_i(a,b,c,d,e,f)     S_my_langinfo_i(aTHX_ a,b,c,d,e,f)
-#       else
-#         define emulate_langinfo(a,b,c,d,e)    S_emulate_langinfo(aTHX_ a,b,c,d,e)
 #       endif
 #       if defined(LC_ALL)
 #         define give_perl_locale_control(a,b)  S_give_perl_locale_control(aTHX_ a,b)

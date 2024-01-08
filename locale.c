@@ -6140,8 +6140,8 @@ S_my_langinfo_i(pTHX_
 STATIC const char * S_override_codeset_if_utf8_found(pTHX_
                                                      const char *codeset,
                                                      const char *locale);
-#  endif
-#  if ! defined(HAS_NL_LANGINFO)                                          \
+#endif
+#if ! defined(HAS_NL_LANGINFO) || defined(HAS_IGNORED_LOCALE_CATEGORIES_)
 
 STATIC const char *
 S_emulate_langinfo(pTHX_ const nl_item item,
@@ -6151,6 +6151,9 @@ S_emulate_langinfo(pTHX_ const nl_item item,
                          utf8ness_t * utf8ness)
 {
     PERL_ARGS_ASSERT_EMULATE_LANGINFO;
+#  ifndef USE_LOCALE
+    PERL_UNUSED_ARG(locale);
+#  endif
 
     /* This emulates nl_langinfo() on platforms where it doesn't exist.
      *
@@ -6971,7 +6974,6 @@ S_override_codeset_if_utf8_found(pTHX_ const char * codeset,
 }
 
 #  endif /* ! HAS_DEFINITIVE_UTF8NESS_DETERMINATION */
-#endif      /* USE_LOCALE */
 
 /*
 =for apidoc_section $time
