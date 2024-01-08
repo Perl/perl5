@@ -7076,16 +7076,17 @@ S_my_setlocale_debug_string_i(pTHX_ const locale_category_index cat_index, const
 #     define PERL_ARGS_ASSERT_MY_SETLOCALE_DEBUG_STRING_I
 
 #   endif
+#   if defined(HAS_IGNORED_LOCALE_CATEGORIES_) || !defined(HAS_NL_LANGINFO)
+STATIC const char *
+S_emulate_langinfo(pTHX_ const int item, const char *locale, char **retbufp, Size_t *retbuf_sizep, utf8ness_t *utf8ness);
+#     define PERL_ARGS_ASSERT_EMULATE_LANGINFO  \
+        assert(locale); assert(retbufp)
+
+#   endif
 #   if defined(HAS_NL_LANGINFO)
 STATIC const char *
 S_my_langinfo_i(pTHX_ const nl_item item, locale_category_index cat_index, const char *locale, char **retbufp, Size_t *retbuf_sizep, utf8ness_t *utf8ness);
 #     define PERL_ARGS_ASSERT_MY_LANGINFO_I     \
-        assert(locale); assert(retbufp)
-
-#   else
-STATIC const char *
-S_emulate_langinfo(pTHX_ const int item, const char *locale, char **retbufp, Size_t *retbuf_sizep, utf8ness_t *utf8ness);
-#     define PERL_ARGS_ASSERT_EMULATE_LANGINFO  \
         assert(locale); assert(retbufp)
 
 #   endif
