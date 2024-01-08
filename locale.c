@@ -6073,9 +6073,10 @@ S_my_langinfo_i(pTHX_
  * make its removal easier, as there may not be any extant platforms that need
  * it; and the function is located after emulate_langinfo() because it's easier
  * to understand when placed in the context of that code */
-STATIC const char * S_override_codeset_if_utf8_found(pTHX_
-                                                     const char *codeset,
-                                                     const char *locale);
+STATIC bool
+S_maybe_override_codeset(pTHX_ const char * codeset,
+                               const char * locale,
+                               const char ** new_codeset);
 #endif
 #if ! defined(HAS_NL_LANGINFO)                      \
  ||   defined(HAS_IGNORED_LOCALE_CATEGORIES_)       \
@@ -6460,7 +6461,7 @@ S_emulate_langinfo(pTHX_ const int item,
          * guesses that it actually should be UTF-8.  It could be inlined here,
          * but was moved out of this switch() so as to make the switch()
          * control flow easier to follow */
-        retval = S_override_codeset_if_utf8_found(aTHX_ retval, locale);
+        (void) S_maybe_override_codeset(aTHX_ retval, locale, &retval);
 
 #      endif
 
@@ -6845,9 +6846,10 @@ S_emulate_langinfo(pTHX_ const int item,
 #endif      /* Needs emulate_langinfo() */
 #ifndef HAS_DEFINITIVE_UTF8NESS_DETERMINATION
 
-STATIC const char *
-S_override_codeset_if_utf8_found(pTHX_ const char * codeset,
-                                       const char * locale)
+STATIC bool
+S_maybe_override_codeset(pTHX_ const char * codeset,
+                               const char * locale,
+                               const char ** new_codeset)
 {
 #  define NAME_INDICATES_UTF8       0x1
 #  define MB_CUR_MAX_SUGGESTS_UTF8  0x2
@@ -6887,18 +6889,19 @@ S_override_codeset_if_utf8_found(pTHX_ const char * codeset,
     const int mb_cur_max = MB_CUR_MAX;
     if (mb_cur_max < (int) UNISKIP(PERL_UNICODE_MAX)) {
         if (lean_towards_being_utf8 & NAME_INDICATES_UTF8) {
-            return "";    /* The name is wrong; override */
+            *new_codeset = "";    /* The name is wrong; override */
+            return true;
         }
 
         restore_toggled_locale_c(LC_CTYPE, orig_CTYPE_locale);
-        return codeset;
+        return false;
     }
 
     /* But if the locale could be UTF-8, and also the name corroborates this,
      * assume it is so */
     if (lean_towards_being_utf8 & NAME_INDICATES_UTF8) {
         restore_toggled_locale_c(LC_CTYPE, orig_CTYPE_locale);
-        return codeset;
+        return false;
     }
 
     /* Here, the name doesn't indicate UTF-8, but MB_CUR_MAX indicates it could
@@ -7090,7 +7093,7 @@ S_override_codeset_if_utf8_found(pTHX_ const char * codeset,
     scratch_buf = NULL;
 
     if (strings_utf8ness == UTF8NESS_NO) {
-        return codeset;     /* No override */
+        return false;     /* No override */
     }
 
     /* Here all tested strings are legal UTF-8.
@@ -7103,7 +7106,8 @@ S_override_codeset_if_utf8_found(pTHX_ const char * codeset,
     }
 
     if (strings_utf8ness == UTF8NESS_YES) {
-        return "UTF-8";
+        *new_codeset = "UTF-8";
+        return true;
     }
 
     /* Here, nothing examined indicates that the codeset is or isn't UTF-8.
@@ -7133,7 +7137,7 @@ S_override_codeset_if_utf8_found(pTHX_ const char * codeset,
     /* Otherwise, assume the locale isn't UTF-8.  This can be wrong if we don't
      * have MB_CUR_MAX, and the locale is English without UTF-8 in its name,
      * and with a dollar currency symbol. */
-    return codeset;     /* No override */
+    return false;     /* No override */
 }
 
 #  endif /* ! HAS_DEFINITIVE_UTF8NESS_DETERMINATION */
