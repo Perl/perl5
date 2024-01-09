@@ -2544,6 +2544,51 @@ foreach my $Locale (@Locale) {
             print "# failed $locales_test_number locale '$Locale' numbers @f\n"
 	}
     }
+
+    {
+        my @f = ();
+        ++$locales_test_number;
+        $test_names{$locales_test_number} =
+                 'Verify ALT_DIGITS returns nothing, or else non-ASCII and'
+               . ' the single char digits evaluate to consecutive integers'
+               . ' starting at 0';
+
+        my $alts = langinfo(ALT_DIGITS);
+        if ($alts) {
+            my @alts = split ';', $alts;
+            my $prev = -1;
+            foreach my $num (@alts) {
+                if ($num =~ /[[:ascii:]]/) {
+                    push @f, disp_str($num);
+                    last;
+                }
+
+                # We only look at single character strings; likely locales
+                # that have alternate digits have a different mechanism for
+                # representing larger numbers.  Japanese for example, has a
+                # single character for the number 10, which is prefixed to the
+                # '1' symbol for '11', etc.  And 21 is represented by 3
+                # characters, the '2' symbol, followed by the '10' symbol,
+                # then the '1' symbol.  (There is nothing to say that a locale
+                # even has to use base 10.)
+                last if length $num > 1;
+
+                use Unicode::UCD 'num';
+                my $value = num($num);
+                if ($value != $prev + 1) {
+                    push @f, disp_str($num);
+                    last;
+                }
+
+                $prev = $value;
+            }
+        }
+
+        report_result($Locale, $locales_test_number, @f == 0);
+        if (@f) {
+            print "# failed $locales_test_number locale '$Locale' numbers @f\n"
+	}
+    }
 }
 
 my $final_locales_test_number = $locales_test_number;

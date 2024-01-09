@@ -110,12 +110,14 @@ our @EXPORT_OK = qw(
                     _NL_TELEPHONE_INT_PREFIX
                    );
 
-our $VERSION = '0.23';
+our $VERSION = '0.24';
 
 XSLoader::load();
 
 1;
 __END__
+
+=encoding utf8
 
 =head1 NAME
 
@@ -226,13 +228,52 @@ C<9$95>.
 
 =item *
 
-For an alternate representation of digits, for the
-radix character used between the integer and the fractional part
-of decimal numbers, the group separator string for large-ish floating point
-numbers (yes, the final two are redundant with
+For the radix character used between the integer and the fractional part of
+decimal numbers, and the group separator string for large-ish floating point
+numbers (yes, these are redundant with
 L<POSIX::localeconv()|POSIX/localeconv>):
 
-    ALT_DIGITS RADIXCHAR THOUSEP
+    RADIXCHAR THOUSEP
+
+=item *
+
+For any alternate digits used in this locale besides the standard C<0..9>:
+
+    ALT_DIGITS
+
+This returns a sequence of alternate numeric reprsesentations for the numbers
+C<0> ... up to C<99>.  The representations are returned in a single string,
+with a semi-colon C<;> used to separated the individual ones.
+
+Most locales don't have alternate digits, so the string will be empty.
+
+To access this data conveniently, you could do something like
+
+ use I18N::Langinfo qw(langinfo ALT_DIGITS);
+ my @alt_digits = split ';', langinfo(ALT_DIGITS);
+
+The array C<@alt_digits> will contain 0 elements if the current locale doesn't
+have alternate digits specified for it.  Otherwise, it will have as many
+elements as the locale defines, with C<[0]> containing the alternate digit for
+zero; C<[1]> for one; and so forth, up to potentially C<[99]> for the
+alternate representation of ninety-nine.
+
+Be aware that the alternate representation in some locales for the numbers
+0..9 will have a leading alternate-zero, so would look like the equivalent of
+00..09.
+
+Running this program
+
+ use I18N::Langinfo qw(langinfo ALT_DIGITS);
+ my @alt_digits = split ';', langinfo(ALT_DIGITS);
+ splice @alt_digits, 15;
+ print join " ", @alt_digits, "\n";
+
+on a Japanese locale yields
+
+S<C<〇 一 二 三 四 五 六 七 八 九 十 十一 十二 十三 十四>>
+
+on some platforms.
 
 =item *
 
@@ -393,6 +434,16 @@ Only the values for English are returned.  C<YESSTR> and C<NOSTR> have been
 removed from POSIX 2008, and are retained here for backwards compatibility.
 Your platform's C<nl_langinfo> may not support them.
 
+=item C<ALT_DIGITS>
+
+On systems with a C<L<strftime(3)>> that recognizes the POSIX-defined C<%O>
+format modifier (not Windows), perl tries hard to return these.  The result
+likely will go as high as what C<nl_langinfo()> would return, but not
+necessarily; and the numbers from C<0..9> will always be stripped of leading
+zeros.
+
+Without C<%O>, an empty string is always returned.
+
 =item C<D_FMT>
 
 Always evaluates to C<%x>, the locale's appropriate date representation.
@@ -406,11 +457,11 @@ Always evaluates to C<%X>, the locale's appropriate time representation.
 Always evaluates to C<%c>, the locale's appropriate date and time
 representation.
 
-=item C<ALT_DIGITS>
+=item C<CRNCYSTR>
 
-Currently this gives the same results as Linux does.  If you have examples of
-it needing to work differently, please file a report at
-L<https://github.com/Perl/perl5/issues>.
+The return may be incorrect for those rare locales where the currency symbol
+replaces the radix character.  If you have examples of it needing to work
+differently, please file a report at L<https://github.com/Perl/perl5/issues>.
 
 =item C<ERA_D_FMT>
 
