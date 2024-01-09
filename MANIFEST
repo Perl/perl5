@@ -1765,19 +1765,19 @@ cpan/PerlIO-via-QuotedPrint/t/critic.t
 cpan/PerlIO-via-QuotedPrint/t/pod.t
 cpan/PerlIO-via-QuotedPrint/t/pod_coverage.t
 cpan/PerlIO-via-QuotedPrint/t/QuotedPrint.t			PerlIO::via::QuotedPrint
-cpan/Pod-Checker/lib/Pod/Checker.pm
-cpan/Pod-Checker/scripts/podchecker.PL
-cpan/Pod-Checker/t/pod/contains_bad_pod.xr
-cpan/Pod-Checker/t/pod/empty.xr
-cpan/Pod-Checker/t/pod/podchkenc.t
-cpan/Pod-Checker/t/pod/podchkenc.xr
-cpan/Pod-Checker/t/pod/podchklink.t
-cpan/Pod-Checker/t/pod/poderrs.t
-cpan/Pod-Checker/t/pod/poderrs.xr
-cpan/Pod-Checker/t/pod/podname.t
-cpan/Pod-Checker/t/pod/selfcheck.t
-cpan/Pod-Checker/t/pod/testcmp.pl
-cpan/Pod-Checker/t/pod/testpchk.pl
+cpan/Pod-Checker/lib/Pod/Checker.pm		Module related to Pod::Checker
+cpan/Pod-Checker/scripts/podchecker.PL		Pod::Checker
+cpan/Pod-Checker/t/pod/contains_bad_pod.xr	Pod::Checker
+cpan/Pod-Checker/t/pod/empty.xr			Pod::Checker
+cpan/Pod-Checker/t/pod/podchkenc.t		Test file related to Pod::Checker
+cpan/Pod-Checker/t/pod/podchkenc.xr		Pod::Checker
+cpan/Pod-Checker/t/pod/podchklink.t		Test file related to Pod::Checker
+cpan/Pod-Checker/t/pod/poderrs.t		Test file related to Pod::Checker
+cpan/Pod-Checker/t/pod/poderrs.xr		Pod::Checker
+cpan/Pod-Checker/t/pod/podname.t		Test file related to Pod::Checker
+cpan/Pod-Checker/t/pod/selfcheck.t		Test file related to Pod::Checker
+cpan/Pod-Checker/t/pod/testcmp.pl		Script related to Pod::Checker
+cpan/Pod-Checker/t/pod/testpchk.pl		Script related to Pod::Checker
 cpan/Pod-Escapes/lib/Pod/Escapes.pm	Pod::Escapes
 cpan/Pod-Escapes/t/01_about_verbose.t	test Pod::Escapes
 cpan/Pod-Escapes/t/10_main.t		test Pod::Escapes

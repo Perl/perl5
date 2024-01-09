@@ -924,7 +924,8 @@ our %Modules = (
     },
 
     'Pod::Checker' => {
-        'DISTRIBUTION' => 'MAREKR/Pod-Checker-1.75.tar.gz',
+        'DISTRIBUTION' => 'MAREKR/Pod-Checker-1.76.tar.gz',
+        'SYNCINFO'     => 'corion on Tue Jan  9 20:34:18 2024',
         'FILES'        => q[cpan/Pod-Checker],
     },
 
