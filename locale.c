@@ -6421,30 +6421,28 @@ S_emulate_langinfo(pTHX_ const int item,
          *    language[_territory[.codeset]][@modifier]
          *
          * So we take the part between the dot and any '@' */
-        retval = strchr(locale, '.');
-        if (! retval) {
+        const char * name;
+        name = strchr(locale, '.');
+        if (! name) {
             retval = "";  /* Alas, no dot */
         }
         else {
 
             /* Don't include the dot */
-            retval++;
-
-            /* And stop before any '@' */
-            const char * modifier = strchr(retval, '@');
-            if (modifier) {
-                char * code_set_name;
-                const Size_t name_len = modifier - retval;
-                Newx(code_set_name, name_len + 1, char);    /* +1 for NUL */
-                my_strlcpy(code_set_name, retval, name_len + 1);
-                SAVEFREEPV(code_set_name);
-                retval = code_set_name;
-            }
+            name++;
 
             /* The code set name is considered to be everything between the dot
-             * and the '@' */
-            retval = save_to_buffer(retval, retbufp, retbuf_sizep);
-            retval_saved = true;
+             * and any '@', so stop before any '@' */
+            const char * modifier = strchr(name, '@');
+            SV * sv = newSV_type_mortal(SVt_PV);
+            if (modifier) {
+                sv_setpvn(sv, name, modifier - name);
+            }
+            else {
+                sv_setpv(sv, name);
+            }
+            retval = SvPVX(sv);
+
         }
 
 #      ifndef HAS_DEFINITIVE_UTF8NESS_DETERMINATION
