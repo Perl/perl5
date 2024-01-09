@@ -6112,6 +6112,7 @@ S_emulate_langinfo(pTHX_ const int item,
      * override if necessary */
     utf8ness_t is_utf8 = UTF8NESS_IMMATERIAL;
     const char * retval = NULL;
+    bool retval_saved = false;
 
     DEBUG_Lv(PerlIO_printf(Perl_debug_log,
                         "Entering emulate_langinfo item=%ld, using locale %s\n",
@@ -6236,6 +6237,7 @@ S_emulate_langinfo(pTHX_ const int item,
             if (LIKELY(s < e)) {
                 *s = '\0';
                 retval = save_to_buffer(item_start, retbufp, retbuf_sizep);
+                retval_saved = true;
                 Safefree(floatbuf);
 
                 if (utf8ness) {
@@ -6325,6 +6327,7 @@ S_emulate_langinfo(pTHX_ const int item,
 
         /* Here, 'string' contains the value we want to return */
         retval = save_to_buffer(SvPV_nolen(string), retbufp, retbuf_sizep);
+        retval_saved = true;
 
         if (utf8ness) {
             is_utf8 = get_locale_string_utf8ness_i(retval,
@@ -6374,6 +6377,7 @@ S_emulate_langinfo(pTHX_ const int item,
         const char * orig_CTYPE_locale;
         orig_CTYPE_locale = toggle_locale_c(LC_CTYPE, locale);
         retval = save_to_buffer(GET_CODE_PAGE_AS_STRING, retbufp, retbuf_sizep);
+        retval_saved = true;
         restore_toggled_locale_c(LC_CTYPE, orig_CTYPE_locale);
 
         DEBUG_Lv(PerlIO_printf(Perl_debug_log, "locale='%s' cp=%s\n",
@@ -6430,6 +6434,7 @@ S_emulate_langinfo(pTHX_ const int item,
             /* The code set name is considered to be everything between the dot
              * and the '@' */
             retval = save_to_buffer(retval, retbufp, retbuf_sizep);
+            retval_saved = true;
         }
 
 #      ifndef HAS_DEFINITIVE_UTF8NESS_DETERMINATION
@@ -6746,6 +6751,7 @@ S_emulate_langinfo(pTHX_ const int item,
         restore_toggled_locale_c(LC_TIME, orig_TIME_locale);
 
         retval = save_to_buffer(temp, retbufp, retbuf_sizep);
+        retval_saved = true;
         Safefree(temp);
 
         /* If the item is 'ALT_DIGITS', '*retbuf' contains the alternate
@@ -6811,6 +6817,10 @@ S_emulate_langinfo(pTHX_ const int item,
 
     if (utf8ness) {
         *utf8ness = is_utf8;
+    }
+
+    if (! retval_saved) {
+        retval = save_to_buffer(retval, retbufp, retbuf_sizep);
     }
 
     DEBUG_Lv(PerlIO_printf(Perl_debug_log,
