@@ -6052,14 +6052,14 @@ S_my_langinfo_i(pTHX_
                                              retbufp, retbuf_sizep);
         gwLOCALE_UNLOCK;
 
+        if (utf8ness) {
+            *utf8ness = get_locale_string_utf8ness_i(retval,
+                                                     LOCALE_UTF8NESS_UNKNOWN,
+                                                     locale, cat_index);
+        }
+
     restore_toggled_locale_i(cat_index, orig_switched_locale);
     end_DEALING_WITH_MISMATCHED_CTYPE(locale)
-
-    if (utf8ness) {
-        *utf8ness = get_locale_string_utf8ness_i(retval,
-                                                 LOCALE_UTF8NESS_UNKNOWN,
-                                                 locale, cat_index);
-    }
 
     return retval;
 }
