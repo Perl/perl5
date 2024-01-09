@@ -728,9 +728,13 @@ static const char C_thousands_sep[] = "";
 #  define langinfo_sv_i(i, c, l, b, s, u)                                   \
                     (PERL_UNUSED_VAR(c), emulate_langinfo(i, l, b, s, u))
 #endif
-#define langinfo_c(item, category, locale, retbufp, retbuf_sizep, utf8ness)    \
-            langinfo_sv_i(item, category##_INDEX_, locale, retbufp,            \
-                                                      retbuf_sizep,  utf8ness)
+
+/* The normal method for interfacing with nl_langinfo() in this file is to use
+ * a scratch buffer (whose existence is hidden from the caller by this macro */
+#define langinfo_c(item, category, locale, utf8ness)                        \
+            langinfo_sv_i(item, category##_INDEX_, locale,                     \
+                                             &scratch_buffer, NULL,  utf8ness)
+
 #ifndef USE_LOCALE  /* A no-op unless locales are enabled */
 #  define toggle_locale_i(index, locale)    NULL
 #  define restore_toggled_locale_i(index, locale)  PERL_UNUSED_VAR(locale)
@@ -3456,7 +3460,7 @@ S_new_numeric(pTHX_ const char *newnum, bool force)
 
     /* Find and save this locale's radix character. */
     const char * radix = langinfo_c(RADIXCHAR, LC_NUMERIC, PL_numeric_name,
-                                    &scratch_buffer, NULL, &utf8ness);
+                                    &utf8ness);
     sv_setpv(PL_underlying_radix_sv, radix);
 
     if (utf8ness == UTF8NESS_YES) {
@@ -3498,10 +3502,10 @@ S_new_numeric(pTHX_ const char *newnum, bool force)
     if (PL_numeric_underlying_is_standard) {
         char * scratch_buffer = NULL;
         PL_numeric_underlying_is_standard = strEQ(C_thousands_sep,
-                                             langinfo_c(THOUSEP, LC_NUMERIC,
-                                                        PL_numeric_name,
-                                                        &scratch_buffer,
-                                                        NULL, NULL));
+                                                  langinfo_c(THOUSEP,
+                                                             LC_NUMERIC,
+                                                             PL_numeric_name,
+                                                             NULL));
         Safefree(scratch_buffer);
     }
 
@@ -3971,10 +3975,7 @@ S_new_ctype(pTHX_ const char *newctype, bool force)
 
             char * scratch_buffer = NULL;
             Perl_sv_catpvf(aTHX_ PL_warn_locale, "; codeset=%s",
-                                 langinfo_c(CODESET, LC_CTYPE,
-                                            newctype,
-                                            &scratch_buffer, NULL,
-                                            NULL));
+                                 langinfo_c(CODESET, LC_CTYPE, newctype, NULL));
             Safefree(scratch_buffer);
 
 #    endif
@@ -4788,8 +4789,7 @@ S_is_locale_utf8(pTHX_ const char * locale)
 #    ifdef USE_LANGINFO_FOR_UTF8NESS
 
     char * scratch_buffer = NULL;
-    const char * codeset = langinfo_c(CODESET, LC_CTYPE, locale,
-                                      &scratch_buffer, NULL, NULL);
+    const char * codeset = langinfo_c(CODESET, LC_CTYPE, locale, NULL);
     bool retval = is_codeset_name_UTF8(codeset);
 
     DEBUG_Lv(PerlIO_printf(Perl_debug_log,
