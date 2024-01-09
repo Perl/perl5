@@ -6047,10 +6047,10 @@ S_my_langinfo_i(pTHX_
 
     const char * orig_switched_locale = toggle_locale_i(cat_index, locale);
 
-    gwLOCALE_LOCK;
-    const char * retval = save_to_buffer(nl_langinfo(item),
-                                         retbufp, retbuf_sizep);
-    gwLOCALE_UNLOCK;
+        gwLOCALE_LOCK;
+        const char * retval = save_to_buffer(nl_langinfo(item),
+                                             retbufp, retbuf_sizep);
+        gwLOCALE_UNLOCK;
 
     restore_toggled_locale_i(cat_index, orig_switched_locale);
     end_DEALING_WITH_MISMATCHED_CTYPE(locale)
