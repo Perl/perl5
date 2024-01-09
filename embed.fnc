@@ -4428,6 +4428,15 @@ S	|char * |strftime8	|NN const char *fmt			\
 				|const bool came_from_sv
 Sf	|char * |strftime_tm	|NN const char *fmt			\
 				|NN const struct tm *mytm
+# if  defined(HAS_IGNORED_LOCALE_CATEGORIES_) || !defined(HAS_NL_LANGINFO) || \
+     !defined(LC_MESSAGES)
+S	|const char *|emulate_langinfo					\
+				|const int item 			\
+				|NN const char *locale			\
+				|NN char **retbufp			\
+				|NULLOK Size_t *retbuf_sizep		\
+				|NULLOK utf8ness_t *utf8ness
+# endif
 # if defined(HAS_LOCALECONV)
 S	|HV *	|my_localeconv	|const int item
 S	|void	|populate_hash_from_C_localeconv			\
@@ -4491,15 +4500,6 @@ RS	|char * |my_setlocale_debug_string_i				\
 				|NULLOK const char *locale		\
 				|NULLOK const char *retval		\
 				|const line_t line
-#   endif
-#   if defined(HAS_IGNORED_LOCALE_CATEGORIES_) || \
-       !defined(HAS_NL_LANGINFO) || !defined(LC_MESSAGES)
-S	|const char *|emulate_langinfo					\
-				|const int item 			\
-				|NN const char *locale			\
-				|NN char **retbufp			\
-				|NULLOK Size_t *retbuf_sizep		\
-				|NULLOK utf8ness_t *utf8ness
 #   endif
 #   if defined(HAS_NL_LANGINFO)
 S	|const char *|my_langinfo_i					\

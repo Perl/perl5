@@ -7015,6 +7015,14 @@ S_strftime_tm(pTHX_ const char *fmt, const struct tm *mytm)
 # define PERL_ARGS_ASSERT_STRFTIME_TM           \
         assert(fmt); assert(mytm)
 
+# if  defined(HAS_IGNORED_LOCALE_CATEGORIES_) || !defined(HAS_NL_LANGINFO) || \
+     !defined(LC_MESSAGES)
+STATIC const char *
+S_emulate_langinfo(pTHX_ const int item, const char *locale, char **retbufp, Size_t *retbuf_sizep, utf8ness_t *utf8ness);
+#   define PERL_ARGS_ASSERT_EMULATE_LANGINFO    \
+        assert(locale); assert(retbufp)
+
+# endif
 # if defined(HAS_LOCALECONV)
 STATIC HV *
 S_my_localeconv(pTHX_ const int item);
@@ -7079,14 +7087,6 @@ STATIC char *
 S_my_setlocale_debug_string_i(pTHX_ const locale_category_index cat_index, const char *locale, const char *retval, const line_t line)
         __attribute__warn_unused_result__;
 #     define PERL_ARGS_ASSERT_MY_SETLOCALE_DEBUG_STRING_I
-
-#   endif
-#   if defined(HAS_IGNORED_LOCALE_CATEGORIES_) || \
-       !defined(HAS_NL_LANGINFO) || !defined(LC_MESSAGES)
-STATIC const char *
-S_emulate_langinfo(pTHX_ const int item, const char *locale, char **retbufp, Size_t *retbuf_sizep, utf8ness_t *utf8ness);
-#     define PERL_ARGS_ASSERT_EMULATE_LANGINFO  \
-        assert(locale); assert(retbufp)
 
 #   endif
 #   if defined(HAS_NL_LANGINFO)
