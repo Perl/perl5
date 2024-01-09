@@ -940,9 +940,11 @@ PP(pp_undef)
     }
 
     if (PL_op->op_private & OPpTARGET_MY) {
+        /* $lex = undef, or undef $lex */
         SV** const padentry = &PAD_SVl(PL_op->op_targ);
         sv = *padentry;
-        rpp_xpush_1(sv);
+        if (UNLIKELY((PL_op->op_flags & OPf_WANT) != OPf_WANT_VOID))
+            rpp_xpush_1(sv);
         if ((PL_op->op_private & (OPpLVAL_INTRO|OPpPAD_STATE))
                                == OPpLVAL_INTRO)
         {
@@ -1046,8 +1048,12 @@ PP(pp_undef)
     }
 
 
-    if (!(PL_op->op_private & OPpTARGET_MY))
-        rpp_replace_1_1_NN(&PL_sv_undef);
+    if (!(PL_op->op_private & OPpTARGET_MY)) {
+        if (LIKELY((PL_op->op_flags & OPf_WANT) == OPf_WANT_VOID))
+            rpp_popfree_1_NN();
+        else
+            rpp_replace_1_1_NN(&PL_sv_undef);
+    }
 
     return NORMAL;
 }
@@ -6350,9 +6356,12 @@ PP(pp_push)
         PL_delaymagic = old_delaymagic;
     }
     rpp_popfree_to_NN(ORIGMARK);
-    if (OP_GIMME(PL_op, 0) != G_VOID) {
+    if (   (PL_op->op_flags & OPf_WANT) != G_VOID
+        || (PL_op->op_private & OPpTARGET_MY))
+    {
         TARGi(AvFILL(ary) + 1, 1);
-        rpp_push_1(targ);
+        if ((PL_op->op_flags & OPf_WANT) != G_VOID)
+            rpp_push_1(targ);
     }
     return NORMAL;
 }
@@ -6432,9 +6441,12 @@ PP(pp_unshift)
         PL_delaymagic = old_delaymagic;
     }
     rpp_popfree_to_NN(ORIGMARK);
-    if (OP_GIMME(PL_op, 0) != G_VOID) {
+    if (   (PL_op->op_flags & OPf_WANT) != G_VOID
+        || (PL_op->op_private & OPpTARGET_MY))
+    {
         TARGi(AvFILL(ary) + 1, 1);
-        rpp_push_1(targ);
+        if ((PL_op->op_flags & OPf_WANT) != G_VOID)
+            rpp_push_1(targ);
     }
     return NORMAL;
 }

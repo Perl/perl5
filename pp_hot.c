@@ -336,7 +336,8 @@ PP(pp_padsv_store)
         );
     SvSetMagicSV(targ, val);
 
-    rpp_replace_1_1_NN(targ);
+    assert(GIMME_V == G_VOID);
+    rpp_popfree_1_NN();
     return NORMAL;
 }
 
@@ -386,7 +387,8 @@ PP(pp_aelemfastlex_store)
 
     SvSetMagicSV(targ, val);
 
-    rpp_replace_1_1_NN(targ);
+    assert(GIMME_V == G_VOID);
+    rpp_popfree_1_NN();
     return NORMAL;
 }
 
@@ -401,6 +403,8 @@ PP(pp_sassign)
     if (PL_op->op_private & OPpASSIGN_BACKWARDS) { /* {or,and,dor}assign */
         SV * const temp = left;
         left = right; right = temp;
+        PL_stack_sp[0]  = left;
+        PL_stack_sp[-1] = right;
     }
     assert(TAINTING_get || !TAINT_get);
     if (UNLIKELY(TAINT_get) && !SvTAINTED(right))
@@ -440,7 +444,9 @@ PP(pp_sassign)
         /* Need to fix things up.  */
         if (!is_gv) {
             /* Need to fix GV.  */
-            left = MUTABLE_SV(gv_fetchsv_nomg(left,GV_ADD, SVt_PVGV));
+            SV *sv = MUTABLE_SV(gv_fetchsv_nomg(left,GV_ADD, SVt_PVGV));
+            rpp_replace_1_1_NN(sv);
+            left = sv;
         }
 
         if (!got_coderef) {
@@ -493,7 +499,18 @@ PP(pp_sassign)
             packWARN(WARN_MISC), "Useless assignment to a temporary"
         );
     SvSetMagicSV(left, right);
-    rpp_replace_2_1_NN(left);
+    if (LIKELY(GIMME_V == G_VOID))
+        rpp_popfree_2_NN(); /* pop left and right */
+    else {
+        /* pop right, leave left on the stack */
+        assert(PL_stack_sp[-1] == right);
+        assert(PL_stack_sp[0]  == left);
+        *--PL_stack_sp = left;
+#ifdef PERL_RC_STACK
+        SvREFCNT_dec_NN(right);
+#endif
+    }
+
     return NORMAL;
 }
 
@@ -2162,7 +2179,8 @@ PP(pp_print)
 
   just_say_no:
     rpp_popfree_to_NN(ORIGMARK);
-    rpp_xpush_IMM(retval);
+    if ((PL_op->op_flags & OPf_WANT) != OPf_WANT_VOID)
+        rpp_xpush_IMM(retval);
     return NORMAL;
 }
 
