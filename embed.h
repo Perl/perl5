@@ -1313,6 +1313,10 @@
 #     define set_save_buffer_min_size(a,b,c)    S_set_save_buffer_min_size(aTHX_ a,b,c)
 #     define strftime8(a,b,c,d,e)               S_strftime8(aTHX_ a,b,c,d,e)
 #     define strftime_tm(a,b)                   S_strftime_tm(aTHX_ a,b)
+#     if defined(HAS_IGNORED_LOCALE_CATEGORIES_) || \
+         !defined(HAS_NL_LANGINFO) || !defined(LC_MESSAGES)
+#       define emulate_langinfo(a,b,c,d,e)      S_emulate_langinfo(aTHX_ a,b,c,d,e)
+#     endif
 #     if defined(HAS_LOCALECONV)
 #       define my_localeconv(a)                 S_my_localeconv(aTHX_ a)
 #       define populate_hash_from_C_localeconv(a,b,c,d,e) S_populate_hash_from_C_localeconv(aTHX_ a,b,c,d,e)
@@ -1329,10 +1333,6 @@
 #       define setlocale_failure_panic_via_i(a,b,c,d,e,f,g) S_setlocale_failure_panic_via_i(aTHX_ a,b,c,d,e,f,g)
 #       if defined(DEBUGGING)
 #         define my_setlocale_debug_string_i(a,b,c,d) S_my_setlocale_debug_string_i(aTHX_ a,b,c,d)
-#       endif
-#       if defined(HAS_IGNORED_LOCALE_CATEGORIES_) || \
-           !defined(HAS_NL_LANGINFO) || !defined(LC_MESSAGES)
-#         define emulate_langinfo(a,b,c,d,e)    S_emulate_langinfo(aTHX_ a,b,c,d,e)
 #       endif
 #       if defined(HAS_NL_LANGINFO)
 #         define my_langinfo_i(a,b,c,d,e,f)     S_my_langinfo_i(aTHX_ a,b,c,d,e,f)
