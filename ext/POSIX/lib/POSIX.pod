@@ -987,6 +987,7 @@ the program, regardless of whether or not it is called from within the
 scope of a S<C<use locale>>.  Users of this function should also read
 L<perllocale>, which provides a comprehensive discussion of Perl locale
 handling, including
+XXX mortal
 L<a section devoted to this function|perllocale/The localeconv function>.
 Prior to Perl 5.28, or when operating in a non thread-safe environment,
 it should not be used in a threaded application unless it's certain that
