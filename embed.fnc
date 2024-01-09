@@ -4503,7 +4503,7 @@ RS	|char * |my_setlocale_debug_string_i				\
 				|const line_t line
 #   endif
 #   if defined(HAS_NL_LANGINFO)
-S	|const char *|my_langinfo_i					\
+S	|const char *|langinfo_sv_i					\
 				|const nl_item item			\
 				|locale_category_index cat_index	\
 				|NN const char *locale			\

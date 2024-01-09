@@ -724,12 +724,12 @@ static const char C_thousands_sep[] = "";
 
 /* If this interface to nl_langinfo() isn't defined by embed.fnc, it means it
  * isn't available on this platform, so instead emulate it */
-#ifndef my_langinfo_i
-#  define my_langinfo_i(i, c, l, b, s, u)                                   \
+#ifndef langinfo_sv_i
+#  define langinfo_sv_i(i, c, l, b, s, u)                                   \
                     (PERL_UNUSED_VAR(c), emulate_langinfo(i, l, b, s, u))
 #endif
 #define langinfo_c(item, category, locale, retbufp, retbuf_sizep, utf8ness)    \
-            my_langinfo_i(item, category##_INDEX_, locale, retbufp,            \
+            langinfo_sv_i(item, category##_INDEX_, locale, retbufp,            \
                                                       retbuf_sizep,  utf8ness)
 #ifndef USE_LOCALE  /* A no-op unless locales are enabled */
 #  define toggle_locale_i(index, locale)    NULL
@@ -5882,7 +5882,7 @@ L<I18N::Langinfo>.
 */
 
 /* external_call_langinfo() is an interface to callers from outside this file to
- * my_langinfo_i(), calculating a necessary value for it.  If those functions
+ * langinfo_sv_i(), calculating a necessary value for it.  If those functions
  * aren't defined, the fallback function is emulate_langinfo(), which doesn't
  * use that value (as everything in this situation takes place in the "C"
  * locale), and so we define this macro to transparently hide the absence of
@@ -5925,7 +5925,7 @@ S_external_call_langinfo(pTHX_ const nl_item item, utf8ness_t * utf8ness,
     PERL_ARGS_ASSERT_EXTERNAL_CALL_LANGINFO;
 
     /* Find the locale category that controls the input 'item', and call
-     * my_langinfo_i() including that value.
+     * langinfo_sv_i() including that value.
      *
      * If we are not paying attention to that category, instead call
      * emulate_langinfo(), which knows how to handle this situation. */
@@ -5991,7 +5991,7 @@ S_external_call_langinfo(pTHX_ const nl_item item, utf8ness_t * utf8ness,
     /* And get the value for this 'item', whose category has now been
      * calculated.  We need to find the current corresponding locale, and pass
      * that as well. */
-    return my_langinfo_i(item,
+    return langinfo_sv_i(item,
                          cat_index,
                          query_nominal_locale_i(cat_index),
                          retbufp, retbuf_sizep,
@@ -6002,7 +6002,7 @@ S_external_call_langinfo(pTHX_ const nl_item item, utf8ness_t * utf8ness,
 #if defined(USE_LOCALE) && defined(HAS_NL_LANGINFO)
 
 STATIC const char *
-S_my_langinfo_i(pTHX_
+S_langinfo_sv_i(pTHX_
                 const nl_item item,           /* The item to look up */
 
                 /* The locale category that controls it */
@@ -6022,11 +6022,11 @@ S_my_langinfo_i(pTHX_
                  * value, as documented */
                 utf8ness_t * utf8ness)
 {
-    PERL_ARGS_ASSERT_MY_LANGINFO_I;
+    PERL_ARGS_ASSERT_LANGINFO_SV_I;
     assert(cat_index < LC_ALL_INDEX_);
 
     DEBUG_Lv(PerlIO_printf(Perl_debug_log,
-                           "Entering my_langinfo item=%ld, using locale %s\n",
+                           "Entering langinfo_sv_i item=%ld, using locale %s\n",
                            (long) item, locale));
 
 #    ifdef HAS_IGNORED_LOCALE_CATEGORIES
@@ -7006,7 +7006,7 @@ S_maybe_override_codeset(pTHX_ const char * codeset,
 #  endif
 
     /* The trials array may consist of strings from two different locale
-     * categories.  The call to my_langinfo_i() below needs to pass the proper
+     * categories.  The call to langinfo_sv_i() below needs to pass the proper
      * category for each string.  There is a max of 1 trial for LC_MONETARY;
      * the rest are LC_TIME.  So the array is arranged so the LC_MONETARY item
      * (if any) is first, and all subsequent iterations will use LC_TIME.
@@ -7043,7 +7043,7 @@ S_maybe_override_codeset(pTHX_ const char * codeset,
 
     /* Everything set up; look through all the strings */
     for (PERL_UINT_FAST8_T i = 0; i < C_ARRAY_LENGTH(trials); i++) {
-        (void) my_langinfo_i(trials[i], cat_index, locale,
+        (void) langinfo_sv_i(trials[i], cat_index, locale,
                              &scratch_buf, &scratch_buf_size, NULL);
         cat_index = follow_on_cat_index;
 
