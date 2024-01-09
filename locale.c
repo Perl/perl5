@@ -6301,9 +6301,97 @@ S_langinfo_sv_i(pTHX_
 
         retval = nl_langinfo(item);
         Size_t total_len = strlen(retval);
+        char separator;
+
+        if (UNLIKELY(item == ALT_DIGITS) && total_len > 0) {
+
+            /* The return from nl_langinfo(ALT_DIGITS) is specified by the
+             * 2017 POSIX Standard as a string consisting of "semicolon-
+             * separated symbols. The first is the alternative symbol
+             * corresponding to zero, the second is the symbol corresponding to
+             * one, and so on.  Up to 100 alternative symbols may be
+             * specified".  Infuriatingly, Linux does not follow this, and uses
+             * the least C-language-friendly separator possible, the NUL.  In
+             * case other platforms also violate the standard, the code below
+             * looks for NUL and any graphic \W character as a potential
+             * separator. */
+            const char * sep_pos = strpbrk(retval,
+                                        " !\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~");
+            if (sep_pos) {
+                separator = *sep_pos;
+            }
+            else if (UNLIKELY(total_len >
+                                        2 * UVCHR_SKIP(PERL_UNICODE_MAX) * 4))
+            {   /* But as a check against the possibility that the separator is
+                 * some other character, look at the length of the returned
+                 * string.  If the separator is a NUL, the length will be just
+                 * for the first NUL-terminated segment; if it is some other
+                 * character, there is only a single segment with all returned
+                 * alternate digits, which will be quite a bit longer than just
+                 * the first one.  Many locales will always have a leading zero
+                 * to represent 0-9 (hence the 2* in the conditional above).
+                 * The conditional uses the worst case value of the most number
+                 * of byte possible for a Unicode character, and it is possible
+                 * that it requires several characters to represent a single
+                 * value; hence the final multiplier.  This length represents a
+                 * conservative upper limit of the number of bytes for the
+                 * alternative representation of 00, but if the string
+                 * represents even only the first 10 alternative digits, it
+                 * will be much longer than that.  So to reach here, the
+                 * separator must be some other byte. */
+                locale_panic_(Perl_form(aTHX_
+                                        "Can't find separator in ALT_DIGITS"
+                                        " representation '%s' for locale '%s'",
+                                        _byte_dump_string((U8 *) retval,
+                                                          total_len, 0),
+                                        locale));
+            }
+            else {
+                separator = '\0';
+
+                /* Must be using NUL to separate the digits.  There are up to
+                 * 100 of them.  Find the length of the entire sequence.
+                 *
+                 * The only way it could work if fewer is if it ends in two
+                 * NULs.  khw has seen cases where there is no 2nd NUL on a 100
+                 * digit return. */
+                const char * s = retval + total_len + 1;
+
+                for (unsigned int i = 1; i <= 99; i++) {
+                    Size_t len = strlen(s) + 1;
+                    total_len += len;
+
+                    if (len == 1) {     /* Only a NUL */
+                        break;
+                    }
+
+                    s += len;
+                }
+            }
+        }
+
         sv_setpvn(sv, retval, total_len);
 
         gwLOCALE_UNLOCK;
+
+        /* Convert the ALT_DIGITS separator to a semi-colon if not already */
+        if (UNLIKELY(item == ALT_DIGITS) && total_len > 0 && separator != ';') {
+
+            /* Operate directly on the string in the SV */
+            char * digit_string = SvPVX(sv);
+            char * s = digit_string;
+            char * e = s + total_len;
+
+            do {
+                char * this_end = (char *) memchr(s, separator, total_len);
+                if (! this_end || this_end >= e) {
+                    break;
+                }
+
+                *this_end = ';';
+                s = this_end;
+            } while (1);
+        }
 
         SvUTF8_off(sv);
         retval = SvPV_nolen(sv);
@@ -7145,34 +7233,7 @@ S_emulate_langinfo(pTHX_ const int item,
 
         restore_toggled_locale_c(LC_TIME, orig_TIME_locale);
 
-        /* If the item is 'ALT_DIGITS', '*retbuf' contains the alternate
-        * format for wday 0.  If the value is the same as the normal 0,
-        * there isn't an alternate, so clear the buffer.
-        *
-        * (wday was chosen because its range is all a single digit.
-        * Things like tm_sec have two digits as the minimum: '00'.) */
-        if (item == ALT_DIGITS && strEQ(temp, "0")) {
-            retval = "";
-            Safefree(temp);
-            break;
-        }
-
-        /* ALT_DIGITS is problematic.  Experiments on it showed that
-        * strftime() did not always work properly when going from alt-9 to
-        * alt-10.  Only a few locales have this item defined, and in all
-        * of them on Linux that khw was able to find, nl_langinfo() merely
-        * returned the alt-0 character, possibly doubled.  Most Unicode
-        * digits are in blocks of 10 consecutive code points, so that is
-        * sufficient information for such scripts, as we can infer alt-1,
-        * alt-2, ....  But for a Japanese locale, a CJK ideographic 0 is
-        * returned, and the CJK digits are not in code point order, so you
-        * can't really infer anything.  The localedef for this locale did
-        * specify the succeeding digits, so that strftime() works properly
-        * on them, without needing to infer anything.  But the
-        * nl_langinfo() return did not give sufficient information for the
-        * caller to understand what's going on.  So until there is
-        * evidence that it should work differently, this returns the alt-0
-        * string for ALT_DIGITS. */
+        if (LIKELY(item != ALT_DIGITS)) {
 
             /* If to return what strftime() returns, are done */
             if (! return_format) {
@@ -7206,6 +7267,130 @@ S_emulate_langinfo(pTHX_ const int item,
 
             Safefree(temp);
             break;
+        }
+
+        /* Here, the item is 'ALT_DIGITS' and temp contains the zeroth
+         * alternate digit.  If empty or doesn't differ from regular digits,
+         * return that there aren't alternate digits */
+        if (temp[0] == '\0' || strchr(temp, '0')) {
+            Safefree(temp);
+            retval = "";
+            break;
+        }
+
+        /* ALT_DIGITS requires special handling because it requires up to 100
+         * values.  Below we generate those by using the %O modifier to
+         * strftime() formats.
+         *
+         * We already have the alternate digit for zero in 'temp', generated
+         * using the %Ow format.  That was used because it seems least likely
+         * to have a leading zero.  But some locales return that anyway.  If
+         * the first half of temp is identical to the second half, assume that
+         * is the case, and use just the first half */
+        const char * alt0 = temp;    /* Clearer synonym */
+        Size_t alt0_len = strlen(alt0);
+        if ((alt0_len & 1) == 0) {
+            Size_t half_alt0_len = alt0_len / 2;
+            if (strnEQ(temp, temp + half_alt0_len, half_alt0_len)) {
+                alt0_len = half_alt0_len;
+            }
+        }
+
+        /* Save the 0 digit string */
+        sv_setpvn(sv, alt0, alt0_len);
+        sv_catpvn_nomg (sv, ";", 1);
+
+        /* Various %O formats can be used to derive the alternate digits.  Only
+         * %Oy can go up to the full 100 values.  If it doesn't work, we try
+         * various fallbacks in decreasing order of how many values they can
+         * deliver.  maxes[] tells the highest value that the format applies
+         * to; offsets[] compensates for 0-based vs 1-based indices; and vars[]
+         * holds what field in the 'struct tm' to applies to the corresponding
+         * format */
+        int year, min, sec;
+      const char  * fmts[] = {"%Oy", "%OM", "%OS", "%Od", "%OH", "%Om", "%Ow" };
+      const Size_t maxes[] = {  99,    59,    59,    31,    23,    11,    6   };
+      const int  offsets[] = {   0,     0,     0,     1,     0,     1,    0   };
+      int         * vars[] = {&year,  &min,  &sec,  &mday, &hour, &mon, &mday };
+        Size_t j = 0;   /* Current index into the above tables */
+
+        orig_TIME_locale = toggle_locale_c(LC_TIME, locale);
+
+        for (unsigned int i = 1; i <= 99; i++) {
+            struct tm  mytm;
+
+          redo:
+            if (j >= C_ARRAY_LENGTH(fmts)) {
+                break;  /* Exhausted formats early; can't continue */
+            }
+
+            if (i > maxes[j]) {
+                j++;    /* Exhausted this format; try next one */
+                goto redo;
+            }
+
+            year = (strchr(fmts[j], 'y')) ? 1900 : 2011;
+            hour = 0;
+            min = 0;
+            sec = 0;
+            mday = 1;
+            mon = 0;
+
+            /* Change the variable corresponding to this format to the
+            * current time being run in 'i' */
+            *(vars[j]) += i - offsets[j];
+
+            /* Do the strftime.  Once we have determined the UTF8ness (if
+            * we want it), assume the rest will be the same, and use
+            * strftime_tm(), which doesn't recalculate UTF8ness */
+            ints_to_tm(&mytm, sec, min, hour, mday, mon, year, 0, 0, 0);
+            char * temp;
+            if (utf8ness && is_utf8 != UTF8NESS_NO && is_utf8 != UTF8NESS_YES) {
+                temp = strftime8(fmts[j],
+                                 &mytm,
+                                 UTF8NESS_IMMATERIAL,
+                                 &is_utf8,
+                                 false    /* not calling from sv_strftime */
+                                );
+            }
+            else {
+                temp = strftime_tm(fmts[j], &mytm);
+            }
+
+            DEBUG_Lv(PerlIO_printf(Perl_debug_log,
+                                "i=%d, format=%s, alt='%s'\n",
+                                i, fmts[j], temp));
+
+            /* If no result (meaning this platform didn't recognize this
+            * format), or it returned regular digits, give up on this
+            * format, to try the next candidate one */
+            if (temp == NULL || strpbrk(temp, "0123456789")) {
+                Safefree(temp);
+                j++;
+                goto redo;
+            }
+
+            /* If there is a leading zero, skip past it, to get the second
+            * one in the string */
+            const char * current = temp;
+            if (strnEQ(temp, alt0, alt0_len)) {
+                current += alt0_len;
+            }
+
+            /* Append this number to the ongoing list, including the separator.
+             * */
+            sv_catpv_nomg (sv, current);
+            sv_catpvn_nomg (sv, ";", 1);
+            Safefree(temp);
+        } /* End of loop generating ALT_DIGIT strings */
+
+        Safefree(alt0);
+
+        restore_toggled_locale_c(LC_TIME, orig_TIME_locale);
+
+        retval_type = RETVAL_IN_sv;
+        break;
+
 #  endif
 
        }    /* End of braced group for outer switch 'default:' case */

@@ -129,6 +129,11 @@ L<XXX> has been upgraded from version A.xx to B.yy.
 
 XXX If there was something important to note about this change, include that here.
 
+L<I18N::Langinfo> has been upgraded from version 0.23 to 0.24.
+
+This fixes what is returned for the C<ALT_DIGITS> item, which has never
+before worked properly in Perl.
+
 =back
 
 =head2 Removed Modules and Pragmata
