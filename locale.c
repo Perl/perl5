@@ -3451,12 +3451,12 @@ S_new_numeric(pTHX_ const char *newnum, bool force)
      * function */
     PL_numeric_underlying = TRUE;
 
-    char * radix = NULL;
+    char * scratch_buffer = NULL;
     utf8ness_t utf8ness = UTF8NESS_IMMATERIAL;
 
     /* Find and save this locale's radix character. */
-    langinfo_c(RADIXCHAR, LC_NUMERIC, PL_numeric_name,
-                  &radix, NULL, &utf8ness);
+    const char * radix = langinfo_c(RADIXCHAR, LC_NUMERIC, PL_numeric_name,
+                                    &scratch_buffer, NULL, &utf8ness);
     sv_setpv(PL_underlying_radix_sv, radix);
 
     if (utf8ness == UTF8NESS_YES) {
@@ -3475,7 +3475,7 @@ S_new_numeric(pTHX_ const char *newnum, bool force)
      * the radix character and the thousands separator are the same as C's.
      * Start with the radix. */
     PL_numeric_underlying_is_standard = strEQ(C_decimal_point, radix);
-    Safefree(radix);
+    Safefree(scratch_buffer);
 
 #    ifndef TS_W32_BROKEN_LOCALECONV
 
@@ -7043,27 +7043,26 @@ S_maybe_override_codeset(pTHX_ const char * codeset,
 
     /* Everything set up; look through all the strings */
     for (PERL_UINT_FAST8_T i = 0; i < C_ARRAY_LENGTH(trials); i++) {
-        (void) langinfo_sv_i(trials[i], cat_index, locale,
+        const char * result = langinfo_sv_i(trials[i], cat_index, locale,
                              &scratch_buffer, &scratch_buf_size, NULL);
         cat_index = follow_on_cat_index;
 
         /* To prevent infinite recursive calls, we don't ask for the UTF-8ness
          * of the string (in 'trials[i]') above.  Instead we examine the
          * returned string here */
-        const Size_t len = strlen(scratch_buffer);
+        const Size_t len = strlen(result);
         const U8 * first_variant;
 
         /* If the string is identical whether or not it is encoded as UTF-8, it
          * isn't helpful in determining UTF8ness. */
-        if (is_utf8_invariant_string_loc((U8 *) scratch_buffer, len,
-                                         &first_variant))
+        if (is_utf8_invariant_string_loc((U8 *) result, len, &first_variant))
         {
             continue;
         }
 
         /* Here, has non-ASCII.  If not legal UTF-8, isn't a UTF-8 locale */
         if (! is_utf8_string(first_variant,
-                             len - (first_variant - (U8 *) scratch_buffer)))
+                                        len - (first_variant - (U8 *) result)))
         {
             strings_utf8ness = UTF8NESS_NO;
             break;
