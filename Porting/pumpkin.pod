@@ -272,7 +272,7 @@ should be updated?)]
 We should never release a main version without testing it as a
 subversion first.
 
-=head2 Test popular applications and modules.
+=head2 Test popular applications and modules
 
 We should never release a main version without testing whether or not
 it breaks various popular modules and applications.  A partial list of

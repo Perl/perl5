@@ -1518,7 +1518,7 @@ The sort order will cause differences between results obtained on
 ASCII platforms versus EBCDIC platforms.  What follows are some suggestions
 on how to deal with these differences.
 
-=head2 Ignore ASCII vs. EBCDIC sort differences.
+=head2 Ignore ASCII vs. EBCDIC sort differences
 
 This is the least computationally expensive strategy.  It may require
 some user education.
@@ -1587,7 +1587,7 @@ Unicode-enabled Perl, do:
     tr/ÿ/\x{178}/;
     tr/µ/\x{39C}/;
 
-=head2 Perform sorting on one type of platform only.
+=head2 Perform sorting on one type of platform only
 
 This strategy can employ a network connection.  As such
 it would be computationally expensive.
