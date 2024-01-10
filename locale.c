@@ -6080,7 +6080,7 @@ STATIC const char * S_override_codeset_if_utf8_found(pTHX_
  || ! defined(LC_MESSAGES)
 
 STATIC const char *
-S_emulate_langinfo(pTHX_ const nl_item item,
+S_emulate_langinfo(pTHX_ const int item,
                          const char * locale,
                          char ** retbufp,
                          Size_t * retbuf_sizep,
@@ -6487,8 +6487,8 @@ S_emulate_langinfo(pTHX_ const nl_item item,
              * invalid. */;
 #  if defined(I_LANGINFO)
 
-            Perl_croak_nocontext("panic: Unexpected nl_langinfo() item %d",
-                                 item);
+            Perl_croak_nocontext("panic: Unexpected nl_langinfo() item %ld",
+                                 (long) item);
 
 #  else
             assert(item < 0);   /* Make sure using perl_langinfo.h */
