@@ -6365,18 +6365,21 @@ S_emulate_langinfo(pTHX_ const int item,
 
 #    ifdef WIN32
 #      ifdef WIN32_USE_FAKE_OLD_MINGW_LOCALES
-#        define GET_CODE_PAGE_AS_STRING  nl_langinfo(CODESET)
+#        define CODE_PAGE_FORMAT  "%s"
+#        define CODE_PAGE_FUNCTION  nl_langinfo(CODESET)
 #      else
-            /* The Windows function retrieves the code page.  It is subject to
-             * change, but is documented and has been stable for many releases
-             * */
-#        define GET_CODE_PAGE_AS_STRING                                     \
-                                Perl_form(aTHX_ "%d", ___lc_codepage_func())
+#        define CODE_PAGE_FORMAT  "%d"
+
+         /* This Windows function retrieves the code page.  It is subject to
+          * change, but is documented, and has been stable for many releases */
+#        define CODE_PAGE_FUNCTION  ___lc_codepage_func()
 #      endif
 
         const char * orig_CTYPE_locale;
         orig_CTYPE_locale = toggle_locale_c(LC_CTYPE, locale);
-        retval = save_to_buffer(GET_CODE_PAGE_AS_STRING, retbufp, retbuf_sizep);
+        retval = save_to_buffer(Perl_form(aTHX_ CODE_PAGE_FORMAT,
+                                                CODE_PAGE_FUNCTION),
+                                retbufp, retbuf_sizep);
         retval_saved = true;
         restore_toggled_locale_c(LC_CTYPE, orig_CTYPE_locale);
 
