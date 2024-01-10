@@ -348,7 +348,10 @@ well.
 
 =item *
 
-XXX
+C<dAX>, C<dITEMS> and hence C<dXSARGS> now declare C<AX> and C<items>
+as C<Stack_off_t> rather than C<SSize_t>.  This reverts back to
+compatibility with pre-64-bit stack support for default builds of perl
+where C<Stack_off_t> is C<I32>.  [GH #21782]
 
 =back
 
