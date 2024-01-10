@@ -3786,7 +3786,8 @@ Adp	|void	|wrap_op_checker|Optype opcode				\
 p	|void	|write_to_stderr|NN SV *msv
 Xp	|void	|xs_boot_epilog |const SSize_t ax
 
-FTXopv	|SSize_t|xs_handshake	|const U32 key				\
+FTXopv	|Stack_off_t|xs_handshake					\
+				|const U32 key				\
 				|NN void *v_my_perl			\
 				|NN const char *file			\
 				|...

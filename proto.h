@@ -5351,7 +5351,7 @@ PERL_CALLCONV void
 Perl_xs_boot_epilog(pTHX_ const SSize_t ax);
 #define PERL_ARGS_ASSERT_XS_BOOT_EPILOG
 
-PERL_CALLCONV SSize_t
+PERL_CALLCONV Stack_off_t
 Perl_xs_handshake(const U32 key, void *v_my_perl, const char *file, ...);
 #define PERL_ARGS_ASSERT_XS_HANDSHAKE           \
         assert(v_my_perl); assert(file)
