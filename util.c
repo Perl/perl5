@@ -5531,12 +5531,12 @@ Perl_my_cxt_init(pTHX_ int *indexp, size_t size)
    'file' is the source filename of the caller.
 */
 
-SSize_t
+Stack_off_t
 Perl_xs_handshake(const U32 key, void * v_my_perl, const char * file, ...)
 {
     va_list args;
-    SSize_t items;
-    SSize_t ax;
+    Stack_off_t items;
+    Stack_off_t ax;
     void * got;
     void * need;
     const char *stage = "first";
@@ -5598,12 +5598,12 @@ Perl_xs_handshake(const U32 key, void * v_my_perl, const char * file, ...)
         ax = POPMARK;
         {   SV **mark = PL_stack_base + ax++;
             {   dSP;
-                items = (SSize_t)(SP - MARK);
+                items = (Stack_off_t)(SP - MARK);
             }
         }
     } else {
-        items = va_arg(args, SSize_t);
-        ax = va_arg(args, SSize_t);
+        items = va_arg(args, Stack_off_t);
+        ax = va_arg(args, Stack_off_t);
     }
     assert(ax >= 0);
     assert(items >= 0);
