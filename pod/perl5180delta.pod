@@ -290,7 +290,7 @@ behaviors, and since the REPLACEMENT CHARACTER has no use other than as
 a stand-in for some unknown character, any code that has this problem is
 buggy.
 
-=head2 Formerly deprecated characters in C<\N{}> character name aliases are now errors.
+=head2 Formerly deprecated characters in C<\N{}> character name aliases are now errors
 
 Since v5.12.0, it has been deprecated to use certain characters in
 user-defined C<\N{...}> character names.  These now cause a syntax

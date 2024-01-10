@@ -86,7 +86,7 @@ Perl 5.42.0 production release.
 
 Category: "deprecated::smartmatch"
 
-=head3 Use of C<'> as a global name separator.
+=head3 Use of C<'> as a global name separator
 
 Perl allows use of C<'> instead of C<::> to replace the parts of a
 package or global variable name, for example C<A::B> and C<A'B> are
@@ -230,7 +230,7 @@ C<{> got a deprecation warning.  Some cases started warning in Perl 5.26,
 and were made fatal in Perl 5.30.  Other cases started in Perl 5.28,
 and were made fatal in 5.32.
 
-=head3 In XS code, use of various macros dealing with UTF-8.
+=head3 In XS code, use of various macros dealing with UTF-8
 
 The macros below now require an extra parameter than in versions prior
 to Perl 5.32.  The final parameter in each one is a pointer into the
@@ -353,7 +353,7 @@ and an unqualified C<dump()> is no longer available as of Perl 5.30.
 See L<perlfunc/dump>.
 
 
-=head3 Using my() in false conditional.
+=head3 Using my() in false conditional
 
 There has been a long-standing bug in Perl that causes a lexical variable
 not to be cleared at scope exit when its declaration includes a false
@@ -384,7 +384,7 @@ The use of C<my()> in a false conditional has been deprecated in
 Perl 5.10, and became a fatal error in Perl 5.30.
 
 
-=head3 Reading/writing bytes from/to :utf8 handles.
+=head3 Reading/writing bytes from/to :utf8 handles
 
 The sysread(), recv(), syswrite() and send() operators are
 deprecated on handles that have the C<:utf8> layer, either explicitly, or
@@ -408,7 +408,7 @@ As of Perl 5.30, it is no longer be possible to use sysread(), recv(),
 syswrite() or send() to read or send bytes from/to :utf8 handles.
 
 
-=head3 Use of unassigned code point or non-standalone grapheme for a delimiter.
+=head3 Use of unassigned code point or non-standalone grapheme for a delimiter
 
 A grapheme is what appears to a native-speaker of a language to be a
 character.  In Unicode (and hence Perl) a grapheme may actually be
@@ -480,7 +480,7 @@ You are recommended to change your code to set C<$/> to C<undef> explicitly
 if you wish to slurp the file.
 
 
-=head3 Limit on the value of Unicode code points.
+=head3 Limit on the value of Unicode code points
 
 Unicode only allows code points up to 0x10FFFF, but Perl allows
 much larger ones. Up till Perl 5.28, it was allowed to use code
@@ -501,7 +501,7 @@ than 32-bit ones. For 32-bit integers, C<IV_MAX> equals C<0x7FFFFFFF>,
 for 64-bit integers, C<IV_MAX> equals C<0x7FFFFFFFFFFFFFFF>.
 
 
-=head3 Use of comma-less variable list in formats.
+=head3 Use of comma-less variable list in formats
 
 It was allowed to use a list of variables in a format, without
 separating them with commas. This usage has been deprecated
@@ -527,7 +527,7 @@ throws a fatal error as of Perl 5.28.
 
 You should be using two different symbols instead.
 
-=head3 ${^ENCODING} is no longer supported.
+=head3 ${^ENCODING} is no longer supported
 
 The special variable C<${^ENCODING}> was used to implement
 the C<encoding> pragma. Setting this variable to anything other
@@ -600,7 +600,7 @@ These old, perl3-era utilities have been deprecated in favour of
 C<< h2xs >> for a long time. As of Perl 5.26, they have been removed.
 
 
-=head3 Trapping C<< $SIG {__DIE__} >> other than during program exit.
+=head3 Trapping C<< $SIG {__DIE__} >> other than during program exit
 
 The C<$SIG{__DIE__}> hook is called even inside an C<eval()>. It was
 never intended to happen this way, but an implementation glitch made

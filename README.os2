@@ -475,7 +475,7 @@ should be done "correctly".
 
 =back
 
-=head2 C<``> and pipe-C<open> do not work under DOS.
+=head2 C<``> and pipe-C<open> do not work under DOS
 
 This may a variant of just L</"I cannot run external programs">, or a
 deeper problem. Basically: you I<need> RSX (see L</Prerequisites>)
@@ -1549,7 +1549,7 @@ Here is the sample C file:
 
 =head1 Build FAQ
 
-=head2 Some C</> became C<\> in pdksh.
+=head2 Some C</> became C<\> in pdksh
 
 You have a very old pdksh. See L</Prerequisites>.
 
