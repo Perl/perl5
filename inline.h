@@ -3463,18 +3463,27 @@ S_lossless_NV_to_IV(const NV nv, IV *ivp)
     }
 #  endif
 
+#  ifndef NV_PRESERVES_UV
+    STATIC_ASSERT_STMT(((UV)1 << NV_PRESERVES_UV_BITS) - 1 <= (UV)IV_MAX);
+#  endif
+
     /* Written this way so that with an always-false NaN comparison we
      * return false */
-    if (!(LIKELY(nv >= (NV) IV_MIN) && LIKELY(nv < IV_MAX_P1))) {
-        return FALSE;
+    if (
+#  ifdef NV_PRESERVES_UV
+        LIKELY(nv >= (NV) IV_MIN) && LIKELY(nv < IV_MAX_P1) &&
+#  else
+        /* If the condition below is not satisfied, lower bits of nv's
+         * integral part is already lost and accurate conversion to integer
+         * is impossible.
+         * Note this should be consistent with S_sv_2iuv_common in sv.c. */
+        Perl_fabs(nv) < (NV) ((UV)1 << NV_PRESERVES_UV_BITS) &&
+#  endif
+        (IV) nv == nv) {
+        *ivp = (IV) nv;
+        return TRUE;
     }
-
-    if ((IV) nv != nv) {
-        return FALSE;
-    }
-
-    *ivp = (IV) nv;
-    return TRUE;
+    return FALSE;
 }
 
 #endif
