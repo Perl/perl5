@@ -6750,10 +6750,6 @@ S_emulate_langinfo(pTHX_ const int item,
 
         restore_toggled_locale_c(LC_TIME, orig_TIME_locale);
 
-        retval = save_to_buffer(temp, retbufp, retbuf_sizep);
-        retval_saved = true;
-        Safefree(temp);
-
         /* If the item is 'ALT_DIGITS', '*retbuf' contains the alternate
         * format for wday 0.  If the value is the same as the normal 0,
         * there isn't an alternate, so clear the buffer.
@@ -6762,6 +6758,7 @@ S_emulate_langinfo(pTHX_ const int item,
         * Things like tm_sec have two digits as the minimum: '00'.) */
         if (item == ALT_DIGITS && strEQ(*retbufp, "0")) {
             retval = "";
+            Safefree(temp);
             break;
         }
 
@@ -6782,7 +6779,14 @@ S_emulate_langinfo(pTHX_ const int item,
         * evidence that it should work differently, this returns the alt-0
         * string for ALT_DIGITS. */
 
-        if (return_format) {
+            /* If to return what strftime() returns, are done */
+            if (! return_format) {
+                retval = save_to_buffer(temp, retbufp, retbuf_sizep);
+                retval_saved = true;
+                Safefree(temp);
+                break;
+            }
+
             /* Here are to return the format, not the value.  This is used when
              * we are testing if the format we expect to return is legal on
              * this platform.  We have passed the format, say "%r, to
@@ -6796,7 +6800,7 @@ S_emulate_langinfo(pTHX_ const int item,
              * back either "" or "%r", and we return "" to our caller.  If the
              * strftime() return is anything else, we conclude that "%r" is
              * understood by the platform, and return "%r". */
-            if (strEQ(*retbufp, format)) {
+            if (*temp == '\0' || strEQ(temp, format)) {
                 retval = "";
             }
             else {
@@ -6805,11 +6809,11 @@ S_emulate_langinfo(pTHX_ const int item,
 
             /* A format is always in ASCII */
             is_utf8 = UTF8NESS_IMMATERIAL;
-        }
 
+            Safefree(temp);
+            break;
 #  endif
 
-        break;
        }    /* End of braced group for outer switch 'default:' case */
     } /* Giant switch() of nl_langinfo() items */
 
