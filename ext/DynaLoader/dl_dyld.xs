@@ -48,7 +48,6 @@ been tested on NeXT platforms.
 #include "dlutils.c"	/* for SaveError() etc */
 
 #undef environ
-#undef bool
 #import <mach-o/dyld.h>
 
 static char *dlerror()
