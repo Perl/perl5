@@ -6197,7 +6197,25 @@ S_emulate_langinfo(pTHX_ const int item,
      * override if necessary */
     utf8ness_t is_utf8 = UTF8NESS_IMMATERIAL;
     const char * retval = NULL;
-    bool retval_saved = false;
+
+    /* This function returns its result either by returning the calculated
+     * value 'retval' if the 'sv' argument is PL_scratch_langinfo; or for any
+     * other value of 'sv', it places the result into that 'sv'.  For some
+     * paths through the code, it is more convenient, in the moment, to use one
+     * or the other to hold the calculated result.  And, the calculation could
+     * end up with the value in both places.  At the end, if the caller
+     * wants the convenient result, we are done; but if it wants the opposite
+     * type of value, it must be converted.  These macros are used to tell the
+     * code at the end where the value got placed. */
+#  define RETVAL_IN_retval -1
+#  define RETVAL_IN_BOTH    0
+#  define RETVAL_IN_sv      1
+#  define isRETVAL_IN_sv(type)      ((type) >= RETVAL_IN_BOTH)
+#  define isRETVAL_IN_retval(type)  ((type) <= RETVAL_IN_BOTH)
+
+    /* Most calculations place the result in 'retval', so initialize to that,
+     * and override if necessary */
+    int retval_type = RETVAL_IN_retval;
 
     DEBUG_Lv(PerlIO_printf(Perl_debug_log,
                         "Entering emulate_langinfo item=%ld, using locale %s\n",
@@ -6323,7 +6341,7 @@ S_emulate_langinfo(pTHX_ const int item,
                 *s = '\0';
                 sv_setpvn(sv, item_start, s - item_start);
                 SvUTF8_off(sv);
-                retval_saved = true;
+                retval_type = RETVAL_IN_sv;
                 Safefree(floatbuf);
 
                 if (utf8ness) {
@@ -6415,7 +6433,7 @@ S_emulate_langinfo(pTHX_ const int item,
          * returned SV (which, since 'string' is in a mortal HV, may steal its
          * PV) */
         SvSetSV(sv, string);
-        retval_saved = true;
+        retval_type = RETVAL_IN_sv;
 
         if (utf8ness) {
             is_utf8 = get_locale_string_utf8ness_i(SvPVX(sv),
@@ -6466,7 +6484,7 @@ S_emulate_langinfo(pTHX_ const int item,
         const char * orig_CTYPE_locale;
         orig_CTYPE_locale = toggle_locale_c(LC_CTYPE, locale);
         Perl_sv_setpvf(aTHX_ sv, CODE_PAGE_FORMAT, CODE_PAGE_FUNCTION);
-        retval_saved = true;
+        retval_type = RETVAL_IN_sv;
 
         /* We just assume the codeset is ASCII; no need to check for it being
          * UTF-8 */
@@ -6523,8 +6541,9 @@ S_emulate_langinfo(pTHX_ const int item,
             else {
                 sv_setpv(sv, name);
             }
-            retval = SvPVX(sv);
+            SvUTF8_off(sv);
 
+            retval_type = RETVAL_IN_sv;
         }
 
 #      ifndef HAS_DEFINITIVE_UTF8NESS_DETERMINATION
@@ -6541,7 +6560,14 @@ S_emulate_langinfo(pTHX_ const int item,
          * guesses that it actually should be UTF-8.  It could be inlined here,
          * but was moved out of this switch() so as to make the switch()
          * control flow easier to follow */
-        (void) S_maybe_override_codeset(aTHX_ retval, locale, &retval);
+        if (isRETVAL_IN_sv(retval_type)) {
+            retval = SvPVX_const(sv);
+            retval_type = RETVAL_IN_BOTH;
+        }
+
+        if (S_maybe_override_codeset(aTHX_ retval, locale, &retval)) {
+            retval_type = RETVAL_IN_retval;
+        }
 
 #      endif
 
@@ -6872,7 +6898,7 @@ S_emulate_langinfo(pTHX_ const int item,
             /* If to return what strftime() returns, are done */
             if (! return_format) {
                 sv_usepvn_flags(sv, temp, strlen(temp), SV_HAS_TRAILING_NUL);
-                retval_saved = true;
+                retval_type = RETVAL_IN_sv;
                 break;
             }
 
@@ -6908,21 +6934,51 @@ S_emulate_langinfo(pTHX_ const int item,
 
     GCC_DIAG_RESTORE_STMT;
 
-    if (utf8ness) {
-        *utf8ness = is_utf8;
+    if (sv != PL_scratch_langinfo) {    /* Caller wants return in 'sv' */
+        if (! isRETVAL_IN_sv(retval_type)) {
+            sv_setpv(sv, retval);
+            SvUTF8_off(sv);
+        }
+
+        if (utf8ness) {
+            *utf8ness = is_utf8;
+            if (is_utf8 == UTF8NESS_YES) {
+                SvUTF8_on(sv);
+            }
+        }
+
+        DEBUG_Lv(PerlIO_printf(Perl_debug_log,
+                         "Leaving emulate_langinfo item=%ld, using locale %s\n",
+                         (long) item, locale));
+
+        /* The caller shouldn't also be wanting a 'retval'; make sure segfaults
+         * if they call this wrong */
+        return NULL;
     }
 
-    if (retval_saved) {
-        retval = SvPV_nolen_const(sv);
+    /* Here, wants a 'retval' return.  Extract that if not already there.  We
+     * know that the value already is a PV */
+    if (! isRETVAL_IN_retval(retval_type)) {
+        retval = SvPVX_const(sv);
     }
-    else {
-        sv_setpv(sv, retval);
+
+    /* Here, 'retval' started as a simple value, or has been converted into
+     * being simple */
+    if (utf8ness) {
+        *utf8ness = is_utf8;
     }
 
     DEBUG_Lv(PerlIO_printf(Perl_debug_log,
                          "Leaving emulate_langinfo item=%ld, using locale %s\n",
                          (long) item, locale));
     return retval;
+
+#  undef RETVAL_IN_retval
+#  undef RETVAL_IN_BOTH
+#  undef RETVAL_IN_sv
+#  undef isRETVAL_IN_sv
+#  undef isRETVAL_IN_retval
+
 }
 
 #endif      /* Needs emulate_langinfo() */
