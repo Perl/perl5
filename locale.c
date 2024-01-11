@@ -729,6 +729,11 @@ static const char C_thousands_sep[] = "";
                         (PERL_UNUSED_VAR(c), emulate_langinfo(i, l, s, u))
 #endif
 
+/* In either case, create a version that takes things like 'LC_NUMERIC' as a
+ * parameter */
+#define langinfo_sv_c(item, category, locale, sv, utf8ness)                 \
+        langinfo_sv_i(item, category##_INDEX_, locale, sv, utf8ness)
+
 /* The normal method for interfacing with nl_langinfo() in this file is to use
  * a scratch buffer (whose existence is hidden from the caller by these
  * macros). */
@@ -3458,20 +3463,13 @@ S_new_numeric(pTHX_ const char *newnum, bool force)
      * function */
     PL_numeric_underlying = TRUE;
 
-    utf8ness_t utf8ness = UTF8NESS_IMMATERIAL;
+    /* Passing a non-NULL causes the function call just below to
+       automatically set the UTF-8 flag on PL_underlying_radix_sv */
+    utf8ness_t dummy;
 
     /* Find and save this locale's radix character. */
-    const char * radix = langinfo_c(RADIXCHAR, LC_NUMERIC, PL_numeric_name,
-                                    &utf8ness);
-    sv_setpv(PL_underlying_radix_sv, radix);
-
-    if (utf8ness == UTF8NESS_YES) {
-        SvUTF8_on(PL_underlying_radix_sv);
-    }
-    else {
-        SvUTF8_off(PL_underlying_radix_sv);
-    }
-
+    langinfo_sv_c(RADIXCHAR, LC_NUMERIC, PL_numeric_name,
+                  PL_underlying_radix_sv, &dummy);
     DEBUG_L(PerlIO_printf(Perl_debug_log,
                           "Locale radix is '%s', ?UTF-8=%d\n",
                           SvPVX(PL_underlying_radix_sv),
@@ -3480,7 +3478,8 @@ S_new_numeric(pTHX_ const char *newnum, bool force)
     /* This locale is indistinguishable from C (for numeric purposes) if both
      * the radix character and the thousands separator are the same as C's.
      * Start with the radix. */
-    PL_numeric_underlying_is_standard = strEQ(C_decimal_point, radix);
+    PL_numeric_underlying_is_standard = strEQ(C_decimal_point,
+                                              SvPVX(PL_underlying_radix_sv));
 
 #    ifndef TS_W32_BROKEN_LOCALECONV
 
