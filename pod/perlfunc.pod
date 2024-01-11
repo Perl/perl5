@@ -10587,6 +10587,8 @@ L<C<$SIG{CHLD}>|perlvar/%SIG>, it may accidentally wait for the child
 created by L<C<qx>|/qxE<sol>STRINGE<sol>> or L<C<system>|/system LIST>.
 See L<perlipc> for details.
 
+Equivalent to L<C<waitpid(-1, 0)>|/waitpid PID,FLAGS>.
+
 Portability issues: L<perlport/wait>.
 
 =item waitpid PID,FLAGS
