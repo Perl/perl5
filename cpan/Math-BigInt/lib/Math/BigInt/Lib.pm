@@ -4,7 +4,7 @@ use 5.006001;
 use strict;
 use warnings;
 
-our $VERSION = '2.003001';
+our $VERSION = '2.003002';
 $VERSION =~ tr/_//d;
 
 use Carp;
@@ -710,19 +710,22 @@ sub _log_int {
 
     # X == 1 => 0 (is exact)
     if ($class -> _is_one($x)) {
-        return $class -> _zero(), 1;
+        return $class -> _zero(), 1 if wantarray;
+        return $class -> _zero();
     }
 
     my $cmp = $class -> _acmp($x, $base);
 
     # X == BASE => 1 (is exact)
     if ($cmp == 0) {
-        return $class -> _one(), 1;
+        return $class -> _one(), 1 if wantarray;
+        return $class -> _one();
     }
 
     # 1 < X < BASE => 0 (is truncated)
     if ($cmp < 0) {
-        return $class -> _zero(), 0;
+        return $class -> _zero(), 0 if wantarray;
+        return $class -> _zero();
     }
 
     my $y;
@@ -745,10 +748,6 @@ sub _log_int {
     my $trial = $class -> _pow($class -> _copy($base), $y);
     my $acmp  = $class -> _acmp($trial, $x);
 
-    # Did we get the exact result?
-
-    return $y, 1 if $acmp == 0;
-
     # Too small?
 
     while ($acmp < 0) {
@@ -765,8 +764,8 @@ sub _log_int {
         $acmp  = $class -> _acmp($trial, $x);
     }
 
-    return $y, 1 if $acmp == 0;         # result is exact
-    return $y, 0;                       # result is too small
+    return wantarray ? ($y, 1) : $y if $acmp == 0;      # result is exact
+    return wantarray ? ($y, 0) : $y;                    # result is too small
 }
 
 sub _ilog2 {
