@@ -4663,7 +4663,7 @@ PERL_STATIC_INLINE U32 S_ptr_hash(PTRV u) {
 #else
     /*
      * This is one of Bob Jenkins' hash functions for 32-bit integers
-     * from: http://burtleburtle.net/bob/hash/integer.html
+     * from: https://burtleburtle.net/bob/hash/integer.html
      */
     u = (u + 0x7ed55d16) + (u << 12);
     u = (u ^ 0xc761c23c) ^ (u >> 19);
