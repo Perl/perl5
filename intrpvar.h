@@ -784,8 +784,8 @@ PERLVARI(I, collation_standard, bool, TRUE)
 PERLVAR(I, in_utf8_COLLATE_locale, bool)
 #endif /* USE_LOCALE_COLLATE */
 
-PERLVARI(I, langinfo_buf, char *, NULL)
-PERLVARI(I, langinfo_bufsize, Size_t, 0)
+PERLVARI(I, langinfo_sv, SV *, NULL)         /* For Perl_langinfo8? */
+PERLVARI(I, scratch_langinfo, SV *, NULL)     /* For internal use */
 PERLVARI(I, setlocale_buf, char *, NULL)
 PERLVARI(I, setlocale_bufsize, Size_t, 0)
 

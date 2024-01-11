@@ -1315,7 +1315,7 @@
 #     define strftime_tm(a,b)                   S_strftime_tm(aTHX_ a,b)
 #     if defined(HAS_IGNORED_LOCALE_CATEGORIES_) || \
          !defined(HAS_NL_LANGINFO) || !defined(LC_MESSAGES)
-#       define emulate_langinfo(a,b,c,d,e)      S_emulate_langinfo(aTHX_ a,b,c,d,e)
+#       define emulate_langinfo(a,b,c,d)        S_emulate_langinfo(aTHX_ a,b,c,d)
 #     endif
 #     if defined(HAS_LOCALECONV)
 #       define my_localeconv(a)                 S_my_localeconv(aTHX_ a)
@@ -1323,7 +1323,7 @@
 #     endif
 #     if defined(USE_LOCALE)
 #       define calculate_LC_ALL_string(a,b,c,d) S_calculate_LC_ALL_string(aTHX_ a,b,c,d)
-#       define external_call_langinfo(a,b,c,d)  S_external_call_langinfo(aTHX_ a,b,c,d)
+#       define external_call_langinfo(a,b,c)    S_external_call_langinfo(aTHX_ a,b,c)
 #       define get_category_index_helper(a,b,c) S_get_category_index_helper(aTHX_ a,b,c)
 #       define mortalized_pv_copy(a)            S_mortalized_pv_copy(aTHX_ a)
 #       define native_querylocale_i(a)          S_native_querylocale_i(aTHX_ a)
@@ -1335,7 +1335,7 @@
 #         define my_setlocale_debug_string_i(a,b,c,d) S_my_setlocale_debug_string_i(aTHX_ a,b,c,d)
 #       endif
 #       if defined(HAS_NL_LANGINFO)
-#         define langinfo_sv_i(a,b,c,d,e,f)     S_langinfo_sv_i(aTHX_ a,b,c,d,e,f)
+#         define langinfo_sv_i(a,b,c,d,e)       S_langinfo_sv_i(aTHX_ a,b,c,d,e)
 #       endif
 #       if defined(LC_ALL)
 #         define give_perl_locale_control(a,b)  S_give_perl_locale_control(aTHX_ a,b)

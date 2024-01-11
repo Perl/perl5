@@ -1177,10 +1177,10 @@ perl_destruct(pTHXx)
         PL_setlocale_buf = NULL;
     }
 
-    if (PL_langinfo_buf) {
-        Safefree(PL_langinfo_buf);
-        PL_langinfo_buf = NULL;
-    }
+    SvREFCNT_dec(PL_langinfo_sv);
+    PL_langinfo_sv = NULL;
+    SvREFCNT_dec(PL_scratch_langinfo);
+    PL_scratch_langinfo = NULL;
 
 #if defined(USE_LOCALE_THREADS) && ! defined(USE_THREAD_SAFE_LOCALE)
     if (PL_less_dicey_locale_buf) {

@@ -63,7 +63,8 @@ Perl_langinfo(const nl_item item);
 
 PERL_CALLCONV const char *
 Perl_langinfo8(const nl_item item, utf8ness_t *utf8ness);
-#define PERL_ARGS_ASSERT_PERL_LANGINFO8
+#define PERL_ARGS_ASSERT_PERL_LANGINFO8         \
+        assert(utf8ness)
 
 PERL_CALLCONV HV *
 Perl_localeconv(pTHX);
@@ -7018,9 +7019,9 @@ S_strftime_tm(pTHX_ const char *fmt, const struct tm *mytm)
 # if  defined(HAS_IGNORED_LOCALE_CATEGORIES_) || !defined(HAS_NL_LANGINFO) || \
      !defined(LC_MESSAGES)
 STATIC const char *
-S_emulate_langinfo(pTHX_ const int item, const char *locale, char **retbufp, Size_t *retbuf_sizep, utf8ness_t *utf8ness);
+S_emulate_langinfo(pTHX_ const int item, const char *locale, SV *sv, utf8ness_t *utf8ness);
 #   define PERL_ARGS_ASSERT_EMULATE_LANGINFO    \
-        assert(locale); assert(retbufp)
+        assert(locale); assert(sv)
 
 # endif
 # if defined(HAS_LOCALECONV)
@@ -7040,9 +7041,9 @@ S_calculate_LC_ALL_string(pTHX_ const char **category_locales_list, const calc_L
 #   define PERL_ARGS_ASSERT_CALCULATE_LC_ALL_STRING
 
 STATIC const char *
-S_external_call_langinfo(pTHX_ const nl_item item, utf8ness_t *utf8ness, char **retbufp, Size_t *retbuf_sizep);
+S_external_call_langinfo(pTHX_ const nl_item item, SV *sv, utf8ness_t *utf8ness);
 #   define PERL_ARGS_ASSERT_EXTERNAL_CALL_LANGINFO \
-        assert(retbufp)
+        assert(sv)
 
 STATIC locale_category_index
 S_get_category_index_helper(pTHX_ const int category, bool *success, const line_t caller_line)
@@ -7091,9 +7092,9 @@ S_my_setlocale_debug_string_i(pTHX_ const locale_category_index cat_index, const
 #   endif
 #   if defined(HAS_NL_LANGINFO)
 STATIC const char *
-S_langinfo_sv_i(pTHX_ const nl_item item, locale_category_index cat_index, const char *locale, char **retbufp, Size_t *retbuf_sizep, utf8ness_t *utf8ness);
+S_langinfo_sv_i(pTHX_ const nl_item item, locale_category_index cat_index, const char *locale, SV *sv, utf8ness_t *utf8ness);
 #     define PERL_ARGS_ASSERT_LANGINFO_SV_I     \
-        assert(locale); assert(retbufp)
+        assert(locale); assert(sv)
 
 #   endif
 #   if defined(LC_ALL)
