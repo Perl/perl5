@@ -5023,8 +5023,9 @@ first encountered C<NUL> byte.
 In the forms that take a C<ptr> argument, if it is NULL, the SV will become
 undefined.
 
-The UTF-8 flag is not changed by these functions.  A terminating NUL byte is
-guaranteed in the result.
+B<The UTF-8 flag is not changed by these functions.>
+
+A terminating NUL byte is guaranteed in the result.
 
 The C<_mg> forms handle 'set' magic; the other forms skip all magic.
 
