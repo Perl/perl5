@@ -7716,7 +7716,7 @@ S_handle_possible_posix(pTHX_ RExC_state_t *pRExC_state,
         /* These two constructs are not handled by perl, and if we find a
          * syntactically valid one, we croak.  khw, who wrote this code, finds
          * this explanation of them very unclear:
-         * http://pubs.opengroup.org/onlinepubs/009696899/basedefs/xbd_chap09.html
+         * https://pubs.opengroup.org/onlinepubs/009696899/basedefs/xbd_chap09.html
          * And searching the rest of the internet wasn't very helpful either.
          * It looks like just about any byte can be in these constructs,
          * depending on the locale.  But unless the pattern is being compiled
@@ -15628,7 +15628,7 @@ S_parse_uniprop_string(pTHX_
                 }
 
                 /* Get the greatest common denominator using
-                   http://en.wikipedia.org/wiki/Euclidean_algorithm */
+                   https://en.wikipedia.org/wiki/Euclidean_algorithm */
                 gcd = numerator;
                 trial = denominator;
                 while (trial != 0) {

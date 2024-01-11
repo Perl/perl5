@@ -135,7 +135,7 @@ PP(pp_regcomp)
            (e.g. $' =~ /$re/ while foo; see bug 70764).  So we must call
            get-magic now before we replace the regexp. Hopefully this hack can
            be replaced with the approach described at
-           http://www.nntp.perl.org/group/perl.perl5.porters/2007/03/msg122415.html
+           https://www.nntp.perl.org/group/perl.perl5.porters/2007/03/msg122415.html
            some day. */
         if (pm->op_type == OP_MATCH) {
             SV *lhs;

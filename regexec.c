@@ -5681,7 +5681,7 @@ S_isSB(pTHX_ SB_enum before,
         SB5.  X (Extend | Format)*  →  X */
     if (after == SB_Extend || after == SB_Format) {
 
-        /* Implied is that the these characters attach to everything
+        /* Implied is that these characters attach to everything
          * immediately prior to them except for those separator-type
          * characters.  And the rules earlier have already handled the case
          * when one of those immediately precedes the extend char */
@@ -5930,7 +5930,7 @@ S_isWB(pTHX_ WB_enum previous,
      *  should be set to WB_UNKNOWN.  The other input parameters give the
      *  boundaries and current position in the matching of the string.  That
      *  is, 'curpos' marks the position where the character whose wb value is
-     *  'after' begins.  See http://www.unicode.org/reports/tr29/ */
+     *  'after' begins.  See https://www.unicode.org/reports/tr29/ */
 
     U8 * before_pos = (U8 *) curpos;
     U8 * after_pos = (U8 *) curpos;

@@ -705,7 +705,7 @@ static const char C_thousands_sep[] = "";
  *   cntrl:  84-97 9B-9F
  *   punct:  A1-A3 A5 A7-AB B0-B3 B5-B7 B9-BD BF-CF D1-DD DF-EF F1-FD
  * Oddly, none there are listed as alphas, though some represent alphabetics
- * http://www.nntp.perl.org/group/perl.perl5.porters/2013/02/msg198753.html */
+ * https://www.nntp.perl.org/group/perl.perl5.porters/2013/02/msg198753.html */
 #define isNAME_C_OR_POSIX(name)                                              \
                              (   (name) != NULL                              \
                               && (( *(name) == 'C' && (*(name + 1)) == '\0') \
@@ -2083,7 +2083,7 @@ S_querylocale_2008_i(pTHX_ const locale_category_index index,
         POSIX_SETLOCALE_UNLOCK;
     }
 
-    /* Here we have handled the case of the the current locale being the global
+    /* Here we have handled the case of the current locale being the global
      * one.  Below is the 'else' case of that.  There are two different
      * implementations, depending on USE_PL_CURLOCALES */
 
@@ -5714,7 +5714,7 @@ these functions from another thread;  unlike the function it replaces.
 But most importantly, they work on systems that don't have C<nl_langinfo>, such
 as Windows, hence making your code more portable.  Of the fifty-some possible
 items specified by the POSIX 2008 standard,
-L<http://pubs.opengroup.org/onlinepubs/9699919799/basedefs/langinfo.h.html>,
+L<https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/langinfo.h.html>,
 only one is completely unimplemented, though on non-Windows platforms, another
 significant one is not fully implemented).  They use various techniques to
 recover the other items, including calling C<L<localeconv(3)>>, and
@@ -8747,7 +8747,7 @@ S_is_codeset_name_UTF8(const char * name)
 
 #    ifdef WIN32
 
-    /* http://msdn.microsoft.com/en-us/library/windows/desktop/dd317756.aspx */
+    /* https://learn.microsoft.com/en-us/windows/win32/intl/code-page-identifiers */
     if (memENDs(name, len, "65001")) {
         return TRUE;
     }
