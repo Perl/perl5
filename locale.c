@@ -730,10 +730,13 @@ static const char C_thousands_sep[] = "";
 #endif
 
 /* The normal method for interfacing with nl_langinfo() in this file is to use
- * a scratch buffer (whose existence is hidden from the caller by this macro */
+ * a scratch buffer (whose existence is hidden from the caller by these
+ * macros). */
+#define langinfo_i(item, index, locale, utf8ness)                           \
+        langinfo_sv_i(item, index, locale, &scratch_buffer, NULL, utf8ness)
+
 #define langinfo_c(item, category, locale, utf8ness)                        \
-            langinfo_sv_i(item, category##_INDEX_, locale,                     \
-                                             &scratch_buffer, NULL,  utf8ness)
+        langinfo_i(item, category##_INDEX_, locale, utf8ness)
 
 #ifndef USE_LOCALE  /* A no-op unless locales are enabled */
 #  define toggle_locale_i(index, locale)    NULL
@@ -7043,8 +7046,7 @@ S_maybe_override_codeset(pTHX_ const char * codeset,
 
     /* Everything set up; look through all the strings */
     for (PERL_UINT_FAST8_T i = 0; i < C_ARRAY_LENGTH(trials); i++) {
-        const char * result = langinfo_sv_i(trials[i], cat_index, locale,
-                             &scratch_buffer, &scratch_buf_size, NULL);
+        const char * result = langinfo_i(trials[i], cat_index, locale, NULL);
         cat_index = follow_on_cat_index;
 
         /* To prevent infinite recursive calls, we don't ask for the UTF-8ness
