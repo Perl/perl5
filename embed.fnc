@@ -2492,7 +2492,7 @@ ATdo	|const char *|Perl_langinfo					\
 				|const nl_item item
 ATdo	|const char *|Perl_langinfo8					\
 				|const nl_item item			\
-				|NULLOK utf8ness_t *utf8ness
+				|NN utf8ness_t *utf8ness
 p	|int	|PerlLIO_dup2_cloexec					\
 				|int oldfd				\
 				|int newfd
@@ -4434,8 +4434,7 @@ Sf	|char * |strftime_tm	|NN const char *fmt			\
 S	|const char *|emulate_langinfo					\
 				|const int item 			\
 				|NN const char *locale			\
-				|NN char **retbufp			\
-				|NULLOK Size_t *retbuf_sizep		\
+				|NN SV *sv				\
 				|NULLOK utf8ness_t *utf8ness
 # endif
 # if defined(HAS_LOCALECONV)
@@ -4455,9 +4454,8 @@ S	|const char *|calculate_LC_ALL_string					\
 				|const line_t caller_line
 S	|const char *|external_call_langinfo				\
 				|const nl_item item			\
-				|NULLOK utf8ness_t *utf8ness		\
-				|NN char **retbufp			\
-				|NULLOK Size_t *retbuf_sizep
+				|NN SV *sv				\
+				|NULLOK utf8ness_t *utf8ness
 RS	|locale_category_index|get_category_index_helper		\
 				|const int category			\
 				|NULLOK bool *success			\
@@ -4507,8 +4505,7 @@ S	|const char *|langinfo_sv_i					\
 				|const nl_item item			\
 				|locale_category_index cat_index	\
 				|NN const char *locale			\
-				|NN char **retbufp			\
-				|NULLOK Size_t *retbuf_sizep		\
+				|NN SV *sv				\
 				|NULLOK utf8ness_t *utf8ness
 #   endif
 #   if defined(LC_ALL)

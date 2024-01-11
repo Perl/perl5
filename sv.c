@@ -16161,8 +16161,8 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_wcrtomb_ps = proto_perl->Iwcrtomb_ps;
 #endif
 
-    PL_langinfo_buf = NULL;
-    PL_langinfo_bufsize = 0;
+    PL_langinfo_sv = newSVpvs("");
+    PL_scratch_langinfo = newSVpvs("");
 
     PL_setlocale_buf = NULL;
     PL_setlocale_bufsize = 0;
