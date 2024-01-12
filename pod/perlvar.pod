@@ -2560,10 +2560,11 @@ This variable was added in Perl v5.8.0.
 =item ${^SAFE_LOCALES}
 X<${^SAFE_LOCALES}>
 
-Reflects if safe locale operations are available to this perl (when the
-value is 1) or not (the value is 0).  This variable is always 1 if the
-perl has been compiled without threads.  It is also 1 if this perl is
-using thread-safe locale operations.  Note that an individual thread may
+Reflects if safe locale operations are available to this perl or not.
+This variable is always 1 if the perl has been compiled without threads.
+It is also 1 if this perl is using thread-safe locale operations.  And
+it is 2 if this perl is emulating thread-safe locale operations.  Note
+that an individual thread may
 choose to use the global locale (generally unsafe) by calling
 L<perlapi/switch_to_global_locale>.  This variable currently is still
 set to 1 in such threads.
