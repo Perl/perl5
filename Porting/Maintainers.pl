@@ -438,7 +438,7 @@ our %Modules = (
     },
 
     'Exporter' => {
-        'DISTRIBUTION' => 'TODDR/Exporter-5.77.tar.gz',
+        'DISTRIBUTION' => 'TODDR/Exporter-5.78.tar.gz',
         'FILES'        => q[dist/Exporter],
         'EXCLUDED' => [
             qw( t/pod.t
