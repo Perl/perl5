@@ -741,7 +741,7 @@ our %Modules = (
     },
 
     'Locale::Maketext' => {
-        'DISTRIBUTION' => 'TODDR/Locale-Maketext-1.32.tar.gz',
+        'DISTRIBUTION' => 'TODDR/Locale-Maketext-1.33.tar.gz',
         'FILES'        => q[dist/Locale-Maketext],
         'EXCLUDED'     => [
             qw(
