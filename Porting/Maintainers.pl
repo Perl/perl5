@@ -658,7 +658,7 @@ our %Modules = (
     },
 
     'IO' => {
-        'DISTRIBUTION' => 'TODDR/IO-1.51.tar.gz',
+        'DISTRIBUTION' => 'TODDR/IO-1.55.tar.gz',
         'FILES'        => q[dist/IO],
         'EXCLUDED'     => ['t/test.pl'],
     },
