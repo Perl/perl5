@@ -14,6 +14,7 @@ my @constants = qw(ABDAY_1 DAY_1 ABMON_1 RADIXCHAR AM_STR THOUSEP D_T_FMT
                    D_FMT T_FMT);
 push @constants, @times;
 
+# The values a C locale should return
 my %want = (    RADIXCHAR => qr/ ^ \. $ /x,
                 THOUSEP	  => qr/ ^$ /x,
 
