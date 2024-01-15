@@ -120,7 +120,7 @@ no normal arguments, and used by L</C<comma_pDEPTH>> itself.
 /* See L<perlguts/"The Perl API"> for detailed notes on
  * MULTIPLICITY and PERL_IMPLICIT_SYS */
 
-#ifdef USE_ITHREADS
+#ifdef USE_THREADS
 #  if !defined(MULTIPLICITY)
 #    define MULTIPLICITY
 #  endif
@@ -1226,7 +1226,7 @@ typedef enum {
  * The defines from here to the following ===== line are unfortunately
  * duplicated in makedef.pl, and changes here MUST also be made there */
 
-#  if defined(USE_ITHREADS) && ! defined(NO_LOCALE_THREADS)
+#  if defined(USE_THREADS) && ! defined(NO_LOCALE_THREADS)
 #    define USE_LOCALE_THREADS
 #  endif
 
@@ -5223,7 +5223,7 @@ typedef Sighandler_t Sigsave_t;
 
 #if defined(USE_PERLIO)
 EXTERN_C void PerlIO_teardown(void);
-# ifdef USE_ITHREADS
+# ifdef USE_THREADS
 #  define PERLIO_INIT MUTEX_INIT(&PL_perlio_mutex)
 #  define PERLIO_TERM 				\
         STMT_START {				\
@@ -6911,7 +6911,7 @@ typedef struct am_table_short AMTS;
 
 #define PERLDB_LINE_OR_SAVESRC (PL_perldb & (PERLDBf_LINE | PERLDBf_SAVESRC))
 
-#ifdef USE_ITHREADS
+#ifdef USE_THREADS
 #  define KEYWORD_PLUGIN_MUTEX_INIT    MUTEX_INIT(&PL_keyword_plugin_mutex)
 #  define KEYWORD_PLUGIN_MUTEX_LOCK    MUTEX_LOCK(&PL_keyword_plugin_mutex)
 #  define KEYWORD_PLUGIN_MUTEX_UNLOCK  MUTEX_UNLOCK(&PL_keyword_plugin_mutex)
