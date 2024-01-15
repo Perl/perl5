@@ -619,9 +619,11 @@ OPTIMIZE	= -Os
 LINK_DBG	= -s
 endif
 
-EXTRACFLAGS	=
+EXTRACFLAGS	= -Wall -Wextra -Werror=pointer-arith -Wno-format -Wno-long-long -Werror=vla
 ifeq ($(USE_CPLUSPLUS),define)
 EXTRACFLAGS	+= $(CXX_FLAG)
+else
+EXTRACFLAGS	+= -std=c99
 endif
 CFLAGS		= $(EXTRACFLAGS) $(INCLUDES) $(DEFINES) $(LOCDEFS) $(OPTIMIZE)
 LINK_FLAGS	= $(LINK_DBG) -L"$(INST_COREDIR)" -L"$(subst ;," -L",$(CCLIBDIR))"
