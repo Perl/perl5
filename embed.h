@@ -1316,8 +1316,7 @@
 #     define set_save_buffer_min_size(a,b,c)    S_set_save_buffer_min_size(aTHX_ a,b,c)
 #     define strftime8(a,b,c,d,e)               S_strftime8(aTHX_ a,b,c,d,e)
 #     define strftime_tm(a,b)                   S_strftime_tm(aTHX_ a,b)
-#     if defined(HAS_IGNORED_LOCALE_CATEGORIES_) || \
-         !defined(HAS_NL_LANGINFO) || !defined(LC_MESSAGES)
+#     if defined(HAS_MISSING_LANGINFO_ITEM_) || !defined(HAS_NL_LANGINFO)
 #       define emulate_langinfo(a,b,c,d)        S_emulate_langinfo(aTHX_ a,b,c,d)
 #     endif
 #     if defined(USE_LOCALE)

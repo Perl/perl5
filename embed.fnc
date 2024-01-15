@@ -4437,8 +4437,7 @@ S	|char * |strftime8	|NN const char *fmt			\
 				|const bool came_from_sv
 Sf	|char * |strftime_tm	|NN const char *fmt			\
 				|NN const struct tm *mytm
-# if  defined(HAS_IGNORED_LOCALE_CATEGORIES_) || !defined(HAS_NL_LANGINFO) || \
-     !defined(LC_MESSAGES)
+# if defined(HAS_MISSING_LANGINFO_ITEM_) || !defined(HAS_NL_LANGINFO)
 S	|const char *|emulate_langinfo					\
 				|const int item 			\
 				|NN const char *locale			\

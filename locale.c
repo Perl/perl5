@@ -5983,7 +5983,7 @@ S_external_call_langinfo(pTHX_ const nl_item item,
 
     } /* End of switch on item */
 
-#  if defined(HAS_IGNORED_LOCALE_CATEGORIES_) || ! defined(LC_MESSAGES)
+#if defined(HAS_MISSING_LANGINFO_ITEM_)
 
     /* If the above didn't find the category's index, it has to be because the
      * item is unknown to us (and the callee will handle that), or the category
@@ -6175,9 +6175,7 @@ S_maybe_override_codeset(pTHX_ const char * codeset,
                                const char * locale,
                                const char ** new_codeset);
 #endif
-#if ! defined(HAS_NL_LANGINFO)                      \
- ||   defined(HAS_IGNORED_LOCALE_CATEGORIES_)       \
- || ! defined(LC_MESSAGES)
+#if ! defined(HAS_NL_LANGINFO) || defined(HAS_MISSING_LANGINFO_ITEM_)
 
 STATIC const char *
 S_emulate_langinfo(pTHX_ const int item,
