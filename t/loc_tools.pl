@@ -490,7 +490,24 @@ sub find_locales ($;$) {
     my @categories = (ref $input_categories)
                       ? $input_categories->@*
                       : $input_categories;
-    return unless locales_enabled(\@categories);
+
+    # If we can't use at least one of these categories, investigate further
+    if (! locales_enabled(\@categories)) {
+
+        # Not usable at all if system doesn't have locales
+        return unless locales_enabled();
+
+        # Nor if any of the required categories isn't on the system
+        my @on_platform = platform_locale_categories();
+        for my $category (@categories) {
+            return unless grep { $category eq $_ } @on_platform;
+        }
+
+        # Otherwise the category is on the system, but not generally usable.
+        # But the two always-present locales should be usable
+        return ( "C", "POSIX" );
+    }
+
 
     # Note, the subroutine call above converts the $categories into a form
     # suitable for _trylocale().
