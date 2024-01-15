@@ -359,7 +359,7 @@ static int debug_initialization = 0;
 /* Automatically include the caller's file, and line number in debugging output;
  * and the errno (and/or extended errno) if non-zero.  On threaded perls add
  * the aTHX too. */
-#  if defined(USE_ITHREADS) && ! defined(NO_LOCALE_THREADS)
+#  if defined(USE_THREADS) && ! defined(NO_LOCALE_THREADS)
 #    define DEBUG_PRE_STMTS                                                 \
         DEBUG_ERRNO;                                                        \
         PerlIO_printf(Perl_debug_log, "\n%s: %" LINE_Tf ": 0x%p%s: ",       \

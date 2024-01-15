@@ -120,7 +120,7 @@ if ($define{WIN32_USE_FAKE_OLD_MINGW_LOCALES}) {
 # perl.h logic duplication begins
 
 
-if ($define{USE_ITHREADS}) {
+if ($define{USE_THREADS}) {
     if (!$define{MULTIPLICITY}) {
         $define{MULTIPLICITY} = 1;
     }
@@ -128,7 +128,7 @@ if ($define{USE_ITHREADS}) {
 
 $define{MULTIPLICITY} ||= $define{PERL_IMPLICIT_CONTEXT} ;
 
-if ($define{USE_ITHREADS} && ! $define{WIN32}) {
+if ($define{USE_THREADS} && ! $define{WIN32}) {
     $define{USE_REENTRANT_API} = 1;
 }
 
@@ -149,7 +149,7 @@ if (! $define{NO_LOCALE}) {
 
 # https://en.wikipedia.org/wiki/Microsoft_Visual_C%2B%2B#Internal_version_numbering
 my $cctype = $ARGS{CCTYPE} =~ s/MSVC//r;
-if (   $define{USE_ITHREADS}
+if (   $define{USE_THREADS}
     && $define{USE_LOCALE}
     && ! $define{NO_LOCALE_THREADS})
 {
