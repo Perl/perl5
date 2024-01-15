@@ -5795,11 +5795,18 @@ the same information.  But it is more thread-safe than regular
 C<nl_langinfo()>, and hides the quirks of Perl's locale handling from your
 code, and can be used on systems that lack a native C<nl_langinfo>.
 
-However, you should instead use the improved version of this:
-L</Perl_langinfo8>, which behaves identically except for an additional
+However, you should instead use either the improved version of this,
+L</Perl_langinfo8>, or even better, L</sv_langinfo>.  The latter returns an SV,
+handling all the possible non-standard returns of C<nl_langinfo()>, including
+the UTF8ness of any returned string.
+
+C<Perl_langinfo8> is identical to C<Perl_langinfo> except for an additional
 parameter, a pointer to a variable declared as L</C<utf8ness_t>>, into which it
 returns to you how you should treat the returned string with regards to it
 being encoded in UTF-8 or not.
+
+These two functions share private per-thread memory that will be changed the
+next time either one of them is called with any input, but not before.
 
 Concerning the differences between these and plain C<nl_langinfo()>:
 
@@ -5869,6 +5876,22 @@ The details for those items which may deviate from what this emulation returns
 and what a native C<nl_langinfo()> would return are specified in
 L<I18N::Langinfo>.
 
+=for apidoc  sv_langinfo
+
+This is the preferred interface for accessing the data that L<nl_langinfo(3)>
+provides (or Perl's emulation of it on platforms lacking it), returning an SV.
+Unlike, the earlier-defined interfaces to this (L</Perl_langinfo> and
+L</Perl_langinfo8>), which return strings, the UTF8ness of the result is
+automatically handled for you.  And like them, it is thread-safe and
+automatically handles getting the proper values for the C<RADIXCHAR> and
+C<THOUSEP> items (that calling the plain libc C<nl_langinfo()> could give the
+wrong results for).  Like them, this also doesn't play well with the libc
+C<localeconv()>; use L<C<POSIX::localeconv()>|POSIX/localeconv> instead.
+
+There are a few deviations from what a native C<nl_langinfo()> would return and
+what this returns on platforms that don't implement that function.  These are
+detailed in L<I18N::Langinfo>.
+
 =cut
 
 */
@@ -5883,6 +5906,17 @@ L<I18N::Langinfo>.
 #  define external_call_langinfo(item, sv, utf8p)                           \
                                     emulate_langinfo(item, "C", sv, utf8p)
 #endif
+
+SV *
+Perl_sv_langinfo(pTHX_ const nl_item  item) {
+    utf8ness_t dummy;   /* Having this tells the layers below that we want the
+                           UTF-8 flag in 'sv' to be set properly. */
+
+    SV * sv = newSV_type(SVt_PV);
+    (void) external_call_langinfo(item, sv, &dummy);
+
+    return sv;
+}
 
 const char *
 Perl_langinfo(const nl_item item)
@@ -9542,7 +9576,7 @@ the global locale), but only if you use the following operations:
 
 =item L<I18N::Langinfo>, items C<CRNCYSTR> and C<THOUSEP>
 
-=item L<perlapi/Perl_langinfo>, items C<CRNCYSTR> and C<THOUSEP>
+=item L<perlapi/sv_langinfo>, items C<CRNCYSTR> and C<THOUSEP>
 
 =back
 

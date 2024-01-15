@@ -353,6 +353,17 @@ as C<Stack_off_t> rather than C<SSize_t>.  This reverts back to
 compatibility with pre-64-bit stack support for default builds of perl
 where C<Stack_off_t> is C<I32>.  [GH #21782]
 
+=item *
+
+A new function is now available to C<XS> code, L<perlapi/sv_langinfo>.
+This provides the same information as the existing
+L<perlapi/Perl_langinfo8>, but returns an SV instead of a S<C<char *>>,
+so that programmers don't have to concern themselves with the UTF-8ness
+of the result.  This new function is now the preferred interface for
+C<XS> code to the L<nl_langinfo(3)> C<libc> function.  From Perl space,
+this information continues to be provided by the L<I18N::Langinfo>
+module.
+
 =back
 
 =head1 Selected Bug Fixes
