@@ -252,6 +252,7 @@ SKIP: {
 
 SKIP: {
     skip("no LC_TIME locales available") unless @locales;
+    skip("no strftime", 1) unless defined $Config{d_strftime};
 
     for my $locale (@locales) {
         use POSIX 'strftime';

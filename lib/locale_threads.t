@@ -1052,7 +1052,7 @@ SKIP: {
             next;
         }
 
-        if ($category eq 'LC_TIME') {
+        if ($category eq 'LC_TIME' && defined $Config{d_strftime}) {
             add_trials('LC_TIME', "POSIX::strftime($strftime_args)");
             add_trials('LC_TIME', <<~'END_OF_CODE');
                 use I18N::Langinfo qw(langinfo

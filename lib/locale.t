@@ -2235,7 +2235,8 @@ foreach my $Locale (@Locale) {
     }
 
     $ok19 = $ok20 = 1;
-    if (locales_enabled('LC_TIME')) {
+    if (locales_enabled('LC_TIME') && defined $Config{d_strftime}) {
+
         if (setlocale(&POSIX::LC_TIME, $Locale)) { # These tests aren't
                                                    # affected by
                                                    # :not_characters

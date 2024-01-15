@@ -266,15 +266,21 @@ cmp_ok(&POSIX::acos(1.0), '==', 0.0, 'dynamic loading');
 # didn't detect it.  If this fails, try adding
 # -DSTRUCT_TM_HASZONE to your cflags when compiling ext/POSIX/POSIX.c.
 # See ext/POSIX/hints/sunos_4.pl and ext/POSIX/hints/linux.pl 
-$test = next_test();
-print POSIX::strftime("ok $test # %H:%M, on %m/%d/%y\n", localtime());
+SKIP: {
+    skip("no strftime", 1) unless defined $Config{d_strftime};
+    $test = next_test();
+    print POSIX::strftime("ok $test # %H:%M, on %m/%d/%y\n", localtime());
+}
 
 # If that worked, validate the mini_mktime() routine's normalisation of
 # input fields to strftime().
 sub try_strftime {
+  SKIP: {
+    skip("no strftime", 1) unless defined $Config{d_strftime};
     my $expect = shift;
     my $got = POSIX::strftime("%a %b %d %H:%M:%S %Y %j", @_);
     is($got, $expect, "validating mini_mktime() and strftime(): $expect");
+  }
 }
 
 if (locales_enabled('LC_TIME')) {
