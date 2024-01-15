@@ -24,9 +24,6 @@ INCLUDE: const-xs.inc
 SV*
 langinfo(code)
 	int	code
-  PREINIT:
-        const char * value;
-        utf8ness_t   is_utf8;
   PROTOTYPE: _
   CODE:
 #ifdef HAS_NL_LANGINFO
@@ -36,8 +33,7 @@ langinfo(code)
 	} else
 #endif
         {
-            value = Perl_langinfo8(code, &is_utf8);
-            RETVAL = newSVpvn_utf8(value, strlen(value), is_utf8 == UTF8NESS_YES);
+            RETVAL = sv_langinfo(code);
         }
 
   OUTPUT:
