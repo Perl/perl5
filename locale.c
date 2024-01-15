@@ -6337,7 +6337,6 @@ S_emulate_langinfo(pTHX_ const int item,
 
             /* Everything in between is the radix string */
             if (LIKELY(s < e)) {
-                *s = '\0';
                 sv_setpvn(sv, item_start, s - item_start);
                 SvUTF8_off(sv);
                 retval_type = RETVAL_IN_sv;
