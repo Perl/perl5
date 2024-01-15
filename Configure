@@ -21502,8 +21502,8 @@ int main() {
 		STDIO_STREAM_ARRAY[i]._flag)
 		fflush(&STDIO_STREAM_ARRAY[i]);
     }
-  }
 # endif
+  }
 #endif
   _exit(42);
 }
