@@ -5913,7 +5913,7 @@ Perl_langinfo(const nl_item item)
     dTHX;
 
     (void) external_call_langinfo(item, PL_langinfo_sv, NULL);
-    return SvPVX_const(PL_langinfo_sv);
+    return SvPV_nolen(PL_langinfo_sv);
 }
 
 const char *
@@ -5923,7 +5923,7 @@ Perl_langinfo8(const nl_item item, utf8ness_t * utf8ness)
     dTHX;
 
     (void) external_call_langinfo(item, PL_langinfo_sv, utf8ness);
-    return SvPVX_const(PL_langinfo_sv);
+    return SvPV_nolen(PL_langinfo_sv);
 }
 
 #ifdef USE_LOCALE
@@ -6146,7 +6146,7 @@ S_langinfo_sv_i(pTHX_
         gwLOCALE_UNLOCK;
 
         SvUTF8_off(sv);
-        retval = SvPVX_const(sv);
+        retval = SvPV_nolen(sv);
 
         if (utf8ness) {
             *utf8ness = get_locale_string_utf8ness_i(retval,
@@ -6973,10 +6973,9 @@ S_emulate_langinfo(pTHX_ const int item,
         return NULL;
     }
 
-    /* Here, wants a 'retval' return.  Extract that if not already there.  We
-     * know that the value already is a PV */
+    /* Here, wants a 'retval' return.  Extract that if not already there. */
     if (! isRETVAL_IN_retval(retval_type)) {
-        retval = SvPVX_const(sv);
+        retval = SvPV_nolen(sv);
     }
 
     /* Here, 'retval' started as a simple value, or has been converted into
