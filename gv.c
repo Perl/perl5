@@ -4151,7 +4151,7 @@ Perl_amagic_call(pTHX_ SV *left, SV *right, int method, int flags)
                  * with the context of individual concats being scalar,
                  * regardless of the overall context of the multiconcat op
                  */
-    U8 gimme = (force_scalar || PL_op->op_type == OP_MULTICONCAT)
+    U8 gimme = (force_scalar || (PL_op && PL_op->op_type == OP_MULTICONCAT))
                     ? G_SCALAR : GIMME_V;
 
     CATCH_SET(TRUE);
