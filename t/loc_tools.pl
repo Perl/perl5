@@ -38,6 +38,7 @@ my $save_D = $^D;
 #local $^D = $save_D if $debug;
 #my $d = $^D;
 #$d |= (0x04000000|0x00100000) if $debug;
+use if $debug, 'Data::Dumper';
 
 my $has_excluded_category = $Config{ccflags} =~ /\bD?NO_LOCALE_/;
 
@@ -553,7 +554,6 @@ sub find_locales ($;$) {
     my @Locale;
 
     if (@platform_locales) {
-    use Data::Dumper;
     #print STDERR __FILE__, ": ", __LINE__, ": ", Dumper \@platform_locales;
         $gathering_platform_locales = 0;
         foreach my $locale (@platform_locales) {
