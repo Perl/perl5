@@ -65,6 +65,26 @@ BEGIN {
                     RADIXCHAR
                     THOUSEP
                     CRNCYSTR
+                    ALT_DIGITS
+                    YESEXPR
+                    YESSTR
+                    NOEXPR
+                    NOSTR
+                    ERA
+                    ABDAY_1
+                    DAY_1
+                    ABMON_1
+                    MON_1
+                    AM_STR
+                    PM_STR
+                    D_FMT
+                    D_T_FMT
+                    ERA_D_FMT
+                    ERA_D_T_FMT
+                    ERA_T_FMT
+                    T_FMT
+                    T_FMT_AMPM
+                  );
 }
 
 use I18N::Langinfo 'langinfo', @langinfo;
