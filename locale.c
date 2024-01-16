@@ -7989,8 +7989,7 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
         PL_C_locale_obj = newlocale(LC_ALL_MASK, "C", (locale_t) 0);
         if (! PL_C_locale_obj) {
             LOCALE_UNLOCK;
-            locale_panic_(Perl_form(aTHX_
-                                "Cannot create POSIX 2008 C locale object"));
+            locale_panic_("Cannot create POSIX 2008 C locale object");
         }
         LOCALE_UNLOCK;
 
