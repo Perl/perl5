@@ -68,6 +68,46 @@ our @EXPORT_OK = qw(
                     T_FMT_AMPM
                     YESEXPR
                     YESSTR
+                    _NL_ADDRESS_POSTAL_FMT
+                    _NL_ADDRESS_COUNTRY_NAME
+                    _NL_ADDRESS_COUNTRY_POST
+                    _NL_ADDRESS_COUNTRY_AB2
+                    _NL_ADDRESS_COUNTRY_AB3
+                    _NL_ADDRESS_COUNTRY_CAR
+                    _NL_ADDRESS_COUNTRY_NUM
+                    _NL_ADDRESS_COUNTRY_ISBN
+                    _NL_ADDRESS_LANG_NAME
+                    _NL_ADDRESS_LANG_AB
+                    _NL_ADDRESS_LANG_TERM
+                    _NL_ADDRESS_LANG_LIB
+                    _NL_IDENTIFICATION_TITLE
+                    _NL_IDENTIFICATION_SOURCE
+                    _NL_IDENTIFICATION_ADDRESS
+                    _NL_IDENTIFICATION_CONTACT
+                    _NL_IDENTIFICATION_EMAIL
+                    _NL_IDENTIFICATION_TEL
+                    _NL_IDENTIFICATION_FAX
+                    _NL_IDENTIFICATION_LANGUAGE
+                    _NL_IDENTIFICATION_TERRITORY
+                    _NL_IDENTIFICATION_AUDIENCE
+                    _NL_IDENTIFICATION_APPLICATION
+                    _NL_IDENTIFICATION_ABBREVIATION
+                    _NL_IDENTIFICATION_REVISION
+                    _NL_IDENTIFICATION_DATE
+                    _NL_IDENTIFICATION_CATEGORY
+                    _NL_MEASUREMENT_MEASUREMENT
+                    _NL_NAME_NAME_FMT
+                    _NL_NAME_NAME_GEN
+                    _NL_NAME_NAME_MR
+                    _NL_NAME_NAME_MRS
+                    _NL_NAME_NAME_MISS
+                    _NL_NAME_NAME_MS
+                    _NL_PAPER_HEIGHT
+                    _NL_PAPER_WIDTH
+                    _NL_TELEPHONE_TEL_INT_FMT
+                    _NL_TELEPHONE_TEL_DOM_FMT
+                    _NL_TELEPHONE_INT_SELECT
+                    _NL_TELEPHONE_INT_PREFIX
                    );
 
 our $VERSION = '0.23';
@@ -178,6 +218,114 @@ For the eras based on typically some ruler, such as the Japanese Emperor
 
 =back
 
+In addition, Linux boxes have extra items, as follows.  (When called from
+other platform types, these return a stub value, of not much use.)
+
+=over
+
+=item C<_NL_ADDRESS_POSTAL_FMT>
+
+=item C<_NL_ADDRESS_COUNTRY_NAME>
+
+=item C<_NL_ADDRESS_COUNTRY_POST>
+
+=item C<_NL_ADDRESS_COUNTRY_AB2>
+
+=item C<_NL_ADDRESS_COUNTRY_AB3>
+
+=item C<_NL_ADDRESS_COUNTRY_CAR>
+
+=item C<_NL_ADDRESS_COUNTRY_NUM>
+
+=item C<_NL_ADDRESS_COUNTRY_ISBN>
+
+=item C<_NL_ADDRESS_LANG_NAME>
+
+=item C<_NL_ADDRESS_LANG_AB>
+
+=item C<_NL_ADDRESS_LANG_TERM>
+
+=item C<_NL_ADDRESS_LANG_LIB>
+
+On Linux boxes, these return information about the country for the current
+locale.  Further information is found in F<langinfo.h>
+
+=item C<_NL_IDENTIFICATION_TITLE>
+
+=item C<_NL_IDENTIFICATION_SOURCE>
+
+=item C<_NL_IDENTIFICATION_ADDRESS>
+
+=item C<_NL_IDENTIFICATION_CONTACT>
+
+=item C<_NL_IDENTIFICATION_EMAIL>
+
+=item C<_NL_IDENTIFICATION_TEL>
+
+=item C<_NL_IDENTIFICATION_FAX>
+
+=item C<_NL_IDENTIFICATION_LANGUAGE>
+
+=item C<_NL_IDENTIFICATION_TERRITORY>
+
+=item C<_NL_IDENTIFICATION_AUDIENCE>
+
+=item C<_NL_IDENTIFICATION_APPLICATION>
+
+=item C<_NL_IDENTIFICATION_ABBREVIATION>
+
+=item C<_NL_IDENTIFICATION_REVISION>
+
+=item C<_NL_IDENTIFICATION_DATE>
+
+=item C<_NL_IDENTIFICATION_CATEGORY>
+
+On Linux boxes, these return meta information about the current locale,
+such as how to get in touch with its maintainers.
+Further information is found in F<langinfo.h>
+
+=item C<_NL_MEASUREMENT_MEASUREMENT>
+
+On Linux boxes, it returns 1 if the metric system of measurement prevails in
+the locale; or 2 if US customary units prevail.
+
+=item C<_NL_NAME_NAME_FMT>
+
+=item C<_NL_NAME_NAME_GEN>
+
+=item C<_NL_NAME_NAME_MR>
+
+=item C<_NL_NAME_NAME_MRS>
+
+=item C<_NL_NAME_NAME_MISS>
+
+=item C<_NL_NAME_NAME_MS>
+
+On Linux boxes, these return information about how names are formatted and
+the personal salutations used in the current locale.  Further information
+is found in L<locale(7)> and F<langinfo.h>
+
+=item C<_NL_PAPER_HEIGHT>
+
+=item C<_NL_PAPER_WIDTH>
+
+On Linux boxes, these return the standard size of sheets of paper (in
+millimeters) in the current locale.
+
+=item C<_NL_TELEPHONE_TEL_INT_FMT>
+
+=item C<_NL_TELEPHONE_TEL_DOM_FMT>
+
+=item C<_NL_TELEPHONE_INT_SELECT>
+
+=item C<_NL_TELEPHONE_INT_PREFIX>
+
+On Linux boxes, these return information about how telephone numbers are
+formatted (both domestically and international calling) in the current locale.
+Further information is found in F<langinfo.h>
+
+=back
+
 =head2 For systems without C<nl_langinfo>
 
 This module originally was just a wrapper for the libc C<nl_langinfo>
@@ -249,6 +397,11 @@ L<https://github.com/Perl/perl5/issues>.
 
 These are derived by using C<strftime()>, and not all versions of that function
 know about them.  C<""> is returned for these on such systems.
+
+=item All C<_NL_I<foo>> items
+
+These return the same values as they do on boxes that don't have the
+appropriate underlying locale categories.
 
 =back
 
