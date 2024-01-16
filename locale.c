@@ -6254,6 +6254,8 @@ S_emulate_langinfo(pTHX_ const int item,
 
     switch (item) {
 
+#  if ! defined(HAS_SOME_LANGINFO) || ! LC_MESSAGES_AVAIL_
+
       /* The following items have no way khw could figure out how to get except
        * via nl_langinfo() */
       case YESEXPR:   retval = "^[+1yY]"; break;
@@ -6261,13 +6263,15 @@ S_emulate_langinfo(pTHX_ const int item,
       case NOEXPR:    retval = "^[-0nN]"; break;
       case NOSTR:     retval = "no";      break;
 
-#  if defined(USE_LOCALE_MONETARY) && defined(HAS_LOCALECONV)
+#  endif
+#  if ! defined(HAS_SOME_LANGINFO) || ! LC_MONETARY_AVAIL_
+#    if defined(USE_LOCALE_MONETARY) && defined(HAS_LOCALECONV)
 
       case CRNCYSTR:
         cat_index = LC_MONETARY_INDEX_;
         goto use_localeconv;
 
-#  else
+#    else
 
       case CRNCYSTR:
 
@@ -6288,24 +6292,26 @@ S_emulate_langinfo(pTHX_ const int item,
         retval = "-";
         break;
 
+#    endif
 #  endif
-#  if defined(USE_LOCALE_NUMERIC) && defined(HAS_LOCALECONV)
+#  if ! defined(HAS_SOME_LANGINFO) || ! LC_NUMERIC_AVAIL_
+#    if defined(USE_LOCALE_NUMERIC) && defined(HAS_LOCALECONV)
 
       case THOUSEP:
         cat_index = LC_NUMERIC_INDEX_;
         goto use_localeconv;
 
-#  else
+#    else
 
       case THOUSEP:
         retval = C_thousands_sep;
         break;
 
-#  endif
+#    endif
 
       case RADIXCHAR:
 
-#  if defined(USE_LOCALE_NUMERIC) && defined(HAS_STRTOD)
+#    if defined(USE_LOCALE_NUMERIC) && defined(HAS_STRTOD)
 
        {
         /* khw knows of only three possible radix characters used in the world.
@@ -6338,7 +6344,7 @@ S_emulate_langinfo(pTHX_ const int item,
         }
        }
 
-#  endif  /* Trying strtod() */
+#    endif  /* Trying strtod() */
 
         /* If gets to here, the strtod() method wasn't compiled, or it failed;
          * drop down.
@@ -6350,18 +6356,20 @@ S_emulate_langinfo(pTHX_ const int item,
          * unlikely to be wanted unless some really broken localeconv() shows
          * up) */
 
-#  if ! defined(USE_LOCALE_NUMERIC) || ! defined(HAS_LOCALECONV)
+#    if ! defined(USE_LOCALE_NUMERIC) || ! defined(HAS_LOCALECONV)
 
         retval = C_decimal_point;
         break;
 
-#  else
+#    else
 
         cat_index = LC_NUMERIC_INDEX_;
 
+#    endif
 #  endif
-#  if defined(HAS_LOCALECONV) && (   defined(USE_LOCALE_NUMERIC)      \
-                                  || defined(USE_LOCALE_MONETARY))
+#  if ! defined(HAS_SOME_LANGINFO)                                      \
+   &&   defined(HAS_LOCALECONV)                                         \
+   &&  (defined(USE_LOCALE_NUMERIC) || defined(USE_LOCALE_MONETARY))
 
     /* These items are available from localeconv(). */
 
@@ -6436,13 +6444,14 @@ S_emulate_langinfo(pTHX_ const int item,
        }
 
 #  endif  /* Using localeconv() for something or other */
-#  ifndef USE_LOCALE_CTYPE
+#  if ! defined(HAS_SOME_LANGINFO) || ! LC_CTYPE_AVAIL_
+#    ifndef USE_LOCALE_CTYPE
 
       case CODESET:
         retval = C_codeset;
         break;
 
-#  else
+#    else
 
       case CODESET:
 
@@ -6458,17 +6467,17 @@ S_emulate_langinfo(pTHX_ const int item,
             break;
         }
 
-#    ifdef WIN32
-#      ifdef WIN32_USE_FAKE_OLD_MINGW_LOCALES
-#        define CODE_PAGE_FORMAT  "%s"
-#        define CODE_PAGE_FUNCTION  nl_langinfo(CODESET)
-#      else
-#        define CODE_PAGE_FORMAT  "%d"
+#      ifdef WIN32
+#        ifdef WIN32_USE_FAKE_OLD_MINGW_LOCALES
+#          define CODE_PAGE_FORMAT  "%s"
+#          define CODE_PAGE_FUNCTION  nl_langinfo(CODESET)
+#        else
+#          define CODE_PAGE_FORMAT  "%d"
 
          /* This Windows function retrieves the code page.  It is subject to
           * change, but is documented, and has been stable for many releases */
-#        define CODE_PAGE_FUNCTION  ___lc_codepage_func()
-#      endif
+#          define CODE_PAGE_FUNCTION  ___lc_codepage_func()
+#        endif
 
         const char * orig_CTYPE_locale;
         orig_CTYPE_locale = toggle_locale_c(LC_CTYPE, locale);
@@ -6484,7 +6493,7 @@ S_emulate_langinfo(pTHX_ const int item,
                                                locale, SvPVX(sv)));
         break;
 
-#    else   /* Below is ! Win32 */
+#      else   /* Below is ! Win32 */
 
         /* The codeset is important, but khw did not figure out a way for it to
          * be retrieved on non-Windows boxes without nl_langinfo().  But even
@@ -6492,14 +6501,14 @@ S_emulate_langinfo(pTHX_ const int item,
          * UTF-8 locale or not.  If it is UTF-8, we (correctly) use that for
          * the code set. */
 
-#      ifdef HAS_DEFINITIVE_UTF8NESS_DETERMINATION
+#        ifdef HAS_DEFINITIVE_UTF8NESS_DETERMINATION
 
         if (is_locale_utf8(locale)) {
             retval = "UTF-8";
             break;
         }
 
-#      endif
+#        endif
 
         /* Here, the code set has not been found.  The only other option khw
          * could think of is to see if the codeset is part of the locale name.
@@ -6535,7 +6544,7 @@ S_emulate_langinfo(pTHX_ const int item,
             retval_type = RETVAL_IN_sv;
         }
 
-#      ifndef HAS_DEFINITIVE_UTF8NESS_DETERMINATION
+#        ifndef HAS_DEFINITIVE_UTF8NESS_DETERMINATION
 
         /* Here, 'retval' contains any codeset name derived from the locale
          * name.  That derived name may be empty or not necessarily indicative
@@ -6558,12 +6567,23 @@ S_emulate_langinfo(pTHX_ const int item,
             retval_type = RETVAL_IN_retval;
         }
 
-#      endif
+#        endif
 
         break;
 
-#    endif    /* ! WIN32 */
-#  endif      /* USE_LOCALE_CTYPE */
+#      endif    /* ! WIN32 */
+#    endif      /* USE_LOCALE_CTYPE */
+#  endif
+
+   /* When we have to emulate TIME-related items, this bit of code is compiled
+    * to have the default: case be a nested switch() which distinguishes
+    * between legal inputs and unknown ones.  This bit does initialization and
+    * then at the end calls switch().  But when we aren't emulating TIME, by
+    * the time we get to here all legal inputs have been handled above, and it
+    * is cleaner to not have a nested switch().  So this bit of code is skipped
+    * and the other-wise nested default: case is compiled as part of the outer
+    * (and actually only) switch() */
+#  if ! defined(HAS_SOME_LANGINFO) || ! LC_TIME_AVAIL_
 
       default:  /* Anything else that is legal is LC_TIME-related */
        {
@@ -6571,7 +6591,7 @@ S_emulate_langinfo(pTHX_ const int item,
         const char * format = NULL;
         retval = NULL;
 
-#  ifdef HAS_STRFTIME
+#    ifdef HAS_STRFTIME
 
         bool return_format = FALSE;
 
@@ -6582,11 +6602,13 @@ S_emulate_langinfo(pTHX_ const int item,
         int mday = 1;
         int hour = 6;
 
-#  endif
+#    endif
 
         /* Nested switch for LC_TIME items, plus the default: case is for
          * unknown items */
         switch (item) {
+
+#  endif    /* ! defined(HAS_SOME_LANGINFO) || ! LC_TIME_AVAIL_ */
 
           default:
 
@@ -6606,6 +6628,9 @@ S_emulate_langinfo(pTHX_ const int item,
             retval = "";
             break;
 #  endif
+
+   /* Back to the nested switch() */
+#  if ! defined(HAS_SOME_LANGINFO) || ! LC_TIME_AVAIL_
 
             /* The case: statments in this switch are all for LC_TIME related
              * values.  There are four types of values returned.  One type is
@@ -6640,17 +6665,17 @@ S_emulate_langinfo(pTHX_ const int item,
             /* Unimplemented by perl; for use with strftime() %E modifier */
           case ERA: retval = ""; break;
 
-#  if ! defined(USE_LOCALE_TIME) || ! defined(HAS_STRFTIME)
+#    if ! defined(USE_LOCALE_TIME) || ! defined(HAS_STRFTIME)
 
           case AM_STR: retval = "AM"; break;
           case PM_STR: retval = "PM"; break;
-#  else
+#    else
           case PM_STR: hour = 18;
           case AM_STR:
             format = "%p";
             break;
-#  endif
-#  if ! defined(USE_LOCALE_TIME) || ! defined(HAS_STRFTIME)
+#    endif
+#    if ! defined(USE_LOCALE_TIME) || ! defined(HAS_STRFTIME)
 
           case ABDAY_1: retval = "Sun"; break;
           case ABDAY_2: retval = "Mon"; break;
@@ -6659,7 +6684,7 @@ S_emulate_langinfo(pTHX_ const int item,
           case ABDAY_5: retval = "Thu"; break;
           case ABDAY_6: retval = "Fri"; break;
           case ABDAY_7: retval = "Sat"; break;
-#  else
+#    else
           case ABDAY_7: mday++;
           case ABDAY_6: mday++;
           case ABDAY_5: mday++;
@@ -6669,8 +6694,8 @@ S_emulate_langinfo(pTHX_ const int item,
           case ABDAY_1:
             format = "%a";
             break;
-#  endif
-#  if ! defined(USE_LOCALE_TIME) || ! defined(HAS_STRFTIME)
+#    endif
+#    if ! defined(USE_LOCALE_TIME) || ! defined(HAS_STRFTIME)
 
           case DAY_1: retval = "Sunday";    break;
           case DAY_2: retval = "Monday";    break;
@@ -6679,7 +6704,7 @@ S_emulate_langinfo(pTHX_ const int item,
           case DAY_5: retval = "Thursday";  break;
           case DAY_6: retval = "Friday";    break;
           case DAY_7: retval = "Saturday";  break;
-#  else
+#    else
           case DAY_7: mday++;
           case DAY_6: mday++;
           case DAY_5: mday++;
@@ -6689,8 +6714,8 @@ S_emulate_langinfo(pTHX_ const int item,
           case DAY_1:
             format = "%A";
             break;
-#  endif
-#  if ! defined(USE_LOCALE_TIME) || ! defined(HAS_STRFTIME)
+#    endif
+#    if ! defined(USE_LOCALE_TIME) || ! defined(HAS_STRFTIME)
           case ABMON_1:  retval = "Jan"; break;
           case ABMON_2:  retval = "Feb"; break;
           case ABMON_3:  retval = "Mar"; break;
@@ -6703,7 +6728,7 @@ S_emulate_langinfo(pTHX_ const int item,
           case ABMON_10: retval = "Oct"; break;
           case ABMON_11: retval = "Nov"; break;
           case ABMON_12: retval = "Dec"; break;
-#  else
+#    else
           case ABMON_12: mon++;
           case ABMON_11: mon++;
           case ABMON_10: mon++;
@@ -6718,8 +6743,8 @@ S_emulate_langinfo(pTHX_ const int item,
           case ABMON_1:
             format = "%b";
             break;
-#  endif
-#  if ! defined(USE_LOCALE_TIME) || ! defined(HAS_STRFTIME)
+#    endif
+#    if ! defined(USE_LOCALE_TIME) || ! defined(HAS_STRFTIME)
 
           case MON_1:  retval = "January";  break;
           case MON_2:  retval = "February"; break;
@@ -6733,7 +6758,7 @@ S_emulate_langinfo(pTHX_ const int item,
           case MON_10: retval = "October";  break;
           case MON_11: retval = "November"; break;
           case MON_12: retval = "December"; break;
-#  else
+#    else
           case MON_12: mon++;
           case MON_11: mon++;
           case MON_10: mon++;
@@ -6748,8 +6773,8 @@ S_emulate_langinfo(pTHX_ const int item,
           case MON_1:
             format = "%B";
             break;
-#  endif
-#  ifndef HAS_STRFTIME
+#    endif
+#    ifndef HAS_STRFTIME
 
           /* If no strftime() on this system, no format will be recognized, so
            * return empty */
@@ -6758,7 +6783,7 @@ S_emulate_langinfo(pTHX_ const int item,
           case T_FMT_AMPM:
             retval = "";
             break;
-#  else
+#    else
           /* These strftime formats are defined by C89, so we assume that
            * strftime supports them, and so are returned unconditionally; they
            * may not be what the locale actually says, but should give good
@@ -6777,7 +6802,7 @@ S_emulate_langinfo(pTHX_ const int item,
             return_format = TRUE;
             break;
 
-#    if defined(WIN32) || ! defined(USE_LOCALE_TIME)
+#      if defined(WIN32) || ! defined(USE_LOCALE_TIME)
 
           /* strftime() on Windows doesn't have the POSIX (beyond C89)
            * extensions that would allow it to recover these, so use the plain
@@ -6786,7 +6811,7 @@ S_emulate_langinfo(pTHX_ const int item,
           case ERA_D_FMT:   retval = "%x"; break;
           case ERA_T_FMT:   retval = "%X"; break;
           case ERA_D_T_FMT: retval = "%c"; break;
-#    else
+#      else
           case ERA_D_FMT:
             format = "%Ex";
             return_format = TRUE;   /* Test that this works on the platform */
@@ -6801,16 +6826,16 @@ S_emulate_langinfo(pTHX_ const int item,
             format = "%Ec";
             return_format = TRUE;
             break;
+#      endif
 #    endif
-#  endif
-#  if defined(WIN32) || ! defined(USE_LOCALE_TIME) || ! defined(HAS_STRFTIME)
+#    if defined(WIN32) || ! defined(USE_LOCALE_TIME) || ! defined(HAS_STRFTIME)
 
           case ALT_DIGITS: retval = "0"; break;
-#  else
+#    else
           case ALT_DIGITS:
             format = "%Ow"; /* Find the alternate digit for 0 */
             break;
-#  endif
+#    endif
 
         } /* End of inner switch() */
 
@@ -6827,7 +6852,7 @@ S_emulate_langinfo(pTHX_ const int item,
             break;
         }
 
-#  ifdef HAS_STRFTIME
+#    ifdef HAS_STRFTIME
 
         /* Here we have figured out what to call strftime() with */
 
@@ -6919,6 +6944,9 @@ S_emulate_langinfo(pTHX_ const int item,
 #  endif
 
        }    /* End of braced group for outer switch 'default:' case */
+
+#  endif
+
     } /* Giant switch() of nl_langinfo() items */
 
     GCC_DIAG_RESTORE_STMT;
