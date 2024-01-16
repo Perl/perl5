@@ -58,7 +58,7 @@ BEGIN {
 }
 
 use feature 'fc';
-use I18N::Langinfo qw(langinfo CODESET CRNCYSTR RADIXCHAR THOUSEP);
+use I18N::Langinfo qw(langinfo CODESET RADIXCHAR THOUSEP CRNCYSTR);
 
 # =1 adds debugging output; =2 increases the verbosity somewhat
 our $debug = $ENV{PERL_DEBUG_FULL_TEST} // 0;
