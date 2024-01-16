@@ -86,6 +86,14 @@ SKIP: {
 
 my %correct_C_responses = (
         # Entries that are undef could have varying returns
+                            CODESET => undef,
+                            CRNCYSTR => undef,
+                            NOEXPR => undef,
+                            NOSTR => undef,
+                            RADIXCHAR => '.',
+                            THOUSEP => '',
+                            YESEXPR => undef,
+                            YESSTR => undef,
                             ABDAY_1 => 'Sun',
                             ABDAY_2 => 'Mon',
                             ABDAY_3 => 'Tue',
