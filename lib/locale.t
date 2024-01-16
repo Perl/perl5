@@ -84,6 +84,46 @@ BEGIN {
                     ERA_T_FMT
                     T_FMT
                     T_FMT_AMPM
+                    _NL_ADDRESS_POSTAL_FMT
+                    _NL_ADDRESS_COUNTRY_NAME
+                    _NL_ADDRESS_COUNTRY_POST
+                    _NL_ADDRESS_COUNTRY_AB2
+                    _NL_ADDRESS_COUNTRY_AB3
+                    _NL_ADDRESS_COUNTRY_CAR
+                    _NL_ADDRESS_COUNTRY_NUM
+                    _NL_ADDRESS_COUNTRY_ISBN
+                    _NL_ADDRESS_LANG_NAME
+                    _NL_ADDRESS_LANG_AB
+                    _NL_ADDRESS_LANG_TERM
+                    _NL_ADDRESS_LANG_LIB
+                    _NL_IDENTIFICATION_TITLE
+                    _NL_IDENTIFICATION_SOURCE
+                    _NL_IDENTIFICATION_ADDRESS
+                    _NL_IDENTIFICATION_CONTACT
+                    _NL_IDENTIFICATION_EMAIL
+                    _NL_IDENTIFICATION_TEL
+                    _NL_IDENTIFICATION_FAX
+                    _NL_IDENTIFICATION_LANGUAGE
+                    _NL_IDENTIFICATION_TERRITORY
+                    _NL_IDENTIFICATION_AUDIENCE
+                    _NL_IDENTIFICATION_APPLICATION
+                    _NL_IDENTIFICATION_ABBREVIATION
+                    _NL_IDENTIFICATION_REVISION
+                    _NL_IDENTIFICATION_DATE
+                    _NL_IDENTIFICATION_CATEGORY
+                    _NL_MEASUREMENT_MEASUREMENT
+                    _NL_NAME_NAME_FMT
+                    _NL_NAME_NAME_GEN
+                    _NL_NAME_NAME_MR
+                    _NL_NAME_NAME_MRS
+                    _NL_NAME_NAME_MISS
+                    _NL_NAME_NAME_MS
+                    _NL_PAPER_HEIGHT
+                    _NL_PAPER_WIDTH
+                    _NL_TELEPHONE_TEL_INT_FMT
+                    _NL_TELEPHONE_TEL_DOM_FMT
+                    _NL_TELEPHONE_INT_SELECT
+                    _NL_TELEPHONE_INT_PREFIX
                   );
 }
 
@@ -1062,6 +1102,8 @@ my $locales_test_number;
 my $not_necessarily_a_problem_test_number;
 my $first_casing_test_number;
 my %setlocale_failed;   # List of locales that setlocale() didn't work on
+my $has_glibc_extra_categories = grep { $_ =~ /^ _NL /x }
+                                                    valid_locale_categories();
 
 foreach my $Locale (@Locale) {
     $locales_test_number = $first_locales_test_number - 1;
@@ -1089,6 +1131,13 @@ foreach my $Locale (@Locale) {
         for my $item (@langinfo) {
             my $numeric_item = eval $item;
             my $value = langinfo($numeric_item);
+
+            # All items should return a value; if not, this will warn.  But on
+            # platforms without the extra categories, almost all items will be
+            # empty.  Skip reporting such.
+            next if $value eq ""
+                 && $item =~ / ^ _NL_ / && ! $has_glibc_extra_categories;
+
             debug "$item = " . disp_str($value);
         }
     }

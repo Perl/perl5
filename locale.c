@@ -5975,6 +5975,82 @@ S_external_call_langinfo(pTHX_ const nl_item item,
         break;
 
 
+      case _NL_ADDRESS_POSTAL_FMT:
+      case _NL_ADDRESS_COUNTRY_NAME:
+      case _NL_ADDRESS_COUNTRY_POST:
+      case _NL_ADDRESS_COUNTRY_AB2:
+      case _NL_ADDRESS_COUNTRY_AB3:
+      case _NL_ADDRESS_COUNTRY_CAR:
+      case _NL_ADDRESS_COUNTRY_NUM:
+      case _NL_ADDRESS_COUNTRY_ISBN:
+      case _NL_ADDRESS_LANG_NAME:
+      case _NL_ADDRESS_LANG_AB:
+      case _NL_ADDRESS_LANG_TERM:
+      case _NL_ADDRESS_LANG_LIB:
+#  ifdef USE_LOCALE_ADDRESS
+        cat_index = LC_ADDRESS_INDEX_;
+#  endif
+        break;
+
+
+      case _NL_IDENTIFICATION_TITLE:
+      case _NL_IDENTIFICATION_SOURCE:
+      case _NL_IDENTIFICATION_ADDRESS:
+      case _NL_IDENTIFICATION_CONTACT:
+      case _NL_IDENTIFICATION_EMAIL:
+      case _NL_IDENTIFICATION_TEL:
+      case _NL_IDENTIFICATION_FAX:
+      case _NL_IDENTIFICATION_LANGUAGE:
+      case _NL_IDENTIFICATION_TERRITORY:
+      case _NL_IDENTIFICATION_AUDIENCE:
+      case _NL_IDENTIFICATION_APPLICATION:
+      case _NL_IDENTIFICATION_ABBREVIATION:
+      case _NL_IDENTIFICATION_REVISION:
+      case _NL_IDENTIFICATION_DATE:
+      case _NL_IDENTIFICATION_CATEGORY:
+#  ifdef USE_LOCALE_IDENTIFICATION
+        cat_index = LC_IDENTIFICATION_INDEX_;
+#  endif
+        break;
+
+
+      case _NL_MEASUREMENT_MEASUREMENT:
+#  ifdef USE_LOCALE_MEASUREMENT
+        cat_index = LC_MEASUREMENT_INDEX_;
+#  endif
+        break;
+
+
+      case _NL_NAME_NAME_FMT:
+      case _NL_NAME_NAME_GEN:
+      case _NL_NAME_NAME_MR:
+      case _NL_NAME_NAME_MRS:
+      case _NL_NAME_NAME_MISS:
+      case _NL_NAME_NAME_MS:
+#  ifdef USE_LOCALE_NAME
+        cat_index = LC_NAME_INDEX_;
+#  endif
+        break;
+
+
+      case _NL_PAPER_HEIGHT:
+      case _NL_PAPER_WIDTH:
+#  ifdef USE_LOCALE_PAPER
+        cat_index = LC_PAPER_INDEX_;
+#  endif
+        break;
+
+
+      case _NL_TELEPHONE_TEL_INT_FMT:
+      case _NL_TELEPHONE_TEL_DOM_FMT:
+      case _NL_TELEPHONE_INT_SELECT:
+      case _NL_TELEPHONE_INT_PREFIX:
+#  ifdef USE_LOCALE_TELEPHONE
+        cat_index = LC_TELEPHONE_INDEX_;
+#  endif
+        break;
+
+
       default:  /* The other possible items are all in LC_TIME. */
 #  ifdef USE_LOCALE_TIME
         cat_index = LC_TIME_INDEX_;
@@ -6137,9 +6213,93 @@ S_langinfo_sv_i(pTHX_
  *                  needed.)  So, a copy of the result is made in this case as
  *                  well.
  */
+    const char * retval = NULL;
+
+    /* Do a bit of extra work so avoid
+     *  switch() { default: ... }
+     * where the only case in it is the default: */
+#  if defined(USE_LOCALE_PAPER)                 \
+   || defined(USE_LOCALE_MEASUREMENT)           \
+   || defined(USE_LOCALE_ADDRESS)
+#    define IS_SWITCH  1
+#    define MAYBE_SWITCH(n)  switch(n)
+#  else
+#    define IS_SWITCH  0
+#    define MAYBE_SWITCH(n)
+#  endif
+
+    GCC_DIAG_IGNORE_STMT(-Wimplicit-fallthrough);
+
+    MAYBE_SWITCH(item) {
+
+#  if defined(USE_LOCALE_MEASUREMENT)
+
+      case _NL_MEASUREMENT_MEASUREMENT:
+       {
+        /* An ugly API; only the first byte of the returned char* address means
+         * anything */
+        gwLOCALE_LOCK;
+        char char_value = nl_langinfo(item)[0];
+        gwLOCALE_UNLOCK;
+
+        sv_setuv(sv, char_value);
+       }
+
+        goto non_string_common;
+
+#  endif
+#  if defined(USE_LOCALE_ADDRESS) || defined(USE_LOCALE_PAPER)
+#    if defined(USE_LOCALE_ADDRESS)
+
+      case _NL_ADDRESS_COUNTRY_NUM:
+
+        /* FALLTHROUGH */
+
+#    endif
+#    if defined(USE_LOCALE_PAPER)
+
+      case _NL_PAPER_HEIGHT: case _NL_PAPER_WIDTH:
+
+#    endif
+
+       {    /* A slightly less ugly API; the int portion of the returned char*
+             * address is an integer. */
+        gwLOCALE_LOCK;
+        int int_value = (int) PTR2UV(nl_langinfo(item));
+        gwLOCALE_UNLOCK;
+
+        sv_setuv(sv, int_value);
+       }
+
+#  endif
+#  if IS_SWITCH
+#    if defined(USE_LOCALE_MEASUREMENT)
+
+       non_string_common:
+
+#    endif
+
+        /* In all cases that get here, the char* instead delivers a numeric
+         * value, so its UTF-8ness is meaningless */
+        if (sv == PL_scratch_langinfo) {
+            retval = SvPV_nomg_const_nolen(sv);
+
+            if (utf8ness) {
+                *utf8ness = UTF8NESS_IMMATERIAL;
+            }
+        }
+
+        break;
+
+      default:
+
+#  endif
+
+        /* The rest of the possibilities deliver a true char* pointer to a
+         * string (or sequence of strings in the case of ALT_DIGITS) */
         gwLOCALE_LOCK;
 
-        const char * retval = nl_langinfo(item);
+        retval = nl_langinfo(item);
         Size_t total_len = strlen(retval);
         sv_setpvn(sv, retval, total_len);
 
@@ -6156,6 +6316,9 @@ S_langinfo_sv_i(pTHX_
                 SvUTF8_on(sv);
             }
         }
+    }
+
+    GCC_DIAG_RESTORE_STMT;
 
     restore_toggled_locale_i(cat_index, orig_switched_locale);
     end_DEALING_WITH_MISMATCHED_CTYPE(locale)
@@ -6163,6 +6326,8 @@ S_langinfo_sv_i(pTHX_
     return retval;
 }
 
+#  undef IS_SWITCH
+#  undef MAYBE_SWITCH
 #endif
 #ifndef HAS_DEFINITIVE_UTF8NESS_DETERMINATION
 
@@ -6571,6 +6736,108 @@ S_emulate_langinfo(pTHX_ const int item,
 
 #      endif    /* ! WIN32 */
 #    endif      /* USE_LOCALE_CTYPE */
+#  endif
+
+   /* The _NL_foo items are mostly empty; the rest are copied from Ubuntu C
+    * locale values.  khw fairly arbitrarily decided which of its non-empty
+    * values to copy and which to change to empty.  All the numeric ones needed
+    * some value */
+
+#  if ! defined(HAS_SOME_LANGINFO) || ! LC_ADDRESS_AVAIL_
+
+      case _NL_ADDRESS_POSTAL_FMT:
+      case _NL_ADDRESS_COUNTRY_NAME:
+      case _NL_ADDRESS_COUNTRY_POST:
+      case _NL_ADDRESS_COUNTRY_AB2:
+      case _NL_ADDRESS_COUNTRY_AB3:
+      case _NL_ADDRESS_COUNTRY_CAR:
+      case _NL_ADDRESS_COUNTRY_ISBN:
+      case _NL_ADDRESS_LANG_NAME:
+      case _NL_ADDRESS_LANG_AB:
+      case _NL_ADDRESS_LANG_TERM:
+      case _NL_ADDRESS_LANG_LIB:
+        retval = "";
+        break;
+
+      case _NL_ADDRESS_COUNTRY_NUM:
+        sv_setuv(sv, 0);
+        retval_type = RETVAL_IN_sv;
+        break;
+
+#  endif
+#  if ! defined(HAS_SOME_LANGINFO) || ! LC_IDENTIFICATION_AVAIL_
+
+      case _NL_IDENTIFICATION_ADDRESS:
+      case _NL_IDENTIFICATION_CONTACT:
+      case _NL_IDENTIFICATION_EMAIL:
+      case _NL_IDENTIFICATION_TEL:
+      case _NL_IDENTIFICATION_FAX:
+      case _NL_IDENTIFICATION_LANGUAGE:
+      case _NL_IDENTIFICATION_AUDIENCE:
+      case _NL_IDENTIFICATION_APPLICATION:
+      case _NL_IDENTIFICATION_ABBREVIATION:
+        retval = "";
+        break;
+
+      case _NL_IDENTIFICATION_DATE:     retval = "1997-12-20"; break;
+      case _NL_IDENTIFICATION_REVISION: retval = "1.0"; break;
+      case _NL_IDENTIFICATION_CATEGORY: retval = "i18n:1999"; break;
+      case _NL_IDENTIFICATION_TERRITORY:retval = "ISO"; break;
+
+      case _NL_IDENTIFICATION_TITLE:
+        retval = "ISO/IEC 14652 i18n FDCC-set";
+        break;
+
+      case _NL_IDENTIFICATION_SOURCE:
+        retval = "ISO/IEC JTC1/SC22/WG20 - internationalization";
+        break;
+
+#  endif
+#  if ! defined(HAS_SOME_LANGINFO) || ! LC_MEASUREMENT_AVAIL_
+
+      case _NL_MEASUREMENT_MEASUREMENT:
+        sv_setuv(sv, 1);
+        retval_type = RETVAL_IN_sv;
+        break;
+
+#  endif
+#  if ! defined(HAS_SOME_LANGINFO) || ! LC_NAME_AVAIL_
+
+      case _NL_NAME_NAME_FMT:
+      case _NL_NAME_NAME_GEN:
+      case _NL_NAME_NAME_MR:
+      case _NL_NAME_NAME_MRS:
+      case _NL_NAME_NAME_MISS:
+      case _NL_NAME_NAME_MS:
+        retval = "";
+        break;
+
+#  endif
+#  if ! defined(HAS_SOME_LANGINFO) || ! LC_PAPER_AVAIL_
+
+      case _NL_PAPER_HEIGHT:
+        sv_setuv(sv, 297);
+        retval_type = RETVAL_IN_sv;
+        break;
+
+      case _NL_PAPER_WIDTH:
+        sv_setuv(sv, 210);
+        retval_type = RETVAL_IN_sv;
+        break;
+
+#  endif
+#  if ! defined(HAS_SOME_LANGINFO) || ! LC_TELEPHONE_AVAIL_
+
+      case _NL_TELEPHONE_INT_SELECT:
+      case _NL_TELEPHONE_INT_PREFIX:
+      case _NL_TELEPHONE_TEL_DOM_FMT:
+        retval = "";
+        break;
+
+      case _NL_TELEPHONE_TEL_INT_FMT:
+        retval = "+%c %a %l";
+        break;
+
 #  endif
 
    /* When we have to emulate TIME-related items, this bit of code is compiled

@@ -26,15 +26,7 @@ langinfo(code)
 	int	code
   PROTOTYPE: _
   CODE:
-#ifdef HAS_NL_LANGINFO
-	if (code < 0) {
-	    SETERRNO(EINVAL, LIB_INVARG);
-	    RETVAL = &PL_sv_undef;
-	} else
-#endif
-        {
-            RETVAL = sv_langinfo(code);
-        }
+        RETVAL = sv_langinfo(code);
 
   OUTPUT:
         RETVAL
