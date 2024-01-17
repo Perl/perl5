@@ -149,9 +149,40 @@ meridiem time formats:
 =item *
 
 For the character code set being used (such as "ISO8859-1", "cp850",
-"koi8-r", "sjis", "utf8", etc.), and for the currency string:
+"koi8-r", "sjis", "utf8", etc.):
 
-    CODESET CRNCYSTR
+    CODESET
+
+=item *
+
+For the symbol or string of characters that indicates a number is a monetary
+value:
+
+    CRNCYSTR
+
+An example is the dollar sign C<$>.  Some locales not associated with
+particular locations may have an empty currency string.  (The C locale is
+one.)  Otherwise, the return of this is always prefixed by one of these three
+characters:
+
+=over
+
+=item C<->
+
+indicates that in this locale, the string precedes the numeric value, as in a
+U.S. locale: C<$9.95>.
+
+=item C<+>
+
+indicates that in this locale, the string follows the numeric value, like
+C<9.95USD>.
+
+=item C<.>
+
+indicates that in this locale, the string replaces the radix character, like
+C<9$95>.
+
+=back
 
 =item *
 
@@ -226,12 +257,6 @@ Always evaluates to C<%X>, the locale's appropriate time representation.
 
 Always evaluates to C<%c>, the locale's appropriate date and time
 representation.
-
-=item C<CRNCYSTR>
-
-The return may be incorrect for those rare locales where the currency symbol
-replaces the radix character.  If you have examples of it needing to work
-differently, please file a report at L<https://github.com/Perl/perl5/issues>.
 
 =item C<ALT_DIGITS>
 
