@@ -1275,6 +1275,23 @@ Perl_valid_utf8_to_uvchr(const U8 *s, STRLEN *retlen)
 
 }
 
+/* This looks like 0x010101... */
+#  define PERL_COUNT_MULTIPLIER   (~ (UINTMAX_C(0)) / 0xFF)
+
+/* This looks like 0x808080... */
+#  define PERL_VARIANTS_WORD_MASK (PERL_COUNT_MULTIPLIER * 0x80)
+#  define PERL_WORDSIZE            sizeof(PERL_UINTMAX_T)
+#  define PERL_WORD_BOUNDARY_MASK (PERL_WORDSIZE - 1)
+
+/* Evaluates to 0 if 'x' is at a word boundary; otherwise evaluates to 1, by
+ * or'ing together the lowest bits of 'x'.  Hopefully the final term gets
+ * optimized out completely on a 32-bit system, and its mask gets optimized out
+ * on a 64-bit system */
+#  define PERL_IS_SUBWORD_ADDR(x) (1 & (       PTR2nat(x)                     \
+                                      |   (  PTR2nat(x) >> 1)                 \
+                                      | ( ( (PTR2nat(x)                       \
+                                           & PERL_WORD_BOUNDARY_MASK) >> 2))))
+
 /*
 =for apidoc      is_utf8_invariant_string
 =for apidoc_item is_utf8_invariant_string_loc
@@ -1332,23 +1349,6 @@ Perl_is_utf8_invariant_string_loc(const U8* const s, STRLEN len, const U8 ** ep)
     }
 
     send = s + len;
-
-/* This looks like 0x010101... */
-#  define PERL_COUNT_MULTIPLIER   (~ (UINTMAX_C(0)) / 0xFF)
-
-/* This looks like 0x808080... */
-#  define PERL_VARIANTS_WORD_MASK (PERL_COUNT_MULTIPLIER * 0x80)
-#  define PERL_WORDSIZE            sizeof(PERL_UINTMAX_T)
-#  define PERL_WORD_BOUNDARY_MASK (PERL_WORDSIZE - 1)
-
-/* Evaluates to 0 if 'x' is at a word boundary; otherwise evaluates to 1, by
- * or'ing together the lowest bits of 'x'.  Hopefully the final term gets
- * optimized out completely on a 32-bit system, and its mask gets optimized out
- * on a 64-bit system */
-#  define PERL_IS_SUBWORD_ADDR(x) (1 & (       PTR2nat(x)                     \
-                                      |   (  PTR2nat(x) >> 1)                 \
-                                      | ( ( (PTR2nat(x)                       \
-                                           & PERL_WORD_BOUNDARY_MASK) >> 2))))
 
 #ifndef EBCDIC
 
