@@ -127,7 +127,7 @@ struct _FILE;
 #define pclose(f)  _CANNOT _pclose_
 #endif
 
-#endif /*not define EBCDIC */
+#endif /*not define OEMVS */
 
 /*
  * ex: set ts=8 sts=4 sw=4 et:
