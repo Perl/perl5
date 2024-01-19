@@ -8046,6 +8046,16 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
                 PL_hints &= ~HINT_STRICT_VARS;
         }
 
+        /* As an optimisation, there's no point scanning for changes of
+         * visible builtin functions when switching between versions earlier
+         * than v5.39, when any became visible at all
+         */
+        if ((shortver >= SHORTVER(5, 39)) || (PL_prevailing_version >= SHORTVER(5, 39))) {
+            prepare_export_lexical();
+            import_builtin_bundle(shortver, true);
+            finish_export_lexical();
+        }
+
         PL_prevailing_version = shortver;
     }
 

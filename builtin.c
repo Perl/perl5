@@ -12,6 +12,7 @@
  */
 
 #include "EXTERN.h"
+#define PERL_IN_BUILTIN_C
 #include "perl.h"
 
 #include "XSUB.h"
@@ -39,8 +40,8 @@ static void S_warn_experimental_builtin(pTHX_ const char *name)
 /* These three utilities might want to live elsewhere to be reused from other
  * code sometime
  */
-#define prepare_export_lexical()  S_prepare_export_lexical(aTHX)
-static void S_prepare_export_lexical(pTHX)
+void
+Perl_prepare_export_lexical(pTHX)
 {
     assert(PL_compcv);
 
@@ -59,8 +60,8 @@ static void S_export_lexical(pTHX_ SV *name, SV *sv)
     PL_curpad[off] = SvREFCNT_inc(sv);
 }
 
-#define finish_export_lexical()  S_finish_export_lexical(aTHX)
-static void S_finish_export_lexical(pTHX)
+void
+Perl_finish_export_lexical(pTHX)
 {
     intro_my();
 
@@ -603,8 +604,8 @@ static bool S_cv_is_builtin(pTHX_ CV *cv)
     return file && strEQ(file, __FILE__);
 }
 
-#define import_builtin_bundle(ver, do_unimport)  S_import_builtin_bundle(aTHX_ ver, do_unimport)
-static void S_import_builtin_bundle(pTHX_ U16 ver, bool do_unimport)
+void
+Perl_import_builtin_bundle(pTHX_ U16 ver, bool do_unimport)
 {
     SV *ampname = sv_newmortal();
 

@@ -6,7 +6,7 @@ BEGIN {
     $INC{"feature.pm"} = 1; # so we don't attempt to load feature.pm
 }
 
-print "1..85\n";
+print "1..88\n";
 
 # Can't require test.pl, as we're testing the use/require mechanism here.
 
@@ -170,6 +170,18 @@ ok $@, 'no strict vars allows ver decl to enable refs';
 eval 'no strict "vars"; use 5.012; ursine_word';
 ok $@, 'no strict vars allows ver decl to enable subs';
 
+# check that "use 5.39.0" and higher imports builtins
+{
+    my $result;
+
+    $result = eval 'use 5.39.0; my $t = true; $t eq "1"';
+    is ($@, "", 'builtin funcs available after use 5.39.0');
+    ok ($result, 'imported true is eq "1"');
+
+    eval 'use 5.39.0; use 5.36.0; my $t = true;';
+    like ($@, qr/^Bareword "true" not allowed while "strict subs" in use at /,
+        'builtin funcs are removed by use 5.36.0');
+}
 
 { use test_use }	# check that subparse saves pending tokens
 
