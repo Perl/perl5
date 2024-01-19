@@ -94,3 +94,9 @@ indexed 1..3;
 EXPECT
 Useless use of builtin::indexed in scalar context at - line 6.
 Useless use of builtin::indexed in void context at - line 7.
+########
+# builtin.c - import from bundles is idempotent
+use builtin qw(true false);
+use builtin ':5.39';
+use builtin ':5.39';
+EXPECT
