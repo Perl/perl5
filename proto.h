@@ -6210,6 +6210,23 @@ S_get_aux_mg(pTHX_ AV *av);
         assert(av)
 
 #endif
+#if defined(PERL_IN_BUILTIN_C) || defined(PERL_IN_OP_C)
+PERL_CALLCONV void
+Perl_finish_export_lexical(pTHX)
+        __attribute__visibility__("hidden");
+# define PERL_ARGS_ASSERT_FINISH_EXPORT_LEXICAL
+
+PERL_CALLCONV void
+Perl_import_builtin_bundle(pTHX_ U16 ver, bool do_unimport)
+        __attribute__visibility__("hidden");
+# define PERL_ARGS_ASSERT_IMPORT_BUILTIN_BUNDLE
+
+PERL_CALLCONV void
+Perl_prepare_export_lexical(pTHX)
+        __attribute__visibility__("hidden");
+# define PERL_ARGS_ASSERT_PREPARE_EXPORT_LEXICAL
+
+#endif /* defined(PERL_IN_BUILTIN_C) || defined(PERL_IN_OP_C) */
 #if defined(PERL_IN_CLASS_C) || defined(PERL_IN_GLOBALS_C) || \
     defined(PERL_IN_OP_C)    || defined(PERL_IN_PEEP_C)
 PERL_CALLCONV OP *
