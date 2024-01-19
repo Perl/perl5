@@ -596,12 +596,37 @@ static void S_import_sym(pTHX_ SV *sym)
     export_lexical(ampname, (SV *)cv);
 }
 
-#define import_builtin_bundle(ver)  S_import_builtin_bundle(aTHX_ ver)
-static void S_import_builtin_bundle(pTHX_ U16 ver)
+#define cv_is_builtin(cv)  S_cv_is_builtin(aTHX_ cv)
+static bool S_cv_is_builtin(pTHX_ CV *cv)
 {
+    char *file = CvFILE(cv);
+    return file && strEQ(file, __FILE__);
+}
+
+#define import_builtin_bundle(ver, do_unimport)  S_import_builtin_bundle(aTHX_ ver, do_unimport)
+static void S_import_builtin_bundle(pTHX_ U16 ver, bool do_unimport)
+{
+    SV *ampname = sv_newmortal();
+
     for(int i = 0; builtins[i].name; i++) {
-        if(builtins[i].since_ver <= ver)
+        sv_setpvf(ampname, "&%s", builtins[i].name);
+
+        bool want = (builtins[i].since_ver <= ver);
+
+        bool got = false;
+        PADOFFSET off = pad_findmy_sv(ampname, 0);
+        CV *cv;
+        if(off != NOT_IN_PAD &&
+                SvTYPE((cv = (CV *)PL_curpad[off])) == SVt_PVCV &&
+                cv_is_builtin(cv))
+            got = true;
+
+        if(!got && want) {
             import_sym(newSVpvn_flags(builtins[i].name, strlen(builtins[i].name), SVs_TEMP));
+        }
+        else if(do_unimport && got && !want) {
+            pad_add_name_sv(ampname, padadd_STATE|padadd_TOMBSTONE, 0, 0);
+        }
     }
 }
 
@@ -636,7 +661,7 @@ XS(XS_builtin_import)
                 Perl_croak(aTHX_ "Builtin version bundle \"%s\" is not supported by Perl " PERL_VERSION_STRING,
                         sympv);
 
-            import_builtin_bundle(want_ver);
+            import_builtin_bundle(want_ver, false);
 
             continue;
         }
