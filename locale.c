@@ -2148,9 +2148,9 @@ S_querylocale_2008_i(pTHX_ const locale_category_index index,
              * but do so incompletely.  If our records say it is POSIX, use
              * that; otherwise use C.  See
              * https://bugs.freebsd.org/bugzilla/show_bug.cgi?id=269375 */
-            retval = mortalized_pv_copy((strEQ(PL_curlocales[index], "POSIX"))
-                                        ? "POSIX"
-                                        : "C");
+            retval = (strEQ(PL_curlocales[index], "POSIX"))
+                     ? "POSIX"
+                     : "C";
         }
         else {
             retval = mortalized_pv_copy(PL_curlocales[index]);
