@@ -403,7 +403,8 @@ Perl_cv_undef_flags(pTHX_ CV *cv, U32 flags)
             SV ** const curpad = AvARRAY(comppad);
             for (ix = PadnamelistMAX(comppad_name); ix > 0; ix--) {
                 PADNAME * const name = namepad[ix];
-                if (name && PadnamePV(name) && *PadnamePV(name) == '&') {
+                if (name && PadnamePV(name) && *PadnamePV(name) == '&' &&
+                        !PadnameIsTOMBSTONE(name)) {
                     CV * const innercv = MUTABLE_CV(curpad[ix]);
                     if (PadnameIsOUR(name) && CvCLONED(&cvbody)) {
                         assert(!innercv);
@@ -641,16 +642,23 @@ Perl_pad_add_name_pvn(pTHX_ const char *namepv, STRLEN namelen,
     if (!PL_min_intro_pending)
         PL_min_intro_pending = offset;
     PL_max_intro_pending = offset;
-    /* if it's not a simple scalar, replace with an AV or HV */
-    assert(SvTYPE(PL_curpad[offset]) == SVt_NULL);
-    assert(SvREFCNT(PL_curpad[offset]) == 1);
-    if (namelen != 0 && *namepv == '@')
-        sv_upgrade(PL_curpad[offset], SVt_PVAV);
-    else if (namelen != 0 && *namepv == '%')
-        sv_upgrade(PL_curpad[offset], SVt_PVHV);
-    else if (namelen != 0 && *namepv == '&')
-        sv_upgrade(PL_curpad[offset], SVt_PVCV);
-    assert(SvPADMY(PL_curpad[offset]));
+    if(!(flags & padadd_TOMBSTONE)) {
+        /* if it's not a simple scalar, replace with an AV or HV */
+        assert(SvTYPE(PL_curpad[offset]) == SVt_NULL);
+        assert(SvREFCNT(PL_curpad[offset]) == 1);
+        if (namelen != 0 && *namepv == '@')
+            sv_upgrade(PL_curpad[offset], SVt_PVAV);
+        else if (namelen != 0 && *namepv == '%')
+            sv_upgrade(PL_curpad[offset], SVt_PVHV);
+        else if (namelen != 0 && *namepv == '&')
+            sv_upgrade(PL_curpad[offset], SVt_PVCV);
+        assert(SvPADMY(PL_curpad[offset]));
+    }
+    else {
+        /* tombstone has no SV */
+        SvREFCNT_dec(PL_curpad[offset]);
+        PL_curpad[offset] = NULL;
+    }
     DEBUG_Xv(PerlIO_printf(Perl_debug_log,
                            "Pad addname: %ld \"%s\" new lex=0x%" UVxf "\n",
                            (long)offset, PadnamePV(name),

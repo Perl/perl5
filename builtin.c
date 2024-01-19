@@ -683,8 +683,7 @@ XS(XS_builtin_unimport)
          * tombstone and instead COP_SEQ_MAX_HIGH_set() on the padname to
          * clear it.
          */
-        off = pad_add_name_sv(ampname, padadd_STATE|padadd_TOMBSTONE, 0, 0);
-        SvREFCNT_dec(PL_curpad[off]);
+        pad_add_name_sv(ampname, padadd_STATE|padadd_TOMBSTONE, 0, 0);
     }
 
     COP_SEQMAX_INC;
