@@ -5735,8 +5735,9 @@ S_populate_hash_from_localeconv(pTHX_ HV * hv,
 
 #      define LOCALECONV_UNLOCK  gwLOCALE_UNLOCK
 #    endif
-
-#    if defined(TS_W32_BROKEN_LOCALECONV) && defined(USE_THREAD_SAFE_LOCALE)
+#    if ! defined(TS_W32_BROKEN_LOCALECONV) || ! defined(USE_THREAD_SAFE_LOCALE)
+#      define WIN32_TEARDOWN
+#    else
 
     /* This is a workaround for another bug in Windows.  localeconv() was
      * broken with thread-safe locales prior to VS 15.  It looks at the global
@@ -5775,9 +5776,26 @@ S_populate_hash_from_localeconv(pTHX_ HV * hv,
     const char * save_global = querylocale_c(LC_ALL);
     void_setlocale_c(LC_ALL, save_thread);
 
+#     define WIN32_TEARDOWN                                                 \
+         STMT_START {                                                       \
+            /* Restore the global locale's prior state */                   \
+            void_setlocale_c(LC_ALL, save_global);                          \
+                                                                            \
+            /* And back to per-thread locales */                            \
+            if (restore_per_thread) {                                       \
+                if (_configthreadlocale(_ENABLE_PER_THREAD_LOCALE) == -1) { \
+                    locale_panic_("_configthreadlocale returned an error"); \
+                }                                                           \
+            }                                                               \
+                                                                            \
+            /* Restore the per-thread locale state */                       \
+            void_setlocale_c(LC_ALL, save_thread);                          \
+        } STMT_END
 #    endif  /* TS_W32_BROKEN_LOCALECONV */
 
-    /* Finally, do the actual call to localeconv() */
+
+    /* Finally, everything is locked and loaded; do the actual call to
+     * localeconv() */
     const char *lcbuf_as_string = (const char *) localeconv();
 
     /* Copy its results for each desired category as determined by
@@ -5829,24 +5847,8 @@ S_populate_hash_from_localeconv(pTHX_ HV * hv,
 
     /* Done with copying to the hash.  Can unwind the critical section locks */
 
-#    if defined(TS_W32_BROKEN_LOCALECONV) && defined(USE_THREAD_SAFE_LOCALE)
-
-    /* Restore the global locale's prior state */
-    void_setlocale_c(LC_ALL, save_global);
-
-    /* And back to per-thread locales */
-    if (restore_per_thread) {
-        if (_configthreadlocale(_ENABLE_PER_THREAD_LOCALE) == -1) {
-            locale_panic_("_configthreadlocale returned an error");
-        }
-    }
-
-    /* Restore the per-thread locale state */
-    void_setlocale_c(LC_ALL, save_thread);
-
-#    endif  /* TS_W32_BROKEN_LOCALECONV */
-
     /* Back out of what we set up */
+    WIN32_TEARDOWN;
     LOCALECONV_UNLOCK;
     MONETARY_TEARDOWN;
     NUMERIC_TEARDOWN;
