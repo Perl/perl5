@@ -7491,12 +7491,13 @@ S_maybe_override_codeset(pTHX_ const char * codeset,
      * UTF-8 locale, even if the locale name says it is. */
     const int mb_cur_max = MB_CUR_MAX;
     if (mb_cur_max < (int) UNISKIP(PERL_UNICODE_MAX)) {
+        restore_toggled_locale_c(LC_CTYPE, orig_CTYPE_locale);
+
         if (lean_towards_being_utf8 & NAME_INDICATES_UTF8) {
             *new_codeset = "";    /* The name is wrong; override */
             return true;
         }
 
-        restore_toggled_locale_c(LC_CTYPE, orig_CTYPE_locale);
         return false;
     }
 
