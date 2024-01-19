@@ -128,7 +128,7 @@ if ($define{USE_THREADS}) {
 
 $define{MULTIPLICITY} ||= $define{PERL_IMPLICIT_CONTEXT} ;
 
-if ($define{USE_THREADS} && ! $define{WIN32}) {
+if ($define{MULTIPLICITY} && ! $define{WIN32}) {
     $define{USE_REENTRANT_API} = 1;
 }
 
