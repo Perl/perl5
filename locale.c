@@ -6650,10 +6650,7 @@ S_emulate_langinfo(pTHX_ const int item,
              * what to change it to.  my_localeconv() has populated the hash
              * with exactly both fields.  Delete this one, leaving just the
              * CRNCYSTR one in the hash */
-            SV* precedes = hv_delete(result_hv,
-                                     P_CS_PRECEDES_LITERAL,
-                                     STRLENs(P_CS_PRECEDES_LITERAL),
-                                     0);
+            SV* precedes = hv_deletes(result_hv, P_CS_PRECEDES_LITERAL, 0);
             if (! precedes) {
                 locale_panic_("my_localeconv() unexpectedly didn't return"
                               " a value for " P_CS_PRECEDES_LITERAL);
