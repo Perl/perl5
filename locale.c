@@ -6498,6 +6498,8 @@ S_emulate_langinfo(pTHX_ const int item,
                                   || defined(USE_LOCALE_MONETARY))
 
     locale_category_index  cat_index;
+    const char * localeconv_key;
+    I32 localeconv_klen;
 
 #  endif
 
@@ -6521,6 +6523,8 @@ S_emulate_langinfo(pTHX_ const int item,
 
       case CRNCYSTR:
         cat_index = LC_MONETARY_INDEX_;
+        localeconv_key = CURRENCY_SYMBOL_LITERAL;
+        localeconv_klen = STRLENs(CURRENCY_SYMBOL_LITERAL);
         goto use_localeconv;
 
 #    else
@@ -6552,6 +6556,8 @@ S_emulate_langinfo(pTHX_ const int item,
 
       case THOUSEP:
         cat_index = LC_NUMERIC_INDEX_;
+        localeconv_key = THOUSANDS_SEP_LITERAL;
+        localeconv_klen = STRLENs(THOUSANDS_SEP_LITERAL);
         goto use_localeconv;
 
 #    else
@@ -6633,23 +6639,15 @@ S_emulate_langinfo(pTHX_ const int item,
 
         /* The hash gets populated with just the field(s) related to 'item'. */
         HV * result_hv = my_localeconv(item);
+        SV* string = hv_delete(result_hv, localeconv_key, localeconv_klen, 0);
 
-        SV* string;
-        if (item != CRNCYSTR) {
+        if (item == CRNCYSTR) {
 
-            /* These items have been populated with just one key => value */
-            (void) hv_iterinit(result_hv);
-            HE * entry = hv_iternext(result_hv);
-            string = hv_iterval(result_hv, entry);
-        }
-        else {
-
-            /* But CRNCYSTR localeconv() returns a slightly different value
+            /* CRNCYSTR localeconv() returns a slightly different value
              * than the nl_langinfo() API calls for, so have to modify this one
              * to conform.  We need another value from localeconv() to know
              * what to change it to.  my_localeconv() has populated the hash
-             * with exactly both fields.  Delete this one, leaving just the
-             * CRNCYSTR one in the hash */
+             * with exactly both fields. */
             SV* precedes = hv_deletes(result_hv, P_CS_PRECEDES_LITERAL, 0);
             if (! precedes) {
                 locale_panic_("my_localeconv() unexpectedly didn't return"
@@ -6666,18 +6664,13 @@ S_emulate_langinfo(pTHX_ const int item,
              * and it makes sense given that CHAR_MAX indicates the value isn't
              * used, so it neither precedes nor succeeds) */
 
-            /* Now get CRNCYSTR */
-            (void) hv_iterinit(result_hv);
-            HE * entry = hv_iternext(result_hv);
-            string = hv_iterval(result_hv, entry);
-
-            /* And perform the modification */
+            /* Perform the modification */
             sv_insert(string, 0, 0, prefix, 1);
         }
 
-        /* Here, 'string' contains the value we want to return.  Copy it to the
-         * returned SV (which, since 'string' is in a mortal HV, may steal its
-         * PV) */
+        /* Here, 'string' contains the value we want to return, and the
+         * hv_delete() has left it mortalized so its PV may be reused instead of
+         * copied */
         SvSetSV(sv, string);
         retval_type = RETVAL_IN_sv;
 
