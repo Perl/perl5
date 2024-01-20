@@ -7029,7 +7029,8 @@ S_strftime_tm(pTHX_ const char *fmt, const struct tm *mytm)
 # define PERL_ARGS_ASSERT_STRFTIME_TM           \
         assert(fmt); assert(mytm)
 
-# if defined(HAS_MISSING_LANGINFO_ITEM_) || !defined(HAS_NL_LANGINFO)
+# if  defined(HAS_MISSING_LANGINFO_ITEM_) || !defined(HAS_NL_LANGINFO) || \
+     !defined(USE_LOCALE)
 STATIC const char *
 S_emulate_langinfo(pTHX_ const int item, const char *locale, SV *sv, utf8ness_t *utf8ness);
 #   define PERL_ARGS_ASSERT_EMULATE_LANGINFO    \

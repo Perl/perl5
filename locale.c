@@ -6340,7 +6340,9 @@ S_maybe_override_codeset(pTHX_ const char * codeset,
                                const char * locale,
                                const char ** new_codeset);
 #endif
-#if ! defined(HAS_NL_LANGINFO) || defined(HAS_MISSING_LANGINFO_ITEM_)
+#if ! defined(USE_LOCALE)                   \
+ || ! defined(HAS_NL_LANGINFO)              \
+|| defined(HAS_MISSING_LANGINFO_ITEM_)
 
 STATIC const char *
 S_emulate_langinfo(pTHX_ const int item,
