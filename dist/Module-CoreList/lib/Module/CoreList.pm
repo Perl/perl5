@@ -418,6 +418,7 @@ sub changes_between {
     5.036003 => '2023-11-29',
     5.038002 => '2023-11-29',
     5.039006 => '2023-12-30',
+    5.039007 => '2024-01-20',
   );
 
 for my $version ( sort { $a <=> $b } keys %released ) {
@@ -21257,6 +21258,27 @@ for my $version ( sort { $a <=> $b } keys %released ) {
         removed => {
         }
     },
+    5.039007 => {
+        delta_from => 5.039006,
+        changed => {
+            'B::Op_private'         => '5.039007',
+            'Config'                => '5.039007',
+            'Exporter'              => '5.78',
+            'Exporter::Heavy'       => '5.78',
+            'Hash::Util'            => '0.31',
+            'I18N::Langinfo'        => '0.23',
+            'Math::BigFloat'        => '2.003002',
+            'Math::BigInt'          => '2.003002',
+            'Math::BigInt::Calc'    => '2.003002',
+            'Math::BigInt::FastCalc'=> '0.5018',
+            'Math::BigInt::Lib'     => '2.003002',
+            'Math::BigRat'          => '2.003002',
+            'Pod::Checker'          => '1.76',
+            'SelfLoader'            => '1.27',
+        },
+        removed => {
+        }
+    },
 );
 
 sub is_core
@@ -22737,6 +22759,13 @@ sub is_core
     },
     5.039006 => {
         delta_from => 5.039005,
+        changed => {
+        },
+        removed => {
+        }
+    },
+    5.039007 => {
+        delta_from => 5.039006,
         changed => {
         },
         removed => {
