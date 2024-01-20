@@ -6676,7 +6676,7 @@ S_emulate_langinfo(pTHX_ const int item,
         /* Here, 'string' contains the value we want to return, and the
          * hv_delete() has left it mortalized so its PV may be reused instead of
          * copied */
-        SvSetSV(sv, string);
+        sv_setsv_nomg(sv, string);
         retval_type = RETVAL_IN_sv;
 
         if (utf8ness) {
