@@ -45,7 +45,7 @@ you should reset the version numbers to the next blead series.
   2023-10-25  5.39.4  ✓       Graham Knop
   2023-11-20  5.39.5  ✓       Karen Etheridge
   2023-12-20  5.39.6  ✓       Philippe Bruhat
-  2024-01-20  5.39.7          Max Maischein
+  2024-01-20  5.39.7  ✓       Max Maischein
   2024-02-20  5.39.8          Renée Bäcker      Contentious changes freeze
   2024-03-20  5.39.9          ?                 User-visible changes to
                                                 correctly functioning
