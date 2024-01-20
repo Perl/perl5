@@ -93,9 +93,24 @@ module.
 
 =over 4
 
-=item *
+=item * Windows test failures
 
-none
+Some tests fail on Windows. This needs further investigation.
+
+  Test Summary Report
+  -------------------
+  ../cpan/Win32/t/GetFolderPath.t                (Wstat: 0 Tests: 1 Failed: 1)
+    Failed test:  1
+  ../cpan/Win32API-File/t/file.t                 (Wstat: 0 Tests: 270 Failed: 1)
+    Failed test:  41
+  ../ext/XS-APItest/t/locale.t                   (Wstat: 1280 (exited 5) Tests: 63 Failed: 0)
+    Non-zero exit status: 5
+    Parse errors: No plan found in TAP output
+
+=item * perlivp is missing streamzip 
+
+The C<streamzip> utility does not get installed on Windows but should
+get installed.
 
 =back
 
