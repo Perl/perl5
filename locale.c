@@ -6641,6 +6641,8 @@ S_emulate_langinfo(pTHX_ const int item,
         HV * result_hv = my_localeconv(item);
         SV* string = hv_delete(result_hv, localeconv_key, localeconv_klen, 0);
 
+#  ifdef USE_LOCALE_MONETARY
+
         if (item == CRNCYSTR) {
 
             /* CRNCYSTR localeconv() returns a slightly different value
@@ -6667,6 +6669,8 @@ S_emulate_langinfo(pTHX_ const int item,
             /* Perform the modification */
             sv_insert(string, 0, 0, prefix, 1);
         }
+
+#  endif
 
         /* Here, 'string' contains the value we want to return, and the
          * hv_delete() has left it mortalized so its PV may be reused instead of
