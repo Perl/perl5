@@ -4991,7 +4991,8 @@ Perl_mbtowc_(pTHX_ const wchar_t * pwc, const char * s, const Size_t len)
 
 This is a thread-safe version of the libc L<localeconv(3)>.  It is the same as
 L<POSIX::localeconv|POSIX/localeconv> (returning a hash of the C<localeconv()>
-fields), but directly callable from XS code.
+fields), but directly callable from XS code.  The hash is mortalized, so must
+be dealt with immediately.
 
 =cut
 */
