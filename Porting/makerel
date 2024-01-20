@@ -241,7 +241,6 @@ my @writables = qw(
     mg_vtable.h
     dist/Devel-PPPort/module2.c
     dist/Devel-PPPort/module3.c
-    cpan/autodie/t/touch_me
     reentr.c
     reentr.h
     regcharclass.h
