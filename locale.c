@@ -4999,7 +4999,7 @@ fields), but directly callable from XS code.
 HV *
 Perl_localeconv(pTHX)
 {
-    return my_localeconv(0);
+    return (HV *) sv_2mortal((SV *) my_localeconv(0));
 }
 
 HV *
@@ -5010,7 +5010,6 @@ S_my_localeconv(pTHX_ const int item)
     /* This returns a mortalized hash containing all or certain elements
      * returned by localeconv(). */
     HV * hv = newHV();      /* The returned hash, initially empty */
-    sv_2mortal((SV*)hv);
 
     /* The function is used by Perl_localeconv() and POSIX::localeconv(), or
      * internally from this file, and is thread-safe.
@@ -6602,6 +6601,7 @@ S_emulate_langinfo(pTHX_ const int item,
                                                    cat_index);
         }
 
+        SvREFCNT_dec_NN(result_hv);
         break;
 
        }
