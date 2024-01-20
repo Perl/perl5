@@ -2055,12 +2055,7 @@ open(filename, flags = O_RDONLY, mode = 0666)
 HV *
 localeconv()
     CODE:
-#ifndef HAS_LOCALECONV
-        RETVAL = NULL;
-        not_here("localeconv");
-#else
         RETVAL = Perl_localeconv(aTHX);
-#endif  /* HAS_LOCALECONV */
     OUTPUT:
 	RETVAL
 
