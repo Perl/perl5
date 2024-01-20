@@ -6429,6 +6429,7 @@ S_emulate_langinfo(pTHX_ const int item,
 #  endif
 #  if ! defined(HAS_SOME_LANGINFO) || ! LC_MONETARY_AVAIL_
 #    if defined(USE_LOCALE_MONETARY) && defined(HAS_LOCALECONV)
+#      define NEED_USE_LOCALECONV
 
       case CRNCYSTR:
         cat_index = LC_MONETARY_INDEX_;
@@ -6459,6 +6460,7 @@ S_emulate_langinfo(pTHX_ const int item,
 #  endif
 #  if ! defined(HAS_SOME_LANGINFO) || ! LC_NUMERIC_AVAIL_
 #    if defined(USE_LOCALE_NUMERIC) && defined(HAS_LOCALECONV)
+#      define NEED_USE_LOCALECONV
 
       case THOUSEP:
         cat_index = LC_NUMERIC_INDEX_;
@@ -6525,14 +6527,13 @@ S_emulate_langinfo(pTHX_ const int item,
         break;
 
 #    else
+#      define NEED_USE_LOCALECONV
 
         cat_index = LC_NUMERIC_INDEX_;
 
 #    endif
 #  endif
-#  if ! defined(HAS_SOME_LANGINFO)                                      \
-   &&   defined(HAS_LOCALECONV)                                         \
-   &&  (defined(USE_LOCALE_NUMERIC) || defined(USE_LOCALE_MONETARY))
+#  ifdef NEED_USE_LOCALECONV
 
     /* These items are available from localeconv(). */
 
@@ -6607,6 +6608,7 @@ S_emulate_langinfo(pTHX_ const int item,
        }
 
 #  endif  /* Using localeconv() for something or other */
+#  undef NEED_USE_LOCALECONV
 #  if ! defined(HAS_SOME_LANGINFO) || ! LC_CTYPE_AVAIL_
 #    ifndef USE_LOCALE_CTYPE
 
