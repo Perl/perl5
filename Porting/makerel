@@ -224,6 +224,8 @@ system("chmod +x @exe") == 0
     or die "system: $!";
 
 # MANIFEST may be resorted, so needs to be writable
+# This list of files is parsed from this source code
+# by t/porting/makerel.t
 my @writables = qw(
     feature.h
     lib/feature.pm

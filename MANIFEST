@@ -6489,6 +6489,7 @@ t/porting/header_parser.t		Check that regen/HeaderParser.pm works as expected
 t/porting/known_pod_issues.dat		Data file for porting/podcheck.t
 t/porting/libperl.t			Check libperl.a sanity
 t/porting/maintainers.t			Test that Porting/Maintainers.pl is up to date
+t/porting/makerel.t			Test that files used by Porting/makerel exist
 t/porting/manifest.t			Test that this MANIFEST file is well formed
 t/porting/perlfunc.t			Test that Functions_pm.PL can parse perlfunc.pod
 t/porting/pod_rules.t			Check that various pod lists are consistent
