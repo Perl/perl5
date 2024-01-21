@@ -7886,7 +7886,7 @@ S_strftime_tm(pTHX_ const char *fmt, const struct tm *mytm)
      * toggled */
 
     /* An empty format yields an empty result */
-    const int fmtlen = strlen(fmt);
+    const Size_t fmtlen = strlen(fmt);
     if (fmtlen == 0) {
         char *ret;
         Newxz (ret, 1, char);
@@ -7906,7 +7906,7 @@ S_strftime_tm(pTHX_ const char *fmt, const struct tm *mytm)
      * factor of the input format, but with a minimum that should handle most
      * common cases.  If this guess is too small, we will try again with a
      * larger one */
-    int bufsize = MAX(fmtlen * 2, 64);
+    Size_t bufsize = MAX(fmtlen * 2, 64);
 
     char *buf = NULL;   /* Makes Renew() act as Newx() on the first iteration */
     do {
@@ -7927,7 +7927,7 @@ S_strftime_tm(pTHX_ const char *fmt, const struct tm *mytm)
         dSAVE_ERRNO;
         errno = 0;
 
-        int len = strftime(buf, bufsize, fmt, mytm);
+        Size_t len = strftime(buf, bufsize, fmt, mytm);
         if (errno == EINVAL) {
             strftime_failed = true;
         }
@@ -7941,7 +7941,7 @@ S_strftime_tm(pTHX_ const char *fmt, const struct tm *mytm)
 
 #else
         STRFTIME_LOCK;
-        int len = strftime(buf, bufsize, fmt, mytm);
+        Size_t len = strftime(buf, bufsize, fmt, mytm);
         STRFTIME_UNLOCK;
 #endif
 
