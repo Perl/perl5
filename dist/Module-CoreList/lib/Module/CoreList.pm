@@ -4,7 +4,7 @@ use strict;
 our ( %released, %version, %families, %upstream, %bug_tracker, %deprecated, %delta );
 
 use version;
-our $VERSION = '5.20240120';
+our $VERSION = '5.20240220';
 
 sub PKG_PATTERN () { q#\A[a-zA-Z_][0-9a-zA-Z_]*(?:(::|')[0-9a-zA-Z_]+)*\z# }
 sub _looks_like_invocant ($) { local $@; !!eval { $_[0]->isa(__PACKAGE__) } }
@@ -21167,8 +21167,8 @@ for my $version ( sort { $a <=> $b } keys %released ) {
             'Math::BigInt::Trace'   => '0.67',
             'Math::BigRat'          => '2.003001',
             'Math::BigRat::Trace'   => '0.67',
-            'Module::CoreList'      => '5.20240120',
-            'Module::CoreList::Utils'=> '5.20240120',
+            'Module::CoreList'      => '5.20231230',
+            'Module::CoreList::Utils'=> '5.20231230',
             'Test2'                 => '1.302198',
             'Test2::API'            => '1.302198',
             'Test2::API::Breakage'  => '1.302198',
@@ -21274,6 +21274,8 @@ for my $version ( sort { $a <=> $b } keys %released ) {
             'Math::BigInt::FastCalc'=> '0.5018',
             'Math::BigInt::Lib'     => '2.003002',
             'Math::BigRat'          => '2.003002',
+            'Module::CoreList'      => '5.20240120',
+            'Module::CoreList::Utils'=> '5.20240120',
             'Pod::Checker'          => '1.76',
             'SelfLoader'            => '1.27',
         },
