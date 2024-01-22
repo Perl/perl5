@@ -1,4 +1,4 @@
-package builtin 0.012;
+package builtin 0.013;
 
 use strict;
 use warnings;
@@ -18,6 +18,7 @@ builtin - Perl pragma to import built-in utility functions
 
     use builtin qw(
         true false is_bool
+        inf nan
         weaken unweaken is_weak
         blessed refaddr reftype
         created_as_string created_as_number
@@ -142,6 +143,22 @@ or any variable containing one of these results.
 
 This function used to be named C<isbool>. A compatibility alias is provided
 currently but will be removed in a later version.
+
+=head2 inf
+
+    $num = inf;
+
+This function is currently B<experimental>.
+
+Returns the floating-point infinity value.
+
+=head2 nan
+
+    $num = nan;
+
+This function is currently B<experimental>.
+
+Returns the floating-point "Not-a-Number" value.
 
 =head2 weaken
 
