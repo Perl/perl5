@@ -6625,6 +6625,8 @@ S_emulate_langinfo(pTHX_ const int item,
 #      define NEED_USE_LOCALECONV
 
         cat_index = LC_NUMERIC_INDEX_;
+        localeconv_key = DECIMAL_POINT_LITERAL;
+        localeconv_klen = STRLENs(DECIMAL_POINT_LITERAL);
 
 #    endif
 #  endif
