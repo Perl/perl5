@@ -51,6 +51,25 @@ package FetchStoreCounter {
     is(prototype(\&builtin::is_bool), '$', 'is_bool prototype');
 }
 
+# float constants
+{
+    use builtin qw( inf nan );
+
+    ok(inf, 'inf is true');
+    ok(inf > 1E10, 'inf is bigger than 1E10');
+    ok(inf == inf, 'inf is equal to inf');
+    ok(inf == inf + 1, 'inf is equal to inf + 1');
+
+    # Invoke the real XSUB
+    my $inf = ( \&builtin::inf )->();
+    ok($inf == $inf + 1, 'inf returned by real xsub');
+
+    ok(nan != nan, 'NaN is not equal to NaN');
+
+    my $nan = ( \&builtin::nan )->();
+    ok($nan != $nan, 'NaN returned by real xsub');
+}
+
 # weakrefs
 {
     use builtin qw( is_weak weaken unweaken );

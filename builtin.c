@@ -89,14 +89,39 @@ XS(XS_builtin_false)
     XSRETURN_NO;
 }
 
+XS(XS_builtin_inf);
+XS(XS_builtin_inf)
+{
+    dXSARGS;
+    if(items)
+        croak_xs_usage(cv, "");
+    EXTEND(SP, 1);
+    XSRETURN_NV(NV_INF);
+}
+
+XS(XS_builtin_nan);
+XS(XS_builtin_nan)
+{
+    dXSARGS;
+    if(items)
+        croak_xs_usage(cv, "");
+    EXTEND(SP, 1);
+    XSRETURN_NV(NV_NAN);
+}
+
 enum {
     BUILTIN_CONST_FALSE,
     BUILTIN_CONST_TRUE,
+    BUILTIN_CONST_INF,
+    BUILTIN_CONST_NAN,
 };
 
 static OP *ck_builtin_const(pTHX_ OP *entersubop, GV *namegv, SV *ckobj)
 {
     const struct BuiltinFuncDescriptor *builtin = NUM2PTR(const struct BuiltinFuncDescriptor *, SvUV(ckobj));
+
+    if(builtin->is_experimental)
+        warn_experimental_builtin(builtin->name);
 
     SV *prototype = newSVpvs("");
     SAVEFREESV(prototype);
@@ -109,6 +134,8 @@ static OP *ck_builtin_const(pTHX_ OP *entersubop, GV *namegv, SV *ckobj)
     switch(builtin->ckval) {
         case BUILTIN_CONST_FALSE: constval = &PL_sv_no; break;
         case BUILTIN_CONST_TRUE:  constval = &PL_sv_yes; break;
+        case BUILTIN_CONST_INF:   constval = newSVnv(NV_INF); break;
+        case BUILTIN_CONST_NAN:   constval = newSVnv(NV_NAN); break;
         default:
             DIE(aTHX_ "panic: unrecognised builtin_const value %" IVdf,
                       builtin->ckval);
@@ -518,6 +545,8 @@ static const struct BuiltinFuncDescriptor builtins[] = {
     /* constants */
     { "true",  SHORTVER(5,39), &XS_builtin_true,   &ck_builtin_const, BUILTIN_CONST_TRUE,  false },
     { "false", SHORTVER(5,39), &XS_builtin_false,  &ck_builtin_const, BUILTIN_CONST_FALSE, false },
+    { "inf",        NO_BUNDLE, &XS_builtin_inf,    &ck_builtin_const, BUILTIN_CONST_INF,   true },
+    { "nan",        NO_BUNDLE, &XS_builtin_nan,    &ck_builtin_const, BUILTIN_CONST_NAN,   true },
 
     /* unary functions */
     { "is_bool",         NO_BUNDLE, &XS_builtin_func1_scalar, &ck_builtin_func1, OP_IS_BOOL,    true  },
