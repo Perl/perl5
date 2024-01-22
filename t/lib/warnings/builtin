@@ -94,3 +94,12 @@ indexed 1..3;
 EXPECT
 Useless use of builtin::indexed in scalar context at - line 6.
 Useless use of builtin::indexed in void context at - line 7.
+########
+# builtin.c - trim
+use strict;
+use warnings qw(all);
+use builtin qw(trim);
+my $str = "cat";
+trim $str;
+EXPECT
+Built-in function 'builtin::trim' is experimental at - line 6.
