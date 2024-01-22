@@ -1236,12 +1236,20 @@ Perl_hv_bucket_ratio(pTHX_ HV *hv)
 /*
 =for apidoc hv_delete
 
-Deletes a key/value pair in the hash.  The value's SV is removed from
-the hash, made mortal, and returned to the caller.  The absolute
-value of C<klen> is the length of the key.  If C<klen> is negative the
-key is assumed to be in UTF-8-encoded Unicode.  The C<flags> value
-will normally be zero; if set to C<G_DISCARD> then C<NULL> will be returned.
-C<NULL> will also be returned if the key is not found.
+=for apidoc_item ||hv_deletes|HV *hv|"key"|U32 flags
+
+These delete a key/value pair in the hash.  The value's SV is removed from
+the hash, made mortal, and returned to the caller.
+
+In C<hv_deletes>, the key must be a literal string and there is no length
+parameter.
+
+In C<hv_delete>, the absolute value of C<klen> is the length of the key.  If
+C<klen> is negative the key is assumed to be in UTF-8-encoded Unicode.
+
+In both, the C<flags> value will normally be zero; if set to C<G_DISCARD> then
+C<NULL> will be returned.  C<NULL> will also be returned if the key is not
+found.
 
 =for apidoc hv_delete_ent
 
