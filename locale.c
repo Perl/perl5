@@ -6169,7 +6169,7 @@ S_langinfo_sv_i(pTHX_
                            "Entering langinfo_sv_i item=%ld, using locale %s\n",
                            (long) item, locale));
 
-#  ifdef HAS_IGNORED_LOCALE_CATEGORIES
+#  ifdef HAS_IGNORED_LOCALE_CATEGORIES_
 
     if (! category_available[cat_index]) {
         return emulate_langinfo(item, locale, sv, utf8ness);
