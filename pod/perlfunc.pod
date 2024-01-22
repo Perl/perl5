@@ -10148,9 +10148,11 @@ functionality from the command-line.
 
 =for Pod::Functions enable Perl language features and declare required version
 
-Lexically enables all features available in the requested version as
-defined by the L<feature> pragma, disabling any features not in the
-requested version's feature bundle.  See L<feature>.
+Performs a Perl version check, and also serves as a base pragma declaring
+the dialect of Perl in which a file is written.  As a lexically-scoped
+pragma it selects a bundle of features defined by the L<feature> pragma,
+adjusts the strictures controlled by the L<strict> pragma, and may also
+enable warnings as if by the L<warnings> pragma.
 
 VERSION may be either a v-string such as v5.24.1, which will be compared
 to L<C<$^V>|perlvar/$^V> (aka $PERL_VERSION), or a numeric argument of the
@@ -10160,16 +10162,41 @@ Perl interpreter; Perl will not attempt to parse the rest of the file.
 Compare with L<C<require>|/require VERSION>, which can do a similar check
 at run time.
 
-If the specified Perl version is 5.12 or higher, strictures are enabled
-lexically as with L<C<use strict>|strict>.  Similarly, if the specified
-Perl version is 5.35.0 or higher, L<warnings> are enabled.  Later use of
-C<use VERSION> will override all behavior of a previous C<use VERSION>,
-possibly removing the C<strict>, C<warnings>, and C<feature> added by it.
+The effect on feature selection is to lexically enable all features
+available in the requested version's bundle as defined by the L<feature>
+pragma, disabling any features not in the requested version's feature
+bundle.  See L<feature>.
+
+If the specified Perl version is 5.37 or higher, strictures are enabled
+lexically, as if L<C<use strict>|strict> had been declared.  If the
+version is 5.11 or higher but less than 5.37, then strictures are enabled
+unless they were already explicitly disabled (by C<no strict>).  If the
+version is less than 5.11, then strictures are disabled unless they were
+already explicitly enabled (by C<use strict> or C<use v5.38>).  Similarly,
+if the specified Perl version is 5.35 or higher, L<warnings> are enabled.
+
+Later use of C<use VERSION> will override most behavior of a previous
+C<use VERSION>.  The feature set of the later-specified version completely
+replaces that of the earlier-specified version, and also any explicit
+feature selection.  Where the later-specified version is less than 5.37,
+its stricture behaviour takes precedence over that of an earlier-specified
+version that is also less than 5.37, but not over explicit stricture
+declarations nor over an earlier-specified version 5.37 or higher.
+Where the later-specified version is 5.37 or higher, its stricture
+behaviour takes precedence over that of any earlier-specified version,
+and also any explicit stricture declaration.  Where the later-specified
+version is less than 5.35, it doesn't affect the lexical warnings status,
+so the warnings aspect of any prior C<use v5.36> and any explicit warnings
+declarations remain in effect.  Where the later-specified version is
+5.35 or higher, its warnings enablement takes precedence over any prior
+declaration, including explicit warnings declarations.
+
 C<use VERSION> does not load the F<feature.pm>, F<strict.pm>, or
 F<warnings.pm> files.
 
 In the current implementation, any explicit use of C<use strict> or
-C<no strict> overrides C<use VERSION>, even if it comes before it.
+C<no strict> overrides C<use VERSION> for versions less than 5.37,
+even if the explicit stricture comes before the version pragma.
 However, this may be subject to change in a future release of Perl, so new
 code should not rely on this fact.  It is recommended that a
 C<use VERSION> declaration be the first significant statement within a
