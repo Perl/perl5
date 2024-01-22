@@ -204,10 +204,16 @@ if (locales_enabled('LC_ALL')) {
     setlocale(LC_ALL, "C");
 }
 else { # If no LC_ALL, make sure the categories used in Langinfo are in C
-    setlocale(LC_CTYPE, "C")    if locales_enabled('LC_CTYPE');
-    setlocale(LC_MONETARY, "C") if locales_enabled('LC_MONETARY');
-    setlocale(LC_NUMERIC, "C")  if locales_enabled('LC_NUMERIC');
-    setlocale(LC_TIME, "C")     if locales_enabled('LC_TIME');
+    setlocale(LC_CTYPE, "C")          if locales_enabled('LC_CTYPE');
+    setlocale(LC_MONETARY, "C")       if locales_enabled('LC_MONETARY');
+    setlocale(LC_NUMERIC, "C")        if locales_enabled('LC_NUMERIC');
+    setlocale(LC_TIME, "C")           if locales_enabled('LC_TIME');
+    setlocale(LC_ADDRESS, "C")        if locales_enabled('LC_ADDRESS');
+    setlocale(LC_IDENTIFICATION, "C") if locales_enabled('LC_IDENTIFICATION');
+    setlocale(LC_MEASUREMENT, "C")    if locales_enabled('LC_MEASUREMENT');
+    setlocale(LC_NAME, "C")           if locales_enabled('LC_NAME');
+    setlocale(LC_PAPER, "C")          if locales_enabled('LC_PAPER');
+    setlocale(LC_TELEPHONE, "C")      if locales_enabled('LC_TELEPHONE');
 }
 
 for my $constant (@constants) {
