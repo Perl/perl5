@@ -3060,6 +3060,11 @@ Perl_newSVpvn_share(pTHX_ const char *s, I32 len, U32 hash)
 #define PERL_ARGS_ASSERT_NEWSVPVN_SHARE
 
 PERL_CALLCONV SV *
+Perl_newSVpvz(pTHX_ const STRLEN len)
+        __attribute__warn_unused_result__;
+#define PERL_ARGS_ASSERT_NEWSVPVZ
+
+PERL_CALLCONV SV *
 Perl_newSVrv(pTHX_ SV * const rv, const char * const classname);
 #define PERL_ARGS_ASSERT_NEWSVRV                \
         assert(rv)
