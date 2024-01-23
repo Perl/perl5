@@ -1,7 +1,5 @@
 package Tie::File;
 
-require 5.005;
-
 use strict;
 use warnings;
 
@@ -10,15 +8,14 @@ use POSIX 'SEEK_SET';
 use Fcntl 'O_CREAT', 'O_RDWR', 'LOCK_EX', 'LOCK_SH', 'O_WRONLY', 'O_RDONLY';
 sub O_ACCMODE () { O_RDONLY | O_RDWR | O_WRONLY }
 
-
-our $VERSION = "1.07";
+our $VERSION = "1.08";
 my $DEFAULT_MEMORY_SIZE = 1<<21;    # 2 megabytes
 my $DEFAULT_AUTODEFER_THRESHHOLD = 3; # 3 records
 my $DEFAULT_AUTODEFER_FILELEN_THRESHHOLD = 65536; # 16 disk blocksful
 
-my %good_opt = map {$_ => 1, "-$_" => 1}
-                 qw(memory dw_size mode recsep discipline 
-                    autodefer autochomp autodefer_threshhold concurrent);
+my %good_opt = map { $_ => 1, "-$_" => 1 }
+  qw(memory dw_size mode recsep discipline
+  autodefer autochomp autodefer_threshhold concurrent binmode);
 
 our $DIAGNOSTIC = 0;
 our @OFF; # used as a temporary alias in some subroutines.
@@ -55,7 +52,8 @@ sub TIEARRAY {
   }
   $opts{dw_size} = $opts{memory} unless defined $opts{dw_size};
   if ($opts{dw_size} > $opts{memory}) {
-      croak("$pack: dw_size may not be larger than total memory allocation\n");
+      croak(
+        "$pack: dw_size may not be larger than total memory allocation\n");
   }
   # are we in deferred-write mode?
   $opts{defer} = 0 unless defined $opts{defer};
@@ -113,7 +111,11 @@ sub TIEARRAY {
 	$fh = Symbol::gensym();
     }
     sysopen $fh, $file, $opts{mode}, 0666 or return;
-    binmode $fh;
+    if ( $opts{binmode} ) {
+      binmode( $fh, $opts{binmode} );
+    } else {
+      binmode $fh 
+    }
     ++$opts{ourfh};
   }
   { my $ofh = select $fh; $| = 1; select $ofh } # autoflush on write
@@ -2051,6 +2053,15 @@ Changes to the array are reflected in the file immediately.
 
 Lazy people and beginners may now stop reading the manual.
 
+=head2 unicode
+
+To open a unicode encoded file, use the L<"binmode"> option or provide a 
+file handle that open with the desired encoding.
+While Tie::File can read Unicode files, it mangles them when attempting
+to write. A unicode string can consume more bytes than its' string
+length and Tie::File miscalculates non-byte oriented
+strings when writing. 
+
 =head2 C<recsep>
 
 What is a 'record'?  By default, the meaning is the same as for the
@@ -2127,6 +2138,14 @@ separator will not be removed.  If the file above was tied with
 then the array C<@gifts> would appear to contain C<("Gold\n",
 "Frankincense\n", "Myrrh\n")>, or (on Win32 systems) C<("Gold\r\n",
 "Frankincense\r\n", "Myrrh\r\n")>.
+
+=head2 C<binmode>
+
+Specify the binmode to set for files opened by Tie::File.
+
+  # tie a file with UTF-8 binmode
+  tie my @array, 
+    'Tie::File', 'array.file', 'binmode' => ':encoding(UTF-8)';
 
 =head2 C<mode>
 
@@ -2613,6 +2632,8 @@ More tests.  (Stuff I didn't think of yet.)
 Paragraph mode?
 
 Fixed-length mode.  Leave-blanks mode.
+
+Write to unicode files without mangling them.
 
 Maybe an autolocking mode?
 
