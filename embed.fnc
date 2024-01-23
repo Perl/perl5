@@ -4440,12 +4440,14 @@ S	|void	|set_save_buffer_min_size				\
 				|const Size_t min_len			\
 				|NULLOK char **buf			\
 				|NULLOK Size_t *buf_size
-S	|char * |strftime8	|NN const char *fmt			\
+S	|bool	|strftime8	|NN const char *fmt			\
+				|NN SV *sv				\
 				|NN const struct tm *mytm		\
 				|const utf8ness_t fmt_utf8ness		\
 				|NN utf8ness_t *result_utf8ness 	\
 				|const bool came_from_sv
-Sf	|char * |strftime_tm	|NN const char *fmt			\
+Sf	|bool	|strftime_tm	|NN const char *fmt			\
+				|NN SV *sv				\
 				|NN const struct tm *mytm
 # if defined(HAS_MISSING_LANGINFO_ITEM_) || !defined(HAS_NL_LANGINFO)
 S	|const char *|emulate_langinfo					\

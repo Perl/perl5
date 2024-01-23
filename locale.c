@@ -7243,25 +7243,27 @@ S_emulate_langinfo(pTHX_ const int item,
         * first day of the week.  Since we're only getting one thing at a
         * time, it all works */
         ints_to_tm(&mytm, 30, 30, hour, mday, mon, 2011, 0, 0, 0);
-        char * temp;
+        bool succeeded;
         if (utf8ness) {
-            temp = strftime8(format,
-                             &mytm,
-                             UTF8NESS_IMMATERIAL, /* All possible formats
-                                                     specified above are
-                                                     entirely ASCII */
-                             &is_utf8,
-                             false      /* not calling from sv_strftime */
-                            );
+            succeeded = strftime8(format,
+                                  sv,
+                                  &mytm,
+
+                                  /* All possible formats specified above are
+                                   * entirely ASCII */
+                                  UTF8NESS_IMMATERIAL,
+
+                                  &is_utf8,
+                                  false    /* not calling from sv_strftime */
+                              );
         }
         else {
-            temp = strftime_tm(format, &mytm);
+            succeeded = strftime_tm(format, sv, &mytm);
         }
 
         restore_toggled_locale_c(LC_TIME, orig_TIME_locale);
 
-        /* If strftime() returned an error, we return an empty string */
-        if (! temp) {
+        if (UNLIKELY(! succeeded)) {
             retval = "";
             break;
         }
@@ -7270,7 +7272,6 @@ S_emulate_langinfo(pTHX_ const int item,
 
             /* If to return what strftime() returns, are done */
             if (! return_format) {
-                sv_usepvn_flags(sv, temp, strlen(temp), SV_HAS_TRAILING_NUL);
                 retval_type = RETVAL_IN_sv;
                 break;
             }
@@ -7278,7 +7279,7 @@ S_emulate_langinfo(pTHX_ const int item,
             /* Here are to return the format, not the value.  This is used when
              * we are testing if the format we expect to return is legal on
              * this platform.  We have passed the format, say "%r, to
-             * strftime(), and now have in 'retval' what strftime processed it
+             * strftime(), and now have in 'sv' what strftime processed it
              * to be.  But the caller doesnt't want that; it wants the actual
              * %r, if it is understood on this platform, and "" if it isn't.
              * Some strftime()s return "" for an unknown format.  (None of the
@@ -7288,7 +7289,7 @@ S_emulate_langinfo(pTHX_ const int item,
              * back either "" or "%r", and we return "" to our caller.  If the
              * strftime() return is anything else, we conclude that "%r" is
              * understood by the platform, and return "%r". */
-            if (*temp == '\0' || strEQ(temp, format)) {
+            if (strEQ(SvPVX(sv), format)) {
                 retval = "";
             }
             else {
@@ -7298,15 +7299,19 @@ S_emulate_langinfo(pTHX_ const int item,
             /* A format is always in ASCII */
             is_utf8 = UTF8NESS_IMMATERIAL;
 
-            Safefree(temp);
             break;
         }
 
-        /* Here, the item is 'ALT_DIGITS' and temp contains the zeroth
+        /* Here, the item is 'ALT_DIGITS' and 'sv' contains the zeroth
          * alternate digit.  If empty or doesn't differ from regular digits,
          * return that there aren't alternate digits */
-        if (temp[0] == '\0' || strchr(temp, '0')) {
-            Safefree(temp);
+        Size_t alt0_len = SvCUR(sv);
+        if (alt0_len == 0) {
+            retval_type = RETVAL_IN_sv;
+            break;
+        }
+
+        if (strchr(SvPVX(sv), '0')) {
             retval = "";
             break;
         }
@@ -7315,23 +7320,24 @@ S_emulate_langinfo(pTHX_ const int item,
          * values.  Below we generate those by using the %O modifier to
          * strftime() formats.
          *
-         * We already have the alternate digit for zero in 'temp', generated
+         * We already have the alternate digit for zero in 'sv', generated
          * using the %Ow format.  That was used because it seems least likely
          * to have a leading zero.  But some locales return that anyway.  If
-         * the first half of temp is identical to the second half, assume that
+         * the first half of 'sv' is identical to the second half, assume that
          * is the case, and use just the first half */
-        const char * alt0 = temp;    /* Clearer synonym */
-        Size_t alt0_len = strlen(alt0);
         if ((alt0_len & 1) == 0) {
             Size_t half_alt0_len = alt0_len / 2;
-            if (strnEQ(temp, temp + half_alt0_len, half_alt0_len)) {
+            if (strnEQ(SvPVX(sv), SvPVX(sv) + half_alt0_len, half_alt0_len)) {
                 alt0_len = half_alt0_len;
+                SvCUR_set(sv, alt0_len);
             }
         }
 
-        /* Save the 0 digit string */
-        sv_setpvn(sv, alt0, alt0_len);
         sv_catpvn_nomg (sv, ";", 1);
+
+        /* Many of the remaining digits have representations that include at
+         * least two 0-sized strings */
+        SV* alt_dig_sv = newSV(2 * alt0_len);
 
         /* Various %O formats can be used to derive the alternate digits.  Only
          * %Oy can go up to the full 100 values.  If it doesn't work, we try
@@ -7377,36 +7383,43 @@ S_emulate_langinfo(pTHX_ const int item,
             * we want it), assume the rest will be the same, and use
             * strftime_tm(), which doesn't recalculate UTF8ness */
             ints_to_tm(&mytm, sec, min, hour, mday, mon, year, 0, 0, 0);
-            char * temp;
             if (utf8ness && is_utf8 != UTF8NESS_NO && is_utf8 != UTF8NESS_YES) {
-                temp = strftime8(fmts[j],
-                                 &mytm,
-                                 UTF8NESS_IMMATERIAL,
-                                 &is_utf8,
-                                 false    /* not calling from sv_strftime */
-                                );
+                succeeded = strftime8(fmts[j],
+                                      alt_dig_sv,
+                                      &mytm,
+                                      UTF8NESS_IMMATERIAL,
+                                      &is_utf8,
+                                      false   /* not calling from sv_strftime */
+                                     );
             }
             else {
-                temp = strftime_tm(fmts[j], &mytm);
+                succeeded = strftime_tm(fmts[j], alt_dig_sv, &mytm);
             }
 
-            DEBUG_Lv(PerlIO_printf(Perl_debug_log,
-                                "i=%d, format=%s, alt='%s'\n",
-                                i, fmts[j], temp));
-
-            /* If no result (meaning this platform didn't recognize this
-            * format), or it returned regular digits, give up on this
-            * format, to try the next candidate one */
-            if (temp == NULL || strpbrk(temp, "0123456789")) {
-                Safefree(temp);
+            /* If didn't recognize this format, try the next */
+            if (UNLIKELY(! succeeded)) {
                 j++;
                 goto redo;
             }
 
-            /* If there is a leading zero, skip past it, to get the second
-            * one in the string */
-            const char * current = temp;
-            if (strnEQ(temp, alt0, alt0_len)) {
+            const char * current = SvPVX(alt_dig_sv);
+
+            DEBUG_Lv(PerlIO_printf(Perl_debug_log,
+                                "i=%d, format=%s, alt='%s'\n",
+                                i, fmts[j], current));
+
+
+            /* If it returned regular digits, give up on this format, to try
+             * the next candidate one */
+            if (strpbrk(current, "0123456789")) {
+                j++;
+                goto redo;
+            }
+
+            /* If there is a leading alternate zero, skip past it, to get the
+             * second one in the string.  The first 'alt0_len' bytes in 'sv'
+             * will be the alternate-zero representation */
+            if (strnEQ(current, SvPVX(sv), alt0_len)) {
                 current += alt0_len;
             }
 
@@ -7414,17 +7427,16 @@ S_emulate_langinfo(pTHX_ const int item,
              * */
             sv_catpv_nomg (sv, current);
             sv_catpvn_nomg (sv, ";", 1);
-            Safefree(temp);
         } /* End of loop generating ALT_DIGIT strings */
 
-        Safefree(alt0);
+        SvREFCNT_dec_NN(alt_dig_sv);
 
         restore_toggled_locale_c(LC_TIME, orig_TIME_locale);
 
         retval_type = RETVAL_IN_sv;
         break;
 
-#  endif
+#    endif
 
        }    /* End of braced group for outer switch 'default:' case */
 
@@ -7820,8 +7832,11 @@ Perl_my_strftime(pTHX_ const char *fmt, int sec, int min, int hour,
 
     struct tm  mytm;
     ints_to_tm(&mytm, sec, min, hour, mday, mon, year, wday, yday, isdst);
-    char * ret = strftime_tm(fmt, &mytm);
-    return ret;
+    if (! strftime_tm(fmt, PL_scratch_langinfo, &mytm)) {
+        return NULL;
+    }
+
+    return savepv(SvPVX(PL_scratch_langinfo));
 }
 
 SV *
@@ -7834,20 +7849,25 @@ Perl_sv_strftime_tm(pTHX_ SV * fmt, const struct tm * mytm)
                               : UTF8NESS_UNKNOWN;
 
     utf8ness_t result_utf8ness;
-    char * retval = strftime8(SvPV_nolen(fmt),
-                              mytm,
-                              fmt_utf8ness,
-                              &result_utf8ness,
-                              true  /* calling from sv_strftime */
-                             );
-    SV * sv = NULL;
-    if (retval) {
-        sv = newSV_type(SVt_PV);
-        sv_usepvn_flags(sv, retval, strlen(retval), SV_HAS_TRAILING_NUL);
 
-        if (result_utf8ness == UTF8NESS_YES) {
-            SvUTF8_on(sv);
-        }
+    /* Use a fairly generous guess as to how big the buffer needs to be, so as
+     * to get almost all the typical returns to fit without the called function
+     * having to realloc; this is a somewhat educated guess, but feel free to
+     * tweak it. */
+    SV* sv = newSV(MAX(SvCUR(fmt) * 2, 64));
+    if (! strftime8(SvPV_nolen(fmt),
+                    sv,
+                    mytm,
+                    fmt_utf8ness,
+                    &result_utf8ness,
+                    true  /* calling from sv_strftime */ ))
+    {
+        return NULL;
+    }
+
+
+    if (result_utf8ness == UTF8NESS_YES) {
+        SvUTF8_on(sv);
     }
 
     return sv;
@@ -7862,8 +7882,7 @@ Perl_sv_strftime_ints(pTHX_ SV * fmt, int sec, int min, int hour,
 
     struct tm  mytm;
     ints_to_tm(&mytm, sec, min, hour, mday, mon, year, wday, yday, isdst);
-    SV * ret = sv_strftime_tm(fmt, &mytm);
-    return ret;
+    return sv_strftime_tm(fmt, &mytm);
 }
 
 STATIC void
@@ -7906,13 +7925,19 @@ S_ints_to_tm(pTHX_ struct tm * mytm,
     return;
 }
 
-STATIC char *
-S_strftime_tm(pTHX_ const char *fmt, const struct tm *mytm)
+STATIC bool
+S_strftime_tm(pTHX_ const char *fmt, SV * sv, const struct tm *mytm)
 {
     PERL_ARGS_ASSERT_STRFTIME_TM;
 
     /* Execute strftime() based on the input struct tm, and the current LC_TIME
      * locale.
+     *
+     * Returns 'true' if succeeded, with the PV pointer in 'sv' filled with the
+     * result, and all other C<OK> bits disabled, and not marked as UTF-8.
+     * Determining the UTF-8ness must be done at a higher level.
+     *
+     * 'false' is returned if if fails; the state of 'sv' is unspecified.
      *
      * The reason the locale isn't passed in and we toggle to it, is because
      * 'mytm' should have been populated using the same locale, so better to
@@ -7923,10 +7948,12 @@ S_strftime_tm(pTHX_ const char *fmt, const struct tm *mytm)
     /* An empty format yields an empty result */
     const Size_t fmtlen = strlen(fmt);
     if (fmtlen == 0) {
-        char *ret;
-        Newxz (ret, 1, char);
-        return ret;
+        sv_setpvs(sv, "");
+        SvUTF8_off(sv);
+        return true;
     }
+
+    bool succeeded = false;
 
 #ifndef HAS_STRFTIME
     Perl_croak(aTHX_ "panic: no strftime");
@@ -7934,15 +7961,14 @@ S_strftime_tm(pTHX_ const char *fmt, const struct tm *mytm)
 
     start_DEALING_WITH_MISMATCHED_CTYPE(querylocale_c(LC_TIME));
 
-    /* Guess an initial size for the returned string based on an expansion
-     * factor of the input format, but with a minimum that should handle most
-     * common cases.  If this guess is too small, we will try again with a
-     * larger one */
-    Size_t bufsize = MAX(fmtlen * 2, 64);
+    /* Assume the caller has furnished a reasonable sized guess, but guard
+     * against one that won't work */
+    Size_t bufsize = MAX(2, SvLEN(sv));
+    SvUPGRADE(sv, SVt_PV);
+    SvPOK_only(sv);
 
-    char *buf = NULL;   /* Makes Renew() act as Newx() on the first iteration */
     do {
-        Renew(buf, bufsize, char);
+        char * buf = SvGROW(sv, bufsize);
 
         /* allowing user-supplied (rather than literal) formats is normally
          * frowned upon as a potential security risk; but this is part of the
@@ -7985,6 +8011,8 @@ S_strftime_tm(pTHX_ const char *fmt, const struct tm *mytm)
          * indicates we have at least one byte of spare space (which will be
          * used for the terminating NUL). */
         if (inRANGE(len, 1, bufsize - 1)) {
+            succeeded = true;
+            SvCUR_set(sv, len);
             goto strftime_return;
         }
 
@@ -8017,8 +8045,9 @@ S_strftime_tm(pTHX_ const char *fmt, const struct tm *mytm)
      * when the format is precisely "%p".  That is the only documented format
      * that can have an empty result. */
     if (strEQ(fmt, "%p")) {
-        Renew(buf, 1, char);
-        *buf = '\0';
+        sv_setpvs(sv, "");
+        SvUTF8_off(sv);
+        succeeded = true;
         goto strftime_return;
     }
 
@@ -8032,19 +8061,18 @@ S_strftime_tm(pTHX_ const char *fmt, const struct tm *mytm)
 #endif
 
     SET_EINVAL;
-
-    Safefree(buf);
-    buf = NULL;
+    succeeded = false;
 
   strftime_return:
 
     end_DEALING_WITH_MISMATCHED_CTYPE(querylocale_c(LC_TIME));
 
-    return buf;
+    return succeeded;
 }
 
-STATIC char *
+STATIC bool
 S_strftime8(pTHX_ const char * fmt,
+                  SV * sv,
                   const struct tm * mytm,
                   const utf8ness_t fmt_utf8ness,
                   utf8ness_t * result_utf8ness,
@@ -8075,7 +8103,7 @@ S_strftime8(pTHX_ const char * fmt,
       case UTF8NESS_NO: /* Known not to be UTF-8; must not be UTF-8 locale */
         if (is_locale_utf8(locale)) {
             SET_EINVAL;
-            return NULL;
+            return false;
         }
 
         locale_utf8ness = LOCALE_NOT_UTF8;
@@ -8091,7 +8119,7 @@ S_strftime8(pTHX_ const char * fmt,
             fmt = (char *) bytes_from_utf8((U8 *) fmt, &fmt_len, &is_utf8);
             if (is_utf8) {
                 SET_EINVAL;
-                return NULL;
+                return false;
             }
 
             SAVEFREEPV(fmt);
@@ -8122,19 +8150,22 @@ S_strftime8(pTHX_ const char * fmt,
         break;
     }
 
-    char * retval = strftime_tm(fmt, mytm);
-    *result_utf8ness = get_locale_string_utf8ness_i(retval,
+    if (! strftime_tm(fmt, sv, mytm)) {
+        return false;
+    }
+
+    *result_utf8ness = get_locale_string_utf8ness_i(SvPVX(sv),
                                                     locale_utf8ness,
                                                     locale,
                                                     INDEX_TO_USE);
     DEBUG_Lv(PerlIO_printf(Perl_debug_log,
                           "fmt=%s, retval=%s; utf8ness=%d",
                           fmt,
-                          ((is_utf8_string((U8 *) retval, 0))
-                           ? retval
-                           :_byte_dump_string((U8 *) retval, strlen(retval),0)),
+                          ((is_utf8_string((U8 *) SvPVX(sv), 0))
+                           ? SvPVX(sv)
+                           :_byte_dump_string((U8 *) SvPVX(sv), SvCUR(sv) ,0)),
                           *result_utf8ness));
-    return retval;
+    return true;
 
 #undef INDEX_TO_USE
 
