@@ -7041,16 +7041,16 @@ STATIC void
 S_set_save_buffer_min_size(pTHX_ const Size_t min_len, char **buf, Size_t *buf_size);
 # define PERL_ARGS_ASSERT_SET_SAVE_BUFFER_MIN_SIZE
 
-STATIC char *
-S_strftime8(pTHX_ const char *fmt, const struct tm *mytm, const utf8ness_t fmt_utf8ness, utf8ness_t *result_utf8ness, const bool came_from_sv);
+STATIC bool
+S_strftime8(pTHX_ const char *fmt, SV *sv, const struct tm *mytm, const utf8ness_t fmt_utf8ness, utf8ness_t *result_utf8ness, const bool came_from_sv);
 # define PERL_ARGS_ASSERT_STRFTIME8             \
-        assert(fmt); assert(mytm); assert(result_utf8ness)
+        assert(fmt); assert(sv); assert(mytm); assert(result_utf8ness)
 
-STATIC char *
-S_strftime_tm(pTHX_ const char *fmt, const struct tm *mytm)
+STATIC bool
+S_strftime_tm(pTHX_ const char *fmt, SV *sv, const struct tm *mytm)
         __attribute__format__(__strftime__,pTHX_1,0);
 # define PERL_ARGS_ASSERT_STRFTIME_TM           \
-        assert(fmt); assert(mytm)
+        assert(fmt); assert(sv); assert(mytm)
 
 # if defined(HAS_MISSING_LANGINFO_ITEM_) || !defined(HAS_NL_LANGINFO)
 STATIC const char *
