@@ -742,7 +742,8 @@ static const char C_thousands_sep[] = "";
         langinfo_i(item, category##_INDEX_, locale, utf8ness)
 
 #ifndef USE_LOCALE  /* A no-op unless locales are enabled */
-#  define toggle_locale_i(index, locale)    NULL
+#  define toggle_locale_i(index, locale)                                    \
+    ((const char *) (PERL_UNUSED_VAR(locale), NULL))
 #  define restore_toggled_locale_i(index, locale)  PERL_UNUSED_VAR(locale)
 #else
 #  define toggle_locale_i(index, locale)                                    \
@@ -2027,6 +2028,12 @@ S_less_dicey_bool_setlocale_r(pTHX_ const int cat, const char * locale)
  * suffices for both querying and setting the locale.  It allows for some
  * shortcuts */
 #  define setlocale_i(i, locale)  less_dicey_setlocale_r(categories[i], locale)
+
+/* The code in this file may change the locale briefly during certain
+ * operations.  This should be a critical section when that could interfere
+ * with other instances executing at the same time. */
+#  define TOGGLE_LOCK(i)    POSIX_SETLOCALE_LOCK
+#  define TOGGLE_UNLOCK(i)  POSIX_SETLOCALE_UNLOCK
 
 /*===========================================================================*/
 
@@ -4495,6 +4502,12 @@ Perl_setlocale(const int category, const char * locale)
 
 #ifdef USE_LOCALE
 
+/* If this implementation hasn't defined these macros, they aren't needed */
+#  ifndef TOGGLE_LOCK
+#    define TOGGLE_LOCK(i)
+#    define TOGGLE_UNLOCK(i)
+#  endif
+
 STATIC const char *
 S_toggle_locale_i(pTHX_ const locale_category_index cat_index,
                         const char * new_locale,
@@ -4504,7 +4517,8 @@ S_toggle_locale_i(pTHX_ const locale_category_index cat_index,
     assert(cat_index <= LC_ALL_INDEX_);
 
     /* Changes the locale for the category specified by 'index' to 'new_locale,
-     * if they aren't already the same.
+     * if they aren't already the same.  EVERY CALL to this function MUST HAVE
+     * a corresponding call to restore_toggled_locale_i()
      *
      * Returns a copy of the name of the original locale for 'cat_index'
      * so can be switched back to with the companion function
@@ -4527,12 +4541,16 @@ S_toggle_locale_i(pTHX_ const locale_category_index cat_index,
                          __FILE__, caller_line);
     }
 
+    /* Begin a critical section on platforms that need it.  We do this even if
+     * we don't have to change here, so as to prevent other instances from
+     * changing the locale out from under us. */
+    TOGGLE_LOCK(cat_index);
+
     /* If the locales are the same, there's nothing to do */
     if (strEQ(locale_to_restore_to, new_locale)) {
         DEBUG_Lv(PerlIO_printf(Perl_debug_log, "%s locale unchanged as %s\n",
                                                category_names[cat_index],
                                                new_locale));
-
         return NULL;
     }
 
@@ -4568,6 +4586,7 @@ S_restore_toggled_locale_i(pTHX_ const locale_category_index cat_index,
                                "restore_toggled_locale_i: No need to"       \
                                " restore %s; called from %" LINE_Tf "\n",   \
                                category_names[cat_index], caller_line));
+        TOGGLE_UNLOCK(cat_index);
         return;
     }
 
@@ -4579,6 +4598,7 @@ S_restore_toggled_locale_i(pTHX_ const locale_category_index cat_index,
 
     void_setlocale_i_with_caller(cat_index, restore_locale,
                                   __FILE__, caller_line);
+    TOGGLE_UNLOCK(cat_index);
 
 #  ifndef DEBUGGING
     PERL_UNUSED_ARG(caller_line);
