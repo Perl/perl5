@@ -952,6 +952,14 @@ file it is up to you to delete the file manually and then let the
 harness recreate it, although the file format does not change frequently
 so this should not be necessary very often.
 
+=head2 Running only specific tests
+
+Running only specific tests of the core distribution can be done with
+
+    HARNESS_RE=PATTERN make test_harness
+
+Which will result in only the test files matching PATTERN to be run.
+
 =head2 Running tests by hand
 
 You can run part of the test suite by hand by using one of the

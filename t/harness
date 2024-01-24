@@ -97,6 +97,10 @@ while ($ARGV[0] && $ARGV[0]=~/^-?-(n?)re/) {
     }
 }
 
+if ($ENV{HARNESS_RE}) {
+  push @re, $ENV{HARNESS_RE};
+}
+
 my $jobs = $ENV{TEST_JOBS};
 my ($rules, $state, $color);
 
