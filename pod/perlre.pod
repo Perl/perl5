@@ -1733,7 +1733,7 @@ equivalent C<< (?<=...) >> construct, and it is especially useful in
 situations where you want to efficiently remove something following
 something else in a string. For instance
 
-  s/(foo)bar/$1/g;
+  s/(?<=foo)bar/$1/g;
 
 can be rewritten as the much more efficient
 
