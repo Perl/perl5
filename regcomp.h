@@ -1559,12 +1559,12 @@ typedef enum {
  * and this is not a DEBUGGING enabled build (identified by
  * DEBUGGING_RE_ONLY being defined)
  */
-#if ( defined(USE_DYNAMIC_LOADING) && defined(DEBUGGING)) || \
+#if ( !defined(PERL_EXT_RE_STATIC) && defined(DEBUGGING)) ||       \
     ( defined(PERL_EXT_RE_BUILD) && defined(DEBUGGING_RE_ONLY)) || \
     (!defined(PERL_EXT_RE_BUILD) && defined(DEBUGGING))
 #define PERL_RE_BUILD_DEBUG
 #endif
-#if ( defined(USE_DYNAMIC_LOADING) || !defined(PERL_EXT_RE_BUILD) )
+#if !defined(PERL_EXT_RE_STATIC)
 #define PERL_RE_BUILD_AUX
 #endif
 
