@@ -6326,6 +6326,22 @@ S_langinfo_sv_i(pTHX_
             if (sep_pos) {
                 separator = *sep_pos;
             }
+            else if (strpbrk(retval, "123456789")) {
+
+                /* Alternate digits, with the possible exception of 0,
+                 * shouldn't be standard digits, so if we get any back, return
+                 * that there aren't alternate digits.  0 is an exception
+                 * because there may be locales that do not have a zero, such
+                 * as Roman numerals.  It could therefore be that alt-0 is 0,
+                 * but alt-1 better be some multi-byte Unicode character(s)
+                 * like U+2160, ROMAN NUMERAL ONE.  This clause is necessary
+                 * because the total length of the ASCII digits won't trigger
+                 * the conditional in the next clause that protects against
+                 * non-Standard libc returns, such as in Alpine platforms, but
+                 * multi-byte returns will trigger it */
+                retval = "";
+                total_len = 0;
+            }
             else if (UNLIKELY(total_len >
                                         2 * UVCHR_SKIP(PERL_UNICODE_MAX) * 4))
             {   /* But as a check against the possibility that the separator is
