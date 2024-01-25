@@ -17,13 +17,13 @@ no warnings 'experimental::builtin';
 {
     package UnimportTest;
 
-    sub true() { return "true" };
+    sub true() { return "yes" };
 
     {
         use builtin 'true';
         no builtin 'true';
 
-        ::is(true(), "true", 'no builtin can remove lexical import');
+        ::is(true(), "yes", 'no builtin can remove lexical import');
     }
 
     {
