@@ -586,8 +586,14 @@ static bool S_parse_version(const char *vstr, const char *vend, UV *vmajor, UV *
     return TRUE;
 }
 
-#define import_sym(sym)  S_import_sym(aTHX_ sym)
-static void S_import_sym(pTHX_ SV *sym)
+enum {
+    BEHAVIOUR_IMPORT_IF_MISSING,
+    BEHAVIOUR_TOMBSTONE_IF_PRESENT,
+    BEHAVIOUR_TOMBSTONE_OR_DIE,
+};
+
+#define import_or_tombstone_sym(sym, behaviour)  S_import_or_tombstone_sym(aTHX_ sym, behaviour)
+static void S_import_or_tombstone_sym(pTHX_ SV *sym, int behaviour)
 {
     SV *ampname = sv_2mortal(Perl_newSVpvf(aTHX_ "&%" SVf, SVfARG(sym)));
     SV *fqname = sv_2mortal(Perl_newSVpvf(aTHX_ "builtin::%" SVf, SVfARG(sym)));
@@ -596,40 +602,52 @@ static void S_import_sym(pTHX_ SV *sym)
     if(!cv)
         Perl_croak(aTHX_ builtin_not_recognised, sym);
 
-    export_lexical(ampname, (SV *)cv);
-}
+    bool got = false;
+    PADOFFSET off = pad_findmy_sv(ampname, 0);
+    if(off != NOT_IN_PAD &&
+            SvTYPE(PL_curpad[off]) == SVt_PVCV &&
+            (CV *)PL_curpad[off] == cv)
+        got = true;
 
-#define cv_is_builtin(cv)  S_cv_is_builtin(aTHX_ cv)
-static bool S_cv_is_builtin(pTHX_ CV *cv)
-{
-    char *file = CvFILE(cv);
-    return file && strEQ(file, __FILE__);
+    switch(behaviour) {
+        case BEHAVIOUR_IMPORT_IF_MISSING:
+            if(got)
+                return;
+
+            export_lexical(ampname, (SV *)cv);
+            break;
+
+        case BEHAVIOUR_TOMBSTONE_IF_PRESENT:
+        case BEHAVIOUR_TOMBSTONE_OR_DIE:
+            if(behaviour == BEHAVIOUR_TOMBSTONE_IF_PRESENT && !got)
+                return;
+            if(behaviour == BEHAVIOUR_TOMBSTONE_OR_DIE && !got)
+                Perl_croak(aTHX_
+                        "'%" SVf "' does not appear to be an imported builtin function", SVfARG(ampname));
+
+            /* TODO: If the pad entry we found is going to go out of scope at the
+             * same time as this tombstone would, we could not bother adding the
+             * tombstone and instead COP_SEQ_MAX_HIGH_set() on the padname to
+             * clear it.
+             */
+            pad_add_name_sv(ampname, padadd_STATE|padadd_TOMBSTONE, 0, 0);
+            break;
+    }
 }
 
 void
 Perl_import_builtin_bundle(pTHX_ U16 ver, bool do_unimport)
 {
-    SV *ampname = sv_newmortal();
+    SV *symname = sv_newmortal();
 
     for(int i = 0; builtins[i].name; i++) {
-        sv_setpvf(ampname, "&%s", builtins[i].name);
+        sv_setpvf(symname, "%s", builtins[i].name);
 
         bool want = (builtins[i].since_ver <= ver);
-
-        bool got = false;
-        PADOFFSET off = pad_findmy_sv(ampname, 0);
-        CV *cv;
-        if(off != NOT_IN_PAD &&
-                SvTYPE((cv = (CV *)PL_curpad[off])) == SVt_PVCV &&
-                cv_is_builtin(cv))
-            got = true;
-
-        if(!got && want) {
-            import_sym(newSVpvn_flags(builtins[i].name, strlen(builtins[i].name), SVs_TEMP));
-        }
-        else if(do_unimport && got && !want) {
-            pad_add_name_sv(ampname, padadd_STATE|padadd_TOMBSTONE, 0, 0);
-        }
+        if(want)
+            import_or_tombstone_sym(symname, BEHAVIOUR_IMPORT_IF_MISSING);
+        else if(do_unimport)
+            import_or_tombstone_sym(symname, BEHAVIOUR_TOMBSTONE_IF_PRESENT);
     }
 }
 
@@ -669,7 +687,7 @@ XS(XS_builtin_import)
             continue;
         }
 
-        import_sym(sym);
+        import_or_tombstone_sym(sym, BEHAVIOUR_IMPORT_IF_MISSING);
     }
 
     finish_export_lexical();
@@ -692,26 +710,7 @@ XS(XS_builtin_unimport)
         if(strEQ(sympv, "import") || strEQ(sympv, "unimport"))
             Perl_croak(aTHX_ builtin_not_recognised, sym);
 
-        SV *ampname = sv_2mortal(Perl_newSVpvf(aTHX_ "&%" SVf, SVfARG(sym)));
-        SV *fqname = sv_2mortal(Perl_newSVpvf(aTHX_ "builtin::%" SVf, SVfARG(sym)));
-
-        CV *cv = get_cv(SvPV_nolen(fqname), SvUTF8(fqname) ? SVf_UTF8 : 0);
-        if(!cv)
-            Perl_croak(aTHX_ builtin_not_recognised, sym);
-
-        PADOFFSET off = pad_findmy_sv(ampname, 0);
-        if((off == NOT_IN_PAD) ||
-                (PL_curpad[off] != (SV *)cv))
-            Perl_croak(aTHX_
-                    "'%" SVf "' does not appear to be an imported builtin function", SVfARG(ampname));
-
-        /* Add a tombstone entry */
-        /* TODO: If the pad entry we found is going to go out of scope at the
-         * same time as this tombstone would, we could not bother adding the
-         * tombstone and instead COP_SEQ_MAX_HIGH_set() on the padname to
-         * clear it.
-         */
-        pad_add_name_sv(ampname, padadd_STATE|padadd_TOMBSTONE, 0, 0);
+        import_or_tombstone_sym(sym, BEHAVIOUR_TOMBSTONE_OR_DIE);
     }
 
     COP_SEQMAX_INC;

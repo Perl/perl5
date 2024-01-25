@@ -34,6 +34,17 @@ no warnings 'experimental::builtin';
     }
 }
 
+# multiple imports are idempotent
+{
+    use builtin 'true';
+    use builtin 'true';
+    is(true(), "1", 'imported true() from two use lines');
+
+    no builtin 'true';
+    ok(!defined eval "true(); 1", 'true() is no longer visible after a single no');
+    like($@, qr/^Undefined subroutine &main::true called at /, 'Failure from missing function');
+}
+
 # vim: tabstop=4 shiftwidth=4 expandtab autoindent softtabstop=4
 
 done_testing();
