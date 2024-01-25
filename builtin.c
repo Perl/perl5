@@ -75,6 +75,7 @@ XS(XS_builtin_true)
     dXSARGS;
     if(items)
         croak_xs_usage(cv, "");
+    EXTEND(SP, 1);
     XSRETURN_YES;
 }
 
@@ -84,6 +85,7 @@ XS(XS_builtin_false)
     dXSARGS;
     if(items)
         croak_xs_usage(cv, "");
+    EXTEND(SP, 1);
     XSRETURN_NO;
 }
 
