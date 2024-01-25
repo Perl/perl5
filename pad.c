@@ -1114,6 +1114,44 @@ S_unavailable(pTHX_ PADNAME *name)
                          PNfARG(name));
 }
 
+/* Given an offset in a pad, walks backwards to return the offset of the
+ * previous pad entry that it negates.
+ */
+
+#define pad_skip_tombstone(namepv, namelen, pnl, seq, offset)  S_pad_skip_tombstone(aTHX_ namepv, namelen, pnl, seq, offset)
+STATIC PADOFFSET
+S_pad_skip_tombstone(pTHX_ const char *namepv, STRLEN namelen, const PADNAMELIST *pnl, U32 seq, PADOFFSET offset);
+STATIC PADOFFSET
+S_pad_skip_tombstone(pTHX_ const char *namepv, STRLEN namelen, const PADNAMELIST *pnl, U32 seq, PADOFFSET offset)
+{
+    PADNAME * const * const padnames = PadnamelistARRAY(pnl);
+
+    assert(PadnameIsTOMBSTONE(padnames[offset]));
+    offset--;
+
+    for (/**/; offset > 0; offset--) {
+        const PADNAME * const pn = padnames[offset];
+        if(!pn)
+            continue;
+
+        if(!PadnameIN_SCOPE(pn, seq))
+            continue;
+
+        if(PadnameLEN(pn) != namelen)
+            continue;
+        if (PadnamePV(pn) != namepv && !memEQ(PadnamePV(pn), namepv, namelen))
+            continue;
+
+        if(!PadnameIsTOMBSTONE(pn))
+            return offset;
+
+        offset = pad_skip_tombstone(namepv, namelen, pnl, seq, offset);
+        /* continue */
+    }
+
+    return 0;
+}
+
 STATIC PADOFFSET
 S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, U32 flags, const CV* cv, U32 seq,
         int warn, SV** out_capture, PADNAME** out_name, int *out_flags)
@@ -1156,8 +1194,19 @@ S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, U32 flags, const CV* cv,
                     fake_offset = offset; /* in case we don't find a real one */
                     continue;
                 }
-                if (PadnameIN_SCOPE(name, seq))
+                if (!PadnameIN_SCOPE(name, seq))
+                    continue;
+
+                if (!PadnameIsTOMBSTONE(name))
                     break;
+
+                /* TODO(leonerd 2024-01-25): For better performance, we could
+                 * have performed this lookup at add time and just skip
+                 * immediately now, but there's currently no spare field in 
+                 * the padname struct to store the result.
+                 */
+                offset = pad_skip_tombstone(namepv, namelen, names, seq, offset);
+                /* continue */
             }
         }
 
@@ -1166,9 +1215,9 @@ S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, U32 flags, const CV* cv,
                 fake_offset = 0;
                 *out_name = name_p[offset]; /* return the name */
 
-                if (PadnameIsTOMBSTONE(*out_name))
-                    /* is this a lexical import that has been deleted? */
-                    return NOT_IN_PAD;
+                /* We should never find a tombstone here because
+                 * pad_skip_tombstone has skipped over it */
+                assert(!PadnameIsTOMBSTONE(*out_name));
 
                 if (PadnameIsFIELD(*out_name) && !fieldok)
                     croak("Field %" SVf " is not accessible outside a method",

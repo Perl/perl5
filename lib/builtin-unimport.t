@@ -45,6 +45,31 @@ no warnings 'experimental::builtin';
     like($@, qr/^Undefined subroutine &main::true called at /, 'Failure from missing function');
 }
 
+# tombstone reveals earlier lexicals of the same name
+{
+   my sub true() { return "yes" }
+
+   {
+      is(true(), "yes", 'lexical true() before import+unimport');
+
+      use builtin 'true';
+      no builtin 'true';
+
+      is(true(), "yes", 'lexical true() after import+unimport');
+   }
+
+   {
+       use builtin 'true';
+       {
+           use builtin 'true';
+           no builtin 'true';
+       }
+       no builtin 'true';
+
+       is(true(), "yes", 'lexical true() after double nested import+unimport');
+   }
+}
+
 # vim: tabstop=4 shiftwidth=4 expandtab autoindent softtabstop=4
 
 done_testing();
