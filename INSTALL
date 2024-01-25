@@ -318,6 +318,7 @@ enable this, run
 	sh Configure -Dusethreads
 
 The default is to compile without thread support.
+Defining usethreads is synonymous with useithreads currently.
 
 Perl used to have two different internal threads implementations.  The
 current model (available internally since 5.6, and as a user-level module
