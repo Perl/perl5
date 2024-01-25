@@ -5313,6 +5313,7 @@ lib/blib.t				blib.pm test
 lib/builtin.pm				builtin function namespace
 lib/builtin.t				test builtin function namespace
 lib/builtin-taint.t			test builtin function namespace in taint mode
+lib/builtin-unimport.t			test unimport of functions from builtin namespace
 lib/bytes.pm				Pragma to enable byte operations
 lib/bytes.t				bytes.pm test
 lib/bytes_heavy.pl			Support routines for byte pragma
