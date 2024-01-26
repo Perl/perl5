@@ -388,7 +388,8 @@ static int debug_initialization = 0;
  * looking for.  XXX This still presumes that we have to match COLLATE and
  * CTYPE even on platforms that apparently handle this. */
 #if defined(USE_LOCALE_CTYPE) && ! defined(LIBC_HANDLES_MISMATCHED_CTYPE)
-#  define WE_MUST_DEAL_WITH_MISMATCHED_CTYPE
+#  define WE_MUST_DEAL_WITH_MISMATCHED_CTYPE    /* no longer used; kept for
+                                                   possible future use */
 #  define start_DEALING_WITH_MISMATCHED_CTYPE(locale)                          \
         const char * orig_CTYPE_locale = toggle_locale_c(LC_CTYPE, locale)
 #  define end_DEALING_WITH_MISMATCHED_CTYPE(locale)                            \
@@ -7896,12 +7897,9 @@ S_strftime_tm(pTHX_ const char *fmt, const struct tm *mytm)
 
 #ifndef HAS_STRFTIME
     Perl_croak(aTHX_ "panic: no strftime");
-#else
-#  if defined(WE_MUST_DEAL_WITH_MISMATCHED_CTYPE) && defined(USE_LOCALE_TIME)
+#endif
 
-    const char * orig_CTYPE_locale = toggle_locale_c(LC_CTYPE,
-                                                     querylocale_c(LC_TIME));
-#  endif
+    start_DEALING_WITH_MISMATCHED_CTYPE(querylocale_c(LC_TIME));
 
     /* Guess an initial size for the returned string based on an expansion
      * factor of the input format, but with a minimum that should handle most
@@ -7996,9 +7994,9 @@ S_strftime_tm(pTHX_ const char *fmt, const struct tm *mytm)
      * platforms an invalid conversion specifier '%?' (for all illegal '?') is
      * treated as a literal, but others may fail when '?' is illegal */
 
-#  ifdef WIN32
+#ifdef WIN32
   strftime_failed:
-#  endif
+#endif
 
     SET_EINVAL;
 
@@ -8007,16 +8005,9 @@ S_strftime_tm(pTHX_ const char *fmt, const struct tm *mytm)
 
   strftime_return:
 
-#  if defined(WE_MUST_DEAL_WITH_MISMATCHED_CTYPE) && defined(USE_LOCALE_TIME)
-
-    restore_toggled_locale_c(LC_CTYPE, orig_CTYPE_locale);
-
-#  endif
+    end_DEALING_WITH_MISMATCHED_CTYPE(querylocale_c(LC_TIME));
 
     return buf;
-
-#endif
-
 }
 
 STATIC char *
