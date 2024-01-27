@@ -6526,8 +6526,9 @@ S_emulate_langinfo(pTHX_ const int item,
                         "Entering emulate_langinfo item=%ld, using locale %s\n",
                         (long) item, locale));
 
-#  if defined(HAS_LOCALECONV) && (   defined(USE_LOCALE_NUMERIC)      \
-                                  || defined(USE_LOCALE_MONETARY))
+#  if   defined(HAS_LOCALECONV)                                         \
+   && ! defined(HAS_SOME_LANGINFO)                                      \
+   &&  (defined(USE_LOCALE_NUMERIC) || defined(USE_LOCALE_MONETARY))
 
     locale_category_index  cat_index;
     const char * localeconv_key;
