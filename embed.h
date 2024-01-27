@@ -1339,6 +1339,10 @@
 #       if defined(DEBUGGING)
 #         define my_setlocale_debug_string_i(a,b,c,d) S_my_setlocale_debug_string_i(aTHX_ a,b,c,d)
 #       endif
+#       if   defined(HAS_LOCALECONV) && \
+           ( defined(USE_LOCALE_MONETARY) || defined(USE_LOCALE_NUMERIC) )
+#         define populate_hash_from_localeconv(a,b,c,d,e) S_populate_hash_from_localeconv(aTHX_ a,b,c,d,e)
+#       endif
 #       if defined(HAS_NL_LANGINFO)
 #         define langinfo_sv_i(a,b,c,d,e)       S_langinfo_sv_i(aTHX_ a,b,c,d,e)
 #       endif
@@ -1356,9 +1360,6 @@
 #       if defined(USE_LOCALE_CTYPE)
 #         define is_codeset_name_UTF8           S_is_codeset_name_UTF8
 #         define new_ctype(a,b)                 S_new_ctype(aTHX_ a,b)
-#       endif
-#       if defined(USE_LOCALE_MONETARY) || defined(USE_LOCALE_NUMERIC)
-#         define populate_hash_from_localeconv(a,b,c,d,e) S_populate_hash_from_localeconv(aTHX_ a,b,c,d,e)
 #       endif
 #       if defined(USE_LOCALE_NUMERIC)
 #         define new_numeric(a,b)               S_new_numeric(aTHX_ a,b)

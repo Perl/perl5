@@ -7114,6 +7114,14 @@ S_my_setlocale_debug_string_i(pTHX_ const locale_category_index cat_index, const
 #     define PERL_ARGS_ASSERT_MY_SETLOCALE_DEBUG_STRING_I
 
 #   endif
+#   if   defined(HAS_LOCALECONV) && \
+       ( defined(USE_LOCALE_MONETARY) || defined(USE_LOCALE_NUMERIC) )
+STATIC void
+S_populate_hash_from_localeconv(pTHX_ HV *hv, const char *locale, const U32 which_mask, const lconv_offset_t *strings[2], const lconv_offset_t *integers[2]);
+#     define PERL_ARGS_ASSERT_POPULATE_HASH_FROM_LOCALECONV \
+        assert(hv); assert(locale); assert(strings); assert(integers)
+
+#   endif
 #   if defined(HAS_NL_LANGINFO)
 STATIC const char *
 S_langinfo_sv_i(pTHX_ const nl_item item, locale_category_index cat_index, const char *locale, SV *sv, utf8ness_t *utf8ness);
@@ -7167,13 +7175,6 @@ S_new_ctype(pTHX_ const char *newctype, bool force);
         assert(newctype)
 
 #   endif /* defined(USE_LOCALE_CTYPE) */
-#   if defined(USE_LOCALE_MONETARY) || defined(USE_LOCALE_NUMERIC)
-STATIC void
-S_populate_hash_from_localeconv(pTHX_ HV *hv, const char *locale, const U32 which_mask, const lconv_offset_t *strings[2], const lconv_offset_t *integers[2]);
-#     define PERL_ARGS_ASSERT_POPULATE_HASH_FROM_LOCALECONV \
-        assert(hv); assert(locale); assert(strings); assert(integers)
-
-#   endif
 #   if defined(USE_LOCALE_NUMERIC)
 STATIC void
 S_new_numeric(pTHX_ const char *newnum, bool force);
