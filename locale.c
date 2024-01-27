@@ -7232,6 +7232,12 @@ S_emulate_langinfo(pTHX_ const int item,
 
         restore_toggled_locale_c(LC_TIME, orig_TIME_locale);
 
+        /* If strftime() returned an error, we return an empty string */
+        if (! temp) {
+            retval = "";
+            break;
+        }
+
         if (LIKELY(item != ALT_DIGITS)) {
 
             /* If to return what strftime() returns, are done */
