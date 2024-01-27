@@ -4429,10 +4429,6 @@ S	|void	|populate_hash_from_C_localeconv			\
 				|const U32 which_mask			\
 				|NN const lconv_offset_t *strings[2]	\
 				|NN const lconv_offset_t *integers[2]
-S	|const char *|save_to_buffer					\
-				|NULLOK const char *string		\
-				|NULLOK char **buf			\
-				|NULLOK Size_t *buf_size
 S	|void	|set_save_buffer_min_size				\
 				|const Size_t min_len			\
 				|NULLOK char **buf			\
@@ -4486,6 +4482,10 @@ So	|void	|restore_toggled_locale_i				\
 				|const locale_category_index cat_index	\
 				|NULLOK const char *original_locale	\
 				|const line_t caller_line
+S	|const char *|save_to_buffer					\
+				|NULLOK const char *string		\
+				|NULLOK char **buf			\
+				|NULLOK Size_t *buf_size
 Sr	|void	|setlocale_failure_panic_via_i				\
 				|const locale_category_index cat_index	\
 				|NULLOK const char *current		\
