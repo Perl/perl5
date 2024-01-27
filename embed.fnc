@@ -4510,6 +4510,15 @@ RS	|char * |my_setlocale_debug_string_i				\
 				|NULLOK const char *retval		\
 				|const line_t line
 #   endif
+#   if   defined(HAS_LOCALECONV) && \
+       ( defined(USE_LOCALE_MONETARY) || defined(USE_LOCALE_NUMERIC) )
+S	|void	|populate_hash_from_localeconv				\
+				|NN HV *hv				\
+				|NN const char *locale			\
+				|const U32 which_mask			\
+				|NN const lconv_offset_t *strings[2]	\
+				|NN const lconv_offset_t *integers[2]
+#   endif
 #   if defined(HAS_NL_LANGINFO)
 S	|const char *|langinfo_sv_i					\
 				|const nl_item item			\
@@ -4544,14 +4553,6 @@ ST	|bool	|is_codeset_name_UTF8					\
 				|NN const char *name
 S	|void	|new_ctype	|NN const char *newctype		\
 				|bool force
-#   endif
-#   if defined(USE_LOCALE_MONETARY) || defined(USE_LOCALE_NUMERIC)
-S	|void	|populate_hash_from_localeconv				\
-				|NN HV *hv				\
-				|NN const char *locale			\
-				|const U32 which_mask			\
-				|NN const lconv_offset_t *strings[2]	\
-				|NN const lconv_offset_t *integers[2]
 #   endif
 #   if defined(USE_LOCALE_NUMERIC)
 S	|void	|new_numeric	|NN const char *newnum			\
