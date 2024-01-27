@@ -7033,10 +7033,6 @@ S_populate_hash_from_C_localeconv(pTHX_ HV *hv, const char *locale, const U32 wh
 # define PERL_ARGS_ASSERT_POPULATE_HASH_FROM_C_LOCALECONV \
         assert(hv); assert(locale); assert(strings); assert(integers)
 
-STATIC const char *
-S_save_to_buffer(pTHX_ const char *string, char **buf, Size_t *buf_size);
-# define PERL_ARGS_ASSERT_SAVE_TO_BUFFER
-
 STATIC void
 S_set_save_buffer_min_size(pTHX_ const Size_t min_len, char **buf, Size_t *buf_size);
 # define PERL_ARGS_ASSERT_SET_SAVE_BUFFER_MIN_SIZE
@@ -7095,6 +7091,10 @@ S_parse_LC_ALL_string(pTHX_ const char *string, const char **output, const parse
 STATIC void
 S_restore_toggled_locale_i(pTHX_ const locale_category_index cat_index, const char *original_locale, const line_t caller_line);
 #   define PERL_ARGS_ASSERT_RESTORE_TOGGLED_LOCALE_I
+
+STATIC const char *
+S_save_to_buffer(pTHX_ const char *string, char **buf, Size_t *buf_size);
+#   define PERL_ARGS_ASSERT_SAVE_TO_BUFFER
 
 PERL_STATIC_NO_RET void
 S_setlocale_failure_panic_via_i(pTHX_ const locale_category_index cat_index, const char *current, const char *failed, const line_t proxy_caller_line, const line_t immediate_caller_line, const char *higher_caller_file, const line_t higher_caller_line)
