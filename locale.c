@@ -6438,9 +6438,8 @@ S_emulate_langinfo(pTHX_ const int item,
                          utf8ness_t * utf8ness)
 {
     PERL_ARGS_ASSERT_EMULATE_LANGINFO;
-#  ifndef USE_LOCALE
-    PERL_UNUSED_ARG(locale);
-#  endif
+    PERL_UNUSED_ARG(locale);    /* Too complicated to specify which
+                                   Configurations use this vs which don't */
 
     /* This emulates nl_langinfo() on platforms:
      *   1) where it doesn't exist; or
