@@ -2456,7 +2456,7 @@ X<qx> X<`> X<``> X<backtick>
 =item C<`I<STRING>`>
 
 A string which is (possibly) interpolated and then executed as a
-system command, via F</bin/sh> or its equivalent if required.  Shell
+system command, via F</bin/sh> (not changable) or its equivalent if required.  Shell
 wildcards, pipes, and redirections will be honored.  Similarly to
 C<system>, if the string contains no shell metacharacters then it will
 executed directly.  The collected standard output of the command is
