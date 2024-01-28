@@ -2467,6 +2467,8 @@ list of lines (however you've defined lines with C<$/> or
 C<$INPUT_RECORD_SEPARATOR>), or an empty list if the shell (or command)
 could not be started.
 
+    print qx/date/; # prints "Sun Jan 28 06:16:19 CST 2024"
+
 Because backticks do not affect standard error, use shell file descriptor
 syntax (assuming the shell supports this) if you care to address this.
 To capture a command's STDERR and STDOUT together:
