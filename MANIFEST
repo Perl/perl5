@@ -4824,7 +4824,9 @@ ext/Hash-Util/Changes			Change history of Hash::Util
 ext/Hash-Util/lib/Hash/Util.pm		Hash::Util
 ext/Hash-Util/Makefile.PL		Makefile for Hash::Util
 ext/Hash-Util/t/builtin.t		See if Hash::Util builtin exports work as expected
-ext/Hash-Util/t/Util.t			See if Hash::Util works
+ext/Hash-Util/t/locked.t		See if Hash::Util locked hash support works as expected
+ext/Hash-Util/t/misc.t			See if Hash::Util misc functions work as expected
+ext/Hash-Util/t/protect.t		See if Hash::Util protected hash support works as expected
 ext/Hash-Util/Util.xs			XS bits of Hash::Util
 ext/Hash-Util-FieldHash/Changes				Changes for Hash::Util::FieldHash
 ext/Hash-Util-FieldHash/FieldHash.xs			XS portion

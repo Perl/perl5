@@ -41,12 +41,10 @@ BEGIN {
                      lock_ref_keys_plus
                      hidden_ref_keys legal_ref_keys
 
-                     hash_seed hash_value bucket_stats bucket_info bucket_array
-                     hv_store
                      lock_hash_recurse unlock_hash_recurse
                      lock_hashref_recurse unlock_hashref_recurse
                     );
-    plan tests => 250 + @Exported_Funcs;
+    plan tests => 232 + @Exported_Funcs;
     use_ok 'Hash::Util', @Exported_Funcs;
 }
 foreach my $func (@Exported_Funcs) {
@@ -56,7 +54,7 @@ foreach my $func (@Exported_Funcs) {
 my %hash = (foo => 42, bar => 23, locked => 'yep');
 lock_keys(%hash);
 eval { $hash{baz} = 99; };
-like( $@, qr/^Attempt to access disallowed key 'baz' in a restricted hash/,
+like( $@, qr/^Attempt to store value into unknown key 'baz' in a restricted hash/,
                                                        'lock_keys()');
 is( $hash{bar}, 23, '$hash{bar} == 23' );
 ok( !exists $hash{baz},'!exists $hash{baz}' );
@@ -67,20 +65,20 @@ $hash{bar} = 69;
 is( $hash{bar}, 69 ,'$hash{bar} == 69');
 
 eval { () = $hash{i_dont_exist} };
-like( $@, qr/^Attempt to access disallowed key 'i_dont_exist' in a restricted hash/,
+like( $@, qr/^Attempt to access unknown key 'i_dont_exist' in a restricted hash/,
       'Disallowed 1' );
 
 lock_value(%hash, 'locked');
 eval { print "# oops" if $hash{four} };
-like( $@, qr/^Attempt to access disallowed key 'four' in a restricted hash/,
+like( $@, qr/^Attempt to access unknown key 'four' in a restricted hash/,
       'Disallowed 2' );
 
 eval { $hash{"\x{2323}"} = 3 };
-like( $@, qr/^Attempt to access disallowed key '(.*)' in a restricted hash/,
+like( $@, qr/^Attempt to store value into unknown key '(.*)' in a restricted hash/,
                                                'wide hex key' );
 
 eval { delete $hash{locked} };
-like( $@, qr/^Attempt to delete readonly key 'locked' from a restricted hash/,
+like( $@, qr/^Attempt to delete key 'locked' from a restricted hash/,
                                            'trying to delete a locked key' );
 eval { $hash{locked} = 42; };
 like( $@, qr/^Modification of a read-only value attempted/,
@@ -88,7 +86,7 @@ like( $@, qr/^Modification of a read-only value attempted/,
 is( $hash{locked}, 'yep', '$hash{locked} is yep' );
 
 eval { delete $hash{I_dont_exist} };
-like( $@, qr/^Attempt to delete disallowed key 'I_dont_exist' from a restricted hash/,
+like( $@, qr/^Attempt to delete unknown key 'I_dont_exist' from a restricted hash/,
                              'trying to delete a key that doesnt exist' );
 
 ok( !exists $hash{I_dont_exist},'!exists $hash{I_dont_exist}' );
@@ -113,7 +111,7 @@ is( $hash{locked}, 42,  'unlock_value' );
 
     lock_keys(%hash);
     eval { %hash = ( wubble => 42 ) };  # we know this will bomb
-    like( $@, qr/^Attempt to access disallowed key 'wubble'/,'Disallowed 3' );
+    like( $@, qr/^Attempt to store value into unknown key 'wubble'/,'Disallowed 3' );
     unlock_keys(%hash);
 }
 
@@ -141,7 +139,7 @@ is( $hash{locked}, 42,  'unlock_value' );
     $hash{foo} = 42;
     is( keys %hash, 1, '1 element in hash' );
     eval { $hash{wibble} = 42 };
-    like( $@, qr/^Attempt to access disallowed key 'wibble' in a restricted hash/,
+    like( $@, qr/^Attempt to store value into unknown key 'wibble' in a restricted hash/,
                         'write threw error (locked)');
 
     unlock_keys(%hash);
@@ -159,7 +157,7 @@ is( $hash{locked}, 42,  'unlock_value' );
     is( $@, '','No error 1' );
 
     eval { $hash{wibble} = 23 };
-    like( $@, qr/^Attempt to access disallowed key 'wibble' in a restricted hash/,
+    like( $@, qr/^Attempt to store value into unknown key 'wibble' in a restricted hash/,
           'locked "wibble"' );
 }
 
@@ -199,14 +197,22 @@ is( $hash{locked}, 42,  'unlock_value' );
     ok( ! hash_unlocked( %hash ), 'hash_unlocked negated' );
 }
 
-lock_keys(%ENV);
-eval { () = $ENV{I_DONT_EXIST} };
-like(
-    $@,
-    qr/^Attempt to access disallowed key 'I_DONT_EXIST' in a restricted hash/,
-    'locked %ENV'
-);
-unlock_keys(%ENV); # Test::Builder cannot print test failures otherwise
+{
+    # Note we can't call like() while %ENV is locked, or we will get an explosion
+    # because of: Attempt to access unknown key 'HARNESS_ACTIVE' in a restricted hash
+    #             at lib/Test2/Formatter/TAP.pm line 121.
+    # So we copy the error, and then do the like check on the copy.
+    lock_keys(%ENV);
+    eval { () = $ENV{I_DONT_EXIST} };
+    my $error = $@;
+    unlock_keys(%ENV);
+
+    like(
+        $error,
+        qr/^Attempt to access unknown key 'I_DONT_EXIST' in a restricted hash/,
+        'locked %ENV'
+    );
+}
 
 {
     my %hash;
@@ -232,11 +238,11 @@ unlock_keys(%ENV); # Test::Builder cannot print test failures otherwise
 
     eval {$hash{zeroeth} = 0};
     like ($@,
-          qr/^Attempt to access disallowed key 'zeroeth' in a restricted hash/,
+          qr/^Attempt to store value into unknown key 'zeroeth' in a restricted hash/,
           'locked key never mentioned before should fail');
     eval {$hash{first} = -1};
     like ($@,
-          qr/^Attempt to access disallowed key 'first' in a restricted hash/,
+          qr/^Attempt to store value into unknown key 'first' in a restricted hash/,
           'previously locked place holders should also fail');
     is (scalar keys %hash, 0, "and therefore there are no keys");
     $hash{second} = 1;
@@ -257,7 +263,7 @@ unlock_keys(%ENV); # Test::Builder cannot print test failures otherwise
 
     eval {$hash{second} = -1};
     like ($@,
-          qr/^Attempt to access disallowed key 'second' in a restricted hash/,
+          qr/^Attempt to store value into unknown key 'second' in a restricted hash/,
           'previously locked place holders should fail');
 
     is ($hash{void}, undef,
@@ -341,15 +347,12 @@ unlock_keys(%ENV); # Test::Builder cannot print test failures otherwise
     my %hash = (key=>__PACKAGE__);
     lock_hash(%hash);
     eval { delete $hash{key} };
-    like $@, qr/^Attempt to delete readonly key /,
+    like $@, qr/^Attempt to delete key 'key' from a restricted hash/,
         'COW scalars are not exempt from lock_hash (delete)';
     eval { %hash = () };
     like $@, qr/^Attempt to delete readonly key /,
         'COW scalars are not exempt from lock_hash (clear)';
 }
-
-my $hash_seed = hash_seed();
-ok(defined($hash_seed) && $hash_seed ne '', "hash_seed $hash_seed");
 
 {
     package Minder;
@@ -401,16 +404,6 @@ ok(defined($hash_seed) && $hash_seed ne '', "hash_seed $hash_seed");
     is ($hash{$first}, $value, "Still correct after iterator advances");
     is ($hash{$second}, $v2, "Other key has the expected value");
 }
-{
-    my $x='foo';
-    my %test;
-    hv_store(%test,'x',$x);
-    is($test{x},'foo','hv_store() stored');
-    $test{x}='bar';
-    is($x,'bar','hv_store() aliased');
-    is($test{x},'bar','hv_store() aliased and stored');
-}
-
 {
     my %hash=map { $_ => 1 } qw( a b c d e f);
     delete $hash{c};
@@ -524,7 +517,7 @@ ok(defined($hash_seed) && $hash_seed ne '', "hash_seed $hash_seed");
     my @ooooff = qw(a c e);
     my @bam = qw(g);
 
-    ok(ref $ref eq ref \%hash && $ref == \%hash, 
+    ok(ref $ref eq ref \%hash && $ref == \%hash,
             "all_keys() - \$ref is a reference to \%hash");
     is_deeply(\@crrack, \@ooooff, "Keys are what they should be");
     is_deeply(\@ph, \@bam, "Placeholders in place");
@@ -590,47 +583,4 @@ ok(defined($hash_seed) && $hash_seed ne '', "hash_seed $hash_seed");
     }
     ok( hash_unlocked(%{$hash{c}[1]}),
         "unlock_hash_recurse(): element which is hashref in array ref not locked" );
-}
-
-{
-    my $h1= hash_value("foo");
-    my $h2= hash_value("bar");
-    is( $h1, hash_value("foo") );
-    is( $h2, hash_value("bar") );
-
-    my $seed= hash_seed();
-    my $h1s= hash_value("foo",$seed);
-    my $h2s= hash_value("bar",$seed);
-
-    is( $h1s, hash_value("foo",$seed) );
-    is( $h2s, hash_value("bar",$seed) );
-
-    $seed= join "", map { chr $_ } 1..length($seed);
-
-    my $h1s2= hash_value("foo",$seed);
-    my $h2s2= hash_value("bar",$seed);
-
-    is( $h1s2, hash_value("foo",$seed) );
-    is( $h2s2, hash_value("bar",$seed) );
-
-    isnt($h1s,$h1s2);
-    isnt($h1s,$h1s2);
-
-}
-
-{
-    my @info1= bucket_info({});
-    my @info2= bucket_info({1..10});
-    my @stats1= bucket_stats({});
-    my @stats2= bucket_stats({1..10});
-    my $array1= bucket_array({});
-    my $array2= bucket_array({1..10});
-    is("@info1","0 8 0");
-    like("@info2[0,1]",qr/5 (?:8|16)/);
-    is("@stats1","0 8 0");
-    like("@stats2[0,1]",qr/5 (?:8|16)/);
-    my @keys1= sort map { ref $_ ? @$_ : () } @$array1;
-    my @keys2= sort map { ref $_ ? @$_ : () } @$array2;
-    is("@keys1","");
-    is("@keys2","1 3 5 7 9");
 }

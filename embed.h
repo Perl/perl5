@@ -1302,7 +1302,7 @@
 #     define hv_free_ent_ret(a)                 S_hv_free_ent_ret(aTHX_ a)
 #     define hv_free_entries(a)                 S_hv_free_entries(aTHX_ a)
 #     define hv_magic_check                     S_hv_magic_check
-#     define hv_notallowed(a,b,c,d)             S_hv_notallowed(aTHX_ a,b,c,d)
+#     define hv_notallowed(a,b,c,d,e)           S_hv_notallowed(aTHX_ a,b,c,d,e)
 #     define refcounted_he_value(a)             S_refcounted_he_value(aTHX_ a)
 #     define save_hek_flags                     S_save_hek_flags
 #     define share_hek_flags(a,b,c,d)           S_share_hek_flags(aTHX_ a,b,c,d)

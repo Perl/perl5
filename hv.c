@@ -300,7 +300,7 @@ Perl_he_dup(pTHX_ const HE *e, bool shared, CLONE_PARAMS* param)
 #endif	/* USE_ITHREADS */
 
 static void
-S_hv_notallowed(pTHX_ int flags, const char *key, I32 klen,
+S_hv_notallowed(pTHX_ HV *hv, int flags, const char *key, I32 klen,
                 const char *msg)
 {
    /* Straight to SVt_PVN here, as needed by sv_setpvn_fresh and
@@ -320,7 +320,7 @@ S_hv_notallowed(pTHX_ int flags, const char *key, I32 klen,
     if (flags & HVhek_UTF8) {
         SvUTF8_on(sv);
     }
-    Perl_croak(aTHX_ msg, SVfARG(sv));
+    Perl_croak(aTHX_ msg, SVfARG(sv), SvFLAGS((SV*)hv) & SVf_PROTECT ? "read-only" : "restricted");
 }
 
 /* (klen == HEf_SVKEY) is special for MAGICAL hv entries, meaning key slot
@@ -911,10 +911,17 @@ Perl_hv_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
     }
 #endif
 
-    if (!entry && SvREADONLY(hv) && !(action & HV_FETCH_ISEXISTS)) {
-        hv_notallowed(flags, key, klen,
-                        "Attempt to access disallowed key '%" SVf "' in"
-                        " a restricted hash");
+    if (!entry && SvREADONLY(hv)) {
+        if (action & (HV_FETCH_ISSTORE|HV_FETCH_LVALUE)) {
+            hv_notallowed(hv, flags, key, klen,
+                            "Attempt to store value into unknown key '%" SVf "' in"
+                            " a %s hash");
+        }
+        else if (!(action & HV_FETCH_ISEXISTS) && !(SvFLAGS(hv) & SVf_PROTECT)) {
+            hv_notallowed(hv, flags, key, klen,
+                            "Attempt to access unknown key '%" SVf "' in"
+                            " a %s hash");
+        }
     }
     if (!(action & (HV_FETCH_LVALUE|HV_FETCH_ISSTORE))) {
         /* Not doing some form of store, so return failure.  */
@@ -1406,9 +1413,9 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
             return NULL;
         }
         if (SvREADONLY(hv) && sv && SvREADONLY(sv)) {
-            hv_notallowed(k_flags, key, klen,
-                            "Attempt to delete readonly key '%" SVf "' from"
-                            " a restricted hash");
+            hv_notallowed(hv, k_flags, key, klen,
+                            "Attempt to delete key '%" SVf "' from"
+                            " a %s hash");
         }
 
         /*
@@ -1562,9 +1569,9 @@ S_hv_delete_common(pTHX_ HV *hv, SV *keysv, const char *key, STRLEN klen,
 
   not_found:
     if (SvREADONLY(hv)) {
-        hv_notallowed(k_flags, key, klen,
-                        "Attempt to delete disallowed key '%" SVf "' from"
-                        " a restricted hash");
+        hv_notallowed(hv, k_flags, key, klen,
+                        "Attempt to delete unknown key '%" SVf "' from"
+                        " a %s hash");
     }
 
     if (k_flags & HVhek_FREEKEY)

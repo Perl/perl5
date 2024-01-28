@@ -7,7 +7,7 @@ use warnings;
 no warnings 'uninitialized';
 use warnings::register;
 no warnings 'experimental::builtin';
-use builtin qw(reftype);
+use builtin qw(reftype refaddr);
 
 require Exporter;
 our @EXPORT_OK  = qw(
@@ -20,6 +20,9 @@ our @EXPORT_OK  = qw(
                      lock_keys_plus
                      hash_locked hash_unlocked
                      hashref_locked hashref_unlocked
+                     hashkeys_locked
+                     unlock_hashkeys
+                     lock_hashkeys
                      hidden_keys legal_keys
 
                      lock_ref_keys unlock_ref_keys
@@ -32,6 +35,13 @@ our @EXPORT_OK  = qw(
                      bucket_stats bucket_stats_formatted bucket_info bucket_array
                      lock_hash_recurse unlock_hash_recurse
                      lock_hashref_recurse unlock_hashref_recurse
+
+                     protect_hash
+                     protect_hashref
+                     protect_hashkeys
+                     protect_hash_recursive
+                     protect_hashref_recursive
+                     hashkeys_protected
 
                      hash_traversal_mask
 
@@ -188,14 +198,14 @@ sub lock_ref_keys {
         foreach my $k (@keys) {
             $hash->{$k} = undef unless exists $hash->{$k};
         }
-        Internals::SvREADONLY %$hash, 1;
+        lock_hashkeys(%$hash);
 
         foreach my $k (@keys) {
             delete $hash->{$k} unless $original_keys{$k};
         }
     }
     else {
-        Internals::SvREADONLY %$hash, 1;
+        lock_hashkeys(%$hash);
     }
 
     return $hash;
@@ -204,7 +214,7 @@ sub lock_ref_keys {
 sub unlock_ref_keys {
     my $hash = shift;
 
-    Internals::SvREADONLY %$hash, 0;
+    unlock_hashkeys(%$hash);
     return $hash;
 }
 
@@ -214,8 +224,7 @@ sub unlock_keys (\%)   { unlock_ref_keys(@_) }
 #=item B<_clear_placeholders>
 #
 # This function removes any placeholder keys from a hash. See Perl_hv_clear_placeholders()
-# in hv.c for what it does exactly. It is currently exposed as XS by universal.c and
-# injected into the Hash::Util namespace.
+# in hv.c for what it does exactly.
 #
 # It is not intended for use outside of this module, and may be changed
 # or removed without notice or deprecation cycle.
@@ -249,7 +258,7 @@ sub lock_ref_keys_plus {
             push @delete,$key;
         }
     }
-    Internals::SvREADONLY(%$hash,1);
+    lock_hashkeys(%$hash);
     delete @{$hash}{@delete};
     return $hash
 }
@@ -276,11 +285,6 @@ Returns a reference to the %hash.
 
 sub lock_ref_value {
     my($hash, $key) = @_;
-    # I'm doubtful about this warning, as it seems not to be true.
-    # Marking a value in the hash as RO is useful, regardless
-    # of the status of the hash itself.
-    carp "Cannot usefully lock values in an unlocked hash"
-      if !Internals::SvREADONLY(%$hash) && warnings::enabled;
     Internals::SvREADONLY $hash->{$key}, 1;
     return $hash
 }
@@ -408,11 +412,9 @@ Returns true if the hash and its keys are locked.
 =cut
 
 sub hashref_locked {
-    my $hash=shift;
-    Internals::SvREADONLY(%$hash);
+    my $hash = shift;
+    hashkeys_locked(%$hash);
 }
-
-sub hash_locked(\%) { hashref_locked(@_) }
 
 =item B<hashref_unlocked>
 
@@ -426,19 +428,11 @@ Returns true if the hash and its keys are unlocked.
 =cut
 
 sub hashref_unlocked {
-    my $hash=shift;
-    !Internals::SvREADONLY(%$hash);
+    my $hash = shift;
+    !hashkeys_locked(%$hash);
 }
 
 sub hash_unlocked(\%) { hashref_unlocked(@_) }
-
-=for demerphqs_editor
-sub legal_ref_keys{}
-sub hidden_ref_keys{}
-sub all_keys{}
-
-=cut
-
 sub legal_keys(\%) { legal_ref_keys(@_)  }
 sub hidden_keys(\%){ hidden_ref_keys(@_) }
 
@@ -489,6 +483,61 @@ on the current implementation of restricted hashes. Should the
 implementation change this routine may become meaningless in which
 case it will behave identically to how it would behave on an
 unrestricted hash.
+
+=cut
+
+=item B<protect_hash_recursive>
+
+=cut
+
+sub _protect_any_recursive {
+    my ($value, $seen)= @_;
+    my $reftype = reftype($value);
+    if ($reftype) {
+        my $refaddr = refaddr($value);
+        return if $seen->{$refaddr}++;
+        if ($reftype eq "ARRAY") {
+            Internals::SvREADONLY @$value, 1;
+            for my $aval (@$value) {
+                Internals::SvREADONLY $aval, 1;
+                _protect_any_recursive($aval,$seen);
+            }
+        }
+        elsif ($reftype eq "HASH") {
+            protect_hashkeys(%$value);
+            for my $hval (values %$value) {
+                Internals::SvREADONLY $hval, 1;
+                _protect_any_recursive($hval,$seen);
+            }
+        }
+        elsif ($reftype eq "REF" or $reftype eq "SCALAR") {
+            Internals::SvREADONLY $_[0], 1;
+            _protect_any_recursive(${$_[0]},$seen);
+        }
+    } else {
+        Internals::SvREADONLY $_[0], 1;
+    }
+}
+
+sub protect_hashref_recursive {
+    my ($hash) = @_;
+    _protect_any_recursive($hash);
+}
+
+sub protect_hash_recursive (\%) {
+    my ($hash) = @_;
+    protect_hashref_recursive($hash);
+}
+
+sub protect_hashref {
+    my ($hash) = @_;
+    protect_hashkeys(%$hash);
+    Internals::SvREADONLY $_, 1 for values %$hash;
+}
+
+sub protect_hash (\%) {
+    protect_hashref($_[0]);
+}
 
 =item B<hash_seed>
 

@@ -4372,7 +4372,8 @@ S	|void	|hv_free_entries|NN HV *hv
 ST	|void	|hv_magic_check |NN HV *hv				\
 				|NN bool *needs_copy			\
 				|NN bool *needs_store
-Sr	|void	|hv_notallowed	|int flags				\
+Sr	|void	|hv_notallowed	|NN HV *hv				\
+				|int flags				\
 				|NN const char *key			\
 				|I32 klen				\
 				|NN const char *msg
