@@ -318,4 +318,20 @@ typedef int nl_item;    /* Substitute 'int' for emulated nl_langinfo() */
 #  define HAS_MISSING_LANGINFO_ITEM_
 #endif
 
+/* All these categories have to be emulated if not available on the platform */
+#if ! LC_CTYPE_AVAIL            \
+ || ! LC_MESSAGES_AVAIL         \
+ || ! LC_MONETARY_AVAIL         \
+ || ! LC_NUMERIC_AVAIL          \
+ || ! LC_TIME_AVAIL             \
+ || ! LC_ADDRESS_AVAIL_         \
+ || ! LC_IDENTIFICATION_AVAIL_  \
+ || ! LC_MEASUREMENT_AVAIL_     \
+ || ! LC_NAME_AVAIL_            \
+ || ! LC_PAPER_AVAIL_           \
+ || ! LC_TELEPHONE_AVAIL_
+
+#  define HAS_MISSING_LANGINFO_ITEM_
+#endif
+
 #endif  /* PERL_LANGINFO_H */
