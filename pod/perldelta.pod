@@ -58,7 +58,7 @@ future release, and will at that time need to be installed from CPAN.
 Distributions on CPAN which require these modules will need to list them as
 prerequisites.
 
-The core versions of these modules will now issue C<"deprecated">-category
+The core versions of these modules will now issue C<deprecated>-category
 warnings to alert you to this fact.  To silence these deprecation warnings,
 install the modules in question from CPAN.
 
@@ -96,7 +96,7 @@ XXX
 =head1 Modules and Pragmata
 
 XXX All changes to installed files in F<cpan/>, F<dist/>, F<ext/> and F<lib/>
-go here.  If Module::CoreList is updated, generate an initial draft of the
+go here.  If L<Module::CoreList> is updated, generate an initial draft of the
 following sections using F<Porting/corelist-perldelta.pl>.  A paragraph summary
 for important changes should then be added by hand.  In an ideal world,
 dual-life modules would have a F<Changes> file that could be cribbed.
@@ -115,7 +115,7 @@ release manager will have to investigate the situation carefully.)
 
 =item *
 
-XXX Remove this section if Porting/corelist-perldelta.pl did not add any content here.
+XXX Remove this section if F<Porting/corelist-perldelta.pl> did not add any content here.
 
 =back
 
@@ -142,7 +142,7 @@ before worked properly in Perl.
 
 =item *
 
-XXX Remove this section if Porting/corelist-perldelta.pl did not add any content here.
+XXX Remove this section if F<Porting/corelist-perldelta.pl> did not add any content here.
 
 =back
 
@@ -192,8 +192,8 @@ include any changes in L<perldiag> that reconcile it to the C<C> code.
 
 =head2 New Diagnostics
 
-XXX Newly added diagnostic messages go under here, separated into New Errors
-and New Warnings
+XXX Newly added diagnostic messages go under here, separated into L</New Errors>
+and L</New Warnings>
 
 =head3 New Errors
 
@@ -398,7 +398,7 @@ XXX
 =item *
 
 XXX Add anything here that we forgot to add, or were mistaken about, in
-the perldelta of a previous release.
+the F<perldelta> of a previous release.
 
 =back
 
@@ -417,7 +417,7 @@ XXX Generate this with:
 
 If you find what you think is a bug, you might check the perl bug database
 at L<https://github.com/Perl/perl5/issues>.  There may also be information at
-L<http://www.perl.org/>, the Perl Home Page.
+L<https://www.perl.org/>, the Perl Home Page.
 
 If you believe you have an unreported bug, please open an issue at
 L<https://github.com/Perl/perl5/issues>.  Be sure to trim your bug down to a
