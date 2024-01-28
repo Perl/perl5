@@ -665,7 +665,8 @@ S_positional_newlocale(int mask, const char * locale, locale_t base)
  * in C.  This macro substitutes C for the locale appropriately, expanding to
  * nothing on the more typical case where all possible categories present on
  * the platform are handled. */
-#  ifdef HAS_IGNORED_LOCALE_CATEGORIES_
+#  if defined(HAS_IGNORED_LOCALE_CATEGORIES_)       \
+   || defined(HAS_MISSING_LANGINFO_ITEM_)
 #    define need_to_override_category(i)  (! category_available[i])
 #    define override_ignored_category(i, new_locale)                        \
                     ((need_to_override_category(i)) ? "C" : (new_locale))
@@ -867,7 +868,8 @@ STATIC void (*update_functions[]) (pTHX_ const char *, bool force) = {
     NULL,   /* No update for unknown category */
 };
 
-#  if defined(HAS_IGNORED_LOCALE_CATEGORIES_)
+#  if defined(HAS_IGNORED_LOCALE_CATEGORIES_)       \
+   || defined(HAS_MISSING_LANGINFO_ITEM_)
 
 /* Indicates if each category on this platform is available to use not in
  * the C locale */
@@ -6066,7 +6068,7 @@ S_external_call_langinfo(pTHX_ const nl_item item,
 
     } /* End of switch on item */
 
-#if defined(HAS_MISSING_LANGINFO_ITEM_)
+#  if defined(HAS_MISSING_LANGINFO_ITEM_)
 
     /* If the above didn't find the category's index, it has to be because the
      * item is unknown to us (and the callee will handle that), or the category
@@ -6175,7 +6177,7 @@ S_langinfo_sv_i(pTHX_
                            "Entering langinfo_sv_i item=%ld, using locale %s\n",
                            (long) item, locale));
 
-#  ifdef HAS_IGNORED_LOCALE_CATEGORIES_
+#  ifdef HAS_MISSING_LANGINFO_ITEM_
 
     if (! category_available[cat_index]) {
         return emulate_langinfo(item, locale, sv, utf8ness);
