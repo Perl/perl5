@@ -1122,6 +1122,13 @@ violations are fatal.
 #   include <xlocale.h>
 #endif
 
+/* Even if not using locales, this header should be #included so as to #define
+ * some symbols which avoid #ifdefs to get things to compile.  But make sure
+ * the macro it calls does nothing */
+#undef PERL_LOCALE_TABLE_ENTRY
+#define PERL_LOCALE_TABLE_ENTRY(name, call_back)
+#include "locale_table.h"
+
 #include "perl_langinfo.h"    /* Needed for _NL_LOCALE_NAME */
 
 /* =========================================================================
@@ -1157,15 +1164,6 @@ violations are fatal.
 #ifdef USE_LOCALE
 #   define HAS_SKIP_LOCALE_INIT /* Solely for XS code to test for this
                                    #define */
-#endif
-
-/* Even if not using locales, this header should be #included so as to #define
- * some symbols which avoid #ifdefs to get things to compile.  But make sure
- * the macro it calls does nothing */
-#ifndef USE_LOCALE
-#    undef PERL_LOCALE_TABLE_ENTRY
-#    define PERL_LOCALE_TABLE_ENTRY(name, call_back)
-#    include "locale_table.h"
 #endif
 
 /* XXX The Configure probe for categories must be updated when adding new
