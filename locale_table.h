@@ -28,12 +28,12 @@
     PERL_LOCALE_TABLE_ENTRY(CTYPE, NULL)
 
 #    define HAS_IGNORED_LOCALE_CATEGORIES_
-#    define LC_CTYPE_AVAIL_  false
+#    define LC_CTYPE_AVAIL_  0
 #  else
 
     PERL_LOCALE_TABLE_ENTRY(CTYPE, S_new_ctype)
 
-#    define LC_CTYPE_AVAIL_  true
+#    define LC_CTYPE_AVAIL_  1
 #    define USE_LOCALE_CTYPE
 #  endif
 #endif
@@ -43,12 +43,12 @@
     PERL_LOCALE_TABLE_ENTRY(NUMERIC, NULL)
 
 #    define HAS_IGNORED_LOCALE_CATEGORIES_
-#    define LC_NUMERIC_AVAIL_  false
+#    define LC_NUMERIC_AVAIL_  0
 #  else
 
     PERL_LOCALE_TABLE_ENTRY(NUMERIC, S_new_numeric)
 
-#    define LC_NUMERIC_AVAIL_  true
+#    define LC_NUMERIC_AVAIL_  1
 #    define USE_LOCALE_NUMERIC
 #  endif
 #endif
@@ -62,12 +62,12 @@
     PERL_LOCALE_TABLE_ENTRY(COLLATE, NULL)
 
 #    define HAS_IGNORED_LOCALE_CATEGORIES_
-#    define LC_COLLATE_AVAIL_  false
+#    define LC_COLLATE_AVAIL_  0
 #  else
 
     PERL_LOCALE_TABLE_ENTRY(COLLATE, S_new_collate)
 
-#    define LC_COLLATE_AVAIL_  true
+#    define LC_COLLATE_AVAIL_  1
 #    define USE_LOCALE_COLLATE
 #  endif
 #endif
@@ -77,9 +77,9 @@
 
 #  if defined(NO_LOCALE) || defined(NO_LOCALE_TIME)
 #    define HAS_IGNORED_LOCALE_CATEGORIES_
-#    define LC_TIME_AVAIL_  false
+#    define LC_TIME_AVAIL_  0
 #  else
-#    define LC_TIME_AVAIL_  true
+#    define LC_TIME_AVAIL_  1
 #    define USE_LOCALE_TIME
 #  endif
 #endif
@@ -89,9 +89,9 @@
 
 #  if defined(NO_LOCALE) || defined(NO_LOCALE_MESSAGES)
 #    define HAS_IGNORED_LOCALE_CATEGORIES_
-#    define LC_MESSAGES_AVAIL_  false
+#    define LC_MESSAGES_AVAIL_  0
 #  else
-#    define LC_MESSAGES_AVAIL_  true
+#    define LC_MESSAGES_AVAIL_  1
 #    define USE_LOCALE_MESSAGES
 #  endif
 #endif
@@ -101,9 +101,9 @@
 
 #  if defined(NO_LOCALE) || defined(NO_LOCALE_MONETARY)
 #    define HAS_IGNORED_LOCALE_CATEGORIES_
-#    define LC_MONETARY_AVAIL_  false
+#    define LC_MONETARY_AVAIL_  0
 #  else
-#    define LC_MONETARY_AVAIL_  true
+#    define LC_MONETARY_AVAIL_  1
 #    define USE_LOCALE_MONETARY
 #  endif
 #endif
@@ -113,9 +113,9 @@
 
 #  if defined(NO_LOCALE) || defined(NO_LOCALE_ADDRESS)
 #    define HAS_IGNORED_LOCALE_CATEGORIES_
-#    define LC_ADDRESS_AVAIL_  false
+#    define LC_ADDRESS_AVAIL_  0
 #  else
-#    define LC_ADDRESS_AVAIL_  true
+#    define LC_ADDRESS_AVAIL_  1
 #    define USE_LOCALE_ADDRESS
 #  endif
 #endif
@@ -125,9 +125,9 @@
 
 #  if defined(NO_LOCALE) || defined(NO_LOCALE_IDENTIFICATION)
 #    define HAS_IGNORED_LOCALE_CATEGORIES_
-#    define LC_IDENTIFICATION_AVAIL_  false
+#    define LC_IDENTIFICATION_AVAIL_  0
 #  else
-#    define LC_IDENTIFICATION_AVAIL_  true
+#    define LC_IDENTIFICATION_AVAIL_  1
 #    define USE_LOCALE_IDENTIFICATION
 #  endif
 #endif
@@ -137,9 +137,9 @@
 
 #  if defined(NO_LOCALE) || defined(NO_LOCALE_MEASUREMENT)
 #    define HAS_IGNORED_LOCALE_CATEGORIES_
-#    define LC_MEASUREMENT_AVAIL_  false
+#    define LC_MEASUREMENT_AVAIL_  0
 #  else
-#    define LC_MEASUREMENT_AVAIL_  true
+#    define LC_MEASUREMENT_AVAIL_  1
 #    define USE_LOCALE_MEASUREMENT
 #  endif
 #endif
@@ -149,9 +149,9 @@
 
 #  if defined(NO_LOCALE) || defined(NO_LOCALE_PAPER)
 #    define HAS_IGNORED_LOCALE_CATEGORIES_
-#    define LC_PAPER_AVAIL_  false
+#    define LC_PAPER_AVAIL_  0
 #  else
-#    define LC_PAPER_AVAIL_  true
+#    define LC_PAPER_AVAIL_  1
 #    define USE_LOCALE_PAPER
 #  endif
 #endif
@@ -161,9 +161,9 @@
 
 #  if defined(NO_LOCALE) || defined(NO_LOCALE_TELEPHONE)
 #    define HAS_IGNORED_LOCALE_CATEGORIES_
-#    define LC_TELEPHONE_AVAIL_  false
+#    define LC_TELEPHONE_AVAIL_  0
 #  else
-#    define LC_TELEPHONE_AVAIL_  true
+#    define LC_TELEPHONE_AVAIL_  1
 #    define USE_LOCALE_TELEPHONE
 #  endif
 #endif
@@ -173,9 +173,9 @@
 
 #  if defined(NO_LOCALE) || defined(NO_LOCALE_NAME)
 #    define HAS_IGNORED_LOCALE_CATEGORIES_
-#    define LC_NAME_AVAIL_  false
+#    define LC_NAME_AVAIL_  0
 #  else
-#    define LC_NAME_AVAIL_  true
+#    define LC_NAME_AVAIL_  1
 #    define USE_LOCALE_NAME
 #  endif
 #endif
@@ -185,9 +185,9 @@
 
 #  if defined(NO_LOCALE) || defined(NO_LOCALE_SYNTAX)
 #    define HAS_IGNORED_LOCALE_CATEGORIES_
-#    define LC_SYNTAX_AVAIL_  false
+#    define LC_SYNTAX_AVAIL_  0
 #  else
-#    define LC_SYNTAX_AVAIL_  true
+#    define LC_SYNTAX_AVAIL_  1
 #    define USE_LOCALE_SYNTAX
 #  endif
 #endif
@@ -197,9 +197,9 @@
 
 #  if defined(NO_LOCALE) || defined(NO_LOCALE_TOD)
 #    define HAS_IGNORED_LOCALE_CATEGORIES_
-#    define LC_TOD_AVAIL_  false
+#    define LC_TOD_AVAIL_  0
 #  else
-#    define LC_TOD_AVAIL_  true
+#    define LC_TOD_AVAIL_  1
 #    define USE_LOCALE_TOD
 #  endif
 #endif
