@@ -37,7 +37,7 @@
 PP(pp_stub)
 {
     if (GIMME_V == G_SCALAR)
-        rpp_xpush_1(&PL_sv_undef);
+        rpp_xpush_IMM(&PL_sv_undef);
     return NORMAL;
 }
 
@@ -199,7 +199,7 @@ PP(pp_rv2gv)
          );
     if (PL_op->op_private & OPpLVAL_INTRO)
         save_gp(MUTABLE_GV(sv), !(PL_op->op_flags & OPf_SPECIAL));
-    rpp_replace_1_1(sv);
+    rpp_replace_1_1_NN(sv);
     return NORMAL;
 }
 
@@ -236,10 +236,10 @@ Perl_softref2xv(pTHX_ SV *const sv, const char *const what,
         if (ckWARN(WARN_UNINITIALIZED))
             report_uninit(sv);
         if (type != SVt_PV && GIMME_V == G_LIST) {
-            rpp_popfree_1();
+            rpp_popfree_1_NN();
             return NULL;
         }
-        rpp_replace_1_1(&PL_sv_undef);
+        rpp_replace_1_IMM_NN(&PL_sv_undef);
         return NULL;
     }
     if ((PL_op->op_flags & OPf_SPECIAL) &&
@@ -247,7 +247,7 @@ Perl_softref2xv(pTHX_ SV *const sv, const char *const what,
         {
             if (!(gv = gv_fetchsv_nomg(sv, GV_ADDMG, type)))
                 {
-                    rpp_replace_1_1(&PL_sv_undef);
+                    rpp_replace_1_IMM_NN(&PL_sv_undef);
                     return NULL;
                 }
         }
@@ -294,7 +294,7 @@ PP(pp_rv2sv)
         else if (PL_op->op_private & OPpDEREF)
             sv = vivify_ref(sv, PL_op->op_private & OPpDEREF);
     }
-    rpp_replace_1_1(sv);
+    rpp_replace_1_1_NN(sv);
     return NORMAL;
 }
 
@@ -334,7 +334,7 @@ PP(pp_av2arylen)
         }
         else
 #endif
-        rpp_replace_1_1(sv_al);
+        rpp_replace_1_1_NN(sv_al);
     } else {
         SV *sv = newSViv(AvFILL(MUTABLE_AV(av)));
         rpp_popfree_1();
@@ -352,24 +352,24 @@ PP(pp_pos)
         sv_magic(ret, NULL, PERL_MAGIC_pos, NULL, 0);
         LvTYPE(ret) = '.';
         LvTARG(ret) = SvREFCNT_inc_simple(sv);
-        rpp_replace_1_1(ret);    /* no SvSETMAGIC */
+        rpp_replace_1_1_NN(ret);    /* no SvSETMAGIC */
     }
     else {
             const MAGIC * const mg = mg_find_mglob(sv);
             if (mg && mg->mg_len != -1) {
                 STRLEN i = mg->mg_len;
                 if (PL_op->op_private & OPpTRUEBOOL)
-                    rpp_replace_1_1(i ? &PL_sv_yes : &PL_sv_zero);
+                    rpp_replace_1_IMM_NN(i ? &PL_sv_yes : &PL_sv_zero);
                 else {
                     dTARGET;
                     if (mg->mg_flags & MGf_BYTES && DO_UTF8(sv))
                         i = sv_pos_b2u_flags(sv, i, SV_GMAGIC|SV_CONST_RETURN);
                     TARGu(i,1);
-                    rpp_replace_1_1(targ);
+                    rpp_replace_1_1_NN(targ);
                 }
                 return NORMAL;
             }
-            rpp_replace_1_1(&PL_sv_undef);
+            rpp_replace_1_IMM_NN(&PL_sv_undef);
     }
     return NORMAL;
 }
@@ -396,7 +396,7 @@ PP(pp_rv2cv)
     }
     else
         cv = MUTABLE_CV(&PL_sv_undef);
-    rpp_replace_1_1(MUTABLE_SV(cv));
+    rpp_replace_1_1_NN(MUTABLE_SV(cv));
     return NORMAL;
 }
 
@@ -431,7 +431,7 @@ PP(pp_prototype)
             CvPROTO(cv), CvPROTOLEN(cv), SVs_TEMP | SvUTF8(cv)
         );
   set:
-    rpp_replace_1_1(ret);
+    rpp_replace_1_1_NN(ret);
     return NORMAL;
 }
 
@@ -453,7 +453,7 @@ PP(pp_anoncode)
 
 PP(pp_srefgen)
 {
-    rpp_replace_1_1(refto(*PL_stack_sp));
+    rpp_replace_1_1_NN(refto(*PL_stack_sp));
     return NORMAL;
 }
 
@@ -466,19 +466,21 @@ PP(pp_refgen)
     dMARK;
 
     if (gimme == G_VOID)
-        rpp_popfree_to(mark);
+        rpp_popfree_to_NN(mark);
     else if (gimme == G_SCALAR) {
         if (++mark < PL_stack_sp) {
             /* 2+ args on stack: free all except top one */
             SV *topsv = *PL_stack_sp;
             *PL_stack_sp = *mark;
             *mark = topsv;
-            rpp_popfree_to(mark);
+            rpp_popfree_to_NN(mark);
         }
-        else if (mark > PL_stack_sp)
+        else if (mark > PL_stack_sp) {
             /* 0 args on stack */
-            rpp_xpush_1(&PL_sv_undef);
-        rpp_replace_1_1(refto(*PL_stack_sp));
+            rpp_xpush_IMM(&PL_sv_undef);
+        }
+
+        rpp_replace_1_1_NN(refto(*PL_stack_sp));
     }
     else {
         /* G_LIST */
@@ -538,7 +540,7 @@ PP(pp_ref)
 
     SvGETMAGIC(sv);
     if (!SvROK(sv)) {
-        rpp_replace_1_1(&PL_sv_no);
+        rpp_replace_1_IMM_NN(&PL_sv_no);
         return NORMAL;
     }
 
@@ -565,7 +567,7 @@ PP(pp_ref)
                     goto do_sv_ref;
             }
         }
-        rpp_replace_1_1(&PL_sv_yes);
+        rpp_replace_1_IMM_NN(&PL_sv_yes);
         return NORMAL;
     }
 
@@ -573,7 +575,7 @@ PP(pp_ref)
     {
         dTARGET;
         sv_ref(TARG, SvRV(sv), TRUE);
-        rpp_replace_1_1(TARG);
+        rpp_replace_1_1_NN(TARG);
         SvSETMAGIC(TARG);
         return NORMAL;
     }
@@ -581,10 +583,10 @@ PP(pp_ref)
 }
 
 
-PP_wrapped(pp_bless, MAXARG, 0)
+PP(pp_bless)
 {
-    dSP;
     HV *stash;
+    SV **sp = PL_stack_sp;
 
     if (MAXARG == 1)
     {
@@ -594,11 +596,13 @@ PP_wrapped(pp_bless, MAXARG, 0)
             Perl_croak(aTHX_ "Attempt to bless into a freed package");
     }
     else {
-        SV * const ssv = POPs;
+        SV * const ssv = *sp--;
         STRLEN len;
         const char *ptr;
 
-        if (!ssv) goto curstash;
+        if (!ssv)
+            goto curstash;
+
         SvGETMAGIC(ssv);
         if (SvROK(ssv)) {
           if (!SvAMAGIC(ssv)) {
@@ -618,9 +622,12 @@ PP_wrapped(pp_bless, MAXARG, 0)
         stash = gv_stashpvn(ptr, len, GV_ADD|SvUTF8(ssv));
     }
 
-    (void)sv_bless(TOPs, stash);
-    RETURN;
+    (void)sv_bless(*sp, stash);
+    if (PL_stack_sp > sp)
+        rpp_popfree_1();
+    return NORMAL;
 }
+
 
 PP(pp_gelem)
 {
@@ -690,7 +697,7 @@ PP(pp_gelem)
         sv_2mortal(sv);
     else
         sv = &PL_sv_undef;
-    rpp_replace_2_1(sv);
+    rpp_replace_2_1_NN(sv);
     return NORMAL;
 }
 
@@ -704,13 +711,13 @@ PP(pp_study)
     (void)SvPV(sv, len);
     if (len == 0 || len > I32_MAX || !SvPOK(sv) || SvUTF8(sv) || SvVALID(sv)) {
         /* Historically, study was skipped in these cases. */
-        rpp_replace_1_1(&PL_sv_no);
+        rpp_replace_1_IMM_NN(&PL_sv_no);
         return NORMAL;
     }
 
     /* Make study a no-op. It's no longer useful and its existence
        complicates matters elsewhere. */
-    rpp_replace_1_1(&PL_sv_yes);
+    rpp_replace_1_IMM_NN(&PL_sv_yes);
     return NORMAL;
 }
 
@@ -900,7 +907,7 @@ PP(pp_schop)
     if (chomping)
         sv_setiv(TARG, count);
     SvSETMAGIC(TARG);
-    rpp_replace_1_1(TARG);
+    rpp_replace_1_1_NN(TARG);
     return NORMAL;
 }
 
@@ -928,15 +935,16 @@ PP(pp_undef)
     SV *sv;
 
     if (!PL_op->op_private) {
-        rpp_extend(1);
-        *++PL_stack_sp = &PL_sv_undef;
+        rpp_xpush_IMM(&PL_sv_undef);
         return NORMAL;
     }
 
     if (PL_op->op_private & OPpTARGET_MY) {
+        /* $lex = undef, or undef $lex */
         SV** const padentry = &PAD_SVl(PL_op->op_targ);
         sv = *padentry;
-        rpp_xpush_1(sv);
+        if (UNLIKELY((PL_op->op_flags & OPf_WANT) != OPf_WANT_VOID))
+            rpp_xpush_1(sv);
         if ((PL_op->op_private & (OPpLVAL_INTRO|OPpPAD_STATE))
                                == OPpLVAL_INTRO)
         {
@@ -1040,8 +1048,12 @@ PP(pp_undef)
     }
 
 
-    if (!(PL_op->op_private & OPpTARGET_MY))
-        rpp_replace_1_1(&PL_sv_undef);
+    if (!(PL_op->op_private & OPpTARGET_MY)) {
+        if (LIKELY((PL_op->op_flags & OPf_WANT) == OPf_WANT_VOID))
+            rpp_popfree_1_NN();
+        else
+            rpp_replace_1_1_NN(&PL_sv_undef);
+    }
 
     return NORMAL;
 }
@@ -1067,7 +1079,7 @@ S_postincdec_common(pTHX_ SV *sv, SV *targ)
     if (inc && !SvOK(TARG))
         sv_setiv(TARG, 0);
     SvSETMAGIC(TARG);
-    rpp_replace_1_1(TARG);
+    rpp_replace_1_1_NN(TARG);
     return NORMAL;
 }
 
@@ -1089,7 +1101,7 @@ PP(pp_postinc)
         IV iv = SvIVX(sv);
         SvIV_set(sv,  iv + 1);
         TARGi(iv, 0); /* arg not GMG, so can't be tainted */
-        rpp_replace_1_1(TARG);
+        rpp_replace_1_1_NN(TARG);
         return NORMAL;
     }
 
@@ -1114,7 +1126,7 @@ PP(pp_postdec)
         IV iv = SvIVX(sv);
         SvIV_set(sv,  iv - 1);
         TARGi(iv, 0); /* arg not GMG, so can't be tainted */
-        rpp_replace_1_1(TARG);
+        rpp_replace_1_1_NN(TARG);
         return NORMAL;
     }
 
@@ -1306,7 +1318,7 @@ PP(pp_pow)
     }
 
   ret:
-    rpp_replace_2_1(targ);
+    rpp_replace_2_1_NN(targ);
     return NORMAL;
 }
 
@@ -1501,7 +1513,7 @@ PP(pp_multiply)
     }
 
   ret:
-    rpp_replace_2_1(targ);
+    rpp_replace_2_1_NN(targ);
     return NORMAL;
 }
 
@@ -1629,7 +1641,7 @@ PP(pp_divide)
     }
 
   ret:
-    rpp_replace_2_1(targ);
+    rpp_replace_2_1_NN(targ);
     return NORMAL;
 }
 
@@ -1763,7 +1775,7 @@ PP(pp_modulo)
         }
 
         SvSETMAGIC(TARG);
-        rpp_replace_2_1(targ);
+        rpp_replace_2_1_NN(targ);
         return NORMAL;
     }
 }
@@ -2081,7 +2093,7 @@ PP(pp_subtract)
     }
 
   ret:
-    rpp_replace_2_1(targ);
+    rpp_replace_2_1_NN(targ);
     return NORMAL;
 
 }
@@ -2171,7 +2183,7 @@ PP(pp_left_shift)
       else {
           TARGu(UV_LEFT_SHIFT(SvUV_nomg(svl), shift), 1);
       }
-      rpp_replace_2_1(targ);
+      rpp_replace_2_1_NN(targ);
       return NORMAL;
     }
 }
@@ -2197,7 +2209,7 @@ PP(pp_right_shift)
       else {
           TARGu(UV_RIGHT_SHIFT(SvUV_nomg(svl), shift), 1);
       }
-      rpp_replace_2_1(targ);
+      rpp_replace_2_1_NN(targ);
       return NORMAL;
     }
 }
@@ -2214,7 +2226,7 @@ PP(pp_lt)
     U32 flags_and = SvFLAGS(left) & SvFLAGS(right);
     U32 flags_or  = SvFLAGS(left) | SvFLAGS(right);
 
-    rpp_replace_2_1(boolSV(
+    rpp_replace_2_IMM_NN(boolSV(
         ( (flags_and & SVf_IOK) && ((flags_or & SVf_IVisUV) ==0 ) )
         ?    (SvIVX(left) < SvIVX(right))
         : (flags_and & SVf_NOK)
@@ -2236,7 +2248,7 @@ PP(pp_gt)
     U32 flags_and = SvFLAGS(left) & SvFLAGS(right);
     U32 flags_or  = SvFLAGS(left) | SvFLAGS(right);
 
-    rpp_replace_2_1(boolSV(
+    rpp_replace_2_IMM_NN(boolSV(
         ( (flags_and & SVf_IOK) && ((flags_or & SVf_IVisUV) ==0 ) )
         ?    (SvIVX(left) > SvIVX(right))
         : (flags_and & SVf_NOK)
@@ -2258,7 +2270,7 @@ PP(pp_le)
     U32 flags_and = SvFLAGS(left) & SvFLAGS(right);
     U32 flags_or  = SvFLAGS(left) | SvFLAGS(right);
 
-    rpp_replace_2_1(boolSV(
+    rpp_replace_2_IMM_NN(boolSV(
         ( (flags_and & SVf_IOK) && ((flags_or & SVf_IVisUV) ==0 ) )
         ?    (SvIVX(left) <= SvIVX(right))
         : (flags_and & SVf_NOK)
@@ -2280,7 +2292,7 @@ PP(pp_ge)
     U32 flags_and = SvFLAGS(left) & SvFLAGS(right);
     U32 flags_or  = SvFLAGS(left) | SvFLAGS(right);
 
-    rpp_replace_2_1(boolSV(
+    rpp_replace_2_IMM_NN(boolSV(
         ( (flags_and & SVf_IOK) && ((flags_or & SVf_IVisUV) ==0 ) )
         ?    (SvIVX(left) >= SvIVX(right))
         : (flags_and & SVf_NOK)
@@ -2302,7 +2314,7 @@ PP(pp_ne)
     U32 flags_and = SvFLAGS(left) & SvFLAGS(right);
     U32 flags_or  = SvFLAGS(left) | SvFLAGS(right);
 
-    rpp_replace_2_1(boolSV(
+    rpp_replace_2_IMM_NN(boolSV(
         ( (flags_and & SVf_IOK) && ((flags_or & SVf_IVisUV) ==0 ) )
         ?    (SvIVX(left) != SvIVX(right))
         : (flags_and & SVf_NOK)
@@ -2402,7 +2414,7 @@ PP(pp_ncmp)
         GETTARGET;
         TARGi(value, 1);
     }
-    rpp_replace_2_1(targ);
+    rpp_replace_2_1_NN(targ);
     return NORMAL;
 }
 
@@ -2447,7 +2459,7 @@ PP(pp_sle)
                       :
 #endif
                         sv_cmp_flags(left, right, 0);
-    rpp_replace_2_1(boolSV(cmp * multiplier < rhs));
+    rpp_replace_2_IMM_NN(boolSV(cmp * multiplier < rhs));
     return NORMAL;
 }
 
@@ -2460,7 +2472,7 @@ PP(pp_seq)
     SV *right = PL_stack_sp[0];
     SV *left  = PL_stack_sp[-1];
 
-    rpp_replace_2_1(boolSV(sv_eq_flags(left, right, 0)));;
+    rpp_replace_2_IMM_NN(boolSV(sv_eq_flags(left, right, 0)));;
     return NORMAL;
 }
 
@@ -2473,7 +2485,7 @@ PP(pp_sne)
     SV *right = PL_stack_sp[0];
     SV *left  = PL_stack_sp[-1];
 
-    rpp_replace_2_1(boolSV(!sv_eq_flags(left, right, 0)));
+    rpp_replace_2_IMM_NN(boolSV(!sv_eq_flags(left, right, 0)));
     return NORMAL;
 }
 
@@ -2496,7 +2508,7 @@ PP(pp_scmp)
 #endif
                         sv_cmp_flags(left, right, 0);
     TARGi(cmp, 1);
-    rpp_replace_2_1(targ);
+    rpp_replace_2_1_NN(targ);
     return NORMAL;
 }
 
@@ -2534,7 +2546,7 @@ PP(pp_bit_and)
 
       }
     }
-    rpp_replace_2_1(targ);
+    rpp_replace_2_1_NN(targ);
     return NORMAL;
 }
 
@@ -2561,7 +2573,7 @@ PP(pp_nbit_and)
           TARGu(u, 1);
         }
     }
-    rpp_replace_2_1(targ);
+    rpp_replace_2_1_NN(targ);
     return NORMAL;
 }
 
@@ -2580,7 +2592,7 @@ PP(pp_sbit_and)
 
     do_vop(OP_BIT_AND, targ, left, right);
     SvSETMAGIC(targ);
-    rpp_replace_2_1(targ);
+    rpp_replace_2_1_NN(targ);
     return NORMAL;
 }
 
@@ -2625,7 +2637,7 @@ PP(pp_bit_or)
         do_vop(op_type, TARG, left, right);
         SvSETMAGIC(targ);
       }
-      rpp_replace_2_1(targ);
+      rpp_replace_2_1_NN(targ);
       return NORMAL;
     }
 }
@@ -2662,7 +2674,7 @@ PP(pp_nbit_or)
           TARGu(result, 1);
         }
     }
-    rpp_replace_2_1(targ);
+    rpp_replace_2_1_NN(targ);
     return NORMAL;
 }
 
@@ -2688,7 +2700,7 @@ PP(pp_sbit_or)
             left, right);
 
     SvSETMAGIC(TARG);
-    rpp_replace_2_1(targ);
+    rpp_replace_2_1_NN(targ);
     return NORMAL;
 }
 
@@ -2721,7 +2733,7 @@ S_negate_string(pTHX)
     else return FALSE;
     SvSETMAGIC(TARG);
     if (LIKELY(targ != sv))
-        rpp_replace_1_1(TARG);
+        rpp_replace_1_1_NN(TARG);
     return TRUE;
 }
 
@@ -2775,7 +2787,7 @@ PP(pp_negate)
 
   ret:
     if (LIKELY(targ != sv))
-        rpp_replace_1_1(TARG);
+        rpp_replace_1_1_NN(TARG);
     return NORMAL;
 }
 
@@ -2784,7 +2796,7 @@ PP(pp_not)
 {
     if (rpp_try_AMAGIC_1(not_amg, 0))
         return NORMAL;
-    rpp_replace_1_1(boolSV(!SvTRUE_nomg_NN(*PL_stack_sp)));
+    rpp_replace_1_IMM_NN(boolSV(!SvTRUE_nomg_NN(*PL_stack_sp)));
     return NORMAL;
 }
 
@@ -2845,7 +2857,7 @@ PP(pp_complement)
         SvSETMAGIC(TARG);
       }
 
-      rpp_replace_1_1(TARG);
+      rpp_replace_1_1_NN(TARG);
       return NORMAL;
     }
 }
@@ -2868,7 +2880,7 @@ PP(pp_ncomplement)
         }
     }
 
-    rpp_replace_1_1(TARG);
+    rpp_replace_1_1_NN(TARG);
     return NORMAL;
 }
 
@@ -2881,7 +2893,7 @@ PP(pp_scomplement)
     SV *sv = *PL_stack_sp;
     S_scomplement(aTHX_ TARG, sv);
     SvSETMAGIC(TARG);
-    rpp_replace_1_1(TARG);
+    rpp_replace_1_1_NN(TARG);
     return NORMAL;
 }
 
@@ -2901,7 +2913,7 @@ PP(pp_i_multiply)
     IV left  = SvIV_nomg(PL_stack_sp[-1]);
 
     TARGi((IV)((UV)left * (UV)right), 1);
-    rpp_replace_2_1(targ);
+    rpp_replace_2_1_NN(targ);
     return NORMAL;
 }
 
@@ -2930,7 +2942,7 @@ PP(pp_i_divide)
       else
           value = num / value;
       TARGi(value, 1);
-      rpp_replace_2_1(targ);
+      rpp_replace_2_1_NN(targ);
       return NORMAL;
     }
 }
@@ -2957,7 +2969,7 @@ PP(pp_i_modulo)
           else
               TARGi(left % right, 1);
      }
-    rpp_replace_2_1(targ);
+    rpp_replace_2_1_NN(targ);
     return NORMAL;
 }
 
@@ -2976,7 +2988,7 @@ PP(pp_i_add)
     IV left    = USE_LEFT(leftsv) ? SvIV_nomg(leftsv) : 0;
 
     TARGi((IV)((UV)left + (UV)right), 1);
-    rpp_replace_2_1(targ);
+    rpp_replace_2_1_NN(targ);
     return NORMAL;
 }
 
@@ -2995,7 +3007,7 @@ PP(pp_i_subtract)
     IV left    = USE_LEFT(leftsv) ? SvIV_nomg(leftsv) : 0;
 
     TARGi((IV)((UV)left - (UV)right), 1);
-    rpp_replace_2_1(targ);
+    rpp_replace_2_1_NN(targ);
     return NORMAL;
 }
 
@@ -3008,7 +3020,7 @@ PP(pp_i_lt)
     IV right   = SvIV_nomg(PL_stack_sp[0]);
     IV left    = SvIV_nomg(PL_stack_sp[-1]);
 
-    rpp_replace_2_1(boolSV(left < right));
+    rpp_replace_2_IMM_NN(boolSV(left < right));
     return NORMAL;
 }
 
@@ -3021,7 +3033,7 @@ PP(pp_i_gt)
     IV right   = SvIV_nomg(PL_stack_sp[0]);
     IV left    = SvIV_nomg(PL_stack_sp[-1]);
 
-    rpp_replace_2_1(boolSV(left > right));
+    rpp_replace_2_IMM_NN(boolSV(left > right));
     return NORMAL;
 }
 
@@ -3034,7 +3046,7 @@ PP(pp_i_le)
     IV right   = SvIV_nomg(PL_stack_sp[0]);
     IV left    = SvIV_nomg(PL_stack_sp[-1]);
 
-    rpp_replace_2_1(boolSV(left <= right));
+    rpp_replace_2_IMM_NN(boolSV(left <= right));
     return NORMAL;
 }
 
@@ -3047,7 +3059,7 @@ PP(pp_i_ge)
     IV right   = SvIV_nomg(PL_stack_sp[0]);
     IV left    = SvIV_nomg(PL_stack_sp[-1]);
 
-    rpp_replace_2_1(boolSV(left >= right));
+    rpp_replace_2_IMM_NN(boolSV(left >= right));
     return NORMAL;
 }
 
@@ -3060,7 +3072,7 @@ PP(pp_i_eq)
     IV right   = SvIV_nomg(PL_stack_sp[0]);
     IV left    = SvIV_nomg(PL_stack_sp[-1]);
 
-    rpp_replace_2_1(boolSV(left == right));
+    rpp_replace_2_IMM_NN(boolSV(left == right));
     return NORMAL;
 }
 
@@ -3073,7 +3085,7 @@ PP(pp_i_ne)
     IV right   = SvIV_nomg(PL_stack_sp[0]);
     IV left    = SvIV_nomg(PL_stack_sp[-1]);
 
-    rpp_replace_2_1(boolSV(left != right));
+    rpp_replace_2_IMM_NN(boolSV(left != right));
     return NORMAL;
 }
 
@@ -3099,7 +3111,7 @@ PP(pp_i_ncmp)
         value = 0;
       TARGi(value, 1);
     }
-    rpp_replace_2_1(targ);
+    rpp_replace_2_1_NN(targ);
     return NORMAL;
 }
 
@@ -3117,7 +3129,7 @@ PP(pp_i_negate)
         IV const i = SvIV_nomg(sv);
         TARGi((IV)-(UV)i, 1);
         if (LIKELY(targ != sv))
-            rpp_replace_1_1(TARG);
+            rpp_replace_1_1_NN(TARG);
         return NORMAL;
     }
 }
@@ -3135,7 +3147,7 @@ PP(pp_atan2)
     NV left  = SvNV_nomg(PL_stack_sp[-1]);
 
     TARGn(Perl_atan2(left, right), 1);
-    rpp_replace_2_1(targ);
+    rpp_replace_2_1_NN(targ);
     return NORMAL;
 }
 
@@ -3196,7 +3208,7 @@ PP(pp_sin)
       case OP_SQRT: result = Perl_sqrt(value); break;
       }
       TARGn(result, 1);
-      rpp_replace_1_1(TARG);
+      rpp_replace_1_1_NN(TARG);
       return NORMAL;
     }
 }
@@ -3348,7 +3360,7 @@ PP(pp_int)
           }
       }
     }
-    rpp_replace_1_1(TARG);
+    rpp_replace_1_1_NN(TARG);
     return NORMAL;
 }
 
@@ -3392,7 +3404,7 @@ PP(pp_abs)
       }
     }
 
-    rpp_replace_1_1(TARG);
+    rpp_replace_1_1_NN(TARG);
     return NORMAL;
 }
 
@@ -3451,7 +3463,7 @@ PP(pp_oct)
         TARGu(result_uv, 1);
     }
 
-    rpp_replace_1_1(TARG);
+    rpp_replace_1_1_NN(TARG);
     return NORMAL;
 }
 
@@ -3498,8 +3510,8 @@ PP(pp_length)
                 len = SvCUR(sv);
                 if (PL_op->op_private & OPpTRUEBOOL) {
                   return_bool:
-                    targ = (len ? &PL_sv_yes : &PL_sv_zero);
-                    goto ret;
+                    rpp_replace_1_IMM_NN(len ? &PL_sv_yes : &PL_sv_zero);
+                    return NORMAL;
                 }
             }
             else {
@@ -3518,9 +3530,8 @@ PP(pp_length)
             targ = &PL_sv_undef;
     }
 
-  ret:
-    rpp_replace_1_1(TARG);
-    return NORMAL; /* no putback, SP didn't move in this opcode */
+    rpp_replace_1_1_NN(TARG);
+    return NORMAL;
 }
 
 
@@ -3821,7 +3832,7 @@ PP(pp_index)
 
     if (threeargs) {
         offset = SvIV(*PL_stack_sp);
-        rpp_popfree_1();
+        rpp_popfree_1_NN();
     }
 
     little = PL_stack_sp[0];
@@ -3921,21 +3932,23 @@ PP(pp_index)
     else
         TARGi(retval, 1);
 
-    rpp_replace_2_1(targ);
+    rpp_replace_2_1_NN(targ);
     return NORMAL;
 }
 
 
-PP_wrapped(pp_sprintf, 0, 1)
+PP(pp_sprintf)
 {
-    dSP; dMARK; dORIGMARK; dTARGET;
+    dMARK; dORIGMARK; dTARGET;
     SvTAINTED_off(TARG);
-    do_sprintf(TARG, SP-MARK, MARK+1);
+    do_sprintf(TARG, PL_stack_sp - MARK, MARK + 1);
     TAINT_IF(SvTAINTED(TARG));
-    SP = ORIGMARK;
-    PUSHTARG;
-    RETURN;
+    rpp_popfree_to_NN(ORIGMARK);
+    SvSETMAGIC(TARG);
+    rpp_push_1(TARG);
+    return NORMAL;
 }
+
 
 PP(pp_ord)
 {
@@ -3950,7 +3963,7 @@ PP(pp_ord)
            : (UV)(*s),
         1);
 
-    rpp_replace_1_1(TARG);
+    rpp_replace_1_1_NN(TARG);
     return NORMAL;
 }
 
@@ -4009,7 +4022,7 @@ PP(pp_chr)
 
   ret:
     SvSETMAGIC(TARG);
-    rpp_replace_1_1(TARG);
+    rpp_replace_1_1_NN(TARG);
     return NORMAL;
 }
 
@@ -4053,7 +4066,7 @@ PP(pp_crypt)
 
     SvUTF8_off(TARG);
     SvSETMAGIC(TARG);
-    rpp_replace_2_1(targ);
+    rpp_replace_2_1_NN(targ);
     return NORMAL;
 #else
     DIE(aTHX_
@@ -5034,7 +5047,7 @@ PP(pp_quotemeta)
         sv_setpvn(TARG, s, len);
 
     SvSETMAGIC(TARG);
-    rpp_replace_1_1(TARG);
+    rpp_replace_1_1_NN(TARG);
     return NORMAL;
 }
 
@@ -5303,7 +5316,7 @@ PP(pp_aslice)
                 }
             }
 
-            rpp_replace_at(MARK, svp ? *svp : &PL_sv_undef);
+            rpp_replace_at_NN(MARK, svp ? *svp : &PL_sv_undef);
         }
     }
 
@@ -5765,11 +5778,11 @@ PP(pp_helemexistsor)
 
     if(!val) {
 other:
-        rpp_popfree_2();
+        rpp_popfree_2_NN();
         return cLOGOP->op_other;
     }
 
-    rpp_replace_2_1(val);
+    rpp_replace_2_1_NN(val);
     return NORMAL;
 }
 
@@ -5824,7 +5837,7 @@ PP(pp_hslice)
             }
         }
 
-        rpp_replace_at(MARK, svp && *svp ? *svp : &PL_sv_undef);
+        rpp_replace_at_NN(MARK, svp && *svp ? *svp : &PL_sv_undef);
     }
 
     rpp_context(ORIGMARK, GIMME_V, 1);
@@ -5980,7 +5993,7 @@ PP(pp_anonlist)
     rpp_push_1_norc(sv); /* this handles ref count and/or mortalising */
     PL_stack_sp[0] = PL_stack_sp[-items];
     PL_stack_sp[-items] = sv;
-    rpp_popfree_to(PL_stack_sp - items);
+    rpp_popfree_to_NN(PL_stack_sp - items);
     return NORMAL;
 }
 
@@ -6080,7 +6093,7 @@ PP(pp_anonhash)
      * above it */
     *PL_stack_sp = ORIGMARK[1];
     ORIGMARK[1] = retval;
-    rpp_popfree_to(ORIGMARK+1);
+    rpp_popfree_to_NN(ORIGMARK+1);
     return NORMAL;
 }
 
@@ -6342,10 +6355,13 @@ PP(pp_push)
             mg_set(MUTABLE_SV(ary));
         PL_delaymagic = old_delaymagic;
     }
-    rpp_popfree_to(ORIGMARK);
-    if (OP_GIMME(PL_op, 0) != G_VOID) {
+    rpp_popfree_to_NN(ORIGMARK);
+    if (   (PL_op->op_flags & OPf_WANT) != G_VOID
+        || (PL_op->op_private & OPpTARGET_MY))
+    {
         TARGi(AvFILL(ary) + 1, 1);
-        rpp_push_1(targ);
+        if ((PL_op->op_flags & OPf_WANT) != G_VOID)
+            rpp_push_1(targ);
     }
     return NORMAL;
 }
@@ -6424,10 +6440,13 @@ PP(pp_unshift)
             mg_set(MUTABLE_SV(ary));
         PL_delaymagic = old_delaymagic;
     }
-    rpp_popfree_to(ORIGMARK);
-    if (OP_GIMME(PL_op, 0) != G_VOID) {
+    rpp_popfree_to_NN(ORIGMARK);
+    if (   (PL_op->op_flags & OPf_WANT) != G_VOID
+        || (PL_op->op_private & OPpTARGET_MY))
+    {
         TARGi(AvFILL(ary) + 1, 1);
-        rpp_push_1(targ);
+        if ((PL_op->op_flags & OPf_WANT) != G_VOID)
+            rpp_push_1(targ);
     }
     return NORMAL;
 }
@@ -7044,7 +7063,7 @@ PP(pp_lock)
      || SvTYPE(retsv) == SVt_PVCV) {
         retsv = refto(retsv);
     }
-    rpp_replace_1_1(retsv);
+    rpp_replace_1_1_NN(retsv);
     return NORMAL;
 }
 
@@ -7275,7 +7294,7 @@ PP(pp_runcv)
 
     rpp_extend(1);
     if (CvEVAL(cv))
-        rpp_push_1(&PL_sv_undef);
+        rpp_push_IMM(&PL_sv_undef);
     else
         rpp_push_1_norc(newRV((SV *)cv));
 
@@ -7416,13 +7435,13 @@ PP(pp_refassign)
 
     if (UNLIKELY(PL_op->op_flags & OPf_MOD)) {
         /* e.g. f(\$x = \1); */
-        rpp_popfree_to(PL_stack_sp - extra);
+        rpp_popfree_to_NN(PL_stack_sp - extra);
         rpp_replace_at_norc(PL_stack_sp, newSVsv(sv));
         /* XXX else can weak references go stale before they are read, e.g.,
            in leavesub?  */
     }
     else
-        rpp_popfree_to(PL_stack_sp - (extra + 1));
+        rpp_popfree_to_NN(PL_stack_sp - (extra + 1));
 
     return NORMAL;
 }
@@ -7545,7 +7564,7 @@ PP(pp_anonconst)
         ret_sv = refto(ret_sv);
     }
 
-    rpp_replace_1_1(ret_sv);
+    rpp_replace_1_1_NN(ret_sv);
     return NORMAL;
 }
 
@@ -7820,10 +7839,10 @@ PP(pp_cmpchain_and)
 {
     SV *result = PL_stack_sp[0];
     if (SvTRUE_NN(result)) {
-        rpp_popfree_1();
+        rpp_popfree_1_NN();
         return cLOGOP->op_other;
     } else {
-        rpp_replace_2_1(result);
+        rpp_replace_2_1_NN(result);
         return NORMAL;
     }
 }
@@ -7846,7 +7865,7 @@ PP(pp_is_bool)
 
     SvGETMAGIC(arg);
 
-    rpp_replace_1_1(boolSV(SvIsBOOL(arg)));
+    rpp_replace_1_IMM_NN(boolSV(SvIsBOOL(arg)));
     return NORMAL;
 }
 
@@ -7856,21 +7875,21 @@ PP(pp_is_weak)
 
     SvGETMAGIC(arg);
 
-    rpp_replace_1_1(boolSV(SvWEAKREF(arg)));
+    rpp_replace_1_IMM_NN(boolSV(SvWEAKREF(arg)));
     return NORMAL;
 }
 
 PP(pp_weaken)
 {
     sv_rvweaken(*PL_stack_sp);
-    rpp_popfree_1();
+    rpp_popfree_1_NN();
     return NORMAL;
 }
 
 PP(pp_unweaken)
 {
     sv_rvunweaken(*PL_stack_sp);
-    rpp_popfree_1();
+    rpp_popfree_1_NN();
     return NORMAL;
 }
 
@@ -7908,7 +7927,7 @@ fallback:
     }
 
   ret:
-    rpp_replace_1_1(ret);
+    rpp_replace_1_1_NN(ret);
     return NORMAL;
 }
 
@@ -7924,7 +7943,7 @@ PP(pp_refaddr)
     else
         sv_setsv(TARG, &PL_sv_undef);
 
-    rpp_replace_1_1(TARG);
+    rpp_replace_1_1_NN(TARG);
     return NORMAL;
 }
 
@@ -7940,7 +7959,7 @@ PP(pp_reftype)
     else
         sv_setsv(TARG, &PL_sv_undef);
 
-    rpp_replace_1_1(TARG);
+    rpp_replace_1_1_NN(TARG);
     return NORMAL;
 }
 
@@ -7948,7 +7967,7 @@ PP(pp_ceil)
 {
     dTARGET;
     TARGn(Perl_ceil(SvNVx(*PL_stack_sp)), 1);
-    rpp_replace_1_1(TARG);
+    rpp_replace_1_1_NN(TARG);
     return NORMAL;
 }
 
@@ -7956,7 +7975,7 @@ PP(pp_floor)
 {
     dTARGET;
     TARGn(Perl_floor(SvNVx(*PL_stack_sp)), 1);
-    rpp_replace_1_1(TARG);
+    rpp_replace_1_1_NN(TARG);
     return NORMAL;
 }
 
@@ -7966,7 +7985,7 @@ PP(pp_is_tainted)
 
     SvGETMAGIC(arg);
 
-    rpp_replace_1_1(boolSV(SvTAINTED(arg)));
+    rpp_replace_1_IMM_NN(boolSV(SvTAINTED(arg)));
     return NORMAL;
 }
 

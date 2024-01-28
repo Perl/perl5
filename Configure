@@ -16105,6 +16105,8 @@ EOCP
 	fi;
 	$rm_try
 	;;
+*)      d_lc_monetary_2008="$undef"
+        ;;
 esac
 
 : see if lchown exists
@@ -21502,8 +21504,8 @@ int main() {
 		STDIO_STREAM_ARRAY[i]._flag)
 		fflush(&STDIO_STREAM_ARRAY[i]);
     }
-  }
 # endif
+  }
 #endif
   _exit(42);
 }

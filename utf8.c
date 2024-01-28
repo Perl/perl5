@@ -2259,7 +2259,7 @@ Perl_utf8_length(pTHX_ const U8 * const s0, const U8 * const e)
     do { /* Process per-word */
 
         /* The idea for counting continuation bytes came from
-         * http://www.daemonology.net/blog/2008-06-05-faster-utf8-strlen.html
+         * https://www.daemonology.net/blog/2008-06-05-faster-utf8-strlen.html
          * One thing it does that this doesn't is to prefetch the buffer
          *      __builtin_prefetch(&s[256], 0, 0);
          *

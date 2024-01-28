@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 BEGIN {
-    for $n (qw(lib regen)) {
+    for my $n (qw(lib regen)) {
         if (-e "../$n") {
             push @INC, "../$n";
         } elsif (-e "./$n") {

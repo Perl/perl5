@@ -278,11 +278,11 @@ S_emulate_eaccess(pTHX_ const char* path, Mode_t mode)
 #   define PERL_EFF_ACCESS(p,f) (S_emulate_eaccess(aTHX_ (p), (f)))
 #endif
 
-PP_wrapped(pp_backtick, 1, 0)
+PP(pp_backtick)
 {
-    dSP; dTARGET;
+    dTARGET;
     PerlIO *fp;
-    const char * const tmps = POPpconstx;
+    const char * const tmps = SvPV_nolen(*PL_stack_sp);
     const U8 gimme = GIMME_V;
     const char *mode = "r";
 
@@ -292,6 +292,7 @@ PP_wrapped(pp_backtick, 1, 0)
     else if (PL_op->op_private & OPpOPEN_IN_CRLF)
         mode = "rt";
     fp = PerlProc_popen(tmps, mode);
+    rpp_popfree_1();
     if (fp) {
         const char * const type = Perl_PerlIO_context_layers(aTHX_ NULL);
         if (type && *type)
@@ -310,7 +311,7 @@ PP_wrapped(pp_backtick, 1, 0)
             while (sv_gets(TARG, fp, SvCUR(TARG)) != NULL)
                 NOOP;
             LEAVE_with_name("backtick");
-            XPUSHs(TARG);
+            rpp_push_1(TARG);
             SvTAINTED_on(TARG);
         }
         else {
@@ -320,7 +321,8 @@ PP_wrapped(pp_backtick, 1, 0)
                     SvREFCNT_dec(sv);
                     break;
                 }
-                mXPUSHs(sv);
+                rpp_extend(1);
+                rpp_push_1_norc(sv);
                 if (SvLEN(sv) - SvCUR(sv) > 20) {
                     SvPV_shrink_to_cur(sv);
                 }
@@ -333,10 +335,10 @@ PP_wrapped(pp_backtick, 1, 0)
     else {
         STATUS_NATIVE_CHILD_SET(-1);
         if (gimme == G_SCALAR)
-            RETPUSHUNDEF;
+            rpp_push_1(&PL_sv_undef);
     }
 
-    RETURN;
+    return NORMAL;
 }
 
 
@@ -376,7 +378,7 @@ PP(pp_glob)
          * of premature freeing, but in this case the GV is always
          * referenced by a preceding OP_GV. */
         assert(!rpp_is_lone((SV*)gv));
-        rpp_popfree_1();
+        rpp_popfree_1_NN();
     }
 
 
@@ -404,7 +406,7 @@ PP(pp_glob)
             assert(SvTYPE(tmpsv) == SVt_PVAV);
             len = av_count((AV *)tmpsv);
             assert(*PL_stack_sp == arg);
-            rpp_popfree_1(); /* pop the original wildcard arg */
+            rpp_popfree_1_NN(); /* pop the original wildcard arg */
             rpp_extend(len);
             for (i = 0; i < len; ++i)
                 /* amagic_call() naughtily doesn't increment the ref counts
@@ -418,7 +420,7 @@ PP(pp_glob)
             SvSETMAGIC(targ);
             /* replace the original wildcard arg with result */
             assert(*PL_stack_sp == arg);
-            rpp_replace_1_1(targ);
+            rpp_replace_1_1_NN(targ);
         }
 
         if (PL_op->op_flags & OPf_SPECIAL) {
@@ -692,7 +694,7 @@ Perl_tied_method(pTHX_ SV *methname, SV **mark, SV *const sv,
         PL_stack_sp = mark + 1;
     }
     else if (rpp_stack_is_rc())
-        rpp_popfree_to(mark);
+        rpp_popfree_to_NN(mark);
     else
         PL_stack_sp = mark;
 
@@ -1669,7 +1671,7 @@ PP(pp_enterwrite)
     }
     io = GvIO(gv);
     if (!io) {
-        *++PL_stack_sp = &PL_sv_no;
+        rpp_push_IMM(&PL_sv_no);
 	return NORMAL;
 
     }
@@ -1776,7 +1778,7 @@ PP(pp_leavewrite)
   forget_top:
     cx = CX_CUR();
     assert(CxTYPE(cx) == CXt_FORMAT);
-    rpp_popfree_to(PL_stack_base + cx->blk_oldsp); /* ignore retval of formline */
+    rpp_popfree_to_NN(PL_stack_base + cx->blk_oldsp); /* ignore retval of formline */
     CX_LEAVE_SCOPE(cx);
     cx_popformat(cx);
     cx_popblock(cx);
@@ -1790,27 +1792,27 @@ PP(pp_leavewrite)
          * Currently we ignore any args to 'return' and just return
          * a single undef in both scalar and list contexts
          */
-        *++PL_stack_sp = &PL_sv_undef;
+        rpp_push_IMM(&PL_sv_undef);
     else if (!io || !(fp = IoOFP(io))) {
         if (io && IoIFP(io))
             report_wrongway_fh(gv, '<');
         else
             report_evil_fh(gv);
-        *++PL_stack_sp = &PL_sv_no;
+        rpp_push_IMM(&PL_sv_no);
     }
     else {
         if ((IoLINES_LEFT(io) -= FmLINES(PL_formtarget)) < 0) {
             Perl_ck_warner(aTHX_ packWARN(WARN_IO), "page overflow");
         }
         if (!do_print(PL_formtarget, fp))
-            *++PL_stack_sp = &PL_sv_no;
+            rpp_push_IMM(&PL_sv_no);
         else {
             FmLINES(PL_formtarget) = 0;
             SvCUR_set(PL_formtarget, 0);
             *SvEND(PL_formtarget) = '\0';
             if (IoFLAGS(io) & IOf_FLUSH)
                 (void)PerlIO_flush(fp);
-            *++PL_stack_sp = &PL_sv_yes;
+            rpp_push_IMM(&PL_sv_yes);
         }
     }
     PL_formtarget = PL_bodytarget;
@@ -1818,31 +1820,36 @@ PP(pp_leavewrite)
 }
 
 
-PP_wrapped(pp_prtf, 0, 1)
+PP(pp_prtf)
 {
-    dSP; dMARK; dORIGMARK;
+    dMARK; dORIGMARK;
     PerlIO *fp;
 
+    /* OPf_STACKED if first argument is a file handle */
     GV * const gv
         = (PL_op->op_flags & OPf_STACKED) ? MUTABLE_GV(*++MARK) : PL_defoutgv;
     IO *const io = GvIO(gv);
 
     /* Treat empty list as "" */
-    if (MARK == SP) XPUSHs(&PL_sv_no);
+    if (MARK == PL_stack_sp)
+        rpp_xpush_IMM(&PL_sv_no);
 
+    SV * retval = &PL_sv_undef;
     if (io) {
         const MAGIC * const mg = SvTIED_mg((const SV *)io, PERL_MAGIC_tiedscalar);
         if (mg) {
             if (MARK == ORIGMARK) {
-                MEXTEND(SP, 1);
-                ++MARK;
-                Move(MARK, MARK + 1, (SP - MARK) + 1, SV*);
-                ++SP;
+                /* insert NULL hole at base of argument list if no FH */
+                rpp_extend(1);
+                MARK = ORIGMARK + 1;
+                Move(MARK, MARK + 1, (PL_stack_sp - MARK) + 1, SV*);
+                *MARK = NULL;
+                ++PL_stack_sp;
             }
             return Perl_tied_method(aTHX_ SV_CONST(PRINTF), mark - 1, MUTABLE_SV(io),
                                     mg,
                                     G_SCALAR | TIED_METHOD_ARGUMENTS_ON_STACK,
-                                    sp - mark);
+                                    PL_stack_sp - mark);
         }
     }
 
@@ -1861,7 +1868,7 @@ PP_wrapped(pp_prtf, 0, 1)
     }
     else {
         SV *sv = sv_newmortal();
-        do_sprintf(sv, SP - MARK, MARK + 1);
+        do_sprintf(sv, PL_stack_sp - MARK, MARK + 1);
         if (!do_print(sv, fp))
             goto just_say_no;
 
@@ -1869,15 +1876,14 @@ PP_wrapped(pp_prtf, 0, 1)
             if (PerlIO_flush(fp) == EOF)
                 goto just_say_no;
     }
-    SP = ORIGMARK;
-    PUSHs(&PL_sv_yes);
-    RETURN;
+    retval = &PL_sv_yes;;
 
   just_say_no:
-    SP = ORIGMARK;
-    PUSHs(&PL_sv_undef);
-    RETURN;
+    rpp_popfree_to_NN(ORIGMARK);
+    rpp_push_IMM(retval);
+    return NORMAL;
 }
+
 
 PP_wrapped(pp_sysopen, MAXARG, 0)
 {
@@ -5662,7 +5668,7 @@ PP(pp_ehostent)
 #endif
         break;
     }
-    rpp_xpush_1(&PL_sv_yes);
+    rpp_xpush_IMM(&PL_sv_yes);
     return NORMAL;
 }
 
@@ -5981,7 +5987,7 @@ PP(pp_getlogin)
     char *tmps;
     rpp_extend(1);
     if (!(tmps = PerlProc_getlogin())) {
-        rpp_push_1(&PL_sv_undef);
+        rpp_push_IMM(&PL_sv_undef);
         return NORMAL;
     }
     sv_setpv_mg(TARG, tmps);

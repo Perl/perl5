@@ -228,23 +228,23 @@ is($CLASS->new($monster)->mantissa(),
 
 $x = $CLASS->new(2);
 $x->bzero();
-is($x->{_a}, undef, qq|\$x = $CLASS->new(2); \$x->bzero(); \$x->{_a}|);
-is($x->{_p}, undef, qq|\$x = $CLASS->new(2); \$x->bzero(); \$x->{_p}|);
+is($x->{accuracy}, undef, qq|\$x = $CLASS->new(2); \$x->bzero(); \$x->{accuracy}|);
+is($x->{precision}, undef, qq|\$x = $CLASS->new(2); \$x->bzero(); \$x->{precision}|);
 
 $x = $CLASS->new(2);
 $x->binf();
-is($x->{_a}, undef, qq|\$x = $CLASS->new(2); \$x->binf(); \$x->{_a}|);
-is($x->{_p}, undef, qq|\$x = $CLASS->new(2); \$x->binf(); \$x->{_p}|);
+is($x->{accuracy}, undef, qq|\$x = $CLASS->new(2); \$x->binf(); \$x->{accuracy}|);
+is($x->{precision}, undef, qq|\$x = $CLASS->new(2); \$x->binf(); \$x->{precision}|);
 
 $x = $CLASS->new(2);
 $x->bone();
-is($x->{_a}, undef, qq|\$x = $CLASS->new(2); \$x->bone(); \$x->{_a}|);
-is($x->{_p}, undef, qq|\$x = $CLASS->new(2); \$x->bone(); \$x->{_p}|);
+is($x->{accuracy}, undef, qq|\$x = $CLASS->new(2); \$x->bone(); \$x->{accuracy}|);
+is($x->{precision}, undef, qq|\$x = $CLASS->new(2); \$x->bone(); \$x->{precision}|);
 
 $x = $CLASS->new(2);
 $x->bnan();
-is($x->{_a}, undef, qq|\$x = $CLASS->new(2); \$x->bnan(); \$x->{_a}|);
-is($x->{_p}, undef, qq|\$x = $CLASS->new(2); \$x->bnan(); \$x->{_p}|);
+is($x->{accuracy}, undef, qq|\$x = $CLASS->new(2); \$x->bnan(); \$x->{accuracy}|);
+is($x->{precision}, undef, qq|\$x = $CLASS->new(2); \$x->bnan(); \$x->{precision}|);
 
 ###############################################################################
 # bone/binf etc as plain calls (Lite failed them)

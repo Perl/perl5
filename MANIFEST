@@ -249,32 +249,32 @@ cpan/autodie/lib/autodie.pm				Functions succeed or die with lexical scope
 cpan/autodie/lib/autodie/exception.pm			Exception class for autodie
 cpan/autodie/lib/autodie/exception/system.pm		Exception class for autodying system()
 cpan/autodie/lib/autodie/hints.pm			Hinting interface for autodie
-cpan/autodie/lib/autodie/Scope/Guard.pm
-cpan/autodie/lib/autodie/Scope/GuardStack.pm
-cpan/autodie/lib/autodie/skip.pm
-cpan/autodie/lib/autodie/Util.pm
+cpan/autodie/lib/autodie/Scope/Guard.pm			Module related to autodie
+cpan/autodie/lib/autodie/Scope/GuardStack.pm		Module related to autodie
+cpan/autodie/lib/autodie/skip.pm			Module related to autodie
+cpan/autodie/lib/autodie/Util.pm			Module related to autodie
 cpan/autodie/lib/Fatal.pm				Make errors in functions/builtins fatal
 cpan/autodie/t/00-load.t				autodie - basic load
-cpan/autodie/t/args.t
+cpan/autodie/t/args.t					Test file related to autodie
 cpan/autodie/t/autodie.t				autodie - Basic functionality
-cpan/autodie/t/autodie_skippy.pm
+cpan/autodie/t/autodie_skippy.pm			Module related to autodie
 cpan/autodie/t/autodie_test_module.pm			autodie - test helper
 cpan/autodie/t/backcompat.t				autodie - More Fatal backcompat
 cpan/autodie/t/basic_exceptions.t			autodie - Basic exception tests
 cpan/autodie/t/binmode.t				autodie - Binmode testing
 cpan/autodie/t/blog_hints.t				autodie - Tests fro PJF's blog
 cpan/autodie/t/caller.t					autodie - Caller diagnostics
-cpan/autodie/t/chmod.t
-cpan/autodie/t/chown.t
+cpan/autodie/t/chmod.t					Test file related to autodie
+cpan/autodie/t/chown.t					Test file related to autodie
 cpan/autodie/t/context.t				autodie - Context clobbering tests
 cpan/autodie/t/context_lexical.t			autodie - Context clobbering lexically
-cpan/autodie/t/core-trampoline-slurp.t
+cpan/autodie/t/core-trampoline-slurp.t			Test file related to autodie
 cpan/autodie/t/crickey.t				autodie - Like an Australian
 cpan/autodie/t/dbmopen.t				autodie - dbm tests
-cpan/autodie/t/eval_error.t
+cpan/autodie/t/eval_error.t				Test file related to autodie
 cpan/autodie/t/exception_class.t			autodie - Exception class subclasses
-cpan/autodie/t/exception_nonref.t
-cpan/autodie/t/exceptions.t				autodie - 5.10 exception tests.
+cpan/autodie/t/exception_nonref.t			Test file related to autodie
+cpan/autodie/t/exceptions-smartmatch.t			autodie
 cpan/autodie/t/exec.t					autodie - exec tests.
 cpan/autodie/t/Fatal.t					autodie - Fatal backcompatibility
 cpan/autodie/t/filehandles.t				autodie - filehandle tests
@@ -287,10 +287,10 @@ cpan/autodie/t/hints_pod_examples.t			autodie - Test hints POD examples
 cpan/autodie/t/hints_provider_does.t			autodie - Test hints/does roles
 cpan/autodie/t/hints_provider_easy_does_it.t		autodie - Test easy hints/does
 cpan/autodie/t/hints_provider_isa.t			autodie - Test hints/inheritance
-cpan/autodie/t/import-into.t
+cpan/autodie/t/import-into.t				Test file related to autodie
 cpan/autodie/t/internal.t				autodie - internal interface tests
 cpan/autodie/t/internal-backcompat.t			autodie - Back-compatibility tests
-cpan/autodie/t/kill.t
+cpan/autodie/t/kill.t					Test file related to autodie
 cpan/autodie/t/lethal.t					autodie - lethal is the one true name
 cpan/autodie/t/lib/autodie/test/au.pm			autodie - Australian helper
 cpan/autodie/t/lib/autodie/test/au/exception.pm		autodie - Australian helper
@@ -304,98 +304,97 @@ cpan/autodie/t/lib/Hints_provider_isa.pm		autodie - Hints/inherit helper
 cpan/autodie/t/lib/Hints_test.pm			autodie - Hints test helper
 cpan/autodie/t/lib/lethal.pm				autodie - with a better name
 cpan/autodie/t/lib/my/autodie.pm			autodie - blog_hints.t helper
-cpan/autodie/t/lib/my/pragma.pm
+cpan/autodie/t/lib/my/pragma.pm				Module related to autodie
 cpan/autodie/t/lib/OtherTypes.pm			autodie - Format clobberer helper.
 cpan/autodie/t/lib/pujHa/ghach.pm			autodie - Like a Klingon
 cpan/autodie/t/lib/pujHa/ghach/Dotlh.pm			autodie - With Klingon honour
 cpan/autodie/t/lib/Some/Module.pm			autodie - blog_hints.t helper
 cpan/autodie/t/mkdir.t					autodie - filesystem tests
-cpan/autodie/t/no-default.t
-cpan/autodie/t/no_carp.t
+cpan/autodie/t/no-default.t				Test file related to autodie
+cpan/autodie/t/no_carp.t				Test file related to autodie
 cpan/autodie/t/open.t					autodie - Testing open
-cpan/autodie/t/read.t
+cpan/autodie/t/read.t					Test file related to autodie
 cpan/autodie/t/recv.t					autodie - send/recv tests
 cpan/autodie/t/repeat.t					autodie - repeat autodie leak tests
-cpan/autodie/t/rt-74246.t
+cpan/autodie/t/rt-74246.t				Test file related to autodie
 cpan/autodie/t/scope_leak.t				autodie - file scope leak tests
-cpan/autodie/t/skip.t
+cpan/autodie/t/skip.t					Test file related to autodie
 cpan/autodie/t/string-eval-basic.t			autodie - Basic string eval test
 cpan/autodie/t/string-eval-leak.t			autodie - String eval leak test
 cpan/autodie/t/sysopen.t				autodie - sysopen tests
-cpan/autodie/t/touch_me
 cpan/autodie/t/truncate.t				autodie - File truncation tests
 cpan/autodie/t/unlink.t					autodie - Unlink system tests.
 cpan/autodie/t/user-context.t				autodie - Context changes for usersubs
 cpan/autodie/t/usersub.t				autodie - user subroutine tests
-cpan/autodie/t/utf8_open.t
-cpan/autodie/t/utime.t
+cpan/autodie/t/utf8_open.t				Test file related to autodie
+cpan/autodie/t/utime.t					Test file related to autodie
 cpan/autodie/t/version.t				autodie - versioning tests
-cpan/autodie/t/version_tag.t
+cpan/autodie/t/version_tag.t				Test file related to autodie
 cpan/AutoLoader/lib/AutoLoader.pm	Autoloader base class
 cpan/AutoLoader/lib/AutoSplit.pm	Split up autoload functions
 cpan/AutoLoader/t/01AutoLoader.t	See if AutoLoader works
 cpan/AutoLoader/t/02AutoSplit.t		See if AutoSplit works
-cpan/bignum/gentest/backend.sh
-cpan/bignum/gentest/scope-nested-const.sh
-cpan/bignum/gentest/scope-nested-hex-oct.sh
-cpan/bignum/lib/bigfloat.pm
+cpan/bignum/gentest/backend.sh			bignum
+cpan/bignum/gentest/scope-nested-const.sh	bignum
+cpan/bignum/gentest/scope-nested-hex-oct.sh	bignum
+cpan/bignum/lib/bigfloat.pm			Module related to bignum
 cpan/bignum/lib/bigint.pm			bigint
 cpan/bignum/lib/bignum.pm			bignum
 cpan/bignum/lib/bigrat.pm			bigrat
 cpan/bignum/lib/Math/BigFloat/Trace.pm		bignum tracing
 cpan/bignum/lib/Math/BigInt/Trace.pm		bignum tracing
-cpan/bignum/lib/Math/BigRat/Trace.pm
-cpan/bignum/t/backend-gmp-bigfloat.t
-cpan/bignum/t/backend-gmp-bigint.t
-cpan/bignum/t/backend-gmp-bignum.t
-cpan/bignum/t/backend-gmp-bigrat.t
-cpan/bignum/t/backend-pari-bigfloat.t
-cpan/bignum/t/backend-pari-bigint.t
-cpan/bignum/t/backend-pari-bignum.t
-cpan/bignum/t/backend-pari-bigrat.t
+cpan/bignum/lib/Math/BigRat/Trace.pm		Module related to bignum
+cpan/bignum/t/backend-gmp-bigfloat.t		Test file related to bignum
+cpan/bignum/t/backend-gmp-bigint.t		Test file related to bignum
+cpan/bignum/t/backend-gmp-bignum.t		Test file related to bignum
+cpan/bignum/t/backend-gmp-bigrat.t		Test file related to bignum
+cpan/bignum/t/backend-pari-bigfloat.t		Test file related to bignum
+cpan/bignum/t/backend-pari-bigint.t		Test file related to bignum
+cpan/bignum/t/backend-pari-bignum.t		Test file related to bignum
+cpan/bignum/t/backend-pari-bigrat.t		Test file related to bignum
 cpan/bignum/t/bigexp.t				See if bignum works
-cpan/bignum/t/bigfloat.t
+cpan/bignum/t/bigfloat.t			Test file related to bignum
 cpan/bignum/t/bigint.t				See if bigint works
 cpan/bignum/t/bignum.t				See if bignum works
 cpan/bignum/t/bigrat.t				See if bigrat works
-cpan/bignum/t/const-bigfloat.t
-cpan/bignum/t/const-bigint.t
-cpan/bignum/t/const-bignum.t
-cpan/bignum/t/const-bigrat.t
-cpan/bignum/t/down-mbi-up-mbf.t
-cpan/bignum/t/down-mbi-up-mbr.t
-cpan/bignum/t/down-mbi-up-undef.t
-cpan/bignum/t/down-undef-up-mbf.t
-cpan/bignum/t/e_pi-bigfloat.t
-cpan/bignum/t/e_pi-bigint.t
-cpan/bignum/t/e_pi-bignum.t
-cpan/bignum/t/e_pi-bigrat.t
-cpan/bignum/t/import-bigfloat.t
-cpan/bignum/t/import-bigint.t
-cpan/bignum/t/import-bignum.t
-cpan/bignum/t/import-bigrat.t
+cpan/bignum/t/const-bigfloat.t			Test file related to bignum
+cpan/bignum/t/const-bigint.t			Test file related to bignum
+cpan/bignum/t/const-bignum.t			Test file related to bignum
+cpan/bignum/t/const-bigrat.t			Test file related to bignum
+cpan/bignum/t/down-mbi-up-mbf.t			Test file related to bignum
+cpan/bignum/t/down-mbi-up-mbr.t			Test file related to bignum
+cpan/bignum/t/down-mbi-up-undef.t		Test file related to bignum
+cpan/bignum/t/down-undef-up-mbf.t		Test file related to bignum
+cpan/bignum/t/e_pi-bigfloat.t			Test file related to bignum
+cpan/bignum/t/e_pi-bigint.t			Test file related to bignum
+cpan/bignum/t/e_pi-bignum.t			Test file related to bignum
+cpan/bignum/t/e_pi-bigrat.t			Test file related to bignum
+cpan/bignum/t/import-bigfloat.t			Test file related to bignum
+cpan/bignum/t/import-bigint.t			Test file related to bignum
+cpan/bignum/t/import-bignum.t			Test file related to bignum
+cpan/bignum/t/import-bigrat.t			Test file related to bignum
 cpan/bignum/t/in_effect.t			See if in_effect() works
-cpan/bignum/t/infnan-bigfloat.t
-cpan/bignum/t/infnan-bigint.t
-cpan/bignum/t/infnan-bignum-mbf.t
-cpan/bignum/t/infnan-bignum-mbr.t
-cpan/bignum/t/infnan-bigrat.t
+cpan/bignum/t/infnan-bigfloat.t			Test file related to bignum
+cpan/bignum/t/infnan-bigint.t			Test file related to bignum
+cpan/bignum/t/infnan-bignum-mbf.t		Test file related to bignum
+cpan/bignum/t/infnan-bignum-mbr.t		Test file related to bignum
+cpan/bignum/t/infnan-bigrat.t			Test file related to bignum
 cpan/bignum/t/option_a.t			See if bignum a => X works
-cpan/bignum/t/option_a-bignum.t
-cpan/bignum/t/option_l-bigfloat.t
-cpan/bignum/t/option_l-bigint.t
-cpan/bignum/t/option_l-bignum.t
-cpan/bignum/t/option_l-bigrat.t
+cpan/bignum/t/option_a-bignum.t			Test file related to bignum
+cpan/bignum/t/option_l-bigfloat.t		Test file related to bignum
+cpan/bignum/t/option_l-bigint.t			Test file related to bignum
+cpan/bignum/t/option_l-bignum.t			Test file related to bignum
+cpan/bignum/t/option_l-bigrat.t			Test file related to bignum
 cpan/bignum/t/option_p.t			See if bignum p => X works
-cpan/bignum/t/option_p-bignum.t
+cpan/bignum/t/option_p-bignum.t			Test file related to bignum
 cpan/bignum/t/overrides.t			See if global overrides behave
 cpan/bignum/t/ratopt_a.t			See if bigrat a => X works
-cpan/bignum/t/scope-bigfloat.t
-cpan/bignum/t/scope-bigint.t
-cpan/bignum/t/scope-bignum.t
-cpan/bignum/t/scope-bigrat.t
-cpan/bignum/t/scope-nested-const.t
-cpan/bignum/t/scope-nested-hex-oct.t
+cpan/bignum/t/scope-bigfloat.t			Test file related to bignum
+cpan/bignum/t/scope-bigint.t			Test file related to bignum
+cpan/bignum/t/scope-bignum.t			Test file related to bignum
+cpan/bignum/t/scope-bigrat.t			Test file related to bignum
+cpan/bignum/t/scope-nested-const.t		Test file related to bignum
+cpan/bignum/t/scope-nested-hex-oct.t		Test file related to bignum
 cpan/Compress-Raw-Bzip2/Bzip2.xs			Compress::Raw::Bzip2
 cpan/Compress-Raw-Bzip2/bzip2-src/blocksort.c		Compress::Raw::Bzip2
 cpan/Compress-Raw-Bzip2/bzip2-src/bzip2.patch		Compress::Raw::Bzip2
@@ -732,7 +731,7 @@ cpan/Digest-MD5/t/files.t		See if Digest::MD5 extension works
 cpan/Digest-MD5/t/md5-aaa.t		See if Digest::MD5 extension works
 cpan/Digest-MD5/t/threads.t		See if Digest::MD5 extension works
 cpan/Digest-MD5/t/utf8.t		See if Digest::MD5 extension works
-cpan/Digest-MD5/t/warns.t
+cpan/Digest-MD5/t/warns.t		Test file related to Digest::MD5
 cpan/Digest-MD5/typemap			Digest::MD5 extension
 cpan/Digest-SHA/lib/Digest/SHA.pm	Digest::SHA extension
 cpan/Digest-SHA/Makefile.PL		Digest::SHA Makefile.PL
@@ -1766,19 +1765,19 @@ cpan/PerlIO-via-QuotedPrint/t/critic.t
 cpan/PerlIO-via-QuotedPrint/t/pod.t
 cpan/PerlIO-via-QuotedPrint/t/pod_coverage.t
 cpan/PerlIO-via-QuotedPrint/t/QuotedPrint.t			PerlIO::via::QuotedPrint
-cpan/Pod-Checker/lib/Pod/Checker.pm
-cpan/Pod-Checker/scripts/podchecker.PL
-cpan/Pod-Checker/t/pod/contains_bad_pod.xr
-cpan/Pod-Checker/t/pod/empty.xr
-cpan/Pod-Checker/t/pod/podchkenc.t
-cpan/Pod-Checker/t/pod/podchkenc.xr
-cpan/Pod-Checker/t/pod/podchklink.t
-cpan/Pod-Checker/t/pod/poderrs.t
-cpan/Pod-Checker/t/pod/poderrs.xr
-cpan/Pod-Checker/t/pod/podname.t
-cpan/Pod-Checker/t/pod/selfcheck.t
-cpan/Pod-Checker/t/pod/testcmp.pl
-cpan/Pod-Checker/t/pod/testpchk.pl
+cpan/Pod-Checker/lib/Pod/Checker.pm		Module related to Pod::Checker
+cpan/Pod-Checker/scripts/podchecker.PL		Pod::Checker
+cpan/Pod-Checker/t/pod/contains_bad_pod.xr	Pod::Checker
+cpan/Pod-Checker/t/pod/empty.xr			Pod::Checker
+cpan/Pod-Checker/t/pod/podchkenc.t		Test file related to Pod::Checker
+cpan/Pod-Checker/t/pod/podchkenc.xr		Pod::Checker
+cpan/Pod-Checker/t/pod/podchklink.t		Test file related to Pod::Checker
+cpan/Pod-Checker/t/pod/poderrs.t		Test file related to Pod::Checker
+cpan/Pod-Checker/t/pod/poderrs.xr		Pod::Checker
+cpan/Pod-Checker/t/pod/podname.t		Test file related to Pod::Checker
+cpan/Pod-Checker/t/pod/selfcheck.t		Test file related to Pod::Checker
+cpan/Pod-Checker/t/pod/testcmp.pl		Script related to Pod::Checker
+cpan/Pod-Checker/t/pod/testpchk.pl		Script related to Pod::Checker
 cpan/Pod-Escapes/lib/Pod/Escapes.pm	Pod::Escapes
 cpan/Pod-Escapes/t/01_about_verbose.t	test Pod::Escapes
 cpan/Pod-Escapes/t/10_main.t		test Pod::Escapes
@@ -5714,6 +5713,8 @@ pod/perl5392delta.pod			Perl changes in version 5.39.2
 pod/perl5393delta.pod			Perl changes in version 5.39.3
 pod/perl5394delta.pod			Perl changes in version 5.39.4
 pod/perl5395delta.pod			Perl changes in version 5.39.5
+pod/perl5396delta.pod			Perl changes in version 5.39.6
+pod/perl5397delta.pod			Perl changes in version 5.39.7
 pod/perl561delta.pod			Perl changes in version 5.6.1
 pod/perl56delta.pod			Perl changes in version 5.6
 pod/perl581delta.pod			Perl changes in version 5.8.1
@@ -6489,6 +6490,7 @@ t/porting/header_parser.t		Check that regen/HeaderParser.pm works as expected
 t/porting/known_pod_issues.dat		Data file for porting/podcheck.t
 t/porting/libperl.t			Check libperl.a sanity
 t/porting/maintainers.t			Test that Porting/Maintainers.pl is up to date
+t/porting/makerel.t			Test that files used by Porting/makerel exist
 t/porting/manifest.t			Test that this MANIFEST file is well formed
 t/porting/perlfunc.t			Test that Functions_pm.PL can parse perlfunc.pod
 t/porting/pod_rules.t			Check that various pod lists are consistent

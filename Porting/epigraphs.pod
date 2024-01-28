@@ -17,6 +17,27 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.39.7 - PJ Caldas
+
+L<Announced on 2024-01-20 by Max Maischein|https://www.nntp.perl.org/group/perl.perl5.porters/2024/01/msg267736.html>
+
+  On the screen the image of a frail-looking bigwig from Yale.
+  Between a mahogany desk and a wall filled with thick
+  books of all colors, he warns uus that the underpinnings
+  of the entire planet rely on the internet.
+  Food and water supply, electricity grid, defense systems...
+  "If the failure continues fo a few days, we go back to the
+  nineteen nineties. A couple extra weeks, and we are back to
+  the nineteenth century."
+
+=head2 v5.39.6 - Jasper Fforde
+
+L<Announced on 2023-12-30 by Philippe Bruhat (BooK)|https://www.nntp.perl.org/group/perl.perl5.porters/2023/12/msg267566.html>
+
+"Do I have to talk to insane people?"
+
+"You're a librarian now. I'm afraid it's mandatory."
+
 =head2 v5.39.5 - Epictetus
 
 L<Announced on 2023-11-20 by Karen Etheridge|https://www.nntp.perl.org/group/perl.perl5.porters/2023/11/msg267331.html>
@@ -1080,7 +1101,7 @@ L<Announced on 2019-03-21 by Zak Elep|https://www.nntp.perl.org/group/perl.perl5
 
 L<Announced on 2019-02-20 by Atoomic|https://www.nntp.perl.org/group/perl.perl5.porters/2019/02/msg253750.html>
 
-=head2 v5.29.7 - Edsger W. Dijkstra: "Programming Considered as a Human Activity", IFIP Congress, New York, 1965.
+=head2 v5.29.7 - Edsger W. Dijkstra: "Programming Considered as a Human Activity", IFIP Congress, New York, 1965
 
 L<Announced on 2019-01-20 by Abigail|https://www.nntp.perl.org/group/perl.perl5.porters/2019/01/msg253444.html>
 
@@ -2417,7 +2438,7 @@ L<Announced on 2015-12-21 by David Golden|http://www.nntp.perl.org/group/perl.pe
    that could splinter the Republic forever and usher in
   a new Empire of gradual typing....
 
-=head2 v5.23.5 - utastro!nather (Ed Nather), "The Story of Mel", in net.jokes, May 21, 1983.
+=head2 v5.23.5 - utastro!nather (Ed Nather), "The Story of Mel", in net.jokes, May 21, 1983
 
 L<Announced on 2015-11-20 by Abigail|http://www.nntp.perl.org/group/perl.perl5.porters/2015/11/msg232758.html>
 

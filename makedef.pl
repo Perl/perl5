@@ -120,7 +120,7 @@ if ($define{WIN32_USE_FAKE_OLD_MINGW_LOCALES}) {
 # perl.h logic duplication begins
 
 
-if ($define{USE_ITHREADS}) {
+if ($define{USE_THREADS}) {
     if (!$define{MULTIPLICITY}) {
         $define{MULTIPLICITY} = 1;
     }
@@ -128,7 +128,7 @@ if ($define{USE_ITHREADS}) {
 
 $define{MULTIPLICITY} ||= $define{PERL_IMPLICIT_CONTEXT} ;
 
-if ($define{USE_ITHREADS} && ! $define{WIN32}) {
+if ($define{MULTIPLICITY} && ! $define{WIN32}) {
     $define{USE_REENTRANT_API} = 1;
 }
 
@@ -149,7 +149,7 @@ if (! $define{NO_LOCALE}) {
 
 # https://en.wikipedia.org/wiki/Microsoft_Visual_C%2B%2B#Internal_version_numbering
 my $cctype = $ARGS{CCTYPE} =~ s/MSVC//r;
-if (   $define{USE_ITHREADS}
+if (   $define{USE_THREADS}
     && $define{USE_LOCALE}
     && ! $define{NO_LOCALE_THREADS})
 {
@@ -174,11 +174,13 @@ if ($define{USE_LOCALE_THREADS} && ! $define{NO_THREAD_SAFE_LOCALE}) {
     }
 }
 
-if ($define{USE_POSIX_2008_LOCALE} && $define{HAS_QUERYLOCALE})
+if (    $define{USE_POSIX_2008_LOCALE}
+    && (   $define{HAS_QUERYLOCALE}
+        || (     $Config{cppsymbols} =~ /__GLIBC__/
+            &&   $define{HAS_NL_LANGINFO_L}
+            && ! $define{SETLOCALE_ACCEPTS_ANY_LOCALE_NAME})))
 {
     $define{USE_QUERYLOCALE} = 1;
-
-    # Don't need glibc only code from perl.h
 }
 
 if ($define{USE_POSIX_2008_LOCALE} && ! $define{USE_QUERYLOCALE})

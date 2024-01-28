@@ -2488,6 +2488,11 @@ ATdo	|void	|perl_free	|NN PerlInterpreter *my_perl
 
 Cop	|const char *|PerlIO_context_layers				\
 				|NULLOK const char *mode
+ATdo	|const char *|Perl_langinfo					\
+				|const nl_item item
+ATdo	|const char *|Perl_langinfo8					\
+				|const nl_item item			\
+				|NN utf8ness_t *utf8ness
 p	|int	|PerlLIO_dup2_cloexec					\
 				|int oldfd				\
 				|int newfd
@@ -2761,6 +2766,10 @@ Adipx	|void	|rpp_context	|NN SV **mark				\
 				|U8 gimme				\
 				|SSize_t extra
 Adipx	|void	|rpp_extend	|SSize_t n
+Xopx	|void	|rpp_free_2_	|NN SV * const sv1			\
+				|NN SV * const sv2			\
+				|const U32 rc1				\
+				|const U32 rc2
 Adipx	|void	|rpp_invoke_xs	|NN CV *cv
 Adipx	|bool	|rpp_is_lone	|NN SV *sv
 Cpx	|void	|rpp_obliterate_stack_to				\
@@ -2776,6 +2785,7 @@ Adipx	|SV *	|rpp_pop_1_norc
 Adipx	|void	|rpp_push_1	|NN SV *sv
 Adipx	|void	|rpp_push_2	|NN SV *sv1				\
 				|NN SV *sv2
+Adipx	|void	|rpp_push_IMM	|NN SV *sv
 Adipx	|void	|rpp_push_1_norc|NN SV *sv
 Adipx	|void	|rpp_replace_1_1|NN SV *sv
 Adipx	|void	|rpp_replace_2_1|NN SV *sv
@@ -2789,6 +2799,12 @@ Adipx	|void	|rpp_replace_at_norc					\
 				|NN SV *sv
 Adipx	|void	|rpp_replace_at_norc_NN 				\
 				|NN SV **sp				\
+				|NN SV *sv
+Cipx	|void	|rpp_replace_2_1_COMMON 				\
+				|NN SV *sv
+Adipx	|void	|rpp_replace_1_IMM_NN					\
+				|NN SV *sv
+Adipx	|void	|rpp_replace_2_IMM_NN					\
 				|NN SV *sv
 Adipx	|void	|rpp_replace_1_1_NN					\
 				|NN SV *sv
@@ -2804,6 +2820,7 @@ Adipx	|bool	|rpp_try_AMAGIC_2					\
 Adipx	|void	|rpp_xpush_1	|NN SV *sv
 Adipx	|void	|rpp_xpush_2	|NN SV *sv1				\
 				|NN SV *sv2
+Adipx	|void	|rpp_xpush_IMM	|NN SV *sv
 Adp	|Sighandler_t|rsignal	|int i					\
 				|Sighandler_t t
 : Used in pp_sys.c
@@ -3177,6 +3194,7 @@ CMbp	|IV	|sv_2iv 	|NN SV *sv
 Adp	|IV	|sv_2iv_flags	|NN SV * const sv			\
 				|const I32 flags
 Adip	|IV	|SvIV_nomg	|NN SV *sv
+Adp	|SV *	|sv_langinfo	|const nl_item item
 Adp	|STRLEN |sv_len 	|NULLOK SV * const sv
 Adp	|STRLEN |sv_len_utf8	|NULLOK SV * const sv
 Adp	|STRLEN |sv_len_utf8_nomg					\
@@ -3769,7 +3787,8 @@ Adp	|void	|wrap_op_checker|Optype opcode				\
 p	|void	|write_to_stderr|NN SV *msv
 Xp	|void	|xs_boot_epilog |const SSize_t ax
 
-FTXopv	|SSize_t|xs_handshake	|const U32 key				\
+FTXopv	|Stack_off_t|xs_handshake					\
+				|const U32 key				\
 				|NN void *v_my_perl			\
 				|NN const char *file			\
 				|...
@@ -3844,19 +3863,6 @@ p	|I32	|do_shmio	|I32 optype				\
 				|NN SV **mark				\
 				|NN SV **sp
 #endif /* defined(HAS_MSG) || defined(HAS_SEM) || defined(HAS_SHM) */
-#if defined(HAS_NL_LANGINFO) && defined(PERL_LANGINFO_H)
-ATdo	|const char *|Perl_langinfo					\
-				|const nl_item item
-ATdo	|const char *|Perl_langinfo8					\
-				|const nl_item item			\
-				|NULLOK utf8ness_t *utf8ness
-#else
-ATdo	|const char *|Perl_langinfo					\
-				|const int item
-ATdo	|const char *|Perl_langinfo8					\
-				|const int item 			\
-				|NULLOK utf8ness_t *utf8ness
-#endif
 #if defined(HAS_PIPE)
 Rp	|int	|PerlProc_pipe_cloexec					\
 				|NN int *pipefd
@@ -4069,6 +4075,13 @@ i	|bool	|PerlEnv_putenv |NN char *str
 #endif
 #if defined(PERL_IN_AV_C)
 S	|MAGIC *|get_aux_mg	|NN AV *av
+#endif
+#if defined(PERL_IN_BUILTIN_C) || defined(PERL_IN_OP_C)
+p	|void	|finish_export_lexical
+p	|void	|import_builtin_bundle					\
+				|U16 ver				\
+				|bool do_unimport
+p	|void	|prepare_export_lexical
 #endif
 #if defined(PERL_IN_CLASS_C) || defined(PERL_IN_OP_C)    || \
     defined(PERL_IN_PAD_C)   || defined(PERL_IN_PERLY_C) || \
@@ -4409,14 +4422,6 @@ S	|void	|ints_to_tm	|NN struct tm *my_tm			\
 				|int yday				\
 				|int isdst
 S	|bool	|is_locale_utf8 |NN const char *locale
-S	|char * |strftime8	|NN const char *fmt			\
-				|NN const struct tm *mytm		\
-				|const utf8ness_t fmt_utf8ness		\
-				|NN utf8ness_t *result_utf8ness 	\
-				|const bool came_from_sv
-Sf	|char * |strftime_tm	|NN const char *fmt			\
-				|NN const struct tm *mytm
-# if defined(HAS_LOCALECONV)
 S	|HV *	|my_localeconv	|const int item
 S	|void	|populate_hash_from_C_localeconv			\
 				|NN HV *hv				\
@@ -4424,6 +4429,27 @@ S	|void	|populate_hash_from_C_localeconv			\
 				|const U32 which_mask			\
 				|NN const lconv_offset_t *strings[2]	\
 				|NN const lconv_offset_t *integers[2]
+S	|const char *|save_to_buffer					\
+				|NULLOK const char *string		\
+				|NULLOK char **buf			\
+				|NULLOK Size_t *buf_size
+S	|void	|set_save_buffer_min_size				\
+				|const Size_t min_len			\
+				|NULLOK char **buf			\
+				|NULLOK Size_t *buf_size
+S	|char * |strftime8	|NN const char *fmt			\
+				|NN const struct tm *mytm		\
+				|const utf8ness_t fmt_utf8ness		\
+				|NN utf8ness_t *result_utf8ness 	\
+				|const bool came_from_sv
+Sf	|char * |strftime_tm	|NN const char *fmt			\
+				|NN const struct tm *mytm
+# if defined(HAS_MISSING_LANGINFO_ITEM_) || !defined(HAS_NL_LANGINFO)
+S	|const char *|emulate_langinfo					\
+				|const int item 			\
+				|NN const char *locale			\
+				|NN SV *sv				\
+				|NULLOK utf8ness_t *utf8ness
 # endif
 # if defined(USE_LOCALE)
 S	|const char *|calculate_LC_ALL_string					\
@@ -4431,6 +4457,10 @@ S	|const char *|calculate_LC_ALL_string					\
 				|const calc_LC_ALL_format format		\
 				|const calc_LC_ALL_return returning		\
 				|const line_t caller_line
+S	|const char *|external_call_langinfo				\
+				|const nl_item item			\
+				|NN SV *sv				\
+				|NULLOK utf8ness_t *utf8ness
 RS	|locale_category_index|get_category_index_helper		\
 				|const int category			\
 				|NULLOK bool *success			\
@@ -4456,10 +4486,6 @@ So	|void	|restore_toggled_locale_i				\
 				|const locale_category_index cat_index	\
 				|NULLOK const char *original_locale	\
 				|const line_t caller_line
-S	|const char *|save_to_buffer					\
-				|NULLOK const char *string		\
-				|NULLOK char **buf			\
-				|NULLOK Size_t *buf_size
 Sr	|void	|setlocale_failure_panic_via_i				\
 				|const locale_category_index cat_index	\
 				|NULLOK const char *current		\
@@ -4468,10 +4494,6 @@ Sr	|void	|setlocale_failure_panic_via_i				\
 				|const line_t immediate_caller_line	\
 				|NN const char *higher_caller_file	\
 				|const line_t higher_caller_line
-S	|void	|set_save_buffer_min_size				\
-				|const Size_t min_len			\
-				|NULLOK char **buf			\
-				|NULLOK Size_t *buf_size
 So	|const char *|toggle_locale_i					\
 				|const locale_category_index cat_index	\
 				|NN const char *new_locale		\
@@ -4483,21 +4505,12 @@ RS	|char * |my_setlocale_debug_string_i				\
 				|NULLOK const char *retval		\
 				|const line_t line
 #   endif
-#   if defined(HAS_NL_LANGINFO) || defined(HAS_NL_LANGINFO_L)
-S	|const char *|my_langinfo_i					\
+#   if defined(HAS_NL_LANGINFO)
+S	|const char *|langinfo_sv_i					\
 				|const nl_item item			\
-				|const locale_category_index cat_index	\
+				|locale_category_index cat_index	\
 				|NN const char *locale			\
-				|NN char **retbufp			\
-				|NULLOK Size_t *retbuf_sizep		\
-				|NULLOK utf8ness_t *utf8ness
-#   else
-S	|const char *|my_langinfo_i					\
-				|const int item 			\
-				|const locale_category_index cat_index	\
-				|NN const char *locale			\
-				|NN char **retbufp			\
-				|NULLOK Size_t *retbuf_sizep		\
+				|NN SV *sv				\
 				|NULLOK utf8ness_t *utf8ness
 #   endif
 #   if defined(LC_ALL)

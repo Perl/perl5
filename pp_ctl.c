@@ -76,7 +76,7 @@ PP(pp_wantarray)
     }
 
   ret:
-    rpp_xpush_1(sv);
+    rpp_xpush_IMM(sv);
     return NORMAL;
 }
 
@@ -135,7 +135,7 @@ PP(pp_regcomp)
            (e.g. $' =~ /$re/ while foo; see bug 70764).  So we must call
            get-magic now before we replace the regexp. Hopefully this hack can
            be replaced with the approach described at
-           http://www.nntp.perl.org/group/perl.perl5.porters/2007/03/msg122415.html
+           https://www.nntp.perl.org/group/perl.perl5.porters/2007/03/msg122415.html
            some day. */
         if (pm->op_type == OP_MATCH) {
             SV *lhs;
@@ -191,26 +191,28 @@ PP(pp_regcomp)
 #if defined(USE_ITHREADS)
   finish:
 #endif
-    rpp_popfree_to(args - 1);
+    rpp_popfree_to_NN(args - 1);
     return NORMAL;
 }
 
 
-/* how many stack arguments a substcont op expects */
-#ifdef PERL_RC_STACK
-STATIC I32
-S_substcont_argcount(pTHX)
-{
-    PERL_CONTEXT *cx = CX_CUR();
-   /* the scalar result of the expression in s//expression/ is on the
-    * stack only on iterations 2+ */
-    return cx->sb_iters ? 1 : 0;
-}
-#endif
+/* s/.../expr/e is executed in order as if written as
+ *
+ * pp_subst();
+ * while (pp_substcont()) {
+ *     expr;
+ * }
+ *
+ * Only on the second and later calls to pp_substcont() is there a scalar
+ * on the stack holding the value of expr.
+ *
+ * Note that pp_subst() leaves its original 0-2 args on the stack to
+ * avoid them being prematurely freed. It is pp_substcont()'s
+ * responsibility to pop them after the last iteration.
+ */
 
-PP_wrapped(pp_substcont, S_substcont_argcount(aTHX), 0)
+PP(pp_substcont)
 {
-    dSP;
     PERL_CONTEXT *cx = CX_CUR();
     PMOP * const pm = cPMOPx(cLOGOP->op_other);
     SV * const dstr = cx->sb_dstr;
@@ -232,14 +234,16 @@ PP_wrapped(pp_substcont, S_substcont_argcount(aTHX), 0)
     rxres_restore(&cx->sb_rxres, rx);
 
     if (cx->sb_iters++) {
+        /* second+ time round. Result is on stack */
         const SSize_t saviters = cx->sb_iters;
         if (cx->sb_iters > cx->sb_maxiters)
             DIE(aTHX_ "Substitution loop");
 
-        SvGETMAGIC(TOPs); /* possibly clear taint on $1 etc: #67962 */
+        SvGETMAGIC(*PL_stack_sp); /* possibly clear taint on $1 etc: #67962 */
 
         /* See "how taint works": pp_subst() in pp_hot.c */
-        sv_catsv_nomg(dstr, POPs);
+        sv_catsv_nomg(dstr, *PL_stack_sp);
+        rpp_popfree_1_NN();
         if (UNLIKELY(TAINT_get))
             cx->sb_rxtainted |= SUBST_TAINT_REPL;
         if (CxONCE(cx) || s < orig ||
@@ -247,7 +251,9 @@ PP_wrapped(pp_substcont, S_substcont_argcount(aTHX), 0)
                              (s == m), cx->sb_targ, NULL,
                     (REXEC_IGNOREPOS|REXEC_NOT_FIRST|REXEC_FAIL_ON_UNDERFLOW)))
         {
+            /* no more iterations. Push return value etc */
             SV *targ = cx->sb_targ;
+            SV *retval;
 
             assert(cx->sb_strend >= s);
             if(cx->sb_strend > s) {
@@ -260,7 +266,7 @@ PP_wrapped(pp_substcont, S_substcont_argcount(aTHX), 0)
                 cx->sb_rxtainted |= SUBST_TAINT_PAT;
 
             if (pm->op_pmflags & PMf_NONDESTRUCT) {
-                PUSHs(dstr);
+                retval = dstr;
                 /* From here on down we're using the copy, and leaving the
                    original untouched.  */
                 targ = dstr;
@@ -277,10 +283,20 @@ PP_wrapped(pp_substcont, S_substcont_argcount(aTHX), 0)
                 SvPV_set(dstr, NULL);
 
                 PL_tainted = 0;
-                mPUSHi(saviters - 1);
+                retval = sv_newmortal();
+                sv_setiv(retval, saviters - 1);
 
                 (void)SvPOK_only_UTF8(targ);
             }
+
+            /* pop the original args (if any) to pp_subst(),
+             * then push the result */
+            if (pm->op_pmflags & PMf_CONST)
+                rpp_popfree_1_NN(); /* pop replacement string */
+            if (pm->op_flags & OPf_STACKED)
+                rpp_replace_1_1_NN(retval); /* pop LHS of =~ */
+            else
+                rpp_push_1(retval);
 
             /* update the taint state of various variables in
              * preparation for final exit.
@@ -295,7 +311,7 @@ PP_wrapped(pp_substcont, S_substcont_argcount(aTHX), 0)
                 if (!(cx->sb_rxtainted & SUBST_TAINT_BOOLRET)
                     && (cx->sb_rxtainted & (SUBST_TAINT_STR|SUBST_TAINT_PAT))
                 )
-                    SvTAINTED_on(TOPs);  /* taint return value */
+                    SvTAINTED_on(retval);  /* taint return value */
                 /* needed for mg_set below */
                 TAINT_set(
                     cBOOL(cx->sb_rxtainted &
@@ -330,11 +346,15 @@ PP_wrapped(pp_substcont, S_substcont_argcount(aTHX), 0)
             CX_POP(cx);
 
             PERL_ASYNC_CHECK();
-            RETURNOP(pm->op_next);
+            return pm->op_next;
             NOT_REACHED; /* NOTREACHED */
         }
         cx->sb_iters = saviters;
     }
+
+    /* First iteration. The substitution expression hasn;'t been executed
+     * this time */
+
     if (RX_MATCH_COPIED(rx) && RX_SUBBEG(rx) != orig) {
         m = s;
         s = orig;
@@ -390,7 +410,7 @@ PP_wrapped(pp_substcont, S_substcont_argcount(aTHX), 0)
     }
     rxres_save(&cx->sb_rxres, rx);
     PL_curpm = pm;
-    RETURNOP(pm->op_pmstashstartu.op_pmreplstart);
+    return pm->op_pmstashstartu.op_pmreplstart;
 }
 
 
@@ -1198,7 +1218,7 @@ PP(pp_mapwhile)
                      * A simple copy would suffice */
                     *dst-- = sv;
                     SvREFCNT_inc_simple_void_NN(sv);
-                    rpp_popfree_1();
+                    rpp_popfree_1_NN();
                 }
                 else {
                     *dst-- = sv;
@@ -2026,13 +2046,8 @@ Perl_die_unwind(pTHX_ SV *msv)
 
             /* return false to the caller of eval */
             gimme = cx->blk_gimme;
-            if (gimme == G_SCALAR) {
-                rpp_extend(1);
-                if (rpp_stack_is_rc())
-                    rpp_push_1(&PL_sv_undef);
-                else
-                    *++PL_stack_sp = &PL_sv_undef;
-            }
+            if (gimme == G_SCALAR)
+                rpp_xpush_IMM(&PL_sv_undef);
 
             restartjmpenv = cx->blk_eval.cur_top_env;
             restartop     = cx->blk_eval.retop;
@@ -2083,7 +2098,7 @@ PP(pp_xor)
 {
     SV *left  = PL_stack_sp[0];
     SV *right = PL_stack_sp[-1];
-    rpp_replace_2_1(SvTRUE_NN(left) != SvTRUE_NN(right)
+    rpp_replace_2_IMM_NN(SvTRUE_NN(left) != SvTRUE_NN(right)
                     ? &PL_sv_yes
                     : &PL_sv_no);
     return NORMAL;
@@ -2347,7 +2362,7 @@ PP(pp_dbstate)
 {
     PL_curcop = (COP*)PL_op;
     TAINT_NOT;		/* Each statement is presumed innocent */
-    rpp_popfree_to(PL_stack_base + CX_CUR()->blk_oldsp);
+    rpp_popfree_to_NN(PL_stack_base + CX_CUR()->blk_oldsp);
     FREETMPS;
 
     PERL_ASYNC_CHECK();
@@ -2455,7 +2470,7 @@ PP(pp_leave)
     gimme = cx->blk_gimme;
 
     if (gimme == G_VOID)
-        rpp_popfree_to(oldsp);
+        rpp_popfree_to_NN(oldsp);
     else
         leave_adjust_stacks(oldsp, oldsp, gimme,
                                 PL_op->op_private & OPpLVALUE ? 3 : 1);
@@ -2563,7 +2578,7 @@ PP(pp_enteriter)
                     DIE(aTHX_ "Range iterator outside integer range");
                 cx->blk_loop.state_u.lazyiv.cur = SvIV_nomg(sv);
                 cx->blk_loop.state_u.lazyiv.end = SvIV_nomg(right);
-                rpp_popfree_2();
+                rpp_popfree_2_NN();
             }
             else {
                 cx->cx_type |= CXt_LOOP_LAZYSV;
@@ -2574,7 +2589,7 @@ PP(pp_enteriter)
                  * stack to the CX .end entry, so no SvREFCNT_dec() needed */
                 (void)rpp_pop_1_norc();
 
-                rpp_popfree_1(); /* free the (now copied) start SV */
+                rpp_popfree_1_NN(); /* free the (now copied) start SV */
                 (void) SvPV_force_nolen(cx->blk_loop.state_u.lazysv.cur);
                 /* This will do the upgrade to SVt_PV, and warn if the value
                    is uninitialised.  */
@@ -2599,7 +2614,8 @@ PP(pp_enteriter)
                 AvFILL(cx->blk_loop.state_u.ary.ary) + 1 :
                 -1;
         }
-        /* rpp_extend(1) not needed in this branch because we just did POPs */
+        /* rpp_extend(1) not needed in this branch
+         * because we just popped 1 item */
     }
     else { /* iterating over items on the stack */
         cx->cx_type |= CXt_LOOP_LIST;
@@ -2644,7 +2660,7 @@ PP(pp_leaveloop)
     gimme = cx->blk_gimme;
 
     if (gimme == G_VOID)
-        rpp_popfree_to(base);
+        rpp_popfree_to_NN(base);
     else
         leave_adjust_stacks(oldsp, base, gimme,
                                 PL_op->op_private & OPpLVALUE ? 3 : 1);
@@ -2689,7 +2705,7 @@ PP(pp_leavesublv)
     oldsp = PL_stack_base + cx->blk_oldsp; /* last arg of previous frame */
 
     if (gimme == G_VOID)
-        rpp_popfree_to(oldsp);
+        rpp_popfree_to_NN(oldsp);
     else {
         U8   lval    = CxLVAL(cx);
         bool is_lval = (lval && !(lval & OPpENTERSUB_INARGS));
@@ -2724,7 +2740,7 @@ PP(pp_leavesublv)
                 SvGETMAGIC(*PL_stack_sp);
                 if (!SvOK(*PL_stack_sp)) {
                     SV *sv = vivify_ref(*PL_stack_sp, CxLVAL(cx) & OPpDEREF);
-                    rpp_replace_1_1(sv);
+                    rpp_replace_1_1_NN(sv);
                 }
             }
         }
@@ -2813,7 +2829,7 @@ PP(pp_return)
                     && !(SvFLAGS(sv) & (SVs_TEMP|SVs_PADTMP))
                 )
 #ifdef PERL_RC_STACK
-                    rpp_replace_1_1(newSVsv(sv));
+                    rpp_replace_at_norc(PL_stack_sp, newSVsv(sv));
 #else
                     *PL_stack_sp = sv_mortalcopy(sv);
 #endif
@@ -2882,7 +2898,7 @@ PP(pp_return)
                 }
             }
             else
-                rpp_popfree_to(oldsp);
+                rpp_popfree_to_NN(oldsp);
         }
     }
 
@@ -2946,7 +2962,7 @@ S_unwind_loop(pTHX)
                                                     label_len,
                                                     label_flags | SVs_TEMP)));
         if (PL_op->op_flags & OPf_STACKED)
-            rpp_popfree_1();
+            rpp_popfree_1_NN();
     }
 
     if (cxix < cxstack_ix) {
@@ -2973,7 +2989,7 @@ PP(pp_last)
     cx = S_unwind_loop(aTHX);
 
     assert(CxTYPE_is_LOOP(cx));
-    rpp_popfree_to(PL_stack_base
+    rpp_popfree_to_NN(PL_stack_base
                 + (CxTYPE(cx) == CXt_LOOP_LIST
                     ?  cx->blk_loop.state_u.stack.basesp
                     : cx->blk_oldsp
@@ -3218,7 +3234,7 @@ PP(pp_goto)
             /* First do some returnish stuff. */
 
             SvREFCNT_inc_simple_void(cv); /* avoid premature free during unwind */
-            rpp_popfree_1(); /* safe to free original sv now */
+            rpp_popfree_1_NN(); /* safe to free original sv now */
 
             FREETMPS;
             if (cxix < cxstack_ix) {
@@ -3436,7 +3452,7 @@ PP(pp_goto)
             /* avoid premature free of label before popping it off stack */
             SvREFCNT_inc_NN(sv);
             sv_2mortal(sv);
-            rpp_popfree_1();
+            rpp_popfree_1_NN();
             label       = SvPV_nomg_const(sv, label_len);
             label_flags = SvUTF8(sv);
         }
@@ -4200,7 +4216,7 @@ S_doeval_compile(pTHX_ U8 gimme, CV* outside, U32 seq, HV *hh)
     }
 
     CvDEPTH(evalcv) = 1;
-    rpp_popfree_to(PL_stack_base + POPMARK); /* pop original mark */
+    rpp_popfree_to_NN(PL_stack_base + POPMARK); /* pop original mark */
     PL_op = saveop;			/* The caller may need it. */
     PL_parser->lex_state = LEX_NOTPARSING;	/* $^S needs this. */
 
@@ -4351,7 +4367,7 @@ static OP *
 S_require_version(pTHX_ SV *sv)
 {
     sv = sv_2mortal(new_version(sv));
-    rpp_popfree_1();
+    rpp_popfree_1_NN();
 
     if (!Perl_sv_derived_from_pvn(aTHX_ PL_patchlevel, STR_WITH_LEN("version"), 0))
         upg_version(PL_patchlevel, TRUE);
@@ -4406,7 +4422,7 @@ S_require_version(pTHX_ SV *sv)
         }
     }
 
-    *++PL_stack_sp = &PL_sv_yes;
+    rpp_push_IMM(&PL_sv_yes);
     return NORMAL;
 }
 
@@ -4473,7 +4489,7 @@ S_require_file(pTHX_ SV *sv)
             /* the RC++ preserves it across the popping and/or FREETMPS
              * below */
             post_hook__require__before_sv = SvREFCNT_inc_simple_NN(rsv);
-            rpp_popfree_1();
+            rpp_popfree_1_NN();
         }
         if (!sv_streq(name_sv,sv)) {
             /* they modified the name argument, so do some sleight of hand */
@@ -4510,7 +4526,7 @@ S_require_file(pTHX_ SV *sv)
                 if (svp_cached &&
                     (SvGETMAGIC(*svp_cached), SvOK(*svp_cached)))
                 {
-                    rpp_replace_1_1(&PL_sv_yes);
+                    rpp_replace_1_IMM_NN(&PL_sv_yes);
                     return NORMAL;
                 }
         }
@@ -4519,7 +4535,7 @@ S_require_file(pTHX_ SV *sv)
     if (!IS_SAFE_PATHNAME(name, len, op_name)) {
         if (!op_is_require) {
             CLEAR_ERRSV();
-            rpp_replace_1_1(&PL_sv_undef);
+            rpp_replace_1_IMM_NN(&PL_sv_undef);
             return NORMAL;
         }
         DIE(aTHX_ "Can't locate %s:   %s",
@@ -4562,7 +4578,7 @@ S_require_file(pTHX_ SV *sv)
             if (!svp_cached)
                 SvGETMAGIC(*svp);
             if (SvOK(*svp)) {
-                rpp_replace_1_1(&PL_sv_yes);
+                rpp_replace_1_IMM_NN(&PL_sv_yes);
                 return NORMAL;
             }
             else
@@ -4874,7 +4890,7 @@ S_require_file(pTHX_ SV *sv)
                                                   PERL_SCRIPT_MODE);
                         }
                       done_hook:
-                        rpp_popfree_to(base - 1);
+                        rpp_popfree_to_NN(base - 1);
                     } else {
                         SV *errsv= ERRSV;
                         if (SvTRUE(errsv) && !SvROK(errsv)) {
@@ -5147,14 +5163,14 @@ S_require_file(pTHX_ SV *sv)
             }
 #endif
             CLEAR_ERRSV();
-            rpp_replace_1_1(&PL_sv_undef);
+            rpp_replace_1_IMM_NN(&PL_sv_undef);
             return NORMAL;
         }
     }
     else
         SETERRNO(0, SS_NORMAL);
 
-    rpp_popfree_1(); /* finished with sv now */
+    rpp_popfree_1_NN(); /* finished with sv now */
 
     /* Update %INC. Assume success here to prevent recursive requirement. */
     /* name is never assigned to again, so len is still strlen(name)  */
@@ -5330,7 +5346,7 @@ PP(pp_entereval)
                         )
              );
 
-    rpp_popfree_1(); /* can free sv now */
+    rpp_popfree_1_NN(); /* can free sv now */
 
     /* switch to eval mode */
 
@@ -5508,11 +5524,8 @@ PP(pp_leaveeval)
         /* make sure that we use a standard return when feature 'module_load'
          * is enabled. Returns from require are problematic (consider what happens
          * when it is called twice) */
-        if (gimme == G_SCALAR) {
-            /* this following is an optimization of POPs()/PUSHs().
-             * and does the same thing with less bookkeeping */
-            *PL_stack_sp = &PL_sv_yes;
-        }
+        if (gimme == G_SCALAR)
+            rpp_replace_1_IMM_NN(&PL_sv_yes);
         assert(gimme == G_VOID || gimme == G_SCALAR);
         failed = 0;
     }
@@ -5664,7 +5677,7 @@ PP(pp_leavetry)
     gimme = cx->blk_gimme;
 
     if (gimme == G_VOID) {
-        rpp_popfree_to(oldsp);
+        rpp_popfree_to_NN(oldsp);
         /* free now to avoid late-called destructors clobbering $@ */
         FREETMPS;
     }
@@ -5708,7 +5721,7 @@ PP(pp_leavegiven)
     gimme = cx->blk_gimme;
 
     if (gimme == G_VOID)
-        rpp_popfree_to(oldsp);
+        rpp_popfree_to_NN(oldsp);
     else
         leave_adjust_stacks(oldsp, oldsp, gimme, 1);
 
@@ -5747,7 +5760,7 @@ S_matcher_matches_sv(pTHX_ PMOP *matcher, SV *sv)
     rpp_xpush_1(sv);
     (void) Perl_pp_match(aTHX);
     result = SvTRUEx(*PL_stack_sp);
-    rpp_popfree_1();
+    rpp_popfree_1_NN();
     return result;
 }
 
@@ -5801,7 +5814,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other, const bool copied)
 
         tmpsv = amagic_call(d, e, smart_amg, AMGf_noleft);
         if (tmpsv) {
-            rpp_replace_2_1(tmpsv);
+            rpp_replace_2_1_NN(tmpsv);
             return NORMAL;
         }
         DEBUG_M(Perl_deb(aTHX_ "        failed to run overload method; continuing...\n"));
@@ -5845,7 +5858,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other, const bool copied)
                 rpp_xpush_1(hv_iterkeysv(he));
                 (void)call_sv(e, G_SCALAR);
                 andedresults = SvTRUEx(PL_stack_sp[0]) && andedresults;
-                rpp_popfree_1();
+                rpp_popfree_1_NN();
                 FREETMPS;
                 LEAVE_with_name("smartmatch_hash_key_test");
             }
@@ -5873,7 +5886,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other, const bool copied)
                     rpp_xpush_1(*svp);
                 (void)call_sv(e, G_SCALAR);
                 andedresults = SvTRUEx(PL_stack_sp[0]) && andedresults;
-                rpp_popfree_1();
+                rpp_popfree_1_NN();
                 FREETMPS;
                 LEAVE_with_name("smartmatch_array_elem_test");
             }
@@ -6076,7 +6089,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other, const bool copied)
                         DEBUG_M(Perl_deb(aTHX_ "        recursion finished\n"));
                         
                          bool ok = SvTRUEx(PL_stack_sp[0]);
-                         rpp_popfree_1();
+                         rpp_popfree_1_NN();
                         if (!ok)
                             goto ret_no;
                     }
@@ -6136,7 +6149,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other, const bool copied)
                     (void) do_smartmatch(NULL, NULL, 1);
                     DEBUG_M(Perl_deb(aTHX_ "        recursion finished\n"));
                     bool ok = SvTRUEx(PL_stack_sp[0]);
-                    rpp_popfree_1();
+                    rpp_popfree_1_NN();
                     if (ok)
                         goto ret_yes;
                 }
@@ -6177,7 +6190,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other, const bool copied)
         DEBUG_M(Perl_deb(aTHX_ "        attempting overload\n"));
         tmpsv = amagic_call(d, e, smart_amg, AMGf_noright);
         if (tmpsv) {
-            rpp_replace_2_1(tmpsv);
+            rpp_replace_2_1_NN(tmpsv);
             return NORMAL;
         }
 
@@ -6204,7 +6217,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other, const bool copied)
         else
             (void) Perl_pp_eq(aTHX);
         bool ok = SvTRUEx(PL_stack_sp[0]);
-        rpp_popfree_1();
+        rpp_popfree_1_NN();
         if (ok)
             goto ret_yes;
         else
@@ -6217,7 +6230,7 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other, const bool copied)
     Perl_pp_seq(aTHX);
     {
         bool ok = SvTRUEx(PL_stack_sp[0]);
-        rpp_popfree_1();
+        rpp_popfree_1_NN();
         if (ok)
             goto ret_yes;
         else
@@ -6225,11 +6238,11 @@ S_do_smartmatch(pTHX_ HV *seen_this, HV *seen_other, const bool copied)
     }
 
   ret_no:
-    rpp_replace_2_1(&PL_sv_no);
+    rpp_replace_2_IMM_NN(&PL_sv_no);
     return NORMAL;
 
   ret_yes:
-    rpp_replace_2_1(&PL_sv_yes);
+    rpp_replace_2_IMM_NN(&PL_sv_yes);
     return NORMAL;
 }
 
@@ -6246,10 +6259,10 @@ PP(pp_enterwhen)
     */
     if (!(PL_op->op_flags & OPf_SPECIAL)) { /* SPECIAL implies no condition */
         bool tr = SvTRUEx(*PL_stack_sp);
-        rpp_popfree_1();
+        rpp_popfree_1_NN();
         if (!tr) {
             if (gimme == G_SCALAR)
-                *++PL_stack_sp = &PL_sv_undef;
+                rpp_push_IMM(&PL_sv_undef);
             return cLOGOP->op_other->op_next;
         }
     }
@@ -6279,7 +6292,7 @@ PP(pp_leavewhen)
 
     oldsp = PL_stack_base + cx->blk_oldsp;
     if (gimme == G_VOID)
-        rpp_popfree_to(oldsp);
+        rpp_popfree_to_NN(oldsp);
     else
         leave_adjust_stacks(oldsp, oldsp, gimme, 1);
 
@@ -6319,7 +6332,7 @@ PP(pp_continue)
     
     cx = CX_CUR();
     assert(CxTYPE(cx) == CXt_WHEN);
-    rpp_popfree_to(PL_stack_base + cx->blk_oldsp);
+    rpp_popfree_to_NN(PL_stack_base + cx->blk_oldsp);
     CX_LEAVE_SCOPE(cx);
     cx_popwhen(cx);
     cx_popblock(cx);
@@ -6347,7 +6360,7 @@ PP(pp_break)
 
     /* Restore the sp at the time we entered the given block */
     cx = CX_CUR();
-    rpp_popfree_to(PL_stack_base + cx->blk_oldsp);
+    rpp_popfree_to_NN(PL_stack_base + cx->blk_oldsp);
 
     return cx->blk_givwhen.leave_op;
 }
@@ -6383,7 +6396,7 @@ _invoke_defer_block(pTHX_ U8 type, void *_arg)
          * ref-counted */
 #ifdef PERL_RC_STACK
         if (rpp_stack_is_rc())
-            rpp_popfree_to(PL_stack_base + cx->blk_oldsp);
+            rpp_popfree_to_NN(PL_stack_base + cx->blk_oldsp);
         else
 #endif
             PL_stack_sp = PL_stack_base + cx->blk_oldsp;

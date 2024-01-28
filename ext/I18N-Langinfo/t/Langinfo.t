@@ -14,8 +14,21 @@ my @constants = qw(ABDAY_1 DAY_1 ABMON_1 RADIXCHAR AM_STR THOUSEP D_T_FMT
                    D_FMT T_FMT);
 push @constants, @times;
 
-my %want = (    RADIXCHAR => ".",
-                THOUSEP	  => "",
+# The values a C locale should return
+my %want = (    RADIXCHAR => qr/ ^ \. $ /x,
+                THOUSEP	  => qr/ ^$ /x,
+
+                # Can be empty; otherwise first character must be one of
+                # these.  In the C locale, there is nothing after the first
+                # character.
+                CRNCYSTR  => qr/ ^ [+-.]? $ /x,
+
+                _NL_ADDRESS_COUNTRY_NUM => qr/^ 0 $/x,
+                _NL_IDENTIFICATION_TERRITORY => qr/ ^ ISO $/x,
+                _NL_MEASUREMENT_MEASUREMENT => qr/ ^ [01] $/x,
+                _NL_PAPER_HEIGHT => qr/^ \d+ $/x,
+                _NL_NAME_NAME_GEN => qr/ .* /x,
+                _NL_TELEPHONE_INT_SELECT => qr/ .* /x,
            );
 
 # Abbreviated and full are swapped in many locales in early netbsd.  Skip
@@ -23,10 +36,10 @@ my %want = (    RADIXCHAR => ".",
 if (   $Config{osname} !~ / netbsd /ix
     || $Config{osvers} !~ / ^ [1-6] \. /x)
 {
-    $want{ABDAY_1} = "Sun";
-    $want{DAY_1}   = "Sunday";
-    $want{ABMON_1} = "Jan";
-    $want{MON_1}   = "January";
+    $want{ABDAY_1} = qr/ ^ Sun $ /x;
+    $want{DAY_1}   = qr/ ^ Sunday $ /x;
+    $want{ABMON_1} = qr/ ^ Jan $ /x;
+    $want{MON_1}   = qr/ ^ January $ /x;
 }
 
 sub disp_str ($) {
@@ -139,7 +152,51 @@ sub check_utf8_validity($$$) {
 my @want = sort keys %want;
 my @illegal_utf8;
 
-use_ok('I18N::Langinfo', 'langinfo', @constants, 'CRNCYSTR');
+my %extra_items = (
+                    _NL_ADDRESS_POSTAL_FMT => 'LC_ADDRESS',
+                    _NL_ADDRESS_COUNTRY_NAME => 'LC_ADDRESS',
+                    _NL_ADDRESS_COUNTRY_POST => 'LC_ADDRESS',
+                    _NL_ADDRESS_COUNTRY_AB2 => 'LC_ADDRESS',
+                    _NL_ADDRESS_COUNTRY_AB3 => 'LC_ADDRESS',
+                    _NL_ADDRESS_COUNTRY_CAR => 'LC_ADDRESS',
+                    _NL_ADDRESS_COUNTRY_NUM => 'LC_ADDRESS',
+                    _NL_ADDRESS_COUNTRY_ISBN => 'LC_ADDRESS',
+                    _NL_ADDRESS_LANG_NAME => 'LC_ADDRESS',
+                    _NL_ADDRESS_LANG_AB => 'LC_ADDRESS',
+                    _NL_ADDRESS_LANG_TERM => 'LC_ADDRESS',
+                    _NL_ADDRESS_LANG_LIB => 'LC_ADDRESS',
+                    _NL_IDENTIFICATION_TITLE => 'LC_IDENTIFICATION',
+                    _NL_IDENTIFICATION_SOURCE => 'LC_IDENTIFICATION',
+                    _NL_IDENTIFICATION_ADDRESS => 'LC_IDENTIFICATION',
+                    _NL_IDENTIFICATION_CONTACT => 'LC_IDENTIFICATION',
+                    _NL_IDENTIFICATION_EMAIL => 'LC_IDENTIFICATION',
+                    _NL_IDENTIFICATION_TEL => 'LC_IDENTIFICATION',
+                    _NL_IDENTIFICATION_FAX => 'LC_IDENTIFICATION',
+                    _NL_IDENTIFICATION_LANGUAGE => 'LC_IDENTIFICATION',
+                    _NL_IDENTIFICATION_TERRITORY => 'LC_IDENTIFICATION',
+                    _NL_IDENTIFICATION_AUDIENCE => 'LC_IDENTIFICATION',
+                    _NL_IDENTIFICATION_APPLICATION => 'LC_IDENTIFICATION',
+                    _NL_IDENTIFICATION_ABBREVIATION => 'LC_IDENTIFICATION',
+                    _NL_IDENTIFICATION_REVISION => 'LC_IDENTIFICATION',
+                    _NL_IDENTIFICATION_DATE => 'LC_IDENTIFICATION',
+                    _NL_IDENTIFICATION_CATEGORY => 'LC_IDENTIFICATION',
+                    _NL_MEASUREMENT_MEASUREMENT => 'LC_MEASUREMENT',
+                    _NL_NAME_NAME_FMT => 'LC_NAME',
+                    _NL_NAME_NAME_GEN => 'LC_NAME',
+                    _NL_NAME_NAME_MR => 'LC_NAME',
+                    _NL_NAME_NAME_MRS => 'LC_NAME',
+                    _NL_NAME_NAME_MISS => 'LC_NAME',
+                    _NL_NAME_NAME_MS => 'LC_NAME',
+                    _NL_PAPER_HEIGHT => 'LC_PAPER',
+                    _NL_PAPER_WIDTH => 'LC_PAPER',
+                    _NL_TELEPHONE_TEL_INT_FMT => 'LC_TELEPHONE',
+                    _NL_TELEPHONE_TEL_DOM_FMT => 'LC_TELEPHONE',
+                    _NL_TELEPHONE_INT_SELECT => 'LC_TELEPHONE',
+                    _NL_TELEPHONE_INT_PREFIX => 'LC_TELEPHONE',
+                );
+
+use_ok('I18N::Langinfo', 'langinfo', @constants, 'CRNCYSTR',
+                          keys %extra_items);
 
 use POSIX;
 
@@ -169,7 +226,7 @@ for my $i (1..@want) {
     SKIP: {
         skip "$try not defined", 1, if $@;
         no strict 'refs';
-        is (langinfo(&$try), $want{$try}, "$try => '$want{$try}'");
+        like (langinfo(&$try), $want{$try}, "$try => '$want{$try}'");
     }
 }
 

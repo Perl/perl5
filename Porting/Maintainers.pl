@@ -146,7 +146,8 @@ our %Modules = (
     },
 
     'autodie' => {
-        'DISTRIBUTION' => 'TODDR/autodie-2.36.tar.gz',
+        'DISTRIBUTION' => 'TODDR/autodie-2.37.tar.gz',
+        'SYNCINFO'     => 'jkeenan on Sat Dec 30 15:24:00 2023',
         'FILES'        => q[cpan/autodie],
         'EXCLUDED'     => [
             qr{benchmarks},
@@ -191,7 +192,8 @@ our %Modules = (
     },
 
     'bignum' => {
-        'DISTRIBUTION' => 'PJACKLAM/bignum-0.66.tar.gz',
+        'DISTRIBUTION' => 'PJACKLAM/bignum-0.67.tar.gz',
+        'SYNCINFO'     => 'jkeenan on Sat Dec 30 15:32:11 2023',
         'FILES'        => q[cpan/bignum],
         'EXCLUDED'     => [
             qr{^xt/},
@@ -373,7 +375,8 @@ our %Modules = (
     },
 
     'Digest::MD5' => {
-        'DISTRIBUTION' => 'TODDR/Digest-MD5-2.58.tar.gz',
+        'DISTRIBUTION' => 'TODDR/Digest-MD5-2.59.tar.gz',
+        'SYNCINFO'     => 'root on Sat Dec 30 21:42:47 2023',
         'FILES'        => q[cpan/Digest-MD5],
         'EXCLUDED'     => [ 'rfc1321.txt', 'bin/md5sum.pl' ],
         'CUSTOMIZED'   => [
@@ -435,7 +438,7 @@ our %Modules = (
     },
 
     'Exporter' => {
-        'DISTRIBUTION' => 'TODDR/Exporter-5.77.tar.gz',
+        'DISTRIBUTION' => 'TODDR/Exporter-5.78.tar.gz',
         'FILES'        => q[dist/Exporter],
         'EXCLUDED' => [
             qw( t/pod.t
@@ -607,7 +610,7 @@ our %Modules = (
     },
 
     'FindBin' => {
-        'DISTRIBUTION' => 'TODDR/FindBin-1.53.tar.gz',
+        'DISTRIBUTION' => 'TODDR/FindBin-1.54.tar.gz',
         'FILES'        => q[dist/FindBin],
     },
 
@@ -655,7 +658,7 @@ our %Modules = (
     },
 
     'IO' => {
-        'DISTRIBUTION' => 'TODDR/IO-1.51.tar.gz',
+        'DISTRIBUTION' => 'TODDR/IO-1.55.tar.gz',
         'FILES'        => q[dist/IO],
         'EXCLUDED'     => ['t/test.pl'],
     },
@@ -738,7 +741,7 @@ our %Modules = (
     },
 
     'Locale::Maketext' => {
-        'DISTRIBUTION' => 'TODDR/Locale-Maketext-1.32.tar.gz',
+        'DISTRIBUTION' => 'TODDR/Locale-Maketext-1.33.tar.gz',
         'FILES'        => q[dist/Locale-Maketext],
         'EXCLUDED'     => [
             qw(
@@ -759,10 +762,9 @@ our %Modules = (
     },
 
     'Math::BigInt' => {
-        'DISTRIBUTION' => 'PJACKLAM/Math-BigInt-2.002001.tar.gz',
-        'SYNCINFO'     => 'jkeenan on Mon Dec 11 21:10:38 2023',
-        'SYNCINFO'     => 'jkeenan on Fri Nov 24 20:23:52 2023',
-        'SYNCINFO'     => 'jkeenan on Tue Nov 14 17:22:07 2023',
+        'DISTRIBUTION' => 'PJACKLAM/Math-BigInt-2.003002.tar.gz',
+        'SYNCINFO'     => 'corion on Thu Jan 11 20:23:12 2024',
+        'SYNCINFO'     => 'book on Tue Dec 26 22:44:58 2023',
         'FILES'        => q[cpan/Math-BigInt],
         'EXCLUDED'     => [
             qr{^xt/},
@@ -774,7 +776,9 @@ our %Modules = (
     },
 
     'Math::BigInt::FastCalc' => {
-        'DISTRIBUTION' => 'PJACKLAM/Math-BigInt-FastCalc-0.5015.tar.gz',
+        'DISTRIBUTION' => 'PJACKLAM/Math-BigInt-FastCalc-0.5018.tar.gz',
+        'SYNCINFO'     => 'corion on Thu Jan 11 20:24:21 2024',
+        'SYNCINFO'     => 'jkeenan on Sat Dec 30 14:31:28 2023',
         'SYNCINFO'     => 'jkeenan on Sun Sep 24 08:29:56 2023',
         'FILES'        => q[cpan/Math-BigInt-FastCalc],
         'EXCLUDED'     => [
@@ -827,7 +831,7 @@ our %Modules = (
     },
 
     'Module::CoreList' => {
-        'DISTRIBUTION' => 'BINGOS/Module-CoreList-5.20231129.tar.gz',
+        'DISTRIBUTION' => 'BINGOS/Module-CoreList-5.20240120.tar.gz',
         'FILES'        => q[dist/Module-CoreList],
     },
 
@@ -922,7 +926,8 @@ our %Modules = (
     },
 
     'Pod::Checker' => {
-        'DISTRIBUTION' => 'MAREKR/Pod-Checker-1.75.tar.gz',
+        'DISTRIBUTION' => 'MAREKR/Pod-Checker-1.76.tar.gz',
+        'SYNCINFO'     => 'corion on Tue Jan  9 20:34:18 2024',
         'FILES'        => q[cpan/Pod-Checker],
     },
 
@@ -1109,7 +1114,6 @@ our %Modules = (
     'Test::Simple' => {
         'DISTRIBUTION' => 'EXODIST/Test-Simple-1.302198.tar.gz',
         'SYNCINFO'     => 'jkeenan on Fri Dec  1 07:01:54 2023',
-        'SYNCINFO'     => 'jkeenan on Wed Nov 29 11:41:51 2023',
         'FILES'        => q[cpan/Test-Simple],
         'EXCLUDED'     => [
             qr{^examples/},

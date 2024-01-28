@@ -15,7 +15,7 @@ BEGIN {
 
 use Config;
 
-plan tests => 154;
+plan tests => 156;
 
 # run some code N times. If the number of SVs at the end of loop N is
 # greater than (N-1)*delta at the end of loop 1, we've got a leak
@@ -667,3 +667,19 @@ sub hook::after   { return }
     leak(5, 0, sub { require strict; }, "require hook");
     leak(5, 0, sub { eval { require "NoSuchFile" } }, "require hook no file");
 }
+
+# at one point compiling this code leaked an AV and its children on
+# PERL_RC_STACK builds
+
+eleak(2, 0, '\(1..3)', 'folded const AV');
+
+# a sort block with a nested scope leaked the return value on each call
+
+leak 2, 0,  sub {
+                () = sort { for (1) {
+                                     if ($a > $b) { return -1 }
+                                     elsif ($a < $b) { return 1 }
+                                     else { return 0 }
+                                } } 1..2;
+            },
+            'sort block return';

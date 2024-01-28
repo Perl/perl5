@@ -106,7 +106,7 @@ exact science, and why we love using Perl so much - TMTOWTDI.
 
 Here are a few examples to demonstrate usage of Perl's benchmarking tools.
 
-=head2  Assigning and Dereferencing Variables.
+=head2  Assigning and Dereferencing Variables
 
 I'm sure most of us have seen code which looks like, (or worse than), this:
 

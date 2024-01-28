@@ -12,6 +12,7 @@
  */
 
 #include "EXTERN.h"
+#define PERL_IN_BUILTIN_C
 #include "perl.h"
 
 #include "XSUB.h"
@@ -39,8 +40,8 @@ static void S_warn_experimental_builtin(pTHX_ const char *name)
 /* These three utilities might want to live elsewhere to be reused from other
  * code sometime
  */
-#define prepare_export_lexical()  S_prepare_export_lexical(aTHX)
-static void S_prepare_export_lexical(pTHX)
+void
+Perl_prepare_export_lexical(pTHX)
 {
     assert(PL_compcv);
 
@@ -59,8 +60,8 @@ static void S_export_lexical(pTHX_ SV *name, SV *sv)
     PL_curpad[off] = SvREFCNT_inc(sv);
 }
 
-#define finish_export_lexical()  S_finish_export_lexical(aTHX)
-static void S_finish_export_lexical(pTHX)
+void
+Perl_finish_export_lexical(pTHX)
 {
     intro_my();
 
@@ -74,6 +75,7 @@ XS(XS_builtin_true)
     dXSARGS;
     if(items)
         croak_xs_usage(cv, "");
+    EXTEND(SP, 1);
     XSRETURN_YES;
 }
 
@@ -83,6 +85,7 @@ XS(XS_builtin_false)
     dXSARGS;
     if(items)
         croak_xs_usage(cv, "");
+    EXTEND(SP, 1);
     XSRETURN_NO;
 }
 
@@ -596,12 +599,37 @@ static void S_import_sym(pTHX_ SV *sym)
     export_lexical(ampname, (SV *)cv);
 }
 
-#define import_builtin_bundle(ver)  S_import_builtin_bundle(aTHX_ ver)
-static void S_import_builtin_bundle(pTHX_ U16 ver)
+#define cv_is_builtin(cv)  S_cv_is_builtin(aTHX_ cv)
+static bool S_cv_is_builtin(pTHX_ CV *cv)
 {
+    char *file = CvFILE(cv);
+    return file && strEQ(file, __FILE__);
+}
+
+void
+Perl_import_builtin_bundle(pTHX_ U16 ver, bool do_unimport)
+{
+    SV *ampname = sv_newmortal();
+
     for(int i = 0; builtins[i].name; i++) {
-        if(builtins[i].since_ver <= ver)
+        sv_setpvf(ampname, "&%s", builtins[i].name);
+
+        bool want = (builtins[i].since_ver <= ver);
+
+        bool got = false;
+        PADOFFSET off = pad_findmy_sv(ampname, 0);
+        CV *cv;
+        if(off != NOT_IN_PAD &&
+                SvTYPE((cv = (CV *)PL_curpad[off])) == SVt_PVCV &&
+                cv_is_builtin(cv))
+            got = true;
+
+        if(!got && want) {
             import_sym(newSVpvn_flags(builtins[i].name, strlen(builtins[i].name), SVs_TEMP));
+        }
+        else if(do_unimport && got && !want) {
+            pad_add_name_sv(ampname, padadd_STATE|padadd_TOMBSTONE, 0, 0);
+        }
     }
 }
 
@@ -636,7 +664,7 @@ XS(XS_builtin_import)
                 Perl_croak(aTHX_ "Builtin version bundle \"%s\" is not supported by Perl " PERL_VERSION_STRING,
                         sympv);
 
-            import_builtin_bundle(want_ver);
+            import_builtin_bundle(want_ver, false);
 
             continue;
         }
@@ -683,8 +711,7 @@ XS(XS_builtin_unimport)
          * tombstone and instead COP_SEQ_MAX_HIGH_set() on the padname to
          * clear it.
          */
-        off = pad_add_name_sv(ampname, padadd_STATE|padadd_TOMBSTONE, 0, 0);
-        SvREFCNT_dec(PL_curpad[off]);
+        pad_add_name_sv(ampname, padadd_STATE|padadd_TOMBSTONE, 0, 0);
     }
 
     COP_SEQMAX_INC;

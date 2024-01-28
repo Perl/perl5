@@ -1014,7 +1014,7 @@ sub _num_to_alpha {
 my %tmpfiles;
 sub unlink_tempfiles {
     unlink_all keys %tmpfiles;
-    %tempfiles = ();
+    %tmpfiles = ();
 }
 
 END { unlink_tempfiles(); }
@@ -1796,11 +1796,11 @@ sub watchdog ($;$)
     if ($timeout == 0) {
         if ($watchdog_thread) {
             $watchdog_thread->kill('KILL');
-            undef $watch_dog_thread;
+            undef $watchdog_thread;
         }
         elsif ($watchdog) {
             kill('KILL', $watchdog);
-            undef $watch_dog;
+            undef $watchdog;
         }
         else {
             alarm(0);

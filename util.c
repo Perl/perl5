@@ -4663,7 +4663,7 @@ PERL_STATIC_INLINE U32 S_ptr_hash(PTRV u) {
 #else
     /*
      * This is one of Bob Jenkins' hash functions for 32-bit integers
-     * from: http://burtleburtle.net/bob/hash/integer.html
+     * from: https://burtleburtle.net/bob/hash/integer.html
      */
     u = (u + 0x7ed55d16) + (u << 12);
     u = (u ^ 0xc761c23c) ^ (u >> 19);
@@ -5531,12 +5531,12 @@ Perl_my_cxt_init(pTHX_ int *indexp, size_t size)
    'file' is the source filename of the caller.
 */
 
-SSize_t
+Stack_off_t
 Perl_xs_handshake(const U32 key, void * v_my_perl, const char * file, ...)
 {
     va_list args;
-    SSize_t items;
-    SSize_t ax;
+    Stack_off_t items;
+    Stack_off_t ax;
     void * got;
     void * need;
     const char *stage = "first";
@@ -5598,12 +5598,12 @@ Perl_xs_handshake(const U32 key, void * v_my_perl, const char * file, ...)
         ax = POPMARK;
         {   SV **mark = PL_stack_base + ax++;
             {   dSP;
-                items = (SSize_t)(SP - MARK);
+                items = (Stack_off_t)(SP - MARK);
             }
         }
     } else {
-        items = va_arg(args, SSize_t);
-        ax = va_arg(args, SSize_t);
+        items = va_arg(args, Stack_off_t);
+        ax = va_arg(args, Stack_off_t);
     }
     assert(ax >= 0);
     assert(items >= 0);

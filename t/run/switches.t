@@ -695,7 +695,12 @@ $TODO = '';  # the -E tests work on VMS
 $r = runperl(
     switches	=> [ '-E', '"say q(Hello, world!)"']
 );
-is( $r, "Hello, world!\n", "-E say" );
+is( $r, "Hello, world!\n", "-E enables 'say' feature" );
+
+$r = runperl(
+    switches	=> [ '-E', '"say reftype []"']
+);
+is( $r, "ARRAY\n", "-E enables 'reftype' builtin" );
 
 $r = runperl(
     switches    => [ '-nE', q("} END { say q/affe/") ],

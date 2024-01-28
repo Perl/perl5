@@ -470,8 +470,8 @@ to use semicolons where you would in a normal program.
 X<-E>
 
 behaves just like L<-e|/-e commandline>, except that it implicitly
-enables all optional features (in the main compilation unit). See
-L<feature>.
+enables all optional features and builtin functions (in the main
+compilation unit). See L<feature> and L<builtin>.
 
 =item B<-f>
 X<-f> X<sitecustomize> X<sitecustomize.pl>

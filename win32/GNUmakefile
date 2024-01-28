@@ -63,7 +63,7 @@ INST_TOP := $(INST_DRV)\perl
 # versioned installation can be obtained by setting INST_TOP above to a
 # path that includes an arbitrary version string.
 #
-#INST_VER	:= \5.39.6
+#INST_VER	:= \5.39.8
 
 #
 # Comment this out if you DON'T want your perl installation to have
@@ -619,9 +619,11 @@ OPTIMIZE	= -Os
 LINK_DBG	= -s
 endif
 
-EXTRACFLAGS	=
+EXTRACFLAGS	= -Wall -Wextra -Werror=pointer-arith -Wno-format -Wno-long-long -Werror=vla
 ifeq ($(USE_CPLUSPLUS),define)
 EXTRACFLAGS	+= $(CXX_FLAG)
+else
+EXTRACFLAGS	+= -std=c99
 endif
 CFLAGS		= $(EXTRACFLAGS) $(INCLUDES) $(DEFINES) $(LOCDEFS) $(OPTIMIZE)
 LINK_FLAGS	= $(LINK_DBG) -L"$(INST_COREDIR)" -L"$(subst ;," -L",$(CCLIBDIR))"
@@ -1641,7 +1643,7 @@ utils: $(HAVEMINIPERL) ..\utils\Makefile
 	copy ..\README.tw       ..\pod\perltw.pod
 	copy ..\README.vos      ..\pod\perlvos.pod
 	copy ..\README.win32    ..\pod\perlwin32.pod
-	copy ..\pod\perldelta.pod ..\pod\perl5396delta.pod
+	copy ..\pod\perldelta.pod ..\pod\perl5398delta.pod
 	$(MINIPERL) -I..\lib $(PL2BAT) $(UTILS)
 	$(MINIPERL) -I..\lib ..\autodoc.pl -c "win32\$(CONFIG_H)" ..
 	$(MINIPERL) -I..\lib ..\pod\perlmodlib.PL -q ..
@@ -1741,7 +1743,7 @@ distclean: realclean
 	-if exist $(LIBDIR)\Win32API rmdir /s /q $(LIBDIR)\Win32API
 	-if exist $(LIBDIR)\XS rmdir /s /q $(LIBDIR)\XS
 	-cd $(PODDIR) && del /f *.html *.bat roffitall \
-	    perl5396delta.pod perlaix.pod perlamiga.pod perlandroid.pod \
+	    perl5398delta.pod perlaix.pod perlamiga.pod perlandroid.pod \
 	    perlapi.pod perlbs2000.pod perlcn.pod perlcygwin.pod \
 	    perlfreebsd.pod perlhaiku.pod perlhpux.pod perlhurd.pod \
 	    perlintern.pod perlirix.pod perljp.pod perlko.pod perllinux.pod \

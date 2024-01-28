@@ -4,6 +4,7 @@
  *    Copyright (C) 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001
  *    2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012
  *    2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023
+ *    2024
  *    by Larry Wall and others
  *
  *    You may distribute under the terms of either the GNU General Public
@@ -1177,10 +1178,10 @@ perl_destruct(pTHXx)
         PL_setlocale_buf = NULL;
     }
 
-    if (PL_langinfo_buf) {
-        Safefree(PL_langinfo_buf);
-        PL_langinfo_buf = NULL;
-    }
+    SvREFCNT_dec(PL_langinfo_sv);
+    PL_langinfo_sv = NULL;
+    SvREFCNT_dec(PL_scratch_langinfo);
+    PL_scratch_langinfo = NULL;
 
 #if defined(USE_LOCALE_THREADS) && ! defined(USE_THREAD_SAFE_LOCALE)
     if (PL_less_dicey_locale_buf) {
@@ -3975,7 +3976,7 @@ S_minus_v(pTHX)
 #endif
 
         PerlIO_printf(PIO_stdout,
-		      "\n\nCopyright 1987-2023, Larry Wall\n");
+		      "\n\nCopyright 1987-2024, Larry Wall\n");
 #ifdef OS2
         PerlIO_printf(PIO_stdout,
                       "\n\nOS/2 port Copyright (c) 1990, 1991, Raymond Chen, Kai Uwe Rommel\n"

@@ -58,7 +58,76 @@ BEGIN {
 }
 
 use feature 'fc';
-use I18N::Langinfo qw(langinfo CODESET CRNCYSTR RADIXCHAR);
+my @langinfo;
+BEGIN {
+    @langinfo = qw(
+                    CODESET
+                    RADIXCHAR
+                    THOUSEP
+                    CRNCYSTR
+                    ALT_DIGITS
+                    YESEXPR
+                    YESSTR
+                    NOEXPR
+                    NOSTR
+                    ERA
+                    ABDAY_1
+                    DAY_1
+                    ABMON_1
+                    MON_1
+                    AM_STR
+                    PM_STR
+                    D_FMT
+                    D_T_FMT
+                    ERA_D_FMT
+                    ERA_D_T_FMT
+                    ERA_T_FMT
+                    T_FMT
+                    T_FMT_AMPM
+                    _NL_ADDRESS_POSTAL_FMT
+                    _NL_ADDRESS_COUNTRY_NAME
+                    _NL_ADDRESS_COUNTRY_POST
+                    _NL_ADDRESS_COUNTRY_AB2
+                    _NL_ADDRESS_COUNTRY_AB3
+                    _NL_ADDRESS_COUNTRY_CAR
+                    _NL_ADDRESS_COUNTRY_NUM
+                    _NL_ADDRESS_COUNTRY_ISBN
+                    _NL_ADDRESS_LANG_NAME
+                    _NL_ADDRESS_LANG_AB
+                    _NL_ADDRESS_LANG_TERM
+                    _NL_ADDRESS_LANG_LIB
+                    _NL_IDENTIFICATION_TITLE
+                    _NL_IDENTIFICATION_SOURCE
+                    _NL_IDENTIFICATION_ADDRESS
+                    _NL_IDENTIFICATION_CONTACT
+                    _NL_IDENTIFICATION_EMAIL
+                    _NL_IDENTIFICATION_TEL
+                    _NL_IDENTIFICATION_FAX
+                    _NL_IDENTIFICATION_LANGUAGE
+                    _NL_IDENTIFICATION_TERRITORY
+                    _NL_IDENTIFICATION_AUDIENCE
+                    _NL_IDENTIFICATION_APPLICATION
+                    _NL_IDENTIFICATION_ABBREVIATION
+                    _NL_IDENTIFICATION_REVISION
+                    _NL_IDENTIFICATION_DATE
+                    _NL_IDENTIFICATION_CATEGORY
+                    _NL_MEASUREMENT_MEASUREMENT
+                    _NL_NAME_NAME_FMT
+                    _NL_NAME_NAME_GEN
+                    _NL_NAME_NAME_MR
+                    _NL_NAME_NAME_MRS
+                    _NL_NAME_NAME_MISS
+                    _NL_NAME_NAME_MS
+                    _NL_PAPER_HEIGHT
+                    _NL_PAPER_WIDTH
+                    _NL_TELEPHONE_TEL_INT_FMT
+                    _NL_TELEPHONE_TEL_DOM_FMT
+                    _NL_TELEPHONE_INT_SELECT
+                    _NL_TELEPHONE_INT_PREFIX
+                  );
+}
+
+use I18N::Langinfo 'langinfo', @langinfo;
 
 # =1 adds debugging output; =2 increases the verbosity somewhat
 our $debug = $ENV{PERL_DEBUG_FULL_TEST} // 0;
@@ -1033,6 +1102,8 @@ my $locales_test_number;
 my $not_necessarily_a_problem_test_number;
 my $first_casing_test_number;
 my %setlocale_failed;   # List of locales that setlocale() didn't work on
+my $has_glibc_extra_categories = grep { $_ =~ /^ _NL /x }
+                                                    valid_locale_categories();
 
 foreach my $Locale (@Locale) {
     $locales_test_number = $first_locales_test_number - 1;
@@ -1056,10 +1127,19 @@ foreach my $Locale (@Locale) {
     my $is_utf8_locale = is_locale_utf8($Locale);
 
     if ($debug) {
-        debug "code set = " . langinfo(CODESET);
         debug "is utf8 locale? = $is_utf8_locale\n";
-        debug "radix = " . disp_str(langinfo(RADIXCHAR)) . "\n";
-        debug "currency = " . disp_str(langinfo(CRNCYSTR));
+        for my $item (@langinfo) {
+            my $numeric_item = eval $item;
+            my $value = langinfo($numeric_item);
+
+            # All items should return a value; if not, this will warn.  But on
+            # platforms without the extra categories, almost all items will be
+            # empty.  Skip reporting such.
+            next if $value eq ""
+                 && $item =~ / ^ _NL_ / && ! $has_glibc_extra_categories;
+
+            debug "$item = " . disp_str($value);
+        }
     }
 
     if (! $is_utf8_locale) {
@@ -2456,6 +2536,51 @@ foreach my $Locale (@Locale) {
             for my $num (@nums) {
                 push @f, $num
                     unless sprintf("%g", $num) =~ /3.+14/;
+            }
+        }
+
+        report_result($Locale, $locales_test_number, @f == 0);
+        if (@f) {
+            print "# failed $locales_test_number locale '$Locale' numbers @f\n"
+	}
+    }
+
+    {
+        my @f = ();
+        ++$locales_test_number;
+        $test_names{$locales_test_number} =
+                 'Verify ALT_DIGITS returns nothing, or else non-ASCII and'
+               . ' the single char digits evaluate to consecutive integers'
+               . ' starting at 0';
+
+        my $alts = langinfo(ALT_DIGITS);
+        if ($alts) {
+            my @alts = split ';', $alts;
+            my $prev = -1;
+            foreach my $num (@alts) {
+                if ($num =~ /[[:ascii:]]/) {
+                    push @f, disp_str($num);
+                    last;
+                }
+
+                # We only look at single character strings; likely locales
+                # that have alternate digits have a different mechanism for
+                # representing larger numbers.  Japanese for example, has a
+                # single character for the number 10, which is prefixed to the
+                # '1' symbol for '11', etc.  And 21 is represented by 3
+                # characters, the '2' symbol, followed by the '10' symbol,
+                # then the '1' symbol.  (There is nothing to say that a locale
+                # even has to use base 10.)
+                last if length $num > 1;
+
+                use Unicode::UCD 'num';
+                my $value = num($num);
+                if ($value != $prev + 1) {
+                    push @f, disp_str($num);
+                    last;
+                }
+
+                $prev = $value;
             }
         }
 

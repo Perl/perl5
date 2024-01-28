@@ -532,7 +532,7 @@ BEGIN {
 use vars qw($VERSION $header);
 
 # bump to X.XX in blead, only use X.XX_XX in maint
-$VERSION = '1.79';
+$VERSION = '1.80';
 
 $header = "perl5db.pl version $VERSION";
 
@@ -3227,7 +3227,7 @@ Just uses C<DB::methods> to determine what methods are available.
 
 Switch to a different filename.
 
-=head4 C<.> - return to last-executed line.
+=head4 C<.> - return to last-executed line
 
 We set C<$incr> to -1 to indicate that the debugger shouldn't move ahead,
 and then we look up the line in the magical C<%dbline> hash.
@@ -3293,11 +3293,11 @@ appropriately, and force us out of the command loop.
 
 Just calls C<DB::print_trace>.
 
-=head4 C<w> - List window around current line.
+=head4 C<w> - List window around current line
 
 Just calls C<DB::cmd_w>.
 
-=head4 C<W> - watch-expression processing.
+=head4 C<W> - watch-expression processing
 
 Just calls C<DB::cmd_W>.
 
@@ -3381,7 +3381,7 @@ the bottom of the loop.
 
 Manipulates C<%alias> to add or list command aliases.
 
-=head4 C<source> - read commands from a file.
+=head4 C<source> - read commands from a file
 
 Opens a lexical filehandle and stacks it on C<@cmdfhs>; C<DB::readline> will
 pick it up.
@@ -3405,7 +3405,7 @@ Restart the debugger session.
 
 Return to any given position in the B<true>-history list
 
-=head4 C<|, ||> - pipe output through the pager.
+=head4 C<|, ||> - pipe output through the pager
 
 For C<|>, we save C<OUT> (the debugger's output filehandle) and C<STDOUT>
 (the program's standard output). For C<||>, we only save C<OUT>. We open a
@@ -9413,7 +9413,7 @@ If there's only one hit, and it's a package qualifier, and it's not equal to the
 
 =back
 
-=head3 Symbol completion: current package or package C<main>.
+=head3 Symbol completion: current package or package C<main>
 
 =cut
 
@@ -9973,7 +9973,7 @@ sub cmd_pre580_null {
     # do nothing...
 }
 
-=head2 Old C<a> command.
+=head2 Old C<a> command
 
 This version added actions if you supplied them, and deleted them
 if you didn't.
@@ -10082,7 +10082,7 @@ sub cmd_pre580_b {
     }
 } ## end sub cmd_pre580_b
 
-=head2 Old C<D> command.
+=head2 Old C<D> command
 
 Delete all breakpoints unconditionally.
 

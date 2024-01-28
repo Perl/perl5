@@ -10161,12 +10161,18 @@ Compare with L<C<require>|/require VERSION>, which can do a similar check
 at run time.
 
 If the specified Perl version is 5.12 or higher, strictures are enabled
-lexically as with L<C<use strict>|strict>.  Similarly, if the specified
-Perl version is 5.35.0 or higher, L<warnings> are enabled.  Later use of
-C<use VERSION> will override all behavior of a previous C<use VERSION>,
-possibly removing the C<strict>, C<warnings>, and C<feature> added by it.
-C<use VERSION> does not load the F<feature.pm>, F<strict.pm>, or
-F<warnings.pm> files.
+lexically as with L<C<use strict>|strict>.
+
+If the specified Perl version is 5.35.0 or higher, L<warnings> are enabled.
+
+If the specified Perl version is 5.39.0 or higher, builtin functions are
+imported lexically as with L<C<use builtin>|builtin> with a corresponding
+version bundle.
+
+Later use of C<use VERSION> will override all behavior of a previous
+C<use VERSION>, possibly removing the C<strict>, C<warnings>, C<feature> and
+C<builtin> effects added by it.  C<use VERSION> does not load the
+F<feature.pm>, F<strict.pm>, F<warnings.pm> or F<builtin.pm> files.
 
 In the current implementation, any explicit use of C<use strict> or
 C<no strict> overrides C<use VERSION>, even if it comes before it.

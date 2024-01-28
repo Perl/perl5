@@ -515,10 +515,10 @@ Perl_rpp_popfree_1_NN(pTHX)
 {
     PERL_ARGS_ASSERT_RPP_POPFREE_1_NN;
 
+    assert(*PL_stack_sp);
 #ifdef PERL_RC_STACK
     assert(rpp_stack_is_rc());
     SV *sv = *PL_stack_sp--;
-    assert(sv);
     SvREFCNT_dec_NN(sv);
 #else
     PL_stack_sp--;
@@ -567,14 +567,30 @@ PERL_STATIC_INLINE void
 Perl_rpp_popfree_2_NN(pTHX)
 {
     PERL_ARGS_ASSERT_RPP_POPFREE_2_NN;
-
 #ifdef PERL_RC_STACK
+    SV *sv2 = *PL_stack_sp--;
+    assert(sv2);
+    SV *sv1 = *PL_stack_sp;
+    assert(sv1);
+
     assert(rpp_stack_is_rc());
-    for (int i = 0; i < 2; i++) {
-        SV *sv = *PL_stack_sp--;
-        assert(sv);
-        SvREFCNT_dec_NN(sv);
+    U32 rc1 = SvREFCNT(sv1);
+    U32 rc2 = SvREFCNT(sv2);
+    /* This expression is intended to be true if either of rc1 or rc2 has
+     * the value 0 or 1, but using only a single branch test, rather
+     * than the two branches that a compiler would plant for a boolean
+     * expression. We are working on the assumption that, most of the
+     * time, neither of the args to a binary function will need to be
+     * freed - they're likely to lex vars, or PADTMPs or whatever.
+     * So give the CPU a single branch that is rarely taken. */
+    if (UNLIKELY( !(rc1>>1) + !(rc2>>1) ))
+        /* at least one of the old SVs needs freeing. Do it the long way */
+        Perl_rpp_free_2_(aTHX_ sv1, sv2, rc1, rc2);
+    else {
+        SvREFCNT(sv1) = rc1 - 1;
+        SvREFCNT(sv2) = rc2 - 1;
     }
+    PL_stack_sp--;
 #else
     PL_stack_sp -= 2;
 #endif
@@ -619,13 +635,17 @@ Perl_rpp_pop_1_norc(pTHX)
 
 /*
 =for apidoc      rpp_push_1
+=for apidoc_item rpp_push_IMM
 =for apidoc_item rpp_push_2
 =for apidoc_item rpp_xpush_1
+=for apidoc_item rpp_xpush_IMM
 =for apidoc_item rpp_xpush_2
 
 Push one or two SVs onto the stack, incrementing their reference counts
 and updating C<PL_stack_sp>. With the C<x> variants, it extends the stack
-first.
+first. The C<IMM> variants assume that the single argument is an immortal
+such as <&PL_sv_undef> and, for efficiency, will skip incrementing its
+reference count.
 
 =cut
 */
@@ -639,6 +659,18 @@ Perl_rpp_push_1(pTHX_ SV *sv)
 #ifdef PERL_RC_STACK
     assert(rpp_stack_is_rc());
     SvREFCNT_inc_simple_void_NN(sv);
+#endif
+}
+
+PERL_STATIC_INLINE void
+Perl_rpp_push_IMM(pTHX_ SV *sv)
+{
+    PERL_ARGS_ASSERT_RPP_PUSH_IMM;
+
+    assert(SvIMMORTAL(sv));
+    *++PL_stack_sp = sv;
+#ifdef PERL_RC_STACK
+    assert(rpp_stack_is_rc());
 #endif
 }
 
@@ -663,6 +695,15 @@ Perl_rpp_xpush_1(pTHX_ SV *sv)
 
     rpp_extend(1);
     rpp_push_1(sv);
+}
+
+PERL_STATIC_INLINE void
+Perl_rpp_xpush_IMM(pTHX_ SV *sv)
+{
+    PERL_ARGS_ASSERT_RPP_XPUSH_IMM;
+
+    rpp_extend(1);
+    rpp_push_IMM(sv);
 }
 
 PERL_STATIC_INLINE void
@@ -702,11 +743,20 @@ Perl_rpp_push_1_norc(pTHX_ SV *sv)
 
 
 /*
-=for apidoc rpp_replace_1_1
+=for apidoc      rpp_replace_1_1
+=for apidoc_item rpp_replace_1_1_NN
+=for apidoc_item rpp_replace_1_IMM_NN
 
 Replace the current top stack item with C<sv>, while suitably adjusting
 reference counts. Equivalent to rpp_popfree_1(); rpp_push_1(sv), but
 is more efficient and handles both SVs being the same.
+
+The C<_NN> variant assumes that the pointer on the stack to the SV being
+freed is non-NULL.
+
+The C<IMM_NN> variant is like the C<_NN> variant, but in addition, assumes
+that the single argument is an immortal such as <&PL_sv_undef> and, for
+efficiency, will skip incrementing its reference count.
 
 =cut
 */
@@ -716,6 +766,7 @@ Perl_rpp_replace_1_1(pTHX_ SV *sv)
 {
     PERL_ARGS_ASSERT_RPP_REPLACE_1_1;
 
+    assert(sv);
 #ifdef PERL_RC_STACK
     assert(rpp_stack_is_rc());
     SV *oldsv = *PL_stack_sp;
@@ -728,26 +779,17 @@ Perl_rpp_replace_1_1(pTHX_ SV *sv)
 }
 
 
-/*
-=for apidoc rpp_replace_1_1_NN
-
-A variant of rpp_replace_1_1() which assumes that the SV pointer on the
-stack is non-NULL.
-
-=cut
-*/
-
 PERL_STATIC_INLINE void
 Perl_rpp_replace_1_1_NN(pTHX_ SV *sv)
 {
     PERL_ARGS_ASSERT_RPP_REPLACE_1_1_NN;
 
+    assert(sv);
+    assert(*PL_stack_sp);
 #ifdef PERL_RC_STACK
     assert(rpp_stack_is_rc());
     SV *oldsv = *PL_stack_sp;
     *PL_stack_sp = sv;
-    assert(sv);
-    assert(oldsv);
     SvREFCNT_inc_simple_void_NN(sv);
     SvREFCNT_dec_NN(oldsv);
 #else
@@ -756,13 +798,40 @@ Perl_rpp_replace_1_1_NN(pTHX_ SV *sv)
 }
 
 
+PERL_STATIC_INLINE void
+Perl_rpp_replace_1_IMM_NN(pTHX_ SV *sv)
+{
+    PERL_ARGS_ASSERT_RPP_REPLACE_1_IMM_NN;
+
+    assert(sv);
+    assert(SvIMMORTAL(sv));
+    assert(*PL_stack_sp);
+#ifdef PERL_RC_STACK
+    assert(rpp_stack_is_rc());
+    SV *oldsv = *PL_stack_sp;
+    *PL_stack_sp = sv;
+    SvREFCNT_dec_NN(oldsv);
+#else
+    *PL_stack_sp = sv;
+#endif
+}
+
+
 /*
-=for apidoc rpp_replace_2_1
+=for apidoc      rpp_replace_2_1
+=for apidoc_item rpp_replace_2_1_NN
+=for apidoc_item rpp_replace_2_IMM_NN
 
-Replace the current top two stack items with C<sv>, while suitably
-adjusting reference counts. Equivalent to rpp_popfree_2();
-rpp_push_1(sv), but is more efficient and handles SVs being the same.
+Replace the current top to stacks item with C<sv>, while suitably
+adjusting reference counts. Equivalent to rpp_popfree_2(); rpp_push_1(sv),
+but is more efficient and handles SVs being the same.
 
+The C<_NN> variant assumes that the pointers on the stack to the SVs being
+freed are non-NULL.
+
+The C<IMM_NN> variant is like the C<_NN> variant, but in addition, assumes
+that the single argument is an immortal such as <&PL_sv_undef> and, for
+efficiency, will skip incrementing its reference count.
 =cut
 */
 
@@ -788,37 +857,69 @@ Perl_rpp_replace_2_1(pTHX_ SV *sv)
 }
 
 
-/*
-=for apidoc rpp_replace_2_1_NN
+/* Private helper function for _NN and _IMM_NN variants.
+ * Assumes sv has already had its ref count incremented,
+ * ready for being put on the stack.
+ * Intended to be small and fast, since it's inlined into many hot parts of
+ * code.
+ */
 
-A variant of rpp_replace_2_1() which assumes that the two SV pointers on
-the stack are non-NULL.
+PERL_STATIC_INLINE void
+Perl_rpp_replace_2_1_COMMON(pTHX_ SV *sv)
+{
 
-=cut
-*/
+    assert(sv);
+#ifdef PERL_RC_STACK
+    SV *sv2 = *PL_stack_sp--;
+    assert(sv2);
+    SV *sv1 = *PL_stack_sp;
+    assert(sv1);
+
+    *PL_stack_sp = sv;
+    assert(rpp_stack_is_rc());
+    U32 rc1 = SvREFCNT(sv1);
+    U32 rc2 = SvREFCNT(sv2);
+    /* This expression is intended to be true if either of rc1 or rc2 has
+     * the value 0 or 1, but using only a single branch test, rather
+     * than the two branches that a compiler would plant for a boolean
+     * expression. We are working on the assumption that, most of the
+     * time, neither of the args to a binary function will need to be
+     * freed - they're likely to lex vars, or PADTMPs or whatever.
+     * So give the CPU a single branch that is rarely taken. */
+    if (UNLIKELY( !(rc1>>1) + !(rc2>>1) ))
+        /* at least one of the old SVs needs freeing. Do it the long way */
+        Perl_rpp_free_2_(aTHX_ sv1, sv2, rc1, rc2);
+    else {
+        SvREFCNT(sv1) = rc1 - 1;
+        SvREFCNT(sv2) = rc2 - 1;
+    }
+#else
+    *--PL_stack_sp = sv;
+#endif
+}
+
 
 PERL_STATIC_INLINE void
 Perl_rpp_replace_2_1_NN(pTHX_ SV *sv)
 {
     PERL_ARGS_ASSERT_RPP_REPLACE_2_1_NN;
 
-#ifdef PERL_RC_STACK
-    assert(rpp_stack_is_rc());
-    /* replace PL_stack_sp[-1] first; leave PL_stack_sp[0] in place while
-     * we free [-1], so if an exception occurs, [0] will still be freed.
-     */
-    SV *oldsv = PL_stack_sp[-1];
-    PL_stack_sp[-1] = sv;
     assert(sv);
+#ifdef PERL_RC_STACK
     SvREFCNT_inc_simple_void_NN(sv);
-    assert(oldsv);
-    SvREFCNT_dec_NN(oldsv);
-    oldsv = *PL_stack_sp--;
-    assert(oldsv);
-    SvREFCNT_dec_NN(oldsv);
-#else
-    *--PL_stack_sp = sv;
 #endif
+    rpp_replace_2_1_COMMON(sv);
+}
+
+
+PERL_STATIC_INLINE void
+Perl_rpp_replace_2_IMM_NN(pTHX_ SV *sv)
+{
+    PERL_ARGS_ASSERT_RPP_REPLACE_2_IMM_NN;
+
+    assert(sv);
+    assert(SvIMMORTAL(sv));
+    rpp_replace_2_1_COMMON(sv);
 }
 
 
@@ -863,13 +964,13 @@ Perl_rpp_replace_at_NN(pTHX_ SV **sp, SV *sv)
 {
     PERL_ARGS_ASSERT_RPP_REPLACE_AT_NN;
 
+    assert(sv);
+    assert(*sp);
 #ifdef PERL_RC_STACK
     assert(rpp_stack_is_rc());
     SV *oldsv = *sp;
     *sp = sv;
-    assert(sv);
     SvREFCNT_inc_simple_void_NN(sv);
-    assert(oldsv);
     SvREFCNT_dec_NN(oldsv);
 #else
     *sp = sv;
@@ -924,11 +1025,11 @@ Perl_rpp_replace_at_norc_NN(pTHX_ SV **sp, SV *sv)
 {
     PERL_ARGS_ASSERT_RPP_REPLACE_AT_NORC_NN;
 
+    assert(*sp);
 #ifdef PERL_RC_STACK
     assert(rpp_stack_is_rc());
     SV *oldsv = *sp;
     *sp = sv;
-    assert(oldsv);
     SvREFCNT_dec_NN(oldsv);
 #else
     *sp = sv;
@@ -1401,7 +1502,7 @@ Perl_is_utf8_invariant_string_loc(const U8* const s, STRLEN len, const U8 ** ep)
 #  endif
 #endif
 
-#if defined(_MSC_VER)
+#if defined(WIN32)
 #  include <intrin.h>
 #  pragma intrinsic(_BitScanForward)
 #  pragma intrinsic(_BitScanReverse)
@@ -1443,7 +1544,7 @@ Perl_lsbit_pos64(U64 word)
 
     return (unsigned) PERL_CTZ_64(word);
 
-#  elif U64SIZE == 8 && defined(_WIN64) && defined(_MSC_VER)
+#  elif U64SIZE == 8 && defined(_WIN64)
 #    define PERL_HAS_FAST_GET_LSB_POS64
 
     {
@@ -1497,7 +1598,7 @@ Perl_lsbit_pos32(U32 word)
 
     return (unsigned) PERL_CTZ_32(word);
 
-#elif U32SIZE == 4 && defined(_MSC_VER)
+#elif U32SIZE == 4 && defined(WIN32)
 #  define PERL_HAS_FAST_GET_LSB_POS32
 
     {
@@ -1551,7 +1652,7 @@ Perl_msbit_pos64(U64 word)
 
     return (unsigned) LZC_TO_MSBIT_POS_(U64, PERL_CLZ_64(word));
 
-#  elif U64SIZE == 8 && defined(_WIN64) && defined(_MSC_VER)
+#  elif U64SIZE == 8 && defined(_WIN64)
 #    define PERL_HAS_FAST_GET_MSB_POS64
 
     {
@@ -1607,8 +1708,7 @@ Perl_msbit_pos32(U32 word)
 #  define PERL_HAS_FAST_GET_MSB_POS32
 
     return (unsigned) LZC_TO_MSBIT_POS_(U32, PERL_CLZ_32(word));
-
-#elif U32SIZE == 4 && defined(_MSC_VER)
+#elif U32SIZE == 4 && defined(WIN32)
 #  define PERL_HAS_FAST_GET_MSB_POS32
 
     {
