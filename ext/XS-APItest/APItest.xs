@@ -4178,6 +4178,9 @@ CODE:
         for (p = PL_stack_base + 1; p <= SP; p++)
             av_push_simple(av, SvREFCNT_inc(*p));
         break;
+
+    default:
+        croak("multicall_return: invalid context %" I32df, context);
     }
 
     POP_MULTICALL;
