@@ -1504,11 +1504,14 @@ Perl_is_utf8_invariant_string_loc(const U8* const s, STRLEN len, const U8 ** ep)
 
 #if defined(WIN32)
 #  include <intrin.h>
-#  pragma intrinsic(_BitScanForward)
-#  pragma intrinsic(_BitScanReverse)
-#  ifdef _WIN64
-#    pragma intrinsic(_BitScanForward64)
-#    pragma intrinsic(_BitScanReverse64)
+   /* MinGW warns that it ignores "pragma intrinsic". */
+#  if defined(_MSC_VER)
+#    pragma intrinsic(_BitScanForward)
+#    pragma intrinsic(_BitScanReverse)
+#    if defined(_WIN64)
+#      pragma intrinsic(_BitScanForward64)
+#      pragma intrinsic(_BitScanReverse64)
+#    endif
 #  endif
 #endif
 
