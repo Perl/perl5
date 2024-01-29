@@ -1,5 +1,5 @@
 #
-# Makefile to build perl on Windows using GMAKE.
+#Makefile to build perl on Windows using GMAKE.
 # Supported compilers:
 #	Microsoft Visual C++ 12.0 or later
 #	MinGW with gcc-3.4.5-5.3.0
