@@ -8076,7 +8076,7 @@ S_strftime8(pTHX_ const char * fmt,
                   const struct tm * mytm,
                   const utf8ness_t fmt_utf8ness,
                   utf8ness_t * result_utf8ness,
-                  const bool came_from_sv)
+                  const bool called_externally)
 {
     PERL_ARGS_ASSERT_STRFTIME8;
 
@@ -8136,9 +8136,11 @@ S_strftime8(pTHX_ const char * fmt,
         }
         else {
             locale_utf8ness = LOCALE_IS_UTF8;
-            if (came_from_sv) {
+            if (called_externally) {
 
-                /* Upgrade 'fmt' to UTF-8 for a UTF-8 locale.  Otherwise the
+                /* All internal calls from this file use ASCII-only formats;
+                 * but otherwise the format could be anything, so make sure to
+                 * upgrade it to UTF-8 for a UTF-8 locale.  Otherwise the
                  * locale would find any UTF-8 variant characters to be
                  * malformed */
                 Size_t fmt_len = strlen(fmt);
