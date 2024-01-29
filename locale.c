@@ -9327,7 +9327,9 @@ Perl_mem_collxfrm_(pTHX_ const char *input_string,
                 /* In this case we use isCNTRL_LC() below, which relies on
                  * LC_CTYPE, so that must be switched to correspond with the
                  * LC_COLLATE locale */
-                if (! try_non_controls && ! PL_in_utf8_COLLATE_locale) {
+                const bool need_to_toggle = (   ! try_non_controls
+                                             && ! PL_in_utf8_COLLATE_locale);
+                if (need_to_toggle) {
                     orig_CTYPE_locale = toggle_locale_c(LC_CTYPE,
                                                         PL_collation_name);
                 }
@@ -9377,7 +9379,10 @@ Perl_mem_collxfrm_(pTHX_ const char *input_string,
                 } /* end of loop through all 255 characters */
 
 #  ifdef USE_LOCALE_CTYPE
-                restore_toggled_locale_c(LC_CTYPE, orig_CTYPE_locale);
+
+                if (need_to_toggle) {
+                    restore_toggled_locale_c(LC_CTYPE, orig_CTYPE_locale);
+                }
 #  endif
 
                 /* Stop looking if found */
