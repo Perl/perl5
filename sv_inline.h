@@ -994,7 +994,9 @@ Perl_sv_setpv_freshbuf(pTHX_ SV *const sv)
     assert(SvPVX(sv));
     SvCUR_set(sv, 0);
     *(SvEND(sv))= '\0';
-    (void)SvPOK_only_UTF8(sv);
+    (void)SvPOK_only_UTF8(sv);  /* UTF-8 flag will be 0; This is used instead
+                                   of 'SvPOK_only' because the other sv_setpv
+                                   functions use it */
     SvTAINT(sv);
     return SvPVX(sv);
 }
