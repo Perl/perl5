@@ -8047,6 +8047,18 @@ Perl_my_strftime(pTHX_ const char *fmt, int sec, int min, int hour,
 }
 
 SV *
+Perl_sv_strftime_ints(pTHX_ SV * fmt, int sec, int min, int hour,
+                            int mday, int mon, int year, int wday,
+                            int yday, int isdst)
+{   /* Documented above */
+    PERL_ARGS_ASSERT_SV_STRFTIME_INTS;
+
+    struct tm  mytm;
+    ints_to_tm(&mytm, sec, min, hour, mday, mon, year, wday, yday, isdst);
+    return sv_strftime_tm(fmt, &mytm);
+}
+
+SV *
 Perl_sv_strftime_tm(pTHX_ SV * fmt, const struct tm * mytm)
 {   /* Documented above */
     PERL_ARGS_ASSERT_SV_STRFTIME_TM;
@@ -8078,18 +8090,6 @@ Perl_sv_strftime_tm(pTHX_ SV * fmt, const struct tm * mytm)
     }
 
     return sv;
-}
-
-SV *
-Perl_sv_strftime_ints(pTHX_ SV * fmt, int sec, int min, int hour,
-                            int mday, int mon, int year, int wday,
-                            int yday, int isdst)
-{   /* Documented above */
-    PERL_ARGS_ASSERT_SV_STRFTIME_INTS;
-
-    struct tm  mytm;
-    ints_to_tm(&mytm, sec, min, hour, mday, mon, year, wday, yday, isdst);
-    return sv_strftime_tm(fmt, &mytm);
 }
 
 STATIC void
