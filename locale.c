@@ -1995,6 +1995,7 @@ S_less_dicey_bool_setlocale_r(pTHX_ const int cat, const char * locale)
 /* The code in this file may change the locale briefly during certain
  * operations.  This should be a critical section when that could interfere
  * with other instances executing at the same time. */
+#  define TOGGLING_LOCKS  1
 #  define TOGGLE_LOCK(i)    POSIX_SETLOCALE_LOCK
 #  define TOGGLE_UNLOCK(i)  POSIX_SETLOCALE_UNLOCK
 
