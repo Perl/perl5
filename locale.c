@@ -7340,11 +7340,12 @@ S_emulate_langinfo(pTHX_ const int item,
         /* The year was deliberately chosen so that January 1 is on the
         * first day of the week.  Since we're only getting one thing at a
         * time, it all works */
-        ints_to_tm(&mytm, 30, 30, hour, mday, mon, 2011, 0, 0, 0);
+        ints_to_tm(&mytm, locale, 30, 30, hour, mday, mon, 2011, 0, 0, 0);
         bool succeeded;
         if (utf8ness) {
             succeeded = strftime8(format,
                                   sv,
+                                  locale,
                                   &mytm,
 
                                   /* All possible formats specified above are
@@ -7356,7 +7357,7 @@ S_emulate_langinfo(pTHX_ const int item,
                               );
         }
         else {
-            succeeded = strftime_tm(format, sv, &mytm);
+            succeeded = strftime_tm(format, sv, locale, &mytm);
         }
 
         restore_toggled_locale_c(LC_TIME, orig_TIME_locale);
@@ -7475,10 +7476,11 @@ S_emulate_langinfo(pTHX_ const int item,
             /* Do the strftime.  Once we have determined the UTF8ness (if
             * we want it), assume the rest will be the same, and use
             * strftime_tm(), which doesn't recalculate UTF8ness */
-            ints_to_tm(&mytm, sec, min, hour, mday, mon, year, 0, 0, 0);
+            ints_to_tm(&mytm, locale, sec, min, hour, mday, mon, year, 0, 0, 0);
             if (utf8ness && is_utf8 != UTF8NESS_NO && is_utf8 != UTF8NESS_YES) {
                 succeeded = strftime8(fmts[j],
                                       alt_dig_sv,
+                                      locale,
                                       &mytm,
                                       UTF8NESS_IMMATERIAL,
                                       &is_utf8,
@@ -7486,7 +7488,7 @@ S_emulate_langinfo(pTHX_ const int item,
                                      );
             }
             else {
-                succeeded = strftime_tm(fmts[j], alt_dig_sv, &mytm);
+                succeeded = strftime_tm(fmts[j], alt_dig_sv, locale, &mytm);
             }
 
             /* If didn't recognize this format, try the next */
@@ -7931,9 +7933,16 @@ Perl_my_strftime(pTHX_ const char *fmt, int sec, int min, int hour,
 {   /* Documented above */
     PERL_ARGS_ASSERT_MY_STRFTIME;
 
+#ifdef USE_LOCALE_TIME
+    const char * locale = querylocale_c(LC_TIME);
+#else
+    const char * locale = "C";
+#endif
+
     struct tm  mytm;
-    ints_to_tm(&mytm, sec, min, hour, mday, mon, year, wday, yday, isdst);
-    if (! strftime_tm(fmt, PL_scratch_langinfo, &mytm)) {
+    ints_to_tm(&mytm, locale, sec, min, hour, mday, mon, year, wday, yday,
+               isdst);
+    if (! strftime_tm(fmt, PL_scratch_langinfo, locale, &mytm)) {
         return NULL;
     }
 
@@ -7947,15 +7956,41 @@ Perl_sv_strftime_ints(pTHX_ SV * fmt, int sec, int min, int hour,
 {   /* Documented above */
     PERL_ARGS_ASSERT_SV_STRFTIME_INTS;
 
+#ifdef USE_LOCALE_TIME
+    const char * locale = querylocale_c(LC_TIME);
+#else
+    const char * locale = "C";
+#endif
+
     struct tm  mytm;
-    ints_to_tm(&mytm, sec, min, hour, mday, mon, year, wday, yday, isdst);
-    return sv_strftime_tm(fmt, &mytm);
+    ints_to_tm(&mytm, locale, sec, min, hour, mday, mon, year, wday, yday,
+               isdst);
+    return sv_strftime_common(fmt, locale, &mytm);
 }
 
 SV *
 Perl_sv_strftime_tm(pTHX_ SV * fmt, const struct tm * mytm)
 {   /* Documented above */
     PERL_ARGS_ASSERT_SV_STRFTIME_TM;
+
+#ifdef USE_LOCALE_TIME
+
+    return sv_strftime_common(fmt, querylocale_c(LC_TIME), mytm);
+
+#else
+
+    return sv_strftime_common(fmt, "C", mytm);
+
+#endif
+
+}
+
+SV *
+S_sv_strftime_common(pTHX_ SV * fmt,
+                           const char * locale,
+                           const struct tm * mytm)
+{   /* Documented above */
+    PERL_ARGS_ASSERT_SV_STRFTIME_COMMON;
 
     utf8ness_t fmt_utf8ness = (SvUTF8(fmt) && LIKELY(! IN_BYTES))
                               ? UTF8NESS_YES
@@ -7970,6 +8005,7 @@ Perl_sv_strftime_tm(pTHX_ SV * fmt, const struct tm * mytm)
     SV* sv = newSV(MAX(SvCUR(fmt) * 2, 64));
     if (! strftime8(SvPV_nolen(fmt),
                     sv,
+                    locale,
                     mytm,
                     fmt_utf8ness,
                     &result_utf8ness,
@@ -7988,11 +8024,12 @@ Perl_sv_strftime_tm(pTHX_ SV * fmt, const struct tm * mytm)
 
 STATIC void
 S_ints_to_tm(pTHX_ struct tm * mytm,
+                   const char * locale,
                    int sec, int min, int hour, int mday, int mon, int year,
                    int wday, int yday, int isdst)
 {
     /* Create a struct tm structure from the input time-related integer
-     * variables for the current underlying LC_TIME locale */
+     * variables for 'locale' */
 
     /* Override with the passed-in values */
     Zero(mytm, 1, struct tm);
@@ -8014,15 +8051,18 @@ S_ints_to_tm(pTHX_ struct tm * mytm,
 
     mini_mktime(mytm);
 
+    PERL_UNUSED_ARG(locale);
 #else
 
     /* Otherwise we have to use the (slower) libc mktime(), which does take
      * locale into consideration. [perl #18238] */
+    const char * orig_TIME_locale = toggle_locale_c(LC_TIME, locale);
     MKTIME_LOCK;
 
     (void) mktime(mytm);
 
     MKTIME_UNLOCK;
+    restore_toggled_locale_c(LC_TIME, orig_TIME_locale);
 
     /* More is needed if this is the very unlikely case of a leap second
      * (sec==60).  Various mktime() routines handle these differently:
@@ -8080,7 +8120,10 @@ S_ints_to_tm(pTHX_ struct tm * mytm,
 }
 
 STATIC bool
-S_strftime_tm(pTHX_ const char *fmt, SV * sv, const struct tm *mytm)
+S_strftime_tm(pTHX_ const char *fmt,
+                    SV * sv,
+                    const char *locale,
+                    const struct tm *mytm)
 {
     PERL_ARGS_ASSERT_STRFTIME_TM;
 
@@ -8091,13 +8134,7 @@ S_strftime_tm(pTHX_ const char *fmt, SV * sv, const struct tm *mytm)
      * result, and all other C<OK> bits disabled, and not marked as UTF-8.
      * Determining the UTF-8ness must be done at a higher level.
      *
-     * 'false' is returned if if fails; the state of 'sv' is unspecified.
-     *
-     * The reason the locale isn't passed in and we toggle to it, is because
-     * 'mytm' should have been populated using the same locale, so better to
-     * not toggle back and forth multiple times, as long as the populating and
-     * this call are close together, to minimize the amount of time spent
-     * toggled */
+     * 'false' is returned if if fails; the state of 'sv' is unspecified. */
 
     /* An empty format yields an empty result */
     const Size_t fmtlen = strlen(fmt);
@@ -8113,7 +8150,18 @@ S_strftime_tm(pTHX_ const char *fmt, SV * sv, const struct tm *mytm)
     Perl_croak(aTHX_ "panic: no strftime");
 #endif
 
-    start_DEALING_WITH_MISMATCHED_CTYPE(querylocale_c(LC_TIME));
+    start_DEALING_WITH_MISMATCHED_CTYPE(locale);
+
+#if defined(USE_LOCALE_TIME)
+
+    const char * orig_TIME_locale = toggle_locale_c(LC_TIME, locale);
+
+#  define LC_TIME_TEARDOWN                                                  \
+                        restore_toggled_locale_c(LC_TIME, orig_TIME_locale)
+#else
+   PERL_UNUSED_ARG(locale);
+#  define LC_TIME_TEARDOWN
+#endif
 
     /* Assume the caller has furnished a reasonable sized guess, but guard
      * against one that won't work */
@@ -8219,7 +8267,8 @@ S_strftime_tm(pTHX_ const char *fmt, SV * sv, const struct tm *mytm)
 
   strftime_return:
 
-    end_DEALING_WITH_MISMATCHED_CTYPE(querylocale_c(LC_TIME));
+    LC_TIME_TEARDOWN;
+    end_DEALING_WITH_MISMATCHED_CTYPE(locale);
 
     return succeeded;
 }
@@ -8227,6 +8276,7 @@ S_strftime_tm(pTHX_ const char *fmt, SV * sv, const struct tm *mytm)
 STATIC bool
 S_strftime8(pTHX_ const char * fmt,
                   SV * sv,
+                  const char * locale,
                   const struct tm * mytm,
                   const utf8ness_t fmt_utf8ness,
                   utf8ness_t * result_utf8ness,
@@ -8239,13 +8289,11 @@ S_strftime8(pTHX_ const char * fmt,
 #ifdef USE_LOCALE_TIME
 #  define INDEX_TO_USE  LC_TIME_INDEX_
 
-    const char * locale = querylocale_c(LC_TIME);
     locale_utf8ness_t locale_utf8ness = LOCALE_UTF8NESS_UNKNOWN;
 
 #else
 #  define INDEX_TO_USE  LC_ALL_INDEX_   /* Effectively out of bounds */
 
-    const char * locale = "C";
     locale_utf8ness_t locale_utf8ness = LOCALE_NOT_UTF8;
 
 #endif
@@ -8306,7 +8354,7 @@ S_strftime8(pTHX_ const char * fmt,
         break;
     }
 
-    if (! strftime_tm(fmt, sv, mytm)) {
+    if (! strftime_tm(fmt, sv, locale, mytm)) {
         return false;
     }
 
