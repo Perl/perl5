@@ -1318,12 +1318,13 @@
 #   endif /* defined(PERL_IN_HV_C) */
 #   if defined(PERL_IN_LOCALE_C)
 #     define get_locale_string_utf8ness_i(a,b,c,d) S_get_locale_string_utf8ness_i(aTHX_ a,b,c,d)
-#     define ints_to_tm(a,b,c,d,e,f,g,h,i,j)    S_ints_to_tm(aTHX_ a,b,c,d,e,f,g,h,i,j)
+#     define ints_to_tm(a,b,c,d,e,f,g,h,i,j,k)  S_ints_to_tm(aTHX_ a,b,c,d,e,f,g,h,i,j,k)
 #     define is_locale_utf8(a)                  S_is_locale_utf8(aTHX_ a)
 #     define my_localeconv(a)                   S_my_localeconv(aTHX_ a)
 #     define populate_hash_from_C_localeconv(a,b,c,d,e) S_populate_hash_from_C_localeconv(aTHX_ a,b,c,d,e)
-#     define strftime8(a,b,c,d,e,f)             S_strftime8(aTHX_ a,b,c,d,e,f)
-#     define strftime_tm(a,b,c)                 S_strftime_tm(aTHX_ a,b,c)
+#     define strftime8(a,b,c,d,e,f,g)           S_strftime8(aTHX_ a,b,c,d,e,f,g)
+#     define strftime_tm(a,b,c,d)               S_strftime_tm(aTHX_ a,b,c,d)
+#     define sv_strftime_common(a,b,c)          S_sv_strftime_common(aTHX_ a,b,c)
 #     if defined(HAS_MISSING_LANGINFO_ITEM_) || !defined(HAS_NL_LANGINFO)
 #       define emulate_langinfo(a,b,c,d)        S_emulate_langinfo(aTHX_ a,b,c,d)
 #     endif

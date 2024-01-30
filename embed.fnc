@@ -4415,6 +4415,7 @@ S	|utf8ness_t|get_locale_string_utf8ness_i			\
 				|NULLOK const char *locale		\
 				|const locale_category_index cat_index
 S	|void	|ints_to_tm	|NN struct tm *my_tm			\
+				|NN const char *locale			\
 				|int sec				\
 				|int min				\
 				|int hour				\
@@ -4434,12 +4435,18 @@ S	|void	|populate_hash_from_C_localeconv			\
 				|NN const lconv_offset_t *integers[2]
 S	|bool	|strftime8	|NN const char *fmt			\
 				|NN SV *sv				\
+				|NN const char *locale			\
 				|NN const struct tm *mytm		\
 				|const utf8ness_t fmt_utf8ness		\
 				|NN utf8ness_t *result_utf8ness 	\
 				|const bool called_externally
 Sf	|bool	|strftime_tm	|NN const char *fmt			\
 				|NN SV *sv				\
+				|NN const char *locale			\
+				|NN const struct tm *mytm
+S	|SV *	|sv_strftime_common					\
+				|NN SV *fmt				\
+				|NN const char *locale			\
 				|NN const struct tm *mytm
 # if defined(HAS_MISSING_LANGINFO_ITEM_) || !defined(HAS_NL_LANGINFO)
 S	|const char *|emulate_langinfo					\

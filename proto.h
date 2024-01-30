@@ -7015,9 +7015,9 @@ S_get_locale_string_utf8ness_i(pTHX_ const char *string, const locale_utf8ness_t
 # define PERL_ARGS_ASSERT_GET_LOCALE_STRING_UTF8NESS_I
 
 STATIC void
-S_ints_to_tm(pTHX_ struct tm *my_tm, int sec, int min, int hour, int mday, int mon, int year, int wday, int yday, int isdst);
+S_ints_to_tm(pTHX_ struct tm *my_tm, const char *locale, int sec, int min, int hour, int mday, int mon, int year, int wday, int yday, int isdst);
 # define PERL_ARGS_ASSERT_INTS_TO_TM            \
-        assert(my_tm)
+        assert(my_tm); assert(locale)
 
 STATIC bool
 S_is_locale_utf8(pTHX_ const char *locale);
@@ -7034,15 +7034,20 @@ S_populate_hash_from_C_localeconv(pTHX_ HV *hv, const char *locale, const U32 wh
         assert(hv); assert(locale); assert(strings); assert(integers)
 
 STATIC bool
-S_strftime8(pTHX_ const char *fmt, SV *sv, const struct tm *mytm, const utf8ness_t fmt_utf8ness, utf8ness_t *result_utf8ness, const bool called_externally);
+S_strftime8(pTHX_ const char *fmt, SV *sv, const char *locale, const struct tm *mytm, const utf8ness_t fmt_utf8ness, utf8ness_t *result_utf8ness, const bool called_externally);
 # define PERL_ARGS_ASSERT_STRFTIME8             \
-        assert(fmt); assert(sv); assert(mytm); assert(result_utf8ness)
+        assert(fmt); assert(sv); assert(locale); assert(mytm); assert(result_utf8ness)
 
 STATIC bool
-S_strftime_tm(pTHX_ const char *fmt, SV *sv, const struct tm *mytm)
+S_strftime_tm(pTHX_ const char *fmt, SV *sv, const char *locale, const struct tm *mytm)
         __attribute__format__(__strftime__,pTHX_1,0);
 # define PERL_ARGS_ASSERT_STRFTIME_TM           \
-        assert(fmt); assert(sv); assert(mytm)
+        assert(fmt); assert(sv); assert(locale); assert(mytm)
+
+STATIC SV *
+S_sv_strftime_common(pTHX_ SV *fmt, const char *locale, const struct tm *mytm);
+# define PERL_ARGS_ASSERT_SV_STRFTIME_COMMON    \
+        assert(fmt); assert(locale); assert(mytm)
 
 # if defined(HAS_MISSING_LANGINFO_ITEM_) || !defined(HAS_NL_LANGINFO)
 STATIC const char *
