@@ -2698,6 +2698,40 @@ S_bool_setlocale_2008_i(pTHX_
 #endif   /* End of the various implementations of the setlocale and
             querylocale macros used in the remainder of this program */
 
+/* Most of the cases in this file just toggle the locale briefly; but there are
+ * a few instances where a longer toggled interval, over multiple operations,
+ * is desirable, since toggling and untoggling have a cost.  But on platforms
+ * where toggling must be done in a critical section, it is even more desirable
+ * to minimize the length of time in an uninterruptable state.
+ *
+ * The macros below try to balance these competing interests.  When the
+ * toggling is to be brief, simply use the plain "toggle_locale" macros.  But
+ * in addition, in the places where an over-arching toggle would be nice, add
+ * calls to the macros below that have the "_locking" suffix.  These are no-ops
+ * except on systems where the toggling doesn't force a critical section.  But
+ * otherwise these toggle to the over-arching locale.  When the individual
+ * toggles are executed, they will check and find that the locale is already in
+ * the right state, and return without doing anything. */
+#if TOGGLING_LOCKS
+#  define toggle_locale_c_unless_locking(cat,          locale)  NULL
+#  define toggle_locale_c_if_locking(    cat,          locale)              \
+                         toggle_locale_i(cat##_INDEX_, locale)
+
+#  define restore_toggled_locale_c_unless_locking(cat,          locale)     \
+                         PERL_UNUSED_ARG(locale)
+#  define restore_toggled_locale_c_if_locking(    cat,          locale)     \
+                restore_toggled_locale_i(         cat##_INDEX_, locale)
+#else
+#  define toggle_locale_c_unless_locking(cat,          locale)              \
+                         toggle_locale_i(cat##_INDEX_, locale)
+#  define toggle_locale_c_if_locking(    cat,          locale)  NULL
+
+#  define restore_toggled_locale_c_unless_locking(cat,          locale)     \
+                         restore_toggled_locale_i(cat##_INDEX_, locale)
+#  define restore_toggled_locale_c_if_locking(    cat,          locale)     \
+                         PERL_UNUSED_ARG(locale)
+#endif
+
 /* query_nominal_locale_i() is used when the caller needs the locale that an
  * external caller would be expecting, and not what we're secretly using
  * behind the scenes.  It deliberately doesn't handle LC_ALL; use
@@ -7335,7 +7369,8 @@ S_emulate_langinfo(pTHX_ const int item,
         /* Here we have figured out what to call strftime() with */
 
         struct tm  mytm;
-        const char * orig_TIME_locale = toggle_locale_c(LC_TIME, locale);
+        const char * orig_TIME_locale
+                            = toggle_locale_c_unless_locking(LC_TIME, locale);
 
         /* The year was deliberately chosen so that January 1 is on the
         * first day of the week.  Since we're only getting one thing at a
@@ -7360,7 +7395,7 @@ S_emulate_langinfo(pTHX_ const int item,
             succeeded = strftime_tm(format, sv, locale, &mytm);
         }
 
-        restore_toggled_locale_c(LC_TIME, orig_TIME_locale);
+        restore_toggled_locale_c_unless_locking(LC_TIME, orig_TIME_locale);
 
         if (UNLIKELY(! succeeded)) {
             retval = "";
@@ -7447,7 +7482,7 @@ S_emulate_langinfo(pTHX_ const int item,
       int         * vars[] = {&year,  &min,  &sec,  &mday, &hour, &mon, &mday };
         Size_t j = 0;   /* Current index into the above tables */
 
-        orig_TIME_locale = toggle_locale_c(LC_TIME, locale);
+        orig_TIME_locale = toggle_locale_c_unless_locking(LC_TIME, locale);
 
         for (unsigned int i = 1; i <= 99; i++) {
             struct tm  mytm;
@@ -7534,7 +7569,7 @@ S_emulate_langinfo(pTHX_ const int item,
 
         SvREFCNT_dec_NN(alt_dig_sv);
 
-        restore_toggled_locale_c(LC_TIME, orig_TIME_locale);
+        restore_toggled_locale_c_unless_locking(LC_TIME, orig_TIME_locale);
 
         retval_type = RETVAL_IN_sv;
         break;
@@ -7657,6 +7692,8 @@ S_maybe_override_codeset(pTHX_ const char * codeset,
         return false;
     }
 
+    restore_toggled_locale_c_if_locking(LC_CTYPE, orig_CTYPE_locale);
+
     /* Here, the name doesn't indicate UTF-8, but MB_CUR_MAX indicates it could
      * be.  khw knows of only two other locales in the world, EUC-TW and GB
      * 18030, that legitimately require this many bytes (4).  So, if the name
@@ -7753,8 +7790,12 @@ S_maybe_override_codeset(pTHX_ const char * codeset,
 
     /* The code in the recursive call below can handle switching the locales,
      * but by doing it now here, that code will check and discover that there
-     * is no need to switch then restore, avoiding those each loop iteration */
-    const char * orig_TIME_locale = toggle_locale_c(LC_TIME, locale);
+     * is no need to switch then restore, avoiding those each loop iteration.
+     *
+     * But don't do this if toggling actually creates a critical section, so as
+     * to minimize the amount of time spent in each critical section. */
+    const char * orig_TIME_locale =
+                                toggle_locale_c_unless_locking(LC_TIME, locale);
 
 #  endif
 
@@ -7837,11 +7878,11 @@ S_maybe_override_codeset(pTHX_ const char * codeset,
 
 #  ifdef USE_LOCALE_TIME
 
-    restore_toggled_locale_c(LC_TIME, orig_TIME_locale);
+    restore_toggled_locale_c_unless_locking(LC_TIME, orig_TIME_locale);
 
 #  endif
 
-    restore_toggled_locale_c(LC_CTYPE, orig_CTYPE_locale);
+    restore_toggled_locale_c_unless_locking(LC_CTYPE, orig_CTYPE_locale);
 
     if (strings_utf8ness == UTF8NESS_NO) {
         return false;     /* No override */
