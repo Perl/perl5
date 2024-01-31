@@ -100,3 +100,10 @@ use builtin qw(true false);
 use builtin ':5.39';
 use builtin ':5.39';
 EXPECT
+########
+# builtin.c - import warns of collisions with package subs
+use warnings 'shadow';
+sub true { "ok" }
+use builtin 'true';
+EXPECT
+Lexical subroutine &true masks previously declared package subroutine at - line 4.

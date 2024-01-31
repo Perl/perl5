@@ -217,11 +217,11 @@ package main;
   state $w ;
   local $SIG{__WARN__} = sub { $w .= shift };
   eval '#line 87 squidges
-    state sub foo;
-    state sub foo {};
+    state sub lexsub1;
+    state sub lexsub1 {};
   ';
   is $w,
-     '"state" subroutine &foo masks earlier declaration in same scope at '
+     '"state" subroutine &lexsub1 masks earlier declaration in same scope at '
    . "squidges line 88.\n",
      'warning for state sub masking earlier declaration';
 }
@@ -584,11 +584,11 @@ package main;
   my $w ;
   local $SIG{__WARN__} = sub { $w .= shift };
   eval '#line 87 squidges
-    my sub foo;
-    my sub foo {};
+    my sub lexsub2;
+    my sub lexsub2 {};
   ';
   is $w,
-     '"my" subroutine &foo masks earlier declaration in same scope at '
+     '"my" subroutine &lexsub2 masks earlier declaration in same scope at '
    . "squidges line 88.\n",
      'warning for my sub masking earlier declaration';
 }
