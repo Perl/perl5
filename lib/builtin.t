@@ -276,6 +276,7 @@ package FetchStoreCounter {
 # imported builtins can be unexported
 {
     package UnimportTest;
+    no warnings 'shadow';
 
     sub true() { return "true" };
 

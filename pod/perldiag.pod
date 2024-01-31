@@ -3573,6 +3573,12 @@ The number of items in a hash can be obtained by doing:
 
     scalar(keys %hash);
 
+=item Lexical subroutine %s masks previously declared package subroutine
+
+(W shadow) The current package already contains a subroutine whose name
+matches that of a newly-declared lexical or lexically imported subroutine.
+The latter will take precedence and make the package one inaccessible by name.
+
 =item Lexing code attempted to stuff non-Latin-1 character into Latin-1 input
 
 (F) An extension is attempting to insert text into the current parse

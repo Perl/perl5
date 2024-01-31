@@ -616,3 +616,13 @@ f();
 EXPECT
 Variable "$è" is not available at (eval 4) line 1.
 ########
+use warnings 'shadow';
+use utf8;
+sub π {}
+sub pi {}
+my sub π {}
+my sub pi {}
+EXPECT
+Lexical subroutine &π masks previously declared package subroutine at - line 5.
+Lexical subroutine &pi masks previously declared package subroutine at - line 6.
+########
