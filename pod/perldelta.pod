@@ -239,7 +239,11 @@ XXX L<message|perldiag/"message">
 
 =item *
 
-XXX L<message|perldiag/"message">
+L<Lexical subroutine %s masks previously declared package subroutine|perldiag/"Lexical subroutine %s masks previously declared package subroutine">
+
+The current package already contains a subroutine whose name matches that of
+a newly-declared lexical or lexically imported subroutine.  The latter will
+take precedence and make the package one inaccessible by name.
 
 =back
 
