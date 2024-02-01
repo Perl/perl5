@@ -619,7 +619,7 @@ OPTIMIZE	= -Os
 LINK_DBG	= -s
 endif
 
-EXTRACFLAGS	= -Wall -Wextra -Werror=pointer-arith -Wno-format -Wno-long-long -Werror=vla
+CWARNFLAGS	= -Wall -Wextra -Werror=pointer-arith -Wno-format -Wno-long-long -Werror=vla
 ifeq ($(USE_CPLUSPLUS),define)
 EXTRACFLAGS	+= $(CXX_FLAG)
 else
@@ -763,7 +763,7 @@ TESTPREPGCC	=
 
 endif
 
-CFLAGS_O	= $(CFLAGS) $(BUILDOPT)
+CFLAGS_O	= $(CFLAGS) $(BUILDOPT) $(CWARNFLAGS)
 
 RSC_FLAGS	=
 
@@ -1424,10 +1424,10 @@ endif
 	@rem. > $(MINIDIR)\.exists
 
 $(MINIDIR)\\%$(o): %.c
-	$(CC) -c -I$(MINIDIR) $(CFLAGS) $(MINIBUILDOPT) -DPERL_EXTERNAL_GLOB -DPERL_IS_MINIPERL $(OBJOUT_FLAG)$@ $(PDBOUT) $<
+	$(CC) -c -I$(MINIDIR) $(CFLAGS) $(CWARNFLAGS) $(MINIBUILDOPT) -DPERL_EXTERNAL_GLOB -DPERL_IS_MINIPERL $(OBJOUT_FLAG)$@ $(PDBOUT) $<
 
 $(MINIDIR)\\%$(o): ..\%.c
-	$(CC) -c -I$(MINIDIR) $(CFLAGS) $(MINIBUILDOPT) -DPERL_EXTERNAL_GLOB -DPERL_IS_MINIPERL $(OBJOUT_FLAG)$@ $(PDBOUT) $<
+	$(CC) -c -I$(MINIDIR) $(CFLAGS) $(CWARNFLAGS) $(MINIBUILDOPT) -DPERL_EXTERNAL_GLOB -DPERL_IS_MINIPERL $(OBJOUT_FLAG)$@ $(PDBOUT) $<
 
 $(MINICORE_OBJ) : $(CORE_NOCFG_H)
 
