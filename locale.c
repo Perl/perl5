@@ -458,6 +458,25 @@ static int debug_initialization = 0;
 #  error Revert the commit following the one that added this line, then revert this one
 #endif
 
+#if defined(MULTIPLICITY) && defined(DEBUGGING)
+#  define uselocale(a)                                                      \
+    ({                                                                      \
+       locale_t obj = uselocale(a);                                         \
+       const char * name;                                                   \
+       if (obj == LC_GLOBAL_LOCALE) name = "global object";                 \
+       else if (obj == PL_cur_locale_obj) name = "current locale object";   \
+       else if (obj == PL_C_locale_obj) name = "C object";                  \
+       else name = Perl_form(aTHX_ "0x%p", (void *) obj);                   \
+       if (a == 0) {                                                        \
+            DEBUG_U(PerlIO_printf(Perl_debug_log, "uselocale(0) returned %s\n",\
+                                                  name));                   \
+       } else {DEBUG_U(PerlIO_printf(Perl_debug_log, "changing locale to"   \
+                               " 0x%p returned %s\n", (void *) a, name));   \
+        }                                                                   \
+        obj;                                                                \
+    })
+#endif
+
 #ifdef WIN32_USE_FAKE_OLD_MINGW_LOCALES
 
    /* Use -Accflags=-DWIN32_USE_FAKE_OLD_MINGW_LOCALES on a POSIX or *nix box
