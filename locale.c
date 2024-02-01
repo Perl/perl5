@@ -6382,7 +6382,9 @@ S_populate_hash_from_localeconv(pTHX_ HV * hv,
 #  define CTYPE_TEARDOWN  end_DEALING_WITH_MISMATCHED_CTYPE(locale)
 
    /* Setup any LC_NUMERIC handling */
-#  ifndef USE_LOCALE_NUMERIC
+#  ifndef USE_LOCALE_NUMERIC    /* Under this configuration, this function
+                                   won't get called looking for NUMERIC values;
+                                   define macros so will compile */
 #    define NUMERIC_TEARDOWN
 #  else
 
