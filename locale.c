@@ -6478,7 +6478,7 @@ S_langinfo_sv_i(pTHX_
         }
 
         SvUTF8_off(sv);
-        retval = SvPV_nolen(sv);
+        retval = SvPV_nomg_const_nolen(sv);
 
         if (utf8ness) {
             *utf8ness = get_locale_string_utf8ness_i(retval,
