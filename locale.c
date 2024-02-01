@@ -6332,6 +6332,7 @@ S_langinfo_sv_i(pTHX_
  *                  well.
  */
     const char * retval = NULL;
+    utf8ness_t is_utf8 = UTF8NESS_UNKNOWN;
 
     /* Do a bit of extra work so avoid
      *  switch() { default: ... }
@@ -6406,12 +6407,10 @@ S_langinfo_sv_i(pTHX_
 
         /* In all cases that get here, the char* instead delivers a numeric
          * value, so its UTF-8ness is meaningless */
+        is_utf8 = UTF8NESS_IMMATERIAL;
+
         if (sv == PL_scratch_langinfo) {
             retval = SvPV_nomg_const_nolen(sv);
-
-            if (utf8ness) {
-                *utf8ness = UTF8NESS_IMMATERIAL;
-            }
         }
 
         break;
@@ -6541,21 +6540,26 @@ S_langinfo_sv_i(pTHX_
 
         SvUTF8_off(sv);
         retval = SvPV_nomg_const_nolen(sv);
-
-        if (utf8ness) {
-            *utf8ness = get_locale_string_utf8ness_i(retval,
-                                                     LOCALE_UTF8NESS_UNKNOWN,
-                                                     locale, cat_index);
-            if (*utf8ness == UTF8NESS_YES) {
-                SvUTF8_on(sv);
-            }
-        }
     }
 
     GCC_DIAG_RESTORE_STMT;
 
     restore_toggled_locale_i(cat_index, orig_switched_locale);
     end_DEALING_WITH_MISMATCHED_CTYPE(locale)
+
+    if (utf8ness) {
+        if (LIKELY(is_utf8 == UTF8NESS_UNKNOWN)) {  /* default: case above */
+            is_utf8 = get_locale_string_utf8ness_i(retval,
+                                                   LOCALE_UTF8NESS_UNKNOWN,
+                                                   locale, cat_index);
+        }
+
+        *utf8ness = is_utf8;
+
+        if (*utf8ness == UTF8NESS_YES) {
+            SvUTF8_on(sv);
+        }
+    }
 
     return retval;
 }
