@@ -7680,7 +7680,7 @@ S_emulate_langinfo(pTHX_ const PERL_INTMAX_T item,
 
         /* Many of the remaining digits have representations that include at
          * least two 0-sized strings */
-        SV* alt_dig_sv = newSV(2 * alt0_len);
+        SV* alt_dig_sv = newSVpvz(2 * alt0_len);
 
         /* Various %O formats can be used to derive the alternate digits.  Only
          * %Oy can go up to the full 100 values.  If it doesn't work, we try
@@ -8265,7 +8265,7 @@ S_sv_strftime_common(pTHX_ SV * fmt,
      * to get almost all the typical returns to fit without the called function
      * having to realloc; this is a somewhat educated guess, but feel free to
      * tweak it. */
-    SV* sv = newSV(MAX(SvCUR(fmt) * 2, 64));
+    SV* sv = newSVpvz(MAX(SvCUR(fmt) * 2, 64));
     if (! strftime8(SvPV_nolen(fmt),
                     sv,
                     locale,
