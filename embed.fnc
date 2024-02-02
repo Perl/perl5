@@ -4132,8 +4132,6 @@ S	|bool	|argvout_final	|NN MAGIC *mg				\
 S	|void	|exec_failed	|NN const char *cmd			\
 				|int fd 				\
 				|int do_report
-RS	|bool	|ingroup	|Gid_t testgid				\
-				|bool effective
 ST	|bool	|is_fork_open	|NN const char *name
 S	|bool	|openn_cleanup	|NN GV *gv				\
 				|NN IO *io				\
@@ -4154,6 +4152,10 @@ S	|IO *	|openn_setup	|NN GV *gv				\
 				|NN PerlIO **saveofp			\
 				|NN int *savefd 			\
 				|NN char *savetype
+# if !defined(DOSISH)
+RS	|bool	|ingroup	|Gid_t testgid				\
+				|bool effective
+# endif
 #endif
 #if defined(PERL_IN_DOOP_C)
 RS	|Size_t |do_trans_complex					\
