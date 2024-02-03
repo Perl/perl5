@@ -2971,9 +2971,7 @@ Perl_cando(pTHX_ Mode_t mode, bool effective, const Stat_t *statbufp)
      /* Atari stat() does pretty much the same thing. we set x_bit_set_in_stat
       * too so it will actually look into the files for magic numbers
       */
-# ifdef __MINGW32__
     PERL_UNUSED_ARG(effective);
-# endif
     return cBOOL(mode & statbufp->st_mode);
 
 #else /* ! DOSISH */
