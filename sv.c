@@ -4972,9 +4972,14 @@ Perl_sv_setsv_cow(pTHX_ SV *dsv, SV *ssv)
 /*
 =for apidoc sv_setpv_bufsize
 
-Sets the SV to be a string of cur bytes length, with at least
-len bytes available. Ensures that there is a null byte at SvEND.
+Sets the SV to be a string of C<cur> bytes length, with at least
+C<len> bytes available.   Ensures that there is a null byte at C<SvEND>.
+
 Returns a char * pointer to the SvPV buffer.
+
+The caller must set the first C<cur> bytes of C<sv> before the first use of its
+contents.  This means that if C<cur> is zero, the SV is immediately fully
+formed and ready to use, just like any other SV containing an empty string.
 
 =cut
 */
