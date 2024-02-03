@@ -11064,6 +11064,8 @@ C<sv_setpvf_nocontext> and C<sv_setpvf_mg_nocontext> do not take a thread
 context (C<aTHX>) parameter, so are used in situations where the caller
 doesn't already have the thread context.
 
+B<The UTF-8 flag is not changed by these functions.>
+
 =cut
 */
 
@@ -11091,6 +11093,8 @@ C<sv_vsetpvf> skips all magic.
 
 They are usually used via their frontends, C<L</sv_setpvf>> and
 C<L</sv_setpvf_mg>>.
+
+B<The UTF-8 flag is not changed by these functions.>
 
 =cut
 */
@@ -11257,6 +11261,8 @@ Perl_sv_vcatpvf_mg(pTHX_ SV *const sv, const char *const pat, va_list *const arg
 
 Works like C<sv_vcatpvfn> but copies the text into the SV instead of
 appending it.
+
+B<The UTF-8 flag is not changed by this function.>
 
 Usually used via one of its frontends L</C<sv_vsetpvf>> and
 L</C<sv_vsetpvf_mg>>.
