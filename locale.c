@@ -500,6 +500,10 @@ S_wsetlocale(const int category, const wchar_t * wlocale)
 #endif  /* WIN32_USE_FAKE_OLD_MINGW_LOCALES */
 
 /* 'for' loop headers to hide the necessary casts */
+#define for_category_indexes_between(i, m, n)                               \
+    for (locale_category_index i = (locale_category_index) (m);             \
+         i <= (locale_category_index) (n);                                  \
+         i = (locale_category_index) ((int) i + 1))
 #define for_all_individual_category_indexes(i)                              \
     for (locale_category_index i = (locale_category_index) 0;               \
          i < LC_ALL_INDEX_;                                                 \
@@ -3226,9 +3230,9 @@ S_find_locale_from_environment(pTHX_ const locale_category_index index)
     /* For each desired category, use any corresponding environment variable;
      * or the default if none such exists. */
     bool is_disparate = false;  /* Assume is uniform until proven otherwise */
-    for (unsigned i = lower; i <= upper; i++) {
+    for_category_indexes_between(i, lower, upper) {
         const char * const env_override = PerlEnv_getenv(category_names[i]);
-        unsigned int j = i - offset;
+        locale_category_index j = (locale_category_index) (i - offset);
 
         if (env_override && strNE(env_override, "")) {
             locale_names[j] = env_override;
