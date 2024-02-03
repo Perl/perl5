@@ -6321,8 +6321,10 @@ S_langinfo_sv_i(pTHX_
              * case other platforms also violate the standard, the code below
              * looks for NUL and any graphic \W character as a potential
              * separator. */
-            const char * sep_pos = strpbrk(retval,
-                                        " !\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~");
+            const char * sep_pos = strchr(retval, ';');
+            if (! sep_pos) {
+                sep_pos = strpbrk(retval, " !\"#$%&'()*+,-./:<=>?@[\\]^_`{|}~");
+            }
             if (sep_pos) {
                 separator = *sep_pos;
             }
