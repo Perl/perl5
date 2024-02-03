@@ -6307,7 +6307,10 @@ S_langinfo_sv_i(pTHX_
 
         retval = nl_langinfo(item);
         Size_t total_len = strlen(retval);
-        char separator;
+
+        /* Initialized only to silence some dumber compilers warning that
+         * might be uninitialized */
+        char separator = ';';
 
         if (UNLIKELY(item == ALT_DIGITS) && total_len > 0) {
 
