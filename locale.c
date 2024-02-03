@@ -6756,6 +6756,7 @@ S_emulate_langinfo(pTHX_ const int item,
 
         /* We just assume the codeset is ASCII; no need to check for it being
          * UTF-8 */
+        SvUTF8_off(sv);
 
         restore_toggled_locale_c(LC_CTYPE, orig_CTYPE_locale);
 
