@@ -7066,9 +7066,15 @@ the plain locale pragma without a parameter (S<C<use locale>>) is in effect.
 
 #else   /* Below: Threaded, and locales are supported */
 
-    /* A locale mutex is required on all such threaded builds.
-     *
-     * This mutex simulates a general (or recursive) semaphore.  The current
+    /* A locale mutex is required on all such threaded builds. */
+#  ifdef WIN32
+
+    /* Windows mutexes are all general semaphores */
+#    define LOCALE_LOCK_(dummy) MUTEX_LOCK(&PL_locale_mutex)
+#    define LOCALE_UNLOCK_      MUTEX_UNLOCK(&PL_locale_mutex)
+#  else
+
+    /* This mutex simulates a general (or recursive) semaphore.  The current
      * thread will lock the mutex if the per-thread variable is zero, and then
      * increments that variable.  Each corresponding UNLOCK decrements the
      * variable until it is 0, at which point it actually unlocks the mutex.
@@ -7081,7 +7087,7 @@ the plain locale pragma without a parameter (S<C<use locale>>) is in effect.
      * Clang improperly gives warnings for this, if not silenced:
      * https://clang.llvm.org/docs/ThreadSafetyAnalysis.html#conditional-locks
      */
-#  define LOCALE_LOCK_(cond_to_panic_if_already_locked)                     \
+#    define LOCALE_LOCK_(cond_to_panic_if_already_locked)                   \
         STMT_START {                                                        \
             CLANG_DIAG_IGNORE(-Wthread-safety)                              \
             if (LIKELY(PL_locale_mutex_depth <= 0)) {                       \
@@ -7112,7 +7118,7 @@ the plain locale pragma without a parameter (S<C<use locale>>) is in effect.
             CLANG_DIAG_RESTORE                                              \
         } STMT_END
 
-#  define LOCALE_UNLOCK_                                                    \
+#    define LOCALE_UNLOCK_                                                  \
         STMT_START {                                                        \
             if (LIKELY(PL_locale_mutex_depth == 1)) {                       \
                 UNLESS_PERL_MEM_LOG(DEBUG_Lv(PerlIO_printf(Perl_debug_log,  \
@@ -7137,6 +7143,7 @@ the plain locale pragma without a parameter (S<C<use locale>>) is in effect.
             }                                                               \
         } STMT_END
 
+#  endif
 #  if defined(USE_THREADS) && ! defined(USE_THREAD_SAFE_LOCALE)
 
      /* By definition, a thread-unsafe locale means we need a critical
