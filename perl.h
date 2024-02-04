@@ -7452,9 +7452,11 @@ cannot have changed since the precalculation.
 
 #  define NOT_IN_NUMERIC_STANDARD_ (! PL_numeric_standard)
 
-/* We can lock the category to stay in the C locale, making requests to the
- * contrary be noops, in the dynamic scope by setting PL_numeric_standard to 2.
- * */
+/* This macro is designed to be a helper macro when we think an operation needs
+ * to take place in the underlying numeric locale category.  When 'true', the
+ * caller will attempt to toggle to that category.  But a later addition was an
+ * override that prevents that toggle when PL_numeric_standard >= 2.  The name
+ * of the macro was not changed when this was added. */
 #  define NOT_IN_NUMERIC_UNDERLYING_                                        \
                     (! PL_numeric_underlying && PL_numeric_standard < 2)
 
