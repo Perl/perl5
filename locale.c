@@ -1974,7 +1974,8 @@ S_stdize_locale(pTHX_ const int category,
  * threading is invisible to us.  Currently this is only on later Windows
  * versions. */
 
-#  define querylocale_r(cat)  mortalized_pv_copy(stdized_setlocale(cat, NULL))
+#  define querylocale_r(cat)      mortalized_pv_copy(querylocale_r_imm(cat))
+#  define querylocale_r_imm(cat)  stdized_setlocale(cat, NULL)
 #  define bool_setlocale_r(cat, locale) cBOOL(posix_setlocale(cat, locale))
 
 /*---------------------------------------------------------------------------*/
@@ -2022,8 +2023,8 @@ S_setlocale_i(pTHX_ const int category, const char * locale)
     * automatic mitigation by making sure there is a per-thread return from
     * setlocale(), and that a mutex protects it from races */
 
-#  define querylocale_r(cat)                                                \
-                      mortalized_pv_copy(less_dicey_setlocale_r(cat, NULL))
+#  define querylocale_r(cat)      mortalized_pv_copy(querylocale_r_imm(cat))
+#  define querylocale_r_imm(cat)  less_dicey_setlocale_r(cat, NULL)
 
 STATIC const char *
 S_less_dicey_setlocale_r(pTHX_ const int category, const char * locale)
@@ -2089,7 +2090,8 @@ S_less_dicey_bool_setlocale_r(pTHX_ const int cat, const char * locale)
  * The locale is changed to the one specified by PL_curlocales[] just before
  * any libc call affected by it, and restored just afterwards. */
 
-#  define querylocale_i(i)    S_querylocale_emulate_safe_i(aTHX_ i, __LINE__)
+#  define querylocale_i(i)      mortalized_pv_copy(querylocale_i_imm(i))
+#  define querylocale_i_imm(i)  S_querylocale_emulate_safe_i(aTHX_ i, __LINE__)
 
 STATIC const char *
 S_querylocale_emulate_safe_i(pTHX_ const locale_category_index  cat_index,
@@ -2116,7 +2118,7 @@ S_querylocale_emulate_safe_i(pTHX_ const locale_category_index  cat_index,
 
 #  endif
 
-    return mortalized_pv_copy(PL_curlocales[cat_index]);
+    return PL_curlocales[cat_index];
 }
 
 /*---------------------------------------------------------------------------*/
@@ -2537,7 +2539,15 @@ Perl_category_unlock(pTHX_ const UV mask,
 #    include <libintl.h>
 #  endif
 
-#  define querylocale_i(i)    querylocale_2008_i(i, __LINE__)
+#  define querylocale_i(i)      querylocale_2008_i(i, false,  __LINE__)
+#  define querylocale_i_imm(i)  querylocale_2008_i(i, true, __LINE__)
+
+    /* We need to define these derivative macros here, as they are needed in
+     * the implementing functions (for recursive calls).  They also get defined
+     * where all the other derivative macros are defined, and  the compiler
+     * will complain if the definitions get out of sync */
+#  define querylocale_c(cat)      querylocale_i(cat##_INDEX_)
+#  define querylocale_c_imm(cat)  querylocale_i_imm(cat##_INDEX_)
 
     /* We need to define this derivative macro here, as it is needed in
      * the implementing function (for recursive calls).  It also gets defined
@@ -2547,6 +2557,7 @@ Perl_category_unlock(pTHX_ const UV mask,
 
 STATIC const char *
 S_querylocale_2008_i(pTHX_ const locale_category_index index,
+                           const bool for_immediate_use,
                            const line_t caller_line)
 {
     PERL_ARGS_ASSERT_QUERYLOCALE_2008_I;
@@ -2649,7 +2660,10 @@ S_querylocale_2008_i(pTHX_ const locale_category_index index,
                      : "C";
         }
         else {
-            retval = mortalized_pv_copy(PL_curlocales[index]);
+            retval = PL_curlocales[index];
+            if (! for_immediate_use) {
+                retval = mortalized_pv_copy(retval);
+            }
         }
     }
 
@@ -2659,7 +2673,8 @@ S_querylocale_2008_i(pTHX_ const locale_category_index index,
      * of the current locale not being the global one on platforms where
      * USE_PL_CURLOCALES is NOT in effect.  That means the system must have
      * some form of querylocale.  But these have varying characteristics, so
-     * first create some #defines to make the actual 'else' clause uniform.
+     * first create some #defines to make the actual 'else' clause as uniform
+     * as possible.
      *
      * First, glibc has a function that implements querylocale(), but is called
      * something else, and takes the category number; the others take the mask.
@@ -2745,6 +2760,15 @@ S_querylocale_2008_i(pTHX_ const locale_category_index index,
                 QUERYLOCALE_UNLOCK;
                 retval = "C";
             }
+
+#    ifdef HAS_THREAD_SAFE_QUERYLOCALE
+
+            else if (for_immediate_use) {
+                QUERYLOCALE_UNLOCK;
+            }
+
+#    endif
+
             else {
                 retval = savepv(retval);
                 QUERYLOCALE_UNLOCK;
@@ -3148,7 +3172,7 @@ S_bool_setlocale_2008_i(pTHX_
      * changed, see [perl #134264] and
      * https://sourceware.org/bugzilla/show_bug.cgi?id=24936 */
     if (old_messages_locale) {
-        if (strNE(old_messages_locale, querylocale_c(LC_MESSAGES))) {
+        if (strNE(old_messages_locale, querylocale_c_imm(LC_MESSAGES))) {
             textdomain(textdomain(NULL));
         }
     }
@@ -3190,11 +3214,19 @@ S_bool_setlocale_2008_i(pTHX_
  * mechanically derived from the fundamental ones. */
 
 #ifdef querylocale_r
-#  define querylocale_c(cat)    querylocale_r(cat)
-#  define querylocale_i(i)      querylocale_r(categories[i])
+#  define querylocale_c(cat)      querylocale_r(cat)
+#  define querylocale_i(i)        querylocale_r(categories[i])
+
+#  define querylocale_c_imm(cat)  querylocale_r_imm(cat)
+#  define querylocale_i_imm(i)    querylocale_r_imm(categories[i])
+
 #elif defined(querylocale_i)
-#  define querylocale_c(cat)    querylocale_i(cat##_INDEX_)
-#  define querylocale_r(cat)    querylocale_i(get_category_index(cat))
+
+#  define querylocale_c(cat)      querylocale_i(cat##_INDEX_)
+#  define querylocale_r(cat)      querylocale_i(get_category_index(cat))
+
+#  define querylocale_c_imm(cat)  querylocale_i_imm(cat##_INDEX_)
+#  define querylocale_r_imm(cat)  querylocale_i_imm(get_category_index(cat))
 #else
 #  error No querylocale() form defined
 #endif
@@ -4963,7 +4995,7 @@ S_native_querylocale_i(pTHX_ const locale_category_index cat_index)
 
 #  else
 
-        return save_to_buffer(querylocale_i(cat_index),
+        return save_to_buffer(querylocale_i_imm(cat_index),
                               &PL_setlocale_buf, &PL_setlocale_bufsize);
 #  endif
 
@@ -8808,7 +8840,7 @@ Perl_sv_strftime_tm(pTHX_ SV * fmt, const struct tm * mytm)
 
 #ifdef USE_LOCALE_TIME
 
-    return sv_strftime_common(fmt, querylocale_c(LC_TIME), mytm);
+    return sv_strftime_common(fmt, querylocale_c_imm(LC_TIME), mytm);
 
 #else
 
@@ -10712,7 +10744,7 @@ Perl_strxfrm(pTHX_ SV * src)
 #  ifdef USE_LOCALE_CTYPE
 
     const char * orig_ctype = toggle_locale_c(LC_CTYPE,
-                                              querylocale_c(LC_COLLATE));
+                                              querylocale_c_imm(LC_COLLATE));
 #  endif
 
     SV * dst = src;
@@ -10879,7 +10911,7 @@ Perl_my_strerror(pTHX_ const int errnum, utf8ness_t * utf8ness)
                matches */
         locale_t cur = duplocale(use_curlocale_scratch());
 
-        const char * locale = querylocale_c(LC_MESSAGES);
+        const char * locale = querylocale_c_imm(LC_MESSAGES);
         NEWLOCALE_LOCK;
         cur = newlocale(LC_CTYPE_MASK, locale, cur);
         NEWLOCALE_UNLOCK;

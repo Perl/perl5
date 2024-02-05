@@ -7227,7 +7227,7 @@ S_bool_setlocale_2008_i(pTHX_ const locale_category_index index, const char *new
         assert(new_locale)
 
 STATIC const char *
-S_querylocale_2008_i(pTHX_ const locale_category_index index, const line_t line);
+S_querylocale_2008_i(pTHX_ const locale_category_index index, const bool for_immediate_use, const line_t line);
 #     define PERL_ARGS_ASSERT_QUERYLOCALE_2008_I
 
 STATIC locale_t

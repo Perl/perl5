@@ -4594,6 +4594,7 @@ S	|bool	|bool_setlocale_2008_i					\
 				|const line_t caller_line
 S	|const char *|querylocale_2008_i				\
 				|const locale_category_index index	\
+				|const bool for_immediate_use		\
 				|const line_t line
 S	|locale_t|use_curlocale_scratch
 #   elif !defined(EMULATE_THREAD_SAFE_LOCALES) && \

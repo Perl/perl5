@@ -1384,7 +1384,7 @@
 #       endif
 #       if defined(USE_POSIX_2008_LOCALE)
 #         define bool_setlocale_2008_i(a,b,c)   S_bool_setlocale_2008_i(aTHX_ a,b,c)
-#         define querylocale_2008_i(a,b)        S_querylocale_2008_i(aTHX_ a,b)
+#         define querylocale_2008_i(a,b,c)      S_querylocale_2008_i(aTHX_ a,b,c)
 #         define use_curlocale_scratch()        S_use_curlocale_scratch(aTHX)
 #       elif !defined(EMULATE_THREAD_SAFE_LOCALES) && \
               defined(USE_LOCALE_THREADS) && !defined(USE_THREAD_SAFE_LOCALE)
