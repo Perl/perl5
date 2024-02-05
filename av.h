@@ -113,6 +113,7 @@ Note that there are both real and fake AVs; see the beginning of this file and
 'av.c'
 
 =for apidoc newAV
+=for apidoc newAV_mortal
 =for apidoc_item newAV_alloc_x
 =for apidoc_item newAV_alloc_xz
 
@@ -168,6 +169,11 @@ or implicitly when the first element is stored:
     (void)av_store(av, 0, sv);
 
 Unused array elements are typically initialized by C<av_extend>.
+
+=item C<newAV_mortal> form
+
+This also creates the whole-array data structure, but also mortalises it.
+(That is to say, a reference to the AV is added to the C<temps> stack.)
 
 =item C<newAV_alloc_x> form
 
