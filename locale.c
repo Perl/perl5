@@ -2232,8 +2232,7 @@ S_querylocale_2008_i(pTHX_ const locale_category_index index,
         else {
 
             QUERYLOCALE_LOCK;
-            retval = savepv(my_querylocale(index, cur_obj));
-            QUERYLOCALE_UNLOCK;
+            retval = my_querylocale(index, cur_obj);
 
             /* querylocale() may conflate the C locale with something that
              * isn't exactly the same.  See for example
@@ -2246,11 +2245,14 @@ S_querylocale_2008_i(pTHX_ const locale_category_index index,
              * rest of our code.  (The code is ordered this way so that if the
              * system distinugishes "C" from "POSIX", we do too.) */
             if (cur_obj == PL_C_locale_obj && ! isNAME_C_OR_POSIX(retval)) {
-                Safefree(retval);
-                retval = savepv("C");
+                QUERYLOCALE_UNLOCK;
+                retval = "C";
             }
-
-            SAVEFREEPV(retval);
+            else {
+                retval = savepv(retval);
+                QUERYLOCALE_UNLOCK;
+                SAVEFREEPV(retval);
+            }
         }
     }
 
