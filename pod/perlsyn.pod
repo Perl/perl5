@@ -787,8 +787,8 @@ is executed on the way past. It provides a means of deferring execution until
 a later time. This acts similarly to syntax provided by some other languages,
 often using keywords named C<try / finally>.
 
-This syntax is available if enabled by the C<defer> named feature, and is
-currently experimental. If experimental warnings are enabled it will emit a
+This syntax is available since Perl 5.36 if enabled by the C<defer> named feature,
+and is currently experimental. If experimental warnings are enabled it will emit a
 warning when used.
 
     use feature 'defer';
