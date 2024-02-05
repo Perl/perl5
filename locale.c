@@ -505,19 +505,11 @@ S_wsetlocale(const int category, const wchar_t * wlocale)
          i <= (locale_category_index) (n);                                  \
          i = (locale_category_index) ((int) i + 1))
 #define for_all_individual_category_indexes(i)                              \
-    for (locale_category_index i = (locale_category_index) 0;               \
-         i < LC_ALL_INDEX_;                                                 \
-         i = (locale_category_index) ((int) i + 1))
-
+        for_category_indexes_between(i, 0, LC_ALL_INDEX_ - 1)
 #define for_all_but_0th_individual_category_indexes(i)                      \
-    for (locale_category_index i = (locale_category_index) 1;               \
-         i < LC_ALL_INDEX_;                                                 \
-         i = (locale_category_index) ((int) i + 1))
-
+        for_category_indexes_between(i, 1, LC_ALL_INDEX_ - 1)
 #define for_all_category_indexes(i)                                         \
-    for (locale_category_index i = (locale_category_index) 0;               \
-         i <= LC_ALL_INDEX_;                                                \
-         i = (locale_category_index) ((int) i + 1))
+        for_category_indexes_between(i, 0, LC_ALL_INDEX_)
 
 #ifdef USE_LOCALE
 #  if defined(USE_FAKE_LC_ALL_POSITIONAL_NOTATION) && defined(LC_ALL)
