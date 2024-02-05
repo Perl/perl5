@@ -227,6 +227,36 @@ If there is no defaulting expression then the parameter is required by the
 constructor; the caller must pass it or an exception is thrown. With a
 defaulting expression this becomes optional.
 
+=head3 :reader
+
+A field with a C<:reader> attribute will generate a reader accessor method
+automatically.  The generated method will have an empty (i.e. zero-argument)
+signature, and its body will simply return the value of the field variable.
+
+    field $s :reader;
+
+    # Equivalent to
+    field $s;
+    method s () { return $s; }
+
+By default accessor method will have the same name as the field (minus the
+leading sigil), but a different name can be specified in the attribute's value.
+
+    field $x :reader(get_x);
+
+    # Generates a method
+    method get_x () { return $x; }
+
+Reader methods can be applied to non-scalar fields. When invoked in list
+context they yield the contents of the field; in scalar context they yield
+the count of elements, as if the field variable had been placed in scalar
+context.
+
+    field @users :reader;
+    ...
+
+    scalar $instance->users;
+
 =head2 Method attributes
 
 None yet.
@@ -301,20 +331,20 @@ that makes all field initializer expressions appear within the same CV on
 ADJUST blocks as well, merging them all into a single CV per class. This will
 make it faster to invoke if a class has more than one of them.
 
-=item * Accessor generator attributes
+=item * More accessor generator attributes
 
-Attributes to request that accessor methods be generated for fields. Likely
-C<:reader> and C<:writer>.
+Attributes to request that other kinds of accessor methods be generated for
+fields. Likely C<:writer>.
 
     class X {
-        field $name :reader;
+        field $name :writer;
     }
 
 Equivalent to
 
     class X {
         field $name;
-        method name { return $name; }
+        method set_name ($new) { $name = $new; return $self; }
     }
 
 =item * Metaprogramming

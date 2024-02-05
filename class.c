@@ -949,6 +949,88 @@ apply_field_attribute_param(pTHX_ PADNAME *pn, SV *value)
     (void)hv_store_ent(aux->xhv_class_param_map, value, newSVuv(PadnameFIELDINFO(pn)->fieldix), 0);
 }
 
+static void
+apply_field_attribute_reader(pTHX_ PADNAME *pn, SV *value)
+{
+    if(value)
+        SvREFCNT_inc(value);
+    else
+        /* Default to name minus the sigil */
+        value = newSVpvn_utf8(PadnamePV(pn) + 1, PadnameLEN(pn) - 1, PadnameUTF8(pn));
+
+    PADOFFSET fieldix = PadnameFIELDINFO(pn)->fieldix;
+
+    I32 floor_ix = start_subparse(FALSE, 0);
+    SAVEFREESV(PL_compcv);
+
+    I32 save_ix = block_start(TRUE);
+
+    PADOFFSET padix;
+
+    padix = pad_add_name_pvs("$self", 0, NULL, NULL);
+    assert(padix == PADIX_SELF);
+
+    padix = pad_add_name_pvn(PadnamePV(pn), PadnameLEN(pn), 0, NULL, NULL);
+    intro_my();
+
+    OP *methstartop;
+    {
+        UNOP_AUX_item *aux;
+        Newx(aux, 2 + 2, UNOP_AUX_item);
+
+        UNOP_AUX_item *ap = aux;
+        (ap++)->uv = 1;       /* fieldcount */
+        (ap++)->uv = fieldix; /* max_fieldix */
+
+        (ap++)->uv = padix;
+        (ap++)->uv = fieldix;
+
+        methstartop = newUNOP_AUX(OP_METHSTART, 0, NULL, aux);
+    }
+
+    OP *argcheckop;
+    {
+        UNOP_AUX_item *aux;
+        Newx(aux, 3, UNOP_AUX_item);
+
+        aux[0].iv = 0; /* params */
+        aux[1].iv = 0; /* opt_params */
+        aux[2].iv = 0; /* slurpy */
+
+        argcheckop = newUNOP_AUX(OP_ARGCHECK, 0, NULL, aux);
+    }
+
+    OP *retop;
+    {
+        OPCODE optype = 0;
+        switch(PadnamePV(pn)[0]) {
+            case '$': optype = OP_PADSV; break;
+            case '@': optype = OP_PADAV; break;
+            case '%': optype = OP_PADHV; break;
+            default: NOT_REACHED;
+        }
+
+        retop = newLISTOP(OP_RETURN, 0,
+            newOP(OP_PUSHMARK, 0),
+            newPADxVOP(optype, 0, padix));
+    }
+
+    OP *ops = newLISTOPn(OP_LINESEQ, 0,
+            newSTATEOP(0, NULL, NULL),
+            methstartop,
+            argcheckop,
+            retop,
+            NULL);
+
+    SvREFCNT_inc(PL_compcv);
+    ops = block_end(save_ix, ops);
+
+    OP *nameop = newSVOP(OP_CONST, 0, value);
+
+    CV *cv = newATTRSUB(floor_ix, nameop, NULL, NULL, ops);
+    CvIsMETHOD_on(cv);
+}
+
 static struct {
     const char *name;
     bool requires_value;
@@ -957,6 +1039,10 @@ static struct {
     { .name           = "param",
       .requires_value = false,
       .apply          = &apply_field_attribute_param,
+    },
+    { .name           = "reader",
+      .requires_value = false,
+      .apply          = &apply_field_attribute_reader,
     },
     { NULL, false, NULL }
 };
