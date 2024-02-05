@@ -5956,6 +5956,7 @@ t/bigmem/subst.t			Test s/// with large strings
 t/bigmem/subst2.t			Test s//EXPR/e with large strings
 t/bigmem/vec.t				Check vec() handles large offsets
 t/charset_tools.pl			To aid in portable testing across platforms with different character sets
+t/class/accessor.t			See if accessor methods work
 t/class/class.t				See if class declarations work
 t/class/construct.t			See if class constructors work
 t/class/destruct.t			See if class destruction works
