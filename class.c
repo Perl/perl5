@@ -489,6 +489,8 @@ static void S_split_attr_nameval(pTHX_ SV *sv, SV **namp, SV **valp)
 
         if(value_max >= value_at)
             *valp = sv_2mortal(newSVpvn_utf8(value_at, value_max - value_at + 1, do_utf8));
+        else
+            *valp = NULL;
     }
     else {
         *namp = sv;
