@@ -705,6 +705,12 @@ If the first character after the B<-M> or B<-m> is a dash (B<->)
 then the 'use' is replaced with 'no'.
 This makes no difference for B<-m>.
 
+Since Perl version 5.39.8, the C<-M> switch and the module name can now
+be passed in separate command-line arguments:
+
+  perl -M MODULE ...            # like perl -MMODULE ...
+  perl -M MODULE=arg1,arg2,...  # like perl -MMODULE=arg1,arg2,...
+
 A little builtin syntactic sugar means you can also say
 B<-mI<MODULE>=foo,bar> or B<-MI<MODULE>=foo,bar> as a shortcut for
 B<'-MI<MODULE> qw(foo bar)'>.  This avoids the need to use quotes when
