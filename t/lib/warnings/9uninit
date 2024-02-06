@@ -2148,7 +2148,7 @@ Use of uninitialized value $i in addition (+) at - line 11.
 Use of uninitialized value $k in hash element at - line 11.
 Use of uninitialized value $i in array element at - line 12.
 Use of uninitialized value $k in hash element at - line 12.
-Use of uninitialized value $i in array element at - line 13.
+Use of uninitialized value length($i) in array element at - line 13.
 Use of uninitialized value $k in hash element at - line 13.
 ########
 # perl #127877
