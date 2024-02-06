@@ -379,13 +379,6 @@ our %Modules = (
         'SYNCINFO'     => 'root on Sat Dec 30 21:42:47 2023',
         'FILES'        => q[cpan/Digest-MD5],
         'EXCLUDED'     => [ 'rfc1321.txt', 'bin/md5sum.pl' ],
-        'CUSTOMIZED'   => [
-            # https://github.com/Dual-Life/digest-md5/pull/24
-            'MD5.pm',
-            'MD5.xs',
-
-            't/files.t'
-        ],
     },
 
     'Digest::SHA' => {

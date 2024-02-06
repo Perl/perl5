@@ -2,9 +2,6 @@
 #     cd t
 #     ./perl -I../lib porting/customized.t --regen
 AutoLoader cpan/AutoLoader/t/02AutoSplit.t bb90cda13b88599ad45de4b45799d5218afcb6d8
-Digest::MD5 cpan/Digest-MD5/MD5.pm cf2fd9d327f3e314e9e66bb6ecb7a62b4ec72767
-Digest::MD5 cpan/Digest-MD5/MD5.xs dc40839d25ba5e2d6f42fc9b81b409f1d0dbfb0e
-Digest::MD5 cpan/Digest-MD5/t/files.t d3d8c88cb6849f73a15e8746ab62bafb67d3c981
 ExtUtils::Constant cpan/ExtUtils-Constant/lib/ExtUtils/Constant/Base.pm 7560e1018f806db5689dee78728ccb8374aea741
 ExtUtils::Constant cpan/ExtUtils-Constant/t/Constant.t 165e9c7132b003fd192d32a737b0f51f9ba4999e
 Filter::Util::Call pod/perlfilter.pod d1e217d0bc6083755b9017050b8724472c58275a
