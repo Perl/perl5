@@ -1315,8 +1315,6 @@ our %Modules = (
         # only necessary with the CPAN release.
         'CUSTOMIZED'   => [
             'lib/version.pm',
-
-            't/07locale.t'
          ],
 
         'MAP' => {
