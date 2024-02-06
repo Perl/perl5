@@ -13,10 +13,6 @@ MIME::Base64 cpan/MIME-Base64/Base64.xs ad617fe2d01932c35b92defa26d40aba601a95a8
 MIME::Base64 cpan/MIME-Base64/lib/MIME/Base64.pm 18e38d197c7c83f96b24f48bef514e93908e6a82
 MIME::Base64 cpan/MIME-Base64/lib/MIME/QuotedPrint.pm 36cbb455ab57b9bbca7e86f50987c8b1df1a8122
 Pod::Perldoc cpan/Pod-Perldoc/lib/Pod/Perldoc.pm 582be34c077c9ff44d99914724a0cc2140bcd48c
-Test2::Suite cpan/Test2-Suite/t/modules/Plugin/SRand.t f1d6a3f8e3f1a34f185c4c833f1ce8128da1da37
-Test2::Suite cpan/Test2-Suite/t/modules/Require/AuthorTesting.t 929b2134c121e9934c8c44c487442a7d33ed328b
-Test2::Suite cpan/Test2-Suite/t/modules/Require/EnvVar.t cb3b2c14cf6107ba6f711d3c4f8f5cc9fe308144
-Test2::Suite cpan/Test2-Suite/t/modules/Tools/GenTemp.t b595f2937b18a690e82bef596ae4a7706ade8d25
 Time::Piece cpan/Time-Piece/Piece.pm 8cec8b66183ceddb9bf2b6af35dcdd345bc9adfa
 Time::Piece cpan/Time-Piece/Piece.xs 543152540ee17788a638b2c5746b86c3d04401d1
 Win32API::File cpan/Win32API-File/File.pm 8fd212857f821cb26648878b96e57f13bf21b99e
