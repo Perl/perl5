@@ -16796,6 +16796,9 @@ Perl_varname(pTHX_ const GV *const gv, const char gvtype, PADOFFSET targ,
         /* We know that name has no magic, so can use 0 instead of SV_GMAGIC */
         Perl_sv_insert_flags(aTHX_ name, 0, 0,  STR_WITH_LEN("within "), 0);
     }
+    else {
+        assert(subscript_type == FUV_SUBSCRIPT_NONE);
+    }
 
     return name;
 }
@@ -17466,6 +17469,7 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
     case OP_UNPACK:
     case OP_SYSOPEN:
     case OP_SYSSEEK:
+    case OP_SPLICE: /* scalar splice(@x, $i, 0) ==> undef */
         match = 1;
         goto do_op;
 
@@ -17495,6 +17499,38 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
             sv_catpvs_nomg(sv, ")");
         }
         return sv;
+
+    case OP_SHIFT:
+    case OP_POP:
+        if (match) {
+            break;
+        }
+        o = cUNOPx(obase)->op_first;
+        if (o->op_type == OP_RV2AV) {
+            o2 = cUNOPx(o)->op_first;
+            if (o2->op_type != OP_GV) {
+                break;
+            }
+            gv = cGVOPx_gv(o2);
+            if (!gv) {
+                break;
+            }
+        }
+        else if (o->op_type == OP_PADAV) {
+            gv = NULL;
+        }
+        else {
+            break;
+        }
+        sv = varname(gv, '@', o->op_targ, NULL, 0, FUV_SUBSCRIPT_NONE);
+        if (sv) {
+            const char *name = OP_NAME(obase);
+            Perl_sv_insert_flags(aTHX_ sv, 0, 0, STR_WITH_LEN("("), 0);
+            Perl_sv_insert_flags(aTHX_ sv, 0, 0, name, strlen(name), 0);
+            sv_catpvs_nomg(sv, ")");
+            return sv;
+        }
+        break;
 
     case OP_POS:
         /* def-ness of rval pos() is independent of the def-ness of its arg */
