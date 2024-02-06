@@ -15,8 +15,11 @@ no warnings 'experimental::class';
 {
     class Testcase1 {
         field $s :reader = "the scalar";
+
         field @a :reader = qw( the array );
-        field %h :reader = qw( the hash );
+
+        # Present-but-empty parens counts as default
+        field %h :reader() = qw( the hash );
     }
 
     my $o = Testcase1->new;
