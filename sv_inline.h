@@ -852,7 +852,7 @@ PERL_STATIC_INLINE UV
 Perl_SvUV_nomg(pTHX_ SV *sv) {
     PERL_ARGS_ASSERT_SVUV_NOMG;
 
-    if (SvIOK_nog(sv))
+    if (SvUOK(sv))
         return SvUVX(sv);
     return sv_2uv_flags(sv, 0);
 }
@@ -861,7 +861,7 @@ PERL_STATIC_INLINE NV
 Perl_SvNV_nomg(pTHX_ SV *sv) {
     PERL_ARGS_ASSERT_SVNV_NOMG;
 
-    if (SvNOK_nog(sv))
+    if (SvNOK(sv))
         return SvNVX(sv);
     return sv_2nv_flags(sv, 0);
 }
