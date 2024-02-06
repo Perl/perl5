@@ -113,7 +113,7 @@ Note that there are both real and fake AVs; see the beginning of this file and
 'av.c'
 
 =for apidoc newAV
-=for apidoc newAV_mortal
+=for apidoc_item newAV_mortal
 =for apidoc_item newAV_alloc_x
 =for apidoc_item newAV_alloc_xz
 
