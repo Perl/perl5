@@ -17487,6 +17487,15 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
         goto do_op;
     }
 
+    case OP_LENGTH:
+        o = cUNOPx(obase)->op_first;
+        sv = find_uninit_var(o, uninit_sv, match, desc_p);
+        if (sv) {
+            Perl_sv_insert_flags(aTHX_ sv, 0, 0, STR_WITH_LEN("length("), 0);
+            sv_catpvs_nomg(sv, ")");
+        }
+        return sv;
+
     case OP_POS:
         /* def-ness of rval pos() is independent of the def-ness of its arg */
         if ( !(obase->op_flags & OPf_MOD))
