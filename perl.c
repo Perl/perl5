@@ -2226,8 +2226,6 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
         case 'h':
         case 'i':
         case 'l':
-        case 'M':
-        case 'm':
         case 'n':
         case 'p':
         case 's':
@@ -2239,6 +2237,21 @@ S_parse_body(pTHX_ char **env, XSINIT_t xsinit)
         case 'w':
             if ((s = moreswitches(s)))
                 goto reswitch;
+            break;
+
+        case 'M':
+            forbid_setid('M', FALSE);   /* XXX ? */
+            /* FALLTHROUGH */
+        case 'm':
+            forbid_setid('m', FALSE);   /* XXX ? */
+            if (*++s)                   /* -MModule */
+                s = S_moreswitch_m(aTHX_ c, s);
+            else if(argc && argv[1]) {  /* -M Module */
+                argc--; argv++;
+                s = S_moreswitch_m(aTHX_ c, *argv);
+            }
+            else
+                croak("Missing argument to -%c", c);
             break;
 
         case 't':

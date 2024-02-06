@@ -27,6 +27,15 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 Permit a space in C<-M> command-line option
+
+When processing command-line options, perl now allows a space between the
+C<-M> switch and the name of the module after it.
+
+    $ perl -M Data::Dumper=Dumper -E 'say Dumper [1,2,3]'
+
+This matches the existing behaviour of the C<-I> option.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
