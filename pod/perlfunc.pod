@@ -1463,7 +1463,7 @@ L<C<continue>|/continue BLOCK> block, it may be more entertaining.
     } continue {
         ### next always comes here
         do_something_else;
-        # then back the top to re-check EXPR
+        # then back to the top to re-check EXPR
     }
     ### last always comes here
 
