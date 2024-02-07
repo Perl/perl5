@@ -1673,6 +1673,13 @@ Use of uninitialized value in addition (+) at - line 4.
 use warnings 'uninitialized';
 my $nofile = '/no/such/file';
 my $v;
+$v = 1 + readline($nofile);
+EXPECT
+Use of uninitialized value in addition (+) at - line 4.
+########
+use warnings 'uninitialized';
+my $nofile = '/no/such/file';
+my $v;
 $v = 1 + eval { send($nofile, $buf,0) };
 EXPECT
 Use of uninitialized value in addition (+) at - line 4.

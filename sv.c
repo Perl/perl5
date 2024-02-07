@@ -17408,6 +17408,7 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
     case OP_TIED:
     case OP_GETC:
     case OP_SYSREAD:
+    case OP_READLINE:
     case OP_SEND:
     case OP_IOCTL:
     case OP_SOCKET:
