@@ -7377,10 +7377,10 @@ S_emulate_langinfo(pTHX_ const int item,
          * strftime() formats.
          *
          * We already have the alternate digit for zero in 'sv', generated
-         * using the %Ow format.  That was used because it seems least likely
-         * to have a leading zero.  But some locales return that anyway.  If
-         * the first half of 'sv' is identical to the second half, assume that
-         * is the case, and use just the first half */
+         * using the %Ow format, which was used because it seems least likely
+         * to have a leading zero.  But some locales return the equivalent of
+         * 00 anyway.  If the first half of 'sv' is identical to the second
+         * half, assume that is the case, and use just the first half */
         if ((alt0_len & 1) == 0) {
             Size_t half_alt0_len = alt0_len / 2;
             if (strnEQ(SvPVX(sv), SvPVX(sv) + half_alt0_len, half_alt0_len)) {
