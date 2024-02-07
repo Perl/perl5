@@ -225,6 +225,50 @@ XXX Changes (i.e. rewording) of diagnostic messages go here
 
 XXX Describe change here
 
+=item *
+
+L<Use of uninitialized value%s|perldiag/"Use of uninitialized value%s">
+
+This warning is now slightly more accurate in cases involving C<length>,
+C<pop>, C<shift>, or C<splice>:
+
+    my $x;
+    length($x) == 0
+    # Before:
+    #  Use of uninitialized value $x in numeric eq (==) at ...
+    # Now:
+    #  Use of uninitialized value length($x) in numeric eq (==) at ...
+
+That is, the warning no longer implies that C<$x> was used directly as an
+operand of C<==>, which it wasn't.
+
+Similarly:
+
+    my @xs;
+    shift @xs == 0
+    # Before:
+    #  Use of uninitialized value within @xs in numeric eq (==) at ...
+    # Now:
+    #  Use of uninitialized value shift(@xs) in numeric eq (==) at ...
+
+This is more accurate because there never was an C<undef> within C<@xs> as the
+warning implied. (The warning for C<pop> works analogously.)
+
+Finally:
+
+    my @xs = (1, 2, 3);
+    splice(@xs, 0, 0) == 0
+    # Before:
+    #  Use of uninitialized value within @xs in numeric eq (==) at ...
+    # Now:
+    #  Use of uninitialized value in numeric eq (==) at ...
+
+That is, in cases where C<splice> returns C<undef>, it no longer
+unconditionally blames its first argument. This was misleading because
+C<splice> can return C<undef> even if none of its arguments contain C<undef>.
+
+[GH #21930]
+
 =back
 
 =head1 Utility Changes
