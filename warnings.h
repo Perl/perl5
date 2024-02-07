@@ -163,6 +163,10 @@
 /* Warnings Categories added in Perl 5.039002 */
 
 #define WARN_DEPRECATED__MISSING_IMPORT_CALLED_WITH_ARGS 80
+
+/* Warnings Categories added in Perl 5.039008 */
+
+#define WARN_DEPRECATED__SUBSEQUENT_USE_VERSION 81
 #define WARNsize			 21
 #define WARN_ALLstring			 "\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125"
 #define WARN_NONEstring			 "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"
@@ -358,6 +362,7 @@ category parameters passed.
 =for apidoc Amnh||WARN_DEPRECATED__APOSTROPHE_AS_PACKAGE_SEPARATOR
 =for apidoc Amnh||WARN_DEPRECATED__SMARTMATCH
 =for apidoc Amnh||WARN_DEPRECATED__MISSING_IMPORT_CALLED_WITH_ARGS
+=for apidoc Amnh||WARN_DEPRECATED__SUBSEQUENT_USE_VERSION
 
 =cut
 */
