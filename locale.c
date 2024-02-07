@@ -7355,16 +7355,11 @@ S_emulate_langinfo(pTHX_ const int item,
         }
 
         /* Here, the item is 'ALT_DIGITS' and 'sv' contains the zeroth
-         * alternate digit.  If empty or doesn't differ from regular digits,
-         * return that there aren't alternate digits */
+         * alternate digit.  If empty, return that there aren't alternate
+         * digits */
         Size_t alt0_len = SvCUR(sv);
         if (alt0_len == 0) {
             retval_type = RETVAL_IN_sv;
-            break;
-        }
-
-        if (strchr(SvPVX(sv), '0')) {
-            retval = "";
             break;
         }
 
@@ -7480,6 +7475,14 @@ S_emulate_langinfo(pTHX_ const int item,
             sv_catpv_nomg (sv, current);
             sv_catpvn_nomg (sv, ";", 1);
         } /* End of loop generating ALT_DIGIT strings */
+
+        /* Above we accepted 0 for alt-0 in case the locale doesn't have a
+         * zero, but we rejected any other ASCII digits.  Now that we have
+         * processed everything, if that 0 is the only thing we found, it was a
+         * false positive, and the locale doesn't have alternate digits */
+        if (SvCUR(sv) == alt0_len + 1) {
+            SvCUR_set(sv, 0);
+        }
 
         SvREFCNT_dec_NN(alt_dig_sv);
 

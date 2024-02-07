@@ -2551,7 +2551,8 @@ foreach my $Locale (@Locale) {
         $test_names{$locales_test_number} =
                  'Verify ALT_DIGITS returns nothing, or else non-ASCII and'
                . ' the single char digits evaluate to consecutive integers'
-               . ' starting at 0';
+               . ' starting at 0; 0 is accepted for alt-0 for locales without'
+               . ' a zero';
 
         my $alts = langinfo(ALT_DIGITS);
         if ($alts) {
@@ -2559,8 +2560,10 @@ foreach my $Locale (@Locale) {
             my $prev = -1;
             foreach my $num (@alts) {
                 if ($num =~ /[[:ascii:]]/) {
-                    push @f, disp_str($num);
-                    last;
+                    if ($prev != -1 || $num != 0) {
+                        push @f, disp_str($num);
+                        last;
+                    }
                 }
 
                 # We only look at single character strings; likely locales
