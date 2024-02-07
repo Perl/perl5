@@ -3547,7 +3547,7 @@ S_reg_set_capture_string(pTHX_ REGEXP * const rx,
 #endif
         {
 #ifdef PERL_ANY_COW
-        didnt_cow:
+        didnt_cow: ;
 #endif
             SSize_t min = 0;
             SSize_t max = strend - strbeg;
