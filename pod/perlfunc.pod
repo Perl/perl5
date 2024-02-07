@@ -9261,7 +9261,7 @@ Returns true on success and L<C<undef>|/undef EXPR> otherwise.
 L<PerlIO> layers will be applied to the handle the same way they would in an
 L<C<open>|/open FILEHANDLE,MODE,EXPR> call that does not specify layers. That is,
 the current value of L<C<${^OPEN}>|perlvar/${^OPEN}> as set by the L<open>
-pragma in a lexical scope, or the C<-C> commandline option or C<PERL_UNICODE>
+pragma in a lexical scope, or the C<-C> command-line option or C<PERL_UNICODE>
 environment variable in the main program scope, falling back to the platform
 defaults as described in L<PerlIO/Defaults and how to override them>. If you
 want to remove any layers that may transform the byte stream, use
