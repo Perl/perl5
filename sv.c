@@ -4904,8 +4904,8 @@ Perl_sv_setsv_mg(pTHX_ SV *const dsv, SV *const ssv)
 
 #ifdef PERL_ANY_COW
 #  define SVt_COW SVt_PV
-SV *
-Perl_sv_setsv_cow(pTHX_ SV *dsv, SV *ssv)
+bool
+Perl_sv_setsv_cow(pTHX_ SV **pdsv, SV *ssv)
 {
     STRLEN cur = SvCUR(ssv);
     STRLEN len = SvLEN(ssv);
@@ -4916,6 +4916,8 @@ Perl_sv_setsv_cow(pTHX_ SV *dsv, SV *ssv)
 #endif
 
     PERL_ARGS_ASSERT_SV_SETSV_COW;
+
+    SV *dsv = *pdsv;
 #ifdef DEBUGGING
     if (DEBUG_C_TEST) {
         PerlIO_printf(Perl_debug_log, "Fast copy on write: %p -> %p\n",
@@ -4970,6 +4972,7 @@ Perl_sv_setsv_cow(pTHX_ SV *dsv, SV *ssv)
     sv_buf_to_ro(ssv);
 
   common_exit:
+    *pdsv = dsv;
     SvPV_set(dsv, new_pv);
     SvFLAGS(dsv) = new_flags;
     if (SvUTF8(ssv))
@@ -4980,7 +4983,7 @@ Perl_sv_setsv_cow(pTHX_ SV *dsv, SV *ssv)
     if (DEBUG_C_TEST)
                 sv_dump(dsv);
 #endif
-    return dsv;
+    return TRUE;
 }
 #endif
 
