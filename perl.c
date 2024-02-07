@@ -1127,7 +1127,7 @@ perl_destruct(pTHXx)
         PL_curlocales[i] = NULL;
     }
 #endif
-#if defined(USE_POSIX_2008_LOCALE) && defined(USE_THREADS)
+#if defined(USE_POSIX_2008_LOCALE) && defined(MULTIPLICITY)
     {
         /* This also makes sure we aren't using a locale object that gets freed
          * below */
