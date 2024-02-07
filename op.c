@@ -8030,6 +8030,10 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
             /* downgrading from >= 5.11 to < 5.11 is now fatal */
             if (PL_prevailing_version >= SHORTVER(5, 11) && shortver < SHORTVER(5, 11))
                 croak("Downgrading a use VERSION declaration to below v5.11 is not permitted");
+
+            /* OK let's at least warn */
+            deprecate_fatal_in(WARN_DEPRECATED__SUBSEQUENT_USE_VERSION, "5.46",
+                    "use VERSION while another use VERSION is in scope");
         }
 
         /* If a version >= 5.11.0 is requested, strictures are on by default! */

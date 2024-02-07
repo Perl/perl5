@@ -251,6 +251,7 @@ EXPECT
 use warnings;
 eval 'use 5.006; use 5.10.0';
 EXPECT
+use VERSION while another use VERSION is in scope is deprecated, and will become fatal in Perl 5.46 at (eval 1) line 1.
 ########
 # SKIP ? !$Config{default_inc_includes_dot}
 # NAME check warning for do with no . in @INC

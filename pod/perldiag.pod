@@ -7845,6 +7845,30 @@ even if it requests a later version.
 subsequent one that calls for a Perl version of at least 5.39 while the first
 is visible.
 
+=item use VERSION while another use VERSION is in scope is now deprecated
+
+(W deprecated) Once you have a C<use VERSION> statement in scope, any other
+C<use VERSION> statement is now deprecated, due to the increasing complexity
+of swapping from one prevalent version to another.
+
+It is suggested that you do not try to mix multiple different version
+declarations within the same file as it leads to complex behaviours about the
+visibility of features and builtin functions, as well as confusing human
+readers.
+
+If it is essential to have different C<use VERSION> declarations in different
+regions of the same file, you should surround each one by its own enclosing
+scope so the two do not mix.
+
+  {
+    use v5.20;
+    ...
+  }
+  {
+    use v5.36;
+    ...
+  }
+
 =item Use \x{...} for more than two hex characters in regex; marked by
 S<<-- HERE> in m/%s/
 

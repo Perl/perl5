@@ -2157,3 +2157,9 @@ c
 a
 d
 b
+########
+use warnings;
+use v5.12;
+use v5.20;
+EXPECT
+use VERSION while another use VERSION is in scope is deprecated, and will become fatal in Perl 5.46 at - line 3.
