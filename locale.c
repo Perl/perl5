@@ -233,17 +233,16 @@
  *      -Accflags=-DNO_POSIX_2008_LOCALE
  *          Even if the libc locale operations specified by the Posix 2008
  *          Standard are available on this platform and would otherwise be used
- *          (because this is a perl with multiplicity), perl is compiled to not
- *          use them.  This could be useful on platforms where the libc is
- *          buggy.  This is like NO_THREAD_SAFE_LOCALE, but has no effect on
- *          platforms that don't have these functions.
+ *          (because this is a threaded perl), perl is compiled to not use
+ *          them.  This could be useful on platforms where the libc is buggy.
+ *          This is like NO_THREAD_SAFE_LOCALE, but has no effect on platforms
+ *          that don't have these functions.
  *
  *      -Accflags=-DUSE_POSIX_2008_LOCALE
  *          Normally, setlocale() is used for locale operations on perls
- *          compiled without multiplicity.  This option causes the locale
- *          operations defined by the Posix 2008 Standard to always be used
- *          instead.  This could be useful on platforms where the libc
- *          setlocale() is buggy.
+ *          compiled without threads.  This option causes the locale operations
+ *          defined by the Posix 2008 Standard to always be used instead.  This
+ *          could be useful on platforms where the libc setlocale() is buggy.
  *
  *      -Accflags=-DNO_THREAD_SAFE_QUERYLOCALE
  *          This applies only to platforms that have a querylocale() libc
@@ -359,7 +358,7 @@ static int debug_initialization = 0;
 /* Automatically include the caller's file, and line number in debugging output;
  * and the errno (and/or extended errno) if non-zero.  On threaded perls add
  * the aTHX too. */
-#  if defined(USE_THREADS) && ! defined(NO_LOCALE_THREADS)
+#  if defined(MULTIPLICITY) && ! defined(NO_LOCALE_THREADS)
 #    define DEBUG_PRE_STMTS                                                 \
         DEBUG_ERRNO;                                                        \
         PerlIO_printf(Perl_debug_log, "\n%s: %" LINE_Tf ": 0x%p%s: ",       \
@@ -4569,7 +4568,7 @@ S_my_setlocale_debug_string_i(pTHX_
         retval_quote = "\"";
     }
 
-#  ifdef USE_LOCALE_THREADS
+#  ifdef MULTIPLICITY
 #    define THREAD_FORMAT "%p:"
 #    define THREAD_ARGUMENT aTHX_
 #  else
@@ -5067,7 +5066,7 @@ Perl_mbtowc_(pTHX_ const wchar_t * pwc, const char * s, const Size_t len)
 
 #else   /* Below we have some form of mbtowc() */
 #  if defined(HAS_MBRTOWC)                                      \
-   && (defined(USE_LOCALE_THREADS) || ! defined(HAS_MBTOWC))
+   && (defined(MULTIPLICITY) || ! defined(HAS_MBTOWC))
 #    define USE_MBRTOWC
 #  else
 #    undef USE_MBRTOWC
@@ -10610,6 +10609,7 @@ Perl_sync_locale(pTHX)
 #endif
 
 }
+
 #ifdef USE_PERL_SWITCH_LOCALE_CONTEXT
 
 void
