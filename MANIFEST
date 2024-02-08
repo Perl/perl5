@@ -5157,6 +5157,7 @@ ext/XS-APItest/t/sv_numeq.t			Test sv_numeq
 ext/XS-APItest/t/sv_streq.t			Test sv_streq
 ext/XS-APItest/t/svcat.t			Test sv_catpvn
 ext/XS-APItest/t/svcatpvf.t			Test sv_catpvf argument reordering
+ext/XS-APItest/t/svcow.t			Test COW
 ext/XS-APItest/t/sviscow.t			Test SvIsCOW
 ext/XS-APItest/t/svpeek.t			XS::APItest extension
 ext/XS-APItest/t/svpv.t				More generic SvPVbyte and SvPVutf8 tests

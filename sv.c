@@ -4916,7 +4916,7 @@ Perl_sv_setsv_cow(pTHX_ SV **pdsv, SV *ssv)
         (!CHECK_COWBUF_THRESHOLD(cur, len)
          || ! CHECK_COW_THRESHOLD(cur, len))) {
         DEBUG_C(PerlIO_printf(Perl_debug_log,
-                              "Fast copy on write: Sizes not appropriate to COW\n"));
+                              "Fast copy on write: Sizes %zu/%zu not appropriate to COW\n", cur, len));
         return FALSE;
     }
     if (dsv) {
