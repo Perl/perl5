@@ -992,14 +992,14 @@ apply_field_attribute_reader(pTHX_ PADNAME *pn, SV *value)
 
     OP *argcheckop;
     {
-        UNOP_AUX_item *aux;
-        Newx(aux, 3, UNOP_AUX_item);
+        struct op_argcheck_aux *aux = (struct op_argcheck_aux *)
+            PerlMemShared_malloc(sizeof(*aux));
 
-        aux[0].iv = 0; /* params */
-        aux[1].iv = 0; /* opt_params */
-        aux[2].iv = 0; /* slurpy */
+        aux->params     = 0;
+        aux->opt_params = 0;
+        aux->slurpy     = 0;
 
-        argcheckop = newUNOP_AUX(OP_ARGCHECK, 0, NULL, aux);
+        argcheckop = newUNOP_AUX(OP_ARGCHECK, 0, NULL, (UNOP_AUX_item *)aux);
     }
 
     OP *retop;
