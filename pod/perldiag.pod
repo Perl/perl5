@@ -7840,6 +7840,18 @@ in future Perl releases in incompatible ways.  This means that a pattern
 that compiles today may not in a future Perl release.  This warning is
 to alert you to that risk.
 
+=item use VERSION is not permitted while another use VERSION of 5.39 or above is in scope
+
+(F) Once you have a C<use VERSION> declaration that calls for a Perl version
+of at least 5.39, you cannot have a subsequent one while the first is visible,
+even if it requests a later version.
+
+=item use VERSION of 5.39 or above is not permitted while another use VERSION is in scope
+
+(F) Once you have a C<use VERSION> declaration in scope, you cannot have a
+subsequent one that calls for a Perl version of at least 5.39 while the first
+is visible.
+
 =item Use \x{...} for more than two hex characters in regex; marked by
 S<<-- HERE> in m/%s/
 
