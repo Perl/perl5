@@ -27,6 +27,25 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 C<:reader> attribute for field variables
+
+When using the C<class> feature, field variables can now take a C<:reader>
+attribute.  This requests that an accessor method be automatically created
+that simply returns the value of the field variable from the given instance.
+
+    field $name :reader;
+
+Is equivalent to
+
+    field $name;
+    method name () { return $name; }
+
+An alternative name can also be provided:
+
+    field $name :reader(get_name);
+
+For more detail, see L<perlclass/:reader>.
+
 =head2 Permit a space in C<-M> command-line option
 
 When processing command-line options, perl now allows a space between the
