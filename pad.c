@@ -594,7 +594,8 @@ variable.  Stores the name and other metadata in the name part of the
 pad, and makes preparations to manage the variable's lexical scoping.
 Returns the offset of the allocated pad slot.
 
-C<namepv>/C<namelen> specify the variable's name, including leading sigil.
+C<namepv>/C<namelen> specify the variable's name in UTF-8, including
+leading sigil.
 If C<typestash> is non-null, the name is for a typed lexical, and this
 identifies the type.  If C<ourstash> is non-null, it's a lexical reference
 to a package variable, and this identifies the package.  The following
