@@ -8044,11 +8044,8 @@ S_ints_to_tm(pTHX_ struct tm * mytm,
 
         /* But since mini_mktime() doesn't handle these fields, save the
          * results we already have for them */
-#  ifdef HAS_TM_TM_GMTOFF
-        long int gmtoff = mytm->tm_gmtoff;
-#  endif
-#  ifdef HAS_TM_TM_ZONE
-        const char *zone = mytm->tm_zone;
+#  if defined(HAS_TM_TM_GMTOFF) || defined(HAS_TM_TM_ZONE)
+        struct tm mytm2 = *mytm;
 #  endif
 
         /* Repeat the entire process with mini_mktime */
@@ -8066,10 +8063,10 @@ S_ints_to_tm(pTHX_ struct tm * mytm,
 
         /* And use the saved libc values for tm_gmtoff and tm_zone */
 #  ifdef HAS_TM_TM_GMTOFF
-        mytm->tm_gmtoff = gmtoff;
+        mytm->tm_gmtoff = mytm2.tm_gmtoff;
 #  endif
 #  ifdef HAS_TM_TM_ZONE
-        mytm->tm_zone = zone;
+        mytm->tm_zone = mytm2.tm_zone;
 #  endif
 
     }
