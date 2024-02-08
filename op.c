@@ -8022,6 +8022,11 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
             /* use VERSION while another use VERSION is in scope
              * This should provoke at least a warning, if not an outright error
              */
+            if (shortver >= SHORTVER(5, 39))
+                croak("use VERSION of 5.39 or above is not permitted while another use VERSION is in scope");
+            if (PL_prevailing_version >= SHORTVER(5, 39))
+                croak("use VERSION is not permitted while another use VERSION of 5.39 or above is in scope");
+
             /* downgrading from >= 5.11 to < 5.11 is now fatal */
             if (PL_prevailing_version >= SHORTVER(5, 11) && shortver < SHORTVER(5, 11))
                 croak("Downgrading a use VERSION declaration to below v5.11 is not permitted");
