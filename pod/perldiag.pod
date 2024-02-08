@@ -2225,14 +2225,14 @@ somehow called on another platform.  This should not happen.
 
 (P) The internal handling of magical variables has been cursed.
 
-=item Downgrading a use VERSION declaration to below v5.11 is deprecated
+=item Downgrading a use VERSION declaration to below v5.11 is not permitted
 
-(S deprecated::version_downgrade) This warning is emitted on a
-C<use VERSION> statement that requests a version below v5.11 (when the
-effects of C<use strict> would be disabled), after a previous
-declaration of one having a larger number (which would have enabled
-these effects). Because of a change to the way that C<use VERSION>
-interacts with the strictness flags, this is no longer supported.
+(F) A C<use VERSION> statement that requests a version below v5.11
+(when the effects of C<use strict> would be disabled) has been found
+after a previous declaration of one having a larger number (which would
+have enabled these effects).  Because of a change to the way that
+C<use VERSION> interacts with the strictness flags, this is no longer
+supported.
 
 =item (Do you need to predeclare %s?)
 
