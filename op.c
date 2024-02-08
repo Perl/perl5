@@ -8018,6 +8018,15 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
 
         U16 shortver = S_extract_shortver(aTHX_ use_version);
 
+        if (shortver && PL_prevailing_version) {
+            /* use VERSION while another use VERSION is in scope
+             * This should provoke at least a warning, if not an outright error
+             */
+            /* downgrading from >= 5.11 to < 5.11 is now fatal */
+            if (PL_prevailing_version >= SHORTVER(5, 11) && shortver < SHORTVER(5, 11))
+                croak("Downgrading a use VERSION declaration to below v5.11 is not permitted");
+        }
+
         /* If a version >= 5.11.0 is requested, strictures are on by default! */
         if (shortver >= SHORTVER(5, 11)) {
             if (!(PL_hints & HINT_EXPLICIT_STRICT_REFS))
@@ -8034,10 +8043,6 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
         }
         /* otherwise they are off */
         else {
-            if(PL_prevailing_version >= SHORTVER(5, 11))
-                deprecate_fatal_in(WARN_DEPRECATED__VERSION_DOWNGRADE, "5.40",
-                    "Downgrading a use VERSION declaration to below v5.11");
-
             if (!(PL_hints & HINT_EXPLICIT_STRICT_REFS))
                 PL_hints &= ~HINT_STRICT_REFS;
             if (!(PL_hints & HINT_EXPLICIT_STRICT_SUBS))
