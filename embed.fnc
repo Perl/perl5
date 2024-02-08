@@ -4437,7 +4437,7 @@ S	|bool	|strftime8	|NN const char *fmt			\
 				|NN const struct tm *mytm		\
 				|const utf8ness_t fmt_utf8ness		\
 				|NN utf8ness_t *result_utf8ness 	\
-				|const bool came_from_sv
+				|const bool called_externally
 Sf	|bool	|strftime_tm	|NN const char *fmt			\
 				|NN SV *sv				\
 				|NN const struct tm *mytm

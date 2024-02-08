@@ -7034,7 +7034,7 @@ S_populate_hash_from_C_localeconv(pTHX_ HV *hv, const char *locale, const U32 wh
         assert(hv); assert(locale); assert(strings); assert(integers)
 
 STATIC bool
-S_strftime8(pTHX_ const char *fmt, SV *sv, const struct tm *mytm, const utf8ness_t fmt_utf8ness, utf8ness_t *result_utf8ness, const bool came_from_sv);
+S_strftime8(pTHX_ const char *fmt, SV *sv, const struct tm *mytm, const utf8ness_t fmt_utf8ness, utf8ness_t *result_utf8ness, const bool called_externally);
 # define PERL_ARGS_ASSERT_STRFTIME8             \
         assert(fmt); assert(sv); assert(mytm); assert(result_utf8ness)
 
