@@ -2495,14 +2495,14 @@ S_bool_setlocale_2008_i(pTHX_
                              " while freeing %p; called from %" LINE_Tf     \
                              " via %" LINE_Tf "\n",                         \
                              category, locale, new, old,                    \
-                             caller_line, __LINE__))
+                             caller_line, (line_t)__LINE__))
 #  define DEBUG_NEW_OBJECT_FAILED(category, locale, basis_obj)              \
       DEBUG_L(PerlIO_printf(Perl_debug_log,                                 \
                             "bool_setlocale_2008_i: creating new object"    \
                             " for (%s '%s') from %p failed; called from %"  \
                             LINE_Tf " via %" LINE_Tf "\n",                  \
                             category, locale, basis_obj,                    \
-                            caller_line, __LINE__));
+                            caller_line, (line_t)__LINE__));
 
         /* Ready to create a new locale by modification of the existing one.
          *
