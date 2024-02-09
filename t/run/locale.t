@@ -25,7 +25,7 @@ use Config;
 use I18N::Langinfo qw(langinfo RADIXCHAR);
 my $have_strtod = $Config{d_strtod} eq 'define';
 my $have_localeconv = defined $Config{d_locconv} && $Config{d_locconv} eq 'define';
-my @locales = find_locales( [ 'LC_ALL', 'LC_CTYPE', 'LC_NUMERIC' ]);
+my @locales = find_locales('LC_NUMERIC');
 skip_all("no locales available") unless @locales;
 note("locales available: @locales");
 
