@@ -2277,6 +2277,12 @@ $_ = length shift @$ref == 0;
 $_ = length pop @$ref == 0;
 
 $_ = splice(@arr, 0, 0) == 0;
+
+# GH #21960
+$_ = lc shift;
+$_ = sub { lc shift }->();
+$_ = lc pop;
+$_ = sub { lc pop }->();
 EXPECT
 Use of uninitialized value in numeric eq (==) at - line 6.
 Use of uninitialized value length($x) in numeric eq (==) at - line 7.
@@ -2292,3 +2298,7 @@ Use of uninitialized value length(pop(@arr)) in numeric eq (==) at - line 19.
 Use of uninitialized value in numeric eq (==) at - line 20.
 Use of uninitialized value in numeric eq (==) at - line 21.
 Use of uninitialized value in numeric eq (==) at - line 23.
+Use of uninitialized value shift(@ARGV) in lc at - line 26.
+Use of uninitialized value shift() in lc at - line 27.
+Use of uninitialized value pop(@ARGV) in lc at - line 28.
+Use of uninitialized value pop() in lc at - line 29.

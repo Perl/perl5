@@ -17506,32 +17506,36 @@ S_find_uninit_var(pTHX_ const OP *const obase, const SV *const uninit_sv,
         if (match) {
             break;
         }
-        o = cUNOPx(obase)->op_first;
-        if (o->op_type == OP_RV2AV) {
-            o2 = cUNOPx(o)->op_first;
-            if (o2->op_type != OP_GV) {
-                break;
-            }
-            gv = cGVOPx_gv(o2);
-            if (!gv) {
-                break;
-            }
-        }
-        else if (o->op_type == OP_PADAV) {
-            gv = NULL;
+        if (!(obase->op_flags & OPf_KIDS)) {
+            sv = newSVpvn_flags("", 0, SVs_TEMP);
         }
         else {
-            break;
+            o = cUNOPx(obase)->op_first;
+            if (o->op_type == OP_RV2AV) {
+                o2 = cUNOPx(o)->op_first;
+                if (o2->op_type != OP_GV) {
+                    break;
+                }
+                gv = cGVOPx_gv(o2);
+                if (!gv) {
+                    break;
+                }
+            }
+            else if (o->op_type == OP_PADAV) {
+                gv = NULL;
+            }
+            else {
+                break;
+            }
+            sv = varname(gv, '@', o->op_targ, NULL, 0, FUV_SUBSCRIPT_NONE);
         }
-        sv = varname(gv, '@', o->op_targ, NULL, 0, FUV_SUBSCRIPT_NONE);
         if (sv) {
             const char *name = OP_NAME(obase);
             Perl_sv_insert_flags(aTHX_ sv, 0, 0, STR_WITH_LEN("("), 0);
             Perl_sv_insert_flags(aTHX_ sv, 0, 0, name, strlen(name), 0);
             sv_catpvs_nomg(sv, ")");
-            return sv;
         }
-        break;
+        return sv;
 
     case OP_POS:
         /* def-ness of rval pos() is independent of the def-ness of its arg */
