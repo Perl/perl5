@@ -263,9 +263,13 @@ SKIP: {
     my $found_time = 0;
     my $found_monetary = 0;
 
-    my @locales = find_locales( [ qw(LC_TIME LC_CTYPE LC_MONETARY) ] );
-    foreach my $utf8_locale (find_utf8_ctype_locales(\@locales)) {
-        if (! $found_time) {
+    my %time_locales;
+    map { $time_locales{$_} = 1 } find_locales("LC_TIME");
+    my %monetary_locales;
+    map { $monetary_locales{$_} = 1 } find_locales("LC_MONETARY");
+
+    foreach my $utf8_locale (find_utf8_ctype_locales()) {
+        if ($time_locales{$utf8_locale} && ! $found_time) {
             setlocale(&LC_TIME, $utf8_locale);
             foreach my $time_item (@times) {
                 my $eval_string = "langinfo(&$time_item)";
@@ -302,7 +306,7 @@ SKIP: {
             }
         }
 
-        if (! $found_monetary) {
+        if ($monetary_locales{$utf8_locale} && ! $found_monetary) {
             setlocale(&LC_MONETARY, $utf8_locale);
             my $eval_string = "langinfo(&CRNCYSTR)";
             my $symbol = eval $eval_string;
