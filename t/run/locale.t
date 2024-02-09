@@ -511,15 +511,12 @@ EOF
     }
 
 SKIP: {
-        # Note: the setlocale Configure probe could be enhanced to give us the
-        # syntax to use, but khw doesn't think it's worth it at this time, as
-        # the current outliers seem to be skipped by the test just below
-        # anyway.  If the POSIX 2008 locale functions are being used, the
-        # syntax becomes mostly irrelevant, so do the test anyway if they are.
-        # It's a lot of trouble to figure out in a perl script.
         if ($Config{d_setlocale_accepts_any_locale_name})
         {
             skip("Can't distinguish between valid and invalid locale names on this system", 2);
+        }
+        if (! $Config{d_perl_lc_all_uses_name_value_pairs}) {
+            skip("Test only valid when LC_ALL syntax is name=value pairs", 2);
         }
 
         my @valid_categories = valid_locale_categories();
