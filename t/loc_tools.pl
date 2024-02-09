@@ -679,7 +679,9 @@ sub find_locales ($;$) {
         }
     }
 
-    @Locale = sort @Locale;
+    my %Locale;
+    $Locale{$_} = 1 for @Locale;
+    @Locale = sort keys %Locale;
 
     return @Locale;
 }
