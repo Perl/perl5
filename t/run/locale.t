@@ -47,7 +47,10 @@ delete local @ENV{'LANGUAGE', 'LANG', (grep /^LC_[A-Z]+$/, keys %ENV)};
 # 'debug'
 delete local $ENV{'PERL_DEBUG_LOCALE_INIT'} unless $debug;
 
-{
+my $has_ctype = grep { $_ eq "LC_CTYPE" } platform_locale_categories();
+
+SKIP: {
+    skip("LC_CTYPE not available on the system", 1 ) unless $has_ctype;
     fresh_perl_is(<<"EOF",
             use locale;
             use POSIX;
@@ -58,7 +61,8 @@ EOF
         1, { stderr => 'devnull' }, "/il matching of [bracketed] doesn't skip POSIX class if fails individ char");
 }
 
-{
+SKIP: {
+    skip("LC_CTYPE not available on the system", 1 ) unless $has_ctype;
     fresh_perl_is(<<"EOF",
             use locale;
             use POSIX;
