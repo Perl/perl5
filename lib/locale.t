@@ -859,11 +859,15 @@ debug "Scanning for locales...\n";
 
 require POSIX; import POSIX ':locale_h';
 
-my $categories = [ 'LC_CTYPE', 'LC_NUMERIC', 'LC_ALL' ];
-debug "Scanning for just compatible";
-my @Locale = find_locales($categories);
-debug "Scanning for even incompatible";
-my @include_incompatible_locales = find_locales($categories,
+debug "Scanning for just perl-compatible locales";
+my $category = 'LC_CTYPE';
+my @Locale = find_locales($category);
+if (! @Locale) {
+    $category = 'LC_ALL';
+    @Locale = find_locales($category);
+}
+debug "Scanning for even incompatible locales";
+my @include_incompatible_locales = find_locales($category,
                                                 'even incompatible locales');
 
 # The locales included in the incompatible list that aren't in the compatible
