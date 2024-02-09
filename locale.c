@@ -1855,6 +1855,15 @@ S_stdize_locale(pTHX_ const int category,
  *                      and query forms are essentially the same, and can be
  *                      combined to save CPU time.
  *
+ * Each implementation is fundamentally defined by just two macros: a
+ * bool_setlocale_X() and a querylocale_X().  The other macros are all
+ * derivable from these.  Each fundamental macro is either a '_i' suffix one or
+ * an '_r' suffix one, depending on what is the most efficient in getting to an
+ * input form that the underlying libc functions want.  The derived macro
+ * definitions are deferred in this file to after the code for all the
+ * implementations.  This makes each implementation shorter and clearer, and
+ * removes duplication.
+ *
  * Each implementation below is separated by ==== lines, and includes bool,
  * void, and query macros.  The query macros are first, followed by any
  * functions needed to implement them.  Then come the bool, again followed by
@@ -1879,36 +1888,7 @@ S_stdize_locale(pTHX_ const int category,
  * versions. */
 
 #  define querylocale_r(cat)  mortalized_pv_copy(stdized_setlocale(cat, NULL))
-#  define querylocale_c(cat)  querylocale_r(cat)
-#  define querylocale_i(i)    querylocale_c(categories[i])
-
-/*---------------------------------------------------------------------------*/
-
 #  define bool_setlocale_r(cat, locale) cBOOL(posix_setlocale(cat, locale))
-#  define bool_setlocale_i(i, locale)                                       \
-                                   bool_setlocale_c(categories[i], locale)
-#  define bool_setlocale_c(cat, locale)      bool_setlocale_r(cat, locale)
-
-/*---------------------------------------------------------------------------*/
-
-#  define void_setlocale_r_with_caller(cat, locale, file, line)             \
-     STMT_START {                                                           \
-        if (! bool_setlocale_r(cat, locale))                                \
-            setlocale_failure_panic_via_i(get_category_index(cat),          \
-                                          NULL, locale, __LINE__, 0,        \
-                                          file, line);                      \
-     } STMT_END
-
-#  define void_setlocale_c_with_caller(cat, locale, file, line)             \
-                    void_setlocale_r_with_caller(cat, locale, file, line)
-
-#  define void_setlocale_i_with_caller(i, locale, file, line)               \
-          void_setlocale_r_with_caller(categories[i], locale, file, line)
-
-#  define void_setlocale_r(cat, locale)                                     \
-            void_setlocale_r_with_caller(cat, locale, __FILE__, __LINE__)
-#  define void_setlocale_c(cat, locale) void_setlocale_r(cat, locale)
-#  define void_setlocale_i(i, locale)   void_setlocale_r(categories[i], locale)
 
 /*---------------------------------------------------------------------------*/
 
@@ -1956,8 +1936,6 @@ S_setlocale_i(pTHX_ const int category, const char * locale)
 
 #  define querylocale_r(cat)                                                \
                       mortalized_pv_copy(less_dicey_setlocale_r(cat, NULL))
-#  define querylocale_c(cat)  querylocale_r(cat)
-#  define querylocale_i(i)    querylocale_r(categories[i])
 
 STATIC const char *
 S_less_dicey_setlocale_r(pTHX_ const int category, const char * locale)
@@ -1981,9 +1959,6 @@ S_less_dicey_setlocale_r(pTHX_ const int category, const char * locale)
 
 #  define bool_setlocale_r(cat, locale)                                     \
                                less_dicey_bool_setlocale_r(cat, locale)
-#  define bool_setlocale_i(i, locale)                                       \
-                                bool_setlocale_r(categories[i], locale)
-#  define bool_setlocale_c(cat, locale) bool_setlocale_r(cat, locale)
 
 STATIC bool
 S_less_dicey_bool_setlocale_r(pTHX_ const int cat, const char * locale)
@@ -2000,27 +1975,6 @@ S_less_dicey_bool_setlocale_r(pTHX_ const int cat, const char * locale)
 
     return retval;
 }
-
-/*---------------------------------------------------------------------------*/
-
-#  define void_setlocale_r_with_caller(cat, locale, file, line)             \
-     STMT_START {                                                           \
-        if (! bool_setlocale_r(cat, locale))                                \
-            setlocale_failure_panic_via_i(get_category_index(cat),          \
-                                          NULL, locale, __LINE__, 0,        \
-                                          file, line);                      \
-     } STMT_END
-
-#  define void_setlocale_c_with_caller(cat, locale, file, line)             \
-                    void_setlocale_r_with_caller(cat, locale, file, line)
-
-#  define void_setlocale_i_with_caller(i, locale, file, line)               \
-          void_setlocale_r_with_caller(categories[i], locale, file, line)
-
-#  define void_setlocale_r(cat, locale)                                     \
-            void_setlocale_r_with_caller(cat, locale, __FILE__, __LINE__)
-#  define void_setlocale_c(cat, locale) void_setlocale_r(cat, locale)
-#  define void_setlocale_i(i, locale)   void_setlocale_r(categories[i], locale)
 
 /*---------------------------------------------------------------------------*/
 
@@ -2055,8 +2009,12 @@ S_less_dicey_bool_setlocale_r(pTHX_ const int cat, const char * locale)
 #  endif
 
 #  define querylocale_i(i)    querylocale_2008_i(i, __LINE__)
-#  define querylocale_c(cat)  querylocale_i(cat##_INDEX_)
-#  define querylocale_r(cat)  querylocale_i(get_category_index(cat))
+
+    /* We need to define this derivative macro here, as it is needed in
+     * the implementing function (for recursive calls).  It also gets defined
+     * where all the other derivative macros are defined, and the compiler
+     * will complain if the definition gets out of sync */
+#  define querylocale_c(cat)      querylocale_i(cat##_INDEX_)
 
 STATIC const char *
 S_querylocale_2008_i(pTHX_ const locale_category_index index,
@@ -2277,10 +2235,6 @@ S_querylocale_2008_i(pTHX_ const locale_category_index index,
 
 #  define bool_setlocale_i(i, locale)                                       \
                               bool_setlocale_2008_i(i, locale, __LINE__)
-#  define bool_setlocale_c(cat, locale)                                     \
-                                  bool_setlocale_i(cat##_INDEX_, locale)
-#  define bool_setlocale_r(cat, locale)                                     \
-                       bool_setlocale_i(get_category_index(cat), locale)
 
 /* If this doesn't exist on this platform, make it a no-op (to save #ifdefs) */
 #  ifndef update_PL_curlocales_i
@@ -2673,7 +2627,64 @@ S_bool_setlocale_2008_i(pTHX_
     return false;
 }
 
-/*---------------------------------------------------------------------------*/
+/*===========================================================================*/
+
+#else
+#  error Unexpected Configuration
+#endif   /* End of the various implementations of the setlocale and
+            querylocale macros used in the remainder of this program */
+
+/*===========================================================================*/
+
+/* Each implementation above is based on two fundamental macros #defined above:
+ *  1) either a querylocale_r or a querylocale_i
+ *  2) either a bool_setlocale_r or a bool_setlocale_i
+ *
+ * (Which one of each got #defined is based on which is most efficient in
+ * interacting with the underlying libc functions called.)
+ *
+ * To complete the implementation, macros for the missing two suffixes must be
+ * #defined, as well as all the void_setlocale_X() forms.  These all can be
+ * mechanically derived from the fundamental ones. */
+
+#ifdef querylocale_r
+#  define querylocale_c(cat)    querylocale_r(cat)
+#  define querylocale_i(i)      querylocale_r(categories[i])
+#elif defined(querylocale_i)
+#  define querylocale_c(cat)    querylocale_i(cat##_INDEX_)
+#  define querylocale_r(cat)    querylocale_i(get_category_index(cat))
+#else
+#  error No querylocale() form defined
+#endif
+
+#ifdef bool_setlocale_r
+#  define bool_setlocale_i(i, l)    bool_setlocale_r(categories[i], l)
+#  define bool_setlocale_c(cat, l)  bool_setlocale_r(cat, l)
+
+#  define void_setlocale_r_with_caller(cat, locale, file, line)             \
+     STMT_START {                                                           \
+        if (! bool_setlocale_r(cat, locale))                                \
+            setlocale_failure_panic_via_i(get_category_index(cat),          \
+                                          NULL, locale, __LINE__, 0,        \
+                                          file, line);                      \
+     } STMT_END
+
+#  define void_setlocale_c_with_caller(cat, locale, file, line)             \
+          void_setlocale_r_with_caller(cat, locale, file, line)
+
+#  define void_setlocale_i_with_caller(i, locale, file, line)               \
+          void_setlocale_r_with_caller(categories[i], locale, file, line)
+
+#  define void_setlocale_r(cat, locale)                                     \
+          void_setlocale_r_with_caller(cat, locale, __FILE__, __LINE__)
+#  define void_setlocale_c(cat, locale)                                     \
+          void_setlocale_r(cat, locale)
+#  define void_setlocale_i(i, locale)                                       \
+          void_setlocale_r(categories[i], locale)
+
+#elif defined(bool_setlocale_i)
+#  define bool_setlocale_c(cat, loc) bool_setlocale_i(cat##_INDEX_, loc)
+#  define bool_setlocale_r(c, loc)   bool_setlocale_i(get_category_index(c), l)
 
 #  define void_setlocale_i_with_caller(i, locale, file, line)               \
      STMT_START {                                                           \
@@ -2683,25 +2694,24 @@ S_bool_setlocale_2008_i(pTHX_
      } STMT_END
 
 #  define void_setlocale_r_with_caller(cat, locale, file, line)             \
-        void_setlocale_i_with_caller(get_category_index(cat), locale,       \
-                                     file, line)
+          void_setlocale_i_with_caller(get_category_index(cat), locale,     \
+                                       file, line)
 
 #  define void_setlocale_c_with_caller(cat, locale, file, line)             \
-            void_setlocale_i_with_caller(cat##_INDEX_, locale, file, line)
+          void_setlocale_i_with_caller(cat##_INDEX_, locale, file, line)
 
 #  define void_setlocale_i(i, locale)                                       \
-                void_setlocale_i_with_caller(i, locale, __FILE__, __LINE__)
+          void_setlocale_i_with_caller(i, locale, __FILE__, __LINE__)
 #  define void_setlocale_c(cat, locale)                                     \
-                                  void_setlocale_i(cat##_INDEX_, locale)
+          void_setlocale_i(cat##_INDEX_, locale)
 #  define void_setlocale_r(cat, locale)                                     \
-                  void_setlocale_i(get_category_index(cat), locale)
-
-/*===========================================================================*/
+          void_setlocale_i(get_category_index(cat), locale)
 
 #else
-#  error Unexpected Configuration
-#endif   /* End of the various implementations of the setlocale and
-            querylocale macros used in the remainder of this program */
+#  error No bool_setlocale() form defined
+#endif
+
+/*===========================================================================*/
 
 /* Most of the cases in this file just toggle the locale briefly; but there are
  * a few instances where a longer toggled interval, over multiple operations,
