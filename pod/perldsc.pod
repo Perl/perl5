@@ -652,6 +652,12 @@ X<hash of hashes> X<HoH>
      $HoH{flintstones}{$what} = $new_folks{$what};
  }
 
+ # same, but using a hash slice
+ @{ $HoH{flintstones} }{ keys %new_folks } = values %new_folks;
+
+ # same, but without a %new_folks variable
+ @{ $HoH{flintstones} }{ "wife", "pet" } = ( "wilma", "dino" );
+
 =head2 Access and Printing of a HASH OF HASHES
 
  # one element
