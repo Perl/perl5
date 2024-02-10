@@ -494,10 +494,10 @@ sub embed_h {
                 }
                 $ret .= ")\n";
                 if($use_va_list and $flags =~ /v/) {
-                    # Make older ones available only when !MULTIPLICITY or PERL_CORE
+                    # Make older ones available only when !MULTIPLICITY or PERL_CORE or PERL_WANT_VARARGS
                     # These should not be done uncondtionally because existing
                     # code might call e.g. warn() without aTHX in scope.
-                    $ret = "#${ind}if !defined(MULTIPLICITY) || defined(PERL_CORE)\n" .
+                    $ret = "#${ind}if !defined(MULTIPLICITY) || defined(PERL_CORE) || defined(PERL_WANT_VARARGS)\n" .
                            $ret .
                            "#${ind}endif\n";
                 }
