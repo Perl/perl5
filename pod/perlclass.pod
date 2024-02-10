@@ -29,10 +29,12 @@ native keywords for object-oriented programming.
 =head2 History
 
 Since Perl 5, support for objects revolved around the concept of I<blessing>
-references with a package name. Such reference could then be used to call
-subroutines from the package it was blessed with (or any of its parents). This
-system, while bare-bones, was flexible enough to allow creation of multiple
-more advanced, community-driven systems for object orientation.
+references with a package name (see L<perlfunc/"bless REF,CLASSNAME">). Such a
+reference could then be used to call subroutines from the package it was
+blessed with (or any of its parents). This system, while bare-bones, was
+flexible enough to allow creation of multiple more advanced, community-driven
+systems for object orientation. For more information, see L<perlmod> and
+L<perlobj>.
 
 The C<class> feature is a core implementation of a class syntax that is similar
 to what one would find in other programming languages. It is not a wrapper
