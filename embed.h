@@ -859,7 +859,8 @@
 #   define warn_nocontext                       Perl_warn_nocontext
 #   define warner_nocontext                     Perl_warner_nocontext
 # endif /* defined(MULTIPLICITY) */
-# if !defined(MULTIPLICITY) || defined(PERL_CORE)
+# if !defined(MULTIPLICITY) || defined(PERL_CORE) || \
+      defined(PERL_WANT_VARARGS)
 #   define ck_warner(a,...)                     Perl_ck_warner(aTHX_ a,__VA_ARGS__)
 #   define ck_warner_d(a,...)                   Perl_ck_warner_d(aTHX_ a,__VA_ARGS__)
 #   define croak(...)                           Perl_croak(aTHX_ __VA_ARGS__)
@@ -877,7 +878,8 @@
 #   define sv_setpvf_mg(a,...)                  Perl_sv_setpvf_mg(aTHX_ a,__VA_ARGS__)
 #   define warn(...)                            Perl_warn(aTHX_ __VA_ARGS__)
 #   define warner(a,...)                        Perl_warner(aTHX_ a,__VA_ARGS__)
-# endif /* !defined(MULTIPLICITY) || defined(PERL_CORE) */
+# endif /* !defined(MULTIPLICITY) || defined(PERL_CORE) ||
+            defined(PERL_WANT_VARARGS) */
 # if defined(MYMALLOC)
 #   define dump_mstats(a)                       Perl_dump_mstats(aTHX_ a)
 #   define get_mstats(a,b,c)                    Perl_get_mstats(aTHX_ a,b,c)
@@ -1180,7 +1182,8 @@
 #   else
 #     define magic_regdatum_set(a,b)            Perl_magic_regdatum_set(aTHX_ a,b)
 #   endif
-#   if !defined(MULTIPLICITY) || defined(PERL_CORE)
+#   if !defined(MULTIPLICITY) || defined(PERL_CORE) || \
+        defined(PERL_WANT_VARARGS)
 #     define tied_method(a,b,c,d,e,...)         Perl_tied_method(aTHX_ a,b,c,d,e,__VA_ARGS__)
 #     if defined(PERL_IN_REGCOMP_C)
 #       define re_croak(a,...)                  S_re_croak(aTHX_ a,__VA_ARGS__)
@@ -2000,7 +2003,8 @@
 #     if defined(DEBUGGING)
 #       define debug_start_match(a,b,c,d,e)     S_debug_start_match(aTHX_ a,b,c,d,e)
 #       define dump_exec_pos(a,b,c,d,e,f,g)     S_dump_exec_pos(aTHX_ a,b,c,d,e,f,g)
-#       if !defined(MULTIPLICITY) || defined(PERL_CORE)
+#       if !defined(MULTIPLICITY) || defined(PERL_CORE) || \
+            defined(PERL_WANT_VARARGS)
 #         define re_exec_indentf(a,...)         Perl_re_exec_indentf(aTHX_ a,__VA_ARGS__)
 #       endif
 #     endif
@@ -2035,20 +2039,19 @@
 #   define check_regnode_after(a,b)             Perl_check_regnode_after(aTHX_ a,b)
 #   define regnext(a)                           Perl_regnext(aTHX_ a)
 #   define regnode_after(a,b)                   Perl_regnode_after(aTHX_ a,b)
-#   if defined(DEBUGGING)
-#     if ( !defined(MULTIPLICITY) || defined(PERL_CORE) ) && \
-         (  defined(PERL_CORE)    || defined(PERL_EXT) )
+#   if defined(DEBUGGING) && ( defined(PERL_CORE) || defined(PERL_EXT) )
+#     define debug_peep(a,b,c,d,e)              Perl_debug_peep(aTHX_ a,b,c,d,e)
+#     define debug_show_study_flags(a,b,c)      Perl_debug_show_study_flags(aTHX_ a,b,c)
+#     define debug_studydata(a,b,c,d,e,f,g)     Perl_debug_studydata(aTHX_ a,b,c,d,e,f,g)
+#     define dumpuntil(a,b,c,d,e,f,g,h)         Perl_dumpuntil(aTHX_ a,b,c,d,e,f,g,h)
+#     define regprop(a,b,c,d,e)                 Perl_regprop(aTHX_ a,b,c,d,e)
+#     if !defined(MULTIPLICITY) || defined(PERL_CORE) || \
+          defined(PERL_WANT_VARARGS)
 #       define re_indentf(a,...)                Perl_re_indentf(aTHX_ a,__VA_ARGS__)
 #       define re_printf(...)                   Perl_re_printf(aTHX_ __VA_ARGS__)
 #     endif
-#     if defined(PERL_CORE) || defined(PERL_EXT)
-#       define debug_peep(a,b,c,d,e)            Perl_debug_peep(aTHX_ a,b,c,d,e)
-#       define debug_show_study_flags(a,b,c)    Perl_debug_show_study_flags(aTHX_ a,b,c)
-#       define debug_studydata(a,b,c,d,e,f,g)   Perl_debug_studydata(aTHX_ a,b,c,d,e,f,g)
-#       define dumpuntil(a,b,c,d,e,f,g,h)       Perl_dumpuntil(aTHX_ a,b,c,d,e,f,g,h)
-#       define regprop(a,b,c,d,e)               Perl_regprop(aTHX_ a,b,c,d,e)
-#     endif
-#   endif /* defined(DEBUGGING) */
+#   endif /*   defined(DEBUGGING) &&
+             ( defined(PERL_CORE) || defined(PERL_EXT) ) */
 #   if defined(PERL_EXT_RE_BUILD)
 #     if defined(PERL_CORE) || defined(PERL_EXT)
 #       define get_re_gclass_aux_data(a,b,c,d,e,f) Perl_get_re_gclass_aux_data(aTHX_ a,b,c,d,e,f)
