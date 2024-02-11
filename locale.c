@@ -10584,13 +10584,14 @@ Perl_switch_locale_context(pTHX)
 }
 
 #endif
+#ifdef USE_THREADS
 
 void
 Perl_thread_locale_init(pTHX)
 {
 
-#ifdef USE_THREAD_SAFE_LOCALE
-#  ifdef USE_POSIX_2008_LOCALE
+#  ifdef USE_THREAD_SAFE_LOCALE
+#    ifdef USE_POSIX_2008_LOCALE
 
     /* Called from a thread on startup.
      *
@@ -10612,12 +10613,9 @@ Perl_thread_locale_init(pTHX)
         NOT_REACHED; /* NOTREACHED */
     }
 
-#    ifdef MULTIPLICITY
-
     PL_cur_locale_obj = PL_C_locale_obj;
 
-#    endif
-#  elif defined(WIN32)
+#    elif defined(WIN32)
 
     /* On Windows, make sure new thread has per-thread locales enabled */
     if (_configthreadlocale(_ENABLE_PER_THREAD_LOCALE) == -1) {
@@ -10625,8 +10623,8 @@ Perl_thread_locale_init(pTHX)
     }
     void_setlocale_c(LC_ALL, "C");
 
+#    endif
 #  endif
-#endif
 
 }
 
@@ -10639,7 +10637,7 @@ Perl_thread_locale_term(pTHX)
      * they affect libc's knowledge of the thread; libc has no knowledge of
      * aTHX */
 
-#if defined(USE_POSIX_2008_LOCALE) && defined(USE_THREADS)
+#  if defined(USE_POSIX_2008_LOCALE)
 
     /* Switch to the global locale, so can free up the per-thread object */
     locale_t actual_obj = uselocale(LC_GLOBAL_LOCALE);
@@ -10658,8 +10656,8 @@ Perl_thread_locale_term(pTHX)
 
     PL_cur_locale_obj = LC_GLOBAL_LOCALE;
 
-#endif
-#ifdef WIN32_USE_FAKE_OLD_MINGW_LOCALES
+#  endif
+#  ifdef WIN32_USE_FAKE_OLD_MINGW_LOCALES
 
     /* When faking the mingw implementation, we coerce this function into doing
      * something completely different from its intent -- namely to free up our
@@ -10668,22 +10666,20 @@ Perl_thread_locale_term(pTHX)
      * from the appropriate pool.  On unthreaded systems, it gets called by the
      * mutex termination code. */
 
-#  ifdef MULTIPLICITY
-
     if (aTHX != wsetlocale_buf_aTHX) {
         return;
     }
-
-#  endif
 
     if (wsetlocale_buf_size > 0) {
         Safefree(wsetlocale_buf);
         wsetlocale_buf_size = 0;
     }
 
-#endif
+#  endif
 
 }
+
+#endif
 
 /*
  * ex: set ts=8 sts=4 sw=4 et:

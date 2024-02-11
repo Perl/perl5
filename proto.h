@@ -5062,14 +5062,6 @@ Perl_taint_proper(pTHX_ const char *f, const char * const s);
 #define PERL_ARGS_ASSERT_TAINT_PROPER           \
         assert(s)
 
-PERL_CALLCONV void
-Perl_thread_locale_init(pTHX);
-#define PERL_ARGS_ASSERT_THREAD_LOCALE_INIT
-
-PERL_CALLCONV void
-Perl_thread_locale_term(pTHX);
-#define PERL_ARGS_ASSERT_THREAD_LOCALE_TERM
-
 PERL_CALLCONV OP *
 Perl_tied_method(pTHX_ SV *methname, SV **mark, SV * const sv, const MAGIC * const mg, const U32 flags, U32 argc, ...)
         __attribute__visibility__("hidden");
@@ -10808,6 +10800,16 @@ Perl_quadmath_format_valid(const char *format)
         assert(format)
 
 #endif /* defined(USE_QUADMATH) */
+#if defined(USE_THREADS)
+PERL_CALLCONV void
+Perl_thread_locale_init(pTHX);
+# define PERL_ARGS_ASSERT_THREAD_LOCALE_INIT
+
+PERL_CALLCONV void
+Perl_thread_locale_term(pTHX);
+# define PERL_ARGS_ASSERT_THREAD_LOCALE_TERM
+
+#endif
 #if defined(VMS) || defined(WIN32)
 PERL_CALLCONV int
 Perl_do_aspawn(pTHX_ SV *really, SV **mark, SV **sp);

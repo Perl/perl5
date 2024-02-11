@@ -3533,8 +3533,6 @@ CTop	|void	|sys_term
 Cdp	|void	|taint_env
 Cdp	|void	|taint_proper	|NULLOK const char *f			\
 				|NN const char * const s
-Apx	|void	|thread_locale_init
-Apx	|void	|thread_locale_term
 
 Fpv	|OP *	|tied_method	|NN SV *methname			\
 				|NN SV **mark				\
@@ -6304,6 +6302,10 @@ Tdp	|bool	|quadmath_format_needed 				\
 				|NN const char *format
 Tdp	|bool	|quadmath_format_valid					\
 				|NN const char *format
+#endif
+#if defined(USE_THREADS)
+Apx	|void	|thread_locale_init
+Apx	|void	|thread_locale_term
 #endif
 #if defined(VMS) || defined(WIN32)
 Cp	|int	|do_aspawn	|NULLOK SV *really			\
