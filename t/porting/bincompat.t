@@ -5,7 +5,6 @@ BEGIN {
 }
 use strict;
 require './t/test.pl';
-skip_all("BROKEN");
 skip_all("Sorting order differs under EBCDIC") if $::IS_EBCDIC || $::IS_EBCDIC;
 
 use Config;
