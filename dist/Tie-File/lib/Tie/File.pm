@@ -11,7 +11,7 @@ use Fcntl 'O_CREAT', 'O_RDWR', 'LOCK_EX', 'LOCK_SH', 'O_WRONLY', 'O_RDONLY';
 sub O_ACCMODE () { O_RDONLY | O_RDWR | O_WRONLY }
 
 
-our $VERSION = "1.07";
+our $VERSION = "1.08";
 my $DEFAULT_MEMORY_SIZE = 1<<21;    # 2 megabytes
 my $DEFAULT_AUTODEFER_THRESHHOLD = 3; # 3 records
 my $DEFAULT_AUTODEFER_FILELEN_THRESHHOLD = 65536; # 16 disk blocksful
@@ -2050,6 +2050,13 @@ gigantic files.
 Changes to the array are reflected in the file immediately.
 
 Lazy people and beginners may now stop reading the manual.
+
+=head2 C<unicode>
+
+You can read a unicode (UTF-8) file by providing a file handle opened with
+the desired encoding. It is not safe to write to one because
+the length in bytes and in characters is often different, Tie::File
+will miscalculate the length of writes, overwriting parts of other records.
 
 =head2 C<recsep>
 
