@@ -776,8 +776,6 @@
 # define sync_locale()                          Perl_sync_locale(aTHX)
 # define taint_env()                            Perl_taint_env(aTHX)
 # define taint_proper(a,b)                      Perl_taint_proper(aTHX_ a,b)
-# define thread_locale_init()                   Perl_thread_locale_init(aTHX)
-# define thread_locale_term()                   Perl_thread_locale_term(aTHX)
 # define to_uni_lower(a,b,c)                    Perl_to_uni_lower(aTHX_ a,b,c)
 # define to_uni_title(a,b,c)                    Perl_to_uni_title(aTHX_ a,b,c)
 # define to_uni_upper(a,b,c)                    Perl_to_uni_upper(aTHX_ a,b,c)
@@ -2215,6 +2213,10 @@
 #   define PerlIO_unread(a,b,c)                 Perl_PerlIO_unread(aTHX_ a,b,c)
 #   define PerlIO_write(a,b,c)                  Perl_PerlIO_write(aTHX_ a,b,c)
 # endif /* defined(USE_PERLIO) */
+# if defined(USE_THREADS)
+#   define thread_locale_init()                 Perl_thread_locale_init(aTHX)
+#   define thread_locale_term()                 Perl_thread_locale_term(aTHX)
+# endif
 # if defined(VMS) || defined(WIN32)
 #   define do_aspawn(a,b,c)                     Perl_do_aspawn(aTHX_ a,b,c)
 #   define do_spawn(a)                          Perl_do_spawn(aTHX_ a)
