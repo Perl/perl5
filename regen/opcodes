@@ -605,3 +605,5 @@ methstart	method start		ck_null		+
 initfield	initialise field	ck_null		+
 
 classname	class name		ck_classname		0t
+
+numify		number conversion	ck_fun		fsT1	S

@@ -167,6 +167,10 @@ XS(XS_builtin_func1_scalar)
             Perl_pp_stringify(aTHX);
             break;
 
+        case OP_NUMIFY:
+            Perl_pp_numify(aTHX);
+            break;
+
         default:
             Perl_die(aTHX_ "panic: unhandled opcode %" IVdf
                            " for xs_builtin_func1_scalar()", (IV) ix);
@@ -532,6 +536,7 @@ static const struct BuiltinFuncDescriptor builtins[] = {
     { "is_tainted", SHORTVER(5,39), &XS_builtin_func1_scalar, &ck_builtin_func1, OP_IS_TAINTED, false },
     { "trim",       SHORTVER(5,39), &XS_builtin_trim,         &ck_builtin_func1, 0,             false },
     { "stringify",       NO_BUNDLE, &XS_builtin_func1_scalar, &ck_builtin_func1, OP_STRINGIFY,  true },
+    { "numify",          NO_BUNDLE, &XS_builtin_func1_scalar, &ck_builtin_func1, OP_NUMIFY,     true },
 
     { "created_as_string", NO_BUNDLE, &XS_builtin_created_as_string, &ck_builtin_func1, 0, true },
     { "created_as_number", NO_BUNDLE, &XS_builtin_created_as_number, &ck_builtin_func1, 0, true },

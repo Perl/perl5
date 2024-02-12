@@ -38,6 +38,16 @@ $x = stringify(undef);
 EXPECT
 Use of uninitialized value in string at - line 5.
 ########
+# builtin.c - numify
+use warnings qw(all -experimental::builtin);
+use builtin qw(numify);
+my $x;
+$x = numify(undef);
+$x = numify("hello");
+EXPECT
+Use of uninitialized value in number conversion at - line 5.
+Argument "hello" isn't numeric in number conversion at - line 6.
+########
 # builtin.c - weakrefs
 use strict;
 use warnings qw(all -void);

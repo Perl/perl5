@@ -436,10 +436,11 @@ typedef enum opcode {
 	OP_METHSTART	 = 419,
 	OP_INITFIELD	 = 420,
 	OP_CLASSNAME	 = 421,
+	OP_NUMIFY	 = 422,
 	OP_max		
 } opcode;
 
-#define MAXO 422
+#define MAXO 423
 #define OP_FREED MAXO
 
 /* the OP_IS_* macros are optimized to a simple range check because
