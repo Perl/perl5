@@ -253,7 +253,8 @@ When given a value that is already a string, a copy of this value is returned
 unchanged. False booleans are treated like the empty string.
 
 Numbers are turned into a decimal representation. True booleans are treated
-like the number 1.
+like the number 1. C<undef> is treated as the empty string, provoking a
+warning in the usual way.
 
 References to objects in classes that have L<overload> and define the C<"">
 overload entry will use the delegated method to provide a value here.

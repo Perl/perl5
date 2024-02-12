@@ -30,6 +30,14 @@ Built-in function 'builtin::is_bool' is experimental at - line 6.
 Built-in function 'builtin::is_bool' is experimental at - line 9.
 Built-in function 'builtin::is_bool' is experimental at - line 12.
 ########
+# builtin.c - stringify
+use warnings qw(all -experimental::builtin);
+use builtin qw(stringify);
+my $x;
+$x = stringify(undef);
+EXPECT
+Use of uninitialized value in string at - line 5.
+########
 # builtin.c - weakrefs
 use strict;
 use warnings qw(all -void);
