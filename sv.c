@@ -11095,9 +11095,9 @@ Perl_sv_setpvf_mg_nocontext(SV *const sv, const char *const pat, ...)
 These work like C<L</sv_catpvf>> but copy the text into the SV instead of
 appending it.
 
-The differences between these are:
+None of the arguments may point to any part of the original PV of C<sv>.
 
-XXX pv can't point to sv
+The differences between these are:
 
 C<sv_setpvf_mg> and C<sv_setpvf_mg_nocontext> perform 'set' magic; C<sv_setpvf>
 and C<sv_setpvf_nocontext> skip all magic.
