@@ -4256,6 +4256,11 @@ CODE:
         PL_scopestack_ix = oldscope;
     }
 
+    /* the COP which PL_curcop points to is about to be freed, but might
+     * still be accessed when destructors, END() blocks etc are called.
+     * So point it somewhere safe.
+     */
+    PL_curcop = &PL_compiling;
     perl_destruct(interp_dup);
     perl_free(interp_dup);
 
