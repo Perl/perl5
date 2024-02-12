@@ -2922,6 +2922,9 @@ This will print...
 
 ...with no leading whitespace.
 
+By the way, one must use if(){}. There is no way to
+do "... if $some_var;" with here-docs.
+
 The line containing the delimiter that marks the end of the here-doc
 determines the indentation template for the whole thing.  Compilation
 croaks if any non-empty line inside the here-doc does not begin with the
