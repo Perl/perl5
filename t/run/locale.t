@@ -49,6 +49,7 @@ delete local @ENV{'LANGUAGE', 'LANG', (grep /^LC_[A-Z]+$/, keys %ENV)};
 delete local $ENV{'PERL_DEBUG_LOCALE_INIT'} unless $debug;
 
 my $has_ctype = grep { $_ eq "LC_CTYPE" } platform_locale_categories();
+my @changeable_from_C_categories = valid_locale_categories();
 
 SKIP: {
     skip("LC_CTYPE not available on the system", 1 ) unless $has_ctype;
@@ -527,14 +528,12 @@ SKIP: {
             skip("Test only valid when LC_ALL syntax is name=value pairs", 2);
         }
 
-        my @valid_categories = valid_locale_categories();
-
         my $valid_string = "";
         my $invalid_string = "";
 
         # Deliberately don't include all categories, so as to test this situation
-        for my $i (0 .. @valid_categories - 2) {
-            my $category = $valid_categories[$i];
+        for my $i (0 .. @changeable_from_C_categories - 2) {
+            my $category = $changeable_from_C_categories[$i];
             if ($category ne "LC_ALL") {
                 $invalid_string .= ";" if $invalid_string ne "";
                 $invalid_string .= "$category=foo_BAR";
