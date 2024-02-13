@@ -372,9 +372,7 @@ Perl_cv_undef_flags(pTHX_ CV *cv, U32 flags)
         else CvGV_set(cv, NULL);
     }
 
-    /* This statement and the subsequence if block was pad_undef().  */
-    pad_peg("pad_undef");
-
+    /* This 'if' block used to be a separate function, pad_undef().  */
     if (!CvISXSUB(&cvbody) && CvPADLIST(&cvbody)) {
         PADOFFSET ix;
         const PADLIST *padlist = CvPADLIST(&cvbody);
@@ -830,7 +828,6 @@ Perl_pad_add_anon(pTHX_ CV* func, I32 optype)
     PERL_ARGS_ASSERT_PAD_ADD_ANON;
     assert (SvTYPE(func) == SVt_PVCV);
 
-    pad_peg("add_anon");
     /* These two aren't used; just make sure they're not equal to
      * PERL_PADSEQ_INTRO.  They should be 0 by default.  */
     assert(COP_SEQ_RANGE_LOW (name) != PERL_PADSEQ_INTRO);
@@ -982,8 +979,6 @@ Perl_pad_findmy_pvn(pTHX_ const char *namepv, STRLEN namelen, U32 flags)
     PADNAME **name_p;
 
     PERL_ARGS_ASSERT_PAD_FINDMY_PVN;
-
-    pad_peg("pad_findmy_pvn");
 
     if (flags)
         Perl_croak(aTHX_ "panic: pad_findmy_pvn illegal flag bits 0x%" UVxf,
