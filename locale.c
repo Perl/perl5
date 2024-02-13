@@ -7330,6 +7330,8 @@ S_emulate_langinfo(pTHX_ const int item,
 
           case ALT_DIGITS: retval = ""; break;
 #    else
+#      define CAN_BE_ALT_DIGITS
+
           case ALT_DIGITS:
             format = "%Ow"; /* Find the alternate digit for 0 */
             break;
@@ -7386,7 +7388,13 @@ S_emulate_langinfo(pTHX_ const int item,
             break;
         }
 
-        if (LIKELY(item != ALT_DIGITS)) {
+#      ifdef CAN_BE_ALT_DIGITS
+
+        if (LIKELY(item != ALT_DIGITS))
+
+#      endif
+
+        {
 
             /* If to return what strftime() returns, are done */
             if (! return_format) {
@@ -7419,6 +7427,8 @@ S_emulate_langinfo(pTHX_ const int item,
 
             break;
         }
+
+#      ifdef CAN_BE_ALT_DIGITS
 
         /* Here, the item is 'ALT_DIGITS' and 'sv' contains the zeroth
          * alternate digit.  If empty, return that there aren't alternate
@@ -7557,7 +7567,8 @@ S_emulate_langinfo(pTHX_ const int item,
         retval_type = RETVAL_IN_sv;
         break;
 
-#    endif
+#      endif    /* End of CAN_BE_ALT_DIGITS */
+#    endif      /* End of HAS_STRFTIME */
 
        }    /* End of braced group for outer switch 'default:' case */
 
