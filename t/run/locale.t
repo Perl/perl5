@@ -47,8 +47,10 @@ delete local @ENV{'LANGUAGE', 'LANG', (grep /^LC_[A-Z]+$/, keys %ENV)};
 # 'debug'
 delete local $ENV{'PERL_DEBUG_LOCALE_INIT'} unless $debug;
 
-my $has_ctype = grep { $_ eq "LC_CTYPE" } platform_locale_categories();
+my @platform_categories = platform_locale_categories();
 my @changeable_from_C_categories = valid_locale_categories();
+
+my $has_ctype = grep { $_ eq "LC_CTYPE" } @platform_categories;
 
 SKIP: {
     skip("LC_CTYPE not available on the system", 1 ) unless $has_ctype;
