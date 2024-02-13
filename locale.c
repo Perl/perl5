@@ -2063,7 +2063,6 @@ S_querylocale_2008_i(pTHX_ const locale_category_index index,
                            const line_t caller_line)
 {
     PERL_ARGS_ASSERT_QUERYLOCALE_2008_I;
-    assert(index <= LC_ALL_INDEX_);
 
     /* This function returns the name of the locale category given by the input
      * 'index' into our parallel tables of them.
@@ -2298,7 +2297,6 @@ S_bool_setlocale_2008_i(pTHX_
        )
 {
     PERL_ARGS_ASSERT_BOOL_SETLOCALE_2008_I;
-    assert(index <= LC_ALL_INDEX_);
 
     /* This function effectively performs a setlocale() on just the current
      * thread; thus it is thread-safe.  It does this by using the POSIX 2008
@@ -2732,7 +2730,6 @@ S_update_PL_curlocales_i(pTHX_
      * our mapping of libc category number to our internal equivalents. */
 
     PERL_ARGS_ASSERT_UPDATE_PL_CURLOCALES_I;
-    assert(index <= LC_ALL_INDEX_);
 
     if (index == LC_ALL_INDEX_) {
 
@@ -4514,7 +4511,6 @@ S_toggle_locale_i(pTHX_ const locale_category_index cat_index,
                         const line_t caller_line)
 {
     PERL_ARGS_ASSERT_TOGGLE_LOCALE_I;
-    assert(cat_index <= LC_ALL_INDEX_);
 
     /* Changes the locale for the category specified by 'index' to 'new_locale,
      * if they aren't already the same.  EVERY CALL to this function MUST HAVE
@@ -4579,7 +4575,6 @@ S_restore_toggled_locale_i(pTHX_ const locale_category_index cat_index,
      * or do nothing if the latter parameter is NULL */
 
     PERL_ARGS_ASSERT_RESTORE_TOGGLED_LOCALE_I;
-    assert(cat_index <= LC_ALL_INDEX_);
 
     if (restore_locale == NULL) {
         DEBUG_Lv(PerlIO_printf(Perl_debug_log,
@@ -4626,8 +4621,6 @@ S_get_locale_string_utf8ness_i(pTHX_ const char * string,
     PERL_UNUSED_ARG(cat_index);
 
 #  else
-
-    assert(cat_index <= LC_ALL_INDEX_);
 
     /* Return to indicate if 'string' in the locale given by the input
      * arguments should be considered UTF-8 or not.
@@ -10487,8 +10480,6 @@ S_my_setlocale_debug_string_i(pTHX_
 
     const char * locale_quote;
     const char * retval_quote;
-
-    assert(cat_index <= LC_ALL_INDEX_);
 
     if (locale == NULL) {
         locale_quote = "";
