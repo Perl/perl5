@@ -76,9 +76,14 @@ EOF
 
 }
 
+sub is_locale_C ($) {
+    my $locale = shift;
+    return $locale eq "C" || $locale eq 'POSIX' || $locale eq "C.UTF-8";
+}
+
 my $non_C_locale;
 foreach my $locale (@locales) {
-    next if $locale eq "C" || $locale eq 'POSIX' || $locale eq "C.UTF-8";
+    next if is_locale_C($locale);
     $non_C_locale = $locale;
     last;
 }
