@@ -7046,7 +7046,7 @@ S_strftime_tm(pTHX_ const char *fmt, SV *sv, const struct tm *mytm)
 
 # if defined(HAS_MISSING_LANGINFO_ITEM_) || !defined(HAS_NL_LANGINFO)
 STATIC const char *
-S_emulate_langinfo(pTHX_ const int item, const char *locale, SV *sv, utf8ness_t *utf8ness);
+S_emulate_langinfo(pTHX_ const PERL_INTMAX_T item, const char *locale, SV *sv, utf8ness_t *utf8ness);
 #   define PERL_ARGS_ASSERT_EMULATE_LANGINFO    \
         assert(locale); assert(sv)
 

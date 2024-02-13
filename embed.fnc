@@ -4443,7 +4443,7 @@ Sf	|bool	|strftime_tm	|NN const char *fmt			\
 				|NN const struct tm *mytm
 # if defined(HAS_MISSING_LANGINFO_ITEM_) || !defined(HAS_NL_LANGINFO)
 S	|const char *|emulate_langinfo					\
-				|const int item 			\
+				|const PERL_INTMAX_T item		\
 				|NN const char *locale			\
 				|NN SV *sv				\
 				|NULLOK utf8ness_t *utf8ness
