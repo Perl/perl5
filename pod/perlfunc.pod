@@ -8673,8 +8673,9 @@ as supported by the compiler used to build Perl:
    h           interpret integer as C type "short" or
                "unsigned short"
    j           interpret integer as C type "intmax_t" on Perl
-               5.14 or later; and prior to Perl 5.30, only with
-               a C99 compiler (unportable)
+               5.14 or later.  Prior to Perl 5.30 this worked only
+               with a C99 compiler, hence was unportable before
+               that release.
    l           interpret integer as C type "long" or
                "unsigned long"
    q, L, or ll interpret integer as C type "long long",
