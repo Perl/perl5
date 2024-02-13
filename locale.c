@@ -6290,8 +6290,8 @@ S_langinfo_sv_i(pTHX_
      * the reentrant uses could infinitely recurse */
 
     DEBUG_Lv(PerlIO_printf(Perl_debug_log,
-                           "Entering langinfo_sv_i item=%ld, using locale %s\n",
-                           (long) item, locale));
+                           "Entering langinfo_sv_i item=%jd, using locale %s\n",
+                           (PERL_INTMAX_T) item, locale));
 
 #  ifdef HAS_MISSING_LANGINFO_ITEM_
 
@@ -6577,7 +6577,7 @@ S_maybe_override_codeset(pTHX_ const char * codeset,
 #if ! defined(HAS_NL_LANGINFO) || defined(HAS_MISSING_LANGINFO_ITEM_)
 
 STATIC const char *
-S_emulate_langinfo(pTHX_ const int item,
+S_emulate_langinfo(pTHX_ const PERL_INTMAX_T item,
                          const char * locale,
                          SV * sv,
                          utf8ness_t * utf8ness)
@@ -6636,8 +6636,8 @@ S_emulate_langinfo(pTHX_ const int item,
     int retval_type = RETVAL_IN_retval;
 
     DEBUG_Lv(PerlIO_printf(Perl_debug_log,
-                        "Entering emulate_langinfo item=%ld, using locale %s\n",
-                        (long) item, locale));
+                        "Entering emulate_langinfo item=%jd, using locale %s\n",
+                        item, locale));
 
 #  if   defined(HAS_LOCALECONV)                                         \
    && ! defined(HAS_SOME_LANGINFO)                                      \
@@ -7117,8 +7117,8 @@ S_emulate_langinfo(pTHX_ const int item,
              * invalid. */;
 #  if defined(I_LANGINFO)
 
-            Perl_croak_nocontext("panic: Unexpected nl_langinfo() item %ld",
-                                 (long) item);
+            Perl_croak_nocontext("panic: Unexpected nl_langinfo() item %jd",
+                                 item);
 
 #  else
             assert(item < 0);   /* Make sure using perl_langinfo.h */
@@ -7581,8 +7581,8 @@ S_emulate_langinfo(pTHX_ const int item,
         }
 
         DEBUG_Lv(PerlIO_printf(Perl_debug_log,
-                         "Leaving emulate_langinfo item=%ld, using locale %s\n",
-                         (long) item, locale));
+                         "Leaving emulate_langinfo item=%jd, using locale %s\n",
+                         item, locale));
 
         /* The caller shouldn't also be wanting a 'retval'; make sure segfaults
          * if they call this wrong */
@@ -7601,8 +7601,8 @@ S_emulate_langinfo(pTHX_ const int item,
     }
 
     DEBUG_Lv(PerlIO_printf(Perl_debug_log,
-                         "Leaving emulate_langinfo item=%ld, using locale %s\n",
-                         (long) item, locale));
+                         "Leaving emulate_langinfo item=%jd, using locale %s\n",
+                         item, locale));
     return retval;
 
 #  undef RETVAL_IN_retval
