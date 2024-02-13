@@ -156,18 +156,14 @@ typedef enum {
  * whether PL_comppad and PL_curpad are consistent and whether they have
  * active values */
 
-#  define pad_peg(label)
-
 #ifdef DEBUGGING
 #  define ASSERT_CURPAD_LEGAL(label) \
-    pad_peg(label); \
     if (PL_comppad ? (AvARRAY(PL_comppad) != PL_curpad) : (PL_curpad != 0))  \
         Perl_croak(aTHX_ "panic: illegal pad in %s: 0x%" UVxf "[0x%" UVxf "]",\
             label, PTR2UV(PL_comppad), PTR2UV(PL_curpad));
 
 
 #  define ASSERT_CURPAD_ACTIVE(label) \
-    pad_peg(label); \
     if (!PL_comppad || (AvARRAY(PL_comppad) != PL_curpad))		  \
         Perl_croak(aTHX_ "panic: invalid pad in %s: 0x%" UVxf "[0x%" UVxf "]",\
             label, PTR2UV(PL_comppad), PTR2UV(PL_curpad));
