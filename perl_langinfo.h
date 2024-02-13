@@ -319,11 +319,11 @@ typedef int nl_item;    /* Substitute 'int' for emulated nl_langinfo() */
 #endif
 
 /* All these categories have to be emulated if not available on the platform */
-#if ! LC_CTYPE_AVAIL            \
- || ! LC_MESSAGES_AVAIL         \
- || ! LC_MONETARY_AVAIL         \
- || ! LC_NUMERIC_AVAIL          \
- || ! LC_TIME_AVAIL             \
+#if ! LC_CTYPE_AVAIL_           \
+ || ! LC_MESSAGES_AVAIL_        \
+ || ! LC_MONETARY_AVAIL_        \
+ || ! LC_NUMERIC_AVAIL_         \
+ || ! LC_TIME_AVAIL_            \
  || ! LC_ADDRESS_AVAIL_         \
  || ! LC_IDENTIFICATION_AVAIL_  \
  || ! LC_MEASUREMENT_AVAIL_     \
