@@ -140,7 +140,7 @@ values only, not array values.
     left	& &.
     left	| |. ^ ^.
     left	&&
-    left	|| //
+    left	|| ^^ //
     nonassoc	..  ...
     right	?:
     right	= += -= *= etc. goto last next redo dump
@@ -1018,6 +1018,13 @@ Binary C<"||"> performs a short-circuit logical OR operation.  That is,
 if the left operand is true, the right operand is not even evaluated.
 Scalar or list context propagates down to the right operand if it
 is evaluated.
+
+=head2 C-style Logical Xor
+X<^^> X<operator, logical, xor>
+
+Binary C<"^^"> performs a logical XOR operation.  Both operands are
+evaluated and the result is true only if exactly one of the operands is true.
+Scalar or list context propagates down to the right operand.
 
 =head2 Logical Defined-Or
 X<//> X<operator, logical, defined-or>

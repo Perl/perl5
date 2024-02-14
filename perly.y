@@ -1247,7 +1247,7 @@ termbinop:	term[lhs] PLUGIN_HIGH_OP[op] term[rhs]
 	|	term[lhs] PLUGIN_LOGICAL_AND_OP[op] term[rhs]
 			{ $$ = build_infix_plugin($lhs, $rhs, $op); }
 	|	term[lhs] OROR term[rhs]                         /* $x || $y */
-			{ $$ = newLOGOP(OP_OR, 0, $lhs, $rhs); }
+			{ $$ = newLOGOP($OROR, 0, $lhs, $rhs); }
 	|	term[lhs] PLUGIN_LOGICAL_OR_OP[op] term[rhs]
 			{ $$ = build_infix_plugin($lhs, $rhs, $op); }
 	|	term[lhs] DORDOR term[rhs]                       /* $x // $y */
