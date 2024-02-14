@@ -4498,6 +4498,62 @@ Perl_setlocale(const int category, const char * locale)
 }
 
 #ifdef USE_LOCALE
+#  ifdef DEBUGGING
+
+STATIC char *
+S_my_setlocale_debug_string_i(pTHX_
+                              const locale_category_index cat_index,
+                              const char* locale, /* Optional locale name */
+
+                              /* return value from setlocale() when attempting
+                               * to set 'category' to 'locale' */
+                              const char* retval,
+
+                              const line_t line)
+{
+    /* Returns a pointer to a NUL-terminated string in static storage with
+     * added text about the info passed in.  This is not thread safe and will
+     * be overwritten by the next call, so this should be used just to
+     * formulate a string to immediately print or savepv() on. */
+
+    const char * locale_quote;
+    const char * retval_quote;
+
+    if (locale == NULL) {
+        locale_quote = "";
+        locale = "NULL";
+    }
+    else {
+        locale_quote = "\"";
+    }
+
+    if (retval == NULL) {
+        retval_quote = "";
+        retval = "NULL";
+    }
+    else {
+        retval_quote = "\"";
+    }
+
+#  ifdef USE_LOCALE_THREADS
+#    define THREAD_FORMAT "%p:"
+#    define THREAD_ARGUMENT aTHX_
+#  else
+#    define THREAD_FORMAT
+#    define THREAD_ARGUMENT
+#  endif
+
+    return Perl_form(aTHX_
+                     "%s:%" LINE_Tf ": " THREAD_FORMAT
+                     " setlocale(%s[%d], %s%s%s) returned %s%s%s\n",
+
+                     __FILE__, line, THREAD_ARGUMENT
+                     category_names[cat_index], categories[cat_index],
+                     locale_quote, locale, locale_quote,
+                     retval_quote, retval, retval_quote);
+}
+
+#  endif
 
 /* If this implementation hasn't defined these macros, they aren't needed */
 #  ifndef TOGGLE_LOCK
@@ -4816,6 +4872,64 @@ S_is_locale_utf8(pTHX_ const char * locale)
 #endif
 
 #ifdef USE_LOCALE
+#  ifdef USE_LOCALE_CTYPE
+
+STATIC bool
+S_is_codeset_name_UTF8(const char * name)
+{
+    /* Return a boolean as to if the passed-in name indicates it is a UTF-8
+     * code set.  Several variants are possible */
+    const Size_t len = strlen(name);
+
+    PERL_ARGS_ASSERT_IS_CODESET_NAME_UTF8;
+
+#    ifdef WIN32
+
+    /* https://learn.microsoft.com/en-us/windows/win32/intl/code-page-identifiers */
+    if (memENDs(name, len, "65001")) {
+        return TRUE;
+    }
+
+#    endif
+               /* 'UTF8' or 'UTF-8' */
+    return (    inRANGE(len, 4, 5)
+            &&  name[len-1] == '8'
+            && (   memBEGINs(name, len, "UTF")
+                || memBEGINs(name, len, "utf"))
+            && (len == 4 || name[3] == '-'));
+}
+
+#  endif
+#  ifdef WIN32
+
+bool
+Perl_get_win32_message_utf8ness(pTHX_ const char * string)
+{
+    /* This is because Windows doesn't have LC_MESSAGES. */
+
+#    ifdef USE_LOCALE_CTYPE
+
+    /* We don't know the locale utf8ness here, and not even the locale itself.
+     * Since Windows uses a different mechanism to specify message language
+     * output than the locale system, it is going to be problematic deciding
+     * if we are to store it as UTF-8 or not.  By specifying LOCALE_IS_UTF8, we
+     * are telling the called function to return true iff the string has
+     * non-ASCII characters in it that are all syntactically UTF-8.  We are
+     * thus relying on the fact that a string that is syntactically valid UTF-8
+     * is likely to be UTF-8.  Should this ever cause problems, this function
+     * could be replaced by something more Windows-specific */
+    return get_locale_string_utf8ness_i(string, LOCALE_IS_UTF8,
+                                        NULL, LC_CTYPE_INDEX_);
+#    else
+
+    PERL_UNUSED_ARG(string);
+    return false;
+
+#    endif
+
+}
+
+#  endif
 
 STATIC void
 S_set_save_buffer_min_size(pTHX_ Size_t min_len,
@@ -4905,38 +5019,6 @@ S_save_to_buffer(pTHX_ const char * string, char **buf, Size_t *buf_size)
 }
 
 #endif
-#ifdef USE_LOCALE
-#  ifdef WIN32
-
-bool
-Perl_get_win32_message_utf8ness(pTHX_ const char * string)
-{
-    /* This is because Windows doesn't have LC_MESSAGES. */
-
-#    ifdef USE_LOCALE_CTYPE
-
-    /* We don't know the locale utf8ness here, and not even the locale itself.
-     * Since Windows uses a different mechanism to specify message language
-     * output than the locale system, it is going to be problematic deciding
-     * if we are to store it as UTF-8 or not.  By specifying LOCALE_IS_UTF8, we
-     * are telling the called function to return true iff the string has
-     * non-ASCII characters in it that are all syntactically UTF-8.  We are
-     * thus relying on the fact that a string that is syntactically valid UTF-8
-     * is likely to be UTF-8.  Should this ever cause problems, this function
-     * could be replaced by something more Windows-specific */
-    return get_locale_string_utf8ness_i(string, LOCALE_IS_UTF8,
-                                        NULL, LC_CTYPE_INDEX_);
-#    else
-
-    PERL_UNUSED_ARG(string);
-    return false;
-
-#    endif
-
-}
-
-#  endif
-#endif  /* USE_LOCALE */
 
 int
 Perl_mbtowc_(pTHX_ const wchar_t * pwc, const char * s, const Size_t len)
@@ -9907,57 +9989,6 @@ Perl_strxfrm(pTHX_ SV * src)
 
 #endif /* USE_LOCALE_COLLATE */
 
-#ifdef USE_LOCALE
-#  ifdef USE_LOCALE_CTYPE
-
-STATIC bool
-S_is_codeset_name_UTF8(const char * name)
-{
-    /* Return a boolean as to if the passed-in name indicates it is a UTF-8
-     * code set.  Several variants are possible */
-    const Size_t len = strlen(name);
-
-    PERL_ARGS_ASSERT_IS_CODESET_NAME_UTF8;
-
-#    ifdef WIN32
-
-    /* https://learn.microsoft.com/en-us/windows/win32/intl/code-page-identifiers */
-    if (memENDs(name, len, "65001")) {
-        return TRUE;
-    }
-
-#    endif
-               /* 'UTF8' or 'UTF-8' */
-    return (    inRANGE(len, 4, 5)
-            &&  name[len-1] == '8'
-            && (   memBEGINs(name, len, "UTF")
-                || memBEGINs(name, len, "utf"))
-            && (len == 4 || name[3] == '-'));
-}
-
-#  endif
-#endif  /* USE_LOCALE */
-
-bool
-Perl__is_in_locale_category(pTHX_ const bool compiling, const int category)
-{
-    /* Internal function which returns if we are in the scope of a pragma that
-     * enables the locale category 'category'.  'compiling' should indicate if
-     * this is during the compilation phase (TRUE) or not (FALSE). */
-
-    const COP * const cop = (compiling) ? &PL_compiling : PL_curcop;
-
-    SV *these_categories = cop_hints_fetch_pvs(cop, "locale", 0);
-    if (! these_categories || these_categories == &PL_sv_placeholder) {
-        return FALSE;
-    }
-
-    /* The pseudo-category 'not_characters' is -1, so just add 1 to each to get
-     * a valid unsigned */
-    assert(category >= -1);
-    return cBOOL(SvUV(these_categories) & (1U << (category + 1)));
-}
-
 /* my_strerror() returns a mortalized copy of the text of the error message
  * associated with 'errnum'.
  *
@@ -10209,6 +10240,26 @@ Perl_my_strerror(pTHX_ const int errnum, utf8ness_t * utf8ness)
 /*--------------------------------------------------------------------------*/
 #  endif /* end of not using strerror_l() */
 #endif   /* end of all the my_strerror() implementations */
+
+bool
+Perl__is_in_locale_category(pTHX_ const bool compiling, const int category)
+{
+    /* Internal function which returns if we are in the scope of a pragma that
+     * enables the locale category 'category'.  'compiling' should indicate if
+     * this is during the compilation phase (TRUE) or not (FALSE). */
+
+    const COP * const cop = (compiling) ? &PL_compiling : PL_curcop;
+
+    SV *these_categories = cop_hints_fetch_pvs(cop, "locale", 0);
+    if (! these_categories || these_categories == &PL_sv_placeholder) {
+        return FALSE;
+    }
+
+    /* The pseudo-category 'not_characters' is -1, so just add 1 to each to get
+     * a valid unsigned */
+    assert(category >= -1);
+    return cBOOL(SvUV(these_categories) & (1U << (category + 1)));
+}
 
 /*
 
@@ -10470,63 +10521,6 @@ Perl_sync_locale(pTHX)
 #endif
 
 }
-
-#if defined(DEBUGGING) && defined(USE_LOCALE)
-
-STATIC char *
-S_my_setlocale_debug_string_i(pTHX_
-                              const locale_category_index cat_index,
-                              const char* locale, /* Optional locale name */
-
-                              /* return value from setlocale() when attempting
-                               * to set 'category' to 'locale' */
-                              const char* retval,
-
-                              const line_t line)
-{
-    /* Returns a pointer to a NUL-terminated string in static storage with
-     * added text about the info passed in.  This is not thread safe and will
-     * be overwritten by the next call, so this should be used just to
-     * formulate a string to immediately print or savepv() on. */
-
-    const char * locale_quote;
-    const char * retval_quote;
-
-    if (locale == NULL) {
-        locale_quote = "";
-        locale = "NULL";
-    }
-    else {
-        locale_quote = "\"";
-    }
-
-    if (retval == NULL) {
-        retval_quote = "";
-        retval = "NULL";
-    }
-    else {
-        retval_quote = "\"";
-    }
-
-#  ifdef USE_LOCALE_THREADS
-#    define THREAD_FORMAT "%p:"
-#    define THREAD_ARGUMENT aTHX_
-#  else
-#    define THREAD_FORMAT
-#    define THREAD_ARGUMENT
-#  endif
-
-    return Perl_form(aTHX_
-                     "%s:%" LINE_Tf ": " THREAD_FORMAT
-                     " setlocale(%s[%d], %s%s%s) returned %s%s%s\n",
-
-                     __FILE__, line, THREAD_ARGUMENT
-                     category_names[cat_index], categories[cat_index],
-                     locale_quote, locale, locale_quote,
-                     retval_quote, retval, retval_quote);
-}
-
-#endif
 #ifdef USE_PERL_SWITCH_LOCALE_CONTEXT
 
 void
