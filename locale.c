@@ -6371,6 +6371,13 @@ S_langinfo_sv_i(pTHX_
 
       case _NL_ADDRESS_COUNTRY_NUM:
 
+        /* Some glibc's return random values for this item and locale;
+         * workaround by special casing it. */
+        if (isNAME_C_OR_POSIX(locale)) {
+            sv_setuv(sv, 0);
+            goto non_string_common;
+        }
+
         /* FALLTHROUGH */
 
 #    endif
