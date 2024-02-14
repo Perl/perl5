@@ -1554,7 +1554,7 @@ case 2:
 
   case 199:
 #line 1250 "perly.y"
-    { (yyval.opval) = newLOGOP(OP_OR, 0, (ps[-2].val.opval), (ps[0].val.opval)); }
+    { (yyval.opval) = newLOGOP((ps[-1].val.ival), 0, (ps[-2].val.opval), (ps[0].val.opval)); }
 
     break;
 
@@ -2354,6 +2354,6 @@ case 2:
     
 
 /* Generated from:
- * ae786f28e8bc303471bcc03fc82e93a348d603252cc8c164a96cc0c26af78217 perly.y
+ * d200edcf6b5ba783b2b4e34928c5787fcab506e14d318042f4e46dee90ba0898 perly.y
  * acf1cbfd2545faeaaa58b1cf0cf9d7f98b5be0752eb7a54528ef904a9e2e1ca7 regen_perly.pl
  * ex: set ro ft=c: */

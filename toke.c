@@ -482,7 +482,7 @@ static struct debug_tokens {
     DEBUG_TOKEN (NONE,  NOAMP),
     DEBUG_TOKEN (NONE,  NOTOP),
     DEBUG_TOKEN (IVAL,  OROP),
-    DEBUG_TOKEN (NONE,  OROR),
+    DEBUG_TOKEN (IVAL,  OROR),
     DEBUG_TOKEN (IVAL,  PERLY_AMPERSAND),
     DEBUG_TOKEN (IVAL,  PERLY_BRACE_CLOSE),
     DEBUG_TOKEN (IVAL,  PERLY_BRACE_OPEN),
@@ -6099,6 +6099,16 @@ yyl_caret(pTHX_ char *s)
 {
     char *d = s;
     const bool bof = cBOOL(FEATURE_BITWISE_IS_ENABLED);
+    if (s[1] == '^') {
+        s += 2;
+        if (!PL_lex_allbrackets && PL_lex_fakeeof >=
+                (*s == '=' ? LEX_FAKEEOF_ASSIGN : LEX_FAKEEOF_LOGIC)) {
+            s -= 2;
+            TOKEN(0);
+        }
+        pl_yylval.ival = OP_XOR;
+        OPERATOR(OROR);
+    }
     if (bof && s[1] == '.')
         s++;
     if (!PL_lex_allbrackets && PL_lex_fakeeof >=
@@ -6618,6 +6628,7 @@ yyl_verticalbar(pTHX_ char *s)
             s -= 2;
             TOKEN(0);
         }
+        pl_yylval.ival = OP_OR;
         AOPERATOR(OROR);
     }
 
