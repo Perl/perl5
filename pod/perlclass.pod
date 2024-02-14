@@ -60,9 +60,9 @@ the current lexical scope:
 
     class NAME VERSION : ATTRIBUTES...;
 
-The C<class> keyword declares a new package that is intended to be a class.
-All other keywords from the C<class> feature should be used within the scope of
-this declaration.
+The C<class> keyword declares a new package (see L<perlmod/Packages>) that is
+intended to be a class. All other keywords from the C<class> feature should be
+used within the scope of this declaration.
 
     class WithVersion 1.000 {
         # class definition goes here
