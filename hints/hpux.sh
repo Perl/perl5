@@ -789,7 +789,7 @@ d_isnan='define'
 d_isinf='define'
 d_isfinite='define'
 d_unordered='define'
-# Old versions of pthreads (Draft 4) might require the following vaiables
+# Old versions of pthreads (Draft 4) might require the following variables
 # set to 'undef'. Having C99 as requirement invalidates forcing those
 #   d_crypt_r_proto, d_getgrent_r_proto, d_getpwent_r_proto, and
 #   d_strerror_r_proto
