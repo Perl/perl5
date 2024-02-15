@@ -155,14 +155,6 @@ struct RExC_state_t {
     AV         *warn_text;
     HV         *unlexed_names;
     SV          *runtime_code_qr;       /* qr with the runtime code blocks */
-#ifdef DEBUGGING
-    const char  *lastparse;
-    I32         lastnum;
-    U32         study_chunk_recursed_count;
-    AV          *paren_name_list;       /* idx -> name */
-    SV          *mysv1;
-    SV          *mysv2;
-#endif
     bool        seen_d_op;
     bool        strict;
     bool        study_started;
@@ -170,6 +162,22 @@ struct RExC_state_t {
     bool        use_BRANCHJ;
     bool        sWARN_EXPERIMENTAL__VLB;
     bool        sWARN_EXPERIMENTAL__REGEX_SETS;
+    /* DEBUGGING only fields, keep these LAST so that we do not
+     * have any weirdness with static builds.
+     *
+     * We include these if we are building a DEBUGGING perl OR if we
+     * are not using dynamic linking (USE_DYNAMIC_LOADING).
+     *
+     * See GH Issue #21558 and also ba6e2c38aafc23cf114f3ba0d0ff3baead34328b
+     */
+#if defined(DEBUGGING) || !defined(USE_DYNAMIC_LOADING)
+    const char  *lastparse;
+    I32         lastnum;
+    U32         study_chunk_recursed_count;
+    AV          *paren_name_list;       /* idx -> name */
+    SV          *mysv1;
+    SV          *mysv2;
+#endif
 };
 
 #ifdef DEBUGGING
