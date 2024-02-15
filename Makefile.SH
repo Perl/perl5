@@ -1591,11 +1591,20 @@ test_prep test-prep: test_prep_pre \$(MINIPERL_EXE) \$(unidatafiles) \$(PERL_EXE
 ;;
 esac
 
+if test "$dlext" = "none"; then
+# this is a static build so we do NOT need to make_ext.pl for the re extension.
+$spitshell >>$Makefile <<'!NO!SUBS!'
+test_prep_reonly: $(MINIPERL_EXE) $(PERL_EXE) $(TEST_PERL_DLL)
+	cd t && (rm -f $(PERL_EXE); $(LNS) ../$(PERL_EXE) $(PERL_EXE))
+!NO!SUBS!
+else
+# this is a dynamic build so we DO need to make_ext.pl for the re extension.
 $spitshell >>$Makefile <<'!NO!SUBS!'
 test_prep_reonly: $(MINIPERL_EXE) $(PERL_EXE) $(dynamic_ext_re) $(TEST_PERL_DLL)
 	$(MINIPERL) make_ext.pl $(dynamic_ext_re) MAKE="$(MAKE)" LIBPERL_A=$(LIBPERL) LINKTYPE=dynamic
 	cd t && (rm -f $(PERL_EXE); $(LNS) ../$(PERL_EXE) $(PERL_EXE))
 !NO!SUBS!
+fi
 
 case "$targethost" in
 '') $spitshell >>$Makefile <<'!NO!SUBS!'
