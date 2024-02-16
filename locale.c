@@ -10228,11 +10228,13 @@ Perl_my_strerror(pTHX_ const int errnum, utf8ness_t * utf8ness)
                matches */
         locale_t cur = duplocale(use_curlocale_scratch());
 
-        cur = newlocale(LC_CTYPE_MASK, querylocale_c(LC_MESSAGES), cur);
+        const char * locale = querylocale_c(LC_MESSAGES);
+        cur = newlocale(LC_CTYPE_MASK, locale, cur);
         errstr = savepv(strerror_l(errnum, cur));
         *utf8ness = get_locale_string_utf8ness_i(errstr,
                                                  LOCALE_UTF8NESS_UNKNOWN,
-                                                 NULL, LC_MESSAGES_INDEX_);
+                                                 locale,
+                                                 LC_MESSAGES_INDEX_);
         freelocale(cur);
     }
 
@@ -10339,7 +10341,8 @@ Perl_my_strerror(pTHX_ const int errnum, utf8ness_t * utf8ness)
     LOCALE_UNLOCK;
 
     *utf8ness = get_locale_string_utf8ness_i(errstr, LOCALE_UTF8NESS_UNKNOWN,
-                                             NULL, LC_MESSAGES_INDEX_);
+                                             desired_locale,
+                                             LC_MESSAGES_INDEX_);
     DEBUG_STRERROR_RETURN(errstr, utf8ness);
 
     SAVEFREEPV(errstr);
