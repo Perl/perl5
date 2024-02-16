@@ -10170,10 +10170,15 @@ If the specified Perl version is 5.39.0 or higher, builtin functions are
 imported lexically as with L<C<use builtin>|builtin> with a corresponding
 version bundle.
 
-Later use of C<use VERSION> will override all behavior of a previous
-C<use VERSION>, possibly removing the C<strict>, C<warnings>, C<feature> and
-C<builtin> effects added by it.  C<use VERSION> does not load the
-F<feature.pm>, F<strict.pm>, F<warnings.pm> or F<builtin.pm> files.
+Later use of C<use VERSION> will override most behavior of a previous
+C<use VERSION>, possibly removing the C<strict>, C<warnings> and C<feature>
+effects added by it.  Because C<builtin> functions are created as lexical
+subroutines in the current scope, it is not possible to remove those again
+and therefore a C<use VERSION> will I<not> remove any that happen to be
+visible but would not have been imported by it.
+
+C<use VERSION> does not load the F<feature.pm>, F<strict.pm>, F<warnings.pm>
+or F<builtin.pm> files.
 
 In the current implementation, any explicit use of C<use strict> or
 C<no strict> overrides C<use VERSION>, even if it comes before it.
