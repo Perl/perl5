@@ -230,6 +230,7 @@ sub read_only_bottom_close_and_rename {
 }
 
 sub tab {
+    no warnings 'numeric';
     my ($l, $t) = @_;
     $t .= "\t" x ($l - (length($t) + 1) / 8);
     $t;
