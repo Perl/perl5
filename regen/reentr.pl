@@ -489,7 +489,6 @@ my %small_bufsizes = (
                         asctime   => 26,
                         ctime     => 26,
                         setlocale => "REENTRANTSMALLSIZE",
-                        getlogin  => "REENTRANTSMALLSIZE",
 
                         # POSIX specifies that the symbol LOGIN_NAME_MAX gives
                         # this value; but not all systems have that;
