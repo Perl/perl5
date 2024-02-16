@@ -256,7 +256,7 @@ In summary:
 
     $AoA[$i] = [ @array ];     # usually best
     $AoA[$i] = \@array;        # perilous; just how my() was that array?
-    $AoA[$i]->@*  = @array;    # way too tricky for most programmers
+    $AoA[$i]->@* = @array;     # way too tricky for most programmers
     @{ $AoA[$i] } = @array;    # just as tricky, and also harder to read
 
 =head1 CAVEAT ON PRECEDENCE
@@ -535,7 +535,7 @@ X<array of hashes> X<AoH>
      push @AoH, { split /[\s+=]/ };
  }
 
- # calling a function  that returns a key/value pair list, like
+ # calling a function that returns a key/value pair list, like
  # "lead","fred","daughter","pebbles"
  while ( my %fields = getnextpairset() ) {
      push @AoH, { %fields };
@@ -631,7 +631,7 @@ X<hash of hashes> X<HoH>
      }
  }
 
- # calling a function  that returns a key,value hash
+ # calling a function that returns a key,value hash
  for my $group ( "simpsons", "jetsons", "flintstones" ) {
      $HoH{$group} = { get_family($group) };
  }
@@ -675,7 +675,7 @@ X<hash of hashes> X<HoH>
      print "}\n";
  }
 
- # print the whole thing  somewhat sorted
+ # print the whole thing somewhat sorted
  foreach my $family ( sort keys %HoH ) {
      print "$family: { ";
      for my $role ( sort keys $HoH{$family}->%* ) {
