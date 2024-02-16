@@ -488,7 +488,11 @@ my %small_bufsizes = (
                         ctime     => 26,
                         setlocale => "REENTRANTSMALLSIZE",
                         getlogin  => "REENTRANTSMALLSIZE",
-                        strerror  => "REENTRANTSMALLSIZE",
+
+                        # glibc documents this size as being enough; assume
+                        # they know what they're doing
+                        strerror  => 1024,
+
                         ttyname   => "REENTRANTSMALLSIZE",
                      );
 
