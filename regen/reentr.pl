@@ -489,10 +489,18 @@ my %small_bufsizes = (
                         setlocale => "REENTRANTSMALLSIZE",
                         getlogin  => "REENTRANTSMALLSIZE",
 
+                        # POSIX specifies that the symbol LOGIN_NAME_MAX gives
+                        # this value; but not all systems have that;
+                        # L_cuserid is another possibility; XXX but both would
+                        # need Configure probes
+                        getlogin  => "REENTRANTSMALLSIZE",
+
                         # glibc documents this size as being enough; assume
                         # they know what they're doing
                         strerror  => 1024,
 
+                        # This value might be L_ctermid, but XXX would need a
+                        # Configure probe.
                         ttyname   => "REENTRANTSMALLSIZE",
                      );
 
@@ -1193,12 +1201,16 @@ EOF
 
 read_only_bottom_close_and_rename($c);
 
-# As of March 2020, the config.h entries that have reentrant prototypes that
+# As of February 2024, the config.h entries that have reentrant prototypes that
 # aren't in this file are:
 #       drand48
 #       random
 #       srand48
 #       srandom
+# Additionally, these are the POSIX defined _r functions that aren't defined
+#       getgrid_r
+#       rand_r
+#       strtok_r
 
 # The meanings of the flags are derivable from %map above
 # Fnc, arg flags| hdr   | ? struct type | prototypes...
