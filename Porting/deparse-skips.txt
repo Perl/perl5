@@ -122,6 +122,7 @@ uni/variables.t
 ../cpan/autodie/t/eval_error.t
 ../cpan/autodie/t/exception_class.t
 ../cpan/autodie/t/exception_nonref.t
+../cpan/autodie/t/exceptions-smartmatch.t
 ../cpan/autodie/t/exec.t
 ../cpan/autodie/t/filehandles.t
 ../cpan/autodie/t/fileno.t
@@ -225,6 +226,13 @@ uni/variables.t
 ../cpan/Test-Simple/t/Legacy/subtest/predicate.t
 ../cpan/Test-Simple/t/regression/684-nested_todo_diag.t
 ../cpan/Test-Simple/t/Test2/behavior/run_subtest_inherit.t
+
+# these three use __LINE__, which gets deparsed as a number rather than
+# __LINE__.
+../cpan/Test2-Suite/t/behavior/filtering.t
+../cpan/Test2-Suite/t/modules/Tools/Compare.t
+../cpan/Test2-Suite/t/modules/Tools/Subtest.t
+
 ../dist/Attribute-Handlers/t/constants.t
 ../dist/Attribute-Handlers/t/data_convert.t
 ../dist/Attribute-Handlers/t/linerep.t
