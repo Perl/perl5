@@ -483,21 +483,28 @@ define('ERRNO', 'E',
 # The loop also contains a lot of intrinsic logic about groups of
 # functions (since functions of certain kind operate the same way).
 
+my %small_bufsizes = (
+                        asctime   => 26,
+                        ctime     => 26,
+                        setlocale => "REENTRANTSMALLSIZE",
+                        getlogin  => "REENTRANTSMALLSIZE",
+                        strerror  => "REENTRANTSMALLSIZE",
+                        ttyname   => "REENTRANTSMALLSIZE",
+                     );
+
 for my $func (@seenf) {
     my $FUNC = uc $func;
     my $ifdef = "#  ifdef HAS_${FUNC}_R\n";
     my $endif = "#  endif /* HAS_${FUNC}_R */\n\n";
     if (exists $seena{$func}) {
         my @p = @{$seena{$func}};
-        if ($func =~ /^(asctime|ctime|getlogin|setlocale|strerror|ttyname)$/) {
+        if (exists $small_bufsizes{$func}) {
             pushssif $ifdef;
             push @struct, <<EOF;
         char*	_${func}_buffer;
         size_t	_${func}_size;
 EOF
-            my $size = ($func =~ /^(asctime|ctime)$/)
-                       ? 26
-                       : "REENTRANTSMALLSIZE";
+            my $size = $small_bufsizes{$func};
             push @size, <<EOF;
         PL_reentrant_buffer->_${func}_size = $size;
 EOF
