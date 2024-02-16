@@ -6,7 +6,7 @@ BEGIN {
     $INC{"feature.pm"} = 1; # so we don't attempt to load feature.pm
 }
 
-print "1..85\n";
+print "1..87\n";
 
 # Can't require test.pl, as we're testing the use/require mechanism here.
 
@@ -168,6 +168,14 @@ ok $@, 'no strict vars allows ver decl to enable subs';
 
     $result = eval 'use 5.39.0; my $t = true; $t eq "1"';
     is ($@, "", 'builtin funcs available after use 5.39.0');
+    ok ($result, 'imported true is eq "1"');
+}
+
+{
+    my $result;
+
+    $result = eval 'use builtin "true"; use v5.36; my $t = true; $t eq "1"';
+    is ($@, "", 'builtin funcs not removed after use v5.36');
     ok ($result, 'imported true is eq "1"');
 }
 
