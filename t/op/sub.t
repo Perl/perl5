@@ -423,6 +423,8 @@ eval '
    {my ($a,$b,$c,$d,$e,$f,$g,$h,$i,$j,$k,$l,$m,$n,$o,$p,$q,$r,$s,$t,$u);}
    {my ($a,$b,$c,$d,$e,$f,$g,$h,$i,$j,$k,$l,$m,$n,$o,$p,$q,$r,$s,$t,$u);}
    {my ($a,$b,$c,$d,$e,$f,$g,$h,$i,$j,$k,$l,$m,$n,$o,$p,$q,$r,$s,$t,$u);}
+   # avoid "Lexical subroutine &b masks previously declared package subroutine"
+   no warnings "shadow";
    CORE::state sub b; sub d { sub b {} sub d }
  ';
 eval '()=%e; sub e { sub e; eval q|$x| } e;';
