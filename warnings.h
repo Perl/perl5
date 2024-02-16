@@ -160,7 +160,7 @@
 
 #define WARN_DEPRECATED__SMARTMATCH	 79
 
-/* Warnings Categories added in Perl 5.03901 */
+/* Warnings Categories added in Perl 5.039002 */
 
 #define WARN_DEPRECATED__MISSING_IMPORT_CALLED_WITH_ARGS 80
 #define WARNsize			 21
