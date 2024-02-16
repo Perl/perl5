@@ -155,7 +155,7 @@ Perl_reentrant_size(pTHX) {
 #  endif /* HAS_SETLOCALE_R */
 
 #  ifdef HAS_STRERROR_R
-        PL_reentrant_buffer->_strerror_size = REENTRANTSMALLSIZE;
+        PL_reentrant_buffer->_strerror_size = 1024;
 #  endif /* HAS_STRERROR_R */
 
 #  ifdef HAS_TTYNAME_R
