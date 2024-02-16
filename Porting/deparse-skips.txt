@@ -122,7 +122,6 @@ uni/variables.t
 ../cpan/autodie/t/eval_error.t
 ../cpan/autodie/t/exception_class.t
 ../cpan/autodie/t/exception_nonref.t
-../cpan/autodie/t/exceptions.t
 ../cpan/autodie/t/exec.t
 ../cpan/autodie/t/filehandles.t
 ../cpan/autodie/t/fileno.t
@@ -213,10 +212,6 @@ uni/variables.t
 # This one does a plan('skip_all') in a BEGIN block, which stops the rest
 # of the test file from being compiled
 ../cpan/ExtUtils-MakeMaker/t/MM_VMS.t
-
-# see comment above about bignum failures
-../cpan/Math-BigRat/t/const-mbr.t
-
 
 ../cpan/Scalar-List-Utils/t/uniq.t
 ../cpan/Term-Cap/test.pl
