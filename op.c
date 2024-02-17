@@ -8062,7 +8062,7 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
          */
         if ((shortver >= SHORTVER(5, 39)) || (PL_prevailing_version >= SHORTVER(5, 39))) {
             prepare_export_lexical();
-            import_builtin_bundle(shortver, false);
+            import_builtin_bundle(shortver);
             finish_export_lexical();
         }
 

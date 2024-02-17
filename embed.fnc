@@ -4078,8 +4078,7 @@ S	|MAGIC *|get_aux_mg	|NN AV *av
 #if defined(PERL_IN_BUILTIN_C) || defined(PERL_IN_OP_C)
 p	|void	|finish_export_lexical
 p	|void	|import_builtin_bundle					\
-				|U16 ver				\
-				|bool do_unimport
+				|U16 ver
 p	|void	|prepare_export_lexical
 #endif
 #if defined(PERL_IN_CLASS_C) || defined(PERL_IN_OP_C)    || \

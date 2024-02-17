@@ -636,7 +636,7 @@ static bool S_cv_is_builtin(pTHX_ CV *cv)
 }
 
 void
-Perl_import_builtin_bundle(pTHX_ U16 ver, bool do_unimport)
+Perl_import_builtin_bundle(pTHX_ U16 ver)
 {
     SV *ampname = sv_newmortal();
 
@@ -655,9 +655,6 @@ Perl_import_builtin_bundle(pTHX_ U16 ver, bool do_unimport)
 
         if(!got && want) {
             import_sym(newSVpvn_flags(builtins[i].name, strlen(builtins[i].name), SVs_TEMP));
-        }
-        else if(do_unimport && got && !want) {
-            pad_add_name_sv(ampname, padadd_STATE|padadd_TOMBSTONE, 0, 0);
         }
     }
 }
@@ -693,7 +690,7 @@ XS(XS_builtin_import)
                 Perl_croak(aTHX_ "Builtin version bundle \"%s\" is not supported by Perl " PERL_VERSION_STRING,
                         sympv);
 
-            import_builtin_bundle(want_ver, false);
+            import_builtin_bundle(want_ver);
 
             continue;
         }
