@@ -6213,7 +6213,7 @@ Perl_finish_export_lexical(pTHX)
 # define PERL_ARGS_ASSERT_FINISH_EXPORT_LEXICAL
 
 PERL_CALLCONV void
-Perl_import_builtin_bundle(pTHX_ U16 ver, bool do_unimport)
+Perl_import_builtin_bundle(pTHX_ U16 ver)
         __attribute__visibility__("hidden");
 # define PERL_ARGS_ASSERT_IMPORT_BUILTIN_BUNDLE
 
