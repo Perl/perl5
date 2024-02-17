@@ -66,6 +66,12 @@ declaration when another is in scope, when either version is 5.39 or above.
 This is to avoid complications surrounding imported lexical functions from
 L<builtin>.
 
+=head2 New C<builtin::inf> and C<builtin::nan> functions
+
+Two new functions, C<inf> and C<nan>, have been added to the C<builtin>
+namespace.  These act like constants that yield the floating-point infinity
+and Not-a-Number value respectively.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
