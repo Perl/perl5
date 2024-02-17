@@ -55,6 +55,17 @@ C<-M> switch and the name of the module after it.
 
 This matches the existing behaviour of the C<-I> option.
 
+=head2 Restrictions to C<use VERSION> declarations
+
+In Perl 5.36, a deprecation warning was added when downgrading a
+C<use VERSION> declaration from one above version 5.11, to below. This has
+now been made a fatal error.
+
+Additionally, it is now a fatal error to issue a subsequent C<use VERSION>
+declaration when another is in scope, when either version is 5.39 or above.
+This is to avoid complications surrounding imported lexical functions from
+L<builtin>.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
