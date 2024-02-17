@@ -342,6 +342,50 @@ sub display {
     return @result;
 }
 
+
+# Escape a string in a similar (but not identical) fashion to how the
+# regex debugger does, using "x" style escapes in the form
+# "%x{01+bc+02+cd}" to show the codepoint of the escaped values.  Like
+# the regex debugger we use percentage instead of backslash so that it
+# is trivial to distinguish backslash based sequences that are commonly
+# found in regex patterns from escaped octets that are in the pattern.
+# To reduce the output length and improve clarity if there are multiple
+# escaped codepoints in a row we bundle them together into one "%x{...}"
+# structure.
+#
+# Implementation note: This code should work fine on all platforms as we
+# use utf8::native_to_unicode() to map native codepoints to unicode
+# (thanks Karl!) and back again, also we deliberately avoid using the
+# regex engine to do the escaping as this function is intended for cases
+# where we are testing the regex engine.
+#
+# WARNING: This function should only be used for diagnostic purposes, it
+# does not output valid code!
+
+sub display_rx {
+    my ($str) = @_;
+    my $escaped = "";
+    my @cp; # codepoints
+    for my $i (0 .. length($str)-1) {
+        my $char = substr($str,$i,1);
+        push @cp, utf8::native_to_unicode(ord($char));
+    }
+    while (@cp) {
+        my $ord = shift @cp;
+        if (32 <= $ord <= 126 and $ord != 37) {
+            $escaped .= chr(utf8::unicode_to_native($ord));
+        }
+        else {
+            my @cp_hex = sprintf "%02x", $ord;
+            while (@cp and $cp[0] != 37 and ($cp[0]<32 or $cp[0]>126)) {
+                push @cp_hex, sprintf "%02x", shift @cp;
+            }
+            $escaped .= sprintf "%%x{%s}", join "+", @cp_hex;
+        }
+    }
+    return $escaped;
+}
+
 sub is ($$@) {
     my ($got, $expected, $name, @mess) = @_;
 
