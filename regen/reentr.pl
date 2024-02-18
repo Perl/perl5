@@ -56,7 +56,7 @@ sub open_print_header {
                     { by => 'regen/reentr.pl',
                       from => 'data in regen/reentr.pl',
                       file => $file, style => '*',
-                      copyright => [2002, 2003, 2005 .. 2007],
+                      copyright => [2002, 2003, 2005 .. 2024],
                       quote => $quote });
 }
 
