@@ -852,6 +852,13 @@ Perl_class_wrap_method_body(pTHX_ OP *o)
     if(!o)
         return o;
 
+    /* Walk the pad of this CV looking for lexicals with field info. These
+     * will be the fields used by this particular method, which we build into
+     * a list for the OP_METHSTART op. This ensures we only set up the fields
+     * needed by this particular method body, rather than every available
+     * field in the whole class
+     */
+
     PADNAMELIST *pnl = PadlistNAMES(CvPADLIST(PL_compcv));
 
     AV *fieldmap = newAV();
