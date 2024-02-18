@@ -907,8 +907,7 @@ our %Modules = (
     },
 
     'perlfaq' => {
-        'DISTRIBUTION' => 'ETHER/perlfaq-5.20230812.tar.gz',
-        'SYNCINFO'     => 'jkeenan on Wed Aug 16 18:13:51 2023',
+        'DISTRIBUTION' => 'ETHER/perlfaq-5.20240218.tar.gz',
         'FILES'        => q[cpan/perlfaq],
         'EXCLUDED'     => [ qr/^inc/, qr/^xt/, qr{^t/00-} ],
     },

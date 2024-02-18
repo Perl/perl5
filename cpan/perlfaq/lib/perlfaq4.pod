@@ -4,7 +4,7 @@ perlfaq4 - Data Manipulation
 
 =head1 VERSION
 
-version 5.20230812
+version 5.20240218
 
 =head1 DESCRIPTION
 
@@ -886,39 +886,57 @@ X<Text::Autoformat> X<capitalize> X<case, title> X<case, sentence>
 (contributed by brian d foy)
 
 Damian Conway's L<Text::Autoformat> handles all of the thinking
-for you.
+for you:
 
     use Text::Autoformat;
-    my $x = "Dr. Strangelove or: How I Learned to Stop ".
-      "Worrying and Love the Bomb";
+    my $s = "Going to the desert with a camel";
 
-    print $x, "\n";
+    printf "%-10s %s\n", "original:", $s;
     for my $style (qw( sentence title highlight )) {
-        print autoformat($x, { case => $style }), "\n";
+    	printf "%-10s %s\n",
+        	"$style:",
+			autoformat($s, { case => $style }) =~ s/\R+\z//r;
     }
 
-How do you want to capitalize those words?
+Each style has a different idea of what if should do with small words:
 
-    FRED AND BARNEY'S LODGE        # all uppercase
-    Fred And Barney's Lodge        # title case
-    Fred and Barney's Lodge        # highlight case
+	original:  Going to the desert with a camel
+	sentence:  Going to the desert with a camel
+	title:     Going To The Desert With A Camel
+	highlight: Going to the Desert with a Camel
 
-It's not as easy a problem as it looks. How many words do you think
-are in there? Wait for it... wait for it.... If you answered 5
-you're right. Perl words are groups of C<\w+>, but that's not what
-you want to capitalize. How is Perl supposed to know not to capitalize
-that C<s> after the apostrophe? You could try a regular expression:
+Trying this yourself in a simple regex has more than a few pitfalls.
+Perl "words" are groups of C<\w+>, but that's not what you want to
+capitalize. Some of those characters aren't even letters. What if you
+used a word boundary, C<\b>?
 
-    $string =~ s/ (
-                 (^\w)    #at the beginning of the line
-                   |      # or
-                 (\s\w)   #preceded by whitespace
-                   )
-                /\U$1/xg;
+	my $string = "A camel's journey";
+	$string =~ s/\b(\w)/\U$1/g;  # A Camel'S Journey
+
+How is Perl supposed to know not to capitalize that C<s>? You could work
+harder to look for preceding whitespace or the beginning of the string:
+
+    $string =~ s/( (?:^|\s) \w ) /\U$1/xg; # A Camel's Journey
+
+Or maybe you match the entire group, lowercase it all (C<L>), then
+uppercase the first letter (C<\u>):
 
     $string =~ s/([\w']+)/\u\L$1/g;
 
-Now, what if you don't want to capitalize that "and"? Just use
+Each of these have their annoying edge cases. Perl v5.22 added fancier
+Unicode word and sentence boundaries to fix this sort of problem. The
+C<\b{wb}> word boundary ignores some things that it doesn't think start
+or end "human" words:
+
+	use v5.22;
+	my $string = "A camel's journey";
+	$string =~ s/\b{wb}(\w)/\U$1/g;  # A Camel's Journey
+
+The details are in Unicode Technical Report #29
+(L<https://unicode.org/reports/tr29/>), and you should make sure that
+its idea of a word boundary corresponds to yours.
+
+Now, what if you don't want to capitalize that "and" or "the"? Just use
 L<Text::Autoformat> and get on with the next problem. :)
 
 =head2 How can I split a [character]-delimited string except when inside [character]?
@@ -1459,18 +1477,18 @@ elements.
     my @unique = keys %hash;
 
 If you want to use a module, try the C<uniq> function from
-L<List::MoreUtils>. In list context it returns the unique elements,
+L<List::Util>. In list context it returns the unique elements,
 preserving their order in the list. In scalar context, it returns the
 number of unique elements.
 
-    use List::MoreUtils qw(uniq);
+    use List::Util qw(uniq);
 
-    my @unique = uniq( 1, 2, 3, 4, 4, 5, 6, 5, 7 ); # 1,2,3,4,5,6,7
-    my $unique = uniq( 1, 2, 3, 4, 4, 5, 6, 5, 7 ); # 7
+    my @unique = uniq( 1, 2, 3, 4, 4, 5, 6, 5, 8 ); # 1,2,3,4,5,6,8
+    my $unique = uniq( 1, 2, 3, 4, 4, 5, 6, 5, 8 ); # 7
 
 You can also go through each element and skip the ones you've seen
 before. Use a hash to keep track. The first time the loop sees an
-element, that element has no key in C<%Seen>. The C<next> statement
+element, that element has no key in C<%seen>. The C<next> statement
 creates the key and immediately uses its value, which is C<undef>, so
 the loop continues to the C<push> and increments the value for that
 key. The next time the loop sees that same element, its key exists in
