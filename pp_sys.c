@@ -4158,7 +4158,9 @@ S_dooneliner(pTHX_ const char *cmd, const char *filename)
                  ; e++)
             {
                 /* you don't see this */
+                STRERROR_LOCK;
                 const char * const errmsg = Strerror(e) ;
+                STRERROR_UNLOCK;
                 if (!errmsg)
                     break;
                 if (instr(s, errmsg)) {
@@ -5927,7 +5929,9 @@ PP_wrapped(pp_ggrent,
 
     if (which == OP_GGRNAM) {
         const char* const name = POPpbytex;
+        GETGRNAM_LOCK;
         grent = (const struct group *)getgrnam(name);
+        GETGRNAM_UNLOCK;
     }
     else if (which == OP_GGRGID) {
 #if Gid_t_sign == 1
@@ -5937,7 +5941,9 @@ PP_wrapped(pp_ggrent,
 #else
 #  error "Unexpected Gid_t_sign"
 #endif
+        GETGRGID_LOCK;
         grent = (const struct group *)getgrgid(gid);
+        GETGRGID_UNLOCK;
     }
     else
 #ifdef HAS_GETGRENT
