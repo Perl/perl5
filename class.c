@@ -1025,7 +1025,6 @@ apply_field_attribute_reader(pTHX_ PADNAME *pn, SV *value)
     }
 
     OP *ops = newLISTOPn(OP_LINESEQ, 0,
-            newSTATEOP(0, NULL, NULL),
             methstartop,
             argcheckop,
             retop,
