@@ -6671,7 +6671,7 @@ S_langinfo_sv_i(pTHX_
     GCC_DIAG_RESTORE_STMT;
 
     restore_toggled_locale_i(cat_index, orig_switched_locale);
-    end_DEALING_WITH_MISMATCHED_CTYPE(locale)
+    end_DEALING_WITH_MISMATCHED_CTYPE(locale);
 
     if (utf8ness) {
         if (LIKELY(is_utf8 == UTF8NESS_UNKNOWN)) {  /* default: case above */
