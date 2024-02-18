@@ -1528,9 +1528,12 @@ Perl_nextargv(pTHX_ GV *gv, bool nomagicopen)
                 temp_name_sv = newSV(0);
                 if (!S_openindirtemp(aTHX_ PL_argvoutgv, GvSV(gv), temp_name_sv)) {
                     SvREFCNT_dec(temp_name_sv);
+                    STRERROR_LOCK;
+                    const char * msg = Strerror(errno);
+                    STRERROR_UNLOCK;
                     /* diag_listed_as: Can't do inplace edit on %s: %s */
                     Perl_ck_warner_d(aTHX_ packWARN(WARN_INPLACE), "Can't do inplace edit on %s: Cannot make temp name: %s",
-                                     PL_oldname, Strerror(errno) );
+                                     PL_oldname, msg );
 #ifndef FLEXFILENAMES
                 cleanup_argv:
 #endif
@@ -1587,8 +1590,11 @@ Perl_nextargv(pTHX_ GV *gv, bool nomagicopen)
                             PL_oldname);
             }
             else {
+                STRERROR_LOCK;
+                const char * msg = Strerror(eno);
+                STRERROR_UNLOCK;
                 Perl_warner(aTHX_ packWARN(WARN_INPLACE), "Can't open %s: %s",
-                            PL_oldname, Strerror(eno));
+                            PL_oldname, msg);
             }
         }
     }
@@ -2414,9 +2420,13 @@ S_exec_failed(pTHX_ const char *cmd, int fd, int do_report)
     const int e = errno;
     PERL_ARGS_ASSERT_EXEC_FAILED;
 
-    if (ckWARN(WARN_EXEC))
+    if (ckWARN(WARN_EXEC)) {
+        STRERROR_LOCK;
+        const char * msg = Strerror(e);
+        STRERROR_UNLOCK;
         Perl_warner(aTHX_ packWARN(WARN_EXEC), "Can't exec \"%s\": %s",
-                    cmd, Strerror(e));
+                    cmd, msg);
+    }
     if (do_report) {
         /* XXX silently ignore failures */
         PERL_UNUSED_RESULT(PerlLIO_write(fd, (void*)&e, sizeof(int)));
@@ -3489,8 +3499,11 @@ Perl_vms_start_glob
     LEAVE;
 
     if (!fp && ckWARN(WARN_GLOB)) {
+        STRERROR_LOCK;
+        const char * msg = Strerror(errno);
+        STRERROR_UNLOCK;
         Perl_warner(aTHX_ packWARN(WARN_GLOB), "glob failed (can't start child: %s)",
-                    Strerror(errno));
+                    msg);
     }
 
     return fp;
