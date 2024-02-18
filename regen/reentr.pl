@@ -297,6 +297,8 @@ EOF
         define)
 EOF
     }
+
+    # Process the prototypes
     for my $p (@p) {
         my ($r, $a) = ($p =~ /^(.)_(.+)/);
         my $v = join(", ", map { $m{$_} } split '', $a);
@@ -763,13 +765,14 @@ EOF
 #      endif
 EOF
         }
-                    push @wrap, <<EOF;
+
+        push @wrap, <<EOF;
 #      if defined($func)
 #        define PERL_REENTR_USING_${FUNC}_R
 #      endif
 EOF
 
-            push @wrap, <<EOF;  #  defined(PERL_REENTR_API) && (PERL_REENTR_API+0 == 1)
+        push @wrap, <<EOF;  #  defined(PERL_REENTR_API) && (PERL_REENTR_API+0 == 1)
 #    endif
 EOF
 
@@ -801,7 +804,7 @@ typedef struct {
 
 #endif /* USE_REENTRANT_API */
 
-#endif
+#endif /* File hasn't already been #included */
 EOF
 
 read_only_bottom_close_and_rename($h);

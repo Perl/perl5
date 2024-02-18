@@ -1697,6 +1697,6 @@ typedef struct {
 
 #endif /* USE_REENTRANT_API */
 
-#endif
+#endif /* File hasn't already been #included */
 
 /* ex: set ro ft=c: */
