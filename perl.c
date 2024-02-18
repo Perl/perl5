@@ -573,9 +573,12 @@ Perl_dump_sv_child(pTHX_ SV *sv)
     }
 
     if (returned_errno || *buffer) {
+        STRERROR_LOCK;
+        const char * msg = Strerror(returned_errno);
+        STRERROR_UNLOCK;
         Perl_warn(aTHX_ "Debug leaking scalars child failed%s%.*s with errno"
                   " %d: %s", (*buffer ? " at " : ""), (int) *buffer, buffer + 1,
-                  returned_errno, Strerror(returned_errno));
+                  returned_errno, msg);
     }
 }
 #endif
@@ -693,9 +696,13 @@ perl_destruct(pTHXx)
         PerlIO *stdo = PerlIO_stdout();
         if (*stdo && PerlIO_flush(stdo)) {
             PerlIO_restore_errno(stdo);
-            if (errno)
+            if (errno) {
+                STRERROR_LOCK;
+                const char * msg = Strerror(errno);
+                STRERROR_UNLOCK;
                 PerlIO_printf(PerlIO_stderr(), "Unable to flush stdout: %s\n",
-                    Strerror(errno));
+                              msg);
+            }
             if (!STATUS_UNIX)
                 STATUS_ALL_FAILURE;
         }
@@ -1858,7 +1865,9 @@ perl_parse(pTHXx_ XSINIT_t xsinit, int argc, char **argv, char **env)
                    while (*s) s++;
 #endif
 
-                   /* Force copy of environment. */
+                   /* Force copy of environment.  After this, PL_origenviron
+                    * will point to a copy of the original 'environ' so is
+                    * immune to changes in that from other threads. */
                    if (PL_origenviron == environ)
                        dup_environ(aTHX);
 
