@@ -578,13 +578,16 @@ fresh_perl_like(
 
 # GH #15769: "attempting free on address which was not malloc()-ed"
 
-fresh_perl_is(
-    # this combines both failing statements from this ticket
-    q{map%$_= %_= %$_,%::;  map %$_ = %_, *::, $::{Internals::};},
-    "",
-    {stderr => 1},
-    "GH #15769"
-);
+SKIP: {
+    skip_if_miniperl('miniperl: ERRNO hash is read only');
+    fresh_perl_is(
+        # this combines both failing statements from this ticket
+        q{map%$_= %_= %$_,%::;  map %$_ = %_, *::, $::{Internals::};},
+        "",
+        {stderr => 1},
+        "GH #15769"
+    );
+}
 
 
 # GH #15770: "Perl_sv_pvn_force_flags(SV *const, STRLEN *const, const I32):
