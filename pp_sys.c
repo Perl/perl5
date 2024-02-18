@@ -347,11 +347,13 @@ PP(pp_backtick)
  *
  * The first arg is the wildcard.
  *
- * The second arg is a gv which (for some reason) is just an empty
+ * The second arg is a gv which is just an empty
  * placeholder to temporarily assign to PL_last_in_gv. It's a GV unique to
  * this op with only a plain PVIO attached, which is in stash IO::File.
- * Presumably this is used because we tail-call do_readline(), which
- * expects PL_last_in_gv to be set.
+ * This is because do_readline() expects PL_last_in_gv to be set by the
+ * caller. In addition, when built with PERL_EXTERNAL_GLOB (e.g. in
+ * miniperl), a pipe filehandle is opened to an external glob program, and
+ * this is stored in the PVIO for subsequent iterations in scalar context.
  *
  * With OPf_SPECIAL, the second arg isn't present, but a stack MARK is,
  * and the glob is done by following on in op_next to a perl-level
