@@ -2105,24 +2105,43 @@ S_bool_setlocale_emulate_safe_r(pTHX_
                                 const char * wanted_locale,
                                 const line_t caller_line)
 {
-    /* Set the locale to 'wanted_locale' for the category given by our internal
-     * index number, and save the result for later use. */
-
     assert(wanted_locale);
 
-    STDIZED_SETLOCALE_LOCK;
-    const char * new_locale = savepv(stdized_setlocale(category,
-                                                       wanted_locale));
-    STDIZED_SETLOCALE_UNLOCK;
+    /* Set XXX the locale to 'wanted_locale' for the category given by our internal
+     * index number, and save the result for later use. */
 
-    if (! new_locale) {
-        SET_EINVAL;
-        return false;
+    bool free_new_locale = false;
+    const char * new_locale;
+
+    if (isNAME_C_OR_POSIX(wanted_locale)) {
+        new_locale = wanted_locale;
+    }
+    else {
+        STDIZED_SETLOCALE_LOCK;
+        const char * cur_locale = savepv(stdized_setlocale(category, NULL));
+        new_locale = savepv(stdized_setlocale(category, wanted_locale));
+        if (! new_locale) {
+            STDIZED_SETLOCALE_UNLOCK;
+            SET_EINVAL;
+            Safefree(cur_locale);
+            return false;
+        }
+
+        if strNE(cur_locale, new_locale) {
+            posix_setlocale(category, cur_locale);
+        }
+
+        STDIZED_SETLOCALE_UNLOCK;
+
+        Safefree(cur_locale);
+        free_new_locale = true;
     }
 
     update_PL_curlocales_i(get_category_index(category),
                            new_locale, caller_line);
-    Safefree(new_locale);
+    if (free_new_locale) {
+        Safefree(new_locale);
+    }
 
     return true;
 }
