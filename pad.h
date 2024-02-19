@@ -150,7 +150,6 @@ typedef enum {
                                             * sub, but only one level up */
 #define padadd_FIELD            0x10       /* set PADNAMEt_FIELD */
 #define padfind_FIELD_OK        0x20       /* pad_findlex is permitted to see fields */
-#define padadd_TOMBSTONE        0x40       /* set PadnameIsTOMBSTONE on the new entry */
 
 /* ASSERT_CURPAD_LEGAL and ASSERT_CURPAD_ACTIVE respectively determine
  * whether PL_comppad and PL_curpad are consistent and whether they have
@@ -263,11 +262,6 @@ Whether this is a "state" variable.
 Whether this is a "field" variable.  PADNAMEs where this is true will
 have additional information available via C<PadnameFIELDINFO>.
 
-=for apidoc m|bool|PadnameIsTOMBSTONE|PADNAME * pn
-Whether this pad entry is a tombstone.  Such an entry indicates that a
-previously-valid pad entry has now been deleted within this scope, and
-should be ignored.
-
 =for apidoc m|HV *|PadnameTYPE|PADNAME * pn
 The stash associated with a typed lexical.  This returns the C<%Foo::> hash
 for C<my Foo $bar>.
@@ -360,7 +354,6 @@ Restore the old pad saved into the local variable C<opad> by C<PAD_SAVE_LOCAL()>
 #define PadnameIsSTATE(pn)	(PadnameFLAGS(pn) & PADNAMEf_STATE)
 #define PadnameLVALUE(pn)	(PadnameFLAGS(pn) & PADNAMEf_LVALUE)
 #define PadnameIsFIELD(pn)	(PadnameFLAGS(pn) & PADNAMEf_FIELD)
-#define PadnameIsTOMBSTONE(pn)  (PadnameFLAGS(pn) & PADNAMEf_TOMBSTONE)
 
 #define PadnameLVALUE_on(pn)    (PadnameFLAGS(pn) |= PADNAMEf_LVALUE)
 #define PadnameIsSTATE_on(pn)   (PadnameFLAGS(pn) |= PADNAMEf_STATE)
@@ -371,7 +364,6 @@ Restore the old pad saved into the local variable C<opad> by C<PAD_SAVE_LOCAL()>
 #define PADNAMEf_TYPED      0x08    /* for B; unused by core */
 #define PADNAMEf_OUR        0x10    /* for B; unused by core */
 #define PADNAMEf_FIELD      0x20    /* field var */
-#define PADNAMEf_TOMBSTONE  0x40    /* padname has been deleted */
 
 /* backward compatibility */
 #ifndef PERL_CORE

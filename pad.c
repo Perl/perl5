@@ -401,8 +401,7 @@ Perl_cv_undef_flags(pTHX_ CV *cv, U32 flags)
             SV ** const curpad = AvARRAY(comppad);
             for (ix = PadnamelistMAX(comppad_name); ix > 0; ix--) {
                 PADNAME * const name = namepad[ix];
-                if (name && PadnamePV(name) && *PadnamePV(name) == '&' &&
-                        !PadnameIsTOMBSTONE(name)) {
+                if (name && PadnamePV(name) && *PadnamePV(name) == '&') {
                     CV * const innercv = MUTABLE_CV(curpad[ix]);
                     if (PadnameIsOUR(name) && CvCLONED(&cvbody)) {
                         assert(!innercv);
@@ -540,7 +539,7 @@ pad (via L<perlapi/pad_alloc>) and
 then stores a name for that entry.  C<name> is adopted and
 becomes the name entry; it must already contain the name
 string.  C<typestash> and C<ourstash> and the C<padadd_STATE>
-and C<padadd_TOMBSTONE> flags get added to C<name>.
+flag gets added to C<name>.
 None of the other processing of L<perlapi/pad_add_name_pvn>
 is done.  Returns the offset of the allocated pad slot.
 
@@ -574,9 +573,6 @@ S_pad_alloc_name(pTHX_ PADNAME *name, U32 flags, HV *typestash,
         assert(HvSTASH_IS_CLASS(PL_curstash));
         class_add_field(PL_curstash, name);
     }
-    if (flags & padadd_TOMBSTONE) {
-        PadnameFLAGS(name) |= PADNAMEf_TOMBSTONE;
-    }
 
     padnamelist_store(PL_comppad_name, offset, name);
     if (PadnameLEN(name) > 1)
@@ -603,7 +599,6 @@ flags can be OR'ed together:
  padadd_STATE        variable will retain value persistently
  padadd_NO_DUP_CHECK skip check for lexical shadowing
  padadd_FIELD        specifies that the lexical is a field for a class
- padadd_TOMBSTONE    sets the PadnameIsTOMBSTONE flag on the new name
 
 =cut
 */
@@ -617,13 +612,13 @@ Perl_pad_add_name_pvn(pTHX_ const char *namepv, STRLEN namelen,
 
     PERL_ARGS_ASSERT_PAD_ADD_NAME_PVN;
 
-    if (flags & ~(padadd_OUR|padadd_STATE|padadd_NO_DUP_CHECK|padadd_FIELD|padadd_TOMBSTONE))
+    if (flags & ~(padadd_OUR|padadd_STATE|padadd_NO_DUP_CHECK|padadd_FIELD))
         Perl_croak(aTHX_ "panic: pad_add_name_pvn illegal flag bits 0x%" UVxf,
                    (UV)flags);
 
     name = newPADNAMEpvn(namepv, namelen);
 
-    if ((flags & (padadd_NO_DUP_CHECK|padadd_TOMBSTONE)) == 0) {
+    if ((flags & (padadd_NO_DUP_CHECK)) == 0) {
         ENTER;
         SAVEFREEPADNAME(name); /* in case of fatal warnings */
         /* check for duplicate declaration */
@@ -641,23 +636,16 @@ Perl_pad_add_name_pvn(pTHX_ const char *namepv, STRLEN namelen,
     if (!PL_min_intro_pending)
         PL_min_intro_pending = offset;
     PL_max_intro_pending = offset;
-    if(!(flags & padadd_TOMBSTONE)) {
-        /* if it's not a simple scalar, replace with an AV or HV */
-        assert(SvTYPE(PL_curpad[offset]) == SVt_NULL);
-        assert(SvREFCNT(PL_curpad[offset]) == 1);
-        if (namelen != 0 && *namepv == '@')
-            sv_upgrade(PL_curpad[offset], SVt_PVAV);
-        else if (namelen != 0 && *namepv == '%')
-            sv_upgrade(PL_curpad[offset], SVt_PVHV);
-        else if (namelen != 0 && *namepv == '&')
-            sv_upgrade(PL_curpad[offset], SVt_PVCV);
-        assert(SvPADMY(PL_curpad[offset]));
-    }
-    else {
-        /* tombstone has no SV */
-        SvREFCNT_dec(PL_curpad[offset]);
-        PL_curpad[offset] = NULL;
-    }
+    /* if it's not a simple scalar, replace with an AV or HV */
+    assert(SvTYPE(PL_curpad[offset]) == SVt_NULL);
+    assert(SvREFCNT(PL_curpad[offset]) == 1);
+    if (namelen != 0 && *namepv == '@')
+        sv_upgrade(PL_curpad[offset], SVt_PVAV);
+    else if (namelen != 0 && *namepv == '%')
+        sv_upgrade(PL_curpad[offset], SVt_PVHV);
+    else if (namelen != 0 && *namepv == '&')
+        sv_upgrade(PL_curpad[offset], SVt_PVCV);
+    assert(SvPADMY(PL_curpad[offset]));
     DEBUG_Xv(PerlIO_printf(Perl_debug_log,
                            "Pad addname: %ld \"%s\" new lex=0x%" UVxf "\n",
                            (long)offset, PadnamePV(name),
@@ -904,7 +892,6 @@ S_pad_check_dup(pTHX_ PADNAME *name, U32 flags, const HV *ourstash)
         if (pn
             && PadnameLEN(pn) == PadnameLEN(name)
             && !PadnameOUTER(pn)
-            && !PadnameIsTOMBSTONE(pn)
             && (   COP_SEQ_RANGE_LOW(pn)  == PERL_PADSEQ_INTRO
                 || COP_SEQ_RANGE_HIGH(pn) == PERL_PADSEQ_INTRO)
             && memEQ(PadnamePV(pn), PadnamePV(name), PadnameLEN(name)))
@@ -1170,10 +1157,6 @@ S_pad_findlex(pTHX_ const char *namepv, STRLEN namelen, U32 flags, const CV* cv,
             if (offset > 0) { /* not fake */
                 fake_offset = 0;
                 *out_name = name_p[offset]; /* return the name */
-
-                if (PadnameIsTOMBSTONE(*out_name))
-                    /* is this a lexical import that has been deleted? */
-                    return NOT_IN_PAD;
 
                 if (PadnameIsFIELD(*out_name) && !fieldok)
                     croak("Field %" SVf " is not accessible outside a method",
