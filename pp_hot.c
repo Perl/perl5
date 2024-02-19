@@ -1581,7 +1581,7 @@ PP(pp_padsv)
  * pp_coreargs() will have pushed a NULL if no argument was supplied.
  *
  * The parser decides whether '<something>' in the perl src code causes an
- * OP_GLOB or an OPREADLINE op to be planted.
+ * OP_GLOB or an OP_READLINE op to be planted.
  */
 
 PP(pp_readline)
@@ -4009,7 +4009,7 @@ PP(pp_match)
  *       targ (or if OPf_STACKED, into the top SV on the stack), and
  *       returns that. (If OP_RCATLINE, concats rather than sets).
  *
- *    So it normally expects zero args, or one arg when  the OPf_STACKED
+ *    So it normally expects zero args, or one arg when the OPf_STACKED
  *    optimisation is present.
  *
  * For file globbing:
@@ -4019,7 +4019,9 @@ PP(pp_match)
  *
  *    Expects one arg, which is the pattern string (e.g. '*.h').
  *    The caller sets PL_last_in_gv to a plain GV that just has a new
- *    IO::File PVIO attached.
+ *    IO::File PVIO attached. That PVIO is used to attach a pipe file
+ *    handle to when an external glob is being run in scalar context,
+ *    so the pipe is available on subsequent iterations.
  *
  * Handles tied IO magic, but not overloading - that's the caller's
  * responsibility.
@@ -4105,10 +4107,6 @@ Perl_do_readline(pTHX)
     if (io) {
         fp = IoIFP(io);
         if (fp) {
-            /* not possible for the faked-up IO passed by an OP_GLOB to
-             * have a file handle */
-            assert(type != OP_GLOB);
-
             if (IoTYPE(io) == IoTYPE_WRONLY)
                 report_wrongway_fh(PL_last_in_gv, '>');
         }
