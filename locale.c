@@ -2058,7 +2058,7 @@ S_less_dicey_bool_setlocale_r(pTHX_ const int cat, const char * locale)
 
 /* Here, use our emulation of thread safe locales.  PL_curlocales[] keeps what
  * the name of the locale should be for each category in the current thread.
- * And so, S_bool_setlocale_emulate_safe_r() wraps each call to the system's
+ * And so, S_bool_setlocale_emulate_safe_i() wraps each call to the system's
  * setlocale() with saving the return into PL_curlocales.
  *
  * The locale is changed to the one specified by PL_curlocales[] just before
@@ -2096,12 +2096,12 @@ S_querylocale_emulate_safe_i(pTHX_ const locale_category_index  cat_index,
 
 /*---------------------------------------------------------------------------*/
 
-#  define bool_setlocale_r(cat, locale)                                     \
-            S_bool_setlocale_emulate_safe_r(aTHX_ cat, locale, __LINE__)
+#  define bool_setlocale_i(index, locale)                                     \
+            S_bool_setlocale_emulate_safe_i(aTHX_ index, locale, __LINE__)
 
 STATIC bool
-S_bool_setlocale_emulate_safe_r(pTHX_
-                                const int category,
+S_bool_setlocale_emulate_safe_i(pTHX_
+                                const locale_category_index  index,
                                 const char * wanted_locale,
                                 const line_t caller_line)
 {
@@ -2113,12 +2113,23 @@ S_bool_setlocale_emulate_safe_r(pTHX_
     bool free_new_locale = false;
     const char * new_locale;
 
-    if (isNAME_C_OR_POSIX(wanted_locale)) {
+    bool skip_changing = /*PL_locale_toggle_depth[index] < 1
+                      && */ PL_restore_locale_depth[index] < 1;
+
+    if (skip_changing && isNAME_C_OR_POSIX(wanted_locale)) {
         new_locale = wanted_locale;
     }
     else {
+        const char * cur_locale = NULL;
+
         STDIZED_SETLOCALE_LOCK;
-        const char * cur_locale = savepv(stdized_setlocale(category, NULL));
+
+        const int category = categories[index];
+
+        if (skip_changing) {
+            cur_locale = savepv(stdized_setlocale(category, NULL));
+        }
+
         new_locale = savepv(stdized_setlocale(category, wanted_locale));
         if (! new_locale) {
             STDIZED_SETLOCALE_UNLOCK;
@@ -2127,7 +2138,10 @@ S_bool_setlocale_emulate_safe_r(pTHX_
             return false;
         }
 
-        if strNE(cur_locale, new_locale) {
+        /* Here, have changed to the new locale.  If the new one is different
+         * from the old one, and we aren't actually supposed to change to it,
+         * change back while still locked. */
+        if (skip_changing && strNE(cur_locale, new_locale)) {
             posix_setlocale(category, cur_locale);
         }
 
@@ -2137,8 +2151,7 @@ S_bool_setlocale_emulate_safe_r(pTHX_
         free_new_locale = true;
     }
 
-    update_PL_curlocales_i(get_category_index(category),
-                           new_locale, caller_line);
+    update_PL_curlocales_i(index, new_locale, caller_line);
     if (free_new_locale) {
         Safefree(new_locale);
     }
@@ -2150,40 +2163,25 @@ S_bool_setlocale_emulate_safe_r(pTHX_
 /* When the locale is toggled in this file, automatically enter a critical
  * section and call category_lock() to make sure the category is in the proper
  * locale for this thread.  LC_NUMERIC is handled specially, so
- * PL_NUMERIC_toggle_depth is used */
+ * XXX PL_NUMERIC_toggle_depth is used */
 #  define TOGGLING_LOCKS  1
 #  define DEBUG_TOGGLE(i)                                                   \
         DEBUG_Lv(PerlIO_printf(Perl_debug_log,                              \
-                               "new depth=%d, index=%d, caller=%" LINE_Tf   \
-                               "\n", PL_NUMERIC_toggle_depth, i, __LINE__))
-#  ifdef USE_LOCALE_NUMERIC
-#    define TOGGLE_NUMERIC(i)                                               \
-         STMT_START {                                                       \
-            if (i == LC_NUMERIC_INDEX_) PL_NUMERIC_toggle_depth++;          \
-         } STMT_END
-#    define UNTOGGLE_NUMERIC(i)                                             \
-         STMT_START {                                                       \
-            if (i == LC_NUMERIC_INDEX_) {                                   \
-                if (PL_NUMERIC_toggle_depth <= 0) {                         \
-                    locale_panic_("toggling down failed");                  \
-                }                                                           \
-                PL_NUMERIC_toggle_depth--;                                  \
-            }                                                               \
-         } STMT_END
-#  else
-#    define TOGGLE_NUMERIC(i)
-#    define UNTOGGLE_NUMERIC(i)
-#  endif
+                               "new depth=%zd, index=%d, caller=%" LINE_Tf  \
+                               "\n", PL_locale_toggle_depth[i], i, __LINE__))
 #  define TOGGLE_LOCK(i)                                                    \
          STMT_START {                                                       \
-            TOGGLE_NUMERIC(i);                                              \
-            DEBUG_TOGGLE(i);                                                \
+            PL_locale_toggle_depth[i]++;                                    \
             LC_LOCK_i_(i);                                                  \
+            DEBUG_TOGGLE(i);                                                \
          } STMT_END
 #  define TOGGLE_UNLOCK(i)                                                  \
          STMT_START {                                                       \
+            if (PL_locale_toggle_depth[i] < 1) {                            \
+                locale_panic_("toggling down failed");                      \
+            }                                                               \
             LC_UNLOCK_i_(i);                                                \
-            UNTOGGLE_NUMERIC(i);                                            \
+            PL_locale_toggle_depth[i]--;                                    \
             DEBUG_TOGGLE(i);                                                \
          } STMT_END
 /*---------------------------------------------------------------------------*/
@@ -2300,14 +2298,16 @@ Perl_category_lock(pTHX_ const UV mask,
          *
          * But it's more complicated for LC_NUMERIC.  When toggled by one of
          * the toggling_2 functions in this file, LC_NUMERIC is also given by
-         * PL_curlocales[].  PL_NUMERIC_toggle_depth > 0 indicates this.
-         * Otherwise, the toggling_1 mechanism is in effect.  Comments at
-         * S_new_numeric describe this */
+         * PL_curlocales[].  PL_locale_toggle_depth[LC_NUMERIC_INDEX_] > 0
+         * indicates this.  Otherwise, the toggling_1 mechanism is in effect.
+         * Comments at S_new_numeric describe this */
 #  ifndef USE_LOCALE_NUMERIC
         const char * wanted = PL_curlocales[cat_index];
 #  else
         const char * wanted;
-        if (cat_index != LC_NUMERIC_INDEX_ || PL_NUMERIC_toggle_depth > 0) {
+        if (   cat_index != LC_NUMERIC_INDEX_
+            || PL_locale_toggle_depth[LC_NUMERIC_INDEX_] > 0)
+        {
             wanted = PL_curlocales[cat_index];
         }
         else if (PL_numeric_underlying) {
@@ -9416,6 +9416,8 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 #  ifdef EMULATE_THREAD_SAFE_LOCALES
     for (unsigned int i = 0; i < LC_ALL_INDEX_; i++) {
         PL_restore_locale[i] = NULL;
+        PL_restore_locale_depth[i] = 0;
+        PL_locale_toggle_depth[i] = 0;
     }
 #  endif
 #  if ! defined(PERL_LC_ALL_USES_NAME_VALUE_PAIRS) && defined(LC_ALL)
@@ -11434,7 +11436,7 @@ Perl_thread_locale_term(pTHX)
 #  endif
 #  if defined(EMULATE_THREAD_SAFE_LOCALES)
 
-    assert(aTHX == 0 || PL_NUMERIC_toggle_depth == 0);
+    assert(aTHX == 0 || PL_locale_toggle_depth[LC_NUMERIC_INDEX_] == 0);
 
 #  endif
 #  ifdef WIN32_USE_FAKE_OLD_MINGW_LOCALES

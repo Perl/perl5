@@ -506,6 +506,7 @@ unless ($define{EMULATE_THREAD_SAFE_LOCALES})
     ++$skip{$_} foreach qw(
         PL_restore_locale
         PL_restore_locale_depth
+        PL_locale_toggle_depth
         PL_NUMERIC_toggle_depth
         Perl_category_lock
         Perl_category_unlock

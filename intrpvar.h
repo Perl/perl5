@@ -762,7 +762,7 @@ PERLVARA(I, curlocales, LOCALE_CATEGORIES_COUNT_ + 1, const char *)
 #ifdef EMULATE_THREAD_SAFE_LOCALES
 PERLVARA(I, restore_locale, LOCALE_CATEGORIES_COUNT_, const char *)
 PERLVARA(I, restore_locale_depth, LOCALE_CATEGORIES_COUNT_, Size_t)
-PERLVARI(I, NUMERIC_toggle_depth, int, 0)
+PERLVARA(I, locale_toggle_depth, LOCALE_CATEGORIES_COUNT_, SSize_t)
 #endif
 
 #if defined(USE_LOCALE) && (defined(WIN32) || ! defined(USE_THREAD_SAFE_LOCALE))
