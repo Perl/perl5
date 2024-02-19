@@ -1414,7 +1414,7 @@ struct IPerlSockInfo
 #    define PerlSock_closesocket(s)     closesocket(s)
 #  endif
 
-#endif  /* PERL_IMPLICIT_SYS */
+#endif  /* ! PERL_IMPLICIT_SYS */
 
 #endif  /* __Inc__IPerl___ */
 

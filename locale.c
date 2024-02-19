@@ -1,7 +1,11 @@
 /*    locale.c
  *
 123456789112345678921234567893123456789412345678951234567896123456789712345678981
+ *    toggle locale locks things, so things like strod() don't need locking wrappers
  *    strptime
+ *    what deltas for stdize changes?
+ *    a bunch of copies aren't needed on nonthreaded
+ *
  *    Copyright (C) 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001,
  *    2002, 2003, 2005, 2006, 2007, 2008 by Larry Wall and others
  *
@@ -4131,7 +4135,7 @@ S_new_numeric(pTHX_ const char *newnum, bool force)
      * */
     PL_numeric_underlying = TRUE;
     PL_numeric_standard = false;
-    PL_numeric_underlying_is_standard = true;   /* Illegal combination */
+    PL_numeric_underlying_is_standard = true;   /* WHY Illegal combination */
 
     /* Passing a non-NULL causes the function call just below to
        automatically set the UTF-8 flag on PL_underlying_radix_sv */
@@ -4211,6 +4215,7 @@ Perl_set_numeric_standard(pTHX_ const char * const file, const line_t line)
     DEBUG_L(PerlIO_printf(Perl_debug_log, "Setting LC_NUMERIC locale to"
                                           " standard C; called from %s: %"
                                           LINE_Tf "\n", file, line));
+    /* XXX Maybe not in init? assert(PL_locale_mutex_depth > 0);*/
 
     void_setlocale_c_with_caller(LC_NUMERIC, "C", file, line);
     PL_numeric_standard = TRUE;
@@ -4243,7 +4248,7 @@ Perl_set_numeric_underlying(pTHX_ const char * const file, const line_t line)
     DEBUG_L(PerlIO_printf(Perl_debug_log, "Setting LC_NUMERIC locale to %s;"
                                           " called from %s: %" LINE_Tf "\n",
                                           PL_numeric_name, file, line));
-    /* Maybe not in init? assert(PL_locale_mutex_depth > 0);*/
+    /* XXX Maybe not in init? assert(PL_locale_mutex_depth > 0);*/
 
     void_setlocale_c_with_caller(LC_NUMERIC, PL_numeric_name, file, line);
     PL_numeric_underlying = TRUE;
@@ -4962,6 +4967,9 @@ S_win32_setlocale(pTHX_ int category, const char* locale)
 
         Safefree(PL_cur_LC_ALL);
         PL_cur_LC_ALL = result;
+
+        DEBUG_L(PerlIO_printf(Perl_debug_log, "new PL_cur_LC_ALL=%s\n",
+                                               PL_cur_LC_ALL));
     }
 
     DEBUG_L(PerlIO_printf(Perl_debug_log, "new PL_cur_LC_ALL=%s\n",
@@ -11033,6 +11041,7 @@ Perl_my_strerror(pTHX_ const int errnum, utf8ness_t * utf8ness)
     else {  /* Otherwise, use the LC_MESSAGES locale, making sure LC_CTYPE
                matches */
         locale_t cur = duplocale(use_curlocale_scratch());
+        // XXX dup, new are expensive.
 
         const char * locale = querylocale_c_imm(LC_MESSAGES);
         NEWLOCALE_LOCK;
@@ -11598,6 +11607,7 @@ Perl_thread_locale_init(pTHX)
     PL_perl_controls_locale = true;
     void_setlocale_c(LC_ALL, "C");
 
+    // XXX dicey?
 #  endif
 
 }

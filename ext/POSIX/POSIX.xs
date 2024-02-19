@@ -3543,6 +3543,7 @@ asctime(sec, min, hour, mday, mon, year, wday = 0, yday = 0, isdst = -1)
 long
 clock()
 
+#XXX: /* Lock it */
 char *
 ctime(time)
 	Time_t		&time
@@ -3684,6 +3685,7 @@ SysRetLong
 sysconf(name)
 	int		name
 
+# /* lock */
 char *
 ttyname(fd)
 	POSIX::Fd	fd
