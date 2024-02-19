@@ -64,7 +64,9 @@ now been made a fatal error.
 Additionally, it is now a fatal error to issue a subsequent C<use VERSION>
 declaration when another is in scope, when either version is 5.39 or above.
 This is to avoid complications surrounding imported lexical functions from
-L<builtin>.
+L<builtin>.  A deprecation warning has also been added for any other
+subsequent C<use VERSION> declaration below version 5.39, to warn that it
+will no longer be permitted in Perl version 5.46.
 
 =head2 C<use VERSION> no longer removes imported C<builtin> functions
 

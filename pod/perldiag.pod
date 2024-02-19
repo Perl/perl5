@@ -7849,7 +7849,7 @@ is visible.
 
 (W deprecated) Once you have a C<use VERSION> statement in scope, any other
 C<use VERSION> statement is now deprecated, due to the increasing complexity
-of swapping from one prevalent version to another.
+of swapping from one prevailing version to another.
 
 It is suggested that you do not try to mix multiple different version
 declarations within the same file as it leads to complex behaviours about the
