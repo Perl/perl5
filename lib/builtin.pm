@@ -1,9 +1,9 @@
-package builtin 0.013;
+package builtin 0.014;
 
 use strict;
 use warnings;
 
-# All code, including &import and &unimport, is implemented by always-present
+# All code, including &import, is implemented by always-present
 # functions in the perl interpreter itself.
 # See also `builtin.c` in perl source
 
@@ -81,13 +81,15 @@ don't accidentally appear as object methods from a class.
     # Can't locate object method "true" via package "An::Object::Class"
     #   at ...
 
-Imported symbols can also be removed again by using the C<no> keyword:
+Once imported, a lexical function is much like any other lexical symbol
+(such as a variable) in that it cannot be removed again.  If you wish to
+limit the visiblity of an imported C<builtin> function, put it inside its
+own scope:
 
-    use builtin 'true';
-    my $yes = true;
-
-    no builtin 'true';
-    # true() is no longer aliased from builtin
+    {
+      use builtin 'refaddr';
+      ...
+    }
 
 =head2 Version Bundles
 

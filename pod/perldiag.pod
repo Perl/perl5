@@ -657,13 +657,6 @@ is currently being compiled. Since this method is used to introduce new
 lexical subroutines into the scope currently being compiled, this is not
 going to have any effect.
 
-=item builtin::unimport can only be called at compile time
-
-(F) The C<unimport> method of the C<builtin> package was invoked when no code
-is currently being compiled. Since this method is used to remove
-previously-introduced lexical subroutines from the scope currently being
-compiled, this is not going to have any effect.
-
 =item Builtin version bundle "%s" is not supported by Perl
 
 (F) You attempted to C<use builtin :ver> for a version number that is either
