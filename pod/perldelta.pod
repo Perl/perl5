@@ -66,6 +66,18 @@ declaration when another is in scope, when either version is 5.39 or above.
 This is to avoid complications surrounding imported lexical functions from
 L<builtin>.
 
+=head2 C<use VERSION> no longer removes imported C<builtin> functions
+
+For a few development versions we have experimented with the idea that as
+well as importing lexical functions, the C<use VERSION> syntax can also
+remove previously imported functions when a new version is requested that
+does not include them.  This behaviour of removing lexical functions has
+turned out to be a bad model to follow so this version of Perl removes it
+again.
+
+As this behaviour has not appeared in any stable release of Perl, no warning
+or deprecation period is required.
+
 =head2 New C<builtin::inf> and C<builtin::nan> functions
 
 Two new functions, C<inf> and C<nan>, have been added to the C<builtin>
