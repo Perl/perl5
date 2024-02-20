@@ -661,7 +661,18 @@ addbits('const',
     2 => qw(OPpCONST_SHORTCIRCUIT SHORT),   # e.g. the constant 5 in (5 || foo)
     3 => qw(OPpCONST_STRICT       STRICT),  # bareword subject to strict 'subs'
     4 => qw(OPpCONST_ENTERED      ENTERED), # Has been entered as symbol
-    6 => qw(OPpCONST_BARE         BARE),    # Was a bare word (filehandle?)
+    5 => qw(OPpCONST_BARE         BARE),    # Was a bare word (filehandle?)
+    '6..7' => {                             # value derived from __LINE__ etc
+        mask_def      => 'OPpCONST_TOKEN_MASK',
+        baseshift_def => 'OPpCONST_TOKEN_SHIFT',
+        bitcount_def  => 'OPpCONST_TOKEN_BITS',
+        label         => 'TOKEN',
+        enum          => [ qw(
+                             1   OPpCONST_TOKEN_LINE    LINE
+                             2   OPpCONST_TOKEN_FILE    FILE
+                             3   OPpCONST_TOKEN_PACKAGE PACKAGE
+                         )],
+    },
 );
 
 

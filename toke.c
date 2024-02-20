@@ -7940,19 +7940,18 @@ yyl_word_or_keyword(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct
         return yyl_just_a_word(aTHX_ s, len, orig_keyword, c);
 
     case KEY___FILE__:
-        FUN0OP( newSVOP(OP_CONST, 0, newSVpv(CopFILE(PL_curcop),0)) );
+        FUN0OP(newSVOP(OP_CONST, OPpCONST_TOKEN_FILE<<8,
+                newSVpv(CopFILE(PL_curcop),0)) );
 
     case KEY___LINE__:
-        FUN0OP(
-            newSVOP(OP_CONST, 0,
-                Perl_newSVpvf(aTHX_ "%" LINE_Tf, CopLINE(PL_curcop)))
-        );
+        FUN0OP(newSVOP(OP_CONST, OPpCONST_TOKEN_LINE<<8,
+                Perl_newSVpvf(aTHX_ "%" LINE_Tf, CopLINE(PL_curcop))));
 
     case KEY___PACKAGE__:
-        FUN0OP(
-            newSVOP(OP_CONST, 0, (PL_curstash
-                                     ? newSVhek(HvNAME_HEK(PL_curstash))
-                                     : &PL_sv_undef))
+        FUN0OP(newSVOP(OP_CONST, OPpCONST_TOKEN_PACKAGE<<8,
+                (PL_curstash
+                     ? newSVhek(HvNAME_HEK(PL_curstash))
+                     : &PL_sv_undef))
         );
 
     case KEY___DATA__:
