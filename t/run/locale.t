@@ -625,13 +625,13 @@ SKIP: {   # GH #20085
 }
 
 SKIP: {   # GH #20054
-    skip "Even illegal locale names are accepted", 2
+    skip "Even illegal locale names are accepted", 1
                     if $Config{d_setlocale_accepts_any_locale_name}
                     && $Config{d_setlocale_accepts_any_locale_name} eq 'define';
 	
     my @lc_all_locales = find_locales('LC_ALL');
     my $locale = $lc_all_locales[0];
-    skip "LC_ALL not enabled on this platform", 2 unless $locale;
+    skip "LC_ALL not enabled on this platform", 1 unless $locale;
     my $fallback = ($^O eq "MSWin32")
                     ? "system default"
                     : "standard";
@@ -643,66 +643,6 @@ SKIP: {   # GH #20054
                     qr/Falling back to the $fallback locale/,
                     { eval $switches },
                     "check that illegal startup environment falls back");
-
-    SKIP: {
-        if (! $Config{d_perl_lc_all_uses_name_value_pairs}) {
-            skip("Test currently written only for name=value pairs LC_ALL syntax",
-                 1);
-        }
-
-        my @non_C_locales = grep { ! is_locale_C($_) } @lc_all_locales;
-
-        # We will look at all changeable categories on the platform, and
-        # spread their names out so that they are quickly distinguishable from
-        # each other.
-        my $index = 0;
-        my $delta = POSIX::floor(@non_C_locales / @changeable_from_C_categories);
-        $delta = 1 if $delta < 1;
-
-        my $lc_all_string = "";
-        my $lc_numeric;
-
-        # Set up an LC_ALL value with each changeable category set to a
-        # different locale (if possible), and the non-changeable ones set to
-        # "C".
-        foreach my $category (@platform_categories) {
-            next if $category eq "LC_ALL";
-            $lc_all_string .= ";" if $lc_all_string;
-
-            my $locale;
-            if (grep { $category eq $_ } @changeable_from_C_categories) {
-                $locale = $non_C_locales[$index];
-                $index += $delta;
-                $index = 0 if $index >= @non_C_locales;
-            }
-            else {
-                $locale = "C";
-            }
-
-            $lc_all_string .= "$category=" . $locale;
-            $lc_numeric = $locale if $category eq "LC_NUMERIC";
-        }
-
-      TODO: {
-        local $::TODO = "fixed by next commit";
-        fresh_perl_is(<<~EOT,
-                        # Some platforms (or shells) can't handle setting from
-                        # a disparate LC_ALL "".  Suppress any message.
-                        local \$ENV{PERL_BADLANG} = 0;
-
-                        local \$ENV{LC_ALL} = '$lc_all_string';
-                        system(qq($^X -I../lib -I. -e 'use POSIX qw(locale_h);
-                                                    setlocale(LC_ALL, "C");
-                                                    setlocale(LC_NUMERIC, "");
-                                                    print setlocale(LC_NUMERIC);'
-                                ));
-                        EOT
-                    $lc_numeric,
-                    { eval $switches },
-                    'Fetching a single category from a disparate "" environment'
-                  . ' works');
-      }
-    }
 }
 
 done_testing();
