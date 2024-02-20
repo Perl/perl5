@@ -54,7 +54,6 @@ mro/complex_c3_utf8.t
 mro/isarev.t
 mro/isarev_utf8.t
 op/attrhand.t             # Custom attrs ignored; also AH provides none
-op/caller.t
 op/goto.t
 op/gv.t                   # glob copy constants
 op/index.t
@@ -230,8 +229,20 @@ uni/variables.t
 ../cpan/Test-Simple/t/regression/684-nested_todo_diag.t
 ../cpan/Test-Simple/t/Test2/behavior/run_subtest_inherit.t
 
-# these three use __LINE__, which gets deparsed as a number rather than
-# __LINE__.
+# These three are very sensitive to line numbers, and in particular
+# to wrong line numbers being output for the closing braces of a function,
+# e.g.
+#
+#    sub foo { .... } # all on line 30
+#
+# becomes
+#
+#    #line 30 ....
+#    sub foo {
+#        ...
+#    #line 10 ....
+#    }
+#
 ../cpan/Test2-Suite/t/behavior/filtering.t
 ../cpan/Test2-Suite/t/modules/Tools/Compare.t
 ../cpan/Test2-Suite/t/modules/Tools/Subtest.t

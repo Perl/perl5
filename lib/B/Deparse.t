@@ -3391,3 +3391,8 @@ $x = (return 'ok');
 $x //= (return 'ok');
 $x = exit 42;
 $x //= exit 42;
+####
+# preserve __LINE__ etc
+my $x = __LINE__;
+my $y = __FILE__;
+my $z = __PACKAGE__;

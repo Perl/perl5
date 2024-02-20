@@ -245,6 +245,20 @@ my @bf = (
             3, 'OPpLVREF_CV', 'CV',
         ],
     },
+    {
+        label     => 'TOKEN',
+        mask_def  => 'OPpCONST_TOKEN_MASK',
+        baseshift_def => 'OPpCONST_TOKEN_SHIFT',
+        bitcount_def => 'OPpCONST_TOKEN_BITS',
+        bitmin    => 6,
+        bitmax    => 7,
+        bitmask   => 192,
+        enum      => [
+            1, 'OPpCONST_TOKEN_LINE', 'LINE',
+            2, 'OPpCONST_TOKEN_FILE', 'FILE',
+            3, 'OPpCONST_TOKEN_PACKAGE', 'PACKAGE',
+        ],
+    },
 );
 
 @{$bits{aassign}}{6,5,4,2,1,0} = ('OPpASSIGN_COMMON_SCALAR', 'OPpASSIGN_COMMON_RC1', 'OPpASSIGN_COMMON_AGG', 'OPpASSIGN_TRUEBOOL', $bf[1], $bf[1]);
@@ -292,7 +306,7 @@ $bits{cmpchain_dup}{0} = $bf[0];
 @{$bits{concat}}{6,1,0} = ('OPpCONCAT_NESTED', $bf[1], $bf[1]);
 $bits{cond_expr}{0} = $bf[0];
 @{$bits{connect}}{3,2,1,0} = ($bf[4], $bf[4], $bf[4], $bf[4]);
-@{$bits{const}}{6,4,3,2,1} = ('OPpCONST_BARE', 'OPpCONST_ENTERED', 'OPpCONST_STRICT', 'OPpCONST_SHORTCIRCUIT', 'OPpCONST_NOVER');
+@{$bits{const}}{7,6,5,4,3,2,1} = ($bf[10], $bf[10], 'OPpCONST_BARE', 'OPpCONST_ENTERED', 'OPpCONST_STRICT', 'OPpCONST_SHORTCIRCUIT', 'OPpCONST_NOVER');
 @{$bits{coreargs}}{7,6,1,0} = ('OPpCOREARGS_PUSHMARK', 'OPpCOREARGS_SCALARMOD', 'OPpCOREARGS_DEREF2', 'OPpCOREARGS_DEREF1');
 $bits{cos}{0} = $bf[0];
 @{$bits{crypt}}{3,2,1,0} = ($bf[4], $bf[4], $bf[4], $bf[4]);
@@ -614,11 +628,17 @@ our %defines = (
     OPpASSIGN_TRUEBOOL       =>   4,
     OPpAVHVSWITCH_MASK       =>   3,
     OPpCONCAT_NESTED         =>  64,
-    OPpCONST_BARE            =>  64,
+    OPpCONST_BARE            =>  32,
     OPpCONST_ENTERED         =>  16,
     OPpCONST_NOVER           =>   2,
     OPpCONST_SHORTCIRCUIT    =>   4,
     OPpCONST_STRICT          =>   8,
+    OPpCONST_TOKEN_BITS      =>   2,
+    OPpCONST_TOKEN_FILE      => 128,
+    OPpCONST_TOKEN_LINE      =>  64,
+    OPpCONST_TOKEN_MASK      => 192,
+    OPpCONST_TOKEN_PACKAGE   => 192,
+    OPpCONST_TOKEN_SHIFT     =>   6,
     OPpCOREARGS_DEREF1       =>   1,
     OPpCOREARGS_DEREF2       =>   2,
     OPpCOREARGS_PUSHMARK     => 128,
@@ -736,6 +756,9 @@ our %labels = (
     OPpCONST_NOVER           => 'NOVER',
     OPpCONST_SHORTCIRCUIT    => 'SHORT',
     OPpCONST_STRICT          => 'STRICT',
+    OPpCONST_TOKEN_FILE      => 'FILE',
+    OPpCONST_TOKEN_LINE      => 'LINE',
+    OPpCONST_TOKEN_PACKAGE   => 'PACKAGE',
     OPpCOREARGS_DEREF1       => 'DEREF1',
     OPpCOREARGS_DEREF2       => 'DEREF2',
     OPpCOREARGS_PUSHMARK     => 'MARK',
