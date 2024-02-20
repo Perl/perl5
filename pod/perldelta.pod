@@ -476,7 +476,50 @@ manager will later use a regex to expand these into links.
 
 =item *
 
-XXX
+Lexical subs now have a new stub in the pad for each recursive call
+into the containing function.  This fixes two problems:
+
+=over
+
+=item *
+
+If the lexical sub called the containing function, a "Can't undef
+active subroutine" error would be thrown.  For example:
+
+    use v5.36.0;
+    sub outer($oc) {
+        my sub inner ($c) {
+             outer($c-1) if $c; # Can't undef active subroutine
+        }
+        inner($oc);
+    }
+    outer(2);
+
+[github #18606]
+
+=item *
+
+If the lexical sub was called from a recursive call into the
+containing function, this would overwrite the bindings to the closed
+over variables in the lexical sub, so calls into the lexical sub from
+the outer recursive call would have access to the variables from the
+inner recursive call:
+
+    use v5.36.0;
+    sub outer ($x) {
+        my sub inner ($label) {
+            say "$label $x";
+        }
+        inner("first");
+        outer("inner") if $x eq "outer";
+        # this call to inner() sees the wrong $x
+        inner("second");
+    }
+    outer("outer");
+
+[github #21987]
+
+=back
 
 =back
 
