@@ -213,6 +213,33 @@ package FetchStoreCounter {
     is(stringify(bless [], "WithOverloadedStringify"), "STRING", 'stringify invokes "" overload');
 }
 
+# numify
+{
+    use builtin qw( numify );
+
+    is(numify(123),   123, 'numify an integral number');
+    is(numify(1.23), 1.23, 'numify a floating point number');
+    is(numify("456"), 456, 'numify a string');
+
+    my $aref = [];
+    is(numify($aref), $aref+0, 'numify an array ref');
+
+    use builtin qw( created_as_number );
+    ok(!ref numify($aref),               'numified arrayref is not a ref');
+    ok(created_as_number(numify($aref)), 'numified arrayref is created as num');
+
+    {
+        no warnings 'uninitialized';
+        is(numify(undef), 0, 'numified undef is zero');
+    }
+
+    package WithOverloadedNumify {
+        use overload '0+' => sub { return 987 };
+    }
+
+    is(numify(bless [], "WithOverloadedNumify"), 987, 'numify invokes 0+ overload');
+}
+
 # ceil, floor
 {
     use builtin qw( ceil floor );

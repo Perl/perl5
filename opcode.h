@@ -568,6 +568,7 @@ EXTCONST char* const PL_op_name[] INIT({
 	"methstart",
 	"initfield",
 	"classname",
+	"numify",
         "freed",
 });
 
@@ -994,6 +995,7 @@ EXTCONST char* const PL_op_desc[] INIT({
 	"method start",
 	"initialise field",
 	"class name",
+	"number conversion",
     "freed op",
 });
 
@@ -1425,6 +1427,7 @@ INIT({
 	Perl_pp_methstart,
 	Perl_pp_initfield,
 	Perl_pp_classname,
+	Perl_pp_numify,
 });
 
 EXT Perl_check_t PL_check[] /* or perlvars.h */
@@ -1851,6 +1854,7 @@ INIT({
 	Perl_ck_null,		/* methstart */
 	Perl_ck_null,		/* initfield */
 	Perl_ck_classname,	/* classname */
+	Perl_ck_fun,		/* numify */
 });
 
 EXTCONST U32 PL_opargs[] INIT({
@@ -2276,6 +2280,7 @@ EXTCONST U32 PL_opargs[] INIT({
 	0x00000f00,	/* methstart */
 	0x00000f00,	/* initfield */
 	0x00000008,	/* classname */
+	0x0000111e,	/* numify */
 });
 
 END_EXTERN_C
@@ -2981,6 +2986,7 @@ EXTCONST I16  PL_op_private_bitdef_ix[] = {
      256, /* methstart */
      258, /* initfield */
       -1, /* classname */
+      78, /* numify */
 
 };
 
@@ -3021,7 +3027,7 @@ EXTCONST U16  PL_op_private_bitdefs[] = {
     0x129c, 0x24b8, 0x0ad4, 0x4acc, 0x2848, 0x5244, 0x08e1, /* trans, transr */
     0x10dc, 0x05f8, 0x0067, /* sassign */
     0x0d98, 0x0c94, 0x0b90, 0x3bac, 0x06c8, 0x0067, /* aassign */
-    0x5010, 0x0003, /* chomp, schomp, negate, i_negate, scomplement, sin, cos, exp, log, sqrt, int, hex, oct, abs, ord, chr, chroot, rmdir, refaddr, reftype, ceil, floor */
+    0x5010, 0x0003, /* chomp, schomp, negate, i_negate, scomplement, sin, cos, exp, log, sqrt, int, hex, oct, abs, ord, chr, chroot, rmdir, refaddr, reftype, ceil, floor, numify */
     0x3abc, 0x4bb8, 0x3534, 0x5010, 0x0003, /* undef */
     0x06d4, 0x3bac, 0x0003, /* pos */
     0x5010, 0x0067, /* pow, multiply, i_multiply, divide, i_divide, modulo, i_modulo, add, i_add, subtract, i_subtract */
@@ -3508,6 +3514,7 @@ EXTCONST U8 PL_op_private_valid[] = {
     /* METHSTART  */ (OPpARG1_MASK|OPpINITFIELDS),
     /* INITFIELD  */ (OPpARG1_MASK|OPpINITFIELD_AV|OPpINITFIELD_HV),
     /* CLASSNAME  */ (0),
+    /* NUMIFY     */ (OPpARG1_MASK|OPpTARGET_MY),
 
 };
 

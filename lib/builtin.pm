@@ -22,7 +22,7 @@ builtin - Perl pragma to import built-in utility functions
         weaken unweaken is_weak
         blessed refaddr reftype
         created_as_string created_as_number
-        stringify
+        stringify numify
         ceil floor
         indexed
         trim
@@ -270,7 +270,8 @@ When given a value that is already a string, a copy of this value is returned
 unchanged. False booleans are treated like the empty string.
 
 Numbers are turned into a decimal representation. True booleans are treated
-like the number 1.
+like the number 1. C<undef> is treated as the empty string, provoking a
+warning in the usual way.
 
 References to objects in classes that have L<overload> and define the C<"">
 overload entry will use the delegated method to provide a value here.
@@ -279,6 +280,26 @@ Non-object references, or references to objects in classes without a C<"">
 overload will return a string that names the underlying container type of
 the reference, its memory address, and possibly its class name if it is an
 object.
+
+=head2 numify
+
+    $num = numify($val);
+
+Returns a new plain perl number that represents the given argument.
+
+When given a value that is already a number, a copy of this value is returned
+unchanged. False booleans are treated like the number zero.
+
+Strings are turned into a number by attempting to interpret a decimal
+representation, possibly provoking a warning in the usual way. C<undef> is
+treated as the number zero, again with a warning in the usual way.
+
+References to objects in class that have L<overload> and define the C<0+>
+overload entry will use the delegated method to provide a value here.
+
+Non-object references, or references to objects in classes without a C<0+>
+overload will return a number that represents the memory address of the
+referred item.
 
 =head2 ceil
 

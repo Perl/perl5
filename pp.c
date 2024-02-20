@@ -7989,6 +7989,21 @@ PP(pp_is_tainted)
     return NORMAL;
 }
 
+PP(pp_numify)
+{
+    dTARGET;
+    SV *ssv = *PL_stack_sp;
+    if(SvNOK(ssv))
+        sv_setnv(TARG, SvNV_nomg(ssv));
+    else if(SvIOK(ssv) && SvIsUV(ssv))
+        sv_setuv(TARG, SvUV_nomg(ssv));
+    else
+        sv_setiv(TARG, SvIV_nomg(ssv));
+    SvSETMAGIC(TARG);
+    rpp_replace_1_1_NN(TARG);
+    return NORMAL;
+}
+
 /*
  * ex: set ts=8 sts=4 sw=4 et:
  */
