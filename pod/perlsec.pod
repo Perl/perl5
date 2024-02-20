@@ -242,8 +242,8 @@ Unix-like environments that support #! and setuid or setgid scripts.)
 
 =head2 Taint mode and @INC
 
-+When the taint mode (C<-T>) is in effect, the environment variables
-+C<PERL5LIB>, C<PERLLIB>, and C<PERL_USE_UNSAFE_INC>
+When taint mode (C<-T>) is in effect, the environment variables
+C<PERL5LIB>, C<PERLLIB>, and C<PERL_USE_UNSAFE_INC>
 are ignored by Perl.  You can still adjust C<@INC> from outside the
 program by using the C<-I> command line option as explained in
 L<perlrun|perlrun/-Idirectory>.  The two environment variables are
