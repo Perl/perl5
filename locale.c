@@ -3258,42 +3258,7 @@ S_find_locale_from_environment(pTHX_ const locale_category_index index)
     /* Use any "LC_ALL" environment variable, as it overrides everything else.
      * */
     if (lc_all && strNE(lc_all, "")) {
-        if (index == LC_ALL_INDEX_) {
-            return lc_all;
-        }
-
-        /* There is an LC_ALL environment variable, but we want only one
-         * component of it.  Split the result into its individual components */
-        switch (parse_LC_ALL_string(lc_all,
-                                    (const char **) &locale_names,
-                                    no_override,  /* Handled by other code */
-                                    false,    /* Return only [0] if suffices */
-                                    false,    /* Don't panic on error */
-                                    __LINE__))
-        {
-          case invalid:
-            return NULL;
-
-          case no_array:
-            return lc_all;
-
-          case only_element_0:
-            SAVEFREEPV(locale_names[0]);
-            return locale_names[0];
-
-          case full_array:
-            /* We need to mortalize the desired component, and free the rest */
-            for (unsigned int i = 0; i < LC_ALL_INDEX_; i++) {
-                if (i == index) {
-                    SAVEFREEPV(locale_names[i]);
-                }
-                else {
-                    Safefree(locale_names[i]);
-                }
-            }
-
-            return locale_names[index];
-        }
+        return lc_all;
     }
 
     /* Here, no usable LC_ALL environment variable.  We have to handle each

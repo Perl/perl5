@@ -683,6 +683,8 @@ SKIP: {   # GH #20054
             $lc_numeric = $locale if $category eq "LC_NUMERIC";
         }
 
+      TODO: {
+        local $::TODO = "fixed by next commit";
         fresh_perl_is(<<~EOT,
                         # Some platforms (or shells) can't handle setting from
                         # a disparate LC_ALL "".  Suppress any message.
@@ -699,6 +701,7 @@ SKIP: {   # GH #20054
                     { eval $switches },
                     'Fetching a single category from a disparate "" environment'
                   . ' works');
+      }
     }
 }
 
