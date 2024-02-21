@@ -7111,8 +7111,10 @@ the plain locale pragma without a parameter (S<C<use locale>>) is in effect.
                         STRINGIFY(cond_to_panic_if_already_locked)));       \
                 )                                                           \
                 if (cond_to_panic_if_already_locked) {                      \
-                    locale_panic_("Trying to lock locale incompatibly: "    \
-                         STRINGIFY(cond_to_panic_if_already_locked));       \
+                    Perl_croak_nocontext("panic: %s: %d: Trying to lock"    \
+                                  " locale incompatibly: "                  \
+                                  STRINGIFY(cond_to_panic_if_already_locked)\
+                                  "\n", __FILE__, __LINE__);                \
                 }                                                           \
             }                                                               \
             CLANG_DIAG_RESTORE                                              \
