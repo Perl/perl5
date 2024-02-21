@@ -922,55 +922,21 @@ static const scan_data_t zero_scan_data = {
             m, REPORT_LOCATION_ARGS(RExC_parse));                       \
 } STMT_END
 
-/*
- * Calls SAVEDESTRUCTOR_X if needed, then Simple_vFAIL()
- */
-#define vFAIL(m) STMT_START {                           \
-    Simple_vFAIL(m);                                    \
-} STMT_END
+#define vFAIL(m) Simple_vFAIL(m)
 
 /*
- * Like Simple_vFAIL(), but accepts two arguments.
+ * Like Simple_vFAIL(), but accepts extra arguments.
  */
-#define Simple_vFAIL2(m,a1) STMT_START {                        \
-    S_re_croak(aTHX_ UTF, m REPORT_LOCATION, a1,                \
-                      REPORT_LOCATION_ARGS(RExC_parse));        \
+#define Simple_vFAILn(m, ...) STMT_START {                              \
+    S_re_croak(aTHX_ UTF, m REPORT_LOCATION, __VA_ARGS__,               \
+                      REPORT_LOCATION_ARGS(RExC_parse));                \
 } STMT_END
 
-/*
- * Calls SAVEDESTRUCTOR_X if needed, then Simple_vFAIL2().
- */
-#define vFAIL2(m,a1) STMT_START {                       \
-    Simple_vFAIL2(m, a1);                               \
-} STMT_END
+#define vFAIL2(m,a1) Simple_vFAILn(m, a1)
 
+#define vFAIL3(m,a1,a2) Simple_vFAILn(m, a1, a2)
 
-/*
- * Like Simple_vFAIL(), but accepts three arguments.
- */
-#define Simple_vFAIL3(m, a1, a2) STMT_START {                   \
-    S_re_croak(aTHX_ UTF, m REPORT_LOCATION, a1, a2,            \
-            REPORT_LOCATION_ARGS(RExC_parse));                  \
-} STMT_END
-
-/*
- * Calls SAVEDESTRUCTOR_X if needed, then Simple_vFAIL3().
- */
-#define vFAIL3(m,a1,a2) STMT_START {                    \
-    Simple_vFAIL3(m, a1, a2);                           \
-} STMT_END
-
-/*
- * Like Simple_vFAIL(), but accepts four arguments.
- */
-#define Simple_vFAIL4(m, a1, a2, a3) STMT_START {               \
-    S_re_croak(aTHX_ UTF, m REPORT_LOCATION, a1, a2, a3,        \
-            REPORT_LOCATION_ARGS(RExC_parse));                  \
-} STMT_END
-
-#define vFAIL4(m,a1,a2,a3) STMT_START {                 \
-    Simple_vFAIL4(m, a1, a2, a3);                       \
-} STMT_END
+#define vFAIL4(m,a1,a2,a3) Simple_vFAILn(m, a1, a2, a3)
 
 /* A specialized version of vFAIL2 that works with UTF8f */
 #define vFAIL2utf8f(m, a1) STMT_START {             \
