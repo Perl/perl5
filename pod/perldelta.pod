@@ -104,6 +104,46 @@ XXX For a release on a stable branch, this section aspires to be:
 
 [ List each incompatible change as a =head2 entry ]
 
+=head2 Class barewords no longer resolved as file handles in method calls under C<no feature "bareword_filehandles">
+
+Under C<no feature "bareword_filehandles"> bareword file handles
+continued to be resolved in method calls:
+
+    open FH, "<", $somefile or die;
+    no feature 'bareword_filehandles';
+    FH->binmode;
+
+This has been fixed, so the:
+
+    FH->binmode;
+
+will attempt to resolve C<FH> as a class, typically resulting in a
+runtime error.
+
+The standard file handles such as C<STDOUT> continue to be resolved as
+a handle:
+
+    no feature 'bareword_filehandles';
+    STDOUT->flush; # continues to work
+
+Note that once perl resolves a bareword name as a class it will
+continue to do so:
+
+    package SomeClass {
+        sub somemethod{}
+    }
+    open SomeClass, "<", "somefile" or die;
+    # SomeClass resolved as a handle
+    SomeClass->binmode;
+    {
+        no feature "bareword_filehandles";
+        SomeClass->somemethod;
+    }
+    # SomeClass resolved as a class
+    SomeClass->binmode;
+
+[github #19426]
+
 =head1 Deprecations
 
 XXX Any deprecated features, syntax, modules etc. should be listed here.
