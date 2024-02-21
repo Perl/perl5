@@ -870,21 +870,6 @@ static const scan_data_t zero_scan_data = {
  * past a nul byte. */
 #define SKIP_IF_CHAR(s, e) (!*(s) ? 0 : UTF ? UTF8_SAFE_SKIP(s, e) : 1)
 
-/* Set up to clean up after our imminent demise */
-#define PREPARE_TO_DIE                                                      \
-    STMT_START {                                                            \
-        if (RExC_rx_sv)                                                     \
-            SAVEFREESV(RExC_rx_sv);                                         \
-        if (RExC_open_parens)                                               \
-            SAVEFREEPV(RExC_open_parens);                                   \
-        if (RExC_close_parens)                                              \
-            SAVEFREEPV(RExC_close_parens);                                  \
-        if (RExC_logical_to_parno)                                          \
-            SAVEFREEPV(RExC_logical_to_parno);                              \
-        if (RExC_parno_to_logical)                                          \
-            SAVEFREEPV(RExC_parno_to_logical);                              \
-    } STMT_END
-
 /*
  * Calls SAVEDESTRUCTOR_X if needed, then calls Perl_croak with the given
  * arg. Show regex, up to a maximum length. If it's too long, chop and add
