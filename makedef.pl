@@ -454,6 +454,11 @@ unless ($define{'USE_ITHREADS'}) {
 			 );
 }
 
+unless ($define{'USE_THREADS'}) {
+    ++$skip{Perl_thread_locale_init};
+    ++$skip{Perl_thread_locale_term};
+}
+
 unless ($define{USE_POSIX_2008_LOCALE})
 {
     ++$skip{$_} foreach qw(
