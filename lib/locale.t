@@ -930,6 +930,12 @@ unless (@Locale) {
 }
 
 
+unless (grep { $_ eq "LC_ALL" } platform_locale_categories()) {
+    note "Need LC_ALL to do remainder of tests";
+    print "1..$test_num\n";
+    exit;
+}
+
 setlocale(&POSIX::LC_ALL, "C");
 
 my %posixes;
