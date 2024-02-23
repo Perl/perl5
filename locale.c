@@ -5413,9 +5413,18 @@ S_get_locale_string_utf8ness_i(pTHX_ const char * string,
     }
 
     /* Can't be UTF-8 if invalid */
-    if (! is_strict_utf8_string((U8 *) first_variant,
-                                len - ((char *) first_variant - string)))
+    U8 * first_failure = NULL;
+    if (! is_strict_utf8_string_loc((U8 *) first_variant,
+                         len - ((char *) first_variant - string),
+                         &first_failure))
     {
+        if (tolerate) {
+            const U8 * e = string;
+            if (is_utf8_valid_partial_char_flags(first_failure, e,
+                                             UTF8_DISALLOW_ILLEGAL_INTERCHANGE))
+            {
+            }
+        }
         return UTF8NESS_NO;
     }
 
