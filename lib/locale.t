@@ -2343,6 +2343,8 @@ foreach my $Locale (@Locale) {
 
     report_result($Locale, ++$locales_test_number, $ok17);
     $test_names{$locales_test_number} = 'Verify that a sprintf of a number outside locale scope uses a dot radix';
+    $problematical_tests{$locales_test_number} = 1
+        if ! defined $Config{d_locconv} && ! defined $Config{d_nl_langinfo};
 
     report_result($Locale, ++$locales_test_number, $ok18);
     $test_names{$locales_test_number} = 'Verify that a sprintf of a number back within locale scope uses locale radix';
