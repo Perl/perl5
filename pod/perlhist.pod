@@ -770,6 +770,7 @@ the strings?).
  Ether     5.39.5       2023-Nov-20
  Philippe  5.39.6       2023-Dec-30
  Max       5.39.7       2024-Jan-20
+ Renee     5.39.8       2024-Feb-23
 
 =head2 SELECTED RELEASE SIZES
 
