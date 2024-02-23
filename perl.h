@@ -6372,6 +6372,93 @@ EXTCONST U8   PL_deBruijn_bitpos_tab64[];
 #  define PERL_SET_THX(t)		NOOP
 #endif
 
+#ifdef WIN32
+    /* Windows mutexes are all general semaphores; we don't currently bother
+     * with reproducing the same panic behavior as on other systems */
+#  define PERL_REENTRANT_LOCK(name, mutex, counter,                         \
+                              cond_to_panic_if_already_locked)              \
+        MUTEX_LOCK(mutex)
+#  define PERL_REENTRANT_UNLOCK(name, mutex, counter)  MUTEX_UNLOCK(mutex)
+#else
+
+    /* Simulate a general (or recursive) semaphore on 'mutex' whose name will
+     * be displayed as 'name' in any messages.  There must be a per-thread
+     * variable 'counter', initialized to 0 upon thread creation that this
+     * macro otherwise controls and keeps set to the recursion depth of the
+     * mutex.  'cond_to_panic_if_already_locked' should be set to '0' for a
+     * fully reentrant semaphore.  Otherwise set it to a bit of code which will
+     * be evaluated if the macro is called recursively.  If it evaluates to
+     * 'true', it means something is seriously wrong, and the process panics.
+     *
+     * It locks the mutex if the 'counter' is zero, and then increments
+     * 'counter'.  Each corresponding UNLOCK decrements 'counter' until it is
+     * 0, at which point it actually unlocks the mutex.  Since the variable is
+     * per-thread, initialized to 0, there is no race with other threads.
+     *
+     * Clang improperly gives warnings for this, if not silenced:
+     * https://clang.llvm.org/docs/ThreadSafetyAnalysis.html#conditional-locks
+     */
+#  define PERL_REENTRANT_LOCK(name, mutex, counter,                         \
+                              cond_to_panic_if_already_locked)              \
+    STMT_START {                                                            \
+        CLANG_DIAG_IGNORE(-Wthread-safety)                                  \
+        if (LIKELY(counter <= 0)) {                                         \
+            UNLESS_PERL_MEM_LOG(DEBUG_Lv(PerlIO_printf(Perl_debug_log,      \
+                                "%s: %d: locking " name "; lock depth=1\n", \
+                                __FILE__, __LINE__));                       \
+            )                                                               \
+            MUTEX_LOCK(mutex);                                         \
+            counter = 1;                                                    \
+            UNLESS_PERL_MEM_LOG(DEBUG_Lv(PerlIO_printf(Perl_debug_log,      \
+                                "%s: %d: " name " locked; lock depth=1\n",  \
+                                __FILE__, __LINE__));                       \
+            )                                                               \
+        }                                                                   \
+        else {                                                              \
+            counter++;                                                      \
+            UNLESS_PERL_MEM_LOG(DEBUG_Lv(PerlIO_printf(Perl_debug_log,      \
+                            "%s: %d: avoided locking " name "; new lock"    \
+                            " depth=%d, but will panic if '%s' is true\n",  \
+                            __FILE__, __LINE__, counter,                    \
+                            STRINGIFY(cond_to_panic_if_already_locked)));   \
+            )                                                               \
+            if (cond_to_panic_if_already_locked) {                          \
+                Perl_croak_nocontext("panic: %s: %d: attempting to lock"    \
+                                name " incompatibly: %s\n",                 \
+                                __FILE__, __LINE__,                         \
+                                STRINGIFY(cond_to_panic_if_already_locked));\
+            }                                                               \
+        }                                                                   \
+        CLANG_DIAG_RESTORE                                                  \
+    } STMT_END
+
+#  define PERL_REENTRANT_UNLOCK(name, mutex, counter)                       \
+    STMT_START {                                                            \
+        if (LIKELY(counter == 1)) {                                         \
+            UNLESS_PERL_MEM_LOG(DEBUG_Lv(PerlIO_printf(Perl_debug_log,      \
+                          "%s: %d: unlocking " name "; new lock depth=0\n", \
+                          __FILE__, __LINE__));                             \
+            )                                                               \
+            counter = 0;                                                    \
+            MUTEX_UNLOCK(mutex);                                       \
+        }                                                                   \
+        else if (counter <= 0) {                                            \
+            Perl_croak_nocontext("panic: %s: %d: attempting to unlock"      \
+                                 " already unlocked " name "; depth was"    \
+                                 " %d\n", __FILE__, __LINE__,               \
+                                 counter);                                  \
+        }                                                                   \
+        else {                                                              \
+            counter--;                                                      \
+            UNLESS_PERL_MEM_LOG(DEBUG_Lv(PerlIO_printf(Perl_debug_log,      \
+                "%s: %d: avoided unlocking " name "; new lock depth=%d\n",  \
+                __FILE__, __LINE__, counter));                              \
+            )                                                               \
+        }                                                                   \
+    } STMT_END
+
+#endif
+
 #ifndef EBCDIC
 
 /* The tables below are adapted from
@@ -7067,85 +7154,14 @@ the plain locale pragma without a parameter (S<C<use locale>>) is in effect.
 #else   /* Below: Threaded, and locales are supported */
 
     /* A locale mutex is required on all such threaded builds. */
-#  ifdef WIN32
+#  define LOCALE_LOCK_(cond_to_panic_if_already_locked)                     \
+       PERL_REENTRANT_LOCK("locale",                                        \
+                           &PL_locale_mutex, PL_locale_mutex_depth,         \
+                           cond_to_panic_if_already_locked)
+#  define LOCALE_UNLOCK_                                                    \
+       PERL_REENTRANT_UNLOCK("locale",                                      \
+                             &PL_locale_mutex, PL_locale_mutex_depth)
 
-    /* Windows mutexes are all general semaphores */
-#    define LOCALE_LOCK_(dummy) MUTEX_LOCK(&PL_locale_mutex)
-#    define LOCALE_UNLOCK_      MUTEX_UNLOCK(&PL_locale_mutex)
-#  else
-
-    /* This mutex simulates a general (or recursive) semaphore.  The current
-     * thread will lock the mutex if the per-thread variable is zero, and then
-     * increments that variable.  Each corresponding UNLOCK decrements the
-     * variable until it is 0, at which point it actually unlocks the mutex.
-     * Since the variable is per-thread, initialized to 0, there is no race
-     * with other threads.
-     *
-     * The single argument is a condition to test for, and if true, to panic.
-     * Call it with the constant 0 to suppress the check.
-     *
-     * Clang improperly gives warnings for this, if not silenced:
-     * https://clang.llvm.org/docs/ThreadSafetyAnalysis.html#conditional-locks
-     */
-#    define LOCALE_LOCK_(cond_to_panic_if_already_locked)                   \
-        STMT_START {                                                        \
-            CLANG_DIAG_IGNORE(-Wthread-safety)                              \
-            if (LIKELY(PL_locale_mutex_depth <= 0)) {                       \
-                UNLESS_PERL_MEM_LOG(DEBUG_Lv(PerlIO_printf(Perl_debug_log,  \
-                         "%s: %d: locking locale; lock depth=1\n",          \
-                         __FILE__, __LINE__));                              \
-                )                                                           \
-                MUTEX_LOCK(&PL_locale_mutex);                               \
-                PL_locale_mutex_depth = 1;                                  \
-                UNLESS_PERL_MEM_LOG(DEBUG_Lv(PerlIO_printf(Perl_debug_log,  \
-                         "%s: %d: locale locked; lock depth=1\n",           \
-                         __FILE__, __LINE__));                              \
-                )                                                           \
-            }                                                               \
-            else {                                                          \
-                PL_locale_mutex_depth++;                                    \
-                UNLESS_PERL_MEM_LOG(DEBUG_Lv(PerlIO_printf(Perl_debug_log,  \
-                        "%s: %d: avoided locking locale; new lock"          \
-                        " depth=%d, but will panic if '%s' is true\n",      \
-                        __FILE__, __LINE__, PL_locale_mutex_depth,          \
-                        STRINGIFY(cond_to_panic_if_already_locked)));       \
-                )                                                           \
-                if (cond_to_panic_if_already_locked) {                      \
-                    Perl_croak_nocontext("panic: %s: %d: Trying to lock"    \
-                                  " locale incompatibly: "                  \
-                                  STRINGIFY(cond_to_panic_if_already_locked)\
-                                  "\n", __FILE__, __LINE__);                \
-                }                                                           \
-            }                                                               \
-            CLANG_DIAG_RESTORE                                              \
-        } STMT_END
-
-#    define LOCALE_UNLOCK_                                                  \
-        STMT_START {                                                        \
-            if (LIKELY(PL_locale_mutex_depth == 1)) {                       \
-                UNLESS_PERL_MEM_LOG(DEBUG_Lv(PerlIO_printf(Perl_debug_log,  \
-                         "%s: %d: unlocking locale; new lock depth=0\n",    \
-                         __FILE__, __LINE__));                              \
-                )                                                           \
-                PL_locale_mutex_depth = 0;                                  \
-                MUTEX_UNLOCK(&PL_locale_mutex);                             \
-            }                                                               \
-            else if (PL_locale_mutex_depth <= 0) {                          \
-                Perl_croak_nocontext("panic: %s: %d: attempting to unlock"  \
-                                     " already unlocked locale; depth was"  \
-                                     " %d\n", __FILE__, __LINE__,           \
-                                     PL_locale_mutex_depth);                \
-            }                                                               \
-            else {                                                          \
-                PL_locale_mutex_depth--;                                    \
-                UNLESS_PERL_MEM_LOG(DEBUG_Lv(PerlIO_printf(Perl_debug_log,  \
-                    "%s: %d: avoided unlocking locale; new lock depth=%d\n",\
-                    __FILE__, __LINE__, PL_locale_mutex_depth));            \
-                )                                                           \
-            }                                                               \
-        } STMT_END
-
-#  endif
 #  if defined(USE_THREADS) && ! defined(USE_THREAD_SAFE_LOCALE)
 
      /* By definition, a thread-unsafe locale means we need a critical
