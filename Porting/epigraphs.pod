@@ -17,6 +17,19 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.39.8 - Friedrich Schiller, "Ode to joy"
+
+L<Announced on 2024-02-23 by Renee Bäcker|https://www.nntp.perl.org/group/perl.perl5.porters/2024/02/msg267978.html>
+
+  Be embraced, all ye millions!
+  With a kiss for all the world!
+  Brothers, beyond the stars
+  Surely dwells a loving Father.
+  Do you kneel before Him, oh millions?
+  Do you feel the Creator's presence?
+  Seek Him beyond the stars!
+  He must dwell beyond the stars
+
 =head2 v5.39.7 - PJ Caldas
 
 L<Announced on 2024-01-20 by Max Maischein|https://www.nntp.perl.org/group/perl.perl5.porters/2024/01/msg267736.html>
