@@ -2672,7 +2672,7 @@ yet.
 
 =head2 Upgrading from 5.39.6 or earlier
 
-B<Perl 5.39.9 may not be binary compatible with Perl 5.39.6 or
+B<Perl 5.39.9 may not be binary compatible with Perl 5.39.8 or
 earlier Perl releases.>  Perl modules having binary parts
 (meaning that a C compiler is used) will have to be recompiled to be
 used with 5.39.9.  If you find you do need to rebuild an extension with
