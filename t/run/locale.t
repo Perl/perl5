@@ -52,6 +52,8 @@ my @platform_categories = platform_locale_categories();
 my @changeable_from_C_categories = valid_locale_categories();
 
 my $has_ctype = grep { $_ eq "LC_CTYPE" } @platform_categories;
+my $has_lc_all = grep { $_ eq "LC_ALL" } @platform_categories;
+my $LC_ALL = ($has_lc_all) ? &LC_ALL : ($has_ctype) ? &LC_CTYPE : &LC_NUMERIC;
 
 SKIP: {
     skip("LC_CTYPE not available on the system", 1 ) unless $has_ctype;
@@ -94,8 +96,8 @@ if ($non_C_locale) {
     note("using non-C locale '$non_C_locale'");
     setlocale(LC_NUMERIC, $non_C_locale);
     isnt(setlocale(LC_NUMERIC), "C", "retrieving current non-C LC_NUMERIC doesn't give 'C'");
-    setlocale(LC_ALL, $non_C_locale);
-    isnt(setlocale(LC_ALL), "C", "retrieving current non-C LC_ALL doesn't give 'C'");
+    setlocale($LC_ALL, $non_C_locale);
+    isnt(setlocale($LC_ALL), "C", "retrieving current non-C LC_ALL doesn't give 'C'");
 
     my @test_numeric_locales = @locales;
 
@@ -426,6 +428,11 @@ EOF
             }
 
         open STDERR, ">&", $saved_stderr or die "Can't dup \$saved_stderr: $!";
+        }
+
+        if (! $has_lc_all) {
+            done_testing();
+            exit;
         }
 
         {
