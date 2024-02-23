@@ -102,6 +102,12 @@ try($FLEN-20000, 200, undef);
 
 sub try {
   my ($src, $dst, $len) = @_;
+
+  my $line = (caller(0))[2];
+  my $desc = sprintf "try(%5s, %5s, %5s) FLEN=%5s called from line %d",
+                map { defined $_ ? $_ : 'undef' }
+                    $src, $dst, $len, $FLEN, $line;
+
   open F, '>', $file or die "Couldn't open file $file: $!";
   binmode F;
 
@@ -138,8 +144,8 @@ sub try {
   undef $o; untie @lines; alarm(0);
   if ($err) {
     if ($err =~ /^Alarm clock/) {
-      print STDERR "# $0 Timeout after $alarm_time seconds at test $N\n";
-      print "not ok $N\n"; $N++;
+      print STDERR "# $0 Timeout after $alarm_time seconds at test $N - $desc\n";
+      print "not ok $N - $desc\n"; $N++;
       return;
     } else {
       $@ = $err;
@@ -159,8 +165,6 @@ sub try {
   unless ($alen == $xlen) {
     print "# try(@_) expected file length $xlen, actual $alen!\n";
   }
-  my $desc = sprintf "try(%d, %d, %s)",
-                $src, $dst, (defined $len ? $len : "undef");
   print $actual eq $expected ? "ok $N - $desc\n" : "not ok $N - $desc\n";
   $N++;
 }

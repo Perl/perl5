@@ -241,6 +241,14 @@ try(42000,     0,     0);  # old=0        , new=0        ; old = new
 
 sub try {
   my ($pos, $len, $newlen) = @_;
+
+  # try() is called with defined len, but then calls itself again with
+  # undef $len
+  my $line = (caller(defined $len ? 0 : 1))[2];
+  my $desc = sprintf "try(%5s, %5s, %5s) FLEN=%5s called from line %d",
+                map { defined $_ ? $_ : 'undef' }
+                    $pos, $len, $newlen, $FLEN, $line;
+
   open F, '>', $file or die "Couldn't open file $file: $!";
   binmode F;
 
@@ -282,13 +290,13 @@ sub try {
   undef $o; untie @lines; alarm(0);
   if ($err) {
     if ($err =~ /^Alarm clock/) {
-      print STDERR "# $0 Timeout after $alarm_time seconds at test $N\n";
-      print "not ok $N\n"; $N++;
-      print "not ok $N\n"; $N++;
+      print STDERR "# $0 Timeout after $alarm_time seconds at test $N - $desc\n";
+      print "not ok $N - $desc\n"; $N++;
+      print "not ok $N - $desc\n"; $N++;
       if (defined $len) {
         # Fail the tests in the recursive call as well
-        print "not ok $N\n"; $N++;
-        print "not ok $N\n"; $N++;
+        print "not ok $N - $desc\n"; $N++;
+        print "not ok $N - $desc\n"; $N++;
       }
       return;
     } else {
@@ -311,9 +319,9 @@ sub try {
     for (@ARGS) { $_ = "UNDEF" unless defined }
     print "# try(@ARGS) expected file length $xlen, actual $alen!\n";
   }
-  print $actual eq $expected ? "ok $N\n" : "not ok $N\n";
+  print $actual eq $expected ? "ok $N - $desc\n" : "not ok $N - $desc\n";
   $N++;
-  print $a_retval eq $x_retval ? "ok $N\n" : "not ok $N\n";
+  print $a_retval eq $x_retval ? "ok $N - $desc\n" : "not ok $N - $desc\n";
   $N++;
 
   if (defined $len) {
