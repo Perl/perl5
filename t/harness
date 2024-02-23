@@ -21,8 +21,16 @@ BEGIN {
 #
 # Example: ../cpan/IO-Zlib/t/basic.t
 #
-my @_must_be_executed_serially = qw(
+my @_must_be_executed_serially = (
+    # These two both create temporary subdirectories which they delete
+    # at the end. If one deletes while the other is running a recursive
+    # find in that subdir, bad things can happen. This was showing as
+    # random crashes in find.t and taint.t in smokes, with errors like:
+    # "Can't cd to .. from ./FF_find_t_RKdkBE/for_find/fb: Stale file handle"
+    '../ext/File-Find/t/taint.t',
+    '../ext/File-Find/t/find.t',
 );
+
 my %must_be_executed_serially = map { $_ => 1 } @_must_be_executed_serially;
 ##############################################################################
 
