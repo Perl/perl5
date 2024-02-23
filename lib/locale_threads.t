@@ -45,13 +45,14 @@ foreach my $category (@valid_categories) {
     $map_category_number_to_name{$cat_num} = $category;
 }
 
+my $has_LC_CTYPE = defined $map_category_name_to_number{LC_CTYPE};
 my $LC_ALL;
 my $LC_ALL_string;
 if (defined $map_category_name_to_number{LC_ALL}) {
     $LC_ALL_string = 'LC_ALL';
     $LC_ALL = $map_category_name_to_number{LC_ALL};
 }
-elsif (defined $map_category_name_to_number{LC_CTYPE}) {
+elsif ($has_LC_CTYPE) {
     $LC_ALL_string = 'LC_CTYPE';
     $LC_ALL = $map_category_name_to_number{LC_CTYPE};
 }
@@ -295,7 +296,8 @@ sub analyze_locale_name($) {
     # definition.)  So use it unconditionally when found.  But note any
     # discrepancy as an aid for improving this test.
     if ($langinfo_codeset) {
-        if ($ret{codeset} && $ret{codeset} ne $langinfo_codeset) {
+        if ($has_LC_CTYPE && $ret{codeset} && $ret{codeset} ne $langinfo_codeset)
+        {
             diag "In $ret{locale_name}, codeset from langinfo"
                . " ($langinfo_codeset) doesn't match codeset in"
                . " locale_name ($ret{codeset})";
