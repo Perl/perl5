@@ -164,7 +164,7 @@
 
 #define WARN_DEPRECATED__MISSING_IMPORT_CALLED_WITH_ARGS 80
 
-/* Warnings Categories added in Perl 5.039008 */
+/* Warnings Categories added in Perl 5.039009 */
 
 #define WARN_DEPRECATED__SUBSEQUENT_USE_VERSION 81
 #define WARNsize			 21

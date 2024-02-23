@@ -135,7 +135,7 @@ our %Offsets = (
     # Warnings Categories added in Perl 5.039002
     'deprecated::missing_import_called_with_args'=> 160,
 
-    # Warnings Categories added in Perl 5.039008
+    # Warnings Categories added in Perl 5.039009
     'deprecated::subsequent_use_version'=> 162,
 );
 

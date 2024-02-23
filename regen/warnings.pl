@@ -85,7 +85,7 @@ our $WARNING_TREE = {
                                 'deprecated::smartmatch'               => [ 5.037010, DEFAULT_ON],
                                 'deprecated::missing_import_called_with_args'   
                                                                        => [ 5.039002, DEFAULT_ON],
-                                'deprecated::subsequent_use_version'   => [ 5.039008, DEFAULT_ON],
+                                'deprecated::subsequent_use_version'   => [ 5.039009, DEFAULT_ON],
                         }],
         'void'          => [ 5.008, DEFAULT_OFF],
         'recursion'     => [ 5.008, DEFAULT_OFF],
