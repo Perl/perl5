@@ -5917,6 +5917,7 @@ regen/genpacksizetables.pl		Generate the size tables for pack/unpack
 regen/HeaderParser.pm			Module used to parse header files
 regen/keywords.pl			Program to write keywords.h
 regen/lib_cleanup.pl			Generate lib/.gitignore from MANIFEST
+regen/locale.pl				Program to write locale_table.h
 regen/mg_vtable.pl			generate mg_vtable.h
 regen/miniperlmain.pl			generate miniperlmain.c
 regen/mk_invlists.pl			Generates charclass_invlists.h

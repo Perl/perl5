@@ -1262,6 +1262,7 @@ CHMOD_W = chmod +w
 #	regcomp.pl:	regnodes.h
 #	warnings.pl:	warnings.h lib/warnings.pm
 #	feature.pl:	feature.h lib/feature.pm
+#	locale.pl:	locale_table.h
 # The correct versions should be already supplied with the perl kit,
 # in case you don't have perl available.
 # To force them to be regenerated, run
