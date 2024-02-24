@@ -420,6 +420,7 @@ sub changes_between {
     5.039006 => '2023-12-30',
     5.039007 => '2024-01-20',
     5.039008 => '2024-02-23',
+    5.039009 => '2024-03-20',
   );
 
 for my $version ( sort { $a <=> $b } keys %released ) {
@@ -21306,6 +21307,14 @@ for my $version ( sort { $a <=> $b } keys %released ) {
             'mro'                   => '1.29',
             'perlfaq'               => '5.20240218',
             'warnings'              => '1.68',
+        },
+        removed => {
+        }
+    },
+    5.039009 => {
+        delta_from => 5.039008,
+        changed => {
+            'warnings'              => '1.69',
         },
         removed => {
         }
