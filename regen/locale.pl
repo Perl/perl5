@@ -97,6 +97,8 @@ while (<DATA>) { # Read in the categories
         #    define LC_${name}_AVAIL_  1
         #    define USE_LOCALE_${name}
         #  endif
+        #else
+        #  define LC_${name}_AVAIL_  0
         #endif
         EOF
 }

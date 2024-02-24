@@ -43,6 +43,8 @@
 #    define LC_CTYPE_AVAIL_  1
 #    define USE_LOCALE_CTYPE
 #  endif
+#else
+#  define LC_CTYPE_AVAIL_  0
 #endif
 #ifdef LC_NUMERIC
 #  if defined(NO_LOCALE) || defined(NO_LOCALE_NUMERIC)
@@ -58,6 +60,8 @@
 #    define LC_NUMERIC_AVAIL_  1
 #    define USE_LOCALE_NUMERIC
 #  endif
+#else
+#  define LC_NUMERIC_AVAIL_  0
 #endif
 #ifdef LC_COLLATE
 
@@ -77,6 +81,8 @@
 #    define LC_COLLATE_AVAIL_  1
 #    define USE_LOCALE_COLLATE
 #  endif
+#else
+#  define LC_COLLATE_AVAIL_  0
 #endif
 #ifdef LC_TIME
 
@@ -89,6 +95,8 @@
 #    define LC_TIME_AVAIL_  1
 #    define USE_LOCALE_TIME
 #  endif
+#else
+#  define LC_TIME_AVAIL_  0
 #endif
 #ifdef LC_MESSAGES
 
@@ -101,6 +109,8 @@
 #    define LC_MESSAGES_AVAIL_  1
 #    define USE_LOCALE_MESSAGES
 #  endif
+#else
+#  define LC_MESSAGES_AVAIL_  0
 #endif
 #ifdef LC_MONETARY
 
@@ -113,6 +123,8 @@
 #    define LC_MONETARY_AVAIL_  1
 #    define USE_LOCALE_MONETARY
 #  endif
+#else
+#  define LC_MONETARY_AVAIL_  0
 #endif
 #ifdef LC_ADDRESS
 
@@ -125,6 +137,8 @@
 #    define LC_ADDRESS_AVAIL_  1
 #    define USE_LOCALE_ADDRESS
 #  endif
+#else
+#  define LC_ADDRESS_AVAIL_  0
 #endif
 #ifdef LC_IDENTIFICATION
 
@@ -137,6 +151,8 @@
 #    define LC_IDENTIFICATION_AVAIL_  1
 #    define USE_LOCALE_IDENTIFICATION
 #  endif
+#else
+#  define LC_IDENTIFICATION_AVAIL_  0
 #endif
 #ifdef LC_MEASUREMENT
 
@@ -149,6 +165,8 @@
 #    define LC_MEASUREMENT_AVAIL_  1
 #    define USE_LOCALE_MEASUREMENT
 #  endif
+#else
+#  define LC_MEASUREMENT_AVAIL_  0
 #endif
 #ifdef LC_PAPER
 
@@ -161,6 +179,8 @@
 #    define LC_PAPER_AVAIL_  1
 #    define USE_LOCALE_PAPER
 #  endif
+#else
+#  define LC_PAPER_AVAIL_  0
 #endif
 #ifdef LC_TELEPHONE
 
@@ -173,6 +193,8 @@
 #    define LC_TELEPHONE_AVAIL_  1
 #    define USE_LOCALE_TELEPHONE
 #  endif
+#else
+#  define LC_TELEPHONE_AVAIL_  0
 #endif
 #ifdef LC_NAME
 
@@ -185,6 +207,8 @@
 #    define LC_NAME_AVAIL_  1
 #    define USE_LOCALE_NAME
 #  endif
+#else
+#  define LC_NAME_AVAIL_  0
 #endif
 #ifdef LC_SYNTAX
 
@@ -197,6 +221,8 @@
 #    define LC_SYNTAX_AVAIL_  1
 #    define USE_LOCALE_SYNTAX
 #  endif
+#else
+#  define LC_SYNTAX_AVAIL_  0
 #endif
 #ifdef LC_TOD
 
@@ -209,6 +235,8 @@
 #    define LC_TOD_AVAIL_  1
 #    define USE_LOCALE_TOD
 #  endif
+#else
+#  define LC_TOD_AVAIL_  0
 #endif
 
 /* ex: set ro ft=c: */
