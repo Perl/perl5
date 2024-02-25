@@ -7316,9 +7316,6 @@ the plain locale pragma without a parameter (S<C<use locale>>) is in effect.
 #  define LC_COLLATE_LOCK               LOCALE_LOCK
 #  define LC_COLLATE_UNLOCK             LOCALE_UNLOCK
 
-#  define STRFTIME_LOCK                 ENV_LOCK
-#  define STRFTIME_UNLOCK               ENV_UNLOCK
-
 /* Some critical sections need to lock both the locale and the environment from
  * changing, while allowing for any number of readers.  To avoid deadlock, this
  * is always done in the same order.  These should always be invoked, like all
@@ -7328,6 +7325,9 @@ the plain locale pragma without a parameter (S<C<use locale>>) is in effect.
             STMT_START { LOCALE_READ_LOCK; ENV_READ_LOCK; } STMT_END
 #define ENVr_LOCALEr_UNLOCK                                             \
         STMT_START { ENV_READ_UNLOCK; LOCALE_READ_UNLOCK; } STMT_END
+
+#define STRFTIME_LOCK                   ENVr_LOCALEr_LOCK
+#define STRFTIME_UNLOCK                 ENVr_LOCALEr_UNLOCK
 
 /* These time-related functions all requre that the environment and locale
  * don't change while they are executing (at least in glibc; this appears to be
