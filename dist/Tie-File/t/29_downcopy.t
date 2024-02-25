@@ -298,8 +298,8 @@ sub try0 {
   if ($err) {
     if ($err =~ /^Alarm clock/) {
       print STDERR "# $0 Timeout after $alarm_time seconds at test $N - $desc\n";
-      print "not ok $N - $desc\n"; $N++;
-      print "not ok $N - $desc\n"; $N++;
+      print "not ok $N - exp $desc TIMEOUT\n"; $N++;
+      print "not ok $N - ret $desc TIMEOUT\n"; $N++;
       return;
     } else {
       $@ = $err;
@@ -321,9 +321,9 @@ sub try0 {
     for (@ARGS) { $_ = "UNDEF" unless defined }
     print "# try(@ARGS) expected file length $xlen, actual $alen!\n";
   }
-  print $actual eq $expected ? "ok $N - $desc\n" : "not ok $N - $desc\n";
+  print $actual eq $expected ? "ok $N - exp $desc\n" : "not ok $N - exp $desc\n";
   $N++;
-  print $a_retval eq $x_retval ? "ok $N - $desc\n" : "not ok $N - $desc\n";
+  print $a_retval eq $x_retval ? "ok $N - ret $desc\n" : "not ok $N - ret $desc\n";
   $N++;
 }
 
