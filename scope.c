@@ -1906,7 +1906,7 @@ Be aware that there is a signficant difference in timing between the
 I<end of the current statement> and the I<end of the current pseudo
 block>. If you are looking for a mechanism to trigger a function at the
 end of the B<current pseudo block> you should look at
-C<SAVEDESTRUCTORX()> instead of this function.
+L<perlapi/C<SAVEDESTRUCTOR_X>> instead of this function.
 
 =for apidoc mortal_svfunc_x
 
@@ -1919,7 +1919,7 @@ Be aware that there is a signficant difference in timing between the
 I<end of the current statement> and the I<end of the current pseudo
 block>. If you are looking for a mechanism to trigger a function at the
 end of the B<current pseudo block> you should look at
-C<SAVEDESTRUCTORX()> instead of this function.
+L<perlapi/C<SAVEDESTRUCTOR_X>> instead of this function.
 
 =for apidoc magic_freedestruct
 
