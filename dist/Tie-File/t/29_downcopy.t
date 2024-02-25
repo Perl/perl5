@@ -239,12 +239,19 @@ try(35272,  6728,     0);  # old=x><x     , new=0        ; old > new
 try(32768,  9232,     0);  # old=<x><x    , new=0        ; old > new
 try(42000,     0,     0);  # old=0        , new=0        ; old = new
 
+
 sub try {
   my ($pos, $len, $newlen) = @_;
+  try0($pos, $len, $newlen);
+  # if len is undef, it implies 'to the end of the string'
+  try0($pos, undef, $newlen);
+}
 
-  # try() is called with defined len, but then calls itself again with
-  # undef $len
-  my $line = (caller(defined $len ? 0 : 1))[2];
+
+sub try0 {
+  my ($pos, $len, $newlen) = @_;
+
+  my $line = (caller(1))[2];
   my $desc = sprintf "try(%5s, %5s, %5s) FLEN=%5s called from line %d",
                 map { defined $_ ? $_ : 'undef' }
                     $pos, $len, $newlen, $FLEN, $line;
@@ -293,11 +300,6 @@ sub try {
       print STDERR "# $0 Timeout after $alarm_time seconds at test $N - $desc\n";
       print "not ok $N - $desc\n"; $N++;
       print "not ok $N - $desc\n"; $N++;
-      if (defined $len) {
-        # Fail the tests in the recursive call as well
-        print "not ok $N - $desc\n"; $N++;
-        print "not ok $N - $desc\n"; $N++;
-      }
       return;
     } else {
       $@ = $err;
@@ -323,10 +325,6 @@ sub try {
   $N++;
   print $a_retval eq $x_retval ? "ok $N - $desc\n" : "not ok $N - $desc\n";
   $N++;
-
-  if (defined $len) {
-    try($pos, undef, $newlen);
-  }
 }
 
 END {
