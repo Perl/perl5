@@ -1496,6 +1496,8 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
         FAIL("Regexp out of space");
 
     rx_flags = orig_rx_flags;
+    if (rx_flags & RXf_SPLIT)
+        rx_flags &= ~(RXf_PMf_EXTENDED|RXf_PMf_EXTENDED_MORE);
 
     if (   toUSE_UNI_CHARSET_NOT_DEPENDS
         && initial_charset == REGEX_DEPENDS_CHARSET)
