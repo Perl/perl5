@@ -408,12 +408,12 @@ typedef uLong FAR uLongf;
 
 #ifdef STDC
    typedef void const *voidpc;
-   typedef void FAR   *voidpf;
+   typedef Bytef      *voidpf;
    typedef Bytef      *voidp;
 #else
    typedef Byte const *voidpc;
-   typedef Byte FAR   *voidpf;
-   typedef Byte       *voidp;
+   typedef Bytef      *voidpf;
+   typedef Bytef      *voidp;
 #endif
 
 #if !defined(Z_U4) && !defined(Z_SOLO) && defined(STDC)
