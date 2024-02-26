@@ -4,41 +4,41 @@ use strict ;
 use warnings;
 use bytes;
 
-use IO::Compress::Base::Common  2.206 qw(:Status );
-use IO::Compress::RawDeflate 2.206 ();
-use IO::Compress::Adapter::Deflate 2.206 ;
-use IO::Compress::Adapter::Identity 2.206 ;
-use IO::Compress::Zlib::Extra 2.206 ;
-use IO::Compress::Zip::Constants 2.206 ;
+use IO::Compress::Base::Common  2.207 qw(:Status );
+use IO::Compress::RawDeflate 2.207 ();
+use IO::Compress::Adapter::Deflate 2.207 ;
+use IO::Compress::Adapter::Identity 2.207 ;
+use IO::Compress::Zlib::Extra 2.207 ;
+use IO::Compress::Zip::Constants 2.207 ;
 
 use File::Spec();
 use Config;
 
-use Compress::Raw::Zlib  2.206 ();
+use Compress::Raw::Zlib  2.207 ();
 
 BEGIN
 {
     eval { require IO::Compress::Adapter::Bzip2 ;
-           IO::Compress::Adapter::Bzip2->VERSION( 2.206 );
+           IO::Compress::Adapter::Bzip2->VERSION( 2.207 );
            require IO::Compress::Bzip2 ;
-           IO::Compress::Bzip2->VERSION( 2.206 );
+           IO::Compress::Bzip2->VERSION( 2.207 );
          } ;
 
     eval { require IO::Compress::Adapter::Lzma ;
-           IO::Compress::Adapter::Lzma->VERSION( 2.206 );
+           IO::Compress::Adapter::Lzma->VERSION( 2.207 );
            require IO::Compress::Lzma ;
-           IO::Compress::Lzma->VERSION( 2.206 );
+           IO::Compress::Lzma->VERSION( 2.207 );
          } ;
 
     eval { require IO::Compress::Adapter::Xz ;
-           IO::Compress::Adapter::Xz->VERSION( 2.206 );
+           IO::Compress::Adapter::Xz->VERSION( 2.207 );
            require IO::Compress::Xz ;
-           IO::Compress::Xz->VERSION( 2.206 );
+           IO::Compress::Xz->VERSION( 2.207 );
          } ;
     eval { require IO::Compress::Adapter::Zstd ;
-           IO::Compress::Adapter::Zstd->VERSION( 2.206 );
+           IO::Compress::Adapter::Zstd->VERSION( 2.207 );
            require IO::Compress::Zstd ;
-           IO::Compress::Zstd->VERSION( 2.206 );
+           IO::Compress::Zstd->VERSION( 2.207 );
          } ;
 }
 
@@ -47,7 +47,7 @@ require Exporter ;
 
 our ($VERSION, @ISA, @EXPORT_OK, %EXPORT_TAGS, %DEFLATE_CONSTANTS, $ZipError);
 
-$VERSION = '2.206';
+$VERSION = '2.207';
 $ZipError = '';
 
 @ISA = qw(IO::Compress::RawDeflate Exporter);
@@ -2285,7 +2285,7 @@ See the Changes file.
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright (c) 2005-2023 Paul Marquess. All rights reserved.
+Copyright (c) 2005-2024 Paul Marquess. All rights reserved.
 
 This program is free software; you can redistribute it and/or
 modify it under the same terms as Perl itself.
