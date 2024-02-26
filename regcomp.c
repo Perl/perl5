@@ -2222,9 +2222,20 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
         /* It's safe to read through *next only if OP(first) is a regop of
          * the right type (not EXACT, for example).
          */
-        if (REGNODE_TYPE(fop) == NOTHING && nop == END)
-            RExC_rx->extflags |= RXf_NULL;
-        else if ((fop == MBOL || (fop == SBOL && !FLAGS(first))) && nop == END)
+        if (REGNODE_TYPE(fop) == NOTHING && nop == END) {
+            if ((RExC_rx->extflags & RXf_SPLIT)
+                && pat_count == 1
+                && OP_TYPE_IS(expr, OP_CONST)
+                && SvPOK(cSVOPx_sv(expr)) && SvCUR(cSVOPx_sv(expr)) == 1
+                && SvPV_nolen(cSVOPx_sv(expr))[0] == ' '
+            ){
+                /* GH 18032: split " " behaviour should remain unchanged
+                 * under `use re qw(/aansx)`, which otherwise converts it
+                 * to the empty pattern. */
+                RExC_rx->extflags |= (RXf_SKIPWHITE|RXf_WHITE);
+            } else
+                RExC_rx->extflags |= RXf_NULL;
+        } else if ((fop == MBOL || (fop == SBOL && !FLAGS(first))) && nop == END)
             /* when fop is SBOL first->flags will be true only when it was
              * produced by parsing /\A/, and not when parsing /^/. This is
              * very important for the split code as there we want to
@@ -2241,7 +2252,6 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
                   && *(STRING(first)) == ' '
                   && OP(regnext(first)) == END )
             RExC_rx->extflags |= (RXf_SKIPWHITE|RXf_WHITE);
-
     }
 
     if (RExC_contains_locale) {

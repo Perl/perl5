@@ -7,7 +7,7 @@ BEGIN {
     require './charset_tools.pl';
 }
 
-plan tests => 197;
+plan tests => 202;
 
 $FS = ':';
 
@@ -724,4 +724,22 @@ SKIP: {
 			switches => [ '-Mre=Debug,COMPILE', '-c' ],
 		}, "special-case pattern for $prog");
 	}
+}
+
+# gh18032: check that `split " "` does not get converted to `split ""`
+SKIP: {
+    skip_if_miniperl("special-case patterns: need dynamic loading", 5);
+
+    for ( 'split " "', 'split "\x20"', 'split "\N{SPACE}"', 'split') {
+        my $prog = $_;
+        fresh_perl_like("use re qw(/aansx); $prog;",
+            qr{^r->extflags:.*\bSKIPWHITE\b\s\bWHITE\b}m,
+            {switches => [ '-Mre=Debug,COMPILE', '-c' ]},
+            "whitespace modifiers do not affect $prog");
+    }
+
+    fresh_perl_like("use re qw(/aansx); split / /;",
+        qr{^r->extflags:.*\bNULL\b}m,
+        {switches => [ '-Mre=Debug,COMPILE', '-c' ]},
+        "whitespace modifiers do affect split / /");
 }
