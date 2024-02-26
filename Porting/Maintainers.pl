@@ -1152,7 +1152,8 @@ our %Modules = (
     },
 
     'Text-Tabs+Wrap' => {
-        'DISTRIBUTION' => 'ARISTOTLE/Text-Tabs+Wrap-2023.0511.tar.gz',
+        'DISTRIBUTION' => 'ARISTOTLE/Text-Tabs+Wrap-2024.001.tar.gz',
+        'SYNCINFO'     => 'jkeenan on Sun Feb 25 20:37:52 2024',
         'MAIN_MODULE'  => 'Text::Tabs',
         'FILES'        => q[cpan/Text-Tabs],
         'EXCLUDED'   => [

@@ -9,7 +9,7 @@ BEGIN { require Exporter; *import = \&Exporter::import }
 our @EXPORT = qw( wrap fill );
 our @EXPORT_OK = qw( $columns $break $huge );
 
-our $VERSION = '2023.0511';
+our $VERSION = '2024.001';
 our $SUBVERSION = 'modern'; # back-compat vestige
 
 BEGIN { eval sprintf 'sub REGEXPS_USE_BYTES () { %d }', scalar( pack('U*', 0x80) =~ /\xc2/ ) }
