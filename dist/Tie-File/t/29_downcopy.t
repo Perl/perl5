@@ -3,6 +3,8 @@
 use strict;
 use warnings;
 
+use File::Temp ();
+
 #
 # Unit tests of _downcopy function
 #
@@ -11,10 +13,16 @@ use warnings;
 # moving everything in the block forwards to make room.
 # Instead of writing the last length($data) bytes from the block
 # (because there isn't room for them any longer) return them.
-#
-#
 
-my $file = "tf29-$$.txt";
+# Make a temp dir under the OS's normal temp directory for creating
+# test files in. By using the OS's temp dir rather than the current
+# directory, we increase the chances that the tests are run on a tmpfs
+# file system or similar. This becomes important when the current
+# directory is on a very slow USB drive for example, as this test file
+# does lots of file creating, modifying and deleting.
+
+my $tempdir = File::Temp::tempdir("Tie-File-XXXXXX",
+                                    TMPDIR => 1, CLEANUP => 1);
 
 print "1..718\n";
 
@@ -256,8 +264,9 @@ sub try0 {
                 map { defined $_ ? $_ : 'undef' }
                     $pos, $len, $newlen, $FLEN, $line;
 
-  open F, '>', $file or die "Couldn't open file $file: $!";
-  binmode F;
+  my ($fh, $file) = File::Temp::tempfile("29-XXXXX", DIR => $tempdir);
+
+  binmode $fh;
 
   # The record has exactly 17 characters.  This will help ensure that
   # even if _downcopy screws up, the data doesn't coincidentally
@@ -269,8 +278,8 @@ sub try0 {
   my $oldfile = $d x $recs;
   my $flen = defined($FLEN) ? $FLEN : $recs * 17;
   substr($oldfile, $FLEN) = "" if defined $FLEN;  # truncate
-  print F $oldfile;
-  close F;
+  print $fh $oldfile;
+  close $fh;
 
   die "wrong length!" unless -s $file == $flen;
 
@@ -325,8 +334,4 @@ sub try0 {
   $N++;
   print $a_retval eq $x_retval ? "ok $N - ret $desc\n" : "not ok $N - ret $desc\n";
   $N++;
-}
-
-END {
-  1 while unlink $file;
 }
