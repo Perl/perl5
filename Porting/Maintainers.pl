@@ -399,7 +399,8 @@ our %Modules = (
     },
 
     'Encode' => {
-        'DISTRIBUTION' => 'DANKOGAI/Encode-3.20.tar.gz',
+        'DISTRIBUTION' => 'DANKOGAI/Encode-3.21.tar.gz',
+        'SYNCINFO'     => 'jkeenan on Sun Feb 25 19:56:46 2024',
         'SYNCINFO'     => 'jkeenan on Fri Nov 10 15:12:07 2023',
         'FILES'        => q[cpan/Encode],
         'EXCLUDED'     => [

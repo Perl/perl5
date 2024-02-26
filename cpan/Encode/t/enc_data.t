@@ -1,4 +1,4 @@
-# $Id: enc_data.t,v 2.7 2023/11/10 01:10:50 dankogai Exp dankogai $
+# $Id: enc_data.t,v 2.7 2023/11/10 01:10:50 dankogai Exp $
 
 BEGIN {
     require Config; Config->import();
