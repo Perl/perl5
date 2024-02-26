@@ -29,14 +29,6 @@ my @_must_be_executed_serially = (
     # "Can't cd to .. from ./FF_find_t_RKdkBE/for_find/fb: Stale file handle"
     '../ext/File-Find/t/taint.t',
     '../ext/File-Find/t/find.t',
-
-    # CJKT.t creates some temporary files called "t/$$.utf", while
-    # Unicode.t expects to find a fixed number of *.utf files in that
-    # directory. Running the tests in parallel can cause failures like:
-    # "Bad plan.  You planned 56 tests but ran 57."
-    # Reported as https://rt.cpan.org/Ticket/Display.html?id=151983
-    'cpan/Encode/t/CJKT.t',
-    'cpan/Encode/t/Unicode.t',
 );
 
 my %must_be_executed_serially = map { $_ => 1 } @_must_be_executed_serially;
