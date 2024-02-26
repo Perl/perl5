@@ -211,7 +211,8 @@ our %Modules = (
     },
 
     'Compress::Raw::Bzip2' => {
-        'DISTRIBUTION' => 'PMQS/Compress-Raw-Bzip2-2.206.tar.gz',
+        'DISTRIBUTION' => 'PMQS/Compress-Raw-Bzip2-2.210.tar.gz',
+        'SYNCINFO'     => 'jkeenan on Mon Feb 26 09:07:43 2024',
         'SYNCINFO'     => 'yorton on Tue Jul 25 20:45:42 2023',
         'FILES'        => q[cpan/Compress-Raw-Bzip2],
         'EXCLUDED'     => [
@@ -224,7 +225,8 @@ our %Modules = (
     },
 
     'Compress::Raw::Zlib' => {
-        'DISTRIBUTION' => 'PMQS/Compress-Raw-Zlib-2.208.tar.gz',
+        'DISTRIBUTION' => 'PMQS/Compress-Raw-Zlib-2.209.tar.gz',
+        'SYNCINFO'     => 'jkeenan on Mon Feb 26 13:48:59 2024',
         'SYNCINFO'     => 'jkeenan on Sun Feb 25 20:07:03 2024',
         'SYNCINFO'     => 'yorton on Tue Jul 25 20:37:04 2023',
         'FILES'    => q[cpan/Compress-Raw-Zlib],
@@ -659,7 +661,8 @@ our %Modules = (
     },
 
     'IO-Compress' => {
-        'DISTRIBUTION' => 'PMQS/IO-Compress-2.206.tar.gz',
+        'DISTRIBUTION' => 'PMQS/IO-Compress-2.207.tar.gz',
+        'SYNCINFO'     => 'jkeenan on Mon Feb 26 09:17:18 2024',
         'SYNCINFO'     => 'yorton on Tue Jul 25 20:51:33 2023',
         'MAIN_MODULE'  => 'IO::Compress::Base',
         'FILES'        => q[cpan/IO-Compress],
