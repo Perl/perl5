@@ -4,7 +4,7 @@ package re;
 use strict;
 use warnings;
 
-our $VERSION     = "0.45";
+our $VERSION     = "0.46";
 our @ISA         = qw(Exporter);
 our @EXPORT_OK   = qw{
 	is_regexp regexp_pattern
@@ -499,6 +499,11 @@ example:
     no re "/u"; # does nothing
     use re "/l";
     no re "/l"; # reverts to unicode_strings behaviour
+
+Default flags are applied to wherever a pattern is compiled with the exception
+of the C</x> flag, which is not applied to patterns compiled from string arguments
+to C<split>. Thus `use re "/x";` does not affect the behaviour of C<split " "> but
+B<does> affect the behavior of C<split / />.
 
 =head2 'debug' mode
 

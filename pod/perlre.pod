@@ -844,7 +844,8 @@ described in the remainder of this section.
 The C<L<use re 'E<sol>foo'|re/"'/flags' mode">> pragma can be used to set
 default modifiers (including these) for regular expressions compiled
 within its scope.  This pragma has precedence over the other pragmas
-listed below that also change the defaults.
+listed below that also change the defaults. Note that the /x modifier does
+NOT affect C<split STR> patterns.
 
 Otherwise, C<L<use locale|perllocale>> sets the default modifier to C</l>;
 and C<L<use feature 'unicode_strings|feature>>, or
