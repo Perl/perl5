@@ -116,7 +116,11 @@ Do things we normally would refuse to do.
 
 =item C<--tarball>
 
-Use a predownloaded tarball and not one from CPAN.
+Use a predownloaded tarball and not one from CPAN.  Example:
+
+    perl Porting/sync-with-cpan Text-Tabs+Wrap \
+        --tarball /tmp/Text-Tabs+Wrap-2024.001.tar.gz \
+        --yes
 
 =item C<--version>
 
