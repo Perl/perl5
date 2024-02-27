@@ -1473,7 +1473,6 @@ our %Modules = (
                 lib/builtin.{pm,t}
                 lib/builtin-taint.t
                 lib/bytes.{pm,t}
-                lib/bytes_heavy.pl
                 lib/charnames.{pm,t}
                 lib/dbm_filter_util.pl
                 lib/deprecate.pm
