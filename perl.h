@@ -7016,6 +7016,39 @@ typedef struct am_table_short AMTS;
 #  define USER_PROP_MUTEX_TERM    NOOP
 #endif
 
+#ifdef USE_THREADS
+#  define ENV_LOCK            PERL_WRITE_LOCK(&PL_env_mutex)
+#  define ENV_UNLOCK          PERL_WRITE_UNLOCK(&PL_env_mutex)
+#  define ENV_READ_LOCK       PERL_READ_LOCK(&PL_env_mutex)
+#  define ENV_READ_UNLOCK     PERL_READ_UNLOCK(&PL_env_mutex)
+#  define ENV_INIT            PERL_RW_MUTEX_INIT(&PL_env_mutex)
+#  define ENV_TERM            PERL_RW_MUTEX_DESTROY(&PL_env_mutex)
+
+   /* On platforms where the static buffer contained in getenv() is per-thread
+    * rather than process-wide, another thread executing a getenv() at the same
+    * time won't destroy ours before we have copied the result safely away and
+    * unlocked the mutex.  On such platforms (which is most), we can have many
+    * readers of the environment at the same time. */
+#  ifdef GETENV_PRESERVES_OTHER_THREAD
+#    define GETENV_LOCK    ENV_READ_LOCK
+#    define GETENV_UNLOCK  ENV_READ_UNLOCK
+#  else
+     /* If, on the other hand, another thread could zap our getenv() return, we
+      * need to keep them from executing until we are done */
+#    define GETENV_LOCK    ENV_LOCK
+#    define GETENV_UNLOCK  ENV_UNLOCK
+#  endif
+#else
+#  define ENV_LOCK        NOOP
+#  define ENV_UNLOCK      NOOP
+#  define ENV_READ_LOCK   NOOP
+#  define ENV_READ_UNLOCK NOOP
+#  define ENV_INIT        NOOP
+#  define ENV_TERM        NOOP
+#  define GETENV_LOCK     NOOP
+#  define GETENV_UNLOCK   NOOP
+#endif
+
 #ifdef USE_LOCALE /* These locale things are all subject to change */
 
    /* Returns TRUE if the plain locale pragma without a parameter is in effect.
@@ -7799,39 +7832,6 @@ cannot have changed since the precalculation.
     STMT_START { block; } STMT_END
 
 #endif /* !USE_LOCALE_NUMERIC */
-
-#ifdef USE_THREADS
-#  define ENV_LOCK            PERL_WRITE_LOCK(&PL_env_mutex)
-#  define ENV_UNLOCK          PERL_WRITE_UNLOCK(&PL_env_mutex)
-#  define ENV_READ_LOCK       PERL_READ_LOCK(&PL_env_mutex)
-#  define ENV_READ_UNLOCK     PERL_READ_UNLOCK(&PL_env_mutex)
-#  define ENV_INIT            PERL_RW_MUTEX_INIT(&PL_env_mutex)
-#  define ENV_TERM            PERL_RW_MUTEX_DESTROY(&PL_env_mutex)
-
-   /* On platforms where the static buffer contained in getenv() is per-thread
-    * rather than process-wide, another thread executing a getenv() at the same
-    * time won't destroy ours before we have copied the result safely away and
-    * unlocked the mutex.  On such platforms (which is most), we can have many
-    * readers of the environment at the same time. */
-#  ifdef GETENV_PRESERVES_OTHER_THREAD
-#    define GETENV_LOCK    ENV_READ_LOCK
-#    define GETENV_UNLOCK  ENV_READ_UNLOCK
-#  else
-     /* If, on the other hand, another thread could zap our getenv() return, we
-      * need to keep them from executing until we are done */
-#    define GETENV_LOCK    ENV_LOCK
-#    define GETENV_UNLOCK  ENV_UNLOCK
-#  endif
-#else
-#  define ENV_LOCK        NOOP
-#  define ENV_UNLOCK      NOOP
-#  define ENV_READ_LOCK   NOOP
-#  define ENV_READ_UNLOCK NOOP
-#  define ENV_INIT        NOOP
-#  define ENV_TERM        NOOP
-#  define GETENV_LOCK     NOOP
-#  define GETENV_UNLOCK   NOOP
-#endif
 
 #ifndef PERL_NO_INLINE_FUNCTIONS
 /* Static inline funcs that depend on includes and declarations above.
