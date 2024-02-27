@@ -1826,7 +1826,23 @@ and concatenated to make the exception.
 
 If the string exception does not end in a newline, the current
 script line number and input line number (if any) and a newline
-are appended to it.  Note that the "input line number" (also
+are appended to it.  
+
+Thus to avoid ending in a newline one might sometimes need
+workarounds, e.g.,
+
+    # Workaround for a function call that ends in a newline:
+    use Data::Dumper;
+    die Dumper(\%h)," ";
+
+    # Here-doc workaround:
+    my $m = <<EOF;
+    Huss, buss,
+    what a fuss.
+    EOF
+    die "$m "; #or chomp $m; die $m;
+
+Note that the "input line number" (also
 known as "chunk") is subject to whatever notion of "line" happens to
 be currently in effect, and is also available as the special variable
 L<C<$.>|perlvar/$.>.  See L<perlvar/"$/"> and L<perlvar/"$.">.
