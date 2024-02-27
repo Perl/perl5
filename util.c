@@ -2398,30 +2398,36 @@ void
 Perl_my_setenv(pTHX_ const char *nam, const char *val)
 {
 #  if defined(USE_ITHREADS) && !defined(WIN32)
-    /* only parent thread can modify process environment, so no need to use a
-     * mutex */
+    /* only parent thread can modify process environment */
     if (PL_curinterp != aTHX)
         return;
 #  endif
 
 #  if defined(HAS_SETENV) && defined(HAS_UNSETENV)
+        ENV_LOCK;
         if (val == NULL) {
             unsetenv(nam);
         } else {
             setenv(nam, val, 1);
         }
+        ENV_UNLOCK;
 
 #  elif defined(HAS_UNSETENV)
 
         if (val == NULL) {
-            if (environ) /* old glibc can crash with null environ */
+            if (environ) {  /* old glibc can crash with null environ */
+                ENV_LOCK;
                 unsetenv(nam);
+                ENV_UNLOCK;
+            }
         } else {
             const Size_t nlen = strlen(nam);
             const Size_t vlen = strlen(val);
             char * const new_env = S_env_alloc(NULL, nlen, vlen, 2, 1);
             my_setenv_format(new_env, nam, nlen, val, vlen);
+            ENV_LOCK;
             putenv(new_env);
+            ENV_UNLOCK;
         }
 
 #  else /* ! HAS_UNSETENV */
@@ -2435,7 +2441,9 @@ Perl_my_setenv(pTHX_ const char *nam, const char *val)
         /* all that work just for this */
         my_setenv_format(new_env, nam, nlen, val, vlen);
 #    ifndef WIN32
+        ENV_LOCK;
         putenv(new_env);
+        ENV_UNLOCK;
 #    else
         PerlEnv_putenv(new_env);
         safesysfree(new_env);
@@ -5400,16 +5408,18 @@ Perl_my_clearenv(pTHX)
 #  else /* ! (PERL_IMPLICIT_SYS || WIN32) */
 #    if defined(USE_ENVIRON_ARRAY)
 #      if defined(USE_ITHREADS)
-    /* only the parent thread can clobber the process environment, so no need
-     * to use a mutex */
+    /* only the parent thread can clobber the process environment */
     if (PL_curinterp != aTHX)
         return;
 #      endif /* USE_ITHREADS */
 #      if defined(HAS_CLEARENV)
+    ENV_LOCK;
     clearenv();
+    ENV_UNLOCK;
 #      elif defined(HAS_UNSETENV)
     int bsiz = 80; /* Most envvar names will be shorter than this. */
     char *buf = (char*)safesysmalloc(bsiz);
+    ENV_LOCK;
     while (*environ != NULL) {
         char *e = strchr(*environ, '=');
         int l = e ? e - *environ : (int)strlen(*environ);
@@ -5422,6 +5432,7 @@ Perl_my_clearenv(pTHX)
         buf[l] = '\0';
         unsetenv(buf);
     }
+    ENV_UNLOCK;
     safesysfree(buf);
 #      else /* ! HAS_CLEARENV && ! HAS_UNSETENV */
     /* Just null environ and accept the leakage. */
