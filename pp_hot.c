@@ -337,8 +337,7 @@ PP(pp_padsv_store)
         );
     SvSetMagicSV(targ, val);
 
-    assert(GIMME_V == G_VOID);
-    rpp_popfree_1_NN();
+    rpp_replace_1_1_NN(targ);
     return NORMAL;
 }
 
