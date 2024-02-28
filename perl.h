@@ -7199,7 +7199,6 @@ typedef struct am_table_short AMTS;
 #define WSETLOCALE_LOCK      POSIX_SETLOCALE_LOCK
 #define WSETLOCALE_UNLOCK    POSIX_SETLOCALE_UNLOCK
 
-
 #ifndef LC_NUMERIC_LOCK
 #  define LC_NUMERIC_LOCK(cond)   NOOP
 #  define LC_NUMERIC_UNLOCK       NOOP
