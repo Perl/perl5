@@ -7172,15 +7172,19 @@ the plain locale pragma without a parameter (S<C<use locale>>) is in effect.
 #define locale_panic_(m)  locale_panic_via_((m), __FILE__, __LINE__)
 
 /* Locale/thread synchronization macros. */
-#if ! defined(USE_LOCALE_THREADS)
+#if ! defined(USE_LOCALE_THREADS)   /* No threads, or no locales */
 #  define LOCALE_LOCK_(cond)  NOOP
 #  define LOCALE_UNLOCK_      NOOP
+#  define LOCALE_LOCK         NOOP
+#  define LOCALE_UNLOCK       NOOP
 #  define LOCALE_INIT
 #  define LOCALE_TERM
 
 #else   /* Below: Threaded, and locales are supported */
 
-    /* A locale mutex is required on all such threaded builds. */
+    /* A locale mutex is required on all such threaded builds for at least
+     * situations where there is a global static buffer.  This base lock that
+     * handles these has a trailing underscore in the name */
 #  define LOCALE_LOCK_(cond_to_panic_if_already_locked)                     \
        PERL_REENTRANT_LOCK("locale",                                        \
                            &PL_locale_mutex, PL_locale_mutex_depth,         \
@@ -7188,13 +7192,19 @@ the plain locale pragma without a parameter (S<C<use locale>>) is in effect.
 #  define LOCALE_UNLOCK_                                                    \
        PERL_REENTRANT_UNLOCK("locale",                                      \
                              &PL_locale_mutex, PL_locale_mutex_depth)
-
-#  ifndef USE_THREAD_SAFE_LOCALE
-
-     /* By definition, a thread-unsafe locale means we need a critical
-      * section. */
-#    define LOCALE_LOCK    LOCALE_LOCK_(0)
-#    define LOCALE_UNLOCK  LOCALE_UNLOCK_
+#  ifdef USE_THREAD_SAFE_LOCALE
+    /* But for most situations, we use the macro name without a trailing
+     * underscore.
+     *
+     * In locale thread-safe Configurations, typical operations don't need
+     * locking */
+#    define LOCALE_LOCK         NOOP
+#    define LOCALE_UNLOCK       NOOP
+#  else
+     /* Whereas, thread-unsafe Configurations always requires locking */
+#    define LOCALE_LOCK_DOES_SOMETHING_
+#    define LOCALE_LOCK         LOCALE_LOCK_(0)
+#    define LOCALE_UNLOCK       LOCALE_UNLOCK_
 #    ifdef USE_LOCALE_NUMERIC
 #      define LC_NUMERIC_LOCK(cond_to_panic_if_already_locked)              \
                  LOCALE_LOCK_(cond_to_panic_if_already_locked)
@@ -7286,7 +7296,7 @@ the plain locale pragma without a parameter (S<C<use locale>>) is in effect.
  * could change out from under us, we use an exclusive LOCALE lock to prevent
  * that, and a read ENV lock to prevent other threads that have nothing to do
  * with locales here from changing the environment. */
-#ifdef LOCALE_LOCK
+#ifdef LOCALE_LOCK_DOES_SOMETHING
 #  define gwENVr_LOCALEr_LOCK                                               \
                     STMT_START { LOCALE_LOCK; ENV_READ_LOCK; } STMT_END
 #  define gwENVr_LOCALEr_UNLOCK                                             \
@@ -7294,15 +7304,6 @@ the plain locale pragma without a parameter (S<C<use locale>>) is in effect.
 #else
 #  define gwENVr_LOCALEr_LOCK           ENV_LOCK
 #  define gwENVr_LOCALEr_UNLOCK         ENV_UNLOCK
-#endif
-
-/* Now that we have defined gwENVr_LOCALEr_LOCK, we can finish defining
- * LOCALE_LOCK, which we kept undefined until here on a thread-safe system
- * so that we could use that fact to calculate what gwENVr_LOCALEr_LOCK should
- * be */
-#ifndef LOCALE_LOCK
-#  define LOCALE_LOCK                NOOP
-#  define LOCALE_UNLOCK              NOOP
 #endif
 
       /* On systems that don't have per-thread locales, even though we don't
