@@ -903,6 +903,8 @@ PERLVAR(I, regex_padav,   AV *)		/* All regex objects, indexed via the
 PERLVAR(I, stashpad,    HV **)		/* for CopSTASH */
 PERLVARI(I, stashpadmax, PADOFFSET, 64)
 PERLVARI(I, stashpadix, PADOFFSET, 0)
+PERLVARI(I, env_mutex_depth, int, 0)     /* Emulate general semaphore */
+PERLVARI(I, env_mutex_readers, int, 0)
 #endif
 
 #ifdef USE_REENTRANT_API
