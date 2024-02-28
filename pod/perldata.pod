@@ -1038,6 +1038,14 @@ This can be used to provide overridable configuration defaults:
     # values in %args take priority over %config_defaults
     %config = (%config_defaults, %args);
 
+Templating:
+
+     %north_american_version = (%world_version, %north_american_tweaks);
+
+Form filling, etc.:
+
+     %form=(%full_template, %partial_response);
+
 =head2 Subscripts
 
 An array can be accessed one scalar at a
