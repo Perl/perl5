@@ -16240,6 +16240,10 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_less_dicey_locale_buf = NULL;
     PL_less_dicey_locale_bufsize = 0;
 #endif
+#ifdef USE_THREADS
+    assert(PL_env_mutex_depth <= 0);
+    PL_env_mutex_depth = 0;
+#endif
 
     /* Unicode inversion lists */
 
