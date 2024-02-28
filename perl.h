@@ -7162,7 +7162,7 @@ the plain locale pragma without a parameter (S<C<use locale>>) is in effect.
        PERL_REENTRANT_UNLOCK("locale",                                      \
                              &PL_locale_mutex, PL_locale_mutex_depth)
 
-#  if defined(USE_THREADS) && ! defined(USE_THREAD_SAFE_LOCALE)
+#  ifndef USE_THREAD_SAFE_LOCALE
 
      /* By definition, a thread-unsafe locale means we need a critical
       * section. */
