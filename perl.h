@@ -7055,9 +7055,6 @@ typedef struct am_table_short AMTS;
 #  define LOCALE_UNLOCK_      NOOP
 #  define LOCALE_LOCK         NOOP
 #  define LOCALE_UNLOCK       NOOP
-#  define LOCALE_INIT
-#  define LOCALE_TERM
-
 #else   /* Below: Threaded, and locales are supported */
 
     /* A locale mutex is required on all such threaded builds for at least
@@ -7089,34 +7086,6 @@ typedef struct am_table_short AMTS;
 #      define LC_NUMERIC_UNLOCK  LOCALE_UNLOCK_
 #    endif
 #  endif
-
-#  ifdef WIN32_USE_FAKE_OLD_MINGW_LOCALES
-    /* This function is coerced by this Configure option into cleaning up
-     * memory that is static to locale.c.  So we call it at termination.  Doing
-     * it this way is kludgy but confines having to deal with this
-     * Configuration to a bare minimum number of places. */
-#      define LOCALE_TERM_POSIX_2008_  Perl_thread_locale_term(NULL)
-#  elif ! defined(USE_POSIX_2008_LOCALE)
-#      define LOCALE_TERM_POSIX_2008_  NOOP
-#  else
-     /* We have a locale object holding the 'C' locale for Posix 2008 */
-#    define LOCALE_TERM_POSIX_2008_                                         \
-                    STMT_START {                                            \
-                        if (PL_C_locale_obj) {                              \
-                            /* Make sure we aren't using the locale         \
-                             * space we are about to free */                \
-                            uselocale(LC_GLOBAL_LOCALE);                    \
-                            freelocale(PL_C_locale_obj);                    \
-                            PL_C_locale_obj = (locale_t) NULL;              \
-                        }                                                   \
-                    } STMT_END
-#  endif
-
-#  define LOCALE_INIT           MUTEX_INIT(&PL_locale_mutex)
-#  define LOCALE_TERM           STMT_START {                                \
-                                    LOCALE_TERM_POSIX_2008_;                \
-                                    MUTEX_DESTROY(&PL_locale_mutex);        \
-                                } STMT_END
 #endif
 
 /* There are some locale-related functions which may need locking only because
@@ -7380,6 +7349,39 @@ typedef struct am_table_short AMTS;
 #define STRFMON_UNLOCK      LC_MONETARY_UNLOCK
 
 /* End of locale/env synchronization */
+
+#if ! defined(USE_LOCALE_THREADS)
+#  define LOCALE_INIT
+#  define LOCALE_TERM
+#else
+#  ifdef WIN32_USE_FAKE_OLD_MINGW_LOCALES
+    /* This function is coerced by this Configure option into cleaning up
+     * memory that is static to locale.c.  So we call it at termination.  Doing
+     * it this way is kludgy but confines having to deal with this
+     * Configuration to a bare minimum number of places. */
+#      define LOCALE_TERM_POSIX_2008_  Perl_thread_locale_term(NULL)
+#  elif ! defined(USE_POSIX_2008_LOCALE)
+#      define LOCALE_TERM_POSIX_2008_  NOOP
+#  else
+     /* We have a locale object holding the 'C' locale for Posix 2008 */
+#    define LOCALE_TERM_POSIX_2008_                                         \
+                    STMT_START {                                            \
+                        if (PL_C_locale_obj) {                              \
+                            /* Make sure we aren't using the locale         \
+                             * space we are about to free */                \
+                            uselocale(LC_GLOBAL_LOCALE);                    \
+                            freelocale(PL_C_locale_obj);                    \
+                            PL_C_locale_obj = (locale_t) NULL;              \
+                        }                                                   \
+                    } STMT_END
+#  endif
+
+#  define LOCALE_INIT           MUTEX_INIT(&PL_locale_mutex)
+#  define LOCALE_TERM           STMT_START {                                \
+                                    LOCALE_TERM_POSIX_2008_;                \
+                                    MUTEX_DESTROY(&PL_locale_mutex);        \
+                                } STMT_END
+#endif
 
 #ifdef USE_LOCALE /* These locale things are all subject to change */
 
