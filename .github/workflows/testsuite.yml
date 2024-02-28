@@ -266,6 +266,7 @@ jobs:
           - "-Accflags=-DSILENT_NO_TAINT_SUPPORT"
           - "-Accflags=-DNO_TAINT_SUPPORT"
           - "-DDEBUGGING -Accflags=-DPERL_RC_STACK"
+          - "-Uusedl"
 
     steps:
       - name: Install System dependencies
