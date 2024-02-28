@@ -7269,28 +7269,6 @@ the plain locale pragma without a parameter (S<C<use locale>>) is in effect.
 #define gwLOCALE_LOCK    LOCALE_LOCK_(0)
 #define gwLOCALE_UNLOCK  LOCALE_UNLOCK_
 
-/* setlocale() generally returns in a global static buffer, but not on Windows
- * when operating in thread-safe mode */
-#if defined(WIN32) && defined(USE_THREAD_SAFE_LOCALE)
-#  define POSIX_SETLOCALE_LOCK                                              \
-            STMT_START {                                                    \
-                if (_configthreadlocale(0) == _DISABLE_PER_THREAD_LOCALE)   \
-                    gwLOCALE_LOCK;                                          \
-            } STMT_END
-#  define POSIX_SETLOCALE_UNLOCK                                            \
-            STMT_START {                                                    \
-                if (_configthreadlocale(0) == _DISABLE_PER_THREAD_LOCALE)   \
-                    gwLOCALE_UNLOCK;                                        \
-            } STMT_END
-#else
-#  define POSIX_SETLOCALE_LOCK      gwLOCALE_LOCK
-#  define POSIX_SETLOCALE_UNLOCK    gwLOCALE_UNLOCK
-#endif
-
-/* It handles _wsetlocale() as well */
-#define WSETLOCALE_LOCK      POSIX_SETLOCALE_LOCK
-#define WSETLOCALE_UNLOCK    POSIX_SETLOCALE_UNLOCK
-
 /* Similar to gwLOCALE_LOCK, there are functions that require both the locale
  * and environment to be constant during their execution, and don't change
  * either of those things, but do write to some sort of shared global space.
@@ -7320,6 +7298,28 @@ the plain locale pragma without a parameter (S<C<use locale>>) is in effect.
 /* Currently, the read lock is an exclusive lock */
 #define LOCALE_READ_LOCK                LOCALE_LOCK
 #define LOCALE_READ_UNLOCK              LOCALE_UNLOCK
+
+/* setlocale() generally returns in a global static buffer, but not on Windows
+ * when operating in thread-safe mode */
+#if defined(WIN32) && defined(USE_THREAD_SAFE_LOCALE)
+#  define POSIX_SETLOCALE_LOCK                                              \
+            STMT_START {                                                    \
+                if (_configthreadlocale(0) == _DISABLE_PER_THREAD_LOCALE)   \
+                    gwLOCALE_LOCK;                                          \
+            } STMT_END
+#  define POSIX_SETLOCALE_UNLOCK                                            \
+            STMT_START {                                                    \
+                if (_configthreadlocale(0) == _DISABLE_PER_THREAD_LOCALE)   \
+                    gwLOCALE_UNLOCK;                                        \
+            } STMT_END
+#else
+#  define POSIX_SETLOCALE_LOCK      gwLOCALE_LOCK
+#  define POSIX_SETLOCALE_UNLOCK    gwLOCALE_UNLOCK
+#endif
+
+/* It handles _wsetlocale() as well */
+#define WSETLOCALE_LOCK      POSIX_SETLOCALE_LOCK
+#define WSETLOCALE_UNLOCK    POSIX_SETLOCALE_UNLOCK
 
 
 #ifndef LC_NUMERIC_LOCK
