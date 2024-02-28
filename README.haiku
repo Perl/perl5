@@ -59,7 +59,7 @@ fail. This is due to bugs in Haiku's network stack implementation.
 =head1 CONTACT
 
 For Haiku specific problems contact the HaikuPorts developers:
-L<http://ports.haiku-files.org/>
+L<https://github.com/haikuports/haikuports>
 
 The initial Haiku port was done by Ingo Weinhold <ingo_weinhold@gmx.de>.
 
