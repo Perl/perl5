@@ -8052,7 +8052,7 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
             else {
                 /* OK let's at least warn */
                 deprecate_fatal_in(WARN_DEPRECATED__SUBSEQUENT_USE_VERSION, "5.46",
-                    "use VERSION while another use VERSION is in scope");
+                    "Changing use VERSION while another use VERSION is in scope");
             }
         }
 
