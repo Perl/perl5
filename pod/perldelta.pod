@@ -27,6 +27,16 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 New C<^^> logical xor operator
+
+Perl has always had three low-precedence logical operators C<and>, C<or> and
+C<xor>, as well as three high-precedence bitwise versions C<&>, C<^> and C<|>.
+Until this release, while the medium-precedence logical operators of C<&&> and
+C<||> were also present, there was no exclusive-or equivalent.  This release
+of Perl adds the final C<^^> operator, completing the set.
+
+    $x ^^ $y and say "One of x or y is true, but not both";
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
