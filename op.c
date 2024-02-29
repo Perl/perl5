@@ -8036,6 +8036,9 @@ Perl_utilize(pTHX_ int aver, I32 floor, OP *version, OP *idop, OP *arg)
                 /* if the old version had no side effects, we can allow this
                  * without any warnings or errors */
             }
+            else if (shortver == PL_prevailing_version) {
+                /* requesting the same version again is fine */
+            }
             else if (shortver >= SHORTVER(5, 39)) {
                 croak("use VERSION of 5.39 or above is not permitted while another use VERSION is in scope");
             }
