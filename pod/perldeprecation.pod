@@ -62,13 +62,14 @@ Category: "deprecated::unicode_property_name"
 
 =head2 Perl 5.46
 
-=head3 C<use VERSION> while another C<use VERSION> is in scope
+=head3 Changing C<use VERSION> while another C<use VERSION> is in scope
 
 A C<use VERSION> declaration has many implicit effects on the surrounding
 scope, such as L<strict> and L<feature> flags, or importing L<builtin>
-functions. Once you have a C<use VERSION> statement in scope, any other
-C<use VERSION> statement is now deprecated since Perl 5.39.8, due to the
-increasing complexity of swapping from one prevailing version to another.
+functions. Once you have a C<use VERSION> statement in scope, another
+C<use VERSION> statement with a different version is now deprecated since
+Perl 5.39.8, due to the increasing complexity of swapping from one
+prevailing version to another.
 
 Category: "deprecated::subsequent_use_version"
 
