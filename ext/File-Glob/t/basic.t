@@ -164,7 +164,7 @@ SKIP: {
 # should return an empty list, and set ERROR
 SKIP: {
     skip $^O, 2 if $^O eq 'MSWin32'
-        or $^O eq 'os2' or $^O eq 'VMS' or $^O eq 'cygwin';
+        or $^O eq 'os2' or $^O eq 'VMS' or $^O eq 'cygwin' or $^O eq 'msys';
     skip "AFS", 2 if Cwd::cwd() =~ m#^$Config{'afsroot'}#s;
     skip "running as root", 2 if not $>;
 

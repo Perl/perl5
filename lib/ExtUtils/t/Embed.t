@@ -119,7 +119,7 @@ if ($^O eq 'VMS') {
         s!-bE:(\S+)!-bE:$perl_exp!;
     }
    }
-   elsif ($^O eq 'cygwin') { # Cygwin needs no special treatment like below
+   elsif ($^O eq 'cygwin' or $^O eq 'msys') { # Cygwin needs no special treatment like below
        ;
    }
    elsif ($Config{'libperl'} !~ /\Alibperl\./) {
@@ -162,7 +162,7 @@ unlink($exe,"embed_test.c",$obj);
 unlink("$exe.manifest") if $cl and $Config{'ccversion'} =~ /^(\d+)/ and $1 >= 14;
 unlink("$exe$Config{exe_ext}") if $skip_exe;
 unlink("embed_test.map","embed_test.lis") if $^O eq 'VMS';
-unlink(glob("./*.dll")) if $^O eq 'cygwin';
+unlink(glob("./*.dll")) if ($^O eq 'cygwin' or $^O eq 'msys');
 unlink($testlib)	       if $libperl_copied;
 
 # gcc -g -I.. -L../ -o perl_test perl_test.c -lperl `../perl -I../lib -MExtUtils::Embed -I../ -e ccflags -e ldopts`

@@ -8,7 +8,7 @@ use Text::Wrap();
 
 # Common functions needed by the regen scripts
 
-our $Needs_Write = $^O eq 'cygwin' || $^O eq 'os2' || $^O eq 'MSWin32';
+our $Needs_Write = $^O eq 'cygwin' || $^O eq 'msys' || $^O eq 'os2' || $^O eq 'MSWin32';
 
 our $Verbose = 0;
 @ARGV = grep { not($_ eq '-q' and $Verbose = -1) }

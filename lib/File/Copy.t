@@ -181,7 +181,7 @@ for my $cross_partition_test (0..1) {
 
   SKIP: {
     skip "Testing hard links", 3 
-         if !$Config{d_link} or $^O eq 'MSWin32' or $^O eq 'cygwin';
+         if !$Config{d_link} or $^O eq 'MSWin32' or $^O eq 'cygwin' or $^O eq 'msys';
 
     open(F, ">", "file-$$") or die $!;
     print F "dummy content\n";
