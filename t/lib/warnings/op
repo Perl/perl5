@@ -2178,5 +2178,5 @@ use VERSION while another use VERSION is in scope is deprecated, and will become
 use warnings;
 use v5.12;
 use v5.12;
+# expect no warning because same version
 EXPECT
-use VERSION while another use VERSION is in scope is deprecated, and will become fatal in Perl 5.46 at - line 3.
