@@ -51,14 +51,16 @@ package FetchStoreCounter {
     is(prototype(\&builtin::is_bool), '$', 'is_bool prototype');
 }
 
-# float constants
+# floats
 {
-    use builtin qw( inf nan );
+    use builtin qw( inf nan is_inf is_nan is_bool );
 
     ok(inf, 'inf is true');
     ok(inf > 1E10, 'inf is bigger than 1E10');
     ok(inf == inf, 'inf is equal to inf');
     ok(inf == inf + 1, 'inf is equal to inf + 1');
+
+    ok(inf != -inf, 'inf is not equal to -inf');
 
     # Invoke the real XSUB
     my $inf = ( \&builtin::inf )->();
@@ -68,6 +70,36 @@ package FetchStoreCounter {
 
     my $nan = ( \&builtin::nan )->();
     ok($nan != $nan, 'NaN returned by real xsub');
+
+    # Test is_inf and is_nan from various sources
+    ok(is_inf(inf), 'is_inf(inf) is true');
+    ok(is_inf(-inf), 'is_inf(-inf) is true');
+    ok(is_nan(nan), 'is_nan(nan) is true');
+
+    ok(is_inf($inf), 'is_inf(inf) from xsub is true');
+    ok(is_inf($inf), 'is_inf(inf) from xsub is true');
+    ok(is_nan($nan), 'is_nan(nan) from xsub is true');
+
+    ok(is_nan(1*(inf-inf)), 'is_nan is true for calculated nan');
+    ok(is_inf(9**9**9), 'is_inf is true for calculated inf');
+
+    # Try some obvious variations that should fail.
+    ok(!is_nan($inf), 'is_nan(inf) is false');
+    ok(!is_inf($nan), 'is_inf(nan) is false');
+
+    # Strings that look like stringified floats should not pass
+    ok(!is_nan('NaN'), 'is_nan(\'NaN\') is false');
+    ok(!is_inf('inf'), 'is_inf(\'inf\') is false');
+
+    ok(!is_nan(0), 'is_nan(0) is false');
+    ok(!is_inf(0), 'is_inf(0) is false');
+
+    ok(!is_nan(0.0), 'is_nan(0.0) is false');
+    ok(!is_inf(0.0), 'is_inf(0.0) is false');
+
+    # Ensure that is_nan and is_inf return real bools
+    ok(is_bool(is_nan($nan)), 'is_nan returns bool');
+    ok(is_bool(is_inf($inf)), 'is_inf returns bool');
 }
 
 # weakrefs

@@ -99,6 +99,20 @@ XS(XS_builtin_inf)
     XSRETURN_NV(NV_INF);
 }
 
+XS(XS_builtin_is_inf);
+XS(XS_builtin_is_inf)
+{
+    dXSARGS;
+    SV *val = ST(0);
+    if(items != 1)
+        croak_xs_usage(cv, "val");
+    SvGETMAGIC(val);
+    if(SvNOK(val) && Perl_isinf(SvNV(val)))
+        XSRETURN_YES;
+    else
+        XSRETURN_NO;
+}
+
 XS(XS_builtin_nan);
 XS(XS_builtin_nan)
 {
@@ -107,6 +121,20 @@ XS(XS_builtin_nan)
         croak_xs_usage(cv, "");
     EXTEND(SP, 1);
     XSRETURN_NV(NV_NAN);
+}
+
+XS(XS_builtin_is_nan);
+XS(XS_builtin_is_nan)
+{
+    dXSARGS;
+    SV *val = ST(0);
+    if(items != 1)
+        croak_xs_usage(cv, "val");
+    SvGETMAGIC(val);
+    if(SvNOK(val) && Perl_isnan(SvNV(val)))
+        XSRETURN_YES;
+    else
+        XSRETURN_NO;
 }
 
 enum {
@@ -550,6 +578,8 @@ static const struct BuiltinFuncDescriptor builtins[] = {
 
     /* unary functions */
     { "is_bool",         NO_BUNDLE, &XS_builtin_func1_scalar, &ck_builtin_func1, OP_IS_BOOL,    true  },
+    { "is_inf",          NO_BUNDLE, &XS_builtin_is_inf,       &ck_builtin_func1, 0,             true  },
+    { "is_nan",          NO_BUNDLE, &XS_builtin_is_nan,       &ck_builtin_func1, 0,             true  },
     { "weaken",     SHORTVER(5,39), &XS_builtin_func1_void,   &ck_builtin_func1, OP_WEAKEN,     false },
     { "unweaken",   SHORTVER(5,39), &XS_builtin_func1_void,   &ck_builtin_func1, OP_UNWEAKEN,   false },
     { "is_weak",    SHORTVER(5,39), &XS_builtin_func1_scalar, &ck_builtin_func1, OP_IS_WEAK,    false },
