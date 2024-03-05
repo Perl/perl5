@@ -279,11 +279,6 @@ uni/variables.t
 ../lib/dumpvar.t
 ../lib/English.t
 
-# 18 Feb 24. This is probably failing due to the new PADNAMEf_TOMBSTONE
-# thing, which is likely to be removed again before 5.40. The test failure
-# can be reduced to: use builtin 'true'; no builtin 'true';
-../lib/builtin.t
-
 ../lib/overload.t
 
 
