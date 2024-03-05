@@ -687,7 +687,8 @@ our %Modules = (
     },
 
     'IO::Zlib' => {
-        'DISTRIBUTION' => 'TOMHUGHES/IO-Zlib-1.14.tar.gz',
+        'DISTRIBUTION' => 'TOMHUGHES/IO-Zlib-1.15.tar.gz',
+        'SYNCINFO'     => 'jkeenan on Mon Mar  4 19:30:34 2024',
         'FILES'        => q[cpan/IO-Zlib],
     },
 
