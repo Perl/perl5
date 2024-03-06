@@ -355,6 +355,10 @@ or C<CHECK> blocks and any C<use> statements: these are considered as
 occurring outside the execution of your program.  C<INIT> and C<END>
 blocks, however, will be skipped.
 
+If the syntax check is successful perl will exit with a status of zero
+and report C<I<yourprogram> syntax OK>.  On failure perl will print
+any detected errors and exit with a non-zero status.
+
 =item B<-d>
 X<-d> X<-dt>
 
