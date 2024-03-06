@@ -880,29 +880,29 @@ DEFINE
 
 	print PREAMBLE <<SIZEOF;
 %sizeof = (
-	char	=> $Config{charsize},
-	uchar	=> $Config{charsize},
-	u_char	=> $Config{charsize},
+	char	=> $Config{charsize}	// length(pack("c",  0)),
+	uchar	=> $Config{charsize}	// length(pack("C",  0)),
+	u_char	=> $Config{charsize}	// length(pack("C",  0)),
 
-	short	=> $Config{shortsize},
-	ushort	=> $Config{shortsize},
-	u_short => $Config{shortsize},
+	short	=> $Config{shortsize}	// length(pack("s!", 0)),
+	ushort	=> $Config{shortsize}	// length(pack("S!", 0)),
+	u_short => $Config{shortsize}	// length(pack("S!", 0)),
 
-	int	=> $Config{intsize},
-	uint	=> $Config{intsize},
-	u_int	=> $Config{intsize},
+	int	=> $Config{intsize}	// length(pack("i!", 0)),
+	uint	=> $Config{intsize}	// length(pack("I!", 0)),
+	u_int	=> $Config{intsize}	// length(pack("I!", 0)),
 
-	long	=> $Config{longsize},
-	ulong	=> $Config{longsize},
-	u_long	=> $Config{longsize},
+	long	=> $Config{longsize}	// length(pack("l!", 0)),
+	ulong	=> $Config{longsize}	// length(pack("L!", 0)),
+	u_long	=> $Config{longsize}	// length(pack("L!", 0)),
 
-	FILE	=> $Config{ptrsize},
-	key_t	=> $Config{ptrsize},
-	caddr_t	=> $Config{ptrsize},
+	FILE	=> $Config{ptrsize}	// length(pack("p",  0)),
+	key_t	=> $Config{ptrsize}	// length(pack("p",  0)),
+	caddr_t => $Config{ptrsize}	// length(pack("p",  0)),
+	size_t	=> $Config{sizesize}	// length(pack("p",  0)),
 
-	float	=> $Config{intsize},
-	double	=> $Config{doublesize},
-	size_t	=> $Config{sizesize},
+	float	=> $Config{floatsize}	// length(pack("f",  0.0)),
+	double	=> $Config{doublesize}	// length(pack("d",  0.0)),
 
 	%sizeof,   # Allow scripts to extend/customize %sizeof
 );
