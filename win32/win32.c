@@ -3733,8 +3733,10 @@ win32_symlink(const char *oldfile, const char *newfile)
 {
     dTHX;
     size_t oldfile_len = strlen(oldfile);
+    GCC_DIAG_IGNORE_DECL(-Wcast-function-type);
     pCreateSymbolicLinkA_t pCreateSymbolicLinkA =
         (pCreateSymbolicLinkA_t)GetProcAddress(GetModuleHandle("kernel32.dll"), "CreateSymbolicLinkA");
+    GCC_DIAG_RESTORE_DECL;
     DWORD create_flags = 0;
 
     /* this flag can be used only on Windows 10 1703 or newer */
@@ -5043,7 +5045,9 @@ Perl_init_os_extras(void)
     HMODULE module = (HMODULE)((w32_perldll_handle == INVALID_HANDLE_VALUE)
                                ? GetModuleHandle(NULL)
                                : w32_perldll_handle);
+    GCC_DIAG_IGNORE_DECL(-Wcast-function-type);
     pfn_init = (void (*)(pTHX))GetProcAddress(module, "init_Win32CORE");
+    GCC_DIAG_RESTORE_DECL;
     aTHXa(PERL_GET_THX);
     if (pfn_init)
         pfn_init(aTHX);
