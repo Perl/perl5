@@ -154,8 +154,8 @@ variadic macros
     void greet(char *file, unsigned int line, char *format, ...);
     #define logged_greet(...) greet(__FILE__, __LINE__, __VA_ARGS__);
 
-Note that C<__VA_OPT__> is a gcc extension not yet in any published
-standard.
+Note that C<__VA_OPT__> is standardized as of C23 and C++20.  Before
+that it was a gcc extension.
 
 =item *
 
