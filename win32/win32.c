@@ -3700,6 +3700,17 @@ win32_pclose(PerlIO *pf)
 #endif /* USE_RTL_POPEN */
 }
 
+/* wcscpy() arguments are restrict qualified, but if they're equal
+   we don't need to do the copy
+*/
+static inline WCHAR *
+cond_wcsncpy(WCHAR *out, const WCHAR *in, size_t n) {
+    assert(wcslen(in) < n);
+    if (out != in)
+        wcsncpy(out, in, n);
+    return out;
+}
+
 DllExport int
 win32_link(const char *oldname, const char *newname)
 {
@@ -3709,7 +3720,8 @@ win32_link(const char *oldname, const char *newname)
 
     if (MultiByteToWideChar(CP_ACP, 0, oldname, -1, wOldName, MAX_PATH+1) &&
         MultiByteToWideChar(CP_ACP, 0, newname, -1, wNewName, MAX_PATH+1) &&
-        ((aTHXa(PERL_GET_THX)), wcscpy(wOldName, PerlDir_mapW(wOldName)),
+        ((aTHXa(PERL_GET_THX)),
+          cond_wcsncpy(wOldName, PerlDir_mapW(wOldName), C_ARRAY_LENGTH(wOldName)),
         CreateHardLinkW(PerlDir_mapW(wNewName), wOldName, NULL)))
     {
         return 0;
