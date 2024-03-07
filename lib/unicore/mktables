@@ -9454,7 +9454,7 @@ sub simple_fold( $line, $prefix="", $hanging_indent=0, $right_margin=0) {
 
     # $prefix Optional string to prepend to each output line
     # $hanging_indent Optional number of spaces to indent
-	# continuation lines
+    # continuation lines
     # $right_margin  Optional number of spaces to narrow the
     # total width by.
 
