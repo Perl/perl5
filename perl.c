@@ -419,7 +419,9 @@ perl_construct(pTHXx)
      * The HZ if not originally defined has been by now
      * been defined as CLK_TCK, if available. */
 #if defined(HAS_SYSCONF) && defined(_SC_CLK_TCK)
+    SYSCONF_LOCK;
     PL_clocktick = sysconf(_SC_CLK_TCK);
+    SYSCONF_UNLOCK;
     if (PL_clocktick <= 0)
 #endif
          PL_clocktick = HZ;
@@ -433,11 +435,13 @@ perl_construct(pTHXx)
 #if defined(HAS_SYSCONF) && (defined(_SC_PAGESIZE) || defined(_SC_MMAP_PAGE_SIZE))
       {
         SETERRNO(0, SS_NORMAL);
+        SYSCONF_LOCK;
 #   ifdef _SC_PAGESIZE
         PL_mmap_page_size = sysconf(_SC_PAGESIZE);
 #   else
         PL_mmap_page_size = sysconf(_SC_MMAP_PAGE_SIZE);
 #   endif
+        SYSCONF_UNLOCK;
         if ((long) PL_mmap_page_size < 0) {
             Perl_croak(aTHX_ "panic: sysconf: %s",
                 errno ? Strerror(errno) : "pagesize unknown");
@@ -781,7 +785,9 @@ perl_destruct(pTHXx)
                EOF never occurs, and we get an infinite hang. Hence all the
                games to pass in a file descriptor if it's actually needed.  */
 
+            SYSCONF_LOCK;
             f = sysconf(_SC_OPEN_MAX);
+            SYSCONF_UNLOCK;
             if(f < 0) {
                 where = "sysconf failed";
                 goto abort;

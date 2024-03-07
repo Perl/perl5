@@ -3446,7 +3446,9 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
             const char* endptr = p_end;
             UV uv;
 #ifdef _SC_NGROUPS_MAX
+           SYSCONF_LOCK;
            int maxgrp = sysconf(_SC_NGROUPS_MAX);
+           SYSCONF_UNLOCK;
 
            if (maxgrp < 0)
                maxgrp = NGROUPS;
