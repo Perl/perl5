@@ -5228,7 +5228,9 @@ ansify_path(void)
          * XXX Is this a bug? Should S_find_script() use the environment
          * XXX passed in the `env` arg to parse_perl()?
          */
+        ENV_LOCK;
         putenv(ansi_path);
+        ENV_UNLOCK;
         /* Keep system environment in sync because S_init_postdump_symbols()
          * will not call mg_set() if it initializes %ENV from `environ`.
          */
