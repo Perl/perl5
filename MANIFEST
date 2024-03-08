@@ -4157,6 +4157,7 @@ dist/ExtUtils-CBuilder/t/01-basic.t					tests for ExtUtils::CBuilder
 dist/ExtUtils-CBuilder/t/02-link.t					tests for ExtUtils::CBuilder
 dist/ExtUtils-CBuilder/t/03-cplusplus.t					tests for ExtUtils::CBuilder
 dist/ExtUtils-CBuilder/t/04-base.t					tests for ExtUtils::CBuilder
+dist/ExtUtils-ParseXS/author/mksnapshot.pl			Utility for detecting before/after changes to xsubpp output
 dist/ExtUtils-ParseXS/Changes					ExtUtils::ParseXS change log
 dist/ExtUtils-ParseXS/lib/ExtUtils/ParseXS.pm			converts Perl XS code into C code
 dist/ExtUtils-ParseXS/lib/ExtUtils/ParseXS.pod			ExtUtils::ParseXS documentation
