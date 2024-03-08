@@ -2,7 +2,7 @@ package ExtUtils::Typemaps;
 use 5.006001;
 use strict;
 use warnings;
-our $VERSION = '3.51';
+our $VERSION = '3.53';
 
 require ExtUtils::ParseXS;
 require ExtUtils::ParseXS::Constants;
