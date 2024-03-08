@@ -389,17 +389,9 @@ Perl_reginitcolors(pTHX)
 #define CHECK_RESTUDY_GOTO_butfirst
 #endif
 
-/*
- * pregcomp - compile a regular expression into internal code
- *
- * Decides which engine's compiler to call based on the hint currently in
- * scope
- */
-
 #ifndef PERL_IN_XSUB_RE
 
 /* return the currently in-scope regex engine (or the default if none)  */
-
 regexp_engine const *
 Perl_current_re_engine(pTHX)
 {
@@ -425,6 +417,13 @@ Perl_current_re_engine(pTHX)
     }
 }
 
+
+/*
+ * pregcomp - compile a regular expression into internal code
+ *
+ * Decides which engine's compiler to call based on the hint currently in
+ * scope
+ */
 
 REGEXP *
 Perl_pregcomp(pTHX_ SV * const pattern, const U32 flags)
