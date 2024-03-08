@@ -900,7 +900,7 @@ DEFINE
 	key_t	=> $Config{ptrsize},
 	caddr_t => $Config{ptrsize},
 
-	float	=> length(pack("f", 0.0)),
+	float	=> @{[ length(pack("f", 0.0)) ]},
 	double	=> $Config{doublesize},
 	size_t	=> $Config{sizesize},
 
