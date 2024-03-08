@@ -384,6 +384,9 @@ static int debug_initialization = 0;
 #define PERL_IN_LOCALE_C
 #include "perl.h"
 
+#define gwLOCALE_LOCK    LOCALE_LOCK_(0)
+#define gwLOCALE_UNLOCK  LOCALE_UNLOCK_
+
 /* Some platforms require LC_CTYPE to be congruent with the category we are
  * looking for.  XXX This still presumes that we have to match COLLATE and
  * CTYPE even on platforms that apparently handle this. */
