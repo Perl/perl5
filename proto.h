@@ -8125,12 +8125,6 @@ Perl_get_ANYOFM_contents(pTHX_ const regnode *n)
 # define PERL_ARGS_ASSERT_GET_ANYOFM_CONTENTS   \
         assert(n)
 
-PERL_CALLCONV bool
-Perl_is_ssc_worth_it(const RExC_state_t *pRExC_state, const regnode_ssc *ssc)
-        __attribute__visibility__("hidden");
-# define PERL_ARGS_ASSERT_IS_SSC_WORTH_IT       \
-        assert(pRExC_state); assert(ssc)
-
 PERL_CALLCONV U32
 Perl_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan, UV *min_subtract, bool *unfolded_multi_char, U32 flags, regnode *val, U32 depth)
         __attribute__visibility__("hidden");
@@ -8168,12 +8162,6 @@ Perl_set_ANYOF_arg(pTHX_ RExC_state_t * const pRExC_state, regnode * const node,
         __attribute__visibility__("hidden");
 # define PERL_ARGS_ASSERT_SET_ANYOF_ARG         \
         assert(pRExC_state); assert(node)
-
-PERL_CALLCONV void
-Perl_ssc_finalize(pTHX_ RExC_state_t *pRExC_state, regnode_ssc *ssc)
-        __attribute__visibility__("hidden");
-# define PERL_ARGS_ASSERT_SSC_FINALIZE          \
-        assert(pRExC_state); assert(ssc)
 
 PERL_CALLCONV void
 Perl_ssc_init(pTHX_ const RExC_state_t *pRExC_state, regnode_ssc *ssc)
@@ -8308,6 +8296,11 @@ S_handle_user_defined_property(pTHX_ const char *name, const STRLEN name_len, co
 # define PERL_ARGS_ASSERT_HANDLE_USER_DEFINED_PROPERTY \
         assert(name); assert(contents); assert(user_defined_ptr); assert(msg)
 
+STATIC bool
+S_is_ssc_worth_it(const RExC_state_t *pRExC_state, const regnode_ssc *ssc);
+# define PERL_ARGS_ASSERT_IS_SSC_WORTH_IT       \
+        assert(pRExC_state); assert(ssc)
+
 STATIC void
 S_nextchar(pTHX_ RExC_state_t *pRExC_state);
 # define PERL_ARGS_ASSERT_NEXTCHAR              \
@@ -8431,6 +8424,11 @@ STATIC void
 S_skip_to_be_ignored_text(pTHX_ RExC_state_t *pRExC_state, char **p, const bool force_to_xmod);
 # define PERL_ARGS_ASSERT_SKIP_TO_BE_IGNORED_TEXT \
         assert(pRExC_state); assert(p)
+
+STATIC void
+S_ssc_finalize(pTHX_ RExC_state_t *pRExC_state, regnode_ssc *ssc);
+# define PERL_ARGS_ASSERT_SSC_FINALIZE          \
+        assert(pRExC_state); assert(ssc)
 
 # if defined(DEBUGGING)
 STATIC regnode_offset

@@ -5103,8 +5103,6 @@ ERTix	|UV	|invlist_highest_range_start				\
 ERTi	|bool	|invlist_is_iterating					\
 				|NN const SV * const invlist
 ERTix	|UV	|invlist_lowest |NN SV * const invlist
-ETp	|bool	|is_ssc_worth_it|NN const RExC_state_t *pRExC_state	\
-				|NN const regnode_ssc *ssc
 Ep	|U32	|join_exact	|NN RExC_state_t *pRExC_state		\
 				|NN regnode *scan			\
 				|NN UV *min_subtract			\
@@ -5135,8 +5133,6 @@ Ep	|void	|set_ANYOF_arg	|NN RExC_state_t * const pRExC_state		\
 				|NULLOK SV * const cp_list			\
 				|NULLOK SV * const runtime_defns		\
 				|NULLOK SV * const only_utf8_locale_list
-Ep	|void	|ssc_finalize	|NN RExC_state_t *pRExC_state		\
-				|NN regnode_ssc *ssc
 Ep	|void	|ssc_init	|NN const RExC_state_t *pRExC_state	\
 				|NN regnode_ssc *ssc
 Ep	|SSize_t|study_chunk	|NN RExC_state_t *pRExC_state		\
@@ -5247,6 +5243,8 @@ ES	|SV *	|handle_user_defined_property				\
 				|NN bool *user_defined_ptr		\
 				|NN SV *msg				\
 				|const STRLEN level
+EST	|bool	|is_ssc_worth_it|NN const RExC_state_t *pRExC_state	\
+				|NN const regnode_ssc *ssc
 ES	|void	|nextchar	|NN RExC_state_t *pRExC_state
 ES	|U8	|optimize_regclass						\
 				|NN RExC_state_t *pRExC_state			\
@@ -5345,6 +5343,8 @@ ES	|void	|skip_to_be_ignored_text				\
 				|NN RExC_state_t *pRExC_state		\
 				|NN char **p				\
 				|const bool force_to_xmod
+ES	|void	|ssc_finalize	|NN RExC_state_t *pRExC_state		\
+				|NN regnode_ssc *ssc
 # if defined(DEBUGGING)
 ES	|regnode_offset|regnode_guts_debug				\
 				|NN RExC_state_t *pRExC_state		\
