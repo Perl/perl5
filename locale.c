@@ -3173,7 +3173,6 @@ S_bool_setlocale_2008_i(pTHX_
      * https://sourceware.org/bugzilla/show_bug.cgi?id=24936 */
     if (old_messages_locale) {
         if (strNE(old_messages_locale, querylocale_c_imm(LC_MESSAGES))) {
-        //if (strNE(old_messages_locale, querylocale_c(LC_MESSAGES))) {
             textdomain(textdomain(NULL));
         }
     }
@@ -4997,7 +4996,6 @@ S_native_querylocale_i(pTHX_ const locale_category_index cat_index)
 #  else
 
         return save_to_buffer(querylocale_i_imm(cat_index),
-        //return save_to_buffer(querylocale_i(cat_index),
                               &PL_setlocale_buf, &PL_setlocale_bufsize);
 #  endif
 
@@ -5148,7 +5146,6 @@ Perl_setlocale(const int category, const char * locale)
      * may have returned a synonymous locale name instead of the input one; or,
      * if there are locale categories that we are compiled to ignore, any
      * attempt to change them away from "C" is overruled */
-    // Fails:current_locale = querylocale_i_imm(cat_index);
     current_locale = querylocale_i(cat_index);
 
     /* But certain categories need further work.  For example we may need to
@@ -8844,7 +8841,6 @@ Perl_sv_strftime_tm(pTHX_ SV * fmt, const struct tm * mytm)
 #ifdef USE_LOCALE_TIME
 
     return sv_strftime_common(fmt, querylocale_c_imm(LC_TIME), mytm);
-    //return sv_strftime_common(fmt, querylocale_c(LC_TIME), mytm);
 
 #else
 
@@ -10749,7 +10745,6 @@ Perl_strxfrm(pTHX_ SV * src)
 
     const char * orig_ctype = toggle_locale_c(LC_CTYPE,
                                               querylocale_c_imm(LC_COLLATE));
-                                              //querylocale_c(LC_COLLATE));
 #  endif
 
     SV * dst = src;
