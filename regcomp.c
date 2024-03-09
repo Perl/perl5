@@ -1391,6 +1391,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     scan_data_t data;
     RExC_state_t RExC_state;
     RExC_state_t * const pRExC_state = &RExC_state;
+
 #ifdef TRIE_STUDY_OPT
     /* search for "restudy" in this file for a detailed explanation */
     int restudied = 0;
@@ -1400,12 +1401,24 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 
     PERL_ARGS_ASSERT_RE_OP_COMPILE;
 
+    /* Ensure that all members of the pRExC_state is initialized to 0
+     * at the start of regex compilation. Historically we have had issues
+     * with people remembering to zero specific members or zeroing them
+     * too late, etc. Doing it in one place is saner and avoid oversight
+     * or error. */
+    Zero(pRExC_state,1,RExC_state_t);
+    DEBUG_r({
+        /* and then initialize RExC_mysv1 and RExC_mysv2 early so if
+         * something calls regprop we don't have issues. These variables
+         * not being set up properly motivated the use of Zero() to initalize
+         * the pRExC_state structure, as there were codepaths under -Uusedl
+         * that left these unitialized, and non-null as well. */
+        RExC_mysv1 = sv_newmortal();
+        RExC_mysv2 = sv_newmortal();
+    });
+
     DEBUG_r(if (!PL_colorset) reginitcolors());
 
-
-    pRExC_state->warn_text = NULL;
-    pRExC_state->unlexed_names = NULL;
-    pRExC_state->code_blocks = NULL;
 
     if (is_bare_re)
         *is_bare_re = FALSE;
@@ -1511,40 +1524,11 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
 
     /* ignore the utf8ness if the pattern is 0 length */
     RExC_utf8 = RExC_orig_utf8 = (plen == 0 || IN_BYTES) ? 0 : SvUTF8(pat);
-    RExC_uni_semantics = 0;
-    RExC_contains_locale = 0;
     RExC_strict = cBOOL(pm_flags & RXf_PMf_STRICT);
-    RExC_in_script_run = 0;
-    RExC_study_started = 0;
-    pRExC_state->runtime_code_qr = NULL;
-    RExC_frame_head= NULL;
-    RExC_frame_last= NULL;
-    RExC_frame_count= 0;
-    RExC_latest_warn_offset = 0;
-    RExC_use_BRANCHJ = 0;
-    RExC_warned_WARN_EXPERIMENTAL__VLB = 0;
-    RExC_warned_WARN_EXPERIMENTAL__REGEX_SETS = 0;
-    RExC_logical_total_parens = 0;
-    RExC_total_parens = 0;
-    RExC_logical_to_parno = NULL;
-    RExC_parno_to_logical = NULL;
-    RExC_open_parens = NULL;
-    RExC_close_parens = NULL;
-    RExC_paren_names = NULL;
-    RExC_size = 0;
-    RExC_seen_d_op = FALSE;
-#ifdef DEBUGGING
-    RExC_paren_name_list = NULL;
-#endif
 
-    DEBUG_r({
-        RExC_mysv1= sv_newmortal();
-        RExC_mysv2= sv_newmortal();
-    });
 
     DEBUG_COMPILE_r({
-            SV *dsv= sv_newmortal();
-            RE_PV_QUOTED_DECL(s, RExC_utf8, dsv, exp, plen, PL_dump_re_max_len);
+            RE_PV_QUOTED_DECL(s, RExC_utf8, RExC_mysv, exp, plen, PL_dump_re_max_len);
             Perl_re_printf( aTHX_  "%sCompiling REx%s %s\n",
                           PL_colors[4], PL_colors[5], s);
         });
@@ -1565,7 +1549,12 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
      * pattern.
      *
      * Things get a touch tricky as we have to compare the utf8 flag
-     * independently from the compile flags.  */
+     * independently from the compile flags.
+     *
+     * ALSO NOTE: After this point we may need to zero members of pRExC_state
+     * explicitly. Prior to this point they should all be zeroed as part of
+     * a struct wide Zero instruction.
+     */
 
     if (   old_re
         && !recompile
@@ -1576,8 +1565,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
         && !runtime_code /* with runtime code, always recompile */ )
     {
         DEBUG_COMPILE_r({
-            SV *dsv= sv_newmortal();
-            RE_PV_QUOTED_DECL(s, RExC_utf8, dsv, exp, plen, PL_dump_re_max_len);
+            RE_PV_QUOTED_DECL(s, RExC_utf8, RExC_mysv, exp, plen, PL_dump_re_max_len);
             Perl_re_printf( aTHX_  "%sSkipping recompilation of unchanged REx%s %s\n",
                           PL_colors[4], PL_colors[5], s);
         });
@@ -1833,7 +1821,7 @@ Perl_re_op_compile(pTHX_ SV ** const patternp, int pat_count,
     SetProgLen(RExC_rxi,RExC_size);
 
     DEBUG_DUMP_PRE_OPTIMIZE_r({
-        SV * const sv = sv_newmortal();
+        SV * const sv = sv_newmortal(); /* can this use RExC_mysv? */
         RXi_GET_DECL(RExC_rx, ri);
         DEBUG_RExC_seen();
         Perl_re_printf( aTHX_ "Program before optimization:\n");
