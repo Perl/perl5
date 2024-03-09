@@ -181,7 +181,7 @@ if ($define{USE_LOCALE_THREADS} && ! $define{NO_THREAD_SAFE_LOCALE}) {
     {
         $define{USE_THREAD_SAFE_LOCALE} = 1;
     }
-    elsif (! $define{WIN32}) {
+    else {
         $define{EMULATE_THREAD_SAFE_LOCALES} = 1;
     }
 }
