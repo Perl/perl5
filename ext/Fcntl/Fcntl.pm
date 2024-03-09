@@ -59,7 +59,7 @@ use strict;
 
 use Exporter 'import';
 require XSLoader;
-our $VERSION = '1.16';
+our $VERSION = '1.17';
 
 XSLoader::load();
 
@@ -166,10 +166,17 @@ our @EXPORT_OK = (qw(
 	DN_MODIFY
 	DN_MULTISHOT
 	DN_RENAME
+	F_ADD_SEALS
 	F_GETLEASE
 	F_GETPIPE_SZ
+	F_GET_SEALS
 	F_GETSIG
 	F_NOTIFY
+	F_SEAL_FUTURE_WRITE
+	F_SEAL_GROW
+	F_SEAL_SEAL
+	F_SEAL_SHRINK
+	F_SEAL_WRITE
 	F_SETLEASE
 	F_SETPIPE_SZ
 	F_SETSIG
