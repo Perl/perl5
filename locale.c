@@ -9591,7 +9591,9 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
     memzero(&PL_mbrtowc_ps, sizeof(PL_mbrtowc_ps));
 #  endif
 #  ifdef HAS_WCTOMBR
+    WCRTOMB_LOCK;
     wcrtomb(NULL, L'\0', &PL_wcrtomb_ps);
+    WCRTOMB_UNLOCK;
 #  endif
 #  ifdef USE_PL_CURLOCALES
 
