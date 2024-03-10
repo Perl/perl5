@@ -66,7 +66,9 @@ Perl_reentrant_size(pTHX) {
 
 #  ifdef HAS_GETGRNAM_R
 #    if defined(HAS_SYSCONF) && defined(_SC_GETGR_R_SIZE_MAX) && !defined(__GLIBC__)
+        SYSCONF_LOCK;
         PL_reentrant_buffer->_grent_size = sysconf(_SC_GETGR_R_SIZE_MAX);
+        SYSCONF_UNLOCK;
         if (PL_reentrant_buffer->_grent_size == (size_t) -1)
                 PL_reentrant_buffer->_grent_size = REENTRANTUSUALSIZE;
 #    elif defined(__osf__) && defined(__alpha) && defined(SIABUFSIZ)
@@ -102,7 +104,9 @@ Perl_reentrant_size(pTHX) {
 
 #  ifdef HAS_GETPWNAM_R
 #    if defined(HAS_SYSCONF) && defined(_SC_GETPW_R_SIZE_MAX) && !defined(__GLIBC__)
+        SYSCONF_LOCK;
         PL_reentrant_buffer->_pwent_size = sysconf(_SC_GETPW_R_SIZE_MAX);
+        SYSCONF_UNLOCK;
         if (PL_reentrant_buffer->_pwent_size == (size_t) -1)
                 PL_reentrant_buffer->_pwent_size = REENTRANTUSUALSIZE;
 #    elif defined(__osf__) && defined(__alpha) && defined(SIABUFSIZ)
@@ -122,7 +126,9 @@ Perl_reentrant_size(pTHX) {
 
 #  ifdef HAS_GETSPNAM_R
 #    if defined(HAS_SYSCONF) && defined(_SC_GETPW_R_SIZE_MAX) && !defined(__GLIBC__)
+        SYSCONF_LOCK;
         PL_reentrant_buffer->_spent_size = sysconf(_SC_GETPW_R_SIZE_MAX);
+        SYSCONF_UNLOCK;
         if (PL_reentrant_buffer->_spent_size == (size_t) -1)
                 PL_reentrant_buffer->_spent_size = REENTRANTUSUALSIZE;
 #    elif defined(__osf__) && defined(__alpha) && defined(SIABUFSIZ)

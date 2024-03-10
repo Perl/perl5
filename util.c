@@ -3765,7 +3765,9 @@ Perl_my_fflush_all(pTHX)
 #   ifdef PERL_FFLUSH_ALL_FOPEN_MAX
     open_max = PERL_FFLUSH_ALL_FOPEN_MAX;
 #   elif defined(HAS_SYSCONF) && defined(_SC_OPEN_MAX)
+    SYSCONF_LOCK;
     open_max = sysconf(_SC_OPEN_MAX);
+    SYSCONF_UNLOCK;
 #   elif defined(FOPEN_MAX)
     open_max = FOPEN_MAX;
 #   elif defined(OPEN_MAX)
