@@ -5653,28 +5653,36 @@ PP(pp_ehostent)
         break;
     case OP_SGRENT:
 #if defined(HAS_GROUP) && defined(HAS_SETGRENT)
+        SETGRENT_LOCK;
         setgrent();
+        SETGRENT_UNLOCK;
 #else
         DIE(aTHX_ PL_no_func, PL_op_desc[PL_op->op_type]);
 #endif
         break;
     case OP_EGRENT:
 #if defined(HAS_GROUP) && defined(HAS_ENDGRENT)
+        ENDGRENT_LOCK;
         endgrent();
+        ENDGRENT_UNLOCK;
 #else
         DIE(aTHX_ PL_no_func, PL_op_desc[PL_op->op_type]);
 #endif
         break;
     case OP_SPWENT:
 #if defined(HAS_PASSWD) && defined(HAS_SETPWENT)
+        SETPWENT_LOCK;
         setpwent();
+        SETPWENT_UNLOCK;
 #else
         DIE(aTHX_ PL_no_func, PL_op_desc[PL_op->op_type]);
 #endif
         break;
     case OP_EPWENT:
 #if defined(HAS_PASSWD) && defined(HAS_ENDPWENT)
+        ENDPWENT_LOCK;
         endpwent();
+        ENDPWENT_UNLOCK;
 #else
         DIE(aTHX_ PL_no_func, PL_op_desc[PL_op->op_type]);
 #endif
@@ -5782,7 +5790,9 @@ PP_wrapped(pp_gpwent,
         break;
     case OP_GPWENT:
 #   ifdef HAS_GETPWENT
+        GETPWENT_LOCK;
         pwent  = getpwent();
+        GETPWENT_UNLOCK;
 #ifdef POSIX_BC   /* In some cases pw_passwd has invalid addresses */
         if (pwent) {
             GETPWNAM_LOCK;
