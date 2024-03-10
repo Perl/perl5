@@ -839,6 +839,10 @@ typedef struct {
 #      endif
 #      if defined(asctime)
 #        define PERL_REENTR_USING_ASCTIME_R
+#        undef ASCTIME_LOCK
+#        undef ASCTIME_UNLOCK
+#        define ASCTIME_LOCK   ASCTIME_R_LOCK
+#        define ASCTIME_UNLOCK ASCTIME_R_UNLOCK
 #      endif
 #    endif
 #  endif /* HAS_ASCTIME_R */
@@ -855,6 +859,10 @@ typedef struct {
 #      endif
 #      if defined(crypt)
 #        define PERL_REENTR_USING_CRYPT_R
+#        undef CRYPT_LOCK
+#        undef CRYPT_UNLOCK
+#        define CRYPT_LOCK   CRYPT_R_LOCK
+#        define CRYPT_UNLOCK CRYPT_R_UNLOCK
 #      endif
 #    endif
 #  endif /* HAS_CRYPT_R */
@@ -868,6 +876,10 @@ typedef struct {
 #      endif
 #      if defined(ctermid)
 #        define PERL_REENTR_USING_CTERMID_R
+#        undef CTERMID_LOCK
+#        undef CTERMID_UNLOCK
+#        define CTERMID_LOCK   CTERMID_R_LOCK
+#        define CTERMID_UNLOCK CTERMID_R_UNLOCK
 #      endif
 #    endif
 #  endif /* HAS_CTERMID_R */
@@ -890,6 +902,10 @@ typedef struct {
 #      endif
 #      if defined(ctime)
 #        define PERL_REENTR_USING_CTIME_R
+#        undef CTIME_LOCK
+#        undef CTIME_UNLOCK
+#        define CTIME_LOCK   CTIME_R_LOCK
+#        define CTIME_UNLOCK CTIME_R_UNLOCK
 #      endif
 #    endif
 #  endif /* HAS_CTIME_R */
@@ -906,6 +922,10 @@ typedef struct {
 #      endif
 #      if defined(endgrent)
 #        define PERL_REENTR_USING_ENDGRENT_R
+#        undef ENDGRENT_LOCK
+#        undef ENDGRENT_UNLOCK
+#        define ENDGRENT_LOCK   ENDGRENT_R_LOCK
+#        define ENDGRENT_UNLOCK ENDGRENT_R_UNLOCK
 #      endif
 #    endif
 #  endif /* HAS_ENDGRENT_R */
@@ -922,6 +942,10 @@ typedef struct {
 #      endif
 #      if defined(endhostent)
 #        define PERL_REENTR_USING_ENDHOSTENT_R
+#        undef ENDHOSTENT_LOCK
+#        undef ENDHOSTENT_UNLOCK
+#        define ENDHOSTENT_LOCK   ENDHOSTENT_R_LOCK
+#        define ENDHOSTENT_UNLOCK ENDHOSTENT_R_UNLOCK
 #      endif
 #    endif
 #  endif /* HAS_ENDHOSTENT_R */
@@ -938,6 +962,10 @@ typedef struct {
 #      endif
 #      if defined(endnetent)
 #        define PERL_REENTR_USING_ENDNETENT_R
+#        undef ENDNETENT_LOCK
+#        undef ENDNETENT_UNLOCK
+#        define ENDNETENT_LOCK   ENDNETENT_R_LOCK
+#        define ENDNETENT_UNLOCK ENDNETENT_R_UNLOCK
 #      endif
 #    endif
 #  endif /* HAS_ENDNETENT_R */
@@ -954,6 +982,10 @@ typedef struct {
 #      endif
 #      if defined(endprotoent)
 #        define PERL_REENTR_USING_ENDPROTOENT_R
+#        undef ENDPROTOENT_LOCK
+#        undef ENDPROTOENT_UNLOCK
+#        define ENDPROTOENT_LOCK   ENDPROTOENT_R_LOCK
+#        define ENDPROTOENT_UNLOCK ENDPROTOENT_R_UNLOCK
 #      endif
 #    endif
 #  endif /* HAS_ENDPROTOENT_R */
@@ -970,6 +1002,10 @@ typedef struct {
 #      endif
 #      if defined(endpwent)
 #        define PERL_REENTR_USING_ENDPWENT_R
+#        undef ENDPWENT_LOCK
+#        undef ENDPWENT_UNLOCK
+#        define ENDPWENT_LOCK   ENDPWENT_R_LOCK
+#        define ENDPWENT_UNLOCK ENDPWENT_R_UNLOCK
 #      endif
 #    endif
 #  endif /* HAS_ENDPWENT_R */
@@ -986,6 +1022,10 @@ typedef struct {
 #      endif
 #      if defined(endservent)
 #        define PERL_REENTR_USING_ENDSERVENT_R
+#        undef ENDSERVENT_LOCK
+#        undef ENDSERVENT_UNLOCK
+#        define ENDSERVENT_LOCK   ENDSERVENT_R_LOCK
+#        define ENDSERVENT_UNLOCK ENDSERVENT_R_UNLOCK
 #      endif
 #    endif
 #  endif /* HAS_ENDSERVENT_R */
@@ -1014,6 +1054,10 @@ typedef struct {
 #      endif
 #      if defined(getgrent)
 #        define PERL_REENTR_USING_GETGRENT_R
+#        undef GETGRENT_LOCK
+#        undef GETGRENT_UNLOCK
+#        define GETGRENT_LOCK   GETGRENT_R_LOCK
+#        define GETGRENT_UNLOCK GETGRENT_R_UNLOCK
 #      endif
 #    endif
 #  endif /* HAS_GETGRENT_R */
@@ -1036,6 +1080,10 @@ typedef struct {
 #      endif
 #      if defined(getgrgid)
 #        define PERL_REENTR_USING_GETGRGID_R
+#        undef GETGRGID_LOCK
+#        undef GETGRGID_UNLOCK
+#        define GETGRGID_LOCK   GETGRGID_R_LOCK
+#        define GETGRGID_UNLOCK GETGRGID_R_UNLOCK
 #      endif
 #    endif
 #  endif /* HAS_GETGRGID_R */
@@ -1061,6 +1109,10 @@ typedef struct {
 #      endif
 #      if defined(getgrnam)
 #        define PERL_REENTR_USING_GETGRNAM_R
+#        undef GETGRNAM_LOCK
+#        undef GETGRNAM_UNLOCK
+#        define GETGRNAM_LOCK   GETGRNAM_R_LOCK
+#        define GETGRNAM_UNLOCK GETGRNAM_R_UNLOCK
 #      endif
 #    endif
 #  endif /* HAS_GETGRNAM_R */
@@ -1104,6 +1156,10 @@ typedef struct {
 #      endif
 #      if defined(gethostbyaddr)
 #        define PERL_REENTR_USING_GETHOSTBYADDR_R
+#        undef GETHOSTBYADDR_LOCK
+#        undef GETHOSTBYADDR_UNLOCK
+#        define GETHOSTBYADDR_LOCK   GETHOSTBYADDR_R_LOCK
+#        define GETHOSTBYADDR_UNLOCK GETHOSTBYADDR_R_UNLOCK
 #      endif
 #    endif
 #  endif /* HAS_GETHOSTBYADDR_R */
@@ -1123,6 +1179,10 @@ typedef struct {
 #      endif
 #      if defined(gethostbyname)
 #        define PERL_REENTR_USING_GETHOSTBYNAME_R
+#        undef GETHOSTBYNAME_LOCK
+#        undef GETHOSTBYNAME_UNLOCK
+#        define GETHOSTBYNAME_LOCK   GETHOSTBYNAME_R_LOCK
+#        define GETHOSTBYNAME_UNLOCK GETHOSTBYNAME_R_UNLOCK
 #      endif
 #    endif
 #  endif /* HAS_GETHOSTBYNAME_R */
@@ -1151,6 +1211,10 @@ typedef struct {
 #      endif
 #      if defined(gethostent)
 #        define PERL_REENTR_USING_GETHOSTENT_R
+#        undef GETHOSTENT_LOCK
+#        undef GETHOSTENT_UNLOCK
+#        define GETHOSTENT_LOCK   GETHOSTENT_R_LOCK
+#        define GETHOSTENT_UNLOCK GETHOSTENT_R_UNLOCK
 #      endif
 #    endif
 #  endif /* HAS_GETHOSTENT_R */
@@ -1173,6 +1237,10 @@ typedef struct {
 #      endif
 #      if defined(getlogin)
 #        define PERL_REENTR_USING_GETLOGIN_R
+#        undef GETLOGIN_LOCK
+#        undef GETLOGIN_UNLOCK
+#        define GETLOGIN_LOCK   GETLOGIN_R_LOCK
+#        define GETLOGIN_UNLOCK GETLOGIN_R_UNLOCK
 #      endif
 #    endif
 #  endif /* HAS_GETLOGIN_R */
@@ -1207,6 +1275,10 @@ typedef struct {
 #      endif
 #      if defined(getnetbyaddr)
 #        define PERL_REENTR_USING_GETNETBYADDR_R
+#        undef GETNETBYADDR_LOCK
+#        undef GETNETBYADDR_UNLOCK
+#        define GETNETBYADDR_LOCK   GETNETBYADDR_R_LOCK
+#        define GETNETBYADDR_UNLOCK GETNETBYADDR_R_UNLOCK
 #      endif
 #    endif
 #  endif /* HAS_GETNETBYADDR_R */
@@ -1229,6 +1301,10 @@ typedef struct {
 #      endif
 #      if defined(getnetbyname)
 #        define PERL_REENTR_USING_GETNETBYNAME_R
+#        undef GETNETBYNAME_LOCK
+#        undef GETNETBYNAME_UNLOCK
+#        define GETNETBYNAME_LOCK   GETNETBYNAME_R_LOCK
+#        define GETNETBYNAME_UNLOCK GETNETBYNAME_R_UNLOCK
 #      endif
 #    endif
 #  endif /* HAS_GETNETBYNAME_R */
@@ -1257,6 +1333,10 @@ typedef struct {
 #      endif
 #      if defined(getnetent)
 #        define PERL_REENTR_USING_GETNETENT_R
+#        undef GETNETENT_LOCK
+#        undef GETNETENT_UNLOCK
+#        define GETNETENT_LOCK   GETNETENT_R_LOCK
+#        define GETNETENT_UNLOCK GETNETENT_R_UNLOCK
 #      endif
 #    endif
 #  endif /* HAS_GETNETENT_R */
@@ -1276,6 +1356,10 @@ typedef struct {
 #      endif
 #      if defined(getprotobyname)
 #        define PERL_REENTR_USING_GETPROTOBYNAME_R
+#        undef GETPROTOBYNAME_LOCK
+#        undef GETPROTOBYNAME_UNLOCK
+#        define GETPROTOBYNAME_LOCK   GETPROTOBYNAME_R_LOCK
+#        define GETPROTOBYNAME_UNLOCK GETPROTOBYNAME_R_UNLOCK
 #      endif
 #    endif
 #  endif /* HAS_GETPROTOBYNAME_R */
@@ -1295,6 +1379,10 @@ typedef struct {
 #      endif
 #      if defined(getprotobynumber)
 #        define PERL_REENTR_USING_GETPROTOBYNUMBER_R
+#        undef GETPROTOBYNUMBER_LOCK
+#        undef GETPROTOBYNUMBER_UNLOCK
+#        define GETPROTOBYNUMBER_LOCK   GETPROTOBYNUMBER_R_LOCK
+#        define GETPROTOBYNUMBER_UNLOCK GETPROTOBYNUMBER_R_UNLOCK
 #      endif
 #    endif
 #  endif /* HAS_GETPROTOBYNUMBER_R */
@@ -1317,6 +1405,10 @@ typedef struct {
 #      endif
 #      if defined(getprotoent)
 #        define PERL_REENTR_USING_GETPROTOENT_R
+#        undef GETPROTOENT_LOCK
+#        undef GETPROTOENT_UNLOCK
+#        define GETPROTOENT_LOCK   GETPROTOENT_R_LOCK
+#        define GETPROTOENT_UNLOCK GETPROTOENT_R_UNLOCK
 #      endif
 #    endif
 #  endif /* HAS_GETPROTOENT_R */
@@ -1345,6 +1437,10 @@ typedef struct {
 #      endif
 #      if defined(getpwent)
 #        define PERL_REENTR_USING_GETPWENT_R
+#        undef GETPWENT_LOCK
+#        undef GETPWENT_UNLOCK
+#        define GETPWENT_LOCK   GETPWENT_R_LOCK
+#        define GETPWENT_UNLOCK GETPWENT_R_UNLOCK
 #      endif
 #    endif
 #  endif /* HAS_GETPWENT_R */
@@ -1367,6 +1463,10 @@ typedef struct {
 #      endif
 #      if defined(getpwnam)
 #        define PERL_REENTR_USING_GETPWNAM_R
+#        undef GETPWNAM_LOCK
+#        undef GETPWNAM_UNLOCK
+#        define GETPWNAM_LOCK   GETPWNAM_R_LOCK
+#        define GETPWNAM_UNLOCK GETPWNAM_R_UNLOCK
 #      endif
 #    endif
 #  endif /* HAS_GETPWNAM_R */
@@ -1389,6 +1489,10 @@ typedef struct {
 #      endif
 #      if defined(getpwuid)
 #        define PERL_REENTR_USING_GETPWUID_R
+#        undef GETPWUID_LOCK
+#        undef GETPWUID_UNLOCK
+#        define GETPWUID_LOCK   GETPWUID_R_LOCK
+#        define GETPWUID_UNLOCK GETPWUID_R_UNLOCK
 #      endif
 #    endif
 #  endif /* HAS_GETPWUID_R */
@@ -1408,6 +1512,10 @@ typedef struct {
 #      endif
 #      if defined(getservbyname)
 #        define PERL_REENTR_USING_GETSERVBYNAME_R
+#        undef GETSERVBYNAME_LOCK
+#        undef GETSERVBYNAME_UNLOCK
+#        define GETSERVBYNAME_LOCK   GETSERVBYNAME_R_LOCK
+#        define GETSERVBYNAME_UNLOCK GETSERVBYNAME_R_UNLOCK
 #      endif
 #    endif
 #  endif /* HAS_GETSERVBYNAME_R */
@@ -1427,6 +1535,10 @@ typedef struct {
 #      endif
 #      if defined(getservbyport)
 #        define PERL_REENTR_USING_GETSERVBYPORT_R
+#        undef GETSERVBYPORT_LOCK
+#        undef GETSERVBYPORT_UNLOCK
+#        define GETSERVBYPORT_LOCK   GETSERVBYPORT_R_LOCK
+#        define GETSERVBYPORT_UNLOCK GETSERVBYPORT_R_UNLOCK
 #      endif
 #    endif
 #  endif /* HAS_GETSERVBYPORT_R */
@@ -1449,6 +1561,10 @@ typedef struct {
 #      endif
 #      if defined(getservent)
 #        define PERL_REENTR_USING_GETSERVENT_R
+#        undef GETSERVENT_LOCK
+#        undef GETSERVENT_UNLOCK
+#        define GETSERVENT_LOCK   GETSERVENT_R_LOCK
+#        define GETSERVENT_UNLOCK GETSERVENT_R_UNLOCK
 #      endif
 #    endif
 #  endif /* HAS_GETSERVENT_R */
@@ -1465,6 +1581,10 @@ typedef struct {
 #      endif
 #      if defined(getspnam)
 #        define PERL_REENTR_USING_GETSPNAM_R
+#        undef GETSPNAM_LOCK
+#        undef GETSPNAM_UNLOCK
+#        define GETSPNAM_LOCK   GETSPNAM_R_LOCK
+#        define GETSPNAM_UNLOCK GETSPNAM_R_UNLOCK
 #      endif
 #    endif
 #  endif /* HAS_GETSPNAM_R */
@@ -1478,6 +1598,10 @@ typedef struct {
 #      endif
 #      if defined(gmtime)
 #        define PERL_REENTR_USING_GMTIME_R
+#        undef GMTIME_LOCK
+#        undef GMTIME_UNLOCK
+#        define GMTIME_LOCK   GMTIME_R_LOCK
+#        define GMTIME_UNLOCK GMTIME_R_UNLOCK
 #      endif
 #    endif
 #  endif /* HAS_GMTIME_R */
@@ -1491,6 +1615,10 @@ typedef struct {
 #      endif
 #      if defined(localtime)
 #        define PERL_REENTR_USING_LOCALTIME_R
+#        undef LOCALTIME_LOCK
+#        undef LOCALTIME_UNLOCK
+#        define LOCALTIME_LOCK   LOCALTIME_R_LOCK
+#        define LOCALTIME_UNLOCK LOCALTIME_R_UNLOCK
 #      endif
 #    endif
 #  endif /* HAS_LOCALTIME_R */
@@ -1507,6 +1635,10 @@ typedef struct {
 #      endif
 #      if defined(readdir)
 #        define PERL_REENTR_USING_READDIR_R
+#        undef READDIR_LOCK
+#        undef READDIR_UNLOCK
+#        define READDIR_LOCK   READDIR_R_LOCK
+#        define READDIR_UNLOCK READDIR_R_UNLOCK
 #      endif
 #    endif
 #  endif /* HAS_READDIR_R */
@@ -1523,6 +1655,10 @@ typedef struct {
 #      endif
 #      if defined(readdir64)
 #        define PERL_REENTR_USING_READDIR64_R
+#        undef READDIR64_LOCK
+#        undef READDIR64_UNLOCK
+#        define READDIR64_LOCK   READDIR64_R_LOCK
+#        define READDIR64_UNLOCK READDIR64_R_UNLOCK
 #      endif
 #    endif
 #  endif /* HAS_READDIR64_R */
@@ -1539,6 +1675,10 @@ typedef struct {
 #      endif
 #      if defined(setgrent)
 #        define PERL_REENTR_USING_SETGRENT_R
+#        undef SETGRENT_LOCK
+#        undef SETGRENT_UNLOCK
+#        define SETGRENT_LOCK   SETGRENT_R_LOCK
+#        define SETGRENT_UNLOCK SETGRENT_R_UNLOCK
 #      endif
 #    endif
 #  endif /* HAS_SETGRENT_R */
@@ -1555,6 +1695,10 @@ typedef struct {
 #      endif
 #      if defined(sethostent)
 #        define PERL_REENTR_USING_SETHOSTENT_R
+#        undef SETHOSTENT_LOCK
+#        undef SETHOSTENT_UNLOCK
+#        define SETHOSTENT_LOCK   SETHOSTENT_R_LOCK
+#        define SETHOSTENT_UNLOCK SETHOSTENT_R_UNLOCK
 #      endif
 #    endif
 #  endif /* HAS_SETHOSTENT_R */
@@ -1568,6 +1712,10 @@ typedef struct {
 #      endif
 #      if defined(setlocale)
 #        define PERL_REENTR_USING_SETLOCALE_R
+#        undef SETLOCALE_LOCK
+#        undef SETLOCALE_UNLOCK
+#        define SETLOCALE_LOCK   SETLOCALE_R_LOCK
+#        define SETLOCALE_UNLOCK SETLOCALE_R_UNLOCK
 #      endif
 #    endif
 #  endif /* HAS_SETLOCALE_R */
@@ -1584,6 +1732,10 @@ typedef struct {
 #      endif
 #      if defined(setnetent)
 #        define PERL_REENTR_USING_SETNETENT_R
+#        undef SETNETENT_LOCK
+#        undef SETNETENT_UNLOCK
+#        define SETNETENT_LOCK   SETNETENT_R_LOCK
+#        define SETNETENT_UNLOCK SETNETENT_R_UNLOCK
 #      endif
 #    endif
 #  endif /* HAS_SETNETENT_R */
@@ -1600,6 +1752,10 @@ typedef struct {
 #      endif
 #      if defined(setprotoent)
 #        define PERL_REENTR_USING_SETPROTOENT_R
+#        undef SETPROTOENT_LOCK
+#        undef SETPROTOENT_UNLOCK
+#        define SETPROTOENT_LOCK   SETPROTOENT_R_LOCK
+#        define SETPROTOENT_UNLOCK SETPROTOENT_R_UNLOCK
 #      endif
 #    endif
 #  endif /* HAS_SETPROTOENT_R */
@@ -1616,6 +1772,10 @@ typedef struct {
 #      endif
 #      if defined(setpwent)
 #        define PERL_REENTR_USING_SETPWENT_R
+#        undef SETPWENT_LOCK
+#        undef SETPWENT_UNLOCK
+#        define SETPWENT_LOCK   SETPWENT_R_LOCK
+#        define SETPWENT_UNLOCK SETPWENT_R_UNLOCK
 #      endif
 #    endif
 #  endif /* HAS_SETPWENT_R */
@@ -1632,6 +1792,10 @@ typedef struct {
 #      endif
 #      if defined(setservent)
 #        define PERL_REENTR_USING_SETSERVENT_R
+#        undef SETSERVENT_LOCK
+#        undef SETSERVENT_UNLOCK
+#        define SETSERVENT_LOCK   SETSERVENT_R_LOCK
+#        define SETSERVENT_UNLOCK SETSERVENT_R_UNLOCK
 #      endif
 #    endif
 #  endif /* HAS_SETSERVENT_R */
@@ -1651,6 +1815,10 @@ typedef struct {
 #      endif
 #      if defined(strerror)
 #        define PERL_REENTR_USING_STRERROR_R
+#        undef STRERROR_LOCK
+#        undef STRERROR_UNLOCK
+#        define STRERROR_LOCK   STRERROR_R_LOCK
+#        define STRERROR_UNLOCK STRERROR_R_UNLOCK
 #      endif
 #    endif
 #  endif /* HAS_STRERROR_R */
@@ -1664,6 +1832,10 @@ typedef struct {
 #      endif
 #      if defined(tmpnam)
 #        define PERL_REENTR_USING_TMPNAM_R
+#        undef TMPNAM_LOCK
+#        undef TMPNAM_UNLOCK
+#        define TMPNAM_LOCK   TMPNAM_R_LOCK
+#        define TMPNAM_UNLOCK TMPNAM_R_UNLOCK
 #      endif
 #    endif
 #  endif /* HAS_TMPNAM_R */
@@ -1683,6 +1855,10 @@ typedef struct {
 #      endif
 #      if defined(ttyname)
 #        define PERL_REENTR_USING_TTYNAME_R
+#        undef TTYNAME_LOCK
+#        undef TTYNAME_UNLOCK
+#        define TTYNAME_LOCK   TTYNAME_R_LOCK
+#        define TTYNAME_UNLOCK TTYNAME_R_UNLOCK
 #      endif
 #    endif
 #  endif /* HAS_TTYNAME_R */

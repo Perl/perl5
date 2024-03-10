@@ -769,6 +769,10 @@ EOF
         push @wrap, <<EOF;
 #      if defined($func)
 #        define PERL_REENTR_USING_${FUNC}_R
+#        undef ${FUNC}_LOCK
+#        undef ${FUNC}_UNLOCK
+#        define ${FUNC}_LOCK   ${FUNC}_R_LOCK
+#        define ${FUNC}_UNLOCK ${FUNC}_R_UNLOCK
 #      endif
 EOF
 
