@@ -1649,6 +1649,9 @@ sub construct_missings_section {
         $text .= "\n";  # End of row
     }
 
+    # Trailing space can creep in if a row isn't completely filled.
+    $text =~ s/\s+$//mg;
+
     return $text;
 }
 
