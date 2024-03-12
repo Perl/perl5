@@ -6517,6 +6517,7 @@ EXTCONST U8   PL_deBruijn_bitpos_tab64[];
             /* If this thread has no read-locks on this mutex, it is a      \
              * simple write lock */                                         \
             if (rcounter <= 0) {                                            \
+                if(rcounter < 0) PerlIO_printf(Perl_debug_log, "rcounter=%d\n", rcounter);\
                 assert(rcounter == 0);                                      \
                 PERL_WRITE_LOCK(mutex);                                     \
             }                                                               \
@@ -6525,14 +6526,19 @@ EXTCONST U8   PL_deBruijn_bitpos_tab64[];
                  * read-lock on this mutex.  Hence, there are no writers;   \
                  * so there is no reason for this lock request to not       \
                  * succeed quickly. */                                      \
+                DEBUG_Lv(PerlIO_printf(Perl_debug_log, "acquiring mutex for " name "\n"));\
                 MUTEX_LOCK(&(mutex)->lock);                                 \
+                DEBUG_Lv(PerlIO_printf(Perl_debug_log, "mutex acquired for " name "\n"));\
                                                                             \
+                DEBUG_Lv(PerlIO_printf(Perl_debug_log, "new readers_count is %zd\n", (mutex)->readers_count));\
                                                                             \
                 /* Wait until we are the only reader */                     \
                 do {                                                        \
                     if ((mutex)->readers_count <= rcounter) {               \
+                        DEBUG_Lv(PerlIO_printf(Perl_debug_log, "should be ready to go\n"));\
                         break;                                              \
                     }                                                       \
+                        DEBUG_Lv(PerlIO_printf(Perl_debug_log, "waiting for another reader to wake us up\n"));\
                     COND_WAIT(&(mutex)->wakeup, &(mutex)->lock);            \
                 }                                                           \
                 while (1);                                                  \
@@ -6596,13 +6602,24 @@ EXTCONST U8   PL_deBruijn_bitpos_tab64[];
         CLANG_DIAG_IGNORE(-Wthread-safety)                                  \
         if (wcounter <= 0) {                                                \
             assert(wcounter == 0);                                          \
+            UNLESS_PERL_MEM_LOG(DEBUG_Lv(PerlIO_printf(Perl_debug_log,      \
+                                "%s: %d: read locking " name "\n",          \
+                                __FILE__, __LINE__));                       \
+            )                                                               \
             PERL_READ_LOCK(mutex);                                          \
+            UNLESS_PERL_MEM_LOG(DEBUG_Lv(PerlIO_printf(Perl_debug_log,      \
+                                "%s: %d: " name " read locked\n",           \
+                                __FILE__, __LINE__));                       \
+            )                                                               \
             (rcounter)++;                                                   \
         }                                                                   \
         else {                                                              \
             /* This thread already has a write lock on this mutex.  Just    \
              * increment the number of readers it has */                    \
             (mutex)->readers_count++;                                       \
+            UNLESS_PERL_MEM_LOG(DEBUG_Lv(PerlIO_printf(Perl_debug_log,      \
+                            "%s: %d: avoided read locking " name "\n",      \
+                            __FILE__, __LINE__)));                          \
         }                                                                   \
         CLANG_DIAG_RESTORE                                                  \
     } STMT_END
@@ -6612,13 +6629,24 @@ EXTCONST U8   PL_deBruijn_bitpos_tab64[];
         CLANG_DIAG_IGNORE(-Wthread-safety)                                  \
         if (wcounter <= 0) {                                                \
             assert(count == 0);                                             \
+            UNLESS_PERL_MEM_LOG(DEBUG_Lv(PerlIO_printf(Perl_debug_log,      \
+                                "%s: %d: read unlocking " name "\n",        \
+                                __FILE__, __LINE__));                       \
+            )                                                               \
             PERL_READ_UNLOCK(mutex);                                        \
+            UNLESS_PERL_MEM_LOG(DEBUG_Lv(PerlIO_printf(Perl_debug_log,      \
+                                "%s: %d: " name " read unlocked\n",         \
+                                __FILE__, __LINE__));                       \
+            )                                                               \
             (rcounter)--;                                                   \
         }                                                                   \
         else if (LIKELY((mutex)->readers_count > 0)) {                      \
             /* This thread already has a write lock on this mutex.  Just    \
              * deccrement the number of readers it has */                   \
             (mutex)->readers_count--;                                       \
+            UNLESS_PERL_MEM_LOG(DEBUG_Lv(PerlIO_printf(Perl_debug_log,      \
+                            "%s: %d: avoided read unlocking " name "\n",    \
+                            __FILE__, __LINE__)));                          \
         }                                                                   \
         else {                                                              \
             Perl_croak_nocontext("panic: %s: %d: attempting to read unlock" \
