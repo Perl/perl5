@@ -7289,11 +7289,27 @@ typedef struct am_table_short AMTS;
      * handles these has a trailing underscore in the name */
 #  define LOCALE_LOCK_(cond_to_panic_if_already_locked)                     \
        PERL_REENTRANT_LOCK("locale",                                        \
-                           &PL_locale_mutex, PL_locale_mutex_depth,         \
-                           cond_to_panic_if_already_locked)
+                           &PL_locale_mutex,                                \
+                           PL_locale_mutex_depth,                           \
+                           PL_locale_mutex_readers,                         \
+                           cond_to_panic_if_already_locked);                \
+       } STMT_END
 #  define LOCALE_UNLOCK_                                                    \
        PERL_REENTRANT_UNLOCK("locale",                                      \
-                             &PL_locale_mutex, PL_locale_mutex_depth)
+                             &PL_locale_mutex,                              \
+                             PL_locale_mutex_depth,                         \
+                             PL_locale_mutex_readers);                      \
+       } STMT_END
+
+#  define LOCALE_READ_LOCK    PERL_REENTRANT_READ_LOCK("locale",            \
+                                                      &PL_locale_mutex,     \
+                                                      PL_locale_mutex_depth,\
+                                                      PL_locale_mutex_readers)
+#  define LOCALE_READ_UNLOCK  PERL_REENTRANT_READ_UNLOCK("locale",          \
+                                                      &PL_locale_mutex,     \
+                                                      PL_locale_mutex_depth, \
+                                                      PL_locale_mutex_readers)
+
 #  ifdef USE_THREAD_SAFE_LOCALE
     /* But for most situations, we use the macro name without a trailing
      * underscore.
