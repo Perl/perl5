@@ -16179,6 +16179,7 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 #ifdef USE_LOCALE_THREADS
     assert(PL_locale_mutex_depth <= 0);
     PL_locale_mutex_depth = 0;
+    PL_locale_mutex_readers = 0;
 #endif
 
 #ifdef USE_LOCALE_NUMERIC

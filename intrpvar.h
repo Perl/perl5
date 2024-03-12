@@ -391,6 +391,7 @@ PERLVAR(I, utf8locale,	bool)		/* utf8 locale detected */
 
 #if defined(USE_LOCALE) && defined(USE_LOCALE_THREADS)
 PERLVARI(I, locale_mutex_depth, int, 0)     /* Emulate general semaphore */
+PERLVARI(I, locale_mutex_readers, int, 0)
 #endif
 
 #ifdef USE_LOCALE_CTYPE

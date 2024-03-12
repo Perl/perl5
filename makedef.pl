@@ -428,6 +428,7 @@ unless ($define{'USE_ITHREADS'}) {
 		    PL_hints_mutex
 		    PL_locale_mutex
 		    PL_locale_mutex_depth
+		    PL_locale_mutex_readers
 		    PL_my_ctx_mutex
 		    PL_perlio_mutex
 		    PL_stashpad

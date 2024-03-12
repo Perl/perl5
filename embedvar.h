@@ -162,6 +162,7 @@
 # define PL_less_dicey_locale_bufsize           (vTHX->Iless_dicey_locale_bufsize)
 # define PL_LIO                                 (vTHX->ILIO)
 # define PL_locale_mutex_depth                  (vTHX->Ilocale_mutex_depth)
+# define PL_locale_mutex_readers                (vTHX->Ilocale_mutex_readers)
 # define PL_localizing                          (vTHX->Ilocalizing)
 # define PL_localpatches                        (vTHX->Ilocalpatches)
 # define PL_lockhook                            (vTHX->Ilockhook)
