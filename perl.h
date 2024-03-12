@@ -6472,6 +6472,21 @@ EXTCONST U8   PL_deBruijn_bitpos_tab64[];
         CLANG_DIAG_RESTORE                                                  \
     } STMT_END
 
+#  define PERL_REENTRANT_READ_LOCK(name, mutex, counter)                    \
+    STMT_START {                                                            \
+        CLANG_DIAG_IGNORE(-Wthread-safety)                                  \
+        if (counter <= 0) {                                                 \
+            assert(counter == 0);                                           \
+            PERL_READ_LOCK(mutex);                                          \
+        }                                                                   \
+        else {                                                              \
+            /* This thread already has a write lock on this mutex.  Just    \
+             * increment the number of readers it has */                    \
+            (mutex)->readers_count++;                                       \
+        }                                                                   \
+        CLANG_DIAG_RESTORE                                                  \
+    } STMT_END
+
 #  define PERL_REENTRANT_UNLOCK(name, mutex, counter)                       \
     STMT_START {                                                            \
         if (LIKELY(counter == 1)) {                                         \
@@ -6495,6 +6510,27 @@ EXTCONST U8   PL_deBruijn_bitpos_tab64[];
                 __FILE__, __LINE__, counter));                              \
             )                                                               \
         }                                                                   \
+    } STMT_END
+
+#  define PERL_REENTRANT_READ_UNLOCK(name, mutex, counter)                  \
+    STMT_START {                                                            \
+        CLANG_DIAG_IGNORE(-Wthread-safety)                                  \
+        if (counter <= 0) {                                                 \
+            assert(count == 0);                                             \
+            PERL_READ_UNLOCK(mutex);                                        \
+        }                                                                   \
+        else if (LIKELY((mutex)->readers_count > 0)) {                      \
+            /* This thread already has a write lock on this mutex.  Just    \
+             * deccrement the number of readers it has */                   \
+            (mutex)->readers_count--;                                       \
+        }                                                                   \
+        else {                                                              \
+            Perl_croak_nocontext("panic: %s: %d: attempting to read unlock" \
+                                 " already unlocked " name "; counter was"  \
+                                 " %zd\n", __FILE__, __LINE__,              \
+                                 (mutex)->readers_count);                   \
+        }                                                                   \
+        CLANG_DIAG_RESTORE                                                  \
     } STMT_END
 
 #endif
