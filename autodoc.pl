@@ -1549,110 +1549,13 @@ sub construct_missings_section {
     # Sort the elements.
     my @missings = sort dictionary_order $missings_ref->@*;
 
+    # Make a table of the missings in columns.  Give the subroutine a width
+    # one less than you might expect, as we indent each line by one, to mark
+    # it as verbatim.
+    my $table .= columnarize_list(\@missings, $max_width - 1);
+    $table =~ s/^/ /gm;
 
-    $text .= "\n";
-
-    use integer;
-
-    # Look through all the elements in the list and see how many columns we
-    # could place them in the output what will fit in the available width.
-    my $min_spacer = 2;     # Need this much space between columns
-    my $columns;
-    my $rows;
-    my @col_widths;
-
-  COLUMN:
-    # We start with more columns, and work down until we find a number that
-    # can accommodate all the data.  This algorithm doesn't require the
-    # resulting columns to all have the same width.  This can allow for
-    # as tight of packing as the data will possibly allow.
-    for ($columns = 7; $columns >= 1; $columns--) {
-
-        # For this many columns, we will need this many rows (final row might
-        # not be completely filled)
-        $rows = (@missings + $columns - 1) / $columns;
-
-        # We only need to execute this final iteration to calculate the number
-        # of rows, as we can't get fewer than a single column.
-        last if $columns == 1;
-
-        my $row_width = 1;  # For 1 space indent
-        my $i = 0;  # Which missing element
-
-        # For each column ...
-        for my $col (0 .. $columns - 1) {
-
-            # Calculate how wide the column needs to be, which is based on the
-            # widest element in it
-            $col_widths[$col] = 0;
-
-            # Look through all the rows to find the widest element
-            for my $row (0 .. $rows - 1) {
-
-                # Skip if this row doesn't have an entry for this column
-                last if $i >= @missings;
-
-                # This entry occupies this many bytes.
-                my $this_width = length $missings[$i];
-
-                # All but the final column need a spacer between it and the
-                # next column over.
-                $this_width += $min_spacer if $col < $columns - 1;
-
-
-                # This column will need to have enough width to accommodate
-                # this element
-                if ($this_width > $col_widths[$col]) {
-
-                    # We can't have this many columns if the total width
-                    # exceeds the available; bail now and try fewer columns
-                    next COLUMN if $row_width + $this_width > $max_width;
-
-                    $col_widths[$col] = $this_width;
-                }
-
-                $i++;   # The next row will contain the next item
-            }
-
-            $row_width += $col_widths[$col];
-            next COLUMN if $row_width > $max_width;
-        }
-
-        # If we get this far, this many columns works
-        last;
-    }
-
-    # Here, have calculated the number of rows ($rows) and columns ($columns)
-    # required to list the elements.  @col_widths contains the width of each
-    # column.
-
-    $text .= "\n";
-
-    # Assemble the output
-    for my $row (0 .. $rows - 1) {
-        for my $col (0 .. $columns - 1) {
-            $text .= " " if $col == 0;  # Indent one to mark as verbatim
-
-            my $index = $row + $rows * $col;  # Convert 2 dimensions to 1
-
-            # Skip if this row doesn't have an entry for this column
-            next if $index >= @missings;
-
-            my $element = $missings[$index];
-            $text .= $element;
-
-            # Add alignment spaces for all but final column
-            $text .= " " x ($col_widths[$col] - length $element)
-                                                        if $col < $columns - 1;
-        }
-
-        $text .= "\n";  # End of row
-    }
-
-    # Trailing space can creep in if a row isn't completely filled.
-    $text =~ s/\s+$//mg;
-
-    return $text;
+    return $text . "\n\n" . $table;
 }
 
 sub dictionary_order {
