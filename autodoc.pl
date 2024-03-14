@@ -520,7 +520,7 @@ sub autodoc ($$) { # parse a file and extract documentation info
         }
         elsif ($in=~ /^ =for [ ]+ apidoc \B /x) {   # Otherwise better be a
                                                     # plain apidoc line
-            die "Unkown apidoc-type line '$in'" unless $in=~ /^=for apidoc_item/;
+            die "Unknown apidoc-type line '$in'" unless $in=~ /^=for apidoc_item/;
             die "apidoc_item doesn't immediately follow an apidoc entry: '$in'";
         }
         else {  # Plain apidoc
@@ -719,7 +719,7 @@ my @has_r_defs;     # Reentrant symbols
 my @include_defs;
 
 sub parse_config_h {
-    use re '/aa';   # Everthing is ASCII in this file
+    use re '/aa';   # Everything is ASCII in this file
 
     # Process config.h
     die "Can't find $config_h" unless -e $config_h;
@@ -1032,7 +1032,7 @@ sub parse_config_h {
             # things in config.h, and should be adjusted as necessary as
             # deficiencies are found.
             #
-            # This is the default section for macros with a definiton but
+            # This is the default section for macros with a definition but
             # no arguments, meaning it is replaced unconditionally
             #
             my $sb = qr/ _ | \b /x; # segment boundary
@@ -1163,7 +1163,7 @@ sub parse_config_h {
                 # and there is no verbatim text in the pod or links to/from it
                 # (which would add value).  That means that it is likely the
                 # intent of the variable can be gleaned from just its name,
-                # and unlikely the description adds signficant value, so just
+                # and unlikely the description adds significant value, so just
                 # listing them suffices.  Giving their descriptions would
                 # expand this pod significantly with little added value.
                 if (   ! $has_defn
