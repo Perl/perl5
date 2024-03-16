@@ -704,7 +704,11 @@ Perl_tied_method(pTHX_ SV *methname, SV **mark, SV *const sv,
      * our caller wasn't, then we'll need to adjust when copying the args
      * and results between the two stacks.
      */
+#ifdef PERL_RC_STACK
     push_stackinfo(PERLSI_MAGIC, 1);
+#else
+    push_stackinfo(PERLSI_MAGIC, 0);
+#endif
 
     /* extend for object + args. If argc might wrap/truncate when cast
      * to SSize_t and incremented, set to -1, which will trigger a panic in
@@ -761,6 +765,10 @@ Perl_tied_method(pTHX_ SV *methname, SV **mark, SV *const sv,
     }
     ret_args = call_sv(methname, (flags & G_WANT)|G_METHOD_NAMED);
     SV **orig_sp = PL_stack_sp;
+    /* Ensure that the old stack is marked as empty before we abandon it.
+     * Otherwise, if it's AvREAL(), items could be double-freed some time
+     * after we copy the return SVs to the caller's stack. */
+    PL_stack_sp = PL_stack_base;
     pop_stackinfo();
     /* pop and free the spare SV (the 'X' in the comments above */
     if (flags & TIED_METHOD_ARGUMENTS_ON_STACK) {
