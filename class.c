@@ -771,7 +771,8 @@ Perl_class_seal_stash(pTHX_ HV *stash)
             }
 
             UNOP_AUX_item *aux;
-            Newx(aux, 2, UNOP_AUX_item);
+            aux = (UNOP_AUX_item *)PerlMemShared_malloc(
+                                    sizeof(UNOP_AUX_item) * 2);
 
             aux[0].uv = fieldix;
 
@@ -882,7 +883,10 @@ Perl_class_wrap_method_body(pTHX_ OP *o)
     UNOP_AUX_item *aux = NULL;
 
     if(av_count(fieldmap)) {
-        Newx(aux, 2 + av_count(fieldmap), UNOP_AUX_item);
+        aux = (UNOP_AUX_item *)PerlMemShared_malloc(
+                                    sizeof(UNOP_AUX_item)
+                                    *  (2 + av_count(fieldmap))
+                                );
 
         UNOP_AUX_item *ap = aux;
 
@@ -985,7 +989,8 @@ apply_field_attribute_reader(pTHX_ PADNAME *pn, SV *value)
     OP *methstartop;
     {
         UNOP_AUX_item *aux;
-        Newx(aux, 2 + 2, UNOP_AUX_item);
+        aux = (UNOP_AUX_item *)PerlMemShared_malloc(
+                                sizeof(UNOP_AUX_item) * (2 + 2));
 
         UNOP_AUX_item *ap = aux;
         (ap++)->uv = 1;       /* fieldcount */

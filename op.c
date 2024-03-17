@@ -1334,7 +1334,7 @@ Perl_op_clear(pTHX_ OP *o)
         {
             UNOP_AUX_item *aux = cUNOP_AUXo->op_aux;
             /* Every item in aux is a UV, so nothing in it to free */
-            Safefree(aux);
+            PerlMemShared_free(aux);
         }
         break;
 
@@ -1342,7 +1342,7 @@ Perl_op_clear(pTHX_ OP *o)
         {
             UNOP_AUX_item *aux = cUNOP_AUXo->op_aux;
             /* Every item in aux is a UV, so nothing in it to free */
-            Safefree(aux);
+            PerlMemShared_free(aux);
         }
         break;
     }
