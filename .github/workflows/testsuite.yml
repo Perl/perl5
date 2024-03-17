@@ -720,6 +720,9 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libgdbm-dev libdb-dev
       - uses: actions/checkout@v3
+      # this can be removed once https://github.com/actions/runner-images/issues/9491 is fixed
+      - name: Reduce ASLR entropy
+        run: sudo sysctl -w vm.mmap_rnd_bits=28
       - name: git cfg
         run: |
           git config diff.renameLimit 999999
@@ -768,6 +771,9 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libgdbm-dev libdb-dev
       - uses: actions/checkout@v3
+      # this can be removed once https://github.com/actions/runner-images/issues/9491 is fixed
+      - name: Reduce ASLR entropy
+        run: sudo sysctl -w vm.mmap_rnd_bits=28
       - name: git cfg
         run: |
           git config diff.renameLimit 999999
