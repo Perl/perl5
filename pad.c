@@ -939,15 +939,6 @@ S_pad_check_dup(pTHX_ PADNAME *name, U32 flags, const HV *ourstash)
             --off;
         }
     }
-    /* check the package for my sub &x vs. sub PACKAGE::x collisions */
-    if (PadnamePV(name)[0] == '&') {
-        /* PadnamePV is always in UTF-8 */
-        CV *cv = get_cvn_flags(PadnamePV(name)+1, PadnameLEN(name)-1, GV_NOTQUAL|SVf_UTF8);
-        if(cv)
-            warner(packWARN(WARN_SHADOW),
-                "Lexical subroutine %" PNf " masks previously declared package subroutine",
-                PNfARG(name));
-    }
 }
 
 
