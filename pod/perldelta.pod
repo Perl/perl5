@@ -139,6 +139,13 @@ L<XXX> has been upgraded from version A.xx to B.yy.
 
 XXX If there was something important to note about this change, include that here.
 
+=item *
+
+L<Tie::File> has been upgraded from version 1.08 to 1.09.
+
+Old compatibility code for perl 5.005 that was no longer functional has been
+removed.
+
 =back
 
 =head2 Removed Modules and Pragmata
