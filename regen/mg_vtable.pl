@@ -477,7 +477,7 @@ EOH
 my @names = sort keys %vtable_conf;
 {
     my $want = join ",\n    ", (map {"want_vtbl_$_"} @names), 'magic_vtable_max';
-    my $names = join qq{,\n    }, map {qq{[want_vtbl_$_] = "$_"}} @names;
+    my $names = join qq{\n    }, map {qq{[want_vtbl_$_] = "$_",}} @names;
 
     print $vt <<"EOH";
 
@@ -520,14 +520,11 @@ while (my $name = shift @names) {
 
     my $funcs = join ", ", @funcs;
 
-    # Because we can't have a , after the last {...}
-    my $comma = @names ? ',' : '';
-
     print $vt "$data->{cond}\n" if $data->{cond};
-    print $vt "  [want_vtbl_$name] = { $funcs }$comma\n";
+    print $vt "  [want_vtbl_$name] = { $funcs },\n";
     print $vt <<"EOH" if $data->{cond};
 #else
-  {0}$comma
+  {0},
 #endif
 EOH
     foreach(@{$data->{alias}}) {

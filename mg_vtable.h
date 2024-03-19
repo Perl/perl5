@@ -140,7 +140,7 @@ EXTCONST char * const PL_magic_vtable_names[magic_vtable_max] = {
     [want_vtbl_taint] = "taint",
     [want_vtbl_utf8] = "utf8",
     [want_vtbl_uvar] = "uvar",
-    [want_vtbl_vec] = "vec"
+    [want_vtbl_vec] = "vec",
 };
 #else
 EXTCONST char * const PL_magic_vtable_names[magic_vtable_max];
@@ -190,7 +190,7 @@ EXT_MGVTBL PL_magic_vtables[magic_vtable_max] = {
   [want_vtbl_taint] = { .svt_get = Perl_magic_gettaint, .svt_set = Perl_magic_settaint },
   [want_vtbl_utf8] = { .svt_set = Perl_magic_setutf8, .svt_free = Perl_magic_freeutf8 },
   [want_vtbl_uvar] = { .svt_get = Perl_magic_getuvar, .svt_set = Perl_magic_setuvar },
-  [want_vtbl_vec] = { .svt_get = Perl_magic_getvec, .svt_set = Perl_magic_setvec }
+  [want_vtbl_vec] = { .svt_get = Perl_magic_getvec, .svt_set = Perl_magic_setvec },
 };
 #else
 EXT_MGVTBL PL_magic_vtables[magic_vtable_max];
