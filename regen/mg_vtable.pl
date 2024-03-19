@@ -477,7 +477,7 @@ EOH
 my @names = sort keys %vtable_conf;
 {
     my $want = join ",\n    ", (map {"want_vtbl_$_"} @names), 'magic_vtable_max';
-    my $names = join qq{",\n    "}, @names;
+    my $names = join qq{,\n    }, map {qq{[want_vtbl_$_] = "$_"}} @names;
 
     print $vt <<"EOH";
 
@@ -487,7 +487,7 @@ enum {		/* pass one of these to get_vtbl */
 
 #ifdef DOINIT
 EXTCONST char * const PL_magic_vtable_names[magic_vtable_max] = {
-    "$names"
+    $names
 };
 #else
 EXTCONST char * const PL_magic_vtable_names[magic_vtable_max];
@@ -524,7 +524,7 @@ while (my $name = shift @names) {
     my $comma = @names ? ',' : '';
 
     print $vt "$data->{cond}\n" if $data->{cond};
-    print $vt "  { $funcs }$comma\n";
+    print $vt "  [want_vtbl_$name] = { $funcs }$comma\n";
     print $vt <<"EOH" if $data->{cond};
 #else
   {0}$comma
