@@ -146,65 +146,51 @@ EXTCONST char * const PL_magic_vtable_names[magic_vtable_max] = {
 EXTCONST char * const PL_magic_vtable_names[magic_vtable_max];
 #endif
 
-/* These all need to be 0, not NULL, as NULL can be (void*)0, which is a
- * pointer to data, whereas we're assigning pointers to functions, which are
- * not the same beast. ANSI doesn't allow the assignment from one to the other.
- * (although most, but not all, compilers are prepared to do it)
- */
-
-/* order is:
-    get
-    set
-    len
-    clear
-    free
-    copy
-    dup
-    local
-*/
-
 #ifdef DOINIT
+/* These named initialisers will upset C++ compilers before C++20, but the
+ * DOINIT macro is only defined within globals.c so this should be fine.
+ */
 EXT_MGVTBL PL_magic_vtables[magic_vtable_max] = {
-  { (int (*)(pTHX_ SV *, MAGIC *))Perl_magic_getarylen, Perl_magic_setarylen, 0, 0, 0, 0, 0, 0 },
-  { 0, 0, 0, Perl_magic_cleararylen_p, Perl_magic_freearylen_p, 0, 0, 0 },
-  { 0, 0, 0, 0, Perl_magic_killbackrefs, 0, 0, 0 },
-  { 0, 0, 0, 0, 0, Perl_magic_copycallchecker, 0, 0 },
+  { .svt_get = (int (*)(pTHX_ SV *, MAGIC *))Perl_magic_getarylen, .svt_set = Perl_magic_setarylen },
+  { .svt_clear = Perl_magic_cleararylen_p, .svt_free = Perl_magic_freearylen_p },
+  { .svt_free = Perl_magic_killbackrefs },
+  { .svt_copy = Perl_magic_copycallchecker },
 #ifdef USE_LOCALE_COLLATE
-  { 0, Perl_magic_setcollxfrm, 0, 0, Perl_magic_freecollxfrm, 0, 0, 0 },
+  { .svt_set = Perl_magic_setcollxfrm, .svt_free = Perl_magic_freecollxfrm },
 #else
-  { 0, 0, 0, 0, 0, 0, 0, 0 },
+  {0},
 #endif
-  { 0, Perl_magic_setdbline, 0, 0, 0, 0, 0, 0 },
-  { Perl_magic_getdebugvar, Perl_magic_setdebugvar, 0, 0, 0, 0, 0, 0 },
-  { Perl_magic_getdefelem, Perl_magic_setdefelem, 0, 0, 0, 0, 0, 0 },
-  { 0, 0, 0, 0, Perl_magic_freedestruct, 0, 0, 0 },
-  { 0, Perl_magic_set_all_env, 0, Perl_magic_clear_all_env, 0, 0, 0, 0 },
-  { 0, Perl_magic_setenv, 0, Perl_magic_clearenv, 0, 0, 0, 0 },
-  { 0, 0, 0, Perl_magic_clearhints, 0, 0, 0, 0 },
-  { 0, Perl_magic_sethint, 0, Perl_magic_clearhint, 0, 0, 0, 0 },
-  { 0, Perl_magic_sethookall, 0, Perl_magic_clearhookall, 0, 0, 0, 0 },
-  { 0, Perl_magic_sethook, 0, Perl_magic_clearhook, 0, 0, 0, 0 },
-  { 0, Perl_magic_setisa, 0, Perl_magic_clearisa, 0, 0, 0, 0 },
-  { 0, Perl_magic_setisa, 0, 0, 0, 0, 0, 0 },
-  { 0, Perl_magic_setlvref, 0, 0, 0, 0, 0, 0 },
-  { 0, Perl_magic_setmglob, 0, 0, Perl_magic_freemglob, 0, 0, 0 },
-  { Perl_magic_getnkeys, Perl_magic_setnkeys, 0, 0, 0, 0, 0, 0 },
-  { 0, Perl_magic_setnonelem, 0, 0, 0, 0, 0, 0 },
-  { 0, 0, 0, 0, Perl_magic_freeovrld, 0, 0, 0 },
-  { 0, 0, Perl_magic_sizepack, Perl_magic_wipepack, 0, 0, 0, 0 },
-  { Perl_magic_getpack, Perl_magic_setpack, 0, Perl_magic_clearpack, 0, 0, 0, 0 },
-  { Perl_magic_getpos, Perl_magic_setpos, 0, 0, 0, 0, 0, 0 },
-  { 0, 0, Perl_magic_regdata_cnt, 0, 0, 0, 0, 0 },
-  { Perl_magic_regdatum_get, Perl_magic_regdatum_set, 0, 0, 0, 0, 0, 0 },
-  { 0, Perl_magic_setregexp, 0, 0, 0, 0, 0, 0 },
-  { 0, Perl_magic_setsigall, 0, 0, 0, 0, 0, 0 },
-  { Perl_magic_getsig, Perl_magic_setsig, 0, Perl_magic_clearsig, 0, 0, 0, 0 },
-  { Perl_magic_getsubstr, Perl_magic_setsubstr, 0, 0, 0, 0, 0, 0 },
-  { Perl_magic_get, Perl_magic_set, 0, 0, 0, 0, 0, 0 },
-  { Perl_magic_gettaint, Perl_magic_settaint, 0, 0, 0, 0, 0, 0 },
-  { 0, Perl_magic_setutf8, 0, 0, Perl_magic_freeutf8, 0, 0, 0 },
-  { Perl_magic_getuvar, Perl_magic_setuvar, 0, 0, 0, 0, 0, 0 },
-  { Perl_magic_getvec, Perl_magic_setvec, 0, 0, 0, 0, 0, 0 }
+  { .svt_set = Perl_magic_setdbline },
+  { .svt_get = Perl_magic_getdebugvar, .svt_set = Perl_magic_setdebugvar },
+  { .svt_get = Perl_magic_getdefelem, .svt_set = Perl_magic_setdefelem },
+  { .svt_free = Perl_magic_freedestruct },
+  { .svt_set = Perl_magic_set_all_env, .svt_clear = Perl_magic_clear_all_env },
+  { .svt_set = Perl_magic_setenv, .svt_clear = Perl_magic_clearenv },
+  { .svt_clear = Perl_magic_clearhints },
+  { .svt_set = Perl_magic_sethint, .svt_clear = Perl_magic_clearhint },
+  { .svt_set = Perl_magic_sethookall, .svt_clear = Perl_magic_clearhookall },
+  { .svt_set = Perl_magic_sethook, .svt_clear = Perl_magic_clearhook },
+  { .svt_set = Perl_magic_setisa, .svt_clear = Perl_magic_clearisa },
+  { .svt_set = Perl_magic_setisa },
+  { .svt_set = Perl_magic_setlvref },
+  { .svt_set = Perl_magic_setmglob, .svt_free = Perl_magic_freemglob },
+  { .svt_get = Perl_magic_getnkeys, .svt_set = Perl_magic_setnkeys },
+  { .svt_set = Perl_magic_setnonelem },
+  { .svt_free = Perl_magic_freeovrld },
+  { .svt_len = Perl_magic_sizepack, .svt_clear = Perl_magic_wipepack },
+  { .svt_get = Perl_magic_getpack, .svt_set = Perl_magic_setpack, .svt_clear = Perl_magic_clearpack },
+  { .svt_get = Perl_magic_getpos, .svt_set = Perl_magic_setpos },
+  { .svt_len = Perl_magic_regdata_cnt },
+  { .svt_get = Perl_magic_regdatum_get, .svt_set = Perl_magic_regdatum_set },
+  { .svt_set = Perl_magic_setregexp },
+  { .svt_set = Perl_magic_setsigall },
+  { .svt_get = Perl_magic_getsig, .svt_set = Perl_magic_setsig, .svt_clear = Perl_magic_clearsig },
+  { .svt_get = Perl_magic_getsubstr, .svt_set = Perl_magic_setsubstr },
+  { .svt_get = Perl_magic_get, .svt_set = Perl_magic_set },
+  { .svt_get = Perl_magic_gettaint, .svt_set = Perl_magic_settaint },
+  { .svt_set = Perl_magic_setutf8, .svt_free = Perl_magic_freeutf8 },
+  { .svt_get = Perl_magic_getuvar, .svt_set = Perl_magic_setuvar },
+  { .svt_get = Perl_magic_getvec, .svt_set = Perl_magic_setvec }
 };
 #else
 EXT_MGVTBL PL_magic_vtables[magic_vtable_max];

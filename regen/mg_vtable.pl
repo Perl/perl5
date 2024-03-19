@@ -497,24 +497,10 @@ EOH
 }
 
 print $vt <<'EOH';
-/* These all need to be 0, not NULL, as NULL can be (void*)0, which is a
- * pointer to data, whereas we're assigning pointers to functions, which are
- * not the same beast. ANSI doesn't allow the assignment from one to the other.
- * (although most, but not all, compilers are prepared to do it)
- */
-
-/* order is:
-    get
-    set
-    len
-    clear
-    free
-    copy
-    dup
-    local
-*/
-
 #ifdef DOINIT
+/* These named initialisers will upset C++ compilers before C++20, but the
+ * DOINIT macro is only defined within globals.c so this should be fine.
+ */
 EXT_MGVTBL PL_magic_vtables[magic_vtable_max] = {
 EOH
 
@@ -525,10 +511,13 @@ while (my $name = shift @names) {
     my $data = $vtable_conf{$name};
     push @vtable_names, $name;
     my @funcs = map {
-        $data->{$_} ? "Perl_magic_$data->{$_}" : 0;
+        my $cast = ( $_ eq "get" and $data->{const} ) ?
+            "(int (*)(pTHX_ SV *, MAGIC *))" :
+            "";
+
+        $data->{$_} ? ( ".svt_$_ = ${cast}Perl_magic_$data->{$_}" ) : ();
     } qw(get set len clear free copy dup local);
 
-    $funcs[0] = "(int (*)(pTHX_ SV *, MAGIC *))" . $funcs[0] if $data->{const};
     my $funcs = join ", ", @funcs;
 
     # Because we can't have a , after the last {...}
@@ -538,7 +527,7 @@ while (my $name = shift @names) {
     print $vt "  { $funcs }$comma\n";
     print $vt <<"EOH" if $data->{cond};
 #else
-  { 0, 0, 0, 0, 0, 0, 0, 0 }$comma
+  {0}$comma
 #endif
 EOH
     foreach(@{$data->{alias}}) {
