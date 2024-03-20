@@ -55,7 +55,7 @@ you should reset the version numbers to the next blead series.
   2023-12-20  5.39.6  ✓       Philippe Bruhat
   2024-01-20  5.39.7  ✓       Max Maischein
   2024-02-23  5.39.8  ✓       Renée Bäcker      Contentious changes freeze
-  2024-03-20  5.39.9          Paul Evans        User-visible changes to
+  2024-03-20  5.39.9  ✓       Paul Evans        User-visible changes to
                                                 correctly functioning
                                                 programs freeze
   2024-04-20  5.39.10         ?                 Full program freeze
