@@ -17,6 +17,15 @@ Consult your favorite dictionary for details.
 
 =head1 EPIGRAPHS
 
+=head2 v5.39.9 - Terry Pratchett, Sourcery
+
+L<Announced on 2024-03-20 by Paul Evans|https://www.nntp.perl.org/group/perl.perl5.porters/2024/03/msg268073.html>
+
+  "I meant," said Ipslore bitterly, "what is there in this world that
+  truly makes living worthwhile?"
+  Death thought about it.
+  CATS, he said eventually. CATS ARE NICE.
+
 =head2 v5.39.8 - Friedrich Schiller, "Ode to joy"
 
 L<Announced on 2024-02-23 by Renee Bäcker|https://www.nntp.perl.org/group/perl.perl5.porters/2024/02/msg267978.html>
