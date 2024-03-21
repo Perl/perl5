@@ -6562,6 +6562,35 @@ EXTCONST U8   PL_deBruijn_bitpos_tab64[];
         CLANG_DIAG_RESTORE                                                  \
     } STMT_END
 
+#  define PERL_REENTRANT_UNLOCK(name, mutex, wcounter, rcounter)            \
+    STMT_START {                                                            \
+        if (LIKELY(wcounter == 1)) {                                        \
+            PERL_WRITE_UNLOCK(mutex);                                       \
+            wcounter = 0;                                                   \
+            UNLESS_PERL_MEM_LOG(DEBUG_Lv(PerlIO_printf(Perl_debug_log,      \
+                          "%s: %d: unlocking " name "; new lock depth=0"    \
+                          "; this thread reader count=%d\n",                \
+                          __FILE__, __LINE__, rcounter));                   \
+            );                                                              \
+        }                                                                   \
+        else if (wcounter <= 0) {                                           \
+            Perl_croak_nocontext("panic: %s: %d: attempting to unlock"      \
+                                 " already unlocked " name "; depth was"    \
+                                 " %d\n", __FILE__, __LINE__,               \
+                                 wcounter);                                 \
+        }                                                                   \
+        else {                                                              \
+            wcounter--;                                                     \
+            UNLESS_PERL_MEM_LOG(DEBUG_Lv(PerlIO_printf(Perl_debug_log,      \
+                "%s: %d: avoided unlocking " name "; new lock depth=%d"     \
+                "; this thread reader count=%d"                             \
+                "; all threads reader count=%zd\n",                         \
+                __FILE__, __LINE__, wcounter, rcounter,                     \
+                (mutex)->readers_count))                                    \
+            );                                                              \
+        }                                                                   \
+    } STMT_END
+
 #  define PERL_REENTRANT_READ_LOCK(name, mutex, wcounter, rcounter)         \
     STMT_START {                                                            \
         CLANG_DIAG_IGNORE(-Wthread-safety)                                  \
@@ -6576,31 +6605,6 @@ EXTCONST U8   PL_deBruijn_bitpos_tab64[];
             (mutex)->readers_count++;                                       \
         }                                                                   \
         CLANG_DIAG_RESTORE                                                  \
-    } STMT_END
-
-#  define PERL_REENTRANT_UNLOCK(name, mutex, wcounter, rcounter)            \
-    STMT_START {                                                            \
-        if (LIKELY(wcounter == 1)) {                                        \
-            UNLESS_PERL_MEM_LOG(DEBUG_Lv(PerlIO_printf(Perl_debug_log,      \
-                          "%s: %d: unlocking " name "; new lock depth=0\n", \
-                          __FILE__, __LINE__));                             \
-            )                                                               \
-            wcounter = 0;                                                   \
-            PERL_WRITE_UNLOCK(mutex);                                       \
-        }                                                                   \
-        else if (wcounter <= 0) {                                           \
-            Perl_croak_nocontext("panic: %s: %d: attempting to unlock"      \
-                                 " already unlocked " name "; depth was"    \
-                                 " %d\n", __FILE__, __LINE__,               \
-                                 wcounter);                                 \
-        }                                                                   \
-        else {                                                              \
-            wcounter--;                                                     \
-            UNLESS_PERL_MEM_LOG(DEBUG_Lv(PerlIO_printf(Perl_debug_log,      \
-                "%s: %d: avoided unlocking " name "; new lock depth=%d\n",  \
-                __FILE__, __LINE__, wcounter));                             \
-            )                                                               \
-        }                                                                   \
     } STMT_END
 
 #  define PERL_REENTRANT_READ_UNLOCK(name, mutex, wcounter, rcounter)       \
