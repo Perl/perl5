@@ -17,7 +17,7 @@
  * debugging support added, which makes "use re 'debug'" work.
  */
 
-/* NOTE: this is derived from Henry Spencer's regexp code, and should not
+/* NOTE: this is derived from Henry Spencer's regexp code, and should not be
  * confused with the original package (see point 3 below).  Thanks, Henry!
  */
 
@@ -689,7 +689,7 @@ S_concat_pat(pTHX_ RExC_state_t * const pRExC_state,
                 oplist = OpSIBLING(oplist); /* skip CONST */
                 assert(oplist);
             }
-            oplist = OpSIBLING(oplist);;
+            oplist = OpSIBLING(oplist);
         }
 
         /* apply magic and QR overloading to arg */
@@ -11183,7 +11183,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
 
         /* If optimized to something else and emitted, clean up and return */
         if (ret >= 0) {
-            SvREFCNT_dec(cp_list);;
+            SvREFCNT_dec(cp_list);
             SvREFCNT_dec(only_utf8_locale_list);
             SvREFCNT_dec(upper_latin1_only_utf8_matches);
             return ret;
@@ -11253,7 +11253,7 @@ S_regclass(pTHX_ RExC_state_t *pRExC_state, I32 *flagp, U32 depth,
                    : NULL,
                   only_utf8_locale_list);
 
-    SvREFCNT_dec(cp_list);;
+    SvREFCNT_dec(cp_list);
     SvREFCNT_dec(only_utf8_locale_list);
     return ret;
 }
@@ -11724,7 +11724,7 @@ S_optimize_regclass(pTHX_
              * convert to UTF-8 if not already there */
             if (value > 255) {
                 if (! UTF) {
-                    SvREFCNT_dec(cp_list);;
+                    SvREFCNT_dec(cp_list);
                     REQUIRE_UTF8(flagp);
                 }
 
@@ -11852,7 +11852,7 @@ S_optimize_regclass(pTHX_
             {
                 U8 ANYOFM_mask;
 
-                op = ANYOFM + inverted;;
+                op = ANYOFM + inverted;
 
                 /* We need to make the bits that differ be 0's */
                 ANYOFM_mask = ~ bits_differing; /* This goes into FLAGS */
@@ -15593,7 +15593,7 @@ S_parse_uniprop_string(pTHX_
                  * property hasn't been encountered yet, but at runtime, it's
                  * an error to try to use an undefined one */
                 if (! deferrable) {
-                    goto unknown_user_defined;;
+                    goto unknown_user_defined;
                 }
 
                 goto definition_deferred;
