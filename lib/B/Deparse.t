@@ -3396,3 +3396,7 @@ $x //= exit 42;
 my $x = __LINE__;
 my $y = __FILE__;
 my $z = __PACKAGE__;
+####
+# CONTEXT use feature "state";
+state sub FOO () { 42 }
+print 42, "\n";
