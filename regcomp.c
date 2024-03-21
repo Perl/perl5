@@ -12185,6 +12185,7 @@ S_optimize_regclass(pTHX_
 
   return_OPFAIL:
     op = OPFAIL;
+    *flagp &= ~(SIMPLE|HASWIDTH);
     *ret = reg1node(pRExC_state, op, 0);
     return op;
 
