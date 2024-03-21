@@ -48,8 +48,9 @@ Perl_prepare_export_lexical(pTHX)
     /* We need to have PL_comppad / PL_curpad set correctly for lexical importing */
     ENTER;
     SAVESPTR(PL_comppad_name); PL_comppad_name = PadlistNAMES(CvPADLIST(PL_compcv));
-    SAVESPTR(PL_comppad);      PL_comppad      = PadlistARRAY(CvPADLIST(PL_compcv))[1];
-    SAVESPTR(PL_curpad);       PL_curpad       = PadARRAY(PL_comppad);
+    SAVECOMPPAD();
+    PL_comppad      = PadlistARRAY(CvPADLIST(PL_compcv))[1];
+    PL_curpad       = PadARRAY(PL_comppad);
 }
 
 #define export_lexical(name, sv)  S_export_lexical(aTHX_ name, sv)

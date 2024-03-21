@@ -621,6 +621,15 @@ TODO: {
     }
 }
 
+# github #21981
+{
+    fresh_perl_is(<<'EOS', "", {}, "github 21981: panic in intro_my");
+use B;
+BEGIN { B::save_BEGINs; }
+use v5.39;
+EOS
+}
+
 # vim: tabstop=4 shiftwidth=4 expandtab autoindent softtabstop=4
 
 done_testing();
