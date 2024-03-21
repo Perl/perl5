@@ -1079,8 +1079,9 @@ index into the parent pad.
 */
 
 /* the CV has finished being compiled. This is not a sufficient test for
- * all CVs (eg XSUBs), but suffices for the CVs found in a lexical chain */
-#define CvCOMPILED(cv)	CvROOT(cv)
+ * all CVs (eg XSUBs), but suffices for the CVs found in a lexical chain.
+ * Note that a fully-compiled eval doesn't get CvROOT() set. */
+#define CvCOMPILED(cv)	(CvROOT(cv) || CvEVAL_COMPILED(cv))
 
 /* the CV does late binding of its lexicals */
 #define CvLATE(cv) (CvANON(cv) || CvCLONE(cv) || SvTYPE(cv) == SVt_PVFM)
