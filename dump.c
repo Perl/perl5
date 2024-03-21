@@ -1781,8 +1781,8 @@ const struct flag_to_name cv_flags_names[] = {
     {CVf_ANONCONST,        "ANONCONST,"},
     {CVf_SIGNATURE,        "SIGNATURE,"},
     {CVf_REFCOUNTED_ANYSV, "REFCOUNTED_ANYSV,"},
-    {CVf_IsMETHOD,         "IsMETHOD,"}
-
+    {CVf_IsMETHOD,         "IsMETHOD,"},
+    {CVf_XS_RCSTACK,       "XS_RCSTACK,"}
 };
 
 const struct flag_to_name hv_flags_names[] = {
