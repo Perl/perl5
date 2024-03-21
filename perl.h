@@ -7241,7 +7241,7 @@ typedef struct am_table_short AMTS;
                                                     PL_env_mutex_readers)
 #  define ENV_READ_LOCK       PERL_REENTRANT_READ_LOCK("env",               \
                                                        &PL_env_mutex,       \
-                                                       PL_env_mutex_depth,\
+                                                       PL_env_mutex_depth,  \
                                                        PL_env_mutex_readers)
 #  define ENV_READ_UNLOCK     PERL_REENTRANT_READ_UNLOCK("env",             \
                                                          &PL_env_mutex,     \
