@@ -7276,6 +7276,64 @@ typedef struct am_table_short AMTS;
 #  define GETENV_UNLOCK   NOOP
 #endif
 
+/* The POSIX Standard says:
+ *
+ *    "... any function dependent on any environment variable is not thread-safe
+ *     if another thread is modifying the environment" 
+ *
+ * Linux glibc also requires the locale to be held constant for more than a few
+ * libc function calls.  This is not in the Standard, but khw thinks that may
+ * be mostly an oversight.  It makes sense in most such functions, that if the
+ * locale changed in the middle of executing it, an implementation could
+ * reasonably get confused.  This should be a problem, though, only if the
+ * locale is currently the global process-wide one.  A per-thread locale isn't
+ * changed by another thread, so there should be no race.
+ *
+ * Any process-wide changeable value, such as the environment, is potentially
+ * an issue for thread-safe access to it.  Neither the POSIX Standard nor the
+ * Linux man pages list any further common ones.  A likely candidate, though,
+ * is chdir():  https://stackoverflow.com/questions/78056645
+ *
+ * Perl takes the stance that other platforms follow POSIX and Linux.  Change
+ * the code if experience shows this to be wrong.  Too often, the vendor man
+ * pages omit such details.  POSIX has a list of the functions that are allowed
+ * to not be thread-safe: https://pubs.opengroup.org/onlinepubs/9699919799/
+ * Section 2.9.1 Thread-Safety.  This is unfortunately incomplete.  It doesn't
+ * include the ones that just access environment variables, for example.  Linux
+ * documents some more as well; some of those might just be documentating that
+ * the Linux implementation is non-compliant; or it might be it is an oversight
+ * in POSIX.
+ *
+ * Whenever there are multiple mutexes available, there is the possibility of
+ * deadlock where thread 1 holds mutex A, then requests B; and at the same time
+ * thread 2 holds B, then requests A.  This can't happen if the code is
+ * structured so that either:
+ *  1)  you never request A while holding B; or
+ *  2)  you never request B without first holding A.
+ *
+ * Note that if you hold a mutex for reading, and then try to acquire it for
+ * writing as well (without first releasing the read-lock), you can get
+ * deadlock.  Perl assumes you don't do that.
+ *
+ * Given that restriction, note that even if you are acquiring 'B' for writing
+ * using strategy 2) above, the mutex for 'A'  above may be acquired just for
+ * reading if no writing related to it is to be done.  You may block when
+ * acquiring 'B', but no other thread will be blocked on 'A" while holding 'B'.
+ *
+ * The perl core does some of each strategy.  Most mutexes are acquired, the
+ * libc function is called, and the mutex immediately released.  Hence strategy
+ * 1) works for them.
+ *
+ * But the combination of both the locale and environment needing to be held
+ * constant occurs over and over in the Linux man pages, sometimes with one or
+ * the other also being written to.  There are macros that implement strategy
+ * 2) above to use for each such combination.  These hide the details from the
+ * caller; and if the code uses them exclusively this should prevent deadlock.
+ * These always try to grab the environment mutex first; then the locale one.
+2008/functions/catopen.html env
+2008/functions/newlocale.html env prob. ""
+ */
+
 /* Locale/thread synchronization macros. */
 #if ! defined(USE_LOCALE_THREADS)   /* No threads, or no locales */
 #  define LOCALE_LOCK_(cond)  NOOP
