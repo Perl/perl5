@@ -1676,7 +1676,7 @@ PP(pp_modulo)
                     right = biv;
                     right_neg = FALSE; /* effectively it's a UV now */
                 } else {
-                    right = (UV) (0 - (UV) biv);
+                    right = NEGATE_2UV(biv);
                 }
             }
         }
@@ -1706,7 +1706,7 @@ PP(pp_modulo)
                         left = aiv;
                         left_neg = FALSE; /* effectively it's a UV now */
                     } else {
-                        left = (UV) (0 - (UV) aiv);
+                        left = NEGATE_2UV(aiv);
                     }
                 }
         }
@@ -1763,10 +1763,8 @@ PP(pp_modulo)
             if ((left_neg != right_neg) && ans)
                 ans = right - ans;
             if (right_neg) {
-                /* XXX may warn: unary minus operator applied to unsigned type */
-                /* could change -foo to be (~foo)+1 instead	*/
-                if (ans <= ~((UV)IV_MAX)+1)
-                    sv_setiv(TARG, ~ans+1);
+                if (ans <= ABS_IV_MIN)
+                    sv_setiv(TARG, NEGATE_2IV(ans));
                 else
                     sv_setnv(TARG, -(NV)ans);
             }
