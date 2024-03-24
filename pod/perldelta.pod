@@ -366,7 +366,10 @@ manager will later use a regex to expand these into links.
 
 =item *
 
-XXX
+prepare_export_lexical() was separately saving C<PL_comppad> and
+C<PL_curpad>, this could result in C<PL_curpad> being restored to a no
+longer valid value, resulting in a panic when importing lexicals in
+some cases.  [github #21981]
 
 =back
 
