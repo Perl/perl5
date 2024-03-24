@@ -1332,7 +1332,7 @@ our %Modules = (
     },
 
     'Win32' => {
-        'DISTRIBUTION' => "JDB/Win32-0.59.tar.gz",
+        'DISTRIBUTION' => 'JDB/Win32-0.59.tar.gz',
         'FILES'        => q[cpan/Win32],
     },
 
