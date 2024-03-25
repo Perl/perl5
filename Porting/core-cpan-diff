@@ -435,9 +435,8 @@ sub relatively_mapped {
 
 sub distro_base {
     my $d = shift;
-    $d =~ s/\.tar\.gz$//;
-    $d =~ s/\.gip$//;
-    $d =~ s/[\d\-_\.]+$//;
+    my $tail_pat = qr/\.(?:tar\.(?:g?z|bz2|Z)|zip|tgz|tbz)/;
+    $d =~ s{-v?([0-9._]+(?:-TRIAL[0-9]*)?)$tail_pat\z}{};
     return $d;
 }
 
