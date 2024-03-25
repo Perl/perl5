@@ -51,6 +51,7 @@ Porting/checkcfgvar.pl
 Porting/checkpodencoding.pl
 Porting/cmpVERSION.pl
 Porting/config_h.pl
+Porting/core-cpan-diff
 Porting/corecpan.pl
 Porting/corelist-perldelta.pl
 Porting/corelist.pl
