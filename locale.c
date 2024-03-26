@@ -2061,6 +2061,10 @@ S_querylocale_2008_i(pTHX_ const locale_category_index index,
     const locale_t cur_obj = uselocale((locale_t) 0);
     const char * retval;
 
+#  ifdef MULTIPLICITY
+    assert(cur_obj== LC_GLOBAL_LOCALE || cur_obj == PL_cur_locale_obj);
+#  endif
+
     DEBUG_Lv(PerlIO_printf(Perl_debug_log, "querylocale_2008_i(%s) on %p;"
                                            " called from %" LINE_Tf "\n",
                                            category_names[index], cur_obj,
@@ -2260,6 +2264,11 @@ S_bool_setlocale_2008_i(pTHX_
 
     int mask = category_masks[index];
     const locale_t entry_obj = uselocale((locale_t) 0);
+
+#  ifdef MULTIPLICITY
+    assert(entry_obj== LC_GLOBAL_LOCALE || entry_obj == PL_cur_locale_obj);
+#  endif
+
     const char * locale_on_entry = querylocale_i(index);
 
     DEBUG_Lv(PerlIO_printf(Perl_debug_log,
