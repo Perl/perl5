@@ -5167,6 +5167,9 @@ Perl_localeconv(pTHX)
     return (HV *) sv_2mortal((SV *) my_localeconv(0));
 }
 
+/* If you need, for some reason, the lconv data structure, revert the commit
+ * that added this comment. */
+
 HV *
 S_my_localeconv(pTHX_ const int item)
 {
