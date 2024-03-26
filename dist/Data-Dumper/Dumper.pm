@@ -1416,8 +1416,9 @@ distribution for more examples.)
 =head1 BUGS
 
 Due to limitations of Perl subroutine call semantics, you cannot pass an
-array or hash.  Prepend it with a C<\> to pass its reference instead.  This
-will be remedied in time, now that Perl has subroutine prototypes.
+array or hash.  Prepend it with a C<\> to pass its reference instead:
+Dumper C<\>(%a, @b, $c), C<\>%e, C<\>@f, C<\>$g.
+This will be remedied in time, now that Perl has subroutine prototypes.
 For now, you need to use the extended usage form, and prepend the
 name with a C<*> to output it as a hash or array.
 
@@ -1459,6 +1460,6 @@ Version 2.189
 
 =head1 SEE ALSO
 
-perl(1)
+Data::Dump
 
 =cut
