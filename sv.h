@@ -648,7 +648,9 @@ typedef U32 cv_flags_t;
                                   * compilation) in the lexically enclosing	\
                                   * sub */					\
     cv_flags_t	xcv_flags;						\
-    I32	xcv_depth	/* >= 2 indicates recursive call */
+    I32	xcv_depth;	/* >= 2 indicates recursive call */			\
+    bool	(*xcv_suboverride)(pTHX_ CV *);					\
+    SV *	xcv_suboverride_aux
 
 /* This structure must match XPVCV in cv.h */
 

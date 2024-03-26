@@ -90,6 +90,11 @@ See L<perlguts/Autoloading with XSUBs>.
 #define CvOUTSIDE_SEQ(sv) ((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_outside_seq
 #define CvFLAGS(sv)	  ((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_flags
 
+#if defined(PERL_CORE) || defined(PERL_EXT)
+#define CvSUBOVERRIDE(sv)	  ((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_suboverride
+#define CvSUBOVERRIDEAUX(sv)	  ((XPVCV*)MUTABLE_PTR(SvANY(sv)))->xcv_suboverride_aux
+#endif
+
 /* These two are sometimes called on non-CVs */
 #define CvPROTO(sv)                               \
         (                                          \
@@ -140,6 +145,9 @@ See L<perlguts/Autoloading with XSUBs>.
                                    CVf_METHOD; now CVf_NOWARN_AMBIGUOUS */
 #define CVf_XS_RCSTACK  0x200000 /* the XS function understands a
                                     reference-counted stack */
+#if defined(PERL_CORE) || defined(PERL_EXT)
+#define CVf_IsSUBOVERRIDE    0x400000 /* CV has a sub override function */
+#endif
 
 /* This symbol for optimised communication between toke.c and op.c: */
 #define CVf_BUILTIN_ATTRS	(CVf_NOWARN_AMBIGUOUS|CVf_LVALUE|CVf_ANONCONST)
@@ -265,6 +273,12 @@ Helper macro to turn off the C<CvREFCOUNTED_ANYSV> flag.
 #define CvXS_RCSTACK(cv)        (CvFLAGS(cv) & CVf_XS_RCSTACK)
 #define CvXS_RCSTACK_on(cv)     (CvFLAGS(cv) |= CVf_XS_RCSTACK)
 #define CvXS_RCSTACK_off(cv)    (CvFLAGS(cv) &= ~CVf_XS_RCSTACK)
+
+#if defined(PERL_CORE) || defined(PERL_EXT)
+#define CvIsSUBOVERRIDE(cv)	(CvFLAGS(cv) & CVf_IsSUBOVERRIDE)
+#define CvIsSUBOVERRIDE_on(cv)	(CvFLAGS(cv) |= CVf_IsSUBOVERRIDE)
+#define CvIsSUBOVERRIDE_off(cv)	(CvFLAGS(cv) &= ~CVf_IsSUBOVERRIDE)
+#endif
 
 /* Back-compat */
 #ifndef PERL_CORE
