@@ -1,7 +1,7 @@
 #!./perl
 
 BEGIN {
-    require Config; import Config;
+    require Config; Config->import;
     if ($Config{'extensions'} !~ /\bSys\/Hostname\b/) {
       print "1..0 # Skip: Sys::Hostname was not built\n";
       exit 0;
@@ -18,7 +18,7 @@ SKIP:
         $host = hostname;
     };
     skip "No hostname available", 1
-      if $@ =~ /Cannot get host name/;
+      if $@ =~ /Cannot get the hostname/;
     isnt($host, undef, "got a hostname");
 }
 
@@ -26,7 +26,7 @@ SKIP:
     local $@;
     eval { hostname("dummy"); };
     like($@,
-        qr/hostname\(\) does not accepts arguments \(it used to silently discard any provided\)/,
+        qr/hostname\(\) does not accept arguments \(it used to silently discard any provided\)/,
         "hostname no longer accepts arguments"
     );
 }
