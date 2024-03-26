@@ -534,7 +534,7 @@ do_test('string with Unicode',
                 . '"\\\0 \[UTF8 "\\\x\{100\}\\\x\{0\}\\\x\{200\}"\]
   CUR = 5
   LEN = \\d+
-  COW_REFCNT = 1					# $] < 5.019007
+  COW_REFCNT = 1					# $] < 5.019007 || $] >=5.041000
 ');
 
 do_test('reference to hash containing Unicode',
@@ -558,7 +558,7 @@ do_test('reference to hash containing Unicode',
       PV = $ADDR "' . $cp200_bytes . '"\\\0 \[UTF8 "\\\x\{200\}"\]
       CUR = 2
       LEN = \\d+
-      COW_REFCNT = 1				# $] < 5.019007
+      COW_REFCNT = 1				# $] < 5.019007 || $] >=5.041000
 ',      '',
 	$] >= 5.015
 	    ? undef

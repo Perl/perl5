@@ -5081,7 +5081,9 @@ S_fold_constants(pTHX_ OP *const o)
         SvPADTMP_off(sv);
     else if (!SvIMMORTAL(sv)) {
         SvPADTMP_on(sv);
-        SvREADONLY_on(sv);
+        /* Do not set SvREADONLY(sv) here. newSVOP will call
+         * Perl_ck_svconst, which will do it. Setting it early
+         * here prevents Perl_ck_svconst from setting SvIsCOW(sv).*/
     }
     newop = newSVOP(OP_CONST, 0, MUTABLE_SV(sv));
     if (!is_stringify) newop->op_folded = 1;
