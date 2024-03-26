@@ -55,7 +55,7 @@ typedef struct {
 
 #define NEEDS_LINES	1
 
-static const MGVTBL PerlIOEncode_tag = { 0, 0, 0, 0, 0, 0, 0, 0 };
+static const MGVTBL PerlIOEncode_tag = {0};
 
 static SV *
 PerlIOEncode_getarg(pTHX_ PerlIO * f, CLONE_PARAMS * param, int flags)

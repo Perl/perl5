@@ -15328,16 +15328,7 @@ custom_op_register_free(pTHX_ SV *sv, MAGIC *mg)
 
 
 static const MGVTBL custom_op_register_vtbl = {
-    0,                          /* get */
-    0,                          /* set */
-    0,                          /* len */
-    0,                          /* clear */
-    custom_op_register_free,     /* free */
-    0,                          /* copy */
-    0,                          /* dup */
-#ifdef MGf_LOCAL
-    0,                          /* local */
-#endif
+    .svt_free = custom_op_register_free,
 };
 
 
