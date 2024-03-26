@@ -9234,6 +9234,8 @@ END_EXTERN_C
 
 */
 
+#include "platform/platforms.h"
+
 #endif /* Include guard */
 
 /*
