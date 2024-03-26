@@ -1447,6 +1447,7 @@
 #     define no_fh_allowed(a)                   S_no_fh_allowed(aTHX_ a)
 #     define op_integerize(a)                   S_op_integerize(aTHX_ a)
 #     define op_std_init(a)                     S_op_std_init(aTHX_ a)
+#     define opslab_slot_offset                 S_opslab_slot_offset
 #     define pmtrans(a,b,c)                     S_pmtrans(aTHX_ a,b,c)
 #     define process_special_blocks(a,b,c,d)    S_process_special_blocks(aTHX_ a,b,c,d)
 #     define ref_array_or_hash(a)               S_ref_array_or_hash(aTHX_ a)
@@ -1456,6 +1457,7 @@
 #     define scalarkids(a)                      S_scalarkids(aTHX_ a)
 #     define search_const(a)                    S_search_const(aTHX_ a)
 #     define simplify_sort(a)                   S_simplify_sort(aTHX_ a)
+#     define size_to_psize                      S_size_to_psize
 #     define too_few_arguments_pv(a,b,c)        S_too_few_arguments_pv(aTHX_ a,b,c)
 #     define too_many_arguments_pv(a,b,c)       S_too_many_arguments_pv(aTHX_ a,b,c)
 #     define voidnonfinal(a)                    S_voidnonfinal(aTHX_ a)
