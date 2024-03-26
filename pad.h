@@ -13,9 +13,6 @@
 
 /* offsets within a pad */
 
-typedef SSize_t PADOFFSET; /* signed so that -1 is a valid value */
-#define NOT_IN_PAD ((PADOFFSET) -1)
-
 /* B.xs expects the first members of these two structs to line up
    (xpadl_max with xpadnl_fill).
  */
