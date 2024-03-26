@@ -355,6 +355,9 @@ or C<CHECK> blocks and any C<use> statements: these are considered as
 occurring outside the execution of your program.  C<INIT> and C<END>
 blocks, however, will be skipped.
 
+Returns 0 to the shell for success, -1 for failure (syntax errors.) In both cases
+a status message will be printed to STDERR.
+
 =item B<-d>
 X<-d> X<-dt>
 
