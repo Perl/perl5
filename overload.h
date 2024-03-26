@@ -89,6 +89,7 @@ enum {
     smart_amg,		/* 0x48 ~~       */
     ftest_amg,		/* 0x49 -X       */
     regexp_amg,		/* 0x4a qr       */
+    substr_amg,		/* 0x4b substr   */
     max_amg_code
     /* Do not leave a trailing comma here.  C9X allows it, C89 doesn't. */
 };
