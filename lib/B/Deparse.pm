@@ -7,7 +7,7 @@
 # This is based on the module of the same name by Malcolm Beattie,
 # but essentially none of his code remains.
 
-package B::Deparse 1.75;
+package B::Deparse 1.76;
 use strict;
 use Carp;
 use B qw(class main_root main_start main_cv svref_2object opnumber perlstring
@@ -466,7 +466,7 @@ sub next_todo {
             my $globname;
             my $gv = $cv->GV;
             if (
-                   $gv
+                   $gv && $gv->isa('B::GV')
                 && defined (($globname = $gv->object_2svref))
                 && $$globname =~ /^\*builtin::/
             ) {
