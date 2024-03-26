@@ -440,6 +440,7 @@
 # define newSVpvn(a,b)                          Perl_newSVpvn(aTHX_ a,b)
 # define newSVpvn_flags(a,b,c)                  Perl_newSVpvn_flags(aTHX_ a,b,c)
 # define newSVpvn_share(a,b,c)                  Perl_newSVpvn_share(aTHX_ a,b,c)
+# define newSVpvz(a)                            Perl_newSVpvz(aTHX_ a)
 # define newSVrv(a,b)                           Perl_newSVrv(aTHX_ a,b)
 # define newSVsv_flags(a,b)                     Perl_newSVsv_flags(aTHX_ a,b)
 # define newSVuv(a)                             Perl_newSVuv(aTHX_ a)
