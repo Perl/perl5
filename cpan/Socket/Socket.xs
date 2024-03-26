@@ -914,7 +914,8 @@ pack_sockaddr_un(pathname)
             addr_len = sizeof(sun_ad);
         }
 #  ifdef HAS_SOCKADDR_SA_LEN
-        sun_ad.sun_len = addr_len;
+        sun_ad.sun_len = len;
+        addr_len = sizeof(sun_ad.sun_len) + sizeof(sun_ad.sun_family) + len; 
 #  endif
         ST(0) = sv_2mortal(newSVpvn((char *)&sun_ad, addr_len));
 #else
@@ -946,9 +947,10 @@ unpack_sockaddr_un(sun_sv)
         }
 #     ifdef HAS_SOCKADDR_SA_LEN
         /* In this case, sun_len must be checked */
-        if (sockaddrlen != addr.sun_len)
-            croak("Invalid arg sun_len field for %s, length is %" UVuf ", but sun_len is %" UVuf,
-                    "Socket::unpack_sockaddr_un", (UV)sockaddrlen, (UV)addr.sun_len);
+        int expectedlen = sizeof(addr.sun_len) + sizeof(addr.sun_family) + addr.sun_len;
+        if (sockaddrlen != expectedlen)
+            croak("Bad arg length for %s, length is %" UVuf ", should be %" UVuf,
+                    "Socket::unpack_sockaddr_un", (UV)sockaddrlen, (UV)expectedlen);
 #     endif
 #   else
         if (sockaddrlen != sizeof(addr))
@@ -970,7 +972,7 @@ unpack_sockaddr_un(sun_sv)
         {
 #   if defined(HAS_SOCKADDR_SA_LEN)
             /* On *BSD sun_path not always ends with a '\0' */
-            int maxlen = addr.sun_len - 2; /* should use STRUCT_OFFSET(struct sockaddr_un, sun_path) instead of 2 */
+            int maxlen = addr.sun_len;
             if (maxlen > (int)sizeof(addr.sun_path))
                 maxlen = (int)sizeof(addr.sun_path);
 #   else
