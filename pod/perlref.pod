@@ -117,6 +117,16 @@ brackets:
         'Clyde' => 'Bonnie',
     };
 
+But be aware:
+
+    $folks{A} = {
+        'Adam'  => 'Eve',
+        'Clyde' => 'Bonnie',
+    };
+    $folks{B} = $folks{A};           # just pointers to the anonymous hash
+    %{ $folks{C} } = %{ $folks{A} }; # deep copy
+    $folks{A}{Clyde} = 'Wilma';      # also updates B! C is immune
+
 Anonymous hash and array composers like these can be intermixed freely to
 produce as complicated a structure as you want.  The multidimensional
 syntax described below works for these too.  The values above are
