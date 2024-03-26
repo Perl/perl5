@@ -140,6 +140,7 @@ See L<perlguts/Autoloading with XSUBs>.
                                    CVf_METHOD; now CVf_NOWARN_AMBIGUOUS */
 #define CVf_XS_RCSTACK  0x200000 /* the XS function understands a
                                     reference-counted stack */
+#define CVf_EVAL_COMPILED 0x400000 /* an eval CV is fully compiled */
 
 /* This symbol for optimised communication between toke.c and op.c: */
 #define CVf_BUILTIN_ATTRS	(CVf_NOWARN_AMBIGUOUS|CVf_LVALUE|CVf_ANONCONST)
@@ -265,6 +266,10 @@ Helper macro to turn off the C<CvREFCOUNTED_ANYSV> flag.
 #define CvXS_RCSTACK(cv)        (CvFLAGS(cv) & CVf_XS_RCSTACK)
 #define CvXS_RCSTACK_on(cv)     (CvFLAGS(cv) |= CVf_XS_RCSTACK)
 #define CvXS_RCSTACK_off(cv)    (CvFLAGS(cv) &= ~CVf_XS_RCSTACK)
+
+#define CvEVAL_COMPILED(cv)     (CvFLAGS(cv) & CVf_EVAL_COMPILED)
+#define CvEVAL_COMPILED_on(cv)  (CvFLAGS(cv) |= CVf_EVAL_COMPILED)
+#define CvEVAL_COMPILED_off(cv) (CvFLAGS(cv) &= ~CVf_EVAL_COMPILED)
 
 /* Back-compat */
 #ifndef PERL_CORE
