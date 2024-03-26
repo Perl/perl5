@@ -902,20 +902,11 @@ Perl_lex_start(pTHX_ SV *line, PerlIO *rsfp, U32 flags)
 
     if (line) {
         Size_t len;
-        const U8* first_bad_char_loc;
 
         s = SvPV_const(line, len);
 
-        if (   SvUTF8(line)
-            && UNLIKELY(! is_utf8_string_loc((U8 *) s,
-                                             SvCUR(line),
-                                             &first_bad_char_loc)))
-        {
-            _force_out_malformed_utf8_message(first_bad_char_loc,
-                                              (U8 *) s + SvCUR(line),
-                                              0,
-                                              1 /* 1 means die */ );
-            NOT_REACHED; /* NOTREACHED */
+        if (SvUTF8(line)) {
+            ensure_not_malformed_utf8((U8 *) s, SvCUR(line));
         }
 
         parser->linestr = flags & LEX_START_COPIED
@@ -1542,18 +1533,10 @@ Perl_lex_next_chunk(pTHX_ U32 flags)
     PL_parser->bufptr = buf + bufptr_pos;
 
     if (UTF) {
-        const U8* first_bad_char_loc;
-        if (UNLIKELY(! is_utf8_string_loc(
-                            (U8 *) PL_parser->bufptr,
-                                   PL_parser->bufend - PL_parser->bufptr,
-                                   &first_bad_char_loc)))
-        {
-            _force_out_malformed_utf8_message(first_bad_char_loc,
-                                              (U8 *) PL_parser->bufend,
-                                              0,
-                                              1 /* 1 means die */ );
-            NOT_REACHED; /* NOTREACHED */
-        }
+        ensure_not_malformed_utf8(
+            (U8 *) PL_parser->bufptr,
+            PL_parser->bufend - PL_parser->bufptr
+        );
     }
 
     PL_parser->oldbufptr = buf + oldbufptr_pos;
@@ -1631,10 +1614,7 @@ Perl_lex_peek_unichar(pTHX_ U32 flags)
         }
         unichar = utf8n_to_uvchr((U8*)s, bufend-s, &retlen, UTF8_CHECK_ONLY);
         if (retlen == (STRLEN)-1) {
-            _force_out_malformed_utf8_message((U8 *) s,
-                                              (U8 *) bufend,
-                                              0,
-                                              1 /* 1 means die */ );
+            force_out_malformed_utf8_die((U8 *) s, (U8 *) bufend);
             NOT_REACHED; /* NOTREACHED */
         }
         return unichar;
@@ -3013,7 +2993,7 @@ Perl_get_and_check_backslash_N_name(pTHX_ const char* s,
             _force_out_malformed_utf8_message(first_bad_char_loc,
                                               (U8 *) PL_parser->bufend,
                                               0,
-                                              0 /* 0 means don't die */ );
+                                              MALFORMED_UTF8_WARN);
             /* diag_listed_as: Malformed UTF-8 returned by \N{%s}
                                immediately after '%s' */
             *error_msg = Perl_form(aTHX_
@@ -9710,16 +9690,8 @@ Perl_yylex(pTHX)
     char *s = PL_bufptr;
 
     if (UNLIKELY(PL_parser->recheck_utf8_validity)) {
-        const U8* first_bad_char_loc;
-        if (UTF && UNLIKELY(! is_utf8_string_loc((U8 *) PL_bufptr,
-                                                        PL_bufend - PL_bufptr,
-                                                        &first_bad_char_loc)))
-        {
-            _force_out_malformed_utf8_message(first_bad_char_loc,
-                                              (U8 *) PL_bufend,
-                                              0,
-                                              1 /* 1 means die */ );
-            NOT_REACHED; /* NOTREACHED */
+        if (UTF) {
+            ensure_not_malformed_utf8((U8 *) PL_bufptr, PL_bufend - PL_bufptr);
         }
         PL_parser->recheck_utf8_validity = FALSE;
     }

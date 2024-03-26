@@ -1103,6 +1103,11 @@ Perl_emulate_cop_io(pTHX_ const COP * const c, SV * const sv);
 #define PERL_ARGS_ASSERT_EMULATE_COP_IO         \
         assert(c); assert(sv)
 
+PERL_CALLCONV void
+Perl_ensure_not_malformed_utf8(pTHX_ const U8 * const start_pos, const STRLEN length);
+#define PERL_ARGS_ASSERT_ENSURE_NOT_MALFORMED_UTF8 \
+        assert(start_pos); assert(length)
+
 PERL_CALLCONV SV *
 Perl_eval_pv(pTHX_ const char *p, I32 croak_on_error);
 #define PERL_ARGS_ASSERT_EVAL_PV                \
@@ -1188,6 +1193,26 @@ PERL_CALLCONV void
 Perl_force_locale_unlock(pTHX)
         __attribute__visibility__("hidden");
 #define PERL_ARGS_ASSERT_FORCE_LOCALE_UNLOCK
+
+PERL_CALLCONV void
+Perl_force_out_malformed_utf8_die(pTHX_ const U8 * const start_pos, const U8 * const end_pos);
+#define PERL_ARGS_ASSERT_FORCE_OUT_MALFORMED_UTF8_DIE \
+        assert(start_pos); assert(end_pos)
+
+PERL_CALLCONV void
+Perl_force_out_malformed_utf8_die_flags(pTHX_ const U8 * const start_pos, const U8 * const end_pos, const U32 flags);
+#define PERL_ARGS_ASSERT_FORCE_OUT_MALFORMED_UTF8_DIE_FLAGS \
+        assert(start_pos); assert(end_pos)
+
+PERL_CALLCONV void
+Perl_force_out_malformed_utf8_warn(pTHX_ const U8 * const start_pos, const U8 * const end_pos);
+#define PERL_ARGS_ASSERT_FORCE_OUT_MALFORMED_UTF8_WARN \
+        assert(start_pos); assert(end_pos)
+
+PERL_CALLCONV void
+Perl_force_out_malformed_utf8_warn_flags(pTHX_ const U8 * const start_pos, const U8 * const end_pos, const U32 flags);
+#define PERL_ARGS_ASSERT_FORCE_OUT_MALFORMED_UTF8_WARN_FLAGS \
+        assert(start_pos); assert(end_pos)
 
 PERL_CALLCONV char *
 Perl_form(pTHX_ const char *pat, ...)
