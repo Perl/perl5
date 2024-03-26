@@ -7010,144 +7010,50 @@ typedef struct am_table_short AMTS;
 #  define USER_PROP_MUTEX_TERM    NOOP
 #endif
 
-#ifdef USE_LOCALE /* These locale things are all subject to change */
+#ifdef USE_THREADS
+#  define ENV_LOCK            PERL_WRITE_LOCK(&PL_env_mutex)
+#  define ENV_UNLOCK          PERL_WRITE_UNLOCK(&PL_env_mutex)
+#  define ENV_READ_LOCK       PERL_READ_LOCK(&PL_env_mutex)
+#  define ENV_READ_UNLOCK     PERL_READ_UNLOCK(&PL_env_mutex)
+#  define ENV_INIT            PERL_RW_MUTEX_INIT(&PL_env_mutex)
+#  define ENV_TERM            PERL_RW_MUTEX_DESTROY(&PL_env_mutex)
 
-   /* Returns TRUE if the plain locale pragma without a parameter is in effect.
-    * */
-#  define IN_LOCALE_RUNTIME	(PL_curcop                                  \
-                              && CopHINTS_get(PL_curcop) & HINT_LOCALE)
-
-   /* Returns TRUE if either form of the locale pragma is in effect */
-#  define IN_SOME_LOCALE_FORM_RUNTIME                                       \
-        cBOOL(CopHINTS_get(PL_curcop) & (HINT_LOCALE|HINT_LOCALE_PARTIAL))
-
-#  define IN_LOCALE_COMPILETIME	cBOOL(PL_hints & HINT_LOCALE)
-#  define IN_SOME_LOCALE_FORM_COMPILETIME                                   \
-                        cBOOL(PL_hints & (HINT_LOCALE|HINT_LOCALE_PARTIAL))
-
-/*
-=for apidoc_section $locale
-
-=for apidoc Amn|bool|IN_LOCALE
-
-Evaluates to TRUE if the plain locale pragma without a parameter (S<C<use
-locale>>) is in effect.
-
-=for apidoc Amn|bool|IN_LOCALE_COMPILETIME
-
-Evaluates to TRUE if, when compiling a perl program (including an C<eval>) if
-the plain locale pragma without a parameter (S<C<use locale>>) is in effect.
-
-=for apidoc Amn|bool|IN_LOCALE_RUNTIME
-
-Evaluates to TRUE if, when executing a perl program (including an C<eval>) if
-the plain locale pragma without a parameter (S<C<use locale>>) is in effect.
-
-=cut
-*/
-
-#  define IN_LOCALE                                                         \
-        (IN_PERL_COMPILETIME ? IN_LOCALE_COMPILETIME : IN_LOCALE_RUNTIME)
-#  define IN_SOME_LOCALE_FORM                                               \
-                    (IN_PERL_COMPILETIME ? IN_SOME_LOCALE_FORM_COMPILETIME  \
-                                         : IN_SOME_LOCALE_FORM_RUNTIME)
-
-#  define IN_LC_ALL_COMPILETIME   IN_LOCALE_COMPILETIME
-#  define IN_LC_ALL_RUNTIME       IN_LOCALE_RUNTIME
-
-#  define IN_LC_PARTIAL_COMPILETIME   cBOOL(PL_hints & HINT_LOCALE_PARTIAL)
-#  define IN_LC_PARTIAL_RUNTIME                                             \
-              (PL_curcop && CopHINTS_get(PL_curcop) & HINT_LOCALE_PARTIAL)
-
-#  define IN_LC_COMPILETIME(category)                                       \
-       (       IN_LC_ALL_COMPILETIME                                        \
-        || (   IN_LC_PARTIAL_COMPILETIME                                    \
-            && Perl__is_in_locale_category(aTHX_ TRUE, (category))))
-#  define IN_LC_RUNTIME(category)                                           \
-      (IN_LC_ALL_RUNTIME || (IN_LC_PARTIAL_RUNTIME                          \
-                 && Perl__is_in_locale_category(aTHX_ FALSE, (category))))
-#  define IN_LC(category)  \
-                    (IN_LC_COMPILETIME(category) || IN_LC_RUNTIME(category))
-
-#  if defined (PERL_CORE) || defined (PERL_IN_XSUB_RE)
-
-     /* This internal macro should be called from places that operate under
-      * locale rules.  If there is a problem with the current locale that
-      * hasn't been raised yet, it will output a warning this time.  Because
-      * this will so rarely  be true, there is no point to optimize for time;
-      * instead it makes sense to minimize space used and do all the work in
-      * the rarely called function */
-#    ifdef USE_LOCALE_CTYPE
-#      define CHECK_AND_WARN_PROBLEMATIC_LOCALE_                              \
-                STMT_START {                                                  \
-                    if (UNLIKELY(PL_warn_locale)) {                           \
-                        Perl_warn_problematic_locale();                       \
-                    }                                                         \
-                }  STMT_END
-#    else
-#      define CHECK_AND_WARN_PROBLEMATIC_LOCALE_
-#    endif
-
-
-     /* These two internal macros are called when a warning should be raised,
-      * and will do so if enabled.  The first takes a single code point
-      * argument; the 2nd, is a pointer to the first byte of the UTF-8 encoded
-      * string, and an end position which it won't try to read past */
-#    define _CHECK_AND_OUTPUT_WIDE_LOCALE_CP_MSG(cp)                        \
-        STMT_START {                                                        \
-            if (! IN_UTF8_CTYPE_LOCALE && ckWARN(WARN_LOCALE)) {            \
-                Perl_warner(aTHX_ packWARN(WARN_LOCALE),                    \
-                                       "Wide character (U+%" UVXf ") in %s",\
-                                       (UV) cp, OP_DESC(PL_op));            \
-            }                                                               \
-        }  STMT_END
-
-#    define _CHECK_AND_OUTPUT_WIDE_LOCALE_UTF8_MSG(s, send)                 \
-        STMT_START { /* Check if to warn before doing the conversion work */\
-            if (! IN_UTF8_CTYPE_LOCALE && ckWARN(WARN_LOCALE)) {            \
-                UV cp = utf8_to_uvchr_buf((U8 *) (s), (U8 *) (send), NULL); \
-                Perl_warner(aTHX_ packWARN(WARN_LOCALE),                    \
-                    "Wide character (U+%" UVXf ") in %s",                   \
-                    (cp == 0)                                               \
-                     ? UNICODE_REPLACEMENT                                  \
-                     : (UV) cp,                                             \
-                    OP_DESC(PL_op));                                        \
-            }                                                               \
-        }  STMT_END
-
-#  endif   /* PERL_CORE or PERL_IN_XSUB_RE */
-#else   /* No locale usage */
-#  define IN_LOCALE_RUNTIME                0
-#  define IN_SOME_LOCALE_FORM_RUNTIME      0
-#  define IN_LOCALE_COMPILETIME            0
-#  define IN_SOME_LOCALE_FORM_COMPILETIME  0
-#  define IN_LOCALE                        0
-#  define IN_SOME_LOCALE_FORM              0
-#  define IN_LC_ALL_COMPILETIME            0
-#  define IN_LC_ALL_RUNTIME                0
-#  define IN_LC_PARTIAL_COMPILETIME        0
-#  define IN_LC_PARTIAL_RUNTIME            0
-#  define IN_LC_COMPILETIME(category)      0
-#  define IN_LC_RUNTIME(category)          0
-#  define IN_LC(category)                  0
-#  define CHECK_AND_WARN_PROBLEMATIC_LOCALE_
-#  define _CHECK_AND_OUTPUT_WIDE_LOCALE_UTF8_MSG(s, send)
-#  define _CHECK_AND_OUTPUT_WIDE_LOCALE_CP_MSG(c)
+   /* On platforms where the static buffer contained in getenv() is per-thread
+    * rather than process-wide, another thread executing a getenv() at the same
+    * time won't destroy ours before we have copied the result safely away and
+    * unlocked the mutex.  On such platforms (which is most), we can have many
+    * readers of the environment at the same time. */
+#  ifdef GETENV_PRESERVES_OTHER_THREAD
+#    define GETENV_LOCK    ENV_READ_LOCK
+#    define GETENV_UNLOCK  ENV_READ_UNLOCK
+#  else
+     /* If, on the other hand, another thread could zap our getenv() return, we
+      * need to keep them from executing until we are done */
+#    define GETENV_LOCK    ENV_LOCK
+#    define GETENV_UNLOCK  ENV_UNLOCK
+#  endif
+#else
+#  define ENV_LOCK        NOOP
+#  define ENV_UNLOCK      NOOP
+#  define ENV_READ_LOCK   NOOP
+#  define ENV_READ_UNLOCK NOOP
+#  define ENV_INIT        NOOP
+#  define ENV_TERM        NOOP
+#  define GETENV_LOCK     NOOP
+#  define GETENV_UNLOCK   NOOP
 #endif
 
-#define locale_panic_via_(m, f, l)  Perl_locale_panic((m), __LINE__, f, l)
-#define locale_panic_(m)  locale_panic_via_((m), __FILE__, __LINE__)
-
 /* Locale/thread synchronization macros. */
-#if ! defined(USE_LOCALE_THREADS)
+#if ! defined(USE_LOCALE_THREADS)   /* No threads, or no locales */
 #  define LOCALE_LOCK_(cond)  NOOP
 #  define LOCALE_UNLOCK_      NOOP
-#  define LOCALE_INIT
-#  define LOCALE_TERM
-
+#  define LOCALE_LOCK         NOOP
+#  define LOCALE_UNLOCK       NOOP
 #else   /* Below: Threaded, and locales are supported */
 
-    /* A locale mutex is required on all such threaded builds. */
+    /* A locale mutex is required on all such threaded builds for at least
+     * situations where there is a global static buffer.  This base lock that
+     * handles these has a trailing underscore in the name */
 #  define LOCALE_LOCK_(cond_to_panic_if_already_locked)                     \
        PERL_REENTRANT_LOCK("locale",                                        \
                            &PL_locale_mutex, PL_locale_mutex_depth,         \
@@ -7155,47 +7061,25 @@ the plain locale pragma without a parameter (S<C<use locale>>) is in effect.
 #  define LOCALE_UNLOCK_                                                    \
        PERL_REENTRANT_UNLOCK("locale",                                      \
                              &PL_locale_mutex, PL_locale_mutex_depth)
-
-#  ifndef USE_THREAD_SAFE_LOCALE
-
-     /* By definition, a thread-unsafe locale means we need a critical
-      * section. */
-#    define LOCALE_LOCK    LOCALE_LOCK_(0)
-#    define LOCALE_UNLOCK  LOCALE_UNLOCK_
+#  ifdef USE_THREAD_SAFE_LOCALE
+    /* But for most situations, we use the macro name without a trailing
+     * underscore.
+     *
+     * In locale thread-safe Configurations, typical operations don't need
+     * locking */
+#    define LOCALE_LOCK         NOOP
+#    define LOCALE_UNLOCK       NOOP
+#  else
+     /* Whereas, thread-unsafe Configurations always requires locking */
+#    define LOCALE_LOCK_DOES_SOMETHING_
+#    define LOCALE_LOCK         LOCALE_LOCK_(0)
+#    define LOCALE_UNLOCK       LOCALE_UNLOCK_
 #    ifdef USE_LOCALE_NUMERIC
 #      define LC_NUMERIC_LOCK(cond_to_panic_if_already_locked)              \
                  LOCALE_LOCK_(cond_to_panic_if_already_locked)
 #      define LC_NUMERIC_UNLOCK  LOCALE_UNLOCK_
 #    endif
 #  endif
-
-#  ifdef WIN32_USE_FAKE_OLD_MINGW_LOCALES
-    /* This function is coerced by this Configure option into cleaning up
-     * memory that is static to locale.c.  So we call it at termination.  Doing
-     * it this way is kludgy but confines having to deal with this
-     * Configuration to a bare minimum number of places. */
-#      define LOCALE_TERM_POSIX_2008_  Perl_thread_locale_term(NULL)
-#  elif ! defined(USE_POSIX_2008_LOCALE)
-#      define LOCALE_TERM_POSIX_2008_  NOOP
-#  else
-     /* We have a locale object holding the 'C' locale for Posix 2008 */
-#    define LOCALE_TERM_POSIX_2008_                                         \
-                    STMT_START {                                            \
-                        if (PL_C_locale_obj) {                              \
-                            /* Make sure we aren't using the locale         \
-                             * space we are about to free */                \
-                            uselocale(LC_GLOBAL_LOCALE);                    \
-                            freelocale(PL_C_locale_obj);                    \
-                            PL_C_locale_obj = (locale_t) NULL;              \
-                        }                                                   \
-                    } STMT_END
-#  endif
-
-#  define LOCALE_INIT           MUTEX_INIT(&PL_locale_mutex)
-#  define LOCALE_TERM           STMT_START {                                \
-                                    LOCALE_TERM_POSIX_2008_;                \
-                                    MUTEX_DESTROY(&PL_locale_mutex);        \
-                                } STMT_END
 #endif
 
 /* There are some locale-related functions which may need locking only because
@@ -7220,6 +7104,36 @@ the plain locale pragma without a parameter (S<C<use locale>>) is in effect.
 #define gwLOCALE_LOCK    LOCALE_LOCK_(0)
 #define gwLOCALE_UNLOCK  LOCALE_UNLOCK_
 
+/* Similar to gwLOCALE_LOCK, there are functions that require both the locale
+ * and environment to be constant during their execution, and don't change
+ * either of those things, but do write to some sort of shared global space.
+ * They require some sort of exclusive lock against similar functions, and a
+ * read lock on both the locale and environment.  However, on systems which
+ * have per-thread locales, the locale is constant during the execution of
+ * these functions, and so no locale lock is necssary.  For such systems, an
+ * exclusive ENV lock is necessary and sufficient.  On systems where the locale
+ * could change out from under us, we use an exclusive LOCALE lock to prevent
+ * that, and a read ENV lock to prevent other threads that have nothing to do
+ * with locales here from changing the environment. */
+#ifdef LOCALE_LOCK_DOES_SOMETHING
+#  define gwENVr_LOCALEr_LOCK                                               \
+                    STMT_START { LOCALE_LOCK; ENV_READ_LOCK; } STMT_END
+#  define gwENVr_LOCALEr_UNLOCK                                             \
+                STMT_START { ENV_READ_UNLOCK; LOCALE_UNLOCK; } STMT_END
+#else
+#  define gwENVr_LOCALEr_LOCK           ENV_LOCK
+#  define gwENVr_LOCALEr_UNLOCK         ENV_UNLOCK
+#endif
+
+      /* On systems that don't have per-thread locales, even though we don't
+       * think we are changing the locale ourselves, behind the scenes it does
+       * get changed to whatever the thread's should be, so it has to be an
+       * exclusive lock.  By defining it here with this name, we can, for the
+       * most part, hide this detail from the rest of the code */
+/* Currently, the read lock is an exclusive lock */
+#define LOCALE_READ_LOCK                LOCALE_LOCK
+#define LOCALE_READ_UNLOCK              LOCALE_UNLOCK
+
 /* setlocale() generally returns in a global static buffer, but not on Windows
  * when operating in thread-safe mode */
 #if defined(WIN32) && defined(USE_THREAD_SAFE_LOCALE)
@@ -7241,45 +7155,6 @@ the plain locale pragma without a parameter (S<C<use locale>>) is in effect.
 /* It handles _wsetlocale() as well */
 #define WSETLOCALE_LOCK      POSIX_SETLOCALE_LOCK
 #define WSETLOCALE_UNLOCK    POSIX_SETLOCALE_UNLOCK
-
-/* Similar to gwLOCALE_LOCK, there are functions that require both the locale
- * and environment to be constant during their execution, and don't change
- * either of those things, but do write to some sort of shared global space.
- * They require some sort of exclusive lock against similar functions, and a
- * read lock on both the locale and environment.  However, on systems which
- * have per-thread locales, the locale is constant during the execution of
- * these functions, and so no locale lock is necssary.  For such systems, an
- * exclusive ENV lock is necessary and sufficient.  On systems where the locale
- * could change out from under us, we use an exclusive LOCALE lock to prevent
- * that, and a read ENV lock to prevent other threads that have nothing to do
- * with locales here from changing the environment. */
-#ifdef LOCALE_LOCK
-#  define gwENVr_LOCALEr_LOCK                                               \
-                    STMT_START { LOCALE_LOCK; ENV_READ_LOCK; } STMT_END
-#  define gwENVr_LOCALEr_UNLOCK                                             \
-                STMT_START { ENV_READ_UNLOCK; LOCALE_UNLOCK; } STMT_END
-#else
-#  define gwENVr_LOCALEr_LOCK           ENV_LOCK
-#  define gwENVr_LOCALEr_UNLOCK         ENV_UNLOCK
-#endif
-
-/* Now that we have defined gwENVr_LOCALEr_LOCK, we can finish defining
- * LOCALE_LOCK, which we kept undefined until here on a thread-safe system
- * so that we could use that fact to calculate what gwENVr_LOCALEr_LOCK should
- * be */
-#ifndef LOCALE_LOCK
-#  define LOCALE_LOCK                NOOP
-#  define LOCALE_UNLOCK              NOOP
-#endif
-
-      /* On systems that don't have per-thread locales, even though we don't
-       * think we are changing the locale ourselves, behind the scenes it does
-       * get changed to whatever the thread's should be, so it has to be an
-       * exclusive lock.  By defining it here with this name, we can, for the
-       * most part, hide this detail from the rest of the code */
-/* Currently, the read lock is an exclusive lock */
-#define LOCALE_READ_LOCK                LOCALE_LOCK
-#define LOCALE_READ_UNLOCK              LOCALE_UNLOCK
 
 
 #ifndef LC_NUMERIC_LOCK
@@ -7468,6 +7343,167 @@ the plain locale pragma without a parameter (S<C<use locale>>) is in effect.
 #define STRFMON_UNLOCK      LC_MONETARY_UNLOCK
 
 /* End of locale/env synchronization */
+
+#if ! defined(USE_LOCALE_THREADS)
+#  define LOCALE_INIT
+#  define LOCALE_TERM
+#else
+#  ifdef WIN32_USE_FAKE_OLD_MINGW_LOCALES
+    /* This function is coerced by this Configure option into cleaning up
+     * memory that is static to locale.c.  So we call it at termination.  Doing
+     * it this way is kludgy but confines having to deal with this
+     * Configuration to a bare minimum number of places. */
+#      define LOCALE_TERM_POSIX_2008_  Perl_thread_locale_term(NULL)
+#  elif ! defined(USE_POSIX_2008_LOCALE)
+#      define LOCALE_TERM_POSIX_2008_  NOOP
+#  else
+     /* We have a locale object holding the 'C' locale for Posix 2008 */
+#    define LOCALE_TERM_POSIX_2008_                                         \
+                    STMT_START {                                            \
+                        if (PL_C_locale_obj) {                              \
+                            /* Make sure we aren't using the locale         \
+                             * space we are about to free */                \
+                            uselocale(LC_GLOBAL_LOCALE);                    \
+                            freelocale(PL_C_locale_obj);                    \
+                            PL_C_locale_obj = (locale_t) NULL;              \
+                        }                                                   \
+                    } STMT_END
+#  endif
+
+#  define LOCALE_INIT           MUTEX_INIT(&PL_locale_mutex)
+#  define LOCALE_TERM           STMT_START {                                \
+                                    LOCALE_TERM_POSIX_2008_;                \
+                                    MUTEX_DESTROY(&PL_locale_mutex);        \
+                                } STMT_END
+#endif
+
+#ifdef USE_LOCALE /* These locale things are all subject to change */
+
+   /* Returns TRUE if the plain locale pragma without a parameter is in effect.
+    * */
+#  define IN_LOCALE_RUNTIME	(PL_curcop                                  \
+                              && CopHINTS_get(PL_curcop) & HINT_LOCALE)
+
+   /* Returns TRUE if either form of the locale pragma is in effect */
+#  define IN_SOME_LOCALE_FORM_RUNTIME                                       \
+        cBOOL(CopHINTS_get(PL_curcop) & (HINT_LOCALE|HINT_LOCALE_PARTIAL))
+
+#  define IN_LOCALE_COMPILETIME	cBOOL(PL_hints & HINT_LOCALE)
+#  define IN_SOME_LOCALE_FORM_COMPILETIME                                   \
+                        cBOOL(PL_hints & (HINT_LOCALE|HINT_LOCALE_PARTIAL))
+
+/*
+=for apidoc_section $locale
+
+=for apidoc Amn|bool|IN_LOCALE
+
+Evaluates to TRUE if the plain locale pragma without a parameter (S<C<use
+locale>>) is in effect.
+
+=for apidoc Amn|bool|IN_LOCALE_COMPILETIME
+
+Evaluates to TRUE if, when compiling a perl program (including an C<eval>) if
+the plain locale pragma without a parameter (S<C<use locale>>) is in effect.
+
+=for apidoc Amn|bool|IN_LOCALE_RUNTIME
+
+Evaluates to TRUE if, when executing a perl program (including an C<eval>) if
+the plain locale pragma without a parameter (S<C<use locale>>) is in effect.
+
+=cut
+*/
+
+#  define IN_LOCALE                                                         \
+        (IN_PERL_COMPILETIME ? IN_LOCALE_COMPILETIME : IN_LOCALE_RUNTIME)
+#  define IN_SOME_LOCALE_FORM                                               \
+                    (IN_PERL_COMPILETIME ? IN_SOME_LOCALE_FORM_COMPILETIME  \
+                                         : IN_SOME_LOCALE_FORM_RUNTIME)
+
+#  define IN_LC_ALL_COMPILETIME   IN_LOCALE_COMPILETIME
+#  define IN_LC_ALL_RUNTIME       IN_LOCALE_RUNTIME
+
+#  define IN_LC_PARTIAL_COMPILETIME   cBOOL(PL_hints & HINT_LOCALE_PARTIAL)
+#  define IN_LC_PARTIAL_RUNTIME                                             \
+              (PL_curcop && CopHINTS_get(PL_curcop) & HINT_LOCALE_PARTIAL)
+
+#  define IN_LC_COMPILETIME(category)                                       \
+       (       IN_LC_ALL_COMPILETIME                                        \
+        || (   IN_LC_PARTIAL_COMPILETIME                                    \
+            && Perl__is_in_locale_category(aTHX_ TRUE, (category))))
+#  define IN_LC_RUNTIME(category)                                           \
+      (IN_LC_ALL_RUNTIME || (IN_LC_PARTIAL_RUNTIME                          \
+                 && Perl__is_in_locale_category(aTHX_ FALSE, (category))))
+#  define IN_LC(category)  \
+                    (IN_LC_COMPILETIME(category) || IN_LC_RUNTIME(category))
+
+#  if defined (PERL_CORE) || defined (PERL_IN_XSUB_RE)
+
+     /* This internal macro should be called from places that operate under
+      * locale rules.  If there is a problem with the current locale that
+      * hasn't been raised yet, it will output a warning this time.  Because
+      * this will so rarely  be true, there is no point to optimize for time;
+      * instead it makes sense to minimize space used and do all the work in
+      * the rarely called function */
+#    ifdef USE_LOCALE_CTYPE
+#      define CHECK_AND_WARN_PROBLEMATIC_LOCALE_                              \
+                STMT_START {                                                  \
+                    if (UNLIKELY(PL_warn_locale)) {                           \
+                        Perl_warn_problematic_locale();                       \
+                    }                                                         \
+                }  STMT_END
+#    else
+#      define CHECK_AND_WARN_PROBLEMATIC_LOCALE_
+#    endif
+
+
+     /* These two internal macros are called when a warning should be raised,
+      * and will do so if enabled.  The first takes a single code point
+      * argument; the 2nd, is a pointer to the first byte of the UTF-8 encoded
+      * string, and an end position which it won't try to read past */
+#    define _CHECK_AND_OUTPUT_WIDE_LOCALE_CP_MSG(cp)                        \
+        STMT_START {                                                        \
+            if (! IN_UTF8_CTYPE_LOCALE && ckWARN(WARN_LOCALE)) {            \
+                Perl_warner(aTHX_ packWARN(WARN_LOCALE),                    \
+                                       "Wide character (U+%" UVXf ") in %s",\
+                                       (UV) cp, OP_DESC(PL_op));            \
+            }                                                               \
+        }  STMT_END
+
+#    define _CHECK_AND_OUTPUT_WIDE_LOCALE_UTF8_MSG(s, send)                 \
+        STMT_START { /* Check if to warn before doing the conversion work */\
+            if (! IN_UTF8_CTYPE_LOCALE && ckWARN(WARN_LOCALE)) {            \
+                UV cp = utf8_to_uvchr_buf((U8 *) (s), (U8 *) (send), NULL); \
+                Perl_warner(aTHX_ packWARN(WARN_LOCALE),                    \
+                    "Wide character (U+%" UVXf ") in %s",                   \
+                    (cp == 0)                                               \
+                     ? UNICODE_REPLACEMENT                                  \
+                     : (UV) cp,                                             \
+                    OP_DESC(PL_op));                                        \
+            }                                                               \
+        }  STMT_END
+
+#  endif   /* PERL_CORE or PERL_IN_XSUB_RE */
+#else   /* No locale usage */
+#  define IN_LOCALE_RUNTIME                0
+#  define IN_SOME_LOCALE_FORM_RUNTIME      0
+#  define IN_LOCALE_COMPILETIME            0
+#  define IN_SOME_LOCALE_FORM_COMPILETIME  0
+#  define IN_LOCALE                        0
+#  define IN_SOME_LOCALE_FORM              0
+#  define IN_LC_ALL_COMPILETIME            0
+#  define IN_LC_ALL_RUNTIME                0
+#  define IN_LC_PARTIAL_COMPILETIME        0
+#  define IN_LC_PARTIAL_RUNTIME            0
+#  define IN_LC_COMPILETIME(category)      0
+#  define IN_LC_RUNTIME(category)          0
+#  define IN_LC(category)                  0
+#  define CHECK_AND_WARN_PROBLEMATIC_LOCALE_
+#  define _CHECK_AND_OUTPUT_WIDE_LOCALE_UTF8_MSG(s, send)
+#  define _CHECK_AND_OUTPUT_WIDE_LOCALE_CP_MSG(c)
+#endif
+
+#define locale_panic_via_(m, f, l)  Perl_locale_panic((m), __LINE__, f, l)
+#define locale_panic_(m)  locale_panic_via_((m), __FILE__, __LINE__)
 
 #ifdef USE_LOCALE_NUMERIC
 
@@ -7793,39 +7829,6 @@ cannot have changed since the precalculation.
     STMT_START { block; } STMT_END
 
 #endif /* !USE_LOCALE_NUMERIC */
-
-#ifdef USE_THREADS
-#  define ENV_LOCK            PERL_WRITE_LOCK(&PL_env_mutex)
-#  define ENV_UNLOCK          PERL_WRITE_UNLOCK(&PL_env_mutex)
-#  define ENV_READ_LOCK       PERL_READ_LOCK(&PL_env_mutex)
-#  define ENV_READ_UNLOCK     PERL_READ_UNLOCK(&PL_env_mutex)
-#  define ENV_INIT            PERL_RW_MUTEX_INIT(&PL_env_mutex)
-#  define ENV_TERM            PERL_RW_MUTEX_DESTROY(&PL_env_mutex)
-
-   /* On platforms where the static buffer contained in getenv() is per-thread
-    * rather than process-wide, another thread executing a getenv() at the same
-    * time won't destroy ours before we have copied the result safely away and
-    * unlocked the mutex.  On such platforms (which is most), we can have many
-    * readers of the environment at the same time. */
-#  ifdef GETENV_PRESERVES_OTHER_THREAD
-#    define GETENV_LOCK    ENV_READ_LOCK
-#    define GETENV_UNLOCK  ENV_READ_UNLOCK
-#  else
-     /* If, on the other hand, another thread could zap our getenv() return, we
-      * need to keep them from executing until we are done */
-#    define GETENV_LOCK    ENV_LOCK
-#    define GETENV_UNLOCK  ENV_UNLOCK
-#  endif
-#else
-#  define ENV_LOCK        NOOP
-#  define ENV_UNLOCK      NOOP
-#  define ENV_READ_LOCK   NOOP
-#  define ENV_READ_UNLOCK NOOP
-#  define ENV_INIT        NOOP
-#  define ENV_TERM        NOOP
-#  define GETENV_LOCK     NOOP
-#  define GETENV_UNLOCK   NOOP
-#endif
 
 #ifndef PERL_NO_INLINE_FUNCTIONS
 /* Static inline funcs that depend on includes and declarations above.
