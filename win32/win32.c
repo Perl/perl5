@@ -3700,6 +3700,17 @@ win32_pclose(PerlIO *pf)
 #endif /* USE_RTL_POPEN */
 }
 
+/* wcscpy() arguments are restrict qualified, but if they're equal
+   we don't need to do the copy
+*/
+static inline WCHAR *
+cond_wcsncpy(WCHAR *out, const WCHAR *in, size_t n) {
+    assert(wcslen(in) < n);
+    if (out != in)
+        wcsncpy(out, in, n);
+    return out;
+}
+
 DllExport int
 win32_link(const char *oldname, const char *newname)
 {
@@ -3709,7 +3720,8 @@ win32_link(const char *oldname, const char *newname)
 
     if (MultiByteToWideChar(CP_ACP, 0, oldname, -1, wOldName, MAX_PATH+1) &&
         MultiByteToWideChar(CP_ACP, 0, newname, -1, wNewName, MAX_PATH+1) &&
-        ((aTHXa(PERL_GET_THX)), wcscpy(wOldName, PerlDir_mapW(wOldName)),
+        ((aTHXa(PERL_GET_THX)),
+          cond_wcsncpy(wOldName, PerlDir_mapW(wOldName), C_ARRAY_LENGTH(wOldName)),
         CreateHardLinkW(PerlDir_mapW(wNewName), wOldName, NULL)))
     {
         return 0;
@@ -3733,8 +3745,10 @@ win32_symlink(const char *oldfile, const char *newfile)
 {
     dTHX;
     size_t oldfile_len = strlen(oldfile);
+    GCC_DIAG_IGNORE_DECL(-Wcast-function-type);
     pCreateSymbolicLinkA_t pCreateSymbolicLinkA =
         (pCreateSymbolicLinkA_t)GetProcAddress(GetModuleHandle("kernel32.dll"), "CreateSymbolicLinkA");
+    GCC_DIAG_RESTORE_DECL;
     DWORD create_flags = 0;
 
     /* this flag can be used only on Windows 10 1703 or newer */
@@ -5043,7 +5057,9 @@ Perl_init_os_extras(void)
     HMODULE module = (HMODULE)((w32_perldll_handle == INVALID_HANDLE_VALUE)
                                ? GetModuleHandle(NULL)
                                : w32_perldll_handle);
+    GCC_DIAG_IGNORE_DECL(-Wcast-function-type);
     pfn_init = (void (*)(pTHX))GetProcAddress(module, "init_Win32CORE");
+    GCC_DIAG_RESTORE_DECL;
     aTHXa(PERL_GET_THX);
     if (pfn_init)
         pfn_init(aTHX);
