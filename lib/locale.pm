@@ -3,7 +3,7 @@ package locale;
 use strict;
 use warnings;
 
-our $VERSION = '1.11';
+our $VERSION = '1.12';
 use Config;
 
 $Carp::Internal{ (__PACKAGE__) } = 1;
@@ -54,7 +54,6 @@ to behave as if in the C<C> locale; attempts to change the locale will fail.
 # argument.
 
 $locale::hint_bits = 0x4;
-$locale::partial_hint_bits = 0x10;  # If pragma has an argument
 
 # The pseudo-category :characters consists of 2 real ones; but it also is
 # given its own number, -1, because in the complement form it also has the
@@ -64,9 +63,9 @@ sub import {
     shift;  # should be 'locale'; not checked
 
     $^H{locale} = 0 unless defined $^H{locale};
+    $^H |= $locale::hint_bits;
     if (! @_) { # If no parameter, use the plain form that changes all categories
-        $^H |= $locale::hint_bits;
-
+        $^H{locale} = 0;
     }
     else {
         my @categories = ( qw(:ctype :collate :messages
@@ -103,11 +102,6 @@ sub import {
                 next;
             }
 
-            $^H |= $locale::partial_hint_bits;
-
-            # This form of the pragma overrides the other
-            $^H &= ~$locale::hint_bits;
-
             $arg =~ s/^://;
 
             eval { require POSIX; POSIX->import('locale_h'); };
@@ -139,7 +133,7 @@ sub import {
 }
 
 sub unimport {
-    $^H &= ~($locale::hint_bits | $locale::partial_hint_bits);
+    $^H &= ~($locale::hint_bits);
     $^H{locale} = 0;
 }
 

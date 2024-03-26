@@ -3178,9 +3178,9 @@ Perl_nothreadhook(pTHX);
 #define PERL_ARGS_ASSERT_NOTHREADHOOK
 
 PERL_CALLCONV void
-Perl_notify_parser_that_changed_to_utf8(pTHX)
+Perl_notify_parser_that_encoding_changed(pTHX)
         __attribute__visibility__("hidden");
-#define PERL_ARGS_ASSERT_NOTIFY_PARSER_THAT_CHANGED_TO_UTF8
+#define PERL_ARGS_ASSERT_NOTIFY_PARSER_THAT_ENCODING_CHANGED
 
 PERL_CALLCONV OP *
 Perl_oopsAV(pTHX_ OP *o)
@@ -9359,6 +9359,11 @@ S_tokeq(pTHX_ SV *sv);
 STATIC void
 S_update_debugger_info(pTHX_ SV *orig_sv, const char * const buf, STRLEN len);
 # define PERL_ARGS_ASSERT_UPDATE_DEBUGGER_INFO
+
+STATIC void
+S_yyerror_non_ascii_message(pTHX_ const U8 * const s);
+# define PERL_ARGS_ASSERT_YYERROR_NON_ASCII_MESSAGE \
+        assert(s)
 
 STATIC int
 S_yywarn(pTHX_ const char * const s, U32 flags);
