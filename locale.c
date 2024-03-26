@@ -3234,7 +3234,46 @@ S_find_locale_from_environment(pTHX_ const locale_category_index index)
     /* Use any "LC_ALL" environment variable, as it overrides everything else.
      * */
     if (lc_all && strNE(lc_all, "")) {
-        return lc_all;
+        if (index == LC_ALL_INDEX_) {
+            return lc_all;
+        }
+
+        /* Here, there is an LC_ALL environment variable, but we want the value
+         * for just one category from it.  This is fine if LC_ALL is a single
+         * locale that applies to all categories, but if not, we need just the
+         * component that is for the category the caller is asking for.  It
+         * turns out that no libc/shell that khw knows about permits such a
+         * disparate LC_ALL environment variable, but this easily handles such
+         * a case should it ever arise. */
+        switch (parse_LC_ALL_string(lc_all,
+                                    (const char **) &locale_names,
+                                    false,      /* Return only [0] if suffices */
+                                    false,      /* Don't panic on error */
+                                    __LINE__))
+        {
+          case invalid:
+            return NULL;
+
+          case no_array:
+            return lc_all;
+
+          case only_element_0:
+            SAVEFREEPV(locale_names[0]);
+            return locale_names[0];
+
+          case full_array:
+            /* We need to mortalize the desired component, and free the rest */
+            for (unsigned int i = 0; i < LC_ALL_INDEX_; i++) {
+                if (i == index) {
+                    SAVEFREEPV(locale_names[i]);
+                }
+                else {
+                    Safefree(locale_names[i]);
+                }
+            }
+
+            return locale_names[index];
+        }
     }
 
     /* Here, no usable LC_ALL environment variable.  We have to handle each
