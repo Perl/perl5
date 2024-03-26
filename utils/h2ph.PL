@@ -368,6 +368,30 @@ while (defined (my $file = next_file())) {
 	    $new =~ s/(["\\])/\\$1/g;       #"]);
 	    # now that's almost like a macro (we hope)
 	    EMIT($proto);
+	} elsif (/^typedef/) {
+	    # Add typedefs to '%isatype' so we can eliminate them later...
+	    until( /typedef[^\{]*(?:\{[^\}]*\}[^\{]*)*[^\{]*\W(?:\w+)?\s*;\s*$/ ) {
+		last unless defined ($next = next_line($file));
+		chomp $next;
+		# We don't really care about the contents; we just want the name
+                $next =~ s/\b\/\/.*//;
+		$next =~ s/^\s*#.*//;
+		$_ .= $next;
+                $_ =~ s/\b\/\*[^*]*\*+([^\/*][^*]*\*+)*\///;
+	    }
+	    $isatype{$1} = 1 if /typedef[^\{]*(?:\{[^\}]*\}[^\{]*)*[^\{]*\W(\w+)\s*;\s*$/;
+	} elsif (/^(?:struct|union)/) {
+	    # Add typedefs to '%isatype' so we can eliminate them later...
+	    until( /(?:struct|union)\s+(?:\w+)\s*(?:\{[^\}]*\}[^\{]*)*[^\{]*\s*;\s*$/ ) {
+		last unless defined ($next = next_line($file));
+		chomp $next;
+		# We don't really care about the contents; we just want the name
+                $next =~ s/\b\/\/.*//;
+		$next =~ s/^\s*#.*//;
+		$_ .= $next;
+                $_ =~ s/\b\/\*[^*]*\*+([^\/*][^*]*\*+)*\///;
+	    }
+	    $isatype{$1} = 1 if /(?:struct|union)\s+(\w+)\s*(?:\{[^\}]*\}[^\{]*)*[^\{]*\s*;\s*$/;
 	}
     }
     $Is_converted{$file} = 1;
@@ -485,6 +509,8 @@ sub expr {
 		s/\([\w\s]+[\*\s]*\)// && next;      # then eliminate them.
 	    }
 	};
+	# "<headers.h>"-style include paths; just quote them for now
+	s/^(<[_A-Z\/]+(?:\.h)?>)//i && do { $new .= "\"$1\""; next;};
 	# struct/union member, including arrays:
 	s/^([_A-Z]\w*(\[[^\]]+\])?((\.|->)[_A-Z]\w*(\[[^\]]+\])?)+)//i && do {
 	    my $id = $1;
@@ -851,6 +877,37 @@ DEFINE
 		    quotemeta($define{$_}), "\" } }\n\n";
 	    }
 	}
+
+	print PREAMBLE <<SIZEOF;
+%sizeof = (
+	char	=> 1,
+	uchar	=> 1,
+	u_char	=> 1,
+
+	short	=> $Config{shortsize},
+	ushort	=> $Config{shortsize},
+	u_short => $Config{shortsize},
+
+	int	=> $Config{intsize},
+	uint	=> $Config{intsize},
+	u_int	=> $Config{intsize},
+
+	long	=> $Config{longsize},
+	ulong	=> $Config{longsize},
+	u_long	=> $Config{longsize},
+
+	FILE	=> $Config{ptrsize},
+	key_t	=> $Config{ptrsize},
+	caddr_t => $Config{ptrsize},
+
+	float	=> @{[ length(pack("f", 0.0)) ]},
+	double	=> $Config{doublesize},
+	size_t	=> $Config{sizesize},
+
+	%sizeof,   # Allow scripts to extend/customize %sizeof
+);
+SIZEOF
+
 	print PREAMBLE "\n1;\n";  # avoid 'did not return a true value' when empty
     close PREAMBLE               or die "Cannot close $preamble:  $!";
 }
@@ -996,7 +1053,7 @@ The usual warnings if it can't read or write the files involved.
 
 =head1 BUGS
 
-Doesn't construct the %sizeof array for you.
+Only constructs part of the %sizeof array for you.
 
 It doesn't handle all C constructs, but it does attempt to isolate
 definitions inside evals so that you can get at the definitions
@@ -1020,6 +1077,10 @@ Doesn't handle complicated expressions built piecemeal, a la:
 
 Doesn't necessarily locate all of your C compiler's internally-defined
 symbols.
+
+Only recognizes C<typedef>s, etc. that were defined B<during this run> --
+meaning C<h2ph -r /usr/include> (recursive) will likely work better than
+trying to individually convert B<.h> files one-by-one.
 
 =cut
 
