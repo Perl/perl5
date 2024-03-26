@@ -1114,6 +1114,8 @@ foreach my $Locale (@Locale) {
     debug "\n";
     debug "Locale = $Locale\n";
 
+    setlocale(&POSIX::LC_ALL, "C");     # Clear out old code set for a fresh
+                                        # start
     unless (setlocale(&POSIX::LC_ALL, $Locale)) {
         $setlocale_failed{$Locale} = $Locale;
 	next;
