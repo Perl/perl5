@@ -2066,6 +2066,15 @@ S_sv_setnv(pTHX_ SV* sv, int numtype)
     }
 }
 
+#ifndef NV_PRESERVES_UV
+#  define MAX_UV_PRESERVED_IN_NV (((UV)1 << NV_PRESERVES_UV_BITS) - 1)
+#  define MAX_IV_PRESERVED_IN_NV ((IV)MAX_UV_PRESERVED_IN_NV)
+#  define MIN_IV_PRESERVED_IN_NV (-MAX_IV_PRESERVED_IN_NV)
+/* We presume that (IV)MAX_UV_PRESERVED_IN_NV and (-MAX_IV_PRESERVED_IN_NV)
+   above will not overflow if the condition below holds true:  */
+STATIC_ASSERT_DECL(MAX_UV_PRESERVED_IN_NV <= (UV)IV_MAX);
+#endif
+
 STATIC bool
 S_sv_2iuv_common(pTHX_ SV *const sv)
 {
@@ -2098,9 +2107,10 @@ S_sv_2iuv_common(pTHX_ SV *const sv)
             SvIV_set(sv, I_V(SvNVX(sv)));
             if (SvNVX(sv) == (NV) SvIVX(sv)
 #ifndef NV_PRESERVES_UV
-                && SvIVX(sv) != IV_MIN /* avoid negating IV_MIN below */
-                && (((UV)1 << NV_PRESERVES_UV_BITS) >
-                    (UV)(SvIVX(sv) > 0 ? SvIVX(sv) : -SvIVX(sv)))
+                /* Optimizing compilers might merge two comparisons below
+                   into single comparison */
+                && MIN_IV_PRESERVED_IN_NV <= SvIVX(sv)
+                && SvIVX(sv) <= MAX_IV_PRESERVED_IN_NV
                 /* Don't flag it as "accurately an integer" if the number
                    came from a (by definition imprecise) NV operation, and
                    we're outside the range of NV integer precision */
