@@ -602,10 +602,12 @@ jobs:
         env:
           PATH: /usr/bin:/bin
           SHELLOPTS: igncr
+        # The -Astatic_ext=mro works around a hash collision with
+        # --enable-auto-image-base and should be revertible in 5.39.11
         run: |
           cd ~/work
           set +e
-          ./Configure -des -Dusedevel -Doptimize=-g -DDEBUGGING || exit 1
+          ./Configure -des -Dusedevel -Doptimize=-g -DDEBUGGING -Astatic_ext=mro || exit 1
       - name: Build
         shell: sh
         env:
