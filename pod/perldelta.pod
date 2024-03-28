@@ -385,7 +385,31 @@ platform specific bugs also go here.
 
 =item *
 
-XXX
+fork() failures on cygwin with C<-DDEBUGGING> builds.
+
+Perl uses the C<--enable-auto-image-base> option to set the base
+images for DLLs for C<cygperl5_39_10.dll> and the DLLs needed for
+dynamically loaded modules on cygwin.
+
+With 5.39.10 if perl is built with C<-DDEBUGGING> or possibly other
+options that increase the address space used by F<cygperl5_39_10.dll>,
+the address space for F<cygperl5_39_10.dll> overlaps with the address
+space allocated for F<mro.dll>.
+
+The C<mro> module will still load, but if perl attempts to fork you
+will likely see an error like:
+
+ 0 [main] perl 34054 child_info_fork::abort: address space needed by \
+    'mro.dll' (0x400000) is already occupied
+
+You can workaround this by building without the C<-DDEBUGGING> option,
+or by making C<mro> a static extension:
+
+  ./Configure ... -Astatic_ext=mro
+
+We expect the name change of the F<cygperl5_39_10.dll> to
+F<cygperl5_39_11.dll> in 5.39.11 will fix this problem for the next
+release.  [github #22104]
 
 =back
 
