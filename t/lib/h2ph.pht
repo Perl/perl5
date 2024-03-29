@@ -2,18 +2,22 @@ require '_h2ph_pre.ph';
 
 no warnings qw(redefine misc);
 
-unless(defined(&SQUARE)) {
-    sub SQUARE {
-	my($x) = @_;
+eval 'sub SQUARE {
+    my($x) = @_;
 	eval q((($x)*($x)));
-    }
-}
+}' unless defined(&SQUARE);
 unless(defined(&ERROR)) {
     eval 'sub ERROR {
         my($x) = @_;
 	    eval q( &fprintf( &stderr, \\"%s\\\\n\\", $x->[2][3][0]));
     }' unless defined(&ERROR);
 }
+if(defined(&NOT_DEFINED_HERE)) {
+    die("NOT_DEFINED_HERE should not be defined at this point!");
+}
+eval 'sub NOT_DEFINED_HERE () {
+    eval q(42);
+}' unless defined(&NOT_DEFINED_HERE);
 unless(defined(&_H2PH_H_)) {
     eval 'sub _H2PH_H_ () {1;}' unless defined(&_H2PH_H_);
     # "$Revision h2ph.h,v 1.0 98/05/04 20:42:14 billy $"
