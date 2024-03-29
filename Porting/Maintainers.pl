@@ -1005,6 +1005,10 @@ our %Modules = (
     'Scalar::Util' => {
         'DISTRIBUTION' => 'PEVANS/Scalar-List-Utils-1.63.tar.gz',
         'FILES'        => q[cpan/Scalar-List-Utils],
+        'CUSTOMIZED'   => [
+            # https://github.com/Dual-Life/Scalar-List-Utils/pull/130
+            't/uniqnum.t'
+         ],
     },
 
     'Search::Dict' => {
