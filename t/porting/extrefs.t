@@ -106,7 +106,7 @@ sub try_compile_and_link {
         my $cccmd = "$Config{'cc'} $out_opt$tmp_exe $ccflags $tmp.c $libs $errornull";
 
 	if ($^O eq 'VMS') {
-            $cccmd = "$Config{'cc'} /include=($COREincdir) $tmp.c";
+            $cccmd = "$Config{'cc'} $Config{'ccflags'}/include=($COREincdir) $tmp.c";
         }
 
        if ($^O eq 'VMS') {
