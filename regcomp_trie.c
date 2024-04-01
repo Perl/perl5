@@ -517,21 +517,28 @@ is the recommended Unicode-aware way of saying
            : ( state==1 ? special : 0 )                                 \
       )
 
-#define TRIE_BITMAP_SET_FOLDED(trie, uvc, folder)           \
-STMT_START {                                                \
-    TRIE_BITMAP_SET(trie, uvc);                             \
-    /* store the folded codepoint */                        \
-    if ( folder )                                           \
-        TRIE_BITMAP_SET(trie, folder[(U8) uvc ]);           \
-                                                            \
-    if ( !UTF ) {                                           \
-        /* store first byte of utf8 representation of */    \
-        /* variant codepoints */                            \
-        if (! UVCHR_IS_INVARIANT(uvc)) {                    \
-            TRIE_BITMAP_SET(trie, UTF8_TWO_BYTE_HI(uvc));   \
-        }                                                   \
-    }                                                       \
-} STMT_END
+/* Helper function for make_trie(): set a trie bit for both the character
+ * and its folded variant, and for the first byte of a variant codepoint,
+ * if any */
+
+STATIC void
+S_trie_bitmap_set_folded(pTHX_ RExC_state_t *pRExC_state,
+    reg_trie_data *trie, U8 uvc, const U8 * folder)
+{
+    TRIE_BITMAP_SET(trie, uvc);
+    /* store the folded codepoint */
+    if ( folder )
+        TRIE_BITMAP_SET(trie, folder[(U8) uvc ]);
+
+    if ( !UTF ) {
+        /* store first byte of utf8 representation of */
+        /* variant codepoints */
+        if (! UVCHR_IS_INVARIANT(uvc)) {
+            TRIE_BITMAP_SET(trie, UTF8_TWO_BYTE_HI(uvc));
+        }
+    }
+}
+
 
 I32
 Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
@@ -777,7 +784,7 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
                 if ( set_bit ) {
                     /* store the codepoint in the bitmap, and its folded
                      * equivalent. */
-                    TRIE_BITMAP_SET_FOLDED(trie, uvc, folder);
+                    S_trie_bitmap_set_folded(aTHX_ pRExC_state, trie, uvc, folder);
                     set_bit = 0; /* We've done our bit :-) */
                 }
             } else {
@@ -1400,14 +1407,14 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
                                     SV ** const tmp = av_fetch_simple( revcharmap, first_ofs, 0);
                                     const U8 * const ch = (U8*)SvPV_nolen_const( *tmp );
 
-                                    TRIE_BITMAP_SET_FOLDED(trie,*ch, folder);
+                                    S_trie_bitmap_set_folded(aTHX_ pRExC_state, trie, *ch, folder);
                                     DEBUG_OPTIMISE_r(
                                         Perl_re_printf( aTHX_  "%s", (char*)ch)
                                     );
                                 }
                             }
                             /* store the current firstchar in the bitmap */
-                            TRIE_BITMAP_SET_FOLDED(trie,*ch, folder);
+                            S_trie_bitmap_set_folded(aTHX_ pRExC_state, trie, *ch, folder);
                             DEBUG_OPTIMISE_r(Perl_re_printf( aTHX_ "%s", ch));
                         }
                         first_ofs = ofs;
