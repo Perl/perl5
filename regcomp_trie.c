@@ -534,7 +534,8 @@ S_trie_bitmap_set_folded(pTHX_ RExC_state_t *pRExC_state,
         /* store first byte of utf8 representation of */
         /* variant codepoints */
         if (! UVCHR_IS_INVARIANT(uvc)) {
-            TRIE_BITMAP_SET(trie, UTF8_TWO_BYTE_HI(uvc));
+            U8 hi = UTF8_TWO_BYTE_HI(uvc);
+            TRIE_BITMAP_SET(trie, hi);
         }
     }
 }
