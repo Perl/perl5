@@ -534,7 +534,12 @@ S_trie_bitmap_set_folded(pTHX_ RExC_state_t *pRExC_state,
         /* store first byte of utf8 representation of */
         /* variant codepoints */
         if (! UVCHR_IS_INVARIANT(uvc)) {
-            TRIE_BITMAP_SET(trie, UTF8_TWO_BYTE_HI(uvc));
+            U8 hi = UTF8_TWO_BYTE_HI(uvc);
+            /* Note that hi will be either 0xc2 or 0xc3, and
+             * TRIE_BITMAP_SET() will do >>3 to get the byte offset
+             * within the bit table, which is constant, and Coverity
+             * complained about this (CID 488118). */
+            TRIE_BITMAP_SET(trie, hi);
         }
     }
 }
