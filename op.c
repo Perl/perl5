@@ -15888,8 +15888,10 @@ Perl_rcpv_new(pTHX_ const char *pv, STRLEN len, U32 flags) {
     if (!pv && (flags & RCPVf_NO_COPY) == 0)
         return NULL;
 
-    if (flags & RCPVf_USE_STRLEN)
+    if (flags & RCPVf_USE_STRLEN) {
+        assert(pv);
         len = strlen(pv);
+    }
 
     assert(len || (flags & RCPVf_ALLOW_EMPTY));
 
