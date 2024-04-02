@@ -5531,6 +5531,16 @@ Perl_op_convert_list(pTHX_ I32 type, I32 flags, OP *o)
         if (FEATURE_MODULE_TRUE_IS_ENABLED)
             flags |= OPf_SPECIAL;
     }
+    if (type == OP_STRINGIFY && OP_TYPE_IS(o, OP_CONST) &&
+        !(flags & OPf_FOLDED) ) {
+        assert(!OpSIBLING(o));
+        /* Don't wrap a single CONST in a list, process that list,
+         * then constant fold the list back to the starting OP.
+         * Note: Folded CONSTs do not seem to occur frequently
+         * enough for it to be worth the code bloat of also
+         * providing a fast path for them. */
+        return o;
+    }
     if (!o || o->op_type != OP_LIST)
         o = force_list(o, FALSE);
     else
