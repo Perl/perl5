@@ -523,18 +523,18 @@ is the recommended Unicode-aware way of saying
 
 STATIC void
 S_trie_bitmap_set_folded(pTHX_ RExC_state_t *pRExC_state,
-    reg_trie_data *trie, U8 uvc, const U8 * folder)
+    reg_trie_data *trie, U8 ch, const U8 * folder)
 {
-    TRIE_BITMAP_SET(trie, uvc);
+    TRIE_BITMAP_SET(trie, ch);
     /* store the folded codepoint */
     if ( folder )
-        TRIE_BITMAP_SET(trie, folder[(U8) uvc ]);
+        TRIE_BITMAP_SET(trie, folder[ch]);
 
     if ( !UTF ) {
         /* store first byte of utf8 representation of */
         /* variant codepoints */
-        if (! UVCHR_IS_INVARIANT(uvc)) {
-            U8 hi = UTF8_TWO_BYTE_HI(uvc);
+        if (! UVCHR_IS_INVARIANT(ch)) {
+            U8 hi = UTF8_TWO_BYTE_HI(ch);
             /* Note that hi will be either 0xc2 or 0xc3, and
              * TRIE_BITMAP_SET() will do >>3 to get the byte offset
              * within the bit table, which is constant, and Coverity
