@@ -9,7 +9,36 @@ use strict;
 
 use Config;
 use POSIX;
-use Test::More tests => 25;
+use Test::More tests => 26;
+
+# For the first go to UTC to avoid DST issues around the world when testing.  SUS3 says that
+# null should get you UTC, but some environments want the explicit names.
+# Those with a working tzset() should be able to use the TZ below.
+$ENV{TZ} = "EST5EDT";
+
+SKIP: {
+    # It looks like POSIX.xs claims that only VMS and Mac OS traditional
+    # don't have tzset().  Win32 works to call the function, but it doesn't
+    # actually do anything.  Cygwin works in some places, but not others.  The
+    # other Win32's below are guesses.
+    skip "No tzset()", 1
+       if $^O eq "VMS" || $^O eq "cygwin" ||
+          $^O eq "MSWin32" || $^O eq "interix";
+    tzset();
+    SKIP: {
+      TODO: {
+        local $TODO = "Make sure this test works to expose the problem";
+
+        my @tzname = tzname();
+
+        # See extensive discussion in GH #22062.
+        skip 1 if $tzname[1] ne "EDT";
+        is(strftime("%Y-%m-%d %H:%M:%S", 0, 30, 2, 10, 2, 124, 0, 0, 0),
+                    "2024-03-10 02:30:00",
+                    "strftime() doesnt pay attention to dst");
+      };
+    }
+}
 
 # go to UTC to avoid DST issues around the world when testing.  SUS3 says that
 # null should get you UTC, but some environments want the explicit names.
@@ -17,10 +46,6 @@ use Test::More tests => 25;
 $ENV{TZ} = "UTC0UTC";
 
 SKIP: {
-    # It looks like POSIX.xs claims that only VMS and Mac OS traditional
-    # don't have tzset().  Win32 works to call the function, but it doesn't
-    # actually do anything.  Cygwin works in some places, but not others.  The
-    # other Win32's below are guesses.
     skip "No tzset()", 2
        if $^O eq "VMS" || $^O eq "cygwin" ||
           $^O eq "MSWin32" || $^O eq "interix";
