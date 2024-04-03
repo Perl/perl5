@@ -26,9 +26,6 @@ SKIP: {
           $^O eq "MSWin32" || $^O eq "interix";
     tzset();
     SKIP: {
-      TODO: {
-        local $TODO = "Make sure this test works to expose the problem";
-
         my @tzname = tzname();
 
         # See extensive discussion in GH #22062.
@@ -36,7 +33,6 @@ SKIP: {
         is(strftime("%Y-%m-%d %H:%M:%S", 0, 30, 2, 10, 2, 124, 0, 0, 0),
                     "2024-03-10 02:30:00",
                     "strftime() doesnt pay attention to dst");
-      };
     }
 }
 
