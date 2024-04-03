@@ -3409,7 +3409,7 @@ Adm	|bool	|sv_streq	|NULLOK SV *sv1 			\
 Adp	|bool	|sv_streq_flags |NULLOK SV *sv1 			\
 				|NULLOK SV *sv2 			\
 				|const U32 flags
-Adp	|SV *	|sv_strftime_ints					\
+EXpx	|SV *	|sv_strftime_ints					\
 				|NN SV *fmt				\
 				|int sec				\
 				|int min				\

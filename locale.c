@@ -8058,31 +8058,38 @@ S_maybe_override_codeset(pTHX_ const char * codeset,
 /*
 =for apidoc_section $time
 =for apidoc      sv_strftime_tm
-=for apidoc_item sv_strftime_ints
 =for apidoc_item my_strftime
 
-These implement the libc strftime(), but with a different API so that the return
-value is a pointer to the formatted result (which MUST be arranged to be FREED
-BY THE CALLER).  This allows these functions to increase the buffer size as
-needed, so that the caller doesn't have to worry about that.
+These implement the libc strftime().
 
 On failure, they return NULL, and set C<errno> to C<EINVAL>.
 
-C<sv_strftime_tm> and C<sv_strftime_ints> are preferred, as they transparently
-handle the UTF-8ness of the current locale, the input C<fmt>, and the returned
-result.  Only if the current C<LC_TIME> locale is a UTF-8 one (and S<C<use
-bytes>> is not in effect) will the result be marked as UTF-8.  These differ
-only in the form of their inputs.  C<sv_strftime_tm> takes a filled-in
-S<C<struct tm>> parameter.  C<sv_strftime_ints> takes a bunch of integer
-parameters that together completely define a given time.
+C<sv_strftime_tm> is preferred, as it transparently handles the UTF-8ness of
+the current locale, the input C<fmt>, and the returned result.  Only if the
+current C<LC_TIME> locale is a UTF-8 one (and S<C<use bytes>> is not in effect)
+will the result be marked as UTF-8.
+
+C<sv_strftime_tm> takes a pointer to a filled-in S<C<struct tm>> parameter.  It
+ignores the values of the C<wday> and C<yday> fields in it.  The other fields
+give enough information to accurately calculate these values, and are used for
+that purpose.
+
+The caller assumes ownership of the returned SV with a reference count of 1.
 
 C<my_strftime> is kept for backwards compatibility.  Knowing if its result
 should be considered UTF-8 or not requires significant extra logic.
 
-Note that C<yday> and C<wday> effectively are ignored by C<sv_strftime_ints>
-and C<my_strftime>, as mini_mktime() overwrites them
+The return value is a pointer to the formatted result (which MUST be arranged
+to be FREED BY THE CALLER).  This allows this function to increase the buffer
+size as needed, so that the caller doesn't have to worry about that, unlike
+libc C<strftime()>.
 
-Also note that all three functions are always executed in the underlying
+The C<wday>, C<yday>, and C<isdst> parameters are ignored by C<my_strftime>.
+Daylight savings time is never considered to exist, and the values returned for
+the other two fields (if C<fmt> even calls for them) are calculated from the
+other parameters, without need for referencing these.
+
+Note that both functions are always executed in the underlying
 C<LC_TIME> locale of the program, giving results based on that locale.
 
 =cut
@@ -8205,74 +8212,30 @@ S_ints_to_tm(pTHX_ struct tm * mytm,
     mytm->tm_yday = yday;
     mytm->tm_isdst = isdst;
 
-/* If no mktime() can't call it; and if it doesn't have the extra fields that
- * mini_mktime() doesn't handle, no need to call it; use our faster internal
- * mini_mktime() instead */
-#if ! defined(HAS_MKTIME) || (   ! defined(HAS_TM_TM_GMTOFF)    \
-                              && ! defined(HAS_TM_TM_ZONE))
-
+    /* Long-standing behavior is to ignore the effects of locale (in
+     * particular, daylight savings time) on the input, so we use mini_mktime.
+     * See GH #22062. */
     mini_mktime(mytm);
 
-    PERL_UNUSED_ARG(locale);
-#else
+    /* But some of those effect are deemed desirable, so use libc to get the
+     * values for tm_gmtoff and tm_zone on platforms that have them [perl
+     * #18238] */
+#if  defined(HAS_MKTIME)                                      \
+ && (defined(HAS_TM_TM_GMTOFF) || defined(HAS_TM_TM_ZONE))
 
-    /* Otherwise we have to use the (slower) libc mktime(), which does take
-     * locale into consideration. [perl #18238] */
     const char * orig_TIME_locale = toggle_locale_c(LC_TIME, locale);
+    struct tm mytm2 = *mytm;
     MKTIME_LOCK;
-
-    (void) mktime(mytm);
-
+    mktime(&mytm2);
     MKTIME_UNLOCK;
     restore_toggled_locale_c(LC_TIME, orig_TIME_locale);
 
-    /* More is needed if this is the very unlikely case of a leap second
-     * (sec==60).  Various mktime() routines handle these differently:
-     *  a)  Some don't know about their existence and normalize them to 0
-     *      seconds in the next minute;
-     *  b)  Others do the same, except if a table lookup indicates there
-     *      actually was an officially declared leap second at the instant the
-     *      input gives, in which case they leave the second at 60, and don't
-     *      adjust the minute.
-     *  c)  mini_mktime takes the caller's word for it that this is an actual
-     *      leap second, and leaves it at 60.
-     * In all cases, if the input was 60 and the result is not, libc did not
-     * act like mini_mktime, and to preserve long-standing behavior, we call
-     * mini_mktime for its result.
-     *
-     * (As an aside, this means the return of these, if we didn't ignore it
-     *  here, is not consistent across platforms.) */
-    if (UNLIKELY(sec == 60 && mytm->tm_sec != 60)) {
-
-        /* But since mini_mktime() doesn't handle these fields, save the
-         * results we already have for them */
-#  if defined(HAS_TM_TM_GMTOFF) || defined(HAS_TM_TM_ZONE)
-        struct tm mytm2 = *mytm;
-#  endif
-
-        /* Repeat the entire process with mini_mktime */
-        Zero(mytm, 1, struct tm);
-        mytm->tm_sec = sec;
-        mytm->tm_min = min;
-        mytm->tm_hour = hour;
-        mytm->tm_mday = mday;
-        mytm->tm_mon = mon;
-        mytm->tm_year = year;
-        mytm->tm_wday = wday;
-        mytm->tm_yday = yday;
-        mytm->tm_isdst = isdst;
-        (void) mini_mktime(mytm);
-
-        /* And use the saved libc values for tm_gmtoff and tm_zone */
 #  ifdef HAS_TM_TM_GMTOFF
-        mytm->tm_gmtoff = mytm2.tm_gmtoff;
+    mytm->tm_gmtoff = mytm2.tm_gmtoff;
 #  endif
 #  ifdef HAS_TM_TM_ZONE
-        mytm->tm_zone = mytm2.tm_zone;
+    mytm->tm_zone = mytm2.tm_zone;
 #  endif
-
-    }
-
 #endif
 
     return;

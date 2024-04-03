@@ -748,7 +748,6 @@
 # define sv_setuv(a,b)                          Perl_sv_setuv(aTHX_ a,b)
 # define sv_setuv_mg(a,b)                       Perl_sv_setuv_mg(aTHX_ a,b)
 # define sv_streq_flags(a,b,c)                  Perl_sv_streq_flags(aTHX_ a,b,c)
-# define sv_strftime_ints(a,b,c,d,e,f,g,h,i,j)  Perl_sv_strftime_ints(aTHX_ a,b,c,d,e,f,g,h,i,j)
 # define sv_strftime_tm(a,b)                    Perl_sv_strftime_tm(aTHX_ a,b)
 # define sv_string_from_errnum(a,b)             Perl_sv_string_from_errnum(aTHX_ a,b)
 # define sv_tainted(a)                          Perl_sv_tainted(aTHX_ a)
@@ -1765,6 +1764,7 @@
 #   define skipspace_flags(a,b)                 Perl_skipspace_flags(aTHX_ a,b)
 #   define sv_magicext_mglob(a)                 Perl_sv_magicext_mglob(aTHX_ a)
 #   define sv_only_taint_gmagic                 Perl_sv_only_taint_gmagic
+#   define sv_strftime_ints(a,b,c,d,e,f,g,h,i,j) Perl_sv_strftime_ints(aTHX_ a,b,c,d,e,f,g,h,i,j)
 #   define utf16_to_utf8_base(a,b,c,d,e,f)      Perl_utf16_to_utf8_base(aTHX_ a,b,c,d,e,f)
 #   define utf8_to_utf16_base(a,b,c,d,e,f)      Perl_utf8_to_utf16_base(aTHX_ a,b,c,d,e,f)
 #   define validate_proto(a,b,c,d)              Perl_validate_proto(aTHX_ a,b,c,d)
