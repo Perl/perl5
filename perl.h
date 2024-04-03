@@ -909,7 +909,7 @@ symbol would not be defined on C<L</EBCDIC>> platforms.
  * constructs that don't play well when PERL_MEM_LOG is active, so that they
  * automatically don't get compiled without having to use extra #ifdef's */
 #ifndef PERL_MEM_LOG
-#  define UNLESS_PERL_MEM_LOG(code)  code
+#  define UNLESS_PERL_MEM_LOG(code)  if ( PL_phase != PERL_PHASE_CONSTRUCT) { code; }
 #else
 #  define UNLESS_PERL_MEM_LOG(code)
 #endif
@@ -6528,6 +6528,14 @@ EXTCONST U8   PL_deBruijn_bitpos_tab64[];
                               cond_to_panic_if_already_locked)              \
     STMT_START {                                                            \
         CLANG_DIAG_IGNORE(-Wthread-safety)                                  \
+        if (rcounter < 0 || wcounter < 0) {\
+            int khw = 0;\
+            assert(0);\
+        }\
+        if (rcounter < 0 || wcounter < 0) (Perl_croak_nocontext("panic: " \
+                            "%s: %d: locking " name "; new lock depth=%d"\
+                            "; this thread reader count=%d\n",          \
+                            __FILE__, __LINE__, wcounter, rcounter));             \
         if (LIKELY(wcounter <= 0)) {                                        \
             UNLESS_PERL_MEM_LOG(DEBUG_U(PerlIO_printf(Perl_debug_log,      \
                                 "%s: %d: locking " name "; new lock depth=1"\

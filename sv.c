@@ -15713,6 +15713,15 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     Zero(my_perl, 1, PerlInterpreter);
 #endif	/* DEBUGGING */
 
+#ifdef USE_LOCALE_THREADS
+    PL_locale_mutex_depth = 0;
+    PL_locale_mutex_readers = 0;
+#endif
+#ifdef USE_THREADS
+    PL_env_mutex_depth = 0;
+    PL_env_mutex_readers = 0;
+#endif
+
 #ifdef PERL_IMPLICIT_SYS
     /* host pointers */
     PL_Mem		= ipM;
@@ -16192,11 +16201,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_strxfrm_NUL_replacement = '\0';
 #endif /* USE_LOCALE_COLLATE */
 
-#ifdef USE_LOCALE_THREADS
-    PL_locale_mutex_depth = 0;
-    PL_locale_mutex_readers = 0;
-#endif
-
 #ifdef USE_LOCALE_NUMERIC
     PL_numeric_name	= SAVEPV("C");
     PL_numeric_radix_sv	= newSVpvs(".");
@@ -16230,10 +16234,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
 #if defined(USE_LOCALE_THREADS) && ! defined(USE_THREAD_SAFE_LOCALE)
     PL_less_dicey_locale_buf = NULL;
     PL_less_dicey_locale_bufsize = 0;
-#endif
-#ifdef USE_THREADS
-    PL_env_mutex_depth = 0;
-    PL_env_mutex_readers = 0;
 #endif
 
     /* Unicode inversion lists */
