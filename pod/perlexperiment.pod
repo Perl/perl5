@@ -55,18 +55,6 @@ L<[perl #14150]|https://github.com/Perl/perl5/issues/14150>.
 
 See also: L<perlref/Assigning to References>
 
-=item The "const" attribute
-
-Introduced in Perl 5.22.0
-
-Using this feature triggers warnings in the category
-C<experimental::const_attr>.
-
-The ticket for this experiment is
-L<[perl #14428]|https://github.com/Perl/perl5/issues/14428>.
-
-See also: L<perlsub/Constant Functions>
-
 =item use re 'strict';
 
 Introduced in Perl 5.22.0
@@ -371,6 +359,14 @@ See : L<perlrecharclass/Extended Bracketed Character Classes>
 Introduced in Perl 5.34.0.
 
 Accepted in Perl 5.40 when not using the optional C<finally> block.
+
+=item The "const" attribute
+
+Introduced in Perl 5.22.0
+
+Accepted in Perl 5.40
+
+See also: L<perlsub/Constant Functions>
 
 =back
 

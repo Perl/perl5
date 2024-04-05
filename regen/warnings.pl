@@ -194,6 +194,7 @@ my %NO_BIT_FOR = map { ( uc $_ => 1, $_ => 1 ) } qw(
   experimental::script_run
   experimental::isa
   experimental::smartmatch
+  experimental::const_attr
 );
 
 ###########################################################################

@@ -887,7 +887,6 @@ my $f = sub {
 } ;
 ####
 # anonconst
-# CONTEXT no warnings 'experimental::const_attr';
 my $f = sub : const {
     123;
 }
