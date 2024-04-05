@@ -285,7 +285,6 @@ The following compound statements may be used to control flow:
 As of Perl 5.36, you can iterate over multiple values at a time by specifying
 a list of lexicals within parentheses:
 
-    no warnings "experimental::for_list";
     LABEL for my (VAR, VAR) (LIST) BLOCK
     LABEL for my (VAR, VAR) (LIST) BLOCK continue BLOCK
     LABEL foreach my (VAR, VAR) (LIST) BLOCK
