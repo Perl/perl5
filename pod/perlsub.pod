@@ -1785,11 +1785,11 @@ aside from where it is declared.
         *ALSO_INLINED = sub () { $x };
     }
 
-Perl 5.22 also introduces the experimental "const" attribute as an
-alternative.  (Disable the "experimental::const_attr" warnings if you want
-to use it.)  When applied to an anonymous subroutine, it forces the sub to
-be called when the C<sub> expression is evaluated.  The return value is
-captured and turned into a constant subroutine:
+Perl 5.22 also introduced the "const" attribute as an alternative.  It was
+initially experimental, but made stable in Perl 5.40.  When applied to an
+anonymous subroutine, it forces the sub to be called when the C<sub>
+expression is evaluated.  The return value is captured and turned into a
+constant subroutine:
 
     my $x = 54321;
     *INLINED = sub : const { $x };

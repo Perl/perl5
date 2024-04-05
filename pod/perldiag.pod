@@ -2041,13 +2041,6 @@ to define an overloaded constant, or when trying to find the
 character name specified in the C<\N{...}> escape.  Perhaps you
 forgot to load the corresponding L<overload> pragma?
 
-=item :const is experimental
-
-(S experimental::const_attr) The "const" attribute is experimental.
-If you want to use the feature, disable the warning with C<no warnings
-'experimental::const_attr'>, but know that in doing so you are taking
-the risk that your code may break in a future Perl version.
-
 =item :const is not permitted on named subroutines
 
 (F) The "const" attribute causes an anonymous subroutine to be run and
