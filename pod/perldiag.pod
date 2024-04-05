@@ -6755,12 +6755,6 @@ disallowed.  See L<Safe>.
 (F) Your machine doesn't implement a file truncation mechanism that
 Configure knows about.
 
-=item try/catch is experimental
-
-(S experimental::try) This warning is emitted if you use the C<try> and
-C<catch> syntax. This syntax is currently experimental and its behaviour may
-change in future releases of Perl.
-
 =item try/catch/finally is experimental
 
 (S experimental::try) This warning is emitted if you use the C<try> and

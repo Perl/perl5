@@ -141,7 +141,8 @@ L<[perl #18759]|https://github.com/Perl/perl5/issues/18759>.
 
 Introduced in Perl 5.34.0.
 
-Using this feature triggers warnings in the category C<experimental::try>.
+Using the optional C<finally> block part of this feature triggers warnings in
+the category C<experimental::try>.
 
 The ticket for this experiment is
 L<[perl #18760]|https://github.com/Perl/perl5/issues/18760>
@@ -364,6 +365,12 @@ Introduced in Perl 5.18
 Accepted in Perl 5.36
 
 See : L<perlrecharclass/Extended Bracketed Character Classes>
+
+=item try/catch control structure
+
+Introduced in Perl 5.34.0.
+
+Accepted in Perl 5.40 when not using the optional C<finally> block.
 
 =back
 
