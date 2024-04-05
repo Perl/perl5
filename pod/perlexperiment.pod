@@ -173,21 +173,6 @@ executed until the containing block is being exited.
 The ticket for this experiment is
 L<[perl #17949]|https://github.com/Perl/perl5/issues/17949>.
 
-=item Extra paired delimiters for quote-like operators
-
-Introduced in Perl 5.36.0
-
-Using this feature triggers warnings in the category
-C<experimental::extra_paired_delimiters>.
-
-This feature allows for many non-ASCII pairs of mirroring delimiters, for
-example:
-
-    my @array = qw« tinker tailor soldier spy »;
-
-The ticket for this experiment is
-L<[perl #19765]|https://github.com/Perl/perl5/issues/19765>.
-
 =back
 
 =head2 Accepted features
@@ -364,6 +349,17 @@ Accepted in Perl 5.40.
 
 This feature enables a parenthesized list of iteration variables for C<for>
 rather than a single variable.
+
+=item Extra paired delimiters for quote-like operators
+
+Introduced in Perl 5.36.0
+
+Accepted in Perl 5.40
+
+This feature allows for many non-ASCII pairs of mirroring delimiters, for
+example:
+
+    my @array = qw« tinker tailor soldier spy »;
 
 =back
 
