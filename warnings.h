@@ -136,39 +136,38 @@
 #define WARN_EXPERIMENTAL__BUILTIN	 69
 #define WARN_EXPERIMENTAL__DEFER	 70
 #define WARN_EXPERIMENTAL__EXTRA_PAIRED_DELIMITERS 71
-#define WARN_EXPERIMENTAL__FOR_LIST	 72
-#define WARN_SCALAR			 73
+#define WARN_SCALAR			 72
 
 /* Warnings Categories added in Perl 5.035009 */
 
-#define WARN_DEPRECATED__VERSION_DOWNGRADE 74
+#define WARN_DEPRECATED__VERSION_DOWNGRADE 73
 
 /* Warnings Categories added in Perl 5.03501 */
 
-#define WARN_DEPRECATED__DELIMITER_WILL_BE_PAIRED 75
+#define WARN_DEPRECATED__DELIMITER_WILL_BE_PAIRED 74
 
 /* Warnings Categories added in Perl 5.037 */
 
-#define WARN_EXPERIMENTAL__CLASS	 76
+#define WARN_EXPERIMENTAL__CLASS	 75
 
 /* Warnings Categories added in Perl 5.037009 */
 
-#define WARN_DEPRECATED__APOSTROPHE_AS_PACKAGE_SEPARATOR 77
+#define WARN_DEPRECATED__APOSTROPHE_AS_PACKAGE_SEPARATOR 76
 
 /* Warnings Categories added in Perl 5.03701 */
 
-#define WARN_DEPRECATED__SMARTMATCH	 78
+#define WARN_DEPRECATED__SMARTMATCH	 77
 
 /* Warnings Categories added in Perl 5.039002 */
 
-#define WARN_DEPRECATED__MISSING_IMPORT_CALLED_WITH_ARGS 79
+#define WARN_DEPRECATED__MISSING_IMPORT_CALLED_WITH_ARGS 78
 
 /* Warnings Categories added in Perl 5.039008 */
 
-#define WARN_DEPRECATED__SUBSEQUENT_USE_VERSION 80
-#define WARNsize			 21
-#define WARN_ALLstring			 "\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125"
-#define WARN_NONEstring			 "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"
+#define WARN_DEPRECATED__SUBSEQUENT_USE_VERSION 79
+#define WARNsize			 20
+#define WARN_ALLstring			 "\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125\125"
+#define WARN_NONEstring			 "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"
 
 #define isLEXWARN_on \
         cBOOL(PL_curcop && PL_curcop->cop_warnings != pWARN_STD)
@@ -352,7 +351,6 @@ category parameters passed.
 =for apidoc Amnh||WARN_EXPERIMENTAL__BUILTIN
 =for apidoc Amnh||WARN_EXPERIMENTAL__DEFER
 =for apidoc Amnh||WARN_EXPERIMENTAL__EXTRA_PAIRED_DELIMITERS
-=for apidoc Amnh||WARN_EXPERIMENTAL__FOR_LIST
 =for apidoc Amnh||WARN_SCALAR
 =for apidoc Amnh||WARN_DEPRECATED__VERSION_DOWNGRADE
 =for apidoc Amnh||WARN_DEPRECATED__DELIMITER_WILL_BE_PAIRED

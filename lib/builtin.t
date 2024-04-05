@@ -324,8 +324,6 @@ package FetchStoreCounter {
     ok(eq_array(\@orig, [1 .. 3]), 'indexed copies values, does not alias');
 
     {
-        no warnings 'experimental::for_list';
-
         my $ok = 1;
         foreach my ($len, $s) (indexed "", "x", "xx") {
             length($s) == $len or undef $ok;

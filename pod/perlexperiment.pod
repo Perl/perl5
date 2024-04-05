@@ -147,18 +147,6 @@ elements of it such as C<$_[$index]>, or situations where the default
 arguments array is accessed implicitly such as C<shift> or C<pop> without
 arguments.
 
-=item for loop with multiple iteration variables
-
-Introduced in Perl 5.36.0.
-
-Using this feature triggers warnings in the category C<experimental::for_list>.
-
-This feature enables a parenthesized list of iteration variables for C<for>
-rather than a single variable.
-
-The ticket for this experiment is
-L<[perl #18744]|https://github.com/Perl/perl5/issues/18744>.
-
 =item The builtin namespace
 
 Introduced in Perl 5.36.0.
@@ -367,6 +355,15 @@ Introduced in Perl 5.22.0
 Accepted in Perl 5.40
 
 See also: L<perlsub/Constant Functions>
+
+=item for loop with multiple iteration variables
+
+Introduced in Perl 5.36.0.
+
+Accepted in Perl 5.40.
+
+This feature enables a parenthesized list of iteration variables for C<for>
+rather than a single variable.
 
 =back
 
