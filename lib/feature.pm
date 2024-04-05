@@ -4,7 +4,7 @@
 # Any changes made here will be lost!
 
 package feature;
-our $VERSION = '1.86';
+our $VERSION = '1.87';
 
 our %feature = (
     fc                      => 'feature_fc',
@@ -391,7 +391,7 @@ except when explicitly disabled:
     no warnings "experimental::isa";
 
 As of Perl 5.36, use of this feature no longer triggers a warning (though the
-C<experimental::isa> warning category stilll exists for compatibility with
+C<experimental::isa> warning category still exists for compatibility with
 code that disables it). This feature is now considered stable, and is enabled
 automatically by C<use v5.36> (or higher).
 
