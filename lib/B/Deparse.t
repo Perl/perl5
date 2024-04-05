@@ -3321,7 +3321,7 @@ $a = $b == ($c == $d != $e);
 $a = $b & $c == $d != $e;
 ####
 # try/catch
-# CONTEXT use feature 'try'; no warnings 'experimental::try';
+# CONTEXT use feature 'try';
 try {
     FIRST();
 }
@@ -3329,7 +3329,7 @@ catch($var) {
     SECOND();
 }
 ####
-# CONTEXT use feature 'try'; no warnings 'experimental::try';
+# CONTEXT use feature 'try';
 try {
     FIRST();
 }

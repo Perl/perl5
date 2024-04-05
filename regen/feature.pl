@@ -899,17 +899,22 @@ bareword filehandles for older versions of perl.
 
 =head2 The 'try' feature
 
-B<WARNING>: This feature is still experimental and the implementation may
-change or be removed in future versions of Perl.  For this reason, Perl will
-warn when you use the feature, unless you have explicitly disabled the warning:
-
-    no warnings "experimental::try";
+B<WARNING>: This feature is still partly experimental, and the implementation
+may change or be removed in future versions of Perl.
 
 This feature enables the C<try> and C<catch> syntax, which allows exception
 handling, where exceptions thrown from the body of the block introduced with
 C<try> are caught by executing the body of the C<catch> block.
 
-This feature is available starting in Perl 5.34.
+This feature is available starting in Perl 5.34. Before Perl 5.40 it was
+classed as experimental, and Perl emitted a warning for its usage, except when
+explicitly disabled:
+
+    no warnings "experimental::try";
+
+As of Perl 5.40, use of this feature without a C<finally> block no longer
+triggers a warning.  The optional C<finally> block is still considered
+experimental and emits a warning, except when explicitly disabled as above.
 
 For more information, see L<perlsyn/"Try Catch Exception Handling">.
 

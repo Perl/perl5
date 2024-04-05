@@ -446,7 +446,6 @@ TODO: {
 {
     use builtin qw( load_module );
     use feature qw( try );
-    no warnings 'experimental::try';
     my ($ok, $e);
 
     # Can't really test this sans string eval, as it's a compilation error:

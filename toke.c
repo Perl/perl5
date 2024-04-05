@@ -8033,8 +8033,6 @@ yyl_word_or_keyword(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct
         FUN0(OP_BREAK);
 
     case KEY_catch:
-        Perl_ck_warner_d(aTHX_
-            packWARN(WARN_EXPERIMENTAL__TRY), "try/catch is experimental");
         PREBLOCK(KW_CATCH);
 
     case KEY_chop:
@@ -8806,8 +8804,6 @@ yyl_word_or_keyword(pTHX_ char *s, STRLEN len, I32 key, I32 orig_keyword, struct
 
     case KEY_try:
         pl_yylval.ival = CopLINE(PL_curcop);
-        Perl_ck_warner_d(aTHX_
-            packWARN(WARN_EXPERIMENTAL__TRY), "try/catch is experimental");
         PREBLOCK(KW_TRY);
 
     case KEY_uc:

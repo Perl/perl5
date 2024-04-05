@@ -675,7 +675,6 @@ test_opcount(0, "multiconcat: local assign",
 
 {
     use feature 'try';
-    no warnings 'experimental::try';
 
     test_opcount(0, "try/catch: catch block is optimized",
                     sub { my @a; try {} catch($e) { $a[0] } },
