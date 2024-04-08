@@ -1688,6 +1688,16 @@ functions is listed.)
 
 See also L<https://github.com/google/sanitizers/wiki/AddressSanitizer>.
 
+=head2 Dr Memory
+
+Dr. Memory is a tool similar to valgrind which is usable on Windows
+and Linux.
+
+It supports heap checking like C<memcheck> from valgrind.  There are
+also other tools included.
+
+See L<https://drmemory.org/>.
+
 
 =head1 PROFILING
 
@@ -1866,6 +1876,33 @@ Annotate all source files containing functions that helped reach the
 event count threshold.
 
 =back
+
+=head2 C<profiler> profiling (Cygwin)
+
+Cygwin allows for C<gprof> profiling and C<gcov> coverage testing, but
+this only profiles the main executable.
+
+You can use the C<profiler> tool to perform sample based profiling, it
+requires no special preparation of the executables beyond debugging
+symbols.
+
+This produces sampling data which can be processed with C<gprof>.
+
+There is L<limited
+documentation|https://www.cygwin.com/cygwin-ug-net/profiler.html> on
+the Cygwin web site.
+
+=head2 Visual Studio Profiling
+
+You can use the Visual Studio profiler to profile perl if you've built
+perl with MSVC, even though we build perl at the command-line.  You
+will need to build perl with C<CFG=Debug> or C<CFG=DebugSymbols>.
+
+The Visual Studio profiler is a sampling profiler.
+
+See L<the visual studio
+documentation|https://github.com/MicrosoftDocs/visualstudio-docs/blob/main/docs/profiling/beginners-guide-to-performance-profiling.md>
+to get started.
 
 =head1 MISCELLANEOUS TRICKS
 
