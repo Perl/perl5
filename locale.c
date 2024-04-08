@@ -4622,7 +4622,8 @@ S_toggle_locale_i(pTHX_ const locale_category_index cat_index,
                            "Entering toggle_locale_i: index=%d(%s),"        \
                            " wanted=%s, actual=%s; called from %" LINE_Tf   \
                            "\n", cat_index, category_names[cat_index],
-                           new_locale, locale_to_restore_to, caller_line));
+                           new_locale, locale_to_restore_to ? locale_to_restore_to : "(null)",
+                           caller_line));
 
     if (! locale_to_restore_to) {
         locale_panic_via_(Perl_form(aTHX_
