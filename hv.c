@@ -2263,9 +2263,10 @@ Perl_hv_undef_flags(pTHX_ HV *hv, U32 flags)
      * in sv_clear(), and changes here should be done there too */
     if (PL_phase != PERL_PHASE_DESTRUCT && HvHasNAME(hv)) {
         if (PL_stashcache) {
+            HEK *hek = HvNAME_HEK(hv);
             DEBUG_o(Perl_deb(aTHX_ "hv_undef_flags clearing PL_stashcache for '%"
-                             HEKf "'\n", HEKfARG(HvNAME_HEK(hv))));
-            (void)hv_deletehek(PL_stashcache, HvNAME_HEK(hv), G_DISCARD);
+                             HEKf "'\n", HEKfARG(hek)));
+            (void)hv_deletehek(PL_stashcache, hek, G_DISCARD);
         }
         hv_name_set(hv, NULL, 0, 0);
     }
