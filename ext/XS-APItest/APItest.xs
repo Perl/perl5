@@ -1601,6 +1601,12 @@ destruct_test(pTHX_ void *p) {
     warn("In destruct_test: %" SVf "\n", (SV*)p);
 }
 
+#ifdef PERL_USE_HWM
+#  define hwm_checks_enabled() true
+#else
+#  define hwm_checks_enabled() false
+#endif
+
 MODULE = XS::APItest            PACKAGE = XS::APItest
 
 INCLUDE: const-xs.inc
@@ -2669,6 +2675,17 @@ PPCODE:
     if (PL_stack_max > PL_stack_sp)
         *PL_stack_max = NULL;
 
+
+void
+bad_EXTEND()
+    PPCODE:
+        /* testing failure to extend the stack, do not extend the stack */
+        PUSHs(&PL_sv_yes);
+        PUSHs(&PL_sv_no);
+        XSRETURN(2);
+
+bool
+hwm_checks_enabled()
 
 void
 call_sv_C()

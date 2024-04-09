@@ -44,7 +44,7 @@ MSVC_DIAG_RESTORE
 
 typedef struct jmpenv JMPENV;
 
-#if defined DEBUGGING && !defined DEBUGGING_RE_ONLY
+#if defined PERL_USE_HWM
 #  define JE_OLD_STACK_HWM_zero      PL_start_env.je_old_stack_hwm = 0
 #  define JE_OLD_STACK_HWM_save(je)  \
         (je).je_old_stack_hwm = PL_curstackinfo->si_stack_hwm
@@ -1271,7 +1271,7 @@ struct stackinfo {
     I32                 si_stack_nonrc_base;
 #endif
 
-#if defined DEBUGGING && !defined DEBUGGING_RE_ONLY
+#ifdef PERL_USE_HWM
 /* high water mark: for checking if the stack was correctly extended /
  * tested for extension by each pp function */
     SSize_t             si_stack_hwm;
@@ -1298,7 +1298,7 @@ typedef struct stackinfo PERL_SI;
 #  define SET_MARK_OFFSET NOOP
 #endif
 
-#if defined DEBUGGING && !defined DEBUGGING_RE_ONLY
+#ifdef PERL_USE_HWM
 #  define PUSHSTACK_INIT_HWM(si) ((si)->si_stack_hwm = 0)
 #else
 #  define PUSHSTACK_INIT_HWM(si) NOOP

@@ -1087,6 +1087,26 @@ violations are fatal.
  */
 #define PERL_USE_SAFE_PUTENV
 
+/* Control whether we set and test the stack high water mark.
+ *
+ * When enabled this checks that pp funcs and XSUBs properly EXTEND()
+ * the stack.
+ *
+ * Debugging builds have HWM checks on by default, you can add
+ * -DPERL_NO_HWM to ccflags to prevent those checks, or add
+ * -DPERL_USE_HWM to ccflags to perform HWM checks even on
+ * non-debugging builds.
+ */
+
+#if defined PERL_NO_HWM
+#  undef PERL_USE_HWM
+#elif defined PERL_USE_HWM
+/* nothing to do here */
+#elif defined DEBUGGING && !defined DEBUGGING_RE_ONLY
+#  define PERL_USE_HWM
+#endif
+
+
 /* HP-UX 10.X CMA (Common Multithreaded Architecture) insists that
    pthread.h must be included before all other header files.
 */
@@ -5204,7 +5224,7 @@ typedef Sighandler_t Sigsave_t;
 #define SCAN_TR 1
 #define SCAN_REPL 2
 
-#ifdef DEBUGGING
+#if defined DEBUGGING || defined PERL_USE_HWM
 # ifndef register
 #  define register
 # endif
