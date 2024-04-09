@@ -6494,7 +6494,7 @@ PP(pp_entersub)
 
         rpp_invoke_xs(cv);
 
-#if defined DEBUGGING && !defined DEBUGGING_RE_ONLY
+#ifdef PERL_USE_HWM
         /* This duplicates the check done in runops_debug(), but provides more
          * information in the common case of the fault being with an XSUB.
          *

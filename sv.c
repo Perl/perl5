@@ -15159,7 +15159,7 @@ Perl_si_dup(pTHX_ PERL_SI *si, CLONE_PARAMS* param)
 #ifdef PERL_RC_STACK
     nsi->si_stack_nonrc_base = si->si_stack_nonrc_base;
 #endif
-#if defined DEBUGGING && !defined DEBUGGING_RE_ONLY
+#ifdef PERL_USE_HWM
     nsi->si_stack_hwm   = 0;
 #endif
 

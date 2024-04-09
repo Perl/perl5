@@ -5146,7 +5146,7 @@ S_gen_constant_list(pTHX_ OP *o)
 
     switch (ret) {
     case 0:
-#if defined DEBUGGING && !defined DEBUGGING_RE_ONLY
+#ifdef PERL_USE_HWM
         PL_curstackinfo->si_stack_hwm = 0; /* stop valgrind complaining */
 #endif
         Perl_pp_pushmark(aTHX);

@@ -387,7 +387,7 @@ Does not use C<TARG>.  See also C<L</XPUSHu>>, C<L</mPUSHu>> and C<L</PUSHu>>.
 /* EXTEND_HWM_SET: note the high-water-mark to which the stack has been
  * requested to be extended (which is likely to be less than PL_stack_max)
  */
-#if defined DEBUGGING && !defined DEBUGGING_RE_ONLY
+#ifdef PERL_USE_HWM
 #  define EXTEND_HWM_SET(p, n)                                     \
         STMT_START {                                               \
             SSize_t extend_hwm_set_ix = (p) - PL_stack_base + (n); \

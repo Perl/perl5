@@ -2808,7 +2808,7 @@ Perl_hv_dump(pTHX_ HV *hv)
 int
 Perl_runops_debug(pTHX)
 {
-#if defined DEBUGGING && !defined DEBUGGING_RE_ONLY
+#ifdef PERL_USE_HWM
     SSize_t orig_stack_hwm = PL_curstackinfo->si_stack_hwm;
 
     PL_curstackinfo->si_stack_hwm = PL_stack_sp - PL_stack_base;
@@ -2829,7 +2829,7 @@ Perl_runops_debug(pTHX)
 #ifdef PERL_TRACE_OPS
         ++PL_op_exec_cnt[PL_op->op_type];
 #endif
-#if defined DEBUGGING && !defined DEBUGGING_RE_ONLY
+#ifdef PERL_USE_HWM
         if (PL_curstackinfo->si_stack_hwm < PL_stack_sp - PL_stack_base)
             Perl_croak_nocontext(
                 "panic: previous op failed to extend arg stack: "
@@ -2867,7 +2867,7 @@ Perl_runops_debug(pTHX)
     DEBUG_l(Perl_deb(aTHX_ "leaving RUNOPS level\n"));
     PERL_ASYNC_CHECK();
 
-#if defined DEBUGGING && !defined DEBUGGING_RE_ONLY
+#ifdef PERL_USE_HWM
     if (PL_curstackinfo->si_stack_hwm < orig_stack_hwm)
         PL_curstackinfo->si_stack_hwm = orig_stack_hwm;
 #endif
