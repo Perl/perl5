@@ -1131,7 +1131,10 @@ listop	:	LSTOP indirob listexpr /* map {...} @args or print $fh @args */
 			{ $$ = op_convert_list($FUNC, 0, $optexpr); }
 	|	LSTOPSUB startanonsub block /* sub f(&@);   f { foo } ... */
 			{ SvREFCNT_inc_simple_void(PL_compcv);
-			  $<opval>$ = newANONATTRSUB($startanonsub, 0, NULL, $block); }[anonattrsub]
+                          $<opval>$ = newANONATTRSUB($startanonsub, 0, NULL, $block);
+                          /* prevent double op_free() if the following fails to parse */
+                          $block = NULL;
+                        }[anonattrsub]
 		    optlistexpr		%prec LSTOP  /* ... @bar */
 			{ $$ = newUNOP(OP_ENTERSUB, OPf_STACKED,
 				 op_append_elem(OP_LIST,
