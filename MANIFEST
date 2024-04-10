@@ -6066,6 +6066,7 @@ t/lib/croak/class			Test croak calls from class.c
 t/lib/croak/gv				Test croak calls from gv.c
 t/lib/croak/mg				Test croak calls from mg.c
 t/lib/croak/op				Test croak calls from op.c
+t/lib/croak/parser			Test parser errors
 t/lib/croak/pp				Test croak calls from pp.c
 t/lib/croak/pp_ctl			Test croak calls from pp_ctl.c
 t/lib/croak/pp_hot			Test croak calls from pp_hot.c
