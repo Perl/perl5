@@ -4887,6 +4887,29 @@ Perl_sv_setsv_mg(pTHX_ SV *const dsv, SV *const ssv)
     SvSETMAGIC(dsv);
 }
 
+/*
+=for apidoc sv_setsv_cow
+
+Attempt to make a COW copy of C<ssv> in C<*dsv>.
+
+C<*pdsv> must be NULL or a valid SV, if NULL it will be filled in with
+a valid SV on success.
+
+C<ssv> must be a POK, pPOK SV.
+
+Returns true if the copy succeeds, false if a CoW copy cannot be made
+for some reason.
+
+sv_setsv_cow() is used by the regular expression engine to attempt to
+make a COW copy of the matched against string for use in reporting
+C<$1> etc.
+
+If this fails the regular expression engine instead makes a non-SV
+copy of a subset of the matched against string.
+
+=cut
+*/
+
 #ifdef PERL_ANY_COW
 #  define SVt_COW SVt_PV
 bool

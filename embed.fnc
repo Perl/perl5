@@ -3979,7 +3979,7 @@ RTp	|MEM_SIZE|malloc_good_size					\
 #endif
 #if defined(PERL_ANY_COW)
 : Used in regexec.c
-EXpx	|bool	|sv_setsv_cow	|NN SV **pdsv				\
+EXdpx	|bool	|sv_setsv_cow	|NN SV **pdsv				\
 				|NN SV *ssv
 #endif
 #if defined(PERL_CORE)
