@@ -204,7 +204,8 @@ info to show that it works; it should be replaced with the real code.
   my $script = File::Basename::basename($0);
   my $SELF  = catfile($FindBin::Bin, $script);
 
-  # POSIX unmasks the sigprocmask properly
+  # Use SA_NODEFER to prevent SIGHUP from being blocked in
+  # the new process (due to signal mask preservation across exec).
   my $sigset = POSIX::SigSet->new();
   my $action = POSIX::SigAction->new("sigHUP_handler",
 				     $sigset,
