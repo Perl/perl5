@@ -151,7 +151,8 @@ arguments.
 
 Introduced in Perl 5.36.0.
 
-Using this feature triggers warnings in the category C<experimental::builtin>.
+Using certain functions of this feature triggers warnings in the category
+C<experimental::builtin>.
 
 In Perl 5.36.0, a new namespace, C<builtin>, was created for new core functions
 that will not be present in every namespace, but will be available for
