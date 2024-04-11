@@ -67,6 +67,8 @@ use constant V5_35  => sort grep {; $_ ne 'switch'
 
 use constant V5_37  => sort grep {; $_ ne 'bareword_filehandles' } +V5_35, qw{module_true};
 
+use constant V5_39  => sort ( +V5_37, qw{try extra_paired_delimiters} );
+
 #
 # when updating features please also update the Pod entry for L</"FEATURES CHEAT SHEET">
 #
@@ -96,7 +98,8 @@ my %feature_bundle = (
     "5.35"  => [ +V5_35 ],
     # using 5.37 features bundle
     "5.37"  => [ +V5_37 ],
-    "5.39"  => [ +V5_37 ],
+    # using 5.39 features bundle
+    "5.39"  => [ +V5_39 ],
 );
 
 my @noops = qw( postderef lexical_subs );
