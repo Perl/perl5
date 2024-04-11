@@ -17810,9 +17810,7 @@ EOF
 set try
 if eval $compile_ok; then
     output=`$run ./try 2>/dev/null`
-    echo "'$output'" >&4
     separator=`echo "$output" | $sed 1q`
-    echo "'$separator'" >&4
     case $separator in
 	"\"=;\"")
           d_perl_lc_all_uses_name_value_pairs="$define"
