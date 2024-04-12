@@ -360,7 +360,6 @@
 # define PL_WB_invlist                          (vTHX->IWB_invlist)
 # define PL_wcrtomb_ps                          (vTHX->Iwcrtomb_ps)
 # define PL_XPosix_ptrs                         (vTHX->IXPosix_ptrs)
-# define PL_Xpv                                 (vTHX->IXpv)
 # define PL_xsubfilename                        (vTHX->Ixsubfilename)
 # if !defined(PL_sawampersand)
 #   define PL_sawampersand                      (vTHX->Isawampersand)

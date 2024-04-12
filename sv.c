@@ -15872,7 +15872,6 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     PL_op		= proto_perl->Iop;
 
     PL_Sv		= NULL;
-    PL_Xpv		= (XPV*)NULL;
     my_perl->Ina	= proto_perl->Ina;
 
     PL_statcache	= proto_perl->Istatcache;
