@@ -3676,7 +3676,6 @@ Perl_perly_sighandler(int sig, Siginfo_t *sip PERL_UNUSED_DECL,
     CV *cv = NULL;
     OP *myop = PL_op;
     U32 flags = 0;
-    XPV * const tXpv = PL_Xpv;
     I32 old_ss_ix = PL_savestack_ix;
     SV *errsv_save = NULL;
 
@@ -3831,7 +3830,6 @@ Perl_perly_sighandler(int sig, Siginfo_t *sip PERL_UNUSED_DECL,
     PL_op = myop;			/* Apparently not needed... */
 
     PL_Sv = tSv;			/* Restore global temporaries. */
-    PL_Xpv = tXpv;
     return;
 }
 
