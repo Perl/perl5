@@ -7780,6 +7780,10 @@ See L<perlunicode/Wildcards in Property Values>.
 it already went past any symlink you are presumably trying to look for.
 The operation returned C<undef>.  Use a filename instead.
 
+=item Use of non-ASCII character 0x%X illegal when 'use source::encoding "ascii"' is in effect
+
+(F) This pragma forbids non-ASCII characters within its scope.
+
 =item Use of reference "%s" as array index
 
 (W misc) You tried to use a reference as an array index; this probably

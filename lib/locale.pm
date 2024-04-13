@@ -3,7 +3,7 @@ package locale;
 use strict;
 use warnings;
 
-our $VERSION = '1.12';
+our $VERSION = '1.13';
 use Config;
 
 $Carp::Internal{ (__PACKAGE__) } = 1;
@@ -113,9 +113,7 @@ sub import {
             my $LC = "LC_" . uc($arg);
 
             my $bit = eval "&POSIX::$LC";
-            if (defined $bit) { # XXX Should we warn that this category isn't
-                                # supported on this platform, or make it
-                                # always be the C locale?
+            if (defined $bit) {
 
                 # Verify our assumption.
                 if (! ($bit >= 0 && $bit < 31)) {

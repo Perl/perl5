@@ -88,7 +88,6 @@ Individual members of C<PL_parser> have their own documentation.
 #  define PL_nexttype		(PL_parser->nexttype)
 #  define PL_nextval		(PL_parser->nextval)
 
-
 #define SvEVALED(sv) \
     (SvTYPE(sv) >= SVt_PVNV \
     && ((XPVIV*)SvANY(sv))->xiv_u.xivu_eval_seen)
@@ -107,6 +106,8 @@ static const char ident_var_zero_multi_digit[] = "Numeric variables with more th
 #else
 #   define UTF cBOOL((PL_linestr && DO_UTF8(PL_linestr)) || ( !(PL_parser->lex_flags & LEX_IGNORE_UTF8_HINTS) && (PL_hints & HINT_UTF8)))
 #endif
+#define ONLY_ASCII (PL_hints & HINT_ASCII_ENCODING)
+#define ALLOW_NON_ASCII (! ONLY_ASCII)
 
 /* The maximum number of characters preceding the unrecognized one to display */
 #define UNRECOGNIZED_PRECEDE_COUNT 10
@@ -773,6 +774,7 @@ S_missingterm(pTHX_ char *s, STRLEN len)
         }
         s = tmpbuf;
     }
+
     q = memchr(s, '"', len) ? '\'' : '"';
     Perl_croak(aTHX_ "Can't find string terminator %c%" UTF8f "%c"
                      " anywhere before EOF", q, UTF8fARG(uni, len, s), q);
@@ -819,6 +821,43 @@ S_cr_textfilter(pTHX_ int idx, SV *sv, int maxlen)
         strip_return(sv);
     return count;
 }
+#endif
+
+STATIC void
+S_yyerror_non_ascii_message(pTHX_ const U8 * const s)
+{
+    PERL_ARGS_ASSERT_YYERROR_NON_ASCII_MESSAGE;
+
+    yyerror_pv(Perl_form(aTHX_ "Use of non-ASCII character 0x%02X"
+                               " illegal when 'use source::encoding"
+                               " \"ascii\"' is in effect", *s), 0);
+}
+
+#ifndef EBCDIC  /* On ASCII platforms, invariants are identical to ASCII; can
+                   use faster method */
+#  define is_ascii_string_loc(s, len, ep)                               \
+                                is_utf8_invariant_string_loc(s, len, ep)
+#else
+STATIC bool
+S_is_ascii_string_loc(const U8* const s, STRLEN len, const U8 ** ep)
+{
+    const U8* send = s + len;
+
+    while (s < send) {
+        if (isASCII(*s)) {
+            s++;
+            continue;
+        }
+
+        *ep = s;
+        return FALSE;
+    }
+
+    return TRUE;
+}
+
+#  define is_ascii_string_loc(s, len, ep)                              \
+                                    S_is_ascii_string_loc(s, len, ep)
 #endif
 
 /*
@@ -916,6 +955,13 @@ Perl_lex_start(pTHX_ SV *line, PerlIO *rsfp, U32 flags)
                                               0,
                                               1 /* 1 means die */ );
             NOT_REACHED; /* NOTREACHED */
+        }
+        else if (ONLY_ASCII && UNLIKELY(! is_ascii_string_loc(
+                                                        (const U8 *) s,
+                                                        SvCUR(line),
+                                                        &first_bad_char_loc)))
+        {
+            yyerror_non_ascii_message(first_bad_char_loc);
         }
 
         parser->linestr = flags & LEX_START_COPIED
@@ -1395,15 +1441,16 @@ Perl_lex_discard_to(pTHX_ char *ptr)
 void
 Perl_notify_parser_that_encoding_changed(pTHX)
 {
-    /* Called when $^H is changed to indicate that HINT_UTF8 has changed from
-     * off to on.  At compile time, this has the effect of entering a 'use
-     * utf8' section.  This means that any input was not previously checked for
-     * UTF-8 (because it was off), but now we do need to check it, or our
+    /* Called when $^H is changed to indicate that HINT_UTF8 or
+     * HINT_ASCII_ENCODING has changed from off to on.  At compile time, this
+     * has the effect of entering a 'use utf8' or 'use source::encoding'
+     * section.  This means that any input was not previously checked for
+     * compliance (because it was off), but now we do need to check it, or our
      * assumptions about the input being sane could be wrong, and we could
      * segfault.  This routine just sets a flag so that the next time we look
-     * at the input we do the well-formed UTF-8 check.  If we aren't in the
-     * proper phase, there may not be a parser object, but if there is, setting
-     * the flag is harmless */
+     * at the input we do the check.  If we aren't in the proper phase, there
+     * may not be a parser object, but if there is, setting the flag is
+     * harmless */
 
     if (PL_parser) {
         PL_parser->recheck_charset_validity = TRUE;
@@ -1513,8 +1560,8 @@ Perl_lex_next_chunk(pTHX_ U32 flags)
     PL_parser->bufend = buf + new_bufend_pos;
     PL_parser->bufptr = buf + bufptr_pos;
 
+    const U8* first_bad_char_loc;
     if (UTF) {
-        const U8* first_bad_char_loc;
         if (UNLIKELY(! is_utf8_string_loc(
                             (U8 *) PL_parser->bufptr,
                             PL_parser->bufend - PL_parser->bufptr,
@@ -1526,6 +1573,13 @@ Perl_lex_next_chunk(pTHX_ U32 flags)
                                               1 /* 1 means die */ );
             NOT_REACHED; /* NOTREACHED */
         }
+    }
+    else if (ONLY_ASCII && UNLIKELY(! is_ascii_string_loc(
+                                        (U8 *) PL_parser->bufptr,
+                                        PL_parser->bufend - PL_parser->bufptr,
+                                        &first_bad_char_loc)))
+    {
+        yyerror_non_ascii_message(first_bad_char_loc);
     }
 
     PL_parser->oldbufptr = buf + oldbufptr_pos;
@@ -9685,6 +9739,13 @@ Perl_yylex(pTHX)
                                               0,
                                               1 /* 1 means die */ );
             NOT_REACHED; /* NOTREACHED */
+        }
+        else if (ONLY_ASCII && UNLIKELY(! is_ascii_string_loc(
+                                                        (U8 *) PL_bufptr,
+                                                        PL_bufend - PL_bufptr,
+                                                        &first_bad_char_loc)))
+        {
+            yyerror_non_ascii_message(first_bad_char_loc);
         }
         PL_parser->recheck_charset_validity = FALSE;
     }

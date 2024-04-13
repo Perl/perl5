@@ -9338,6 +9338,11 @@ STATIC void
 S_update_debugger_info(pTHX_ SV *orig_sv, const char * const buf, STRLEN len);
 # define PERL_ARGS_ASSERT_UPDATE_DEBUGGER_INFO
 
+STATIC void
+S_yyerror_non_ascii_message(pTHX_ const U8 * const s);
+# define PERL_ARGS_ASSERT_YYERROR_NON_ASCII_MESSAGE \
+        assert(s)
+
 STATIC int
 S_yywarn(pTHX_ const char * const s, U32 flags);
 # define PERL_ARGS_ASSERT_YYWARN                \

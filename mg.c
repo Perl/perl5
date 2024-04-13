@@ -3091,8 +3091,9 @@ Perl_magic_set(pTHX_ SV *sv, MAGIC *mg)
             U32 save_hints = PL_hints;
             PL_hints = SvUV(sv);
 
-            /* If wasn't UTF-8, and now is, notify the parser */
-            if ((PL_hints & HINT_UTF8) && ! (save_hints & HINT_UTF8)) {
+            if (   (PL_hints   & (HINT_UTF8|HINT_ASCII_ENCODING))
+                != (save_hints & (HINT_UTF8|HINT_ASCII_ENCODING)))
+            {
                 notify_parser_that_encoding_changed();
             }
         }

@@ -1643,6 +1643,7 @@
 #     define tokenize_use(a,b)                  S_tokenize_use(aTHX_ a,b)
 #     define tokeq(a)                           S_tokeq(aTHX_ a)
 #     define update_debugger_info(a,b,c)        S_update_debugger_info(aTHX_ a,b,c)
+#     define yyerror_non_ascii_message(a)       S_yyerror_non_ascii_message(aTHX_ a)
 #     define yywarn(a,b)                        S_yywarn(aTHX_ a,b)
 #     if defined(DEBUGGING)
 #       define printbuf(a,b)                    S_printbuf(aTHX_ a,b)
