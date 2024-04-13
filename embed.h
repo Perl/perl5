@@ -114,7 +114,6 @@
 # define SvUV(a)                                Perl_SvUV(aTHX_ a)
 # define SvUV_nomg(a)                           Perl_SvUV_nomg(aTHX_ a)
 # define _force_out_malformed_utf8_message(a,b,c,d) Perl__force_out_malformed_utf8_message(aTHX_ a,b,c,d)
-# define _is_in_locale_category(a,b)            Perl__is_in_locale_category(aTHX_ a,b)
 # define _is_uni_FOO(a,b)                       Perl__is_uni_FOO(aTHX_ a,b)
 # define _is_uni_perl_idcont(a)                 Perl__is_uni_perl_idcont(aTHX_ a)
 # define _is_uni_perl_idstart(a)                Perl__is_uni_perl_idstart(aTHX_ a)
@@ -314,6 +313,7 @@
 # define isUTF8_CHAR                            Perl_isUTF8_CHAR
 # define isUTF8_CHAR_flags                      Perl_isUTF8_CHAR_flags
 # define is_c9strict_utf8_string_loclen         Perl_is_c9strict_utf8_string_loclen
+# define is_in_locale_category_(a,b)            Perl_is_in_locale_category_(aTHX_ a,b)
 # define is_lvalue_sub()                        Perl_is_lvalue_sub(aTHX)
 # define is_safe_syscall(a,b,c,d)               Perl_is_safe_syscall(aTHX_ a,b,c,d)
 # define is_strict_utf8_string_loclen           Perl_is_strict_utf8_string_loclen

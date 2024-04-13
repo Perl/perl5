@@ -1632,7 +1632,7 @@ ATdip	|bool	|is_c9strict_utf8_string_loclen 			\
 
 APTdp	|bool	|isinfnan	|NV nv
 dp	|bool	|isinfnansv	|NN SV *sv
-Cp	|bool	|_is_in_locale_category 				\
+Cp	|bool	|is_in_locale_category_ 				\
 				|const bool compiling			\
 				|const int category
 ARdp	|I32	|is_lvalue_sub

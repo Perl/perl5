@@ -103,10 +103,6 @@ Perl__inverse_folds(pTHX_ const UV cp, U32 *first_folds_to, const U32 **remainin
         assert(first_folds_to); assert(remaining_folds_to)
 
 PERL_CALLCONV bool
-Perl__is_in_locale_category(pTHX_ const bool compiling, const int category);
-#define PERL_ARGS_ASSERT__IS_IN_LOCALE_CATEGORY
-
-PERL_CALLCONV bool
 Perl__is_uni_FOO(pTHX_ const U8 classnum, const UV c)
         __attribute__warn_unused_result__;
 #define PERL_ARGS_ASSERT__IS_UNI_FOO
@@ -1820,6 +1816,10 @@ is_c9strict_utf8_string(const U8 *s, STRLEN len)
 
 /* PERL_CALLCONV bool
 is_c9strict_utf8_string_loc(const U8 *s, STRLEN len, const U8 **ep); */
+
+PERL_CALLCONV bool
+Perl_is_in_locale_category_(pTHX_ const bool compiling, const int category);
+#define PERL_ARGS_ASSERT_IS_IN_LOCALE_CATEGORY_
 
 PERL_CALLCONV I32
 Perl_is_lvalue_sub(pTHX)

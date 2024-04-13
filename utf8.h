@@ -933,7 +933,7 @@ case any call to string overloading updates the internal UTF-8 encoding flag.
             ((    (      (CopHINTS_get(PL_curcop) & HINT_UNI_8_BIT))    \
                    || (   CopHINTS_get(PL_curcop) & HINT_LOCALE_PARTIAL \
                             /* -1 below is for :not_characters */       \
-                       && _is_in_locale_category(FALSE, -1)))           \
+                       && is_in_locale_category_(FALSE, -1)))           \
               && (! IN_BYTES))
 
 #define UNICODE_SURROGATE_FIRST		0xD800
