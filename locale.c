@@ -10423,7 +10423,7 @@ Perl_my_strerror(pTHX_ const int errnum, utf8ness_t * utf8ness)
 #endif   /* end of all the my_strerror() implementations */
 
 bool
-Perl__is_in_locale_category(pTHX_ const bool compiling, const int category)
+Perl_is_in_locale_category_(pTHX_ const bool compiling, const int category)
 {
     /* Internal function which returns if we are in the scope of a pragma that
      * enables the locale category 'category'.  'compiling' should indicate if

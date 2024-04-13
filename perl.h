@@ -7487,10 +7487,10 @@ the plain locale pragma without a parameter (S<C<use locale>>) is in effect.
 #  define IN_LC_COMPILETIME(category)                                       \
        (       IN_LC_ALL_COMPILETIME                                        \
         || (   IN_LC_PARTIAL_COMPILETIME                                    \
-            && Perl__is_in_locale_category(aTHX_ TRUE, (category))))
+            && Perl_is_in_locale_category_(aTHX_ TRUE, (category))))
 #  define IN_LC_RUNTIME(category)                                           \
       (IN_LC_ALL_RUNTIME || (IN_LC_PARTIAL_RUNTIME                          \
-                 && Perl__is_in_locale_category(aTHX_ FALSE, (category))))
+                 && Perl_is_in_locale_category_(aTHX_ FALSE, (category))))
 #  define IN_LC(category)  \
                     (IN_LC_COMPILETIME(category) || IN_LC_RUNTIME(category))
 
