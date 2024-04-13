@@ -5934,7 +5934,7 @@ typedef enum {
 #define HINT_STRICT_REFS	0x00000002 /* strict pragma */
 #define HINT_LOCALE		0x00000004 /* locale pragma */
 #define HINT_BYTES		0x00000008 /* bytes pragma */
-#define HINT_LOCALE_PARTIAL	0x00000010 /* locale, but a subset of categories */
+/* #define spare_bit               0x00000010 */
 
 #define HINT_EXPLICIT_STRICT_REFS	0x00000020 /* strict.pm */
 #define HINT_EXPLICIT_STRICT_SUBS	0x00000040 /* strict.pm */
@@ -7439,16 +7439,23 @@ typedef struct am_table_short AMTS;
 
    /* Returns TRUE if the plain locale pragma without a parameter is in effect.
     * */
-#  define IN_LOCALE_RUNTIME	(PL_curcop                                  \
-                              && CopHINTS_get(PL_curcop) & HINT_LOCALE)
-
+#  define PERL_IN_UNRESTRICTED_LOCALE_  -2   /* Chosen so as to not conflict
+                                                with a real category number,
+                                                nor -1 already reserved */
    /* Returns TRUE if either form of the locale pragma is in effect */
 #  define IN_SOME_LOCALE_FORM_RUNTIME                                       \
-        cBOOL(CopHINTS_get(PL_curcop) & (HINT_LOCALE|HINT_LOCALE_PARTIAL))
+                     (PL_curcop && CopHINTS_get(PL_curcop) & (HINT_LOCALE))
 
-#  define IN_LOCALE_COMPILETIME	cBOOL(PL_hints & HINT_LOCALE)
-#  define IN_SOME_LOCALE_FORM_COMPILETIME                                   \
-                        cBOOL(PL_hints & (HINT_LOCALE|HINT_LOCALE_PARTIAL))
+#  define IN_LOCALE_RUNTIME                                                 \
+      (   IN_SOME_LOCALE_FORM_RUNTIME                                       \
+       && is_in_locale_category_(false, /* runtime */                       \
+                                 PERL_IN_UNRESTRICTED_LOCALE_))
+#  define IN_LOCALE_COMPILETIME	                                            \
+      (   IN_SOME_LOCALE_FORM_COMPILETIME                                  \
+       && is_in_locale_category_(true, /* is compiling */                   \
+                                 PERL_IN_UNRESTRICTED_LOCALE_ ))
+
+#  define IN_SOME_LOCALE_FORM_COMPILETIME  cBOOL(PL_hints & (HINT_LOCALE))
 
 /*
 =for apidoc_section $locale
@@ -7480,9 +7487,10 @@ the plain locale pragma without a parameter (S<C<use locale>>) is in effect.
 #  define IN_LC_ALL_COMPILETIME   IN_LOCALE_COMPILETIME
 #  define IN_LC_ALL_RUNTIME       IN_LOCALE_RUNTIME
 
-#  define IN_LC_PARTIAL_COMPILETIME   cBOOL(PL_hints & HINT_LOCALE_PARTIAL)
-#  define IN_LC_PARTIAL_RUNTIME                                             \
-              (PL_curcop && CopHINTS_get(PL_curcop) & HINT_LOCALE_PARTIAL)
+#  define IN_LC_PARTIAL_COMPILETIME   (     IN_SOME_LOCALE_FORM_COMPILETIME \
+                                       && ! IN_LOCALE_COMPILETIME)
+#  define IN_LC_PARTIAL_RUNTIME       (     IN_SOME_LOCALE_FORM_RUNTIME     \
+                                       && ! IN_LOCALE_RUNTIME)
 
 #  define IN_LC_COMPILETIME(category)                                       \
        (       IN_LC_ALL_COMPILETIME                                        \
