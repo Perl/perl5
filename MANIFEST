@@ -5466,6 +5466,8 @@ lib/sigtrap.pm				For trapping an abort and giving traceback
 lib/sigtrap.t				See if sigtrap works
 lib/sort.pm				For "use sort"
 lib/sort.t				See if "use sort" works
+lib/source/encoding.pm			use source::encoding
+lib/source/source_encoding.t		test "use source::encoding"
 lib/strict.pm				For "use strict"
 lib/strict.t				See if strictures work
 lib/subs.pm				Declare overriding subs

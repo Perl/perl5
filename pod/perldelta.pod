@@ -27,6 +27,21 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 New pragma C<L<source::encoding>>
+
+This allows you to declare that the portion of a program for the
+remainder of the lexical scope of this pragma is encoded either entirely
+in ASCII (for S<C<use source::encoding 'ascii'>>) or if UTF-8 is allowed
+as well (for S<C<use source::encoding 'utf8'>>).  No other encodings are
+accepted.  The second form is entirely equivalent to S<C<use utf8>>, and
+may be used interchangeably with that.
+
+The purpose of this pragma is to catch cases early where you forgot to
+specify S<C<use utf8>>.
+
+S<C<no source::encoding>> turns off all this checking for the remainder of
+its lexical scope.  The meaning of non-ASCII characters is then undefined.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security

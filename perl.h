@@ -5934,7 +5934,7 @@ typedef enum {
 #define HINT_STRICT_REFS	0x00000002 /* strict pragma */
 #define HINT_LOCALE		0x00000004 /* locale pragma */
 #define HINT_BYTES		0x00000008 /* bytes pragma */
-/* #define spare_bit               0x00000010 */
+#define HINT_ASCII_ENCODING     0x00000010 /* source::encoding */
 
 #define HINT_EXPLICIT_STRICT_REFS	0x00000020 /* strict.pm */
 #define HINT_EXPLICIT_STRICT_SUBS	0x00000040 /* strict.pm */

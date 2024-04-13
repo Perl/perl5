@@ -5916,6 +5916,8 @@ S	|void	|update_debugger_info					\
 				|NULLOK SV *orig_sv			\
 				|NULLOK const char * const buf		\
 				|STRLEN len
+S	|void	|yyerror_non_ascii_message				\
+				|NN const U8 * const s
 S	|int	|yywarn 	|NN const char * const s		\
 				|U32 flags
 # if defined(DEBUGGING)
