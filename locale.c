@@ -10436,6 +10436,10 @@ Perl_is_in_locale_category_(pTHX_ const bool compiling, const int category)
         return FALSE;
     }
 
+    if (category == PERL_IN_UNRESTRICTED_LOCALE_) {
+        return SvUV(these_categories) == 0;
+    }
+
     /* The pseudo-category 'not_characters' is -1, so just add 1 to each to get
      * a valid unsigned */
     assert(category >= -1);
