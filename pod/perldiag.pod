@@ -8255,11 +8255,19 @@ set-id, your best bet is to put a set-id C wrapper around your script.
 
 =item You need to quote "%s"
 
-(W syntax) You assigned a bareword as a signal handler name.
-Unfortunately, you already have a subroutine of that name declared,
-which means that Perl 5 will try to call the subroutine when the
-assignment is executed, which is probably not what you want.  (If it IS
-what you want, put an & in front.)
+(W syntax) You assigned a bareword as a signal handler name:
+
+    $SIG{...} = foo;
+
+However, this will not make C<sub foo> the signal handler. Instead, Perl
+will call the subroutine when the assignment is executed and use the
+returned value as the signal handler, which is probably not what you want.
+(If it I<is> what you want, put C<()> after the subroutine name to avoid
+the warning.)
+
+To register the subroutine as the signal handler, take a reference to it:
+
+    $SIG{...} = \&foo;
 
 =item Your random numbers are not that random
 
