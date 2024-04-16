@@ -5455,8 +5455,7 @@ yyl_dollar(pTHX_ char *s)
                     } while (isSPACE(*t));
                     if (isIDFIRST_lazy_if_safe(t, PL_bufend, UTF)) {
                         STRLEN len;
-                        t = scan_word6(t, tmpbuf, sizeof tmpbuf, TRUE,
-                                      &len, TRUE);
+                        t = scan_word(t, tmpbuf, sizeof tmpbuf, TRUE, &len);
                         while (isSPACE(*t))
                             t++;
                         if (  *t == ';'
