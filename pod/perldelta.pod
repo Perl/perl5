@@ -27,6 +27,12 @@ here, but most should go in the L</Performance Enhancements> section.
 
 [ List each enhancement as a =head2 entry ]
 
+=head2 The C<:5.40> feature bundle adds C<try> and C<extra_paired_delimiters>
+
+The latest version feature bundle now contains the recently-stablised features
+C<try> and C<extra_paired_delimiters>. As this feature bundle is used by the
+C<-E> commandline switch, these are immediately available in C<-E> scripts.
+
 =head1 Security
 
 XXX Any security-related notices go here.  In particular, any security
