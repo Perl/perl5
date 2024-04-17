@@ -669,6 +669,14 @@ Perl_make_trie(pTHX_ RExC_state_t *pRExC_state, regnode *startbranch,
         STRLEN maxchars = 0;
         bool set_bit = trie->bitmap ? 1 : 0; /*store the first char in the
                                                bitmap?*/
+
+        /* wordlen is needed for the TRIE_READ_CHAR() macro, but we don't use its
+           value in this scope, we only modify it.  clang 17 warns about this.
+           The later definitions of wordlen in this function do have their values
+           used.
+        */
+        PERL_UNUSED_VAR(wordlen);
+
         lastbranch = cur;
 
         if (OP(noper) == NOTHING) {
