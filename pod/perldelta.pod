@@ -172,13 +172,14 @@ section.
 
 Additionally, the following selected changes have been made:
 
-=head3 L<XXX>
+=head3 L<perlhacktips>
 
 =over 4
 
 =item *
 
-XXX Description of the change here
+Added brief documentation for some tools useful when developing perl
+itself on Windows or Cygwin.
 
 =back
 
@@ -224,7 +225,12 @@ XXX Changes (i.e. rewording) of diagnostic messages go here
 
 =item *
 
-XXX Describe change here
+L<Old package separator "'" deprecated|perldiag/"Old package separator "'" deprecated">
+
+Prevent this warning appearing spuriously when checking the heuristic for the
+L<You need to quote "%s"|perldiag/"You need to quote "%s""> warning.
+
+[github #22145]
 
 =back
 
@@ -260,7 +266,10 @@ L</Platform Support> section, instead.
 
 =item *
 
-XXX
+You can now separately enable high water mark checks for non-DEBUGGING
+or disable them for DEBUGGING builds with C<-Accflags=-DPERL_USE_HWM>
+or C<-Accflags=-DPERL_NO_HWM> respectively.  The default remains the
+same.  [github #16607]
 
 =back
 
