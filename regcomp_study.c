@@ -1064,9 +1064,9 @@ Perl_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan,
     regnode *n = regnext(scan);
     U32 stringok = 1;
     regnode *next = REGNODE_AFTER_varies(scan);
-    U32 merged = 0;
     U32 stopnow = 0;
 #ifdef DEBUGGING
+    U32 merged = 0;
     regnode *stop = scan;
     DECLARE_AND_GET_RE_DEBUG_FLAGS;
 #else
@@ -1214,7 +1214,9 @@ Perl_join_exact(pTHX_ RExC_state_t *pRExC_state, regnode *scan,
             }
 
             DEBUG_PEEP("merg", n, depth, 0);
+#ifdef DEBUGGING
             merged++;
+#endif
 
             next = REGNODE_AFTER_varies(n);
             NEXT_OFF(scan) += NEXT_OFF(n);
