@@ -1938,9 +1938,7 @@ PP(pp_add)
                         auv = aiv;
                         auvok = 1;	/* Now acting as a sign flag.  */
                     } else {
-                        /* Using 0- here and later to silence bogus warning
-                         * from MS VC */
-                        auv = (UV) (0 - (UV) aiv);
+                        auv = NEGATE_2UV(aiv);
                     }
                 }
                 a_valid = 1;
@@ -1960,7 +1958,7 @@ PP(pp_add)
                     buv = biv;
                     buvok = 1;
                 } else
-                    buv = (UV) (0 - (UV) biv);
+                    buv = NEGATE_2UV(biv);
             }
             /* ?uvok if value is >= 0. basically, flagged as UV if it's +ve,
                else "IV" now, independent of how it came in.
@@ -1999,9 +1997,8 @@ PP(pp_add)
                     TARGu(result,1);
                 else {
                     /* Negate result */
-                    if (result <= (UV)IV_MIN)
-                        TARGi(result == (UV)IV_MIN
-                                ? IV_MIN : -(IV)result, 1);
+                    if (result <= ABS_IV_MIN)
+                        TARGi(NEGATE_2IV(result), 1);
                     else {
                         /* result valid, but out of range for IV.  */
                         TARGn(-(NV)result, 1);
