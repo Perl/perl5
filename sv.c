@@ -2242,9 +2242,8 @@ S_sv_2iuv_common(pTHX_ SV *const sv)
                 }
             } else {
                 /* 2s complement assumption  */
-                if (value <= (UV)IV_MIN) {
-                    SvIV_set(sv, value == (UV)IV_MIN
-                                    ? IV_MIN : -(IV)value);
+                if (value <= ABS_IV_MIN) {
+                    SvIV_set(sv, NEGATE_2IV(value));
                 } else {
                     /* Too negative for an IV.  This is a double upgrade, but
                        I'm assuming it will be rare.  */
@@ -2396,10 +2395,10 @@ Perl_sv_2iv_flags(pTHX_ SV *const sv, const I32 flags)
                 == IS_NUMBER_IN_UV) {
                 /* It's definitely an integer */
                 if (numtype & IS_NUMBER_NEG) {
-                    if (value < (UV)IV_MIN)
-                        return -(IV)value;
+                    if (value <= ABS_IV_MIN)
+                        return NEGATE_2IV(value);
                 } else {
-                    if (value < (UV)IV_MAX)
+                    if (value <= (UV)IV_MAX)
                         return (IV)value;
                 }
             }

@@ -1237,12 +1237,9 @@ PP(pp_pow)
                         if (baseuok || !odd_power)
                             /* answer is positive */
                             TARGu(result, 1);
-                        else if (result <= (UV)IV_MAX)
+                        else if (result <= ABS_IV_MIN)
                             /* answer negative, fits in IV */
-                            TARGi(-(IV)result, 1);
-                        else if (result == (UV)IV_MIN)
-                            /* 2's complement assumption: special case IV_MIN */
-                            TARGi(IV_MIN, 1);
+                            TARGi(NEGATE_2IV(result), 1);
                         else
                             /* answer negative, doesn't fit */
                             TARGn(-(NV)result, 1);
@@ -1410,9 +1407,8 @@ PP(pp_multiply)
                     alow = aiv;
                     auvok = TRUE; /* effectively it's a UV now */
                 } else {
-                    /* abs, auvok == false records sign; Using 0- here and
-                     * later to silence bogus warning from MS VC */
-                    alow = (UV) (0 - (UV) aiv);
+                    /* abs, auvok == false records sign */
+                    alow = NEGATE_2UV(aiv);
                 }
             }
             if (buvok) {
@@ -1424,7 +1420,7 @@ PP(pp_multiply)
                     buvok = TRUE; /* effectively it's a UV now */
                 } else {
                     /* abs, buvok == false records sign */
-                    blow = (UV) (0 - (UV) biv);
+                    blow = NEGATE_2UV(biv);
                 }
             }
 
@@ -1445,14 +1441,9 @@ PP(pp_multiply)
                     /* -ve * -ve or +ve * +ve gives a +ve result.  */
                     TARGu(product, 1);
                     goto ret;
-                } else if (product <= (UV)IV_MIN) {
-                    /* 2s complement assumption that (UV)-IV_MIN is correct.  */
+                } else if (product <= ABS_IV_MIN) {
                     /* -ve result, which could overflow an IV  */
-                    /* can't negate IV_MIN, but there are aren't two
-                     * integers such that !ahigh && !bhigh, where the
-                     * product equals 0x800....000 */
-                    assert(product != (UV)IV_MIN);
-                    TARGi(-(IV)product, 1);
+                    TARGi(NEGATE_2IV(product), 1);
                     goto ret;
                 } /* else drop to NVs below. */
             } else {
@@ -1484,12 +1475,9 @@ PP(pp_multiply)
                             /* -ve * -ve or +ve * +ve gives a +ve result.  */
                             TARGu(product_low, 1);
                             goto ret;
-                        } else if (product_low <= (UV)IV_MIN) {
-                            /* 2s complement assumption again  */
+                        } else if (product_low <= ABS_IV_MIN) {
                             /* -ve result, which could overflow an IV  */
-                            TARGi(product_low == (UV)IV_MIN
-                                    ? IV_MIN : -(IV)product_low,
-                                  1);
+                            TARGi(NEGATE_2IV(product_low), 1);
                             goto ret;
                         } /* else drop to NVs below. */
                     }
@@ -1562,7 +1550,7 @@ PP(pp_divide)
                     right_non_neg = TRUE; /* effectively it's a UV now */
                 }
                 else {
-                    right = -(UV)biv;
+                    right = NEGATE_2UV(biv);
                 }
             }
             /* historically undef()/0 gives a "Use of uninitialized value"
@@ -1583,7 +1571,7 @@ PP(pp_divide)
                     left_non_neg = TRUE; /* effectively it's a UV now */
                 }
                 else {
-                    left = -(UV)aiv;
+                    left = NEGATE_2UV(aiv);
                 }
             }
 
@@ -1615,9 +1603,8 @@ PP(pp_divide)
                         goto ret;
                     }
                     /* 2s complement assumption */
-                    if (result <= (UV)IV_MIN)
-                        TARGi(result == (UV)IV_MIN ? IV_MIN : -(IV)result,
-                              1);
+                    if (result <= ABS_IV_MIN)
+                        TARGi(NEGATE_2IV(result), 1);
                     else {
                         /* It's exact but too negative for IV. */
                         TARGn(-(NV)result, 1);
@@ -2003,7 +1990,7 @@ PP(pp_subtract)
                         auv = aiv;
                         auvok = 1;	/* Now acting as a sign flag.  */
                     } else {
-                        auv = (UV) (0 - (UV) aiv);
+                        auv = NEGATE_2UV(aiv);
                     }
                 }
                 a_valid = 1;
@@ -2023,7 +2010,7 @@ PP(pp_subtract)
                     buv = biv;
                     buvok = 1;
                 } else
-                    buv = (UV) (0 - (UV) biv);
+                    buv = NEGATE_2UV(biv);
             }
             /* ?uvok if value is >= 0. basically, flagged as UV if it's +ve,
                else "IV" now, independent of how it came in.
@@ -2062,10 +2049,8 @@ PP(pp_subtract)
                     TARGu(result, 1);
                 else {
                     /* Negate result */
-                    if (result <= (UV)IV_MIN)
-                        TARGi(result == (UV)IV_MIN
-                                ? IV_MIN : -(IV)result,
-                              1);
+                    if (result <= ABS_IV_MIN)
+                        TARGi(NEGATE_2IV(result), 1);
                     else {
                         /* result valid, but out of range for IV.  */
                         TARGn(-(NV)result, 1);
@@ -2753,24 +2738,23 @@ PP(pp_negate)
             /* It's publicly an integer */
         oops_its_an_int:
             if (SvIsUV(sv)) {
-                if (SvIVX(sv) == IV_MIN) {
-                    /* 2s complement assumption. */
-                    TARGi(SvIVX(sv), 1);/* special case: -((UV)IV_MAX+1) ==
-                                           IV_MIN */
-                    goto ret;
-                }
-                else if (SvUVX(sv) <= IV_MAX) {
-                    TARGi(-SvIVX(sv), 1);
+                if (SvUVX(sv) <= ABS_IV_MIN) {
+                    TARGi(NEGATE_2IV(SvUVX(sv)), 1);
                     goto ret;
                 }
             }
-            else if (SvIVX(sv) != IV_MIN) {
+#ifdef PERL_PRESERVE_IVUV
+            else if (SvIVX(sv) < 0) {
+                TARGu(NEGATE_2UV(SvIVX(sv)), 1);
+                goto ret;
+            }
+            else {
                 TARGi(-SvIVX(sv), 1);
                 goto ret;
             }
-#ifdef PERL_PRESERVE_IVUV
-            else {
-                TARGu((UV)IV_MIN, 1);
+#else
+            else if (SvIVX(sv) != IV_MIN) {
+                TARGi(-SvIVX(sv), 1);
                 goto ret;
             }
 #endif
@@ -3386,12 +3370,7 @@ PP(pp_abs)
           if (iv >= 0) {
             uv = (UV)iv;
           } else {
-              /* "(UV)-(iv + 1) + 1" below is mathematically "-iv", but
-                 transformed so that every subexpression will never trigger
-                 overflows even on 2's complement representation (note that
-                 iv is always < 0 here), and modern compilers could optimize
-                 this to a single negation.  */
-              uv = (UV)-(iv + 1) + 1;
+              uv = NEGATE_2UV(iv);
           }
         }
       set_uv:
