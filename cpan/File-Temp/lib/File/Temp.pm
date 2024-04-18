@@ -749,7 +749,7 @@ sub _is_verysafe {
   if (defined $chown_restricted) {
 
     # Return if the current directory is safe
-    return _is_safe($path,$err_ref) if POSIX::sysconf( $chown_restricted );
+    return _is_safe($path,$err_ref) if POSIX::pathconf( $path, $chown_restricted );
 
   }
 
