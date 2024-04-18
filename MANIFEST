@@ -6495,6 +6495,7 @@ t/porting/checkcfgvar.t			Check that all config.sh-like files are good
 t/porting/cmp_version.t			Test whether all changed module files have their VERSION bumped
 t/porting/copyright.t			Check that copyright years match
 t/porting/corelist.t			Check that Module-CoreList has perl versions for the current perl
+t/porting/cpphdrcheck.t			Test headers on the C++ variant of $Config{cc}
 t/porting/customized.dat		Data file for porting/customized.t
 t/porting/customized.t			Check all CUSTOMIZED files are as they should be
 t/porting/deprecation.t			Test that deprecation warnings are handled right
