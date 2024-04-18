@@ -312,9 +312,6 @@ sub _decode_encodings { # For use only by other functions in this file!
 	    push @enc, $_;
             push @enc, "$_.UTF-8";
             push @enc, "$_.65001"; # Windows UTF-8
-            push @enc, "$_.ACP"; # Windows ANSI code page
-            push @enc, "$_.OCP"; # Windows OEM code page
-            push @enc, "$_.1252"; # Windows
 	}
     }
     if ($^O eq 'os390') {
@@ -322,6 +319,7 @@ sub _decode_encodings { # For use only by other functions in this file!
     }
     push @enc, "UTF-8";
     push @enc, "65001"; # Windows UTF-8
+    push @enc, "1252";  # Windows
 
     return @enc;
 }
@@ -633,6 +631,11 @@ sub find_locales ($;$) {
             # The rest of the locales are in this file.
             state @my_data = <DATA>; close DATA if fileno DATA;
             push @Data, @my_data;
+
+            foreach my $default (qw(.ACP .OCP)) {
+                _trylocale($default, \@categories, \@Locale,
+                           $allow_incompatible);
+            }
 
             foreach my $line (@Data) {
                 chomp $line;
