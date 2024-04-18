@@ -2235,7 +2235,7 @@ S_cv_clone(pTHX_ CV *proto, CV *cv, CV *outside, HV *cloned)
     if (UNLIKELY(CvISXSUB(proto))) {
         CvXSUB(cv)    = CvXSUB(proto);
         CvXSUBANY(cv) = CvXSUBANY(proto);
-        if (CvREFCOUNTED_ANYSV(cv))
+        if (CvREFCOUNTED_ANYSV(cv) || CvCONST(cv))
             SvREFCNT_inc(CvXSUBANY(cv).any_sv);
     }
     else {
