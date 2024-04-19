@@ -3174,6 +3174,7 @@ mblen(s, n = ~0)
     CODE:
         errno = 0;
 
+        CHECK_AND_WARN_PROBLEMATIC_LOCALE_;
         SvGETMAGIC(s);
         if (! SvOK(s)) {
 #ifdef USE_MBRLEN
@@ -3268,6 +3269,7 @@ wctomb(s, wchar)
 	wchar_t		wchar
     CODE:
         errno = 0;
+        CHECK_AND_WARN_PROBLEMATIC_LOCALE_;
         SvGETMAGIC(s);
         if (s == &PL_sv_undef) {
 #ifdef USE_WCRTOMB
@@ -3307,7 +3309,8 @@ strcoll(s1, s2)
 	char *		s1
 	char *		s2
     CODE:
-        LC_COLLATE_LOCK;
+        CHECK_AND_WARN_PROBLEMATIC_LOCALE_;
+	LC_COLLATE_LOCK;
         RETVAL = strcoll(s1, s2);
         LC_COLLATE_UNLOCK;
     OUTPUT:
@@ -3365,6 +3368,7 @@ strtol(str, base = 0)
 	long num;
 	char *unparsed;
     PPCODE:
+        CHECK_AND_WARN_PROBLEMATIC_LOCALE_;
 	if (base == 0 || inRANGE(base, 2, 36)) {
             num = strtol(str, &unparsed, base);
 #if IVSIZE < LONGSIZE
@@ -3399,6 +3403,7 @@ strtoul(str, base = 0)
     PPCODE:
 	PERL_UNUSED_VAR(str);
 	PERL_UNUSED_VAR(base);
+        CHECK_AND_WARN_PROBLEMATIC_LOCALE_;
 	if (base == 0 || inRANGE(base, 2, 36)) {
             num = strtoul(str, &unparsed, base);
 #if UVSIZE < LONGSIZE
@@ -3428,6 +3433,7 @@ strxfrm(src)
 	SV *		src
     CODE:
 #ifdef USE_LOCALE_COLLATE
+      CHECK_AND_WARN_PROBLEMATIC_LOCALE_;
       ST(0) = Perl_strxfrm(aTHX_ src);
 #else
       ST(0) = src;
