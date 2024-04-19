@@ -3830,10 +3830,19 @@ S_new_ctype(pTHX_ const char *newctype, bool force)
         DEBUG_L(PerlIO_printf(Perl_debug_log,
                               "Unsupported, MB_CUR_MAX=%d\n", mb_cur_max));
 
-        Perl_ck_warner_d(aTHX_ packWARN(WARN_LOCALE),
-                         "Locale '%s' is unsupported, and may crash the"
-                         " interpreter",
-                         newctype);
+        if (! IN_LC(LC_CTYPE) || ckWARN_d(WARN_LOCALE)) {
+            char * msg = Perl_form(aTHX_
+                                   "Locale '%s' is unsupported, and may hang"
+                                   " or crash the interpreter",
+                                     newctype);
+            if (IN_LC(LC_CTYPE)) {
+                Perl_warner(aTHX_ packWARN(WARN_LOCALE), "%s", msg);
+            }
+            else {
+                PL_warn_locale = newSV(0);
+                sv_setpvn(PL_warn_locale, msg, strlen(msg));
+            }
+        }
     }
 
 #    endif
@@ -3995,16 +4004,22 @@ S_new_ctype(pTHX_ const char *newctype, bool force)
             /* WARNING.  If you change the wording of these; be sure to update
              * t/loc_tools.pl correspondingly */
 
+            if (PL_warn_locale) {
+                sv_catpvs(PL_warn_locale, "\n");
+            }
+            else {
+                PL_warn_locale = newSVpvs("");
+            }
+
             if (PL_in_utf8_CTYPE_locale) {
-                PL_warn_locale = Perl_newSVpvf(aTHX_
+                Perl_sv_catpvf(aTHX_ PL_warn_locale,
                      "Locale '%s' contains (at least) the following characters"
                      " which have\nunexpected meanings: %s\nThe Perl program"
                      " will use the expected meanings",
                       newctype, bad_chars_list);
             }
             else {
-                PL_warn_locale =
-                    Perl_newSVpvf(aTHX_
+                Perl_sv_catpvf(aTHX_ PL_warn_locale,
                                   "\nThe following characters (and maybe"
                                   " others) may not have the same meaning as"
                                   " the Perl program expects: %s\n",
@@ -5078,6 +5093,7 @@ Perl_mbtowc_(pTHX_ const wchar_t * pwc, const char * s, const Size_t len)
 #    undef USE_MBRTOWC
 #  endif
 
+    CHECK_AND_WARN_PROBLEMATIC_LOCALE_;
     int retval = -1;
 
     if (s == NULL) { /* Initialize the shift state to all zeros in

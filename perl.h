@@ -7456,7 +7456,7 @@ the plain locale pragma without a parameter (S<C<use locale>>) is in effect.
 #  define IN_LC(category)  \
                     (IN_LC_COMPILETIME(category) || IN_LC_RUNTIME(category))
 
-#  if defined (PERL_CORE) || defined (PERL_IN_XSUB_RE)
+#  if defined (PERL_CORE) || defined (PERL_IN_XSUB_RE) || defined(PERL_EXT_POSIX)
 
      /* This internal macro should be called from places that operate under
       * locale rules.  If there is a problem with the current locale that
