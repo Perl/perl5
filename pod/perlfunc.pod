@@ -1283,8 +1283,9 @@ the group to any of your secondary groups.  On insecure systems, these
 restrictions may be relaxed, but this is not a portable assumption.
 On POSIX systems, you can detect this condition this way:
 
-    use POSIX qw(sysconf _PC_CHOWN_RESTRICTED);
-    my $can_chown_giveaway = ! sysconf(_PC_CHOWN_RESTRICTED);
+    use POSIX qw(pathconf _PC_CHOWN_RESTRICTED);
+    my $can_chown_giveaway =
+        ! pathconf($path_of_interest, _PC_CHOWN_RESTRICTED);
 
 Portability issues: L<perlport/chown>.
 
