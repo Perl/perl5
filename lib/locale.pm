@@ -3,7 +3,7 @@ package locale;
 use strict;
 use warnings;
 
-our $VERSION = '1.11';
+our $VERSION = '1.12';
 use Config;
 
 $Carp::Internal{ (__PACKAGE__) } = 1;
@@ -14,13 +14,31 @@ locale - Perl pragma to use or avoid POSIX locales for built-in operations
 
 =head1 SYNOPSIS
 
-    my @x1 = sort @y;      # Native-platform/Unicode code point sort order
-    {
-        use locale;
-        my @x2 = sort @y;  # Locale-defined sort order
-    }
-    my @x3 = sort @y;      # Native-platform/Unicode code point sort order
-                       # again
+ my @x1 = sort @y;      # Native-platform/Unicode code point sort order
+ {
+     use locale;
+     my @x2 = sort @y;  # Locale-defined sort order
+ }
+ my @x3 = sort @y;      # Native-platform/Unicode code point sort order
+                        # again
+
+ # Parameters to the pragma are to work around deficiencies in locale
+ # handling that have since been fixed, and hence these are likely no
+ # longer useful
+ use locale qw(:ctype :collate);    # Only use the locale for character
+                                    # classification (\w, \d, etc.), and
+                                    # for string comparison operations
+                                    # like '$a le $b' and sorting.
+ use locale ':not_characters';      # Use the locale for everything but
+                                    # character classification and string
+                                    # comparison operations
+
+ use locale ':!numeric';            # Use the locale for everything but
+                                    # numeric-related operations
+ use locale ':not_numeric';         # Same
+
+ no locale;             # Turn off locale handling for the remainder of
+                        # the scope.
 
 =head1 DESCRIPTION
 
@@ -30,11 +48,7 @@ expressions, C<LC_COLLATE> for string comparison, and C<LC_NUMERIC> for number
 formatting).  Each C<use locale> or C<no locale>
 affects statements to the end of the enclosing BLOCK.
 
-See L<perllocale> for more detailed information on how Perl supports
-locales.
-
-On systems that don't have locales, this pragma will cause your operations
-to behave as if in the C<C> locale; attempts to change the locale will fail.
+The pragma is documented as part of L<perllocale>.
 
 =cut
 
