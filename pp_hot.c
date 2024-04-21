@@ -5992,15 +5992,22 @@ Perl_leave_adjust_stacks(pTHX_ SV **from_sp, SV **to_sp, U8 gimme, int pass)
                  *    ++PL_tmps_ix, moving the previous occupant there
                  *    instead.
                  */
-                SV *newsv = newSV_type(SVt_NULL);
+
+                /* A newsv of type SVt_NULL will always be upgraded to
+                 * SvTYPE(sv), where that is a SVt_PVNV or below. It is
+                 * more efficient to create such types directly than
+                 * upgrade to them via sv_upgrade() within sv_setsv_flags. */
+                SV *newsv = (SvTYPE(sv) <= SVt_PVNV)
+                            ? newSV_type(SvTYPE(sv))
+                            : newSV_type(SVt_NULL);
 
                 PL_tmps_stack[++PL_tmps_ix] = *tmps_basep;
                 /* put it on the tmps stack early so it gets freed if we die */
                 *tmps_basep++ = newsv;
 
-                if (SvTYPE(sv) <= SVt_IV) {
-                    /* arg must be one of undef, IV/UV, or RV: skip
-                     * sv_setsv_flags() and do the copy directly */
+                if (SvTYPE(sv) <= (NVSIZE <= IVSIZE ? SVt_NV : SVt_IV)) {
+                    /* arg must be one of undef/IV/UV/RV - maybe NV depending on
+                     * config, skip sv_setsv_flags() and do the copy directly */
                     U32 dstflags;
                     U32 srcflags = SvFLAGS(sv);
 
@@ -6028,6 +6035,21 @@ Perl_leave_adjust_stacks(pTHX_ SV **from_sp, SV **to_sp, U8 gimme, int pass)
                                             |(srcflags & SVf_IVisUV));
                         }
                     }
+#if NVSIZE <= IVSIZE
+                    else if (srcflags & SVf_NOK) {
+                        SET_SVANY_FOR_BODYLESS_NV(newsv);
+                        dstflags = (SVt_NV|SVf_NOK|SVp_NOK|SVs_TEMP);
+
+                        /* both src and dst are <= SVt_MV, so sv_any points to the
+                         * head; so access the head directly
+                         */
+                        assert(    &(sv->sv_u.svu_nv)
+                                == &(((XPVNV*) SvANY(sv))->xnv_u.xnv_nv));
+                        assert(    &(newsv->sv_u.svu_nv)
+                                == &(((XPVNV*) SvANY(newsv))->xnv_u.xnv_nv));
+                        newsv->sv_u.svu_nv = sv->sv_u.svu_nv;
+                    }
+#endif
                     else {
                         assert(!(srcflags & SVf_OK));
                         dstflags = (SVt_NULL|SVs_TEMP); /* SV type plus flags */
