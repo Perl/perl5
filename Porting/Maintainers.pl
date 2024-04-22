@@ -989,7 +989,15 @@ our %Modules = (
             qr{^\.github/dependabot\.yml},
             qr{^\.github/workflows/build\.yaml},
         ],
-
+        'CUSTOMIZED'   => [
+            # https://github.com/rra/podlators/pull/28
+            'lib/Pod/Man.pm',
+            'lib/Pod/ParseLink.pm',
+            'lib/Pod/Text.pm',
+            'lib/Pod/Text/Color.pm',
+            'lib/Pod/Text/Overstrike.pm',
+            'lib/Pod/Text/Termcap.pm'
+        ],
         'MAP' => {
             ''                 => 'cpan/podlators/',
             # this file lives outside the cpan/ directory
