@@ -243,6 +243,7 @@ my $specialformats_re = qr/%$format_modifiers"\s*($specialformats)(\s*(?:"|\z))?
 # We skip the bodies of most XS functions, but not within these files
 my @include_xs_files = (
   "builtin.c",
+  "class.c",
   "universal.c",
 );
 
