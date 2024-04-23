@@ -731,6 +731,18 @@ be directly assigned to.
 an C<@ISA> array, and the array is not empty.  This is not permitted, as it
 would lead to a class with inconsistent inheritance.
 
+=item Cannot create an object of incomplete class "%s"
+
+(F) An attempt was made to create an object of a class where the start
+of the class definition has been seen, but the class has not been
+completed.
+
+This can happen for a failed eval, or if you attempt to create an
+object at compile time before the class is complete:
+
+  eval "class Foo {"; Foo->new; # error
+  class Bar { BEGIN { Bar->new } }; # error
+
 =item Cannot find encoding "%s"
 
 (S io) You tried to apply an encoding that did not exist to a filehandle,

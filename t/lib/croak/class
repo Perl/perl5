@@ -137,3 +137,21 @@ class XXX {
 }
 EXPECT
 Cannot use __CLASS__ outside of a method or field initializer expression at - line 5.
+########
+# NAME try to create an object of incomplete class (error)
+use v5.36;
+use feature 'class';
+no warnings 'experimental::class';
+eval "class C {";
+C->new;
+EXPECT
+Cannot create an object of incomplete class "C" at - line 5.
+########
+# NAME try to create an object of incomplete class (compile-time)
+use v5.36;
+use feature 'class';
+no warnings 'experimental::class';
+class C { BEGIN { C->new; } };
+EXPECT
+Cannot create an object of incomplete class "C" at - line 4.
+BEGIN failed--compilation aborted at - line 4.
