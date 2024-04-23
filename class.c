@@ -140,6 +140,11 @@ XS(injected_constructor)
         Perl_warn(aTHX_ "Odd number of arguments passed to %" HvNAMEf_QUOTEDPREFIX " constructor",
                 HvNAMEfARG(stash));
 
+    if (!aux->xhv_class_initfields_cv) {
+        Perl_croak(aTHX_ "Cannot create an object of incomplete class %" HvNAMEf_QUOTEDPREFIX,
+                   HvNAMEfARG(stash));
+    }
+
     HV *params = NULL;
     {
         /* Set up params HV */
