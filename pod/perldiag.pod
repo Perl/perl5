@@ -4729,6 +4729,14 @@ regardless of what name the caller used.
 (W overload) The call to overload::constant contained an odd number of
 arguments.  The arguments should come in pairs.
 
+=item Odd number of arguments passed to "%s" constructor
+
+(S) The constructor for the given class was called with an odd
+number of arguments.
+
+Class constructors accept named arguments as a list and expect pairs
+of name followed by value as if you were initialising a hash.
+
 =item Odd number of elements in anonymous hash
 
 (W misc) You specified an odd number of elements to initialize a hash,
@@ -7307,6 +7315,11 @@ whereabouts in the regular expression the escape was discovered.
 
 (F) You attempted to add a named attribute to a C<field> definition, but
 perl does not recognise the name of the requested attribute.
+
+=item Unrecognised parameters for "%s" constructor: %s
+
+(F) You called new on a class but supplied a parameter name that
+didn't match a class field name.
 
 =item Unrecognized signal name "%s"
 
