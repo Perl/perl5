@@ -2658,19 +2658,14 @@ Perl_sv_2nv_flags(pTHX_ SV *const sv, const I32 flags)
             SvNOK_on(sv);
         } else {
             /* value has been set.  It may not be precise.  */
-            if ((numtype & IS_NUMBER_NEG) && (value >= (UV)IV_MIN)) {
-                /* 2s complement assumption for (UV)IV_MIN  */
+            if ((numtype & IS_NUMBER_NEG) && (value > ABS_IV_MIN)) {
                 SvNOK_on(sv); /* Integer is too negative.  */
             } else {
                 SvNOKp_on(sv);
                 SvIOKp_on(sv);
 
                 if (numtype & IS_NUMBER_NEG) {
-                    /* -IV_MIN is undefined, but we should never reach
-                     * this point with both IS_NUMBER_NEG and value ==
-                     * (UV)IV_MIN */
-                    assert(value != (UV)IV_MIN);
-                    SvIV_set(sv, -(IV)value);
+                    SvIV_set(sv, NEGATE_2IV(value));
                 } else if (value <= (UV)IV_MAX) {
                     SvIV_set(sv, (IV)value);
                 } else {
