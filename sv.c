@@ -16159,8 +16159,8 @@ perl_clone_using(PerlInterpreter *proto_perl, UV flags,
     for (i = 0; i < (int) C_ARRAY_LENGTH(PL_restore_locale); i++) {
         PL_restore_locale[i] = NULL;
         PL_restore_locale_depth[i] = 0;
-        PL_locale_toggle_depth[i] = 0;
     }
+    PL_NUMERIC_toggle_depth = 0;
 #endif
 #ifdef USE_LOCALE_CTYPE
     Copy(PL_fold, PL_fold_locale, 256, U8);
