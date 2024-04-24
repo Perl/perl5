@@ -6529,7 +6529,7 @@ EXTCONST U8   PL_deBruijn_bitpos_tab64[];
     STMT_START {                                                            \
         CLANG_DIAG_IGNORE(-Wthread-safety)                                  \
         if (rcounter < 0 || wcounter < 0) {\
-            int khw = 0;\
+            /*int khw = 0;*/\
             assert(0);\
         }\
         if (rcounter < 0 || wcounter < 0) (Perl_croak_nocontext("panic: " \
@@ -6554,7 +6554,7 @@ EXTCONST U8   PL_deBruijn_bitpos_tab64[];
                 if(rcounter < 0) PerlIO_printf(Perl_debug_log, "rcounter=%d\n", rcounter);\
                 assert(rcounter == 0);                                      \
                 PERL_WRITE_LOCK(mutex);                                     \
-                DEBUG_U(PerlIO_printf(Perl_debug_log, "locked " name " all threads reader count is %zd\n", (mutex)->readers_count));\
+                DEBUG_U(PerlIO_printf(Perl_debug_log, "locked " name " all threads reader count is %lld\n", (mutex)->readers_count));\
             }                                                               \
             else {                                                          \
                 /* Here, this thread effectively already owns at least one  \
@@ -6582,7 +6582,7 @@ EXTCONST U8   PL_deBruijn_bitpos_tab64[];
                             __FILE__, __LINE__, wcounter, rcounter,         \
                             STRINGIFY(cond_to_panic_if_already_locked)))    \
             );                                                              \
-            DEBUG_U(PerlIO_printf(Perl_debug_log, "mutex " name ": all threads reader count is %zd\n", (mutex)->readers_count));\
+            DEBUG_U(PerlIO_printf(Perl_debug_log, "mutex " name " all threads reader count is %lld\n", (mutex)->readers_count));\
             if (cond_to_panic_if_already_locked) {                          \
                 Perl_croak_nocontext("panic: %s: %d: attempting to lock "   \
                                 name " incompatibly: %s\n",                 \
@@ -6596,7 +6596,7 @@ EXTCONST U8   PL_deBruijn_bitpos_tab64[];
 #  define PERL_REENTRANT_UNLOCK(name, mutex, wcounter, rcounter)            \
     STMT_START {                                                            \
         if (LIKELY(wcounter == 1)) {                                        \
-                DEBUG_U(PerlIO_printf(Perl_debug_log, "unlocking " name " all threads reader count is %zd\n", (mutex)->readers_count));\
+                DEBUG_U(PerlIO_printf(Perl_debug_log, "unlocking " name " all threads reader count is %lld\n", (mutex)->readers_count));\
             PERL_WRITE_UNLOCK(mutex);                                       \
             wcounter = 0;                                                   \
             UNLESS_PERL_MEM_LOG(DEBUG_U(PerlIO_printf(Perl_debug_log,      \
@@ -6616,7 +6616,7 @@ EXTCONST U8   PL_deBruijn_bitpos_tab64[];
             UNLESS_PERL_MEM_LOG(DEBUG_U(PerlIO_printf(Perl_debug_log,      \
                 "%s: %d: avoided unlocking " name "; new lock depth=%d"     \
                 "; this thread reader count=%d"                             \
-                "; all threads reader count=%zd\n",                         \
+                "; all threads reader count=%lld\n",                         \
                 __FILE__, __LINE__, wcounter, rcounter,                     \
                 (mutex)->readers_count))                                    \
             );                                                              \
@@ -6652,7 +6652,7 @@ EXTCONST U8   PL_deBruijn_bitpos_tab64[];
             UNLESS_PERL_MEM_LOG(DEBUG_U(PerlIO_printf(Perl_debug_log,      \
                             "%s: %d: avoided read-locking " name            \
                             "; lock depth=%d, this thread reader count=%d"  \
-                            "; all threads reader count=%zd\n",             \
+                            "; all threads reader count=%lld\n",             \
                             __FILE__, __LINE__, wcounter, rcounter,         \
                             (mutex)->readers_count)));                      \
         }                                                                   \
@@ -6687,7 +6687,7 @@ EXTCONST U8   PL_deBruijn_bitpos_tab64[];
             (mutex)->readers_count--;                                       \
             UNLESS_PERL_MEM_LOG(DEBUG_U(PerlIO_printf(Perl_debug_log,      \
                             "%s: %d: avoided read-unlocking " name          \
-                            "; all threads new reader count=%zd; lock"      \
+                            "; khw all threads new reader count=%lld; lock"      \
                             " depth=%d, this thread reader count=%d\n",     \
                             __FILE__, __LINE__, (mutex)->readers_count,     \
                             wcounter, rcounter))                            \
@@ -6697,7 +6697,7 @@ EXTCONST U8   PL_deBruijn_bitpos_tab64[];
             Perl_croak_nocontext("panic: %s: %d: attempting to read-unlock" \
                                  " already unlocked " name "; readers"      \
                                  " count was"                               \
-                                 " %zd\n", __FILE__, __LINE__,              \
+                                 " %lld\n", __FILE__, __LINE__,              \
                                  (mutex)->readers_count);                   \
         }                                                                   \
         CLANG_DIAG_RESTORE                                                  \
@@ -9645,7 +9645,7 @@ END_EXTERN_C
                 MUTEX_LOCK(&(mutex)->lock);                                 \
                 DEBUG_Lv(PerlIO_printf(Perl_debug_log, "mutex acquired for " name "\n"));\
                                                                             \
-                DEBUG_Lv(PerlIO_printf(Perl_debug_log, "new " name " all threads reader count is %zd\n", (mutex)->readers_count));\
+                DEBUG_Lv(PerlIO_printf(Perl_debug_log, "new " name " all threads reader count is %lld\n", (mutex)->readers_count));\
                                                                             \
                 /* Wait until we are the only reader */                     \
                 do {                                                        \

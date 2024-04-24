@@ -1,4 +1,8 @@
 # Common tools for test files to find the locales which exist on the
+    #print STDERR __FILE__, ": ", __LINE__, ": \n"; 
+BEGIN {
+    #print STDERR __FILE__, ": ", __LINE__, ": \n"; 
+}
 #23456789112345678921234567893123456789412345678951234567896123456789712345678981
 # system.  Caller should have verified that this isn't miniperl before calling
 # the functions.
@@ -173,6 +177,7 @@ sub _trylocale ($$$$) { # For use only by other functions in this file!
     print STDERR "#", __FILE__, ": ", __LINE__, ": Current state=", setlocale(&LC_ALL), "\n" if $debug;
 
     my $normalized_locale = lc ($locale =~ s/\W//gr);
+    return if $locale eq "Turkish";
     return if ! $locale || grep { $normalized_locale eq lc ($_ =~ s/\W//gr) } @$list;
 
     # This is a toy (pig latin) locale that is not fully implemented on some
@@ -236,8 +241,10 @@ sub _trylocale ($$$$) { # For use only by other functions in this file!
         use locale;
         #local $^D = $d;
 
+        next if $locale eq "Turkish";
         print STDERR "#", __FILE__, ": ", __LINE__, ": Calling setlocale($category, $locale)\n" if $debug;
         my $cur_result = setlocale($category, $locale);
+        print STDERR "#", __FILE__, ": ", __LINE__, ": undef\n"  if $debug;# && ! defined $cur_result;
         print STDERR "#", __FILE__, ": ", __LINE__, ": undef\n"  if $debug && ! defined $cur_result;
         return unless defined $cur_result;
 

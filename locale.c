@@ -2146,7 +2146,7 @@ S_bool_setlocale_emulate_safe_r(pTHX_
 {
     /* Set the locale to 'wanted_locale' for the category given by our internal
      * index number, and save the result for later use. */
-    DEBUG_U(PerlIO_printf( Perl_debug_log, "unlocked, setting %s to %s\n",
+    DEBUG_U(PerlIO_printf( Perl_debug_log, "setting %s to %s\n",
                            category_names[get_category_index(category)],
                            wanted_locale));
 
@@ -2306,6 +2306,9 @@ Perl_category_lock(pTHX_ const UV mask,
     DEBUG_U(PerlIO_printf(Perl_debug_log,
                            "Entering category_lock; mask=%" UVxf
                            ", called from %s: %d\n", mask, file, caller_line));
+    for (unsigned q = 0; q < LC_ALL_INDEX_; q++) {
+        DEBUG_U(PerlIO_printf(Perl_debug_log, "index=%d; cat=%d=%s, PL_curlocales=%s\n", q, categories[q], category_names[q], PL_curlocales[q]));
+    }
 
     //ENVr_LOCK_;
     LOCALE_LOCK_(0);
@@ -4916,6 +4919,7 @@ S_wrap_wsetlocale(pTHX_ const int category, const char *locale)
     const wchar_t * wlocale = NULL;
 
     if (locale) {
+        if (strEQ(locale, "POSIX")) locale = "C";
         wlocale = Win_utf8_string_to_wstring(locale);
         if (! wlocale) {
             return NULL;
@@ -4923,7 +4927,9 @@ S_wrap_wsetlocale(pTHX_ const int category, const char *locale)
     }
 
     WSETLOCALE_LOCK;
+    errno = 0;
     const wchar_t * wresult = _wsetlocale(category, wlocale);
+    //if (strEQ(locale, "POSIX") && ! wresult) DEBUG_U(PerlIO_printf(Perl_debug_log, "Return from _wsetlocale(%S) is NULL, errno=%d\n", wresult, errno));
 
     if (! wresult) {
         WSETLOCALE_UNLOCK;
@@ -5815,7 +5821,7 @@ S_save_to_buffer(pTHX_ const char * string, char **buf, Size_t *buf_size)
 #  ifdef DEBUGGING
 
     DEBUG_Lv(PerlIO_printf(Perl_debug_log,
-                         "Copying '%s' to %p\n",
+                         "Copying '%s' to 0x%p\n",
                          ((is_strict_utf8_string((U8 *) string, 0))
                           ? string
                           :_byte_dump_string((U8 *) string, strlen(string), 0)),
@@ -9692,7 +9698,7 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
         }
         gwLOCALE_UNLOCK;
 
-        DEBUG_Lv(PerlIO_printf(Perl_debug_log, "created C object %p\n",
+        DEBUG_Lv(PerlIO_printf(Perl_debug_log, "created C object 0x%p\n",
                                                PL_C_locale_obj));
     }
 
@@ -9702,7 +9708,7 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
      * overridden below  */
     if (! uselocale(PL_C_locale_obj)) {
         locale_panic_(Perl_form(aTHX_
-                                "Can't uselocale(%p), LC_ALL supposed to"
+                                "Can't uselocale(0x%p), LC_ALL supposed to"
                                 " be 'C'",
                                 PL_C_locale_obj));
     }
@@ -10095,8 +10101,8 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 #  endif
 #  if defined(USE_POSIX_2008_LOCALE) && defined(MULTIPLICITY)
     DEBUG_Lv(PerlIO_printf(Perl_debug_log,
-                           "finished Perl_init_i18nl10n; actual obj=%p,"
-                           " expected obj=%p, initial=%s\n",
+                           "finished Perl_init_i18nl10n; actual obj=0x%p,"
+                           " expected obj=0x%p, initial=%s\n",
                            uselocale(0), PL_cur_locale_obj,
                            get_LC_ALL_display()));
 #  endif
@@ -11567,7 +11573,7 @@ Perl_switch_locale_context(pTHX)
 
     if (! uselocale(PL_cur_locale_obj)) {
         locale_panic_(Perl_form(aTHX_
-                                "Can't uselocale(%p), LC_ALL supposed to"
+                                "Can't uselocale(0x%p), LC_ALL supposed to"
                                 " be '%s'",
                                 PL_cur_locale_obj, get_LC_ALL_display()));
     }
@@ -11621,7 +11627,7 @@ Perl_thread_locale_init(pTHX)
         /* Not being able to change to the C locale is severe; don't keep
          * going.  */
         locale_panic_(Perl_form(aTHX_
-                                "Can't uselocale(%p), 'C'", PL_C_locale_obj));
+                                "Can't uselocale(0x%p), 'C'", PL_C_locale_obj));
         NOT_REACHED; /* NOTREACHED */
     }
 

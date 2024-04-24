@@ -297,21 +297,24 @@
     STMT_START {                                                    \
         MUTEX_LOCK(&(mutex)->lock);                                 \
         (mutex)->readers_count++;                                   \
-            DEBUG_U(PerlIO_printf(Perl_debug_log, "all threads new reader count is %zd\n", (mutex)->readers_count));\
+        DEBUG_U(PerlIO_printf(Perl_debug_log, "%s: %d: 0x%p: mutex 0x%p write locked! for readers increment, new reader count is %lld\n", __FILE__, (int) __LINE__, aTHX, mutex, (mutex)->readers_count));\
         MUTEX_UNLOCK(&(mutex)->lock);                               \
+        DEBUG_U(PerlIO_printf(Perl_debug_log, "%s: %d: 0x%p: mutex 0x%p write unlocked! for readers increment\n", __FILE__, (int) __LINE__, aTHX, mutex));\
     } STMT_END
 
 #  define PERL_READ_UNLOCK(mutex)                                   \
     STMT_START {                                                    \
         MUTEX_LOCK(&(mutex)->lock);                                 \
         (mutex)->readers_count--;                                   \
-        DEBUG_U(PerlIO_printf(Perl_debug_log, "all threads new reader count is %zd\n", (mutex)->readers_count));\
+        DEBUG_U(PerlIO_printf(Perl_debug_log, "%s: %d: 0x%p: mutex 0x%p write locked! for readers decrement, new reader count is %lld\n", __FILE__, (int) __LINE__, aTHX, mutex, (mutex)->readers_count));\
         if ((mutex)->readers_count <= 0) {                          \
             assert((mutex)->readers_count == 0);                    \
-            COND_SIGNAL(&(mutex)->wakeup);                          \
             (mutex)->readers_count = 0;                             \
+            DEBUG_U(PerlIO_printf(Perl_debug_log, "%s: %d: 0x%p: mutex 0x%p write still locked! for readers decrement, about to signal\n", __FILE__, (int) __LINE__, aTHX, mutex));\
+            COND_SIGNAL(&(mutex)->wakeup);                          \
         }                                                           \
         MUTEX_UNLOCK(&(mutex)->lock);                               \
+        DEBUG_U(PerlIO_printf(Perl_debug_log, "%s: %d: 0x%p: mutex 0x%p write unlocked! for readers decrement\n", __FILE__, (int) __LINE__, aTHX, mutex));\
     } STMT_END
 
 #  define PERL_WRITE_LOCK(mutex)                                    \
@@ -323,20 +326,21 @@
                 (mutex)->readers_count = 0;                         \
                 break;                                              \
             }                                                       \
-            DEBUG_U(PerlIO_printf(Perl_debug_log, "write locked but there are %zd readers; sleeping until one releases\n", (mutex)->readers_count));\
+            DEBUG_U(PerlIO_printf(Perl_debug_log, "mutex 0x%p write locked but there are %zd readers; sleeping until one releases\n", (mutex)->readers_count));\
             COND_WAIT(&(mutex)->wakeup, &(mutex)->lock);            \
         }                                                           \
         while (1);                                                  \
                                                                     \
-        DEBUG_U(PerlIO_printf(Perl_debug_log, "write locked!\n"));\
+        DEBUG_U(PerlIO_printf(Perl_debug_log, "%s: %d: 0x%p: mutex 0x%p write locked!\n", __FILE__, (int) __LINE__, aTHX, mutex));\
         /* Here, the mutex is locked, with no readers */            \
     } STMT_END
 
 #  define PERL_WRITE_UNLOCK(mutex)                                  \
     STMT_START {                                                    \
+        DEBUG_U(PerlIO_printf(Perl_debug_log, "%s: %d: 0x%p: mutex 0x%p about to signal, then write unlock\n", __FILE__, (int) __LINE__, aTHX, mutex));\
         COND_SIGNAL(&(mutex)->wakeup);                              \
         MUTEX_UNLOCK(&(mutex)->lock);                               \
-        DEBUG_U(PerlIO_printf(Perl_debug_log, "write unlocked; signalled\n"));\
+        DEBUG_U(PerlIO_printf(Perl_debug_log, "%s: %d: 0x%p mutex 0x%p: signalled, write unlocked!\n", __FILE__, (int) __LINE__, aTHX, mutex));\
     } STMT_END
 
 #  define PERL_RW_MUTEX_INIT(mutex)                                 \
