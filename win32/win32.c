@@ -1542,11 +1542,7 @@ translate_ft_to_time_t(FILETIME ft) {
     pt.tm_hour = st.wHour;
     pt.tm_min = st.wMinute;
     pt.tm_sec = st.wSecond;
-
-    MKTIME_LOCK;
     retval = _mkgmtime(&pt);
-    MKTIME_UNLOCK;
-
     return retval;
 }
 
@@ -5228,9 +5224,9 @@ ansify_path(void)
          * XXX Is this a bug? Should S_find_script() use the environment
          * XXX passed in the `env` arg to parse_perl()?
          */
-        ENV_LOCK;
+        //ENV_LOCK;
         putenv(ansi_path);
-        ENV_UNLOCK;
+        //ENV_UNLOCK;
         /* Keep system environment in sync because S_init_postdump_symbols()
          * will not call mg_set() if it initializes %ENV from `environ`.
          */

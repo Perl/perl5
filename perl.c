@@ -1684,7 +1684,7 @@ dup_environ(pTHX)
 
     size_t n_entries = 0, vars_size = 0;
 
-    ENV_READ_LOCK;
+    ENV_LOCK;
     for (char **ep = environ; *ep; ++ep) {
         ++n_entries;
         vars_size += strlen(*ep) + 1;
@@ -1705,10 +1705,8 @@ dup_environ(pTHX)
 
     new_environ[n_entries] = NULL;
 
-    ENV_LOCK;
     environ = new_environ;
     ENV_UNLOCK;
-    ENV_READ_UNLOCK;
     /* Store a pointer in a global variable to ensure it's always reachable so
      * LeakSanitizer/Valgrind won't complain about it. We can't ever free it.
      * Even if libc allocates a new environ, it's possible that some of its

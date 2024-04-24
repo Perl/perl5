@@ -231,6 +231,9 @@ Perl_safesysrealloc(Malloc_t where,MEM_SIZE size)
         : 0;
 #endif
 
+    if (size && size > 0x10CFC20000) {
+        //int khw = 0;
+    }
     if (!size) {
         safesysfree(where);
         ptr = NULL;

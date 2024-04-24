@@ -428,8 +428,16 @@ static int debug_initialization = 0;
 #define PERL_IN_LOCALE_C
 #include "perl.h"
 
-//#define gwLOCALE_LOCK    LOCALE_LOCK_(0)
-//#define gwLOCALE_UNLOCK  LOCALE_UNLOCK_
+#define gwLOCALE_LOCK                                                       \
+                           STMT_START {                                     \
+                                        ENVr_LOCK_;                         \
+                                        LOCALE_LOCK_(0);                    \
+                           } STMT_END
+#  define gwLOCALE_UNLOCK                                                   \
+                           STMT_START {                                     \
+                                        LOCALE_UNLOCK_;                     \
+                                        ENVr_UNLOCK_;                       \
+                           } STMT_END
 
 /* Some platforms require LC_CTYPE to be congruent with the category we are
  * looking for.  XXX This still presumes that we have to match COLLATE and
@@ -437,9 +445,6 @@ static int debug_initialization = 0;
 #if defined(USE_LOCALE_CTYPE) && ! defined(LIBC_HANDLES_MISMATCHED_CTYPE)
 #  define WE_MUST_DEAL_WITH_MISMATCHED_CTYPE    /* no longer used; kept for
                                                    possible future use */
-
-#define gwLOCALE_LOCK    LOCALE_LOCK_(0)
-#define gwLOCALE_UNLOCK  LOCALE_UNLOCK_
 
 #  define start_DEALING_WITH_MISMATCHED_CTYPE(locale)                          \
         const char * orig_CTYPE_locale = toggle_locale_c(LC_CTYPE, locale)
@@ -1725,8 +1730,8 @@ S_posix_setlocale_with_complications(pTHX_ const int cat,
 
 #endif
 
-#define POSIX_SETLOCALE_LOCK      SETLOCALE_LOCK
-#define POSIX_SETLOCALE_UNLOCK    SETLOCALE_UNLOCK
+//#define POSIX_SETLOCALE_LOCK      SETLOCALE_LOCK
+//#define POSIX_SETLOCALE_UNLOCK    SETLOCALE_UNLOCK
 
 /* End of posix layer
  *==========================================================================
@@ -2083,8 +2088,8 @@ S_less_dicey_bool_setlocale_r(pTHX_ const int cat, const char * locale)
  * operations.  This should be a critical section when that could interfere
  * with other instances executing at the same time. */
 #  define TOGGLING_LOCKS  1
-#  define TOGGLE_LOCK(i)    POSIX_SETLOCALE_LOCK
-#  define TOGGLE_UNLOCK(i)  POSIX_SETLOCALE_UNLOCK
+#  define TOGGLE_LOCK(i)    LOCALE_LOCK_(0)
+#  define TOGGLE_UNLOCK(i)  LOCALE_UNLOCK_
 
 /*===========================================================================*/
 #elif defined(EMULATE_THREAD_SAFE_LOCALES)
@@ -2142,7 +2147,7 @@ S_bool_setlocale_emulate_safe_r(pTHX_
     /* Set the locale to 'wanted_locale' for the category given by our internal
      * index number, and save the result for later use. */
     DEBUG_U(PerlIO_printf( Perl_debug_log, "unlocked, setting %s to %s\n",
-                           category_names[index],
+                           category_names[get_category_index(category)],
                            wanted_locale));
 
     assert(wanted_locale);
@@ -2156,7 +2161,7 @@ S_bool_setlocale_emulate_safe_r(pTHX_
         SET_EINVAL;
         return false;
     }
-    DEBUG_U(PerlIO_printf( Perl_debug_log, "finished set %d to %s\n", categories[index], wanted_locale));
+    DEBUG_U(PerlIO_printf( Perl_debug_log, "finished set %d to %s\n", categories[get_category_index(category)], wanted_locale));
 
     update_PL_curlocales_i(get_category_index(category),
                            new_locale, caller_line);
@@ -2201,9 +2206,9 @@ S_bool_setlocale_emulate_safe_r(pTHX_
                                "new depth=%zd, index=%d, caller=%" LINE_Tf  \
                                "\n", PL_locale_toggle_depth[i], i, __LINE__))
 >>>>>>> 47febd6af9 (DEBUG Lv to U)
-#endif
 #  define TOGGLE_LOCK(i)                                                    \
          STMT_START {                                                       \
+<<<<<<< HEAD
             TOGGLE_NUMERIC(i);                                              \
             /*DEBUG_TOGGLE(i);*/                                            \
             LC_LOCK_i_(i);                                                  \
@@ -2213,7 +2218,28 @@ S_bool_setlocale_emulate_safe_r(pTHX_
             LC_UNLOCK_i_(i);                                                \
             UNTOGGLE_NUMERIC(i);                                            \
             /*DEBUG_TOGGLE(i);*/                                            \
+=======
+            PL_locale_toggle_depth[i]++;                                    \
+            ENVx_LOCK_;                                 \
+            LCx_LOCK_(LC_INDEX_TO_BIT_(i));                                 \
+            DEBUG_TOGGLE(i);                                                \
          } STMT_END
+#  define TOGGLE_UNLOCK(i)                                                  \
+         STMT_START {                                                       \
+            if (PL_locale_toggle_depth[i] < 1) {                            \
+                locale_panic_("toggling down failed");                      \
+            }                                                               \
+            LCx_UNLOCK_(LC_INDEX_TO_BIT_(i));                               \
+            ENVx_UNLOCK_;                                 \
+            PL_locale_toggle_depth[i]--;                                    \
+            DEBUG_TOGGLE(i);                                                \
+>>>>>>> bf7f900938 (l)
+         } STMT_END
+#endif
+#  define TOGGLE_LOCK(i)                                                    \
+            LCx_LOCK_(LC_INDEX_TO_BIT_(i))
+#  define TOGGLE_UNLOCK(i)                                                  \
+            LCx_UNLOCK_(LC_INDEX_TO_BIT_(i))
 
 /*---------------------------------------------------------------------------*/
 /* utility functions for emulating thread-safe locales.
@@ -2281,7 +2307,8 @@ Perl_category_lock(pTHX_ const UV mask,
                            "Entering category_lock; mask=%" UVxf
                            ", called from %s: %d\n", mask, file, caller_line));
 
-    gwLOCALE_LOCK;
+    //ENVr_LOCK_;
+    LOCALE_LOCK_(0);
 
     UV working_mask = mask;
 
@@ -2522,7 +2549,8 @@ Perl_category_unlock(pTHX_ const UV mask,
     }
 
     /* Doesn't actually unlock until recursion fully unwound */
-    gwLOCALE_UNLOCK;
+    LOCALE_UNLOCK_;
+    //ENVr_UNLOCK_;
 
     DEBUG_U(PerlIO_printf(Perl_debug_log, "Leaving category_unlock\n"));
 
@@ -9173,13 +9201,15 @@ S_strftime_tm(pTHX_ const char *fmt,
          * khw's Linux box, the maximum result of this is 67 characters, in the
          * km_KH locale.  If a new script comes along that uses 4 UTF-8 bytes
          * per character, and with a similar expansion factor, that would be a
-         * 268:2 byte ratio, or a bit more than 128:1 = 2**7:1.  Some strftime
-         * implementations allow you to say %1000c to pad to 1000 bytes.  This
-         * shows that it is impossible to implement this without a heuristic
-         * (which can fail).  But it indicates we need to be generous in the
-         * upper limit before failing.  The previous heuristic used was too
-         * stingy.  Since the size doubles per iteration, it doesn't take many
-         * to reach the limit */
+         * 268:2 byte ratio, or a bit more than 128:1 = 2**7:1.  As of POSIX
+         * 2008, conforming implementations allow you to specify minimum field
+         * widths, for example %1000c to pad to 1000 bytes.  This shows that it
+         * is impossible to implement this without parsing the format (and
+         * assuming the implementation follows the syntax specified by the
+         * Standard) or using a (potentially wrong) heuristic.  But it
+         * indicates we need to be generous in the upper limit before failing.
+         * The previous heuristic used was too stingy.  Since the size doubles
+         * per iteration, it doesn't take many to reach the limit */
     } while (bufsize < ((1 << 11) + 1) * fmtlen);
 
     /* Here, strftime() returned 0, and it likely wasn't for lack of space.

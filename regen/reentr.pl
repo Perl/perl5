@@ -585,9 +585,9 @@ EOF
             my $sz = "_${genfunc}_size";
             push @size, <<EOF;
 #    if defined(HAS_SYSCONF) && defined($sc) && !defined(__GLIBC__)
-        SYSCONF_LOCK;
+        //SYSCONF_LOCK;
         PL_reentrant_buffer->$sz = sysconf($sc);
-        SYSCONF_UNLOCK;
+        //SYSCONF_UNLOCK;
         if (PL_reentrant_buffer->$sz == (size_t) -1)
                 PL_reentrant_buffer->$sz = REENTRANTUSUALSIZE;
 #    elif defined(__osf__) && defined(__alpha) && defined(SIABUFSIZ)

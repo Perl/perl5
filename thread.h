@@ -297,6 +297,7 @@
     STMT_START {                                                    \
         MUTEX_LOCK(&(mutex)->lock);                                 \
         (mutex)->readers_count++;                                   \
+            DEBUG_U(PerlIO_printf(Perl_debug_log, "all threads new reader count is %zd\n", (mutex)->readers_count));\
         MUTEX_UNLOCK(&(mutex)->lock);                               \
     } STMT_END
 
@@ -304,6 +305,7 @@
     STMT_START {                                                    \
         MUTEX_LOCK(&(mutex)->lock);                                 \
         (mutex)->readers_count--;                                   \
+        DEBUG_U(PerlIO_printf(Perl_debug_log, "all threads new reader count is %zd\n", (mutex)->readers_count));\
         if ((mutex)->readers_count <= 0) {                          \
             assert((mutex)->readers_count == 0);                    \
             COND_SIGNAL(&(mutex)->wakeup);                          \
@@ -321,10 +323,12 @@
                 (mutex)->readers_count = 0;                         \
                 break;                                              \
             }                                                       \
+            DEBUG_U(PerlIO_printf(Perl_debug_log, "write locked but there are %zd readers; sleeping until one releases\n", (mutex)->readers_count));\
             COND_WAIT(&(mutex)->wakeup, &(mutex)->lock);            \
         }                                                           \
         while (1);                                                  \
                                                                     \
+        DEBUG_U(PerlIO_printf(Perl_debug_log, "write locked!\n"));\
         /* Here, the mutex is locked, with no readers */            \
     } STMT_END
 
@@ -332,6 +336,7 @@
     STMT_START {                                                    \
         COND_SIGNAL(&(mutex)->wakeup);                              \
         MUTEX_UNLOCK(&(mutex)->lock);                               \
+        DEBUG_U(PerlIO_printf(Perl_debug_log, "write unlocked; signalled\n"));\
     } STMT_END
 
 #  define PERL_RW_MUTEX_INIT(mutex)                                 \

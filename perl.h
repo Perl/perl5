@@ -6443,15 +6443,6 @@ EXTCONST U8   PL_deBruijn_bitpos_tab64[];
 /* Create a reentrant lock mechanism.  Currently these are also
  * many-readers/1-writer locks, simply because that's all that is so far needed
  * */
-#ifdef WIN32
-    /* Windows mutexes are all general semaphores; we don't currently bother
-     * with reproducing the same panic behavior as on other systems */
-#  define PERL_REENTRANT_LOCK(name, mutex, wcounter,                        \
-                              cond_to_panic_if_already_locked)              \
-        PERL_WRITE_LOCK(mutex)
-#  define PERL_REENTRANT_UNLOCK(name, mutex, wcounter, rcounter)            \
-       PERL_WRITE_UNLOCK(mutex)
-#else
 
     /* Simulate a general (or recursive) semaphore on 'mutex' whose name will
      * be displayed as 'name' in any messages.  A lock may be exclusive (for
@@ -6538,12 +6529,16 @@ EXTCONST U8   PL_deBruijn_bitpos_tab64[];
     STMT_START {                                                            \
         CLANG_DIAG_IGNORE(-Wthread-safety)                                  \
         if (LIKELY(wcounter <= 0)) {                                        \
-            assert(wcounter == 0);                                          \
-            UNLESS_PERL_MEM_LOG(DEBUG_Lv(PerlIO_printf(Perl_debug_log,      \
+            UNLESS_PERL_MEM_LOG(DEBUG_U(PerlIO_printf(Perl_debug_log,      \
                                 "%s: %d: locking " name "; new lock depth=1"\
                                 "; this thread reader count=%d\n",          \
                                 __FILE__, __LINE__, rcounter));             \
             )                                                               \
+            if (wcounter != 0) (Perl_croak_nocontext("panic: " \
+                                "%s: %d: locking " name "; new lock depth=%d"\
+                                "; this thread reader count=%d\n",          \
+                                __FILE__, __LINE__, wcounter, rcounter));             \
+            assert(wcounter == 0);                                          \
                                                                             \
             /* If this thread has no read-locks on this mutex, it is a      \
              * simple write lock */                                         \
@@ -6551,47 +6546,37 @@ EXTCONST U8   PL_deBruijn_bitpos_tab64[];
                 if(rcounter < 0) PerlIO_printf(Perl_debug_log, "rcounter=%d\n", rcounter);\
                 assert(rcounter == 0);                                      \
                 PERL_WRITE_LOCK(mutex);                                     \
+                DEBUG_U(PerlIO_printf(Perl_debug_log, "locked " name " all threads reader count is %zd\n", (mutex)->readers_count));\
             }                                                               \
             else {                                                          \
                 /* Here, this thread effectively already owns at least one  \
                  * read-lock on this mutex.  Hence, there are no writers;   \
                  * so there is no reason for this lock request to not       \
                  * succeed quickly. */                                      \
-                DEBUG_Lv(PerlIO_printf(Perl_debug_log, "acquiring mutex for " name "\n"));\
-                MUTEX_LOCK(&(mutex)->lock);                                 \
-                DEBUG_Lv(PerlIO_printf(Perl_debug_log, "mutex acquired for " name "\n"));\
-                                                                            \
-                DEBUG_Lv(PerlIO_printf(Perl_debug_log, "new all threads reader count is %zd\n", (mutex)->readers_count));\
-                                                                            \
-                /* Wait until we are the only reader */                     \
-                do {                                                        \
-                    if ((mutex)->readers_count <= rcounter) {               \
-                        DEBUG_Lv(PerlIO_printf(Perl_debug_log, "should be ready to go\n"));\
-                        break;                                              \
-                    }                                                       \
-                        DEBUG_Lv(PerlIO_printf(Perl_debug_log, "waiting for another reader to wake us up\n"));\
-                    COND_WAIT(&(mutex)->wakeup, &(mutex)->lock);            \
-                }                                                           \
-                while (1);                                                  \
+                Perl_croak_nocontext("panic: %s: %d: attempting to convert "\
+                                " non-exclusive lock on " name " to"        \
+                                " exclusive\n",                             \
+                                __FILE__, __LINE__);                        \
             }                                                               \
                                                                             \
             wcounter = 1;                                                   \
-            UNLESS_PERL_MEM_LOG(DEBUG_Lv(PerlIO_printf(Perl_debug_log,      \
+            UNLESS_PERL_MEM_LOG(DEBUG_U(PerlIO_printf(Perl_debug_log,      \
                                 "%s: %d: " name " locked; lock depth=1\n",  \
                                 __FILE__, __LINE__));                       \
             )                                                               \
         }                                                                   \
         else {                                                              \
             wcounter++;                                                     \
-            UNLESS_PERL_MEM_LOG(DEBUG_Lv(PerlIO_printf(Perl_debug_log,      \
+            UNLESS_PERL_MEM_LOG(DEBUG_U(PerlIO_printf(Perl_debug_log,      \
                             "%s: %d: avoided locking " name "; new lock"    \
                             " depth=%d, this thread reader count=%d;"       \
                             " but will panic if '%s' is true\n",            \
                             __FILE__, __LINE__, wcounter, rcounter,         \
                             STRINGIFY(cond_to_panic_if_already_locked)))    \
             );                                                              \
+            DEBUG_U(PerlIO_printf(Perl_debug_log, "mutex " name ": all threads reader count is %zd\n", (mutex)->readers_count));\
             if (cond_to_panic_if_already_locked) {                          \
-                Perl_croak_nocontext("panic: %s: %d: attempting to lock"    \
+                Perl_croak_nocontext("panic: %s: %d: attempting to lock "   \
                                 name " incompatibly: %s\n",                 \
                                 __FILE__, __LINE__,                         \
                                 STRINGIFY(cond_to_panic_if_already_locked));\
@@ -6603,9 +6588,10 @@ EXTCONST U8   PL_deBruijn_bitpos_tab64[];
 #  define PERL_REENTRANT_UNLOCK(name, mutex, wcounter, rcounter)            \
     STMT_START {                                                            \
         if (LIKELY(wcounter == 1)) {                                        \
+                DEBUG_U(PerlIO_printf(Perl_debug_log, "unlocking " name " all threads reader count is %zd\n", (mutex)->readers_count));\
             PERL_WRITE_UNLOCK(mutex);                                       \
             wcounter = 0;                                                   \
-            UNLESS_PERL_MEM_LOG(DEBUG_Lv(PerlIO_printf(Perl_debug_log,      \
+            UNLESS_PERL_MEM_LOG(DEBUG_U(PerlIO_printf(Perl_debug_log,      \
                           "%s: %d: unlocking " name "; new lock depth=0"    \
                           "; this thread reader count=%d\n",                \
                           __FILE__, __LINE__, rcounter));                   \
@@ -6619,7 +6605,7 @@ EXTCONST U8   PL_deBruijn_bitpos_tab64[];
         }                                                                   \
         else {                                                              \
             wcounter--;                                                     \
-            UNLESS_PERL_MEM_LOG(DEBUG_Lv(PerlIO_printf(Perl_debug_log,      \
+            UNLESS_PERL_MEM_LOG(DEBUG_U(PerlIO_printf(Perl_debug_log,      \
                 "%s: %d: avoided unlocking " name "; new lock depth=%d"     \
                 "; this thread reader count=%d"                             \
                 "; all threads reader count=%zd\n",                         \
@@ -6633,25 +6619,29 @@ EXTCONST U8   PL_deBruijn_bitpos_tab64[];
     STMT_START {                                                            \
         CLANG_DIAG_IGNORE(-Wthread-safety)                                  \
         if (wcounter <= 0) {                                                \
-            assert(wcounter == 0);                                          \
-            UNLESS_PERL_MEM_LOG(DEBUG_Lv(PerlIO_printf(Perl_debug_log,      \
+            UNLESS_PERL_MEM_LOG(DEBUG_U(PerlIO_printf(Perl_debug_log,      \
                                 "%s: %d: read-locking " name "; no"         \
                                 " writers\n",                               \
                                 __FILE__, __LINE__));                       \
             )                                                               \
+            if (wcounter != 0) Perl_croak_nocontext("panic: " \
+                                "%s: %d: read-locking " name "; "         \
+                                " writers=%d\n",                               \
+                                __FILE__, __LINE__, wcounter);                       \
+            assert(wcounter == 0);                                          \
             PERL_READ_LOCK(mutex);                                          \
             (rcounter)++;                                                   \
-            UNLESS_PERL_MEM_LOG(DEBUG_Lv(PerlIO_printf(Perl_debug_log,      \
+            UNLESS_PERL_MEM_LOG(DEBUG_U(PerlIO_printf(Perl_debug_log,      \
                                 "%s: %d: " name " read-locked"              \
-                                "; new this thread reader count=%d\n",      \
+                                "; this thread reader new count=%d\n",      \
                                 __FILE__, __LINE__, rcounter));             \
-            )                                                               \
+            );                                                              \
         }                                                                   \
         else {                                                              \
             /* This thread already has a write lock on this mutex.  Just    \
              * increment the number of readers it has */                    \
             (mutex)->readers_count++;                                       \
-            UNLESS_PERL_MEM_LOG(DEBUG_Lv(PerlIO_printf(Perl_debug_log,      \
+            UNLESS_PERL_MEM_LOG(DEBUG_U(PerlIO_printf(Perl_debug_log,      \
                             "%s: %d: avoided read-locking " name            \
                             "; lock depth=%d, this thread reader count=%d"  \
                             "; all threads reader count=%zd\n",             \
@@ -6665,17 +6655,21 @@ EXTCONST U8   PL_deBruijn_bitpos_tab64[];
     STMT_START {                                                            \
         CLANG_DIAG_IGNORE(-Wthread-safety)                                  \
         if (wcounter <= 0) {                                                \
-            assert(wcounter == 0);                                          \
-            UNLESS_PERL_MEM_LOG(DEBUG_Lv(PerlIO_printf(Perl_debug_log,      \
+            UNLESS_PERL_MEM_LOG(DEBUG_U(PerlIO_printf(Perl_debug_log,      \
                                 "%s: %d: read-unlocking " name "; no"       \
                                 " writers; this thread reader count=%d\n",  \
                                 __FILE__, __LINE__, rcounter));             \
             )                                                               \
+            if (wcounter != 0) Perl_croak_nocontext("panic: " \
+                                "%s: %d: read-unlocking " name "; "       \
+                                " writers=%d; this thread reader count=%d\n",  \
+                                __FILE__, __LINE__, wcounter, rcounter);             \
+            assert(wcounter == 0);                                          \
             PERL_READ_UNLOCK(mutex);                                        \
             (rcounter)--;                                                   \
-            UNLESS_PERL_MEM_LOG(DEBUG_Lv(PerlIO_printf(Perl_debug_log,      \
+            UNLESS_PERL_MEM_LOG(DEBUG_U(PerlIO_printf(Perl_debug_log,      \
                                 "%s: %d: " name " read-unlocked"            \
-                                " new this thread reader count=%d\n",       \
+                                " this thread reader new count=%d\n",       \
                                 __FILE__, __LINE__, rcounter))              \
             );                                                              \
         }                                                                   \
@@ -6683,9 +6677,9 @@ EXTCONST U8   PL_deBruijn_bitpos_tab64[];
             /* This thread already has a write lock on this mutex.  Just    \
              * deccrement the number of readers it has */                   \
             (mutex)->readers_count--;                                       \
-            UNLESS_PERL_MEM_LOG(DEBUG_Lv(PerlIO_printf(Perl_debug_log,      \
+            UNLESS_PERL_MEM_LOG(DEBUG_U(PerlIO_printf(Perl_debug_log,      \
                             "%s: %d: avoided read-unlocking " name          \
-                            "; new all threads reader count=%zd; lock"      \
+                            "; all threads new reader count=%zd; lock"      \
                             " depth=%d, this thread reader count=%d\n",     \
                             __FILE__, __LINE__, (mutex)->readers_count,     \
                             wcounter, rcounter))                            \
@@ -6701,7 +6695,6 @@ EXTCONST U8   PL_deBruijn_bitpos_tab64[];
         CLANG_DIAG_RESTORE                                                  \
     } STMT_END
 
-#endif
 
 #ifndef EBCDIC
 
@@ -7265,7 +7258,7 @@ typedef struct am_table_short AMTS;
                                                   &PL_env_mutex,            \
                                                   PL_env_mutex_depth,       \
                                                   PL_env_mutex_readers,     \
-                                                  1);
+                                                  0);
 #  define ENV_UNLOCK          PERL_REENTRANT_UNLOCK("env",                  \
                                                     &PL_env_mutex,          \
                                                     PL_env_mutex_depth,     \
@@ -7290,8 +7283,8 @@ typedef struct am_table_short AMTS;
 #  define ENV_TERM        NOOP
 #endif
 
-#define ENVw_LOCK_      ENV_LOCK
-#define ENVw_UNLOCK_    ENV_UNLOCK
+#define ENVx_LOCK_      ENV_LOCK
+#define ENVx_UNLOCK_    ENV_UNLOCK
 #define ENVr_LOCK_      ENV_READ_LOCK
 #define ENVr_UNLOCK_    ENV_READ_UNLOCK
 
@@ -7330,7 +7323,102 @@ typedef struct am_table_short AMTS;
  *  1)  you never request A while holding B; or
  *  2)  you never request B without first holding A.
  *
- * Note that if you hold a mutex for reading, and then try to acquire it for
+ * Having read-only locks complicates the matter somewhat.  These always
+ * succeed unless someone else holds the mutex for writing.
+ *  1)  Thread 1 holds A exclusively while Thread 2 holds B exclusively
+ *          This won't happen because T2 won't have even tried to acquire B
+ *          without first acquiring A
+ *
+ *  2)  Thread 1 holds A exclusively while Thread 2 holds B non-exclusively
+ This goes away if T2 must first hold A non-exclusively
+ *   a) T1 tries to accuire B exclusively while T2 tries to acquire A exclusively
+ D          T1 blocks on T2 releasing B; T2 blocks on T1 releasing A.  Deadlock
+ *   b) T1 tries to accuire B exclusively while T2 tries to acquire A
+ *      nonexclusively
+ D          T1 blocks on T2 releasing B; T2 blocks on T1 releasing A.  Deadlock
+ *   c) T1 tries to accuire B non-exclusively while T2 tries to acquire A
+ *      exclusively
+ *          T1 is able to acquire B and continue on, eventually releasing A;
+ *          T2 blocks on T1 releasing A.  No problem.
+ *   d) T1 tries to accuire B non-exclusively while T2 tries to acquire A
+ *      nonexclusively
+ *          T1 is able to acquire B and continue on, eventually releasing A;
+ *          T2 is able to acquire A and continue on, eventually releasing B;
+ *          No problem.
+ *
+ *  3)  Thread 1 holds A non-exclusively while Thread 2 holds B non-exclusively
+ *This goes away if forbid acquiring exclusive while holding nonexclusive
+ *   a) T1 tries to accuire B exclusively while T2 tries to acquire A exclusively
+ D          T1 blocks on T2 releasing B; T2 blocks on T1 releasing A.  Deadlock
+ *   b) T1 tries to accuire B exclusively while T2 tries to acquire A
+ *      nonexclusively
+ *          T1 blocks on T2 releasing B; T2 is able to acquire A, and continue,
+ *          eventually releasing B.  No problem.
+ *   c) T1 tries to accuire B non-exclusively while T2 tries to acquire A
+ *      exclusively
+ *          T1 is able to acquire B and continue on, eventually releasing A;
+ *          T2 blocks on T1 releasing A.  No problem.
+ *   d) T1 tries to accuire B non-exclusively while T2 tries to acquire A
+ *      nonexclusively
+ *          No problem
+ *
+ *  3.1)  Thread 1 holds A non-exclusively while Thread 2 holds both A and B non-exclusively
+ *This goes away if forbid acquiring exclusive while holding nonexclusive
+ *   a) T1 tries to accuire B exclusively while T2 tries to acquire A exclusively
+ D          T1 blocks on T2 releasing B; T2 blocks on T1 releasing A.  Deadlock
+ *   b) T1 tries to accuire B exclusively while T2 tries to acquire A
+ *      nonexclusively
+ *          T1 blocks on T2 releasing B; T2 is able to acquire A, and continue,
+ *          eventually releasing B.  No problem.
+ *   c) T1 tries to accuire B non-exclusively while T2 tries to acquire A
+ *      exclusively
+ *          T1 is able to acquire B and continue on, eventually releasing A;
+ *          T2 blocks on T1 releasing A.  No problem.
+ *   d) T1 tries to accuire B non-exclusively while T2 tries to acquire A
+ *      nonexclusively
+ *          No problem
+ *
+ *  4)  Thread 1 holds A non-exclusively while Thread 2 holds B exclusively
+ This goes away if T2 must first hold A exclusively
+ *   a) T1 tries to accuire B exclusively while T2 tries to acquire A exclusively
+ D          T1 blocks on T2 releasing B; T2 blocks on T1 releasing A.  Deadlock
+ *   b) T1 tries to accuire B exclusively while T2 tries to acquire A
+ *      nonexclusively
+ *          T1 blocks on T2 releasing B; T2 is able to acquire A, and continue,
+ *          eventually releasing B.  No problem.
+ *   c) T1 tries to accuire B non-exclusively while T2 tries to acquire A
+ *      exclusively
+ D          T1 blocks on T2 releasing B; T2 blocks on T1 releasing A.  Deadlock
+ *   d) T1 tries to accuire B non-exclusively while T2 tries to acquire A
+ *      nonexclusively
+ *          T1 blocks on T2 releasing B; T2 is able to acquire A, and continue,
+ *          eventually releasing B.  No problem.
+ *
+ *  4.1)  Thread 1 holds A non-exclusively while Thread 2 holds A non-exclusively and B exclusively
+ This goes away if T2 must first hold A exclusively
+ *This goes away if forbid acquiring exclusive while holding nonexclusive
+ *   a) T1 tries to accuire B exclusively while T2 tries to acquire A exclusively
+ D          T1 blocks on T2 releasing B; T2 blocks on T1 releasing A.  Deadlock
+ *   b) T1 tries to accuire B exclusively while T2 tries to acquire A
+ *      nonexclusively
+ *          T1 blocks on T2 releasing B; T2 is able to acquire A, and continue,
+ *          eventually releasing B.  No problem.
+ *   c) T1 tries to accuire B non-exclusively while T2 tries to acquire A
+ *      exclusively
+ D          T1 blocks on T2 releasing B; T2 blocks on T1 releasing A.  Deadlock
+ *   d) T1 tries to accuire B non-exclusively while T2 tries to acquire A
+ *      nonexclusively
+ *          T1 blocks on T2 releasing B; T2 is able to acquire A, and continue,
+ *          eventually releasing B.  No problem.
+ *
+ *
+ *
+ *  1)  Thread 1 holds A read-only while process 2 holds B read-only
+ *      If the two processes then seek to get the other mutext read-only, those
+ *      always succed, and there is no problem.
+ *      If 1 
+ *  Note that if you
+ * hold a mutex for reading, and then try to acquire it for
  * writing as well (without first releasing the read-lock), you can get
  * deadlock.  Perl assumes you don't do that.
  *
@@ -7352,17 +7440,17 @@ typedef struct am_table_short AMTS;
  */
 
 /* Locale/thread synchronization macros. */
-#define GENr_LCw_LOCK_(m)           error_unexpected_GENr_LCw_LOCK_macro
-#define GENr_ENVr_LCw_LOCK_(m)      error_unexpected_GENr_ENVr_LCw_LOCK_macro
-#define GENr_ENVw_LCr_LOCK_(m)      error_unexpected_GENr_ENVw_LCr_LOCK_macro
-#define GENr_ENVw_LCw_LOCK_(m)      error_unexpected_GENr_ENVw_LCw_LOCK_macro
-#define GENr_ENVw_LOCK_             error_unexpected_GENr_ENVw_LOCK_macro
-#define GENw_LCw_LOCK_(m)           error_unexpected_GENw_LCw_LOCK_macro
-#define GENw_ENVr_LCw_LOCK_(m)      error_unexpected_GENw_ENVr_LCw_LOCK_macro
-#define GENw_ENVw_LCr_LOCK_(m)      error_unexpected_GENw_ENVw_LCr_LOCK_macro
-#define GENw_ENVw_LCw_LOCK_(m)      error_unexpected_GENw_ENVw_LCw_LOCK_macro
-#define GENw_ENVw_LOCK_             error_unexpected_GENw_ENVw_LOCK_macro
-#define ENVw_LCw_LOCK_(m)           error_unexpected_ENVw_LCw_LOCK_macro
+#define GENr_LCx_LOCK_(m)           error_unexpected_GENr_LCx_LOCK_macro
+#define GENr_ENVr_LCx_LOCK_(m)      error_unexpected_GENr_ENVr_LCx_LOCK_macro
+#define GENr_ENVx_LCr_LOCK_(m)      error_unexpected_GENr_ENVx_LCr_LOCK_macro
+#define GENr_ENVx_LCx_LOCK_(m)      error_unexpected_GENr_ENVx_LCx_LOCK_macro
+#define GENr_ENVx_LOCK_             error_unexpected_GENr_ENVx_LOCK_macro
+#define GENx_LCx_LOCK_(m)           error_unexpected_GENx_LCx_LOCK_macro
+#define GENx_ENVx_LCr_LOCK_(m)      error_unexpected_GENx_ENVx_LCr_LOCK_macro
+#define GENx_ENVx_LCx_LOCK_(m)      error_unexpected_GENx_ENVx_LCx_LOCK_macro
+#define GENx_ENVx_LOCK_             error_unexpected_GENx_ENVx_LOCK_macro
+#define ENVx_LCx_LOCK_(m)           error_unexpected_ENVx_LCx_LOCK_macro
+#define ENVx_LCr_LOCK_(m)           error_unexpected_ENVx_LCr_LOCK_macro
 
 #ifndef USE_LOCALE_THREADS
 #  define LOCALE_LOCK_(cond_to_panic_if_already_locked)  NOOP
@@ -7403,31 +7491,34 @@ typedef struct am_table_short AMTS;
 #ifdef USE_THREAD_SAFE_LOCALE
 
      /* With thread-safe locales, the locale mutex is unused except for
-      * interacting with the global locale, which is done (rarely) with just
-      * the setlocale() libc call.  Therefore repurpose the locale mutex to be
-      * used as the generic mutex. */
+      * interacting with the global locale.  The only libc function that
+      * changes that is setlocale(), generally called by perl only at startup.
+      * Therefore repurpose the locale mutex to be used as the generic mutex.
+      * */
 #  define GENr_LOCK_                    LOCALE_READ_LOCK
 #  define GENr_UNLOCK_                  LOCALE_READ_UNLOCK
-#  define GENw_LOCK_                    LOCALE_LOCK_(0)
-#  define GENw_UNLOCK_                  LOCALE_UNLOCK_
+#  define GENx_LOCK_                    LOCALE_LOCK_(0)
+#  define GENx_UNLOCK_                  LOCALE_UNLOCK_
+#  define GENx_ENVr_LCx_LOCK_(m)        ENVr_LCx_LOCK_(m)
+#  define GENx_ENVr_LCx_UNLOCK_(m)      ENVr_LCx_UNLOCK_(m)
 
     /* The read-locks involving locale reduce to the equivalent without it */
 #  define GENr_LCr_LOCK_(m)             GENr_LOCK_
 #  define GENr_LCr_UNLOCK_(m)           GENr_UNLOCK_
-#  define GENw_LCr_LOCK_(m)             GENw_LOCK_
-#  define GENw_LCr_UNLOCK_(m)           GENw_UNLOCK_
+#  define GENx_LCr_LOCK_(m)             GENx_LOCK_
+#  define GENx_LCr_UNLOCK_(m)           GENx_UNLOCK_
 #  define GENr_ENVr_LCr_LOCK_(m)        GENr_ENVr_LOCK_
 #  define GENr_ENVr_LCr_UNLOCK_(m)      GENr_ENVr_UNLOCK_
-#  define GENw_ENVr_LCr_LOCK_(m)        GENw_ENVr_LOCK_
-#  define GENw_ENVr_LCr_UNLOCK_(m)      GENw_ENVr_UNLOCK_
+#  define GENx_ENVr_LCr_LOCK_(m)        GENx_ENVr_LOCK_
+#  define GENx_ENVr_LCr_UNLOCK_(m)      GENx_ENVr_UNLOCK_
 
-    /* The locale write-locks do need an exclusive locale mutex.  Treat them as
-     * the (repurposed) generic lock */
-#  define LCw_LOCK_(m)                  GENw_LOCK_
-#  define LCw_UNLOCK_(m)                GENw_LOCK_
+    /* The locale write-locks exist to handle races, so do need an exclusive
+     * locale mutex.  Treat them as the (repurposed) generic lock */
+#  define LCx_LOCK_(m)                  GENx_LOCK_
+#  define LCx_UNLOCK_(m)                GENx_UNLOCK_
 
-#  define ENVr_LCw_LOCK_(m)             GENw_ENVr_LOCK_
-#  define ENVr_LCw_UNLOCK_(m)           GENw_ENVr_UNLOCK_
+#  define ENVr_LCx_LOCK_(m)             GENx_ENVr_LOCK_
+#  define ENVr_LCx_UNLOCK_(m)           GENx_ENVr_UNLOCK_
 
     /* The generic non-locale but with environment locks are as you would
      * expect */
@@ -7441,15 +7532,15 @@ typedef struct am_table_short AMTS;
                                         ENVr_UNLOCK_;                       \
                                         GENr_UNLOCK_;                       \
                            } STMT_END
-#  define GENw_ENVr_LOCK_                                                   \
+#  define GENx_ENVr_LOCK_                                                   \
                            STMT_START {                                     \
-                                        GENw_LOCK_;                         \
+                                        GENx_LOCK_;                         \
                                         ENVr_LOCK_;                         \
                            } STMT_END
-#  define GENw_ENVr_UNLOCK_                                                 \
+#  define GENx_ENVr_UNLOCK_                                                 \
                            STMT_START {                                     \
                                         ENVr_UNLOCK_;                       \
-                                        GENw_UNLOCK_;                       \
+                                        GENx_UNLOCK_;                       \
                            } STMT_END
 
     /* The remaining locks not involving the generic one reduce to the locale
@@ -7460,8 +7551,8 @@ typedef struct am_table_short AMTS;
 #  define ENVr_LCr_LOCK_(m)             ENVr_LOCK_
 #  define ENVr_LCr_UNLOCK_(m)           ENVr_UNLOCK_
 
-#  define ENVw_LCr_LOCK_(m)             ENVw_LOCK_
-#  define ENVw_LCr_UNLOCK_(m)           ENVw_UNLOCK_
+#  define TSE_TOGGLE_(m)                NOOP
+#  define TSE_UNTOGGLE_(m)              NOOP
 
 #  define LC_NUMERIC_LOCK(cond_to_panic_if_already_locked)    NOOP
 #  define LC_NUMERIC_UNLOCK       NOOP
@@ -7471,109 +7562,107 @@ typedef struct am_table_short AMTS;
      * uses the env mutex.  This is mainly because, as explained XXX,
      * the code is assumed to be structured so that that mutex is specifically
      * locked just around a single libc call, whereas the locale mutex can be
-     * locked around recursive calls. 
-     *
-     * First, the locks not involving the generic one are as you would expect,
-     * with any env lock being done before any locale one. */
-#  define ENVr_LCr_LOCK_(m)                                                 \
-                           STMT_START {                                     \
-                                        ENVr_LOCK_;                         \
-                                        LCr_LOCK_(m);                       \
-                           } STMT_END
-#  define ENVr_LCr_UNLOCK_(m)                                               \
-                           STMT_START {                                     \
-                                        LCr_UNLOCK_(m);                     \
-                                        ENVr_UNLOCK_;                       \
-                           } STMT_END
+     * locked around recursive calls. */
 
-#  define ENVw_LCr_LOCK_(m)                                                 \
-                           STMT_START {                                     \
-                                        ENVw_LOCK_;                         \
-                                        LCr_LOCK_(m);                       \
-                           } STMT_END
-#  define ENVw_LCr_UNLOCK_(m)                                               \
-                           STMT_START {                                     \
-                                        LCr_UNLOCK_(m);                     \
-                                        ENVw_UNLOCK_;                       \
-                           } STMT_END
-
-#  define ENVr_LCw_LOCK_(m)                                                 \
-                           STMT_START {                                     \
-                                        ENVr_LOCK_;                         \
-                                        LCw_LOCK(m);                        \
-                           } STMT_END
-#  define ENVr_LCw_UNLOCK_(m)                                               \
-                           STMT_START {                                     \
-                                        LCw_UNLOCK(m);                      \
-                                        ENVr_UNLOCK_;                       \
-                           } STMT_END
-
-/* Second, any generic locks simply reduce to being an env lock */
+/* First, any generic locks simply reduce to being an env lock */
 #  define GENr_LOCK_                    ENVr_LOCK_
 #  define GENr_UNLOCK_                  ENVr_UNLOCK_
 
-#  define GENw_LOCK_                    ENVw_LOCK_
-#  define GENw_UNLOCK_                  ENVw_UNLOCK_
+#  define GENx_LOCK_                    ENVx_LOCK_
+#  define GENx_UNLOCK_                  ENVx_UNLOCK_
 
 #  define GENr_ENVr_LOCK_               ENVr_LOCK_
 #  define GENr_ENVr_UNLOCK_             ENVr_UNLOCK_
 
-#  define GENw_ENVr_LOCK_               ENVw_LOCK_
-#  define GENw_ENVr_UNLOCK_             ENVw_UNLOCK_
+#  define GENx_ENVr_LOCK_               ENVx_LOCK_
+#  define GENx_ENVr_UNLOCK_             ENVx_UNLOCK_
 
 #  define GENr_LCr_LOCK_(m)             ENVr_LCr_LOCK_(m)  
 #  define GENr_LCr_UNLOCK_(m)           ENVr_LCr_UNLOCK_(m)  
 
-#  define GENw_LCr_LOCK_(m)             ENVw_LCr_LOCK_(m)  
-#  define GENw_LCr_UNLOCK_(m)           ENVw_LCr_UNLOCK_(m)  
+#  define GENx_LCr_LOCK_(m)             ENVr_LCx_LOCK_(m)  
+#  define GENx_LCr_UNLOCK_(m)           ENVr_LCx_UNLOCK_(m)  
 
 #  define GENr_ENVr_LCr_LOCK_(m)        ENVr_LCr_LOCK_(m)  
-#  define GENr_ENVr_LCr_UNLOCK(m)       ENVr_LCr_UNLOCK_(m)  
+#  define GENr_ENVr_LCr_UNLOCK_(m)      ENVr_LCr_UNLOCK_(m)  
 
-#  define GENw_ENVr_LCr_LOCK_(m)        ENVw_LCr_LOCK_(m)  
-#  define GENw_ENVr_LCr_UNLOCK_(m)      ENVw_LCr_UNLOCK_(m)  
+#  define GENx_ENVr_LCr_LOCK_(m)        ENVr_LCx_LOCK_(m)  
+#  define GENx_ENVr_LCr_UNLOCK_(m)      ENVr_LCx_UNLOCK_(m)  
+
+#  define GENx_ENVr_LCx_LOCK_(m)        ENVr_LCx_LOCK_(m)
+#  define GENx_ENVr_LCx_UNLOCK_(m)      ENVr_LCx_UNLOCK_(m)
+
+/* Second, for the prevention of deadlock, any locale-only locks expand to do a
+ * non-exclusive env lock before the locale lock */
+#  define LCr_LOCK_(m)                  ENVr_LCr_LOCK_(m)
+#  define LCr_UNLOCK_(m)                ENVr_LCr_UNLOCK_(m)
+
+#  define LCx_LOCK_(m)                  ENVr_LCx_LOCK_(m)
+#  define LCx_UNLOCK_(m)                ENVr_LCx_UNLOCK_(m)
 
 #  ifndef EMULATE_THREAD_SAFE_LOCALES
-#    define LCr_LOCK_(m)                LOCALE_READ_LOCK
-#    define LCr_UNLOCK_(m)              LOCALE_READ_UNLOCK
 
-#    define LCw_LOCK_(m)                LOCALE_LOCK_(0)  
-#    define LCw_UNLOCK_(m)              LOCALE_UNLOCK_
+    /* When using plain unsafe locales, everything is straightforward */
+#    define ENVr_LCr_LOCK_(m)                                               \
+                           STMT_START {                                     \
+                                        ENVr_LOCK_;                         \
+                                        LOCALE_READ_LOCK;                   \
+                           } STMT_END
+#    define ENVr_LCr_UNLOCK_(m)                                             \
+                           STMT_START {                                     \
+                                       LOCALE_READ_UNLOCK;                  \
+                                       ENVr_UNLOCK_;                        \
+                           } STMT_END
+
+#    define ENVr_LCx_LOCK_(m)                                               \
+                           STMT_START {                                     \
+                                        ENVr_LOCK_;                         \
+                                        LOCALE_LOCK_(0);                    \
+                           } STMT_END
+#    define ENVr_LCx_UNLOCK_(m)                                             \
+                           STMT_START {                                     \
+                                        LOCALE_UNLOCK_;                     \
+                                        ENVr_UNLOCK_;                       \
+                           } STMT_END
+
+#    define TSE_TOGGLE_(m)              NOOP
+#    define TSE_UNTOGGLE_(m)            NOOP
 
 #    define LC_NUMERIC_LOCK(cond_to_panic_if_already_locked)              \
                LOCALE_LOCK_(cond_to_panic_if_already_locked)
 #    define LC_NUMERIC_UNLOCK           LOCALE_UNLOCK_
 
-#    define TSE_TOGGLE_(m)              NOOP
-#    define TSE_UNTOGGLE_(m)            NOOP
 #  else
 
-     /* Here, are emulating safe locales; everything has to be treated as a
-      * write lock, as everything is done in the global locale, so we can't
-      * have another thread changing it, and this thread may well have to
-      * toggle the locale */
-#    define LCr_LOCK_(m)                LCw_LOCK_(m)
-#    define LCr_UNLOCK_(m)              LCw_UNLOCK_(m)
+     /* When emulating safe locales; all locale locks must be treated as write
+      * ones, as everything is done in the global locale, so we can't have
+      * another thread changing it, and this thread may well have to toggle the
+      * locale */
+#    define ENVr_LCr_LOCK_(m)           ENVr_LCx_LOCK_(m)
+#    define ENVr_LCr_UNLOCK_(m)         ENVr_LCx_UNLOCK_(m)
 
-#    define LCw_LOCK_(m)                category_lock(  m, __FILE__, __LINE__)
-#    define LCw_UNLOCK_(m)              category_unlock(m, __FILE__, __LINE__)
+#    define ENVr_LCx_LOCK_(m)                                               \
+                           STMT_START {                                     \
+                                        ENVr_LOCK_;                         \
+                                        category_lock(m, __FILE__, __LINE__);\
+                           } STMT_END
+#    define ENVr_LCx_UNLOCK_(m)                                             \
+                           STMT_START {                                     \
+                                       category_unlock(m, __FILE__, __LINE__);\
+                                       ENVr_UNLOCK_;                        \
+                           } STMT_END
 
-#    define TSE_TOGGLE_(m)              LCw_LOCK_(m)
-#    define TSE_UNTOGGLE_(m)            LCw_UNLOCK_(m)
+#    define TSE_TOGGLE_(m)              LCx_LOCK_(m)
+#    define TSE_UNTOGGLE_(m)            LCx_UNLOCK_(m)
 
 #    define LC_NUMERIC_LOCK(cond_to_panic_if_already_locked)                \
-                               LCw_LOCK_(  LC_INDEX_TO_BIT(LC_NUMERIC_INDEX_))
-#    define LC_NUMERIC_UNLOCK  LCw_UNLOCK_(LC_INDEX_TO_BIT(LC_NUMERIC_INDEX_))
+                               LCx_LOCK_(  LC_INDEX_TO_BIT_(LC_NUMERIC_INDEX_))
+#    define LC_NUMERIC_UNLOCK  LCx_UNLOCK_(LC_INDEX_TO_BIT_(LC_NUMERIC_INDEX_))
 
 #    define LC_INDEX_TO_BIT_(i) (1 << (i))
 
 #  endif
 #endif
-
-#include "lock_definitions.h"
-
-#define gwLOCALE_LOCK    GENw_LCr_LOCK_(LC_ALL)
-#define gwLOCALE_UNLOCK  GENw_LCr_UNLOCK_(LC_ALL)
 
 /* setlocale() generally returns in a global static buffer, but not on Windows
  * when operating in thread-safe mode */
@@ -7581,24 +7670,44 @@ typedef struct am_table_short AMTS;
 #  define POSIX_SETLOCALE_LOCK    SETLOCALE_LOCK
 #  define POSIX_SETLOCALE_UNLOCK  SETLOCALE_UNLOCK
 #else
-#  ifdef USE_THREADS
+#  ifndef USE_LOCALE_THREADS
+#    define WSETLOCALE_LOCK    NOOP
+#    define WSETLOCALE_UNLOCK  NOOP
+#  elif defined(USE_THREAD_SAFE_LOCALE)
+
+    /* On Windows, _wsetlocale() can be called from both the global and
+     * per-thread locales.  No need to lock on per-thread ones. */
 #    define WSETLOCALE_LOCK                                                 \
             STMT_START {                                                    \
-                if (_configthreadlocale(0) == _DISABLE_PER_THREAD_LOCALE)   \
-                    gwLOCALE_LOCK;                                          \
+                if (_configthreadlocale(0) == _DISABLE_PER_THREAD_LOCALE) { \
+                    ENVr_LOCK_;                                              \
+                    LOCALE_LOCK_(0);                                        \
+                }                                                           \
             } STMT_END
 #    define WSETLOCALE_UNLOCK                                               \
             STMT_START {                                                    \
-                if (_configthreadlocale(0) == _DISABLE_PER_THREAD_LOCALE)   \
-                    gwLOCALE_UNLOCK;                                        \
+                if (_configthreadlocale(0) == _DISABLE_PER_THREAD_LOCALE) { \
+                    LOCALE_UNLOCK_;                                         \
+                    ENVr_UNLOCK_;                                            \
+                }                                                           \
             } STMT_END
 #  else
-#    define WSETLOCALE_LOCK    NOOP
-#    define WSETLOCALE_UNLOCK  NOOP
+#    define WSETLOCALE_LOCK                                                 \
+            STMT_START {                                                    \
+                ENVr_LOCK_;                                                  \
+                LOCALE_LOCK_(0);                                            \
+            } STMT_END
+#    define WSETLOCALE_UNLOCK                                               \
+            STMT_START {                                                    \
+                LOCALE_UNLOCK_;                                             \
+                ENVr_UNLOCK_;                                                \
+            } STMT_END
 #  endif
 #  define POSIX_SETLOCALE_LOCK    WSETLOCALE_LOCK
 #  define POSIX_SETLOCALE_UNLOCK  WSETLOCALE_UNLOCK
 #endif
+
+#include "lock_definitions.h"
 
 /* End of locale/env synchronization */
 
@@ -9523,8 +9632,26 @@ END_EXTERN_C
 
 */
 
-#endif /* Include guard */
+#if 0
+                DEBUG_Lv(PerlIO_printf(Perl_debug_log, "acquiring mutex for " name "\n"));\
+                MUTEX_LOCK(&(mutex)->lock);                                 \
+                DEBUG_Lv(PerlIO_printf(Perl_debug_log, "mutex acquired for " name "\n"));\
+                                                                            \
+                DEBUG_Lv(PerlIO_printf(Perl_debug_log, "new " name " all threads reader count is %zd\n", (mutex)->readers_count));\
+                                                                            \
+                /* Wait until we are the only reader */                     \
+                do {                                                        \
+                    if ((mutex)->readers_count <= rcounter) {               \
+                        DEBUG_Lv(PerlIO_printf(Perl_debug_log, "should be ready to go\n"));\
+                        break;                                              \
+                    }                                                       \
+                        DEBUG_Lv(PerlIO_printf(Perl_debug_log, "waiting for another reader to wake us up\n"));\
+                    COND_WAIT(&(mutex)->wakeup, &(mutex)->lock);            \
+                }                                                           \
+                while (1);                                                  \
 
+#  endif
+#endif /* Include guard */
 /*
  * ex: set ts=8 sts=4 sw=4 et:
  */
