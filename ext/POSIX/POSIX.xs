@@ -3183,9 +3183,9 @@ mblen(s, n = ~0)
             memzero(&PL_mbrlen_ps, sizeof(PL_mbrlen_ps));
             RETVAL = 0;
 #else
-            MBLEN_LOCK_;
+            MBLEN_LOCK;
             RETVAL = mblen(NULL, 0);
-            MBLEN_UNLOCK_;
+            MBLEN_UNLOCK;
 #endif
         }
         else {  /* Not resetting state */
@@ -3199,17 +3199,17 @@ mblen(s, n = ~0)
                 char * string = SvPVbyte(byte_s, len);
                 if (n < len) len = n;
 #ifdef USE_MBRLEN
-                MBRLEN_LOCK_;
+                MBRLEN_LOCK;
                 RETVAL = (SSize_t) mbrlen(string, len, &PL_mbrlen_ps);
-                MBRLEN_UNLOCK_;
+                MBRLEN_UNLOCK;
                 if (RETVAL < 0) RETVAL = -1;    /* Use mblen() ret code for
                                                    transparency */
 #else
                 /* Locking prevents races, but locales can be switched out
                  * without locking, so this isn't a cure all */
-                MBLEN_LOCK_;
+                MBLEN_LOCK;
                 RETVAL = mblen(string, len);
-                MBLEN_UNLOCK_;
+                MBLEN_UNLOCK;
 #endif
             }
         }
@@ -3275,27 +3275,27 @@ wctomb(s, wchar)
 #ifdef USE_WCRTOMB
             /* The man pages khw looked at are in agreement that this works.
              * But probably memzero would too */
-            WCRTOMB_LOCK_;
+            WCRTOMB_LOCK;
             RETVAL = wcrtomb(NULL, L'\0', &PL_wcrtomb_ps);
-            WCRTOMB_UNLOCK_;
+            WCRTOMB_UNLOCK;
 #else
-            WCTOMB_LOCK_;
+            WCTOMB_LOCK;
             RETVAL = wctomb(NULL, L'\0');
-            WCTOMB_UNLOCK_;
+            WCTOMB_UNLOCK;
 #endif
         }
         else {  /* Not resetting state */
             char buffer[MB_LEN_MAX];
 #ifdef USE_WCRTOMB
-            WCRTOMB_LOCK_;
+            WCRTOMB_LOCK;
             RETVAL = wcrtomb(buffer, wchar, &PL_wcrtomb_ps);
-            WCRTOMB_UNLOCK_;
+            WCRTOMB_UNLOCK;
 #else
             /* Locking prevents races, but locales can be switched out without
              * locking, so this isn't a cure all */
-            WCTOMB_LOCK_;
+            WCTOMB_LOCK;
             RETVAL = wctomb(buffer, wchar);
-            WCTOMB_UNLOCK_;
+            WCTOMB_UNLOCK;
 #endif
             if (RETVAL >= 0) {
                 sv_setpvn_mg(s, buffer, RETVAL);
@@ -3310,9 +3310,9 @@ strcoll(s1, s2)
 	char *		s2
     CODE:
         CHECK_AND_WARN_PROBLEMATIC_LOCALE_;
-	LC_COLLATE_LOCK;
+        STRCOLL_LOCK;
         RETVAL = strcoll(s1, s2);
-        LC_COLLATE_UNLOCK;
+        STRCOLL_UNLOCK;
     OUTPUT:
         RETVAL
 
@@ -3613,10 +3613,10 @@ tzname()
 	EXTEND(SP,2);
         /* It is undefined behavior if another thread is changing this while
          * its being read */
-        ENVr_LOCALEr_LOCK;
+        TZSET_LOCK;
 	PUSHs(newSVpvn_flags(tzname[0], strlen(tzname[0]), SVs_TEMP));
 	PUSHs(newSVpvn_flags(tzname[1], strlen(tzname[1]), SVs_TEMP));
-        ENVr_LOCALEr_UNLOCK;
+        TZSET_UNLOCK;
 
 char *
 ctermid(s = 0)

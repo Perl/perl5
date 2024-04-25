@@ -1922,11 +1922,11 @@ S_setlocale_i(pTHX_ const int category, const char * locale)
         return stdized_setlocale(category, locale);
     }
 
-    gwLOCALE_LOCK;
+    STDIZED_SETLOCALE_LOCK;
     const char * retval = save_to_buffer(stdized_setlocale(category, locale),
                                          &PL_setlocale_buf,
                                          &PL_setlocale_bufsize);
-    gwLOCALE_UNLOCK;
+    STDIZED_SETLOCALE_UNLOCK;
 
     return retval;
 }
@@ -2493,9 +2493,11 @@ S_bool_setlocale_2008_i(pTHX_
 #  endif
 
         {
+            NEWLOCALE_LOCK;
             new_obj = newlocale(mask,
                                 override_ignored_category(index, new_locale),
                                 basis_obj);
+            NEWLOCALE_UNLOCK;
             if (! new_obj) {
                 DEBUG_NEW_OBJECT_FAILED(category_names[index], new_locale,
                                         basis_obj);
@@ -2537,9 +2539,11 @@ S_bool_setlocale_2008_i(pTHX_
              * next one.  (The first time we effectively use the locale in
              * force upon entry to this function.) */
             for_all_individual_category_indexes(i) {
+                NEWLOCALE_LOCK;
                 new_obj = newlocale(category_masks[i],
                                     new_locales[i],
                                     basis_obj);
+                NEWLOCALE_UNLOCK;
                 if (new_obj) {
                     DEBUG_NEW_OBJECT_CREATED(category_names[i],
                                              new_locales[i],
@@ -5132,9 +5136,9 @@ Perl_mbtowc_(pTHX_ const wchar_t * pwc, const char * s, const Size_t len)
 #  else
 
         SETERRNO(0, 0);
-        MBTOWC_LOCK_;
+        MBTOWC_LOCK;
         retval = mbtowc(NULL, NULL, 0);
-        MBTOWC_UNLOCK_;
+        MBTOWC_UNLOCK;
         return retval;
 
 #  endif
@@ -5144,18 +5148,18 @@ Perl_mbtowc_(pTHX_ const wchar_t * pwc, const char * s, const Size_t len)
 #  if defined(USE_MBRTOWC)
 
     SETERRNO(0, 0);
-    MBRTOWC_LOCK_;
+    MBRTOWC_LOCK;
     retval = (SSize_t) mbrtowc((wchar_t *) pwc, s, len, &PL_mbrtowc_ps);
-    MBRTOWC_UNLOCK_;
+    MBRTOWC_UNLOCK;
 
 #  else
 
     /* Locking prevents races, but locales can be switched out without locking,
      * so this isn't a cure all */
     SETERRNO(0, 0);
-    MBTOWC_LOCK_;
+    MBTOWC_LOCK;
     retval = mbtowc((wchar_t *) pwc, s, len);
-    MBTOWC_UNLOCK_;
+    MBTOWC_UNLOCK;
 
 #  endif
 
@@ -5932,6 +5936,7 @@ S_populate_hash_from_localeconv(pTHX_ HV * hv,
       * needed (none if there is only a single perl instance) */
     gwLOCALE_LOCK;
 
+#    undef LOCALECONV_UNLOCK
 #    define LOCALECONV_UNLOCK  gwLOCALE_UNLOCK
 #  endif
 #  if ! defined(TS_W32_BROKEN_LOCALECONV) || ! defined(USE_THREAD_SAFE_LOCALE)
@@ -8879,7 +8884,7 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
 #  endif
 #  if ! defined(PERL_LC_ALL_USES_NAME_VALUE_PAIRS) && defined(LC_ALL)
 
-    LOCALE_LOCK;
+    gwLOCALE_LOCK;
 
     /* If we haven't done so already, translate the LC_ALL positions of
      * categories into our internal indices. */
@@ -8899,23 +8904,25 @@ Perl_init_i18nl10n(pTHX_ int printwarn)
         }
     }
 
-    LOCALE_UNLOCK;
+    gwLOCALE_UNLOCK;
 
 #  endif
 #  ifdef USE_POSIX_2008_LOCALE
 
     /* This is a global, so be sure to keep another instance from zapping it */
-    LOCALE_LOCK;
+    gwLOCALE_LOCK;
     if (PL_C_locale_obj) {
-        LOCALE_UNLOCK;
+        gwLOCALE_UNLOCK;
     }
     else {
+        NEWLOCALE_LOCK;
         PL_C_locale_obj = newlocale(LC_ALL_MASK, "C", (locale_t) 0);
+        NEWLOCALE_UNLOCK;
         if (! PL_C_locale_obj) {
-            LOCALE_UNLOCK;
+            gwLOCALE_UNLOCK;
             locale_panic_("Cannot create POSIX 2008 C locale object");
         }
-        LOCALE_UNLOCK;
+        gwLOCALE_UNLOCK;
 
         DEBUG_Lv(PerlIO_printf(Perl_debug_log, "created C object %p\n",
                                                PL_C_locale_obj));
@@ -9887,8 +9894,11 @@ Perl_mem_collxfrm_(pTHX_ const char *input_string,
 #  if defined(USE_POSIX_2008_LOCALE) && defined HAS_STRXFRM_L
 #    ifdef USE_LOCALE_CTYPE
 
+    NEWLOCALE_LOCK;
     constructed_locale = newlocale(LC_CTYPE_MASK, PL_collation_name,
                                    duplocale(use_curlocale_scratch()));
+    NEWLOCALE_UNLOCK;
+
 #    else
 
     constructed_locale = duplocale(use_curlocale_scratch());
@@ -10281,7 +10291,9 @@ Perl_my_strerror(pTHX_ const int errnum, utf8ness_t * utf8ness)
         locale_t cur = duplocale(use_curlocale_scratch());
 
         const char * locale = querylocale_c(LC_MESSAGES);
+        NEWLOCALE_LOCK;
         cur = newlocale(LC_CTYPE_MASK, locale, cur);
+        NEWLOCALE_UNLOCK;
         errstr = savepv(strerror_l(errnum, cur));
         *utf8ness = get_locale_string_utf8ness_i(errstr,
                                                  LOCALE_UTF8NESS_UNKNOWN,
@@ -10342,7 +10354,7 @@ Perl_my_strerror(pTHX_ const int errnum, utf8ness_t * utf8ness)
     }
     else {
 
-        LOCALE_LOCK;
+        gwLOCALE_LOCK;
 
         const char * orig_locale = toggle_locale_i(WHICH_LC_INDEX, "C");
 
@@ -10350,7 +10362,7 @@ Perl_my_strerror(pTHX_ const int errnum, utf8ness_t * utf8ness)
 
         restore_toggled_locale_i(WHICH_LC_INDEX, orig_locale);
 
-        LOCALE_UNLOCK;
+        gwLOCALE_UNLOCK;
 
         *utf8ness = UTF8NESS_IMMATERIAL;
     }
@@ -10379,7 +10391,7 @@ Perl_my_strerror(pTHX_ const int errnum, utf8ness_t * utf8ness)
                                   : "C";
     /* XXX Can fail on z/OS */
 
-    LOCALE_LOCK;
+    gwLOCALE_LOCK;
 
     const char* orig_CTYPE_locale    = toggle_locale_c(LC_CTYPE,
                                                        desired_locale);
@@ -10390,7 +10402,7 @@ Perl_my_strerror(pTHX_ const int errnum, utf8ness_t * utf8ness)
     restore_toggled_locale_c(LC_MESSAGES, orig_MESSAGES_locale);
     restore_toggled_locale_c(LC_CTYPE, orig_CTYPE_locale);
 
-    LOCALE_UNLOCK;
+    gwLOCALE_UNLOCK;
 
     *utf8ness = get_locale_string_utf8ness_i(errstr, LOCALE_UTF8NESS_UNKNOWN,
                                              desired_locale,
