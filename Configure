@@ -16105,8 +16105,8 @@ EOCP
 	fi;
 	$rm_try
 	;;
-*)      d_lc_monetary_2008="$undef"
-        ;;
+*)	d_lc_monetary_2008="$undef"
+	;;
 esac
 
 : see if lchown exists
@@ -24046,7 +24046,7 @@ else
     mv ccsym1.raw ccsym.raw
 fi
 
-$awk '/\=/ { print $0; next }
+$awk '/=/ { print $0; next }
 	{ print $0"=1" }' ccsym.raw >ccsym.list
 $comm -13 Cppsym.true ccsym.list >ccsym.own
 $comm -12 Cppsym.true ccsym.list >ccsym.com
