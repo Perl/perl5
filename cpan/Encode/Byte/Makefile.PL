@@ -171,7 +171,7 @@ sub postamble
     my $lengthsofar = length($str);
     my $continuator = '';
     $str .= "$table.c : $enc2xs Makefile.PL";
-    foreach my $file (@{$tables{$table}})
+    foreach my $file (sort (@{$tables{$table}}))
     {
         $str .= $continuator.' '.$self->catfile($dir,$file);
         if ( length($str)-$lengthsofar > 128*$numlines )
@@ -189,7 +189,7 @@ sub postamble
         qq{\n\t\$(PERL) $plib $enc2xs $ucopts -o \$\@ -f $table.fnm\n\n};
     open (FILELIST, ">$table.fnm")
         || die "Could not open $table.fnm: $!";
-    foreach my $file (@{$tables{$table}})
+    foreach my $file (sort (@{$tables{$table}}))
     {
         print FILELIST $self->catfile($dir,$file) . "\n";
     }
