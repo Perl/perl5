@@ -1419,22 +1419,29 @@ Perl_form_nocontext(const char* pat, ...)
 These take a sprintf-style format pattern and conventional
 (non-SV) arguments and return the formatted string.
 
-    (char *) Perl_form(pTHX_ const char* pat, ...)
+    (char *) Perl_form(aTHX_ const char* pat, ...)
 
-can be used any place a string (char *) is required:
+They can be used any place a string (char *) is required:
 
-    char * s = Perl_form("%d.%d",major,minor);
+    char * s = form_nocontext("%d.%d", major, minor);
 
-They use a single (per-thread) private buffer so if you want to format several
-strings you must explicitly copy the earlier strings away (and free the copies
-when you are done).
+They each return a temporary that will be freed "soon", automatically by the
+system, at the same time that SVs operated on by C<L</sv_2mortal>> are freed.
+
+Use the result immediately, or copy to a stable place for longer retention.
+This is contrary to the incorrect previous documentation of these that claimed
+that the return was a single per-thread buffer.  That was (and is) actually
+true only when these are called during global destruction.
 
 The two forms differ only in that C<form_nocontext> does not take a thread
 context (C<aTHX>) parameter, so is used in situations where the caller doesn't
 already have the thread context.
 
+C<L</vform>> is the same except the arguments are an encapsulated argument list.
+
 =for apidoc vform
-Like C<L</form>> but but the arguments are an encapsulated argument list.
+
+Like C<L</form>> except the arguments are an encapsulated argument list.
 
 =cut
 */
